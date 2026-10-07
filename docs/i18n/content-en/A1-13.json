@@ -1,0 +1,132 @@
+{
+ "unit": "A1-13",
+ "en": {
+  "title": "Weather and seasons",
+  "goal": "Talk about the weather and the seasons of the year.",
+  "lessons": {
+   "tempo-bonito-frio-quente": "Describing the weather: nice, cold and hot",
+   "chuva-neve-sol": "Rain, snow and sun",
+   "estacoes-do-ano": "The four seasons",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "the weather is nice",
+   "it's cold",
+   "it's hot",
+   "it's raining",
+   "it's snowing",
+   "the sun",
+   "spring",
+   "summer",
+   "autumn / fall",
+   "winter"
+  ],
+  "phrases": [
+   {
+    "t": "What's the weather like?",
+    "scenario": "You're about to go out and want to know what the weather is like outside. What do you ask?"
+   },
+   {
+    "t": "It's very hot today.",
+    "scenario": "Someone asks what the weather is like, and today it's very hot. What do you answer?"
+   },
+   {
+    "t": "I like winter.",
+    "scenario": "Someone asks your favorite season, and it's winter. What do you say?"
+   },
+   {
+    "t": "It often rains in autumn.",
+    "scenario": "Someone asks what autumn is like in your city, with frequent rain. What do you say?"
+   },
+   {
+    "t": "It snows a lot in winter."
+   },
+   {
+    "t": "The sun is shining today."
+   },
+   {
+    "t": "Spring is my favorite season."
+   },
+   {
+    "t": "Autumn is very colorful."
+   }
+  ],
+  "dialogue": {
+   "title": "Talking about the weather",
+   "lines": [
+    "What's the weather like today?",
+    "It's nice, but it's cold.",
+    "Which season do you prefer?",
+    "I prefer summer, it's hot."
+   ]
+  },
+  "concepts": {
+   "il-fait-vs-jai": [
+    {
+     "title": "\"Il fait chaud\" or \"j'ai chaud\"?",
+     "body": "To talk about the <strong>weather</strong>, French uses the verb faire: <strong>il fait chaud</strong> (it's hot outside). To talk about a <strong>feeling of your own</strong>, it uses avoir: <strong>j'ai chaud</strong> (I'm hot, I feel hot). Watch out: \"I am hot/cold\" must not become je suis chaud/froid, which means something else; say j'ai chaud / j'ai froid. Impersonal \"il\" is for the weather, \"je\" for yourself.",
+     "examples": [
+      "it's hot"
+     ]
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "This sentence describes how a person is feeling.",
+    "whyNote": "Wrong — <strong>il fait chaud</strong> describes the WEATHER (it's hot), not how someone feels. The \"il\" here is impersonal, as in \"it's hot out.\""
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[0]",
+   "pt": "está bonito (tempo)",
+   "en": "the weather is nice",
+   "conf": "media",
+   "why": "'il fait beau' = 'it's nice out'; chose full phrase."
+  },
+  {
+   "path": "vocab[8]",
+   "pt": "o outono",
+   "en": "autumn / fall",
+   "conf": "media",
+   "why": "EN-US 'fall' vs EN-GB 'autumn'."
+  },
+  {
+   "path": "phrases[0]",
+   "pt": "Como está o tempo?",
+   "en": "What's the weather like?",
+   "conf": "media",
+   "why": "Also 'How's the weather?'."
+  },
+  {
+   "path": "phrases[2].scenario",
+   "pt": "estação preferida",
+   "en": "favorite season",
+   "conf": "media",
+   "why": "EN-US spelling."
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Eu prefiro o verão, está quente.",
+   "en": "I prefer summer, it's hot.",
+   "conf": "media",
+   "why": "Informal 'tu' dialogue; reason clause rendered loosely."
+  },
+  {
+   "path": "dialogue.lines[1]",
+   "pt": "Está bonito, mas está frio.",
+   "en": "It's nice, but it's cold.",
+   "conf": "media",
+   "why": "'beau' = nice/fine weather."
+  },
+  {
+   "path": "concepts.il-fait-vs-jai[0].body",
+   "pt": "(sem equivalente no texto PT: aviso adicionado para falantes de inglês)",
+   "en": "Watch out: \"I am hot/cold\" must not become je suis chaud/froid ... say j'ai chaud / j'ai froid",
+   "conf": "media",
+   "why": "Added a warning aimed at English speakers (literal \"I am hot/cold\" is the classic error)."
+  }
+ ]
+}

@@ -35,15 +35,15 @@ let ADMIN_CLASS_LOGS_STATE = { studentIds: new Set(), langFilter: 'all', editing
 function classLogStudentLabel(s){
   return s.display_name
     ? `${escapeHTML(s.display_name)} (@${escapeHTML(s.username || '?')})`
-    : `@${escapeHTML(s.username || '(usuário removido)')}`;
+    : `@${escapeHTML(s.username || t('admin.common.removedUser'))}`;
 }
 
 function classLogFieldRowsHTML(log){
   const rows = [
-    ['📌 Tópico', log.topic],
-    ['📝 Lição de casa', log.homework],
-    ['🔎 Observações', log.observations],
-    ['💬 Notas', log.notes],
+    [t('admin.classLogs.fieldTopic'), log.topic],
+    [t('admin.classLogs.fieldHomework'), log.homework],
+    [t('admin.classLogs.fieldObservations'), log.observations],
+    [t('admin.classLogs.fieldNotes'), log.notes],
   ].filter(([, value]) => !!value);
   if (!rows.length) return '';
   return rows.map(([label, value]) => `<div><strong>${label}:</strong> <span style="white-space:pre-wrap;">${escapeHTML(value)}</span></div>`).join('');
@@ -52,20 +52,20 @@ function classLogFieldRowsHTML(log){
 function classLogEditFormHTML(log){
   return `
     <form class="profile-edit-form" data-edit-class-log-form="${log.id}" style="margin-top:8px;">
-      <label class="profile-edit-label" for="edit-class-log-date-${log.id}">Data</label>
+      <label class="profile-edit-label" for="edit-class-log-date-${log.id}">${t('admin.common.date')}</label>
       <input type="date" id="edit-class-log-date-${log.id}" class="profile-edit-input" value="${log.class_date}">
-      <label class="profile-edit-label" for="edit-class-log-topic-${log.id}">Tópico (opcional)</label>
+      <label class="profile-edit-label" for="edit-class-log-topic-${log.id}">${t('admin.classLogs.topicOpt')}</label>
       <input type="text" id="edit-class-log-topic-${log.id}" class="profile-edit-input" value="${escapeHTML(log.topic || '')}">
-      <label class="profile-edit-label" for="edit-class-log-homework-${log.id}">Lição de casa (opcional)</label>
+      <label class="profile-edit-label" for="edit-class-log-homework-${log.id}">${t('admin.classLogs.homeworkOpt')}</label>
       <input type="text" id="edit-class-log-homework-${log.id}" class="profile-edit-input" value="${escapeHTML(log.homework || '')}">
-      <label class="profile-edit-label" for="edit-class-log-observations-${log.id}">Observações (opcional)</label>
+      <label class="profile-edit-label" for="edit-class-log-observations-${log.id}">${t('admin.classLogs.observationsOpt')}</label>
       <input type="text" id="edit-class-log-observations-${log.id}" class="profile-edit-input" value="${escapeHTML(log.observations || '')}">
-      <label class="profile-edit-label" for="edit-class-log-notes-${log.id}">Notas / texto livre (opcional)</label>
+      <label class="profile-edit-label" for="edit-class-log-notes-${log.id}">${t('admin.classLogs.notesOpt')}</label>
       <textarea id="edit-class-log-notes-${log.id}" class="profile-edit-input" rows="3">${escapeHTML(log.notes || '')}</textarea>
       <p class="profile-edit-error" data-edit-class-log-error="${log.id}"></p>
       <div style="display:flex; gap:8px;">
-        <button type="submit" class="btn btn-primary">Salvar</button>
-        <button type="button" class="btn" data-cancel-edit-log="${log.id}">Cancelar</button>
+        <button type="submit" class="btn btn-primary">${t('profile.save')}</button>
+        <button type="button" class="btn" data-cancel-edit-log="${log.id}">${t('myFlashcards.edit.cancel')}</button>
       </div>
     </form>
   `;
@@ -76,12 +76,12 @@ function classLogRowHTML(log, showUsername){
   return `
     <div class="admin-badge-row" style="align-items:flex-start;">
       <div class="admin-badge-info">
-        <div class="admin-badge-name">${showUsername ? `<span style="opacity:.6">@${escapeHTML(log.__studentUsername || '?')}</span> · ` : ''}${new Date(`${log.class_date}T00:00:00`).toLocaleDateString('pt-BR')}</div>
-        ${!isEditing ? `<div class="admin-badge-desc">${classLogFieldRowsHTML(log) || '<em>(sem campos preenchidos)</em>'}</div>` : classLogEditFormHTML(log)}
+        <div class="admin-badge-name">${showUsername ? `<span style="opacity:.6">@${escapeHTML(log.__studentUsername || '?')}</span> · ` : ''}${fmtDate(new Date(`${log.class_date}T00:00:00`))}</div>
+        ${!isEditing ? `<div class="admin-badge-desc">${classLogFieldRowsHTML(log) || `<em>${t('admin.classLogs.noFields')}</em>`}</div>` : classLogEditFormHTML(log)}
       </div>
       ${!isEditing ? `
-      <button class="admin-badge-delete-btn" data-edit-class-log="${log.id}" title="Editar">✏️</button>
-      <button class="admin-badge-delete-btn" data-delete-class-log="${log.id}" title="Apagar">✕</button>
+      <button class="admin-badge-delete-btn" data-edit-class-log="${log.id}" title="${t('myFlashcards.row.editTitle')}">✏️</button>
+      <button class="admin-badge-delete-btn" data-delete-class-log="${log.id}" title="${t('admin.common.delete')}">✕</button>
       ` : ''}
     </div>
   `;
@@ -94,8 +94,8 @@ async function buildClassLogsListBoxHTML(selectedStudents){
   const showUsername = selectedStudents.length > 1;
 
   return `
-    <div class="section-label">Aulas registradas (${logs.length})</div>
-    ${logs.length ? logs.map(log => classLogRowHTML(log, showUsername)).join('') : `<p class="profile-empty-note">Nenhuma aula registrada ainda pra${selectedStudents.length > 1 ? ' esses alunos' : selectedStudents.length === 1 ? ' este aluno' : ' nenhum aluno selecionado'}.</p>`}
+    <div class="section-label">${t('admin.classLogs.listTitle', { n: logs.length })}</div>
+    ${logs.length ? logs.map(log => classLogRowHTML(log, showUsername)).join('') : `<p class="profile-empty-note">${t('admin.classLogs.emptyFor')}${adminEmptyForSuffix(selectedStudents.length)}.</p>`}
   `;
 }
 
@@ -114,9 +114,9 @@ function wireClassLogsListBox(listBox){
   });
   listBox.querySelectorAll('[data-delete-class-log]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Apagar este registro de aula? Essa ação não pode ser desfeita.')) return;
+      if (!confirm(t('admin.classLogs.deleteConfirm'))) return;
       await deleteClassLog(btn.dataset.deleteClassLog);
-      showToast('✓ Registro apagado.');
+      showToast(t('admin.classLogs.deleted'));
       await refreshClassLogsListBox(listBox);
     });
   });
@@ -135,7 +135,7 @@ function wireClassLogsListBox(listBox){
       });
       if (!result.ok){ errorEl.textContent = result.error; return; }
       ADMIN_CLASS_LOGS_STATE.editingId = null;
-      showToast('✓ Aula atualizada.');
+      showToast(t('admin.classLogs.updated'));
       await refreshClassLogsListBox(listBox);
     });
   });
@@ -154,11 +154,7 @@ async function refreshClassLogsListBox(listBox){
 async function updateClassLogsSelectionDependentUI(){
   const students = ADMIN_CLASS_LOGS_STATE._studentsCache;
   const selectedStudents = students.filter(s => ADMIN_CLASS_LOGS_STATE.studentIds.has(s.student_id));
-  const selectionCountLabel = selectedStudents.length === 0
-    ? 'Nenhum aluno selecionado'
-    : selectedStudents.length === 1
-      ? '1 aluno selecionado'
-      : `${selectedStudents.length} alunos selecionados`;
+  const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length);
 
   const counterEl = document.getElementById('admin-classlog-selection-counter');
   if (counterEl) counterEl.textContent = selectionCountLabel;
@@ -166,7 +162,7 @@ async function updateClassLogsSelectionDependentUI(){
   const subtitleEl = document.getElementById('admin-classlog-content-subtitle');
   if (subtitleEl) subtitleEl.textContent = selectedStudents.length === 1
     ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
-    : selectedStudents.length > 1 ? ` -- ${selectedStudents.length} alunos selecionados` : '';
+    : selectedStudents.length > 1 ? ` -- ${tp('admin.common.selectedCount', selectedStudents.length)}` : '';
 
   const contentHint = document.getElementById('admin-classlog-content-hint');
   if (contentHint) contentHint.style.display = selectedStudents.length ? 'none' : '';
@@ -174,7 +170,7 @@ async function updateClassLogsSelectionDependentUI(){
   const btn = document.getElementById('admin-create-class-log-btn');
   if (btn){
     btn.disabled = !selectedStudents.length;
-    btn.textContent = `Registrar aula${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunos` : ''}`;
+    btn.textContent = `${t('admin.classLogs.register')}${adminForStudentsSuffix(selectedStudents.length)}`;
   }
 
   const listBox = document.getElementById('admin-classlogs-list-box');
@@ -197,14 +193,14 @@ async function renderAdminClassLogsView(){
   const wrap = document.getElementById('admin-classlogs-content');
   if (!wrap) return;
   if (!isAdminUser()){
-    wrap.innerHTML = `<p class="profile-empty-note">Esta tela é só pra administração da plataforma.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
   wrap.innerHTML = loadingHTML();
 
   const students = await fetchMyStudents();
   if (!students.length){
-    wrap.innerHTML = `<p class="profile-empty-note">Vincule um aluno primeiro, na aba "🎓 Alunos", pra poder registrar aulas pra ele.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.classLogs.linkFirst')}</p>`;
     return;
   }
   ADMIN_CLASS_LOGS_STATE._studentsCache = students;
@@ -215,16 +211,12 @@ async function renderAdminClassLogsView(){
   ADMIN_CLASS_LOGS_STATE.studentIds = new Set([...ADMIN_CLASS_LOGS_STATE.studentIds].filter(id => validIds.has(id)));
 
   const selectedStudents = students.filter(s => ADMIN_CLASS_LOGS_STATE.studentIds.has(s.student_id));
-  const selectionCountLabel = selectedStudents.length === 0
-    ? 'Nenhum aluno selecionado'
-    : selectedStudents.length === 1
-      ? '1 aluno selecionado'
-      : `${selectedStudents.length} alunos selecionados`;
+  const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length);
 
   const langsPresent = [...new Set(students.map(s => s.language_app_key))];
   const langFilterHTML = langsPresent.length > 1 ? `
-    <div class="leaderboard-tabs" role="tablist" aria-label="Filtrar por idioma" style="justify-content:flex-start; margin-bottom:8px;">
-      <button type="button" class="leaderboard-tab ${ADMIN_CLASS_LOGS_STATE.langFilter === 'all' ? 'active' : ''}" data-lang-filter="all">Todos (${students.length})</button>
+    <div class="leaderboard-tabs" role="tablist" aria-label="${t('admin.common.langFilterAria')}" style="justify-content:flex-start; margin-bottom:8px;">
+      <button type="button" class="leaderboard-tab ${ADMIN_CLASS_LOGS_STATE.langFilter === 'all' ? 'active' : ''}" data-lang-filter="all">${t('admin.common.all')} (${students.length})</button>
       ${langsPresent.map(key => `<button type="button" class="leaderboard-tab ${ADMIN_CLASS_LOGS_STATE.langFilter === key ? 'active' : ''}" data-lang-filter="${key}">${STUDENT_LANGUAGE_LABELS[key] || key} (${students.filter(s => s.language_app_key === key).length})</button>`).join('')}
     </div>
   ` : '';
@@ -240,18 +232,18 @@ async function renderAdminClassLogsView(){
   const newLogSubtitle = selectedStudents.length === 1
     ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
     : selectedStudents.length > 1
-      ? ` -- ${selectedStudents.length} alunos selecionados`
+      ? ` -- ${tp('admin.common.selectedCount', selectedStudents.length)}`
       : '';
 
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">Alunos</div>
-      <p class="profile-edit-hint">Selecione os alunos desta aula.</p>
+      <div class="section-label">${t('admin.common.students')}</div>
+      <p class="profile-edit-hint">${t('admin.classLogs.pickStudentsHint')}</p>
       ${langFilterHTML}
-      <input type="text" id="admin-classlog-search" class="profile-edit-input" placeholder="Buscar por nome ou @usuário..." autocomplete="off" style="margin-bottom:8px;">
+      <input type="text" id="admin-classlog-search" class="profile-edit-input" placeholder="${t('admin.common.searchPlaceholder')}" autocomplete="off" style="margin-bottom:8px;">
       <div style="display:flex; gap:12px; margin-bottom:4px;">
-        <a href="#" id="admin-classlog-select-all" style="font-size:13px;">Selecionar todos</a>
-        <a href="#" id="admin-classlog-select-none" style="font-size:13px;">Limpar seleção</a>
+        <a href="#" id="admin-classlog-select-all" style="font-size:13px;">${t('publicProfile.selectAll')}</a>
+        <a href="#" id="admin-classlog-select-none" style="font-size:13px;">${t('publicProfile.clear')}</a>
       </div>
       <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:flex; flex-direction:column;">
         ${studentCheckboxesHTML}
@@ -260,21 +252,21 @@ async function renderAdminClassLogsView(){
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Nova aula<span id="admin-classlog-content-subtitle">${newLogSubtitle}</span></div>
-      <p class="profile-edit-hint" id="admin-classlog-content-hint" style="${selectedStudents.length ? 'display:none;' : ''}">Selecione ao menos um aluno acima pra poder registrar a aula.</p>
+      <div class="section-label">${t('admin.classLogs.newTitle')}<span id="admin-classlog-content-subtitle">${newLogSubtitle}</span></div>
+      <p class="profile-edit-hint" id="admin-classlog-content-hint" style="${selectedStudents.length ? 'display:none;' : ''}">${t('admin.classLogs.needStudent')}</p>
       <form id="admin-create-class-log-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-class-log-date">Data</label>
+        <label class="profile-edit-label" for="admin-class-log-date">${t('admin.common.date')}</label>
         <input type="date" id="admin-class-log-date" class="profile-edit-input" value="${todayStr()}">
-        <label class="profile-edit-label" for="admin-class-log-topic">Tópico (opcional)</label>
-        <input type="text" id="admin-class-log-topic" class="profile-edit-input" placeholder="ex: passé composé" autocomplete="off">
-        <label class="profile-edit-label" for="admin-class-log-homework">Lição de casa (opcional)</label>
-        <input type="text" id="admin-class-log-homework" class="profile-edit-input" placeholder="ex: exercícios 1-3 da página 24" autocomplete="off">
-        <label class="profile-edit-label" for="admin-class-log-observations">Observações (opcional)</label>
-        <input type="text" id="admin-class-log-observations" class="profile-edit-input" placeholder="material usado, página do livro..." autocomplete="off">
-        <label class="profile-edit-label" for="admin-class-log-notes">Notas / texto livre (opcional)</label>
-        <textarea id="admin-class-log-notes" class="profile-edit-input" rows="3" placeholder="vocabulário e gramática trabalhados na aula..."></textarea>
+        <label class="profile-edit-label" for="admin-class-log-topic">${t('admin.classLogs.topicOpt')}</label>
+        <input type="text" id="admin-class-log-topic" class="profile-edit-input" placeholder="${t('admin.classLogs.topicPlaceholder')}" autocomplete="off">
+        <label class="profile-edit-label" for="admin-class-log-homework">${t('admin.classLogs.homeworkOpt')}</label>
+        <input type="text" id="admin-class-log-homework" class="profile-edit-input" placeholder="${t('admin.classLogs.homeworkPlaceholder')}" autocomplete="off">
+        <label class="profile-edit-label" for="admin-class-log-observations">${t('admin.classLogs.observationsOpt')}</label>
+        <input type="text" id="admin-class-log-observations" class="profile-edit-input" placeholder="${t('admin.classLogs.observationsPlaceholder')}" autocomplete="off">
+        <label class="profile-edit-label" for="admin-class-log-notes">${t('admin.classLogs.notesOpt')}</label>
+        <textarea id="admin-class-log-notes" class="profile-edit-input" rows="3" placeholder="${t('admin.classLogs.notesPlaceholder')}"></textarea>
         <p class="profile-edit-error" id="admin-create-class-log-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-class-log-btn" ${selectedStudents.length ? '' : 'disabled'}>Registrar aula${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunos` : ''}</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-create-class-log-btn" ${selectedStudents.length ? '' : 'disabled'}>${t('admin.classLogs.register')}${adminForStudentsSuffix(selectedStudents.length)}</button>
       </form>
     </div>
 
@@ -326,7 +318,7 @@ async function renderAdminClassLogsView(){
 
     const selectedNow = ADMIN_CLASS_LOGS_STATE._studentsCache.filter(s => ADMIN_CLASS_LOGS_STATE.studentIds.has(s.student_id));
     if (!selectedNow.length){
-      errorEl.textContent = 'Selecione ao menos um aluno.';
+      errorEl.textContent = t('admin.common.selectAtLeastOne');
       return;
     }
     btn.disabled = true;
@@ -353,7 +345,7 @@ async function renderAdminClassLogsView(){
       errorEl.textContent = failed[0].error;
       return;
     }
-    showToast(results.length > 1 ? `✓ Aula registrada pra ${results.length - failed.length} alunos.` : '✓ Aula registrada.');
+    showToast(results.length > 1 ? t('admin.classLogs.registeredN', { n: results.length - failed.length }) : t('admin.classLogs.registered'));
     // Único ponto de re-render COMPLETO por causa da seleção -- intencional
     // aqui, um submit bem sucedido deve mesmo limpar o formulário.
     renderAdminClassLogsView();

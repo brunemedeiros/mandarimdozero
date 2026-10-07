@@ -2623,6 +2623,207 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .challenge-feedback.partial, .listen-translate-feedback.partial, .accent-feedback.partial{ background: rgba(224,165,38,0.10); border-color: rgba(224,165,38,0.4); }
 .challenge-retry-actions{ display:flex; flex-direction:column; gap:8px; margin-top:16px; }
 .challenge-retry-actions .btn{ width:100%; }
+
+/* ---------- Desafios: passada de design (celular primeiro) ----------
+   Linguagem herdada do mapa/trilha: título em fonte de exibição sem caixa
+   alta, estado atual com anel/borda (nunca opacidade), tons que seguem o
+   tema via color-mix, alvos de toque de 44px+, foco visível. Só tokens que já
+   existem nos dois temas; acerto = --jade, erro = --error-red, texto sobre
+   essas cores = --on-vivid. */
+#view-challenges .back-link, #view-dictation .back-link{ min-height:44px; padding:10px 0; font-size:14px; margin-bottom:4px; }
+#view-challenges .path-header h2, #view-dictation .path-header h2{ font-family: var(--font-display); font-size:24px; font-weight:800; letter-spacing:-.01em; }
+
+/* Tela principal: uma linha por categoria, com o progresso no anel do ícone */
+.challenges-categories{ grid-template-columns:1fr; gap:10px; }
+@media (min-width:760px){ .challenges-categories{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+.challenge-category-card{
+  display:grid; grid-template-columns:62px minmax(0,1fr) 16px; grid-template-areas:"ico title chev" "ico sub chev" "ico prog chev";
+  column-gap:16px; row-gap:1px; align-items:center; text-align:left; padding:14px 16px 14px 14px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.challenge-category-card:hover{ transform:none; border-color: color-mix(in srgb, var(--seal-red) 55%, var(--paper-line)); box-shadow: var(--shadow-lift); }
+.challenge-category-card:focus-visible{ outline:3px solid color-mix(in srgb, var(--seal-red) 55%, transparent); outline-offset:2px; }
+.challenge-category-card::after{ content:'›'; grid-area:chev; font-size:26px; line-height:1; color: var(--ink-soft); justify-self:end; }
+.challenge-category-emoji{
+  grid-area:ico; position:relative; width:54px; height:54px; display:grid; place-items:center;
+  font-size:25px; border-radius:50%; background: var(--paper-warm);
+}
+.challenge-category-emoji::before{
+  content:''; position:absolute; inset:-4px; border-radius:50%;
+  background: conic-gradient(var(--seal-red) calc(var(--p, 0) * 1%), var(--paper-line) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+          mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+}
+.challenge-category-card[data-complete="1"] .challenge-category-emoji::before{ background: var(--jade); }
+.challenge-category-title{ grid-area:title; font-family: var(--font-display); font-size:17px; font-weight:800; }
+.challenge-category-subtitle{ grid-area:sub; font-size:13px; }
+.challenge-category-card .challenge-progress{ grid-area:prog; max-width:none; margin:4px 0 0; }
+.challenge-category-card .challenge-progress-label{ font-size:12.5px; margin:0; font-variant-numeric: tabular-nums; }
+.challenge-category-card .challenge-progress-track{ display:none; }
+.challenge-review-card .challenge-category-emoji{ background: color-mix(in srgb, var(--jade) 16%, var(--paper)); }
+
+/* Listas: nível em etiqueta, expressão em destaque, estado à direita */
+.challenges-cards, .dictation-cards{ grid-template-columns:1fr; gap:10px; }
+@media (min-width:760px){ .challenges-cards, .dictation-cards{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+.challenge-card, .dictation-card{
+  display:grid; grid-template-columns:minmax(0,1fr) 28px; column-gap:12px; row-gap:3px; align-items:center;
+  padding:12px 16px; min-height:68px; transition: border-color .15s ease, box-shadow .15s ease;
+}
+.challenge-card > *, .dictation-card > *{ grid-column:1; }
+.challenge-card:hover, .dictation-card:hover{ transform:none; border-color: color-mix(in srgb, var(--seal-red) 55%, var(--paper-line)); box-shadow: var(--shadow-lift); }
+.challenge-card:focus-visible, .dictation-card:focus-visible{ outline:3px solid color-mix(in srgb, var(--seal-red) 55%, transparent); outline-offset:2px; }
+.challenge-card-level, .dictation-card-level{
+  justify-self:start; font-size:12px; font-weight:800; text-transform:none; letter-spacing:0; color: var(--seal-red-dark);
+  background: color-mix(in srgb, var(--seal-red) 13%, var(--paper)); border-radius:999px; padding:1px 9px;
+}
+.challenge-card-expr, .dictation-card-task{ font-family: var(--font-display); font-size:18px; font-weight:800; line-height:1.25; }
+.challenge-card-expr{ overflow-wrap:anywhere; }
+.tier-badge{ text-transform:none; letter-spacing:0; font-size:11.5px; font-weight:700; padding:1px 8px; margin-top:0; justify-self:start; }
+.challenge-card::after, .dictation-card::after{ content:'›'; grid-column:2; grid-row:1 / span 4; font-size:26px; line-height:1; color: var(--ink-soft); justify-self:end; }
+.challenge-card:has(.challenge-card-check)::after, .dictation-card:has(.challenge-card-check)::after{ content:none; }
+.challenge-card-check{ position:static; grid-column:2; grid-row:1 / span 4; justify-self:end; align-self:center; }
+.challenge-card.completed{ opacity:1; background: color-mix(in srgb, var(--jade) 7%, var(--paper)); border-color: color-mix(in srgb, var(--jade) 38%, var(--paper-line)); }
+.challenge-card:not(.locked) .challenge-card-check{ font-size:0; width:26px; height:26px; border-radius:50%; background: var(--jade); display:grid; place-items:center; }
+.challenge-card:not(.locked) .challenge-card-check::before{ content:'✓'; font-size:15px; font-weight:800; color: var(--on-vivid); }
+.challenge-card.locked .challenge-card-check{ font-size:18px; }
+.challenges-level-heading{ min-height:44px; }
+
+/* Jogar: pergunta em destaque, áudio como ação principal */
+#challenge-player-content, #dictation-player-content{ max-width:640px; margin-inline:auto; }
+.challenge-expression{ font-family: var(--font-display); }
+.challenge-expression:has(#challenge-expression-play-btn){ font-size:30px; line-height:1.15; letter-spacing:-.01em; margin:6px 0 18px; }
+.challenge-expression:not(:has(#challenge-expression-play-btn)){ justify-content:flex-start; font-size:20px; margin-bottom:14px; }
+.challenge-question{ font-size:17px; font-weight:800; }
+.listen-translate-audio-wrap .dictation-play-btn, .accent-audio-wrap .dictation-play-btn{
+  min-height:56px; padding:14px 30px; font-size:17px;
+  background: color-mix(in srgb, var(--seal-red) 14%, var(--paper)); border-color: color-mix(in srgb, var(--seal-red) 45%, var(--paper-line));
+}
+.listen-translate-audio-wrap .dictation-play-btn-slow, .accent-audio-wrap .dictation-play-btn-slow{
+  min-height:44px; background: var(--paper-warm); border-color: var(--paper-line);
+}
+.listen-translate-hint-wrap{ text-align:left; }
+.listen-translate-hint-text{ font-style:normal; font-size:16px; color: var(--ink); background: var(--paper-warm); border-radius:10px; padding:10px 14px; }
+.listen-translate-answer-label{ font-size:14px; }
+.listen-translate-answer-input, .accent-answer-input, .dictation-textarea{ font-size:17px; border-width:1.5px; }
+.listen-translate-answer-input:focus-visible, .accent-answer-input:focus-visible, .dictation-textarea:focus-visible{
+  outline:none; border-color: var(--seal-red); box-shadow: 0 0 0 3px color-mix(in srgb, var(--seal-red) 25%, transparent);
+}
+.dictation-textarea:focus{ border-color: var(--seal-red); }
+.listen-translate-actions{ margin-bottom:16px; }
+.listen-translate-actions .btn, .dictation-actions .btn{ min-height:50px; font-size:16px; flex:1 1 220px; }
+
+/* Alternativas (Expressões e Complete a frase) */
+.challenge-choices{ gap:10px; }
+.challenge-choice-btn{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:54px; padding:14px 16px;
+  font-size:16px; border-width:1.5px; transition: border-color .15s ease, background-color .15s ease;
+}
+.challenge-choice-btn:hover{ border-color: var(--seal-red); }
+.challenge-choice-btn.selected{ border-color: var(--seal-red); background: color-mix(in srgb, var(--seal-red) 12%, var(--paper)); }
+.challenge-choice-btn:focus-visible{ outline:3px solid color-mix(in srgb, var(--seal-red) 55%, transparent); outline-offset:2px; }
+.challenge-choice-btn.correct{ border-color: var(--jade); background: color-mix(in srgb, var(--jade) 12%, var(--paper)); }
+.challenge-choice-btn.incorrect{ border-color: var(--error-red); background: color-mix(in srgb, var(--error-red) 10%, var(--paper)); }
+.challenge-choice-btn.correct::after{ content:'✓'; font-weight:800; color: var(--jade); }
+.challenge-choice-btn.incorrect::after{ content:'✕'; font-weight:800; color: var(--error-red); }
+.cloze-grammar-sentence{ font-family: var(--font-display); font-size:23px; line-height:1.7; margin:8px 0 22px; }
+.cloze-grammar-slot{
+  min-width:84px; text-align:center; padding:0 10px; border-bottom:2.5px dashed var(--seal-red); border-radius:8px 8px 0 0;
+  background: color-mix(in srgb, var(--seal-red) 9%, transparent);
+}
+.cloze-grammar-slot.filled{ border-bottom-style:solid; }
+.cloze-grammar-slot.correct{ border-bottom-color: var(--jade); background: color-mix(in srgb, var(--jade) 14%, transparent); }
+.cloze-grammar-slot.incorrect{ border-bottom-color: var(--error-red); background: color-mix(in srgb, var(--error-red) 12%, transparent); }
+.cloze-grammar-group .challenge-choice-btn{ min-width:96px; justify-content:center; border-radius:999px; padding:10px 22px; min-height:48px; }
+.cloze-grammar-group .challenge-choice-btn::after{ margin-left:2px; }
+.cloze-grammar-group-label{ text-transform:none; letter-spacing:0; font-size:13px; font-weight:700; }
+.cloze-grammar-msg{ color: var(--error-red); font-weight:700; }
+.cloze-grammar .btn-block{ min-height:50px; font-size:16px; }
+
+/* Devolutiva: barra de cor à esquerda, texto alinhado, rótulos sem caixa alta */
+.challenge-feedback, .listen-translate-feedback, .accent-feedback{ text-align:left; border-left-width:5px; padding:18px 18px 18px 18px; margin-top:16px; }
+.challenge-feedback.correct, .listen-translate-feedback.correct, .accent-feedback.correct{
+  background: color-mix(in srgb, var(--jade) 8%, var(--paper)); border-color: color-mix(in srgb, var(--jade) 35%, var(--paper-line)); border-left-color: var(--jade);
+}
+.challenge-feedback.incorrect, .listen-translate-feedback.incorrect, .accent-feedback.incorrect{
+  background: color-mix(in srgb, var(--error-red) 7%, var(--paper)); border-color: color-mix(in srgb, var(--error-red) 32%, var(--paper-line)); border-left-color: var(--error-red);
+}
+.challenge-feedback.partial, .listen-translate-feedback.partial, .accent-feedback.partial{
+  background: color-mix(in srgb, #E0A526 12%, var(--paper)); border-color: color-mix(in srgb, #E0A526 45%, var(--paper-line)); border-left-color:#E0A526;
+}
+.challenge-feedback-header, .listen-translate-feedback-header, .accent-feedback-header{ font-family: var(--font-display); font-size:19px; font-weight:800; margin-bottom:12px; }
+.listen-translate-feedback-row strong, .challenge-second-example-label, .challenge-microactivity-label, .challenge-external-resources-label{
+  text-transform:none; letter-spacing:0; font-size:13px; font-weight:700; color: var(--ink-soft);
+}
+.listen-translate-feedback-row{ font-size:15px; line-height:1.55; margin-bottom:12px; }
+.listen-translate-feedback-warning{ background: color-mix(in srgb, #E0A526 14%, var(--paper)); border-color: color-mix(in srgb, #E0A526 45%, var(--paper-line)); }
+.challenge-feedback-meaning{ font-size:16px; border-left:3px solid var(--seal-red); padding:2px 0 2px 12px; margin:0 0 12px; }
+.challenge-explanation{ font-size:14.5px; }
+.challenge-second-example{ background: var(--paper); border-left:3px solid var(--paper-line); border-radius:6px 10px 10px 6px; }
+.challenge-second-example-text{ font-size:15px; }
+.accent-feedback-correct-word{ font-family: var(--font-display); font-size:26px; font-weight:800; margin:6px 0 12px; }
+.accent-feedback{ text-align:center; }
+.accent-feedback .accent-feedback-header{ text-align:center; }
+.challenge-retry-actions .btn, .challenge-complete-btn{ min-height:50px; font-size:16px; }
+
+
+/* Devolutiva ousada (acerto / quase / erro): ícone circular, título grande, linhas em caixas */
+.challenge-feedback, .listen-translate-feedback, .accent-feedback{ --c: var(--jade); border-left-width:1px; border-radius:18px; padding:20px 18px; box-shadow: var(--shadow-lift); }
+.challenge-feedback.incorrect, .listen-translate-feedback.incorrect, .accent-feedback.incorrect{ --c: var(--error-red); border-left-color: color-mix(in srgb, var(--error-red) 32%, var(--paper-line)); }
+.challenge-feedback.partial, .listen-translate-feedback.partial, .accent-feedback.partial{ --c:#B7791F; border-left-color: color-mix(in srgb, #E0A526 45%, var(--paper-line)); }
+.challenge-feedback.correct, .listen-translate-feedback.correct, .accent-feedback.correct{ border-left-color: color-mix(in srgb, var(--jade) 35%, var(--paper-line)); }
+:root[data-theme="dark"] .challenge-feedback.partial, :root[data-theme="dark"] .listen-translate-feedback.partial, :root[data-theme="dark"] .accent-feedback.partial{ --c:#E0A93B; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .challenge-feedback.partial, :root:not([data-theme="light"]) .listen-translate-feedback.partial, :root:not([data-theme="light"]) .accent-feedback.partial{ --c:#E0A93B; } }
+:root[data-theme="dark"] .challenge-feedback.partial, :root[data-theme="dark"] .listen-translate-feedback.partial, :root[data-theme="dark"] .accent-feedback.partial{ --c:#E0A93B; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .challenge-feedback.partial, :root:not([data-theme="light"]) .listen-translate-feedback.partial, :root:not([data-theme="light"]) .accent-feedback.partial{ --c:#E0A93B; } }
+.challenge-feedback-header, .listen-translate-feedback-header, .accent-feedback-header{ display:flex; align-items:center; gap:14px; font-size:22px; line-height:1.15; color: var(--ink); }
+.accent-feedback .accent-feedback-header{ justify-content:center; }
+.fb-ico{ flex:none; width:48px; height:48px; border-radius:50%; display:grid; place-items:center; font-size:24px; font-weight:800; background: var(--c); color: var(--on-vivid); }
+.listen-translate-feedback-row{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:12px; padding:10px 12px; }
+.listen-translate-feedback-row strong{ display:block; margin-bottom:2px; }
+.challenge-feedback-chosen{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:12px; padding:10px 12px; }
+.challenge-explanation, .accent-feedback-explanation{ background: color-mix(in srgb, var(--seal-red) 9%, var(--paper)); border-radius:12px; padding:10px 12px; }
+.challenge-retry-actions{ display:grid; gap:10px; }
+.challenge-retry-actions .btn, .challenge-complete-btn{ min-height:52px; width:100%; border-radius:14px; }
+.challenge-retry-actions .btn-secondary{ background:transparent; border:1px solid var(--paper-line); }
+
+.fb-cmp{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+.fb-cmp .listen-translate-feedback-row{ margin-bottom:0; overflow-wrap:anywhere; }
+@media (max-width:340px){ .fb-cmp{ grid-template-columns:1fr; } }
+/* Marcação palavra a palavra (Ouça e traduza): sublinhado + fundo tintado,
+   nunca só cor (daltonismo). Texto segue --ink, legível nos 2 temas. */
+.tw-ok{ color:inherit; }
+.tw-bad, .tw-near, .tw-miss{ color:var(--ink); border-radius:4px; padding:0 3px; font-weight:700; text-decoration-line:underline; text-underline-offset:3px; }
+.tw-bad{ background:color-mix(in srgb, var(--error-red) 22%, transparent); text-decoration-style:wavy; text-decoration-color:var(--error-red); }
+.tw-near{ background:color-mix(in srgb, #B7791F 24%, transparent); text-decoration-style:dotted; text-decoration-color:#B7791F; }
+.tw-miss{ background:color-mix(in srgb, var(--jade) 22%, transparent); text-decoration-style:dashed; text-decoration-color:var(--jade); }
+:root[data-theme="dark"] .tw-near{ background:color-mix(in srgb, #E0A93B 26%, transparent); text-decoration-color:#E0A93B; }
+/* Lista de Expressões: busca, filtros e anel por nível */
+.challenges-toolbar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px; }
+.challenges-search{ flex:1 1 200px; min-height:44px; padding:0 14px; border:1.5px solid var(--paper-line); border-radius:12px; background:var(--paper); color:var(--ink); font:inherit; }
+.challenges-search:focus-visible{ outline:3px solid color-mix(in srgb, var(--seal-red) 55%, transparent); outline-offset:1px; }
+.challenges-filter-chips{ display:flex; gap:6px; flex-wrap:wrap; }
+.challenges-filter-chip{ min-height:44px; padding:0 14px; border:1.5px solid var(--paper-line); border-radius:999px; background:var(--paper); color:var(--ink); font:inherit; font-weight:700; cursor:pointer; }
+.challenges-filter-chip.active{ background:color-mix(in srgb, var(--seal-red) 16%, var(--paper)); border-color:var(--seal-red); }
+.challenges-filter-chip:focus-visible{ outline:3px solid color-mix(in srgb, var(--seal-red) 55%, transparent); outline-offset:2px; }
+.challenges-level-ring{ position:relative; width:40px; height:40px; flex:none; display:grid; place-items:center; border-radius:50%; font-size:10.5px; font-weight:800; font-variant-numeric:tabular-nums; background:var(--paper-warm); color:var(--ink); margin:0 4px; }
+.challenges-level-ring::before{ content:''; position:absolute; inset:-3px; border-radius:50%; background:conic-gradient(var(--seal-red) calc(var(--p, 0) * 1%), var(--paper-line) 0);
+  -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px)); mask:radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px)); }
+.challenges-level-ring[data-complete="1"]::before{ background:var(--jade); }
+.tw-legend{ display:flex; flex-wrap:wrap; gap:8px; font-size:.8rem; margin:-4px 0 12px; }
+
+/* Lista: concluído sólido, pendente tracejado, premium trancado quente */
+.challenge-card, .dictation-card{ border-radius:16px; min-height:64px; }
+.challenge-card:not(.completed):not(.locked), .dictation-card:not(.completed):not(.locked){ border-style:dashed; }
+.challenge-card.locked, .dictation-card.locked{ opacity:1; background: var(--paper-warm); }
+.challenge-card.completed{ border-width:2px; }
+@media (prefers-reduced-motion: reduce){ .challenge-card, .dictation-card, .fb-ico{ transition:none; animation:none; } }
+
+/* Ditado: mesma linguagem das atividades */
+.dictation-player-task{ font-family: var(--font-display); font-size:24px; letter-spacing:-.01em; }
+.dictation-card-module{ font-size:13px; }
+@media (prefers-reduced-motion: reduce){
+  .challenge-category-card, .challenge-card, .dictation-card, .challenge-choice-btn{ transition:none; }
+}
 .accent-feedback-header{ font-weight:800; font-size:15px; margin-bottom:12px; }
 .accent-feedback-answer{ font-size:14px; margin:4px 0; }
 .accent-feedback-correct-word{ font-size:22px; font-weight:800; margin:8px 0; }
@@ -3604,7 +3805,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 </head>
 <body>
 
-<a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+<a data-i18n="ui.skipLink" class="skip-link" href="#main-content">Pular para o conteúdo</a>
 
 <div id="toast-layer"></div>
 <div id="badge-unlock-layer" aria-live="polite"></div>
@@ -3655,9 +3856,9 @@ footer.app-footer img{ height:40px; opacity:.85; }
            comum na navegação/conclusão de lição, sem revogar privilégios
            administrativos reais (Painel de Admin etc. continuam
            acessíveis pela conta, só saem da navegação normal). -->
-      <button class="pill admin-mode-toggle-btn" id="admin-mode-toggle-btn" aria-label="Ativar/desativar Admin Mode" title="Admin Mode: OFF simula a experiência de um aluno comum" style="display:none;">🔒 Admin: <span id="admin-mode-state-label">ON</span></button>
-      <button class="pill notifications-pill" id="notifications-topbar-btn" aria-label="Notificações" title="Notificações">🔔<span class="notifications-badge" id="notifications-badge" style="display:none;"></span></button>
-      <button class="pill report-topbar-pill" id="report-topbar-btn" aria-label="Reportar problema" title="Reportar problema">⚑</button>
+      <button class="pill admin-mode-toggle-btn" id="admin-mode-toggle-btn" data-i18n="admin.mode.pillLabel" data-i18n-attr="aria-label:admin.mode.pillAria;title:admin.mode.pillTitle" aria-label="Ativar/desativar Admin Mode" title="Admin Mode: OFF simula a experiência de um aluno comum" style="display:none;">🔒 Admin: <span id="admin-mode-state-label">ON</span></button>
+      <button class="pill notifications-pill" id="notifications-topbar-btn" aria-label="Notificações" title="Notificações" data-i18n-attr="aria-label:notif.pref.sectionTitle;title:notif.pref.sectionTitle">🔔<span class="notifications-badge" id="notifications-badge" style="display:none;"></span></button>
+      <button class="pill report-topbar-pill" id="report-topbar-btn" aria-label="Reportar problema" title="Reportar problema" data-i18n-attr="aria-label:report.entry.label;title:report.entry.label">⚑</button>
       <div class="lang-switcher">
         <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
         <div class="lang-switcher-dropdown" id="lang-switcher-dropdown"></div>
@@ -3669,19 +3870,19 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <div class="tabs">
     <button class="tab-btn active" data-tab="path">
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5c-1.6-1.2-3.6-1.7-6-1.7v13c2.4 0 4.4.5 6 1.7 1.6-1.2 3.6-1.7 6-1.7v-13c-2.4 0-4.4.5-6 1.7z"/><path d="M12 6.5v13"/></svg>
-      <span>Estudo</span>
+      <span data-i18n="nav.study">Estudo</span>
     </button>
     <button class="tab-btn" data-tab="review">
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.3-6"/><path d="M17.3 3v4h-4"/><path d="M20 12a8 8 0 0 1-13.3 6"/><path d="M6.7 21v-4h4"/></svg>
-      <span>Revisão</span>
+      <span data-i18n="admin.reports.screen.review">Revisão</span>
     </button>
     <button class="tab-btn" data-tab="conjugaison">
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.2L15.8 5c.8-.8 2-.8 2.8 0l.4.4c.8.8.8 2 0 2.8L8.2 19l-4.2 1z"/><path d="M13.5 6.5l4 4"/></svg>
-      <span>Conjugação</span>
+      <span data-i18n="admin.reports.screen.conjugaison">Conjugação</span>
     </button>
     <button class="tab-btn" data-tab="challenges">
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>
-      <span>Desafios</span>
+      <span data-i18n="nav.challenges">Desafios</span>
     </button>
   </div>
 
@@ -3695,11 +3896,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <nav class="bottom-nav" id="app-bottom-nav">
     <button class="tab-btn active" data-tab="path">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><path d="M12 5c-1.8-1.3-4-2-6.5-2A1.5 1.5 0 0 0 4 4.5v13A1.5 1.5 0 0 0 5.5 19c2.5 0 4.7.7 6.5 2" fill="#60A5FA"/><path d="M12 5c1.8-1.3 4-2 6.5-2A1.5 1.5 0 0 1 20 4.5v13a1.5 1.5 0 0 1-1.5 1.5c-2.5 0-4.7.7-6.5 2" fill="#3B82F6"/></svg>
-      <span>Estudo</span>
+      <span data-i18n="nav.study">Estudo</span>
     </button>
     <button class="tab-btn" data-tab="review">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="10" rx="2.5" fill="#A78BFA" transform="rotate(-8 10 12)"/><rect x="7" y="7" width="14" height="10" rx="2.5" fill="#7C3AED"/></svg>
-      <span>Revisão</span>
+      <span data-i18n="admin.reports.screen.review">Revisão</span>
     </button>
     <button class="tab-btn" data-tab="challenges">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#FCA5A5"/><circle cx="12" cy="12" r="5.5" fill="#EF4444"/><circle cx="12" cy="12" r="2" fill="#FFFFFF"/></svg>
@@ -3707,11 +3908,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
     </button>
     <button class="tab-btn" data-tab="profile">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#FBBF24"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" fill="#7C3AED"/></svg>
-      <span>Perfil</span>
+      <span data-i18n="nav.profile">Perfil</span>
     </button>
-    <button class="tab-btn" id="mais-btn" type="button" aria-haspopup="true" aria-controls="user-menu-dropdown" aria-label="Mais opções" title="Mais">
+    <button class="tab-btn" id="mais-btn" type="button" aria-haspopup="true" aria-controls="user-menu-dropdown" aria-label="Mais opções" title="Mais" data-i18n-attr="aria-label:ui.moreOptions;title:zh.progress.heatMore">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.3" fill="#94A3B8"/><circle cx="12" cy="12" r="2.3" fill="#64748B"/><circle cx="19" cy="12" r="2.3" fill="#475569"/></svg>
-      <span>Mais</span>
+      <span data-i18n="zh.progress.heatMore">Mais</span>
     </button>
   </nav>
 
@@ -3726,26 +3927,26 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <nav class="sidebar-nav">
       <button class="tab-btn" data-tab="path">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M12 5c-1.8-1.3-4-2-6.5-2A1.5 1.5 0 0 0 4 4.5v13A1.5 1.5 0 0 0 5.5 19c2.5 0 4.7.7 6.5 2" fill="#60A5FA"/><path d="M12 5c1.8-1.3 4-2 6.5-2A1.5 1.5 0 0 1 20 4.5v13a1.5 1.5 0 0 1-1.5 1.5c-2.5 0-4.7.7-6.5 2" fill="#3B82F6"/></svg>
-        <span class="sidebar-label">Estudo</span>
+        <span class="sidebar-label" data-i18n="nav.study">Estudo</span>
       </button>
       <button class="tab-btn" data-tab="review">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="10" rx="2.5" fill="#A78BFA" transform="rotate(-8 10 12)"/><rect x="7" y="7" width="14" height="10" rx="2.5" fill="#7C3AED"/></svg>
-        <span class="sidebar-label">Revisão</span>
+        <span data-i18n="admin.reports.screen.review" class="sidebar-label">Revisão</span>
       </button>
       <button class="tab-btn" data-tab="conjugaison">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M4 20l1-4.2L15.8 5c.8-.8 2-.8 2.8 0l.4.4c.8.8.8 2 0 2.8L8.2 19l-4.2 1z" fill="#FBBF24"/><path d="M13.5 6.5l4 4" stroke="#F97316" stroke-width="2.2" stroke-linecap="round"/><path d="M4 20l1-4.2 3.2 3.2z" fill="#EC4899"/></svg>
-        <span class="sidebar-label">Conjugação</span>
+        <span data-i18n="admin.reports.screen.conjugaison" class="sidebar-label">Conjugação</span>
       </button>
       <button class="tab-btn" data-tab="challenges">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="#F87171"/><circle cx="12" cy="12" r="5" fill="#FEF2F2"/><circle cx="12" cy="12" r="2.3" fill="#DC2626"/></svg>
-        <span class="sidebar-label">Desafios</span>
+        <span class="sidebar-label" data-i18n="nav.challenges">Desafios</span>
       </button>
     </nav>
     <div class="sidebar-divider"></div>
     <nav class="sidebar-nav sidebar-nav-secondary">
       <button class="tab-btn" data-tab="profile">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#FBBF24"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" fill="#7C3AED"/></svg>
-        <span class="sidebar-label">Perfil</span>
+        <span class="sidebar-label" data-i18n="nav.profile">Perfil</span>
       </button>
       <button class="tab-btn" data-tab="leaderboard">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M7 4h10v6a5 5 0 0 1-10 0V4z" fill="#FBBF24"/><path d="M7 6H4a2 2 0 0 0 2 4" fill="#F59E0B"/><path d="M17 6h3a2 2 0 0 1-2 4" fill="#F59E0B"/><path d="M8 21h8" stroke="#B45309" stroke-width="2" stroke-linecap="round"/><path d="M12 17v4" stroke="#B45309" stroke-width="2" stroke-linecap="round"/></svg>
@@ -3753,7 +3954,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
       </button>
       <button class="tab-btn" data-tab="settings">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.36a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.26.42.7.7 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z" fill="#14B8A6"/><circle cx="12" cy="12" r="3" fill="#0F766E"/></svg>
-        <span class="sidebar-label">Configurações</span>
+        <span data-i18n="settings.title" class="sidebar-label">Configurações</span>
       </button>
       <button class="tab-btn admin-only-nav" data-tab="admin-badges" style="display:none;">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z" fill="#7C3AED"/><path d="M9 12l2 2 4-4" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
@@ -3772,7 +3973,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <span class="level-toggle-chevron">⌄</span>
       </button>
       <div class="path-header">
-        <p>Unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima.</p>
+        <p data-i18n="ui.path.sub">Unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima.</p>
       </div>
       <div class="daily-goal-chip" id="daily-goal-chip" style="display:none;"></div>
       <div class="daily-challenges-strip" id="daily-challenges-strip"></div>
@@ -3784,15 +3985,16 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <div class="lesson-hint-eyebrow" id="ud-eyebrow"></div>
         <div class="lesson-unit-title" id="ud-title"></div>
         <p class="lesson-unit-goal" id="ud-goal"></p>
+        <p class="lesson-unit-goal" id="ud-lang-notice" hidden style="font-style:italic;opacity:.8"></p>
       </div>
 
       <div class="lesson-focus-bar">
         <div class="lesson-progress-track" id="step-progress-wrap">
           <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
-        <button class="lesson-close-btn" id="report-flag-lesson-btn" data-report-flag aria-label="Reportar problema" title="Reportar problema">⚑</button>
-        <button class="lesson-close-btn" id="lesson-kbd-btn" aria-label="Atalhos do teclado" title="Atalhos do teclado">⌨️</button>
-        <button class="lesson-close-btn" id="back-to-path" aria-label="Sair da lição" title="Sair da lição">✕</button>
+        <button class="lesson-close-btn" id="report-flag-lesson-btn" data-report-flag aria-label="Reportar problema" title="Reportar problema" data-i18n-attr="aria-label:report.entry.label;title:report.entry.label">⚑</button>
+        <button class="lesson-close-btn" id="lesson-kbd-btn" aria-label="Atalhos do teclado" title="Atalhos do teclado" data-i18n-attr="aria-label:ui.kbd.ariaTitle;title:ui.kbd.ariaTitle">⌨️</button>
+        <button class="lesson-close-btn" id="back-to-path" aria-label="Sair da lição" title="Sair da lição" data-i18n-attr="aria-label:ui.exitLesson;title:ui.exitLesson">✕</button>
       </div>
 
       <div class="acq-phase-banner" id="acq-phase-banner" style="display:none;"></div>
@@ -3809,7 +4011,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <div class="view" id="view-review">
     <div id="review-mode-select-wrap">
       <div class="path-header">
-        <h2>Revisão</h2>
+        <h2 data-i18n="admin.reports.screen.review">Revisão</h2>
       </div>
       <div id="review-deck-topbar-home"></div>
 
@@ -3822,26 +4024,26 @@ footer.app-footer img{ height:40px; opacity:.85; }
           <div class="section-label">Origem</div>
           <select class="review-settings-select" id="review-origin-select"></select>
         </div>
-        <div class="section-label">Frequência de revisão</div>
+        <div data-i18n="ui.review.frequency" class="section-label">Frequência de revisão</div>
         <select class="review-settings-select" id="review-frequency-select">
-          <option value="frequent">Mais frequente (revisa mais cedo e mais vezes)</option>
+          <option data-i18n="ui.review.freq.frequent" value="frequent">Mais frequente (revisa mais cedo e mais vezes)</option>
           <option value="balanced">Equilibrada (recomendado)</option>
-          <option value="spaced">Mais espaçada (intervalos mais longos entre revisões)</option>
+          <option data-i18n="ui.review.freq.spaced" value="spaced">Mais espaçada (intervalos mais longos entre revisões)</option>
         </select>
-        <div class="section-label">Novas palavras por dia</div>
+        <div data-i18n="ui.review.newPerDay" class="section-label">Novas palavras por dia</div>
         <select class="review-settings-select" id="review-newcards-select">
-          <option value="0">0 (nenhuma, só revisar o que já viu)</option>
-          <option value="5">5 (ritmo mais lento)</option>
+          <option data-i18n="ui.review.newPerDay.0" value="0">0 (nenhuma, só revisar o que já viu)</option>
+          <option data-i18n="ui.review.newPerDay.5" value="5">5 (ritmo mais lento)</option>
           <option value="10">10 (recomendado)</option>
-          <option value="15">15 (ritmo mais rápido)</option>
-          <option value="20">20 (ritmo bem rápido)</option>
-          <option value="9999">Sem limite (todas as pendentes de uma vez)</option>
+          <option data-i18n="ui.review.newPerDay.15" value="15">15 (ritmo mais rápido)</option>
+          <option data-i18n="ui.review.newPerDay.20" value="20">20 (ritmo bem rápido)</option>
+          <option data-i18n="ui.review.newPerDay.unlimited" value="9999">Sem limite (todas as pendentes de uma vez)</option>
         </select>
-        <div class="section-label">Intensidade da sessão</div>
+        <div data-i18n="ui.review.intensity" class="section-label">Intensidade da sessão</div>
         <select class="review-settings-select" id="review-intensity-select">
-          <option value="light">Leve (sessões mais curtas)</option>
+          <option data-i18n="ui.review.intensity.light" value="light">Leve (sessões mais curtas)</option>
           <option value="normal">Normal (recomendado)</option>
-          <option value="intense">Intensa (sessões mais longas)</option>
+          <option data-i18n="ui.review.intensity.intense" value="intense">Intensa (sessões mais longas)</option>
         </select>
       </div>
 
@@ -3867,8 +4069,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <div class="view" id="view-conjugaison">
     <div id="conj-select-wrap">
       <div class="path-header">
-        <h2>Conjugação</h2>
-        <p>Escolha os tempos verbais e as categorias de verbo. Você sempre pratica as 6 pessoas.</p>
+        <h2 data-i18n="admin.reports.screen.conjugaison">Conjugação</h2>
+        <p data-i18n="ui.conj.sub">Escolha os tempos verbais e as categorias de verbo. Você sempre pratica as 6 pessoas.</p>
       </div>
       <div class="conj-select-grid">
         <div class="conj-select-col">
@@ -3878,7 +4080,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <div class="conj-select-col">
           <h3>Verbos</h3>
           <div class="conj-filter-row">
-            <label for="conj-topn-select">Número de verbos (mais comuns primeiro)</label>
+            <label data-i18n="ui.conj.topN" for="conj-topn-select">Número de verbos (mais comuns primeiro)</label>
             <select id="conj-topn-select"></select>
           </div>
           <div class="conj-toggle-item" id="conj-toggle-regular">
@@ -3892,11 +4094,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
           <div class="conj-check-list" id="conj-verb-list"></div>
         </div>
       </div>
-      <button class="btn btn-primary btn-block" id="conj-start-btn" style="max-width:320px; margin:0 auto; display:flex;">Começar prática</button>
+      <button data-i18n="ui.conj.start" class="btn btn-primary btn-block" id="conj-start-btn" style="max-width:320px; margin:0 auto; display:flex;">Começar prática</button>
     </div>
 
     <div id="conj-practice-wrap" style="display:none;">
-      <button class="back-link" id="conj-back-to-select">← Voltar à seleção</button>
+      <button data-i18n="ui.conj.backToSelect" class="back-link" id="conj-back-to-select">← Voltar à seleção</button>
       <div id="conj-practice-content"></div>
     </div>
   </div>
@@ -3910,47 +4112,47 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <div class="view" id="view-leaderboard">
     <div class="path-header">
       <h2>Ranking semanal</h2>
-      <p>Quem ganhou mais XP essa semana, no geral e por idioma.</p>
+      <p data-i18n="ui.leaderboard.sub">Quem ganhou mais XP essa semana, no geral e por idioma.</p>
     </div>
     <div id="leaderboard-content"></div>
   </div>
 
   <!-- ===== PROGRESSO ===== -->
   <div class="view" id="view-progress">
-    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil">
-      <button class="leaderboard-tab" data-tab="profile">Visão geral</button>
+    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil" data-i18n-attr="aria-label:profile.subnavAria">
+      <button data-i18n="profile.tabOverview" class="leaderboard-tab" data-tab="profile">Visão geral</button>
       <button class="leaderboard-tab" data-tab="goals">Metas</button>
       <button class="leaderboard-tab active" data-tab="progress">Progresso</button>
     </div>
     <div class="path-header">
-      <h2>Seu progresso</h2>
-      <p>Acompanhe sua consistência e conquistas.</p>
+      <h2 data-i18n="ui.stats.title">Seu progresso</h2>
+      <p data-i18n="ui.stats.sub">Acompanhe sua consistência e conquistas.</p>
     </div>
     <div class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
     <div class="badge-grid conquests-grid" id="badge-grid"></div>
     <div class="stat-cards" id="stat-cards"></div>
     <div id="vocab-strength-widget"></div>
-    <div class="section-label">Atividade diária</div>
+    <div data-i18n="ui.stats.dailyActivity" class="section-label">Atividade diária</div>
     <div class="heatmap-wrap" id="heatmap-wrap"></div>
-    <div class="section-label">Palavras aprendidas ao longo do tempo</div>
+    <div data-i18n="ui.stats.wordsOverTime" class="section-label">Palavras aprendidas ao longo do tempo</div>
     <div class="progress-line-wrap" id="progress-line-chart-wrap"></div>
   </div>
 
   <!-- ===== METAS ===== -->
   <div class="view" id="view-goals">
-    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil">
-      <button class="leaderboard-tab" data-tab="profile">Visão geral</button>
+    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil" data-i18n-attr="aria-label:profile.subnavAria">
+      <button data-i18n="profile.tabOverview" class="leaderboard-tab" data-tab="profile">Visão geral</button>
       <button class="leaderboard-tab active" data-tab="goals">Metas</button>
       <button class="leaderboard-tab" data-tab="progress">Progresso</button>
     </div>
     <div class="path-header">
       <h2>Minhas metas</h2>
-      <p>Defina quantas lições por dia você quer estudar.</p>
+      <p data-i18n="ui.goal.sub">Defina quantas lições por dia você quer estudar.</p>
     </div>
     <div class="study-plan-card" id="study-plan-card">
       <div class="study-plan-header">
         <div>
-          <div class="study-plan-title">Minha meta de estudo</div>
+          <div data-i18n="ui.goal.title" class="study-plan-title">Minha meta de estudo</div>
           <div class="study-plan-sub" id="study-plan-sub"></div>
         </div>
         <button class="study-plan-edit-btn" id="study-plan-edit-btn" aria-label="Editar meta" title="Editar meta">✏️</button>
@@ -3962,58 +4164,68 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <!-- ===== CONFIGURAÇÕES ===== -->
   <div class="view" id="view-settings">
     <div class="path-header">
-      <h2>Configurações</h2>
-      <p>Sua conta, preferências e exportação de dados.</p>
+      <h2 data-i18n="settings.title">Configurações</h2>
+      <p data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</p>
     </div>
-    <div class="leaderboard-tabs" role="tablist" aria-label="Seção de Configurações">
-      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-settings-section="geral">Geral</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="notifications">🔔 Notificações</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="export">📦 Exportar</button>
+    <div class="leaderboard-tabs" role="tablist" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
+      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
     </div>
     <div id="settings-geral-content">
-      <div class="section-label">Conta</div>
+      <div class="section-label" data-i18n="settings.section.account">Conta</div>
       <div class="settings-card">
         <div class="settings-row">
-          <div class="settings-row-label">E-mail</div>
+          <div class="settings-row-label" data-i18n="settings.account.email">E-mail</div>
           <div class="settings-row-value" id="settings-email">—</div>
         </div>
         <div class="settings-row">
-          <div class="settings-row-label">Conectado com</div>
+          <div class="settings-row-label" data-i18n="settings.account.provider">Conectado com</div>
           <div class="settings-row-value" id="settings-provider">—</div>
         </div>
       </div>
-      <p class="settings-more-note">Mais opções de conta em breve.</p>
-      <div class="section-label">Preferências</div>
+      <p class="settings-more-note" data-i18n="settings.account.moreSoon">Mais opções de conta em breve.</p>
+      <div class="section-label" data-i18n="settings.section.preferences">Preferências</div>
       <div class="pref-row">
         <div class="pref-row-text">
-          <div class="pref-row-title">Modo escuro</div>
-          <div class="pref-row-sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
+          <div class="pref-row-title" data-i18n="settings.pref.dark.title">Modo escuro</div>
+          <div class="pref-row-sub" data-i18n="settings.pref.dark.sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
         </div>
         <button class="pref-switch" id="theme-pref-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
       </div>
       <div class="pref-row">
         <div class="pref-row-text">
-          <div class="pref-row-title">Sempre digitar no exercício de completar frase</div>
-          <div class="pref-row-sub">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</div>
+          <div class="pref-row-title" data-i18n="settings.pref.cloze.title">Sempre digitar no exercício de completar frase</div>
+          <div class="pref-row-sub" data-i18n="settings.pref.cloze.subFr">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</div>
         </div>
         <button class="pref-switch" id="cloze-mode-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
       </div>
       <div class="pref-row">
         <div class="pref-row-text">
-          <div class="pref-row-title">Som de acerto/erro nos exercícios</div>
-          <div class="pref-row-sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
+          <div class="pref-row-title" data-i18n="settings.pref.sound.title">Som de acerto/erro nos exercícios</div>
+          <div class="pref-row-sub" data-i18n="settings.pref.sound.sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
         </div>
         <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
+      </div>
+      <div class="pref-row">
+        <div class="pref-row-text">
+          <div class="pref-row-title" data-i18n="settings.uiLanguage.title">Idioma da interface</div>
+          <div class="pref-row-sub" data-i18n="settings.uiLanguage.sub">Muda só os textos do app (menus, botões e avisos). Não muda o idioma que você estuda.</div>
+        </div>
+        <select class="review-settings-select" id="ui-language-select" aria-label="Idioma da interface" data-i18n-attr="aria-label:settings.uiLanguage.title" style="width:auto; flex-shrink:0;">
+          <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+          <option value="en" lang="en">English</option>
+        </select>
       </div>
     </div>
     <div id="settings-notifications-content" style="display:none;"></div>
     <div id="settings-export-content" style="display:none;">
       <div class="export-box">
         <div class="icon">📦</div>
-        <h3>Escolha o que exportar</h3>
+        <h3 data-i18n="settings.export.title">Escolha o que exportar</h3>
         <div class="deck-select" id="export-deck-select"></div>
-        <p>O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.</p>
-        <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;">Gerar arquivo .apkg</button>
+        <p data-i18n="settings.export.descFr">O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.</p>
+        <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;" data-i18n="settings.export.button">Gerar arquivo .apkg</button>
         <div class="export-status" id="export-status"></div>
       </div>
     </div>
@@ -4022,20 +4234,20 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <!-- ===== PAINEL DE ADMIN ===== -->
   <div class="view" id="view-admin-badges">
     <div class="path-header">
-      <h2>Painel de Admin</h2>
-      <p>Badges especiais e métricas de uso da plataforma.</p>
+      <h2 data-i18n="admin.reports.screen.admin_badges">Painel de Admin</h2>
+      <p data-i18n="admin.panel.sub">Badges especiais e métricas de uso da plataforma.</p>
     </div>
-    <div class="leaderboard-tabs" role="tablist" aria-label="Seção do painel de admin">
-      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-admin-section="badges">🎖️ Badges</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="analytics">📊 Analytics</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="notifications">🔔 Notificações</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="reports">⚑ Reports</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="students">🎓 Alunos</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="flashcards">📇 Flashcards</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="classlogs">📝 Aulas</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="materials">📚 Material de apoio</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="premium">⭐ Premium</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="tags">🏷️ Tags</button>
+    <div class="leaderboard-tabs" role="tablist" aria-label="Seção do painel de admin" data-i18n-attr="aria-label:admin.panel.aria">
+      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-admin-section="badges" data-i18n="admin.panel.tab.badges">🎖️ Badges</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="analytics" data-i18n="admin.panel.tab.analytics">📊 Analytics</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="reports" data-i18n="admin.panel.tab.reports">⚑ Reports</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="students" data-i18n="admin.panel.tab.students">🎓 Alunos</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="flashcards" data-i18n="admin.panel.tab.flashcards">📇 Flashcards</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="classlogs" data-i18n="admin.panel.tab.classlogs">📝 Aulas</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="materials" data-i18n="admin.panel.tab.materials">📚 Material de apoio</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="premium" data-i18n="admin.panel.tab.premium">⭐ Premium</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="tags" data-i18n="admin.panel.tab.tags">🏷️ Tags</button>
     </div>
     <div id="admin-badges-content"></div>
     <div id="admin-analytics-content" style="display:none;"></div>
@@ -4052,8 +4264,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <!-- ===== MEUS CARTÕES (Fase 5, aberta pra qualquer conta) ===== -->
   <div class="view" id="view-my-flashcards">
     <div class="path-header">
-      <h2>📇 Meus cartões</h2>
-      <p>Crie seus próprios flashcards -- palavras e frases que você quer memorizar, mesmo que não estejam na trilha.</p>
+      <h2 data-i18n="ui.myCards.title">📇 Meus cartões</h2>
+      <p data-i18n="ui.myCards.sub">Crie seus próprios flashcards -- palavras e frases que você quer memorizar, mesmo que não estejam na trilha.</p>
     </div>
     <div id="my-flashcards-content"></div>
   </div>
@@ -4062,8 +4274,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
        leitura: quem envia é a professora, ver Painel de Admin) ===== -->
   <div class="view" id="view-support-materials">
     <div class="path-header">
-      <h2>📚 Material de apoio</h2>
-      <p>Resumos, links e arquivos que sua professora compartilhou com você.</p>
+      <h2 data-i18n="menu.supportMaterials">📚 Material de apoio</h2>
+      <p data-i18n="ui.materials.sub">Resumos, links e arquivos que sua professora compartilhou com você.</p>
     </div>
     <div id="support-materials-content"></div>
   </div>
@@ -4102,12 +4314,12 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div id="challenges-categories-wrap">
       <button class="back-link" id="challenges-module-back" style="display:none;" data-ch-i18n="ch.static.backTrail">← Voltar à trilha</button>
       <div class="path-header">
-        <h2 id="challenges-categories-title">Desafios</h2>
-        <p id="challenges-categories-sub">Pratique francês de verdade: expressões, compreensão auditiva e ortografia.</p>
+        <h2 id="challenges-categories-title" data-i18n="nav.challenges">Desafios</h2>
+        <p data-i18n="fr.challenges.sub" id="challenges-categories-sub">Pratique francês de verdade: expressões, compreensão auditiva e ortografia.</p>
       </div>
       <div class="challenges-admin-bar" id="challenges-admin-bar" style="display:none;">
-        <button class="btn btn-secondary" id="challenges-admin-import-btn">📥 Importar JSON</button>
-        <button class="btn btn-secondary" id="challenges-admin-review-btn">🛠️ Revisar pendentes (<span id="challenges-pending-count">0</span>)</button>
+        <button class="btn btn-secondary" id="challenges-admin-import-btn" data-i18n="adminChallenges.bar.import">📥 Importar JSON</button>
+        <button class="btn btn-secondary" id="challenges-admin-review-btn" data-i18n="adminChallenges.bar.review">🛠️ Revisar pendentes (<span id="challenges-pending-count">0</span>)</button>
       </div>
       <div class="challenges-categories" id="challenges-categories"></div>
     </div>
@@ -4115,7 +4327,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div id="challenges-list-wrap" style="display:none;">
       <button class="back-link" id="challenges-list-back-btn" data-ch-i18n="ch.static.back">← Voltar às categorias</button>
       <div class="path-header">
-        <h2 id="challenges-list-title">Desafios</h2>
+        <h2 id="challenges-list-title" data-i18n="nav.challenges">Desafios</h2>
       </div>
       <div id="challenges-list-progress"></div>
       <div class="challenges-level-tabs" id="challenges-level-tabs" style="display:none;"></div>
@@ -4129,7 +4341,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     </div>
 
     <div id="challenges-admin-wrap" style="display:none;">
-      <button class="back-link" id="challenges-admin-back-btn">← Voltar aos desafios</button>
+      <button class="back-link" id="challenges-admin-back-btn" data-i18n="fr.dictation.backToChallenges">← Voltar aos desafios</button>
       <div id="challenges-admin-content"></div>
     </div>
   </div>
@@ -4150,7 +4362,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div class="side-card" id="side-card-status">
       <div class="side-card-title">Status</div>
       <div class="side-status-row"><span>⭐</span><span id="side-xp-count" class="stat-count">0</span><span>XP</span></div>
-      <div class="side-status-row"><span>🔥</span><span id="side-streak-count" class="stat-count">0</span><span>dias seguidos</span></div>
+      <div class="side-status-row"><span>🔥</span><span id="side-streak-count" class="stat-count">0</span><span data-i18n="side.streakDays">dias seguidos</span></div>
     </div>
     <div class="side-card" id="side-card-missions">
       <div id="side-missions-body"></div>
@@ -4162,7 +4374,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 
 <div id="notifications-dropdown" class="user-dropdown notifications-dropdown">
   <div class="notifications-dropdown-header">
-    <span>Notificações</span>
+    <span data-i18n="notif.pref.sectionTitle">Notificações</span>
     <button class="notifications-mark-all-btn" id="notifications-mark-all-btn">Ler todas</button>
   </div>
   <div id="notifications-list"></div>
@@ -4179,29 +4391,29 @@ footer.app-footer img{ height:40px; opacity:.85; }
        #user-profile-btn{display:none} mobile -- ver bloco de tema mobile;
        os outros 3 não têm aba fixa própria na barra inferior, então
        continuam só alcançáveis via "Mais" lá). -->
-  <button class="user-dropdown-item mais-extra-tab" id="user-profile-btn">👤 Meu perfil</button>
-  <button class="user-dropdown-item mais-extra-tab" id="mais-conjugaison-btn" data-tab="conjugaison">✍️ Conjugação</button>
-  <button class="user-dropdown-item mais-extra-tab mais-promoted-tab" id="mais-challenges-btn" data-tab="challenges">🎯 Desafios</button>
-  <button class="user-dropdown-item mais-extra-tab" id="leaderboard-btn">🏆 Ranking</button>
-  <button class="user-dropdown-item" id="support-materials-btn">📚 Material de apoio</button>
-  <button class="user-dropdown-item mais-extra-tab" id="user-settings-btn">⚙️ Configurações</button>
-  <button class="user-dropdown-item admin-only-nav mais-extra-tab" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
-  <button class="user-dropdown-item" id="report-menu-btn">⚑ Reportar problema</button>
+  <button class="user-dropdown-item mais-extra-tab" id="user-profile-btn" data-i18n="menu.profile">👤 Meu perfil</button>
+  <button class="user-dropdown-item mais-extra-tab" id="mais-conjugaison-btn" data-tab="conjugaison" data-i18n="menu.conjugation">✍️ Conjugação</button>
+  <button class="user-dropdown-item mais-extra-tab mais-promoted-tab" id="mais-challenges-btn" data-tab="challenges" data-i18n="menu.challenges">🎯 Desafios</button>
+  <button class="user-dropdown-item mais-extra-tab" id="leaderboard-btn" data-i18n="menu.ranking">🏆 Ranking</button>
+  <button class="user-dropdown-item" id="support-materials-btn" data-i18n="menu.supportMaterials">📚 Material de apoio</button>
+  <button class="user-dropdown-item mais-extra-tab" id="user-settings-btn" data-i18n="menu.settings">⚙️ Configurações</button>
+  <button class="user-dropdown-item admin-only-nav mais-extra-tab" id="admin-badges-btn" style="display:none;" data-i18n="menu.admin">🛠️ Painel de Admin</button>
+  <button class="user-dropdown-item" id="report-menu-btn" data-i18n="report.entry.menuItem">⚑ Reportar problema</button>
   <div class="user-dropdown-sep"></div>
-  <button class="user-dropdown-item danger" id="logout-btn">Sair da conta</button>
+  <button class="user-dropdown-item danger" id="logout-btn" data-i18n="menu.logout">Sair da conta</button>
 </div>
 
 <!-- ===== MODAL: IMPORTAR DESAFIOS VIA JSON (admin) ===== -->
 <div id="challenges-import-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>Importar desafios via JSON</h3>
-      <button class="app-modal-close" id="challenges-import-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="adminChallenges.modal.title">Importar desafios via JSON</h3>
+      <button class="app-modal-close" id="challenges-import-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
       <p>Cole aqui a saída do pipeline de geração (<code>challenges_pipeline_output.json</code>, ou só o array de <code>accepted</code>) -- vai direto pro banco, sem precisar rodar SQL manualmente no Supabase.</p>
       <textarea id="challenges-import-textarea" class="challenges-import-textarea" placeholder='[{"id": "expr-auto-001", "type": "expression", "level": "B1", ...}, ...]' rows="12"></textarea>
-      <button class="btn btn-primary btn-block" id="challenges-import-submit-btn" style="max-width:320px; margin:12px auto 0;">Importar</button>
+      <button class="btn btn-primary btn-block" id="challenges-import-submit-btn" style="max-width:320px; margin:12px auto 0;" data-i18n="adminChallenges.import.btn">Importar</button>
       <div class="challenges-import-status" id="challenges-import-status"></div>
     </div>
   </div>
@@ -4223,13 +4435,13 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="admin-manage-badge-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3 id="admin-manage-badge-title">Gerenciar badge</h3>
-      <button class="app-modal-close" id="admin-manage-badge-modal-close" aria-label="Fechar">✕</button>
+      <h3 id="admin-manage-badge-title" data-i18n="admin.modal.manageBadge.title">Gerenciar badge</h3>
+      <button class="app-modal-close" id="admin-manage-badge-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p class="admin-manage-badge-hint">Marque quem deve ter este badge. Desmarcar remove.</p>
+      <p class="admin-manage-badge-hint" data-i18n="admin.modal.manageBadge.hint">Marque quem deve ter este badge. Desmarcar remove.</p>
       <div id="admin-manage-badge-list" class="admin-member-list"></div>
-      <button class="btn btn-primary btn-block" id="admin-manage-badge-save-btn" style="margin-top:14px;">Salvar</button>
+      <button class="btn btn-primary btn-block" id="admin-manage-badge-save-btn" style="margin-top:14px;" data-i18n="profile.save">Salvar</button>
     </div>
   </div>
 </div>
@@ -4237,21 +4449,21 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="admin-edit-badge-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>Editar badge</h3>
-      <button class="app-modal-close" id="admin-edit-badge-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="admin.badges.catalog.editTitle">Editar badge</h3>
+      <button class="app-modal-close" id="admin-edit-badge-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
       <form id="admin-edit-badge-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-edit-badge-id">ID (só letras minúsculas/números/_)</label>
+        <label class="profile-edit-label" for="admin-edit-badge-id" data-i18n="admin.badges.create.id">ID (só letras minúsculas/números/_)</label>
         <input type="text" id="admin-edit-badge-id" class="profile-edit-input" maxlength="32">
-        <label class="profile-edit-label" for="admin-edit-badge-name">Nome</label>
+        <label class="profile-edit-label" for="admin-edit-badge-name" data-i18n="admin.badges.create.name">Nome</label>
         <input type="text" id="admin-edit-badge-name" class="profile-edit-input" maxlength="40">
-        <label class="profile-edit-label" for="admin-edit-badge-icon">Emoji</label>
+        <label class="profile-edit-label" for="admin-edit-badge-icon" data-i18n="admin.badges.create.icon">Emoji</label>
         <input type="text" id="admin-edit-badge-icon" class="profile-edit-input" maxlength="8">
-        <label class="profile-edit-label" for="admin-edit-badge-desc">Descrição (opcional)</label>
+        <label class="profile-edit-label" for="admin-edit-badge-desc" data-i18n="admin.materials.descOpt">Descrição (opcional)</label>
         <input type="text" id="admin-edit-badge-desc" class="profile-edit-input" maxlength="120">
         <p class="profile-edit-error" id="admin-edit-badge-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-edit-badge-save-btn">Salvar alterações</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-edit-badge-save-btn" data-i18n="admin.modal.saveChanges">Salvar alterações</button>
       </form>
     </div>
   </div>
@@ -4260,19 +4472,19 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="admin-edit-template-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>Editar variante</h3>
-      <button class="app-modal-close" id="admin-edit-template-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="admin.modal.editTemplate.title">Editar variante</h3>
+      <button class="app-modal-close" id="admin-edit-template-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
       <form id="admin-edit-template-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-edit-template-title">Título (opcional)</label>
+        <label class="profile-edit-label" for="admin-edit-template-title" data-i18n="admin.notifications.new.titleLabel">Título (opcional)</label>
         <input type="text" id="admin-edit-template-title" class="profile-edit-input" maxlength="60">
-        <label class="profile-edit-label" for="admin-edit-template-icon">Emoji (opcional)</label>
+        <label class="profile-edit-label" for="admin-edit-template-icon" data-i18n="admin.notifications.new.icon">Emoji (opcional)</label>
         <input type="text" id="admin-edit-template-icon" class="profile-edit-input" maxlength="8">
-        <label class="profile-edit-label" for="admin-edit-template-body">Texto</label>
+        <label class="profile-edit-label" for="admin-edit-template-body" data-i18n="admin.notifications.new.body">Texto</label>
         <textarea id="admin-edit-template-body" class="profile-edit-textarea" maxlength="300" rows="2"></textarea>
         <p class="profile-edit-error" id="admin-edit-template-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-edit-template-save-btn">Salvar alterações</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-edit-template-save-btn" data-i18n="admin.modal.saveChanges">Salvar alterações</button>
       </form>
     </div>
   </div>
@@ -4281,71 +4493,71 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="admin-report-detail-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3 id="admin-report-detail-category">Report</h3>
-      <button class="app-modal-close" id="admin-report-detail-modal-close" aria-label="Fechar">✕</button>
+      <h3 id="admin-report-detail-category" data-i18n="admin.modal.report.title">Report</h3>
+      <button class="app-modal-close" id="admin-report-detail-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
       <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label">Enviado por</div>
+        <div class="admin-report-detail-label" data-i18n="admin.modal.report.sentBy">Enviado por</div>
         <div id="admin-report-detail-reporter" class="admin-report-detail-text"></div>
       </div>
       <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label">Descrição</div>
+        <div class="admin-report-detail-label" data-i18n="admin.modal.report.description">Descrição</div>
         <div id="admin-report-detail-description" class="admin-report-detail-text"></div>
       </div>
       <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label">O que a pessoa esperava</div>
+        <div class="admin-report-detail-label" data-i18n="admin.modal.report.expected">O que a pessoa esperava</div>
         <div id="admin-report-detail-expected" class="admin-report-detail-text"></div>
       </div>
       <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label">Gravidade percebida</div>
+        <div class="admin-report-detail-label" data-i18n="admin.modal.report.severity">Gravidade percebida</div>
         <div id="admin-report-detail-severity" class="admin-report-detail-text"></div>
       </div>
       <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label">Contexto capturado automaticamente</div>
+        <div class="admin-report-detail-label" data-i18n="admin.modal.report.context">Contexto capturado automaticamente</div>
         <div id="admin-report-detail-context" class="admin-report-detail-context"></div>
       </div>
       <div class="admin-report-detail-block admin-report-detail-text" id="admin-report-detail-screenshot"></div>
 
-      <label class="profile-edit-label" for="admin-report-detail-status">Status</label>
+      <label class="profile-edit-label" for="admin-report-detail-status" data-i18n="admin.modal.report.status">Status</label>
       <select id="admin-report-detail-status" class="profile-edit-input">
-        <option value="novo">Novo</option>
-        <option value="em_analise">Em análise</option>
-        <option value="confirmado">Confirmado</option>
-        <option value="em_desenvolvimento">Em desenvolvimento</option>
-        <option value="resolvido">Resolvido</option>
-        <option value="nao_reproduzido">Não reproduzido</option>
-        <option value="recusado">Recusado</option>
-        <option value="duplicado">Duplicado</option>
+        <option value="novo" data-i18n="admin.reports.status.novo">Novo</option>
+        <option value="em_analise" data-i18n="admin.reports.status.em_analise">Em análise</option>
+        <option value="confirmado" data-i18n="admin.reports.status.confirmado">Confirmado</option>
+        <option value="em_desenvolvimento" data-i18n="admin.reports.status.em_desenvolvimento">Em desenvolvimento</option>
+        <option value="resolvido" data-i18n="admin.reports.status.resolvido">Resolvido</option>
+        <option value="nao_reproduzido" data-i18n="admin.reports.status.nao_reproduzido">Não reproduzido</option>
+        <option value="recusado" data-i18n="admin.reports.status.recusado">Recusado</option>
+        <option value="duplicado" data-i18n="admin.reports.status.duplicado">Duplicado</option>
       </select>
 
-      <label class="profile-edit-label" for="admin-report-detail-priority">Prioridade técnica</label>
+      <label class="profile-edit-label" for="admin-report-detail-priority" data-i18n="admin.modal.report.priority">Prioridade técnica</label>
       <select id="admin-report-detail-priority" class="profile-edit-input">
-        <option value="">(não definida)</option>
-        <option value="baixa">Baixa</option>
-        <option value="media">Média</option>
-        <option value="alta">Alta</option>
-        <option value="critica">Crítica</option>
+        <option value="" data-i18n="admin.modal.report.priorityNone">(não definida)</option>
+        <option value="baixa" data-i18n="admin.reports.priority.baixa">Baixa</option>
+        <option value="media" data-i18n="admin.reports.priority.media">Média</option>
+        <option value="alta" data-i18n="admin.reports.priority.alta">Alta</option>
+        <option value="critica" data-i18n="admin.reports.priority.critica">Crítica</option>
       </select>
 
-      <label class="profile-edit-label" for="admin-report-detail-note">Nota interna</label>
-      <textarea id="admin-report-detail-note" class="profile-edit-textarea" rows="3" placeholder="Só a equipe vê isso"></textarea>
+      <label class="profile-edit-label" for="admin-report-detail-note" data-i18n="admin.modal.report.note">Nota interna</label>
+      <textarea id="admin-report-detail-note" class="profile-edit-textarea" rows="3" placeholder="Só a equipe vê isso" data-i18n-attr="placeholder:admin.modal.report.notePh"></textarea>
 
       <p class="profile-edit-error" id="admin-report-detail-error"></p>
-      <button type="button" class="btn btn-primary btn-block" id="admin-report-detail-save-btn">Salvar</button>
+      <button type="button" class="btn btn-primary btn-block" id="admin-report-detail-save-btn" data-i18n="profile.save">Salvar</button>
 
       <div class="admin-report-detail-block admin-report-reply-block">
-        <div class="admin-report-detail-label">Responder por e-mail</div>
+        <div class="admin-report-detail-label" data-i18n="admin.modal.report.replyByEmail">Responder por e-mail</div>
         <div id="admin-report-reply-history" class="admin-report-detail-text"></div>
         <div id="admin-report-reply-composer">
-          <label class="profile-edit-label" for="admin-report-reply-subject">Assunto</label>
+          <label class="profile-edit-label" for="admin-report-reply-subject" data-i18n="admin.modal.report.subject">Assunto</label>
           <input type="text" id="admin-report-reply-subject" class="profile-edit-input" maxlength="150">
-          <label class="profile-edit-label" for="admin-report-reply-body">Mensagem</label>
-          <textarea id="admin-report-reply-body" class="profile-edit-textarea" rows="5" placeholder="Obrigada por avisar! ..."></textarea>
+          <label class="profile-edit-label" for="admin-report-reply-body" data-i18n="admin.modal.report.message">Mensagem</label>
+          <textarea id="admin-report-reply-body" class="profile-edit-textarea" rows="5" placeholder="Obrigada por avisar! ..." data-i18n-attr="placeholder:admin.modal.report.replyPh"></textarea>
           <p class="profile-edit-error" id="admin-report-reply-error"></p>
-          <button type="button" class="btn btn-primary btn-block" id="admin-report-reply-send-btn">Enviar resposta</button>
+          <button type="button" class="btn btn-primary btn-block" id="admin-report-reply-send-btn" data-i18n="admin.reports.reply.send">Enviar resposta</button>
         </div>
-        <p id="admin-report-reply-noemail" class="profile-edit-hint" style="display:none;">Sem e-mail associado a este report (convidado que não informou e-mail) -- não é possível responder.</p>
+        <p id="admin-report-reply-noemail" class="profile-edit-hint" style="display:none;" data-i18n="admin.modal.report.noEmail">Sem e-mail associado a este report (convidado que não informou e-mail) -- não é possível responder.</p>
       </div>
     </div>
   </div>
@@ -4370,16 +4582,24 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <p class="profile-edit-avatar-error" id="profile-edit-avatar-error"></p>
 
         <label class="profile-edit-label" for="profile-edit-display-name">Nome exibido</label>
-        <input type="text" id="profile-edit-display-name" class="profile-edit-input" maxlength="60" placeholder="Como você quer ser chamada(o)">
+        <input type="text" id="profile-edit-display-name" class="profile-edit-input" maxlength="60" placeholder="Como você quer ser chamada(o)" data-i18n-attr="placeholder:ui.profileEdit.namePh">
 
-        <label class="profile-edit-label" for="profile-edit-username">Seu identificador público (permanente)</label>
+        <label data-i18n="ui.profileEdit.country" class="profile-edit-label" for="profile-edit-country">País de origem</label>
+        <select id="profile-edit-country" class="profile-edit-input"></select>
+        <p data-i18n="ui.profileEdit.countryHint" class="profile-edit-hint">Usado nos exemplos da trilha (ex.: "Eu sou brasileira"). Sem escolher, assumimos Brasil.</p>
+
+        <label data-i18n="ui.profileEdit.gender" class="profile-edit-label" for="profile-edit-gender">Gênero</label>
+        <select id="profile-edit-gender" class="profile-edit-input"></select>
+        <p data-i18n="ui.profileEdit.genderHint" class="profile-edit-hint">Privado: só você vê. Usado para escolher a forma certa das palavras nos exemplos da trilha (ex.: brasileiro ou brasileira). Sem escolher, mostramos as duas formas (brasileiro·a).</p>
+
+        <label data-i18n="ui.profileEdit.username" class="profile-edit-label" for="profile-edit-username">Seu identificador público (permanente)</label>
         <div class="profile-edit-username-wrap">
           <span class="profile-edit-at">@</span>
           <input type="text" id="profile-edit-username" class="profile-edit-input" maxlength="24" readonly aria-readonly="true" title="Gerado pelo sistema; não pode ser alterado">
         </div>
 
         <label class="profile-edit-label" for="profile-edit-bio">Sobre mim</label>
-        <textarea id="profile-edit-bio" class="profile-edit-textarea" maxlength="160" placeholder="Conte um pouco sobre você e por que está aprendendo francês"></textarea>
+        <textarea id="profile-edit-bio" class="profile-edit-textarea" maxlength="160" placeholder="Conte um pouco sobre você e por que está aprendendo francês" data-i18n-attr="placeholder:ui.profileEdit.bioPh.fr"></textarea>
         <div class="profile-edit-bio-count" id="profile-edit-bio-count">0/160</div>
 
         <!-- Fase 1 do perfil público (ver CLAUDE.md, grilling Q1) --
@@ -4393,14 +4613,14 @@ footer.app-footer img{ height:40px; opacity:.85; }
              dos outros campos deste modal (nome/username/bio). -->
         <div class="pref-row">
           <div class="pref-row-text">
-            <div class="pref-row-title">Perfil público</div>
-            <div class="pref-row-sub">Deixa seu nome, badges, progresso e cartões próprios visíveis a quem tiver o link do seu perfil.</div>
+            <div data-i18n="ui.profileEdit.publicProfile" class="pref-row-title">Perfil público</div>
+            <div data-i18n="ui.profileEdit.publicProfileSub" class="pref-row-sub">Deixa seu nome, badges, progresso e cartões próprios visíveis a quem tiver o link do seu perfil.</div>
           </div>
           <button type="button" class="pref-switch" id="profile-edit-public-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
         </div>
 
         <div id="profile-edit-featured-badge-row" style="display:none;">
-          <label class="profile-edit-label" for="profile-edit-featured-badge">Badge em destaque (aparece no Ranking)</label>
+          <label data-i18n="ui.profileEdit.featuredBadge" class="profile-edit-label" for="profile-edit-featured-badge">Badge em destaque (aparece no Ranking)</label>
           <select id="profile-edit-featured-badge" class="profile-edit-input"></select>
         </div>
 
@@ -4414,7 +4634,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="study-plan-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal study-wizard-modal">
     <div class="app-modal-header">
-      <h3>Minha meta de estudo</h3>
+      <h3 data-i18n="ui.goal.title">Minha meta de estudo</h3>
       <button class="app-modal-close" id="study-plan-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body" id="study-plan-wizard-body"></div>
@@ -4424,7 +4644,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="kbd-shortcuts-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>⌨️ Atalhos do teclado</h3>
+      <h3 data-i18n="ui.kbd.title">⌨️ Atalhos do teclado</h3>
       <button class="app-modal-close" id="kbd-shortcuts-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body">
@@ -4432,17 +4652,17 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <div class="kbd-shortcuts-keys">
           <span class="kbd-key">1</span><span class="kbd-key">2</span><span class="kbd-key">3</span><span class="kbd-key">4</span>
         </div>
-        <div class="kbd-shortcuts-desc">Escolher uma alternativa, pela posição dela na tela</div>
+        <div data-i18n="ui.kbd.choose" class="kbd-shortcuts-desc">Escolher uma alternativa, pela posição dela na tela</div>
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">Enter</span></div>
-        <div class="kbd-shortcuts-desc">Confirmar uma resposta digitada e avançar pra próxima</div>
+        <div data-i18n="ui.kbd.confirm" class="kbd-shortcuts-desc">Confirmar uma resposta digitada e avançar pra próxima</div>
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">r</span></div>
-        <div class="kbd-shortcuts-desc">Tocar áudio novamente</div>
+        <div data-i18n="ui.kbd.replay" class="kbd-shortcuts-desc">Tocar áudio novamente</div>
       </div>
-      <p class="kbd-shortcuts-note">Os números só aparecem quando um exercício tem alternativas pra escolher -- nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela.</p>
+      <p data-i18n="ui.kbd.note" class="kbd-shortcuts-note">Os números só aparecem quando um exercício tem alternativas pra escolher -- nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela.</p>
     </div>
   </div>
 </div>
@@ -4458,7 +4678,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <div class="app-modal">
     <div class="app-modal-header">
       <h3 data-ch-i18n="prem.modal.title">🔒 Recurso Premium</h3>
-      <button class="app-modal-close" id="premium-challenges-modal-close" aria-label="Fechar">✕</button>
+      <button class="app-modal-close" id="premium-challenges-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
       <p data-ch-i18n="prem.modal.p1">Os <strong>Desafios do Módulo</strong> reforçam cada tema da trilha com Expressões, Ouça e traduza, Acentuação e Ditados extras.</p>
@@ -4470,11 +4690,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="flashcard-limit-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>🔒 Limite do plano grátis</h3>
-      <button class="app-modal-close" id="flashcard-limit-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="flashcardLimit.modal.title">🔒 Limite do plano grátis</h3>
+      <button class="app-modal-close" id="flashcard-limit-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p>Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Pra criar mais, arquive algum cartão que já não usa, ou peça pra sua professora te vincular -- alunos vinculados a uma professora têm cartões próprios ilimitados.</p>
+      <p data-i18n-html="flashcardLimit.modal.bodyHtml">Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Pra criar mais, apague algum cartão, ou peça pra sua professora te vincular -- alunos vinculados a uma professora têm cartões próprios ilimitados.</p>
     </div>
   </div>
 </div>
@@ -4484,17 +4704,48 @@ footer.app-footer img{ height:40px; opacity:.85; }
      próprio): editar reinicia o progresso de revisão (mesmo mecanismo de
      id-com-revisão de shared/teacher-flashcards.js/shared/own-flashcards.js).
      Compartilhado entre shared/admin-flashcards.js e shared/my-flashcards.js. -->
+<div id="ui-language-confirm-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3 data-i18n="settings.uiLanguage.confirm.title">Trocar o idioma do site?</h3>
+      <button class="app-modal-close" id="ui-language-confirm-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
+    </div>
+    <div class="app-modal-body">
+      <p id="ui-language-confirm-body"></p>
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <button class="btn btn-secondary" id="ui-language-confirm-no" style="flex:1;" data-i18n="settings.uiLanguage.confirm.cancel">Cancelar</button>
+        <button class="btn btn-primary" id="ui-language-confirm-yes" style="flex:1;" data-i18n="settings.uiLanguage.confirm.yes">Trocar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ui-language-first-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3>Em que idioma você quer usar o site?<br><span style="font-weight:400; font-size:.85em;">Which language do you want to use the site in?</span></h3>
+    </div>
+    <div class="app-modal-body">
+      <p style="margin:0 0 4px;">Os menus, as explicações e as traduções vão aparecer nesse idioma. Você pode mudar depois em Configurações.<br><span style="opacity:.8;">Menus, explanations, and translations will appear in this language. You can change it later in Settings.</span></p>
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <button class="btn btn-secondary" id="ui-language-first-pt" data-lang="pt-BR" style="flex:1;" lang="pt-BR">Português (Brasil)</button>
+        <button class="btn btn-secondary" id="ui-language-first-en" data-lang="en" style="flex:1;" lang="en">English</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="flashcard-reset-confirm-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>⚠️ Confirmar edição</h3>
-      <button class="app-modal-close" id="flashcard-reset-confirm-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="flashcardReset.modal.title">⚠️ Confirmar edição</h3>
+      <button class="app-modal-close" id="flashcard-reset-confirm-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p>Esta edição irá reiniciar o progresso de revisão deste cartão. Deseja continuar?</p>
+      <p data-i18n="flashcardReset.modal.body">Esta edição irá reiniciar o progresso de revisão deste cartão. Deseja continuar?</p>
       <div style="display:flex; gap:10px; margin-top:14px;">
-        <button class="btn btn-secondary" id="flashcard-reset-confirm-discard" style="flex:1;">Descartar edições</button>
-        <button class="btn btn-primary" id="flashcard-reset-confirm-yes" style="flex:1;">Sim</button>
+        <button class="btn btn-secondary" id="flashcard-reset-confirm-discard" style="flex:1;" data-i18n="flashcardReset.modal.discard">Descartar edições</button>
+        <button class="btn btn-primary" id="flashcard-reset-confirm-yes" style="flex:1;" data-i18n="flashcardReset.modal.confirm">Sim</button>
       </div>
     </div>
   </div>
@@ -4509,11 +4760,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="flashcard-preview-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>👁️ Pré-visualização</h3>
-      <button class="app-modal-close" id="flashcard-preview-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="review.previewLabel">👁️ Pré-visualização</h3>
+      <button class="app-modal-close" id="flashcard-preview-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p class="profile-edit-hint" style="margin-top:0;">Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão -- nada é salvo ou avaliado aqui.</p>
+      <p class="profile-edit-hint" style="margin-top:0;" data-i18n="flashcardPreview.modal.hint">Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão -- nada é salvo ou avaliado aqui.</p>
       <div id="flashcard-preview-modal-body"></div>
       <div id="flashcard-preview-modal-nav" style="display:flex; align-items:center; justify-content:center; margin-top:12px;"></div>
     </div>
@@ -4533,8 +4784,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="public-profile-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>Perfil</h3>
-      <button class="app-modal-close" id="public-profile-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="admin.reports.screen.profile">Perfil</h3>
+      <button class="app-modal-close" id="public-profile-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body" id="public-profile-modal-body"></div>
   </div>
@@ -4547,8 +4798,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="public-flashcard-preview-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>👁 Cartão</h3>
-      <button class="app-modal-close" id="public-flashcard-preview-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="publicFlashcard.modal.title">👁 Cartão</h3>
+      <button class="app-modal-close" id="public-flashcard-preview-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body" id="public-flashcard-preview-body"></div>
   </div>
@@ -4558,42 +4809,42 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="report-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>⚑ Reportar problema ou sugestão</h3>
-      <button class="app-modal-close" id="report-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="report.modal.title">⚑ Reportar problema ou sugestão</h3>
+      <button class="app-modal-close" id="report-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
       <div id="report-form-view">
-        <p class="report-modal-label">O que aconteceu?</p>
+        <p class="report-modal-label" data-i18n="report.modal.whatHappened">O que aconteceu?</p>
         <div class="report-option-grid" id="report-category-options"></div>
 
-        <p class="report-modal-label">Quanto isso atrapalhou? <span class="report-modal-optional">(opcional)</span></p>
+        <p class="report-modal-label" data-i18n="report.modal.howMuch">Quanto isso atrapalhou? <span class="report-modal-optional" data-i18n="report.modal.optional">(opcional)</span></p>
         <div class="report-severity-row" id="report-severity-options"></div>
 
-        <label class="profile-edit-label" for="report-description">Descreva o que você viu</label>
-        <textarea id="report-description" class="profile-edit-textarea" maxlength="600" rows="3" placeholder="O que aconteceu, exatamente?"></textarea>
+        <label class="profile-edit-label" for="report-description" data-i18n="report.modal.describeLabel">Descreva o que você viu</label>
+        <textarea id="report-description" class="profile-edit-textarea" maxlength="600" rows="3" placeholder="O que aconteceu, exatamente?" data-i18n-attr="placeholder:report.modal.describePlaceholder"></textarea>
 
-        <label class="profile-edit-label" for="report-expected">O que você esperava que acontecesse? <span class="report-modal-optional">(opcional)</span></label>
+        <label class="profile-edit-label" for="report-expected" data-i18n="report.modal.expectedLabel">O que você esperava que acontecesse? <span class="report-modal-optional" data-i18n="report.modal.optional">(opcional)</span></label>
         <textarea id="report-expected" class="profile-edit-textarea" maxlength="300" rows="2"></textarea>
 
         <div id="report-guest-email-wrap">
-          <label class="profile-edit-label" for="report-guest-email">Seu e-mail <span class="report-modal-optional">(opcional, só se quiser receber uma resposta)</span></label>
-          <input type="email" id="report-guest-email" class="profile-edit-input" maxlength="200" placeholder="seuemail@exemplo.com">
+          <label class="profile-edit-label" for="report-guest-email" data-i18n="report.modal.guestEmailLabel">Seu e-mail <span class="report-modal-optional" data-i18n="report.modal.guestEmailOptional">(opcional, só se quiser receber uma resposta)</span></label>
+          <input type="email" id="report-guest-email" class="profile-edit-input" maxlength="200" placeholder="seuemail@exemplo.com" data-i18n-attr="placeholder:report.modal.guestEmailPlaceholder">
         </div>
 
         <div class="report-screenshot-row">
-          <button type="button" class="report-screenshot-btn" id="report-screenshot-btn">📎 Anexar captura de tela (opcional)</button>
+          <button type="button" class="report-screenshot-btn" id="report-screenshot-btn" data-i18n="report.modal.attachButton">📎 Anexar captura de tela (opcional)</button>
           <input type="file" id="report-screenshot-input" accept="image/*" style="display:none;">
           <span class="report-screenshot-name" id="report-screenshot-name"></span>
         </div>
-        <p class="report-modal-privacy-note">A captura, se anexada, fica visível só para a equipe -- nada é enviado automaticamente.</p>
+        <p class="report-modal-privacy-note" data-i18n="report.modal.privacyNote">A captura, se anexada, fica visível só para a equipe -- nada é enviado automaticamente.</p>
 
         <p class="profile-edit-error" id="report-error"></p>
-        <button type="button" class="btn btn-primary btn-block" id="report-submit-btn">Enviar</button>
+        <button type="button" class="btn btn-primary btn-block" id="report-submit-btn" data-i18n="report.modal.submit">Enviar</button>
       </div>
       <div id="report-success-view" style="display:none;">
         <div class="report-success-check">✓</div>
-        <p class="report-success-text">Report enviado. Obrigada por ajudar a melhorar o app!</p>
-        <button type="button" class="btn btn-primary btn-block" id="report-success-close-btn">Fechar</button>
+        <p class="report-success-text" data-i18n="report.modal.successText">Report enviado. Obrigada por ajudar a melhorar o app!</p>
+        <button type="button" class="btn btn-primary btn-block" id="report-success-close-btn" data-i18n="common.close">Fechar</button>
       </div>
     </div>
   </div>
@@ -4604,7 +4855,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div class="streak-flame">🔥</div>
     <div class="streak-week-row" id="streak-week-row"></div>
     <h2 class="streak-headline">Você está em uma sequência de <span id="streak-days-num">0</span> <span id="streak-days-unit">dias</span>!</h2>
-    <p class="streak-subtext">Continue assim: sua série será zerada se você não estudar amanhã.</p>
+    <p data-i18n="ui.streak.sub" class="streak-subtext">Continue assim: sua série será zerada se você não estudar amanhã.</p>
   </div>
   <div class="streak-modal-footer">
     <button class="btn btn-primary" id="streak-modal-continue-btn">Continuar</button>
@@ -4614,11 +4865,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="review-reminder-banner" class="review-reminder-banner" style="display:none;">
   <div class="review-reminder-icon">🗂️</div>
   <div class="review-reminder-text">
-    <div class="review-reminder-title">Vamos fazer uma pequena revisão?</div>
+    <div data-i18n="ui.reviewReminder.title" class="review-reminder-title">Vamos fazer uma pequena revisão?</div>
     <div class="review-reminder-sub"><span id="review-reminder-count">0</span> cartões estão esperando por você — afie sua memória revisando o que já viu.</div>
   </div>
   <div class="review-reminder-actions">
-    <button class="review-reminder-dismiss" id="review-reminder-dismiss-btn">Agora não</button>
+    <button data-i18n="ui.notNow" class="review-reminder-dismiss" id="review-reminder-dismiss-btn">Agora não</button>
     <button class="btn btn-primary review-reminder-cta" id="review-reminder-cta-btn">Revisar agora</button>
   </div>
 </div>
@@ -4626,15 +4877,20 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="pwa-update-banner" class="pwa-update-banner" style="display:none;">
   <div class="pwa-update-icon">🔄</div>
   <div class="pwa-update-text">
-    <div class="pwa-update-title">Nova versão disponível</div>
-    <div class="pwa-update-sub">Atualizamos o app. Recarregue quando for conveniente para ver as novidades.</div>
+    <div data-i18n="ui.update.title" class="pwa-update-title">Nova versão disponível</div>
+    <div data-i18n="ui.update.body" class="pwa-update-sub">Atualizamos o app. Recarregue quando for conveniente para ver as novidades.</div>
   </div>
   <div class="pwa-update-actions">
-    <button class="pwa-update-dismiss" id="pwa-update-dismiss-btn">Agora não</button>
+    <button data-i18n="ui.notNow" class="pwa-update-dismiss" id="pwa-update-dismiss-btn">Agora não</button>
     <button class="btn btn-primary pwa-update-cta" id="pwa-update-reload-btn">Atualizar</button>
   </div>
 </div>
 
+<script src="../shared/i18n/i18n.js"></script>
+<script src="../shared/i18n/pt-BR.js"></script>
+<script src="../shared/content-i18n.js"></script>
+<script src="../shared/card-variants.js"></script>
+<script src="../shared/translation-compare.js"></script>
 <script src="content.js"></script>
 <script src="conjugation-data.js"></script>
 <script src="dictations.js"></script>
@@ -4652,6 +4908,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/study-queue.js"></script>
 <script src="../shared/wizard.js"></script>
 <script src="../shared/profile.js"></script>
+<script src="../shared/profile-placeholders.js"></script>
 <script src="../shared/reports.js"></script>
 <script src="../shared/notifications.js"></script>
 <script src="../shared/push.js"></script>

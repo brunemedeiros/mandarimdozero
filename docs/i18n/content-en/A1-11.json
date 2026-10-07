@@ -1,0 +1,159 @@
+{
+ "unit": "A1-11",
+ "en": {
+  "title": "Grocery shopping",
+  "goal": "Make a shopping list and say what you eat or don't eat in everyday life.",
+  "lessons": {
+   "carne-frango-legumes": "Meat, chicken and vegetables",
+   "salada-arroz-massa": "Salad, rice and pasta",
+   "acucar-sal-ovo-sobremesa": "Sugar, salt, egg and dessert",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "the meat",
+   "the chicken",
+   "the vegetables",
+   "the salad",
+   "the rice",
+   "the pasta",
+   "the sugar",
+   "the salt",
+   "the egg",
+   "the dessert"
+  ],
+  "phrases": [
+   {
+    "t": "I like meat.",
+    "scenario": "Someone asks if you like meat, and you like it a lot. What do you answer?"
+   },
+   {
+    "t": "I eat vegetables every day.",
+    "scenario": "Someone asks about your eating habits and you eat vegetables every day. What do you say?"
+   },
+   {
+    "t": "I don't eat meat.",
+    "scenario": "You're a vegetarian and need to tell the waiter you don't eat meat. What do you say?"
+   },
+   {
+    "t": "I'll take rice and pasta.",
+    "scenario": "At the supermarket, someone asks what you're going to get. What do you answer?"
+   },
+   {
+    "t": "The chicken is delicious tonight."
+   },
+   {
+    "t": "Vegetables are good for your health."
+   },
+   {
+    "t": "The salad is fresh."
+   },
+   {
+    "t": "Rice and pasta are my favorite dishes."
+   },
+   {
+    "t": "The sugar and the salt are on the table."
+   },
+   {
+    "t": "The egg is cooked."
+   },
+   {
+    "t": "The dessert is ready."
+   }
+  ],
+  "dialogue": {
+   "title": "Making the shopping list",
+   "lines": [
+    "What are we buying?",
+    "Rice, vegetables and chicken.",
+    "Do you want a dessert?",
+    "Yes, with sugar, please!"
+   ]
+  },
+  "concepts": {
+   "negation-partitif": [
+    {
+     "title": "\"Je ne mange pas DE viande\" — where did the \"la\" go?",
+     "body": "After a negation with <strong>ne... pas</strong>, the articles du/de la/des disappear and become just <strong>de</strong> (or <strong>d'</strong> before a vowel): je mange <strong>de la</strong> viande → je ne mange <strong>pas de</strong> viande. This rule applies to almost every negation of quantity in French — it's worth paying attention to it.",
+     "examples": [
+      "the meat"
+     ]
+    }
+   ],
+   "le-marche-tradicao": [
+    {
+     "title": "Beyond the supermarket: the marché",
+     "body": "In many French cities and villages, besides the supermarket, it's a tradition to shop at the <strong>marché</strong> — an open-air market that usually takes place once or twice a week, with stalls of local producers selling fresh fruit, vegetables, cheese, meat and bread. It's also a social moment: many people run into neighbors and acquaintances there.",
+     "examples": [
+      "the market / the open-air market"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[2]",
+   "pt": "os legumes / as verduras",
+   "en": "the vegetables",
+   "conf": "media",
+   "why": "PT gives two glosses; EN 'vegetables' covers both"
+  },
+  {
+   "path": "vocab[5]",
+   "pt": "a massa",
+   "en": "the pasta",
+   "conf": "media",
+   "why": "PT 'massa' = pasta; phrase[7] PT says 'macarrão' (also pasta)"
+  },
+  {
+   "path": "phrases[3].t",
+   "pt": "Eu levo arroz e massa.",
+   "en": "I'll take rice and pasta.",
+   "conf": "media",
+   "why": "'Je prends' = I'll take/get (shopping context), not 'I'm taking'"
+  },
+  {
+   "path": "phrases[5].t",
+   "pt": "Os vegetais são bons para a saúde.",
+   "en": "Vegetables are good for your health.",
+   "conf": "media",
+   "why": "FR 'les légumes' (PT says 'vegetais')"
+  },
+  {
+   "path": "phrases[7].t",
+   "pt": "O arroz e o macarrão são meus pratos favoritos.",
+   "en": "Rice and pasta are my favorite dishes.",
+   "conf": "media",
+   "why": "'plats préférés' = favorite dishes/foods"
+  },
+  {
+   "path": "phrases[9].t",
+   "pt": "O ovo está cozido.",
+   "en": "The egg is cooked.",
+   "conf": "media",
+   "why": "FR 'cuit' = cooked; PT 'cozido' suggests boiled, but FR is generic"
+  },
+  {
+   "path": "phrases[2].t",
+   "pt": "Eu não como carne.",
+   "en": "I don't eat meat.",
+   "conf": "media",
+   "why": "scenario says vegetarian; FR/EN statement is just about meat"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Sim, com açúcar, por favor!",
+   "en": "Yes, with sugar, please!",
+   "conf": "media",
+   "why": "FR 's'il te plaît' = informal please; EN has no tu/vous distinction"
+  },
+  {
+   "path": "concepts.le-marche-tradicao[0].examples[0]",
+   "pt": "a feira / o mercado ao ar livre",
+   "en": "the market / the open-air market",
+   "conf": "media",
+   "why": "EN 'street market' also fits"
+  }
+ ]
+}

@@ -1,0 +1,162 @@
+{
+ "unit": 16,
+ "en": {
+  "title": "Calendar and dates",
+  "goal": "Talk about days of the week, full dates and times, and set up a meeting.",
+  "lessons": {
+   "dias-semana": "Saying the days of the week",
+   "data-completa": "Saying a full date",
+   "hora-encontro": "Saying the exact time and setting up a meeting",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "week",
+   "Monday",
+   "Sunday",
+   "day of the month (spoken)",
+   "month",
+   "year",
+   "minute",
+   "after",
+   "before",
+   "hundred"
+  ],
+  "phrases": [
+   {
+    "t": "What day of the week is it today?"
+   },
+   {
+    "t": "Today is Wednesday."
+   },
+   {
+    "t": "Today is August 20th."
+   },
+   {
+    "t": "It's 11:18 now."
+   },
+   {
+    "t": "Before 10 o'clock I'm at home."
+   },
+   {
+    "t": "After 10 o'clock I'm not at home."
+   }
+  ],
+  "dialogue": {
+   "title": "Setting up a meeting",
+   "lines": [
+    "What day of the week is it today?",
+    "Today is Friday, August 15th.",
+    "Then let's meet on Sunday, okay?",
+    "Great! After 3 p.m. I'm free all the time."
+   ]
+  },
+  "concepts": {
+   "weekdays": [
+    {
+     "title": "How the days of the week are built",
+     "body": "The days of the week in Chinese follow a very logical pattern: 星期 (xīngqī, \"week\") followed by a number from 1 to 6 for Monday to Saturday. Sunday is the exception, using 星期天 or 星期日 instead of a number.",
+     "examples": [
+      "Monday",
+      "Sunday (the exception)"
+     ]
+    }
+   ],
+   "dates": [
+    {
+     "title": "How full dates are built",
+     "body": "A full date in Chinese goes from largest to smallest: Year + 年 + Month + 月 + Day + 号 — unlike English dates, which put the month or the day first.",
+     "examples": [
+      "August 20th"
+     ]
+    }
+   ],
+   "hao-vs-ri": [
+    {
+     "title": "\"Hào\" is what you SAY — \"rì\" is what you WRITE",
+     "body": "<strong>Hào</strong> (号) is the form you'll hear in everyday speech for the day of the month. In formal texts, documents and written dates, it's common to see <strong>rì</strong> (日) instead — the same character that appears in 星期日 (Sunday).",
+     "examples": [
+      "August 20th (written/formal form)"
+     ]
+    }
+   ],
+   "hours-minutes": [
+    {
+     "title": "Hours with minutes",
+     "body": "To say a time with minutes, just put Number + 点 (hour) + Number + 分 (minute) in a row — very direct, with no extra words between them.",
+     "examples": [
+      "11:18"
+     ]
+    }
+   ],
+   "yiqian-vs-yihou": [
+    {
+     "title": "\"Yǐqián\" or \"yǐhòu\"?",
+     "body": "<strong>Yǐqián</strong> (以前) means \"before\". <strong>Yǐhòu</strong> (以后) means \"after\". Both always come <strong>after</strong> the time or event they refer to — in English, \"before\" and \"after\" come first (\"before 10\").",
+     "examples": [
+      "before 10 o'clock I'm at home",
+      "after 10 o'clock I'm not at home"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[3]",
+   "pt": "dia do mês (uso falado)",
+   "en": "day of the month (spoken)",
+   "conf": "media",
+   "why": "glosa com rótulo de registro"
+  },
+  {
+   "path": "vocab[7]/vocab[8]",
+   "pt": "depois de / antes de",
+   "en": "after / before",
+   "conf": "media",
+   "why": "mantido 'after/before' (in English also 'afterwards')"
+  },
+  {
+   "path": "concepts.dates[0].body",
+   "pt": "o oposto da ordem mais comum em português (dia/mês/ano)",
+   "en": "unlike English dates, which put the month or the day first",
+   "conf": "media",
+   "why": "adaptado: comparação com o inglês (EUA mês/dia, outros dia/mês); evitei afirmar uma só ordem"
+  },
+  {
+   "path": "concepts.hao-vs-ri[0].body",
+   "pt": "mesmo caractere que aparece em 星期日 (domingo) e em 今天/明天",
+   "en": "the same character that appears in 星期日 (Sunday)",
+   "conf": "baixa",
+   "why": "retirei 今天/明天: esses não contêm 日 (contêm 天), então a afirmação do PT parece incorreta; confira"
+  },
+  {
+   "path": "concepts.hao-vs-ri[0].title",
+   "pt": "é o que se FALA — é o que se ESCREVE",
+   "en": "is what you SAY — is what you WRITE",
+   "conf": "media",
+   "why": "nota de realidade (registro falado x escrito)"
+  },
+  {
+   "path": "concepts.yiqian-vs-yihou[0].body",
+   "pt": "nunca antes dela, diferente do português",
+   "en": "in English, \"before\" and \"after\" come first",
+   "conf": "media",
+   "why": "adaptado: comparação refeita com o inglês"
+  },
+  {
+   "path": "dialogue.lines[2]",
+   "pt": "Então a gente se vê no domingo, tá bom?",
+   "en": "Then let's meet on Sunday, okay?",
+   "conf": "media",
+   "why": "那我们…见, 好吗 coloquial; várias traduções"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Combinado! ... tenho tempo livre",
+   "en": "Great! ... I'm free",
+   "conf": "media",
+   "why": "好 / 有空; registro informal"
+  }
+ ]
+}

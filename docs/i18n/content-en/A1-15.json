@@ -1,0 +1,170 @@
+{
+ "unit": "A1-15",
+ "en": {
+  "title": "Body and health",
+  "goal": "Describe simple symptoms and go to the doctor.",
+  "lessons": {
+   "cabeca-barriga-mao": "Head, stomach and hand",
+   "pe-doente-medico": "Foot, being sick and the doctor",
+   "farmacia-dor-febre": "Pharmacy, pain, fever and feeling",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "the head",
+   "the belly / stomach",
+   "the hand",
+   "the foot",
+   "sick / ill",
+   "the doctor",
+   "the pharmacy",
+   "to be in pain / to hurt",
+   "the fever",
+   "to feel"
+  ],
+  "phrases": [
+   {
+    "t": "I have a headache.",
+    "scenario": "You're not feeling well, with a headache. What do you tell a friend?"
+   },
+   {
+    "t": "I feel sick.",
+    "scenario": "You're not well and need to let someone know you're sick. What do you say?"
+   },
+   {
+    "t": "Where is the pharmacy?",
+    "scenario": "You need to buy medicine and don't know where the pharmacy is. What do you ask?"
+   },
+   {
+    "t": "He has a fever.",
+    "scenario": "Your son has a fever and you're explaining it to the doctor. What do you say?"
+   },
+   {
+    "t": "My stomach hurts."
+   },
+   {
+    "t": "The hand is injured."
+   },
+   {
+    "t": "My foot hurts too."
+   },
+   {
+    "t": "The doctor is arriving in ten minutes."
+   },
+   {
+    "t": "I'm going to have a headache if this continues."
+   },
+   {
+    "t": "He's not going to feel well tomorrow."
+   }
+  ],
+  "dialogue": {
+   "title": "At the doctor's",
+   "lines": [
+    "What's wrong?",
+    "I have a stomachache and a fever.",
+    "Since when?",
+    "Since last night.",
+    "You need to rest."
+   ]
+  },
+  "concepts": {
+   "avoir-mal-vs-etre-malade": [
+    {
+     "title": "\"J'ai mal à la tête\" or \"je suis malade\"?",
+     "body": "For pain in a specific part of the body, use <strong>avoir mal à</strong>: <strong>j'ai mal à la</strong> tête (I have a headache). For a general state of feeling unwell, without pointing to a specific part, use <strong>être malade</strong>: <strong>je suis malade</strong> (I'm sick). The choice of verb changes depending on whether you're describing a specific pain or a general state.",
+     "examples": [
+      "the head",
+      "sick / ill"
+     ]
+    }
+   ],
+   "quest-ce-qui-ne-va-pas-ca-va-pas": [
+    {
+     "title": "\"Qu'est-ce qui ne va pas ?\" in everyday speech becomes \"Ça va pas ?\"",
+     "body": "The full question that opens the dialogue, <strong>Qu'est-ce qui ne va pas ?</strong>, tends to shrink a lot in everyday speech: <strong>Ça va pas ?</strong> (literally \"it's not going well?\") asks the same thing in a much shorter, more casual way — similar to \"you OK?\" in English.",
+     "examples": [
+      "what's wrong? / you OK? (everyday speech)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "This sentence is used when someone has a headache.",
+    "whyNote": "Correct — <strong>j'ai mal à la tête</strong> literally means \"I have pain at the head\", that is, a headache."
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[1]",
+   "pt": "a barriga",
+   "en": "the belly / stomach",
+   "conf": "media",
+   "why": "'ventre' = belly/abdomen; EN 'stomach' used for pain."
+  },
+  {
+   "path": "vocab[7]",
+   "pt": "estar com dor",
+   "en": "to be in pain / to hurt",
+   "conf": "media",
+   "why": "'avoir mal' = to hurt/ache."
+  },
+  {
+   "path": "vocab[9]",
+   "pt": "sentir-se",
+   "en": "to feel",
+   "conf": "media",
+   "why": "Reflexive 'se sentir' = to feel (a state)."
+  },
+  {
+   "path": "phrases[1]",
+   "pt": "Eu me sinto doente.",
+   "en": "I feel sick.",
+   "conf": "media",
+   "why": "'sick' (US) vs 'ill' (UK)."
+  },
+  {
+   "path": "phrases[4]",
+   "pt": "Minha barriga dói.",
+   "en": "My stomach hurts.",
+   "conf": "media",
+   "why": "Literal 'The belly hurts me'; natural EN."
+  },
+  {
+   "path": "phrases[5]",
+   "pt": "A mão está machucada.",
+   "en": "The hand is injured.",
+   "conf": "media",
+   "why": "'blessée' = hurt/injured."
+  },
+  {
+   "path": "dialogue.lines[0]",
+   "pt": "O que não vai bem?",
+   "en": "What's wrong?",
+   "conf": "media",
+   "why": "Natural equivalent of 'Qu'est-ce qui ne va pas ?'."
+  },
+  {
+   "path": "dialogue.lines[4]",
+   "pt": "Você precisa descansar.",
+   "en": "You need to rest.",
+   "conf": "media",
+   "why": "'vous devez' formal; 'must' too strong."
+  },
+  {
+   "path": "concepts.quest-ce-qui-ne-va-pas-ca-va-pas.examples[0]",
+   "pt": "o que foi? / tá tudo bem? (fala cotidiana)",
+   "en": "what's wrong? / you OK? (everyday speech)",
+   "conf": "media",
+   "why": "Informal register; no exact EN equivalent."
+  },
+  {
+   "path": "concepts.quest-ce-qui-ne-va-pas-ca-va-pas.body",
+   "pt": "tá tudo bem?",
+   "en": "you OK?",
+   "conf": "media",
+   "why": "Colloquial PT comparison replaced with an EN colloquial equivalent."
+  }
+ ]
+}

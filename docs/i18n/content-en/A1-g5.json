@@ -1,0 +1,58 @@
+{
+ "unit": "A1-g5",
+ "en": {
+  "title": "The verbs faire and prendre",
+  "goal": "Conjugate the irregular verbs faire and prendre in the present tense.",
+  "grammar": {
+   "blocks": [
+    {
+     "title": "Faire: a verb with a thousand uses",
+     "body": "Faire (to do / to make) is irregular and shows up in lots of fixed expressions — including the weather ones you've already seen, like il fait chaud and il fait froid.",
+     "examples": [
+      "It's 30 degrees today.",
+      "What are you doing tonight?"
+     ]
+    },
+    {
+     "title": "Prendre: to take, to catch, to have",
+     "body": "Prendre (to take / to catch) is used both for transportation, as you've already seen, and for ordering food or drink — it's a very versatile everyday verb.",
+     "examples": [
+      "I often take the metro.",
+      "Are you having a coffee?"
+     ]
+    },
+    {
+     "title": "A similar pattern",
+     "body": "Notice that both verbs change their stem in the plural — faire goes from fais-/fais-/fait- in the singular to faisons/faites/font in the plural, and prendre doubles the \"n\" in ils/elles prennent. These irregularities are worth paying attention to.",
+     "examples": [
+      "We take the bus together.",
+      "What are you all doing this weekend?"
+     ]
+    },
+    {
+     "title": "Très bien! 🎉",
+     "body": "Here is the full conjugation of both verbs — notice the highlighted irregularities:",
+     "examples": [],
+     "table": [
+      {"label": "faire", "pronouns": ["je", "tu", "il / elle / on", "nous", "vous", "ils / elles"]},
+      {"label": "prendre", "pronouns": ["je", "tu", "il / elle / on", "nous", "vous", "ils / elles"]}
+     ]
+    }
+   ],
+   "exercises": [
+    {"hint": "faire"},
+    {"hint": "prendre"},
+    {"hint": "faire"},
+    {"hint": "prendre"},
+    {"hint": "prendre"},
+    {"hint": "faire"}
+   ]
+  }
+ },
+ "review": [
+  {"path": "grammar.blocks[0].examples[0]", "pt": "Está fazendo 30 graus hoje.", "en": "It's 30 degrees today.", "conf": "media", "why": "Celsius; US readers may expect Fahrenheit, kept faithful to the French"},
+  {"path": "grammar.blocks[1].title", "pt": "Prendre: pegar, tomar, comer", "en": "Prendre: to take, to catch, to have", "conf": "media", "why": "adapted to English senses of prendre"},
+  {"path": "grammar.blocks[1].examples[1]", "pt": "Você vai tomar um café?", "en": "Are you having a coffee?", "conf": "media", "why": "'to have a coffee' is the natural English equivalent of 'prendre un café'"},
+  {"path": "grammar.blocks[2].examples[1]", "pt": "O que vocês fazem esse fim de semana?", "en": "What are you all doing this weekend?", "conf": "media", "why": "'you all' marks the plural 'vous'; adapted for English"}
+ ]
+}

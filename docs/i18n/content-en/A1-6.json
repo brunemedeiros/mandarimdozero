@@ -1,0 +1,177 @@
+{
+ "unit": "A1-6",
+ "en": {
+  "title": "Time and daily routine",
+  "goal": "Tell the time and describe your daily routine.",
+  "lessons": {
+   "horas-e-periodos": "Telling the time and parts of the day",
+   "noite-acordar-levantar": "Night, waking up and getting up",
+   "rotina-diaria": "Eating, working, sleeping and midnight",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "time / hour",
+   "morning",
+   "noon",
+   "evening (in the evening)",
+   "to wake up",
+   "to get up",
+   "to eat",
+   "to work",
+   "to sleep",
+   "midnight"
+  ],
+  "phrases": [
+   {
+    "t": "What time is it?",
+    "scenario": "You forgot your watch and want to know what time it is. What do you ask?"
+   },
+   {
+    "t": "It's eight o'clock.",
+    "scenario": "Someone asks the time and it's eight o'clock. What do you answer?"
+   },
+   {
+    "t": "I wake up at seven o'clock.",
+    "scenario": "Someone asks what time you wake up every day. What do you answer?"
+   },
+   {
+    "t": "In the evening, I watch TV.",
+    "scenario": "Someone asks what you do in the evening. What do you answer?"
+   },
+   {
+    "t": "He's checking the time on his phone."
+   },
+   {
+    "t": "At noon, I eat at home."
+   },
+   {
+    "t": "He's going to wake up early tomorrow."
+   },
+   {
+    "t": "She's going to get up at seven o'clock."
+   },
+   {
+    "t": "He has to work until midnight."
+   },
+   {
+    "t": "I'm going to sleep now."
+   }
+  ],
+  "dialogue": {
+   "title": "My routine",
+   "lines": [
+    "What time do you get up?",
+    "I get up at six thirty.",
+    "And when do you work?",
+    "I work in the morning and in the afternoon."
+   ]
+  },
+  "concepts": {
+   "etre-heures": [
+    {
+     "title": "\"Il est huit heures\" — again, no \"avoir\"... or rather, just \"être\"!",
+     "body": "Unlike age (which uses avoir), telling the time in French uses the verb <strong>être</strong>: <strong>il est</strong> huit heures (it's eight o'clock). Notice that here the \"il\" doesn't refer to anyone — it's an impersonal \"il\", just there to build the sentence, like the \"it\" in \"it's raining\" in English.",
+     "examples": [
+      "time / hour"
+     ]
+    }
+   ],
+   "le-midi-almoco-longo": [
+    {
+     "title": "\"Le midi\" in France is time to sit down and really eat",
+     "body": "In France, lunch (<strong>le déjeuner</strong>, from around noon to 1 p.m.) is usually a real break — many restaurants and work canteens serve a full meal (starter, main course, sometimes dessert), and it's common to set aside 45 minutes to an hour just for it, rather than eating quickly at your desk.",
+     "examples": [
+      "lunch"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[0]",
+   "pt": "a hora",
+   "en": "time / hour",
+   "conf": "media",
+   "why": "'l'heure' = both 'hour' and 'time (of day)'"
+  },
+  {
+   "path": "vocab[3]",
+   "pt": "a noite (à noite)",
+   "en": "evening (in the evening)",
+   "conf": "media",
+   "why": "'le soir' = evening; 'night' also possible in PT gloss"
+  },
+  {
+   "path": "phrases[2].t",
+   "pt": "Eu acordo às sete horas.",
+   "en": "I wake up at seven o'clock.",
+   "conf": "media",
+   "why": "fine; EN 'at seven' also common"
+  },
+  {
+   "path": "phrases[3].t",
+   "pt": "À noite, eu assisto TV.",
+   "en": "In the evening, I watch TV.",
+   "conf": "media",
+   "why": "PT 'à noite' = evening/night; FR 'le soir'"
+  },
+  {
+   "path": "phrases[4].t",
+   "pt": "Ele olha as horas no celular.",
+   "en": "He's checking the time on his phone.",
+   "conf": "media",
+   "why": "FR 'regarde l'heure'; EN idiom 'checks the time'"
+  },
+  {
+   "path": "phrases[7].t",
+   "pt": "Ela vai se levantar às sete horas.",
+   "en": "She's going to get up at seven o'clock.",
+   "conf": "media",
+   "why": "fine"
+  },
+  {
+   "path": "dialogue.lines[1]",
+   "pt": "Eu levanto às seis e meia.",
+   "en": "I get up at six thirty.",
+   "conf": "media",
+   "why": "FR 'six heures et demie'; EN 'six thirty' / 'half past six'"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Eu trabalho de manhã e à tarde.",
+   "en": "I work in the morning and in the afternoon.",
+   "conf": "media",
+   "why": "fine"
+  },
+  {
+   "path": "concepts.etre-heures[0].title",
+   "pt": "\"Il est huit heures\" — de novo, nada de \"être\"... ou melhor, só \"être\"!",
+   "en": "\"Il est huit heures\" — again, no \"avoir\"... or rather, just \"être\"!",
+   "conf": "media",
+   "why": "PT title is a playful aside; I mirrored the playfulness but changed 'être' to 'avoir' for the joke to make sense in EN context (age uses avoir)"
+  },
+  {
+   "path": "concepts.etre-heures[0].body",
+   "pt": "...\"está\" de \"está chovendo\"",
+   "en": "...the \"it\" in \"it's raining\"",
+   "conf": "media",
+   "why": "PT analogy adapted to the English impersonal 'it'"
+  },
+  {
+   "path": "concepts.le-midi-almoco-longo[0].title",
+   "pt": "\"Le midi\"...hora de sentar pra comer de verdade",
+   "en": "\"Le midi\"... time to sit down and really eat",
+   "conf": "media",
+   "why": "idiomatic"
+  },
+  {
+   "path": "concepts.le-midi-almoco-longo[0].body",
+   "pt": "por volta de meio-dia às treze horas",
+   "en": "from around noon to 1 p.m.",
+   "conf": "media",
+   "why": "PT source is a bit ambiguous (noon to thirteen hours); interpreted as noon-1 p.m."
+  }
+ ]
+}

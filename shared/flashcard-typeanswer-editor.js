@@ -86,10 +86,10 @@ const TYPE_ANSWER_ROLES = ['prompt', 'answer'];
 //     pra ela).
 function validateNativeTypeAnswerStructure(editorState){
   if (!editorState || editorState.kind !== 'native'){
-    return { ok: false, error: 'Este Note não é nativo.' };
+    return { ok: false, error: t('taEditor.err.notNative') };
   }
   if (editorState.cardGenerationMode !== 'type_answer'){
-    return { ok: false, error: 'Este Note não está no modo Digite a resposta.' };
+    return { ok: false, error: t('taEditor.err.notTaMode') };
   }
 
   const row = noteEditorStateToRow(editorState);
@@ -100,7 +100,7 @@ function validateNativeTypeAnswerStructure(editorState){
 
   const selfReferencing = fields.filter(f => f.pinyinFieldId != null && f.pinyinFieldId === f.id);
   if (selfReferencing.length){
-    return { ok: false, error: 'Um campo não pode apontar pra si mesmo como pinyin.' };
+    return { ok: false, error: t('taEditor.err.selfPinyin') };
   }
 
   // Fields satélite de pinyin (apontados por pinyinFieldId de outro Field)
@@ -112,19 +112,19 @@ function validateNativeTypeAnswerStructure(editorState){
 
   const unrecognized = roledFields.filter(f => f.role !== 'prompt' && f.role !== 'answer');
   if (unrecognized.length){
-    return { ok: false, error: `Digite a resposta não aceita Field sem papel definido (${unrecognized.length} campo(s) sem prompt/resposta) -- atribua um papel ou remova.` };
+    return { ok: false, error: tp('taEditor.err.unrecognized', unrecognized.length) };
   }
 
   const promptFields = roledFields.filter(f => f.role === 'prompt');
   const answerFields = roledFields.filter(f => f.role === 'answer');
-  if (promptFields.length === 0) return { ok: false, error: 'Falta o campo de pergunta.' };
-  if (promptFields.length > 1) return { ok: false, error: 'Só pode haver 1 campo de pergunta.' };
-  if (answerFields.length === 0) return { ok: false, error: 'Falta o campo de resposta.' };
-  if (answerFields.length > 1) return { ok: false, error: 'Só pode haver 1 campo de resposta.' };
+  if (promptFields.length === 0) return { ok: false, error: t('taEditor.err.missingPrompt') };
+  if (promptFields.length > 1) return { ok: false, error: t('taEditor.err.multiPrompt') };
+  if (answerFields.length === 0) return { ok: false, error: t('taEditor.err.missingAnswer') };
+  if (answerFields.length > 1) return { ok: false, error: t('taEditor.err.multiAnswer') };
 
   const isEmptyField = f => !(f.content && (f.content.value || '').trim());
   if (isEmptyField(promptFields[0]) || isEmptyField(answerFields[0])){
-    return { ok: false, error: 'Pergunta e resposta precisam ter conteúdo.' };
+    return { ok: false, error: t('taEditor.err.emptyField') };
   }
 
   return { ok: true };
@@ -195,38 +195,38 @@ function renderTypeAnswerEditorHTML(editorState, opts){
   const validation = validateNativeTypeAnswerStructure(editorState);
 
   const promptHTML = promptField
-    ? renderFieldEditorHTML(promptField, 0, { namePrefix, label: 'Pergunta/Prompt', removable: false })
-    : `<p class="profile-edit-hint">Nenhum campo de pergunta ainda.</p><button type="button" class="admin-select-link" data-ta-add-prompt>+ Criar campo de pergunta</button>`;
+    ? renderFieldEditorHTML(promptField, 0, { namePrefix, label: t('taEditor.promptLabel'), removable: false })
+    : `<p class="profile-edit-hint">${t('taEditor.noPrompt')}</p><button type="button" class="admin-select-link" data-ta-add-prompt>${t('taEditor.addPrompt')}</button>`;
 
   const answerHTML = answerField
-    ? renderFieldEditorHTML(answerField, 0, { namePrefix, label: 'Resposta esperada', removable: false })
-    : `<p class="profile-edit-hint">Nenhum campo de resposta ainda.</p><button type="button" class="admin-select-link" data-ta-add-answer>+ Criar campo de resposta</button>`;
+    ? renderFieldEditorHTML(answerField, 0, { namePrefix, label: t('taEditor.answerLabel'), removable: false })
+    : `<p class="profile-edit-hint">${t('taEditor.noAnswer')}</p><button type="button" class="admin-select-link" data-ta-add-answer>${t('taEditor.addAnswer')}</button>`;
 
   // Field satélite de pinyin (pinyinFieldId apontando pra outro Field --
   // hoje só chega aqui reconstruído de uma linha nativa já existente, ver
   // comentário de arquitetura no topo -- esta subfase não constrói UI pra
   // ASSOCIAR um novo pinyin, só preserva/exibe o que já existir).
   const satelliteHTML = satelliteFields.length ? `
-    <div class="section-label" style="margin:14px 0 4px;">Pinyin (satélite de outro campo)</div>
-    <p class="profile-edit-hint">Associado a outro campo via pinyinFieldId -- editável normalmente, nunca conta como um 3º campo de pergunta/resposta.</p>
-    ${satelliteFields.map((f, i) => renderFieldEditorHTML(f, i, { namePrefix, label: `Pinyin ${i + 1}`, removable: true })).join('')}
+    <div class="section-label" style="margin:14px 0 4px;">${t('taEditor.pinyinTitle')}</div>
+    <p class="profile-edit-hint">${t('taEditor.pinyinHint')}</p>
+    ${satelliteFields.map((f, i) => renderFieldEditorHTML(f, i, { namePrefix, label: t('taEditor.pinyinLabel', { n: i + 1 }), removable: true })).join('')}
   ` : '';
 
   const otherFieldsHTML = otherFields.length ? `
-    <div class="section-label" style="margin:14px 0 4px;">Outros campos (sem papel definido em Digite a resposta)</div>
-    <p class="profile-edit-hint">Estes campos vieram de outro modo e ainda não têm função aqui -- remova-os ou atribua um papel pra estrutura ficar válida.</p>
-    ${otherFields.map((f, i) => renderFieldEditorHTML(f, i, { namePrefix, label: `Campo sem papel ${i + 1}`, removable: true })).join('')}
+    <div class="section-label" style="margin:14px 0 4px;">${t('taEditor.othersTitle')}</div>
+    <p class="profile-edit-hint">${t('taEditor.othersHint')}</p>
+    ${otherFields.map((f, i) => renderFieldEditorHTML(f, i, { namePrefix, label: t('taEditor.noRoleField', { n: i + 1 }), removable: true })).join('')}
   ` : '';
 
   const validationHTML = validation.ok
-    ? `<p class="profile-edit-hint" style="margin-top:10px; color:var(--jade);">✓ Estrutura de Digite a resposta completa.</p>`
+    ? `<p class="profile-edit-hint" style="margin-top:10px; color:var(--jade);">${t('taEditor.valid')}</p>`
     : `<p class="profile-edit-error" style="margin-top:10px;">${escapeHTML(validation.error)}</p>`;
 
   return `
     <div data-type-answer-editor>
-      <div class="section-label" style="margin:0 0 4px;">Pergunta/Prompt</div>
+      <div class="section-label" style="margin:0 0 4px;">${t('taEditor.promptLabel')}</div>
       ${promptHTML}
-      <div class="section-label" style="margin:14px 0 4px;">Resposta esperada</div>
+      <div class="section-label" style="margin:14px 0 4px;">${t('taEditor.answerLabel')}</div>
       ${answerHTML}
       ${satelliteHTML}
       ${otherFieldsHTML}

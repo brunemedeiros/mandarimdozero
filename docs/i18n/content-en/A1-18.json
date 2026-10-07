@@ -1,0 +1,104 @@
+{
+ "unit": "A1-18",
+ "en": {
+  "title": "Where things are",
+  "goal": "Describe the position of furniture and objects using prepositions of place.",
+  "lessons": {
+   "cama-mesa-cadeira": "Bed, table and chair",
+   "sofa-luminaria-em-cima": "Sofa, lamp and on top of",
+   "embaixo-frente-atras-lado": "Under, in front of, behind and next to",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "the bed",
+   "the table",
+   "the chair",
+   "the sofa",
+   "the lamp",
+   "on / on top of",
+   "under",
+   "in front of",
+   "behind",
+   "next to"
+  ],
+  "phrases": [
+   {
+    "t": "The bed is next to the window.",
+    "scenario": "You're describing your bedroom and where the bed is, next to the window. What do you say?"
+   },
+   {
+    "t": "There is a lamp on the table.",
+    "scenario": "Someone asks what's on the table — a lamp. What do you answer?"
+   },
+   {
+    "t": "The cat is under the sofa.",
+    "scenario": "You're looking for the cat and find it under the sofa. What do you say?"
+   },
+   {
+    "t": "The blue chair is in front of the table.",
+    "scenario": "You're explaining where the blue chair is, in front of the table. What do you say?"
+   },
+   {
+    "t": "The cat is behind the chair."
+   }
+  ],
+  "dialogue": {
+   "title": "Tidying the bedroom",
+   "lines": [
+    "Where is my backpack?",
+    "It's under the bed.",
+    "And my keys?",
+    "They're on the table, next to the lamp."
+   ]
+  },
+  "concepts": {
+   "sur-vs-dans": [
+    {
+     "title": "\"Sur\" or \"dans\"?",
+     "body": "<strong>Sur</strong> means \"on top of\", a surface: il y a une lampe <strong>sur</strong> la table. <strong>Dans</strong> means \"inside\", an enclosed space: il y a des vêtements <strong>dans</strong> l'armoire. The distinction is largely the same as English on vs. in.",
+     "examples": [
+      "on top of"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "concepts.sur-vs-dans[0].body",
+   "pt": "já que às vezes usamos \"em\" pras duas situações",
+   "en": "The distinction is largely the same as English on vs. in.",
+   "conf": "media",
+   "why": "Original PT note compared with Portuguese \"em\"; an English learner needs no such comparison. Replaced with an English-based remark (on/in map onto sur/dans here). Exceptions (on the wall, on the bus) deliberately omitted because not verified."
+  },
+  {
+   "path": "vocab[5]",
+   "pt": "em cima de",
+   "en": "on / on top of",
+   "conf": "media",
+   "why": "'sur' covers both 'on' and 'on top of'; PT gloss is only 'em cima de'."
+  },
+  {
+   "path": "phrases[0].t",
+   "pt": "A cama fica ao lado da janela.",
+   "en": "The bed is next to the window.",
+   "conf": "media",
+   "why": "'by the window' also possible."
+  },
+  {
+   "path": "dialogue.lines[1]",
+   "pt": "Está embaixo da cama.",
+   "en": "It's under the bed.",
+   "conf": "media",
+   "why": "'sac' translated as backpack following PT 'mochila'; French 'sac' is a generic bag."
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Estão em cima da mesa, do lado da luminária.",
+   "en": "They're on the table, next to the lamp.",
+   "conf": "media",
+   "why": "'lamp' for 'lampe' (PT 'luminária'); could be 'light'."
+  }
+ ]
+}

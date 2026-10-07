@@ -1,0 +1,93 @@
+{
+ "unit": "A1-g3",
+ "en": {
+  "title": "First-group verbs and pronominal verbs",
+  "goal": "Conjugate regular -er verbs and pronominal (reflexive) verbs in the present tense.",
+  "grammar": {
+   "blocks": [
+    {
+     "title": "First-group verbs (-er)",
+     "body": "Most French verbs end in -er in the infinitive — this is the so-called \"first group\", and it is the most regular of all. Just drop the -er and add the endings -e, -es, -e, -ons, -ez, -ent.",
+     "examples": [
+      "I work in the morning.",
+      "You eat at noon."
+     ]
+    },
+    {
+     "title": "A small exception: manger",
+     "body": "Verbs ending in -ger (like manger) get an extra \"e\" before -ons, just to keep the soft \"g\" sound — it is the only change, and it only happens with \"nous\".",
+     "examples": [
+      "We eat at seven o'clock.",
+      "You (plural) eat bread."
+     ]
+    },
+    {
+     "title": "Pronominal verbs",
+     "body": "Some verbs always come with a pronoun that \"reflects\" back to the subject — se réveiller (to wake up), se lever (to get up). The pronoun changes along with the subject: me, te, se, nous, vous, se.",
+     "examples": [
+      "I get up at six o'clock.",
+      "Do you wake up early?"
+     ]
+    },
+    {
+     "title": "Très bien! 🎉",
+     "body": "Notice that a pronominal verb is conjugated exactly like an ordinary first-group verb — only the reflexive pronoun in front changes. Here is the full conjugation of both models:",
+     "examples": [],
+     "table": [
+      {
+       "label": "travailler",
+       "pronouns": [
+        "je",
+        "tu",
+        "il / elle / on",
+        "nous",
+        "vous",
+        "ils / elles"
+       ]
+      },
+      {
+       "label": "se lever",
+       "pronouns": [
+        "je",
+        "tu",
+        "il / elle / on",
+        "nous",
+        "vous",
+        "ils / elles"
+       ]
+      }
+     ]
+    }
+   ],
+   "exercises": [
+    {
+     "hint": "se réveiller"
+    },
+    {
+     "hint": "se lever"
+    },
+    {
+     "hint": "manger"
+    },
+    {
+     "hint": "travailler"
+    },
+    {
+     "hint": "aimer"
+    },
+    {
+     "hint": "se lever"
+    }
+   ]
+  }
+ },
+ "review": [
+  {
+   "path": "grammar.blocks[2].body",
+   "pt": "Alguns verbos vêm sempre acompanhados de um pronome que \"reflete\" de volta pro sujeito ...",
+   "en": "Some verbs always come with a pronoun that \"reflects\" back to the subject ...",
+   "conf": "media",
+   "why": "In English, \"to get up/wake up\" are not reflexive, so the idea may feel unfamiliar; kept the explanation as is without adding a comparison. Examples translated naturally (\"I get up\", not \"I raise myself\")."
+  }
+ ]
+}

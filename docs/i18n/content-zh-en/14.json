@@ -1,0 +1,133 @@
+{
+ "unit": 14,
+ "en": {
+  "title": "Simple comparisons",
+  "goal": "Make basic comparisons between people, objects and situations.",
+  "lessons": {
+   "comparar": "Comparing two things",
+   "diferente-melhor": "Saying what is different or the best",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "compared to / more than",
+   "even more",
+   "the same",
+   "different",
+   "the most (superlative)",
+   "or (in choice questions)"
+  ],
+  "phrases": [
+   {
+    "t": "Chinese is harder than French."
+   },
+   {
+    "t": "This one and that one are the same."
+   },
+   {
+    "t": "Which do you think is the best?"
+   }
+  ],
+  "dialogue": {
+   "title": "Comparing languages",
+   "lines": [
+    "Do you think Chinese is hard?",
+    "Chinese is even harder than French, but it's really interesting.",
+    "Which do you think is the hardest? Chinese or Italian?",
+    "Chinese, of course!"
+   ]
+  },
+  "concepts": {
+   "bi-comparison": [
+    {
+     "title": "比 (bǐ) — making comparisons",
+     "body": "比 (bǐ) is used to compare two things, working like \"more... than\" in English. The structure is: A + 比 + B + Adjective.",
+     "examples": [
+      "Chinese is harder than French"
+     ]
+    },
+    {
+     "title": "\"Bǐ\" or \"yíyàng\"?",
+     "body": "<strong>Bǐ</strong> compares a <strong>difference</strong> between two things. <strong>Yíyàng</strong> (一样) says that two things are the <strong>same</strong>. Note that \"bù yíyàng\" (not the same) does not use bǐ — they are two separate structures and don't mix.",
+     "examples": [
+      "this one and that one are the same"
+     ]
+    }
+   ],
+   "haishi": [
+    {
+     "title": "还是 (háishi) — \"or\" in choice questions",
+     "body": "还是 (háishi) is used to offer two options in a question, like \"or\" when you expect the person to choose between one thing and the other — unlike 或者, which is used outside of questions.",
+     "examples": [
+      "do you want tea or coffee?"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[0]",
+   "pt": "comparado a / mais que",
+   "en": "compared to / more than",
+   "conf": "media",
+   "why": "比 is a preposition; no single English word"
+  },
+  {
+   "path": "vocab[1]",
+   "pt": "ainda mais",
+   "en": "even more",
+   "conf": "media",
+   "why": "alt 'more' / 'still more'"
+  },
+  {
+   "path": "vocab[4]",
+   "pt": "o mais (superlativo)",
+   "en": "the most (superlative)",
+   "conf": "media",
+   "why": "grammar label"
+  },
+  {
+   "path": "vocab[5]",
+   "pt": "ou (em perguntas de escolha)",
+   "en": "or (in choice questions)",
+   "conf": "media",
+   "why": "grammar label"
+  },
+  {
+   "path": "dialogue.lines[1]",
+   "pt": "Chinês é ainda mais difícil que francês, mas é bem interessante.",
+   "en": "Chinese is even harder than French, but it's really interesting.",
+   "conf": "media",
+   "why": "更 'even more'; 很有意思 = really interesting"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Chinês, claro!",
+   "en": "Chinese, of course!",
+   "conf": "media",
+   "why": "alt 'Chinese, obviously!'"
+  },
+  {
+   "path": "concepts.bi-comparison[0].body",
+   "pt": "funcionando como 'mais... que' em português; bem mais direta que a construção em português",
+   "en": "working like 'more... than' in English (comparison of directness removed)",
+   "conf": "media",
+   "why": "adapted PT->EN; removed claim that it's more direct than the PT construction (no EN equivalent claim made)"
+  },
+  {
+   "path": "concepts.bi-comparison[1].body",
+   "pt": "são duas estruturas separadas, não se misturam",
+   "en": "they are two separate structures and don't mix",
+   "conf": "media",
+   "why": "kept"
+  },
+  {
+   "path": "concepts.haishi[0].body",
+   "pt": "diferente de 或者, que é usado fora de perguntas",
+   "en": "unlike 或者, which is used outside of questions",
+   "conf": "media",
+   "why": "usage claim carried from PT source; not independently checked"
+  }
+ ]
+}
