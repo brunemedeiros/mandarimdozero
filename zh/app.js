@@ -3981,8 +3981,10 @@ function renderStep(){
   // navegação é do próprio motor de exercícios, sem histórico pra desfazer)
   // -- só aparece na introdução do bloco, igual ao antigo "recuar palavra a
   // palavra".
-  const showBack = STEP_STATE.currentStep > 0
-    || (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro' && (STEP_STATE.acq.blockIdx > 0 || STEP_STATE.acq.introIdx > 0));
+  // Na micro-checagem do diálogo não há "Voltar": voltar ao diálogo
+  // deixaria copiar as respostas.
+  const showBack = stepKey !== 'dialogueCheck' && (STEP_STATE.currentStep > 0
+    || (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro' && (STEP_STATE.acq.blockIdx > 0 || STEP_STATE.acq.introIdx > 0)));
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
 
   if (stepKey === 'vocab'){

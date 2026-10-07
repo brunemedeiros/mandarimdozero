@@ -4040,9 +4040,11 @@ function renderStep(){
   // Durante checkpoint/practice/mixed, o "Voltar" não faz sentido (a
   // navegação é do próprio motor de exercícios, sem histórico pra desfazer)
   // -- só aparece na introdução do bloco.
-  const showBack = STEP_STATE.currentStep > 0
+  // Na micro-checagem do diálogo não há "Voltar": voltar ao diálogo
+  // deixaria copiar as respostas.
+  const showBack = stepKey !== 'dialogueCheck' && (STEP_STATE.currentStep > 0
     || (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro' && (STEP_STATE.acq.blockIdx > 0 || STEP_STATE.acq.introIdx > 0))
-    || (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0);
+    || (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0));
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
 
   if (u.type === 'grammar'){
