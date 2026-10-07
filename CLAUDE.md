@@ -52,6 +52,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   diz "não existir" -- o histórico/instrução pode estar desatualizado.
 - Testes ficam versionados em `tests/<tema>/`. Sempre rodar a regressão da área tocada e relatar números reais.
 - Commit sem identificador de modelo; PR/merge só a pedido.
+- Branch antiga que ainda acrescenta seções no fim do `CLAUDE.md`: no conflito, ficar com o `CLAUDE.md` da `main` e
+  mover o texto novo para `docs/historico/` (e as regras curtas para `.claude/rules/` ou para cá). Nada se descarta.
 
 ## Arquitetura em uma tela (detalhes nas regras por pasta)
 
@@ -79,7 +81,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   `revisor-conteudo` (opus, revisa notas/traduções), `code-architecture-reviewer`/`principal-engineer`/
   `plan-reviewer`/`refactor-planner` (opus), `code-refactor-master`/`documentation-architect`/
   `web-research-specialist`/`auto-error-resolver` (sonnet).
-- Histórico completo (texto original, só leitura sob demanda): `docs/historico/01..12-*.md`.
+- Histórico completo (texto original, só leitura sob demanda): `docs/historico/01..14-*.md`.
   Comentários no código que citam "seção X do CLAUDE.md" apontam para esse texto: buscar com `grep -rn` em `docs/historico/`.
 
 ## Estado atual (1 linha por item; apagar ao fechar)
@@ -87,7 +89,9 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - Migrations com número repetido no repo: `072_add_country_to_profiles` (NÃO aplicada) e
   `072_flashcard_media_allow_images` (aplicada); `073_create_profile_private` e `073_friends_and_friend_ranking`
   (ambas aplicadas). 074 aplicada no Staging e na produção.
-- `fr/scripts/supabase_migrations/007` (tipo `cloze_grammar`) e `008` (gating Premium dos Desafios) NÃO aplicadas.
+- Desafios: `fr/scripts/supabase_migrations/007` (`cloze_grammar`) aplicada pela autora em 2026-10-07; `008` (gating
+  Premium) NÃO aplicar antes do paywall. Lista do que fazer ao ligar o paywall: `docs/historico/14-pendencias-pos-paywall-e-decks.md`.
+- Todos os cartões antigos já têm Deck (migração de 2026-10-07). Regra "1 professora por aluno por idioma" ainda não imposta no banco.
 - Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.

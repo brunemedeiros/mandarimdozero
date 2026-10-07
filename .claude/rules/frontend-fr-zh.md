@@ -27,4 +27,7 @@ paths:
 - Áudio: `speakFrench/speakChinese` = reprodução + `registerAudioPlay()` (analytics); `speakXAudioOnly`/
   `playAudioPreview` = só reprodução. Preview (`card.__isPreviewCard`) nunca conta analytics nem faz autoplay.
 - Service Worker do PWA cacheia: ao testar, bloquear SW; ao publicar, a versão é atualizada pelo `pwa.js`.
+- Diálogo: palavras do vocabulário da unidade em COR + negrito (`.dlg-new`, `var(--seal-red-dark)`), nunca sublinhado
+  (sublinhado = pontuação faltando/bloco no lugar errado). Transcrição (pinyin) também destacada (`.dlg-new-py`,
+  alinhada por busca, `dlgHighlightPinyin`). zh: pinyin acima do hanzi. Idioma novo reutiliza essas classes.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
