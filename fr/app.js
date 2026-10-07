@@ -4260,7 +4260,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
     </div>
     <div class="dlg-chat" id="ud-dialogue">${rowsHTML}</div>
     <div class="dlg-float"><button class="dlg-chip dlg-chip-float" id="dlg-trans-btn" aria-pressed="false">🌐 Mostrar traduções</button></div>
-    ${terms.length ? `<div class="dlg-legend">As palavras sublinhadas são do vocabulário desta unidade. Toque numa delas para ver o significado.</div>` : ''}
+    ${terms.length ? `<div class="dlg-legend">As palavras coloridas são do vocabulário desta unidade. Toque numa delas para ver o significado.</div>` : ''}
   `;
 
   const chat = document.getElementById('ud-dialogue');

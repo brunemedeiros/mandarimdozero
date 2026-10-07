@@ -2175,13 +2175,13 @@ const UNITS = [
       scene: "Alguém pergunta ao amigo quem é a moça da foto.",
       speakers: { "A": { n: "小唐", e: "👩" }, "B": { n: "小宋", e: "🧑" } },
       check: [
-        { k: "fill", line: 1, bad: [{ c: "这是我爸爸，他是医生。", p: "Zhè shì wǒ bàba, tā shì yīshēng." }, { c: "这是我哥哥，他是学生。", p: "Zhè shì wǒ gēge, tā shì xuéshēng." }] },
+        { k: "fill", line: 1, bad: [{ c: "这是我爸爸，他是医生。", p: "Zhè shì wǒ bàba, tā shì yīshēng." }, { c: "这是我哥哥，他是学生。", p: "Zhè shì wǒ gēge, tā shì xuésheng." }] },
         { k: "listen", line: 2, bad: [{ c: "她在医院工作。", p: "Tā zài yīyuàn gōngzuò." }, { c: "这是我女朋友。", p: "Zhè shì wǒ nǚpéngyou." }] },
         { k: "understand", q: "O que a namorada faz?", opts: ["Estuda numa escola", "Trabalha num hospital", "É médica"], ok: 0 }
       ],
       lines: [
         { spk: "A", p: "Zhè shì shéi?", c: "这是谁？", t: "Quem é essa?" },
-        { spk: "B", p: "Zhè shì wǒ nǚpéngyou, tā shì xuéshēng.", c: "这是我女朋友，她是学生。", t: "Essa é minha namorada, ela é estudante." },
+        { spk: "B", p: "Zhè shì wǒ nǚpéngyou, tā shì xuésheng.", c: "这是我女朋友，她是学生。", t: "Essa é minha namorada, ela é estudante." },
         { spk: "A", p: "Tā zài nǎlǐ gōngzuò huò xuéxí?", c: "她在哪里工作或学习？", t: "Onde ela trabalha ou estuda?" },
         { spk: "B", p: "Tā zài xuéxiào xuéxí, zhèlǐ yǒu yìxiē tā de shū.", c: "她在学校学习，这里有一些她的书。", t: "Ela estuda na escola, aqui tem alguns livros dela." }
       ]

@@ -4098,7 +4098,7 @@ function dlgVocabTerms(u){
   return terms;
 }
 
-// HTML da fala com as palavras da unidade sublinhadas (data-tr = significado,
+// HTML da fala com as palavras da unidade em cor de destaque (data-tr = significado,
 // mostrado num toast ao tocar). Tudo que não casa é escapado.
 function dlgHighlight(text, terms){
   if (!terms.length) return escapeHTML(text);
@@ -4113,6 +4113,43 @@ function dlgHighlight(text, terms){
     last = m.index + m[1].length;
   }
   return out + escapeHTML(text.slice(last));
+}
+
+// Pinyin da fala com as palavras da unidade em destaque. O pinyin das falas vem
+// agrupado por palavra (não sílaba a sílaba), então não dá para alinhar por
+// posição: procura o pinyin do vocabulário (sem espaços/maiúsculas) dentro do
+// pinyin da fala, só para as palavras que casaram no hanzi e no máximo tantas
+// vezes quantas apareceram nele.
+function dlgHighlightPinyin(c, p, terms){
+  if (!terms.length || !p) return escapeHTML(p || '');
+  const used = terms.filter(x => x.py && c.includes(x.t));
+  if (!used.length) return escapeHTML(p);
+  const keep = [], idx = []; // keep[j] = caractere normalizado; idx[j] = posição em p
+  for (let i = 0; i < p.length; i++){
+    if (/[\s'’·]/.test(p[i])) continue;
+    keep.push(p[i].toLowerCase()); idx.push(i);
+  }
+  const hay = keep.join('');
+  const norm = x => x.toLowerCase().replace(/[\s'’·]/g, '');
+  const ranges = [];
+  const taken = new Array(hay.length).fill(false);
+  used.sort((a, b) => norm(b.py).length - norm(a.py).length).forEach(x => {
+    const needle = norm(x.py); if (!needle) return;
+    let max = c.split(x.t).length - 1, from = 0;
+    while (max > 0){
+      const at = hay.indexOf(needle, from); if (at < 0) break;
+      from = at + needle.length;
+      if (taken.slice(at, at + needle.length).some(Boolean)) continue;
+      for (let k = at; k < at + needle.length; k++) taken[k] = true;
+      ranges.push([idx[at], idx[at + needle.length - 1] + 1]); max--;
+    }
+  });
+  ranges.sort((a, b) => a[0] - b[0]);
+  let out = '', last = 0;
+  ranges.forEach(([a, b]) => {
+    out += escapeHTML(p.slice(last, a)) + `<span class="dlg-new-py">${escapeHTML(p.slice(a, b))}</span>`; last = b;
+  });
+  return out + escapeHTML(p.slice(last));
 }
 
 // Toca UMA fala e resolve quando ela termina: true = terminou, false =
@@ -4172,7 +4209,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
       <div class="dlg-row ${side}" data-i="${i}" role="button" tabindex="0" aria-label="${escapeHTML(w.n)}: ouvir a partir desta fala">
         <div class="dlg-avatar"><span class="dlg-emoji" aria-hidden="true">${w.e || escapeHTML(l.spk.slice(0, 1))}</span><span class="dlg-name">${escapeHTML(w.n)}</span></div>
         <div class="dlg-bubble">
-          <div class="dlg-py">${escapeHTML(l.p)}</div>
+          <div class="dlg-py">${dlgHighlightPinyin(l.c, l.p, terms)}</div>
           <div class="dlg-hz">${dlgHighlight(l.c, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>
           <div class="dlg-tr">${escapeHTML(l.t)}</div>
           <button type="button" class="dlg-trbtn" aria-label="Mostrar a tradução desta fala" aria-pressed="false">🌐</button>
@@ -4190,7 +4227,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
     </div>
     <div class="dlg-chat" id="ud-dialogue">${rowsHTML}</div>
     <div class="dlg-float"><button class="dlg-chip dlg-chip-float" id="dlg-trans-btn" aria-pressed="false">🌐 Mostrar traduções</button></div>
-    ${terms.length ? `<div class="dlg-legend">As palavras sublinhadas são do vocabulário desta unidade. Toque numa delas para ver o significado.</div>` : ''}
+    ${terms.length ? `<div class="dlg-legend">As palavras coloridas são do vocabulário desta unidade. Toque numa delas para ver o significado.</div>` : ''}
   `;
 
   const chat = document.getElementById('ud-dialogue');
