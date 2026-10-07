@@ -93,6 +93,6 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   Premium) NÃO aplicar antes do paywall. Lista do que fazer ao ligar o paywall: `docs/historico/14-pendencias-pos-paywall-e-decks.md`.
 - Todos os cartões antigos já têm Deck (migração de 2026-10-07). Regra "1 professora por aluno por idioma" ainda não imposta no banco.
 - Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
-- Fase K final (Analytics: Decks do aluno, botão no perfil, cópias de Deck público): plano em `docs/K-analytics-contrato.md`, não iniciada.
+- Plano aprovado (não iniciado): 1) papel Professora, 2) Fase K final, 3) perfil privado, 4) mural da professora -- `docs/plano-professora-privacidade.md`.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.
