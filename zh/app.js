@@ -7919,7 +7919,8 @@ const switchTab = createTabSwitcher({
     'admin-badges': renderAdminPanelView,
     'my-flashcards': renderMyFlashcardsView,
     'support-materials': renderSupportMaterialsView,
-    leaderboard: renderLeaderboardView,
+    leaderboard: openLeaderboardView,
+    friends: renderFriendsView,
     path: renderUnitsGrid,
   }
 });

@@ -174,7 +174,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const NESTED_TEMPLATE_KEYS = ['review.deck.createdCount.other' /* original: criado${n === 1 ? '' : 's'} */, 'limitCut.main', 'limitCut.already', 'admin.reports.reply.lastSent', 'admin.reports.reply.lastSentTo'];
   const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k of ptKeys){
-    if (NEW_KEYS.includes(k) || k.startsWith('badge.catalog.')) continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
+    if (NEW_KEYS.includes(k) || k.startsWith('badge.catalog.') || k.startsWith('friends.') || k === 'profile.tabFriends' || k === 'notif.cat.amigos' || k === 'notif.pref.inAppOnly') continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
     const v = pt[k];
     // Plural por categoria ({one, other}): no original o plural era montado por código (módulo${n===1?'':'s'}).
     if (v && typeof v === 'object'){ check(`regressão: pt-BR '${k}' (plural) tem one e other`, typeof v.one === 'string' && typeof v.other === 'string'); continue; }
@@ -213,7 +213,14 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     check(`${lang}: bloco novo do campo Gênero encontrado`, gS > 0 && gE > gS);
     const curNoGender = curNoSel.slice(0, gS) + curNoSel.slice(gE).replace(/^\n/, '');
     const cmS2 = curNoGender.indexOf('<div id="ui-language-confirm-modal"'), cmE2 = curNoGender.indexOf('<div id="flashcard-reset-confirm-modal"');
-    const curClean = curNoGender.slice(0, cmS2) + curNoGender.slice(cmE2);
+    let curClean = curNoGender.slice(0, cmS2) + curNoGender.slice(cmE2);
+    // Amigos + Ranking de Amigos (migration 073/074): CSS, tela e aba novos e deliberados.
+    const fcS = curClean.indexOf('/* ---------- Amigos (Perfil > Amigos)'), fcE = curClean.indexOf('/* ---------- Ranking (Leaderboard)', fcS);
+    check(`${lang}: bloco CSS de Amigos encontrado`, fcS > 0 && fcE > fcS);
+    curClean = curClean.slice(0, fcS) + curClean.slice(fcE);
+    curClean = curClean.replace(/  <!-- ===== AMIGOS \(Perfil > Amigos\) ===== -->\n  <div class="view" id="view-friends">\n    <div id="friends-content"><\/div>\n  <\/div>\n\n/, '');
+    curClean = curClean.replace(/      <button[^>]*data-tab="friends">Amigos<\/button>\n/g, '');
+    curClean = curClean.replace(/<script src="..\/shared\/friends.js"><\/script>\n/, '');
     // O commit de referência (PREV) já tem seletor, campo Gênero e aviso de idioma:
     // tira os mesmos blocos dele antes de comparar.
     const cleanBlocks = (h) => {
