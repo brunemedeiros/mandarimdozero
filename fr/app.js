@@ -820,6 +820,8 @@ const STATE = {
   // resetado por leitura (ensurePeriodXp), sem job/cron.
   periodXp: { weekStart: null, amount: 0 },
   activityLog: {},
+  reviewRecords: { speedBestScore: 0, matchBestMs: null, hardSeenIds: [] }, // recordes dos modos (shared/review-extras.js)
+  reviewTimeStats: { cards: 0, ms: 0 }, // tempo por cartão (estimativa de minutos e sessão de 5 min)
   studyGoal: {
     objective: null, levels: [],
     days: { mon:true, tue:true, wed:true, thu:true, fri:true, sat:true, sun:true },
@@ -1072,6 +1074,8 @@ function serializeState(){
     lastStudyDay: STATE.lastStudyDay,
     lastReviewReminderDay: STATE.lastReviewReminderDay,
     activityLog: STATE.activityLog,
+    reviewRecords: STATE.reviewRecords,
+    reviewTimeStats: STATE.reviewTimeStats,
     studyGoal: STATE.studyGoal,
     studySettings: STATE.studySettings,
     dailyMinutesLog: STATE.dailyMinutesLog,
@@ -1122,6 +1126,8 @@ function applySerializedState(data){
   if (data.dailyMinutesLog) Object.assign(STATE.dailyMinutesLog, data.dailyMinutesLog);
   if (data.dailyLessonsLog) Object.assign(STATE.dailyLessonsLog, data.dailyLessonsLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
+  if (data.reviewRecords && typeof data.reviewRecords === 'object') STATE.reviewRecords = Object.assign({ speedBestScore: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
+  if (data.reviewTimeStats && typeof data.reviewTimeStats === 'object') STATE.reviewTimeStats = { cards: Number(data.reviewTimeStats.cards) || 0, ms: Number(data.reviewTimeStats.ms) || 0 };
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
   if (data.hadStreakComeback) STATE.hadStreakComeback = true;
   if (typeof data.totalAudioPlays === 'number') STATE.totalAudioPlays = data.totalAudioPlays;
@@ -5774,16 +5780,32 @@ function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
   const pool = eligibleReviewPool();
-  const trueCount = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length;
+  const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
+  const split = { new: 0, learning: 0, review: 0 };
+  queue.forEach(c => { split[cardStudyBucket(c)]++; });
+  const trueCount = queue.length;
   const filterSummary = reviewSessionFilterSummary();
   const filterNote = filterSummary
     ? `<div class="review-today-filter">Filtro da sessão: ${escapeHTML(filterSummary)} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">Limpar filtro</button></div>`
     : '';
+  const num = (n, cls, label) => `<div class="review-today-col"><div class="review-today-count ${n ? cls : 'is-zero'}">${n}</div><div class="review-today-col-label">${label}</div></div>`;
+  const eta = reviewEtaMinutes(trueCount);
   wrap.innerHTML = `
-    ${trueCount ? `<button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">Estudar todos os Decks</button>` : ''}
+    <div class="review-today-strip">
+      <div class="review-today-split" aria-label="Para hoje: ${split.new} novas, ${split.learning} aprendendo, ${split.review} para revisar">
+        ${num(split.new, 'is-new', 'Novo')}${num(split.learning, 'is-learning', 'Aprendendo')}${num(split.review, 'is-review', 'Revisar')}
+      </div>
+      <div class="review-today-go">
+        ${trueCount ? `<span class="review-today-eta">cerca de ${eta} min</span>
+        <button class="btn btn-secondary review-short-btn" id="review-short-btn" title="Sessão curta: primeiro os cartões que você mais erra e os mais atrasados">⏱ 5 minutos</button>
+        <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">Estudar tudo (${trueCount})</button>`
+        : `<span class="review-today-done">Você está em dia por hoje.</span>`}
+      </div>
+    </div>
     ${filterNote}
   `;
   document.getElementById('review-study-all-btn')?.addEventListener('click', () => openReviewSession('flashcard'));
+  document.getElementById('review-short-btn')?.addEventListener('click', () => openReviewSession('flashcard', { short: true }));
   document.getElementById('review-today-filter-clear')?.addEventListener('click', () => {
     updateStudySetting({ reviewOriginFilter: 'all', reviewTagFilter: [] });
     renderReviewModeSelect();
@@ -5840,7 +5862,13 @@ function renderReviewModeSelect(){
   // -- "precisa revisar agora" (REVISAR) e "é uma palavra difícil"
   // (PRATICAR) são perguntas diferentes. getStudyQueue(scope:'hard') usa
   // o difficulty do FSRS, nunca due.
-  const hardCount = getStudyQueue(pool, { scope: 'hard' }).length;
+  const hardCards = getStudyQueue(pool, { scope: 'hard' });
+  const hardCount = hardCards.length;
+  // Recordes (shared/review-extras.js). Ja saíram da lista = palavras que já
+  // estiveram em Palavras difíceis e hoje não estão mais.
+  if (updateHardSeen(hardCards)) saveState();
+  const hardLeft = hardLeftCount(pool, hardCards);
+  const rec = reviewRecords();
 
   renderReviewTodayWidget();
   // Navegador de Decks (shared/deck-browser.js): tabela Deck | Novo | Aprendendo | Revisar.
@@ -5858,28 +5886,29 @@ function renderReviewModeSelect(){
         <span class="${speedSplit.learning ? 'is-learning' : 'is-zero'}">${speedSplit.learning}</span>
         <span class="${speedSplit.review ? 'is-review' : 'is-zero'}">${speedSplit.review}</span>
       </div>
-      <div class="speed-split-legend">Novo · Aprendendo · Revisar</div>
-      <div class="desc">Revisão rápida</div>
+      <div class="desc">${rec.speedBestScore ? `Seu recorde: ${rec.speedBestScore} pts` : 'Contra o relógio'}</div>
     </button>
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
       <div class="icon">🔥</div>
       <div class="name">Palavras difíceis</div>
       <div class="count">${hardCount}</div>
-      <div class="desc">As que você mais erra</div>
+      <div class="desc">${hardLeft ? `Já saíram da lista: ${hardLeft}` : 'As que você mais erra'}</div>
     </button>
     <button class="review-mode-card" id="mode-card-match" ${matchWordCount < 10 ? 'disabled' : ''}>
       <div class="icon">🧩</div>
       <div class="name">Combinar</div>
       <div class="count">${matchWordCount}</div>
-      <div class="desc">Jogo de pares</div>
+      <div class="desc">${rec.matchBestMs ? `Seu recorde: ${formatRecordSeconds(rec.matchBestMs)}` : 'Jogo de pares'}</div>
     </button>
   `;
+  const weekEl = document.getElementById('review-week');
+  if (weekEl) weekEl.innerHTML = reviewWeekHTML(pool);
   document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
   document.getElementById('mode-card-hard').addEventListener('click', () => openReviewSession('hard'));
   document.getElementById('mode-card-match').addEventListener('click', () => openReviewSession('match'));
 }
 
-function openReviewSession(mode){
+function openReviewSession(mode, opts){
   document.getElementById('review-mode-select-wrap').style.display = 'none';
   document.getElementById('review-session-wrap').style.display = 'block';
   document.getElementById('review-content').style.display = mode === 'speed' || mode === 'match' ? 'none' : 'block';
@@ -5895,7 +5924,7 @@ function openReviewSession(mode){
     STATE.reviewSessionUnitFilter = null;
     STATE.reviewSessionDeckId = null; // Fase D -- entrada normal (sem Deck) nunca herda escopo de uma sessão anterior
     STATE.reviewSessionMilestone = null;
-    startReviewSession();
+    startReviewSession(opts);
   } else if (mode === 'hard'){
     holdBadgeCelebrations();
     STATE.reviewSessionUnitFilter = null;
@@ -5905,6 +5934,7 @@ function openReviewSession(mode){
     STATE.reviewQueue = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'hard' }));
     STATE.reviewIndex = 0;
     STATE.reviewCardState = null;
+    STATE.reviewSessionStartedAt = Date.now(); // nunca herda o início de uma sessão anterior abandonada
     renderReviewView();
   } else if (mode === 'match'){
     renderMatchSizePicker();
@@ -5945,6 +5975,7 @@ function backToReviewModeSelect(){
   const deckWrap = document.getElementById('review-deck-wrap');
   if (deckWrap) deckWrap.style.display = 'none';
   STATE.reviewSessionDeckId = null; // K2-H: sair da sessão não deixa escopo de Deck stale
+  STATE.reviewSessionStartedAt = null; // sessão abandonada não entra na média de tempo
   syncReviewBackLink();
   renderReviewModeSelect();
 
@@ -6035,6 +6066,7 @@ function startMatchGame(){
   MATCH_STATE.matchedCount = 0;
   MATCH_STATE.attempts = 0;
   MATCH_STATE.busy = false;
+  MATCH_STATE.startedAt = Date.now();
 
   renderMatchGame();
 }
@@ -6126,6 +6158,8 @@ function onMatchTileClick(btn){
         STATE.totalReviews += MATCH_STATE.pairs.length;
         registerDailyMatchGame();
         trackEvent('lesson_complete', 'match_game', { pairs: MATCH_STATE.pairs.length });
+        const matchMs = MATCH_STATE.startedAt ? Date.now() - MATCH_STATE.startedAt : 0;
+        const matchIsRecord = recordMatchTime(matchMs);
         saveState();
         renderTopbarStats();
         setTimeout(() => {
@@ -6135,6 +6169,7 @@ function onMatchTileClick(btn){
               <div class="big-emoji">🎉</div>
               <h3>Todos os pares combinados!</h3>
               <div class="score-num">${MATCH_STATE.attempts} tentativa(s)</div>
+              ${matchMs ? `<p class="review-record-line">Tempo: ${formatRecordSeconds(matchMs)} · ${matchIsRecord ? '🏅 Novo recorde!' : `Seu recorde: ${formatRecordSeconds(reviewRecords().matchBestMs)}`}</p>` : ''}
               <button class="btn btn-primary" id="match-restart-btn">Jogar de novo</button>
             </div>
           `;
@@ -6226,6 +6261,8 @@ function renderSpeedReview(){
     }
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'speed_review', { score: SPEED_STATE.score });
+    const speedIsRecord = recordSpeedReviewScore(SPEED_STATE.score);
+    if (speedIsRecord) saveState();
     // Fase 6 do projeto: nunca oferecer "Jogar de novo" repetindo a mesma
     // bateria de revisão -- Voltar/Praticar mais, igual à conclusão do
     // Flashcard (ver renderReviewView).
@@ -6236,6 +6273,7 @@ function renderSpeedReview(){
         <h3>Fim de jogo!</h3>
         <div class="score-num">${SPEED_STATE.score} pts</div>
         <p>Você respondeu ${SPEED_STATE.index} palavra(s) nesta rodada.</p>
+        <p class="review-record-line">${speedIsRecord ? '🏅 Novo recorde!' : `Seu recorde: ${reviewRecords().speedBestScore} pts`}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">Voltar</button>
           <button class="btn btn-primary" id="speed-practice-btn">Praticar mais</button>
@@ -6271,12 +6309,15 @@ function renderSpeedReview(){
     // Fase 6 do projeto: idem -- sem "Jogar de novo" (a fila devida já foi
     // zerada de verdade nesta sessão; "de novo" mostraria vazio ou
     // reaproveitaria cartões que acabaram de ser respondidos).
+    const speedIsRecord2 = recordSpeedReviewScore(SPEED_STATE.score);
+    if (speedIsRecord2) saveState();
     releaseBadgeCelebrations();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
         <h3>Revisão concluída!</h3>
         <div class="score-num">${SPEED_STATE.score} pts</div>
+        <p class="review-record-line">${speedIsRecord2 ? '🏅 Novo recorde!' : `Seu recorde: ${reviewRecords().speedBestScore} pts`}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">Voltar</button>
           <button class="btn btn-primary" id="speed-practice-btn">Praticar mais</button>
@@ -6487,7 +6528,7 @@ function buildModuleReviewRow(module){
   return block;
 }
 
-function startReviewSession(){
+function startReviewSession(opts){
   holdBadgeCelebrations();
   trackEvent('lesson_start', 'flashcard_review', null);
   // eligibleReviewPool() (não STATE.cards.filter(isCardLessonCompleted)
@@ -6527,6 +6568,8 @@ function startReviewSession(){
   // ordem. Unidade específica continua embaralhada, como sempre.
   const shouldShuffle = !!STATE.reviewSessionUnitFilter;
   STATE.reviewQueue = shouldShuffle ? shuffle(queue) : queue;
+  // Sessão de 5 minutos (shared/review-extras.js): mesma fila, mais curta.
+  if (opts && opts.short && !STATE.reviewSessionUnitFilter) STATE.reviewQueue = shortReviewQueue(STATE.reviewQueue);
   STATE.reviewIndex = 0;
   // Fase 6C.1/6C.2/6C.3 -- descarta o localState (Normal/Múltipla escolha/
   // Digite a resposta/Cloze) da sessão anterior, se houver; renderReviewView()
@@ -6535,6 +6578,7 @@ function startReviewSession(){
   // eliminou STATE.reviewClozeAnswered (Cloze migrou 100% pra este slot
   // único, mesmo padrão dos outros 3 tipos) -- não há mais nenhum campo
   // solto de tipo pra zerar aqui.
+  STATE.reviewSessionStartedAt = Date.now();
   STATE.reviewCardState = null;
   renderReviewView();
 }
@@ -6677,6 +6721,7 @@ async function startDeckReviewSession(deckId, opts){
   document.getElementById('speed-review-content').style.display = 'none';
   document.getElementById('match-review-content').style.display = 'none';
 
+  STATE.reviewSessionStartedAt = Date.now();
   renderReviewView();
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard', deckId });
   } finally {
@@ -7077,6 +7122,11 @@ function renderReviewView(){
     // difíceis (os dois usam esta mesma tela, ver openReviewSession) -- não
     // a cada cartão avaliado (ver gradeCurrentCard).
     registerStudyToday();
+    if (STATE.reviewSessionStartedAt){
+      recordReviewSessionTime(STATE.reviewQueue.length, Date.now() - STATE.reviewSessionStartedAt);
+      STATE.reviewSessionStartedAt = null;
+      saveState();
+    }
     maybeShowStreakCelebration();
     // Fase 5: o marco de Revisão conta como realizado só quando a SESSÃO termina
     // (sem nota mínima). A meta ganha moduleId/unitIds (sessão de marco) ou

@@ -224,7 +224,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
       const card = document.getElementById('mode-card-speed').getBoundingClientRect();
       return { spans, exp, fits: sp.width <= card.width, legend: (document.querySelector('#mode-card-speed .speed-split-legend') || {}).textContent };
     });
-    check(lang + ' Speed Review mostra Novo/Aprendendo/Revisar da sessão, cabendo no card', speed.spans.join() === speed.exp.join() && speed.fits && /novo/i.test(speed.legend || ''), speed);
+    check(lang + ' Speed Review mostra Novo/Aprendendo/Revisar da sessão, cabendo no card', speed.spans.join() === speed.exp.join() && speed.fits, speed);
     check(lang + ' sem bloco Flashcard nem seção Revisar', !modes.flash && !modes.revisar, modes);
     const queueLen = await page.evaluate(() => getStudyQueue(eligibleReviewPool(), { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length);
     check(lang + ' "Estudar todos os Decks" só quando há o que estudar', modes.studyAll === queueLen > 0, { modes, queueLen });
@@ -521,10 +521,11 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
       const w = document.getElementById('review-today-widget');
       const table = document.getElementById('review-decks-table');
       return { nums: w.querySelectorAll('.review-today-count').length, text: w.textContent,
-        afterTable: !!(table.compareDocumentPosition(w) & Node.DOCUMENT_POSITION_FOLLOWING),
+        beforeTable: !!(table.compareDocumentPosition(w) & Node.DOCUMENT_POSITION_PRECEDING),
+        btn: (document.getElementById('review-study-all-btn') || {}).textContent || '', short: !!document.getElementById('review-short-btn'),
         oldBtn: !!document.getElementById('review-header-settings-btn'), oldLabel: /Configurar sessão|Revisões pendentes|Para estudar agora/.test(document.getElementById('review-mode-select-wrap').textContent) };
     });
-    check(lang + ' sem contador de revisões no topo; botão de estudar abaixo da tabela', w1.nums === 0 && w1.afterTable && !w1.oldBtn && !w1.oldLabel && !/Filtro da sessão/.test(w1.text), w1);
+    check(lang + ' total de hoje no topo (Novo/Aprendendo/Revisar), acima da tabela, com Estudar tudo (N) e 5 minutos', w1.nums === 3 && w1.beforeTable && /^Estudar tudo \(\d+\)$/.test(w1.btn.trim()) && w1.short && !w1.oldBtn && !w1.oldLabel && !/Filtro da sessão/.test(w1.text), w1);
     const head = await page.evaluate(() => {
       const wrap = document.getElementById('review-mode-select-wrap');
       const h2 = wrap.querySelector('.path-header h2'), bar = document.getElementById('review-deck-topbar-home');

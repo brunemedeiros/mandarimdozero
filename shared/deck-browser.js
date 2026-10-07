@@ -612,6 +612,7 @@ function renderDeckDetail(){
         </dl>
         ${studyHTML}
       </div>
+      ${c.total && typeof deckMemoryStrengthHTML === 'function' ? deckMemoryStrengthHTML(deckBrowserScope(decks, nodeId, pool)) : ''}
       ${c.total ? `<p class="deck-overview-total">${escapeHTML(totalLine)}</p>` : ''}
       ${hint ? `<p class="profile-edit-hint deck-overview-hint">${escapeHTML(hint)}</p>` : ''}
     </div>

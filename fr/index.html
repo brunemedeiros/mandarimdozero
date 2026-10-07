@@ -63,7 +63,7 @@ try{
   --error-red: #D62619;      /* vermelho — reservado para estados de erro/errado */
   --ink: #201335;            /* quase-preto com tom roxo, tipo tinta */
   --paper: #FAF5EA;          /* bege — fundo */
-  --count-new: #1D5A82; --count-learning: #B3261E; --count-review: #2E6B4F; /* colunas Novo/Aprendendo/Revisar (Decks) */
+  --count-new: #1D5A82; --count-learning: #B3261E; --count-review: #2E6B4F; --mem-weak: #A9D3EE; --mem-mid: #3498D6; --mem-strong: #1D5A82; /* colunas Novo/Aprendendo/Revisar (Decks) */
   --paper-warm: #F0E8D8;     /* fundo secundário, cards */
   --paper-line: #E1D6C0;     /* linhas/bordas sutis */
   --jade: #3A7359;           /* verde — sucesso/acerto (funcional, fora da paleta de marca) */
@@ -135,7 +135,7 @@ try{
     --error-red: #FF6B5C;
     --ink: #EDE6F5;
     --paper: #17121F;
-    --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497;
+    --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497; --mem-weak: #2E5A78; --mem-mid: #4DA9E8; --mem-strong: #A8D8F8;
     --paper-warm: #201A2C;
     --paper-line: #362C42;
     --jade: #52B487;
@@ -169,7 +169,7 @@ try{
   --error-red: #FF6B5C;
   --ink: #EDE6F5;
   --paper: #17121F;
-  --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497;
+  --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497; --mem-weak: #2E5A78; --mem-mid: #4DA9E8; --mem-strong: #A8D8F8;
   --paper-warm: #201A2C;
   --paper-line: #362C42;
   --jade: #52B487;
@@ -3384,6 +3384,69 @@ footer.app-footer img{ height:40px; opacity:.85; }
 .conj-session-result .big-emoji{ font-size:48px; margin-bottom:10px; }
 .conj-session-result .score-num{ font-size:34px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
 
+/* ===== Revisão: total de hoje, recordes, semana e força da memória (shared/review-extras.js) ===== */
+#review-today-widget{ text-align:left; margin:14px 0 16px; }
+.review-today-strip{ display:flex; align-items:center; justify-content:space-between; gap:14px 18px; flex-wrap:wrap; padding:12px 16px; border:1px solid var(--paper-line); border-radius:14px; background:var(--paper-warm); }
+.review-today-strip .review-today-split{ display:flex; gap:20px; margin:0; justify-content:flex-start; }
+.review-today-strip .review-today-col{ display:grid; line-height:1.1; }
+.review-today-strip .review-today-count{ font-size:26px; }
+.review-today-go{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.review-today-eta{ font-size:13px; color:var(--ink-soft); font-weight:700; }
+.review-today-done{ font-size:14px; color:var(--ink-soft); font-weight:700; }
+.review-today-go .btn{ margin:0; min-width:0; width:auto; padding:10px 16px; white-space:nowrap; }
+.review-short-btn{ background:transparent; color:var(--ink); border:1.5px solid var(--paper-line); }
+.review-today-filter{ margin:8px 0 0; }
+.review-mode-cards-row .review-mode-card{ padding-top:12px; padding-bottom:12px; gap:2px; }
+.review-mode-cards-row .review-mode-card .icon{ font-size:24px; }
+.review-mode-cards-row .review-mode-card .count{ font-size:22px; }
+.review-record-line{ font-size:14px; color:var(--ink-soft); font-weight:700; margin:6px 0 0; }
+.review-week{ margin:6px 0 24px; padding:14px 16px 12px; border:1px solid var(--paper-line); border-radius:14px; background:var(--paper); }
+.review-week-head{ display:flex; justify-content:space-between; align-items:baseline; gap:6px 14px; flex-wrap:wrap; }
+.review-week-title{ font-weight:800; font-size:15px; color:var(--ink); }
+.review-week-goal{ font-size:13px; color:var(--ink-soft); }
+.review-week-goal b{ color:var(--ink); }
+.review-week-goal.is-done b{ color:var(--count-review); }
+.review-week-days{ list-style:none; margin:12px 0 6px; padding:0; display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; }
+.week-day{ display:grid; grid-template-rows:96px auto; text-align:center; }
+.week-day-body{ display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:3px; }
+.week-day-label{ font-size:12px; font-weight:700; color:var(--ink-soft); padding-top:4px; border-top:1px solid var(--paper-line); }
+.week-day.is-today .week-day-label{ color:var(--ink); font-weight:800; border-top:2px solid var(--count-new); }
+.week-check{ width:30px; height:30px; border-radius:50%; border:1.5px dashed var(--paper-line); display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; }
+.week-check.is-done{ border:0; background:var(--count-review); color:var(--paper); }
+.week-check-small{ width:20px; height:20px; font-size:11px; }
+.week-total{ font-size:12px; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums; }
+.week-total.is-zero{ color:var(--ink-soft); font-weight:600; }
+.week-bar{ display:flex; flex-direction:column-reverse; width:70%; max-width:34px; border-radius:6px 6px 3px 3px; overflow:hidden; }
+.week-bar-due{ background:var(--count-review); display:block; }
+.week-bar-new{ background:var(--count-new); display:block; }
+.review-week-legend{ font-size:12px; color:var(--ink-soft); margin:4px 0 0; line-height:1.5; }
+.week-key{ display:inline-block; width:10px; height:10px; border-radius:2px; margin:0 4px 0 2px; vertical-align:-1px; }
+.week-key-due{ background:var(--count-review); }
+.week-key-new{ background:var(--count-new); }
+.deck-memory{ margin:16px 0 4px; }
+.deck-memory-title{ font-size:13px; font-weight:800; color:var(--ink-soft); margin-bottom:6px; }
+.mem-bar{ display:flex; height:12px; border-radius:6px; overflow:hidden; background:var(--paper-line); gap:2px; }
+.mem-bar-seg{ display:block; flex-basis:0; min-width:4px; }
+.mem-bar-seg[data-tier="weak"], .mem-swatch[data-tier="weak"]{ background:var(--mem-weak); }
+.mem-bar-seg[data-tier="mid"], .mem-swatch[data-tier="mid"]{ background:var(--mem-mid); }
+.mem-bar-seg[data-tier="strong"], .mem-swatch[data-tier="strong"]{ background:var(--mem-strong); }
+.mem-legend{ display:flex; flex-wrap:wrap; gap:4px 16px; margin-top:6px; font-size:13px; color:var(--ink-soft); }
+.mem-legend b{ color:var(--ink); }
+.mem-swatch{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }
+@media (max-width:600px){
+  .review-today-strip{ padding:10px 12px; }
+  .review-today-strip .review-today-split{ gap:14px; }
+  .review-today-strip .review-today-count{ font-size:22px; }
+  .review-today-go{ width:100%; justify-content:flex-start; }
+  .review-today-go .btn-primary{ flex:1; }
+  .review-today-go .btn{ min-height:44px; }
+  .review-today-eta{ width:100%; }
+  .review-week{ padding:12px 10px 10px; }
+  .review-week-days{ gap:3px; }
+  .week-day{ grid-template-rows:80px auto; }
+  .week-check{ width:24px; height:24px; font-size:13px; }
+}
+
 /* ===== Navegador de Decks (shared/deck-browser.js; doc de arquitetura, seções 12-14 e 5.4) ===== */
 .deck-table-wrap{ margin: 4px 0 18px; }
 .deck-table{ width:100%; border-collapse:collapse; background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); overflow:hidden; }
@@ -3784,12 +3847,12 @@ footer.app-footer img{ height:40px; opacity:.85; }
         </select>
       </div>
 
-      <div class="deck-table-wrap" id="review-decks-table"></div>
       <div id="review-today-widget"></div>
+      <div class="deck-table-wrap" id="review-decks-table"></div>
 
       <div class="review-modes-spacer" aria-hidden="true"></div>
-      <p class="review-section-hint">Speed Review usa a sessão de hoje (palavras novas e revisões); Palavras difíceis e Combinar funcionam a qualquer hora.</p>
       <div class="review-mode-cards review-mode-cards-row" id="review-mode-cards-praticar"></div>
+      <div id="review-week"></div>
     </div>
 
     <div id="review-deck-wrap" style="display:none;"></div>
@@ -4630,6 +4693,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
 <script src="../shared/my-flashcards.js"></script>
+<script src="../shared/review-extras.js"></script>
 <script src="../shared/deck-browser.js"></script>
 <script src="../shared/anki-import-ui.js"></script>
 <script src="../shared/admin-analytics.js"></script>
