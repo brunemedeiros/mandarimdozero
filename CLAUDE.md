@@ -17741,3 +17741,8 @@ Testes: desafios-modulo 75/75, desafios-conclusao 19/19, test_answer_validation 
 - **i18n**: textos de Amigos/Ranking de Amigos passaram para `shared/i18n` (chaves `friends.*`, `profile.tabFriends`, `notif.cat.amigos`, `notif.pref.inAppOnly`; en espelha pt-BR; es congelado). O teste `tests/i18n` isenta essas chaves da regressão byte a byte e o HTML de Amigos da comparação com o commit-base. A única falha restante do teste (zh, HTML) já existe na `main`.
 - **PR**: branch `claude/fervent-heisenberg-rlf8va` -> `main` aberto depois do merge com a `main`.
 
+## Revisão em inglês (2026-10-07)
+- Tela nova da Revisão (`shared/deck-browser.js`, `shared/review-extras.js`, faixa de hoje e recordes em fr/zh `app.js`, Configurar, Painel, Adicionar) passou para `t()`: 193 chaves `review.*` em pt-BR/en (es congelado). Português byte a byte igual.
+- Plural feito com chaves `.one`/`.other` escolhidas por `n === 1` (como o código antigo), não `tp()`: em pt-BR o `Intl.PluralRules` trata 0 como singular.
+- `tests/i18n/test_i18n_unit.js`: `PREV2 = '9969e3c'` cobre os arquivos convertidos; 2090/2090.
+- Sobras traduzidas (2026-10-07): etiqueta "Na frase · <unidade>" (`studyPhraseCardTitle`, shared/study-trail-model.js; atualizada também por `refreshStudyCardTexts` ao trocar o idioma), erros de envio de áudio/imagem/link (`mediaErrorText` + chaves `media.*`, shared/flashcard-model.js; sem `t()` fica o português), título do topo (`brand.title.fr`/`brand.title.zh`, `brand.byline`) e a aba "Desafios" da barra de baixo (`nav.challenges`). "Já saíram da lista" já usava `review.records.leftList` desde cdd1156 (só não estava publicado).

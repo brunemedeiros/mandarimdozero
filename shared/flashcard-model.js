@@ -252,15 +252,23 @@ const FIELD_AUDIO_UPLOAD_MAX_BYTES = 5242880; // 5 MiB
 // impede um upload malicioso. `file.name`/extensão NUNCA entram nesta
 // checagem (Seção 15 -- nunca confiar no nome de arquivo pra decisão de
 // segurança).
+// Mensagens de erro de envio de mídia: idioma do site quando t() existe
+// (fora do navegador, nos testes, fica o texto em português).
+function mediaErrorText(key, pt){
+  if (typeof t !== 'function') return pt;
+  const v = t(key);
+  return (v && v !== key) ? v : pt;
+}
+
 function validateFieldAudioUploadFile(file){
-  if (!file) return { ok: false, error: 'Nenhum arquivo selecionado.' };
-  if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: 'Arquivo vazio.' };
+  if (!file) return { ok: false, error: mediaErrorText('media.noFile', 'Nenhum arquivo selecionado.') };
+  if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: mediaErrorText('media.emptyFile', 'Arquivo vazio.') };
   if (typeof file.size === 'number' && file.size > FIELD_AUDIO_UPLOAD_MAX_BYTES){
-    return { ok: false, error: 'Arquivo maior que 5 MB -- escolha um arquivo de áudio menor.' };
+    return { ok: false, error: mediaErrorText('media.audioTooBig', 'Arquivo maior que 5 MB -- escolha um arquivo de áudio menor.') };
   }
   const type = file.type || '';
   if (!FIELD_AUDIO_UPLOAD_MIME_TYPES.includes(type)){
-    return { ok: false, error: 'Formato de áudio não suportado. Use MP3, M4A/AAC, OGG, WAV ou WEBM.' };
+    return { ok: false, error: mediaErrorText('media.audioBadType', 'Formato de áudio não suportado. Use MP3, M4A/AAC, OGG, WAV ou WEBM.') };
   }
   return { ok: true };
 }
@@ -270,13 +278,13 @@ function validateFieldAudioUploadFile(file){
 // estes tipos no bucket.
 const FIELD_IMAGE_UPLOAD_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 function validateFieldImageUploadFile(file){
-  if (!file) return { ok: false, error: 'Nenhum arquivo selecionado.' };
-  if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: 'Arquivo vazio.' };
+  if (!file) return { ok: false, error: mediaErrorText('media.noFile', 'Nenhum arquivo selecionado.') };
+  if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: mediaErrorText('media.emptyFile', 'Arquivo vazio.') };
   if (typeof file.size === 'number' && file.size > FIELD_AUDIO_UPLOAD_MAX_BYTES){
-    return { ok: false, error: 'Imagem maior que 5 MB. Escolha uma imagem menor.' };
+    return { ok: false, error: mediaErrorText('media.imageTooBig', 'Imagem maior que 5 MB. Escolha uma imagem menor.') };
   }
   if (!FIELD_IMAGE_UPLOAD_MIME_TYPES.includes(file.type || '')){
-    return { ok: false, error: 'Formato de imagem não suportado. Use JPG, PNG, WEBP ou GIF.' };
+    return { ok: false, error: mediaErrorText('media.imageBadType', 'Formato de imagem não suportado. Use JPG, PNG, WEBP ou GIF.') };
   }
   return { ok: true };
 }
@@ -293,9 +301,9 @@ function validateFieldImageUploadFile(file){
 const FIELD_AUDIO_URL_MAX_LENGTH = 2000;
 function validateFieldAudioUrl(url){
   const clean = (url || '').trim();
-  if (!clean) return { ok: false, error: 'Cole o link do áudio.' };
-  if (clean.length > FIELD_AUDIO_URL_MAX_LENGTH) return { ok: false, error: 'Link muito longo.' };
-  if (!/^https:\/\//i.test(clean)) return { ok: false, error: 'O link precisa começar com https://.' };
+  if (!clean) return { ok: false, error: mediaErrorText('media.urlEmpty', 'Cole o link do áudio.') };
+  if (clean.length > FIELD_AUDIO_URL_MAX_LENGTH) return { ok: false, error: mediaErrorText('media.urlTooLong', 'Link muito longo.') };
+  if (!/^https:\/\//i.test(clean)) return { ok: false, error: mediaErrorText('media.urlNeedsHttps', 'O link precisa começar com https://.') };
   return { ok: true, url: clean };
 }
 

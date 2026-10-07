@@ -669,6 +669,200 @@ window.I18N_CATALOG['en'] = {
   'review.interval.month': { one: '{n} month', other: '{n} months' }, // ALTA
   'review.interval.year': { one: '{n} year', other: '{n} years' }, // ALTA
   'review.interval.yearsFrac': '{n} years', // ALTA
+  // Revisão nova (tabela de Decks, Painel, semana, recordes) -- 2026-10-07
+  'review.deck.lang.frances': 'French', // ALTA -- Revisão nova
+  'review.deck.lang.mandarim': 'Mandarin', // ALTA -- Revisão nova
+  'review.deck.lang.portugues': 'Portuguese', // ALTA -- Revisão nova
+  'review.deck.lang.fallback': 'Language', // ALTA -- Revisão nova
+  'review.deck.myDecks': 'My Decks', // ALTA -- Revisão nova
+  'review.deck.teacherCards': 'Teacher\'s cards', // MÉDIA -- Revisão nova
+  'review.deck.studyPath': 'Study Path', // MÉDIA -- Revisão nova
+  'review.deck.allDecks': 'All Decks', // ALTA -- Revisão nova
+  'review.deck.decks': 'Decks', // ALTA -- Revisão nova
+  'review.deck.add': 'Add', // ALTA -- Revisão nova
+  'review.deck.browse': 'Browse', // MÉDIA -- Revisão nova
+  'review.deck.settings': 'Settings', // ALTA -- Revisão nova
+  'review.deck.moreOptions': 'More options: import and export', // ALTA -- Revisão nova
+  'review.deck.importFile': 'Import file (.apkg or .json)', // ALTA -- Revisão nova
+  'review.deck.export': 'Export', // ALTA -- Revisão nova
+  'review.deck.loadingDecks': 'Loading your Decks…', // ALTA -- Revisão nova
+  'review.deck.expand': 'Expand', // ALTA -- Revisão nova
+  'review.deck.collapse': 'Collapse', // ALTA -- Revisão nova
+  'review.deck.createLink': '+ Create Deck', // ALTA -- Revisão nova
+  'review.deck.colDeck': 'Deck', // ALTA -- Revisão nova
+  'review.count.new': 'New', // ALTA -- Revisão nova
+  'review.count.learning': 'Learning', // ALTA -- Revisão nova
+  'review.count.review': 'Review', // ALTA -- Revisão nova
+  'review.deck.noneYet': 'No Decks yet. Finish a lesson or create a Deck.', // ALTA -- Revisão nova
+  'review.deck.orphans.one': '{n} of your older cards is not in any Deck yet. Open Browse to see it and move it.', // ALTA -- Revisão nova
+  'review.deck.orphans.other': '{n} of your older cards are not in any Deck yet. Open Browse to see them and move them.', // ALTA -- Revisão nova
+  'review.deck.createLoadError': 'Couldn\'t load "My Decks". Reload the page.', // ALTA -- Revisão nova
+  'review.deck.create': 'Create Deck', // ALTA -- Revisão nova
+  'review.deck.nameLabel': 'Deck name', // ALTA -- Revisão nova
+  'review.deck.namePlaceholder': 'E.g.: Verbs', // ALTA -- Revisão nova
+  'review.deck.insideLabel': 'Inside', // ALTA -- Revisão nova
+  'review.deck.cancel': 'Cancel', // ALTA -- Revisão nova
+  'review.deck.created': '✓ Deck "{name}" created.', // ALTA -- Revisão nova
+  'review.deck.renameAria': 'Rename Deck', // ALTA -- Revisão nova
+  'review.deck.newName': 'New name', // ALTA -- Revisão nova
+  'review.deck.save': 'Save', // ALTA -- Revisão nova
+  'review.deck.importReadError': 'Couldn\'t read this file. Use an Anki .apkg or a .json exported from this site.', // ALTA -- Revisão nova
+  'review.deck.importLoginRequired': 'Sign in to your account to import cards.', // ALTA -- Revisão nova
+  'review.deck.importLinkBroken': 'The shared cards link is incomplete or corrupted.', // ALTA -- Revisão nova
+  'review.deck.exportNone': 'You don\'t have any cards of your own to export yet.', // ALTA -- Revisão nova
+  'review.deck.hintCourse': 'Study Path cards come from the lessons: each lesson you finish unlocks its cards.', // ALTA -- Revisão nova
+  'review.deck.hintTeacher': 'These cards are organized by your teacher. Here you only study them.', // ALTA -- Revisão nova
+  'review.deck.cardWord.one': 'card', // ALTA -- Revisão nova
+  'review.deck.cardWord.other': 'cards', // ALTA -- Revisão nova
+  'review.deck.inSubdecks': ' in this Deck and its subdecks', // ALTA -- Revisão nova
+  'review.deck.newCapPrefix': ' · up to ', // ALTA -- Revisão nova
+  'review.deck.newWord.one': 'new', // ALTA -- Revisão nova
+  'review.deck.newWord.other': 'new', // ALTA -- Revisão nova
+  'review.deck.perDay': ' per day', // ALTA -- Revisão nova
+  'review.deck.loginToCreate': 'Sign in to your account to create cards.', // ALTA -- Revisão nova
+  'review.deck.studyNow': 'Study now', // ALTA -- Revisão nova
+  'review.deck.emptyDeck': 'This Deck doesn\'t have any cards yet.', // ALTA -- Revisão nova
+  'review.deck.addCard': 'Add card', // ALTA -- Revisão nova
+  'review.deck.createSubdeck': 'Create subdeck', // ALTA -- Revisão nova
+  'review.deck.rename': 'Rename', // ALTA -- Revisão nova
+  'review.deck.isPublic': '🌐 Public', // ALTA -- Revisão nova
+  'review.deck.publish': 'Publish', // ALTA -- Revisão nova
+  'review.deck.delete': 'Delete', // ALTA -- Revisão nova
+  'review.deck.loading': 'Loading…', // ALTA -- Revisão nova
+  'review.deck.loadError': 'Couldn\'t load. Try again.', // ALTA -- Revisão nova
+  'review.deck.createdCount.one': '✓ {n} created', // ALTA -- Revisão nova
+  'review.deck.createdCount.other': '✓ {n} created', // ALTA -- Revisão nova
+  'review.deck.deleteTitle': 'Deleting this deck will delete all the cards in it', // ALTA -- Revisão nova
+  'review.deck.deleteHas': '"{name}" has', // ALTA -- Revisão nova
+  'review.deck.and': ' and ', // ALTA -- Revisão nova
+  'review.deck.subdeckWord.one': 'subdeck', // ALTA -- Revisão nova
+  'review.deck.subdeckWord.other': 'subdecks', // ALTA -- Revisão nova
+  'review.deck.alsoDeleted': ' (which will also be deleted)', // ALTA -- Revisão nova
+  'review.deck.moveFirst': '. If you\'d rather keep the cards, move them first.', // ALTA -- Revisão nova
+  'review.deck.moveCardsTo': 'Move the cards to', // ALTA -- Revisão nova
+  'review.deck.moveToOther': 'Move to another deck', // ALTA -- Revisão nova
+  'review.deck.deletePermanently': 'Delete permanently', // ALTA -- Revisão nova
+  'review.deck.deleteConfirm': 'Delete "{name}" and {n} {cards} forever? The review history will be deleted too. This can\'t be undone.', // ALTA -- Revisão nova
+  'review.deck.movedWhat.one': 'card was moved', // ALTA -- Revisão nova
+  'review.deck.movedWhat.other': 'cards were moved', // ALTA -- Revisão nova
+  'review.deck.deletedMoved': 'Deck deleted. {n} {what} to "{dest}".', // ALTA -- Revisão nova
+  'review.deck.deletedWith': 'Deck deleted with {n} {cards}.', // ALTA -- Revisão nova
+  'review.panel.type.cloze': 'Fill in the blank', // ALTA -- Revisão nova
+  'review.panel.origin.study': 'Study Path', // MÉDIA -- Revisão nova
+  'review.panel.origin.self': 'My cards', // ALTA -- Revisão nova
+  'review.panel.origin.teacher': 'Teacher', // ALTA -- Revisão nova
+  'review.panel.all': 'All', // ALTA -- Revisão nova
+  'review.panel.searchPlaceholder': 'Search cards and notes', // ALTA -- Revisão nova
+  'review.panel.searchAria': 'Search cards', // ALTA -- Revisão nova
+  'review.panel.filters': 'Filters', // ALTA -- Revisão nova
+  'review.panel.cardsAria': 'Cards', // ALTA -- Revisão nova
+  'review.panel.front': 'Front', // ALTA -- Revisão nova
+  'review.panel.back': 'Back', // ALTA -- Revisão nova
+  'review.panel.listAria': 'Card list', // ALTA -- Revisão nova
+  'review.panel.editorAria': 'Card editor', // ALTA -- Revisão nova
+  'review.panel.state': 'Status', // MÉDIA -- Revisão nova
+  'review.panel.archived': 'Archived ({n})', // ALTA -- Revisão nova
+  'review.panel.tags': 'Tags', // ALTA -- Revisão nova
+  'review.panel.noTags': 'No tags.', // ALTA -- Revisão nova
+  'review.panel.manageTags': 'Manage tags', // ALTA -- Revisão nova
+  'review.panel.noMatch': 'No cards match this filter.', // ALTA -- Revisão nova
+  'review.panel.emptyScope': 'No cards here yet. Study Path cards show up as you finish lessons.', // ALTA -- Revisão nova
+  'review.panel.selectNamed': 'Select {name}', // ALTA -- Revisão nova
+  'review.panel.readOnly': 'Read-only', // ALTA -- Revisão nova
+  'review.panel.selectedWord.one': 'selected', // ALTA -- Revisão nova
+  'review.panel.selectedWord.other': 'selected', // ALTA -- Revisão nova
+  'review.panel.moveTo': 'Move to', // ALTA -- Revisão nova
+  'review.panel.move': 'Move', // ALTA -- Revisão nova
+  'review.panel.clearSelection': 'Clear selection', // ALTA -- Revisão nova
+  'review.panel.backToList': '← List', // ALTA -- Revisão nova
+  'review.panel.pickCard': 'Pick a card from the list to view or edit it.', // ALTA -- Revisão nova
+  'review.panel.archivedSuffix': ' · archived', // ALTA -- Revisão nova
+  'review.panel.whyStudy': 'Study Path cards come from the lessons and can\'t be edited here.', // ALTA -- Revisão nova
+  'review.panel.whyTeacher': 'Teacher\'s cards: only your teacher can edit them.', // ALTA -- Revisão nova
+  'review.panel.loadCardError': 'Couldn\'t load this card.', // ALTA -- Revisão nova
+  'review.panel.reactivate': '↺ Reactivate', // ALTA -- Revisão nova
+  'review.panel.hiddenFromProfile': '🙈 Hidden from profile', // ALTA -- Revisão nova
+  'review.panel.visibleOnProfile': '👁️ Visible on profile', // ALTA -- Revisão nova
+  'review.panel.deleteOne': '🗑 Delete', // ALTA -- Revisão nova
+  'review.panel.reactivated': '✓ Card reactivated.', // ALTA -- Revisão nova
+  'review.panel.changeError': 'Couldn\'t change that right now.', // ALTA -- Revisão nova
+  'review.panel.deleteOneConfirm': 'This will permanently delete the card and all its review history. This can\'t be undone. Continue?', // ALTA -- Revisão nova
+  'review.panel.deleteOneError': 'Couldn\'t delete the card right now.', // ALTA -- Revisão nova
+  'review.panel.deletedOne': '✓ Card deleted.', // ALTA -- Revisão nova
+  'review.panel.movedWhat.one': 'item moved', // ALTA -- Revisão nova
+  'review.panel.movedWhat.other': 'items moved', // ALTA -- Revisão nova
+  'review.panel.movedToast': '{n} {what} to "{dest}".', // ALTA -- Revisão nova
+  'review.panel.moveFailed': 'Couldn\'t move: {list}', // ALTA -- Revisão nova
+  'review.panel.itemWord.one': 'item', // ALTA -- Revisão nova
+  'review.panel.itemWord.other': 'items', // ALTA -- Revisão nova
+  'review.panel.deleteManyConfirm': 'Delete {n} {items} ({total} {cards}) forever? The review history will be deleted too.', // ALTA -- Revisão nova
+  'review.panel.deletedWhat.one': 'item deleted', // ALTA -- Revisão nova
+  'review.panel.deletedWhat.other': 'items deleted', // ALTA -- Revisão nova
+  'review.week.day.mon': 'Mon', // ALTA -- Revisão nova
+  'review.week.day.tue': 'Tue', // ALTA -- Revisão nova
+  'review.week.day.wed': 'Wed', // ALTA -- Revisão nova
+  'review.week.day.thu': 'Thu', // ALTA -- Revisão nova
+  'review.week.day.fri': 'Fri', // ALTA -- Revisão nova
+  'review.week.day.sat': 'Sat', // ALTA -- Revisão nova
+  'review.week.day.sun': 'Sun', // ALTA -- Revisão nova
+  'review.week.today': 'Today', // ALTA -- Revisão nova
+  'review.week.studied': 'studied', // ALTA -- Revisão nova
+  'review.week.notStudied': 'didn\'t study', // ALTA -- Revisão nova
+  'review.week.ariaFuture': '{day}: {due} to review, {new} new', // ALTA -- Revisão nova
+  'review.week.alreadyStudied': ', already studied', // ALTA -- Revisão nova
+  'review.week.title': 'Your review week', // ALTA -- Revisão nova
+  'review.week.goalDone': 'Weekly goal reached', // ALTA -- Revisão nova
+  'review.week.goal': 'Weekly goal', // ALTA -- Revisão nova
+  'review.week.goalCount': ': <b>{n} of {goal}</b> study days', // ALTA -- Revisão nova
+  'review.week.legendPast': 'Past days: ✓ when you studied. Coming days: ', // ALTA -- Revisão nova
+  'review.week.legendDue': 'cards coming due and ', // ALTA -- Revisão nova
+  'review.week.legendNew': 'new words.', // ALTA -- Revisão nova
+  'review.memory.title': 'Memory strength', // ALTA -- Revisão nova
+  'review.memory.aria': 'Memory strength: {weak} weak, {medium} medium, {strong} strong', // ALTA -- Revisão nova
+  'review.memory.weak': 'Weak', // ALTA -- Revisão nova
+  'review.memory.medium': 'Medium', // ALTA -- Revisão nova
+  'review.memory.strong': 'Strong', // ALTA -- Revisão nova
+  'review.records.streakWord.one': 'correct in a row', // ALTA -- Revisão nova
+  'review.records.streakWord.other': 'correct in a row', // ALTA -- Revisão nova
+  'review.records.yourRecord': 'Your record: {record}', // ALTA -- Revisão nova
+  'review.records.againstClock': 'Against the clock', // ALTA -- Revisão nova
+  'review.records.leftList': 'Left the list: {n}', // MÉDIA -- Revisão nova
+  'review.records.time': 'Time: {time}', // ALTA -- Revisão nova
+  'review.records.newRecord': '🏅 New record!', // ALTA -- Revisão nova
+  'review.today.filter': 'Session filter: {filter}', // ALTA -- Revisão nova
+  'review.today.clearFilter': 'Clear filter', // ALTA -- Revisão nova
+  'review.today.aria': 'For today: {new} new, {learning} learning, {review} to review', // ALTA -- Revisão nova
+  'review.today.shortTitle': 'Short session: the cards you miss most and the most overdue come first', // ALTA -- Revisão nova
+  'review.today.short': '⏱ 5 minutes', // ALTA -- Revisão nova
+  'review.today.studyAll': 'Study all ({n})', // ALTA -- Revisão nova
+  'review.today.upToDate': 'You\'re all caught up for today.', // ALTA -- Revisão nova
+  'review.today.speedSplitAria': 'New {new}, Learning {learning}, Review {review}', // ALTA -- Revisão nova
+  'review.backToDeck': '← Back to Deck', // ALTA -- Revisão nova
+  'review.backToModes': '← Back to modes', // ALTA -- Revisão nova
+  'review.settings.origin': 'Source', // ALTA -- Revisão nova
+  'review.settings.freq.balanced': 'Balanced (recommended)', // ALTA -- Revisão nova
+  'review.settings.newPerDay.10': '10 (recommended)', // ALTA -- Revisão nova
+  'review.settings.intensity.normal': 'Normal (recommended)', // ALTA -- Revisão nova
+  'review.tagLabel.studyPath': 'Study Path', // MÉDIA -- Revisão nova
+  'review.tagLabel.word': 'Word', // ALTA -- Revisão nova
+  'review.tagLabel.inPhrase': 'In a sentence', // MÉDIA -- Revisão nova
+  'review.tagLabel.general': ' (general)', // ALTA -- Revisão nova
+  'review.tagLabel.level': 'Level', // ALTA -- Revisão nova
+  'review.tagLabel.module': 'Module', // ALTA -- Revisão nova
+  'review.tagLabel.lesson': 'Lesson', // ALTA -- Revisão nova
+  'review.tags.systemTagTitle': 'Permanent attribution to the original author', // ALTA -- Revisão nova
+  'review.tags.removeAria': 'Remove tag {tag}', // ALTA -- Revisão nova
+  'review.tags.placeholder': 'e.g.: greeting, a1', // ALTA -- Revisão nova
+  'review.tags.invalid': '"{tag}" is not a valid tag.', // ALTA -- Revisão nova
+  'review.tags.systemNotAllowed': '"criado-por-…" tags are system tags (author attribution) and can\'t be created manually.', // ALTA -- Revisão nova
+  'review.tags.exists': 'The tag "{tag}" already exists.', // ALTA -- Revisão nova
+  'review.tags.hint': 'Tags apply to the whole card (every card generated from it) and can be used to filter Review. Up to {max} tags of {len} characters.', // ALTA -- Revisão nova
+  'review.image.alt': 'Field image', // ALTA -- Revisão nova
+  'review.image.change': 'Change image', // ALTA -- Revisão nova
+  'review.image.add': '🖼️ Image', // ALTA -- Revisão nova
+  'review.image.remove': 'Remove', // ALTA -- Revisão nova
+  'review.image.uploading': 'Uploading image...', // ALTA -- Revisão nova
+  'review.image.uploadError': 'Couldn\'t upload the image right now.', // ALTA -- Revisão nova
   'langSwitcher.ariaCurrent': 'Current language: {name}. Click to switch language.', // ALTA
   'langSwitcher.ariaSwitch': 'Switch language', // ALTA
   'langSwitcher.studying': 'You are studying', // ALTA
@@ -1868,6 +2062,20 @@ window.I18N_CATALOG['en'] = {
   'badge.catalog.pioneer.desc': 'Among the first people to use the app in its early phase', // MÉDIA
   'badge.catalog.student.name': 'Prof. Brune\'s student', // MÉDIA
   'badge.catalog.student.desc': 'Prof. Brune\'s student', // MÉDIA
+
+  // Erros de envio de mídia e topo do site.
+  'media.noFile': 'No file selected.', // ALTA
+  'media.emptyFile': 'Empty file.', // ALTA
+  'media.audioTooBig': 'File larger than 5 MB. Choose a smaller audio file.', // ALTA
+  'media.audioBadType': 'Audio format not supported. Use MP3, M4A/AAC, OGG, WAV or WEBM.', // ALTA
+  'media.imageTooBig': 'Image larger than 5 MB. Choose a smaller image.', // ALTA
+  'media.imageBadType': 'Image format not supported. Use JPG, PNG, WEBP or GIF.', // ALTA
+  'media.urlEmpty': 'Paste the audio link.', // ALTA
+  'media.urlTooLong': 'Link too long.', // ALTA
+  'media.urlNeedsHttps': 'The link must start with https://.', // ALTA
+  'brand.title.fr': 'French', // ALTA
+  'brand.title.zh': 'Chinese', // ALTA
+  'brand.byline': 'with Prof. Brune', // ALTA
   // ---- Amigos + Ranking de Amigos ----
   'friends.timeNow': 'just now', // ALTA
   'friends.timeHours': { one: '{n} hour ago', other: '{n} hours ago' }, // ALTA

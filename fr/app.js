@@ -956,6 +956,8 @@ function refreshStudyCardTexts(){
   STATE.cards.forEach((c) => {
     if (c.origin !== 'study') return;
     const u = UNITS.find((x) => x.id === c.unitId);
+    // Cartão "Na frase": só a etiqueta muda com o idioma do site.
+    if (u && c.vocabIdx == null && c.gateVocabIdx != null){ c.unitTitle = studyPhraseCardTitle(u.title); return; }
     if (!u || !u.vocab || !u.vocab[c.vocabIdx]) return;
     // Palavra diferente no slot (país do aluno etc.): o progresso segue a palavra,
     // não a posição (shared/card-variants.js).
@@ -5865,18 +5867,18 @@ function renderReviewTodayWidget(){
   const trueCount = queue.length;
   const filterSummary = reviewSessionFilterSummary();
   const filterNote = filterSummary
-    ? `<div class="review-today-filter">Filtro da sessão: ${escapeHTML(filterSummary)} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">Limpar filtro</button></div>`
+    ? `<div class="review-today-filter">${t('review.today.filter', { filter: escapeHTML(filterSummary) })} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">${escapeHTML(t('review.today.clearFilter'))}</button></div>`
     : '';
   const num = (n, cls, label) => `<div class="review-today-col"><div class="review-today-count ${n ? cls : 'is-zero'}">${n}</div><div class="review-today-col-label">${label}</div></div>`;
   wrap.innerHTML = `
     <div class="review-today-strip">
-      <div class="review-today-split" aria-label="Para hoje: ${split.new} novas, ${split.learning} aprendendo, ${split.review} para revisar">
-        ${num(split.new, 'is-new', 'Novo')}${num(split.learning, 'is-learning', 'Aprendendo')}${num(split.review, 'is-review', 'Revisar')}
+      <div class="review-today-split" aria-label="${escapeHTML(t('review.today.aria', { new: split.new, learning: split.learning, review: split.review }))}">
+        ${num(split.new, 'is-new', escapeHTML(t('review.count.new')))}${num(split.learning, 'is-learning', escapeHTML(t('review.count.learning')))}${num(split.review, 'is-review', escapeHTML(t('review.count.review')))}
       </div>
       <div class="review-today-go">
-        ${trueCount ? `<button class="btn btn-secondary review-short-btn" id="review-short-btn" title="Sessão curta: primeiro os cartões que você mais erra e os mais atrasados">⏱ 5 minutos</button>
-        <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">Estudar tudo (${trueCount})</button>`
-        : `<span class="review-today-done">Você está em dia por hoje.</span>`}
+        ${trueCount ? `<button class="btn btn-secondary review-short-btn" id="review-short-btn" title="${escapeHTML(t('review.today.shortTitle'))}">${escapeHTML(t('review.today.short'))}</button>
+        <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">${escapeHTML(t('review.today.studyAll', { n: trueCount }))}</button>`
+        : `<span class="review-today-done">${escapeHTML(t('review.today.upToDate'))}</span>`}
       </div>
     </div>
     ${filterNote}
@@ -5957,25 +5959,25 @@ function renderReviewModeSelect(){
   praticarEl.innerHTML = `
     <button class="review-mode-card" id="mode-card-speed" ${trueCount === 0 ? 'disabled' : ''}>
       <div class="icon">⚡</div>
-      <div class="name">Speed Review</div>
-      <div class="count speed-split" aria-label="Novo ${speedSplit.new}, Aprendendo ${speedSplit.learning}, Revisar ${speedSplit.review}">
+      <div class="name">${t('review.mode.speed.name')}</div>
+      <div class="count speed-split" aria-label="${escapeHTML(t('review.today.speedSplitAria', { new: speedSplit.new, learning: speedSplit.learning, review: speedSplit.review }))}">
         <span class="${speedSplit.new ? 'is-new' : 'is-zero'}">${speedSplit.new}</span>
         <span class="${speedSplit.learning ? 'is-learning' : 'is-zero'}">${speedSplit.learning}</span>
         <span class="${speedSplit.review ? 'is-review' : 'is-zero'}">${speedSplit.review}</span>
       </div>
-      <div class="desc">${rec.speedBestScore ? `Seu recorde: ${speedRecordText(rec)}` : 'Contra o relógio'}</div>
+      <div class="desc">${rec.speedBestScore ? t('review.records.yourRecord', { record: speedRecordText(rec) }) : t('review.records.againstClock')}</div>
     </button>
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
       <div class="icon">🔥</div>
       <div class="name">${t('review.mode.hard.name')}</div>
       <div class="count">${hardCount}</div>
-      <div class="desc">${hardLeft ? `Já saíram da lista: ${hardLeft}` : t('review.mode.hard.desc')}</div>
+      <div class="desc">${hardLeft ? t('review.records.leftList', { n: hardLeft }) : t('review.mode.hard.desc')}</div>
     </button>
     <button class="review-mode-card" id="mode-card-match" ${matchWordCount < 10 ? 'disabled' : ''}>
       <div class="icon">🧩</div>
       <div class="name">${t('review.mode.match.name')}</div>
       <div class="count">${matchWordCount}</div>
-      <div class="desc">${rec.matchBestMs ? `Seu recorde: ${formatRecordSeconds(rec.matchBestMs)}` : t('review.mode.match.desc')}</div>
+      <div class="desc">${rec.matchBestMs ? t('review.records.yourRecord', { record: formatRecordSeconds(rec.matchBestMs) }) : t('review.mode.match.desc')}</div>
     </button>
   `;
   const weekEl = document.getElementById('review-week');
@@ -6038,7 +6040,7 @@ function reviewCardTagLabel(card){
 // Link de voltar da sessão: "Voltar ao Deck" quando a sessão veio de um Deck.
 function syncReviewBackLink(){
   const el = document.getElementById('review-back-to-modes');
-  if (el) el.textContent = STATE.reviewSessionDeckId != null ? '← Voltar ao Deck' : '← Voltar aos modos';
+  if (el) el.textContent = t(STATE.reviewSessionDeckId != null ? 'review.backToDeck' : 'review.backToModes');
 }
 
 function backToReviewModeSelect(){
@@ -6246,7 +6248,7 @@ function onMatchTileClick(btn){
               <div class="big-emoji">🎉</div>
               <h3>${t('review.match.allMatched')}</h3>
               <div class="score-num">${t('review.match.attempts', { n: MATCH_STATE.attempts })}</div>
-              ${matchMs ? `<p class="review-record-line">Tempo: ${formatRecordSeconds(matchMs)} · ${matchIsRecord ? '🏅 Novo recorde!' : `Seu recorde: ${formatRecordSeconds(reviewRecords().matchBestMs)}`}</p>` : ''}
+              ${matchMs ? `<p class="review-record-line">${t('review.records.time', { time: formatRecordSeconds(matchMs) })} · ${matchIsRecord ? t('review.records.newRecord') : t('review.records.yourRecord', { record: formatRecordSeconds(reviewRecords().matchBestMs) })}</p>` : ''}
               <button class="btn btn-primary" id="match-restart-btn">${t('review.match.playAgain')}</button>
             </div>
           `;
@@ -6353,7 +6355,7 @@ function renderSpeedReview(){
         <h3>${t('review.speed.gameOver')}</h3>
         <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
         <p>${t('review.speed.answered', { n: SPEED_STATE.index })}</p>
-        <p class="review-record-line">${speedIsRecord ? `🏅 Novo recorde! ${speedRecordText(reviewRecords())}` : `Seu recorde: ${speedRecordText(reviewRecords())}`}</p>
+        <p class="review-record-line">${speedIsRecord ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
           <button class="btn btn-primary" id="speed-practice-btn">${t('review.practiceMore')}</button>
@@ -6398,7 +6400,7 @@ function renderSpeedReview(){
         <div class="big-emoji">🏆</div>
         <h3>${t('review.complete.title')}</h3>
         <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
-        <p class="review-record-line">${speedIsRecord2 || speedStreakRecord2 ? `🏅 Novo recorde! ${speedRecordText(reviewRecords())}` : `Seu recorde: ${speedRecordText(reviewRecords())}`}</p>
+        <p class="review-record-line">${speedIsRecord2 || speedStreakRecord2 ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
           <button class="btn btn-primary" id="speed-practice-btn">${t('review.practiceMore')}</button>

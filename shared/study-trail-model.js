@@ -222,7 +222,7 @@ function buildStudyPhraseCards(units, appKey){
         c.gateVocabIdx = vIdx;
         c.phraseIdx = m.idx;
         c.phraseSource = { unitId: m.unitId, kind: m.kind };
-        c.unitTitle = `Na frase · ${unit.title}`; // etiqueta do cartão na Revisão
+        c.unitTitle = studyPhraseCardTitle(unit.title); // etiqueta do cartão na Revisão
         c.deckId = null;
         cards.push(c);
       });
@@ -357,19 +357,28 @@ function projectStudyWordsToA(cards){
 // automáticas da trilha ganham nome por extenso ("Módulo 1", "Francês
 // (geral)"); qualquer outra tag continua aparecendo como "#tag". Só muda o
 // que se lê na tela: o filtro continua usando o slug.
-const STUDY_TRAIL_TAG_LANG_NAMES = { frances: 'Francês', mandarim: 'Mandarim', portugues: 'Português' };
+// Nomes vêm do idioma do site (shared/i18n) quando t() existe; sem ele
+// (testes Node), cai no português de sempre.
+const STUDY_TRAIL_TAG_LABEL_PT = {
+  'review.deck.lang.frances': 'Francês', 'review.deck.lang.mandarim': 'Mandarim', 'review.deck.lang.portugues': 'Português',
+  'review.tagLabel.studyPath': 'Trilha de Estudo', 'review.tagLabel.word': 'Palavra', 'review.tagLabel.inPhrase': 'Na frase',
+  'review.tagLabel.general': ' (geral)', 'review.tagLabel.level': 'Nível', 'review.tagLabel.module': 'Módulo', 'review.tagLabel.lesson': 'Lição',
+};
+// Etiqueta do cartão "Na frase" na Revisão (segue o idioma do site).
+function studyPhraseCardTitle(unitTitle){ return `${studyTrailTagText('review.tagLabel.inPhrase')} · ${unitTitle}`; }
+function studyTrailTagText(key){ return typeof t === 'function' ? t(key) : STUDY_TRAIL_TAG_LABEL_PT[key]; }
 function friendlyTagLabel(tag){
-  const t = String(tag || '');
-  if (t === 'estudo') return 'Trilha de Estudo';
-  if (t === 'palavra') return 'Palavra';
-  if (t === 'na-frase') return 'Na frase';
-  let m = t.match(/^(frances|mandarim|portugues)-geral$/);
-  if (m) return STUDY_TRAIL_TAG_LANG_NAMES[m[1]] + ' (geral)';
-  m = t.match(/^nivel-([a-z0-9]+)$/);
-  if (m) return 'Nível ' + m[1].toUpperCase();
-  m = t.match(/^modulo-(\d+)$/);
-  if (m) return 'Módulo ' + m[1];
-  m = t.match(/^licao-(\d+)$/);
-  if (m) return 'Lição ' + m[1];
-  return '#' + t;
+  const s = String(tag || '');
+  if (s === 'estudo') return studyTrailTagText('review.tagLabel.studyPath');
+  if (s === 'palavra') return studyTrailTagText('review.tagLabel.word');
+  if (s === 'na-frase') return studyTrailTagText('review.tagLabel.inPhrase');
+  let m = s.match(/^(frances|mandarim|portugues)-geral$/);
+  if (m) return studyTrailTagText('review.deck.lang.' + m[1]) + studyTrailTagText('review.tagLabel.general');
+  m = s.match(/^nivel-([a-z0-9]+)$/);
+  if (m) return studyTrailTagText('review.tagLabel.level') + ' ' + m[1].toUpperCase();
+  m = s.match(/^modulo-(\d+)$/);
+  if (m) return studyTrailTagText('review.tagLabel.module') + ' ' + m[1];
+  m = s.match(/^licao-(\d+)$/);
+  if (m) return studyTrailTagText('review.tagLabel.lesson') + ' ' + m[1];
+  return '#' + s;
 }
