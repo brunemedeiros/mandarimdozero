@@ -148,10 +148,11 @@ try{
   --shadow-lift: 0 8px 24px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05);
 }
 
-@font-face{
-  font-family:'Nunito';
-  src: local('Nunito');
-}
+/* Nunito de verdade (antes só local('Nunito'), que na prática nunca carregava). Subconjunto latin, 4 pesos. */
+@font-face{ font-family:'Nunito'; font-weight:400; font-style:normal; font-display:swap; src:url(../shared/fonts/nunito-latin-400-normal.woff2) format('woff2'); }
+@font-face{ font-family:'Nunito'; font-weight:700; font-style:normal; font-display:swap; src:url(../shared/fonts/nunito-latin-700-normal.woff2) format('woff2'); }
+@font-face{ font-family:'Nunito'; font-weight:800; font-style:normal; font-display:swap; src:url(../shared/fonts/nunito-latin-800-normal.woff2) format('woff2'); }
+@font-face{ font-family:'Nunito'; font-weight:900; font-style:normal; font-display:swap; src:url(../shared/fonts/nunito-latin-900-normal.woff2) format('woff2'); }
 
 *{ box-sizing: border-box; }
 /* Foco de teclado: sem isto, cada navegador desenha um anel default
@@ -1110,7 +1111,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 
 /* zh: hanzi + pinyin dentro do balão e das opções */
 .dlg-hz{ font-family: var(--font-hanzi); font-size:19px; font-weight:700; line-height:1.4; color: var(--ink); }
-.dlg-py{ font-size:12.5px; line-height:1.35; color: var(--ink-soft); margin-top:1px; }
+.dlg-py{ font-size:12.5px; line-height:1.35; color: var(--ink-soft); margin-bottom:1px; }
 .dlg-opt .dlg-py{ display:block; font-weight:600; }
 .dlg-opt .dlg-hz{ font-size:17px; }
 .dlg-bubble .dlg-fr{ font-size:inherit; font-weight:inherit; }
@@ -1344,6 +1345,10 @@ button.wrong-feedback-continue{ background: var(--seal-red); color: var(--on-sea
   min-height:64px; justify-content:center;
 }
 .exercise-prompt .prompt-hanzi{ font-family: var(--font-hanzi); font-size:38px; font-weight:700; }
+.exercise-prompt .prompt-translation{ font-size:20px; font-weight:800; text-align:center; line-height:1.35; }
+.reorder-target{ margin-bottom:14px; }
+.reorder-target .prompt-translation{ font-size:18px; }
+.reorder-wrap-hint{ font-size:12.5px; color: var(--ink-soft); margin:-4px 0 12px; }
 .exercise-prompt .prompt-pinyin{ font-size:20px; color: var(--seal-red-dark); font-weight:800; }
 .exercise-prompt .prompt-trans{ font-size:17px; color: var(--ink); }
 .exercise-prompt .prompt-audio-hint{ font-size:12.5px; color: var(--ink-soft); margin-top:4px; }

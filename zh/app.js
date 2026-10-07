@@ -3085,6 +3085,7 @@ function buildExerciseHint(ex, unit){
     return `Pense no contexto do tema desta unidade ("${unit.title}"): em que situação você usaria essa palavra?`;
   }
   if (ex.format === 'reorder'){
+    if (ex.mode === 'translate') return 'Primeiro descarte os blocos que não pertencem a esta frase -- só depois pense na ordem das palavras que sobraram.';
     return 'Identifique primeiro quem realiza a ação e depois a ação em si -- monte a frase seguindo essa ordem de raciocínio, ignorando os blocos que não pertencem a ela.';
   }
   if (ex.format === 'fullsentence'){
@@ -4171,8 +4172,8 @@ function renderDialogueStep(u, contentEl, nextBtn){
       <div class="dlg-row ${side}" data-i="${i}" role="button" tabindex="0" aria-label="${escapeHTML(w.n)}: ouvir a partir desta fala">
         <div class="dlg-avatar"><span class="dlg-emoji" aria-hidden="true">${w.e || escapeHTML(l.spk.slice(0, 1))}</span><span class="dlg-name">${escapeHTML(w.n)}</span></div>
         <div class="dlg-bubble">
-          <div class="dlg-hz">${dlgHighlight(l.c, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>
           <div class="dlg-py">${escapeHTML(l.p)}</div>
+          <div class="dlg-hz">${dlgHighlight(l.c, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>
           <div class="dlg-tr">${escapeHTML(l.t)}</div>
           <button type="button" class="dlg-trbtn" aria-label="Mostrar a tradução desta fala" aria-pressed="false">🌐</button>
         </div>
@@ -4307,13 +4308,13 @@ function renderDialogueCheck(u, dlg, who, checks, nextBtn, rows){
   const box = document.getElementById('dlg-check');
   const st = DLG.check;
   const L = dlg.lines;
-  const zhOpt = o => `<span class="dlg-hz">${escapeHTML(o.c)}</span><span class="dlg-py">${escapeHTML(o.p)}</span>`;
+  const zhOpt = o => `<span class="dlg-py">${escapeHTML(o.p)}</span><span class="dlg-hz">${escapeHTML(o.c)}</span>`;
   const bubble = (idx, blank) => {
     const l = L[idx];
     const side = dlgSpeakerSide(dlg, l.spk);
     const w = who(l.spk);
     return `<div class="dlg-row ${side} static"><div class="dlg-avatar"><span class="dlg-emoji" aria-hidden="true">${w.e || escapeHTML(l.spk.slice(0, 1))}</span><span class="dlg-name">${escapeHTML(w.n)}</span></div>
-      <div class="dlg-bubble">${blank ? '<div class="dlg-hz"><span class="dlg-blank">· · · · ·</span></div>' : `<div class="dlg-hz">${escapeHTML(l.c)}</div><div class="dlg-py">${escapeHTML(l.p)}</div>`}</div></div>`;
+      <div class="dlg-bubble">${blank ? '<div class="dlg-hz"><span class="dlg-blank">· · · · ·</span></div>' : `<div class="dlg-py">${escapeHTML(l.p)}</div><div class="dlg-hz">${escapeHTML(l.c)}</div>`}</div></div>`;
   };
 
   function showQuestion(){
@@ -4606,7 +4607,10 @@ function buildExerciseSet(unit){
     const distractorCount = reorderDistractorCount(unit, p.blocks);
     const distractorBlocks = buildReorderDistractors(unit, p.blocks, distractorCount);
     return { format: 'reorder', phrase: p, shuffledBlocks: shuffle([...p.blocks, ...distractorBlocks]) };
-  });
+  }).map((e, i) => ({ ...e, mode: i % 2 === 0 ? 'translate' : 'order' }));
+  // mode 'translate': parte do português e monta o chinês do zero (nunca mostra
+  // a frase em chinês antes de responder); 'order': mostra tradução + áudio e
+  // pede só a ordem. Mesma divisão do Français.
 
   const trueFalseExercises = (unit.trueFalseExercises || []).map(tf => ({ format: 'trueFalse', ...tf }));
 
@@ -5767,16 +5771,31 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
   const correctOrder = ex.phrase.blocks;
   const chosenSequence = []; // índices (no array shuffledBlocks) já escolhidos, em ordem
 
+  const isTranslate = ex.mode === 'translate';
+  const phraseZh = phraseForExercise(ex.phrase);
+
   contentEl.innerHTML = `
     <div class="exercise-wrap">
       <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">Ordene a frase</div>
+      <div class="exercise-prompt-label">${isTranslate ? 'Traduza para o chinês' : 'Ordene a frase'}</div>
+      ${isTranslate ? `
+        <div class="exercise-prompt">
+          <div class="prompt-translation">${ex.phrase.t}</div>
+        </div>
+      ` : `
+        <div class="exercise-prompt reorder-target">
+          <div class="prompt-translation">${ex.phrase.t}</div>
+          ${audioBtnHTML(phraseZh.c, 'audio-btn-lg')}
+        </div>
+        <div class="reorder-wrap-hint">Toque nos blocos na ordem certa. Toque num já colocado para devolvê-lo.</div>
+      `}
       <div class="reorder-answer-slots" id="reorder-answer-slots"></div>
       <div class="reorder-blocks" id="reorder-blocks"></div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
     </div>
   `;
 
+  wireAudioButtons(contentEl);
   const slotsEl = document.getElementById('reorder-answer-slots');
   const blocksEl = document.getElementById('reorder-blocks');
 

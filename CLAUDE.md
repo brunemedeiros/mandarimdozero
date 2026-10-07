@@ -17570,3 +17570,10 @@ Decisão da autora: TTS explícito por Field usa o **Google Cloud TTS com a chav
 - Causa: `tts-generate` não respondia ao preflight CORS (OPTIONS) nem mandava `Access-Control-Allow-*`; o navegador bloqueava a chamada antes de chegar à função (nenhum log de tts-generate). Corrigido no `index.ts` (OPTIONS + cabeçalhos CORS em toda resposta) e publicado em produção (versão 4, `verify_jwt:true`; a cópia publicada tem a mesma lógica, comentários encurtados e helper `json()`). Preflight conferido ao vivo (200 com os cabeçalhos).
 - Cliente (`requestFieldAudioTTS`/`requestOwnFieldAudioTTS`): em resposta não-2xx o supabase-js deixa o corpo em `error.context` (Response); agora o código lê esse corpo para mostrar o motivo real (cota, provedor etc.). Só vale no site depois do deploy desta branch.
 - Primeiro áudio TTS real gerado pelo app confirmado pela autora em 2026-10-06 (depois da correção do CORS, função versão 4). A pendência "primeiro teste real" está fechada.
+
+## Onda 0/5 do redesenho das lições -- atualização (2026-10-07)
+
+- **Nunito**: o fr já carregava os 4 pesos locais (`shared/fonts/nunito-latin-*.woff2`); o zh agora também (antes era só `local('Nunito')`). Anton foi abandonada (não existe no código).
+- **Pinyin acima do hanzi** (decisão da autora, vale para zh): balões do diálogo, opções e bolhas da micro-checagem agora põem `.dlg-py` antes de `.dlg-hz`.
+- **"Ordene a frase" no zh** igual ao fr: modos alternados `translate` ("Traduza para o chinês", só o português) e `order` (tradução + áudio + dica), com dica própria no modo `translate`. CSS `.reorder-target`/`.reorder-wrap-hint`/`.prompt-translation` copiado para `zh/index.html`.
+- Ondas 3 (família de opções) e 6 (conclusão) seguem sem decisão; testado visualmente só a unidade 3 (claro/escuro); as 18 unidades passam em teste automático de renderização.
