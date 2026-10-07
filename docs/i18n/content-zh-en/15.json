@@ -1,0 +1,169 @@
+{
+ "unit": 15,
+ "en": {
+  "title": "Invitations and abilities",
+  "goal": "Invite someone to do something, say what you know how to do or can do, and make polite requests.",
+  "lessons": {
+   "saber-conseguir": "Saying what you know how to do or can do",
+   "pedidos": "Making polite requests",
+   "convite-cinema": "Inviting someone to the movies",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "to want / to be thinking of doing something",
+   "to know how to (a learned skill)",
+   "can, to be able to (ability/permission in a situation)",
+   "please / to invite",
+   "to sit",
+   "all, both",
+   "also, too",
+   "to speak / to say",
+   "to come",
+   "movie theater / cinema"
+  ],
+  "phrases": [
+   {
+    "t": "I want to go see a movie."
+   },
+   {
+    "t": "Can you speak Chinese?"
+   },
+   {
+    "t": "Can you come tomorrow?"
+   },
+   {
+    "t": "Please, have a seat."
+   },
+   {
+    "t": "We all want to go."
+   },
+   {
+    "t": "I want to go too."
+   }
+  ],
+  "dialogue": {
+   "title": "Invitation to the movies",
+   "lines": [
+    "I want to go see a movie. Can you come?",
+    "I can! What time?",
+    "At 7 in the evening, at the movie theater.",
+    "Sounds good, I want to see that movie too!"
+   ]
+  },
+  "concepts": {
+   "hui-vs-neng": [
+    {
+     "title": "\"Huì\" or \"néng\"?",
+     "body": "<strong>Huì</strong> (会) is a learned skill — something you know how to do because you learned it. <strong>Néng</strong> (能) is ability or permission in a specific situation — it depends on your schedule or circumstances, not on skill. English uses \"can\" for both, but Chinese keeps them apart.",
+     "examples": [
+      "can you speak Chinese? (skill)",
+      "can you come tomorrow? (situation)"
+     ]
+    }
+   ],
+   "xiang-vs-yao": [
+    {
+     "title": "\"Xiǎng\" or \"yào\"?",
+     "body": "想 (xiǎng) expresses a softer wish to do something — closer to \"would like to\" or \"I'm thinking of\". 要 (which you saw in Unit 5) sounds more direct, like \"I want\", especially for requests.",
+     "examples": [
+      "I want to go see a movie (softer)",
+      "I want a cup of tea (direct request)"
+     ]
+    }
+   ],
+   "qing-please": [
+    {
+     "title": "请 (qǐng) — polite requests",
+     "body": "请 (qǐng) is like \"please\" when it comes before a request or invitation — a simple, polite way to soften a direct instruction.",
+     "examples": [
+      "please, have a seat"
+     ]
+    }
+   ],
+   "dou-all": [
+    {
+     "title": "都 (dōu) — \"all\"",
+     "body": "都 (dōu) means \"all\" or \"both\", but it always comes right before the verb (after the subject).",
+     "examples": [
+      "we all want to go"
+     ]
+    }
+   ],
+   "ye-also": [
+    {
+     "title": "也 (yě) — \"also\"",
+     "body": "也 (yě) means \"also\" or \"too\", and just like 都, it always comes before the verb, not at the end of the sentence the way \"too\" often does in English.",
+     "examples": [
+      "I want to go too"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "lessons.saber-conseguir",
+   "pt": "Dizer o que você sabe ou consegue fazer",
+   "en": "Saying what you know how to do or can do",
+   "conf": "media",
+   "why": "sabe/consegue = know how to / can (huì/néng)"
+  },
+  {
+   "path": "vocab[0]",
+   "pt": "querer / pensar em fazer algo",
+   "en": "to want / to be thinking of doing something",
+   "conf": "media",
+   "why": "glosa dupla; 想 também é 'to miss'/'to think', mas o PT só dá esses sentidos"
+  },
+  {
+   "path": "vocab[1]",
+   "pt": "saber fazer (habilidade aprendida)",
+   "en": "to know how to (a learned skill)",
+   "conf": "media",
+   "why": "várias traduções possíveis (can / know how to)"
+  },
+  {
+   "path": "vocab[2]",
+   "pt": "conseguir, poder (capacidade/permissão)",
+   "en": "can, to be able to (ability/permission in a situation)",
+   "conf": "media",
+   "why": "várias traduções possíveis"
+  },
+  {
+   "path": "concepts.hui-vs-neng[0].body",
+   "pt": "...habilidade aprendida... capacidade ou permissão...",
+   "en": "...English uses \"can\" for both, but Chinese keeps them apart.",
+   "conf": "media",
+   "why": "adaptado: acrescentei comparação com o inglês (can cobre ambos)"
+  },
+  {
+   "path": "concepts.xiang-vs-yao[0].body",
+   "pt": "\"gostaria de\" ou \"estou pensando em\"... \"quero\"",
+   "en": "\"would like to\" / \"I'm thinking of\" ... \"I want\"",
+   "conf": "media",
+   "why": "nuance de registro suave x direto"
+  },
+  {
+   "path": "concepts.dou-all[0].body",
+   "pt": "sempre vem antes do verbo, nunca depois do substantivo como em português",
+   "en": "it always comes right before the verb (after the subject)",
+   "conf": "media",
+   "why": "adaptado: comparação com o português retirada (sem equivalente claro em inglês)"
+  },
+  {
+   "path": "concepts.ye-also[0].body",
+   "pt": "nunca no final da frase como costuma ficar em português",
+   "en": "not at the end of the sentence the way \"too\" often does in English",
+   "conf": "media",
+   "why": "adaptado: comparação refeita com o inglês ('too' no fim)"
+  },
+  {
+   "path": "phrases[0]/dialogue[3]",
+   "pt": "Combinado",
+   "en": "Sounds good",
+   "conf": "media",
+   "why": "好的 tem várias traduções (OK / sounds good / deal)"
+  }
+ ]
+}

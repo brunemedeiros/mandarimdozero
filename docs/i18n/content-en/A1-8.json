@@ -1,0 +1,114 @@
+{
+ "unit": "A1-8",
+ "en": {
+  "title": "Places and directions",
+  "goal": "Ask for and give directions to a place in the city.",
+  "lessons": {
+   "lugares-na-cidade": "Places in the city",
+   "hospital-estacao-em-frente": "Hospital, station and straight ahead",
+   "direcoes": "Giving directions: left, right, near and far",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "the street",
+   "the square",
+   "the museum",
+   "the hospital",
+   "the (train) station",
+   "straight ahead",
+   "to the left",
+   "to the right",
+   "near",
+   "far"
+  ],
+  "phrases": [
+   {
+    "t": "Where is the station?",
+    "scenario": "You're lost and need to find the train station. What do you ask someone on the street?"
+   },
+   {
+    "t": "Turn left.",
+    "scenario": "You're giving someone directions and need to tell them to turn left. What do you say?"
+   },
+   {
+    "t": "It's straight ahead.",
+    "scenario": "Someone asks how to get to a place that's straight ahead. What do you answer?"
+   },
+   {
+    "t": "Is it far from here?",
+    "scenario": "You want to know whether the place you're looking for is far from where you are. What do you ask?"
+   },
+   {
+    "t": "The street is very quiet at night."
+   },
+   {
+    "t": "The square is in the city center."
+   },
+   {
+    "t": "The hospital is far from here."
+   }
+  ],
+  "dialogue": {
+   "title": "Asking for information",
+   "lines": [
+    "Excuse me, where is the museum?",
+    "Straight ahead, then to the right.",
+    "Is it far?",
+    "No, it's five minutes away.",
+    "Thank you very much!"
+   ]
+  },
+  "concepts": {
+   "ou-est-vs-il-y-a": [
+    {
+     "title": "\"Où est...?\" or \"Il y a...?\"",
+     "body": "Use <strong>où est...?</strong> when you already know the place exists and just want to know where it is (e.g. où est la gare? — where is the station?). Use <strong>il y a...?</strong> when you don't know whether the place exists nearby (e.g. il y a une pharmacie près d'ici? — is there a pharmacy near here?).",
+     "examples": []
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "This question is about the price of something.",
+    "whyNote": "Wrong — <strong>c'est loin d'ici ?</strong> asks about DISTANCE (loin = far), not price. For price you'd say \"c'est combien ?\"."
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[1]",
+   "pt": "a praça",
+   "en": "the square",
+   "conf": "media",
+   "why": "'la place' = town square / plaza; 'square' is the usual EN word"
+  },
+  {
+   "path": "vocab[6]",
+   "pt": "à esquerda",
+   "en": "to the left",
+   "conf": "media",
+   "why": "also 'on the left'; 'to the left' fits both turning and location"
+  },
+  {
+   "path": "vocab[5]",
+   "pt": "sempre em frente",
+   "en": "straight ahead",
+   "conf": "media",
+   "why": "also 'straight on' (EN-GB)"
+  },
+  {
+   "path": "dialogue.lines[1]",
+   "pt": "É sempre em frente, depois à direita.",
+   "en": "Straight ahead, then to the right.",
+   "conf": "media",
+   "why": "dropped 'It's' for natural spoken directions; 'It's straight ahead, then to the right' also works"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Não, é a cinco minutos.",
+   "en": "No, it's five minutes away.",
+   "conf": "media",
+   "why": "'à cinq minutes' = 5 minutes away (on foot implied); mode of travel not stated"
+  }
+ ]
+}

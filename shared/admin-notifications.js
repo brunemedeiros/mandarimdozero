@@ -30,27 +30,27 @@
 //   - languages/<lang>/app.js   (isAdminUser)
 
 const NOTIFICATION_TEMPLATE_EVENT_LABELS = {
-  xp_earned: '⭐ XP ganho',
-  achievement_unlocked: '🏅 Badge desbloqueado',
-  mission_completed: '🎯 Missão concluída',
-  streak_completed: '🔥 Sequência mantida',
-  featured_badge_reminder: '🏅 Lembrete de badge em destaque',
-  user_inactive_1: '👋 Reengajamento -- 1 dia sumida',
-  user_inactive_3: '👋 Reengajamento -- 3 dias sumida',
-  user_inactive_5: '👋 Reengajamento -- 5 dias sumida',
-  user_inactive_7: '👋 Reengajamento -- 7 dias sumida',
-  user_inactive_9: '👋 Reengajamento -- 9 dias sumida',
-  user_inactive_15: '👋 Reengajamento -- 15 dias sumida',
-  user_inactive_20: '👋 Reengajamento -- 20 dias sumida',
-  user_inactive_30: '👋 Reengajamento -- 30 dias sumida',
+  get xp_earned(){ return t('admin.notifications.event.xp_earned'); },
+  get achievement_unlocked(){ return t('admin.notifications.event.achievement_unlocked'); },
+  get mission_completed(){ return t('admin.notifications.event.mission_completed'); },
+  get streak_completed(){ return t('admin.notifications.event.streak_completed'); },
+  get featured_badge_reminder(){ return t('admin.notifications.event.featured_badge_reminder'); },
+  get user_inactive_1(){ return t('admin.notifications.event.user_inactive_1'); },
+  get user_inactive_3(){ return t('admin.notifications.event.user_inactive_3'); },
+  get user_inactive_5(){ return t('admin.notifications.event.user_inactive_5'); },
+  get user_inactive_7(){ return t('admin.notifications.event.user_inactive_7'); },
+  get user_inactive_9(){ return t('admin.notifications.event.user_inactive_9'); },
+  get user_inactive_15(){ return t('admin.notifications.event.user_inactive_15'); },
+  get user_inactive_20(){ return t('admin.notifications.event.user_inactive_20'); },
+  get user_inactive_30(){ return t('admin.notifications.event.user_inactive_30'); },
 };
 
 const NOTIFICATION_TEMPLATE_PLACEHOLDER_HINTS = {
-  xp_earned: '{{amount}} -- quantidade de XP ganho',
-  achievement_unlocked: '{{badge_name}} / {{badge_icon}} -- nome e emoji do badge',
-  mission_completed: '{{mission_label}} / {{mission_icon}} -- texto e ícone da Missão do dia concluída',
-  streak_completed: '{{days}} -- dias de sequência',
-  featured_badge_reminder: '(sem placeholders)',
+  get xp_earned(){ return '{{amount}} -- ' + t('admin.notifications.hint.xp_earned'); },
+  get achievement_unlocked(){ return '{{badge_name}} / {{badge_icon}} -- ' + t('admin.notifications.hint.achievement_unlocked'); },
+  get mission_completed(){ return '{{mission_label}} / {{mission_icon}} -- ' + t('admin.notifications.hint.mission_completed'); },
+  get streak_completed(){ return '{{days}} -- ' + t('admin.notifications.hint.streak_completed'); },
+  get featured_badge_reminder(){ return t('admin.notifications.hint.none'); },
 };
 
 function notificationTemplateEventLabel(eventType){
@@ -69,8 +69,8 @@ async function fetchAllNotificationTemplates(){
 
 async function createNotificationTemplate({ eventType, languageAppKey, channel, title, body, icon }){
   const cleanEventType = String(eventType || '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
-  if (cleanEventType.length < 3) return { ok: false, error: 'Dê um identificador de evento válido (ex: xp_earned).' };
-  if (!body?.trim()) return { ok: false, error: 'Escreva o texto da notificação.' };
+  if (cleanEventType.length < 3) return { ok: false, error: t('admin.notifications.err.eventId') };
+  if (!body?.trim()) return { ok: false, error: t('admin.notifications.err.bodyRequired') };
   const cleanChannel = channel === 'email' ? 'email' : 'in_app';
   const { data, error } = await supabaseClient
     .from('notification_templates')
@@ -86,15 +86,15 @@ async function createNotificationTemplate({ eventType, languageAppKey, channel, 
     .select()
     .single();
   if (error){
-    if (error.code === '23505') return { ok: false, error: 'Já existe uma variante idêntica (mesmo evento/canal/idioma/texto).' };
+    if (error.code === '23505') return { ok: false, error: t('admin.notifications.err.duplicate') };
     console.error('Erro ao criar template de notificação:', error);
-    return { ok: false, error: 'Não foi possível criar agora.' };
+    return { ok: false, error: t('admin.notifications.err.createFailed') };
   }
   return { ok: true, template: data };
 }
 
 async function updateNotificationTemplate(id, { title, body, icon }){
-  if (!body?.trim()) return { ok: false, error: 'Escreva o texto da notificação.' };
+  if (!body?.trim()) return { ok: false, error: t('admin.notifications.err.bodyRequired') };
   const { data, error } = await supabaseClient
     .from('notification_templates')
     .update({ title: title?.trim() || null, body: body.trim().slice(0, 300), icon: icon?.trim().slice(0, 8) || null })
@@ -102,9 +102,9 @@ async function updateNotificationTemplate(id, { title, body, icon }){
     .select()
     .single();
   if (error){
-    if (error.code === '23505') return { ok: false, error: 'Já existe uma variante idêntica (mesmo evento/canal/idioma/texto).' };
+    if (error.code === '23505') return { ok: false, error: t('admin.notifications.err.duplicate') };
     console.error('Erro ao editar template de notificação:', error);
-    return { ok: false, error: 'Não foi possível salvar agora.' };
+    return { ok: false, error: t('teacherMaterials.err.saveFailed') };
   }
   return { ok: true, template: data };
 }
@@ -153,7 +153,7 @@ async function renderAdminNotificationsView(){
   const wrap = document.getElementById('admin-notifications-content');
   if (!wrap) return;
   if (!isAdminUser()){
-    wrap.innerHTML = `<p class="profile-empty-note">Esta tela é só pra administração da plataforma.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
   wrap.innerHTML = loadingHTML();
@@ -165,23 +165,23 @@ async function renderAdminNotificationsView(){
   // Agrupa por evento -- é assim que a autora pensa nisso ("as variantes do
   // XP", "as do badge"), não uma tabela crua linha a linha.
   const byEvent = new Map();
-  templates.forEach(t => {
-    if (!byEvent.has(t.event_type)) byEvent.set(t.event_type, []);
-    byEvent.get(t.event_type).push(t);
+  templates.forEach(tpl => {
+    if (!byEvent.has(tpl.event_type)) byEvent.set(tpl.event_type, []);
+    byEvent.get(tpl.event_type).push(tpl);
   });
 
   const groupsHTML = byEvent.size ? [...byEvent.entries()].map(([eventType, variants]) => {
     const hint = NOTIFICATION_TEMPLATE_PLACEHOLDER_HINTS[eventType];
-    const rowsHTML = variants.map(t => `
-      <div class="admin-badge-row" data-template-id="${t.id}">
-        <span class="admin-badge-icon">${t.icon || '🔔'}</span>
+    const rowsHTML = variants.map(tpl => `
+      <div class="admin-badge-row" data-template-id="${tpl.id}">
+        <span class="admin-badge-icon">${tpl.icon || '🔔'}</span>
         <div class="admin-badge-info">
-          <div class="admin-badge-name">${t.channel === 'email' ? '📧' : '📱'} ${t.language_app_key === 'frances' ? '🇫🇷' : '🇨🇳'} ${t.title ? escapeHTML(t.title) + ' -- ' : ''}${escapeHTML(t.body)}</div>
-          <div class="admin-badge-desc">${t.channel === 'email' ? 'e-mail' : 'no app'} · ${t.active ? 'ativa' : 'desativada'}</div>
+          <div class="admin-badge-name">${tpl.channel === 'email' ? '📧' : '📱'} ${tpl.language_app_key === 'frances' ? '🇫🇷' : '🇨🇳'} ${tpl.title ? escapeHTML(tpl.title) + ' -- ' : ''}${escapeHTML(tpl.body)}</div>
+          <div class="admin-badge-desc">${tpl.channel === 'email' ? t('admin.notifications.channel.emailLower') : t('admin.notifications.channel.inAppLower')} · ${tpl.active ? t('admin.notifications.status.active') : t('admin.notifications.status.inactive')}</div>
         </div>
-        <button class="admin-badge-edit-btn" data-template-toggle="${t.id}" data-template-active="${t.active}" title="${t.active ? 'Desativar' : 'Ativar'}">${t.active ? '👁️' : '🚫'}</button>
-        <button class="admin-badge-edit-btn" data-template-edit="${t.id}" title="Editar">✏️</button>
-        <button class="admin-badge-delete-btn" data-template-delete="${t.id}" title="Excluir">🗑️</button>
+        <button class="admin-badge-edit-btn" data-template-toggle="${tpl.id}" data-template-active="${tpl.active}" title="${tpl.active ? t('admin.notifications.btn.deactivate') : t('admin.notifications.btn.activate')}">${tpl.active ? '👁️' : '🚫'}</button>
+        <button class="admin-badge-edit-btn" data-template-edit="${tpl.id}" title="${t('admin.notifications.btn.edit')}">✏️</button>
+        <button class="admin-badge-delete-btn" data-template-delete="${tpl.id}" title="${t('admin.notifications.btn.delete')}">🗑️</button>
       </div>
     `).join('');
     return `
@@ -191,48 +191,48 @@ async function renderAdminNotificationsView(){
         ${rowsHTML}
       </div>
     `;
-  }).join('') : `<p class="profile-empty-note">Nenhuma variante criada ainda.</p>`;
+  }).join('') : `<p class="profile-empty-note">${t('admin.notifications.empty')}</p>`;
 
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">⭐ Regra de "XP ganho"</div>
-      <p class="profile-edit-hint">Controla quando a notificação de XP dispara -- não o texto dela (isso fica nas variantes abaixo). Revisões de palavras já bem sabidas dão XP bem baixo de propósito; abaixo do mínimo, a notificação nem é criada.</p>
+      <div class="section-label">${t('admin.notifications.rule.title')}</div>
+      <p class="profile-edit-hint">${t('admin.notifications.rule.hint')}</p>
       <form id="admin-gamificacao-rule-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-rule-min-xp">XP mínimo pra notificar</label>
-        <input type="number" id="admin-rule-min-xp" class="profile-edit-input" min="0" max="999" value="${gamificacaoRule?.min_xp_amount ?? ''}" placeholder="ex: 5 (0 ou vazio = sem piso)">
-        <label class="profile-edit-label" for="admin-rule-cooldown">Intervalo mínimo entre notificações (minutos)</label>
+        <label class="profile-edit-label" for="admin-rule-min-xp">${t('admin.notifications.rule.minXp')}</label>
+        <input type="number" id="admin-rule-min-xp" class="profile-edit-input" min="0" max="999" value="${gamificacaoRule?.min_xp_amount ?? ''}" placeholder="${t('admin.notifications.rule.minXpPh')}">
+        <label class="profile-edit-label" for="admin-rule-cooldown">${t('admin.notifications.rule.cooldown')}</label>
         <input type="number" id="admin-rule-cooldown" class="profile-edit-input" min="0" max="1440" value="${gamificacaoRule?.cooldown_minutes ?? 15}">
-        <label class="profile-edit-label" for="admin-rule-daily-cap">Máximo por dia</label>
+        <label class="profile-edit-label" for="admin-rule-daily-cap">${t('admin.notifications.rule.dailyCap')}</label>
         <input type="number" id="admin-rule-daily-cap" class="profile-edit-input" min="0" max="99" value="${gamificacaoRule?.daily_cap ?? 5}">
         <p class="profile-edit-error" id="admin-gamificacao-rule-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-gamificacao-rule-save-btn">Salvar regra</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-gamificacao-rule-save-btn">${t('admin.notifications.rule.save')}</button>
       </form>
     </div>
     <div class="profile-section">
-      <div class="section-label">Nova variante</div>
+      <div class="section-label">${t('admin.notifications.new.title')}</div>
       <form id="admin-create-template-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-template-event">Evento</label>
-        <input type="text" id="admin-template-event" class="profile-edit-input" list="admin-template-event-datalist" placeholder="ex: xp_earned">
+        <label class="profile-edit-label" for="admin-template-event">${t('admin.notifications.new.event')}</label>
+        <input type="text" id="admin-template-event" class="profile-edit-input" list="admin-template-event-datalist" placeholder="${t('admin.notifications.new.eventPh')}">
         <datalist id="admin-template-event-datalist">${eventOptionsHTML}</datalist>
-        <label class="profile-edit-label" for="admin-template-lang">Idioma do app</label>
+        <label class="profile-edit-label" for="admin-template-lang">${t('admin.notifications.new.lang')}</label>
         <select id="admin-template-lang" class="profile-edit-input">
-          <option value="frances">🇫🇷 Francês</option>
-          <option value="mandarim">🇨🇳 Chinês</option>
+          <option value="frances">${t('admin.notifications.new.langFr')}</option>
+          <option value="mandarim">${t('admin.notifications.new.langZh')}</option>
         </select>
-        <label class="profile-edit-label" for="admin-template-channel">Canal</label>
+        <label class="profile-edit-label" for="admin-template-channel">${t('admin.notifications.new.channel')}</label>
         <select id="admin-template-channel" class="profile-edit-input">
-          <option value="in_app">📱 No app</option>
-          <option value="email">📧 E-mail</option>
+          <option value="in_app">${t('admin.notifications.new.channelInApp')}</option>
+          <option value="email">${t('admin.notifications.new.channelEmail')}</option>
         </select>
-        <p class="profile-edit-hint">Push não aparece aqui -- ele reaproveita o texto da variante "No app" do mesmo evento, sem pool próprio. No e-mail, o título vira o assunto. Placeholders tipo {{amount}}/{{days}} são substituídos pelo dado real do evento -- veja a dica de cada evento acima.</p>
-        <label class="profile-edit-label" for="admin-template-title">Título (opcional)</label>
-        <input type="text" id="admin-template-title" class="profile-edit-input" maxlength="60" placeholder="ex: Nova conquista!">
-        <label class="profile-edit-label" for="admin-template-icon">Emoji (opcional)</label>
+        <p class="profile-edit-hint">${t('admin.notifications.new.hint')}</p>
+        <label class="profile-edit-label" for="admin-template-title">${t('admin.notifications.new.titleLabel')}</label>
+        <input type="text" id="admin-template-title" class="profile-edit-input" maxlength="60" placeholder="${t('admin.notifications.new.titlePh')}">
+        <label class="profile-edit-label" for="admin-template-icon">${t('admin.notifications.new.icon')}</label>
         <input type="text" id="admin-template-icon" class="profile-edit-input" maxlength="8" placeholder="🔔">
-        <label class="profile-edit-label" for="admin-template-body">Texto</label>
-        <textarea id="admin-template-body" class="profile-edit-textarea" maxlength="300" rows="2" placeholder="Ei, você esqueceu de mim? 🥺"></textarea>
+        <label class="profile-edit-label" for="admin-template-body">${t('admin.notifications.new.body')}</label>
+        <textarea id="admin-template-body" class="profile-edit-textarea" maxlength="300" rows="2" placeholder="${t('admin.notifications.new.bodyPh')}"></textarea>
         <p class="profile-edit-error" id="admin-create-template-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-template-btn">Criar variante</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-create-template-btn">${t('admin.notifications.new.create')}</button>
       </form>
     </div>
     ${groupsHTML}
@@ -251,8 +251,8 @@ async function renderAdminNotificationsView(){
       dailyCap: parseInt(document.getElementById('admin-rule-daily-cap').value, 10) || 0,
     });
     btn.disabled = false;
-    if (!result.ok){ errorEl.textContent = 'Não foi possível salvar agora.'; return; }
-    showToast('✓ Regra salva.');
+    if (!result.ok){ errorEl.textContent = t('teacherMaterials.err.saveFailed'); return; }
+    showToast(t('admin.notifications.toast.ruleSaved'));
   });
 
   document.getElementById('admin-create-template-form').addEventListener('submit', async (e) => {
@@ -271,7 +271,7 @@ async function renderAdminNotificationsView(){
     });
     btn.disabled = false;
     if (!result.ok){ errorEl.textContent = result.error; return; }
-    showToast('✓ Variante criada.');
+    showToast(t('admin.notifications.toast.created'));
     renderAdminNotificationsView();
   });
 
@@ -284,7 +284,7 @@ async function renderAdminNotificationsView(){
 
   wrap.querySelectorAll('[data-template-delete]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Excluir esta variante de notificação?')) return;
+      if (!confirm(t('admin.notifications.confirm.delete'))) return;
       await deleteNotificationTemplate(btn.dataset.templateDelete);
       renderAdminNotificationsView();
     });
@@ -336,7 +336,7 @@ function wireEditNotificationTemplateModal(){
     btn.disabled = false;
     if (!result.ok){ errorEl.textContent = result.error; return; }
     closeEditNotificationTemplateModal();
-    showToast('✓ Variante atualizada.');
+    showToast(t('admin.notifications.toast.updated'));
     renderAdminNotificationsView();
   });
 }

@@ -44,15 +44,15 @@
 // existir (ex: português), um novo valor entra aqui, nunca inferido a
 // partir de APP_KEY/direção (isso seria recriar frontIsTargetLanguage).
 const FIELD_LANG_OPTIONS = [
-  { value: 'fr', label: 'Francês' },
-  { value: 'zh', label: 'Mandarim (chinês)' },
-  { value: 'zh-pinyin', label: 'Pinyin' },
-  { value: 'pt-BR', label: 'Português' },
+  { value: 'fr', labelKey: 'fieldEditor.lang.fr' },
+  { value: 'zh', labelKey: 'fieldEditor.lang.zh' },
+  { value: 'zh-pinyin', labelKey: 'fieldEditor.lang.zhPinyin' },
+  { value: 'pt-BR', labelKey: 'fieldEditor.lang.ptBR' },
 ];
 
 function fieldLangLabel(lang){
   const found = FIELD_LANG_OPTIONS.find(o => o.value === lang);
-  return found ? found.label : (lang ? lang : '(idioma não definido)');
+  return found ? t(found.labelKey) : (lang ? lang : t('fieldEditor.lang.undefinedLabel'));
 }
 
 // Fase 7b (ver CLAUDE.md) -- indicador textual reflete o `type` canônico
@@ -65,11 +65,11 @@ function fieldLangLabel(lang){
 // abaixo) como linha de status dentro do editor de áudio de verdade.
 function fieldAudioIndicatorText(audio){
   if (!audio) return null;
-  if (audio.type === 'tts') return audio.generatedUrl ? '🎧 áudio TTS gerado' : '🎧 TTS configurado (áudio ainda não gerado)';
-  if (audio.type === 'recording') return audio.url ? '🎙️ gravação vinculada' : '🎙️ gravação configurada (ainda sem arquivo)';
-  if (audio.type === 'url') return '🎧 áudio (link externo)';
-  if (audio.type === 'upload') return '🎧 áudio (upload)';
-  return '🎧 tem áudio vinculado';
+  if (audio.type === 'tts') return audio.generatedUrl ? t('fieldEditor.audio.status.ttsDone') : t('fieldEditor.audio.status.ttsPending');
+  if (audio.type === 'recording') return audio.url ? t('fieldEditor.audio.status.recDone') : t('fieldEditor.audio.status.recPending');
+  if (audio.type === 'url') return t('fieldEditor.audio.status.url');
+  if (audio.type === 'upload') return t('fieldEditor.audio.status.upload');
+  return t('fieldEditor.audio.status.generic');
 }
 
 // ---------- Editor de áudio por Field -- Fase 7e (ver CLAUDE.md) ----------
@@ -105,11 +105,11 @@ function fieldAudioIndicatorText(audio){
 // shared/flashcard-model.js) e grava `{type:'url', url}` direto, mediante
 // clique explícito em "Usar este link" (nunca ao digitar/colar sozinho).
 const FIELD_AUDIO_ORIGIN_UI_META = [
-  { value: 'none', label: 'Sem áudio' },
-  { value: 'url', label: 'URL externa' },
-  { value: 'upload', label: 'Arquivo (upload)' },
-  { value: 'tts', label: 'Texto para voz' },
-  { value: 'recording', label: 'Gravação' },
+  { value: 'none', labelKey: 'fieldEditor.audio.origin.none' },
+  { value: 'url', labelKey: 'fieldEditor.audio.origin.url' },
+  { value: 'upload', labelKey: 'fieldEditor.audio.origin.upload' },
+  { value: 'tts', labelKey: 'fieldEditor.audio.origin.tts' },
+  { value: 'recording', labelKey: 'fieldEditor.audio.origin.recording' },
 ];
 
 // ---------- CONSOLIDAÇÃO-4 (ver CLAUDE.md) -- UX de áudio em 2 passos ----------
@@ -126,10 +126,10 @@ const FIELD_AUDIO_ORIGIN_UI_META = [
 // (cardTypeUIMetaForEntitlement, shared/admin-flashcards.js): esconder
 // a opção não-permitida da lista, nunca mostrá-la cinza/travada.
 const FIELD_AUDIO_METHOD_UI_META = [
-  { value: 'upload', label: '📁 Enviar arquivo' },
-  { value: 'url', label: '🔗 Usar link' },
-  { value: 'tts', label: '🔊 Texto para voz' },
-  { value: 'recording', label: '🎙️ Gravar áudio' },
+  { value: 'upload', labelKey: 'fieldEditor.audio.method.upload' },
+  { value: 'url', labelKey: 'fieldEditor.audio.method.url' },
+  { value: 'tts', labelKey: 'fieldEditor.audio.method.tts' },
+  { value: 'recording', labelKey: 'fieldEditor.audio.method.recording' },
 ];
 
 // Locale de síntese (audio.language) -- eixo DELIBERADAMENTE independente
@@ -137,10 +137,10 @@ const FIELD_AUDIO_METHOD_UI_META = [
 // contrato da Fase 7b em shared/flashcard-model.js) -- só usado aqui pra
 // SUGERIR um valor inicial no `<select>`, nunca gravado sozinho.
 const TTS_LANGUAGE_UI_OPTIONS = [
-  { value: '', label: '-- escolha o idioma --' },
-  { value: 'fr-FR', label: 'Francês (fr-FR)' },
-  { value: 'zh-CN', label: 'Mandarim (zh-CN)' },
-  { value: 'pt-BR', label: 'Português (pt-BR)' },
+  { value: '', labelKey: 'fieldEditor.audio.ttsLang.choose' },
+  { value: 'fr-FR', labelKey: 'fieldEditor.audio.ttsLang.fr' },
+  { value: 'zh-CN', labelKey: 'fieldEditor.audio.ttsLang.zh' },
+  { value: 'pt-BR', labelKey: 'fieldEditor.audio.ttsLang.pt' },
 ];
 function suggestedTtsLanguageForFieldLang(lang){
   if (lang === 'fr') return 'fr-FR';
@@ -149,9 +149,9 @@ function suggestedTtsLanguageForFieldLang(lang){
   return '';
 }
 const TTS_RATE_UI_OPTIONS = [
-  { value: '0.8', label: 'Lento' },
-  { value: '1', label: 'Normal' },
-  { value: '1.2', label: 'Rápido' },
+  { value: '0.8', labelKey: 'fieldEditor.audio.rate.slow' },
+  { value: '1', labelKey: 'fieldEditor.audio.rate.normal' },
+  { value: '1.2', labelKey: 'fieldEditor.audio.rate.fast' },
 ];
 
 // ---------- Fase 7g (gravação de áudio por Field, ver CLAUDE.md) ----------
@@ -163,13 +163,13 @@ const TTS_RATE_UI_OPTIONS = [
 // cai no mesmo texto de "idle".
 function fieldAudioRecordingStatusLabel(recState){
   const status = (recState && recState.status) || 'idle';
-  if (status === 'requesting_permission') return 'Aguardando permissão do microfone...';
-  if (status === 'recording') return '🔴 Gravando...';
-  if (status === 'stopping') return 'Finalizando gravação...';
-  if (status === 'uploading') return 'Enviando gravação...';
-  if (status === 'ready') return 'Gravação salva.';
-  if (status === 'error') return (recState && recState.errorMessage) || 'Não foi possível gravar.';
-  return 'Clique em "🎙️ Gravar" para começar.';
+  if (status === 'requesting_permission') return t('fieldEditor.audio.rec.requesting');
+  if (status === 'recording') return t('fieldEditor.audio.rec.recording');
+  if (status === 'stopping') return t('fieldEditor.audio.rec.stopping');
+  if (status === 'uploading') return t('fieldEditor.audio.rec.uploading');
+  if (status === 'ready') return t('fieldEditor.audio.rec.ready');
+  if (status === 'error') return (recState && recState.errorMessage) || t('fieldEditor.audio.rec.error');
+  return t('fieldEditor.audio.rec.idle');
 }
 
 // ---------- Fase 7h.2 (fechamento/auditoria da UI de áudio por Field, ver
@@ -268,7 +268,7 @@ function renderFieldAudioBlockHTML(field, opts){
   const ttsLanguage = (ttsAudio && ttsAudio.language) || suggestedTtsLanguageForFieldLang(field.lang);
   const ttsVoiceId = (ttsAudio && ttsAudio.voiceId) || '';
   const ttsRate = (ttsAudio && ttsAudio.rate !== null && ttsAudio.rate !== undefined) ? String(ttsAudio.rate) : '1';
-  const generateLabel = (ttsAudio && ttsAudio.generatedUrl) ? '🔊 Regenerar áudio' : '🔊 Gerar áudio';
+  const generateLabel = (ttsAudio && ttsAudio.generatedUrl) ? t('fieldEditor.audio.regenerate') : t('fieldEditor.audio.generate');
 
   const showUrl = originValue === 'url';
   const showUpload = originValue === 'upload' || originValue === 'none';
@@ -279,40 +279,40 @@ function renderFieldAudioBlockHTML(field, opts){
 
   return `
     <div class="field-audio-block" data-field-audio-field="${field.id}" data-field-audio-ui-state="summary" style="margin-top:6px; padding-top:6px; border-top:1px dashed var(--paper-line);">
-      <span class="section-label" style="margin:0 0 6px; display:block;">Áudio</span>
+      <span class="section-label" style="margin:0 0 6px; display:block;">${t('fieldEditor.audio.title')}</span>
 
       <div data-field-audio-summary="${field.id}">
         ${resolvedUrl ? `<audio controls preload="none" style="width:100%; margin-bottom:6px;" src="${escapeHTML(resolvedUrl)}"></audio>` : ''}
-        <p class="profile-edit-hint" style="margin:0 0 8px;">${escapeHTML(statusText || 'Sem áudio.')}</p>
+        <p class="profile-edit-hint" style="margin:0 0 8px;">${escapeHTML(statusText || t('fieldEditor.audio.noAudio'))}</p>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           ${audio ? `
-            <button type="button" class="btn btn-secondary" data-field-audio-replace="${field.id}">Substituir</button>
-            <button type="button" class="admin-select-link" data-field-audio-remove="${field.id}">🗑 Remover</button>
+            <button type="button" class="btn btn-secondary" data-field-audio-replace="${field.id}">${t('fieldEditor.audio.replace')}</button>
+            <button type="button" class="admin-select-link" data-field-audio-remove="${field.id}">${t('fieldEditor.audio.remove')}</button>
           ` : `
-            <button type="button" class="btn btn-secondary" data-field-audio-add="${field.id}">+ Adicionar áudio</button>
+            <button type="button" class="btn btn-secondary" data-field-audio-add="${field.id}">${t('fieldEditor.audio.add')}</button>
           `}
         </div>
       </div>
 
       <div data-field-audio-picker="${field.id}" style="display:none;">
-        <p class="profile-edit-hint" style="margin:0 0 6px;">Como você quer adicionar o áudio?</p>
+        <p class="profile-edit-hint" style="margin:0 0 6px;">${t('fieldEditor.audio.pickerQuestion')}</p>
         <div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
-          ${pickableMethods.map(m => `<button type="button" class="btn btn-secondary" style="text-align:left;" data-field-audio-pick="${m.value}">${m.label}</button>`).join('')}
+          ${pickableMethods.map(m => `<button type="button" class="btn btn-secondary" style="text-align:left;" data-field-audio-pick="${m.value}">${t(m.labelKey)}</button>`).join('')}
         </div>
-        <button type="button" class="admin-select-link" data-field-audio-picker-cancel="${field.id}" style="margin-top:8px;">Cancelar</button>
+        <button type="button" class="admin-select-link" data-field-audio-picker-cancel="${field.id}" style="margin-top:8px;">${t('fieldEditor.audio.cancel')}</button>
       </div>
 
       <select id="${namePrefix}-audio-origin-${field.id}" class="profile-edit-input" data-field-audio-origin="${field.id}" style="display:none;" aria-hidden="true" tabindex="-1">
-        ${originMeta.map(o => `<option value="${o.value}" ${originValue === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+        ${originMeta.map(o => `<option value="${o.value}" ${originValue === o.value ? 'selected' : ''}>${t(o.labelKey)}</option>`).join('')}
       </select>
 
       <div data-field-audio-method-panel="${field.id}" style="display:none;">
-        <button type="button" class="admin-select-link" data-field-audio-panel-back="${field.id}" style="margin-bottom:8px;">← Voltar</button>
+        <button type="button" class="admin-select-link" data-field-audio-panel-back="${field.id}" style="margin-bottom:8px;">${t('fieldEditor.audio.back')}</button>
 
         <div data-field-audio-panel-url="${field.id}" style="${showUrl ? '' : 'display:none;'}">
-          <label class="profile-edit-label" for="${namePrefix}-audio-url-${field.id}">Link do áudio (https://...)</label>
-          <input type="url" id="${namePrefix}-audio-url-${field.id}" class="profile-edit-input" placeholder="https://exemplo.com/audio.mp3" value="${escapeHTML((urlAudio && urlAudio.url) || '')}" data-field-audio-url-input="${field.id}">
-          <button type="button" class="btn btn-secondary" style="margin-top:6px;" data-field-audio-url-apply="${field.id}">🔗 Usar este link</button>
+          <label class="profile-edit-label" for="${namePrefix}-audio-url-${field.id}">${t('fieldEditor.audio.urlLabel')}</label>
+          <input type="url" id="${namePrefix}-audio-url-${field.id}" class="profile-edit-input" placeholder="${t('fieldEditor.audio.urlPlaceholder')}" value="${escapeHTML((urlAudio && urlAudio.url) || '')}" data-field-audio-url-input="${field.id}">
+          <button type="button" class="btn btn-secondary" style="margin-top:6px;" data-field-audio-url-apply="${field.id}">${t('fieldEditor.audio.urlApply')}</button>
         </div>
 
         <div data-field-audio-panel-upload="${field.id}" style="${showUpload ? '' : 'display:none;'}">
@@ -322,30 +322,30 @@ function renderFieldAudioBlockHTML(field, opts){
 
         <div data-field-audio-panel-tts="${field.id}" style="${showTts ? '' : 'display:none;'}">
           ${canGenerate ? `
-            <label class="profile-edit-label" for="${namePrefix}-audio-tts-text-${field.id}">Texto a sintetizar</label>
+            <label class="profile-edit-label" for="${namePrefix}-audio-tts-text-${field.id}">${t('fieldEditor.audio.ttsText')}</label>
             <textarea id="${namePrefix}-audio-tts-text-${field.id}" class="profile-edit-input profile-edit-textarea" rows="2" data-field-audio-tts-text="${field.id}">${escapeHTML(ttsText)}</textarea>
-            <label class="profile-edit-label" for="${namePrefix}-audio-tts-lang-${field.id}">Idioma da síntese</label>
+            <label class="profile-edit-label" for="${namePrefix}-audio-tts-lang-${field.id}">${t('fieldEditor.audio.ttsLangLabel')}</label>
             <select id="${namePrefix}-audio-tts-lang-${field.id}" class="profile-edit-input" data-field-audio-tts-lang="${field.id}">
-              ${TTS_LANGUAGE_UI_OPTIONS.map(o => `<option value="${o.value}" ${ttsLanguage === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+              ${TTS_LANGUAGE_UI_OPTIONS.map(o => `<option value="${o.value}" ${ttsLanguage === o.value ? 'selected' : ''}>${t(o.labelKey)}</option>`).join('')}
             </select>
-            <label class="profile-edit-label" for="${namePrefix}-audio-tts-voice-${field.id}">Voz (opcional)</label>
-            <input type="text" id="${namePrefix}-audio-tts-voice-${field.id}" class="profile-edit-input" placeholder="em branco = voz padrão (Chirp 3 HD)" value="${escapeHTML(ttsVoiceId)}" data-field-audio-tts-voice="${field.id}">
-            <label class="profile-edit-label" for="${namePrefix}-audio-tts-rate-${field.id}">Velocidade</label>
+            <label class="profile-edit-label" for="${namePrefix}-audio-tts-voice-${field.id}">${t('fieldEditor.audio.ttsVoice')}</label>
+            <input type="text" id="${namePrefix}-audio-tts-voice-${field.id}" class="profile-edit-input" placeholder="${t('fieldEditor.audio.ttsVoicePlaceholder')}" value="${escapeHTML(ttsVoiceId)}" data-field-audio-tts-voice="${field.id}">
+            <label class="profile-edit-label" for="${namePrefix}-audio-tts-rate-${field.id}">${t('fieldEditor.audio.ttsRate')}</label>
             <select id="${namePrefix}-audio-tts-rate-${field.id}" class="profile-edit-input" data-field-audio-tts-rate="${field.id}">
-              ${TTS_RATE_UI_OPTIONS.map(o => `<option value="${o.value}" ${ttsRate === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+              ${TTS_RATE_UI_OPTIONS.map(o => `<option value="${o.value}" ${ttsRate === o.value ? 'selected' : ''}>${t(o.labelKey)}</option>`).join('')}
             </select>
             <button type="button" class="btn btn-secondary" style="margin-top:6px;" data-field-audio-tts-generate="${field.id}">${generateLabel}</button>
             <p class="profile-edit-field-error" data-field-audio-tts-stale="${field.id}" style="margin:4px 0 0; display:none;"></p>
             <p class="profile-edit-hint" data-field-audio-tts-msg="${field.id}" style="margin:4px 0 0;"></p>
-          ` : `<p class="profile-edit-hint">Salve o cartão primeiro para poder gerar áudio por texto.</p>`}
+          ` : `<p class="profile-edit-hint">${t('fieldEditor.audio.saveFirst')}</p>`}
         </div>
 
         <div data-field-audio-panel-recording="${field.id}" style="${showRecording ? '' : 'display:none;'}">
           <p class="profile-edit-hint" data-field-audio-record-status="${field.id}" style="margin:0 0 6px;">${escapeHTML(fieldAudioRecordingStatusLabel(null))}</p>
-          <button type="button" class="btn btn-secondary" data-field-audio-record-start="${field.id}">${recordingAudio ? '🎙️ Regravar' : '🎙️ Gravar'}</button>
-          <button type="button" class="btn btn-secondary" data-field-audio-record-stop="${field.id}" style="display:none;">⏹ Parar</button>
-          <button type="button" class="admin-select-link" data-field-audio-record-cancel="${field.id}" style="display:none;">Cancelar</button>
-          ${recordingAudio && recordingAudio.durationMs != null ? `<p class="profile-edit-hint" style="margin:4px 0 0;">Duração: ${Math.round(recordingAudio.durationMs / 1000)}s</p>` : ''}
+          <button type="button" class="btn btn-secondary" data-field-audio-record-start="${field.id}">${recordingAudio ? t('fieldEditor.audio.rerecord') : t('fieldEditor.audio.record')}</button>
+          <button type="button" class="btn btn-secondary" data-field-audio-record-stop="${field.id}" style="display:none;">${t('fieldEditor.audio.stop')}</button>
+          <button type="button" class="admin-select-link" data-field-audio-record-cancel="${field.id}" style="display:none;">${t('fieldEditor.audio.cancel')}</button>
+          ${recordingAudio && recordingAudio.durationMs != null ? `<p class="profile-edit-hint" style="margin:4px 0 0;">${t('fieldEditor.audio.duration', { s: Math.round(recordingAudio.durationMs / 1000) })}</p>` : ''}
         </div>
       </div>
 
@@ -479,7 +479,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       if (errorEl) errorEl.textContent = '';
       const v = (typeof validateFieldAudioUrl === 'function')
         ? validateFieldAudioUrl(urlInput.value)
-        : { ok: false, error: 'Validação de URL não está disponível nesta tela.' };
+        : { ok: false, error: t('fieldEditor.audio.err.urlValidatorMissing') };
       if (!v.ok){
         if (errorEl) errorEl.textContent = v.error;
         return;
@@ -508,7 +508,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
         }
       }
       if (typeof opts.uploadFn !== 'function'){
-        if (errorEl) errorEl.textContent = 'Upload de áudio não está disponível nesta tela.';
+        if (errorEl) errorEl.textContent = t('fieldEditor.audio.err.uploadUnavailable');
         return;
       }
       // Fase 7h.2 -- captura a "geração" desta tentativa ANTES de subir de
@@ -519,7 +519,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       // descartado ao voltar, nunca sobrescreve um field.audio mais recente.
       const myGeneration = beginAudioOp();
       fileInput.disabled = true;
-      if (uploadStatusEl) uploadStatusEl.textContent = 'Enviando áudio...';
+      if (uploadStatusEl) uploadStatusEl.textContent = t('fieldEditor.audio.uploading');
       const up = await opts.uploadFn(file, 'audio', fieldId);
       // Seção 8 (relatório da fase) -- guarda contra o container ter sido
       // removido do DOM enquanto o upload estava em voo (ex: a professora
@@ -530,7 +530,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       fileInput.disabled = false;
       fileInput.value = '';
       if (!up.ok){
-        if (errorEl) errorEl.textContent = up.error || 'Não foi possível enviar o áudio agora.';
+        if (errorEl) errorEl.textContent = up.error || t('fieldEditor.audio.err.uploadFailed');
         if (uploadStatusEl) uploadStatusEl.textContent = '';
         return; // Seção 2/9 -- upload falhou: o áudio anterior (se havia) permanece intacto, nada é sobrescrito.
       }
@@ -547,7 +547,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       if (myGeneration !== currentFieldAudioOpGeneration(fieldId)){
         // Outra origem já assumiu field.audio enquanto este upload estava
         // em voo (Fase 7h.2) -- descarta silenciosamente, nunca sobrescreve.
-        if (uploadStatusEl) uploadStatusEl.textContent = 'Outra origem de áudio foi usada enquanto este arquivo era enviado -- o resultado foi descartado.';
+        if (uploadStatusEl) uploadStatusEl.textContent = t('fieldEditor.audio.discardedUpload');
         return;
       }
       // Só ATUALIZA field.audio depois do upload ter sucesso de verdade
@@ -596,8 +596,8 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
     if (!block.isConnected) return; // container abandonado enquanto o hash era calculado (mesmo guard já usado por upload/geração)
     if (stale){
       ttsStaleEl.style.display = '';
-      ttsStaleEl.textContent = '⚠️ Áudio desatualizado -- o texto ou a configuração mudou desde a última geração. Clique em "Gerar novamente" para atualizar.';
-      if (ttsGenerateBtn) ttsGenerateBtn.textContent = '🔄 Gerar novamente';
+      ttsStaleEl.textContent = t('fieldEditor.audio.stale');
+      if (ttsGenerateBtn) ttsGenerateBtn.textContent = t('fieldEditor.audio.generateAgain');
     } else {
       ttsStaleEl.style.display = 'none';
       ttsStaleEl.textContent = '';
@@ -626,7 +626,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
         }
       }
       if (typeof opts.ttsFn !== 'function' || !opts.noteId){
-        if (errorEl) errorEl.textContent = 'Geração de áudio não está disponível nesta tela.';
+        if (errorEl) errorEl.textContent = t('fieldEditor.audio.err.genUnavailable');
         return;
       }
 
@@ -662,13 +662,13 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       const existingAudio = fieldBeforeGen && fieldBeforeGen.audio;
       if (existingAudio && existingAudio.type === 'tts' && existingAudio.generatedUrl
         && myKey !== null && existingAudio.generationKey === myKey){
-        if (msgEl) msgEl.textContent = 'Áudio já está atualizado para esta configuração -- nenhuma geração nova foi solicitada.';
+        if (msgEl) msgEl.textContent = t('fieldEditor.audio.alreadyUpToDate');
         return;
       }
 
       ttsGenerateBtn.disabled = true;
       const originalLabel = ttsGenerateBtn.textContent;
-      ttsGenerateBtn.textContent = 'Gerando áudio...';
+      ttsGenerateBtn.textContent = t('fieldEditor.audio.generating');
       if (msgEl) msgEl.textContent = '';
 
       const res = await opts.ttsFn({ rowId: opts.noteId, fieldId, text, language, voiceId, rate });
@@ -679,7 +679,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       ttsGenerateBtn.textContent = originalLabel;
 
       if (!res.ok){
-        if (errorEl) errorEl.textContent = res.error || 'Não foi possível gerar o áudio agora.';
+        if (errorEl) errorEl.textContent = res.error || t('fieldEditor.audio.err.genFailed');
         return; // falha nunca sobrescreve o áudio anterior (se havia) -- mesma regra do upload.
       }
 
@@ -689,7 +689,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
         // descarta o resultado silenciosamente, nunca sobrescreve o que já
         // é mais recente. O áudio devolvido continua salvo no Storage
         // (órfão, best-effort -- sem garbage collector nesta fase).
-        if (msgEl) msgEl.textContent = 'Outra origem de áudio foi usada enquanto este era gerado -- o resultado foi descartado.';
+        if (msgEl) msgEl.textContent = t('fieldEditor.audio.discardedGen');
         return;
       }
 
@@ -706,7 +706,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
         // devolvido ainda ficou salvo no Storage (órfão) -- best-effort,
         // mesma categoria já documentada pra remoção/substituição (sem
         // garbage collector nesta fase).
-        if (msgEl) msgEl.textContent = 'A configuração mudou enquanto o áudio era gerado -- clique em Gerar de novo.';
+        if (msgEl) msgEl.textContent = t('fieldEditor.audio.configChanged');
         return;
       }
 
@@ -786,7 +786,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       const status = (recState && recState.status) || 'idle';
       if (recordStartBtn){
         recordStartBtn.style.display = canStartFieldAudioRecording(status) ? '' : 'none';
-        recordStartBtn.textContent = (status === 'ready' || status === 'error') ? '🎙️ Regravar' : '🎙️ Gravar';
+        recordStartBtn.textContent = (status === 'ready' || status === 'error') ? t('fieldEditor.audio.rerecord') : t('fieldEditor.audio.record');
       }
       if (recordStopBtn) recordStopBtn.style.display = canStopFieldAudioRecording(status) ? '' : 'none';
       if (recordCancelBtn) recordCancelBtn.style.display = canCancelFieldAudioRecording(status) ? '' : 'none';
@@ -853,30 +853,30 @@ function renderFieldEditorHTML(field, index, opts){
   opts = opts || {};
   const namePrefix = opts.namePrefix || 'field-editor';
   const removable = opts.removable !== false;
-  const label = opts.label || `Campo ${index + 1}`;
+  const label = opts.label || t('fieldEditor.field.defaultLabel', { n: index + 1 });
   const contentValue = field.content && typeof field.content.value === 'string' ? field.content.value : '';
   // Fase 7e (ver CLAUDE.md) -- áudio saiu de `mediaNotes` (texto estático)
   // e virou o editor de verdade (renderFieldAudioBlockHTML, acima) --
   // imagem/pinyin continuam só indicador textual, ainda fora do escopo
   // desta subfase (Seção 8/19 -- só upload de ÁUDIO é implementado agora).
   const mediaNotes = [];
-  if (field.image) mediaNotes.push('🖼️ tem imagem vinculada');
-  if (field.pinyinFieldId) mediaNotes.push('🔤 tem um campo de pinyin vinculado');
+  if (field.image) mediaNotes.push(t('fieldEditor.field.hasImage'));
+  if (field.pinyinFieldId) mediaNotes.push(t('fieldEditor.field.hasPinyin'));
   return `
     <div class="field-editor-row" data-field-editor data-field-id="${field.id}" data-field-index="${index}" style="border:1px solid var(--paper-line); border-radius:var(--radius); padding:10px; margin-bottom:8px;">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">
         <span class="section-label" style="margin:0;">${escapeHTML(label)}</span>
-        ${removable ? `<button type="button" class="admin-badge-delete-btn" data-field-remove="${field.id}" title="Remover campo">🗑</button>` : ''}
+        ${removable ? `<button type="button" class="admin-badge-delete-btn" data-field-remove="${field.id}" title="${t('fieldEditor.field.removeTitle')}">🗑</button>` : ''}
       </div>
-      <label class="profile-edit-label" for="${namePrefix}-content-${field.id}">Conteúdo</label>
+      <label class="profile-edit-label" for="${namePrefix}-content-${field.id}">${t('fieldEditor.field.content')}</label>
       <textarea id="${namePrefix}-content-${field.id}" class="profile-edit-input profile-edit-textarea" rows="2" data-field-content="${field.id}">${escapeHTML(contentValue)}</textarea>
-      <label class="profile-edit-label" for="${namePrefix}-lang-${field.id}">Idioma</label>
+      <label class="profile-edit-label" for="${namePrefix}-lang-${field.id}">${t('fieldEditor.field.language')}</label>
       <select id="${namePrefix}-lang-${field.id}" class="profile-edit-input" data-field-lang="${field.id}">
-        <option value="" ${!field.lang ? 'selected' : ''}>(não definido)</option>
-        ${FIELD_LANG_OPTIONS.map(o => `<option value="${o.value}" ${field.lang === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+        <option value="" ${!field.lang ? 'selected' : ''}>${t('fieldEditor.lang.notSet')}</option>
+        ${FIELD_LANG_OPTIONS.map(o => `<option value="${o.value}" ${field.lang === o.value ? 'selected' : ''}>${t(o.labelKey)}</option>`).join('')}
       </select>
       ${renderFieldAudioBlockHTML(field, opts)}
-      ${mediaNotes.length ? `<p class="profile-edit-hint" style="margin-top:6px;">${mediaNotes.join(' · ')} (edição ainda não implementada nesta fase -- preservados como estão).</p>` : ''}
+      ${mediaNotes.length ? `<p class="profile-edit-hint" style="margin-top:6px;">${t('fieldEditor.field.mediaNotes', { notes: mediaNotes.join(' · ') })}</p>` : ''}
     </div>
   `;
 }
@@ -889,9 +889,9 @@ function renderFieldEditorListHTML(editorState, opts){
   const fields = editorState.fields || [];
   return `
     <div data-field-editor-list>
-      ${fields.length ? fields.map((f, i) => renderFieldEditorHTML(f, i, opts)).join('') : `<p class="profile-edit-hint">Nenhum campo ainda -- use "Adicionar campo" abaixo.</p>`}
+      ${fields.length ? fields.map((f, i) => renderFieldEditorHTML(f, i, opts)).join('') : `<p class="profile-edit-hint">${t('fieldEditor.list.empty')}</p>`}
     </div>
-    ${opts.allowAdd !== false ? `<button type="button" class="admin-select-link" data-field-add>+ Adicionar campo</button>` : ''}
+    ${opts.allowAdd !== false ? `<button type="button" class="admin-select-link" data-field-add>${t('fieldEditor.list.add')}</button>` : ''}
   `;
 }
 

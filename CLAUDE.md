@@ -17295,6 +17295,7 @@ P7: cópia de Public Deck duplica a mídia no Storage do copiador (manifest → 
 | 069 (`069_public_deck_duplicates_changed_not_retryable.sql`, commit `fb5c159`) | `20261003124403` (`public_deck_duplicates_changed_not_retryable`) | 2026-10-03 |
 | 070 (`070_teacher_student_overview.sql`) | `20261005121926` (`teacher_student_overview`) | 2026-10-05 |
 | 071 (`071_public_deck_hardening.sql`) | `20261005202012` (`public_deck_hardening`) | 2026-10-05 |
+| 073 (`073_create_profile_private.sql`) | Staging `20261006171157`; produção `20261006201346` (`create_profile_private`, aplicada pela ferramenta com autorização, RLS+4 policies, anon sem acesso) | 2026-10-06 |
 
 ## Checkpoint -- etapa de segurança (grants + proteção de plan/role) validada no Staging (2026-10-02)
 
@@ -17444,6 +17445,18 @@ Pedido da autora, verbatim: "ao criar um novo nível, módulo, unidade ou liçã
 - Paywall desligado (`CHALLENGE_PAYWALL_ENABLED=false` em `fr/app.js`): tudo abre, só há selos Free/Premium. Bloqueio, paywall e Stripe vêm depois.
 - Áudio: Actions > "Áudio TTS" > modo `ditados` refaz todos (abertura fr + instruções em pt-BR + corpo fr). Limite de 5000 bytes de SSML por pedido.
 
+## Idioma do site (interface + conteúdo) -- decisões da dona do projeto (2026-10-04)
+
+Plano completo: `docs/i18n/roadmap-i18n-l1.md`. Núcleo em `shared/i18n/` (`t()`, `tp()`, catálogos `pt-BR`/`en`; `es` congelado).
+
+- **Dois eixos só**: idioma estudado (`/fr`, `/zh`, futuro `/ptbr`) e **idioma do site** (`uiLanguage`). Não existe "L1" separada: o idioma do site é a língua pela qual o aluno aprende, e vale para botões, avisos, traduções, explicações e correção de respostas. Ex.: aluno russo estuda francês com o site em inglês.
+- **Conteúdo também migra** para o idioma do site (não só a interface). Ordem: francês inteiro, depois mandarim. Fallback para português enquanto não houver tradução.
+- **Idioma do site nunca é Premium.** Futuro (não decidido, sem infraestrutura): planos por idioma estudado (Free = 1 idioma; Basic = premium em 1; Pro = premium em todos).
+- **Novos idiomas estudados entram já com todos os idiomas de site disponíveis.** `/ptbr` = português para falantes de inglês (projeto próprio, depois das fases de conteúdo).
+- Guardar o idioma na conta em `progress.data._meta.uiLanguage` (nunca em `serializeState()`), com `localStorage['ui-language']` para convidado.
+- Regra de ouro: texto em português não muda byte a byte; só muda com aprovação explícita (testes têm a lista `DELIBERATE_PT_CHANGES`). O aviso de limite de cartões diz "apague" (a ação real; arquivar foi removido na CONSOLIDAÇÃO-3).
+- Toda tradução nova relatada com nível de confiança (alta/média/baixa) e entra como `needs_review` até a dona aprovar. Espanhol segue congelado.
+- Bloqueios antes de traduzir conteúdo: texto em português usado como lógica (nomes de campo do Anki "Caractere"/"Tradução", `unitTitle` no cartão, `lang:'pt-BR'` em `shared/flashcard-model.js`, títulos de Course Deck em PT no banco, comparador de "Ouça e traduza" sem testes).
 ### Ditados (fr) -- correção do campo de digitar (Fatia 1, 2026-10-03)
 - Lógica pura em `fr/app.js`, bloco `dictation-answer-logic` (`evaluateDictation`), testada por `fr/scripts/test_answer_validation.js` (44 casos) e `tests/ditado/test_playwright.js`.
 - Nota: acerto exato = 1; erro leve (falta de acento, hífen, apóstrofo, `œ` como `oe`) = 0,5 e vira "quase" com explicação; palavra a mais (não troca) = -0,5. Colar o texto 2 vezes não dá mais 100.
@@ -17570,6 +17583,19 @@ Decisão da autora: TTS explícito por Field usa o **Google Cloud TTS com a chav
 - Causa: `tts-generate` não respondia ao preflight CORS (OPTIONS) nem mandava `Access-Control-Allow-*`; o navegador bloqueava a chamada antes de chegar à função (nenhum log de tts-generate). Corrigido no `index.ts` (OPTIONS + cabeçalhos CORS em toda resposta) e publicado em produção (versão 4, `verify_jwt:true`; a cópia publicada tem a mesma lógica, comentários encurtados e helper `json()`). Preflight conferido ao vivo (200 com os cabeçalhos).
 - Cliente (`requestFieldAudioTTS`/`requestOwnFieldAudioTTS`): em resposta não-2xx o supabase-js deixa o corpo em `error.context` (Response); agora o código lê esse corpo para mostrar o motivo real (cota, provedor etc.). Só vale no site depois do deploy desta branch.
 - Primeiro áudio TTS real gerado pelo app confirmado pela autora em 2026-10-06 (depois da correção do CORS, função versão 4). A pendência "primeiro teste real" está fechada.
+
+## Variantes de palavra por idioma do site (decisão 2026-10-06)
+Projeto e auditoria (Fase 0) em `docs/i18n/projeto-variantes-por-idioma.md`. Decisões: o seletor da variante é só o idioma do site; a chave é o IDIOMA (mesma palavra em dois idiomas = cartões e históricos separados, pois o áudio difere); categorias que crescem em A2/B1 (país, nacionalidade, moeda, cidade, exemplos e notas culturais) devem ser registradas por slot ao criar conteúdo novo. Até haver 3 idiomas de site, vale a gaveta (`shared/card-variants.js`). Risco principal achado: `studyWordCardsFor` (K2) e as RPCs 059/070 leem cartões da trilha sem passar por `isCardLessonCompleted`.
+
+## Placeholders de perfil no conteúdo da trilha (2026-10-06)
+- Decisão da dona: exemplos em que o falante é o próprio aluno usam o perfil, não o nome da autora. Marcadores: `{nome}`, `{primeiro_nome}`, `{nacionalidade}` (idioma estudado: fr "brésilienne", zh "巴西人"), `{nacionalidade_p}` (pinyin, zh) e `{nacionalidade_t}` (língua da tradução: pt "brasileira", en "Brazilian"; os dois últimos foram acrescentados por necessidade do conteúdo).
+- `shared/profile-placeholders.js` (carregado depois de `profile.js` em fr/zh): `applyProfilePlaceholders()` reescreve as strings DENTRO de `UNITS` (guarda o modelo num WeakMap; reaplicável). Disparado por `onApplied` do ContentI18n (fr/zh `app.js`, cobre troca de idioma do site e convidado), por `ensureProfileLoaded()` e por `saveProfileEdits()`. Convidado/conta sem nome = "Convidado" (en: "Guest"); sem país = Brasil. Nome sanitizado (remove `<` `>` e controles). Gênero: o perfil não tem, então a nacionalidade usa o feminino que o conteúdo já usava (decisão pendente).
+- Áudio: texto com placeholder resolvido quase nunca bate `AUDIO_MANIFEST` (chave = texto literal); `speakFrench`/`speakChinese` caem no Web Speech. Com nome "Brune"/país Brasil o texto volta idêntico ao do manifest.
+- Perfil: campo "País de origem" (select) em Editar perfil; só aparece/é gravado se a coluna existir no perfil carregado. **Migration `072_add_country_to_profiles.sql` NÃO aplicada** (coluna `country text` nullable + CHECK `^[A-Z]{2}$`; sem ela o campo some e nada quebra). Atenção: `profiles_public_read` deixa o país legível como o nome.
+- Convertido: fr A1-1 frase 0 (nome), A1-2 frase 1 e A1-9 frase 0 (nacionalidade, incl. `scenario` do A1-2); zh Unit 1 frase 0 (nome) e Unit 2 frase 1 (nacionalidade); overlays `fr/content.en.js` e `zh/content.en.js` só em "My name is {nome}".
+- Ficou para decisão da dona: diálogos com personagens nomeados (fr A1-2 Ana/Léo; zh Unit 2 "B" = "Brune"; zh `spk:"Brune"` nas Units 5 e 8); exemplos de conceito/gramática ("Je suis brésilienne" em A1-g1 linha ~452; zh `shi` "我是巴西人"/"我叫Brune"); `scenarioEmoji` 🇧🇷; o overlay `src` do inglês continua fixando "américaine"/"美国人" (não usa o país do perfil); gênero da nacionalidade; preencher o país dos alunos existentes.
+- Testes: `tests/placeholders/` (Node/VM 44, Playwright FR+ZH 28). `tests/i18n/test_i18n_unit.js` (NEW_KEYS + strip do bloco novo) e `test_content_en.js` (guest em en = "Guest") ajustados deliberadamente. `test_card_variants_browser.js` (2) e `tests/i18n/test_playwright.js` (timeout) já falhavam antes.
+- **Gênero e nacionalidade neutra (2026-10-06)**: campo "Gênero" em Editar perfil (Masculino/Feminino/Outro/Prefiro não dizer, opcional), guardado em `profile_private` (migration 073, tabela privada com RLS só do dono; NUNCA em `profiles`, que é público). `loadProfilePrivate`/`saveProfileGender` em `shared/profile.js` (`PROFILE_PRIVATE_CACHE`/`PROFILE_PRIVATE_SUPPORTED`; sem a tabela o campo some). `{nacionalidade}` (fr) e `{nacionalidade_t}` (pt) seguem o gênero: masculino/feminino = forma própria; Outro/Prefiro não dizer/vazio/convidado = neutra "brésilien·ne"/"brasileiro·a" (en e zh sem gênero). Tabela `PROFILE_COUNTRIES` ganhou `frm`/`frn`/`ptm`/`ptn`. Áudio: `speakableProfileText` expande o neutro para as duas formas ("brésilien, brésilienne") só no Web Speech de `speakFrenchAudioOnly`; texto exibido e manifest não mudam. Efeito: quem não preencheu gênero passa a ver a forma neutra no lugar da feminina. **073 aplicada no Staging e na produção (2026-10-06).** Rótulos em inglês do gênero: Masculine/Feminine/Other/Prefer not to say. Testes: `tests/placeholders/` (Node/VM 70, Playwright 45), `tests/profile-private/run.sh` (Postgres local, 12). Detalhes em `docs/i18n/projeto-variantes-por-idioma.md` seção 11.
 
 ## Piloto automático -- pendências de código fechadas (2026-10-06)
 - **Cloze (fr/zh `renderClozeCard`)**: a frase autorada e a resposta revelada agora passam por `escapeHTML` antes de virar HTML (antes, um `<img onerror>` digitado num cartão executaria na Revisão). A lacuna é inserida com `replace('___', () => blankHTML)` (sem interpretar `$&`). Pendência registrada desde "7 propostas", fechada.

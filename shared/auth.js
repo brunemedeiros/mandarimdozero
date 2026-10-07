@@ -103,6 +103,8 @@ async function initAuth(){
       await onUserLoggedIn(session.user);
     } else if (event === 'SIGNED_OUT'){
       CURRENT_USER = null;
+      pendingAccountUiLanguage = null;
+      progressAccountUiLanguage = null;
       goToNeutralGate();
     }
   });
@@ -151,7 +153,7 @@ function applyPendingLevelTestOffer(){
       setTimeout(() => card.classList.remove('level-test-highlight'), 3000);
     }
     if (typeof showToast === 'function' && test){
-      showToast(`🎓 Você disse que já sabe o básico — dá uma olhada no "${test.title}" aqui embaixo pra pular pro próximo nível.`);
+      showToast(t('auth.levelTestHint', { title: test.title }));
     }
   });
 }
@@ -165,7 +167,7 @@ function enterGuestMode(){
   // sidebar/cards, Fase 3) -- setar 'block' aqui travaria isso pra sempre,
   // em qualquer largura de tela.
   document.getElementById('app').style.removeProperty('display');
-  document.getElementById('user-label').textContent = 'Convidado';
+  document.getElementById('user-label').textContent = t('auth.guestLabel');
   // .then() (não await -- enterGuestMode não é async) garante que o
   // redirecionamento de notificação (se houver) só rode DEPOIS do
   // render padrão terminar, senão a aba padrão do carregamento sobrescreve
@@ -195,7 +197,7 @@ async function onUserLoggedIn(user){
   // sidebar/cards, Fase 3) -- setar 'block' aqui travaria isso pra sempre,
   // em qualquer largura de tela.
   document.getElementById('app').style.removeProperty('display');
-  const label = user.user_metadata?.full_name || user.email || 'Minha conta';
+  const label = user.user_metadata?.full_name || user.email || t('auth.myAccount');
   document.getElementById('user-label').textContent = label;
   document.getElementById('user-dropdown-email').textContent = user.email || '';
   // isAdminUser()/isAdminModeOn() vêm de languages/<lang>/app.js e
@@ -215,7 +217,13 @@ async function onUserLoggedIn(user){
   if (typeof ensureProfileLoaded === 'function') ensureProfileLoaded().catch(() => {});
   if (typeof refreshNotificationUnreadCount === 'function') refreshNotificationUnreadCount();
   if (typeof ensureNotificationPreferencesLoaded === 'function') ensureNotificationPreferencesLoaded();
+  progressAccountUiLanguage = null;
   await loadStateAndRender();
+  // Idioma do site da conta (data._meta.uiLanguage): só depois de o
+  // progresso estar carregado (reaproveita a leitura de loadState(), sem
+  // ida extra à rede) e grava qualquer escolha pendente feita antes disso.
+  await applyAccountUiLanguage();
+  askUiLanguageOnFirstAccess();
   // Depois do render padrão (ver comentário equivalente em enterGuestMode)
   // -- só assim a navegação forçada por uma notificação clicada vence a
   // aba default do carregamento normal.
@@ -255,7 +263,7 @@ async function applyAdminModeUI(){
     pill.style.display = '';
     pill.classList.toggle('active', !on);
     const label = document.getElementById('admin-mode-state-label');
-    if (label) label.textContent = on ? 'ON' : 'OFF';
+    if (label) label.textContent = on ? t('admin.mode.on') : t('admin.mode.off');
   }
 }
 
@@ -270,8 +278,8 @@ document.getElementById('admin-mode-toggle-btn')?.addEventListener('click', asyn
   // imediata, não só na próxima navegação).
   if (typeof renderUnitsGrid === 'function') renderUnitsGrid();
   showToast(wasOn
-    ? '🔒 Admin Mode desligado — navegando como um aluno comum.'
-    : '🔒 Admin Mode ligado — privilégios de admin restaurados.');
+    ? t('admin.mode.toastOff')
+    : t('admin.mode.toastOn'));
 });
 
 // #mais-btn é o botão "Mais" da barra inferior mobile (Fase 6) -- abre o
@@ -315,6 +323,96 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 let saveInFlight = false;
 let savePending = false;
 
+// ---------- Idioma do site na conta (data._meta.uiLanguage) ----------
+// Nunca dentro de serializeState() (que é por idioma estudado). Ordem de
+// leitura: conta > navegador (localStorage 'ui-language') > pt-BR.
+// progressAccountUiLanguage: valor lido por loadState() (mesma leitura do
+// progresso). pendingAccountUiLanguage: escolha feita no seletor que ainda
+// não foi confirmada no servidor -- saveState() também a inclui no _meta
+// que grava, então nenhuma das duas escritas apaga a outra (corrida).
+let progressAccountUiLanguage = null;
+let pendingAccountUiLanguage = null;
+// Conta sem nenhum progresso salvo ainda (primeiro acesso): só então o site pergunta o idioma.
+let progressAccountIsNew = false;
+
+function accountUiLangFromQuery(){
+  try { return !!new URLSearchParams(window.location.search).get('ui'); } catch (e) { return false; }
+}
+
+async function applyAccountUiLanguage(){
+  if (!CURRENT_USER || !progressLoadedOk) return;
+  if (pendingAccountUiLanguage){ await flushAccountUiLanguage(); return; }
+  const acct = progressAccountUiLanguage;
+  // ?ui= na URL (ferramenta de teste) vence a conta nesta aba.
+  if (!acct || accountUiLangFromQuery()) return;
+  if (typeof getUiLang === 'function' && typeof setUiLang === 'function' && getUiLang() !== acct){
+    await setUiLang(acct);
+  }
+}
+
+async function flushAccountUiLanguage(){
+  if (!CURRENT_USER || !pendingAccountUiLanguage || !progressLoadedOk) return false;
+  // Espera um saveState() em andamento terminar (ele também carrega o
+  // pendente no _meta, mas evitar duas escritas simultâneas é mais limpo).
+  for (let i = 0; i < 100 && saveInFlight; i++) await sleepMs(50);
+  const lang = pendingAccountUiLanguage;
+  try{
+    const saved = await setAccountUiLanguage(CURRENT_USER.id, lang);
+    progressAccountUiLanguage = saved;
+    if (pendingAccountUiLanguage === lang) pendingAccountUiLanguage = null;
+    return true;
+  }catch(e){
+    console.error('Erro ao salvar idioma do site na conta:', e);
+    return false;
+  }
+}
+
+// Primeiro acesso de uma conta nova: pergunta o idioma do site (menus, explicações
+// e traduções), com o idioma do navegador como sugestão. Conta que já tem
+// progresso ou idioma salvo, ?ui= na URL e navegador que já guardou uma escolha
+// nunca veem o aviso. Não trava o carregamento: a escolha é um toque.
+function uiLanguageSuggestionFromBrowser(){
+  try {
+    const langs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+    return String(langs[0] || '').toLowerCase().startsWith('en') ? 'en' : 'pt-BR';
+  } catch (e) { return 'pt-BR'; }
+}
+
+function askUiLanguageOnFirstAccess(){
+  if (!CURRENT_USER || !progressLoadedOk || !progressAccountIsNew) return;
+  if (progressAccountUiLanguage || pendingAccountUiLanguage || accountUiLangFromQuery()) return;
+  try { if (window.localStorage.getItem('ui-language')) return; } catch (e) {}
+  const modal = document.getElementById('ui-language-first-modal');
+  if (!modal || typeof setUiLang !== 'function') return;
+  const suggested = uiLanguageSuggestionFromBrowser();
+  const btns = modal.querySelectorAll('button[data-lang]');
+  btns.forEach(btn => {
+    const isSuggested = btn.getAttribute('data-lang') === suggested;
+    btn.classList.toggle('btn-primary', isSuggested);
+    btn.classList.toggle('btn-secondary', !isSuggested);
+    btn.onclick = () => {
+      const lang = btn.getAttribute('data-lang');
+      modal.style.display = 'none';
+      setUiLang(lang);
+      persistUiLanguageToAccount(lang);
+    };
+  });
+  modal.style.display = 'flex';
+}
+
+// Chamado pelo seletor "Idioma da interface" (shared/i18n/i18n.js) depois
+// de uma troca EXPLÍCITA. Convidado: só localStorage (já feito por
+// setUiLang). Conta: grava em _meta.uiLanguage assim que o progresso
+// estiver carregado (antes disso fica pendente e applyAccountUiLanguage()
+// grava logo após loadState()).
+function persistUiLanguageToAccount(lang){
+  if (!CURRENT_USER || typeof normalizeAccountUiLanguage !== 'function') return Promise.resolve(false);
+  const norm = normalizeAccountUiLanguage(lang);
+  if (!norm) return Promise.resolve(false);
+  pendingAccountUiLanguage = norm;
+  return flushAccountUiLanguage();
+}
+
 // Se uma tentativa de salvar falhar (rede caiu, Supabase fora do ar), quem
 // está estudando precisa saber -- antes só era um console.error, sem
 // nenhum jeito de perceber que o progresso não estava sendo salvo. Um
@@ -329,7 +427,7 @@ function notifySaveFailure(){
   const now = Date.now();
   if (now - lastSaveErrorToastAt < SAVE_ERROR_TOAST_COOLDOWN_MS) return;
   lastSaveErrorToastAt = now;
-  showToast('⚠ Não foi possível salvar seu progresso agora. Verifique sua conexão.');
+  showToast(t('auth.saveFailed'));
 }
 
 // Mesmo cooldown do aviso acima, contador PRÓPRIO -- este dispara num
@@ -342,7 +440,7 @@ function notifyProgressNotLoadedYet(){
   const now = Date.now();
   if (now - lastLoadGuardToastAt < SAVE_ERROR_TOAST_COOLDOWN_MS) return;
   lastLoadGuardToastAt = now;
-  showToast('⏳ Ainda confirmando seu progresso salvo -- espere um instante antes de continuar.');
+  showToast(t('auth.notLoadedYet'));
 }
 
 // Cooldown/contador PRÓPRIO de novo -- mensagem diferente de propósito das
@@ -357,7 +455,7 @@ function notifyStaleLocalProgress(){
   const now = Date.now();
   if (now - lastStaleLocalToastAt < SAVE_ERROR_TOAST_COOLDOWN_MS) return;
   lastStaleLocalToastAt = now;
-  showToast('⚠ Seu progresso aqui parece desatualizado em relação ao que já foi salvo -- recarregue a página se isto persistir.');
+  showToast(t('auth.staleLocal'));
 }
 
 async function saveState(){
@@ -423,6 +521,9 @@ async function saveState(){
     }
 
     const merged = Object.assign({}, existing && existing.data, { [APP_KEY]: payload });
+    if (pendingAccountUiLanguage){
+      merged._meta = Object.assign({}, merged._meta, { uiLanguage: pendingAccountUiLanguage });
+    }
     const { error } = await supabaseClient
       .from('progress')
       .upsert({ user_id: CURRENT_USER.id, data: merged }, { onConflict: 'user_id' });
@@ -504,6 +605,9 @@ async function loadState(){
         return; // progressLoadedOk continua false -- saveState() se recusa a gravar até a próxima tentativa de load
       }
 
+      progressAccountUiLanguage = (typeof uiLanguageFromProgressData === 'function' && data)
+        ? uiLanguageFromProgressData(data.data) : null;
+      progressAccountIsNew = !(data && data.data && Object.keys(data.data).some(k => k !== '_meta'));
       if (data && data.data && data.data[APP_KEY]){
         applySerializedState(data.data[APP_KEY]);
       } else if (typeof loadLegacyState === 'function' && data && data.data){

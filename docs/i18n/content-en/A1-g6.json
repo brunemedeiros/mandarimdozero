@@ -1,0 +1,62 @@
+{
+ "unit": "A1-g6",
+ "en": {
+  "title": "Modal verbs and il faut",
+  "goal": "Conjugate vouloir, pouvoir, devoir and savoir, and understand when to use il faut instead of devoir.",
+  "grammar": {
+   "blocks": [
+    {
+     "title": "Vouloir and pouvoir",
+     "body": "Vouloir (to want) and pouvoir (can / to be able to) are two of the most used verbs in French, and they appear in almost every everyday conversation. You've already seen both in earlier units, without stopping to think about the full conjugation.",
+     "examples": [
+      "Do you want a dessert?",
+      "Can I try on this dress?"
+     ]
+    },
+    {
+     "title": "Devoir and savoir",
+     "body": "Devoir (must / to have to) expresses personal obligation, and savoir (to know) expresses knowledge or a learned skill — different from connaître (to be familiar with a place/person), which you'll see later on.",
+     "examples": [
+      "You need to rest.",
+      "I know how to speak French."
+     ]
+    },
+    {
+     "title": "Il faut: an impersonal alternative to devoir",
+     "body": "Il faut + infinitive expresses a need or a general rule — without saying WHO has to do something. Il faut never conjugates; it's always the same form. Devoir + infinitive, on the other hand, is personal: you conjugate the verb to say that ONE specific person has to do something (je dois, tu dois, il doit...). Compare the two examples: the first is a general rule, the second is aimed at a specific person.",
+     "examples": [
+      "You have to sleep eight hours. (general rule, applies to anyone)",
+      "You need to rest. (directed at you specifically)"
+     ]
+    },
+    {
+     "title": "Très bien! 🎉",
+     "body": "Four essential verbs — all irregular, so it's worth memorizing the whole table. Remember: il faut isn't in the table because it doesn't conjugate; it's always invariable.",
+     "examples": [],
+     "table": [
+      {"label": "vouloir", "pronouns": ["je", "tu", "il / elle / on", "nous", "vous", "ils / elles"]},
+      {"label": "pouvoir", "pronouns": ["je", "tu", "il / elle / on", "nous", "vous", "ils / elles"]},
+      {"label": "devoir", "pronouns": ["je", "tu", "il / elle / on", "nous", "vous", "ils / elles"]},
+      {"label": "savoir", "pronouns": ["je", "tu", "il / elle / on", "nous", "vous", "ils / elles"]}
+     ]
+    }
+   ],
+   "exercises": [
+    {"hint": "vouloir"},
+    {"hint": "pouvoir"},
+    {"hint": "devoir"},
+    {"hint": "savoir"},
+    {"hint": "il faut (impersonal)"},
+    {"hint": "vouloir"},
+    {"hint": "pouvoir"},
+    {"hint": "savoir"}
+   ]
+  }
+ },
+ "review": [
+  {"path": "grammar.blocks[0].body", "pt": "pouvoir (poder)", "en": "pouvoir (can / to be able to)", "conf": "media", "why": "English 'can' is a modal with no infinitive; glossed with both forms"},
+  {"path": "grammar.blocks[1].body", "pt": "devoir (dever/precisar)", "en": "devoir (must / to have to)", "conf": "media", "why": "adapted to English modal senses"},
+  {"path": "grammar.blocks[1].examples[0]", "pt": "Você precisa descansar.", "en": "You need to rest.", "conf": "media", "why": "FR 'vous' formal/plural; EN 'you' has no formal/plural distinction"},
+  {"path": "grammar.blocks[2].examples[0]", "pt": "É preciso dormir oito horas.", "en": "You have to sleep eight hours.", "conf": "media", "why": "impersonal 'il faut' rendered with generic 'you' (more natural in English than 'one must')"}
+ ]
+}

@@ -12,36 +12,60 @@
 // Só chamados dentro de funções, nunca no top-level deste arquivo -- a
 // ordem de carregamento dos <script> não importa (hoisting normal).
 
-const STREAK_DAY_LABELS = ['dom','seg','ter','qua','qui','sex','sáb'];
-
-const DAY_DEFS = [
-  { key: 'mon', label: 'seg' }, { key: 'tue', label: 'ter' }, { key: 'wed', label: 'qua' },
-  { key: 'thu', label: 'qui' }, { key: 'fri', label: 'sex' }, { key: 'sat', label: 'sáb' }, { key: 'sun', label: 'dom' }
-];
 const DAY_KEY_BY_JS_INDEX = ['sun','mon','tue','wed','thu','fri','sat'];
-const PT_MONTHS = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+// Chaves de catálogo escritas por extenso (o lint de i18n só enxerga labelKey: literais).
+const WIZARD_DAY_LABEL_KEYS = {
+  mon: { labelKey: 'wizard.day.mon' }, tue: { labelKey: 'wizard.day.tue' }, wed: { labelKey: 'wizard.day.wed' },
+  thu: { labelKey: 'wizard.day.thu' }, fri: { labelKey: 'wizard.day.fri' }, sat: { labelKey: 'wizard.day.sat' },
+  sun: { labelKey: 'wizard.day.sun' },
+};
+const WIZARD_MONTH_LABEL_KEYS = [
+  { labelKey: 'wizard.month.jan' }, { labelKey: 'wizard.month.feb' }, { labelKey: 'wizard.month.mar' },
+  { labelKey: 'wizard.month.apr' }, { labelKey: 'wizard.month.may' }, { labelKey: 'wizard.month.jun' },
+  { labelKey: 'wizard.month.jul' }, { labelKey: 'wizard.month.aug' }, { labelKey: 'wizard.month.sep' },
+  { labelKey: 'wizard.month.oct' }, { labelKey: 'wizard.month.nov' }, { labelKey: 'wizard.month.dec' },
+];
 
-function formatDatePt(date){
-  return `${date.getDate()} ${PT_MONTHS[date.getMonth()]}, ${date.getFullYear()}`;
+// Rótulos de dia da semana avaliados só no uso (t() nunca roda no carregamento
+// do módulo). Proxy de 7 posições: fr/app.js e zh/app.js leem
+// STREAK_DAY_LABELS[d.getDay()] como se fosse um array.
+const STREAK_DAY_LABELS = new Proxy(new Array(7).fill(''), {
+  get(target, prop, receiver){
+    if (typeof prop === 'string' && /^[0-6]$/.test(prop)) return t(WIZARD_DAY_LABEL_KEYS[DAY_KEY_BY_JS_INDEX[Number(prop)]].labelKey);
+    return Reflect.get(target, prop, receiver);
+  }
+});
+
+function dayDefs(){
+  return ['mon','tue','wed','thu','fri','sat','sun'].map(k => ({ key: k, label: t(WIZARD_DAY_LABEL_KEYS[k].labelKey) }));
 }
 
-const OBJECTIVE_OPTIONS = [
-  { id: 'fun', icon: '🎭', label: 'Diversão e cultura' },
-  { id: 'travel', icon: '🌍', label: 'Viagem' },
-  { id: 'friends', icon: '💬', label: 'Amigos e familiares' },
-  { id: 'work', icon: '💼', label: 'Trabalho' },
-  { id: 'education', icon: '🎓', label: 'Educação' }
-];
+
+function formatDatePt(date){
+  return t('wizard.date', { day: date.getDate(), month: t(WIZARD_MONTH_LABEL_KEYS[date.getMonth()].labelKey), year: date.getFullYear() });
+}
+
+function objectiveOptions(){
+  return [
+    { id: 'fun', icon: '🎭', label: t('wizard.obj.fun') },
+    { id: 'travel', icon: '🌍', label: t('wizard.obj.travel') },
+    { id: 'friends', icon: '💬', label: t('wizard.obj.friends') },
+    { id: 'work', icon: '💼', label: t('wizard.obj.work') },
+    { id: 'education', icon: '🎓', label: t('wizard.obj.education') }
+  ];
+}
 
 // Meta diária em LIÇÕES, não minutos (ver artefato "A Gramática da
 // Recompensa", §4) -- 3 faixas nomeadas em vez de um stepper contínuo,
 // porque "2 de 3 lições" é uma unidade literal que o aluno já vê na trilha,
 // diferente de uma estimativa de minutos que ele não controla diretamente.
-const DAILY_LESSON_TIERS = [
-  { id: 1, icon: '🌱', label: 'Casual', desc: '1 lição por dia' },
-  { id: 2, icon: '🎯', label: 'Regular', desc: '2 lições por dia' },
-  { id: 3, icon: '🔥', label: 'Intenso', desc: '3+ lições por dia' }
-];
+function dailyLessonTiers(){
+  return [
+    { id: 1, icon: '🌱', label: t('wizard.tier.1.label'), desc: t('wizard.tier.1.desc') },
+    { id: 2, icon: '🎯', label: t('wizard.tier.2.label'), desc: t('wizard.tier.2.desc') },
+    { id: 3, icon: '🔥', label: t('wizard.tier.3.label'), desc: t('wizard.tier.3.desc') }
+  ];
+}
 
 function remainingUnitsForLevels(levels){
   if (!levels || !levels.length) return [];
@@ -129,9 +153,9 @@ function advanceWizard(){
 function renderWizardObjectiveStep(){
   const bodyEl = document.getElementById('study-plan-wizard-body');
   bodyEl.innerHTML = `
-    <div class="wizard-question">Qual é o seu principal objetivo ao aprender ${LANGUAGE_STUDY_NAME}?</div>
+    <div class="wizard-question">${t('wizard.q.objective', { language: LANGUAGE_STUDY_NAME })}</div>
     <div class="wizard-option-list">
-      ${OBJECTIVE_OPTIONS.map(o => `
+      ${objectiveOptions().map(o => `
         <button class="wizard-option-row ${STUDY_WIZARD.objective === o.id ? 'active' : ''}" data-objective="${o.id}">
           <span class="wizard-option-icon">${o.icon}</span>
           <span class="wizard-option-label">${o.label}</span>
@@ -150,7 +174,7 @@ function renderWizardObjectiveStep(){
 function renderWizardLevelStep(){
   const bodyEl = document.getElementById('study-plan-wizard-body');
   bodyEl.innerHTML = `
-    <div class="wizard-question">Que nível você quer alcançar?</div>
+    <div class="wizard-question">${t('wizard.q.level')}</div>
     <div class="wizard-level-list">
       ${LEVELS.map(l => {
         const desc = LEVEL_DESCRIPTIONS[l.id] || {};
@@ -178,16 +202,16 @@ function renderWizardLevelStep(){
 function renderWizardScheduleStep(){
   const bodyEl = document.getElementById('study-plan-wizard-body');
   bodyEl.innerHTML = `
-    <div class="wizard-question">Em quais dias da semana você deseja estudar?</div>
+    <div class="wizard-question">${t('wizard.q.days')}</div>
     <div class="wizard-day-row">
-      ${DAY_DEFS.map(d => `
+      ${dayDefs().map(d => `
         <button class="wizard-day-chip ${STUDY_WIZARD.days[d.key] ? 'active' : ''}" data-day="${d.key}">
           <span class="wizard-day-check">${STUDY_WIZARD.days[d.key] ? '✓' : ''}</span>
           <span class="wizard-day-label">${d.label}</span>
         </button>
       `).join('')}
     </div>
-    <div class="wizard-question" style="margin-top:26px;">Que hora do dia você deseja estudar?</div>
+    <div class="wizard-question" style="margin-top:26px;">${t('wizard.q.time')}</div>
     <div class="wizard-time-row">
       <input type="number" min="0" max="23" id="wizard-hour-input" value="${STUDY_WIZARD.hour}">
       <span class="wizard-time-sep">:</span>
@@ -195,12 +219,12 @@ function renderWizardScheduleStep(){
     </div>
     <div class="wizard-notif-row">
       <div class="wizard-notif-text">
-        <div class="wizard-notif-title">Notificações</div>
-        <div class="wizard-notif-sub">Receber lembretes de quando você deve estudar — só funciona com o navegador aberto (não temos servidor de notificação push).</div>
+        <div class="wizard-notif-title">${t('wizard.notif.title')}</div>
+        <div class="wizard-notif-sub">${t('wizard.notif.sub')}</div>
       </div>
       <button class="pref-switch" id="wizard-notif-switch" role="switch" aria-checked="${STUDY_WIZARD.notifications}"><span class="pref-switch-knob"></span></button>
     </div>
-    <button class="btn btn-primary btn-block wizard-continue-btn" id="wizard-continue-btn">Continuar</button>
+    <button class="btn btn-primary btn-block wizard-continue-btn" id="wizard-continue-btn">${t('common.continue')}</button>
   `;
 
   bodyEl.querySelectorAll('.wizard-day-chip').forEach(chip => {
@@ -234,19 +258,19 @@ function renderWizardScheduleStep(){
 function renderWizardLessonsStep(){
   const bodyEl = document.getElementById('study-plan-wizard-body');
   bodyEl.innerHTML = `
-    <div class="wizard-question">Quantas lições por dia você quer fazer?</div>
+    <div class="wizard-question">${t('wizard.q.lessons')}</div>
     <div class="wizard-level-list">
-      ${DAILY_LESSON_TIERS.map(t => `
-        <button class="wizard-level-row ${STUDY_WIZARD.dailyLessonsGoal === t.id ? 'active' : ''}" data-tier="${t.id}">
-          <span class="wizard-level-circle">${t.icon}</span>
+      ${dailyLessonTiers().map(tr => `
+        <button class="wizard-level-row ${STUDY_WIZARD.dailyLessonsGoal === tr.id ? 'active' : ''}" data-tier="${tr.id}">
+          <span class="wizard-level-circle">${tr.icon}</span>
           <span class="wizard-level-text">
-            <span class="wizard-level-tier">${t.label}</span>
-            <span class="wizard-level-desc">${t.desc}</span>
+            <span class="wizard-level-tier">${tr.label}</span>
+            <span class="wizard-level-desc">${tr.desc}</span>
           </span>
         </button>
       `).join('')}
     </div>
-    <button class="btn btn-primary btn-block wizard-continue-btn" id="wizard-continue-btn">Continuar</button>
+    <button class="btn btn-primary btn-block wizard-continue-btn" id="wizard-continue-btn">${t('common.continue')}</button>
   `;
 
   bodyEl.querySelectorAll('.wizard-level-row').forEach(btn => {
@@ -263,25 +287,25 @@ function renderWizardSummaryStep(){
   const levels = LEVELS.filter((l, i) => i <= LEVELS.findIndex(x => x.id === STUDY_WIZARD.targetLevel)).map(l => l.id);
   const lessonsRemaining = estimateLessonsRemainingForLevels(levels);
   const completionDate = estimateCompletionDate(lessonsRemaining, STUDY_WIZARD.days, STUDY_WIZARD.dailyLessonsGoal);
-  const dateLabel = completionDate ? formatDatePt(completionDate) : 'defina ao menos 1 dia da semana';
+  const dateLabel = completionDate ? formatDatePt(completionDate) : t('wizard.summary.noDays');
   const goalText = LEVEL_DESCRIPTIONS[STUDY_WIZARD.targetLevel]?.text || '';
-  const tier = DAILY_LESSON_TIERS.find(t => t.id === STUDY_WIZARD.dailyLessonsGoal);
+  const tier = dailyLessonTiers().find(tr => tr.id === STUDY_WIZARD.dailyLessonsGoal);
 
   bodyEl.innerHTML = `
-    <div class="wizard-summary-title">Você alcançará sua meta até <strong>${dateLabel}</strong></div>
+    <div class="wizard-summary-title">${t('wizard.summary.title', { date: dateLabel })}</div>
     <div class="wizard-summary-goal-box">
       <span class="wizard-summary-goal-icon">🎯</span>
       <div>
-        <div class="wizard-summary-goal-label">Sua meta</div>
+        <div class="wizard-summary-goal-label">${t('wizard.summary.goalLabel')}</div>
         <div class="wizard-summary-goal-text">${goalText}</div>
       </div>
     </div>
     <div class="wizard-summary-plan-header">
-      <div class="wizard-summary-plan-title">Seu Plano de Estudo personalizado</div>
-      <button class="wizard-summary-edit-btn" id="wizard-edit-btn">Editar</button>
+      <div class="wizard-summary-plan-title">${t('wizard.summary.planTitle')}</div>
+      <button class="wizard-summary-edit-btn" id="wizard-edit-btn">${t('wizard.summary.edit')}</button>
     </div>
     <div class="wizard-day-row wizard-summary-days">
-      ${DAY_DEFS.map(d => `
+      ${dayDefs().map(d => `
         <div class="wizard-day-chip ${STUDY_WIZARD.days[d.key] ? 'active' : ''}" style="pointer-events:none;">
           <span class="wizard-day-check">${STUDY_WIZARD.days[d.key] ? '✓' : ''}</span>
           <span class="wizard-day-label">${d.label}</span>
@@ -290,15 +314,15 @@ function renderWizardSummaryStep(){
     </div>
     <div class="wizard-summary-stats">
       <div>
-        <div class="wizard-summary-stat-label">Ritmo</div>
+        <div class="wizard-summary-stat-label">${t('wizard.summary.rhythm')}</div>
         <div class="wizard-summary-stat-value">${tier.icon} ${tier.label} · ${tier.desc}</div>
       </div>
       <div>
-        <div class="wizard-summary-stat-label">Horário</div>
+        <div class="wizard-summary-stat-label">${t('wizard.summary.time')}</div>
         <div class="wizard-summary-stat-value">🌅 ${String(STUDY_WIZARD.hour).padStart(2,'0')}:${String(STUDY_WIZARD.minute).padStart(2,'0')}</div>
       </div>
     </div>
-    <button class="btn btn-primary btn-block wizard-continue-btn" id="wizard-save-btn">Salvar Plano de Estudo</button>
+    <button class="btn btn-primary btn-block wizard-continue-btn" id="wizard-save-btn">${t('wizard.summary.save')}</button>
   `;
 
   document.getElementById('wizard-edit-btn').addEventListener('click', () => {
@@ -329,8 +353,8 @@ function renderStudyPlanCard(){
   const goal = STATE.studyGoal;
 
   if (!goal.dailyLessonsGoal || !goal.objective){
-    subEl.textContent = 'Defina quantas lições por dia você quer fazer';
-    bodyEl.innerHTML = `<button class="btn btn-primary btn-block" id="study-plan-cta-btn">Definir minha meta</button>`;
+    subEl.textContent = t('wizard.card.setSub');
+    bodyEl.innerHTML = `<button class="btn btn-primary btn-block" id="study-plan-cta-btn">${t('wizard.card.setCta')}</button>`;
     document.getElementById('study-plan-cta-btn').addEventListener('click', openStudyPlanModal);
     return;
   }
@@ -338,7 +362,7 @@ function renderStudyPlanCard(){
   const lessonsRemaining = estimateLessonsRemainingForLevels(goal.levels);
   const completionDate = estimateCompletionDate(lessonsRemaining, goal.days, goal.dailyLessonsGoal);
   const dateLabel = completionDate ? formatDatePt(completionDate) : null;
-  const objLabel = OBJECTIVE_OPTIONS.find(o => o.id === goal.objective)?.label || '';
+  const objLabel = objectiveOptions().find(o => o.id === goal.objective)?.label || '';
   const goalText = LEVEL_DESCRIPTIONS[goal.levels[goal.levels.length - 1]]?.text || objLabel;
 
   const week = buildLessonsWeekData();
@@ -347,12 +371,12 @@ function renderStudyPlanCard(){
   const pct = weekGoal ? Math.min(100, Math.round((weekTotal / weekGoal) * 100)) : 0;
   const todayLessons = week[6].lessons;
 
-  subEl.textContent = dateLabel ? `Meta até ${dateLabel}` : 'Meta definida';
+  subEl.textContent = dateLabel ? t('wizard.card.subUntil', { date: dateLabel }) : t('wizard.card.subSet');
   bodyEl.innerHTML = `
     <div class="wizard-summary-goal-box">
       <span class="wizard-summary-goal-icon">🎯</span>
       <div>
-        <div class="wizard-summary-goal-label">Sua meta</div>
+        <div class="wizard-summary-goal-label">${t('wizard.summary.goalLabel')}</div>
         <div class="wizard-summary-goal-text">${goalText}</div>
       </div>
     </div>
@@ -360,14 +384,14 @@ function renderStudyPlanCard(){
       <div class="study-ring" style="--pct:${pct}">
         <div class="study-ring-inner">
           <div class="study-ring-num">${weekTotal}/${weekGoal}</div>
-          <div class="study-ring-label">lições esta semana</div>
+          <div class="study-ring-label">${t('wizard.card.lessonsThisWeek')}</div>
         </div>
       </div>
       <div class="study-plan-today">
-        <div class="study-plan-today-label">Meta diária</div>
-        <div class="study-plan-today-num">${todayLessons} / ${goal.dailyLessonsGoal} lições</div>
+        <div class="study-plan-today-label">${t('wizard.card.dailyGoal')}</div>
+        <div class="study-plan-today-num">${tp('wizard.card.todayLessons', goal.dailyLessonsGoal, { done: todayLessons, goal: goal.dailyLessonsGoal })}</div>
         <div class="study-plan-estimate">${
-          dateLabel ? `Nesse ritmo, você alcança sua meta até <strong>${dateLabel}</strong>.` : 'Selecione ao menos um dia da semana pra calcularmos sua meta.'
+          dateLabel ? t('wizard.card.estimate', { date: dateLabel }) : t('wizard.card.estimateNone')
         }</div>
       </div>
     </div>
@@ -405,7 +429,7 @@ function renderDailyGoalChip(){
   chip.innerHTML = `
     <span class="daily-goal-chip-icon">🎯</span>
     <div class="daily-goal-chip-body">
-      <div class="daily-goal-chip-label">Meta diária · ${done}/${goal} lições</div>
+      <div class="daily-goal-chip-label">${tp('wizard.chip.label', goal, { done, goal })}</div>
       <div class="daily-goal-chip-track"><div class="daily-goal-chip-fill" style="width:${pct}%"></div></div>
     </div>
     ${reached ? '<span class="daily-goal-chip-check">✓</span>' : ''}

@@ -1,0 +1,117 @@
+{
+ "unit": "A1-12",
+ "en": {
+  "title": "Weights and quantities",
+  "goal": "Ask for specific amounts when shopping: kilo, litre, a little, a lot...",
+  "lessons": {
+   "quilo-meio-quilo-litro": "Kilo, half a kilo and litre",
+   "grama-pouco-muito": "Gram, a little and a lot",
+   "suficiente-demais-fatia-garrafa": "Enough, too much, slice and bottle",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "a kilo (of)",
+   "half a kilo",
+   "a litre",
+   "a gram",
+   "a little (of)",
+   "a lot (of) / plenty (of)",
+   "enough (of)",
+   "too much (of) / too many (of)",
+   "a slice (of)",
+   "a bottle (of)"
+  ],
+  "phrases": [
+   {
+    "t": "I'll take a kilo of apples.",
+    "scenario": "You're at the market and want to buy a kilo of apples. What do you say to the seller?"
+   },
+   {
+    "t": "A litre of milk, please.",
+    "scenario": "You're at the shop and want to ask for a litre of milk. What do you say?"
+   },
+   {
+    "t": "That's too much sugar for me.",
+    "scenario": "Someone is serving you coffee with a lot of sugar, and it's too much for you. What do you say?"
+   },
+   {
+    "t": "A slice of bread, please.",
+    "scenario": "At the breakfast table, you want to ask for a slice of bread. What do you say?"
+   },
+   {
+    "t": "One gram is very little."
+   },
+   {
+    "t": "There are a lot of people here."
+   },
+   {
+    "t": "I don't have enough time."
+   }
+  ],
+  "dialogue": {
+   "title": "Shopping at the market",
+   "lines": [
+    "How many apples would you like?",
+    "Half a kilo, please.",
+    "Anything else?",
+    "A bottle of water and a little cheese."
+   ]
+  },
+  "concepts": {
+   "de-quantite": [
+    {
+     "title": "\"Un kilo DE pommes\" — the same \"de\" rule",
+     "body": "After an expression of quantity (un kilo <strong>de</strong>, un litre <strong>de</strong>, beaucoup <strong>de</strong>, trop <strong>de</strong>), the article also disappears and becomes just <strong>de</strong>/<strong>d'</strong> — the same thing that happens after a negation (previous unit). Notice: you don't say \"un kilo des pommes\", you say <strong>un kilo de pommes</strong>.",
+     "examples": [
+      "a kilo (of)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[5]",
+   "pt": "muito / bastante",
+   "en": "a lot (of) / plenty (of)",
+   "conf": "media",
+   "why": "Two PT glosses; EN equivalents depend on countable/uncountable."
+  },
+  {
+   "path": "vocab[7]",
+   "pt": "demais / em excesso",
+   "en": "too much (of) / too many (of)",
+   "conf": "media",
+   "why": "EN splits by countable vs uncountable."
+  },
+  {
+   "path": "vocab[6]",
+   "pt": "o suficiente de",
+   "en": "enough (of)",
+   "conf": "media",
+   "why": "Fine, but the PT gloss is awkward."
+  },
+  {
+   "path": "phrases[2]",
+   "pt": "É açúcar demais pra mim.",
+   "en": "That's too much sugar for me.",
+   "conf": "media",
+   "why": "Natural EN may be 'That's too much sugar for me.'; literal 'It's' also fine."
+  },
+  {
+   "path": "dialogue.lines[2]",
+   "pt": "E mais alguma coisa?",
+   "en": "Anything else?",
+   "conf": "media",
+   "why": "'Et avec ça ?' is a shop idiom; 'Anything else?' is the natural equivalent."
+  },
+  {
+   "path": "dialogue.lines[0]",
+   "pt": "Quantas maçãs você quer?",
+   "en": "How many apples would you like?",
+   "conf": "media",
+   "why": "Formal 'vous voulez' rendered as polite 'would you like'."
+  }
+ ]
+}

@@ -104,15 +104,22 @@ function fillNotificationPlaceholders(text, payload){
 }
 
 async function pickNotificationTemplate(eventType){
-  const { data, error } = await supabaseClient
-    .from('notification_templates')
-    .select('*')
-    .eq('event_type', eventType)
-    .eq('channel', 'in_app')
-    .eq('language_app_key', APP_KEY)
-    .eq('active', true);
-  if (error || !data?.length) return null;
-  return data[Math.floor(Math.random() * data.length)];
+  // Idioma do SITE (Fase 11 i18n): tenta a variante nesse idioma; sem variante
+  // ATIVA cai no português (mesma regra do notification-cron).
+  const uiLang = (typeof getUiLang === 'function') ? getUiLang() : 'pt-BR';
+  for (const lang of uiLang === 'en' ? ['en', 'pt-BR'] : ['pt-BR']) {
+    const { data, error } = await supabaseClient
+      .from('notification_templates')
+      .select('*')
+      .eq('event_type', eventType)
+      .eq('channel', 'in_app')
+      .eq('language_app_key', APP_KEY)
+      .eq('ui_language', lang)
+      .eq('active', true);
+    if (error) return null;
+    if (data?.length) return data[Math.floor(Math.random() * data.length)];
+  }
+  return null;
 }
 
 // Anti-spam básico da Fase 1 (seção 5/16): cooldown por categoria (minutos
@@ -257,11 +264,11 @@ function renderNotificationBellBadge(){
 function notificationTimeAgoLabel(iso){
   const diffMs = Date.now() - new Date(iso).getTime();
   const min = Math.floor(diffMs / 60000);
-  if (min < 1) return 'agora';
-  if (min < 60) return `${min}min`;
+  if (min < 1) return t('notif.time.now');
+  if (min < 60) return t('notif.time.min', { n: min });
   const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}h`;
-  return `${Math.floor(hr / 24)}d`;
+  if (hr < 24) return t('notif.time.hour', { n: hr });
+  return t('notif.time.day', { n: Math.floor(hr / 24) });
 }
 
 async function renderNotificationDropdown(){
@@ -270,7 +277,7 @@ async function renderNotificationDropdown(){
   list.innerHTML = loadingHTML();
   const items = await fetchRecentNotifications();
   if (!items.length){
-    list.innerHTML = `<p class="notifications-empty">Nenhuma notificação ainda. Continue estudando! 📚</p>`;
+    list.innerHTML = `<p class="notifications-empty">${t('notif.empty')}</p>`;
     return;
   }
   list.innerHTML = items.map(n => `
