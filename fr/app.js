@@ -10129,7 +10129,7 @@ function challengeFeedbackWrapperHTML(typeClass, isCorrect, headerText, bodyHTML
   const cls = out === 'ok' ? 'correct' : out === 'partial' ? 'partial' : 'incorrect';
   return `
     <div class="${typeClass}-feedback ${cls}">
-      <div class="${typeClass}-feedback-header">${headerText}</div>
+      <div class="${typeClass}-feedback-header"><span class="fb-ico" aria-hidden="true">${out === 'ok' ? '✓' : out === 'partial' ? '~' : '✕'}</span><span class="fb-title">${String(headerText).replace(/^[\u2705\u274C\u26A0\uFE0F\s]+/, '')}</span></div>
       ${bodyHTML}
       ${out === 'fail' ? challengeRetryButtonsHTML() : challengeCompleteButtonHTML()}
     </div>
