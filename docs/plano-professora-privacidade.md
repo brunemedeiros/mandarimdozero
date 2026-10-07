@@ -97,3 +97,11 @@ Plano de migrations (proposto):
   student, teacher) na aba ⭐ Premium (que também concede/remove Professora; separar depois se crescer). Uma conta
   com vários tipos fica com a soma das permissões (vale sempre a mais generosa; limites numéricos = o maior).
   Professora é um Premium com mais permissões (assinatura mais cara no futuro).
+
+## Etapa 1 -- modelo de papéis (decisões da autora, 2026-10-07, 2ª rodada)
+- **Aulas e Material de apoio iguais**: o aluno com vínculo ativo **lê** os registros de aula ("O que aconteceu nesta
+  aula") e os materiais dele; só a professora edita. Sem vínculo ativo, não aparece. Material de apoio só aparece no
+  menu quando houver pelo menos 1 material.
+- **Papéis somados**: toda conta tem Usuário. Vínculo ativo acrescenta Aluno (desvincular volta a só Usuário).
+  Professora é concedida pela admin. Assinatura concede Premium. Permissões = soma dos papéis (vale a mais generosa).
+- "Premium" continua sendo o nome geral (quem não é grátis); Basic e Pro são as duas faixas dentro dele.
