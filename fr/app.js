@@ -9954,6 +9954,17 @@ const CHALLENGE_I18N = {
     'ch.lt.alert.mustInclude': 'Faltou uma ideia importante: "{word}".',
     'ch.lt.alert.mustExclude': 'A palavra "{word}" não se encaixa nesta frase.',
     'ch.lt.missing': 'Palavras que faltaram',
+    'ch.search.placeholder': 'Buscar expressão…',
+    'ch.search.label': 'Buscar nas expressões',
+    'ch.search.none': 'Nenhuma expressão encontrada.',
+    'ch.filter.label': 'Filtrar expressões',
+    'ch.filter.all': 'Todas',
+    'ch.filter.pending': 'Pendentes',
+    'ch.filter.done': 'Concluídas',
+    'ch.ring.aria': '{done} de {total} concluídas',
+    'ch.lt.legend.bad': 'palavra errada',
+    'ch.lt.legend.near': 'quase certa',
+    'ch.lt.legend.miss': 'faltou',
     'ch.lt.agreement': '⚠ Repare na concordância: depois de "{pronoun}", "{verb}" não é a conjugação certa.',
     'ch.lt.yours': 'Sua resposta',
     'ch.lt.expected': 'Resposta esperada',
@@ -10347,7 +10358,7 @@ function challengeFeedbackWrapperHTML(typeClass, isCorrect, headerText, bodyHTML
   const cls = out === 'ok' ? 'correct' : out === 'partial' ? 'partial' : 'incorrect';
   return `
     <div class="${typeClass}-feedback ${cls}">
-      <div class="${typeClass}-feedback-header">${headerText}</div>
+      <div class="${typeClass}-feedback-header"><span class="fb-ico" aria-hidden="true">${out === 'ok' ? '✓' : out === 'partial' ? '~' : '✕'}</span><span class="fb-title">${String(headerText).replace(/^[\u2705\u274C\u26A0\uFE0F\s]+/, '')}</span></div>
       ${bodyHTML}
       ${out === 'fail' ? challengeRetryButtonsHTML() : challengeCompleteButtonHTML()}
     </div>
@@ -10500,6 +10511,14 @@ async function renderChallengeCategories(){
       ${challengeProgressHTML(dictationsHere.filter(d => isDictationDone(d.id)).length, dictationsHere.length)}
     </button>
   ` : '');
+  // Anel de progresso no ícone de cada categoria (CSS lê --p, 0 a 100).
+  wrap.querySelectorAll('.challenge-category-card').forEach(card => {
+    const pr = card.querySelector('.challenge-progress');
+    if (!pr) return;
+    const d = Number(pr.dataset.done), t = Number(pr.dataset.total);
+    card.style.setProperty('--p', t ? Math.round(d / t * 100) : 0);
+    if (t && d >= t) card.dataset.complete = '1';
+  });
   const reviewCard = document.getElementById('challenges-review-card');
   if (reviewCard) reviewCard.addEventListener('click', openChallengeReviewQueue);
   wrap.querySelectorAll('.challenge-category-card[data-category]').forEach(card => {
@@ -10626,16 +10645,69 @@ function renderChallengesList(type){
   // Todos os níveis numa página só (estilo lingua.com), cada um com seus
   // próprios cards -- em vez de abas que escondem os outros níveis.
   cardsWrap.className = 'challenges-level-sections';
+  cardsWrap.innerHTML = `
+    <div class="challenges-toolbar">
+      <input type="search" class="challenges-search" id="challenges-search" placeholder="${chT('ch.search.placeholder')}" aria-label="${chT('ch.search.label')}" autocomplete="off" value="${escapeHtmlChallenge(challengesListSearch)}">
+      <div class="challenges-filter-chips" role="group" aria-label="${chT('ch.filter.label')}">
+        ${['all', 'pending', 'done'].map(f => `<button type="button" class="challenges-filter-chip ${challengesListFilter === f ? 'active' : ''}" data-filter="${f}" aria-pressed="${challengesListFilter === f}">${chT('ch.filter.' + f)}</button>`).join('')}
+      </div>
+    </div>
+    <div id="challenges-level-sections-inner"></div>
+  `;
+  const fillSections = () => fillExpressionLevelSections(type, published);
+  document.getElementById('challenges-search').addEventListener('input', e => {
+    challengesListSearch = e.target.value;
+    fillSections();
+  });
+  cardsWrap.querySelectorAll('.challenges-filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      challengesListFilter = chip.dataset.filter;
+      cardsWrap.querySelectorAll('.challenges-filter-chip').forEach(ch => {
+        const on = ch.dataset.filter === challengesListFilter;
+        ch.classList.toggle('active', on);
+        ch.setAttribute('aria-pressed', String(on));
+      });
+      fillSections();
+    });
+  });
+  fillSections();
+}
+
+// Busca/filtro da lista de Expressões (07/10/2026). Só filtram a exibição --
+// o anel de cada nível sempre mostra o progresso do nível inteiro (não do
+// que está filtrado), pra não parecer que o progresso mudou ao buscar.
+let challengesListSearch = '';
+let challengesListFilter = 'all';
+
+function challengeSearchHaystack(c){
+  return normalizeForTranslationCompare([c.canonicalExpression, c.level].join(' '));
+}
+
+function fillExpressionLevelSections(type, published){
+  const inner = document.getElementById('challenges-level-sections-inner');
+  if (!inner) return;
+  const q = normalizeForTranslationCompare(challengesListSearch);
+  const matches = c => {
+    if (challengesListFilter === 'pending' && isChallengeCompleted(c.id)) return false;
+    if (challengesListFilter === 'done' && !isChallengeCompleted(c.id)) return false;
+    return !q || challengeSearchHaystack(c).includes(q);
+  };
+  const filtering = challengesListFilter !== 'all' || !!q;
   const levelsPresent = CHALLENGE_LEVELS_ORDER.filter(lvl => published.some(c => c.level === lvl));
-  cardsWrap.innerHTML = levelsPresent.map(level => {
-    const levelCards = published.filter(c => c.level === level);
-    const collapsed = collapsedChallengeLevels.has(level);
+  const html = levelsPresent.map(level => {
+    const levelAll = published.filter(c => c.level === level);
+    const levelCards = levelAll.filter(matches);
+    if (filtering && !levelCards.length) return '';
+    const collapsed = collapsedChallengeLevels.has(level) && !filtering;
+    const doneN = levelAll.filter(c => isChallengeCompleted(c.id)).length;
+    const pct = levelAll.length ? Math.round(doneN / levelAll.length * 100) : 0;
     return `
       <div class="challenges-level-section">
         <button class="challenges-level-heading" data-level="${level}">
           <span class="challenges-level-chevron ${collapsed ? 'collapsed' : ''}">▾</span>
+          <span class="challenges-level-ring" style="--p:${pct}" data-complete="${pct === 100 ? 1 : 0}" role="img" aria-label="${chT('ch.ring.aria', { done: doneN, total: levelAll.length })}">${doneN}/${levelAll.length}</span>
           ${t('fr.challenges.levelName', { level })}
-          <span class="challenges-level-count">${levelCards.length}</span>
+          <span class="challenges-level-count">${filtering ? `${levelCards.length}/${levelAll.length}` : levelAll.length}</span>
         </button>
         <div class="challenges-cards" ${collapsed ? 'style="display:none;"' : ''}>
           ${levelCards.map(challengeCardHTML).join('')}
@@ -10643,16 +10715,17 @@ function renderChallengesList(type){
       </div>
     `;
   }).join('');
+  inner.innerHTML = html || `<div class="challenges-empty"><p>${chT('ch.search.none')}</p></div>`;
 
-  cardsWrap.querySelectorAll('.challenge-card').forEach(card => {
+  inner.querySelectorAll('.challenge-card').forEach(card => {
     card.addEventListener('click', () => openChallengePlayer(card.dataset.challengeId));
   });
-  cardsWrap.querySelectorAll('.challenges-level-heading').forEach(btn => {
+  inner.querySelectorAll('.challenges-level-heading').forEach(btn => {
     btn.addEventListener('click', () => {
       const level = btn.dataset.level;
       if (collapsedChallengeLevels.has(level)) collapsedChallengeLevels.delete(level);
       else collapsedChallengeLevels.add(level);
-      renderChallengesList(type);
+      fillExpressionLevelSections(type, published);
     });
   });
 }
@@ -10866,8 +10939,8 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
   const bodyHTML = `
       ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.expr.yourAnswer', { chosen: escapeHtmlChallenge(c.options[chosenIdx]), correct: escapeHtmlChallenge(c.correctAnswer) })}</p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
-      ${chT('ch.expr.signifies', { fr: escapeHtmlChallenge(c.meaning.fr) })}<br>
-      ${chT('ch.expr.inPt', { pt: escapeHtmlChallenge(c.meaning.pt) })}</p>
+      ${chT('ch.expr.signifies', { fr: escapeHtmlChallenge(String(c.meaning.fr).replace(/[.\s]+$/, '')) })}<br>
+      ${chT('ch.expr.inPt', { pt: escapeHtmlChallenge(String(c.meaning.pt).replace(/[.\s]+$/, '')) })}</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
 
       <div class="challenge-second-example">
@@ -11174,7 +11247,70 @@ function listenTranslateOutcome(studentAnswer, referenceTranslations, personMism
   if (personMismatch || an.alerts.length || an.similarity < 0.8) return 'partial';
   return 'ok';
 }
+
+// ---- Marcação palavra a palavra (07/10/2026) ----
+// Cada palavra da resposta do aluno vira 'ok' (está na referência), 'near'
+// (quase: mesma raiz/pequena diferença de grafia ou flexão, ex. comprou x
+// comprei) ou 'bad' (não está na referência). Palavras de ligação (artigos,
+// preposições) que sobram são neutras (null). Na referência, 'ok' = o aluno
+// escreveu, 'near' = foi a quase-acertada, 'miss' = faltou.
+function translationEditDistance(a, b){
+  const m = a.length, n = b.length;
+  if (!m) return n;
+  if (!n) return m;
+  let prev = Array.from({ length: n + 1 }, (_, j) => j);
+  for (let i = 1; i <= m; i++){
+    const cur = [i];
+    for (let j = 1; j <= n; j++){
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+function translationWordsAreNear(a, b){
+  if (a === b) return true;
+  if (Math.min(a.length, b.length) < 4) return false;
+  let p = 0;
+  while (p < a.length && p < b.length && a[p] === b[p]) p++;
+  if (p >= 4 && p >= Math.min(a.length, b.length) - 3) return true;
+  return translationEditDistance(a, b) <= Math.max(1, Math.floor(Math.max(a.length, b.length) / 4));
+}
+function markTranslationWords(studentAnswer, referenceText){
+  const toks = s => String(s || '').split(/\s+/).filter(Boolean)
+    .map(text => ({ text, norm: normalizeForTranslationCompare(text) }));
+  const stu = toks(studentAnswer), ref = toks(referenceText);
+  stu.forEach(t => { t.cls = null; });
+  ref.forEach(t => { t.cls = null; });
+  const free = t => t.norm && !t.cls;
+  // 1) iguais
+  stu.forEach(s => {
+    if (!s.norm) return;
+    const r = ref.find(r => free(r) && r.norm === s.norm);
+    if (r){ s.cls = 'ok'; r.cls = 'ok'; }
+  });
+  // 2) quase
+  stu.forEach(s => {
+    if (!s.norm || s.cls) return;
+    const r = ref.find(r => free(r) && !TRANSLATION_STOPWORDS_PT.has(r.norm) && translationWordsAreNear(s.norm, r.norm));
+    if (r){ s.cls = 'near'; r.cls = 'near'; }
+  });
+  // 3) o resto
+  stu.forEach(s => {
+    if (!s.norm || s.cls) return;
+    s.cls = TRANSLATION_STOPWORDS_PT.has(s.norm) ? null : 'bad';
+  });
+  ref.forEach(r => {
+    if (!r.norm || r.cls) return;
+    r.cls = TRANSLATION_STOPWORDS_PT.has(r.norm) ? null : 'miss';
+  });
+  return { student: stu.map(({ text, cls }) => ({ text, cls })), reference: ref.map(({ text, cls }) => ({ text, cls })) };
+}
 // END challenge-translation-logic
+
+function markedWordsHTML(parts){
+  return parts.map(p => p.cls ? `<span class="tw-${p.cls}">${escapeHtmlChallenge(p.text)}</span>` : escapeHtmlChallenge(p.text)).join(' ');
+}
 
 function openListenTranslatePlayer(c){
   const content = document.getElementById('challenge-player-content');
@@ -11247,11 +11383,19 @@ function checkListenTranslateAnswer(c){
   // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
+  const marked = (outcome !== 'ok' && studentAnswer && analysis) ? markTranslationWords(studentAnswer, analysis.bestRef || c.referenceTranslations[0]) : null;
+  const yoursHTML = marked ? markedWordsHTML(marked.student) : escapeHtmlChallenge(studentAnswer || '—');
+  const expectedHTML = marked ? markedWordsHTML(marked.reference) : escapeHtmlChallenge((analysis && analysis.bestRef) || lt.refs[0]);
+  const legendHTML = marked && (marked.student.some(p => p.cls === 'bad' || p.cls === 'near') || marked.reference.some(p => p.cls === 'miss'))
+    ? `<p class="tw-legend"><span class="tw-bad">${chT('ch.lt.legend.bad')}</span> <span class="tw-near">${chT('ch.lt.legend.near')}</span> <span class="tw-miss">${chT('ch.lt.legend.miss')}</span></p>` : '';
   const ltBodyHTML = `
       ${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
       ${analysis ? translationAlertsHTML(analysis, outcome) : ''}
-      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
-      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${escapeHtmlChallenge(lt.refs[0])}</p>
+      <div class="fb-cmp">
+        <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${yoursHTML}</p>
+        <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${expectedHTML}</p>
+      </div>
+      ${legendHTML}
       <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
       ${lt.explanation ? `<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.explanation')}</strong>${escapeHtmlChallenge(lt.explanation)}</p>` : ''}
       <div class="audio-btn-row">
