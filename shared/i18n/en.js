@@ -256,7 +256,6 @@ window.I18N_CATALOG['en'] = {
   'trail.unit.skippedBadge': '⏭ Skipped', // ALTA
   'trail.unit.grammarChip': 'Grammar', // ALTA
   'trail.checkpoint.skipLocked': 'Skipping units is a Premium plan feature (or for the teacher\'s students).', // ALTA
-  'review.studyAll': '▶ Study all Decks', // ALTA
   'review.listen.placeholder': 'Write what you heard', // ALTA
   'trail.unit.done': 'Completed', // ALTA
   'trail.unit.lessonsProgress': '{done} of {total} lessons', // ALTA
@@ -335,7 +334,6 @@ window.I18N_CATALOG['en'] = {
   'myFlashcards.edit.back': 'Back', // ALTA
   'myFlashcards.edit.cancel': 'Cancel', // ALTA
   'myFlashcards.edit.save': 'Save edit', // ALTA
-  'myFlashcards.edit.imageNotice': '⚠️ This card\'s image was kept in the data, but it doesn\'t show up in Review yet for cards from the new editor.', // MÉDIA
   'myFlashcards.toast.editedReset': '✓ Card edited. Its review progress was reset.', // ALTA
   'myFlashcards.toast.edited': '✓ Card edited.', // ALTA
   'myFlashcards.native.title': 'Edit card', // MÉDIA
@@ -740,7 +738,7 @@ window.I18N_CATALOG['en'] = {
   'auth.guestLabel': 'Guest', // ALTA
   'auth.myAccount': 'My account', // ALTA
   'auth.saveFailed': "⚠ We couldn't save your progress right now. Check your connection.", // ALTA
-  'auth.notLoadedYet': '⏳ Still confirming your saved progress -- wait a moment before continuing.', // ALTA
+  'auth.notLoadedYet': '⏳ Still confirming your saved progress. Wait a moment before continuing.', // ALTA
   'auth.staleLocal': '⚠ Your progress here looks out of date compared to what was already saved -- reload the page if this persists.', // ALTA
   'leaderboard.daysLeft': { one: '{n} day left', other: '{n} days left' }, // ALTA
   'leaderboard.sideEmpty': 'Nobody has scored this week yet.', // ALTA
@@ -927,23 +925,21 @@ window.I18N_CATALOG['en'] = {
   'fieldEditor.audio.err.uploadUnavailable': 'Audio upload is not available on this screen.', // ALTA
   'fieldEditor.audio.uploading': 'Uploading audio...', // ALTA
   'fieldEditor.audio.err.uploadFailed': "We couldn't upload the audio right now.", // ALTA
-  'fieldEditor.audio.discardedUpload': 'Another audio source was used while this file was uploading -- the result was discarded.', // ALTA
-  'fieldEditor.audio.stale': '⚠️ Outdated audio -- the text or settings changed since the last generation. Click "Generate again" to update.', // ALTA
+  'fieldEditor.audio.discardedUpload': 'Another audio source was used while this file was uploading. The result was discarded.', // ALTA
+  'fieldEditor.audio.stale': '⚠️ Outdated audio: the text or settings changed since the last generation. Click "Generate again" to update.', // ALTA
   'fieldEditor.audio.generateAgain': '🔄 Generate again', // ALTA
   'fieldEditor.audio.err.genUnavailable': 'Audio generation is not available on this screen.', // ALTA
-  'fieldEditor.audio.alreadyUpToDate': 'The audio is already up to date for these settings -- no new generation was requested.', // ALTA
+  'fieldEditor.audio.alreadyUpToDate': 'The audio is already up to date for these settings. No new generation was requested.', // ALTA
   'fieldEditor.audio.generating': 'Generating audio...', // ALTA
   'fieldEditor.audio.err.genFailed': "We couldn't generate the audio right now.", // ALTA
-  'fieldEditor.audio.discardedGen': 'Another audio source was used while this one was being generated -- the result was discarded.', // ALTA
-  'fieldEditor.audio.configChanged': 'The settings changed while the audio was being generated -- click Generate again.', // ALTA
+  'fieldEditor.audio.discardedGen': 'Another audio source was used while this one was being generated. The result was discarded.', // ALTA
+  'fieldEditor.audio.configChanged': 'The settings changed while the audio was being generated. Click Generate again.', // ALTA
   'fieldEditor.field.removeTitle': 'Remove field', // ALTA
   'fieldEditor.field.content': 'Content', // ALTA
   'fieldEditor.field.language': 'Language', // ALTA
-  'fieldEditor.field.hasImage': '🖼️ has an attached image', // ALTA
   'fieldEditor.field.hasPinyin': '🔤 has a linked pinyin field', // ALTA
-  'fieldEditor.field.mediaNotes': '{notes} (editing is not implemented yet at this stage -- preserved as they are).', // ALTA
   'fieldEditor.field.defaultLabel': 'Field {n}', // ALTA
-  'fieldEditor.list.empty': 'No fields yet -- use "Add field" below.', // ALTA
+  'fieldEditor.list.empty': 'No fields yet. Use "Add field" below.', // ALTA
   'fieldEditor.list.add': '+ Add field', // ALTA
   'mcEditor.err.notNative': 'This Note is not native.', // ALTA
   'mcEditor.err.notMcMode': 'This Note is not in Multiple choice mode.', // ALTA
@@ -1707,9 +1703,6 @@ window.I18N_CATALOG['en'] = {
   'ui.review.intensity': 'Session intensity', // ALTA
   'ui.review.intensity.light': 'Light (shorter sessions)', // ALTA
   'ui.review.intensity.intense': 'Intense (longer sessions)', // ALTA
-  'ui.review.settingsNote': 'These settings control the review engine behind the scenes -- you don\'t need to understand the technical details.', // ALTA
-  'ui.review.otherModes': 'Other modes', // ALTA
-  'ui.review.otherModesHint': 'Speed Review uses today\'s session (new words and reviews); Hard words and Match work any time.', // ALTA
   'ui.review.practiceHint': 'Keep practicing whenever you like, even with no reviews due.', // ALTA
   'ui.conj.sub': 'Choose the verb tenses and verb categories. You always practice all 6 persons.', // ALTA
   'ui.conj.topN': 'Number of verbs (most common first)', // ALTA

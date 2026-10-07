@@ -104,40 +104,22 @@ async function bootPage(browser, lang, port){
     check(lang + ' boot: cartões "Na frase" existem (1 por frase de exemplo)', info.phrases > 0, info.phrases);
     // libera todas as unidades e abre o painel de configurar sessão
     await ev(() => { UNITS.forEach(x => { STATE.unitProgress[x.id] = { started: true, completed: true, lessonIdx: 99, lessonMisses: {} }; }); switchTab('review'); renderReviewSettingsView(); });
-    const chips = await ev(() => [...document.querySelectorAll('#review-tag-chips [data-review-tag]')].map(b => b.dataset.reviewTag));
-    check(lang + ' chips aparecem com tags grossas da trilha', chips.includes('estudo') && chips.includes(course), chips);
-    check(lang + ' chips sem unidade-*/licao-*/palavra (sem poluição)', !chips.some(t => /^unidade-|^licao-/.test(t) || t === 'palavra'), chips);
-    check(lang + ' chips: poucos', chips.length > 0 && chips.length <= 12, chips.length);
-    // clique real num chip -> filtro ativo
-    const tagToClick = lang === 'fr' ? 'modulo-1' : course;
-    await ev(t => document.querySelector(`#review-tag-chips [data-review-tag="${t}"]`).click(), tagToClick);
-    const r = await ev(t => ({ filt: STATE.studySettings.reviewTagFilter, pool: eligibleReviewPool().length, all: STATE.cards.filter(isCardLessonCompleted).length,
-      allHave: eligibleReviewPool().every(c => c.tags.includes(t)) }), tagToClick);
-    check(lang + ' clique no chip ativa filtro', JSON.stringify(r.filt) === JSON.stringify([tagToClick]), r.filt);
-    check(lang + ' pool filtrado só com cards da tag', r.pool > 0 && r.allHave && (lang === 'zh' ? r.pool === r.all : r.pool < r.all), r);
-    await ev(() => document.getElementById("review-tag-clear").click());
-    const cleared = await ev(() => ({ f: STATE.studySettings.reviewTagFilter, n: eligibleReviewPool().length, all: STATE.cards.filter(isCardLessonCompleted).length }));
-    check(lang + ' limpar volta a tudo', cleared.f.length === 0 && cleared.n === cleared.all, cleared);
-    // filtro por unidade (seleção programática) funciona
-    const unitF = await ev(() => {
-      const c = STATE.cards.find(x => x.origin === 'study');
-      const ut = c.tags.find(t => t.startsWith('unidade-'));
-      updateStudySetting({ reviewTagFilter: [ut] });
-      const pool = eligibleReviewPool();
-      const out = { n: pool.length, same: pool.every(x => x.unitId === c.unitId), chipShown: !!document.querySelector(`#review-tag-chips [data-review-tag="${ut}"]`) };
-      updateStudySetting({ reviewTagFilter: [] });
-      return out;
-    });
-    check(lang + ' filtro por unidade-*: só a unidade, chip selecionado continua visível', unitF.n > 0 && unitF.same && unitF.chipShown, unitF);
+    // 2026-10-06: o filtro de tags saiu de "Configurar" e vive só no Painel
+    // (mesma lista de tags visíveis, reviewFilterVisibleTags).
+    const chips = await ev(() => reviewFilterVisibleTags(reviewTagUniverse()));
+    check(lang + ' tags visíveis do filtro incluem as grossas da trilha', chips.includes('estudo') && chips.includes(course), chips);
+    check(lang + ' tags visíveis sem unidade-*/licao-*/palavra (sem poluição)', !chips.some(t => /^unidade-|^licao-/.test(t) || t === 'palavra'), chips);
+    check(lang + ' tags visíveis: poucas', chips.length > 0 && chips.length <= 12, chips.length);
+    check(lang + ' Configurar sem filtro de tags', await ev(() => !document.getElementById('review-tag-chips')));
+    const ign = await ev(() => { updateStudySetting({ reviewTagFilter: ['modulo-1'] }); const n = eligibleReviewPool().length; updateStudySetting({ reviewTagFilter: [] }); return { n, all: STATE.cards.filter(isCardLessonCompleted).length }; });
+    check(lang + ' filtro de tag salvo é ignorado na revisão', ign.n === ign.all, ign);
     // "Na frase": cartão de frase de exemplo já existe para toda frase usada
     const ph = await ev(() => {
       const p = STATE.cards.find(c => isStudyTrailPhraseCard(c));
       const u = UNITS.find(x => x.id === p.unitId);
       const groups = studyWordGroups(STATE.cards.filter(c => c.unitId === u.id)).length;
       const speedPool = projectStudyWordsToA(eligibleReviewPool()).includes(p);
-      updateStudySetting({ reviewTagFilter: ['na-frase'] });
-      const naFrase = eligibleReviewPool().map(c => c.id);
-      updateStudySetting({ reviewTagFilter: [] });
+      const naFrase = STATE.cards.filter(isCardLessonCompleted).filter(c => cardMatchesTagFilter(c, ['na-frase'])).map(c => c.id);
       const tags = p && p.tags;
       // revisão real do card de frase
       STATE.reviewQueue = [p]; STATE.reviewIndex = 0; STATE.reviewCardState = null; switchTab('review'); renderReviewView();

@@ -152,10 +152,12 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const BASE = process.env.I18N_BASELINE || 'e88fabb';
   const orig = (f) => execSync(`git show ${BASE}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
   const origFr = orig('fr/index.html'), origZh = orig('zh/index.html'), origRep = orig('shared/reports.js');
-  const PREV = process.env.I18N_PREV || '957a154';
+  // ce8c3b1 = ponta da branch da Revisão antes do merge com o i18n (2026-10-07): o HTML
+  // e os textos em pt-BR daquela branch passam a ser a referência.
+  const PREV = process.env.I18N_PREV || 'ce8c3b1';
   // Mudanças DELIBERADAS de texto em português (aprovadas pela dona do projeto) desde o
   // commit PREV: aplicadas ao texto antigo antes de comparar. Qualquer outra diferença falha.
-  const DELIBERATE_PT_CHANGES = [['arquive algum cartão que já não usa, ou peça', 'apague algum cartão, ou peça']];
+  const DELIBERATE_PT_CHANGES = [['arquive algum cartão que já não usa, ou peça', 'apague algum cartão, ou peça'], ['exportado de lá Você confere', 'exportado de lá. Você confere']];
   const prev = (f) => DELIBERATE_PT_CHANGES.reduce((acc, [o, n]) => acc.split(o).join(n), execSync(`git show ${PREV}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 }));
   const prevFr = prev('fr/index.html'), prevZh = prev('zh/index.html');
   const prevJs = ['shared/my-flashcards.js', 'shared/public-profile.js', 'shared/anki-import-ui.js', 'fr/app.js', 'zh/app.js', 'shared/flashcard-model.js', 'shared/own-flashcards.js', 'shared/flashcard-preview.js', 'shared/notifications.js', 'shared/notification-preferences.js', 'shared/deck-data.js', 'shared/admin-students.js', 'shared/profile.js', 'shared/leaderboard.js', 'shared/auth.js', 'shared/support-materials-view.js', 'shared/anki-export.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-mc-editor.js', 'shared/flashcard-typeanswer-editor.js', 'shared/flashcard-cloze-editor.js', 'shared/admin-flashcards.js', 'shared/admin-class-logs.js', 'shared/admin-support-materials.js', 'shared/admin-premium.js', 'shared/teacher-flashcards.js', 'shared/teacher-class-logs.js', 'shared/teacher-support-materials.js', 'shared/admin-analytics.js', 'shared/admin-badges.js', 'shared/admin-notifications.js', 'shared/admin-reports.js', 'shared/flashcard-field-audio-recorder.js', 'shared/wizard.js', 'shared/language-switcher.js', 'shared/fsrs.js', 'shared/deck-engine.js', 'shared/checkpoint-exam.js'].map(prev).join('\n');

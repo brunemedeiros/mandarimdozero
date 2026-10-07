@@ -176,7 +176,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     await page.evaluate(() => switchTab('review'));
     await page.waitForSelector('#review-decks-table table.deck-table', { timeout: 8000 });
     const table = await page.evaluate(() => {
-      const rows = Array.from(document.querySelectorAll('#review-decks-table tbody tr')).map(tr => ({
+      const rows = Array.from(document.querySelectorAll('#review-decks-table tbody tr[data-deck-row]')).map(tr => ({
         id: tr.dataset.deckRow, name: tr.querySelector('.deck-table-link').textContent,
         nums: Array.from(tr.querySelectorAll('.deck-table-num')).map(td => Number(td.textContent)),
       }));
@@ -187,8 +187,14 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
       const b = bar.getBoundingClientRect();
       return { rows, head, studyBtns: document.querySelectorAll('#review-decks-table [data-study-deck], #review-decks-table .btn-primary').length,
         align: [getComputedStyle(num).textAlign, getComputedStyle(th).textAlign],
-        bar: Array.from(bar.querySelectorAll('button')).map(x => x.textContent.trim()), barCenter: Math.abs((b.left + b.right) / 2 - (wrap.left + wrap.right) / 2),
-        homeBtns: Array.from(document.querySelectorAll('#review-decks-table .deck-home-actions button')).map(x => x.textContent.trim()) };
+        bar: Array.from(bar.querySelectorAll(':scope > button, :scope > details > summary')).map(x => x.textContent.trim()), barCenter: Math.abs((b.left + b.right) / 2 - (wrap.left + wrap.right) / 2),
+        homeBtns: document.querySelectorAll('#review-decks-table .deck-home-actions, #review-decks-table .deck-more-menu').length,
+        createRow: (() => { const r = document.querySelector('#review-decks-table .deck-table-create-row'); const prev = r && r.previousElementSibling; return { text: r ? r.textContent.trim() : null, afterPersonal: !!(prev && ['9001','9002','9003','9004'].includes(prev.dataset.deckRow)) }; })(),
+        modesLabel: Array.from(document.querySelectorAll('#view-review .section-label')).some(x => x.textContent.trim() === 'Outros modos'),
+        spacer: !!document.querySelector('#view-review .review-modes-spacer'),
+        tagFilter: !!document.getElementById('review-tag-filter-wrap'),
+        moreItems: Array.from(document.querySelectorAll('#review-deck-topbar-home .deck-more-menu-list button')).map(x => x.textContent.trim()),
+        decksLabel: Array.from(document.querySelectorAll('#view-review .section-label')).some(x => x.textContent.trim() === 'Decks') };
     });
     check(lang + ' cabeçalho Deck|Novo|Aprendendo|Revisar', table.head.join('|') === 'Deck|Novo|Aprendendo|Revisar', table.head);
     const ids = table.rows.map(r => r.id);
@@ -197,7 +203,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     check(lang + ' Trilha começa fechada', !ids.includes('9201'), ids);
     check(lang + ' sem botão Estudar na tabela', table.studyBtns === 0, table.studyBtns);
     check(lang + ' números centralizados embaixo das colunas', table.align.join() === 'center,center', table.align);
-    check(lang + ' barra do topo: Decks | Adicionar | Painel | Configurar, centralizada', table.bar.join('|') === 'Decks|Adicionar|Painel|Configurar' && table.barCenter < 3, table);
+    check(lang + ' barra do topo: Decks | Adicionar | Painel | Configurar, centralizada', table.bar.join('|') === 'Decks|Adicionar|Painel|Configurar|⋯' && table.barCenter < 3, table);
 
     // ---- 1b) Outros modos numa fileira só; sem bloco Flashcard ----
     const modes = await page.evaluate(() => {
@@ -218,7 +224,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
       const card = document.getElementById('mode-card-speed').getBoundingClientRect();
       return { spans, exp, fits: sp.width <= card.width, legend: (document.querySelector('#mode-card-speed .speed-split-legend') || {}).textContent };
     });
-    check(lang + ' Speed Review mostra Novo/Aprendendo/Revisar da sessão, cabendo no card', speed.spans.join() === speed.exp.join() && speed.fits && /novo/.test(speed.legend || ''), speed);
+    check(lang + ' Speed Review mostra Novo/Aprendendo/Revisar da sessão, cabendo no card', speed.spans.join() === speed.exp.join() && speed.fits, speed);
     check(lang + ' sem bloco Flashcard nem seção Revisar', !modes.flash && !modes.revisar, modes);
     const queueLen = await page.evaluate(() => getStudyQueue(eligibleReviewPool(), { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length);
     check(lang + ' "Estudar todos os Decks" só quando há o que estudar', modes.studyAll === queueLen > 0, { modes, queueLen });
@@ -228,21 +234,26 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
       window.__DB.teacher_students[0].status = 'removed';
       DECK_BROWSER.teacherLink = {};
       await renderReviewDeckTable();
-      const ids = Array.from(document.querySelectorAll('#review-decks-table tbody tr')).map(tr => tr.dataset.deckRow);
+      const ids = Array.from(document.querySelectorAll('#review-decks-table tbody tr[data-deck-row]')).map(tr => tr.dataset.deckRow);
       window.__DB.teacher_students[0].status = 'active';
       DECK_BROWSER.teacherLink = {};
       await renderReviewDeckTable();
-      const back = Array.from(document.querySelectorAll('#review-decks-table tbody tr')).map(tr => tr.dataset.deckRow);
+      const back = Array.from(document.querySelectorAll('#review-decks-table tbody tr[data-deck-row]')).map(tr => tr.dataset.deckRow);
       return { ids, back };
     });
     check(lang + ' sem vínculo ativo: Cartões da professora não aparece', !noLink.ids.includes('9100') && noLink.ids.includes('9001'), noLink);
     check(lang + ' com vínculo ativo: volta a aparecer', noLink.back.includes('9100'), noLink);
 
-    check(lang + ' embaixo da tabela: Criar Deck, Importar arquivo, Exportar', table.homeBtns.join('|') === 'Criar Deck|Importar arquivo|Exportar', table.homeBtns);
+    check(lang + ' sem linha de botões embaixo da tabela', table.homeBtns === 0, table.homeBtns);
+    check(lang + ' "+ Criar Deck" é um link discreto logo abaixo de Meus Decks', table.createRow.text === '+ Criar Deck' && table.createRow.afterPersonal, table.createRow);
+    check(lang + ' sem título "Outros modos", com espaço acima dos modos', !table.modesLabel && table.spacer, table);
+    check(lang + ' Configurar sem filtro de tags', !table.tagFilter, table.tagFilter);
+    check(lang + ' menu ⋯ (ao lado de Configurar) tem Importar e Exportar', table.moreItems.length === 2 && /^Importar arquivo/.test(table.moreItems[0]) && table.moreItems[1] === 'Exportar', table.moreItems);
+    check(lang + ' sem o título DECKS', !table.decksLabel);
     const meus = await page.evaluate(() => getDeckCounts(STATE.decks, 9001, eligibleDeckReviewPool()).new);
     check(lang + ' Novo de Meus Decks = 4', table.rows.find(r => r.id === '9001').nums[0] === 4 && meus === 4, table.rows.find(r => r.id === '9001'));
     await page.click('[data-deck-toggle="9200"]');
-    check(lang + ' abrir a Trilha mostra a unidade', (await page.evaluate(() => Array.from(document.querySelectorAll('#review-decks-table tbody tr')).map(tr => tr.dataset.deckRow))).includes('9201'));
+    check(lang + ' abrir a Trilha mostra a unidade', (await page.evaluate(() => Array.from(document.querySelectorAll('#review-decks-table tbody tr[data-deck-row]')).map(tr => tr.dataset.deckRow))).includes('9201'));
     if (lang === 'fr') await shot(page, 'deck-home-fr');
 
     // ---- 1b) Criar Deck ----
@@ -261,13 +272,13 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
         title: w.querySelector('.deck-overview-title').textContent,
         labels: Array.from(w.querySelectorAll('.deck-overview-counts dt')).map(n => n.textContent),
         nums: Array.from(w.querySelectorAll('.deck-overview-counts dd')).map(n => Number(n.textContent)),
-        study: !!w.querySelector('[data-deck-study]'), bar: Array.from(w.querySelectorAll('.deck-topbar button')).map(b => b.textContent.trim()),
+        study: !!w.querySelector('[data-deck-study]'), bar: Array.from(w.querySelectorAll('.deck-topbar > button, .deck-topbar > details > summary')).map(b => b.textContent.trim()),
         footer: Array.from(w.querySelectorAll('.deck-overview-footer button')).map(b => b.textContent.trim()), hash: location.hash };
     });
     check(lang + ' tela do Deck no lugar da tela de modos', detail.visible && detail.modesHidden, detail);
     check(lang + ' tela do Deck: nome com caminho', detail.title === 'Meus Decks › Verbos', detail.title);
-    check(lang + ' tela do Deck: Novo/Aprendendo/Revisar + Estudar agora', detail.labels.join('|') === 'Novo:|Aprendendo:|Revisar:' && detail.nums[0] === 2 && detail.study, detail);
-    check(lang + ' tela do Deck: mesma barra do topo', detail.bar.join('|') === 'Decks|Adicionar|Painel|Configurar', detail.bar);
+    check(lang + ' tela do Deck: Novo/Aprendendo/Revisar + Estudar agora', detail.labels.join('|') === 'Novo|Aprendendo|Revisar' && detail.nums[0] === 2 && detail.study, detail);
+    check(lang + ' tela do Deck: mesma barra do topo', detail.bar.join('|') === 'Decks|Adicionar|Painel|Configurar|⋯', detail.bar);
     check(lang + ' tela do Deck pessoal: Criar subdeck, Renomear, Publicar, Excluir', ['Criar subdeck', 'Renomear', 'Excluir'].every(b => detail.footer.includes(b)) && detail.footer.some(b => /Publicar|Público/.test(b)), detail.footer);
     check(lang + ' tela do Deck tem endereço próprio', detail.hash === '#/review/decks/9002', detail.hash);
     if (lang === 'fr'){ await shot(page, 'deck-detail-fr'); await page.evaluate(() => openReviewSettingsModal()); await shot(page, 'deck-settings-fr'); await page.evaluate(() => closeReviewSettingsModal()); }
@@ -421,13 +432,14 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     check(lang + ' fechar o Painel da tela inicial volta à tabela', await page.evaluate(() => DECK_BROWSER.view === 'home' && location.hash === '#/review'));
 
     // ---- 5) Exportar e Importar ----
-    await page.click('#review-decks-table [data-deck-export]');
+    await page.click('#review-deck-topbar-home .deck-more-menu summary');
+    await page.click('#review-deck-topbar-home [data-deck-export]');
     await page.waitForFunction(() => { const m = document.getElementById('my-flashcards-export-modal'); return m && getComputedStyle(m).display !== 'none'; });
     check(lang + ' Exportar abre a janela de exportação', true);
     await page.evaluate(() => { document.getElementById('my-flashcards-export-modal').style.display = 'none'; });
     const payload = JSON.stringify({ languageAppKey: await page.evaluate(() => APP_KEY), cards: [{ front: 'chat', backTrans: 'gato', frontIsTargetLanguage: true }] });
     await page.evaluate(() => { window.__created = []; resolveOwnCreationDeck = async () => ({ ok: true, deckId: 9001, decks: STATE.decks }); });
-    await page.setInputFiles('#review-decks-table [data-deck-import-file]', { name: 'cartoes.json', mimeType: 'application/json', buffer: Buffer.from(payload) });
+    await page.setInputFiles('#review-deck-topbar-home [data-deck-import-file]', { name: 'cartoes.json', mimeType: 'application/json', buffer: Buffer.from(payload) });
     await page.waitForFunction(() => window.__created.length === 1, null, { timeout: 8000 });
     check(lang + ' Importar arquivo (.json) cria o cartão', await page.evaluate(() => window.__created[0].deck_id === 9001 && STATE.cards.some(c => c.origin === 'self' && c.rowId === window.__created[0].id)));
 
@@ -509,10 +521,11 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
       const w = document.getElementById('review-today-widget');
       const table = document.getElementById('review-decks-table');
       return { nums: w.querySelectorAll('.review-today-count').length, text: w.textContent,
-        afterTable: !!(table.compareDocumentPosition(w) & Node.DOCUMENT_POSITION_FOLLOWING),
+        beforeTable: !!(table.compareDocumentPosition(w) & Node.DOCUMENT_POSITION_PRECEDING),
+        btn: (document.getElementById('review-study-all-btn') || {}).textContent || '', short: !!document.getElementById('review-short-btn'),
         oldBtn: !!document.getElementById('review-header-settings-btn'), oldLabel: /Configurar sessão|Revisões pendentes|Para estudar agora/.test(document.getElementById('review-mode-select-wrap').textContent) };
     });
-    check(lang + ' sem contador de revisões no topo; botão de estudar abaixo da tabela', w1.nums === 0 && w1.afterTable && !w1.oldBtn && !w1.oldLabel && !/Filtro da sessão/.test(w1.text), w1);
+    check(lang + ' total de hoje no topo (Novo/Aprendendo/Revisar), acima da tabela, com Estudar tudo (N) e 5 minutos', w1.nums === 3 && w1.beforeTable && /^Estudar tudo \(\d+\)$/.test(w1.btn.trim()) && w1.short && !w1.oldBtn && !w1.oldLabel && !/Filtro da sessão/.test(w1.text), w1);
     const head = await page.evaluate(() => {
       const wrap = document.getElementById('review-mode-select-wrap');
       const h2 = wrap.querySelector('.path-header h2'), bar = document.getElementById('review-deck-topbar-home');
@@ -563,6 +576,23 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     check(lang + ' Painel: lista inteira, sem "mostrando os primeiros"', pn.rows === pn.shown && !/primeiros/.test(pn.count), pn);
     await page.evaluate(() => closeDeckPanel());
 
+    // ---- Conquista: guardada durante a revisão, mostrada no fim ----
+    const badge = await page.evaluate(async () => {
+      document.querySelectorAll('.badge-unlock-toast').forEach(e => e.remove());
+      badgeCelebrationShowing = false; badgeCelebrationQueue.length = 0;
+      holdBadgeCelebrations();
+      badgeCelebrationQueue.push({ icon: '🏅', name: 'Teste', desc: 'desc' });
+      processBadgeCelebrationQueue();
+      const during = document.querySelectorAll('.badge-unlock-toast').length;
+      releaseBadgeCelebrations();
+      const after = document.querySelectorAll('.badge-unlock-toast').length;
+      const layer = getComputedStyle(document.getElementById('badge-unlock-layer'));
+      document.querySelectorAll('.badge-unlock-toast').forEach(e => e.remove());
+      badgeCelebrationShowing = false;
+      return { during, after, top: layer.top, bottom: layer.bottom };
+    });
+    check(lang + ' conquista guardada durante a sessão e mostrada ao terminar', badge.during === 0 && badge.after === 1, badge);
+    check(lang + ' conquista aparece embaixo (não no topo)', badge.bottom !== 'auto' && parseFloat(badge.bottom) > 0, badge);
     check(lang + ' sem erros de página', errors.length === 0, errors);
     // F5 com o Painel aberto (da tela inicial: depois do F5 a sessão de teste
     // volta a ser convidada, sem os Decks pessoais montados no setup)
@@ -629,6 +659,22 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     await shot(page, `deck-panel-${lang}-mobile-editor`);
     await page.click('#deck-panel-modal [data-panel-back]');
     check(lang + ' celular: "← Lista" volta para a lista', await page.evaluate(() => getComputedStyle(document.querySelector('#deck-panel-modal .deck-panel-listpane')).display !== 'none'));
+    // Conquista no celular: logo acima da barra de abas, sem cobrir o título.
+    const mb = await page.evaluate(() => {
+      const layer = document.getElementById('badge-unlock-layer');
+      const el = document.createElement('div'); el.className = 'badge-unlock-toast'; el.textContent = 'x'; layer.appendChild(el);
+      const r = el.getBoundingClientRect(); const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
+      el.remove(); return { bottom: r.bottom, navTop: nav.top, top: r.top, h: window.innerHeight };
+    });
+    check(lang + ' celular: conquista logo acima da barra de abas', mb.bottom <= mb.navTop + 1 && mb.top > mb.h / 2, mb);
+    const tb = await page.evaluate(() => { closeDeckPanel({ silent: true }); backToDeckTable && backToDeckTable(); const b = document.querySelector('#review-deck-topbar-home .deck-topbar'); if (!b) return null; const tops = Array.from(b.querySelectorAll(':scope > button, :scope > details > summary')).map(x => Math.round(x.getBoundingClientRect().top)); return { right: b.getBoundingClientRect().right, w: window.innerWidth, oneLine: new Set(tops).size === 1 }; });
+    check(lang + ' celular: barra do topo (com ⋯) cabe numa linha só', tb && tb.right <= tb.w + 1 && tb.oneLine, tb);
+    await page.click('#review-deck-topbar-home .deck-more-menu summary');
+    await page.waitForTimeout(500);
+    const mm = await page.evaluate(() => { const l = document.querySelector('#review-deck-topbar-home .deck-more-menu-list').getBoundingClientRect(); return { left: l.left, right: l.right, w: window.innerWidth }; });
+    check(lang + ' celular: menu ⋯ abre dentro da tela', mm.left >= 0 && mm.right <= mm.w + 1, mm);
+    await shot(page, `deck-menu-${lang}-mobile`);
+    await page.keyboard.press('Escape');
     await ctx.close();
   }
 

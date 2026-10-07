@@ -352,3 +352,24 @@ function projectStudyWordsToA(cards){
   // vocabulário (Speed/Combinar). Review/Deck/Anki continuam vendo-os.
   return (cards || []).filter(c => !isStudyTrailPhraseCard(c) && isStudyWordProjectionCard(c));
 }
+
+// Nome amigável de uma tag para os filtros (Configurar e Painel). As tags
+// automáticas da trilha ganham nome por extenso ("Módulo 1", "Francês
+// (geral)"); qualquer outra tag continua aparecendo como "#tag". Só muda o
+// que se lê na tela: o filtro continua usando o slug.
+const STUDY_TRAIL_TAG_LANG_NAMES = { frances: 'Francês', mandarim: 'Mandarim', portugues: 'Português' };
+function friendlyTagLabel(tag){
+  const t = String(tag || '');
+  if (t === 'estudo') return 'Trilha de Estudo';
+  if (t === 'palavra') return 'Palavra';
+  if (t === 'na-frase') return 'Na frase';
+  let m = t.match(/^(frances|mandarim|portugues)-geral$/);
+  if (m) return STUDY_TRAIL_TAG_LANG_NAMES[m[1]] + ' (geral)';
+  m = t.match(/^nivel-([a-z0-9]+)$/);
+  if (m) return 'Nível ' + m[1].toUpperCase();
+  m = t.match(/^modulo-(\d+)$/);
+  if (m) return 'Módulo ' + m[1];
+  m = t.match(/^licao-(\d+)$/);
+  if (m) return 'Lição ' + m[1];
+  return '#' + t;
+}

@@ -265,6 +265,22 @@ function validateFieldAudioUploadFile(file){
   return { ok: true };
 }
 
+// Imagem por campo (botão discreto do editor, 2026-10-06). Mesmo bucket
+// `flashcard-media` e mesmo teto de 5 MB do áudio; a migration 072 libera
+// estes tipos no bucket.
+const FIELD_IMAGE_UPLOAD_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+function validateFieldImageUploadFile(file){
+  if (!file) return { ok: false, error: 'Nenhum arquivo selecionado.' };
+  if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: 'Arquivo vazio.' };
+  if (typeof file.size === 'number' && file.size > FIELD_AUDIO_UPLOAD_MAX_BYTES){
+    return { ok: false, error: 'Imagem maior que 5 MB. Escolha uma imagem menor.' };
+  }
+  if (!FIELD_IMAGE_UPLOAD_MIME_TYPES.includes(file.type || '')){
+    return { ok: false, error: 'Formato de imagem não suportado. Use JPG, PNG, WEBP ou GIF.' };
+  }
+  return { ok: true };
+}
+
 // ---------- Fase 7h.1 (UI completa de áudio por Field, ver CLAUDE.md) ----------
 //
 // Validação PURA de uma URL externa de áudio -- nunca faz I/O (nunca busca
@@ -300,7 +316,16 @@ function validateFieldAudioUrl(url){
 // invalida o cache de TODO Field TTS já gerado (generationKey muda pra
 // todo mundo), sem nenhuma migração de dado.
 const TTS_PROVIDER_MODEL_ID = 'google-chirp3-hd'; // Google Cloud TTS, Chirp 3 HD (ver Edge Function tts-generate)
-const TTS_CONFIG_VERSION = 1;
+const TTS_CONFIG_VERSION = 2;
+// Versão das regras de "texto falado" POR IDIOMA (tts_core.mjs /
+// spoken_text.py). Entra no generationKey junto com TTS_CONFIG_VERSION:
+// mudar a regra de um idioma invalida só os áudios daquele idioma.
+const TTS_SPOKEN_RULES_VERSION_BY_LANG = { fr: 4, pt: 1, zh: 0 };
+function ttsConfigVersionFor(language){
+  const l = String(language || '').trim().toLowerCase();
+  const fam = l.startsWith('fr') ? 'fr' : l.startsWith('pt') ? 'pt' : (l.startsWith('zh') || l.startsWith('cmn')) ? 'zh' : 'x';
+  return `${TTS_CONFIG_VERSION}:${fam}${TTS_SPOKEN_RULES_VERSION_BY_LANG[fam] ?? 0}`;
+}
 
 // Limite de caracteres por geração -- controle de custo (auditoria Fase
 // 7f, Seção 14/15: "nunca gerar um texto absurdamente longo"). Mesmo
@@ -325,7 +350,7 @@ async function computeTtsGenerationKey(effectiveText, language, voiceId, rate){
     voiceId || '',
     (rate === null || rate === undefined) ? '' : String(rate),
     TTS_PROVIDER_MODEL_ID,
-    String(TTS_CONFIG_VERSION),
+    ttsConfigVersionFor(language),
   ];
   const input = parts.map(p => encodeURIComponent(p)).join('\u001F');
   const bytes = new TextEncoder().encode(input);

@@ -168,7 +168,8 @@ function teacherTagsReadOnlyHTML(cards){
 // Deck" (Deck AND Tag). Aviso visível + atalho para limpar, pra o filtro
 // nunca parecer um "Deck vazio" inexplicável.
 function tagFilterNoticeHTML(){
-  const f = (typeof STATE !== 'undefined' && STATE.studySettings && Array.isArray(STATE.studySettings.reviewTagFilter)) ? STATE.studySettings.reviewTagFilter : [];
+  // A sessão não aplica mais filtro de tag (só o Painel filtra), ver activeReviewTagFilter().
+  const f = (typeof activeReviewTagFilter === 'function') ? activeReviewTagFilter() : [];
   if (!f.length) return '';
   return `<p class="profile-edit-hint" data-tag-filter-notice>Filtro de tags ativo na Revisão: ${noteTagChipsHTML(f)} — vale também para "Estudar este Deck". <button type="button" class="admin-select-link" data-clear-review-tag-filter style="background:none;border:none;cursor:pointer;padding:0;">Limpar</button></p>`;
 }
@@ -296,6 +297,8 @@ function myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML }){
          cartão LEGADO já existente continua no formulário legado de
          sempre (myFlashcardEditFormHTML, intocado) -- isto é só
          CRIAÇÃO de um cartão novo. -->
+    <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:0;">${t('myFlashcards.deckDest')}</label>
+    <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
     ${premium ? '' : `<p class="profile-edit-hint">${t('myFlashcards.free.hint')}</p>`}
     <div class="section-label" style="margin:0 0 4px;">${t('myFlashcards.cardType')}</div>
     <select id="my-flashcard-card-type-preview" class="profile-edit-input">
@@ -305,13 +308,13 @@ function myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML }){
     <p class="profile-edit-hint" style="margin-top:-2px;">${t('myFlashcards.fields.hint')}</p>
     <div id="my-flashcard-native-fields"></div>
     <div id="my-flashcard-tags"></div>
-    <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">${t('myFlashcards.preview')}</button>
-    <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:14px;">${t('myFlashcards.deckDest')}</label>
-    <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
+    <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" data-touch44 style="background:none; border:none; cursor:pointer; margin:6px 0 0;">${t('myFlashcards.preview')}</button>
     <label class="profile-edit-label" for="my-flashcard-note" style="margin-top:14px;">${t('myFlashcards.note.label')}</label>
     <textarea id="my-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="${t('myFlashcards.note.placeholder')}"></textarea>
-    <p class="profile-edit-error" id="my-create-flashcard-error"></p>
-    <button type="submit" class="btn btn-primary btn-block" id="my-create-flashcard-btn" ${atLimit ? 'disabled' : ''}>${atLimit ? t('myFlashcards.limitReached') : t('myFlashcards.create')}</button>
+    <div class="add-card-submit-bar">
+      <p class="profile-edit-error" id="my-create-flashcard-error"></p>
+      <button type="submit" class="btn btn-primary btn-block" id="my-create-flashcard-btn" ${atLimit ? 'disabled' : ''}>${atLimit ? t('myFlashcards.limitReached') : t('myFlashcards.create')}</button>
+    </div>
   </form>`;
 }
 
@@ -562,9 +565,6 @@ function wireMyFlashcardEditForm(c, wrap, premium){
     // shared/admin-flashcards.js) -- é contra ISTO que o save compara pra
     // decidir se revision precisa incrementar.
     MY_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(MY_FLASHCARDS_STATE.editingNativeState);
-    if (c.image_url){
-      showToast(t('myFlashcards.edit.imageNotice'));
-    }
     // CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- `preserveEditingNativeState:true`
     // é obrigatório aqui: sem ele, o topo de renderMyFlashcardsView()
     // zeraria de volta o editingNativeState que acabamos de setar, no
@@ -643,7 +643,7 @@ function myFlashcardNativeEditFormHTML(c, editorState, premium){
       </select>
       <div id="edit-my-native-flashcard-fields"></div>
       <div id="edit-my-native-flashcard-tags"></div>
-      <button type="button" class="admin-select-link" id="edit-my-native-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">${t('myFlashcards.preview')}</button>
+      <button type="button" class="admin-select-link" id="edit-my-native-flashcard-preview-btn" data-touch44 style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">${t('myFlashcards.preview')}</button>
       <label class="profile-edit-label">${t('myFlashcards.note.label')}</label>
       <textarea id="edit-my-native-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea>
       <p class="profile-edit-error" id="edit-my-native-flashcard-error"></p>

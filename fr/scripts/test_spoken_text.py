@@ -67,6 +67,54 @@ check("l'âge sem circunflexo", st.to_spoken_text("l'âge", "fr") == "l'age")
 check("quel âge não muda", st.to_spoken_text("t'as quel âge ?", "fr") == "t'as quel âge ?")
 check("explain nada", st.explain_spoken_text("Bonjour !", "fr") == [])
 
+# --- português (pt-BR), aprovado em 2026-10-06 --------------------------------
+PT_CASES = {
+    "bonito / bonita": "bonito, bonita",
+    "km/h": "km/h", "e/ou": "e/ou", "24/7": "24/7",
+    "obrigado(a)": "obrigado, obrigada",
+    "Muito obrigado(a)!": "Muito obrigado, obrigada!",
+    "professor(a)": "professor, professora",
+    "bem-vindo(a)": "bem-vindo, bem-vinda",
+    "livro(s)": "livro, livros",
+    "o(a) aluno(a)": "o aluno, a aluna",
+    "Caro(a) professor(a), bom dia.": "Caro professor, Cara professora, bom dia.",
+    "professor(es)": "professor, professores",
+    "os(as) alunos(as)": "os alunos, as alunas",
+    "inglês(a)": "inglês(a)",
+    "gostar (de)": "gostar de…",
+    "você (informal)": "você (informal)",
+    "Bom dia, Sra. Silva!": "Bom dia, Senhora Silva!",
+    "Obrigado, Sra.": "Obrigado, Senhora.",
+    "Sr. e Sra. Silva": "Senhor e Senhora Silva",
+    "Sr.(a) Silva": "Senhor ou Senhora Silva",
+    "Prof.ª Ana": "Professora Ana",
+    "Dr Paulo chegou": "Doutor Paulo chegou",
+    "1º andar": "primeiro andar",
+    "a 2ª aula": "a segunda aula",
+    "21º andar": "vigésimo primeiro andar",
+    "1.º de maio": "primeiro de maio",
+    "25ª edição": "vigésima quinta edição",
+    "101º": "101º",
+    "1° andar": "1° andar",
+    "nº 5": "número 5",
+    "Nº 12": "Número 12",
+    "Oi 👋 → tudo ✓": "Oi tudo",
+    "* item": "item",
+    "Os carros azuis.": "Os carros azuis.",
+    "Vou chamá-lo amanhã.": "Vou chamá-lo amanhã.",
+    "Tudo bem?": "Tudo bem?",
+    "Moro nos EUA.": "Moro nos EUA.",
+    "Tenho 25 anos.": "Tenho 25 anos.",
+    "você": "você",
+}
+for src, want in PT_CASES.items():
+    got = st.to_spoken_text(src, "pt")
+    check(f"pt: {src!r} -> {want!r} (veio {got!r})", got == want)
+check("fr não é afetado por pt", st.to_spoken_text("Bom dia, Sra. Silva, 1º andar", "fr") == "Bom dia, Sra. Silva, 1º andar")
+check("pt não aplica regra do fr", st.to_spoken_text("l'œuf", "pt") == "l'œuf")
+check("explain pt gênero", st.explain_spoken_text("obrigado(a)", "pt") == ["pt.gender-parenthetical"])
+check("regras de pt são só pt", all(r.lang == "pt" for r in st.RULES_BY_LANG["pt"]))
+
 # --- contra o manifest REAL --------------------------------------------------
 root = os.path.join(HERE, "..", "..")
 fr = st.load_manifest(os.path.join(root, "fr", "audio-manifest.js"))
