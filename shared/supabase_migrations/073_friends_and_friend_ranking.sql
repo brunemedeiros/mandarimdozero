@@ -15,7 +15,7 @@
 --
 -- ROLLBACK (manual): funções friend_*/search_profiles_for_friends/
 -- friends_leaderboard/process_friend_overtakes/_friends_notify, tabelas
--- friend_rank_state e friendships, linha 'amigos' de notification_rules.
+-- friend_request_log, friend_rank_state e friendships, linha 'amigos' de notification_rules.
 
 -- ---------- friendships ----------
 create table if not exists public.friendships (
@@ -47,7 +47,23 @@ begin
 end $$;
 
 revoke all on public.friendships from anon;
-revoke insert, update, delete on public.friendships from authenticated;
+revoke insert, update, delete, truncate on public.friendships from authenticated;
+
+-- ---------- registro de pedidos enviados (limite diário) ----------
+-- Cada envio grava uma linha aqui, MESMO que o pedido seja cancelado ou a
+-- amizade desfeita depois -- senão "enviar, cancelar, enviar" burlaria o limite
+-- de 20 por dia e geraria notificações sem fim para a mesma pessoa. Quando o
+-- destinatário RECUSA, a linha mais recente do par é apagada (recusa não conta
+-- contra quem enviou).
+create table if not exists public.friend_request_log (
+  id bigint generated always as identity primary key,
+  requester_id uuid not null references auth.users(id) on delete cascade,
+  addressee_id uuid not null references auth.users(id) on delete cascade,
+  sent_at timestamptz not null default now()
+);
+create index if not exists friend_request_log_requester_idx on public.friend_request_log (requester_id, sent_at desc);
+alter table public.friend_request_log enable row level security;
+revoke all on public.friend_request_log from anon, authenticated;
 
 -- ---------- estado interno do "te passou no ranking" ----------
 -- Guarda, por (pessoa, amigo, semana), se o amigo estava À FRENTE na última
@@ -148,6 +164,7 @@ begin
       when f.status = 'accepted' then 'friends'
       when f.status = 'pending' and f.requester_id = v_me then 'sent'
       when f.status = 'pending' then 'received'
+      when f.requester_id = v_me and f.responded_at > now() - interval '7 days' then 'declined_recently'
       else 'none'
     end as relation
   from profiles p
@@ -175,6 +192,7 @@ declare
   v_me uuid := auth.uid();
   v_row friendships%rowtype;
   v_name text;
+  v_existing boolean;
 begin
   if v_me is null then return jsonb_build_object('error', 'not_authenticated'); end if;
   if p_addressee is null or p_addressee = v_me then return jsonb_build_object('error', 'invalid_target'); end if;
@@ -187,8 +205,9 @@ begin
   select * into v_row from friendships
   where (requester_id = v_me and addressee_id = p_addressee)
      or (requester_id = p_addressee and addressee_id = v_me);
+  v_existing := found; -- FOUND é sobrescrito pelos comandos seguintes
 
-  if found then
+  if v_existing then
     if v_row.status = 'accepted' then return jsonb_build_object('error', 'already_friends'); end if;
     if v_row.status = 'pending' and v_row.requester_id = v_me then return jsonb_build_object('error', 'already_sent'); end if;
     if v_row.status = 'pending' then
@@ -208,13 +227,17 @@ begin
 
   if public._friend_count(v_me) >= 100 then return jsonb_build_object('error', 'friend_limit_reached'); end if;
   if public._friend_count(p_addressee) >= 100 then return jsonb_build_object('error', 'target_friend_limit'); end if;
-  -- 20 pedidos por dia; pedido recusado não conta contra quem enviou.
-  if (select count(*) from friendships
-      where requester_id = v_me and status <> 'declined' and requested_at > now() - interval '24 hours') >= 20 then
+  -- 20 pedidos por dia (contados no registro, que sobrevive a cancelar/desfazer);
+  -- pedido recusado não conta contra quem enviou. Lock por quem envia para duas
+  -- chamadas simultâneas não passarem do limite.
+  perform pg_advisory_xact_lock(hashtextextended('friendreq:' || v_me::text, 0));
+  if (select count(*) from friend_request_log
+      where requester_id = v_me and sent_at > now() - interval '24 hours') >= 20 then
     return jsonb_build_object('error', 'daily_request_limit');
   end if;
+  insert into friend_request_log (requester_id, addressee_id) values (v_me, p_addressee);
 
-  if found then
+  if v_existing then
     update friendships
       set requester_id = v_me, addressee_id = p_addressee, status = 'pending',
           requested_at = now(), responded_at = null
@@ -256,6 +279,11 @@ begin
   end if;
 
   update friendships set status = 'declined', responded_at = now() where id = v_row.id;
+  -- recusa não conta no limite diário de quem enviou
+  delete from friend_request_log
+  where id = (select l.id from friend_request_log l
+              where l.requester_id = p_requester and l.addressee_id = v_me
+              order by l.sent_at desc limit 1);
   return jsonb_build_object('ok', true, 'status', 'declined');
 end;
 $$;
@@ -314,7 +342,7 @@ set search_path = public
 as $$
 declare
   v_me uuid := auth.uid();
-  v_week date := coalesce(p_week, date_trunc('week', current_date)::date);
+  v_week date := coalesce(p_week, date_trunc('week', (now() at time zone 'America/Sao_Paulo'))::date);
 begin
   if v_me is null then return; end if;
   return query

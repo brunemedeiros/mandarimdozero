@@ -121,6 +121,10 @@ insert into r select (cancel_friend_request('73100000-0000-0000-0000-00000000000
 insert into r select (remove_friend('73100000-0000-0000-0000-000000000002') ->> 'ok')::boolean, 'desfazer amizade';
 insert into r select (remove_friend('73100000-0000-0000-0000-000000000002') ->> 'error') = 'not_friends', 'desfazer sem amizade -> erro';
 -- após desfazer, pode pedir de novo
+reset role;
+delete from friend_request_log where requester_id = '73000000-0000-0000-0000-0000000000d1';
+set local role authenticated;
+select pg_temp.as_user('73000000-0000-0000-0000-0000000000d1');
 insert into r select (send_friend_request('73100000-0000-0000-0000-000000000002') ->> 'status') = 'sent', 'após desfazer pode pedir de novo';
 reset role;
 
@@ -143,6 +147,45 @@ insert into r select not has_function_privilege('authenticated','public.process_
 insert into r select has_function_privilege('service_role','public.process_friend_overtakes(date)','execute'), 'service_role executa varredura';
 insert into r select not has_function_privilege('authenticated','public._friends_notify(uuid,text,text,text,text)','execute'), 'helper de notificação fechado';
 insert into r select not has_table_privilege('anon','public.friendships','select'), 'anon sem SELECT em friendships';
+
+
+-- cancelar/desfazer NÃO burlam o limite de 20 pedidos/dia (registro separado)
+reset role;
+delete from friend_request_log; delete from friendships;
+delete from notifications;
+set local role authenticated;
+select pg_temp.as_user('73000000-0000-0000-0000-0000000000a1');
+do $$ declare i int; res jsonb; okc int := 0; begin
+  for i in 1..30 loop
+    res := send_friend_request('73000000-0000-0000-0000-0000000000c1');
+    if res ? 'ok' then okc := okc + 1; end if;
+    perform cancel_friend_request('73000000-0000-0000-0000-0000000000c1');
+  end loop;
+  insert into r values (okc = 20, 'enviar+cancelar em loop: no máximo 20 pedidos (' || okc || ')');
+end $$;
+reset role;
+insert into r select (select count(*) from notifications where user_id = '73000000-0000-0000-0000-0000000000c1') = 40, 'vítima recebeu no máximo 20 pedidos x 2 sites de notificação';
+-- recusa devolve a vaga (apaga o registro mais recente)
+delete from friend_request_log; delete from friendships;
+set local role authenticated;
+select pg_temp.as_user('73000000-0000-0000-0000-0000000000a1');
+select send_friend_request('73000000-0000-0000-0000-0000000000c1');
+select pg_temp.as_user('73000000-0000-0000-0000-0000000000c1');
+select respond_friend_request('73000000-0000-0000-0000-0000000000a1', false);
+reset role;
+insert into r select (select count(*) from friend_request_log where requester_id = '73000000-0000-0000-0000-0000000000a1') = 0, 'recusa não conta no limite de quem enviou';
+set local role authenticated;
+select pg_temp.as_user('73000000-0000-0000-0000-0000000000a1');
+insert into r select (select relation from search_profiles_for_friends('carla') where user_id = '73000000-0000-0000-0000-0000000000c1') = 'declined_recently', 'busca: recusado há <7 dias -> declined_recently';
+-- busca devolve no máximo 20
+reset role;
+insert into auth.users(id, email) select ('73300000-0000-0000-0000-' || lpad(g::text,12,'0'))::uuid, 's'||g||'@example.invalid' from generate_series(1,30) g;
+insert into profiles(user_id, username, display_name) select ('73300000-0000-0000-0000-' || lpad(g::text,12,'0'))::uuid, 'x', 'Zuleide ' || g from generate_series(1,30) g;
+set local role authenticated;
+select pg_temp.as_user('73000000-0000-0000-0000-0000000000a1');
+insert into r select (select count(*) from search_profiles_for_friends('zuleide')) = 20, 'busca: no máximo 20 resultados';
+reset role;
+insert into r select not has_table_privilege('authenticated','public.friend_request_log','select'), 'registro de pedidos fechado ao cliente';
 
 -- varredura "te passou"
 delete from notifications; delete from friendships; delete from friend_rank_state;

@@ -27,6 +27,9 @@ let SIDE_RANKING_MODE = 'all';
 // "Ver ranking completo" do card leva à tela já na aba que o card mostrava;
 // qualquer outra entrada (menu, sidebar, notificação) abre SEMPRE em Geral.
 let LEADERBOARD_PENDING_MODE = null;
+// Contadores de requisição: se a pessoa troca de aba rápido, só a última resposta desenha.
+let LEADERBOARD_RENDER_SEQ = 0;
+let SIDE_RANKING_RENDER_SEQ = 0;
 function openLeaderboardView(){
   LEADERBOARD_MODE = LEADERBOARD_PENDING_MODE || 'all';
   LEADERBOARD_PENDING_MODE = null;
@@ -152,7 +155,9 @@ async function renderSideRankingCard(){
   const mode = SIDE_RANKING_MODE;
   targets.forEach(body => { body.innerHTML = loadingHTML(); });
   const weekStart = leaderboardCurrentWeekStart();
+  const seq = ++SIDE_RANKING_RENDER_SEQ;
   const rows = mode === 'friends' ? await fetchFriendsLeaderboard('all', weekStart) : await fetchLeaderboard('all', weekStart);
+  if (seq !== SIDE_RANKING_RENDER_SEQ) return;
 
   const tabsHTML = loggedIn ? `
     <div class="side-ranking-tabs" role="tablist" aria-label="Tipo de ranking">
@@ -261,6 +266,7 @@ async function renderLeaderboardView(){
   const wrap = document.getElementById('leaderboard-content');
   if (!wrap) return;
   wrap.innerHTML = loadingHTML('Carregando ranking...');
+  const renderSeq = ++LEADERBOARD_RENDER_SEQ;
 
   const weekStart = leaderboardCurrentWeekStart();
   const scope = LEADERBOARD_SCOPE;
@@ -273,6 +279,7 @@ async function renderLeaderboardView(){
     mode === 'friends' ? fetchFriendsLeaderboard(scope, weekStart) : fetchLeaderboard(scope, weekStart),
     fetchBadgeCatalog(),
   ]);
+  if (renderSeq !== LEADERBOARD_RENDER_SEQ) return; // chegou uma troca de aba mais nova
   const loadFailed = mode === 'friends' && fetched === null;
   const rows = fetched || [];
   // Sem nenhum amigo, o ranking de amigos só teria você: mostra o convite.

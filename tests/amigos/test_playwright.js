@@ -160,6 +160,14 @@ async function run(browser, lang, port){
   check(`${L}: 1 pedido enviado`, (await page.locator('#friends-outgoing .friends-row').count()) === 1);
   check(`${L}: view Amigos ativa`, await page.evaluate(() => document.getElementById('view-friends').classList.contains('active')));
 
+  // render repetido NÃO acumula listeners: um clique em 'Desfazer' = 1 confirm e 1 RPC
+  await page.evaluate(() => renderFriendsView()); await page.waitForSelector('#friends-list');
+  await page.evaluate(() => renderFriendsView()); await page.waitForSelector('#friends-list');
+  await page.evaluate(() => { window.__confirms = 0; window.confirm = () => { window.__confirms++; return false; }; });
+  await page.click('#friends-list [data-friend-row="caio"] [data-friend-action="remove"]');
+  await page.waitForTimeout(150);
+  check(`${L}: 3 renders seguidos -> 1 confirm só`, (await page.evaluate(() => window.__confirms)) === 1);
+  await page.evaluate(() => { window.confirm = () => true; });
   // aceitar Dani
   await page.click('#friends-incoming [data-friend-row="dani"] [data-friend-action="accept"]');
   await page.waitForFunction(() => document.querySelectorAll('#friends-list .friends-row').length === 3);

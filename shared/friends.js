@@ -172,6 +172,7 @@ function friendActionButtonHTML(label, action, userId, kind){
 
 function friendsRelationActionsHTML(relation, userId){
   if (relation === 'friends') return `<span class="friends-chip">✓ Amigos</span>`;
+  if (relation === 'declined_recently') return `<span class="friends-chip">Indisponível por enquanto</span>`;
   if (relation === 'sent') return `<span class="friends-chip">Pedido enviado</span>${friendActionButtonHTML('Cancelar', 'cancel', userId)}`;
   if (relation === 'received') return friendActionButtonHTML('Aceitar', 'accept', userId, 'btn-primary') + friendActionButtonHTML('Recusar', 'decline', userId);
   return friendActionButtonHTML('Adicionar', 'add', userId, 'btn-primary');
@@ -268,7 +269,11 @@ function wireFriendsView(wrap){
     clearTimeout(timer);
     timer = setTimeout(() => runFriendsSearch(input.value), 350);
   });
-  // Delegação única: cobre as listas e os resultados da busca (reinjetados).
+  // Delegação única, ligada UMA vez só: #friends-content nunca é recriado, só o
+  // conteúdo dele -- ligar de novo a cada render acumularia listeners (confirm()
+  // repetido, ações em dobro). Cobre as listas e os resultados da busca.
+  if (wrap.dataset.friendsWired === '1') return;
+  wrap.dataset.friendsWired = '1';
   wrap.addEventListener('click', async (e) => {
     const person = e.target.closest('[data-open-profile]');
     if (person && person.dataset.openProfile && !e.target.closest('[data-friend-action]')){
