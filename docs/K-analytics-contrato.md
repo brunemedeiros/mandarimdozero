@@ -153,7 +153,7 @@ Não alterado de propósito: `todaysReviewCount`/"Tudo em dia" (derivam da fila 
 (recurso próprio). Limitação: o gráfico histórico segue por `firstLearnedDate` de CardInstance (K.4).
 Testes: `tests/k7/test_k7_student_analytics.js` (Playwright FR+ZH, 40).
 
-## K.8 -- Public Analytics: BLOQUEADA POR DEPENDÊNCIA (ver docs/public-decks-auditoria.md v3 (contrato fechado); onde cita `source_*`, ler "atribuição pela Tag `criado-por-<username>`") (Public Decks / atribuição ainda não implementados)
+## K.8 -- Public Analytics: auditoria de 2026-09 (DESBLOQUEADA em 2026-10-07: Deck público existe desde a 061; plano em "Fase K final" abaixo)
 Auditoria de prontidão (só leitura; nenhum código, migration, RPC ou UI criados).
 Existe (Perfil Público, Fases 1-2 do prompt-mestre "perfil público"): `profiles.public_profile` (default true),
 rota `#/user/<username>` (`shared/router.js`, `shared/public-profile.js`), página sem login, RPCs
@@ -173,6 +173,40 @@ streak por idioma e % de progresso (`get_public_profile_stats`), isto é, agrega
 da conta. Não expõe FSRS/due/N-L-R nem cartões de Teacher; vale revisar se XP/streak devem continuar públicos
 por padrão (hoje `public_profile` é true para todas as contas).
 Retomar quando: Public Decks (flag + RPC autorizada + rota) e `source_user_id/source_card_id` existirem.
+
+## Fase K final -- decisões da autora (2026-10-07); plano aguardando autorização, implementação NÃO iniciada
+
+O que já existe e não se refaz: painel 📊 do aluno (Painel de Admin > 🎓 Alunos, RPCs 070 e 059, ambas aplicadas
+na produção), Analytics de produto (`shared/admin-analytics.js`), contrato K.2 (`shared/analytics-metrics.js`).
+
+Decisões da autora:
+- Botão "📊 Analytics" do aluno em dois lugares: Painel de Admin > 🎓 Alunos (já existe) e perfil público
+  `#/user/<username>`. Os dois só aparecem com Admin Mode ON (hoje o da aba Alunos não consulta o Admin Mode).
+- Decks pessoais do aluno: a professora vê **nome + Novo/Aprendendo/Revisar**, sem abrir os cartões.
+- Quantas pessoas adicionaram um Deck público: veem a admin (Analytics) e o autor do Deck.
+- Grátis x Premium: Analytics do aluno é ferramenta da admin; o contador do autor é **só Premium**
+  (checado no servidor por `profiles.plan_tier = 'premium'`, como a 061; hoje todas as contas são free, então
+  nenhum autor vê o contador até existir Premium).
+
+Etapas (cada uma com autorização própria):
+- **K.9 -- Decks do aluno (servidor)**: RPC nova `SECURITY DEFINER` `get_teacher_student_deck_counts(student, lang)`,
+  mesma porta da 059 (vínculo ativo em `teacher_students`) e exigindo `profiles.admin_mode = true` de quem chama.
+  Devolve a árvore de Decks do aluno (curso, Meus Decks e subdecks, Cartões da Professora) com contagens por
+  subárvore, nas regras de `cardStudyBucket`/`structuralCounts` (Novo = sem histórico; Aprendendo = learning +
+  relearning; Revisar = review vencido). Deck do cartão: `own_flashcards.deck_id`, `teacher_flashcards.deck_id`,
+  trilha pelo Deck de curso da unidade. Sem conteúdo dos cartões. Limitação herdada da 059: só conta o que o aluno
+  já sincronizou em `progress`. Teste de paridade SQL x `getDeckCounts` com as mesmas fixtures.
+- **K.10 -- UI**: seção "Decks" no painel 📊 (tabela Deck / Novo / Aprendendo / Revisar); botão no perfil público
+  (só `isAdminUser() && isAdminModeOn()` e aluno com vínculo ativo), abrindo o mesmo painel; botão da aba Alunos
+  passa a respeitar o Admin Mode. Validar fr/zh × claro/escuro.
+- **K.8 -- cópias de Deck público**: tabela `public_deck_copies (deck_id, user_id, first_copied_at, last_copied_at)`,
+  uma linha por pessoa (recópia só atualiza a data), gravada dentro de `copy_public_deck` (novo `create or replace`
+  sobre o corpo da 068, sem `DROP`). Sem leitura direta (RLS fechada); RPC `get_public_deck_copy_count(deck)` para o
+  dono Premium ou admin, e lista para a subaba nova "Decks públicos" do Analytics da admin. Unidade: **pessoas
+  distintas**. Cópias feitas antes da migration não entram (o dado não existe). Autor vê "N pessoas adicionaram"
+  na tela do próprio Deck público.
+- Ordem: K.9 → K.10 → K.8. Migrations novas (números a partir de 075) sempre Staging antes da produção
+  (skill `migration-supabase`). Testes em `tests/k8/`, `tests/k9/`, `tests/k10/`.
 
 ## Fora desta fase
 - Histórico por Note e "última atividade" (`firstLearnedDate`/`lastReview` são por
