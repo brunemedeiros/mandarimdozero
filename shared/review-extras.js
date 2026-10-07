@@ -9,7 +9,7 @@
 // (shared/analytics-metrics.js, a mesma conta de "Suas palavras").
 //
 // Dados novos (salvos com o resto do progresso, por idioma):
-//   STATE.reviewRecords   = { speedBestScore, matchBestMs, hardSeenIds[] }
+//   STATE.reviewRecords   = { speedBestScore, speedBestMsPerCard, matchBestMs, hardSeenIds[] }
 //   STATE.reviewTimeStats = { cards, ms }  (tempo médio por cartão)
 
 const REVIEW_WEEK_GOAL_DAYS = 5;
@@ -110,11 +110,6 @@ function reviewSecondsPerCard(stats){
   return Math.min(REVIEW_MAX_SECONDS_PER_CARD, Math.max(3, avg));
 }
 
-function reviewEtaMinutes(cardCount, stats){
-  if (!(cardCount > 0)) return 0;
-  return Math.max(1, Math.round(cardCount * reviewSecondsPerCard(stats) / 60));
-}
-
 // Fila curta: os cartões já estudados primeiro (mais erros, depois mais
 // atrasados), as palavras novas por último; corta quando a soma do tempo
 // médio passa de 5 minutos. Nunca devolve vazio se a fila tinha cartões.
@@ -130,10 +125,11 @@ function shortReviewQueue(queue, stats){
 // ---------- recordes ----------
 
 function reviewRecords(){
-  if (typeof STATE === 'undefined') return { speedBestScore: 0, matchBestMs: null, hardSeenIds: [] };
+  if (typeof STATE === 'undefined') return { speedBestScore: 0, speedBestMsPerCard: null, matchBestMs: null, hardSeenIds: [] };
   const r = STATE.reviewRecords && typeof STATE.reviewRecords === 'object' ? STATE.reviewRecords : {};
   STATE.reviewRecords = {
     speedBestScore: Number(r.speedBestScore) || 0,
+    speedBestMsPerCard: Number(r.speedBestMsPerCard) > 0 ? Number(r.speedBestMsPerCard) : null,
     matchBestMs: Number(r.matchBestMs) > 0 ? Number(r.matchBestMs) : null,
     hardSeenIds: Array.isArray(r.hardSeenIds) ? r.hardSeenIds : []
   };
@@ -146,6 +142,27 @@ function recordSpeedReviewScore(score){
   if (!(score > r.speedBestScore)) return false;
   r.speedBestScore = score;
   return true;
+}
+
+// Tempo do Speed Review: média por palavra (as rodadas têm tamanhos
+// diferentes, então o tempo total não seria comparável). Só conta rodada
+// completa (todas as palavras respondidas, sem perder as 3 vidas) com pelo
+// menos SPEED_TIME_MIN_CARDS palavras.
+const SPEED_TIME_MIN_CARDS = 5;
+function recordSpeedReviewTime(ms, cards){
+  const r = reviewRecords();
+  if (!(ms > 0) || !(cards >= SPEED_TIME_MIN_CARDS)) return false;
+  const per = ms / cards;
+  if (r.speedBestMsPerCard != null && per >= r.speedBestMsPerCard) return false;
+  r.speedBestMsPerCard = per;
+  return true;
+}
+
+function speedRecordText(rec){
+  const pts = `${rec.speedBestScore || 0} pts`;
+  if (!(rec.speedBestMsPerCard > 0)) return pts;
+  const sec = (Math.round(rec.speedBestMsPerCard / 100) / 10).toFixed(1).replace('.', ',');
+  return `${pts} · ${sec} s por palavra`;
 }
 
 function recordMatchTime(ms){

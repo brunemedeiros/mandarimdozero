@@ -156,13 +156,13 @@ const SHOTS = process.env.SHOT_DIR || require('os').tmpdir();
       const w = document.getElementById('review-today-widget');
       return { exp: [exp.new, exp.learning, exp.review], got: Array.from(w.querySelectorAll('.review-today-count')).map(x => Number(x.textContent)),
         btn: document.getElementById('review-study-all-btn').textContent.trim(), n: q.length,
-        eta: (w.querySelector('.review-today-eta') || {}).textContent, etaExp: reviewEtaMinutes(q.length),
+        eta: w.querySelector('.review-today-eta'), etaText: /cerca de/.test(w.textContent),
         short: (document.getElementById('review-short-btn') || {}).textContent,
         before: !!(document.getElementById('review-decks-table').compareDocumentPosition(w) & Node.DOCUMENT_POSITION_PRECEDING) };
     });
     check(lang + ' topo: Novo/Aprendendo/Revisar iguais à fila de Estudar tudo', top.got.join() === top.exp.join(), top);
     check(lang + ' botão "Estudar tudo (N)" com N da fila', top.btn === `Estudar tudo (${top.n})`, top);
-    check(lang + ' tempo estimado "cerca de N min" (10 s por cartão sem histórico)', top.eta === `cerca de ${top.etaExp} min` && top.etaExp === Math.max(1, Math.round(top.n * 10 / 60)), top);
+    check(lang + ' sem estimativa de tempo no topo', !top.eta && !top.etaText, top);
     check(lang + ' botão "⏱ 5 minutos" ao lado, faixa acima da tabela', /5 minutos/.test(top.short || '') && top.before, top);
 
     // ---- 2) Sessão de 5 minutos ----
@@ -216,24 +216,26 @@ const SHOTS = process.env.SHOT_DIR || require('os').tmpdir();
     const rec = await page.evaluate(() => {
       const a = recordSpeedReviewScore(30), b = recordSpeedReviewScore(20);
       const c = recordMatchTime(41000), d = recordMatchTime(60000);
+      const t1 = recordSpeedReviewTime(3000, 3), t2 = recordSpeedReviewTime(24000, 10), t3 = recordSpeedReviewTime(30000, 10);
       renderReviewModeSelect();
       const hardBefore = document.querySelector('#mode-card-hard .desc').textContent;
       // 502 sai da lista de difíceis
       STATE.cards.filter(x => x.rowId === 502).forEach(x => Object.assign(x, { lapses: 0, difficulty: 3 }));
       renderReviewModeSelect();
       const ser = serializeState();
-      return { a, b, c, d, speed: document.querySelector('#mode-card-speed .desc').textContent, match: document.querySelector('#mode-card-match .desc').textContent,
+      return { a, b, c, d, t1, t2, t3, speed: document.querySelector('#mode-card-speed .desc').textContent, match: document.querySelector('#mode-card-match .desc').textContent,
         hardBefore, hardAfter: document.querySelector('#mode-card-hard .desc').textContent,
         saved: JSON.stringify(ser.reviewRecords || null), savedTime: !!ser.reviewTimeStats };
     });
     check(lang + ' recorde do Speed Review só sobe', rec.a === true && rec.b === false && /Seu recorde: 30 pts/.test(rec.speed), rec);
+    check(lang + ' Speed Review também guarda tempo (média por palavra, rodada de 5+)', rec.t1 === false && rec.t2 === true && rec.t3 === false && /30 pts · 2,4 s por palavra/.test(rec.speed), rec);
     check(lang + ' recorde do Combinar só desce (melhor tempo)', rec.c === true && rec.d === false && /Seu recorde: 41 s/.test(rec.match), rec);
     check(lang + ' "Já saíram da lista" conta quem saiu de Palavras difíceis', !/saíram/.test(rec.hardBefore) && /Já saíram da lista: \d+/.test(rec.hardAfter), rec);
-    check(lang + ' recordes e tempo vão no progresso salvo', /"speedBestScore":30/.test(rec.saved) && /"matchBestMs":41000/.test(rec.saved) && rec.savedTime, rec);
+    check(lang + ' recordes e tempo vão no progresso salvo', /"speedBestScore":30/.test(rec.saved) && /"speedBestMsPerCard":2400/.test(rec.saved) && /"matchBestMs":41000/.test(rec.saved) && rec.savedTime, rec);
     const restored = await page.evaluate(() => { const ser = serializeState(); STATE.reviewRecords = null; applySerializedState(JSON.parse(JSON.stringify(ser))); return reviewRecords(); });
-    check(lang + ' recordes voltam ao recarregar', restored.speedBestScore === 30 && restored.matchBestMs === 41000, restored);
-    const matchStart = await page.evaluate(() => { startMatchGame(); return typeof MATCH_STATE.startedAt === 'number'; });
-    check(lang + ' Combinar marca o início para medir o tempo', matchStart, matchStart);
+    check(lang + ' recordes voltam ao recarregar', restored.speedBestScore === 30 && restored.speedBestMsPerCard === 2400 && restored.matchBestMs === 41000, restored);
+    const matchStart = await page.evaluate(() => { startMatchGame(); const m = typeof MATCH_STATE.startedAt === 'number'; startSpeedReview(); const sp = typeof SPEED_STATE.startedAt === 'number'; stopSpeedTimer(); SPEED_STATE.active = false; return m && sp; });
+    check(lang + ' Combinar e Speed Review marcam o início para medir o tempo', matchStart, matchStart);
 
     // ---- 5) Força da memória na tela do Deck ----
     await page.evaluate(() => { STATE.cards.filter(c => c.rowId === 502).forEach(c => Object.assign(c, { lapses: 2 })); openDeckDetail(9001); });

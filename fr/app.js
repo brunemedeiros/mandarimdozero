@@ -820,7 +820,7 @@ const STATE = {
   // resetado por leitura (ensurePeriodXp), sem job/cron.
   periodXp: { weekStart: null, amount: 0 },
   activityLog: {},
-  reviewRecords: { speedBestScore: 0, matchBestMs: null, hardSeenIds: [] }, // recordes dos modos (shared/review-extras.js)
+  reviewRecords: { speedBestScore: 0, speedBestMsPerCard: null, matchBestMs: null, hardSeenIds: [] }, // recordes dos modos (shared/review-extras.js)
   reviewTimeStats: { cards: 0, ms: 0 }, // tempo por cartão (estimativa de minutos e sessão de 5 min)
   studyGoal: {
     objective: null, levels: [],
@@ -1126,7 +1126,7 @@ function applySerializedState(data){
   if (data.dailyMinutesLog) Object.assign(STATE.dailyMinutesLog, data.dailyMinutesLog);
   if (data.dailyLessonsLog) Object.assign(STATE.dailyLessonsLog, data.dailyLessonsLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
-  if (data.reviewRecords && typeof data.reviewRecords === 'object') STATE.reviewRecords = Object.assign({ speedBestScore: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
+  if (data.reviewRecords && typeof data.reviewRecords === 'object') STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestMsPerCard: null, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
   if (data.reviewTimeStats && typeof data.reviewTimeStats === 'object') STATE.reviewTimeStats = { cards: Number(data.reviewTimeStats.cards) || 0, ms: Number(data.reviewTimeStats.ms) || 0 };
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
   if (data.hadStreakComeback) STATE.hadStreakComeback = true;
@@ -5789,15 +5789,13 @@ function renderReviewTodayWidget(){
     ? `<div class="review-today-filter">Filtro da sessão: ${escapeHTML(filterSummary)} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">Limpar filtro</button></div>`
     : '';
   const num = (n, cls, label) => `<div class="review-today-col"><div class="review-today-count ${n ? cls : 'is-zero'}">${n}</div><div class="review-today-col-label">${label}</div></div>`;
-  const eta = reviewEtaMinutes(trueCount);
   wrap.innerHTML = `
     <div class="review-today-strip">
       <div class="review-today-split" aria-label="Para hoje: ${split.new} novas, ${split.learning} aprendendo, ${split.review} para revisar">
         ${num(split.new, 'is-new', 'Novo')}${num(split.learning, 'is-learning', 'Aprendendo')}${num(split.review, 'is-review', 'Revisar')}
       </div>
       <div class="review-today-go">
-        ${trueCount ? `<span class="review-today-eta">cerca de ${eta} min</span>
-        <button class="btn btn-secondary review-short-btn" id="review-short-btn" title="Sessão curta: primeiro os cartões que você mais erra e os mais atrasados">⏱ 5 minutos</button>
+        ${trueCount ? `<button class="btn btn-secondary review-short-btn" id="review-short-btn" title="Sessão curta: primeiro os cartões que você mais erra e os mais atrasados">⏱ 5 minutos</button>
         <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">Estudar tudo (${trueCount})</button>`
         : `<span class="review-today-done">Você está em dia por hoje.</span>`}
       </div>
@@ -5886,7 +5884,7 @@ function renderReviewModeSelect(){
         <span class="${speedSplit.learning ? 'is-learning' : 'is-zero'}">${speedSplit.learning}</span>
         <span class="${speedSplit.review ? 'is-review' : 'is-zero'}">${speedSplit.review}</span>
       </div>
-      <div class="desc">${rec.speedBestScore ? `Seu recorde: ${rec.speedBestScore} pts` : 'Contra o relógio'}</div>
+      <div class="desc">${rec.speedBestScore ? `Seu recorde: ${speedRecordText(rec)}` : 'Contra o relógio'}</div>
     </button>
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
       <div class="icon">🔥</div>
@@ -6201,6 +6199,7 @@ function startSpeedReview(){
   SPEED_STATE.streak = 0;
   SPEED_STATE.active = true;
   SPEED_STATE.dailyCounted = false;
+  SPEED_STATE.startedAt = Date.now();
   renderSpeedReview();
 }
 
@@ -6273,7 +6272,7 @@ function renderSpeedReview(){
         <h3>Fim de jogo!</h3>
         <div class="score-num">${SPEED_STATE.score} pts</div>
         <p>Você respondeu ${SPEED_STATE.index} palavra(s) nesta rodada.</p>
-        <p class="review-record-line">${speedIsRecord ? '🏅 Novo recorde!' : `Seu recorde: ${reviewRecords().speedBestScore} pts`}</p>
+        <p class="review-record-line">${speedIsRecord ? '🏅 Novo recorde!' : `Seu recorde: ${speedRecordText(reviewRecords())}`}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">Voltar</button>
           <button class="btn btn-primary" id="speed-practice-btn">Praticar mais</button>
@@ -6310,14 +6309,15 @@ function renderSpeedReview(){
     // zerada de verdade nesta sessão; "de novo" mostraria vazio ou
     // reaproveitaria cartões que acabaram de ser respondidos).
     const speedIsRecord2 = recordSpeedReviewScore(SPEED_STATE.score);
-    if (speedIsRecord2) saveState();
+    const speedTimeRecord = recordSpeedReviewTime(Date.now() - (SPEED_STATE.startedAt || Date.now()), SPEED_STATE.index);
+    if (speedIsRecord2 || speedTimeRecord) saveState();
     releaseBadgeCelebrations();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
         <h3>Revisão concluída!</h3>
         <div class="score-num">${SPEED_STATE.score} pts</div>
-        <p class="review-record-line">${speedIsRecord2 ? '🏅 Novo recorde!' : `Seu recorde: ${reviewRecords().speedBestScore} pts`}</p>
+        <p class="review-record-line">${speedIsRecord2 || speedTimeRecord ? `🏅 Novo recorde! ${speedRecordText(reviewRecords())}` : `Seu recorde: ${speedRecordText(reviewRecords())}`}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">Voltar</button>
           <button class="btn btn-primary" id="speed-practice-btn">Praticar mais</button>

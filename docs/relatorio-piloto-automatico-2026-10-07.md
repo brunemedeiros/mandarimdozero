@@ -1,7 +1,7 @@
 # Relatório do piloto automático — 07/10/2026
 
 ## Resumo
-A aba Revisão agora segue a Proposta A com as partes da B que você escolheu. No topo fica o total de hoje (Novo, Aprendendo e Revisar), o tempo estimado e os botões "⏱ 5 minutos" e "Estudar tudo (N)". Os modos mostram seus recordes. Embaixo deles fica "Sua semana de revisão", com a meta de 5 dias. Dentro de cada Deck há a barra de força da memória. O 🔥 de dias seguidos continua no topo. Tudo foi testado, commitado e enviado para a branch `claude/fervent-noether-9f1ya7`. Nada foi publicado no site e nada mudou no banco.
+A aba Revisão agora segue a Proposta A com as partes da B que você escolheu. No topo fica o total de hoje (Novo, Aprendendo e Revisar) e os botões "⏱ 5 minutos" e "Estudar tudo (N)". Os modos mostram seus recordes. Embaixo deles fica "Sua semana de revisão", com a meta de 5 dias. Dentro de cada Deck há a barra de força da memória. O 🔥 de dias seguidos continua no topo. Tudo foi testado, commitado e enviado para a branch `claude/fervent-noether-9f1ya7`. Nada foi publicado no site e nada mudou no banco.
 
 **Critério de "pronto" que usei:** as 5 partes funcionando em francês e chinês, nos temas claro e escuro e no celular. Os testes novos e os antigos passando, e um revisor independente sem achar problema aberto.
 
@@ -16,7 +16,6 @@ A aba Revisão agora segue a Proposta A com as partes da B que você escolheu. N
 
 ## Pendências que precisam de você
 - **Publicar:** o código está só na branch. Ele vai para o site quando você pedir o PR ou o merge.
-- **Revisar a decisão 1:** pontos ou tempo no Speed Review.
 - Nenhuma migration, nenhum custo e nenhuma ação irreversível.
 
 ## O que foi alterado
@@ -65,3 +64,10 @@ Todos passando:
 ## Divisão do trabalho
 - Eu (orquestrador): planejamento, código, testes e capturas de tela.
 - 1 subagente opus: verificação independente do código e dos testes, com uma correção pequena.
+
+## Ajustes depois da sua resposta (07/10/2026)
+- **Estimativa removida:** o "cerca de N min" saiu do topo.
+- **Tempo no Speed Review:** o recorde agora mostra pontos e tempo, por exemplo "Seu recorde: 30 pts · 2,4 s por palavra".
+  - O tempo é a média por palavra, porque cada rodada tem um número diferente de palavras e o tempo total não daria para comparar.
+  - Só conta rodada completa: todas as palavras respondidas, sem perder as 3 vidas, com pelo menos 5 palavras.
+  - Testes: Proposta A 58/58, Deck browser 206/206, Ajustes 48/48, K1 30/30, K3 20/20, K5 18/18, K6 28/28.
