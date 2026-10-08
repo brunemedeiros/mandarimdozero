@@ -201,3 +201,10 @@ Checkpoint pedido pela autora: só documentação. Nenhuma migration, nenhuma mu
 - **Rollout 059–069 CONCLUÍDO na produção (2026-10-04).** As 11 migrations estão aplicadas: 060/061/062/063/066 pelo SQL Editor (não aparecem em `schema_migrations`) e 064/065/067/068/069/059 pela ferramenta. Nenhum dado mudou.
 - **Janela aberta até o deploy do código novo:** o painel 📊 Métricas da aba 🎓 Alunos fica vazio (as chaves mudaram); trocar username dá `username_immutable`; conta nova recebe username `u…`. Próximo passo, quando a autora decidir: trazer o `main` para esta branch (conflito esperado só no fim do CLAUDE.md -- manter os dois blocos; em `fr/app.js`/`fr/index.html` preservar Desafios/Ditados) e só então merge/deploy.
 
+
+## Migration 075 `account_roles_and_permissions` (2026-10-08)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` | `20261008011037` |
+| Produção | SQL Editor da autora (`docs/rollout-sql/075_sql_editor.sql`; a ferramenta estourou o tempo 2x) | não aparece em `schema_migrations` |
+Detalhes e verificação: `docs/plano-professora-privacidade.md`.

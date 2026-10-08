@@ -116,7 +116,11 @@ Plano de migrations (proposto):
   executável por anon; hash de profiles igual antes/depois; simulação com JWT: autora admin/professora/TTS
   ilimitado, conta grátis só `user` e limite 20.
 - Confirmado no Staging: o botão atual de dar Premium (`setPlanTier`) afeta 0 linhas (falha silenciosa).
-- Produção: NÃO aplicada (aguarda autorização).
 - Produção (2026-10-08): `apply_migration` estourou o tempo 2 vezes (nada aplicado, conferido: sem tabelas novas,
   hash de profiles igual). Provável bloqueio da ferramenta por haver `delete` no corpo de `admin_revoke_role`.
   Caminho: SQL Editor da autora com `docs/rollout-sql/075_sql_editor.sql`.
+- **Produção: aplicada pela autora no SQL Editor em 2026-10-08** (não aparece em `schema_migrations`). Verificado só
+  leitura: 12 permissões, 60 linhas na matriz, autora com admin+premium_basic+teacher (3 linhas em account_roles),
+  14 funções definer com `search_path=public`, nenhuma executável por anon, internas fechadas, 3 policies; hash de
+  profiles igual ao de antes (`a2f735fe…`). Simulação com JWT (transação desfeita): autora admin/professora com
+  cartões ilimitados; aluno vinculado = `user,student`, ilimitado; conta grátis = `user`, limite 20.
