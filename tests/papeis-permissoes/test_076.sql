@@ -45,6 +45,9 @@ insert into storage.objects(bucket_id, name) values ('support-materials','000000
 insert into r select 'prof grava para aluna dela', (select count(*) from teacher_class_logs where teacher_id='00000000-0000-0000-0000-00000000000d')=1, '';
 do $$ begin insert into teacher_class_logs(teacher_id, student_id, language_app_key, topic) values ('00000000-0000-0000-0000-00000000000d','00000000-0000-0000-0000-00000000000b','frances','x');
  insert into r values ('prof nao grava para aluna alheia', false, 'passou'); exception when others then insert into r values ('prof nao grava para aluna alheia', true, sqlerrm); end $$;
+do $$ begin insert into teacher_support_materials(teacher_id, student_id, language_app_key, title) values ('00000000-0000-0000-0000-00000000000d','00000000-0000-0000-0000-00000000000b','frances','x');
+ insert into r values ('prof nao grava material para aluna alheia', false, 'passou'); exception when others then insert into r values ('prof nao grava material para aluna alheia', true, sqlerrm); end $$;
+insert into teacher_support_materials(teacher_id, student_id, language_app_key, title) values ('00000000-0000-0000-0000-00000000000d','00000000-0000-0000-0000-00000000000e','frances','PDF da d');
 insert into r select 'prof nao ve aulas alheias', (select count(*) from teacher_class_logs)=1, (select count(*) from teacher_class_logs)::text;
 insert into r select 'prof cria decks da aluna dela', (select count(*) from ensure_user_decks('00000000-0000-0000-0000-00000000000e','frances'))=1, '';
 do $$ begin perform ensure_user_decks('00000000-0000-0000-0000-00000000000b','frances');
@@ -56,11 +59,13 @@ do $$ begin update teacher_students set status='active', language_app_key='manda
 select pg_temp.u('00000000-0000-0000-0000-00000000000e','e@x.com');
 insert into r select 'aluna le aula', (select count(*) from get_my_class_logs('frances'))=1, '';
 insert into r select 'aula sem anotacoes', not exists (select 1 from information_schema.routines where routine_name='get_my_class_logs' and routine_definition ilike '%l.notes%'), '';
+insert into r select 'aluna e le so o material dela', (select count(*) from teacher_support_materials)=1, (select count(*) from teacher_support_materials)::text;
 insert into r select 'aluna nao le tabela de aulas direto', (select count(*) from teacher_class_logs)=0, (select count(*) from teacher_class_logs)::text;
 select pg_temp.u('00000000-0000-0000-0000-00000000000d','prof@x.com');
 update teacher_students set status='inactive' where teacher_id='00000000-0000-0000-0000-00000000000d';
 insert into r select 'prof desativa vinculo dela', (select status from teacher_students where teacher_id='00000000-0000-0000-0000-00000000000d')='inactive', '';
 select pg_temp.u('00000000-0000-0000-0000-00000000000e','e@x.com');
+insert into r select 'ex-aluna nao le material', (select count(*) from teacher_support_materials)=0, (select count(*) from teacher_support_materials)::text;
 insert into r select 'ex-aluna nao le aula', (select count(*) from get_my_class_logs('frances'))=0, '';
 -- aluna b lê material da autora
 select pg_temp.u('00000000-0000-0000-0000-00000000000b','aluna@x.com');

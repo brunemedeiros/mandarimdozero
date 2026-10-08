@@ -41,6 +41,7 @@ returns boolean language sql stable security definer set search_path to 'public'
   select exists (select 1 from teacher_students where teacher_id = p_teacher and student_id = p_student
                  and language_app_key = p_lang and status = 'active'); $$;
 
+revoke execute on function public.teacher_link_is_active(uuid, uuid, text) from public, anon, authenticated;
 create schema if not exists storage;
 create table storage.objects (id bigint generated always as identity primary key, bucket_id text, name text);
 create or replace function storage.foldername(name text) returns text[] language sql immutable as $$ select string_to_array(name, '/') $$;

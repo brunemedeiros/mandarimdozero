@@ -1,3 +1,5 @@
+begin;
+set local lock_timeout = '10s';
 -- 076 -- Regras das tabelas da professora passam a usar o PAPEL Professora (075), não o e-mail da autora.
 -- Etapa 1 do plano Professora (docs/plano-professora-privacidade.md).
 --
@@ -173,3 +175,4 @@ begin
   end if;
   return new;
 end $$;
+commit;
