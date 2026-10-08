@@ -105,3 +105,15 @@ Plano de migrations (proposto):
 - **Papéis somados**: toda conta tem Usuário. Vínculo ativo acrescenta Aluno (desvincular volta a só Usuário).
   Professora é concedida pela admin. Assinatura concede Premium. Permissões = soma dos papéis (vale a mais generosa).
 - "Premium" continua sendo o nome geral (quem não é grátis); Basic e Pro são as duas faixas dentro dele.
+
+## Migration 075 (papéis somados + matriz de permissões) -- 2026-10-08
+- Arquivo `shared/supabase_migrations/075_account_roles_and_permissions.sql`; testes locais
+  `tests/papeis-permissoes/run_local.sh` (29/29, inclui reaplicar = idempotente).
+- Decisão da autora: alunos ganham só o nível Premium Basic (upsell para Pro); Professora também é plano
+  (assinatura ou concessão, como o Premium); Premium de hoje vira Premium Basic.
+- **Staging: aplicada** (versão `20261008011037`). Verificado: 12 permissões, 60 linhas na matriz, autora com
+  admin+teacher+premium_basic, 14 funções definer com `search_path=public`, internas sem EXECUTE, nenhuma
+  executável por anon; hash de profiles igual antes/depois; simulação com JWT: autora admin/professora/TTS
+  ilimitado, conta grátis só `user` e limite 20.
+- Confirmado no Staging: o botão atual de dar Premium (`setPlanTier`) afeta 0 linhas (falha silenciosa).
+- Produção: NÃO aplicada (aguarda autorização).
