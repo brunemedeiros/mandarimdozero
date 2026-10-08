@@ -124,3 +124,16 @@ Plano de migrations (proposto):
   14 funções definer com `search_path=public`, nenhuma executável por anon, internas fechadas, 3 policies; hash de
   profiles igual ao de antes (`a2f735fe…`). Simulação com JWT (transação desfeita): autora admin/professora com
   cartões ilimitados; aluno vinculado = `user,student`, ilimitado; conta grátis = `user`, limite 20.
+
+## Migration 076 (regras da professora pelo papel) -- 2026-10-08
+- Arquivo `shared/supabase_migrations/076_teacher_role_policies.sql`, sem DROP/DELETE (ALTER POLICY + create or replace),
+  para a ferramenta conseguir aplicar. Testes locais `tests/papeis-permissoes/run_local_076.sh` 25/25 (075: 29/29).
+- Achado no Staging: `teacher_link_is_active()` não tem EXECUTE para authenticated (055); as policies passaram a
+  conferir o vínculo com `exists` em teacher_students, colunas qualificadas pelo nome da tabela.
+- Status de vínculo no banco: `active`, `invited`, `removed` (o convite já tem status previsto).
+- Aulas: o aluno lê pela RPC `get_my_class_logs(lang)`, sem o campo "Anotações" (nota privada da professora).
+- **Staging: aplicada** (`teacher_role_policies` + correção `teacher_role_policies_link_check`). Verificado com JWT
+  simulado (transação desfeita): professora grava aula/material para aluna vinculada; aluna lê material e aula
+  (sem anotações); depois de `removed` não lê mais; conta comum não grava material para ninguém; autopromoção
+  bloqueada; estranho não cria Decks de outra conta; anon continua lendo Decks de curso.
+- Produção: NÃO aplicada (aguarda autorização). Reserva: `docs/rollout-sql/076_sql_editor.sql`.
