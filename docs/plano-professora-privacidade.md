@@ -117,3 +117,6 @@ Plano de migrations (proposto):
   ilimitado, conta grátis só `user` e limite 20.
 - Confirmado no Staging: o botão atual de dar Premium (`setPlanTier`) afeta 0 linhas (falha silenciosa).
 - Produção: NÃO aplicada (aguarda autorização).
+- Produção (2026-10-08): `apply_migration` estourou o tempo 2 vezes (nada aplicado, conferido: sem tabelas novas,
+  hash de profiles igual). Provável bloqueio da ferramenta por haver `delete` no corpo de `admin_revoke_role`.
+  Caminho: SQL Editor da autora com `docs/rollout-sql/075_sql_editor.sql`.
