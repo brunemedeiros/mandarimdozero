@@ -30,7 +30,7 @@
 
 | Unidade | Expressão | Registro | Significado | Exemplo |
 |---|---|---|---|---|
-| A1-13 | Il pleut des cordes | neutral | Está chovendo canivetes; chove muito. | Prends un parapluie, il pleut des cordes ! |
+| A1-13 | Il pleut des cordes | familiar | Está chovendo canivetes; chove muito. Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais. | Prends un parapluie, il pleut des cordes ! |
 | A1-14 | Bon voyage ! | neutral | Boa viagem! | Tu pars demain ? Bon voyage ! |
 | A1-15 | Bon rétablissement ! | neutral | Melhoras! Boa recuperação! | Tu es malade ? Bon rétablissement ! |
 | A1-15 | À tes souhaits ! | neutral | Saúde! (quando alguém espirra) | Atchoum ! — À tes souhaits ! |

@@ -207,11 +207,11 @@
     "type": "expression",
     "canonicalExpression": "Il pleut des cordes",
     "level": "A1",
-    "register": "neutral",
+    "register": "familiar",
     "expressionAudioFile": "8239559bf59d.mp3",
     "meaning": {
       "fr": "Il pleut très fort.",
-      "pt": "Está chovendo canivetes; chove muito."
+      "pt": "Está chovendo canivetes; chove muito. Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
     },
     "example": {
       "text": "Prends un parapluie, il pleut des cordes !",
@@ -225,7 +225,7 @@
       "Il fait beau"
     ],
     "correctAnswer": "Il pleut très fort",
-    "explanation": "C'est une image : la pluie tombe comme des cordes, en lignes serrées.",
+    "explanation": "C'est une image : la pluie tombe comme des cordes, en lignes serrées. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
     "secondExample": {
       "text": "Il pleut des cordes depuis ce matin.",
       "audioFile": "cf75a56348dc.mp3"
