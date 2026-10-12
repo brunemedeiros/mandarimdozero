@@ -1,0 +1,156 @@
+/* Tokens do painel (Professora e Admin).
+   Não define nenhuma cor nova de marca: lê os tokens que o site JÁ define em fr/index.html e zh/index.html
+   (--seal-red, --paper, --ink...), então cada curso e cada tema (claro/escuro) chegam sozinhos. Um curso novo
+   entra ao definir os mesmos tokens no :root dele, sem mexer aqui.
+   Fonte: sempre var(--font-body) (Nunito). O painel NÃO usa --font-display, para a fonte ser a mesma em todos os cursos.
+   Ordem de carga: vendor/pico.painel.css, depois este arquivo, depois painel-componentes.css.
+   Escopo: tudo vale só dentro de um elemento com a classe .painel. */
+
+/* ---------- 1. Tokens do painel (--p-*) ---------- */
+.painel{
+  --p-bg: var(--paper);
+  --p-superficie: var(--paper-warm);
+  --p-linha: var(--paper-line);
+  --p-tinta: var(--ink);
+  --p-tinta-suave: var(--ink-soft);
+  --p-marca: var(--seal-red);
+  --p-marca-escura: var(--seal-red-dark);
+  --p-sobre-marca: var(--on-seal-red);
+  --p-destaque: var(--imperial-gold);
+  --p-ok: var(--jade);
+  --p-aviso: var(--grade-hard-bg);
+  /* fr define --error-red; zh usa --grade-again-bg para o mesmo papel */
+  --p-erro: var(--error-red, var(--grade-again-bg));
+  /* azul de informação existe nos dois cursos (--count-new) */
+  --p-info: var(--count-new);
+  --p-sobre-vivo: var(--on-vivid);
+  --p-raio: var(--radius, 14px);
+  --p-raio-controle: 10px;
+  --p-sombra: var(--shadow-card, 0 2px 8px rgba(33,23,20,.08));
+  --p-fonte: var(--font-body, 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  /* única cor nova do painel: fundo de campo e de bloco "elevado", um pouco mais claro que a superfície.
+     Definida nos 3 blocos de tema, como as demais cores do projeto. */
+  --p-elevado: color-mix(in srgb, var(--paper-warm), white 45%);
+  /* borda de campo e trilho do interruptor desligado: contraste mínimo de 3:1 (WCAG 1.4.11), medido em tests/painel-ds/test_contraste.js */
+  --p-borda-campo: color-mix(in srgb, var(--p-linha), var(--p-tinta-suave) 60%);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .painel{ --p-elevado: color-mix(in srgb, var(--paper-warm), white 8%); }
+}
+:root[data-theme="dark"] .painel{ --p-elevado: color-mix(in srgb, var(--paper-warm), white 8%); }
+
+/* ---------- 2. Ligação com o Pico (--pico-*) ----------
+   Especificidade alta de propósito (:root:root:root .painel = 0,4,0): vence o bloco escuro do Pico, que usa
+   :root[data-theme="dark"] .painel (0,3,0). Só os ícones (setas, checks) seguem vindo do Pico, claro ou escuro. */
+:root:root:root .painel{
+  --pico-font-family: var(--p-fonte);
+  --pico-font-size: 100%;
+  --pico-border-radius: var(--p-raio-controle);
+  --pico-block-spacing-vertical: 1rem;
+  --pico-block-spacing-horizontal: 1.1rem;
+  --pico-form-element-spacing-vertical: .55rem;
+  --pico-form-element-spacing-horizontal: .9rem;
+  --pico-spacing: .75rem;
+
+  --pico-background-color: var(--p-bg);
+  --pico-color: var(--p-tinta);
+  --pico-muted-color: var(--p-tinta-suave);
+  --pico-muted-border-color: var(--p-linha);
+  --pico-text-selection-color: color-mix(in srgb, var(--p-marca) 28%, transparent);
+
+  --pico-primary: var(--p-marca-escura);
+  --pico-primary-background: var(--p-marca);
+  --pico-primary-border: var(--p-marca);
+  --pico-primary-underline: color-mix(in srgb, var(--p-marca-escura) 50%, transparent);
+  --pico-primary-hover: var(--p-marca-escura);
+  --pico-primary-hover-background: color-mix(in srgb, var(--p-marca) 90%, white);
+  --pico-primary-hover-border: color-mix(in srgb, var(--p-marca) 90%, white);
+  --pico-primary-hover-underline: var(--p-marca-escura);
+  --pico-primary-focus: color-mix(in srgb, var(--p-marca-escura) 40%, transparent);
+  --pico-primary-inverse: var(--p-sobre-marca);
+
+  --pico-secondary: var(--p-tinta-suave);
+  --pico-secondary-background: var(--p-tinta-suave);
+  --pico-secondary-border: var(--p-tinta-suave);
+  --pico-secondary-underline: color-mix(in srgb, var(--p-tinta-suave) 50%, transparent);
+  --pico-secondary-hover: var(--p-tinta);
+  --pico-secondary-hover-background: var(--p-tinta);
+  --pico-secondary-hover-border: var(--p-tinta);
+  --pico-secondary-hover-underline: var(--p-tinta);
+  --pico-secondary-focus: color-mix(in srgb, var(--p-tinta-suave) 30%, transparent);
+  --pico-secondary-inverse: var(--p-bg);
+
+  --pico-contrast: var(--p-tinta);
+  --pico-contrast-background: var(--p-tinta);
+  --pico-contrast-border: var(--p-tinta);
+  --pico-contrast-underline: color-mix(in srgb, var(--p-tinta) 50%, transparent);
+  --pico-contrast-hover: var(--p-tinta-suave);
+  --pico-contrast-hover-background: var(--p-tinta-suave);
+  --pico-contrast-hover-border: var(--p-tinta-suave);
+  --pico-contrast-hover-underline: var(--p-tinta-suave);
+  --pico-contrast-focus: color-mix(in srgb, var(--p-tinta-suave) 30%, transparent);
+  --pico-contrast-inverse: var(--p-bg);
+
+  --pico-box-shadow: var(--p-sombra);
+  --pico-h1-color: var(--p-tinta);
+  --pico-h2-color: var(--p-tinta);
+  --pico-h3-color: var(--p-tinta);
+  --pico-h4-color: var(--p-tinta);
+  --pico-h5-color: var(--p-tinta-suave);
+  --pico-h6-color: var(--p-tinta-suave);
+  --pico-mark-background-color: color-mix(in srgb, var(--p-destaque) 28%, transparent);
+  --pico-mark-color: var(--p-tinta);
+  --pico-ins-color: var(--p-ok);
+  --pico-del-color: var(--p-erro);
+
+  --pico-table-border-color: var(--p-linha);
+  --pico-table-row-stripped-background-color: color-mix(in srgb, var(--p-superficie) 55%, transparent);
+  --pico-code-background-color: var(--p-superficie);
+  --pico-code-color: var(--p-tinta-suave);
+
+  --pico-form-element-background-color: var(--p-elevado);
+  --pico-form-element-selected-background-color: var(--p-linha);
+  --pico-form-element-border-color: var(--p-borda-campo);
+  --pico-form-element-color: var(--p-tinta);
+  --pico-form-element-placeholder-color: var(--p-tinta-suave);
+  --pico-form-element-active-background-color: var(--p-elevado);
+  --pico-form-element-active-border-color: var(--p-marca-escura);
+  --pico-form-element-focus-color: var(--p-marca-escura);
+  --pico-form-element-invalid-border-color: var(--p-erro);
+  --pico-form-element-invalid-active-border-color: var(--p-erro);
+  --pico-form-element-invalid-focus-color: var(--p-erro);
+  --pico-form-element-valid-border-color: var(--p-ok);
+  --pico-form-element-valid-active-border-color: var(--p-ok);
+  --pico-form-element-valid-focus-color: var(--p-ok);
+
+  --pico-switch-background-color: var(--p-borda-campo);
+  --pico-switch-checked-background-color: var(--p-marca-escura);
+  --pico-switch-color: var(--p-elevado);
+  --pico-range-border-color: var(--p-linha);
+  --pico-range-active-border-color: var(--p-tinta-suave);
+  --pico-range-thumb-border-color: var(--p-bg);
+  --pico-range-thumb-color: var(--p-marca-escura);
+  --pico-range-thumb-active-color: var(--p-marca-escura);
+
+  --pico-accordion-border-color: var(--p-linha);
+  --pico-accordion-active-summary-color: var(--p-marca-escura);
+  --pico-accordion-close-summary-color: var(--p-tinta);
+  --pico-accordion-open-summary-color: var(--p-tinta-suave);
+
+  --pico-card-background-color: var(--p-superficie);
+  --pico-card-border-color: var(--p-linha);
+  --pico-card-box-shadow: var(--p-sombra);
+  --pico-card-sectioning-background-color: color-mix(in srgb, var(--p-superficie), var(--p-bg) 40%);
+
+  --pico-dropdown-background-color: var(--p-elevado);
+  --pico-dropdown-border-color: var(--p-linha);
+  --pico-dropdown-box-shadow: var(--p-sombra);
+  --pico-dropdown-color: var(--p-tinta);
+  --pico-dropdown-hover-background-color: var(--p-linha);
+
+  --pico-modal-overlay-background-color: color-mix(in srgb, var(--p-bg) 78%, transparent);
+  --pico-progress-background-color: var(--p-linha);
+  --pico-progress-color: var(--p-marca-escura);
+  --pico-tooltip-background-color: var(--p-tinta);
+  --pico-tooltip-color: var(--p-bg);
+}

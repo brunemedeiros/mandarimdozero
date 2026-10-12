@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guia de estilo do painel</title>
+<!-- Página de documentação para quem desenvolve o painel (não faz parte do app do aluno). Texto fixo em português
+     de propósito: não passa por t(). Cada componente é mostrado renderizado e com o HTML para copiar. -->
+<link rel="stylesheet" href="guia-paletas.css">
+<link rel="stylesheet" href="vendor/pico.painel.css">
+<link rel="stylesheet" href="painel-tokens.css">
+<link rel="stylesheet" href="painel-componentes.css">
+<style>
+  html, body{ margin: 0; background: var(--paper); }
+  .g-topo{ position: sticky; top: 0; z-index: 10; display: flex; gap: .75rem 1.5rem; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: .75rem 1.5rem; background: var(--p-bg); border-bottom: 1px solid var(--p-linha); }
+  .g-topo strong{ font-size: 1.05rem; }
+  .g-controles{ display: flex; gap: .75rem; flex-wrap: wrap; }
+  .g-seg{ display: inline-flex; gap: .25rem; padding: .25rem; background: var(--p-superficie); border: 1px solid var(--p-linha); border-radius: 12px; }
+  .painel .g-seg button{ margin: 0; width: auto; padding: .4rem .9rem; background: transparent; border-color: transparent; color: var(--p-tinta-suave); font-weight: 700; min-height: 2.5rem; }
+  .painel .g-seg button[aria-pressed="true"]{ background: var(--p-marca); border-color: var(--p-marca); color: var(--p-sobre-marca); }
+  .g-corpo{ display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 0; }
+  .g-menu{ position: sticky; top: 3.9rem; align-self: start; padding: 1.25rem 1rem; display: flex; flex-direction: column; gap: .15rem; max-height: calc(100vh - 4rem); overflow-y: auto; }
+  .g-menu a{ padding: .35rem .7rem; border-radius: 8px; text-decoration: none; color: var(--p-tinta-suave); font-weight: 700; font-size: .9rem; }
+  .g-menu a:hover{ background: var(--p-linha); color: var(--p-tinta); }
+  .g-sec{ display: flex; flex-direction: column; gap: 1rem; scroll-margin-top: 4.5rem; }
+  .g-sec > h2{ margin: 0; font-size: 1.4rem; }
+  .g-sec > p{ margin: 0; color: var(--p-tinta-suave); max-width: 70ch; }
+  .g-exemplo > header{ display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; }
+  .g-exemplo > header strong{ font-size: 1.02rem; }
+  .g-origem{ font-size: .7rem; font-weight: 800; padding: .1rem .6rem; border-radius: 999px; border: 1px solid var(--p-linha); color: var(--p-tinta-suave); white-space: nowrap; }
+  .g-origem--pico{ background: color-mix(in srgb, var(--p-ok) 18%, transparent); color: var(--p-tinta); border-color: color-mix(in srgb, var(--p-ok) 50%, transparent); }
+  .g-uso{ margin: 0 0 .75rem; color: var(--p-tinta-suave); font-size: .9rem; }
+  .g-palco{ padding: 1rem; border: 1px dashed var(--p-linha); border-radius: var(--p-raio-controle); background: var(--p-bg); overflow-x: auto; }
+  .g-palco > *:last-child{ margin-bottom: 0; }
+  .g-exemplo details{ margin: .75rem 0 0; }
+  .g-exemplo pre{ margin: .5rem 0 0; max-height: 22rem; overflow: auto; font-size: .78rem; }
+  .g-tokens{ display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: .75rem; }
+  .g-token{ display: grid; grid-template-columns: 2.6rem 1fr; gap: .6rem; align-items: center; padding: .55rem; border: 1px solid var(--p-linha); border-radius: var(--p-raio-controle); background: var(--p-elevado); }
+  .g-token i{ width: 2.6rem; height: 2.6rem; border-radius: 8px; border: 1px solid var(--p-linha); display: block; }
+  .g-token b{ display: block; font-size: .85rem; }
+  .g-token small{ display: block; color: var(--p-tinta-suave); font-size: .72rem; line-height: 1.3; }
+  .g-par{ display: flex; gap: .5rem; flex-wrap: wrap; }
+  @media (max-width: 900px){ .g-corpo{ grid-template-columns: 1fr; } .g-menu{ position: static; flex-direction: row; flex-wrap: wrap; max-height: none; } }
+</style>
+</head>
+<body>
+<div class="painel" id="raiz">
+  <div class="g-topo">
+    <strong>Guia de estilo do painel</strong>
+    <div class="g-controles">
+      <div class="g-seg" id="curso" role="group" aria-label="Curso">
+        <button type="button" data-v="fr" aria-pressed="true">Francês</button>
+        <button type="button" data-v="zh" aria-pressed="false">Mandarim</button>
+      </div>
+      <div class="g-seg" id="tema" role="group" aria-label="Tema">
+        <button type="button" data-v="light" aria-pressed="true">Claro</button>
+        <button type="button" data-v="dark" aria-pressed="false">Escuro</button>
+      </div>
+    </div>
+  </div>
+  <div class="g-corpo">
+    <nav class="g-menu" id="menu" aria-label="Seções"></nav>
+    <main class="p-pagina" id="conteudo"></main>
+  </div>
+</div>
+
+<script>
+/* ---------- Conteúdo do guia ---------- */
+var TOKENS = [
+  ['--p-bg','Fundo da página','--paper'],
+  ['--p-superficie','Blocos e cartões','--paper-warm'],
+  ['--p-elevado','Campos e itens elevados','mistura de --paper-warm com branco'],
+  ['--p-linha','Bordas e divisórias','--paper-line'],
+  ['--p-tinta','Texto principal','--ink'],
+  ['--p-tinta-suave','Texto secundário','--ink-soft'],
+  ['--p-marca','Cor do curso (botões, destaque)','--seal-red'],
+  ['--p-marca-escura','Links e texto de destaque','--seal-red-dark'],
+  ['--p-sobre-marca','Texto sobre a cor do curso','--on-seal-red'],
+  ['--p-destaque','Detalhe secundário','--imperial-gold'],
+  ['--p-ok','Em dia, sucesso','--jade'],
+  ['--p-aviso','Atenção','--grade-hard-bg'],
+  ['--p-erro','Parado, erro','--error-red (fr) ou --grade-again-bg (zh)'],
+  ['--p-info','Informação','--count-new'],
+  ['--p-sobre-vivo','Texto sobre ok, aviso, erro e informação','--on-vivid']
+];
+
+var SECOES = [
+ {id:'como-usar', titulo:'Como usar', texto:'O painel é uma área marcada com a classe painel. Dentro dela valem o Pico CSS (limitado a essa área), os tokens e os componentes abaixo. Fora dela nada muda.', ex:[
+  {t:'Carregar os arquivos', pico:false, uso:'Nesta ordem, no HTML da tela. As cores vêm dos tokens do site, então o curso e o tema chegam sozinhos.', html:
+'<link rel="stylesheet" href="../shared/painel/vendor/pico.painel.css">\n<link rel="stylesheet" href="../shared/painel/painel-tokens.css">\n<link rel="stylesheet" href="../shared/painel/painel-componentes.css">\n\n<div class="painel">\n  <main class="p-pagina"> ... </main>\n</div>', so_codigo:true}
+ ]},
+ {id:'cores', titulo:'Cores', texto:'Nenhuma cor de marca nova: cada token do painel aponta para um token que o site já tem. Os valores mudam sozinhos com o curso e o tema.', tokens:true, ex:[]},
+ {id:'tipografia', titulo:'Tipografia', texto:'Uma fonte só (a do site) em todos os cursos. O que muda a hierarquia é tamanho e peso, nunca outra fonte.', ex:[
+  {t:'Títulos, texto e números', pico:true, uso:'Use h1 só uma vez por tela, no cabeçalho. Blocos usam h2 ou h3. Números de destaque usam o indicador.', html:
+'<h1>Título da tela</h1>\n<h2>Título de seção</h2>\n<h3>Título de bloco</h3>\n<p>Texto normal para explicações e dados corridos.</p>\n<p><small>Texto pequeno para notas e legendas.</small></p>\n<p><strong>Texto em negrito</strong> e <a href="#">um link</a>.</p>'}
+ ]},
+ {id:'botoes', titulo:'Botões', texto:'Um botão principal por tela. O resto é secundário ou contorno.', ex:[
+  {t:'Variações', pico:true, uso:'Primário para a ação principal, contorno para ações de apoio, secundário e contraste para casos neutros.', html:
+'<div class="p-acoes">\n  <button>Primário</button>\n  <button class="secondary">Secundário</button>\n  <button class="contrast">Contraste</button>\n  <button class="outline">Contorno</button>\n  <button disabled>Desabilitado</button>\n</div>'},
+  {t:'Botão pequeno e em grupo', pico:true, uso:'Pequeno dentro de linhas de tabela. Grupo para opções que andam juntas.', html:
+'<div class="p-acoes">\n  <button class="outline" style="padding:.3rem .7rem;font-size:.85rem">Abrir</button>\n  <div role="group">\n    <button class="outline">Semana</button>\n    <button class="outline">Mês</button>\n    <button class="outline">Ano</button>\n  </div>\n</div>'}
+ ]},
+ {id:'campos', titulo:'Campos de formulário', texto:'Todo campo tem rótulo visível. O placeholder só dá um exemplo.', ex:[
+  {t:'Texto, seleção e mensagem', pico:true, uso:'Rótulo envolve o campo. Use aria-invalid para erro e valor válido.', html:
+'<label>Nome do aluno\n  <input placeholder="Ex.: Marina Alves">\n</label>\n<label>Curso\n  <select><option>Francês</option><option>Mandarim</option></select>\n</label>\n<label>Mensagem\n  <textarea rows="3" placeholder="Escreva um recado"></textarea>\n</label>\n<label>E-mail\n  <input value="marina@" aria-invalid="true" aria-describedby="e1">\n  <small id="e1">Falta o endereço completo.</small>\n</label>'},
+  {t:'Caixas, rádio e interruptor', pico:true, uso:'Caixa para várias opções, rádio para uma só, interruptor para ligar e desligar.', html:
+'<fieldset>\n  <label><input type="checkbox" checked> Receber lembretes</label>\n  <label><input type="checkbox"> Resumo semanal</label>\n</fieldset>\n<fieldset>\n  <label><input type="radio" name="r" checked> Todos</label>\n  <label><input type="radio" name="r"> Só quem precisa de atenção</label>\n</fieldset>\n<label><input type="checkbox" role="switch" checked> Notificações por e-mail</label>'},
+  {t:'Barra de ferramentas', pico:false, uso:'Busca, filtro e interruptor acima de uma tabela. O primeiro campo cresce.', html:
+'<div class="p-ferramentas">\n  <input class="p-cresce" type="search" placeholder="Buscar por nome ou @usuário" aria-label="Buscar aluno">\n  <select aria-label="Curso"><option>Francês</option><option>Mandarim</option></select>\n  <label><input type="checkbox" role="switch"> Só quem precisa de atenção</label>\n</div>'}
+ ]},
+ {id:'selos', titulo:'Selos de situação', texto:'Mostram o estado em uma palavra. A cor nunca é a única pista: o texto sempre diz.', ex:[
+  {t:'Selos', pico:false, uso:'Em dia, atenção, parado, informação e neutro.', html:
+'<span class="p-selo p-selo--ok">Em dia</span>\n<span class="p-selo p-selo--aviso">Atenção</span>\n<span class="p-selo p-selo--erro">Parado</span>\n<span class="p-selo p-selo--info">Novo</span>\n<span class="p-selo">Rascunho</span>'}
+ ]},
+ {id:'alertas', titulo:'Alertas', texto:'Avisos que aparecem no topo da tela ou do bloco. Opcionalmente trazem uma ação.', ex:[
+  {t:'Quatro tons', pico:false, uso:'Aviso é o padrão. Use ok, erro e info quando o assunto pedir.', html:
+'<div class="p-pagina" style="padding:0">\n  <div class="p-alerta p-alerta--ok"><span>Cartões salvos com sucesso.</span></div>\n  <div class="p-alerta"><span><strong>3 alunos</strong> estão há mais de 7 dias sem estudar.</span><button style="padding:.3rem .8rem">Enviar lembrete</button></div>\n  <div class="p-alerta p-alerta--erro"><span>Não foi possível salvar. Tente de novo.</span></div>\n  <div class="p-alerta p-alerta--info"><span>Novo módulo disponível no francês A2.</span></div>\n</div>'}
+ ]},
+ {id:'abas', titulo:'Abas', texto:'Separam partes de uma mesma tela. A aba atual leva aria-current.', ex:[
+  {t:'Abas', pico:false, uso:'Para dividir um bloco ou a navegação entre Professora e Admin.', html:
+'<nav class="p-abas" aria-label="Seções do aluno">\n  <a href="#" aria-current="page">Resumo</a>\n  <a href="#">Cartões</a>\n  <a href="#">Aulas</a>\n  <a href="#">Atividade</a>\n</nav>'}
+ ]},
+ {id:'avatar', titulo:'Avatar e pessoa', texto:'Iniciais em um círculo, com nome e usuário ao lado.', ex:[
+  {t:'Avatar e linha de pessoa', pico:false, uso:'Em tabelas e cabeçalhos de aluno.', html:
+'<div class="p-pessoa">\n  <span class="p-avatar">MA</span>\n  <div><strong>Marina Alves</strong><small>@marina.alves</small></div>\n</div>\n<p></p>\n<div class="p-pessoa">\n  <span class="p-avatar p-avatar--grande">CF</span>\n  <div><strong>Camila Ferraz</strong><small>@cafer · Francês A2</small></div>\n</div>'}
+ ]},
+ {id:'blocos', titulo:'Blocos, indicadores e progresso', texto:'Bloco é o cartão do Pico com título no topo. Indicador é o número grande para ver o quadro geral de relance.', ex:[
+  {t:'Bloco', pico:true, uso:'Agrupa informação de um mesmo assunto. Título em header, ações em footer.', html:
+'<article>\n  <header><h3>Anotação da professora</h3></header>\n  <label>Lembrete para a próxima aula\n    <textarea rows="3"></textarea>\n  </label>\n  <footer><button>Salvar anotação</button></footer>\n</article>'},
+  {t:'Faixa de resumo', pico:false, uso:'No topo da tela, antes do detalhe. Quatro indicadores é o ideal.', html:
+'<div class="p-resumo">\n  <article class="p-indicador"><span class="p-indicador-rotulo">Alunos ativos</span><span class="p-indicador-valor">18</span><span class="p-indicador-detalhe">2 novos este mês</span></article>\n  <article class="p-indicador"><span class="p-indicador-rotulo">Estudaram hoje</span><span class="p-indicador-valor">11</span><span class="p-indicador-detalhe">61% da turma</span></article>\n  <article class="p-indicador"><span class="p-indicador-rotulo">Cartões vencidos</span><span class="p-indicador-valor">142</span><span class="p-indicador-detalhe">média de 8 por aluno</span></article>\n  <article class="p-indicador"><span class="p-indicador-rotulo">Parados há 7+ dias</span><span class="p-indicador-valor">3</span><span class="p-indicador-detalhe">precisam de atenção</span></article>\n</div>'},
+  {t:'Barra de progresso', pico:true, uso:'Sempre com o número ao lado ou no rótulo.', html:
+'<label>Retenção (91%)\n  <progress value="91" max="100"></progress>\n</label>\n<label>Meta da semana (62%)\n  <progress value="62" max="100"></progress>\n</label>'}
+ ]},
+ {id:'tabelas', titulo:'Tabelas e listas', texto:'Tabela para comparar vários alunos. Lista para poucos itens com uma ação.', ex:[
+  {t:'Tabela', pico:true, uso:'Dentro de p-tabela, para rolar de lado só ela, nunca a página.', html:
+'<article class="p-tabela">\n  <table class="striped">\n    <thead><tr><th>Aluno</th><th>Nível</th><th>Atividade</th><th>Retenção</th><th>Situação</th></tr></thead>\n    <tbody>\n      <tr><td><div class="p-pessoa"><span class="p-avatar">MA</span><div><strong>Marina Alves</strong><small>@marina.alves</small></div></div></td><td>A2</td><td>hoje</td><td>91%</td><td><span class="p-selo p-selo--ok">Em dia</span></td></tr>\n      <tr><td><div class="p-pessoa"><span class="p-avatar">HD</span><div><strong>Helena Duarte</strong><small>@helena.d</small></div></div></td><td>B1</td><td>há 9 dias</td><td>72%</td><td><span class="p-selo p-selo--erro">Parado</span></td></tr>\n    </tbody>\n  </table>\n</article>'},
+  {t:'Lista com selo', pico:false, uso:'Para atividade recente e itens curtos.', html:
+'<article>\n  <header><h3>Atividade recente</h3></header>\n  <ul class="p-lista">\n    <li><span>Hoje · 48 cartões revisados</span><span class="p-selo p-selo--ok">Em dia</span></li>\n    <li><span>Ontem · Ditado do módulo 4</span><span class="p-selo p-selo--info">Acertou 8 de 10</span></li>\n    <li><span>Há 5 dias · Ouça e traduza</span><span class="p-selo p-selo--aviso">Acertou 5 de 10</span></li>\n  </ul>\n</article>'}
+ ]},
+ {id:'janelas', titulo:'Janela, menu e acordeão', texto:'Para confirmações, ações escondidas e conteúdo que o leitor abre quando quer.', ex:[
+  {t:'Janela de confirmação', pico:true, uso:'Na tela real vai dentro de dialog com o atributo open. Aqui aparece fixa para mostrar o visual.', html:
+'<article style="max-width:440px">\n  <header><strong>Remover o vínculo com a aluna?</strong></header>\n  <p>O progresso dela continua guardado. Você pode vincular de novo depois.</p>\n  <footer class="p-acoes" style="justify-content:flex-end">\n    <button class="secondary">Cancelar</button>\n    <button>Remover</button>\n  </footer>\n</article>'},
+  {t:'Menu suspenso e acordeão', pico:true, uso:'Sem JavaScript: usam a tag details.', html:
+'<details class="dropdown">\n  <summary>Mais ações</summary>\n  <ul>\n    <li><a href="#">Enviar mensagem</a></li>\n    <li><a href="#">Exportar cartões</a></li>\n    <li><a href="#">Remover vínculo</a></li>\n  </ul>\n</details>\n<details>\n  <summary>Como a retenção é calculada?</summary>\n  <p>É a porcentagem de cartões respondidos corretamente nos últimos 30 dias.</p>\n</details>'}
+ ]},
+ {id:'vazio', titulo:'Estado vazio', texto:'Quando não há nada para mostrar, a tela explica e sugere o próximo passo.', ex:[
+  {t:'Estado vazio', pico:false, uso:'Nunca deixe um bloco em branco.', html:
+'<article class="p-vazio">\n  <strong>Nenhuma aluna vinculada ainda</strong>\n  <span>Convide uma pessoa pelo @usuário para ver o progresso dela aqui.</span>\n  <button>Convidar aluna</button>\n</article>'}
+ ]},
+ {id:'padroes', titulo:'Padrões de página', texto:'A mesma estrutura em toda tela: cabeçalho, alerta se houver, faixa de resumo, ferramentas e blocos. Isso é o que dá o ar de uma família só.', ex:[
+  {t:'Tela de lista: Alunos', pico:false, uso:'Quadro geral da turma.', html:
+'<div class="p-pagina" style="padding:0">\n  <header class="p-cabecalho">\n    <div><span class="p-sobretitulo">Painel da professora</span><h1>Alunos de Francês</h1><span class="p-subtitulo">18 alunos ativos</span></div>\n    <div class="p-acoes"><button class="outline">Exportar lista</button><button>Convidar aluno</button></div>\n  </header>\n  <div class="p-alerta"><span><strong>3 alunos</strong> estão há mais de 7 dias sem estudar.</span><button style="padding:.3rem .8rem">Enviar lembrete</button></div>\n  <div class="p-resumo">\n    <article class="p-indicador"><span class="p-indicador-rotulo">Alunos ativos</span><span class="p-indicador-valor">18</span><span class="p-indicador-detalhe">2 novos este mês</span></article>\n    <article class="p-indicador"><span class="p-indicador-rotulo">Estudaram hoje</span><span class="p-indicador-valor">11</span><span class="p-indicador-detalhe">61% da turma</span></article>\n    <article class="p-indicador"><span class="p-indicador-rotulo">Parados há 7+ dias</span><span class="p-indicador-valor">3</span><span class="p-indicador-detalhe">precisam de atenção</span></article>\n  </div>\n  <div class="p-ferramentas"><input class="p-cresce" type="search" placeholder="Buscar por nome ou @usuário" aria-label="Buscar aluno"><label><input type="checkbox" role="switch"> Só quem precisa de atenção</label></div>\n  <article class="p-tabela"><table class="striped"><thead><tr><th>Aluno</th><th>Nível</th><th>Atividade</th><th>Situação</th></tr></thead><tbody>\n    <tr><td><div class="p-pessoa"><span class="p-avatar">MA</span><div><strong>Marina Alves</strong><small>@marina.alves</small></div></div></td><td>A2</td><td>hoje</td><td><span class="p-selo p-selo--ok">Em dia</span></td></tr>\n    <tr><td><div class="p-pessoa"><span class="p-avatar">TN</span><div><strong>Tiago Nunes</strong><small>@tiagonunes</small></div></div></td><td>A1</td><td>há 3 dias</td><td><span class="p-selo p-selo--aviso">Atenção</span></td></tr>\n  </tbody></table></article>\n</div>'},
+  {t:'Tela de detalhe: Aluno', pico:false, uso:'Visão individual. A gamificação do aluno aparece só como dado (números), sem peças de jogo.', html:
+'<div class="p-pagina" style="padding:0">\n  <header class="p-cabecalho">\n    <div class="p-pessoa"><span class="p-avatar p-avatar--grande">MA</span><div><span class="p-sobretitulo">Aluna</span><h1>Marina Alves</h1><span class="p-subtitulo">@marina.alves · Francês A2 · Módulo 4</span></div></div>\n    <div class="p-acoes"><button class="outline">Enviar mensagem</button><button>Ver cartões</button></div>\n  </header>\n  <nav class="p-abas" aria-label="Seções do aluno"><a href="#" aria-current="page">Resumo</a><a href="#">Cartões</a><a href="#">Aulas</a></nav>\n  <div class="p-resumo">\n    <article class="p-indicador"><span class="p-indicador-rotulo">Sequência</span><span class="p-indicador-valor">23 dias</span><span class="p-indicador-detalhe">recorde: 41 dias</span></article>\n    <article class="p-indicador"><span class="p-indicador-rotulo">Cartões hoje</span><span class="p-indicador-valor">48</span><span class="p-indicador-detalhe">meta de 60</span></article>\n    <article class="p-indicador"><span class="p-indicador-rotulo">Retenção</span><span class="p-indicador-valor">91%</span><span class="p-indicador-detalhe">últimos 30 dias</span></article>\n  </div>\n  <div class="p-grade-2">\n    <article><header><h3>Atividade recente</h3></header><ul class="p-lista"><li><span>Hoje · 48 cartões revisados</span><span class="p-selo p-selo--ok">Em dia</span></li><li><span>Ontem · Ditado do módulo 4</span><span class="p-selo p-selo--info">Acertou 8 de 10</span></li></ul></article>\n    <article><header><h3>Anotação da professora</h3></header><label>Lembrete para a próxima aula<textarea rows="3"></textarea></label><footer><button>Salvar anotação</button></footer></article>\n  </div>\n</div>'}
+ ]}
+];
+
+/* ---------- Montagem ---------- */
+var raiz = document.getElementById('raiz');
+var html = document.documentElement;
+
+function criar(tag, cls, texto){ var e = document.createElement(tag); if(cls) e.className = cls; if(texto != null) e.textContent = texto; return e; }
+
+function montar(){
+  var menu = document.getElementById('menu'), conteudo = document.getElementById('conteudo');
+  var cab = criar('header','p-cabecalho');
+  var cab1 = criar('div'); cab1.appendChild(criar('span','p-sobretitulo','Design System')); cab1.appendChild(criar('h1',null,'Guia de estilo do painel'));
+  cab1.appendChild(criar('span','p-subtitulo','Pico CSS limitado ao painel, mais os tokens e componentes da Brune. Troque curso e tema no topo para conferir.'));
+  cab.appendChild(cab1); conteudo.appendChild(cab);
+  SECOES.forEach(function(s){
+    var a = criar('a',null,s.titulo); a.href = '#'+s.id; menu.appendChild(a);
+    var sec = criar('section','g-sec'); sec.id = s.id;
+    sec.appendChild(criar('h2',null,s.titulo)); sec.appendChild(criar('p',null,s.texto));
+    if(s.tokens){ var g = criar('div','g-tokens'); g.id = 'tokens'; sec.appendChild(g); }
+    s.ex.forEach(function(ex){
+      var art = criar('article','g-exemplo');
+      var h = criar('header'); h.appendChild(criar('strong',null,ex.t));
+      h.appendChild(criar('span','g-origem'+(ex.pico?' g-origem--pico':''), ex.so_codigo?'Instrução':(ex.pico?'Nativo do Pico':'Feito à mão')));
+      art.appendChild(h);
+      art.appendChild(criar('p','g-uso',ex.uso));
+      if(!ex.so_codigo){ var palco = criar('div','g-palco'); palco.innerHTML = ex.html; art.appendChild(palco); }
+      var det = criar('details'); det.appendChild(criar('summary',null,'Ver o HTML'));
+      var pre = criar('pre'); pre.appendChild(criar('code',null,ex.html)); det.appendChild(pre); art.appendChild(det);
+      sec.appendChild(art);
+    });
+    conteudo.appendChild(sec);
+  });
+  conteudo.appendChild(criar('p','p-subtitulo','Dados de exemplo. Nada aqui lê ou grava no Supabase.'));
+}
+
+function hex(rgb){ var m = rgb.match(/\d+(\.\d+)?/g); if(!m) return rgb; return '#'+m.slice(0,3).map(function(n){ return ('0'+Math.round(+n).toString(16)).slice(-2); }).join('').toUpperCase(); }
+function pintarTokens(){
+  var g = document.getElementById('tokens'); if(!g) return; g.textContent = '';
+  TOKENS.forEach(function(t){
+    var c = criar('div','g-token'); var i = criar('i'); i.style.background = 'var('+t[0]+')'; c.appendChild(i);
+    var d = criar('div'); var b = criar('b',null,t[0]); var s1 = criar('small',null,t[1]); var s2 = criar('small',null,'vem de '+t[2]);
+    var s3 = criar('small',null,hex(getComputedStyle(i).backgroundColor)); d.appendChild(b); d.appendChild(s1); d.appendChild(s2); d.appendChild(s3); c.appendChild(d); g.appendChild(c);
+  });
+}
+function aplicar(curso, tema){
+  html.setAttribute('data-curso', curso); html.setAttribute('data-theme', tema);
+  document.querySelectorAll('#curso button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === curso)); });
+  document.querySelectorAll('#tema button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === tema)); });
+  pintarTokens();
+  try{ localStorage.setItem('guia-painel', JSON.stringify({curso:curso, tema:tema})); }catch(e){}
+}
+var estado = {curso:'fr', tema: (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'};
+try{ var sv = JSON.parse(localStorage.getItem('guia-painel')||'{}'); if(sv.curso) estado.curso = sv.curso; if(sv.tema) estado.tema = sv.tema; }catch(e){}
+montar(); aplicar(estado.curso, estado.tema);
+document.getElementById('curso').addEventListener('click', function(e){ var b = e.target.closest('button'); if(b){ estado.curso = b.getAttribute('data-v'); aplicar(estado.curso, estado.tema); } });
+document.getElementById('tema').addEventListener('click', function(e){ var b = e.target.closest('button'); if(b){ estado.tema = b.getAttribute('data-v'); aplicar(estado.curso, estado.tema); } });
+</script>
+</body>
+</html>

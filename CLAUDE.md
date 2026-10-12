@@ -74,7 +74,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 ## Índice
 
 - Regras por área (carregam sozinhas): `.claude/rules/` -- frontend-fr-zh, flashcards-motor, decks-review,
-  supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora.
+  supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora, painel-design-system.
 - Skills do projeto: `migration-supabase`, `notas-de-realidade`, `criar-desafios`, `audio-tts`,
   `teste-navegador`, `registrar-entrega`.
 - Agentes (`.claude/agents/`, `model:` pela dificuldade): `regressao` (haiku, roda testes),
@@ -93,6 +93,6 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   Premium) NÃO aplicar antes do paywall. Lista do que fazer ao ligar o paywall: `docs/historico/14-pendencias-pos-paywall-e-decks.md`.
 - Todos os cartões antigos já têm Deck (migração de 2026-10-07). Regra "1 professora por aluno por idioma" ainda não imposta no banco.
 - Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
-- Design System do painel: decidido Pico CSS, sem React e sem build (`docs/levantamento-design-system-painel.md`, seções 6 a 8). Falta a autora autorizar a Fase 1 e confirmar a entrega do Admin numa única vez.
+- Design System do painel: Pico CSS escopado, sem React e sem build. Fase 1 (fundação em `shared/painel/`) entregue em 2026-10-12, nenhuma tela alterada (`docs/historico/15-*`). Falta autorizar a Fase 2 (área da Professora) e confirmar o Admin numa única entrega. Decisão pendente: hospedar a fonte Nunito (hoje o site só usa a instalada no aparelho).
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.

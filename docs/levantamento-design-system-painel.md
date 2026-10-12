@@ -129,3 +129,7 @@ A autora não quer painel antigo e novo convivendo, mas também quer rapidez. As
 4. Cada fase com a regressão da área, o teste visual nos quatro cenários (fr e zh, claro e escuro) e o registro em `docs/historico/`.
 
 Nada deste documento foi aplicado ao site.
+
+## 9. Fase 1 entregue (2026-10-12)
+
+Fundação em `shared/painel/` e testes em `tests/painel-ds/`, sem alterar nenhuma tela. Relatório: `docs/historico/15-design-system-painel-fase-1.md`. Guia de estilo: `shared/painel/guia-de-estilo.html`.

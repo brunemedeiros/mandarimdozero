@@ -1,0 +1,84 @@
+/* Componentes e padrões de página do painel, em cima do Pico (limitado a .painel).
+   Só o que o Pico NÃO traz: selo, alerta, abas, avatar, indicador, padrões de página.
+   Tudo usa os tokens de painel-tokens.css (nenhuma cor escrita à mão). Prefixo p- para não colidir com o CSS do site.
+   Regra: peça nova entra primeiro em guia-de-estilo.html e só depois nas telas. */
+
+.painel{ line-height: 1.5; }
+.painel *:focus-visible{ outline: 2px solid var(--p-marca-escura); outline-offset: 2px; }
+
+/* ---------- Padrões de página ---------- */
+/* Página: coluna de blocos com espaçamento fixo. Cada tela do painel = .p-pagina com cabeçalho, resumo e blocos. */
+.painel .p-pagina{ display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; padding: 1.5rem; }
+.painel .p-pagina > *{ margin: 0; min-width: 0; }
+
+/* Cabeçalho: sobretítulo (onde estou), título, subtítulo (contexto) e ações à direita. */
+.painel .p-cabecalho{ display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.painel .p-cabecalho h1{ margin: 0; font-size: 1.9rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+.painel .p-sobretitulo{ display: block; font-size: .75rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--p-tinta-suave); }
+.painel .p-subtitulo{ display: block; margin-top: .15rem; font-size: .9rem; color: var(--p-tinta-suave); }
+.painel .p-acoes{ display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+.painel .p-acoes > *{ margin: 0; width: auto; }
+
+/* Resumo: faixa de indicadores no topo (o "quadro geral" antes do detalhe). */
+.painel .p-resumo{ display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; }
+.painel .p-indicador{ margin: 0; display: grid; gap: .2rem; align-content: start; }
+.painel .p-indicador-rotulo{ font-size: .85rem; color: var(--p-tinta-suave); }
+.painel .p-indicador-valor{ font-size: 2rem; line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; }
+.painel .p-indicador-detalhe{ font-size: .85rem; color: var(--p-tinta-suave); }
+
+/* Grades de blocos. */
+.painel .p-grade{ display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
+.painel .p-grade-2{ display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: start; }
+.painel .p-grade > *, .painel .p-grade-2 > *{ margin: 0; min-width: 0; }
+@media (max-width: 900px){ .painel .p-grade-2{ grid-template-columns: 1fr; } .painel .p-pagina{ padding: 1rem; } }
+
+/* Bloco = <article> do Pico. Título dentro de <header>. */
+.painel article > header > h2, .painel article > header > h3{ margin: 0; font-size: 1.05rem; font-weight: 800; }
+
+/* Barra de ferramentas: busca, filtros e interruptores acima de uma tabela. */
+.painel .p-ferramentas{ display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+.painel .p-ferramentas > *{ margin: 0; width: auto; }
+.painel .p-ferramentas .p-cresce{ flex: 1 1 220px; min-width: 180px; }
+.painel .p-ferramentas label{ display: flex; align-items: center; gap: .5rem; }
+
+/* Tabela com rolagem lateral só nela, nunca na página. */
+.painel .p-tabela{ overflow-x: auto; margin: 0; padding: 0; }
+.painel .p-tabela table{ margin: 0; min-width: 640px; }
+.painel .p-tabela th, .painel .p-tabela td{ white-space: nowrap; vertical-align: middle; }
+
+/* Lista de itens com um selo ou ação à direita. */
+.painel .p-lista{ display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
+.painel .p-lista li{ display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; margin: 0; padding: 0; }
+
+/* Estado vazio: nunca uma tela em branco. */
+.painel .p-vazio{ display: grid; gap: .4rem; justify-items: center; text-align: center; padding: 2rem 1rem; color: var(--p-tinta-suave); }
+.painel .p-vazio strong{ color: var(--p-tinta); font-size: 1.05rem; }
+
+/* ---------- Selo de situação ---------- */
+.painel .p-selo{ display: inline-flex; align-items: center; padding: .1rem .65rem; border-radius: 999px; font-size: .8rem; font-weight: 800; white-space: nowrap; background: var(--p-linha); color: var(--p-tinta); }
+.painel .p-selo--ok{ background: var(--p-ok); color: var(--p-sobre-vivo); }
+.painel .p-selo--aviso{ background: var(--p-aviso); color: var(--p-sobre-vivo); }
+.painel .p-selo--erro{ background: var(--p-erro); color: var(--p-sobre-vivo); }
+.painel .p-selo--info{ background: var(--p-info); color: var(--p-sobre-vivo); }
+
+/* ---------- Alerta ---------- */
+.painel .p-alerta{ --c: var(--p-aviso); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: .8rem 1.1rem; border-radius: var(--p-raio); border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); background: color-mix(in srgb, var(--c) 14%, var(--p-bg)); color: var(--p-tinta); }
+.painel .p-alerta--ok{ --c: var(--p-ok); }
+.painel .p-alerta--erro{ --c: var(--p-erro); }
+.painel .p-alerta--info{ --c: var(--p-info); }
+.painel .p-alerta > *{ margin: 0; }
+
+/* ---------- Abas ---------- */
+.painel .p-abas{ display: flex; justify-content: flex-start; align-items: stretch; gap: .25rem; margin: 0; padding: 0; border-bottom: 1px solid var(--p-linha); overflow-x: auto; list-style: none; }
+.painel .p-abas a{ padding: .5rem .9rem; text-decoration: none; font-weight: 700; white-space: nowrap; color: var(--p-tinta-suave); border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.painel .p-abas a:hover{ color: var(--p-tinta); }
+.painel .p-abas a[aria-current]{ color: var(--p-tinta); border-bottom-color: var(--p-marca); }
+
+/* ---------- Avatar (iniciais) ---------- */
+.painel .p-avatar{ display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; flex: none; font-size: .85rem; font-weight: 800; background: var(--p-marca-escura); color: var(--p-bg); }
+.painel .p-avatar--grande{ width: 4rem; height: 4rem; font-size: 1.2rem; }
+/* No escuro, --p-marca-escura é claro: vira contorno sobre a superfície para manter contraste com as iniciais. */
+:root[data-theme="dark"] .painel .p-avatar{ background: var(--p-elevado); color: var(--p-tinta); outline: 1px solid var(--p-linha); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .painel .p-avatar{ background: var(--p-elevado); color: var(--p-tinta); outline: 1px solid var(--p-linha); } }
+.painel .p-pessoa{ display: flex; align-items: center; gap: .75rem; min-width: 200px; }
+.painel .p-pessoa small{ display: block; color: var(--p-tinta-suave); }
