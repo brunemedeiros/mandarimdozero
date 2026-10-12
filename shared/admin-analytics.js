@@ -1378,12 +1378,12 @@ async function renderAdminAnalyticsView(){
 }
 
 // Alterna entre as seções do Painel de Admin (Badges/Analytics/
-// Notificações/Reports/Planos/Tags) -- cada uma renderiza no seu próprio wrap
+// Notificações/Reports/Planos) -- cada uma renderiza no seu próprio wrap
 // (#admin-badges-content / #admin-analytics-content / ...), só um fica
 // visível por vez. Alunos/Cartões/Aulas/Material de apoio saíram daqui para
 // o Painel da professora (shared/teacher-panel.js), que depende do PAPEL
 // Professora e não do Admin Mode.
-const ADMIN_PANEL_SECTIONS = ['badges', 'analytics', 'notifications', 'reports', 'premium', 'tags'];
+const ADMIN_PANEL_SECTIONS = ['badges', 'analytics', 'notifications', 'reports', 'premium'];
 function switchAdminPanelSection(section){
   if (!ADMIN_PANEL_SECTIONS.includes(section)) section = 'badges';
   ADMIN_PANEL_STATE.section = section;
@@ -1400,7 +1400,6 @@ function switchAdminPanelSection(section){
   else if (section === 'notifications') renderAdminNotificationsView();
   else if (section === 'reports') renderAdminReportsView();
   else if (section === 'premium') renderAdminPremiumView();
-  else if (section === 'tags') renderAdminTagsView();
   else renderAdminAnalyticsView();
 }
 

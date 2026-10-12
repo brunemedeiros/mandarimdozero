@@ -2165,13 +2165,12 @@ window.I18N_CATALOG['en'] = {
   'friends.rank.noFriendsBtn': 'Add a friend', // ALTA
   'friends.rank.footnoteFriends': 'The ranking resets every Monday. Friends who haven\'t earned XP yet appear at the end.', // ALTA
   'profile.tabFriends': 'Friends', // ALTA
-  'panel.admin.sub': 'Badges, metrics, notifications, reports, plans and tags.', // ALTA
+  'panel.admin.sub': 'Badges, metrics, notifications, reports and plans.', // ALTA
   'panel.tab.badges': 'Badges', // ALTA
   'panel.tab.analytics': 'Analytics', // ALTA
   'panel.tab.notifications': 'Notifications', // ALTA
   'panel.tab.reports': 'Reports', // ALTA
   'panel.tab.plans': 'Plans', // ALTA
-  'panel.tab.tags': 'Tags', // ALTA
   'panel.teacher.title': 'Teacher panel', // ALTA
   'panel.teacher.sub': 'Your students, their cards and classes, and the materials you share.', // ALTA
   'panel.teacher.aria': 'Teacher panel section', // ALTA

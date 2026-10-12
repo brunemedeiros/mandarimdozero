@@ -126,7 +126,7 @@ const PANEL_STUB = (who) => {
       await ev(() => { switchTab('admin-badges'); switchAdminPanelSection('premium'); });
       await page.waitForSelector('#plans-search-input');
       const adminTabs = await ev(() => [...document.querySelectorAll('#view-admin-badges [data-admin-section]')].map(b => b.dataset.adminSection));
-      L('admin: 6 abas sem as da professora', JSON.stringify(adminTabs) === '["badges","analytics","notifications","reports","premium","tags"]', adminTabs);
+      L('admin: 5 abas, sem as da professora e sem Tags', JSON.stringify(adminTabs) === '["badges","analytics","notifications","reports","premium"]', adminTabs);
       await page.waitForSelector('.plans-matrix tbody tr');
       L('matriz: 12 permissões x 5 tipos', await ev(() => document.querySelectorAll('.plans-matrix tbody tr').length === 12 && document.querySelectorAll('.plans-matrix thead th').length === 6));
       await page.fill('#plans-search-input', 'a');

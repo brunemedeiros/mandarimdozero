@@ -145,7 +145,8 @@ Plano de migrations (proposto):
 
 ## Etapa 1 -- telas (2026-10-12)
 Entregue (pedido da autora: separar menus, melhorar a busca por @, aplicar a skill frontend-design nos painéis):
-- **Painel de Admin** (Admin Mode): Badges, Analytics, Notificações, Reports, **Planos** (antiga ⭐ Premium), Tags.
+- **Painel de Admin** (Admin Mode): Badges, Analytics, Notificações, Reports, **Planos** (antiga ⭐ Premium). A aba Tags
+  foi removida a pedido da autora (2026-10-12): Tags se editam no próprio cartão/Deck.
 - **Painel da professora** (novo, papel Professora, não desliga com o Admin Mode): Alunos, Cartões, Aulas, Material
   de apoio. Item "Professora" na barra lateral e "🎓 Painel da professora" no menu do avatar. Link antigo para o
   Admin (ex.: notificação de supervisão com rota `admin-badges`) leva quem só é professora ao painel dela.
@@ -163,11 +164,10 @@ Entregue (pedido da autora: separar menus, melhorar a busca por @, aplicar a ski
 - Código: `shared/permissions.js`, `shared/teacher-panel.js` (novos), `shared/admin-premium.js` (reescrito),
   `admin-analytics.js` (troca de seção), gates em admin-students/flashcards/class-logs/support-materials, `roles.js`.
 - Testes: `tests/painel-professora/test_playwright.js` 162/162 (fr/zh, claro/escuro, 1200/390); regressão:
-  painel-alunos 48, plano-admin 26, fase-g 68, fase-h 68, fase-i 48, fase-k6 28, k5 18, k7 40, fase-f 50,
+  painel-alunos 48, plano-admin 26, fase-j 62 (bloco da aba Tags do Admin trocado por checagem de que ela saiu), fase-g 68, fase-h 68, fase-i 48, fase-k6 28, k5 18, k7 40, fase-f 50,
   deck-browser 206, amigos 158, revisao-proposta-a 58, i18n unit 2039/2039 (65 chaves da passada de design saem da
   comparação byte a byte, listadas em DESIGN_PASS_KEYS). `tests/i18n/test_playwright.js` falha no modal de limite
   de cartões também SEM esta entrega (pré-existente, conferido com git stash).
 - Testes antigos que abriam Alunos/Cartões pelo Admin passaram a abrir pelo Painel da professora (mudança deliberada).
 - Pendente: badge "Aluno/a do/a Prof. {nome}", convite de aluno, rota da notificação de supervisão na Edge Function
-  (`notification-cron`, hoje 'admin-badges', funciona pelo redirecionamento; trocar exige deploy), Tags no painel da
-  professora? (hoje no Admin, por decisão da autora).
+  (`notification-cron`, hoje 'admin-badges', funciona pelo redirecionamento; trocar exige deploy).
