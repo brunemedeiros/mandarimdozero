@@ -10,7 +10,7 @@ const code = [
   pick(/const DAY_KEY_BY_UTC_INDEX[^\n]*/),
   pick(/function todayDateKeyUTC\(\)[\s\S]*?\n}\n/),
   pick(/function daysSince\([\s\S]*?\n}\n/),
-  cut('function withAccountProgress', 'async function processWeeklyRankingResults('),
+  cut('// E3/C5: o bloco de um idioma', 'async function processWeeklyRankingResults('),
 ].join('\n');
 const js = mod.stripTypeScriptTypes(code);
 let notified = [];
@@ -21,7 +21,7 @@ const ctx = { console, Date, Object, Number, Array, Promise,
   maybeNotify: async (_s, _r, _p, _e, userId, lang, event) => { notified.push(`${lang}:${event}`); return true; },
 };
 vm.createContext(ctx);
-vm.runInContext(js + '\nthis.W = withAccountProgress; this.P = primaryLanguageAppKey; this.U = processUserLanguage;', ctx);
+vm.runInContext(js + '\nthis.B = blockForLanguage; this.W = withAccountProgress; this.P = primaryLanguageAppKey; this.U = processUserLanguage;', ctx);
 let pass = 0, fail = 0;
 const t = (n, ok, x) => { if (ok) pass++; else { fail++; console.log('FALHOU', n, x !== undefined ? JSON.stringify(x) : ''); } };
 const day = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
@@ -66,6 +66,15 @@ const run2 = async (lang, state, account, isPrimary) => { notified = []; await c
   const overdue = { streak: 0, cards: { overdue: 5 } };
   t('revisão atrasada continua por idioma (não principal também)', (await run('mandarim', { ...overdue }, acc, false)).includes('mandarim:review_overdue'));
 
+  // C5: blocos de curso por idioma do site (frances@en)
+  const B = ctx.B;
+  t('bloco legado continua valendo', B({ frances: { a: 1 } }, 'frances').a === 1);
+  t('sem bloco do idioma: null', B({ mandarim: { a: 1 } }, 'frances') === null && B(null, 'frances') === null);
+  t('só curso @en: usa ele', B({ 'frances@en': { a: 2 } }, 'frances').a === 2);
+  t('currentCourse @en vence o legado', B({ frances: { a: 1 }, 'frances@en': { a: 2 }, _meta: { currentCourse: 'frances@en', courses: { 'frances@en': { storageKey: 'frances@en' } } } }, 'frances').a === 2);
+  t('currentCourse legado (pt-BR) usa a chave sem sufixo', B({ frances: { a: 1 }, 'frances@en': { a: 2 }, _meta: { currentCourse: 'frances@pt-BR', courses: { 'frances@pt-BR': { storageKey: 'frances' } } } }, 'frances').a === 1);
+  t('currentCourse de outro idioma não interfere', B({ frances: { a: 1 }, mandarim: { a: 3 }, 'mandarim@en': { a: 4 }, _meta: { currentCourse: 'mandarim@en' } }, 'frances').a === 1);
+  t('idioma principal enxerga conta só com curso @', ctx.P({ 'mandarim@en': { lastStudyDay: day(0) }, _meta: {} }) === 'mandarim');
   console.log(`cron conta: ${pass} passaram, ${fail} falharam`);
   process.exit(fail ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

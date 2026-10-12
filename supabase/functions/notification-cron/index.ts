@@ -573,6 +573,21 @@ async function maybeNotify(
 
 // E3/C3 -- sequência da CONTA (progress.data._account, ver shared/account-progress.js). Vale por cima do bloco do idioma quando
 // existe e não está atrás dele; senão devolve o próprio bloco (comportamento de antes).
+// E3/C5: o bloco de um idioma pode ser o legado (`frances`) ou de um curso por idioma do site (`frances@en`). Cada idioma
+// é processado UMA vez, pelo curso aberto por último (_meta.currentCourse) quando ele é deste idioma; senão o legado; senão o
+// primeiro curso `@` que existir. Assim a revisão atrasada e as missões continuam saindo uma vez por idioma.
+function blockForLanguage(data: any, appKey: string): any {
+  if (!data) return null;
+  const cur = data?._meta?.currentCourse;
+  if (typeof cur === 'string' && cur.split('@')[0] === appKey) {
+    const key = data?._meta?.courses?.[cur]?.storageKey ?? (cur === appKey + '@pt-BR' ? appKey : cur);
+    if (data[key]) return data[key];
+  }
+  if (data[appKey]) return data[appKey];
+  const other = Object.keys(data).find((k) => k.startsWith(appKey + '@') && data[k]);
+  return other ? data[other] : null;
+}
+
 function withAccountProgress(state: any, account: any): any {
   if (!account || typeof account !== 'object') return state;
   const accLast = typeof account.lastStudyDay === 'string' ? account.lastStudyDay : null;
@@ -589,7 +604,7 @@ function withAccountProgress(state: any, account: any): any {
 // Idioma "principal" da conta: onde os avisos da CONTA (sequência em risco, meta do dia, reengajamento) são entregues, uma vez só.
 // 1) o idioma atual da conta (_meta.currentLearningLanguage); 2) o bloco estudado mais recentemente; 3) o primeiro que existir.
 function primaryLanguageAppKey(data: any): string | null {
-  const present = LANGUAGES.filter((l) => data?.[l.appKey]);
+  const present = LANGUAGES.filter((l) => blockForLanguage(data, l.appKey));
   if (!present.length) return null;
   const current = data?._meta?.currentLearningLanguage;
   const byCurrent = present.find((l) => l.id === current);
@@ -597,7 +612,7 @@ function primaryLanguageAppKey(data: any): string | null {
   let best = present[0];
   let bestDay = '';
   for (const l of present) {
-    const d = data[l.appKey]?.lastStudyDay;
+    const d = blockForLanguage(data, l.appKey)?.lastStudyDay;
     if (typeof d === 'string' && d > bestDay) { best = l; bestDay = d; }
   }
   return best.appKey;
@@ -746,7 +761,7 @@ async function processFeaturedBadgeReminders(
     if (!eligible) continue;
 
     const state = progressByUserId.get(userId);
-    const languageAppKey = state?.frances ? 'frances' : (state?.mandarim ? 'mandarim' : 'frances');
+    const languageAppKey = blockForLanguage(state, 'frances') ? 'frances' : (blockForLanguage(state, 'mandarim') ? 'mandarim' : 'frances');
     if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'featured_badge_reminder', 'perfil', {}, 'profile-edit')) created++;
   }
   return created;
@@ -851,7 +866,7 @@ Deno.serve(async (_req: Request) => {
   for (const row of progressResult.data ?? []) {
     const primaryAppKey = primaryLanguageAppKey(row.data);
     for (const lang of LANGUAGES) {
-      const state = row.data?.[lang.appKey];
+      const state = blockForLanguage(row.data, lang.appKey);
       if (!state) continue; // conta nunca usou este idioma
       usersScanned++;
       try {
