@@ -2,7 +2,7 @@
 // Carrega o código REAL de supabase/functions/notification-cron/index.ts (recorte withAccountProgress..processUserLanguage, types
 // removidos pelo Node 22) com stubs de rede. Rodar: node tests/curso-progresso/test_cron_account.js
 const fs = require('fs'), vm = require('vm'), path = require('path'), mod = require('module');
-const src = fs.readFileSync(path.join(__dirname, '../../supabase/functions/notification-cron/index.ts'), 'utf8');
+const src = fs.readFileSync(process.env.CRON_SRC || path.join(__dirname, '../../supabase/functions/notification-cron/index.ts'), 'utf8');
 const cut = (a, b) => src.slice(src.indexOf(a), src.indexOf(b));
 const pick = (re) => src.match(re)[0];
 const code = [
@@ -10,7 +10,7 @@ const code = [
   pick(/const DAY_KEY_BY_UTC_INDEX[^\n]*/),
   pick(/function todayDateKeyUTC\(\)[\s\S]*?\n}\n/),
   pick(/function daysSince\([\s\S]*?\n}\n/),
-  cut('function withAccountProgress', '// Roda 1x por invocação'),
+  cut('function withAccountProgress', 'async function processWeeklyRankingResults('),
 ].join('\n');
 const js = mod.stripTypeScriptTypes(code);
 let notified = [];

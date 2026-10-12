@@ -169,3 +169,9 @@ Só front-end estático; nenhuma migration; nada em produção além do deploy n
 - **Passos manuais que dependem da dona**: (1) aplicar a 075 em produção (não tem DROP, então pode ir pelo MCP ou pelo SQL Editor; ordem: antes do cliente do C2 chegar às contas); (2) redeployar a Edge
   Function `notification-cron` com o `index.ts` novo. Sem o passo 2 o cron segue com o comportamento de antes (um aviso por idioma, lendo os blocos), que continua correto porque o espelho do bloco mantém os mesmos campos.
 Próximo: C4 (conquistas da conta, só tela), aguardando as respostas Q-10 a P8 e autorização.
+
+### C3: aplicado em produção (2026-10-12, autorizado pela dona)
+
+- **Migration 075 aplicada em produção** (e no Staging) pelo MCP, sem passo manual da dona. Prova de zero regressão com dados reais: 27 perfis públicos e 13 visões de professora, antes e depois, 0 erros e hashes idênticos.
+- **`notification-cron` redeployada em produção (versão 22)**: partiu da versão que estava no ar mais o delta do C3. O `index.ts` do repositório está à frente (suporte a `ui_language`) e esse
+  trecho **NÃO foi para produção**: é decisão separada.
