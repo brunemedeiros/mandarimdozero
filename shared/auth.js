@@ -50,6 +50,12 @@ let progressLoadedOk = false;
 // página inteira.
 const MONOTONIC_PROGRESS_FIELDS = ['xp', 'totalReviews', 'totalAudioPlays'];
 
+// Chave do bloco deste curso dentro de progress.data (E3/C1, ver shared/course-storage.js). Com os cursos por idioma do
+// site desligados é sempre APP_KEY ('frances', 'mandarim'), igual a antes. `progressData` = a linha lida do servidor.
+function progressBlockKey(progressData){
+  return CourseStorage.courseStorageKeyFor(APP_KEY, typeof getUiLang === 'function' ? getUiLang() : 'pt-BR', progressData);
+}
+
 const GUEST_MODE_FLAG = 'guest_mode';
 // (antes cada site tinha sua própria chave -- 'frances_zero_guest_mode' /
 // 'mandarim_guest_mode'; sessionStorage é por aba E por origem, então
@@ -507,7 +513,8 @@ async function saveState(){
     // progressLoadedOk acima) quanto duas abas/dispositivos da mesma conta
     // salvando ao mesmo tempo (a mais antiga tende a ter um valor
     // vitalício menor que o que a mais nova já gravou).
-    const existingPayload = existing && existing.data && existing.data[APP_KEY];
+    const blockKey = progressBlockKey(existing && existing.data);
+    const existingPayload = existing && existing.data && existing.data[blockKey];
     if (existingPayload){
       const regressed = MONOTONIC_PROGRESS_FIELDS.find(field => Number(payload[field]) < Number(existingPayload[field] || 0));
       if (regressed){
@@ -523,7 +530,7 @@ async function saveState(){
       }
     }
 
-    const merged = Object.assign({}, existing && existing.data, { [APP_KEY]: payload });
+    const merged = Object.assign({}, existing && existing.data, { [blockKey]: payload });
     if (pendingAccountUiLanguage){
       merged._meta = Object.assign({}, merged._meta, { uiLanguage: pendingAccountUiLanguage });
     }
@@ -611,8 +618,9 @@ async function loadState(){
       progressAccountUiLanguage = (typeof uiLanguageFromProgressData === 'function' && data)
         ? uiLanguageFromProgressData(data.data) : null;
       progressAccountIsNew = !(data && data.data && Object.keys(data.data).some(k => k !== '_meta'));
-      if (data && data.data && data.data[APP_KEY]){
-        applySerializedState(data.data[APP_KEY]);
+      const blockKey = progressBlockKey(data && data.data);
+      if (data && data.data && data.data[blockKey]){
+        applySerializedState(data.data[blockKey]);
       } else if (typeof loadLegacyState === 'function' && data && data.data){
         // Hook opcional: um idioma que já persistia progresso ANTES do
         // namespacing por APP_KEY existir pode definir loadLegacyState(data)

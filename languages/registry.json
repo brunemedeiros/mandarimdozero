@@ -55,7 +55,10 @@
           "notice": false
         }
       },
-      "flagEmoji": "🇫🇷"
+      "flagEmoji": "🇫🇷",
+      "legacyStorage": [
+        "pt-BR"
+      ]
     },
     {
       "id": "zh",
@@ -109,7 +112,10 @@
           "notice": false
         }
       },
-      "flagEmoji": "🇨🇳"
+      "flagEmoji": "🇨🇳",
+      "legacyStorage": [
+        "pt-BR"
+      ]
     },
     {
       "id": "pt",
@@ -155,7 +161,8 @@
           "status": "rascunho"
         }
       },
-      "flagEmoji": "🇧🇷"
+      "flagEmoji": "🇧🇷",
+      "legacyStorage": []
     }
   ]
 }

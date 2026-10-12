@@ -55,7 +55,10 @@ const LANGUAGE_REGISTRY_DATA = {
           "notice": false
         }
       },
-      "flagEmoji": "🇫🇷"
+      "flagEmoji": "🇫🇷",
+      "legacyStorage": [
+        "pt-BR"
+      ]
     },
     {
       "id": "zh",
@@ -109,7 +112,10 @@ const LANGUAGE_REGISTRY_DATA = {
           "notice": false
         }
       },
-      "flagEmoji": "🇨🇳"
+      "flagEmoji": "🇨🇳",
+      "legacyStorage": [
+        "pt-BR"
+      ]
     },
     {
       "id": "pt",
@@ -155,7 +161,8 @@ const LANGUAGE_REGISTRY_DATA = {
           "status": "rascunho"
         }
       },
-      "flagEmoji": "🇧🇷"
+      "flagEmoji": "🇧🇷",
+      "legacyStorage": []
     }
   ]
 };
@@ -242,6 +249,9 @@ const LanguageRegistry = (function(){
       list.forEach(l => { out[l.fieldLang] = l.tts.spokenRulesVersion; });
       return out;
     },
+    // Cursos cujo progresso mora na chave SEM sufixo (data.frances, data.mandarim), por idioma do site.
+    // Dado do registro, nunca deduzido: 'portugues' (curso base em inglês) não tem nenhum.
+    usesLegacyStorage: function(appKey, siteLang){ return (pick(appKey, 'legacyStorage') || []).indexOf(siteLang) >= 0; },
     courseIdOf: courseIdOf,
     parseCourseId: parseCourseId,
     layerDir: layerDir,
