@@ -94,3 +94,11 @@ Mesmo padrão da primeira rodada, autorizado pela dona. Sem migration, sem Edge 
 Testes da segunda rodada: 77 de 93 suítes locais passam (inclui `camada-curso` 75/75, `registro` 89/89, `test_i18n_unit` 2104/2104, `deck-browser`, `ditado` e
 `desafios-modulo`). As 16 que falham são exatamente as mesmas da E1 e da primeira rodada, com os mesmos checks; nenhuma nova. `fase-j/test_playwright` é instável
 (timeout intermitente em `[data-tag-manager-retry]`, já visto no baseline): falhou no lote e passou 76/76 em três rodadas isoladas seguidas.
+
+## E3, auditoria (2026-10-12)
+
+Só leitura: nenhum código, banco ou migration alterados. Documento: `docs/i18n/auditoria-e3-progresso-por-curso.md` (atualiza `auditoria-progresso-por-curso.md` de 2026-10-06).
+Produção consultada só com agregados (sem dados individuais). Principais achados: nenhuma conta precisa de migração de progresso; streak e `activityLog` seguros para ir à conta;
+gaveta `cardVariants` já está na `main` mas vazia em produção; `zh` grava e não restaura `hanziCards` (provável bug atual, a confirmar em navegador, passo C0);
+`weekly_xp` seria sobrescrito entre dois cursos do mesmo idioma (gravar a soma); próxima migration livre é a 075. Plano em passos C0 a C6, tudo grátis.
+Pendente da dona: responder Q-10, Q-11, Q-12 e as perguntas P1 a P8 (cada uma com recomendação) e autorizar o início do C0.
