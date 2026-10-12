@@ -46,3 +46,11 @@ Nenhum (sem migration, secret ou deploy de função). O guia ficará acessível 
 ### Próximas fases (precisam de autorização)
 - **Fase 2**: área da Professora (Alunos, Flashcards, Aulas) já no sistema novo, com a função nova de Flashcards.
 - **Fase 3**: Admin refeito numa única entrega, depois de conversar com a autora sobre Analytics, Notificações e Badges.
+
+## Fase 2: auditoria e desenho (2026-10-12, nenhum código de tela alterado)
+Auditoria em `docs/fase-2-professora/auditoria.md`, desenho em `docs/fase-2-professora/desenho.html` (+ `antes-*.jpg`).
+- Achado: o painel é uma tela só com 10 abas (primeira: Badges); Professora e Admin não são separados; as telas são os `admin-*.js`
+  (os `teacher-*.js` só acessam dados). O levantamento dizia "3 telas do lado da professora": corrigido.
+- Achado: criar cartão exige ser admin por regra do banco (migration 026). Fora do escopo; vira trabalho quando houver outras professoras.
+- Guia de estilo e desenho publicados como Artefato por `scripts/painel-ds/preparar-artefato.mjs` (a visualização de código do app
+  não carrega o CSS vizinho e mostra a página quebrada).

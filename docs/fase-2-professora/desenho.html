@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desenho da área da Professora</title>
+<!-- Proposta visual da Fase 2 (Alunos, Flashcards, Aulas). Usa o CSS REAL do Design System do painel (shared/painel/).
+     Tudo aqui é dado de exemplo; nada lê ou grava no Supabase. As classes m- são só desta página (candidatas a entrar
+     no Design System se a autora aprovar). Para ver ao vivo: node scripts/painel-ds/preparar-artefato.mjs e publicar. -->
+<link rel="stylesheet" href="../../shared/painel/guia-paletas.css">
+<link rel="stylesheet" href="../../shared/painel/vendor/pico.painel.css">
+<link rel="stylesheet" href="../../shared/painel/painel-tokens.css">
+<link rel="stylesheet" href="../../shared/painel/painel-componentes.css">
+<style>
+  html, body{ margin: 0; background: var(--paper); }
+  .m-topo{ position: sticky; top: 0; z-index: 20; display: flex; gap: .75rem 1.5rem; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: .65rem 1.5rem; background: var(--p-bg); border-bottom: 1px solid var(--p-linha); }
+  .m-topo strong{ font-size: 1.02rem; }
+  /* Controle segmentado (candidato ao Design System: estilo "toggle group" do shadcn) */
+  .painel .m-seg{ display: inline-flex; flex-wrap: wrap; gap: .2rem; padding: .22rem; background: var(--p-superficie); border: 1px solid var(--p-linha); border-radius: 12px; }
+  .painel .m-seg button{ margin: 0; width: auto; padding: .35rem .85rem; background: transparent; border-color: transparent; color: var(--p-tinta-suave); font-weight: 700; min-height: 2.3rem; font-size: .92rem; }
+  .painel .m-seg button[aria-pressed="true"]{ background: var(--p-elevado); border-color: var(--p-linha); color: var(--p-tinta); box-shadow: var(--p-sombra); }
+  /* o Pico trata role=group como grupo de botões colados: aqui queremos o controle segmentado, com largura do conteúdo */
+  .painel .m-seg[role=group]{ display: inline-flex; width: auto; }
+  .painel .m-seg[role=group] button{ flex: 0 0 auto; border-radius: 9px; }
+  .painel .m-seg--forte button[aria-pressed="true"]{ background: var(--p-marca); border-color: var(--p-marca); color: var(--p-sobre-marca); }
+  .m-sec{ display: flex; flex-direction: column; gap: 1rem; padding: 0 1.5rem; max-width: 1240px; margin: 2rem auto; }
+  .m-sec > h2{ margin: 0; font-size: 1.5rem; }
+  .m-sec > p{ margin: 0; color: var(--p-tinta-suave); max-width: 75ch; }
+  .m-nota{ font-size: .85rem; color: var(--p-tinta-suave); margin: 0; }
+  .m-janela{ border: 1px solid var(--p-linha); border-radius: var(--p-raio); background: var(--p-bg); box-shadow: var(--p-sombra); overflow: hidden; }
+  .m-janela > .m-barra{ display: flex; justify-content: space-between; gap: .5rem; flex-wrap: wrap; align-items: center; padding: .55rem 1rem; background: var(--p-superficie); border-bottom: 1px solid var(--p-linha); font-size: .85rem; color: var(--p-tinta-suave); }
+  .m-barra b{ color: var(--p-tinta); }
+  .m-pontos{ display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .75rem; }
+  .m-ponto{ padding: .9rem 1rem; border: 1px solid var(--p-linha); border-radius: var(--p-raio-controle); background: var(--p-superficie); }
+  .m-ponto b{ display: block; margin-bottom: .25rem; }
+  .m-ponto span{ font-size: .9rem; color: var(--p-tinta-suave); }
+  .m-antes img{ width: 100%; border: 1px solid var(--p-linha); border-radius: var(--p-raio-controle); display: block; }
+  .m-antes figure{ margin: 0; display: grid; gap: .4rem; }
+  .m-antes figcaption{ font-size: .85rem; color: var(--p-tinta-suave); }
+
+  /* Navegação da área */
+  .m-nav{ display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: .85rem 1.5rem 0; border-bottom: 1px solid var(--p-linha); background: var(--p-superficie); }
+  .painel .m-nav .p-abas{ border: 0; width: auto; flex: 0 1 auto; }
+  .painel .m-nav .m-seg{ margin-bottom: .6rem; flex: none; }
+
+  /* Atividade de 30 dias (peça já existente no app, agora com nome) */
+  .m-atividade{ display: flex; flex-wrap: wrap; gap: 3px; }
+  .m-atividade i{ width: 14px; height: 14px; border-radius: 3px; background: var(--p-linha); display: block; }
+  .m-atividade i.on{ background: var(--p-ok); }
+  /* Barra empilhada da fila de revisão */
+  .m-pilha{ display: flex; height: .9rem; border-radius: 999px; overflow: hidden; background: var(--p-linha); }
+  .m-pilha i{ display: block; height: 100%; }
+  .m-legenda{ display: flex; gap: .4rem 1.1rem; flex-wrap: wrap; font-size: .85rem; color: var(--p-tinta-suave); margin-top: .5rem; }
+  .m-legenda b{ color: var(--p-tinta); }
+  .m-legenda span::before{ content: ""; display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; margin-right: .35rem; background: var(--k, var(--p-linha)); }
+  /* Chips de pessoas selecionadas */
+  .m-chips{ display: flex; flex-wrap: wrap; gap: .4rem; }
+  .m-chip{ display: inline-flex; align-items: center; gap: .4rem; padding: .2rem .35rem .2rem .7rem; border: 1px solid var(--p-linha); border-radius: 999px; background: var(--p-elevado); font-size: .88rem; font-weight: 700; }
+  .painel .m-chip button{ margin: 0; flex: none; min-height: 0; width: 1.4rem; height: 1.4rem; padding: 0; border-radius: 50%; background: var(--p-linha); border-color: transparent; color: var(--p-tinta); font-size: .8rem; line-height: 1; }
+  /* Tipos de cartão como peças escolhíveis */
+  .m-tipos{ display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .6rem; }
+  .m-tipos label{ display: grid; gap: .15rem; padding: .7rem .8rem; border: 1px solid var(--p-linha); border-radius: var(--p-raio-controle); background: var(--p-elevado); cursor: pointer; margin: 0; }
+  .m-tipos label:has(input:checked){ border-color: var(--p-marca-escura); box-shadow: 0 0 0 2px color-mix(in srgb, var(--p-marca-escura) 35%, transparent); }
+  .m-tipos input{ display: none; }
+  .m-tipos b{ font-size: .92rem; } .m-tipos span{ font-size: .8rem; color: var(--p-tinta-suave); }
+  /* Cartão de pré-visualização */
+  .m-cartao{ display: grid; gap: .75rem; padding: 1.25rem; border: 1px solid var(--p-linha); border-radius: var(--p-raio); background: var(--p-elevado); text-align: center; }
+  .m-cartao .m-frase{ font-size: 1.6rem; font-weight: 800; }
+  .m-cartao .m-rot{ font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--p-tinta-suave); font-weight: 800; }
+  /* Data em destaque nas aulas */
+  .m-aula{ display: grid; grid-template-columns: 3.4rem 1fr auto; gap: .9rem; align-items: start; margin: 0; }
+  .m-data{ display: grid; place-items: center; width: 3.4rem; padding: .3rem 0; border-radius: var(--p-raio-controle); background: var(--p-superficie); border: 1px solid var(--p-linha); text-align: center; line-height: 1.1; }
+  .m-data b{ font-size: 1.3rem; } .m-data span{ font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--p-tinta-suave); font-weight: 800; }
+  .m-aula h3{ margin: 0 0 .25rem; font-size: 1.02rem; }
+  .m-aula dl{ margin: .35rem 0 0; display: grid; grid-template-columns: max-content 1fr; gap: .15rem .75rem; font-size: .9rem; }
+  .m-aula dt{ color: var(--p-tinta-suave); font-weight: 700; } .m-aula dd{ margin: 0; }
+  .m-mes{ margin: .5rem 0 0; font-size: .75rem; letter-spacing: .09em; text-transform: uppercase; font-weight: 800; color: var(--p-tinta-suave); }
+  /* Janela (diálogo) mostrada inline */
+  .m-dialogo{ max-width: 460px; box-shadow: var(--p-sombra); }
+  /* Referências do shadcn */
+  .m-ref{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+  .m-ref article{ margin: 0; } .m-ref h3{ font-size: .98rem; margin: 0; }
+  .m-bread{ display: flex; flex-wrap: wrap; gap: .4rem; list-style: none; margin: 0; padding: 0; font-size: .9rem; color: var(--p-tinta-suave); }
+  .painel .m-bread li{ list-style: none; margin: 0; padding: 0; }
+  .m-bread li + li::before{ content: "/"; margin-right: .4rem; color: var(--p-linha); }
+  .m-bread a{ color: var(--p-tinta-suave); text-decoration: none; } .m-bread li:last-child{ color: var(--p-tinta); font-weight: 700; }
+  .m-pag{ display: flex; gap: .3rem; align-items: center; flex-wrap: wrap; }
+  .m-pag a, .m-pag span{ min-width: 2.2rem; height: 2.2rem; display: inline-grid; place-items: center; padding: 0 .6rem; border-radius: var(--p-raio-controle); text-decoration: none; font-weight: 700; color: var(--p-tinta); }
+  .m-pag a:hover{ background: var(--p-linha); } .m-pag a[aria-current]{ border: 1px solid var(--p-linha); background: var(--p-elevado); }
+  .m-esq{ background: linear-gradient(90deg, var(--p-linha) 25%, color-mix(in srgb, var(--p-linha), var(--p-bg) 55%) 50%, var(--p-linha) 75%); background-size: 200% 100%; border-radius: 8px; height: 1rem; animation: m-brilho 1.4s linear infinite; }
+  @keyframes m-brilho{ to{ background-position: -200% 0; } }
+  @media (prefers-reduced-motion: reduce){ .m-esq{ animation: none; } }
+  .m-toast{ display: grid; gap: .15rem; padding: .8rem 1rem; border-radius: var(--p-raio-controle); border: 1px solid var(--p-linha); background: var(--p-elevado); box-shadow: var(--p-sombra); max-width: 340px; }
+  .m-grupo{ display: flex; } .m-grupo .p-avatar{ width: 2.1rem; height: 2.1rem; font-size: .7rem; margin-left: -.45rem; outline: 2px solid var(--p-bg); } .m-grupo .p-avatar:first-child{ margin-left: 0; }
+  .m-status{ white-space: nowrap; font-size: .75rem; font-weight: 800; padding: .1rem .55rem; border-radius: 999px; border: 1px solid var(--p-linha); }
+  .m-status--ja{ background: color-mix(in srgb, var(--p-ok) 18%, transparent); border-color: color-mix(in srgb, var(--p-ok) 50%, transparent); color: var(--p-tinta); }
+  .m-status--css{ background: color-mix(in srgb, var(--p-info) 16%, transparent); border-color: color-mix(in srgb, var(--p-info) 45%, transparent); color: var(--p-tinta); }
+  .m-status--js{ background: color-mix(in srgb, var(--p-aviso) 16%, transparent); border-color: color-mix(in srgb, var(--p-aviso) 45%, transparent); color: var(--p-tinta); }
+  .m-status--nao{ color: var(--p-tinta-suave); }
+  .m-tela[hidden]{ display: none; }
+  .painel table{ margin-bottom: 0; }
+  @media (max-width: 760px){ .m-aula{ grid-template-columns: 3.4rem 1fr; } .m-aula > :last-child{ grid-column: 2; } }
+</style>
+</head>
+<body>
+<div class="painel" id="raiz">
+  <div class="m-topo">
+    <strong>Desenho da área da Professora (Fase 2)</strong>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+      <div class="m-seg" id="curso" role="group" aria-label="Curso"><button type="button" data-v="fr" aria-pressed="true">Francês</button><button type="button" data-v="zh" aria-pressed="false">Mandarim</button></div>
+      <div class="m-seg" id="tema" role="group" aria-label="Tema"><button type="button" data-v="light" aria-pressed="true">Claro</button><button type="button" data-v="dark" aria-pressed="false">Escuro</button></div>
+    </div>
+  </div>
+
+  <!-- ===== 1. O que a auditoria encontrou ===== -->
+  <section class="m-sec" id="auditoria">
+    <h2>Como é hoje e o que atrapalha</h2>
+    <p>Essas são as telas atuais, fotografadas do app com dados de exemplo. Os problemas abaixo vieram da leitura do código e dessas telas.</p>
+    <div class="m-antes p-grade" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))">
+      <figure><img src="antes-alunos.jpg" alt="Tela atual de Alunos: formulário no topo e uma lista de linhas de texto" loading="lazy"><figcaption><b>Alunos hoje:</b> formulário de vínculo ocupa o topo; cada aluna é uma linha; os dados abrem como 8 linhas de texto e 6 itens recolhidos.</figcaption></figure>
+      <figure><img src="antes-aulas.jpg" alt="Tela atual de Aulas: lista de alunos com caixas e formulário longo" loading="lazy"><figcaption><b>Aulas hoje:</b> escolher alunos em lista de caixas, depois um formulário de cinco campos. O histórico fica no fim da página.</figcaption></figure>
+      <figure><img src="antes-flashcards.jpg" alt="Tela atual de Flashcards: alunos, destino e criação do cartão numa página só" loading="lazy"><figcaption><b>Flashcards hoje:</b> quatro blocos longos numa página (alunos, destino, novo cartão, lista). Quem só quer conferir os cartões rola tudo.</figcaption></figure>
+    </div>
+    <div class="m-pontos">
+      <div class="m-ponto"><b>Dez abas sem ordem</b><span>Badges, Analytics, Notificações, Reports, Alunos, Flashcards, Aulas, Material, Premium e Tags ficam lado a lado. A primeira é Badges, justo a que você evita.</span></div>
+      <div class="m-ponto"><b>Professora e Admin misturados</b><span>Tudo mora no "Painel de Admin". Alunos, Flashcards e Aulas são da professora, mas aparecem junto de Premium e Reports.</span></div>
+      <div class="m-ponto"><b>Falta o quadro geral</b><span>Hoje só dá para ver uma aluna por vez, abrindo uma linha. Não há uma visão da turma com quem precisa de atenção.</span></div>
+      <div class="m-ponto"><b>Estreito, com coisas do aluno ao lado</b><span>O painel usa só a coluna do meio. À direita ficam o ranking e as missões do dia, que são do aluno.</span></div>
+      <div class="m-ponto"><b>Ícones sem texto e confirmação do navegador</b><span>Visualizar, editar, reativar e apagar são ícones com dica que não aparece no celular. Remover pede confirmação feita pelo navegador.</span></div>
+      <div class="m-ponto"><b>Avisos que chegam tarde</b><span>Editar um cartão reinicia o progresso da aluna naquele cartão, e a professora só descobre ao salvar.</span></div>
+    </div>
+  </section>
+
+  <!-- ===== 2. O desenho ===== -->
+  <section class="m-sec" id="desenho">
+    <h2>O desenho proposto</h2>
+    <p>Mesma informação de hoje, com hierarquia: o geral no topo, o detalhe sob demanda, uma ação principal por tela. Tudo abaixo é o CSS real do Design System (clique nas abas, nas linhas e nos botões).</p>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center">
+      <div class="m-seg m-seg--forte" id="telas" role="group" aria-label="Tela">
+        <button type="button" data-t="nav" aria-pressed="false">Navegação</button>
+        <button type="button" data-t="geral" aria-pressed="true">Alunos: quadro geral</button>
+        <button type="button" data-t="aluno" aria-pressed="false">Aluno: detalhe</button>
+        <button type="button" data-t="cartoes" aria-pressed="false">Flashcards: criar</button>
+        <button type="button" data-t="lista" aria-pressed="false">Flashcards: cartões</button>
+        <button type="button" data-t="aulas" aria-pressed="false">Aulas</button>
+      </div>
+    </div>
+
+    <div class="m-janela">
+      <div class="m-barra"><span><b>Painel</b> · tela cheia, sem a barra do aluno ao lado</span><span id="rotulo-tela">Alunos: quadro geral</span></div>
+      <div class="m-nav" id="nav-area">
+        <nav class="p-abas" id="abas-area" aria-label="Seções"></nav>
+        <div class="m-seg" id="area" role="group" aria-label="Área"><button type="button" data-v="prof" aria-pressed="true">Professora</button><button type="button" data-v="admin" aria-pressed="false">Admin</button></div>
+      </div>
+
+      <!-- Navegação (explicação) -->
+      <div class="m-tela" data-tela="nav" hidden>
+        <main class="p-pagina">
+          <header class="p-cabecalho"><div><span class="p-sobretitulo">Painel</span><h1>Duas áreas, cada uma com o seu propósito</h1><span class="p-subtitulo">Troque entre Professora e Admin no seletor à direita das abas, acima.</span></div></header>
+          <div class="p-grade">
+            <article><header><h3>Professora (abre aqui)</h3></header><ul class="p-lista"><li><span><b>Alunos</b>: quadro geral da turma e a ficha de cada aluno</span></li><li><span><b>Flashcards</b>: criar e acompanhar cartões</span></li><li><span><b>Aulas</b>: diário de aulas</span></li><li><span><b>Material de apoio</b>: fica como está até a sua vez</span></li></ul></article>
+            <article><header><h3>Admin</h3></header><ul class="p-lista"><li><span><b>Analytics</b>, <b>Notificações</b>, <b>Badges</b>, <b>Reports</b>, <b>Premium</b>, <b>Tags</b></span></li><li><span class="p-subtitulo" style="margin:0">Fase 3: refeitas numa única entrega, com resumo primeiro e detalhe sob demanda.</span></li></ul></article>
+          </div>
+          <div class="p-alerta p-alerta--info"><span>Quem não é admin continua sem ver a área Admin. A regra de acesso atual não muda nesta fase.</span></div>
+        </main>
+      </div>
+
+      <!-- Alunos: quadro geral -->
+      <div class="m-tela" data-tela="geral">
+        <main class="p-pagina">
+          <header class="p-cabecalho"><div><span class="p-sobretitulo">Professora</span><h1>Alunos</h1><span class="p-subtitulo">6 alunos ativos</span></div>
+            <div class="p-acoes"><button class="outline" type="button">Exportar lista</button><button type="button" data-abrir="dialogo-vincular">Vincular aluno</button></div></header>
+          <div class="p-alerta"><span><strong>2 alunos</strong> estão há 7 dias ou mais sem estudar.</span><button type="button" style="padding:.3rem .8rem">Ver quem são</button></div>
+          <div class="p-resumo">
+            <article class="p-indicador"><span class="p-indicador-rotulo">Alunos ativos</span><span class="p-indicador-valor">6</span><span class="p-indicador-detalhe">5 no francês, 1 no mandarim</span></article>
+            <article class="p-indicador"><span class="p-indicador-rotulo">Estudaram hoje</span><span class="p-indicador-valor">2</span><span class="p-indicador-detalhe">33% da turma</span></article>
+            <article class="p-indicador"><span class="p-indicador-rotulo">Revisões vencidas</span><span class="p-indicador-valor">96</span><span class="p-indicador-detalhe">soma de todos os alunos</span></article>
+            <article class="p-indicador"><span class="p-indicador-rotulo">Precisam de atenção</span><span class="p-indicador-valor">3</span><span class="p-indicador-detalhe">2 parados, 1 em alerta</span></article>
+          </div>
+          <div class="p-ferramentas"><input class="p-cresce" type="search" placeholder="Buscar por nome ou @usuário" aria-label="Buscar aluno">
+            <select aria-label="Curso"><option>Todos os cursos</option><option>Francês</option><option>Mandarim</option></select>
+            <label><input type="checkbox" role="switch"> Só quem precisa de atenção</label></div>
+          <article class="p-tabela"><table class="striped"><thead><tr><th>Aluno</th><th>Curso</th><th>Último estudo</th><th>Sequência</th><th>Revisões vencidas</th><th>Acerto (7 dias)</th><th>Situação</th><th></th></tr></thead><tbody id="linhas-alunos"></tbody></table></article>
+          <p class="m-nota">Situação, regra proposta (a confirmar com você): <b>Em dia</b> estudou nos últimos 3 dias, <b>Atenção</b> há 4 a 6 dias, <b>Parado</b> há 7 dias ou mais.</p>
+          <article class="m-dialogo" id="dialogo-vincular" hidden><header><strong>Vincular aluno</strong></header>
+            <label>Conta do aluno<select><option>Selecione uma conta...</option><option>@novaaluna: Nova Aluna</option></select></label>
+            <label>Curso<select><option>Francês</option><option>Mandarim</option></select></label>
+            <small>O vínculo vale para um curso. A mesma pessoa pode ser vinculada em outro curso depois.</small>
+            <footer class="p-acoes" style="justify-content:flex-end"><button class="secondary" type="button" data-fechar="dialogo-vincular">Cancelar</button><button type="button" data-fechar="dialogo-vincular">Vincular</button></footer></article>
+        </main>
+      </div>
+
+      <!-- Aluno: detalhe -->
+      <div class="m-tela" data-tela="aluno" hidden>
+        <main class="p-pagina">
+          <ul class="m-bread" aria-label="Você está em"><li><a href="#" data-ir="geral">Alunos</a></li><li>Marina Alves</li></ul>
+          <header class="p-cabecalho"><div class="p-pessoa"><span class="p-avatar p-avatar--grande">MA</span><div><span class="p-sobretitulo">Aluna · Francês · vinculada em 11/10/2026</span><h1>Marina Alves</h1><span class="p-subtitulo">@marina.alves · Nível A2 · Módulo 4</span></div></div>
+            <div class="p-acoes"><button class="outline" type="button" data-ir="aulas">Registrar aula</button><button type="button" data-ir="cartoes">Criar cartão</button>
+              <details class="dropdown"><summary role="button" class="outline secondary" style="width:auto">Mais</summary><ul><li><a href="#">Ver como a aluna vê</a></li><li><a href="#">Remover vínculo</a></li></ul></details></div></header>
+          <nav class="p-abas" aria-label="Seções da aluna"><a href="#" aria-current="page">Resumo</a><a href="#">Cartões</a><a href="#">Aulas</a><a href="#">Atividade</a></nav>
+          <div class="p-resumo">
+            <article class="p-indicador"><span class="p-indicador-rotulo">Último estudo</span><span class="p-indicador-valor">hoje</span><span class="p-indicador-detalhe">último acesso: 12/10, 16:26</span></article>
+            <article class="p-indicador"><span class="p-indicador-rotulo">Sequência</span><span class="p-indicador-valor">23 dias</span><span class="p-indicador-detalhe">4 dias ativos nos últimos 30</span></article>
+            <article class="p-indicador"><span class="p-indicador-rotulo">Revisões vencidas</span><span class="p-indicador-valor">12</span><span class="p-indicador-detalhe">de 40 na fila</span></article>
+            <article class="p-indicador"><span class="p-indicador-rotulo">Acerto (7 dias)</span><span class="p-indicador-valor">80%</span><span class="p-indicador-detalhe">em 10 cartões revisados</span></article>
+          </div>
+          <div class="p-grade-2">
+            <article><header><h3>Progresso no curso</h3></header>
+              <label>Nível A2 (45%)<progress value="45" max="100"></progress></label>
+              <ul class="p-lista"><li><span>Unidades concluídas</span><strong>2 (4 iniciadas)</strong></li><li><span>Pontos de verificação</span><span class="p-selo">nenhum ainda</span></li><li><span>Desafios concluídos</span><strong>3</strong></li><li><span>Lições e pontos de verificação (30 dias)</span><strong>média 85%</strong></li></ul></article>
+            <article><header><h3>Atividade dos últimos 30 dias</h3></header>
+              <div class="m-atividade" id="atividade" aria-label="Atividade dos últimos 30 dias"></div>
+              <p class="m-nota" style="margin-top:.6rem">4 dias ativos · 1 lição concluída. Passe o mouse sobre um quadrado para ver o dia.</p></article>
+          </div>
+          <div class="p-grade-2">
+            <article><header><h3>Fila de revisão</h3></header>
+              <div class="m-pilha" role="img" aria-label="40 cartões: 8 novos, 6 aprendendo, 26 para revisar"><i style="width:20%;background:var(--p-info)"></i><i style="width:15%;background:var(--p-aviso)"></i><i style="width:65%;background:var(--p-ok)"></i></div>
+              <div class="m-legenda"><span style="--k:var(--p-info)"><b>8</b> novos</span><span style="--k:var(--p-aviso)"><b>6</b> aprendendo</span><span style="--k:var(--p-ok)"><b>26</b> para revisar</span><span style="--k:var(--p-erro)"><b>4</b> fracos (errados 2+ vezes)</span></div></article>
+            <article><header><h3>Cartões que você criou</h3></header>
+              <div class="p-vazio"><strong>Nenhum cartão criado para a Marina ainda</strong><span>Os cartões que você criar aparecem aqui, com a força de cada um.</span><button type="button" data-ir="cartoes">Criar o primeiro cartão</button></div></article>
+          </div>
+          <div class="p-grade-2">
+            <article><header><h3>Últimas atividades</h3></header>
+              <ul class="p-lista"><li><span>Hoje, 16:26 · Concluiu lição da trilha (A1-1, 90%)</span></li><li><span>Hoje, 15:26 · Abriu a aba Revisão</span></li><li><span>Ontem · Revisou 12 cartões</span></li></ul></article>
+            <article><header><h3>Aulas recentes</h3></header>
+              <ul class="p-lista"><li><span><b>09/10</b> · Passé composé com être</span><span class="p-selo p-selo--info">Lição de casa</span></li><li><span><b>02/10</b> · Verbos do 1º grupo</span></li></ul>
+              <footer><a href="#" data-ir="aulas">Ver todas as aulas</a></footer></article>
+          </div>
+        </main>
+      </div>
+
+      <!-- Flashcards: criar -->
+      <div class="m-tela" data-tela="cartoes" hidden>
+        <main class="p-pagina">
+          <header class="p-cabecalho"><div><span class="p-sobretitulo">Professora</span><h1>Flashcards</h1><span class="p-subtitulo">Crie cartões para uma ou mais pessoas</span></div></header>
+          <nav class="p-abas" aria-label="Flashcards"><a href="#" aria-current="page">Criar cartão</a><a href="#" data-ir="lista">Cartões criados (84)</a></nav>
+          <div class="p-grade-2" style="grid-template-columns: minmax(0,1.5fr) minmax(0,1fr)">
+            <div style="display:grid;gap:1rem;min-width:0">
+              <article><header><h3>1. Para quem</h3></header>
+                <div class="m-chips" id="chips"><span class="m-chip">Marina Alves <button type="button" aria-label="Remover Marina">×</button></span><span class="m-chip">Rafael Costa <button type="button" aria-label="Remover Rafael">×</button></span></div>
+                <details style="margin-top:.8rem"><summary>Escolher outras pessoas</summary>
+                  <input type="search" placeholder="Buscar por nome ou @usuário" aria-label="Buscar aluno"><fieldset><label><input type="checkbox" checked> Marina Alves (@marina.alves)</label><label><input type="checkbox" checked> Rafael Costa (@rafa.costa)</label><label><input type="checkbox"> Helena Duarte (@helena.d)</label><label><input type="checkbox"> Camila Ferraz (@cafer)</label></fieldset></details>
+                <p class="m-nota" style="margin-top:.6rem">Os cartões vão para o deck <b>Cartões da professora</b> de cada pessoa. <a href="#">Escolher outro deck</a></p></article>
+              <article><header><h3>2. Tipo de cartão</h3></header>
+                <div class="m-tipos"><label><input type="radio" name="tipo" checked><b>Normal</b><span>Frente e verso</span></label><label><input type="radio" name="tipo"><b>Normal com reverso</b><span>Também pergunta no sentido contrário</span></label><label><input type="radio" name="tipo"><b>Múltipla escolha</b><span>Uma certa e três erradas</span></label><label><input type="radio" name="tipo"><b>Digite a resposta</b><span>A pessoa escreve a resposta</span></label><label><input type="radio" name="tipo"><b>Completar a frase</b><span>Uma lacuna na frase</span></label></div></article>
+              <article><header><h3>3. Conteúdo</h3></header>
+                <label>Frente <small>(francês)</small><input value="le chat" aria-label="Frente"></label>
+                <label>Verso <small>(português)</small><input value="o gato" aria-label="Verso"></label>
+                <div class="p-acoes"><button class="outline" type="button" style="padding:.3rem .8rem">Adicionar áudio</button><button class="outline" type="button" style="padding:.3rem .8rem">Adicionar imagem</button><button class="outline" type="button" style="padding:.3rem .8rem">Adicionar campo</button></div>
+                <label style="margin-top:.8rem">Tags<div class="m-chips"><span class="m-chip">animais <button type="button" aria-label="Remover">×</button></span><span class="m-chip">A1 <button type="button" aria-label="Remover">×</button></span></div></label>
+                <label>Nota privada <small>(só você vê, a aluna nunca vê)</small><textarea rows="2" placeholder="Ex.: lembrar do artigo definido"></textarea></label></article>
+            </div>
+            <aside style="display:grid;gap:1rem;align-content:start;position:sticky;top:4.5rem;min-width:0">
+              <article><header><h3>Como a aluna vai ver</h3></header>
+                <div class="m-cartao"><span class="m-rot">Frente</span><span class="m-frase">le chat</span><hr style="margin:.2rem 0"><span class="m-rot">Verso</span><span class="m-frase" style="font-weight:700">o gato</span></div></article>
+              <div class="p-alerta p-alerta--info"><span>Se você editar o conteúdo de um cartão depois, a pessoa <b>perde o progresso</b> naquele cartão. Avisamos antes de salvar.</span></div>
+              <div class="p-acoes" style="justify-content:flex-end"><button class="outline" type="button">Pré-visualizar</button><button type="button">Criar cartão para 2 alunos</button></div>
+            </aside>
+          </div>
+          <p class="m-nota">Espaço reservado: a função nova de Flashcards que você mencionou entra aqui, como uma etapa ou uma aba. Preciso que você me conte o que ela faz.</p>
+        </main>
+      </div>
+
+      <!-- Flashcards: cartões criados -->
+      <div class="m-tela" data-tela="lista" hidden>
+        <main class="p-pagina">
+          <header class="p-cabecalho"><div><span class="p-sobretitulo">Professora</span><h1>Flashcards</h1><span class="p-subtitulo">84 cartões ativos · 6 arquivados</span></div><div class="p-acoes"><button type="button" data-ir="cartoes">Criar cartão</button></div></header>
+          <nav class="p-abas" aria-label="Flashcards"><a href="#" data-ir="cartoes">Criar cartão</a><a href="#" aria-current="page">Cartões criados (84)</a></nav>
+          <div class="p-ferramentas"><input class="p-cresce" type="search" placeholder="Buscar no conteúdo dos cartões" aria-label="Buscar cartão">
+            <select aria-label="Aluno"><option>Todos os alunos</option><option>Marina Alves</option><option>Rafael Costa</option></select>
+            <select aria-label="Deck"><option>Todos os decks</option><option>Cartões da professora</option><option>Verbos</option></select>
+            <select aria-label="Situação"><option>Ativos</option><option>Arquivados</option></select></div>
+          <article class="p-tabela"><table class="striped"><thead><tr><th>Cartão</th><th>Para</th><th>Deck</th><th>Tags</th><th>Formato</th><th>Criado em</th><th></th></tr></thead><tbody>
+            <tr><td><b>le chat</b> → o gato</td><td><div class="m-grupo"><span class="p-avatar">MA</span><span class="p-avatar">RC</span></div></td><td>Cartões da professora</td><td><span class="p-selo">animais</span> <span class="p-selo">A1</span></td><td><span class="p-selo p-selo--info">Áudio</span></td><td>09/10</td><td><details class="dropdown" style="margin:0"><summary role="button" class="outline secondary" style="width:auto;padding:.25rem .7rem">Ações</summary><ul><li><a href="#">Visualizar</a></li><li><a href="#">Editar</a></li><li><a href="#">Mover para outro deck</a></li><li><a href="#">Arquivar</a></li><li><a href="#">Apagar</a></li></ul></details></td></tr>
+            <tr><td><b>Je ___ au marché</b> → vais</td><td><div class="p-pessoa"><span class="p-avatar">CF</span></div></td><td>Verbos</td><td><span class="p-selo">verbos</span></td><td><span class="p-selo p-selo--info">Completar a frase</span></td><td>05/10</td><td><details class="dropdown" style="margin:0"><summary role="button" class="outline secondary" style="width:auto;padding:.25rem .7rem">Ações</summary><ul><li><a href="#">Visualizar</a></li><li><a href="#">Editar</a></li><li><a href="#">Mover para outro deck</a></li><li><a href="#">Arquivar</a></li><li><a href="#">Apagar</a></li></ul></details></td></tr>
+            <tr><td><b>la maison</b> → a casa</td><td><div class="p-pessoa"><span class="p-avatar">MA</span></div></td><td>Cartões da professora</td><td><span class="p-selo">casa</span></td><td><span class="p-selo p-selo--info">Imagem</span></td><td>01/10</td><td><details class="dropdown" style="margin:0"><summary role="button" class="outline secondary" style="width:auto;padding:.25rem .7rem">Ações</summary><ul><li><a href="#">Visualizar</a></li><li><a href="#">Editar</a></li><li><a href="#">Mover para outro deck</a></li><li><a href="#">Arquivar</a></li><li><a href="#">Apagar</a></li></ul></details></td></tr>
+          </tbody></table></article>
+          <div class="m-pag" role="navigation" aria-label="Páginas"><a href="#">‹ Anterior</a><a href="#" aria-current="page">1</a><a href="#">2</a><a href="#">3</a><span>…</span><a href="#">9</a><a href="#">Próxima ›</a><span class="m-nota" style="margin-left:auto">1 a 10 de 84</span></div>
+        </main>
+      </div>
+
+      <!-- Aulas -->
+      <div class="m-tela" data-tela="aulas" hidden>
+        <main class="p-pagina">
+          <header class="p-cabecalho"><div><span class="p-sobretitulo">Professora</span><h1>Aulas</h1><span class="p-subtitulo">Seu diário de aulas. Só você vê estes registros.</span></div></header>
+          <div class="p-grade-2" style="grid-template-columns: minmax(0,1.3fr) minmax(0,1fr)">
+            <div style="display:grid;gap:1rem;min-width:0">
+              <div class="p-ferramentas"><select aria-label="Aluno"><option>Todos os alunos</option><option>Marina Alves</option><option>Rafael Costa</option></select><select aria-label="Curso"><option>Todos os cursos</option><option>Francês</option></select><input class="p-cresce" type="search" placeholder="Buscar no registro" aria-label="Buscar aula"></div>
+              <p class="m-mes">Outubro de 2026</p>
+              <article class="m-aula"><div class="m-data"><b>09</b><span>out</span></div><div><h3>Passé composé com être</h3><div class="p-pessoa" style="min-width:0"><div class="m-grupo"><span class="p-avatar">MA</span></div><small>Marina Alves · Francês</small></div>
+                <dl><dt>Lição de casa</dt><dd>Exercícios 4 e 5 da apostila</dd><dt>Observações</dt><dd>Confunde avoir e être</dd><dt>Anotações</dt><dd>Ótima pronúncia.</dd></dl></div>
+                <details class="dropdown" style="margin:0"><summary role="button" class="outline secondary" style="width:auto;padding:.25rem .7rem">Ações</summary><ul><li><a href="#">Editar</a></li><li><a href="#">Apagar</a></li></ul></details></article>
+              <article class="m-aula"><div class="m-data"><b>02</b><span>out</span></div><div><h3>Verbos do 1º grupo</h3><div class="p-pessoa" style="min-width:0"><div class="m-grupo"><span class="p-avatar">MA</span><span class="p-avatar">RC</span></div><small>Aula em grupo · Marina e Rafael</small></div>
+                <dl><dt>Anotações</dt><dd>Revisão de vocabulário.</dd></dl></div>
+                <details class="dropdown" style="margin:0"><summary role="button" class="outline secondary" style="width:auto;padding:.25rem .7rem">Ações</summary><ul><li><a href="#">Editar</a></li><li><a href="#">Apagar</a></li></ul></details></article>
+            </div>
+            <aside style="min-width:0;position:sticky;top:4.5rem;align-self:start">
+              <article><header><h3>Registrar aula</h3></header>
+                <label>Quem teve a aula
+                  <div class="m-chips"><span class="m-chip">Marina Alves <button type="button" aria-label="Remover">×</button></span></div></label>
+                <details><summary>Adicionar mais pessoas (aula em grupo)</summary><fieldset><label><input type="checkbox" checked> Marina Alves</label><label><input type="checkbox"> Rafael Costa</label><label><input type="checkbox"> Helena Duarte</label></fieldset></details>
+                <label>Data<input type="date" value="2026-10-12"></label>
+                <label>Tópico<input placeholder="Ex.: passé composé"></label>
+                <label>Lição de casa<input placeholder="Ex.: exercícios 1 a 3 da página 24"></label>
+                <label>Observações<input placeholder="Material usado, página do livro..."></label>
+                <label>Anotações livres<textarea rows="3"></textarea></label>
+                <small>Preencha pelo menos um campo.</small>
+                <footer class="p-acoes" style="justify-content:flex-end"><button class="secondary" type="button">Limpar</button><button type="button">Registrar aula</button></footer></article>
+            </aside>
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 3. Referências do shadcn ===== -->
+  <section class="m-sec" id="shadcn">
+    <h2>Componentes de referência do shadcn: o que dá para trazer</h2>
+    <p>Dá para escolher peças do shadcn e do catálogo dele. Não instalamos o shadcn (ele exige React): refazemos o visual em HTML e CSS puro, sobre o Pico, com as suas cores. As peças que precisam de comportamento ganham um JavaScript pequeno, ou usam o que o navegador já tem. Marque as que você quer.</p>
+    <div class="p-tabela" style="padding:0"><table class="striped">
+      <thead><tr><th>Componente do shadcn</th><th>Como entra</th><th>Onde seria usado no painel</th></tr></thead>
+      <tbody>
+        <tr><td>Button, Input, Select, Textarea, Checkbox, Radio, Switch</td><td><span class="m-status m-status--ja">Já temos</span></td><td>Todos os formulários</td></tr>
+        <tr><td>Card, Table, Badge, Avatar, Alert, Progress, Tabs</td><td><span class="m-status m-status--ja">Já temos</span></td><td>Blocos, listas, situação, abas</td></tr>
+        <tr><td>Accordion, Dropdown Menu, Tooltip, Dialog</td><td><span class="m-status m-status--ja">Já temos (Pico)</span></td><td>Menu "Ações", confirmações</td></tr>
+        <tr><td>Breadcrumb</td><td><span class="m-status m-status--css">Só CSS</span></td><td>Alunos / Marina Alves</td></tr>
+        <tr><td>Pagination</td><td><span class="m-status m-status--css">Só CSS</span></td><td>Lista de cartões</td></tr>
+        <tr><td>Toggle Group (controle segmentado)</td><td><span class="m-status m-status--css">Só CSS</span></td><td>Alternar visões e áreas</td></tr>
+        <tr><td>Skeleton</td><td><span class="m-status m-status--css">Só CSS</span></td><td>Carregando a lista de alunos</td></tr>
+        <tr><td>Alert com título, Separator, Kbd, Avatar em grupo</td><td><span class="m-status m-status--css">Só CSS</span></td><td>Avisos, aulas em grupo</td></tr>
+        <tr><td>Toast (Sonner)</td><td><span class="m-status m-status--js">CSS e JS pequeno</span></td><td>"Cartão criado", "Vínculo removido" (o site já tem um toast)</td></tr>
+        <tr><td>Sheet / Drawer</td><td><span class="m-status m-status--js">CSS e JS pequeno</span></td><td>Ficha rápida do aluno ao lado da lista</td></tr>
+        <tr><td>Combobox, Command (busca com atalho)</td><td><span class="m-status m-status--js">JS médio</span></td><td>Escolher alunos e decks com busca</td></tr>
+        <tr><td>Data Table (ordenar, filtrar, paginar)</td><td><span class="m-status m-status--js">JS médio</span></td><td>Tabela de alunos e de cartões</td></tr>
+        <tr><td>Date Picker, Calendar</td><td><span class="m-status m-status--js">Campo nativo ou JS médio</span></td><td>Data da aula</td></tr>
+        <tr><td>Chart</td><td><span class="m-status m-status--js">Biblioteca à parte</span></td><td>Gráficos de evolução (Admin, Fase 3)</td></tr>
+        <tr><td>Carousel, Resizable, Input OTP, Context Menu</td><td><span class="m-status m-status--nao">Não recomendo</span></td><td>Sem uso no painel</td></tr>
+      </tbody></table></div>
+    <div class="m-ref">
+      <article><header><h3>Breadcrumb</h3></header><ul class="m-bread"><li><a href="#">Professora</a></li><li><a href="#">Alunos</a></li><li>Marina Alves</li></ul></article>
+      <article><header><h3>Paginação</h3></header><div class="m-pag"><a href="#">‹</a><a href="#">1</a><a href="#" aria-current="page">2</a><a href="#">3</a><span>…</span><a href="#">9</a><a href="#">›</a></div></article>
+      <article><header><h3>Controle segmentado</h3></header><div class="m-seg"><button type="button" aria-pressed="true">Semana</button><button type="button" aria-pressed="false">Mês</button><button type="button" aria-pressed="false">Ano</button></div></article>
+      <article><header><h3>Skeleton (carregando)</h3></header><div style="display:grid;gap:.5rem"><div class="m-esq" style="width:60%"></div><div class="m-esq"></div><div class="m-esq" style="width:80%"></div></div></article>
+      <article><header><h3>Aviso com título</h3></header><div class="p-alerta p-alerta--info" style="align-items:flex-start"><div><strong>Novo módulo disponível</strong><br><span>O francês A2 ganhou o módulo 5. Os alunos já podem iniciar.</span></div></div></article>
+      <article><header><h3>Toast</h3></header><div class="m-toast"><strong>Cartão criado</strong><span class="m-nota">Enviado para Marina e Rafael.</span></div></article>
+      <article><header><h3>Avatares em grupo</h3></header><div class="m-grupo"><span class="p-avatar">MA</span><span class="p-avatar">RC</span><span class="p-avatar">HD</span><span class="p-avatar">+3</span></div></article>
+    </div>
+  </section>
+
+  <!-- ===== 4. Decisões ===== -->
+  <section class="m-sec" id="decisoes" style="margin-bottom:4rem">
+    <h2>O que preciso que você decida</h2>
+    <div class="p-grade" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))">
+      <article><header><h3>1. A função nova de Flashcards</h3></header><p>O que ela faz? Não encontrei nada no código nem nos documentos. O desenho deixa um espaço reservado (etapa ou aba) para ela.</p></article>
+      <article><header><h3>2. A regra de situação</h3></header><p>Em dia, Atenção e Parado: 3 dias e 7 dias servem? Esse número muda quem aparece em alerta.</p></article>
+      <article><header><h3>3. O quadro geral</h3></header><p>Hoje os dados de cada aluno vêm de uma consulta por aluno. Para 6 a 20 alunos dá para buscar todos de uma vez ao abrir a tela. Se a turma crescer muito, vale criar uma consulta única no banco (isso exigiria uma migration, rodada por você no SQL Editor).</p></article>
+      <article><header><h3>4. Quem pode usar a área da Professora</h3></header><p>Hoje criar cartão exige ser admin (regra do banco). Com outras professoras no futuro, isso precisará mudar. Nesta fase, nada muda: só você usa.</p></article>
+      <article><header><h3>5. Quais peças do shadcn entram</h3></header><p>Diga quais da tabela acima você quer. As de "Só CSS" entram sem custo; as de JavaScript eu avalio uma a uma.</p></article>
+      <article><header><h3>6. Material de apoio</h3></header><p>Fica na área da Professora, mas fora desta fase. Ok deixar como está até a Fase 3?</p></article>
+    </div>
+  </section>
+</div>
+
+<script>
+var html = document.documentElement;
+var DADOS = [
+  ['MA','Marina Alves','marina.alves','Francês','hoje','23 dias','12',80,'ok'],
+  ['RC','Rafael Costa','rafa.costa','Francês','ontem','4 dias','3',84,'ok'],
+  ['HD','Helena Duarte','helena.d','Francês','há 9 dias','zerada','41',72,'erro'],
+  ['TN','Tiago Nunes','tiagonunes','Francês','há 4 dias','2 dias','18',78,'aviso'],
+  ['CF','Camila Ferraz','cafer','Francês','hoje','41 dias','0',95,'ok'],
+  ['BT','Bruno Teles','brunot','Mandarim','há 12 dias','zerada','22',66,'erro']
+];
+var ROT = {ok:'Em dia', aviso:'Atenção', erro:'Parado'};
+var ABAS = { prof: ['Alunos','Flashcards','Aulas','Material de apoio'], admin: ['Analytics','Notificações','Badges','Reports','Premium','Tags'] };
+var TELAS = { nav:'Navegação', geral:'Alunos: quadro geral', aluno:'Aluno: detalhe', cartoes:'Flashcards: criar', lista:'Flashcards: cartões', aulas:'Aulas' };
+var S = { curso:'fr', tema:'light', tela:'geral', area:'prof' };
+function el(tag, cls, txt){ var e = document.createElement(tag); if(cls) e.className = cls; if(txt != null) e.textContent = txt; return e; }
+
+(function montar(){
+  var tb = document.getElementById('linhas-alunos');
+  DADOS.forEach(function(d){
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><div class="p-pessoa"><span class="p-avatar"></span><div><strong></strong><small></small></div></div></td><td></td><td></td><td></td><td></td><td></td><td><span class="p-selo"></span></td><td><button class="outline" type="button" style="padding:.25rem .75rem">Abrir</button></td>';
+    var c = tr.children;
+    c[0].querySelector('.p-avatar').textContent = d[0]; c[0].querySelector('strong').textContent = d[1]; c[0].querySelector('small').textContent = '@' + d[2];
+    c[1].textContent = d[3]; c[2].textContent = d[4]; c[3].textContent = d[5]; c[4].textContent = d[6];
+    c[5].innerHTML = '<progress value="' + d[7] + '" max="100" style="width:5rem;display:inline-block;margin:0 .4rem 0 0;vertical-align:middle"></progress><small>' + d[7] + '%</small>';
+    var sel = c[6].querySelector('.p-selo'); sel.textContent = ROT[d[8]]; sel.className = 'p-selo p-selo--' + d[8];
+    c[7].querySelector('button').addEventListener('click', function(){ ir('aluno'); });
+    tb.appendChild(tr);
+  });
+  var at = document.getElementById('atividade'); var ligados = [29, 28, 27, 19, 0];
+  for (var i = 29; i >= 0; i--){ var q = document.createElement('i'); if (i===0||i===1||i===2||i===10) q.className = 'on'; q.title = (i === 0 ? 'hoje' : 'há ' + i + ' dias'); at.appendChild(q); }
+})();
+
+function pintarAbas(){
+  var nav = document.getElementById('abas-area'); nav.textContent = '';
+  ABAS[S.area].forEach(function(n, i){ var a = el('a', null, n); a.href = '#'; if (S.area === 'prof' && ((['geral','aluno'].indexOf(S.tela) >= 0 && i === 0) || (['cartoes','lista'].indexOf(S.tela) >= 0 && i === 1) || (S.tela === 'aulas' && i === 2))) a.setAttribute('aria-current','page'); if (S.area === 'admin' && i === 0) a.setAttribute('aria-current','page');
+    a.addEventListener('click', function(e){ e.preventDefault(); if (S.area === 'prof'){ ir(['geral','cartoes','aulas'][i] || S.tela); } }); nav.appendChild(a); });
+}
+function ir(t){
+  if (t === 'nav'){ S.tela = 'nav'; } else { S.tela = t; S.area = 'prof'; }
+  render();
+}
+function render(){
+  document.querySelectorAll('.m-tela').forEach(function(d){ d.hidden = d.getAttribute('data-tela') !== S.tela; });
+  document.querySelectorAll('#telas button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-t') === S.tela)); });
+  document.querySelectorAll('#area button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === S.area)); });
+  document.querySelectorAll('#curso button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === S.curso)); });
+  document.querySelectorAll('#tema button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === S.tema)); });
+  document.getElementById('rotulo-tela').textContent = TELAS[S.tela];
+  html.setAttribute('data-curso', S.curso); html.setAttribute('data-theme', S.tema);
+  pintarAbas();
+  try { localStorage.setItem('desenho-fase2', JSON.stringify({curso:S.curso, tema:S.tema})); } catch (e) {}
+}
+try { var sv = JSON.parse(localStorage.getItem('desenho-fase2') || '{}'); if (sv.curso) S.curso = sv.curso; if (sv.tema) S.tema = sv.tema; else if (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) S.tema = 'dark'; } catch (e) {}
+document.getElementById('telas').addEventListener('click', function(e){ var b = e.target.closest('button'); if (b) ir(b.getAttribute('data-t')); });
+document.getElementById('area').addEventListener('click', function(e){ var b = e.target.closest('button'); if (!b) return; S.area = b.getAttribute('data-v'); if (S.area === 'admin'){ S.tela = 'nav'; } else if (S.tela === 'nav'){ S.tela = 'geral'; } render(); });
+document.getElementById('curso').addEventListener('click', function(e){ var b = e.target.closest('button'); if (b){ S.curso = b.getAttribute('data-v'); render(); } });
+document.getElementById('tema').addEventListener('click', function(e){ var b = e.target.closest('button'); if (b){ S.tema = b.getAttribute('data-v'); render(); } });
+document.getElementById('raiz').addEventListener('click', function(e){
+  var go = e.target.closest('[data-ir]'); if (go){ e.preventDefault(); ir(go.getAttribute('data-ir')); return; }
+  var ab = e.target.closest('[data-abrir]'); if (ab){ document.getElementById(ab.getAttribute('data-abrir')).hidden = false; return; }
+  var fe = e.target.closest('[data-fechar]'); if (fe){ document.getElementById(fe.getAttribute('data-fechar')).hidden = true; }
+});
+render();
+</script>
+</body>
+</html>

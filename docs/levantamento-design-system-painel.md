@@ -12,8 +12,9 @@ Documento de apoio à decisão. Nada aqui altera o site: é só o retrato do que
 ## 2. O que o código mostra hoje (conferido em 2026-10-12)
 
 ### O painel em números
-- **11 telas de admin** (Alunos, Analytics, Badges, Registro de aulas, Flashcards, Notificações, Premium, Relatórios, Materiais de apoio, Tags e o menu do painel) e **3 telas do lado da professora** (Registro de aulas, Flashcards, Materiais).
-- Cerca de **5.900 linhas** em 14 arquivos (`shared/admin-*.js`, `shared/teacher-*.js`, `shared/student-metrics.js`, `shared/support-materials-view.js`).
+- O painel é **uma tela só, o "Painel de Admin", com 10 abas** lado a lado: Badges, Analytics, Notificações, Reports, Alunos, Flashcards, Aulas, Material de apoio, Premium e Tags. A aba que abre primeiro é Badges.
+- **Professora e Admin não estão separados.** Alunos, Flashcards, Aulas e Material de apoio são da professora, mas moram no mesmo painel e só aparecem para quem é admin.
+- Cerca de **5.900 linhas** em 14 arquivos (`shared/admin-*.js`, `shared/teacher-*.js`, `shared/student-metrics.js`, `shared/support-materials-view.js`). Os `teacher-*.js` só acessam dados no Supabase; as telas são os `admin-*.js`. (Uma versão anterior deste documento falava em "3 telas do lado da professora": estava errada, corrigido em 2026-10-12.)
 - As maiores: `admin-flashcards.js` (1.475 linhas) e `admin-analytics.js` (1.421). Depois vêm `admin-badges.js` (481), `admin-students.js` (453) e `admin-class-logs.js` (353).
 
 ### Como o painel é montado

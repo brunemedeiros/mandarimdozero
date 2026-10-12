@@ -93,6 +93,6 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   Premium) NÃO aplicar antes do paywall. Lista do que fazer ao ligar o paywall: `docs/historico/14-pendencias-pos-paywall-e-decks.md`.
 - Todos os cartões antigos já têm Deck (migração de 2026-10-07). Regra "1 professora por aluno por idioma" ainda não imposta no banco.
 - Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
-- Design System do painel: Pico CSS escopado, sem React e sem build. Fase 1 (fundação em `shared/painel/`) entregue em 2026-10-12, nenhuma tela alterada (`docs/historico/15-*`). Falta autorizar a Fase 2 (área da Professora) e confirmar o Admin numa única entrega. Decisão pendente: hospedar a fonte Nunito (hoje o site só usa a instalada no aparelho).
+- Design System do painel: Pico CSS escopado, sem React e sem build. Fase 1 (fundação em `shared/painel/`) entregue em 2026-10-12, nenhuma tela alterada (`docs/historico/15-*`). Fase 2 (área da Professora): auditoria e desenho prontos em `docs/fase-2-professora/`, aguardando a autora aprovar o desenho e responder 4 decisões (função nova de Flashcards, regra de situação, peças do shadcn, Material de apoio). Admin só na Fase 3, numa única entrega. Decisão pendente: hospedar a fonte Nunito (hoje o site só usa a instalada no aparelho).
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.
