@@ -48,6 +48,8 @@ try{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="preload" href="../shared/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../shared/fonts/nunito.css">
 <style>
 :root{
   /* Design tokens — paleta própria do Francês do Zero (azul como cor
@@ -184,10 +186,6 @@ try{
   --shadow-lift: 0 8px 24px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05);
 }
 
-@font-face{
-  font-family:'Nunito';
-  src: local('Nunito');
-}
 
 *{ box-sizing: border-box; }
 /* Foco de teclado: sem isto, cada navegador desenha um anel default

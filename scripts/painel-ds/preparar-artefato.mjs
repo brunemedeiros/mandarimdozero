@@ -17,6 +17,25 @@ let html = fs.readFileSync(arqEntrada, "utf8");
 const titulo = (html.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || "Página";
 
 const arquivos = {};
+// Arquivos usados dentro de um CSS por url(...) (fontes, imagens) e CSS importados: vão junto, com o mesmo caminho relativo à raiz.
+function copiarUrls(absCss, relCss){
+  const css = fs.readFileSync(absCss, "utf8");
+  for (const m of css.matchAll(/url\(\s*['"]?([^'")]+)['"]?\s*\)/g)){
+    const u = m[1]; if (/^(https?:|data:|#)/.test(u)) continue;
+    const abs = path.resolve(path.dirname(absCss), u.split("?")[0]), rel = path.relative(raiz, abs).split(path.sep).join("/");
+    if (arquivos[rel] || !fs.existsSync(abs)) continue;
+    fs.mkdirSync(path.dirname(path.join(saida, rel)), { recursive: true });
+    fs.copyFileSync(abs, path.join(saida, rel)); arquivos[rel] = path.join(path.resolve(saida), rel);
+  }
+}
+// Os <script src="..."> locais são copiados com o caminho relativo à raiz.
+html = html.replace(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>\s*<\/script>/gi, (tag, src) => {
+  if (/^(https?:)?\/\//.test(src)) return tag;
+  const abs = path.resolve(dirEntrada, src), rel = path.relative(raiz, abs).split(path.sep).join("/");
+  fs.mkdirSync(path.dirname(path.join(saida, rel)), { recursive: true });
+  fs.copyFileSync(abs, path.join(saida, rel)); arquivos[rel] = path.join(path.resolve(saida), rel);
+  return tag.replace(src, rel);
+});
 // Os <script> ficam de fora da troca: o guia mostra exemplos de <link> dentro de strings de código.
 const scripts = [];
 html = html.replace(/<script\b[\s\S]*?<\/script>/gi, (m) => { scripts.push(m); return `\u0000SCRIPT${scripts.length - 1}\u0000`; });
@@ -28,6 +47,7 @@ html = html.replace(/<link\b[^>]*rel=["']stylesheet["'][^>]*>/g, (tag) => {
   fs.mkdirSync(path.dirname(path.join(saida, rel)), { recursive: true });
   fs.copyFileSync(abs, path.join(saida, rel));
   arquivos[rel] = path.join(path.resolve(saida), rel);
+  copiarUrls(abs, rel);
   return tag.replace(href, rel);
 });
 // Imagens locais (<img src="...">) também vão junto, com o mesmo caminho relativo à raiz.

@@ -13,7 +13,9 @@ const BRANCO = [255, 255, 255];
 const css = require('fs').readFileSync(path.join(ROOT, 'shared/painel/painel-tokens.css'), 'utf8');
 check('CSS: --p-elevado claro = paper-warm + 45% branco', /--p-elevado: color-mix\(in srgb, var\(--paper-warm\), white 45%\)/.test(css));
 check('CSS: --p-elevado escuro = paper-warm + 8% branco (2 blocos)', (css.match(/--p-elevado: color-mix\(in srgb, var\(--paper-warm\), white 8%\)/g) || []).length === 2);
-check('CSS: hover do botão = marca 90% + branco', /--pico-primary-hover-background: color-mix\(in srgb, var\(--p-marca\) 90%, white\)/.test(css));
+check('CSS: hover do botão claro = marca 85% + preto', /--p-botao-hover: color-mix\(in srgb, var\(--p-marca\) 85%, black\)/.test(css));
+check('CSS: hover do botão escuro = marca 88% + branco (2 blocos)', (css.match(/--p-botao-hover: color-mix\(in srgb, var\(--p-marca\) 88%, white\)/g) || []).length === 2);
+check('CSS: texto do botão claro é branco, escuro é --on-seal-red (2 blocos)', /--p-texto-botao: white;/.test(css) && (css.match(/--p-texto-botao: var\(--on-seal-red\)/g) || []).length === 2);
 check('CSS: borda de campo = linha + 60% tinta suave', /--p-borda-campo: color-mix\(in srgb, var\(--p-linha\), var\(--p-tinta-suave\) 60%\)/.test(css));
 check('CSS: alerta usa 14% da cor sobre o fundo', /color-mix\(in srgb, var\(--c\) 14%, var\(--p-bg\)\)/.test(require('fs').readFileSync(path.join(ROOT, 'shared/painel/painel-componentes.css'), 'utf8')));
 for (const curso of ['fr', 'zh']){
@@ -24,13 +26,19 @@ for (const curso of ['fr', 'zh']){
     const marca = c('--seal-red'), marcaEsc = c('--seal-red-dark'), sobreMarca = c('--on-seal-red');
     const ok_ = c('--jade'), aviso = c('--grade-hard-bg'), erro = rgb(s['--error-red'] || s['--grade-again-bg']), info = c('--count-new'), vivo = c('--on-vivid');
     const elev = tema === 'luz' ? mix(sup, BRANCO, .55) : mix(sup, BRANCO, .92);   // = --p-elevado
-    const marcaHover = mix(marca, BRANCO, .90);                                     // = --pico-primary-hover-background
+    const textoBotao = tema === 'luz' ? BRANCO : sobreMarca;                          // = --p-texto-botao (claro: branco, como o Ranking)
+    const marcaHover = tema === 'luz' ? mix(marca, [0, 0, 0], .85) : mix(marca, BRANCO, .88); // = --p-botao-hover
     const T = (nome, fg, bgc, min = 4.5) => { const r = razao(fg, bgc); check(`${curso} ${rot}: ${nome} ${r.toFixed(2)}:1 (mín ${min})`, r >= min, r.toFixed(2)); };
     T('texto principal em fundo', tinta, bg); T('texto principal em bloco', tinta, sup); T('texto principal em campo', tinta, elev);
     T('texto secundário em fundo', suave, bg); T('texto secundário em bloco', suave, sup); T('placeholder em campo', suave, elev);
     T('link (marca escura) em fundo', marcaEsc, bg); T('link (marca escura) em bloco', marcaEsc, sup);
-    T('botão primário', sobreMarca, marca); T('botão primário em hover', sobreMarca, marcaHover);
-    T('botão secundário', bg, suave); T('botão contraste', bg, tinta); T('dica (tooltip)', bg, tinta);
+    // Decisão da autora: botão primário igual ao do Ranking (branco sobre o azul). No francês claro dá 3,2:1, abaixo do AA (4,5),
+    // então ali o piso é 3 (vale para texto grande/negrito) e o número real aparece no nome do check.
+    const minBotao = (curso === 'fr' && tema === 'luz') ? 3 : 4.5;
+    T('botão primário' + (minBotao === 3 ? ' (exceção da autora, igual ao Ranking)' : ''), textoBotao, marca, minBotao);
+    T('botão primário em hover' + (minBotao === 3 ? ' (exceção da autora)' : ''), textoBotao, marcaHover, minBotao);
+    T('botão secundário e contorno (pílula bege)', suave, elev); T('botão secundário em hover', tinta, linha);
+    T('botão contraste', bg, tinta); T('dica (tooltip)', bg, tinta);
     T('selo ok', vivo, ok_); T('selo aviso', vivo, aviso); T('selo erro', vivo, erro); T('selo info', vivo, info); T('selo neutro', tinta, linha);
     if (tema === 'luz') T('avatar (iniciais)', bg, marcaEsc); else T('avatar (iniciais)', tinta, elev);
     for (const [nome, cor] of [['aviso', aviso], ['ok', ok_], ['erro', erro], ['info', info]]) T(`texto em alerta ${nome}`, tinta, mix(cor, bg, .14));

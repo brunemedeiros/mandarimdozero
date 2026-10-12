@@ -57,6 +57,52 @@ const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', ok: 'rgb(58, 115, 89)',
         check(`[${rot}] abas agrupadas à esquerda (não espalhadas)`, info.abasEspalhadas !== null && info.abasEspalhadas < 40, info.abasEspalhadas);
         check(`[${rot}] 15 tokens de cor no guia`, info.tokens === 15, info.tokens);
         check(`[${rot}] tabela rola só nela`, info.tabelaOverflow === 'auto', info.tabelaOverflow);
+        // ---- Fase 2 do guia: botões do Ranking, tabela, fonte e as 5 peças do shadcn ----
+        await page.evaluate(() => document.fonts.ready);
+        const ext = await page.evaluate(() => {
+          const q = (sel) => document.querySelector(sel), cs = (e, pseudo) => e ? getComputedStyle(e, pseudo || null) : null;
+          const prim = q('#conteudo .g-palco button:not([disabled]):not(.secondary):not(.contrast):not(.outline)');
+          const sec = q('#conteudo .g-palco button.secondary'), out = q('#conteudo .g-palco button.outline');
+          const seg = q('#curso'), segAtivo = q('#curso [aria-pressed="true"]'), segInativo = q('#curso [aria-pressed="false"]');
+          const tr = q('#padroes .p-tabela tbody tr'); const tds = tr ? [...tr.children] : [];
+          const th = [...document.querySelectorAll('#padroes .p-tabela thead th')];
+          const trilhaLi = document.querySelectorAll('.p-trilha li');
+          const sp = q('.p-spinner'), toast = q('.p-toast'), sep = q('hr.p-separador'), tip = q('[data-tooltip]');
+          return {
+            fontes: [...document.fonts].filter(f => /nunito/i.test(f.family) && f.status === 'loaded').length,
+            nunitoOk: document.fonts.check('800 16px Nunito'),
+            prim: prim && { raio: cs(prim).borderRadius, peso: cs(prim).fontWeight, cor: cs(prim).color, fundo: cs(prim).backgroundColor },
+            sec: sec && { raio: cs(sec).borderRadius, peso: cs(sec).fontWeight, fundo: cs(sec).backgroundColor },
+            out: out && { raio: cs(out).borderRadius, fundo: cs(out).backgroundColor },
+            seg: seg && { gap: cs(seg).columnGap, ativoFundo: cs(segAtivo).backgroundColor, ativoRaio: [cs(segAtivo).borderTopLeftRadius, cs(segAtivo).borderTopRightRadius], inativoRaio: [cs(segInativo).borderTopLeftRadius, cs(segInativo).borderTopRightRadius], inativoPeso: cs(segInativo).fontWeight, espaco: (() => { const a = segAtivo.getBoundingClientRect(), i = segInativo.getBoundingClientRect(), [p, q] = a.left < i.left ? [a, i] : [i, a]; return Math.round(q.left - p.right); })() },
+            tabela: { primeira: tds[0] && cs(tds[0]).textAlign, demais: tds.slice(1).map(t => cs(t).textAlign), titulosDemais: th.slice(1).map(t => cs(t).textAlign), tituloPrimeira: th[0] && cs(th[0]).textAlign },
+            trilha: { itens: trilhaLi.length, chevron: trilhaLi[1] && cs(trilhaLi[1], '::before').content, atual: q('.p-trilha [aria-current="page"]') && cs(q('.p-trilha [aria-current="page"]')).fontWeight },
+            spinner: sp && { anim: cs(sp).animationName, dur: cs(sp).animationDuration, w: cs(sp).width, raio: cs(sp).borderRadius },
+            toast: toast && { raio: cs(toast).borderRadius, sombra: cs(toast).boxShadow !== 'none', botoes: toast.querySelectorAll('button').length },
+            sep: sep && { h: cs(sep).height, w: sep.getBoundingClientRect().width, pai: sep.parentElement.getBoundingClientRect().width },
+            tip: tip && { fs: cs(tip, '::before').fontSize, attr: tip.getAttribute('data-tooltip') },
+          };
+        });
+        check(`[${rot}] Nunito hospedada: arquivo carregado e fonte disponível`, ext.fontes >= 1 && ext.nunitoOk, [ext.fontes, ext.nunitoOk]);
+        const textoBotao = tema === 'light' ? 'rgb(255, 255, 255)' : (curso === 'fr' ? 'rgb(32, 19, 83)' : 'rgb(26, 6, 5)');
+        check(`[${rot}] botão primário: pílula, negrito, texto ${tema === 'light' ? 'branco' : 'escuro'} (igual ao Ranking)`, ext.prim && /^(999|1000)px|^9999px/.test(ext.prim.raio) && +ext.prim.peso >= 800 && (tema === 'light' ? ext.prim.cor === textoBotao : ext.prim.cor !== 'rgb(255, 255, 255)'), ext.prim);
+        check(`[${rot}] botão secundário e contorno: pílula bege em negrito`, ext.sec && ext.out && /999|1000/.test(ext.sec.raio) && /999|1000/.test(ext.out.raio) && +ext.sec.peso >= 800 && ext.sec.fundo === ext.out.fundo && ext.out.fundo !== 'rgba(0, 0, 0, 0)', [ext.sec, ext.out]);
+        check(`[${rot}] seletor em pílulas: ativa na cor do curso, pílulas inteiras (os 2 cantos), negrito e espaço de 6px entre elas`, ext.seg && ext.seg.ativoFundo === esp.marca && [...ext.seg.ativoRaio, ...ext.seg.inativoRaio].every(r => parseFloat(r) >= 100) && +ext.seg.inativoPeso >= 800 && ext.seg.espaco >= 4, ext.seg);
+        check(`[${rot}] tabela: primeira coluna à esquerda, demais dados e títulos centralizados`, ext.tabela.primeira === 'start' || ext.tabela.primeira === 'left' ? ext.tabela.demais.length >= 3 && ext.tabela.demais.every(a => a === 'center') && ext.tabela.titulosDemais.every(a => a === 'center') && (ext.tabela.tituloPrimeira === 'start' || ext.tabela.tituloPrimeira === 'left') : false, ext.tabela);
+        check(`[${rot}] trilha de navegação: itens, separador › e página atual em destaque`, ext.trilha.itens === 4 && /›/.test(ext.trilha.chevron || '') && +ext.trilha.atual >= 700, ext.trilha);
+        check(`[${rot}] spinner girando (animação p-giro, 0,8s) e redondo`, ext.spinner && ext.spinner.anim === 'p-giro' && ext.spinner.dur === '0.8s' && /50%|9\d\dpx|px/.test(ext.spinner.raio), ext.spinner);
+        check(`[${rot}] toast: cartão com sombra e ações`, ext.toast && ext.toast.sombra && ext.toast.botoes === 2, ext.toast);
+        check(`[${rot}] separador: linha de 1px na largura do pai`, ext.sep && ext.sep.h === '1px' && Math.abs(ext.sep.w - ext.sep.pai) < 2, ext.sep);
+        check(`[${rot}] dica: texto pequeno e atributo data-tooltip`, ext.tip && ext.tip.fs === '12px' && !!ext.tip.attr, ext.tip);
+        { const antes = await page.evaluate(() => getComputedStyle(document.querySelector('[data-tooltip]'), '::before').opacity);
+          await page.hover('[data-tooltip]'); await page.waitForTimeout(300);
+          const dep = await page.evaluate(() => { const e = document.querySelector('[data-tooltip]'), b = getComputedStyle(e, '::before'); return { opacidade: b.opacity, visivel: b.visibility, caixa: e.getBoundingClientRect().top > 0 }; });
+          check(`[${rot}] dica aparece só ao passar o mouse`, antes !== '1' && dep.opacidade === '1' && dep.visivel !== 'hidden', [antes, dep]); }
+        if (largura === 1280 && tema === 'light' && curso === 'fr'){
+          await page.emulateMedia({ reducedMotion: 'reduce' });
+          const dur = await page.evaluate(() => getComputedStyle(document.querySelector('.p-spinner')).animationDuration);
+          check('menos movimento: spinner continua girando, mais devagar (2,4s)', dur === '2.4s', dur);
+        }
         if (OUT){ fs.mkdirSync(OUT, { recursive: true }); await page.screenshot({ path: path.join(OUT, `guia-${curso}-${tema}-${largura}.png`), fullPage: largura === 390 ? false : false }); }
         await ctx.close();
       }

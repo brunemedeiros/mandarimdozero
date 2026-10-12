@@ -3,6 +3,6 @@
 # Uso: bash tests/painel-ds/run.sh   (SHOT_DIR=/tmp/painel-shots para salvar screenshots)
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
-for t in test_escopo test_tokens test_contraste test_playwright; do
+for t in test_escopo test_tokens test_contraste test_playwright test_ui; do
   echo "== $t"; node "$HERE/$t.js"
 done

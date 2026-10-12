@@ -15,14 +15,6 @@
   html, body{ margin: 0; background: var(--paper); }
   .m-topo{ position: sticky; top: 0; z-index: 20; display: flex; gap: .75rem 1.5rem; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: .65rem 1.5rem; background: var(--p-bg); border-bottom: 1px solid var(--p-linha); }
   .m-topo strong{ font-size: 1.02rem; }
-  /* Controle segmentado (candidato ao Design System: estilo "toggle group" do shadcn) */
-  .painel .m-seg{ display: inline-flex; flex-wrap: wrap; gap: .2rem; padding: .22rem; background: var(--p-superficie); border: 1px solid var(--p-linha); border-radius: 12px; }
-  .painel .m-seg button{ margin: 0; width: auto; padding: .35rem .85rem; background: transparent; border-color: transparent; color: var(--p-tinta-suave); font-weight: 700; min-height: 2.3rem; font-size: .92rem; }
-  .painel .m-seg button[aria-pressed="true"]{ background: var(--p-elevado); border-color: var(--p-linha); color: var(--p-tinta); box-shadow: var(--p-sombra); }
-  /* o Pico trata role=group como grupo de botões colados: aqui queremos o controle segmentado, com largura do conteúdo */
-  .painel .m-seg[role=group]{ display: inline-flex; width: auto; }
-  .painel .m-seg[role=group] button{ flex: 0 0 auto; border-radius: 9px; }
-  .painel .m-seg--forte button[aria-pressed="true"]{ background: var(--p-marca); border-color: var(--p-marca); color: var(--p-sobre-marca); }
   .m-sec{ display: flex; flex-direction: column; gap: 1rem; padding: 0 1.5rem; max-width: 1240px; margin: 2rem auto; }
   .m-sec > h2{ margin: 0; font-size: 1.5rem; }
   .m-sec > p{ margin: 0; color: var(--p-tinta-suave); max-width: 75ch; }
@@ -41,7 +33,7 @@
   /* Navegação da área */
   .m-nav{ display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: .85rem 1.5rem 0; border-bottom: 1px solid var(--p-linha); background: var(--p-superficie); }
   .painel .m-nav .p-abas{ border: 0; width: auto; flex: 0 1 auto; }
-  .painel .m-nav .m-seg{ margin-bottom: .6rem; flex: none; }
+  .painel .m-nav .p-seg{ margin-bottom: .6rem; flex: none; }
 
   /* Atividade de 30 dias (peça já existente no app, agora com nome) */
   .m-atividade{ display: flex; flex-wrap: wrap; gap: 3px; }
@@ -80,10 +72,6 @@
   /* Referências do shadcn */
   .m-ref{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
   .m-ref article{ margin: 0; } .m-ref h3{ font-size: .98rem; margin: 0; }
-  .m-bread{ display: flex; flex-wrap: wrap; gap: .4rem; list-style: none; margin: 0; padding: 0; font-size: .9rem; color: var(--p-tinta-suave); }
-  .painel .m-bread li{ list-style: none; margin: 0; padding: 0; }
-  .m-bread li + li::before{ content: "/"; margin-right: .4rem; color: var(--p-linha); }
-  .m-bread a{ color: var(--p-tinta-suave); text-decoration: none; } .m-bread li:last-child{ color: var(--p-tinta); font-weight: 700; }
   .m-pag{ display: flex; gap: .3rem; align-items: center; flex-wrap: wrap; }
   .m-pag a, .m-pag span{ min-width: 2.2rem; height: 2.2rem; display: inline-grid; place-items: center; padding: 0 .6rem; border-radius: var(--p-raio-controle); text-decoration: none; font-weight: 700; color: var(--p-tinta); }
   .m-pag a:hover{ background: var(--p-linha); } .m-pag a[aria-current]{ border: 1px solid var(--p-linha); background: var(--p-elevado); }
@@ -105,10 +93,10 @@
 <body>
 <div class="painel" id="raiz">
   <div class="m-topo">
-    <strong>Desenho da área da Professora (Fase 2)</strong>
+    <strong>Desenho do Painel da professora (Fase 2)</strong>
     <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-      <div class="m-seg" id="curso" role="group" aria-label="Curso"><button type="button" data-v="fr" aria-pressed="true">Francês</button><button type="button" data-v="zh" aria-pressed="false">Mandarim</button></div>
-      <div class="m-seg" id="tema" role="group" aria-label="Tema"><button type="button" data-v="light" aria-pressed="true">Claro</button><button type="button" data-v="dark" aria-pressed="false">Escuro</button></div>
+      <div class="p-seg" id="curso" role="toolbar" aria-label="Curso"><button type="button" data-v="fr" aria-pressed="true">Francês</button><button type="button" data-v="zh" aria-pressed="false">Mandarim</button></div>
+      <div class="p-seg" id="tema" role="toolbar" aria-label="Tema"><button type="button" data-v="light" aria-pressed="true">Claro</button><button type="button" data-v="dark" aria-pressed="false">Escuro</button></div>
     </div>
   </div>
 
@@ -136,7 +124,7 @@
     <h2>O desenho proposto</h2>
     <p>Mesma informação de hoje, com hierarquia: o geral no topo, o detalhe sob demanda, uma ação principal por tela. Tudo abaixo é o CSS real do Design System (clique nas abas, nas linhas e nos botões).</p>
     <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center">
-      <div class="m-seg m-seg--forte" id="telas" role="group" aria-label="Tela">
+      <div class="p-seg" id="telas" role="toolbar" aria-label="Tela">
         <button type="button" data-t="nav" aria-pressed="false">Navegação</button>
         <button type="button" data-t="geral" aria-pressed="true">Alunos: quadro geral</button>
         <button type="button" data-t="aluno" aria-pressed="false">Aluno: detalhe</button>
@@ -150,7 +138,7 @@
       <div class="m-barra"><span><b>Painel</b> · tela cheia, sem a barra do aluno ao lado</span><span id="rotulo-tela">Alunos: quadro geral</span></div>
       <div class="m-nav" id="nav-area">
         <nav class="p-abas" id="abas-area" aria-label="Seções"></nav>
-        <div class="m-seg" id="area" role="group" aria-label="Área"><button type="button" data-v="prof" aria-pressed="true">Professora</button><button type="button" data-v="admin" aria-pressed="false">Admin</button></div>
+        <div class="p-seg" id="area" role="toolbar" aria-label="Área"><button type="button" data-v="prof" aria-pressed="true">Professora</button><button type="button" data-v="admin" aria-pressed="false">Admin</button></div>
       </div>
 
       <!-- Navegação (explicação) -->

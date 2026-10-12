@@ -33,11 +33,16 @@
   --p-elevado: color-mix(in srgb, var(--paper-warm), white 45%);
   /* borda de campo e trilho do interruptor desligado: contraste mínimo de 3:1 (WCAG 1.4.11), medido em tests/painel-ds/test_contraste.js */
   --p-borda-campo: color-mix(in srgb, var(--p-linha), var(--p-tinta-suave) 60%);
+  /* Botão primário igual ao do Ranking (pílula azul com texto branco, negrito). No claro, texto branco como o site faz hoje
+     (no francês dá 3,2:1, abaixo do AA de 4,5 para texto normal: decisão da autora, ver docs/historico/15). No escuro o
+     site não define cor própria e o branco ficaria ilegível, então usa --on-seal-red (escuro) e passa o AA. */
+  --p-texto-botao: white;
+  --p-botao-hover: color-mix(in srgb, var(--p-marca) 85%, black);
 }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) .painel{ --p-elevado: color-mix(in srgb, var(--paper-warm), white 8%); }
+  :root:not([data-theme="light"]) .painel{ --p-elevado: color-mix(in srgb, var(--paper-warm), white 8%); --p-texto-botao: var(--on-seal-red); --p-botao-hover: color-mix(in srgb, var(--p-marca) 88%, white); }
 }
-:root[data-theme="dark"] .painel{ --p-elevado: color-mix(in srgb, var(--paper-warm), white 8%); }
+:root[data-theme="dark"] .painel{ --p-elevado: color-mix(in srgb, var(--paper-warm), white 8%); --p-texto-botao: var(--on-seal-red); --p-botao-hover: color-mix(in srgb, var(--p-marca) 88%, white); }
 
 /* ---------- 2. Ligação com o Pico (--pico-*) ----------
    Especificidade alta de propósito (:root:root:root .painel = 0,4,0): vence o bloco escuro do Pico, que usa
@@ -63,22 +68,22 @@
   --pico-primary-border: var(--p-marca);
   --pico-primary-underline: color-mix(in srgb, var(--p-marca-escura) 50%, transparent);
   --pico-primary-hover: var(--p-marca-escura);
-  --pico-primary-hover-background: color-mix(in srgb, var(--p-marca) 90%, white);
-  --pico-primary-hover-border: color-mix(in srgb, var(--p-marca) 90%, white);
+  --pico-primary-hover-background: var(--p-botao-hover);
+  --pico-primary-hover-border: var(--p-botao-hover);
   --pico-primary-hover-underline: var(--p-marca-escura);
   --pico-primary-focus: color-mix(in srgb, var(--p-marca-escura) 40%, transparent);
-  --pico-primary-inverse: var(--p-sobre-marca);
+  --pico-primary-inverse: var(--p-texto-botao);
 
   --pico-secondary: var(--p-tinta-suave);
-  --pico-secondary-background: var(--p-tinta-suave);
-  --pico-secondary-border: var(--p-tinta-suave);
+  --pico-secondary-background: var(--p-elevado);
+  --pico-secondary-border: var(--p-linha);
   --pico-secondary-underline: color-mix(in srgb, var(--p-tinta-suave) 50%, transparent);
   --pico-secondary-hover: var(--p-tinta);
-  --pico-secondary-hover-background: var(--p-tinta);
-  --pico-secondary-hover-border: var(--p-tinta);
+  --pico-secondary-hover-background: var(--p-linha);
+  --pico-secondary-hover-border: var(--p-linha);
   --pico-secondary-hover-underline: var(--p-tinta);
   --pico-secondary-focus: color-mix(in srgb, var(--p-tinta-suave) 30%, transparent);
-  --pico-secondary-inverse: var(--p-bg);
+  --pico-secondary-inverse: var(--p-tinta-suave);
 
   --pico-contrast: var(--p-tinta);
   --pico-contrast-background: var(--p-tinta);
