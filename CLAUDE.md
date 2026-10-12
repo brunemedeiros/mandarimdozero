@@ -81,7 +81,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   `revisor-conteudo` (opus, revisa notas/traduções), `code-architecture-reviewer`/`principal-engineer`/
   `plan-reviewer`/`refactor-planner` (opus), `code-refactor-master`/`documentation-architect`/
   `web-research-specialist`/`auto-error-resolver` (sonnet).
-- Histórico completo (texto original, só leitura sob demanda): `docs/historico/01..14-*.md`.
+- Histórico completo (texto original, só leitura sob demanda): `docs/historico/01..15-*.md`.
   Comentários no código que citam "seção X do CLAUDE.md" apontam para esse texto: buscar com `grep -rn` em `docs/historico/`.
 
 ## Estado atual (1 linha por item; apagar ao fechar)
