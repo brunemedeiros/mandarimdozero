@@ -193,10 +193,14 @@
   function mensagem(lista, op){
     op = op || {};
     var li = document.createElement('li'); li.className = 'p-mensagem p-mensagem--' + (op.tipo === 'enviada' ? 'enviada' : 'recebida');
+    var av = document.createElement('span'); av.className = 'p-avatar'; av.setAttribute('aria-hidden', 'true');
+    av.textContent = (op.iniciais || String(op.autor || '?').split(/\s+/).map(function(w){ return w.charAt(0); }).join('').slice(0, 2)).toUpperCase();
+    var bloco = document.createElement('div'); bloco.className = 'p-mensagem-bloco';
     var corpo = document.createElement('div'); corpo.className = 'p-mensagem-corpo';
     String(op.texto || '').split(/\n{2,}/).forEach(function(par){ var p = document.createElement('p'); p.textContent = par; corpo.appendChild(p); });
-    li.appendChild(corpo);
-    if (op.autor || op.hora){ var m = document.createElement('span'); m.className = 'p-mensagem-meta'; m.textContent = [op.autor, op.hora].filter(Boolean).join(' · '); li.appendChild(m); }
+    bloco.appendChild(corpo);
+    if (op.autor || op.hora){ var m = document.createElement('span'); m.className = 'p-mensagem-meta'; m.textContent = [op.autor, op.hora].filter(Boolean).join(' · '); bloco.appendChild(m); }
+    li.appendChild(av); li.appendChild(bloco);
     lista.appendChild(li); return li;
   }
 

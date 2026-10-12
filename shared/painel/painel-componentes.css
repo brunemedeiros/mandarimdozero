@@ -156,7 +156,8 @@
 .painel details.dropdown.p-selecao > summary{ margin: 0; }
 .painel details.dropdown.p-selecao > ul{ min-width: 100%; max-height: 18rem; overflow-y: auto; margin-top: .35rem; padding: .35rem; border: 1px solid var(--p-linha); border-radius: 12px; background: var(--p-elevado); box-shadow: var(--p-sombra), 0 8px 24px color-mix(in srgb, var(--p-tinta) 14%, transparent); }
 .painel details.dropdown.p-selecao li{ margin: 0; padding: 0; list-style: none; }
-.painel details.dropdown.p-selecao li.p-selecao-grupo{ padding: .35rem .6rem .2rem; font-size: .75rem; font-weight: 800; letter-spacing: .04em; color: var(--p-tinta-suave); }
+.painel details.dropdown.p-selecao li.p-selecao-grupo{ margin: .35rem -.35rem .2rem; padding: .4rem .95rem; font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--p-tinta); background: var(--p-superficie); border-top: 1px solid var(--p-linha); border-bottom: 1px solid var(--p-linha); }
+.painel details.dropdown.p-selecao li.p-selecao-grupo:first-child{ margin-top: -.35rem; border-top: 0; border-radius: 10px 10px 0 0; }
 .painel details.dropdown.p-selecao label{ position: relative; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 0; padding: .5rem .6rem; border-radius: 8px; cursor: pointer; font-weight: 600; }
 .painel details.dropdown.p-selecao label:has(input){ width: 100%; }
 .painel details.dropdown.p-selecao label:hover, .painel details.dropdown.p-selecao label:has(input:focus-visible){ background: var(--p-superficie); }
@@ -254,8 +255,8 @@
 .painel .p-menunav :is(summary, a.p-menunav-link){ display: inline-flex; align-items: center; gap: .3rem; height: 2.4rem; margin: 0; padding: 0 .85rem; border: 0; border-radius: 10px; background: transparent; color: var(--p-tinta); font-size: .92rem; font-weight: 700; text-decoration: none; cursor: pointer; list-style: none; }
 .painel .p-menunav :is(summary, a){ margin: 0; } /* idem: margem negativa do Pico em nav */
 .painel .p-menunav summary::-webkit-details-marker{ display: none; }
-.painel .p-menunav summary::after{ content: "\2304"; font-size: 1.1em; line-height: 1; opacity: .7; transform: translateY(-.1em); }
-.painel .p-menunav details[open] > summary::after{ transform: rotate(180deg) translateY(.1em); }
+.painel .p-menunav details > summary::after{ content: ""; display: inline-block; float: none; flex: none; width: .45rem; height: .45rem; margin: 0 0 .2rem .25rem; border: 0; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; background: none; background-image: none; opacity: .7; transform: rotate(45deg); transition: transform .15s ease; }
+.painel .p-menunav details[open] > summary::after{ transform: translateY(.2rem) rotate(-135deg); }
 .painel .p-menunav :is(summary, a.p-menunav-link):hover, .painel .p-menunav details[open] > summary{ background: var(--p-superficie); }
 .painel .p-menunav a[aria-current="page"]{ background: var(--p-superficie); }
 .painel .p-menunav-painel{ position: absolute; z-index: 30; top: calc(100% + .4rem); left: 0; display: grid; grid-template-columns: repeat(2, minmax(13rem, 1fr)); gap: .25rem; width: max-content; max-width: min(40rem, 90vw); padding: .5rem; border: 1px solid var(--p-linha); border-radius: 12px; background: var(--p-elevado); box-shadow: var(--p-sombra), 0 8px 24px color-mix(in srgb, var(--p-tinta) 14%, transparent); }
@@ -274,14 +275,18 @@
 
 /* ---------- Mensagens (Message do shadcn) ---------- */
 .painel .p-mensagens{ display: flex; flex-direction: column; gap: 1rem; margin: 0; padding: 0; list-style: none; }
-.painel .p-mensagem{ display: flex; flex-direction: column; gap: .2rem; max-width: 85%; margin: 0; padding: 0; list-style: none; }
-.painel .p-mensagem-corpo{ display: grid; gap: .5rem; line-height: 1.5; }
+.painel .p-mensagem{ display: flex; align-items: flex-end; gap: .6rem; max-width: 88%; margin: 0; padding: 0; list-style: none; }
+.painel .p-mensagem > .p-avatar{ flex: none; width: 2.2rem; height: 2.2rem; font-size: .72rem; }
+.painel .p-mensagem-bloco{ display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
+.painel .p-mensagem-corpo{ display: grid; gap: .5rem; line-height: 1.5; padding: .65rem 1rem; border-radius: 18px; overflow-wrap: anywhere; }
 .painel .p-mensagem-corpo > *{ margin: 0; }
-.painel .p-mensagem-meta{ font-size: .75rem; color: var(--p-tinta-suave); font-weight: 700; }
-/* enviada = a pessoa que usa o painel (balão à direita); recebida = a outra pessoa (texto solto à esquerda) */
-.painel .p-mensagem--enviada{ align-self: flex-end; align-items: flex-end; }
-.painel .p-mensagem--enviada .p-mensagem-corpo{ padding: .7rem 1rem; border-radius: 16px; background: var(--p-superficie); border: 1px solid var(--p-linha); }
+.painel .p-mensagem-meta{ font-size: .75rem; color: var(--p-tinta-suave); font-weight: 700; padding: 0 .4rem; }
+/* enviada = a pessoa que usa o painel (balão na cor do curso, à direita); recebida = a outra pessoa (balão neutro, à esquerda). Os dois têm avatar. */
+.painel .p-mensagem--enviada{ align-self: flex-end; flex-direction: row-reverse; }
+.painel .p-mensagem--enviada .p-mensagem-bloco{ align-items: flex-end; }
+.painel .p-mensagem--enviada .p-mensagem-corpo{ background: var(--p-marca); color: var(--p-texto-botao); border-bottom-right-radius: 6px; }
 .painel .p-mensagem--recebida{ align-self: flex-start; }
+.painel .p-mensagem--recebida .p-mensagem-corpo{ background: var(--p-superficie); color: var(--p-tinta); border: 1px solid var(--p-linha); border-bottom-left-radius: 6px; }
 
 /* ---------- Rolagem de mensagens (Message Scroller do shadcn) ---------- */
 /* Conversa com altura fixa que começa embaixo, acompanha as mensagens novas e mostra um botão para voltar ao fim. */

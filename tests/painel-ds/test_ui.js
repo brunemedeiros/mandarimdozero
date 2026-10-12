@@ -149,8 +149,8 @@ let ok = 0, ruim = 0; const check = (n, c, x) => { if (process.env.V) console.lo
     const dist = async () => ro.evaluate(e => Math.round(e.scrollHeight - e.scrollTop - e.clientHeight));
     check(`[${rot}] conversa: começa no fim (mensagem mais recente visível)`, (await dist()) <= 2, await dist());
     check(`[${rot}] conversa: botão de voltar ao fim começa escondido`, await cv.locator('.p-ir-ao-fim').isHidden());
-    const lados = await cv.evaluate(e => { const a = e.querySelector('.p-mensagem--enviada'), b = e.querySelector('.p-mensagem--recebida'); const ca = getComputedStyle(a.querySelector('.p-mensagem-corpo')); return { enviadaFundo: ca.backgroundColor !== 'rgba(0, 0, 0, 0)', enviadaDir: a.getBoundingClientRect().right > b.getBoundingClientRect().right, recebidaSolta: getComputedStyle(b.querySelector('.p-mensagem-corpo')).backgroundColor === 'rgba(0, 0, 0, 0)' }; });
-    check(`[${rot}] mensagens: enviada em balão à direita, recebida em texto solto à esquerda`, lados.enviadaFundo && lados.enviadaDir && lados.recebidaSolta, lados);
+    const lados = await cv.evaluate(e => { const a = e.querySelector('.p-mensagem--enviada'), b = e.querySelector('.p-mensagem--recebida'); const fa = getComputedStyle(a.querySelector('.p-mensagem-corpo')), fb = getComputedStyle(b.querySelector('.p-mensagem-corpo')); return { avatares: !!a.querySelector('.p-avatar') && !!b.querySelector('.p-avatar'), baloes: fa.backgroundColor !== 'rgba(0, 0, 0, 0)' && fb.backgroundColor !== 'rgba(0, 0, 0, 0)', coresDiferentes: fa.backgroundColor !== fb.backgroundColor, enviadaDir: a.getBoundingClientRect().right > b.getBoundingClientRect().right }; });
+    check(`[${rot}] mensagens: as duas partes têm avatar e balão, em cores diferentes, enviada à direita`, lados.avatares && lados.baloes && lados.coresDiferentes && lados.enviadaDir, lados);
     await page.evaluate(() => PainelUI.mensagem(document.getElementById('conv-lista'), { texto: 'Mensagem nova\n\nSegundo parágrafo', tipo: 'recebida', autor: 'Marina', hora: '10:00' })); await page.waitForTimeout(150);
     check(`[${rot}] conversa: mensagem nova com o leitor no fim continua acompanhando`, (await dist()) <= 2 && (await cv.locator('.p-mensagem').last().locator('p').count()) === 2, await dist());
     await ro.evaluate(e => { e.scrollTop = 0; }); await page.waitForTimeout(150);
@@ -344,6 +344,19 @@ let ok = 0, ruim = 0; const check = (n, c, x) => { if (process.env.V) console.lo
     const ac = page.locator('#alerta .p-alerta--caixa');
     check(`[${rot}] alerta em caixa: 3 caixas com ícone, título e descrição; só o erro usa role=alert`, (await ac.count()) === 3 && (await ac.locator('svg').count()) === 3 && (await ac.locator('strong').count()) === 3 && (await page.locator('#alerta [role="alert"]').count()) === 1);
     check(`[${rot}] alerta em caixa: cor do ícone muda por tipo`, new Set(await ac.locator('svg').evaluateAll(l => l.map(x => getComputedStyle(x).color))).size === 3);
+
+    // ---- Correções de revisão da autora ----
+    const mnSeta = page.locator('#menunav .p-menunav details > summary').first();
+    await mnSeta.evaluate(e => e.scrollIntoView({ block: 'center' }));
+    const setaFechado = await mnSeta.evaluate(e => { const c = getComputedStyle(e, '::after'); return { img: c.backgroundImage, conteudo: c.content, w: c.width }; });
+    check(`[${rot}] menu com painéis: uma seta só (sem imagem do Pico, sem glifo duplo)`, setaFechado.img === 'none' && setaFechado.conteudo === '""', setaFechado);
+    const rotFechado = await mnSeta.evaluate(e => getComputedStyle(e, '::after').transform);
+    await mnSeta.click(); await page.waitForTimeout(300); const rotAberto = await mnSeta.evaluate(e => getComputedStyle(e, '::after').transform);
+    check(`[${rot}] menu com painéis: a seta vira ao abrir`, rotFechado !== rotAberto, [rotFechado, rotAberto]); await page.keyboard.press('Escape');
+    const gr = await page.locator('#selecao li.p-selecao-grupo').first().evaluate(e => { const c = getComputedStyle(e); return { fundo: c.backgroundColor !== 'rgba(0, 0, 0, 0)', caixa: c.textTransform === 'uppercase' }; });
+    check(`[${rot}] seleção: rótulo de grupo em caixa alta com fundo próprio`, gr.fundo && gr.caixa, gr);
+    const ic = await page.locator('#vazio-rico .p-vazio-icone svg').first().evaluate(e => { const r = e.getBoundingClientRect(); return r.width > 10 && r.height > 10; });
+    check(`[${rot}] vazio: o ícone é um desenho de verdade, não um caractere`, ic);
     check(`[${rot}] 0 pageerrors`, erros.length === 0, erros);
     await ctx.close();
   }
