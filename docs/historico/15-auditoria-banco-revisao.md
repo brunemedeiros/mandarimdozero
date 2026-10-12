@@ -23,3 +23,18 @@ Aluno: métricas derivadas de `STATE.cards` (`analytics-metrics.js:173`), entram
 
 ## Riscos
 Duplicar cartões (insert sem idempotência), zerar FSRS ao editar item entregue (`revision`), zh exige pinyin e não inverte, privacidade de notas, regra "1 professora por aluno" não imposta.
+
+## Decisões da autora (2026-10-12)
+- O cartão aprovado vai para o deck existente "Cartões da professora" (`teacher_root`), sem deck/kind novo e sem subdeck. Aprovar entrega na hora.
+- Banco só para quem tem vínculo; geração automática = permissão `review_bank` do plano Professora.
+- Modo aluno: "Ver resposta" = 4 notas (Errei, Difícil, Bom, Fácil); múltipla escolha = 2 (Errei, Bom); digitar = 3 (errou = Errei, quase lá = Difícil, certo = Bom).
+- O campo "Notas" do cartão é observação/explicação para o aluno (não nota pessoal): renomear para Observações ou Explicação. Pendente: confirmar nome e o que fazer com notas privadas que já existam.
+- Caixas azuis: fundo `#1D5A82` com texto branco em negrito (contraste ~7:1).
+- Dados do artifact (itens, revisões, recaps, manual) podem ser levados ao banco do site: autorizado.
+- Editar cartão entregue: bloquear é inaceitável. Proposta: correção mantém o progresso (mesmo id) e só "mudou o sentido" reinicia.
+
+## Bug confirmado e corrigido (mergeSavedCards)
+`tests/banco-revisao/test_merge_saved_cards.js` (fr e zh): antes da correção, arquivar, mudar observação e mudar tags de um cartão da professora já estudado NÃO chegavam ao aluno (6 falhas); o save antigo vencia o dado novo do banco. Correção em `shared/study-trail-model.js` (`NOTE_LEVEL_FRESH_FIELDS` vencem a cópia salva; só o progresso vem do save). Depois: 10/10. Regressão: fase-e 75/75, fase-f 68/68, fase-g 134/134, fase-h 78/78 e 52/52, k2c 88/88, k2e 64/64, k2g 31/31. Falhas que já existiam antes da correção (iguais sem ela): fase-i 63/67, trilha-tags 72/74; `tests/i18n/test_i18n_unit.js` não roda (commit `e88fabb` ausente no clone).
+
+## Migration 080_review_bank
+Arquivo `shared/supabase_migrations/080_review_bank.sql` (077/078/079 já existiam no Staging, de outra conversa, fora do repo). Tabelas `review_bank_items`, `review_bank_recaps`, `review_bank_reviews`; `teacher_flashcards.bank_item_id` (índice único parcial); RPCs `approve_review_bank_item`, `set_review_bank_item_status`, `get_my_pending_bank_reviews`, `ack_my_bank_reviews`; permissão `review_bank` (só `teacher`). Teste local `tests/banco-revisao/run_local.sh`: 22/22 e reaplicação sem erro. Staging: aplicada em 2026-10-12, versão `20261012202106`; verificado 3 tabelas com RLS, 3 policies, 4 funções `security definer` com `search_path=public`, sem execute para `anon`, `teacher_flashcards` intacta. Produção: NÃO aplicada.
