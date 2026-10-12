@@ -1198,6 +1198,11 @@ function openFlashcardLimitModal(opts){
   const title = modal.querySelector('.app-modal-header h3');
   if (body && body.dataset.defaultHtml === undefined) body.dataset.defaultHtml = body.innerHTML;
   if (title && title.dataset.defaultText === undefined) title.dataset.defaultText = title.textContent;
+  // Texto padrão no idioma ATUAL do site (o guardado acima é o do 1º uso e
+  // ficaria em português depois de trocar para inglês).
+  const hasT = typeof t === 'function';
+  const defaultBodyHTML = hasT ? `<p data-i18n-html="flashcardLimit.modal.bodyHtml">${t('flashcardLimit.modal.bodyHtml')}</p>` : body && body.dataset.defaultHtml;
+  const defaultTitle = hasT ? t('flashcardLimit.modal.title') : title && title.dataset.defaultText;
   const cutMessage = opts && opts.cutMessage;
   if (body){
     body.innerHTML = cutMessage
@@ -1206,9 +1211,9 @@ function openFlashcardLimitModal(opts){
            <strong>⭐ Com o Premium, seus cartões próprios são ilimitados.</strong><br>
            Para ativar, fale com a administração (profbrune). Você também pode excluir cartões que já não usa para liberar espaço.
          </div>`
-      : body.dataset.defaultHtml;
+      : defaultBodyHTML;
   }
-  if (title) title.textContent = cutMessage ? '🔒 Importação limitada pelo plano grátis' : title.dataset.defaultText;
+  if (title) title.textContent = cutMessage ? '🔒 Importação limitada pelo plano grátis' : defaultTitle;
   modal.style.display = 'flex';
   return true;
 }

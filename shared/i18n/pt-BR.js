@@ -184,7 +184,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'notif.pref.titleMatrixEmail': 'E-mail',
   // ---- Fase 6 lote 2 (fr/app.js): Revisão, flashcards, Trilha, toasts ----
   'toast.audioPlayFailed': 'Não foi possível reproduzir o áudio',
-  'toast.audioTapSpeaker': '🔇 Toque no alto-falante pra ouvir',
+  'toast.audioTapSpeaker': '🔇 Toque no alto-falante para ouvir',
   'toast.audioUnsupported': 'Áudio não suportado neste navegador',
   'toast.voiceMissingFr': '🔇 Voz em francês não encontrada neste navegador/SO',
   'toast.audioPlayFailedThis': '🔇 Não foi possível reproduzir este áudio',

@@ -4167,6 +4167,12 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 #settings-export-content .export-box p{ margin:4px 0 16px; max-width:62ch; }
 #settings-export-content #export-btn{ margin:0 !important; }
 #settings-export-content .export-status:empty{ min-height:0; margin:0; }
+/* ---------- Lições: opções de múltipla escolha com o mesmo dourado das outras ----------
+   A regra antiga usava --imperial-gold (rosa no fr) e valia também no toque. */
+.exercise-option:not(.correct):not(.incorrect):hover{ border-color:var(--paper-line); transform:none; }
+@media (hover:hover){
+  .exercise-option:not(.disabled):not(.correct):not(.incorrect):hover{ border-color:var(--hover-gold); background:color-mix(in srgb, var(--hover-gold) 14%, var(--paper)); transform:translateY(-1px); }
+}
 </style>
 </head>
 <body>
