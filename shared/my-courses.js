@@ -18,11 +18,9 @@ function listAvailableCourses(currentAppKey, currentSiteLang, admin){
   return out;
 }
 
+// Nome do curso = nome do idioma estudado na língua do curso: Francês (pt-BR), French (en), Chinês, Chinese.
 function courseDisplayName(appKey, siteLang){
-  const l = LanguageRegistry.byAppKey(appKey);
-  const n = l && l.names && (l.names[getUiLang()] || l.names['pt-BR']);
-  const lang = n ? n.short : (l ? l.name : appKey);
-  return t('courses.name', { language: lang, site: t('courses.siteLang.' + siteLang) });
+  return LanguageRegistry.shortName(appKey, siteLang) || appKey;
 }
 
 // Troca de curso: salva o curso atual (na chave dele), grava o idioma do site na conta, abre a página do idioma estudado e recarrega.

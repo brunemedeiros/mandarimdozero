@@ -44,7 +44,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
         check(`${tag}: "Meus cursos" aparece com a flag ligada`, state.display !== 'none' && state.buttons >= 3, state);
         check(`${tag}: mostra o título`, /Meus cursos/.test(state.text), state.text.slice(0, 80));
         const cur = await page.evaluate(() => [...document.querySelectorAll('button.my-course[aria-current]')].map(b => b.textContent.trim()));
-        check(`${tag}: exatamente um curso atual (pt-BR)`, cur.length === 1 && /explicado em português/.test(cur[0]), cur);
+        check(`${tag}: exatamente um curso atual (pt-BR)`, cur.length === 1 && /^(Francês|Chinês)\s+ATUAL$/i.test(cur[0].replace(/\s+/g,' ')), cur);
         // abrir o aviso ao escolher o curso em inglês do mesmo idioma
         await page.evaluate(() => { document.getElementById('my-courses').scrollIntoView(); });
         const target = await page.$(`button.my-course[data-app="${app === 'fr' ? 'frances' : 'mandarim'}"][data-site="en"]`);
@@ -52,7 +52,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
         if (target) {
           await page.evaluate((sel) => document.querySelector(sel).click(), `button.my-course[data-app="${app === 'fr' ? 'frances' : 'mandarim'}"][data-site="en"]`);
           const modal = await page.evaluate(() => ({ disp: document.getElementById('ui-language-confirm-modal').style.display, body: document.getElementById('ui-language-confirm-body').textContent }));
-          check(`${tag}: aviso novo aparece com o nome do curso`, modal.disp === 'flex' && /progresso de cada curso é separado/.test(modal.body) && /explicado em inglês/.test(modal.body), modal);
+          check(`${tag}: aviso novo aparece com o nome do curso`, modal.disp === 'flex' && /curso novo, com progresso próprio/.test(modal.body) && /(French|Chinese)/.test(modal.body), modal);
           await page.evaluate(() => document.getElementById('ui-language-confirm-no').click());
           const closed = await page.evaluate(() => document.getElementById('ui-language-confirm-modal').style.display);
           check(`${tag}: Cancelar fecha sem trocar`, closed === 'none');

@@ -87,12 +87,9 @@ window.I18N_CATALOG['pt-BR'] = {
   'settings.uiLanguage.confirm.yes': 'Trocar',
   'courses.title': 'Meus cursos',
   'courses.sub': 'Cada curso tem progresso próprio. Sua sequência de dias e suas conquistas são da conta e valem em todos.',
-  'courses.name': '{language}, {site}',
-  'courses.siteLang.pt-BR': 'explicado em português',
-  'courses.siteLang.en': 'explicado em inglês',
   'courses.beta': 'em teste',
   'courses.current': 'atual',
-  'courses.confirm.body': 'Você vai trocar para o curso {course}. O progresso de cada curso é separado: o que você fez no curso atual continua salvo e volta quando você voltar a ele. Sua sequência de dias e suas conquistas continuam as mesmas.',
+  'courses.confirm.body': 'Você vai trocar para o curso {course}. É um curso novo, com progresso próprio: se você nunca estudou nele, começa do zero. O progresso do curso atual continua salvo e volta quando você voltar a ele. Sua sequência de dias e suas conquistas continuam as mesmas.',
   'courses.first.title': 'Qual curso você quer começar?',
   'courses.first.sub': 'Você pode trocar de curso depois em Configurações. O progresso de cada curso é separado.',
 

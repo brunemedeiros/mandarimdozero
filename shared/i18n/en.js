@@ -71,12 +71,9 @@ window.I18N_CATALOG['en'] = {
   'settings.uiLanguage.confirm.yes': 'Change', // ALTA
   'courses.title': 'My courses', // ALTA
   'courses.sub': 'Each course has its own progress. Your day streak and achievements belong to your account and count in every course.', // ALTA
-  'courses.name': '{language} ({site})', // ALTA
-  'courses.siteLang.pt-BR': 'explained in Portuguese', // ALTA
-  'courses.siteLang.en': 'explained in English', // ALTA
   'courses.beta': 'beta', // ALTA
   'courses.current': 'current', // ALTA
-  'courses.confirm.body': 'You are about to switch to the course {course}. Each course keeps its own progress: what you did in the current course stays saved and comes back when you return to it. Your day streak and achievements stay the same.', // MÉDIA
+  'courses.confirm.body': 'You are about to switch to the {course} course. It is a separate course with its own progress: if you have never studied in it, you start from zero. Your progress in the current course stays saved and comes back when you return to it. Your day streak and achievements stay the same.', // MÉDIA
   'courses.first.title': 'Which course do you want to start?', // ALTA
   'courses.first.sub': 'You can switch courses later in Settings. Each course keeps its own progress.', // ALTA
 

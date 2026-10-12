@@ -211,3 +211,7 @@ Só front-end estático; **nenhuma migration**; **flag desligada para todos**: s
 - Textos novos (confiança alta; a redação é da dona): `courses.first.title`, `courses.first.sub`. Código: `showFirstCoursePick` em `shared/my-courses.js`; gancho em `askUiLanguageOnFirstAccess` (`shared/auth.js`).
 - Teste: `tests/curso-progresso/test_portao_cursos_browser.js` (21: fr/zh x flag desligada/ligada, 390px, capturas claro/escuro, recarregar, atalho `?cursos=`).
 - Regressão do C6: 81 de 97 no lote; as 15 de sempre mais `tests/i18n/test_ui_language_confirm_browser.js` (1 check de temporização do aviso em inglês, falhou só no lote e passou 16/16 em duas rodadas isoladas; instável sob carga, como o `fase-j`). Teste novo `test_portao_cursos_browser.js` 21/21.
+
+### Ajuste pós-C6 (2026-10-12, pedido da dona)
+- Nome do curso = só o nome do idioma estudado na língua do curso: Francês, French, Chinês, Chinese (`LanguageRegistry.shortName`); saíram as chaves `courses.name` e `courses.siteLang.*`.
+- Aviso de troca (`courses.confirm.body`) agora diz que é um **curso novo, com progresso próprio** (começa do zero se nunca estudou nele). Vale só com a flag ligada. **Em produção continua o aviso antigo** ("Seu progresso continua salvo"), que descreve o comportamento de hoje (mesmo progresso, só muda o idioma da interface).
