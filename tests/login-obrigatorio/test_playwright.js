@@ -28,12 +28,13 @@ const GATE_STUB = `window.supabase = { createClient: () => {
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe(){} } } }),
       signUp: async (a) => { rec('signUp', a); return { data: { user: { id: 'n1', email: a.email }, session: null }, error: null }; },
       signInWithPassword: async (a) => { rec('signIn', a);
-        if (a.email === 'jaativa@x.com') return { data: { user: { id: 'j1' }, session: {} }, error: null };
+        if (a.email === 'jaativa@x.com' || (a.email === 'outraaba@x.com' && window.__ativadaFora)) return { data: { user: { id: 'j1' }, session: {} }, error: null };
+        if (a.email === 'outraaba@x.com') return { data: {}, error: { code: 'email_not_confirmed', message: 'Email not confirmed' } };
         return a.email === 'naoconfirmado@x.com'
         ? { data: {}, error: { code: 'email_not_confirmed', message: 'Email not confirmed' } }
         : { data: {}, error: { message: 'Invalid login credentials' } }; },
       resend: async (a) => { rec('resend', a); return { error: null }; },
-      verifyOtp: async (a) => { rec('verifyOtp', a); return (a.token === '123456' || a.token_hash === 'hashbom')
+      verifyOtp: async (a) => { rec('verifyOtp', a); if (a.token_hash === 'metade') return { data: { user: null, session: null }, error: null }; return (a.token === '123456' || a.token_hash === 'hashbom')
         ? { data: { user: { id: 'n1' }, session: {} }, error: null } : { data: {}, error: { message: 'Token has expired or is invalid' } }; },
       resetPasswordForEmail: async () => ({ error: null }), signInWithOAuth: async () => ({ error: null }),
     },
@@ -101,6 +102,37 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     L('link usado avisa e oferece o login', await page.evaluate(() => /já foi usado/.test(document.getElementById('gate-confirm-link-note').textContent)));
     await page.click('#gate-confirm-link-login');
     L('"Ir para o login" abre o login', await page.isVisible('#gate-login'));
+    // conta ativada fora desta aba (botão do e-mail em outra janela): a tela do código percebe ao voltar e avisa
+    await page.goto(`http://127.0.0.1:${port}/index.html`);
+    await page.waitForSelector('#gate-login', { state: 'visible' });
+    await page.click('#gate-toggle-mode-btn');
+    await page.fill('#gate-email', 'outraaba@x.com'); await page.fill('#gate-password', 'segredo1');
+    await page.click('#gate-submit-btn');
+    await page.waitForSelector('#gate-verify', { state: 'visible' });
+    await page.evaluate(() => { window.dispatchEvent(new Event('focus')); });
+    await page.waitForTimeout(300);
+    L('antes de ativar continua na tela do código', await page.isVisible('#gate-verify'));
+    await page.evaluate(() => { window.__ativadaFora = true; window.dispatchEvent(new Event('focus')); });
+    await page.waitForFunction(() => document.getElementById('gate-verify-note').classList.contains('ok'));
+    L('avisa "Sua conta foi ativada!"', await page.evaluate(() => /Sua conta foi ativada/.test(document.getElementById('gate-verify-note').textContent)));
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/gate-ativada-${theme}-${width}.png` });
+    await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+    L('depois do aviso segue para o app', true);
+    // os outros botões dos e-mails também só valem com um toque
+    for (const [kind, type, title, next] of [['entrar', 'email', 'Entrar no app', '#gate-choose-language'],
+      ['nova-senha', 'recovery', 'Crie uma senha nova', '#gate-new-password'], ['trocar-email', 'email_change', 'Confirmar o novo e-mail', '#gate-choose-language']]){
+      await page.goto(`http://127.0.0.1:${port}/index.html?${kind}=hashbom`);
+      await page.waitForSelector('#gate-confirm-link', { state: 'visible' });
+      L(`${kind}: tela própria sem usar o link sozinho`, await page.evaluate((t) => document.getElementById('gate-confirm-link-title').textContent === t && !window.__calls.some(c => c[0] === 'verifyOtp') && !location.search, title));
+      await page.click('#gate-confirm-link-btn');
+      await page.waitForSelector(next, { state: 'visible' });
+      L(`${kind}: toque usa o token_hash com o tipo certo`, await page.evaluate((t) => window.__calls.some(c => c[0] === 'verifyOtp' && c[1].token_hash === 'hashbom' && c[1].type === t), type));
+    }
+    await page.goto(`http://127.0.0.1:${port}/index.html?trocar-email=metade`);
+    await page.waitForSelector('#gate-confirm-link', { state: 'visible' });
+    await page.click('#gate-confirm-link-btn');
+    await page.waitForFunction(() => document.getElementById('gate-confirm-link-note').classList.contains('ok'));
+    L('troca de e-mail: pede o segundo endereço', await page.evaluate(() => /outro endereço/.test(document.getElementById('gate-confirm-link-note').textContent)));
     // conta não confirmada tentando entrar
     await page.goto(`http://127.0.0.1:${port}/index.html`);
     await page.waitForSelector('#gate-login', { state: 'visible' });

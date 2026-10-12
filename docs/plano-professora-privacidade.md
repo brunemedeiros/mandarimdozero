@@ -300,7 +300,13 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
 - **Aviso**: o recado chega no sino e mostra um pill "+N" (mensagens novas) na aba Perfil e num submenu Aulas ou
   Mural, ou num menu próprio de Aluno (a decidir na auditoria).
 - **Anexo**: sim.
-- Em aberto para a auditoria: comentário do aluno é visto só pela professora ou pelos outros que receberam o mesmo
-  recado (conflita com "não sabe que outro recebeu"); tipos e tamanho de anexo; editar/apagar recado; Grátis x
-  Premium; e-mail além do sino.
+- 2ª rodada (2026-10-12):
+  - **Mural por aluno** (como no Google Classroom): cada aluno tem a sua aba Mural. Alunos de uma mesma **turma**
+    podem compartilhar o mural: aí veem os recados e comentários uns dos outros, só dentro da turma.
+  - **Anexo**: PDF e imagem (tamanho sugerido: até 10 MB por arquivo e até 5 por recado; imagem reduzida no
+    navegador antes de subir).
+  - **Editar/apagar**: a professora edita e apaga recados; o aluno só apaga o próprio comentário.
+  - **Aviso**: só no sino + sinalizador no menu Perfil. Sem e-mail.
+- Em aberto para a auditoria: o que é uma turma (quem cria, aluno em várias turmas), quem liga o compartilhamento
+  (professora ou aluno), recado individual dentro de turma compartilhada, Grátis x Premium.
 

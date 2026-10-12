@@ -38,5 +38,10 @@ Correção:
   **Passo da autora**: colar de novo o modelo Confirm signup depois do merge.
 - Se o código falhar ou a pessoa pedir reenvio, o portão tenta entrar com o e-mail e a senha do cadastro: se a
   conta já estiver ativa, entra direto.
-- Os links de Magic Link, Reset Password e Change Email ainda usam `ConfirmationURL` (mesmo risco com antivírus);
-  ficam como estão até aparecer um caso real.
+- Os outros 3 modelos também: Magic Link `?entrar=`, Reset Password `?nova-senha=` (tipo `recovery`, abre "Crie uma
+  senha nova"), Change Email `?trocar-email=` (tipo `email_change`; no primeiro dos dois links da troca segura pede
+  o outro endereço). Todos com `{{ .TokenHash }}` e tela de um toque (`GATE_LINK_KINDS` em `index.html`).
+  **Passo da autora**: colar de novo os 4 modelos depois do merge.
+- Aviso visual: a tela do código confere sozinha (a cada 15s e ao voltar para a aba) se a conta já foi ativada em
+  outra aba ou janela e mostra "Sua conta foi ativada! Entrando..." antes de seguir. Teste: 100/100
+  (`tests/login-obrigatorio/test_playwright.js`).
