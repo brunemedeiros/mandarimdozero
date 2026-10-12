@@ -61,7 +61,7 @@ const FLASHCARD_DIRECTION_LANGUAGE_LABELS = {
 async function renderAdminStudentsView(){
   const wrap = document.getElementById('admin-students-content');
   if (!wrap) return;
-  if (!isAdminUser()){
+  if (!isTeacherUser()){
     wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
@@ -102,8 +102,12 @@ async function renderAdminStudentsView(){
     <div class="admin-badge-desc" id="metrics-link-${s.id}" style="display:none; padding:10px 0 14px;"></div>
   `).join('') : `<p class="profile-empty-note">${t('admin.students.none')}</p>`;
 
+  // Criar vínculo direto é só da admin (policy da 076). A professora vai
+  // convidar o aluno, que aceita (etapa seguinte do plano).
+  const canLink = typeof isAdminUser === 'function' && isAdminUser();
   wrap.innerHTML = `
-    <div class="profile-section">
+    ${canLink ? '' : `<div class="profile-section"><div class="section-label">${t('admin.students.linkTitle')}</div><p class="panel-hint">${t('panel.students.inviteSoon')}</p></div>`}
+    <div class="profile-section" ${canLink ? '' : 'hidden'}>
       <div class="section-label">${t('admin.students.linkTitle')}</div>
       <form id="admin-assign-student-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-student-username">${t('admin.students.accountLabel')}</label>
@@ -133,7 +137,7 @@ async function renderAdminStudentsView(){
     usernameSelect.innerHTML = `<option value="" disabled selected>${t('admin.students.selectAccount')}</option>${opts}`;
   });
 
-  document.getElementById('admin-assign-student-form').addEventListener('submit', async (e) => {
+  if (canLink) document.getElementById('admin-assign-student-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('admin-assign-student-btn');
     const errorEl = document.getElementById('admin-assign-student-error');

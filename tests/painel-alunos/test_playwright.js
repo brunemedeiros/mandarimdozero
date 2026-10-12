@@ -67,7 +67,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
           { id: 1, student_id: 's1', username: 'al1', display_name: 'Aluno 1', language_app_key: appKey, status: 'active', created_at: new Date().toISOString() },
           { id: 2, student_id: 'p1', username: 'al2', display_name: 'Aluno PT', language_app_key: 'portugues', status: 'active', created_at: new Date().toISOString() }];
         fetchAllProfiles = async () => [];
-        switchTab('admin-badges'); switchAdminPanelSection('students');
+        switchTab('teacher-panel'); switchTeacherPanelSection('students');
       }, appKey);
       await page.waitForSelector('[data-toggle-metrics]');
       const open = async (n) => { await page.click(`[data-toggle-metrics="${n}"]`); await page.waitForFunction((n) => { const t = document.getElementById('metrics-link-' + n).textContent; return t && !t.includes('Carregando'); }, n); return page.evaluate((n) => document.getElementById('metrics-link-' + n).innerText, n); };

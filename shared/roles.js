@@ -39,6 +39,7 @@ async function fetchMyStudents(){
     .from('teacher_students')
     .select('*')
     .eq('teacher_id', CURRENT_USER.id)
+    .neq('status', 'removed')
     .order('created_at', { ascending: false });
   if (error){ console.error('Erro ao carregar alunos:', error); return []; }
   if (!links?.length) return [];
@@ -68,9 +69,18 @@ async function assignStudentToTeacher(studentUsername, languageAppKey){
     .from('teacher_students')
     .insert({ teacher_id: CURRENT_USER.id, student_id: target.user_id, language_app_key: languageAppKey });
   if (error){
-    if (error.code === '23505') return { ok: false, error: `@${target.username} já é sua aluna nesse idioma.` };
-    console.error('Erro ao vincular aluna:', error);
-    return { ok: false, error: 'Não foi possível vincular agora.' };
+    if (error.code === '23505'){
+      // Vínculo antigo marcado como 'removed' (a professora desvinculou): reativa o mesmo registro.
+      const { data: revived } = await supabaseClient
+        .from('teacher_students')
+        .update({ status: 'active' })
+        .eq('teacher_id', CURRENT_USER.id).eq('student_id', target.user_id).eq('language_app_key', languageAppKey).eq('status', 'removed')
+        .select('id');
+      if (!revived || !revived.length) return { ok: false, error: `@${target.username} já é sua aluna nesse idioma.` };
+    } else {
+      console.error('Erro ao vincular aluna:', error);
+      return { ok: false, error: 'Não foi possível vincular agora.' };
+    }
   }
   // Pedido da autora (ver CLAUDE.md) -- toda aluna vinculada ganha o badge
   // "Aluno/a da Prof. Brune" (badge_catalog, id='student') automaticamente,
@@ -89,8 +99,14 @@ async function assignStudentToTeacher(studentUsername, languageAppKey){
   return { ok: true, target };
 }
 
+// Desvincular nunca apaga progresso. A admin apaga o registro (como sempre);
+// a professora que não é admin só pode marcar 'removed' (policy da 076), o
+// que também guarda o histórico do vínculo.
 async function removeStudentLink(linkId){
-  const { error } = await supabaseClient.from('teacher_students').delete().eq('id', linkId);
+  const admin = typeof isAdminUser === 'function' && isAdminUser();
+  const { error } = admin
+    ? await supabaseClient.from('teacher_students').delete().eq('id', linkId)
+    : await supabaseClient.from('teacher_students').update({ status: 'removed' }).eq('id', linkId);
   return { ok: !error };
 }
 

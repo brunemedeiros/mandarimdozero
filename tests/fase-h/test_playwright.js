@@ -165,8 +165,8 @@ async function bootPage(browser, lang, port){
         { student_id: 'S2', username: 'bia', display_name: 'Bia', language_app_key: appKey, status: 'active' },
         { student_id: 'S3', username: 'cris', display_name: 'Cris', language_app_key: appKey, status: 'removed' }];
       window.__DB.teacher_flashcards.push({ id: 1, teacher_id: 'T', student_id: 'S1', language_app_key: appKey, status: 'active', front: 'hist', back_trans: 'hist', deck_id: null, revision: 0, created_at: '2026-01-01T00:00:00Z', tags: [] });
-      switchTab('admin-badges');
-      switchAdminPanelSection('flashcards');
+      switchTab('teacher-panel');
+      switchTeacherPanelSection('flashcards');
     }, [appKey, otherKey]);
     await page.waitForSelector('[data-student-checkbox]');
     L('H6 vínculo removido não aparece no seletor de alunos', await ev(() => ![...document.querySelectorAll('[data-student-row]')].some(r => r.textContent.includes('cris')) && document.querySelectorAll('[data-student-checkbox]').length === 3));
@@ -295,7 +295,7 @@ async function bootPage(browser, lang, port){
       CURRENT_USER = { id: 'T2' }; window.__uid = 'T2'; isAdminUser = () => true;
       window.__DB.teacher_students.push({ teacher_id: 'T2', student_id: 'S1', language_app_key: a, status: 'active' });
       fetchMyStudents = async () => [{ student_id: 'S1', username: 'ana', display_name: 'Ana', language_app_key: a, status: 'active' }];
-      switchTab('admin-badges'); switchAdminPanelSection('flashcards');
+      switchTab('teacher-panel'); switchTeacherPanelSection('flashcards');
     }, appKey);
     await page.waitForSelector('[data-student-checkbox]');
     await page.check('[data-student-checkbox][value="S1"]');

@@ -3571,6 +3571,92 @@ body.hide-pinyin .prompt-pinyin{
 .exercise-option:not(.correct):not(.incorrect):hover{ border-color:var(--paper-line); transform:none; }
 @media (hover:hover){
   .exercise-option:not(.disabled):not(.correct):not(.incorrect):hover{ border-color:var(--hover-gold); background:color-mix(in srgb, var(--hover-gold) 14%, var(--paper)); transform:translateY(-1px); }
+
+/* ---------- Painéis (Admin, Professora, Minhas aulas): passada de design 2026-10-12 ----------
+   Mesma linguagem da Revisão: seletor segmentado (.deck-topbar) numa linha, títulos de seção sem
+   caixa-alta, blocos em "papel" com borda fina, botões do tamanho do conteúdo no computador. */
+.panel-view .panel-nav{ margin-bottom:22px; }
+.panel-view .section-label, .panel-h{
+  font-size:15px; font-weight:800; text-transform:none; letter-spacing:0; color:var(--ink); margin:26px 0 8px;
+}
+.panel-view .panel-section:first-of-type .panel-h, .panel-view .profile-section:first-child .section-label{ margin-top:4px; }
+.panel-hint{ font-size:13px; color:var(--ink-soft); line-height:1.5; margin:0 0 12px; max-width:64ch; }
+.panel-view .profile-edit-hint{ max-width:64ch; }
+.panel-view .profile-edit-form{ max-width:560px; }
+.panel-section + .panel-section{ margin-top:30px; padding-top:20px; border-top:1px solid var(--paper-line); }
+.panel-view .profile-section{ margin-top:0; }
+.panel-view .profile-section + .profile-section{ margin-top:26px; }
+@media (min-width:640px){
+  .panel-view .btn-block{ width:auto; min-width:200px; padding-left:22px; padding-right:22px; align-self:flex-start; }
+}
+
+/* Sub-abas dentro de um painel (ex.: Analytics): sublinhadas, um nível abaixo do seletor principal. */
+.panel-view .leaderboard-tabs{ justify-content:flex-start; gap:0 4px; border-bottom:1px solid var(--paper-line); margin:14px 0 16px; }
+.panel-view .leaderboard-tab{ background:none; border:none; border-bottom:2px solid transparent; border-radius:0; padding:8px 10px; margin-bottom:-1px; font-weight:700; color:var(--ink-soft); }
+.panel-view .leaderboard-tab:hover{ color:var(--ink); }
+.panel-view .leaderboard-tab.active{ background:none; color:var(--ink); border-bottom-color:var(--seal-red); }
+@media (max-width:640px){
+  .panel-view .leaderboard-tabs{ flex-wrap:nowrap; overflow-x:auto; }
+  .panel-view .leaderboard-tab{ white-space:nowrap; min-height:44px; }
+}
+
+/* Planos: busca por nome/@ com sugestões */
+.plans-search{ position:relative; max-width:460px; }
+.plans-search-input{ width:100%; }
+.plans-search-list{
+  position:absolute; z-index:20; left:0; right:0; top:calc(100% + 4px); margin:0; padding:4px; list-style:none;
+  background:var(--paper); border:1px solid var(--paper-line); border-radius:12px; box-shadow:var(--shadow-card);
+  max-height:320px; overflow-y:auto;
+}
+.plans-option{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:9px; cursor:pointer; }
+.plans-option[aria-selected="true"], .plans-option:hover{ background:var(--paper-warm); }
+.plans-avatar{
+  flex-shrink:0; width:30px; height:30px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+  background:var(--paper-line); color:var(--ink); font-weight:800; font-size:13px;
+}
+.plans-avatar-lg{ width:40px; height:40px; font-size:16px; }
+.plans-option-text{ display:flex; flex-direction:column; min-width:0; flex:1; }
+.plans-option-name{ font-weight:700; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.plans-option-user{ font-size:12.5px; color:var(--ink-soft); }
+.plans-chip{ flex-shrink:0; font-size:11.5px; font-weight:700; color:var(--ink-soft); border:1px solid var(--paper-line); border-radius:999px; padding:2px 8px; }
+.plans-search-status{ font-size:12.5px; color:var(--ink-soft); margin:6px 0 0; min-height:1em; }
+.plans-account-card{ max-width:460px; margin-top:12px; }
+.plans-account-head{ justify-content:flex-start; gap:12px; }
+
+/* Planos: tabela de permissões (mesmo desenho da tabela de Decks) */
+.plans-matrix-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); }
+.plans-matrix{ width:100%; border-collapse:separate; border-spacing:0; }
+.plans-matrix tbody th{ min-width:150px; }
+.plans-matrix tbody th, .plans-matrix thead th:first-child{ position:sticky; left:0; z-index:1; background:var(--paper); }
+.plans-matrix th, .plans-matrix td{ padding:8px 6px; border-bottom:1px solid var(--paper-line); text-align:center; vertical-align:middle; }
+.plans-matrix th:first-child{ padding-left:12px; }
+.plans-matrix thead th{ font-size:12px; font-weight:600; color:var(--ink-soft); line-height:1.25; }
+.plans-matrix tbody th{ text-align:left; font-weight:600; font-size:13.5px; color:var(--ink); line-height:1.35; }
+.plans-matrix thead th:first-child{ text-align:left; }
+.plans-matrix tr:last-child th, .plans-matrix tr:last-child td{ border-bottom:none; }
+.plans-cell{ display:inline-flex; flex-direction:column; align-items:center; gap:6px; }
+.plans-cell input[type="checkbox"]{ width:18px; height:18px; accent-color:var(--seal-red); cursor:pointer; }
+.plans-limit{
+  width:64px; text-align:center; font:inherit; font-size:13px; padding:4px 6px; border:1px solid var(--paper-line); border-radius:8px;
+  background:var(--paper-warm); color:var(--ink);
+}
+.plans-limit:disabled{ opacity:.45; }
+.plans-cell.is-saved .plans-limit, .plans-cell.is-saved input[type="checkbox"]{ outline:2px solid color-mix(in srgb, var(--seal-red) 45%, transparent); outline-offset:2px; border-radius:4px; }
+
+/* Minhas aulas (aluno): uma linha por aula, data à esquerda */
+.class-log-list{ list-style:none; margin:0; padding:0; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); }
+.class-log-entry{ display:grid; grid-template-columns:120px 1fr; gap:16px; padding:14px 16px; }
+.class-log-entry + .class-log-entry{ border-top:1px solid var(--paper-line); }
+.class-log-date{ font-weight:800; color:var(--ink); font-size:14px; }
+.class-log-fields{ margin:0; display:flex; flex-direction:column; gap:8px; }
+.class-log-field dt{ font-size:12px; font-weight:700; color:var(--ink-soft); }
+.class-log-field dd{ margin:2px 0 0; color:var(--ink); line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+@media (max-width:640px){
+  .class-log-entry{ grid-template-columns:1fr; gap:6px; }
+  .plans-matrix{ min-width:520px; }
+  .plans-option, .plans-cell input[type="checkbox"]{ min-height:44px; }
+  .panel-view .panel-nav{ flex-wrap:nowrap; overflow-x:auto; max-width:100%; justify-content:flex-start; }
+  .panel-view .panel-nav .deck-topbar-btn{ white-space:nowrap; }
 }
 </style>
 </head>
@@ -3730,6 +3816,10 @@ body.hide-pinyin .prompt-pinyin{
       <button class="tab-btn" data-tab="settings">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.36a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.26.42.7.7 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z" fill="#14B8A6"/><circle cx="12" cy="12" r="3" fill="#0F766E"/></svg>
         <span data-i18n="settings.title" class="sidebar-label">Configurações</span>
+      </button>
+      <button class="tab-btn teacher-only-nav" data-tab="teacher-panel" style="display:none;">
+        <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M12 4 2 9l10 5 10-5-10-5z" fill="#2563EB"/><path d="M6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5l-6 3-6-3z" fill="#60A5FA"/><path d="M21 9v5" stroke="#1E40AF" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="sidebar-label" data-i18n="panel.teacher.nav">Professora</span>
       </button>
       <button class="tab-btn admin-only-nav" data-tab="admin-badges" style="display:none;">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z" fill="#7C3AED"/><path d="M9 12l2 2 4-4" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
@@ -3992,33 +4082,50 @@ body.hide-pinyin .prompt-pinyin{
   </div>
 
   <!-- ===== BADGES (ADMIN) ===== -->
-  <div class="view" id="view-admin-badges">
+  <div class="view panel-view" id="view-admin-badges">
     <div class="path-header">
       <h2 data-i18n="admin.reports.screen.admin_badges">Painel de Admin</h2>
-      <p data-i18n="admin.panel.sub">Badges especiais e métricas de uso da plataforma.</p>
+      <p data-i18n="panel.admin.sub">Badges, métricas, notificações, reports e planos.</p>
     </div>
-    <div class="leaderboard-tabs" role="tablist" aria-label="Seção do painel de admin" data-i18n-attr="aria-label:admin.panel.aria">
-      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-admin-section="badges" data-i18n="admin.panel.tab.badges">🎖️ Badges</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="analytics" data-i18n="admin.panel.tab.analytics">📊 Analytics</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="reports" data-i18n="admin.panel.tab.reports">⚑ Reports</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="students" data-i18n="admin.panel.tab.students">🎓 Alunos</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="flashcards" data-i18n="admin.panel.tab.flashcards">📇 Flashcards</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="classlogs" data-i18n="admin.panel.tab.classlogs">📝 Aulas</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="materials" data-i18n="admin.panel.tab.materials">📚 Material de apoio</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="premium" data-i18n="admin.panel.tab.premium">⭐ Premium</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="tags" data-i18n="admin.panel.tab.tags">🏷️ Tags</button>
+    <div class="deck-topbar panel-nav" role="tablist" aria-label="Seção do painel de admin" data-i18n-attr="aria-label:admin.panel.aria">
+      <button class="deck-topbar-btn is-active" role="tab" aria-selected="true" data-admin-section="badges" data-i18n="panel.tab.badges">Badges</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="analytics" data-i18n="panel.tab.analytics">Analytics</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="notifications" data-i18n="panel.tab.notifications">Notificações</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="reports" data-i18n="panel.tab.reports">Reports</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="premium" data-i18n="panel.tab.plans">Planos</button>
     </div>
     <div id="admin-badges-content"></div>
     <div id="admin-analytics-content" style="display:none;"></div>
     <div id="admin-notifications-content" style="display:none;"></div>
     <div id="admin-reports-content" style="display:none;"></div>
-    <div id="admin-students-content" style="display:none;"></div>
+    <div id="admin-premium-content" style="display:none;"></div>
+  </div>
+
+  <!-- ===== PAINEL DA PROFESSORA (papel Professora, migration 075/076; não depende do Admin Mode) ===== -->
+  <div class="view panel-view" id="view-teacher-panel">
+    <div class="path-header">
+      <h2 data-i18n="panel.teacher.title">Painel da professora</h2>
+      <p data-i18n="panel.teacher.sub">Seus alunos, os cartões e as aulas de cada um e os materiais que você compartilha.</p>
+    </div>
+    <div class="deck-topbar panel-nav" role="tablist" aria-label="Seção do painel da professora" data-i18n-attr="aria-label:panel.teacher.aria">
+      <button class="deck-topbar-btn is-active" role="tab" aria-selected="true" data-teacher-section="students" data-i18n="panel.tab.students">Alunos</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="flashcards" data-i18n="panel.tab.cards">Cartões</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="classlogs" data-i18n="panel.tab.classlogs">Aulas</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="materials" data-i18n="panel.tab.materials">Material de apoio</button>
+    </div>
+    <div id="admin-students-content"></div>
     <div id="admin-flashcards-content" style="display:none;"></div>
     <div id="admin-classlogs-content" style="display:none;"></div>
     <div id="admin-materials-content" style="display:none;"></div>
-    <div id="admin-premium-content" style="display:none;"></div>
-    <div id="admin-tags-content" style="display:none;"></div>
+  </div>
+
+  <!-- ===== MINHAS AULAS (aluno com vínculo ativo; só leitura, get_my_class_logs) ===== -->
+  <div class="view panel-view" id="view-my-class-logs">
+    <div class="path-header">
+      <h2 data-i18n="myClassLogs.title">Minhas aulas</h2>
+      <p data-i18n="myClassLogs.sub">O que você trabalhou em cada aula com sua professora.</p>
+    </div>
+    <div id="my-class-logs-content"></div>
   </div>
 
   <!-- ===== MEUS CARTÕES (Fase 5, aberta pra qualquer conta) ===== -->
@@ -4136,8 +4243,10 @@ body.hide-pinyin .prompt-pinyin{
   <button class="user-dropdown-item mais-extra-tab" id="user-profile-btn" data-i18n="menu.profile">👤 Meu perfil</button>
   <button class="user-dropdown-item mais-extra-tab mais-promoted-tab" id="mais-hanzi-btn" data-tab="hanzi">汉字</button>
   <button class="user-dropdown-item mais-extra-tab" id="leaderboard-btn" data-i18n="menu.ranking">🏆 Ranking</button>
-  <button class="user-dropdown-item" id="support-materials-btn" data-i18n="menu.supportMaterials">📚 Material de apoio</button>
+  <button class="user-dropdown-item student-teacher-nav" id="my-class-logs-btn" style="display:none;" data-i18n="myClassLogs.menu">📝 Minhas aulas</button>
+  <button class="user-dropdown-item student-teacher-nav" id="support-materials-btn" style="display:none;" data-i18n="menu.supportMaterials">📚 Material de apoio</button>
   <button class="user-dropdown-item mais-extra-tab" id="user-settings-btn" data-i18n="menu.settings">⚙️ Configurações</button>
+  <button class="user-dropdown-item teacher-only-nav mais-extra-tab" id="teacher-panel-btn" style="display:none;" data-i18n="panel.teacher.menu">🎓 Painel da professora</button>
   <button class="user-dropdown-item admin-only-nav mais-extra-tab" id="admin-badges-btn" style="display:none;" data-i18n="menu.admin">🛠️ Painel de Admin</button>
   <button class="user-dropdown-item" id="report-menu-btn" data-i18n="report.entry.menuItem">⚑ Reportar problema</button>
   <div class="user-dropdown-sep"></div>
@@ -4638,6 +4747,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/notification-preferences.js"></script>
 <script src="../shared/admin-badges.js"></script>
 <script src="../shared/roles.js"></script>
+<script src="../shared/permissions.js"></script>
 <script src="../shared/student-metrics.js"></script>
 <script src="../shared/admin-students.js"></script>
 <script src="../shared/admin-premium.js"></script>
@@ -4666,6 +4776,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/teacher-support-materials.js"></script>
 <script src="../shared/admin-support-materials.js"></script>
 <script src="../shared/support-materials-view.js"></script>
+<script src="../shared/teacher-panel.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
 <script src="../shared/my-flashcards.js"></script>

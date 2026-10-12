@@ -154,8 +154,8 @@ async function updateMaterialsSelectionDependentUI(){
 
   const subtitleEl = document.getElementById('admin-material-content-subtitle');
   if (subtitleEl) subtitleEl.textContent = selectedStudents.length === 1
-    ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
-    : selectedStudents.length > 1 ? ` -- ${tp('admin.common.selectedCount', selectedStudents.length)}` : '';
+    ? ` · ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
+    : selectedStudents.length > 1 ? ` · ${tp('admin.common.selectedCount', selectedStudents.length)}` : '';
 
   const contentHint = document.getElementById('admin-material-content-hint');
   if (contentHint) contentHint.style.display = selectedStudents.length ? 'none' : '';
@@ -185,7 +185,7 @@ function applyMaterialPickerFilters(wrap){
 async function renderAdminSupportMaterialsView(){
   const wrap = document.getElementById('admin-materials-content');
   if (!wrap) return;
-  if (!isAdminUser()){
+  if (!isTeacherUser()){
     wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
@@ -216,14 +216,14 @@ async function renderAdminSupportMaterialsView(){
   const studentCheckboxesHTML = students.map(s => `
     <label data-student-row data-lang="${s.language_app_key}" data-searchtext="${escapeHTML(`${s.display_name || ''} ${s.username || ''}`.toLowerCase())}" style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0; width:100%; box-sizing:border-box;">
       <input type="checkbox" data-material-student-checkbox value="${s.student_id}" ${ADMIN_MATERIALS_STATE.studentIds.has(s.student_id) ? 'checked' : ''}>
-      ${materialStudentLabel(s)} -- ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}
+      ${materialStudentLabel(s)} · ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}
     </label>
   `).join('');
 
   const newMaterialSubtitle = selectedStudents.length === 1
-    ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
+    ? ` · ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
     : selectedStudents.length > 1
-      ? ` -- ${tp('admin.common.selectedCount', selectedStudents.length)}`
+      ? ` · ${tp('admin.common.selectedCount', selectedStudents.length)}`
       : '';
 
   wrap.innerHTML = `
@@ -233,8 +233,8 @@ async function renderAdminSupportMaterialsView(){
       ${langFilterHTML}
       <input type="text" id="admin-material-search" class="profile-edit-input" placeholder="${t('admin.common.searchPlaceholder')}" autocomplete="off" style="margin-bottom:8px;">
       <div style="display:flex; gap:12px; margin-bottom:4px;">
-        <a href="#" id="admin-material-select-all" style="font-size:13px;">${t('publicProfile.selectAll')}</a>
-        <a href="#" id="admin-material-select-none" style="font-size:13px;">${t('publicProfile.clear')}</a>
+        <a href="#" id="admin-material-select-all" class="admin-select-link">${t('publicProfile.selectAll')}</a>
+        <a href="#" id="admin-material-select-none" class="admin-select-link">${t('publicProfile.clear')}</a>
       </div>
       <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:flex; flex-direction:column;">
         ${studentCheckboxesHTML}
