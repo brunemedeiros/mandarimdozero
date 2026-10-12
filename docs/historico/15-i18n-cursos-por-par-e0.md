@@ -210,3 +210,4 @@ Só front-end estático; **nenhuma migration**; **flag desligada para todos**: s
 - Atalho para a dona testar: abrir qualquer página com `?cursos=1` liga a flag só naquele navegador (`?cursos=0` desliga). Substitui o console do navegador.
 - Textos novos (confiança alta; a redação é da dona): `courses.first.title`, `courses.first.sub`. Código: `showFirstCoursePick` em `shared/my-courses.js`; gancho em `askUiLanguageOnFirstAccess` (`shared/auth.js`).
 - Teste: `tests/curso-progresso/test_portao_cursos_browser.js` (21: fr/zh x flag desligada/ligada, 390px, capturas claro/escuro, recarregar, atalho `?cursos=`).
+- Regressão do C6: 81 de 97 no lote; as 15 de sempre mais `tests/i18n/test_ui_language_confirm_browser.js` (1 check de temporização do aviso em inglês, falhou só no lote e passou 16/16 em duas rodadas isoladas; instável sob carga, como o `fase-j`). Teste novo `test_portao_cursos_browser.js` 21/21.
