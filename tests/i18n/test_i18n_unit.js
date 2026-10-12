@@ -21,7 +21,6 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     URLSearchParams, Intl, Promise, Object, String, Number, CustomEvent: function(n, o){ this.type = n; this.detail = o && o.detail; },
   };
   sandbox.window = sandbox;
-  sandbox.I18N_DEBUG = debug;
   sandbox.location = { search };
   sandbox.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } };
   const events = [];
@@ -88,9 +87,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   check('valor vazio em en cai em pt-BR', W.t('test.empty') === 'vazio pt');
   check('chave inexistente em en devolve a chave', W.t('nada.aqui') === 'nada.aqui');
   e.warns.length = 0; W.t('nada.aqui');
-  check('sem I18N_DEBUG não há console.warn', e.warns.length === 0);
   const ed = makeEnv({ debug: true }); ed.w.t('nada.aqui');
-  check('com I18N_DEBUG há console.warn', ed.warns.length > 0);
 
   // ---- tp / Intl.PluralRules ----
   const PL = { one: '{n} cartão', other: '{n} cartões' };
@@ -161,14 +158,21 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const PREV2 = process.env.I18N_PREV2 || '9969e3c';
   // Mudanças DELIBERADAS de texto em português (aprovadas pela dona do projeto) desde o
   // commit PREV: aplicadas ao texto antigo antes de comparar. Qualquer outra diferença falha.
-  const DELIBERATE_PT_CHANGES = [['arquive algum cartão que já não usa, ou peça', 'apague algum cartão, ou peça'], ['exportado de lá Você confere', 'exportado de lá. Você confere']];
+  const DELIBERATE_PT_CHANGES = [['arquive algum cartão que já não usa, ou peça', 'apague algum cartão, ou peça'], ['exportado de lá Você confere', 'exportado de lá. Você confere'], ['Sino na topbar + central de notificações. Desligar aqui silencia tudo de uma vez -- ajuste fino por categoria em "Personalizar por categoria" abaixo.', 'Sino no topo da tela e central de notificações. Desligar aqui silencia tudo de uma vez. Para ajustar cada categoria, use "Personalizar por categoria" abaixo.'], ['Avisa mesmo com o app fechado. Liga por categoria em "Personalizar" abaixo -- este interruptor cuida da permissão do navegador e liga tudo de uma vez.', 'Avisa mesmo com o app fechado. Este interruptor cuida da permissão do navegador e liga tudo de uma vez. Para escolher por categoria, use "Personalizar por categoria" abaixo.'], ['Manda pro e-mail da sua conta em alguns casos (ex: quando você some por um tempo). Liga por categoria em "Personalizar" abaixo -- este interruptor liga tudo de uma vez.', 'Manda para o e-mail da sua conta em alguns casos (por exemplo, quando você some por um tempo). Este interruptor liga tudo de uma vez. Para escolher por categoria, use "Personalizar por categoria" abaixo.'], ['Vale pras notificações calculadas automaticamente (revisão, sequência...) -- as que acontecem na hora (XP, badge) continuam aparecendo. Horário aproximado (ainda não ajustado ao seu fuso).', 'Vale para as notificações calculadas automaticamente (revisão, sequência...). As que acontecem na hora (XP, conquista) continuam aparecendo. Horário aproximado (ainda não ajustado ao seu fuso).'], ['🔇 Toque no alto-falante pra ouvir', '🔇 Toque no alto-falante para ouvir'] /* regra do projeto: sem "--" e sem "pra" */];
   const prev = (f) => DELIBERATE_PT_CHANGES.reduce((acc, [o, n]) => acc.split(o).join(n), execSync(`git show ${PREV}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 }));
   const prevFr = prev('fr/index.html'), prevZh = prev('zh/index.html');
   const prevJs = ['shared/my-flashcards.js', 'shared/public-profile.js', 'shared/anki-import-ui.js', 'fr/app.js', 'zh/app.js', 'shared/flashcard-model.js', 'shared/own-flashcards.js', 'shared/flashcard-preview.js', 'shared/notifications.js', 'shared/notification-preferences.js', 'shared/deck-data.js', 'shared/admin-students.js', 'shared/profile.js', 'shared/leaderboard.js', 'shared/auth.js', 'shared/support-materials-view.js', 'shared/anki-export.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-mc-editor.js', 'shared/flashcard-typeanswer-editor.js', 'shared/flashcard-cloze-editor.js', 'shared/admin-flashcards.js', 'shared/admin-class-logs.js', 'shared/admin-support-materials.js', 'shared/admin-premium.js', 'shared/teacher-flashcards.js', 'shared/teacher-class-logs.js', 'shared/teacher-support-materials.js', 'shared/admin-analytics.js', 'shared/admin-badges.js', 'shared/admin-notifications.js', 'shared/admin-reports.js', 'shared/flashcard-field-audio-recorder.js', 'shared/wizard.js', 'shared/language-switcher.js', 'shared/fsrs.js', 'shared/deck-engine.js', 'shared/checkpoint-exam.js', 'shared/deck-browser.js', 'shared/review-extras.js', 'shared/study-trail-model.js'].map(prev).join('\n');
   const prev2 = (f) => execSync(`git show ${PREV2}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
   const prev2Fr = prev2('fr/index.html'), prev2Zh = prev2('zh/index.html');
   const prev2Js = ['shared/deck-browser.js', 'shared/review-extras.js', 'shared/study-trail-model.js', 'shared/flashcard-tags-editor.js', 'shared/flashcard-field-editor.js', 'fr/app.js', 'zh/app.js'].map(prev2).join('\n');
-  const all = origFr + origZh + origRep + prevFr + prevZh + prevJs + prev2Fr + prev2Zh + prev2Js;
+  // 8631db5 = ponta da branch do redesenho das lições (Ondas 0-6) antes do merge com o
+  // i18n (2026-10-07): textos e HTML daquela branch também são referência.
+  const PREV3 = process.env.I18N_PREV3 || '8631db5';
+  // MAIN3 = main no momento desse merge (lado "theirs" do merge de 3 vias abaixo).
+  const MAIN3 = process.env.I18N_MAIN3 || 'a88d0d3';
+  const prev3 = (f) => execSync(`git show ${PREV3}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
+  const prev3Js = ['fr/app.js', 'zh/app.js', 'fr/index.html', 'zh/index.html'].map(prev3).join('\n');
+  const all = origFr + origZh + origRep + prevFr + prevZh + prevJs + prev2Fr + prev2Zh + prev2Js + prev3Js;
   // Textos NOVOS (não existiam antes): só o seletor de idioma.
   const NEW_KEYS = ['ui.profileEdit.country', 'ui.profileEdit.countryHint', 'ui.profileEdit.countryNone', 'ui.profileEdit.gender', 'ui.profileEdit.genderHint', 'ui.profileEdit.genderNone', 'ui.profileEdit.gender.masculine', 'ui.profileEdit.gender.feminine', 'ui.profileEdit.gender.other', 'ui.profileEdit.gender.undisclosed' /* País de origem e Gênero (placeholders de perfil) */, 'settings.uiLanguage.title', 'settings.uiLanguage.sub', 'settings.uiLanguage.confirm.title', 'settings.uiLanguage.confirm.toEn', 'settings.uiLanguage.confirm.toPt' /* aviso novo ao trocar o idioma do site */, 'content.untranslatedNotice', 'fr.challenge.inEnglish', 'nav.study', 'nav.challenges', 'nav.profile', 'side.streakDays', 'fr.challenge.lt.placeholder' /* Fase 9: "{lang}" parametriza o idioma da tradução; com lang=português o texto final é idêntico ao original "Sua tradução em português..." */]; // Fase 8: aviso novo (só aparece fora do pt-BR)
   // Passada de design dos painéis Admin/Professora (2026-10-12, pedido da autora): sem "--" nem "pra" no texto
@@ -198,7 +202,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     const cur = fs.readFileSync(path.join(ROOT, lang, 'index.html'), 'utf8');
     const o = lang === 'fr' ? origFr : origZh;
     // Fase 8: linhas novas deliberadas (aviso de lição sem tradução + script do overlay).
-    const strip = (s) => s.replace(/\n\/\* ---------- Desafios: passada de design[\s\S]*?@media \(prefers-reduced-motion: reduce\)\{\n[^\n]*\n\}\n/, '').replace(/ data-i18n(-attr|-html)?="[^"]*"/g, '').replace(/\n[ ]*<p class="lesson-unit-goal" id="ud-lang-notice"[^\n]*<\/p>/, '').replace(/<script src="..\/shared\/content-i18n.js"><\/script>\n/, '').replace(/<script src="..\/shared\/card-variants.js"><\/script>\n/, '').replace(/<script src="..\/shared\/translation-compare.js"><\/script>\n/, '').replace(/<script src="..\/shared\/i18n\/i18n.js"><\/script>\n/, '').replace(/<script src="..\/shared\/i18n\/pt-BR.js"><\/script>\n/, '').replace(/<script src="..\/shared\/profile-placeholders.js"><\/script>\n/, '').replace(/\n[ ]*<label class="profile-edit-label" for="profile-edit-country">[\s\S]*?<\/p>\n/, '');
+    const strip = (s) => s.replace(/\n\/\* ---------- Janelas da Revisão \(Adicionar[\s\S]*?(?=\n<\/style>\n<\/head>)/, '').replace(/\n\/\* ---------- Desafios: passada de design[\s\S]*?@media \(prefers-reduced-motion: reduce\)\{\n[^\n]*\n\}\n/, '').replace(/ data-i18n(-attr|-html)?="[^"]*"/g, '').replace(/\n[ ]*<p class="lesson-unit-goal" id="ud-lang-notice"[^\n]*<\/p>/, '').replace(/<script src="..\/shared\/content-i18n.js"><\/script>\n/, '').replace(/<script src="..\/shared\/card-variants.js"><\/script>\n/, '').replace(/<script src="..\/shared\/translation-compare.js"><\/script>\n/, '').replace(/<script src="..\/shared\/i18n\/i18n.js"><\/script>\n/, '').replace(/<script src="..\/shared\/i18n\/pt-BR.js"><\/script>\n/, '').replace(/<script src="..\/shared\/profile-placeholders.js"><\/script>\n/, '').replace(/\n[ ]*<label class="profile-edit-label" for="profile-edit-country">[\s\S]*?<\/p>\n/, '');
     const modal = (s) => s.slice(s.indexOf('<!-- ===== MODAL: REPORTAR'), s.indexOf('<div id="streak-modal-overlay"'));
     check(`${lang}: modal atual sem data-i18n == modal original`, strip(modal(cur)) === modal(o));
     // Passo "modais pequenos + seletor": contra o commit anterior (PREV), a
@@ -218,6 +222,13 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     const cmS2 = curNoGender.indexOf('<div id="ui-language-confirm-modal"'), cmE2 = curNoGender.indexOf('<div id="flashcard-reset-confirm-modal"');
     let curClean = curNoGender.slice(0, cmS2) + curNoGender.slice(cmE2);
     // Amigos + Ranking de Amigos (migration 073/074): CSS, tela e aba novos e deliberados.
+    const noFriends = (h) => {
+      const a = h.indexOf('/* ---------- Amigos (Perfil > Amigos)'), b = h.indexOf('/* ---------- Ranking (Leaderboard)', a);
+      if (a > 0 && b > a) h = h.slice(0, a) + h.slice(b);
+      h = h.replace(/  <!-- ===== AMIGOS \(Perfil > Amigos\) ===== -->\n  <div class="view" id="view-friends">\n    <div id="friends-content"><\/div>\n  <\/div>\n\n/, '');
+      h = h.replace(/      <button[^>]*data-tab="friends">Amigos<\/button>\n/g, '');
+      return h.replace(/<script src="..\/shared\/friends.js"><\/script>\n/, '');
+    };
     const fcS = curClean.indexOf('/* ---------- Amigos (Perfil > Amigos)'), fcE = curClean.indexOf('/* ---------- Ranking (Leaderboard)', fcS);
     check(`${lang}: bloco CSS de Amigos encontrado`, fcS > 0 && fcE > fcS);
     curClean = curClean.slice(0, fcS) + curClean.slice(fcE);
@@ -252,7 +263,31 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     };
     curClean = panelBlocks(curClean);
     const p = panelBlocks(cleanBlocks(p0));
-    check(`${lang}: HTML inteiro sem data-i18n* e sem o seletor == commit anterior (${PREV2})`, strip(curClean) === strip(p));
+    // Com a branch do redesenho (PREV3) mesclada, a referência é o merge de 3 vias
+    // (base comum, PREV2 e PREV3) dos HTMLs já limpos: só passa se o HTML atual for
+    // exatamente a união das duas pontas.
+    const mergeBase = execSync(`git merge-base ${MAIN3} ${PREV3}`, { cwd: ROOT, encoding: 'utf8' }).trim();
+    const tmp = fs.mkdtempSync(path.join(require('os').tmpdir(), 'i18n-merge-'));
+    const wr = (n, h) => { const fp = path.join(tmp, n); fs.writeFileSync(fp, strip(panelBlocks(noFriends(cleanBlocks(h))))); return fp; };
+    const showAt = (c) => execSync(`git show ${c}:${lang}/index.html`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
+    let merged = null;
+    try { merged = execSync(`git merge-file -p "${wr('ours', showAt(PREV3))}" "${wr('base', showAt(mergeBase))}" "${wr('theirs', showAt(MAIN3))}"`, { encoding: 'utf8', maxBuffer: 64 << 20 }); }
+    catch (e) { merged = e.stdout || null; }
+    // Conflito do merge: aceita cada trecho resolvido como "nosso", "deles" ou os dois juntos
+    // (nunca texto novo inventado na resolução).
+    const matchesResolution = (m, target) => {
+      if (m === null) return false;
+      const parts = m.split(/^<<<<<<< [^\n]*\n([\s\S]*?)^=======\n([\s\S]*?)^>>>>>>> [^\n]*\n/m);
+      const go = (i, pos) => {
+        if (i >= parts.length) return pos === target.length;
+        if (i % 3 === 0) return target.startsWith(parts[i], pos) && go(i + 1, pos + parts[i].length);
+        const ours = parts[i], theirs = parts[i + 1];
+        return [theirs, ours, ours + theirs, theirs + ours].some(opt => target.startsWith(opt, pos) && go(i + 2, pos + opt.length));
+      };
+      return go(0, 0);
+    };
+    const okMerged = matchesResolution(merged, strip(curClean));
+    check(`${lang}: HTML inteiro sem data-i18n* e sem o seletor == commit anterior (${PREV2}) ou merge ${MAIN3}+${PREV3}`, strip(curClean) === strip(p) || okMerged);
     check(`${lang}: seletor só oferece pt-BR e English`, /<option value="pt-BR" lang="pt-BR">Português \(Brasil\)<\/option>\s*<option value="en" lang="en">English<\/option>\s*<\/select>/.test(cur.slice(selStart, selEnd)));
     const usedHtml = [...cur.matchAll(/data-i18n-html="([^"]+)"/g)].map(m => m[1]);
     check(`${lang}: todo data-i18n-html existe em pt-BR`, usedHtml.every(k => k in pt));

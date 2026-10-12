@@ -141,14 +141,14 @@ window.I18N_CATALOG['en'] = {
   'notif.pref.loadFailed': 'Could not load your preferences right now.', // ALTA
   'notif.pref.sectionTitle': 'Notifications', // ALTA
   'notif.pref.inApp.title': 'In-app notifications', // ALTA
-  'notif.pref.inApp.sub': 'Bell in the top bar + notification center. Turning this off silences everything at once -- fine-tune by category under "Customize by category" below.', // ALTA
+  'notif.pref.inApp.sub': 'Bell at the top of the screen and notification center. Turning this off silences everything at once. To adjust each category, use "Customize by category" below.', // ALTA
   'notif.pref.push.title': 'Browser alerts (push)', // ALTA
-  'notif.pref.push.sub': 'Notifies you even when the app is closed. Turn on by category under "Customize" below -- this switch handles the browser permission and turns everything on at once.', // MÉDIA
+  'notif.pref.push.sub': 'Notifies you even when the app is closed. This switch handles the browser permission and turns everything on at once. To choose by category, use "Customize by category" below.', // MÉDIA
   'notif.pref.email.title': 'Emails', // ALTA
-  'notif.pref.email.sub': 'Sends to your account email in some cases (e.g., when you disappear for a while). Turn on by category under "Customize" below -- this switch turns everything on at once.', // MÉDIA
+  'notif.pref.email.sub': 'Sends to your account email in some cases (for example, when you disappear for a while). This switch turns everything on at once. To choose by category, use "Customize by category" below.', // MÉDIA
   'notif.pref.quiet.section': 'Quiet hours', // ALTA
   'notif.pref.quiet.title': 'Do not notify between', // ALTA
-  'notif.pref.quiet.sub': 'Applies to automatically calculated notifications (review, streak...) -- instant ones (XP, badge) still appear. Approximate time (not yet adjusted to your time zone).', // MÉDIA
+  'notif.pref.quiet.sub': 'Applies to automatically calculated notifications (review, streak...). Instant ones (XP, badge) still appear. Approximate time (not yet adjusted to your time zone).', // MÉDIA
   'notif.pref.quiet.startAria': 'Start of quiet hours', // ALTA
   'notif.pref.quiet.endAria': 'End of quiet hours', // ALTA
   'notif.pref.quiet.until': 'to', // ALTA
@@ -304,7 +304,7 @@ window.I18N_CATALOG['en'] = {
   'myFlashcards.free.hint': '🔒 On the free plan you create Normal cards, with image/audio upload per field (external URL also available). <strong>Premium</strong> unlocks Normal with reverse, Multiple choice, Fill in the blank, Type the answer, plus generating audio from text and recording audio with the microphone.', // MÉDIA
   'myFlashcards.cardType': 'Card type', // ALTA
   'myFlashcards.fields.title': 'Fields', // ALTA
-  'myFlashcards.fields.hint': 'Add this card\'s fields -- for example, Front and Back for a Normal card. Each field has its own language and its own audio options.', // ALTA
+  'myFlashcards.fields.hint': 'Add this card\'s fields, for example Front and Back for a Normal card. Each field has its own language and its own audio options.', // ALTA
   'myFlashcards.preview': '👁️ Preview', // ALTA
   'myFlashcards.deckDest': 'Destination Deck', // ALTA
   'myFlashcards.note.label': 'Note (optional)', // ALTA
@@ -1961,6 +1961,11 @@ window.I18N_CATALOG['en'] = {
   'ui.zh.searchPh': 'Search by pinyin, hanzi or translation...', // ALTA
   'feedback.almostArrow': 'Almost! → {expected}', // ALTA
   'feedback.correctAnswerColon': 'Correct answer:', // ALTA
+  'feedback.label.yourAnswer': 'Your answer', // ALTA
+  'lesson.step.dialogueCheck': 'Did you understand?', // ALTA
+  'lesson.vocabDots.aria': 'Word {pos} of {total}', // ALTA
+  'zh.exercise.translateToChinese': 'Translate into Chinese', // ALTA
+  'zh.reorder.tapHint': 'Tap the blocks in the right order. Tap a placed one to send it back.', // ALTA
   'feedback.whereSeen': 'Where you saw this before', // ALTA
   'feedback.header.revealed': '👀 Answer revealed', // ALTA
   'feedback.header.notThisTime': '❌ Not this time', // ALTA
