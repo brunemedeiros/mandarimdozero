@@ -675,6 +675,8 @@ window.I18N_CATALOG['en'] = {
   'review.deck.lang.portugues': 'Portuguese', // ALTA -- Revisão nova
   'review.deck.lang.fallback': 'Language', // ALTA -- Revisão nova
   'review.deck.myDecks': 'My Decks', // ALTA -- Revisão nova
+  'review.observation': 'Note from your teacher',
+  'review.almost': 'Almost there',
   'review.deck.teacherCards': 'Teacher\'s cards', // MÉDIA -- Revisão nova
   'review.deck.studyPath': 'Study Path', // MÉDIA -- Revisão nova
   'review.deck.allDecks': 'All Decks', // ALTA -- Revisão nova
@@ -1378,7 +1380,7 @@ window.I18N_CATALOG['en'] = {
   'admin.flashcards.edit.err.answer': 'Enter the correct answer.', // ALTA
   'admin.flashcards.edit.err.pinyin': 'Enter the answer pinyin.', // ALTA
   'admin.flashcards.edit.err.trans': 'Enter the translation.', // ALTA
-  'admin.flashcards.native.privateNote': 'Note (private -- the student never sees it)', // ALTA
+  'admin.flashcards.native.privateNote': 'Notes (the student sees them after answering)', // ALTA
   'admin.flashcards.dest.rootDefault': 'Teacher cards (default)', // ALTA
   'admin.flashcards.dest.noDeck': '📂 <em>no Deck (card created before Decks)</em> · ', // ALTA
   'admin.flashcards.dest.deckFallback': 'Deck', // ALTA

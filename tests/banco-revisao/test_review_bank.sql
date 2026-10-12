@@ -77,6 +77,16 @@ do $$ begin insert into review_bank_recaps(teacher_id, bank_student_id, language
 insert into review_bank_settings(teacher_id, auto_generate, manual_markdown) values ('00000000-0000-0000-0000-00000000000d', true, '# Manual');
 insert into r select 'professora grava respostas (inclusive de aluno sem conta), recap e manual', (select count(*) from review_bank_reviews)=3 and (select count(*) from review_bank_recaps)=1 and (select count(*) from review_bank_settings)=1, '';
 
+-- 083: agendamento do Récap e modo da resposta
+update review_bank_items set level = 2, due_date = '2026-10-20', last_result = 'acertou', last_review_date = '2026-10-12' where id = '11111111-1111-1111-1111-111111111111';
+insert into r select 'item guarda nivel, proxima data e ultimo resultado', (select level=2 and due_date='2026-10-20' and last_result='acertou' from review_bank_items where id='11111111-1111-1111-1111-111111111111'), '';
+do $$ begin update review_bank_items set last_result = 'talvez' where id = '11111111-1111-1111-1111-111111111111';
+ insert into r values ('ultimo resultado invalido bloqueado', false, 'passou'); exception when others then insert into r values ('ultimo resultado invalido bloqueado', true, sqlerrm); end $$;
+update review_bank_reviews set mode = 'recap' where outcome = 'errou';
+do $$ begin update review_bank_reviews set mode = 'prova' where outcome = 'errou';
+ insert into r values ('modo de resposta invalido bloqueado', false, 'passou'); exception when others then insert into r values ('modo de resposta invalido bloqueado', true, sqlerrm); end $$;
+insert into r select 'resposta guarda modo e data', (select count(*)=1 from review_bank_reviews where mode='recap' and review_date is not null), '';
+
 select pg_temp.u('00000000-0000-0000-0000-00000000000e','e@x.com');
 insert into r select 'aluna nao le nada do Banco (itens, recaps, respostas, alunos, config)',
   (select count(*) from review_bank_items)=0 and (select count(*) from review_bank_recaps)=0 and (select count(*) from review_bank_reviews)=0

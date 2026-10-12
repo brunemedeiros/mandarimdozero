@@ -1785,6 +1785,10 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .flashcard-hint{ position:absolute; bottom:16px; font-size:12px; color: var(--ink-soft); opacity:.7; }
 .flashcard .divider-line{ width:40px; height:3px; background:var(--paper-line); border-radius:2px; margin: 16px 0; }
 
+/* Observação da professora (depois de responder) e "Quase lá" (digitar) -- Banco de Revisão */
+.review-observation{ display:flex; flex-direction:column; gap:2px; margin:12px 0; padding:10px 14px; background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:var(--radius); color:var(--ink); font-size:14px; line-height:1.45; text-align:left; white-space:pre-line; }
+.review-observation strong{ font-size:12px; font-weight:800; color:var(--ink-soft); }
+.review-almost{ margin:10px 0 0; text-align:center; font-weight:800; font-size:14px; color:var(--ink); }
 .grade-buttons{ display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:18px; }
 .grade-btn{
   padding: 12px 6px; border-radius:12px; border:none; cursor:pointer; font-family:var(--font-body);
@@ -5094,6 +5098,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/flashcard-native-persistence.js"></script>
 <script src="../shared/anki-parser.js"></script>
 <script src="../shared/anki-import.js"></script>
+<script src="../shared/review-answer-extras.js"></script>
+<script src="../shared/review-bank-student.js"></script>
 <script src="../shared/flashcard-preview.js"></script>
 <script src="../shared/teacher-flashcards.js"></script>
 <script src="../shared/admin-flashcards.js"></script>

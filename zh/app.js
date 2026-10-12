@@ -1145,6 +1145,7 @@ async function loadStateAndRender(){
   await mergeTeacherFlashcardsIntoState();
   await mergeSelfFlashcardsIntoState();
   await loadState();
+  if (typeof applyPendingBankReviews === 'function') await applyPendingBankReviews();
   // Fase 10: aplica a preferência de frequência de revisão (padrão ou
   // salva) no motor FSRS -- precisa rodar antes de qualquer grading real.
   setDesiredRetention(reviewFrequencyToRetention(STATE.studySettings.reviewFrequency));
@@ -7057,7 +7058,7 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
         return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${mark}${escapeHTML(opt.text)}</button>`;
       }).join('')}
     </div>
-    ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}</button>` : ''}
+    ${answered ? `${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}</button>` : ''}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -7158,7 +7159,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
         ${pinyinTonePickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `${toneHintHTML(localState)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${toneHintHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
   `;
 
   wireCustomAudioButtons(mountEl);
@@ -7241,7 +7242,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
         ${pinyinTonePickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `${toneHintHTML(localState)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${toneHintHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -7523,6 +7524,7 @@ function renderNormalCard(mountEl, card, localState, callbacks){
       ` : `<div class="flashcard-hint">${t('review.tapToReveal')}</div>`}
     </div>
     ${localState.revealed ? `
+      ${reviewObservationHTML(card)}
       ${gradeButtonsHTML(card)}
     ` : ''}
   `;
