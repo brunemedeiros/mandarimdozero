@@ -287,3 +287,7 @@ Sem teste hoje: stats `not_public`, tela do perfil privado, exceções de amigo/
   painel-alunos 48, fase-i 48, anki-destino 38, i18n 2036. Testes antigos ajustados de propósito: amigos (busca por
   nome de conta privada), Deck público SQL (visitante sem login) e Playwright ("Publicar" virou "🔒 Privado",
   campos em "Editar página do Deck"), deck-browser (rótulo do botão).
+
+### Publicação (2026-10-12)
+PR #304 mergeado e publicado (convite, Fase K final, login obrigatório, e-mails, perfil privado); em seguida a 080
+foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural.
