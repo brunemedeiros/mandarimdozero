@@ -229,3 +229,12 @@ Furos em relação às decisões da tabela acima:
 6. Textos de publicar estão fixos em português (sem `t()`); subtítulo da chave do perfil fala de "cartões próprios"
    (seção desligada).
 Sem teste hoje: stats `not_public`, tela do perfil privado, exceções de amigo/professora.
+
+### Respostas da autora à auditoria (2026-10-12)
+- Fechar a leitura aberta de `profiles` e abrir só o necessário por funções: **sim**.
+- Deck nasce público em conta pública: **sim** (confirmado).
+- País é dado sensível (fecha). **Plano e papel ficam públicos** (estimulam: Premium, Professora).
+- Proposta nova da autora: **fechar o acesso de convidado** (site exige login, como o Duolingo), melhorar o login
+  com confirmação por e-mail/SMS e deixar o modo sem login só para o sistema (testes e capturas de tela).
+  Com isso a pergunta "ranking para visitante sem login" deixa de existir.
+- Dados de produção: 1 Deck criado por usuário (1 conta), 13 "Meus Decks" automáticos, 7 cartões próprios de 2 contas.
