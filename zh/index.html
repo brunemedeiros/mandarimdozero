@@ -3373,6 +3373,113 @@ body.hide-pinyin .prompt-pinyin{
   .deck-topbar-btn{ padding:8px 9px; font-size:13.5px; }
   .deck-topbar .deck-more-menu > summary.deck-topbar-more{ padding:8px 8px; }
 }
+/* ---------- Janelas da Revisão (Adicionar, Painel, Configurar, Exportar) ----------
+   Rótulos em tom de frase (sem caixa alta) e o campo do cartão desenhado
+   como uma ficha pautada: linha vermelha no topo e pauta no texto. */
+/* Campo do editor de cartão: visual base, vale em qualquer tela. */
+.field-editor-row{ border:1px solid var(--paper-line); border-radius:var(--radius); padding:10px; margin-bottom:8px; }
+.field-editor-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
+.field-editor-title{ margin:0; }
+.field-audio-block{ margin-top:6px; padding-top:6px; border-top:1px dashed var(--paper-line); }
+.field-audio-title{ display:block; margin:0 0 6px; }
+.field-audio-summary audio{ width:100%; margin-bottom:6px; }
+.field-audio-status{ margin:0 0 8px; }
+.field-audio-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+.deck-window .app-modal-header{ padding:16px 22px; }
+.deck-window .app-modal-header h3{ font-size:18px; font-weight:800; letter-spacing:-.01em; }
+.deck-window .app-modal-body{ padding:18px 22px 22px; }
+.deck-window-sm{ max-width:520px; }
+.deck-window .section-label{ text-transform:none; letter-spacing:0; font-size:14px; font-weight:800; color:var(--ink); }
+.deck-window .pill{ text-transform:none; letter-spacing:0; font-size:12.5px; font-weight:700; }
+.deck-window .profile-edit-label{ font-size:12.5px; }
+
+/* Adicionar */
+.add-card-modal .app-modal-body{ container-type:inline-size; }
+#add-card-modal-body > .section-label:first-child{ margin:0 0 14px; min-height:0; }
+#add-card-modal-body > .section-label:first-child > span:first-child{ display:none; }
+.add-card-meta{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; }
+.add-card-meta .profile-edit-input{ margin-bottom:0; }
+.add-card-fields-title{ margin:22px 0 2px; }
+.add-card-fields-hint{ margin:0 0 12px; }
+@container (max-width: 479px){ .add-card-meta{ grid-template-columns:minmax(0, 1fr); } }
+
+/* Campo = ficha pautada */
+.deck-window .field-editor-row{
+  padding:12px 14px 14px; margin-bottom:14px; border-radius:4px 4px 12px 12px;
+  background:var(--paper); border:1px solid var(--paper-line);
+  box-shadow:0 1px 0 var(--paper-line), 0 4px 0 -2px var(--paper), 0 5px 0 -2px var(--paper-line);
+}
+.deck-window .field-editor-head{
+  margin:0 0 10px; padding-bottom:7px;
+  border-bottom:2px solid color-mix(in srgb, var(--error-red, var(--seal-red)) 55%, transparent);
+}
+.deck-window .field-editor-title{ font-size:13.5px; }
+.deck-window .field-editor-row [data-field-content]{
+  font-size:17px; line-height:28px; padding:2px 10px; min-height:60px; resize:vertical;
+  border-color:transparent; border-radius:6px; background-color:transparent;
+  background-image:repeating-linear-gradient(to bottom, transparent 0 27px, color-mix(in srgb, var(--ink-soft) 22%, transparent) 27px 28px);
+  background-attachment:local;
+}
+.deck-window .field-editor-row [data-field-content]:hover{ border-color:var(--paper-line); }
+.deck-window .field-editor-row [data-field-content] + .profile-edit-label{ margin-top:10px; }
+.deck-window .field-editor-head + .profile-edit-label{ margin-top:0; }
+.deck-window .field-audio-block{ margin-top:12px; padding-top:0; border-top:none; }
+.deck-window .field-audio-title{ margin:0 0 4px; font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+.deck-window .field-audio-summary{ display:flex; align-items:center; gap:6px 12px; flex-wrap:wrap; }
+.deck-window .field-audio-summary audio{ flex:1 1 100%; margin:0; }
+.deck-window .field-audio-status{ margin:0; }
+.deck-window .field-audio-actions .btn{ padding:7px 14px; font-size:13px; }
+.deck-window .field-image-block{ margin-top:8px; }
+.deck-panel-editor{ container-type:inline-size; }
+/* Com espaço, Idioma e Áudio dividem a mesma linha embaixo do texto. */
+@container (min-width: 480px){
+  .deck-window .field-editor-row{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); column-gap:16px; align-items:start; }
+  .deck-window .field-editor-row > *{ grid-column:1 / -1; }
+  .deck-window .field-editor-row > label[for*="-lang-"]{ grid-column:1; grid-row:4; }
+  .deck-window .field-editor-row > select[data-field-lang]{ grid-column:1; grid-row:5; }
+  .deck-window .field-editor-row > .field-audio-block{ grid-column:2; grid-row:4 / span 2; margin-top:10px; }
+  .deck-window .field-editor-row > .field-audio-block[data-field-audio-ui-state="picker"],
+  .deck-window .field-editor-row > .field-audio-block[data-field-audio-ui-state="panel"]{ grid-column:1 / -1; grid-row:auto; }
+}
+
+/* Painel: grupos da lateral e cabeçalho do editor também sem caixa alta. */
+.deck-window .deck-panel-side-label{ text-transform:none; letter-spacing:0; font-size:12.5px; font-weight:800; padding:6px 10px 4px; }
+.deck-window .native-edit-title{ font-size:15px; }
+
+/* Configurar: rótulo à esquerda, escolha à direita. */
+.review-settings-modal .app-modal-body{ container-type:inline-size; }
+.review-settings-modal .review-settings-panel{ display:grid; grid-template-columns:minmax(0, 1fr); row-gap:6px; }
+.review-settings-modal #review-origin-select-wrap:not([hidden]){ display:contents; }
+.review-settings-modal .review-settings-panel .section-label{ margin:10px 0 0; }
+.review-settings-modal .review-settings-panel .section-label:first-child,
+.review-settings-modal #review-origin-select-wrap:not([hidden]) > .section-label{ margin-top:0; }
+.review-settings-modal .review-settings-select{ max-width:none; font-size:14px; padding:10px 12px; }
+@container (min-width: 440px){
+  .review-settings-modal .review-settings-panel{ grid-template-columns:minmax(0, .8fr) minmax(0, 1.2fr); column-gap:18px; row-gap:14px; align-items:center; }
+  .review-settings-modal .review-settings-panel .section-label,
+  .review-settings-modal .review-settings-select{ margin:0; }
+}
+
+/* Exportar: duas escolhas lado a lado. */
+.export-choices{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin:14px 0 0; }
+.export-choices .btn{ padding:16px 12px; font-size:14.5px; }
+#my-flashcards-export-feedback:empty{ display:none; }
+@media (max-width:420px){ .export-choices{ grid-template-columns:minmax(0, 1fr); } }
+
+/* Criar, Renomear e Excluir Deck */
+.deck-inline-form, .deck-delete-dialog{ max-width:460px; margin:14px auto 0; padding:16px 18px; border-radius:var(--radius); box-shadow:var(--shadow-card); }
+.deck-inline-form{ border:1px solid var(--paper-line); background:var(--paper); }
+.deck-inline-title{ margin:0 0 6px; font-size:15.5px; font-weight:800; color:var(--ink); }
+.deck-inline-form .deck-inline-title + .profile-edit-label{ margin-top:8px; }
+.deck-inline-actions{ margin-top:14px; }
+.deck-delete-dialog{ border:1px solid color-mix(in srgb, var(--error-red, var(--seal-red)) 45%, var(--paper-line)); background:color-mix(in srgb, var(--error-red, var(--seal-red)) 6%, var(--paper)); }
+.deck-delete-dialog .profile-edit-error:empty{ display:none; }
+.deck-delete-dialog{ max-width:none; }
+.deck-inline-actions .btn{ padding:10px 14px; font-size:13.5px; }
+.deck-delete-confirm{ background:var(--error-red, var(--seal-red)); color:var(--on-vivid); border:1px solid var(--error-red, var(--seal-red)); }
+.deck-delete-confirm:hover{ filter:brightness(1.06); }
+.deck-overview-danger{ color:var(--error-red, var(--seal-red)); }
 </style>
 </head>
 <body>

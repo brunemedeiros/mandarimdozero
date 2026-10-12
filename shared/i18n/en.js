@@ -304,7 +304,7 @@ window.I18N_CATALOG['en'] = {
   'myFlashcards.free.hint': '🔒 On the free plan you create Normal cards, with image/audio upload per field (external URL also available). <strong>Premium</strong> unlocks Normal with reverse, Multiple choice, Fill in the blank, Type the answer, plus generating audio from text and recording audio with the microphone.', // MÉDIA
   'myFlashcards.cardType': 'Card type', // ALTA
   'myFlashcards.fields.title': 'Fields', // ALTA
-  'myFlashcards.fields.hint': 'Add this card\'s fields -- for example, Front and Back for a Normal card. Each field has its own language and its own audio options.', // ALTA
+  'myFlashcards.fields.hint': 'Add this card\'s fields, for example Front and Back for a Normal card. Each field has its own language and its own audio options.', // ALTA
   'myFlashcards.preview': '👁️ Preview', // ALTA
   'myFlashcards.deckDest': 'Destination Deck', // ALTA
   'myFlashcards.note.label': 'Note (optional)', // ALTA

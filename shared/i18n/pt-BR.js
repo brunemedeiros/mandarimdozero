@@ -320,7 +320,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'myFlashcards.free.hint': '🔒 No plano grátis você cria cartões do tipo Normal, com upload de imagem/áudio por campo (URL externa também disponível). <strong>Premium</strong> desbloqueia Normal com reverso, Múltipla escolha, Completar a frase, Digite a resposta, além de gerar áudio por texto e gravar áudio pelo microfone.',
   'myFlashcards.cardType': 'Tipo de cartão',
   'myFlashcards.fields.title': 'Campos',
-  'myFlashcards.fields.hint': 'Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.',
+  'myFlashcards.fields.hint': 'Adicione os campos deste cartão, por exemplo Frente e Verso para um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.',
   'myFlashcards.preview': '👁️ Pré-visualizar',
   'myFlashcards.deckDest': 'Deck de destino',
   'myFlashcards.note.label': 'Nota (opcional)',
