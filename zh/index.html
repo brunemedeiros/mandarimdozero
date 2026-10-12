@@ -3537,6 +3537,35 @@ body.hide-pinyin .prompt-pinyin{
 /* Editar perfil: sem o buraco embaixo da foto quando não há erro. */
 #profile-edit-modal .profile-edit-avatar-row{ margin:4px 0 4px; }
 #profile-edit-modal .profile-edit-avatar-error:empty{ display:none; }
+/* ---------- Configurações: passada de design (Geral, Notificações, Exportar) ----------
+   Cada grupo é um painel só, com linhas separadas por traço fino (como "Conta"),
+   em vez de uma caixa solta por preferência. Títulos em tom de frase. */
+#view-settings .section-label{ text-transform:none; letter-spacing:0; font-size:15px; font-weight:800; color:var(--ink); margin:28px 0 10px; }
+#view-settings .settings-card{ box-shadow:var(--shadow-card); }
+#view-settings .settings-more-note{ display:none; }
+#view-settings .pref-row{ border-radius:0; border-bottom-width:0; padding:16px 18px; }
+#view-settings .section-label + .pref-row{ border-top-left-radius:var(--radius); border-top-right-radius:var(--radius); }
+#view-settings .pref-row:not(:has(+ .pref-row)){ border-bottom-width:1px; border-bottom-left-radius:var(--radius); border-bottom-right-radius:var(--radius); box-shadow:var(--shadow-card); }
+#view-settings .pref-row-sub{ max-width:60ch; }
+#view-settings .notif-pref-advanced{ margin-top:22px; }
+#view-settings .notif-pref-advanced summary{ font-size:15px; font-weight:800; color:var(--ink); cursor:pointer; min-height:44px; display:flex; align-items:center; gap:6px; }
+#view-settings .notif-pref-matrix-head{ text-transform:none; letter-spacing:0; font-size:12px; }
+@media (max-width:560px){
+  #view-settings .pref-row{ padding:14px; }
+  #view-settings .pref-row:has(.notif-pref-quiet-hours){ flex-wrap:wrap; }
+  #view-settings .pref-row:has(.notif-pref-quiet-hours) .pref-row-text{ flex-basis:100%; }
+}
+
+/* Exportar: escolha da unidade como lista legível, alinhada à esquerda. */
+#settings-export-content .export-box{ background:var(--paper); text-align:left; padding:20px; box-shadow:var(--shadow-card); }
+#settings-export-content .export-box .icon{ display:none; }
+#settings-export-content .export-box h3{ font-size:15px; font-weight:800; margin:0 0 12px; }
+#settings-export-content .deck-select{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:6px; justify-content:stretch; }
+#settings-export-content .deck-select > .deck-chip{ text-align:left; border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.3; min-height:44px; }
+#settings-export-content .deck-select > .deck-chip:first-child{ grid-column:1 / -1; justify-self:start; padding-left:16px; padding-right:16px; }
+#settings-export-content .export-box p{ margin:4px 0 16px; max-width:62ch; }
+#settings-export-content #export-btn{ margin:0 !important; }
+#settings-export-content .export-status:empty{ min-height:0; margin:0; }
 </style>
 </head>
 <body>

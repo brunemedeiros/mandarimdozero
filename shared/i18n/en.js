@@ -141,14 +141,14 @@ window.I18N_CATALOG['en'] = {
   'notif.pref.loadFailed': 'Could not load your preferences right now.', // ALTA
   'notif.pref.sectionTitle': 'Notifications', // ALTA
   'notif.pref.inApp.title': 'In-app notifications', // ALTA
-  'notif.pref.inApp.sub': 'Bell in the top bar + notification center. Turning this off silences everything at once -- fine-tune by category under "Customize by category" below.', // ALTA
+  'notif.pref.inApp.sub': 'Bell at the top of the screen and notification center. Turning this off silences everything at once. To adjust each category, use "Customize by category" below.', // ALTA
   'notif.pref.push.title': 'Browser alerts (push)', // ALTA
-  'notif.pref.push.sub': 'Notifies you even when the app is closed. Turn on by category under "Customize" below -- this switch handles the browser permission and turns everything on at once.', // MÉDIA
+  'notif.pref.push.sub': 'Notifies you even when the app is closed. This switch handles the browser permission and turns everything on at once. To choose by category, use "Customize by category" below.', // MÉDIA
   'notif.pref.email.title': 'Emails', // ALTA
-  'notif.pref.email.sub': 'Sends to your account email in some cases (e.g., when you disappear for a while). Turn on by category under "Customize" below -- this switch turns everything on at once.', // MÉDIA
+  'notif.pref.email.sub': 'Sends to your account email in some cases (for example, when you disappear for a while). This switch turns everything on at once. To choose by category, use "Customize by category" below.', // MÉDIA
   'notif.pref.quiet.section': 'Quiet hours', // ALTA
   'notif.pref.quiet.title': 'Do not notify between', // ALTA
-  'notif.pref.quiet.sub': 'Applies to automatically calculated notifications (review, streak...) -- instant ones (XP, badge) still appear. Approximate time (not yet adjusted to your time zone).', // MÉDIA
+  'notif.pref.quiet.sub': 'Applies to automatically calculated notifications (review, streak...). Instant ones (XP, badge) still appear. Approximate time (not yet adjusted to your time zone).', // MÉDIA
   'notif.pref.quiet.startAria': 'Start of quiet hours', // ALTA
   'notif.pref.quiet.endAria': 'End of quiet hours', // ALTA
   'notif.pref.quiet.until': 'to', // ALTA
