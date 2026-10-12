@@ -73,6 +73,8 @@ try{
   /* Botões de nota da revisão: fundo próprio + texto --on-vivid (mesmo padrão do fr). Branco no claro (>=5.0:1), escuro no escuro (>=6.8:1). */
   --on-vivid: #FFFFFF;
   --grade-again-bg: #A83A2E; --grade-hard-bg: #8C5F0E; --grade-good-bg: #3A7359; --grade-easy-bg: #2E7D4F;
+  /* Medalhas do pódio (Amigos > Disputa da semana): texto escuro fixo, legível nos dois temas. */
+  --medal-gold: #F2B33D; --medal-silver: #BCC5D1; --medal-bronze: #D58A4E; --on-medal: #2A1E05;
   /* Selo colorido atrás do ícone de cada desafio diário -- 3 cores fixas
      por posição no card (não por desafio específico), pra manter a mesma
      assinatura visual todo dia mesmo quando o desafio sorteado muda. */
@@ -136,6 +138,7 @@ try{
     --on-seal-red: #1A0605; /* 5.14:1 sobre o --seal-red do modo escuro */
     --on-vivid: #1B1512;
     --grade-again-bg: #FF7B6E; --grade-hard-bg: #C9973A; --grade-good-bg: #52B487; --grade-easy-bg: #7CCBA0;
+    --medal-gold: #F5C25B; --medal-silver: #C9D2DD; --medal-bronze: #E3A06C; --on-medal: #2A1E05;
     --dc-slot-0: #F7B84A;
     --dc-slot-1: #9A85FF;
     --dc-slot-2: #5B9DFF;
@@ -163,12 +166,12 @@ try{
   --on-seal-red: #1A0605;
   --on-vivid: #1B1512;
   --grade-again-bg: #FF7B6E; --grade-hard-bg: #C9973A; --grade-good-bg: #52B487; --grade-easy-bg: #7CCBA0;
+  --medal-gold: #F5C25B; --medal-silver: #C9D2DD; --medal-bronze: #E3A06C; --on-medal: #2A1E05;
   --dc-slot-0: #F7B84A;
   --dc-slot-1: #9A85FF;
   --dc-slot-2: #5B9DFF;
   --shadow-lift: 0 8px 24px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05);
 }
-
 
 *{ box-sizing: border-box; }
 /* Foco de teclado: sem isto, cada navegador desenha um anel default
@@ -1949,6 +1952,9 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .profile-special-badge-icon svg{ width:16px; height:16px; display:block; }
 
 /* ---------- Amigos (Perfil > Amigos) + selo "+N" + ranking de amigos ---------- */
+/* Cara de jogo (docs/historico/15): pedidos em cartão rosa, "Disputa da semana"
+   com pódio e barra de "faltam X XP", amigos em cartões com menu ⋯ e estado
+   vazio que convida. */
 .tab-btn{ position:relative; }
 .friends-badge{
   display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:18px; padding:0 5px;
@@ -1963,30 +1969,127 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .friends-person:disabled{ cursor:default; }
 .friends-avatar{ width:40px; height:40px; border-radius:50%; flex-shrink:0; object-fit:cover; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:15px; }
 .friends-person-text{ display:flex; flex-direction:column; min-width:0; }
-.friends-person-name{ font-weight:700; font-size:14px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.friends-person-user{ font-size:12px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.friends-person-name{ font-weight:800; font-size:15px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.friends-person-user{ font-size:12.5px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .friends-row-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.friends-action{ padding:7px 14px; font-size:13px; width:auto; }
+.friends-action{ padding:8px 14px; font-size:13px; width:auto; }
 .friends-chip{ font-size:12.5px; font-weight:700; color:var(--ink-soft); }
 .friends-profile-actions{ display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
 .leaderboard-mode-tabs{ margin-bottom:8px; }
 .leaderboard-empty-friends{ text-align:center; padding:22px 10px; }
 .leaderboard-empty-friends p{ color:var(--ink-soft); font-size:13.5px; margin:6px 0 12px; }
-.friends-rank-row{ gap:8px; }
-.friends-rank-row.is-me{ background:var(--paper-warm); border-radius:8px; padding-left:6px; padding-right:6px; }
-.friends-rank-pos{ width:26px; text-align:center; font-weight:800; font-size:14px; color:var(--ink-soft); flex-shrink:0; }
-.friends-rank-xp{ margin-left:auto; font-weight:800; font-size:13px; color:var(--ink); white-space:nowrap; }
-.friends-rank-scopes{ margin-bottom:6px; }
-.friends-rank-more{ margin-top:10px; }
-.friends-invite-banner{ background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:8px; padding:10px 12px; font-size:13.5px; color:var(--ink); margin:0 0 10px; }
-.friends-invite-actions{ display:flex; gap:8px; flex-wrap:wrap; }
-.friends-prefs summary{ cursor:pointer; font-weight:700; font-size:14px; color:var(--ink); padding:6px 0; }
+.friends-rank-scopes{ margin:10px 0 0; justify-content:flex-start; }
+.friends-invite-banner{ background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:12px; padding:10px 12px; font-size:13.5px; color:var(--ink); margin:0 0 10px; }
 .friends-pref-row{ display:flex; align-items:center; gap:10px; padding:8px 0; font-size:14px; color:var(--ink); cursor:pointer; }
-.friends-pref-row input{ width:18px; height:18px; flex-shrink:0; }
+.friends-pref-row input{ width:18px; height:18px; flex-shrink:0; accent-color:var(--seal-red); }
+.friends-prefs-box{ background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:var(--radius); padding:8px 14px; }
+
+/* Cabeçalho da aba */
+.friends-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:18px; }
+.friends-title{ font-family:var(--font-body); font-size:26px; font-weight:900; letter-spacing:-.01em; margin:0; color:var(--ink); }
+
+/* Pedidos recebidos: o que pede ação vem primeiro, em destaque */
+.friends-requests{ margin-top:16px; border-radius:20px; padding:14px 16px;
+  background: var(--paper-warm);
+  background: color-mix(in srgb, var(--imperial-gold) 14%, var(--paper)); }
+.friends-requests-title{ font-family:var(--font-body); font-weight:900; font-size:16px; display:flex; align-items:center; gap:8px; margin:0 0 4px; color:var(--ink); }
+.friends-dot{ width:9px; height:9px; border-radius:50%; background:var(--imperial-gold); flex-shrink:0; }
+.friends-requests .friends-row{ border-bottom:1px dashed var(--paper-line); }
+.friends-requests .friends-row:last-child{ border-bottom:none; }
+
+/* Disputa da semana */
+.friends-week{ margin-top:16px; background:var(--paper); border:1px solid var(--paper-line); border-radius:22px; padding:16px 18px; box-shadow:var(--shadow-card); }
+.friends-week-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+.friends-week-title{ font-family:var(--font-body); margin:0; font-size:19px; font-weight:900; color:var(--ink); }
+.friends-week-days{ font-size:12.5px; font-weight:800; color:var(--ink-soft); background:var(--paper-warm); padding:3px 10px; border-radius:999px; }
+.friends-podium{ display:grid; grid-template-columns:repeat(var(--pods, 3), 1fr); align-items:end; gap:10px; margin:16px auto 4px; max-width:360px; }
+.friends-pod{ display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0; }
+.friends-pod .friends-avatar{ width:46px; height:46px; font-size:16px; }
+.friends-pod.pos-1 .friends-avatar{ width:60px; height:60px; font-size:21px; }
+.friends-pod.is-me .friends-avatar{ box-shadow:0 0 0 3px var(--paper), 0 0 0 6px var(--seal-red); }
+.friends-pod-name{ font-weight:800; font-size:14px; color:var(--ink); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.friends-pod.is-me .friends-pod-name{ color:var(--seal-red-dark); }
+.friends-pod-xp{ font-size:12.5px; font-weight:800; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.friends-pod-step{ width:100%; margin-top:4px; border-radius:14px 14px 6px 6px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:22px; color:var(--on-medal); }
+.friends-pod.pos-1 .friends-pod-step{ height:88px; background:var(--medal-gold); }
+.friends-pod.pos-2 .friends-pod-step{ height:64px; background:var(--medal-silver); }
+.friends-pod.pos-3 .friends-pod-step{ height:46px; background:var(--medal-bronze); }
+.friends-duel{ margin-top:12px; background:var(--paper-warm); border-radius:16px; padding:12px 14px; }
+.friends-duel p{ margin:0; font-weight:800; font-size:15px; color:var(--ink); }
+.friends-duel p strong{ color:var(--seal-red-dark); }
+.friends-bar{ height:12px; border-radius:999px; background:var(--paper-line); overflow:hidden; margin-top:8px; }
+.friends-bar i{ display:block; height:100%; border-radius:999px; background:linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); }
+.friends-bar-labels{ display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:var(--ink-soft); margin-top:4px; font-variant-numeric:tabular-nums; }
+.friends-feed{ margin-top:12px; display:grid; gap:8px; }
+.friends-feed:empty{ display:none; }
+.friends-activity-row{ display:flex; align-items:center; gap:10px; font-size:14px; color:var(--ink); }
+.friends-medal{ width:38px; height:38px; border-radius:12px; background:var(--paper-warm); border:1px solid var(--paper-line); display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
+.friends-activity-when{ color:var(--ink-soft); font-size:12.5px; white-space:nowrap; }
+.friends-feed-empty{ margin:0; font-size:13.5px; color:var(--ink-soft); }
+.friends-link{ display:inline-block; margin-top:12px; padding:6px 0; background:none; border:none; font:inherit; font-weight:800; font-size:14px; color:var(--seal-red-dark); cursor:pointer; }
+.friends-link:hover{ text-decoration:underline; }
+@media (prefers-reduced-motion: no-preference){
+  .friends-bar i{ animation: friends-bar-grow 1s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes friends-bar-grow{ from{ width:0; } }
+}
+
+/* Busca */
+.friends-search{ display:flex; align-items:center; gap:8px; background:var(--paper); border:2px solid var(--paper-line); border-radius:14px; padding:0 12px; }
+.friends-search:focus-within{ border-color:var(--seal-red); }
+.friends-search-icon{ font-size:14px; }
+.friends-search input{ flex:1; min-width:0; border:none; background:none; outline:none; padding:10px 0; font:inherit; font-size:14.5px; color:var(--ink); }
+#friends-search-results:not(:empty){ margin-top:8px; }
+#friends-list .friends-invite-banner{ margin:10px 0 0; }
+
+/* Seus amigos: cartões */
+.friends-list-head{ display:flex; align-items:center; justify-content:space-between; gap:10px 16px; flex-wrap:wrap; margin-top:22px; }
+.friends-list-head .section-label{ margin:0; }
+.friends-list-search{ flex:1; min-width:200px; max-width:320px; }
+.friends-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; margin-top:12px; }
+.friend-card{ position:relative; background:var(--paper); border:1px solid var(--paper-line); border-radius:20px; padding:16px 10px 12px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; box-shadow:0 3px 0 var(--paper-line); }
+.friend-card.is-pending{ border-style:dashed; box-shadow:none; }
+.friend-card-person{ display:flex; flex-direction:column; align-items:center; gap:2px; background:none; border:none; padding:0; font:inherit; color:var(--ink); cursor:pointer; max-width:100%; }
+.friend-card-person:disabled{ cursor:default; }
+.friend-card .friends-avatar{ width:62px; height:62px; font-size:21px; margin-bottom:6px; }
+.friend-card-name{ font-weight:900; font-size:15px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.friend-card-user{ font-size:12px; color:var(--ink-soft); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.friend-card-wait{ font-size:12px; font-weight:800; color:var(--ink-soft); }
+.friend-card-xp{ font-size:12px; font-weight:800; background:var(--paper-warm); border-radius:999px; padding:2px 10px; font-variant-numeric:tabular-nums; color:var(--ink); }
+.friend-card-more{ position:absolute; top:4px; right:4px; width:34px; height:34px; border-radius:10px; border:none; background:none; color:var(--ink-soft); font-size:20px; line-height:1; cursor:pointer; }
+.friend-card-more:hover, .friend-card-more[aria-expanded="true"]{ background:var(--paper-warm); color:var(--ink); }
+.friend-card-menu{ position:absolute; top:40px; right:6px; z-index:5; min-width:170px; background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:12px; box-shadow:var(--shadow-lift); padding:6px; display:flex; flex-direction:column; text-align:left; }
+.friend-card-menu[hidden]{ display:none; }
+.friend-card-menu button{ background:none; border:none; font:inherit; font-size:14px; font-weight:700; text-align:left; padding:9px 10px; border-radius:8px; cursor:pointer; color:var(--ink); }
+.friend-card-menu button:hover{ background:var(--paper-line); }
+.friend-card-menu .friends-danger{ color:var(--error-red-text, var(--error-red)); }
+
+/* Sem amigos: o estado vazio é um convite */
+.friends-empty{ text-align:center; margin-top:16px; padding:22px 18px; background:var(--paper); border:1px solid var(--paper-line); border-radius:22px; box-shadow:var(--shadow-card); }
+.friends-crowd{ display:flex; justify-content:center; align-items:center; margin:2px 0 14px; }
+.friends-crowd .friends-avatar{ width:48px; height:48px; font-size:18px; border:3px solid var(--paper); box-sizing:content-box; }
+.friends-crowd .friends-crowd-other{ opacity:.85; }
+.friends-crowd .friends-crowd-other:first-child{ margin-right:-12px; }
+.friends-crowd .friends-crowd-other:last-child{ margin-left:-12px; }
+.friends-crowd .friends-crowd-me{ width:64px; height:64px; font-size:22px; background:var(--seal-red); color:var(--on-seal-red); position:relative; z-index:1; }
+.friends-empty-title{ font-family:var(--font-body); font-size:22px; font-weight:900; margin:0; color:var(--ink); text-wrap:balance; }
+.friends-empty-text{ color:var(--ink-soft); margin:6px auto 16px; max-width:32ch; font-size:15px; }
+.friends-empty .btn-block{ max-width:360px; }
+.friends-empty-search{ max-width:360px; margin:12px auto 0; text-align:left; }
+.friends-empty-steps{ list-style:none; padding:0; margin:18px auto 0; max-width:360px; display:grid; gap:8px; text-align:left; }
+.friends-empty-steps li{ display:flex; gap:12px; align-items:center; background:var(--paper-warm); border-radius:14px; padding:10px 12px; font-size:14px; font-weight:700; color:var(--ink); }
+.friends-empty-steps span{ font-size:20px; }
+
+@media (max-width: 640px){
+  .friends-title{ font-size:24px; }
+  .friends-list-search{ max-width:none; flex-basis:100%; }
+  .friends-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
+  .friends-row-actions .friends-action{ min-height:44px; }
+  .friend-card-more{ width:44px; height:44px; top:0; right:0; }
+  .friend-card-menu{ top:44px; }
+}
 .side-ranking-tabs{ display:flex; gap:6px; margin-bottom:8px; }
 .side-ranking-tab{ flex:1; background:var(--paper-warm); border:1px solid var(--paper-line); color:var(--ink-soft); border-radius:999px; padding:4px 8px; font-size:12px; font-weight:700; cursor:pointer; }
 .side-ranking-tab.active{ background:var(--seal-red); border-color:var(--seal-red); color:#fff; }
-
 /* ---------- Ranking (Leaderboard) ---------- */
 .leaderboard-week-label{ font-size:12.5px; color:var(--ink-soft); font-weight:700; text-align:center; margin-bottom:10px; }
 .leaderboard-tabs{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; }

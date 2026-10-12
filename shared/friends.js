@@ -232,7 +232,7 @@ function friendsRelationActionsHTML(relation, userId){
 function friendsSectionHTML(title, count, bodyHTML, id){
   return `
     <section class="friends-section" ${id ? `id="${id}"` : ''}>
-      <div class="section-label">${title}${count != null ? ` (${count})` : ''}</div>
+      <h3 class="section-label">${title}${count != null ? ` (${count})` : ''}</h3>
       ${bodyHTML}
     </section>`;
 }
@@ -242,6 +242,130 @@ function friendsSubnavHTML(active){
   return `<div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="${t('profile.subnavAria')}">
     ${tabs.map(([k, l]) => `<button class="leaderboard-tab ${k === active ? 'active' : ''}" data-tab="${k}">${l}</button>`).join('')}
   </div>`;
+}
+
+const friendFirstName = (profile) => {
+  const full = profile?.display_name || profile?.username || t('leaderboard.anonymous');
+  return full.split(/\s+/)[0];
+};
+
+// Um único botão de convite: abre o compartilhar do aparelho quando existe,
+// senão copia o link (friendsInviteAction decide).
+function friendsInviteButtonHTML(extraClass){
+  return `<button type="button" class="btn btn-primary ${extraClass || ''}" data-friends-invite="${navigator.share ? 'share' : 'copy'}">${t('friends.inviteBtn')}</button>`;
+}
+
+// Campo de busca + (opcional) aviso de convite e resultados. Na lista com
+// amigos o campo fica à direita do título e o resto vai para a largura toda
+// (friendsSearchExtrasHTML), para os resultados não ficarem espremidos.
+function friendsSearchFieldHTML(keepQuery, label){
+  return `
+    <div class="friends-search">
+      <label class="sr-only" for="friends-search-input">${t('friends.searchLabel')}</label>
+      <span class="friends-search-icon" aria-hidden="true">🔍</span>
+      <input type="search" id="friends-search-input" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="40" placeholder="${escapeAttr(label)}" value="${escapeAttr(keepQuery)}">
+    </div>`;
+}
+
+function friendsSearchExtrasHTML(inviteUser){
+  const banner = inviteUser
+    ? `<p class="friends-invite-banner" role="status">👋 ${t('friends.inviteBanner', { user: '<strong>@' + escapeHTML(inviteUser) + '</strong>' })}</p>`
+    : '';
+  return `${banner}<div id="friends-search-results" aria-live="polite"></div>`;
+}
+
+// Cartão de amigo: avatar grande, nome, XP da semana (preenchido pelo
+// ranking) e menu ⋯ com "Desfazer amizade" (fica fora da vista de propósito).
+function friendCardHTML(item){
+  const p = item.profile;
+  const name = p?.display_name || p?.username || t('leaderboard.anonymous');
+  const username = p?.username || '';
+  const id = escapeAttr(item.userId);
+  return `
+    <div class="friend-card" data-friend-row="${id}">
+      <button type="button" class="friend-card-more" data-friend-menu="${id}" aria-haspopup="true" aria-expanded="false" aria-label="${escapeAttr(t('friends.card.more', { name }))}">⋯</button>
+      <div class="friend-card-menu" role="menu" hidden>
+        ${username ? `<button type="button" role="menuitem" data-open-profile="${escapeAttr(username)}">${t('friends.card.viewProfile')}</button>` : ''}
+        <button type="button" role="menuitem" class="friends-danger" data-friend-action="remove" data-user-id="${id}">${t('friends.btn.remove')}</button>
+      </div>
+      <button type="button" class="friend-card-person" data-open-profile="${escapeAttr(username)}" ${username ? '' : 'disabled'}>
+        ${friendAvatarHTML(p, item.userId)}
+        <span class="friend-card-name">${escapeHTML(name)}</span>
+        <span class="friend-card-user">@${escapeHTML(username)}</span>
+      </button>
+      <span class="friend-card-xp" data-friend-xp="${id}">…</span>
+    </div>`;
+}
+
+function friendPendingCardHTML(item){
+  const p = item.profile;
+  const name = p?.display_name || p?.username || t('leaderboard.anonymous');
+  const username = p?.username || '';
+  return `
+    <div class="friend-card is-pending" data-friend-row="${escapeAttr(item.userId)}">
+      <button type="button" class="friend-card-person" data-open-profile="${escapeAttr(username)}" ${username ? '' : 'disabled'}>
+        ${friendAvatarHTML(p, item.userId)}
+        <span class="friend-card-name">${escapeHTML(name)}</span>
+        <span class="friend-card-wait">${t('friends.chip.sent')}</span>
+      </button>
+      ${friendActionButtonHTML(t('friends.btn.cancel'), 'cancel', item.userId, 'btn-secondary btn-sm')}
+    </div>`;
+}
+
+function friendsRequestsHTML(incoming){
+  if (!incoming.length) return '';
+  return `
+    <section class="friends-requests" id="friends-incoming">
+      <h3 class="friends-requests-title"><span class="friends-dot" aria-hidden="true"></span>${tp('friends.requests.title', incoming.length)}</h3>
+      ${incoming.map(i => `
+        <div class="friends-row" data-friend-row="${escapeAttr(i.userId)}">
+          ${friendPersonHTML(i.profile, i.userId)}
+          <div class="friends-row-actions">
+            ${friendActionButtonHTML(t('friends.btn.accept'), 'accept', i.userId, 'btn-primary')}
+            ${friendActionButtonHTML(t('friends.btn.notNow'), 'decline', i.userId)}
+          </div>
+        </div>`).join('')}
+    </section>`;
+}
+
+function friendsWeekHTML(){
+  const days = (typeof leaderboardDaysRemaining === 'function' && typeof leaderboardCurrentWeekStart === 'function')
+    ? leaderboardDaysRemaining(leaderboardCurrentWeekStart()) : null;
+  return `
+    <section class="friends-week" id="friends-rank">
+      <div class="friends-week-top">
+        <h3 class="friends-week-title">${t('friends.week.title')}</h3>
+        ${days != null ? `<span class="friends-week-days">${tp('friends.week.endsIn', days)}</span>` : ''}
+      </div>
+      <div id="friends-mini-rank"></div>
+      <div class="friends-feed" id="friends-activity"></div>
+      <button type="button" class="friends-link" data-friends-rank-more="1">${t('friends.rank.seeFull')} →</button>
+    </section>`;
+}
+
+function friendsEmptyHTML(keepQuery, inviteUser){
+  const me = (typeof PROFILE_CACHE !== 'undefined' && PROFILE_CACHE) || {};
+  const myName = me.display_name || me.username || '';
+  const meAvatar = me.avatar_url
+    ? `<img class="friends-avatar friends-crowd-me" src="${escapeAttr(me.avatar_url)}" alt="">`
+    : `<div class="friends-avatar friends-crowd-me" aria-hidden="true">${myName ? avatarInitials(myName) : '🙂'}</div>`;
+  return `
+    <section class="friends-empty" id="friends-invite">
+      <div class="friends-crowd" aria-hidden="true">
+        <div class="friends-avatar friends-crowd-other" style="background:${avatarColor('a')};">?</div>
+        ${meAvatar}
+        <div class="friends-avatar friends-crowd-other" style="background:${avatarColor('b')};">?</div>
+      </div>
+      <h3 class="friends-empty-title">${t('friends.empty.title')}</h3>
+      <p class="friends-empty-text">${t('friends.empty.text')}</p>
+      ${friendsInviteButtonHTML('btn-block')}
+      <div class="friends-empty-search">${friendsSearchFieldHTML(keepQuery, t('friends.empty.searchLabel'))}${friendsSearchExtrasHTML(inviteUser)}</div>
+      <ul class="friends-empty-steps">
+        <li><span aria-hidden="true">🏆</span>${t('friends.empty.step1')}</li>
+        <li><span aria-hidden="true">🔔</span>${t('friends.empty.step2')}</li>
+        <li><span aria-hidden="true">🎉</span>${t('friends.empty.step3')}</li>
+      </ul>
+    </section>`;
 }
 
 async function renderFriendsView(){
@@ -265,59 +389,83 @@ async function renderFriendsView(){
     return;
   }
   FRIENDS_STATE.pendingCount = ov.incoming.length;
+  const hasFriends = ov.friends.length > 0;
 
-  const incomingHTML = ov.incoming.length ? friendsSectionHTML(t('friends.section.incoming'), ov.incoming.length, ov.incoming.map(i => `
-    <div class="friends-row" data-friend-row="${escapeAttr(i.userId)}">
-      ${friendPersonHTML(i.profile, i.userId)}
-      <div class="friends-row-actions">${friendsRelationActionsHTML('received', i.userId)}</div>
-    </div>`).join(''), 'friends-incoming') : '';
+  // Ordem: o que pede ação (pedidos), a disputa da semana e os amigos.
+  const headHTML = `
+    <div class="friends-head">
+      <h2 class="friends-title">${t('friends.title')}</h2>
+      ${hasFriends ? friendsInviteButtonHTML('friends-head-invite') : ''}
+    </div>`;
 
-  const inviteBannerHTML = inviteUser
-    ? `<p class="friends-invite-banner" role="status">👋 ${t('friends.inviteBanner', { user: '<strong>@' + escapeHTML(inviteUser) + '</strong>' })}</p>`
-    : '';
-  const searchHTML = friendsSectionHTML(t('friends.section.add'), null, `
-    ${inviteBannerHTML}
-    <label class="profile-edit-label" for="friends-search-input">${t('friends.searchLabel')}</label>
-    <input type="search" class="profile-edit-input" id="friends-search-input" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="40" placeholder="${t('friends.searchPlaceholder')}" value="${escapeAttr(keepQuery)}">
-    <div id="friends-search-results" aria-live="polite"></div>`, 'friends-add');
+  let bodyHTML;
+  if (hasFriends){
+    const cards = ov.friends.map(friendCardHTML).join('') + ov.outgoing.map(friendPendingCardHTML).join('');
+    bodyHTML = `
+      ${friendsWeekHTML()}
+      <section class="friends-section" id="friends-list">
+        <div class="friends-list-head">
+          <h3 class="section-label">${t('friends.section.friends')} (${ov.friends.length})</h3>
+          <div class="friends-list-search">${friendsSearchFieldHTML(keepQuery, t('friends.searchLabel'))}</div>
+        </div>
+        ${friendsSearchExtrasHTML(inviteUser)}
+        <div class="friends-grid">${cards}</div>
+      </section>`;
+  } else {
+    const pending = ov.outgoing.length
+      ? friendsSectionHTML(t('friends.section.outgoing'), ov.outgoing.length, `<div class="friends-grid">${ov.outgoing.map(friendPendingCardHTML).join('')}</div>`, 'friends-outgoing')
+      : '';
+    bodyHTML = friendsEmptyHTML(keepQuery, inviteUser) + pending;
+  }
 
-  const friendsHTML = friendsSectionHTML(t('friends.section.friends'), ov.friends.length, ov.friends.length
-    ? ov.friends.map(i => `
-      <div class="friends-row" data-friend-row="${escapeAttr(i.userId)}">
-        ${friendPersonHTML(i.profile, i.userId)}
-        <div class="friends-row-actions">${friendActionButtonHTML(t('friends.btn.remove'), 'remove', i.userId, 'btn-secondary friends-danger')}</div>
-      </div>`).join('')
-    : `<p class="profile-empty-note">${t('friends.empty')}</p>`, 'friends-list');
-
-  const outgoingHTML = ov.outgoing.length ? friendsSectionHTML(t('friends.section.outgoing'), ov.outgoing.length, ov.outgoing.map(i => `
-    <div class="friends-row" data-friend-row="${escapeAttr(i.userId)}">
-      ${friendPersonHTML(i.profile, i.userId)}
-      <div class="friends-row-actions">${friendsRelationActionsHTML('sent', i.userId)}</div>
-    </div>`).join(''), 'friends-outgoing') : '';
-
-  const rankHTML = ov.friends.length ? friendsSectionHTML(t('friends.section.rank'), null, '<div id="friends-mini-rank"></div>', 'friends-rank') : '';
-  const activityHTML = ov.friends.length ? friendsSectionHTML(t('friends.section.activity'), null, '<div id="friends-activity"></div>', 'friends-activity-section') : '';
-  const inviteHTML = friendsSectionHTML(t('friends.section.invite'), null, `
-    <p class="profile-edit-hint">${t('friends.inviteHint')}</p>
-    <div class="friends-invite-actions">
-      <button type="button" class="btn btn-secondary friends-action" data-friends-invite="copy">🔗 ${t('friends.inviteCopy')}</button>
-      <button type="button" class="btn btn-secondary friends-action" data-friends-invite="share" ${navigator.share ? '' : 'hidden'}>📤 ${t('friends.inviteShare')}</button>
-    </div>`, 'friends-invite');
-  const prefsHTML = friendsSectionHTML(t('friends.section.prefs'), null, `
-    <details class="friends-prefs" id="friends-prefs">
-      <summary>${t('friends.prefsSummary')}</summary>
-      <div id="friends-prefs-body">${loadingHTML(t('friends.loadingShort'))}</div>
-    </details>`, 'friends-prefs-section');
-
-  wrap.innerHTML = `${subnav}${incomingHTML}${rankHTML}${searchHTML}${friendsHTML}${activityHTML}${outgoingHTML}${inviteHTML}${prefsHTML}`;
+  wrap.innerHTML = `${subnav}${headHTML}${friendsRequestsHTML(ov.incoming)}${bodyHTML}`;
   renderFriendsBadges();
   wireFriendsView(wrap);
-  if (ov.friends.length){ loadFriendsMiniRank(); loadFriendsActivity(); }
-  loadFriendsPrefs();
+  if (hasFriends){ loadFriendsMiniRank(); loadFriendsActivity(); }
   if (keepQuery.trim().length >= 3) runFriendsSearch(keepQuery);
 }
 
-// ---------- ranking dos amigos (resumo no topo da aba) ----------
+// ---------- disputa da semana: pódio + "faltam X XP" ----------
+function friendsPodiumHTML(rows, me){
+  const top = rows.slice(0, 3);
+  // Ordem visual de pódio: 2º, 1º, 3º.
+  const order = top.length >= 2 ? [top[1], top[0], top[2]].filter(Boolean) : top;
+  return `<div class="friends-podium" style="--pods:${order.length}">${order.map(r => {
+    const isMe = r.user_id === me;
+    const name = isMe ? t('friends.week.you') : friendFirstName(r.profile);
+    return `<div class="friends-pod pos-${r.rank} ${isMe ? 'is-me' : ''}" data-podium-user="${escapeAttr(r.user_id)}">
+      ${friendAvatarHTML(r.profile, r.user_id)}
+      <span class="friends-pod-name">${escapeHTML(name)}</span>
+      <span class="friends-pod-xp">${Number(r.amount || 0)} XP</span>
+      <div class="friends-pod-step" aria-label="${escapeAttr(t('friends.week.place', { n: r.rank }))}">${r.rank}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function friendsDuelHTML(rows, me){
+  const i = rows.findIndex(r => r.user_id === me);
+  if (i < 0 || rows.length < 2) return '';
+  const mine = Number(rows[i].amount || 0);
+  if (rows.every(r => !Number(r.amount))) return `<div class="friends-duel"><p>${t('friends.duel.noOne')}</p></div>`;
+  if (i === 0){
+    const second = rows[1];
+    const lead = mine - Number(second.amount || 0);
+    const secondName = `<strong>${escapeHTML(friendFirstName(second.profile))}</strong>`;
+    const text = lead > 0 ? tp('friends.duel.ahead', lead, { name: secondName }) : t('friends.duel.tie', { name: secondName });
+    return `<div class="friends-duel is-ahead"><p>${text}</p></div>`;
+  }
+  const above = rows[i - 1];
+  const target = Number(above.amount || 0);
+  const need = target - mine + 1;
+  const pct = target > 0 ? Math.max(4, Math.min(100, Math.round((mine / target) * 100))) : 0;
+  const aboveName = escapeHTML(friendFirstName(above.profile));
+  return `<div class="friends-duel">
+    <p>${tp('friends.duel.behind', need, { name: `<strong>${aboveName}</strong>` })}</p>
+    <div class="friends-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${target}" aria-valuenow="${mine}"><i style="width:${pct}%"></i></div>
+    <div class="friends-bar-labels"><span>${t('friends.week.you')} ${mine}</span><span>${aboveName} ${target}</span></div>
+  </div>`;
+}
+
 async function loadFriendsMiniRank(){
   const box = document.getElementById('friends-mini-rank');
   if (!box) return;
@@ -335,19 +483,12 @@ async function loadFriendsMiniRank(){
   if (!rowsBox) return;
   if (rows == null){ rowsBox.innerHTML = `<p class="profile-edit-error">${t('friends.rank.miniError')}</p>`; return; }
   const me = CURRENT_USER && CURRENT_USER.id;
-  const top = rows.slice(0, 5);
-  const meRow = rows.find(r => r.user_id === me);
-  const shown = (meRow && !top.includes(meRow)) ? [...top, meRow] : top;
-  rowsBox.innerHTML = shown.map(r => {
-    const name = r.profile?.display_name || r.profile?.username || 'Aluno(a)';
-    const isMe = r.user_id === me;
-    return `<div class="friends-row friends-rank-row ${isMe ? 'is-me' : ''}">
-      <span class="friends-rank-pos">${typeof leaderboardRankBadge === 'function' ? leaderboardRankBadge(r.rank) : r.rank}</span>
-      ${friendAvatarHTML(r.profile, r.user_id)}
-      <span class="friends-person-text"><span class="friends-person-name">${escapeHTML(name)}${isMe ? ' ' + t('leaderboard.youTag') : ''}</span></span>
-      <span class="friends-rank-xp">${Number(r.amount || 0)} XP</span>
-    </div>`;
-  }).join('') + `<button type="button" class="btn btn-secondary friends-action friends-rank-more" data-friends-rank-more="1">${t('friends.rank.seeFull')}</button>`;
+  rowsBox.innerHTML = friendsPodiumHTML(rows, me) + friendsDuelHTML(rows, me);
+  // XP da semana (mesmo escopo) nos cartões dos amigos.
+  const byId = Object.fromEntries(rows.map(r => [r.user_id, Number(r.amount || 0)]));
+  document.querySelectorAll('[data-friend-xp]').forEach(el => {
+    el.textContent = `${byId[el.dataset.friendXp] || 0} XP`;
+  });
 }
 
 // ---------- atividade dos amigos (conquistas dos últimos 30 dias) ----------
@@ -362,15 +503,13 @@ async function loadFriendsActivity(){
   if (error){ console.error('Erro ao carregar atividade dos amigos:', error); el.innerHTML = `<p class="profile-edit-error">${t('friends.activity.error')}</p>`; return; }
   const catalog = (typeof BADGES !== 'undefined' && Array.isArray(BADGES)) ? BADGES : [];
   const items = (data || []).map(r => ({ r, badge: catalog.find(b => b.id === r.badge_id) })).filter(x => x.badge);
-  if (!items.length){ el.innerHTML = `<p class="profile-empty-note">${t('friends.activity.empty')}</p>`; return; }
-  el.innerHTML = items.slice(0, 10).map(({ r, badge }) => {
+  if (!items.length){ el.innerHTML = `<p class="friends-feed-empty">${t('friends.activity.empty')}</p>`; return; }
+  el.innerHTML = items.slice(0, 5).map(({ r, badge }) => {
     const name = r.display_name || r.username || t('friends.activity.aFriend');
-    return `<div class="friends-row friends-activity-row">
-      ${friendAvatarHTML({ username: r.username, display_name: r.display_name, avatar_url: r.avatar_url }, r.user_id)}
-      <span class="friends-person-text">
-        <span class="friends-person-name">${t('friends.activity.earned', { name: escapeHTML(name), badge: escapeHTML(badge.icon || '🏅') + ' ' + escapeHTML(badge.name || '') })}</span>
-        <span class="friends-person-user">${escapeHTML(friendsTimeAgo(r.earned_at))}</span>
-      </span>
+    return `<div class="friends-activity-row">
+      <span class="friends-medal" aria-hidden="true">${escapeHTML(badge.icon || '🏅')}</span>
+      <span class="friends-activity-text">${t('friends.activity.earned', { name: `<strong>${escapeHTML(name)}</strong>`, badge: escapeHTML(badge.name || '') })}
+        <span class="friends-activity-when">· ${escapeHTML(friendsTimeAgo(r.earned_at))}</span></span>
     </div>`;
   }).join('');
 }
@@ -383,9 +522,13 @@ const FRIENDS_PREF_FIELDS = [
   { key: 'accept_requests', label: () => t('friends.pref.accept_requests') },
 ];
 
+// Mora em Configurações > Notificações (shared/notification-preferences.js
+// chama esta função depois de desenhar a aba). O contêiner é recriado a cada
+// render de lá, então o listener é ligado de novo junto com ele.
 async function loadFriendsPrefs(){
   const body = document.getElementById('friends-prefs-body');
   if (!body || typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
+  body.innerHTML = loadingHTML(t('friends.loadingShort'));
   const { data, error } = await supabaseClient.from('friend_settings').select('*').eq('user_id', CURRENT_USER.id).maybeSingle();
   const box = document.getElementById('friends-prefs-body');
   if (!box) return;
@@ -396,6 +539,13 @@ async function loadFriendsPrefs(){
       <input type="checkbox" data-friends-pref="${f.key}" ${cur[f.key] === false ? '' : 'checked'}>
       <span>${escapeHTML(f.label())}</span>
     </label>`).join('') + `<p class="profile-edit-hint">${t('friends.prefs.hint')}</p>`;
+  if (box.dataset.friendsPrefsWired !== '1'){
+    box.dataset.friendsPrefsWired = '1';
+    box.addEventListener('change', (e) => {
+      const pref = e.target.closest('[data-friends-pref]');
+      if (pref) saveFriendsPref(pref.dataset.friendsPref, pref.checked, pref);
+    });
+  }
 }
 
 async function saveFriendsPref(key, value, input){
@@ -447,6 +597,15 @@ async function runFriendsSearch(rawQuery){
     </div>`).join('');
 }
 
+function friendsCloseMenus(refocus){
+  document.querySelectorAll('.friend-card-menu:not([hidden])').forEach(m => {
+    m.hidden = true;
+    const btn = m.parentElement.querySelector('[data-friend-menu]');
+    btn?.setAttribute('aria-expanded', 'false');
+    if (refocus) btn?.focus();
+  });
+}
+
 function wireFriendsView(wrap){
   const input = wrap.querySelector('#friends-search-input');
   let timer = null;
@@ -460,6 +619,17 @@ function wireFriendsView(wrap){
   if (wrap.dataset.friendsWired === '1') return;
   wrap.dataset.friendsWired = '1';
   wrap.addEventListener('click', async (e) => {
+    const menuBtn = e.target.closest('[data-friend-menu]');
+    if (menuBtn){
+      const menu = menuBtn.parentElement.querySelector('.friend-card-menu');
+      const opening = menu.hidden;
+      friendsCloseMenus();
+      menu.hidden = !opening;
+      menuBtn.setAttribute('aria-expanded', String(opening));
+      if (opening) menu.querySelector('button')?.focus();
+      return;
+    }
+    if (e.target.closest('.friend-card-menu')) friendsCloseMenus();
     const person = e.target.closest('[data-open-profile]');
     if (person && person.dataset.openProfile && !e.target.closest('[data-friend-action]')){
       if (typeof openPublicProfileModalForUsername === 'function') openPublicProfileModalForUsername(person.dataset.openProfile);
@@ -478,10 +648,9 @@ function wireFriendsView(wrap){
     if (!btn || btn.disabled) return;
     await handleFriendAction(btn.dataset.friendAction, btn.dataset.userId, btn);
   });
-  wrap.addEventListener('change', (e) => {
-    const pref = e.target.closest('[data-friends-pref]');
-    if (pref) saveFriendsPref(pref.dataset.friendsPref, pref.checked, pref);
-  });
+  // Fecha o menu ⋯ aberto ao clicar fora dele ou apertar Esc.
+  document.addEventListener('click', (e) => { if (!e.target.closest('.friend-card-more, .friend-card-menu')) friendsCloseMenus(); });
+  wrap.addEventListener('keydown', (e) => { if (e.key === 'Escape') friendsCloseMenus(true); });
 }
 
 // Faz a ação, mostra o resultado e redesenha a tela. Botão fica desabilitado

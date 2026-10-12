@@ -9,7 +9,7 @@ A maquete aprovada como direção é o artifact "Amigos com cara de jogo" (claud
 1. Fonte Nunito de verdade e bug do título da atividade de Amigos. **Feito.**
 2. Base visual compartilhada: botão com volume e títulos sem caixa alta **(feito)**; cartão, estado vazio e selo
    entram junto com a primeira tela que usar cada um (passo 3).
-3. Aba Amigos redesenhada conforme a maquete (fecha os achados da auditoria).
+3. Aba Amigos redesenhada conforme a maquete (fecha os achados da auditoria). **Feito.**
 4. Outras telas: Perfil (Visão geral, Metas, Progresso) e Ranking (estética antiga); Configurações (metade);
    ajuste fino em Desafios, Revisão e Trilha.
 5. Dados novos: sequência e idioma por amigo no `friends_leaderboard` (migration), sequência como evento na
@@ -37,3 +37,35 @@ Grátis x Premium: passos 1 a 4 são visuais, tudo grátis.
 - Regressão Playwright: amigos 158/158, revisao-ajustes 48/48, deck-browser 206/206, desafios-conclusao 19/19,
   desafios-modulo 75/75, placeholders 45/45, ditado 58/58, checkpoint-zh 25/25. i18n trava em
   `triggerWouldGenerate` (`#flashcard-limit-modal`), igual sem as mudanças (pré-existente, não investigado).
+
+## Passo 3: aba Amigos (2026-10-12)
+
+Só tela, com os dados que já existiam (sem migration). Grátis x Premium: tudo grátis.
+
+- Ordem nova em `renderFriendsView` (`shared/friends.js`): título "Amigos" + botão "＋ Convidar amigos" (um botão só:
+  `navigator.share` quando existe, senão copia o link); pedidos recebidos num cartão em destaque ("N pessoas querem
+  estudar com você", botões Aceitar e "Agora não", que continua sendo o `respond_friend_request(false)`); "Disputa da
+  semana" (prazo, seletor de idioma, pódio 2º/1º/3º, barra "Faltam X XP para você passar Fulano", conquistas recentes e
+  "Ver ranking completo"); "Seus amigos (N)" em cartões com o XP da semana e menu ⋯ ("Ver perfil", "Desfazer
+  amizade"), com os pedidos enviados como cartão tracejado na mesma grade e a busca ao lado do título.
+- "Faltam X XP" = XP de quem está logo acima - meu XP + 1 (passar, não empatar). Líder vê a vantagem sobre o 2º;
+  empate no topo e semana zerada têm frase própria.
+- Sem amigos: o estado vazio vira convite (título, botão de convidar, busca e 3 motivos). Os pedidos enviados aparecem
+  abaixo dele.
+- Preferências de Amigos (`friend_settings`) saíram da aba e foram para Configurações > Notificações, seção "Amigos"
+  (`renderNotificationPreferencesView` chama `loadFriendsPrefs`).
+- Cores do pódio: tokens `--medal-gold/-silver/-bronze` e `--on-medal` nos 3 blocos de tema de fr e zh. O cartão de
+  pedidos usa `color-mix` de `--imperial-gold` (rosa no fr, dourado no zh).
+- i18n: 21 chaves novas em pt-BR e en; 12 chaves sem uso removidas dos dois (seções antigas, convite em dois botões).
+- `tests/i18n/test_i18n_unit.js`: a comparação do HTML com o commit de referência ganhou o normalizador `gameLook`
+  (Nunito, botões, títulos e tokens de medalha). O commit dos passos 1 e 2 tinha deixado 2 falhas nesse teste, que a
+  regressão daquela entrega não rodou; corrigidas aqui (incluindo uma linha em branco a mais que a troca do `@font-face`
+  deixou no fr e no zh).
+- Testes: amigos 182/182 (eram 158; seletores atualizados para cartões e menu, mais verificações de menu ⋯, pódio,
+  barra, prazo, estado vazio e preferências em Configurações); i18n unit 2039/2039; placeholders 45/45;
+  revisao-ajustes 48/48; desafios-conclusao 19/19; checkpoint-zh 25/25; ditado 58/58; i18n
+  ui_language_first_access 20/20, persistence 39/39, badges 12/12. `test_ui_language_confirm_browser` 15/16, com a
+  mesma falha sem as mudanças (pré-existente).
+- No teste, `navigator.serviceWorker.ready` nunca resolve (SW bloqueado), e a aba Notificações ficava carregando: o
+  teste troca `getLocalPushSubscription` por uma que devolve null. Em produção isso não acontece.
+- Validação visual: fr/zh × claro/escuro, celular com e sem amigos, menu aberto, Configurações > Notificações.

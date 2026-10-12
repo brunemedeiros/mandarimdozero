@@ -2104,23 +2104,11 @@ window.I18N_CATALOG['en'] = {
   'friends.loading': 'Loading friends...', // ALTA
   'friends.loadError': 'Couldn\'t load your friends right now.', // ALTA
   'friends.retry': 'Try again', // ALTA
-  'friends.section.incoming': 'Received requests', // ALTA
   'friends.inviteBanner': 'You opened {user}\'s invite. Tap "Add" to send the request.', // ALTA
-  'friends.section.add': 'Add a friend', // ALTA
   'friends.searchLabel': 'Search by name or @username', // ALTA
-  'friends.searchPlaceholder': 'Type at least 3 letters', // ALTA
   'friends.section.friends': 'Your friends', // ALTA
   'friends.btn.remove': 'Unfriend', // ALTA
-  'friends.empty': 'You don\'t have any friends yet. Search for someone above to send a request.', // ALTA
   'friends.section.outgoing': 'Sent requests', // ALTA
-  'friends.section.rank': 'Friends\' ranking (this week)', // ALTA
-  'friends.section.activity': 'Friends\' activity', // ALTA
-  'friends.section.invite': 'Invite friends', // ALTA
-  'friends.inviteHint': 'Want to study with someone? Send your link: whoever opens it finds your profile to send a request.', // ALTA
-  'friends.inviteCopy': 'Copy invite link', // ALTA
-  'friends.inviteShare': 'Share', // ALTA
-  'friends.section.prefs': 'Preferences', // ALTA
-  'friends.prefsSummary': 'Notifications and friend requests', // ALTA
   'friends.loadingShort': 'Loading...', // ALTA
   'friends.scopeAll': 'All', // ALTA
   'friends.scopeAria': 'Friends\' ranking language', // ALTA
@@ -2164,6 +2152,27 @@ window.I18N_CATALOG['en'] = {
   'friends.rank.noFriendsText': 'Add friends to see who is studying the most this week.', // ALTA
   'friends.rank.noFriendsBtn': 'Add a friend', // ALTA
   'friends.rank.footnoteFriends': 'The ranking resets every Monday. Friends who haven\'t earned XP yet appear at the end.', // ALTA
+  'friends.title': 'Friends', // ALTA
+  'friends.inviteBtn': '＋ Invite friends', // ALTA
+  'friends.requests.title': { one: '{n} person wants to study with you', other: '{n} people want to study with you' }, // ALTA
+  'friends.btn.notNow': 'Not now', // ALTA
+  'friends.week.title': 'This week\'s challenge', // ALTA
+  'friends.week.endsIn': { one: 'ends today', other: 'ends in {n} days' }, // ALTA
+  'friends.week.you': 'You', // ALTA
+  'friends.week.place': 'Place {n}', // ALTA
+  'friends.duel.behind': { one: '{n} XP to go to pass {name}', other: '{n} XP to go to pass {name}' }, // ALTA
+  'friends.duel.ahead': { one: 'You\'re in the lead, {n} XP ahead of {name}!', other: 'You\'re in the lead, {n} XP ahead of {name}!' }, // ALTA
+  'friends.duel.tie': 'Tied with {name}! A little more study and you take the lead.', // ALTA
+  'friends.duel.noOne': 'Nobody has scored yet this week. Study today and get ahead!', // ALTA
+  'friends.card.more': 'Options for {name}', // ALTA
+  'friends.card.viewProfile': 'View profile', // ALTA
+  'friends.empty.title': 'Studying together is more fun', // ALTA
+  'friends.empty.text': 'Invite someone to compete for XP with you every week.', // ALTA
+  'friends.empty.searchLabel': 'Or search by name or @username', // ALTA
+  'friends.empty.step1': 'A ranking just for you and your friends, every week', // ALTA
+  'friends.empty.step2': 'A heads-up when a friend passes you', // ALTA
+  'friends.empty.step3': 'See your friends\' achievements', // ALTA
+  'friends.prefs.sectionTitle': 'Friends', // ALTA
   'profile.tabFriends': 'Friends', // ALTA
   'panel.admin.sub': 'Badges, metrics, notifications, reports and plans.', // ALTA
   'panel.tab.badges': 'Badges', // ALTA

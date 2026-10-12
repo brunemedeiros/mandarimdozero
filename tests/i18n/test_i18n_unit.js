@@ -249,7 +249,16 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
         .replace(/<script src="..\/shared\/(permissions|teacher-panel)\.js"><\/script>\n/g, '');
     };
     curClean = panelBlocks(curClean);
-    const p = panelBlocks(cleanBlocks(p0));
+    // Cara de jogo (docs/historico/15, 2026-10-12, pedido da autora): Nunito via Google Fonts, botões com volume,
+    // títulos de seção sem caixa alta e tokens de medalha. Mudança só de CSS/<head>, sem texto: sai dos dois lados.
+    const gameLook = (h) => h
+      .replace(/<!-- Nunito de verdade[\s\S]*?display=swap">\n/, '')
+      .replace(/@font-face\{\n  font-family:'Nunito';\n  src: local\('Nunito'\);\n\}\n\n?/, '')
+      .replace(/[ ]*\/\* (Título de seção: antes|Botões com volume|Profundidade dos botões|Mesmo peso dos outros títulos|Medalhas do pódio)[\s\S]*?\*\/\n/g, '')
+      .replace(/^[ ]*--(btn-depth|btn-depth-sm|medal-gold|medal-silver|medal-bronze|on-medal):[^\n]*\n/gm, '')
+      .replace(/^[ ]*(\.btn[^{\n]*|\.section-label|\.side-card-title|#side-missions-body \.dcs-caption|\.module-label \.ml-text)\{[^}]*\}\n/gm, '');
+    curClean = gameLook(curClean);
+    const p = gameLook(panelBlocks(cleanBlocks(p0)));
     check(`${lang}: HTML inteiro sem data-i18n* e sem o seletor == commit anterior (${PREV2})`, strip(curClean) === strip(p));
     check(`${lang}: seletor só oferece pt-BR e English`, /<option value="pt-BR" lang="pt-BR">Português \(Brasil\)<\/option>\s*<option value="en" lang="en">English<\/option>\s*<\/select>/.test(cur.slice(selStart, selEnd)));
     const usedHtml = [...cur.matchAll(/data-i18n-html="([^"]+)"/g)].map(m => m[1]);

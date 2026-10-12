@@ -169,21 +169,31 @@ async function run(browser, lang, port){
   await page.waitForSelector('#friends-list');
   check(`${L}: hash #/friends`, (await page.evaluate(() => location.hash)) === '#/friends');
   check(`${L}: 2 pedidos recebidos`, (await page.locator('#friends-incoming .friends-row').count()) === 2);
-  check(`${L}: 2 amigos listados`, (await page.locator('#friends-list .friends-row').count()) === 2);
-  check(`${L}: 1 pedido enviado`, (await page.locator('#friends-outgoing .friends-row').count()) === 1);
+  check(`${L}: 2 amigos listados (cartões)`, (await page.locator('#friends-list .friend-card:not(.is-pending)').count()) === 2);
+  check(`${L}: 1 pedido enviado (cartão tracejado na mesma grade)`, (await page.locator('#friends-list .friend-card.is-pending').count()) === 1);
+  check(`${L}: pedidos com "Agora não" no lugar de "Recusar"`, (await page.locator('#friends-incoming [data-friend-action="decline"]').first().textContent()).trim() === 'Agora não');
+  check(`${L}: "Desfazer amizade" escondido até abrir o menu ⋯`, !(await page.locator('#friends-list [data-friend-row="caio"] [data-friend-action="remove"]').isVisible()));
+  await page.click('[data-friend-menu="caio"]');
+  check(`${L}: menu ⋯ abre e marca aria-expanded`, (await page.locator('#friends-list [data-friend-row="caio"] [data-friend-action="remove"]').isVisible()) && (await page.getAttribute('[data-friend-menu="caio"]', 'aria-expanded')) === 'true');
+  await page.keyboard.press('Escape');
+  check(`${L}: Esc fecha o menu ⋯`, !(await page.locator('#friends-list [data-friend-row="caio"] [data-friend-action="remove"]').isVisible()));
+  await page.click('[data-friend-menu="caio"]'); await page.click('.friends-title');
+  check(`${L}: clicar fora fecha o menu ⋯`, !(await page.locator('#friends-list [data-friend-row="caio"] [data-friend-action="remove"]').isVisible()));
+  check(`${L}: preferências saíram da aba Amigos`, (await page.locator('#friends-content #friends-prefs-body').count()) === 0);
   check(`${L}: view Amigos ativa`, await page.evaluate(() => document.getElementById('view-friends').classList.contains('active')));
 
   // render repetido NÃO acumula listeners: um clique em 'Desfazer' = 1 confirm e 1 RPC
   await page.evaluate(() => renderFriendsView()); await page.waitForSelector('#friends-list');
   await page.evaluate(() => renderFriendsView()); await page.waitForSelector('#friends-list');
   await page.evaluate(() => { window.__confirms = 0; window.confirm = () => { window.__confirms++; return false; }; });
+  await page.click('[data-friend-menu="caio"]');
   await page.click('#friends-list [data-friend-row="caio"] [data-friend-action="remove"]');
   await page.waitForTimeout(150);
   check(`${L}: 3 renders seguidos -> 1 confirm só`, (await page.evaluate(() => window.__confirms)) === 1);
   await page.evaluate(() => { window.confirm = () => true; });
   // aceitar Dani
   await page.click('#friends-incoming [data-friend-row="dani"] [data-friend-action="accept"]');
-  await page.waitForFunction(() => document.querySelectorAll('#friends-list .friends-row').length === 3);
+  await page.waitForFunction(() => document.querySelectorAll('#friends-list .friend-card:not(.is-pending)').length === 3);
   check(`${L}: aceitar chamou respond_friend_request(accept)`, await page.evaluate(() => __rpc.some(r => r.name === 'respond_friend_request' && r.args.p_requester === 'dani' && r.args.p_accept === true)));
   await page.waitForFunction(() => document.querySelector('.tab-btn[data-tab="profile"] .friends-badge')?.textContent === '+1');
   check(`${L}: contador cai para +1`, true);
@@ -206,7 +216,7 @@ async function run(browser, lang, port){
   await page.click('#friends-search-results [data-friend-action="add"]');
   await page.waitForFunction(() => __rpc.some(r => r.name === 'send_friend_request' && r.args.p_addressee === 'joao'));
   check(`${L}: Adicionar chama send_friend_request`, true);
-  await page.waitForFunction(() => document.querySelectorAll('#friends-outgoing .friends-row').length === 2);
+  await page.waitForFunction(() => document.querySelectorAll('#friends-list .friend-card.is-pending').length === 2);
   check(`${L}: pedido aparece em enviados`, true);
   await page.waitForSelector('#friends-search-results [data-friend-row="joao"] .friends-chip');
   check(`${L}: resultado vira 'Pedido enviado'`, (await page.locator('#friends-search-results [data-friend-row="joao"] .friends-chip').textContent()).includes('Pedido enviado'));
@@ -215,12 +225,13 @@ async function run(browser, lang, port){
   await page.waitForSelector('#friends-search-results [data-friend-row="gabi"]');
   check(`${L}: perfil privado também aparece na busca`, true);
   // cancelar enviado
-  await page.click('#friends-outgoing [data-friend-row="fabi"] [data-friend-action="cancel"]');
-  await page.waitForFunction(() => document.querySelectorAll('#friends-outgoing .friends-row').length === 1);
+  await page.click('#friends-list .friend-card.is-pending[data-friend-row="fabi"] [data-friend-action="cancel"]');
+  await page.waitForFunction(() => document.querySelectorAll('#friends-list .friend-card.is-pending').length === 1);
   check(`${L}: cancelar pedido enviado`, true);
   // desfazer amizade
+  await page.click('[data-friend-menu="caio"]');
   await page.click('#friends-list [data-friend-row="caio"] [data-friend-action="remove"]');
-  await page.waitForFunction(() => document.querySelectorAll('#friends-list .friends-row').length === 2);
+  await page.waitForFunction(() => document.querySelectorAll('#friends-list .friend-card:not(.is-pending)').length === 2);
   check(`${L}: desfazer amizade chamou remove_friend`, await page.evaluate(() => __rpc.some(r => r.name === 'remove_friend' && r.args.p_friend === 'caio')));
 
   // ---- Ranking: unificado, abre sempre em Geral ----
@@ -299,17 +310,21 @@ async function runNew(browser, lang, port){
   await setup(page);
   await page.evaluate(() => { Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (t) => { window.__copied = t; } }, configurable: true }); });
   await page.evaluate(() => switchTab('friends'));
-  await page.waitForSelector('#friends-mini-rank-rows .friends-rank-row');
-  const rankIds = await page.locator('#friends-mini-rank-rows .friends-rank-row .friends-person-name').allTextContents();
-  check(`${L}: mini ranking mostra eu + amigos (3 linhas)`, rankIds.length === 3, rankIds);
-  check(`${L}: mini ranking: Bia (180 XP) em 1º`, /Bia/.test(rankIds[0] || ''), rankIds);
-  check(`${L}: mini ranking marca "(você)"`, rankIds.some(n => /você/.test(n)), rankIds);
+  await page.waitForSelector('#friends-mini-rank-rows .friends-pod');
+  const podIds = await page.locator('#friends-mini-rank-rows .friends-pod').evaluateAll(els => els.map(e => e.dataset.podiumUser));
+  check(`${L}: pódio com eu + amigos, na ordem visual 2º, 1º, 3º`, JSON.stringify(podIds) === JSON.stringify(['me', 'bia', 'caio']), podIds);
+  check(`${L}: pódio: Bia (180 XP) no degrau 1`, (await page.getAttribute('.friends-pod.pos-1', 'data-podium-user')) === 'bia');
+  check(`${L}: pódio marca "Você"`, (await page.locator('.friends-pod.is-me .friends-pod-name').textContent()) === 'Você');
+  const duel = await page.locator('.friends-duel').textContent();
+  check(`${L}: "Faltam 81 XP para você passar Bia" (180 - 100 + 1)`, /Faltam 81 XP para você passar Bia/.test(duel), duel);
+  check(`${L}: XP da semana no cartão do amigo`, (await page.locator('[data-friend-xp="bia"]').textContent()) === '180 XP');
+  check(`${L}: prazo da disputa aparece`, /acaba (hoje|em \d dias)/.test(await page.locator('.friends-week-days').textContent()));
   const appKey = await page.evaluate(() => APP_KEY);
   await page.evaluate(() => { __rpc.length = 0; });
   await page.click(`#friends-mini-rank [data-friends-rank-scope="${appKey}"]`);
   await page.waitForFunction((k) => __rpc.some(r => r.name === 'friends_leaderboard' && r.args.p_scope === k), appKey);
   check(`${L}: seletor de idioma do mini ranking chama a RPC com o idioma`, true);
-  await page.waitForSelector('#friends-mini-rank-rows .friends-rank-row');
+  await page.waitForSelector('#friends-mini-rank-rows .friends-pod');
   check(`${L}: chip do idioma fica ativo`, (await page.locator('#friends-mini-rank .leaderboard-tab.active').getAttribute('data-friends-rank-scope')) === appKey);
   await page.click('#friends-mini-rank [data-friends-rank-scope="all"]');
   await page.waitForFunction(() => document.querySelector('#friends-mini-rank .leaderboard-tab.active')?.dataset.friendsRankScope === 'all');
@@ -319,24 +334,28 @@ async function runNew(browser, lang, port){
   check(`${L}: atividade mostra 1 conquista (a desconhecida é ignorada)`, act.length === 1, act);
   check(`${L}: atividade cita o amigo, a conquista e "há 2 dias"`, /Bia Lima ganhou/.test(act[0]) && /há 2 dias/.test(act[0]), act[0]);
   // "Ver ranking completo" abre o ranking na aba Amigos
-  await page.click('#friends-mini-rank [data-friends-rank-more]');
+  await page.click('#friends-rank [data-friends-rank-more]');
   await page.waitForSelector('#leaderboard-content .leaderboard-mode-tabs');
   check(`${L}: "Ver ranking completo" abre Ranking em Amigos`, (await page.locator('#leaderboard-content .leaderboard-mode-tabs .active').getAttribute('data-mode')) === 'friends');
-  // preferências
-  await page.evaluate(() => switchTab('friends'));
-  await page.waitForSelector('#friends-prefs-body [data-friends-pref]', { state: 'attached' });
+  // preferências: moram em Configurações > Notificações (seção "Amigos").
+  // serviceWorker.ready nunca resolve com o SW bloqueado no teste: sem inscrição de push.
+  await page.evaluate(() => { getLocalPushSubscription = async () => null; switchTab('settings'); switchSettingsSection('notifications'); });
+  await page.waitForSelector('#settings-notifications-content #friends-prefs-body [data-friends-pref]', { state: 'attached' });
   check(`${L}: 4 interruptores, todos ligados por padrão`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 4);
-  await page.evaluate(() => { document.getElementById('friends-prefs').open = true; });
   await page.uncheck('#friends-prefs-body [data-friends-pref="accept_requests"]');
-  await page.waitForFunction(() => (window.__upserts || []).length === 1);
-  const up = await page.evaluate(() => window.__upserts[0]);
+  // (Configurações também cria a linha de notification_preferences: filtra a de friend_settings.)
+  await page.waitForFunction(() => (window.__upserts || []).some(u => u.table === 'friend_settings'));
+  const up = await page.evaluate(() => window.__upserts.find(u => u.table === 'friend_settings'));
   check(`${L}: desligar "aceitar pedidos" grava em friend_settings`, up.table === 'friend_settings' && up.row.user_id === 'me' && up.row.accept_requests === false, up);
-  await page.evaluate(() => renderFriendsView());
-  await page.waitForSelector('#friends-prefs-body [data-friends-pref]', { state: 'attached' });
+  await page.evaluate(() => renderNotificationPreferencesView());
+  await page.waitForFunction(() => document.querySelectorAll('#friends-prefs-body [data-friends-pref]').length === 4);
   check(`${L}: preferência persiste ao recarregar a aba`, (await page.locator('#friends-prefs-body [data-friends-pref="accept_requests"]').isChecked()) === false);
   check(`${L}: os outros 3 continuam ligados`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 3);
-  // convite: copiar link
-  await page.click('[data-friends-invite="copy"]');
+  // convite: o botão único copia o link quando o aparelho não tem "compartilhar"
+  await page.evaluate(() => { Object.defineProperty(navigator, 'share', { value: undefined, configurable: true }); switchTab('friends'); });
+  await page.waitForSelector('.friends-head [data-friends-invite]');
+  check(`${L}: sem navigator.share o botão de convite copia`, (await page.getAttribute('.friends-head [data-friends-invite]', 'data-friends-invite')) === 'copy');
+  await page.click('.friends-head [data-friends-invite]');
   await page.waitForFunction(() => !!window.__copied);
   const copied = await page.evaluate(() => window.__copied);
   check(`${L}: link de convite traz ?amigo=<meu usuário>`, /\?amigo=u1me$/.test(copied), copied);
@@ -357,7 +376,9 @@ async function runNew(browser, lang, port){
   await page.evaluate(() => renderFriendsView());
   await page.waitForSelector('#friends-invite');
   check(`${L}: sem amigos: sem mini ranking nem atividade`, (await page.locator('#friends-rank').count()) === 0 && (await page.locator('#friends-activity').count()) === 0);
-  check(`${L}: sem amigos: convite e preferências continuam`, (await page.locator('#friends-invite').count()) === 1 && (await page.locator('#friends-prefs').count()) === 1);
+  check(`${L}: sem amigos: estado vazio vira convite`, /Estudar junto é mais divertido/.test(await page.locator('#friends-invite').textContent()));
+  check(`${L}: sem amigos: botão de convite e busca no estado vazio`, (await page.locator('#friends-invite [data-friends-invite]').count()) === 1 && (await page.locator('#friends-invite #friends-search-input').count()) === 1);
+  check(`${L}: sem amigos: pedido recebido continua em destaque`, (await page.locator('#friends-incoming [data-friend-row="dani"]').count()) === 1);
   check(`${L}: sem erro de página (novidades)`, errors.length === 0, errors);
   await ctx.close();
 
@@ -381,7 +402,7 @@ async function visual(browser, lang, port){
     await page.evaluate(() => refreshFriendRequestCount());
     await page.evaluate(() => switchTab('friends'));
     await page.waitForSelector('#friends-list');
-    await page.waitForSelector('#friends-mini-rank-rows .friends-rank-row');
+    await page.waitForSelector('#friends-mini-rank-rows .friends-pod');
     await page.waitForSelector('#friends-activity .friends-activity-row');
     await page.fill('#friends-search-input', 'joão');
     await page.waitForSelector('#friends-search-results [data-friend-row="joao"]');
