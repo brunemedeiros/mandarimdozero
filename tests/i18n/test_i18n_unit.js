@@ -177,7 +177,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const NESTED_TEMPLATE_KEYS = ['review.deck.createdCount.other' /* original: criado${n === 1 ? '' : 's'} */, 'limitCut.main', 'limitCut.already', 'admin.reports.reply.lastSent', 'admin.reports.reply.lastSentTo'];
   const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k of ptKeys){
-    if (NEW_KEYS.includes(k) || DESIGN_PASS_KEYS.includes(k) || /^(panel|plans|perm|myClassLogs|tinvite|studentDecks|studentAnalytics|publicDeckCopies)\./.test(k) /* painéis Admin/Professora, aba Planos, Minhas aulas e convite de aluno (2026-10-12): textos novos */ || k.startsWith('badge.catalog.') || k.startsWith('friends.') || k === 'profile.tabFriends' || k === 'notif.cat.amigos' || k === 'notif.pref.inAppOnly' || k === 'publicProfile.loginToSee' || k === 'publicProfile.loginCta') continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
+    if (NEW_KEYS.includes(k) || DESIGN_PASS_KEYS.includes(k) || /^(panel|plans|perm|myClassLogs|tinvite|studentDecks|studentAnalytics|publicDeckCopies)\./.test(k) /* painéis Admin/Professora, aba Planos, Minhas aulas e convite de aluno (2026-10-12): textos novos */ || k.startsWith('badge.catalog.') || k.startsWith('friends.') || k === 'profile.tabFriends' || k === 'notif.cat.amigos' || k === 'notif.pref.inAppOnly' || k === 'publicProfile.loginToSee' || k === 'publicProfile.loginCta' || k === 'deck.publish' || k === 'review.deck.publish' || k === 'ui.profileEdit.publicProfileSub') /* perfil privado (Etapa 3b, 2026-10-12) */ continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
     const v = pt[k];
     // Plural por categoria ({one, other}): no original o plural era montado por código (módulo${n===1?'':'s'}).
     if (v && typeof v === 'object'){ check(`regressão: pt-BR '${k}' (plural) tem one e other`, typeof v.one === 'string' && typeof v.other === 'string'); continue; }
@@ -246,7 +246,9 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
       return h.replace(/      <button class="tab-btn teacher-only-nav"[\s\S]*?<\/button>\n/, '')
         .replace(/  <button class="user-dropdown-item (student-teacher-nav|teacher-only-nav mais-extra-tab)" id="(my-class-logs-btn|teacher-panel-btn)"[^\n]*\n/g, '')
         .replace(' class="user-dropdown-item student-teacher-nav" id="support-materials-btn" style="display:none;"', ' class="user-dropdown-item" id="support-materials-btn"')
-        .replace(/<script src="..\/shared\/(permissions|teacher-panel|teacher-invites)\.js"><\/script>\n/g, '');
+        .replace(/<script src="..\/shared\/(permissions|teacher-panel|teacher-invites)\.js"><\/script>\n/g, '')
+        // perfil privado (2026-10-12): texto novo da chave "Perfil público", mudança deliberada
+        .replace('Ligado: quem tem conta vê sua foto, seu progresso e seus Decks públicos. Desligado: só amigos e sua professora veem; os outros veem só nome, @ e badges, e só te acham pelo @ exato.', 'Deixa seu nome, badges, progresso e cartões próprios visíveis a quem tiver o link do seu perfil.');
     };
     curClean = panelBlocks(curClean);
     const p = panelBlocks(cleanBlocks(p0));

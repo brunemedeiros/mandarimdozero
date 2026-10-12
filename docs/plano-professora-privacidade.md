@@ -265,3 +265,25 @@ Sem teste hoje: stats `not_public`, tela do perfil privado, exceções de amigo/
 - Testes: `tests/login-obrigatorio/test_playwright.js` 43/43; regressão i18n 2039, identity 22, k10 114,
   painel-professora 277, Deck público 152, amigos 158, placeholders 45.
 - Importante: fechar o portão não fecha o banco (a chave anon é pública). Isso é a Etapa 3b.
+
+### Etapa 3b -- perfil privado no banco e nas telas (2026-10-12)
+- **Migration 080** `private_profile` (Staging aplicada; produção **só depois do PR publicado**, porque o site
+  atual lê o próprio perfil com `select('*')`, que a 080 fecha. O site novo funciona com e sem a 080):
+  `_profile_full_access` (própria conta, admin, amigo aceito, professora/aluno com vínculo ativo); policy
+  `profiles_public_read` só para logado e só linhas públicas ou com acesso total; colunas `country`, `admin_mode`,
+  `exclude_own_activity` fechadas para todos (a conta lê tudo por `get_my_profile`); plano e papel seguem públicos;
+  RPCs `profile_cards`, `get_profile_card` (também sem login), `search_accounts`; `search_profiles_for_friends` com
+  privada só pelo @ exato e sem foto; stats/Decks/Deck/cartões/checagem/mídia/cópia liberados para amigos e
+  professora (troca feita no corpo que está no ar, por `pg_get_functiondef` + replace conferido); ranking, badges
+  e conquistas fechados para anon; RPCs de perfil público perdem anon (menos o cartão do Deck e do perfil).
+- **Site**: `fetchMyProfileRow`/`updateMyProfile`/`fetchProfileCards` (`shared/profile.js`); ranking, amizades e
+  alunos usam `profile_cards`; convite usa `search_accounts`; página do perfil usa `get_profile_card`; Deck
+  criado à mão nasce público em conta pública (`createPersonalDeck({source:'manual'})` + `publish_deck`), import
+  do Anki e cópia nascem privados; caixa do Deck com "Tornar público"/"Tornar privado" e "Editar página do Deck";
+  texto novo da chave "Perfil público".
+- **Testes**: `tests/perfil-privado/run.sh` (080 33/33 + Deck público 87/48/20/9/72/9 + cópias 15/15 + amigos 63+18
+  sobre o banco com a 080); `tests/perfil-privado/test_playwright.js` 16/16. Regressão de telas: painel-professora
+  277, k10 114, login 52, deck-browser 206, Deck público 152, amigos 158, identity 22, placeholders 45,
+  painel-alunos 48, fase-i 48, anki-destino 38, i18n 2036. Testes antigos ajustados de propósito: amigos (busca por
+  nome de conta privada), Deck público SQL (visitante sem login) e Playwright ("Publicar" virou "🔒 Privado",
+  campos em "Editar página do Deck"), deck-browser (rótulo do botão).

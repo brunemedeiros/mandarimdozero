@@ -223,7 +223,7 @@ function wireMyDecksSection(wrap){
     if (!deck || !box) return;
     const opening = box.style.display === 'none';
     box.style.display = opening ? 'block' : 'none';
-    if (opening) openPublishBox(deck, box, (d) => { btn.textContent = d.is_public ? '🌐 Público' : 'Publicar'; });
+    if (opening) openPublishBox(deck, box, (d) => { btn.textContent = d.is_public ? t('deck.publicBadge') : t('deck.publish'); });
   }));
   document.getElementById('my-deck-new-btn')?.addEventListener('click', async () => {
     const errEl = document.getElementById('my-deck-error');
@@ -233,6 +233,7 @@ function wireMyDecksSection(wrap){
       parentDeckId: Number(document.getElementById('my-deck-new-parent').value),
       languageAppKey: APP_KEY,
       decks: MY_FLASHCARDS_STATE._decks,
+      source: 'manual',
     });
     if (!res.ok){ errEl.textContent = res.error; return; }
     renderMyFlashcardsView();

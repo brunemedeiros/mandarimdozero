@@ -119,8 +119,8 @@ async function fetchFriendshipOverview(){
   const ids = [...new Set((rows || []).map(otherId))];
   let byId = {};
   if (ids.length){
-    const { data: profiles } = await supabaseClient
-      .from('profiles').select('user_id, username, display_name, avatar_url').in('user_id', ids);
+    // 080: pedido de quem tem perfil privado também mostra o nome (profile_cards).
+    const profiles = await fetchProfileCards(ids);
     byId = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
   }
   const out = { friends: [], incoming: [], outgoing: [] };

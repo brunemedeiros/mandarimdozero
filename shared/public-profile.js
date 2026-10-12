@@ -95,11 +95,18 @@ async function fetchPublicProfileByUsername(username){
   const clean = String(username || '').trim().toLowerCase();
   if (!clean) return { notFound: true };
 
-  const { data: profile, error } = await supabaseClient
-    .from('profiles')
-    .select('user_id, username, display_name, avatar_url, bio, featured_badge_id')
-    .eq('username', clean)
-    .maybeSingle();
+  // 080: get_profile_card (também sem login). Perfil privado visto por estranho vem sem
+  // foto e bio; amigo/professora com vínculo recebem tudo. Sem a RPC, lê a tabela.
+  let profile = null, error = null;
+  const card = await supabaseClient.rpc('get_profile_card', { p_username: clean });
+  if (!card.error && card.data && typeof card.data === 'object'){ profile = card.data.user_id ? card.data : null; }
+  else {
+    ({ data: profile, error } = await supabaseClient
+      .from('profiles')
+      .select('user_id, username, display_name, avatar_url, bio, featured_badge_id')
+      .eq('username', clean)
+      .maybeSingle());
+  }
   if (error){ console.error('Erro ao carregar perfil público:', error); return { notFound: true }; }
   if (!profile) return { notFound: true };
 

@@ -14,6 +14,10 @@ insert into profiles(user_id, username, display_name) values
   ('73000000-0000-0000-0000-0000000000c1','x','Carla'),
   ('73000000-0000-0000-0000-0000000000d1','x',null);
 update profiles set public_profile = false where user_id = '73000000-0000-0000-0000-0000000000b1';
+-- @ gerados pelo banco, lidos antes de trocar de papel (080: a linha de B privada some para quem não é amigo)
+create temp table un73 as select (select username from profiles where user_id='73000000-0000-0000-0000-0000000000b1') b,
+  (select username from profiles where user_id='73000000-0000-0000-0000-0000000000c1') c;
+grant all on un73 to public;
 
 -- semana corrente de teste
 create temp table wk as select '2026-10-05'::date as w;
@@ -32,8 +36,11 @@ select pg_temp.as_user('73000000-0000-0000-0000-0000000000a1');
 
 -- busca
 insert into r select (select count(*) from search_profiles_for_friends('jo')) = 0, 'busca: menos de 3 letras não retorna';
-insert into r select (select count(*) from search_profiles_for_friends('joao')) = 1, 'busca por nome sem acento acha João';
-insert into r select (select count(*) from search_profiles_for_friends('PEREIRA')) = 1, 'busca case-insensitive';
+-- 080: João (B) é privado; quem não é amigo só o acha pelo @ exato. Nome sem acento e maiúsculas: Carla (pública).
+insert into r select (select count(*) from search_profiles_for_friends('joao')) = (case when exists (select 1 from pg_proc where proname = 'get_profile_card') then 0 else 1 end), 'busca por nome: privado só aparece com @ exato (080)';
+insert into r select (select count(*) from search_profiles_for_friends(upper((select c from un73)))) = 1, 'busca case-insensitive';
+insert into r select (select count(*) from search_profiles_for_friends((select b from un73))) = 1
+  or not exists (select 1 from pg_proc where proname = 'get_profile_card'), 'busca pelo @ exato acha o privado';
 insert into r select (select count(*) from search_profiles_for_friends('souza')) = 0, 'busca não retorna a própria pessoa';
 insert into r select (select count(*) from search_profiles_for_friends('%%%')) = 0, 'busca: curinga % não lista todo mundo';
 insert into r select (select count(*) from search_profiles_for_friends('___')) = 0, 'busca: curinga _ não lista todo mundo';
@@ -45,7 +52,7 @@ insert into r select (send_friend_request('73000000-0000-0000-0000-0000000000b1'
 insert into r select (send_friend_request('73000000-0000-0000-0000-0000000000b1') ->> 'error') = 'already_sent', 'pedido repetido -> already_sent';
 insert into r select (send_friend_request('73000000-0000-0000-0000-0000000000a1') ->> 'error') = 'invalid_target', 'não dá para pedir a si mesmo';
 insert into r select (send_friend_request(gen_random_uuid()) ->> 'error') = 'not_found', 'pessoa inexistente';
-insert into r select (select relation from search_profiles_for_friends('joao')) = 'sent', 'relation = sent';
+insert into r select (select relation from search_profiles_for_friends((select b from un73))) = 'sent', 'relation = sent';
 insert into r select (select count(*) from friendships) = 1, 'A vê só a própria linha';
 -- A não consegue aceitar o próprio pedido
 insert into r select (respond_friend_request('73000000-0000-0000-0000-0000000000b1', true) ->> 'error') = 'no_pending_request', 'quem pediu não aceita';

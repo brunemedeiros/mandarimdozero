@@ -178,12 +178,16 @@ async function runTinvSearch(raw, pickFirst){
     return;
   }
   const seq = ++TINVITE_STATE.seq;
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .select('user_id, username, display_name, avatar_url')
-    .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
-    .order('username', { ascending: true })
-    .limit(8);
+  // 080: search_accounts (conta privada só pelo @ exato). Sem a RPC, busca na tabela.
+  let { data, error } = await supabaseClient.rpc('search_accounts', { p_query: q, p_limit: 8 });
+  if (error || !Array.isArray(data)){
+    ({ data, error } = await supabaseClient
+      .from('profiles')
+      .select('user_id, username, display_name, avatar_url')
+      .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+      .order('username', { ascending: true })
+      .limit(8));
+  }
   if (seq !== TINVITE_STATE.seq) return;
   if (error){ status.textContent = t('plans.search.error'); closeTinvList(); return; }
   const lc = q.toLowerCase();

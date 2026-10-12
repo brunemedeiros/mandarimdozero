@@ -458,7 +458,7 @@ function openCreateDeckForm(box, parentId){
     const btn = box.querySelector('[data-deck-create-save]');
     errEl.textContent = '';
     btn.disabled = true;
-    const res = await createPersonalDeck({ name: nameEl.value, parentDeckId: Number(box.querySelector('#deck-create-parent').value), languageAppKey: APP_KEY, decks });
+    const res = await createPersonalDeck({ name: nameEl.value, parentDeckId: Number(box.querySelector('#deck-create-parent').value), languageAppKey: APP_KEY, decks, source: 'manual' });
     btn.disabled = false;
     if (!res.ok){ errEl.textContent = res.error; return; }
     STATE.decks = (STATE.decks || []).concat([res.deck]);

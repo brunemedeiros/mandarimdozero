@@ -100,10 +100,8 @@ async function fetchLeaderboard(scope, weekStart){
   // featured_badge_id junto com o resto do perfil -- é o badge que a
   // própria pessoa escolheu destacar (ver "Badge em destaque" no modal de
   // editar perfil), não precisa de consulta separada.
-  const { data: profiles } = await supabaseClient
-    .from('profiles')
-    .select('user_id, username, display_name, avatar_url, featured_badge_id')
-    .in('user_id', ranked.map(r => r.user_id));
+  // 080: profile_cards (conta privada aparece com nome, sem foto).
+  const profiles = await fetchProfileCards(ranked.map(r => r.user_id));
   const byId = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
   return ranked.map((r, i) => ({ ...r, rank: i + 1, profile: byId[r.user_id] || null }));
 }

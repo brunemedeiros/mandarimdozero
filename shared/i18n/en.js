@@ -281,7 +281,7 @@ window.I18N_CATALOG['en'] = {
   'deck.studyThis': 'Study this Deck', // ALTA
   'deck.countsFull': '{total} cards · {new} new · {learning} learning · {review} to review · {due} due', // ALTA
   'deck.publicBadge': '🌐 Public', // ALTA
-  'deck.publish': 'Publish', // ALTA
+  'deck.publish': '🔒 Private', // ALTA
   'deck.cardsCount': { one: '{n} card', other: '{n} cards' }, // ALTA
   'deck.countsDetail': { one: '{n} card · {new} new · {learning} learning · {review} to review', other: '{n} cards · {new} new · {learning} learning · {review} to review' }, // MÉDIA
   'myFlashcards.lang.fr': 'French', // ALTA
@@ -726,7 +726,7 @@ window.I18N_CATALOG['en'] = {
   'review.deck.createSubdeck': 'Create subdeck', // ALTA -- Revisão nova
   'review.deck.rename': 'Rename', // ALTA -- Revisão nova
   'review.deck.isPublic': '🌐 Public', // ALTA -- Revisão nova
-  'review.deck.publish': 'Publish', // ALTA -- Revisão nova
+  'review.deck.publish': '🔒 Private', // ALTA -- Revisão nova
   'review.deck.delete': 'Delete', // ALTA -- Revisão nova
   'review.deck.loading': 'Loading…', // ALTA -- Revisão nova
   'review.deck.loadError': 'Couldn\'t load. Try again.', // ALTA -- Revisão nova
@@ -1922,7 +1922,7 @@ window.I18N_CATALOG['en'] = {
   'ui.challenges.backToCategories': '← Back to categories', // ALTA
   'ui.profileEdit.username': 'Your public identifier (permanent)', // ALTA
   'ui.profileEdit.publicProfile': 'Public profile', // ALTA
-  'ui.profileEdit.publicProfileSub': 'Makes your name, badges, progress and your own cards visible to anyone with your profile link.', // ALTA
+  'ui.profileEdit.publicProfileSub': 'On: anyone with an account sees your photo, progress and public decks. Off: only friends and your teacher do; others see just your name, @ and badges, and can only find you by your exact @.', // ALTA
   'ui.profileEdit.featuredBadge': 'Featured badge (shown in the Leaderboard)', // ALTA
   'ui.kbd.title': '⌨️ Keyboard shortcuts', // ALTA
   'ui.kbd.choose': 'Pick an option by its position on screen', // ALTA

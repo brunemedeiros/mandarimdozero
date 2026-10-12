@@ -54,10 +54,8 @@ async function fetchMyTeacherLinks(status){
   if (error){ console.error('Erro ao carregar alunos:', error); return []; }
   if (!links?.length) return [];
   const studentIds = [...new Set(links.map(l => l.student_id))];
-  const { data: profiles } = await supabaseClient
-    .from('profiles')
-    .select('user_id, username, display_name, avatar_url')
-    .in('user_id', studentIds);
+  // 080: convidado com perfil privado ainda não é aluno; profile_cards traz o nome.
+  const profiles = await fetchProfileCards(studentIds);
   const byId = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
   return links.map(l => ({ ...l, username: byId[l.student_id]?.username, display_name: byId[l.student_id]?.display_name, avatar_url: byId[l.student_id]?.avatar_url }));
 }
