@@ -207,6 +207,7 @@
     "type": "expression",
     "canonicalExpression": "Il pleut des cordes",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "8239559bf59d.mp3",
     "meaning": {
       "fr": "Il pleut très fort.",
@@ -256,6 +257,7 @@
     "type": "expression",
     "canonicalExpression": "Bon voyage !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "ec3401ed870f.mp3",
     "meaning": {
       "fr": "On le dit à quelqu'un qui part en voyage.",
@@ -305,6 +307,7 @@
     "type": "expression",
     "canonicalExpression": "Bon rétablissement !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "51bd4e31cd4b.mp3",
     "meaning": {
       "fr": "On le dit à quelqu'un de malade.",
@@ -354,6 +357,7 @@
     "type": "expression",
     "canonicalExpression": "À tes souhaits !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "64cd7c816813.mp3",
     "meaning": {
       "fr": "On le dit quand quelqu'un éternue.",
@@ -403,6 +407,7 @@
     "type": "expression",
     "canonicalExpression": "Quel temps !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "bad91f69d120.mp3",
     "meaning": {
       "fr": "On commente le temps qu'il fait (souvent pour se plaindre).",

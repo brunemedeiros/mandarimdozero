@@ -1737,6 +1737,7 @@ window.I18N_CATALOG['en'] = {
   'adminChallenges.import.missing': '{label}: missing id/type/level', // ALTA
   'adminChallenges.import.badType': '{id}: invalid type ("{type}")', // ALTA
   'adminChallenges.import.badLevel': '{id}: invalid level ("{level}")', // ALTA
+  'adminChallenges.import.badRegister': '{id}: expression without a valid register (register: formal, neutral, familiar, slang or vulgar)', // ALTA
   'adminChallenges.import.dupId': '{id}: id already exists (duplicate)', // ALTA
   'adminChallenges.persist.failed': 'Could not save to the database: ', // ALTA
   'adminChallenges.import.importing': 'Importing…', // ALTA

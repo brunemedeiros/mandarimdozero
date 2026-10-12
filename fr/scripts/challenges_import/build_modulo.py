@@ -100,9 +100,9 @@ def write_summary(items, path, module_id):
     L += ["", "## Acentuação", "", "| Unidade | Palavra | Explicação |", "|---|---|---|"]
     for i in by("accent"):
         L.append(f"| {i['unitId']} | {i['targetText']} | {i['explanation']} |")
-    L += ["", "## Expressões", "", "| Unidade | Expressão | Significado | Exemplo |", "|---|---|---|---|"]
+    L += ["", "## Expressões", "", "| Unidade | Expressão | Registro | Significado | Exemplo |", "|---|---|---|---|---|"]
     for i in by("expression"):
-        L.append(f"| {i['unitId']} | {i['canonicalExpression']} | {i['meaning']['pt']} | {i['example']['text']} |")
+        L.append(f"| {i['unitId']} | {i['canonicalExpression']} | {i['register']} | {i['meaning']['pt']} | {i['example']['text']} |")
     with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(L) + "\n")
 

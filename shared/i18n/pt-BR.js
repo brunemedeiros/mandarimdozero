@@ -1753,6 +1753,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'adminChallenges.import.missing': '{label}: faltando id/type/level',
   'adminChallenges.import.badType': '{id}: type inválido ("{type}")',
   'adminChallenges.import.badLevel': '{id}: level inválido ("{level}")',
+  'adminChallenges.import.badRegister': '{id}: expressão sem registro válido (register: formal, neutral, familiar, slang ou vulgar)',
   'adminChallenges.import.dupId': '{id}: id já existe (duplicado)',
   'adminChallenges.persist.failed': 'Não foi possível salvar no banco de dados: ',
   'adminChallenges.import.importing': 'Importando…',

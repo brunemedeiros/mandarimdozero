@@ -2856,6 +2856,44 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .challenge-card.completed{ border-width:2px; }
 @media (prefers-reduced-motion: reduce){ .challenge-card, .dictation-card, .fb-ico{ transition:none; animation:none; } }
 
+/* Expressões: álbum de figurinhas + expressão de hoje (12/10/2026) */
+.expr-reg{ display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:800; line-height:1.2; border-radius:999px; padding:2px 9px; border:1.5px solid currentColor; white-space:nowrap; background: var(--paper); }
+.expr-reg-neutral{ color: var(--seal-red-dark); }
+.expr-reg-familiar{ color: var(--brand-purple); }
+.expr-reg-slang{ color: color-mix(in srgb, var(--imperial-gold) 55%, var(--ink)); }
+.expr-reg-vulgar{ color: var(--error-red-text); border-style:dashed; }
+.expr-reg-formal{ color: var(--ink-soft); }
+.expr-question-reg{ display:flex; justify-content:center; margin:-4px 0 12px; }
+
+.challenges-cards .expr-card-wrap{ position:relative; min-width:0; }
+.challenge-card.expr-card{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; width:100%; height:100%; min-height:128px; padding:14px 56px 14px 16px; text-align:left; }
+.challenge-card.expr-card::after{ content:none; }
+.expr-card .challenge-card-expr{ font-size:18px; text-wrap:balance; }
+.expr-card-hint{ font-size:13.5px; font-weight:700; color: var(--ink-soft); }
+.expr-card-meaning{ font-size:14px; font-weight:700; color: var(--ink-soft); line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.expr-card-foot{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:auto; padding-top:2px; }
+.expr-card-foot .tier-badge{ margin:0; }
+.challenge-card.expr-card.completed{ border-color: var(--jade); }
+.expr-card-seal{ position:absolute; top:-9px; right:12px; background: var(--jade); color: var(--on-vivid); font-size:11.5px; font-weight:900; border-radius:999px; padding:2px 9px; transform:rotate(4deg); box-shadow: var(--shadow-card); }
+.expr-play{ position:absolute; top:14px; right:12px; width:40px; height:40px; border-radius:50%; border:0; display:grid; place-items:center; background: var(--seal-red); color: var(--on-vivid); font-size:14px; cursor:pointer; box-shadow: var(--shadow-card); }
+.expr-play:hover{ background: var(--seal-red-dark); }
+.expr-play.speaking{ background: var(--imperial-gold); }
+.expr-play:focus-visible{ outline:3px solid color-mix(in srgb, var(--seal-red) 55%, transparent); outline-offset:2px; }
+
+.expr-today{ display:flex; flex-direction:column; gap:10px; background: color-mix(in srgb, var(--seal-red) 9%, var(--paper-warm)); border:1.5px solid color-mix(in srgb, var(--seal-red) 30%, var(--paper-line)); border-radius:20px; padding:18px; margin-bottom:16px; }
+.expr-today-eyebrow{ font-size:12px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color: var(--seal-red-dark); }
+.expr-today-row{ display:flex; align-items:center; gap:14px; }
+.expr-today .expr-play{ position:static; flex:none; }
+.expr-play.expr-play-lg{ width:52px; height:52px; font-size:18px; }
+.expr-today-text{ min-width:0; display:flex; flex-direction:column; gap:6px; }
+.expr-today-expr{ font-family: var(--font-display); font-size:28px; font-weight:900; line-height:1.15; color: var(--ink); overflow-wrap:anywhere; text-wrap:balance; }
+.expr-today-meta{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.expr-today-hint{ margin:0; font-size:14px; font-weight:700; color: var(--ink-soft); }
+.expr-today-cta{ align-self:stretch; min-height:48px; }
+@media (min-width:760px){ .expr-today-cta{ align-self:flex-start; } }
+.expr-today-done p{ margin:0; font-weight:800; color: var(--ink); }
+@media (prefers-reduced-motion: no-preference){ .expr-card-seal{ transition: transform .2s ease; } .expr-card-wrap:hover .expr-card-seal{ transform:rotate(0deg); } }
+
 /* Ditado: mesma linguagem das atividades */
 .dictation-player-task{ font-family: var(--font-display); font-size:24px; letter-spacing:-.01em; }
 .dictation-card-module{ font-size:13px; }

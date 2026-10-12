@@ -9840,6 +9840,11 @@ async function importChallengesFromJSON(rawText){
       skipped.push(t('adminChallenges.import.badLevel', { id: item.id, level: item.level }));
       return;
     }
+    // Regra de 12/10/2026: toda expressão nova chega com registro (campo próprio).
+    if (item.type === 'expression' && !Object.prototype.hasOwnProperty.call(EXPRESSION_REGISTERS, item.register)){
+      skipped.push(t('adminChallenges.import.badRegister', { id: item.id }));
+      return;
+    }
     if (existingIds.has(item.id) || seenInBatch.has(item.id)){
       skipped.push(t('adminChallenges.import.dupId', { id: item.id }));
       return;
@@ -10079,6 +10084,24 @@ const CHALLENGE_I18N = {
     'ch.filter.pending': 'Pendentes',
     'ch.filter.done': 'Concluídas',
     'ch.ring.aria': '{done} de {total} concluídas',
+    'ch.reg.formal': 'Formal',
+    'ch.reg.neutral': 'Dia a dia',
+    'ch.reg.familiar': 'Entre amigos',
+    'ch.reg.slang': 'Gíria',
+    'ch.reg.vulgar': 'Pode ofender',
+    'ch.reg.formal.hint': 'Registro formal: bom com desconhecidos e em situações sérias.',
+    'ch.reg.neutral.hint': 'Serve em quase qualquer situação.',
+    'ch.reg.familiar.hint': 'Informal: use com amigos e pessoas próximas.',
+    'ch.reg.slang.hint': 'Gíria: só com pessoas bem próximas.',
+    'ch.reg.vulgar.hint': 'Vulgar: bom reconhecer, melhor não usar.',
+    'ch.album.guess': 'O que será que significa?',
+    'ch.album.seal': 'no álbum',
+    'ch.album.locked': '🔒 Premium',
+    'ch.album.listen': 'Ouvir a expressão',
+    'ch.today.title': 'Expressão de hoje',
+    'ch.today.hint': 'Ouça e tente adivinhar antes de abrir.',
+    'ch.today.cta': 'Descobrir o sentido',
+    'ch.today.allDone': '🎉 Você já descobriu todas as expressões disponíveis.',
     'ch.lt.legend.bad': 'palavra errada',
     'ch.lt.legend.near': 'quase certa',
     'ch.lt.legend.miss': 'faltou',
@@ -10237,6 +10260,24 @@ const CHALLENGE_I18N = {
     'ch.lt.original': "Original sentence",
     'ch.lt.explanation': "Explanation",
     'ch.listenAgain': "▶ Listen again",
+    'ch.reg.formal': "Formal",
+    'ch.reg.neutral': "Everyday",
+    'ch.reg.familiar': "Among friends",
+    'ch.reg.slang': "Slang",
+    'ch.reg.vulgar': "Can offend",
+    'ch.reg.formal.hint': "Formal register: good with strangers and in serious situations.",
+    'ch.reg.neutral.hint': "Works in almost any situation.",
+    'ch.reg.familiar.hint': "Informal: use with friends and people close to you.",
+    'ch.reg.slang.hint': "Slang: only with people very close to you.",
+    'ch.reg.vulgar.hint': "Vulgar: good to recognize, better not to use.",
+    'ch.album.guess': "What could it mean?",
+    'ch.album.seal': "in your album",
+    'ch.album.locked': "🔒 Premium",
+    'ch.album.listen': "Listen to the expression",
+    'ch.today.title': "Expression of the day",
+    'ch.today.hint': "Listen and try to guess before opening it.",
+    'ch.today.cta': "Find out the meaning",
+    'ch.today.allDone': "🎉 You have discovered every available expression.",
     'ch.lt.right': "✅ Correct translation.",
     'ch.lt.partial': "🟡 Almost: right idea, but check the details.",
     'ch.accent.label': "Type what you heard:",
@@ -10666,7 +10707,110 @@ const CHALLENGE_LEVELS_ORDER = ['A1', 'A2', 'B1', 'B2'];
 // que o aluno já fechou, tudo aberto por padrão.
 const collapsedChallengeLevels = new Set();
 
+// Registro das expressões (campo próprio `register`, 12/10/2026). Mesmos
+// valores de REGISTER_KEY em fr/scripts/challenges_import/build_lote_expressoes.py.
+// Toda expressão nova precisa ter registro (skill criar-desafios).
+const EXPRESSION_REGISTERS = {
+  formal:   { icon: '🎩' },
+  neutral:  { icon: '🗣' },
+  familiar: { icon: '😎' },
+  slang:    { icon: '🤙' },
+  vulgar:   { icon: '⚠️' },
+};
+
+function expressionRegisterChipHTML(c){
+  const reg = c && Object.prototype.hasOwnProperty.call(EXPRESSION_REGISTERS, c.register) ? c.register : null;
+  if (!reg) return '';
+  return `<span class="expr-reg expr-reg-${reg}" title="${escapeHtmlChallenge(chT('ch.reg.' + reg + '.hint'))}">${EXPRESSION_REGISTERS[reg].icon} ${chT('ch.reg.' + reg)}</span>`;
+}
+
+// Sentido curto mostrado no cartão do álbum (só depois de concluir, para não
+// entregar a resposta). O aviso de registro no fim do texto sai: agora ele é
+// a etiqueta. Site em outro idioma: o sentido em francês.
+function expressionCardMeaning(c){
+  const lang = (typeof getUiLang === 'function' && getUiLang()) || 'pt-BR';
+  const m = c.meaning || {};
+  const raw = lang === 'pt-BR' ? (m.pt || m.fr) : (m.fr || m.pt);
+  return String(raw || '').replace(/\s*(⚠️\s*)?Registro:[\s\S]*$/, '').trim();
+}
+
+function expressionAudioBtnHTML(c, extraClass){
+  if (!c.expressionAudioFile) return '';
+  return `<button type="button" class="expr-play ${extraClass || ''}" data-expr-audio="${escapeHtmlChallenge(c.expressionAudioFile)}" aria-label="${chT('ch.album.listen')}: ${escapeHtmlChallenge(c.canonicalExpression)}" title="${chT('ch.album.listen')}">▶</button>`;
+}
+
+function wireExpressionAudioButtons(container){
+  container.querySelectorAll('[data-expr-audio]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playPregeneratedAudio(`challenges/${btn.dataset.exprAudio}`, btn);
+    });
+  });
+}
+
+// "Expressão de hoje": uma pendente (não trancada) sorteada pelo dia, do
+// nível mais baixo que ainda tem pendentes; "Pode ofender" só se não sobrar
+// outra. Concluir a do dia faz aparecer a próxima.
+function expressionOfTheDay(list){
+  let pending = list.filter(c => !isChallengeCompleted(c.id) && !isChallengeLocked(c));
+  if (!pending.length) return null;
+  const level = CHALLENGE_LEVELS_ORDER.find(lvl => pending.some(c => c.level === lvl));
+  if (level) pending = pending.filter(c => c.level === level);
+  const polite = pending.filter(c => c.register !== 'vulgar');
+  if (polite.length) pending = polite;
+  pending.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  const day = typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10);
+  let h = 0;
+  for (const ch of day) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return pending[h % pending.length];
+}
+
+function expressionTodayHTML(list){
+  const c = expressionOfTheDay(list);
+  if (!c){
+    return list.length ? `<section class="expr-today expr-today-done"><p>${chT('ch.today.allDone')}</p></section>` : '';
+  }
+  return `
+    <section class="expr-today" aria-labelledby="expr-today-title">
+      <div class="expr-today-eyebrow" id="expr-today-title">${chT('ch.today.title')}</div>
+      <div class="expr-today-row">
+        ${expressionAudioBtnHTML(c, 'expr-play-lg')}
+        <div class="expr-today-text">
+          <div class="expr-today-expr">${escapeHtmlChallenge(c.canonicalExpression)}</div>
+          <div class="expr-today-meta"><span class="challenge-card-level">${escapeHtmlChallenge(c.level || '')}</span>${expressionRegisterChipHTML(c)}</div>
+        </div>
+      </div>
+      <p class="expr-today-hint">${chT('ch.today.hint')}</p>
+      <button type="button" class="btn btn-primary expr-today-cta" data-today-open="${escapeHtmlChallenge(c.id)}">${chT('ch.today.cta')}</button>
+    </section>
+  `;
+}
+
+// Cartão de expressão no estilo álbum de figurinhas: pendente tracejada com
+// "O que será que significa?", concluída mostra o sentido e o selo. O áudio
+// fica fora do <button> do cartão (botão dentro de botão não é válido).
+function expressionCardHTML(c){
+  const done = isChallengeCompleted(c.id);
+  const locked = isChallengeLocked(c);
+  const middle = done
+    ? `<span class="expr-card-meaning">${escapeHtmlChallenge(expressionCardMeaning(c))}</span>`
+    : `<span class="expr-card-hint">${locked ? chT('ch.album.locked') : chT('ch.album.guess')}</span>`;
+  return `
+    <div class="expr-card-wrap">
+      <button class="challenge-card expr-card ${done ? 'completed' : ''} ${locked ? 'locked' : ''}" data-challenge-id="${c.id}">
+        ${done ? `<span class="expr-card-seal">${chT('ch.album.seal')}</span>` : ''}
+        <span class="challenge-card-level">${escapeHtmlChallenge(c.level || '')}</span>
+        <span class="challenge-card-expr">${escapeHtmlChallenge(c.canonicalExpression)}</span>
+        ${middle}
+        <span class="expr-card-foot">${expressionRegisterChipHTML(c)}${tierBadgeHTML(challengeTier(c))}</span>
+      </button>
+      ${locked ? '' : expressionAudioBtnHTML(c)}
+    </div>
+  `;
+}
+
 function challengeCardHTML(c){
+  if (c.type === 'expression') return expressionCardHTML(c);
   const done = isChallengeCompleted(c.id);
   const locked = isChallengeLocked(c);
   return `
@@ -10764,6 +10908,7 @@ function renderChallengesList(type){
   // próprios cards -- em vez de abas que escondem os outros níveis.
   cardsWrap.className = 'challenges-level-sections';
   cardsWrap.innerHTML = `
+    ${expressionTodayHTML(published)}
     <div class="challenges-toolbar">
       <input type="search" class="challenges-search" id="challenges-search" placeholder="${chT('ch.search.placeholder')}" aria-label="${chT('ch.search.label')}" autocomplete="off" value="${escapeHtmlChallenge(challengesListSearch)}">
       <div class="challenges-filter-chips" role="group" aria-label="${chT('ch.filter.label')}">
@@ -10773,6 +10918,10 @@ function renderChallengesList(type){
     <div id="challenges-level-sections-inner"></div>
   `;
   const fillSections = () => fillExpressionLevelSections(type, published);
+  wireExpressionAudioButtons(cardsWrap.querySelector('.expr-today') || document.createElement('div'));
+  cardsWrap.querySelectorAll('[data-today-open]').forEach(btn => {
+    btn.addEventListener('click', () => openChallengePlayer(btn.dataset.todayOpen));
+  });
   document.getElementById('challenges-search').addEventListener('input', e => {
     challengesListSearch = e.target.value;
     fillSections();
@@ -10838,6 +10987,7 @@ function fillExpressionLevelSections(type, published){
   inner.querySelectorAll('.challenge-card').forEach(card => {
     card.addEventListener('click', () => openChallengePlayer(card.dataset.challengeId));
   });
+  wireExpressionAudioButtons(inner);
   inner.querySelectorAll('.challenges-level-heading').forEach(btn => {
     btn.addEventListener('click', () => {
       const level = btn.dataset.level;
@@ -11009,6 +11159,7 @@ function renderExpressionQuestionScreen(c){
       <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="${chT('ch.listenPron')}" title="${chT('ch.listenPron')}">🔊</button>
       ${c.expressionAudioFile ? slowAudioIconBtnHTML('challenge-expression-play-slow-btn') : ''}
     </div>
+    ${c.register ? `<div class="expr-question-reg">${expressionRegisterChipHTML(c)}</div>` : ''}
     <div class="challenge-hypothesis">
       <p class="challenge-question">${escapeHtmlChallenge(c.question)}</p>
       <div class="challenge-choices-wrap">

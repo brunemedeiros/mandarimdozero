@@ -28,10 +28,10 @@
 
 ## Expressões
 
-| Unidade | Expressão | Significado | Exemplo |
-|---|---|---|---|
-| A1-13 | Il pleut des cordes | Está chovendo canivetes; chove muito. | Prends un parapluie, il pleut des cordes ! |
-| A1-14 | Bon voyage ! | Boa viagem! | Tu pars demain ? Bon voyage ! |
-| A1-15 | Bon rétablissement ! | Melhoras! Boa recuperação! | Tu es malade ? Bon rétablissement ! |
-| A1-15 | À tes souhaits ! | Saúde! (quando alguém espirra) | Atchoum ! — À tes souhaits ! |
-| A1-13 | Quel temps ! | Que tempo! (comentando o clima) | Quel temps ! Il pleut encore. |
+| Unidade | Expressão | Registro | Significado | Exemplo |
+|---|---|---|---|---|
+| A1-13 | Il pleut des cordes | neutral | Está chovendo canivetes; chove muito. | Prends un parapluie, il pleut des cordes ! |
+| A1-14 | Bon voyage ! | neutral | Boa viagem! | Tu pars demain ? Bon voyage ! |
+| A1-15 | Bon rétablissement ! | neutral | Melhoras! Boa recuperação! | Tu es malade ? Bon rétablissement ! |
+| A1-15 | À tes souhaits ! | neutral | Saúde! (quando alguém espirra) | Atchoum ! — À tes souhaits ! |
+| A1-13 | Quel temps ! | neutral | Que tempo! (comentando o clima) | Quel temps ! Il pleut encore. |

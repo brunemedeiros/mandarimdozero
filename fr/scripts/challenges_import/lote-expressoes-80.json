@@ -4,6 +4,7 @@
     "type": "expression",
     "canonicalExpression": "n'importe quoi",
     "level": "A2",
+    "register": "familiar",
     "expressionAudioFile": "967f00d93dc2.mp3",
     "meaning": {
       "fr": "Une chose stupide ou fausse ; quelque chose sans sens.",
@@ -50,6 +51,7 @@
     "type": "expression",
     "canonicalExpression": "en avoir marre",
     "level": "A2",
+    "register": "familiar",
     "expressionAudioFile": "d63540365f43.mp3",
     "meaning": {
       "fr": "Être fatigué d'une situation, ne plus la supporter.",
@@ -96,6 +98,7 @@
     "type": "expression",
     "canonicalExpression": "s'en foutre",
     "level": "B1",
+    "register": "slang",
     "expressionAudioFile": "3c38a3d1e5aa.mp3",
     "meaning": {
       "fr": "Ne pas s'intéresser du tout à quelque chose, s'en moquer complètement.",
@@ -142,6 +145,7 @@
     "type": "expression",
     "canonicalExpression": "être dans la merde",
     "level": "B1",
+    "register": "vulgar",
     "expressionAudioFile": "9282cf13d31f.mp3",
     "meaning": {
       "fr": "Être dans une situation très difficile, avoir de gros problèmes.",
@@ -188,6 +192,7 @@
     "type": "expression",
     "canonicalExpression": "ça craint",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "79cbc6bc2efd.mp3",
     "meaning": {
       "fr": "Se dit d'une situation mauvaise, nulle ou inquiétante.",
@@ -234,6 +239,7 @@
     "type": "expression",
     "canonicalExpression": "avoir la flemme",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "4b8d2dee7201.mp3",
     "meaning": {
       "fr": "Ne pas avoir envie de faire un effort, être paresseux sur le moment.",
@@ -280,6 +286,7 @@
     "type": "expression",
     "canonicalExpression": "c'est dingue",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "d720d3d979c9.mp3",
     "meaning": {
       "fr": "Se dit de quelque chose d'incroyable, de surprenant ou d'absurde.",
@@ -326,6 +333,7 @@
     "type": "expression",
     "canonicalExpression": "foutre le camp",
     "level": "B1",
+    "register": "slang",
     "expressionAudioFile": "7a3dea55bc7e.mp3",
     "meaning": {
       "fr": "Partir vite, s'en aller (souvent sur un ton agressif).",
@@ -372,6 +380,7 @@
     "type": "expression",
     "canonicalExpression": "ta gueule",
     "level": "B1",
+    "register": "vulgar",
     "expressionAudioFile": "fff50923cd0a.mp3",
     "meaning": {
       "fr": "Ordre très grossier pour faire taire quelqu'un.",
@@ -418,6 +427,7 @@
     "type": "expression",
     "canonicalExpression": "faire chier",
     "level": "B1",
+    "register": "vulgar",
     "expressionAudioFile": "3d2a36f7a059.mp3",
     "meaning": {
       "fr": "Énerver beaucoup quelqu'un, l'ennuyer fortement.",
@@ -464,6 +474,7 @@
     "type": "expression",
     "canonicalExpression": "se prendre la tête",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "d8e03517a5ee.mp3",
     "meaning": {
       "fr": "Se compliquer la vie, trop réfléchir, ou se disputer pour rien.",
@@ -510,6 +521,7 @@
     "type": "expression",
     "canonicalExpression": "tu parles !",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "8da358140f9c.mp3",
     "meaning": {
       "fr": "Exclamation ironique pour dire que ce qui vient d'être dit est faux.",
@@ -556,6 +568,7 @@
     "type": "expression",
     "canonicalExpression": "c'est du gâteau",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "e2803e0b8978.mp3",
     "meaning": {
       "fr": "Se dit d'une chose très facile à faire.",
@@ -602,6 +615,7 @@
     "type": "expression",
     "canonicalExpression": "avoir le cafard",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "eb8a3a790623.mp3",
     "meaning": {
       "fr": "Se sentir triste, mélancolique, sans raison précise.",
@@ -648,6 +662,7 @@
     "type": "expression",
     "canonicalExpression": "passer un coup de fil",
     "level": "A2",
+    "register": "neutral",
     "expressionAudioFile": "014daa280caf.mp3",
     "meaning": {
       "fr": "Téléphoner à quelqu'un.",
@@ -694,6 +709,7 @@
     "type": "expression",
     "canonicalExpression": "faire la queue",
     "level": "A2",
+    "register": "neutral",
     "expressionAudioFile": "a5392995e3a5.mp3",
     "meaning": {
       "fr": "Attendre son tour, les uns derrière les autres.",
@@ -740,6 +756,7 @@
     "type": "expression",
     "canonicalExpression": "avoir hâte",
     "level": "A2",
+    "register": "neutral",
     "expressionAudioFile": "f33bc67e747f.mp3",
     "meaning": {
       "fr": "Être impatient de faire quelque chose ou qu'une chose arrive.",
@@ -786,6 +803,7 @@
     "type": "expression",
     "canonicalExpression": "mon œil !",
     "level": "B2",
+    "register": "familiar",
     "expressionAudioFile": "7bf7855a49be.mp3",
     "meaning": {
       "fr": "Exclamation ironique pour dire qu'on ne croit pas ce que l'autre raconte.",
@@ -832,6 +850,7 @@
     "type": "expression",
     "canonicalExpression": "monter sur ses grands chevaux",
     "level": "B2",
+    "register": "neutral",
     "expressionAudioFile": "4c55b82e08b9.mp3",
     "meaning": {
       "fr": "Se mettre en colère et réagir de manière excessive ou hautaine.",
@@ -878,6 +897,7 @@
     "type": "expression",
     "canonicalExpression": "avoir un coup de barre",
     "level": "B2",
+    "register": "familiar",
     "expressionAudioFile": "30feb570e21a.mp3",
     "meaning": {
       "fr": "Ressentir une fatigue soudaine et forte.",
@@ -924,6 +944,7 @@
     "type": "expression",
     "canonicalExpression": "dégage",
     "level": "B1",
+    "register": "slang",
     "expressionAudioFile": "6b469f3af421.mp3",
     "meaning": {
       "fr": "Façon très directe et brutale de dire à quelqu'un de partir tout de suite.",
@@ -970,6 +991,7 @@
     "type": "expression",
     "canonicalExpression": "se casser",
     "level": "B1",
+    "register": "slang",
     "expressionAudioFile": "426ba1a9f40b.mp3",
     "meaning": {
       "fr": "Partir, s'en aller, souvent rapidement.",
@@ -1016,6 +1038,7 @@
     "type": "expression",
     "canonicalExpression": "c'est chiant",
     "level": "B1",
+    "register": "vulgar",
     "expressionAudioFile": "5e7197a17f5d.mp3",
     "meaning": {
       "fr": "C'est très ennuyeux ou très pénible à supporter.",
@@ -1062,6 +1085,7 @@
     "type": "expression",
     "canonicalExpression": "avoir la trouille",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "ab382e4bc959.mp3",
     "meaning": {
       "fr": "Avoir peur.",
@@ -1108,6 +1132,7 @@
     "type": "expression",
     "canonicalExpression": "être crevé",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "8c7e9f7c1dc8.mp3",
     "meaning": {
       "fr": "Être très fatigué, ne plus avoir d'énergie.",
@@ -1154,6 +1179,7 @@
     "type": "expression",
     "canonicalExpression": "être bourré",
     "level": "B1",
+    "register": "slang",
     "expressionAudioFile": "7b014b2b0dc6.mp3",
     "meaning": {
       "fr": "Être ivre, avoir bu beaucoup trop d'alcool.",
@@ -1200,6 +1226,7 @@
     "type": "expression",
     "canonicalExpression": "avoir la dalle",
     "level": "B1",
+    "register": "slang",
     "expressionAudioFile": "a9a581cfa1de.mp3",
     "meaning": {
       "fr": "Avoir très faim.",
@@ -1246,6 +1273,7 @@
     "type": "expression",
     "canonicalExpression": "casser les bonbons",
     "level": "B1",
+    "register": "slang",
     "expressionAudioFile": "3b8ce7fb7590.mp3",
     "meaning": {
       "fr": "Énerver quelqu'un, l'embêter sans arrêt.",
@@ -1292,6 +1320,7 @@
     "type": "expression",
     "canonicalExpression": "arrête ton char",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "26d2e5857ecf.mp3",
     "meaning": {
       "fr": "Arrête d'exagérer ou de raconter des histoires.",
@@ -1338,6 +1367,7 @@
     "type": "expression",
     "canonicalExpression": "tomber dans les pommes",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "9e7871831e97.mp3",
     "meaning": {
       "fr": "S'évanouir, perdre connaissance pendant un moment.",
@@ -1384,6 +1414,7 @@
     "type": "expression",
     "canonicalExpression": "donner sa langue au chat",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "9e55cfa45a26.mp3",
     "meaning": {
       "fr": "Arrêter de chercher une réponse et demander la solution.",
@@ -1430,6 +1461,7 @@
     "type": "expression",
     "canonicalExpression": "coûter les yeux de la tête",
     "level": "B1",
+    "register": "neutral",
     "expressionAudioFile": "c8f65484b89f.mp3",
     "meaning": {
       "fr": "Être très cher.",
@@ -1476,6 +1508,7 @@
     "type": "expression",
     "canonicalExpression": "nuit blanche",
     "level": "A2",
+    "register": "neutral",
     "expressionAudioFile": "5e21293f7075.mp3",
     "meaning": {
       "fr": "Une nuit où on ne dort pas.",
@@ -1522,6 +1555,7 @@
     "type": "expression",
     "canonicalExpression": "jeter l'éponge",
     "level": "B1",
+    "register": "neutral",
     "expressionAudioFile": "ba258549ee3e.mp3",
     "meaning": {
       "fr": "Abandonner, arrêter d'essayer.",
@@ -1568,6 +1602,7 @@
     "type": "expression",
     "canonicalExpression": "avoir la tête dans les nuages",
     "level": "B1",
+    "register": "neutral",
     "expressionAudioFile": "e4aa1e5d5e00.mp3",
     "meaning": {
       "fr": "Être distrait, rêver au lieu de faire attention.",
@@ -1614,6 +1649,7 @@
     "type": "expression",
     "canonicalExpression": "avoir le cœur sur la main",
     "level": "B1",
+    "register": "neutral",
     "expressionAudioFile": "a2c765a0bff9.mp3",
     "meaning": {
       "fr": "Être très généreux, aimer aider les autres.",
@@ -1660,6 +1696,7 @@
     "type": "expression",
     "canonicalExpression": "avoir un verre dans le nez",
     "level": "B2",
+    "register": "familiar",
     "expressionAudioFile": "30b75d90ced7.mp3",
     "meaning": {
       "fr": "Avoir un peu trop bu, être légèrement ivre.",
@@ -1706,6 +1743,7 @@
     "type": "expression",
     "canonicalExpression": "coûter la peau des fesses",
     "level": "B2",
+    "register": "familiar",
     "expressionAudioFile": "63b6961989a0.mp3",
     "meaning": {
       "fr": "Coûter extrêmement cher.",
@@ -1752,6 +1790,7 @@
     "type": "expression",
     "canonicalExpression": "en faire tout un fromage",
     "level": "B2",
+    "register": "familiar",
     "expressionAudioFile": "e16d8f769d9e.mp3",
     "meaning": {
       "fr": "Donner trop d'importance à un petit problème.",
@@ -1798,6 +1837,7 @@
     "type": "expression",
     "canonicalExpression": "rire jaune",
     "level": "B2",
+    "register": "neutral",
     "expressionAudioFile": "ac8cb126374c.mp3",
     "meaning": {
       "fr": "Rire sans en avoir envie, pour cacher sa gêne ou sa déception.",
@@ -1844,6 +1884,7 @@
     "type": "expression",
     "canonicalExpression": "ça vaut le coup",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "02111e996b37.mp3",
     "meaning": {
       "fr": "Ça mérite l'effort, le temps ou l'argent qu'on y met.",
@@ -1890,6 +1931,7 @@
     "type": "expression",
     "canonicalExpression": "pas de bol",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "aa7c2454eb35.mp3",
     "meaning": {
       "fr": "On le dit quand quelqu'un n'a pas de chance.",
@@ -1936,6 +1978,7 @@
     "type": "expression",
     "canonicalExpression": "avoir du bol",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "b8fe2ba7c960.mp3",
     "meaning": {
       "fr": "Avoir de la chance.",
@@ -1982,6 +2025,7 @@
     "type": "expression",
     "canonicalExpression": "faire gaffe",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "1aa5b38ad17a.mp3",
     "meaning": {
       "fr": "Faire attention.",
@@ -2028,6 +2072,7 @@
     "type": "expression",
     "canonicalExpression": "se planter",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "9bd034853cec.mp3",
     "meaning": {
       "fr": "Se tromper complètement ou échouer.",
@@ -2074,6 +2119,7 @@
     "type": "expression",
     "canonicalExpression": "c'est nul",
     "level": "A2",
+    "register": "familiar",
     "expressionAudioFile": "7d48b3f1e914.mp3",
     "meaning": {
       "fr": "C'est très mauvais.",
@@ -2120,6 +2166,7 @@
     "type": "expression",
     "canonicalExpression": "c'est génial",
     "level": "A2",
+    "register": "familiar",
     "expressionAudioFile": "f65ec28a488c.mp3",
     "meaning": {
       "fr": "C'est très bien, c'est super.",
@@ -2166,6 +2213,7 @@
     "type": "expression",
     "canonicalExpression": "mince alors",
     "level": "A2",
+    "register": "familiar",
     "expressionAudioFile": "70f5d6ccb6a6.mp3",
     "meaning": {
       "fr": "On le dit quand on est surpris ou un peu énervé.",
@@ -2212,6 +2260,7 @@
     "type": "expression",
     "canonicalExpression": "mort de rire",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "49d97724cd05.mp3",
     "meaning": {
       "fr": "On rit beaucoup, très fort.",
@@ -2258,6 +2307,7 @@
     "type": "expression",
     "canonicalExpression": "être au top",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "c7a32ec5f870.mp3",
     "meaning": {
       "fr": "Être excellent, au meilleur niveau.",
@@ -2304,6 +2354,7 @@
     "type": "expression",
     "canonicalExpression": "perdre patience",
     "level": "B1",
+    "register": "neutral",
     "expressionAudioFile": "254945c10c4c.mp3",
     "meaning": {
       "fr": "Ne plus réussir à attendre calmement, commencer à s'énerver.",
@@ -2350,6 +2401,7 @@
     "type": "expression",
     "canonicalExpression": "tomber amoureux",
     "level": "A2",
+    "register": "neutral",
     "expressionAudioFile": "117627317efa.mp3",
     "meaning": {
       "fr": "Commencer à aimer quelqu'un.",
@@ -2396,6 +2448,7 @@
     "type": "expression",
     "canonicalExpression": "ferme-la",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "028cba4d1368.mp3",
     "meaning": {
       "fr": "Ordre impoli pour dire à quelqu'un de se taire.",
@@ -2442,6 +2495,7 @@
     "type": "expression",
     "canonicalExpression": "fous-moi la paix",
     "level": "B1",
+    "register": "slang",
     "expressionAudioFile": "2ecdf55de052.mp3",
     "meaning": {
       "fr": "Façon très impolie de demander à quelqu'un de nous laisser tranquille.",
@@ -2488,6 +2542,7 @@
     "type": "expression",
     "canonicalExpression": "tu te fous de moi ?",
     "level": "B1",
+    "register": "slang",
     "expressionAudioFile": "7bb905f2e6a5.mp3",
     "meaning": {
       "fr": "Question pour dire qu'on pense que l'autre se moque de nous ou plaisante.",
@@ -2534,6 +2589,7 @@
     "type": "expression",
     "canonicalExpression": "bordel",
     "level": "B1",
+    "register": "vulgar",
     "expressionAudioFile": "e60c7e248086.mp3",
     "meaning": {
       "fr": "Mot très grossier pour exprimer la colère ou l'agacement.",
@@ -2580,6 +2636,7 @@
     "type": "expression",
     "canonicalExpression": "putain",
     "level": "B1",
+    "register": "vulgar",
     "expressionAudioFile": "49d59d36342d.mp3",
     "meaning": {
       "fr": "Mot très grossier pour exprimer une forte surprise, la colère ou l'admiration.",
@@ -2626,6 +2683,7 @@
     "type": "expression",
     "canonicalExpression": "espèce de con",
     "level": "B1",
+    "register": "vulgar",
     "expressionAudioFile": "fb7c9dcadee6.mp3",
     "meaning": {
       "fr": "Insulte pour traiter quelqu'un d'idiot.",
@@ -2672,6 +2730,7 @@
     "type": "expression",
     "canonicalExpression": "connard",
     "level": "B1",
+    "register": "vulgar",
     "expressionAudioFile": "d944c282ee6e.mp3",
     "meaning": {
       "fr": "Insulte pour un homme méchant ou désagréable.",
@@ -2718,6 +2777,7 @@
     "type": "expression",
     "canonicalExpression": "être à côté de la plaque",
     "level": "B2",
+    "register": "familiar",
     "expressionAudioFile": "0a11b28e8379.mp3",
     "meaning": {
       "fr": "Se tromper complètement, ne pas comprendre la situation.",
@@ -2764,6 +2824,7 @@
     "type": "expression",
     "canonicalExpression": "faire semblant",
     "level": "A2",
+    "register": "neutral",
     "expressionAudioFile": "c186b5d9419d.mp3",
     "meaning": {
       "fr": "Montrer une chose qui n'est pas vraie.",
@@ -2810,6 +2871,7 @@
     "type": "expression",
     "canonicalExpression": "faire exprès",
     "level": "A2",
+    "register": "neutral",
     "expressionAudioFile": "462996e4fc59.mp3",
     "meaning": {
       "fr": "Faire une chose volontairement, pas par accident.",
@@ -2856,6 +2918,7 @@
     "type": "expression",
     "canonicalExpression": "tourner la page",
     "level": "B1",
+    "register": "neutral",
     "expressionAudioFile": "1c54c0530e4e.mp3",
     "meaning": {
       "fr": "Oublier une période difficile et passer à autre chose.",
@@ -2902,6 +2965,7 @@
     "type": "expression",
     "canonicalExpression": "en vouloir à quelqu'un",
     "level": "B1",
+    "register": "neutral",
     "expressionAudioFile": "f6f3b8e05fd7.mp3",
     "meaning": {
       "fr": "Être fâché contre quelqu'un à cause de ce qu'il a fait.",
@@ -2948,6 +3012,7 @@
     "type": "expression",
     "canonicalExpression": "c'est foutu",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "a04d7e6e294d.mp3",
     "meaning": {
       "fr": "Il n'y a plus rien à faire, c'est raté.",
@@ -2994,6 +3059,7 @@
     "type": "expression",
     "canonicalExpression": "être fauché",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "d6928082daea.mp3",
     "meaning": {
       "fr": "Ne plus avoir d'argent.",
@@ -3040,6 +3106,7 @@
     "type": "expression",
     "canonicalExpression": "avoir les boules",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "435f5964761e.mp3",
     "meaning": {
       "fr": "Être très déçu, énervé ou triste.",
@@ -3086,6 +3153,7 @@
     "type": "expression",
     "canonicalExpression": "avoir la pêche",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "5380e1ed22f2.mp3",
     "meaning": {
       "fr": "Être en pleine forme, plein d'énergie.",
@@ -3132,6 +3200,7 @@
     "type": "expression",
     "canonicalExpression": "galérer",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "f14168565997.mp3",
     "meaning": {
       "fr": "Avoir beaucoup de difficultés pour faire quelque chose.",
@@ -3178,6 +3247,7 @@
     "type": "expression",
     "canonicalExpression": "avoir du fric",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "c7bb7b392437.mp3",
     "meaning": {
       "fr": "Avoir de l'argent, souvent beaucoup.",
@@ -3224,6 +3294,7 @@
     "type": "expression",
     "canonicalExpression": "tu m'emmerdes",
     "level": "B1",
+    "register": "vulgar",
     "expressionAudioFile": "b8da9a1e18f0.mp3",
     "meaning": {
       "fr": "Tu m'énerves beaucoup, tu me déranges.",
@@ -3270,6 +3341,7 @@
     "type": "expression",
     "canonicalExpression": "va te faire voir",
     "level": "B2",
+    "register": "slang",
     "expressionAudioFile": "a73f5f155b56.mp3",
     "meaning": {
       "fr": "Phrase pour envoyer promener quelqu'un avec colère.",
@@ -3316,6 +3388,7 @@
     "type": "expression",
     "canonicalExpression": "tirer la gueule",
     "level": "B2",
+    "register": "vulgar",
     "expressionAudioFile": "8ce0248ce218.mp3",
     "meaning": {
       "fr": "Montrer sa mauvaise humeur par un visage fermé, bouder.",
@@ -3362,6 +3435,7 @@
     "type": "expression",
     "canonicalExpression": "se foutre de la gueule de quelqu'un",
     "level": "B2",
+    "register": "slang",
     "expressionAudioFile": "f424a5d9f4ed.mp3",
     "meaning": {
       "fr": "Se moquer de quelqu'un, le prendre pour un idiot.",
@@ -3408,6 +3482,7 @@
     "type": "expression",
     "canonicalExpression": "être sur les nerfs",
     "level": "B2",
+    "register": "familiar",
     "expressionAudioFile": "eb2b8fd98610.mp3",
     "meaning": {
       "fr": "Être très tendu, stressé et prêt à s'énerver.",
@@ -3454,6 +3529,7 @@
     "type": "expression",
     "canonicalExpression": "il pleut des cordes",
     "level": "B2",
+    "register": "familiar",
     "expressionAudioFile": "77651eea9407.mp3",
     "meaning": {
       "fr": "Il pleut très fort.",
@@ -3500,6 +3576,7 @@
     "type": "expression",
     "canonicalExpression": "mettre le paquet",
     "level": "B2",
+    "register": "familiar",
     "expressionAudioFile": "b6206a8f1b82.mp3",
     "meaning": {
       "fr": "Faire tous les efforts possibles ou dépenser beaucoup pour quelque chose.",
@@ -3546,6 +3623,7 @@
     "type": "expression",
     "canonicalExpression": "à fond la caisse",
     "level": "B2",
+    "register": "familiar",
     "expressionAudioFile": "439a5be717ec.mp3",
     "meaning": {
       "fr": "À toute vitesse, très vite.",
@@ -3592,6 +3670,7 @@
     "type": "expression",
     "canonicalExpression": "ça ne casse pas des briques",
     "level": "B2",
+    "register": "familiar",
     "expressionAudioFile": "0052e4521638.mp3",
     "meaning": {
       "fr": "Ce n'est pas extraordinaire, c'est assez moyen.",
@@ -3638,6 +3717,7 @@
     "type": "expression",
     "canonicalExpression": "être cinglé",
     "level": "B1",
+    "register": "familiar",
     "expressionAudioFile": "eb3a771041c9.mp3",
     "meaning": {
       "fr": "Être fou, faire des choses bizarres ou dangereuses.",

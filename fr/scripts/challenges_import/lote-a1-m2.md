@@ -28,10 +28,10 @@
 
 ## Expressões
 
-| Unidade | Expressão | Significado | Exemplo |
-|---|---|---|---|
-| A1-5 | Bon appétit ! | Bom apetite! | Voilà ton plat. — Bon appétit ! |
-| A1-5 | À table ! | Hora de comer! Para a mesa! | Les enfants, à table ! |
-| A1-6 | À tout à l'heure ! | Até daqui a pouco! | Je vais au marché. — À tout à l'heure ! |
-| A1-6 | Tout de suite | Agora mesmo; já. | Tu viens ? — Oui, tout de suite ! |
-| A1-7 | Bonne journée ! | Tenha um bom dia! | Au revoir et bonne journée ! |
+| Unidade | Expressão | Registro | Significado | Exemplo |
+|---|---|---|---|---|
+| A1-5 | Bon appétit ! | neutral | Bom apetite! | Voilà ton plat. — Bon appétit ! |
+| A1-5 | À table ! | neutral | Hora de comer! Para a mesa! | Les enfants, à table ! |
+| A1-6 | À tout à l'heure ! | neutral | Até daqui a pouco! | Je vais au marché. — À tout à l'heure ! |
+| A1-6 | Tout de suite | neutral | Agora mesmo; já. | Tu viens ? — Oui, tout de suite ! |
+| A1-7 | Bonne journée ! | neutral | Tenha um bom dia! | Au revoir et bonne journée ! |
