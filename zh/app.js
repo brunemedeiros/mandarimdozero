@@ -7704,17 +7704,17 @@ function renderProgressView(){
   ` : '';
 
   document.getElementById('stat-cards').innerHTML = guestWarning + `
-    <div class="stat-card"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">${t('zh.progress.statUnits')}</div></div>
-    <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">${t('zh.progress.statWords')}</div></div>
-    <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">${t('zh.progress.statStreak')}</div></div>
-    <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">${t('zh.progress.statReviews')}</div></div>
+    <div class="stat-card" data-stat="units"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">${t('zh.progress.statUnits')}</div></div>
+    <div class="stat-card" data-stat="words"><div class="num">${learnedCards}/${totalCards}</div><div class="label">${t('zh.progress.statWords')}</div></div>
+    <div class="stat-card" data-stat="streak"><div class="num">${effectiveStreak()}</div><div class="label">${t('zh.progress.statStreak')}</div></div>
+    <div class="stat-card" data-stat="reviews"><div class="num">${STATE.totalReviews}</div><div class="label">${t('zh.progress.statReviews')}</div></div>
     <div class="stat-card" data-stat="new"><div class="num">${sc.new}</div><div class="label">${t('progress.statNew')}</div></div>
     <div class="stat-card" data-stat="learning"><div class="num">${sc.learning}</div><div class="label">${t('progress.statLearning')}</div></div>
     <div class="stat-card" data-stat="review"><div class="num">${sc.review}</div><div class="label">${t('progress.statReview')}</div></div>
     <div class="stat-card" data-stat="due"><div class="num">${sc.due}</div><div class="label">${t('progress.statDueNow')}</div></div>
     <div class="stat-card" data-stat="today" title="${escapeHTML(t('progress.statTodayTitle'))}"><div class="num">${studyToday}</div><div class="label">${t('progress.statToday')}</div></div>
     ${ownContentCards}
-    <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
+    <div class="stat-card" data-stat="xp"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
   `;
 
   if (!CURRENT_USER){

@@ -310,12 +310,12 @@ async function runNew(browser, lang, port){
   await setup(page);
   await page.evaluate(() => { Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (t) => { window.__copied = t; } }, configurable: true }); });
   await page.evaluate(() => switchTab('friends'));
-  await page.waitForSelector('#friends-mini-rank-rows .friends-pod');
-  const podIds = await page.locator('#friends-mini-rank-rows .friends-pod').evaluateAll(els => els.map(e => e.dataset.podiumUser));
+  await page.waitForSelector('#friends-mini-rank-rows .lb-pod');
+  const podIds = await page.locator('#friends-mini-rank-rows .lb-pod').evaluateAll(els => els.map(e => e.dataset.podiumUser));
   check(`${L}: pódio com eu + amigos, na ordem visual 2º, 1º, 3º`, JSON.stringify(podIds) === JSON.stringify(['me', 'bia', 'caio']), podIds);
-  check(`${L}: pódio: Bia (180 XP) no degrau 1`, (await page.getAttribute('.friends-pod.pos-1', 'data-podium-user')) === 'bia');
-  check(`${L}: pódio marca "Você"`, (await page.locator('.friends-pod.is-me .friends-pod-name').textContent()) === 'Você');
-  const duel = await page.locator('.friends-duel').textContent();
+  check(`${L}: pódio: Bia (180 XP) no degrau 1`, (await page.getAttribute('.lb-pod.pos-1', 'data-podium-user')) === 'bia');
+  check(`${L}: pódio marca "Você"`, (await page.locator('.lb-pod.is-me .lb-pod-name').textContent()) === 'Você');
+  const duel = await page.locator('#friends-rank .lb-duel').textContent();
   check(`${L}: "Faltam 81 XP para você passar Bia" (180 - 100 + 1)`, /Faltam 81 XP para você passar Bia/.test(duel), duel);
   check(`${L}: XP da semana no cartão do amigo`, (await page.locator('[data-friend-xp="bia"]').textContent()) === '180 XP');
   check(`${L}: prazo da disputa aparece`, /acaba (hoje|em \d dias)/.test(await page.locator('.friends-week-days').textContent()));
@@ -324,7 +324,7 @@ async function runNew(browser, lang, port){
   await page.click(`#friends-mini-rank [data-friends-rank-scope="${appKey}"]`);
   await page.waitForFunction((k) => __rpc.some(r => r.name === 'friends_leaderboard' && r.args.p_scope === k), appKey);
   check(`${L}: seletor de idioma do mini ranking chama a RPC com o idioma`, true);
-  await page.waitForSelector('#friends-mini-rank-rows .friends-pod');
+  await page.waitForSelector('#friends-mini-rank-rows .lb-pod');
   check(`${L}: chip do idioma fica ativo`, (await page.locator('#friends-mini-rank .leaderboard-tab.active').getAttribute('data-friends-rank-scope')) === appKey);
   await page.click('#friends-mini-rank [data-friends-rank-scope="all"]');
   await page.waitForFunction(() => document.querySelector('#friends-mini-rank .leaderboard-tab.active')?.dataset.friendsRankScope === 'all');
@@ -402,7 +402,7 @@ async function visual(browser, lang, port){
     await page.evaluate(() => refreshFriendRequestCount());
     await page.evaluate(() => switchTab('friends'));
     await page.waitForSelector('#friends-list');
-    await page.waitForSelector('#friends-mini-rank-rows .friends-pod');
+    await page.waitForSelector('#friends-mini-rank-rows .lb-pod');
     await page.waitForSelector('#friends-activity .friends-activity-row');
     await page.fill('#friends-search-input', 'joão');
     await page.waitForSelector('#friends-search-results [data-friend-row="joao"]');

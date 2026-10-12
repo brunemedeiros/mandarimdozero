@@ -75,6 +75,7 @@ try{
   --grade-again-bg: #A83A2E; --grade-hard-bg: #8C5F0E; --grade-good-bg: #3A7359; --grade-easy-bg: #2E7D4F;
   /* Medalhas do pódio (Amigos > Disputa da semana): texto escuro fixo, legível nos dois temas. */
   --medal-gold: #F2B33D; --medal-silver: #BCC5D1; --medal-bronze: #D58A4E; --on-medal: #2A1E05;
+  --error-red: #D62619; /* faltava no zh: selo +N, opção errada, apagar Deck (mesmo valor do fr) */
   /* Selo colorido atrás do ícone de cada desafio diário -- 3 cores fixas
      por posição no card (não por desafio específico), pra manter a mesma
      assinatura visual todo dia mesmo quando o desafio sorteado muda. */
@@ -139,6 +140,7 @@ try{
     --on-vivid: #1B1512;
     --grade-again-bg: #FF7B6E; --grade-hard-bg: #C9973A; --grade-good-bg: #52B487; --grade-easy-bg: #7CCBA0;
     --medal-gold: #F5C25B; --medal-silver: #C9D2DD; --medal-bronze: #E3A06C; --on-medal: #2A1E05;
+    --error-red: #FF6B5C; /* faltava no zh: selo +N, opção errada, apagar Deck (mesmo valor do fr) */
     --dc-slot-0: #F7B84A;
     --dc-slot-1: #9A85FF;
     --dc-slot-2: #5B9DFF;
@@ -167,6 +169,7 @@ try{
   --on-vivid: #1B1512;
   --grade-again-bg: #FF7B6E; --grade-hard-bg: #C9973A; --grade-good-bg: #52B487; --grade-easy-bg: #7CCBA0;
   --medal-gold: #F5C25B; --medal-silver: #C9D2DD; --medal-bronze: #E3A06C; --on-medal: #2A1E05;
+  --error-red: #FF6B5C; /* faltava no zh: selo +N, opção errada, apagar Deck (mesmo valor do fr) */
   --dc-slot-0: #F7B84A;
   --dc-slot-1: #9A85FF;
   --dc-slot-2: #5B9DFF;
@@ -2002,24 +2005,6 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .friends-week-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
 .friends-week-title{ font-family:var(--font-body); margin:0; font-size:19px; font-weight:900; color:var(--ink); }
 .friends-week-days{ font-size:12.5px; font-weight:800; color:var(--ink-soft); background:var(--paper-warm); padding:3px 10px; border-radius:999px; }
-.friends-podium{ display:grid; grid-template-columns:repeat(var(--pods, 3), 1fr); align-items:end; gap:10px; margin:16px auto 4px; max-width:360px; }
-.friends-pod{ display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0; }
-.friends-pod .friends-avatar{ width:46px; height:46px; font-size:16px; }
-.friends-pod.pos-1 .friends-avatar{ width:60px; height:60px; font-size:21px; }
-.friends-pod.is-me .friends-avatar{ box-shadow:0 0 0 3px var(--paper), 0 0 0 6px var(--seal-red); }
-.friends-pod-name{ font-weight:800; font-size:14px; color:var(--ink); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.friends-pod.is-me .friends-pod-name{ color:var(--seal-red-dark); }
-.friends-pod-xp{ font-size:12.5px; font-weight:800; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
-.friends-pod-step{ width:100%; margin-top:4px; border-radius:14px 14px 6px 6px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:22px; color:var(--on-medal); }
-.friends-pod.pos-1 .friends-pod-step{ height:88px; background:var(--medal-gold); }
-.friends-pod.pos-2 .friends-pod-step{ height:64px; background:var(--medal-silver); }
-.friends-pod.pos-3 .friends-pod-step{ height:46px; background:var(--medal-bronze); }
-.friends-duel{ margin-top:12px; background:var(--paper-warm); border-radius:16px; padding:12px 14px; }
-.friends-duel p{ margin:0; font-weight:800; font-size:15px; color:var(--ink); }
-.friends-duel p strong{ color:var(--seal-red-dark); }
-.friends-bar{ height:12px; border-radius:999px; background:var(--paper-line); overflow:hidden; margin-top:8px; }
-.friends-bar i{ display:block; height:100%; border-radius:999px; background:linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); }
-.friends-bar-labels{ display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:var(--ink-soft); margin-top:4px; font-variant-numeric:tabular-nums; }
 .friends-feed{ margin-top:12px; display:grid; gap:8px; }
 .friends-feed:empty{ display:none; }
 .friends-activity-row{ display:flex; align-items:center; gap:10px; font-size:14px; color:var(--ink); }
@@ -2028,10 +2013,6 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .friends-feed-empty{ margin:0; font-size:13.5px; color:var(--ink-soft); }
 .friends-link{ display:inline-block; margin-top:12px; padding:6px 0; background:none; border:none; font:inherit; font-weight:800; font-size:14px; color:var(--seal-red-dark); cursor:pointer; }
 .friends-link:hover{ text-decoration:underline; }
-@media (prefers-reduced-motion: no-preference){
-  .friends-bar i{ animation: friends-bar-grow 1s cubic-bezier(.2,.8,.2,1) both; }
-  @keyframes friends-bar-grow{ from{ width:0; } }
-}
 
 /* Busca */
 .friends-search{ display:flex; align-items:center; gap:8px; background:var(--paper); border:2px solid var(--paper-line); border-radius:14px; padding:0 12px; }
@@ -3432,6 +3413,114 @@ body.hide-pinyin .prompt-pinyin{
   .panel-view .panel-nav{ flex-wrap:nowrap; overflow-x:auto; max-width:100%; justify-content:flex-start; }
   .panel-view .panel-nav .deck-topbar-btn{ white-space:nowrap; }
 }
+/* ---------- Cara de jogo: telas (passo 4, docs/historico/15) ----------
+   Bloco único com o visual "de jogo" das telas fora de Amigos: pódio e "faltam
+   X XP" (Ranking e Amigos), Perfil, Progresso, Metas e o volume dos cartões
+   clicáveis. Fica no fim do <style> de propósito: sobrescreve as regras
+   antigas de cada tela sem precisar reescrevê-las. */
+
+/* Pódio + barra (leaderboardPodiumHTML / leaderboardDuelHTML) */
+.lb-podium{ display:grid; grid-template-columns:repeat(var(--pods, 3), 1fr); align-items:end; gap:10px; margin:16px auto 4px; max-width:360px; }
+.lb-pod{ display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0; }
+.lb-pod-avatar{ width:46px; height:46px; border-radius:50%; flex-shrink:0; object-fit:cover; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:16px; }
+.lb-pod.pos-1 .lb-pod-avatar{ width:60px; height:60px; font-size:21px; }
+.lb-pod.is-me .lb-pod-avatar{ box-shadow:0 0 0 3px var(--paper), 0 0 0 6px var(--seal-red); }
+.lb-pod-name{ font-weight:800; font-size:14px; color:var(--ink); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lb-pod.is-me .lb-pod-name{ color:var(--seal-red-dark); }
+.lb-pod-xp{ font-size:12.5px; font-weight:800; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.lb-pod-step{ width:100%; margin-top:4px; border-radius:14px 14px 6px 6px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:22px; color:var(--on-medal); }
+.lb-pod.pos-1 .lb-pod-step{ height:88px; background:var(--medal-gold); }
+.lb-pod.pos-2 .lb-pod-step{ height:64px; background:var(--medal-silver); }
+.lb-pod.pos-3 .lb-pod-step{ height:46px; background:var(--medal-bronze); }
+.lb-duel{ margin-top:12px; background:var(--paper-warm); border-radius:16px; padding:12px 14px; }
+.lb-duel p{ margin:0; font-weight:800; font-size:15px; color:var(--ink); }
+.lb-duel p strong{ color:var(--seal-red-dark); }
+.lb-bar{ height:12px; border-radius:999px; background:var(--paper-line); overflow:hidden; margin-top:8px; }
+.lb-bar i{ display:block; height:100%; border-radius:999px; background:linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); }
+.lb-bar-labels{ display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:var(--ink-soft); margin-top:4px; font-variant-numeric:tabular-nums; }
+@media (prefers-reduced-motion: no-preference){
+  .lb-bar i{ animation: lb-bar-grow 1s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes lb-bar-grow{ from{ width:0; } }
+}
+
+/* Ranking completo */
+.lb-days-pill{ display:inline-block; font-size:12.5px; font-weight:800; color:var(--ink-soft); background:var(--paper-warm); border:1px solid var(--paper-line); padding:4px 12px; border-radius:999px; }
+.lb-game{ background:var(--paper); border:1px solid var(--paper-line); border-radius:22px; padding:8px 16px 16px; box-shadow:var(--shadow-card); margin-bottom:14px; }
+.leaderboard-list{ border:1px solid var(--paper-line); border-radius:20px; box-shadow:0 3px 0 var(--paper-line); }
+.leaderboard-row{ padding-top:12px; padding-bottom:12px; }
+.leaderboard-name{ font-size:14.5px; font-weight:800; }
+.leaderboard-xp{ font-size:13px; font-weight:900; background:var(--paper-warm); border-radius:999px; padding:3px 10px; color:var(--ink); }
+.leaderboard-row.me{
+  background: var(--paper-warm);
+  background: color-mix(in srgb, var(--seal-red) 16%, var(--paper));
+  box-shadow: inset 0 0 0 2px var(--seal-red);
+}
+.leaderboard-row.me .leaderboard-rank,
+.leaderboard-row.me .leaderboard-name,
+.leaderboard-row.me .leaderboard-you-tag{ color:var(--ink); }
+.leaderboard-row.me .leaderboard-xp{ color:var(--ink); background:var(--paper); }
+
+/* Perfil > Visão geral */
+.profile-hero{ position:relative; margin-top:14px; padding:22px 16px 18px; border-radius:22px; border:1px solid var(--paper-line); box-shadow:var(--shadow-card);
+  background: var(--paper-warm);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--seal-red) 18%, var(--paper)) 0, color-mix(in srgb, var(--imperial-gold) 10%, var(--paper)) 64px, var(--paper) 120px); }
+.profile-hero .profile-avatar{ width:88px; height:88px; font-size:32px; box-shadow:0 0 0 4px var(--paper), 0 0 0 7px var(--seal-red); }
+.profile-hero .profile-name{ font-size:22px; font-weight:900; margin-top:6px; }
+.profile-hero .profile-edit-btn{ font-size:13px; font-weight:800; color:var(--ink); background:var(--paper-warm); border:2px solid var(--paper-line); border-radius:12px; padding:7px 16px; box-shadow:0 3px 0 var(--paper-line); }
+.profile-hero .profile-edit-btn:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--paper-line); }
+.profile-lang-card{ border-radius:16px; padding:12px 14px; box-shadow:0 3px 0 var(--paper-line); }
+.profile-lang-name{ font-size:15px; font-weight:900; }
+.profile-lang-level{ font-size:12.5px; font-weight:700; }
+.profile-lang-bar{ height:10px; border-radius:999px; margin-top:7px; }
+.profile-lang-bar > div{ border-radius:999px; background:linear-gradient(90deg, var(--jade), var(--seal-red)); }
+.profile-nums-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; justify-content:stretch; }
+.profile-num{ display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; column-gap:12px; align-items:center; background:var(--paper); border:1px solid var(--paper-line); border-radius:18px; padding:12px 14px; box-shadow:0 3px 0 var(--paper-line); }
+.profile-num-icon{ grid-row:1 / span 2; width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:24px; background:var(--paper-warm); }
+.profile-num.is-streak .profile-num-icon{ background: var(--paper-warm); background: color-mix(in srgb, var(--medal-bronze) 30%, var(--paper)); }
+.profile-num.is-xp .profile-num-icon{ background: var(--paper-warm); background: color-mix(in srgb, var(--medal-gold) 30%, var(--paper)); }
+.profile-num .v{ font-size:26px; font-weight:900; color:var(--ink); text-align:left; line-height:1.1; font-variant-numeric:tabular-nums; }
+.profile-num .l{ font-size:13px; font-weight:700; color:var(--ink-soft); text-transform:none; letter-spacing:0; text-align:left; margin-top:0; }
+
+/* Conquistas: bloqueadas em cinza com cadeado (antes: só transparência) */
+.badge{ position:relative; border-radius:16px; opacity:1; filter:grayscale(1); background:var(--paper-warm); border:1px dashed var(--paper-line); }
+.badge:not(.earned) .icon{ opacity:.5; }
+.badge:not(.earned) .name{ color:var(--ink-soft); }
+.badge:not(.earned)::after{ content:'🔒'; position:absolute; top:6px; right:7px; font-size:11px; filter:none; }
+.badge.earned{ filter:none; border:2px solid var(--imperial-gold); box-shadow:0 3px 0 var(--imperial-gold); }
+.badge.earned .icon{ font-size:30px; }
+
+/* Progresso: números com ícone e volume */
+.stat-card{ position:relative; border-radius:18px; padding:14px 14px 14px 64px; min-height:76px; display:flex; flex-direction:column; justify-content:center; box-shadow:0 3px 0 var(--paper-line); }
+.stat-card::before{ content:'📊'; position:absolute; left:12px; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:21px; background:var(--paper-warm); }
+.stat-card .num{ font-size:24px; font-weight:900; color:var(--ink); margin-bottom:4px; font-variant-numeric:tabular-nums; }
+.stat-card .label{ font-size:12.5px; }
+.stat-card[data-stat="units"]::before{ content:'🗺️'; }
+.stat-card[data-stat="words"]::before{ content:'📚'; }
+.stat-card[data-stat="streak"]::before{ content:'🔥'; }
+.stat-card[data-stat="reviews"]::before{ content:'🔁'; }
+.stat-card[data-stat="new"]::before{ content:'🌱'; }
+.stat-card[data-stat="learning"]::before{ content:'🧠'; }
+.stat-card[data-stat="review"]::before{ content:'🔄'; }
+.stat-card[data-stat="due"]::before{ content:'⏰'; }
+.stat-card[data-stat="today"]::before{ content:'📅'; }
+.stat-card[data-stat="xp"]::before{ content:'⭐'; }
+.stat-card[data-stat^="content-"]::before{ content:'📖'; }
+
+/* Volume nos cartões clicáveis (mesma "borda de baixo" dos botões) */
+.challenge-category-card, .review-mode-card, .unit-block{ box-shadow:0 3px 0 var(--paper-line); }
+
+/* Metas */
+.study-plan-card{ border-radius:22px; box-shadow:var(--shadow-card); }
+.study-plan-title{ font-size:19px; font-weight:900; }
+.study-plan-empty-art{ display:flex; justify-content:center; margin:6px 0 16px; }
+.study-plan-empty-art span{ width:84px; height:84px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:44px;
+  background: var(--paper-warm);
+  background: radial-gradient(circle, var(--paper) 0 34%, color-mix(in srgb, var(--seal-red) 22%, var(--paper)) 35% 58%, var(--paper) 59% 66%, color-mix(in srgb, var(--imperial-gold) 25%, var(--paper)) 67%);
+  box-shadow:0 3px 0 var(--paper-line); }
+.study-plan-today-label, .wizard-summary-goal-label{ font-size:13px; text-transform:none; letter-spacing:0; }
+.study-plan-today-num{ font-size:22px; font-weight:900; }
+
+/* ---------- fim: cara de jogo, telas ---------- */
 </style>
 </head>
 <body>

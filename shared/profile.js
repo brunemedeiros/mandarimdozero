@@ -535,7 +535,17 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
         </div>
       `).join('')}
     </div>
-  ` : `<p class="profile-empty-note">${t('profile.noBadges')}</p>`;
+  ` : `<p class="profile-empty-note">${t('profile.noBadges')}</p>
+    <div class="profile-badge-showcase is-locked-preview">
+      ${BADGES.slice(0, 4).map(b => `
+        <div class="badge profile-badge is-locked" data-badge-id="${b.id}">
+          <div class="icon">${b.icon}</div>
+          <div class="name">${b.name}</div>
+        </div>
+      `).join('')}
+    </div>`;
+  // Sem nenhuma conquista ainda: as 4 primeiras aparecem bloqueadas (em cinza,
+  // com cadeado) como meta, no lugar de só uma frase. Tocar mostra como ganhar.
 
   // Badges especiais (Fundadora, Beta Tester...) ficam junto da identidade,
   // não misturados com a grade de conquistas por gameplay -- são sobre
@@ -563,7 +573,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
       <button class="leaderboard-tab" data-tab="friends">${t('profile.tabFriends')}</button>
     </div>
     ${guestNote}
-    <div class="profile-identity">
+    <div class="profile-identity profile-hero">
       ${avatarHTML}
       <div class="profile-name">${name}</div>
       ${profile ? `<div class="profile-username">@${profile.username}</div>` : ''}
@@ -576,8 +586,8 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
       <div class="section-label">${t('profile.sectionLangs')}</div>
       <div class="profile-langs-row">${langsHTML}</div>
       <div class="profile-nums-row">
-        <div class="profile-num"><div class="v">🔥 ${effectiveStreak()}</div><div class="l">${t('profile.streakLabel')}</div></div>
-        <div class="profile-num"><div class="v">${STATE.xp}</div><div class="l">${t('profile.xpLabel')}</div></div>
+        <div class="profile-num is-streak"><span class="profile-num-icon" aria-hidden="true">🔥</span><div class="v">${effectiveStreak()}</div><div class="l">${t('profile.streakLabel')}</div></div>
+        <div class="profile-num is-xp"><span class="profile-num-icon" aria-hidden="true">⭐</span><div class="v">${STATE.xp}</div><div class="l">${t('profile.xpLabel')}</div></div>
       </div>
       <button class="profile-stats-link" id="profile-stats-link">${t('profile.statsLink')}</button>
     </div>

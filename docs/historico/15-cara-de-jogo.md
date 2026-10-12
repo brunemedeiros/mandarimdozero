@@ -11,7 +11,7 @@ A maquete aprovada como direção é o artifact "Amigos com cara de jogo" (claud
    entram junto com a primeira tela que usar cada um (passo 3).
 3. Aba Amigos redesenhada conforme a maquete (fecha os achados da auditoria). **Feito.**
 4. Outras telas: Perfil (Visão geral, Metas, Progresso) e Ranking (estética antiga); Configurações (metade);
-   ajuste fino em Desafios, Revisão e Trilha.
+   ajuste fino em Desafios, Revisão e Trilha. **Feito.**
 5. Dados novos: sequência e idioma por amigo no `friends_leaderboard` (migration), sequência como evento na
    atividade, botão "Parabenizar" (proposta: grátis).
 
@@ -69,3 +69,35 @@ Só tela, com os dados que já existiam (sem migration). Grátis x Premium: tudo
 - No teste, `navigator.serviceWorker.ready` nunca resolve (SW bloqueado), e a aba Notificações ficava carregando: o
   teste troca `getLocalPushSubscription` por uma que devolve null. Em produção isso não acontece.
 - Validação visual: fr/zh × claro/escuro, celular com e sem amigos, menu aberto, Configurações > Notificações.
+
+## Passo 4: outras telas (2026-10-12)
+
+Só tela e texto, sem migration. Grátis x Premium: tudo grátis.
+
+- CSS novo num bloco único no fim do `<style>` de fr e zh: `/* ---------- Cara de jogo: telas` até
+  `/* ---------- fim: cara de jogo, telas`. Sobrescreve as regras antigas de cada tela sem reescrevê-las (próximas
+  telas entram nesse bloco). O teste de i18n já ignora tudo do bloco dos Painéis até o `</style>`.
+- Ranking completo (`shared/leaderboard.js`): prazo em pílula, cartão com pódio dos 3 primeiros e "Faltam X XP"
+  acima da lista (a lista completa continua embaixo), linha "você" com fundo claro e contorno da cor da marca (antes:
+  fundo cheio azul/vermelho), XP em pílula. Pódio clicável abre o perfil, como as linhas.
+- Pódio e barra viraram genéricos em `leaderboard.js` (`leaderboardPodiumHTML`, `leaderboardDuelHTML`, classes `lb-*`);
+  Perfil > Amigos passou a usar os mesmos. Os textos continuam com as chaves `friends.*` (nasceram em Amigos).
+- Perfil > Visão geral (`shared/profile.js`): identidade num cartão com faixa de cor e anel no avatar, "Editar perfil"
+  com volume, barra do idioma mais grossa, sequência e XP em blocos com ícone (rótulos sem caixa alta). Sem nenhuma
+  conquista, as 4 primeiras aparecem bloqueadas (tocar mostra como ganhar).
+- Conquistas (Perfil e Progresso): bloqueadas em cinza com cadeado e borda tracejada (antes: só transparência);
+  ganhas com borda e "volume" na cor de destaque.
+- Progresso: cada número ganhou ícone (`data-stat` novo em unidades, palavras, sequência, revisões e XP, em fr e zh).
+- Metas: sem meta, um alvo grande acima de "Definir minha meta"; rótulos sem caixa alta.
+- Desafios, Revisão e Trilha: cartões clicáveis com a mesma borda de baixo dos botões.
+- Configurações > Notificações: 6 textos sem "--" nem "pra" (regra do projeto). Lista `GAME_PASS_KEYS` no teste de i18n.
+- zh não definia `--error-red` (usado no selo "+N", na opção errada e em apagar Deck): o selo de pedidos aparecia sem
+  fundo. Token criado nos 3 blocos de tema do zh com os valores do fr.
+- Testes: amigos 182/182, i18n unit 2033/2033 (6 a menos porque os textos reescritos saem da comparação com o texto
+  antigo), k2e 28/28, k7 40/40, revisao-ajustes 48/48, deck-browser 206/206, desafios-conclusao 19/19,
+  desafios-modulo 75/75, placeholders 45/45, checkpoint-zh 25/25, ditado 58/58, fase-public-deck 152 ok, trilha
+  (mobile_shell 108, trail_map 61, review_milestone_ui 34, skip_checkpoint_ui 19) sem falhas. desafios-progresso 22/23:
+  "barra existe" falha igual na main (a barra do cartão de categoria foi escondida numa passada de design anterior;
+  pré-existente).
+- Validação visual: Perfil, Metas, Progresso, Ranking, Desafios, Revisão, Trilha e Configurações em fr claro/escuro,
+  celular e zh claro/escuro.

@@ -244,11 +244,6 @@ function friendsSubnavHTML(active){
   </div>`;
 }
 
-const friendFirstName = (profile) => {
-  const full = profile?.display_name || profile?.username || t('leaderboard.anonymous');
-  return full.split(/\s+/)[0];
-};
-
 // Um único botão de convite: abre o compartilhar do aparelho quando existe,
 // senão copia o link (friendsInviteAction decide).
 function friendsInviteButtonHTML(extraClass){
@@ -425,47 +420,6 @@ async function renderFriendsView(){
   if (keepQuery.trim().length >= 3) runFriendsSearch(keepQuery);
 }
 
-// ---------- disputa da semana: pódio + "faltam X XP" ----------
-function friendsPodiumHTML(rows, me){
-  const top = rows.slice(0, 3);
-  // Ordem visual de pódio: 2º, 1º, 3º.
-  const order = top.length >= 2 ? [top[1], top[0], top[2]].filter(Boolean) : top;
-  return `<div class="friends-podium" style="--pods:${order.length}">${order.map(r => {
-    const isMe = r.user_id === me;
-    const name = isMe ? t('friends.week.you') : friendFirstName(r.profile);
-    return `<div class="friends-pod pos-${r.rank} ${isMe ? 'is-me' : ''}" data-podium-user="${escapeAttr(r.user_id)}">
-      ${friendAvatarHTML(r.profile, r.user_id)}
-      <span class="friends-pod-name">${escapeHTML(name)}</span>
-      <span class="friends-pod-xp">${Number(r.amount || 0)} XP</span>
-      <div class="friends-pod-step" aria-label="${escapeAttr(t('friends.week.place', { n: r.rank }))}">${r.rank}</div>
-    </div>`;
-  }).join('')}</div>`;
-}
-
-function friendsDuelHTML(rows, me){
-  const i = rows.findIndex(r => r.user_id === me);
-  if (i < 0 || rows.length < 2) return '';
-  const mine = Number(rows[i].amount || 0);
-  if (rows.every(r => !Number(r.amount))) return `<div class="friends-duel"><p>${t('friends.duel.noOne')}</p></div>`;
-  if (i === 0){
-    const second = rows[1];
-    const lead = mine - Number(second.amount || 0);
-    const secondName = `<strong>${escapeHTML(friendFirstName(second.profile))}</strong>`;
-    const text = lead > 0 ? tp('friends.duel.ahead', lead, { name: secondName }) : t('friends.duel.tie', { name: secondName });
-    return `<div class="friends-duel is-ahead"><p>${text}</p></div>`;
-  }
-  const above = rows[i - 1];
-  const target = Number(above.amount || 0);
-  const need = target - mine + 1;
-  const pct = target > 0 ? Math.max(4, Math.min(100, Math.round((mine / target) * 100))) : 0;
-  const aboveName = escapeHTML(friendFirstName(above.profile));
-  return `<div class="friends-duel">
-    <p>${tp('friends.duel.behind', need, { name: `<strong>${aboveName}</strong>` })}</p>
-    <div class="friends-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${target}" aria-valuenow="${mine}"><i style="width:${pct}%"></i></div>
-    <div class="friends-bar-labels"><span>${t('friends.week.you')} ${mine}</span><span>${aboveName} ${target}</span></div>
-  </div>`;
-}
-
 async function loadFriendsMiniRank(){
   const box = document.getElementById('friends-mini-rank');
   if (!box) return;
@@ -483,7 +437,7 @@ async function loadFriendsMiniRank(){
   if (!rowsBox) return;
   if (rows == null){ rowsBox.innerHTML = `<p class="profile-edit-error">${t('friends.rank.miniError')}</p>`; return; }
   const me = CURRENT_USER && CURRENT_USER.id;
-  rowsBox.innerHTML = friendsPodiumHTML(rows, me) + friendsDuelHTML(rows, me);
+  rowsBox.innerHTML = leaderboardPodiumHTML(rows, me) + leaderboardDuelHTML(rows, me);
   // XP da semana (mesmo escopo) nos cartões dos amigos.
   const byId = Object.fromEntries(rows.map(r => [r.user_id, Number(r.amount || 0)]));
   document.querySelectorAll('[data-friend-xp]').forEach(el => {

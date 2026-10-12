@@ -354,7 +354,8 @@ function renderStudyPlanCard(){
 
   if (!goal.dailyLessonsGoal || !goal.objective){
     subEl.textContent = t('wizard.card.setSub');
-    bodyEl.innerHTML = `<button class="btn btn-primary btn-block" id="study-plan-cta-btn">${t('wizard.card.setCta')}</button>`;
+    bodyEl.innerHTML = `<div class="study-plan-empty-art" aria-hidden="true"><span>🎯</span></div>
+      <button class="btn btn-primary btn-block" id="study-plan-cta-btn">${t('wizard.card.setCta')}</button>`;
     document.getElementById('study-plan-cta-btn').addEventListener('click', openStudyPlanModal);
     return;
   }
