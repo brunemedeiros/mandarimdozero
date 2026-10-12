@@ -186,3 +186,4 @@ Só front-end estático; **nenhuma migration**; `earned_badges` não mudou. Auto
   O perfil de outra pessoa (`fetchUserEarnedBadges`, `shared/leaderboard.js`) mostra conquista de curso só do idioma aberto e conquista da conta de qualquer idioma.
 - Garantias: nada que já estava ganho some (a união só acrescenta; falha de rede mantém o que havia); sem conta, o idioma atual segue calculando sozinho.
 - Teste: `tests/curso-progresso/test_conquistas_conta.js` (43 verificações: catálogo real de fr e zh classificado sem sobra, união, propriedade com 300 casos, sandbox do `auth.js`, perfil público, nenhuma migration nova).
+- Regressão: 82 de 97 suítes passam; as 15 que falham são as mesmas de antes, com a mesma lista (`fase-j`, instável, passou desta vez). O teste novo roda à parte e passa 43/43.
