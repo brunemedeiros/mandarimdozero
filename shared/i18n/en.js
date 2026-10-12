@@ -1346,9 +1346,9 @@ window.I18N_CATALOG['en'] = {
   'flashcardModel.tts.missingText': 'Enter the text to synthesize.', // ALTA
   'flashcardModel.tts.missingLanguage': 'Choose the synthesis language.', // ALTA
   'flashcardModel.tts.uploadFailed': 'Audio generated, but it could not be saved -- try again.', // ALTA
-  'admin.flashcards.hint.flip': 'Image and audio appear next to the front of the card. Note is a reminder just for you -- the student never sees it.', // ALTA
-  'admin.flashcards.hint.mc': 'Image and audio appear next to the question, above the multiple-choice options. Note is a reminder just for you -- the student never sees it.', // ALTA
-  'admin.flashcards.hint.cloze': 'Image and audio appear next to the sentence with the blank. Note is a reminder just for you -- the student never sees it.', // ALTA
+  'admin.flashcards.hint.flip': 'Image and audio appear next to the front of the card. Notes show up for the student after they answer.', // ALTA
+  'admin.flashcards.hint.mc': 'Image and audio appear next to the question, above the multiple-choice options. Notes show up for the student after they answer.', // ALTA
+  'admin.flashcards.hint.cloze': 'Image and audio appear next to the sentence with the blank. Notes show up for the student after they answer.', // ALTA
   'admin.flashcards.cardType.normal': 'Normal', // ALTA
   'admin.flashcards.cardType.normalReversed': 'Normal with reverse', // ALTA
   'admin.flashcards.cardType.multipleChoice': 'Multiple choice', // ALTA
@@ -2228,4 +2228,213 @@ window.I18N_CATALOG['en'] = {
   'perm.teacher_board': 'Class board', // ALTA
   'plans.chip.premium': 'Premium', // ALTA
   'panel.students.inviteSoon': 'For now, students are linked by the admin. Soon you will be able to invite a student, who accepts from their own profile.', // ALTA
+
+  // ---- Banco de Revisão (Professora > Cartões) ----
+  'rb.sub.cards': 'Cards', // ALTA
+  'rb.sub.bank': 'Review Bank', // ALTA
+  'rb.intro': 'Everything that comes out of your class notebooks. Pick a student, then approve or cut items. Items for students with an account become cards in Teacher cards. Items with a doubt stay in Pending for you to check.', // ALTA
+  'rb.autoLabel': 'Create cards automatically', // ALTA
+  'rb.autoOn': 'Automatic creation is on.', // ALTA
+  'rb.autoOff': 'Automatic creation is off.', // ALTA
+  'rb.tabStudents': 'Students', // ALTA
+  'rb.tabOverview': 'Overview', // ALTA
+  'rb.tabManual': 'Notes manual', // ALTA
+  'rb.lang.frances': 'French', // ALTA
+  'rb.lang.portugues': 'Portuguese', // ALTA
+  'rb.lang.mandarim': 'Mandarin', // ALTA
+  'rb.type.vocabulario': 'Vocabulary', // ALTA
+  'rb.type.estrutura': 'Structure', // ALTA
+  'rb.type.verbo': 'Verb', // ALTA
+  'rb.type.erro': 'Corrected mistake', // ALTA
+  'rb.type.pronuncia': 'Pronunciation', // ALTA
+  'rb.f.pendente': 'Pending', // ALTA
+  'rb.f.aprovado': 'Approved', // ALTA
+  'rb.f.cortado': 'Cut', // ALTA
+  'rb.f.todos': 'All', // ALTA
+  'rb.st.pendente': 'pending', // ALTA
+  'rb.st.cortado': 'cut', // ALTA
+  'rb.reason.acento': 'Accent', // ALTA
+  'rb.reason.genero': 'Gender', // ALTA
+  'rb.reason.tempo': 'Verb tense', // ALTA
+  'rb.reason.preposicao': 'Preposition', // ALTA
+  'rb.reason.vocabulario': 'Vocabulary', // ALTA
+  'rb.reason.ordem': 'Word order', // ALTA
+  'rb.reason.pronuncia': 'Pronunciation', // ALTA
+  'rb.reason.concordancia': 'Agreement', // ALTA
+  'rb.reason.outro': 'Other', // ALTA
+  'rb.field.question': 'meaning / prompt', // ALTA
+  'rb.field.answer': 'correct form', // ALTA
+  'rb.field.wrong_form': 'wrong form', // ALTA
+  'rb.ref.pt': 'Portuguese', // ALTA
+  'rb.ref.en': 'English', // ALTA
+  'rb.ref.fr': 'French', // ALTA
+  'rb.mode.recap': 'Recap', // ALTA
+  'rb.mode.ultima': 'Last class', // ALTA
+  'rb.mode.erros': 'Mistakes', // ALTA
+  'rb.classEmpty.recap': 'There is no Recap for this student yet. Approve some items and create the Recap in the panel.', // ALTA
+  'rb.classEmpty.ultima': 'There are no approved items with a class date for this student yet.', // ALTA
+  'rb.classEmpty.erros': 'No recent mistakes to go over. Good sign!', // ALTA
+  'rb.oAttOpt0': 'All', // ALTA
+  'rb.oAttOpt1': 'With pending items', // ALTA
+  'rb.oAttOpt2': 'Notebook idle (3 weeks or more)', // ALTA
+  'rb.oAttOpt3': 'Accuracy under 60%', // ALTA
+  'rb.oAttOpt4': 'Recap created and unused', // ALTA
+  'rb.oLessonOpt0': 'Any date', // ALTA
+  'rb.oLessonOpt1': 'Today', // ALTA
+  'rb.oLessonOpt2': 'In the next 7 days', // ALTA
+  'rb.cItems': 'items', // ALTA
+  'rb.cApproved': 'approved', // ALTA
+  'rb.cToCheck': 'to check', // ALTA
+  'rb.cCut': 'cut', // ALTA
+  'rb.oStudents': 'active students', // ALTA
+  'rb.oPending': 'pending items', // ALTA
+  'rb.oStale': 'notebook idle', // ALTA
+  'rb.oAccuracy': 'accuracy, 30 days', // ALTA
+  'rb.colName': 'Student', // ALTA
+  'rb.colNext': 'Next class', // ALTA
+  'rb.colPending': 'Pending', // ALTA
+  'rb.colApproved': 'Approved', // ALTA
+  'rb.colEntry': 'Last notebook read', // ALTA
+  'rb.colRecap': 'Recap used', // ALTA
+  'rb.colAccuracy': 'Accuracy (30 days)', // ALTA
+  'rb.colErrors': 'Mistakes (30 days)', // ALTA
+  'rb.colReason': 'Most common reason', // ALTA
+  'rb.active': 'Active', // ALTA
+  'rb.addStudent': '+ Add student', // ALTA
+  'rb.all': 'All', // ALTA
+  'rb.allTypes': 'All types', // ALTA
+  'rb.answerHidden': 'Answer hidden', // ALTA
+  'rb.approve': 'Approve', // ALTA
+  'rb.approved': 'Item approved.', // ALTA
+  'rb.archived': 'Archived', // ALTA
+  'rb.backToPanel': 'Back to the panel', // ALTA
+  'rb.backToPending': 'Back to pending', // ALTA
+  'rb.cancel': 'Cancel', // ALTA
+  'rb.cardDelivered': 'This item already became a card for the student', // ALTA
+  'rb.cardTag': 'Card delivered', // ALTA
+  'rb.chooseStudent': 'Choose a student', // ALTA
+  'rb.classNoAccount': 'This student has no linked account yet: answers are only kept in the class record.', // ALTA
+  'rb.classOf': 'class of {d}', // ALTA
+  'rb.cut': 'Cut', // ALTA
+  'rb.cutDone': 'Item cut.', // ALTA
+  'rb.daysAgo': '{n} days ago', // ALTA
+  'rb.edit': 'Edit', // ALTA
+  'rb.editStudent': 'Edit student', // ALTA
+  'rb.emptyFilter': 'No items in this filter.', // ALTA
+  'rb.emptyStudent': 'No items for this student yet. Add the first one with "+ New item".', // ALTA
+  'rb.endAll': 'All correct this round.', // ALTA
+  'rb.endHelped': 'Got it with help', // ALTA
+  'rb.endMissed': 'To go over again', // ALTA
+  'rb.endRedo': 'Review the missed ones', // ALTA
+  'rb.endSome': '{n} to go over again.', // ALTA
+  'rb.endTitle': 'End of the round', // ALTA
+  'rb.error': 'Could not finish.', // ALTA
+  'rb.fAnswer': 'Correct form', // ALTA
+  'rb.fCheck': 'To check (only for you)', // ALTA
+  'rb.fDate': 'Class date', // ALTA
+  'rb.fGap': 'Gap word (alternatives: separate with /)', // ALTA
+  'rb.fObservation': 'Notes (the student sees them after answering)', // ALTA
+  'rb.fQuestion': 'Meaning / prompt', // ALTA
+  'rb.fReset': 'The meaning changed: restart the student\'s progress on this card', // ALTA
+  'rb.fResetHint': 'Leave it unchecked to fix typos, accents or the explanation: the student keeps their progress.', // ALTA
+  'rb.fType': 'Type', // ALTA
+  'rb.fWrong': 'Wrong form (mistakes only)', // ALTA
+  'rb.filterAria': 'Filter by status', // ALTA
+  'rb.fix': 'Fix it:', // ALTA
+  'rb.fullscreen': 'Full screen', // ALTA
+  'rb.generateReady': 'Create cards', // ALTA
+  'rb.generated': '{n} cards created.', // ALTA
+  'rb.generatedPartial': '{ok} created, {fail} failed.', // ALTA
+  'rb.gotIt': 'Got it', // ALTA
+  'rb.keys': 'Space shows · right arrow got it · H with help · left arrow missed', // ALTA
+  'rb.link': 'Link', // ALTA
+  'rb.linkPick': 'Student account', // ALTA
+  'rb.linked': 'Linked', // ALTA
+  'rb.linkedAccount': 'Linked account', // ALTA
+  'rb.linkedDone': 'Student linked.', // ALTA
+  'rb.loadError': 'Could not load the Review Bank. Reload the page.', // ALTA
+  'rb.loading': 'Loading…', // ALTA
+  'rb.manualEdit': 'Edit manual', // ALTA
+  'rb.manualEmpty': 'There is no manual yet. Click "Edit manual" to write your note-taking rules.', // ALTA
+  'rb.manualHint': 'Write in simple markdown: headings with #, lists with -, **bold** and tables with |.', // ALTA
+  'rb.missed': 'Missed it', // ALTA
+  'rb.missing': 'Missing: {f}.', // ALTA
+  'rb.modesAria': 'What to review', // ALTA
+  'rb.more': 'Show more', // ALTA
+  'rb.newItem': '+ New item', // ALTA
+  'rb.noAccount': 'No account on the site', // ALTA
+  'rb.noLinkable': 'No account with an active link in this language to connect.', // ALTA
+  'rb.noPermission': 'The Review Bank is part of the Teacher plan.', // ALTA
+  'rb.noReason': 'No reason', // ALTA
+  'rb.noStudents': 'There are no students in the Review Bank yet.', // ALTA
+  'rb.none': '–', // ALTA
+  'rb.oAtt': 'Attention', // ALTA
+  'rb.oEmpty': 'No students in this filter.', // ALTA
+  'rb.oLesson': 'Class', // ALTA
+  'rb.openClass': 'Open class mode', // ALTA
+  'rb.popupBlocked': 'The browser blocked the print window. Allow pop-ups for this site.', // ALTA
+  'rb.preview': 'Preview', // ALTA
+  'rb.printAnswers': 'Print with answers', // ALTA
+  'rb.printStudent': 'Print for the student', // ALTA
+  'rb.proposal': 'Review suggestion', // ALTA
+  'rb.proposalApplied': 'Suggestion applied.', // ALTA
+  'rb.proposalApply': 'Apply', // ALTA
+  'rb.proposalDismiss': 'Dismiss', // ALTA
+  'rb.readyBanner': '{n} items are ready to become cards.', // ALTA
+  'rb.recapDone': 'Recap created with {n} items.', // ALTA
+  'rb.recapEmpty': 'The Recap shows up here. Approve some items and create the Recap for the next class.', // ALTA
+  'rb.recapHint': 'Ask, then wait for the answer in the target language.', // ALTA
+  'rb.recapMake': 'Create Recap for the class of {d}', // ALTA
+  'rb.recapNext': 'Next Recap', // ALTA
+  'rb.recapNone': 'No approved item is ready for the Recap.', // ALTA
+  'rb.recapRemake': 'Create again for {d}', // ALTA
+  'rb.recapTitle': 'Recap of the class of {d}', // ALTA
+  'rb.recapUnused': 'created on {d}, not used', // ALTA
+  'rb.refresh': 'Refresh', // ALTA
+  'rb.restore': 'Restore', // ALTA
+  'rb.restored': 'Item went back to pending.', // ALTA
+  'rb.sByClass': 'Accuracy per class', // ALTA
+  'rb.sByType': 'Mistakes by item type', // ALTA
+  'rb.sDays': 'classes reviewed', // ALTA
+  'rb.sHelp': 'with help', // ALTA
+  'rb.sHint': 'since tracking started', // ALTA
+  'rb.sNoMiss': 'No mistakes recorded.', // ALTA
+  'rb.sNoReason': 'No reasons noted.', // ALTA
+  'rb.sOk': 'got it', // ALTA
+  'rb.sReasons': 'Reasons for mistakes', // ALTA
+  'rb.sTip': '{d}: {a} correct, {h} with help, {e} mistakes', // ALTA
+  'rb.sTitle': 'Class-mode performance', // ALTA
+  'rb.sTop': 'Most missed', // ALTA
+  'rb.sTotal': 'answers', // ALTA
+  'rb.sWrong': 'missed', // ALTA
+  'rb.save': 'Save', // ALTA
+  'rb.saveApprove': 'Save and approve', // ALTA
+  'rb.saved': 'Saved.', // ALTA
+  'rb.savedDelivered': 'Saved and delivered to the student.', // ALTA
+  'rb.savedReset': 'Saved. The student\'s progress on this card was restarted.', // ALTA
+  'rb.say': 'How do you say:', // ALTA
+  'rb.search': 'Search items', // ALTA
+  'rb.searchStudent': 'Search student', // ALTA
+  'rb.sfDateAdd': 'Add date', // ALTA
+  'rb.sfDateDel': 'Remove date', // ALTA
+  'rb.sfDates': 'Dates of the next classes', // ALTA
+  'rb.sfLang': 'Language studied', // ALTA
+  'rb.sfName': 'Name', // ALTA
+  'rb.sfNeedName': 'Write the student\'s name.', // ALTA
+  'rb.sfNoDates': 'No dates yet.', // ALTA
+  'rb.sfRef': 'Student\'s reference language', // ALTA
+  'rb.sfStatus': 'Status', // ALTA
+  'rb.showAnswer': 'Show answer', // ALTA
+  'rb.skip': 'Skip', // ALTA
+  'rb.statsEmpty': 'No answers recorded yet. Numbers show up after the next class mode.', // ALTA
+  'rb.studentsAria': 'Students', // ALTA
+  'rb.toCheck': 'To check', // ALTA
+  'rb.toCheckColon': 'To check:', // ALTA
+  'rb.today': 'Today', // ALTA
+  'rb.typeAria': 'Type', // ALTA
+  'rb.unlink': 'Unlink', // ALTA
+  'rb.unlinkedDone': 'Student unlinked. Cards already delivered stay with them.', // ALTA
+  'rb.updatedAt': 'Updated {d}', // ALTA
+  'rb.whyMissed': 'Why was it missed?', // ALTA
+  'rb.withHelp': 'With help', // ALTA
 };

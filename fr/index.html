@@ -48,6 +48,7 @@ try{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="../shared/review-bank.css">
 <style>
 :root{
   /* Design tokens — paleta própria do Francês do Zero (azul como cor
@@ -4405,7 +4406,12 @@ footer.app-footer img{ height:40px; opacity:.85; }
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="materials" data-i18n="panel.tab.materials">Material de apoio</button>
     </div>
     <div id="admin-students-content"></div>
+    <div id="admin-cards-subnav" class="deck-topbar panel-nav panel-subnav" role="tablist" style="display:none;" aria-label="Cartões ou Banco de Revisão">
+      <button class="deck-topbar-btn is-active" role="tab" aria-selected="true" data-cards-sub="cards" data-i18n="rb.sub.cards">Cartões</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-cards-sub="bank" data-i18n="rb.sub.bank">Banco de Revisão</button>
+    </div>
     <div id="admin-flashcards-content" style="display:none;"></div>
+    <div id="admin-reviewbank-content" style="display:none;"></div>
     <div id="admin-classlogs-content" style="display:none;"></div>
     <div id="admin-materials-content" style="display:none;"></div>
   </div>
@@ -5108,6 +5114,9 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/teacher-support-materials.js"></script>
 <script src="../shared/admin-support-materials.js"></script>
 <script src="../shared/support-materials-view.js"></script>
+<script src="../shared/review-bank-model.js"></script>
+<script src="../shared/review-bank.js"></script>
+<script src="../shared/review-bank-class.js"></script>
 <script src="../shared/teacher-panel.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
