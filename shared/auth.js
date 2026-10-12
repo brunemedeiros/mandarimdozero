@@ -236,6 +236,8 @@ async function onUserLoggedIn(user){
   // aba default do carregamento normal.
   applyPendingLevelTestOffer();
   if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
+  // Link de perfil/Deck aberto antes do login: volta para ele (shared/router.js).
+  if (typeof consumePendingRouteAfterLogin === 'function') consumePendingRouteAfterLogin();
   if (typeof applyInitialRoute === 'function') applyInitialRoute();
   // Convite por link (?amigo=usuario): abre Amigos já buscando a pessoa.
   if (typeof friendsConsumePendingInvite === 'function') friendsConsumePendingInvite();

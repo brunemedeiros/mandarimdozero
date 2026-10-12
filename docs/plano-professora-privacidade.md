@@ -252,3 +252,16 @@ Sem teste hoje: stats `not_public`, tela do perfil privado, exceções de amigo/
 | Conta vira privada | Decks públicos somem para estranhos e continuam visíveis para amigos e para a professora; voltam se a conta voltar a ser pública. |
 | Ordem | 3a) fechar convidado + confirmação por código; 3b) perfil privado no banco e nas telas. |
 | Grátis x Premium | Tudo grátis (login, confirmação, perfil privado, Tornar público/privado). Abrir/copiar Deck de outra pessoa continua Premium. |
+
+### Etapa 3a -- login obrigatório (2026-10-12, branch; sem migration)
+- Portão (`index.html`): sem "Continuar sem conta"; quem já tinha estudado como convidado vê o login; a flag
+  `guest_mode` é zerada (o modo sem login só existe para testes, ligado direto no sessionStorage).
+- Cadastro por e-mail: tela "Confirme seu e-mail" com código (6 a 10 dígitos), "Reenviar código" com espera de 60 s,
+  "Usar outro e-mail"; login de conta não confirmada manda código novo e abre a mesma tela.
+- Perfil aberto sem login: só nome e @ (foto só se o perfil for público) + "Entrar ou criar conta"; Deck público
+  sem login já era só o cartão + botão. O botão guarda a rota e, depois do login, a pessoa volta ao perfil/Deck
+  (`rememberRouteForLogin`/`consumePendingRouteAfterLogin`, `shared/router.js`).
+- Passo manual: modelo do e-mail com `{{ .Token }}` e SMTP do Resend -- `docs/auth/confirmacao-por-codigo.md`.
+- Testes: `tests/login-obrigatorio/test_playwright.js` 43/43; regressão i18n 2039, identity 22, k10 114,
+  painel-professora 277, Deck público 152, amigos 158, placeholders 45.
+- Importante: fechar o portão não fecha o banco (a chave anon é pública). Isso é a Etapa 3b.

@@ -216,6 +216,20 @@ async function renderPublicProfileInto(bodyEl, username){
     ? `<img class="public-profile-avatar" src="${escapeAttr(profile.avatar_url)}" alt="${t('publicProfile.avatarAlt')}">`
     : `<div class="public-profile-avatar" style="background:${color};">${initials}</div>`;
 
+  // Sem login (link compartilhado): só o cartão de apresentação + "Entrar".
+  // O resto do perfil exige conta (decisão da autora, 2026-10-12).
+  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER){
+    bodyEl.innerHTML = `
+      <div class="public-profile-header">
+        ${isPublic ? avatarHTML : `<div class="public-profile-avatar" style="background:${color};">${initials}</div>`}
+        <div class="public-profile-name">${escapeHTML(name)}</div>
+        <div class="public-profile-username">@${escapeHTML(profile.username)}</div>
+      </div>
+      <p class="profile-empty-note">${t('publicProfile.loginToSee')}</p>
+      <a class="btn btn-primary btn-block" href="../" data-login-cta>${t('publicProfile.loginCta')}</a>`;
+    return;
+  }
+
   const badgesHTML = badges.length ? `
     <div class="public-profile-badges">
       ${badges.map(b => `

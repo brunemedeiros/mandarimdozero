@@ -2241,6 +2241,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'perm.teacher_student_analytics': 'Analytics do aluno',
   'perm.teacher_board': 'Mural para a turma',
   'plans.chip.premium': 'Premium',
+  'publicProfile.loginToSee': 'Entre na sua conta para ver o perfil completo.',
+  'publicProfile.loginCta': 'Entrar ou criar conta',
   'publicDeckCopies.tab': 'Decks públicos',
   'publicDeckCopies.adminHint': 'Quantas pessoas adicionaram cada Deck público (cada conta conta uma vez; recópias entram só em "Cópias"). Conta desde 12/10/2026.',
   'publicDeckCopies.none': 'Nenhum Deck público ainda.',

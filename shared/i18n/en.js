@@ -2225,6 +2225,8 @@ window.I18N_CATALOG['en'] = {
   'perm.teacher_student_analytics': 'Student analytics', // ALTA
   'perm.teacher_board': 'Class board', // ALTA
   'plans.chip.premium': 'Premium', // ALTA
+  'publicProfile.loginToSee': 'Log in to see the full profile.', // ALTA
+  'publicProfile.loginCta': 'Log in or sign up', // ALTA
   'publicDeckCopies.tab': 'Public decks', // ALTA
   'publicDeckCopies.adminHint': 'How many people added each public deck (each account counts once; re-copies only add to "Copies"). Counted since Oct 12, 2026.', // ALTA
   'publicDeckCopies.none': 'No public decks yet.', // ALTA

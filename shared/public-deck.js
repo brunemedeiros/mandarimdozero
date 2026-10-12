@@ -312,7 +312,7 @@ function publicDeckBadgeHTML(icon, color){
 function publicDeckGateHTML(v){
   if (!v.authenticated){
     return `<p class="profile-empty-note" data-public-deck-gate="login">🔒 Entre na sua conta para ver os cartões. Abrir e importar Decks públicos é um recurso Premium.</p>
-      <a class="btn btn-secondary btn-block" href="../">Entrar ou criar conta</a>`;
+      <a class="btn btn-secondary btn-block" href="../" data-login-cta>Entrar ou criar conta</a>`;
   }
   if (!v.can_open){
     return `<p class="profile-empty-note" data-public-deck-gate="premium">🔒 Abrir e importar Decks públicos é um recurso Premium. Você pode ver as informações do Deck acima.</p>`;
