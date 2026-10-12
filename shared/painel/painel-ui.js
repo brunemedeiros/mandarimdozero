@@ -301,6 +301,7 @@
     else if (e.key === 'Enter'){ var a = c.querySelector('.p-ativo'); if (a && !c.querySelector('.p-combo-lista').hidden){ e.preventDefault(); comboEscolher(c, a); } }
     else if (e.key === 'Escape'){ comboFechar(c); }
   });
+  document.addEventListener('click', function(e){ var c = e.target.closest && e.target.closest('.p-combo'); if (c && e.target.matches('input') && c.querySelector('.p-combo-lista').hidden){ comboFiltrar(c); comboAbrir(c); } });
   document.addEventListener('mousedown', function(e){
     var li = e.target.closest && e.target.closest('.p-combo-lista li[role="option"]');
     if (li){ e.preventDefault(); comboEscolher(li.closest('.p-combo'), li); return; }

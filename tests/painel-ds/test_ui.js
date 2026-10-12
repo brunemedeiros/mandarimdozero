@@ -9,7 +9,7 @@ const server = http.createServer((req, res) => {
   if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()){ res.writeHead(404); return res.end(); }
   res.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(res);
 });
-let ok = 0, ruim = 0; const check = (n, c, x) => { if (c) ok++; else { ruim++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x).slice(0, 400) : ''); } };
+let ok = 0, ruim = 0; const check = (n, c, x) => { if (process.env.V) console.log(c ? 'ok ' : 'XX ', n.slice(0, 90)); if (c) ok++; else { ruim++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x).slice(0, 400) : ''); } };
 (async () => {
   await new Promise(r => server.listen(0, '127.0.0.1', r)); const base = `http://127.0.0.1:${server.address().port}`;
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
@@ -299,14 +299,51 @@ let ok = 0, ruim = 0; const check = (n, c, x) => { if (c) ok++; else { ruim++; c
     await page.keyboard.press('Enter'); const ev2 = await escolhido;
     check(`[${rot}] combobox: Enter escolhe, mostra o nome, fecha e avisa com valor e rótulo`, (await ci.inputValue()) === 'Rafael Costa' && await lista.isHidden() && ev2.valor === 'rafael' && ev2.rotulo === 'Rafael Costa' && (await cx2.locator('li[aria-selected="true"]').count()) === 1, ev2);
     await ci.focus(); await ci.fill('zzz'); await page.keyboard.press('Escape'); check(`[${rot}] combobox: Esc desfaz o que foi digitado e volta ao escolhido`, (await ci.inputValue()) === 'Rafael Costa' && await lista.isHidden());
-    await ci.focus(); await cx2.locator('li[role="option"]', { hasText: 'Helena' }).click(); check(`[${rot}] combobox: clicar numa opção escolhe`, (await ci.inputValue()) === 'Helena Duarte' && (await cx2.getAttribute('data-valor')) === 'helena');
-    await ci.focus(); await ci.fill('tia'); await page.mouse.click(5, 5); check(`[${rot}] combobox: clique fora fecha e volta ao escolhido`, await lista.isHidden() && (await ci.inputValue()) === 'Helena Duarte');
+    await ci.click(); await cx2.locator('li[role="option"]', { hasText: 'Helena' }).click(); check(`[${rot}] combobox: clicar numa opção escolhe`, (await ci.inputValue()) === 'Helena Duarte' && (await cx2.getAttribute('data-valor')) === 'helena');
+    await ci.click(); await ci.fill('tia'); await page.mouse.click(5, 5); check(`[${rot}] combobox: clique fora fecha e volta ao escolhido`, await lista.isHidden() && (await ci.inputValue()) === 'Helena Duarte');
 
     // ---- Bloco que abre e fecha ----
     const co = page.locator('#colapsavel .p-colapsavel'), cbt = co.locator('.p-colapsavel-botao'), cc = co.locator('.p-colapsavel-corpo');
     check(`[${rot}] colapsável: o resumo aparece e o detalhe fica escondido`, await co.locator('.p-linha-info').first().isVisible() && await cc.isHidden() && (await cbt.getAttribute('aria-expanded')) === 'false');
     await cbt.click(); check(`[${rot}] colapsável: clicar mostra o detalhe e marca aria-expanded`, await cc.isVisible() && (await cbt.getAttribute('aria-expanded')) === 'true' && (await cc.locator('.p-linha-info').count()) === 2);
     await cbt.click(); check(`[${rot}] colapsável: clicar de novo esconde`, await cc.isHidden() && (await cbt.getAttribute('aria-expanded')) === 'false');
+
+    // ---- Balão ----
+    const bl = page.locator('#balao .p-balaos'); await bl.evaluate(e => e.scrollIntoView({ block: 'center' }));
+    const bg = await bl.evaluate(e => { const r = e.querySelector('.p-balao--enviada'), q = e.querySelector('.p-balao--recebida'), a = r.getBoundingClientRect(), b = q.getBoundingClientRect(); return { dir: a.right > b.right, cor: getComputedStyle(r).backgroundColor !== getComputedStyle(q).backgroundColor, raio: getComputedStyle(q).borderBottomLeftRadius }; });
+    check(`[${rot}] balão: enviada à direita, recebida à esquerda, cores diferentes`, bg.dir && bg.cor, bg);
+    check(`[${rot}] balão: o primeiro do grupo tem o canto reto`, parseFloat(bg.raio) <= 6, bg);
+
+    // ---- Anexo ----
+    const an = page.locator('#anexo .p-anexos'); await an.evaluate(e => e.scrollIntoView({ block: 'center' }));
+    check(`[${rot}] anexo: 3 itens, o em envio mostra spinner girando e barra a 60%`, (await an.locator('.p-anexo').count()) === 3 && (await an.locator('.p-anexo--enviando .p-spinner').count()) === 1 && (await an.locator('.p-anexo--enviando .p-anexo-barra > i').evaluate(i => Math.round(i.getBoundingClientRect().width / i.parentElement.getBoundingClientRect().width * 100))) === 60);
+    check(`[${rot}] anexo: o spinner do Pico (aria-busy) não aparece solto ao lado do item`, (await an.locator('.p-anexo--enviando').evaluate(e => getComputedStyle(e, '::before').content)) === 'none');
+    await page.locator('#anx-demo').click(); await page.waitForTimeout(150);
+    check(`[${rot}] anexo: PainelUI.anexo adiciona item em envio com aria-busy`, (await an.locator('.p-anexo').count()) === 4 && (await an.locator('.p-anexo').nth(3).getAttribute('aria-busy')) === 'true');
+    await page.waitForTimeout(3300);
+    const ult = an.locator('.p-anexo').nth(3);
+    check(`[${rot}] anexo: ao terminar tira a barra e o aria-busy e mostra o tamanho`, (await ult.locator('.p-anexo-barra').count()) === 0 && (await ult.getAttribute('aria-busy')) === null && (await ult.locator('.p-anexo-detalhe').textContent()) === '1,1 MB');
+    await ult.locator('.p-anexo-remover').click(); await page.waitForTimeout(500);
+    check(`[${rot}] anexo: remover tira o item da lista`, (await an.locator('.p-anexo').count()) === 3);
+    check(`[${rot}] anexo: erro tem borda e texto de erro`, await an.locator('.p-anexo--erro .p-anexo-detalhe').isVisible());
+
+    // ---- Confirmação ----
+    await page.locator('[data-abrir-dialogo="dlg-alerta"]').scrollIntoViewIfNeeded(); await page.locator('[data-abrir-dialogo="dlg-alerta"]').click();
+    const da = page.locator('#dlg-alerta');
+    check(`[${rot}] confirmação: abre sem botão X e com Cancelar focado`, (await da.evaluate(d => d.open)) && (await da.locator('header button').count()) === 0 && (await page.evaluate(() => document.activeElement.textContent.trim())) === 'Cancelar');
+    await page.mouse.click(5, 5); check(`[${rot}] confirmação: clicar no fundo NÃO fecha`, await da.evaluate(d => d.open));
+    await page.keyboard.press('Escape'); check(`[${rot}] confirmação: Esc fecha`, !(await da.evaluate(d => d.open)));
+    await page.locator('#conf-demo').click(); const dc = page.locator('dialog.p-dialogo--alerta[open]');
+    check(`[${rot}] confirmação pelo código: abre com título e botão de perigo`, (await dc.locator('h3').textContent()) === 'Apagar 12 cartões?' && (await dc.locator('.p-perigo').count()) === 1);
+    await dc.locator('.p-perigo').click(); await page.waitForTimeout(200);
+    check(`[${rot}] confirmação pelo código: Apagar resolve true, fecha e some do DOM`, (await page.locator('.p-toast', { hasText: 'Cartões apagados' }).count()) === 1 && (await page.locator('dialog.p-dialogo--alerta[open]').count()) === 0 && (await page.locator('dialog.p-dialogo--alerta').count()) === 1);
+    await page.locator('#conf-demo').click(); await page.locator('dialog.p-dialogo--alerta[open] button', { hasText: 'Cancelar' }).click(); await page.waitForTimeout(200);
+    check(`[${rot}] confirmação pelo código: Cancelar resolve false`, (await page.locator('.p-toast', { hasText: 'Nada foi apagado' }).count()) === 1);
+
+    // ---- Alerta em caixa ----
+    const ac = page.locator('#alerta .p-alerta--caixa');
+    check(`[${rot}] alerta em caixa: 3 caixas com ícone, título e descrição; só o erro usa role=alert`, (await ac.count()) === 3 && (await ac.locator('svg').count()) === 3 && (await ac.locator('strong').count()) === 3 && (await page.locator('#alerta [role="alert"]').count()) === 1);
+    check(`[${rot}] alerta em caixa: cor do ícone muda por tipo`, new Set(await ac.locator('svg').evaluateAll(l => l.map(x => getComputedStyle(x).color))).size === 3);
     check(`[${rot}] 0 pageerrors`, erros.length === 0, erros);
     await ctx.close();
   }

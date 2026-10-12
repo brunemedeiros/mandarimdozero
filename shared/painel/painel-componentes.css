@@ -446,7 +446,7 @@
 /* ---------- Anexos (Attachment do shadcn): arquivo, imagem e envio em andamento ---------- */
 .painel .p-anexos{ display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
 .painel .p-anexos--grade{ grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); }
-.painel .p-anexo{ position: relative; display: flex; align-items: center; gap: .8rem; margin: 0; padding: .55rem .7rem .55rem .55rem; border: 1px solid var(--p-linha); border-radius: 16px; background: var(--p-elevado); animation: p-entrar .28s ease both; }
+.painel .p-anexo{ position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; margin: 0; padding: .55rem .7rem .55rem .55rem; border: 1px solid var(--p-linha); border-radius: 16px; background: var(--p-elevado); animation: p-entrar .28s ease both; }
 .painel .p-anexo-media{ display: inline-grid; place-items: center; flex: none; width: 2.6rem; height: 2.6rem; border-radius: 12px; background: var(--p-superficie); color: var(--p-tinta); }
 .painel .p-anexo-media svg{ width: 1.2rem; height: 1.2rem; }
 .painel .p-anexo-texto{ flex: 1; min-width: 0; display: grid; gap: .1rem; }
@@ -457,7 +457,7 @@
 .painel .p-anexo--imagem .p-anexo-media{ width: 100%; height: auto; aspect-ratio: 1; border-radius: 12px; overflow: hidden; }
 .painel .p-anexo--imagem .p-anexo-media img{ width: 100%; height: 100%; object-fit: cover; display: block; }
 .painel .p-anexo--imagem .p-anexo-remover{ position: absolute; top: .9rem; right: .9rem; background: color-mix(in srgb, var(--p-bg) 80%, transparent); }
-.painel .p-anexo-barra{ grid-column: 1 / -1; height: 4px; border-radius: 999px; background: var(--p-linha); overflow: hidden; }
+.painel .p-anexo-barra{ flex: 0 0 100%; height: 4px; border-radius: 999px; background: var(--p-linha); overflow: hidden; }
 .painel .p-anexo-barra > i{ display: block; height: 100%; width: var(--v, 0%); border-radius: 999px; background: var(--p-marca-escura); transition: width .35s ease; }
 .painel .p-anexo--enviando .p-anexo-barra > i{ background: linear-gradient(90deg, var(--p-marca-escura) 0%, color-mix(in srgb, var(--p-marca-escura) 55%, white) 50%, var(--p-marca-escura) 100%); background-size: 200% 100%; animation: p-brilho-barra 1.2s linear infinite; }
 .painel .p-anexo--erro{ border-color: var(--p-erro); }
@@ -481,3 +481,13 @@
 
 /* ---------- Janela de alerta (Alert Dialog do shadcn): exige uma resposta, sem X e sem fechar no fundo ---------- */
 .painel dialog.p-dialogo--alerta article{ width: min(28rem, calc(100vw - 2rem)); }
+
+/* cor do ícone do alerta em caixa, por tipo */
+.painel .p-alerta--caixa{ --c: var(--p-info); }
+.painel .p-alerta--caixa.p-alerta--ok{ --c: var(--p-ok); }
+.painel .p-alerta--caixa.p-alerta--erro{ --c: var(--p-erro); }
+.painel .p-alerta--caixa.p-alerta--aviso{ --c: var(--p-aviso); }
+
+/* o marcador de lista que o Pico põe em li não pode virar um item solto dentro de anexo e balão */
+.painel .p-anexo::before, .painel .p-balao-grupo::before{ content: none; display: none; }
+.painel li.p-anexo[aria-busy="true"]:not(input, select, textarea)::before{ content: none; display: none; }
