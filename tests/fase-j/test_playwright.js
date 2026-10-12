@@ -179,37 +179,8 @@ async function bootPage(browser, lang, port){
     await page.waitForSelector('#my-tag-manager [data-tag-row]');
     L('retry recupera a lista', true);
 
-    // ===== professora (admin): Painel administrativo, todos os alunos/idiomas =====
-    await ev((a) => {
-      const other = a === 'frances' ? 'mandarim' : 'frances';
-      window.__DB.teacher_flashcards.length = 0;
-      const tf = (id, tid, sid, lang, tags) => ({ id, teacher_id: tid, student_id: sid, language_app_key: lang, status: 'active', revision: 3, front: 'f', back_trans: 'b', tags, deck_id: null });
-      window.__DB.teacher_flashcards.push(tf(1, 'T', 'S1', a, ['saudacao', 'a1']), tf(2, 'T', 'S2', other, ['saudacao']), tf(3, 'T', 'S3', a, ['a1']), tf(4, 'T2', 'S9', a, ['saudacao']));
-      CURRENT_USER = { id: 'T' }; window.__uid = 'T'; window.__isAdmin = true; isAdminUser = () => true;
-      switchTab('admin-badges'); switchAdminPanelSection('tags');
-    }, appKey);
-    await page.waitForSelector('#admin-tag-manager [data-tag-row]');
-    const arows = await ev(() => [...document.querySelectorAll('#admin-tag-manager [data-tag-row]')].map(r => r.dataset.tagRow + ':' + r.querySelector('.profile-edit-hint').textContent.trim()));
-    L('professora: lista Tags de Teacher Cards de TODOS os alunos/idiomas dela (sem a de outra professora)', JSON.stringify(arows) === '["a1:2 notas","saudacao:2 notas"]', arows);
-    await page.click('#admin-tag-manager [data-tag-rename="saudacao"]');
-    await page.fill('#admin-tag-manager [data-tag-rename-input]', 'cumprimentos');
-    await page.click('#admin-tag-manager [data-tag-rename-confirm]');
-    await page.waitForFunction(() => window.__DB.teacher_flashcards[1].tags.join() === 'cumprimentos', null, { timeout: 8000 });
-    const t = await ev(() => window.__DB.teacher_flashcards.map(r => r.tags.join('+') + '@' + r.revision).join(' | '));
-    L('professora: rename atravessa alunos e idiomas sem escolher aluno; ordem e revision preservadas', t === 'cumprimentos+a1@3 | cumprimentos@3 | a1@3 | saudacao@3', t);
-    L('professora: Teacher Card de OUTRA professora intacto', t.endsWith('saudacao@3'));
-    await page.waitForSelector('#admin-tag-manager [data-tag-row="cumprimentos"]');
-    await page.click('#admin-tag-manager [data-tag-delete="a1"]');
-    L('professora: confirmação de exclusão com contagem', (await ev(() => document.querySelector('#admin-tag-manager [data-tag-delete-panel]').textContent)).includes('2 notas'));
-    await page.click('#admin-tag-manager [data-tag-delete-confirm]');
-    await page.waitForFunction(() => window.__DB.teacher_flashcards.slice(0, 3).every(r => !r.tags.includes('a1')), null, { timeout: 8000 });
-    L('professora: delete global no escopo dela', (await ev(() => window.__DB.teacher_flashcards.slice(0, 3).map(r => r.tags.join()).join('|'))) === 'cumprimentos|cumprimentos|');
-    L('professora: seção não altera o filtro de Review dela (escopo teacher)', (await ev(() => STATE.studySettings.reviewTagFilter.length)) === 0);
-    L('professora: nenhuma RPC pediu own (só scope teacher)', await ev(() => window.__tagRpcCalls.filter(c => c.args.p_scope === 'teacher').length > 0));
-
-    // ===== não-admin não acessa a seção =====
-    await ev(() => { isAdminUser = () => false; window.__isAdmin = false; renderAdminTagsView(); });
-    L('não-admin: seção bloqueada (nenhum gerenciador montado)', (await ev(() => document.getElementById('admin-tags-content').textContent)).includes('administração') && (await ev(() => !document.querySelector('#admin-tag-manager'))));
+    // A seção Tags do Painel de Admin saiu (2026-10-12, pedido da autora): Tags se editam no próprio cartão/Deck.
+    L('Painel de Admin sem a seção Tags', await ev(() => !document.querySelector('[data-admin-section="tags"]') && !document.getElementById('admin-tags-content') && typeof renderAdminTagsView === 'undefined'));
     L('sem pageerror', errors.length === 0, errors);
     await page.context().close();
   }

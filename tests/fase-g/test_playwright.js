@@ -149,8 +149,8 @@ async function bootPage(browser, lang, port){
         { student_id: 'S2', username: 'bia', display_name: 'Bia', language_app_key: appKey, status: 'active' }];
       // pré-existente: 1 cartão histórico sem Deck do aluno 1
       window.__DB.teacher_flashcards.push({ id: 1, teacher_id: 'T', student_id: 'S1', language_app_key: appKey, status: 'active', front: 'hist', back_trans: 'hist', deck_id: null, revision: 0, created_at: '2026-01-01T00:00:00Z', tags: [] });
-      switchTab('admin-badges');
-      switchAdminPanelSection('flashcards');
+      switchTab('teacher-panel');
+      switchTeacherPanelSection('flashcards');
     }, appKey);
     await page.waitForSelector('[data-student-checkbox]');
     L('nenhum Teacher Deck é criado no boot/abertura (bootstrap é lazy)', await ev(() => window.__DB.decks.filter(d => d.kind === 'teacher_root').length === 0));
