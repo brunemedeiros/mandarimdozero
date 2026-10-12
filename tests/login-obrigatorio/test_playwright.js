@@ -27,11 +27,13 @@ const GATE_STUB = `window.supabase = { createClient: () => {
       updateUser: async (a) => { rec('updateUser', a); return { data: { user: { id: 'r1' } }, error: null }; },
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe(){} } } }),
       signUp: async (a) => { rec('signUp', a); return { data: { user: { id: 'n1', email: a.email }, session: null }, error: null }; },
-      signInWithPassword: async (a) => { rec('signIn', a); return a.email === 'naoconfirmado@x.com'
+      signInWithPassword: async (a) => { rec('signIn', a);
+        if (a.email === 'jaativa@x.com') return { data: { user: { id: 'j1' }, session: {} }, error: null };
+        return a.email === 'naoconfirmado@x.com'
         ? { data: {}, error: { code: 'email_not_confirmed', message: 'Email not confirmed' } }
         : { data: {}, error: { message: 'Invalid login credentials' } }; },
       resend: async (a) => { rec('resend', a); return { error: null }; },
-      verifyOtp: async (a) => { rec('verifyOtp', a); return a.token === '123456'
+      verifyOtp: async (a) => { rec('verifyOtp', a); return (a.token === '123456' || a.token_hash === 'hashbom')
         ? { data: { user: { id: 'n1' }, session: {} }, error: null } : { data: {}, error: { message: 'Token has expired or is invalid' } }; },
       resetPasswordForEmail: async () => ({ error: null }), signInWithOAuth: async () => ({ error: null }),
     },
@@ -67,10 +69,38 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/gate-codigo-${theme}-${width}.png` });
     await page.fill('#gate-code', '999999'); await page.click('#gate-verify-btn');
     await page.waitForFunction(() => document.getElementById('gate-verify-note').classList.contains('err'));
-    L('código errado avisa', await page.evaluate(() => /venceu|incorreto/.test(document.getElementById('gate-verify-note').textContent)));
+    L('código errado avisa', await page.evaluate(() => /não vale/.test(document.getElementById('gate-verify-note').textContent)));
     await page.fill('#gate-code', '123456'); await page.click('#gate-verify-btn');
     await page.waitForSelector('#gate-choose-language', { state: 'visible' });
     L('código certo confirma e segue para a escolha de idioma', await page.evaluate(() => window.__calls.some(c => c[0] === 'verifyOtp' && c[1].email === 'nova@x.com' && c[1].token === '123456' && c[1].type === 'email')));
+    // conta que o antivírus do e-mail já ativou (abriu o link sozinho): código falha, mas a senha entra direto
+    for (const via of ['codigo', 'reenviar']){
+      await page.goto(`http://127.0.0.1:${port}/index.html`);
+      await page.waitForSelector('#gate-login', { state: 'visible' });
+      await page.click('#gate-toggle-mode-btn');
+      await page.fill('#gate-email', 'jaativa@x.com'); await page.fill('#gate-password', 'segredo1');
+      await page.click('#gate-submit-btn');
+      await page.waitForSelector('#gate-verify', { state: 'visible' });
+      if (via === 'codigo'){ await page.fill('#gate-code', '999999'); await page.click('#gate-verify-btn'); }
+      else { await page.evaluate(() => { const b = document.getElementById('gate-resend-btn'); b.disabled = false; b.click(); }); }
+      await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+      L(`conta já ativa entra direto (${via})`, await page.evaluate(() => window.__calls.some(c => c[0] === 'signIn' && c[1].email === 'jaativa@x.com' && c[1].password === 'segredo1')));
+    }
+    // botão do e-mail: ?confirmar=<hash> só confirma com um toque
+    await page.goto(`http://127.0.0.1:${port}/index.html?confirmar=hashbom`);
+    await page.waitForSelector('#gate-confirm-link', { state: 'visible' });
+    L('link do e-mail não confirma sozinho', await page.evaluate(() => !window.__calls.some(c => c[0] === 'verifyOtp') && !location.search.includes('confirmar')));
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/gate-ativar-${theme}-${width}.png` });
+    await page.click('#gate-confirm-link-btn');
+    await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+    L('toque no botão confirma pelo token_hash', await page.evaluate(() => window.__calls.some(c => c[0] === 'verifyOtp' && c[1].token_hash === 'hashbom' && c[1].type === 'email')));
+    await page.goto(`http://127.0.0.1:${port}/index.html?confirmar=usado`);
+    await page.waitForSelector('#gate-confirm-link', { state: 'visible' });
+    await page.click('#gate-confirm-link-btn');
+    await page.waitForSelector('#gate-confirm-link-login', { state: 'visible' });
+    L('link usado avisa e oferece o login', await page.evaluate(() => /já foi usado/.test(document.getElementById('gate-confirm-link-note').textContent)));
+    await page.click('#gate-confirm-link-login');
+    L('"Ir para o login" abre o login', await page.isVisible('#gate-login'));
     // conta não confirmada tentando entrar
     await page.goto(`http://127.0.0.1:${port}/index.html`);
     await page.waitForSelector('#gate-login', { state: 'visible' });

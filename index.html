@@ -204,7 +204,16 @@ h1{
       <button type="button" class="gate-link-btn" id="gate-resend-btn">Reenviar código</button>
       <button type="button" class="gate-link-btn" id="gate-verify-back-btn">Usar outro e-mail</button>
     </div>
-    <p class="gate-note" id="gate-verify-note">Não chegou? Olhe a caixa de spam. Se o e-mail trouxer um link em vez de código, é só tocar nele.</p>
+    <p class="gate-note" id="gate-verify-note">Não chegou? Olhe a caixa de spam. Também dá para tocar no botão "Ativar minha conta" do e-mail.</p>
+  </div>
+</div>
+
+<div class="wrap" id="gate-confirm-link" style="display:none;">
+  <h1>Ativar sua conta</h1>
+  <p class="sub">Toque no botão para confirmar seu e-mail e entrar.</p>
+  <div class="gate-card">
+    <button type="button" class="btn btn-primary btn-block" id="gate-confirm-link-btn">Ativar minha conta</button>
+    <p class="gate-note" id="gate-confirm-link-note"></p>
   </div>
 </div>
 
@@ -261,7 +270,7 @@ if (typeof APP_IDENTITY !== 'undefined'){
 const GUEST_MODE_FLAG = 'guest_mode'; // mesma chave usada por shared/auth.js dentro de cada idioma
 
 function showOnly(id){
-  ['gate-loading', 'gate-login', 'gate-verify', 'gate-new-password', 'gate-choose-language', 'gate-choose-experience'].forEach(x => {
+  ['gate-loading', 'gate-login', 'gate-verify', 'gate-confirm-link', 'gate-new-password', 'gate-choose-language', 'gate-choose-experience'].forEach(x => {
     document.getElementById(x).style.display = (x === id) ? '' : 'none';
   });
 }
@@ -348,6 +357,9 @@ sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
 // recuperação. Antes, a pessoa entrava direto no app sem trocar a senha. Agora: tela de senha nova
 // (updateUser) e só depois segue o fluxo normal. Lido ANTES do getSession(), que limpa o hash.
 const GATE_IS_RECOVERY = /(^|[#&])type=recovery(&|$)/.test(window.location.hash);
+// Botão "Ativar minha conta" do e-mail de cadastro: ?confirmar=<token_hash>. Só confirma com um toque (ver
+// gateEnterIfAlreadyConfirmed abaixo sobre antivírus que abrem links).
+const GATE_CONFIRM_HASH = (new URLSearchParams(window.location.search).get('confirmar') || '').trim();
 let gateRecoveryUser = null;
 function showNewPassword(user){
   gateRecoveryUser = user;
@@ -356,7 +368,20 @@ function showNewPassword(user){
 }
 
 // ---------- Confirmação do cadastro por código (e-mail) ----------
+// Antivírus de e-mail (ex.: e-mail institucional) abre os links da mensagem sozinho para checar. Antes, o botão
+// do e-mail confirmava a conta nessa visita: o código digitado depois dava "vencido" e o reenvio não mandava
+// nada (o Supabase não reenvia para conta já confirmada). Agora o botão leva à tela gate-confirm-link, que só
+// confirma com um toque; e, se o código falhar ou o reenvio for pedido, tentamos entrar com a senha digitada no
+// cadastro: se a conta já estiver ativa, a pessoa entra direto.
 let gateVerifyEmail = '';
+async function gateEnterIfAlreadyConfirmed(){
+  const password = document.getElementById('gate-password').value;
+  if (!gateVerifyEmail || !password) return false;
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email: gateVerifyEmail, password });
+  if (error || !data || !data.user) return false;
+  await afterAuthResolved(data.user);
+  return true;
+}
 let gateResendTimer = null;
 function showVerify(email, note){
   gateVerifyEmail = email;
@@ -453,16 +478,20 @@ document.getElementById('gate-verify-form').addEventListener('submit', async (e)
   if (token.length < 6){ note.textContent = 'Digite o código completo.'; note.className = 'gate-note err'; return; }
   btn.disabled = true;
   const { data, error } = await supabaseClient.auth.verifyOtp({ email: gateVerifyEmail, token, type: 'email' });
-  btn.disabled = false;
   if (error || !data || !data.user){
-    note.textContent = /expired/i.test((error && error.message) || '') ? 'Esse código venceu. Toque em "Reenviar código".' : 'Código incorreto. Confira e tente de novo.';
+    if (await gateEnterIfAlreadyConfirmed()) return;
+    btn.disabled = false;
+    // O Supabase usa a mesma mensagem ("expired or invalid") para código vencido e código errado.
+    note.textContent = 'Esse código não vale. Confira os números ou toque em "Reenviar código".';
     note.className = 'gate-note err';
     return;
   }
+  btn.disabled = false;
   await afterAuthResolved(data.user);
 });
 document.getElementById('gate-resend-btn').addEventListener('click', async () => {
   const note = document.getElementById('gate-verify-note');
+  if (await gateEnterIfAlreadyConfirmed()) return;
   const { error } = await supabaseClient.auth.resend({ type: 'signup', email: gateVerifyEmail });
   note.textContent = error ? 'Não deu para reenviar agora. Espere um pouco e tente de novo.' : 'Mandamos um código novo.';
   note.className = error ? 'gate-note err' : 'gate-note';
@@ -486,6 +515,20 @@ document.getElementById('gate-new-password-form').addEventListener('submit', asy
   note.textContent = 'Senha nova salva!'; note.className = 'gate-note';
   await afterAuthResolved((data && data.user) || gateRecoveryUser);
 });
+document.getElementById('gate-confirm-link-btn').addEventListener('click', async () => {
+  const note = document.getElementById('gate-confirm-link-note');
+  const btn = document.getElementById('gate-confirm-link-btn');
+  btn.disabled = true;
+  const { data, error } = await supabaseClient.auth.verifyOtp({ token_hash: GATE_CONFIRM_HASH, type: 'email' });
+  if (error || !data || !data.user){
+    btn.disabled = false;
+    note.innerHTML = 'Esse link já foi usado ou venceu. Se você já ativou a conta, é só entrar com e-mail e senha. <button type="button" class="gate-link-btn" id="gate-confirm-link-login">Ir para o login</button>';
+    note.className = 'gate-note err';
+    document.getElementById('gate-confirm-link-login').addEventListener('click', () => showOnly('gate-login'));
+    return;
+  }
+  await afterAuthResolved(data.user);
+});
 document.getElementById('gate-verify-back-btn').addEventListener('click', () => {
   clearInterval(gateResendTimer);
   showOnly('gate-login');
@@ -497,7 +540,15 @@ document.getElementById('gate-verify-back-btn').addEventListener('click', () => 
   if (window.location.hash){
     history.replaceState(null, '', window.location.pathname + window.location.search);
   }
-  if (session && session.user && GATE_IS_RECOVERY){
+  if (GATE_CONFIRM_HASH){
+    const params = new URLSearchParams(window.location.search);
+    params.delete('confirmar');
+    const qs = params.toString();
+    history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : ''));
+  }
+  if (GATE_CONFIRM_HASH && !(session && session.user)){
+    showOnly('gate-confirm-link');
+  } else if (session && session.user && GATE_IS_RECOVERY){
     showNewPassword(session.user);
   } else if (session && session.user){
     await afterAuthResolved(session.user);

@@ -291,3 +291,16 @@ Sem teste hoje: stats `not_public`, tela do perfil privado, exceções de amigo/
 ### Publicação (2026-10-12)
 PR #304 mergeado e publicado (convite, Fase K final, login obrigatório, e-mails, perfil privado); em seguida a 080
 foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural.
+
+## Etapa 4 (mural) -- respostas da autora (2026-10-12, antes da auditoria)
+
+- **Destinatários**: a professora seleciona alunos (todos, vários ou um só). O recado aparece no mural de cada
+  selecionado como se fosse só dele: o aluno não sabe quem mais recebeu.
+- **Respostas**: o aluno pode responder e comentar.
+- **Aviso**: o recado chega no sino e mostra um pill "+N" (mensagens novas) na aba Perfil e num submenu Aulas ou
+  Mural, ou num menu próprio de Aluno (a decidir na auditoria).
+- **Anexo**: sim.
+- Em aberto para a auditoria: comentário do aluno é visto só pela professora ou pelos outros que receberam o mesmo
+  recado (conflita com "não sabe que outro recebeu"); tipos e tamanho de anexo; editar/apagar recado; Grátis x
+  Premium; e-mail além do sino.
+
