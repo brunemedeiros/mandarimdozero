@@ -171,3 +171,36 @@ Entregue (pedido da autora: separar menus, melhorar a busca por @, aplicar a ski
 - Testes antigos que abriam Alunos/Cartões pelo Admin passaram a abrir pelo Painel da professora (mudança deliberada).
 - Pendente: badge "Aluno/a do/a Prof. {nome}", convite de aluno, rota da notificação de supervisão na Edge Function
   (`notification-cron`, hoje 'admin-badges', funciona pelo redirecionamento; trocar exige deploy).
+
+## Convite de aluno + badge por professora (2026-10-12)
+
+Decisões da autora: convite bloqueado se o aluno já tem professora naquele idioma; vale 14 dias; **o aluno não sai
+sozinho** (só a professora encerra o vínculo); **o badge some quando o vínculo acaba**; a admin continua vinculando
+direto, as outras professoras só convidam; link de convite com cartão caprichado; limite de 30 convites por dia.
+
+- **Migration 077** `teacher_invites_and_badges` (Staging `20261012182754`; produção pendente):
+  `invited_at`/`responded_at` em `teacher_students`; índice único parcial "1 professora ativa por aluno por idioma";
+  `badge_catalog.teacher_id` (o `student` da autora vira o badge dela); tabelas `teacher_invite_codes` (link por
+  professora e idioma, código de 10 letras/números) e `teacher_invite_log` (limite diário), sem acesso direto;
+  trigger em `teacher_students` que dá o badge da professora quando o vínculo fica ativo e tira quando não sobra
+  vínculo ativo com ela (vale também para o vínculo direto da admin e para apagar o vínculo); RPCs
+  `teacher_invite_student`, `my_teacher_invites`, `respond_teacher_invite`, `teacher_invite_link`,
+  `invite_code_info` (também sem login) e `accept_invite_code`. A policy `teacher_students_teacher_update` agora só
+  deixa a professora gravar `removed` (antes aceitava `invited` direto, sem limite e sem aviso).
+  Badge de professora nova: "Aluno/a do/a Prof. {primeiro nome}", 🎓, criado no primeiro aceite.
+  Avisos no sino: aluno (`sistema`, abre a Trilha); professora (`supervisao`: aceitou, recusou, entrou pelo link).
+- **Telas**: Painel da professora > Alunos ganhou "Convidar aluno" (idioma em chips; busca por nome/@ igual à aba
+  Planos; link com Copiar, Mandar no WhatsApp e Gerar outro link), "Convites pendentes" (vence em N dias, Cancelar,
+  Reenviar o vencido) e, só para a admin, "Vincular direto" recolhido. Aluno: faixa no topo da Trilha com o convite
+  e o cartão (capa colorida, foto da professora, o que muda, Aceitar/Recusar). Link `?convite=` funciona sem login
+  (cartão com "Entrar para aceitar"; o código fica guardado e o cartão volta depois do login).
+  Código: `shared/teacher-invites.js` (novo), `admin-students.js`, `roles.js` (sem o insert do badge pelo cliente;
+  `fetchMyStudents` só ativos, `fetchMyPendingInvites`), `auth.js`, CSS `.tinv-*` nos dois `index.html`.
+- **Grátis x Premium**: convidar é do plano Professora; aceitar é grátis para qualquer conta.
+- **Testes**: `tests/papeis-permissoes/run_local_077.sh` 47/47 (Postgres local, 077 aplicada 2x); Staging ponta a
+  ponta dentro de transação desfeita (convite, aceite, badge, link já aceito, desvínculo tira badge);
+  `tests/painel-professora/test_playwright.js` 277/277; regressão: fase-f 50, fase-g 68+134, fase-h 68+78, fase-i 48,
+  fase-k6 28, painel-alunos 48, deck-browser 206, revisao-ajustes 48, revisao-proposta-a 58, i18n unit 2039/2039,
+  papeis 076 25/25. `tests/painel-alunos/test_student_panel_unit.js` já quebrava antes (`t` ausente no VM).
+- Atenção: outra conversa aplicou `course_keys_and_account_streak_readers` no Staging hoje sem arquivo na `main`;
+  se ela também usar o número 077, renumerar a dela (esta já está no repo).

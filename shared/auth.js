@@ -93,6 +93,8 @@ async function initAuth(){
       await renderStandalonePublicDeck(publicDeckId);
     } else if (publicProfileUsername && typeof renderStandalonePublicProfile === 'function'){
       await renderStandalonePublicProfile(publicProfileUsername);
+    } else if (typeof teacherInviteGateIfPending === 'function' && await teacherInviteGateIfPending()){
+      // Link de convite da professora (?convite=): o cartão aparece antes do login (077).
     } else {
       goToNeutralGate();
     }
@@ -237,6 +239,8 @@ async function onUserLoggedIn(user){
   if (typeof applyInitialRoute === 'function') applyInitialRoute();
   // Convite por link (?amigo=usuario): abre Amigos já buscando a pessoa.
   if (typeof friendsConsumePendingInvite === 'function') friendsConsumePendingInvite();
+  // Convite da professora (link guardado ou convite pendente na Trilha).
+  if (typeof teacherInvitesAfterLogin === 'function') teacherInvitesAfterLogin();
 }
 
 // ---------- Admin Mode ON/OFF (topbar) ----------

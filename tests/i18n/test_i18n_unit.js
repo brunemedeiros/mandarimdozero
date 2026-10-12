@@ -177,7 +177,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const NESTED_TEMPLATE_KEYS = ['review.deck.createdCount.other' /* original: criado${n === 1 ? '' : 's'} */, 'limitCut.main', 'limitCut.already', 'admin.reports.reply.lastSent', 'admin.reports.reply.lastSentTo'];
   const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k of ptKeys){
-    if (NEW_KEYS.includes(k) || DESIGN_PASS_KEYS.includes(k) || /^(panel|plans|perm|myClassLogs)\./.test(k) /* painéis Admin/Professora, aba Planos e Minhas aulas (2026-10-12): textos novos */ || k.startsWith('badge.catalog.') || k.startsWith('friends.') || k === 'profile.tabFriends' || k === 'notif.cat.amigos' || k === 'notif.pref.inAppOnly') continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
+    if (NEW_KEYS.includes(k) || DESIGN_PASS_KEYS.includes(k) || /^(panel|plans|perm|myClassLogs|tinvite)\./.test(k) /* painéis Admin/Professora, aba Planos, Minhas aulas e convite de aluno (2026-10-12): textos novos */ || k.startsWith('badge.catalog.') || k.startsWith('friends.') || k === 'profile.tabFriends' || k === 'notif.cat.amigos' || k === 'notif.pref.inAppOnly') continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
     const v = pt[k];
     // Plural por categoria ({one, other}): no original o plural era montado por código (módulo${n===1?'':'s'}).
     if (v && typeof v === 'object'){ check(`regressão: pt-BR '${k}' (plural) tem one e other`, typeof v.one === 'string' && typeof v.other === 'string'); continue; }
@@ -246,7 +246,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
       return h.replace(/      <button class="tab-btn teacher-only-nav"[\s\S]*?<\/button>\n/, '')
         .replace(/  <button class="user-dropdown-item (student-teacher-nav|teacher-only-nav mais-extra-tab)" id="(my-class-logs-btn|teacher-panel-btn)"[^\n]*\n/g, '')
         .replace(' class="user-dropdown-item student-teacher-nav" id="support-materials-btn" style="display:none;"', ' class="user-dropdown-item" id="support-materials-btn"')
-        .replace(/<script src="..\/shared\/(permissions|teacher-panel)\.js"><\/script>\n/g, '');
+        .replace(/<script src="..\/shared\/(permissions|teacher-panel|teacher-invites)\.js"><\/script>\n/g, '');
     };
     curClean = panelBlocks(curClean);
     const p = panelBlocks(cleanBlocks(p0));

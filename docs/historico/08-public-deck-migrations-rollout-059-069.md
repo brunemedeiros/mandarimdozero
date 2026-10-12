@@ -214,3 +214,10 @@ Detalhes e verificação: `docs/plano-professora-privacidade.md`.
 |---|---|---|
 | Staging | ferramenta | `20261008020957` + correção `20261008021111` (`teacher_role_policies_link_check`) |
 | Produção | ferramenta (arquivo final, já corrigido) | `20261012123457` |
+
+## Migration 077 `teacher_invites_and_badges` (2026-10-12)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` (+ `_lang_label` com 'chinês' reaplicado por `execute_sql`) | `20261012182754` |
+| Produção | pendente (autorização da autora; se a ferramenta travar, `docs/rollout-sql/077_sql_editor.sql`) | -- |
+Detalhes e verificação: `docs/plano-professora-privacidade.md`.

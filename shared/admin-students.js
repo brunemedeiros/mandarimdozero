@@ -67,14 +67,16 @@ async function renderAdminStudentsView(){
   }
   wrap.innerHTML = loadingHTML();
 
-  const [students, profiles] = await Promise.all([fetchMyStudents(), fetchAllProfiles()]);
+  // Vínculo direto (sem convite) é só da admin (policy da 076). Toda
+  // professora convida (busca ou link) e o aluno aceita (077, shared/teacher-invites.js).
+  const canLink = typeof isAdminUser === 'function' && isAdminUser();
+  const [students, invites, profiles] = await Promise.all([
+    fetchMyStudents(), fetchMyPendingInvites(), canLink ? fetchAllProfiles() : Promise.resolve([]),
+  ]);
 
   // Aluno já vinculado some da lista "Conta do aluno" -- mas só pro MESMO
-  // idioma que já tem vínculo. "Cada aluno vale pra 1 idioma" (Fase 1)
-  // significa que a mesma conta pode ser vinculada de novo, legitimamente,
-  // pra um idioma DIFERENTE (ex: Sandra de francês + Sandra de mandarim
-  // como 2 vínculos separados) -- por isso o filtro depende do idioma
-  // escolhido no 2º select, não é uma exclusão fixa de "quem já é aluno".
+  // idioma que já tem vínculo: a mesma conta pode ser vinculada de novo para
+  // um idioma DIFERENTE (1 professora por idioma, não por conta).
   const linkedUsernamesByLang = {};
   students.forEach(s => {
     if (!s.username) return;
@@ -84,7 +86,7 @@ async function renderAdminStudentsView(){
   const usernameOptionsHTMLForLang = (lang) => {
     const linked = linkedUsernamesByLang[lang] || new Set();
     return profiles.filter(p => !linked.has(p.username))
-      .map(p => `<option value="${p.username}">@${p.username}${p.display_name ? ` — ${escapeHTML(p.display_name)}` : ''}</option>`).join('');
+      .map(p => `<option value="${escapeHTML(p.username)}">@${escapeHTML(p.username)}${p.display_name ? ` — ${escapeHTML(p.display_name)}` : ''}</option>`).join('');
   };
   const languageOptionsHTML = Object.entries(STUDENT_LANGUAGE_LABELS)
     .map(([key, label]) => `<option value="${key}">${label}</option>`).join('');
@@ -93,8 +95,8 @@ async function renderAdminStudentsView(){
   const studentsHTML = students.length ? students.map(s => `
     <div class="admin-badge-row">
       <div class="admin-badge-info">
-        <div class="admin-badge-name">@${s.username || t('admin.common.removedUser')}${s.display_name ? ` <span class="admin-grant-badge-name">— ${escapeHTML(s.display_name)}</span>` : ''}</div>
-        <div class="admin-badge-desc">${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key} · ${t('admin.students.linkedOn', { date: fmtDate(s.created_at) })}</div>
+        <div class="admin-badge-name">@${escapeHTML(s.username || t('admin.common.removedUser'))}${s.display_name ? ` <span class="admin-grant-badge-name">— ${escapeHTML(s.display_name)}</span>` : ''}</div>
+        <div class="admin-badge-desc">${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key} · ${t('admin.students.linkedOn', { date: fmtDate(s.responded_at || s.created_at) })}</div>
       </div>
       <button class="admin-badge-delete-btn" data-toggle-metrics="${s.id}" data-metrics-student="${s.student_id}" data-metrics-lang="${s.language_app_key}" title="${t('admin.students.metricsTitle')}">📊</button>
       <button class="admin-badge-delete-btn" data-remove-link="${s.id}" title="${t('admin.students.removeLinkTitle')}">✕</button>
@@ -102,13 +104,17 @@ async function renderAdminStudentsView(){
     <div class="admin-badge-desc" id="metrics-link-${s.id}" style="display:none; padding:10px 0 14px;"></div>
   `).join('') : `<p class="profile-empty-note">${t('admin.students.none')}</p>`;
 
-  // Criar vínculo direto é só da admin (policy da 076). A professora vai
-  // convidar o aluno, que aceita (etapa seguinte do plano).
-  const canLink = typeof isAdminUser === 'function' && isAdminUser();
   wrap.innerHTML = `
-    ${canLink ? '' : `<div class="profile-section"><div class="section-label">${t('admin.students.linkTitle')}</div><p class="panel-hint">${t('panel.students.inviteSoon')}</p></div>`}
-    <div class="profile-section" ${canLink ? '' : 'hidden'}>
-      <div class="section-label">${t('admin.students.linkTitle')}</div>
+    ${teacherInviteSectionHTML()}
+    ${teacherPendingInvitesHTML(invites)}
+    <section class="panel-section">
+      <h3 class="panel-h">${t('admin.students.yourStudents', { n: students.length })}</h3>
+      ${studentsHTML}
+    </section>
+    ${canLink ? `
+    <details class="panel-section tinv-direct">
+      <summary class="panel-h">${t('tinvite.direct.title')}</summary>
+      <p class="panel-hint">${t('tinvite.direct.hint')}</p>
       <form id="admin-assign-student-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-student-username">${t('admin.students.accountLabel')}</label>
         <select id="admin-student-username" class="profile-edit-input">
@@ -120,38 +126,34 @@ async function renderAdminStudentsView(){
         <p class="profile-edit-error" id="admin-assign-student-error"></p>
         <button type="submit" class="btn btn-primary btn-block" id="admin-assign-student-btn">${t('admin.students.link')}</button>
       </form>
-    </div>
-
-    <div class="profile-section">
-      <div class="section-label">${t('admin.students.yourStudents', { n: students.length })}</div>
-      ${studentsHTML}
-    </div>
+    </details>` : ''}
   `;
 
-  // Reconstrói a lista de contas disponíveis a cada troca de idioma -- um
-  // aluno que já tem vínculo em Francês continua aparecendo aqui se ela
-  // trocar pra Mandarim (ver comentário acima sobre linkedUsernamesByLang).
-  document.getElementById('admin-student-language').addEventListener('change', (e) => {
-    const usernameSelect = document.getElementById('admin-student-username');
-    const opts = usernameOptionsHTMLForLang(e.target.value);
-    usernameSelect.innerHTML = `<option value="" disabled selected>${t('admin.students.selectAccount')}</option>${opts}`;
-  });
+  wireTeacherInviteSection();
 
-  if (canLink) document.getElementById('admin-assign-student-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('admin-assign-student-btn');
-    const errorEl = document.getElementById('admin-assign-student-error');
-    errorEl.textContent = '';
-    btn.disabled = true;
-    const result = await assignStudentToTeacher(
-      document.getElementById('admin-student-username').value,
-      document.getElementById('admin-student-language').value
-    );
-    btn.disabled = false;
-    if (!result.ok){ errorEl.textContent = result.error; return; }
-    showToast(t('admin.students.linkedToast', { username: result.target.username }));
-    renderAdminStudentsView();
-  });
+  if (canLink){
+    // Reconstrói a lista de contas disponíveis a cada troca de idioma.
+    document.getElementById('admin-student-language').addEventListener('change', (e) => {
+      const usernameSelect = document.getElementById('admin-student-username');
+      const opts = usernameOptionsHTMLForLang(e.target.value);
+      usernameSelect.innerHTML = `<option value="" disabled selected>${t('admin.students.selectAccount')}</option>${opts}`;
+    });
+    document.getElementById('admin-assign-student-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('admin-assign-student-btn');
+      const errorEl = document.getElementById('admin-assign-student-error');
+      errorEl.textContent = '';
+      btn.disabled = true;
+      const result = await assignStudentToTeacher(
+        document.getElementById('admin-student-username').value,
+        document.getElementById('admin-student-language').value
+      );
+      btn.disabled = false;
+      if (!result.ok){ errorEl.textContent = result.error; return; }
+      showToast(t('admin.students.linkedToast', { username: result.target.username }));
+      renderAdminStudentsView();
+    });
+  }
 
   wrap.querySelectorAll('[data-remove-link]').forEach(btn => {
     btn.addEventListener('click', async () => {

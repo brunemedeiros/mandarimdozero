@@ -1258,7 +1258,7 @@ window.I18N_CATALOG['en'] = {
   'admin.students.link': 'Link', // ALTA
   'admin.students.yourStudents': 'Your students ({n})', // ALTA
   'admin.students.linkedToast': '✓ @{username} linked as a student.', // ALTA
-  'admin.students.removeConfirm': 'Remove this link? The student\'s progress and history are preserved -- they just stop appearing in your list.', // ALTA
+  'admin.students.removeConfirm': 'End the link with this student? Their progress and history are kept; they leave your list and lose your student badge.', // ALTA
   'admin.students.metrics.failed': 'We couldn\'t load the metrics right now.', // ALTA
   'admin.students.metrics.noCards': 'You haven\'t created any cards for this student yet, in the "📇 Flashcards" tab.', // ALTA
   'admin.students.metrics.noRecord': 'no record', // ALTA
@@ -2225,5 +2225,55 @@ window.I18N_CATALOG['en'] = {
   'perm.teacher_student_analytics': 'Student analytics', // ALTA
   'perm.teacher_board': 'Class board', // ALTA
   'plans.chip.premium': 'Premium', // ALTA
-  'panel.students.inviteSoon': 'For now, students are linked by the admin. Soon you will be able to invite a student, who accepts from their own profile.', // ALTA
+  'tinvite.lang.frances': 'French', // ALTA
+  'tinvite.lang.mandarim': 'Chinese', // ALTA
+  'tinvite.lang.portugues': 'Portuguese', // ALTA
+  'tinvite.title': 'Invite a student', // ALTA
+  'tinvite.hint': 'Pick the language and invite through search or send the link. The student accepts, gets your badge and shows up here. Invites last 14 days.', // ALTA
+  'tinvite.langLabel': 'Class language', // ALTA
+  'tinvite.search.title': 'By search', // ALTA
+  'tinvite.send': 'Invite for {lang}', // ALTA
+  'tinvite.sentToast': 'Invite sent! The student sees it in the bell and at the top of the Path.', // ALTA
+  'tinvite.link.title': 'By link', // ALTA
+  'tinvite.link.hint': 'Anyone who opens this link and accepts becomes your student right away. Good for WhatsApp or your class group.', // ALTA
+  'tinvite.link.copy': 'Copy link', // ALTA
+  'tinvite.link.copied': 'Link copied!', // ALTA
+  'tinvite.link.whatsapp': 'Send on WhatsApp', // ALTA
+  'tinvite.link.reset': 'Make a new link', // ALTA
+  'tinvite.link.resetConfirm': 'Make a new link? The old link stops working right away.', // ALTA
+  'tinvite.link.whatsText': 'Hi! Here is my invite to the {lang} classes. Just open it and accept: {url}', // ALTA
+  'tinvite.pending.title': 'Pending invites ({n})', // ALTA
+  'tinvite.pending.daysLeft': { one: 'expires in {n} day', other: 'expires in {n} days' }, // ALTA
+  'tinvite.pending.expired': 'expired', // ALTA
+  'tinvite.pending.resend': 'Resend', // ALTA
+  'tinvite.pending.cancel': 'Cancel', // ALTA
+  'tinvite.pending.cancelConfirm': 'Cancel this invite? The student will no longer see it.', // ALTA
+  'tinvite.direct.title': 'Link directly (admin only)', // ALTA
+  'tinvite.direct.hint': 'Creates the link right away, without the student accepting. Only use it for someone who already agreed to classes with you.', // ALTA
+  'tinvite.banner.title': '{name} invited you to {lang} classes', // ALTA
+  'tinvite.banner.see': 'See invite', // ALTA
+  'tinvite.card.kicker': 'Class invite', // ALTA
+  'tinvite.card.title': '{name} invited you to be their {lang} student', // ALTA
+  'tinvite.card.perkProgress': 'Follow-up on your {lang} progress', // ALTA
+  'tinvite.card.perkCards': 'Cards and class notes made for you', // ALTA
+  'tinvite.card.perkBadge': 'A student badge on your profile', // ALTA
+  'tinvite.card.accept': 'Accept invite', // ALTA
+  'tinvite.card.loginToAccept': 'Log in to accept', // ALTA
+  'tinvite.card.decline': 'Decline', // ALTA
+  'tinvite.card.later': 'Not now', // ALTA
+  'tinvite.card.foot': 'To end the link later, just talk to whoever invited you.', // ALTA
+  'tinvite.acceptedToast': 'Done! You are now {name}\'s {lang} student 🎓', // ALTA
+  'tinvite.declinedToast': 'Invite declined.', // ALTA
+  'tinvite.err.not_authorized': 'Only accounts with the Teacher plan can invite students.', // ALTA
+  'tinvite.err.invalid_language': 'Invalid language.', // ALTA
+  'tinvite.err.invalid_target': 'This invite is yours: you can\'t be your own student.', // ALTA
+  'tinvite.err.not_found': 'I couldn\'t find that account.', // ALTA
+  'tinvite.err.student_has_teacher': 'This account already has a teacher for this language. Only one per language.', // ALTA
+  'tinvite.err.already_student': 'This account is already your student for this language.', // ALTA
+  'tinvite.err.already_invited': 'You already invited this account. The invite is still valid.', // ALTA
+  'tinvite.err.daily_invite_limit': 'You reached the limit of 30 invites per day. Try again tomorrow or send the link.', // ALTA
+  'tinvite.err.no_pending_invite': 'This invite is no longer valid.', // ALTA
+  'tinvite.err.invalid_code': 'This invite link no longer works. Ask whoever invited you for a new one.', // ALTA
+  'tinvite.err.not_authenticated': 'Log in to answer the invite.', // ALTA
+  'tinvite.err.generic': 'That didn\'t work right now. Try again in a moment.', // ALTA
 };

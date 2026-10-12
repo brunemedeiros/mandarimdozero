@@ -3920,8 +3920,70 @@ footer.app-footer img{ height:40px; opacity:.85; }
 .class-log-fields{ margin:0; display:flex; flex-direction:column; gap:8px; }
 .class-log-field dt{ font-size:12px; font-weight:700; color:var(--ink-soft); }
 .class-log-field dd{ margin:2px 0 0; color:var(--ink); line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+/* Convite de aluno (077): seção da professora, faixa na Trilha e cartão do convite */
+.tinv-lang{ display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 14px; }
+.tinv-grid{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; align-items:start; }
+.tinv-box{ border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); padding:14px 16px; min-width:0; }
+.tinv-box .plans-search{ max-width:none; }
+.tinv-box-h{ margin:0 0 10px; font-size:14px; font-weight:800; color:var(--ink); }
+.tinv-linkbox .panel-hint{ margin-top:0; }
+.tinv-link-field input{ width:100%; font-size:13px; color:var(--ink-soft); }
+.tinv-link-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.tinv-small-btn{ width:auto; padding:8px 14px; font-size:13.5px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+.tinv-ghost{ background:transparent; color:var(--ink-soft); border:1px solid transparent; }
+.tinv-ghost:hover{ background:var(--paper-warm); color:var(--ink); }
+.tinv-avatar, .tinv-avatar-lg{ flex-shrink:0; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-weight:800; object-fit:cover; }
+.tinv-avatar{ width:38px; height:38px; font-size:14px; }
+.tinv-picked{ display:flex; align-items:center; gap:12px; margin-top:12px; padding:10px 12px; border-radius:12px; background:var(--paper-warm); }
+.tinv-pending-text{ display:flex; flex-direction:column; min-width:0; flex:1; }
+.tinv-pending-name{ font-weight:700; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tinv-pending-meta{ font-size:12.5px; color:var(--ink-soft); }
+.tinv-pending{ list-style:none; margin:0; padding:0; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); }
+.tinv-pending-row{ display:flex; align-items:center; gap:12px; padding:10px 14px; }
+.tinv-pending-row + .tinv-pending-row{ border-top:1px solid var(--paper-line); }
+.tinv-pending-row.is-expired .tinv-pending-meta{ color:var(--seal-red-dark); font-weight:600; }
+.tinv-direct > summary{ cursor:pointer; list-style:none; }
+.tinv-direct > summary::-webkit-details-marker{ display:none; }
+.tinv-direct > summary::before{ content:'▸'; display:inline-block; width:1em; color:var(--ink-soft); transition:transform .15s; }
+.tinv-direct[open] > summary::before{ transform:rotate(90deg); }
+#teacher-invite-banner{ display:flex; flex-direction:column; gap:10px; margin:0 0 16px; }
+#teacher-invite-banner[hidden]{ display:none; }
+.tinv-banner{
+  display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:var(--radius);
+  border:1px solid color-mix(in srgb, var(--seal-red) 40%, var(--paper-line));
+  background:color-mix(in srgb, var(--seal-red) 9%, var(--paper));
+}
+.tinv-banner-text{ display:flex; flex-direction:column; min-width:0; flex:1; }
+.tinv-banner-title{ font-weight:700; color:var(--ink); line-height:1.35; }
+.tinv-banner-actions{ display:flex; gap:8px; flex-shrink:0; }
+.tinv-card{ max-width:420px; position:relative; overflow:hidden; padding:0; text-align:center; }
+.tinv-card-close{ position:absolute; top:12px; right:12px; z-index:3; }
+.tinv-hero{
+  height:96px; display:flex; align-items:flex-start; justify-content:flex-start; padding:14px 16px;
+  background:
+    radial-gradient(circle at 85% 20%, color-mix(in srgb, var(--imperial-gold) 45%, transparent) 0, transparent 55%),
+    linear-gradient(135deg, color-mix(in srgb, var(--seal-red) 70%, var(--paper)), color-mix(in srgb, var(--seal-red-dark) 80%, var(--paper)));
+}
+.tinv-hero-seal{ font-size:22px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.18)); }
+.tinv-card-avatar{ margin-top:-42px; position:relative; z-index:2; }
+.tinv-avatar-lg{ width:84px; height:84px; font-size:30px; border:4px solid var(--paper); box-shadow:var(--shadow-lift); }
+.tinv-card-body{ padding:8px 24px 22px; }
+.tinv-kicker{ margin:6px 0 2px; font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--seal-red-dark); }
+.tinv-card-title{ margin:4px 0 2px; font-size:20px; line-height:1.3; color:var(--ink); }
+.tinv-card-user{ margin:0 0 14px; font-size:13px; color:var(--ink-soft); }
+.tinv-perks{ list-style:none; margin:0 0 14px; padding:12px 14px; text-align:left; border-radius:12px; background:var(--paper-warm); display:flex; flex-direction:column; gap:8px; }
+.tinv-perks li{ display:flex; gap:10px; align-items:flex-start; font-size:14px; color:var(--ink); line-height:1.4; }
+.tinv-perks li span{ flex-shrink:0; }
+.tinv-card-error:empty{ display:none; }
+.tinv-card-actions{ display:flex; flex-direction:column; gap:8px; }
+.tinv-card-foot{ margin:12px 0 0; font-size:12.5px; color:var(--ink-soft); }
 @media (max-width:640px){
   .class-log-entry{ grid-template-columns:1fr; gap:6px; }
+  .tinv-grid{ grid-template-columns:1fr; }
+  .tinv-banner{ flex-wrap:wrap; }
+  .tinv-banner-actions{ width:100%; }
+  .tinv-banner-actions .btn, .tinv-small-btn{ min-height:44px; }
+  .tinv-pending-row{ flex-wrap:wrap; }
   .plans-matrix{ min-width:520px; }
   .plans-option, .plans-cell input[type="checkbox"]{ min-height:44px; }
   .panel-view .panel-nav{ flex-wrap:nowrap; overflow-x:auto; max-width:100%; justify-content:flex-start; }
@@ -5103,6 +5165,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/admin-support-materials.js"></script>
 <script src="../shared/support-materials-view.js"></script>
 <script src="../shared/teacher-panel.js"></script>
+<script src="../shared/teacher-invites.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
 <script src="../shared/my-flashcards.js"></script>
