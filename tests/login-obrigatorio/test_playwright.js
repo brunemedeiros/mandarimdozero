@@ -23,7 +23,8 @@ const GATE_STUB = `window.supabase = { createClient: () => {
   return {
     from: q, rpc: async () => ({ data: null, error: null }),
     auth: {
-      getSession: async () => ({ data: { session: null } }),
+      getSession: async () => ({ data: { session: /type=recovery/.test(location.hash) ? { user: { id: 'r1', email: 'esqueci@x.com' } } : null } }),
+      updateUser: async (a) => { rec('updateUser', a); return { data: { user: { id: 'r1' } }, error: null }; },
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe(){} } } }),
       signUp: async (a) => { rec('signUp', a); return { data: { user: { id: 'n1', email: a.email }, session: null }, error: null }; },
       signInWithPassword: async (a) => { rec('signIn', a); return a.email === 'naoconfirmado@x.com'
@@ -79,6 +80,19 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     L('conta não confirmada recebe código novo', await page.evaluate(() => window.__calls.some(c => c[0] === 'resend' && c[1].type === 'signup' && c[1].email === 'naoconfirmado@x.com')));
     await page.click('#gate-verify-back-btn');
     L('"Usar outro e-mail" volta ao login', await page.isVisible('#gate-login'));
+    // link de "Nova senha": tela de senha nova antes de entrar
+    await page.goto("about:blank");
+    await page.goto(`http://127.0.0.1:${port}/index.html#access_token=x&refresh_token=y&type=recovery`);
+    await page.waitForSelector('#gate-new-password', { state: 'visible' });
+    L('link de recuperação abre "Crie uma senha nova"', !(await page.isVisible('#gate-choose-language')));
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/gate-senha-nova-${theme}-${width}.png` });
+    await page.fill('#gate-new-password-input', 'nova123'); await page.fill('#gate-new-password-confirm', 'nova124');
+    await page.click('#gate-new-password-btn');
+    L('senhas diferentes avisam', await page.evaluate(() => /não são iguais/.test(document.getElementById('gate-new-password-note').textContent) && !window.__calls.some(c => c[0] === 'updateUser')));
+    await page.fill('#gate-new-password-confirm', 'nova123');
+    await page.click('#gate-new-password-btn');
+    await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+    L('senha nova salva e segue o fluxo', await page.evaluate(() => window.__calls.some(c => c[0] === 'updateUser' && c[1].password === 'nova123')));
     L('sem rolagem horizontal', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
     L('sem erros de página', errors.length === 0, errors);
     await ctx.close();

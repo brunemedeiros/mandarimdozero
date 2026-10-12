@@ -208,6 +208,21 @@ h1{
   </div>
 </div>
 
+<div class="wrap" id="gate-new-password" style="display:none;">
+  <h1>Crie uma senha nova</h1>
+  <p class="sub">Escolha a senha que você vai usar daqui para frente.</p>
+  <div class="gate-card">
+    <form id="gate-new-password-form">
+      <label class="sr-only" for="gate-new-password-input" style="position:absolute;left:-9999px;">Senha nova</label>
+      <input type="password" id="gate-new-password-input" class="gate-input" placeholder="Senha nova (mínimo 6 caracteres)" autocomplete="new-password" required minlength="6">
+      <label class="sr-only" for="gate-new-password-confirm" style="position:absolute;left:-9999px;">Repita a senha nova</label>
+      <input type="password" id="gate-new-password-confirm" class="gate-input" placeholder="Repita a senha nova" autocomplete="new-password" required minlength="6">
+      <button type="submit" class="btn btn-primary btn-block" id="gate-new-password-btn">Salvar senha nova</button>
+    </form>
+    <p class="gate-note" id="gate-new-password-note"></p>
+  </div>
+</div>
+
 <div class="wrap" id="gate-choose-language" style="display:none;">
   <h1>Qual idioma você quer aprender?</h1>
   <p class="sub" id="gate-choose-sub">Você poderá trocar de idioma a qualquer momento dentro da plataforma.</p>
@@ -246,7 +261,7 @@ if (typeof APP_IDENTITY !== 'undefined'){
 const GUEST_MODE_FLAG = 'guest_mode'; // mesma chave usada por shared/auth.js dentro de cada idioma
 
 function showOnly(id){
-  ['gate-loading', 'gate-login', 'gate-verify', 'gate-choose-language', 'gate-choose-experience'].forEach(x => {
+  ['gate-loading', 'gate-login', 'gate-verify', 'gate-new-password', 'gate-choose-language', 'gate-choose-experience'].forEach(x => {
     document.getElementById(x).style.display = (x === id) ? '' : 'none';
   });
 }
@@ -327,6 +342,18 @@ async function afterAuthResolved(user){
 // login (flag `guest_mode` no sessionStorage, lida por shared/auth.js) só existe para
 // testes e capturas de tela; este portão não oferece mais o botão e limpa a flag.
 sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
+
+// ---------- Redefinir senha ----------
+// O link do e-mail "Nova senha" volta para este portão com #...type=recovery e uma sessão de
+// recuperação. Antes, a pessoa entrava direto no app sem trocar a senha. Agora: tela de senha nova
+// (updateUser) e só depois segue o fluxo normal. Lido ANTES do getSession(), que limpa o hash.
+const GATE_IS_RECOVERY = /(^|[#&])type=recovery(&|$)/.test(window.location.hash);
+let gateRecoveryUser = null;
+function showNewPassword(user){
+  gateRecoveryUser = user;
+  showOnly('gate-new-password');
+  document.getElementById('gate-new-password-input').focus();
+}
 
 // ---------- Confirmação do cadastro por código (e-mail) ----------
 let gateVerifyEmail = '';
@@ -441,6 +468,24 @@ document.getElementById('gate-resend-btn').addEventListener('click', async () =>
   note.className = error ? 'gate-note err' : 'gate-note';
   if (!error) startResendCooldown();
 });
+document.getElementById('gate-new-password-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pass = document.getElementById('gate-new-password-input').value;
+  const again = document.getElementById('gate-new-password-confirm').value;
+  const note = document.getElementById('gate-new-password-note');
+  const btn = document.getElementById('gate-new-password-btn');
+  if (pass !== again){ note.textContent = 'As duas senhas não são iguais.'; note.className = 'gate-note err'; return; }
+  btn.disabled = true;
+  const { data, error } = await supabaseClient.auth.updateUser({ password: pass });
+  btn.disabled = false;
+  if (error){
+    note.textContent = /same|different/i.test(error.message || '') ? 'A senha nova precisa ser diferente da antiga.' : 'Não deu para salvar agora. Peça um link novo em "Esqueceu sua senha?".';
+    note.className = 'gate-note err';
+    return;
+  }
+  note.textContent = 'Senha nova salva!'; note.className = 'gate-note';
+  await afterAuthResolved((data && data.user) || gateRecoveryUser);
+});
 document.getElementById('gate-verify-back-btn').addEventListener('click', () => {
   clearInterval(gateResendTimer);
   showOnly('gate-login');
@@ -452,14 +497,18 @@ document.getElementById('gate-verify-back-btn').addEventListener('click', () => 
   if (window.location.hash){
     history.replaceState(null, '', window.location.pathname + window.location.search);
   }
-  if (session && session.user){
+  if (session && session.user && GATE_IS_RECOVERY){
+    showNewPassword(session.user);
+  } else if (session && session.user){
     await afterAuthResolved(session.user);
   } else {
     // Sem sessão: sempre a tela de login (não existe mais modo convidado).
     showOnly('gate-login');
   }
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session && session.user){
+    if (event === 'PASSWORD_RECOVERY' && session && session.user){
+      showNewPassword(session.user);
+    } else if (event === 'SIGNED_IN' && session && session.user && !GATE_IS_RECOVERY && !gateRecoveryUser){
       await afterAuthResolved(session.user);
     }
   });

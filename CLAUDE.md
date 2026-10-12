@@ -42,6 +42,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - **Notas de realidade/culturais**: toda nota nova ou editada é reportada no chat com nível de confiança
   (alta/média/baixa). Procedimento na skill `notas-de-realidade`.
 - **Conteúdo novo (nível/módulo/unidade)**: decidir os Desafios por categoria (skill `criar-desafios`).
+- **E-mails**: todo e-mail do site (Supabase Auth, Edge Functions, Resend) segue o padrão Prof Brune
+  (`docs/email/PADRAO-EMAIL.md`, modelo `docs/email/supabase/confirmar-conta.html`; detalhes em `.claude/rules/email.md`).
 
 ## Processo
 
@@ -74,7 +76,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 ## Índice
 
 - Regras por área (carregam sozinhas): `.claude/rules/` -- frontend-fr-zh, flashcards-motor, decks-review,
-  supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora.
+  supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora, email.
 - Skills do projeto: `migration-supabase`, `notas-de-realidade`, `criar-desafios`, `audio-tts`,
   `teste-navegador`, `registrar-entrega`.
 - Agentes (`.claude/agents/`, `model:` pela dificuldade): `regressao` (haiku, roda testes),
@@ -96,6 +98,6 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - 075/076 (papéis, permissões, regras da professora) na produção; telas (painéis Admin x Professora, Planos, Minhas aulas) publicadas pelo PR #302 (2026-10-12). Plano: 1) papel Professora (feito), 2) Fase K final (feito), 3) perfil privado, 4) mural -- `docs/plano-professora-privacidade.md`.
 - 077 (convite de aluno + badge por professora + 1 professora por idioma) no Staging e na produção; telas na branch, PR pendente.
 - Fase K final: 078 (Decks do aluno) e 079 (contador de cópias de Deck público) no Staging e na produção; telas na branch, PR pendente.
-- Etapa 3a (login obrigatório + confirmação por código) na branch, PR pendente; falta o modelo de e-mail com código (`docs/auth/confirmacao-por-codigo.md`). Etapa 3b (perfil privado no banco) a fazer.
+- Etapa 3a (login obrigatório + confirmação por código) na branch, PR pendente; falta a autora configurar o SMTP (Resend) e colar os modelos de `docs/email/supabase/` (`docs/auth/confirmacao-por-codigo.md`). Etapa 3b (perfil privado no banco) a fazer.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.

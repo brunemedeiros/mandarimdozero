@@ -14,8 +14,13 @@ manda só um **link**. Para o código aparecer no e-mail:
 1. Supabase (produção) > Authentication > Emails > **Confirm signup**
    (https://supabase.com/dashboard/project/eigjocalzwamisgqilhg/auth/templates).
 2. Assunto: `Seu código para ativar a conta`
-3. Corpo: em **Source**, apagar tudo e colar o conteúdo de `docs/auth/email-confirmacao.html` (visual do site:
-   papel creme, logo, faixa azul/rosa, código grande, botão azul escuro; tabelas e estilos inline para Gmail/Outlook).
+3. Corpo: em **Source**, apagar tudo e colar `docs/email/supabase/confirmar-conta.html` (padrão Prof Brune,
+   `docs/email/PADRAO-EMAIL.md`).
+4. Mesmos passos para os outros modelos (Subject entre parênteses):
+   - Magic Link: `docs/email/supabase/magic-link.html` ("Seu link para entrar")
+   - Reset Password: `docs/email/supabase/redefinir-senha.html` ("Crie uma senha nova")
+   - Change Email Address: `docs/email/supabase/trocar-email.html` ("Confirme o novo e-mail")
+   A foto da assinatura (`icons/brune-email.jpg`) só aparece depois que a branch for mergeada na `main`.
 
 
 Até o passo 3 ser feito, o e-mail continua trazendo o link, e tocar nele também confirma a conta (a tela do
