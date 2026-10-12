@@ -100,7 +100,7 @@ Autorização da autora: "pode seguir para Aulas". Mesmo método de Alunos (dese
   `shared/painel/` (peças novas: `p-aula`, `p-mes`, `p-chips`, `p-avatares`, `p-grade-2--larga`, `p-lateral`; no guia: "Aula no diário"), `fr/index.html` e `zh/index.html` (script novo).
 - **Correções no Design System achadas pelos testes:** `PainelUI.confirmar` e `PainelUI.toast` agora entram no primeiro `.painel` visível (no app há um por aba, os das abas fechadas ficam escondidos e o diálogo sumia);
   diálogo com formulário dentro do `article` (X no canto, rodapé lado a lado); botão de envio dentro de `.p-acoes` não ocupa a linha toda; o X do diálogo de vincular aluno (tela Alunos) tinha o mesmo defeito e foi corrigido.
-- **i18n:** 49 chaves novas `classlogs.*` (pt-BR e en, confiança ALTA). Chaves antigas `admin.classLogs.*` que a tela nova não usa mais ficaram no catálogo (inofensivas; limpeza futura).
+- **i18n:** 48 chaves novas `classlogs.*` (pt-BR e en, confiança ALTA). Chaves antigas `admin.classLogs.*` que a tela nova não usa mais ficaram no catálogo (inofensivas; limpeza futura).
 - **Testes** (2026-10-12): `tests/painel-aulas/test_classlogs_ui_unit.js` 33/33 (agrupamento, filtros, meses, escape de HTML), `tests/painel-aulas/test_playwright.js` 162/162
   (fr e zh x claro e escuro: lista, filtros sem refazer o formulário, chips, registrar para 1 e para 2, validação, editar e apagar em grupo, atalho da ficha, vazios, celular, professora x admin),
   regressão: painel-alunos 206/206 e 61/61, painel-professora 162/162, fase-k6 28/28, painel-ds 9+87+131+194+288.
