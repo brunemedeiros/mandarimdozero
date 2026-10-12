@@ -9,7 +9,7 @@ Padrão visual de TODO e-mail enviado em nome da Prof Brune (Central, site app.p
 3. **Faixa roxa** `#3D167B`, texto `#FAF5EA`, com:
    - marca: `IDIOMAS COM PROF BRUNE` (900, 14px). Em e-mail de um curso específico pode virar `FRANÇAIS AVEC PROF BRUNE` / `中文 COM PROF BRUNE`;
    - etiqueta: pílula com borda rosa, texto `#f6c4ec`, 11px, caixa alta, espaçada;
-   - título: Anton, 38px (30px no celular), caixa alta. Um trecho em rosa `#E36BCA` como destaque.
+   - título: Anton, peso 900 (engrossa o Anton e garante título grosso quando o e-mail cai na fonte reserva), 38px (30px no celular), caixa alta. Um trecho em rosa `#E36BCA` como destaque.
 4. **Corpo** (Nunito 16px, entrelinha 1.65, texto `#22113f`).
 5. **Caixas de destaque** em bege `#FAF5EA`, cantos 16px: listas com ✓ azul `#3498D6`, ou o código de verificação (38px, 900, roxo, espaçado).
 6. **Botão rosa** centralizado: fundo `#E36BCA`, borda 2px `#22113f`, sombra sólida `4px 4px 0 #22113f`, cantos 999px, texto 900 escuro. Um botão principal por e-mail.
