@@ -37,6 +37,9 @@ for (const curso of ['fr', 'zh']){
     const minBotao = (curso === 'fr' && tema === 'luz') ? 3 : 4.5;
     T('botão primário' + (minBotao === 3 ? ' (exceção da autora, igual ao Ranking)' : ''), textoBotao, marca, minBotao);
     T('botão primário em hover' + (minBotao === 3 ? ' (exceção da autora)' : ''), textoBotao, marcaHover, minBotao);
+    // balão enviado: texto sempre branco; no escuro o fundo é a cor do curso a 55% sobre preto (--p-balao-enviada)
+    const balao = tema === 'luz' ? marca : mix(marca, [0, 0, 0], .55);
+    T('balão enviado (texto branco)' + (minBotao === 3 ? ' (exceção da autora, igual ao Ranking)' : ''), BRANCO, balao, minBotao);
     T('botão secundário e contorno (pílula bege)', suave, elev); T('botão secundário em hover', tinta, linha);
     T('botão contraste', bg, tinta); T('dica (tooltip)', bg, tinta);
     T('selo ok', vivo, ok_); T('selo aviso', vivo, aviso); T('selo erro', vivo, erro); T('selo info', vivo, info); T('selo neutro', tinta, linha);

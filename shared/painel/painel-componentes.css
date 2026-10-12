@@ -284,7 +284,7 @@
 /* enviada = a pessoa que usa o painel (balão na cor do curso, à direita); recebida = a outra pessoa (balão neutro, à esquerda). Os dois têm avatar. */
 .painel .p-mensagem--enviada{ align-self: flex-end; flex-direction: row-reverse; }
 .painel .p-mensagem--enviada .p-mensagem-bloco{ align-items: flex-end; }
-.painel .p-mensagem--enviada .p-mensagem-corpo{ background: var(--p-marca); color: var(--p-texto-botao); border-bottom-right-radius: 6px; }
+.painel .p-mensagem--enviada .p-mensagem-corpo{ background: var(--p-balao-enviada); color: white; border-bottom-right-radius: 6px; }
 .painel .p-mensagem--recebida{ align-self: flex-start; }
 .painel .p-mensagem--recebida .p-mensagem-corpo{ background: var(--p-superficie); color: var(--p-tinta); border: 1px solid var(--p-linha); border-bottom-left-radius: 6px; }
 
@@ -441,7 +441,7 @@
 .painel .p-balao-grupo--recebida{ align-self: flex-start; align-items: flex-start; }
 .painel .p-balao{ position: relative; margin: 0; padding: .6rem 1rem; border-radius: 18px; line-height: 1.45; font-size: .95rem; overflow-wrap: anywhere; }
 .painel .p-balao > *{ margin: 0; }
-.painel .p-balao--enviada{ background: var(--p-marca); color: var(--p-texto-botao); }
+.painel .p-balao--enviada{ background: var(--p-balao-enviada); color: white; }
 .painel .p-balao--recebida{ background: var(--p-superficie); color: var(--p-tinta); }
 .painel .p-balao-grupo--enviada .p-balao:not(:last-of-type){ border-bottom-right-radius: 6px; }
 .painel .p-balao-grupo--recebida .p-balao:not(:last-of-type){ border-bottom-left-radius: 6px; }

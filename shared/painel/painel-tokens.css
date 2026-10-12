@@ -37,12 +37,13 @@
      (no francês dá 3,2:1, abaixo do AA de 4,5 para texto normal: decisão da autora, ver docs/historico/15). No escuro o
      site não define cor própria e o branco ficaria ilegível, então usa --on-seal-red (escuro) e passa o AA. */
   --p-texto-botao: white;
+  --p-balao-enviada: var(--p-marca); /* fundo do balão enviado; o texto dele é sempre branco */
   --p-botao-hover: color-mix(in srgb, var(--p-marca) 85%, black);
 }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) .painel{ --p-elevado: color-mix(in srgb, var(--paper-warm), white 8%); --p-texto-botao: var(--on-seal-red); --p-botao-hover: color-mix(in srgb, var(--p-marca) 88%, white); }
+  :root:not([data-theme="light"]) .painel{ --p-elevado: color-mix(in srgb, var(--paper-warm), white 8%); --p-texto-botao: var(--on-seal-red); --p-balao-enviada: color-mix(in srgb, var(--p-marca) 55%, black); --p-botao-hover: color-mix(in srgb, var(--p-marca) 88%, white); }
 }
-:root[data-theme="dark"] .painel{ --p-elevado: color-mix(in srgb, var(--paper-warm), white 8%); --p-texto-botao: var(--on-seal-red); --p-botao-hover: color-mix(in srgb, var(--p-marca) 88%, white); }
+:root[data-theme="dark"] .painel{ --p-elevado: color-mix(in srgb, var(--paper-warm), white 8%); --p-texto-botao: var(--on-seal-red); --p-balao-enviada: color-mix(in srgb, var(--p-marca) 55%, black); --p-botao-hover: color-mix(in srgb, var(--p-marca) 88%, white); }
 
 /* ---------- 2. Ligação com o Pico (--pico-*) ----------
    Especificidade alta de propósito (:root:root:root .painel = 0,4,0): vence o bloco escuro do Pico, que usa

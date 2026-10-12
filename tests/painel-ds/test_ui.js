@@ -150,6 +150,8 @@ let ok = 0, ruim = 0; const check = (n, c, x) => { if (process.env.V) console.lo
     check(`[${rot}] conversa: começa no fim (mensagem mais recente visível)`, (await dist()) <= 2, await dist());
     check(`[${rot}] conversa: botão de voltar ao fim começa escondido`, await cv.locator('.p-ir-ao-fim').isHidden());
     const lados = await cv.evaluate(e => { const a = e.querySelector('.p-mensagem--enviada'), b = e.querySelector('.p-mensagem--recebida'); const fa = getComputedStyle(a.querySelector('.p-mensagem-corpo')), fb = getComputedStyle(b.querySelector('.p-mensagem-corpo')); return { avatares: !!a.querySelector('.p-avatar') && !!b.querySelector('.p-avatar'), baloes: fa.backgroundColor !== 'rgba(0, 0, 0, 0)' && fb.backgroundColor !== 'rgba(0, 0, 0, 0)', coresDiferentes: fa.backgroundColor !== fb.backgroundColor, enviadaDir: a.getBoundingClientRect().right > b.getBoundingClientRect().right }; });
+    const brancos = await page.evaluate(() => [document.querySelector('.p-mensagem--enviada .p-mensagem-corpo'), document.querySelector('.p-balao--enviada')].map(e => getComputedStyle(e).color));
+    check(`[${rot}] mensagem enviada e balão enviado: texto branco`, brancos.every(c => c === 'rgb(255, 255, 255)'), brancos);
     check(`[${rot}] mensagens: as duas partes têm avatar e balão, em cores diferentes, enviada à direita`, lados.avatares && lados.baloes && lados.coresDiferentes && lados.enviadaDir, lados);
     await page.evaluate(() => PainelUI.mensagem(document.getElementById('conv-lista'), { texto: 'Mensagem nova\n\nSegundo parágrafo', tipo: 'recebida', autor: 'Marina', hora: '10:00' })); await page.waitForTimeout(150);
     check(`[${rot}] conversa: mensagem nova com o leitor no fim continua acompanhando`, (await dist()) <= 2 && (await cv.locator('.p-mensagem').last().locator('p').count()) === 2, await dist());
@@ -295,8 +297,8 @@ let ok = 0, ruim = 0; const check = (n, c, x) => { if (process.env.V) console.lo
     await ci.fill('xyz'); check(`[${rot}] combobox: sem resultado mostra a mensagem`, await cx2.locator('.p-combo-vazio').isVisible() && (await cx2.locator('li[role="option"]:visible').count()) === 0);
     await ci.fill('a'); await page.keyboard.press('ArrowDown');
     check(`[${rot}] combobox: setas movem o item ativo (aria-activedescendant)`, !!(await ci.getAttribute('aria-activedescendant')) && (await cx2.locator('.p-ativo').count()) === 1);
-    await ci.fill('rafa'); const escolhido = page.evaluate(() => new Promise(res => document.querySelector('#combo .p-combo').addEventListener('p-combo:escolheu', e => res(e.detail), { once: true })));
-    await page.keyboard.press('Enter'); const ev2 = await escolhido;
+    await ci.fill('rafa'); await page.evaluate(() => { window.__esc = null; document.querySelector('#combo .p-combo').addEventListener('p-combo:escolheu', e => { window.__esc = e.detail; }, { once: true }); });
+    await page.keyboard.press('Enter'); await page.waitForFunction(() => window.__esc, null, { timeout: 5000 }); const ev2 = await page.evaluate(() => window.__esc);
     check(`[${rot}] combobox: Enter escolhe, mostra o nome, fecha e avisa com valor e rótulo`, (await ci.inputValue()) === 'Rafael Costa' && await lista.isHidden() && ev2.valor === 'rafael' && ev2.rotulo === 'Rafael Costa' && (await cx2.locator('li[aria-selected="true"]').count()) === 1, ev2);
     await ci.focus(); await ci.fill('zzz'); await page.keyboard.press('Escape'); check(`[${rot}] combobox: Esc desfaz o que foi digitado e volta ao escolhido`, (await ci.inputValue()) === 'Rafael Costa' && await lista.isHidden());
     await ci.click(); await cx2.locator('li[role="option"]', { hasText: 'Helena' }).click(); check(`[${rot}] combobox: clicar numa opção escolhe`, (await ci.inputValue()) === 'Helena Duarte' && (await cx2.getAttribute('data-valor')) === 'helena');
