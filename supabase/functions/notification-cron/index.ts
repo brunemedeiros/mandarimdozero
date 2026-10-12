@@ -91,8 +91,8 @@ const resendFromEmail = Deno.env.get('RESEND_FROM_EMAIL');
 // Mesmos appKey de languages/index.js -- duplicado aqui de propósito (este
 // arquivo roda em runtime Deno separado, não importa módulos do site).
 const LANGUAGES = [
-  { appKey: 'frances' },
-  { appKey: 'mandarim' },
+  { appKey: 'frances', id: 'fr' },
+  { appKey: 'mandarim', id: 'zh' },
 ];
 
 // Mesmos valores de ADMIN_EMAIL (languages/<lang>/app.js) e
@@ -571,12 +571,49 @@ async function maybeNotify(
   return true;
 }
 
+// E3/C3 -- sequência da CONTA (progress.data._account, ver shared/account-progress.js). Vale por cima do bloco do idioma quando
+// existe e não está atrás dele; senão devolve o próprio bloco (comportamento de antes).
+function withAccountProgress(state: any, account: any): any {
+  if (!account || typeof account !== 'object') return state;
+  const accLast = typeof account.lastStudyDay === 'string' ? account.lastStudyDay : null;
+  const blockLast = typeof state?.lastStudyDay === 'string' ? state.lastStudyDay : null;
+  if (!accLast || typeof account.streak !== 'number' || (blockLast && accLast < blockLast)) return state;
+  const lessons: Record<string, number> = { ...(state?.dailyLessonsLog || {}) };
+  for (const [d, v] of Object.entries(account.dailyLessonsLog || {})) {
+    const n = Number(v);
+    if (Number.isFinite(n) && n > (lessons[d] || 0)) lessons[d] = n;
+  }
+  return { ...state, streak: account.streak, lastStudyDay: accLast, dailyLessonsLog: lessons };
+}
+
+// Idioma "principal" da conta: onde os avisos da CONTA (sequência em risco, meta do dia, reengajamento) são entregues, uma vez só.
+// 1) o idioma atual da conta (_meta.currentLearningLanguage); 2) o bloco estudado mais recentemente; 3) o primeiro que existir.
+function primaryLanguageAppKey(data: any): string | null {
+  const present = LANGUAGES.filter((l) => data?.[l.appKey]);
+  if (!present.length) return null;
+  const current = data?._meta?.currentLearningLanguage;
+  const byCurrent = present.find((l) => l.id === current);
+  if (byCurrent) return byCurrent.appKey;
+  let best = present[0];
+  let bestDay = '';
+  for (const l of present) {
+    const d = data[l.appKey]?.lastStudyDay;
+    if (typeof d === 'string' && d > bestDay) { best = l; bestDay = d; }
+  }
+  return best.appKey;
+}
+
 async function processUserLanguage(
   supabase: any, rules: Map<string, any>, prefsCache: Map<string, any>, emailCache: Map<string, string | null>,
   userId: string, languageAppKey: string, state: any,
+  account: any = null, isPrimary: boolean = true,
 ): Promise<number> {
   let created = 0;
   const today = todayDateKeyUTC();
+  // Com _account (conta já migrada pelo cliente), os avisos da CONTA saem uma vez só, pelo idioma principal; sem _account,
+  // tudo igual a antes (um por idioma).
+  const accountEvents = !account || isPrimary;
+  const acct = accountEvents ? withAccountProgress(state, account) : state;
 
   // 1) Revisão atrasada
   const dueCount = computeReviewOverdueCount(state.cards, state.unitProgress, languageAppKey);
@@ -586,8 +623,8 @@ async function processUserLanguage(
 
   // 2) Sequência em risco -- tem sequência (algo a perder) e ainda não
   // estudou "hoje" (ver limitação de fuso no topo do arquivo).
-  if ((state.streak || 0) > 0 && state.lastStudyDay !== today) {
-    if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'streak_at_risk', 'streak', { days: state.streak }, 'path')) created++;
+  if (accountEvents && (acct.streak || 0) > 0 && acct.lastStudyDay !== today) {
+    if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'streak_at_risk', 'streak', { days: acct.streak }, 'path')) created++;
   }
 
   // 3) Meta do dia não batida -- só nos dias que a própria pessoa escolheu
@@ -595,8 +632,8 @@ async function processUserLanguage(
   // pro lembrete local (maybeSendStudyReminder).
   const goal = state.studyGoal?.dailyLessonsGoal || 0;
   const todayWeekdayKey = DAY_KEY_BY_UTC_INDEX[new Date().getUTCDay()];
-  if (goal > 0 && state.studyGoal?.days?.[todayWeekdayKey]) {
-    const done = state.dailyLessonsLog?.[today] || 0;
+  if (accountEvents && goal > 0 && state.studyGoal?.days?.[todayWeekdayKey]) {
+    const done = acct.dailyLessonsLog?.[today] || 0;
     if (done < goal) {
       const lessonsRemaining = goal - done;
       if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'study_goal_remaining', 'estudo', { lessonsRemaining, goal }, 'path')) created++;
@@ -608,7 +645,7 @@ async function processUserLanguage(
   // verdade). daysSince(null) é null pra quem nunca estudou -- de propósito
   // fora do calendário: reengajamento é sobre quem sumiu, não quem nunca
   // começou.
-  const inactiveDays = daysSince(state.lastStudyDay);
+  const inactiveDays = accountEvents ? daysSince(acct.lastStudyDay) : null;
   const reengRule = rules.get('reengajamento');
   const scheduleDays: number[] = reengRule?.schedule_days || [];
   if (inactiveDays !== null && scheduleDays.includes(inactiveDays)) {
@@ -812,12 +849,13 @@ Deno.serve(async (_req: Request) => {
   }
 
   for (const row of progressResult.data ?? []) {
+    const primaryAppKey = primaryLanguageAppKey(row.data);
     for (const lang of LANGUAGES) {
       const state = row.data?.[lang.appKey];
       if (!state) continue; // conta nunca usou este idioma
       usersScanned++;
       try {
-        notificationsCreated += await processUserLanguage(supabase, rules, prefsCache, emailCache, row.user_id, lang.appKey, state);
+        notificationsCreated += await processUserLanguage(supabase, rules, prefsCache, emailCache, row.user_id, lang.appKey, state, row.data?._account ?? null, lang.appKey === primaryAppKey);
       } catch (e) {
         errors.push(`${row.user_id}/${lang.appKey}: ${String(e)}`);
       }

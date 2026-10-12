@@ -115,7 +115,37 @@
     return state;
   }
 
-  var api = { ACCOUNT_FIELDS: ACCOUNT_FIELDS, pickAccount: pickAccount, mergeAccount: mergeAccount, deriveAccountFromRow: deriveAccountFromRow, applyAccountToState: applyAccountToState, consecutiveEndingAt: consecutiveEndingAt };
+  // ---- espelho por idioma ----
+  // O STATE carrega a UNIÃO dos dias de todos os idiomas (para a sequência continuar). Mas os leitores por idioma (painel da
+  // professora, perfil, alerta de infrequência) querem os dias estudados NAQUELE idioma. Por isso o bloco grava só os dias do próprio
+  // idioma: o que o bloco já tinha ao carregar + o que mudou nesta sessão em relação à união carregada.
+  function copyDays(src){ var out = {}; if (isObj(src)) Object.keys(src).forEach(function(k){ var v = Number(src[k]); if (isDay(k) && isFinite(v)) out[k] = v; }); return out; }
+  function snapshotBase(ownState, unionState){
+    return {
+      ownActivityLog: copyDays(ownState && ownState.activityLog), ownDailyLessonsLog: copyDays(ownState && ownState.dailyLessonsLog),
+      ownLastStudyDay: isDay(ownState && ownState.lastStudyDay) ? ownState.lastStudyDay : null,
+      unionActivityLog: copyDays(unionState && unionState.activityLog), unionDailyLessonsLog: copyDays(unionState && unionState.dailyLessonsLog),
+      unionLastStudyDay: isDay(unionState && unionState.lastStudyDay) ? unionState.lastStudyDay : null
+    };
+  }
+  function ownDaysSince(ownBase, unionBase, current){
+    var out = copyDays(ownBase);
+    var cur = copyDays(current);
+    Object.keys(cur).forEach(function(d){ var delta = cur[d] - (Number(unionBase && unionBase[d]) || 0); if (delta > 0) out[d] = (out[d] || 0) + delta; });
+    return out;
+  }
+  // Campos do bloco (idioma) que dependem só do que foi estudado nesse idioma.
+  function mirrorForBlock(payload, base){
+    if (!base || !isObj(payload)) return {};
+    var out = {};
+    out.activityLog = ownDaysSince(base.ownActivityLog, base.unionActivityLog, payload.activityLog);
+    out.dailyLessonsLog = ownDaysSince(base.ownDailyLessonsLog, base.unionDailyLessonsLog, payload.dailyLessonsLog);
+    var last = (isDay(payload.lastStudyDay) && payload.lastStudyDay !== base.unionLastStudyDay) ? payload.lastStudyDay : base.ownLastStudyDay;
+    if (last) out.lastStudyDay = last;
+    return out;
+  }
+
+  var api = { snapshotBase: snapshotBase, mirrorForBlock: mirrorForBlock, ACCOUNT_FIELDS: ACCOUNT_FIELDS, pickAccount: pickAccount, mergeAccount: mergeAccount, deriveAccountFromRow: deriveAccountFromRow, applyAccountToState: applyAccountToState, consecutiveEndingAt: consecutiveEndingAt };
   (typeof globalThis !== 'undefined' ? globalThis : root).AccountProgress = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

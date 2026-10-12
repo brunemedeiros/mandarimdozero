@@ -56,6 +56,9 @@ function progressBlockKey(progressData){
   return CourseStorage.courseStorageKeyFor(APP_KEY, typeof getUiLang === 'function' ? getUiLang() : 'pt-BR', progressData);
 }
 
+// E3/C2: o que o bloco deste idioma tinha ao carregar (só dias estudados neste idioma) x a união da conta; ver saveState.
+let progressAccountBase = null;
+
 const GUEST_MODE_FLAG = 'guest_mode';
 // (antes cada site tinha sua própria chave -- 'frances_zero_guest_mode' /
 // 'mandarim_guest_mode'; sessionStorage é por aba E por origem, então
@@ -530,11 +533,16 @@ async function saveState(){
       }
     }
 
-    const merged = Object.assign({}, existing && existing.data, { [blockKey]: payload });
-    // E3/C2: sequência de dias e afins são da CONTA (união de todos os blocos); o bloco continua com o espelho.
+    // E3/C2: sequência de dias e afins são da CONTA (união de todos os blocos); o bloco continua com o espelho, mas só com
+    // os dias estudados NESTE idioma (a união fica em _account).
+    let blockPayload = payload;
+    let accountMerged = null;
     if (typeof AccountProgress !== 'undefined'){
-      merged._account = AccountProgress.mergeAccount(AccountProgress.deriveAccountFromRow(existing && existing.data), AccountProgress.pickAccount(payload));
+      accountMerged = AccountProgress.mergeAccount(AccountProgress.deriveAccountFromRow(existing && existing.data), AccountProgress.pickAccount(payload));
+      if (progressAccountBase) blockPayload = Object.assign({}, payload, AccountProgress.mirrorForBlock(payload, progressAccountBase));
     }
+    const merged = Object.assign({}, existing && existing.data, { [blockKey]: blockPayload });
+    if (accountMerged) merged._account = accountMerged;
     if (pendingAccountUiLanguage){
       merged._meta = Object.assign({}, merged._meta, { uiLanguage: pendingAccountUiLanguage });
     }
@@ -635,8 +643,13 @@ async function loadState(){
         loadLegacyState(data.data);
       }
       // E3/C2: sequência de dias, lições do dia e afins vêm da CONTA (soma dos blocos), por cima do que o bloco trouxe.
+      // Guarda antes o que é só DESTE idioma, para o espelho do bloco não receber dias estudados no outro (ver saveState).
       if (data && data.data && typeof AccountProgress !== 'undefined'){
-        try { AccountProgress.applyAccountToState(STATE, AccountProgress.deriveAccountFromRow(data.data)); }
+        try {
+          const ownSnapshot = { activityLog: Object.assign({}, STATE.activityLog), dailyLessonsLog: Object.assign({}, STATE.dailyLessonsLog), lastStudyDay: STATE.lastStudyDay };
+          AccountProgress.applyAccountToState(STATE, AccountProgress.deriveAccountFromRow(data.data));
+          progressAccountBase = AccountProgress.snapshotBase(ownSnapshot, STATE);
+        }
         catch (e) { console.error('Erro ao aplicar progresso da conta:', e); }
       }
       // Só chega aqui depois de uma leitura bem-sucedida (com ou sem dado

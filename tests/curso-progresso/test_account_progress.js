@@ -138,6 +138,29 @@ const zhBlock = () => ({ xp: 80, totalReviews: 10, totalAudioPlays: 0, streak: 1
     check('2 abas: sequência da conta = 3 (hoje, ontem, anteontem)', db.row._account.streak === 3);
     check('2 abas: cada bloco guarda só o seu xp', db.row.frances.xp === 130 && db.row.mandarim.xp === 95);
   }
+  // 6. o espelho do bloco guarda só os dias estudados NAQUELE idioma (painel da professora e alerta de infrequência leem por idioma)
+  {
+    const db = { row: { frances: frBlock(), mandarim: zhBlock(), _meta: {} } };
+    const s = makeSession({ db, appKey: 'mandarim' }); await s.loadState();
+    await s.saveState(); // abriu o chinês e não estudou nada
+    check('espelho: abrir o chinês sem estudar não muda os dias do chinês', eq(db.row.mandarim.activityLog, zhBlock().activityLog) && db.row.mandarim.lastStudyDay === zhBlock().lastStudyDay);
+    check('espelho: o francês continua intacto', eq(db.row.frances, frBlock()));
+    check('espelho: a união está em _account', db.row._account.lastStudyDay === day(-1) && Object.keys(db.row._account.activityLog).length === 3);
+    // estudar hoje no chinês
+    s.S.activityLog[day(0)] = (s.S.activityLog[day(0)] || 0) + 1; s.S.lastStudyDay = day(0); s.S.streak = 3; s.S.dailyLessonsLog[day(0)] = 1;
+    await s.saveState();
+    check('espelho: estudar hoje no chinês entra no bloco do chinês', db.row.mandarim.activityLog[day(0)] === 1 && db.row.mandarim.lastStudyDay === day(0) && db.row.mandarim.dailyLessonsLog[day(0)] === 1);
+    check('espelho: dias do francês NÃO entram no bloco do chinês', db.row.mandarim.activityLog[day(-1)] === undefined && db.row.mandarim.activityLog[day(-2)] === undefined);
+    check('espelho: francês continua intacto depois', eq(db.row.frances, frBlock()));
+    check('espelho: _account tem hoje e a sequência 3', db.row._account.activityLog[day(0)] === 1 && db.row._account.lastStudyDay === day(0) && db.row._account.streak === 3);
+    // recarregar o chinês: a sequência continua e o bloco não perdeu nada
+    const s2 = makeSession({ db, appKey: 'mandarim' }); await s2.loadState();
+    check('espelho: recarregar traz a sequência da conta (3)', s2.S.streak === 3 && s2.S.lastStudyDay === day(0));
+    // abrir o francês depois: vê hoje (da conta) mas o bloco do francês continua só com os dias do francês
+    const s3 = makeSession({ db, appKey: 'frances' }); await s3.loadState(); await s3.saveState();
+    check('espelho: abrir o francês depois não grava o dia de hoje do chinês no francês', db.row.frances.activityLog[day(0)] === undefined && db.row.frances.lastStudyDay === day(-1));
+    check('espelho: STATE do francês vê a sequência da conta (3)', s3.S.streak === 3 && s3.S.lastStudyDay === day(0));
+  }
   console.log(`conta: ${passed} passaram, ${failed} falharam`);
   process.exit(failed ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
