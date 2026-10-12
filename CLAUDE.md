@@ -93,8 +93,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   Premium) NÃO aplicar antes do paywall. Lista do que fazer ao ligar o paywall: `docs/historico/14-pendencias-pos-paywall-e-decks.md`.
 - Todos os cartões antigos já têm Deck (migração de 2026-10-07).
 - Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
-- 075/076 (papéis, permissões, regras da professora) na produção; telas (painéis Admin x Professora, Planos, Minhas aulas) publicadas pelo PR #302 (2026-10-12). Plano: 1) papel Professora (feito), 2) Fase K final (no Staging), 3) perfil privado, 4) mural -- `docs/plano-professora-privacidade.md`.
+- 075/076 (papéis, permissões, regras da professora) na produção; telas (painéis Admin x Professora, Planos, Minhas aulas) publicadas pelo PR #302 (2026-10-12). Plano: 1) papel Professora (feito), 2) Fase K final (feito), 3) perfil privado, 4) mural -- `docs/plano-professora-privacidade.md`.
 - 077 (convite de aluno + badge por professora + 1 professora por idioma) no Staging e na produção; telas na branch, PR pendente.
-- Fase K final: 078 (Decks do aluno) e 079 (contador de cópias de Deck público) só no Staging; produção e PR pendentes.
+- Fase K final: 078 (Decks do aluno) e 079 (contador de cópias de Deck público) no Staging e na produção; telas na branch, PR pendente.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.

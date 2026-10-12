@@ -226,5 +226,5 @@ Detalhes e verificação: `docs/plano-professora-privacidade.md`.
 | Projeto | Como | Versão |
 |---|---|---|
 | Staging | ferramenta `apply_migration` (079: corpo de `copy_public_deck` com md5 `d0da8f9d…`, igual ao arquivo) | conferir em `list_migrations` |
-| Produção | pendente (autorização da autora) | -- |
+| Produção | ferramenta, autorizada pela autora 2026-10-12 (antes: md5 da 068 conferido; depois: `d0da8f9d…`, 3 funções, sem execute para anon, tabela fechada) | `20261012190508` (078), `20261012190559` (079) |
 Detalhes: `docs/K-analytics-contrato.md`, seção "Fase K final -- entrega".
