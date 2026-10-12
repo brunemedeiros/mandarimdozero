@@ -7919,6 +7919,8 @@ const switchTab = createTabSwitcher({
     'admin-badges': renderAdminPanelView,
     'my-flashcards': renderMyFlashcardsView,
     'support-materials': renderSupportMaterialsView,
+    'teacher-panel': renderTeacherPanelView,
+    'my-class-logs': renderMyClassLogsView,
     leaderboard: openLeaderboardView,
     friends: renderFriendsView,
     path: renderUnitsGrid,
