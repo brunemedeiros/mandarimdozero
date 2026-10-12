@@ -44,6 +44,7 @@ function load(lang){
        this.registerStudyToday = () => {}; this.maybeShowStreakCelebration = () => {};
        this.registerDailyLessonCompleted = () => {}; this.registerDailyStars = () => {};
        this.lessonStars = () => 0; this.trackEvent = () => {}; this.showToast = () => {};
+       this.t = k => k; // i18n: só monta o texto do aviso, que aqui é stub
        this.saveState = () => {}; this.setTimeout = () => {};
        this.todayStr = () => '2026-10-06';
        this.registerExerciseCorrect = () => { calls.fsrs++; };

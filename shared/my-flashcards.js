@@ -297,15 +297,21 @@ function myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML }){
          cartão LEGADO já existente continua no formulário legado de
          sempre (myFlashcardEditFormHTML, intocado) -- isto é só
          CRIAÇÃO de um cartão novo. -->
-    <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:0;">${t('myFlashcards.deckDest')}</label>
-    <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
+    <div class="add-card-meta">
+      <div>
+        <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:0;">${t('myFlashcards.deckDest')}</label>
+        <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
+      </div>
+      <div>
+        <label class="profile-edit-label" for="my-flashcard-card-type-preview" style="margin-top:0;">${t('myFlashcards.cardType')}</label>
+        <select id="my-flashcard-card-type-preview" class="profile-edit-input">
+          ${cardTypeUIMetaForEntitlement(premium).map(ct => `<option value="${ct.id}" ${ct.id === 'normal' ? 'selected' : ''}>${ct.label}</option>`).join('')}
+        </select>
+      </div>
+    </div>
     ${premium ? '' : `<p class="profile-edit-hint">${t('myFlashcards.free.hint')}</p>`}
-    <div class="section-label" style="margin:0 0 4px;">${t('myFlashcards.cardType')}</div>
-    <select id="my-flashcard-card-type-preview" class="profile-edit-input">
-      ${cardTypeUIMetaForEntitlement(premium).map(ct => `<option value="${ct.id}" ${ct.id === 'normal' ? 'selected' : ''}>${ct.label}</option>`).join('')}
-    </select>
-    <div class="section-label" style="margin:14px 0 4px;">${t('myFlashcards.fields.title')}</div>
-    <p class="profile-edit-hint" style="margin-top:-2px;">${t('myFlashcards.fields.hint')}</p>
+    <div class="section-label add-card-fields-title">${t('myFlashcards.fields.title')}</div>
+    <p class="profile-edit-hint add-card-fields-hint">${t('myFlashcards.fields.hint')}</p>
     <div id="my-flashcard-native-fields"></div>
     <div id="my-flashcard-tags"></div>
     <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" data-touch44 style="background:none; border:none; cursor:pointer; margin:6px 0 0;">${t('myFlashcards.preview')}</button>
@@ -636,8 +642,8 @@ function myFlashcardNativeEditFormHTML(c, editorState, premium){
   }
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">
-      <div class="section-label" style="margin:0;">${t('myFlashcards.native.title')}</div>
-      <div class="section-label" style="margin:6px 0 4px;">${t('myFlashcards.native.cardType')}</div>
+      <div class="section-label native-edit-title" style="margin:0;">${t('myFlashcards.native.title')}</div>
+      <label class="profile-edit-label" for="edit-my-native-flashcard-card-type" style="margin:0;">${t('myFlashcards.native.cardType')}</label>
       <select id="edit-my-native-flashcard-card-type" class="profile-edit-input">
         ${typeOptions.map(ct => `<option value="${ct.id}" ${ct.id === editorState.cardGenerationMode ? 'selected' : ''}>${ct.label}</option>`).join('')}
       </select>
@@ -1045,7 +1051,7 @@ function openMyFlashcardsExportModal(cardsToExport){
   }
   modal.style.display = 'flex';
   modal.innerHTML = `
-    <div class="app-modal">
+    <div class="app-modal deck-window deck-window-sm">
       <div class="app-modal-header">
         <h3>${t('myFlashcards.export.modalTitle', { n: payload.cards.length })}</h3>
         <button class="app-modal-close" id="my-flashcards-export-close" aria-label="${t('common.close')}">✕</button>
@@ -1053,7 +1059,7 @@ function openMyFlashcardsExportModal(cardsToExport){
       <div class="app-modal-body">
         ${payload.cards.length < cardsToExport.length ? `<p class="profile-edit-hint">${t('myFlashcards.export.leftOut', { n: cardsToExport.length - payload.cards.length })}</p>` : ''}
         <p class="profile-edit-hint">${t('myFlashcards.export.hint')}</p>
-        <div style="display:flex; gap:10px; margin:10px 0;">
+        <div class="export-choices">
           <button type="button" class="btn btn-secondary" id="my-flashcards-export-download" style="flex:1;">${t('myFlashcards.export.download')}</button>
           <button type="button" class="btn btn-secondary" id="my-flashcards-export-copy-link" style="flex:1;">${t('myFlashcards.export.copyLink')}</button>
         </div>
@@ -1192,6 +1198,11 @@ function openFlashcardLimitModal(opts){
   const title = modal.querySelector('.app-modal-header h3');
   if (body && body.dataset.defaultHtml === undefined) body.dataset.defaultHtml = body.innerHTML;
   if (title && title.dataset.defaultText === undefined) title.dataset.defaultText = title.textContent;
+  // Texto padrão no idioma ATUAL do site (o guardado acima é o do 1º uso e
+  // ficaria em português depois de trocar para inglês).
+  const hasT = typeof t === 'function';
+  const defaultBodyHTML = hasT ? `<p data-i18n-html="flashcardLimit.modal.bodyHtml">${t('flashcardLimit.modal.bodyHtml')}</p>` : body && body.dataset.defaultHtml;
+  const defaultTitle = hasT ? t('flashcardLimit.modal.title') : title && title.dataset.defaultText;
   const cutMessage = opts && opts.cutMessage;
   if (body){
     body.innerHTML = cutMessage
@@ -1200,9 +1211,9 @@ function openFlashcardLimitModal(opts){
            <strong>⭐ Com o Premium, seus cartões próprios são ilimitados.</strong><br>
            Para ativar, fale com a administração (profbrune). Você também pode excluir cartões que já não usa para liberar espaço.
          </div>`
-      : body.dataset.defaultHtml;
+      : defaultBodyHTML;
   }
-  if (title) title.textContent = cutMessage ? '🔒 Importação limitada pelo plano grátis' : title.dataset.defaultText;
+  if (title) title.textContent = cutMessage ? '🔒 Importação limitada pelo plano grátis' : defaultTitle;
   modal.style.display = 'flex';
   return true;
 }
