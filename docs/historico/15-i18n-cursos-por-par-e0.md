@@ -69,3 +69,10 @@ Divergências e lacunas (de propósito)
 - Fora desta rodada, mesmo padrão a aplicar: `zh/stories.js`, `zh/hanzi-data.js`, `fr/challenges.js`, `fr/dictations.js`, `fr/conjugation-data.js`.
 - Lacuna existente confirmada: nomes de personagem em português no zh ("Garçom", "Vendedor") nunca foram traduzidos no inglês; a camada já carrega `speakers`.
 - V-05 (busca por campos de tradução retorna zero) vale para `content.js` de fr e zh; ainda não para os arquivos acima.
+
+Testes da E2: 77 de 93 suítes locais passam (92 da lista da E1 + `camada-curso`, 72/72). As 16 que falham são as mesmas da E1, com a mesma lista exata de checks
+(desafios-progresso, fase-i/tags_unit, fase-identity, fase-public-deck/legacy_parity, i18n/card_variants_browser, i18n/test_playwright, k2c, k2f x2, k2h, k2i,
+painel-alunos unit, trilha-tags, trilha/trail_state_model, tts-google); mais `fase-j/test_playwright`, instável, que falhou no lote e passou 76/76 isolado.
+Passam: `test_i18n_unit` 2104/2104, `deck-browser` 208/208, `fase-e` playwright 38/38, `trilha/trail_ui` 86/86, `i18n/content_en` 30/30, `content_zh_en` 16/16,
+`registro` 89/89. Testes ajustados por causa da E2: `fase-e/harness`, `placeholders`, `trilha/checkpoint_exam`, `trilha/trail_state_model`, `i18n/content_src`
+(passam a ler base + camada) e `i18n/test_i18n_unit` (ignora os 2 `<script>` novos).
