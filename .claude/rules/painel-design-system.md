@@ -17,3 +17,6 @@ Histórico e decisão: `docs/historico/15-*`, `docs/levantamento-design-system-p
 - Mudou token, cor ou componente: rodar `bash tests/painel-ds/run.sh` e olhar fr/zh x claro/escuro (e 390px).
 - `guia-paletas.css` é cópia das paletas só para o guia; `test_tokens.js` falha se divergir de `fr/index.html` e `zh/index.html`.
 - Gamificação (sequência, XP, conquistas) é do site do aluno, não do painel.
+- Peças com comportamento (selects, menus, diálogo, combobox, data, questionário, anexo, `PainelUI.toast/mensagem/confirmar/anexo`) vivem em `painel-ui.js` (IIFE, só `window.PainelUI`, eventos delegados, texto externo sempre via `textContent`). Teste em `tests/painel-ds/test_ui.js`.
+- Botão primário: pílula, peso 800, fundo da marca com texto branco (igual às abas do Ranking). No francês claro isso dá 3,2:1 (abaixo de 4,5): exceção documentada, o teste de contraste tem piso 3. Alternativa de azul mais escuro está no guia, seção Botões.
+- Fonte Nunito é hospedada (`shared/fonts/`), igual em todos os cursos; só a paleta muda.

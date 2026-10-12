@@ -54,3 +54,11 @@ Auditoria em `docs/fase-2-professora/auditoria.md`, desenho em `docs/fase-2-prof
 - Achado: criar cartão exige ser admin por regra do banco (migration 026). Fora do escopo; vira trabalho quando houver outras professoras.
 - Guia de estilo e desenho publicados como Artefato por `scripts/painel-ds/preparar-artefato.mjs` (a visualização de código do app
   não carrega o CSS vizinho e mostra a página quebrada).
+
+## Peças do shadcn e fonte hospedada (2026-10-12, Fase 1 estendida)
+- Nunito passou a ser hospedada em `shared/fonts/` (latin e latin-ext, licença OFL); `fr/`, `zh/` e `index.html` trocaram `local('Nunito')` por `<link>` + preload. Resolve o achado acima e muda o visual do site inteiro para quem não tinha a fonte instalada.
+- Botões do painel: pílula, peso 800, fundo da marca e texto branco, como as abas do Ranking. Dados da tabela centralizados (primeira coluna à esquerda).
+- Peças pedidas pela autora (HTML + CSS + JS simples, sem React): Breadcrumb, Tooltip, Toast, Spinner, Separator, Select, Scroll area, Resizable, Questionnaire, Popover, Pagination, Navigation menu, Native select, Message e Message scroller, Menubar, Label, Field, Item, Input OTP, Input Group, Input, Hover card, Empty, Dropdown menu, KBD, Dialog, Date Picker, Context Menu, Combobox, Collapsible, Bubble, Attachment, Alert Dialog, Alert.
+- Regra de situação aprovada: Em dia = estudou nos últimos 3 dias; Atenção = 4 a 6; Parado = 7 ou mais.
+- Testes em 2026-10-12: escopo 9/9, tokens 87/87, contraste 127/127, navegador 192/192, interação (`test_ui.js`) 274/274. Contraste: texto branco sobre o azul claro do francês = 3,2:1 (exceção documentada).
+- Bugs achados e corrigidos nos testes: spinner do Pico (`aria-busy`) aparecia solto ao lado do anexo em envio; barra de progresso do anexo sem largura (item em flex); clicar no campo já focado não reabria o combobox.

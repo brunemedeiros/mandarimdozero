@@ -7,6 +7,7 @@
 <!-- Proposta visual da Fase 2 (Alunos, Flashcards, Aulas). Usa o CSS REAL do Design System do painel (shared/painel/).
      Tudo aqui é dado de exemplo; nada lê ou grava no Supabase. As classes m- são só desta página (candidatas a entrar
      no Design System se a autora aprovar). Para ver ao vivo: node scripts/painel-ds/preparar-artefato.mjs e publicar. -->
+<link rel="stylesheet" href="../../shared/fonts/nunito.css">
 <link rel="stylesheet" href="../../shared/painel/guia-paletas.css">
 <link rel="stylesheet" href="../../shared/painel/vendor/pico.painel.css">
 <link rel="stylesheet" href="../../shared/painel/painel-tokens.css">
@@ -301,50 +302,34 @@
     </div>
   </section>
 
-  <!-- ===== 3. Referências do shadcn ===== -->
+  <!-- ===== 3. Peças do shadcn ===== -->
   <section class="m-sec" id="shadcn">
-    <h2>Componentes de referência do shadcn: o que dá para trazer</h2>
-    <p>Dá para escolher peças do shadcn e do catálogo dele. Não instalamos o shadcn (ele exige React): refazemos o visual em HTML e CSS puro, sobre o Pico, com as suas cores. As peças que precisam de comportamento ganham um JavaScript pequeno, ou usam o que o navegador já tem. Marque as que você quer.</p>
+    <h2>Peças do shadcn que você escolheu</h2>
+    <p>Não instalamos o shadcn (ele exige React): refizemos cada peça em HTML e CSS puro, sobre o Pico, com as suas cores e a fonte Nunito. As que precisam de comportamento têm um JavaScript pequeno. Todas estão prontas e funcionando no <b>guia de estilo</b> (<code>shared/painel/guia-de-estilo.html</code>), nos dois cursos, claro e escuro.</p>
     <div class="p-tabela" style="padding:0"><table class="striped">
-      <thead><tr><th>Componente do shadcn</th><th>Como entra</th><th>Onde seria usado no painel</th></tr></thead>
+      <thead><tr><th>Grupo</th><th>Peças prontas</th><th>Onde entram no painel</th></tr></thead>
       <tbody>
-        <tr><td>Button, Input, Select, Textarea, Checkbox, Radio, Switch</td><td><span class="m-status m-status--ja">Já temos</span></td><td>Todos os formulários</td></tr>
-        <tr><td>Card, Table, Badge, Avatar, Alert, Progress, Tabs</td><td><span class="m-status m-status--ja">Já temos</span></td><td>Blocos, listas, situação, abas</td></tr>
-        <tr><td>Accordion, Dropdown Menu, Tooltip, Dialog</td><td><span class="m-status m-status--ja">Já temos (Pico)</span></td><td>Menu "Ações", confirmações</td></tr>
-        <tr><td>Breadcrumb</td><td><span class="m-status m-status--css">Só CSS</span></td><td>Alunos / Marina Alves</td></tr>
-        <tr><td>Pagination</td><td><span class="m-status m-status--css">Só CSS</span></td><td>Lista de cartões</td></tr>
-        <tr><td>Toggle Group (controle segmentado)</td><td><span class="m-status m-status--css">Só CSS</span></td><td>Alternar visões e áreas</td></tr>
-        <tr><td>Skeleton</td><td><span class="m-status m-status--css">Só CSS</span></td><td>Carregando a lista de alunos</td></tr>
-        <tr><td>Alert com título, Separator, Kbd, Avatar em grupo</td><td><span class="m-status m-status--css">Só CSS</span></td><td>Avisos, aulas em grupo</td></tr>
-        <tr><td>Toast (Sonner)</td><td><span class="m-status m-status--js">CSS e JS pequeno</span></td><td>"Cartão criado", "Vínculo removido" (o site já tem um toast)</td></tr>
-        <tr><td>Sheet / Drawer</td><td><span class="m-status m-status--js">CSS e JS pequeno</span></td><td>Ficha rápida do aluno ao lado da lista</td></tr>
-        <tr><td>Combobox, Command (busca com atalho)</td><td><span class="m-status m-status--js">JS médio</span></td><td>Escolher alunos e decks com busca</td></tr>
-        <tr><td>Data Table (ordenar, filtrar, paginar)</td><td><span class="m-status m-status--js">JS médio</span></td><td>Tabela de alunos e de cartões</td></tr>
-        <tr><td>Date Picker, Calendar</td><td><span class="m-status m-status--js">Campo nativo ou JS médio</span></td><td>Data da aula</td></tr>
-        <tr><td>Chart</td><td><span class="m-status m-status--js">Biblioteca à parte</span></td><td>Gráficos de evolução (Admin, Fase 3)</td></tr>
-        <tr><td>Carousel, Resizable, Input OTP, Context Menu</td><td><span class="m-status m-status--nao">Não recomendo</span></td><td>Sem uso no painel</td></tr>
+        <tr><td>Navegação</td><td>Breadcrumb, Pagination (anterior e próximo), Navigation menu, Menubar</td><td>Alunos / Marina Alves, lista de cartões, abas das duas áreas</td></tr>
+        <tr><td>Campos e formulários</td><td>Input, Label, Field, Input Group, Select, Native select, Combobox, Date Picker, Input OTP, Collapsible</td><td>Criar cartão, registrar aula, escolher alunos com busca</td></tr>
+        <tr><td>Menus e janelas</td><td>Dropdown menu, Context menu, Popover, Hover card, Tooltip, Dialog, Alert Dialog</td><td>Menu "Ações" de cada aluno, confirmar remoção de vínculo</td></tr>
+        <tr><td>Avisos e estados</td><td>Toast, Alert, Spinner, Empty, Separator, KBD</td><td>"Cartão criado", lista vazia, carregando alunos</td></tr>
+        <tr><td>Conversa e arquivos</td><td>Message, Message scroller, Bubble, Attachment (com animação)</td><td>Recados para a aluna, anexos de aula</td></tr>
+        <tr><td>Estrutura</td><td>Scroll area, Resizable, Item, Questionnaire</td><td>Painéis lado a lado, listas de itens, passo a passo</td></tr>
+        <tr><td>Fora do pedido</td><td>Chart, Data Table com ordenação, Sheet/Drawer</td><td>Gráficos são da Fase 3 (Admin). Os demais só se você pedir.</td></tr>
       </tbody></table></div>
-    <div class="m-ref">
-      <article><header><h3>Breadcrumb</h3></header><ul class="m-bread"><li><a href="#">Professora</a></li><li><a href="#">Alunos</a></li><li>Marina Alves</li></ul></article>
-      <article><header><h3>Paginação</h3></header><div class="m-pag"><a href="#">‹</a><a href="#">1</a><a href="#" aria-current="page">2</a><a href="#">3</a><span>…</span><a href="#">9</a><a href="#">›</a></div></article>
-      <article><header><h3>Controle segmentado</h3></header><div class="m-seg"><button type="button" aria-pressed="true">Semana</button><button type="button" aria-pressed="false">Mês</button><button type="button" aria-pressed="false">Ano</button></div></article>
-      <article><header><h3>Skeleton (carregando)</h3></header><div style="display:grid;gap:.5rem"><div class="m-esq" style="width:60%"></div><div class="m-esq"></div><div class="m-esq" style="width:80%"></div></div></article>
-      <article><header><h3>Aviso com título</h3></header><div class="p-alerta p-alerta--info" style="align-items:flex-start"><div><strong>Novo módulo disponível</strong><br><span>O francês A2 ganhou o módulo 5. Os alunos já podem iniciar.</span></div></div></article>
-      <article><header><h3>Toast</h3></header><div class="m-toast"><strong>Cartão criado</strong><span class="m-nota">Enviado para Marina e Rafael.</span></div></article>
-      <article><header><h3>Avatares em grupo</h3></header><div class="m-grupo"><span class="p-avatar">MA</span><span class="p-avatar">RC</span><span class="p-avatar">HD</span><span class="p-avatar">+3</span></div></article>
-    </div>
+    <p class="m-nota">Você pode seguir mandando peças: basta o nome e uma imagem, não precisa colar código.</p>
   </section>
 
   <!-- ===== 4. Decisões ===== -->
   <section class="m-sec" id="decisoes" style="margin-bottom:4rem">
-    <h2>O que preciso que você decida</h2>
+    <h2>Decisões</h2>
     <div class="p-grade" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))">
-      <article><header><h3>1. A função nova de Flashcards</h3></header><p>O que ela faz? Não encontrei nada no código nem nos documentos. O desenho deixa um espaço reservado (etapa ou aba) para ela.</p></article>
-      <article><header><h3>2. A regra de situação</h3></header><p>Em dia, Atenção e Parado: 3 dias e 7 dias servem? Esse número muda quem aparece em alerta.</p></article>
-      <article><header><h3>3. O quadro geral</h3></header><p>Hoje os dados de cada aluno vêm de uma consulta por aluno. Para 6 a 20 alunos dá para buscar todos de uma vez ao abrir a tela. Se a turma crescer muito, vale criar uma consulta única no banco (isso exigiria uma migration, rodada por você no SQL Editor).</p></article>
-      <article><header><h3>4. Quem pode usar a área da Professora</h3></header><p>Hoje criar cartão exige ser admin (regra do banco). Com outras professoras no futuro, isso precisará mudar. Nesta fase, nada muda: só você usa.</p></article>
-      <article><header><h3>5. Quais peças do shadcn entram</h3></header><p>Diga quais da tabela acima você quer. As de "Só CSS" entram sem custo; as de JavaScript eu avalio uma a uma.</p></article>
-      <article><header><h3>6. Material de apoio</h3></header><p>Fica na área da Professora, mas fora desta fase. Ok deixar como está até a Fase 3?</p></article>
+      <article><header><h3>Já decidido</h3></header><ul class="p-lista"><li><span><b>Regra de situação</b>: Em dia = estudou nos últimos 3 dias; Atenção = 4 a 6; Parado = 7 ou mais.</span></li><li><span><b>Fonte</b>: Nunito hospedada no repositório, igual em todos os cursos.</span></li><li><span><b>Botões</b>: pílula em negrito, azul com texto branco, como o Ranking.</span></li><li><span><b>Áreas</b>: Professora e Admin já separadas no site.</span></li></ul></article>
+      <article><header><h3>Para uma sessão futura</h3></header><p><b>Banco de Revisão</b> nos cartões: entra depois, em outra sessão. Nesta fase o desenho deixa só o espaço da aba.</p></article>
+      <article><header><h3>1. Cor do botão principal</h3></header><p>Com texto branco, o azul claro do francês chega a 3,2:1 de contraste, abaixo do recomendado (4,5:1). Fica igual ao Ranking, mas é difícil de ler para algumas pessoas. Um azul um pouco mais escuro chega a 4,55:1. Os dois estão lado a lado no guia, na seção Botões. Qual você prefere?</p></article>
+      <article><header><h3>2. Material de apoio</h3></header><p>Fica na área da Professora, mas fora da Fase 2. Pode ficar como está até a Fase 3?</p></article>
+      <article><header><h3>3. O quadro geral</h3></header><p>Para 6 a 20 alunos, dá para buscar tudo de uma vez ao abrir a tela. Se a turma crescer muito, vale criar uma consulta única no banco (uma migration, rodada por você no SQL Editor).</p></article>
+      <article><header><h3>4. Aprovar o desenho</h3></header><p>Se estiver bom, começo pela tela de Alunos, depois Cartões e Aulas, uma por vez, com teste e fotos antes e depois. Nada muda no site até você autorizar.</p></article>
     </div>
   </section>
 </div>
