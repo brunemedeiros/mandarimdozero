@@ -117,3 +117,19 @@ Só front-end estático; nenhuma migration, nenhuma mudança em produção além
 - Efeito em produção após o deploy: as 5 contas de mandarim têm `hanziCards` gravados com progresso zero (nenhum com histórico), então nada muda para elas ao carregar; quem estudar hanzi daqui para frente
   passa a ter o progresso preservado. O progresso de hanzi estudado ANTES do deploy já se perdeu (foi regravado como zero) e não é recuperável.
 Próximo: C1 (`courseStorageKey` puro e uso nos 3 pontos de `shared/auth.js`), aguardando autorização e as respostas das perguntas da auditoria.
+
+## E3, passo C1 (2026-10-12): chave do bloco de progresso por curso
+
+Só front-end estático; nenhuma migration, nada em produção além do deploy normal do Pages. Autorizado pela dona ("execute o C1"). **Comportamento idêntico para todas as contas atuais.**
+- `shared/course-storage.js` (novo, funções puras): `courseStorageKey(courseId, _meta.courses)`, `activeCourseId`, `courseStorageKeyFor`. `_meta.courses[courseId].storageKey` tem prioridade;
+  senão, cursos legados usam a chave sem sufixo (`frances`, `mandarim`); cursos novos usam o próprio `courseId` (`frances@en`, `portugues@en`).
+  A regra do legado vem do registro de idiomas (campo novo `legacyStorage: ["pt-BR"]` em fr e zh, vazio em pt), não é deduzida no código.
+- Flag `COURSE_PROGRESS_PER_SITE_LANGUAGE = false`: enquanto desligada, a página usa sempre o curso legado (`appKey@pt-BR`), qualquer que seja o idioma do site. O passo C5 liga a flag.
+- `shared/auth.js`: `progressBlockKey()` usada nos 3 pontos de antes (guard-rail do salvar, merge do salvar, load). `<script>` novo nos `index.html` de fr e zh.
+- Nada grava `_meta.courses` ainda (isso é do C5).
+- Teste `tests/curso-progresso/test_course_storage.js` (105 verificações): função pura (legado, registro, cursos novos, `portugues@en`); **diferencial** `auth.js` de antes (congelado em
+  `tests/curso-progresso/fixtures/auth.antes-do-c1.js`) contra o novo em 28 cenários (7 tipos de conta, inclusive sem `_meta`, formato legado do zh e conta nova, x fr/zh x pt-BR/en): o que o app
+  recebe ao carregar, a linha gravada e o XP semanal saem idênticos; guard-rail monotônico igual nos dois; com a flag ligada o curso novo grava em `data["frances@en"]` sem tocar em `frances`, `mandarim` e
+  `_meta`, recarregar traz o curso novo e voltar para pt-BR traz o progresso antigo.
+- Regressão: 80 de 95 suítes locais passam; as 15 que falham são as mesmas de antes, com os mesmos checks.
+Próximo: C2 (bloco `_account` com streak e `activityLog`), aguardando autorização.
