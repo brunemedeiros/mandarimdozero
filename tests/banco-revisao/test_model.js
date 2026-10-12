@@ -58,6 +58,7 @@ check('aluno sem conta não gera cartão', ready(vocab, semConta).reason === 'no
 check('mandarim não é automático', ready(vocab, zhAluno).reason === 'needs_pinyin');
 check('aluno arquivado não gera', ready(vocab, { ...frAluna, status: 'arquivado' }).reason === 'archived');
 check('configuração desligada para tudo', ready(vocab, frAluna, { auto_generate: false }).reason === 'auto_off');
+check('item sensível nunca é automático', ready({ ...vocab, sensitive: true }, frAluna).reason === 'sensitive');
 check('item já aprovado/cortado não é reaprovado', ready({ ...vocab, status: 'aprovado' }, frAluna).reason === 'not_pending' && ready({ ...vocab, status: 'cortado' }, frAluna).reason === 'not_pending');
 
 // --- agendamento e récap
@@ -74,22 +75,24 @@ check('récap respeita o tamanho', J(R('rbSelectRecap(__p, "2026-12-31", 2).leng
 
 // --- estatísticas
 const rev = [
-  { review_date: '2026-10-10', outcome: 'acertou', reason: null, mode: 'recap' }, { review_date: '2026-10-10', outcome: 'errou', reason: 'acento', mode: 'recap' },
-  { review_date: '2026-10-12', outcome: 'ajuda', reason: null, mode: 'erros' }, { review_date: '2026-10-12', outcome: 'errou', reason: 'acento', mode: 'erros' }, { review_date: '2026-10-12', outcome: 'errou', reason: 'tempo', mode: 'erros' },
+  { review_date: '2026-10-10', outcome: 'acertou', reason: null, mode: 'recap' }, { review_date: '2026-10-10', outcome: 'errou', reason: 'ordem', mode: 'recap' },
+  { review_date: '2026-10-12', outcome: 'ajuda', reason: null, mode: 'erros' }, { review_date: '2026-10-12', outcome: 'errou', reason: 'ordem', mode: 'erros' }, { review_date: '2026-10-12', outcome: 'errou', reason: 'conjugacao', mode: 'erros' },
 ];
 const st = J(R('rbStatsFromReviews(__r)', { r: rev }));
 check('estatísticas: total, dias e porcentagens', st.total === 5 && st.days === 2 && st.okPct === 20 && st.helpPct === 20 && st.wrongPct === 60, JSON.stringify(st));
-check('estatísticas: motivos de erro ordenados', JSON.stringify(st.byReason) === JSON.stringify([['acento', 2], ['tempo', 1]]));
+check('estatísticas: motivos de erro ordenados', JSON.stringify(st.byReason) === JSON.stringify([['ordem', 2], ['conjugacao', 1]]));
 check('estatísticas: acerto por aula', st.byDay.length === 2 && st.byDay[0].date === '2026-10-10' && st.byDay[0].pct === 50);
 check('estatísticas sem respostas não quebram', J(R('rbStatsFromReviews([])')).total === 0);
 const ov = J(R('rbOverviewRow(__s, __i, __r, __rc, "2026-10-12")', { s: { id: 's1', name: 'Evan', language_app_key: 'portugues', status: 'ativo', linked_student_id: 'u', lesson_dates: ['2026-10-12', '2026-10-14'], last_entry_read: '2026-10-07' }, i: pool, r: rev, rc: { class_date: '2026-10-09' } }));
-check('visão geral: próxima aula, pendentes, aprovados, dias desde o caderno, acerto 30d', ov.nextLesson === '2026-10-12' && ov.pending === 1 && ov.approved === 5 && ov.daysSinceEntry === 5 && ov.accuracy === 20 && ov.errors30 === 3 && ov.topReason === 'acento' && ov.recapUsed === '2026-10-10' && ov.recapGenerated === '2026-10-09', JSON.stringify(ov));
+check('visão geral: próxima aula, pendentes, aprovados, dias desde o caderno, acerto 30d', ov.nextLesson === '2026-10-12' && ov.pending === 1 && ov.approved === 5 && ov.daysSinceEntry === 5 && ov.accuracy === 20 && ov.errors30 === 3 && ov.topReason === 'ordem' && ov.recapUsed === '2026-10-10' && ov.recapGenerated === '2026-10-09', JSON.stringify(ov));
 
 // --- texto da pergunta no Modo aula
 const pt = J(R('rbPromptText(__i, { say: "Como se diz:", fix: "Corrija:" })', { i: erro }));
 check('pergunta de erro: Corrija + forma errada + sentido', pt.prefix === 'Corrija:' && pt.wrong === true && pt.text === erro.wrong_form && pt.hint === erro.question);
 check('pergunta de pronúncia é o próprio texto', J(R('rbPromptText(__i, {}).prefix', { i: { item_type: 'pronuncia', question: "How do you pronounce 'significado'?" } })) === '');
 
+// --- motivos por tipo (os do Banco antigo)
+check('motivos por tipo de item', JSON.stringify(J(R('RB_REASONS_BY_TYPE.erro'))) === '["repetiu","corrigiu_parte"]' && J(R('RB_REASONS_BY_TYPE.estrutura')).includes('preposicao') && J(R('RB_REASONS')).length === 14);
 // --- markdown do Manual (tudo escapado)
 const md = R('rbMarkdownToHTML(__m)', { m: '# Manual\n\nTexto com **negrito**, `código` e <script>x</script>.\n\n- um\n- dois\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\n1. primeiro\n2. segundo\n\n```\n<b>cru</b>\n```\n---' });
 check('markdown: títulos, listas, tabela, código, negrito', md.includes('<h2>Manual</h2>') && md.includes('<strong>negrito</strong>') && md.includes('<ul><li>um</li><li>dois</li></ul>') && md.includes('<th>a</th>') && md.includes('<td>2</td>') && md.includes('<ol>') && md.includes('<hr>'));

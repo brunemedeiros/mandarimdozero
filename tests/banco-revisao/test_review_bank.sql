@@ -87,6 +87,29 @@ do $$ begin update review_bank_reviews set mode = 'prova' where outcome = 'errou
  insert into r values ('modo de resposta invalido bloqueado', false, 'passou'); exception when others then insert into r values ('modo de resposta invalido bloqueado', true, sqlerrm); end $$;
 insert into r select 'resposta guarda modo e data', (select count(*)=1 from review_bank_reviews where mode='recap' and review_date is not null), '';
 
+-- 085: marca de sensível
+update review_bank_items set sensitive = true where id = '22222222-2222-2222-2222-222222222222';
+insert into r select 'item guarda a marca de sensivel (padrao falso)', (select sensitive from review_bank_items where id='22222222-2222-2222-2222-222222222222') and (select not sensitive from review_bank_items where id='11111111-1111-1111-1111-111111111111'), '';
+update review_bank_items set sensitive = false where id = '22222222-2222-2222-2222-222222222222';
+
+-- 084: o upsert da importação (ON CONFLICT nas colunas de import_key) funciona e não duplica nem sobrescreve
+insert into review_bank_students(teacher_id, name, language_app_key, import_key) values ('00000000-0000-0000-0000-00000000000d','Importada','portugues','imp1') on conflict (teacher_id, import_key) do nothing;
+insert into review_bank_students(teacher_id, name, language_app_key, import_key) values ('00000000-0000-0000-0000-00000000000d','Outro nome','portugues','imp1') on conflict (teacher_id, import_key) do nothing;
+insert into r select 'importar aluno 2x nao duplica nem sobrescreve', (select count(*)=1 and min(name)='Importada' from review_bank_students where import_key='imp1'), '';
+insert into review_bank_items(teacher_id, bank_student_id, language_app_key, item_type, question, answer, import_key) select '00000000-0000-0000-0000-00000000000d', id, 'portugues', 'vocabulario', 'q', 'a', 'i001' from review_bank_students where import_key='imp1' on conflict (bank_student_id, import_key) do nothing;
+insert into review_bank_items(teacher_id, bank_student_id, language_app_key, item_type, question, answer, import_key) select '00000000-0000-0000-0000-00000000000d', id, 'portugues', 'vocabulario', 'q2', 'a2', 'i001' from review_bank_students where import_key='imp1' on conflict (bank_student_id, import_key) do nothing;
+insert into r select 'importar item 2x nao duplica nem sobrescreve', (select count(*)=1 and min(question)='q' from review_bank_items where import_key='i001'), '';
+insert into review_bank_items(teacher_id, bank_student_id, language_app_key, item_type, question, answer) select '00000000-0000-0000-0000-00000000000d', id, 'portugues', 'vocabulario', 'a', 'b' from review_bank_students where import_key='imp1';
+insert into review_bank_items(teacher_id, bank_student_id, language_app_key, item_type, question, answer) select '00000000-0000-0000-0000-00000000000d', id, 'portugues', 'vocabulario', 'c', 'd' from review_bank_students where import_key='imp1';
+insert into r select 'itens criados a mao (sem import_key) nao colidem entre si', (select count(*)=3 from review_bank_items where bank_student_id=(select id from review_bank_students where import_key='imp1')), '';
+insert into review_bank_recaps(teacher_id, bank_student_id, language_app_key, class_date, item_ids) select '00000000-0000-0000-0000-00000000000d', id, 'portugues', '2026-10-09', '{}' from review_bank_students where import_key='imp1' on conflict (bank_student_id, class_date) do nothing;
+insert into review_bank_recaps(teacher_id, bank_student_id, language_app_key, class_date, item_ids) select '00000000-0000-0000-0000-00000000000d', id, 'portugues', '2026-10-09', '{}' from review_bank_students where import_key='imp1' on conflict (bank_student_id, class_date) do nothing;
+insert into r select 'importar recap 2x nao duplica', (select count(*)=1 from review_bank_recaps where bank_student_id=(select id from review_bank_students where import_key='imp1')), '';
+insert into review_bank_reviews(item_id, teacher_id, bank_student_id, language_app_key, outcome, source, applied_at) select i.id, i.teacher_id, i.bank_student_id, i.language_app_key, 'errou', 'importado', now() from review_bank_items i where import_key='i001';
+delete from review_bank_reviews where bank_student_id=(select id from review_bank_students where import_key='imp1') and source='importado';
+insert into r select 'respostas importadas podem ser apagadas e regravadas', (select count(*)=0 from review_bank_reviews where source='importado'), '';
+insert into r select 'respostas importadas nao chegam ao aluno como pendentes', (select count(*)=0 from review_bank_reviews where source='importado' and applied_at is null), '';
+
 select pg_temp.u('00000000-0000-0000-0000-00000000000e','e@x.com');
 insert into r select 'aluna nao le nada do Banco (itens, recaps, respostas, alunos, config)',
   (select count(*) from review_bank_items)=0 and (select count(*) from review_bank_recaps)=0 and (select count(*) from review_bank_reviews)=0

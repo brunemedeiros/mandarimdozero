@@ -26,3 +26,7 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
 - Telas com seleção de alunos: seleção pode ficar vazia, filtro por idioma ativo, busca por nome/@usuário.
 - Notificações: categorias em `notification_rules`; novas categorias precisam decidir se aparecem na matriz de
   Configurações > Notificações.
+- Banco de Revisão (`shared/review-bank*.js`, permissão `review_bank` do plano Professora, migrations 081 a 085): aluno do Banco
+  (`review_bank_students`) existe com ou sem conta; só `linked_student_id` (conta com vínculo ativo, mesmo idioma) gera cartão em
+  "Cartões da professora". Aprovar = RPC `approve_review_bank_item` (atômica, 1 cartão por item); cortar arquiva, nunca apaga.
+  Item sensível ou com "Para conferir" nunca vira cartão sozinho. Doc: `docs/historico/15-auditoria-banco-revisao.md`.

@@ -45,11 +45,16 @@ const BANK_STUB = (who, appKey) => {
         return { data: st.single ? made[0] : made, error: null };
       }
       if (st.op === 'upsert'){
-        const r = st.pl, keys = st.conf.split(',');
-        let ex = rows.find(x => keys.every(k => x[k] === r[k]));
-        if (ex) Object.assign(ex, r); else { ex = Object.assign({ id: uuid(), created_at: now }, DEF[table](), r); rows.push(ex); }
-        return { data: st.single ? ex : [ex], error: null };
+        const keys = st.conf.split(','), out = [];
+        [].concat(st.pl).forEach(r => {
+          let ex = rows.find(x => keys.every(k => x[k] === r[k]));
+          if (ex){ if (!st.ignore) Object.assign(ex, r); else return; }
+          else { ex = Object.assign({ id: uuid(), created_at: now, updated_at: now }, DEF[table](), r); rows.push(ex); }
+          out.push(ex);
+        });
+        return { data: st.single ? (out[0] || null) : out, error: null };
       }
+      if (st.op === 'delete'){ const hit = rows.filter(test); hit.forEach(r => rows.splice(rows.indexOf(r), 1)); (window.__bankDeletes = window.__bankDeletes || []).push([table, hit.length]); return { data: null, error: null }; }
       if (st.op === 'update'){ const hit = rows.filter(test); hit.forEach(r => Object.assign(r, st.pl)); return { data: st.single ? (hit[0] || null) : hit, error: null }; }
       let out = rows.filter(test);
       st.ord.forEach(([k, asc]) => { out = out.slice().sort((a, b) => { const x = a[k], y = b[k]; if (x === y) return 0; if (x == null) return 1; if (y == null) return -1; return (x > y ? 1 : -1) * (asc ? 1 : -1); }); });
@@ -68,7 +73,8 @@ const BANK_STUB = (who, appKey) => {
       if (p === 'limit') return (n) => { st.lim = n; return b; };
       if (p === 'insert') return (pl) => { st.op = 'insert'; st.pl = pl; return b; };
       if (p === 'update') return (pl) => { st.op = 'update'; st.pl = pl; return b; };
-      if (p === 'upsert') return (pl, o) => { st.op = 'upsert'; st.pl = pl; st.conf = (o && o.onConflict) || 'id'; return b; };
+      if (p === 'upsert') return (pl, o) => { st.op = 'upsert'; st.pl = pl; st.conf = (o && o.onConflict) || 'id'; st.ignore = !!(o && o.ignoreDuplicates); return b; };
+      if (p === 'delete') return () => { st.op = 'delete'; return b; };
       if (p === 'single' || p === 'maybeSingle') return () => { st.single = true; return b; };
       return () => b;
     } });
@@ -179,7 +185,7 @@ const BANK_STUB = (who, appKey) => {
           mk('i6', 'rb-sem', 'portugues', { question: 'a hike', answer: 'a trilha' }),
           mk('i7', 'rb-evan', 'portugues', { question: 'worth it', answer: 'valer a pena', status: 'aprovado' }));
         D.review_bank_reviews.push(
-          { id: 'r1', item_id: 'i3', teacher_id: 'A', bank_student_id: 'rb-carol', language_app_key: 'frances', outcome: 'errou', reason: 'acento', mode: 'recap', review_date: d0, created_at: new Date().toISOString(), applied_at: null },
+          { id: 'r1', item_id: 'i3', teacher_id: 'A', bank_student_id: 'rb-carol', language_app_key: 'frances', outcome: 'errou', reason: 'ordem', mode: 'recap', review_date: d0, created_at: new Date().toISOString(), applied_at: null },
           { id: 'r2', item_id: 'i3', teacher_id: 'A', bank_student_id: 'rb-carol', language_app_key: 'frances', outcome: 'acertou', reason: null, mode: 'recap', review_date: d0, created_at: new Date().toISOString(), applied_at: null });
         D.review_bank_reviews.forEach(r => { r.applied_at = r.created_at; });
       }, ['A', appKey, theme, BANK_STUB.toString(), inDays(2), inDays(-25)]);
@@ -296,10 +302,11 @@ const BANK_STUB = (who, appKey) => {
       L('espaço mostra a resposta com os 3 botões', await ev(() => document.querySelectorAll('#rb-class .rb-ctrl .rb-big').length === 3));
       await page.click('#rb-class [data-o="errou"]');
       await page.waitForSelector('#rb-class .rb-reasons');
-      L('errou pede o motivo', await ev(() => document.querySelectorAll('#rb-class .rb-reasons .chips button').length === 10));
+      L('errou pede o motivo (os motivos do tipo do item + sem motivo)', await ev(() => (() => { const n = document.querySelectorAll('#rb-class .rb-reasons .chips button').length; const erro = !!document.querySelector('#rb-class .rb-sq.is-wrong'); return erro ? n === 3 : n === 5; })() && !!document.querySelector('#rb-class .chips .is-none')));
       await shot('modo-aula-motivo');
-      await page.click('#rb-class [data-r="acento"]');
-      await page.waitForFunction(() => window.__DB.review_bank_reviews.some(r => r.reason === 'acento' && r.mode === 'recap' && r.id.startsWith('u')));
+      const chosenReason = await ev(() => document.querySelector('#rb-class .rb-reasons .chips button:not(.is-none)').dataset.r);
+      await page.click('#rb-class .rb-reasons .chips button:not(.is-none)');
+      await page.waitForFunction((rs) => window.__DB.review_bank_reviews.some(r => r.reason === rs && r.mode === 'recap' && r.id.startsWith('u')), chosenReason);
       const rv = await ev(() => window.__DB.review_bank_reviews.filter(r => r.id.startsWith('u')));
       L('resposta gravada com motivo, modo e data; aluno vinculado recebe o aluno_id', rv.length === 1 && rv[0].outcome === 'errou' && rv[0].student_id === 'S1' && rv[0].mode === 'recap' && /^\d{4}-\d\d-\d\d$/.test(rv[0].review_date), rv);
       const firstId = rv[0].item_id;
@@ -310,6 +317,13 @@ const BANK_STUB = (who, appKey) => {
       await shot('modo-aula-fim');
       await page.click('#rb-class [data-c="close"]');
       L('fechar o Modo aula volta ao painel', await ev(() => !document.getElementById('rb-class') && !!document.querySelector('.rb-recap')));
+
+      // item sensível nunca entra sozinho: nem na geração automática, nem no "Gerar cartões"
+      await ev(() => { window.__DB.review_bank_items.push({ id: 'i-sens', teacher_id: 'A', bank_student_id: 'rb-carol', language_app_key: 'frances', student_id: null, item_type: 'vocabulario', question: 'pessoal', answer: 'pessoal', wrong_form: null, gap_word: null, explanation: null, check_note: null, class_date: '2026-10-07', status: 'aprovado', teacher_flashcard_id: null, level: 0, due_date: null, last_result: null, last_review_date: null, proposal: null, sensitive: true, created_at: '2026-10-07', updated_at: '2026-10-07' }); });
+      await ev(async () => { await rbReloadCur(); rbRender(); });
+      L('item sensível aprovado sem cartão não conta como pronto para gerar', await ev(() => !document.querySelector('.rb-ready') || !document.querySelector('.rb-ready').textContent.includes('pessoal')) && await ev(() => rbReadyItems(rbStudentById('rb-carol')).every(i => !i.sensitive)));
+      await page.click('[data-rb="filter"][data-f="aprovado"]');
+      L('item sensível aparece com a marca "Sensível"', await ev(() => [...document.querySelectorAll('.rb-item')].some(e => e.textContent.includes('pessoal') && e.textContent.includes('Sensível'))));
 
       // vincular aluno sem conta e gerar os cartões dos itens prontos
       await page.click('.rb-stu:has-text("Sem Conta")');
@@ -352,6 +366,56 @@ const BANK_STUB = (who, appKey) => {
       await page.click('#rb-auto');
       await page.waitForFunction(() => window.__DB.review_bank_settings[0].auto_generate === false);
       L('desligar a geração automática grava na configuração', true);
+
+      // Importação dos dados do Banco antigo: resumo, gravação sem entregar nada, repetível sem duplicar nem sobrescrever
+      const EXPORT = { version: 1, manual: '# Manual antigo\n\n- anote tudo', students: [
+        { key: 'ana', name: 'Ana Importada', language: 'portugues', reference: 'en', status: 'ativo', lessonDates: [inDays(3)], lastEntryRead: inDays(-4), items: [
+          { key: 'i001', type: 'vocabulario', q: 'traffic', a: 'o trânsito', note: 'Exemplo: o trânsito está ruim.', status: 'aprovado', date: '2026-07-03', level: 2, due: '2026-10-10', last: '2026-10-07', lastResult: 'acertou' },
+          { key: 'i002', type: 'erro', q: 'I went', wrong: 'Eu fui ido', a: 'Eu fui', status: 'pendente', date: '2026-07-06', doubt: 'Conferir.', proposal: { acao: 'editar', resumo: 'Troca a pergunta.', cartoes: [{ q: 'I went there', a: 'Eu fui lá', tipo: 'erro', errado: 'Eu fui ido lá' }] } },
+          { key: 'i003', type: 'tipo_estranho', q: 'x', a: 'y', status: 'estranho', level: 99 },
+          { key: 'i004', type: 'vocabulario', q: '', a: 'sem pergunta' }, { key: 'i005', type: 'estrutura', q: 'I believe in energy.', a: 'Eu acredito em energia.', status: 'pendente', doubt: 'Conteúdo pessoal. Decida se entra na revisão.', sensitive: true }],
+          recaps: [{ date: '2026-10-09', items: ['i001', 'i002', 'i999'] }],
+          reviews: [{ item: 'i001', outcome: 'acertou', reason: '', mode: 'recap', date: '2026-10-07', ts: '2026-10-07T12:00:00Z' }, { item: 'i002', outcome: 'errou', reason: 'tempo', mode: 'erros', date: '2026-10-08' }, { item: 'i404', outcome: 'errou', date: '2026-10-08' }] },
+        { key: 'beto', name: 'Beto', language: 'frances', reference: 'pt', status: 'arquivado', items: [{ key: 'i001', type: 'verbo', q: 'ir', a: 'aller' }] },
+        { key: 'sem-idioma', name: 'Sem idioma', language: 'klingon', items: [] }] };
+      const ex = JSON.stringify(EXPORT);
+      L('importar: bloco fechado por padrão e visível na aba Alunos', await ev(() => !!document.querySelector('details#rb-import') && !document.querySelector('details#rb-import').open));
+      await page.evaluate(() => { document.querySelector('details#rb-import').open = true; });
+      await page.setInputFiles('#rb-import-file', { name: 'banco.json', mimeType: 'application/json', buffer: Buffer.from('isto não é json') });
+      await page.waitForSelector('#rb-import-box .rb-wrong');
+      L('importar: arquivo inválido mostra o erro', await ev(() => document.querySelector('#rb-import-box').textContent.includes('JSON')));
+      await page.setInputFiles('#rb-import-file', { name: 'banco.json', mimeType: 'application/json', buffer: Buffer.from(ex) });
+      await page.waitForSelector('#rb-import-box [data-rb="import-run"]');
+      const impSum = await ev(() => [...document.querySelectorAll('#rb-import-box .rb-count b')].map(e => e.textContent));
+      L('importar: resumo (2 alunos, 5 itens válidos, 4 pendentes, 1 récap, 2 respostas) e aviso de ignorados', JSON.stringify(impSum) === '["2","5","4","1","2"]' && (await ev(() => document.querySelector('#rb-import-box').textContent.includes('ignorados'))), impSum);
+      await page.check('#rb-import-manual');
+      await page.click('[data-rb="import-run"]');
+      await page.waitForFunction(() => window.__DB.review_bank_students.some(s => s.import_key === 'ana') && !document.getElementById('rb-import-msg'));
+      const imp = await ev(() => { const D = window.__DB, ana = D.review_bank_students.find(s => s.import_key === 'ana'); return {
+        students: D.review_bank_students.filter(s => s.import_key).map(s => [s.import_key, s.language_app_key, s.reference_language, s.status, s.linked_student_id]),
+        items: D.review_bank_items.filter(i => i.bank_student_id === ana.id).map(i => [i.import_key, i.item_type, i.status, i.level, i.explanation, !!i.proposal, i.check_note, i.student_id, i.sensitive]),
+        recap: D.review_bank_recaps.filter(r => r.bank_student_id === ana.id).map(r => [r.class_date, r.item_ids.length]),
+        reviews: D.review_bank_reviews.filter(r => r.bank_student_id === ana.id).map(r => [r.outcome, r.reason, r.mode, r.source, r.review_date, !!r.applied_at]),
+        cards: D.teacher_flashcards.filter(c => c.student_id === 'S2' || c.student_id === 'S3').length, manual: D.review_bank_settings[0].manual_markdown }; });
+      L('importar: 2 alunos válidos gravados (idioma inválido ignorado)', imp.students.length === 2 && imp.students.some(s => s[0] === 'ana' && s[1] === 'portugues' && s[2] === 'en') && imp.students.some(s => s[0] === 'beto' && s[3] === 'arquivado'), imp.students);
+      L('importar: itens normalizados (tipo e status inválidos viram vocabulário e pendente, nível limitado a 9, sem pergunta ignorado)', imp.items.length === 4 && imp.items.find(i => i[0] === 'i003')[1] === 'vocabulario' && imp.items.find(i => i[0] === 'i003')[2] === 'pendente' && imp.items.find(i => i[0] === 'i003')[3] === 9, imp.items);
+      L('importar: observação, dúvida e proposta preservadas', imp.items.find(i => i[0] === 'i001')[4].includes('trânsito') && imp.items.find(i => i[0] === 'i002')[5] === true && imp.items.find(i => i[0] === 'i002')[6] === 'Conferir.', imp.items);
+      L('importar: marca de sensível preservada', imp.items.find(i => i[0] === 'i005')[8] === true && imp.items.find(i => i[0] === 'i001')[8] === false, imp.items);
+      L('importar: récap só com itens que existem', JSON.stringify(imp.recap) === '[["2026-10-09",2]]', imp.recap);
+      L('importar: respostas antigas gravadas como importadas e já aplicadas (não vão ao aluno)', imp.reviews.length === 2 && imp.reviews.every(r => r[3] === 'importado' && r[5] === true), imp.reviews);
+      L('importar: nenhum cartão criado e nada entregue', imp.cards === 0 || imp.cards === await ev(() => window.__DB.teacher_flashcards.filter(c => c.student_id === 'S2' || c.student_id === 'S3').length));
+      L('importar: Manual substituído quando marcado', imp.manual.includes('Manual antigo'), imp.manual);
+      L('importar: tela recarrega com os alunos novos no Banco', await ev(() => [...document.querySelectorAll('.rb-stu')].some(b => b.textContent.startsWith('Ana Importada'))));
+      // 2ª importação: não duplica e não sobrescreve o que foi mexido no site
+      await ev(() => { const i = window.__DB.review_bank_items.find(x => x.import_key === 'i001' && x.question === 'traffic'); i.status = 'cortado'; i.question = 'traffic (editado aqui)'; });
+      await page.evaluate(() => { document.querySelector('details#rb-import').open = true; });
+      await page.setInputFiles('#rb-import-file', { name: 'banco.json', mimeType: 'application/json', buffer: Buffer.from(ex) });
+      await page.waitForSelector('#rb-import-box [data-rb="import-run"]');
+      await page.click('[data-rb="import-run"]');
+      await page.waitForFunction(() => !document.getElementById('rb-import-msg'));
+      const again = await ev(() => { const D = window.__DB, ana = D.review_bank_students.find(s => s.import_key === 'ana'); return { students: D.review_bank_students.filter(s => s.import_key === 'ana').length, items: D.review_bank_items.filter(i => i.bank_student_id === ana.id).length, edited: D.review_bank_items.find(i => i.question === 'traffic (editado aqui)') ? D.review_bank_items.find(i => i.question === 'traffic (editado aqui)').status : null, reviews: D.review_bank_reviews.filter(r => r.bank_student_id === ana.id && r.source === 'importado').length, recaps: D.review_bank_recaps.filter(r => r.bank_student_id === ana.id).length }; });
+      L('importar de novo: nada duplica e o que foi editado no site não é sobrescrito', again.students === 1 && again.items === 4 && again.edited === 'cortado' && again.reviews === 2 && again.recaps === 1, again);
+      await shot('importacao');
 
       // ---------- aluno: Observação só depois de responder ----------
       await ev(([appKey, stub]) => {

@@ -77,7 +77,7 @@ function rbcStageHTML(s){
   const q = `<div class="rb-sq${p.wrong ? ' is-wrong' : ''}">${p.prefix ? `<span class="rb-pre">${rbH(p.prefix)}</span>` : ''}${p.wrong ? '✕ ' : ''}${rbH(p.text)}</div>${p.hint ? `<div class="rb-sh">${rbH(p.hint)}</div>` : ''}`;
   let ctrl;
   if (RBC.reasonFor === it.id){
-    ctrl = `<div class="rb-reasons"><h3 class="rb-h">${rbH(rbt('whyMissed'))}</h3><div class="chips">${RB_REASONS.map((r, k) => `<button data-c="reason" data-r="${r}">${k + 1} · ${rbH(rbt('reason.' + r))}</button>`).join('')}<button class="is-none" data-c="reason" data-r="">${rbH(rbt('noReason'))}</button></div></div>`;
+    ctrl = `<div class="rb-reasons"><h3 class="rb-h">${rbH(rbt('whyMissed'))}</h3><div class="chips">${(RB_REASONS_BY_TYPE[it.item_type] || RB_REASONS_BY_TYPE.vocabulario).map((r, k) => `<button data-c="reason" data-r="${r}">${k + 1} · ${rbH(rbt('reason.' + r))}</button>`).join('')}<button class="is-none" data-c="reason" data-r="">${rbH(rbt('noReason'))}</button></div></div>`;
   } else if (RBC.shown){
     ctrl = `<div class="rb-ctrl"><button class="rb-big is-ok" data-c="ans" data-o="acertou">${rbH(rbt('gotIt'))}</button><button class="rb-big is-help" data-c="ans" data-o="ajuda">${rbH(rbt('withHelp'))}</button><button class="rb-big is-bad" data-c="ans" data-o="errou">${rbH(rbt('missed'))}</button></div>`;
   } else {
@@ -155,8 +155,8 @@ function rbcKey(e){
   if (e.key === 'Escape'){ if (RBC.drawer){ RBC.drawer = false; rbcRender(); } else rbcClose(); return; }
   if (RBC.done || !RBC.slides.length || RBC.busy) return;
   if (RBC.reasonFor){
-    const n = Number(e.key);
-    if (n >= 1 && n <= RB_REASONS.length){ e.preventDefault(); rbcRecord('errou', RB_REASONS[n - 1]); }
+    const n = Number(e.key), list = RB_REASONS_BY_TYPE[(RBC.slides[RBC.idx] || {}).item_type] || RB_REASONS_BY_TYPE.vocabulario;
+    if (n >= 1 && n <= list.length){ e.preventDefault(); rbcRecord('errou', list[n - 1]); }
     else if (e.key === '0'){ e.preventDefault(); rbcRecord('errou', null); }
     return;
   }

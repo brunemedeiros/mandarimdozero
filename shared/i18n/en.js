@@ -2253,15 +2253,6 @@ window.I18N_CATALOG['en'] = {
   'rb.f.todos': 'All', // ALTA
   'rb.st.pendente': 'pending', // ALTA
   'rb.st.cortado': 'cut', // ALTA
-  'rb.reason.acento': 'Accent', // ALTA
-  'rb.reason.genero': 'Gender', // ALTA
-  'rb.reason.tempo': 'Verb tense', // ALTA
-  'rb.reason.preposicao': 'Preposition', // ALTA
-  'rb.reason.vocabulario': 'Vocabulary', // ALTA
-  'rb.reason.ordem': 'Word order', // ALTA
-  'rb.reason.pronuncia': 'Pronunciation', // ALTA
-  'rb.reason.concordancia': 'Agreement', // ALTA
-  'rb.reason.outro': 'Other', // ALTA
   'rb.field.question': 'meaning / prompt', // ALTA
   'rb.field.answer': 'correct form', // ALTA
   'rb.field.wrong_form': 'wrong form', // ALTA
@@ -2437,4 +2428,38 @@ window.I18N_CATALOG['en'] = {
   'rb.updatedAt': 'Updated {d}', // ALTA
   'rb.whyMissed': 'Why was it missed?', // ALTA
   'rb.withHelp': 'With help', // ALTA
+  'rb.imp.title': 'Import data from the old Review Bank', // ALTA
+  'rb.imp.hint': 'Choose the .json file exported from the old Review Bank. Nothing is delivered to anyone: items come in as they were, and cards are only created after you link the student and click Create cards.', // ALTA
+  'rb.imp.note': 'Importing again is safe: what already exists here is not overwritten or duplicated.', // ALTA
+  'rb.imp.cStudents': 'students', // ALTA
+  'rb.imp.cItems': 'items', // ALTA
+  'rb.imp.cPending': 'pending', // ALTA
+  'rb.imp.cRecaps': 'recaps', // ALTA
+  'rb.imp.cReviews': 'answers', // ALTA
+  'rb.imp.warn': '{n} records in the file were skipped because data was missing.', // ALTA
+  'rb.imp.manual': 'Replace the current Manual with the one in the file', // ALTA
+  'rb.imp.run': 'Import', // ALTA
+  'rb.imp.progress': 'Importing {name}…', // ALTA
+  'rb.imp.done': 'Imported: {s} students and {i} items. Now link the students who have an account.', // ALTA
+  'rb.imp.errRun': 'The import stopped.', // ALTA
+  'rb.imp.err.json': 'This file is not valid JSON.', // ALTA
+  'rb.imp.err.format': 'This file is not in the Review Bank format.', // ALTA
+  'rb.imp.err.empty': 'The file has no students to import.', // ALTA
+  'rb.reason.nao_lembrou': 'Didn\'t remember', // ALTA
+  'rb.reason.em_parte': 'Partly remembered', // ALTA
+  'rb.reason.confundiu': 'Mixed up with another word', // ALTA
+  'rb.reason.genero': 'Gender or article', // ALTA
+  'rb.reason.conjugacao': 'Wrong conjugation', // ALTA
+  'rb.reason.tempo': 'Wrong tense', // ALTA
+  'rb.reason.auxiliar': 'Wrong auxiliary', // ALTA
+  'rb.reason.ordem': 'Word order', // ALTA
+  'rb.reason.preposicao': 'Preposition', // ALTA
+  'rb.reason.concordancia': 'Agreement', // ALTA
+  'rb.reason.repetiu': 'Made the same mistake', // ALTA
+  'rb.reason.corrigiu_parte': 'Partly corrected', // ALTA
+  'rb.reason.som': 'Wrong sound', // ALTA
+  'rb.reason.tonico': 'Stress', // ALTA
+  'rb.sensitiveTag': 'Sensitive', // ALTA
+  'rb.sensitiveHint': 'Personal content or strong language: it does not become a card on its own.', // ALTA
+  'rb.fSensitive': 'Sensitive content: it does not become a card on its own, you decide', // ALTA
 };

@@ -36,6 +36,9 @@ Histórico completo: `docs/historico/04-*` (motor e editor), `05-*` (áudio/Anki
 - Criação é sempre nativa (`createFlashcard`/`createOwnFlashcard` exigem `nativeState`). Legado: só leitura,
   edição e conversão EXPLÍCITA (botão "Usar o novo editor"); nunca converter automaticamente nem em massa.
 - `revision` incrementa em mudança de conteúdo (reseta FSRS via id novo). Arquivar ≠ apagar; "Arquivar" saiu da UI.
+  Exceção do Banco de Revisão: corrigir item já entregue mantém o mesmo cartão e a mesma revisão (mudar de tipo de cartão ou
+  marcar "mudou o sentido" sobe a revisão). `note` do cartão da professora = Observações, visível ao aluno depois de responder.
+  `mergeSavedCards`: status, observação, tags, conteúdo e deck vêm do banco (`NOTE_LEVEL_FRESH_FIELDS`); do save só o progresso.
 - Tags: `normalizeNoteTags()` é a única normalização; limites 20 tags × 50 caracteres; `criado-por-*` é tag de sistema.
 - Limite grátis: 20 CardInstances em `own_flashcards` (Premium e aluno vinculado sem teto); importações cortam e avisam.
 - Export Anki leva mídia por Field e tags; import cria Note nativa (nunca histórico FSRS do Anki).

@@ -10,7 +10,7 @@ const RB = {
   students: [], settings: { auto_generate: true, manual_markdown: '' }, links: [],
   summary: null, itemsBy: {}, reviewsBy: {}, recapBy: {},
   view: 'students', cur: null, filter: 'pendente', type: '', q: '', limit: 60,
-  editingId: null, adding: false, studentForm: null, manualEditing: false,
+  editingId: null, adding: false, studentForm: null, manualEditing: false, importPlan: null, importOpen: false,
   overview: { ord: { k: 'pending', dir: -1 }, f: { lg: 'todos', att: '0', aula: '0', q: '' }, data: null, loading: false, at: null },
 };
 const rbt = (k, p) => t('rb.' + k, p);
@@ -120,7 +120,49 @@ function rbStudentsHTML(){
   const s = rbStudentById(RB.cur);
   return `<nav class="rb-roster" aria-label="${rbH(rbt('studentsAria'))}">${roster}<div><button class="rb-link" data-rb="student-new">${rbH(rbt('addStudent'))}</button></div></nav>
     ${RB.studentForm ? rbStudentFormHTML() : ''}
-    <div id="rb-student">${s ? rbStudentPanelHTML(s) : ''}</div>`;
+    <div id="rb-student">${s ? rbStudentPanelHTML(s) : ''}</div>${rbImportHTML()}`;
+}
+
+function rbImportHTML(){
+  return `<details class="rb-import rb-newbox" id="rb-import"${RB.importOpen ? ' open' : ''}><summary class="rb-h" style="cursor:pointer;">${rbH(rbt('imp.title'))}</summary>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+      <p class="rb-hint">${rbH(rbt('imp.hint'))}</p>
+      <input type="file" id="rb-import-file" accept="application/json,.json" aria-label="${rbH(rbt('imp.title'))}">
+      <div id="rb-import-box" aria-live="polite">${RB.importPlan ? rbImportBoxHTML() : ''}</div>
+    </div></details>`;
+}
+function rbImportBoxHTML(){
+  const P = RB.importPlan;
+  if (!P) return '';
+  if (!P.ok) return `<p class="rb-wrong" style="margin:0;">${rbH(rbt('imp.err.' + P.error))}</p>`;
+  const m = P.summary;
+  return `<div class="rb-counts" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));">${[[m.students, 'imp.cStudents'], [m.items, 'imp.cItems'], [m.pending, 'imp.cPending'], [m.recaps, 'imp.cRecaps'], [m.reviews, 'imp.cReviews']].map(([v, k]) => `<div class="rb-count"><b>${v}</b><span>${rbH(rbt(k))}</span></div>`).join('')}</div>
+    ${P.warnings.length ? `<p class="rb-hint">${rbH(rbt('imp.warn', { n: P.warnings.length }))}</p>` : ''}
+    <p class="rb-hint">${rbH(rbt('imp.note'))}</p>
+    ${m.manual ? `<label class="rb-check" style="display:flex;gap:8px;align-items:center;font-weight:700;font-size:14px;"><input type="checkbox" id="rb-import-manual"> ${rbH(rbt('imp.manual'))}</label>` : ''}
+    <div class="rb-edit-actions" style="display:flex;gap:8px;align-items:center;"><button class="rb-btn rb-btn-blue" data-rb="import-run">${rbH(rbt('imp.run'))}</button><span class="rb-meta" id="rb-import-msg" role="status" aria-live="polite"></span></div>`;
+}
+async function rbImportRead(file){
+  RB.importOpen = true;
+  let text = '';
+  try { text = await file.text(); } catch (e) { text = ''; }
+  RB.importPlan = rbiParse(text);
+  const box = document.getElementById('rb-import-box'); if (box) box.innerHTML = rbImportBoxHTML();
+}
+async function rbImportRunNow(btn){
+  const P = RB.importPlan; if (!P || !P.ok) return;
+  const msg = document.getElementById('rb-import-msg'), manual = document.getElementById('rb-import-manual');
+  btn.disabled = true;
+  const r = await rbiRun(P.data, { replaceManual: !!(manual && manual.checked) }, (m) => { if (msg) msg.textContent = m; });
+  if (!r.ok){ if (msg) msg.textContent = rbt('imp.errRun') + ' ' + r.error; btn.disabled = false; return; }
+  const keep = RB.cur;
+  await rbLoadBase();
+  RB.itemsBy = {}; RB.reviewsBy = {}; RB.recapBy = {}; RB.overview.data = null;
+  RB.cur = RB.students.find(x => x.id === keep) ? keep : ((RB.students.find(x => x.status !== 'arquivado') || RB.students[0] || {}).id || null);
+  if (RB.cur) await rbLoadStudentData(RB.cur);
+  RB.importPlan = null; RB.importOpen = false;
+  rbRender();
+  showToast(rbt('imp.done', { s: r.counts.students, i: r.counts.items }));
 }
 
 function rbLinkLineHTML(s){
@@ -139,7 +181,7 @@ function rbLinkLineHTML(s){
 
 function rbReadyItems(s){
   const items = RB.itemsBy[s.id] || [];
-  return items.filter(i => (i.status === 'pendente' && rbReadyForAuto(i, s, RB.settings).ok) || (i.status === 'aprovado' && !i.teacher_flashcard_id && s.linked_student_id && !rbItemIssues(i).length && s.language_app_key !== 'mandarim'));
+  return items.filter(i => (i.status === 'pendente' && rbReadyForAuto(i, s, RB.settings).ok) || (i.status === 'aprovado' && !i.teacher_flashcard_id && !i.sensitive && s.linked_student_id && !rbItemIssues(i).length && s.language_app_key !== 'mandarim'));
 }
 
 function rbStudentPanelHTML(s){
@@ -189,6 +231,7 @@ function rbItemHTML(i, s){
       <div class="rb-tags"><span class="rb-tag">${rbH(rbt('type.' + i.item_type))}</span>
         ${i.class_date ? `<span class="rb-meta">${rbH(rbt('classOf', { d: rbDateFmt(i.class_date) }))}</span>` : ''}
         ${i.status === 'pendente' ? `<span class="rb-tag is-pend">${rbH(rbt('st.pendente'))}</span>` : i.status === 'cortado' ? `<span class="rb-tag">${rbH(rbt('st.cortado'))}</span>` : ''}
+        ${i.sensitive ? `<span class="rb-tag is-pend" title="${rbH(rbt('sensitiveHint'))}">${rbH(rbt('sensitiveTag'))}</span>` : ''}
         ${i.teacher_flashcard_id ? `<span class="rb-tag is-card" title="${rbH(rbt('cardDelivered'))}">${rbH(rbt('cardTag'))}</span>` : ''}</div>
       <div class="rb-q">${rbH(i.question)}</div>
       ${i.wrong_form ? `<div class="rb-wrong">${rbH(i.wrong_form)}</div>` : ''}
@@ -224,6 +267,7 @@ function rbItemFormHTML(item, s){
     <label>${rbH(rbt('fGap'))}<input type="text" data-f="gap_word" value="${rbH(i.gap_word)}"></label>
     <label class="rb-wide">${rbH(rbt('fObservation'))}<textarea rows="2" data-f="explanation">${rbH(i.explanation)}</textarea></label>
     <label class="rb-wide">${rbH(rbt('fCheck'))}<input type="text" data-f="check_note" value="${rbH(i.check_note)}"></label>
+    <label class="rb-wide rb-check"><input type="checkbox" data-f="sensitive"${i.sensitive ? ' checked' : ''}> ${rbH(rbt('fSensitive'))}</label>
     ${delivered ? `<label class="rb-wide rb-check"><input type="checkbox" data-f="reset_progress"> ${rbH(rbt('fReset'))}</label><p class="rb-hint rb-wide">${rbH(rbt('fResetHint'))}</p>` : ''}
     <div class="rb-edit-actions">
       ${(!item || item.status === 'pendente') ? `<button class="rb-btn rb-btn-ok" data-rb="item-save" data-approve="1">${rbH(rbt('saveApprove'))}</button>` : ''}
@@ -236,7 +280,7 @@ function rbItemFormHTML(item, s){
 function rbStatsHTML(s){
   const st = rbStatsFromReviews(RB.reviewsBy[s.id] || []);
   const open = rbLs.get('stats-open') === '1';
-  const label = k => (RB_REASONS.includes(k) ? rbt('reason.' + k) : k);
+  const label = k => (RB_REASONS.includes(k) ? rbt('reason.' + k) : k === 'sem' ? rbt('noReason') : k);
   let body;
   if (!st.total) body = `<p class="rb-meta" style="margin:0;">${rbH(rbt('statsEmpty'))}</p>`;
   else {
@@ -342,7 +386,7 @@ async function rbSaveItem(box, approve){
   const issues = rbItemIssues(n);
   if (issues.length){ if (msg) msg.textContent = rbt('missing', { f: issues.map(k => rbt('field.' + k)).join(', ') }); return; }
   if (approve) n.check_note = '';
-  const cols = { item_type: n.item_type, class_date: n.class_date, question: n.question, answer: n.answer, wrong_form: n.wrong_form || null, gap_word: n.gap_word || null, explanation: n.explanation || null, check_note: n.check_note || null, updated_at: new Date().toISOString() };
+  const cols = { item_type: n.item_type, class_date: n.class_date, question: n.question, answer: n.answer, wrong_form: n.wrong_form || null, gap_word: n.gap_word || null, explanation: n.explanation || null, check_note: n.check_note || null, sensitive: !!f.sensitive, updated_at: new Date().toISOString() };
   let saved = existing, err;
   if (existing){
     const r = await supabaseClient.from('review_bank_items').update(cols).eq('id', existing.id).select().maybeSingle(); err = r.error; saved = r.data || Object.assign({}, existing, cols);
@@ -552,6 +596,7 @@ function rbWire(wrap){
       else if (a === 'ov-refresh'){ rbLoadOverview(true); }
       else if (a === 'ov-lg'){ RB.overview.f.lg = b.dataset.lg; rbLs.set('ov-filters', JSON.stringify(RB.overview.f)); rbRenderOverview(); }
       else if (a === 'ov-open'){ RB.view = 'students'; RB.cur = id; rbLs.set('view', 'students'); rbLs.set('cur', id); if (!RB.itemsBy[id]) await rbLoadStudentData(id); rbRender(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      else if (a === 'import-run'){ await rbImportRunNow(b); }
       else if (a === 'manual-edit'){ RB.manualEditing = true; rbRender(); }
       else if (a === 'manual-cancel'){ RB.manualEditing = false; rbRender(); }
       else if (a === 'manual-save'){ b.disabled = true; const ok = await rbSaveSettings({ manual_markdown: document.getElementById('rb-manual-text').value }); if (ok){ RB.manualEditing = false; rbRender(); showToast(rbt('saved')); } else b.disabled = false; }
@@ -563,7 +608,8 @@ function rbWire(wrap){
   });
   wrap.addEventListener('change', async (e) => {
     const el = e.target;
-    if (el.id === 'rb-type'){ RB.type = el.value; const s = rbStudentById(RB.cur); if (s) document.getElementById('rb-list').innerHTML = rbListHTML(s); }
+    if (el.id === 'rb-import-file'){ if (el.files && el.files[0]) await rbImportRead(el.files[0]); }
+    else if (el.id === 'rb-type'){ RB.type = el.value; const s = rbStudentById(RB.cur); if (s) document.getElementById('rb-list').innerHTML = rbListHTML(s); }
     else if (el.id === 'rb-auto'){ const ok = await rbSaveSettings({ auto_generate: el.checked }); if (!ok) el.checked = !el.checked; else showToast(el.checked ? rbt('autoOn') : rbt('autoOff')); }
     else if (el.id === 'rb-ov-att'){ RB.overview.f.att = el.value; rbLs.set('ov-filters', JSON.stringify(RB.overview.f)); rbRenderOverview(); }
     else if (el.id === 'rb-ov-aula'){ RB.overview.f.aula = el.value; rbLs.set('ov-filters', JSON.stringify(RB.overview.f)); rbRenderOverview(); }
