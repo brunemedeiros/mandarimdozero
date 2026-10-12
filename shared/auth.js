@@ -531,6 +531,10 @@ async function saveState(){
     }
 
     const merged = Object.assign({}, existing && existing.data, { [blockKey]: payload });
+    // E3/C2: sequência de dias e afins são da CONTA (união de todos os blocos); o bloco continua com o espelho.
+    if (typeof AccountProgress !== 'undefined'){
+      merged._account = AccountProgress.mergeAccount(AccountProgress.deriveAccountFromRow(existing && existing.data), AccountProgress.pickAccount(payload));
+    }
     if (pendingAccountUiLanguage){
       merged._meta = Object.assign({}, merged._meta, { uiLanguage: pendingAccountUiLanguage });
     }
@@ -617,7 +621,7 @@ async function loadState(){
 
       progressAccountUiLanguage = (typeof uiLanguageFromProgressData === 'function' && data)
         ? uiLanguageFromProgressData(data.data) : null;
-      progressAccountIsNew = !(data && data.data && Object.keys(data.data).some(k => k !== '_meta'));
+      progressAccountIsNew = !(data && data.data && Object.keys(data.data).some(k => k !== '_meta' && k !== '_account'));
       const blockKey = progressBlockKey(data && data.data);
       if (data && data.data && data.data[blockKey]){
         applySerializedState(data.data[blockKey]);
@@ -629,6 +633,11 @@ async function loadState(){
         // definida, este ramo simplesmente não faz nada (caso comum: idioma
         // novo, nunca teve formato antigo pra migrar).
         loadLegacyState(data.data);
+      }
+      // E3/C2: sequência de dias, lições do dia e afins vêm da CONTA (soma dos blocos), por cima do que o bloco trouxe.
+      if (data && data.data && typeof AccountProgress !== 'undefined'){
+        try { AccountProgress.applyAccountToState(STATE, AccountProgress.deriveAccountFromRow(data.data)); }
+        catch (e) { console.error('Erro ao aplicar progresso da conta:', e); }
       }
       // Só chega aqui depois de uma leitura bem-sucedida (com ou sem dado
       // pra essa conta -- as duas são um resultado válido, "conta nova"
