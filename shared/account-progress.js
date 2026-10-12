@@ -145,7 +145,19 @@
     return out;
   }
 
-  var api = { snapshotBase: snapshotBase, mirrorForBlock: mirrorForBlock, ACCOUNT_FIELDS: ACCOUNT_FIELDS, pickAccount: pickAccount, mergeAccount: mergeAccount, deriveAccountFromRow: deriveAccountFromRow, applyAccountToState: applyAccountToState, consecutiveEndingAt: consecutiveEndingAt };
+  // ---- conquistas (C4) ----
+  // Conquista da CONTA vale em qualquer idioma: se foi ganha em um, aparece nos outros. Conquista de CURSO (unidades, explorador,
+  // ouvido treinado, multitarefa) continua por idioma. A tabela earned_badges não muda; a união é feita na leitura.
+  var ACCOUNT_BADGE_IDS = ['first_step', 'streak_3', 'streak_7', 'xp_100', 'xp_500', 'reviews_100', 'comeback', 'weekend'];
+  function isAccountBadge(id){ return ACCOUNT_BADGE_IDS.indexOf(id) !== -1; }
+  // ids ganhos = os que o idioma atual já calcula + as conquistas da conta ganhas em outros idiomas. Nunca remove nada.
+  function unionBadgeIds(ownIds, rows){
+    var out = new Set(ownIds || []);
+    (rows || []).forEach(function(r){ if (r && isAccountBadge(r.badge_id)) out.add(r.badge_id); });
+    return out;
+  }
+
+  var api = { ACCOUNT_BADGE_IDS: ACCOUNT_BADGE_IDS, isAccountBadge: isAccountBadge, unionBadgeIds: unionBadgeIds, snapshotBase: snapshotBase, mirrorForBlock: mirrorForBlock, ACCOUNT_FIELDS: ACCOUNT_FIELDS, pickAccount: pickAccount, mergeAccount: mergeAccount, deriveAccountFromRow: deriveAccountFromRow, applyAccountToState: applyAccountToState, consecutiveEndingAt: consecutiveEndingAt };
   (typeof globalThis !== 'undefined' ? globalThis : root).AccountProgress = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

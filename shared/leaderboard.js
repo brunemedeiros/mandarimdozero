@@ -254,11 +254,11 @@ async function fetchUserBadgeGrants(userId){
 async function fetchUserEarnedBadges(userId){
   const { data, error } = await supabaseClient
     .from('earned_badges')
-    .select('badge_id')
-    .eq('user_id', userId)
-    .eq('language_app_key', APP_KEY);
+    .select('badge_id, language_app_key')
+    .eq('user_id', userId);
   if (error){ console.error('Erro ao carregar conquistas do perfil:', error); return []; }
-  const ids = new Set((data || []).map(r => r.badge_id));
+  // C4: conquista de curso só do idioma atual; conquista da conta, de qualquer idioma.
+  const ids = new Set((data || []).filter(r => r.language_app_key === APP_KEY || AccountProgress.isAccountBadge(r.badge_id)).map(r => r.badge_id));
   return BADGES.filter(b => ids.has(b.id));
 }
 

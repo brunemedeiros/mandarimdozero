@@ -602,6 +602,23 @@ async function upsertEarnedBadges(badgeIds){
   if (error) console.error('Erro ao sincronizar badges públicos:', error);
 }
 
+// C4: conquistas da CONTA ganhas em qualquer idioma (earned_badges de todos os idiomas, só os ids de conta). Falha de rede = lista vazia
+// (o idioma atual continua mostrando o que ele mesmo calcula). Nunca remove conquista.
+let accountEarnedBadgeRows = [];
+async function loadAccountEarnedBadges(){
+  if (!CURRENT_USER) { accountEarnedBadgeRows = []; return accountEarnedBadgeRows; }
+  const { data, error } = await supabaseClient
+    .from('earned_badges')
+    .select('badge_id, language_app_key')
+    .eq('user_id', CURRENT_USER.id);
+  if (error){ console.error('Erro ao carregar conquistas da conta:', error); return accountEarnedBadgeRows; }
+  accountEarnedBadgeRows = data || [];
+  return accountEarnedBadgeRows;
+}
+function badgeEarnedNow(b, s){
+  return !!b.check(s) || accountEarnedBadgeRows.some(r => r.badge_id === b.id && AccountProgress.isAccountBadge(b.id));
+}
+
 // Tenta de novo (rede instável é comum logo no carregamento da página,
 // ainda competindo por banda com o resto dos assets) antes de desistir --
 // cada tentativa falha deixa progressLoadedOk em false, então desistir

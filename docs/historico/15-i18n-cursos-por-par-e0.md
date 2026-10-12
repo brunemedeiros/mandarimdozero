@@ -175,3 +175,14 @@ Próximo: C4 (conquistas da conta, só tela), aguardando as respostas Q-10 a P8 
 - **Migration 075 aplicada em produção** (e no Staging) pelo MCP, sem passo manual da dona. Prova de zero regressão com dados reais: 27 perfis públicos e 13 visões de professora, antes e depois, 0 erros e hashes idênticos.
 - **`notification-cron` redeployada em produção (versão 22)**: partiu da versão que estava no ar mais o delta do C3. O `index.ts` do repositório está à frente (suporte a `ui_language`) e esse
   trecho **NÃO foi para produção**: é decisão separada.
+
+## E3, passo C4 (2026-10-12): conquistas da conta
+
+Só front-end estático; **nenhuma migration**; `earned_badges` não mudou. Autorizado pela dona ("execute o C4"). Grátis x Premium: tudo grátis.
+- Classificação (recomendação Q-10, ainda sem resposta da dona): **da conta** (valem em qualquer idioma) = `first_step`, `streak_3`, `streak_7`, `xp_100`, `xp_500`, `reviews_100`, `comeback`, `weekend`;
+  **de curso** (continuam por idioma) = `unit_1`, `unit_half`, `unit_all`, `explorer`, `trained_ear`, `multitasker`. Lista em `AccountProgress.ACCOUNT_BADGE_IDS` (`shared/account-progress.js`).
+- Como funciona: a conquista da conta ganha em um idioma aparece como ganha nos outros, **sem celebrar de novo**. A união é feita na leitura (`loadAccountEarnedBadges` e `badgeEarnedNow` em `shared/auth.js`;
+  `seedEarnedBadges` e a grade em `fr/app.js` e `zh/app.js`); o idioma atual também grava a linha dele em `earned_badges`, então rankings e `friends_activity` (que filtram por idioma) continuam coerentes.
+  O perfil de outra pessoa (`fetchUserEarnedBadges`, `shared/leaderboard.js`) mostra conquista de curso só do idioma aberto e conquista da conta de qualquer idioma.
+- Garantias: nada que já estava ganho some (a união só acrescenta; falha de rede mantém o que havia); sem conta, o idioma atual segue calculando sozinho.
+- Teste: `tests/curso-progresso/test_conquistas_conta.js` (43 verificações: catálogo real de fr e zh classificado sem sobra, união, propriedade com 300 casos, sandbox do `auth.js`, perfil público, nenhuma migration nova).
