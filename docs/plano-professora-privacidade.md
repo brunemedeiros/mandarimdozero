@@ -204,3 +204,28 @@ direto, as outras professoras só convidam; link de convite com cartão capricha
   papeis 076 25/25. `tests/painel-alunos/test_student_panel_unit.js` já quebrava antes (`t` ausente no VM).
 - Atenção: outra conversa aplicou `course_keys_and_account_streak_readers` no Staging hoje sem arquivo na `main`;
   se ela também usar o número 077, renumerar a dela (esta já está no repo).
+
+## Etapa 3 (perfil privado) -- auditoria (2026-10-12, só leitura; repo + produção ao vivo)
+
+Produção: 27 perfis, **todos públicos**; 14 Decks pessoais, **nenhum público**; 0 amizades. Nada muda para quem já
+existe ao ligar as regras novas.
+
+O que respeita `public_profile` hoje: `get_public_profile_stats` (037), `list_public_decks_for_user`, `get_public_deck`,
+`get_public_deck_notes`, `copy_public_flashcard` (061), `check_public_deck_duplicates` (062), manifest (068),
+`copy_public_deck` (079). **Nenhuma tem exceção para amigos nem para a professora com vínculo.**
+
+Furos em relação às decisões da tabela acima:
+1. `profiles` tem leitura pública total (`profiles_public_read`, 001, inclusive anon). Expõe bio, país, plano, papel,
+   admin_mode, exclude_own_activity e o próprio public_profile. Qualquer busca direta na tabela (Planos, convite de
+   aluno) acha conta privada por pedaço do nome: a regra "só pelo @ exato" não se sustenta sem fechar a tabela.
+2. `search_profiles_for_friends` (073) ignora a privacidade (busca por pedaço, 3 letras).
+3. Página do perfil privado ainda mostra bio, badges (inclusive o da professora) e conquistas
+   (`fetchPublicProfileByUsername` lê profiles/badge_grants/earned_badges direto). Decidido: só nome, @ e avatar.
+4. `weekly_xp`, `badge_grants`, `earned_badges`, `badge_catalog`: leitura pública até para anon. Ranking geral
+   aparece no modo convidado sem filtro.
+5. Decks: `is_public default false`; o trigger `decks_public_guard` (061) impede o cliente de criar Deck já público
+   (precisa de RPC/trigger no servidor que gere public_id/published_at). Publicar é grátis; abrir/copiar é Premium.
+   Decks criados por cópia de Deck público, import Anki e `ensure_user_decks` também nascem privados.
+6. Textos de publicar estão fixos em português (sem `t()`); subtítulo da chave do perfil fala de "cartões próprios"
+   (seção desligada).
+Sem teste hoje: stats `not_public`, tela do perfil privado, exceções de amigo/professora.
