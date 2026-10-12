@@ -103,6 +103,7 @@ async function initAuth(){
       await onUserLoggedIn(session.user);
     } else if (event === 'SIGNED_OUT'){
       CURRENT_USER = null;
+      if (typeof clearMyPermissions === 'function') clearMyPermissions();
       pendingAccountUiLanguage = null;
       progressAccountUiLanguage = null;
       goToNeutralGate();
@@ -209,6 +210,9 @@ async function onUserLoggedIn(user){
   // única função, pra não duplicar a checagem em vários lugares (ver
   // Fase 2/9 da spec de Admin Mode).
   await applyAdminModeUI();
+  // Papéis (075): menu da professora e Aulas/Material do aluno não dependem
+  // do Admin Mode, só do papel/vínculo. Não segura o carregamento.
+  if (typeof applyRoleNavUI === 'function') applyRoleNavUI().catch(() => {});
   // Garante que já exista uma linha em `profiles` assim que a pessoa loga --
   // antes, só era criada na primeira vez que ela abria "Meu perfil" (lazy),
   // então quem nunca tinha visitado a aba aparecia como "Aluno(a)" genérico

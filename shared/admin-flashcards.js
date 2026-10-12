@@ -809,7 +809,7 @@ function renderTeacherDestinationRows(box, selected, problems){
   const S = ADMIN_FLASHCARDS_STATE;
   box.innerHTML = selected.map(s => {
     const key = `${s.student_id}|${s.language_app_key}`;
-    const head = `<div class="admin-badge-name">${flashcardStudentLabel(s)} -- ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}</div>`;
+    const head = `<div class="admin-badge-name">${flashcardStudentLabel(s)} · ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}</div>`;
     if (problems[key]) return `<div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:4px;">${head}<p class="profile-edit-error">${escapeHTML(problems[key])}</p></div>`;
     const tree = teacherTreeForStudent(s.student_id, s.language_app_key);
     const root = tree.find(d => d.kind === 'teacher_root');
@@ -1079,8 +1079,8 @@ async function updateFlashcardsSelectionDependentUI(wrap){
 
   const subtitleEl = document.getElementById('admin-flashcard-content-subtitle');
   if (subtitleEl) subtitleEl.textContent = selectedStudents.length === 1
-    ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
-    : selectedStudents.length > 1 ? ` -- ${tp('admin.common.selectedCount', selectedStudents.length)}` : '';
+    ? ` · ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
+    : selectedStudents.length > 1 ? ` · ${tp('admin.common.selectedCount', selectedStudents.length)}` : '';
 
   const contentHint = document.getElementById('admin-flashcard-content-hint');
   if (contentHint) contentHint.style.display = selectedStudents.length ? 'none' : '';
@@ -1127,7 +1127,7 @@ function applyFlashcardPickerFilters(wrap){
 async function renderAdminFlashcardsView(){
   const wrap = document.getElementById('admin-flashcards-content');
   if (!wrap) return;
-  if (!isAdminUser()){
+  if (!isTeacherUser()){
     wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
@@ -1199,14 +1199,14 @@ async function renderAdminFlashcardsView(){
   const studentCheckboxesHTML = students.map(s => `
     <label data-student-row data-lang="${s.language_app_key}" data-searchtext="${escapeHTML(`${s.display_name || ''} ${s.username || ''}`.toLowerCase())}" style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0; width:100%; box-sizing:border-box;">
       <input type="checkbox" data-student-checkbox value="${s.student_id}" ${ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) ? 'checked' : ''}>
-      ${flashcardStudentLabel(s)} -- ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}
+      ${flashcardStudentLabel(s)} · ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}
     </label>
   `).join('');
 
   const newCardSubtitle = selectedStudents.length === 1
-    ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
+    ? ` · ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
     : selectedStudents.length > 1
-      ? ` -- ${tp('admin.common.selectedCount', selectedStudents.length)}`
+      ? ` · ${tp('admin.common.selectedCount', selectedStudents.length)}`
       : '';
 
   wrap.innerHTML = `

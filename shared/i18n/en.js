@@ -1280,11 +1280,11 @@ window.I18N_CATALOG['en'] = {
   'admin.classLogs.fieldTopic': '📌 Topic', // ALTA
   'admin.classLogs.fieldHomework': '📝 Homework', // ALTA
   'admin.classLogs.fieldObservations': '🔎 Observations', // ALTA
-  'admin.classLogs.fieldNotes': '💬 Notes', // ALTA
+  'admin.classLogs.fieldNotes': '💬 Your private notes', // ALTA
   'admin.classLogs.topicOpt': 'Topic (optional)', // ALTA
   'admin.classLogs.homeworkOpt': 'Homework (optional)', // ALTA
   'admin.classLogs.observationsOpt': 'Observations (optional)', // ALTA
-  'admin.classLogs.notesOpt': 'Notes / free text (optional)', // ALTA
+  'admin.classLogs.notesOpt': 'Your private notes, the student doesn\'t see them (optional)', // ALTA
   'admin.classLogs.noFields': '(no fields filled in)', // ALTA
   'admin.classLogs.listTitle': 'Recorded classes ({n})', // ALTA
   'admin.classLogs.emptyFor': 'No class recorded yet', // ALTA
@@ -1299,7 +1299,7 @@ window.I18N_CATALOG['en'] = {
   'admin.classLogs.topicPlaceholder': 'e.g. passé composé', // ALTA
   'admin.classLogs.homeworkPlaceholder': 'e.g. exercises 1-3 on page 24', // ALTA
   'admin.classLogs.observationsPlaceholder': 'material used, book page...', // ALTA
-  'admin.classLogs.notesPlaceholder': 'vocabulary and grammar covered in class...', // ALTA
+  'admin.classLogs.notesPlaceholder': 'reminders for yourself about this class...', // ALTA
   'admin.classLogs.registeredN': '✓ Class recorded for {n} students.', // ALTA
   'admin.classLogs.registered': '✓ Class recorded.', // ALTA
   'admin.materials.badgeLink': '🔗 link', // ALTA
@@ -2165,4 +2165,66 @@ window.I18N_CATALOG['en'] = {
   'friends.rank.noFriendsBtn': 'Add a friend', // ALTA
   'friends.rank.footnoteFriends': 'The ranking resets every Monday. Friends who haven\'t earned XP yet appear at the end.', // ALTA
   'profile.tabFriends': 'Friends', // ALTA
+  'panel.admin.sub': 'Badges, metrics, notifications, reports, plans and tags.', // ALTA
+  'panel.tab.badges': 'Badges', // ALTA
+  'panel.tab.analytics': 'Analytics', // ALTA
+  'panel.tab.notifications': 'Notifications', // ALTA
+  'panel.tab.reports': 'Reports', // ALTA
+  'panel.tab.plans': 'Plans', // ALTA
+  'panel.tab.tags': 'Tags', // ALTA
+  'panel.teacher.title': 'Teacher panel', // ALTA
+  'panel.teacher.sub': 'Your students, their cards and classes, and the materials you share.', // ALTA
+  'panel.teacher.aria': 'Teacher panel section', // ALTA
+  'panel.teacher.nav': 'Teacher', // ALTA
+  'panel.teacher.menu': '🎓 Teacher panel', // ALTA
+  'panel.tab.students': 'Students', // ALTA
+  'panel.tab.cards': 'Cards', // ALTA
+  'panel.tab.classlogs': 'Classes', // ALTA
+  'panel.tab.materials': 'Study materials', // ALTA
+  'myClassLogs.menu': '📝 My classes', // ALTA
+  'myClassLogs.title': 'My classes', // ALTA
+  'myClassLogs.sub': 'What you worked on in each class with your teacher.', // ALTA
+  'myClassLogs.topic': 'Topic', // ALTA
+  'myClassLogs.homework': 'Homework', // ALTA
+  'myClassLogs.observations': 'Notes', // ALTA
+  'myClassLogs.empty': 'Your teacher hasn\'t logged any classes yet.', // ALTA
+  'plans.grant.title': 'Give or remove a plan', // ALTA
+  'plans.grant.hint': 'Search the account by name or @username. No billing yet: the plan stays on until you remove it.', // ALTA
+  'plans.search.label': 'Account', // ALTA
+  'plans.search.placeholder': 'Name or @username', // ALTA
+  'plans.search.none': 'No account found for "{q}".', // ALTA
+  'plans.search.short': 'Type at least 2 letters.', // ALTA
+  'plans.search.error': 'Couldn\'t search right now. Try again.', // ALTA
+  'plans.role.user': 'Free', // ALTA
+  'plans.role.student': 'Student', // ALTA
+  'plans.role.premium_basic': 'Premium Basic', // ALTA
+  'plans.role.premium_pro': 'Premium Pro', // ALTA
+  'plans.role.teacher': 'Teacher', // ALTA
+  'plans.role.admin': 'Admin', // ALTA
+  'plans.role.studentNote': 'Comes from the link with a teacher; it isn\'t granted here.', // ALTA
+  'plans.role.adminNote': 'Admin has access to everything.', // ALTA
+  'plans.granted': '{role} turned on for @{username}.', // ALTA
+  'plans.revoked': '{role} removed from @{username}.', // ALTA
+  'plans.failed': 'Couldn\'t save. Try again.', // ALTA
+  'plans.loadFailed': 'Couldn\'t load this account\'s plans.', // ALTA
+  'plans.matrix.title': 'What each plan unlocks', // ALTA
+  'plans.matrix.hint': 'Accounts with more than one plan get all of them combined. For numbers the highest wins, and an empty field means no limit.', // ALTA
+  'plans.matrix.permission': 'Permission', // ALTA
+  'plans.matrix.unlimited': 'no limit', // ALTA
+  'plans.matrix.saved': 'Saved', // ALTA
+  'plans.matrix.loadFailed': 'Couldn\'t load the permissions table.', // ALTA
+  'perm.own_cards_limit': 'Own cards (how many)', // ALTA
+  'perm.rich_card_formats': 'Rich formats (image, audio, multiple choice, fill in the blank)', // ALTA
+  'perm.tts_monthly_quota': 'Automatic audio per field (per month)', // ALTA
+  'perm.public_deck_import': 'Import public Decks', // ALTA
+  'perm.public_deck_copy_count': 'See how many people copied my Deck', // ALTA
+  'perm.challenges_premium': 'Premium challenges', // ALTA
+  'perm.trail_skip_locked': 'Skip trail lessons', // ALTA
+  'perm.class_logs_view': 'See My classes', // ALTA
+  'perm.support_materials_view': 'See study materials', // ALTA
+  'perm.teacher_panel': 'Teacher panel', // ALTA
+  'perm.teacher_student_analytics': 'Student analytics', // ALTA
+  'perm.teacher_board': 'Class board', // ALTA
+  'plans.chip.premium': 'Premium', // ALTA
+  'panel.students.inviteSoon': 'For now, students are linked by the admin. Soon you will be able to invite a student, who accepts from their own profile.', // ALTA
 };

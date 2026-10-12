@@ -142,3 +142,32 @@ Plano de migrations (proposto):
   Verificado depois (transação desfeita): anon lê os 40 Decks de curso; aluna lê o material dela e os cartões da
   professora; conta comum não grava aula nem material para ninguém e não lê material alheio; autopromoção bloqueada;
   autora vê os 13 vínculos e grava aula para aluna vinculada.
+
+## Etapa 1 -- telas (2026-10-12)
+Entregue (pedido da autora: separar menus, melhorar a busca por @, aplicar a skill frontend-design nos painéis):
+- **Painel de Admin** (Admin Mode): Badges, Analytics, Notificações, Reports, **Planos** (antiga ⭐ Premium), Tags.
+- **Painel da professora** (novo, papel Professora, não desliga com o Admin Mode): Alunos, Cartões, Aulas, Material
+  de apoio. Item "Professora" na barra lateral e "🎓 Painel da professora" no menu do avatar. Link antigo para o
+  Admin (ex.: notificação de supervisão com rota `admin-badges`) leva quem só é professora ao painel dela.
+- **Planos**: busca por nome ou @ com sugestões enquanto digita (setas, Enter, Esc; quem começa com o termo vem
+  primeiro); conta escolhida mostra interruptores Premium Basic / Premium Pro / Professora (RPCs da 075) e Aluno
+  (só leitura, vem do vínculo). Tabela "O que cada plano libera" editável célula a célula (limite vazio = sem limite).
+- **Aluno**: "📝 Minhas aulas" (novo, RPC `get_my_class_logs`, sem as notas privadas) e "📚 Material de apoio" só
+  aparecem no menu com vínculo ativo e pelo menos 1 item.
+- Professora que não é admin: não vê o formulário de vincular (aviso do convite que vem aí); desvincular marca
+  `removed` (a admin continua apagando); vincular de novo reativa o registro `removed`.
+- Notas da aula: o campo agora diz "Notas só suas, o aluno não vê" (decisão pendente da autora: mostrar ao aluno?).
+- Design (skill frontend-design, mesma linguagem da Revisão): seletor segmentado numa linha (sem emoji),
+  sub-abas sublinhadas (Analytics), títulos de seção sem caixa-alta, botões do tamanho do conteúdo no computador,
+  formulários com largura de leitura, links de seleção com estilo, "--" e "pra" fora de 62 textos dos painéis.
+- Código: `shared/permissions.js`, `shared/teacher-panel.js` (novos), `shared/admin-premium.js` (reescrito),
+  `admin-analytics.js` (troca de seção), gates em admin-students/flashcards/class-logs/support-materials, `roles.js`.
+- Testes: `tests/painel-professora/test_playwright.js` 162/162 (fr/zh, claro/escuro, 1200/390); regressão:
+  painel-alunos 48, plano-admin 26, fase-g 68, fase-h 68, fase-i 48, fase-k6 28, k5 18, k7 40, fase-f 50,
+  deck-browser 206, amigos 158, revisao-proposta-a 58, i18n unit 2039/2039 (65 chaves da passada de design saem da
+  comparação byte a byte, listadas em DESIGN_PASS_KEYS). `tests/i18n/test_playwright.js` falha no modal de limite
+  de cartões também SEM esta entrega (pré-existente, conferido com git stash).
+- Testes antigos que abriam Alunos/Cartões pelo Admin passaram a abrir pelo Painel da professora (mudança deliberada).
+- Pendente: badge "Aluno/a do/a Prof. {nome}", convite de aluno, rota da notificação de supervisão na Edge Function
+  (`notification-cron`, hoje 'admin-badges', funciona pelo redirecionamento; trocar exige deploy), Tags no painel da
+  professora? (hoje no Admin, por decisão da autora).
