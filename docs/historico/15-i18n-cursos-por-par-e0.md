@@ -91,3 +91,6 @@ Mesmo padrão da primeira rodada, autorizado pela dona. Sem migration, sem Edge 
   desenho da camada quando a E9 tratar Desafios.
 - Prova: `tests/camada-curso` agora com 75 verificações; fr e zh: base + camada, pelos arquivos em disco, idênticos ao original (histórias, hanzi, ditados e conjugação
   incluídos). Validadores `validate-content-overlay.js` e `validate-challenges-en.js` com a mesma saída de antes.
+Testes da segunda rodada: 77 de 93 suítes locais passam (inclui `camada-curso` 75/75, `registro` 89/89, `test_i18n_unit` 2104/2104, `deck-browser`, `ditado` e
+`desafios-modulo`). As 16 que falham são exatamente as mesmas da E1 e da primeira rodada, com os mesmos checks; nenhuma nova. `fase-j/test_playwright` é instável
+(timeout intermitente em `[data-tag-manager-retry]`, já visto no baseline): falhou no lote e passou 76/76 em três rodadas isoladas seguidas.
