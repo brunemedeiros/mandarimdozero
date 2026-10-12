@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Chinês com Prof. Brune</title>
+<!-- Nunito de verdade: antes o @font-face só usava local('Nunito'), então quase
+     ninguém via a fonte (caía em Arial/Segoe). display=swap mostra o texto na
+     fonte do sistema até a Nunito chegar; offline, fica a do sistema. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#C0231F">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -79,6 +85,11 @@ try{
   --font-hanzi: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 
   --radius: 14px;
+  /* Profundidade dos botões "de jogo": a borda de baixo é a própria cor do
+     botão escurecida (color-mix), então funciona com qualquer cor de marca
+     nos dois temas sem token novo por tema. */
+  --btn-depth: 4px;
+  --btn-depth-sm: 3px;
   --shadow-card: 0 2px 8px rgba(33,23,20,0.08), 0 1px 2px rgba(33,23,20,0.06);
   --shadow-lift: 0 8px 24px rgba(33,23,20,0.14);
 
@@ -158,10 +169,6 @@ try{
   --shadow-lift: 0 8px 24px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05);
 }
 
-@font-face{
-  font-family:'Nunito';
-  src: local('Nunito');
-}
 
 *{ box-sizing: border-box; }
 /* Foco de teclado: sem isto, cada navegador desenha um anel default
@@ -476,7 +483,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   /* Mesmo motivo do top:97px da sidebar acima -- ver comentário lá. */
   .right-cards{ grid-area:cards; display:flex; flex-direction:column; gap:16px; position:sticky; top:97px; }
   .side-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-card); }
-  .side-card-title{ font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin:0 0 12px; display:flex; align-items:center; gap:6px; }
+  .side-card-title{ font-size:15px; font-weight:900; letter-spacing:0; color:var(--ink); margin:0 0 12px; display:flex; align-items:center; gap:6px; }
   .side-status-row{ display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:700; padding:4px 0; }
   .side-status-row + .side-status-row{ border-top:1px solid var(--paper-line); }
   /* Card de Missões do dia usa o mesmo .dcs-card/.dcs-caption-btn da faixa
@@ -485,6 +492,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
      tem o próprio respiro. */
   #side-card-missions{ padding-top:10px; }
   #side-missions-body .dcs-caption-btn{ padding-top:0; }
+  /* Mesmo peso dos outros títulos da coluna (.side-card-title). */
+  #side-missions-body .dcs-caption{ font-size:15px; font-weight:900; letter-spacing:0; text-transform:none; color:var(--ink); }
   /* Configurações não tem nenhuma relação com desafios/missões do dia --
      esconde só esse card ali (Ranking e Status continuam fazendo sentido
      em qualquer aba). */
@@ -973,7 +982,11 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .manual-empty{ text-align:center; padding:50px 20px; color: var(--ink-soft); }
 .manual-empty .big-emoji{ font-size:40px; margin-bottom:10px; }
 
-.section-label{ font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:800; margin: 22px 0 10px; }
+/* Título de seção: antes era 12px em CAIXA ALTA cinza (cara de cabeçalho de
+   tabela). Agora é frase normal, mais forte e na cor do texto, para criar
+   hierarquia sem gritar. Também serve de rótulo de campo nos formulários,
+   por isso não passa de 15px. */
+.section-label{ font-family: var(--font-body); font-size:15px; letter-spacing:0; color:var(--ink); font-weight:900; margin: 24px 0 10px; }
 
 .vocab-table, .phrase-list{ display:flex; flex-direction:column; gap:1px; background:var(--paper-line); border-radius:10px; overflow:hidden; border:1px solid var(--paper-line); }
 .vocab-row{ background:var(--paper); display:grid; grid-template-columns: 1.4fr 1fr 1.4fr auto; gap:10px; padding:11px 14px; align-items:center; }
@@ -1520,16 +1533,27 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .reorder-block.disabled{ opacity:.4; pointer-events:none; }
 
 /* ---------- Buttons ---------- */
+/* Botões com volume (estilo app de jogo): uma "borda" sólida embaixo, mais
+   escura que o botão, que some quando a pessoa aperta (o botão desce).
+   O fallback rgba vem antes para navegador sem color-mix. */
 .btn{
-  font-family: var(--font-body); font-weight:800; font-size:14px; border:none; border-radius:11px;
-  padding: 13px 20px; cursor:pointer; transition: transform .1s ease, filter .15s ease; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  font-family: var(--font-body); font-weight:800; font-size:14.5px; border:none; border-radius:14px;
+  padding: 12px 20px; cursor:pointer; transition: transform .08s ease, box-shadow .08s ease, filter .15s ease; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  position:relative;
 }
-.btn:active{ transform: scale(.97); }
-.btn-primary{ background: linear-gradient(135deg, var(--seal-red), var(--seal-red-dark)); color: var(--on-seal-red); box-shadow: 0 4px 14px rgba(192,35,31,0.3); }
+.btn:active:not(:disabled){ transform: translateY(2px); }
+.btn-primary{ background: linear-gradient(135deg, var(--seal-red), var(--seal-red-dark)); color: var(--on-seal-red);
+  box-shadow: 0 var(--btn-depth) 0 rgba(0,0,0,0.22);
+  box-shadow: 0 var(--btn-depth) 0 color-mix(in srgb, var(--seal-red) 62%, #000); }
+.btn-primary:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--seal-red) 62%, #000); }
 .btn-primary:hover{ filter:brightness(1.06); }
-.btn-secondary{ background: var(--paper-warm); color: var(--ink); border:1px solid var(--paper-line); }
+.btn-secondary{ background: var(--paper-warm); color: var(--ink); border:2px solid var(--paper-line); box-shadow: 0 var(--btn-depth-sm) 0 var(--paper-line); }
+.btn-secondary:active:not(:disabled){ box-shadow: 0 1px 0 var(--paper-line); }
 .btn-secondary:hover{ background: var(--paper-line); }
-.btn-gold{ background: linear-gradient(135deg, var(--gold-bright), var(--imperial-gold)); color: var(--ink); }
+.btn-gold{ background: linear-gradient(135deg, var(--gold-bright), var(--imperial-gold)); color: var(--ink);
+  box-shadow: 0 var(--btn-depth) 0 rgba(0,0,0,0.18);
+  box-shadow: 0 var(--btn-depth) 0 color-mix(in srgb, var(--imperial-gold) 65%, #000); }
+.btn-gold:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--imperial-gold) 65%, #000); }
 .btn:disabled{ opacity:.45; cursor:not-allowed; }
 .btn-block{ width:100%; }
 

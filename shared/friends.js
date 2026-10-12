@@ -296,7 +296,7 @@ async function renderFriendsView(){
     </div>`).join(''), 'friends-outgoing') : '';
 
   const rankHTML = ov.friends.length ? friendsSectionHTML(t('friends.section.rank'), null, '<div id="friends-mini-rank"></div>', 'friends-rank') : '';
-  const activityHTML = ov.friends.length ? friendsSectionHTML(t('friends.section.activity'), null, '<div id="friends-activity"></div>', 'friends-activity') : '';
+  const activityHTML = ov.friends.length ? friendsSectionHTML(t('friends.section.activity'), null, '<div id="friends-activity"></div>', 'friends-activity-section') : '';
   const inviteHTML = friendsSectionHTML(t('friends.section.invite'), null, `
     <p class="profile-edit-hint">${t('friends.inviteHint')}</p>
     <div class="friends-invite-actions">
