@@ -238,3 +238,17 @@ Sem teste hoje: stats `not_public`, tela do perfil privado, exceções de amigo/
   com confirmação por e-mail/SMS e deixar o modo sem login só para o sistema (testes e capturas de tela).
   Com isso a pergunta "ranking para visitante sem login" deixa de existir.
 - Dados de produção: 1 Deck criado por usuário (1 conta), 13 "Meus Decks" automáticos, 7 cartões próprios de 2 contas.
+
+### Decisões finais da Etapa 3 (2026-10-12)
+| Tema | Decisão |
+|---|---|
+| Convidado | Acaba. Site exige login. Quem estudava como convidado perde o progresso local (decisão da autora). Modo sem login fica escondido, só para testes e prints (sem botão). |
+| Cadastro por e-mail | Confirmação com **código** enviado por e-mail (Resend, profbrune.com.br). Google já vem confirmado. SMS fica para depois (custo). |
+| Links compartilhados sem login (perfil, Deck público, convite) | Abrem um cartão de apresentação + "Entrar para ver"; conteúdo exige login. |
+| `profiles` | Leitura aberta fechada; abre só o necessário por funções. País fecha. Plano e papel continuam públicos. |
+| Página do perfil privado (estranhos) | Mostra nome, @, **badges e conquistas**. Esconde **foto, bio**, progresso e Decks. Amigos e a professora com vínculo veem tudo. |
+| Busca | Conta privada só pelo @ exato na busca de amigos e no convite de aluno; a admin (Planos) vê todos. |
+| Decks | Conta pública: Deck novo nasce público; conta privada: nasce privado. Deck vindo de cópia de Deck público ou de import Anki nasce privado. Botões "Tornar público"/"Tornar privado"; descrição/ícone/cor em "Editar página do Deck". O único Deck existente continua privado. |
+| Conta vira privada | Decks públicos somem para estranhos e continuam visíveis para amigos e para a professora; voltam se a conta voltar a ser pública. |
+| Ordem | 3a) fechar convidado + confirmação por código; 3b) perfil privado no banco e nas telas. |
+| Grátis x Premium | Tudo grátis (login, confirmação, perfil privado, Tornar público/privado). Abrir/copiar Deck de outra pessoa continua Premium. |
