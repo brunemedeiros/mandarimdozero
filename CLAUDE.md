@@ -93,5 +93,6 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   Premium) NÃO aplicar antes do paywall. Lista do que fazer ao ligar o paywall: `docs/historico/14-pendencias-pos-paywall-e-decks.md`.
 - Todos os cartões antigos já têm Deck (migração de 2026-10-07). Regra "1 professora por aluno por idioma" ainda não imposta no banco.
 - Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
+- Design System do painel: decidido Pico CSS, sem React e sem build (`docs/levantamento-design-system-painel.md`, seções 6 a 8). Falta a autora autorizar a Fase 1 e confirmar a entrega do Admin numa única vez.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.

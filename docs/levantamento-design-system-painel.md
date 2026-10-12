@@ -84,12 +84,48 @@ Responda do seu jeito, em uma linha cada. "Não sei" também é resposta válida
 
 Respostas contraditórias entre si (por exemplo, "melhoria rápida" e "vou migrar tudo") valem uma conversa, não uma regra.
 
-## 6. Próximos passos (só com autorização da autora)
+## 6. Respostas da autora (2026-10-12)
 
-1. Você responde as perguntas da seção 4.
-2. Eu fecho a recomendação com base nelas.
-3. Se o caminho for o Pico ou o daisyUI: criar o arquivo de tokens e a página de guia de estilo no repositório, sem mexer em nenhuma tela existente.
-4. Depois, migrar uma tela por vez, começando por Alunos, validada em fr e zh, claro e escuro.
-5. Se o caminho for o shadcn: antes de qualquer código, uma auditoria própria da migração (rotas, autenticação, testes e publicação), como o projeto exige para fases grandes.
+1. Mais usado no site: Estudo, Revisão, Ranking e Desafios. No painel, a área da professora está sendo separada da de Admin. A nova função importante virá em Flashcards, com três telas para a professora: Alunos, Flashcards e Aulas.
+2. Evita Analytics, Notificações e Badges: informação demais, sem forma legível para leigos.
+3. Usa mais no computador.
+4. Quer outras professoras no futuro; por enquanto só ela.
+5. Incômodo principal: telas muito diferentes entre si, sem padrão, e informação como sequência de linhas de texto, sem hierarquia nem blocos definidos. Não é problema de velocidade.
+6. Nunca errou por tela confusa, mas já evitou Analytics e Badges por isso.
+7. O painel da professora mostra o aluno individualmente e o quadro geral da turma. É uma área claramente separada e mais densa que o resto do site, que leva o aluno a uma tarefa por vez.
+8. Não sabe o que é React.
+9. Pode entrar um desenvolvedor em breve: ela chegou a um limite técnico.
+10. Gamificação é do aluno, não do painel.
+11. O painel precisa atender todos os cursos, porque todo curso poderá ter professor.
+12. Prefere melhoria rápida de visual agora, e as funções novas já nascerem no novo sistema visual.
+13. Não sabe o que é build.
+14. Não quer painel antigo e novo convivendo.
 
-Nada deste documento foi aplicado ao site, e nada foi commitado.
+## 7. Decisão: Pico CSS, sem React e sem build
+
+Motivos, ligados às respostas:
+- **8 e 13:** não há plano de React, e etapa de build seria um peso novo que a autora não pediu. Fica fora shadcn, Material UI e o Tailwind do daisyUI.
+- **12:** a melhoria é de visual e de organização, não de tecnologia. O Pico entra com um link no HTML e se apoia nos tokens que já existem.
+- **5:** o incômodo é de **padrão e hierarquia**, e não de componentes que faltam. A solução é um conjunto de padrões de página (cabeçalho, bloco com título, faixa de resumo, tabela, estado vazio), que o Pico não traz e a gente escreve.
+- **2:** as telas densas (Analytics, Notificações, Badges) pedem "resumo primeiro, detalhe sob demanda". Isso é desenho de informação, vale para qualquer biblioteca.
+- **9:** um desenvolvedor novo entende HTML e CSS com um guia de estilo documentado. Como os tokens ficam num arquivo único, uma migração futura para React continua possível.
+- **10:** a gamificação do aluno fica no site dos alunos. O painel só mostra os números dela (sequência, XP) como informação, sem peças de jogo.
+- **11:** os tokens por curso já existem (azul no francês, vermelho no mandarim). Um curso novo entra com um bloco de cores novo, sem mexer nos componentes.
+
+### Pontos de desenho que as respostas levantam
+- **Duas áreas, dois propósitos:** Professora (alunos, flashcards, aulas) e Admin (analytics, notificações, badges, premium, relatórios, tags, materiais). Mesmo sistema visual, navegação separada.
+- **Professora vê o individual e o geral:** a tela "Detalhe do aluno" do preview é o ponto de partida, e a faixa de resumo da turma é o geral.
+- **Telas de Analytics, Notificações e Badges:** antes de redesenhar, uma conversa com a autora sobre o que ela queria saber ali. Sem isso, o visual novo repete a confusão.
+- **Computador primeiro.** O celular só precisa não quebrar.
+
+### Ponto aberto: convivência do antigo com o novo
+A autora não quer painel antigo e novo convivendo, mas também quer rapidez. As duas coisas se conciliam assim: a área da **Professora é nova** (está sendo separada do Admin), então já nasce no sistema novo. O **Admin** é refeito de uma vez, numa só entrega, e só vai ao ar completo. Nenhuma tela individual fica metade de um jeito, metade de outro. Falta a autora confirmar.
+
+## 8. Próximos passos (só com autorização da autora)
+
+1. **Fase 1, fundação:** arquivo de tokens compartilhado em `shared/`, Pico CSS copiado para o repositório (sem depender de CDN), os componentes próprios (selo, alerta, abas, avatar, indicador), os padrões de página e a página de guia de estilo. Nenhuma tela existente é alterada.
+2. **Fase 2, área da Professora:** Alunos, Flashcards e Aulas já no sistema novo, com a função nova de Flashcards construída nele.
+3. **Fase 3, Admin:** conversa sobre Analytics, Notificações e Badges, depois o redesenho de todas as telas numa única entrega.
+4. Cada fase com a regressão da área, o teste visual nos quatro cenários (fr e zh, claro e escuro) e o registro em `docs/historico/`.
+
+Nada deste documento foi aplicado ao site.
