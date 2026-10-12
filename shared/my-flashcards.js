@@ -361,7 +361,7 @@ async function renderMyFlashcardsView(opts){
   }
   wrap.innerHTML = loadingHTML();
 
-  const isMandarim = APP_KEY === 'mandarim';
+  const isMandarim = LanguageRegistry.isCjk(APP_KEY);
   const { cards, hasLink, premium, decks, activeCards, archivedCards, atLimit, tierBadgeHTML } = await loadMyFlashcardsContext();
   wrap.innerHTML = `
     <div class="profile-section">
@@ -508,7 +508,7 @@ function myFlashcardRowHTML(c, premium){
 // teacher_flashcards desde a Fase 8a, ver CLAUDE.md), então não há radios
 // de modo aqui, só direção (quando aplicável) + front/pinyin/back/note.
 function myFlashcardEditFormHTML(c, premium){
-  const isMandarim = APP_KEY === 'mandarim';
+  const isMandarim = LanguageRegistry.isCjk(APP_KEY);
   const direction = c.front_is_target_language === false ? 'target-back' : 'target-front';
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">

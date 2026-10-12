@@ -355,7 +355,7 @@ async function loadFriendsActivity(){
   const box = document.getElementById('friends-activity');
   if (!box) return;
   box.innerHTML = loadingHTML(t('friends.loadingShort'));
-  const appKey = (typeof APP_KEY !== 'undefined') ? APP_KEY : 'frances';
+  const appKey = (typeof APP_KEY !== 'undefined') ? APP_KEY : LanguageRegistry.defaultAppKey();
   const { data, error } = await supabaseClient.rpc('friends_activity', { p_language: appKey, p_limit: 20 });
   const el = document.getElementById('friends-activity');
   if (!el) return;
