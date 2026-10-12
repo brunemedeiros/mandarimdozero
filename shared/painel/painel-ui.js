@@ -355,11 +355,19 @@
     else if (e.key === 'PageUp' || e.key === 'PageDown'){ e.preventDefault(); var m = e.key === 'PageDown' ? 1 : -1; calendario(d, new Date(at.getFullYear(), at.getMonth() + m, 1), new Date(at.getFullYear(), at.getMonth() + m, Math.min(at.getDate(), 28))); }
   });
 
+  // Raiz onde entram diálogos e avisos: o primeiro .painel que aparece na tela. No app há um .painel por aba do painel da professora
+  // e os das abas fechadas ficam escondidos (um diálogo dentro deles não se vê); sem nenhum visível, cai no primeiro.
+  function raizVisivel(){
+    var todos = document.querySelectorAll('.painel');
+    for (var i = 0; i < todos.length; i++) if (todos[i].getClientRects().length) return todos[i];
+    return todos[0] || null;
+  }
+
   // PainelUI.confirmar({ titulo, descricao, confirmar, cancelar, perigo }) -> Promise<boolean>. Substitui o confirm() do navegador.
   function confirmar(op){
     op = op || {};
     return new Promise(function(resolve){
-      var raiz = document.querySelector('.painel'); if (!raiz){ resolve(false); return; }
+      var raiz = raizVisivel(); if (!raiz){ resolve(false); return; }
       var d = document.createElement('dialog'); d.className = 'p-dialogo p-dialogo--alerta'; d.setAttribute('role', 'alertdialog');
       var a = document.createElement('article'), h = document.createElement('header'), t = document.createElement('h3'), p = document.createElement('p'), f = document.createElement('footer');
       t.textContent = op.titulo || 'Tem certeza?'; p.textContent = op.descricao || ''; h.appendChild(t); if (op.descricao) h.appendChild(p);
@@ -412,7 +420,7 @@
   // PainelUI.toast({ titulo, detalhe, acaoRotulo, aoAcao, duracao })   duracao em ms (padrão 5000; 0 = só fecha no X)
   function toast(op){
     op = op || {};
-    var raiz = document.querySelector('.painel'); if (!raiz) return null;
+    var raiz = raizVisivel(); if (!raiz) return null;
     var caixa = raiz.querySelector('.p-toasts');
     if (!caixa){ caixa = document.createElement('div'); caixa.className = 'p-toasts'; raiz.appendChild(caixa); }
     var el = document.createElement('div'); el.className = 'p-toast'; el.setAttribute('role', 'status');

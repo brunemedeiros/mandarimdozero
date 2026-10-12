@@ -359,6 +359,15 @@ let ok = 0, ruim = 0; const check = (n, c, x) => { if (process.env.V) console.lo
     check(`[${rot}] seleção: rótulo de grupo em caixa alta com fundo próprio`, gr.fundo && gr.caixa, gr);
     const ic = await page.locator('#vazio-rico .p-vazio-icone svg').first().evaluate(e => { const r = e.getBoundingClientRect(); return r.width > 10 && r.height > 10; });
     check(`[${rot}] vazio: o ícone é um desenho de verdade, não um caractere`, ic);
+    // O diálogo e o aviso entram no primeiro .painel VISÍVEL (no app há .painel escondidos em abas fechadas)
+    await page.evaluate(() => { const o = document.createElement('div'); o.className = 'painel'; o.id = 'painel-escondido'; o.hidden = true; document.body.insertBefore(o, document.body.firstChild); });
+    const confAbriu = page.evaluate(() => PainelUI.confirmar({ titulo: 'Teste?', confirmar: 'Sim', cancelar: 'Não' }));
+    await page.waitForSelector('dialog.p-dialogo--alerta[open]', { state: 'visible', timeout: 3000 }).catch(() => {});
+    check(`[${rot}] confirmar: o diálogo aparece mesmo com um .painel escondido antes dele`, await page.locator('dialog.p-dialogo--alerta[open]').isVisible() && (await page.evaluate(() => document.querySelector('#painel-escondido').querySelector('dialog') === null)));
+    await page.locator('dialog.p-dialogo--alerta[open] button.secondary').click(); await confAbriu;
+    await page.evaluate(() => PainelUI.toast({ titulo: 'Aviso escondido?' }));
+    check(`[${rot}] toast: aparece mesmo com um .painel escondido antes dele`, await page.locator('.p-toast', { hasText: 'Aviso escondido?' }).isVisible());
+    await page.evaluate(() => document.getElementById('painel-escondido').remove());
     check(`[${rot}] 0 pageerrors`, erros.length === 0, erros);
     await ctx.close();
   }

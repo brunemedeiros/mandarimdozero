@@ -101,6 +101,7 @@ const check = (n, c, x) => { if (c) ok++; else { ruim++; console.log('  FALHOU:'
     await p.click('[data-abrir-dialogo="dlg-vincular-aluno"]'); const vd = p.locator('#dlg-vincular-aluno');
     L('vincular: janela abre com conta e idioma', await vd.isVisible() && !!(await p.$('#admin-student-username')) && !!(await p.$('#admin-student-language')));
     await p.selectOption('#admin-student-language', lang === 'fr' ? 'frances' : 'mandarim');
+    L('vincular: X no canto e botões do rodapé lado a lado', await p.evaluate(() => { const x = document.querySelector('#dlg-vincular-aluno header button'), f = [...document.querySelectorAll('#dlg-vincular-aluno footer button')]; return getComputedStyle(x).position === 'absolute' && x.getBoundingClientRect().width < 60 && f.length === 2 && Math.abs(f[0].getBoundingClientRect().top - f[1].getBoundingClientRect().top) < 4; }));
     const opts = await p.$$eval('#admin-student-username option', o => o.map(x => x.value));
     L('vincular: quem já é aluno naquele idioma não aparece na lista (Marina fora, Nova Aluna dentro)', opts.includes('novaaluna') && !opts.includes('marina.alves'), opts);
     await p.selectOption('#admin-student-username', 'novaaluna'); await p.click('#admin-assign-student-btn'); await p.waitForTimeout(300);

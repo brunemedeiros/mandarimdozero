@@ -27,6 +27,22 @@ async function fetchClassLogs(studentId, languageAppKey){
   return data || [];
 }
 
+// Todas as aulas da professora de uma vez (a tela Aulas agrupa, filtra e busca no navegador). O RLS já limita às dela;
+// o filtro por teacher_id é redundante de propósito. O limite do PostgREST é 1000 linhas: a tela avisa se chegar nele.
+const CLASS_LOGS_FETCH_LIMIT = 1000;
+async function fetchAllClassLogs(){
+  if (!CURRENT_USER) return { logs: [], truncated: false };
+  const { data, error } = await supabaseClient
+    .from('teacher_class_logs')
+    .select('*')
+    .eq('teacher_id', CURRENT_USER.id)
+    .order('class_date', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(CLASS_LOGS_FETCH_LIMIT);
+  if (error){ console.error('Erro ao carregar aulas:', error); return { logs: null, truncated: false }; }
+  return { logs: data || [], truncated: (data || []).length >= CLASS_LOGS_FETCH_LIMIT };
+}
+
 // Os 4 campos de conteúdo (tópico/lição de casa/observações/texto livre)
 // são todos opcionais individualmente -- pedido explícito da autora, cada
 // aula é diferente e nem toda aula tem lição de casa, por exemplo -- mas

@@ -382,6 +382,11 @@
 .painel dialog article > header > button[rel="prev"], .painel dialog article > header > .p-dialogo-fechar{ position: absolute; top: 1rem; right: 1rem; margin: 0; }
 .painel dialog article > footer{ display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .6rem; }
 .painel dialog article > footer > *{ margin: 0; width: auto; }
+/* o formulário pode ficar dentro do article: o rodapé e os campos dele recebem o mesmo estilo */
+.painel dialog article > form{ margin: 0; }
+.painel dialog article > form > footer{ display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .6rem; }
+.painel dialog article :is(footer, form > footer) > :is(button, [type=submit], [role=button]){ margin: 0; width: auto; }
+.painel dialog article > form > :is(label, .p-campo, .p-alerta){ margin-bottom: .75rem; }
 .painel dialog article > :is(label, .p-campo){ margin-bottom: .75rem; }
 
 /* ---------- Escolher data (Date Picker do shadcn) ---------- */
@@ -515,3 +520,28 @@
 .painel .p-so-leitor{ left: 0; top: 0; }
 /* No celular a tabela mostra só o essencial: as colunas marcadas somem (a ficha mostra o resto). */
 @media (max-width: 640px){ .painel .p-oculta-movel{ display: none; } }
+
+/* ---------- Aula no diário, mês, pessoas escolhidas (chips) e avatares em grupo ---------- */
+.painel .p-chips{ display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; list-style: none; }
+.painel .p-chip{ display: inline-flex; align-items: center; gap: .4rem; margin: 0; padding: .2rem .35rem .2rem .7rem; border: 1px solid var(--p-linha); border-radius: 999px; background: var(--p-elevado); font-size: .88rem; font-weight: 700; }
+.painel .p-chip button{ margin: 0; flex: none; width: 1.4rem; height: 1.4rem; min-height: 0; padding: 0; border-radius: 50%; background: var(--p-linha); border-color: transparent; color: var(--p-tinta); font-size: .8rem; line-height: 1; }
+.painel .p-avatares{ display: flex; }
+.painel .p-avatares .p-avatar{ width: 2.1rem; height: 2.1rem; font-size: .7rem; margin-left: -.45rem; outline: 2px solid var(--p-bg); }
+.painel .p-avatares .p-avatar:first-child{ margin-left: 0; }
+.painel .p-mes{ margin: .5rem 0 0; font-size: .75rem; letter-spacing: .09em; text-transform: uppercase; font-weight: 800; color: var(--p-tinta-suave); }
+.painel .p-aula{ display: grid; grid-template-columns: 3.4rem minmax(0, 1fr) auto; gap: .9rem; align-items: start; margin: 0; }
+.painel .p-aula-dia{ display: grid; place-items: center; width: 3.4rem; padding: .3rem 0; border-radius: var(--p-raio-controle); background: var(--p-superficie); border: 1px solid var(--p-linha); text-align: center; line-height: 1.1; }
+.painel .p-aula-dia b{ font-size: 1.3rem; }
+.painel .p-aula-dia span{ font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--p-tinta-suave); font-weight: 800; }
+.painel .p-aula h3{ margin: 0 0 .25rem; font-size: 1.02rem; }
+.painel .p-aula dl{ margin: .35rem 0 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .15rem .75rem; font-size: .9rem; }
+.painel .p-aula dt{ color: var(--p-tinta-suave); font-weight: 700; }
+.painel .p-aula dd{ margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 760px){ .painel .p-aula{ grid-template-columns: 3.4rem minmax(0, 1fr); } .painel .p-aula > :last-child{ grid-column: 2; } }
+
+/* Duas colunas com a principal maior; a lateral (formulário) fica fixa ao rolar e vai para baixo no celular. */
+.painel .p-grade-2.p-grade-2--larga{ grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
+.painel .p-lateral{ position: sticky; top: 5.5rem; align-self: start; min-width: 0; }
+@media (max-width: 900px){ .painel .p-grade-2.p-grade-2--larga{ grid-template-columns: 1fr; } .painel .p-lateral{ position: static; } }
+/* botão de envio (type=submit) dentro de .p-acoes não ocupa a linha toda: os botões ficam lado a lado */
+.painel .p-acoes > :is(button, [type=submit], [role=button]){ width: auto; margin: 0; }

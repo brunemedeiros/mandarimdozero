@@ -30,6 +30,7 @@ const ALUNOS = [
   [7, 'novato', 'Novo Aluno', 'frances', null, 0, 0],
 ];
 
+
 async function abrir({ lang = 'fr', scheme = 'light', width = 1280, height = 1000, alunos = ALUNOS, admin = true, falhar = [] } = {}){
   const server = http.createServer((req, res) => {
     let p = decodeURIComponent(req.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html';
@@ -71,7 +72,23 @@ async function abrir({ lang = 'fr', scheme = 'light', width = 1280, height = 100
     const links = alunos.map(a => ({ id: a[0], student_id: 's' + a[0], username: a[1], display_name: a[2], language_app_key: a[3] === 'frances' ? appKey : a[3], status: 'active', created_at: new Date(Date.now() - a[0] * 9e7).toISOString() }));
     fetchMyStudents = async () => links.slice();
     fetchAllProfiles = async () => [{ username: 'novaaluna', display_name: 'Nova Aluna' }, { username: 'marina.alves', display_name: 'Marina Alves' }];
-    fetchClassLogs = async (sid) => sid === 's1' ? [{ id: 'l1', student_id: 's1', class_date: '2026-10-09', topic: 'Passé composé com être', homework: 'Ex. 4 e 5', observations: '', notes: '', created_at: new Date().toISOString() }] : [];
+    // Diário de aulas em memória: mesmas funções que o app usa, sem rede (aula em grupo = uma linha por aluno, mesmo created_at).
+    const lang = appKey; let nid = 100; const L = (id, sid, d, topic, hw, obs, notes, at) => ({ id, student_id: sid, language_app_key: lang, class_date: d, topic, homework: hw, observations: obs, notes, created_at: at, updated_at: at });
+    window.__logs = [
+      L(1, 's1', '2026-10-09', 'Passé composé com être', 'Exercícios 4 e 5 da apostila', 'Confunde avoir e être', 'Ótima pronúncia.', '2026-10-09T15:00:00Z'),
+      L(2, 's1', '2026-10-02', 'Verbos do 1º grupo', null, null, 'Revisão de vocabulário.', '2026-10-02T15:00:00.100Z'),
+      L(3, 's2', '2026-10-02', 'Verbos do 1º grupo', null, null, 'Revisão de vocabulário.', '2026-10-02T15:00:00.400Z'),
+      L(4, 's3', '2026-09-20', 'Apresentações', 'Gravar um áudio', null, null, '2026-09-20T15:00:00Z'),
+      L(5, 's4', '2026-09-30', 'Números', null, 'Usou o livro azul', null, '2026-09-30T15:00:00Z'),
+    ];
+    const clean = (o) => ['topic', 'homework', 'observations', 'notes'].map(k => (o[k] || '').trim());
+    fetchAllClassLogs = async () => ({ logs: window.__logs.map(x => ({ ...x })), truncated: false });
+    fetchClassLogs = async (sid) => window.__logs.filter(x => x.student_id === sid).map(x => ({ ...x }));
+    createClassLog = async (o) => { const c = clean(o); if (!c.some(Boolean)) return { ok: false, error: t('teacherLogs.err.needOneField') };
+      window.__logs.push({ id: nid++, student_id: o.studentId, language_app_key: o.languageAppKey, class_date: o.classDate, topic: c[0] || null, homework: c[1] || null, observations: c[2] || null, notes: c[3] || null, created_at: new Date().toISOString() }); return { ok: true }; };
+    updateClassLog = async (id, o) => { const c = clean(o); if (!c.some(Boolean)) return { ok: false, error: t('teacherLogs.err.needOneField') };
+      Object.assign(window.__logs.find(x => x.id === id), { class_date: o.classDate, topic: c[0] || null, homework: c[1] || null, observations: c[2] || null, notes: c[3] || null }); return { ok: true }; };
+    deleteClassLog = async (id) => { window.__logs = window.__logs.filter(x => String(x.id) !== String(id)); return { ok: true }; };
     window.__removidos = []; removeStudentLink = async (id) => { window.__removidos.push(id); return { ok: true }; };
     assignStudentToTeacher = async (u, l) => { window.__vinculou = [u, l]; return { ok: true, target: { username: u } }; };
     switchTab('teacher-panel'); switchTeacherPanelSection('students');

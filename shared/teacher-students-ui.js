@@ -178,7 +178,7 @@ function tsuGeralHTML(rows, f, canLink, accounts){
 
 function tsuLinkDialogHTML(a){
   return `<dialog id="dlg-vincular-aluno" class="p-dialogo" aria-labelledby="dlg-vincular-aluno-t"><article>
-    <header><button type="button" aria-label="${tsuEsc(t('common.close'))}" data-fechar-dialogo></button><h3 id="dlg-vincular-aluno-t">${tsuEsc(t('admin.students.linkTitle'))}</h3></header>
+    <header><button type="button" rel="prev" aria-label="${tsuEsc(t('common.close'))}" data-fechar-dialogo></button><h3 id="dlg-vincular-aluno-t">${tsuEsc(t('admin.students.linkTitle'))}</h3></header>
     <form id="admin-assign-student-form">
       <label>${tsuEsc(t('admin.students.accountLabel'))}<select id="admin-student-username"><option value="" disabled selected>${tsuEsc(t('admin.students.selectAccount'))}</option>${a.options}</select></label>
       <label>${tsuEsc(t('fieldEditor.field.language'))}<select id="admin-student-language">${a.languages}</select></label>
@@ -276,7 +276,7 @@ function tsuAnswersHTML(overview){
 }
 
 // Aulas recentes: carregadas depois (lista de objetos de teacher_class_logs); logs === undefined = ainda carregando.
-function tsuClassesHTML(logs){
+function tsuClassesHTML(logs, studentId){
   if (logs === undefined) return `<div class="p-carregando" role="status"><span class="p-spinner" aria-hidden="true"></span><span>${tsuEsc(t('students.loading'))}</span></div>`;
   const items = (logs || []).slice(0, 3);
   const list = items.length
@@ -285,7 +285,7 @@ function tsuClassesHTML(logs){
         return `<li><span><b>${tsuEsc(fmtDate(d, { day: '2-digit', month: '2-digit' }))}</b> · ${tsuEsc(l.topic || '')}</span></li>`;
       }).join('')}</ul>`
     : `<p class="p-subtitulo">${tsuEsc(t('students.classes.empty'))}</p>`;
-  return `${list}<footer><a href="#" data-ir-secao="classlogs">${tsuEsc(t('students.classes.all'))}</a></footer>`;
+  return `${list}<footer><a href="#" data-ir-secao="classlogs" data-aluno="${tsuEsc(studentId || '')}">${tsuEsc(t('students.classes.all'))}</a></footer>`;
 }
 
 // Ficha completa. st = { link, overview, metrics (undefined = carregando), logs (undefined = carregando), langKey }
@@ -298,7 +298,7 @@ function tsuFichaHTML(st, canRemove){
     <header class="p-cabecalho"><div class="p-pessoa"><span class="p-avatar p-avatar--grande" aria-hidden="true">${tsuEsc(tsuInitials(name))}</span><div>
       <span class="p-sobretitulo">${tsuEsc(t('students.ficha.kicker', { lang: STUDENT_LANGUAGE_LABELS[link.language_app_key] || link.language_app_key, date: fmtDate(link.created_at) }))}</span>
       <h2>${tsuEsc(name)}</h2><span class="p-subtitulo">@${tsuEsc(link.username || '')}${lang && lang.progressSummary && lang.progressSummary.levelLabel ? ' · ' + tsuEsc(t('students.ficha.level', { level: lang.progressSummary.levelLabel, pct: tsuNum(lang.progressSummary.pct) })) : ''}</span></div></div>
-      <div class="p-acoes"><button type="button" class="outline" data-ir-secao="classlogs">${tsuEsc(t('students.act.class'))}</button><button type="button" data-ir-secao="flashcards">${tsuEsc(t('students.act.card'))}</button>
+      <div class="p-acoes"><button type="button" class="outline" data-ir-secao="classlogs" data-aluno="${tsuEsc(link.student_id)}">${tsuEsc(t('students.act.class'))}</button><button type="button" data-ir-secao="flashcards">${tsuEsc(t('students.act.card'))}</button>
         ${canRemove ? `<details class="p-menu" data-alinhar="fim"><summary role="button" class="outline secondary">${tsuEsc(t('students.act.more'))}</summary><div class="p-menu-lista" role="menu"><button type="button" class="p-menu-item p-menu-item--perigo" role="menuitem" data-remover-vinculo="${tsuEsc(link.id)}">${tsuEsc(t('students.act.remove'))}</button></div></details>` : ''}</div></header>`;
   if (!ov || !Array.isArray(ov.languages)){
     return `<div class="painel"><div class="p-pagina" data-tsu="ficha">${head}<div class="p-alerta p-alerta--erro" role="alert"><span>${tsuEsc(t('students.overviewFailed'))}</span></div>
@@ -338,7 +338,7 @@ function tsuFichaHTML(st, canRemove){
       <article><header><h3>${tsuEsc(t('students.block.recent'))}</h3></header>${tsuRecentHTML(ov.timeline)}</article>
       <div style="display:grid;gap:1rem;min-width:0">
         <article><header><h3>${tsuEsc(t('students.block.answers'))}</h3></header>${tsuAnswersHTML(ov)}</article>
-        <article data-bloco-aulas><header><h3>${tsuEsc(t('students.block.classes'))}</h3></header>${tsuClassesHTML(st.logs)}</article>
+        <article data-bloco-aulas><header><h3>${tsuEsc(t('students.block.classes'))}</h3></header>${tsuClassesHTML(st.logs, link.student_id)}</article>
       </div>
     </div>
   </div></div>`;

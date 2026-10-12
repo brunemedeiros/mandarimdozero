@@ -69,3 +69,4 @@ Alunos (quadro geral, depois ficha) → Aulas → Flashcards (criar, depois list
 
 ## 9. Andamento
 - 2026-10-12: desenho aprovado pela autora, botão primário no azul atual. **Alunos entregue** na branch (quadro geral e ficha); fotos em `depois-alunos-*.jpg`; relatório em `docs/historico/15-*`. Próximo: Aulas, depois Cartões.
+- 2026-10-12: **Aulas entregue** na branch; fotos em `depois-aulas-*.jpg`; relatório em `docs/historico/15-*`. Próximo: Cartões.

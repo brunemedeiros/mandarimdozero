@@ -174,7 +174,7 @@ async function openStudentFicha(linkId){
   if (c.logs === undefined){
     const logs = await fetchClassLogs(link.student_id, link.language_app_key);
     c.logs = logs || [];
-    fill('[data-bloco-aulas]', `<header><h3>${escapeHTML(t('students.block.classes'))}</h3></header>${tsuClassesHTML(c.logs)}`);
+    fill('[data-bloco-aulas]', `<header><h3>${escapeHTML(t('students.block.classes'))}</h3></header>${tsuClassesHTML(c.logs, link.student_id)}`);
   }
 }
 
@@ -207,7 +207,11 @@ function studentViewBind(wrap){
     let el;
     if ((el = q('[data-abrir-aluno]'))) return openStudentFicha(el.dataset.abrirAluno);
     if (q('[data-voltar-alunos]')){ e.preventDefault(); return renderAdminStudentsView(); }
-    if ((el = q('[data-ir-secao]'))){ e.preventDefault(); return switchTeacherPanelSection(el.dataset.irSecao); }
+    if ((el = q('[data-ir-secao]'))){
+      e.preventDefault();
+      if (el.dataset.irSecao === 'classlogs' && el.dataset.aluno && typeof CLASSLOGS_VIEW !== 'undefined') CLASSLOGS_VIEW.preselect = el.dataset.aluno;   // abre Aulas já filtrada e com o aluno escolhido
+      return switchTeacherPanelSection(el.dataset.irSecao);
+    }
     if ((el = q('[data-remover-vinculo]'))) return removeStudentFromFicha(el.dataset.removerVinculo);
     if ((el = q('[data-ficha-idioma]'))){ STUDENT_VIEW.fichaLang = el.dataset.fichaIdioma; return studentRenderFicha(); }
     if (q('[data-atualizar-alunos]')){ Object.keys(STUDENT_METRICS_CACHE).forEach(k => delete STUDENT_METRICS_CACHE[k]); return renderAdminStudentsView(); }

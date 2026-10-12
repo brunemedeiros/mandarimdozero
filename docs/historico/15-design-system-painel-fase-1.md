@@ -84,3 +84,25 @@ Autorização da autora: desenho aprovado, botão primário no azul atual (igual
 - **Grátis x Premium:** tudo grátis (painel da professora; sem checkout).
 - **Fica para depois:** Cartões (Flashcards) e Aulas na nova linguagem; "Registrar aula" e "Criar cartão" da ficha abrem as abas atuais sem pré-selecionar o aluno;
   Banco de Revisão; Material de apoio; função nova de Flashcards (a autora ainda vai descrever).
+
+## Fase 2, tela Aulas entregue (2026-10-12, branch `claude/epic-fermat-ulyw5j`, nada publicado)
+Autorização da autora: "pode seguir para Aulas". Mesmo método de Alunos (desenho aprovado, sem migration, sem dado novo).
+- **Tela nova** (aba Aulas do painel da professora, fr e zh): lista por mês com a data em destaque, filtros (aluno, curso) e busca (tópico, lição de casa,
+  observações, anotações e nomes), e o formulário "Registrar aula" ao lado (fixo ao rolar; no celular vai para baixo da lista). Escolher pessoas por chips
+  (busca + caixas), registrar para uma ou várias pessoas, editar em janela, apagar com a confirmação do painel (antes `confirm()` do navegador).
+- **Aula em grupo:** continua sendo uma linha por aluno em `teacher_class_logs` (migration 031, sem mudança). Na tela volta a ser UMA aula com vários avatares:
+  mesmo conteúdo e criação com até 10 segundos de diferença (as linhas saem juntas do mesmo envio). Editar e apagar valem para o grupo todo (a janela avisa quantas pessoas).
+  Limite conhecido: duas aulas idênticas registradas no mesmo instante para o mesmo grupo viram uma só na tela.
+- **Dados:** uma consulta só (`fetchAllClassLogs`, até 1000 linhas, RLS da professora) em vez de uma por aluno; agrupa e filtra no navegador.
+- **Atalhos da ficha:** "Registrar aula" e "Ver todas as aulas" da ficha do aluno abrem Aulas já filtrada nele e com ele escolhido.
+- **Privacidade:** nada muda para o aluno; "Minhas aulas" continua pela RPC `get_my_class_logs` (sem as anotações privadas).
+- **Arquivos:** `shared/teacher-classlogs-ui.js` (HTML puro), `shared/admin-class-logs.js` (reescrito: dados, eventos, diálogos), `shared/teacher-class-logs.js` (+`fetchAllClassLogs`),
+  `shared/painel/` (peças novas: `p-aula`, `p-mes`, `p-chips`, `p-avatares`, `p-grade-2--larga`, `p-lateral`; no guia: "Aula no diário"), `fr/index.html` e `zh/index.html` (script novo).
+- **Correções no Design System achadas pelos testes:** `PainelUI.confirmar` e `PainelUI.toast` agora entram no primeiro `.painel` visível (no app há um por aba, os das abas fechadas ficam escondidos e o diálogo sumia);
+  diálogo com formulário dentro do `article` (X no canto, rodapé lado a lado); botão de envio dentro de `.p-acoes` não ocupa a linha toda; o X do diálogo de vincular aluno (tela Alunos) tinha o mesmo defeito e foi corrigido.
+- **i18n:** 49 chaves novas `classlogs.*` (pt-BR e en, confiança ALTA). Chaves antigas `admin.classLogs.*` que a tela nova não usa mais ficaram no catálogo (inofensivas; limpeza futura).
+- **Testes** (2026-10-12): `tests/painel-aulas/test_classlogs_ui_unit.js` 33/33 (agrupamento, filtros, meses, escape de HTML), `tests/painel-aulas/test_playwright.js` 162/162
+  (fr e zh x claro e escuro: lista, filtros sem refazer o formulário, chips, registrar para 1 e para 2, validação, editar e apagar em grupo, atalho da ficha, vazios, celular, professora x admin),
+  regressão: painel-alunos 206/206 e 61/61, painel-professora 162/162, fase-k6 28/28, painel-ds 9+87+131+194+288.
+- **Grátis x Premium:** tudo grátis. Passo manual da autora: nenhum.
+- **Fica para depois:** Cartões (Flashcards) na nova linguagem; "Criar cartão" da ficha ainda abre a aba atual sem pré-selecionar o aluno; Material de apoio.

@@ -2367,4 +2367,52 @@ window.I18N_CATALOG['en'] = {
   'students.n.lessonsDone': { one: '{n} lesson completed', other: '{n} lessons completed' }, // ALTA
   'students.n.items': { one: '{n} item', other: '{n} items' }, // ALTA
   'students.n.cards': { one: '{n} card', other: '{n} cards' }, // ALTA
+  'classlogs.title': 'Classes', // ALTA
+  'classlogs.sub': 'Your class diary. Only you can see these records.', // ALTA
+  'classlogs.filter.student.aria': 'Student', // ALTA
+  'classlogs.filter.student.all': 'All students', // ALTA
+  'classlogs.search.placeholder': 'Search the records', // ALTA
+  'classlogs.search.aria': 'Search classes', // ALTA
+  'classlogs.card.single': '{name}, {lang}', // ALTA
+  'classlogs.card.group': 'Group class · {names}', // ALTA
+  'classlogs.card.noTopic': 'Class without a topic', // ALTA
+  'classlogs.card.groupAria': 'Group class with {n} people', // ALTA
+  'classlogs.field.homework': 'Homework', // ALTA
+  'classlogs.field.observations': 'Observations', // ALTA
+  'classlogs.field.notes': 'Your private notes', // ALTA
+  'classlogs.menu': 'Actions', // ALTA
+  'classlogs.edit': 'Edit', // ALTA
+  'classlogs.delete': 'Delete', // ALTA
+  'classlogs.empty.title': 'No classes logged yet', // ALTA
+  'classlogs.empty.text': 'Log the first class in the form. The history shows up here.', // ALTA
+  'classlogs.empty.filtered': 'No classes match these filters.', // ALTA
+  'classlogs.noStudents.title': 'No students linked yet', // ALTA
+  'classlogs.noStudents.text': 'Link a student in the Students tab to log classes for them.', // ALTA
+  'classlogs.loading': 'Loading classes…', // ALTA
+  'classlogs.fail': 'Could not load the classes right now.', // ALTA
+  'classlogs.form.title': 'Log a class', // ALTA
+  'classlogs.form.who': 'Who had the class', // ALTA
+  'classlogs.form.pick': 'Choose people', // ALTA
+  'classlogs.form.pickHint': 'Choose one person, or several for a group class.', // ALTA
+  'classlogs.form.none': 'Nobody chosen yet', // ALTA
+  'classlogs.form.removePerson': 'Remove {name}', // ALTA
+  'classlogs.form.date': 'Date', // ALTA
+  'classlogs.form.topic': 'Topic', // ALTA
+  'classlogs.form.homework': 'Homework', // ALTA
+  'classlogs.form.observations': 'Observations', // ALTA
+  'classlogs.form.notes': 'Your private notes (the student does not see them)', // ALTA
+  'classlogs.form.atLeastOne': 'Fill in at least one field.', // ALTA
+  'classlogs.form.clear': 'Clear', // ALTA
+  'classlogs.form.submit': { one: 'Log class', other: 'Log class for {n} students' }, // ALTA
+  'classlogs.form.needStudent': 'Choose who had the class.', // ALTA
+  'classlogs.form.partial': 'The class was logged for {ok} of {total} people. Try again for the others.', // ALTA
+  'classlogs.edit.title': 'Edit class', // ALTA
+  'classlogs.edit.group': { one: 'This class was logged for {n} person.', other: 'This class was logged for {n} people. The change applies to all of them.' }, // ALTA
+  'classlogs.edit.save': 'Save', // ALTA
+  'classlogs.edit.cancel': 'Cancel', // ALTA
+  'classlogs.delete.title': 'Delete this class?', // ALTA
+  'classlogs.delete.text': 'The record disappears from your diary and cannot be undone.', // ALTA
+  'classlogs.delete.textGroup': 'This class was logged for {n} people and disappears for all of them. This cannot be undone.', // ALTA
+  'classlogs.delete.confirm': 'Delete class', // ALTA
+  'classlogs.form.submitOne': 'Log class', // ALTA
 };
