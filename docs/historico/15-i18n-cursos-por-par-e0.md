@@ -102,3 +102,18 @@ Produção consultada só com agregados (sem dados individuais). Principais acha
 gaveta `cardVariants` já está na `main` mas vazia em produção; `zh` grava e não restaura `hanziCards` (provável bug atual, a confirmar em navegador, passo C0);
 `weekly_xp` seria sobrescrito entre dois cursos do mesmo idioma (gravar a soma); próxima migration livre é a 075. Plano em passos C0 a C6, tudo grátis.
 Pendente da dona: responder Q-10, Q-11, Q-12 e as perguntas P1 a P8 (cada uma com recomendação) e autorizar o início do C0.
+
+## E3, passo C0 (2026-10-12): hanzi do zh e texto do convidado
+
+Só front-end estático; nenhuma migration, nenhuma mudança em produção além do deploy normal do Pages. Autorizado pela dona ("execute o C0").
+- **Bug confirmado em navegador e corrigido**: o zh gravava `hanziCards` no save mas não os restaurava ao carregar (restauração removida na K2-C, commit `49692ff`, 2026-09-30).
+  O teste novo reproduziu: cartão estudado voltava zerado (reps 0, estado `new`). Correção: `mergeSavedHanziCards` em `shared/study-trail-model.js` (só a lista de campos de progresso,
+  igual à da trilha; o texto vem da camada do curso) e chamada em `applySerializedState` (`zh/app.js`). O formato do save não mudou.
+- **Texto do portão**: `index.html` dizia "seu progresso fica salvo só neste navegador"; o código nunca salvou o progresso do convidado. Agora: "Como convidado(a), seu progresso não é salvo: ao
+  fechar a aba ele se perde. Entre com uma conta para guardar seu avanço."
+- Teste: `tests/curso-progresso/test_hanzi_restore.js` (Playwright, zh em modo convidado): 6/10 antes da correção, 10/10 depois (progresso FSRS e SM-2 de 2 cartões volta, cartão não estudado continua novo,
+  texto dos hanzi continua o da camada, 198 cartões, sem erros de página, texto do portão).
+- Regressão: 79 de 94 suítes locais passam; as 15 que falham são as mesmas de antes com os mesmos checks (fase-j, instável, passou desta vez).
+- Efeito em produção após o deploy: as 5 contas de mandarim têm `hanziCards` gravados com progresso zero (nenhum com histórico), então nada muda para elas ao carregar; quem estudar hanzi daqui para frente
+  passa a ter o progresso preservado. O progresso de hanzi estudado ANTES do deploy já se perdeu (foi regravado como zero) e não é recuperável.
+Próximo: C1 (`courseStorageKey` puro e uso nos 3 pontos de `shared/auth.js`), aguardando autorização e as respostas das perguntas da auditoria.

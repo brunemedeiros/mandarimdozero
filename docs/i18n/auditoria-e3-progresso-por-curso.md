@@ -113,6 +113,8 @@ Grátis x Premium: **tudo grátis.** Trocar de curso, ter vários cursos e o idi
 
 ## 7. Plano de execução da E3 (passos pequenos, cada um com gate)
 
+**C0 entregue em 2026-10-12** (ver `docs/historico/15-i18n-cursos-por-par-e0.md`): bug do `hanziCards` confirmado em navegador e corrigido; texto do convidado corrigido.
+
 | Passo | O quê | Banco | Pronto quando | Rollback |
 |---|---|---|---|---|
 | C0 | Teste e correção do `hanziCards` no zh; corrigir o texto do convidado | não | teste de gravar, recarregar e comparar FSRS verde; texto do portão correto | reverter o commit |
