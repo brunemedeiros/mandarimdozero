@@ -174,7 +174,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const NESTED_TEMPLATE_KEYS = ['review.deck.createdCount.other' /* original: criado${n === 1 ? '' : 's'} */, 'limitCut.main', 'limitCut.already', 'admin.reports.reply.lastSent', 'admin.reports.reply.lastSentTo'];
   const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k of ptKeys){
-    if (NEW_KEYS.includes(k) || k.startsWith('badge.catalog.') || k.startsWith('friends.') || k.startsWith('courses.') || k === 'profile.tabFriends' || k === 'notif.cat.amigos' || k === 'notif.pref.inAppOnly') continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
+    if (NEW_KEYS.includes(k) || k.startsWith('badge.catalog.') || k.startsWith('friends.') || k.startsWith('courses.') || k.startsWith('courseMenu.') || k === 'profile.tabFriends' || k === 'notif.cat.amigos' || k === 'notif.pref.inAppOnly') continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
     const v = pt[k];
     // Plural por categoria ({one, other}): no original o plural era montado por código (módulo${n===1?'':'s'}).
     if (v && typeof v === 'object'){ check(`regressão: pt-BR '${k}' (plural) tem one e other`, typeof v.one === 'string' && typeof v.other === 'string'); continue; }
