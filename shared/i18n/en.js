@@ -71,6 +71,11 @@ window.I18N_CATALOG['en'] = {
   'settings.uiLanguage.confirm.yes': 'Change', // ALTA
   'courses.group.pt-BR': 'Courses for Portuguese speakers', // ALTA
   'courses.group.en': 'Courses for English speakers', // ALTA
+  'courseMenu.title': 'My courses', // ALTA
+  'courseMenu.add': 'Add a course', // ALTA
+  'courseMenu.speakLabel': 'Language you speak', // ALTA
+  'courseMenu.speak.pt-BR': 'I speak Portuguese', // ALTA
+  'courseMenu.speak.en': 'I speak English', // ALTA
   'courses.title': 'My courses', // ALTA
   'courses.sub': 'Each course has its own progress. Your day streak and achievements belong to your account and count in every course.', // ALTA
   'courses.beta': 'beta', // ALTA
