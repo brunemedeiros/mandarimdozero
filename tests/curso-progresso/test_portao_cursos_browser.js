@@ -68,22 +68,20 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       await ctx.close();
     }
   }
-  // atalho ?cursos=1
+  // flag ligada por padrão; chave de emergência '0' desliga só naquele navegador
   {
     const ctx = await browser.newContext({ serviceWorkers: 'block' });
     await ctx.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
     const page = await ctx.newPage();
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
     await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
-    await page.goto(`${base}/fr/index.html?cursos=1`);
-    await page.waitForFunction(() => typeof CourseStorage !== 'undefined');
-    check('atalho ?cursos=1 liga só neste navegador', await page.evaluate(() => CourseStorage.isPerSiteLanguage()));
     await page.goto(`${base}/fr/index.html`);
     await page.waitForFunction(() => typeof CourseStorage !== 'undefined');
-    check('continua ligado nas próximas aberturas', await page.evaluate(() => CourseStorage.isPerSiteLanguage()));
-    await page.goto(`${base}/fr/index.html?cursos=0`);
-    await page.waitForFunction(() => typeof CourseStorage !== 'undefined');
-    check('?cursos=0 desliga', !(await page.evaluate(() => CourseStorage.isPerSiteLanguage())));
+    check('cursos por idioma do site ligados por padrão', await page.evaluate(() => CourseStorage.isPerSiteLanguage()));
+    check('?cursos=0 na URL não desliga (atalho removido)', await (async () => { await page.goto(`${base}/fr/index.html?cursos=0`); await page.waitForFunction(() => typeof CourseStorage !== 'undefined'); return page.evaluate(() => CourseStorage.isPerSiteLanguage()); })());
+    await page.evaluate(() => localStorage.setItem('courses-per-site-language', '0'));
+    await page.goto(`${base}/fr/index.html`); await page.waitForFunction(() => typeof CourseStorage !== 'undefined');
+    check("chave de emergência localStorage '0' desliga", !(await page.evaluate(() => CourseStorage.isPerSiteLanguage())));
     await ctx.close();
   }
   await browser.close(); server.close();
