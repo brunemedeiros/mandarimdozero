@@ -149,3 +149,23 @@ Só front-end estático; nenhuma migration; nada em produção além do deploy n
   streak vivo do mesmo dia), e integração com `auth.js` (1 idioma, 2 idiomas, formato antigo, conta nova, duas abas salvando ao mesmo tempo).
 - Regressão: 81 de 96 suítes passam; as 15 que falham são as mesmas de antes, com os mesmos checks.
 - Efeito visível: a sequência de dias passa a ser da conta. Quem estuda os dois idiomas vê a mesma sequência nos dois (hoje 1 conta em produção muda: no chinês passa de 1 para 2).
+
+## E3, passo C3 (2026-10-12): servidor entende chaves de curso e a sequência da conta
+
+**Estado de entrega**: código e migration prontos e testados; **Staging: migration 075 aplicada**; **produção: NADA aplicado e a Edge Function NÃO foi redeployada** (aguardam autorização da dona).
+- **Migration `075_course_keys_and_account_streak_readers.sql`** (só `CREATE OR REPLACE`, sem DROP, sem tabela/coluna/política nova), mesmas assinaturas e grants:
+  `get_teacher_student_overview` (070) e `get_public_profile_stats` (037) aceitam chaves de curso (`frances@en`...), devolvem `languageAppKey` (idioma estudado) e `courseId` além de `key`,
+  e leem `streak`/`lastStudyDay` de `progress.data._account` quando existir e não estiver atrás do bloco; cartões próprios e ordenação usam o idioma estudado. Para as contas de hoje o resultado
+  é o mesmo, só com os dois campos novos. `get_teacher_student_metrics` (059) não mudou (lê o bloco do idioma pedido; FSRS dos cartões da professora por idioma estudado é do C5, decisão P1).
+- **`notification-cron`**: com `_account`, `streak_at_risk`, meta do dia e reengajamento usam a sequência e as lições da conta e saem **uma vez só**, pelo idioma principal (idioma atual da conta, senão o
+  estudado mais recentemente). Sem `_account`, tudo como antes (um por idioma). Revisão atrasada e missões continuam por idioma. Blocos de curso (`@`) ainda não são lidos pelo cron (fica para o C5, quando existirem).
+- **Correção no C2 descoberta ao revisar o cron**: o STATE carrega a UNIÃO dos dias de todos os idiomas, então o espelho gravado no bloco de um idioma passaria a conter dias estudados no outro e
+  mascararia o painel da professora e o alerta de infrequência (que leem por idioma). Agora `AccountProgress.snapshotBase/mirrorForBlock` fazem o bloco guardar só os dias do próprio idioma
+  (o que tinha ao carregar mais o que mudou na sessão), e a união fica em `_account`. Alerta de infrequência da professora, por idioma, não mudou.
+- **Testes**: Postgres local (criado em `/tmp/pg`, porta 54329, com os papéis anon, authenticated, service_role e postgres): o teste antigo `tests/painel-alunos/test_rpc.sql` passa 25/25 COM a 075 aplicada e o novo
+  `tests/curso-progresso/test_075_rpc.sql` 19/19 (`bash tests/curso-progresso/run_075.sh`); **Staging**: o mesmo SQL novo, 19/19 em transação com ROLLBACK, e zero resíduo conferido; cron
+  `tests/curso-progresso/test_cron_account.js` 21/21 (e `k2b` 60/60); conta `test_account_progress.js` agora 47/47 (10 verificações novas do espelho por idioma).
+- Regressão: 81 de 97 suítes locais passam; as 15 que falham são as mesmas de antes, com os mesmos checks (`fase-j`, instável, falhou no lote e passou 76/76 em duas rodadas isoladas).
+- **Passos manuais que dependem da dona**: (1) aplicar a 075 em produção (não tem DROP, então pode ir pelo MCP ou pelo SQL Editor; ordem: antes do cliente do C2 chegar às contas); (2) redeployar a Edge
+  Function `notification-cron` com o `index.ts` novo. Sem o passo 2 o cron segue com o comportamento de antes (um aviso por idioma, lendo os blocos), que continua correto porque o espelho do bloco mantém os mesmos campos.
+Próximo: C4 (conquistas da conta, só tela), aguardando as respostas Q-10 a P8 e autorização.
