@@ -233,4 +233,4 @@ Detalhes: `docs/K-analytics-contrato.md`, seção "Fase K final -- entrega".
 | Projeto | Como | Versão |
 |---|---|---|
 | Staging | ferramenta `apply_migration` (conferido: 8 funções com a condição nova, tabela fechada para anon, país fechado) | conferir em `list_migrations` |
-| Produção | pendente: **só depois do PR publicado** (site antigo quebra com a 080) | -- |
+| Produção | ferramenta, depois do PR #304 publicado (deploy 2026-10-12 21:04); antes: 9 trechos conferidos (1 ocorrência cada); depois: 11 funções com a regra, anon sem tabela, país fechado, leitura como admin ok | `20261012210455` |

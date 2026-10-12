@@ -287,3 +287,26 @@ Sem teste hoje: stats `not_public`, tela do perfil privado, exceções de amigo/
   painel-alunos 48, fase-i 48, anki-destino 38, i18n 2036. Testes antigos ajustados de propósito: amigos (busca por
   nome de conta privada), Deck público SQL (visitante sem login) e Playwright ("Publicar" virou "🔒 Privado",
   campos em "Editar página do Deck"), deck-browser (rótulo do botão).
+
+### Publicação (2026-10-12)
+PR #304 mergeado e publicado (convite, Fase K final, login obrigatório, e-mails, perfil privado); em seguida a 080
+foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural.
+
+## Etapa 4 (mural) -- respostas da autora (2026-10-12, antes da auditoria)
+
+- **Destinatários**: a professora seleciona alunos (todos, vários ou um só). O recado aparece no mural de cada
+  selecionado como se fosse só dele: o aluno não sabe quem mais recebeu.
+- **Respostas**: o aluno pode responder e comentar.
+- **Aviso**: o recado chega no sino e mostra um pill "+N" (mensagens novas) na aba Perfil e num submenu Aulas ou
+  Mural, ou num menu próprio de Aluno (a decidir na auditoria).
+- **Anexo**: sim.
+- 2ª rodada (2026-10-12):
+  - **Mural por aluno** (como no Google Classroom): cada aluno tem a sua aba Mural. Alunos de uma mesma **turma**
+    podem compartilhar o mural: aí veem os recados e comentários uns dos outros, só dentro da turma.
+  - **Anexo**: PDF e imagem (tamanho sugerido: até 10 MB por arquivo e até 5 por recado; imagem reduzida no
+    navegador antes de subir).
+  - **Editar/apagar**: a professora edita e apaga recados; o aluno só apaga o próprio comentário.
+  - **Aviso**: só no sino + sinalizador no menu Perfil. Sem e-mail.
+- Em aberto para a auditoria: o que é uma turma (quem cria, aluno em várias turmas), quem liga o compartilhamento
+  (professora ou aluno), recado individual dentro de turma compartilhada, Grátis x Premium.
+

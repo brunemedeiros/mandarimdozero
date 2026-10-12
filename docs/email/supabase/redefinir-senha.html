@@ -9,7 +9,8 @@
 </head>
 <body style="margin:0;padding:0;background:#FAF5EA">
 <!-- Padrão de e-mail Prof Brune (variação 1c, docs/email/PADRAO-EMAIL.md). Modelo: Supabase Auth > Reset Password.
-     Variáveis do Supabase: {{ .ConfirmationURL }} (link). -->
+     Variáveis do Supabase: {{ .TokenHash }} (botão; não usa ConfirmationURL porque antivírus de e-mail
+     abrem links sozinhos e gastariam o link: o portão index.html só usa com um toque). -->
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Toque no botão para criar uma senha nova. Vale por 1 hora.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAF5EA"><tr><td align="center" style="padding:24px 10px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:22px;overflow:hidden;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;color:#22113f">
@@ -26,7 +27,7 @@
 
 <!-- Botão rosa -->
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:6px auto 22px"><tr><td align="center" style="border-radius:999px;background:#E36BCA;border:2px solid #22113f;box-shadow:4px 4px 0 #22113f">
-<a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:15px 32px;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;font-size:16px;font-weight:900;color:#22113f;text-decoration:none">Criar nova senha</a></td></tr></table>
+<a href="https://app.profbrune.com.br/?nova-senha={{ .TokenHash }}" style="display:inline-block;padding:15px 32px;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;font-size:16px;font-weight:900;color:#22113f;text-decoration:none">Criar nova senha</a></td></tr></table>
 
 <p style="margin:0 0 4px;text-align:center;font-size:14px;line-height:1.6;color:#5d4f72">O link vale por 1 hora. Não pediu? Pode ignorar este e-mail, sua senha atual continua valendo.</p>
 
