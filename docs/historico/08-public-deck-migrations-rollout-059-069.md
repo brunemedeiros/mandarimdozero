@@ -219,5 +219,5 @@ Detalhes e verificação: `docs/plano-professora-privacidade.md`.
 | Projeto | Como | Versão |
 |---|---|---|
 | Staging | ferramenta `apply_migration` (+ `_lang_label` com 'chinês' reaplicado por `execute_sql`) | `20261012182754` |
-| Produção | pendente (autorização da autora; se a ferramenta travar, `docs/rollout-sql/077_sql_editor.sql`) | -- |
+| Produção | ferramenta `apply_migration` (autorizada pela autora 2026-10-12; conferido: 7 funções, trigger, índice, policy, grants; 13 vínculos e 13 badges intactos) | `20261012184454` |
 Detalhes e verificação: `docs/plano-professora-privacidade.md`.

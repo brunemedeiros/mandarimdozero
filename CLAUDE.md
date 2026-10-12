@@ -94,6 +94,6 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - Todos os cartões antigos já têm Deck (migração de 2026-10-07).
 - Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
 - 075/076 (papéis, permissões, regras da professora) na produção; telas (painéis Admin x Professora, Planos, Minhas aulas) publicadas pelo PR #302 (2026-10-12). Plano: 1) papel Professora, 2) Fase K final, 3) perfil privado, 4) mural -- `docs/plano-professora-privacidade.md`.
-- 077 (convite de aluno + badge por professora + 1 professora por idioma) só no Staging; produção e PR pendentes.
+- 077 (convite de aluno + badge por professora + 1 professora por idioma) no Staging e na produção; telas na branch, PR pendente.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.

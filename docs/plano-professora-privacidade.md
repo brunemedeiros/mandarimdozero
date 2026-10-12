@@ -178,7 +178,7 @@ Decisões da autora: convite bloqueado se o aluno já tem professora naquele idi
 sozinho** (só a professora encerra o vínculo); **o badge some quando o vínculo acaba**; a admin continua vinculando
 direto, as outras professoras só convidam; link de convite com cartão caprichado; limite de 30 convites por dia.
 
-- **Migration 077** `teacher_invites_and_badges` (Staging `20261012182754`; produção pendente):
+- **Migration 077** `teacher_invites_and_badges` (Staging `20261012182754`; produção `20261012184454`, 2026-10-12):
   `invited_at`/`responded_at` em `teacher_students`; índice único parcial "1 professora ativa por aluno por idioma";
   `badge_catalog.teacher_id` (o `student` da autora vira o badge dela); tabelas `teacher_invite_codes` (link por
   professora e idioma, código de 10 letras/números) e `teacher_invite_log` (limite diário), sem acesso direto;
