@@ -38,3 +38,25 @@ tts-google. `i18n/ui_language_confirm_browser` falhou uma vez no lote e passou 1
 Ignoradas por exigirem Postgres/Supabase real: `run.sh` e `.sql` de amigos, painel-alunos, profile-private, fase-grants,
 fase-public-deck, fase-identity, fase-k6. `test_i18n_unit` 2104/2104, `deck-browser` 208/208.
 Teste alterado de propósito: `tts-google` agora compara a cópia do Deno com o registro; `test_i18n_unit` ignora o novo `<script>`.
+
+## E2, separar conteúdo-base da camada do curso (2026-10-12, parte 1 de 2)
+
+Entregue até aqui (só ferramenta e prova; o app em produção NÃO mudou, `content.js` está intacto):
+- `shared/course-layer.js`: `extract`, `strip`, `apply` (funções puras). A camada usa o mesmo formato do overlay de inglês
+  (`shared/content-i18n.js`), mais `dialogue.speakers`; a tabela de conjugação vira colunas por índice na base.
+- `tests/camada-curso/test_equivalence.js` (66/66): para fr (30 unidades) e zh (18), `apply(strip(c), extract(c))` é idêntico
+  ao original, por hash por unidade e no total, inclusive ordem das colunas das tabelas e `levels`/`modules`/`levelTests`;
+  aplicar a camada duas vezes dá o mesmo resultado; a base fica sem nenhum campo de texto fora da lista de campos do idioma
+  estudado ou de lógica (`id`, `f`, `c`, `p`, `answer`, `alt`, `form`, `subject`, `pinyin`, `kind`, `category`...).
+- Tamanhos: fr base 48 KB + camada 70 KB (original 114 KB); zh base 34 KB + camada 44 KB (original 75 KB).
+
+Achados da auditoria do conteúdo:
+- `kind`/`category`/`trigger.after` são chaves de lógica em português (`reality`, `gramatica-coloquial`...), ficam na base.
+- `dialogue.lines[].spk` em zh traz nomes de personagem em português ("Garçom", "Vendedor") que o overlay de inglês nunca
+  traduziu: lacuna existente, a camada agora carrega `speakers` para a E9 corrigir.
+- Não coberto nesta parte (mesmo padrão, próxima rodada): `zh/stories.js`, `zh/hanzi-data.js`, `fr/challenges.js`,
+  `fr/dictations.js`, `fr/conjugation-data.js` e o `lessonVocab` do cron.
+- Divergência (Dv-7): a camada vai como UM arquivo por curso (`courses/<estudado>-<site>/layer.js`), não um por unidade,
+  porque o app lê UNITS de forma síncrona na inicialização; carregamento por unidade só quando houver loader assíncrono (E4).
+
+Pendente: decisão da dona sobre como gravar a base (ver a pergunta da entrega) antes de trocar o app para ler base + camada.
