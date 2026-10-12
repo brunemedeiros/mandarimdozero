@@ -157,7 +157,7 @@ Entregue (pedido da autora: separar menus, melhorar a busca por @, aplicar a ski
   aparecem no menu com vínculo ativo e pelo menos 1 item.
 - Professora que não é admin: não vê o formulário de vincular (aviso do convite que vem aí); desvincular marca
   `removed` (a admin continua apagando); vincular de novo reativa o registro `removed`.
-- Notas da aula: o campo agora diz "Notas só suas, o aluno não vê" (decisão pendente da autora: mostrar ao aluno?).
+- Notas da aula: o campo diz "Notas só suas, o aluno não vê". **Decidido pela autora (2026-10-12): ficam só para a professora.**
 - Design (skill frontend-design, mesma linguagem da Revisão): seletor segmentado numa linha (sem emoji),
   sub-abas sublinhadas (Analytics), títulos de seção sem caixa-alta, botões do tamanho do conteúdo no computador,
   formulários com largura de leitura, links de seleção com estilo, "--" e "pra" fora de 62 textos dos painéis.
