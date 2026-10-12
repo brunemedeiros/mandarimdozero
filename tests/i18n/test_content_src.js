@@ -24,9 +24,7 @@ ok(JSON.stringify(ctx.U)===orig,'ciclos repetidos ok');
 {
 const win2={CONTENT_OVERLAYS:{}};const c2={window:win2,document:{},console};vm.createContext(c2);
 vm.runInContext(fs.readFileSync(root+'shared/content-i18n.js','utf8'),c2);
-vm.runInContext(require(root+'scripts/lib/course-content.js').composedSource('zh')+';globalThis.U=UNITS;',c2);
-vm.runInContext(fs.readFileSync(root+'zh/stories.js','utf8')+';globalThis.S=STORIES;',c2);
-vm.runInContext(fs.readFileSync(root+'zh/hanzi-data.js','utf8')+';globalThis.H=HANZI_LESSONS;',c2);
+vm.runInContext(require(root+'scripts/lib/course-content.js').composedSource('zh')+';globalThis.U=UNITS;globalThis.S=STORIES;globalThis.H=HANZI_LESSONS;',c2);
 vm.runInContext(fs.readFileSync(root+'zh/content.en.js','utf8'),c2);
 const o2=JSON.stringify(c2.U),os=JSON.stringify(c2.S),oh=JSON.stringify(c2.H);
 const ci2=c2.window.ContentI18n.create({units:c2.U,stories:c2.S,hanzi:c2.H,overlayUrl:()=>'x'});

@@ -1,10 +1,7 @@
-// CONTEÚDO-BASE do curso de chinês (E2 de docs/i18n/arquitetura-multi-idioma-cursos.md).
-// Só o IDIOMA ESTUDADO e a estrutura: ids, hanzi (c), pinyin (p), tipos, ordem.
-// Todo texto em língua de origem (títulos, metas, traduções, explicações, cenários, rótulos, nomes de personagem)
-// mora na CAMADA DO CURSO: courses/zh-pt-BR/layer.js (português) e zh/content.en.js (inglês).
-// Este arquivo sozinho NÃO é exibível: a camada carrega logo depois (index.html) e se aplica sobre LEVELS e UNITS.
-// Os comentários de autoria do arquivo anterior (fluxo da lição, gatilhos de explicação) estão em
-// docs/historico/conteudo-original/zh-content.js.txt.
+// CONTEÚDO-BASE do curso de chinês (E2 de docs/i18n/arquitetura-multi-idioma-cursos.md): só o IDIOMA ESTUDADO e a estrutura.
+// O texto em língua de origem mora na CAMADA DO CURSO: courses/zh-pt-BR/layer.js (português) e zh/content.en.js (inglês).
+// Ids, hanzi (c), pinyin (p), tipos e ordem. Sozinho NÃO é exibível: a camada carrega logo depois e se aplica sobre ele.
+// Os comentários de autoria do arquivo anterior estão em docs/historico/conteudo-original/zh-<arquivo>.js.txt.
 
 const LEVELS = [
   { "id": "HSK1" }

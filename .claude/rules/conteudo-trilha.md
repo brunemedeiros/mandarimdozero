@@ -13,7 +13,7 @@ paths:
 # Conteúdo da trilha, notas e desafios
 
 - **Base x camada (E2)**: `fr/content.js` e `zh/content.js` são só o idioma estudado (ids, frases, hanzi/pinyin, respostas, estrutura).
-  Texto em português (título, meta, tradução, notas, cenários, rótulos, nomes de personagem) mora em `courses/<fr|zh>-pt-BR/layer.js`
+  Vale também para `zh/stories.js`, `zh/hanzi-data.js`, `fr/dictations.js` e o cabeçalho de `fr/conjugation-data.js`. Texto em português (título, meta, tradução, notas, cenários, rótulos, nomes de personagem, significado de hanzi, tarefa de ditado) mora em `courses/<fr|zh>-pt-BR/layer.js`
   (mesma unidade pelo `id`). Comentários de autoria antigos: `docs/historico/conteudo-original/`. Scripts que precisam do texto
   em português usam `scripts/lib/course-content.js`; `tests/camada-curso` prova base + camada == original.
 

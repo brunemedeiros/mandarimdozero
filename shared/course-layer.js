@@ -61,7 +61,82 @@
     if (content.levels){ layer.levels = {}; each(content.levels, function(l){ layer.levels[l.id] = l.label; }); }
     if (content.modules){ layer.modules = {}; each(content.modules, function(m){ layer.modules[m.id] = m.title; }); }
     if (content.levelTests){ layer.levelTests = {}; each(content.levelTests, function(x){ layer.levelTests[x.id] = x.title; }); }
+    extractExtras(content, layer);
     return layer;
+  }
+
+  // ---- dados fora de UNITS: histórias e hanzi (zh), ditados e conjugação (fr) ----
+  function extractExtras(content, layer){
+    if (content.stories){
+      layer.stories = {};
+      each(content.stories, function(st){
+        layer.stories[st.id] = { title: st.title, subtitle: st.subtitle, beats: (st.beats || []).map(function(b){
+          var o = { lines: (b.lines || []).map(function(l){ return l.t; }) };
+          if (b.question) o.question = { prompt: b.question.prompt, options: (b.question.options || []).slice() };
+          return o;
+        }) };
+      });
+    }
+    if (content.hanzi){
+      layer.hanzi = {};
+      each(content.hanzi, function(lesson){ each(lesson, function(h){
+        var o = { meaning: h.meaning, radicals: (h.radicals || []).map(function(r){ return r.m; }) };
+        put(o, 'mnemonic', h.mnemonic);
+        layer.hanzi[h.char] = o;
+      }); });
+    }
+    if (content.dictations){ layer.dictations = {}; each(content.dictations, function(d){ layer.dictations[d.id] = { task: d.task }; }); }
+    if (content.conjugation){
+      layer.conjugation = { groups: {}, verbTranslations: {} };
+      Object.keys(content.conjugation.groups || {}).forEach(function(k){ var g = content.conjugation.groups[k]; layer.conjugation.groups[k] = { label: g.label, desc: g.desc }; });
+      Object.keys(content.conjugation.verbTranslations || {}).forEach(function(k){ layer.conjugation.verbTranslations[k] = content.conjugation.verbTranslations[k]; });
+    }
+  }
+
+  function stripExtras(content){
+    each(content.stories, function(st){
+      delete st.title; delete st.subtitle;
+      each(st.beats, function(b){
+        each(b.lines, function(l){ delete l.t; });
+        if (b.question){ delete b.question.prompt; delete b.question.options; }
+      });
+    });
+    each(content.hanzi, function(lesson){ each(lesson, function(h){
+      delete h.meaning; delete h.mnemonic;
+      each(h.radicals, function(r){ delete r.m; });
+    }); });
+    each(content.dictations, function(d){ delete d.task; });
+    if (content.conjugation){
+      Object.keys(content.conjugation.groups || {}).forEach(function(k){ content.conjugation.groups[k] = {}; });
+      content.conjugation.verbTranslations = {};
+    }
+  }
+
+  function applyExtras(content, layer){
+    var ls = layer.stories || {};
+    each(content.stories, function(st){
+      var l = ls[st.id]; if (!l) return;
+      set(st, 'title', l.title); set(st, 'subtitle', l.subtitle);
+      each(st.beats, function(b, bi){
+        var lb = l.beats && l.beats[bi]; if (!lb) return;
+        each(b.lines, function(ln, li){ if (lb.lines) set(ln, 't', lb.lines[li]); });
+        if (b.question && lb.question){ set(b.question, 'prompt', lb.question.prompt); set(b.question, 'options', lb.question.options && lb.question.options.slice()); }
+      });
+    });
+    var lh = layer.hanzi || {};
+    each(content.hanzi, function(lesson){ each(lesson, function(h){
+      var l = lh[h.char]; if (!l) return;
+      set(h, 'meaning', l.meaning); set(h, 'mnemonic', l.mnemonic);
+      each(h.radicals, function(r, ri){ if (l.radicals) set(r, 'm', l.radicals[ri]); });
+    }); });
+    var ld = layer.dictations || {};
+    each(content.dictations, function(d){ if (ld[d.id]) set(d, 'task', ld[d.id].task); });
+    if (content.conjugation && layer.conjugation){
+      var g = content.conjugation.groups || {}, lg = layer.conjugation.groups || {};
+      Object.keys(g).forEach(function(k){ if (lg[k]){ set(g[k], 'label', lg[k].label); set(g[k], 'desc', lg[k].desc); } });
+      var vt = content.conjugation.verbTranslations;
+      if (vt) Object.keys(layer.conjugation.verbTranslations || {}).forEach(function(k){ vt[k] = layer.conjugation.verbTranslations[k]; });
+    }
   }
 
   function stripUnit(u){
@@ -97,6 +172,7 @@
     each(content.levels, function(l){ delete l.label; });
     each(content.modules, function(m){ delete m.title; });
     each(content.levelTests, function(x){ delete x.title; });
+    stripExtras(content);
     return content;
   }
 
@@ -151,6 +227,7 @@
     each(content.levels, function(l){ if (layer.levels) set(l, 'label', layer.levels[l.id]); });
     each(content.modules, function(m){ if (layer.modules) set(m, 'title', layer.modules[m.id]); });
     each(content.levelTests, function(x){ if (layer.levelTests) set(x, 'title', layer.levelTests[x.id]); });
+    applyExtras(content, layer);
     return content;
   }
 

@@ -76,3 +76,18 @@ painel-alunos unit, trilha-tags, trilha/trail_state_model, tts-google); mais `fa
 Passam: `test_i18n_unit` 2104/2104, `deck-browser` 208/208, `fase-e` playwright 38/38, `trilha/trail_ui` 86/86, `i18n/content_en` 30/30, `content_zh_en` 16/16,
 `registro` 89/89. Testes ajustados por causa da E2: `fase-e/harness`, `placeholders`, `trilha/checkpoint_exam`, `trilha/trail_state_model`, `i18n/content_src`
 (passam a ler base + camada) e `i18n/test_i18n_unit` (ignora os 2 `<script>` novos).
+
+### E2, segunda rodada (2026-10-12): histórias, hanzi, ditados e conjugação
+
+Mesmo padrão da primeira rodada, autorizado pela dona. Sem migration, sem Edge Function, nada em produção; vale após o deploy do Pages.
+- zh: `stories.js` (título, subtítulo, falas `t`, pergunta e opções) e `hanzi-data.js` (significado, mnemônico, significado dos radicais) regravados só com hanzi, pinyin,
+  radicais (`r`), falantes e `correctIndex`. fr: `dictations.js` sem `task`; `conjugation-data.js` com o trecho de rótulos de grupo e `VERB_TRANSLATIONS` esvaziado,
+  e as formas conjugadas (`CONJUGATION_VERBS`) byte a byte iguais ao original.
+- A camada pt-BR de cada curso (`courses/<fr|zh>-pt-BR/layer.js`) ganhou `stories`, `hanzi`, `dictations` e `conjugation`. Agora ela carrega DEPOIS de todos os arquivos
+  de dados (fr: depois de `dictations.js`; zh: depois de `hanzi-data.js`) e se aplica sobre o que existir na página.
+- `shared/course-layer.js` ganhou os extras; `scripts/lib/course-content.js` concatena os arquivos de dados de cada idioma. Originais com comentários em
+  `docs/historico/conteudo-original/` (6 arquivos de fr e zh, ao todo 8 com o `content.js`).
+- `fr/challenges.js` ficou de fora de propósito: o site não o carrega mais (os desafios vêm da tabela do Supabase); o português dos desafios mora no banco e entra no
+  desenho da camada quando a E9 tratar Desafios.
+- Prova: `tests/camada-curso` agora com 75 verificações; fr e zh: base + camada, pelos arquivos em disco, idênticos ao original (histórias, hanzi, ditados e conjugação
+  incluídos). Validadores `validate-content-overlay.js` e `validate-challenges-en.js` com a mesma saída de antes.

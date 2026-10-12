@@ -1,7 +1,7 @@
-// CAMADA DO CURSO mandarim@pt-BR (E2): texto em português do conteúdo-base zh/content.js.
-// Carrega DEPOIS de zh/content.js e de shared/course-layer.js e se aplica sozinha sobre LEVELS e UNITS.
-// Formato: o mesmo do overlay de inglês (shared/content-i18n.js) mais dialogue.speakers. Editar este arquivo para
-// mudar texto em português; ids e frases do idioma estudado ficam em zh/content.js.
+// CAMADA DO CURSO mandarim@pt-BR (E2): todo o texto em português dos dados de zh/ (content.js, stories.js, hanzi-data.js).
+// Carrega DEPOIS desses arquivos e de shared/course-layer.js e se aplica sozinha sobre o que existir na página.
+// Formato: o mesmo do overlay de inglês (shared/content-i18n.js) mais dialogue.speakers, stories, hanzi, dictations e conjugation.
+// Editar este arquivo para mudar texto em português; ids, frases do idioma estudado e ordem ficam em zh/.
 (function(){
   var L = {
     "units": {
@@ -1253,10 +1253,1031 @@
         ]
       }
     },
-    "levels": { "HSK1": "Nível 1 · Iniciante" }
+    "levels": { "HSK1": "Nível 1 · Iniciante" },
+    "stories": {
+      "1": {
+        "title": "A família de Xiao Li",
+        "subtitle": "Revendo Unidades 1-5",
+        "beats": [
+          {
+            "lines": ["Olá, Brune!", "Olá! Bom dia!", "Este é meu pai."],
+            "question": {
+              "prompt": "Quem é apresentado nesta parte?",
+              "options": ["A mãe de Xiao Li", "O pai de Xiao Li", "A irmã de Xiao Li", "Um amigo de Brune"]
+            }
+          },
+          {
+            "lines": ["Olá! De que país você é?", "Eu sou brasileira.", "Brasil! Legal!"]
+          },
+          {
+            "lines": [
+              "Esta é minha irmã mais velha.",
+              "Olá! Quantos anos você tem?",
+              "Eu tenho 30 anos. E você?",
+              "Eu tenho 28 anos."
+            ],
+            "question": {
+              "prompt": "Quantos anos a irmã de Xiao Li tem?",
+              "options": ["28 anos", "30 anos", "18 anos", "13 anos"]
+            }
+          },
+          {
+            "lines": [
+              "Quantas pessoas há na sua família, Brune?",
+              "Minha família tem pai, mãe e eu.",
+              "Você tem irmã mais velha?",
+              "Não tenho. Eu tenho um irmão mais velho."
+            ]
+          },
+          {
+            "lines": [
+              "Brune, o que você quer comer?",
+              "Eu quero comer arroz. Isso está muito gostoso!",
+              "Você quer beber chá?",
+              "Quero! Eu gosto de beber chá."
+            ],
+            "question": {
+              "prompt": "O que Brune quer comer?",
+              "options": ["Macarrão", "Café", "Arroz", "Água"]
+            }
+          },
+          {
+            "lines": ["Obrigado, Brune!", "De nada! Tchau!", "Tchau!"]
+          }
+        ]
+      },
+      "2": {
+        "title": "Um dia na cidade",
+        "subtitle": "Revendo Unidades 6-10",
+        "beats": [
+          {
+            "lines": [
+              "Brune, que horas você levanta todos os dias?",
+              "Eu levanto às 7h e vou trabalhar às 9h todos os dias.",
+              "Hoje você sai do trabalho que horas?",
+              "Agora! Eu já saí do trabalho."
+            ],
+            "question": {
+              "prompt": "A que horas Brune vai trabalhar?",
+              "options": ["7h", "8h", "9h", "5h"]
+            }
+          },
+          {
+            "lines": ["Você quer comprar roupa?", "Quero! Onde fica?", "Fica na frente, do lado esquerdo. Fica bem perto daqui."]
+          },
+          {
+            "lines": ["Quanto custa isso?", "30 yuans.", "Está muito caro! Faz mais barato.", "Tá bom, 20 yuans."],
+            "question": {
+              "prompt": "Por quanto Brune conseguiu comprar a roupa?",
+              "options": ["30 yuans", "25 yuans", "20 yuans", "15 yuans"]
+            }
+          },
+          {
+            "lines": [
+              "Como está o tempo hoje?",
+              "Hoje está bem quente, ensolarado.",
+              "E amanhã?",
+              "Amanhã vai chover, vai estar meio frio."
+            ]
+          },
+          {
+            "lines": [
+              "Agora, como se vai até a estação?",
+              "A pé?",
+              "Não, é muito longe. Vamos de metrô.",
+              "Combinado! Onde fica a estação de metrô?"
+            ],
+            "question": {
+              "prompt": "Como eles decidem ir até a estação?",
+              "options": ["A pé", "De ônibus", "De táxi", "De metrô"]
+            }
+          },
+          {
+            "lines": ["Fica na frente, bem perto.", "Ótimo! Hoje foi muito bom.", "Tchau, Brune!", "Tchau!"]
+          }
+        ]
+      },
+      "3": {
+        "title": "Xiao Li não está bem",
+        "subtitle": "Revendo Unidades 11-14",
+        "beats": [
+          {
+            "lines": [
+              "Xiao Li, o que houve com você?",
+              "Não estou bem, minha cabeça está doendo muito.",
+              "Você quer ir ao hospital?",
+              "Quero. O hospital fica longe daqui?"
+            ],
+            "question": {
+              "prompt": "O que está doendo em Xiao Li?",
+              "options": ["A barriga", "A cabeça", "As costas", "Os pés"]
+            }
+          },
+          {
+            "lines": ["Não é longe, é bem perto.", "Obrigado, Brune.", "De nada! Você está melhor agora?"]
+          },
+          {
+            "lines": [
+              "Um pouco melhor. Qual é o seu hobby?",
+              "Eu gosto de assistir filme e dançar. E você?",
+              "Eu gosto de fazer exercício, mas agora não está bom (pra isso)."
+            ],
+            "question": {
+              "prompt": "Qual é o hobby de Xiao Li?",
+              "options": ["Assistir filme", "Dançar", "Fazer exercício", "Cantar"]
+            }
+          },
+          {
+            "lines": [
+              "Quais são seus planos para semana que vem?",
+              "Eu pretendo ficar em casa. Eu ainda não estou bom.",
+              "Certo. Você quer ir fazer exercício no futuro?",
+              "Quero! Fazer exercício é ainda melhor que assistir filme."
+            ],
+            "question": {
+              "prompt": "O que Xiao Li acha que é melhor: exercício ou filme?",
+              "options": ["Filme", "Exercício", "Os dois são iguais", "Nenhum dos dois"]
+            }
+          },
+          {
+            "lines": [
+              "Você acha o chinês difícil?",
+              "Não é difícil! Mas é bem interessante.",
+              "Certo! Eu acho que chinês é o mais interessante."
+            ]
+          },
+          {
+            "lines": ["Obrigado por vir me ver hoje.", "De nada! Tchau!", "Obrigado! Tchau."]
+          }
+        ]
+      },
+      "4": {
+        "title": "Convite para o cinema",
+        "subtitle": "Revendo Unidades 15-18 — o fim do HSK1!",
+        "beats": [
+          {
+            "lines": [
+              "Brune, eu quero ir ver um filme. Você consegue vir?",
+              "Consigo! Que horas?",
+              "Domingo às 7 da noite, no cinema."
+            ],
+            "question": {
+              "prompt": "Que dia da semana é o cinema?",
+              "options": ["Segunda-feira", "Sexta-feira", "Domingo", "Hoje"]
+            }
+          },
+          {
+            "lines": [
+              "Combinado! Que dia da semana é hoje?",
+              "Hoje é sexta-feira.",
+              "Ótimo, eu tenho tempo livre em ambos os dias!"
+            ]
+          },
+          {
+            "lines": [
+              "Você já comeu?",
+              "Ainda não, ainda estou trabalhando.",
+              "Eu já comi, comi duas maçãs.",
+              "Ontem eu não jantei, hoje estou com muita fome."
+            ],
+            "question": {
+              "prompt": "O que Xiao Li já comeu?",
+              "options": ["Arroz", "Duas maçãs", "Macarrão", "Nada"]
+            }
+          },
+          {
+            "lines": [
+              "Até domingo! Esta é minha namorada, ela também vai vir.",
+              "Quem é ela?",
+              "Ela se chama Xiao Mei, ela é estudante."
+            ],
+            "question": {
+              "prompt": "O que Xiao Mei faz?",
+              "options": ["Trabalha num hospital", "É estudante", "É médica", "Trabalha na escola"]
+            }
+          },
+          {
+            "lines": ["Onde ela estuda?", "Ela estuda na escola. Por quê?", "Porque eu também gosto de estudar!"]
+          },
+          {
+            "lines": ["Até domingo, Brune!", "Combinado! Tchau!", "Tchau!"]
+          }
+        ]
+      }
+    },
+    "hanzi": {
+      "你": {
+        "meaning": "você",
+        "radicals": ["pessoa", "tu (fonético)"]
+      },
+      "好": {
+        "meaning": "bom, bem",
+        "radicals": ["mulher", "filho"],
+        "mnemonic": "Uma mulher (女) ao lado de um filho (子) — a imagem tradicional de uma família reunida, algo bom e completo."
+      },
+      "再": {
+        "meaning": "de novo, outra vez",
+        "radicals": []
+      },
+      "见": {
+        "meaning": "ver, encontrar",
+        "radicals": []
+      },
+      "谢": {
+        "meaning": "agradecer",
+        "radicals": ["fala", "atirar (fonético)"]
+      },
+      "不": {
+        "meaning": "não",
+        "radicals": []
+      },
+      "客": {
+        "meaning": "convidado, hóspede",
+        "radicals": ["teto/casa", "cada (fonético)"]
+      },
+      "气": {
+        "meaning": "ar, energia",
+        "radicals": []
+      },
+      "对": {
+        "meaning": "certo, correto; em relação a",
+        "radicals": []
+      },
+      "起": {
+        "meaning": "levantar, começar",
+        "radicals": ["andar", "si mesmo (fonético)"]
+      },
+      "没": {
+        "meaning": "não ter, não há",
+        "radicals": ["água", "instrumento (fonético)"]
+      },
+      "关": {
+        "meaning": "fechar; relação",
+        "radicals": []
+      },
+      "系": {
+        "meaning": "sistema, ligação",
+        "radicals": []
+      },
+      "早": {
+        "meaning": "cedo, manhã",
+        "radicals": ["sol", "dez"],
+        "mnemonic": "O sol (日) nascendo bem acima da linha do horizonte (十, como as primeiras raias de luz) — a imagem do início da manhã."
+      },
+      "上": {
+        "meaning": "em cima, subir",
+        "radicals": []
+      },
+      "晚": {
+        "meaning": "noite, tarde",
+        "radicals": ["sol", "evitar (fonético)"]
+      },
+      "我": {
+        "meaning": "eu",
+        "radicals": []
+      },
+      "叫": {
+        "meaning": "chamar-se, gritar",
+        "radicals": ["boca", "enroscar (fonético)"]
+      },
+      "名": {
+        "meaning": "nome",
+        "radicals": ["anoitecer", "boca"]
+      },
+      "字": {
+        "meaning": "caractere, palavra",
+        "radicals": ["teto/casa", "filho"]
+      },
+      "是": {
+        "meaning": "ser, estar",
+        "radicals": []
+      },
+      "人": {
+        "meaning": "pessoa",
+        "radicals": []
+      },
+      "巴": {
+        "meaning": "(parte de Bāxī, Brasil)",
+        "radicals": []
+      },
+      "西": {
+        "meaning": "oeste",
+        "radicals": []
+      },
+      "中": {
+        "meaning": "meio, centro",
+        "radicals": []
+      },
+      "国": {
+        "meaning": "país",
+        "radicals": ["cercado, fronteira", "jade (tesouro)"]
+      },
+      "哪": {
+        "meaning": "qual",
+        "radicals": ["boca", "aquele (fonético)"]
+      },
+      "零": {
+        "meaning": "zero",
+        "radicals": []
+      },
+      "一": {
+        "meaning": "um",
+        "radicals": []
+      },
+      "二": {
+        "meaning": "dois",
+        "radicals": []
+      },
+      "三": {
+        "meaning": "três",
+        "radicals": []
+      },
+      "四": {
+        "meaning": "quatro",
+        "radicals": []
+      },
+      "五": {
+        "meaning": "cinco",
+        "radicals": []
+      },
+      "六": {
+        "meaning": "seis",
+        "radicals": []
+      },
+      "七": {
+        "meaning": "sete",
+        "radicals": []
+      },
+      "八": {
+        "meaning": "oito",
+        "radicals": []
+      },
+      "九": {
+        "meaning": "nove",
+        "radicals": []
+      },
+      "十": {
+        "meaning": "dez",
+        "radicals": []
+      },
+      "岁": {
+        "meaning": "anos (idade)",
+        "radicals": []
+      },
+      "多": {
+        "meaning": "muito, quanto",
+        "radicals": ["anoitecer", "anoitecer (repetido)"]
+      },
+      "大": {
+        "meaning": "grande",
+        "radicals": []
+      },
+      "家": {
+        "meaning": "família, casa",
+        "radicals": ["teto/casa", "porco"],
+        "mnemonic": "Um porco (豕) sob um teto (宀) — na China antiga, ter um porco dentro de casa era sinal de que a família tinha se estabelecido e tinha fartura."
+      },
+      "爸": {
+        "meaning": "pai",
+        "radicals": ["pai", "(fonético)"]
+      },
+      "妈": {
+        "meaning": "mãe",
+        "radicals": ["mulher", "cavalo (fonético)"]
+      },
+      "哥": {
+        "meaning": "irmão mais velho",
+        "radicals": ["poder (fonético)", "poder (repetido)"]
+      },
+      "弟": {
+        "meaning": "irmão mais novo",
+        "radicals": []
+      },
+      "姐": {
+        "meaning": "irmã mais velha",
+        "radicals": ["mulher", "além disso (fonético)"]
+      },
+      "妹": {
+        "meaning": "irmã mais nova",
+        "radicals": ["mulher", "ainda não (fonético)"]
+      },
+      "孩": {
+        "meaning": "criança, filho(a)",
+        "radicals": ["filho", "(fonético)"]
+      },
+      "子": {
+        "meaning": "filho, criança",
+        "radicals": []
+      },
+      "有": {
+        "meaning": "ter, haver",
+        "radicals": []
+      },
+      "几": {
+        "meaning": "quantos",
+        "radicals": []
+      },
+      "个": {
+        "meaning": "(classificador geral)",
+        "radicals": []
+      },
+      "口": {
+        "meaning": "boca; (classificador p/ pessoas da família)",
+        "radicals": []
+      },
+      "吃": {
+        "meaning": "comer",
+        "radicals": ["boca", "mendigar (fonético)"]
+      },
+      "喝": {
+        "meaning": "beber",
+        "radicals": ["boca", "(fonético)"]
+      },
+      "米": {
+        "meaning": "arroz (grão)",
+        "radicals": []
+      },
+      "饭": {
+        "meaning": "arroz (cozido), refeição",
+        "radicals": ["comida", "reverso (fonético)"]
+      },
+      "面": {
+        "meaning": "macarrão; rosto",
+        "radicals": []
+      },
+      "水": {
+        "meaning": "água",
+        "radicals": []
+      },
+      "茶": {
+        "meaning": "chá",
+        "radicals": ["planta", "restante (fonético)"]
+      },
+      "咖": {
+        "meaning": "(parte de kāfēi, café)",
+        "radicals": ["boca", "adicionar (fonético)"]
+      },
+      "啡": {
+        "meaning": "(parte de kāfēi, café)",
+        "radicals": ["boca", "não (fonético)"]
+      },
+      "喜": {
+        "meaning": "gostar, alegria",
+        "radicals": []
+      },
+      "欢": {
+        "meaning": "alegre (em xǐhuan, gostar)",
+        "radicals": []
+      },
+      "要": {
+        "meaning": "querer, precisar",
+        "radicals": []
+      },
+      "杯": {
+        "meaning": "copo, xícara",
+        "radicals": ["madeira", "não (fonético)"]
+      },
+      "点": {
+        "meaning": "hora; ponto",
+        "radicals": []
+      },
+      "床": {
+        "meaning": "cama",
+        "radicals": ["abrigo", "madeira"]
+      },
+      "班": {
+        "meaning": "turno, turma (em shàngbān, trabalhar)",
+        "radicals": []
+      },
+      "下": {
+        "meaning": "embaixo, descer",
+        "radicals": []
+      },
+      "睡": {
+        "meaning": "dormir",
+        "radicals": ["olho", "pendurar (fonético)"]
+      },
+      "觉": {
+        "meaning": "sono (em shuìjiào, dormir)",
+        "radicals": []
+      },
+      "每": {
+        "meaning": "cada",
+        "radicals": []
+      },
+      "天": {
+        "meaning": "dia, céu",
+        "radicals": []
+      },
+      "现": {
+        "meaning": "atual, presente",
+        "radicals": ["jade/rei", "ver (fonético)"]
+      },
+      "在": {
+        "meaning": "estar (localização); em",
+        "radicals": []
+      },
+      "今": {
+        "meaning": "hoje, presente",
+        "radicals": []
+      },
+      "里": {
+        "meaning": "dentro",
+        "radicals": []
+      },
+      "左": {
+        "meaning": "esquerda",
+        "radicals": []
+      },
+      "右": {
+        "meaning": "direita",
+        "radicals": []
+      },
+      "前": {
+        "meaning": "frente, antes",
+        "radicals": []
+      },
+      "后": {
+        "meaning": "atrás, depois",
+        "radicals": []
+      },
+      "离": {
+        "meaning": "distância de, longe de",
+        "radicals": []
+      },
+      "近": {
+        "meaning": "perto",
+        "radicals": ["caminhar", "machado (fonético)"]
+      },
+      "远": {
+        "meaning": "longe",
+        "radicals": ["caminhar", "origem (fonético)"]
+      },
+      "买": {
+        "meaning": "comprar",
+        "radicals": []
+      },
+      "卖": {
+        "meaning": "vender",
+        "radicals": []
+      },
+      "少": {
+        "meaning": "pouco",
+        "radicals": []
+      },
+      "钱": {
+        "meaning": "dinheiro",
+        "radicals": ["metal", "pequeno (fonético)"]
+      },
+      "块": {
+        "meaning": "pedaço; unidade monetária",
+        "radicals": ["terra", "(fonético)"]
+      },
+      "便": {
+        "meaning": "barato (em piányi)",
+        "radicals": []
+      },
+      "宜": {
+        "meaning": "apropriado (em piányi, barato)",
+        "radicals": ["teto/casa", "além disso"]
+      },
+      "贵": {
+        "meaning": "caro, precioso",
+        "radicals": []
+      },
+      "这": {
+        "meaning": "este, esta",
+        "radicals": ["caminhar", "escrita (fonético)"]
+      },
+      "那": {
+        "meaning": "aquele, aquela",
+        "radicals": []
+      },
+      "衣": {
+        "meaning": "roupa",
+        "radicals": []
+      },
+      "服": {
+        "meaning": "roupa, vestir (em yīfu)",
+        "radicals": []
+      },
+      "鞋": {
+        "meaning": "sapato",
+        "radicals": ["couro", "jade (fonético)"]
+      },
+      "热": {
+        "meaning": "quente",
+        "radicals": ["mão", "fogo"]
+      },
+      "冷": {
+        "meaning": "frio",
+        "radicals": ["gelo", "ordem (fonético)"]
+      },
+      "雨": {
+        "meaning": "chuva",
+        "radicals": []
+      },
+      "晴": {
+        "meaning": "ensolarado",
+        "radicals": ["sol", "verde-azulado (fonético)"]
+      },
+      "阴": {
+        "meaning": "nublado, sombrio",
+        "radicals": []
+      },
+      "风": {
+        "meaning": "vento",
+        "radicals": []
+      },
+      "怎": {
+        "meaning": "como (em zěnme)",
+        "radicals": []
+      },
+      "么": {
+        "meaning": "(partícula interrogativa)",
+        "radicals": []
+      },
+      "样": {
+        "meaning": "tipo, aparência",
+        "radicals": ["madeira", "ovelha (fonético)"]
+      },
+      "公": {
+        "meaning": "público",
+        "radicals": []
+      },
+      "共": {
+        "meaning": "comum, junto",
+        "radicals": []
+      },
+      "汽": {
+        "meaning": "vapor (em qìchē, carro)",
+        "radicals": ["água", "ar (fonético)"]
+      },
+      "车": {
+        "meaning": "carro, veículo",
+        "radicals": []
+      },
+      "地": {
+        "meaning": "terra, chão (em dìtiě, metrô)",
+        "radicals": ["terra", "também (fonético)"]
+      },
+      "铁": {
+        "meaning": "ferro (em dìtiě, metrô)",
+        "radicals": ["metal", "perder (fonético)"]
+      },
+      "出": {
+        "meaning": "sair",
+        "radicals": []
+      },
+      "租": {
+        "meaning": "alugar (em chūzūchē, táxi)",
+        "radicals": ["cereal", "além disso (fonético)"]
+      },
+      "走": {
+        "meaning": "andar, ir a pé",
+        "radicals": []
+      },
+      "路": {
+        "meaning": "caminho, estrada",
+        "radicals": ["pé", "cada (fonético)"]
+      },
+      "去": {
+        "meaning": "ir",
+        "radicals": []
+      },
+      "站": {
+        "meaning": "estação, parada",
+        "radicals": ["ficar de pé", "ocupar (fonético)"]
+      },
+      "票": {
+        "meaning": "bilhete, passagem",
+        "radicals": []
+      },
+      "张": {
+        "meaning": "(classificador p/ objetos planos)",
+        "radicals": ["arco", "longo (fonético)"]
+      },
+      "身": {
+        "meaning": "corpo",
+        "radicals": []
+      },
+      "体": {
+        "meaning": "corpo (em shēntǐ)",
+        "radicals": ["pessoa", "raiz/origem"]
+      },
+      "头": {
+        "meaning": "cabeça",
+        "radicals": []
+      },
+      "肚": {
+        "meaning": "barriga",
+        "radicals": ["carne/corpo", "terra (fonético)"]
+      },
+      "疼": {
+        "meaning": "doer",
+        "radicals": ["doença", "inverno (fonético)"]
+      },
+      "生": {
+        "meaning": "nascer, vida (em shēngbìng, ficar doente)",
+        "radicals": []
+      },
+      "病": {
+        "meaning": "doença",
+        "radicals": ["doença", "terceiro (fonético)"]
+      },
+      "医": {
+        "meaning": "medicina, médico",
+        "radicals": []
+      },
+      "院": {
+        "meaning": "pátio, instituição (em yīyuàn, hospital)",
+        "radicals": ["colina/lugar", "completo (fonético)"]
+      },
+      "舒": {
+        "meaning": "confortável (em bù shūfu)",
+        "radicals": []
+      },
+      "爱": {
+        "meaning": "amor, gostar muito",
+        "radicals": []
+      },
+      "看": {
+        "meaning": "ver, assistir",
+        "radicals": ["mão", "olho"],
+        "mnemonic": "Uma mão (手) protegendo o olho (目) do sol — o gesto de fazer uma pala com a mão para enxergar melhor algo à distância."
+      },
+      "书": {
+        "meaning": "livro",
+        "radicals": []
+      },
+      "听": {
+        "meaning": "ouvir",
+        "radicals": ["boca", "machado (fonético)"]
+      },
+      "音": {
+        "meaning": "som",
+        "radicals": []
+      },
+      "乐": {
+        "meaning": "música (em yīnyuè)",
+        "radicals": []
+      },
+      "电": {
+        "meaning": "eletricidade",
+        "radicals": []
+      },
+      "影": {
+        "meaning": "sombra, filme (em diànyǐng)",
+        "radicals": []
+      },
+      "运": {
+        "meaning": "mover, sorte (em yùndòng, esporte)",
+        "radicals": ["caminhar", "nuvem (fonético)"]
+      },
+      "动": {
+        "meaning": "mover (em yùndòng, esporte)",
+        "radicals": []
+      },
+      "唱": {
+        "meaning": "cantar",
+        "radicals": ["boca", "próspero (fonético)"]
+      },
+      "歌": {
+        "meaning": "canção",
+        "radicals": []
+      },
+      "跳": {
+        "meaning": "pular, dançar",
+        "radicals": ["pé", "presságio (fonético)"]
+      },
+      "舞": {
+        "meaning": "dança (em tiàowǔ)",
+        "radicals": []
+      },
+      "空": {
+        "meaning": "vazio, tempo livre (em yǒu kòng)",
+        "radicals": ["caverna/buraco", "trabalho (fonético)"]
+      },
+      "打": {
+        "meaning": "bater, fazer (em dǎsuàn, planejar)",
+        "radicals": ["mão", "prego (fonético)"]
+      },
+      "算": {
+        "meaning": "calcular, planejar (em dǎsuàn)",
+        "radicals": []
+      },
+      "明": {
+        "meaning": "claro, amanhã (em míngtiān)",
+        "radicals": ["sol", "lua"],
+        "mnemonic": "O sol (日) e a lua (月) lado a lado — juntos, os dois maiores astros do céu, iluminando tudo: daí o sentido de \"claro\" e \"brilhante\"."
+      },
+      "星": {
+        "meaning": "estrela (em xīngqī, semana)",
+        "radicals": ["sol", "nascer (fonético)"]
+      },
+      "期": {
+        "meaning": "período (em xīngqī, semana)",
+        "radicals": []
+      },
+      "旅": {
+        "meaning": "viajar",
+        "radicals": []
+      },
+      "游": {
+        "meaning": "passear, nadar (em lǚyóu, viajar)",
+        "radicals": ["água", "(fonético)"]
+      },
+      "学": {
+        "meaning": "estudar, aprender",
+        "radicals": []
+      },
+      "习": {
+        "meaning": "praticar (em xuéxí, estudar)",
+        "radicals": []
+      },
+      "计": {
+        "meaning": "calcular, plano (em jìhuà)",
+        "radicals": ["fala", "dez (fonético)"]
+      },
+      "划": {
+        "meaning": "planejar (em jìhuà, plano)",
+        "radicals": []
+      },
+      "以": {
+        "meaning": "com, por meio de (em yǐhòu, depois)",
+        "radicals": []
+      },
+      "比": {
+        "meaning": "comparar, mais que",
+        "radicals": []
+      },
+      "更": {
+        "meaning": "ainda mais",
+        "radicals": []
+      },
+      "最": {
+        "meaning": "o mais (superlativo)",
+        "radicals": []
+      },
+      "还": {
+        "meaning": "ainda; ou (em háishi)",
+        "radicals": ["caminhar", "não (fonético)"]
+      },
+      "高": {
+        "meaning": "alto",
+        "radicals": []
+      },
+      "毛": {
+        "meaning": "pelo; centavo (1/10 do kuài)",
+        "radicals": []
+      },
+      "想": {
+        "meaning": "querer, pensar em",
+        "radicals": ["mútuo (fonético)", "coração"]
+      },
+      "会": {
+        "meaning": "saber fazer (habilidade aprendida)",
+        "radicals": []
+      },
+      "能": {
+        "meaning": "conseguir, poder",
+        "radicals": []
+      },
+      "请": {
+        "meaning": "por favor, convidar",
+        "radicals": ["fala", "verde-azulado (fonético)"]
+      },
+      "坐": {
+        "meaning": "sentar",
+        "radicals": ["pessoa", "terra"],
+        "mnemonic": "Duas pessoas (人, duplicado no traço) sentadas diretamente no chão (土) — a imagem mais simples possível de sentar-se."
+      },
+      "都": {
+        "meaning": "todos, ambos",
+        "radicals": []
+      },
+      "也": {
+        "meaning": "também",
+        "radicals": []
+      },
+      "说": {
+        "meaning": "falar",
+        "radicals": ["fala", "trocar (fonético)"]
+      },
+      "来": {
+        "meaning": "vir",
+        "radicals": []
+      },
+      "号": {
+        "meaning": "dia do mês (uso falado)",
+        "radicals": []
+      },
+      "月": {
+        "meaning": "mês; lua",
+        "radicals": []
+      },
+      "年": {
+        "meaning": "ano",
+        "radicals": []
+      },
+      "分": {
+        "meaning": "minuto; dividir",
+        "radicals": ["dividir/oito", "faca"]
+      },
+      "百": {
+        "meaning": "cem",
+        "radicals": []
+      },
+      "了": {
+        "meaning": "partícula de conclusão/mudança de estado",
+        "radicals": []
+      },
+      "苹": {
+        "meaning": "(parte de píngguǒ, maçã)",
+        "radicals": ["planta", "plano (fonético)"]
+      },
+      "果": {
+        "meaning": "fruta; resultado (em píngguǒ, maçã)",
+        "radicals": []
+      },
+      "昨": {
+        "meaning": "ontem (em zuótiān)",
+        "radicals": ["sol", "de repente (fonético)"]
+      },
+      "完": {
+        "meaning": "terminar, acabar",
+        "radicals": ["teto/casa", "origem (fonético)"]
+      },
+      "工": {
+        "meaning": "trabalho (em gōngzuò)",
+        "radicals": []
+      },
+      "作": {
+        "meaning": "fazer, trabalhar (em gōngzuò)",
+        "radicals": ["pessoa", "de repente (fonético)"]
+      },
+      "酒": {
+        "meaning": "álcool, bebida alcoólica",
+        "radicals": ["água", "jarro de vinho"]
+      },
+      "吧": {
+        "meaning": "partícula de sugestão; bar (em jiǔbā)",
+        "radicals": ["boca", "(fonético)"]
+      },
+      "谁": {
+        "meaning": "quem",
+        "radicals": ["fala", "pássaro (fonético)"]
+      },
+      "为": {
+        "meaning": "para, por (em wèishénme, por quê)",
+        "radicals": []
+      },
+      "什": {
+        "meaning": "que (em shénme/wèishénme)",
+        "radicals": ["pessoa", "dez"]
+      },
+      "因": {
+        "meaning": "causa (em yīnwèi, porque)",
+        "radicals": []
+      },
+      "校": {
+        "meaning": "escola (em xuéxiào)",
+        "radicals": ["madeira", "trocar (fonético)"]
+      },
+      "女": {
+        "meaning": "mulher (em nǚpéngyou, namorada)",
+        "radicals": []
+      },
+      "朋": {
+        "meaning": "amigo (em péngyou)",
+        "radicals": []
+      },
+      "友": {
+        "meaning": "amigo (em péngyou)",
+        "radicals": []
+      },
+      "男": {
+        "meaning": "homem (em nánpéngyou, namorado)",
+        "radicals": ["campo", "força"],
+        "mnemonic": "Um campo de cultivo (田) sobre força/vigor físico (力) — na sociedade agrícola tradicional, o homem era quem trabalhava a terra com sua força."
+      },
+      "些": {
+        "meaning": "alguns, um pouco (em yìxiē)",
+        "radicals": []
+      }
+    }
   };
   var g = typeof window !== 'undefined' ? window : globalThis;
   g.COURSE_LAYERS = g.COURSE_LAYERS || {};
   g.COURSE_LAYERS['mandarim@pt-BR'] = L;
-  CourseLayer.apply({ units: UNITS, levels: typeof LEVELS !== 'undefined' ? LEVELS : undefined, modules: typeof MODULES !== 'undefined' ? MODULES : undefined, levelTests: typeof LEVEL_TESTS !== 'undefined' ? LEVEL_TESTS : undefined }, L);
+  CourseLayer.apply({
+    units: typeof UNITS !== 'undefined' ? UNITS : undefined,
+    levels: typeof LEVELS !== 'undefined' ? LEVELS : undefined,
+    modules: typeof MODULES !== 'undefined' ? MODULES : undefined,
+    levelTests: typeof LEVEL_TESTS !== 'undefined' ? LEVEL_TESTS : undefined,
+    stories: typeof STORIES !== 'undefined' ? STORIES : undefined,
+    hanzi: typeof HANZI_LESSONS !== 'undefined' ? HANZI_LESSONS : undefined,
+    dictations: typeof DICTATIONS !== 'undefined' ? DICTATIONS : undefined,
+    conjugation: typeof CONJUGATION_GROUPS !== 'undefined' ? { groups: CONJUGATION_GROUPS, verbTranslations: VERB_TRANSLATIONS } : undefined
+  }, L);
 })();

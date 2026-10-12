@@ -1,10 +1,7 @@
-// CONTEÚDO-BASE do curso de francês (E2 de docs/i18n/arquitetura-multi-idioma-cursos.md).
-// Só o IDIOMA ESTUDADO e a estrutura: ids, frases em francês (f), respostas, tipos, ordem.
-// Todo texto em língua de origem (títulos, metas, traduções, explicações, cenários, rótulos, nomes de personagem)
-// mora na CAMADA DO CURSO: courses/fr-pt-BR/layer.js (português) e fr/content.en.js (inglês).
-// Este arquivo sozinho NÃO é exibível: a camada carrega logo depois (index.html) e se aplica sobre LEVELS, UNITS, MODULES e LEVEL_TESTS.
-// Os comentários de autoria do arquivo anterior (fluxo da lição, gatilhos de explicação) estão em
-// docs/historico/conteudo-original/fr-content.js.txt.
+// CONTEÚDO-BASE do curso de francês (E2 de docs/i18n/arquitetura-multi-idioma-cursos.md): só o IDIOMA ESTUDADO e a estrutura.
+// O texto em língua de origem mora na CAMADA DO CURSO: courses/fr-pt-BR/layer.js (português) e fr/content.en.js (inglês).
+// Ids, frases em francês (f), respostas, tipos e ordem. Sozinho NÃO é exibível: a camada carrega logo depois e se aplica sobre ele.
+// Os comentários de autoria do arquivo anterior estão em docs/historico/conteudo-original/fr-<arquivo>.js.txt.
 
 const LEVELS = [
   { "id": "A1" },
