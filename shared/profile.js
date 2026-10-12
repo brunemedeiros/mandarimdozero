@@ -441,7 +441,7 @@ async function buildLanguagesSummary(){
       const s = computeProgressSummary();
       return { id: l.id, name: l.name, flagSvg: l.flagSvg, levelLabel: s.levelLabel, pct: s.pct, isCurrent: true };
     }
-    const other = raw[l.appKey];
+    const other = CourseStorage.isPerSiteLanguage() ? CourseStorage.blockFor(raw, l.appKey, getUiLang()) : raw[l.appKey];
     if (!other) return null;
     if (other.progressSummary){
       const s = other.progressSummary;

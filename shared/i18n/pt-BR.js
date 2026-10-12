@@ -85,6 +85,14 @@ window.I18N_CATALOG['pt-BR'] = {
   'settings.uiLanguage.confirm.toPt': 'Os textos, as explicações e as traduções passam a aparecer em português. Seu progresso continua salvo.',
   'settings.uiLanguage.confirm.cancel': 'Cancelar',
   'settings.uiLanguage.confirm.yes': 'Trocar',
+  'courses.title': 'Meus cursos',
+  'courses.sub': 'Cada curso tem progresso próprio. Sua sequência de dias e suas conquistas são da conta e valem em todos.',
+  'courses.name': '{language}, {site}',
+  'courses.siteLang.pt-BR': 'explicado em português',
+  'courses.siteLang.en': 'explicado em inglês',
+  'courses.beta': 'em teste',
+  'courses.current': 'atual',
+  'courses.confirm.body': 'Você vai trocar para o curso {course}. O progresso de cada curso é separado: o que você fez no curso atual continua salvo e volta quando você voltar a ele. Sua sequência de dias e suas conquistas continuam as mesmas.',
 
   // ---- Fase 6 lote 1: Configurações + menu da conta (fr e zh) ----
   'settings.title': 'Configurações',

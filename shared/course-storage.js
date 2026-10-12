@@ -12,6 +12,13 @@
   // Enquanto false, a página lê/grava SEMPRE o curso legado (appKey@pt-BR), qualquer que seja o idioma do site:
   // comportamento idêntico ao de antes da E3. O passo C5 liga isto junto com a tela "Meus cursos".
   var COURSE_PROGRESS_PER_SITE_LANGUAGE = false;
+  // C5: o dono do projeto liga só no próprio navegador para testar (localStorage['courses-per-site-language'] = '1'), sem afetar ninguém.
+  // Ligar para todos = trocar a constante acima (decisão da dona, depois das pendências listadas em docs/historico/15).
+  function isPerSiteLanguage(){
+    if (COURSE_PROGRESS_PER_SITE_LANGUAGE) return true;
+    try { return root.localStorage && root.localStorage.getItem('courses-per-site-language') === '1'; } catch (e) { return false; }
+  }
+  function setPerSiteLanguage(v){ COURSE_PROGRESS_PER_SITE_LANGUAGE = !!v; }
 
   // `LanguageRegistry` é um const de script clássico (não vira propriedade de window): referência solta, resolvida na chamada.
   var LR = function(){ return LanguageRegistry; };
@@ -27,7 +34,7 @@
 
   // Curso que a página aberta representa. Com a flag desligada é sempre o curso legado (pt-BR).
   function activeCourseId(appKey, uiLang, perSiteLanguage){
-    var per = perSiteLanguage === undefined ? COURSE_PROGRESS_PER_SITE_LANGUAGE : perSiteLanguage;
+    var per = perSiteLanguage === undefined ? isPerSiteLanguage() : perSiteLanguage;
     return LR().courseIdOf(appKey, per && uiLang ? uiLang : 'pt-BR');
   }
 
@@ -37,7 +44,41 @@
     return courseStorageKey(activeCourseId(appKey, uiLang, perSiteLanguage), courses);
   }
 
-  var api = { COURSE_PROGRESS_PER_SITE_LANGUAGE: COURSE_PROGRESS_PER_SITE_LANGUAGE, courseStorageKey: courseStorageKey, activeCourseId: activeCourseId, courseStorageKeyFor: courseStorageKeyFor };
+  function isLegacyCourse(appKey, siteLang){ return LR().usesLegacyStorage(appKey, siteLang || 'pt-BR'); }
+
+  // Bloco de um curso dentro de uma linha de progress.data (sem rede). Sem curso próprio gravado, cai no bloco legado só quando
+  // o curso é o legado; um curso novo sem bloco devolve undefined (nunca empresta o progresso do outro curso).
+  function blockFor(progressData, appKey, siteLang){
+    if (!progressData) return undefined;
+    var key = courseStorageKey(LR().courseIdOf(appKey, siteLang || 'pt-BR'), progressData._meta && progressData._meta.courses);
+    return progressData[key];
+  }
+
+  // Registro de cursos que a conta já iniciou (progress.data._meta.courses). Só acrescenta: nunca muda um registro existente.
+  // `hasBlock` = o bloco já existia (conta antiga no curso legado): startedAt fica null (a data real não é conhecida).
+  function registerCourse(courses, courseId, storageKey, hasBlock, nowIso){
+    var out = Object.assign({}, courses || {});
+    if (!out[courseId]) out[courseId] = { storageKey: storageKey, startedAt: hasBlock ? null : nowIso };
+    return out;
+  }
+
+  // XP da semana de um IDIOMA estudado = soma dos blocos de todos os cursos dele naquela semana. weekly_xp tem chave
+  // (conta, semana, idioma estudado); gravar só o bloco atual faria frances@pt-BR e frances@en se sobrescreverem.
+  function weeklyXpForLanguage(progressData, appKey, currentBlockKey, currentPeriodXp){
+    var week = currentPeriodXp && currentPeriodXp.weekStart;
+    if (!week) return null;
+    var total = Number(currentPeriodXp.amount) || 0;
+    Object.keys(progressData || {}).forEach(function(k){
+      if (k === currentBlockKey || k.charAt(0) === '_') return;
+      var base = k.indexOf('@') > 0 ? k.slice(0, k.indexOf('@')) : k;
+      if (base !== appKey) return;
+      var b = progressData[k], px = b && b.periodXp;
+      if (px && px.weekStart === week) total += Number(px.amount) || 0;
+    });
+    return total;
+  }
+
+  var api = { COURSE_PROGRESS_PER_SITE_LANGUAGE: COURSE_PROGRESS_PER_SITE_LANGUAGE, isPerSiteLanguage: isPerSiteLanguage, setPerSiteLanguage: setPerSiteLanguage, isLegacyCourse: isLegacyCourse, blockFor: blockFor, registerCourse: registerCourse, weeklyXpForLanguage: weeklyXpForLanguage, courseStorageKey: courseStorageKey, activeCourseId: activeCourseId, courseStorageKeyFor: courseStorageKeyFor };
   root.CourseStorage = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

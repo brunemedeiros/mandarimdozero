@@ -69,6 +69,14 @@ window.I18N_CATALOG['en'] = {
   'settings.uiLanguage.confirm.toPt': 'Text, explanations, and translations will now appear in Portuguese. Your progress stays saved.', // ALTA
   'settings.uiLanguage.confirm.cancel': 'Cancel', // ALTA
   'settings.uiLanguage.confirm.yes': 'Change', // ALTA
+  'courses.title': 'My courses', // ALTA
+  'courses.sub': 'Each course has its own progress. Your day streak and achievements belong to your account and count in every course.', // ALTA
+  'courses.name': '{language} ({site})', // ALTA
+  'courses.siteLang.pt-BR': 'explained in Portuguese', // ALTA
+  'courses.siteLang.en': 'explained in English', // ALTA
+  'courses.beta': 'beta', // ALTA
+  'courses.current': 'current', // ALTA
+  'courses.confirm.body': 'You are about to switch to the course {course}. Each course keeps its own progress: what you did in the current course stays saved and comes back when you return to it. Your day streak and achievements stay the same.', // MÉDIA
 
   // Fase 6 lote 1
   'settings.title': 'Settings', // ALTA

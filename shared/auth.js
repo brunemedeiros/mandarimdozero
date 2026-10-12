@@ -52,7 +52,20 @@ const MONOTONIC_PROGRESS_FIELDS = ['xp', 'totalReviews', 'totalAudioPlays'];
 
 // Chave do bloco deste curso dentro de progress.data (E3/C1, ver shared/course-storage.js). Com os cursos por idioma do
 // site desligados é sempre APP_KEY ('frances', 'mandarim'), igual a antes. `progressData` = a linha lida do servidor.
+// C5: com os cursos por idioma do site ligados, o curso desta página é FIXADO no primeiro carregamento (idioma do site da conta, ou o da
+// URL ?ui=) e nunca muda enquanto a página viver: trocar de curso recarrega a página. Assim uma aba antiga não grava o progresso de um
+// curso na chave de outro quando a conta muda de idioma em outra aba.
+let pageCourseSiteLang = null;
+function pageSiteLanguage(progressData){
+  if (!pageCourseSiteLang){
+    const live = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+    const acct = (typeof uiLanguageFromProgressData === 'function') ? uiLanguageFromProgressData(progressData) : null;
+    pageCourseSiteLang = (!accountUiLangFromQuery() && acct) ? acct : live;
+  }
+  return pageCourseSiteLang;
+}
 function progressBlockKey(progressData){
+  if (CourseStorage.isPerSiteLanguage()) return CourseStorage.courseStorageKeyFor(APP_KEY, pageSiteLanguage(progressData), progressData);
   return CourseStorage.courseStorageKeyFor(APP_KEY, typeof getUiLang === 'function' ? getUiLang() : 'pt-BR', progressData);
 }
 
@@ -546,6 +559,15 @@ async function saveState(){
     if (pendingAccountUiLanguage){
       merged._meta = Object.assign({}, merged._meta, { uiLanguage: pendingAccountUiLanguage });
     }
+    if (CourseStorage.isPerSiteLanguage()){
+      // C5: registra o curso iniciado e qual é o atual (só acrescenta; nunca muda registro existente).
+      const courseId = CourseStorage.activeCourseId(APP_KEY, pageSiteLanguage(existing && existing.data));
+      const hadBlock = !!(existing && existing.data && existing.data[blockKey]);
+      const meta = Object.assign({}, merged._meta);
+      meta.courses = CourseStorage.registerCourse(meta.courses, courseId, blockKey, hadBlock, new Date().toISOString());
+      meta.currentCourse = courseId;
+      merged._meta = meta;
+    }
     const { error } = await supabaseClient
       .from('progress')
       .upsert({ user_id: CURRENT_USER.id, data: merged }, { onConflict: 'user_id' });
@@ -568,7 +590,10 @@ async function saveState(){
           user_id: CURRENT_USER.id,
           week_start: STATE.periodXp.weekStart,
           language_app_key: APP_KEY,
-          amount: STATE.periodXp.amount,
+          // C5: soma dos cursos do idioma na semana (frances@pt-BR + frances@en), senão um sobrescreve o outro.
+          amount: CourseStorage.isPerSiteLanguage()
+            ? CourseStorage.weeklyXpForLanguage(merged, APP_KEY, blockKey, STATE.periodXp)
+            : STATE.periodXp.amount,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id,week_start,language_app_key' });
       if (weeklyError) console.error('Erro ao atualizar XP semanal (ranking):', weeklyError);
@@ -650,7 +675,8 @@ async function loadState(){
       const blockKey = progressBlockKey(data && data.data);
       if (data && data.data && data.data[blockKey]){
         applySerializedState(data.data[blockKey]);
-      } else if (typeof loadLegacyState === 'function' && data && data.data){
+      } else if (typeof loadLegacyState === 'function' && data && data.data
+        && (!CourseStorage.isPerSiteLanguage() || CourseStorage.isLegacyCourse(APP_KEY, pageSiteLanguage(data.data)))){
         // Hook opcional: um idioma que já persistia progresso ANTES do
         // namespacing por APP_KEY existir pode definir loadLegacyState(data)
         // pra reconhecer o formato antigo (salvo direto na raiz do JSON) e

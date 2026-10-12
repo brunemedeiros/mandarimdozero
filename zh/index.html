@@ -2335,6 +2335,9 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 }
 .pref-row-text{ flex:1; }
 .pref-row-title{ font-size:14px; font-weight:800; color: var(--ink); margin-bottom:3px; }
+.my-courses-list{ display:flex; flex-direction:column; gap:8px; }
+.my-course{ text-align:left; min-height:44px; }
+.my-course-tag{ font-size:11px; opacity:.8; margin-left:6px; text-transform:uppercase; }
 .pref-row-sub{ font-size:12.5px; color: var(--ink-soft); line-height:1.4; }
 .pref-switch{
   flex-shrink:0; width:46px; height:26px; border-radius:999px; border:none; background: var(--paper-line);
@@ -3623,6 +3626,7 @@ body.hide-pinyin .prompt-pinyin{
           <option value="en" lang="en">English</option>
         </select>
       </div>
+      <div id="my-courses" class="pref-row" style="display:none; flex-direction:column; align-items:stretch; gap:8px;"></div>
     </div>
     <div id="settings-notifications-content" style="display:none;"></div>
     <div id="settings-export-content" style="display:none;">
@@ -4282,6 +4286,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/study-queue.js"></script>
 <script src="../shared/wizard.js"></script>
 <script src="../shared/profile.js"></script>
+<script src="../shared/my-courses.js"></script>
 <script src="../shared/profile-placeholders.js"></script>
 <script src="../shared/reports.js"></script>
 <script src="../shared/notifications.js"></script>

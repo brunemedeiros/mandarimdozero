@@ -33,7 +33,7 @@ check('registro no _meta.courses é respeitado em courseStorageKeyFor', CS.cours
 // ---------- ambiente de auth (mesmo molde de tests/i18n/test_ui_language_persistence.js) ----------
 function fakeEl(){ return { addEventListener(){}, style: { removeProperty(){} }, classList: { add(){}, remove(){}, toggle(){} }, textContent: '' }; }
 function makeEnv({ authSrc, row, appKey, uiLang, state, flagOn }){
-  const db = { row: row ? clone(row) : null, upserts: [], applied: [], weekly: [] };
+  const db = { row: row ? clone(row) : null, upserts: [], applied: [], weekly: [], legacyCalls: 0 };
   const supabaseClient = { from(table){
     const q = { select(){ return q; }, eq(){ return q; },
       async maybeSingle(){ return { data: db.row ? { data: clone(db.row) } : null, error: null }; },
@@ -42,7 +42,7 @@ function makeEnv({ authSrc, row, appKey, uiLang, state, flagOn }){
   const sb = { console: { error(){}, log(){}, warn(){} }, supabaseClient, URLSearchParams, Promise, Object, JSON, Number, String, setTimeout, Date,
     location: { search: '' }, document: { getElementById: () => fakeEl(), addEventListener(){}, querySelectorAll: () => [] },
     APP_KEY: appKey, STATE: { xp: state.xp, periodXp: { weekStart: '2026-10-05', amount: 7 } },
-    serializeState: () => clone(state), applySerializedState(d){ db.applied.push(clone(d)); }, showToast(){},
+    serializeState: () => clone(state), applySerializedState(d){ db.applied.push(clone(d)); }, loadLegacyState(){ db.legacyCalls++; }, showToast(){},
     getUiLang: () => uiLang, setUiLang: async l => l, ensurePeriodXp(){}, t: k => k };
   sb.window = sb; vm.createContext(sb);
   vm.runInContext(read('languages/registry.js'), sb);
@@ -114,9 +114,71 @@ async function scenario(authSrc, { row, appKey, uiLang, state, flagOn }){
     const env2 = makeEnv({ authSrc: read('shared/auth.js'), row: env.db.row, appKey: 'frances', uiLang: 'en', state, flagOn: true });
     env2.run("CURRENT_USER = { id: 'u1' };"); await env2.loadState();
     check('flag ligada: recarregar traz o bloco do curso novo', env2.db.applied.length === 1 && env2.db.applied[0].marker === 'novo-curso');
-    const env3 = makeEnv({ authSrc: read('shared/auth.js'), row: env.db.row, appKey: 'frances', uiLang: 'pt-BR', state, flagOn: true });
+    const env3 = makeEnv({ authSrc: read('shared/auth.js'), row: Object.assign({}, env.db.row, { _meta: Object.assign({}, env.db.row._meta, { uiLanguage: 'pt-BR' }) }), appKey: 'frances', uiLang: 'pt-BR', state, flagOn: true });
     env3.run("CURRENT_USER = { id: 'u1' };"); await env3.loadState();
     check('flag ligada: voltar para pt-BR traz o progresso antigo, não o do curso novo', env3.db.applied.length === 1 && hash(env3.db.applied[0]) === hash(frBlock));
+  }
+
+  // (D) C5: cursos por idioma do site ligados
+  {
+    const src = read('shared/auth.js');
+    const base = { frances: Object.assign({}, frBlock, { periodXp: { weekStart: '2026-10-05', amount: 30 } }), mandarim: zhBlock, _meta: { currentLearningLanguage: 'fr', uiLanguage: 'en' } };
+    const stA = { xp: 9, totalReviews: 1, totalAudioPlays: 0, marker: 'A-en' };
+    const stB = { xp: 130, totalReviews: 41, totalAudioPlays: 3, marker: 'B-pt' };
+    const mk = (row, uiLang, state) => { const e = makeEnv({ authSrc: src, row, appKey: 'frances', uiLang, state, flagOn: true }); e.run("CURRENT_USER = { id: 'u1' };"); return e; };
+
+    const e1 = mk(base, 'en', stA); await e1.loadState(); await e1.saveState();
+    check('C5: XP semanal grava a SOMA dos cursos do idioma (7 do curso novo + 30 do legado)', e1.db.weekly.length === 1 && e1.db.weekly[0].amount === 37, e1.db.weekly);
+    check('C5: curso novo registrado em _meta.courses', JSON.stringify(Object.keys(e1.db.row._meta.courses)) === '["frances@en"]' && e1.db.row._meta.courses['frances@en'].storageKey === 'frances@en' && typeof e1.db.row._meta.courses['frances@en'].startedAt === 'string');
+    check('C5: _meta.currentCourse = curso aberto', e1.db.row._meta.currentCourse === 'frances@en');
+    check('C5: demais campos de _meta preservados', e1.db.row._meta.uiLanguage === 'en' && e1.db.row._meta.currentLearningLanguage === 'fr');
+    const started = e1.db.row._meta.courses['frances@en'].startedAt;
+
+    // trocar de curso e voltar: os dois progressos preservados
+    const row2 = clone(e1.db.row); row2._meta.uiLanguage = 'pt-BR';
+    const e2 = mk(row2, 'pt-BR', stB); await e2.loadState(); await e2.saveState();
+    check('C5: no curso pt-BR carrega o bloco antigo (não o do curso novo)', e2.db.applied.length === 1 && e2.db.applied[0].marker === undefined && e2.db.applied[0].xp === 120);
+    check('C5: curso legado registrado com startedAt null (bloco já existia)', e2.db.row._meta.courses['frances@pt-BR'].storageKey === 'frances' && e2.db.row._meta.courses['frances@pt-BR'].startedAt === null);
+    check('C5: currentCourse acompanha', e2.db.row._meta.currentCourse === 'frances@pt-BR');
+    check('C5: curso novo continua intacto depois de salvar o pt-BR', e2.db.row['frances@en'].marker === 'A-en' && e2.db.row.frances.marker === 'B-pt');
+    check('C5: registro do curso novo não é reescrito (startedAt igual)', e2.db.row._meta.courses['frances@en'].startedAt === started);
+    check('C5: XP semanal no pt-BR soma o curso novo (7 + 0 do bloco en sem periodXp = 7)', e2.db.weekly[0].amount === 7, e2.db.weekly);
+    const row3 = clone(e2.db.row); row3._meta.uiLanguage = 'en';
+    const e3 = mk(row3, 'en', stA); await e3.loadState();
+    check('C5: voltar ao curso novo traz o progresso dele', e3.db.applied.length === 1 && e3.db.applied[0].marker === 'A-en');
+
+    // o curso da página é fixado no carregamento: outra aba mudando o idioma da conta não desvia a gravação
+    const e4 = mk(base, 'en', stA); await e4.loadState();
+    e4.db.row._meta.uiLanguage = 'pt-BR';
+    await e4.saveState();
+    check('C5: aba antiga continua gravando no curso em que carregou', e4.db.row['frances@en'] && e4.db.row['frances@en'].marker === 'A-en' && e4.db.row.frances.marker === undefined);
+
+    // zh no formato antigo (raiz) não vira progresso do curso novo
+    const e5 = makeEnv({ authSrc: src, row: { xp: 5, cards: [{ id: 'x', reps: 1 }] }, appKey: 'mandarim', uiLang: 'en', state: stA, flagOn: true });
+    e5.run("CURRENT_USER = { id: 'u1' };"); await e5.loadState();
+    check('C5: formato antigo do zh na raiz NÃO é importado para mandarim@en', e5.db.legacyCalls === 0);
+    const e6 = makeEnv({ authSrc: src, row: { xp: 5, cards: [{ id: 'x', reps: 1 }] }, appKey: 'mandarim', uiLang: 'pt-BR', state: stA, flagOn: true });
+    e6.run("CURRENT_USER = { id: 'u1' };"); await e6.loadState();
+    check('C5: formato antigo do zh continua sendo lido no curso legado (pt-BR)', e6.db.legacyCalls === 1);
+
+    // XP semanal: outra semana não soma
+    const e7 = mk({ frances: { periodXp: { weekStart: '2026-09-28', amount: 99 } }, _meta: { uiLanguage: 'en' } }, 'en', stA); await e7.loadState(); await e7.saveState();
+    check('C5: bloco de outra semana não entra na soma', e7.db.weekly[0].amount === 7, e7.db.weekly);
+    // mandarim não soma frances
+    const e8 = makeEnv({ authSrc: src, row: { frances: { periodXp: { weekStart: '2026-10-05', amount: 50 } }, _meta: { uiLanguage: 'en' } }, appKey: 'mandarim', uiLang: 'en', state: stA, flagOn: true });
+    e8.run("CURRENT_USER = { id: 'u1' };"); await e8.loadState(); await e8.saveState();
+    check('C5: idiomas diferentes não somam entre si', e8.db.weekly[0].amount === 7 && e8.db.weekly[0].language_app_key === 'mandarim', e8.db.weekly);
+
+    // "Meus cursos": lista pura
+    const mc = fs.readFileSync(path.join(ROOT, 'shared/my-courses.js'), 'utf8');
+    const lr = { enabled: () => [{ appKey: 'frances', path: 'fr/', siteLanguages: ['pt-BR', 'en'] }, { appKey: 'mandarim', path: 'zh/', siteLanguages: ['pt-BR', 'en'] }],
+      courseStatus: (a, s) => (a === 'mandarim' && s === 'en') ? { status: 'rascunho' } : (a === 'frances' && s === 'en') ? { status: 'beta' } : { status: 'publicado' }, courseIdOf: (a, s) => a + '@' + s };
+    const sbx = { LanguageRegistry: lr, window: { addEventListener(){} }, document: { readyState: 'complete', getElementById: () => null } };
+    vm.createContext(sbx); vm.runInContext(mc + '\nthis.list = listAvailableCourses;', sbx);
+    const aluno = sbx.list('frances', 'pt-BR', false), adm = sbx.list('frances', 'pt-BR', true);
+    check('Meus cursos: aluno não vê rascunho; admin vê', aluno.length === 3 && adm.length === 4);
+    check('Meus cursos: marca só o curso atual', aluno.filter(c => c.current).length === 1 && aluno.find(c => c.current).courseId === 'frances@pt-BR');
+    check('Meus cursos: beta aparece com status beta', aluno.find(c => c.courseId === 'frances@en').status === 'beta');
   }
 
   console.log(`curso-storage: ${passed} passaram, ${failed} falharam`);
