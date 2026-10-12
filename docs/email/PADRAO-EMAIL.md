@@ -33,7 +33,7 @@ Fontes: títulos `'Anton','Impact','Arial Narrow',sans-serif`; texto `'Nunito','
 ## Regras técnicas
 
 - Layout em `<table role="presentation">` e **estilo em linha** (Gmail descarta boa parte do `<style>`); o `<style>` só serve para o ajuste de celular.
-- Imagens sempre por **URL https hospedada** (nunca `data:` base64: o Gmail bloqueia). Foto da assinatura: `https://app.profbrune.com.br/icons/brune-email.jpg` (arquivo `brune-email.jpg` deste kit, 112×112).
+- Imagens sempre por **URL https hospedada** (nunca `data:` base64: o Gmail bloqueia). Foto da assinatura: `https://app.profbrune.com.br/icons/brune-email.jpg` (arquivo `icons/brune-email.jpg`, 240×240, recorte da foto da Torre Eiffel; exibida a 60px, nítida em tela retina).
 - Texto de pré-visualização escondido logo após o `<body>` (o que aparece na lista da caixa de entrada).
 - Sempre enviar também a versão em texto puro quando quem envia permitir (Resend permite; Supabase Auth não).
 - Nunca expor preço, dado pessoal sensível ou dados de contrato no e-mail.
