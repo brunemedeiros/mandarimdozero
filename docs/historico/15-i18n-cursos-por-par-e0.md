@@ -215,3 +215,4 @@ Só front-end estático; **nenhuma migration**; **flag desligada para todos**: s
 ### Ajuste pós-C6 (2026-10-12, pedido da dona)
 - Nome do curso = só o nome do idioma estudado na língua do curso: Francês, French, Chinês, Chinese (`LanguageRegistry.shortName`); saíram as chaves `courses.name` e `courses.siteLang.*`.
 - Aviso de troca (`courses.confirm.body`) agora diz que é um **curso novo, com progresso próprio** (começa do zero se nunca estudou nele). Vale só com a flag ligada. **Em produção continua o aviso antigo** ("Seu progresso continua salvo"), que descreve o comportamento de hoje (mesmo progresso, só muda o idioma da interface).
+- Lista de cursos separada por grupo: "Cursos para falantes de português" (Francês, Chinês) e "Cursos para falantes de inglês" (French, Chinese).

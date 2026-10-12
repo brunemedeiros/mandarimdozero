@@ -65,8 +65,9 @@ function renderMyCourses(){
   box.style.display = '';
   box.innerHTML = `<div class="pref-row-title">${escapeHTML(t('courses.title'))}</div>
     <div class="pref-row-sub">${escapeHTML(t('courses.sub'))}</div>
-    <div class="my-courses-list">${items.map(c => `<button type="button" class="btn ${c.current ? 'btn-primary' : 'btn-secondary'} my-course" data-app="${escapeHTML(c.appKey)}" data-site="${escapeHTML(c.siteLang)}" ${c.current ? 'aria-current="true"' : ''}>
-      ${escapeHTML(courseDisplayName(c.appKey, c.siteLang))}${c.status === 'beta' ? ` <span class="my-course-tag">${escapeHTML(t('courses.beta'))}</span>` : ''}${c.current ? ` <span class="my-course-tag">${escapeHTML(t('courses.current'))}</span>` : ''}</button>`).join('')}</div>`;
+    ${['pt-BR', 'en'].map(site => { const grp = items.filter(c => c.siteLang === site); if (!grp.length) return ''; return `<div class="my-courses-group-title">${escapeHTML(t('courses.group.' + site))}</div>
+    <div class="my-courses-list">${grp.map(c => `<button type="button" class="btn ${c.current ? 'btn-primary' : 'btn-secondary'} my-course" data-app="${escapeHTML(c.appKey)}" data-site="${escapeHTML(c.siteLang)}" ${c.current ? 'aria-current="true"' : ''}>
+      ${escapeHTML(courseDisplayName(c.appKey, c.siteLang))}${c.status === 'beta' ? ` <span class="my-course-tag">${escapeHTML(t('courses.beta'))}</span>` : ''}${c.current ? ` <span class="my-course-tag">${escapeHTML(t('courses.current'))}</span>` : ''}</button>`).join('')}</div>`; }).join('')}`;
   box.querySelectorAll('button.my-course:not([aria-current])').forEach(b => {
     b.addEventListener('click', () => confirmSwitchCourse(b.dataset.app, b.dataset.site));
   });

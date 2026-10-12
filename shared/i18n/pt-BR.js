@@ -85,6 +85,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'settings.uiLanguage.confirm.toPt': 'Os textos, as explicações e as traduções passam a aparecer em português. Seu progresso continua salvo.',
   'settings.uiLanguage.confirm.cancel': 'Cancelar',
   'settings.uiLanguage.confirm.yes': 'Trocar',
+  'courses.group.pt-BR': 'Cursos para falantes de português',
+  'courses.group.en': 'Cursos para falantes de inglês',
   'courses.title': 'Meus cursos',
   'courses.sub': 'Cada curso tem progresso próprio. Sua sequência de dias e suas conquistas são da conta e valem em todos.',
   'courses.beta': 'em teste',

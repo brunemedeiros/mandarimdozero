@@ -69,6 +69,8 @@ window.I18N_CATALOG['en'] = {
   'settings.uiLanguage.confirm.toPt': 'Text, explanations, and translations will now appear in Portuguese. Your progress stays saved.', // ALTA
   'settings.uiLanguage.confirm.cancel': 'Cancel', // ALTA
   'settings.uiLanguage.confirm.yes': 'Change', // ALTA
+  'courses.group.pt-BR': 'Courses for Portuguese speakers', // ALTA
+  'courses.group.en': 'Courses for English speakers', // ALTA
   'courses.title': 'My courses', // ALTA
   'courses.sub': 'Each course has its own progress. Your day streak and achievements belong to your account and count in every course.', // ALTA
   'courses.beta': 'beta', // ALTA
