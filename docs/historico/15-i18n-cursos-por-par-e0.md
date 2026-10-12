@@ -133,3 +133,19 @@ Só front-end estático; nenhuma migration, nada em produção além do deploy n
   `_meta`, recarregar traz o curso novo e voltar para pt-BR traz o progresso antigo.
 - Regressão: 80 de 95 suítes locais passam; as 15 que falham são as mesmas de antes, com os mesmos checks.
 Próximo: C2 (bloco `_account` com streak e `activityLog`), aguardando autorização.
+
+## E3, passo C2 (2026-10-12): progresso da conta em `_account`
+
+Só front-end estático; nenhuma migration; nada em produção além do deploy normal do Pages. Autorizado pela dona ("execute o C2").
+- `shared/account-progress.js` (puro): `progress.data._account` guarda `streak`, `lastStudyDay`, `activityLog`, `hadStreakComeback`, `dailyLessonsLog` e `lastReviewReminderDay`, somados entre
+  todos os blocos de curso e o formato antigo do zh na raiz da linha. Regras: último dia = o maior; logs = união com o maior valor por dia; comeback = OU; streak = maior entre os dias seguidos do log
+  terminando no último dia e os streaks vivos que terminam nesse mesmo dia. `shared/auth.js`: o carregamento aplica a conta no STATE, o salvar grava `_account`, e `progressAccountIsNew` ignora `_account`.
+  Os blocos continuam gravando os mesmos campos (espelho), então 037, 059, 070 e o cron seguem lendo como antes até o C3.
+- **Fora do C2 de propósito**: `studyGoal` (objetivo e níveis são por idioma; hora do lembrete espera a decisão P2) e `dailyMinutesLog` (legado sem leitor).
+- Achado novo na leitura de produção: 6 linhas ainda estão no formato antigo do chinês (progresso na raiz, sem bloco `mandarim`); a regra trata a raiz como mais uma fonte, senão a sequência delas se perderia.
+- Ensaio em produção, **somente leitura** (`tests/curso-progresso/ensaio_streak_conta.sql`, só contagens): 33 linhas, 26 contas com progresso, 22 blocos comparados; 19 iguais, 2 sobem (a conta com os dois
+  idiomas, em que o outro idioma estudou depois: efeito desejado), **0 diminuem, 0 dias do log perdidos**.
+- Testes: `tests/curso-progresso/test_account_progress.js` (37): regras, 5 propriedades com 300 casos aleatórios (nenhum dia se perde, idempotente, independente da ordem, último dia nunca diminui, streak nunca menor que um
+  streak vivo do mesmo dia), e integração com `auth.js` (1 idioma, 2 idiomas, formato antigo, conta nova, duas abas salvando ao mesmo tempo).
+- Regressão: 81 de 96 suítes passam; as 15 que falham são as mesmas de antes, com os mesmos checks.
+- Efeito visível: a sequência de dias passa a ser da conta. Quem estuda os dois idiomas vê a mesma sequência nos dois (hoje 1 conta em produção muda: no chinês passa de 1 para 2).

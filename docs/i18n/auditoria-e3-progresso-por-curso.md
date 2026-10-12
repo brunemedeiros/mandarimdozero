@@ -113,7 +113,7 @@ Grátis x Premium: **tudo grátis.** Trocar de curso, ter vários cursos e o idi
 
 ## 7. Plano de execução da E3 (passos pequenos, cada um com gate)
 
-**C0 e C1 entregues em 2026-10-12** (ver `docs/historico/15-i18n-cursos-por-par-e0.md`): C0 = bug do `hanziCards` corrigido e texto do convidado; C1 = `courseStorageKey` com flag desligada, comportamento idêntico (diferencial em 28 cenários).
+**C0, C1 e C2 entregues em 2026-10-12** (ver `docs/historico/15-i18n-cursos-por-par-e0.md`): C0 = bug do `hanziCards` corrigido e texto do convidado; C1 = `courseStorageKey` com flag desligada, comportamento idêntico (diferencial em 28 cenários); C2 = `_account` (sequência da conta), ensaio em produção sem nenhum streak diminuindo.
 
 | Passo | O quê | Banco | Pronto quando | Rollback |
 |---|---|---|---|---|
