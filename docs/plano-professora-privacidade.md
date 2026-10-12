@@ -136,4 +136,9 @@ Plano de migrations (proposto):
   simulado (transação desfeita): professora grava aula/material para aluna vinculada; aluna lê material e aula
   (sem anotações); depois de `removed` não lê mais; conta comum não grava material para ninguém; autopromoção
   bloqueada; estranho não cria Decks de outra conta; anon continua lendo Decks de curso.
-- Produção: NÃO aplicada (aguarda autorização). Reserva: `docs/rollout-sql/076_sql_editor.sql`.
+- Staging: versões `20261008020957` (teacher_role_policies) e `20261008021111` (link_check).
+- **Produção: aplicada pela ferramenta em 2026-10-12** (versão `20261012123457`, arquivo final já com a correção).
+  Conferido antes: policies iguais às de 2026-10-08, os 2 materiais existentes são da autora com vínculo ativo.
+  Verificado depois (transação desfeita): anon lê os 40 Decks de curso; aluna lê o material dela e os cartões da
+  professora; conta comum não grava aula nem material para ninguém e não lê material alheio; autopromoção bloqueada;
+  autora vê os 13 vínculos e grava aula para aluna vinculada.

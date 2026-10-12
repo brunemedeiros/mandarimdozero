@@ -208,3 +208,9 @@ Checkpoint pedido pela autora: só documentação. Nenhuma migration, nenhuma mu
 | Staging | ferramenta `apply_migration` | `20261008011037` |
 | Produção | SQL Editor da autora (`docs/rollout-sql/075_sql_editor.sql`; a ferramenta estourou o tempo 2x) | não aparece em `schema_migrations` |
 Detalhes e verificação: `docs/plano-professora-privacidade.md`.
+
+## Migration 076 `teacher_role_policies` (2026-10-08 Staging / 2026-10-12 produção)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta | `20261008020957` + correção `20261008021111` (`teacher_role_policies_link_check`) |
+| Produção | ferramenta (arquivo final, já corrigido) | `20261012123457` |
