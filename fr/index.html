@@ -50,6 +50,10 @@ try{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link rel="preload" href="../shared/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../shared/fonts/nunito.css">
+<!-- Design System do painel (tudo escopado em .painel: não muda nada fora dele). Ver .claude/rules/painel-design-system.md -->
+<link rel="stylesheet" href="../shared/painel/vendor/pico.painel.css">
+<link rel="stylesheet" href="../shared/painel/painel-tokens.css">
+<link rel="stylesheet" href="../shared/painel/painel-componentes.css">
 <style>
 :root{
   /* Design tokens — paleta própria do Francês do Zero (azul como cor
@@ -551,6 +555,11 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   #app.sidebar-collapsed .sidebar-label{ display:none; }
   #app.sidebar-collapsed .sidebar .tab-btn{ justify-content:center; padding:10px; }
   #app.sidebar-collapsed .sidebar-toggle-btn{ align-self:center; }
+
+  /* Painel da professora ocupa a largura toda: sem Ranking, Status e Missões do dia ao lado (são do aluno). */
+  #app[data-active-tab="teacher-panel"]{ grid-template-columns:220px minmax(0,1fr); grid-template-areas:"topbar topbar" "sidebar content"; padding-right:32px; }
+  #app[data-active-tab="teacher-panel"] .right-cards{ display:none; }
+  #app.sidebar-collapsed[data-active-tab="teacher-panel"]{ grid-template-columns:64px minmax(0,1fr); }
 
   /* Modo foco de lição estendido pro desktop: sidebar e cards somem, o
      conteúdo (o exercício em si) ocupa a largura toda -- reaproveita a
@@ -3852,6 +3861,9 @@ footer.app-footer img{ height:40px; opacity:.85; }
 .panel-view .profile-edit-form{ max-width:560px; }
 .panel-section + .panel-section{ margin-top:30px; padding-top:20px; border-top:1px solid var(--paper-line); }
 .panel-view .profile-section{ margin-top:0; }
+/* Design System do painel dentro do app: sem fundo próprio (usa o do app) e sem recuo lateral extra. */
+.panel-view .painel{ background:transparent; }
+.panel-view .painel .p-pagina{ padding-left:0; padding-right:0; }
 .panel-view .profile-section + .profile-section{ margin-top:26px; }
 @media (min-width:640px){
   .panel-view .btn-block{ width:auto; min-width:200px; padding-left:22px; padding-right:22px; align-self:flex-start; }
@@ -5071,6 +5083,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/roles.js"></script>
 <script src="../shared/permissions.js"></script>
 <script src="../shared/student-metrics.js"></script>
+<script src="../shared/teacher-students-ui.js"></script>
 <script src="../shared/admin-students.js"></script>
 <script src="../shared/admin-premium.js"></script>
 <script src="../shared/flashcard-model.js"></script>
@@ -5101,6 +5114,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/admin-support-materials.js"></script>
 <script src="../shared/support-materials-view.js"></script>
 <script src="../shared/teacher-panel.js"></script>
+<script src="../shared/painel/painel-ui.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
 <script src="../shared/my-flashcards.js"></script>

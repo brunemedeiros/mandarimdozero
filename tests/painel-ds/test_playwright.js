@@ -148,11 +148,14 @@ const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', ok: 'rgb(58, 115, 89)',
   check('DENTRO de .painel o h1 recebe a cor de tinta do site (a base do Pico está ativa)', h1d === 'rgb(32, 19, 53)' && h1f !== h1d, [h1d, h1f]);
   await ctx.close();
 
-  // ---------- 4. Fase 1 não toca nas telas existentes ----------
-  for (const f of ['fr/index.html', 'zh/index.html', 'index.html']){
+  // ---------- 4. Onde o CSS do painel é carregado ----------
+  // fr e zh carregam o CSS do painel (escopado em .painel, a aba Alunos já usa); a home não carrega.
+  for (const f of ['fr/index.html', 'zh/index.html']){
     const txt = fs.readFileSync(path.join(ROOT, f), 'utf8');
-    check(`${f} não carrega o CSS do painel (Fase 1 não altera telas)`, !/shared\/painel\//.test(txt));
+    check(`${f} carrega pico.painel, tokens e componentes, nessa ordem`, /pico\.painel\.css[\s\S]*painel-tokens\.css[\s\S]*painel-componentes\.css/.test(txt));
+    check(`${f} carrega painel-ui.js`, /shared\/painel\/painel-ui\.js/.test(txt));
   }
+  check('index.html (home) não carrega o CSS do painel', !/shared\/painel\//.test(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')));
   await browser.close(); server.close();
   console.log(`\npainel-ds playwright: ${passed}/${passed + failed} checks`); process.exit(failed ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

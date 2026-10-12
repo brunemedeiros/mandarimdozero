@@ -2226,4 +2226,145 @@ window.I18N_CATALOG['en'] = {
   'perm.teacher_board': 'Class board', // ALTA
   'plans.chip.premium': 'Premium', // ALTA
   'panel.students.inviteSoon': 'For now, students are linked by the admin. Soon you will be able to invite a student, who accepts from their own profile.', // ALTA
+  'students.title': 'Students', // ALTA
+  'students.count': { one: '{n} active student', other: '{n} active students' }, // ALTA
+  'students.link.btn': 'Link a student', // ALTA
+  'students.refresh': 'Refresh data', // ALTA
+  'students.alert.stopped': { one: '{n} student has not studied for 7 days or more.', other: '{n} students have not studied for 7 days or more.' }, // ALTA
+  'students.alert.see': 'Show who', // ALTA
+  'students.ind.active': 'Active students', // ALTA
+  'students.ind.byLang': '{n} in {lang}', // ALTA
+  'students.ind.today': 'Studied today', // ALTA
+  'students.ind.todayPct': '{pct}% of the class', // ALTA
+  'students.ind.due': 'Reviews due', // ALTA
+  'students.ind.dueSum': 'total across all students', // ALTA
+  'students.ind.attention': 'Need attention', // ALTA
+  'students.ind.attentionDetail': '{stopped} stopped, {warn} to watch', // ALTA
+  'students.search.placeholder': 'Search by name or @username', // ALTA
+  'students.search.aria': 'Search students', // ALTA
+  'students.filter.course.all': 'All courses', // ALTA
+  'students.filter.course.aria': 'Course', // ALTA
+  'students.filter.attention': 'Only those who need attention', // ALTA
+  'students.col.student': 'Student', // ALTA
+  'students.col.course': 'Course', // ALTA
+  'students.col.last': 'Last study', // ALTA
+  'students.col.streak': 'Streak', // ALTA
+  'students.col.due': 'Reviews due', // ALTA
+  'students.col.status': 'Status', // ALTA
+  'students.open': 'Open', // ALTA
+  'students.situation.ok': 'On track', // ALTA
+  'students.situation.warn': 'Watch', // ALTA
+  'students.situation.stopped': 'Stopped', // ALTA
+  'students.situation.none': 'No study yet', // ALTA
+  'students.situation.rule': 'Status: On track studied in the last 3 days, Watch 4 to 6 days ago, Stopped 7 days or more.', // ALTA
+  'students.streak.days': { one: '{n} day', other: '{n} days' }, // ALTA
+  'students.empty.title': 'No students linked yet', // ALTA
+  'students.empty.text': 'Once you link someone, their progress shows up here.', // ALTA
+  'students.empty.filtered': 'No students match these filters.', // ALTA
+  'students.loading': 'Loading students…', // ALTA
+  'students.loading.count': '{done} of {total}', // ALTA
+  'students.error.partial': { one: 'Could not load the data of {n} student. They appear without a status.', other: 'Could not load the data of {n} students. They appear without a status.' }, // ALTA
+  'students.dialog.hint': 'A link applies to one course. The same person can be linked to another course later.', // ALTA
+  'students.dialog.cancel': 'Cancel', // ALTA
+  'students.crumb.aria': 'You are here', // ALTA
+  'students.ficha.kicker': 'Student · {lang} · linked on {date}', // ALTA
+  'students.ficha.level': 'Level {level} · {pct}%', // ALTA
+  'students.act.class': 'Log a class', // ALTA
+  'students.act.card': 'Create a card', // ALTA
+  'students.act.more': 'More', // ALTA
+  'students.act.remove': 'Remove link', // ALTA
+  'students.remove.title': 'Remove the link with {name}?', // ALTA
+  'students.remove.text': 'Progress and history are kept. You can link again later. The person just stops appearing in your list.', // ALTA
+  'students.remove.confirm': 'Remove link', // ALTA
+  'students.removed': 'Link removed.', // ALTA
+  'students.ind.last': 'Last study', // ALTA
+  'students.ind.lastAccess': 'last access: {when}', // ALTA
+  'students.ind.noRecord': 'no record', // ALTA
+  'students.ind.streak': 'Streak', // ALTA
+  'students.ind.activeDays': { one: '{n} active day in the last 30', other: '{n} active days in the last 30' }, // ALTA
+  'students.ind.dueCount': 'Reviews due', // ALTA
+  'students.ind.dueOf': 'of {total} in the queue', // ALTA
+  'students.ind.accuracy': 'Accuracy (7 days)', // ALTA
+  'students.ind.accuracyOf': { one: 'over {n} reviewed card', other: 'over {n} reviewed cards' }, // ALTA
+  'students.ind.accuracyNone': 'no reviews yet', // ALTA
+  'students.block.progress': 'Course progress', // ALTA
+  'students.progress.units': 'Units completed', // ALTA
+  'students.progress.unitsValue': '{done} ({started} started)', // ALTA
+  'students.progress.checkpoints': 'Checkpoints', // ALTA
+  'students.progress.checkpointsNone': 'none yet', // ALTA
+  'students.progress.checkpointsValue': 'best score {pct}%', // ALTA
+  'students.progress.challenges': 'Challenges completed', // ALTA
+  'students.progress.lessons': 'Lesson average (30 days)', // ALTA
+  'students.progress.lessonsAvg': '{pct}% avg.', // ALTA
+  'students.progress.level': 'Level {level} ({pct}%)', // ALTA
+  'students.block.activity': 'Activity in the last 30 days', // ALTA
+  'students.block.queue': 'Review queue', // ALTA
+  'students.queue.new': 'new', // ALTA
+  'students.queue.learning': 'learning', // ALTA
+  'students.queue.review': 'to review', // ALTA
+  'students.queue.weak': 'weak (wrong 2+ times)', // ALTA
+  'students.queue.empty': 'No cards in the queue yet.', // ALTA
+  'students.block.created': 'Cards you created', // ALTA
+  'students.created.empty.title': 'No cards created for {name} yet', // ALTA
+  'students.created.empty.text': 'The cards you create appear here, with the strength of each one.', // ALTA
+  'students.created.empty.btn': 'Create the first card', // ALTA
+  'students.created.total': 'Items created for this student', // ALTA
+  'students.created.studied': 'Items studied', // ALTA
+  'students.created.studiedValue': '{studied} of {total} ({notStarted} not started)', // ALTA
+  'students.created.strength': 'Item strength', // ALTA
+  'students.created.strengthValue': '{notStarted} not started · {weak} weak · {medium} medium · {strong} strong', // ALTA
+  'students.created.cards': 'Cards generated', // ALTA
+  'students.created.cardsValue': '{total} ({n} new · {learning} learning · {review} to review · {due} due)', // ALTA
+  'students.created.archived': 'Archived (not counted)', // ALTA
+  'students.created.failed': 'Could not load this student\'s cards right now.', // ALTA
+  'students.block.recent': 'Recent activity', // ALTA
+  'students.recent.empty': 'No activity recorded yet.', // ALTA
+  'students.block.classes': 'Recent classes', // ALTA
+  'students.classes.all': 'See all classes', // ALTA
+  'students.classes.empty': 'No classes logged for this student.', // ALTA
+  'students.block.answers': 'Review accuracy', // ALTA
+  'students.answers.7': 'Last 7 days', // ALTA
+  'students.answers.30': 'Last 30 days', // ALTA
+  'students.answers.value': { one: '{pct}% over {n} card', other: '{pct}% over {n} cards' }, // ALTA
+  'students.answers.none': 'Review accuracy history starts being recorded from {date}.', // ALTA
+  'students.noProgress': 'There is no saved progress on this account yet.', // ALTA
+  'students.otherSite': 'No progress in {lang}: studying on the {others} site.', // ALTA
+  'students.lang.switch.aria': 'Progress language', // ALTA
+  'students.overviewFailed': 'Could not load this student\'s data right now.', // ALTA
+  'students.back': 'Back to Students', // ALTA
+  'students.ev.tab.path': 'Path', // ALTA
+  'students.ev.tab.review': 'Review', // ALTA
+  'students.ev.tab.profile': 'Profile', // ALTA
+  'students.ev.tab.challenges': 'Challenges', // ALTA
+  'students.ev.tab.conjugaison': 'Conjugation', // ALTA
+  'students.ev.tab.leaderboard': 'Leaderboard', // ALTA
+  'students.ev.tab.progress': 'Progress', // ALTA
+  'students.ev.tab.dictation': 'Dictations', // ALTA
+  'students.ev.tab.my-flashcards': 'My cards', // ALTA
+  'students.ev.tab.settings': 'Settings', // ALTA
+  'students.ev.tab.goals': 'Goals', // ALTA
+  'students.ev.tab.support-materials': 'Support materials', // ALTA
+  'students.ev.tab.admin-badges': 'Admin panel', // ALTA
+  'students.ev.tab.hanzi': 'Hanzi', // ALTA
+  'students.ev.act.vocab_lesson': 'path lesson', // ALTA
+  'students.ev.act.unit_checkpoint': 'checkpoint', // ALTA
+  'students.ev.act.flashcard_review': 'flashcard review', // ALTA
+  'students.ev.act.match_game': 'Match game', // ALTA
+  'students.ev.act.speed_review': 'speed review', // ALTA
+  'students.ev.act.dictation': 'dictation', // ALTA
+  'students.ev.act.conjugation_session': 'conjugation', // ALTA
+  'students.ev.act.challenge': 'challenge', // ALTA
+  'students.ev.act.hanzi_lesson': 'hanzi lesson', // ALTA
+  'students.ev.act.hanzi_review': 'hanzi review', // ALTA
+  'students.ev.openedTab': 'Opened the {tab} tab', // ALTA
+  'students.ev.report': 'Sent a problem report or suggestion', // ALTA
+  'students.ev.started': 'Started {what}{unit}', // ALTA
+  'students.ev.completed': 'Completed {what}{unit}{score}', // ALTA
+  'students.ev.score.pct': ' · {n}% correct', // ALTA
+  'students.ev.score.dictation': ' · score {n}', // ALTA
+  'students.ev.score.cards': ' · {n} cards', // ALTA
+  'students.n.activeDays': { one: '{n} active day', other: '{n} active days' }, // ALTA
+  'students.n.lessonsDone': { one: '{n} lesson completed', other: '{n} lessons completed' }, // ALTA
+  'students.n.items': { one: '{n} item', other: '{n} items' }, // ALTA
+  'students.n.cards': { one: '{n} card', other: '{n} cards' }, // ALTA
 };

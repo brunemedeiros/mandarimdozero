@@ -66,3 +66,6 @@ Auditoria feita em 2026-10-12, antes de qualquer código, como o projeto exige p
 ## 8. Ordem sugerida de construção (depois da aprovação)
 Alunos (quadro geral, depois ficha) → Aulas → Flashcards (criar, depois listar). Cada tela com regressão da área, teste visual nos
 4 cenários, e `shared/painel/` como única fonte de estilo. Textos novos passam por `t()` (regra do i18n).
+
+## 9. Andamento
+- 2026-10-12: desenho aprovado pela autora, botão primário no azul atual. **Alunos entregue** na branch (quadro geral e ficha); fotos em `depois-alunos-*.jpg`; relatório em `docs/historico/15-*`. Próximo: Aulas, depois Cartões.

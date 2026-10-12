@@ -13,7 +13,7 @@
 
 /* Cabeçalho: sobretítulo (onde estou), título, subtítulo (contexto) e ações à direita. */
 .painel .p-cabecalho{ display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-.painel .p-cabecalho h1{ margin: 0; font-size: 1.9rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+.painel .p-cabecalho :is(h1, h2){ margin: 0; font-size: 1.9rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
 .painel .p-sobretitulo{ display: block; font-size: .75rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--p-tinta-suave); }
 .painel .p-subtitulo{ display: block; margin-top: .15rem; font-size: .9rem; color: var(--p-tinta-suave); }
 .painel .p-acoes{ display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
@@ -496,3 +496,22 @@
 /* o marcador de lista que o Pico põe em li não pode virar um item solto dentro de anexo e balão */
 .painel .p-anexo::before, .painel .p-balao-grupo::before{ content: none; display: none; }
 .painel li.p-anexo[aria-busy="true"]:not(input, select, textarea)::before{ content: none; display: none; }
+
+/* ---------- Atividade em quadradinhos, barra empilhada e legenda (usadas na ficha do aluno) ---------- */
+.painel .p-atividade{ display: flex; flex-wrap: wrap; gap: 3px; margin: 0; }
+.painel .p-atividade i{ display: block; width: 14px; height: 14px; border-radius: 3px; background: var(--p-linha); }
+.painel .p-atividade i.on{ background: var(--p-ok); }
+.painel .p-pilha{ display: flex; height: .9rem; border-radius: 999px; overflow: hidden; background: var(--p-linha); }
+.painel .p-pilha i{ display: block; height: 100%; }
+.painel .p-legenda{ display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; margin: .5rem 0 0; font-size: .85rem; color: var(--p-tinta-suave); }
+.painel .p-legenda b{ color: var(--p-tinta); }
+.painel .p-legenda span::before{ content: ""; display: inline-block; width: .6rem; height: .6rem; margin-right: .35rem; border-radius: 50%; background: var(--k, var(--p-linha)); }
+
+/* Botão pequeno (dentro de linhas de tabela e alertas) e texto só para leitor de tela */
+.painel :is(button, [type=button], [role=button]).p-pequeno{ padding: .3rem .8rem; font-size: .85rem; min-height: 0; width: auto; }
+.painel .p-so-leitor{ position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.painel .p-lista li > small{ flex-basis: 100%; color: var(--p-tinta-suave); font-size: .82rem; }
+.painel .p-tabela{ position: relative; }
+.painel .p-so-leitor{ left: 0; top: 0; }
+/* No celular a tabela mostra só o essencial: as colunas marcadas somem (a ficha mostra o resto). */
+@media (max-width: 640px){ .painel .p-oculta-movel{ display: none; } }

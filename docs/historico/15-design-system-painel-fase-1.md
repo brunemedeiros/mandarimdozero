@@ -62,3 +62,25 @@ Auditoria em `docs/fase-2-professora/auditoria.md`, desenho em `docs/fase-2-prof
 - Regra de situação aprovada: Em dia = estudou nos últimos 3 dias; Atenção = 4 a 6; Parado = 7 ou mais.
 - Testes em 2026-10-12: escopo 9/9, tokens 87/87, contraste 127/127, navegador 192/192, interação (`test_ui.js`) 274/274. Contraste: texto branco sobre o azul claro do francês = 3,2:1 (exceção documentada).
 - Bugs achados e corrigidos nos testes: spinner do Pico (`aria-busy`) aparecia solto ao lado do anexo em envio; barra de progresso do anexo sem largura (item em flex); clicar no campo já focado não reabria o combobox.
+
+## Fase 2, tela Alunos entregue (2026-10-12, branch `claude/epic-fermat-ulyw5j`, nada publicado)
+Autorização da autora: desenho aprovado, botão primário no azul atual (igual ao Ranking, 3,2:1 no francês claro; exceção documentada).
+- **Tela nova** (aba Alunos do painel da professora, fr e zh): quadro geral (alerta de parados, 4 indicadores, busca, filtro de curso e de atenção,
+  tabela com situação) e ficha do aluno em página própria (trilha, cabeçalho, 4 indicadores, progresso, atividade de 30 dias, fila de revisão,
+  cartões criados, últimas atividades, acertos, aulas recentes, troca de idioma quando há progresso em mais de um). Vincular aluno virou janela (só admin),
+  remover vínculo usa a confirmação do painel (antes `confirm()` do navegador).
+- **Situação (aprovada):** Em dia = estudou nos últimos 3 dias (0 a 3); Atenção = 4 a 6; Parado = 7 ou mais; sem estudo registrado = "Sem estudo" (neutro, não conta
+  como parado); consulta que falhou = "—" e aviso (nunca vira "Parado").
+- **Sem migration e sem dado novo:** usa as RPCs de hoje (`get_teacher_student_overview`, `get_teacher_student_metrics`), até 5 consultas ao mesmo tempo, cache por vínculo
+  na sessão e botão "Atualizar dados". Para turmas grandes (centenas) uma consulta única no banco exigiria migration (decisão futura).
+- **Arquivos:** `shared/teacher-students-ui.js` (HTML puro, testável), `shared/admin-students.js` (dados, eventos, diálogos; renderizadores antigos em texto removidos),
+  `shared/painel/` (peças novas: `p-atividade`, `p-pilha`, `p-legenda`, `p-pequeno`, `p-so-leitor`, `p-oculta-movel`; no guia: "Atividade e fila"), `fr/index.html` e `zh/index.html`
+  (carregam o CSS do painel e `painel-ui.js`; painel da professora em tela cheia, sem Ranking/Status/Missões ao lado; fundo transparente dentro do app).
+- **i18n:** 141 chaves novas `students.*` (pt-BR e en, todas com confiança ALTA, traduções simples de interface). Rótulos da linha do tempo (antes fixos em português) agora passam por `t()`.
+- **Testes** (rodados em 2026-10-12): `tests/painel-alunos/test_students_ui_unit.js` 61/61 (regra de situação nos limites 3/4/6/7, filtros, ficha, escape de HTML, plural com zero),
+  `test_playwright.js` 202/202 (fr e zh x claro e escuro, tela cheia, filtros sem refazer o campo de busca, cache, remover, vincular, professora x admin, falha de consulta, celular sem rolagem horizontal),
+  `tests/fase-k6` 28/28 (métricas dos cartões criados, portado para a ficha), `tests/painel-professora` 162/162, `tests/painel-ds` 9+87+131+194+284 checks.
+  `tests/i18n/test_i18n_unit.js` e `test_playwright.js` dependem de um commit antigo (`e88fabb`) que não existe neste clone: não rodam aqui (já era assim); a paridade pt-BR x en foi conferida à parte.
+- **Grátis x Premium:** tudo grátis (painel da professora; sem checkout).
+- **Fica para depois:** Cartões (Flashcards) e Aulas na nova linguagem; "Registrar aula" e "Criar cartão" da ficha abrem as abas atuais sem pré-selecionar o aluno;
+  Banco de Revisão; Material de apoio; função nova de Flashcards (a autora ainda vai descrever).

@@ -115,7 +115,7 @@ const PANEL_STUB = (who) => {
       const tabs = await ev(() => [...document.querySelectorAll('#view-teacher-panel [data-teacher-section]')].map(b => b.textContent.trim()));
       L('professora: 4 abas', tabs.length === 4, tabs);
       L('professora: Alunos abre (sem aviso de acesso negado)', !(await ev(() => document.getElementById('admin-students-content').textContent.includes(t('admin.common.adminOnly')))));
-      L('professora: sem formulário de vincular (só a admin vincula)', await ev(() => !!document.querySelector('#admin-assign-student-form') && document.querySelector('#admin-assign-student-form').closest('.profile-section').hidden));
+      L('professora: sem formulário nem botão de vincular (só a admin vincula)', await ev(() => !document.querySelector('#admin-assign-student-form') && !document.querySelector('[data-abrir-dialogo="dlg-vincular-aluno"]')));
       await ev(() => switchTab('admin-badges'));
       L('professora: link antigo do Admin cai no painel da professora', await ev(() => document.getElementById('view-teacher-panel').classList.contains('active')));
       await shot('professora-alunos');
