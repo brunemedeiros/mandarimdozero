@@ -9,20 +9,14 @@
 (function(root){
   'use strict';
 
-  // Enquanto false, a página lê/grava SEMPRE o curso legado (appKey@pt-BR), qualquer que seja o idioma do site:
-  // comportamento idêntico ao de antes da E3. O passo C5 liga isto junto com a tela "Meus cursos".
-  var COURSE_PROGRESS_PER_SITE_LANGUAGE = false;
-  // C5: o dono do projeto liga só no próprio navegador para testar (localStorage['courses-per-site-language'] = '1'), sem afetar ninguém.
-  // Ligar para todos = trocar a constante acima (decisão da dona, depois das pendências listadas em docs/historico/15).
-  // Atalho para a dona: abrir a página com ?cursos=1 liga só naquele navegador; ?cursos=0 desliga.
-  try {
-    var q = new URLSearchParams(root.location.search).get('cursos');
-    if (q === '1') root.localStorage.setItem('courses-per-site-language', '1');
-    else if (q === '0') root.localStorage.removeItem('courses-per-site-language');
-  } catch (e) {}
+  // true: o idioma do site da conta escolhe o curso (appKey@idiomaDoSite). Com false a página lê/grava SEMPRE o curso legado
+  // (appKey@pt-BR), igual a antes da E3.
+  var COURSE_PROGRESS_PER_SITE_LANGUAGE = true;
+  // Ligada para todos por decisão da dona (2026-10-12). Chave de emergência/teste: localStorage['courses-per-site-language'] = '0'
+  // desliga só naquele navegador (usada pelos testes do comportamento antigo).
   function isPerSiteLanguage(){
-    if (COURSE_PROGRESS_PER_SITE_LANGUAGE) return true;
-    try { return root.localStorage && root.localStorage.getItem('courses-per-site-language') === '1'; } catch (e) { return false; }
+    try { if (root.localStorage && root.localStorage.getItem('courses-per-site-language') === '0') return false; } catch (e) {}
+    return COURSE_PROGRESS_PER_SITE_LANGUAGE;
   }
   function setPerSiteLanguage(v){ COURSE_PROGRESS_PER_SITE_LANGUAGE = !!v; }
 

@@ -29,7 +29,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     for (const flag of [false, true]) {
       const tag = `${app} flag=${flag}`;
       const ctx = await browser.newContext({ viewport: { width: 1000, height: 800 }, serviceWorkers: 'block' });
-      await ctx.addInitScript(({ flag }) => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); if (flag) localStorage.setItem('courses-per-site-language', '1'); } catch (e) {} }, { flag });
+      await ctx.addInitScript(({ flag }) => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); localStorage.setItem('courses-per-site-language', flag ? '1' : '0'); } catch (e) {} }, { flag });
       const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(String(e)));
       await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
       await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));

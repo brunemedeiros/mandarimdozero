@@ -28,7 +28,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   for (const app of ['fr', 'zh']) {
     for (const flag of [false, true]) {
       const ctx = await browser.newContext({ viewport: { width: 390, height: 800 }, serviceWorkers: 'block' });
-      await ctx.addInitScript(({ flag }) => { try { sessionStorage.setItem('guest_mode', '1'); if (flag) localStorage.setItem('courses-per-site-language', '1'); localStorage.setItem('ui-language', 'pt-BR'); } catch (e) {} }, { flag });
+      await ctx.addInitScript(({ flag }) => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('courses-per-site-language', flag ? '1' : '0'); localStorage.setItem('ui-language', 'pt-BR'); } catch (e) {} }, { flag });
       const page = await ctx.newPage();
       await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
       await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));

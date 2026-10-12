@@ -16,7 +16,7 @@ const OLD_AUTH = fs.readFileSync(path.join(__dirname, 'fixtures', 'auth.antes-do
 const reg = require(path.join(ROOT, 'languages/registry.js'));
 global.LanguageRegistry = reg.LanguageRegistry;
 const CS = require(path.join(ROOT, 'shared/course-storage.js'));
-check('flag de cursos por idioma do site começa DESLIGADA', CS.COURSE_PROGRESS_PER_SITE_LANGUAGE === false);
+check('flag de cursos por idioma do site está LIGADA (decisão da dona, 2026-10-12)', CS.COURSE_PROGRESS_PER_SITE_LANGUAGE === true);
 check('frances@pt-BR -> frances (legado, vem do registro)', CS.courseStorageKey('frances@pt-BR') === 'frances');
 check('mandarim@pt-BR -> mandarim', CS.courseStorageKey('mandarim@pt-BR') === 'mandarim');
 check('frances@en -> própria chave', CS.courseStorageKey('frances@en') === 'frances@en');
@@ -25,7 +25,7 @@ check('portugues@en -> própria chave (nada de deduzir "pt-BR usa sem sufixo")',
 check('registro em _meta.courses vence', CS.courseStorageKey('frances@en', { 'frances@en': { storageKey: 'frances-en-x' } }) === 'frances-en-x');
 check('registro sem storageKey é ignorado', CS.courseStorageKey('frances@pt-BR', { 'frances@pt-BR': {} }) === 'frances');
 check('courseId inválido não quebra', CS.courseStorageKey('lixo') === 'lixo');
-check('flag desligada: site em inglês continua no curso legado', CS.activeCourseId('frances', 'en') === 'frances@pt-BR' && CS.courseStorageKeyFor('frances', 'en', null) === 'frances');
+check('flag desligada: site em inglês continua no curso legado', CS.activeCourseId('frances', 'en', false) === 'frances@pt-BR' && CS.courseStorageKeyFor('frances', 'en', null, false) === 'frances');
 check('flag ligada: site em inglês abre frances@en', CS.activeCourseId('frances', 'en', true) === 'frances@en' && CS.courseStorageKeyFor('frances', 'en', null, true) === 'frances@en');
 check('flag ligada: pt-BR continua na chave legada', CS.courseStorageKeyFor('mandarim', 'pt-BR', null, true) === 'mandarim');
 check('registro no _meta.courses é respeitado em courseStorageKeyFor', CS.courseStorageKeyFor('frances', 'pt-BR', { _meta: { courses: { 'frances@pt-BR': { storageKey: 'frances' } } } }) === 'frances');
@@ -46,7 +46,7 @@ function makeEnv({ authSrc, row, appKey, uiLang, state, flagOn }){
     getUiLang: () => uiLang, setUiLang: async l => l, ensurePeriodXp(){}, t: k => k };
   sb.window = sb; vm.createContext(sb);
   vm.runInContext(read('languages/registry.js'), sb);
-  let cs = read('shared/course-storage.js'); if (flagOn) cs = cs.replace('var COURSE_PROGRESS_PER_SITE_LANGUAGE = false;', 'var COURSE_PROGRESS_PER_SITE_LANGUAGE = true;');
+  let cs = read('shared/course-storage.js'); cs = cs.replace('var COURSE_PROGRESS_PER_SITE_LANGUAGE = true;', 'var COURSE_PROGRESS_PER_SITE_LANGUAGE = ' + (flagOn ? 'true' : 'false') + ';');
   if (authSrc !== OLD_AUTH) vm.runInContext(cs, sb);
   vm.runInContext(read('shared/language-pref.js'), sb);
   vm.runInContext(authSrc, sb);
