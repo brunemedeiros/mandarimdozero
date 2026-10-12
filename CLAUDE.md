@@ -94,5 +94,6 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - Todos os cartões antigos já têm Deck (migração de 2026-10-07). Regra "1 professora por aluno por idioma" ainda não imposta no banco.
 - Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
 - `tests/i18n/test_playwright.js` dá tempo esgotado em `triggerWouldGenerate` (também na main): investigar na conversa de i18n.
+- `tests/trilha/test_trail_state_model.js` falha com `t is not defined` (carrega a trilha sem o i18n): conversa de i18n.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.

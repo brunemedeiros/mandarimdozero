@@ -4084,6 +4084,60 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .deck-delete-confirm{ background:var(--error-red, var(--seal-red)); color:var(--on-vivid); border:1px solid var(--error-red, var(--seal-red)); }
 .deck-delete-confirm:hover{ filter:brightness(1.06); }
 .deck-overview-danger{ color:var(--error-red, var(--seal-red)); }
+/* ---------- Perfil: passada de design (Visão geral, Metas, Progresso, Amigos) ----------
+   Identidade como carteirinha de estudante (faixa na cor do idioma no topo);
+   o resto fica quieto: títulos em tom de frase, números do Progresso num painel só. */
+:is(#view-profile, #view-goals, #view-progress, #view-friends, #public-profile-modal, #public-profile-standalone) .section-label{
+  text-transform:none; letter-spacing:0; font-size:15px; font-weight:800; color:var(--ink); margin:28px 0 12px;
+}
+.conquests-count, #badge-grid-count{ color:var(--ink-soft); font-weight:700; margin-left:4px; letter-spacing:0; }
+
+/* Carteirinha */
+#profile-content .profile-identity{
+  position:relative; overflow:hidden; display:grid;
+  grid-template-columns:auto minmax(0, 1fr) auto; column-gap:20px; row-gap:2px; align-items:center;
+  text-align:left; margin:6px 0 0; padding:26px 22px 20px;
+  background:var(--paper); border:1px solid var(--paper-line); border-radius:18px; box-shadow:var(--shadow-card);
+}
+#profile-content .profile-identity::before{ content:""; position:absolute; inset:0 0 auto 0; height:6px; background:var(--seal-red); }
+#profile-content .profile-identity > *{ grid-column:2; }
+#profile-content .profile-identity > .profile-avatar{ grid-column:1; grid-row:1 / span 5; align-self:start; width:88px; height:88px; font-size:32px; margin:0; box-shadow:0 0 0 4px var(--paper), 0 0 0 5px var(--paper-line); }
+#profile-content .profile-identity > .profile-name{ font-size:22px; line-height:1.2; letter-spacing:-.01em; }
+#profile-content .profile-identity > .profile-username{ margin:0; }
+#profile-content .profile-identity > .profile-bio{ max-width:52ch; margin:8px 0 0; font-size:14px; line-height:1.55; color:var(--ink); }
+#profile-content .profile-identity > .profile-special-badges{ justify-content:flex-start; margin-top:10px; }
+#profile-content .profile-identity > .profile-edit-btn{ grid-column:3; grid-row:1 / span 2; align-self:start; margin:0; }
+@media (max-width:560px){
+  #profile-content .profile-identity{ grid-template-columns:auto minmax(0, 1fr); column-gap:14px; padding:22px 16px 16px; }
+  #profile-content .profile-identity > .profile-avatar{ grid-row:1 / span 2; width:64px; height:64px; font-size:24px; }
+  #profile-content .profile-identity > .profile-name{ font-size:19px; align-self:end; }
+  #profile-content .profile-identity > .profile-username{ align-self:start; }
+  #profile-content .profile-identity > :is(.profile-bio, .profile-special-badges){ grid-column:1 / -1; }
+  #profile-content .profile-identity > .profile-edit-btn{ grid-column:1 / -1; grid-row:auto; justify-self:start; margin-top:12px; min-height:44px; }
+}
+.profile-num .l{ text-transform:none; letter-spacing:0; font-size:12.5px; }
+
+/* Progresso: os números num painel só, separados por linhas finas. */
+#view-progress .stat-cards{
+  gap:0; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+  background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-card);
+}
+#view-progress .stat-cards > .guest-warning{ grid-column:1 / -1; margin:0; border-radius:0; }
+#view-progress .stat-card{ border:none; border-radius:0; background:none; padding:14px 16px; box-shadow:1px 0 0 var(--paper-line), 0 1px 0 var(--paper-line); }
+#view-progress .stat-card .num{ font-size:24px; font-variant-numeric:tabular-nums; }
+#view-progress .stat-card .label{ font-weight:600; }
+
+/* Selo de pedidos sobre a aba ativa (mesma cor da aba no zh): fundo claro. */
+.profile-subnav .leaderboard-tab.active .friends-badge{ background:var(--paper); color:var(--ink); }
+/* Metas: o subtítulo da página repetia o do cartão. */
+#view-goals .path-header p{ display:none; }
+
+/* Amigos: seções com respiro. */
+#view-friends .friends-section{ margin-bottom:6px; }
+
+/* Editar perfil: sem o buraco embaixo da foto quando não há erro. */
+#profile-edit-modal .profile-edit-avatar-row{ margin:4px 0 4px; }
+#profile-edit-modal .profile-edit-avatar-error:empty{ display:none; }
 </style>
 </head>
 <body>
