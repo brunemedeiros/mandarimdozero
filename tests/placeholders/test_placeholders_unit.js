@@ -130,7 +130,7 @@ check('nome do país por idioma', A.profileCountryName('US', 'en') === 'United S
 
 // ---- conteúdo real: nenhum placeholder desconhecido ---
 for (const lang of ['fr', 'zh']){
-  const src = fs.readFileSync(path.join(ROOT, lang, 'content.js'), 'utf8');
+  const src = require(path.join(ROOT, 'scripts/lib/course-content.js')).composedSource(lang);
   const found = [...src.matchAll(/\{(\w+)\}/g)].map(m => m[1]).filter(k => /^(nome|primeiro_nome|nacionalidade\w*)$/.test(k) || false);
   const ok = new Set(['nome', 'primeiro_nome', 'nacionalidade', 'nacionalidade_p', 'nacionalidade_t']);
   check(lang + ': conteúdo só usa placeholders conhecidos', found.every(k => ok.has(k)) && found.length > 0, found);

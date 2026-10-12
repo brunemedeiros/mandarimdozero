@@ -2,7 +2,7 @@ const fs=require('fs'),vm=require('vm');
 const root=require('path').resolve(__dirname,'..','..')+'/';
 const win={CONTENT_OVERLAYS:{}};const ctx={window:win,document:{},console};vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(root+'shared/content-i18n.js','utf8'),ctx);
-vm.runInContext(fs.readFileSync(root+'fr/content.js','utf8')+';globalThis.U=UNITS;globalThis.M=MODULES;',ctx);
+vm.runInContext(require(root+'scripts/lib/course-content.js').composedSource('fr')+';globalThis.U=UNITS;globalThis.M=MODULES;',ctx);
 vm.runInContext(fs.readFileSync(root+'fr/content.en.js','utf8'),ctx);
 const orig=JSON.stringify(ctx.U);
 const ci=ctx.window.ContentI18n.create({units:ctx.U,overlayUrl:()=>'x'});
@@ -24,7 +24,7 @@ ok(JSON.stringify(ctx.U)===orig,'ciclos repetidos ok');
 {
 const win2={CONTENT_OVERLAYS:{}};const c2={window:win2,document:{},console};vm.createContext(c2);
 vm.runInContext(fs.readFileSync(root+'shared/content-i18n.js','utf8'),c2);
-vm.runInContext(fs.readFileSync(root+'zh/content.js','utf8')+';globalThis.U=UNITS;',c2);
+vm.runInContext(require(root+'scripts/lib/course-content.js').composedSource('zh')+';globalThis.U=UNITS;',c2);
 vm.runInContext(fs.readFileSync(root+'zh/stories.js','utf8')+';globalThis.S=STORIES;',c2);
 vm.runInContext(fs.readFileSync(root+'zh/hanzi-data.js','utf8')+';globalThis.H=HANZI_LESSONS;',c2);
 vm.runInContext(fs.readFileSync(root+'zh/content.en.js','utf8'),c2);

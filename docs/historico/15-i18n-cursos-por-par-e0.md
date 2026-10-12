@@ -39,24 +39,33 @@ Ignoradas por exigirem Postgres/Supabase real: `run.sh` e `.sql` de amigos, pain
 fase-public-deck, fase-identity, fase-k6. `test_i18n_unit` 2104/2104, `deck-browser` 208/208.
 Teste alterado de propósito: `tts-google` agora compara a cópia do Deno com o registro; `test_i18n_unit` ignora o novo `<script>`.
 
-## E2, separar conteúdo-base da camada do curso (2026-10-12, parte 1 de 2)
+## E2, separar conteúdo-base da camada do curso (2026-10-12)
 
-Entregue até aqui (só ferramenta e prova; o app em produção NÃO mudou, `content.js` está intacto):
-- `shared/course-layer.js`: `extract`, `strip`, `apply` (funções puras). A camada usa o mesmo formato do overlay de inglês
-  (`shared/content-i18n.js`), mais `dialogue.speakers`; a tabela de conjugação vira colunas por índice na base.
-- `tests/camada-curso/test_equivalence.js` (66/66): para fr (30 unidades) e zh (18), `apply(strip(c), extract(c))` é idêntico
-  ao original, por hash por unidade e no total, inclusive ordem das colunas das tabelas e `levels`/`modules`/`levelTests`;
-  aplicar a camada duas vezes dá o mesmo resultado; a base fica sem nenhum campo de texto fora da lista de campos do idioma
-  estudado ou de lógica (`id`, `f`, `c`, `p`, `answer`, `alt`, `form`, `subject`, `pinyin`, `kind`, `category`...).
-- Tamanhos: fr base 48 KB + camada 70 KB (original 114 KB); zh base 34 KB + camada 44 KB (original 75 KB).
+Decisão da dona (2026-10-12): regravar a base por script, sem texto em português, e guardar o original com os comentários em `docs/`.
+Só front-end estático e scripts; sem migration, sem Edge Function, nada em produção. Vale após o deploy normal do Pages.
 
-Achados da auditoria do conteúdo:
-- `kind`/`category`/`trigger.after` são chaves de lógica em português (`reality`, `gramatica-coloquial`...), ficam na base.
-- `dialogue.lines[].spk` em zh traz nomes de personagem em português ("Garçom", "Vendedor") que o overlay de inglês nunca
-  traduziu: lacuna existente, a camada agora carrega `speakers` para a E9 corrigir.
-- Não coberto nesta parte (mesmo padrão, próxima rodada): `zh/stories.js`, `zh/hanzi-data.js`, `fr/challenges.js`,
-  `fr/dictations.js`, `fr/conjugation-data.js` e o `lessonVocab` do cron.
-- Divergência (Dv-7): a camada vai como UM arquivo por curso (`courses/<estudado>-<site>/layer.js`), não um por unidade,
-  porque o app lê UNITS de forma síncrona na inicialização; carregamento por unidade só quando houver loader assíncrono (E4).
+O que mudou
+- `shared/course-layer.js`: `extract`, `strip`, `apply` (puras). A camada usa o formato do overlay de inglês mais `dialogue.speakers`;
+  a tabela de conjugação vira colunas por índice na base e a camada recria os rótulos.
+- `fr/content.js` e `zh/content.js` agora são a BASE (ids, frases em francês/hanzi/pinyin, respostas, estrutura) e não exibem nada sozinhos.
+- `courses/fr-pt-BR/layer.js` e `courses/zh-pt-BR/layer.js`: o texto em português. Carregam logo depois do `content.js` nos dois `index.html`,
+  junto com `course-layer.js`, e se aplicam sozinhos sobre `LEVELS`, `UNITS`, `MODULES` e `LEVEL_TESTS`. O `ContentI18n` e o overlay de inglês
+  continuam como estavam (veem o português já aplicado, como antes).
+- Original com todos os comentários de autoria: `docs/historico/conteudo-original/{fr,zh}-content.js.txt`. A migração única está em
+  `scripts/split-course-content.js` (já executada; relê o original guardado).
+- `scripts/lib/course-content.js` (`composedSource`, `load`): carrega base + camada em Node; foi ligado aos consumidores que precisam do texto em
+  português: testes (fase-e, placeholders, trilha, i18n/content_src), `check_grammar_input.js`, `validate-content-overlay.js`, `build_modulo.py`, `build_cloze.py`.
 
-Pendente: decisão da dona sobre como gravar a base (ver a pergunta da entrega) antes de trocar o app para ler base + camada.
+Como editar daqui para frente: texto em português (título, meta, tradução, nota) em `courses/<par>/layer.js`; frase em francês/hanzi, ids e ordem em `<lang>/content.js`.
+
+Provas
+- `tests/camada-curso/test_equivalence.js` (72): para as 48 unidades (30 fr, 18 zh) e para os arquivos REAIS em disco, base + camada == original por hash
+  por unidade e total, ordem das colunas das tabelas inclusive; base sem `title`/`goal`/traduções; aplicar a camada duas vezes dá o mesmo resultado.
+- Tokens que os scripts de desafio usam por módulo (`build_modulo`/`build_cloze`) idênticos ao original.
+
+Divergências e lacunas (de propósito)
+- Dv-7: a camada é UM arquivo por curso, não um por unidade (o app lê `UNITS` de forma síncrona); por unidade só com loader assíncrono (E4).
+- Camada `en` continua o overlay atual (`content.en.js`), ainda não movido para `courses/<par>-en/` (a E2 só prepara o terreno; mover é cosmético e fica com a E9).
+- Fora desta rodada, mesmo padrão a aplicar: `zh/stories.js`, `zh/hanzi-data.js`, `fr/challenges.js`, `fr/dictations.js`, `fr/conjugation-data.js`.
+- Lacuna existente confirmada: nomes de personagem em português no zh ("Garçom", "Vendedor") nunca foram traduzidos no inglês; a camada já carrega `speakers`.
+- V-05 (busca por campos de tradução retorna zero) vale para `content.js` de fr e zh; ainda não para os arquivos acima.

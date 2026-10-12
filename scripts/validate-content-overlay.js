@@ -8,7 +8,7 @@ const ROOT = path.resolve(__dirname, '..');
 const lang = process.argv[2] || 'en';
 const site = process.env.SITE || 'fr';
 const only = process.argv.slice(3);
-const c = {}; vm.runInNewContext(fs.readFileSync(path.join(ROOT, site, 'content.js'), 'utf8') + ';this.UNITS=UNITS;', c);
+const c = {}; vm.runInNewContext(require(path.join(ROOT, 'scripts/lib/course-content.js')).composedSource(site) + ';this.UNITS=UNITS;', c);
 const dir = path.join(ROOT, 'docs', 'i18n', site === 'fr' ? 'content-' + lang : 'content-' + site + '-' + lang);
 let errors = 0;
 const err = (u, m) => { errors++; console.log('  ERRO [' + u + ']: ' + m); };

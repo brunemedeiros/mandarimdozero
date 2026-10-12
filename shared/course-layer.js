@@ -155,6 +155,7 @@
   }
 
   var CourseLayer = { extract: extract, strip: strip, apply: apply };
+  // sempre global (layer.js usa o nome solto), e também módulo CommonJS quando há `module`
+  (typeof globalThis !== 'undefined' ? globalThis : root).CourseLayer = CourseLayer;
   if (typeof module !== 'undefined' && module.exports) module.exports = CourseLayer;
-  else root.CourseLayer = CourseLayer;
 })(typeof window !== 'undefined' ? window : this);

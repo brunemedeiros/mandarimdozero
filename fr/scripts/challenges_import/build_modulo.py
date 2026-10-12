@@ -58,7 +58,7 @@ def tokens(text):
 
 def module_allowed_tokens(module_id):
     js = r"""
-    const fs=require('fs');const src=fs.readFileSync(process.argv[1],'utf8');
+    const src=require(process.argv[1]).composedSource('fr');
     const w=new Function(src+';return {UNITS,MODULES};')();
     const m=w.MODULES.find(x=>x.id===process.argv[2]);
     const out=[];
@@ -69,7 +69,7 @@ def module_allowed_tokens(module_id):
     }
     console.log(JSON.stringify({units:m.unitIds,texts:out}));
     """
-    res = subprocess.run(["node", "-e", js, os.path.join(ROOT, "fr", "content.js"), module_id],
+    res = subprocess.run(["node", "-e", js, os.path.join(ROOT, "scripts", "lib", "course-content.js"), module_id],
                          capture_output=True, text=True, check=True)
     data = json.loads(res.stdout)
     allowed = set()

@@ -3,12 +3,14 @@
 const fs = require('fs'), path = require('path'), vm = require('vm'), crypto = require('crypto');
 const ROOT = path.resolve(__dirname, '..', '..');
 const CourseLayer = require(path.join(ROOT, 'shared/course-layer.js'));
+const CourseContent = require(path.join(ROOT, 'scripts/lib/course-content.js'));
 let pass = 0, fail = 0;
 const ok = (c, m, x) => { if (c) pass++; else { fail++; console.log('FALHOU:', m, x !== undefined ? x : ''); } };
 
+// ORIGINAL de antes da E2 (com o português embutido), guardado em docs/historico/conteudo-original.
 function load(lang){
   const ctx = vm.createContext({ console });
-  vm.runInContext(fs.readFileSync(path.join(ROOT, lang, 'content.js'), 'utf8') +
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'docs/historico/conteudo-original', lang + '-content.js.txt'), 'utf8') +
     ';this.__c={units:UNITS,levels:typeof LEVELS!=="undefined"?LEVELS:undefined,modules:typeof MODULES!=="undefined"?MODULES:undefined,levelTests:typeof LEVEL_TESTS!=="undefined"?LEVEL_TESTS:undefined};', ctx);
   return JSON.parse(JSON.stringify(ctx.__c)); // cópia limpa
 }
@@ -57,6 +59,14 @@ for (const lang of ['fr', 'zh']){
   const twice = CourseLayer.apply(JSON.parse(JSON.stringify(composed)), layerRt);
   ok(hash(twice) === hash(composed), lang + ': aplicar a camada é idempotente');
   ok(Object.keys(layer.units).length === orig.units.length, lang + ': camada cobre todas as unidades');
+
+  // 4. ARQUIVOS REAIS em disco: <lang>/content.js (base) + courses/<lang>-pt-BR/layer.js == original
+  const disk = CourseContent.load(lang);
+  const diskContent = { units: disk.UNITS, levels: disk.LEVELS, modules: disk.MODULES, levelTests: disk.LEVEL_TESTS };
+  ok(hash(orig) === hash(JSON.parse(JSON.stringify(diskContent))), lang + ': arquivos em disco (base + camada) == original');
+  const diskBaseOnly = (() => { const ctx = vm.createContext({}); vm.runInContext(fs.readFileSync(path.join(ROOT, lang, 'content.js'), 'utf8') + ';this.U=UNITS;', ctx); return JSON.parse(JSON.stringify(ctx.U)); })();
+  ok(JSON.stringify(diskBaseOnly).indexOf('"title"') === -1 && JSON.stringify(diskBaseOnly).indexOf('"goal"') === -1, lang + ': content.js em disco não tem title/goal (sem texto de língua de origem)');
+  ok(hash(diskBaseOnly) === hash(base.units), lang + ': content.js em disco == strip(original)');
 
   console.log(lang + ': ' + orig.units.length + ' unidades; base ' + JSON.stringify(base).length + ' B + camada ' + JSON.stringify(layer).length + ' B (original ' + JSON.stringify(orig).length + ' B)');
 }
