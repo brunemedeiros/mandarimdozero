@@ -316,7 +316,7 @@ function enterGuestFlow(){
     goToLanguageApp(lastLang);
     return;
   }
-  document.getElementById('gate-choose-sub').textContent = 'Como convidado(a), seu progresso fica salvo só neste navegador.';
+  document.getElementById('gate-choose-sub').textContent = 'Como convidado(a), seu progresso não é salvo: ao fechar a aba ele se perde. Entre com uma conta para guardar seu avanço.';
   showOnly('gate-choose-language');
   renderLanguageChoices((langId) => {
     askExperienceThenProceed(langId, (langId, alreadyKnows) => {

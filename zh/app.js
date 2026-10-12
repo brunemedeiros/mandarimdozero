@@ -1287,6 +1287,8 @@ function applySerializedState(data){
     // mergeSavedCards (shared/study-trail-model.js).
     mergeSavedCards(STATE.cards, data.cards);
   }
+  // Hanzi: só o progresso volta (o texto vem da camada do curso); ver mergeSavedHanziCards.
+  if (Array.isArray(data.hanziCards)) mergeSavedHanziCards(STATE.hanziCards, data.hanziCards);
   if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(data.cardVariants);
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
   // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).

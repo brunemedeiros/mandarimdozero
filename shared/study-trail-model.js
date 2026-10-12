@@ -269,6 +269,22 @@ function mergeSavedCards(cards, savedCards){
   });
 }
 
+// Hanzi do zh (STATE.hanziCards, ids h<lição>-c<índice>): o save grava o objeto inteiro, mas ao carregar só o
+// PROGRESSO volta (mesma whitelist da trilha). O texto (char, pinyin, significado, radicais) vem da camada do
+// curso e é reaplicado por refreshStudyCardTexts. Sem isto o progresso dos hanzi zerava a cada carregamento
+// (a restauração foi removida na K2-C, commit 49692ff; ver docs/i18n/auditoria-e3-progresso-por-curso.md).
+function mergeSavedHanziCards(cards, savedCards){
+  const byId = {};
+  (savedCards || []).forEach(s => { if (s && s.id != null) byId[s.id] = s; });
+  (cards || []).forEach(c => {
+    const saved = byId[c.id];
+    if (!saved) return;
+    STUDY_PROGRESS_FIELDS.forEach(k => {
+      if (Object.prototype.hasOwnProperty.call(saved, k) && saved[k] !== undefined) c[k] = saved[k];
+    });
+  });
+}
+
 // ============================================================
 // K2-E -- unidade PEDAGÓGICA (palavra = Note) x unidade de ESTUDO
 // (CardInstance). Uma palavra da trilha = 1 Note = 2 CardInstances (A e B).
