@@ -146,7 +146,7 @@ const ANALYTICS_TECHNICAL_ERROR_LABELS = {
 // custo de Retenção/Engajamento/Tecnologia em toda troca de filtro se a
 // autora nunca chega a olhar essas abas. Cache limpo a cada novo período/
 // idioma/dispositivo/comparação (início de renderAdminAnalyticsView()).
-const ANALYTICS_LAZY_TABS = new Set(['retencao', 'engajamento', 'tecnologia']);
+const ANALYTICS_LAZY_TABS = new Set(['retencao', 'engajamento', 'tecnologia', 'decks']);
 
 // ---------- Período ----------
 function analyticsStartOfDay(d){ const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
@@ -1184,6 +1184,30 @@ function renderRetencaoSectionHTML(cohorts){
   `;
 }
 
+// K.8 (079): quantas PESSOAS adicionaram cada Deck público (uma por conta,
+// recópias somam só em "cópias"). Não depende do período escolhido acima:
+// é o total desde a 079 (cópias de antes não foram registradas).
+function renderPublicDeckCopiesSectionHTML(decks){
+  if (!Array.isArray(decks)) return `<p class="profile-empty-note">${t('publicDeckCopies.error')}</p>`;
+  const head = `<div class="section-label">${t('publicDeckCopies.tab')}</div><p class="panel-hint">${t('publicDeckCopies.adminHint')}</p>`;
+  if (!decks.length) return head + `<p class="profile-empty-note">${t('publicDeckCopies.none')}</p>`;
+  const lang = (k) => (typeof STUDENT_LANGUAGE_LABELS !== 'undefined' && STUDENT_LANGUAGE_LABELS[k]) || k;
+  return head + `
+    <div class="student-decks-scroll">
+      <table class="student-decks">
+        <thead><tr><th scope="col">${t('studentDecks.deck')}</th><th scope="col">${t('publicDeckCopies.people')}</th><th scope="col">${t('publicDeckCopies.copies')}</th><th scope="col">${t('publicDeckCopies.last')}</th></tr></thead>
+        <tbody>${decks.map(d => `
+          <tr>
+            <th scope="row">${escapeHTML(d.name || '')}<span class="public-copies-meta">@${escapeHTML(d.owner_username || '')} · ${escapeHTML(lang(d.language_app_key))}${d.is_public ? '' : ` · ${t('publicDeckCopies.unpublished')}`}</span></th>
+            <td${d.people ? '' : ' class="is-zero"'}>${d.people}</td>
+            <td${d.copies ? '' : ' class="is-zero"'}>${d.copies}</td>
+            <td>${d.last_copied_at ? escapeHTML(fmtDate(d.last_copied_at)) : '—'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
 // ---------- Render: navegação interna (abas) ----------
 // Escalável de propósito: uma aba nova é só mais uma entrada aqui e mais
 // um botão no HTML gerado -- nenhuma outra parte do arquivo precisa saber
@@ -1199,6 +1223,7 @@ const ANALYTICS_TABS = [
   { key: 'idioma', get label(){ return t('admin.analytics.subtab.idioma'); } },
   { key: 'dispositivos', get label(){ return t('admin.analytics.subtab.dispositivos'); } },
   { key: 'tecnologia', get label(){ return t('admin.analytics.subtab.tecnologia'); } },
+  { key: 'decks', get label(){ return t('publicDeckCopies.tab'); } },
 ];
 
 function analyticsSubnavHTML(){
@@ -1239,6 +1264,10 @@ async function switchAnalyticsTab(tab){
     ]);
     ANALYTICS_LAZY_CACHE.engajamento = { weeklyXp, badgeGrants };
     panel.innerHTML = renderEngajamentoSectionHTML(ANALYTICS_CURRENT.stats, weeklyXp, badgeGrants);
+  } else if (tab === 'decks'){
+    const { data, error } = await supabaseClient.rpc('admin_public_deck_copy_stats');
+    ANALYTICS_LAZY_CACHE.decks = (!error && data && Array.isArray(data.decks)) ? data.decks : null;
+    panel.innerHTML = renderPublicDeckCopiesSectionHTML(ANALYTICS_LAZY_CACHE.decks);
   } else if (tab === 'tecnologia'){
     const events = await fetchTechnicalEventsForWindow(ANALYTICS_CURRENT.sinceIso, ANALYTICS_CURRENT.untilIso);
     ANALYTICS_LAZY_CACHE.tecnologia = computeTechnicalStats(events);
@@ -1368,7 +1397,8 @@ async function renderAdminAnalyticsView(){
     + `<div data-analytics-panel="engajamento"></div>`
     + `<div data-analytics-panel="idioma">${renderIdiomaSectionHTML(stats)}</div>`
     + `<div data-analytics-panel="dispositivos">${renderDispositivosSectionHTML(stats)}</div>`
-    + `<div data-analytics-panel="tecnologia"></div>`;
+    + `<div data-analytics-panel="tecnologia"></div>`
+    + `<div data-analytics-panel="decks"></div>`;
 
   wireAdminModeAnalyticsToggle();
   wireAnalyticsExcludeOwnToggle();

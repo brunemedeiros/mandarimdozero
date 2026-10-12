@@ -174,7 +174,7 @@ da conta. Não expõe FSRS/due/N-L-R nem cartões de Teacher; vale revisar se XP
 por padrão (hoje `public_profile` é true para todas as contas).
 Retomar quando: Public Decks (flag + RPC autorizada + rota) e `source_user_id/source_card_id` existirem.
 
-## Fase K final -- decisões da autora (2026-10-07); plano aguardando autorização, implementação NÃO iniciada
+## Fase K final -- decisões da autora (2026-10-07); implementada em 2026-10-12 (ver "Fase K final -- entrega" abaixo)
 
 O que já existe e não se refaz: painel 📊 do aluno (Painel de Admin > 🎓 Alunos, RPCs 070 e 059, ambas aplicadas
 na produção), Analytics de produto (`shared/admin-analytics.js`), contrato K.2 (`shared/analytics-metrics.js`).
@@ -209,6 +209,24 @@ Etapas (cada uma com autorização própria):
   na tela do próprio Deck público.
 - Ordem: K.9 → K.10 → K.8. Migrations novas (números a partir de 075) sempre Staging antes da produção
   (skill `migration-supabase`). Testes em `tests/k8/`, `tests/k9/`, `tests/k10/`.
+
+## Fase K final -- entrega (2026-10-12)
+- **K.9** (migration 078 `get_teacher_student_deck_counts`): Meus Decks do aluno + os Decks DESTA professora (a de
+  outra professora fica fora), contagens por subárvore com as regras de `structuralCounts` (total, new, learning,
+  review = estado, due = não-New vencido). Trilha fora (painel 070 já cobre; elegibilidade da trilha é do cliente).
+  Cartão -> Note por `rowId` + `origin` (save antigo SEM rowId: `^s{n}`/`^t{n}` ancorado); Note -> Deck pela coluna
+  `deck_id` da linha ATIVA. Teste de paridade com `getDeckCounts` usando cartões do motor real:
+  `tests/k9/test_deck_counts.js` (18/18).
+- **K.10**: seção "Decks do aluno" no painel 📊 (tabela em árvore: Novos / Aprendendo / Para revisar / Devidos, as
+  mesmas colunas da lista de Decks do aluno) e botão "📊 Analytics do aluno" no perfil público, só para quem tem
+  vínculo ATIVO de professora com a conta (abre o mesmo painel num modal). `tests/k10/test_playwright.js`.
+- **K.8** (migration 079 `public_deck_copies`): tabela uma linha por pessoa e Deck de origem, gravada dentro de
+  `copy_public_deck` (corpo idêntico ao da 068 + o bloco K.8; md5 conferido). Só conta cópia que criou algo (a
+  recópia sem nada novo volta antes e não conta). `get_public_deck_copy_count` para o dono com a permissão
+  `public_deck_copy_count` (Premium/Professora/Aluno na matriz da 075) ou a admin; os outros veem o convite do
+  Premium. `admin_public_deck_copy_stats` alimenta a subaba "Decks públicos" do Analytics da admin.
+  `tests/k8/run.sh`: suíte inteira do Deck público de novo com a 079 (87+48+20+9+72+9) + `test_079.sql` 15/15.
+- Grátis x Premium: Analytics do aluno é da professora; contador do dono é Premium (grátis vê o convite).
 
 ## Fora desta fase
 - Histórico por Note e "última atividade" (`firstLearnedDate`/`lastReview` são por

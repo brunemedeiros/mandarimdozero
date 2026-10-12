@@ -214,3 +214,23 @@ Detalhes e verificação: `docs/plano-professora-privacidade.md`.
 |---|---|---|
 | Staging | ferramenta | `20261008020957` + correção `20261008021111` (`teacher_role_policies_link_check`) |
 | Produção | ferramenta (arquivo final, já corrigido) | `20261012123457` |
+
+## Migration 077 `teacher_invites_and_badges` (2026-10-12)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` (+ `_lang_label` com 'chinês' reaplicado por `execute_sql`) | `20261012182754` |
+| Produção | ferramenta `apply_migration` (autorizada pela autora 2026-10-12; conferido: 7 funções, trigger, índice, policy, grants; 13 vínculos e 13 badges intactos) | `20261012184454` |
+Detalhes e verificação: `docs/plano-professora-privacidade.md`.
+
+## Migrations 078 `teacher_student_deck_counts` e 079 `public_deck_copies` (Fase K final, 2026-10-12)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` (079: corpo de `copy_public_deck` com md5 `d0da8f9d…`, igual ao arquivo) | conferir em `list_migrations` |
+| Produção | ferramenta, autorizada pela autora 2026-10-12 (antes: md5 da 068 conferido; depois: `d0da8f9d…`, 3 funções, sem execute para anon, tabela fechada) | `20261012190508` (078), `20261012190559` (079) |
+Detalhes: `docs/K-analytics-contrato.md`, seção "Fase K final -- entrega".
+
+## Migration 080 `private_profile` (Etapa 3b, 2026-10-12)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` (conferido: 8 funções com a condição nova, tabela fechada para anon, país fechado) | conferir em `list_migrations` |
+| Produção | pendente: **só depois do PR publicado** (site antigo quebra com a 080) | -- |
