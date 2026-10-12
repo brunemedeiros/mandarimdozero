@@ -595,6 +595,23 @@ async function renderPublicDecksSection(boxEl, username){
   }));
 }
 
+// ---------- K.8 (079): "N pessoas adicionaram este Deck" (só o dono Premium ou a admin) ----------
+// Sem a permissão public_deck_copy_count (plano grátis), a RPC responde not_allowed e a
+// caixa mostra o convite para o Premium. Conta pessoas distintas desde a 079.
+async function renderPublicDeckCopiesBox(box, deckId){
+  if (!box) return;
+  const { data, error } = await supabaseClient.rpc('get_public_deck_copy_count', { p_deck_id: deckId });
+  if (!box.isConnected) return;
+  if (error || !data){ box.innerHTML = ''; return; }
+  if (data.error){
+    box.innerHTML = data.error === 'not_allowed' ? `<p class="public-copies-line is-locked">🔒 ${t('publicDeckCopies.premiumHint')}</p>` : '';
+    return;
+  }
+  const n = Number(data.people) || 0;
+  box.innerHTML = `<p class="public-copies-line"><strong>👥 ${escapeHTML(tp('publicDeckCopies.ownerCount', n))}</strong>
+    ${data.last_copied_at ? `<span>${escapeHTML(t('publicDeckCopies.lastOn', { date: fmtDate(data.last_copied_at) }))}</span>` : ''}</p>`;
+}
+
 // ---------- Controles do DONO (Meus Decks): publicar / atualizar / despublicar ----------
 // Toda escrita passa por RPC (publish_deck/unpublish_deck): o UPDATE direto das colunas de
 // publicação é barrado no servidor (trigger decks_public_guard). A UI só orienta.
@@ -618,6 +635,7 @@ function publishBoxHTML(deck, status){
     </div>
     ${status ? `<p class="profile-edit-hint">${status.notes_count} Notes serão públicas.${incompat ? ` ${incompat} não podem ser representadas no formato novo e <strong>não serão publicadas</strong> (continuam intactas no seu Deck).` : ''}</p>` : ''}
     ${isPublic && publicId ? `<input type="text" class="profile-edit-input" readonly data-publish-link value="${escapeHTML(publicDeckShareUrl(publicId, deck.language_app_key))}">` : ''}
+    ${isPublic ? '<div class="public-copies-box" data-publish-copies></div>' : ''}
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
       <button type="button" class="btn btn-primary" data-publish-save>${isPublic ? 'Salvar alterações' : 'Publicar'}</button>
       ${isPublic ? `<button type="button" class="btn btn-secondary" data-publish-copy>Copiar link</button>
@@ -632,6 +650,7 @@ async function openPublishBox(deck, boxEl, onChange){
   const status = await fetchPublicDeckOwnerStatus(deck.id);
   boxEl.innerHTML = publishBoxHTML(deck, status);
   const errEl = boxEl.querySelector('[data-publish-error]');
+  renderPublicDeckCopiesBox(boxEl.querySelector('[data-publish-copies]'), deck.id);
   boxEl.querySelector('[data-publish-save]')?.addEventListener('click', async (ev) => {
     ev.currentTarget.disabled = true;
     errEl.textContent = '';

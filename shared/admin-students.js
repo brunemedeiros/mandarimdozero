@@ -186,16 +186,12 @@ async function toggleStudentMetrics(btn){
   if (!STUDENT_METRICS_CACHE[linkId]){
     panel.style.display = 'block';
     panel.innerHTML = 'Carregando painel do aluno...';
-    const [overview, metrics] = await Promise.all([
-      fetchTeacherStudentOverview(btn.dataset.metricsStudent, btn.dataset.metricsLang),
-      fetchTeacherStudentMetrics(btn.dataset.metricsStudent, btn.dataset.metricsLang),
-    ]);
-    STUDENT_METRICS_CACHE[linkId] = { overview, metrics };
+    STUDENT_METRICS_CACHE[linkId] = await fetchStudentPanelData(btn.dataset.metricsStudent, btn.dataset.metricsLang);
   }
 
   const cached = STUDENT_METRICS_CACHE[linkId];
   panel.style.display = 'block';
-  panel.innerHTML = renderStudentPanelHTML(cached.overview, cached.metrics);
+  panel.innerHTML = renderStudentPanelHTML(cached.overview, cached.metrics, cached.decks);
 }
 
 // ---------- Painel do aluno ampliado (070) -- helpers puros de render ----------
@@ -403,7 +399,52 @@ function studentPanelAnswersHTML(answers, lessonScores){
 }
 
 // Painel completo: visão geral (070) + bloco dos cartões da professora (059).
-function renderStudentPanelHTML(overview, metrics){
+// As 3 RPCs do painel 📊 (070, 059 e 078), em paralelo. Também usado pelo
+// botão Analytics do perfil público (shared/public-profile.js).
+async function fetchStudentPanelData(studentId, lang){
+  const [overview, metrics, decks] = await Promise.all([
+    fetchTeacherStudentOverview(studentId, lang),
+    fetchTeacherStudentMetrics(studentId, lang),
+    typeof fetchTeacherStudentDeckCounts === 'function' ? fetchTeacherStudentDeckCounts(studentId, lang) : Promise.resolve(null),
+  ]);
+  return { overview, metrics, decks };
+}
+
+// K.10: Decks do aluno (Meus Decks + os Decks desta professora) em árvore,
+// com as mesmas colunas da lista de Decks do próprio aluno. Só nome e números.
+function studentPanelDecksHTML(decks){
+  if (!Array.isArray(decks)) return `<p class="profile-empty-note">${t('studentDecks.error')}</p>`;
+  const byParent = new Map();
+  decks.forEach(d => { const k = d.parentId; if (!byParent.has(k)) byParent.set(k, []); byParent.get(k).push(d); });
+  const ids = new Set(decks.map(d => d.id));
+  const roots = decks.filter(d => !ids.has(d.parentId));
+  const ordered = [];
+  const walk = (d, lvl) => { ordered.push([d, lvl]); (byParent.get(d.id) || []).forEach(c => walk(c, lvl + 1)); };
+  roots.forEach(r => walk(r, 0));
+  const hasCards = decks.some(d => d.total > 0);
+  const name = (d) => d.kind === 'personal_root' ? t('deck.myDecks') : d.kind === 'teacher_root' ? t('deck.teacherRoot') : d.name;
+  const num = (n) => n ? `<td>${n}</td>` : '<td class="is-zero">0</td>';
+  return `
+    <div class="student-decks-scroll">
+      <table class="student-decks">
+        <thead><tr>
+          <th scope="col">${t('studentDecks.deck')}</th>
+          <th scope="col">${t('progress.statNew')}</th><th scope="col">${t('progress.statLearning')}</th>
+          <th scope="col">${t('progress.statReview')}</th><th scope="col">${t('progress.statDueNow')}</th>
+        </tr></thead>
+        <tbody>${ordered.map(([d, lvl]) => `
+          <tr class="${lvl === 0 ? 'is-root' : ''}">
+            <th scope="row" style="padding-left:${12 + lvl * 16}px">${escapeHTML(name(d))}</th>
+            ${num(d.new)}${num(d.learning)}${num(d.review)}${num(d.due)}
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    ${hasCards ? '' : `<p class="panel-hint">${t('studentDecks.empty')}</p>`}
+    <p class="panel-hint">${t('studentDecks.hint')}</p>`;
+}
+
+function renderStudentPanelHTML(overview, metrics, decks){
   let html = '';
   if (!overview || !Array.isArray(overview.languages)){
     html += '<p class="profile-empty-note">Não foi possível carregar a visão geral do aluno agora.</p>';
@@ -424,6 +465,7 @@ function renderStudentPanelHTML(overview, metrics){
     html += studentPanelDetailsHTML('Linha do tempo (últimas atividades)', studentPanelTimelineHTML(overview.timeline));
   }
   html += `<div class="admin-badge-name" style="margin-top:10px;">Cartões que você criou</div>${renderStudentMetricsHTML(metrics)}`;
+  if (decks !== undefined) html += `<div class="admin-badge-name" style="margin-top:14px;">${t('studentDecks.title')}</div>${studentPanelDecksHTML(decks)}`;
   return html;
 }
 

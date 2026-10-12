@@ -221,3 +221,10 @@ Detalhes e verificação: `docs/plano-professora-privacidade.md`.
 | Staging | ferramenta `apply_migration` (+ `_lang_label` com 'chinês' reaplicado por `execute_sql`) | `20261012182754` |
 | Produção | ferramenta `apply_migration` (autorizada pela autora 2026-10-12; conferido: 7 funções, trigger, índice, policy, grants; 13 vínculos e 13 badges intactos) | `20261012184454` |
 Detalhes e verificação: `docs/plano-professora-privacidade.md`.
+
+## Migrations 078 `teacher_student_deck_counts` e 079 `public_deck_copies` (Fase K final, 2026-10-12)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` (079: corpo de `copy_public_deck` com md5 `d0da8f9d…`, igual ao arquivo) | conferir em `list_migrations` |
+| Produção | pendente (autorização da autora) | -- |
+Detalhes: `docs/K-analytics-contrato.md`, seção "Fase K final -- entrega".

@@ -2225,6 +2225,24 @@ window.I18N_CATALOG['en'] = {
   'perm.teacher_student_analytics': 'Student analytics', // ALTA
   'perm.teacher_board': 'Class board', // ALTA
   'plans.chip.premium': 'Premium', // ALTA
+  'publicDeckCopies.tab': 'Public decks', // ALTA
+  'publicDeckCopies.adminHint': 'How many people added each public deck (each account counts once; re-copies only add to "Copies"). Counted since Oct 12, 2026.', // ALTA
+  'publicDeckCopies.none': 'No public decks yet.', // ALTA
+  'publicDeckCopies.error': 'Couldn\'t load public decks right now.', // ALTA
+  'publicDeckCopies.people': 'People', // ALTA
+  'publicDeckCopies.copies': 'Copies', // ALTA
+  'publicDeckCopies.last': 'Last copy', // ALTA
+  'publicDeckCopies.unpublished': 'unpublished', // ALTA
+  'publicDeckCopies.ownerCount': { one: '{n} person added this deck', other: '{n} people added this deck' }, // ALTA
+  'publicDeckCopies.lastOn': 'Last time on {date}', // ALTA
+  'publicDeckCopies.premiumHint': 'With Premium you can see how many people added this deck.', // ALTA
+  'studentAnalytics.open': 'Student analytics ({lang})', // ALTA
+  'studentAnalytics.title': '{name}\'s analytics', // ALTA
+  'studentDecks.title': 'Student decks', // ALTA
+  'studentDecks.deck': 'Deck', // ALTA
+  'studentDecks.hint': 'You see each deck\'s name and numbers (subdecks included), without opening the cards. Only what the student has already synced counts.', // ALTA
+  'studentDecks.empty': 'The student has no cards in decks yet.', // ALTA
+  'studentDecks.error': 'Couldn\'t load the student\'s decks right now.', // ALTA
   'tinvite.lang.frances': 'French', // ALTA
   'tinvite.lang.mandarim': 'Chinese', // ALTA
   'tinvite.lang.portugues': 'Portuguese', // ALTA
