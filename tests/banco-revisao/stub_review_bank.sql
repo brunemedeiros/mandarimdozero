@@ -1,4 +1,4 @@
--- Complemento para a 080: colunas de teacher_flashcards que a produção já tem e um ensure_teacher_decks mínimo.
+-- Complemento para a 081: colunas de teacher_flashcards que a produção já tem e um ensure_teacher_decks mínimo.
 alter table public.teacher_flashcards add column if not exists back_trans text, add column if not exists note text,
   add column if not exists fields jsonb, add column if not exists card_generation_mode text,
   add column if not exists tags text[] not null default '{}'::text[], add column if not exists deck_id bigint,
