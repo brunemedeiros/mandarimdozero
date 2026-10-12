@@ -545,3 +545,31 @@
 @media (max-width: 900px){ .painel .p-grade-2.p-grade-2--larga{ grid-template-columns: 1fr; } .painel .p-lateral{ position: static; } }
 /* botão de envio (type=submit) dentro de .p-acoes não ocupa a linha toda: os botões ficam lado a lado */
 .painel .p-acoes > :is(button, [type=submit], [role=button]){ width: auto; margin: 0; }
+
+/* ---------- Tipos de cartão como peças escolháveis (rádios com título e descrição) ---------- */
+.painel .p-tipos{ display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .6rem; margin: 0; }
+.painel .p-tipos label{ position: relative; display: grid; gap: .15rem; width: 100%; margin: 0; padding: .7rem .8rem; border: 1px solid var(--p-linha); border-radius: var(--p-raio-controle); background: var(--p-elevado); cursor: pointer; }
+.painel .p-tipos label:has(input:checked){ border-color: var(--p-marca-escura); box-shadow: 0 0 0 2px color-mix(in srgb, var(--p-marca-escura) 35%, transparent); }
+.painel .p-tipos label:has(input:focus-visible){ outline: 2px solid var(--p-marca-escura); outline-offset: 2px; }
+.painel .p-tipos input{ position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.painel .p-tipos b{ font-size: .92rem; }
+.painel .p-tipos span{ font-size: .8rem; color: var(--p-tinta-suave); }
+
+/* ---------- Envoltório dos editores de campo (marcação antiga, compartilhada com o lado do aluno) ----------
+   Os editores de campos, de múltipla escolha, de lacunas e de tags geram HTML com classes do site (btn, admin-select-link,
+   field-image-link...). Dentro de .p-editor esses botões ficam no tamanho e no tom das ações secundárias do painel. */
+.painel .p-editor :is(button.admin-select-link, button.btn, button.field-image-link, button.admin-badge-delete-btn){ width: auto; min-height: 0; margin: .2rem .3rem .2rem 0; padding: .3rem .8rem; border: 1px solid var(--p-borda-campo); border-radius: 999px; background: transparent; color: var(--p-tinta); font-size: .85rem; font-weight: 700; text-decoration: none; }
+.painel .p-editor :is(button.admin-select-link, button.btn, button.field-image-link, button.admin-badge-delete-btn):hover{ background: var(--p-linha); }
+.painel .p-editor .field-editor-row{ border-radius: var(--p-raio-controle); background: var(--p-superficie); }
+.painel .p-editor :is(label.profile-edit-label, .section-label){ display: block; margin: .6rem 0 .2rem; font-size: .85rem; font-weight: 800; color: var(--p-tinta); }
+.painel .p-editor .profile-edit-hint, .painel .p-editor .profile-edit-field-error{ font-size: .82rem; color: var(--p-tinta-suave); }
+.painel .p-editor .profile-edit-error{ color: var(--p-erro); font-weight: 700; }
+
+/* Destino de um aluno (Deck onde o cartão entra) e janela larga para formulários longos. */
+.painel .p-destino{ display: grid; gap: .5rem; padding: .8rem 0; border-top: 1px solid var(--p-linha); }
+.painel .p-destino:first-child{ border-top: 0; padding-top: 0; }
+.painel .p-destino select{ margin: 0; }
+.painel dialog.p-dialogo--larga article{ width: min(46rem, calc(100vw - 2rem)); }
+.painel .p-tabela--compacta :is(th, td){ padding: .55rem .6rem; font-size: .9rem; }
+.painel .p-tabela--compacta td small{ font-size: .78rem; color: var(--p-tinta-suave); }
+.painel .p-editor form > label{ margin-top: 1rem; }

@@ -2415,4 +2415,82 @@ window.I18N_CATALOG['en'] = {
   'classlogs.delete.textGroup': 'This class was logged for {n} people and disappears for all of them. This cannot be undone.', // ALTA
   'classlogs.delete.confirm': 'Delete class', // ALTA
   'classlogs.form.submitOne': 'Log class', // ALTA
+  'cards.title': 'Cards', // ALTA
+  'cards.sub': 'Create cards for one or more people and keep track of the ones you created.', // ALTA
+  'cards.tab.aria': 'Cards sections', // ALTA
+  'cards.tab.create': 'Create card', // ALTA
+  'cards.tab.list': 'Created cards', // ALTA
+  'cards.tab.bank': 'Review Bank', // ALTA
+  'cards.step.who': '1. Who is it for', // ALTA
+  'cards.step.type': '2. Card type', // ALTA
+  'cards.step.content': '3. Content', // ALTA
+  'cards.who.none': 'Nobody chosen yet', // ALTA
+  'cards.who.pick': 'Choose people', // ALTA
+  'cards.who.hint': 'Choose one person, or several for the same card. Each person gets their own copy.', // ALTA
+  'cards.who.langHint': 'A card belongs to one language. To mix languages, create one card for each.', // ALTA
+  'cards.who.removePerson': 'Remove {name}', // ALTA
+  'cards.who.langAria': 'Students language', // ALTA
+  'cards.type.normal.desc': 'Front and back. The person sees one side and recalls the other.', // ALTA
+  'cards.type.normalReversed.desc': 'Also asks in the opposite direction: each card becomes two.', // ALTA
+  'cards.type.multipleChoice.desc': 'One right answer and some wrong options.', // ALTA
+  'cards.type.typeAnswer.desc': 'The person types the answer.', // ALTA
+  'cards.type.cloze.desc': 'A sentence with gaps. Each gap becomes a card.', // ALTA
+  'cards.summary.title': 'Ready to create', // ALTA
+  'cards.summary.people': { one: '{n} person', other: '{n} people' }, // ALTA
+  'cards.summary.none': 'Choose who will get the card.', // ALTA
+  'cards.summary.warn': 'If you edit the content later, the person loses their progress on that card. We warn you before saving.', // ALTA
+  'cards.list.studentAll': 'All students', // ALTA
+  'cards.list.studentAria': 'Student', // ALTA
+  'cards.list.statusAria': 'Card status', // ALTA
+  'cards.list.statusActive': 'Active', // ALTA
+  'cards.list.statusArchived': 'Archived', // ALTA
+  'cards.list.search': 'Search card content', // ALTA
+  'cards.list.searchAria': 'Search cards', // ALTA
+  'cards.list.title': { one: '{n} card', other: '{n} cards' }, // ALTA
+  'cards.col.card': 'Card', // ALTA
+  'cards.col.for': 'For', // ALTA
+  'cards.col.deck': 'Deck', // ALTA
+  'cards.col.tags': 'Tags', // ALTA
+  'cards.col.format': 'Format', // ALTA
+  'cards.col.created': 'Created on', // ALTA
+  'cards.noDeck': 'no Deck', // ALTA
+  'cards.menu': 'Actions', // ALTA
+  'cards.act.preview': 'Preview', // ALTA
+  'cards.act.edit': 'Edit', // ALTA
+  'cards.act.move': 'Move to another Deck', // ALTA
+  'cards.act.reactivate': 'Reactivate', // ALTA
+  'cards.act.delete': 'Delete', // ALTA
+  'cards.empty.title': 'No cards created yet', // ALTA
+  'cards.empty.text': 'Create the first one in the Create card tab.', // ALTA
+  'cards.empty.btn': 'Create card', // ALTA
+  'cards.empty.filtered': 'No cards match these filters.', // ALTA
+  'cards.noStudents.title': 'No students linked yet', // ALTA
+  'cards.noStudents.text': 'Link a student in the Students tab to create cards for them.', // ALTA
+  'cards.page.aria': 'Pages', // ALTA
+  'cards.page.prev': 'Previous', // ALTA
+  'cards.page.next': 'Next', // ALTA
+  'cards.page.range': '{from} to {to} of {total}', // ALTA
+  'cards.loading': 'Loading cards…', // ALTA
+  'cards.fail': 'Could not load the cards right now.', // ALTA
+  'cards.edit.title': 'Edit card', // ALTA
+  'cards.edit.for': 'Card for {name}', // ALTA
+  'cards.edit.legacyNote': 'This is an old card, from before the field editor. The old editor is still available just for it.', // ALTA
+  'cards.edit.save': 'Save', // ALTA
+  'cards.edit.cancel': 'Cancel', // ALTA
+  'cards.edit.resetTitle': 'Save and restart progress?', // ALTA
+  'cards.edit.resetText': 'Changing the card content restarts the person\'s review progress on it.', // ALTA
+  'cards.edit.resetConfirm': 'Save and restart', // ALTA
+  'cards.move.title': 'Move card', // ALTA
+  'cards.move.to': 'To the Deck', // ALTA
+  'cards.move.confirm': 'Move', // ALTA
+  'cards.delete.title': 'Delete this card?', // ALTA
+  'cards.delete.text': 'The card and all of the person\'s review history on it are deleted and this cannot be undone.', // ALTA
+  'cards.delete.confirm': 'Delete card', // ALTA
+  'cards.deck.delete.title': 'Delete the Deck?', // ALTA
+  'cards.deck.delete.text': 'The Deck "{name}" is empty and disappears for the student. This cannot be undone.', // ALTA
+  'cards.deck.delete.confirm': 'Delete Deck', // ALTA
+  'cards.deck.folders': 'See Decks and cards of {name}', // ALTA
+  'cards.deck.newSub': 'New subdeck', // ALTA
+  'cards.bank.title': 'Review Bank', // ALTA
+  'cards.bank.text': 'Cards generated automatically from each student\'s Google Doc will show up here, for you to check, approve or cut before they go to their review. This part is still being moved to the site and is not active yet.', // ALTA
 };

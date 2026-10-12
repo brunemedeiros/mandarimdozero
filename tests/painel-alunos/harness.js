@@ -91,6 +91,36 @@ async function abrir({ lang = 'fr', scheme = 'light', width = 1280, height = 100
     deleteClassLog = async (id) => { window.__logs = window.__logs.filter(x => String(x.id) !== String(id)); return { ok: true }; };
     window.__removidos = []; removeStudentLink = async (id) => { window.__removidos.push(id); return { ok: true }; };
     assignStudentToTeacher = async (u, l) => { window.__vinculou = [u, l]; return { ok: true, target: { username: u } }; };
+    // Cartões e Decks da professora em memória (mesmas funções que o app usa, sem rede).
+    let did = 500, cid = 1000; const iso = (d) => `2026-10-${String(d).padStart(2, '0')}T12:00:00Z`;
+    window.__decks = links.map(l => ({ id: did++, owner_id: l.student_id, teacher_id: 'T', kind: 'teacher_root', parent_deck_id: null, name: 'Cartões da professora', language_app_key: l.language_app_key, created_at: iso(1) }));
+    const rootOf = (sid) => window.__decks.find(d => d.owner_id === sid && d.kind === 'teacher_root').id;
+    const temS1 = links.some(l => l.student_id === 's1');
+    if (temS1) window.__decks.push({ id: did++, owner_id: 's1', teacher_id: 'T', kind: 'teacher', parent_deck_id: rootOf('s1'), name: 'Verbos', language_app_key: links.find(l => l.student_id === 's1').language_app_key, created_at: iso(2) });
+    const native = (front, back, tags, mode) => { const st = createNativeNoteEditorState({ cardGenerationMode: mode || 'normal', fields: [{ content: { value: front }, lang: 'fr' }, { content: { value: back }, lang: 'pt-BR' }], tags: tags || [] }); return nativeContentColumnsFromEditorState(st); };
+    const row = (sid, day, content, deckId, extra) => Object.assign({ id: cid++, teacher_id: 'T', student_id: sid, language_app_key: links.find(l => l.student_id === sid).language_app_key, deck_id: deckId == null ? rootOf(sid) : deckId, status: 'active', revision: 0, created_at: iso(day), image_url: null, audio_url: null }, content, extra || {});
+    window.__cards = [];
+    if (links.length >= 5){
+      window.__cards = [
+        row('s1', 9, native('le chat', 'o gato', ['animais', 'a1'])),
+        row('s1', 8, native('manger', 'comer', ['verbos'], 'normal_reversed'), window.__decks[window.__decks.length - 1].id, { note: 'verbo do 1º grupo' }),
+        row('s2', 8, native('manger', 'comer', ['verbos'], 'normal_reversed')),
+        row('s2', 7, { front: 'la maison', back_trans: 'a casa', note: null, choices: null, cloze_sentence: null, cloze_answer: null, fields: null, card_generation_mode: null, front_is_target_language: true, tags: [] }),
+        row('s3', 6, native('la porte', 'a porta'), null, { status: 'archived' }),
+      ];
+      for (let i = 1; i <= 12; i++) window.__cards.push(row('s4', 5, native('mot ' + i, 'palavra ' + i, ['lote'])));
+    }
+    const clone = (x) => JSON.parse(JSON.stringify(x));
+    fetchDecksForLanguage = async (lang) => clone(window.__decks.filter(d => d.language_app_key === lang));
+    ensureTeacherDecksForStudent = async (sid, lang) => ({ ok: true, rootDeckId: 1, teacherRootDeckId: rootOf(sid) });
+    fetchAllTeacherFlashcards = async () => ({ cards: clone(window.__cards).sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id), truncated: false });
+    createFlashcard = async ({ studentId, languageAppKey, nativeState, deckId }) => { const r = row(studentId, 12, nativeContentColumnsFromEditorState(nativeState), deckId); r.language_app_key = languageAppKey; r.created_at = new Date().toISOString(); window.__cards.push(r); return { ok: true, card: r }; };
+    updateFlashcardContent = async (id, o) => { const c = window.__cards.find(x => x.id === id); if (o.nativeState) Object.assign(c, { revision: o.revision }, nativeContentColumnsFromEditorState(o.nativeState)); else Object.assign(c, { front: o.front || null, back_trans: o.backTrans, note: o.note || null, revision: o.revision }); return { ok: true }; };
+    deleteFlashcardPermanently = async (id) => { window.__cards = window.__cards.filter(c => c.id !== Number(id)); return { ok: true }; };
+    setFlashcardStatus = async (id, status) => { window.__cards.find(c => c.id === Number(id)).status = status; return { ok: true }; };
+    setTeacherFlashcardDeck = async ({ note, destination }) => { window.__cards.find(c => c.id === note.id).deck_id = destination.id; return { ok: true }; };
+    createTeacherDeck = async ({ name, parentDeck }) => { const n = (name || '').trim(); if (!n) return { ok: false, error: 'Dê um nome ao subdeck.' }; const d = { id: did++, owner_id: parentDeck.owner_id, teacher_id: 'T', kind: 'teacher', parent_deck_id: parentDeck.id, name: n, language_app_key: parentDeck.language_app_key, created_at: iso(3) }; window.__decks.push(d); return { ok: true, deck: clone(d) }; };
+    deleteTeacherDeck = async ({ deck }) => { window.__decks = window.__decks.filter(d => d.id !== deck.id); return { ok: true }; };
     switchTab('teacher-panel'); switchTeacherPanelSection('students');
   }, [alunos, admin, lang === 'fr' ? 'frances' : 'mandarim']);
   return { page, errors, base: `http://127.0.0.1:${server.address().port}`, close: async () => { await browser.close(); server.close(); } };

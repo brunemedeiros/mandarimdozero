@@ -1,4 +1,5 @@
 // Fase I (Tags) -- Playwright (Chromium real), FR + ZH. Stub em memória do Supabase (CDN bloqueado no sandbox); regras reais de RLS/limites estão em test_supabase_real.sql.
+const CARTOES = require('../painel-cartoes/helpers.js');
 // Rodar: node tests/fase-i/test_playwright.js
 // vazio, vínculo inativo fora do seletor, duas professoras isoladas.
 // Aluno (Meus Cartões > "Cartões da professora"): árvore somente leitura com
@@ -240,12 +241,12 @@ async function bootPage(browser, lang, port){
       fetchMyStudents = async () => [{ student_id: 'S1', username: 'ana', display_name: 'Ana', language_app_key: a, status: 'active' }];
       switchTab('teacher-panel'); switchTeacherPanelSection('flashcards');
     }, appKey);
-    await page.waitForSelector('[data-student-checkbox]');
-    await page.check('[data-student-checkbox][value="S1"]:visible');
+    await page.waitForSelector('[data-tcc="pagina"]');
+    await CARTOES.pickStudent(page, 'S1');
     await page.waitForSelector('#admin-flashcard-tags [data-tags-input]');
     await page.fill('#admin-flashcard-tags [data-tags-input]', 'Professora Tag, a1');
     await page.click('#admin-flashcard-tags [data-tags-add]');
-    await page.selectOption('#admin-flashcard-card-type-preview', 'normal');
+    await CARTOES.setType(page, 'normal');
     for (let i = 0; i < 2; i++) await page.click('#admin-flashcard-native-fields [data-field-add]');
     const ai = page.locator('#admin-flashcard-native-fields [data-field-content]');
     await ai.nth(0).fill('a'); await ai.nth(1).fill('b');
@@ -253,8 +254,9 @@ async function bootPage(browser, lang, port){
     await page.waitForFunction(() => (window.__tinserts || []).length === 1, null, { timeout: 8000 });
     const ti = await ev(() => window.__tinserts[0]);
     L('professora cria Teacher Card com tags normalizadas', JSON.stringify(ti.tags) === '["professora-tag","a1"]', ti.tags);
+    await CARTOES.goTab(page, 'lista');
     await page.waitForSelector('[data-row-tags]');
-    L('lista da professora mostra as tags do cartão', await ev(() => document.querySelector('[data-row-tags]').textContent.includes('#professora-tag')));
+    L('lista da professora mostra as tags do cartão', await ev(() => document.querySelector('[data-row-tags]').textContent.includes('professora-tag')));
 
     L('nenhum pageerror', errors.length === 0, errors.slice(0, 3));
   }

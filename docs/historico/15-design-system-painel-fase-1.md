@@ -106,3 +106,11 @@ Autorização da autora: "pode seguir para Aulas". Mesmo método de Alunos (dese
   regressão: painel-alunos 206/206 e 61/61, painel-professora 162/162, fase-k6 28/28, painel-ds 9+87+131+194+288.
 - **Grátis x Premium:** tudo grátis. Passo manual da autora: nenhum.
 - **Fica para depois:** Cartões (Flashcards) na nova linguagem; "Criar cartão" da ficha ainda abre a aba atual sem pré-selecionar o aluno; Material de apoio.
+
+## Fase 2, tela Cartões entregue (2026-10-12, branch `claude/epic-fermat-ulyw5j`, nada publicado)
+Autorização da autora: "pode seguir para Cartões". Sem migration, sem dado novo; Grátis x Premium: tudo grátis (é ferramenta da professora).
+- **Tela nova** (fr e zh): 3 abas. **Criar cartão** (1 Para quem: seletor de pessoas com chips, destino por aluno com Deck/subdeck e árvore; 2 Tipo de cartão em 5 opções com descrição; 3 Conteúdo: editor de campos nativo, tags, nota; resumo e botão ao lado). **Cartões criados**: tabela com filtros (aluno, ativos/arquivados, busca), 10 por página, menu por linha (visualizar, editar, mover, reativar, apagar). **Banco de Revisão**: só um aviso de que ainda não está ativa.
+- Arquivos: `shared/teacher-cards-ui.js` (HTML), `shared/admin-flashcards.js` (reescrito; mesmos ganchos `data-*` e exports usados por `my-flashcards.js`), `fetchAllTeacherFlashcards` em `teacher-flashcards.js`, 78 chaves `cards.*` (pt-BR/en).
+- Regras mantidas: editar conteúdo reinicia o progresso (confirma antes), Deck só do próprio aluno/idioma, trocar de idioma zera a seleção, Deck com cartão não se apaga, histórico sem Deck intacto.
+- Testes: `tests/painel-cartoes/` (46 de peças de tela, 256 no navegador); testes antigos fase-g (68), fase-h (68), fase-i (48) portados para a tela nova via `tests/painel-cartoes/helpers.js` (seletor de alunos abre/fecha, tipo por botão, mover por janela na lista, apagar Deck com confirmação do painel). Regressão: painel-ds 9/87/131/194/288, painel-alunos 61+206, painel-aulas 33+162, painel-professora 162, fase-k6 28, fase-h unit 78.
+- **Banco de Revisão (função nova, geração automática de cartões a partir do Google Docs de cada aluno): NÃO implementado.** Precisa de auditoria antes: ver `docs/fase-2-professora/banco-de-revisao-auditoria.md`.

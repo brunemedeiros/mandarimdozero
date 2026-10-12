@@ -20,6 +20,7 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
   Dar/tirar plano só pelas RPCs `admin_grant_role`/`admin_revoke_role` (UPDATE direto em `profiles.plan_tier` falha).
 - Aba **Alunos** (Design System novo): quadro geral com situação (Em dia 0 a 3 dias, Atenção 4 a 6, Parado 7+) e ficha em página própria; peças HTML em `shared/teacher-students-ui.js`, dados e eventos em `shared/admin-students.js`. Vincular (janela) é só da admin; remover vínculo usa `PainelUI.confirmar`. Testes: `tests/painel-alunos/`.
 - Aba **Aulas** (Design System novo): lista por mês + formulário ao lado; aula em grupo = 1 linha por aluno no banco, agrupadas na tela por conteúdo e instante de criação (`tclGroupLogs`); editar/apagar vale para o grupo. HTML em `shared/teacher-classlogs-ui.js`, dados e eventos em `shared/admin-class-logs.js`. Testes: `tests/painel-aulas/`.
+- Aba **Cartões** (Design System novo): abas Criar cartão / Cartões criados / Banco de Revisão (ainda só aviso). HTML em `shared/teacher-cards-ui.js`, dados e eventos em `shared/admin-flashcards.js` (ganchos `data-*` preservados; testes fase-g/h/i usam `tests/painel-cartoes/helpers.js`). Testes: `tests/painel-cartoes/`.
 - Visual dos painéis: classe `.panel-view` (seletor `.deck-topbar`, títulos `.panel-h`/`.section-label` sem caixa-alta).
 - Vínculo professora↔aluno é por idioma (`teacher_students`, `status='active'`); remover vínculo nunca apaga progresso.
 - Leitura de progresso de outra conta só por RPC `security definer` com checagem de vínculo (059, 070).

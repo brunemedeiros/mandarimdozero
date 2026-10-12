@@ -241,7 +241,7 @@
     if (ab){ var d = document.getElementById(ab.getAttribute('data-abrir-dialogo')); if (d && d.showModal && !d.open){ d.showModal(); var f = d.querySelector('[data-foco-inicial]') || d.querySelector('input, textarea, select, button:not([rel="prev"])'); if (f) f.focus(); } return; }
     var fe = e.target.closest && e.target.closest('[data-fechar-dialogo], dialog button[rel="prev"]');
     if (fe){ var dd = fe.closest('dialog'); if (dd && dd.close) dd.close(); return; }
-    if (e.target.matches && e.target.matches('dialog.p-dialogo[open]:not(.p-dialogo--alerta)') && e.target.close) e.target.close();   // clique no fundo (alerta exige resposta)
+    if (e.target.matches && e.target.matches('dialog.p-dialogo[open]:not(.p-dialogo--alerta):not([data-nao-fechar-no-fundo])') && e.target.close) e.target.close();   // clique no fundo (alerta e janela de edição longa não fecham assim)
   });
 
   /* ---------- Menu de contexto (botão direito) ---------- */
