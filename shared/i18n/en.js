@@ -77,6 +77,8 @@ window.I18N_CATALOG['en'] = {
   'courses.beta': 'beta', // ALTA
   'courses.current': 'current', // ALTA
   'courses.confirm.body': 'You are about to switch to the course {course}. Each course keeps its own progress: what you did in the current course stays saved and comes back when you return to it. Your day streak and achievements stay the same.', // MÉDIA
+  'courses.first.title': 'Which course do you want to start?', // ALTA
+  'courses.first.sub': 'You can switch courses later in Settings. Each course keeps its own progress.', // ALTA
 
   // Fase 6 lote 1
   'settings.title': 'Settings', // ALTA

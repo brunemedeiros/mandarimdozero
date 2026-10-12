@@ -14,6 +14,12 @@
   var COURSE_PROGRESS_PER_SITE_LANGUAGE = false;
   // C5: o dono do projeto liga só no próprio navegador para testar (localStorage['courses-per-site-language'] = '1'), sem afetar ninguém.
   // Ligar para todos = trocar a constante acima (decisão da dona, depois das pendências listadas em docs/historico/15).
+  // Atalho para a dona: abrir a página com ?cursos=1 liga só naquele navegador; ?cursos=0 desliga.
+  try {
+    var q = new URLSearchParams(root.location.search).get('cursos');
+    if (q === '1') root.localStorage.setItem('courses-per-site-language', '1');
+    else if (q === '0') root.localStorage.removeItem('courses-per-site-language');
+  } catch (e) {}
   function isPerSiteLanguage(){
     if (COURSE_PROGRESS_PER_SITE_LANGUAGE) return true;
     try { return root.localStorage && root.localStorage.getItem('courses-per-site-language') === '1'; } catch (e) { return false; }

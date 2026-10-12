@@ -73,6 +73,32 @@ function renderMyCourses(){
     b.addEventListener('click', () => confirmSwitchCourse(b.dataset.app, b.dataset.site));
   });
 }
+// C6: portão do primeiro acesso. Depois de "Eu falo..." (idioma do site), a pessoa escolhe o curso entre os disponíveis para esse idioma.
+// Conta nova: sem progresso a perder, então não salva nada antes de recarregar/abrir a outra página. Só roda com a flag ligada.
+function showFirstCoursePick(lang, modal){
+  const box = document.getElementById('ui-language-first-courses');
+  if (!box || !modal) return false;
+  const items = listAvailableCourses(APP_KEY, lang, false).filter(c => c.siteLang === lang);
+  if (items.length < 2) return false;
+  items.sort((a, b) => (b.appKey === APP_KEY) - (a.appKey === APP_KEY));
+  const body = modal.querySelector('.app-modal-body');
+  const head = modal.querySelector('.app-modal-header h3');
+  if (head) head.textContent = t('courses.first.title');
+  if (body) Array.from(body.children).forEach(ch => { if (ch !== box) ch.style.display = 'none'; });
+  box.style.display = '';
+  box.innerHTML = `<p style="margin:0 0 4px;">${escapeHTML(t('courses.first.sub'))}</p>
+    <div class="my-courses-list" style="margin-top:12px;">${items.map((c, i) => `<button type="button" class="btn ${i === 0 ? 'btn-primary' : 'btn-secondary'} my-course" data-app="${escapeHTML(c.appKey)}">${escapeHTML(courseDisplayName(c.appKey, c.siteLang))}${c.status === 'beta' ? ` <span class="my-course-tag">${escapeHTML(t('courses.beta'))}</span>` : ''}</button>`).join('')}</div>`;
+  box.querySelectorAll('button.my-course').forEach(b => b.addEventListener('click', async () => {
+    try { if (typeof flushAccountUiLanguage === 'function') await flushAccountUiLanguage(); } catch (e) {}
+    const l = LanguageRegistry.byAppKey(b.dataset.app);
+    const pinned = (typeof pageCourseSiteLang !== 'undefined') ? pageCourseSiteLang : null;
+    if (l && b.dataset.app !== APP_KEY) window.location.href = '../' + l.path;
+    else if (pinned !== lang) window.location.reload();
+    else modal.style.display = 'none';
+  }));
+  return true;
+}
+
 try {
   window.addEventListener('i18n:change', renderMyCourses);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', renderMyCourses); else renderMyCourses();

@@ -93,6 +93,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'courses.beta': 'em teste',
   'courses.current': 'atual',
   'courses.confirm.body': 'Você vai trocar para o curso {course}. O progresso de cada curso é separado: o que você fez no curso atual continua salvo e volta quando você voltar a ele. Sua sequência de dias e suas conquistas continuam as mesmas.',
+  'courses.first.title': 'Qual curso você quer começar?',
+  'courses.first.sub': 'Você pode trocar de curso depois em Configurações. O progresso de cada curso é separado.',
 
   // ---- Fase 6 lote 1: Configurações + menu da conta (fr e zh) ----
   'settings.title': 'Configurações',

@@ -415,11 +415,13 @@ function askUiLanguageOnFirstAccess(){
     const isSuggested = btn.getAttribute('data-lang') === suggested;
     btn.classList.toggle('btn-primary', isSuggested);
     btn.classList.toggle('btn-secondary', !isSuggested);
-    btn.onclick = () => {
+    btn.onclick = async () => {
       const lang = btn.getAttribute('data-lang');
-      modal.style.display = 'none';
-      setUiLang(lang);
       persistUiLanguageToAccount(lang);
+      try { await setUiLang(lang); } catch (e) {}
+      // C6: com cursos por idioma do site, segue para "Qual curso você quer começar?" (só quando há mais de um para escolher).
+      if (CourseStorage.isPerSiteLanguage() && typeof showFirstCoursePick === 'function' && showFirstCoursePick(lang, modal)) return;
+      modal.style.display = 'none';
     };
   });
   modal.style.display = 'flex';
