@@ -5,6 +5,12 @@ O site (portão `index.html`) agora pede o **código** do e-mail depois de "Cria
 (conferido em 2026-10-12: o único cadastro por e-mail recebeu `confirmation_sent_at`), mas o e-mail padrão
 manda só um **link**. Para o código aparecer no e-mail:
 
+0. **Antes de tudo, SMTP próprio** (o Supabase só deixa editar o modelo com SMTP configurado; descoberto em
+   2026-10-12). Domínio `profbrune.com.br` está verificado no Resend (região sa-east-1, envio ligado).
+   a) Resend > API Keys > Create API key: nome `supabase-auth`, permissão "Sending access", domínio
+      `profbrune.com.br`. Copiar a chave (começa com `re_`; só aparece uma vez).
+   b) Supabase > Authentication > Emails > Set up SMTP: Sender email `nao-responda@profbrune.com.br`,
+      Sender name `Prof. Brune`, Host `smtp.resend.com`, Port `465`, Username `resend`, Password = a chave.
 1. Supabase (produção) > Authentication > Emails > **Confirm signup**
    (https://supabase.com/dashboard/project/eigjocalzwamisgqilhg/auth/templates).
 2. Assunto: `Seu código para ativar a conta`
