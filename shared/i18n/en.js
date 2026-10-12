@@ -2415,6 +2415,56 @@ window.I18N_CATALOG['en'] = {
   'classlogs.delete.textGroup': 'This class was logged for {n} people and disappears for all of them. This cannot be undone.', // ALTA
   'classlogs.delete.confirm': 'Delete class', // ALTA
   'classlogs.form.submitOne': 'Log class', // ALTA
+  'materials.title': 'Support materials', // ALTA
+  'materials.sub': 'Summaries, links and files you share with your students. Each student only sees what was sent to them.', // ALTA
+  'materials.filter.student.aria': 'Student', // ALTA
+  'materials.filter.student.all': 'All students', // ALTA
+  'materials.search.placeholder': 'Search materials', // ALTA
+  'materials.search.aria': 'Search material', // ALTA
+  'materials.card.single': '{name}, {lang}', // ALTA
+  'materials.card.group': 'Sent to {names}', // ALTA
+  'materials.card.groupAria': 'Material sent to {n} people', // ALTA
+  'materials.card.link': 'Link: {host}', // ALTA
+  'materials.card.file': 'File: {name}', // ALTA
+  'materials.card.fileNoName': 'attached file', // ALTA
+  'materials.card.sentOn': 'Sent on {date}', // ALTA
+  'materials.menu': 'Actions', // ALTA
+  'materials.edit': 'Edit', // ALTA
+  'materials.delete': 'Delete', // ALTA
+  'materials.empty.title': 'No material sent yet', // ALTA
+  'materials.empty.text': 'Send the first material using the form next to this list. It shows up here and on each student\'s screen.', // ALTA
+  'materials.empty.filtered': 'No material matches these filters.', // ALTA
+  'materials.noStudents.title': 'No students linked yet', // ALTA
+  'materials.noStudents.text': 'Link a student in the Students tab to send them material.', // ALTA
+  'materials.loading': 'Loading materials…', // ALTA
+  'materials.fail': 'Could not load the materials right now.', // ALTA
+  'materials.form.title': 'Send material', // ALTA
+  'materials.form.who': 'Who will get it', // ALTA
+  'materials.form.pick': 'Choose people', // ALTA
+  'materials.form.pickHint': 'Choose one person, or several to send the same material.', // ALTA
+  'materials.form.none': 'Nobody chosen yet', // ALTA
+  'materials.form.removePerson': 'Remove {name}', // ALTA
+  'materials.form.titleLabel': 'Title', // ALTA
+  'materials.form.desc': 'Description (optional)', // ALTA
+  'materials.form.link': 'Link (optional)', // ALTA
+  'materials.form.file': 'File (optional)', // ALTA
+  'materials.form.fileTooBig': 'The file is over 50 MB. Choose a smaller one or send it as a link.', // ALTA
+  'materials.form.atLeastOne': 'Fill in the description, a link or a file.', // ALTA
+  'materials.form.clear': 'Clear', // ALTA
+  'materials.form.submitOne': 'Send material', // ALTA
+  'materials.form.needStudent': 'Choose who will get the material.', // ALTA
+  'materials.form.partial': 'The material was sent to {ok} of {total} people. Try again for the others.', // ALTA
+  'materials.edit.title': 'Edit material', // ALTA
+  'materials.edit.fileKept': 'The attached file ({name}) cannot be changed here. To replace it, delete and send again.', // ALTA
+  'materials.edit.save': 'Save', // ALTA
+  'materials.edit.cancel': 'Cancel', // ALTA
+  'materials.delete.title': 'Delete this material?', // ALTA
+  'materials.delete.text': 'The material disappears from the student\'s screen and this cannot be undone.', // ALTA
+  'materials.delete.textGroup': 'This material was sent to {n} people and disappears for all of them. This cannot be undone.', // ALTA
+  'materials.delete.confirm': 'Delete material', // ALTA
+  'teacherMaterials.err.badLink': 'The link must start with http:// or https://.', // ALTA
+  'materials.form.submit': { one: 'Send material', other: 'Send material to {n} students' }, // ALTA
+  'materials.edit.group': { one: 'This material was sent to {n} person.', other: 'This material was sent to {n} people. The change applies to all of them.' }, // ALTA
   'cards.title': 'Cards', // ALTA
   'cards.sub': 'Create cards for one or more people and keep track of the ones you created.', // ALTA
   'cards.tab.aria': 'Cards sections', // ALTA

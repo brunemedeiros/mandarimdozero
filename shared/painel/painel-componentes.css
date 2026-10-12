@@ -537,6 +537,9 @@
 .painel .p-aula dl{ margin: .35rem 0 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .15rem .75rem; font-size: .9rem; }
 .painel .p-aula dt{ color: var(--p-tinta-suave); font-weight: 700; }
 .painel .p-aula dd{ margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.painel .p-aula p.p-material-texto{ margin: .4rem 0 0; font-size: .9rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.painel .p-material-anexos{ display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .5rem; }
+.painel .p-material-anexos a.p-selo{ text-decoration: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 760px){ .painel .p-aula{ grid-template-columns: 3.4rem minmax(0, 1fr); } .painel .p-aula > :last-child{ grid-column: 2; } }
 
 /* Duas colunas com a principal maior; a lateral (formulário) fica fixa ao rolar e vai para baixo no celular. */

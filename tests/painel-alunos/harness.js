@@ -89,6 +89,23 @@ async function abrir({ lang = 'fr', scheme = 'light', width = 1280, height = 100
     updateClassLog = async (id, o) => { const c = clean(o); if (!c.some(Boolean)) return { ok: false, error: t('teacherLogs.err.needOneField') };
       Object.assign(window.__logs.find(x => x.id === id), { class_date: o.classDate, topic: c[0] || null, homework: c[1] || null, observations: c[2] || null, notes: c[3] || null }); return { ok: true }; };
     deleteClassLog = async (id) => { window.__logs = window.__logs.filter(x => String(x.id) !== String(id)); return { ok: true }; };
+    // Material de apoio em memória (envio a várias pessoas = uma linha por aluno, mesmo created_at).
+    window.__mats = [
+      { id: 1, teacher_id: 'T', student_id: 's1', language_app_key: lang, title: 'Resumo do passé composé', description: 'Leia antes da aula.\nFoque nos verbos com être.', link_url: 'https://exemplo.com/passe-compose', file_url: null, file_name: null, created_at: '2026-10-08T15:00:00Z' },
+      { id: 2, teacher_id: 'T', student_id: 's1', language_app_key: lang, title: 'Lista de vocabulário', description: null, link_url: null, file_url: 'https://cdn.exemplo.com/vocab.pdf', file_name: 'vocab.pdf', created_at: '2026-10-02T15:00:00.100Z' },
+      { id: 3, teacher_id: 'T', student_id: 's2', language_app_key: lang, title: 'Lista de vocabulário', description: null, link_url: null, file_url: 'https://cdn.exemplo.com/vocab.pdf', file_name: 'vocab.pdf', created_at: '2026-10-02T15:00:00.400Z' },
+      { id: 4, teacher_id: 'T', student_id: 's3', language_app_key: lang, title: 'Números de 1 a 100', description: 'Áudio e tabela.', link_url: null, file_url: null, file_name: null, created_at: '2026-09-20T15:00:00Z' },
+    ];
+    window.__matUploads = [];
+    fetchAllSupportMaterials = async () => ({ rows: window.__mats.map(x => ({ ...x })), truncated: false });
+    uploadSupportMaterialFile = async (f) => { window.__matUploads.push(f.name); return { ok: true, url: 'https://cdn.exemplo.com/' + encodeURIComponent(f.name), fileName: f.name }; };
+    createSupportMaterial = async (o) => { const ti = (o.title || '').trim(), de = (o.description || '').trim(), li = (o.linkUrl || '').trim();
+      if (!ti) return { ok: false, error: t('teacherMaterials.err.titleRequired') }; if (!de && !li && !o.fileUrl) return { ok: false, error: t('teacherMaterials.err.needContent') };
+      if (li && !isHttpUrl(li)) return { ok: false, error: t('teacherMaterials.err.badLink') };
+      window.__mats.push({ id: nid++, teacher_id: 'T', student_id: o.studentId, language_app_key: o.languageAppKey, title: ti, description: de || null, link_url: li || null, file_url: o.fileUrl || null, file_name: o.fileUrl ? o.fileName : null, created_at: new Date().toISOString() }); return { ok: true }; };
+    updateSupportMaterial = async (id, o) => { const li = (o.linkUrl || '').trim(); if (!(o.title || '').trim()) return { ok: false, error: t('teacherMaterials.err.titleRequired') }; if (li && !isHttpUrl(li)) return { ok: false, error: t('teacherMaterials.err.badLink') };
+      Object.assign(window.__mats.find(x => x.id === id), { title: o.title.trim(), description: (o.description || '').trim() || null, link_url: li || null }); return { ok: true }; };
+    deleteSupportMaterial = async (id) => { window.__mats = window.__mats.filter(x => String(x.id) !== String(id)); return { ok: true }; };
     window.__removidos = []; removeStudentLink = async (id) => { window.__removidos.push(id); return { ok: true }; };
     assignStudentToTeacher = async (u, l) => { window.__vinculou = [u, l]; return { ok: true, target: { username: u } }; };
     // Cartões e Decks da professora em memória (mesmas funções que o app usa, sem rede).
