@@ -804,7 +804,7 @@ async function processTeacherStudentAlerts(
   // até 2, uma por idioma, nunca uma por aluna).
   const groups = new Map<string, { teacherId: string; languageAppKey: string; hits: { studentId: string; days: number }[] }>();
   for (const link of links) {
-    const state = progressByUserId.get(link.student_id)?.[link.language_app_key];
+    const state = blockForLanguage(progressByUserId.get(link.student_id), link.language_app_key);
     const days = daysSince(state?.lastStudyDay);
     if (days === null || !scheduleDays.includes(days)) continue;
     const key = `${link.teacher_id}|${link.language_app_key}`;
