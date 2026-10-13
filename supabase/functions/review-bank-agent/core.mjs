@@ -10,7 +10,7 @@ const MAX_ITEMS_PER_STUDENT = 400;
 const MAX_STUDENTS = 80;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-const norm = (s) => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+const norm = (s) => String(s == null ? '' : s).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
 const clean = (s, max = 4000) => String(s == null ? '' : s).replace(/\r/g, '').trim().slice(0, max);
 
 // Hash curto e determinístico (FNV-1a) para a chave do item: repetir a mesma entrega nunca duplica.
