@@ -155,7 +155,7 @@ reset role; select pg_temp.u('00000000-0000-0000-0000-00000000000a','brunemed131
 select admin_set_role_permission('teacher','review_bank',true,null);
 reset role;
 
--- ---------- 086: rotina automática (Edge Function com service role) ----------
+-- ---------- 089: rotina automática (Edge Function com service role) ----------
 grant all on r to service_role;
 reset role;
 insert into review_bank_items(id, teacher_id, bank_student_id, language_app_key, item_type, question, answer) values
@@ -163,10 +163,10 @@ insert into review_bank_items(id, teacher_id, bank_student_id, language_app_key,
  ('bbbbbbbb-0000-0000-0000-000000000002','00000000-0000-0000-0000-00000000000d','aaaaaaaa-0000-0000-0000-000000000001','portugues','vocabulario','traffic','o trânsito');
 select pg_temp.u('00000000-0000-0000-0000-00000000000d','prof@x.com'); set role authenticated;
 do $$ begin perform agent_approve_review_bank_item('00000000-0000-0000-0000-00000000000d','bbbbbbbb-0000-0000-0000-000000000001','a','b','[{"id":"f1"}]'::jsonb,'normal',array['t'],'n');
- insert into r values ('086: professora logada NAO executa a funcao da rotina', false, 'passou'); exception when others then insert into r values ('086: professora logada NAO executa a funcao da rotina', sqlstate='42501', sqlerrm); end $$;
+ insert into r values ('089: professora logada NAO executa a funcao da rotina', false, 'passou'); exception when others then insert into r values ('089: professora logada NAO executa a funcao da rotina', sqlstate='42501', sqlerrm); end $$;
 reset role; set role anon;
 do $$ begin perform agent_approve_review_bank_item('00000000-0000-0000-0000-00000000000d','bbbbbbbb-0000-0000-0000-000000000001','a','b','[{"id":"f1"}]'::jsonb,'normal',array['t'],'n');
- insert into r values ('086: anon NAO executa a funcao da rotina', false, 'passou'); exception when others then insert into r values ('086: anon NAO executa a funcao da rotina', sqlstate='42501', sqlerrm); end $$;
+ insert into r values ('089: anon NAO executa a funcao da rotina', false, 'passou'); exception when others then insert into r values ('089: anon NAO executa a funcao da rotina', sqlstate='42501', sqlerrm); end $$;
 reset role;
 select set_config('request.jwt.claims', '', false);  -- service_role de verdade chega SEM claims (o teste antigo herdava as da professora)
 set role service_role;
@@ -174,35 +174,35 @@ create temp table card_ids(n int, id bigint); grant all on card_ids to service_r
 insert into card_ids select 1, agent_approve_review_bank_item('00000000-0000-0000-0000-00000000000d','bbbbbbbb-0000-0000-0000-000000000001','the door','la porte','[{"id":"f1","role":null}]'::jsonb,'normal',array['banco-de-revisao'],'Fem.');
 insert into card_ids select 2, agent_approve_review_bank_item('00000000-0000-0000-0000-00000000000d','bbbbbbbb-0000-0000-0000-000000000001','OUTRO','OUTRO','[]'::jsonb,'normal',null,null);
 reset role;
-insert into r select '086: rotina gera o cartao da aluna vinculada, no deck da professora, ligado ao item',
+insert into r select '089: rotina gera o cartao da aluna vinculada, no deck da professora, ligado ao item',
   (select count(*) from teacher_flashcards where bank_item_id='bbbbbbbb-0000-0000-0000-000000000001')=1
   and (select student_id='00000000-0000-0000-0000-00000000000e' and teacher_id='00000000-0000-0000-0000-00000000000d' and note='Fem.' and deck_id is not null and status='active' from teacher_flashcards where bank_item_id='bbbbbbbb-0000-0000-0000-000000000001')
   and (select status='aprovado' and teacher_flashcard_id is not null from review_bank_items where id='bbbbbbbb-0000-0000-0000-000000000001'), '';
-insert into r select '086: repetir nao cria segundo cartao (idempotente, mesmo id)', (select count(distinct id) from card_ids)=1 and (select count(*) from teacher_flashcards where bank_item_id='bbbbbbbb-0000-0000-0000-000000000001')=1, '';
+insert into r select '089: repetir nao cria segundo cartao (idempotente, mesmo id)', (select count(distinct id) from card_ids)=1 and (select count(*) from teacher_flashcards where bank_item_id='bbbbbbbb-0000-0000-0000-000000000001')=1, '';
 set role service_role;
 do $$ begin perform agent_approve_review_bank_item('00000000-0000-0000-0000-00000000000d','bbbbbbbb-0000-0000-0000-000000000002','a','b','[{"id":"f1"}]'::jsonb,'normal',null,null);
- insert into r values ('086: aluno sem conta nao gera cartao pela rotina', false, 'passou'); exception when others then insert into r values ('086: aluno sem conta nao gera cartao pela rotina', sqlerrm='student_not_linked', sqlerrm); end $$;
+ insert into r values ('089: aluno sem conta nao gera cartao pela rotina', false, 'passou'); exception when others then insert into r values ('089: aluno sem conta nao gera cartao pela rotina', sqlerrm='student_not_linked', sqlerrm); end $$;
 do $$ begin perform agent_approve_review_bank_item('00000000-0000-0000-0000-00000000000b','bbbbbbbb-0000-0000-0000-000000000001','a','b','[]'::jsonb,'normal',null,null);
- insert into r values ('086: conta sem permissao/papel nao usa a rotina', false, 'passou'); exception when others then insert into r values ('086: conta sem permissao/papel nao usa a rotina', sqlerrm='not_authorized', sqlerrm); end $$;
+ insert into r values ('089: conta sem permissao/papel nao usa a rotina', false, 'passou'); exception when others then insert into r values ('089: conta sem permissao/papel nao usa a rotina', sqlerrm='not_authorized', sqlerrm); end $$;
 do $$ begin perform agent_approve_review_bank_item('00000000-0000-0000-0000-00000000000a','bbbbbbbb-0000-0000-0000-000000000002','a','b','[]'::jsonb,'normal',null,null);
- insert into r values ('086: professora errada (item de outra) nao aprova', false, 'passou'); exception when others then insert into r values ('086: professora errada (item de outra) nao aprova', sqlerrm='not_authorized', sqlerrm); end $$;
+ insert into r values ('089: professora errada (item de outra) nao aprova', false, 'passou'); exception when others then insert into r values ('089: professora errada (item de outra) nao aprova', sqlerrm='not_authorized', sqlerrm); end $$;
 reset role;
 -- vinculo encerrado: a rotina nao entrega
 update teacher_students set status='inactive' where teacher_id='00000000-0000-0000-0000-00000000000d' and student_id='00000000-0000-0000-0000-00000000000e';
 insert into review_bank_items(id, teacher_id, bank_student_id, language_app_key, item_type, question, answer) values ('bbbbbbbb-0000-0000-0000-000000000003','00000000-0000-0000-0000-00000000000d','aaaaaaaa-0000-0000-0000-000000000002','frances','vocabulario','window','la fenetre');
 set role service_role;
 do $$ begin perform agent_approve_review_bank_item('00000000-0000-0000-0000-00000000000d','bbbbbbbb-0000-0000-0000-000000000003','a','b','[{"id":"f1"}]'::jsonb,'normal',null,null);
- insert into r values ('086: vinculo encerrado nao recebe cartao da rotina', false, 'passou'); exception when others then insert into r values ('086: vinculo encerrado nao recebe cartao da rotina', sqlerrm='link_inactive', sqlerrm); end $$;
+ insert into r values ('089: vinculo encerrado nao recebe cartao da rotina', false, 'passou'); exception when others then insert into r values ('089: vinculo encerrado nao recebe cartao da rotina', sqlerrm='link_inactive', sqlerrm); end $$;
 reset role;
 update teacher_students set status='active' where teacher_id='00000000-0000-0000-0000-00000000000d' and student_id='00000000-0000-0000-0000-00000000000e';
 -- agent_managed e registro das rodadas
-insert into r select '086: agent_managed nasce desligado (aluno e do artifact ate migrar)', (select bool_and(agent_managed = false) from review_bank_students), '';
+insert into r select '089: agent_managed nasce desligado (aluno e do artifact ate migrar)', (select bool_and(agent_managed = false) from review_bank_students), '';
 insert into review_bank_agent_runs(teacher_id, summary) values ('00000000-0000-0000-0000-00000000000d','{"ok":true}'),('00000000-0000-0000-0000-00000000000a','{"ok":true}');
 select pg_temp.u('00000000-0000-0000-0000-00000000000d','prof@x.com'); set role authenticated;
-insert into r select '086: professora le so as rodadas dela', (select count(*) from review_bank_agent_runs)=1, '';
+insert into r select '089: professora le so as rodadas dela', (select count(*) from review_bank_agent_runs)=1, '';
 do $$ begin insert into review_bank_agent_runs(teacher_id, summary) values ('00000000-0000-0000-0000-00000000000d','{}');
- insert into r values ('086: professora nao grava rodada (so a funcao)', false, 'passou'); exception when others then insert into r values ('086: professora nao grava rodada (so a funcao)', true, sqlerrm); end $$;
+ insert into r values ('089: professora nao grava rodada (so a funcao)', false, 'passou'); exception when others then insert into r values ('089: professora nao grava rodada (so a funcao)', true, sqlerrm); end $$;
 reset role;
 select count(*) filter (where ok) passed, count(*) filter (where not ok or ok is null) failed from r;
 select name, got from r where not ok or ok is null;
-select count(*) filter (where name like '086:%') as checks_086, count(*) as total from r;
+select count(*) filter (where name like '089:%') as checks_089, count(*) as total from r;

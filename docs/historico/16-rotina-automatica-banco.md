@@ -35,10 +35,11 @@ Decidido com a autora em 2026-10-13. Substitui, aluno por aluno, a tarefa agenda
     gravados por `agent_approve_review_bank_item` (só `service_role` executa); respeita "geração automática" ligada/desligada;
   - cada rodada grava uma linha em `review_bank_agent_runs` (a professora lê; só a função grava).
 
-## Migrations 086 e 087
-- `086_review_bank_agent.sql`: `agent_managed` em `review_bank_students`, tabela `review_bank_agent_runs`, função `agent_approve_review_bank_item`.
-- `087_review_bank_agent_deck_fix.sql`: corrige a função da 086 (deck "Cartões da professora" com `auth.uid()` nulo). Aplicar sempre as duas, em ordem.
-Staging: aplicadas em 2026-10-13. Produção: NÃO.
+## Migrations 089 e 090 (no Staging aparecem como `086_review_bank_agent` e `087_review_bank_agent_deck_fix`)
+Renumeradas de 086/087 para 089/090 em 2026-10-13: outras conversas já usavam 086 (friends_streak), 087 (mural) e 088 (revoke_anon_ensure_user_decks).
+- `089_review_bank_agent.sql`: `agent_managed` em `review_bank_students`, tabela `review_bank_agent_runs`, função `agent_approve_review_bank_item`.
+- `090_review_bank_agent_deck_fix.sql`: corrige a função da 089 (deck "Cartões da professora" com `auth.uid()` nulo). Aplicar sempre as duas, em ordem.
+Staging e produção: aplicadas em 2026-10-13 (produção: versões 20261013172151 e 20261013172156; conferido: 24 alunos, 2076 itens e 75 cartões do Banco intactos, `agent_managed` falso em todos).
 
 ## Deploy (feito pela ferramenta MCP, sem CLI)
 O motor gerado tem ~288 KB e não cabe inline na chamada. O deploy leva `index.ts` (sem os comentários longos) e dois atalhos de 2 linhas
@@ -52,7 +53,7 @@ A ferramenta de segredos do MCP pede que a autora digite o valor no painel do Su
   O teste achou um bug que o teste local não pegou: `ensure_teacher_decks` confere `auth.uid()`, nulo no service role (087 corrige assumindo a identidade da professora
   só dentro da transação). O teste local passou antes por herdar as claims de uma sessão anterior; agora a sessão é limpa antes do service_role.
   Dados de teste ainda no Staging: limpar com `tests/banco-revisao/limpar_staging_zz.sql` (a ferramenta MCP não executa DELETE: trava em 60 s).
-- Produção: NÃO implantada.
+- Produção: função v1 implantada em 2026-10-13 (commit adf0eb5), TRAVADA: sem os 2 segredos responde 503 `not_configured`. A autora digita os segredos de produção (id da professora `33c478d9-b6f4-4b5a-8798-a037672edce4` e um token novo, privado) e só então a função passa a aceitar chamadas.
 
 ## Virada por aluno (não aplicar tudo de uma vez)
 1. A autora já importou os 24 alunos no site (todos com `agent_managed = false`). Para um aluno migrar: conta criada e vínculo ativo + vinculado no Banco.
@@ -63,5 +64,5 @@ A ferramenta de segredos do MCP pede que a autora digite o valor no painel do Su
 ## Pendências
 - Teste ao vivo no Staging (secrets + `ping` + `ingest`) e teste de chamada de escrita a partir do ambiente da tarefa agendada (rede avaliada por chamada).
 - Escrever o texto da tarefa nova (passos: `state` -> agenda -> caderno -> `ingest`); só ligar depois de testada.
-- Produção: aplicar 086, implantar a função, digitar os secrets lá, só com autorização da autora naquela etapa.
+- Produção: migrations e função feitas; falta a autora digitar os segredos lá e o merge da branch (caixa "Atualizar automaticamente" no formulário do aluno).
 - Interface: mostrar "última rodada" (lê `review_bank_agent_runs`).

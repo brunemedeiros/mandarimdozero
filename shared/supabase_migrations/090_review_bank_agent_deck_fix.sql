@@ -1,4 +1,4 @@
--- Correção da 086: ensure_teacher_decks (a função que cria/acha o deck "Cartões da professora") confere auth.uid(), que é NULO
+-- Correção da 089: ensure_teacher_decks (a função que cria/acha o deck "Cartões da professora") confere auth.uid(), que é NULO
 -- quando a Edge Function chama com service role, então agent_approve_review_bank_item falhava com not_authorized (achado no teste ao vivo
 -- do Staging; o teste local não pegou porque a sessão de teste ainda carregava as claims de uma professora).
 -- Agora a função, DEPOIS de conferir a professora e a permissão, assume a identidade dela só dentro desta transação (claims locais) para
