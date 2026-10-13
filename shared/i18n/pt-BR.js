@@ -93,6 +93,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'courseMenu.speak.pt-BR': 'Eu falo português',
   'courseMenu.speak.en': 'Eu falo inglês',
   'courses.beta': 'em teste',
+  'courses.confirm.title': 'Trocar de curso?',
   'courses.confirm.body': 'Você vai trocar para o curso {course}. É um curso novo, com progresso próprio: se você nunca estudou nele, começa do zero. O progresso do curso atual continua salvo e volta quando você voltar a ele. Sua sequência de dias e suas conquistas continuam as mesmas.',
   'courses.first.title': 'Qual curso você quer começar?',
   'courses.first.sub': 'Você pode trocar ou adicionar cursos depois, na bandeira no topo da tela. O progresso de cada curso é separado.',

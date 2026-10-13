@@ -53,12 +53,12 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
         await page.hover('#lang-switcher-btn'); await page.waitForTimeout(200);
         await page.click('.course-menu-add');
         await page.waitForSelector('#add-course-overlay .add-course-card');
-        let ov = await page.evaluate(() => ({ disp: document.getElementById('add-course-overlay').style.display, cards: [...document.querySelectorAll('.add-course-card')].map(c => c.textContent.replace(/\s+/g, ' ').trim()), sel: document.getElementById('add-course-speak').value, opts: [...document.querySelectorAll('#add-course-speak option')].map(o => o.textContent) }));
+        let ov = await page.evaluate(() => ({ disp: document.getElementById('add-course-overlay').style.display, cards: [...document.querySelectorAll('.add-course-card')].map(c => c.textContent.replace(/\s+/g, ' ').trim()), sel: document.querySelector('.add-course-speak button[aria-pressed="true"]').dataset.site, opts: [...document.querySelectorAll('.add-course-speak button')].map(o => o.textContent) }));
         check(`${tag}: "Adicionar curso" abre a tela com "Eu falo português" e os cursos`, ov.disp === 'flex' && ov.sel === 'pt-BR' && ov.cards.length === 2 && ov.cards.some(c => /^✓?\s*Francês/.test(c)) && ov.cards.some(c => /Chinês/.test(c)) && ov.opts.join('|') === 'Eu falo português|Eu falo inglês', ov);
         if (process.env.SHOTS) { await page.screenshot({ path: `${process.env.SHOTS}/${app}-adicionar-curso-pt.png` }); }
-        await page.selectOption('#add-course-speak', 'en');
+        await page.click('.add-course-speak button[data-site="en"]');
         await page.waitForTimeout(200);
-        ov = await page.evaluate(() => ({ cards: [...document.querySelectorAll('.add-course-card')].map(c => c.textContent.replace(/\s+/g, ' ').trim()), head: document.querySelector('#add-course-overlay strong').textContent }));
+        ov = await page.evaluate(() => ({ cards: [...document.querySelectorAll('.add-course-card')].map(c => c.textContent.replace(/\s+/g, ' ').trim()), head: document.querySelector('#add-course-overlay .add-course-group').textContent }));
         check(`${tag}: "Eu falo inglês" mostra French e Chinese`, ov.cards.length === 2 && ov.cards.some(c => /French/.test(c)) && ov.cards.some(c => /Chinese/.test(c)) && /falantes de inglês/.test(ov.head), ov);
         if (process.env.SHOTS) { await page.screenshot({ path: `${process.env.SHOTS}/${app}-adicionar-curso-en.png` }); }
         await page.evaluate(() => document.querySelector('.add-course-card').click());
