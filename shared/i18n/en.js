@@ -652,6 +652,19 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.practiceMistakes': 'Practice only the ones I missed', // ALTA
   'fr.conj.almost': 'Almost', // ALTA
   'fr.conj.otherForm': '"{form}" is the {tense} form.', // ALTA
+  'fr.conj.sel.verbs': 'Verbs', // ALTA
+  'fr.conj.sel.searchLabel': 'Practice specific verbs (in French or Portuguese)', // ALTA
+  'fr.conj.sel.searchPh': 'manger, être, aller...', // ALTA
+  'fr.conj.sel.noMatch': 'This verb is not on the list yet.', // ALTA
+  'fr.conj.sel.pickedNote': 'The session will use only these verbs. The filters below are set aside.', // ALTA
+  'fr.conj.sel.removeVerb': 'Remove {verb}', // ALTA
+  'fr.conj.sel.pickLimit': 'You can pick up to {n} verbs.', // ALTA
+  'fr.conj.sel.orFilters': 'Or draw verbs with the filters', // ALTA
+  'fr.conj.sel.onlyRegular': 'Regular verbs only', // ALTA
+  'fr.conj.sel.onlyIrregular': 'Irregular verbs only', // ALTA
+  'fr.conj.sel.tenses': 'Verb tenses', // ALTA
+  'fr.conj.sel.langFr': 'French', // ALTA
+  'fr.conj.sel.langPt': 'Portuguese', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA
@@ -1920,7 +1933,7 @@ window.I18N_CATALOG['en'] = {
   'ui.review.intensity.light': 'Light (shorter sessions)', // ALTA
   'ui.review.intensity.intense': 'Intense (longer sessions)', // ALTA
   'ui.review.practiceHint': 'Keep practicing whenever you like, even with no reviews due.', // ALTA
-  'ui.conj.sub': 'Choose the verb tenses and verb categories. You always practice all 6 persons.', // ALTA
+  'ui.conj.sub': 'Choose the verbs and the verb tenses. You always practice all 6 persons.', // ALTA
   'ui.conj.topN': 'Number of verbs (most common first)', // ALTA
   'ui.conj.start': 'Start practice', // ALTA
   'ui.conj.backToSelect': '← Back to selection', // ALTA

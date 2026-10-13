@@ -22,6 +22,19 @@ const CONJUGATION_GROUPS = {
 
 const VERB_TRANSLATIONS = {};
 
+// Frase de exemplo de cada tempo, mostrada nos cartões da tela de escolha. [ ] marca o verbo
+// conjugado (pode ter mais de um trecho). A tradução (t) vem da camada do curso.
+const CONJ_TENSE_EXAMPLES = {
+  "presente": { "fr": "Je [prends] le métro tous les matins." },
+  "passeCompose": { "fr": "Hier, j'[ai mangé] une pizza." },
+  "imparfait": { "fr": "Quand j'[étais] petit, je [jouais] au foot tous les dimanches." },
+  "plusQueParfait": { "fr": "Quand je suis arrivé, le film [avait] déjà [commencé]." },
+  "futurSimple": { "fr": "L'année prochaine, j'[irai] à Paris." },
+  "condPresente": { "fr": "J'[aimerais] un café, s'il vous plaît." },
+  "subjPresente": { "fr": "Il faut que tu [viennes] demain." },
+  "imperatif": { "fr": "[Prends] ton parapluie !" }
+};
+
 const CONJUGATION_VERBS = {
   "être": {
     "g": "core",

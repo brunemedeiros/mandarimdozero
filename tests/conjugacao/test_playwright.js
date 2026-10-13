@@ -100,11 +100,14 @@ async function fill(page, wrongIdx){
     await page.waitForSelector('#conj-tense-list .conj-check-item');
     const sel = await page.evaluate(() => {
       const list = document.getElementById('conj-tense-list');
-      const items = Array.from(list.querySelectorAll('.conj-check-item'));
-      const h3 = document.querySelector('.conj-select-col h3');
-      return { n: items.length, gap: getComputedStyle(list).rowGap, caps: getComputedStyle(h3).textTransform, itemH: Math.round(Math.min(...items.map(i => i.getBoundingClientRect().height))) };
+      const items = Array.from(list.querySelectorAll('.conj-tense-card'));
+      const h3 = document.querySelector('.conj-sel-block h3');
+      const verbsTop = document.getElementById('conj-search-input').getBoundingClientRect().top < list.getBoundingClientRect().top;
+      return { n: items.length, ex: items.filter(i => i.querySelector('.conj-ex .conj-ex-verb') && i.querySelector('.conj-ex-tr')).length, verbsTop,
+        caps: getComputedStyle(h3).textTransform, itemH: Math.round(Math.min(...items.map(i => i.getBoundingClientRect().height))) };
     });
-    L('escolha: tempos numa lista agrupada (sem espaço entre itens)', sel.n > 3 && (sel.gap === '0px' || sel.gap === 'normal'), sel);
+    L('escolha: 8 cartões de tempo, cada um com frase de exemplo (verbo em destaque) e tradução', sel.n === 8 && sel.ex === 8, sel);
+    L('escolha: verbos em cima, tempos embaixo', sel.verbsTop, sel);
     L('escolha: títulos sem caixa alta', sel.caps === 'none', sel.caps);
     L('escolha: itens com 44px de toque', sel.itemH >= 44, sel.itemH);
 
@@ -144,7 +147,7 @@ async function fill(page, wrongIdx){
     await page.evaluate(() => switchTab('conjugaison'));
     await page.waitForSelector('#conj-tense-list .conj-check-item');
     const sel = await page.evaluate(() => ({
-      tenses: Array.from(document.querySelectorAll('#conj-tense-list .conj-check-item span')).map(s => s.textContent.trim()),
+      tenses: Array.from(document.querySelectorAll('#conj-tense-list .conj-tense-name')).map(s => s.textContent.trim()),
       sizes: Array.from(document.querySelectorAll('#conj-size-select option')).map(o => o.value).join(),
       size: document.getElementById('conj-size-select').value, hint: document.getElementById('conj-size-hint').textContent }));
     check('ordem dos tempos da autora, sem futur proche', sel.tenses.join('|') === 'Présent|Passé composé|Imparfait|Plus-que-parfait|Futur simple|Conditionnel présent|Subjonctif présent|Impératif', sel.tenses);
@@ -244,6 +247,47 @@ async function fill(page, wrongIdx){
     const again = await page.evaluate(() => ({ q: CONJ_STATE.verbQueue.join(), t: CONJ_STATE.sessionTenses.join() }));
     check('"Praticar só os que errei": só esses verbos e tempos', again.q === 'parler,avoir' && again.t === 'subjPresente', again);
     check('fase 1: zero pageerror', errors.length === 0, errors);
+    await ctx.close();
+  }
+
+  // ---- Fase 2: busca de verbos com bandeira, chips, filtros de lado ----
+  {
+    const { page, errors, ctx } = await bootPage(browser, 'fr', port, 'light');
+    await page.evaluate(() => switchTab('conjugaison'));
+    await page.waitForSelector('#conj-search-input');
+    const ex = await page.evaluate(() => ({ pc: document.querySelector('.conj-tense-card input[data-tense="passeCompose"]').closest('label').querySelector('.conj-ex-verb').textContent,
+      tr: document.querySelector('.conj-tense-card input[data-tense="condPresente"]').closest('label').querySelector('.conj-ex-tr').textContent }));
+    check('exemplo do passé composé destaca "ai mangé"; tradução da camada pt-BR', ex.pc === 'ai mangé' && ex.tr === 'Eu queria um café, por favor.', ex);
+    await page.click('#conj-search-input');
+    await page.keyboard.type('comer');
+    const s1 = await page.evaluate(() => { const o = document.querySelector('#conj-search-list .conj-search-opt');
+      return { open: !document.getElementById('conj-search-list').hidden, exp: document.getElementById('conj-search-input').getAttribute('aria-expanded'),
+        verb: o && o.dataset.verb, word: o && o.querySelector('.conj-opt-word').textContent, flag: o && o.querySelector('.conj-flag').getAttribute('aria-label'),
+        green: !!(o && o.querySelector('.conj-flag rect[fill="#009739"]')) }; });
+    check('"comer" acha manger, com a bandeira do Brasil', s1.open && s1.exp === 'true' && s1.verb === 'manger' && s1.word === 'comer' && s1.flag === 'português' && s1.green, s1);
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('etre');
+    const s2 = await page.evaluate(() => { const o = document.querySelector('#conj-search-list .conj-search-opt');
+      return { verb: o && o.dataset.verb, flag: o && o.querySelector('.conj-flag').getAttribute('aria-label'), blue: !!(o && o.querySelector('.conj-flag rect[fill="#0055A4"]')) }; });
+    check('"etre" (sem acento) acha être, com a bandeira da França', s2.verb === 'être' && s2.flag === 'francês' && s2.blue, s2);
+    await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowUp'); await page.keyboard.press('Enter');
+    await page.keyboard.type('xyzw');
+    const s3 = await page.evaluate(() => ({ chips: Array.from(document.querySelectorAll('.conj-chip > span')).map(x => x.textContent),
+      empty: (document.querySelector('.conj-search-empty') || {}).textContent, off: document.getElementById('conj-filters').classList.contains('is-off'),
+      dis: document.getElementById('conj-topn-select').disabled && document.querySelector('#conj-verb-list input').disabled,
+      hint: document.getElementById('conj-size-hint').textContent }));
+    check('Enter vira chip; sem resultado avisa', s3.chips.join() === 'manger,être' && s3.empty === 'Esse verbo ainda não está na lista.', s3);
+    check('com chips, filtros ficam de lado e a conta usa os 2 verbos', s3.off && s3.dis && /12/.test(s3.hint), s3);
+    await page.keyboard.press('Escape');
+    check('Esc limpa e fecha a lista', await page.evaluate(() => document.getElementById('conj-search-list').hidden && !document.getElementById('conj-search-input').value));
+    await page.click('#conj-search-input'); await page.keyboard.type('fin');
+    await page.click('#conj-search-list .conj-search-opt[data-verb="finir"]');
+    await page.click('.conj-chip-x[data-verb="manger"]');
+    check('clique escolhe; × tira o chip', (await page.evaluate(() => CONJ_STATE.pickedVerbs.join())) === 'être,finir');
+    await page.click('#conj-start-btn');
+    await page.waitForSelector('.conj-tense-box');
+    check('sessão usa só os verbos escolhidos, na ordem', (await page.evaluate(() => CONJ_STATE.verbQueue.join())) === 'être,finir');
+    check('fase 2: zero pageerror', errors.length === 0, errors);
     await ctx.close();
   }
 

@@ -9010,6 +9010,9 @@ const CONJ_STATE = {
   selectedGroups: Object.keys(CONJUGATION_GROUPS),
   topN: CONJ_TOTAL_VERBS,
   regularity: null, // null | 'regular' | 'irregular'
+  pickedVerbs: [],     // verbos escolhidos na busca (a sessão usa só eles)
+  searchHits: [],
+  searchActive: -1,
   sessionSize: CONJ_SESSION_SIZE,
   sessionTenses: [],   // tempos desta sessão (na ordem de CONJ_TENSES); "só os que errei" usa um subconjunto
   mistakes: [],        // formas erradas/quase da sessão, para a revisão no fim
@@ -9022,50 +9025,136 @@ const CONJ_STATE = {
   hintLevel: 0          // 0/1/2 — nível de dica na página do verbo atual (não persiste entre verbos)
 };
 
+// Verbos escolhidos pela busca: quando há algum, a sessão usa só eles e os filtros ficam de lado.
+const CONJ_PICK_MAX = 12;
+// Bandeira do idioma da palavra encontrada (como no Reverso, mas com a do Brasil para o português).
+const CONJ_LANG_FLAG = { fr: '🇫🇷', pt: '🇧🇷' };
+
 function updateConjSizeHint(){
   const el = document.getElementById('conj-size-hint');
   if (!el) return;
   const perVerb = CONJ_STATE.selectedTenses.reduce((n, k) => n + conjActiveMask(k).filter(Boolean).length, 0);
-  el.textContent = perVerb ? t('fr.conj.sessionForms', { n: perVerb * CONJ_STATE.sessionSize }) : '';
+  const verbs = CONJ_STATE.pickedVerbs.length || CONJ_STATE.sessionSize;
+  el.textContent = perVerb ? t('fr.conj.sessionForms', { n: perVerb * verbs }) : '';
+}
+
+// Frase de exemplo do tempo: [ ] marca o verbo, que vai em cor + negrito (mesma convenção do diálogo).
+function conjExampleHTML(tenseKey){
+  const ex = (typeof CONJ_TENSE_EXAMPLES !== 'undefined') && CONJ_TENSE_EXAMPLES[tenseKey];
+  if (!ex || !ex.fr) return '';
+  const fr = escapeHTML(ex.fr).replace(/\[([^\]]+)\]/g, '<b class="conj-ex-verb">$1</b>');
+  return `<span class="conj-ex" lang="fr">${fr}</span>${ex.t ? `<span class="conj-ex-tr">${escapeHTML(ex.t)}</span>` : ''}`;
+}
+
+const conjFold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+
+// Busca pelo infinitivo (fr) ou pela tradução (pt), sem acento: "etre" acha être, "comer" acha manger.
+// Ordem: igual > começa com > contém; empate pelo verbo mais comum.
+function conjSearchVerbs(query, limit){
+  const q = conjFold(query).replace(/^(se |s')/, '');
+  if (!q) return [];
+  const out = [];
+  Object.keys(CONJUGATION_VERBS).forEach(verb => {
+    if (CONJ_STATE.pickedVerbs.includes(verb)) return;
+    const bare = conjFold(verb).replace(/^(se |s')/, '');
+    const score = w => w === q ? 0 : w.startsWith(q) ? 1 : (q.length >= 3 && w.includes(q)) ? 2 : 9;
+    let best = { score: score(bare), lang: 'fr', word: verb };
+    String(VERB_TRANSLATIONS[verb] || '').split('/').map(x => x.trim()).filter(Boolean).forEach(tr => {
+      const sc = score(conjFold(tr));
+      if (sc < best.score) best = { score: sc, lang: 'pt', word: tr };
+    });
+    if (best.score < 9) out.push(Object.assign({ verb, rank: CONJ_VERB_RANK[verb] }, best));
+  });
+  out.sort((x, y) => x.score - y.score || x.rank - y.rank);
+  return out.slice(0, limit || 8);
+}
+
+function conjFlagHTML(lang){
+  return `<span class="conj-flag" role="img" aria-label="${t(lang === 'pt' ? 'fr.conj.sel.langPt' : 'fr.conj.sel.langFr')}">${SCENARIO_FLAG_SVG[CONJ_LANG_FLAG[lang]]}</span>`;
+}
+
+function renderConjSearchList(){
+  const input = document.getElementById('conj-search-input');
+  const list = document.getElementById('conj-search-list');
+  const q = input.value;
+  const hits = conjSearchVerbs(q);
+  CONJ_STATE.searchHits = hits;
+  CONJ_STATE.searchActive = hits.length ? 0 : -1;
+  if (!conjFold(q)){
+    list.hidden = true; list.innerHTML = '';
+    input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant');
+    return;
+  }
+  list.innerHTML = hits.length ? hits.map((h, i) => {
+    const other = h.lang === 'fr' ? (VERB_TRANSLATIONS[h.verb] || '') : h.verb;
+    return `<li role="option" id="conj-opt-${i}" class="conj-search-opt" data-verb="${escapeHTML(h.verb)}" aria-selected="${i === 0}">
+      ${conjFlagHTML(h.lang)}<span class="conj-opt-word" ${h.lang === 'fr' ? 'lang="fr"' : ''}>${escapeHTML(h.word)}</span>
+      <span class="conj-opt-other" ${h.lang === 'pt' ? 'lang="fr"' : ''}>${escapeHTML(other)}</span></li>`;
+  }).join('') : `<li class="conj-search-empty" role="presentation">${t('fr.conj.sel.noMatch')}</li>`;
+  list.hidden = false;
+  input.setAttribute('aria-expanded', 'true');
+  if (hits.length) input.setAttribute('aria-activedescendant', 'conj-opt-0'); else input.removeAttribute('aria-activedescendant');
+}
+
+function setConjSearchActive(i){
+  const list = document.getElementById('conj-search-list');
+  const opts = list.querySelectorAll('.conj-search-opt');
+  if (!opts.length) return;
+  CONJ_STATE.searchActive = (i + opts.length) % opts.length;
+  opts.forEach((o, k) => o.setAttribute('aria-selected', String(k === CONJ_STATE.searchActive)));
+  document.getElementById('conj-search-input').setAttribute('aria-activedescendant', 'conj-opt-' + CONJ_STATE.searchActive);
+  opts[CONJ_STATE.searchActive].scrollIntoView({ block: 'nearest' });
+}
+
+function pickConjVerb(verb){
+  if (!verb || CONJ_STATE.pickedVerbs.includes(verb)) return;
+  if (CONJ_STATE.pickedVerbs.length >= CONJ_PICK_MAX){ showToast(t('fr.conj.sel.pickLimit', { n: CONJ_PICK_MAX })); return; }
+  CONJ_STATE.pickedVerbs.push(verb);
+  const input = document.getElementById('conj-search-input');
+  input.value = '';
+  renderConjSearchList();
+  renderConjPicked();
+  input.focus();
+}
+
+// Só o pedaço dependente muda (chips + estado dos filtros); o resto do formulário fica como está.
+function renderConjPicked(){
+  const el = document.getElementById('conj-picked');
+  const picked = CONJ_STATE.pickedVerbs;
+  el.innerHTML = picked.length ? `<ul class="conj-chips">${picked.map(v => `<li class="conj-chip">
+      <span lang="fr">${escapeHTML(v)}</span><button type="button" class="conj-chip-x" data-verb="${escapeHTML(v)}" aria-label="${escapeHTML(t('fr.conj.sel.removeVerb', { verb: v }))}">×</button></li>`).join('')}</ul>
+    <p class="conj-picked-note">${t('fr.conj.sel.pickedNote')}</p>` : '';
+  const filters = document.getElementById('conj-filters');
+  filters.classList.toggle('is-off', picked.length > 0);
+  filters.querySelectorAll('select, input').forEach(x => { x.disabled = picked.length > 0; });
+  filters.querySelectorAll('.conj-toggle-item').forEach(x => { x.setAttribute('aria-disabled', String(picked.length > 0)); x.tabIndex = picked.length ? -1 : 0; });
+  updateConjSizeHint();
 }
 
 function renderConjSelectScreen(){
+  if (!Array.isArray(CONJ_STATE.pickedVerbs)) CONJ_STATE.pickedVerbs = [];
   const tenseListEl = document.getElementById('conj-tense-list');
-  tenseListEl.innerHTML = CONJ_TENSES.map(t => `
-    <label class="conj-check-item">
-      <input type="checkbox" data-tense="${t.key}" ${CONJ_STATE.selectedTenses.includes(t.key) ? 'checked' : ''}>
-      <span>${t.label}</span>
+  tenseListEl.innerHTML = CONJ_TENSES.map(x => `
+    <label class="conj-check-item conj-tense-card">
+      <input type="checkbox" data-tense="${x.key}" ${CONJ_STATE.selectedTenses.includes(x.key) ? 'checked' : ''}>
+      <span class="conj-tense-name">${x.label}</span>
+      ${conjExampleHTML(x.key)}
     </label>
   `).join('');
 
-  // Tamanho da sessão (verbos), com a conta de quantas formas isso dá.
-  let sizeRow = document.getElementById('conj-size-row');
-  if (!sizeRow){
-    const topnRow = document.getElementById('conj-topn-select').closest('.conj-filter-row');
-    topnRow.insertAdjacentHTML('beforebegin', `<div class="conj-filter-row" id="conj-size-row">
-      <label for="conj-size-select">${t('fr.conj.sessionSize')}</label>
-      <select id="conj-size-select"></select>
-      <p class="conj-size-hint" id="conj-size-hint"></p>
-    </div>`);
-    sizeRow = document.getElementById('conj-size-row');
-    document.getElementById('conj-size-select').addEventListener('change', function(){
-      CONJ_STATE.sessionSize = parseInt(this.value);
-      updateConjSizeHint();
-    });
-  }
   document.getElementById('conj-size-select').innerHTML = CONJ_SESSION_SIZES.map(n =>
     `<option value="${n}" ${CONJ_STATE.sessionSize === n ? 'selected' : ''}>${n}</option>`).join('');
-  updateConjSizeHint();
 
   const topnSelectEl = document.getElementById('conj-topn-select');
   topnSelectEl.innerHTML = CONJ_TOPN_OPTIONS.map(n =>
     `<option value="${n}" ${CONJ_STATE.topN === n ? 'selected' : ''}>${n === CONJ_TOTAL_VERBS ? t('fr.conj.topAll', { n }) : `Top ${n}`}</option>`
   ).join('');
 
-  const regularToggleEl = document.getElementById('conj-toggle-regular');
-  const irregularToggleEl = document.getElementById('conj-toggle-irregular');
-  regularToggleEl.classList.toggle('active', CONJ_STATE.regularity === 'regular');
-  irregularToggleEl.classList.toggle('active', CONJ_STATE.regularity === 'irregular');
+  [['conj-toggle-regular', 'regular'], ['conj-toggle-irregular', 'irregular']].forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    el.classList.toggle('active', CONJ_STATE.regularity === val);
+    el.setAttribute('aria-checked', String(CONJ_STATE.regularity === val));
+  });
 
   const verbListEl = document.getElementById('conj-verb-list');
   verbListEl.innerHTML = Object.entries(CONJUGATION_GROUPS).map(([key, info]) => `
@@ -9097,6 +9186,7 @@ function renderConjSelectScreen(){
       }
     });
   });
+  renderConjPicked();
 }
 
 // Estes elementos são fixos no HTML (renderConjSelectScreen só atualiza seu
@@ -9109,23 +9199,69 @@ document.getElementById('conj-topn-select').addEventListener('change', function(
   CONJ_STATE.topN = parseInt(this.value);
 });
 
-document.getElementById('conj-toggle-regular').addEventListener('click', () => {
-  CONJ_STATE.regularity = CONJ_STATE.regularity === 'regular' ? null : 'regular';
-  renderConjSelectScreen();
+document.getElementById('conj-size-select').addEventListener('change', function(){
+  CONJ_STATE.sessionSize = parseInt(this.value);
+  updateConjSizeHint();
 });
 
-document.getElementById('conj-toggle-irregular').addEventListener('click', () => {
-  CONJ_STATE.regularity = CONJ_STATE.regularity === 'irregular' ? null : 'irregular';
+function toggleConjRegularity(val){
+  if (CONJ_STATE.pickedVerbs.length) return;
+  CONJ_STATE.regularity = CONJ_STATE.regularity === val ? null : val;
   renderConjSelectScreen();
+}
+[['conj-toggle-regular', 'regular'], ['conj-toggle-irregular', 'irregular']].forEach(([id, val]) => {
+  const el = document.getElementById(id);
+  el.addEventListener('click', () => toggleConjRegularity(val));
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleConjRegularity(val); document.getElementById(id).focus(); }
+  });
 });
+
+(function wireConjSearch(){
+  const input = document.getElementById('conj-search-input');
+  const list = document.getElementById('conj-search-list');
+  input.addEventListener('input', renderConjSearchList);
+  input.addEventListener('focus', () => { if (input.value) renderConjSearchList(); });
+  input.addEventListener('keydown', e => {
+    const open = !list.hidden && (CONJ_STATE.searchHits || []).length;
+    if (e.key === 'ArrowDown' && open){ e.preventDefault(); setConjSearchActive(CONJ_STATE.searchActive + 1); }
+    else if (e.key === 'ArrowUp' && open){ e.preventDefault(); setConjSearchActive(CONJ_STATE.searchActive - 1); }
+    else if (e.key === 'Enter'){
+      e.preventDefault(); e.stopPropagation();
+      if (open && CONJ_STATE.searchActive >= 0) pickConjVerb(CONJ_STATE.searchHits[CONJ_STATE.searchActive].verb);
+    }
+    else if (e.key === 'Escape' && !list.hidden){ e.preventDefault(); input.value = ''; renderConjSearchList(); }
+    else if (e.key === 'Backspace' && !input.value && CONJ_STATE.pickedVerbs.length){
+      CONJ_STATE.pickedVerbs.pop(); renderConjPicked();
+    }
+  });
+  // mousedown (não click): escolhe antes do blur fechar a lista.
+  list.addEventListener('mousedown', e => {
+    const opt = e.target.closest('.conj-search-opt');
+    if (!opt) return;
+    e.preventDefault();
+    pickConjVerb(opt.dataset.verb);
+  });
+  input.addEventListener('blur', () => setTimeout(() => {
+    if (document.activeElement !== input){ list.hidden = true; input.setAttribute('aria-expanded', 'false'); }
+  }, 120));
+  document.getElementById('conj-picked').addEventListener('click', e => {
+    const x = e.target.closest('.conj-chip-x');
+    if (!x) return;
+    CONJ_STATE.pickedVerbs = CONJ_STATE.pickedVerbs.filter(v => v !== x.dataset.verb);
+    renderConjPicked();
+    input.focus();
+  });
+})();
 
 document.getElementById('conj-start-btn').addEventListener('click', () => {
-  if (!CONJ_STATE.selectedTenses.length || !CONJ_STATE.selectedGroups.length){
+  const picked = CONJ_STATE.pickedVerbs;
+  if (!CONJ_STATE.selectedTenses.length || (!picked.length && !CONJ_STATE.selectedGroups.length)){
     showToast(t('toast.conjPickOne'));
     return;
   }
 
-  const eligibleVerbs = Object.entries(CONJUGATION_VERBS)
+  const eligibleVerbs = picked.length ? picked.slice() : Object.entries(CONJUGATION_VERBS)
     .filter(([name, v]) => CONJ_STATE.selectedGroups.includes(v.g))
     .filter(([name]) => CONJ_VERB_RANK[name] <= CONJ_STATE.topN)
     .filter(([name, v]) => {
@@ -9143,8 +9279,9 @@ document.getElementById('conj-start-btn').addEventListener('click', () => {
   trackEvent('lesson_start', 'conjugation_session', null);
 
   // Fila de prática: um verbo por página, com todos os tempos escolhidos
-  // juntos (estilo Verbugata) — embaralhada, limitada por sessão.
-  startConjSession(shuffle(eligibleVerbs).slice(0, CONJ_STATE.sessionSize),
+  // juntos (estilo Verbugata). Verbos escolhidos na busca vêm na ordem em que
+  // foram escolhidos; sorteio pelos filtros é embaralhado e limitado por sessão.
+  startConjSession(picked.length ? eligibleVerbs : shuffle(eligibleVerbs).slice(0, CONJ_STATE.sessionSize),
     CONJ_TENSES.map(x => x.key).filter(k => CONJ_STATE.selectedTenses.includes(k)));
 });
 

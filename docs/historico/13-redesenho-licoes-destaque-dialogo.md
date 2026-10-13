@@ -106,3 +106,24 @@ nível. Mapa da francofonia descartado. Jogos e busca de verbo ficam para as pr�
 - Conjugação é grátis (tudo).
 - Testes: `tests/conjugacao/test_playwright.js` 40/40, `fr/scripts/test_answer_validation.js` 154/154, i18n unit
   2040/2040. Screenshots fr claro, escuro e celular (390px) conferidos.
+
+## Conjugação, fase 2: tela de escolha nova (fr, 2026-10-13)
+
+- Ordem da tela: bloco "Verbos" em cima (busca, chips, filtros) e "Tempos verbais" embaixo, em cartões com frase de
+  exemplo (verbo em cor + negrito) e tradução. Por último vêm "≈ N formas para preencher" e "Começar prática".
+- Busca com autocompletar (`conjSearchVerbs`): pelo infinitivo ou pela tradução, sem acento ("etre" acha être,
+  "comer" acha manger). Ordem dos resultados: igual, depois começa com, depois contém, desempate pela frequência. Cada
+  resultado mostra a bandeira do idioma da palavra achada: França para o infinitivo, Brasil para o português (SVG de
+  `SCENARIO_FLAG_SVG`). Funciona pelo teclado: setas, Enter, Esc, e Backspace com o campo vazio tira o último chip.
+  Tem ARIA de combobox.
+- Verbos escolhidos viram chips (até 12). Com chips, a sessão usa só esses verbos, na ordem escolhida, e os filtros
+  (tamanho, top N, regulares/irregulares, grupos) ficam esmaecidos e desligados.
+- Frases de exemplo: as frases em francês ficam na base (`CONJ_TENSE_EXAMPLES` em `fr/conjugation-data.js`) e as
+  traduções na camada `courses/fr-pt-BR/layer.js` (`conjugation.tenseExamples`). `shared/course-layer.js` passou a
+  extrair, limpar e aplicar esse campo. As frases aguardam a aprovação da autora.
+- Texto alterado: `ui.conj.sub` ("Escolha os verbos e os tempos verbais..."). Textos novos: `fr.conj.sel.*`. Os
+  títulos "Verbos"/"Tempos verbais" e os interruptores passaram a ter i18n (antes ficavam em português no inglês).
+- `tests/camada-curso/test_equivalence.js` agora aceita a correção deliberada "assiss" → "assis" (falhava desde a fase 1).
+- Grátis x Premium: tudo grátis.
+- Testes: conjugação 51/51 (11 novos), i18n unit 2040/2040, i18n navegador 209/209, camada do curso 75/75,
+  celular 108/108, validação de respostas 154/154. Screenshots fr claro, escuro e 390px conferidos.
