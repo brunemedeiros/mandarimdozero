@@ -25,7 +25,9 @@ Decidido com a autora em 2026-10-13. Substitui, aluno por aluno, a tarefa agenda
 - Regras do `ingest` (nenhuma delas depende do texto da tarefa):
   - só aluno do Banco da professora com `agent_managed = true`; outros vão para `rejected`;
   - só INSERE (itens e recaps). Nunca edita, apaga, corta nem aprova item existente; nunca toca em progresso (FSRS);
-  - status vem da regra: dúvida, sensível ou sugestão => `pendente`; senão `aprovado` (a tarefa não consegue mandar `cortado`);
+  - status vem da regra, nunca do que a tarefa manda: dúvida, sensível, linha `[pessoal]` (a marca é tirada do texto), sugestão ou pedido de
+    `cortado` => `pendente` (com "Para conferir" preenchido, senão a geração automática entregaria o cartão); só o item limpo entra `aprovado`;
+    com "geração automática" desligada, item limpo de aluno vinculado também entra `pendente` (aluno sem conta segue aprovado: não há cartão a gerar);
   - duplicado por chave ou por conteúdo (tipo + pergunta + resposta normalizados) é ignorado; chave sem `key` = hash determinístico;
   - `lesson_dates`: mantém as passadas, troca as futuras; `last_entry_read` só avança;
   - Récap da aula (`recap_date`): `rbSelectRecap` (tamanho 8), não refaz se já existe para a data;
@@ -33,16 +35,23 @@ Decidido com a autora em 2026-10-13. Substitui, aluno por aluno, a tarefa agenda
     gravados por `agent_approve_review_bank_item` (só `service_role` executa); respeita "geração automática" ligada/desligada;
   - cada rodada grava uma linha em `review_bank_agent_runs` (a professora lê; só a função grava).
 
-## Migration 086 (`086_review_bank_agent.sql`)
-`agent_managed` em `review_bank_students`, tabela `review_bank_agent_runs`, função `agent_approve_review_bank_item`.
-Staging: aplicada em 2026-10-13. Produção: NÃO.
+## Migrations 086 e 087
+- `086_review_bank_agent.sql`: `agent_managed` em `review_bank_students`, tabela `review_bank_agent_runs`, função `agent_approve_review_bank_item`.
+- `087_review_bank_agent_deck_fix.sql`: corrige a função da 086 (deck "Cartões da professora" com `auth.uid()` nulo). Aplicar sempre as duas, em ordem.
+Staging: aplicadas em 2026-10-13. Produção: NÃO.
 
 ## Deploy (feito pela ferramenta MCP, sem CLI)
-O motor gerado tem ~288 KB e não cabe inline na chamada. O deploy leva `index.ts` e `core.mjs` iguais aos do repositório e um
-`engine.generated.mjs` de 2 linhas que reexporta o motor do GitHub **fixado no commit** (`raw.githubusercontent.com/.../<sha>/...`).
+O motor gerado tem ~288 KB e não cabe inline na chamada. O deploy leva `index.ts` (sem os comentários longos) e dois atalhos de 2 linhas
+(`engine.generated.mjs` e `core.mjs`) que reexportam os arquivos do GitHub **fixados no commit** (`raw.githubusercontent.com/.../<sha>/...`).
 O bundle é montado no deploy; em execução não há dependência do GitHub. Mudou código em `shared/` ou na função: push, novo deploy com o novo SHA.
-- Staging: deploy v1 feito (commit 69ad254). Boot, gateway (401 sem JWT), 503 sem secrets e 405 em GET conferidos ao vivo.
-  Falta: a autora digitar os 2 secrets no Staging para o teste ao vivo (`ping` e `ingest` com dados de teste).
+A ferramenta de segredos do MCP pede que a autora digite o valor no painel do Supabase (nunca passa pelo chat).
+- Staging: função v7 (commit adf0eb5), migrations 086 e 087, secrets digitados pela autora. Teste ao vivo feito em 2026-10-13 com alunos "ZZ":
+  ping, state (traz o e-mail da conta vinculada), ingest com todos os casos (limpo, erro, estrutura, verbo, dúvida, sensível, `[pessoal]`, cortado, duplicado,
+  inválido), cartões em "Cartões da professora" (modo digitar para erro, observação preservada), repetir a rodada não duplica nada, aluno sem conta não gera cartão,
+  aluno não gerenciado e id inexistente rejeitados, register_student idempotente, token errado 401, JSON inválido 400, geração automática desligada.
+  O teste achou um bug que o teste local não pegou: `ensure_teacher_decks` confere `auth.uid()`, nulo no service role (087 corrige assumindo a identidade da professora
+  só dentro da transação). O teste local passou antes por herdar as claims de uma sessão anterior; agora a sessão é limpa antes do service_role.
+  Dados de teste ainda no Staging: limpar com `tests/banco-revisao/limpar_staging_zz.sql` (a ferramenta MCP não executa DELETE: trava em 60 s).
 - Produção: NÃO implantada.
 
 ## Virada por aluno (não aplicar tudo de uma vez)
