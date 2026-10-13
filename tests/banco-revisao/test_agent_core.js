@@ -55,21 +55,24 @@ const DIR = path.join(__dirname, '../../supabase/functions/review-bank-agent');
     { type: 'erro', q: 'I went', wrong: 'Je suis allé hier soir', a: 'Je suis allé(e) hier soir', note: 'concordância', status: 'aprovado' },
     { type: 'estrutura', q: 'Besides being cheap', a: 'En plus d\'être bon marché, c\'est rapide', gap: 'En plus de', doubt: 'Conferir a lacuna.', status: 'pendente' },
     { type: 'vocabulario', q: 'dick', a: 'bite', doubt: 'Linguagem livre: palavrão. Decida se entra na revisão.', status: 'pendente', sensitive: true },
+    { type: 'vocabulario', q: '[pessoal] meu ex-marido', a: 'mon ex-mari' },                         // linha [pessoal]
     { type: 'vocabulario', q: '', a: 'sem pergunta' },                                              // inválido
     { type: 'vocabulario', q: 'the window', a: 'la fenêtre', key: 'c001' },                        // chave repetida
   ];
   r = await call(agent, { action: 'ingest', students: [{ student_id: 'sA', items: itemsA, lesson_dates: ['2026-10-14', '2026-10-17'], last_entry_read: '2026-10-13', recap_date: TODAY }] });
   const a = r.json.summary.students[0];
-  check('ingest: conta itens novos, duplicados e inválidos', r.status === 200 && a.new_items === 5 && a.skipped_duplicates === 2 && a.skipped_invalid === 1, JSON.stringify(a));
-  check('ingest: pendentes e sensíveis contados', a.pending === 3 && a.sensitive === 1, JSON.stringify(a));
+  check('ingest: conta itens novos, duplicados e inválidos', r.status === 200 && a.new_items === 6 && a.skipped_duplicates === 2 && a.skipped_invalid === 1, JSON.stringify(a));
+  check('ingest: pendentes e sensíveis contados', a.pending === 4 && a.sensitive === 2, JSON.stringify(a));
   check('ingest: só os prontos viram cartão (sem dúvida, não sensível)', a.cards_created === 2 && d.cards.length === 2 && a.card_errors.length === 0, JSON.stringify(a));
-  check('ingest: item com dúvida, sensível e "cortado" seguem pendentes sem cartão', d.items.filter(i => i.status === 'pendente' && !i.teacher_flashcard_id).length === 3);
+  check('ingest: item com dúvida, sensível e "cortado" seguem pendentes sem cartão', d.items.filter(i => i.status === 'pendente' && !i.teacher_flashcard_id).length === 4);
   const erroCard = d.cards.find(c => c.mode === 'type_answer');
   check('cartão de erro sai como digitar, com observação para o aluno', !!erroCard && erroCard.note === 'concordância' && erroCard.fields.length === 2, JSON.stringify(erroCard && erroCard.mode));
   const direct = engine.rbBuildCard(d.items.find(i => i.question === 'the door'), d.students[0]);
   const viaAgent = d.cards.find(c => c.itemId === d.items.find(i => i.question === 'the door').id);
   check('cartão da rotina = cartão do motor do site (mesmos campos e modo)', direct.ok && viaAgent.mode === direct.mode && viaAgent.front === direct.front && viaAgent.back_trans === direct.back_trans && JSON.stringify(viaAgent.tags) === JSON.stringify(direct.tags));
   check('a rotina nunca corta nem aprova por conta própria: o status vem da regra (dúvida/sensível/sugestão => pendente)', d.items.find(i => i.question === 'the door').status === 'aprovado' && d.items.find(i => i.question === 'dick').status === 'pendente' && d.items.find(i => i.question === 'the cut one').status === 'pendente' && !!d.items.find(i => i.question === 'the cut one').check_note && d.items.find(i => i.question === 'the cut one').teacher_flashcard_id == null);
+  const pes = d.items.find(i => i.answer === 'mon ex-mari');
+  check('linha [pessoal]: entra pendente e sensível, sem a marca no texto, com aviso, sem cartão', !!pes && pes.status === 'pendente' && pes.sensitive === true && pes.question === 'meu ex-marido' && /pessoal/i.test(pes.check_note) && !pes.teacher_flashcard_id);
   check('item novo nasce com nível 0 e vence hoje', d.items.filter(i => i.import_key !== 'c001').every(i => i.level === 0 && i.due_date === TODAY));
   check('o item antigo (c001) não foi tocado', JSON.stringify(d.items[0]) === JSON.stringify(mk().d.items[0]));
   check('datas de aula: mantém passadas, troca as futuras', JSON.stringify(d.students[0].lesson_dates) === JSON.stringify(['2026-10-01', '2026-10-14', '2026-10-17']), JSON.stringify(d.students[0].lesson_dates));

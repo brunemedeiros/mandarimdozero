@@ -167,7 +167,9 @@ do $$ begin perform agent_approve_review_bank_item('00000000-0000-0000-0000-0000
 reset role; set role anon;
 do $$ begin perform agent_approve_review_bank_item('00000000-0000-0000-0000-00000000000d','bbbbbbbb-0000-0000-0000-000000000001','a','b','[{"id":"f1"}]'::jsonb,'normal',array['t'],'n');
  insert into r values ('086: anon NAO executa a funcao da rotina', false, 'passou'); exception when others then insert into r values ('086: anon NAO executa a funcao da rotina', sqlstate='42501', sqlerrm); end $$;
-reset role; set role service_role;
+reset role;
+select set_config('request.jwt.claims', '', false);  -- service_role de verdade chega SEM claims (o teste antigo herdava as da professora)
+set role service_role;
 create temp table card_ids(n int, id bigint); grant all on card_ids to service_role;
 insert into card_ids select 1, agent_approve_review_bank_item('00000000-0000-0000-0000-00000000000d','bbbbbbbb-0000-0000-0000-000000000001','the door','la porte','[{"id":"f1","role":null}]'::jsonb,'normal',array['banco-de-revisao'],'Fem.');
 insert into card_ids select 2, agent_approve_review_bank_item('00000000-0000-0000-0000-00000000000d','bbbbbbbb-0000-0000-0000-000000000001','OUTRO','OUTRO','[]'::jsonb,'normal',null,null);

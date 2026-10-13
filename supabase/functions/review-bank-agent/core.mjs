@@ -87,17 +87,22 @@ export function createAgent({ engine, db, teacherId, now }) {
     // itens novos: mesma validação e normalização do arquivo de importação (rbiParse), sem sobrescrever nada
     const incoming = (Array.isArray(entry.items) ? entry.items : []).slice(0, MAX_ITEMS_PER_STUDENT);
     const prepared = [];
-    for (const it of incoming) {
+    for (const raw of incoming) {
+      // linha [pessoal] do caderno: entra como PENDENTE e sensível (nunca vira cartão sozinha); a marca é tirada do texto
+      const PERSONAL = /^\s*\[pessoal\]\s*/i;
+      const personal = !!raw && (raw.personal === true || PERSONAL.test(String(raw.q || '')) || PERSONAL.test(String(raw.a || '')) || PERSONAL.test(String(raw.note || '')));
+      const it = raw && typeof raw === 'object' ? Object.assign({}, raw, { q: String(raw.q == null ? '' : raw.q).replace(PERSONAL, ''), a: String(raw.a == null ? '' : raw.a).replace(PERSONAL, ''), note: String(raw.note == null ? '' : raw.note).replace(PERSONAL, '') }) : raw;
       const key = clean(it && it.key, 80) || itemKey({ type: it && it.type, q: it && it.q, a: it && it.a });
       const sig = contentSig(it && it.type, it && it.q, it && it.a);
       if (seenKeys.has(key) || seenSigs.has(sig)) { res.skipped_duplicates++; continue; }
       seenKeys.add(key); seenSigs.add(sig);
-      // mesma regra do caderno: dúvida, conteúdo sensível, sugestão ou pedido de "cortado" => "pendente" (quem corta é a professora,
-      // nunca a rotina); só entra "aprovado" o item limpo, sem nenhuma dessas marcas
-      const hold = !!(clean(it && it.doubt) || (it && it.sensitive === true) || (it && it.status === 'cortado') || (it && it.proposal && typeof it.proposal === 'object' && Object.keys(it.proposal).length));
-      // "cortado" pedido pela rotina vira pendente COM dúvida preenchida: sem ela a geração automática entregaria o cartão na hora
-      const doubt = clean(it && it.doubt) || (it && it.status === 'cortado' ? 'A rotina marcou este item como cortado. Decida se entra na revisão.' : '');
-      prepared.push(Object.assign({}, it, { key, date: isDate(it && it.date) ? it.date : t, doubt, status: hold ? 'pendente' : 'aprovado' }));
+      // dúvida, conteúdo sensível, [pessoal], sugestão ou pedido de "cortado" => "pendente" (quem corta é a professora, nunca a rotina);
+      // só entra "aprovado" o item limpo, sem nenhuma dessas marcas
+      const sensitive = !!(it && it.sensitive === true) || personal;
+      const hold = !!(clean(it && it.doubt) || sensitive || (it && it.status === 'cortado') || (it && it.proposal && typeof it.proposal === 'object' && Object.keys(it.proposal).length));
+      // "cortado"/[pessoal] viram pendente COM dúvida preenchida: sem ela a geração automática entregaria o cartão na hora
+      const doubt = clean(it && it.doubt) || (personal ? 'Linha marcada [pessoal] no caderno. Decida se entra na revisão.' : (it && it.status === 'cortado' ? 'A rotina marcou este item como cortado. Decida se entra na revisão.' : ''));
+      prepared.push(Object.assign({}, it, { key, date: isDate(it && it.date) ? it.date : t, doubt, sensitive, status: hold ? 'pendente' : 'aprovado' }));
     }
     if (prepared.length) {
       const parsed = engine.rbiParse(JSON.stringify({ version: 1, students: [{ key: 'x', name: 'x', language: s.language_app_key, items: prepared }] }));
