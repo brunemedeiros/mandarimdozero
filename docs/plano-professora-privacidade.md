@@ -309,4 +309,25 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   - **Aviso**: só no sino + sinalizador no menu Perfil. Sem e-mail.
 - Em aberto para a auditoria: o que é uma turma (quem cria, aluno em várias turmas), quem liga o compartilhamento
   (professora ou aluno), recado individual dentro de turma compartilhada, Grátis x Premium.
+- 3ª rodada (2026-10-13), **turmas**:
+  - A professora cria a turma e põe os alunos, ou manda o link da turma (o aluno entra ou cria a conta já dentro dela).
+    Estar numa turma não dá permissão especial nenhuma.
+  - O mural é da professora; o aluno é inserido nele. O aluno não compartilha nada.
+  - Numa turma, o mural é um só para todos os alunos da turma (como no Google Classroom). Recado vai para a turma
+    toda por padrão, com opção de escolher um aluno só: aí só ele vê.
+  - **Grátis** para alunos vinculados a uma professora.
+
+### Proposta de desenho (2026-10-13, aguardando aprovação; nada codado)
+
+- Tabelas novas: `classrooms` (professora, idioma, nome, código do link), `classroom_members`, `mural_posts`
+  (professora, turma OU aluno, texto, anexos, editado_em), `mural_comments` (autor, texto; apagar = do autor ou da
+  professora), `mural_reads` (o que cada um já viu, para o "+N"). Tudo com RLS: vê quem é a professora dona, o aluno
+  destinatário, ou membro ativo da turma.
+- Anexos no Storage num bucket privado `mural` (PDF e imagem, 10 MB por arquivo, até 5 por recado), lidos por link
+  temporário assinado.
+- Sino: cada recado novo gera uma notificação in-app (sem e-mail), reaproveitando `shared/notifications.js`.
+- Link da turma reaproveita o convite da 077: entrar pelo link cria o vínculo com a professora (se ainda não houver)
+  e já põe o aluno na turma.
+- Telas: Professora ganha "Turmas" no painel (criar, pôr alunos, link, mural da turma). Aluno: "Mural" dentro de
+  "Minhas aulas", com o "+N" lá e no menu Perfil.
 

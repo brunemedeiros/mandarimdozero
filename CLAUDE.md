@@ -96,7 +96,6 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - Todos os cartões antigos já têm Deck (migração de 2026-10-07).
 - Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
 - 075/076 (papéis, permissões, regras da professora) na produção; telas (painéis Admin x Professora, Planos, Minhas aulas) publicadas pelo PR #302 (2026-10-12). Plano: 1) papel Professora, 2) Fase K final, 3) login obrigatório + perfil privado (077-080 na produção, telas pelo PR #304), 4) mural -- `docs/plano-professora-privacidade.md`.
-- E-mails: SMTP (Resend) e modelos colados pela autora em 2026-10-12; depois do merge da correção do antivírus (PR dos botões de um toque), colar de novo os 4 modelos (`docs/auth/confirmacao-por-codigo.md`).
 - Banco de Revisão (migrations 081 a 085): aplicadas no Staging e na produção (2026-10-13; versões 20261013105651 a 105731, a 081 no Staging aparece como `080_review_bank`). Tela em Professora > Cartões publicada pelo merge da branch. Falta: importar o arquivo JSON pela tela, vincular alunos, "Gerar cartões". App de português (`ptbr`) é urgente: 13 dos 24 alunos estudam português. Registro: `docs/historico/15-auditoria-banco-revisao.md`.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.
