@@ -24,8 +24,8 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
 (async () => {
   // texto do portão: convidado NÃO salva nada (auditoria 2026-10-12)
   const gate = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  // main (2026-10-12): sem modo convidado no portão, login obrigatório; a frase antiga sobre salvar no navegador não existe mais
   check('portão: não afirma salvar o progresso do convidado no navegador', !/seu progresso fica salvo só neste navegador/.test(gate));
-  check('portão: diz que o progresso do convidado não é salvo', /Como convidado\(a\), seu progresso não é salvo/.test(gate));
 
   await new Promise(r => server.listen(0, '127.0.0.1', r));
   const port = server.address().port;

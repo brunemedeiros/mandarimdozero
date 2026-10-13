@@ -238,7 +238,7 @@ async function bootPage(browser, lang, port){
       CURRENT_USER = { id: 'T' }; window.__uid = 'T'; isAdminUser = () => true;
       window.__DB.teacher_students = [{ teacher_id: 'T', student_id: 'S1', language_app_key: a, status: 'active' }];
       fetchMyStudents = async () => [{ student_id: 'S1', username: 'ana', display_name: 'Ana', language_app_key: a, status: 'active' }];
-      switchTab('admin-badges'); switchAdminPanelSection('flashcards');
+      switchTab('teacher-panel'); switchTeacherPanelSection('flashcards');
     }, appKey);
     await page.waitForSelector('[data-student-checkbox]');
     await page.check('[data-student-checkbox][value="S1"]:visible');

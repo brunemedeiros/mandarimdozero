@@ -24,6 +24,20 @@ async function fetchTeacherStudentMetrics(studentId, languageAppKey){
   return data;
 }
 
+// K.9 (migration 078): Meus Decks do aluno e os Decks desta professora, com
+// Novos/Aprendendo/Para revisar/Devidos por subárvore. Só nome + números.
+async function fetchTeacherStudentDeckCounts(studentId, languageAppKey){
+  const { data, error } = await supabaseClient.rpc('get_teacher_student_deck_counts', {
+    p_student_id: studentId,
+    p_language_app_key: languageAppKey,
+  });
+  if (error || !data || data.error || !Array.isArray(data.decks)){
+    if (error) console.error('Erro ao carregar Decks do aluno:', error);
+    return null;
+  }
+  return data.decks;
+}
+
 // Painel do aluno ampliado (migration 070) -- visão geral do aluno em TODOS
 // os idiomas em que ele tem progresso (decisão da autora: como professora ela
 // vê uso, progresso, sequência, últimas atividades etc.). Mesma checagem de

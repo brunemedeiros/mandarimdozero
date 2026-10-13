@@ -201,3 +201,36 @@ Checkpoint pedido pela autora: só documentação. Nenhuma migration, nenhuma mu
 - **Rollout 059–069 CONCLUÍDO na produção (2026-10-04).** As 11 migrations estão aplicadas: 060/061/062/063/066 pelo SQL Editor (não aparecem em `schema_migrations`) e 064/065/067/068/069/059 pela ferramenta. Nenhum dado mudou.
 - **Janela aberta até o deploy do código novo:** o painel 📊 Métricas da aba 🎓 Alunos fica vazio (as chaves mudaram); trocar username dá `username_immutable`; conta nova recebe username `u…`. Próximo passo, quando a autora decidir: trazer o `main` para esta branch (conflito esperado só no fim do CLAUDE.md -- manter os dois blocos; em `fr/app.js`/`fr/index.html` preservar Desafios/Ditados) e só então merge/deploy.
 
+
+## Migration 075 `account_roles_and_permissions` (2026-10-08)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` | `20261008011037` |
+| Produção | SQL Editor da autora (`docs/rollout-sql/075_sql_editor.sql`; a ferramenta estourou o tempo 2x) | não aparece em `schema_migrations` |
+Detalhes e verificação: `docs/plano-professora-privacidade.md`.
+
+## Migration 076 `teacher_role_policies` (2026-10-08 Staging / 2026-10-12 produção)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta | `20261008020957` + correção `20261008021111` (`teacher_role_policies_link_check`) |
+| Produção | ferramenta (arquivo final, já corrigido) | `20261012123457` |
+
+## Migration 077 `teacher_invites_and_badges` (2026-10-12)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` (+ `_lang_label` com 'chinês' reaplicado por `execute_sql`) | `20261012182754` |
+| Produção | ferramenta `apply_migration` (autorizada pela autora 2026-10-12; conferido: 7 funções, trigger, índice, policy, grants; 13 vínculos e 13 badges intactos) | `20261012184454` |
+Detalhes e verificação: `docs/plano-professora-privacidade.md`.
+
+## Migrations 078 `teacher_student_deck_counts` e 079 `public_deck_copies` (Fase K final, 2026-10-12)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` (079: corpo de `copy_public_deck` com md5 `d0da8f9d…`, igual ao arquivo) | conferir em `list_migrations` |
+| Produção | ferramenta, autorizada pela autora 2026-10-12 (antes: md5 da 068 conferido; depois: `d0da8f9d…`, 3 funções, sem execute para anon, tabela fechada) | `20261012190508` (078), `20261012190559` (079) |
+Detalhes: `docs/K-analytics-contrato.md`, seção "Fase K final -- entrega".
+
+## Migration 080 `private_profile` (Etapa 3b, 2026-10-12)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` (conferido: 8 funções com a condição nova, tabela fechada para anon, país fechado) | conferir em `list_migrations` |
+| Produção | ferramenta, depois do PR #304 publicado (deploy 2026-10-12 21:04); antes: 9 trechos conferidos (1 ocorrência cada); depois: 11 funções com a regra, anon sem tabela, país fechado, leitura como admin ok | `20261012210455` |

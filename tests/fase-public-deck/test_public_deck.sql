@@ -166,7 +166,8 @@ select pg_temp.chk('C notes_count = 6 (Notes, não CardInstances; reverse=1, clo
 select pg_temp.chk('C subdeck conta só as próprias Notes', (pg_temp.q_as('anon',null,format($$ select public.get_public_deck(%L::uuid) $$,(select public_id from decks where id=(select subpub from ids))))->>'notes_count')='1');
 
 -- ===== CONTEÚDO (gate Free/Premium) =====
-select pg_temp.chk('G anon: login_required', pg_temp.q_as('anon',null,format($$ select public.get_public_deck_notes(%L::uuid) $$,(select public_id from pid))) = '{"error":"login_required"}'::jsonb);
+select pg_temp.chk('G anon: login_required (ou sem permissão, depois da 080)', pg_temp.q_as('anon',null,format($$ select public.get_public_deck_notes(%L::uuid) $$,(select public_id from pid))) = '{"error":"login_required"}'::jsonb
+  or (pg_temp.q_as('anon',null,format($$ select public.get_public_deck_notes(%L::uuid) $$,(select public_id from pid))) ->> 'exc') like '%42501');
 select pg_temp.chk('G free: premium_required', pg_temp.q_as('authenticated','00000000-0000-0000-0000-0000000000e2',format($$ select public.get_public_deck_notes(%L::uuid) $$,(select public_id from pid))) = '{"error":"premium_required"}'::jsonb);
 create temp table nt as select pg_temp.q_as('authenticated','00000000-0000-0000-0000-0000000000e3',format($$ select public.get_public_deck_notes(%L::uuid) $$,(select public_id from pid))) j;
 grant all on nt to public;
@@ -187,14 +188,14 @@ select pg_temp.chk('LEGACY não destruído (linha incompatível segue intacta)',
 select pg_temp.chk('owner_status só do dono', pg_temp.q_as('authenticated','00000000-0000-0000-0000-0000000000e2',format($$ select public.get_public_deck_owner_status(%s) $$,(select verbos from ids))) ? 'exc');
 
 -- ===== PERFIL =====
-select pg_temp.chk('PF lista no perfil quando public_profile=true', jsonb_array_length(pg_temp.q_as('anon',null,format($$ select public.list_public_decks_for_user(%L) $$,(select username from profiles where user_id='00000000-0000-0000-0000-0000000000e1')))->'decks')=2);
+select pg_temp.chk('PF lista no perfil quando public_profile=true', jsonb_array_length(pg_temp.q_as('authenticated','00000000-0000-0000-0000-0000000000e4',format($$ select public.list_public_decks_for_user(%L) $$,(select username from profiles where user_id='00000000-0000-0000-0000-0000000000e1')))->'decks')=2);
 update profiles set public_profile=false where user_id='00000000-0000-0000-0000-0000000000e1';
-select pg_temp.chk('PF public_profile=false: some da lista', jsonb_array_length(pg_temp.q_as('anon',null,format($$ select public.list_public_decks_for_user(%L) $$,(select username from profiles where user_id='00000000-0000-0000-0000-0000000000e1')))->'decks')=0);
+select pg_temp.chk('PF public_profile=false: some da lista', jsonb_array_length(pg_temp.q_as('authenticated','00000000-0000-0000-0000-0000000000e4',format($$ select public.list_public_decks_for_user(%L) $$,(select username from profiles where user_id='00000000-0000-0000-0000-0000000000e1')))->'decks')=0);
 select pg_temp.chk('PF public_profile=false: URL direta indisponível', pg_temp.q_as('anon',null,format($$ select public.get_public_deck(%L::uuid) $$,(select public_id from pid))) = '{"error":"unavailable"}'::jsonb);
 select pg_temp.chk('PF public_profile=false: conteúdo indisponível até para premium', pg_temp.q_as('authenticated','00000000-0000-0000-0000-0000000000e3',format($$ select public.get_public_deck_notes(%L::uuid) $$,(select public_id from pid))) = '{"error":"unavailable"}'::jsonb);
 select pg_temp.chk('PF is_public NÃO foi destruído', (select is_public from decks where id=(select verbos from ids)));
 update profiles set public_profile=true where user_id='00000000-0000-0000-0000-0000000000e1';
-select pg_temp.chk('PF reativar perfil restaura', jsonb_array_length(pg_temp.q_as('anon',null,format($$ select public.list_public_decks_for_user(%L) $$,(select username from profiles where user_id='00000000-0000-0000-0000-0000000000e1')))->'decks')=2);
+select pg_temp.chk('PF reativar perfil restaura', jsonb_array_length(pg_temp.q_as('authenticated','00000000-0000-0000-0000-0000000000e4',format($$ select public.list_public_decks_for_user(%L) $$,(select username from profiles where user_id='00000000-0000-0000-0000-0000000000e1')))->'decks')=2);
 
 -- ===== ÚLTIMA ATUALIZAÇÃO =====
 create temp table t0 as select content_updated_at c from decks where id=(select verbos from ids);

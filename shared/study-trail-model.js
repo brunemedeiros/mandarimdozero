@@ -251,6 +251,10 @@ function serializeCardsForSave(cards){
 //    está na whitelist simplesmente nunca é copiado.
 //  - demais origens: comportamento anterior (Object.assign inteiro, deckId
 //    fresco vence -- é dado derivado do banco).
+const NOTE_LEVEL_FRESH_FIELDS = [
+  'flashcardStatus', 'teacherNote', 'tags', 'imageUrl', 'note', 'cardInstance', 'deckId',
+  'rowId', 'unitTitle', 'unitTitleKey', 'origin',
+];
 function mergeSavedCards(cards, savedCards){
   const byId = {};
   (savedCards || []).forEach(s => { if (s && s.id != null) byId[s.id] = s; });
@@ -263,9 +267,14 @@ function mergeSavedCards(cards, savedCards){
       });
       return;
     }
-    const freshDeckId = c.deckId;
+    // Teacher/Self: o save traz o objeto inteiro (progresso + cópia do conteúdo). O que é DERIVADO DO
+    // BANCO (status, observação, tags, conteúdo, deck) tem de vencer a cópia velha do save; senão arquivar,
+    // corrigir ou mudar a observação de um cartão já estudado nunca chega ao aluno. Só o progresso vem do save.
+    const fresh = {};
+    NOTE_LEVEL_FRESH_FIELDS.forEach(k => { fresh[k] = c[k]; });
     Object.assign(c, saved);
-    c.deckId = freshDeckId === undefined ? null : freshDeckId;
+    NOTE_LEVEL_FRESH_FIELDS.forEach(k => { c[k] = fresh[k]; });
+    if (c.deckId === undefined) c.deckId = null;
   });
 }
 

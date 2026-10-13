@@ -75,3 +75,25 @@ Desenho aprovado no artifact "Revisão: proposta A com o melhor da B" (todas as 
 - Teste: `tests/revisao-proposta-a/test_playwright.js` (56, FR+ZH, claro/escuro, 390px); deck-browser 206 (2 checks atualizados para o desenho novo).
 - **Ajuste (2026-10-07, decisão da autora)**: a estimativa "cerca de N min" saiu do topo (`reviewEtaMinutes` removida; a fila de 5 minutos continua usando o tempo médio). O recorde do Speed Review é pontos + **maior sequência de acertos seguidos** numa rodada (`STATE.reviewRecords.speedBestStreak`, `SPEED_STATE.bestStreak`, `recordSpeedReviewStreak`), contando também a rodada que termina com as 3 vidas perdidas; aparece como "Seu recorde: 30 pts · 14 acertos seguidos" (`speedRecordText`). Substituiu um recorde de tempo total (`speedBestMs`, removido), que premiava rodadas curtas e respostas lentas. Teste: tests/revisao-proposta-a (60).
 
+
+## Passada de design nas janelas da Revisão (2026-10-12)
+
+Janelas abertas pela barra Decks | Adicionar | Painel | Configurar | ⋯ e pela tela do Deck (Criar, Renomear, Excluir).
+Classe nova `deck-window` (e `deck-window-sm` para as pequenas) nos `.app-modal` de Adicionar, Painel, Configurar e Exportar;
+CSS num bloco só no fim do `<style>` de fr/zh ("Janelas da Revisão"), só com tokens existentes.
+
+- Rótulos em tom de frase dentro dessas janelas (sem caixa alta), inclusive os grupos da lateral do Painel.
+- Campo do cartão desenhado como ficha pautada: linha vermelha embaixo de "Campo N" e pauta no texto (17px). Com
+  largura >= 480px (container query), Idioma e Áudio dividem a linha; Áudio vira uma linha só ("Sem áudio" + botão).
+- Adicionar: "Deck de destino" e "Tipo de cartão" lado a lado; o "Novo cartão" repetido do título sumiu (fica o selo do plano).
+- Configurar: rótulo à esquerda e escolha à direita (empilha no celular).
+- Exportar: as duas escolhas em grade, sem o espaço vazio embaixo.
+- Criar/Renomear Deck: título visível no formulário. Excluir Deck: caixa em tom de perigo, botões na ordem
+  Cancelar | Mover | Excluir permanentemente, este em vermelho (`--error-red` + `--on-vivid`).
+- zh não define `--error-red`: o bloco usa `var(--error-red, var(--seal-red))` (corrige também o "Excluir" do zh, que estava sem cor).
+- Inline styles do editor de campos (`shared/flashcard-field-editor.js`) viraram classes (`field-editor-row/head/title`,
+  `field-audio-*`) com o mesmo visual de antes fora dessas janelas.
+- Texto: `myFlashcards.fields.hint` sem "--" e sem "pra" (regra do projeto); registrado em `DELIBERATE_PT_CHANGES` do teste de i18n,
+  que também ignora o bloco CSS novo na comparação do HTML.
+- Testes: deck-browser 206/206, fase-f 50/50, fase-i 48/48, plano-admin 26/26, revisao-ajustes 48/48, i18n unit 2107/2107.
+  Prints conferidos em fr/zh × claro/escuro e 390px (0 pageerrors).

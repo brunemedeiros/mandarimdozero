@@ -312,7 +312,7 @@ function publicDeckBadgeHTML(icon, color){
 function publicDeckGateHTML(v){
   if (!v.authenticated){
     return `<p class="profile-empty-note" data-public-deck-gate="login">🔒 Entre na sua conta para ver os cartões. Abrir e importar Decks públicos é um recurso Premium.</p>
-      <a class="btn btn-secondary btn-block" href="../">Entrar ou criar conta</a>`;
+      <a class="btn btn-secondary btn-block" href="../" data-login-cta>Entrar ou criar conta</a>`;
   }
   if (!v.can_open){
     return `<p class="profile-empty-note" data-public-deck-gate="premium">🔒 Abrir e importar Decks públicos é um recurso Premium. Você pode ver as informações do Deck acima.</p>`;
@@ -595,6 +595,23 @@ async function renderPublicDecksSection(boxEl, username){
   }));
 }
 
+// ---------- K.8 (079): "N pessoas adicionaram este Deck" (só o dono Premium ou a admin) ----------
+// Sem a permissão public_deck_copy_count (plano grátis), a RPC responde not_allowed e a
+// caixa mostra o convite para o Premium. Conta pessoas distintas desde a 079.
+async function renderPublicDeckCopiesBox(box, deckId){
+  if (!box) return;
+  const { data, error } = await supabaseClient.rpc('get_public_deck_copy_count', { p_deck_id: deckId });
+  if (!box.isConnected) return;
+  if (error || !data){ box.innerHTML = ''; return; }
+  if (data.error){
+    box.innerHTML = data.error === 'not_allowed' ? `<p class="public-copies-line is-locked">🔒 ${t('publicDeckCopies.premiumHint')}</p>` : '';
+    return;
+  }
+  const n = Number(data.people) || 0;
+  box.innerHTML = `<p class="public-copies-line"><strong>👥 ${escapeHTML(tp('publicDeckCopies.ownerCount', n))}</strong>
+    ${data.last_copied_at ? `<span>${escapeHTML(t('publicDeckCopies.lastOn', { date: fmtDate(data.last_copied_at) }))}</span>` : ''}</p>`;
+}
+
 // ---------- Controles do DONO (Meus Decks): publicar / atualizar / despublicar ----------
 // Toda escrita passa por RPC (publish_deck/unpublish_deck): o UPDATE direto das colunas de
 // publicação é barrado no servidor (trigger decks_public_guard). A UI só orienta.
@@ -607,22 +624,32 @@ function publishBoxHTML(deck, status){
   const colorOpts = Object.keys(PUBLIC_DECK_COLORS).map(k => `<option value="${k}" ${k === color ? 'selected' : ''}>${k}</option>`).join('');
   const incompat = status && status.incompatible ? status.incompatible.length : 0;
   const publicId = (status && status.public_id) || deck.public_id;
+  const profilePrivate = typeof PROFILE_CACHE !== 'undefined' && PROFILE_CACHE && PROFILE_CACHE.public_profile === false;
+  // "Tornar público"/"Tornar privado" (Etapa 3b, 2026-10-12). Descrição, ícone e cor ficam em
+  // "Editar página do Deck". Os data-publish-* são os mesmos de antes (testes e fluxo).
   return `<div class="public-deck-publish-form" data-publish-form="${deck.id}">
-    <p class="profile-edit-hint">${isPublic ? '🌐 Este Deck está público.' : 'Publicar torna este Deck visível no seu perfil e acessível por link.'}
-      Publicar é por Deck: <strong>subdecks não são publicados automaticamente</strong> — publique cada um que quiser. O campo "nota privada" dos cartões nunca é público.</p>
-    <label class="profile-edit-label">Descrição (opcional, até 280 caracteres)</label>
-    <textarea class="profile-edit-input profile-edit-textarea" rows="2" maxlength="280" data-publish-desc>${escapeHTML(desc)}</textarea>
-    <div style="display:flex; gap:8px;">
-      <select class="profile-edit-input" data-publish-icon aria-label="Ícone">${iconOpts}</select>
-      <select class="profile-edit-input" data-publish-color aria-label="Cor">${colorOpts}</select>
-    </div>
-    ${status ? `<p class="profile-edit-hint">${status.notes_count} Notes serão públicas.${incompat ? ` ${incompat} não podem ser representadas no formato novo e <strong>não serão publicadas</strong> (continuam intactas no seu Deck).` : ''}</p>` : ''}
+    <p class="profile-edit-hint">${isPublic
+      ? (profilePrivate ? '🌐 Este Deck é público, mas seu perfil está privado: só seus amigos e sua professora veem.' : '🌐 Este Deck é público: aparece no seu perfil e abre pelo link.')
+      : '🔒 Este Deck é privado: só você vê.'}
+      Cada Deck tem a própria chave: <strong>subdecks não mudam junto</strong>. O campo "nota privada" dos cartões nunca é público.</p>
+    ${status && !isPublic ? `<p class="profile-edit-hint">${status.notes_count} Notes ficarão públicas.${incompat ? ` ${incompat} não podem ser representadas no formato novo e <strong>não serão publicadas</strong> (continuam intactas no seu Deck).` : ''}</p>` : ''}
+    ${isPublic ? '<div class="public-copies-box" data-publish-copies></div>' : ''}
     ${isPublic && publicId ? `<input type="text" class="profile-edit-input" readonly data-publish-link value="${escapeHTML(publicDeckShareUrl(publicId, deck.language_app_key))}">` : ''}
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button type="button" class="btn btn-primary" data-publish-save>${isPublic ? 'Salvar alterações' : 'Publicar'}</button>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin:8px 0;">
       ${isPublic ? `<button type="button" class="btn btn-secondary" data-publish-copy>Copiar link</button>
-      <button type="button" class="btn btn-secondary" data-publish-unpublish>Despublicar</button>` : ''}
+      <button type="button" class="btn btn-secondary" data-publish-unpublish>Tornar privado</button>`
+      : `<button type="button" class="btn btn-primary" data-publish-save>Tornar público</button>`}
     </div>
+    <details class="public-deck-page-edit"${isPublic ? '' : ''}>
+      <summary class="profile-edit-label" style="cursor:pointer;">Editar página do Deck</summary>
+      <label class="profile-edit-label">Descrição (opcional, até 280 caracteres)</label>
+      <textarea class="profile-edit-input profile-edit-textarea" rows="2" maxlength="280" data-publish-desc>${escapeHTML(desc)}</textarea>
+      <div style="display:flex; gap:8px;">
+        <select class="profile-edit-input" data-publish-icon aria-label="Ícone">${iconOpts}</select>
+        <select class="profile-edit-input" data-publish-color aria-label="Cor">${colorOpts}</select>
+      </div>
+      ${isPublic ? '<button type="button" class="btn btn-primary" data-publish-save>Salvar alterações</button>' : ''}
+    </details>
     <p class="profile-edit-field-error" data-publish-error></p>
   </div>`;
 }
@@ -632,6 +659,7 @@ async function openPublishBox(deck, boxEl, onChange){
   const status = await fetchPublicDeckOwnerStatus(deck.id);
   boxEl.innerHTML = publishBoxHTML(deck, status);
   const errEl = boxEl.querySelector('[data-publish-error]');
+  renderPublicDeckCopiesBox(boxEl.querySelector('[data-publish-copies]'), deck.id);
   boxEl.querySelector('[data-publish-save]')?.addEventListener('click', async (ev) => {
     ev.currentTarget.disabled = true;
     errEl.textContent = '';
@@ -642,18 +670,18 @@ async function openPublishBox(deck, boxEl, onChange){
     });
     if (!res.ok){ errEl.textContent = res.error; ev.currentTarget.disabled = false; return; }
     Object.assign(deck, { is_public: true, public_id: res.publicId, published_at: res.publishedAt });
-    if (!res.visibleOnProfile) showToast('Deck publicado, mas seu perfil público está desligado — ele só aparece quando você reativar o perfil público.');
-    else showToast('🌐 Deck publicado.');
+    if (!res.visibleOnProfile) showToast('Deck público. Como seu perfil está privado, só seus amigos e sua professora veem.');
+    else showToast('🌐 Deck público.');
     if (onChange) onChange(deck);
     openPublishBox(deck, boxEl, onChange);
   });
   boxEl.querySelector('[data-publish-unpublish]')?.addEventListener('click', async (ev) => {
-    if (!window.confirm('Despublicar este Deck? Ele sai do seu perfil e o link deixa de funcionar. Cópias que outras pessoas já fizeram continuam com elas.')) return;
+    if (!window.confirm('Tornar este Deck privado? Ele sai do seu perfil e o link deixa de funcionar. Cópias que outras pessoas já fizeram continuam com elas.')) return;
     ev.currentTarget.disabled = true;
     const res = await unpublishDeckRpc(deck.id);
     if (!res.ok){ errEl.textContent = res.error; ev.currentTarget.disabled = false; return; }
     deck.is_public = false;
-    showToast('Deck despublicado.');
+    showToast('🔒 Deck privado.');
     if (onChange) onChange(deck);
     openPublishBox(deck, boxEl, onChange);
   });

@@ -179,6 +179,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Léa", "e": "👩" },
+        "B": { "n": "Hugo", "e": "👨" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 3,
+          "bad": ["Bonsoir !", "S'il vous plaît !"]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["À bientôt !", "Au revoir !"]
+        },
+        { "k": "understand", "ok": 0 }
+      ],
       "lines": [
         { "f": "Bonjour !" },
         { "f": "Bonjour ! Ça va ?" },
@@ -337,6 +354,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Ana", "e": "👩" },
+        "B": { "n": "Léo", "e": "👨" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 1,
+          "bad": ["Oui, je suis français.", "Non, je suis brésilien."]
+        },
+        {
+          "k": "listen",
+          "line": 2,
+          "bad": ["Je m'appelle Ana.", "Bonjour, comment tu t'appelles ?"]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "Bonjour, comment tu t'appelles ?" },
         { "f": "Je m'appelle Léo. Et toi ?" },
@@ -494,6 +528,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Sophie", "e": "👩" },
+        "B": { "n": "Marc", "e": "👨" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 2,
+          "bad": ["Elle a huit ans.", "Oui, merci !"]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["Il a dix ans.", "Ils sont grands !"]
+        },
+        { "k": "understand", "ok": 0 }
+      ],
       "lines": [
         { "f": "Quel âge a ta fille ?" },
         { "f": "Elle a huit ans. Et ton fils ?" },
@@ -731,6 +782,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Julie", "e": "👩" },
+        "B": { "n": "Antoine", "e": "👨" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 4,
+          "bad": ["Il s'appelle Paul.", "Oui, j'ai une sœur."]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["Il a quinze ans.", "Il s'appelle Paul."]
+        },
+        { "k": "understand", "ok": 0 }
+      ],
       "lines": [
         { "f": "Tu as des frères et sœurs ?" },
         { "f": "Oui, j'ai une sœur. Et toi ?" },
@@ -974,6 +1042,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Nicolas", "e": "🧑‍🍳" },
+        "B": { "n": "Manon", "e": "👩" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 3,
+          "bad": ["Bonjour, vous désirez ?", "Ça fait cinq euros."]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["Non merci, c'est tout.", "Voilà, ça fait cinq euros."]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "Bonjour, vous désirez ?" },
         { "f": "Un café et un croissant, s'il vous plaît." },
@@ -1131,6 +1216,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Clara", "e": "👩" },
+        "B": { "n": "Julien", "e": "👨" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 3,
+          "bad": ["Je me lève à six heures et demie.", "Je dors à minuit."]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["Je travaille le matin et l'après-midi.", "Je dors à minuit."]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "Tu te lèves à quelle heure ?" },
         { "f": "Je me lève à six heures et demie." },
@@ -1350,6 +1452,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Chloé", "e": "👩" },
+        "B": { "n": "Maxime", "e": "👨" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 3,
+          "bad": ["Non, je travaille mercredi.", "Mardi, ça te va ?"]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["Parfait, à mercredi alors !", "Non, je travaille mardi."]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "On se voit quel jour ?" },
         { "f": "Mardi, ça te va ?" },
@@ -1464,6 +1583,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Emma", "e": "👩" },
+        "B": { "n": "Pierre", "e": "👨" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 3,
+          "bad": ["Merci beaucoup !", "C'est à gauche."]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["Non, c'est à cinq minutes.", "Merci beaucoup !"]
+        },
+        { "k": "understand", "ok": 0 }
+      ],
       "lines": [
         { "f": "Excusez-moi, où est le musée ?" },
         { "f": "C'est tout droit, puis à droite." },
@@ -1637,6 +1773,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Thomas", "e": "🧑" },
+        "B": { "n": "Sofia", "e": "👩" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 4,
+          "bad": ["Oui, je suis italienne.", "Je suis d'Italie."]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["Moi, je suis allemand.", "Non, j'habite au Portugal."]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "Tu es d'où ?" },
         { "f": "Je suis italienne, et toi ?" },
@@ -1833,6 +1986,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Inès", "e": "👩" },
+        "B": { "n": "Vincent", "e": "🧑‍💼" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 3,
+          "bad": ["Je fais du 38.", "Je la prends !"]
+        },
+        {
+          "k": "listen",
+          "line": 1,
+          "bad": ["Elle coûte soixante euros.", "Parfait, je la prends !"]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "Bonjour, je cherche une robe." },
         { "f": "Quelle taille faites-vous ?" },
@@ -2069,6 +2239,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Lucas", "e": "👨" },
+        "B": { "n": "Marion", "e": "👩" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 1,
+          "bad": ["Oui, avec du sucre !", "Tu veux un dessert ?"]
+        },
+        {
+          "k": "listen",
+          "line": 2,
+          "bad": ["Du riz, des légumes et du poulet.", "Qu'est-ce qu'on achète ?"]
+        },
+        { "k": "understand", "ok": 0 }
+      ],
       "lines": [
         { "f": "Qu'est-ce qu'on achète ?" },
         { "f": "Du riz, des légumes et du poulet." },
@@ -2189,6 +2376,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Michel", "e": "🧑‍🌾" },
+        "B": { "n": "Hélène", "e": "👩" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 1,
+          "bad": ["Une bouteille d'eau.", "Et avec ça ?"]
+        },
+        {
+          "k": "listen",
+          "line": 2,
+          "bad": ["Un demi-kilo, s'il vous plaît.", "Vous voulez combien de pommes ?"]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "Vous voulez combien de pommes ?" },
         { "f": "Un demi-kilo, s'il vous plaît." },
@@ -2318,6 +2522,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Alice", "e": "👩" },
+        "B": { "n": "Baptiste", "e": "👨" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 1,
+          "bad": ["Je préfère l'été.", "Il neige et il fait chaud."]
+        },
+        {
+          "k": "listen",
+          "line": 2,
+          "bad": ["Il fait beau, mais il fait froid.", "Il pleut aujourd'hui."]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "Quel temps fait-il aujourd'hui ?" },
         { "f": "Il fait beau, mais il fait froid." },
@@ -2468,6 +2689,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Laura", "e": "👩" },
+        "B": { "n": "Romain", "e": "👨" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 3,
+          "bad": ["Oui, c'est la bonne direction.", "Le train va au centre-ville."]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["Ça coûte deux euros.", "Combien coûte le billet ?"]
+        },
+        { "k": "understand", "ok": 0 }
+      ],
       "lines": [
         { "f": "Excusez-moi, ce train va au centre-ville ?" },
         { "f": "Oui, c'est la bonne direction." },
@@ -2682,6 +2920,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Dr. Martin", "e": "🩺" },
+        "B": { "n": "Théo", "e": "🧑" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 3,
+          "bad": ["J'ai mal au ventre.", "Vous devez vous reposer."]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["Depuis hier soir.", "Vous devez vous reposer."]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "Qu'est-ce qui ne va pas ?" },
         { "f": "J'ai mal au ventre et j'ai de la fièvre." },
@@ -2898,6 +3153,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Pauline", "e": "👩" },
+        "B": { "n": "Adrien", "e": "👨" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 3,
+          "bad": ["Il a les cheveux noirs.", "Non, il est petit."]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["Oui, il est très gentil !", "Il est sympa ?"]
+        },
+        { "k": "understand", "ok": 0 }
+      ],
       "lines": [
         { "f": "Comment est ton frère ?" },
         { "f": "Il est grand et il a les cheveux noirs." },
@@ -3133,6 +3405,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Mathilde", "e": "👩" },
+        "B": { "n": "Karim", "e": "🧑‍💼" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 3,
+          "bad": ["Oui, il y a un balcon.", "Il y a deux chambres."]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["Non, il n'y a pas de balcon.", "Il y a un beau salon."]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "Il y a combien de chambres ?" },
         { "f": "Il y a deux chambres et une cuisine." },
@@ -3237,6 +3526,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Enzo", "e": "🧒" },
+        "B": { "n": "Maman", "e": "👩" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 1,
+          "bad": ["Elles sont sur la table.", "Oui, il est grand."]
+        },
+        {
+          "k": "listen",
+          "line": 2,
+          "bad": ["Il est sous le lit.", "Où est mon sac ?"]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "Où est mon sac ?" },
         { "f": "Il est sous le lit." },
@@ -3419,6 +3725,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Élise", "e": "👩" },
+        "B": { "n": "Quentin", "e": "👨" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 3,
+          "bad": ["Oui, avec des amis.", "Je danse le samedi."]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["On ne sait pas encore !", "Quel film vous allez voir ?"]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "Tu as des projets pour le week-end ?" },
         { "f": "Oui, je vais au cinéma avec des amis." },
@@ -3623,6 +3946,23 @@ const UNITS = [
       }
     ],
     "dialogue": {
+      "speakers": {
+        "A": { "n": "Sarah", "e": "👩" },
+        "B": { "n": "Kévin", "e": "👨" }
+      },
+      "check": [
+        {
+          "k": "fill",
+          "line": 3,
+          "bad": ["J'ai travaillé le matin.", "Demain, je fais du sport."]
+        },
+        {
+          "k": "listen",
+          "line": 0,
+          "bad": ["On est allés au cinéma avec des amis.", "Et le week-end dernier ?"]
+        },
+        { "k": "understand", "ok": 1 }
+      ],
       "lines": [
         { "f": "Qu'est-ce que tu as fait hier ?" },
         { "f": "J'ai travaillé le matin, et l'après-midi j'ai fait du sport." },

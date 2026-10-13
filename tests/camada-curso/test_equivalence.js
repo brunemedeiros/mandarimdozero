@@ -29,7 +29,8 @@ function canon(v, inTable){
 const hash = o => crypto.createHash('sha256').update(String(JSON.stringify(canon(o)))).digest('hex').slice(0, 12);
 
 // campos de string que PODEM ficar na base (idioma estudado ou chave de lógica)
-const BASE_KEYS = new Set(['id','level','f','c','p','answer','alt','form','subject','pinyin','emoji','scenarioEmoji','kind','category','after','type','spk','char','r','moduleId','text','opening','icon']);
+// n,e = nome e emoji do personagem do diálogo; k = tipo da micro-checagem; bad = respostas erradas (frases do idioma estudado)
+const BASE_KEYS = new Set(['id','level','f','c','p','answer','alt','form','subject','pinyin','emoji','scenarioEmoji','kind','category','after','type','spk','char','r','moduleId','text','opening','icon','n','e','k','bad']);
 
 for (const lang of ['fr', 'zh']){
   const orig = load(lang);

@@ -49,7 +49,16 @@
         "dialogue": {
           "title": "Encontro na rua",
           "lines": ["Olá!", "Olá! Tudo bem?", "Vou bem, obrigada! E você?", "Tudo bem. Até breve!"],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "De manhã, na rua do bairro: Léa encontra o vizinho Hugo.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Como Léa e Hugo se despedem no final?",
+              "opts": ["Dizem \"até breve\"", "Dizem \"de nada\"", "Pedem \"por favor\""]
+            }
+          ]
         },
         "concepts": {
           "bonjour-vs-bonsoir": [
@@ -140,7 +149,16 @@
             "Sim, eu sou francês. E você, é brasileira?",
             "Sim, eu sou brasileira!"
           ],
-          "speakers": ["A", "B", "A", "B", "A"]
+          "speakers": ["A", "B", "A", "B", "A"],
+          "scene": "Numa festa de boas-vindas, dois desconhecidos se apresentam.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "De que país é a Ana?",
+              "opts": ["França", "Brasil", "Itália"]
+            }
+          ]
         },
         "concepts": {
           "tu-vs-vous": [
@@ -212,7 +230,16 @@
             "Ele tem dez anos.",
             "Eles estão grandes!"
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "No parque, dois pais conversam enquanto os filhos brincam.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Quantos anos tem a filha do Marc?",
+              "opts": ["Oito", "Dez", "Seis"]
+            }
+          ]
         },
         "concepts": {
           "avoir-age": [
@@ -340,7 +367,16 @@
             "Quantos anos ele tem?",
             "Ele tem quinze anos."
           ],
-          "speakers": ["A", "B", "A", "B", "A"]
+          "speakers": ["A", "B", "A", "B", "A"],
+          "scene": "Na pausa do café do trabalho, dois colegas falam da família.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Como se chama o irmão da Julie?",
+              "opts": ["Paul", "Marc", "Louis"]
+            }
+          ]
         },
         "concepts": {
           "mon-vs-ma": [
@@ -469,7 +505,16 @@
             "Não, obrigado(a), é só isso.",
             "Aqui está, são cinco euros."
           ],
-          "speakers": ["A", "B", "A", "B", "A"]
+          "speakers": ["A", "B", "A", "B", "A"],
+          "scene": "Num café de Paris, de manhã: um cliente faz o pedido ao garçom.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Quanto custa o pedido da Manon?",
+              "opts": ["Dois euros", "Cinco euros", "Dez euros"]
+            }
+          ]
         },
         "concepts": {
           "aime-le-vs-bois-du": [
@@ -541,7 +586,16 @@
             "E você trabalha quando?",
             "Eu trabalho de manhã e à tarde."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Na hora do almoço, dois colegas de trabalho falam da rotina.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "A que horas o Julien levanta?",
+              "opts": ["Às seis horas", "Às seis e meia", "Ao meio-dia"]
+            }
+          ]
         },
         "concepts": {
           "etre-heures": [
@@ -655,7 +709,16 @@
             "Não, eu trabalho terça. E quarta?",
             "Perfeito, até quarta então!"
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Dois amigos combinam de se ver na semana que vem.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Em que dia Chloé e Maxime marcam o encontro?",
+              "opts": ["Terça", "Quarta", "Segunda"]
+            }
+          ]
         },
         "concepts": {
           "a-demain-vs-a-bientot": [
@@ -732,7 +795,16 @@
             "Não, é a cinco minutos.",
             "Muito obrigado(a)!"
           ],
-          "speakers": ["A", "B", "A", "B", "A"]
+          "speakers": ["A", "B", "A", "B", "A"],
+          "scene": "Na rua, uma turista pede informação a um morador da cidade.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "O museu fica longe?",
+              "opts": ["Não, fica a cinco minutos", "Sim, fica a uma hora", "Está fechado"]
+            }
+          ]
         },
         "concepts": {
           "ou-est-vs-il-y-a": [
@@ -845,7 +917,16 @@
             "Você mora na Alemanha?",
             "Não, eu moro em Portugal agora."
           ],
-          "speakers": ["A", "B", "A", "B", "A"]
+          "speakers": ["A", "B", "A", "B", "A"],
+          "scene": "Numa festa internacional, duas pessoas descobrem de onde cada uma vem.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Onde o Thomas mora agora?",
+              "opts": ["Na Alemanha", "Em Portugal", "Na Itália"]
+            }
+          ]
         },
         "concepts": {
           "etre-nationalite-vs-venir-de": [
@@ -934,7 +1015,16 @@
             "Custa sessenta euros.",
             "Perfeito, vou levar!"
           ],
-          "speakers": ["A", "B", "A", "B", "A"]
+          "speakers": ["A", "B", "A", "B", "A"],
+          "scene": "Numa loja de roupas, uma cliente procura um vestido.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Quanto custa o vestido?",
+              "opts": ["Quarenta euros", "Sessenta euros", "Cem euros"]
+            }
+          ]
         },
         "concepts": {
           "voudrais-vs-peux": [
@@ -1054,7 +1144,16 @@
             "Você quer uma sobremesa?",
             "Sim, com açúcar, por favor!"
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Dois amigos que moram juntos fazem a lista de compras da semana.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Quais itens estão na lista de compras?",
+              "opts": ["Arroz, legumes e frango", "Peixe e salada", "Pão e queijo"]
+            }
+          ]
         },
         "concepts": {
           "negation-partitif": [
@@ -1123,7 +1222,16 @@
             "E mais alguma coisa?",
             "Uma garrafa de água e um pouco de queijo."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Numa feira livre, uma cliente compra maçãs, água e queijo.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Quantas maçãs a Hélène quer?",
+              "opts": ["Um quilo", "Meio quilo", "Uma garrafa"]
+            }
+          ]
         },
         "concepts": {
           "de-quantite": [
@@ -1186,7 +1294,16 @@
             "Você prefere qual estação?",
             "Eu prefiro o verão, está quente."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "No ponto de ônibus, numa manhã fria, dois colegas falam do tempo.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Qual estação o Baptiste prefere?",
+              "opts": ["Inverno", "Verão", "Outono"]
+            }
+          ]
         },
         "concepts": {
           "il-fait-vs-jai": [
@@ -1256,7 +1373,16 @@
             "Quanto custa a passagem?",
             "Custa dois euros."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Na estação de metrô, uma passageira pergunta sobre o trem.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Quanto custa a passagem?",
+              "opts": ["Dois euros", "Três euros", "Um euro"]
+            }
+          ]
         },
         "concepts": {
           "en-vs-a-transport": [
@@ -1375,7 +1501,16 @@
             "Desde ontem à noite.",
             "Você precisa descansar."
           ],
-          "speakers": ["A", "B", "A", "B", "A"]
+          "speakers": ["A", "B", "A", "B", "A"],
+          "scene": "Num consultório médico, um paciente conta o que está sentindo.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "O que o Théo está sentindo?",
+              "opts": ["Dor de cabeça", "Dor de barriga e febre", "Dor no pé"]
+            }
+          ]
         },
         "concepts": {
           "avoir-mal-vs-etre-malade": [
@@ -1503,7 +1638,16 @@
         "dialogue": {
           "title": "Descrevendo alguém",
           "lines": ["Como é o seu irmão?", "Ele é alto e tem cabelo preto.", "Ele é legal?", "Sim, ele é muito gentil!"],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Dois amigos conversam e Adrien descreve o irmão para Pauline.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Como é o irmão do Adrien?",
+              "opts": ["Alto, de cabelo preto e gentil", "Baixo, de cabelo claro e tímido", "Alto e antipático"]
+            }
+          ]
         },
         "concepts": {
           "adjective-placement": [
@@ -1632,7 +1776,16 @@
             "Tem uma varanda?",
             "Não, não tem varanda, mas tem uma sala bonita."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Numa visita a um apartamento para alugar, a cliente faz perguntas ao corretor.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "O apartamento tem varanda?",
+              "opts": ["Sim, e dois quartos", "Não, mas tem uma sala bonita", "Não, e não tem cozinha"]
+            }
+          ]
         },
         "concepts": {
           "il-y-a-vs-negation": [
@@ -1706,7 +1859,16 @@
             "E minhas chaves?",
             "Estão em cima da mesa, do lado da luminária."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Em casa, um menino procura suas coisas antes de sair para a escola.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Onde estão as chaves do Enzo?",
+              "opts": ["Embaixo da cama", "Em cima da mesa, ao lado da luminária", "Atrás do sofá"]
+            }
+          ]
         },
         "concepts": {
           "sur-vs-dans": [
@@ -1772,7 +1934,16 @@
             "Qual filme vocês vão ver?",
             "A gente ainda não sabe!"
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Na sexta-feira, dois amigos falam dos planos para o fim de semana.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Eles já escolheram o filme?",
+              "opts": ["Sim, já escolheram", "Ainda não sabem qual", "Não vão ao cinema"]
+            }
+          ]
         },
         "concepts": {
           "jouer-de-vs-jouer-a": [
@@ -1899,7 +2070,16 @@
             "E no fim de semana passado?",
             "A gente foi ao cinema com amigos."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Na segunda-feira, dois colegas contam o que fizeram ontem e no fim de semana passado.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "O que o Kévin fez à tarde, ontem?",
+              "opts": ["Trabalhou", "Fez esporte", "Foi ao cinema"]
+            }
+          ]
         },
         "concepts": {
           "hier-vs-semaine-derniere": [

@@ -146,7 +146,7 @@ const ANALYTICS_TECHNICAL_ERROR_LABELS = {
 // custo de Retenção/Engajamento/Tecnologia em toda troca de filtro se a
 // autora nunca chega a olhar essas abas. Cache limpo a cada novo período/
 // idioma/dispositivo/comparação (início de renderAdminAnalyticsView()).
-const ANALYTICS_LAZY_TABS = new Set(['retencao', 'engajamento', 'tecnologia']);
+const ANALYTICS_LAZY_TABS = new Set(['retencao', 'engajamento', 'tecnologia', 'decks']);
 
 // ---------- Período ----------
 function analyticsStartOfDay(d){ const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
@@ -1184,6 +1184,30 @@ function renderRetencaoSectionHTML(cohorts){
   `;
 }
 
+// K.8 (079): quantas PESSOAS adicionaram cada Deck público (uma por conta,
+// recópias somam só em "cópias"). Não depende do período escolhido acima:
+// é o total desde a 079 (cópias de antes não foram registradas).
+function renderPublicDeckCopiesSectionHTML(decks){
+  if (!Array.isArray(decks)) return `<p class="profile-empty-note">${t('publicDeckCopies.error')}</p>`;
+  const head = `<div class="section-label">${t('publicDeckCopies.tab')}</div><p class="panel-hint">${t('publicDeckCopies.adminHint')}</p>`;
+  if (!decks.length) return head + `<p class="profile-empty-note">${t('publicDeckCopies.none')}</p>`;
+  const lang = (k) => (typeof STUDENT_LANGUAGE_LABELS !== 'undefined' && STUDENT_LANGUAGE_LABELS[k]) || k;
+  return head + `
+    <div class="student-decks-scroll">
+      <table class="student-decks">
+        <thead><tr><th scope="col">${t('studentDecks.deck')}</th><th scope="col">${t('publicDeckCopies.people')}</th><th scope="col">${t('publicDeckCopies.copies')}</th><th scope="col">${t('publicDeckCopies.last')}</th></tr></thead>
+        <tbody>${decks.map(d => `
+          <tr>
+            <th scope="row">${escapeHTML(d.name || '')}<span class="public-copies-meta">@${escapeHTML(d.owner_username || '')} · ${escapeHTML(lang(d.language_app_key))}${d.is_public ? '' : ` · ${t('publicDeckCopies.unpublished')}`}</span></th>
+            <td${d.people ? '' : ' class="is-zero"'}>${d.people}</td>
+            <td${d.copies ? '' : ' class="is-zero"'}>${d.copies}</td>
+            <td>${d.last_copied_at ? escapeHTML(fmtDate(d.last_copied_at)) : '—'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
 // ---------- Render: navegação interna (abas) ----------
 // Escalável de propósito: uma aba nova é só mais uma entrada aqui e mais
 // um botão no HTML gerado -- nenhuma outra parte do arquivo precisa saber
@@ -1199,6 +1223,7 @@ const ANALYTICS_TABS = [
   { key: 'idioma', get label(){ return t('admin.analytics.subtab.idioma'); } },
   { key: 'dispositivos', get label(){ return t('admin.analytics.subtab.dispositivos'); } },
   { key: 'tecnologia', get label(){ return t('admin.analytics.subtab.tecnologia'); } },
+  { key: 'decks', get label(){ return t('publicDeckCopies.tab'); } },
 ];
 
 function analyticsSubnavHTML(){
@@ -1239,6 +1264,10 @@ async function switchAnalyticsTab(tab){
     ]);
     ANALYTICS_LAZY_CACHE.engajamento = { weeklyXp, badgeGrants };
     panel.innerHTML = renderEngajamentoSectionHTML(ANALYTICS_CURRENT.stats, weeklyXp, badgeGrants);
+  } else if (tab === 'decks'){
+    const { data, error } = await supabaseClient.rpc('admin_public_deck_copy_stats');
+    ANALYTICS_LAZY_CACHE.decks = (!error && data && Array.isArray(data.decks)) ? data.decks : null;
+    panel.innerHTML = renderPublicDeckCopiesSectionHTML(ANALYTICS_LAZY_CACHE.decks);
   } else if (tab === 'tecnologia'){
     const events = await fetchTechnicalEventsForWindow(ANALYTICS_CURRENT.sinceIso, ANALYTICS_CURRENT.untilIso);
     ANALYTICS_LAZY_CACHE.tecnologia = computeTechnicalStats(events);
@@ -1368,7 +1397,8 @@ async function renderAdminAnalyticsView(){
     + `<div data-analytics-panel="engajamento"></div>`
     + `<div data-analytics-panel="idioma">${renderIdiomaSectionHTML(stats)}</div>`
     + `<div data-analytics-panel="dispositivos">${renderDispositivosSectionHTML(stats)}</div>`
-    + `<div data-analytics-panel="tecnologia"></div>`;
+    + `<div data-analytics-panel="tecnologia"></div>`
+    + `<div data-analytics-panel="decks"></div>`;
 
   wireAdminModeAnalyticsToggle();
   wireAnalyticsExcludeOwnToggle();
@@ -1378,38 +1408,39 @@ async function renderAdminAnalyticsView(){
 }
 
 // Alterna entre as seções do Painel de Admin (Badges/Analytics/
-// Notificações/Reports/Alunos) -- cada uma renderiza no seu próprio wrap
+// Notificações/Reports/Planos) -- cada uma renderiza no seu próprio wrap
 // (#admin-badges-content / #admin-analytics-content / ...), só um fica
-// visível por vez.
+// visível por vez. Alunos/Cartões/Aulas/Material de apoio saíram daqui para
+// o Painel da professora (shared/teacher-panel.js), que depende do PAPEL
+// Professora e não do Admin Mode.
+const ADMIN_PANEL_SECTIONS = ['badges', 'analytics', 'notifications', 'reports', 'premium'];
 function switchAdminPanelSection(section){
+  if (!ADMIN_PANEL_SECTIONS.includes(section)) section = 'badges';
   ADMIN_PANEL_STATE.section = section;
-  document.querySelectorAll('[data-admin-section]').forEach(btn => btn.classList.toggle('active', btn.dataset.adminSection === section));
-  document.getElementById('admin-badges-content').style.display = section === 'badges' ? '' : 'none';
-  document.getElementById('admin-analytics-content').style.display = section === 'analytics' ? '' : 'none';
-  document.getElementById('admin-notifications-content').style.display = section === 'notifications' ? '' : 'none';
-  document.getElementById('admin-reports-content').style.display = section === 'reports' ? '' : 'none';
-  document.getElementById('admin-students-content').style.display = section === 'students' ? '' : 'none';
-  document.getElementById('admin-flashcards-content').style.display = section === 'flashcards' ? '' : 'none';
-  document.getElementById('admin-classlogs-content').style.display = section === 'classlogs' ? '' : 'none';
-  document.getElementById('admin-materials-content').style.display = section === 'materials' ? '' : 'none';
-  document.getElementById('admin-premium-content').style.display = section === 'premium' ? '' : 'none';
-  document.getElementById('admin-tags-content').style.display = section === 'tags' ? '' : 'none';
+  document.querySelectorAll('[data-admin-section]').forEach(btn => {
+    const on = btn.dataset.adminSection === section;
+    btn.classList.toggle('is-active', on);
+    btn.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  ADMIN_PANEL_SECTIONS.forEach(s => {
+    const el = document.getElementById(`admin-${s}-content`);
+    if (el) el.style.display = s === section ? '' : 'none';
+  });
   if (section === 'badges') renderAdminBadgesView();
   else if (section === 'notifications') renderAdminNotificationsView();
   else if (section === 'reports') renderAdminReportsView();
-  else if (section === 'students') renderAdminStudentsView();
-  else if (section === 'flashcards') renderAdminFlashcardsView();
-  else if (section === 'classlogs') renderAdminClassLogsView();
-  else if (section === 'materials') renderAdminSupportMaterialsView();
   else if (section === 'premium') renderAdminPremiumView();
-  else if (section === 'tags') renderAdminTagsView();
   else renderAdminAnalyticsView();
 }
 
 // tabHandlers['admin-badges'] chama esta função (em vez de
 // renderAdminBadgesView direto) pra sempre reabrir na seção que a autora
-// deixou selecionada da última vez.
+// deixou selecionada da última vez. Quem é só professora (sem ser admin) e
+// chega aqui por um link antigo (ex.: notificação de supervisão com rota
+// 'admin-badges') vai para o Painel da professora.
 function renderAdminPanelView(){
+  const admin = typeof isAdminUser === 'function' && isAdminUser();
+  if (!admin && typeof isTeacherUser === 'function' && isTeacherUser()){ switchTab('teacher-panel'); return; }
   switchAdminPanelSection(ADMIN_PANEL_STATE.section);
 }
 

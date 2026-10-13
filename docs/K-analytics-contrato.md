@@ -153,7 +153,7 @@ Não alterado de propósito: `todaysReviewCount`/"Tudo em dia" (derivam da fila 
 (recurso próprio). Limitação: o gráfico histórico segue por `firstLearnedDate` de CardInstance (K.4).
 Testes: `tests/k7/test_k7_student_analytics.js` (Playwright FR+ZH, 40).
 
-## K.8 -- Public Analytics: BLOQUEADA POR DEPENDÊNCIA (ver docs/public-decks-auditoria.md v3 (contrato fechado); onde cita `source_*`, ler "atribuição pela Tag `criado-por-<username>`") (Public Decks / atribuição ainda não implementados)
+## K.8 -- Public Analytics: auditoria de 2026-09 (DESBLOQUEADA em 2026-10-07: Deck público existe desde a 061; plano em "Fase K final" abaixo)
 Auditoria de prontidão (só leitura; nenhum código, migration, RPC ou UI criados).
 Existe (Perfil Público, Fases 1-2 do prompt-mestre "perfil público"): `profiles.public_profile` (default true),
 rota `#/user/<username>` (`shared/router.js`, `shared/public-profile.js`), página sem login, RPCs
@@ -173,6 +173,60 @@ streak por idioma e % de progresso (`get_public_profile_stats`), isto é, agrega
 da conta. Não expõe FSRS/due/N-L-R nem cartões de Teacher; vale revisar se XP/streak devem continuar públicos
 por padrão (hoje `public_profile` é true para todas as contas).
 Retomar quando: Public Decks (flag + RPC autorizada + rota) e `source_user_id/source_card_id` existirem.
+
+## Fase K final -- decisões da autora (2026-10-07); implementada em 2026-10-12 (ver "Fase K final -- entrega" abaixo)
+
+O que já existe e não se refaz: painel 📊 do aluno (Painel de Admin > 🎓 Alunos, RPCs 070 e 059, ambas aplicadas
+na produção), Analytics de produto (`shared/admin-analytics.js`), contrato K.2 (`shared/analytics-metrics.js`).
+
+Decisões da autora:
+- Botão "📊 Analytics" do aluno em dois lugares: aba 🎓 Alunos (já existe) e perfil público `#/user/<username>`
+  (aqui só para a professora do aluno). A aba Alunos já some com Admin Mode OFF, então não muda nada nela agora;
+  a autora propôs separar o menu em "Admin" (desligável) e "Professora" (papel próprio, não desligável), em
+  discussão -- se aprovado, Alunos/Flashcards/Aulas/Material de apoio vão para "Professora" e o Analytics do aluno
+  segue o papel Professora, não o Admin Mode.
+- Decks pessoais do aluno: a professora vê **nome + Novo/Aprendendo/Revisar**, sem abrir os cartões.
+- Quantas pessoas adicionaram um Deck público: veem a admin (Analytics) e o autor do Deck.
+- Grátis x Premium: Analytics do aluno é ferramenta da professora (hoje só a autora); o contador do autor é **só Premium**
+  (checado no servidor por `profiles.plan_tier = 'premium'`, como a 061; hoje todas as contas são free, então
+  nenhum autor vê o contador até existir Premium).
+
+Etapas (cada uma com autorização própria):
+- **K.9 -- Decks do aluno (servidor)**: RPC nova `SECURITY DEFINER` `get_teacher_student_deck_counts(student, lang)`,
+  mesma porta da 059 (vínculo ativo em `teacher_students` com quem chama).
+  Devolve a árvore de Decks do aluno (curso, Meus Decks e subdecks, Cartões da Professora) com contagens por
+  subárvore, nas regras de `cardStudyBucket`/`structuralCounts` (Novo = sem histórico; Aprendendo = learning +
+  relearning; Revisar = review vencido). Deck do cartão: `own_flashcards.deck_id`, `teacher_flashcards.deck_id`,
+  trilha pelo Deck de curso da unidade. Sem conteúdo dos cartões. Limitação herdada da 059: só conta o que o aluno
+  já sincronizou em `progress`. Teste de paridade SQL x `getDeckCounts` com as mesmas fixtures.
+- **K.10 -- UI**: seção "Decks" no painel 📊 (tabela Deck / Novo / Aprendendo / Revisar); botão no perfil público
+  (só para a professora com vínculo ativo com aquele aluno), abrindo o mesmo painel. Validar fr/zh × claro/escuro.
+- **K.8 -- cópias de Deck público**: tabela `public_deck_copies (deck_id, user_id, first_copied_at, last_copied_at)`,
+  uma linha por pessoa (recópia só atualiza a data), gravada dentro de `copy_public_deck` (novo `create or replace`
+  sobre o corpo da 068, sem `DROP`). Sem leitura direta (RLS fechada); RPC `get_public_deck_copy_count(deck)` para o
+  dono Premium ou admin, e lista para a subaba nova "Decks públicos" do Analytics da admin. Unidade: **pessoas
+  distintas**. Cópias feitas antes da migration não entram (o dado não existe). Autor vê "N pessoas adicionaram"
+  na tela do próprio Deck público.
+- Ordem: K.9 → K.10 → K.8. Migrations novas (números a partir de 075) sempre Staging antes da produção
+  (skill `migration-supabase`). Testes em `tests/k8/`, `tests/k9/`, `tests/k10/`.
+
+## Fase K final -- entrega (2026-10-12)
+- **K.9** (migration 078 `get_teacher_student_deck_counts`): Meus Decks do aluno + os Decks DESTA professora (a de
+  outra professora fica fora), contagens por subárvore com as regras de `structuralCounts` (total, new, learning,
+  review = estado, due = não-New vencido). Trilha fora (painel 070 já cobre; elegibilidade da trilha é do cliente).
+  Cartão -> Note por `rowId` + `origin` (save antigo SEM rowId: `^s{n}`/`^t{n}` ancorado); Note -> Deck pela coluna
+  `deck_id` da linha ATIVA. Teste de paridade com `getDeckCounts` usando cartões do motor real:
+  `tests/k9/test_deck_counts.js` (18/18).
+- **K.10**: seção "Decks do aluno" no painel 📊 (tabela em árvore: Novos / Aprendendo / Para revisar / Devidos, as
+  mesmas colunas da lista de Decks do aluno) e botão "📊 Analytics do aluno" no perfil público, só para quem tem
+  vínculo ATIVO de professora com a conta (abre o mesmo painel num modal). `tests/k10/test_playwright.js`.
+- **K.8** (migration 079 `public_deck_copies`): tabela uma linha por pessoa e Deck de origem, gravada dentro de
+  `copy_public_deck` (corpo idêntico ao da 068 + o bloco K.8; md5 conferido). Só conta cópia que criou algo (a
+  recópia sem nada novo volta antes e não conta). `get_public_deck_copy_count` para o dono com a permissão
+  `public_deck_copy_count` (Premium/Professora/Aluno na matriz da 075) ou a admin; os outros veem o convite do
+  Premium. `admin_public_deck_copy_stats` alimenta a subaba "Decks públicos" do Analytics da admin.
+  `tests/k8/run.sh`: suíte inteira do Deck público de novo com a 079 (87+48+20+9+72+9) + `test_079.sql` 15/15.
+- Grátis x Premium: Analytics do aluno é da professora; contador do dono é Premium (grátis vê o convite).
 
 ## Fora desta fase
 - Histórico por Note e "última atividade" (`firstLearnedDate`/`lastReview` são por

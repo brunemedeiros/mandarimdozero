@@ -48,7 +48,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       CURRENT_USER = { id: 'T' }; isAdminUser = () => true;
       fetchMyStudents = async () => [1,2,3,4,5,6].map(n => ({ id: n, student_id: 'd' + n, username: 'al' + n, display_name: 'Aluno ' + n, language_app_key: appKey, status: 'active' }));
       fetchAllProfiles = async () => [];
-      switchTab('admin-badges'); switchAdminPanelSection('students');
+      switchTab('teacher-panel'); switchTeacherPanelSection('students');
     }, appKey);
     await page.waitForSelector('[data-toggle-metrics]');
     const open = async (n) => { await page.click(`[data-toggle-metrics="${n}"]`); await page.waitForFunction((n) => { const t = document.getElementById('metrics-link-' + n).textContent; return t && !t.includes('Carregando'); }, n); return page.evaluate((n) => document.getElementById('metrics-link-' + n).innerText, n); };

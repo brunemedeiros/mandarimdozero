@@ -30,6 +30,9 @@
       L.dialogue = { title: u.dialogue.title,
         lines: (u.dialogue.lines || []).map(function(l){ return l.t; }),
         speakers: (u.dialogue.lines || []).map(function(l){ return l.spk; }) };
+      // Cena (contexto) e pergunta de compreensão ("understand") são língua de origem; `fill`/`listen` só têm frases do idioma estudado.
+      put(L.dialogue, 'scene', u.dialogue.scene);
+      if (u.dialogue.check) L.dialogue.check = u.dialogue.check.map(function(c){ return c.k === 'understand' ? { q: c.q, opts: c.opts } : null; });
     }
     if (u.concepts){
       L.concepts = {};
@@ -144,7 +147,11 @@
     each(u.lessons, function(l){ delete l.title; });
     each(u.vocab, function(v){ delete v.t; });
     each(u.phrases, function(p){ delete p.t; delete p.scenario; });
-    if (u.dialogue){ delete u.dialogue.title; each(u.dialogue.lines, function(l){ delete l.t; delete l.spk; }); }
+    if (u.dialogue){
+      delete u.dialogue.title; delete u.dialogue.scene;
+      each(u.dialogue.lines, function(l){ delete l.t; delete l.spk; });
+      each(u.dialogue.check, function(c){ if (c.k === 'understand'){ delete c.q; delete c.opts; } });
+    }
     each(u.concepts, function(c){
       each(c.blocks, function(b){
         delete b.title; delete b.body;
@@ -186,6 +193,8 @@
     each(u.phrases, function(p, i){ var lp = L.phrases && L.phrases[i]; if (lp){ set(p, 't', lp.t); set(p, 'scenario', lp.scenario); } });
     if (u.dialogue && L.dialogue){
       set(u.dialogue, 'title', L.dialogue.title);
+      set(u.dialogue, 'scene', L.dialogue.scene);
+      each(u.dialogue.check, function(c, i){ var x = L.dialogue.check && L.dialogue.check[i]; if (x){ set(c, 'q', x.q); set(c, 'opts', x.opts); } });
       each(u.dialogue.lines, function(l, i){
         if (L.dialogue.lines) set(l, 't', L.dialogue.lines[i]);
         if (L.dialogue.speakers) set(l, 'spk', L.dialogue.speakers[i]);

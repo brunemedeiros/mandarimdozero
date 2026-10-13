@@ -93,7 +93,10 @@ async function resolveOwnCreationDeck({ languageAppKey, deckId, decks }){
 // esta função. Validação de destino via getDeckById/kind aqui mesmo
 // (mesmo critério de canPlaceOwnNoteInDeck, mas pra outro Deck no lugar
 // de uma Note) -- nunca confia só na RLS/trigger do banco.
-async function createPersonalDeck({ name, parentDeckId, languageAppKey, decks }){
+// source 'manual' (criado pela pessoa no app): numa conta com perfil público, o Deck nasce
+// público (decisão da autora, 2026-10-12; publish_deck da 061). Import do Anki e cópia de
+// Deck público não passam 'manual' e nascem privados.
+async function createPersonalDeck({ name, parentDeckId, languageAppKey, decks, source }){
   if (!CURRENT_USER) return { ok: false, error: t('deck.err.loginRequired') };
   const parent = getDeckById(decks, parentDeckId);
   if (!parent) return { ok: false, error: t('deck.err.parentNotFound') };
@@ -114,6 +117,11 @@ async function createPersonalDeck({ name, parentDeckId, languageAppKey, decks })
     language_app_key: languageAppKey,
   }).select().single();
   if (error){ console.error('Erro ao criar Deck:', error); return { ok: false, error: t('deck.err.createFailed') }; }
+  if (source === 'manual' && typeof PROFILE_CACHE !== 'undefined' && PROFILE_CACHE && PROFILE_CACHE.public_profile !== false
+      && typeof publishDeckRpc === 'function'){
+    const pub = await publishDeckRpc(data.id, {});
+    if (pub && pub.ok) Object.assign(data, { is_public: true, public_id: pub.publicId, published_at: pub.publishedAt });
+  }
   return { ok: true, deck: data };
 }
 

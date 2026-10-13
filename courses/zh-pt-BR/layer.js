@@ -33,7 +33,16 @@
         "dialogue": {
           "title": "Encontro na rua",
           "lines": ["Olá!", "Olá! Bom dia.", "Obrigada, até logo!", "Até logo!"],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Duas pessoas se encontram na rua pela manhã.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Em que parte do dia acontece essa conversa?",
+              "opts": ["De manhã", "À noite", "Não dá para saber"]
+            }
+          ]
         },
         "concepts": {
           "duibuqi-vs-meiguanxi": [
@@ -102,7 +111,16 @@
             "Eu me chamo Xiao Li. De que país você é?",
             "Eu sou brasileira."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Brune conhece Xiao Li num evento de intercâmbio.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "De que país Brune é?",
+              "opts": ["Brasil", "China", "A conversa não diz"]
+            }
+          ]
         },
         "concepts": {
           "shi": [
@@ -181,7 +199,16 @@
         "dialogue": {
           "title": "Perguntando a idade",
           "lines": ["Quantos anos você tem?", "Eu tenho 28 anos. E você?", "Eu tenho 30 anos."],
-          "speakers": ["A", "B", "A"]
+          "speakers": ["A", "B", "A"],
+          "scene": "Dois colegas de curso conversam no intervalo da aula.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Quem tem 30 anos?",
+              "opts": ["Quem fez a primeira pergunta", "Quem respondeu primeiro", "Nenhum dos dois"]
+            }
+          ]
         },
         "concepts": {
           "number-structure": [
@@ -260,7 +287,16 @@
             "Você tem irmã mais nova?",
             "Não, eu não tenho irmã mais nova."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Duas amigas olham fotos de família.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Quantas pessoas tem a família de quem responde?",
+              "opts": ["3", "4", "5"]
+            }
+          ]
         },
         "concepts": {
           "classifiers": [
@@ -341,7 +377,16 @@
             "Certo. Você quer beber café?",
             "Não, obrigada. Eu gosto de beber chá."
           ],
-          "speakers": ["Garçom", "Brune", "Garçom", "Brune"]
+          "speakers": ["Garçom", "Brune", "Garçom", "Brune"],
+          "scene": "Brune pede o almoço num restaurante.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "O que Brune pede para beber?",
+              "opts": ["Chá", "Café", "Água"]
+            }
+          ]
         },
         "concepts": {
           "hen-adjective": [
@@ -411,7 +456,16 @@
             "Que horas você sai do trabalho hoje?",
             "Hoje eu saio às 5h."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Dois colegas de trabalho conversam no corredor do escritório.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "A que horas quem responde começa a trabalhar?",
+              "opts": ["7h", "8h", "5h"]
+            }
+          ]
         },
         "concepts": {
           "dian-hours": [
@@ -471,7 +525,16 @@
             "Fica longe daqui?",
             "Não é longe, é bem perto."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Num shopping, alguém procura o banheiro e pergunta a uma senhora.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Onde fica o banheiro?",
+              "opts": ["Na frente, à esquerda", "Atrás, à direita", "Longe daqui"]
+            }
+          ]
         },
         "concepts": {
           "zai-location": [
@@ -528,7 +591,16 @@
         "dialogue": {
           "title": "No mercado",
           "lines": ["Quanto custa isso?", "30 yuans.", "Está muito caro! Faz mais barato.", "Tá bom, 25 yuans."],
-          "speakers": ["Brune", "Vendedor", "Brune", "Vendedor"]
+          "speakers": ["Brune", "Vendedor", "Brune", "Vendedor"],
+          "scene": "Brune pechincha numa banca de feira.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Quanto Brune paga no final?",
+              "opts": ["30 yuans", "25 yuans", "20 yuans"]
+            }
+          ]
         },
         "concepts": {
           "kuai-mao": [
@@ -591,7 +663,16 @@
             "E amanhã?",
             "Amanhã vai chover, vai estar meio frio."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Dois amigos olham a previsão do tempo.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Como será o tempo amanhã?",
+              "opts": ["Chuva e um pouco de frio", "Sol e calor", "Vento forte"]
+            }
+          ]
         },
         "concepts": {
           "adjective-predicate": [
@@ -656,7 +737,16 @@
             "Onde fica a estação de metrô?",
             "Fica na frente, bem perto."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Na recepção de um hotel, um hóspede pergunta como chegar ao aeroporto.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Que transportes a recepcionista sugere?",
+              "opts": ["Metrô ou táxi", "Ônibus ou a pé", "Só avião"]
+            }
+          ]
         },
         "concepts": {
           "zenme": [
@@ -712,7 +802,16 @@
             "Você precisa ver um médico?",
             "Sim, o hospital fica longe daqui?"
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Um amigo percebe que o outro não está bem.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "O que está doendo em quem não se sente bem?",
+              "opts": ["A cabeça", "A barriga", "A perna"]
+            }
+          ]
         },
         "concepts": {
           "teng": [
@@ -776,7 +875,16 @@
             "Eu gosto de fazer exercício. Você tem tempo livre no fim de semana?",
             "Tenho! Vamos assistir um filme."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Dois colegas combinam um programa para o fim de semana.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "O que quem responde primeiro gosta de fazer?",
+              "opts": ["Assistir filme e dançar", "Fazer exercício", "Cantar e ler"]
+            }
+          ]
         },
         "concepts": {
           "de-posse": [
@@ -830,7 +938,16 @@
             "Você quer ir à China no futuro?",
             "Quero! Eu quero viajar para a China."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Dois amigos falam dos planos para o futuro.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "O que quem responde pretende fazer na semana que vem?",
+              "opts": ["Estudar chinês", "Viajar à China", "Trabalhar"]
+            }
+          ]
         },
         "concepts": {
           "dasuan": [
@@ -883,7 +1000,16 @@
             "Qual você acha o mais difícil? Chinês ou italiano?",
             "Chinês, claro!"
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Dois colegas de turma conversam sobre estudar idiomas.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Qual idioma quem responde acha mais difícil?",
+              "opts": ["Chinês", "Francês", "Italiano"]
+            }
+          ]
         },
         "concepts": {
           "bi-comparison": [
@@ -944,7 +1070,16 @@
             "Às 7 da noite, no cinema.",
             "Combinado, eu também quero ver esse filme!"
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Um amigo convida o outro para ir ao cinema.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "A que horas é o filme?",
+              "opts": ["19h", "17h", "21h"]
+            }
+          ]
         },
         "concepts": {
           "hui-vs-neng": [
@@ -1021,7 +1156,16 @@
             "Então a gente se vê no domingo, tá bom?",
             "Combinado! Depois das 15h eu tenho tempo livre."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Dois amigos marcam de se ver no fim de semana.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "Em que dia eles vão se encontrar?",
+              "opts": ["Domingo", "Sexta-feira", "Sábado"]
+            }
+          ]
         },
         "concepts": {
           "weekdays": [
@@ -1096,7 +1240,16 @@
             "Eu já comi, comi duas maçãs.",
             "Ontem eu não jantei, hoje estou com muita fome."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Dois colegas conversam na hora do jantar.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "O que a pessoa que comeu disse que comeu?",
+              "opts": ["Duas maçãs", "Arroz", "Nada"]
+            }
+          ]
         },
         "concepts": {
           "le-completion": [
@@ -1201,7 +1354,16 @@
             "Onde ela trabalha ou estuda?",
             "Ela estuda na escola, aqui tem alguns livros dela."
           ],
-          "speakers": ["A", "B", "A", "B"]
+          "speakers": ["A", "B", "A", "B"],
+          "scene": "Alguém pergunta ao amigo quem é a moça da foto.",
+          "check": [
+            null,
+            null,
+            {
+              "q": "O que a namorada faz?",
+              "opts": ["Estuda numa escola", "Trabalha num hospital", "É médica"]
+            }
+          ]
         },
         "concepts": {
           "shei": [

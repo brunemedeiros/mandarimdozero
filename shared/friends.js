@@ -119,8 +119,8 @@ async function fetchFriendshipOverview(){
   const ids = [...new Set((rows || []).map(otherId))];
   let byId = {};
   if (ids.length){
-    const { data: profiles } = await supabaseClient
-      .from('profiles').select('user_id, username, display_name, avatar_url').in('user_id', ids);
+    // 080: pedido de quem tem perfil privado também mostra o nome (profile_cards).
+    const profiles = await fetchProfileCards(ids);
     byId = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
   }
   const out = { friends: [], incoming: [], outgoing: [] };
@@ -296,7 +296,7 @@ async function renderFriendsView(){
     </div>`).join(''), 'friends-outgoing') : '';
 
   const rankHTML = ov.friends.length ? friendsSectionHTML(t('friends.section.rank'), null, '<div id="friends-mini-rank"></div>', 'friends-rank') : '';
-  const activityHTML = ov.friends.length ? friendsSectionHTML(t('friends.section.activity'), null, '<div id="friends-activity"></div>', 'friends-activity') : '';
+  const activityHTML = ov.friends.length ? friendsSectionHTML(t('friends.section.activity'), null, '<div id="friends-activity-list"></div>', 'friends-activity') : '';
   const inviteHTML = friendsSectionHTML(t('friends.section.invite'), null, `
     <p class="profile-edit-hint">${t('friends.inviteHint')}</p>
     <div class="friends-invite-actions">
@@ -352,12 +352,14 @@ async function loadFriendsMiniRank(){
 
 // ---------- atividade dos amigos (conquistas dos últimos 30 dias) ----------
 async function loadFriendsActivity(){
-  const box = document.getElementById('friends-activity');
+  // A lista vive dentro da seção #friends-activity (mesmo id da seção antes,
+  // o que apagava o título "Atividade dos amigos" ao preencher).
+  const box = document.getElementById('friends-activity-list');
   if (!box) return;
   box.innerHTML = loadingHTML(t('friends.loadingShort'));
   const appKey = (typeof APP_KEY !== 'undefined') ? APP_KEY : LanguageRegistry.defaultAppKey();
   const { data, error } = await supabaseClient.rpc('friends_activity', { p_language: appKey, p_limit: 20 });
-  const el = document.getElementById('friends-activity');
+  const el = document.getElementById('friends-activity-list');
   if (!el) return;
   if (error){ console.error('Erro ao carregar atividade dos amigos:', error); el.innerHTML = `<p class="profile-edit-error">${t('friends.activity.error')}</p>`; return; }
   const catalog = (typeof BADGES !== 'undefined' && Array.isArray(BADGES)) ? BADGES : [];

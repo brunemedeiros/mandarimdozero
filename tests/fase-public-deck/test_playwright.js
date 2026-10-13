@@ -409,13 +409,14 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
         STATE.decks = []; switchTab('my-flashcards');
       }, appKey);
       await page.waitForSelector('[data-publish-deck="7001"]');
-      L('Meus Decks: Deck pessoal tem "Publicar"', (await page.locator('[data-publish-deck="7001"]').innerText()).includes('Publicar'));
+      L('Meus Decks: Deck pessoal mostra "🔒 Privado" (2026-10-12: era "Publicar")', (await page.locator('[data-publish-deck="7001"]').innerText()).includes('Privado'));
       L('Meus Decks: Meus Decks (personal_root) NÃO tem controle de publicar', await page.locator('[data-publish-deck="7000"]').count() === 0);
       await page.click('[data-publish-deck="7001"]');
       await page.waitForSelector('[data-publish-form="7001"]');
       const ft = await page.locator('[data-publish-form="7001"]').innerText();
-      L('formulário: avisa que subdecks não são publicados automaticamente e que a nota privada nunca é pública', /subdecks não são publicados automaticamente/.test(ft) && /nota privada/.test(ft));
+      L('formulário: avisa que subdecks não mudam junto e que a nota privada nunca é pública', /subdecks não mudam junto/.test(ft) && /nota privada/.test(ft) && /Tornar público/.test(ft));
       L('formulário: informa Notes incompatíveis não publicadas', /não serão publicadas/.test(ft));
+      await page.click('.public-deck-page-edit > summary');  // "Editar página do Deck"
       await page.fill('[data-publish-desc]', 'Minha lista');
       await page.selectOption('[data-publish-icon]', 'school'); await page.selectOption('[data-publish-color]', 'green');
       await page.click('[data-publish-save]');
@@ -425,8 +426,8 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       L('nenhum UPDATE direto de is_public pelo cliente', await page.evaluate(() => !(window.__updatesToDecks || []).length));
       L('publicado: botão vira 🌐 Público e mostra o link com #/deck/<public_id>', (await page.locator('[data-publish-deck="7001"]').innerText()).includes('Público') && (await page.locator('[data-publish-link]').inputValue()).includes('#/deck/' + PID));
       await page.click('[data-publish-unpublish]');
-      await page.waitForFunction(() => document.querySelector('[data-publish-deck="7001"]').textContent.includes('Publicar'));
-      L('despublicar chama unpublish_deck e volta a "Publicar"', await page.evaluate(() => window.__rpcLog.some(x => x[0] === 'unpublish_deck')));
+      await page.waitForFunction(() => document.querySelector('[data-publish-deck="7001"]').textContent.includes('Privado'));
+      L('"Tornar privado" chama unpublish_deck e volta a "🔒 Privado"', await page.evaluate(() => window.__rpcLog.some(x => x[0] === 'unpublish_deck')));
       L('Deck: erros de página', errors.length === 0, errors);
       await ctx.close();
     }

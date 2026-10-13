@@ -167,14 +167,41 @@ function refreshProfilePlaceholders(){
   try { if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); } catch (e) { console.error('placeholders de perfil:', e); }
 }
 
+// Perfil privado (migration 080): a tabela não deixa mais ler país/admin_mode/
+// exclude_own_activity de NENHUMA linha; a própria conta lê a linha inteira por
+// get_my_profile(). Sem a RPC (banco ainda sem a 080), cai na leitura antiga.
+async function fetchMyProfileRow(){
+  const rpc = await supabaseClient.rpc('get_my_profile');
+  if (!rpc.error && rpc.data && typeof rpc.data === 'object' && rpc.data.user_id) return { data: rpc.data, error: null };
+  return supabaseClient.from('profiles').select('*').eq('user_id', CURRENT_USER.id).maybeSingle();
+}
+
+// UPDATE da própria linha SEM devolver a linha (devolver pediria ler colunas que a
+// 080 fechou). O cache recebe o que foi gravado.
+async function updateMyProfile(payload){
+  const { error } = await supabaseClient.from('profiles').update(payload).eq('user_id', CURRENT_USER.id);
+  if (error) return { data: null, error };
+  PROFILE_CACHE = Object.assign({}, PROFILE_CACHE || { user_id: CURRENT_USER.id }, payload);
+  return { data: PROFILE_CACHE, error: null };
+}
+
+// Nome/@/foto de várias contas (ranking, amizades, alunos). A 080 esconde a LINHA
+// de conta privada de quem não é amigo/professora; profile_cards devolve nome e @
+// de qualquer conta e a foto só quando pode. Sem a RPC, lê a tabela como antes.
+async function fetchProfileCards(ids){
+  const list = [...new Set((ids || []).filter(Boolean))];
+  if (!list.length) return [];
+  const rpc = await supabaseClient.rpc('profile_cards', { p_ids: list });
+  if (!rpc.error && Array.isArray(rpc.data)) return rpc.data;
+  const { data } = await supabaseClient.from('profiles')
+    .select('user_id, username, display_name, avatar_url, featured_badge_id').in('user_id', list);
+  return data || [];
+}
+
 async function ensureProfileLoaded(){
   if (!CURRENT_USER) return null;
   if (PROFILE_CACHE) return PROFILE_CACHE;
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .select('*')
-    .eq('user_id', CURRENT_USER.id)
-    .maybeSingle();
+  const { data, error } = await fetchMyProfileRow();
   if (error){ console.error('Erro ao carregar perfil:', error); return null; }
   PROFILE_CACHE = data || await createInitialProfile();
   await loadProfilePrivate();
@@ -239,12 +266,7 @@ async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfi
   if (country !== undefined && PROFILE_CACHE && Object.prototype.hasOwnProperty.call(PROFILE_CACHE, 'country')){
     payload.country = /^[A-Z]{2}$/.test(country || '') ? country : null;
   }
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .update(payload)
-    .eq('user_id', CURRENT_USER.id)
-    .select()
-    .single();
+  const { data, error } = await updateMyProfile(payload);
   if (error){
     console.error('Erro ao salvar perfil:', error);
     return { ok: false, error: t('profile.err.saveFailed') };
@@ -271,12 +293,7 @@ async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfi
 // preferência de conta, mesmo padrão de leitura/escrita de
 // saveProfileEdits() acima -- só que aqui é um campo só, sem formulário.
 async function setExcludeOwnActivity(value){
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .update({ exclude_own_activity: !!value })
-    .eq('user_id', CURRENT_USER.id)
-    .select()
-    .single();
+  const { data, error } = await updateMyProfile({ exclude_own_activity: !!value });
   if (error){ console.error('Erro ao salvar preferência de Analytics:', error); return false; }
   PROFILE_CACHE = data;
   return true;
@@ -300,12 +317,7 @@ function isAdminModeOn(){
 }
 
 async function setAdminMode(value){
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .update({ admin_mode: !!value })
-    .eq('user_id', CURRENT_USER.id)
-    .select()
-    .single();
+  const { data, error } = await updateMyProfile({ admin_mode: !!value });
   if (error){ console.error('Erro ao salvar Admin Mode:', error); return false; }
   PROFILE_CACHE = data;
   return true;
@@ -373,12 +385,7 @@ async function uploadAvatar(file){
   // navegador continuaria mostrando a foto antiga em cache depois de trocar.
   const avatarUrl = `${pub.publicUrl}?t=${Date.now()}`;
 
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .update({ avatar_url: avatarUrl })
-    .eq('user_id', CURRENT_USER.id)
-    .select()
-    .single();
+  const { data, error } = await updateMyProfile({ avatar_url: avatarUrl });
   if (error){
     console.error('Erro ao salvar avatar no perfil:', error);
     return { ok: false, error: t('profile.err.photoSaveProfile') };
@@ -393,12 +400,7 @@ async function removeAvatar(){
   // remoção falhar por algum motivo), ainda limpamos avatar_url no
   // perfil -- o dado que a UI realmente lê é a coluna, não o arquivo.
   await supabaseClient.storage.from('avatars').remove([avatarStoragePath()]);
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .update({ avatar_url: null })
-    .eq('user_id', CURRENT_USER.id)
-    .select()
-    .single();
+  const { data, error } = await updateMyProfile({ avatar_url: null });
   if (error){
     console.error('Erro ao remover avatar:', error);
     return { ok: false, error: t('profile.err.photoRemove') };
