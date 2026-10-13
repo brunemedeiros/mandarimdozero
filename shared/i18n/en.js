@@ -2197,6 +2197,84 @@ window.I18N_CATALOG['en'] = {
   'plans.confirm.perm.title': 'Turn off "{perm}" for {role}?', // ALTA
   'plans.confirm.perm.text': 'All accounts of this type lose this right away, unless they have another plan that unlocks it.', // ALTA
   'plans.confirm.perm.confirm': 'Turn off', // ALTA
+  'notifications.title': 'Notifications', // ALTA
+  'notifications.sub': 'The texts people get for each event. Each time, the app picks one active variant; the more variants, the less repetitive it feels.', // ALTA
+  'notifications.loading': 'Loading notifications…', // ALTA
+  'notifications.menu': 'Actions', // ALTA
+  'notifications.delete': 'Delete', // ALTA
+  'notifications.lang.fr': 'French', // ALTA
+  'notifications.lang.zh': 'Chinese', // ALTA
+  'notifications.filter.event.aria': 'Event', // ALTA
+  'notifications.filter.event.all': 'All events', // ALTA
+  'notifications.filter.lang.aria': 'App language', // ALTA
+  'notifications.filter.lang.all': 'All languages', // ALTA
+  'notifications.filter.channel.aria': 'Channel', // ALTA
+  'notifications.filter.channel.all': 'All channels', // ALTA
+  'notifications.search.placeholder': 'Search the text', // ALTA
+  'notifications.search.aria': 'Search variant', // ALTA
+  'notifications.empty.text': 'Create the first variant using the form next to the list.', // ALTA
+  'notifications.empty.filtered': 'No variant matches these filters.', // ALTA
+  'notifications.form.clear': 'Clear', // ALTA
+  'notifications.edit.fixed': 'Event, channel and language cannot change after creation. To change them, create a new variant and delete this one.', // ALTA
+  'notifications.edit.cancel': 'Cancel', // ALTA
+  'notifications.delete.title': 'Delete this variant?', // ALTA
+  'notifications.delete.text': '"{text}" will no longer be picked and this cannot be undone.', // ALTA
+  'notifications.delete.confirm': 'Delete variant', // ALTA
+  'badges.title': 'Badges', // ALTA
+  'badges.sub': 'Create special badges and choose who gets them. They show up on the winner\'s profile.', // ALTA
+  'badges.loading': 'Loading badges…', // ALTA
+  'badges.menu': 'Actions', // ALTA
+  'badges.edit': 'Edit', // ALTA
+  'badges.delete': 'Delete', // ALTA
+  'badges.card.manage': 'Manage people', // ALTA
+  'badges.card.idTitle': 'Badge identifier', // ALTA
+  'badges.catalog.emptyText': 'Create the first badge using the form next to the list.', // ALTA
+  'badges.builtin.hint': 'These are given automatically by the app and cannot be edited here.', // ALTA
+  'badges.filter.aria': 'Filter by badge', // ALTA
+  'badges.filter.all': 'All badges', // ALTA
+  'badges.search.placeholder': 'Search person or note', // ALTA
+  'badges.search.aria': 'Search grants', // ALTA
+  'badges.grants.emptyFiltered': 'No grant matches these filters.', // ALTA
+  'badges.grants.colPerson': 'Person', // ALTA
+  'badges.grants.colBadge': 'Badge', // ALTA
+  'badges.grants.colNote': 'Note', // ALTA
+  'badges.grants.colDate': 'Granted on', // ALTA
+  'badges.grants.revokeAria': 'Revoke {badge} from @{username}', // ALTA
+  'badges.form.id': 'Identifier', // ALTA
+  'badges.form.idHint': 'Use only lowercase letters, numbers and _ (e.g. collaborator).', // ALTA
+  'badges.edit.title': 'Edit badge', // ALTA
+  'badges.edit.idHint': 'If you change the identifier, the grants follow the badge.', // ALTA
+  'badges.edit.cancel': 'Cancel', // ALTA
+  'badges.members.noteAria': 'Note for @{username}', // ALTA
+  'badges.members.partial': 'Some changes were not saved ({n}). Check the list and try again.', // ALTA
+  'badges.delete.title': 'Delete the badge "{name}"?', // ALTA
+  'badges.delete.textWith': 'The badge disappears from the profile of {n} person(s) who got it. This cannot be undone.', // ALTA
+  'badges.delete.textNone': 'Nobody has this badge yet. This cannot be undone.', // ALTA
+  'badges.delete.confirm': 'Delete badge', // ALTA
+  'badges.toast.revoked': '✓ Badge revoked.', // ALTA
+  'reports.title': 'Reports', // ALTA
+  'reports.loading': 'Loading reports…', // ALTA
+  'reports.menu': 'Actions', // ALTA
+  'reports.row.replied': 'replied', // ALTA
+  'reports.row.repliedTitle': 'You already replied by email', // ALTA
+  'reports.row.openAria': 'Open report: {category}', // ALTA
+  'reports.empty.search': 'No report matches this search.', // ALTA
+  'reports.col.report': 'Report', // ALTA
+  'reports.col.who': 'Sent by', // ALTA
+  'reports.col.where': 'Where', // ALTA
+  'reports.col.date': 'Date', // ALTA
+  'reports.col.status': 'Status', // ALTA
+  'reports.count': '{n} reports in the list.', // ALTA
+  'reports.count.truncated': 'Showing the {n} most recent. Use the filters to find older ones.', // ALTA
+  'reports.filter.status.aria': 'Status', // ALTA
+  'reports.filter.kind.aria': 'Type', // ALTA
+  'reports.filter.lang.aria': 'Language', // ALTA
+  'reports.search.placeholder': 'Search text, person or screen', // ALTA
+  'reports.search.aria': 'Search reports', // ALTA
+  'reports.reply.confirm.title': 'Send the reply to {who}?', // ALTA
+  'reports.reply.confirm.text': 'The email "{subject}" is sent right now and cannot be undone.', // ALTA
+  'reports.reply.confirm.ok': 'Send email', // ALTA
+  'reports.reply.confirm.cancel': 'Back', // ALTA
   'plans.grant.title': 'Give or remove a plan', // ALTA
   'plans.grant.hint': 'Search the account by name or @username. No billing yet: the plan stays on until you remove it.', // ALTA
   'plans.search.label': 'Account', // ALTA

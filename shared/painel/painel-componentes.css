@@ -597,3 +597,40 @@
 .painel .p-celula input:disabled{ opacity: .45; }
 .painel .p-celula.is-saved{ outline: 2px solid var(--p-ok); outline-offset: 1px; }
 @media (max-width: 760px){ .painel .p-celula input[type=checkbox]{ min-width: 1.4rem; min-height: 1.4rem; } }
+.painel .p-variante[data-inativa]{ opacity: .72; }
+.painel .p-variante .p-aula-dia b{ font-size: 1.5rem; }
+.painel article form > small{ display: block; margin: 0 0 1rem; }
+
+/* ---------- Badges (painel de Admin) ---------- */
+.painel .p-grade-badges{ display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 1rem; }
+.painel .p-badge{ display: grid; grid-template-columns: 3.4rem minmax(0, 1fr); gap: .9rem; align-items: start; margin: 0; }
+.painel .p-badge-icone{ display: grid; place-items: center; width: 3.4rem; height: 3.4rem; font-size: 1.8rem; border-radius: var(--p-raio-controle); background: var(--p-superficie); border: 1px solid var(--p-linha); }
+.painel .p-badge h3{ margin: 0; font-size: 1.02rem; }
+.painel .p-badge small{ display: block; color: var(--p-tinta-suave); }
+.painel .p-badge > .p-acoes{ grid-column: 2; margin: 0; }
+.painel .p-automaticos summary{ font-weight: 800; cursor: pointer; }
+.painel .p-lista-simples{ list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.painel .p-lista-simples li{ display: flex; gap: .7rem; align-items: flex-start; margin: 0; padding: 0; }
+.painel .p-lista-simples li > span:first-child{ font-size: 1.4rem; line-height: 1.2; }
+.painel .p-lista-simples small{ display: block; color: var(--p-tinta-suave); }
+.painel .p-membros{ display: grid; gap: .3rem; }
+.painel .p-membro{ display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 11rem); gap: .6rem; align-items: center; padding: .25rem 0; border-bottom: 1px solid var(--p-linha); }
+.painel .p-membro[hidden]{ display: none; }
+.painel .p-membro > label{ margin: 0; overflow-wrap: anywhere; }
+.painel .p-membro > input[type=text]{ margin: 0; min-height: 2.2rem; }
+@media (max-width: 760px){ .painel .p-membro{ grid-template-columns: 1fr; } }
+.painel .p-tabela--fluida table{ min-width: 0; }
+.painel .p-tabela--fluida :is(th, td){ white-space: normal; overflow-wrap: anywhere; }
+.painel .p-tabela--fluida td:last-child{ white-space: nowrap; }
+.painel :is(.p-tabela td, .p-lista-simples, .p-badge-icone) svg{ width: 1.4rem; height: 1.4rem; vertical-align: -.3em; flex: none; }
+.painel .p-lista-simples li > span:first-child{ display: inline-flex; }
+
+/* ---------- Reports (painel de Admin) ---------- */
+.painel .p-detalhe-report{ display: grid; gap: .9rem; }
+.painel .p-detalhe-report h4{ margin: .5rem 0 0; }
+.painel .p-bloco{ display: grid; gap: .15rem; }
+.painel .p-bloco > small{ font-weight: 800; color: var(--p-tinta-suave); text-transform: uppercase; letter-spacing: .05em; font-size: .72rem; }
+.painel .p-contexto{ display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .15rem .75rem; margin: .5rem 0 0; font-size: .85rem; }
+.painel .p-contexto dt{ font-weight: 700; color: var(--p-tinta-suave); }
+.painel .p-contexto dd{ margin: 0; overflow-wrap: anywhere; }
+.painel .p-resposta{ border-top: 1px solid var(--p-linha); padding-top: .5rem; display: grid; gap: .5rem; }

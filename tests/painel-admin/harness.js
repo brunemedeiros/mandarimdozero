@@ -15,11 +15,11 @@ function instalarBanco(seed){
     const st = { op: 'select', payload: null, filtros: [], ordem: [], limite: null, faixa: null, unico: false, contar: false };
     const run = () => {
       const f = window.__falha;
-      if (f && f.tabela === nome && f.op === st.op){ window.__falha = null; return { data: null, error: { message: 'falha simulada' } }; }
+      if (f && f.tabela === nome && f.op === st.op){ window.__falha = null; return { data: null, error: { message: 'falha simulada', code: f.code } }; }
       const T = tabela(nome);
       const ok = (r) => st.filtros.every(fn => fn(r));
       if (st.op === 'insert'){
-        const lista = (Array.isArray(st.payload) ? st.payload : [st.payload]).map(r => Object.assign({ id: ++nid, created_at: new Date().toISOString() }, r));
+        const lista = (Array.isArray(st.payload) ? st.payload : [st.payload]).map(r => Object.assign({ id: ++nid, created_at: new Date().toISOString(), granted_at: new Date().toISOString() }, r));
         lista.forEach(r => T.push(r));
         return { data: st.unico ? lista[0] : lista, error: null };
       }
@@ -41,8 +41,8 @@ function instalarBanco(seed){
         case 'update': return (pl) => { st.op = 'update'; st.payload = pl; return b; };
         case 'delete': return () => { st.op = 'delete'; return b; };
         case 'upsert': return (pl) => { st.op = 'insert'; st.payload = pl; return b; };
-        case 'eq': return (c, v) => add(r => r[c] === v);
-        case 'neq': return (c, v) => add(r => r[c] !== v);
+        case 'eq': return (c, v) => add(r => String(r[c]) === String(v));   // PostgREST compara texto: id numérico casa com "3"
+        case 'neq': return (c, v) => add(r => String(r[c]) !== String(v));
         case 'in': return (c, vs) => add(r => vs.includes(r[c]));
         case 'gte': return (c, v) => add(r => r[c] >= v);
         case 'lte': return (c, v) => add(r => r[c] <= v);
@@ -58,6 +58,8 @@ function instalarBanco(seed){
     } });
     return b;
   };
+  // o harness da professora troca fetchAllProfiles por uma lista fixa; aqui volta a ler do banco em memória (como o código real)
+  fetchAllProfiles = async () => (await supabaseClient.from('profiles').select('user_id, username, display_name').order('username', { ascending: true })).data || [];
   supabaseClient.rpc = async (nome, args) => {
     window.__rpcLog.push([nome, args]);
     const f = window.__falha; if (f && f.rpc === nome){ window.__falha = null; return { data: null, error: { message: 'falha simulada' } }; }
