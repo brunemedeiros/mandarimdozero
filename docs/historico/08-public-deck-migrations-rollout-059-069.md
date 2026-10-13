@@ -214,3 +214,17 @@ Detalhes e verificação: `docs/plano-professora-privacidade.md`.
 |---|---|---|
 | Staging | ferramenta | `20261008020957` + correção `20261008021111` (`teacher_role_policies_link_check`) |
 | Produção | ferramenta (arquivo final, já corrigido) | `20261012123457` |
+
+## 088 -- ensure_user_decks fechada para anon (2026-10-13)
+
+- Achado no advisor de segurança da produção (lint 0028): `ensure_user_decks(uuid, text)` (SECURITY DEFINER, 049)
+  executável por `anon` só na produção. A 049 revogou de `public` mas não de `anon` (o Supabase dá grant direto a
+  `anon`). Risco real baixo: a função já recusa quando `auth.uid() <> p_owner_id` (anon cai em `not_authorized`).
+  O site só chama depois do login (`shared/deck-data.js`, `ensureDecksForCurrentUser`).
+- `shared/supabase_migrations/088_revoke_anon_ensure_user_decks.sql`: só `revoke ... from public, anon` + `grant ...
+  to authenticated`. Número 088 porque 086 e 087 já foram usados por outras conversas.
+- Aplicada no Staging (no-op lá) e na produção em 2026-10-13, a pedido da autora. Conferido: anon sem EXECUTE,
+  authenticated com EXECUTE, definição da função igual (md5 `dcd5bb52...`), 76 decks intactos, item sumiu do advisor.
+- Ainda executáveis por anon na produção (fora do escopo): `get_profile_card`, `get_public_deck`, `invite_code_info`
+  (públicas de propósito) e as funções de gatilho `decks_touch_parent`, `own_flashcards_touch_deck` (chamadas via
+  RPC falham por serem de trigger).
