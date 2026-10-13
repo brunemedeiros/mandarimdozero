@@ -28,8 +28,8 @@ const PUBLIC_DECK_COLORS = {
   red: '#D62619', orange: '#E07B1F', gold: '#C9973A', green: '#3A7359', teal: '#2A8C8C',
   blue: '#3498D6', purple: '#7E57C2', pink: '#D6479B', gray: '#7A7A85',
 };
-const PUBLIC_DECK_LANG_LABELS = { frances: 'Francês', mandarim: 'Mandarim', portugues: 'Português' };
-const PUBLIC_DECK_LANG_FOLDERS = { frances: 'fr', mandarim: 'zh' };
+const PUBLIC_DECK_LANG_LABELS = Object.fromEntries(LanguageRegistry.appKeys().map(k => [k, LanguageRegistry.deckLabel(k)]));
+const PUBLIC_DECK_LANG_FOLDERS = LanguageRegistry.folderMap(true);
 const PUBLIC_DECK_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PUBLIC_DECK_RENDER_TOKENS = new WeakMap();
 const PUBLIC_DECK_STATE = { current: null, notes: null };

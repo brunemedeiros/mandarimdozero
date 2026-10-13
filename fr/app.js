@@ -1818,6 +1818,12 @@ const BADGES = [
 let earnedBadgeIds = new Set();
 function seedEarnedBadges(){
   earnedBadgeIds = new Set(BADGES.filter(b => b.check(STATE)).map(b => b.id));
+  // C4: conquistas da conta ganhas em outro idioma também valem aqui (sem celebrar de novo).
+  loadAccountEarnedBadges().then(() => {
+    earnedBadgeIds = AccountProgress.unionBadgeIds(earnedBadgeIds, accountEarnedBadgeRows);
+    upsertEarnedBadges([...earnedBadgeIds]);
+    if (typeof renderProgressView === 'function' && document.getElementById('badge-grid')) renderProgressView();
+  });
   // Backfill/sincronização: garante que a tabela pública earned_badges
   // reflita tudo que já era verdade antes desta feature existir, ou que
   // uma sessão anterior não tenha conseguido gravar -- upsert idempotente,
@@ -8348,11 +8354,11 @@ function renderProgressView(){
   renderActivityHeatmap();
   renderProgressLineChart();
 
-  const earnedCount = BADGES.filter(b => b.check(STATE)).length;
+  const earnedCount = BADGES.filter(b => badgeEarnedNow(b, STATE)).length;
   document.getElementById('badge-grid-count').textContent = `${earnedCount}/${BADGES.length}`;
   const badgeGridEl = document.getElementById('badge-grid');
   badgeGridEl.innerHTML = BADGES.map(b => {
-    const earned = b.check(STATE);
+    const earned = badgeEarnedNow(b, STATE);
     return `<div class="badge ${earned?'earned':''}" data-badge-id="${b.id}"><div class="icon">${b.icon}</div><div class="name">${b.name}</div></div>`;
   }).join('');
   badgeGridEl.querySelectorAll('.badge[data-badge-id]').forEach(el => {

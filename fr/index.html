@@ -2391,6 +2391,10 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 }
 .pref-row-text{ flex:1; }
 .pref-row-title{ font-size:14px; font-weight:800; color: var(--ink); margin-bottom:3px; }
+.my-courses-list{ display:flex; flex-direction:column; gap:8px; }
+.my-courses-group-title{ font-size:12.5px; font-weight:700; margin-top:10px; color:var(--ink-soft); }
+.my-course{ text-align:left; min-height:44px; }
+.my-course-tag{ font-size:11px; opacity:.8; margin-left:6px; text-transform:uppercase; }
 .pref-row-sub{ font-size:12.5px; color: var(--ink-soft); line-height:1.4; }
 .pref-switch{
   flex-shrink:0; width:46px; height:26px; border-radius:999px; border:none; background: var(--paper-line);
@@ -4807,6 +4811,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
           <option value="en" lang="en">English</option>
         </select>
       </div>
+      <div id="my-courses" class="pref-row" style="display:none; flex-direction:column; align-items:stretch; gap:8px;"></div>
     </div>
     <div id="settings-notifications-content" style="display:none;"></div>
     <div id="settings-export-content" style="display:none;">
@@ -5345,6 +5350,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
         <button class="btn btn-secondary" id="ui-language-first-pt" data-lang="pt-BR" style="flex:1;" lang="pt-BR">Português (Brasil)</button>
         <button class="btn btn-secondary" id="ui-language-first-en" data-lang="en" style="flex:1;" lang="en">English</button>
       </div>
+      <div id="ui-language-first-courses" style="display:none;"></div>
     </div>
   </div>
 </div>
@@ -5508,13 +5514,18 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 <script src="content.js"></script>
 <script src="conjugation-data.js"></script>
 <script src="dictations.js"></script>
+<script src="../shared/course-layer.js"></script>
+<script src="../courses/fr-pt-BR/layer.js"></script>
 <!-- challenges.js não é mais carregado: os desafios agora vêm da tabela
      "challenges" do Supabase (persistência real, ver
      scripts/supabase_migrations/). O arquivo é mantido no repositório só
      como referência histórica do conteúdo já migrado. -->
 <script src="audio-manifest.js"></script>
 <script src="../shared/app-identity.js"></script>
+<script src="../languages/registry.js"></script>
 <script src="../languages/index.js"></script>
+<script src="../shared/course-storage.js"></script>
+<script src="../shared/account-progress.js"></script>
 <script src="../shared/utils.js"></script>
 <script src="../shared/theme.js"></script>
 <script src="../shared/srs.js"></script>
@@ -5522,6 +5533,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 <script src="../shared/study-queue.js"></script>
 <script src="../shared/wizard.js"></script>
 <script src="../shared/profile.js"></script>
+<script src="../shared/my-courses.js"></script>
 <script src="../shared/profile-placeholders.js"></script>
 <script src="../shared/reports.js"></script>
 <script src="../shared/notifications.js"></script>

@@ -6,6 +6,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
 
 function load(globals){
   const ctx = vm.createContext(Object.assign({ console }, globals || {}));
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'languages/registry.js'), 'utf8'), ctx);
   vm.runInContext(fs.readFileSync(path.join(ROOT, 'shared/profile-placeholders.js'), 'utf8') + ';globalThis.__api={buildProfilePlaceholderContext,resolveProfilePlaceholders,applyProfilePlaceholders,sanitizeProfileName,hasProfilePlaceholder,PROFILE_COUNTRIES,profileCountryName,speakableProfileText};', ctx);
   return ctx;
 }
@@ -129,7 +130,7 @@ check('nome do país por idioma', A.profileCountryName('US', 'en') === 'United S
 
 // ---- conteúdo real: nenhum placeholder desconhecido ---
 for (const lang of ['fr', 'zh']){
-  const src = fs.readFileSync(path.join(ROOT, lang, 'content.js'), 'utf8');
+  const src = require(path.join(ROOT, 'scripts/lib/course-content.js')).composedSource(lang);
   const found = [...src.matchAll(/\{(\w+)\}/g)].map(m => m[1]).filter(k => /^(nome|primeiro_nome|nacionalidade\w*)$/.test(k) || false);
   const ok = new Set(['nome', 'primeiro_nome', 'nacionalidade', 'nacionalidade_p', 'nacionalidade_t']);
   check(lang + ': conteúdo só usa placeholders conhecidos', found.every(k => ok.has(k)) && found.length > 0, found);
@@ -137,6 +138,7 @@ for (const lang of ['fr', 'zh']){
   vm.runInContext(src + ';globalThis.U=UNITS;', ctxc);
   const walk = (o, f) => { if (typeof o === 'string') f(o); else if (o && typeof o === 'object') Object.values(o).forEach(v => walk(v, f)); };
   let leftover = [];
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'languages/registry.js'), 'utf8'), ctxc);
   vm.runInContext(fs.readFileSync(path.join(ROOT, 'shared/profile-placeholders.js'), 'utf8'), ctxc);
   vm.runInContext('globalThis.UNITS=U; globalThis.APP_KEY=' + JSON.stringify(lang === 'fr' ? 'frances' : 'mandarim') + '; applyProfilePlaceholders({guest:true});', ctxc);
   walk(vm.runInContext('U', ctxc), s => { if (/\{(nome|primeiro_nome|nacionalidade\w*)\}/.test(s)) leftover.push(s); });

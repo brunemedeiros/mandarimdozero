@@ -4,7 +4,7 @@ const ROOT = path.resolve(__dirname, '../..');
 const c = {}; vm.createContext(c);
 vm.runInContext(fs.readFileSync(path.join(ROOT, 'shared/checkpoint-exam.js'), 'utf8'), c);
 const cc = {}; vm.createContext(cc);
-vm.runInContext(fs.readFileSync(path.join(ROOT, 'fr/content.js'), 'utf8') + ';this.UNITS=UNITS;this.MODULES=MODULES;', cc);
+vm.runInContext(require(path.join(ROOT, 'scripts/lib/course-content.js')).composedSource('fr') + ';this.UNITS=UNITS;this.MODULES=MODULES;', cc);
 let ok = 0, bad = 0; const t = (n, x, d) => x ? ok++ : (bad++, console.log('FALHOU', n, d !== undefined ? JSON.stringify(d) : ''));
 let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 const shuf = a => { const x = a.slice(); for (let i = x.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; } return x; };
