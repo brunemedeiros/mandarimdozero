@@ -367,6 +367,22 @@ const BANK_STUB = (who, appKey) => {
       await page.waitForFunction(() => window.__DB.review_bank_settings[0].auto_generate === false);
       L('desligar a geração automática grava na configuração', true);
 
+      // Dono dos dados do aluno: "atualizar automaticamente toda madrugada" (agent_managed), desligado por padrão
+      await page.click('[data-rb="student-edit"]');
+      await page.waitForSelector('[data-form="student"] [data-f="agent_managed"]');
+      L('aluno: caixa de atualização automática existe e vem desmarcada', await ev(() => { const c = document.querySelector('[data-f="agent_managed"]'); return !!c && !c.checked && document.querySelector('[data-form="student"]').textContent.includes(rbt('sfAgent')); }));
+      await page.check('[data-f="agent_managed"]');
+      await page.click('[data-rb="student-save"]');
+      await page.waitForFunction(() => !document.querySelector('[data-form="student"]'));
+      const curId = await ev(() => RB.cur);
+      L('aluno: marcar a caixa grava agent_managed no banco', await ev((id) => window.__DB.review_bank_students.find(s => s.id === id).agent_managed === true, curId));
+      await page.click('[data-rb="student-edit"]');
+      await page.waitForSelector('[data-form="student"] [data-f="agent_managed"]');
+      await page.uncheck('[data-f="agent_managed"]');
+      await page.click('[data-rb="student-save"]');
+      await page.waitForFunction(() => !document.querySelector('[data-form="student"]'));
+      L('aluno: desmarcar devolve o aluno ao Banco antigo', await ev((id) => window.__DB.review_bank_students.find(s => s.id === id).agent_managed === false, curId));
+
       // Importação dos dados do Banco antigo: resumo, gravação sem entregar nada, repetível sem duplicar nem sobrescrever
       const EXPORT = { version: 1, manual: '# Manual antigo\n\n- anote tudo', students: [
         { key: 'ana', name: 'Ana Importada', language: 'portugues', reference: 'en', status: 'ativo', lessonDates: [inDays(3)], lastEntryRead: inDays(-4), items: [

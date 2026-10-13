@@ -2418,6 +2418,8 @@ window.I18N_CATALOG['en'] = {
   'rb.sfName': 'Name', // ALTA
   'rb.sfNeedName': 'Write the student\'s name.', // ALTA
   'rb.sfNoDates': 'No dates yet.', // ALTA
+  'rb.sfAgent': 'Update automatically every night', // ALTA
+  'rb.sfAgentHint': "Turn this on only when this student already uses the site (linked account). The nightly routine then brings new items from the notebook and creates the cards. While it is off, the old Bank (artifact) owns this student's data.", // ALTA
   'rb.sfRef': 'Student\'s reference language', // ALTA
   'rb.sfStatus': 'Status', // ALTA
   'rb.showAnswer': 'Show answer', // ALTA
