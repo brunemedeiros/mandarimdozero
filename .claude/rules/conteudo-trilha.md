@@ -2,6 +2,8 @@
 paths:
   - "fr/content*.js"
   - "zh/content*.js"
+  - "courses/**"
+  - "shared/course-layer.js"
   - "fr/dictations.js"
   - "fr/scripts/challenges_import/**"
   - "shared/challenge-policy.js"
@@ -9,6 +11,11 @@ paths:
 ---
 
 # Conteúdo da trilha, notas e desafios
+
+- **Base x camada (E2)**: `fr/content.js` e `zh/content.js` são só o idioma estudado (ids, frases, hanzi/pinyin, respostas, estrutura).
+  Vale também para `zh/stories.js`, `zh/hanzi-data.js`, `fr/dictations.js` e o cabeçalho de `fr/conjugation-data.js`. Texto em português (título, meta, tradução, notas, cenários, rótulos, nomes de personagem, significado de hanzi, tarefa de ditado) mora em `courses/<fr|zh>-pt-BR/layer.js`
+  (mesma unidade pelo `id`). Comentários de autoria antigos: `docs/historico/conteudo-original/`. Scripts que precisam do texto
+  em português usam `scripts/lib/course-content.js`; `tests/camada-curso` prova base + camada == original.
 
 Skills: `notas-de-realidade` (notas de realidade/culturais) e `criar-desafios`. Histórico: `docs/historico/01-*`, `09-*`.
 

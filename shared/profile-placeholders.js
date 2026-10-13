@@ -198,7 +198,7 @@ function applyProfilePlaceholders(opts){
   var user = typeof CURRENT_USER !== 'undefined' ? CURRENT_USER : null;
   var ctx = buildProfilePlaceholderContext({
     profile: profile,
-    studyLang: opts.studyLang || (appKey === 'mandarim' ? 'zh' : 'fr'),
+    studyLang: opts.studyLang || (LanguageRegistry.isCjk(appKey) ? 'zh' : 'fr'),
     uiLang: opts.uiLang || (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
     guest: opts.guest !== undefined ? opts.guest : !user,
     gender: opts.gender !== undefined ? opts.gender : (typeof PROFILE_PRIVATE_CACHE !== 'undefined' && PROFILE_PRIVATE_CACHE ? PROFILE_PRIVATE_CACHE.gender : null)

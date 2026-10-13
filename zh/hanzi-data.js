@@ -1,329 +1,1321 @@
-// Banco de dados de caracteres (Hanzi) — extraído automaticamente do vocabulário
-// das 14 unidades, agrupado em lições de 5, na ordem de primeira aparição.
-//
-// Cada caractere tem: pinyin individual, significado principal, e (quando
-// aplicável) decomposição de radicais para o mnemônico visual (Opção C).
-// Mnemônicos narrativos (Opção A) serão adicionados numa fase posterior,
-// só onde a composição contar uma história clara.
+// BANCO DE HANZI do curso de chinês (E2 de docs/i18n/arquitetura-multi-idioma-cursos.md): só o IDIOMA ESTUDADO e a estrutura.
+// O texto em língua de origem mora na CAMADA DO CURSO: courses/zh-pt-BR/layer.js (português) e zh/content.en.js (inglês).
+// Caractere, pinyin e decomposição por radical (r); significado e mnemônico estão na camada.
+// Os comentários de autoria do arquivo anterior estão em docs/historico/conteudo-original/zh-<arquivo>.js.txt.
 
 const HANZI_LESSONS = [
-  // Lição 1
   [
-    { char: "你", pinyin: "nǐ", meaning: "você", radicals: [{r:"亻",m:"pessoa"},{r:"尔",m:"tu (fonético)"}] },
-    { char: "好", pinyin: "hǎo", meaning: "bom, bem", radicals: [{r:"女",m:"mulher"},{r:"子",m:"filho"}], mnemonic: "Uma mulher (女) ao lado de um filho (子) — a imagem tradicional de uma família reunida, algo bom e completo." },
-    { char: "再", pinyin: "zài", meaning: "de novo, outra vez", radicals: [] },
-    { char: "见", pinyin: "jiàn", meaning: "ver, encontrar", radicals: [] },
-    { char: "谢", pinyin: "xiè", meaning: "agradecer", radicals: [{r:"讠",m:"fala"},{r:"射",m:"atirar (fonético)"}] }
+    {
+      "char": "你",
+      "pinyin": "nǐ",
+      "radicals": [
+        { "r": "亻" },
+        { "r": "尔" }
+      ]
+    },
+    {
+      "char": "好",
+      "pinyin": "hǎo",
+      "radicals": [
+        { "r": "女" },
+        { "r": "子" }
+      ]
+    },
+    {
+      "char": "再",
+      "pinyin": "zài",
+      "radicals": []
+    },
+    {
+      "char": "见",
+      "pinyin": "jiàn",
+      "radicals": []
+    },
+    {
+      "char": "谢",
+      "pinyin": "xiè",
+      "radicals": [
+        { "r": "讠" },
+        { "r": "射" }
+      ]
+    }
   ],
-  // Lição 2
   [
-    { char: "不", pinyin: "bù", meaning: "não", radicals: [] },
-    { char: "客", pinyin: "kè", meaning: "convidado, hóspede", radicals: [{r:"宀",m:"teto/casa"},{r:"各",m:"cada (fonético)"}] },
-    { char: "气", pinyin: "qì", meaning: "ar, energia", radicals: [] },
-    { char: "对", pinyin: "duì", meaning: "certo, correto; em relação a", radicals: [] },
-    { char: "起", pinyin: "qǐ", meaning: "levantar, começar", radicals: [{r:"走",m:"andar"},{r:"己",m:"si mesmo (fonético)"}] }
+    {
+      "char": "不",
+      "pinyin": "bù",
+      "radicals": []
+    },
+    {
+      "char": "客",
+      "pinyin": "kè",
+      "radicals": [
+        { "r": "宀" },
+        { "r": "各" }
+      ]
+    },
+    {
+      "char": "气",
+      "pinyin": "qì",
+      "radicals": []
+    },
+    {
+      "char": "对",
+      "pinyin": "duì",
+      "radicals": []
+    },
+    {
+      "char": "起",
+      "pinyin": "qǐ",
+      "radicals": [
+        { "r": "走" },
+        { "r": "己" }
+      ]
+    }
   ],
-  // Lição 3
   [
-    { char: "没", pinyin: "méi", meaning: "não ter, não há", radicals: [{r:"氵",m:"água"},{r:"殳",m:"instrumento (fonético)"}] },
-    { char: "关", pinyin: "guān", meaning: "fechar; relação", radicals: [] },
-    { char: "系", pinyin: "xì", meaning: "sistema, ligação", radicals: [] },
-    { char: "早", pinyin: "zǎo", meaning: "cedo, manhã", radicals: [{r:"日",m:"sol"},{r:"十",m:"dez"}], mnemonic: "O sol (日) nascendo bem acima da linha do horizonte (十, como as primeiras raias de luz) — a imagem do início da manhã." },
-    { char: "上", pinyin: "shàng", meaning: "em cima, subir", radicals: [] }
+    {
+      "char": "没",
+      "pinyin": "méi",
+      "radicals": [
+        { "r": "氵" },
+        { "r": "殳" }
+      ]
+    },
+    {
+      "char": "关",
+      "pinyin": "guān",
+      "radicals": []
+    },
+    {
+      "char": "系",
+      "pinyin": "xì",
+      "radicals": []
+    },
+    {
+      "char": "早",
+      "pinyin": "zǎo",
+      "radicals": [
+        { "r": "日" },
+        { "r": "十" }
+      ]
+    },
+    {
+      "char": "上",
+      "pinyin": "shàng",
+      "radicals": []
+    }
   ],
-  // Lição 4
   [
-    { char: "晚", pinyin: "wǎn", meaning: "noite, tarde", radicals: [{r:"日",m:"sol"},{r:"免",m:"evitar (fonético)"}] },
-    { char: "我", pinyin: "wǒ", meaning: "eu", radicals: [] },
-    { char: "叫", pinyin: "jiào", meaning: "chamar-se, gritar", radicals: [{r:"口",m:"boca"},{r:"丩",m:"enroscar (fonético)"}] },
-    { char: "名", pinyin: "míng", meaning: "nome", radicals: [{r:"夕",m:"anoitecer"},{r:"口",m:"boca"}] },
-    { char: "字", pinyin: "zì", meaning: "caractere, palavra", radicals: [{r:"宀",m:"teto/casa"},{r:"子",m:"filho"}] }
+    {
+      "char": "晚",
+      "pinyin": "wǎn",
+      "radicals": [
+        { "r": "日" },
+        { "r": "免" }
+      ]
+    },
+    {
+      "char": "我",
+      "pinyin": "wǒ",
+      "radicals": []
+    },
+    {
+      "char": "叫",
+      "pinyin": "jiào",
+      "radicals": [
+        { "r": "口" },
+        { "r": "丩" }
+      ]
+    },
+    {
+      "char": "名",
+      "pinyin": "míng",
+      "radicals": [
+        { "r": "夕" },
+        { "r": "口" }
+      ]
+    },
+    {
+      "char": "字",
+      "pinyin": "zì",
+      "radicals": [
+        { "r": "宀" },
+        { "r": "子" }
+      ]
+    }
   ],
-  // Lição 5
   [
-    { char: "是", pinyin: "shì", meaning: "ser, estar", radicals: [] },
-    { char: "人", pinyin: "rén", meaning: "pessoa", radicals: [] },
-    { char: "巴", pinyin: "bā", meaning: "(parte de Bāxī, Brasil)", radicals: [] },
-    { char: "西", pinyin: "xī", meaning: "oeste", radicals: [] },
-    { char: "中", pinyin: "zhōng", meaning: "meio, centro", radicals: [] }
+    {
+      "char": "是",
+      "pinyin": "shì",
+      "radicals": []
+    },
+    {
+      "char": "人",
+      "pinyin": "rén",
+      "radicals": []
+    },
+    {
+      "char": "巴",
+      "pinyin": "bā",
+      "radicals": []
+    },
+    {
+      "char": "西",
+      "pinyin": "xī",
+      "radicals": []
+    },
+    {
+      "char": "中",
+      "pinyin": "zhōng",
+      "radicals": []
+    }
   ],
-  // Lição 6
   [
-    { char: "国", pinyin: "guó", meaning: "país", radicals: [{r:"囗",m:"cercado, fronteira"},{r:"玉",m:"jade (tesouro)"}] },
-    { char: "哪", pinyin: "nǎ", meaning: "qual", radicals: [{r:"口",m:"boca"},{r:"那",m:"aquele (fonético)"}] },
-    { char: "零", pinyin: "líng", meaning: "zero", radicals: [] },
-    { char: "一", pinyin: "yī", meaning: "um", radicals: [] },
-    { char: "二", pinyin: "èr", meaning: "dois", radicals: [] }
+    {
+      "char": "国",
+      "pinyin": "guó",
+      "radicals": [
+        { "r": "囗" },
+        { "r": "玉" }
+      ]
+    },
+    {
+      "char": "哪",
+      "pinyin": "nǎ",
+      "radicals": [
+        { "r": "口" },
+        { "r": "那" }
+      ]
+    },
+    {
+      "char": "零",
+      "pinyin": "líng",
+      "radicals": []
+    },
+    {
+      "char": "一",
+      "pinyin": "yī",
+      "radicals": []
+    },
+    {
+      "char": "二",
+      "pinyin": "èr",
+      "radicals": []
+    }
   ],
-  // Lição 7
   [
-    { char: "三", pinyin: "sān", meaning: "três", radicals: [] },
-    { char: "四", pinyin: "sì", meaning: "quatro", radicals: [] },
-    { char: "五", pinyin: "wǔ", meaning: "cinco", radicals: [] },
-    { char: "六", pinyin: "liù", meaning: "seis", radicals: [] },
-    { char: "七", pinyin: "qī", meaning: "sete", radicals: [] }
+    {
+      "char": "三",
+      "pinyin": "sān",
+      "radicals": []
+    },
+    {
+      "char": "四",
+      "pinyin": "sì",
+      "radicals": []
+    },
+    {
+      "char": "五",
+      "pinyin": "wǔ",
+      "radicals": []
+    },
+    {
+      "char": "六",
+      "pinyin": "liù",
+      "radicals": []
+    },
+    {
+      "char": "七",
+      "pinyin": "qī",
+      "radicals": []
+    }
   ],
-  // Lição 8
   [
-    { char: "八", pinyin: "bā", meaning: "oito", radicals: [] },
-    { char: "九", pinyin: "jiǔ", meaning: "nove", radicals: [] },
-    { char: "十", pinyin: "shí", meaning: "dez", radicals: [] },
-    { char: "岁", pinyin: "suì", meaning: "anos (idade)", radicals: [] },
-    { char: "多", pinyin: "duō", meaning: "muito, quanto", radicals: [{r:"夕",m:"anoitecer"},{r:"夕",m:"anoitecer (repetido)"}] }
+    {
+      "char": "八",
+      "pinyin": "bā",
+      "radicals": []
+    },
+    {
+      "char": "九",
+      "pinyin": "jiǔ",
+      "radicals": []
+    },
+    {
+      "char": "十",
+      "pinyin": "shí",
+      "radicals": []
+    },
+    {
+      "char": "岁",
+      "pinyin": "suì",
+      "radicals": []
+    },
+    {
+      "char": "多",
+      "pinyin": "duō",
+      "radicals": [
+        { "r": "夕" },
+        { "r": "夕" }
+      ]
+    }
   ],
-  // Lição 9
   [
-    { char: "大", pinyin: "dà", meaning: "grande", radicals: [] },
-    { char: "家", pinyin: "jiā", meaning: "família, casa", radicals: [{r:"宀",m:"teto/casa"},{r:"豕",m:"porco"}], mnemonic: "Um porco (豕) sob um teto (宀) — na China antiga, ter um porco dentro de casa era sinal de que a família tinha se estabelecido e tinha fartura." },
-    { char: "爸", pinyin: "bà", meaning: "pai", radicals: [{r:"父",m:"pai"},{r:"巴",m:"(fonético)"}] },
-    { char: "妈", pinyin: "mā", meaning: "mãe", radicals: [{r:"女",m:"mulher"},{r:"马",m:"cavalo (fonético)"}] },
-    { char: "哥", pinyin: "gē", meaning: "irmão mais velho", radicals: [{r:"可",m:"poder (fonético)"},{r:"可",m:"poder (repetido)"}] }
+    {
+      "char": "大",
+      "pinyin": "dà",
+      "radicals": []
+    },
+    {
+      "char": "家",
+      "pinyin": "jiā",
+      "radicals": [
+        { "r": "宀" },
+        { "r": "豕" }
+      ]
+    },
+    {
+      "char": "爸",
+      "pinyin": "bà",
+      "radicals": [
+        { "r": "父" },
+        { "r": "巴" }
+      ]
+    },
+    {
+      "char": "妈",
+      "pinyin": "mā",
+      "radicals": [
+        { "r": "女" },
+        { "r": "马" }
+      ]
+    },
+    {
+      "char": "哥",
+      "pinyin": "gē",
+      "radicals": [
+        { "r": "可" },
+        { "r": "可" }
+      ]
+    }
   ],
-  // Lição 10
   [
-    { char: "弟", pinyin: "dì", meaning: "irmão mais novo", radicals: [] },
-    { char: "姐", pinyin: "jiě", meaning: "irmã mais velha", radicals: [{r:"女",m:"mulher"},{r:"且",m:"além disso (fonético)"}] },
-    { char: "妹", pinyin: "mèi", meaning: "irmã mais nova", radicals: [{r:"女",m:"mulher"},{r:"未",m:"ainda não (fonético)"}] },
-    { char: "孩", pinyin: "hái", meaning: "criança, filho(a)", radicals: [{r:"子",m:"filho"},{r:"亥",m:"(fonético)"}] },
-    { char: "子", pinyin: "zǐ", meaning: "filho, criança", radicals: [] }
+    {
+      "char": "弟",
+      "pinyin": "dì",
+      "radicals": []
+    },
+    {
+      "char": "姐",
+      "pinyin": "jiě",
+      "radicals": [
+        { "r": "女" },
+        { "r": "且" }
+      ]
+    },
+    {
+      "char": "妹",
+      "pinyin": "mèi",
+      "radicals": [
+        { "r": "女" },
+        { "r": "未" }
+      ]
+    },
+    {
+      "char": "孩",
+      "pinyin": "hái",
+      "radicals": [
+        { "r": "子" },
+        { "r": "亥" }
+      ]
+    },
+    {
+      "char": "子",
+      "pinyin": "zǐ",
+      "radicals": []
+    }
   ],
-  // Lição 11
   [
-    { char: "有", pinyin: "yǒu", meaning: "ter, haver", radicals: [] },
-    { char: "几", pinyin: "jǐ", meaning: "quantos", radicals: [] },
-    { char: "个", pinyin: "gè", meaning: "(classificador geral)", radicals: [] },
-    { char: "口", pinyin: "kǒu", meaning: "boca; (classificador p/ pessoas da família)", radicals: [] },
-    { char: "吃", pinyin: "chī", meaning: "comer", radicals: [{r:"口",m:"boca"},{r:"乞",m:"mendigar (fonético)"}] }
+    {
+      "char": "有",
+      "pinyin": "yǒu",
+      "radicals": []
+    },
+    {
+      "char": "几",
+      "pinyin": "jǐ",
+      "radicals": []
+    },
+    {
+      "char": "个",
+      "pinyin": "gè",
+      "radicals": []
+    },
+    {
+      "char": "口",
+      "pinyin": "kǒu",
+      "radicals": []
+    },
+    {
+      "char": "吃",
+      "pinyin": "chī",
+      "radicals": [
+        { "r": "口" },
+        { "r": "乞" }
+      ]
+    }
   ],
-  // Lição 12
   [
-    { char: "喝", pinyin: "hē", meaning: "beber", radicals: [{r:"口",m:"boca"},{r:"曷",m:"(fonético)"}] },
-    { char: "米", pinyin: "mǐ", meaning: "arroz (grão)", radicals: [] },
-    { char: "饭", pinyin: "fàn", meaning: "arroz (cozido), refeição", radicals: [{r:"饣",m:"comida"},{r:"反",m:"reverso (fonético)"}] },
-    { char: "面", pinyin: "miàn", meaning: "macarrão; rosto", radicals: [] },
-    { char: "水", pinyin: "shuǐ", meaning: "água", radicals: [] }
+    {
+      "char": "喝",
+      "pinyin": "hē",
+      "radicals": [
+        { "r": "口" },
+        { "r": "曷" }
+      ]
+    },
+    {
+      "char": "米",
+      "pinyin": "mǐ",
+      "radicals": []
+    },
+    {
+      "char": "饭",
+      "pinyin": "fàn",
+      "radicals": [
+        { "r": "饣" },
+        { "r": "反" }
+      ]
+    },
+    {
+      "char": "面",
+      "pinyin": "miàn",
+      "radicals": []
+    },
+    {
+      "char": "水",
+      "pinyin": "shuǐ",
+      "radicals": []
+    }
   ],
-  // Lição 13
   [
-    { char: "茶", pinyin: "chá", meaning: "chá", radicals: [{r:"艹",m:"planta"},{r:"余",m:"restante (fonético)"}] },
-    { char: "咖", pinyin: "kā", meaning: "(parte de kāfēi, café)", radicals: [{r:"口",m:"boca"},{r:"加",m:"adicionar (fonético)"}] },
-    { char: "啡", pinyin: "fēi", meaning: "(parte de kāfēi, café)", radicals: [{r:"口",m:"boca"},{r:"非",m:"não (fonético)"}] },
-    { char: "喜", pinyin: "xǐ", meaning: "gostar, alegria", radicals: [] },
-    { char: "欢", pinyin: "huān", meaning: "alegre (em xǐhuan, gostar)", radicals: [] }
+    {
+      "char": "茶",
+      "pinyin": "chá",
+      "radicals": [
+        { "r": "艹" },
+        { "r": "余" }
+      ]
+    },
+    {
+      "char": "咖",
+      "pinyin": "kā",
+      "radicals": [
+        { "r": "口" },
+        { "r": "加" }
+      ]
+    },
+    {
+      "char": "啡",
+      "pinyin": "fēi",
+      "radicals": [
+        { "r": "口" },
+        { "r": "非" }
+      ]
+    },
+    {
+      "char": "喜",
+      "pinyin": "xǐ",
+      "radicals": []
+    },
+    {
+      "char": "欢",
+      "pinyin": "huān",
+      "radicals": []
+    }
   ],
-  // Lição 14
   [
-    { char: "要", pinyin: "yào", meaning: "querer, precisar", radicals: [] },
-    { char: "杯", pinyin: "bēi", meaning: "copo, xícara", radicals: [{r:"木",m:"madeira"},{r:"不",m:"não (fonético)"}] },
-    { char: "点", pinyin: "diǎn", meaning: "hora; ponto", radicals: [] },
-    { char: "床", pinyin: "chuáng", meaning: "cama", radicals: [{r:"广",m:"abrigo"},{r:"木",m:"madeira"}] },
-    { char: "班", pinyin: "bān", meaning: "turno, turma (em shàngbān, trabalhar)", radicals: [] }
+    {
+      "char": "要",
+      "pinyin": "yào",
+      "radicals": []
+    },
+    {
+      "char": "杯",
+      "pinyin": "bēi",
+      "radicals": [
+        { "r": "木" },
+        { "r": "不" }
+      ]
+    },
+    {
+      "char": "点",
+      "pinyin": "diǎn",
+      "radicals": []
+    },
+    {
+      "char": "床",
+      "pinyin": "chuáng",
+      "radicals": [
+        { "r": "广" },
+        { "r": "木" }
+      ]
+    },
+    {
+      "char": "班",
+      "pinyin": "bān",
+      "radicals": []
+    }
   ],
-  // Lição 15
   [
-    { char: "下", pinyin: "xià", meaning: "embaixo, descer", radicals: [] },
-    { char: "睡", pinyin: "shuì", meaning: "dormir", radicals: [{r:"目",m:"olho"},{r:"垂",m:"pendurar (fonético)"}] },
-    { char: "觉", pinyin: "jiào", meaning: "sono (em shuìjiào, dormir)", radicals: [] },
-    { char: "每", pinyin: "měi", meaning: "cada", radicals: [] },
-    { char: "天", pinyin: "tiān", meaning: "dia, céu", radicals: [] }
+    {
+      "char": "下",
+      "pinyin": "xià",
+      "radicals": []
+    },
+    {
+      "char": "睡",
+      "pinyin": "shuì",
+      "radicals": [
+        { "r": "目" },
+        { "r": "垂" }
+      ]
+    },
+    {
+      "char": "觉",
+      "pinyin": "jiào",
+      "radicals": []
+    },
+    {
+      "char": "每",
+      "pinyin": "měi",
+      "radicals": []
+    },
+    {
+      "char": "天",
+      "pinyin": "tiān",
+      "radicals": []
+    }
   ],
-  // Lição 16
   [
-    { char: "现", pinyin: "xiàn", meaning: "atual, presente", radicals: [{r:"王",m:"jade/rei"},{r:"见",m:"ver (fonético)"}] },
-    { char: "在", pinyin: "zài", meaning: "estar (localização); em", radicals: [] },
-    { char: "今", pinyin: "jīn", meaning: "hoje, presente", radicals: [] },
-    { char: "里", pinyin: "lǐ", meaning: "dentro", radicals: [] },
-    { char: "左", pinyin: "zuǒ", meaning: "esquerda", radicals: [] }
+    {
+      "char": "现",
+      "pinyin": "xiàn",
+      "radicals": [
+        { "r": "王" },
+        { "r": "见" }
+      ]
+    },
+    {
+      "char": "在",
+      "pinyin": "zài",
+      "radicals": []
+    },
+    {
+      "char": "今",
+      "pinyin": "jīn",
+      "radicals": []
+    },
+    {
+      "char": "里",
+      "pinyin": "lǐ",
+      "radicals": []
+    },
+    {
+      "char": "左",
+      "pinyin": "zuǒ",
+      "radicals": []
+    }
   ],
-  // Lição 17
   [
-    { char: "右", pinyin: "yòu", meaning: "direita", radicals: [] },
-    { char: "前", pinyin: "qián", meaning: "frente, antes", radicals: [] },
-    { char: "后", pinyin: "hòu", meaning: "atrás, depois", radicals: [] },
-    { char: "离", pinyin: "lí", meaning: "distância de, longe de", radicals: [] },
-    { char: "近", pinyin: "jìn", meaning: "perto", radicals: [{r:"辶",m:"caminhar"},{r:"斤",m:"machado (fonético)"}] }
+    {
+      "char": "右",
+      "pinyin": "yòu",
+      "radicals": []
+    },
+    {
+      "char": "前",
+      "pinyin": "qián",
+      "radicals": []
+    },
+    {
+      "char": "后",
+      "pinyin": "hòu",
+      "radicals": []
+    },
+    {
+      "char": "离",
+      "pinyin": "lí",
+      "radicals": []
+    },
+    {
+      "char": "近",
+      "pinyin": "jìn",
+      "radicals": [
+        { "r": "辶" },
+        { "r": "斤" }
+      ]
+    }
   ],
-  // Lição 18
   [
-    { char: "远", pinyin: "yuǎn", meaning: "longe", radicals: [{r:"辶",m:"caminhar"},{r:"元",m:"origem (fonético)"}] },
-    { char: "买", pinyin: "mǎi", meaning: "comprar", radicals: [] },
-    { char: "卖", pinyin: "mài", meaning: "vender", radicals: [] },
-    { char: "少", pinyin: "shǎo", meaning: "pouco", radicals: [] },
-    { char: "钱", pinyin: "qián", meaning: "dinheiro", radicals: [{r:"钅",m:"metal"},{r:"戋",m:"pequeno (fonético)"}] }
+    {
+      "char": "远",
+      "pinyin": "yuǎn",
+      "radicals": [
+        { "r": "辶" },
+        { "r": "元" }
+      ]
+    },
+    {
+      "char": "买",
+      "pinyin": "mǎi",
+      "radicals": []
+    },
+    {
+      "char": "卖",
+      "pinyin": "mài",
+      "radicals": []
+    },
+    {
+      "char": "少",
+      "pinyin": "shǎo",
+      "radicals": []
+    },
+    {
+      "char": "钱",
+      "pinyin": "qián",
+      "radicals": [
+        { "r": "钅" },
+        { "r": "戋" }
+      ]
+    }
   ],
-  // Lição 19
   [
-    { char: "块", pinyin: "kuài", meaning: "pedaço; unidade monetária", radicals: [{r:"土",m:"terra"},{r:"块",m:"(fonético)"}] },
-    { char: "便", pinyin: "pián", meaning: "barato (em piányi)", radicals: [] },
-    { char: "宜", pinyin: "yí", meaning: "apropriado (em piányi, barato)", radicals: [{r:"宀",m:"teto/casa"},{r:"且",m:"além disso"}] },
-    { char: "贵", pinyin: "guì", meaning: "caro, precioso", radicals: [] },
-    { char: "这", pinyin: "zhè", meaning: "este, esta", radicals: [{r:"辶",m:"caminhar"},{r:"文",m:"escrita (fonético)"}] }
+    {
+      "char": "块",
+      "pinyin": "kuài",
+      "radicals": [
+        { "r": "土" },
+        { "r": "块" }
+      ]
+    },
+    {
+      "char": "便",
+      "pinyin": "pián",
+      "radicals": []
+    },
+    {
+      "char": "宜",
+      "pinyin": "yí",
+      "radicals": [
+        { "r": "宀" },
+        { "r": "且" }
+      ]
+    },
+    {
+      "char": "贵",
+      "pinyin": "guì",
+      "radicals": []
+    },
+    {
+      "char": "这",
+      "pinyin": "zhè",
+      "radicals": [
+        { "r": "辶" },
+        { "r": "文" }
+      ]
+    }
   ],
-  // Lição 20
   [
-    { char: "那", pinyin: "nà", meaning: "aquele, aquela", radicals: [] },
-    { char: "衣", pinyin: "yī", meaning: "roupa", radicals: [] },
-    { char: "服", pinyin: "fú", meaning: "roupa, vestir (em yīfu)", radicals: [] },
-    { char: "鞋", pinyin: "xié", meaning: "sapato", radicals: [{r:"革",m:"couro"},{r:"圭",m:"jade (fonético)"}] },
-    { char: "热", pinyin: "rè", meaning: "quente", radicals: [{r:"扌",m:"mão"},{r:"灬",m:"fogo"}] }
+    {
+      "char": "那",
+      "pinyin": "nà",
+      "radicals": []
+    },
+    {
+      "char": "衣",
+      "pinyin": "yī",
+      "radicals": []
+    },
+    {
+      "char": "服",
+      "pinyin": "fú",
+      "radicals": []
+    },
+    {
+      "char": "鞋",
+      "pinyin": "xié",
+      "radicals": [
+        { "r": "革" },
+        { "r": "圭" }
+      ]
+    },
+    {
+      "char": "热",
+      "pinyin": "rè",
+      "radicals": [
+        { "r": "扌" },
+        { "r": "灬" }
+      ]
+    }
   ],
-  // Lição 21
   [
-    { char: "冷", pinyin: "lěng", meaning: "frio", radicals: [{r:"冫",m:"gelo"},{r:"令",m:"ordem (fonético)"}] },
-    { char: "雨", pinyin: "yǔ", meaning: "chuva", radicals: [] },
-    { char: "晴", pinyin: "qíng", meaning: "ensolarado", radicals: [{r:"日",m:"sol"},{r:"青",m:"verde-azulado (fonético)"}] },
-    { char: "阴", pinyin: "yīn", meaning: "nublado, sombrio", radicals: [] },
-    { char: "风", pinyin: "fēng", meaning: "vento", radicals: [] }
+    {
+      "char": "冷",
+      "pinyin": "lěng",
+      "radicals": [
+        { "r": "冫" },
+        { "r": "令" }
+      ]
+    },
+    {
+      "char": "雨",
+      "pinyin": "yǔ",
+      "radicals": []
+    },
+    {
+      "char": "晴",
+      "pinyin": "qíng",
+      "radicals": [
+        { "r": "日" },
+        { "r": "青" }
+      ]
+    },
+    {
+      "char": "阴",
+      "pinyin": "yīn",
+      "radicals": []
+    },
+    {
+      "char": "风",
+      "pinyin": "fēng",
+      "radicals": []
+    }
   ],
-  // Lição 22
   [
-    { char: "怎", pinyin: "zěn", meaning: "como (em zěnme)", radicals: [] },
-    { char: "么", pinyin: "me", meaning: "(partícula interrogativa)", radicals: [] },
-    { char: "样", pinyin: "yàng", meaning: "tipo, aparência", radicals: [{r:"木",m:"madeira"},{r:"羊",m:"ovelha (fonético)"}] },
-    { char: "公", pinyin: "gōng", meaning: "público", radicals: [] },
-    { char: "共", pinyin: "gòng", meaning: "comum, junto", radicals: [] }
+    {
+      "char": "怎",
+      "pinyin": "zěn",
+      "radicals": []
+    },
+    {
+      "char": "么",
+      "pinyin": "me",
+      "radicals": []
+    },
+    {
+      "char": "样",
+      "pinyin": "yàng",
+      "radicals": [
+        { "r": "木" },
+        { "r": "羊" }
+      ]
+    },
+    {
+      "char": "公",
+      "pinyin": "gōng",
+      "radicals": []
+    },
+    {
+      "char": "共",
+      "pinyin": "gòng",
+      "radicals": []
+    }
   ],
-  // Lição 23
   [
-    { char: "汽", pinyin: "qì", meaning: "vapor (em qìchē, carro)", radicals: [{r:"氵",m:"água"},{r:"气",m:"ar (fonético)"}] },
-    { char: "车", pinyin: "chē", meaning: "carro, veículo", radicals: [] },
-    { char: "地", pinyin: "dì", meaning: "terra, chão (em dìtiě, metrô)", radicals: [{r:"土",m:"terra"},{r:"也",m:"também (fonético)"}] },
-    { char: "铁", pinyin: "tiě", meaning: "ferro (em dìtiě, metrô)", radicals: [{r:"钅",m:"metal"},{r:"失",m:"perder (fonético)"}] },
-    { char: "出", pinyin: "chū", meaning: "sair", radicals: [] }
+    {
+      "char": "汽",
+      "pinyin": "qì",
+      "radicals": [
+        { "r": "氵" },
+        { "r": "气" }
+      ]
+    },
+    {
+      "char": "车",
+      "pinyin": "chē",
+      "radicals": []
+    },
+    {
+      "char": "地",
+      "pinyin": "dì",
+      "radicals": [
+        { "r": "土" },
+        { "r": "也" }
+      ]
+    },
+    {
+      "char": "铁",
+      "pinyin": "tiě",
+      "radicals": [
+        { "r": "钅" },
+        { "r": "失" }
+      ]
+    },
+    {
+      "char": "出",
+      "pinyin": "chū",
+      "radicals": []
+    }
   ],
-  // Lição 24
   [
-    { char: "租", pinyin: "zū", meaning: "alugar (em chūzūchē, táxi)", radicals: [{r:"禾",m:"cereal"},{r:"且",m:"além disso (fonético)"}] },
-    { char: "走", pinyin: "zǒu", meaning: "andar, ir a pé", radicals: [] },
-    { char: "路", pinyin: "lù", meaning: "caminho, estrada", radicals: [{r:"足",m:"pé"},{r:"各",m:"cada (fonético)"}] },
-    { char: "去", pinyin: "qù", meaning: "ir", radicals: [] },
-    { char: "站", pinyin: "zhàn", meaning: "estação, parada", radicals: [{r:"立",m:"ficar de pé"},{r:"占",m:"ocupar (fonético)"}] }
+    {
+      "char": "租",
+      "pinyin": "zū",
+      "radicals": [
+        { "r": "禾" },
+        { "r": "且" }
+      ]
+    },
+    {
+      "char": "走",
+      "pinyin": "zǒu",
+      "radicals": []
+    },
+    {
+      "char": "路",
+      "pinyin": "lù",
+      "radicals": [
+        { "r": "足" },
+        { "r": "各" }
+      ]
+    },
+    {
+      "char": "去",
+      "pinyin": "qù",
+      "radicals": []
+    },
+    {
+      "char": "站",
+      "pinyin": "zhàn",
+      "radicals": [
+        { "r": "立" },
+        { "r": "占" }
+      ]
+    }
   ],
-  // Lição 25
   [
-    { char: "票", pinyin: "piào", meaning: "bilhete, passagem", radicals: [] },
-    { char: "张", pinyin: "zhāng", meaning: "(classificador p/ objetos planos)", radicals: [{r:"弓",m:"arco"},{r:"长",m:"longo (fonético)"}] },
-    { char: "身", pinyin: "shēn", meaning: "corpo", radicals: [] },
-    { char: "体", pinyin: "tǐ", meaning: "corpo (em shēntǐ)", radicals: [{r:"亻",m:"pessoa"},{r:"本",m:"raiz/origem"}] },
-    { char: "头", pinyin: "tóu", meaning: "cabeça", radicals: [] }
+    {
+      "char": "票",
+      "pinyin": "piào",
+      "radicals": []
+    },
+    {
+      "char": "张",
+      "pinyin": "zhāng",
+      "radicals": [
+        { "r": "弓" },
+        { "r": "长" }
+      ]
+    },
+    {
+      "char": "身",
+      "pinyin": "shēn",
+      "radicals": []
+    },
+    {
+      "char": "体",
+      "pinyin": "tǐ",
+      "radicals": [
+        { "r": "亻" },
+        { "r": "本" }
+      ]
+    },
+    {
+      "char": "头",
+      "pinyin": "tóu",
+      "radicals": []
+    }
   ],
-  // Lição 26
   [
-    { char: "肚", pinyin: "dù", meaning: "barriga", radicals: [{r:"月",m:"carne/corpo"},{r:"土",m:"terra (fonético)"}] },
-    { char: "疼", pinyin: "téng", meaning: "doer", radicals: [{r:"疒",m:"doença"},{r:"冬",m:"inverno (fonético)"}] },
-    { char: "生", pinyin: "shēng", meaning: "nascer, vida (em shēngbìng, ficar doente)", radicals: [] },
-    { char: "病", pinyin: "bìng", meaning: "doença", radicals: [{r:"疒",m:"doença"},{r:"丙",m:"terceiro (fonético)"}] },
-    { char: "医", pinyin: "yī", meaning: "medicina, médico", radicals: [] }
+    {
+      "char": "肚",
+      "pinyin": "dù",
+      "radicals": [
+        { "r": "月" },
+        { "r": "土" }
+      ]
+    },
+    {
+      "char": "疼",
+      "pinyin": "téng",
+      "radicals": [
+        { "r": "疒" },
+        { "r": "冬" }
+      ]
+    },
+    {
+      "char": "生",
+      "pinyin": "shēng",
+      "radicals": []
+    },
+    {
+      "char": "病",
+      "pinyin": "bìng",
+      "radicals": [
+        { "r": "疒" },
+        { "r": "丙" }
+      ]
+    },
+    {
+      "char": "医",
+      "pinyin": "yī",
+      "radicals": []
+    }
   ],
-  // Lição 27
   [
-    { char: "院", pinyin: "yuàn", meaning: "pátio, instituição (em yīyuàn, hospital)", radicals: [{r:"阝",m:"colina/lugar"},{r:"完",m:"completo (fonético)"}] },
-    { char: "舒", pinyin: "shū", meaning: "confortável (em bù shūfu)", radicals: [] },
-    { char: "爱", pinyin: "ài", meaning: "amor, gostar muito", radicals: [] },
-    { char: "看", pinyin: "kàn", meaning: "ver, assistir", radicals: [{r:"手",m:"mão"},{r:"目",m:"olho"}], mnemonic: "Uma mão (手) protegendo o olho (目) do sol — o gesto de fazer uma pala com a mão para enxergar melhor algo à distância." },
-    { char: "书", pinyin: "shū", meaning: "livro", radicals: [] }
+    {
+      "char": "院",
+      "pinyin": "yuàn",
+      "radicals": [
+        { "r": "阝" },
+        { "r": "完" }
+      ]
+    },
+    {
+      "char": "舒",
+      "pinyin": "shū",
+      "radicals": []
+    },
+    {
+      "char": "爱",
+      "pinyin": "ài",
+      "radicals": []
+    },
+    {
+      "char": "看",
+      "pinyin": "kàn",
+      "radicals": [
+        { "r": "手" },
+        { "r": "目" }
+      ]
+    },
+    {
+      "char": "书",
+      "pinyin": "shū",
+      "radicals": []
+    }
   ],
-  // Lição 28
   [
-    { char: "听", pinyin: "tīng", meaning: "ouvir", radicals: [{r:"口",m:"boca"},{r:"斤",m:"machado (fonético)"}] },
-    { char: "音", pinyin: "yīn", meaning: "som", radicals: [] },
-    { char: "乐", pinyin: "yuè", meaning: "música (em yīnyuè)", radicals: [] },
-    { char: "电", pinyin: "diàn", meaning: "eletricidade", radicals: [] },
-    { char: "影", pinyin: "yǐng", meaning: "sombra, filme (em diànyǐng)", radicals: [] }
+    {
+      "char": "听",
+      "pinyin": "tīng",
+      "radicals": [
+        { "r": "口" },
+        { "r": "斤" }
+      ]
+    },
+    {
+      "char": "音",
+      "pinyin": "yīn",
+      "radicals": []
+    },
+    {
+      "char": "乐",
+      "pinyin": "yuè",
+      "radicals": []
+    },
+    {
+      "char": "电",
+      "pinyin": "diàn",
+      "radicals": []
+    },
+    {
+      "char": "影",
+      "pinyin": "yǐng",
+      "radicals": []
+    }
   ],
-  // Lição 29
   [
-    { char: "运", pinyin: "yùn", meaning: "mover, sorte (em yùndòng, esporte)", radicals: [{r:"辶",m:"caminhar"},{r:"云",m:"nuvem (fonético)"}] },
-    { char: "动", pinyin: "dòng", meaning: "mover (em yùndòng, esporte)", radicals: [] },
-    { char: "唱", pinyin: "chàng", meaning: "cantar", radicals: [{r:"口",m:"boca"},{r:"昌",m:"próspero (fonético)"}] },
-    { char: "歌", pinyin: "gē", meaning: "canção", radicals: [] },
-    { char: "跳", pinyin: "tiào", meaning: "pular, dançar", radicals: [{r:"足",m:"pé"},{r:"兆",m:"presságio (fonético)"}] }
+    {
+      "char": "运",
+      "pinyin": "yùn",
+      "radicals": [
+        { "r": "辶" },
+        { "r": "云" }
+      ]
+    },
+    {
+      "char": "动",
+      "pinyin": "dòng",
+      "radicals": []
+    },
+    {
+      "char": "唱",
+      "pinyin": "chàng",
+      "radicals": [
+        { "r": "口" },
+        { "r": "昌" }
+      ]
+    },
+    {
+      "char": "歌",
+      "pinyin": "gē",
+      "radicals": []
+    },
+    {
+      "char": "跳",
+      "pinyin": "tiào",
+      "radicals": [
+        { "r": "足" },
+        { "r": "兆" }
+      ]
+    }
   ],
-  // Lição 30
   [
-    { char: "舞", pinyin: "wǔ", meaning: "dança (em tiàowǔ)", radicals: [] },
-    { char: "空", pinyin: "kòng", meaning: "vazio, tempo livre (em yǒu kòng)", radicals: [{r:"穴",m:"caverna/buraco"},{r:"工",m:"trabalho (fonético)"}] },
-    { char: "打", pinyin: "dǎ", meaning: "bater, fazer (em dǎsuàn, planejar)", radicals: [{r:"扌",m:"mão"},{r:"丁",m:"prego (fonético)"}] },
-    { char: "算", pinyin: "suàn", meaning: "calcular, planejar (em dǎsuàn)", radicals: [] },
-    { char: "明", pinyin: "míng", meaning: "claro, amanhã (em míngtiān)", radicals: [{r:"日",m:"sol"},{r:"月",m:"lua"}], mnemonic: "O sol (日) e a lua (月) lado a lado — juntos, os dois maiores astros do céu, iluminando tudo: daí o sentido de \"claro\" e \"brilhante\"." }
+    {
+      "char": "舞",
+      "pinyin": "wǔ",
+      "radicals": []
+    },
+    {
+      "char": "空",
+      "pinyin": "kòng",
+      "radicals": [
+        { "r": "穴" },
+        { "r": "工" }
+      ]
+    },
+    {
+      "char": "打",
+      "pinyin": "dǎ",
+      "radicals": [
+        { "r": "扌" },
+        { "r": "丁" }
+      ]
+    },
+    {
+      "char": "算",
+      "pinyin": "suàn",
+      "radicals": []
+    },
+    {
+      "char": "明",
+      "pinyin": "míng",
+      "radicals": [
+        { "r": "日" },
+        { "r": "月" }
+      ]
+    }
   ],
-  // Lição 31
   [
-    { char: "星", pinyin: "xīng", meaning: "estrela (em xīngqī, semana)", radicals: [{r:"日",m:"sol"},{r:"生",m:"nascer (fonético)"}] },
-    { char: "期", pinyin: "qī", meaning: "período (em xīngqī, semana)", radicals: [] },
-    { char: "旅", pinyin: "lǚ", meaning: "viajar", radicals: [] },
-    { char: "游", pinyin: "yóu", meaning: "passear, nadar (em lǚyóu, viajar)", radicals: [{r:"氵",m:"água"},{r:"斿",m:"(fonético)"}] },
-    { char: "学", pinyin: "xué", meaning: "estudar, aprender", radicals: [] }
+    {
+      "char": "星",
+      "pinyin": "xīng",
+      "radicals": [
+        { "r": "日" },
+        { "r": "生" }
+      ]
+    },
+    {
+      "char": "期",
+      "pinyin": "qī",
+      "radicals": []
+    },
+    {
+      "char": "旅",
+      "pinyin": "lǚ",
+      "radicals": []
+    },
+    {
+      "char": "游",
+      "pinyin": "yóu",
+      "radicals": [
+        { "r": "氵" },
+        { "r": "斿" }
+      ]
+    },
+    {
+      "char": "学",
+      "pinyin": "xué",
+      "radicals": []
+    }
   ],
-  // Lição 32
   [
-    { char: "习", pinyin: "xí", meaning: "praticar (em xuéxí, estudar)", radicals: [] },
-    { char: "计", pinyin: "jì", meaning: "calcular, plano (em jìhuà)", radicals: [{r:"讠",m:"fala"},{r:"十",m:"dez (fonético)"}] },
-    { char: "划", pinyin: "huà", meaning: "planejar (em jìhuà, plano)", radicals: [] },
-    { char: "以", pinyin: "yǐ", meaning: "com, por meio de (em yǐhòu, depois)", radicals: [] },
-    { char: "比", pinyin: "bǐ", meaning: "comparar, mais que", radicals: [] }
+    {
+      "char": "习",
+      "pinyin": "xí",
+      "radicals": []
+    },
+    {
+      "char": "计",
+      "pinyin": "jì",
+      "radicals": [
+        { "r": "讠" },
+        { "r": "十" }
+      ]
+    },
+    {
+      "char": "划",
+      "pinyin": "huà",
+      "radicals": []
+    },
+    {
+      "char": "以",
+      "pinyin": "yǐ",
+      "radicals": []
+    },
+    {
+      "char": "比",
+      "pinyin": "bǐ",
+      "radicals": []
+    }
   ],
-  // Lição 33
   [
-    { char: "更", pinyin: "gèng", meaning: "ainda mais", radicals: [] },
-    { char: "最", pinyin: "zuì", meaning: "o mais (superlativo)", radicals: [] },
-    { char: "还", pinyin: "hái", meaning: "ainda; ou (em háishi)", radicals: [{r:"辶",m:"caminhar"},{r:"不",m:"não (fonético)"}] }
+    {
+      "char": "更",
+      "pinyin": "gèng",
+      "radicals": []
+    },
+    {
+      "char": "最",
+      "pinyin": "zuì",
+      "radicals": []
+    },
+    {
+      "char": "还",
+      "pinyin": "hái",
+      "radicals": [
+        { "r": "辶" },
+        { "r": "不" }
+      ]
+    }
   ],
-  // Lição 34
   [
-    { char: "高", pinyin: "gāo", meaning: "alto", radicals: [] },
-    { char: "毛", pinyin: "máo", meaning: "pelo; centavo (1/10 do kuài)", radicals: [] },
-    { char: "想", pinyin: "xiǎng", meaning: "querer, pensar em", radicals: [{r:"相",m:"mútuo (fonético)"},{r:"心",m:"coração"}] },
-    { char: "会", pinyin: "huì", meaning: "saber fazer (habilidade aprendida)", radicals: [] },
-    { char: "能", pinyin: "néng", meaning: "conseguir, poder", radicals: [] }
+    {
+      "char": "高",
+      "pinyin": "gāo",
+      "radicals": []
+    },
+    {
+      "char": "毛",
+      "pinyin": "máo",
+      "radicals": []
+    },
+    {
+      "char": "想",
+      "pinyin": "xiǎng",
+      "radicals": [
+        { "r": "相" },
+        { "r": "心" }
+      ]
+    },
+    {
+      "char": "会",
+      "pinyin": "huì",
+      "radicals": []
+    },
+    {
+      "char": "能",
+      "pinyin": "néng",
+      "radicals": []
+    }
   ],
-  // Lição 35
   [
-    { char: "请", pinyin: "qǐng", meaning: "por favor, convidar", radicals: [{r:"讠",m:"fala"},{r:"青",m:"verde-azulado (fonético)"}] },
-    { char: "坐", pinyin: "zuò", meaning: "sentar", radicals: [{r:"人",m:"pessoa"},{r:"土",m:"terra"}], mnemonic: "Duas pessoas (人, duplicado no traço) sentadas diretamente no chão (土) — a imagem mais simples possível de sentar-se." },
-    { char: "都", pinyin: "dōu", meaning: "todos, ambos", radicals: [] },
-    { char: "也", pinyin: "yě", meaning: "também", radicals: [] },
-    { char: "说", pinyin: "shuō", meaning: "falar", radicals: [{r:"讠",m:"fala"},{r:"兑",m:"trocar (fonético)"}] }
+    {
+      "char": "请",
+      "pinyin": "qǐng",
+      "radicals": [
+        { "r": "讠" },
+        { "r": "青" }
+      ]
+    },
+    {
+      "char": "坐",
+      "pinyin": "zuò",
+      "radicals": [
+        { "r": "人" },
+        { "r": "土" }
+      ]
+    },
+    {
+      "char": "都",
+      "pinyin": "dōu",
+      "radicals": []
+    },
+    {
+      "char": "也",
+      "pinyin": "yě",
+      "radicals": []
+    },
+    {
+      "char": "说",
+      "pinyin": "shuō",
+      "radicals": [
+        { "r": "讠" },
+        { "r": "兑" }
+      ]
+    }
   ],
-  // Lição 36
   [
-    { char: "来", pinyin: "lái", meaning: "vir", radicals: [] },
-    { char: "号", pinyin: "hào", meaning: "dia do mês (uso falado)", radicals: [] },
-    { char: "月", pinyin: "yuè", meaning: "mês; lua", radicals: [] },
-    { char: "年", pinyin: "nián", meaning: "ano", radicals: [] },
-    { char: "分", pinyin: "fēn", meaning: "minuto; dividir", radicals: [{r:"八",m:"dividir/oito"},{r:"刀",m:"faca"}] }
+    {
+      "char": "来",
+      "pinyin": "lái",
+      "radicals": []
+    },
+    {
+      "char": "号",
+      "pinyin": "hào",
+      "radicals": []
+    },
+    {
+      "char": "月",
+      "pinyin": "yuè",
+      "radicals": []
+    },
+    {
+      "char": "年",
+      "pinyin": "nián",
+      "radicals": []
+    },
+    {
+      "char": "分",
+      "pinyin": "fēn",
+      "radicals": [
+        { "r": "八" },
+        { "r": "刀" }
+      ]
+    }
   ],
-  // Lição 37
   [
-    { char: "百", pinyin: "bǎi", meaning: "cem", radicals: [] },
-    { char: "了", pinyin: "le", meaning: "partícula de conclusão/mudança de estado", radicals: [] },
-    { char: "苹", pinyin: "píng", meaning: "(parte de píngguǒ, maçã)", radicals: [{r:"艹",m:"planta"},{r:"平",m:"plano (fonético)"}] },
-    { char: "果", pinyin: "guǒ", meaning: "fruta; resultado (em píngguǒ, maçã)", radicals: [] },
-    { char: "昨", pinyin: "zuó", meaning: "ontem (em zuótiān)", radicals: [{r:"日",m:"sol"},{r:"乍",m:"de repente (fonético)"}] }
+    {
+      "char": "百",
+      "pinyin": "bǎi",
+      "radicals": []
+    },
+    {
+      "char": "了",
+      "pinyin": "le",
+      "radicals": []
+    },
+    {
+      "char": "苹",
+      "pinyin": "píng",
+      "radicals": [
+        { "r": "艹" },
+        { "r": "平" }
+      ]
+    },
+    {
+      "char": "果",
+      "pinyin": "guǒ",
+      "radicals": []
+    },
+    {
+      "char": "昨",
+      "pinyin": "zuó",
+      "radicals": [
+        { "r": "日" },
+        { "r": "乍" }
+      ]
+    }
   ],
-  // Lição 38
   [
-    { char: "完", pinyin: "wán", meaning: "terminar, acabar", radicals: [{r:"宀",m:"teto/casa"},{r:"元",m:"origem (fonético)"}] },
-    { char: "工", pinyin: "gōng", meaning: "trabalho (em gōngzuò)", radicals: [] },
-    { char: "作", pinyin: "zuò", meaning: "fazer, trabalhar (em gōngzuò)", radicals: [{r:"亻",m:"pessoa"},{r:"乍",m:"de repente (fonético)"}] },
-    { char: "酒", pinyin: "jiǔ", meaning: "álcool, bebida alcoólica", radicals: [{r:"氵",m:"água"},{r:"酉",m:"jarro de vinho"}] },
-    { char: "吧", pinyin: "ba", meaning: "partícula de sugestão; bar (em jiǔbā)", radicals: [{r:"口",m:"boca"},{r:"巴",m:"(fonético)"}] }
+    {
+      "char": "完",
+      "pinyin": "wán",
+      "radicals": [
+        { "r": "宀" },
+        { "r": "元" }
+      ]
+    },
+    {
+      "char": "工",
+      "pinyin": "gōng",
+      "radicals": []
+    },
+    {
+      "char": "作",
+      "pinyin": "zuò",
+      "radicals": [
+        { "r": "亻" },
+        { "r": "乍" }
+      ]
+    },
+    {
+      "char": "酒",
+      "pinyin": "jiǔ",
+      "radicals": [
+        { "r": "氵" },
+        { "r": "酉" }
+      ]
+    },
+    {
+      "char": "吧",
+      "pinyin": "ba",
+      "radicals": [
+        { "r": "口" },
+        { "r": "巴" }
+      ]
+    }
   ],
-  // Lição 39
   [
-    { char: "谁", pinyin: "shéi", meaning: "quem", radicals: [{r:"讠",m:"fala"},{r:"隹",m:"pássaro (fonético)"}] },
-    { char: "为", pinyin: "wèi", meaning: "para, por (em wèishénme, por quê)", radicals: [] },
-    { char: "什", pinyin: "shén", meaning: "que (em shénme/wèishénme)", radicals: [{r:"亻",m:"pessoa"},{r:"十",m:"dez"}] },
-    { char: "因", pinyin: "yīn", meaning: "causa (em yīnwèi, porque)", radicals: [] },
-    { char: "校", pinyin: "xiào", meaning: "escola (em xuéxiào)", radicals: [{r:"木",m:"madeira"},{r:"交",m:"trocar (fonético)"}] }
+    {
+      "char": "谁",
+      "pinyin": "shéi",
+      "radicals": [
+        { "r": "讠" },
+        { "r": "隹" }
+      ]
+    },
+    {
+      "char": "为",
+      "pinyin": "wèi",
+      "radicals": []
+    },
+    {
+      "char": "什",
+      "pinyin": "shén",
+      "radicals": [
+        { "r": "亻" },
+        { "r": "十" }
+      ]
+    },
+    {
+      "char": "因",
+      "pinyin": "yīn",
+      "radicals": []
+    },
+    {
+      "char": "校",
+      "pinyin": "xiào",
+      "radicals": [
+        { "r": "木" },
+        { "r": "交" }
+      ]
+    }
   ],
-  // Lição 40
   [
-    { char: "女", pinyin: "nǚ", meaning: "mulher (em nǚpéngyou, namorada)", radicals: [] },
-    { char: "朋", pinyin: "péng", meaning: "amigo (em péngyou)", radicals: [] },
-    { char: "友", pinyin: "yǒu", meaning: "amigo (em péngyou)", radicals: [] },
-    { char: "男", pinyin: "nán", meaning: "homem (em nánpéngyou, namorado)", radicals: [{r:"田",m:"campo"},{r:"力",m:"força"}], mnemonic: "Um campo de cultivo (田) sobre força/vigor físico (力) — na sociedade agrícola tradicional, o homem era quem trabalhava a terra com sua força." },
-    { char: "些", pinyin: "xiē", meaning: "alguns, um pouco (em yìxiē)", radicals: [] }
+    {
+      "char": "女",
+      "pinyin": "nǚ",
+      "radicals": []
+    },
+    {
+      "char": "朋",
+      "pinyin": "péng",
+      "radicals": []
+    },
+    {
+      "char": "友",
+      "pinyin": "yǒu",
+      "radicals": []
+    },
+    {
+      "char": "男",
+      "pinyin": "nán",
+      "radicals": [
+        { "r": "田" },
+        { "r": "力" }
+      ]
+    },
+    {
+      "char": "些",
+      "pinyin": "xiē",
+      "radicals": []
+    }
   ]
 ];
 

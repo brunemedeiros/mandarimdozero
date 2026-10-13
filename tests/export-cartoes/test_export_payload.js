@@ -6,7 +6,7 @@ let ok=0, fail=0; const t=(n,c)=>{ if(c){ok++;} else {fail++; console.log('FALHA
 function load(appKey){
   const ctx={console, APP_KEY:appKey, document:{getElementById:()=>null}};
   vm.createContext(ctx);
-  for (const f of ['shared/flashcard-model.js','shared/flashcard-editor-state.js','shared/flashcard-native-persistence.js','shared/my-flashcards.js'])
+  for (const f of ['languages/registry.js','shared/flashcard-model.js','shared/flashcard-editor-state.js','shared/flashcard-native-persistence.js','shared/my-flashcards.js'])
     vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f});
   return ctx;
 }

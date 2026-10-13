@@ -339,7 +339,7 @@ function flashcardFrontSummaryHTML(c){
 // motivo do form de criação (ver comentário lá): não existe um
 // "back_pinyin" pra completar o par hanzi+pinyin se invertido no zh.
 function flashcardEditFormHTML(c){
-  const isMandarim = c.language_app_key === 'mandarim';
+  const isMandarim = LanguageRegistry.isCjk(c.language_app_key);
   const isMC = !!(c.choices && c.choices.length);
   const isCloze = !!c.cloze_sentence;
   const mode = isCloze ? 'cloze' : (isMC ? 'mc' : 'flip');
@@ -428,7 +428,7 @@ function flashcardEditFormHTML(c){
 // (openFlashcardResetConfirm) ANTES de chamar updateFlashcardContent --
 // só depois do "Sim" a chamada de rede acontece de verdade.
 function wireFlashcardEditForm(c, container){
-  const isMandarim = c.language_app_key === 'mandarim';
+  const isMandarim = LanguageRegistry.isCjk(c.language_app_key);
 
   container.querySelectorAll('input[name="edit-flashcard-mode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
@@ -626,7 +626,7 @@ function wireFlashcardNativeEditForm(c, editorState, container){
   // nativeNoteEditorStateFromLegacyRow() (row.language_app_key).
   document.getElementById('edit-native-flashcard-preview-btn')?.addEventListener('click', () => {
     openFlashcardPreviewFromEditorState(editorState, {
-      appKey: editorState.languageAppKey || c.language_app_key || 'frances',
+      appKey: editorState.languageAppKey || c.language_app_key || LanguageRegistry.defaultAppKey(),
       origin: 'teacher',
     });
   });
@@ -1067,13 +1067,13 @@ async function updateFlashcardsSelectionDependentUI(wrap){
     ADMIN_FLASHCARDS_STATE.langFilter = langsPresent[0];
   }
   const selectedStudents = adminSelectedStudents(students);
-  const anyMandarim = selectedStudents.some(s => s.language_app_key === 'mandarim');
+  const anyMandarim = selectedStudents.some(s => LanguageRegistry.isCjk(s.language_app_key));
   // Fase 6D.5 (ver CLAUDE.md) -- mesma regra do render inicial: só o
   // booleano relevante pra validação (compareAnswer/pinyin obrigatório de
   // um Cloze/Digite a resposta em mandarim), mutação pura de estado, NUNCA
   // dispara re-render da caixa "Campos" (que só re-renderiza por sua
   // própria mudança estrutural).
-  ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey = anyMandarim ? 'mandarim' : null;
+  ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey = anyMandarim ? selectedStudents.find(s => LanguageRegistry.isCjk(s.language_app_key)).language_app_key : null;
   const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length);
 
   const counterEl = document.getElementById('admin-flashcard-selection-counter');
@@ -1168,13 +1168,13 @@ async function renderAdminFlashcardsView(){
     ADMIN_FLASHCARDS_STATE.langFilter = langsPresent[0];
   }
   const selectedStudents = adminSelectedStudents(students);
-  const anyMandarim = selectedStudents.some(s => s.language_app_key === 'mandarim');
+  const anyMandarim = selectedStudents.some(s => LanguageRegistry.isCjk(s.language_app_key));
   // Fase 6D.5 (ver CLAUDE.md) -- languageAppKey do editor nativo espelha o
   // mesmo sinal `anyMandarim` que o resto desta função já usa pra decidir
   // se pinyin é exigido (mistura fr+pt não precisa de compareAnswer, só
   // mandarim precisa) -- nunca escolhe um idioma "representante" arbitrário
   // pra seleção mista, só o booleano relevante pra validação.
-  ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey = anyMandarim ? 'mandarim' : null;
+  ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey = anyMandarim ? selectedStudents.find(s => LanguageRegistry.isCjk(s.language_app_key)).language_app_key : null;
   const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length);
 
   // Filtro de idioma: pills construídas a partir dos idiomas REALMENTE
@@ -1360,7 +1360,7 @@ async function renderAdminFlashcardsView(){
   // mandarim selecionado).
   document.getElementById('admin-flashcard-preview-btn')?.addEventListener('click', () => {
     openFlashcardPreviewFromEditorState(ADMIN_FLASHCARDS_STATE.nativeCardState, {
-      appKey: ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey || 'frances',
+      appKey: ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey || LanguageRegistry.defaultAppKey(),
       origin: 'teacher',
     });
   });

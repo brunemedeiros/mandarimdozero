@@ -34,7 +34,7 @@ function studyNoteRowForWord(unit, vocab, idx, appKey){
     content: { value }, audio: null, image: null, pinyinFieldId: null,
   });
   let fields;
-  if (appKey === 'mandarim'){
+  if (LanguageRegistry.isCjk(appKey)){
     fields = [f(0, 'zh', vocab.c), f(1, 'zh-pinyin', vocab.p), f(2, 'pt-BR', vocab.t)];
     fields[0].pinyinFieldId = fields[1].id;
   } else {
@@ -69,7 +69,7 @@ function studyNoteRowForWord(unit, vocab, idx, appKey){
 // Como reverter: devolver `tags: []` em studyNoteRowForWord.
 // ============================================================
 function studyTrailCourseTag(appKey){
-  return normalizeTagSlug(String(appKey || 'frances') + '-geral');
+  return normalizeTagSlug(String(appKey || LanguageRegistry.defaultAppKey()) + '-geral');
 }
 function studyTrailModuleTag(unit){
   const mods = (typeof MODULES !== 'undefined' && Array.isArray(MODULES)) ? MODULES : null;
@@ -150,7 +150,7 @@ function buildStudyWordCards(unit, vocab, idx, appKey){
 //   - Note `normal` (1 CardInstance): frase no idioma estudado -> tradução.
 // ============================================================
 function studyExamplePhraseKey(appKey){
-  return appKey === 'mandarim' ? 'c' : 'f';
+  return LanguageRegistry.isCjk(appKey) ? 'c' : 'f';
 }
 // Espelho exato de findMatchingPhrase (fr/app.js e zh/app.js), mas sobre a
 // lista `units` recebida e devolvendo também a posição da frase.
@@ -186,7 +186,7 @@ function studyNoteRowForPhrase(unit, phrase, idx, appKey, gateVocabIdx){
     content: { value }, audio: null, image: null, pinyinFieldId: null,
   });
   let fields;
-  if (appKey === 'mandarim'){
+  if (LanguageRegistry.isCjk(appKey)){
     fields = [f(0, 'zh', phrase.c), f(1, 'zh-pinyin', phrase.p), f(2, 'pt-BR', phrase.t)];
     fields[0].pinyinFieldId = fields[1].id;
   } else {
@@ -212,7 +212,7 @@ function buildStudyPhraseCards(units, appKey){
       if (seen.has(loc + m.idx)) return;
       seen.add(loc + m.idx);
       const ph = m.phrase;
-      const hasText = appKey === 'mandarim' ? (ph.c && ph.t) : (ph.f && ph.t);
+      const hasText = LanguageRegistry.isCjk(appKey) ? (ph.c && ph.t) : (ph.f && ph.t);
       if (!hasText) return;
       const row = studyNoteRowForPhrase(unit, ph, m.idx, appKey, vIdx);
       buildEngineCardsFromRow(row, { origin: 'study', appKey, idPrefix: loc }).forEach(c => {
@@ -275,6 +275,22 @@ function mergeSavedCards(cards, savedCards){
     Object.assign(c, saved);
     NOTE_LEVEL_FRESH_FIELDS.forEach(k => { c[k] = fresh[k]; });
     if (c.deckId === undefined) c.deckId = null;
+  });
+}
+
+// Hanzi do zh (STATE.hanziCards, ids h<lição>-c<índice>): o save grava o objeto inteiro, mas ao carregar só o
+// PROGRESSO volta (mesma whitelist da trilha). O texto (char, pinyin, significado, radicais) vem da camada do
+// curso e é reaplicado por refreshStudyCardTexts. Sem isto o progresso dos hanzi zerava a cada carregamento
+// (a restauração foi removida na K2-C, commit 49692ff; ver docs/i18n/auditoria-e3-progresso-por-curso.md).
+function mergeSavedHanziCards(cards, savedCards){
+  const byId = {};
+  (savedCards || []).forEach(s => { if (s && s.id != null) byId[s.id] = s; });
+  (cards || []).forEach(c => {
+    const saved = byId[c.id];
+    if (!saved) return;
+    STUDY_PROGRESS_FIELDS.forEach(k => {
+      if (Object.prototype.hasOwnProperty.call(saved, k) && saved[k] !== undefined) c[k] = saved[k];
+    });
   });
 }
 
@@ -381,7 +397,7 @@ function friendlyTagLabel(tag){
   if (s === 'estudo') return studyTrailTagText('review.tagLabel.studyPath');
   if (s === 'palavra') return studyTrailTagText('review.tagLabel.word');
   if (s === 'na-frase') return studyTrailTagText('review.tagLabel.inPhrase');
-  let m = s.match(/^(frances|mandarim|portugues)-geral$/);
+  let m = s.match(new RegExp('^(' + LanguageRegistry.appKeys().join('|') + ')-geral$'));
   if (m) return studyTrailTagText('review.deck.lang.' + m[1]) + studyTrailTagText('review.tagLabel.general');
   m = s.match(/^nivel-([a-z0-9]+)$/);
   if (m) return studyTrailTagText('review.tagLabel.level') + ' ' + m[1].toUpperCase();

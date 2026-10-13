@@ -8,7 +8,7 @@ const ROOT = path.resolve(__dirname, '..');
 const lang = process.argv[2] || 'en';
 const site = process.env.SITE || 'fr';
 const only = process.argv.slice(3);
-const c = {}; vm.runInNewContext(fs.readFileSync(path.join(ROOT, site, 'content.js'), 'utf8') + ';this.UNITS=UNITS;', c);
+const c = {}; vm.runInNewContext(require(path.join(ROOT, 'scripts/lib/course-content.js')).composedSource(site) + ';this.UNITS=UNITS;', c);
 const dir = path.join(ROOT, 'docs', 'i18n', site === 'fr' ? 'content-' + lang : 'content-' + site + '-' + lang);
 let errors = 0;
 const err = (u, m) => { errors++; console.log('  ERRO [' + u + ']: ' + m); };
@@ -122,7 +122,7 @@ fs.readdirSync(dir).filter(f => f.endsWith('.json') && f !== '_meta.json' && !f.
 // Mandarim: histórias e hanzi (arquivos _stories.json / _hanzi.json)
 if (site === 'zh' && !only.length){
   const opt = (f) => { const q = path.join(dir, f); return fs.existsSync(q) ? JSON.parse(fs.readFileSync(q, 'utf8')) : null; };
-  const sx = {}; vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'zh', 'stories.js'), 'utf8') + ';this.S=STORIES', sx);
+  const sx = {}; vm.runInNewContext(require(path.join(ROOT, 'scripts/lib/course-content.js')).composedSource('zh') + ';this.S=STORIES', sx);
   const st = opt('_stories.json');
   if (!st) err('stories', '_stories.json ausente');
   else sx.S.forEach(s0 => {
@@ -149,7 +149,7 @@ if (site === 'zh' && !only.length){
       } else if (ob.question) err(L, 'beat ' + bi + ' tem question sem original');
     });
   });
-  const hx = {}; vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'zh', 'hanzi-data.js'), 'utf8') + ';this.L=HANZI_LESSONS', hx);
+  const hx = {}; vm.runInNewContext(require(path.join(ROOT, 'scripts/lib/course-content.js')).composedSource('zh') + ';this.L=HANZI_LESSONS', hx);
   const hz = opt('_hanzi.json');
   if (!hz) err('hanzi', '_hanzi.json ausente');
   else hx.L.flat().forEach(h => {
