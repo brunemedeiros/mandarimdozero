@@ -128,7 +128,9 @@ parabéns até a autora definir o critério das conquistas (análise em `docs/co
 - Aplicada no **Staging** (`ilfjzizjfcmhibkhwber`) em 2026-10-13, mais o ajuste `086b` (search_path fixo em
   `_congrats_target_label`, já incluído no arquivo). Conferido: tabelas com RLS e sem acesso direto, anon sem
   execução, funções internas fechadas, `_friends_notify` era idêntica à da 074 nos dois ambientes antes da troca.
-  **Produção: pendente de autorização.**
+  **Produção: aplicada em 2026-10-13 com autorização da autora** (versão do arquivo, já com o ajuste do search_path;
+  conferido antes: `_friends_notify` idêntica à da 074, tabelas novas inexistentes; depois: RLS, grants e advisors iguais
+  ao Staging, a linha existente de `friend_settings` intacta).
 - Testes: banco local 124/124 (80 antigos + 44 da 086: amigo/não amigo, perfil privado, sequência quebrada,
   maior marco, reação trocada, aviso agrupado, agradecer só uma vez, limite diário, sem acesso direto, progress
   intacto); Playwright amigos 210/210 (eram 182); i18n unit 2033/2033; k2e 28/28; revisao-ajustes 48/48;
