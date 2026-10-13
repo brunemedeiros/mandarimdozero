@@ -240,3 +240,7 @@ Só front-end estático; **nenhuma migration**; **flag desligada para todos**: s
 - Subtítulo do portão: "Você pode trocar ou adicionar cursos depois, na bandeira no topo da tela. O progresso de cada curso é separado." (sem citar Configurações).
 - Teste `test_meus_cursos_browser.js` reescrito (12): Configurações sem seletor nem lista. Menu 24 e portão 21 seguem verdes; i18n 2104/2104.
 - Deploy do `notification-cron` tentado de novo e falhou igual (erro interno do Supabase). Arquivo pronto para colar no painel: `docs/deploy/notification-cron-para-colar-no-painel.ts` (v22 + `blockForLanguage` + alerta de infrequência).
+
+### Cron: v23 no ar e achado do idioma dos avisos (2026-10-13)
+- **`notification-cron` v23 publicada pela dona no painel** (v22 + leitura de blocos de curso + alerta de infrequência com blocos de curso). Conferido ao vivo: versão 23, ACTIVE, verify_jwt true.
+- **Achado em produção (só leitura)**: `notification_templates` tem a coluna `ui_language` (migration 056 aplicada) com 70 avisos in_app e 8 de e-mail em pt-BR **e** em en. A versão no ar (v22 e v23) **não filtra por `ui_language`** (o suporte só existia no repo), então escolhe ao acaso entre os dois idiomas: aluna em português pode receber aviso em inglês e vice-versa. Correção: `docs/deploy/notification-cron-para-colar-no-painel.ts` agora leva o `ui_language` (idioma do site da conta, cai para pt-BR sem variante). **Pendente: a dona colar de novo e fazer o deploy (v24).**

@@ -1,5 +1,5 @@
 // Notification Cron (versão publicada: mesma lógica de supabase/functions/notification-cron/index.ts do repositório, com os comentários longos encurtados).
-// E3/C3 (2026-10-12): + sequência da conta (_account) para streak_at_risk, meta do dia e reengajamento, uma vez por pessoa. Esta versão NÃO inclui o suporte a idioma do site (ui_language) que o index.ts do repositório já tem.
+// E3/C3 (2026-10-12): + sequência da conta (_account) para streak_at_risk, meta do dia e reengajamento, uma vez por pessoa.
 // Roda fora do navegador com service role; fuso: usa UTC (agendar entre 21h-23h UTC).
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -298,22 +298,33 @@ async function passesAntiSpam(supabase: any, rules: Map<string, any>, userId: st
   return true;
 }
 
-async function pickTemplate(supabase: any, eventType: string, languageAppKey: string): Promise<any> {
-  const { data, error } = await supabase
-    .from('notification_templates')
-    .select('*')
-    .eq('event_type', eventType).eq('channel', 'in_app').eq('language_app_key', languageAppKey).eq('active', true);
-  if (error || !data?.length) return null;
-  return data[Math.floor(Math.random() * data.length)];
+// Idioma do SITE de cada conta (progress.data._meta.uiLanguage); conta sem valor usa 'pt-BR'. Preenchido no handler.
+const UI_LANG_BY_USER = new Map<string, string>();
+function uiLangFor(userId: string): string {
+  return UI_LANG_BY_USER.get(userId) === 'en' ? 'en' : 'pt-BR';
 }
 
-async function pickEmailTemplate(supabase: any, eventType: string, languageAppKey: string): Promise<any> {
-  const { data, error } = await supabase
-    .from('notification_templates')
-    .select('*')
-    .eq('event_type', eventType).eq('channel', 'email').eq('language_app_key', languageAppKey).eq('active', true);
-  if (error || !data?.length) return null;
-  return data[Math.floor(Math.random() * data.length)];
+// Escolhe a variante no idioma do site; se esse idioma não tiver variante ATIVA para o evento, cai pro pt-BR.
+async function pickFromPool(supabase: any, channel: string, userId: string, eventType: string, languageAppKey: string): Promise<any> {
+  const uiLang = uiLangFor(userId);
+  for (const lang of uiLang === 'pt-BR' ? ['pt-BR'] : [uiLang, 'pt-BR']) {
+    const { data, error } = await supabase
+      .from('notification_templates')
+      .select('*')
+      .eq('event_type', eventType).eq('channel', channel).eq('language_app_key', languageAppKey)
+      .eq('ui_language', lang).eq('active', true);
+    if (error) return null;
+    if (data?.length) return data[Math.floor(Math.random() * data.length)];
+  }
+  return null;
+}
+
+async function pickTemplate(supabase: any, userId: string, eventType: string, languageAppKey: string): Promise<any> {
+  return pickFromPool(supabase, 'in_app', userId, eventType, languageAppKey);
+}
+
+async function pickEmailTemplate(supabase: any, userId: string, eventType: string, languageAppKey: string): Promise<any> {
+  return pickFromPool(supabase, 'email', userId, eventType, languageAppKey);
 }
 
 async function maybeNotify(
@@ -330,7 +341,7 @@ async function maybeNotify(
   if (isWithinQuietHours(prefs)) return false;
   if (!(await passesAntiSpam(supabase, rules, userId, category))) return false;
 
-  const template = await pickTemplate(supabase, eventType, languageAppKey);
+  const template = await pickTemplate(supabase, userId, eventType, languageAppKey);
   if (!template) return false;
 
   const title = fillPlaceholders(template.title, payload);
@@ -346,7 +357,7 @@ async function maybeNotify(
   if (categoryAllowsPush(prefs, category)) await sendPushToUser(supabase, userId, title || 'Notificação', body, actionTab);
 
   if (categoryAllowsEmail(prefs, category)) {
-    const emailTemplate = await pickEmailTemplate(supabase, eventType, languageAppKey);
+    const emailTemplate = await pickEmailTemplate(supabase, userId, eventType, languageAppKey);
     if (emailTemplate) {
       const emailSubject = fillPlaceholders(emailTemplate.title, payload) || title || 'Notificação';
       const emailBody = fillPlaceholders(emailTemplate.body, payload);
@@ -585,6 +596,11 @@ Deno.serve(async (_req: Request) => {
   const errors: string[] = [];
 
   const progressByUserId = new Map<string, any>((progressResult.data ?? []).map((row: any) => [row.user_id, row.data]));
+  UI_LANG_BY_USER.clear();
+  for (const row of progressResult.data ?? []) {
+    const ul = row.data?._meta?.uiLanguage;
+    if (typeof ul === 'string') UI_LANG_BY_USER.set(row.user_id, ul);
+  }
 
   for (const row of progressResult.data ?? []) {
     const primaryAppKey = primaryLanguageAppKey(row.data);
