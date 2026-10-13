@@ -24,10 +24,13 @@ Duolingo ("Lenha na Fogueira, nível 6, 60/75"). Nada foi implementado; é base 
    Comportamentos de uma vez só (ex.: voltar depois de parar) ficam com um nível só.
 3. **O nível 1 sai na primeira semana** (todo mundo ganha algo cedo); **o máximo leva meses**.
 4. **Mesmo id e mesma regra no francês e no chinês.** O texto pode citar o nível do curso ("A1", "HSK 1").
-5. **Nome sem gênero fixo** sempre que der (expressões como "Pé na Estrada"). Quando o nome tem gênero
-   (Revisor/Revisora), usa o gênero do perfil; sem gênero informado, a forma neutra.
-6. **Parabéns**: amigos podem parabenizar a partir do **ouro** e no **nível máximo** (que aparece em destaque na
-   atividade). Bronze e prata aparecem só no perfil. Conquistas de nível único só recebem parabéns se forem raras.
+5. **Gênero no nome** (decidido em 2026-10-13): em inglês os nomes são neutros. Em português, nome com gênero
+   segue o gênero do perfil (`profile_private.gender`): feminino → "Revisora Sênior", masculino → "Revisor Sênior",
+   outro, prefiro não dizer ou vazio → "Revisor(a) Sênior". Sempre que der, o nome já nasce neutro (expressões
+   como "Pé na Estrada"). Os textos ficam em i18n com as três formas (`.f`, `.m`, `.n`) só quando há gênero.
+6. **Parabéns** (decidido em 2026-10-13): amigos podem parabenizar a partir do **ouro** e no **nível máximo** (que
+   aparece em destaque na atividade). Bronze e prata aparecem só no perfil. Conquistas de nível único só recebem
+   parabéns se forem raras.
 7. **Nada é tirado de ninguém.** Conquista aposentada continua no perfil de quem ganhou ("clássica").
 
 ## 3. Proposta conquista por conquista
@@ -49,8 +52,12 @@ Metas e nomes são sugestões para a autora ajustar. ✨ = nível máximo (toda 
 
 Notas:
 - **Nível A1/HSK 1** vira uma conquista por nível do curso: quando entrar o A2 (ou HSK 2), nasce "Nível A2" igual,
-  e o problema do "HSK 1 Completo" contar o curso inteiro some. Falta decidir se pular uma unidade pelo ponto de
-  verificação conta como concluída (hoje o francês não conta e o chinês conta).
+  e o problema do "HSK 1 Completo" contar o curso inteiro some.
+- **Unidade pulada pelo ponto de verificação (sugestão)**: conta para "Nível A1/HSK 1" (bronze, prata e ouro), porque
+  quem passou no ponto de verificação provou que sabe, e o próprio modelo da trilha já trata a unidade pulada como
+  "conta para o nível" (`shared/trail-state-model.js`). Sem isso, quem faz o Teste de Nivelamento e pula o A1 nunca
+  ganharia "A1 Completo". O que fica só para quem estudou é a trilha **Primeiro Passo** (lições concluídas), e o
+  máximo "A1 Gabaritado" exige 100% em todos os pontos de verificação, o que vale para os dois caminhos.
 - **Sequência** é da conta (mudança de outra conversa): passa a valer para os dois idiomas. Os marcos que os amigos
   veem (5, 10, 15... 365) continuam à parte.
 
@@ -65,7 +72,7 @@ Notas:
 
 | Conquista | Por quê |
 |---|---|
-| 🧩 Multitarefa | sai quase sozinha (uma lição já passa por vários formatos): 11 das 33 contas no francês. Quem tem continua vendo, como "clássica". |
+| 🧩 Multitarefa | **aposentada (decidido em 2026-10-13)**: sai quase sozinha (uma lição já passa por vários formatos), 11 das 33 contas no francês. Quem tem continua vendo, como "clássica". |
 
 ### Novas (já levantadas antes, agora no mesmo formato)
 
@@ -78,15 +85,38 @@ Notas:
 | 🏆 **Pódio** | semanas em 1º lugar entre amigos | 1 → Topo do Pódio · 5 → Dona/Dono da Semana · 10 ✨ → Reinado |
 | 🤝 **Amigos** | amigos aceitos | 1 → Primeira Amizade · 3 → Turma Formada · 10 ✨ → Galera de Estudo (sem parabéns) |
 
-## 4. O que a autora decide
+## 4. Nomes em inglês (interface em inglês, nomes neutros)
 
-1. Os nomes e metas de cada trilha (tabela acima).
-2. Nomes com gênero (Revisor/Revisora): usar o gênero do perfil, ou trocar por nomes neutros ("Aprendiz da Revisão").
-3. Pular unidade pelo ponto de verificação conta para "Nível A1/HSK 1"?
-4. Aposentar Multitarefa?
-5. Parabéns a partir do ouro + nível máximo (critério 6), ou outra regra.
+| Trilha | Níveis (mesma ordem da tabela em português) |
+|---|---|
+| Primeiro Passo / First Step | First Step · Getting the Hang of It · Hitting the Road · Good Pace · Giant Leap · Unstoppable ✨ |
+| Revisão / Reviews | Review Apprentice · Junior Reviewer · Senior Reviewer · Review Master ✨ |
+| Sequência / Streak | Spark · One Week! · Flame On · A Month on Fire · Bonfire · Volcano · Eternal Flame ✨ |
+| XP | First Points · Adding Up · A Thousand and Counting · Pile of Points · Mountain of XP · XP Legend ✨ |
+| Nível A1 / A1 Level (zh: HSK 1) | First Unit · Halfway Through A1 · A1 Complete · A1 Aced ✨ |
+| Ouvido / Listening | Curious Ear · Trained Ear · Perfect Pitch ✨ |
+| Explorar / Explorer | Looking Around · Exploring Everything · Knows Every Corner ✨ |
+| Fim de Semana / Weekends | Weekend · Sunday Study · No Days Off · Half a Year of Saturdays · A Year Without a Break ✨ |
+| De Volta ao Jogo | Back in the Game |
+| Vocabulário / Vocabulary | First Words · Word by Word · Pocket Dictionary · Sharp Vocabulary · Walking Dictionary ✨ |
+| Gabaritou / Aced It | Aced It! · Bullseye · Sharpshooter · Perfect Score ✨ |
+| Ditado / Dictation | Careful Listener · Sharp Listener · Perfect Listener ✨ |
+| Desafios / Challenges | Up for Anything · Challenger · Unbeatable ✨ |
+| Pódio / Podium | Top of the Podium · Champion of the Week · Dynasty ✨ |
+| Amigos / Friends | First Friend · Study Crew · Study Squad ✨ |
 
-## 5. Implementação (depois da aprovação)
+Nomes com gênero em português (seguem o perfil, critério 5): Revisor(a) Aprendiz/Júnior/Sênior e Dona/Dono da Semana
+(neutro: "Quem Manda na Semana"). Todos os outros já são neutros.
+
+## 5. Decisões
+
+Decidido em 2026-10-13: aposentar Multitarefa; parabéns a partir do ouro + nível máximo; inglês neutro e português
+pelo gênero do perfil, com "(a)" quando não informado.
+
+Ainda com a autora: nomes e metas finais de cada trilha (maquete visual publicada para isso) e se a unidade pulada
+conta para "Nível A1/HSK 1" (sugestão: conta).
+
+## 6. Implementação (depois da aprovação)
 
 - Catálogo único de trilhas em `shared/` (hoje `BADGES` é duplicado em fr e zh), com níveis, metas e nomes em i18n.
 - `earned_badges` guarda um id por nível (ex.: `reviews_3`), então não precisa de migration de tabela; as conquistas
