@@ -129,13 +129,98 @@ async function fill(page, wrongIdx){
     await page.click('#conj-verify-btn');
     await page.waitForSelector('.conj-field.wrong');
     const chk = await page.evaluate(() => {
-      const r = i => document.querySelector('.conj-field[data-idx="' + i + '"] input').getBoundingClientRect();
+      // Campo errado vira a visão com as letras marcadas (não é mais um input).
+      const r = i => document.querySelector('.conj-field[data-idx="' + i + '"] :is(input, .conj-answer-view)').getBoundingClientRect();
       return { wrong: document.querySelector('.conj-field.wrong').dataset.idx, exp: document.querySelector('.conj-field.wrong .expected').textContent,
         aligned: Math.abs(r(0).top - r(3).top) < 2, ok: document.querySelectorAll('.conj-field.ok').length };
     });
     L('corrigir: erro mostra a forma certa e acertos ficam verdes', chk.wrong === '3' && chk.exp.startsWith('→') && chk.ok === 5, chk);
     L('corrigir: a correção embaixo não desalinha je e nous', chk.aligned, chk);
     L('zero pageerror', errors.length === 0, errors);
+    await ctx.close();
+  }
+
+  // ---- Fase 1 (pedagógica) ----
+  {
+    const { page, errors, ctx } = await bootPage(browser, 'fr', port, 'light');
+    await page.evaluate(() => switchTab('conjugaison'));
+    await page.waitForSelector('#conj-tense-list .conj-check-item');
+    const sel = await page.evaluate(() => ({
+      tenses: Array.from(document.querySelectorAll('#conj-tense-list .conj-check-item span')).map(s => s.textContent.trim()),
+      sizes: Array.from(document.querySelectorAll('#conj-size-select option')).map(o => o.value).join(),
+      size: document.getElementById('conj-size-select').value, hint: document.getElementById('conj-size-hint').textContent }));
+    check('ordem dos tempos da autora, sem futur proche', sel.tenses.join('|') === 'Présent|Passé composé|Imparfait|Plus-que-parfait|Futur simple|Conditionnel présent|Subjonctif présent|Impératif', sel.tenses);
+    check('tamanho da sessão: 3, 5, 8, 12 (8 marcado) e conta de formas', sel.sizes === '3,5,8,12' && sel.size === '8' && /48/.test(sel.hint), sel);
+    await page.selectOption('#conj-size-select', '3');
+    check('conta de formas acompanha o tamanho', /18/.test(await page.textContent('#conj-size-hint')));
+    await page.click('#conj-start-btn');
+    await page.waitForSelector('.conj-tense-box');
+    const s1 = await page.evaluate(() => ({ n: CONJ_STATE.verbQueue.length, next: !!document.querySelector('.conj-verb-header.next'),
+      bar: document.querySelector('.conj-progress-bar > i').style.width, acc: document.querySelectorAll('.conj-accents .fr-accent-key').length }));
+    check('sessão com 3 verbos, sem "Próximo verbo", barra em 0%, teclas de acento', s1.n === 3 && !s1.next && s1.bar === '0%' && s1.acc >= 10, s1);
+
+    // Acento entra no campo com o cursor; Enter passa para o próximo campo.
+    await page.click('.conj-field[data-idx="1"] input');
+    await page.click('.conj-accents .fr-accent-key:has-text("é")');
+    const acc = await page.evaluate(() => document.querySelector('.conj-field[data-idx="1"] input').value);
+    check('tecla de acento escreve no campo com o cursor', acc === 'é', acc);
+    await page.keyboard.press('Enter');
+    check('Enter passa para o próximo campo', await page.evaluate(() => document.activeElement === document.querySelector('.conj-field[data-idx="2"] input')));
+
+    // parler no présent: nous "parlez" marca só "ez"; acertos ganham áudio.
+    await page.evaluate(() => startConjSession(['parler', 'aller'], ['presente']));
+    await page.waitForSelector('.conj-field input[data-idx]');
+    await page.evaluate(() => {
+      const v = ['parle', 'parles', 'parle', 'parlez', 'parlez', 'parlent'];
+      document.querySelectorAll('.conj-field input[data-idx]').forEach((inp, k) => { inp.value = v[k]; });
+    });
+    await page.click('#conj-verify-btn');
+    await page.waitForSelector('.conj-field.wrong');
+    const d = await page.evaluate(() => ({ x: Array.from(document.querySelectorAll('.conj-field.wrong .conj-x')).map(e => e.textContent).join(''),
+      view: document.querySelector('.conj-field.wrong .conj-answer-view').textContent, exp: document.querySelector('.conj-field.wrong .expected').textContent.trim(),
+      audio: document.querySelectorAll('.conj-field .expected .audio-btn').length, speak: document.querySelector('.conj-field[data-idx="3"] .audio-btn').dataset.speak,
+      bar: document.querySelector('.conj-progress-bar > i').style.width, focus: document.activeElement && document.activeElement.id }));
+    check('letras erradas em vermelho só onde erra (parlez -> "ez")', d.x === 'ez' && d.view === 'parlez' && d.exp.includes('parlons'), d);
+    check('áudio em cada forma depois de corrigir, com o pronome', d.audio === 6 && d.speak === 'nous parlons', d);
+    check('barra avança e o foco vai para "Próximo verbo"', d.bar === '50%' && d.focus === 'conj-next-verb-btn', d);
+
+    // aller no passé composé, feminino: tudo certo; correção mostra allé(e).
+    await page.evaluate(() => startConjSession(['aller'], ['passeCompose']));
+    await page.waitForSelector('.conj-field input[data-idx]');
+    await page.evaluate(() => {
+      const v = ['suis allée', 'es allée', 'est allée', 'sommes allées', 'êtes allée', 'sont allées'];
+      document.querySelectorAll('.conj-field input[data-idx]').forEach((inp, k) => { inp.value = v[k]; });
+    });
+    await page.click('#conj-verify-btn');
+    const fem = await page.evaluate(() => ({ ok: document.querySelectorAll('.conj-field.ok').length, info: conjExpectedInfo('aller', 'passeCompose', 0).display,
+      pl: conjExpectedInfo('aller', 'passeCompose', 3).display, assis: conjExpectedInfo("s'asseoir", 'passeCompose', 5).accepted }));
+    check('passé composé com être aceita o feminino (6/6)', fem.ok === 6, fem);
+    check('correção mostra allé(e) e allé(e)s; s\'asseoir sem "assiss"', fem.info === 'suis allé(e)' && fem.pl === 'sommes allé(e)s' && fem.assis.every(f => !/assiss/.test(f)), fem);
+
+    // Subjonctif com "que".
+    await page.evaluate(() => startConjSession(['parler', 'avoir'], ['subjPresente']));
+    await page.waitForSelector('.conj-field label');
+    const subj = await page.evaluate(() => Array.from(document.querySelectorAll('.conj-field label')).map(l => l.textContent));
+    check('subjonctif com "que": que je ... qu\'ils / qu\'elles', subj.join('|') === "que je|que tu|qu'il / qu'elle / qu'on|que nous|que vous|qu'ils / qu'elles", subj);
+
+    // Revisão no fim e "Praticar só os que errei".
+    await page.evaluate(() => {
+      document.querySelectorAll('.conj-field input[data-idx]').forEach((inp, k) => { inp.value = k === 1 ? 'parle' : getConjForms('parler', 'subjPresente')[k]; });
+    });
+    await page.click('#conj-verify-btn');
+    await page.click('#conj-next-verb-btn');
+    await page.waitForSelector('.conj-field input[data-idx]');
+    await page.click('#conj-verify-btn');
+    await page.click('#conj-next-verb-btn');
+    await page.waitForSelector('.conj-session-result');
+    const res = await page.evaluate(() => ({ items: document.querySelectorAll('.conj-review-list li').length, btn: !!document.getElementById('conj-practice-mistakes-btn'),
+      first: document.querySelector('.conj-review-list li').textContent.replace(/\s+/g, ' ').trim() }));
+    check('fim da sessão lista as formas para revisar (1 de parler + 6 vazias de avoir)', res.items === 7 && res.btn && res.first.includes('parler') && res.first.includes('parles'), res);
+    await page.click('#conj-practice-mistakes-btn');
+    await page.waitForSelector('.conj-tense-box');
+    const again = await page.evaluate(() => ({ q: CONJ_STATE.verbQueue.join(), t: CONJ_STATE.sessionTenses.join() }));
+    check('"Praticar só os que errei": só esses verbos e tempos', again.q === 'parler,avoir' && again.t === 'subjPresente', again);
+    check('fase 1: zero pageerror', errors.length === 0, errors);
     await ctx.close();
   }
 

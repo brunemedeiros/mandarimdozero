@@ -62,3 +62,30 @@ Só CSS, num bloco "Conjugação: passada de design" no fim do `<style>` de `fr/
   celular 108/108, deck-browser 206/206, amigos 158/158, i18n navegador 209/209.
 - `tests/i18n/test_i18n_unit.js` está 2090/2273 na main (chaves `rb.*` do Banco de Revisão sem registro no teste e
   comparação do HTML), igual sem esta mudança.
+
+## Conjugação, fase 1 pedagógica (fr, 2026-10-13)
+
+Decisões da autora: ordem dos tempos por modo (Présent, Passé composé, Imparfait, Plus-que-parfait, Futur simple,
+Conditionnel présent, Subjonctif présent, Impératif), sem futur proche, sem o cartão "Próximo verbo", sem selo de
+nível. Mapa da francofonia descartado. Jogos e busca de verbo ficam para as próximas fases.
+
+- Correção (bug): passé composé e plus-que-parfait com être aceitam a concordância (allée, allés, allées); a correção
+  mostra "allé(e)" / "allé(e)s" / "allé(e)(s)" (`conjExpectedInfo`). il/elle/on e vous aceitam as quatro formas.
+- Subjonctif com "que": que je / que j' / que tu / qu'il / qu'elle / qu'on / que nous / que vous / qu'ils / qu'elles.
+- Dado corrigido: s'asseoir tinha "assiss" no plural (`fr/conjugation-data.js`).
+- Letras erradas em vermelho: depois de corrigir, o campo errado mostra o que foi digitado com só as letras erradas
+  marcadas e um traço onde faltou letra (alinhamento por distância de edição, `conjAlign`, como no Jogo de Conjugações);
+  a forma certa continua embaixo. Campo vazio mostra "—".
+- Áudio em cada forma depois de corrigir, com o pronome ("nous parlons").
+- Teclas de acento (as mesmas das lições) escrevem no campo com o cursor; Enter passa para o próximo campo e, no
+  último, corrige; depois de corrigir, o foco vai para "Próximo verbo".
+- Tamanho da sessão: 3, 5, 8 ou 12 verbos (8 marcado), com "≈ N formas para preencher". Barra de progresso ao lado de
+  "Verbo i de N" (avança a cada verbo corrigido).
+- Fim da sessão: "Formas para revisar (N)" com o que foi digitado (letras marcadas) e a forma certa, e
+  "Praticar só os que errei" (só esses verbos, só esses tempos).
+- Um tempo por linha (com vários tempos, duas tabelas lado a lado ficavam ilegíveis).
+- A correção virou uma função só (`conjEvaluate`), usada ao corrigir e ao voltar a um verbo já corrigido.
+- Textos novos (pt/en): `fr.conj.sessionSize`, `sessionForms`, `reviewTitle`, `practiceMistakes`.
+- Testes: `tests/conjugacao/test_playwright.js` 37/37 (15 novos), `fr/scripts/test_answer_validation.js` 154/154,
+  i18n unit 2040/2040, i18n navegador 209/209, celular 108/108.
+- Pendente de decisão: "radical | terminação" em destaque (prévia comparativa enviada à autora).

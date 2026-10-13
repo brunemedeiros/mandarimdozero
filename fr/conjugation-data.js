@@ -16537,17 +16537,17 @@ const CONJUGATION_VERBS = {
         "me suis assis",
         "t'es assis",
         "s'est assis",
-        "nous sommes assiss",
-        "vous êtes assiss",
-        "se sont assiss"
+        "nous sommes assis",
+        "vous êtes assis",
+        "se sont assis"
       ],
       "plusQueParfait": [
         "m'étais assis",
         "t'étais assis",
         "s'était assis",
-        "nous étions assiss",
-        "vous étiez assiss",
-        "s'étaient assiss"
+        "nous étions assis",
+        "vous étiez assis",
+        "s'étaient assis"
       ],
       "futurSimple": [
         "m'assiérai/asseyerai/assoirai",

@@ -646,6 +646,10 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.hintMore': '💡 More help', // ALTA
   'fr.conj.hintMoreTitle': 'Reveal most of the letters', // ALTA
   'fr.conj.hintMax': '💡 Maximum hint', // ALTA
+  'fr.conj.sessionSize': 'Verbs per session', // ALTA
+  'fr.conj.sessionForms': '≈ {n} forms to fill in', // ALTA
+  'fr.conj.reviewTitle': 'Forms to review ({n})', // ALTA
+  'fr.conj.practiceMistakes': 'Practice only the ones I missed', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA
