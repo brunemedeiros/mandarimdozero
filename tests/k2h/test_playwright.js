@@ -178,8 +178,10 @@ async function bootPage(browser, lang, port){
     // sair da sessão
     await ev(async () => { await startDeckReviewSession(7000); });
     await page.click('#review-back-to-modes');
-    const ex = await ev(() => ({ deckId: STATE.reviewSessionDeckId, mode: getComputedStyle(document.getElementById('review-mode-select-wrap')).display !== 'none', sess: getComputedStyle(document.getElementById('review-session-wrap')).display === 'none' }));
-    check(lang + ' sair: volta ao seletor e limpa escopo de Deck', ex.deckId === null && ex.mode && ex.sess, ex);
+    // Sessão iniciada por um Deck volta para a tela DAQUELE Deck (como no Anki;
+    // backToReviewModeSelect -> openDeckDetail), não para a tela de modos.
+    const ex = await ev(() => ({ deckId: STATE.reviewSessionDeckId, deckScreen: getComputedStyle(document.getElementById('review-deck-wrap')).display !== 'none' && DECK_BROWSER.nodeId === 7000, sess: getComputedStyle(document.getElementById('review-session-wrap')).display === 'none' }));
+    check(lang + ' sair: volta à tela do Deck e limpa escopo de Deck', ex.deckId === null && ex.deckScreen && ex.sess, ex);
 
     check(lang + ' sem pageerror', errors.length === 0, errors);
     await ctx.close();

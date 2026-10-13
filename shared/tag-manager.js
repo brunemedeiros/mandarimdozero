@@ -253,14 +253,3 @@ async function renderTagManagerInto(mountEl, opts){
   paint();
 }
 
-// Seção "🏷️ Tags" do Painel de Admin (professora): Tags dos Teacher Cards dela.
-async function renderAdminTagsView(){
-  const wrap = document.getElementById('admin-tags-content');
-  if (!wrap) return;
-  if (!isAdminUser()){
-    wrap.innerHTML = `<p class="profile-empty-note">Só a administração pode acessar esta seção.</p>`;
-    return;
-  }
-  wrap.innerHTML = `<div class="profile-section"><div class="section-label">🏷️ Tags dos cartões de alunos</div><div id="admin-tag-manager"></div></div>`;
-  await renderTagManagerInto(document.getElementById('admin-tag-manager'), { scope: 'teacher' });
-}

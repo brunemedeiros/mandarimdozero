@@ -278,13 +278,13 @@ function renderFieldAudioBlockHTML(field, opts){
   const urlAudio = (audio && audio.type === 'url') ? audio : null;
 
   return `
-    <div class="field-audio-block" data-field-audio-field="${field.id}" data-field-audio-ui-state="summary" style="margin-top:6px; padding-top:6px; border-top:1px dashed var(--paper-line);">
-      <span class="section-label" style="margin:0 0 6px; display:block;">${t('fieldEditor.audio.title')}</span>
+    <div class="field-audio-block" data-field-audio-field="${field.id}" data-field-audio-ui-state="summary">
+      <span class="section-label field-audio-title">${t('fieldEditor.audio.title')}</span>
 
-      <div data-field-audio-summary="${field.id}">
-        ${resolvedUrl ? `<audio controls preload="none" style="width:100%; margin-bottom:6px;" src="${escapeHTML(resolvedUrl)}"></audio>` : ''}
-        <p class="profile-edit-hint" style="margin:0 0 8px;">${escapeHTML(statusText || t('fieldEditor.audio.noAudio'))}</p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <div class="field-audio-summary" data-field-audio-summary="${field.id}">
+        ${resolvedUrl ? `<audio controls preload="none" src="${escapeHTML(resolvedUrl)}"></audio>` : ''}
+        <p class="profile-edit-hint field-audio-status">${escapeHTML(statusText || t('fieldEditor.audio.noAudio'))}</p>
+        <div class="field-audio-actions">
           ${audio ? `
             <button type="button" class="btn btn-secondary" data-field-audio-replace="${field.id}">${t('fieldEditor.audio.replace')}</button>
             <button type="button" class="admin-select-link" data-field-audio-remove="${field.id}">${t('fieldEditor.audio.remove')}</button>
@@ -921,9 +921,9 @@ function renderFieldEditorHTML(field, index, opts){
   const mediaNotes = [];
   if (field.pinyinFieldId) mediaNotes.push(t('fieldEditor.field.hasPinyin'));
   return `
-    <div class="field-editor-row" data-field-editor data-field-id="${field.id}" data-field-index="${index}" style="border:1px solid var(--paper-line); border-radius:var(--radius); padding:10px; margin-bottom:8px;">
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">
-        <span class="section-label" style="margin:0;">${escapeHTML(label)}</span>
+    <div class="field-editor-row" data-field-editor data-field-id="${field.id}" data-field-index="${index}">
+      <div class="field-editor-head">
+        <span class="section-label field-editor-title">${escapeHTML(label)}</span>
         ${removable ? `<button type="button" class="admin-badge-delete-btn" data-field-remove="${field.id}" data-touch44 title="${t('fieldEditor.field.removeTitle')}">🗑</button>` : ''}
       </div>
       <label class="profile-edit-label" for="${namePrefix}-content-${field.id}">${t('fieldEditor.field.content')}</label>

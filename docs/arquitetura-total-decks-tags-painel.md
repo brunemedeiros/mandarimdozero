@@ -1,7 +1,7 @@
 # Arquitetura Total --- Decks, Tags, Painel e Sistema de Estudo
 
 **Projeto:** aplicação de aprendizagem de idiomas\
-**Status:** arquitetura consolidada para implementação futura\
+**Status:** implementada (fases A a K1); pendências em `docs/historico/14-pendencias-pos-paywall-e-decks.md`\
 **Data:** 2026-09-27
 
 ------------------------------------------------------------------------

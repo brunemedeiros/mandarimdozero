@@ -8,7 +8,11 @@
 //   phrases:  [{ f: "...", t: "...", blocks: [{f:"..."}, ...] }, ...]
 //             (blocks = a frase segmentada em pedaços, usada no exercício de
 //              ordenar a frase — cada bloco é um trecho clicável)
-//   dialogue: { title: "...", lines: [{ spk: "A", f: "...", t: "..." }, ...] }
+//   dialogue: { title: "...", lines: [{ spk: "A", f: "...", t: "..." }, ...],
+//               scene: "contexto da cena", speakers: { A:{n,e}, B:{n,e} },
+//               check: [{k:"fill",line,bad:[..]} | {k:"listen",line,bad:[..]} | {k:"understand",q,opts:[..],ok}] }
+//             (fill: lacuna na fala `line`; listen: ouve a fala `line` e escolhe a
+//              resposta = fala `line+1`; understand: pergunta de compreensão em pt-BR)
 //
 // Progressão completa do nível A1 (29 unidades: 20 comunicativas + 9 de
 // gramática). Próximos níveis entram como novas unidades com "level"
@@ -182,6 +186,13 @@ const UNITS = [
         blocks: [{f:"Un café,"},{f:"s'il vous plaît."}] }
     ],
     dialogue: {
+      scene: "De manhã, na rua do bairro: Léa encontra o vizinho Hugo.",
+      speakers: { A: { n: "Léa", e: "👩" }, B: { n: "Hugo", e: "👨" } },
+      check: [
+        { k: "fill", line: 3, bad: ["Bonsoir !", "S'il vous plaît !"] },
+        { k: "listen", line: 0, bad: ["À bientôt !", "Au revoir !"] },
+        { k: "understand", q: "Como Léa e Hugo se despedem no final?", opts: ["Dizem \"até breve\"", "Dizem \"de nada\"", "Pedem \"por favor\""], ok: 0 }
+      ],
       title: "Encontro na rua",
       lines: [
         { spk: "A", f: "Bonjour !", t: "Olá!" },
@@ -301,6 +312,13 @@ const UNITS = [
         blocks: [{f:"Le pays"},{f:"est magnifique."}] }
     ],
     dialogue: {
+      scene: "Numa festa de boas-vindas, dois desconhecidos se apresentam.",
+      speakers: { A: { n: "Ana", e: "👩" }, B: { n: "Léo", e: "👨" } },
+      check: [
+        { k: "fill", line: 1, bad: ["Oui, je suis français.", "Non, je suis brésilien."] },
+        { k: "listen", line: 2, bad: ["Je m'appelle Ana.", "Bonjour, comment tu t'appelles ?"] },
+        { k: "understand", q: "De que país é a Ana?", opts: ["França", "Brasil", "Itália"], ok: 1 }
+      ],
       title: "Primeiro encontro",
       lines: [
         { spk: "A", f: "Bonjour, comment tu t'appelles ?", t: "Olá, qual é o seu nome?" },
@@ -423,6 +441,13 @@ const UNITS = [
         blocks: [{f:"Quel est"},{f:"l'âge"},{f:"de ton père ?"}] }
     ],
     dialogue: {
+      scene: "No parque, dois pais conversam enquanto os filhos brincam.",
+      speakers: { A: { n: "Sophie", e: "👩" }, B: { n: "Marc", e: "👨" } },
+      check: [
+        { k: "fill", line: 2, bad: ["Elle a huit ans.", "Oui, merci !"] },
+        { k: "listen", line: 0, bad: ["Il a dix ans.", "Ils sont grands !"] },
+        { k: "understand", q: "Quantos anos tem a filha do Marc?", opts: ["Oito", "Dez", "Seis"], ok: 0 }
+      ],
       title: "No parque",
       lines: [
         { spk: "A", f: "Quel âge a ta fille ?", t: "Qual é a idade da sua filha?" },
@@ -616,6 +641,13 @@ const UNITS = [
         blocks: [{f:"Le mari"},{f:"et la femme"},{f:"habitent à Paris."}] }
     ],
     dialogue: {
+      scene: "Na pausa do café do trabalho, dois colegas falam da família.",
+      speakers: { A: { n: "Julie", e: "👩" }, B: { n: "Antoine", e: "👨" } },
+      check: [
+        { k: "fill", line: 4, bad: ["Il s'appelle Paul.", "Oui, j'ai une sœur."] },
+        { k: "listen", line: 0, bad: ["Il a quinze ans.", "Il s'appelle Paul."] },
+        { k: "understand", q: "Como se chama o irmão da Julie?", opts: ["Paul", "Marc", "Louis"], ok: 0 }
+      ],
       title: "Falando da família",
       lines: [
         { spk: "A", f: "Tu as des frères et sœurs ?", t: "Você tem irmãos?" },
@@ -795,6 +827,13 @@ const UNITS = [
         blocks: [{f:"Je vais"},{f:"détester"},{f:"ce plat, je pense."}] }
     ],
     dialogue: {
+      scene: "Num café de Paris, de manhã: um cliente faz o pedido ao garçom.",
+      speakers: { A: { n: "Nicolas", e: "🧑‍🍳" }, B: { n: "Manon", e: "👩" } },
+      check: [
+        { k: "fill", line: 3, bad: ["Bonjour, vous désirez ?", "Ça fait cinq euros."] },
+        { k: "listen", line: 0, bad: ["Non merci, c'est tout.", "Voilà, ça fait cinq euros."] },
+        { k: "understand", q: "Quanto custa o pedido da Manon?", opts: ["Dois euros", "Cinco euros", "Dez euros"], ok: 1 }
+      ],
       title: "No café",
       lines: [
         { spk: "A", f: "Bonjour, vous désirez ?", t: "Olá, o que deseja?" },
@@ -892,6 +931,13 @@ const UNITS = [
         blocks: [{f:"Je vais"},{f:"dormir"},{f:"maintenant."}] }
     ],
     dialogue: {
+      scene: "Na hora do almoço, dois colegas de trabalho falam da rotina.",
+      speakers: { A: { n: "Clara", e: "👩" }, B: { n: "Julien", e: "👨" } },
+      check: [
+        { k: "fill", line: 3, bad: ["Je me lève à six heures et demie.", "Je dors à minuit."] },
+        { k: "listen", line: 0, bad: ["Je travaille le matin et l'après-midi.", "Je dors à minuit."] },
+        { k: "understand", q: "A que horas o Julien levanta?", opts: ["Às seis horas", "Às seis e meia", "Ao meio-dia"], ok: 1 }
+      ],
       title: "Minha rotina",
       lines: [
         { spk: "A", f: "Tu te lèves à quelle heure ?", t: "Você levanta a que horas?" },
@@ -1074,6 +1120,13 @@ const UNITS = [
         blocks: [{f:"Quelle est"},{f:"la date"},{f:"aujourd'hui ?"}] }
     ],
     dialogue: {
+      scene: "Dois amigos combinam de se ver na semana que vem.",
+      speakers: { A: { n: "Chloé", e: "👩" }, B: { n: "Maxime", e: "👨" } },
+      check: [
+        { k: "fill", line: 3, bad: ["Non, je travaille mercredi.", "Mardi, ça te va ?"] },
+        { k: "listen", line: 0, bad: ["Parfait, à mercredi alors !", "Non, je travaille mardi."] },
+        { k: "understand", q: "Em que dia Chloé e Maxime marcam o encontro?", opts: ["Terça", "Quarta", "Segunda"], ok: 1 }
+      ],
       title: "Marcando um encontro",
       lines: [
         { spk: "A", f: "On se voit quel jour ?", t: "A gente se vê que dia?" },
@@ -1142,6 +1195,13 @@ const UNITS = [
         blocks: [{f:"L'hôpital"},{f:"est loin"},{f:"d'ici."}] }
     ],
     dialogue: {
+      scene: "Na rua, uma turista pede informação a um morador da cidade.",
+      speakers: { A: { n: "Emma", e: "👩" }, B: { n: "Pierre", e: "👨" } },
+      check: [
+        { k: "fill", line: 3, bad: ["Merci beaucoup !", "C'est à gauche."] },
+        { k: "listen", line: 0, bad: ["Non, c'est à cinq minutes.", "Merci beaucoup !"] },
+        { k: "understand", q: "O museu fica longe?", opts: ["Não, fica a cinco minutos", "Sim, fica a uma hora", "Está fechado"], ok: 0 }
+      ],
       title: "Pedindo informação",
       lines: [
         { spk: "A", f: "Excusez-moi, où est le musée ?", t: "Com licença, onde fica o museu?" },
@@ -1294,6 +1354,13 @@ const UNITS = [
         blocks: [{f:"La nationalité"},{f:"est écrite"},{f:"sur le passeport."}] }
     ],
     dialogue: {
+      scene: "Numa festa internacional, duas pessoas descobrem de onde cada uma vem.",
+      speakers: { A: { n: "Thomas", e: "🧑" }, B: { n: "Sofia", e: "👩" } },
+      check: [
+        { k: "fill", line: 4, bad: ["Oui, je suis italienne.", "Je suis d'Italie."] },
+        { k: "listen", line: 0, bad: ["Moi, je suis allemand.", "Non, j'habite au Portugal."] },
+        { k: "understand", q: "Onde o Thomas mora agora?", opts: ["Na Alemanha", "Em Portugal", "Na Itália"], ok: 1 }
+      ],
       title: "De onde você é?",
       lines: [
         { spk: "A", f: "Tu es d'où ?", t: "Você é de onde?" },
@@ -1401,6 +1468,13 @@ const UNITS = [
         blocks: [{f:"Ce sac"},{f:"coûte"},{f:"quatre-vingt-dix euros."}] }
     ],
     dialogue: {
+      scene: "Numa loja de roupas, uma cliente procura um vestido.",
+      speakers: { A: { n: "Inès", e: "👩" }, B: { n: "Vincent", e: "🧑‍💼" } },
+      check: [
+        { k: "fill", line: 3, bad: ["Je fais du 38.", "Je la prends !"] },
+        { k: "listen", line: 1, bad: ["Elle coûte soixante euros.", "Parfait, je la prends !"] },
+        { k: "understand", q: "Quanto custa o vestido?", opts: ["Quarenta euros", "Sessenta euros", "Cem euros"], ok: 1 }
+      ],
       title: "Numa loja",
       lines: [
         { spk: "A", f: "Bonjour, je cherche une robe.", t: "Olá, estou procurando um vestido." },
@@ -1568,6 +1642,13 @@ const UNITS = [
         blocks: [{f:"Le dessert"},{f:"est prêt."}] }
     ],
     dialogue: {
+      scene: "Dois amigos que moram juntos fazem a lista de compras da semana.",
+      speakers: { A: { n: "Lucas", e: "👨" }, B: { n: "Marion", e: "👩" } },
+      check: [
+        { k: "fill", line: 1, bad: ["Oui, avec du sucre !", "Tu veux un dessert ?"] },
+        { k: "listen", line: 2, bad: ["Du riz, des légumes et du poulet.", "Qu'est-ce qu'on achète ?"] },
+        { k: "understand", q: "Quais itens estão na lista de compras?", opts: ["Arroz, legumes e frango", "Peixe e salada", "Pão e queijo"], ok: 0 }
+      ],
       title: "Fazendo a lista de compras",
       lines: [
         { spk: "A", f: "Qu'est-ce qu'on achète ?", t: "O que a gente compra?" },
@@ -1637,6 +1718,13 @@ const UNITS = [
         blocks: [{f:"Je n'ai pas"},{f:"assez de"},{f:"temps."}] }
     ],
     dialogue: {
+      scene: "Numa feira livre, uma cliente compra maçãs, água e queijo.",
+      speakers: { A: { n: "Michel", e: "🧑‍🌾" }, B: { n: "Hélène", e: "👩" } },
+      check: [
+        { k: "fill", line: 1, bad: ["Une bouteille d'eau.", "Et avec ça ?"] },
+        { k: "listen", line: 2, bad: ["Un demi-kilo, s'il vous plaît.", "Vous voulez combien de pommes ?"] },
+        { k: "understand", q: "Quantas maçãs a Hélène quer?", opts: ["Um quilo", "Meio quilo", "Uma garrafa"], ok: 1 }
+      ],
       title: "Comprando no mercado",
       lines: [
         { spk: "A", f: "Vous voulez combien de pommes ?", t: "Quantas maçãs você quer?" },
@@ -1710,6 +1798,13 @@ const UNITS = [
         blocks: [{f:"L'automne"},{f:"est très"},{f:"coloré."}] }
     ],
     dialogue: {
+      scene: "No ponto de ônibus, numa manhã fria, dois colegas falam do tempo.",
+      speakers: { A: { n: "Alice", e: "👩" }, B: { n: "Baptiste", e: "👨" } },
+      check: [
+        { k: "fill", line: 1, bad: ["Je préfère l'été.", "Il neige et il fait chaud."] },
+        { k: "listen", line: 2, bad: ["Il fait beau, mais il fait froid.", "Il pleut aujourd'hui."] },
+        { k: "understand", q: "Qual estação o Baptiste prefere?", opts: ["Inverno", "Verão", "Outono"], ok: 1 }
+      ],
       title: "Falando do tempo",
       lines: [
         { spk: "A", f: "Quel temps fait-il aujourd'hui ?", t: "Como está o tempo hoje?" },
@@ -1804,6 +1899,13 @@ const UNITS = [
         blocks: [{f:"La station"},{f:"est fermée"},{f:"aujourd'hui."}] }
     ],
     dialogue: {
+      scene: "Na estação de metrô, uma passageira pergunta sobre o trem.",
+      speakers: { A: { n: "Laura", e: "👩" }, B: { n: "Romain", e: "👨" } },
+      check: [
+        { k: "fill", line: 3, bad: ["Oui, c'est la bonne direction.", "Le train va au centre-ville."] },
+        { k: "listen", line: 0, bad: ["Ça coûte deux euros.", "Combien coûte le billet ?"] },
+        { k: "understand", q: "Quanto custa a passagem?", opts: ["Dois euros", "Três euros", "Um euro"], ok: 0 }
+      ],
       title: "Na estação de metrô",
       lines: [
         { spk: "A", f: "Excusez-moi, ce train va au centre-ville ?", t: "Com licença, esse trem vai pro centro?" },
@@ -1969,6 +2071,13 @@ const UNITS = [
         blocks: [{f:"Il ne va pas"},{f:"se sentir bien"},{f:"demain."}] }
     ],
     dialogue: {
+      scene: "Num consultório médico, um paciente conta o que está sentindo.",
+      speakers: { A: { n: "Dr. Martin", e: "🩺" }, B: { n: "Théo", e: "🧑" } },
+      check: [
+        { k: "fill", line: 3, bad: ["J'ai mal au ventre.", "Vous devez vous reposer."] },
+        { k: "listen", line: 0, bad: ["Depuis hier soir.", "Vous devez vous reposer."] },
+        { k: "understand", q: "O que o Théo está sentindo?", opts: ["Dor de cabeça", "Dor de barriga e febre", "Dor no pé"], ok: 1 }
+      ],
       title: "No médico",
       lines: [
         { spk: "A", f: "Qu'est-ce qui ne va pas ?", t: "O que não vai bem?" },
@@ -2164,6 +2273,13 @@ const UNITS = [
         blocks: [{f:"Le chien"},{f:"est petit."}] }
     ],
     dialogue: {
+      scene: "Dois amigos conversam e Adrien descreve o irmão para Pauline.",
+      speakers: { A: { n: "Pauline", e: "👩" }, B: { n: "Adrien", e: "👨" } },
+      check: [
+        { k: "fill", line: 3, bad: ["Il a les cheveux noirs.", "Non, il est petit."] },
+        { k: "listen", line: 0, bad: ["Oui, il est très gentil !", "Il est sympa ?"] },
+        { k: "understand", q: "Como é o irmão do Adrien?", opts: ["Alto, de cabelo preto e gentil", "Baixo, de cabelo claro e tímido", "Alto e antipático"], ok: 0 }
+      ],
       title: "Descrevendo alguém",
       lines: [
         { spk: "A", f: "Comment est ton frère ?", t: "Como é o seu irmão?" },
@@ -2344,6 +2460,13 @@ const UNITS = [
         blocks: [{f:"La fenêtre"},{f:"donne sur"},{f:"le jardin."}] }
     ],
     dialogue: {
+      scene: "Numa visita a um apartamento para alugar, a cliente faz perguntas ao corretor.",
+      speakers: { A: { n: "Mathilde", e: "👩" }, B: { n: "Karim", e: "🧑‍💼" } },
+      check: [
+        { k: "fill", line: 3, bad: ["Oui, il y a un balcon.", "Il y a deux chambres."] },
+        { k: "listen", line: 0, bad: ["Non, il n'y a pas de balcon.", "Il y a un beau salon."] },
+        { k: "understand", q: "O apartamento tem varanda?", opts: ["Sim, e dois quartos", "Não, mas tem uma sala bonita", "Não, e não tem cozinha"], ok: 1 }
+      ],
       title: "Visitando um apartamento",
       lines: [
         { spk: "A", f: "Il y a combien de chambres ?", t: "Tem quantos quartos?" },
@@ -2409,6 +2532,13 @@ const UNITS = [
         blocks: [{f:"Le chat"},{f:"est derrière"},{f:"la chaise."}] }
     ],
     dialogue: {
+      scene: "Em casa, um menino procura suas coisas antes de sair para a escola.",
+      speakers: { A: { n: "Enzo", e: "🧒" }, B: { n: "Maman", e: "👩" } },
+      check: [
+        { k: "fill", line: 1, bad: ["Elles sont sur la table.", "Oui, il est grand."] },
+        { k: "listen", line: 2, bad: ["Il est sous le lit.", "Où est mon sac ?"] },
+        { k: "understand", q: "Onde estão as chaves do Enzo?", opts: ["Embaixo da cama", "Em cima da mesa, ao lado da luminária", "Atrás do sofá"], ok: 1 }
+      ],
       title: "Arrumando o quarto",
       lines: [
         { spk: "A", f: "Où est mon sac ?", t: "Onde está minha mochila?" },
@@ -2529,6 +2659,13 @@ const UNITS = [
         blocks: [{f:"Le film"},{f:"commence"},{f:"à vingt heures."}] }
     ],
     dialogue: {
+      scene: "Na sexta-feira, dois amigos falam dos planos para o fim de semana.",
+      speakers: { A: { n: "Élise", e: "👩" }, B: { n: "Quentin", e: "👨" } },
+      check: [
+        { k: "fill", line: 3, bad: ["Oui, avec des amis.", "Je danse le samedi."] },
+        { k: "listen", line: 0, bad: ["On ne sait pas encore !", "Quel film vous allez voir ?"] },
+        { k: "understand", q: "Eles já escolheram o filme?", opts: ["Sim, já escolheram", "Ainda não sabem qual", "Não vão ao cinema"], ok: 1 }
+      ],
       title: "O fim de semana",
       lines: [
         { spk: "A", f: "Tu as des projets pour le week-end ?", t: "Você tem planos pro fim de semana?" },
@@ -2682,6 +2819,13 @@ const UNITS = [
         blocks: [{f:"Récemment,"},{f:"j'ai changé"},{f:"de travail."}] }
     ],
     dialogue: {
+      scene: "Na segunda-feira, dois colegas contam o que fizeram ontem e no fim de semana passado.",
+      speakers: { A: { n: "Sarah", e: "👩" }, B: { n: "Kévin", e: "👨" } },
+      check: [
+        { k: "fill", line: 3, bad: ["J'ai travaillé le matin.", "Demain, je fais du sport."] },
+        { k: "listen", line: 0, bad: ["On est allés au cinéma avec des amis.", "Et le week-end dernier ?"] },
+        { k: "understand", q: "O que o Kévin fez à tarde, ontem?", opts: ["Trabalhou", "Fez esporte", "Foi ao cinema"], ok: 1 }
+      ],
       title: "O que você fez ontem?",
       lines: [
         { spk: "A", f: "Qu'est-ce que tu as fait hier ?", t: "O que você fez ontem?" },

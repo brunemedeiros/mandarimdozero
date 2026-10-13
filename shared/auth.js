@@ -93,6 +93,8 @@ async function initAuth(){
       await renderStandalonePublicDeck(publicDeckId);
     } else if (publicProfileUsername && typeof renderStandalonePublicProfile === 'function'){
       await renderStandalonePublicProfile(publicProfileUsername);
+    } else if (typeof teacherInviteGateIfPending === 'function' && await teacherInviteGateIfPending()){
+      // Link de convite da professora (?convite=): o cartão aparece antes do login (077).
     } else {
       goToNeutralGate();
     }
@@ -103,6 +105,7 @@ async function initAuth(){
       await onUserLoggedIn(session.user);
     } else if (event === 'SIGNED_OUT'){
       CURRENT_USER = null;
+      if (typeof clearMyPermissions === 'function') clearMyPermissions();
       pendingAccountUiLanguage = null;
       progressAccountUiLanguage = null;
       goToNeutralGate();
@@ -209,6 +212,9 @@ async function onUserLoggedIn(user){
   // única função, pra não duplicar a checagem em vários lugares (ver
   // Fase 2/9 da spec de Admin Mode).
   await applyAdminModeUI();
+  // Papéis (075): menu da professora e Aulas/Material do aluno não dependem
+  // do Admin Mode, só do papel/vínculo. Não segura o carregamento.
+  if (typeof applyRoleNavUI === 'function') applyRoleNavUI().catch(() => {});
   // Garante que já exista uma linha em `profiles` assim que a pessoa loga --
   // antes, só era criada na primeira vez que ela abria "Meu perfil" (lazy),
   // então quem nunca tinha visitado a aba aparecia como "Aluno(a)" genérico
@@ -230,9 +236,13 @@ async function onUserLoggedIn(user){
   // aba default do carregamento normal.
   applyPendingLevelTestOffer();
   if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
+  // Link de perfil/Deck aberto antes do login: volta para ele (shared/router.js).
+  if (typeof consumePendingRouteAfterLogin === 'function') consumePendingRouteAfterLogin();
   if (typeof applyInitialRoute === 'function') applyInitialRoute();
   // Convite por link (?amigo=usuario): abre Amigos já buscando a pessoa.
   if (typeof friendsConsumePendingInvite === 'function') friendsConsumePendingInvite();
+  // Convite da professora (link guardado ou convite pendente na Trilha).
+  if (typeof teacherInvitesAfterLogin === 'function') teacherInvitesAfterLogin();
 }
 
 // ---------- Admin Mode ON/OFF (topbar) ----------

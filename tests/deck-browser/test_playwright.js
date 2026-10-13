@@ -279,7 +279,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     check(lang + ' tela do Deck: nome com caminho', detail.title === 'Meus Decks › Verbos', detail.title);
     check(lang + ' tela do Deck: Novo/Aprendendo/Revisar + Estudar agora', detail.labels.join('|') === 'Novo|Aprendendo|Revisar' && detail.nums[0] === 2 && detail.study, detail);
     check(lang + ' tela do Deck: mesma barra do topo', detail.bar.join('|') === 'Decks|Adicionar|Painel|Configurar|⋯', detail.bar);
-    check(lang + ' tela do Deck pessoal: Criar subdeck, Renomear, Publicar, Excluir', ['Criar subdeck', 'Renomear', 'Excluir'].every(b => detail.footer.includes(b)) && detail.footer.some(b => /Publicar|Público/.test(b)), detail.footer);
+    check(lang + ' tela do Deck pessoal: Criar subdeck, Renomear, Publicar, Excluir', ['Criar subdeck', 'Renomear', 'Excluir'].every(b => detail.footer.includes(b)) && detail.footer.some(b => /Publicar|Público|Privado/.test(b)), detail.footer);
     check(lang + ' tela do Deck tem endereço próprio', detail.hash === '#/review/decks/9002', detail.hash);
     if (lang === 'fr'){ await shot(page, 'deck-detail-fr'); await page.evaluate(() => openReviewSettingsModal()); await shot(page, 'deck-settings-fr'); await page.evaluate(() => closeReviewSettingsModal()); }
     await page.click('[data-deck-study]');

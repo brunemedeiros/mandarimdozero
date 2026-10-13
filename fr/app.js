@@ -1032,6 +1032,7 @@ async function loadStateAndRender(){
   await mergeTeacherFlashcardsIntoState();
   await mergeSelfFlashcardsIntoState();
   await loadState();
+  if (typeof applyPendingBankReviews === 'function') await applyPendingBankReviews();
   // Fase 10: aplica a preferência de frequência de revisão (padrão ou
   // salva) no motor FSRS -- precisa rodar antes de qualquer grading real.
   setDesiredRetention(reviewFrequencyToRetention(STATE.studySettings.reviewFrequency));
@@ -2147,7 +2148,7 @@ function renderTrailMapView(container, levelModules){
     });
     const sel = moduleReviewSelection(module);
     const rst = milestoneState(sel.available, STATE.reviewMilestones[module.id]);
-    nodes.push({ key: 'r:' + module.id, kind: 'review', icon: '🔁', label: 'Revisão', state: rst === 'empty' ? 'empty' : (rst === 'done' ? 'done' : 'available'),
+    nodes.push({ key: 'r:' + module.id, kind: 'review', icon: '🔁', label: 'Revisão', state: !moduleUnlocked(module) ? 'locked' : (rst === 'empty' ? 'empty' : (rst === 'done' ? 'done' : 'available')),
       aria: `Revisão do módulo ${mIdx + 1}, opcional${rst === 'empty' ? ', nada para revisar ainda' : ''}` });
     const cp = STATE.checkpointProgress[module.id];
     nodes.push({ key: 'c:' + module.id, kind: 'checkpoint', icon: '🏆', label: 'Ponto', state: cp.completed ? 'done' : (moduleUnlocked(module) ? 'available' : 'locked'),
@@ -2170,7 +2171,7 @@ function renderTrailMapView(container, levelModules){
       return { eyebrow: 'Revisão', title: 'Revisão do módulo', status: st === 'done' ? 'Revisada' : (st === 'empty' ? 'Sem itens' : 'Recomendada'),
         goal: 'Opcional: uma sessão curta com o que mais precisa ser revisto neste módulo. Nunca bloqueia o avanço.',
         lines: st === 'empty' ? ['Nada para revisar ainda: estude as unidades deste módulo e volte aqui.'] : [why].concat(rec && rec.lastDate ? [`Última sessão: ${rec.lastDate.split('-').reverse().join('/')}`] : []),
-        actions: st === 'empty' ? [] : [{ label: 'Revisar agora', primary: true, onClick: () => startModuleReviewSession(module.id) }] };
+        actions: (st === 'empty' || !moduleUnlocked(module)) ? [] : [{ label: 'Revisar agora', primary: true, onClick: () => startModuleReviewSession(module.id) }] };
     }
     const cp = STATE.checkpointProgress[module.id];
     const lines = [];
@@ -2613,7 +2614,7 @@ function renderUnitsGrid(){
     module.unitIds.forEach(id => {
       list.appendChild(buildUnitBlock(UNITS.find(u => u.id === id)));
     });
-    list.appendChild(buildModuleReviewRow(module));
+    list.appendChild(buildModuleReviewRow(module, unlocked));
     list.appendChild(buildCheckpointRow(module, unlocked));
     // Unidade opcional "Desafios do Módulo N" (Premium): o slot nasce vazio e
     // só vira uma linha se o módulo tiver desafios publicados -- os
@@ -2641,6 +2642,7 @@ function getStepDefs(){
   return [
     { key: 'vocab', label: t('fr.step.vocab') },
     { key: 'dialogue', label: t('fr.step.dialogue') },
+    { key: 'dialogueCheck', label: t('lesson.step.dialogueCheck') },
     { key: 'usage', label: t('fr.step.usage') },
     { key: 'exercises', label: t('fr.step.exercises') }
   ];
@@ -2669,10 +2671,13 @@ function currentStepDefs(){
     if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: t('trail.checkpoint.title') }];
     const steps = [];
     if (lesson.vocabIdx && lesson.vocabIdx.length) steps.push({ key: 'vocab', label: t('fr.step.vocab') });
-    if (lesson.includesDialogue) steps.push({ key: 'dialogue', label: t('fr.step.dialogue') });
+    if (lesson.includesDialogue){
+      steps.push({ key: 'dialogue', label: t('fr.step.dialogue') });
+      if (u.dialogue && Array.isArray(u.dialogue.check) && u.dialogue.check.length) steps.push({ key: 'dialogueCheck', label: t('lesson.step.dialogueCheck') });
+    }
     return steps;
   }
-  return getStepDefs().filter(s => s.key !== 'usage' || (u && u.usageNote));
+  return getStepDefs().filter(s => (s.key !== 'usage' || (u && u.usageNote)) && (s.key !== 'dialogueCheck' || (u && u.dialogue && Array.isArray(u.dialogue.check) && u.dialogue.check.length)));
 }
 
 // ---------- Lições (Modelo B) ----------
@@ -3190,7 +3195,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   ` : '';
 
   contentEl.innerHTML = `
-    <div class="vocab-card-counter">${t('fr.blockIntro.counter', { block: acq.blockIdx + 1, blocks: acq.blocks.length, pos: posInBlock + 1, total: block.length })}</div>
+    <div class="vocab-card-counter" role="img" aria-label="${t('lesson.vocabDots.aria', { pos: posInBlock + 1, total: block.length })}">${block.map((_, i) => `<span class="vc-dot${i <= posInBlock ? ' on' : ''}"></span>`).join('')}</div>
     <div class="vocab-card">
       <div class="vocab-card-word">${v.f} ${audioBtnHTML(v.f)}</div>
       <div class="vocab-card-trans">${v.t}</div>
@@ -3358,7 +3363,7 @@ function renderConceptStep(){
     </ul>` : '';
 
   contentEl.innerHTML = `
-    <div class="gram-block-counter">${concept.blocks.length > 1 ? t('concept.counter.of', { i: STEP_STATE.conceptBlockIdx + 1, n: concept.blocks.length }) : (isReality ? t('concept.counter.reality') : isCulture ? t('concept.counter.culture') : t('concept.counter.understand'))}</div>
+    ${concept.blocks.length > 1 ? `<div class="gram-block-counter">${t('concept.counter.of', { i: STEP_STATE.conceptBlockIdx + 1, n: concept.blocks.length })}</div>` : ''}
     <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
       <h3 class="gram-block-title">${block.title}</h3>
       <p class="gram-block-body">${block.body}</p>
@@ -3800,8 +3805,9 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
 // unidade (decisão explícita, ver Q6 da grilagem), substituindo o toast
 // "Unidade concluída! 🏮" que markUnitCompleted mostrava antes (Q5). Roda
 // DEPOIS da tela de "Lição concluída" do checkpoint (que já mostrou
-// vocabulário/nota daquela lição) -- por isso NUNCA repete vocabulário aqui,
-// só o que a unidade como um todo desenvolveu: competências (títulos das
+// vocabulário/nota daquela lição) -- a lista "O que você aprendeu" (todas as
+// palavras da unidade, uma vez) foi pedida pela autora; o resto é só o que a
+// unidade como um todo desenvolveu: competências (títulos das
 // lições não-checkpoint desta unidade) e o objetivo comunicacional
 // (unit.goal), ambos já autorados em content.js, nunca inventados (ver
 // CLAUDE.md, "Coerência pedagógica entre funcionalidades").
@@ -3819,6 +3825,14 @@ function renderUnitCompleteScreen(u, xpEarned){
   maybeShowStreakCelebration();
 
   const competencies = (u.lessons || []).filter(l => !l.isCheckpoint).map(l => l.title).filter(Boolean);
+  // Todas as palavras novas da unidade, na ordem das lições (decisão da
+  // autora: sem agrupar e sem destacar erradas), com áudio e tradução.
+  // Sem vocabIdx nas lições, cai na ordem do próprio vocabulário.
+  const seenWords = new Set();
+  const unitWords = [];
+  const pushWord = i => { const v = u.vocab && u.vocab[i]; if (v && !seenWords.has(i)){ seenWords.add(i); unitWords.push(v); } };
+  (u.lessons || []).forEach(l => (l.vocabIdx || []).forEach(pushWord));
+  (u.vocab || []).forEach((_, i) => pushWord(i));
 
   contentEl.innerHTML = `
     <div class="lesson-complete tier-bounce">
@@ -3834,6 +3848,17 @@ function renderUnitCompleteScreen(u, xpEarned){
           ${competencies.map(c => `<div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${c}</span></div>`).join('')}
         </div>
       ` : ''}
+      ${unitWords.length ? `
+        <div class="lesson-recap">
+          <div class="lesson-recap-label">O que você aprendeu: ${unitWords.length} ${unitWords.length > 1 ? 'palavras novas' : 'palavra nova'}</div>
+          ${unitWords.map(item => `
+            <div class="lesson-recap-item">
+              <div class="lesson-recap-french">${audioBtnHTML(item.f)}<span>${item.f}</span></div>
+              <div class="lesson-recap-trans">${item.t}</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
       ${u.goal ? `
         <div class="unit-skills">
           <div class="unit-skills-label">${t('zh.path.unitDone.goalReached')}</div>
@@ -3845,6 +3870,7 @@ function renderUnitCompleteScreen(u, xpEarned){
   // Marco de fim de UNIDADE (tier 3) -- confete + contador subindo, o peso
   // que antes (por engano) a tela de "Lição concluída" do checkpoint levava
   // pra si mesma (ver comentário histórico removido de renderLessonCompleteScreen).
+  wireAudioButtons(contentEl);
   spawnConfetti(20, 1800);
   animateCount(document.getElementById('uc-stat-xp'), xpEarned, { prefix: '+', suffix: ' ⚡' });
 
@@ -4098,9 +4124,11 @@ function renderStep(){
   // Durante checkpoint/practice/mixed, o "Voltar" não faz sentido (a
   // navegação é do próprio motor de exercícios, sem histórico pra desfazer)
   // -- só aparece na introdução do bloco.
-  const showBack = STEP_STATE.currentStep > 0
+  // Na micro-checagem do diálogo não há "Voltar": voltar ao diálogo
+  // deixaria copiar as respostas.
+  const showBack = stepKey !== 'dialogueCheck' && (STEP_STATE.currentStep > 0
     || (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro' && (STEP_STATE.acq.blockIdx > 0 || STEP_STATE.acq.introIdx > 0))
-    || (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0);
+    || (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0));
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
 
   if (u.type === 'grammar'){
@@ -4184,26 +4212,338 @@ function renderStep(){
     renderExerciseStep();
 
   } else if (stepKey === 'dialogue'){
-    contentEl.innerHTML = `
-      <div class="section-label">${t('fr.step.dialogue')}</div>
-      <div class="dialogue-box" id="ud-dialogue"></div>
-    `;
-    const dialogueEl = document.getElementById('ud-dialogue');
-    dialogueEl.innerHTML = `<div class="dialogue-title">${u.dialogue.title}</div>` +
-      u.dialogue.lines.map(l => `
-        <div class="dialogue-line">
-          <div class="dialogue-spk">${l.spk}</div>
-          <div class="dialogue-content">
-            <div class="french">${l.f} ${audioBtnHTML(l.f)}</div>
-            <div class="trans">${l.t}</div>
-          </div>
-        </div>
-      `).join('');
-    wireAudioButtons(dialogueEl);
-    nextBtn.textContent = t('common.continueArrow');
-    nextBtn.style.display = 'flex';
+    renderDialogueStep(u, contentEl, nextBtn);
+
+  } else if (stepKey === 'dialogueCheck'){
+    renderDialogueCheckStep(u, contentEl, nextBtn);
 
   }
+}
+
+// ============================================================
+// RENDER: Diálogo da lição (balões, áudio em sequência, vocabulário
+// destacado e micro-checagem "Você entendeu?")
+// ============================================================
+// Dados extras de cada diálogo (content.js): `scene` (contexto), `speakers`
+// ({A:{n,e}, B:{n,e}} -- nome e emoji de cada falante) e `check` (3 perguntas
+// de compreensão). Tudo opcional: sem `speakers` cai em "A"/"B", sem `check`
+// o botão Continuar aparece direto.
+const DLG = { run: 0, check: null };
+const DLG_AUTOPLAY_KEY = 'dlg_autoplay';
+
+function dlgAutoplayOn(){
+  try { return localStorage.getItem(DLG_AUTOPLAY_KEY) !== '0'; } catch(e){ return true; }
+}
+function dlgSetAutoplay(on){
+  try { localStorage.setItem(DLG_AUTOPLAY_KEY, on ? '1' : '0'); } catch(e){}
+}
+
+// Termos do vocabulário da unidade que valem destaque nas falas. "français /
+// française" vira dois termos; "(de)" e outros parênteses saem do termo.
+function dlgVocabTerms(u){
+  const terms = [];
+  (u.vocab || []).forEach(v => {
+    String(v.f || '').split(' / ').forEach(part => {
+      const t = part.replace(/\s*\([^)]*\)/g, '').trim();
+      if (!t) return;
+      terms.push({ t, tr: v.t });
+      // Substantivos aparecem nas falas com outro artigo ("la sœur" -> "une
+      // sœur"): também marca o substantivo sem artigo (aceita plural em -s).
+      const bare = t.replace(/^(le|la|les|l'|un|une|des) ?/i, '');
+      if (bare !== t && bare.length >= 3) terms.push({ t: bare, tr: v.t, plural: true });
+    });
+  });
+  terms.sort((a, b) => b.t.length - a.t.length);
+  return terms;
+}
+
+// Devolve o HTML da fala com as palavras da unidade sublinhadas (data-tr com
+// o significado, mostrado num toast ao tocar). Tudo que não casa é escapado.
+function dlgHighlight(text, terms){
+  if (!terms.length) return escapeHTML(text);
+  const esc = x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp("(?<![\\p{L}'’-])(" + terms.map(x => esc(x.t) + (x.plural ? 's?' : '')).join('|') + ")(?![\\p{L}-])", 'giu');
+  const map = new Map(terms.map(x => [x.t.toLowerCase(), x.tr]));
+  let out = '', last = 0, m;
+  while ((m = re.exec(text))){
+    out += escapeHTML(text.slice(last, m.index));
+    const low = m[1].toLowerCase();
+    const tr = map.get(low) || map.get(low.replace(/s$/, '')) || '';
+    out += `<span class="dlg-new" data-tr="${escapeHTML(tr)}" data-w="${escapeHTML(m[1])}">${escapeHTML(m[1])}</span>`;
+    last = m.index + m[1].length;
+  }
+  return out + escapeHTML(text.slice(last));
+}
+
+// Toca UMA fala e resolve quando ela termina: true = terminou, false =
+// interrompida/erro, 'blocked' = o navegador bloqueou o autoplay.
+function dlgPlayLine(text){
+  return new Promise(resolve => {
+    registerAudioPlay();
+    stopExerciseAudio();
+    const file = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
+    if (file){
+      const a = new Audio('audio/' + file);
+      a.playbackRate = PREGEN_AUDIO_RATE;
+      exerciseAudioEl = a;
+      let done = false;
+      const fin = v => { if (done) return; done = true; if (exerciseAudioEl === a) exerciseAudioEl = null; resolve(v); };
+      a.addEventListener('ended', () => fin(true));
+      a.addEventListener('pause', () => fin(a.ended));
+      a.addEventListener('error', () => fin(false));
+      a.play().catch(() => fin('blocked'));
+      return;
+    }
+    if (!TTS.supported) return resolve(false);
+    if (!TTS.voice) loadFrenchVoice();
+    if (!TTS.voice) return resolve(false);
+    window.speechSynthesis.resume();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'fr-FR'; u.voice = TTS.voice; u.rate = 0.9;
+    let started = false, done = false;
+    const fin = v => { if (done) return; done = true; resolve(v); };
+    u.onstart = () => { started = true; };
+    u.onend = () => fin(true);
+    u.onerror = () => fin(false);
+    window.speechSynthesis.speak(u);
+    setTimeout(() => { if (!started){ window.speechSynthesis.cancel(); fin(false); } }, 1800);
+  });
+}
+
+function dlgSleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+function renderDialogueStep(u, contentEl, nextBtn){
+  const dlg = u.dialogue;
+  const token = ++DLG.run;
+  const sp = dlg.speakers || { A: { n: 'A', e: '' }, B: { n: 'B', e: '' } };
+  const terms = dlgVocabTerms(u);
+  const checks = Array.isArray(dlg.check) ? dlg.check : [];
+  DLG.check = { qi: 0, correct: 0 };
+
+  const rowsHTML = dlg.lines.map((l, i) => {
+    const side = l.spk === 'B' ? 'b' : 'a';
+    const who = sp[l.spk] || { n: l.spk, e: '' };
+    return `
+      <div class="dlg-row ${side}" data-i="${i}" role="button" tabindex="0" aria-label="${escapeHTML(who.n)}: ouvir a partir desta fala">
+        <div class="dlg-avatar"><span class="dlg-emoji" aria-hidden="true">${who.e || escapeHTML(l.spk)}</span><span class="dlg-name">${escapeHTML(who.n)}</span></div>
+        <div class="dlg-bubble">
+          <div class="dlg-fr">${dlgHighlight(l.f, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>
+          <div class="dlg-tr">${escapeHTML(l.t)}</div>
+          <button type="button" class="dlg-trbtn" aria-label="Mostrar a tradução desta fala" aria-pressed="false">🌐</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  contentEl.innerHTML = `
+    <div class="section-label">Diálogo</div>
+    <div class="dlg-title">${escapeHTML(dlg.title)}</div>
+    ${dlg.scene ? `<div class="dlg-scene">📍 ${escapeHTML(dlg.scene)}</div>` : ''}
+    <div class="dlg-tools">
+      <button class="btn btn-secondary dlg-play-btn" id="dlg-play-btn">▶ Ouvir tudo</button>
+      <button class="dlg-chip" id="dlg-auto-btn" aria-pressed="${dlgAutoplayOn()}">Áudio automático: ${dlgAutoplayOn() ? 'ligado' : 'desligado'}</button>
+    </div>
+    <div class="dlg-chat" id="ud-dialogue">${rowsHTML}</div>
+    <div class="dlg-float"><button class="dlg-chip dlg-chip-float" id="dlg-trans-btn" aria-pressed="false">🌐 Mostrar traduções</button></div>
+    ${terms.length ? `<div class="dlg-legend">As palavras coloridas são do vocabulário desta unidade. Toque numa delas para ver o significado.</div>` : ''}
+  `;
+
+  const chat = document.getElementById('ud-dialogue');
+  const playBtn = document.getElementById('dlg-play-btn');
+  const transBtn = document.getElementById('dlg-trans-btn');
+  const autoBtn = document.getElementById('dlg-auto-btn');
+  const rows = [...chat.querySelectorAll('.dlg-row')];
+
+  function setPlaying(on){
+    chat.classList.toggle('playing', on);
+    playBtn.textContent = on ? '⏸ Parar' : '▶ Ouvir tudo';
+    if (!on) rows.forEach(r => r.classList.remove('speaking'));
+  }
+  function setTranslations(on){
+    chat.classList.toggle('show-trans', on);
+    transBtn.setAttribute('aria-pressed', String(on));
+    transBtn.textContent = on ? '🌐 Ocultar traduções' : '🌐 Mostrar traduções';
+    // o botão geral manda em todas as falas; os 🌐 individuais acompanham
+    rows.forEach(r => { r.classList.remove('show-tr'); r.querySelector('.dlg-trbtn')?.setAttribute('aria-pressed', 'false'); });
+  }
+  function stillHere(){ return token === DLG.run && document.body.contains(chat); }
+
+  async function playFrom(start, viaAutoplay){
+    const myRun = ++DLG.run;
+    const alive = () => myRun === DLG.run && document.body.contains(chat);
+    setPlaying(true);
+    for (let i = start; i < dlg.lines.length; i++){
+      if (!alive()) return;
+      rows.forEach(r => r.classList.toggle('speaking', Number(r.dataset.i) === i));
+      rows[i].scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
+      const res = await dlgPlayLine(dlg.lines[i].f);
+      if (!alive()) return;
+      if (res === 'blocked'){
+        setPlaying(false);
+        if (viaAutoplay) showToast('🔇 Toque em "Ouvir tudo" para ouvir a conversa');
+        return;
+      }
+      if (!res){ setPlaying(false); return; }
+      if (i < dlg.lines.length - 1) await dlgSleep(380);
+    }
+    if (!alive()) return;
+    setPlaying(false);
+    setTranslations(true); // ao fim da conversa completa, as traduções aparecem
+  }
+
+  playBtn.addEventListener('click', () => {
+    if (chat.classList.contains('playing')){ DLG.run++; stopExerciseAudio(); setPlaying(false); }
+    else playFrom(0, false);
+  });
+  transBtn.addEventListener('click', () => setTranslations(!chat.classList.contains('show-trans')));
+  autoBtn.addEventListener('click', () => {
+    const on = !dlgAutoplayOn();
+    dlgSetAutoplay(on);
+    autoBtn.setAttribute('aria-pressed', String(on));
+    autoBtn.textContent = 'Áudio automático: ' + (on ? 'ligado' : 'desligado');
+  });
+  rows.forEach(r => {
+    const tb = r.querySelector('.dlg-trbtn');
+    if (tb) tb.addEventListener('click', e => {
+      e.stopPropagation();   // não toca o áudio: só mostra/esconde a tradução desta fala
+      const on = !r.classList.contains('show-tr');
+      r.classList.toggle('show-tr', on);
+      tb.setAttribute('aria-pressed', String(on));
+    });
+    const go = () => playFrom(Number(r.dataset.i), false);
+    r.addEventListener('click', go);
+    r.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
+  });
+  chat.querySelectorAll('.dlg-new').forEach(w => w.addEventListener('click', e => {
+    e.stopPropagation();
+    if (w.dataset.tr) showToast(`“${w.dataset.w}” = ${w.dataset.tr}`);
+  }));
+
+  // A micro-checagem é um passo à parte (dialogueCheck), depois deste:
+  // na mesma tela daria para rolar e copiar a resposta do próprio diálogo.
+  nextBtn.textContent = 'Continuar →';
+  nextBtn.style.display = 'flex';
+
+  const canHear = dlg.lines.some(l => canSpeakFrench(l.f));
+  if (!canHear) playBtn.disabled = true;
+  else if (dlgAutoplayOn()) setTimeout(() => { if (stillHere()) playFrom(0, true); }, 350);
+}
+
+// Passo "Você entendeu?" -- só as perguntas, SEM o diálogo na tela (quem quiser
+// conferir precisa lembrar). Não dá para pular: o Continuar só aparece no fim.
+function renderDialogueCheckStep(u, contentEl, nextBtn){
+  const dlg = u.dialogue;
+  DLG.run++; stopExerciseAudio();
+  const sp = dlg.speakers || { A: { n: 'A', e: '' }, B: { n: 'B', e: '' } };
+  const checks = Array.isArray(dlg.check) ? dlg.check : [];
+  DLG.check = { qi: 0, correct: 0 };
+  contentEl.innerHTML = `
+    <div class="section-label">Diálogo</div>
+    <div class="dlg-title">${escapeHTML(dlg.title)}</div>
+    <div class="dlg-scene">Sem olhar o diálogo: o que você entendeu da conversa?</div>
+    <div class="dlg-check" id="dlg-check"></div>
+  `;
+  nextBtn.style.display = 'none';
+  renderDialogueCheck(u, dlg, sp, checks, nextBtn, []);
+}
+
+function dlgShuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Micro-checagem "Você entendeu?" -- 3 perguntas, uma de cada vez. Não dá
+// para pular (o Continuar só aparece no fim); errar não reprova, mostra a
+// resposta certa e acende a fala correspondente no diálogo.
+function renderDialogueCheck(u, dlg, sp, checks, nextBtn, rows){
+  const box = document.getElementById('dlg-check');
+  const st = DLG.check;
+  const L = dlg.lines;
+  const bubble = (idx, text, blank) => {
+    const l = L[idx];
+    const side = l.spk === 'B' ? 'b' : 'a';
+    const who = sp[l.spk] || { n: l.spk, e: '' };
+    return `<div class="dlg-row ${side} static"><div class="dlg-avatar"><span class="dlg-emoji" aria-hidden="true">${who.e || escapeHTML(l.spk)}</span><span class="dlg-name">${escapeHTML(who.n)}</span></div>
+      <div class="dlg-bubble"><div class="dlg-fr">${blank ? '<span class="dlg-blank">· · · · ·</span>' : escapeHTML(text)}</div></div></div>`;
+  };
+
+  function showQuestion(){
+    const q = checks[st.qi];
+    let label = '', ctx = '', opts = [], flashIdx = -1;
+    if (q.k === 'fill'){
+      label = 'Complete a resposta';
+      ctx = `<div class="dlg-q-ctx">${bubble(q.line - 1, L[q.line - 1].f, false)}${bubble(q.line, '', true)}</div>`;
+      opts = dlgShuffle([{ t: L[q.line].f, ok: true }, ...q.bad.map(t => ({ t, ok: false }))]);
+      flashIdx = q.line;
+    } else if (q.k === 'listen'){
+      label = 'Ouça e escolha a resposta';
+      ctx = `<div class="dlg-q-listen"><button class="audio-btn audio-btn-lg" id="dlg-q-audio" aria-label="Ouvir a fala">🔊</button><div class="prompt-audio-hint">toque para ouvir de novo</div></div>`;
+      opts = dlgShuffle([{ t: L[q.line + 1].f, ok: true }, ...q.bad.map(t => ({ t, ok: false }))]);
+      flashIdx = q.line + 1;
+    } else {
+      label = 'Compreensão';
+      ctx = `<div class="dlg-q-text">${escapeHTML(q.q)}</div>`;
+      opts = q.opts.map((t, i) => ({ t, ok: i === q.ok }));
+      flashIdx = -1;
+    }
+    const dots = checks.map((_, i) => `<span class="dlg-dot${i < st.qi ? ' done' : (i === st.qi ? ' on' : '')}"></span>`).join('');
+    box.innerHTML = `
+      <div class="dlg-check-head"><span>Você entendeu?</span><span class="dlg-dots" role="img" aria-label="Pergunta ${st.qi + 1} de ${checks.length}">${dots}</span></div>
+      <div class="exercise-prompt-label">${label}</div>
+      ${ctx}
+      <div class="dlg-opts">${opts.map((o, i) => `<button class="dlg-opt" data-i="${i}">${escapeHTML(o.t)}</button>`).join('')}</div>
+      <div class="dlg-fb-slot"></div>`;
+    if (q.k === 'listen'){
+      const a = document.getElementById('dlg-q-audio');
+      const line = L[q.line].f;
+      a.addEventListener('click', () => speakFrench(line, a));
+      if (canSpeakFrench(line)) speakFrench(line, a, true);
+    }
+    box.querySelectorAll('.dlg-opt').forEach(btn => btn.addEventListener('click', () => {
+      const o = opts[Number(btn.dataset.i)];
+      box.querySelectorAll('.dlg-opt').forEach((b, i) => {
+        b.disabled = true;
+        b.classList.add('locked');
+        if (opts[i].ok) b.classList.add('correct');
+      });
+      if (!o.ok) btn.classList.add('incorrect');
+      playFeedbackSound(o.ok);
+      if (o.ok) st.correct += 1;
+      if (flashIdx >= 0 && rows[flashIdx]){
+        rows[flashIdx].classList.add('flash');
+        setTimeout(() => rows[flashIdx] && rows[flashIdx].classList.remove('flash'), 2400);
+      }
+      const right = opts.find(x => x.ok).t;
+      const last = st.qi === checks.length - 1;
+      box.querySelector('.dlg-fb-slot').innerHTML = `
+        <div class="dlg-fb ${o.ok ? 'ok' : 'no'}">
+          <div class="dlg-fb-title">${o.ok ? '✅ Isso mesmo!' : 'Quase! A resposta certa era:'}</div>
+          ${o.ok ? '' : `<div class="dlg-fb-right">${escapeHTML(right)}</div>`}
+          <button class="btn btn-primary btn-block" id="dlg-q-next">${last ? 'Concluir' : 'Próxima pergunta →'}</button>
+        </div>`;
+      document.getElementById('dlg-q-next').addEventListener('click', () => {
+        if (last) finish(); else { st.qi += 1; showQuestion(); }
+      });
+      document.getElementById('dlg-q-next').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }));
+  }
+
+  function finish(){
+    stopExerciseAudio();
+    box.innerHTML = `
+      <div class="dlg-check-head"><span>Você entendeu?</span></div>
+      <div class="dlg-sum">${st.correct} de ${checks.length} certas. ${st.correct === checks.length ? 'Conversa entendida!' : 'Ouça de novo e tente outra vez quando quiser.'}</div>
+      <button class="dlg-chip" id="dlg-redo">Refazer as perguntas</button>`;
+    document.getElementById('dlg-redo').addEventListener('click', () => { st.qi = 0; st.correct = 0; showQuestion(); nextBtn.style.display = 'none'; });
+    nextBtn.textContent = 'Continuar →';
+    nextBtn.style.display = 'flex';
+    nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  showQuestion();
 }
 
 document.getElementById('step-back-btn').addEventListener('click', () => {
@@ -4728,12 +5068,13 @@ function answerExplanationHTML(ex){
     return '';
   }
   if (ex && ex.format === 'scenario' && ex.phrase){
-    // a frase em francês já aparece destacada entre as opções — só a tradução é informação nova
-    return `<p class="usage-note-body">${ex.phrase.t}</p>`;
+    // Mesmo padrão do "Complete a frase": resposta certa (com áudio) + tradução.
+    // A frase vem da própria unidade, então ela mesma já é o "onde você viu".
+    return `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${ex.phrase.f}</strong> ${audioBtnHTML(ex.phrase.f)}</div><div class="feedback-phrase-trans">${ex.phrase.t}</div>`;
   }
   if (ex && ex.phrase){
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
-    return `<p class="usage-note-body"><strong>${ex.phrase.f}</strong><br>${ex.phrase.t}</p>${noteOrConceptReviewHTML(u) || ''}`;
+    return `<div class="feedback-phrase-zh"><strong>${ex.phrase.f}</strong> ${audioBtnHTML(ex.phrase.f)}</div><div class="feedback-phrase-trans">${ex.phrase.t}</div>${noteOrConceptReviewHTML(u) || ''}`;
   }
   if (ex && ex.item){
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
@@ -4746,7 +5087,7 @@ function answerExplanationHTML(ex){
     const originHTML = origin
       ? `<div class="usage-note-title">${t('feedback.whereSeen')}</div><p class="usage-note-body"><strong>${origin.f}</strong><br>${origin.t}</p>`
       : (noteOrConceptReviewHTML(u, ex.vocabIdx, true) || '');
-    return `<p class="usage-note-body"><strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)} = ${ex.item.t}</p>${originHTML}`;
+    return `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)}</div><div class="feedback-phrase-trans">${ex.item.t}</div>${originHTML}`;
   }
   if (ex && ex.format === 'trueFalse' && ex.whyNote){
     return `<p class="usage-note-body">${ex.whyNote}</p>`;
@@ -4811,6 +5152,12 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.innerHTML = `
     <div class="feedback-card-body">
       <div class="wrong-feedback-header">${revealed ? t('feedback.header.revealed') : t('feedback.header.notThisTime')}</div>
+      ${opts.attemptHTML ? `
+        <div class="wrong-feedback-why">
+          <div class="wrong-feedback-why-label">${t('feedback.label.yourAnswer')}</div>
+          <div class="feedback-inner-box">${opts.attemptHTML}</div>
+        </div>
+      ` : ''}
       ${explanation ? `
         <div class="wrong-feedback-why">
           <div class="wrong-feedback-why-label">${ex && ex.format === 'cloze' ? t('feedback.label.fullSentence') : (revealed ? t('feedback.label.answer') : t('feedback.label.whyNot'))}</div>
@@ -4831,8 +5178,8 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function showWrongAnswerPanel(contentEl, ex){
-  showAnswerPanel(contentEl, ex, { revealed: false });
+function showWrongAnswerPanel(contentEl, ex, opts = {}){
+  showAnswerPanel(contentEl, ex, { revealed: false, attemptHTML: opts.attemptHTML });
 }
 
 // ---------- Exercício de múltipla escolha (meaning / listen) ----------
@@ -5335,13 +5682,20 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
         <div class="exercise-prompt">
           <div class="prompt-translation">${ex.phrase.t}</div>
         </div>
-      ` : ''}
+      ` : `
+        <div class="exercise-prompt reorder-target">
+          <div class="prompt-translation">${ex.phrase.t}</div>
+          ${audioBtnHTML(ex.phrase.f, 'audio-btn-lg')}
+        </div>
+        <div class="reorder-wrap-hint">Toque nas palavras na ordem certa. Toque numa já colocada para devolvê-la.</div>
+      `}
       <div class="reorder-answer-slots" id="reorder-answer-slots"></div>
       <div class="reorder-blocks" id="reorder-blocks"></div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
+  wireAudioButtons(contentEl);
   const slotsEl = document.getElementById('reorder-answer-slots');
   const blocksEl = document.getElementById('reorder-blocks');
 
@@ -5406,8 +5760,11 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     );
     playFeedbackSound(isCorrect);
 
-    slotsEl.querySelectorAll('.reorder-slot').forEach(slot => {
-      slot.classList.add(isCorrect ? 'correct' : 'incorrect');
+    // Acerto: tudo verde. Erro: só os blocos fora do lugar ficam vermelhos,
+    // os que já estavam na posição certa ficam verdes (dica de onde errou).
+    slotsEl.querySelectorAll('.reorder-slot').forEach((slot, pos) => {
+      const here = ex.shuffledBlocks[chosenSequence[pos]] === correctOrder[pos];
+      slot.classList.add(isCorrect || here ? 'correct' : 'incorrect');
     });
     // Com a frase completa, todo bloco já foi usado (visibility:hidden --
     // preserva a posição pra "desfazer" clicando num slot) -- mas essa
@@ -5426,10 +5783,19 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       // repeti-lo aqui seria redundante; mostra a frase francesa completa
       // (o aluno só viu ela em pedaços separados até agora) como
       // confirmação nova de verdade.
-      const detail = ex.mode === 'translate' ? ex.phrase.f : ex.phrase.t;
+      // A frase montada, inteira e em tamanho de leitura, com áudio e tradução:
+      // é a recompensa pedagógica de quem acabou de montá-la.
+      const detail = `<div class="reorder-final"><div class="reorder-final-fr">${ex.phrase.f} ${audioBtnHTML(ex.phrase.f)}</div><div class="reorder-final-tr">${ex.phrase.t}</div></div>`;
       setTimeout(() => showCorrectFeedbackPanel(contentEl, detail), 500);
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+      // "Sua resposta" com cada bloco marcado: vermelho = não pertence à
+      // frase (isca) ; amarelo sublinhado = palavra certa no lugar errado.
+      const attemptHTML = `<div class="reorder-attempt">${chosenSequence.map((blockIdx, pos) => {
+        const block = ex.shuffledBlocks[blockIdx];
+        const cls = block === correctOrder[pos] ? 'ok' : (correctOrder.includes(block) ? 'near' : 'bad');
+        return `<span class="reorder-attempt-w ${cls}">${block.f}</span>`;
+      }).join(' ')}</div>`;
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex, { attemptHTML }), 500);
     }
   }
 
@@ -6587,18 +6953,19 @@ function startModuleReviewSession(moduleId){
   renderReviewView();
 }
 
-function buildModuleReviewRow(module){
+function buildModuleReviewRow(module, unlocked){
   const sel = moduleReviewSelection(module);
   const rec = STATE.reviewMilestones[module.id];
   const st = milestoneState(sel.available, rec);
   const why = milestoneReasonText(sel);
   const dateBR = rec && rec.lastDate ? rec.lastDate.split('-').reverse().join('/') : '';
   let goal;
-  if (st === 'empty') goal = 'Nada para revisar ainda: estude as unidades deste módulo e volte aqui.';
+  if (unlocked === false) goal = 'Bloqueada: libere o módulo (complete a unidade anterior) para revisar.';
+  else if (st === 'empty') goal = 'Nada para revisar ainda: estude as unidades deste módulo e volte aqui.';
   else if (st === 'done') goal = `Revisada em ${dateBR}${why ? ' · de novo agora: ' + why : ''} (opcional)`;
   else goal = `Recomendado antes de seguir (opcional)${why ? ' · ' + why : ''}`;
   const block = document.createElement('div');
-  block.className = 'unit-block review-milestone' + (st === 'empty' ? ' empty' : '') + (st === 'done' ? ' done' : '');
+  block.className = 'unit-block review-milestone' + (unlocked === false ? ' locked' : '') + (st === 'empty' ? ' empty' : '') + (st === 'done' ? ' done' : '');
   block.innerHTML = `
     <div class="ub-header">
       <div class="ub-icon">🔁</div>
@@ -6608,7 +6975,7 @@ function buildModuleReviewRow(module){
       </div>
     </div>
   `;
-  if (st !== 'empty') wireHeaderActivation(block.querySelector('.ub-header'), () => startModuleReviewSession(module.id));
+  if (unlocked !== false && st !== 'empty') wireHeaderActivation(block.querySelector('.ub-header'), () => startModuleReviewSession(module.id));
   return block;
 }
 
@@ -6947,7 +7314,7 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
         return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${mark}${escapeHTML(opt.text)}</button>`;
       }).join('')}
     </div>
-    ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}</button>` : ''}
+    ${answered ? `${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}</button>` : ''}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -7049,7 +7416,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
         ${frAccentPickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
   `;
 
   wireCustomAudioButtons(mountEl);
@@ -7058,17 +7425,17 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     const inputEl = mountEl.querySelector('#cloze-review-input');
     inputEl.focus();
     wireFrAccentPicker(mountEl.querySelector('.fr-accent-picker'), inputEl);
-    const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
     function verify(){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
       mountEl.querySelector('#cloze-review-verify-btn').disabled = true;
-      const typed = strip(inputEl.value);
       // Interação intermediária (verificar) -- muta localState e o
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      localState.wasCorrect = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      const verdict = typedAnswerVerdict(inputEl.value, acceptedForms(view.compareAnswerText));
+      localState.wasCorrect = verdict !== 'errou';
+      localState.almost = verdict === 'quase';
       renderClozeCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
@@ -7077,7 +7444,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
       // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
       // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
+      callbacks.onAnswered(localState.wasCorrect, typedAnswerGrade(localState.almost ? 'quase' : localState.wasCorrect ? 'ok' : 'errou'));
     });
   }
 }
@@ -7129,7 +7496,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
         ${frAccentPickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -7144,17 +7511,17 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     const inputEl = mountEl.querySelector('#cloze-review-input');
     inputEl.focus();
     wireFrAccentPicker(mountEl.querySelector('.fr-accent-picker'), inputEl);
-    const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
     function verify(){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
       mountEl.querySelector('#cloze-review-verify-btn').disabled = true;
-      const typed = strip(inputEl.value);
       // Interação intermediária (verificar) -- muta localState e o
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      localState.wasCorrect = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      const verdict = typedAnswerVerdict(inputEl.value, acceptedForms(view.compareAnswerText));
+      localState.wasCorrect = verdict !== 'errou';
+      localState.almost = verdict === 'quase';
       renderTypeAnswerCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
@@ -7163,7 +7530,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
       // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
       // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
+      callbacks.onAnswered(localState.wasCorrect, typedAnswerGrade(localState.almost ? 'quase' : localState.wasCorrect ? 'ok' : 'errou'));
     });
   }
 }
@@ -7430,6 +7797,7 @@ function renderNormalCard(mountEl, card, localState, callbacks){
       ` : `<div class="flashcard-hint">${t('review.tapToReveal')}</div>`}
     </div>
     ${localState.revealed ? `
+      ${reviewObservationHTML(card)}
       ${gradeButtonsHTML(card)}
     ` : ''}
   `;
@@ -8154,6 +8522,8 @@ const switchTab = createTabSwitcher({
     'admin-badges': renderAdminPanelView,
     'my-flashcards': renderMyFlashcardsView,
     'support-materials': renderSupportMaterialsView,
+    'teacher-panel': renderTeacherPanelView,
+    'my-class-logs': renderMyClassLogsView,
     leaderboard: openLeaderboardView,
     friends: renderFriendsView,
     path: renderUnitsGrid,
