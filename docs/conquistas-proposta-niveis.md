@@ -53,11 +53,9 @@ Metas e nomes são sugestões para a autora ajustar. ✨ = nível máximo (toda 
 Notas:
 - **Nível A1/HSK 1** vira uma conquista por nível do curso: quando entrar o A2 (ou HSK 2), nasce "Nível A2" igual,
   e o problema do "HSK 1 Completo" contar o curso inteiro some.
-- **Unidade pulada pelo ponto de verificação (sugestão)**: conta para "Nível A1/HSK 1" (bronze, prata e ouro), porque
-  quem passou no ponto de verificação provou que sabe, e o próprio modelo da trilha já trata a unidade pulada como
-  "conta para o nível" (`shared/trail-state-model.js`). Sem isso, quem faz o Teste de Nivelamento e pula o A1 nunca
-  ganharia "A1 Completo". O que fica só para quem estudou é a trilha **Primeiro Passo** (lições concluídas), e o
-  máximo "A1 Gabaritado" exige 100% em todos os pontos de verificação, o que vale para os dois caminhos.
+- **Unidade pulada pelo ponto de verificação (decidido em 2026-10-13)**: conta para "Nível A1/HSK 1" (bronze, prata
+  e ouro), porque quem passou no ponto de verificação provou que sabe (`shared/trail-state-model.js` já trata assim).
+  O máximo "A1 Gabaritado" exige 100% em todos os pontos de verificação, o que vale para os dois caminhos.
 - **Sequência** é da conta (mudança de outra conversa): passa a valer para os dois idiomas. Os marcos que os amigos
   veem (5, 10, 15... 365) continuam à parte.
 
@@ -113,8 +111,36 @@ Nomes com gênero em português (seguem o perfil, critério 5): Revisor(a) Apren
 Decidido em 2026-10-13: aposentar Multitarefa; parabéns a partir do ouro + nível máximo; inglês neutro e português
 pelo gênero do perfil, com "(a)" quando não informado.
 
-Ainda com a autora: nomes e metas finais de cada trilha (maquete visual publicada para isso) e se a unidade pulada
-conta para "Nível A1/HSK 1" (sugestão: conta).
+Decidido em 2026-10-13: unidade pulada pelo ponto de verificação conta para "Nível A1/HSK 1".
+
+Ainda com a autora: nomes e metas finais (sugestão calibrada na seção 7).
+
+## 7. Metas finais sugeridas (calibradas em 2026-10-13)
+
+Base: produção (fr 20 contas, zh 5) e tamanho do curso (fr 30 unidades, 82 lições, 204 palavras, 21 ditados;
+zh 18 unidades, 74 lições, 166 palavras). Números de hoje: revisões p90 ~100 (máx. 142), XP p50 ~570, p90 ~2.000
+(máx. 4.056), áudios p90 671 (máx. 1.215), lições p90 26 (máx. 74), dias ativos máx. 15, sequência máx. 2.
+
+Critério novo (8): **trilha presa ao tamanho do curso termina no fim do conteúdo e ganha níveis quando entrar o
+A2/HSK 2**; trilha sem teto (dias, XP, revisões) tem o máximo em meses de estudo.
+
+| Trilha | Metas sugeridas | Mudou por quê |
+|---|---|---|
+| Primeiro Passo | **dias de estudo no total**: 1 · 7 · 20 · 50 · 100 · 200 ✨ | 250 lições não existem (82 no fr, 74 no zh) e lições já estão em "Nível A1"; dias no total (não seguidos) premia voltar sempre |
+| Revisão | 50 · 100 · 200 · 500 ✨ (opcional 6º: 1.000) | igual ao pedido; o melhor aluno faria 500 em uns 2 meses |
+| Sequência | 3 · 7 · 15 · 30 · 75 · 150 · 365 ✨ | igual; hoje ninguém passou de 2 |
+| XP | 100 · 500 · 2.000 · 5.000 · 10.000 · 25.000 ✨ | 10.000 sairia em um mês para quem lidera (4.056 em duas semanas) |
+| Nível A1 / HSK 1 | 1ª unidade · metade · todas · todos os pontos de verificação com 100% ✨ | igual (preso ao curso) |
+| Ouvido | 100 · 500 · 2.000 · 5.000 ✨ | 1.500 quase já saiu (máx. 1.215) |
+| Explorar | 3 · 5 · todos os modos do site ✨ | igual |
+| Fim de Semana | 1 · 4 · 12 · 26 · 52 ✨ | igual |
+| Vocabulário | 25 · 50 · 100 · 150 ✨ (cartões de palavra aprendidos) | 1.000 não existe; 150 cabe nos dois cursos; novos níveis com o A2 |
+| Gabaritou | 1 · 5 · 10 · todos de um nível ✨ | 3 e 5 ficavam muito perto (há 1 ponto de verificação por unidade) |
+| Ditado (fr) | 5 · 25 · 100 ✨ ditados com 90% ou mais (repetir conta) | igual; só 21 ditados, então repetir tem de contar |
+| Desafios (fr) | 10 · 50 · 200 ✨ | igual |
+| Pódio | 1 · 5 · 10 ✨ semanas em 1º | igual |
+| Amigos | 1 · 3 · 10 ✨ | igual |
+
 
 ## 6. Implementação (depois da aprovação)
 
