@@ -28,10 +28,10 @@
 
 ## Expressões
 
-| Unidade | Expressão | Significado | Exemplo |
-|---|---|---|---|
-| A1-8 | Excusez-moi ! | Com licença! Desculpe! | Excusez-moi, où est la gare ? |
-| A1-8 | Je vous en prie | De nada; por favor, fique à vontade. | Merci beaucoup ! — Je vous en prie. |
-| A1-10 | Ça fait combien ? | Quanto fica? Quanto dá? | Ça fait combien, s'il vous plaît ? |
-| A1-10 | C'est trop cher ! | É caro demais! | Cent euros ? C'est trop cher ! |
-| A1-12 | Et avec ça ? | Mais alguma coisa? | Un kilo de pommes. — Et avec ça ? |
+| Unidade | Expressão | Registro | Significado | Exemplo |
+|---|---|---|---|---|
+| A1-8 | Excusez-moi ! | neutral | Com licença! Desculpe! | Excusez-moi, où est la gare ? |
+| A1-8 | Je vous en prie | neutral | De nada; por favor, fique à vontade. | Merci beaucoup ! — Je vous en prie. |
+| A1-10 | Ça fait combien ? | neutral | Quanto fica? Quanto dá? | Ça fait combien, s'il vous plaît ? |
+| A1-10 | C'est trop cher ! | neutral | É caro demais! | Cent euros ? C'est trop cher ! |
+| A1-12 | Et avec ça ? | neutral | Mais alguma coisa? | Un kilo de pommes. — Et avec ça ? |
