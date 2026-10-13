@@ -141,14 +141,14 @@ window.I18N_CATALOG['en'] = {
   'notif.pref.loadFailed': 'Could not load your preferences right now.', // ALTA
   'notif.pref.sectionTitle': 'Notifications', // ALTA
   'notif.pref.inApp.title': 'In-app notifications', // ALTA
-  'notif.pref.inApp.sub': 'Bell in the top bar + notification center. Turning this off silences everything at once -- fine-tune by category under "Customize by category" below.', // ALTA
+  'notif.pref.inApp.sub': 'Bell at the top of the screen and notification center. Turning this off silences everything at once. To adjust each category, use "Customize by category" below.', // ALTA
   'notif.pref.push.title': 'Browser alerts (push)', // ALTA
-  'notif.pref.push.sub': 'Notifies you even when the app is closed. Turn on by category under "Customize" below -- this switch handles the browser permission and turns everything on at once.', // MÉDIA
+  'notif.pref.push.sub': 'Notifies you even when the app is closed. This switch handles the browser permission and turns everything on at once. To choose by category, use "Customize by category" below.', // MÉDIA
   'notif.pref.email.title': 'Emails', // ALTA
-  'notif.pref.email.sub': 'Sends to your account email in some cases (e.g., when you disappear for a while). Turn on by category under "Customize" below -- this switch turns everything on at once.', // MÉDIA
+  'notif.pref.email.sub': 'Sends to your account email in some cases (for example, when you disappear for a while). This switch turns everything on at once. To choose by category, use "Customize by category" below.', // MÉDIA
   'notif.pref.quiet.section': 'Quiet hours', // ALTA
   'notif.pref.quiet.title': 'Do not notify between', // ALTA
-  'notif.pref.quiet.sub': 'Applies to automatically calculated notifications (review, streak...) -- instant ones (XP, badge) still appear. Approximate time (not yet adjusted to your time zone).', // MÉDIA
+  'notif.pref.quiet.sub': 'Applies to automatically calculated notifications (review, streak...). Instant ones (XP, badge) still appear. Approximate time (not yet adjusted to your time zone).', // MÉDIA
   'notif.pref.quiet.startAria': 'Start of quiet hours', // ALTA
   'notif.pref.quiet.endAria': 'End of quiet hours', // ALTA
   'notif.pref.quiet.until': 'to', // ALTA
@@ -281,7 +281,7 @@ window.I18N_CATALOG['en'] = {
   'deck.studyThis': 'Study this Deck', // ALTA
   'deck.countsFull': '{total} cards · {new} new · {learning} learning · {review} to review · {due} due', // ALTA
   'deck.publicBadge': '🌐 Public', // ALTA
-  'deck.publish': 'Publish', // ALTA
+  'deck.publish': '🔒 Private', // ALTA
   'deck.cardsCount': { one: '{n} card', other: '{n} cards' }, // ALTA
   'deck.countsDetail': { one: '{n} card · {new} new · {learning} learning · {review} to review', other: '{n} cards · {new} new · {learning} learning · {review} to review' }, // MÉDIA
   'myFlashcards.lang.fr': 'French', // ALTA
@@ -304,7 +304,7 @@ window.I18N_CATALOG['en'] = {
   'myFlashcards.free.hint': '🔒 On the free plan you create Normal cards, with image/audio upload per field (external URL also available). <strong>Premium</strong> unlocks Normal with reverse, Multiple choice, Fill in the blank, Type the answer, plus generating audio from text and recording audio with the microphone.', // MÉDIA
   'myFlashcards.cardType': 'Card type', // ALTA
   'myFlashcards.fields.title': 'Fields', // ALTA
-  'myFlashcards.fields.hint': 'Add this card\'s fields -- for example, Front and Back for a Normal card. Each field has its own language and its own audio options.', // ALTA
+  'myFlashcards.fields.hint': 'Add this card\'s fields, for example Front and Back for a Normal card. Each field has its own language and its own audio options.', // ALTA
   'myFlashcards.preview': '👁️ Preview', // ALTA
   'myFlashcards.deckDest': 'Destination Deck', // ALTA
   'myFlashcards.note.label': 'Note (optional)', // ALTA
@@ -728,7 +728,7 @@ window.I18N_CATALOG['en'] = {
   'review.deck.createSubdeck': 'Create subdeck', // ALTA -- Revisão nova
   'review.deck.rename': 'Rename', // ALTA -- Revisão nova
   'review.deck.isPublic': '🌐 Public', // ALTA -- Revisão nova
-  'review.deck.publish': 'Publish', // ALTA -- Revisão nova
+  'review.deck.publish': '🔒 Private', // ALTA -- Revisão nova
   'review.deck.delete': 'Delete', // ALTA -- Revisão nova
   'review.deck.loading': 'Loading…', // ALTA -- Revisão nova
   'review.deck.loadError': 'Couldn\'t load. Try again.', // ALTA -- Revisão nova
@@ -1260,7 +1260,7 @@ window.I18N_CATALOG['en'] = {
   'admin.students.link': 'Link', // ALTA
   'admin.students.yourStudents': 'Your students ({n})', // ALTA
   'admin.students.linkedToast': '✓ @{username} linked as a student.', // ALTA
-  'admin.students.removeConfirm': 'Remove this link? The student\'s progress and history are preserved -- they just stop appearing in your list.', // ALTA
+  'admin.students.removeConfirm': 'End the link with this student? Their progress and history are kept; they leave your list and lose your student badge.', // ALTA
   'admin.students.metrics.failed': 'We couldn\'t load the metrics right now.', // ALTA
   'admin.students.metrics.noCards': 'You haven\'t created any cards for this student yet, in the "📇 Flashcards" tab.', // ALTA
   'admin.students.metrics.noRecord': 'no record', // ALTA
@@ -1924,7 +1924,7 @@ window.I18N_CATALOG['en'] = {
   'ui.challenges.backToCategories': '← Back to categories', // ALTA
   'ui.profileEdit.username': 'Your public identifier (permanent)', // ALTA
   'ui.profileEdit.publicProfile': 'Public profile', // ALTA
-  'ui.profileEdit.publicProfileSub': 'Makes your name, badges, progress and your own cards visible to anyone with your profile link.', // ALTA
+  'ui.profileEdit.publicProfileSub': 'On: anyone with an account sees your photo, progress and public decks. Off: only friends and your teacher do; others see just your name, @ and badges, and can only find you by your exact @.', // ALTA
   'ui.profileEdit.featuredBadge': 'Featured badge (shown in the Leaderboard)', // ALTA
   'ui.kbd.title': '⌨️ Keyboard shortcuts', // ALTA
   'ui.kbd.choose': 'Pick an option by its position on screen', // ALTA
@@ -1963,6 +1963,11 @@ window.I18N_CATALOG['en'] = {
   'ui.zh.searchPh': 'Search by pinyin, hanzi or translation...', // ALTA
   'feedback.almostArrow': 'Almost! → {expected}', // ALTA
   'feedback.correctAnswerColon': 'Correct answer:', // ALTA
+  'feedback.label.yourAnswer': 'Your answer', // ALTA
+  'lesson.step.dialogueCheck': 'Did you understand?', // ALTA
+  'lesson.vocabDots.aria': 'Word {pos} of {total}', // ALTA
+  'zh.exercise.translateToChinese': 'Translate into Chinese', // ALTA
+  'zh.reorder.tapHint': 'Tap the blocks in the right order. Tap a placed one to send it back.', // ALTA
   'feedback.whereSeen': 'Where you saw this before', // ALTA
   'feedback.header.revealed': '👀 Answer revealed', // ALTA
   'feedback.header.notThisTime': '❌ Not this time', // ALTA
@@ -2462,4 +2467,75 @@ window.I18N_CATALOG['en'] = {
   'rb.sensitiveTag': 'Sensitive', // ALTA
   'rb.sensitiveHint': 'Personal content or strong language: it does not become a card on its own.', // ALTA
   'rb.fSensitive': 'Sensitive content: it does not become a card on its own, you decide', // ALTA
+  'publicProfile.loginToSee': 'Log in to see the full profile.', // ALTA
+  'publicProfile.loginCta': 'Log in or sign up', // ALTA
+  'publicDeckCopies.tab': 'Public decks', // ALTA
+  'publicDeckCopies.adminHint': 'How many people added each public deck (each account counts once; re-copies only add to "Copies"). Counted since Oct 12, 2026.', // ALTA
+  'publicDeckCopies.none': 'No public decks yet.', // ALTA
+  'publicDeckCopies.error': 'Couldn\'t load public decks right now.', // ALTA
+  'publicDeckCopies.people': 'People', // ALTA
+  'publicDeckCopies.copies': 'Copies', // ALTA
+  'publicDeckCopies.last': 'Last copy', // ALTA
+  'publicDeckCopies.unpublished': 'unpublished', // ALTA
+  'publicDeckCopies.ownerCount': { one: '{n} person added this deck', other: '{n} people added this deck' }, // ALTA
+  'publicDeckCopies.lastOn': 'Last time on {date}', // ALTA
+  'publicDeckCopies.premiumHint': 'With Premium you can see how many people added this deck.', // ALTA
+  'studentAnalytics.open': 'Student analytics ({lang})', // ALTA
+  'studentAnalytics.title': '{name}\'s analytics', // ALTA
+  'studentDecks.title': 'Student decks', // ALTA
+  'studentDecks.deck': 'Deck', // ALTA
+  'studentDecks.hint': 'You see each deck\'s name and numbers (subdecks included), without opening the cards. Only what the student has already synced counts.', // ALTA
+  'studentDecks.empty': 'The student has no cards in decks yet.', // ALTA
+  'studentDecks.error': 'Couldn\'t load the student\'s decks right now.', // ALTA
+  'tinvite.lang.frances': 'French', // ALTA
+  'tinvite.lang.mandarim': 'Chinese', // ALTA
+  'tinvite.lang.portugues': 'Portuguese', // ALTA
+  'tinvite.title': 'Invite a student', // ALTA
+  'tinvite.hint': 'Pick the language and invite through search or send the link. The student accepts, gets your badge and shows up here. Invites last 14 days.', // ALTA
+  'tinvite.langLabel': 'Class language', // ALTA
+  'tinvite.search.title': 'By search', // ALTA
+  'tinvite.send': 'Invite for {lang}', // ALTA
+  'tinvite.sentToast': 'Invite sent! The student sees it in the bell and at the top of the Path.', // ALTA
+  'tinvite.link.title': 'By link', // ALTA
+  'tinvite.link.hint': 'Anyone who opens this link and accepts becomes your student right away. Good for WhatsApp or your class group.', // ALTA
+  'tinvite.link.copy': 'Copy link', // ALTA
+  'tinvite.link.copied': 'Link copied!', // ALTA
+  'tinvite.link.whatsapp': 'Send on WhatsApp', // ALTA
+  'tinvite.link.reset': 'Make a new link', // ALTA
+  'tinvite.link.resetConfirm': 'Make a new link? The old link stops working right away.', // ALTA
+  'tinvite.link.whatsText': 'Hi! Here is my invite to the {lang} classes. Just open it and accept: {url}', // ALTA
+  'tinvite.pending.title': 'Pending invites ({n})', // ALTA
+  'tinvite.pending.daysLeft': { one: 'expires in {n} day', other: 'expires in {n} days' }, // ALTA
+  'tinvite.pending.expired': 'expired', // ALTA
+  'tinvite.pending.resend': 'Resend', // ALTA
+  'tinvite.pending.cancel': 'Cancel', // ALTA
+  'tinvite.pending.cancelConfirm': 'Cancel this invite? The student will no longer see it.', // ALTA
+  'tinvite.direct.title': 'Link directly (admin only)', // ALTA
+  'tinvite.direct.hint': 'Creates the link right away, without the student accepting. Only use it for someone who already agreed to classes with you.', // ALTA
+  'tinvite.banner.title': '{name} invited you to {lang} classes', // ALTA
+  'tinvite.banner.see': 'See invite', // ALTA
+  'tinvite.card.kicker': 'Class invite', // ALTA
+  'tinvite.card.title': '{name} invited you to be their {lang} student', // ALTA
+  'tinvite.card.perkProgress': 'Follow-up on your {lang} progress', // ALTA
+  'tinvite.card.perkCards': 'Cards and class notes made for you', // ALTA
+  'tinvite.card.perkBadge': 'A student badge on your profile', // ALTA
+  'tinvite.card.accept': 'Accept invite', // ALTA
+  'tinvite.card.loginToAccept': 'Log in to accept', // ALTA
+  'tinvite.card.decline': 'Decline', // ALTA
+  'tinvite.card.later': 'Not now', // ALTA
+  'tinvite.card.foot': 'To end the link later, just talk to whoever invited you.', // ALTA
+  'tinvite.acceptedToast': 'Done! You are now {name}\'s {lang} student 🎓', // ALTA
+  'tinvite.declinedToast': 'Invite declined.', // ALTA
+  'tinvite.err.not_authorized': 'Only accounts with the Teacher plan can invite students.', // ALTA
+  'tinvite.err.invalid_language': 'Invalid language.', // ALTA
+  'tinvite.err.invalid_target': 'This invite is yours: you can\'t be your own student.', // ALTA
+  'tinvite.err.not_found': 'I couldn\'t find that account.', // ALTA
+  'tinvite.err.student_has_teacher': 'This account already has a teacher for this language. Only one per language.', // ALTA
+  'tinvite.err.already_student': 'This account is already your student for this language.', // ALTA
+  'tinvite.err.already_invited': 'You already invited this account. The invite is still valid.', // ALTA
+  'tinvite.err.daily_invite_limit': 'You reached the limit of 30 invites per day. Try again tomorrow or send the link.', // ALTA
+  'tinvite.err.no_pending_invite': 'This invite is no longer valid.', // ALTA
+  'tinvite.err.invalid_code': 'This invite link no longer works. Ask whoever invited you for a new one.', // ALTA
+  'tinvite.err.not_authenticated': 'Log in to answer the invite.', // ALTA
+  'tinvite.err.generic': 'That didn\'t work right now. Try again in a moment.', // ALTA
 };

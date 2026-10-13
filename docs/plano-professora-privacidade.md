@@ -171,3 +171,142 @@ Entregue (pedido da autora: separar menus, melhorar a busca por @, aplicar a ski
 - Testes antigos que abriam Alunos/Cartões pelo Admin passaram a abrir pelo Painel da professora (mudança deliberada).
 - Pendente: badge "Aluno/a do/a Prof. {nome}", convite de aluno, rota da notificação de supervisão na Edge Function
   (`notification-cron`, hoje 'admin-badges', funciona pelo redirecionamento; trocar exige deploy).
+
+## Convite de aluno + badge por professora (2026-10-12)
+
+Decisões da autora: convite bloqueado se o aluno já tem professora naquele idioma; vale 14 dias; **o aluno não sai
+sozinho** (só a professora encerra o vínculo); **o badge some quando o vínculo acaba**; a admin continua vinculando
+direto, as outras professoras só convidam; link de convite com cartão caprichado; limite de 30 convites por dia.
+
+- **Migration 077** `teacher_invites_and_badges` (Staging `20261012182754`; produção `20261012184454`, 2026-10-12):
+  `invited_at`/`responded_at` em `teacher_students`; índice único parcial "1 professora ativa por aluno por idioma";
+  `badge_catalog.teacher_id` (o `student` da autora vira o badge dela); tabelas `teacher_invite_codes` (link por
+  professora e idioma, código de 10 letras/números) e `teacher_invite_log` (limite diário), sem acesso direto;
+  trigger em `teacher_students` que dá o badge da professora quando o vínculo fica ativo e tira quando não sobra
+  vínculo ativo com ela (vale também para o vínculo direto da admin e para apagar o vínculo); RPCs
+  `teacher_invite_student`, `my_teacher_invites`, `respond_teacher_invite`, `teacher_invite_link`,
+  `invite_code_info` (também sem login) e `accept_invite_code`. A policy `teacher_students_teacher_update` agora só
+  deixa a professora gravar `removed` (antes aceitava `invited` direto, sem limite e sem aviso).
+  Badge de professora nova: "Aluno/a do/a Prof. {primeiro nome}", 🎓, criado no primeiro aceite.
+  Avisos no sino: aluno (`sistema`, abre a Trilha); professora (`supervisao`: aceitou, recusou, entrou pelo link).
+- **Telas**: Painel da professora > Alunos ganhou "Convidar aluno" (idioma em chips; busca por nome/@ igual à aba
+  Planos; link com Copiar, Mandar no WhatsApp e Gerar outro link), "Convites pendentes" (vence em N dias, Cancelar,
+  Reenviar o vencido) e, só para a admin, "Vincular direto" recolhido. Aluno: faixa no topo da Trilha com o convite
+  e o cartão (capa colorida, foto da professora, o que muda, Aceitar/Recusar). Link `?convite=` funciona sem login
+  (cartão com "Entrar para aceitar"; o código fica guardado e o cartão volta depois do login).
+  Código: `shared/teacher-invites.js` (novo), `admin-students.js`, `roles.js` (sem o insert do badge pelo cliente;
+  `fetchMyStudents` só ativos, `fetchMyPendingInvites`), `auth.js`, CSS `.tinv-*` nos dois `index.html`.
+- **Grátis x Premium**: convidar é do plano Professora; aceitar é grátis para qualquer conta.
+- **Testes**: `tests/papeis-permissoes/run_local_077.sh` 47/47 (Postgres local, 077 aplicada 2x); Staging ponta a
+  ponta dentro de transação desfeita (convite, aceite, badge, link já aceito, desvínculo tira badge);
+  `tests/painel-professora/test_playwright.js` 277/277; regressão: fase-f 50, fase-g 68+134, fase-h 68+78, fase-i 48,
+  fase-k6 28, painel-alunos 48, deck-browser 206, revisao-ajustes 48, revisao-proposta-a 58, i18n unit 2039/2039,
+  papeis 076 25/25. `tests/painel-alunos/test_student_panel_unit.js` já quebrava antes (`t` ausente no VM).
+- Atenção: outra conversa aplicou `course_keys_and_account_streak_readers` no Staging hoje sem arquivo na `main`;
+  se ela também usar o número 077, renumerar a dela (esta já está no repo).
+
+## Etapa 3 (perfil privado) -- auditoria (2026-10-12, só leitura; repo + produção ao vivo)
+
+Produção: 27 perfis, **todos públicos**; 14 Decks pessoais, **nenhum público**; 0 amizades. Nada muda para quem já
+existe ao ligar as regras novas.
+
+O que respeita `public_profile` hoje: `get_public_profile_stats` (037), `list_public_decks_for_user`, `get_public_deck`,
+`get_public_deck_notes`, `copy_public_flashcard` (061), `check_public_deck_duplicates` (062), manifest (068),
+`copy_public_deck` (079). **Nenhuma tem exceção para amigos nem para a professora com vínculo.**
+
+Furos em relação às decisões da tabela acima:
+1. `profiles` tem leitura pública total (`profiles_public_read`, 001, inclusive anon). Expõe bio, país, plano, papel,
+   admin_mode, exclude_own_activity e o próprio public_profile. Qualquer busca direta na tabela (Planos, convite de
+   aluno) acha conta privada por pedaço do nome: a regra "só pelo @ exato" não se sustenta sem fechar a tabela.
+2. `search_profiles_for_friends` (073) ignora a privacidade (busca por pedaço, 3 letras).
+3. Página do perfil privado ainda mostra bio, badges (inclusive o da professora) e conquistas
+   (`fetchPublicProfileByUsername` lê profiles/badge_grants/earned_badges direto). Decidido: só nome, @ e avatar.
+4. `weekly_xp`, `badge_grants`, `earned_badges`, `badge_catalog`: leitura pública até para anon. Ranking geral
+   aparece no modo convidado sem filtro.
+5. Decks: `is_public default false`; o trigger `decks_public_guard` (061) impede o cliente de criar Deck já público
+   (precisa de RPC/trigger no servidor que gere public_id/published_at). Publicar é grátis; abrir/copiar é Premium.
+   Decks criados por cópia de Deck público, import Anki e `ensure_user_decks` também nascem privados.
+6. Textos de publicar estão fixos em português (sem `t()`); subtítulo da chave do perfil fala de "cartões próprios"
+   (seção desligada).
+Sem teste hoje: stats `not_public`, tela do perfil privado, exceções de amigo/professora.
+
+### Respostas da autora à auditoria (2026-10-12)
+- Fechar a leitura aberta de `profiles` e abrir só o necessário por funções: **sim**.
+- Deck nasce público em conta pública: **sim** (confirmado).
+- País é dado sensível (fecha). **Plano e papel ficam públicos** (estimulam: Premium, Professora).
+- Proposta nova da autora: **fechar o acesso de convidado** (site exige login, como o Duolingo), melhorar o login
+  com confirmação por e-mail/SMS e deixar o modo sem login só para o sistema (testes e capturas de tela).
+  Com isso a pergunta "ranking para visitante sem login" deixa de existir.
+- Dados de produção: 1 Deck criado por usuário (1 conta), 13 "Meus Decks" automáticos, 7 cartões próprios de 2 contas.
+
+### Decisões finais da Etapa 3 (2026-10-12)
+| Tema | Decisão |
+|---|---|
+| Convidado | Acaba. Site exige login. Quem estudava como convidado perde o progresso local (decisão da autora). Modo sem login fica escondido, só para testes e prints (sem botão). |
+| Cadastro por e-mail | Confirmação com **código** enviado por e-mail (Resend, profbrune.com.br). Google já vem confirmado. SMS fica para depois (custo). |
+| Links compartilhados sem login (perfil, Deck público, convite) | Abrem um cartão de apresentação + "Entrar para ver"; conteúdo exige login. |
+| `profiles` | Leitura aberta fechada; abre só o necessário por funções. País fecha. Plano e papel continuam públicos. |
+| Página do perfil privado (estranhos) | Mostra nome, @, **badges e conquistas**. Esconde **foto, bio**, progresso e Decks. Amigos e a professora com vínculo veem tudo. |
+| Busca | Conta privada só pelo @ exato na busca de amigos e no convite de aluno; a admin (Planos) vê todos. |
+| Decks | Conta pública: Deck novo nasce público; conta privada: nasce privado. Deck vindo de cópia de Deck público ou de import Anki nasce privado. Botões "Tornar público"/"Tornar privado"; descrição/ícone/cor em "Editar página do Deck". O único Deck existente continua privado. |
+| Conta vira privada | Decks públicos somem para estranhos e continuam visíveis para amigos e para a professora; voltam se a conta voltar a ser pública. |
+| Ordem | 3a) fechar convidado + confirmação por código; 3b) perfil privado no banco e nas telas. |
+| Grátis x Premium | Tudo grátis (login, confirmação, perfil privado, Tornar público/privado). Abrir/copiar Deck de outra pessoa continua Premium. |
+
+### Etapa 3a -- login obrigatório (2026-10-12, branch; sem migration)
+- Portão (`index.html`): sem "Continuar sem conta"; quem já tinha estudado como convidado vê o login; a flag
+  `guest_mode` é zerada (o modo sem login só existe para testes, ligado direto no sessionStorage).
+- Cadastro por e-mail: tela "Confirme seu e-mail" com código (6 a 10 dígitos), "Reenviar código" com espera de 60 s,
+  "Usar outro e-mail"; login de conta não confirmada manda código novo e abre a mesma tela.
+- Perfil aberto sem login: só nome e @ (foto só se o perfil for público) + "Entrar ou criar conta"; Deck público
+  sem login já era só o cartão + botão. O botão guarda a rota e, depois do login, a pessoa volta ao perfil/Deck
+  (`rememberRouteForLogin`/`consumePendingRouteAfterLogin`, `shared/router.js`).
+- Passo manual: modelo do e-mail com `{{ .Token }}` e SMTP do Resend -- `docs/auth/confirmacao-por-codigo.md`.
+- Testes: `tests/login-obrigatorio/test_playwright.js` 43/43; regressão i18n 2039, identity 22, k10 114,
+  painel-professora 277, Deck público 152, amigos 158, placeholders 45.
+- Importante: fechar o portão não fecha o banco (a chave anon é pública). Isso é a Etapa 3b.
+
+### Etapa 3b -- perfil privado no banco e nas telas (2026-10-12)
+- **Migration 080** `private_profile` (Staging aplicada; produção **só depois do PR publicado**, porque o site
+  atual lê o próprio perfil com `select('*')`, que a 080 fecha. O site novo funciona com e sem a 080):
+  `_profile_full_access` (própria conta, admin, amigo aceito, professora/aluno com vínculo ativo); policy
+  `profiles_public_read` só para logado e só linhas públicas ou com acesso total; colunas `country`, `admin_mode`,
+  `exclude_own_activity` fechadas para todos (a conta lê tudo por `get_my_profile`); plano e papel seguem públicos;
+  RPCs `profile_cards`, `get_profile_card` (também sem login), `search_accounts`; `search_profiles_for_friends` com
+  privada só pelo @ exato e sem foto; stats/Decks/Deck/cartões/checagem/mídia/cópia liberados para amigos e
+  professora (troca feita no corpo que está no ar, por `pg_get_functiondef` + replace conferido); ranking, badges
+  e conquistas fechados para anon; RPCs de perfil público perdem anon (menos o cartão do Deck e do perfil).
+- **Site**: `fetchMyProfileRow`/`updateMyProfile`/`fetchProfileCards` (`shared/profile.js`); ranking, amizades e
+  alunos usam `profile_cards`; convite usa `search_accounts`; página do perfil usa `get_profile_card`; Deck
+  criado à mão nasce público em conta pública (`createPersonalDeck({source:'manual'})` + `publish_deck`), import
+  do Anki e cópia nascem privados; caixa do Deck com "Tornar público"/"Tornar privado" e "Editar página do Deck";
+  texto novo da chave "Perfil público".
+- **Testes**: `tests/perfil-privado/run.sh` (080 33/33 + Deck público 87/48/20/9/72/9 + cópias 15/15 + amigos 63+18
+  sobre o banco com a 080); `tests/perfil-privado/test_playwright.js` 16/16. Regressão de telas: painel-professora
+  277, k10 114, login 52, deck-browser 206, Deck público 152, amigos 158, identity 22, placeholders 45,
+  painel-alunos 48, fase-i 48, anki-destino 38, i18n 2036. Testes antigos ajustados de propósito: amigos (busca por
+  nome de conta privada), Deck público SQL (visitante sem login) e Playwright ("Publicar" virou "🔒 Privado",
+  campos em "Editar página do Deck"), deck-browser (rótulo do botão).
+
+### Publicação (2026-10-12)
+PR #304 mergeado e publicado (convite, Fase K final, login obrigatório, e-mails, perfil privado); em seguida a 080
+foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural.
+
+## Etapa 4 (mural) -- respostas da autora (2026-10-12, antes da auditoria)
+
+- **Destinatários**: a professora seleciona alunos (todos, vários ou um só). O recado aparece no mural de cada
+  selecionado como se fosse só dele: o aluno não sabe quem mais recebeu.
+- **Respostas**: o aluno pode responder e comentar.
+- **Aviso**: o recado chega no sino e mostra um pill "+N" (mensagens novas) na aba Perfil e num submenu Aulas ou
+  Mural, ou num menu próprio de Aluno (a decidir na auditoria).
+- **Anexo**: sim.
+- 2ª rodada (2026-10-12):
+  - **Mural por aluno** (como no Google Classroom): cada aluno tem a sua aba Mural. Alunos de uma mesma **turma**
+    podem compartilhar o mural: aí veem os recados e comentários uns dos outros, só dentro da turma.
+  - **Anexo**: PDF e imagem (tamanho sugerido: até 10 MB por arquivo e até 5 por recado; imagem reduzida no
+    navegador antes de subir).
+  - **Editar/apagar**: a professora edita e apaga recados; o aluno só apaga o próprio comentário.
+  - **Aviso**: só no sino + sinalizador no menu Perfil. Sem e-mail.
+- Em aberto para a auditoria: o que é uma turma (quem cria, aluno em várias turmas), quem liga o compartilhamento
+  (professora ou aluno), recado individual dentro de turma compartilhada, Grátis x Premium.
+

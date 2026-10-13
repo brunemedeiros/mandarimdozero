@@ -42,6 +42,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - **Notas de realidade/culturais**: toda nota nova ou editada é reportada no chat com nível de confiança
   (alta/média/baixa). Procedimento na skill `notas-de-realidade`.
 - **Conteúdo novo (nível/módulo/unidade)**: decidir os Desafios por categoria (skill `criar-desafios`).
+- **E-mails**: todo e-mail do site (Supabase Auth, Edge Functions, Resend) segue o padrão Prof Brune
+  (`docs/email/PADRAO-EMAIL.md`, modelo `docs/email/supabase/confirmar-conta.html`; detalhes em `.claude/rules/email.md`).
 
 ## Processo
 
@@ -74,7 +76,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 ## Índice
 
 - Regras por área (carregam sozinhas): `.claude/rules/` -- frontend-fr-zh, flashcards-motor, decks-review,
-  supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora.
+  supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora, email.
 - Skills do projeto: `migration-supabase`, `notas-de-realidade`, `criar-desafios`, `audio-tts`,
   `teste-navegador`, `registrar-entrega`.
 - Agentes (`.claude/agents/`, `model:` pela dificuldade): `regressao` (haiku, roda testes),
@@ -91,9 +93,10 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   (ambas aplicadas). 074 aplicada no Staging e na produção.
 - Desafios: `fr/scripts/supabase_migrations/007` (`cloze_grammar`) aplicada pela autora em 2026-10-07; `008` (gating
   Premium) NÃO aplicar antes do paywall. Lista do que fazer ao ligar o paywall: `docs/historico/14-pendencias-pos-paywall-e-decks.md`.
-- Todos os cartões antigos já têm Deck (migração de 2026-10-07). Regra "1 professora por aluno por idioma" ainda não imposta no banco.
+- Todos os cartões antigos já têm Deck (migração de 2026-10-07).
 - Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
-- 075/076 (papéis, permissões, regras da professora) na produção; telas novas (painéis Admin x Professora, Planos, Minhas aulas) na branch, não publicadas. Plano: 1) papel Professora, 2) Fase K final, 3) perfil privado, 4) mural -- `docs/plano-professora-privacidade.md`.
-- Banco de Revisão (migrations 081 a 085; no Staging a 081 aparece como `080_review_bank`): tela pronta e testada na branch (Professora > Cartões), NÃO publicada; migrations só no Staging, produção NÃO. Falta: autorizar 081 a 085 na produção, publicar, importar o arquivo, vincular alunos. App de português (`ptbr`) é urgente: 13 dos 24 alunos estudam português. Há também `080_private_profile` (outra conversa). Registro: `docs/historico/15-auditoria-banco-revisao.md`.
+- 075/076 (papéis, permissões, regras da professora) na produção; telas (painéis Admin x Professora, Planos, Minhas aulas) publicadas pelo PR #302 (2026-10-12). Plano: 1) papel Professora, 2) Fase K final, 3) login obrigatório + perfil privado (077-080 na produção, telas pelo PR #304), 4) mural -- `docs/plano-professora-privacidade.md`.
+- E-mails: SMTP (Resend) e modelos colados pela autora em 2026-10-12; depois do merge da correção do antivírus (PR dos botões de um toque), colar de novo os 4 modelos (`docs/auth/confirmacao-por-codigo.md`).
+- Banco de Revisão (migrations 081 a 085): aplicadas no Staging e na produção (2026-10-13; versões 20261013105651 a 105731, a 081 no Staging aparece como `080_review_bank`). Tela em Professora > Cartões publicada pelo merge da branch. Falta: importar o arquivo JSON pela tela, vincular alunos, "Gerar cartões". App de português (`ptbr`) é urgente: 13 dos 24 alunos estudam português. Registro: `docs/historico/15-auditoria-banco-revisao.md`.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.

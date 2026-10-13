@@ -34,22 +34,30 @@ function isTeacherOrAdmin(){
 // (admin-badges.js): teacher_students e profiles não têm FK direta entre
 // si, então o join é feito aqui em JS.
 async function fetchMyStudents(){
+  return fetchMyTeacherLinks('active');
+}
+
+// Convites que a professora mandou e o aluno ainda não respondeu (077). Os
+// vencidos (mais de 14 dias) vêm junto: a tela mostra "venceu" e oferece reenviar.
+async function fetchMyPendingInvites(){
+  return fetchMyTeacherLinks('invited');
+}
+
+async function fetchMyTeacherLinks(status){
   if (!CURRENT_USER) return [];
   const { data: links, error } = await supabaseClient
     .from('teacher_students')
     .select('*')
     .eq('teacher_id', CURRENT_USER.id)
-    .neq('status', 'removed')
-    .order('created_at', { ascending: false });
+    .eq('status', status)
+    .order(status === 'invited' ? 'invited_at' : 'created_at', { ascending: false });
   if (error){ console.error('Erro ao carregar alunos:', error); return []; }
   if (!links?.length) return [];
   const studentIds = [...new Set(links.map(l => l.student_id))];
-  const { data: profiles } = await supabaseClient
-    .from('profiles')
-    .select('user_id, username, display_name')
-    .in('user_id', studentIds);
+  // 080: convidado com perfil privado ainda não é aluno; profile_cards traz o nome.
+  const profiles = await fetchProfileCards(studentIds);
   const byId = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
-  return links.map(l => ({ ...l, username: byId[l.student_id]?.username, display_name: byId[l.student_id]?.display_name }));
+  return links.map(l => ({ ...l, username: byId[l.student_id]?.username, display_name: byId[l.student_id]?.display_name, avatar_url: byId[l.student_id]?.avatar_url }));
 }
 
 // Vincula uma aluna (por @username) à professora logada, num idioma
@@ -65,37 +73,32 @@ async function assignStudentToTeacher(studentUsername, languageAppKey){
   const target = await resolveProfileByUsername(clean);
   if (!target) return { ok: false, error: 'Não achei ninguém com esse @username. Confira a grafia.' };
   if (target.user_id === CURRENT_USER?.id) return { ok: false, error: 'Você não pode se atribuir como sua própria aluna.' };
+  // 1 professora ativa por idioma (índice da 077): avisa antes, com a mensagem certa.
+  const { data: activeLinks } = await supabaseClient
+    .from('teacher_students')
+    .select('teacher_id')
+    .eq('student_id', target.user_id).eq('language_app_key', languageAppKey).eq('status', 'active');
+  if ((activeLinks || []).some(l => l.teacher_id === CURRENT_USER.id)) return { ok: false, error: t('tinvite.err.already_student') };
+  if ((activeLinks || []).length) return { ok: false, error: t('tinvite.err.student_has_teacher') };
   const { error } = await supabaseClient
     .from('teacher_students')
     .insert({ teacher_id: CURRENT_USER.id, student_id: target.user_id, language_app_key: languageAppKey });
   if (error){
     if (error.code === '23505'){
-      // Vínculo antigo marcado como 'removed' (a professora desvinculou): reativa o mesmo registro.
+      // Vínculo antigo ('removed' ou convite pendente): reativa o mesmo registro.
       const { data: revived } = await supabaseClient
         .from('teacher_students')
         .update({ status: 'active' })
-        .eq('teacher_id', CURRENT_USER.id).eq('student_id', target.user_id).eq('language_app_key', languageAppKey).eq('status', 'removed')
+        .eq('teacher_id', CURRENT_USER.id).eq('student_id', target.user_id).eq('language_app_key', languageAppKey).in('status', ['removed', 'invited'])
         .select('id');
-      if (!revived || !revived.length) return { ok: false, error: `@${target.username} já é sua aluna nesse idioma.` };
+      if (!revived || !revived.length) return { ok: false, error: t('tinvite.err.student_has_teacher') };
     } else {
       console.error('Erro ao vincular aluna:', error);
       return { ok: false, error: 'Não foi possível vincular agora.' };
     }
   }
-  // Pedido da autora (ver CLAUDE.md) -- toda aluna vinculada ganha o badge
-  // "Aluno/a da Prof. Brune" (badge_catalog, id='student') automaticamente,
-  // sem precisar de uma segunda ação manual em "🎖️ Badges". `on conflict`
-  // não existe aqui (insert simples), então o erro 23505 (já tem o badge --
-  // ex: vínculo num segundo idioma pra quem já era aluna em outro) é
-  // esperado e ignorado, não um erro de verdade. Nunca falha o vínculo por
-  // causa disto -- a aluna já foi vinculada com sucesso acima, um problema
-  // no badge não deveria desfazer isso nem aparecer como erro pra autora.
-  const { error: badgeError } = await supabaseClient
-    .from('badge_grants')
-    .insert({ user_id: target.user_id, badge_id: 'student', granted_by: CURRENT_USER?.email || null, note: 'Concedido automaticamente ao vincular como aluno(a)' });
-  if (badgeError && badgeError.code !== '23505'){
-    console.error('Erro ao conceder badge de aluno automaticamente:', badgeError);
-  }
+  // O badge da professora (o da autora é "Aluno/a da Prof. Brune") entra e sai
+  // sozinho com o vínculo ativo: trigger da migration 077 em teacher_students.
   return { ok: true, target };
 }
 

@@ -220,9 +220,15 @@ async function triggerWouldGenerate(page){
     ensureProfileLoaded = async () => ({ plan_tier: 'premium' });
     window.__DB.own_flashcards = [];
     for (let i = 0; i < 19; i++) window.__DB.own_flashcards.push({ id: 9000 + i, owner_id: 'u-i18n', language_app_key: APP_KEY, status: 'active', deck_id: null, front: 'a' + i, back_trans: 'b', fields: null, card_generation_mode: null, revision: 0, tags: [], created_at: new Date().toISOString() });
-    switchTab('my-flashcards');
+    // "Meus Cartões" virou a janela Adicionar da Revisão (mesmo formulário);
+    // o commit de referência antigo ainda tem a aba.
+    if (typeof openAddCardModal === 'function') openAddCardModal({});
+    else switchTab('my-flashcards');
   });
   await page.waitForSelector('#my-flashcard-deck', { timeout: 8000 });
+  // Hoje Premium não tem teto (regra atual); o teste só confere o TEXTO do aviso,
+  // então força o caminho do teto na janela nova (o tipo "com reverso" pede Premium).
+  await page.evaluate(() => { if (document.getElementById('add-card-modal')) MY_FLASHCARDS_STATE._hasLink = false; });
   await page.selectOption('#my-flashcard-card-type-preview', 'normal_reversed');
   const before = await page.locator('#my-flashcard-native-fields [data-field-content]').count();
   for (let i = before; i < 2; i++) await page.click('#my-flashcard-native-fields [data-field-add]');
@@ -233,7 +239,7 @@ async function triggerWouldGenerate(page){
   await page.waitForFunction(() => document.getElementById('flashcard-limit-modal').style.display === 'flex', null, { timeout: 8000 });
   const r = await page.evaluate(() => ({ err: document.getElementById('my-create-flashcard-error').textContent, n: window.__DB.own_flashcards.length,
     title: document.querySelector('#flashcard-limit-modal h3').textContent }));
-  await page.evaluate(() => { document.getElementById('flashcard-limit-modal').style.display = 'none'; CURRENT_USER = false; });
+  await page.evaluate(() => { document.getElementById('flashcard-limit-modal').style.display = 'none'; if (typeof closeAddCardModal === 'function') closeAddCardModal(); CURRENT_USER = false; });
   return Object.assign(r, { n0 });
 }
 

@@ -47,6 +47,7 @@ try{
   --accent: #3498D6;
   --accent-dark: #2678AC;
   --danger: #C0231F;
+  --success: #1E7A3C;
   --shadow-card: 0 2px 10px rgba(32,26,44,0.07), 0 1px 3px rgba(32,26,44,0.06);
   --shadow-lift: 0 14px 34px rgba(32,26,44,0.14);
 }
@@ -54,11 +55,13 @@ try{
   :root:not([data-theme="light"]){
     --ink: #EEE9F5; --ink-soft: #ADA5BE; --paper: #17141F; --paper-warm: #201C2B;
     --paper-line: #362F44; --shadow-card: 0 2px 10px rgba(0,0,0,0.35); --shadow-lift: 0 14px 34px rgba(0,0,0,0.45);
+    --success: #6FD495;
   }
 }
 :root[data-theme="dark"]{
   --ink: #EEE9F5; --ink-soft: #ADA5BE; --paper: #17141F; --paper-warm: #201C2B;
   --paper-line: #362F44; --shadow-card: 0 2px 10px rgba(0,0,0,0.35); --shadow-lift: 0 14px 34px rgba(0,0,0,0.45);
+  --success: #6FD495;
 }
 *{ box-sizing:border-box; }
 html,body{ margin:0; padding:0; }
@@ -91,6 +94,7 @@ h1{
 }
 .gate-note{ min-height:16px; font-size:12.5px; color:var(--ink-soft); margin:14px 0 0; }
 .gate-note.err{ color:var(--danger); font-weight:700; }
+.gate-note.ok{ color:var(--success); font-weight:800; font-size:14px; }
 .btn{
   border:none; border-radius:11px; padding:13px 20px; font-family:'Nunito', sans-serif; font-weight:800;
   font-size:14px; cursor:pointer; transition:transform .1s ease, filter .15s ease, background .15s ease;
@@ -132,9 +136,11 @@ h1{
   font-weight:800; color:var(--accent-dark); cursor:pointer; margin-left:4px;
 }
 .gate-signup-link:hover{ text-decoration:underline; }
-.gate-guest-btn{ margin-top:14px; }
+.gate-code-input{ font-size:24px; font-weight:800; letter-spacing:.35em; text-align:center; font-variant-numeric:tabular-nums; }
+.gate-verify-email{ font-weight:800; color:var(--ink); word-break:break-all; }
+.gate-verify-actions{ display:flex; justify-content:space-between; gap:12px; margin-top:12px; flex-wrap:wrap; }
 
-/* ---------- Escolha de idioma (primeiro login / convidado) ---------- */
+/* ---------- Escolha de idioma (primeiro login) ---------- */
 .lang-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
 @media (max-width:420px){ .lang-grid{ grid-template-columns:1fr; } }
 .lang-card{
@@ -184,8 +190,49 @@ h1{
       <span id="gate-signup-question">Não tem conta?</span>
       <button type="button" class="gate-signup-link" id="gate-toggle-mode-btn">Cadastre-se</button>
     </p>
-    <button class="btn btn-secondary btn-block gate-guest-btn" id="gate-guest-btn">Continuar sem conta</button>
     <p class="gate-note" id="gate-login-note"></p>
+  </div>
+</div>
+
+<div class="wrap" id="gate-verify" style="display:none;">
+  <h1>Confirme seu e-mail</h1>
+  <p class="sub">Enviamos um código para <span class="gate-verify-email" id="gate-verify-email"></span>. Digite o código aqui para ativar sua conta.</p>
+  <div class="gate-card">
+    <form id="gate-verify-form">
+      <label class="sr-only" for="gate-code" style="position:absolute;left:-9999px;">Código de confirmação</label>
+      <input type="text" id="gate-code" class="gate-input gate-code-input" inputmode="numeric" autocomplete="one-time-code"
+        pattern="[0-9]{6,10}" maxlength="10" placeholder="000000" required>
+      <button type="submit" class="btn btn-primary btn-block" id="gate-verify-btn">Confirmar</button>
+    </form>
+    <div class="gate-verify-actions">
+      <button type="button" class="gate-link-btn" id="gate-resend-btn">Reenviar código</button>
+      <button type="button" class="gate-link-btn" id="gate-verify-back-btn">Usar outro e-mail</button>
+    </div>
+    <p class="gate-note" id="gate-verify-note">Não chegou? Olhe a caixa de spam. Também dá para tocar no botão "Ativar minha conta" do e-mail.</p>
+  </div>
+</div>
+
+<div class="wrap" id="gate-confirm-link" style="display:none;">
+  <h1 id="gate-confirm-link-title">Ativar sua conta</h1>
+  <p class="sub" id="gate-confirm-link-sub">Toque no botão para confirmar seu e-mail e entrar.</p>
+  <div class="gate-card">
+    <button type="button" class="btn btn-primary btn-block" id="gate-confirm-link-btn">Ativar minha conta</button>
+    <p class="gate-note" id="gate-confirm-link-note"></p>
+  </div>
+</div>
+
+<div class="wrap" id="gate-new-password" style="display:none;">
+  <h1>Crie uma senha nova</h1>
+  <p class="sub">Escolha a senha que você vai usar daqui para frente.</p>
+  <div class="gate-card">
+    <form id="gate-new-password-form">
+      <label class="sr-only" for="gate-new-password-input" style="position:absolute;left:-9999px;">Senha nova</label>
+      <input type="password" id="gate-new-password-input" class="gate-input" placeholder="Senha nova (mínimo 6 caracteres)" autocomplete="new-password" required minlength="6">
+      <label class="sr-only" for="gate-new-password-confirm" style="position:absolute;left:-9999px;">Repita a senha nova</label>
+      <input type="password" id="gate-new-password-confirm" class="gate-input" placeholder="Repita a senha nova" autocomplete="new-password" required minlength="6">
+      <button type="submit" class="btn btn-primary btn-block" id="gate-new-password-btn">Salvar senha nova</button>
+    </form>
+    <p class="gate-note" id="gate-new-password-note"></p>
   </div>
 </div>
 
@@ -197,7 +244,7 @@ h1{
 
 <div class="wrap" id="gate-choose-experience" style="display:none;">
   <h1>Você já sabe algo de <span id="gate-exp-lang-name"></span>?</h1>
-  <p class="sub">Isso só ajusta como você começa — dá pra mudar depois, a qualquer momento.</p>
+  <p class="sub">Isso só ajusta como você começa — dá para mudar depois, a qualquer momento.</p>
   <div class="gate-card" style="display:flex; flex-direction:column; gap:12px;">
     <button type="button" class="btn btn-secondary btn-block" id="gate-exp-beginner-btn">Sou iniciante</button>
     <button type="button" class="btn btn-primary btn-block" id="gate-exp-knows-btn">Já sei o básico</button>
@@ -227,7 +274,7 @@ if (typeof APP_IDENTITY !== 'undefined'){
 const GUEST_MODE_FLAG = 'guest_mode'; // mesma chave usada por shared/auth.js dentro de cada idioma
 
 function showOnly(id){
-  ['gate-loading', 'gate-login', 'gate-choose-language', 'gate-choose-experience'].forEach(x => {
+  ['gate-loading', 'gate-login', 'gate-verify', 'gate-confirm-link', 'gate-new-password', 'gate-choose-language', 'gate-choose-experience'].forEach(x => {
     document.getElementById(x).style.display = (x === id) ? '' : 'none';
   });
 }
@@ -304,25 +351,116 @@ async function afterAuthResolved(user){
   });
 }
 
-function enterGuestFlow(){
-  // Convidado não tem conta pra guardar currentLearningLanguage no Supabase,
-  // mas se este navegador já tem um idioma salvo de uma visita anterior
-  // (mesmo sem conta), não faz sentido perguntar de novo -- entra direto,
-  // igual um usuário que já não é novo.
-  const lastLang = localStorageSafeGet(LAST_LANGUAGE_KEY);
-  if (lastLang && AVAILABLE_LANGUAGES.some(l => l.id === lastLang && l.enabled)){
-    sessionStorageSafeSet(GUEST_MODE_FLAG, '1');
-    goToLanguageApp(lastLang);
-    return;
+// Sem modo convidado (decisão da autora, 2026-10-12): o site exige login. O modo sem
+// login (flag `guest_mode` no sessionStorage, lida por shared/auth.js) só existe para
+// testes e capturas de tela; este portão não oferece mais o botão e limpa a flag.
+sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
+
+// ---------- Redefinir senha ----------
+// O link do e-mail "Nova senha" volta para este portão com #...type=recovery e uma sessão de
+// recuperação. Antes, a pessoa entrava direto no app sem trocar a senha. Agora: tela de senha nova
+// (updateUser) e só depois segue o fluxo normal. Lido ANTES do getSession(), que limpa o hash.
+const GATE_IS_RECOVERY = /(^|[#&])type=recovery(&|$)/.test(window.location.hash);
+// Botões dos e-mails do Supabase Auth (docs/email/supabase/): ?confirmar= (cadastro), ?entrar= (Magic Link),
+// ?nova-senha= (redefinir senha) e ?trocar-email= (troca de e-mail), cada um com o {{ .TokenHash }}. A tela
+// gate-confirm-link só usa o link com um toque: antivírus de e-mail abrem os links sozinhos para checar e, com o
+// ConfirmationURL direto, gastavam o link antes da pessoa (ver gateEnterIfAlreadyConfirmed abaixo).
+const GATE_LINK_KINDS = {
+  'confirmar': { type: 'email', title: 'Ativar sua conta', sub: 'Toque no botão para confirmar seu e-mail e entrar.',
+    btn: 'Ativar minha conta', ok: 'Conta ativada! Entrando...',
+    fail: 'Esse link já foi usado ou venceu. Se você já ativou a conta, é só entrar com e-mail e senha.' },
+  'entrar': { type: 'email', title: 'Entrar no app', sub: 'Toque no botão para entrar na sua conta.',
+    btn: 'Entrar', ok: 'Pronto! Entrando...',
+    fail: 'Esse link já foi usado ou venceu. Entre com e-mail e senha ou peça um link novo.' },
+  'nova-senha': { type: 'recovery', title: 'Crie uma senha nova', sub: 'Toque no botão para escolher a senha nova.',
+    btn: 'Criar senha nova', ok: '',
+    fail: 'Esse link já foi usado ou venceu. Peça outro em "Esqueceu sua senha?".' },
+  'trocar-email': { type: 'email_change', title: 'Confirmar o novo e-mail', sub: 'Toque no botão para confirmar a troca de e-mail.',
+    btn: 'Confirmar e-mail', ok: 'E-mail confirmado! Entrando...',
+    fail: 'Esse link já foi usado ou venceu. Peça a troca de e-mail de novo.' },
+};
+const GATE_LINK = (() => {
+  const params = new URLSearchParams(window.location.search);
+  for (const kind of Object.keys(GATE_LINK_KINDS)){
+    const hash = (params.get(kind) || '').trim();
+    if (hash) return Object.assign({ kind, hash }, GATE_LINK_KINDS[kind]);
   }
-  document.getElementById('gate-choose-sub').textContent = 'Como convidado(a), seu progresso fica salvo só neste navegador.';
-  showOnly('gate-choose-language');
-  renderLanguageChoices((langId) => {
-    askExperienceThenProceed(langId, (langId, alreadyKnows) => {
-      sessionStorageSafeSet(GUEST_MODE_FLAG, '1');
-      goToLanguageApp(langId, alreadyKnows);
-    });
-  });
+  return null;
+})();
+// Enquanto um link é usado, o SIGNED_IN do verifyOtp não pode levar a pessoa adiante sozinho (a senha nova ainda
+// não foi escolhida, ou a mensagem de sucesso ainda não apareceu).
+let gateHoldSignedIn = false;
+let gateRecoveryUser = null;
+function showNewPassword(user){
+  gateRecoveryUser = user;
+  showOnly('gate-new-password');
+  document.getElementById('gate-new-password-input').focus();
+}
+
+// ---------- Confirmação do cadastro por código (e-mail) ----------
+// Antivírus de e-mail (ex.: e-mail institucional) abre os links da mensagem sozinho para checar. Antes, o botão
+// do e-mail confirmava a conta nessa visita: o código digitado depois dava "vencido" e o reenvio não mandava
+// nada (o Supabase não reenvia para conta já confirmada). Agora o botão leva à tela gate-confirm-link, que só
+// confirma com um toque; e, se o código falhar ou o reenvio for pedido, tentamos entrar com a senha digitada no
+// cadastro: se a conta já estiver ativa, a pessoa entra direto.
+// Conta ativada em outra aba/janela ou pelo botão do e-mail: a tela do código confere sozinha (a cada 15s e ao
+// voltar para a aba) e avisa "Sua conta foi ativada!" antes de seguir.
+let gateVerifyEmail = '';
+let gateCheckBusy = false;
+let gateCheckTimer = null;
+let gateActivated = false;
+function gateShowActivated(noteId, text, user){
+  if (gateActivated) return;
+  gateActivated = true;
+  stopActivationCheck();
+  const n = document.getElementById(noteId);
+  if (n){ n.textContent = text; n.className = 'gate-note ok'; }
+  setTimeout(() => { afterAuthResolved(user); }, 1200);
+}
+async function gateEnterIfAlreadyConfirmed(){
+  const password = document.getElementById('gate-password').value;
+  if (!gateVerifyEmail || !password || gateCheckBusy || gateActivated) return false;
+  gateCheckBusy = true;
+  try {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email: gateVerifyEmail, password });
+    if (error || !data || !data.user) return false;
+    gateShowActivated('gate-verify-note', 'Sua conta foi ativada! Entrando...', data.user);
+    return true;
+  } finally { gateCheckBusy = false; }
+}
+function gateCheckIfVisible(){
+  if (document.visibilityState === 'visible' && document.getElementById('gate-verify').style.display !== 'none') gateEnterIfAlreadyConfirmed();
+}
+function startActivationCheck(){
+  stopActivationCheck();
+  gateCheckTimer = setInterval(gateCheckIfVisible, 15000);
+}
+function stopActivationCheck(){ clearInterval(gateCheckTimer); gateCheckTimer = null; }
+document.addEventListener('visibilitychange', gateCheckIfVisible);
+window.addEventListener('focus', gateCheckIfVisible);
+let gateResendTimer = null;
+function showVerify(email, note){
+  gateVerifyEmail = email;
+  document.getElementById('gate-verify-email').textContent = email;
+  document.getElementById('gate-code').value = '';
+  const n = document.getElementById('gate-verify-note');
+  if (note){ n.textContent = note; n.className = 'gate-note'; }
+  showOnly('gate-verify');
+  document.getElementById('gate-code').focus();
+  startResendCooldown();
+  startActivationCheck();
+}
+function startResendCooldown(){
+  const btn = document.getElementById('gate-resend-btn');
+  let left = 60;
+  clearInterval(gateResendTimer);
+  btn.disabled = true;
+  btn.textContent = `Reenviar código (${left}s)`;
+  gateResendTimer = setInterval(() => {
+    left--;
+    if (left <= 0){ clearInterval(gateResendTimer); btn.disabled = false; btn.textContent = 'Reenviar código'; return; }
+    btn.textContent = `Reenviar código (${left}s)`;
+  }, 1000);
 }
 
 // ---------- Wiring da tela de login ----------
@@ -360,12 +498,17 @@ document.getElementById('gate-email-form').addEventListener('submit', async (e) 
       return;
     }
     if (data.user && !data.session){
-      note.textContent = 'Conta criada! Confira seu e-mail pra confirmar antes de entrar.';
+      showVerify(email);
       return;
     }
     if (data.session){ await afterAuthResolved(data.user); }
   } else {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error && (error.code === 'email_not_confirmed' || /not confirmed/i.test(error.message || ''))){
+      await supabaseClient.auth.resend({ type: 'signup', email });
+      showVerify(email, 'Sua conta ainda não foi confirmada. Mandamos um código novo para o seu e-mail.');
+      return;
+    }
     if (error){
       note.textContent = 'E-mail ou senha incorretos.';
       note.className = 'gate-note err';
@@ -380,11 +523,88 @@ document.getElementById('gate-forgot-btn').addEventListener('click', async () =>
   const note = document.getElementById('gate-login-note');
   if (!email){ note.textContent = 'Digite seu e-mail no campo acima primeiro.'; note.className = 'gate-note'; return; }
   const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: cleanRedirectURL() });
-  note.textContent = error ? 'Não foi possível enviar o e-mail agora.' : 'Enviamos um link pra redefinir sua senha.';
+  note.textContent = error ? 'Não foi possível enviar o e-mail agora.' : 'Enviamos um link para redefinir sua senha.';
   note.className = error ? 'gate-note err' : 'gate-note';
 });
 
-document.getElementById('gate-guest-btn').addEventListener('click', enterGuestFlow);
+document.getElementById('gate-verify-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const token = document.getElementById('gate-code').value.replace(/\D/g, '');
+  const note = document.getElementById('gate-verify-note');
+  const btn = document.getElementById('gate-verify-btn');
+  if (token.length < 6){ note.textContent = 'Digite o código completo.'; note.className = 'gate-note err'; return; }
+  btn.disabled = true;
+  const { data, error } = await supabaseClient.auth.verifyOtp({ email: gateVerifyEmail, token, type: 'email' });
+  if (error || !data || !data.user){
+    if (await gateEnterIfAlreadyConfirmed()) return;
+    btn.disabled = false;
+    // O Supabase usa a mesma mensagem ("expired or invalid") para código vencido e código errado.
+    note.textContent = 'Esse código não vale. Confira os números ou toque em "Reenviar código".';
+    note.className = 'gate-note err';
+    return;
+  }
+  btn.disabled = false;
+  gateShowActivated('gate-verify-note', 'Conta ativada! Entrando...', data.user);
+});
+document.getElementById('gate-resend-btn').addEventListener('click', async () => {
+  const note = document.getElementById('gate-verify-note');
+  if (await gateEnterIfAlreadyConfirmed()) return;
+  const { error } = await supabaseClient.auth.resend({ type: 'signup', email: gateVerifyEmail });
+  note.textContent = error ? 'Não deu para reenviar agora. Espere um pouco e tente de novo.' : 'Mandamos um código novo.';
+  note.className = error ? 'gate-note err' : 'gate-note';
+  if (!error) startResendCooldown();
+});
+document.getElementById('gate-new-password-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pass = document.getElementById('gate-new-password-input').value;
+  const again = document.getElementById('gate-new-password-confirm').value;
+  const note = document.getElementById('gate-new-password-note');
+  const btn = document.getElementById('gate-new-password-btn');
+  if (pass !== again){ note.textContent = 'As duas senhas não são iguais.'; note.className = 'gate-note err'; return; }
+  btn.disabled = true;
+  const { data, error } = await supabaseClient.auth.updateUser({ password: pass });
+  btn.disabled = false;
+  if (error){
+    note.textContent = /same|different/i.test(error.message || '') ? 'A senha nova precisa ser diferente da antiga.' : 'Não deu para salvar agora. Peça um link novo em "Esqueceu sua senha?".';
+    note.className = 'gate-note err';
+    return;
+  }
+  note.textContent = 'Senha nova salva!'; note.className = 'gate-note ok';
+  await afterAuthResolved((data && data.user) || gateRecoveryUser);
+});
+document.getElementById('gate-confirm-link-btn').addEventListener('click', async () => {
+  const note = document.getElementById('gate-confirm-link-note');
+  const btn = document.getElementById('gate-confirm-link-btn');
+  btn.disabled = true;
+  gateHoldSignedIn = true;
+  const { data, error } = await supabaseClient.auth.verifyOtp({ token_hash: GATE_LINK.hash, type: GATE_LINK.type });
+  if (error){
+    gateHoldSignedIn = false;
+    btn.disabled = false;
+    note.textContent = GATE_LINK.fail + ' ';
+    const back = document.createElement('button');
+    back.type = 'button'; back.className = 'gate-link-btn'; back.id = 'gate-confirm-link-login'; back.textContent = 'Ir para o login';
+    back.addEventListener('click', () => showOnly('gate-login'));
+    note.appendChild(back);
+    note.className = 'gate-note err';
+    return;
+  }
+  const user = data && data.user;
+  if (GATE_LINK.kind === 'nova-senha' && user){ showNewPassword(user); return; }
+  if (!user){
+    // Troca de e-mail segura: o primeiro dos dois links só é aceito; falta confirmar no outro endereço.
+    btn.style.display = 'none';
+    note.textContent = 'Confirmado! Agora toque também no botão do e-mail que chegou no outro endereço.';
+    note.className = 'gate-note ok';
+    return;
+  }
+  gateShowActivated('gate-confirm-link-note', GATE_LINK.ok, user);
+});
+document.getElementById('gate-verify-back-btn').addEventListener('click', () => {
+  clearInterval(gateResendTimer);
+  stopActivationCheck();
+  showOnly('gate-login');
+});
 
 // ---------- Resolução inicial ----------
 (async () => {
@@ -392,25 +612,37 @@ document.getElementById('gate-guest-btn').addEventListener('click', enterGuestFl
   if (window.location.hash){
     history.replaceState(null, '', window.location.pathname + window.location.search);
   }
-  if (session && session.user){
+  if (GATE_LINK){
+    const params = new URLSearchParams(window.location.search);
+    params.delete(GATE_LINK.kind);
+    const qs = params.toString();
+    history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : ''));
+    document.getElementById('gate-confirm-link-title').textContent = GATE_LINK.title;
+    document.getElementById('gate-confirm-link-sub').textContent = GATE_LINK.sub;
+    document.getElementById('gate-confirm-link-btn').textContent = GATE_LINK.btn;
+  }
+  // Já logado e abriu o botão de cadastro/entrada: nada a confirmar, segue. Senha nova e troca de e-mail sempre
+  // passam pela tela do toque.
+  if (GATE_LINK && !(session && session.user && (GATE_LINK.kind === 'confirmar' || GATE_LINK.kind === 'entrar'))){
+    showOnly('gate-confirm-link');
+  } else if (session && session.user && GATE_IS_RECOVERY){
+    showNewPassword(session.user);
+  } else if (session && session.user){
     await afterAuthResolved(session.user);
   } else {
-    // Sem sessão: se este navegador já estudou aqui antes (tem idioma
-    // salvo do modo convidado ou de uma sessão anterior), entra direto
-    // nesse idioma em vez de mostrar o portão de login de novo -- só quem
-    // nunca usou este navegador vê a tela de login. enterGuestFlow() já
-    // faz exatamente essa checagem (ver função acima).
-    const lastLang = localStorageSafeGet(LAST_LANGUAGE_KEY);
-    const hasReturningLang = lastLang && AVAILABLE_LANGUAGES.some(l => l.id === lastLang && l.enabled);
-    if (hasReturningLang){
-      enterGuestFlow();
-    } else {
-      showOnly('gate-login');
-    }
+    // Sem sessão: sempre a tela de login (não existe mais modo convidado).
+    showOnly('gate-login');
   }
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session && session.user){
-      await afterAuthResolved(session.user);
+    if (event === 'PASSWORD_RECOVERY' && session && session.user){
+      showNewPassword(session.user);
+    } else if (event === 'SIGNED_IN' && session && session.user && !GATE_IS_RECOVERY && !gateRecoveryUser && !gateHoldSignedIn){
+      // Conta ativada em outra aba (o Supabase avisa as outras abas): mostra o aviso antes de seguir.
+      if (document.getElementById('gate-verify').style.display !== 'none'){
+        gateShowActivated('gate-verify-note', 'Sua conta foi ativada! Entrando...', session.user);
+      } else if (!gateActivated){
+        await afterAuthResolved(session.user);
+      }
     }
   });
 })();
