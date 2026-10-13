@@ -69,6 +69,17 @@ window.I18N_CATALOG['en'] = {
   'settings.uiLanguage.confirm.toPt': 'Text, explanations, and translations will now appear in Portuguese. Your progress stays saved.', // ALTA
   'settings.uiLanguage.confirm.cancel': 'Cancel', // ALTA
   'settings.uiLanguage.confirm.yes': 'Change', // ALTA
+  'courses.group.pt-BR': 'Courses for Portuguese speakers', // ALTA
+  'courses.group.en': 'Courses for English speakers', // ALTA
+  'courseMenu.title': 'My courses', // ALTA
+  'courseMenu.add': 'Add a course', // ALTA
+  'courseMenu.speakLabel': 'Language you speak', // ALTA
+  'courseMenu.speak.pt-BR': 'I speak Portuguese', // ALTA
+  'courseMenu.speak.en': 'I speak English', // ALTA
+  'courses.beta': 'beta', // ALTA
+  'courses.confirm.body': 'You are about to switch to the {course} course. It is a separate course with its own progress: if you have never studied in it, you start from zero. Your progress in the current course stays saved and comes back when you return to it. Your day streak and achievements stay the same.', // MÉDIA
+  'courses.first.title': 'Which course do you want to start?', // ALTA
+  'courses.first.sub': 'You can switch or add courses later from the flag at the top of the screen. Each course keeps its own progress.', // ALTA
 
   // Fase 6 lote 1
   'settings.title': 'Settings', // ALTA

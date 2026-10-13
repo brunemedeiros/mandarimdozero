@@ -88,7 +88,7 @@ async function boot(browser, port, lang, query){
   page.on('dialog', d => d.accept());
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
-  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
+  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('courses-per-site-language', '0'); } catch (e) {} }); // comportamento antigo (chave de emergência)
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html${query || ''}`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 20000 });
   return { ctx, page, errors };
@@ -167,7 +167,7 @@ async function boot2(ctx, port, lang, query){
   page.on('dialog', d => d.accept());
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB2 }));
-  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
+  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('courses-per-site-language', '0'); } catch (e) {} }); // comportamento antigo (chave de emergência)
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html${query || ''}`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 20000 });
   await page.evaluate(() => window.i18nReady);
