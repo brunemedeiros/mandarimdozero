@@ -4343,6 +4343,50 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
   .panel-view .panel-nav{ flex-wrap:nowrap; overflow-x:auto; max-width:100%; justify-content:flex-start; }
   .panel-view .panel-nav .deck-topbar-btn{ white-space:nowrap; }
 }
+/* ---------- Conjugação: passada de design (escolha, prática, resultado) ----------
+   A tabela de prática imita a página de um livro de conjugação: pronome à
+   esquerda do campo, singular numa coluna (je, tu, il) e plural na outra
+   (nous, vous, ils). Listas da escolha agrupadas num painel, sem caixa alta. */
+#view-conjugaison .conj-select-col h3{ text-transform:none; letter-spacing:0; font-size:15px; color:var(--ink); margin:0 0 10px; }
+#view-conjugaison .conj-filter-row label{ text-transform:none; letter-spacing:0; font-size:12.5px; font-weight:700; }
+#view-conjugaison .conj-check-list{ gap:0; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); overflow:hidden; box-shadow:var(--shadow-card); }
+#view-conjugaison .conj-check-list > .conj-check-item{ border:none; border-radius:0; min-height:44px; padding:11px 14px; }
+#view-conjugaison .conj-check-list > .conj-check-item + .conj-check-item{ border-top:1px solid var(--paper-line); }
+#view-conjugaison .conj-check-item:hover, #view-conjugaison .conj-toggle-item:hover{ border-color:var(--paper-line); }
+@media (hover:hover){ #view-conjugaison .conj-check-list > .conj-check-item:hover{ background:color-mix(in srgb, var(--hover-gold) 10%, var(--paper)); } }
+#view-conjugaison .conj-check-item:has(input:checked){ background:color-mix(in srgb, var(--seal-red) 7%, var(--paper)); }
+#view-conjugaison .conj-toggle-item{ min-height:44px; }
+#view-conjugaison #conj-start-btn{ margin-top:6px !important; }
+
+/* Verbo atual em destaque; o próximo só avisa o que vem. */
+#view-conjugaison .conj-verb-header{ background:var(--paper); box-shadow:var(--shadow-card); }
+#view-conjugaison .conj-verb-header .conj-verb-label{ text-transform:none; letter-spacing:0; font-size:12.5px; font-weight:700; }
+#view-conjugaison .conj-verb-header .infinitif{ font-size:32px; letter-spacing:-.01em; }
+#view-conjugaison .conj-verb-header .tempo{ display:inline-block; text-transform:none; letter-spacing:0; font-size:12px; font-weight:700; margin-top:8px; padding:3px 10px; border-radius:999px; background:var(--paper-warm); border:1px solid var(--paper-line); }
+#view-conjugaison .conj-verb-header.next{ opacity:1; background:transparent; box-shadow:none; border-style:dashed; color:var(--ink-soft); }
+#view-conjugaison .conj-verb-header.next .infinitif{ font-size:22px; color:var(--ink-soft); }
+
+/* Tabela de conjugação */
+#view-conjugaison .conj-tense-grid:has(> .conj-tense-box:only-child){ grid-template-columns:minmax(0, 1fr); }
+#view-conjugaison .conj-tense-box{ padding:18px 20px 16px; box-shadow:var(--shadow-card); }
+#view-conjugaison .conj-tense-title{ text-align:left; font-size:16px; padding-bottom:10px; margin-bottom:12px; border-bottom:1px solid var(--paper-line); }
+#view-conjugaison .conj-grid{ grid-auto-flow:column; grid-template-rows:repeat(3, auto); column-gap:24px; row-gap:8px; }
+#view-conjugaison .conj-grid{ align-items:start; }
+#view-conjugaison .conj-field{ display:grid; grid-template-columns:6.4em minmax(0, 1fr); column-gap:10px; row-gap:2px; align-items:start; }
+#view-conjugaison .conj-field label{ text-align:right; font-size:14px; line-height:1.25; font-weight:700; color:var(--ink-soft); font-style:italic; padding-top:13px; }
+#view-conjugaison .conj-field .expected{ grid-column:2; min-height:0; font-size:12px; }
+#view-conjugaison .conj-field .expected:empty{ display:none; }
+#view-conjugaison .conj-field input{ font-size:15.5px; }
+@media (max-width:480px){
+  #view-conjugaison .conj-grid{ grid-auto-flow:row; grid-template-rows:none; grid-template-columns:minmax(0, 1fr); }
+  #view-conjugaison .conj-field{ grid-template-columns:5.6em minmax(0, 1fr); }
+  #view-conjugaison .conj-tense-box{ padding:16px 14px 14px; }
+}
+
+/* Resultado */
+#view-conjugaison .conj-session-result{ max-width:420px; margin:28px auto 0; padding:32px 24px; background:var(--paper); border:1px solid var(--paper-line); border-radius:18px; box-shadow:var(--shadow-card); }
+#view-conjugaison .conj-session-result .score-num{ font-size:44px; font-variant-numeric:tabular-nums; margin:8px 0 4px; }
+#view-conjugaison .conj-session-result p{ color:var(--ink-soft); margin:0 0 20px; }
 </style>
 </head>
 <body>

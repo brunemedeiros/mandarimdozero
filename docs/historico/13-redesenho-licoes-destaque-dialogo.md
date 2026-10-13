@@ -45,3 +45,20 @@ Decisão da autora (2026-10-07), vale para francês, chinês e qualquer idioma f
   escondida, tela do Deck aberta). 30/30.
 - Regressão: trilha UI 86/86, celular 108/108, checkpoint zh 25/25, i18n unit 2107/2107, limite-corte 30/30 + 26/26,
   fase-f 50/50, deck-browser 206/206.
+
+## Passada de design na Conjugação (fr, 2026-10-13)
+
+Só CSS, num bloco "Conjugação: passada de design" no fim do `<style>` de `fr/index.html` (zh não tem Conjugação).
+
+- Prática como página de livro de conjugação: pronome à esquerda do campo (itálico, alinhado à direita), singular
+  (je, tu, il) numa coluna e plural (nous, vous, ils) na outra (`grid-auto-flow: column`; a ordem do DOM e do Tab não
+  muda). Um tempo só ocupa a largura toda. A correção embaixo de um campo errado não desalinha a linha vizinha.
+  No celular, uma coluna só (je ... ils).
+- Verbo atual em destaque (32px, "Regular/Irregular" como selo); "Próximo verbo" vira cartão tracejado e leve.
+- Escolha: tempos e grupos de verbos em listas agrupadas num painel (linhas de 44px, marcado com fundo leve),
+  títulos sem caixa alta.
+- Resultado da sessão num cartão.
+- Teste novo `tests/conjugacao/test_playwright.js` (22/22; 8/22 sem a mudança). Regressão: trilha UI 86/86,
+  celular 108/108, deck-browser 206/206, amigos 158/158, i18n navegador 209/209.
+- `tests/i18n/test_i18n_unit.js` está 2090/2273 na main (chaves `rb.*` do Banco de Revisão sem registro no teste e
+  comparação do HTML), igual sem esta mudança.
