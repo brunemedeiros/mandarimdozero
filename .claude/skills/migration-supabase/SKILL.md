@@ -22,7 +22,7 @@ Histórico de rollouts: `docs/historico/08-public-deck-migrations-rollout-059-06
 ## 3. Aplicar
 - Antes: `get_project` (confirmar nome/ref) + `list_migrations` (aplicar só pendentes).
 - **SQL sem `DROP`**: `mcp__Supabase__apply_migration` com `project_id` literal, primeiro no Staging.
-- **SQL com `DROP` real** (inclusive dentro de `EXECUTE`): a ferramenta trava 60 s e não aplica. Preparar
+- **SQL com `DROP` ou `DELETE` real** (inclusive dentro de `EXECUTE` ou de corpo de função; visto de novo na 087): a ferramenta trava 60 s e não aplica. Preparar
   `docs/rollout-sql/NNN_sql_editor.sql` (arquivo original entre `begin;` e `commit;`) para a autora colar no
   SQL Editor ("Copy raw file" no GitHub; colar do chat trunca). Não aparece em `schema_migrations` -- registrar à mão no histórico.
 - Produção: só com autorização explícita da autora NAQUELA etapa. Destrutiva/risco alto: confirmar antes.

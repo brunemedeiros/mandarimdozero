@@ -12,7 +12,7 @@
 // Depende de: shared/permissions.js, shared/supabase-client.js, shared/auth.js,
 // fr/zh app.js (switchTab, APP_KEY) e os renders das abas acima.
 
-const TEACHER_PANEL_SECTIONS = ['students', 'flashcards', 'classlogs', 'materials'];
+const TEACHER_PANEL_SECTIONS = ['students', 'flashcards', 'classlogs', 'materials', 'mural'];
 const TEACHER_PANEL_STATE = { section: 'students', cardsSub: 'cards' };
 
 function switchTeacherPanelSection(section){
@@ -44,6 +44,7 @@ function switchTeacherPanelSection(section){
   if (section === 'students') renderAdminStudentsView();
   else if (section === 'flashcards') (bank ? renderReviewBankView() : renderAdminFlashcardsView());
   else if (section === 'classlogs') renderAdminClassLogsView();
+  else if (section === 'mural') renderTeacherMuralSection();
   else renderAdminSupportMaterialsView();
 }
 

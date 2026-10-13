@@ -2498,6 +2498,93 @@ window.I18N_CATALOG['en'] = {
   'studentDecks.hint': 'You see each deck\'s name and numbers (subdecks included), without opening the cards. Only what the student has already synced counts.', // ALTA
   'studentDecks.empty': 'The student has no cards in decks yet.', // ALTA
   'studentDecks.error': 'Couldn\'t load the student\'s decks right now.', // ALTA
+  'panel.tab.mural': 'Board', // ALTA
+  'mural.menu': '📌 Board', // ALTA
+  'mural.title': 'Board', // ALTA
+  'mural.sub': 'Notes, materials and conversations with your teacher and your class.', // ALTA
+  'mural.profileEntrySub': 'Notes from your teacher and class', // ALTA
+  'mural.newCount': { one: '{n} new', other: '{n} new' }, // ALTA
+  'mural.teacherIntro': 'Pick a class (a note for everyone or just one student) or a student who is not in a class. New notes show up in the bell, no e-mail.', // ALTA
+  'mural.studentIntro': '{lang} board with {name}', // ALTA
+  'mural.mode.classrooms': 'Classes', // ALTA
+  'mural.mode.students': 'Students', // ALTA
+  'mural.newClassroom': '+ New class', // ALTA
+  'mural.newClassroomPh': 'Class name (e.g. Thursday class)', // ALTA
+  'mural.create': 'Create', // ALTA
+  'mural.cancel': 'Cancel', // ALTA
+  'mural.save': 'Save', // ALTA
+  'mural.edit': 'Edit', // ALTA
+  'mural.delete': 'Delete', // ALTA
+  'mural.edited': 'edited', // ALTA
+  'mural.teacherTag': 'Teacher', // ALTA
+  'mural.onlyFor': '🔒 Only for {name}', // ALTA
+  'mural.individualChip': 'With {name}', // ALTA
+  'mural.noClassrooms': 'You have no classes yet. Create one, add your students or send the class link.', // ALTA
+  'mural.pickClassroom': 'Pick a class to see its board.', // ALTA
+  'mural.noStudents': 'You have no students in this language yet. Invite them in the Students tab.', // ALTA
+  'mural.allInClassrooms': 'All your students are in a class. To talk to just one, open the class and pick the student under "To".', // ALTA
+  'mural.pickStudent': 'Pick a student to see their personal board.', // ALTA
+  'mural.noTeacher': 'The board shows up when you have a teacher in this language.', // ALTA
+  'mural.empty': 'Nothing on the board yet. Why not start?', // ALTA
+  'mural.composer.label': 'New post', // ALTA
+  'mural.composer.placeholderTeacher': 'Write a note', // ALTA
+  'mural.composer.placeholderStudent': 'Write on the board', // ALTA
+  'mural.composer.attach': '📎 Attach', // ALTA
+  'mural.composer.attachHint': 'Attachments: PDF or image, up to 5 files of 10 MB.', // ALTA
+  'mural.composer.toLabel': 'To', // ALTA
+  'mural.composer.toAll': 'The whole class', // ALTA
+  'mural.composer.toOne': 'Only {name}', // ALTA
+  'mural.composer.publish': 'Post', // ALTA
+  'mural.composer.sending': 'Sending...', // ALTA
+  'mural.composer.removeFile': 'Remove {name}', // ALTA
+  'mural.comment.label': 'Comment', // ALTA
+  'mural.comment.placeholder': 'Write a comment', // ALTA
+  'mural.comment.send': 'Send', // ALTA
+  'mural.deletePostConfirm': 'Delete this post? Its comments and attachments go too.', // ALTA
+  'mural.deleteCommentConfirm': 'Delete this comment?', // ALTA
+  'mural.file.badType': '"{name}" is not a PDF or an image.', // ALTA
+  'mural.file.tooBig': '"{name}" is over 10 MB.', // ALTA
+  'mural.file.tooMany': 'Up to 5 files per post.', // ALTA
+  'mural.manage.summary': '⚙️ Students ({n}), link and class name', // ALTA
+  'mural.manage.name': 'Class name', // ALTA
+  'mural.manage.saveName': 'Save name', // ALTA
+  'mural.manage.members': 'Students in this class', // ALTA
+  'mural.manage.membersHint': 'Only your students with an active link in this language show up. A student can be in several classes.', // ALTA
+  'mural.manage.filter': 'Search by name or @', // ALTA
+  'mural.manage.saveMembers': 'Save students', // ALTA
+  'mural.manage.saved': 'Class updated!', // ALTA
+  'mural.manage.link': 'Class link', // ALTA
+  'mural.manage.linkHint': 'Whoever opens the link joins the class and, if not your student yet, becomes one.', // ALTA
+  'mural.manage.linkCreate': 'Create class link', // ALTA
+  'mural.manage.linkWhatsText': 'Hi! This is the link for the {name} class. Just open it and join: {url}', // ALTA
+  'mural.manage.delete': 'Delete class', // ALTA
+  'mural.manage.deleteConfirm': 'Delete the class "{name}"? Its notes, comments and attachments disappear for everyone. The students remain your students.', // ALTA
+  'mural.join.kicker': 'Class invite', // ALTA
+  'mural.join.title': '{classroom}', // ALTA
+  'mural.join.sub': 'With {name}, {lang} lessons', // ALTA
+  'mural.join.perkMural': 'Class board with notes and materials', // ALTA
+  'mural.join.perkTalk': 'Post and comment with the class', // ALTA
+  'mural.join.perkTeacher': 'Your teacher follows your {lang} progress', // ALTA
+  'mural.join.accept': 'Join the class', // ALTA
+  'mural.join.login': 'Sign in to join', // ALTA
+  'mural.join.later': 'Not now', // ALTA
+  'mural.join.done': 'Done! You are in the {classroom} class 🏫', // ALTA
+  'mural.join.already': 'You are already in this class.', // ALTA
+  'mural.err.generic': 'That did not work. Try again.', // ALTA
+  'mural.err.not_authorized': 'You do not have access to this board.', // ALTA
+  'mural.err.not_member': 'This student is not in the class.', // ALTA
+  'mural.err.empty': 'Write something or attach a file.', // ALTA
+  'mural.err.too_long': 'Text too long.', // ALTA
+  'mural.err.daily_limit': 'You reached today\'s limit. Try tomorrow.', // ALTA
+  'mural.err.invalid_attachments': 'An attachment was not accepted (PDF or image, up to 10 MB).', // ALTA
+  'mural.err.invalid_name': 'Use a name with 1 to 60 characters.', // ALTA
+  'mural.err.classroom_limit': 'You reached the limit of 50 classes.', // ALTA
+  'mural.err.not_found': 'Class not found.', // ALTA
+  'mural.err.no_teacher': 'You do not have a teacher in this language.', // ALTA
+  'mural.err.upload': 'Could not upload the file. Try again.', // ALTA
+  'mural.err.invalid_code': 'This class link no longer works. Ask your teacher for a new one.', // ALTA
+  'mural.err.student_has_teacher': 'You already have a teacher in this language (one per language).', // ALTA
+  'mural.err.invalid_target': 'This class is yours.', // ALTA
   'tinvite.lang.frances': 'French', // ALTA
   'tinvite.lang.mandarim': 'Chinese', // ALTA
   'tinvite.lang.portugues': 'Portuguese', // ALTA

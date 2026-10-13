@@ -10,6 +10,11 @@
 // essas duas partes que variam.
 function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
   return function switchTab(tab){
+    // Aviso do mural para a professora (087): abre o Painel da professora já na seção Mural.
+    if (tab === 'teacher-mural'){
+      if (typeof TEACHER_PANEL_STATE !== 'undefined') TEACHER_PANEL_STATE.section = 'mural';
+      tab = 'teacher-panel';
+    }
     if (onBeforeSwitch) onBeforeSwitch(tab);
     // Saiu da revisão: conquistas guardadas durante a sessão aparecem agora.
     if (typeof releaseBadgeCelebrations === 'function') releaseBadgeCelebrations();

@@ -3660,6 +3660,96 @@ body.hide-pinyin .prompt-pinyin{
 .class-log-fields{ margin:0; display:flex; flex-direction:column; gap:8px; }
 .class-log-field dt{ font-size:12px; font-weight:700; color:var(--ink-soft); }
 .class-log-field dd{ margin:2px 0 0; color:var(--ink); line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+/* Mural da professora (087, shared/mural.js) */
+.mural-count{ display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 6px; margin-left:6px; border-radius:999px; background:var(--seal-red); color:var(--on-seal-red); font-size:11.5px; font-weight:800; line-height:1; vertical-align:middle; }
+.tab-btn > .mural-count{ position:absolute; top:2px; right:4px; margin:0; min-width:18px; height:18px; font-size:10.5px; border:2px solid var(--paper); box-sizing:content-box; padding:0 4px; }
+.tab-btn > .friends-badge ~ .mural-count, .tab-btn > .mural-count ~ .friends-badge{ right:auto; left:4px; }
+.mural-wrap{ display:flex; flex-direction:column; gap:12px; }
+.mural-intro, .mural-composer-hint{ margin:0; color:var(--ink-soft); font-size:13.5px; line-height:1.5; }
+.mural-composer-hint{ font-size:12.5px; }
+.mural-mode{ margin:0; }
+.mural-picker{ display:flex; flex-wrap:wrap; gap:8px; }
+.mural-chip{ display:inline-flex; align-items:center; gap:6px; min-height:40px; padding:6px 14px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink); font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+.mural-chip:hover{ border-color:var(--seal-red); }
+.mural-chip.is-active{ background:var(--seal-red); color:var(--on-seal-red); border-color:var(--seal-red); }
+.mural-chip.is-active .mural-count{ background:var(--paper); color:var(--ink); }
+.mural-chip-new{ border-style:dashed; color:var(--ink-soft); }
+.mural-chip .mural-count{ margin-left:2px; }
+.mural-new-form[hidden]{ display:none; }
+.mural-new-form, .mural-inline{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.mural-new-form input, .mural-inline input{ flex:1 1 220px; }
+.mural-new-form .profile-edit-error{ flex-basis:100%; margin:0; }
+.mural-small-btn{ width:auto; padding:8px 14px; font-size:14px; }
+.mural-avatar{ width:38px; height:38px; border-radius:50%; flex:0 0 auto; object-fit:cover; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:14px; }
+.mural-avatar-sm{ width:30px; height:30px; font-size:12px; }
+.mural-avatar-xs{ width:24px; height:24px; font-size:10.5px; }
+.mural-teacher-line{ display:flex; align-items:center; gap:10px; color:var(--ink-soft); font-size:14px; font-weight:700; }
+.mural-manage{ border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); }
+.mural-manage > summary{ cursor:pointer; padding:12px 14px; font-weight:800; color:var(--ink); min-height:44px; }
+.mural-manage-body{ padding:0 14px 14px; display:flex; flex-direction:column; gap:14px; }
+.mural-manage-body .panel-h{ margin:0 0 6px; }
+.mural-member-list{ list-style:none; margin:8px 0; padding:0; max-height:260px; overflow-y:auto; border:1px solid var(--paper-line); border-radius:12px; }
+.mural-member-list li + li{ border-top:1px solid var(--paper-line); }
+.mural-member{ display:flex; align-items:center; gap:8px; padding:8px 10px; min-height:44px; cursor:pointer; color:var(--ink); font-size:14px; }
+.mural-member input{ width:18px; height:18px; flex:0 0 auto; }
+.mural-composer{ display:flex; flex-direction:column; gap:8px; padding:14px; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper-warm); }
+.mural-composer-text{ width:100%; resize:vertical; min-height:72px; font:inherit; }
+.mural-composer-bar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.mural-composer-bar .mural-publish{ margin-left:auto; }
+.mural-attach{ cursor:pointer; }
+.mural-target-wrap{ display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:700; color:var(--ink-soft); }
+.mural-target-wrap select{ width:auto; max-width:220px; padding:8px 10px; }
+.mural-composer-files{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.mural-composer-files:empty{ display:none; }
+.mural-composer-file{ display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:10px; background:var(--paper); border:1px solid var(--paper-line); font-size:13.5px; color:var(--ink); }
+.mural-composer-error{ margin:0; }
+.mural-composer-error:empty{ display:none; }
+.mural-feed{ display:flex; flex-direction:column; gap:12px; }
+.mural-post{ padding:14px 16px; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); box-shadow:var(--shadow-card); }
+.mural-post.is-teacher{ border-left:4px solid var(--seal-red); }
+.mural-post-head{ display:flex; align-items:center; gap:10px; }
+.mural-post-who{ display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 8px; min-width:0; flex:1; }
+.mural-author{ font-weight:800; color:var(--ink); font-size:14.5px; overflow-wrap:anywhere; }
+.mural-tag{ font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; background:var(--paper-warm); color:var(--seal-red-dark); border:1px solid var(--paper-line); }
+.mural-meta{ font-size:12.5px; color:var(--ink-soft); }
+.mural-post-actions{ display:flex; gap:4px; flex:0 0 auto; }
+.mural-text-btn{ background:none; border:none; padding:8px; min-height:36px; font:inherit; font-size:13px; font-weight:700; color:var(--ink-soft); cursor:pointer; border-radius:8px; }
+.mural-text-btn:hover{ color:var(--ink); background:var(--paper-warm); }
+.mural-text-btn.is-danger:hover, .btn.is-danger{ color:var(--error-red-text, var(--error-red)); }
+.mural-icon-btn{ background:none; border:none; color:var(--ink-soft); cursor:pointer; padding:4px 8px; font-size:13px; border-radius:8px; min-width:32px; min-height:32px; margin-left:auto; }
+.mural-icon-btn:hover{ color:var(--ink); background:var(--paper-warm); }
+.mural-post-target{ margin:10px 0 0; font-size:13px; font-weight:700; color:var(--seal-red-dark); }
+.mural-post-body{ margin:10px 0 0; color:var(--ink); font-size:15px; line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere; }
+.mural-post-body a, .mural-comment-body a{ color:var(--seal-red-dark); }
+.mural-edit-form{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+.mural-files{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.mural-file{ display:inline-flex; align-items:center; gap:8px; max-width:100%; padding:8px 12px; border-radius:12px; border:1px solid var(--paper-line); background:var(--paper-warm); color:var(--ink); text-decoration:none; font-size:13.5px; font-weight:700; min-height:44px; }
+.mural-file-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.mural-file-size{ color:var(--ink-soft); font-weight:400; font-size:12px; flex:0 0 auto; }
+.mural-file-img{ display:block; width:160px; height:120px; border-radius:12px; overflow:hidden; border:1px solid var(--paper-line); background:var(--paper-warm); }
+.mural-file-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+.mural-comments{ list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.mural-comments:empty{ display:none; }
+.mural-comments{ border-top:1px solid var(--paper-line); padding-top:12px; }
+.mural-comment{ display:flex; gap:8px; }
+.mural-comment-main{ min-width:0; flex:1; }
+.mural-comment-head{ display:flex; flex-wrap:wrap; align-items:center; gap:2px 8px; }
+.mural-comment-body{ margin:2px 0 0; color:var(--ink); font-size:14px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+.mural-comment-form{ display:flex; gap:8px; margin-top:12px; }
+.mural-comment-form input{ flex:1; min-width:0; }
+.mural-profile-entry{ display:flex; align-items:center; gap:12px; width:100%; margin:0 0 14px; padding:12px 16px; border-radius:var(--radius); border:1px solid var(--paper-line); background:var(--paper-warm); color:var(--ink); font:inherit; text-align:left; cursor:pointer; min-height:56px; }
+.mural-profile-entry:hover{ border-color:var(--seal-red); }
+.mural-profile-entry-icon{ font-size:22px; }
+.mural-profile-entry-text{ display:flex; flex-direction:column; gap:2px; flex:1; font-size:14px; }
+.mural-profile-entry-text span{ color:var(--ink-soft); font-size:13px; }
+.user-dropdown-item > .mural-count{ margin-left:8px; }
+@media (max-width: 600px){
+  .mural-post{ padding:12px; }
+  .mural-file-img{ width:120px; height:96px; }
+  .mural-composer-bar .mural-publish{ flex:1 1 100%; margin-left:0; }
+  .mural-target-wrap{ flex:1 1 100%; }
+  .mural-target-wrap select{ flex:1; max-width:none; }
+}
 /* K.10: Decks do aluno no painel 📊 e botão Analytics no perfil público */
 .student-decks-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); margin-top:6px; }
 .student-decks{ width:100%; border-collapse:collapse; font-size:13.5px; }
@@ -4036,6 +4126,7 @@ body.hide-pinyin .prompt-pinyin{
 
   <!-- ===== MEU PERFIL ===== -->
   <div class="view" id="view-profile">
+    <div id="profile-mural-entry"></div>
     <div id="profile-content"></div>
   </div>
 
@@ -4201,6 +4292,7 @@ body.hide-pinyin .prompt-pinyin{
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="flashcards" data-i18n="panel.tab.cards">Cartões</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="classlogs" data-i18n="panel.tab.classlogs">Aulas</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="materials" data-i18n="panel.tab.materials">Material de apoio</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="mural" data-i18n="panel.tab.mural">Mural</button>
     </div>
     <div id="admin-students-content"></div>
     <div id="admin-cards-subnav" class="deck-topbar panel-nav panel-subnav" role="tablist" style="display:none;" aria-label="Cartões ou Banco de Revisão">
@@ -4211,6 +4303,16 @@ body.hide-pinyin .prompt-pinyin{
     <div id="admin-reviewbank-content" style="display:none;"></div>
     <div id="admin-classlogs-content" style="display:none;"></div>
     <div id="admin-materials-content" style="display:none;"></div>
+    <div id="admin-mural-content" style="display:none;"></div>
+  </div>
+
+  <!-- ===== MURAL (aluno com vínculo ativo; migration 087, shared/mural.js) ===== -->
+  <div class="view panel-view" id="view-my-mural">
+    <div class="path-header">
+      <h2 data-i18n="mural.title">Mural</h2>
+      <p data-i18n="mural.sub">Recados, materiais e conversas com sua professora e sua turma.</p>
+    </div>
+    <div id="my-mural-content"></div>
   </div>
 
   <!-- ===== MINHAS AULAS (aluno com vínculo ativo; só leitura, get_my_class_logs) ===== -->
@@ -4337,6 +4439,7 @@ body.hide-pinyin .prompt-pinyin{
   <button class="user-dropdown-item mais-extra-tab" id="user-profile-btn" data-i18n="menu.profile">👤 Meu perfil</button>
   <button class="user-dropdown-item mais-extra-tab mais-promoted-tab" id="mais-hanzi-btn" data-tab="hanzi">汉字</button>
   <button class="user-dropdown-item mais-extra-tab" id="leaderboard-btn" data-i18n="menu.ranking">🏆 Ranking</button>
+  <button class="user-dropdown-item student-teacher-nav" id="my-mural-btn" style="display:none;" data-i18n="mural.menu">📌 Mural</button>
   <button class="user-dropdown-item student-teacher-nav" id="my-class-logs-btn" style="display:none;" data-i18n="myClassLogs.menu">📝 Minhas aulas</button>
   <button class="user-dropdown-item student-teacher-nav" id="support-materials-btn" style="display:none;" data-i18n="menu.supportMaterials">📚 Material de apoio</button>
   <button class="user-dropdown-item mais-extra-tab" id="user-settings-btn" data-i18n="menu.settings">⚙️ Configurações</button>
@@ -4885,6 +4988,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/review-bank-import.js"></script>
 <script src="../shared/teacher-panel.js"></script>
 <script src="../shared/teacher-invites.js"></script>
+<script src="../shared/mural.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
 <script src="../shared/my-flashcards.js"></script>

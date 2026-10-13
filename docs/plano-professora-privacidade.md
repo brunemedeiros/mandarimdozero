@@ -317,7 +317,7 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
     toda por padrão, com opção de escolher um aluno só: aí só ele vê.
   - **Grátis** para alunos vinculados a uma professora.
 
-### Proposta de desenho (2026-10-13, aguardando aprovação; nada codado)
+### Proposta de desenho (2026-10-13; aprovada, ver a entrega abaixo)
 
 - Tabelas novas: `classrooms` (professora, idioma, nome, código do link), `classroom_members`, `mural_posts`
   (professora, turma OU aluno, texto, anexos, editado_em), `mural_comments` (autor, texto; apagar = do autor ou da
@@ -330,4 +330,28 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   e já põe o aluno na turma.
 - Telas: Professora ganha "Turmas" no painel (criar, pôr alunos, link, mural da turma). Aluno: "Mural" dentro de
   "Minhas aulas", com o "+N" lá e no menu Perfil.
+- 4ª rodada (2026-10-13): na professora, área própria "Mural" (não "Turmas") com seletor **Turmas | Alunos**: Turmas lista
+  as turmas; Alunos lista só quem não está em turma (os nomes de todos ficam na aba Alunos). Aluno pode estar em mais
+  de uma turma. Aluno também **cria** post (não só comenta). Concordou com o resto das sugestões (turma de um idioma,
+  mural individual para aluno sem turma, desvincular tira das turmas). "Minhas aulas" fica no menu Mais.
+
+### Entrega da Etapa 4 (2026-10-13, branch; migration 087)
+
+- **087_mural.sql** (número 086 já usado por outras conversas): tabelas `classrooms`, `classroom_members`, `mural_posts`,
+  `mural_comments`, `mural_seen`, todas sem policy (só RPCs security definer): `mural_list`, `mural_feed` (marca visto),
+  `mural_create_post`, `mural_update_post` (só a professora, só o dela), `mural_delete_post` (autor ou professora),
+  `mural_add_comment`, `mural_delete_comment`, `mural_save_classroom`, `mural_delete_classroom`,
+  `mural_set_classroom_members`, `mural_classroom_link`, `classroom_code_info` (anon), `join_classroom_code` (cria o
+  vínculo se faltar). Trigger tira o aluno das turmas ao desvincular. Bucket privado `mural` (PDF/JPEG/PNG/WebP, 10 MB)
+  com policies `mural_files_*`. Sino: categoria `mural`, `action_tab` `my-mural` (aluno) e `teacher-mural` (abre o
+  Painel da professora na seção Mural). Limites: 50 posts e 200 comentários por pessoa por dia, 50 turmas.
+- **Telas** (`shared/mural.js`): Painel da professora > Mural; aluno: item "📌 Mural" no menu Mais, "+N" no Perfil (barra
+  e sidebar) e no Mais, atalho no topo do Perfil; link `?turma=CODIGO` com cartão (com e sem login).
+- **Grátis x Premium**: grátis para alunos vinculados; criar turma e postar como professora exige o papel Professora.
+- **Testes**: `tests/mural/run.sh` 80/80 (banco local, 087 aplicada duas vezes); `tests/mural/test_playwright.js`
+  235/235 (fr/zh, claro/escuro, 1200/390); regressão: painel-professora 277/277 (teste de "4 abas" virou 5),
+  login 100/100, perfil-privado 16/16, k10 114/114, painel-alunos 48/48, amigos 158/158, banco-revisao 387/387;
+  i18n unit sem falha nova (183 falhas já existiam na main).
+- **Staging**: aplicadas pela ferramenta só as partes sem `DELETE` (`087_mural` tabelas+helpers, `087b_mural_list`,
+  `087c_mural_feed`, `087d_mural_create_post`); o resto trava a ferramenta: a autora roda `docs/rollout-sql/087_sql_editor.sql`.
 

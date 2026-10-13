@@ -234,3 +234,13 @@ Detalhes: `docs/K-analytics-contrato.md`, seção "Fase K final -- entrega".
 |---|---|---|
 | Staging | ferramenta `apply_migration` (conferido: 8 funções com a condição nova, tabela fechada para anon, país fechado) | conferir em `list_migrations` |
 | Produção | ferramenta, depois do PR #304 publicado (deploy 2026-10-12 21:04); antes: 9 trechos conferidos (1 ocorrência cada); depois: 11 funções com a regra, anon sem tabela, país fechado, leitura como admin ok | `20261012210455` |
+
+## Migration 087 `mural` (Etapa 4, 2026-10-13)
+
+Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_congrats`, `086_review_bank_agent`).
+
+| Onde | Como | Versão |
+|---|---|---|
+| Staging | ferramenta (partes sem `DELETE`) | `20261013153950` `087_mural` (tabelas e helpers), depois `087b_mural_list`, `087c_mural_feed`, `087d_mural_create_post` |
+| Staging | SQL Editor da autora (`docs/rollout-sql/087_sql_editor.sql`, o arquivo inteiro) | pendente |
+| Produção | SQL Editor da autora, com autorização | pendente |
