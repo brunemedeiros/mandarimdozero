@@ -92,13 +92,10 @@ window.I18N_CATALOG['pt-BR'] = {
   'courseMenu.speakLabel': 'Idioma que você fala',
   'courseMenu.speak.pt-BR': 'Eu falo português',
   'courseMenu.speak.en': 'Eu falo inglês',
-  'courses.title': 'Meus cursos',
-  'courses.sub': 'Cada curso tem progresso próprio. Sua sequência de dias e suas conquistas são da conta e valem em todos.',
   'courses.beta': 'em teste',
-  'courses.current': 'atual',
   'courses.confirm.body': 'Você vai trocar para o curso {course}. É um curso novo, com progresso próprio: se você nunca estudou nele, começa do zero. O progresso do curso atual continua salvo e volta quando você voltar a ele. Sua sequência de dias e suas conquistas continuam as mesmas.',
   'courses.first.title': 'Qual curso você quer começar?',
-  'courses.first.sub': 'Você pode trocar de curso depois em Configurações. O progresso de cada curso é separado.',
+  'courses.first.sub': 'Você pode trocar ou adicionar cursos depois, na bandeira no topo da tela. O progresso de cada curso é separado.',
 
   // ---- Fase 6 lote 1: Configurações + menu da conta (fr e zh) ----
   'settings.title': 'Configurações',

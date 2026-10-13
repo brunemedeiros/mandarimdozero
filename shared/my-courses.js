@@ -60,23 +60,16 @@ function confirmSwitchCourse(appKey, siteLang){
   modal.style.display = 'flex';
 }
 
+// A troca de curso mora só no menu da bandeira (topo). Com os cursos por idioma do site ligados, Configurações não tem seletor de idioma
+// do site nem lista de cursos: esconde os dois (o seletor antigo só volta com a chave de emergência).
 function renderMyCourses(){
   const box = document.getElementById('my-courses');
-  if (!box) return;
-  if (!CourseStorage.isPerSiteLanguage()){ box.style.display = 'none'; box.innerHTML = ''; return; }
-  const admin = typeof isAdminUser === 'function' && isAdminUser();
-  const site = (typeof pageSiteLanguage === 'function' && typeof progressLoadedOk !== 'undefined' && progressLoadedOk) ? pageSiteLanguage(null) : getUiLang();
-  const items = listAvailableCourses(APP_KEY, site, admin);
-  box.style.display = '';
-  box.innerHTML = `<div class="pref-row-title">${escapeHTML(t('courses.title'))}</div>
-    <div class="pref-row-sub">${escapeHTML(t('courses.sub'))}</div>
-    ${['pt-BR', 'en'].map(site => { const grp = items.filter(c => c.siteLang === site); if (!grp.length) return ''; return `<div class="my-courses-group-title">${escapeHTML(t('courses.group.' + site))}</div>
-    <div class="my-courses-list">${grp.map(c => `<button type="button" class="btn ${c.current ? 'btn-primary' : 'btn-secondary'} my-course" data-app="${escapeHTML(c.appKey)}" data-site="${escapeHTML(c.siteLang)}" ${c.current ? 'aria-current="true"' : ''}>
-      ${escapeHTML(courseDisplayName(c.appKey, c.siteLang))}${c.status === 'beta' ? ` <span class="my-course-tag">${escapeHTML(t('courses.beta'))}</span>` : ''}${c.current ? ` <span class="my-course-tag">${escapeHTML(t('courses.current'))}</span>` : ''}</button>`).join('')}</div>`; }).join('')}`;
-  box.querySelectorAll('button.my-course:not([aria-current])').forEach(b => {
-    b.addEventListener('click', () => confirmSwitchCourse(b.dataset.app, b.dataset.site));
-  });
+  if (box){ box.style.display = 'none'; box.innerHTML = ''; }
+  const sel = document.getElementById('ui-language-select');
+  const row = sel && sel.closest('.pref-row');
+  if (row) row.style.display = CourseStorage.isPerSiteLanguage() ? 'none' : '';
 }
+
 // C6: portão do primeiro acesso. Depois de "Eu falo..." (idioma do site), a pessoa escolhe o curso entre os disponíveis para esse idioma.
 // Conta nova: sem progresso a perder, então não salva nada antes de recarregar/abrir a outra página. Só roda com a flag ligada.
 function showFirstCoursePick(lang, modal){

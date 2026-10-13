@@ -234,3 +234,9 @@ Só front-end estático; **nenhuma migration**; **flag desligada para todos**: s
 - Conferido no banco (só contagens): 1 conta com `uiLanguage = en`, não é da dona, 0 XP; nada a perder.
 - **Deploy do `notification-cron` (autorizado) FALHOU**: erro interno do Supabase ao publicar e ao ler o bundle de qualquer função; versão 22 segue no ar, sem mudança. Versão pronta (v22 + `blockForLanguage` + alerta de infrequência) em `/tmp/cron-deploy/index.ts` (temporário; a fonte é o repo + o delta descrito aqui). **Não mesclar na `main` antes do deploy.**
 - Regressão: 82 de 97 suítes; as 15 de sempre. Duas suítes do i18n (`test_ui_language_confirm_browser`, `test_ui_language_first_access_browser`) testam o comportamento antigo e passaram a rodar com a chave de emergência; o comportamento novo está nos testes `*_cursos_browser`. Corrida de temporização no teste do aviso em inglês corrigida (esperava o catálogo).
+
+### Troca de curso só pela bandeira (2026-10-13, pedido da dona)
+- A troca/adição de curso mora **só no menu da bandeira do topo** (como no Duolingo). Com a flag ligada, Configurações **não** tem mais o seletor "Idioma da interface" nem a lista "Meus cursos" (`renderMyCourses` esconde os dois; o seletor volta só com a chave de emergência `courses-per-site-language = 0`). Saíram as chaves `courses.title`, `courses.sub`, `courses.current`.
+- Subtítulo do portão: "Você pode trocar ou adicionar cursos depois, na bandeira no topo da tela. O progresso de cada curso é separado." (sem citar Configurações).
+- Teste `test_meus_cursos_browser.js` reescrito (12): Configurações sem seletor nem lista. Menu 24 e portão 21 seguem verdes; i18n 2104/2104.
+- Deploy do `notification-cron` tentado de novo e falhou igual (erro interno do Supabase). Arquivo pronto para colar no painel: `docs/deploy/notification-cron-para-colar-no-painel.ts` (v22 + `blockForLanguage` + alerta de infrequência).

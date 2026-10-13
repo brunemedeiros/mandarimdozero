@@ -21,62 +21,36 @@ const STUB = `(function(){
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x) : ''); } };
 
+// Troca de curso só no menu da bandeira: Configurações não tem lista de cursos nem seletor de idioma do site (com a flag ligada).
 (async () => {
   await new Promise(r => server.listen(0, '127.0.0.1', r));
   const base = 'http://127.0.0.1:' + server.address().port;
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   for (const app of ['fr', 'zh']) {
     for (const flag of [false, true]) {
+      const tag = `${app} flag=${flag}`;
       const ctx = await browser.newContext({ viewport: { width: 390, height: 800 }, serviceWorkers: 'block' });
-      await ctx.addInitScript(({ flag }) => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('courses-per-site-language', flag ? '1' : '0'); localStorage.setItem('ui-language', 'pt-BR'); } catch (e) {} }, { flag });
-      const page = await ctx.newPage();
+      await ctx.addInitScript(({ flag }) => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); localStorage.setItem('courses-per-site-language', flag ? '1' : '0'); } catch (e) {} }, { flag });
+      const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(String(e)));
       await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
       await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
-      const errs = []; page.on('pageerror', e => errs.push(String(e)));
       await page.goto(`${base}/${app}/index.html`);
-      await page.waitForFunction(() => typeof renderMyCourses === 'function' && typeof STATE !== 'undefined' && CURRENT_USER === false, null, { timeout: 20000 }).catch(async e => { console.log('ERRS', errs, await page.evaluate(() => typeof LanguageRegistry + typeof CourseStorage + typeof t)); throw e; });
-      await page.evaluate(() => { renderMyCourses(); });
-      const tag = `${app} flag=${flag}`;
-      const state = await page.evaluate(() => { const b = document.getElementById('my-courses'); return { exists: !!b, display: b && b.style.display, buttons: b ? b.querySelectorAll('button.my-course').length : 0, text: b ? b.textContent : '' }; });
-      if (!flag) {
-        check(`${tag}: "Meus cursos" escondido com a flag desligada`, state.exists && state.display === 'none' && state.buttons === 0, state);
+      await page.waitForFunction(() => typeof renderMyCourses === 'function' && typeof STATE !== 'undefined' && CURRENT_USER === false, null, { timeout: 20000 });
+      await page.evaluate(() => { switchTab('settings'); renderMyCourses(); });
+      const st = await page.evaluate(() => { const sel = document.getElementById('ui-language-select'); const row = sel.closest('.pref-row'); const b = document.getElementById('my-courses');
+        return { selRowDisplay: row.style.display, selVisible: row.getBoundingClientRect().height > 0, boxHidden: b.style.display === 'none' && b.innerHTML === '', text: document.getElementById('settings-general-content') ? document.getElementById('settings-general-content').textContent : document.body.textContent }; });
+      if (flag) {
+        check(`${tag}: seletor de idioma do site some de Configurações`, st.selRowDisplay === 'none' && !st.selVisible, st);
+        check(`${tag}: sem lista "Meus cursos" em Configurações`, st.boxHidden, st);
+        check(`${tag}: nenhum texto manda trocar de curso em Configurações`, !/trocar de curso depois em Configura/i.test(st.text) && !/switch courses later in Settings/i.test(st.text));
       } else {
-        check(`${tag}: "Meus cursos" aparece com a flag ligada`, state.display !== 'none' && state.buttons >= 3, state);
-        check(`${tag}: mostra o título`, /Meus cursos/.test(state.text), state.text.slice(0, 80));
-        const cur = await page.evaluate(() => [...document.querySelectorAll('button.my-course[aria-current]')].map(b => b.textContent.trim()));
-        check(`${tag}: exatamente um curso atual (pt-BR)`, cur.length === 1 && /^(Francês|Chinês)\s+ATUAL$/i.test(cur[0].replace(/\s+/g,' ')), cur);
-        // abrir o aviso ao escolher o curso em inglês do mesmo idioma
-        await page.evaluate(() => { document.getElementById('my-courses').scrollIntoView(); });
-        const target = await page.$(`button.my-course[data-app="${app === 'fr' ? 'frances' : 'mandarim'}"][data-site="en"]`);
-        check(`${tag}: há botão do curso em inglês`, !!target);
-        if (target) {
-          await page.evaluate((sel) => document.querySelector(sel).click(), `button.my-course[data-app="${app === 'fr' ? 'frances' : 'mandarim'}"][data-site="en"]`);
-          const modal = await page.evaluate(() => ({ disp: document.getElementById('ui-language-confirm-modal').style.display, body: document.getElementById('ui-language-confirm-body').textContent }));
-          check(`${tag}: aviso novo aparece com o nome do curso`, modal.disp === 'flex' && /curso novo, com progresso próprio/.test(modal.body) && /(French|Chinese)/.test(modal.body), modal);
-          await page.evaluate(() => document.getElementById('ui-language-confirm-no').click());
-          const closed = await page.evaluate(() => document.getElementById('ui-language-confirm-modal').style.display);
-          check(`${tag}: Cancelar fecha sem trocar`, closed === 'none');
-        }
-        const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
-        check(`${tag}: sem rolagem horizontal em 390px`, !overflow);
-        if (process.env.SHOTS) {
-          await page.evaluate(() => { switchTab('settings'); renderMyCourses(); });
-          for (const theme of ['light', 'dark']) {
-            await page.evaluate((th) => { document.documentElement.setAttribute('data-theme', th); }, theme);
-            await page.waitForTimeout(800);
-            await page.evaluate(() => document.getElementById('my-courses').scrollIntoView({ block: 'center' }));
-            await page.waitForTimeout(300);
-            const vis = await page.evaluate(() => { const r = document.getElementById('my-courses').getBoundingClientRect(); return [r.width, r.height]; });
-            check(`${app} ${theme}: bloco visível com tamanho`, vis[0] > 100 && vis[1] > 60, vis);
-            await page.screenshot({ path: `${process.env.SHOTS}/${app}-${theme}-meus-cursos.png` });
-          }
-        }
+        check(`${tag}: com a chave de emergência o seletor antigo continua`, st.selRowDisplay !== 'none' && st.selVisible, st);
       }
       check(`${tag}: sem erro de script`, errs.length === 0, errs);
       await ctx.close();
     }
   }
   await browser.close(); server.close();
-  console.log(`meus cursos (navegador): ${passed} passaram, ${failed} falharam`);
+  console.log(`configurações sem troca de curso (navegador): ${passed} passaram, ${failed} falharam`);
   process.exit(failed ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

@@ -76,13 +76,10 @@ window.I18N_CATALOG['en'] = {
   'courseMenu.speakLabel': 'Language you speak', // ALTA
   'courseMenu.speak.pt-BR': 'I speak Portuguese', // ALTA
   'courseMenu.speak.en': 'I speak English', // ALTA
-  'courses.title': 'My courses', // ALTA
-  'courses.sub': 'Each course has its own progress. Your day streak and achievements belong to your account and count in every course.', // ALTA
   'courses.beta': 'beta', // ALTA
-  'courses.current': 'current', // ALTA
   'courses.confirm.body': 'You are about to switch to the {course} course. It is a separate course with its own progress: if you have never studied in it, you start from zero. Your progress in the current course stays saved and comes back when you return to it. Your day streak and achievements stay the same.', // MÉDIA
   'courses.first.title': 'Which course do you want to start?', // ALTA
-  'courses.first.sub': 'You can switch courses later in Settings. Each course keeps its own progress.', // ALTA
+  'courses.first.sub': 'You can switch or add courses later from the flag at the top of the screen. Each course keeps its own progress.', // ALTA
 
   // Fase 6 lote 1
   'settings.title': 'Settings', // ALTA
