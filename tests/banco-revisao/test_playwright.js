@@ -379,6 +379,7 @@ const BANK_STUB = (who, appKey) => {
         { key: 'beto', name: 'Beto', language: 'frances', reference: 'pt', status: 'arquivado', items: [{ key: 'i001', type: 'verbo', q: 'ir', a: 'aller' }] },
         { key: 'sem-idioma', name: 'Sem idioma', language: 'klingon', items: [] }] };
       const ex = JSON.stringify(EXPORT);
+      L('importar: aparece também com a lista de alunos vazia (produção nova)', await ev(() => { const keep = RB.students; RB.students = []; const h = rbStudentsHTML(); RB.students = keep; return h.includes('id="rb-import"') && h.includes('rb-import-file'); }));
       L('importar: bloco fechado por padrão e visível na aba Alunos', await ev(() => !!document.querySelector('details#rb-import') && !document.querySelector('details#rb-import').open));
       await page.evaluate(() => { document.querySelector('details#rb-import').open = true; });
       await page.setInputFiles('#rb-import-file', { name: 'banco.json', mimeType: 'application/json', buffer: Buffer.from('isto não é json') });

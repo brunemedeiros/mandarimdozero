@@ -111,7 +111,7 @@ function rbRender(){
 
 // ---------- aba Alunos ----------
 function rbStudentsHTML(){
-  if (!RB.students.length) return `<div class="rb-empty">${rbH(rbt('noStudents'))}<br><br><button class="rb-btn rb-btn-blue" data-rb="student-new">${rbH(rbt('addStudent'))}</button></div>${RB.studentForm ? rbStudentFormHTML() : ''}`;
+  if (!RB.students.length) return `<div class="rb-empty">${rbH(rbt('noStudents'))}<br><br><button class="rb-btn rb-btn-blue" data-rb="student-new">${rbH(rbt('addStudent'))}</button></div>${RB.studentForm ? rbStudentFormHTML() : ''}${rbImportHTML()}`;
   const groups = ['frances', 'portugues', 'mandarim'].map(lg => ({ lg, list: RB.students.filter(s => s.language_app_key === lg).sort((a, b) => (a.status === 'arquivado') - (b.status === 'arquivado') || a.name.localeCompare(b.name)) })).filter(g => g.list.length);
   const roster = groups.map(g => `<div class="rb-group"><span class="rb-group-lbl">${rbH(rbLangLabel(g.lg))}</span>${g.list.map(s => {
     const pend = (RB.summary[s.id] || {}).pendente || 0;
