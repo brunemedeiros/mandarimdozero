@@ -208,6 +208,7 @@
     "type": "expression",
     "canonicalExpression": "Excusez-moi !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "358e82d5d131.mp3",
     "meaning": {
       "fr": "On l'utilise pour attirer l'attention ou s'excuser poliment.",
@@ -257,6 +258,7 @@
     "type": "expression",
     "canonicalExpression": "Je vous en prie",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "998a30c1edd7.mp3",
     "meaning": {
       "fr": "C'est la réponse polie à « merci » (« de rien », en plus formel).",
@@ -306,6 +308,7 @@
     "type": "expression",
     "canonicalExpression": "Ça fait combien ?",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "1cb7cd552e39.mp3",
     "meaning": {
       "fr": "On demande le prix total.",
@@ -355,6 +358,7 @@
     "type": "expression",
     "canonicalExpression": "C'est trop cher !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "3c42e392d8b3.mp3",
     "meaning": {
       "fr": "Le prix est trop élevé.",
@@ -404,6 +408,7 @@
     "type": "expression",
     "canonicalExpression": "Et avec ça ?",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "179fb9cbabe5.mp3",
     "meaning": {
       "fr": "Le vendeur demande si vous voulez autre chose.",

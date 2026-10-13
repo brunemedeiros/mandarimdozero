@@ -50,12 +50,13 @@ function loadLang(lang, overrides){
   run(read('shared/srs.js'), 'shared/srs.js');
   run(read('shared/fsrs.js'), 'shared/fsrs.js');
   run(read('shared/study-queue.js'), 'shared/study-queue.js');
+  run(read('languages/registry.js'), 'languages/registry.js');
   run(read('shared/flashcard-model.js'), 'shared/flashcard-model.js');
   run(read('shared/study-trail-model.js'), 'shared/study-trail-model.js');
   run(read('shared/analytics-metrics.js'), 'shared/analytics-metrics.js');
   run(read('shared/deck-engine.js'), 'shared/deck-engine.js');
   run(read('shared/deck-data.js'), 'shared/deck-data.js');
-  run(read(lang + '/content.js') + '\n;this.UNITS = UNITS;', lang + '/content.js');
+  run(require('../../scripts/lib/course-content.js').composedSource(lang) + '\n;this.UNITS = UNITS;', lang + '/content.js');
   const appSrc = read(lang + '/app.js');
   APP_FUNCTIONS.forEach(fn => {
     try { run(extractFunction(appSrc, fn), lang + '/app.js#' + fn); }

@@ -26,10 +26,10 @@
 
 ## Expressões
 
-| Unidade | Expressão | Significado | Exemplo |
-|---|---|---|---|
-| A1-17 | Fais comme chez toi | Fique à vontade; faça como se fosse a sua casa. | Entre, fais comme chez toi ! |
-| A1-17 | Chez moi | Na minha casa; em casa. | Viens chez moi ce soir ! |
-| A1-17 | Bienvenue ! | Bem-vindo(a)! | Bienvenue chez moi ! |
-| A1-16 | Ça te va bien ! | Fica bem em você! Combina com você! | Cette robe rouge, ça te va bien ! |
-| A1-16 | Ça te plaît ? | Você gostou? Gostou disso? | Ma nouvelle maison, ça te plaît ? |
+| Unidade | Expressão | Registro | Significado | Exemplo |
+|---|---|---|---|---|
+| A1-17 | Fais comme chez toi | neutral | Fique à vontade; faça como se fosse a sua casa. | Entre, fais comme chez toi ! |
+| A1-17 | Chez moi | neutral | Na minha casa; em casa. | Viens chez moi ce soir ! |
+| A1-17 | Bienvenue ! | neutral | Bem-vindo(a)! | Bienvenue chez moi ! |
+| A1-16 | Ça te va bien ! | neutral | Fica bem em você! Combina com você! | Cette robe rouge, ça te va bien ! |
+| A1-16 | Ça te plaît ? | neutral | Você gostou? Gostou disso? | Ma nouvelle maison, ça te plaît ? |

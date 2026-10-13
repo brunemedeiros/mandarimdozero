@@ -21,7 +21,7 @@ const CHALLENGE_CATEGORIES = {
   dictation:        { label: 'Ditado',                scope: 'module', defaultAudience: 'trail',   note: 'Já aberto a todos (free:true).' },
   listen_translate: { label: 'Ouça e traduza',        scope: 'unit',   defaultAudience: 'premium', note: 'Poucos por unidade (hoje 2), frases só com vocabulário já visto no módulo.' },
   writing_marks:    { label: 'Acentuação / tons',     scope: 'unit',   defaultAudience: 'premium', note: 'fr: só ´ ` ^ ~ ¨ ("ç" NÃO é acento). zh: marcas de tom do pinyin.' },
-  expression:       { label: 'Expressões',            scope: 'unit',   defaultAudience: 'premium', note: 'Leve: ~5 por módulo, no fim da unidade.' },
+  expression:       { label: 'Expressões',            scope: 'unit',   defaultAudience: 'premium', note: 'Leve: ~5 por módulo, no fim da unidade. Registro obrigatório (campo register: formal/neutral/familiar/slang/vulgar).' },
   cloze_grammar:    { label: 'Complete a frase (gramática)', scope: 'module', defaultAudience: 'premium', note: 'Múltipla escolha (2-4 opções) por lacuna ___, só com vocabulário visto até o módulo; explicação pt-BR obrigatória. fr: python3 fr/scripts/challenges_import/build_cloze.py. Avaliar quando o módulo ensina um ponto de gramática.' },
 };
 

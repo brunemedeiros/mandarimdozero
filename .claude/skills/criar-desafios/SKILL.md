@@ -15,6 +15,11 @@ Histórico e decisões: `docs/historico/09-desafios-ditados.md`. Política em c�
    (fr ´ ` ^ ~ ¨, "ç" não conta; zh tons). Só vocabulário já visto no módulo.
 4. Conteúdo em `fr/scripts/challenges_import/modulo-*-content.json` → `build_modulo.py` → `lote-*.json` + `lote-*.md`.
    A autora revisa o `.md` antes de áudio/importação. Importar como `needs_review`.
+4b. **Registro obrigatório em toda expressão nova** (regra de 12/10/2026): campo `register` no conteúdo-fonte
+   (`soutenu` / `neutre` / `familier` / `très familier` / `vulgaire`), que o builder converte no campo próprio
+   `register` do desafio (`formal` / `neutral` / `familiar` / `slang` / `vulgar`). Sem ele o build falha.
+   Na lista vira etiqueta (Formal, Dia a dia, Entre amigos, Gíria, Pode ofender). Reportar o registro de cada
+   expressão nova no chat com nível de confiança. Expressão criada à mão (admin/SQL) também precisa do campo.
 5. Áudio: Actions > "Áudio TTS" com o modo do lote (ex.: `desafios-a1-m1`, `ditados`).
 6. Conclusão: acerto ou erro leve conclui; erro total mostra "Tentar de novo"/"Tentar mais tarde".
 7. Textos de interface via `chT()`/`CHALLENGE_I18N`. chinês ainda não tem aba Desafios.

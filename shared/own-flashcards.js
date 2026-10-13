@@ -71,7 +71,7 @@ function _validateOwnFlashcardContent({ front, backTrans, choices, clozeSentence
       return { ok: false, error: t('ownFlashcards.err.clozeOneBlank') };
     }
     if (!cleanClozeAnswer) return { ok: false, error: t('ownFlashcards.err.clozeAnswerRequired') };
-    if (languageAppKey === 'mandarim' && !(clozeAnswerPinyin || '').trim()){
+    if (LanguageRegistry.isCjk(languageAppKey) && !(clozeAnswerPinyin || '').trim()){
       return { ok: false, error: t('ownFlashcards.err.clozePinyinRequired') };
     }
   }

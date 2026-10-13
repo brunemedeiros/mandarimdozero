@@ -124,6 +124,7 @@ check('Anki round-trip: exportar -> importar preserva o conjunto', plan.notes[0]
 // ---------- Filtro no Review (fr + zh): funções REAIS de app.js ----------
 for (const [label, appjs] of [['fr', 'fr/app.js'], ['zh', 'zh/app.js']]){
   const ctx = vm.createContext({ console, JSON, Array, Set, Object });
+  vm.runInContext(read('languages/registry.js'), ctx);
   vm.runInContext(read('shared/flashcard-model.js'), ctx);
   const src = read(appjs);
   ['activeReviewTagFilter', 'matchesReviewTagFilter', 'eligibleReviewPool', 'reviewTagUniverse', 'matchesReviewOriginFilter'].forEach(fn => vm.runInContext(extractFunction(src, fn), ctx));
