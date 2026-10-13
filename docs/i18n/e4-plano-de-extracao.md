@@ -4,7 +4,7 @@ Base: `docs/i18n/e4-levantamento-funcoes.md` (passo 1). Estratégia aprovada na 
 
 ## 1. O que o levantamento mostrou
 
-- Funções de topo: 536 entre os dois arquivos (fr 474, zh 299; 237 só do francês, 62 só do mandarim).
+- Funções de topo: 536 nomes distintos (fr 474, zh 299 declarações; 237 só do francês, 62 só do mandarim).
 - **163 funções são idênticas** (1.971 linhas no fr, 21% das linhas de função; 30% no zh). **55 são quase iguais** (2.541 linhas). **19 divergem**.
 - Se só as idênticas saírem, `fr/app.js` perde ~2.000 linhas e `zh/app.js` ~1.970; com as quase iguais, perto de 4.500 em cada. A conta da meta "duplicação abaixo de 30%" será refeita a cada área com o mesmo script.
 - 43% do francês e 21% do mandarim são peças de um idioma só (Desafios, conjugação e ditados no francês; hanzi e traços no mandarim): viram módulos opcionais declarados no registro (passo 6), não duplicação.
@@ -27,7 +27,7 @@ Base: `docs/i18n/e4-levantamento-funcoes.md` (passo 1). Estratégia aprovada na 
 | 1 | idênticas de **áudio e fala** e de **perfil, ranking e social** (conquistas, celebrações, missões) | 25 | ~220 | baixo |
 | 2 | idênticas de **revisão e decks** | 42 | ~500 | médio (cartões e FSRS; regressão da Revisão) |
 | 3 | idênticas de **exercícios de lição** | 39 | ~420 | médio (telas de lição) |
-| 4 | idênticas de **estado e persistência**, **mapa da trilha**, **checkpoint**, **desafios**, **outros** | 57 | ~1.040 | médio/alto (salvar e carregar) |
+| 4 | idênticas de **estado e persistência**, **mapa da trilha**, **checkpoint**, **desafios**, **outros** | 57 | ~835 | médio/alto (salvar e carregar) |
 | 5 | **quase iguais** (55), uma área por vez, com ponto de extensão (nome do falante, função de fala, teclado) | 55 | ~2.540 | alto |
 | 6 | **divergentes** (19), uma a uma: unificar ou assumir como regra do idioma (E5) | 19 | ~730 | alto |
 | 7 | **módulos opcionais** (conjugação, Desafios, ditados) declarados no registro; `index.html` por idioma vira casca | — | — | alto |
