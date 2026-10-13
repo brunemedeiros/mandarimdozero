@@ -88,6 +88,20 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     }
     await ctx.close();
   }
+  // "Eu falo": até 3 idiomas do site = botões; com mais, lista
+  {
+    const ctx = await browser.newContext({ serviceWorkers: 'block' });
+    await ctx.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
+    const page = await ctx.newPage();
+    await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.goto(`${base}/fr/index.html`);
+    await page.waitForFunction(() => typeof speakControlHTML === 'function' && CURRENT_USER === false);
+    const r = await page.evaluate(() => { const a = speakControlHTML('en'); const orig = courseSiteLanguages; courseSiteLanguages = () => ['pt-BR', 'en', 'es', 'de']; const b = speakControlHTML('en'); courseSiteLanguages = orig; return { a, b }; });
+    check('Eu falo com 2 idiomas: botões', /<button/.test(r.a) && !/<select/.test(r.a));
+    check('Eu falo com mais de 3 idiomas: lista', /<select/.test(r.b) && !/<button/.test(r.b));
+    await ctx.close();
+  }
   await browser.close(); server.close();
   console.log(`menu de cursos (navegador): ${passed} passaram, ${failed} falharam`);
   process.exit(failed ? 1 : 0);

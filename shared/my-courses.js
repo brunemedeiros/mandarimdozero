@@ -19,6 +19,23 @@ function listAvailableCourses(currentAppKey, currentSiteLang, admin){
 }
 
 // Nome do curso = nome do idioma estudado na língua do curso: Francês (pt-BR), French (en), Chinês, Chinese.
+// Idiomas do site que existem no registro (união dos `siteLanguages`), na ordem do registro. Hoje pt-BR e en.
+function courseSiteLanguages(){
+  const out = [];
+  LanguageRegistry.enabled().forEach(l => (l.siteLanguages || []).forEach(x => { if (out.indexOf(x) < 0) out.push(x); }));
+  return out;
+}
+
+// "Eu falo ...": até 3 idiomas do site, botões lado a lado; com mais, uma lista (como o "I speak English" do Duolingo).
+function speakControlHTML(site){
+  const sites = courseSiteLanguages();
+  const label = escapeHTML(t('courseMenu.speakLabel'));
+  if (sites.length <= 3){
+    return `<div class="add-course-speak" role="group" aria-label="${label}">${sites.map(x => `<button type="button" data-site="${x}" aria-pressed="${x === site}">${escapeHTML(t('courseMenu.speak.' + x))}</button>`).join('')}</div>`;
+  }
+  return `<select class="review-settings-select add-course-speak" aria-label="${label}">${sites.map(x => `<option value="${x}"${x === site ? ' selected' : ''}>${escapeHTML(t('courseMenu.speak.' + x))}</option>`).join('')}</select>`;
+}
+
 function courseDisplayName(appKey, siteLang){
   return LanguageRegistry.shortName(appKey, siteLang) || appKey;
 }
@@ -49,11 +66,16 @@ function confirmSwitchCourse(appKey, siteLang){
   const yes = document.getElementById('ui-language-confirm-yes');
   const no = document.getElementById('ui-language-confirm-no');
   const title = modal && modal.querySelector('h3');
-  const text = t('courses.confirm.body', { course: courseDisplayName(appKey, siteLang) });
   if (!modal || !body || !yes || !no){ switchCourse(appKey, siteLang); return; }
   const oldTitle = title ? title.textContent : null;
   if (title) title.textContent = t('courses.confirm.title');
-  body.innerHTML = `<p class="course-confirm-head">${courseFlag(appKey)}<span>${escapeHTML(courseDisplayName(appKey, siteLang))}</span></p><p style="margin:0;">${escapeHTML(text)}</p>`;
+  body.innerHTML = `<div class="course-confirm">
+    <p class="course-confirm-intro">${escapeHTML(t('courses.confirm.intro'))}</p>
+    <p class="course-confirm-head">${courseFlag(appKey)}<span>${escapeHTML(courseDisplayName(appKey, siteLang))}</span></p>
+    <p class="course-confirm-p">${escapeHTML(t('courses.confirm.p1'))}</p>
+    <p class="course-confirm-p">${escapeHTML(t('courses.confirm.p2'))}</p>
+    <p class="course-confirm-keep"><span aria-hidden="true">🔥</span> ${escapeHTML(t('courses.confirm.p3'))}</p>
+  </div>`;
   const done = (ok) => {
     modal.style.display = 'none';
     yes.onclick = null; no.onclick = null;
@@ -166,9 +188,14 @@ function ensureCourseMenuStyles(){
 .add-course-card .course-flag svg{ width:104px; height:72px; }
 .add-course-tag{ font-size:12px; font-weight:700; padding:1px 10px; border-radius:999px; border:1px solid var(--paper-line); background: var(--paper); color: var(--ink-soft); }
 .add-course-done{ position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:50%; background: var(--jade); color: var(--on-vivid); font-size:13px; display:flex; align-items:center; justify-content:center; }
-.course-confirm-head{ display:flex; align-items:center; gap:12px; margin:0 0 10px; font-weight:800; font-size:18px; color: var(--ink); }
-.course-confirm-head .course-flag{ width:44px; height:44px; }
-.course-confirm-head .course-flag svg{ width:63px; height:44px; }
+.course-confirm{ display:flex; flex-direction:column; gap:12px; }
+.course-confirm p{ margin:0; }
+.course-confirm-intro{ font-size:14px; font-weight:700; color: var(--ink-soft); }
+.course-confirm-head{ display:flex; align-items:center; gap:12px; font-weight:900; font-size:26px; line-height:1.15; color: var(--ink); }
+.course-confirm-head .course-flag{ width:52px; height:52px; }
+.course-confirm-head .course-flag svg{ width:78px; height:52px; }
+.course-confirm-p{ font-size:16px; line-height:1.55; color: var(--ink); max-width:46ch; }
+.course-confirm-keep{ margin-top:2px !important; padding:10px 14px; border-radius: var(--radius); background: var(--paper); border:1px solid var(--paper-line); font-size:14.5px; font-weight:700; line-height:1.45; color: var(--ink); }
 @media (prefers-reduced-motion: no-preference){ .add-course-card{ transition: box-shadow .15s ease, border-color .15s ease; } }`;
   document.head.appendChild(st);
 }
@@ -185,7 +212,8 @@ function openAddCourse(){
   }
   const admin = typeof isAdminUser === 'function' && isAdminUser();
   const startSite = (typeof pageSiteLanguage === 'function' && typeof progressLoadedOk !== 'undefined' && progressLoadedOk) ? pageSiteLanguage(null) : getUiLang();
-  let site = startSite === 'en' ? 'en' : 'pt-BR';
+  const sites = courseSiteLanguages();
+  let site = sites.indexOf(startSite) >= 0 ? startSite : sites[0];
   const paint = async () => {
     let raw = null;
     try { if (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && typeof fetchOtherLanguagesRaw === 'function') raw = await fetchOtherLanguagesRaw(); } catch (e) {}
@@ -194,14 +222,14 @@ function openAddCourse(){
       <div class="app-modal-header add-course-head"><h3 id="add-course-title" style="margin:0;">${escapeHTML(t('courseMenu.add'))}</h3>
         <button type="button" class="app-modal-close" id="add-course-close" aria-label="${escapeHTML(t('settings.uiLanguage.confirm.cancel'))}">✕</button></div>
       <div class="app-modal-body">
-        <div class="add-course-head"><div class="add-course-speak" role="group" aria-label="${escapeHTML(t('courseMenu.speakLabel'))}">
-            ${['pt-BR', 'en'].map(x => `<button type="button" data-site="${x}" aria-pressed="${x === site}">${escapeHTML(t('courseMenu.speak.' + x))}</button>`).join('')}</div></div>
+        <div class="add-course-head">${speakControlHTML(site)}</div>
         <h4 class="add-course-group">${escapeHTML(t('courses.group.' + site))}</h4>
         <div class="add-course-grid">${items.map(c => { const done = raw && CourseStorage.blockFor(raw, c.appKey, c.siteLang); return `<button type="button" class="add-course-card" data-app="${escapeHTML(c.appKey)}" data-site="${escapeHTML(c.siteLang)}"${c.current ? ' aria-current="true"' : ''}>
           ${done || c.current ? '<span class="add-course-done" aria-hidden="true">✓</span>' : ''}${courseFlag(c.appKey)}<span>${escapeHTML(courseDisplayName(c.appKey, c.siteLang))}</span>${c.status === 'beta' ? `<span class="add-course-tag">${escapeHTML(t('courses.beta'))}</span>` : ''}</button>`; }).join('')}</div>
       </div></div>`;
     ov.querySelector('#add-course-close').addEventListener('click', () => { ov.style.display = 'none'; });
     ov.querySelectorAll('.add-course-speak button').forEach(b => b.addEventListener('click', () => { site = b.dataset.site; paint(); }));
+    const speakSel = ov.querySelector('select.add-course-speak'); if (speakSel) speakSel.addEventListener('change', () => { site = speakSel.value; paint(); });
     ov.querySelectorAll('.add-course-card:not([aria-current])').forEach(b => b.addEventListener('click', () => { ov.style.display = 'none'; confirmSwitchCourse(b.dataset.app, b.dataset.site); }));
     ov.querySelector('.add-course-card[aria-current]') && ov.querySelector('.add-course-card[aria-current]').addEventListener('click', () => { ov.style.display = 'none'; });
   };
