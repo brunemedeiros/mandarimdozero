@@ -48,6 +48,7 @@ try{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="../shared/review-bank.css">
 <style>
 :root{
   /* Design tokens — paleta própria do Francês do Zero (azul como cor
@@ -1900,6 +1901,10 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .flashcard-hint{ position:absolute; bottom:16px; font-size:12px; color: var(--ink-soft); opacity:.7; }
 .flashcard .divider-line{ width:40px; height:3px; background:var(--paper-line); border-radius:2px; margin: 16px 0; }
 
+/* Observação da professora (depois de responder) e "Quase lá" (digitar) -- Banco de Revisão */
+.review-observation{ display:flex; flex-direction:column; gap:2px; margin:12px 0; padding:10px 14px; background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:var(--radius); color:var(--ink); font-size:14px; line-height:1.45; text-align:left; white-space:pre-line; }
+.review-observation strong{ font-size:12px; font-weight:800; color:var(--ink-soft); }
+.review-almost{ margin:10px 0 0; text-align:center; font-weight:800; font-size:14px; color:var(--ink); }
 .grade-buttons{ display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:18px; }
 .grade-btn{
   padding: 12px 6px; border-radius:12px; border:none; cursor:pointer; font-family:var(--font-body);
@@ -4812,7 +4817,12 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="materials" data-i18n="panel.tab.materials">Material de apoio</button>
     </div>
     <div id="admin-students-content"></div>
+    <div id="admin-cards-subnav" class="deck-topbar panel-nav panel-subnav" role="tablist" style="display:none;" aria-label="Cartões ou Banco de Revisão">
+      <button class="deck-topbar-btn is-active" role="tab" aria-selected="true" data-cards-sub="cards" data-i18n="rb.sub.cards">Cartões</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-cards-sub="bank" data-i18n="rb.sub.bank">Banco de Revisão</button>
+    </div>
     <div id="admin-flashcards-content" style="display:none;"></div>
+    <div id="admin-reviewbank-content" style="display:none;"></div>
     <div id="admin-classlogs-content" style="display:none;"></div>
     <div id="admin-materials-content" style="display:none;"></div>
   </div>
@@ -5505,6 +5515,8 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 <script src="../shared/flashcard-native-persistence.js"></script>
 <script src="../shared/anki-parser.js"></script>
 <script src="../shared/anki-import.js"></script>
+<script src="../shared/review-answer-extras.js"></script>
+<script src="../shared/review-bank-student.js"></script>
 <script src="../shared/flashcard-preview.js"></script>
 <script src="../shared/teacher-flashcards.js"></script>
 <script src="../shared/admin-flashcards.js"></script>
@@ -5513,6 +5525,10 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 <script src="../shared/teacher-support-materials.js"></script>
 <script src="../shared/admin-support-materials.js"></script>
 <script src="../shared/support-materials-view.js"></script>
+<script src="../shared/review-bank-model.js"></script>
+<script src="../shared/review-bank.js"></script>
+<script src="../shared/review-bank-class.js"></script>
+<script src="../shared/review-bank-import.js"></script>
 <script src="../shared/teacher-panel.js"></script>
 <script src="../shared/teacher-invites.js"></script>
 <script src="../shared/own-flashcards.js"></script>

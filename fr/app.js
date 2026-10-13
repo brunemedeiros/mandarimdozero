@@ -1032,6 +1032,7 @@ async function loadStateAndRender(){
   await mergeTeacherFlashcardsIntoState();
   await mergeSelfFlashcardsIntoState();
   await loadState();
+  if (typeof applyPendingBankReviews === 'function') await applyPendingBankReviews();
   // Fase 10: aplica a preferência de frequência de revisão (padrão ou
   // salva) no motor FSRS -- precisa rodar antes de qualquer grading real.
   setDesiredRetention(reviewFrequencyToRetention(STATE.studySettings.reviewFrequency));
@@ -7313,7 +7314,7 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
         return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${mark}${escapeHTML(opt.text)}</button>`;
       }).join('')}
     </div>
-    ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}</button>` : ''}
+    ${answered ? `${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}</button>` : ''}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -7415,7 +7416,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
         ${frAccentPickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
   `;
 
   wireCustomAudioButtons(mountEl);
@@ -7424,17 +7425,17 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     const inputEl = mountEl.querySelector('#cloze-review-input');
     inputEl.focus();
     wireFrAccentPicker(mountEl.querySelector('.fr-accent-picker'), inputEl);
-    const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
     function verify(){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
       mountEl.querySelector('#cloze-review-verify-btn').disabled = true;
-      const typed = strip(inputEl.value);
       // Interação intermediária (verificar) -- muta localState e o
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      localState.wasCorrect = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      const verdict = typedAnswerVerdict(inputEl.value, acceptedForms(view.compareAnswerText));
+      localState.wasCorrect = verdict !== 'errou';
+      localState.almost = verdict === 'quase';
       renderClozeCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
@@ -7443,7 +7444,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
       // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
       // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
+      callbacks.onAnswered(localState.wasCorrect, typedAnswerGrade(localState.almost ? 'quase' : localState.wasCorrect ? 'ok' : 'errou'));
     });
   }
 }
@@ -7495,7 +7496,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
         ${frAccentPickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -7510,17 +7511,17 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     const inputEl = mountEl.querySelector('#cloze-review-input');
     inputEl.focus();
     wireFrAccentPicker(mountEl.querySelector('.fr-accent-picker'), inputEl);
-    const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
     function verify(){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
       mountEl.querySelector('#cloze-review-verify-btn').disabled = true;
-      const typed = strip(inputEl.value);
       // Interação intermediária (verificar) -- muta localState e o
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      localState.wasCorrect = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      const verdict = typedAnswerVerdict(inputEl.value, acceptedForms(view.compareAnswerText));
+      localState.wasCorrect = verdict !== 'errou';
+      localState.almost = verdict === 'quase';
       renderTypeAnswerCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
@@ -7529,7 +7530,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
       // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
       // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
+      callbacks.onAnswered(localState.wasCorrect, typedAnswerGrade(localState.almost ? 'quase' : localState.wasCorrect ? 'ok' : 'errou'));
     });
   }
 }
@@ -7796,6 +7797,7 @@ function renderNormalCard(mountEl, card, localState, callbacks){
       ` : `<div class="flashcard-hint">${t('review.tapToReveal')}</div>`}
     </div>
     ${localState.revealed ? `
+      ${reviewObservationHTML(card)}
       ${gradeButtonsHTML(card)}
     ` : ''}
   `;

@@ -146,7 +146,9 @@
 // já usada em UX-fix 4/6): Imagem/Áudio (card.imageUrl/audioUrl) JÁ renderizam
 // corretamente nos 3 modos de revisão hoje (flip/mc/cloze, fr+zh app.js) --
 // escondê-los por modo seria regressão, não melhoria. Nota (card.note/
-// teacherNote) nunca aparece pro aluno em NENHUM modo, mas isso também não é
+// teacherNote) JÁ NÃO é privada (2026-10-12, decisão da autora, Banco de Revisão): vira "Observações" e o aluno a vê
+// DEPOIS de responder (reviewObservationHTML, shared/review-answer-extras.js). O texto abaixo é o histórico da fase,
+// quando ela nunca aparecia pro aluno em NENHUM modo, mas isso também não é
 // bug de modo -- é o único ponto de leitura confirmado (buildFlashcardsCardsBoxHTML
 // acima), um lembrete privado da própria professora, não um campo destinado
 // ao aluno. Ou seja: nenhum dos 3 campos genuinamente varia por modo hoje.
