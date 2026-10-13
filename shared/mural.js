@@ -4,7 +4,7 @@
 // Professora (Painel da professora > Mural): seletor Turmas | Alunos. Turmas lista as turmas (criar, alunos, link,
 // nome, apagar); Alunos lista só quem NÃO está em turma (mural individual). Em cada mural: escrever, anexar PDF ou
 // imagem, "Para" a turma toda ou um aluno só, editar/apagar os próprios recados, apagar qualquer post/comentário.
-// Aluno (menu Mais > Mural, "+N" no Perfil): o mural individual com a professora e o de cada turma. Posta, comenta e
+// Aluno (item "Aluno" > Mural, "+N" no item Aluno e no Mais): o mural individual com a professora e o de cada turma. Posta, comenta e
 // só apaga o que é dele. Link ?turma=CODIGO: cartão para entrar na turma (vira aluno se ainda não for).
 // Quem barra de verdade é o banco (RPCs security definer da 087 e as policies do bucket privado 'mural').
 //
@@ -116,26 +116,17 @@ function muralSetPill(el, n){
   } else if (pill) pill.remove();
 }
 
+// "+N" do aluno: no item Aluno (barra lateral e menu Mais), no botão Mais do celular e na aba Mural do Aluno.
+// O Perfil não mostra mais o número (decisão da autora, 2026-10-13). Quem mostra/esconde o item Aluno é
+// applyStudentNavVisibility (shared/teacher-panel.js).
 function muralApplyBadges(){
   const list = MURAL_STATE.list;
   const sN = muralStudentUnread(list);
   const tN = muralTeacherUnread(list);
-  const btn = document.getElementById('my-mural-btn');
-  if (btn){ btn.style.display = list?.as_student ? '' : 'none'; muralSetPill(btn, sN); }
-  document.querySelectorAll('.tab-btn[data-tab="profile"]').forEach(el => muralSetPill(el, sN));
+  document.querySelectorAll('#student-panel-btn, .student-only-nav[data-tab="student-panel"], [data-student-section="mural"]').forEach(el => muralSetPill(el, sN));
   muralSetPill(document.getElementById('mais-btn'), sN);
   document.querySelectorAll('#teacher-panel-btn, .teacher-only-nav[data-tab="teacher-panel"], [data-teacher-section="mural"]').forEach(el => muralSetPill(el, tN));
-  const entry = document.getElementById('profile-mural-entry');
-  if (entry){
-    entry.innerHTML = list?.as_student ? `
-      <button type="button" class="mural-profile-entry" data-mural-open>
-        <span class="mural-profile-entry-icon" aria-hidden="true">📌</span>
-        <span class="mural-profile-entry-text"><strong>${t('mural.title')}</strong>
-          <span>${sN > 0 ? escapeHTML(tp('mural.newCount', sN)) : escapeHTML(t('mural.profileEntrySub'))}</span></span>
-        ${muralCountHTML(sN)}
-      </button>` : '';
-    entry.querySelector('[data-mural-open]')?.addEventListener('click', () => switchTab('my-mural'));
-  }
+  if (typeof applyStudentNavVisibility === 'function') applyStudentNavVisibility();
 }
 
 async function refreshMuralBadges(){
@@ -728,8 +719,3 @@ async function muralAfterLogin(){
   refreshMuralBadges();
   scheduleMuralBadgeRefresh();
 }
-
-document.getElementById('my-mural-btn')?.addEventListener('click', () => {
-  document.getElementById('user-menu-dropdown')?.classList.remove('open');
-  switchTab('my-mural');
-});

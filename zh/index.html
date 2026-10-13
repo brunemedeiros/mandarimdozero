@@ -3737,11 +3737,6 @@ body.hide-pinyin .prompt-pinyin{
 .mural-comment-body{ margin:2px 0 0; color:var(--ink); font-size:14px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
 .mural-comment-form{ display:flex; gap:8px; margin-top:12px; }
 .mural-comment-form input{ flex:1; min-width:0; }
-.mural-profile-entry{ display:flex; align-items:center; gap:12px; width:100%; margin:0 0 14px; padding:12px 16px; border-radius:var(--radius); border:1px solid var(--paper-line); background:var(--paper-warm); color:var(--ink); font:inherit; text-align:left; cursor:pointer; min-height:56px; }
-.mural-profile-entry:hover{ border-color:var(--seal-red); }
-.mural-profile-entry-icon{ font-size:22px; }
-.mural-profile-entry-text{ display:flex; flex-direction:column; gap:2px; flex:1; font-size:14px; }
-.mural-profile-entry-text span{ color:var(--ink-soft); font-size:13px; }
 .user-dropdown-item > .mural-count{ margin-left:8px; }
 @media (max-width: 600px){
   .mural-post{ padding:12px; }
@@ -3995,6 +3990,10 @@ body.hide-pinyin .prompt-pinyin{
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.36a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.26.42.7.7 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z" fill="#14B8A6"/><circle cx="12" cy="12" r="3" fill="#0F766E"/></svg>
         <span data-i18n="settings.title" class="sidebar-label">Configurações</span>
       </button>
+      <button class="tab-btn student-only-nav" data-tab="student-panel" style="display:none;">
+        <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><rect x="5" y="7" width="14" height="14" rx="3" fill="#F97316"/><path d="M9 7V5.5a3 3 0 0 1 6 0V7" stroke="#C2410C" stroke-width="2" fill="none"/><rect x="8" y="12" width="8" height="5" rx="1.5" fill="#FDBA74"/></svg>
+        <span class="sidebar-label" data-i18n="studentPanel.nav">Aluno</span>
+      </button>
       <button class="tab-btn teacher-only-nav" data-tab="teacher-panel" style="display:none;">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M12 4 2 9l10 5 10-5-10-5z" fill="#2563EB"/><path d="M6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5l-6 3-6-3z" fill="#60A5FA"/><path d="M21 9v5" stroke="#1E40AF" stroke-width="2" stroke-linecap="round"/></svg>
         <span class="sidebar-label" data-i18n="panel.teacher.nav">Professora</span>
@@ -4126,7 +4125,6 @@ body.hide-pinyin .prompt-pinyin{
 
   <!-- ===== MEU PERFIL ===== -->
   <div class="view" id="view-profile">
-    <div id="profile-mural-entry"></div>
     <div id="profile-content"></div>
   </div>
 
@@ -4306,23 +4304,22 @@ body.hide-pinyin .prompt-pinyin{
     <div id="admin-mural-content" style="display:none;"></div>
   </div>
 
-  <!-- ===== MURAL (aluno com vínculo ativo; migration 087, shared/mural.js) ===== -->
-  <div class="view panel-view" id="view-my-mural">
+  <!-- ===== ALUNO (vínculo ativo com professora): Mural | Aulas | Material de apoio (shared/teacher-panel.js, mural.js) ===== -->
+  <div class="view panel-view" id="view-student-panel">
     <div class="path-header">
-      <h2 data-i18n="mural.title">Mural</h2>
-      <p data-i18n="mural.sub">Recados, materiais e conversas com sua professora e sua turma.</p>
+      <h2 data-i18n="studentPanel.title">Aluno</h2>
+      <p data-i18n="studentPanel.sub">Tudo o que vem da sua professora: recados, aulas e materiais.</p>
+    </div>
+    <div class="deck-topbar panel-nav" role="tablist" aria-label="Seção do Aluno" data-i18n-attr="aria-label:studentPanel.aria">
+      <button class="deck-topbar-btn is-active" role="tab" aria-selected="true" data-student-section="mural" data-i18n="mural.title">Mural</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-student-section="classlogs" data-i18n="studentPanel.tab.classlogs">Aulas</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-student-section="materials" data-i18n="studentPanel.tab.materials">Material de apoio</button>
     </div>
     <div id="my-mural-content"></div>
+    <div id="my-class-logs-content" style="display:none;"></div>
+    <div id="support-materials-content" style="display:none;"></div>
   </div>
 
-  <!-- ===== MINHAS AULAS (aluno com vínculo ativo; só leitura, get_my_class_logs) ===== -->
-  <div class="view panel-view" id="view-my-class-logs">
-    <div class="path-header">
-      <h2 data-i18n="myClassLogs.title">Minhas aulas</h2>
-      <p data-i18n="myClassLogs.sub">O que você trabalhou em cada aula com sua professora.</p>
-    </div>
-    <div id="my-class-logs-content"></div>
-  </div>
 
   <!-- ===== MEUS CARTÕES (Fase 5, aberta pra qualquer conta) ===== -->
   <div class="view" id="view-my-flashcards">
@@ -4333,15 +4330,6 @@ body.hide-pinyin .prompt-pinyin{
     <div id="my-flashcards-content"></div>
   </div>
 
-  <!-- ===== MATERIAL DE APOIO (Fase 8b, aberta pra qualquer conta -- só
-       leitura: quem envia é a professora, ver Painel de Admin) ===== -->
-  <div class="view" id="view-support-materials">
-    <div class="path-header">
-      <h2 data-i18n="menu.supportMaterials">📚 Material de apoio</h2>
-      <p data-i18n="ui.materials.sub">Resumos, links e arquivos que sua professora compartilhou com você.</p>
-    </div>
-    <div id="support-materials-content"></div>
-  </div>
 
   <!-- ===== HANZI (trilha de caracteres) ===== -->
   <div class="view" id="view-hanzi">
@@ -4439,9 +4427,7 @@ body.hide-pinyin .prompt-pinyin{
   <button class="user-dropdown-item mais-extra-tab" id="user-profile-btn" data-i18n="menu.profile">👤 Meu perfil</button>
   <button class="user-dropdown-item mais-extra-tab mais-promoted-tab" id="mais-hanzi-btn" data-tab="hanzi">汉字</button>
   <button class="user-dropdown-item mais-extra-tab" id="leaderboard-btn" data-i18n="menu.ranking">🏆 Ranking</button>
-  <button class="user-dropdown-item student-teacher-nav" id="my-mural-btn" style="display:none;" data-i18n="mural.menu">📌 Mural</button>
-  <button class="user-dropdown-item student-teacher-nav" id="my-class-logs-btn" style="display:none;" data-i18n="myClassLogs.menu">📝 Minhas aulas</button>
-  <button class="user-dropdown-item student-teacher-nav" id="support-materials-btn" style="display:none;" data-i18n="menu.supportMaterials">📚 Material de apoio</button>
+  <button class="user-dropdown-item student-teacher-nav mais-extra-tab" id="student-panel-btn" style="display:none;" data-i18n="studentPanel.menu">🎒 Aluno</button>
   <button class="user-dropdown-item mais-extra-tab" id="user-settings-btn" data-i18n="menu.settings">⚙️ Configurações</button>
   <button class="user-dropdown-item teacher-only-nav mais-extra-tab" id="teacher-panel-btn" style="display:none;" data-i18n="panel.teacher.menu">🎓 Painel da professora</button>
   <button class="user-dropdown-item admin-only-nav mais-extra-tab" id="admin-badges-btn" style="display:none;" data-i18n="menu.admin">🛠️ Painel de Admin</button>

@@ -10,10 +10,15 @@
 // essas duas partes que variam.
 function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
   return function switchTab(tab){
-    // Aviso do mural para a professora (087): abre o Painel da professora já na seção Mural.
+    // Abas antigas/avisos do sino que hoje são seções de um painel (087): abre o painel já na seção certa.
+    // 'teacher-mural' = Painel da professora > Mural; 'my-mural'/'my-class-logs'/'support-materials' = Aluno.
+    const studentSection = { 'my-mural': 'mural', 'my-class-logs': 'classlogs', 'support-materials': 'materials' }[tab];
     if (tab === 'teacher-mural'){
       if (typeof TEACHER_PANEL_STATE !== 'undefined') TEACHER_PANEL_STATE.section = 'mural';
       tab = 'teacher-panel';
+    } else if (studentSection){
+      if (typeof STUDENT_PANEL_STATE !== 'undefined') STUDENT_PANEL_STATE.section = studentSection;
+      tab = 'student-panel';
     }
     if (onBeforeSwitch) onBeforeSwitch(tab);
     // Saiu da revisão: conquistas guardadas durante a sessão aparecem agora.

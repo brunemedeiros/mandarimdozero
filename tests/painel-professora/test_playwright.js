@@ -110,12 +110,12 @@ const PANEL_STUB = (who) => {
       // ---- conta comum ----
       await login('U', 'u@x.com');
       L('comum: sem menu professora', !(await ev(() => [...document.querySelectorAll('.teacher-only-nav')].some(e => e.style.display !== 'none'))));
-      L('comum: sem Minhas aulas/Material', (await ev(() => ['my-class-logs-btn','support-materials-btn'].map(id => document.getElementById(id).style.display))).every(d => d === 'none'));
+      L('comum: sem item Aluno', await ev(() => document.getElementById('student-panel-btn').style.display === 'none'));
 
       // ---- aluna com aulas e material ----
       await login('S', 's@x.com');
-      await page.waitForFunction(() => document.getElementById('my-class-logs-btn').style.display === '');
-      L('aluna: Minhas aulas e Material no menu', (await ev(() => ['my-class-logs-btn','support-materials-btn'].map(id => document.getElementById(id).style.display))).every(d => d === ''));
+      await page.waitForFunction(() => document.getElementById('student-panel-btn').style.display === '');
+      L('aluna: item Aluno no menu (Aulas e Material ficam dentro)', true);
       L('aluna: sem menu professora', !(await ev(() => [...document.querySelectorAll('.teacher-only-nav')].some(e => e.style.display !== 'none'))));
       await ev(() => switchTab('my-class-logs'));
       await page.waitForSelector('.class-log-entry');

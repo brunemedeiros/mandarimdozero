@@ -2499,10 +2499,16 @@ window.I18N_CATALOG['en'] = {
   'studentDecks.empty': 'The student has no cards in decks yet.', // ALTA
   'studentDecks.error': 'Couldn\'t load the student\'s decks right now.', // ALTA
   'panel.tab.mural': 'Board', // ALTA
+  'studentPanel.menu': '🎒 Student', // ALTA
+  'studentPanel.nav': 'Student', // ALTA
+  'studentPanel.title': 'Student', // ALTA
+  'studentPanel.sub': 'Everything from your teacher: notes, lessons and materials.', // ALTA
+  'studentPanel.aria': 'Student section', // ALTA
+  'studentPanel.tab.classlogs': 'Lessons', // ALTA
+  'studentPanel.tab.materials': 'Study materials', // ALTA
   'mural.menu': '📌 Board', // ALTA
   'mural.title': 'Board', // ALTA
   'mural.sub': 'Notes, materials and conversations with your teacher and your class.', // ALTA
-  'mural.profileEntrySub': 'Notes from your teacher and class', // ALTA
   'mural.newCount': { one: '{n} new', other: '{n} new' }, // ALTA
   'mural.teacherIntro': 'Pick a class (a note for everyone or just one student) or a student who is not in a class. New notes show up in the bell, no e-mail.', // ALTA
   'mural.studentIntro': '{lang} board with {name}', // ALTA

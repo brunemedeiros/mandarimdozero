@@ -148,7 +148,7 @@ const MURAL_FAKE = (who) => {
 
     // ===== professora =====
     await login('P');
-    L('professora: sem item Mural de aluno', await ev(() => document.getElementById('my-mural-btn').style.display === 'none'));
+    L('professora sem professora: sem item Aluno', await ev(() => document.getElementById('student-panel-btn').style.display === 'none' && document.querySelector('.student-only-nav').style.display === 'none'));
     await ev(() => switchTab('teacher-panel'));
     await ev(() => document.querySelector('[data-teacher-section="mural"]').click());
     await page.waitForSelector('#admin-mural-content .mural-wrap');
@@ -221,18 +221,17 @@ const MURAL_FAKE = (who) => {
 
     // ===== aluna da turma =====
     await login('S');
-    L('aluna: item Mural no menu com +2', await ev(() => { const b = document.getElementById('my-mural-btn'); return b.style.display === '' && b.querySelector('.mural-count')?.textContent === '2'; }));
-    L('aluna: +2 no Perfil', await ev(() => [...document.querySelectorAll('.tab-btn[data-tab="profile"]')].every(b => b.querySelector('.mural-count')?.textContent === '2')));
-    await ev(() => switchTab('profile'));
-    await page.waitForSelector('#profile-mural-entry .mural-profile-entry');
-    L('aluna: atalho do Mural no Perfil', await ev(() => document.querySelector('#profile-mural-entry').textContent.includes(tp('mural.newCount', 2))));
-    await shot('aluna-perfil');
-    await page.click('#profile-mural-entry [data-mural-open]');
-    await page.waitForSelector('#my-mural-content .mural-post');
+    L('aluna: item Aluno no menu Mais e na barra lateral com +2', await ev(() => ['#student-panel-btn', '.student-only-nav'].every(sel => { const b = document.querySelector(sel); return b.style.display === '' && b.querySelector('.mural-count')?.textContent === '2'; })));
+    L('aluna: +2 no botão Mais', await ev(() => document.querySelector('#mais-btn > .mural-count')?.textContent === '2'));
+    L('aluna: Perfil sem o número do mural', await ev(() => ![...document.querySelectorAll('.tab-btn[data-tab="profile"]')].some(b => b.querySelector('.mural-count'))));
+    await shot('aluna-menu');
+    await ev(() => document.querySelector('.student-only-nav').click());
+    await page.waitForSelector('#view-student-panel.active #my-mural-content .mural-post');
+    L('Aluno: 3 abas Mural, Aulas, Material', await ev(() => [...document.querySelectorAll('[data-student-section]')].map(b => b.dataset.studentSection).join() === 'mural,classlogs,materials'));
     L('aluna: abre na turma com novidade', await ev(() => document.querySelector('#my-mural-content .mural-chip.is-active')?.textContent.includes('Turma de quinta')));
     L('aluna: vê os 2 recados (o dela inclusive)', await ev(() => document.querySelectorAll('#my-mural-content .mural-post').length === 2));
     L('aluna: não edita nem apaga recado da professora', await ev(() => !document.querySelector('#my-mural-content [data-mural-edit], #my-mural-content [data-mural-del-post]')));
-    await page.waitForFunction(() => !document.getElementById('my-mural-btn').querySelector('.mural-count'));
+    await page.waitForFunction(() => !document.getElementById('student-panel-btn').querySelector('.mural-count'));
     L('aluna: +N some depois de abrir', true);
     await page.fill('#my-mural-content .mural-comment-form input', 'Combinado!');
     await page.click('#my-mural-content .mural-comment-form button');
@@ -246,6 +245,12 @@ const MURAL_FAKE = (who) => {
     L('aluna: apaga o próprio post', await ev(() => document.querySelectorAll('#my-mural-content [data-mural-del-post]').length === 1));
     L('aluna: chip do mural individual com a professora', await ev(() => [...document.querySelectorAll('#my-mural-content .mural-chip')].some(c => c.textContent.includes('Carla Prof'))));
     await shot('aluna-mural');
+    await ev(() => document.querySelector('[data-student-section="classlogs"]').click());
+    L('Aluno > Aulas mostra o registro', await ev(() => document.getElementById('my-class-logs-content').style.display === '' && document.getElementById('my-mural-content').style.display === 'none'));
+    await ev(() => document.querySelector('[data-student-section="materials"]').click());
+    L('Aluno > Material de apoio', await ev(() => document.getElementById('support-materials-content').style.display === ''));
+    await ev(() => switchTab('my-mural'));
+    L('aviso antigo "my-mural" abre Aluno > Mural', await ev(() => document.getElementById('view-student-panel').classList.contains('active') && STUDENT_PANEL_STATE.section === 'mural'));
     L('sem rolagem horizontal', await ev(() => document.documentElement.scrollWidth <= window.innerWidth + 1), await ev(() => [document.documentElement.scrollWidth, window.innerWidth]));
 
     // ===== aviso do sino abre o Mural da professora =====
@@ -257,7 +262,7 @@ const MURAL_FAKE = (who) => {
 
     // ===== link da turma =====
     await login('X');
-    L('sem professora: sem item Mural', await ev(() => document.getElementById('my-mural-btn').style.display === 'none'));
+    L('sem professora: sem item Aluno', await ev(() => document.getElementById('student-panel-btn').style.display === 'none'));
     await ev(() => { localStorage.setItem('pendingClassroomCode', 'turma11cod'); muralAfterLogin(); });
     await page.waitForSelector('#classroom-join-modal .tinv-card');
     L('link: cartão com o nome da turma', await ev(() => document.getElementById('classroom-join-title').textContent.includes('Turma de quinta')));
@@ -265,7 +270,7 @@ const MURAL_FAKE = (who) => {
     await page.click('#classroom-join-modal [data-join-act="accept"]');
     await page.waitForFunction(() => !document.getElementById('classroom-join-modal'));
     L('link: entra na turma e esquece o código', await ev(() => window.__joined === 'turma11cod' && !localStorage.getItem('pendingClassroomCode')));
-    await page.waitForSelector('#view-my-mural.active #my-mural-content .mural-post');
+    await page.waitForSelector('#view-student-panel.active #my-mural-content .mural-post');
     L('link: abre o Mural da turma', true);
     await ev(async () => { CURRENT_USER = false; window.__gate = 0; goToNeutralGate = () => { window.__gate++; }; localStorage.setItem('pendingClassroomCode', 'turma11cod'); window.__shown = await muralClassroomGateIfPending(); });
     L('sem login: cartão com "Entrar para participar"', await ev(() => window.__shown === true && document.querySelector('#classroom-join-modal [data-join-act="accept"]').textContent === t('mural.join.login')));

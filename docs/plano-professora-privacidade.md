@@ -355,3 +355,21 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
 - **Staging**: aplicadas pela ferramenta só as partes sem `DELETE` (`087_mural` tabelas+helpers, `087b_mural_list`,
   `087c_mural_feed`, `087d_mural_create_post`); o resto trava a ferramenta: a autora roda `docs/rollout-sql/087_sql_editor.sql`.
 
+### Menu Aluno e revisão Mural x Aulas x Material (2026-10-13)
+
+- Autora: item **"Aluno"** (como "Professora"), com o "+N" do mural; o Perfil deixa de mostrar o número.
+  Feito: item "🎒 Aluno" na barra lateral e no menu Mais (só para quem tem professora ou já recebeu aula/material),
+  painel com abas Mural | Aulas | Material de apoio; os 3 itens soltos saíram do menu Mais; abas antigas e avisos do sino
+  (`my-mural`, `my-class-logs`, `support-materials`) caem no painel Aluno na seção certa.
+- Revisão pedagógica e estrutural pedida pela autora (dados da produção em 2026-10-13: 0 aulas registradas, 2 materiais,
+  13 vínculos ativos):
+  - Mural = conversa e avisos (fluxo cronológico, duas vias, some com o tempo).
+  - Aulas = diário estruturado de cada aula (data, tema, tarefa, observações; notas privadas da professora fora),
+    só a professora escreve, por aluno; serve para rever o que foi visto e acompanhar a tarefa.
+  - Material = biblioteca de consulta (título, descrição, link/arquivo), por aluno; o aluno volta nela.
+  - Sobreposição: com anexo, um recado do Mural já entrega um material; um registro de aula pode virar recado. O risco de
+    juntar tudo num fluxo é o material e a tarefa sumirem no meio da conversa (o Google Classroom separa Mural de
+    Atividades por isso).
+  - Proposta: tudo no Mural, com tipos de cartão (Recado, Aula, Material) e filtros "Tudo | Aulas | Materiais"; o "+N"
+    passa a contar aula e material novos. Aguardando a escolha da autora (A manter 3 abas, B 2 abas, C tudo no Mural).
+
