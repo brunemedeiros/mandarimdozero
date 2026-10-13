@@ -98,7 +98,9 @@ const DIR = path.join(__dirname, '../../supabase/functions/review-bank-agent');
   check('payload sem lista de alunos é recusado; lista enorme também', (await call(agent, { action: 'ingest' })).status === 400 && (await call(agent, { action: 'ingest', students: new Array(81).fill({}) })).status === 413);
   d.settings.auto_generate = false;
   r = await call(agent, { action: 'ingest', students: [{ student_id: 'sA', items: [{ type: 'vocabulario', q: 'the wall', a: 'le mur' }] }] });
-  check('geração automática desligada: item pendente não vira cartão', r.json.summary.students[0].cards_created === 0 || d.items.find(i => i.question === 'the wall').status === 'aprovado', JSON.stringify(r.json.summary.students[0]));
+  check('geração automática desligada: item limpo de aluno vinculado entra pendente e não vira cartão', r.json.summary.students[0].cards_created === 0 && d.items.find(i => i.question === 'the wall').status === 'pendente' && !d.items.find(i => i.question === 'the wall').teacher_flashcard_id, JSON.stringify(r.json.summary.students[0]));
+  r = await call(agent, { action: 'ingest', students: [{ student_id: 'sB', items: [{ type: 'vocabulario', q: 'the road', a: 'a estrada' }] }] });
+  check('geração automática desligada: aluno sem conta continua entrando aprovado (não há cartão a gerar)', d.items.find(i => i.question === 'the road').status === 'aprovado');
   check('chave determinística: mesma entrada, mesma chave', itemKey({ type: 'Verbo', q: 'Ir ', a: 'Aller' }) === itemKey({ type: 'verbo', q: 'ir', a: 'aller' }));
 
   // --- cadastrar aluno novo

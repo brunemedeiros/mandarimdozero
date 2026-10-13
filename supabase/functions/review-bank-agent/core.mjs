@@ -99,7 +99,9 @@ export function createAgent({ engine, db, teacherId, now }) {
       // dúvida, conteúdo sensível, [pessoal], sugestão ou pedido de "cortado" => "pendente" (quem corta é a professora, nunca a rotina);
       // só entra "aprovado" o item limpo, sem nenhuma dessas marcas
       const sensitive = !!(it && it.sensitive === true) || personal;
-      const hold = !!(clean(it && it.doubt) || sensitive || (it && it.status === 'cortado') || (it && it.proposal && typeof it.proposal === 'object' && Object.keys(it.proposal).length));
+      // geração automática desligada: item limpo de aluno vinculado nunca entra aprovado (a professora aprova um a um, como na tela)
+      const autoOff = !!(settings && settings.auto_generate === false && s.linked_student_id);
+      const hold = !!(autoOff || clean(it && it.doubt) || sensitive || (it && it.status === 'cortado') || (it && it.proposal && typeof it.proposal === 'object' && Object.keys(it.proposal).length));
       // "cortado"/[pessoal] viram pendente COM dúvida preenchida: sem ela a geração automática entregaria o cartão na hora
       const doubt = clean(it && it.doubt) || (personal ? 'Linha marcada [pessoal] no caderno. Decida se entra na revisão.' : (it && it.status === 'cortado' ? 'A rotina marcou este item como cortado. Decida se entra na revisão.' : ''));
       prepared.push(Object.assign({}, it, { key, date: isDate(it && it.date) ? it.date : t, doubt, sensitive, status: hold ? 'pendente' : 'aprovado' }));
