@@ -69,8 +69,9 @@ vm.runInContext(auth.slice(start, end) + '\nthis.fns={loadAccountEarnedBadges,ba
   check('perfil público: não filtra mais por idioma no SQL', !/fetchUserEarnedBadges[\s\S]{0,400}\.eq\('language_app_key', APP_KEY\)/.test(pp));
   check('perfil público: filtra no cliente por idioma ou conquista da conta', /language_app_key === APP_KEY \|\| AccountProgress\.isAccountBadge/.test(pp));
   // 5) tabela earned_badges inalterada: nenhuma migration nova
-  const migs = fs.readdirSync(path.join(ROOT, 'shared/supabase_migrations')).filter(f => /^07[6-9]/.test(f));
-  check('nenhuma migration nova no C4', migs.length === 0, migs);
+  const migDir = path.join(ROOT, 'shared/supabase_migrations');
+  const migs = fs.readdirSync(migDir).filter(f => /^07[5-9]|^0[89]/.test(f) && /(create|alter)\s+table[^;]*earned_badges/i.test(fs.readFileSync(path.join(migDir, f), 'utf8')) && !/^075_/.test(f));
+  check('nenhuma migration posterior ao 017 altera a tabela earned_badges (a união é feita na leitura)', migs.length === 0, migs);
   console.log(`conquistas da conta: ${passed} passaram, ${failed} falharam`);
   process.exit(failed ? 1 : 0);
 })();

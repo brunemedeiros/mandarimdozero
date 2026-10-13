@@ -49,6 +49,11 @@ const EXCECOES = {
   'deck-browser.js': 'DECK_BROWSER_LANG_LABELS (getters i18n)',
   'my-flashcards.js': 'myFlashcardLangName: nome em português como lógica (docs/i18n/inventario)',
   'study-trail-model.js': 'tabela de rótulos de tag em português (STUDY_TRAIL_TAG_LABEL_PT)',
+  // Código da main (2026-10-12, Banco de Revisão e convite de professora) escrito depois da E1 com os três idiomas fixos; migrar para o registro é item da E4+.
+  'review-bank-import.js': 'lista de idiomas fixa (migrar para o registro)',
+  'review-bank-model.js': 'lista de idiomas fixa (migrar para o registro)',
+  'review-bank.js': 'lista de idiomas fixa (migrar para o registro)',
+  'teacher-invites.js': 'lista de idiomas fixa (migrar para o registro)',
 };
 const dir = path.join(root, 'shared');
 const bad = [];
