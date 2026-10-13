@@ -499,10 +499,10 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   #app.sidebar-collapsed .sidebar .tab-btn{ justify-content:center; padding:10px; }
   #app.sidebar-collapsed .sidebar-toggle-btn{ align-self:center; }
 
-  /* Painel da professora ocupa a largura toda: sem Ranking, Status e Missões do dia ao lado (são do aluno). */
-  #app[data-active-tab="teacher-panel"]{ grid-template-columns:220px minmax(0,1fr); grid-template-areas:"topbar topbar" "sidebar content"; padding-right:32px; }
-  #app[data-active-tab="teacher-panel"] .right-cards{ display:none; }
-  #app.sidebar-collapsed[data-active-tab="teacher-panel"]{ grid-template-columns:64px minmax(0,1fr); }
+  /* Painéis da professora e do Admin ocupam a largura toda: sem Ranking, Status e Missões do dia ao lado (são do aluno). */
+  #app:is([data-active-tab="teacher-panel"], [data-active-tab="admin-badges"]){ grid-template-columns:220px minmax(0,1fr); grid-template-areas:"topbar topbar" "sidebar content"; padding-right:32px; }
+  #app:is([data-active-tab="teacher-panel"], [data-active-tab="admin-badges"]) .right-cards{ display:none; }
+  #app.sidebar-collapsed:is([data-active-tab="teacher-panel"], [data-active-tab="admin-badges"]){ grid-template-columns:64px minmax(0,1fr); }
 
   /* Modo foco de lição estendido pro desktop: sidebar e cards somem, o
      conteúdo (o exercício em si) ocupa a largura toda -- reaproveita a
@@ -3257,49 +3257,6 @@ body.hide-pinyin .prompt-pinyin{
   .panel-view .leaderboard-tab{ white-space:nowrap; min-height:44px; }
 }
 
-/* Planos: busca por nome/@ com sugestões */
-.plans-search{ position:relative; max-width:460px; }
-.plans-search-input{ width:100%; }
-.plans-search-list{
-  position:absolute; z-index:20; left:0; right:0; top:calc(100% + 4px); margin:0; padding:4px; list-style:none;
-  background:var(--paper); border:1px solid var(--paper-line); border-radius:12px; box-shadow:var(--shadow-card);
-  max-height:320px; overflow-y:auto;
-}
-.plans-option{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:9px; cursor:pointer; }
-.plans-option[aria-selected="true"], .plans-option:hover{ background:var(--paper-warm); }
-.plans-avatar{
-  flex-shrink:0; width:30px; height:30px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
-  background:var(--paper-line); color:var(--ink); font-weight:800; font-size:13px;
-}
-.plans-avatar-lg{ width:40px; height:40px; font-size:16px; }
-.plans-option-text{ display:flex; flex-direction:column; min-width:0; flex:1; }
-.plans-option-name{ font-weight:700; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.plans-option-user{ font-size:12.5px; color:var(--ink-soft); }
-.plans-chip{ flex-shrink:0; font-size:11.5px; font-weight:700; color:var(--ink-soft); border:1px solid var(--paper-line); border-radius:999px; padding:2px 8px; }
-.plans-search-status{ font-size:12.5px; color:var(--ink-soft); margin:6px 0 0; min-height:1em; }
-.plans-account-card{ max-width:460px; margin-top:12px; }
-.plans-account-head{ justify-content:flex-start; gap:12px; }
-
-/* Planos: tabela de permissões (mesmo desenho da tabela de Decks) */
-.plans-matrix-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); }
-.plans-matrix{ width:100%; border-collapse:separate; border-spacing:0; }
-.plans-matrix tbody th{ min-width:150px; }
-.plans-matrix tbody th, .plans-matrix thead th:first-child{ position:sticky; left:0; z-index:1; background:var(--paper); }
-.plans-matrix th, .plans-matrix td{ padding:8px 6px; border-bottom:1px solid var(--paper-line); text-align:center; vertical-align:middle; }
-.plans-matrix th:first-child{ padding-left:12px; }
-.plans-matrix thead th{ font-size:12px; font-weight:600; color:var(--ink-soft); line-height:1.25; }
-.plans-matrix tbody th{ text-align:left; font-weight:600; font-size:13.5px; color:var(--ink); line-height:1.35; }
-.plans-matrix thead th:first-child{ text-align:left; }
-.plans-matrix tr:last-child th, .plans-matrix tr:last-child td{ border-bottom:none; }
-.plans-cell{ display:inline-flex; flex-direction:column; align-items:center; gap:6px; }
-.plans-cell input[type="checkbox"]{ width:18px; height:18px; accent-color:var(--seal-red); cursor:pointer; }
-.plans-limit{
-  width:64px; text-align:center; font:inherit; font-size:13px; padding:4px 6px; border:1px solid var(--paper-line); border-radius:8px;
-  background:var(--paper-warm); color:var(--ink);
-}
-.plans-limit:disabled{ opacity:.45; }
-.plans-cell.is-saved .plans-limit, .plans-cell.is-saved input[type="checkbox"]{ outline:2px solid color-mix(in srgb, var(--seal-red) 45%, transparent); outline-offset:2px; border-radius:4px; }
-
 /* Minhas aulas (aluno): uma linha por aula, data à esquerda */
 .class-log-list{ list-style:none; margin:0; padding:0; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); }
 .class-log-entry{ display:grid; grid-template-columns:120px 1fr; gap:16px; padding:14px 16px; }
@@ -3310,8 +3267,6 @@ body.hide-pinyin .prompt-pinyin{
 .class-log-field dd{ margin:2px 0 0; color:var(--ink); line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
 @media (max-width:640px){
   .class-log-entry{ grid-template-columns:1fr; gap:6px; }
-  .plans-matrix{ min-width:520px; }
-  .plans-option, .plans-cell input[type="checkbox"]{ min-height:44px; }
   .panel-view .panel-nav{ flex-wrap:nowrap; overflow-x:auto; max-width:100%; justify-content:flex-start; }
   .panel-view .panel-nav .deck-topbar-btn{ white-space:nowrap; }
 }
@@ -4408,6 +4363,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/student-metrics.js"></script>
 <script src="../shared/teacher-students-ui.js"></script>
 <script src="../shared/admin-students.js"></script>
+<script src="../shared/admin-plans-ui.js"></script>
 <script src="../shared/admin-premium.js"></script>
 <script src="../shared/flashcard-model.js"></script>
 <script src="../shared/study-trail-model.js"></script>
@@ -4446,6 +4402,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/deck-browser.js"></script>
 <script src="../shared/anki-import-ui.js"></script>
 <script src="../shared/admin-analytics.js"></script>
+<script src="../shared/admin-panel.js"></script>
 <script src="../shared/admin-notifications.js"></script>
 <script src="../shared/admin-reports.js"></script>
 <script src="../shared/friends.js"></script>

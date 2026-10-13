@@ -44,7 +44,6 @@
 //   - shared/profile.js         (PROFILE_CACHE, ensureProfileLoaded, setExcludeOwnActivity)
 //   - shared/toast.js           (showToast)
 
-const ADMIN_PANEL_STATE = { section: 'badges' };
 const ANALYTICS_STATE = {
   languageFilter: 'all',
   deviceFilter: 'all',    // 'mobile' | 'tablet' | 'desktop' | 'all'
@@ -1284,42 +1283,6 @@ function wireAnalyticsExcludeOwnToggle(){
   });
 }
 
-// Toggle "Admin Mode" -- mesma fonte de verdade do pill da topbar
-// (#admin-mode-toggle-btn, ver applyAdminModeUI em shared/auth.js e
-// isAdminModeOn()/setAdminMode() em shared/profile.js). Não é uma segunda
-// implementação: só um segundo PONTO DE ACESSO pro mesmo estado global
-// (Fase 9 da spec de Admin Mode -- "Home -> Admin OFF também significa
-// Analytics -> Admin OFF e vice-versa").
-function adminModeToggleHTML(adminModeOn){
-  return `
-    <div class="profile-section">
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title">${t('admin.mode.title')}</div>
-          <div class="pref-row-sub">${t('admin.mode.sub')}</div>
-        </div>
-        <button class="pref-switch" id="admin-mode-analytics-switch" role="switch" aria-checked="${adminModeOn ? 'true' : 'false'}"><span class="pref-switch-knob"></span></button>
-      </div>
-    </div>
-  `;
-}
-
-function wireAdminModeAnalyticsToggle(){
-  const btn = document.getElementById('admin-mode-analytics-switch');
-  if (!btn) return;
-  btn.addEventListener('click', async () => {
-    const next = btn.getAttribute('aria-checked') !== 'true';
-    btn.setAttribute('aria-checked', next ? 'true' : 'false');
-    const ok = await setAdminMode(next);
-    if (!ok){ btn.setAttribute('aria-checked', next ? 'false' : 'true'); return; }
-    if (typeof applyAdminModeUI === 'function') await applyAdminModeUI();
-    if (typeof renderUnitsGrid === 'function') renderUnitsGrid();
-    showToast(next
-      ? t('admin.mode.toastOn')
-      : t('admin.mode.toastOff'));
-  });
-}
-
 async function renderAdminAnalyticsView(){
   const wrap = document.getElementById('admin-analytics-content');
   if (!wrap) return;
@@ -1331,8 +1294,7 @@ async function renderAdminAnalyticsView(){
 
   const profile = await ensureProfileLoaded();
   const excludeOwn = profile ? profile.exclude_own_activity !== false : true;
-  const adminModeOn = typeof isAdminModeOn === 'function' && isAdminModeOn();
-  const toggleHTML = adminModeToggleHTML(adminModeOn) + analyticsExcludeOwnToggleHTML(excludeOwn);
+  const toggleHTML = analyticsExcludeOwnToggleHTML(excludeOwn);
 
   const { since, until } = analyticsResolvePeriod();
   const controlsHTML = analyticsControlsHTML(since, until);
@@ -1370,53 +1332,8 @@ async function renderAdminAnalyticsView(){
     + `<div data-analytics-panel="dispositivos">${renderDispositivosSectionHTML(stats)}</div>`
     + `<div data-analytics-panel="tecnologia"></div>`;
 
-  wireAdminModeAnalyticsToggle();
   wireAnalyticsExcludeOwnToggle();
   wireAnalyticsControls();
   wireAnalyticsSubnav();
   await switchAnalyticsTab(ANALYTICS_STATE.tab);
 }
-
-// Alterna entre as seções do Painel de Admin (Badges/Analytics/
-// Notificações/Reports/Planos) -- cada uma renderiza no seu próprio wrap
-// (#admin-badges-content / #admin-analytics-content / ...), só um fica
-// visível por vez. Alunos/Cartões/Aulas/Material de apoio saíram daqui para
-// o Painel da professora (shared/teacher-panel.js), que depende do PAPEL
-// Professora e não do Admin Mode.
-const ADMIN_PANEL_SECTIONS = ['badges', 'analytics', 'notifications', 'reports', 'premium'];
-function switchAdminPanelSection(section){
-  if (!ADMIN_PANEL_SECTIONS.includes(section)) section = 'badges';
-  ADMIN_PANEL_STATE.section = section;
-  document.querySelectorAll('[data-admin-section]').forEach(btn => {
-    const on = btn.dataset.adminSection === section;
-    btn.classList.toggle('is-active', on);
-    btn.setAttribute('aria-selected', on ? 'true' : 'false');
-  });
-  ADMIN_PANEL_SECTIONS.forEach(s => {
-    const el = document.getElementById(`admin-${s}-content`);
-    if (el) el.style.display = s === section ? '' : 'none';
-  });
-  if (section === 'badges') renderAdminBadgesView();
-  else if (section === 'notifications') renderAdminNotificationsView();
-  else if (section === 'reports') renderAdminReportsView();
-  else if (section === 'premium') renderAdminPremiumView();
-  else renderAdminAnalyticsView();
-}
-
-// tabHandlers['admin-badges'] chama esta função (em vez de
-// renderAdminBadgesView direto) pra sempre reabrir na seção que a autora
-// deixou selecionada da última vez. Quem é só professora (sem ser admin) e
-// chega aqui por um link antigo (ex.: notificação de supervisão com rota
-// 'admin-badges') vai para o Painel da professora.
-function renderAdminPanelView(){
-  const admin = typeof isAdminUser === 'function' && isAdminUser();
-  if (!admin && typeof isTeacherUser === 'function' && isTeacherUser()){ switchTab('teacher-panel'); return; }
-  switchAdminPanelSection(ADMIN_PANEL_STATE.section);
-}
-
-function wireAdminPanelTabs(){
-  document.querySelectorAll('[data-admin-section]').forEach(btn => {
-    btn.addEventListener('click', () => switchAdminPanelSection(btn.dataset.adminSection));
-  });
-}
-wireAdminPanelTabs();

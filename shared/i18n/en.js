@@ -2187,6 +2187,16 @@ window.I18N_CATALOG['en'] = {
   'myClassLogs.homework': 'Homework', // ALTA
   'myClassLogs.observations': 'Notes', // ALTA
   'myClassLogs.empty': 'Your teacher hasn\'t logged any classes yet.', // ALTA
+  'plans.title': 'Plans', // ALTA
+  'plans.sub': 'Who has which plan and what each plan unlocks. Changes apply right away.', // ALTA
+  'plans.loading': 'Loading…', // ALTA
+  'plans.confirm.cancel': 'Cancel', // ALTA
+  'plans.confirm.revoke.title': 'Remove {role} from @{username}?', // ALTA
+  'plans.confirm.revoke.text': 'The account loses what this plan unlocks right away. You can give the plan back anytime.', // ALTA
+  'plans.confirm.revoke.confirm': 'Remove plan', // ALTA
+  'plans.confirm.perm.title': 'Turn off "{perm}" for {role}?', // ALTA
+  'plans.confirm.perm.text': 'All accounts of this type lose this right away, unless they have another plan that unlocks it.', // ALTA
+  'plans.confirm.perm.confirm': 'Turn off', // ALTA
   'plans.grant.title': 'Give or remove a plan', // ALTA
   'plans.grant.hint': 'Search the account by name or @username. No billing yet: the plan stays on until you remove it.', // ALTA
   'plans.search.label': 'Account', // ALTA
