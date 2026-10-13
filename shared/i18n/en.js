@@ -2275,6 +2275,17 @@ window.I18N_CATALOG['en'] = {
   'reports.reply.confirm.text': 'The email "{subject}" is sent right now and cannot be undone.', // ALTA
   'reports.reply.confirm.ok': 'Send email', // ALTA
   'reports.reply.confirm.cancel': 'Back', // ALTA
+  'analytics.title': 'Analytics', // ALTA
+  'analytics.sub': 'How people use the app: who studies, what they do and where they get stuck. Only student accounts are counted; yours is left out.', // ALTA
+  'analytics.loading': 'Loading numbers…', // ALTA
+  'analytics.custom.from': 'From', // ALTA
+  'analytics.custom.to': 'To', // ALTA
+  'analytics.delta.flatAria': 'No change from the previous period', // ALTA
+  'analytics.delta.upAria': 'Up {pct}% from the previous period', // ALTA
+  'analytics.delta.downAria': 'Down {pct}% from the previous period', // ALTA
+  'analytics.truncated.main': 'Heads up: the query hit the limit of {n} events, so these numbers may be lower than the real ones. Pick a shorter period, or a single language or device, to see everything.', // ALTA
+  'analytics.truncated.retention': 'Heads up: the retention query hit the limit of {n} events. The farthest days (7, 14 and 30) may be lower than the real ones.', // ALTA
+  'analytics.truncated.tech': 'Heads up: the technical query hit the limit of {n} events, so errors may be lower than the real ones. Pick a shorter period.', // ALTA
   'plans.grant.title': 'Give or remove a plan', // ALTA
   'plans.grant.hint': 'Search the account by name or @username. No billing yet: the plan stays on until you remove it.', // ALTA
   'plans.search.label': 'Account', // ALTA

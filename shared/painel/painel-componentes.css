@@ -634,3 +634,25 @@
 .painel .p-contexto dt{ font-weight: 700; color: var(--p-tinta-suave); }
 .painel .p-contexto dd{ margin: 0; overflow-wrap: anywhere; }
 .painel .p-resposta{ border-top: 1px solid var(--p-linha); padding-top: .5rem; display: grid; gap: .5rem; }
+
+/* ---------- Analytics (painel de Admin) ---------- */
+.painel .p-indicadores{ display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr)); gap: 1rem; margin-bottom: .75rem; }
+.painel .p-indicadores .p-indicador-valor .p-selo{ vertical-align: middle; font-size: .72rem; margin-left: .25rem; }
+.painel .p-campos-linha{ display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: end; margin-bottom: .5rem; }
+.painel .p-campos-linha > label{ margin: 0; min-width: 11rem; flex: 1 1 11rem; }
+.painel .p-campos-linha select, .painel .p-campos-linha input{ margin-bottom: 0; }
+.painel .p-nota{ display: block; margin: .35rem 0 0; }
+.painel .p-secoes{ display: grid; gap: 1rem; }
+.painel .p-barras{ display: grid; gap: .7rem; }
+.painel .p-barra-linha{ display: grid; gap: .25rem; }
+.painel .p-barra-topo{ display: flex; justify-content: space-between; gap: 1rem; font-size: .9rem; font-weight: 700; }
+.painel .p-barra-topo > span:last-child{ color: var(--p-tinta-suave); font-weight: 600; text-align: right; }
+.painel .p-barra{ height: .6rem; border-radius: 999px; background: var(--p-linha); overflow: hidden; }
+.painel .p-barra > i{ display: block; height: 100%; width: var(--v, 0%); min-width: 2px; border-radius: inherit; background: var(--p-marca); }
+.painel .p-funil-linha{ display: grid; gap: .35rem; padding: .6rem 0; border-top: 1px solid var(--p-linha); }
+.painel .p-funil-linha:first-of-type{ border-top: 0; }
+.painel .p-funil{ display: flex; flex-wrap: wrap; gap: .5rem .9rem; align-items: center; }
+.painel .p-funil > div{ display: grid; gap: .1rem; }
+.painel .p-funil > div > span{ font-size: 1.4rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.painel .p-funil > div > small{ color: var(--p-tinta-suave); }
+.painel .p-funil > i{ font-style: normal; color: var(--p-tinta-suave); }

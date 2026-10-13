@@ -47,3 +47,7 @@ Grátis x Premium: nada muda (é ferramenta da admin; os planos continuam como e
 5. **Notificações e Reports:** posso deixar a janela de edição/detalhe como janela (dialog) do Design System, com as mesmas regras? E o envio de e-mail de resposta pede confirmação ("enviar para fulano?") antes de enviar?
 6. **Tags** (Painel de Tags da Fase J) continua fora da área Admin, como no teste atual?
 7. Os dois botões de **Admin Mode** (topo e dentro de Analytics) podem virar um só lugar?
+
+## 10. Respostas da autora e andamento
+- Respostas (2026-10-13): ordem proposta serve; Planos pediu para eu sugerir como seria a confirmação (adotado: confirmar só ao tirar plano e ao desligar permissão); Badges pediu minha sugestão (renomear já era seguro: sem migration); Analytics pediu explicação (adotado: só o aviso de corte, sem banco); janela do Design System para editar e ver detalhe: sim; confirmar o envio do e-mail de resposta: sim; Tags fora do Admin: sim; Admin Mode em um lugar só: sim.
+- 2026-10-13: Navegação, Planos, Notificações, Badges, Reports e Analytics entregues na branch. Relatório em `docs/historico/15-*`.

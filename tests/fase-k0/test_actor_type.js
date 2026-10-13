@@ -36,7 +36,8 @@ const ROWS = [
 ];
 
 // ---- carrega admin-analytics.js real
-const src = fs.readFileSync(path.join(root,'shared/admin-analytics.js'),'utf8');
+// admin-analytics.js foi dividido (cálculos e rótulos em admin-analytics-calc.js, HTML em admin-analytics-ui.js): carrega calc + controlador
+const src = ['shared/admin-analytics-calc.js','shared/admin-analytics.js'].map(f => fs.readFileSync(path.join(root,f),'utf8')).join('\n');
 const ctx = { console, document: { getElementById(){ return null; }, querySelectorAll(){ return []; } }, supabaseClient: makeClient(ROWS, []) };
 vm.createContext(ctx);
 vm.runInContext(src + `
@@ -87,7 +88,7 @@ ctx.setState({ languageFilter:'all', deviceFilter:'all' });
   ins = await run(true, false);
   t('admin com exclude=false: grava actor_type=admin', ins.length===1 && ins[0].actor_type==='admin');
   // arquitetura: nenhum 'student' restante em código executável
-  const code = ['shared/analytics.js','shared/admin-analytics.js'].map(f=>fs.readFileSync(path.join(root,f),'utf8').split('\n').filter(l=>!/^\s*\/\//.test(l)).join('\n')).join('\n');
+  const code = ['shared/analytics.js','shared/admin-analytics-calc.js','shared/admin-analytics.js'].map(f=>fs.readFileSync(path.join(root,f),'utf8').split('\n').filter(l=>!/^\s*\/\//.test(l)).join('\n')).join('\n');
   t("único 'student' executável é o valor legado da constante", (code.match(/'student'/g)||[]).length === 1);
   t('nenhum .eq actor_type restante', !/\.eq\('actor_type'/.test(code));
   console.log(`K.0-A: ${pass} ok, ${fail} falhas`); process.exit(fail?1:0);
