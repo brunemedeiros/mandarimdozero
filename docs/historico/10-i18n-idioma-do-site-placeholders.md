@@ -60,3 +60,14 @@ Abas Geral, Notificações e Exportar. CSS num bloco "Configurações: passada d
   `DELIBERATE_PT_CHANGES` do teste de i18n.
 - Testes: i18n unit 2107/2107, deck-browser 206/206, amigos 158/158. `tests/i18n/test_playwright.js` continua com o tempo
   esgotado conhecido em `triggerWouldGenerate` (pré-existente). Prints em fr/zh × claro/escuro e 390px, 0 pageerrors.
+
+## Teste i18n de volta ao verde depois do Banco de Revisão (2026-10-13)
+
+- Na `main`, `tests/i18n/test_i18n_unit.js` falhava em 183 de 2273 verificações desde a entrada do Banco de Revisão (PRs #305 a #307).
+  As causas eram textos novos tratados como regressão (`rb.*` e `review.observation`), `rb.none` igual nos dois idiomas (é só o traço "–"),
+  dois comentários de confiança faltando no `en.js` (`review.observation` e `review.almost`) e o HTML de fr/zh com CSS e scripts novos do Banco.
+- Correção (só teste e comentários, nenhum texto visível mudou): prefixo `rb` na lista de textos novos, `review.observation` liberada,
+  `rb.none` na lista de valores iguais permitidos, `// ALTA` nas duas linhas e o `strip` da comparação de HTML ignorando
+  `review-bank.css`, os scripts `review-answer-extras.js`/`review-bank*.js` e o bloco `.review-observation`/`.review-almost`.
+- Resultado: 2040/2040 (o total caiu porque as chaves `rb.*` não passam mais pela checagem de regressão).
+  Banco de Revisão: unitários 100/100 e playwright 387/387; Desafios e Ditado sem falha.

@@ -257,6 +257,7 @@
     "type": "expression",
     "canonicalExpression": "Enchanté !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "b7da9c0935be.mp3",
     "meaning": {
       "fr": "On le dit quand on rencontre quelqu'un pour la première fois.",
@@ -306,6 +307,7 @@
     "type": "expression",
     "canonicalExpression": "Comme ci, comme ça",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "26aa37d63ee5.mp3",
     "meaning": {
       "fr": "Ni bien ni mal ; moyen.",
@@ -355,6 +357,7 @@
     "type": "expression",
     "canonicalExpression": "Pas mal",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "a99b9b60a92c.mp3",
     "meaning": {
       "fr": "Plutôt bien.",
@@ -404,6 +407,7 @@
     "type": "expression",
     "canonicalExpression": "Ça marche !",
     "level": "A1",
+    "register": "familiar",
     "expressionAudioFile": "c912135ddbc0.mp3",
     "meaning": {
       "fr": "D'accord ; c'est bon.",
@@ -453,6 +457,7 @@
     "type": "expression",
     "canonicalExpression": "Pas de problème !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "2f6c2c8b7e72.mp3",
     "meaning": {
       "fr": "Ce n'est pas grave ; d'accord.",

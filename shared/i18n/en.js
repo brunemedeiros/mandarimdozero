@@ -686,8 +686,8 @@ window.I18N_CATALOG['en'] = {
   'review.deck.lang.portugues': 'Portuguese', // ALTA -- Revisão nova
   'review.deck.lang.fallback': 'Language', // ALTA -- Revisão nova
   'review.deck.myDecks': 'My Decks', // ALTA -- Revisão nova
-  'review.observation': 'Note from your teacher',
-  'review.almost': 'Almost there',
+  'review.observation': 'Note from your teacher', // ALTA
+  'review.almost': 'Almost there', // ALTA
   'review.deck.teacherCards': 'Teacher\'s cards', // MÉDIA -- Revisão nova
   'review.deck.studyPath': 'Study Path', // MÉDIA -- Revisão nova
   'review.deck.allDecks': 'All Decks', // ALTA -- Revisão nova
@@ -1750,6 +1750,7 @@ window.I18N_CATALOG['en'] = {
   'adminChallenges.import.missing': '{label}: missing id/type/level', // ALTA
   'adminChallenges.import.badType': '{id}: invalid type ("{type}")', // ALTA
   'adminChallenges.import.badLevel': '{id}: invalid level ("{level}")', // ALTA
+  'adminChallenges.import.badRegister': '{id}: expression without a valid register (register: formal, neutral, familiar, slang or vulgar)', // ALTA
   'adminChallenges.import.dupId': '{id}: id already exists (duplicate)', // ALTA
   'adminChallenges.persist.failed': 'Could not save to the database: ', // ALTA
   'adminChallenges.import.importing': 'Importing…', // ALTA

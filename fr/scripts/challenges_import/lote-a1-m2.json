@@ -208,6 +208,7 @@
     "type": "expression",
     "canonicalExpression": "Bon appétit !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "9e42796cd2c7.mp3",
     "meaning": {
       "fr": "On le dit avant de manger.",
@@ -257,6 +258,7 @@
     "type": "expression",
     "canonicalExpression": "À table !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "c09e3e44cb3a.mp3",
     "meaning": {
       "fr": "On appelle tout le monde pour manger.",
@@ -306,6 +308,7 @@
     "type": "expression",
     "canonicalExpression": "À tout à l'heure !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "b1b7d0b34625.mp3",
     "meaning": {
       "fr": "Au revoir, on se voit bientôt dans la journée.",
@@ -355,6 +358,7 @@
     "type": "expression",
     "canonicalExpression": "Tout de suite",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "255d806872f5.mp3",
     "meaning": {
       "fr": "Immédiatement, sans attendre.",
@@ -404,6 +408,7 @@
     "type": "expression",
     "canonicalExpression": "Bonne journée !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "616c24576bac.mp3",
     "meaning": {
       "fr": "On le dit pour se quitter pendant la journée.",
