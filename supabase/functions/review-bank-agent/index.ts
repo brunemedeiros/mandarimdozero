@@ -46,7 +46,11 @@ Deno.serve(async (req: Request) => {
 
   const token = Deno.env.get('REVIEW_BANK_AGENT_TOKEN') || '';
   const teacherId = Deno.env.get('REVIEW_BANK_AGENT_TEACHER_ID') || '';
-  if (token.length < 24 || !teacherId) return json(503, { ok: false, error: 'not_configured' });
+  if (token.length < 24 || !teacherId) {
+    // só os NOMES do que falta (nunca valores): ajuda a achar secret digitado no projeto errado ou com nome diferente
+    const missing = [token.length < 24 ? (token ? 'REVIEW_BANK_AGENT_TOKEN (menos de 24 caracteres)' : 'REVIEW_BANK_AGENT_TOKEN') : null, !teacherId ? 'REVIEW_BANK_AGENT_TEACHER_ID' : null].filter(Boolean);
+    return json(503, { ok: false, error: 'not_configured', missing });
+  }
   const sent = req.headers.get('x-agent-token') || '';
   if (!safeEqual(sent, token)) return json(401, { ok: false, error: 'unauthorized' });
 

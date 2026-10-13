@@ -92,9 +92,12 @@ export function createAgent({ engine, db, teacherId, now }) {
       const sig = contentSig(it && it.type, it && it.q, it && it.a);
       if (seenKeys.has(key) || seenSigs.has(sig)) { res.skipped_duplicates++; continue; }
       seenKeys.add(key); seenSigs.add(sig);
-      // mesma regra do caderno: dúvida, conteúdo sensível ou sugestão pendente => "pendente"; senão "aprovado" (nunca "cortado" por aqui)
-      const hold = !!(clean(it && it.doubt) || (it && it.sensitive === true) || (it && it.proposal && typeof it.proposal === 'object' && Object.keys(it.proposal).length));
-      prepared.push(Object.assign({}, it, { key, date: isDate(it && it.date) ? it.date : t, status: hold ? 'pendente' : 'aprovado' }));
+      // mesma regra do caderno: dúvida, conteúdo sensível, sugestão ou pedido de "cortado" => "pendente" (quem corta é a professora,
+      // nunca a rotina); só entra "aprovado" o item limpo, sem nenhuma dessas marcas
+      const hold = !!(clean(it && it.doubt) || (it && it.sensitive === true) || (it && it.status === 'cortado') || (it && it.proposal && typeof it.proposal === 'object' && Object.keys(it.proposal).length));
+      // "cortado" pedido pela rotina vira pendente COM dúvida preenchida: sem ela a geração automática entregaria o cartão na hora
+      const doubt = clean(it && it.doubt) || (it && it.status === 'cortado' ? 'A rotina marcou este item como cortado. Decida se entra na revisão.' : '');
+      prepared.push(Object.assign({}, it, { key, date: isDate(it && it.date) ? it.date : t, doubt, status: hold ? 'pendente' : 'aprovado' }));
     }
     if (prepared.length) {
       const parsed = engine.rbiParse(JSON.stringify({ version: 1, students: [{ key: 'x', name: 'x', language: s.language_app_key, items: prepared }] }));
