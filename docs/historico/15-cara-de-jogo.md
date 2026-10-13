@@ -101,3 +101,36 @@ Só tela e texto, sem migration. Grátis x Premium: tudo grátis.
   pré-existente).
 - Validação visual: Perfil, Metas, Progresso, Ranking, Desafios, Revisão, Trilha e Configurações em fr claro/escuro,
   celular e zh claro/escuro.
+
+## Passo 5a: foguinho, marcos de sequência, Parabenizar e Agradecer (2026-10-13)
+
+Decisões da autora: marcos 5, 10, 15, 25, 50, 75, 100, 125, 150, 175, 200, 250, 300, 350 e 365 dias; reações fixas
+🎉 👏 💪 ❤️ com botão de agradecer ("mostrar que o parabéns não foi ignorado"); conquistas (badges) ficam SEM
+parabéns até a autora definir o critério das conquistas (análise em `docs/conquistas-analise.md`, pausado); tudo grátis.
+
+- Migration **086** (`shared/supabase_migrations/086_friends_streak_milestones_and_congrats.sql`). Número 086 porque
+  078 a 085 já foram usados por outras conversas no Staging (080 aparece duas vezes lá). Sem DROP, sem mudar assinatura.
+  - `_account_streak` (interna): mesma leitura de sequência da 075 (`data._account`, ou o idioma com
+    `lastStudyDay` mais novo); zera se o último dia foi antes de ontem (Brasília).
+  - `friends_extras()`: sequência, "estudou hoje" e idiomas (bandeiras) de você + amigos.
+  - `streak_milestones` + `record_streak_milestone(p_streak, p_last_day)`: registra só o MAIOR marco ainda não
+    registrado na sequência atual (quem já tinha 40 dias não gera 5 avisos). O site chama em `registerStudyToday`.
+  - `friend_congrats` + `congratulate_friend`: só amigo aceito, marco dos últimos 7 dias, 1 por pessoa por marco
+    (tocar de novo troca a reação), até 20 por dia; aviso agrupado no sino ("Fulana e mais 2 amigos parabenizaram você").
+  - `thank_friend_congrats`: só quem recebeu, uma vez; avisa quem mandou ("Fulano agradeceu seu parabéns 💛").
+  - `friends_streak_feed`, `my_received_congrats`; `friend_settings.notify_congrats` (Configurações > Notificações > Amigos).
+  - Privacidade: amigos veem a sequência mesmo de perfil privado, mesma regra do perfil privado em construção
+    (080_private_profile no Staging: amigos aceitos veem o perfil completo).
+- Site (`shared/friends.js`): foguinho 🔥N no avatar (cartões e pódio) com anel quando estudou hoje, bandeiras (SVG de
+  `AVAILABLE_LANGUAGES`) no cartão, atividade com marcos de sequência + conquistas dos últimos 7 dias (antes 30),
+  botão "👏 Parabenizar" com as 4 reações, "Você reagiu 💪", contagem e "Fulano agradeceu 💛"; cartão "Parabéns para
+  você" com "Agradecer 💛". 17 chaves i18n novas (pt-BR e en).
+- Aplicada no **Staging** (`ilfjzizjfcmhibkhwber`) em 2026-10-13, mais o ajuste `086b` (search_path fixo em
+  `_congrats_target_label`, já incluído no arquivo). Conferido: tabelas com RLS e sem acesso direto, anon sem
+  execução, funções internas fechadas, `_friends_notify` era idêntica à da 074 nos dois ambientes antes da troca.
+  **Produção: pendente de autorização.**
+- Testes: banco local 124/124 (80 antigos + 44 da 086: amigo/não amigo, perfil privado, sequência quebrada,
+  maior marco, reação trocada, aviso agrupado, agradecer só uma vez, limite diário, sem acesso direto, progress
+  intacto); Playwright amigos 210/210 (eram 182); i18n unit 2033/2033; k2e 28/28; revisao-ajustes 48/48;
+  checkpoint-zh 25/25; ditado 58/58; placeholders 45/45; desafios-conclusao 19/19; trilha mobile_shell 108,
+  review_milestone_ui 34. O Postgres local de teste foi recriado neste container (initdb em /tmp/pgdata, porta 54329).

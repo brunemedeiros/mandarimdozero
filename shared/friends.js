@@ -15,7 +15,7 @@
 // (showToast). openPublicProfileModalForUsername/switchTab são só chamados
 // dentro de funções.
 
-const FRIENDS_STATE = { pendingCount: 0, searchSeq: 0, rankScope: 'all', rankSeq: 0, inviteUsername: null };
+const FRIENDS_STATE = { pendingCount: 0, searchSeq: 0, rankScope: 'all', rankSeq: 0, inviteUsername: null, extras: null };
 
 // ---------- convite por link (?amigo=usuario) ----------
 // O link de convite abre o site com ?amigo=<usuario>. Guardamos o usuário no
@@ -80,6 +80,8 @@ const FRIENDS_ERROR_LABELS = {
   no_pending_request: () => t('friends.error.no_pending_request'),
   not_friends: () => t('friends.error.not_friends'),
   not_accepting_requests: () => t('friends.error.not_accepting_requests'),
+  daily_congrats_limit: () => t('friends.error.daily_congrats_limit'),
+  target_not_found: () => t('friends.error.target_not_found'),
 };
 
 function friendsErrorMessage(code){
@@ -283,8 +285,9 @@ function friendCardHTML(item){
         ${username ? `<button type="button" role="menuitem" data-open-profile="${escapeAttr(username)}">${t('friends.card.viewProfile')}</button>` : ''}
         <button type="button" role="menuitem" class="friends-danger" data-friend-action="remove" data-user-id="${id}">${t('friends.btn.remove')}</button>
       </div>
+      <span class="friend-card-flags" data-friend-flags="${id}"></span>
       <button type="button" class="friend-card-person" data-open-profile="${escapeAttr(username)}" ${username ? '' : 'disabled'}>
-        ${friendAvatarHTML(p, item.userId)}
+        <span class="friend-avatar-wrap" data-friend-avatar="${id}">${friendAvatarHTML(p, item.userId)}</span>
         <span class="friend-card-name">${escapeHTML(name)}</span>
         <span class="friend-card-user">@${escapeHTML(username)}</span>
       </button>
@@ -413,10 +416,11 @@ async function renderFriendsView(){
     bodyHTML = friendsEmptyHTML(keepQuery, inviteUser) + pending;
   }
 
-  wrap.innerHTML = `${subnav}${headHTML}${friendsRequestsHTML(ov.incoming)}${bodyHTML}`;
+  wrap.innerHTML = `${subnav}${headHTML}${friendsRequestsHTML(ov.incoming)}<section class="friends-received" id="friends-received" hidden></section>${bodyHTML}`;
   renderFriendsBadges();
   wireFriendsView(wrap);
-  if (hasFriends){ loadFriendsMiniRank(); loadFriendsActivity(); }
+  if (hasFriends){ loadFriendsMiniRank(); loadFriendsActivity(); loadFriendsExtras(); }
+  loadFriendsReceivedCongrats();
   if (keepQuery.trim().length >= 3) runFriendsSearch(keepQuery);
 }
 
@@ -443,29 +447,160 @@ async function loadFriendsMiniRank(){
   document.querySelectorAll('[data-friend-xp]').forEach(el => {
     el.textContent = `${byId[el.dataset.friendXp] || 0} XP`;
   });
+  friendsDecorateExtras();
 }
 
-// ---------- atividade dos amigos (conquistas dos últimos 30 dias) ----------
+// ---------- foguinho e bandeiras (migration 086: friends_extras) ----------
+// Sequência efetiva (zera se a pessoa pulou um dia) de você + amigos, se estudou
+// hoje e os idiomas que estuda. Amigos veem mesmo quem tem perfil privado.
+async function loadFriendsExtras(){
+  const { data, error } = await supabaseClient.rpc('friends_extras');
+  if (error){ console.error('Erro ao carregar sequência dos amigos:', error); return; }
+  FRIENDS_STATE.extras = Object.fromEntries((data || []).map(r => [r.user_id, r]));
+  friendsDecorateExtras();
+}
+
+function friendsStreakChipHTML(x){
+  const n = Number(x?.streak || 0);
+  if (!n) return '';
+  const label = tp('friends.streak.aria', n) + (x.studied_today ? ` · ${t('friends.streak.today')}` : '');
+  return `<span class="friend-streak ${x.studied_today ? 'is-today' : ''}" title="${escapeAttr(label)}" aria-label="${escapeAttr(label)}">🔥${n}</span>`;
+}
+
+function friendsLangFlagsHTML(langs){
+  const all = (typeof AVAILABLE_LANGUAGES !== 'undefined') ? AVAILABLE_LANGUAGES : [];
+  return (langs || []).map(k => all.find(l => l.appKey === k)).filter(Boolean)
+    .map(l => `<span class="friend-flag" title="${escapeAttr(l.name)}">${l.flagSvg}</span>`).join('');
+}
+
+// Põe o foguinho nos avatares (cartões e pódio) e as bandeiras nos cartões.
+// Idempotente: roda quando chegam os extras e de novo quando o pódio é redesenhado.
+function friendsDecorateExtras(){
+  const map = FRIENDS_STATE.extras;
+  if (!map) return;
+  document.querySelectorAll('#friends-content [data-friend-avatar]').forEach(el => {
+    el.querySelector('.friend-streak')?.remove();
+    const x = map[el.dataset.friendAvatar];
+    el.classList.toggle('is-today', !!x?.studied_today && !!x?.streak);
+    el.insertAdjacentHTML('beforeend', friendsStreakChipHTML(x));
+  });
+  document.querySelectorAll('#friends-content [data-friend-flags]').forEach(el => {
+    el.innerHTML = friendsLangFlagsHTML(map[el.dataset.friendFlags]?.languages);
+  });
+  document.querySelectorAll('#friends-rank .lb-pod[data-podium-user]').forEach(el => {
+    el.querySelector('.friend-streak')?.remove();
+    const chip = friendsStreakChipHTML(map[el.dataset.podiumUser]);
+    if (chip) el.querySelector('.lb-pod-avatar')?.insertAdjacentHTML('afterend', chip);
+  });
+}
+
+// ---------- marco de sequência (chamado por registerStudyToday em fr/zh app.js) ----------
+// O servidor registra só o maior marco ainda não registrado nesta sequência
+// (5, 10, 15, 25, 50... 365) e é ele que aparece para os amigos.
+function friendsRecordStreakMilestone(streak, lastDay){
+  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER || !(Number(streak) >= 5) || !lastDay) return;
+  try {
+    Promise.resolve(supabaseClient.rpc('record_streak_milestone', { p_streak: Number(streak), p_last_day: lastDay }))
+      .then(({ error } = {}) => { if (error) console.error('Erro ao registrar marco de sequência:', error); })
+      .catch(e => console.error('Erro ao registrar marco de sequência:', e));
+  } catch (e) { console.error('Erro ao registrar marco de sequência:', e); }
+}
+
+// ---------- atividade dos amigos: marcos de sequência + conquistas (últimos 7 dias) ----------
+const FRIENDS_REACTIONS = ['🎉', '👏', '💪', '❤️'];
+const FRIENDS_FEED_DAYS = 7;
+
+function friendsCheerHTML(item){
+  const picker = `<div class="friends-reactions" role="group" aria-label="${escapeAttr(t('friends.cheer.aria'))}" hidden>
+      ${FRIENDS_REACTIONS.map(r => `<button type="button" class="friends-reaction ${item.my_reaction === r ? 'is-mine' : ''}" data-cheer-reaction="${r}" aria-label="${r}">${r}</button>`).join('')}
+    </div>`;
+  const btn = item.my_reaction
+    ? `<button type="button" class="friends-cheer is-done" data-cheer-open="1" aria-expanded="false">${t('friends.cheer.done', { r: item.my_reaction })}</button>`
+    : `<button type="button" class="btn btn-secondary btn-sm friends-cheer" data-cheer-open="1" aria-expanded="false">${t('friends.cheer.btn')}</button>`;
+  return `<div class="friends-cheer-wrap">${btn}${picker}</div>`;
+}
+
 async function loadFriendsActivity(){
   const box = document.getElementById('friends-activity');
   if (!box) return;
-  box.innerHTML = loadingHTML(t('friends.loadingShort'));
+  if (!box.children.length) box.innerHTML = loadingHTML(t('friends.loadingShort'));
   const appKey = (typeof APP_KEY !== 'undefined') ? APP_KEY : 'frances';
-  const { data, error } = await supabaseClient.rpc('friends_activity', { p_language: appKey, p_limit: 20 });
+  const [badgesRes, streakRes] = await Promise.all([
+    supabaseClient.rpc('friends_activity', { p_language: appKey, p_limit: 20 }),
+    supabaseClient.rpc('friends_streak_feed', { p_limit: 20 }),
+  ]);
   const el = document.getElementById('friends-activity');
   if (!el) return;
-  if (error){ console.error('Erro ao carregar atividade dos amigos:', error); el.innerHTML = `<p class="profile-edit-error">${t('friends.activity.error')}</p>`; return; }
+  if (badgesRes.error && streakRes.error){
+    console.error('Erro ao carregar atividade dos amigos:', badgesRes.error, streakRes.error);
+    el.innerHTML = `<p class="profile-edit-error">${t('friends.activity.error')}</p>`;
+    return;
+  }
+  const since = Date.now() - FRIENDS_FEED_DAYS * 86400000;
   const catalog = (typeof BADGES !== 'undefined' && Array.isArray(BADGES)) ? BADGES : [];
-  const items = (data || []).map(r => ({ r, badge: catalog.find(b => b.id === r.badge_id) })).filter(x => x.badge);
-  if (!items.length){ el.innerHTML = `<p class="friends-feed-empty">${t('friends.activity.empty')}</p>`; return; }
-  el.innerHTML = items.slice(0, 5).map(({ r, badge }) => {
-    const name = r.display_name || r.username || t('friends.activity.aFriend');
-    return `<div class="friends-activity-row">
+  const nameOf = (r) => r.display_name || r.username || t('friends.activity.aFriend');
+  const badgeItems = (badgesRes.data || [])
+    .map(r => ({ r, badge: catalog.find(b => b.id === r.badge_id), at: new Date(r.earned_at).getTime() }))
+    .filter(x => x.badge && x.at >= since)
+    .map(({ r, badge, at }) => ({ at, html: `<div class="friends-activity-row">
       <span class="friends-medal" aria-hidden="true">${escapeHTML(badge.icon || '🏅')}</span>
-      <span class="friends-activity-text">${t('friends.activity.earned', { name: `<strong>${escapeHTML(name)}</strong>`, badge: escapeHTML(badge.name || '') })}
+      <span class="friends-activity-text">${t('friends.activity.earned', { name: `<strong>${escapeHTML(nameOf(r))}</strong>`, badge: escapeHTML(badge.name || '') })}
         <span class="friends-activity-when">· ${escapeHTML(friendsTimeAgo(r.earned_at))}</span></span>
+    </div>` }));
+  // Marcos de sequência: com "Parabenizar" (as conquistas ganham o botão quando o critério for definido).
+  const streakItems = (streakRes.data || []).map(r => ({ at: new Date(r.reached_at).getTime(), html: `
+    <div class="friends-activity-row is-streak" data-cheer-friend="${escapeAttr(r.user_id)}" data-cheer-ref="${escapeAttr(r.ref)}">
+      <span class="friends-medal is-fire" aria-hidden="true">🔥</span>
+      <span class="friends-activity-text">${t('friends.feed.streak', { name: `<strong>${escapeHTML(nameOf(r))}</strong>`, n: Number(r.days) })}
+        <span class="friends-activity-when">· ${escapeHTML(friendsTimeAgo(r.reached_at))}</span>
+        ${Number(r.total_reactions) > 0 ? `<span class="friends-cheer-count">${tp('friends.cheer.count', Number(r.total_reactions))}</span>` : ''}
+        ${r.my_congrats_thanked ? `<span class="friends-cheer-thanked">${t('friends.cheer.thanked', { name: escapeHTML(leaderboardFirstName(r)) })}</span>` : ''}
+      </span>
+      ${friendsCheerHTML(r)}
+    </div>` }));
+  const items = [...streakItems, ...badgeItems].sort((a, b) => b.at - a.at).slice(0, 6);
+  el.innerHTML = items.length ? items.map(i => i.html).join('') : `<p class="friends-feed-empty">${t('friends.activity.empty')}</p>`;
+}
+
+async function friendsSendCheer(row, reaction, btn){
+  if (btn) btn.disabled = true;
+  const res = await friendsRpc('congratulate_friend', { p_friend: row.dataset.cheerFriend, p_kind: 'streak', p_ref: row.dataset.cheerRef, p_reaction: reaction });
+  if (!res.ok){ showToast(friendsErrorMessage(res.error)); if (btn) btn.disabled = false; return; }
+  showToast(t('friends.toast.cheered', { r: reaction }));
+  await loadFriendsActivity();
+}
+
+// ---------- parabéns que eu recebi (com "Agradecer") ----------
+async function loadFriendsReceivedCongrats(){
+  const box = document.getElementById('friends-received');
+  if (!box) return;
+  const { data, error } = await supabaseClient.rpc('my_received_congrats', { p_limit: 20 });
+  const el = document.getElementById('friends-received');
+  if (!el) return;
+  if (error){ console.error('Erro ao carregar parabéns recebidos:', error); el.hidden = true; return; }
+  const rows = data || [];
+  if (!rows.length){ el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  el.innerHTML = `<h3 class="friends-received-title">🎉 ${t('friends.received.title')}</h3>` + rows.map(r => {
+    const name = r.display_name || r.username || t('friends.activity.aFriend');
+    const days = Number(String(r.target_ref || '').split('@')[0]) || 0;
+    return `<div class="friends-received-row" data-congrats-id="${escapeAttr(String(r.id))}">
+      ${friendAvatarHTML({ username: r.username, display_name: r.display_name, avatar_url: r.avatar_url }, r.from_user)}
+      <span class="friends-activity-text">${t('friends.received.row', { name: `<strong>${escapeHTML(name)}</strong>`, r: escapeHTML(r.reaction), n: days })}
+        <span class="friends-activity-when">· ${escapeHTML(friendsTimeAgo(r.created_at))}</span></span>
+      ${r.thanked
+        ? `<span class="friends-thanked-chip">${t('friends.received.thanked')}</span>`
+        : `<button type="button" class="btn btn-primary btn-sm friends-thank" data-thank-congrats="${escapeAttr(String(r.id))}">${t('friends.received.thank')}</button>`}
     </div>`;
   }).join('');
+}
+
+async function friendsThank(id, btn){
+  if (btn) btn.disabled = true;
+  const res = await friendsRpc('thank_friend_congrats', { p_congrats_id: Number(id) });
+  if (!res.ok){ showToast(friendsErrorMessage(res.error)); if (btn) btn.disabled = false; return; }
+  showToast(t('friends.toast.thanked'));
+  await loadFriendsReceivedCongrats();
 }
 
 // ---------- preferências (avisos + "aceitar novos pedidos") ----------
@@ -473,6 +608,7 @@ const FRIENDS_PREF_FIELDS = [
   { key: 'notify_requests', label: () => t('friends.pref.notify_requests') },
   { key: 'notify_accepts', label: () => t('friends.pref.notify_accepts') },
   { key: 'notify_overtakes', label: () => t('friends.pref.notify_overtakes') },
+  { key: 'notify_congrats', label: () => t('friends.pref.notify_congrats') },
   { key: 'accept_requests', label: () => t('friends.pref.accept_requests') },
 ];
 
@@ -552,6 +688,12 @@ async function runFriendsSearch(rawQuery){
 }
 
 function friendsCloseMenus(refocus){
+  document.querySelectorAll('.friends-reactions:not([hidden])').forEach(p => {
+    p.hidden = true;
+    const btn = p.parentElement.querySelector('[data-cheer-open]');
+    btn?.setAttribute('aria-expanded', 'false');
+    if (refocus) btn?.focus();
+  });
   document.querySelectorAll('.friend-card-menu:not([hidden])').forEach(m => {
     m.hidden = true;
     const btn = m.parentElement.querySelector('[data-friend-menu]');
@@ -589,6 +731,20 @@ function wireFriendsView(wrap){
       if (typeof openPublicProfileModalForUsername === 'function') openPublicProfileModalForUsername(person.dataset.openProfile);
       return;
     }
+    const cheerOpen = e.target.closest('[data-cheer-open]');
+    if (cheerOpen){
+      const picker = cheerOpen.parentElement.querySelector('.friends-reactions');
+      const opening = picker.hidden;
+      document.querySelectorAll('#friends-content .friends-reactions:not([hidden])').forEach(p => { p.hidden = true; p.parentElement.querySelector('[data-cheer-open]')?.setAttribute('aria-expanded', 'false'); });
+      picker.hidden = !opening;
+      cheerOpen.setAttribute('aria-expanded', String(opening));
+      if (opening) picker.querySelector('button')?.focus();
+      return;
+    }
+    const reactionBtn = e.target.closest('[data-cheer-reaction]');
+    if (reactionBtn){ friendsSendCheer(reactionBtn.closest('[data-cheer-ref]'), reactionBtn.dataset.cheerReaction, reactionBtn); return; }
+    const thankBtn = e.target.closest('[data-thank-congrats]');
+    if (thankBtn){ friendsThank(thankBtn.dataset.thankCongrats, thankBtn); return; }
     const chip = e.target.closest('[data-friends-rank-scope]');
     if (chip){ FRIENDS_STATE.rankScope = chip.dataset.friendsRankScope; loadFriendsMiniRank(); return; }
     if (e.target.closest('[data-friends-rank-more]')){
@@ -603,7 +759,7 @@ function wireFriendsView(wrap){
     await handleFriendAction(btn.dataset.friendAction, btn.dataset.userId, btn);
   });
   // Fecha o menu ⋯ aberto ao clicar fora dele ou apertar Esc.
-  document.addEventListener('click', (e) => { if (!e.target.closest('.friend-card-more, .friend-card-menu')) friendsCloseMenus(); });
+  document.addEventListener('click', (e) => { if (!e.target.closest('.friend-card-more, .friend-card-menu, .friends-cheer-wrap')) friendsCloseMenus(); });
   wrap.addEventListener('keydown', (e) => { if (e.key === 'Escape') friendsCloseMenus(true); });
 }
 

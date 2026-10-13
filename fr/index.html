@@ -1992,6 +1992,38 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .friends-empty-steps li{ display:flex; gap:12px; align-items:center; background:var(--paper-warm); border-radius:14px; padding:10px 12px; font-size:14px; font-weight:700; color:var(--ink); }
 .friends-empty-steps span{ font-size:20px; }
 
+/* Foguinho, bandeiras, marcos e parabéns (migration 086) */
+.friend-avatar-wrap{ position:relative; display:inline-flex; border-radius:50%; }
+.friend-avatar-wrap.is-today .friends-avatar{ box-shadow:0 0 0 3px var(--paper), 0 0 0 6px var(--medal-bronze); }
+.friend-streak{ position:absolute; right:-8px; bottom:2px; background:var(--paper); border:2px solid var(--paper-line); border-radius:999px; font-size:11.5px; font-weight:900; color:var(--ink); padding:0 6px; line-height:18px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.friend-avatar-wrap.is-today .friend-streak{ border-color:var(--medal-bronze); }
+.lb-pod .friend-streak{ position:relative; right:auto; bottom:auto; margin-top:-14px; z-index:1; }
+.friend-card-flags{ position:absolute; top:10px; left:10px; display:flex; gap:4px; }
+.friend-flag{ display:inline-flex; width:20px; height:14px; border-radius:3px; overflow:hidden; box-shadow:0 0 0 1px var(--paper-line); }
+.friend-flag svg{ width:100%; height:100%; display:block; }
+.friends-activity-row{ flex-wrap:wrap; }
+.friends-activity-row .friends-activity-text{ flex:1; min-width:160px; }
+.friends-medal.is-fire{ background: var(--paper-warm); background: color-mix(in srgb, var(--medal-bronze) 28%, var(--paper)); border-color:transparent; }
+.friends-cheer-count, .friends-cheer-thanked{ display:inline-block; margin-left:6px; font-size:12px; font-weight:800; color:var(--ink-soft); white-space:nowrap; }
+.friends-cheer-thanked{ color:var(--seal-red-dark); }
+.friends-cheer-wrap{ position:relative; margin-left:auto; }
+.friends-cheer.is-done{ background:none; border:none; font:inherit; font-size:13px; font-weight:800; color:var(--ink-soft); cursor:pointer; padding:6px 4px; }
+.friends-cheer.is-done:hover{ color:var(--ink); }
+.friends-reactions{ position:absolute; right:0; top:calc(100% + 6px); z-index:5; display:flex; gap:4px; background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px; padding:4px; box-shadow:var(--shadow-lift); }
+.friends-reactions[hidden]{ display:none; }
+.friends-reaction{ width:40px; height:40px; border-radius:50%; border:none; background:none; font-size:22px; cursor:pointer; transition:transform .1s ease; }
+.friends-reaction:hover{ transform:scale(1.15); background:var(--paper); }
+.friends-reaction.is-mine{ background:var(--paper); box-shadow:0 0 0 2px var(--seal-red); }
+.friends-received{ margin-top:16px; border-radius:20px; padding:12px 16px; border:2px solid var(--medal-gold);
+  background: var(--paper-warm);
+  background: color-mix(in srgb, var(--medal-gold) 16%, var(--paper)); }
+.friends-received[hidden]{ display:none; }
+.friends-received-title{ font-family:var(--font-body); font-weight:900; font-size:16px; margin:0 0 4px; color:var(--ink); }
+.friends-received-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 0; font-size:14px; color:var(--ink); }
+.friends-received-row + .friends-received-row{ border-top:1px dashed var(--paper-line); }
+.friends-received-row .friends-activity-text{ flex:1; min-width:160px; }
+.friends-thanked-chip{ font-size:12.5px; font-weight:800; color:var(--ink-soft); white-space:nowrap; }
+
 @media (max-width: 640px){
   .friends-title{ font-size:24px; }
   .friends-list-search{ max-width:none; flex-basis:100%; }
@@ -1999,6 +2031,8 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   .friends-row-actions .friends-action{ min-height:44px; }
   .friend-card-more{ width:44px; height:44px; top:0; right:0; }
   .friend-card-menu{ top:44px; }
+  .friends-reaction{ width:44px; height:44px; }
+  .friends-cheer.is-done{ min-height:44px; }
 }
 .side-ranking-tabs{ display:flex; gap:6px; margin-bottom:8px; }
 .side-ranking-tab{ flex:1; background:var(--paper-warm); border:1px solid var(--paper-line); color:var(--ink-soft); border-radius:999px; padding:4px 8px; font-size:12px; font-weight:700; cursor:pointer; }

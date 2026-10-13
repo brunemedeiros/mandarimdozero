@@ -1358,6 +1358,8 @@ function registerStudyToday(){
     STATE.streak = 1;
   }
   STATE.lastStudyDay = today;
+  // Marco de sequência (5, 10, 15... 365) para a atividade dos amigos (shared/friends.js, migration 086).
+  if (typeof friendsRecordStreakMilestone === 'function') friendsRecordStreakMilestone(STATE.streak, today);
   // Não mostra a tela de sequência AGORA -- isso interromperia no meio de
   // uma atividade (ex: no meio de uma sessão de revisão, competindo até com
   // o áudio automático da próxima carta). Só marca que tem uma comemoração

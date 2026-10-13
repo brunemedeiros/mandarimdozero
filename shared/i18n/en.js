@@ -2173,6 +2173,23 @@ window.I18N_CATALOG['en'] = {
   'friends.empty.step2': 'A heads-up when a friend passes you', // ALTA
   'friends.empty.step3': 'See your friends\' achievements', // ALTA
   'friends.prefs.sectionTitle': 'Friends', // ALTA
+  'friends.streak.aria': { one: '{n}-day streak', other: '{n}-day streak' }, // ALTA
+  'friends.streak.today': 'studied today', // ALTA
+  'friends.feed.streak': '{name} reached a {n}-day streak', // ALTA
+  'friends.cheer.btn': '👏 Congratulate', // ALTA
+  'friends.cheer.aria': 'Pick a reaction', // ALTA
+  'friends.cheer.done': 'You reacted {r}', // ALTA
+  'friends.cheer.thanked': '{name} said thanks 💛', // ALTA
+  'friends.cheer.count': { one: '{n} cheer', other: '{n} cheers' }, // ALTA
+  'friends.received.title': 'Cheers for you', // ALTA
+  'friends.received.row': '{name} reacted {r} to your {n}-day streak', // ALTA
+  'friends.received.thank': 'Say thanks 💛', // ALTA
+  'friends.received.thanked': 'You said thanks ✓', // ALTA
+  'friends.toast.cheered': 'Cheer sent! {r}', // ALTA
+  'friends.toast.thanked': 'Thanks sent 💛', // ALTA
+  'friends.error.daily_congrats_limit': 'You already sent 20 cheers today. More tomorrow!', // ALTA
+  'friends.error.target_not_found': 'This milestone is no longer available.', // ALTA
+  'friends.pref.notify_congrats': 'Notify me when a friend congratulates or thanks me', // ALTA
   'profile.tabFriends': 'Friends', // ALTA
   'panel.admin.sub': 'Badges, metrics, notifications, reports and plans.', // ALTA
   'panel.tab.badges': 'Badges', // ALTA

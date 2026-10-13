@@ -141,6 +141,29 @@ async function setup(page, opts){
       { user_id: 'caio', username: 'ucaio', display_name: 'Caio Reis', avatar_url: null, language_app_key: APP_KEY, badge_id: 'badge-que-nao-existe-aqui', earned_at: new Date(Date.now() - 3600000).toISOString() },
     ]);
     window.__DB.friend_settings = [];
+    // 086: foguinho/bandeiras, marcos de sequência, parabéns e agradecimento.
+    window.__RPC.friends_extras = () => [
+      { user_id: 'me', streak: 3, studied_today: true, languages: ['frances'] },
+      { user_id: 'bia', streak: 12, studied_today: true, languages: ['frances', 'mandarim'] },
+      { user_id: 'caio', streak: 0, studied_today: false, languages: ['mandarim'] },
+    ];
+    window.__DB.congrats = [];
+    window.__RPC.friends_streak_feed = () => [{ user_id: 'caio', username: 'ucaio', display_name: 'Caio Reis', avatar_url: null, days: 25, ref: '25@2026-09-20',
+      reached_at: new Date(Date.now() - 3600000).toISOString(), my_reaction: (window.__DB.congrats.find(c => c.ref === '25@2026-09-20') || {}).r || null,
+      my_congrats_thanked: false, total_reactions: window.__DB.congrats.length }];
+    window.__RPC.congratulate_friend = (a) => {
+      const c = window.__DB.congrats.find(x => x.ref === a.p_ref);
+      if (c){ c.r = a.p_reaction; return { ok: true, status: 'updated' }; }
+      window.__DB.congrats.push({ ref: a.p_ref, r: a.p_reaction }); return { ok: true, status: 'sent' };
+    };
+    window.__DB.received = [{ id: 7, from_user: 'bia', username: 'ubia', display_name: 'Bia Lima', avatar_url: null, target_kind: 'streak',
+      target_ref: '10@2026-10-01', reaction: '🎉', created_at: new Date(Date.now() - 7200000).toISOString(), thanked: false }];
+    window.__RPC.my_received_congrats = () => window.__DB.received;
+    window.__RPC.thank_friend_congrats = ({ p_congrats_id }) => {
+      const r = window.__DB.received.find(x => x.id === p_congrats_id);
+      if (!r) return { error: 'not_found' }; r.thanked = true; return { ok: true, status: 'thanked' };
+    };
+    window.__RPC.record_streak_milestone = (a) => ({ ok: true, recorded: a.p_streak >= 5 ? 5 : null });
     PROFILE_CACHE = { user_id: 'me', username: 'u1me', display_name: 'Eu Mesma' };
     window.__rpc.length = 0;
   }, opts || {});
@@ -330,8 +353,40 @@ async function runNew(browser, lang, port){
   await page.waitForFunction(() => document.querySelector('#friends-mini-rank .leaderboard-tab.active')?.dataset.friendsRankScope === 'all');
   // atividade
   await page.waitForSelector('#friends-activity .friends-activity-row');
-  const act = await page.locator('#friends-activity .friends-activity-row').allTextContents();
+  const act = await page.locator('#friends-activity .friends-activity-row:not(.is-streak)').allTextContents();
   check(`${L}: atividade mostra 1 conquista (a desconhecida é ignorada)`, act.length === 1, act);
+  // 086: marco de sequência com Parabenizar
+  await page.waitForSelector('#friends-activity .friends-activity-row.is-streak');
+  const streakRow = await page.locator('#friends-activity .is-streak').textContent();
+  check(`${L}: marco "Caio Reis chegou a 25 dias seguidos"`, /Caio Reis chegou a 25 dias seguidos/.test(streakRow), streakRow);
+  check(`${L}: reações escondidas até tocar em Parabenizar`, !(await page.locator('#friends-activity .friends-reactions').isVisible()));
+  await page.click('#friends-activity [data-cheer-open]');
+  check(`${L}: Parabenizar abre 4 reações`, (await page.locator('#friends-activity .friends-reactions').isVisible()) && (await page.locator('#friends-activity [data-cheer-reaction]').count()) === 4);
+  await page.keyboard.press('Escape');
+  check(`${L}: Esc fecha as reações`, !(await page.locator('#friends-activity .friends-reactions').isVisible()));
+  await page.evaluate(() => { __rpc.length = 0; });
+  await page.click('#friends-activity [data-cheer-open]');
+  await page.click('#friends-activity [data-cheer-reaction="💪"]');
+  await page.waitForFunction(() => /Você reagiu 💪/.test(document.querySelector('#friends-activity .is-streak')?.textContent || ''));
+  check(`${L}: parabéns chama congratulate_friend com o marco e a reação`, await page.evaluate(() => __rpc.some(r => r.name === 'congratulate_friend' && r.args.p_friend === 'caio' && r.args.p_kind === 'streak' && r.args.p_ref === '25@2026-09-20' && r.args.p_reaction === '💪')));
+  check(`${L}: depois de reagir aparece "Você reagiu 💪" e a contagem`, /1 parabéns/.test(await page.locator('#friends-activity .is-streak').textContent()));
+  // 086: foguinho e bandeiras
+  await page.waitForSelector('[data-friend-avatar="bia"] .friend-streak');
+  check(`${L}: foguinho 🔥12 na Bia`, (await page.locator('[data-friend-avatar="bia"] .friend-streak').textContent()) === '🔥12');
+  check(`${L}: anel de "estudou hoje" na Bia`, await page.evaluate(() => document.querySelector('[data-friend-avatar="bia"]').classList.contains('is-today')));
+  check(`${L}: sem foguinho para sequência 0 (Caio)`, (await page.locator('[data-friend-avatar="caio"] .friend-streak').count()) === 0);
+  check(`${L}: 2 bandeiras na Bia, 1 no Caio`, (await page.locator('[data-friend-flags="bia"] .friend-flag').count()) === 2 && (await page.locator('[data-friend-flags="caio"] .friend-flag').count()) === 1);
+  check(`${L}: foguinho também no pódio`, (await page.locator('#friends-rank .lb-pod[data-podium-user="bia"] .friend-streak').count()) === 1);
+  // 086: parabéns recebidos + Agradecer
+  await page.waitForSelector('#friends-received:not([hidden]) [data-thank-congrats]');
+  check(`${L}: "Bia Lima reagiu 🎉 aos seus 10 dias seguidos"`, /Bia Lima reagiu 🎉 aos seus 10 dias seguidos/.test(await page.locator('#friends-received').textContent()));
+  await page.click('[data-thank-congrats="7"]');
+  await page.waitForFunction(() => /Você agradeceu/.test(document.querySelector('#friends-received')?.textContent || ''));
+  check(`${L}: Agradecer chama thank_friend_congrats(7)`, await page.evaluate(() => __rpc.some(r => r.name === 'thank_friend_congrats' && r.args.p_congrats_id === 7)));
+  // 086: registro do marco a partir de registerStudyToday
+  await page.evaluate(() => { __rpc.length = 0; friendsRecordStreakMilestone(3, '2026-10-13'); friendsRecordStreakMilestone(5, '2026-10-13'); });
+  await page.waitForTimeout(100);
+  check(`${L}: marco só é registrado a partir de 5 dias`, await page.evaluate(() => __rpc.filter(r => r.name === 'record_streak_milestone').length === 1 && __rpc.find(r => r.name === 'record_streak_milestone').args.p_streak === 5));
   check(`${L}: atividade cita o amigo, a conquista e "há 2 dias"`, /Bia Lima ganhou/.test(act[0]) && /há 2 dias/.test(act[0]), act[0]);
   // "Ver ranking completo" abre o ranking na aba Amigos
   await page.click('#friends-rank [data-friends-rank-more]');
@@ -341,16 +396,16 @@ async function runNew(browser, lang, port){
   // serviceWorker.ready nunca resolve com o SW bloqueado no teste: sem inscrição de push.
   await page.evaluate(() => { getLocalPushSubscription = async () => null; switchTab('settings'); switchSettingsSection('notifications'); });
   await page.waitForSelector('#settings-notifications-content #friends-prefs-body [data-friends-pref]', { state: 'attached' });
-  check(`${L}: 4 interruptores, todos ligados por padrão`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 4);
+  check(`${L}: 5 interruptores (com parabéns), todos ligados por padrão`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 5);
   await page.uncheck('#friends-prefs-body [data-friends-pref="accept_requests"]');
   // (Configurações também cria a linha de notification_preferences: filtra a de friend_settings.)
   await page.waitForFunction(() => (window.__upserts || []).some(u => u.table === 'friend_settings'));
   const up = await page.evaluate(() => window.__upserts.find(u => u.table === 'friend_settings'));
   check(`${L}: desligar "aceitar pedidos" grava em friend_settings`, up.table === 'friend_settings' && up.row.user_id === 'me' && up.row.accept_requests === false, up);
   await page.evaluate(() => renderNotificationPreferencesView());
-  await page.waitForFunction(() => document.querySelectorAll('#friends-prefs-body [data-friends-pref]').length === 4);
+  await page.waitForFunction(() => document.querySelectorAll('#friends-prefs-body [data-friends-pref]').length === 5);
   check(`${L}: preferência persiste ao recarregar a aba`, (await page.locator('#friends-prefs-body [data-friends-pref="accept_requests"]').isChecked()) === false);
-  check(`${L}: os outros 3 continuam ligados`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 3);
+  check(`${L}: os outros 4 continuam ligados`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 4);
   // convite: o botão único copia o link quando o aparelho não tem "compartilhar"
   await page.evaluate(() => { Object.defineProperty(navigator, 'share', { value: undefined, configurable: true }); switchTab('friends'); });
   await page.waitForSelector('.friends-head [data-friends-invite]');
