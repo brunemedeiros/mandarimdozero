@@ -8932,12 +8932,35 @@ function conjExpectedInfo(verb, tenseKey, idx){
 function conjEvaluate(verb, tenseKey, idx, given){
   const info = conjExpectedInfo(verb, tenseKey, idx);
   const g = (given || '').trim();
-  let status = 'wrong';
+  let status = 'wrong', otherForm = null;
   if (info.accepted.includes(g)) status = 'ok';
-  else if (info.accepted.some(f => normalizeLoose(g) === normalizeLoose(f))) status = 'almost';
+  else if (info.accepted.some(f => normalizeLoose(g) === normalizeLoose(f))){
+    // "Quase" é só acento/maiúscula. Se a palavra digitada é outra forma do
+    // mesmo verbo (a parle x a parlé: "parle" é do présent), o aluno trocou
+    // de tempo, e isso é erro (decisão da autora, 2026-10-13).
+    otherForm = conjOtherFormOf(verb, tenseKey, g, info.accepted);
+    status = otherForm ? 'wrong' : 'almost';
+  }
   // Forma mais parecida com o que foi digitado, para marcar as letras.
   const target = info.accepted.slice().sort((a, b) => conjAlign(g, a).cost - conjAlign(g, b).cost)[0] || '';
-  return Object.assign({ status, target }, info);
+  return Object.assign({ status, target, otherForm }, info);
+}
+
+// Palavra digitada que é, letra por letra, outra forma do mesmo verbo:
+// devolve { word, tenseKey } do primeiro tempo (na ordem de CONJ_TENSES)
+// em que ela aparece, ou null.
+function conjOtherFormOf(verb, tenseKey, given, accepted){
+  const gw = given.toLowerCase().split(/\s+/);
+  const tw = (accepted.find(f => normalizeLoose(f) === normalizeLoose(given)) || '').toLowerCase().split(/\s+/);
+  const diff = gw.filter((w, i) => w !== tw[i]);
+  if (!diff.length) return null;
+  for (const t of CONJ_TENSES){
+    const forms = (CONJUGATION_VERBS[verb].f[t.key] || []).filter(Boolean)
+      .flatMap(f => f.split('/')).flatMap(f => f.trim().toLowerCase().split(/\s+/));
+    const word = diff.find(w => forms.includes(w));
+    if (word && !(t.key === tenseKey && tw.includes(word))) return { word, tenseKey: t.key };
+  }
+  return null;
 }
 
 // Alinhamento letra a letra (distância de edição), como no Jogo de Conjugações.
@@ -8964,13 +8987,15 @@ function conjAlign(a, b){
 
 // O que a pessoa digitou, com só as letras erradas em vermelho; o traço
 // marca uma letra que faltou.
-function conjAnswerViewHTML(given, target){
-  if (!(given || '').trim()) return '<div class="conj-answer-view is-empty" aria-label="—">—</div>';
-  const html = conjAlign(given, target).ops.map(o =>
+function conjAnswerViewHTML(given, target, status){
+  const icon = status ? `<span class="conj-ic" aria-hidden="true">${status === 'ok' ? '✓' : status === 'almost' ? '~' : '✕'}</span>` : '';
+  const cls = 'conj-answer-view' + (status ? ' is-' + status : '');
+  if (!(given || '').trim()) return `<div class="${cls} is-empty" role="img" aria-label="—">—${icon}</div>`;
+  const html = status === 'ok' ? escapeHTML(given.trim()) : conjAlign(given, target).ops.map(o =>
     o.t === 'same' ? escapeHTML(o.a)
     : o.t === 'missing' ? '<span class="conj-gap"></span>'
     : `<span class="conj-x">${escapeHTML(o.a)}</span>`).join('');
-  return `<div class="conj-answer-view" role="img" aria-label="${escapeHTML(t('feedback.label.yourAnswer') + ': ' + given)}">${html || '&nbsp;'}</div>`;
+  return `<div class="${cls}" role="img" aria-label="${escapeHTML(t('feedback.label.yourAnswer') + ': ' + given)}"><span class="conj-answer-text">${html}</span>${icon}</div>`;
 }
 
 // Texto falado de uma forma: pronome + forma (sem pronome no impératif).
@@ -9217,7 +9242,7 @@ function renderConjPracticeStep(){
       <div class="conj-field" data-tense="${tenseKey}" data-idx="${i}">
         <label>${label}</label>
         <input type="text" disabled placeholder="—">
-        <div class="expected"></div>
+        <div class="conj-side"></div>
       </div>`;
     const given = (savedAnswers[tenseKey] || [])[i] || '';
     const id = `conj-in-${tenseKey}-${i}`;
@@ -9225,21 +9250,19 @@ function renderConjPracticeStep(){
       <div class="conj-field" data-tense="${tenseKey}" data-idx="${i}">
         <label for="${id}">${label}</label>
         <input type="text" id="${id}" data-tense="${tenseKey}" data-idx="${i}" value="${escapeHTML(given)}" autocomplete="off" autocapitalize="off" spellcheck="false">
-        <div class="expected"></div>
+        <div class="conj-side"></div>
       </div>`;
     const ev = conjEvaluate(verb, tenseKey, i, given);
     const speak = audioBtnHTML(conjSpeakText(i, tenseKey, ev.accepted[0] || ''));
-    const answer = ev.status === 'ok'
-      ? `<input type="text" id="${id}" value="${escapeHTML(given)}" disabled>`
-      : conjAnswerViewHTML(given, ev.target);
-    const expectedText = ev.status === 'ok' ? '' : ev.status === 'almost'
-      ? escapeHTML(t('feedback.almostArrow', { expected: ev.display }))
-      : `→ ${escapeHTML(ev.display)}`;
+    const note = ev.otherForm ? `<span class="conj-other-form">${escapeHTML(t('fr.conj.otherForm', { form: ev.otherForm.word, tense: CONJ_TENSES.find(x => x.key === ev.otherForm.tenseKey).label }))}</span>` : '';
+    // Certa: caixa verde + ✓, áudio ao lado. Quase/errada: caixa amarela ou
+    // vermelha com as letras marcadas; embaixo, a forma certa com o áudio.
     return `
       <div class="conj-field ${ev.status}" data-tense="${tenseKey}" data-idx="${i}">
-        <label for="${id}">${label}</label>
-        ${answer}
-        <div class="expected">${expectedText ? `<span>${expectedText}</span>` : ''}${speak}</div>
+        <label>${label}</label>
+        ${conjAnswerViewHTML(given, ev.target, ev.status)}
+        <div class="conj-side">${ev.status === 'ok' ? speak : ''}</div>
+        ${ev.status === 'ok' ? '' : `<div class="expected">${ev.status === 'almost' ? `<span class="conj-tag">${escapeHTML(t('fr.conj.almost'))}</span>` : ''}<span>→ ${escapeHTML(ev.display)}</span>${speak}${note}</div>`}
       </div>`;
   };
 

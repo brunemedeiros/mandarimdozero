@@ -102,7 +102,7 @@ async function fill(page, wrongIdx){
       const list = document.getElementById('conj-tense-list');
       const items = Array.from(list.querySelectorAll('.conj-check-item'));
       const h3 = document.querySelector('.conj-select-col h3');
-      return { n: items.length, gap: getComputedStyle(list).rowGap, caps: getComputedStyle(h3).textTransform, itemH: Math.min(...items.map(i => i.getBoundingClientRect().height)) };
+      return { n: items.length, gap: getComputedStyle(list).rowGap, caps: getComputedStyle(h3).textTransform, itemH: Math.round(Math.min(...items.map(i => i.getBoundingClientRect().height))) };
     });
     L('escolha: tempos numa lista agrupada (sem espaço entre itens)', sel.n > 3 && (sel.gap === '0px' || sel.gap === 'normal'), sel);
     L('escolha: títulos sem caixa alta', sel.caps === 'none', sel.caps);
@@ -117,25 +117,23 @@ async function fill(page, wrongIdx){
       const lab = i => document.querySelector('.conj-field[data-idx="' + i + '"] label').getBoundingClientRect();
       const p = [0, 1, 2, 3, 4, 5].map(r);
       return { single: document.querySelectorAll('.conj-tense-box').length === 1, full: Math.abs(box.width - grid.width) < 2,
-        leftCol: p[0].left === p[1].left && p[1].left === p[2].left, rightCol: p[3].left === p[4].left && p[4].left === p[5].left,
-        rightOfLeft: p[3].left > p[0].right, sameRow: Math.abs(p[0].top - p[3].top) < 2 && Math.abs(p[2].top - p[5].top) < 2,
-        labelLeft: lab(0).right <= p[0].left && lab(0).top >= p[0].top - 1 && lab(0).bottom <= p[0].bottom + 1 };
+        oneCol: p.every(x => x.left === p[0].left), down: p.every((x, i) => i === 0 || x.top > p[i - 1].top),
+        labelLeft: lab(0).right <= p[0].left && Math.abs((lab(0).top + lab(0).bottom) / 2 - (p[0].top + p[0].bottom) / 2) < 6 };
     });
     L('prática: um tempo só ocupa a largura toda', lay.single && lay.full, lay);
-    L('prática: je/tu/il numa coluna, nous/vous/ils na outra, lado a lado', lay.leftCol && lay.rightCol && lay.rightOfLeft && lay.sameRow, lay);
+    L('prática: as 6 pessoas na vertical (je ... ils)', lay.oneCol && lay.down, lay);
     L('prática: pronome à esquerda do campo, na mesma linha', lay.labelLeft, lay);
 
     await fill(page, 3);
     await page.click('#conj-verify-btn');
     await page.waitForSelector('.conj-field.wrong');
-    const chk = await page.evaluate(() => {
-      // Campo errado vira a visão com as letras marcadas (não é mais um input).
-      const r = i => document.querySelector('.conj-field[data-idx="' + i + '"] :is(input, .conj-answer-view)').getBoundingClientRect();
-      return { wrong: document.querySelector('.conj-field.wrong').dataset.idx, exp: document.querySelector('.conj-field.wrong .expected').textContent,
-        aligned: Math.abs(r(0).top - r(3).top) < 2, ok: document.querySelectorAll('.conj-field.ok').length };
-    });
-    L('corrigir: erro mostra a forma certa e acertos ficam verdes', chk.wrong === '3' && chk.exp.startsWith('→') && chk.ok === 5, chk);
-    L('corrigir: a correção embaixo não desalinha je e nous', chk.aligned, chk);
+    const chk = await page.evaluate(() => ({ wrong: document.querySelector('.conj-field.wrong').dataset.idx, exp: document.querySelector('.conj-field.wrong .expected').textContent,
+      ok: document.querySelectorAll('.conj-field.ok').length,
+      okIc: document.querySelector('.conj-field.ok .conj-ic').textContent, wrongIc: document.querySelector('.conj-field.wrong .conj-ic').textContent,
+      okColor: getComputedStyle(document.querySelector('.conj-field.ok .conj-answer-view')).borderTopColor,
+      okAudio: !!document.querySelector('.conj-field.ok .conj-side .audio-btn') }));
+    L('corrigir: erro mostra a forma certa e acertos ficam verdes', chk.wrong === '3' && chk.exp.includes('→') && chk.ok === 5, chk);
+    L('corrigir: caixa certa com ✓ e áudio ao lado; errada com ✕', chk.okIc === '✓' && chk.wrongIc === '✕' && chk.okAudio, chk);
     L('zero pageerror', errors.length === 0, errors);
     await ctx.close();
   }
@@ -177,8 +175,8 @@ async function fill(page, wrongIdx){
     await page.click('#conj-verify-btn');
     await page.waitForSelector('.conj-field.wrong');
     const d = await page.evaluate(() => ({ x: Array.from(document.querySelectorAll('.conj-field.wrong .conj-x')).map(e => e.textContent).join(''),
-      view: document.querySelector('.conj-field.wrong .conj-answer-view').textContent, exp: document.querySelector('.conj-field.wrong .expected').textContent.trim(),
-      audio: document.querySelectorAll('.conj-field .expected .audio-btn').length, speak: document.querySelector('.conj-field[data-idx="3"] .audio-btn').dataset.speak,
+      view: document.querySelector('.conj-field.wrong .conj-answer-text').textContent, exp: document.querySelector('.conj-field.wrong .expected').textContent.trim(),
+      audio: document.querySelectorAll('.conj-field .audio-btn').length, speak: document.querySelector('.conj-field[data-idx="3"] .audio-btn').dataset.speak,
       bar: document.querySelector('.conj-progress-bar > i').style.width, focus: document.activeElement && document.activeElement.id }));
     check('letras erradas em vermelho só onde erra (parlez -> "ez")', d.x === 'ez' && d.view === 'parlez' && d.exp.includes('parlons'), d);
     check('áudio em cada forma depois de corrigir, com o pronome', d.audio === 6 && d.speak === 'nous parlons', d);
@@ -196,6 +194,31 @@ async function fill(page, wrongIdx){
       pl: conjExpectedInfo('aller', 'passeCompose', 3).display, assis: conjExpectedInfo("s'asseoir", 'passeCompose', 5).accepted }));
     check('passé composé com être aceita o feminino (6/6)', fem.ok === 6, fem);
     check('correção mostra allé(e) e allé(e)s; s\'asseoir sem "assiss"', fem.info === 'suis allé(e)' && fem.pl === 'sommes allé(e)s' && fem.assis.every(f => !/assiss/.test(f)), fem);
+
+    // "Quase" amarelo (só acento) x acento que muda de tempo (erro).
+    await page.evaluate(() => startConjSession(['parler'], ['passeCompose']));
+    await page.waitForSelector('.conj-field input[data-idx]');
+    await page.evaluate(() => {
+      const v = ['ai parlé', 'as parlé', 'a parle', 'avons parlé', 'avez parle', 'ont parlé'];
+      document.querySelectorAll('.conj-field input[data-idx]').forEach((inp, k) => { inp.value = v[k]; });
+    });
+    await page.click('#conj-verify-btn');
+    const q = await page.evaluate(() => {
+      const f2 = document.querySelector('.conj-field[data-idx="2"]'), f4 = document.querySelector('.conj-field[data-idx="4"]');
+      return { s2: f2.className, note: (f2.querySelector('.conj-other-form') || {}).textContent, s4: f4.className,
+        tag: (f4.querySelector('.conj-tag') || {}).textContent, ic: f4.querySelector('.conj-ic').textContent,
+        border: getComputedStyle(f4.querySelector('.conj-answer-view')).borderTopColor, quase: getComputedStyle(document.getElementById('view-conjugaison')).getPropertyValue('--conj-quase').trim(),
+        pink: getComputedStyle(document.documentElement).getPropertyValue('--imperial-gold').trim() };
+    });
+    check('"a parle" no lugar de "a parlé" é erro (parle é do présent), com aviso', /wrong/.test(q.s2) && q.note === '"parle" é do Présent.', q);
+    check('"avez parle": também conta como erro (parle é forma do présent)', /wrong/.test(q.s4), q);
+    await page.evaluate(() => startConjSession(['prendre'], ['presente']));
+    await page.waitForSelector('.conj-field input[data-idx]');
+    await page.evaluate(() => { const v = ['prends', 'prends', 'prend', 'prenons', 'prenéz', 'prennent']; document.querySelectorAll('.conj-field input[data-idx]').forEach((inp, k) => { inp.value = v[k]; }); });
+    await page.click('#conj-verify-btn');
+    const q2 = await page.evaluate(() => { const f4 = document.querySelector('.conj-field[data-idx="4"]'); return { s4: f4.className, tag: (f4.querySelector('.conj-tag') || {}).textContent, ic: f4.querySelector('.conj-ic').textContent,
+      border: getComputedStyle(f4.querySelector('.conj-answer-view')).borderTopColor }; });
+    check('"prenéz": Quase, amarelo-escuro (#B7791F), com ~ e a etiqueta', /almost/.test(q2.s4) && q2.tag === 'Quase' && q2.ic === '~' && q2.border === 'rgb(183, 121, 31)', q2);
 
     // Subjonctif com "que".
     await page.evaluate(() => startConjSession(['parler', 'avoir'], ['subjPresente']));

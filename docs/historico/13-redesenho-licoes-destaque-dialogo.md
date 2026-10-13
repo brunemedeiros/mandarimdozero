@@ -88,4 +88,21 @@ nível. Mapa da francofonia descartado. Jogos e busca de verbo ficam para as pr�
 - Textos novos (pt/en): `fr.conj.sessionSize`, `sessionForms`, `reviewTitle`, `practiceMistakes`.
 - Testes: `tests/conjugacao/test_playwright.js` 37/37 (15 novos), `fr/scripts/test_answer_validation.js` 154/154,
   i18n unit 2040/2040, i18n navegador 209/209, celular 108/108.
-- Pendente de decisão: "radical | terminação" em destaque (prévia comparativa enviada à autora).
+- "Radical | terminação" em destaque: a autora viu a prévia comparativa e decidiu NÃO adotar.
+
+## Conjugação: correção vertical e regra do "Quase" (fr, 2026-10-13)
+
+- As 6 pessoas ficam em coluna (rótulo | resposta | áudio). Cada tempo é uma caixa de 340 a 480px, centralizada
+  (vários tempos lado a lado só quando cabem). Substitui o "Um tempo por linha" da fase 1.
+- Depois de corrigir: certo = caixa verde + ✓ + alto-falante; quase = caixa amarela + "~" e etiqueta "Quase",
+  com "→ forma certa" + áudio embaixo; errado = caixa vermelha com as letras erradas marcadas + ✕, com
+  "→ forma certa" + áudio embaixo.
+- Cor do "Quase": o mesmo amarelo escuro do "parcial" dos Desafios (`--conj-quase`: #B7791F no claro, #E0A93B no
+  escuro), no lugar do rosa `--imperial-gold`. As lições (`.gram-exercise.almost`) seguem em rosa (fora do escopo).
+- Critério do "Quase": a resposta só difere da certa em acento, cedilha ou maiúscula (`normalizeLoose`). Vale meio
+  ponto e não dá XP. Regra nova: se a palavra que difere é outra forma do mesmo verbo (ex.: "a parle", "avez parle"),
+  é erro, com a nota '"parle" é do Présent.' (`conjOtherFormOf`, procura em todos os tempos na ordem do curso).
+- Textos novos (pt/en): `fr.conj.almost`, `fr.conj.otherForm`.
+- Conjugação é grátis (tudo).
+- Testes: `tests/conjugacao/test_playwright.js` 40/40, `fr/scripts/test_answer_validation.js` 154/154, i18n unit
+  2040/2040. Screenshots fr claro, escuro e celular (390px) conferidos.

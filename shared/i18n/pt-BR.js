@@ -666,6 +666,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'fr.conj.sessionForms': '≈ {n} formas para preencher',
   'fr.conj.reviewTitle': 'Formas para revisar ({n})',
   'fr.conj.practiceMistakes': 'Praticar só os que errei',
+  'fr.conj.almost': 'Quase',
+  'fr.conj.otherForm': '"{form}" é do {tense}.',
   'fr.dictation.levelReviewTitle': 'Revisão do nível {level}',
   'fr.challenges.title': 'Desafios',
   'fr.challenges.sub': 'Pratique francês de verdade: expressões, compreensão auditiva e ortografia.',

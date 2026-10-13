@@ -650,6 +650,8 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.sessionForms': '≈ {n} forms to fill in', // ALTA
   'fr.conj.reviewTitle': 'Forms to review ({n})', // ALTA
   'fr.conj.practiceMistakes': 'Practice only the ones I missed', // ALTA
+  'fr.conj.almost': 'Almost', // ALTA
+  'fr.conj.otherForm': '"{form}" is the {tense} form.', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA

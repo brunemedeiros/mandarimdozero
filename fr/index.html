@@ -4411,16 +4411,16 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 #view-conjugaison .conj-tense-grid:has(> .conj-tense-box:only-child){ grid-template-columns:minmax(0, 1fr); }
 #view-conjugaison .conj-tense-box{ padding:18px 20px 16px; box-shadow:var(--shadow-card); }
 #view-conjugaison .conj-tense-title{ text-align:left; font-size:16px; padding-bottom:10px; margin-bottom:12px; border-bottom:1px solid var(--paper-line); }
-#view-conjugaison .conj-grid{ grid-auto-flow:column; grid-template-rows:repeat(3, auto); column-gap:24px; row-gap:8px; }
-#view-conjugaison .conj-grid{ align-items:start; }
-#view-conjugaison .conj-field{ display:grid; grid-template-columns:6.4em minmax(0, 1fr); column-gap:10px; row-gap:2px; align-items:start; }
-#view-conjugaison .conj-field label{ text-align:right; font-size:14px; line-height:1.25; font-weight:700; color:var(--ink-soft); font-style:italic; padding-top:13px; }
-#view-conjugaison .conj-field .expected{ grid-column:2; min-height:0; font-size:12px; }
+/* Pessoas na vertical (je ... ils), uma coluna por tempo; linha = pronome | caixa | lado (áudio). */
+#view-conjugaison .conj-grid{ grid-template-columns:minmax(0, 1fr); row-gap:8px; }
+#view-conjugaison .conj-field{ display:grid; grid-template-columns:6.4em minmax(0, 1fr) 34px; column-gap:10px; row-gap:4px; align-items:center; }
+#view-conjugaison .conj-field label{ text-align:right; font-size:14px; line-height:1.25; font-weight:700; color:var(--ink-soft); font-style:italic; }
+#view-conjugaison .conj-field .expected{ grid-column:2 / 4; min-height:0; font-size:13px; font-weight:700; color:var(--ink); }
 #view-conjugaison .conj-field .expected:empty{ display:none; }
 #view-conjugaison .conj-field input{ font-size:15.5px; }
+#view-conjugaison .conj-side{ display:flex; align-items:center; justify-content:center; }
 @media (max-width:480px){
-  #view-conjugaison .conj-grid{ grid-auto-flow:row; grid-template-rows:none; grid-template-columns:minmax(0, 1fr); }
-  #view-conjugaison .conj-field{ grid-template-columns:5.6em minmax(0, 1fr); }
+  #view-conjugaison .conj-field{ grid-template-columns:5.6em minmax(0, 1fr) 34px; }
   #view-conjugaison .conj-tense-box{ padding:16px 14px 14px; }
 }
 
@@ -4434,19 +4434,28 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 #view-conjugaison .conj-progress-bar{ flex:1; height:6px; border-radius:99px; background:var(--paper-line); overflow:hidden; }
 #view-conjugaison .conj-progress-bar > i{ display:block; height:100%; border-radius:99px; background:var(--seal-red); transition:width .3s ease; }
 #view-conjugaison .conj-verb-nav{ grid-template-columns:minmax(0, 1fr); max-width:520px; margin-left:auto; margin-right:auto; }
-/* Um tempo por linha: a tabela precisa da largura toda (singular e plural lado a lado). */
-#view-conjugaison .conj-tense-grid{ grid-template-columns:minmax(0, 1fr); }
-#view-conjugaison .conj-tense-box[data-tense="subjPresente"] .conj-field{ grid-template-columns:8.6em minmax(0, 1fr); }
-#view-conjugaison .conj-field .expected{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-#view-conjugaison .conj-field .expected .audio-btn{ width:28px; height:28px; min-width:28px; font-size:13px; padding:0; }
+/* Tempos lado a lado (cada um uma coluna vertical); no celular, um embaixo do outro. */
+#view-conjugaison .conj-tense-grid{ grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 480px)); justify-content:center; }
+#view-conjugaison .conj-tense-box[data-tense="subjPresente"] .conj-field{ grid-template-columns:8.6em minmax(0, 1fr) 34px; }
+#view-conjugaison .conj-field .expected{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+#view-conjugaison .conj-field .audio-btn{ width:30px; height:30px; min-width:30px; font-size:13px; padding:0; }
+/* "Quase": o mesmo amarelo-escuro dos Desafios (claro / escuro). */
+#view-conjugaison{ --conj-quase:#B7791F; }
+:root[data-theme="dark"] #view-conjugaison{ --conj-quase:#E0A93B; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #view-conjugaison{ --conj-quase:#E0A93B; } }
 #view-conjugaison .conj-answer-view{
-  min-height:46px; display:flex; align-items:center; padding:11px 12px; border-radius:10px; border:2px solid var(--error-red);
-  background:color-mix(in srgb, var(--error-red) 7%, var(--paper)); font-size:15.5px; color:var(--ink); letter-spacing:.02em; overflow-wrap:anywhere;
+  position:relative; min-height:46px; display:flex; align-items:center; padding:11px 38px 11px 12px; border-radius:10px; border:2px solid var(--error-red);
+  background:color-mix(in srgb, var(--error-red) 7%, var(--paper)); font-size:15.5px; color:var(--ink); letter-spacing:.02em; overflow-wrap:break-word;
 }
 #view-conjugaison .conj-answer-view.is-empty{ color:var(--ink-soft); }
-#view-conjugaison .conj-field.almost .conj-answer-view{ border-color:var(--imperial-gold); background:color-mix(in srgb, var(--imperial-gold) 10%, var(--paper)); }
-.conj-x{ color:var(--error-red); background:color-mix(in srgb, var(--error-red) 16%, transparent); border-radius:3px; font-weight:800; text-decoration:underline wavy; text-decoration-thickness:1.5px; text-underline-offset:3px; }
-.conj-gap{ display:inline-block; width:.55em; height:1em; border-bottom:3px solid var(--error-red); vertical-align:-.15em; margin:0 1px; }
+#view-conjugaison .conj-answer-view.is-ok{ border-color:var(--jade); background:color-mix(in srgb, var(--jade) 9%, var(--paper)); }
+#view-conjugaison .conj-answer-view.is-almost{ border-color:var(--conj-quase); background:color-mix(in srgb, var(--conj-quase) 12%, var(--paper)); }
+#view-conjugaison .conj-ic{ position:absolute; right:8px; top:50%; transform:translateY(-50%); width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; line-height:1; background:var(--error-red); color:var(--on-vivid); }
+#view-conjugaison .is-ok .conj-ic{ background:var(--jade); }
+#view-conjugaison .is-almost .conj-ic{ background:var(--conj-quase); }
+#view-conjugaison .conj-tag{ font-weight:800; color:var(--conj-quase); }
+#view-conjugaison .is-almost .conj-x{ color:var(--conj-quase); background:color-mix(in srgb, var(--conj-quase) 20%, transparent); }
+#view-conjugaison .conj-other-form{ flex-basis:100%; font-weight:600; color:var(--ink-soft); font-size:12.5px; }
 #view-conjugaison .conj-accents{ display:flex; justify-content:center; margin:-6px 0 14px; }
 #view-conjugaison .conj-size-hint{ margin:2px 0 0; font-size:12px; color:var(--ink-soft); }
 #view-conjugaison .conj-size-hint:empty{ display:none; }
