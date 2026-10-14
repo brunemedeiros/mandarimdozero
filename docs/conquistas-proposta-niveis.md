@@ -113,16 +113,18 @@ pelo gênero do perfil, com "(a)" quando não informado.
 
 Decidido em 2026-10-13: unidade pulada pelo ponto de verificação conta para "Nível A1/HSK 1".
 
-Ainda com a autora: nomes e metas finais (sugestão calibrada na seção 7).
+Aprovado em 2026-10-14: todos os nomes e as metas da seção 7 (incluindo Primeiro Passo por dias de estudo) e o
+critério 8. Próximo passo: implementação (seção 6), com os ícones do Fluent (`docs/icones-fluent.md`).
 
-## 7. Metas finais sugeridas (calibradas em 2026-10-13)
+## 7. Metas finais (calibradas em 2026-10-13, aprovadas em 2026-10-14)
 
 Base: produção (fr 20 contas, zh 5) e tamanho do curso (fr 30 unidades, 82 lições, 204 palavras, 21 ditados;
 zh 18 unidades, 74 lições, 166 palavras). Números de hoje: revisões p90 ~100 (máx. 142), XP p50 ~570, p90 ~2.000
 (máx. 4.056), áudios p90 671 (máx. 1.215), lições p90 26 (máx. 74), dias ativos máx. 15, sequência máx. 2.
 
-Critério novo (8): **trilha presa ao tamanho do curso termina no fim do conteúdo e ganha níveis quando entrar o
-A2/HSK 2**; trilha sem teto (dias, XP, revisões) tem o máximo em meses de estudo.
+Critério 8 (aprovado em 2026-10-14): **o nível máximo acompanha o tamanho do curso e o conteúdo que a conquista
+mede**: trilha presa ao conteúdo termina no fim dele e ganha níveis quando entrar mais (A2/HSK 2, novos ditados);
+trilha sem teto (dias, XP, revisões) tem o máximo em meses de estudo.
 
 | Trilha | Metas sugeridas | Mudou por quê |
 |---|---|---|

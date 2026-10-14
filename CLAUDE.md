@@ -94,7 +94,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - Todos os cartões antigos já têm Deck (migração de 2026-10-07). Regra "1 professora por aluno por idioma" ainda não imposta no banco.
 - Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
 - 075/076 (papéis, permissões, regras da professora) na produção; telas novas (painéis Admin x Professora, Planos, Minhas aulas) na branch, não publicadas. Plano: 1) papel Professora, 2) Fase K final, 3) perfil privado, 4) mural -- `docs/plano-professora-privacidade.md`.
-- 086 (amigos: foguinho, marcos de sequência, parabéns) aplicada no Staging e na produção (2026-10-13). Critério das conquistas
-  (o que fica e o que recebe parabéns) pausado para a autora: `docs/conquistas-analise.md`.
+- 086 (amigos: foguinho, marcos de sequência, parabéns) aplicada no Staging e na produção (2026-10-13). Conquistas com níveis
+  aprovadas (2026-10-14), implementação pendente: `docs/conquistas-proposta-niveis.md`. Ícones: Fluent Emoji, `docs/icones-fluent.md`.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.
