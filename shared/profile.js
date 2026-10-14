@@ -44,7 +44,8 @@ let OTHER_LANGUAGES_RAW_CACHE = null;
 // shared/language-switcher.js): renderização consistente em qualquer
 // navegador/SO, sem depender da fonte de emoji do sistema ter um glifo
 // de coroa "bonito o suficiente".
-const FOUNDER_CROWN_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Coroa de fundadora"><path d="M3,18 L5.5,7 L9,13 L12,5 L15,13 L18.5,7 L21,18 Z" fill="#F0BF3A" stroke="#B8860B" stroke-width="0.6" stroke-linejoin="round"/><rect x="2.5" y="17" width="19" height="3" rx="1.2" fill="#E0A825" stroke="#B8860B" stroke-width="0.4"/><circle cx="5.5" cy="7.2" r="1.15" fill="#D6483A"/><circle cx="12" cy="5.2" r="1.3" fill="#3D6FBF"/><circle cx="18.5" cy="7.2" r="1.15" fill="#3F8F5C"/><circle cx="12" cy="18.5" r="1" fill="#D6483A"/></svg>';
+// Coroa da Fundadora: Fluent Emoji (troca geral de ícones, docs/icones-fluent.md). Nome mantido por compatibilidade.
+const FOUNDER_CROWN_SVG = '<img src="../shared/icons/fluent/1f451.svg" alt="" width="16" height="16" style="display:block;width:16px;height:16px" role="img" aria-label="Coroa de fundadora">';
 
 // "Beta tester" = qualquer conta criada antes do lançamento deste sistema
 // de badges -- ou seja, todo mundo que já estava usando o app e ajudando a

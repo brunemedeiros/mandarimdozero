@@ -24,9 +24,24 @@ fr/, zh/, shared/ (inclui i18n pt-BR/en), páginas iniciais e modelos de notific
 - Push e assunto de e-mail são texto: lá o emoji fica. Reações do Parabéns e `badge_catalog.icon` estão gravados como
   emoji no banco: o site troca na hora de mostrar, sem mudar dado.
 
-## Plano de implementação (não iniciado)
+## Implementado (2026-10-14, autorizado pela autora: "pode fazer")
 
-1. `shared/icons/fluent/` com os SVGs usados + LICENSE; `shared/icons.js` com o mapa emoji → arquivo e uma função que
-   troca emoji por `<img>` ao renderizar (textos e conteúdo continuam escritos com emoji).
-2. Trocar menus, conquistas e telas; seletor do Fluent em Admin › Conquistas no lugar do campo livre.
-3. Service worker guarda os SVGs; validar fr/zh × claro/escuro. Grátis x Premium: tudo grátis.
+- `shared/emoji-icons.js` (fr, zh e página inicial): troca, na hora de mostrar, cada emoji do mapa por
+  `<span class="emo" role="img" aria-label="🔥">🔥</span>`, com o SVG de fundo e o caractere transparente. Por isso
+  textos, i18n e conteúdo continuam escritos com emoji, e textContent, copiar/colar e leitor de tela não mudam.
+  Também vale para o que aparece depois (avisos, telas novas), por MutationObserver.
+  - Não mexe em campo de texto, `<code>`/`<pre>`, `<svg>`, title/placeholder/aria, push do celular e e-mail.
+  - Emoji fora do mapa fica como está. Para desligar num trecho: `data-no-emoji-icons`.
+- Arquivos: `shared/icons/fluent/` (200 SVGs, cerca de 3,5 MB, cada um baixa só quando aparece; LICENSE MIT) e bandeiras
+  próprias em `shared/icons/flags/` (fr, br, pt, cn, us).
+- Menus do celular, lateral e abas do topo: imagens do Fluent. Ficaram como estavam o "Mais" (três pontinhos) e o
+  botão de recolher a barra.
+  - Ícones: Estudo 📚, Revisão 📇, Conjugação ✍️, Desafios 🎯, Hanzi 🀄, Perfil 🧑, Ranking 🏆,
+    Configurações ⚙️, Aluno 🎒, Professora 🧑‍🏫, Admin 🛠️.
+- Ajustes sobre a auditoria:
+  - 👤 (silhueta, cinza escuro) virou 🧑 (Pessoa), porque sumia no tema escuro;
+  - 🈺 virou 🀄 nas lições de Hanzi;
+  - a coroa da Fundadora virou a do Fluent.
+- Dado: `badge_catalog.icon` do Pioneiro/a mudou de 🌱 para 🚀 na produção (2026-10-14; no Staging essa linha não existe).
+- Testes: `tests/icones/test_playwright.js`.
+- Falta: em Admin › Conquistas, trocar o campo livre de emoji por um seletor só com os ícones do mapa.

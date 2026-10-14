@@ -381,7 +381,7 @@ window.I18N_CATALOG['en'] = {
   'zh.toast.operaAudioFailed': '🔇 Opera couldn\'t play this audio', // ALTA
   'zh.toast.storyDone': 'Story completed! 🎉', // ALTA
   'zh.toast.unitDone': 'Unit completed! 🏮', // ALTA
-  'zh.toast.hanziLessonDone': 'Hanzi lesson completed! 🈺', // ALTA
+  'zh.toast.hanziLessonDone': 'Hanzi lesson completed! 🀄', // ALTA
   'zh.review.cloze.placeholder': 'Type the missing pinyin', // ALTA
   'zh.review.typeAnswer.placeholder': 'Type the answer in pinyin', // ALTA
   'zh.review.match.pairs': 'Pairs: {done}/{total}', // ALTA
