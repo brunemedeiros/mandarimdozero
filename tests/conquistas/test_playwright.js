@@ -76,7 +76,11 @@ async function setup(page, lang){
       { user_id: 'me', language_app_key: 'frances', badge_id: 'streak_7' },
       { user_id: 'me', language_app_key: 'frances', badge_id: 'multitasker' },
       { user_id: 'me', language_app_key: 'mandarim', badge_id: 'unit_1' },
+      { user_id: 'me', language_app_key: 'frances', badge_id: 'podium.1' },
     ];
+    // Pódio (092): 2 semanas em 1º; o nível 1 já estava gravado, então abrir o site não comemora de novo.
+    window.__PODIUM = 2;
+    window.__RPC.my_podium_weeks = () => window.__PODIUM;
     const days = ['2026-10-03', '2026-10-04', '2026-10-06', '2026-10-07', '2026-10-08', '2026-10-10', '2026-10-12', '2026-10-13'];
     STATE.activityLog = Object.fromEntries(days.map(d => [d, 1]));
     STATE.totalReviews = 120; STATE.xp = 2100; STATE.streak = 2; STATE.totalAudioPlays = 40;
@@ -111,6 +115,8 @@ async function runFr(browser, port){
   check('fr: Desafios 12 concluídos (lista ainda não carregada) nível 1', await levelOf(page, 'challenge') === 1);
   check('fr: Ditado 2 (90%+) nível 0', await levelOf(page, 'dictation') === 0);
   check('fr: Amigos (2 aceitos, pendente não conta) nível 1', await levelOf(page, 'friends') === 1);
+  await page.waitForFunction(() => PODIUM_WEEKS !== null, null, { timeout: 5000 });
+  check('fr: Pódio (2 semanas) nível 1', await levelOf(page, 'podium') === 1);
   check('fr: unit_1 do zh não vale no fr (curso)', await levelOf(page, 'course1') === 2);
   const ids = await page.evaluate(() => [...earnedBadgeIds]);
   check('fr: earnedBadgeIds tem review.1 e review.2', ids.includes('review.1') && ids.includes('review.2'));
@@ -128,7 +134,7 @@ async function runFr(browser, port){
   await page.evaluate(() => switchTab('progress'));
   await page.waitForTimeout(300);
   const cards = await page.$$eval('#badge-grid .track-card', els => els.map(e => e.dataset.track));
-  check('fr: 14 trilhas no Progresso (inclui Ditado e Desafios)', cards.length === 14, cards);
+  check('fr: 15 trilhas no Progresso (inclui Ditado, Desafios e Pódio)', cards.length === 15, cards);
   check('fr: clássica Multitarefa aparece', await page.$('#badge-grid [data-track-chip="multitasker"]') !== null);
   const reviewCard = await page.$eval('#badge-grid .track-card[data-track="review"]', e => e.innerText);
   check('fr: cartão Revisão mostra nível, nome neutro e barra', /Nível 2 de 4/.test(reviewCard) && /Revisor\(a\) Júnior/.test(reviewCard) && /120\/200/.test(reviewCard) && /Faça 200 revisões/.test(reviewCard), reviewCard);
@@ -152,6 +158,11 @@ async function runFr(browser, port){
   check('fr: masculino vira Revisor Sênior', await page.evaluate(() => badgeTrackViews(STATE).find(v => v.id === 'review').name) === 'Revisor Sênior');
   await page.evaluate(() => { PROFILE_PRIVATE_CACHE = { gender: 'other' }; });
   check('fr: outro vira Revisor(a) Sênior', await page.evaluate(() => badgeTrackViews(STATE).find(v => v.id === 'review').name) === 'Revisor(a) Sênior');
+  // Pódio: semana fechada em 1º sobe o nível e comemora (nome no gênero do perfil).
+  await page.evaluate(async () => { document.querySelectorAll('.badge-unlock-toast').forEach(e => e.remove()); PROFILE_PRIVATE_CACHE = { gender: 'feminine' }; window.__PODIUM = 5; await loadPodiumWeeks(); });
+  await page.waitForFunction(() => [...document.querySelectorAll('.badge-unlock-toast')].some(e => /Dona da Semana/.test(e.innerText)), null, { timeout: 15000 });
+  check('fr: Pódio 5 semanas comemora "Dona da Semana"', true);
+  await page.evaluate(() => { PROFILE_PRIVATE_CACHE = { gender: 'other' }; });
 
   // 5. Perfil: vitrine com uma medalha por trilha ganha
   await page.evaluate(() => switchTab('profile'));
@@ -215,7 +226,7 @@ async function runZh(browser, port){
   await page.waitForTimeout(300);
   const courseCard = await page.$eval('#badge-grid .track-card[data-track="course1"]', e => e.innerText);
   check('zh: cartão cita HSK 1', /Nível HSK 1/.test(courseCard) && /Metade do HSK 1/.test(courseCard), courseCard);
-  check('zh: 12 trilhas', (await page.$$('#badge-grid .track-card')).length === 12);
+  check('zh: 13 trilhas (com Pódio)', (await page.$$('#badge-grid .track-card')).length === 13);
   check('zh: sem erros de página', errors.length === 0, errors);
   await ctx.close();
 }

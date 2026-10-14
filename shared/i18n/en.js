@@ -2177,6 +2177,14 @@ window.I18N_CATALOG['en'] = {
   'badge.track.challenge.3': 'Unbeatable', // ALTA
   'badge.track.challenge.goal': 'Finish {n} challenges', // ALTA
   'badge.track.challenge.goal.3': 'Finish every challenge', // ALTA
+  'badge.track.podium.title': 'Podium', // ALTA
+  'badge.track.podium.1': 'Top of the Podium', // ALTA
+  'badge.track.podium.2': 'Champion of the Week', // ALTA
+  'badge.track.podium.2.f': 'Champion of the Week', // ALTA
+  'badge.track.podium.2.m': 'Champion of the Week', // ALTA
+  'badge.track.podium.3': 'Dynasty', // ALTA
+  'badge.track.podium.goal': 'Finish {n} weeks in 1st place among your friends', // ALTA
+  'badge.track.podium.goal.1': 'Finish a week in 1st place among your friends', // ALTA
   'badge.track.friends.title': 'Friends', // ALTA
   'badge.track.friends.1': 'First Friend', // ALTA
   'badge.track.friends.2': 'Study Crew', // ALTA

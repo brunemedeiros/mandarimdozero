@@ -55,6 +55,18 @@ id no formato novo, nunca `friends.*`); `friends_badge_feed(p_limit)`. Sem DROP.
 
 ## Fora desta entrega
 
-- Trilha **Pódio** (semanas em 1º entre amigos): o banco não guarda o histórico semanal de vencedores; precisa de
-  migration própria.
+- (Feito depois do PR #313, ver abaixo) Trilha **Pódio**.
 - Pioneiro/a com foguete: o ícone está em `badge_catalog` na produção (dado); muda junto com a troca geral de ícones.
+
+## Pódio (depois do PR #313, 2026-10-14)
+
+- Trilha `podium` (da conta): 1 · 5 · 10 semanas fechadas em 1º lugar entre os amigos. Nomes: Topo do Pódio · Quem Manda
+  na Semana (Dona/Dono da Semana) · Reinado ✨. Ícone: troféu (Fluent `1f3c6`). Parabéns só no Reinado (máximo).
+- Sem tabela nova: `my_podium_weeks()` (migration `092_podium_weeks.sql`) conta as semanas fechadas em `weekly_xp`
+  (idiomas somados, como o Ranking de Amigos). Só vale amigo que já era amigo no fim da semana; empate não conta;
+  precisa de pelo menos 1 amigo com XP. Nível que sobe aqui comemora (é uma semana que fechou); o que já estava
+  gravado não repete.
+- Testes: catálogo 71/71, navegador 66/66, SQL `tests/conquistas/run.sh` 31/31 (6 do Pódio), Amigos 210/210,
+  `test_badges_i18n` 14/14, `test_conquistas_conta` 40/40, i18n 2034/2034.
+- 092: Staging e produção em 2026-10-14 (produção a pedido da autora, versão `20261014200735`; anon sem EXECUTE). Na produção hoje há 0 amizades
+  aceitas, então ninguém começa com nível de Pódio.

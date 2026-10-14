@@ -151,6 +151,7 @@ function seedEarnedBadges(){
     upsertEarnedBadges([...earnedBadgeIds], { backfill: true });
     if (typeof renderProgressView === 'function' && document.getElementById('badge-grid')) renderProgressView();
     if (typeof loadFriendsAcceptedCount === 'function') loadFriendsAcceptedCount();
+    if (typeof loadPodiumWeeks === 'function') loadPodiumWeeks();
   });
   // Backfill/sincronização: garante que a tabela pública earned_badges
   // reflita tudo que já era verdade antes desta feature existir, ou que

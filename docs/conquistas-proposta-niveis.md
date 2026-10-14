@@ -140,7 +140,7 @@ trilha sem teto (dias, XP, revisões) tem o máximo em meses de estudo.
 | Gabaritou | 1 · 5 · 10 · todos de um nível ✨ | 3 e 5 ficavam muito perto (há 1 ponto de verificação por unidade) |
 | Ditado (fr) | 5 · 25 · 100 ✨ ditados com 90% ou mais (repetir conta) | igual; só 21 ditados, então repetir tem de contar |
 | Desafios (fr) | 10 · 50 · 200 ✨ | igual |
-| Pódio | 1 · 5 · 10 ✨ semanas em 1º | igual |
+| Pódio | 1 · 5 · 10 ✨ semanas em 1º | igual (implementada depois do PR #313, migration 092) |
 | Amigos | 1 · 3 · 10 ✨ | igual |
 
 
