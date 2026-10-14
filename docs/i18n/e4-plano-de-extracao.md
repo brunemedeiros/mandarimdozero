@@ -53,3 +53,8 @@ O lote 4 inclui o que toca salvar e carregar: só entra com teste de ida e volta
 - Ficaram de fora de propósito `renderSettingsView`, `switchSettingsSection` e `isAdminUser` (Configurações e painel estão sendo editados por outras sessões) e as constantes/`let` idênticas (só funções neste lote).
 - Ferramenta: `scripts/e4-extract.js` (copia o texto exato; se o comentário difere entre fr e zh, fica o mais longo; aborta se o texto de uma função diferir ou se o conjunto de declarações de topo não bater).
 - Bateria completa (115 suítes) antes e depois: as mesmas 14 falhas de antes; a `test_i18n_unit` precisou ignorar os `<script>` novos na comparação de HTML (ajustado); `fase-j` falhou uma vez no lote e passou 62/62 em duas rodadas isoladas (instável).
+
+### Lote 2 (2026-10-14): feito, na branch, **sem PR**
+- 42 funções idênticas de revisão e decks (fila de revisão, sessão, resumos, filtros por tag e origem, humor/ajuda de cartão, missões de revisão, cartões de professora e próprios) para `shared/core/revisao-decks.js` (cerca de 800 linhas com comentários). Em 13 funções o comentário diferia entre fr e zh; ficou o mais longo (o outro está no histórico do git).
+- Os testes que extraem funções do TEXTO do `app.js` (12 arquivos, harness e unitários) passaram a usar `tests/e4/app-source.js` (`withCore`), que acrescenta `shared/core/*.js` ao texto. Novo `tests/e4/test_core_carregado.js`: o core está carregado antes do `app.js`, todas as funções existem como função global em fr e zh e nenhuma foi repetida no `app.js`.
+- Bateria completa (119 suítes) antes: 15 falhas. Depois do lote, 23 suítes novas falharam só por lerem o `app.js` sem o core; depois do ajuste, as falhas voltaram às mesmas 15 de antes (nenhuma nova).
