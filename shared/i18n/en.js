@@ -2772,6 +2772,7 @@ window.I18N_CATALOG['en'] = {
   'mural.join.done': 'Done! You are in the {classroom} class 🏫', // ALTA
   'mural.join.already': 'You are already in this class.', // ALTA
   'mural.err.generic': 'That did not work. Try again.', // ALTA
+  'mural.err.has_class_logs': 'This class has lessons logged, so it can\'t be deleted. The lessons stay in the history.', // ALTA
   'mural.err.not_authorized': 'You do not have access to this board.', // ALTA
   'mural.err.not_member': 'This student is not in the class.', // ALTA
   'mural.err.empty': 'Write something or attach a file.', // ALTA

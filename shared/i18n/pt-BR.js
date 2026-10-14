@@ -2788,6 +2788,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'mural.join.done': 'Pronto! Você está na turma {classroom} 🏫',
   'mural.join.already': 'Você já está nessa turma.',
   'mural.err.generic': 'Não deu certo agora. Tente de novo.',
+  'mural.err.has_class_logs': 'Essa turma tem aulas registradas, então não pode ser apagada. As aulas ficam no histórico.',
   'mural.err.not_authorized': 'Você não tem acesso a este mural.',
   'mural.err.not_member': 'Esse aluno não está na turma.',
   'mural.err.empty': 'Escreva algo ou anexe um arquivo.',
