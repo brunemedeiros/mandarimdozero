@@ -37,7 +37,7 @@
 
 /* Barra de ferramentas: busca, filtros e interruptores acima de uma tabela. */
 .painel .p-ferramentas{ display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
-.painel .p-ferramentas > *{ margin: 0; width: auto; }
+.painel .p-ferramentas.p-ferramentas > *{ margin: 0; width: auto; } /* classe dobrada: o Pico põe margem embaixo em campos */
 .painel .p-ferramentas .p-cresce{ flex: 1 1 220px; min-width: 180px; }
 .painel .p-ferramentas label{ display: flex; align-items: center; gap: .5rem; }
 
@@ -253,6 +253,7 @@
 .painel .p-menunav > ul{ display: flex; flex-wrap: wrap; align-items: center; gap: .15rem; margin: 0; padding: 0; list-style: none; }
 .painel .p-menunav > ul > li{ position: relative; display: flex; margin: 0; padding: 0; list-style: none; }
 .painel .p-menunav :is(summary, a.p-menunav-link){ display: inline-flex; align-items: center; gap: .3rem; height: 2.4rem; margin: 0; padding: 0 .85rem; border: 0; border-radius: 10px; background: transparent; color: var(--p-tinta); font-size: .92rem; font-weight: 700; text-decoration: none; cursor: pointer; list-style: none; }
+.painel .p-menunav details{ margin: 0; } /* o Pico dá margem embaixo ao details e desalinha o link simples */
 .painel .p-menunav :is(summary, a){ margin: 0; } /* idem: margem negativa do Pico em nav */
 .painel .p-menunav summary::-webkit-details-marker{ display: none; }
 .painel .p-menunav details > summary::after{ content: ""; display: inline-block; float: none; flex: none; width: .45rem; height: .45rem; margin: 0 0 .2rem .25rem; border: 0; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; background: none; background-image: none; opacity: .7; transform: rotate(45deg); transition: transform .15s ease; }

@@ -58,10 +58,27 @@ const ANALYTICS_STATE = {
 // refazer a mesma busca. Limpo a cada renderAdminAnalyticsView() novo.
 const ANALYTICS_CURRENT = { stats: null, activeUserIds: [], sinceIso: null, untilIso: null };
 const ANALYTICS_LAZY_CACHE = {};
-// Tetos de linhas das consultas (o limite do PostgREST é 1000 por padrão; estas pedem mais). Quando uma consulta volta com o teto
-// cheio, os números dessa parte podem estar abaixo do real: a tela avisa (ANALYTICS_TRUNCATED) em vez de mostrar como se fosse completo.
-const ANALYTICS_EVENT_LIMIT = 5000;
-const ANALYTICS_TECH_LIMIT = 2000;
+// O Supabase devolve no máximo 1000 linhas por pedido, mesmo se a consulta pedir mais. Por isso as consultas buscam em páginas de 1000
+// até acabar ou até o teto abaixo. Se bater no teto, os números dessa parte podem estar abaixo do real: a tela avisa (ANALYTICS_TRUNCATED)
+// em vez de mostrar como se fosse completo.
+const ANALYTICS_PAGE_SIZE = 1000;
+const ANALYTICS_EVENT_LIMIT = 50000;
+const ANALYTICS_TECH_LIMIT = 10000;
+
+// make() devolve uma consulta nova a cada chamada (o construtor do Supabase não pode ser reaproveitado entre páginas).
+async function analyticsFetchPaged(make, cap){
+  const rows = [];
+  while (rows.length < cap){
+    const from = rows.length;
+    const want = Math.min(ANALYTICS_PAGE_SIZE, cap - from);
+    const { data, error } = await make().range(from, from + want - 1);
+    if (error) return { data: rows, error, truncated: false };
+    const page = data || [];
+    rows.push(...page);
+    if (page.length < want) return { data: rows, error: null, truncated: false };
+  }
+  return { data: rows, error: null, truncated: true };
+}
 const ANALYTICS_TRUNCATED = { main: false, retencao: false, tecnologia: false };
 
 
@@ -104,6 +121,7 @@ function analyticsResolvePeriod(){
 // o teto de linhas: assim todo dia dentro do período fica completo, em vez
 // de truncar no meio de um dia se o teto de linhas fosse o único corte.
 async function fetchUsageEventsForWindow(sinceIso, untilIso){
+  const make = () => {
   let q = supabaseClient
     .from('usage_events')
     .select('user_id, language_app_key, event_type, event_name, meta, created_at, session_id, device_type, browser, os')
@@ -120,16 +138,18 @@ async function fetchUsageEventsForWindow(sinceIso, untilIso){
     .gte('created_at', sinceIso)
     .lte('created_at', untilIso)
     .order('created_at', { ascending: false })
-    .limit(ANALYTICS_EVENT_LIMIT);
+    .order('id', { ascending: false });
   if (ANALYTICS_STATE.languageFilter !== 'all'){
     q = q.eq('language_app_key', ANALYTICS_STATE.languageFilter);
   }
   if (ANALYTICS_STATE.deviceFilter !== 'all'){
     q = q.eq('device_type', ANALYTICS_STATE.deviceFilter);
   }
-  const { data, error } = await q;
+  return q;
+};
+  const { data, error, truncated } = await analyticsFetchPaged(make, ANALYTICS_EVENT_LIMIT);
   if (error){ console.error('Erro ao carregar métricas de uso:', error); return []; }
-  if ((data || []).length >= ANALYTICS_EVENT_LIMIT) ANALYTICS_TRUNCATED.main = true;
+  ANALYTICS_TRUNCATED.main = truncated;
   return data || [];
 }
 
@@ -189,6 +209,7 @@ async function fetchAllStudentProfilesForRetention(){
 }
 
 async function fetchAllStudentEventsForRetention(){
+  const make = () => {
   let q = supabaseClient
     .from('usage_events')
     .select('user_id, created_at')
@@ -200,12 +221,14 @@ async function fetchAllStudentEventsForRetention(){
     .neq('event_type', 'technical_error')
     .neq('event_type', 'technical_perf')
     .order('created_at', { ascending: false })
-    .limit(ANALYTICS_EVENT_LIMIT);
+    .order('id', { ascending: false });
   if (ANALYTICS_STATE.languageFilter !== 'all') q = q.eq('language_app_key', ANALYTICS_STATE.languageFilter);
   if (ANALYTICS_STATE.deviceFilter !== 'all') q = q.eq('device_type', ANALYTICS_STATE.deviceFilter);
-  const { data, error } = await q;
+  return q;
+};
+  const { data, error, truncated } = await analyticsFetchPaged(make, ANALYTICS_EVENT_LIMIT);
   if (error){ console.error('Erro ao carregar eventos para retenção:', error); return []; }
-  ANALYTICS_TRUNCATED.retencao = (data || []).length >= ANALYTICS_EVENT_LIMIT;
+  ANALYTICS_TRUNCATED.retencao = truncated;
   return data || [];
 }
 
@@ -242,6 +265,7 @@ async function fetchBadgeGrantsInWindow(sinceIso, untilIso){
 // Mesmo actor_type (user/student) (a atividade de teste da autora tampouco
 // deve contar como "alunos tendo problemas técnicos").
 async function fetchTechnicalEventsForWindow(sinceIso, untilIso){
+  const make = () => {
   let q = supabaseClient
     .from('usage_events')
     .select('user_id, event_type, event_name, meta, created_at')
@@ -250,12 +274,14 @@ async function fetchTechnicalEventsForWindow(sinceIso, untilIso){
     .gte('created_at', sinceIso)
     .lte('created_at', untilIso)
     .order('created_at', { ascending: false })
-    .limit(ANALYTICS_TECH_LIMIT);
+    .order('id', { ascending: false });
   if (ANALYTICS_STATE.languageFilter !== 'all') q = q.eq('language_app_key', ANALYTICS_STATE.languageFilter);
   if (ANALYTICS_STATE.deviceFilter !== 'all') q = q.eq('device_type', ANALYTICS_STATE.deviceFilter);
-  const { data, error } = await q;
+  return q;
+};
+  const { data, error, truncated } = await analyticsFetchPaged(make, ANALYTICS_TECH_LIMIT);
   if (error){ console.error('Erro ao carregar eventos técnicos:', error); return []; }
-  ANALYTICS_TRUNCATED.tecnologia = (data || []).length >= ANALYTICS_TECH_LIMIT;
+  ANALYTICS_TRUNCATED.tecnologia = truncated;
   return data || [];
 }
 

@@ -140,3 +140,9 @@ Decisões da autora: janela do Design System para editar e ver detalhe; confirma
 ## Guia de estilo e antes e depois (2026-10-13)
 - Guia (`shared/painel/guia-de-estilo.html`): seção nova "Peças do painel de Admin" com 9 exemplos (indicadores com variação, barras, funil, filtros em linha e interruptor, busca de conta e ficha, matriz de permissões, cartão de badge, variante/material com ícone, detalhe de report). Artifact do guia republicado (mesma URL).
 - Páginas antes e depois: `docs/fase-2-professora/cartoes-antes-depois.html`, `material-antes-depois.html`, `docs/fase-3-admin/admin-antes-depois.html` (cada aba, Francês claro e Mandarim escuro). As capturas "antes" foram geradas de worktrees dos commits anteriores (92056f7 para o Admin, 8513499 para o Material) com os mesmos dados de exemplo.
+
+## Ajustes pós-Fase 3 (2026-10-14)
+
+- **Alinhamento:** no guia, o link "Ranking" do menu com painéis ficava 6px acima de Professora/Admin (o Pico dá margem embaixo ao `details`), e o campo de busca da barra de ferramentas ficava 6px acima do seletor (margem embaixo do `input`). Corrigido em `painel-componentes.css`; teste `tests/painel-ds/test_alinhamento.js` (falhava antes, 4/4 depois).
+- **Analytics sem corte:** o Supabase devolve no máximo 1000 linhas por pedido, então o teto antigo de 5000 podia cortar em 1000 sem avisar. Agora `analyticsFetchPaged` busca páginas de 1000 até o teto de 50000 (técnicos 10000) e só então mostra o aviso. Decisão: sem migration/RPC; um resumo em SQL exigiria reescrever os cálculos testados e só vale se o volume passar do teto.
+- Textos do Analytics em pt-BR conferidos: não há "pra" nem "--" (só no en.js, em inglês), nada a trocar.

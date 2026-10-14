@@ -113,10 +113,15 @@ const ANTES = () => {
     L('mudar o filtro limpa o cache: ao reabrir a Retenção, busca de novo', await (async () => { const n0 = await reads('usage_events'); await go('retencao'); return (await reads('usage_events')) > n0; })());
     await go('resumo');
 
-    // ---- aviso de lista cortada ----
-    await p.evaluate(() => { window.__T.usage_events = window.__T.usage_events.concat(Array.from({ length: 5100 }, (_, i) => ({ user_id: 'u' + (i % 7), actor_type: 'user', language_app_key: 'frances', event_type: 'tab_switch', event_name: 'path', meta: {}, created_at: new Date(Date.now() - 86400000).toISOString(), session_id: null, device_type: null, browser: null, os: null }))); });
+    // ---- lista grande: busca em páginas; aviso só ao passar do teto ----
+    const linhas = n => Array.from({ length: n }, (_, i) => ({ user_id: 'u' + (i % 7), actor_type: 'user', language_app_key: 'frances', event_type: 'tab_switch', event_name: 'path', meta: {}, created_at: new Date(Date.now() - 86400000).toISOString(), session_id: null, device_type: null, browser: null, os: null }));
+    await p.evaluate(l => { window.__T.usage_events = window.__T.usage_events.concat(l); }, linhas(5100));
+    const antes5k = await reads('usage_events');
     await render(async () => { await p.selectOption('#analytics-period-select', 'last30'); });
-    L('consulta no teto de 5000: aparece o aviso de números possivelmente abaixo do real', (await p.$$eval('[data-tan="pagina"] > [data-analytics-cortado]', l => l.length)) === 1 && (await p.innerText('[data-analytics-cortado]')).includes('5000'));
+    L('5100 eventos: vem tudo em páginas de 1000 e não aparece aviso', (await p.$$eval('[data-analytics-cortado]', l => l.length)) === 0 && (await reads('usage_events')) - antes5k >= 6, [await reads('usage_events') - antes5k]);
+    await p.evaluate(l => { window.__T.usage_events = window.__T.usage_events.concat(l); }, linhas(45000));
+    await render(async () => { await p.selectOption('#analytics-period-select', 'last7'); await p.selectOption('#analytics-period-select', 'last30'); });
+    L('passou de 50000: aparece o aviso de números possivelmente abaixo do real', (await p.$$eval('[data-tan="pagina"] > [data-analytics-cortado]', l => l.length)) === 1 && (await p.innerText('[data-analytics-cortado]')).includes('50000'));
     await p.evaluate(() => { window.__T.usage_events = window.__T.usage_events.filter(e => e.event_name !== 'path' || e.event_type !== 'tab_switch'); });
     await render(async () => { await p.selectOption('#analytics-period-select', 'last7'); await p.selectOption('#analytics-period-select', 'last30'); });
     L('abaixo do teto o aviso some', (await p.$$eval('[data-analytics-cortado]', l => l.length)) === 0);
