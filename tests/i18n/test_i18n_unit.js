@@ -262,6 +262,28 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
         // perfil privado (2026-10-12): texto novo da chave "Perfil público", mudança deliberada
         .replace('Ligado: quem tem conta vê sua foto, seu progresso e seus Decks públicos. Desligado: só amigos e sua professora veem; os outros veem só nome, @ e badges, e só te acham pelo @ exato.', 'Deixa seu nome, badges, progresso e cartões próprios visíveis a quem tiver o link do seu perfil.');
     };
+    // Mural e painel Aluno (087, 2026-10-13/14): CSS, views, abas e itens de menu novos, mudança deliberada.
+    // Volta o HTML atual para a forma de antes (Minhas aulas e Material de apoio como telas próprias).
+    const muralBlocks = (h) => {
+      const c1 = h.indexOf('/* Mural da professora (087, shared/mural.js) */\n');
+      if (c1 > 0) h = h.slice(0, c1) + h.slice(h.indexOf('/* K.10:', c1));
+      h = h.replace(/      <button class="tab-btn student-only-nav"[\s\S]*?<\/button>\n/, '')
+        .replace(/      <button class="deck-topbar-btn"[^\n]*data-teacher-section="mural"[^\n]*\n/, '')
+        .replace('    <div id="admin-mural-content" style="display:none;"></div>\n', '')
+        .replace(/<script src="..\/shared\/mural\.js"><\/script>\n/, '');
+      const s1 = h.indexOf('  <!-- ===== ALUNO (vínculo ativo com professora)');
+      if (s1 > 0){
+        const end = '<div id="support-materials-content" style="display:none;"></div>\n  </div>\n';
+        const s2 = h.indexOf(end, s1) + end.length;
+        h = h.slice(0, s1) + '  <!-- ===== MINHAS AULAS (aluno com vínculo ativo; só leitura, get_my_class_logs) ===== -->\n  <div class="view panel-view" id="view-my-class-logs">\n    <div class="path-header">\n      <h2 data-i18n="myClassLogs.title">Minhas aulas</h2>\n      <p data-i18n="myClassLogs.sub">O que você trabalhou em cada aula com sua professora.</p>\n    </div>\n    <div id="my-class-logs-content"></div>\n  </div>\n' + h.slice(s2);
+        const before = lang === 'zh' ? '  <!-- ===== HANZI (trilha de caracteres) ===== -->' : '  <!-- ===== DITADOS ===== -->';
+        h = h.replace(before, '  <!-- ===== MATERIAL DE APOIO (Fase 8b, aberta pra qualquer conta -- só\n       leitura: quem envia é a professora, ver Painel de Admin) ===== -->\n  <div class="view" id="view-support-materials">\n    <div class="path-header">\n      <h2 data-i18n="menu.supportMaterials">📚 Material de apoio</h2>\n      <p data-i18n="ui.materials.sub">Resumos, links e arquivos que sua professora compartilhou com você.</p>\n    </div>\n    <div id="support-materials-content"></div>\n  </div>\n\n' + before);
+        h = h.replace(/  <button class="user-dropdown-item student-teacher-nav mais-extra-tab" id="student-panel-btn"[^\n]*\n/, '  <button class="user-dropdown-item student-teacher-nav" id="my-class-logs-btn" style="display:none;" data-i18n="myClassLogs.menu">📝 Minhas aulas</button>\n  <button class="user-dropdown-item student-teacher-nav" id="support-materials-btn" style="display:none;" data-i18n="menu.supportMaterials">📚 Material de apoio</button>\n');
+        h = h.replace(/\n\n\n(  <!-- ===== (MEUS CARTÕES|MATERIAL DE APOIO|HANZI))/g, '\n\n$1');
+      }
+      return h;
+    };
+    curClean = muralBlocks(curClean);
     curClean = panelBlocks(curClean);
     const p = panelBlocks(cleanBlocks(p0));
     // Com a branch do redesenho (PREV3) mesclada, a referência é o merge de 3 vias
