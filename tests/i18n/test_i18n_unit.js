@@ -262,6 +262,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
         .replace(/  <button class="user-dropdown-item (student-teacher-nav|teacher-only-nav mais-extra-tab)" id="(my-class-logs-btn|teacher-panel-btn)"[^\n]*\n/g, '')
         .replace(' class="user-dropdown-item student-teacher-nav" id="support-materials-btn" style="display:none;"', ' class="user-dropdown-item" id="support-materials-btn"')
         .replace(/<script src="..\/shared\/(permissions|teacher-panel|teacher-invites)\.js"><\/script>\n/g, '')
+        .replace(/<script src="..\/shared\/activity-focus\.js"><\/script>\n/, '') /* modo foco na Conjugação/Revisão/Desafios (2026-10-14) */
         // perfil privado (2026-10-12): texto novo da chave "Perfil público", mudança deliberada
         .replace('Ligado: quem tem conta vê sua foto, seu progresso e seus Decks públicos. Desligado: só amigos e sua professora veem; os outros veem só nome, @ e badges, e só te acham pelo @ exato.', 'Deixa seu nome, badges, progresso e cartões próprios visíveis a quem tiver o link do seu perfil.');
     };

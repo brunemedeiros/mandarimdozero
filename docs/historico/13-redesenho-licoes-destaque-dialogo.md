@@ -130,3 +130,22 @@ nível. Mapa da francofonia descartado. Jogos e busca de verbo ficam para as pr�
   tradução em português e a tradução dos verbos aparece em português no site em inglês. Será consertado.
 - Testes: conjugação 52/52 (12 novos), i18n unit 2040/2040, i18n navegador 209/209, camada do curso 75/75,
   celular 108/108, validação de respostas 154/154. Screenshots fr claro, escuro e 390px conferidos.
+
+## Modo foco na Conjugação, na Revisão e nos Desafios (fr e zh, 2026-10-14)
+
+- `shared/activity-focus.js` (carregado nos dois sites, depois de `tabs.js`): quando a sessão aparece
+  (`#conj-practice-wrap`, `#review-session-wrap`, `#challenge-player-wrap`) com a aba dela ativa, liga o modo foco
+  das lições (`setLessonFocusMode`). Topo, menu lateral, cartões da direita e barra de baixo somem. Usa um
+  MutationObserver nos wrappers e na aba ativa, então cobre todas as entradas (modos da Revisão, Deck, marco da
+  trilha, rota restaurada) sem mexer em cada uma. Marca `body[data-activity-focus]` e só desliga o foco que ele
+  mesmo ligou: uma lição aberta na trilha continua dona do foco dela.
+- Saída: o link que já existia (Voltar à seleção / aos modos / aos desafios). Trocar de aba por fora (rota)
+  também desliga. Ao lado do link entra a ⚑ de report (`data-report-flag`), porque a ⚑ da topbar some no foco.
+- No foco, a sessão fica numa coluna centralizada (Revisão e Desafios 760px, Conjugação 1040px; os botões da
+  Conjugação, 640px).
+- Grátis x Premium: tudo grátis (não muda acesso a nada).
+- Testes: `tests/modo-foco/test_playwright.js` 19/19 (novo; fr Conjugação/Revisão/Desafios, zh Revisão, trilha
+  intacta, celular), conjugação 52/52, deck-browser 208/208, banco de revisão 387/387, trilha UI 86/86,
+  celular 108/108, Desafios (cloze 38/38, conclusão 19/19, álbum 62/62, módulo 75/75), ditado 58/58, i18n unit
+  2040/2040, i18n navegador 209/209. `desafios-progresso` 22/23 ("barra existe") falha igual sem esta mudança
+  (pré-existente). Screenshots fr claro/escuro/celular e zh claro/escuro conferidos.
