@@ -7,7 +7,7 @@ for (const lang of ['fr', 'zh']){
   console.log('== ' + lang);
   const ctx = loadLang(lang), isZh = lang === 'zh', appKey = ctx.APP_KEY;
   const run = c => vm.runInContext(c, ctx);
-  const src = read(lang + '/app.js');
+  const src = require('../e4/app-source').withCore(read(lang + '/app.js'));
   ['hasPlainFrontBack', 'cardPromptText', 'cardAnswerText'].forEach(f => run(extractFunction(src, f)));
   if (isZh){ run(extractFunction(src, 'cardPromptPinyinText')); run(extractFunction(src, 'zhTypeAnswerExportColumns')); }
   else run('this.cardPromptPinyinText = function(){ return ""; };');

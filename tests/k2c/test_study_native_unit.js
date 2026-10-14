@@ -103,7 +103,7 @@ for (const lang of ['fr', 'zh']){
   check(lang + ' serialização: sem direção/note/cardInstance/deck/origin', !['lastDirection', 'reviewDirection', 'note', 'cardInstance', 'deckId', 'origin', 'unitId', 'front', 'tags'].some(k => k in sA));
   check(lang + ' serialização: progresso de A presente', sA.reps === 4 && sA.due === 555555);
   check(lang + ' serialização: A e B saem como entradas separadas', ser.some(c => c.id === idB) && ser.length === ctx.STATE.cards.length);
-  const src = read(lang + '/app.js');
+  const src = require('../e4/app-source').withCore(read(lang + '/app.js'));
   check(lang + ' serializeState usa serializeCardsForSave', /cards: serializeCardsForSave\(STATE\.cards\)/.test(src));
   // round-trip: serializar -> reconstruir -> aplicar
   const json = JSON.parse(JSON.stringify(ser));
