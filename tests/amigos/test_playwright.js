@@ -137,7 +137,7 @@ async function setup(page, opts){
       }).sort((a, b) => b.amount - a.amount);
     };
     window.__RPC.friends_activity = () => ([
-      { user_id: 'bia', username: 'ubia', display_name: 'Bia Lima', avatar_url: null, language_app_key: APP_KEY, badge_id: BADGES[0].id, earned_at: new Date(Date.now() - 2 * 86400000).toISOString() },
+      { user_id: 'bia', username: 'ubia', display_name: 'Bia Lima', avatar_url: null, language_app_key: APP_KEY, badge_id: BADGES.find(b => b.tier === 'max').id /* conquistas com níveis: o feed só mostra ouro/máximo */, earned_at: new Date(Date.now() - 2 * 86400000).toISOString() },
       { user_id: 'caio', username: 'ucaio', display_name: 'Caio Reis', avatar_url: null, language_app_key: APP_KEY, badge_id: 'badge-que-nao-existe-aqui', earned_at: new Date(Date.now() - 3600000).toISOString() },
     ]);
     window.__DB.friend_settings = [];
@@ -387,7 +387,7 @@ async function runNew(browser, lang, port){
   await page.evaluate(() => { __rpc.length = 0; friendsRecordStreakMilestone(3, '2026-10-13'); friendsRecordStreakMilestone(5, '2026-10-13'); });
   await page.waitForTimeout(100);
   check(`${L}: marco só é registrado a partir de 5 dias`, await page.evaluate(() => __rpc.filter(r => r.name === 'record_streak_milestone').length === 1 && __rpc.find(r => r.name === 'record_streak_milestone').args.p_streak === 5));
-  check(`${L}: atividade cita o amigo, a conquista e "há 2 dias"`, /Bia Lima ganhou/.test(act[0]) && /há 2 dias/.test(act[0]), act[0]);
+  check(`${L}: atividade cita o amigo, a conquista e "há 2 dias"`, /Bia Lima chegou a/.test(act[0]) && /há 2 dias/.test(act[0]), act[0]);
   // "Ver ranking completo" abre o ranking na aba Amigos
   await page.click('#friends-rank [data-friends-rank-more]');
   await page.waitForSelector('#leaderboard-content .leaderboard-mode-tabs');

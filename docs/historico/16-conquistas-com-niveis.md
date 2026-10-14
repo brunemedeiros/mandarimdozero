@@ -47,6 +47,11 @@ id no formato novo, nunca `friends.*`); `friends_badge_feed(p_limit)`. Sem DROP.
   `test_conquistas_conta.js` e `test_badges_i18n.js` (catálogo virou trilhas; o segundo também deixou de bloquear
   `supabase-client.js` sem querer).
 
+- Regressão ampla (40 arquivos de tests/): `tests/amigos/test_playwright.js` 210/210 depois de atualizar a atividade
+  (o feed agora só mostra ouro/máximo, com o texto "chegou a"). Pré-existentes, iguais na `main`: desafios-progresso
+  22/23 ("barra existe"), `i18n/test_card_variants_browser.js` 14/2 e `i18n/test_content_en.js` 29/30 (aviso
+  "This lesson isn't available in English yet" fica com display none: `.lesson-unit-goal` some em `body.lesson-focus`).
+
 ## Fora desta entrega
 
 - Trilha **Pódio** (semanas em 1º entre amigos): o banco não guarda o histórico semanal de vencedores; precisa de

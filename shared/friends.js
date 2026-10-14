@@ -530,7 +530,7 @@ async function loadFriendsActivity(){
     supabaseClient.rpc('friends_badge_feed', { p_limit: 30 }),
     supabaseClient.rpc('friends_streak_feed', { p_limit: 20 }),
   ]);
-  const badgeCheers = !badgesRes.error;
+  const badgeCheers = !badgesRes.error && Array.isArray(badgesRes.data);
   if (!badgeCheers) badgesRes = await supabaseClient.rpc('friends_activity', { p_language: appKey, p_limit: 20 });
   const el = document.getElementById('friends-activity');
   if (!el) return;
