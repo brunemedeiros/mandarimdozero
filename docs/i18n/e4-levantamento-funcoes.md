@@ -1,19 +1,19 @@
 # E4, passo 1: levantamento por função de `fr/app.js` x `zh/app.js`
 
 Gerado por `scripts/e4-classify-functions.js` (parser do TypeScript sobre o código real; só leitura). Dados completos em `docs/i18n/e4-levantamento-funcoes.json`.
-Declarações de topo: 552 em `fr/app.js` (12154 linhas) e 309 em `zh/app.js` (8291 linhas). "Quase igual" = pelo menos 75% de semelhança em pares de símbolos do código (sem comentários e espaços).
+Declarações de topo: 513 em `fr/app.js` (11621 linhas) e 270 em `zh/app.js` (7760 linhas). "Quase igual" = pelo menos 75% de semelhança em pares de símbolos do código (sem comentários e espaços).
 
 ## 1. Resumo das funções (declarações de função)
 
 | Classe | Funções | Linhas no fr | Linhas no zh | % das linhas de função do fr | % do zh |
 |---|---:|---:|---:|---:|---:|
-| idêntica | 100 | 1278 | 1284 | 14.9% | 22% |
-| quase igual | 55 | 2545 | 2561 | 29.7% | 44% |
-| divergente | 21 | 771 | 624 | 9% | 10.7% |
-| só fr | 237 | 3965 | 0 | 46.3% | 0% |
-| só zh | 62 | 0 | 1358 | 0% | 23.3% |
+| idêntica | 61 | 861 | 873 | 10.6% | 16.1% |
+| quase igual | 55 | 2545 | 2561 | 31.3% | 47.3% |
+| divergente | 21 | 771 | 624 | 9.5% | 11.5% |
+| só fr | 237 | 3965 | 0 | 48.7% | 0% |
+| só zh | 62 | 0 | 1358 | 0% | 25.1% |
 
-Total de linhas em funções: fr 8559, zh 5827. Os blocos de dados e constantes (não função) somam 151 declarações e ficam fora desta conta.
+Total de linhas em funções: fr 8142, zh 5416. Os blocos de dados e constantes (não função) somam 151 declarações e ficam fora desta conta.
 
 ## 2. Por área (funções)
 
@@ -23,7 +23,7 @@ Total de linhas em funções: fr 8559, zh 5827. Os blocos de dados e constantes 
 | conjugação | 0 | 0 | 0 | 9 | 0 |
 | desafios e ditados | 8 | 0 | 0 | 87 | 7 |
 | estado e persistência | 14 | 2 | 1 | 9 | 4 |
-| exercícios de lição | 39 | 19 | 8 | 32 | 15 |
+| exercícios de lição | 0 | 19 | 8 | 32 | 15 |
 | mapa da trilha e unidades | 7 | 7 | 6 | 32 | 3 |
 | outros | 27 | 6 | 1 | 24 | 9 |
 | perfil, ranking e social | 3 | 3 | 3 | 2 | 0 |
@@ -38,100 +38,61 @@ Total de linhas em funções: fr 8559, zh 5827. Os blocos de dados e constantes 
 - `renderDailyChallengesScreen` (51 linhas, desafios e ditados)
 - `advanceAcquisitionPhase` (48 linhas, outros)
 - `renderDailyChallengesStrip` (42 linhas, desafios e ditados)
-- `renderMatchSizePicker` (37 linhas, exercícios de lição)
 - `showBadgeUnlockCelebration` (35 linhas, mapa da trilha e unidades)
-- `buildSpeedOptions` (35 linhas, exercícios de lição)
-- `wireKeyboardOptions` (34 linhas, exercícios de lição)
 - `registerStudyToday` (29 linhas, outros)
 - `showCorrectFeedbackPanel` (27 linhas, outros)
-- `renderVocabStrengthWidget` (24 linhas, exercícios de lição)
 - `loadStateAndRender` (20 linhas, estado e persistência)
-- `advanceConceptStep` (20 linhas, exercícios de lição)
-- `startMatchGame` (20 linhas, exercícios de lição)
 - `renderChallengeChipHTML` (19 linhas, desafios e ditados)
-- `buildConsolidationVocabExercises` (19 linhas, exercícios de lição)
-- `runSpeedTimer` (18 linhas, exercícios de lição)
 - `spawnConfetti` (17 linhas, outros)
 - `ensureCourseDecksLoaded` (16 linhas, estado e persistência)
-- `exerciseXP` (16 linhas, exercícios de lição)
 - `ensureDailyBucket` (15 linhas, estado e persistência)
 - `startBridgeQueue` (15 linhas, outros)
 - `animateCount` (15 linhas, outros)
-- `renderMatchTiles` (15 linhas, exercícios de lição)
 - `gradeButtonsHTML` (14 linhas, outros)
 - `playFeedbackTone` (13 linhas, desafios e ditados)
 - `mergeTeacherFlashcardsIntoState` (13 linhas, estado e persistência)
 - `mergeSelfFlashcardsIntoState` (13 linhas, estado e persistência)
-- `pickVocabFormat` (13 linhas, exercícios de lição)
-- `lessonRecapItems` (13 linhas, exercícios de lição)
 - `buildAcquisitionBlocks` (12 linhas, outros)
 - `advanceToNextBlockOrConsolidation` (12 linhas, desafios e ditados)
-- `stopExerciseAudio` (11 linhas, exercícios de lição)
 - `countStudyWeekends` (11 linhas, outros)
 - `checkUnitCompletion` (11 linhas, mapa da trilha e unidades)
-- `buildSpeedQueue` (13 linhas, exercícios de lição)
-- `registerDailyExerciseFormat` (9 linhas, exercícios de lição)
 - `unitProgressFraction` (9 linhas, mapa da trilha e unidades)
-- `pendingConceptsForBlock` (9 linhas, exercícios de lição)
 - `setAcqPhaseBanner` (9 linhas, outros)
-- `vocabStrengthBuckets` (9 linhas, exercícios de lição)
 - `updateStudySetting` (9 linhas, outros)
 - `todaysChallenges` (8 linhas, desafios e ditados)
 - `lessonRowState` (8 linhas, estado e persistência)
 - `wireHeaderActivation` (8 linhas, outros)
-- `setLessonFocusMode` (8 linhas, exercícios de lição)
-- `buildVocabWordExercise` (8 linhas, exercícios de lição)
 - `buildMixedQueue` (8 linhas, outros)
-- `runConceptQueueThen` (8 linhas, exercícios de lição)
 - `startBlockCheckpoint` (8 linhas, checkpoint e testes)
-- `dlgShuffle` (8 linhas, exercícios de lição)
 - `ensureDecksLoadedForReview` (8 linhas, estado e persistência)
 - `shuffle` (8 linhas, outros)
 - `switchSettingsSection` (8 linhas, perfil, ranking e social)
 - `addSelfFlashcardToState` (7 linhas, estado e persistência)
-- `registerDailyLessonForGoal` (7 linhas, exercícios de lição)
 - `challengeById` (7 linhas, desafios e ditados)
 - `currentWeekStart` (7 linhas, outros)
 - `isDailyChallengesStripCollapsed` (7 linhas, desafios e ditados)
 - `acqPhaseSequence` (7 linhas, outros)
 - `buildBlockCheckpointQueue` (7 linhas, checkpoint e testes)
 - `acqPhaseBannerText` (7 linhas, outros)
-- `currentLessonIdx` (6 linhas, exercícios de lição)
 - `hardWordsPool` (6 linhas, outros)
-- `stopSpeedTimer` (6 linhas, exercícios de lição)
 - `updateSelfFlashcardStatusInState` (5 linhas, estado e persistência)
-- `registerDailyMatchGame` (5 linhas, exercícios de lição)
 - `recalculateUnlockedUnits` (5 linhas, mapa da trilha e unidades)
 - `finishBlockIntro` (5 linhas, outros)
-- `reorderDistractorCount` (5 linhas, exercícios de lição)
 - `addStudyMinutes` (5 linhas, outros)
 - `renderSettingsView` (5 linhas, perfil, ranking e social)
 - `replaceSelfFlashcardInState` (4 linhas, estado e persistência)
-- `updateClozeModeSwitch` (4 linhas, exercícios de lição)
-- `missionMatchGameFeasible` (4 linhas, exercícios de lição)
 - `ensurePeriodXp` (4 linhas, estado e persistência)
-- `currentLesson` (4 linhas, exercícios de lição)
-- `pendingConceptsAfterDialogue` (4 linhas, exercícios de lição)
 - `hideAcqPhaseBanner` (4 linhas, outros)
-- `nextCorrectFeedbackPhrase` (4 linhas, exercícios de lição)
-- `nextComboPhrase` (4 linhas, exercícios de lição)
 - `hasPlainFrontBack` (4 linhas, outros)
 - `normalizeNewCardsPerDay` (4 linhas, estado e persistência)
 - `removeSelfFlashcardFromState` (3 linhas, estado e persistência)
-- `getClozeMode` (3 linhas, exercícios de lição)
 - `unitBlockState` (3 linhas, estado e persistência)
 - `isAdminUser` (3 linhas, perfil, ranking e social)
-- `isLessonUnit` (3 linhas, exercícios de lição)
 - `buildPracticeQueue` (3 linhas, outros)
 - `prefersReducedMotion` (3 linhas, outros)
-- `dlgAutoplayOn` (3 linhas, exercícios de lição)
-- `dlgSetAutoplay` (3 linhas, exercícios de lição)
 - `anyAppModalOpen` (3 linhas, outros)
-- `lessonIndexForVocabIdx` (3 linhas, exercícios de lição)
 - `renderGoalsView` (3 linhas, mapa da trilha e unidades)
 - `acceptedForms` (3 linhas, outros)
-- `dlgSleep` (1 linhas, exercícios de lição)
-- `clearKeyboardOptions` (1 linhas, exercícios de lição)
 
 ## 4. Quase iguais (passo 4: extrair com ponto de extensão)
 
