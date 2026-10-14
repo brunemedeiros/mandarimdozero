@@ -823,6 +823,10 @@ const STATE = {
   // Nunca serializado (ver serializeState() -- mesmo motivo de reviewQueue/
   // reviewIndex/reviewCardState: é estado de SESSÃO, não progresso salvo).
   reviewSessionDeckId: null,
+  // Aba Revisão do painel Aluno (2026-10-14): true só durante a sessão aberta
+  // por startClassReviewSession() -- o pool passa a ser SÓ os cartões da
+  // professora. switchTab() zera ao trocar de aba. Nunca serializado.
+  reviewSessionClassReview: false,
   cardVariants: {}, // progresso das palavras que trocam por idioma do site (shared/card-variants.js)
   // Fase D -- cache em memória da árvore de Decks do idioma atual, carregada
   // sob demanda por ensureDecksLoadedForReview() (só quando uma sessão
@@ -973,6 +977,8 @@ async function loadStateAndRender(){
   renderExportDeckSelect(ANKI_EXPORT_CONFIG);
   maybeShowReviewReminder();
   maybeSendStudyReminder();
+  // +N da aba Aluno > Revisão (cartões da professora) já com o progresso carregado.
+  if (typeof muralApplyBadges === 'function') muralApplyBadges();
 }
 
 // Login (Google/e-mail/convidado), menu do usuário e logout agora vêm de
@@ -5767,9 +5773,59 @@ function buildSpeedOptions(card){
 // Difíceis, Speed Review, Combinar, hero widget, mode-select). Um só
 // ponto de checagem, mesmo padrão de isCardLessonCompleted() -- nunca
 // reimplementar este filtro solto em outro lugar.
-function matchesReviewOriginFilter(card){
+// Aba Revisão do painel Aluno (2026-10-14, pedido da autora): cartões da
+// professora (origin 'teacher', Banco de Revisão) são revisão das AULAS, não
+// da trilha -- saem da Revisão geral (Estudar tudo, modos, contagens, opção
+// de origem) e só aparecem na aba Aluno > Revisão, cuja sessão liga
+// STATE.reviewSessionClassReview. O progresso FSRS é o mesmo (nada apagado).
+function isClassReviewCard(card){
+  return !!card && card.origin === 'teacher';
+}
+// Valor salvo 'teacher' (de antes da aba) vale como 'all'.
+function effectiveReviewOriginFilter(){
   const filter = STATE.studySettings.reviewOriginFilter || 'all';
+  return filter === 'teacher' ? 'all' : filter;
+}
+function matchesReviewOriginFilter(card){
+  if (STATE.reviewSessionClassReview) return isClassReviewCard(card);
+  if (isClassReviewCard(card)) return false;
+  const filter = effectiveReviewOriginFilter();
   return filter === 'all' || card.origin === filter;
+}
+
+// Pool da aba Aluno > Revisão (mesma elegibilidade, só cartões da professora).
+function classReviewPool(){
+  return STATE.cards.filter(c => isClassReviewCard(c) && isCardLessonCompleted(c));
+}
+// +N da aba Revisão do Aluno: o que a sessão entregaria hoje (mesma fila do "Estudar tudo").
+function classReviewTodayCount(){
+  return getStudyQueue(classReviewPool(), { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length;
+}
+
+// Abre a sessão de Flashcard com o escopo "cartões da professora". Mesmo motor
+// (startReviewSession/renderReviewView, modos de resposta do Banco), só o pool muda.
+function startClassReviewSession(){
+  if (typeof switchTab === 'function') switchTab('review'); // zera escopos e mostra a Revisão
+  STATE.reviewSessionUnitFilter = null;
+  STATE.reviewSessionDeckId = null;
+  STATE.reviewSessionMilestone = null;
+  STATE.reviewSessionClassReview = true;
+  STATE.reviewActiveMode = 'flashcard';
+  document.getElementById('review-mode-select-wrap').style.display = 'none';
+  document.getElementById('review-session-wrap').style.display = 'block';
+  document.getElementById('review-content').style.display = 'block';
+  document.getElementById('speed-review-content').style.display = 'none';
+  document.getElementById('match-review-content').style.display = 'none';
+  syncReviewBackLink();
+  startReviewSession();
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'class' });
+}
+
+// Sai da sessão de cartões da professora e volta ao Aluno > Revisão.
+function backToClassReviewTab(){
+  STATE.reviewSessionClassReview = false;
+  if (typeof STUDENT_PANEL_STATE !== 'undefined') STUDENT_PANEL_STATE.section = 'revisao';
+  if (typeof switchTab === 'function') switchTab('student-panel');
 }
 
 // Fase I (Tags): filtro de Review por Tag -- estado PRÓPRIO
@@ -5963,7 +6019,7 @@ function flashcardUnitTitleText(card){
 // tudo", mas não para a tabela de Decks. Resumo para avisar quando estão ativos.
 function reviewSessionFilterSummary(){
   const parts = [];
-  const origin = STATE.studySettings.reviewOriginFilter || 'all';
+  const origin = effectiveReviewOriginFilter();
   if (origin !== 'all') parts.push(REVIEW_ORIGIN_LABELS[origin] || origin);
   const tags = activeReviewTagFilter();
   if (tags.length) parts.push(tags.map(t => friendlyTagLabel(t)).join(', '));
@@ -6114,6 +6170,7 @@ function openReviewSession(mode, opts){
   // #review-content, sem isso não dava pra distinguir qual delas gerou o
   // report. Não afeta nenhuma lógica de revisão/memória.
   STATE.reviewActiveMode = mode;
+  STATE.reviewSessionClassReview = false; // modos da Revisão geral nunca herdam a sessão do Aluno
 
   if (mode === 'flashcard'){
     STATE.reviewSessionUnitFilter = null;
@@ -6156,11 +6213,16 @@ function reviewCardTagLabel(card){
 // Link de voltar da sessão: "Voltar ao Deck" quando a sessão veio de um Deck.
 function syncReviewBackLink(){
   const el = document.getElementById('review-back-to-modes');
-  if (el) el.textContent = t(STATE.reviewSessionDeckId != null ? 'review.backToDeck' : 'review.backToModes');
+  if (el) el.textContent = t(STATE.reviewSessionClassReview ? 'review.backToStudent' : STATE.reviewSessionDeckId != null ? 'review.backToDeck' : 'review.backToModes');
 }
 
 function backToReviewModeSelect(){
   releaseBadgeCelebrations();
+  if (STATE.reviewSessionClassReview){
+    STATE.reviewSessionStartedAt = null;
+    backToClassReviewTab();
+    return;
+  }
   const returnDeckId = STATE.reviewSessionDeckId;
   stopSpeedTimer();
   stopMatchTimer();
@@ -7297,15 +7359,17 @@ function renderReviewView(){
     // -- senão esse número prometeria mais do que "Revisar tudo disponível"
     // realmente consegue puxar (o botão clicava e caía de volta nesta
     // mesma tela vazia).
-    const allDue = todaysReviewCount(STATE.cards.filter(isCardLessonCompleted));
+    const allDue = STATE.reviewSessionClassReview ? 0 : todaysReviewCount(STATE.cards.filter(isCardLessonCompleted).filter(c => !isClassReviewCard(c)));
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">☕</div>
-        <h3>${activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
+        <h3>${STATE.reviewSessionClassReview ? t('review.session.classEmptyTitle') : activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
         <p>${allDue > 0 ? t('review.session.pendingOverall', { n: allDue }) : t('review.session.comeBackLater')}</p>
         ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">${t('review.session.reviewAllAvailable')}</button>` : ''}
+        ${STATE.reviewSessionClassReview ? `<button class="btn btn-secondary" id="review-class-back">${t('review.backToStudent')}</button>` : ''}
       </div>
     `;
+    document.getElementById('review-class-back')?.addEventListener('click', backToClassReviewTab);
     if (allDue > 0){
       document.getElementById('review-start-all').addEventListener('click', () => {
         STATE.reviewSessionUnitFilter = null;
@@ -7347,19 +7411,22 @@ function renderReviewView(){
         <h3>${t('review.complete.title')}</h3>
         <p>${t('review.complete.reviewed', { n: STATE.reviewQueue.length })}</p>
         <div class="review-complete-actions">
-          <button class="btn btn-secondary" id="review-again">${t('review.back')}</button>
-          <button class="btn btn-primary" id="review-go-practice">${t('review.practiceMore')}</button>
+          ${STATE.reviewSessionClassReview
+            ? `<button class="btn btn-primary" id="review-class-back">${t('review.backToStudent')}</button>`
+            : `<button class="btn btn-secondary" id="review-again">${t('review.back')}</button>
+          <button class="btn btn-primary" id="review-go-practice">${t('review.practiceMore')}</button>`}
         </div>
       </div>
     `;
     checkUnitCompletion();
-    document.getElementById('review-again').addEventListener('click', () => {
+    document.getElementById('review-class-back')?.addEventListener('click', backToClassReviewTab);
+    document.getElementById('review-again')?.addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
       STATE.reviewSessionMilestone = null;
       switchTab('path');
     });
-    document.getElementById('review-go-practice').addEventListener('click', () => {
+    document.getElementById('review-go-practice')?.addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
       STATE.reviewSessionMilestone = null;
@@ -8398,18 +8465,19 @@ function renderReviewSettingsView(){
   // origens possíveis mostrar uma opção sempre-zero seria confuso.
   const originWrap = document.getElementById('review-origin-select-wrap');
   const originSelect = document.getElementById('review-origin-select');
-  const hasTeacherCards = STATE.cards.some(c => c.origin === 'teacher');
+  // Cartões da professora ficam na aba Aluno > Revisão, fora desta opção.
+  const hasTeacherCards = false;
   const hasSelfCards = STATE.cards.some(c => c.origin === 'self');
   if (originWrap) originWrap.hidden = !hasTeacherCards && !hasSelfCards;
   if (originSelect && (hasTeacherCards || hasSelfCards)){
-    const basePool = STATE.cards.filter(isCardLessonCompleted);
+    const basePool = STATE.cards.filter(isCardLessonCompleted).filter(c => !isClassReviewCard(c));
     const originCounts = {
       all: basePool.length,
       study: basePool.filter(c => c.origin === 'study').length,
       teacher: basePool.filter(c => c.origin === 'teacher').length,
       self: basePool.filter(c => c.origin === 'self').length
     };
-    const currentOrigin = s.reviewOriginFilter || 'all';
+    const currentOrigin = effectiveReviewOriginFilter();
     originSelect.innerHTML = `
       <option value="all" ${currentOrigin === 'all' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.all} (${originCounts.all})</option>
       <option value="study" ${currentOrigin === 'study' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.study} (${originCounts.study})</option>

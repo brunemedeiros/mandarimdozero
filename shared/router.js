@@ -93,7 +93,7 @@ function hashToRoute(hash){
       return { type: 'deckBrowser', view: parts[3] === 'panel' ? 'panel' : 'detail', nodeId: parts[2] === 'lang' ? 'lang' : parseInt(parts[2], 10) };
     }
     if (parts[1] === 'deck' && /^\d+$/.test(parts[2] || '')) return { type: 'reviewSession', mode: 'flashcard', deckId: parseInt(parts[2], 10) };
-    if (['flashcard', 'speed', 'hard', 'match'].includes(parts[1])) return { type: 'reviewSession', mode: parts[1] };
+    if (['flashcard', 'speed', 'hard', 'match', 'class'].includes(parts[1])) return { type: 'reviewSession', mode: parts[1] };
     return { type: 'tab', tab: 'review' };
   }
   if (parts[0] === 'unit' && parts[1]){
@@ -163,6 +163,10 @@ function renderRoute(route){
       case 'reviewSession': {
         if (route.deckId != null && typeof startDeckReviewSession === 'function'){
           startDeckReviewSession(route.deckId, { restore: true }); // K2-H: restaura a sessão COM o escopo do Deck
+          break;
+        }
+        if (route.mode === 'class' && typeof startClassReviewSession === 'function'){
+          startClassReviewSession(); // Aluno > Revisão (cartões da professora)
           break;
         }
         if (typeof switchTab === 'function') switchTab('review');

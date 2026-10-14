@@ -157,7 +157,8 @@ function deckBrowserChildren(decks, nodeId){
     if (course) out.push(course);
     const root = deckBrowserRootDeck(decks);
     if (root) getDeckChildren(decks, root.id)
-      .filter(d => d.kind !== 'teacher_root' || deckBrowserHasTeacherLink())
+      // Cartões da professora saíram da Revisão: ficam na aba Aluno > Revisão (2026-10-14).
+      .filter(d => d.kind !== 'teacher_root')
       .forEach(d => out.push(d));
     return out.sort((a, b) => (kindOrder[a.kind] ?? 9) - (kindOrder[b.kind] ?? 9) || a.id - b.id);
   }
@@ -173,7 +174,9 @@ function deckBrowserChildren(decks, nodeId){
 }
 
 function deckBrowserPool(){
-  if (typeof eligibleDeckReviewPool === 'function') return eligibleDeckReviewPool();
+  // Sem os cartões da professora (aba Aluno > Revisão), senão o total do idioma os contaria.
+  const notClass = c => typeof isClassReviewCard !== 'function' || !isClassReviewCard(c);
+  if (typeof eligibleDeckReviewPool === 'function') return eligibleDeckReviewPool().filter(notClass);
   return ((typeof STATE !== 'undefined' && STATE.cards) || []).filter(c => typeof isCardLessonCompleted !== 'function' || isCardLessonCompleted(c));
 }
 
@@ -595,7 +598,7 @@ async function restoreDeckBrowserRoute(route){
   const app = document.getElementById('app');
   if (app && app.dataset.activeTab && app.dataset.activeTab !== 'review') return; // a pessoa já saiu da Revisão
   const routeDeck = route.nodeId !== 'lang' ? getDeckById(deckBrowserDecks(), route.nodeId) : null;
-  if (route.nodeId !== 'lang' && (!routeDeck || (deckBrowserIsTeacherDeck(routeDeck) && !deckBrowserHasTeacherLink()))){ backToDeckTable(); return; }
+  if (route.nodeId !== 'lang' && (!routeDeck || deckBrowserIsTeacherDeck(routeDeck))){ backToDeckTable(); return; }
   if (route.view === 'panel') openDeckPanel(route.nodeId);
   else openDeckDetail(route.nodeId);
 }
