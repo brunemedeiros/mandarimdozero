@@ -857,6 +857,7 @@ const STATE = {
   totalAudioPlays: 0, // vitalício, nunca zera (badge "Ouvido treinado")
   everUsedSpeedReview: false, // vitalício (badge "Exploradora")
   everUsedMatchGame: false, // vitalício (badge "Exploradora")
+  modesUsed: {}, // conquistas: modos de estudo já usados (trilha Explorar)
   // XP da semana corrente -- preparação pra leaderboard futura (artefato
   // §9), NÃO implementa leaderboard nenhuma. Separado do XP vitalício
   // (acima) porque uma leaderboard semanal precisa de um número que reseta;
@@ -1192,6 +1193,7 @@ function serializeState(){
     totalAudioPlays: STATE.totalAudioPlays,
     everUsedSpeedReview: STATE.everUsedSpeedReview,
     everUsedMatchGame: STATE.everUsedMatchGame,
+    modesUsed: STATE.modesUsed,
     periodXp: STATE.periodXp,
     daily: STATE.daily,
     storyProgress: STATE.storyProgress,
@@ -1245,6 +1247,7 @@ function applySerializedState(data){
   if (typeof data.totalAudioPlays === 'number') STATE.totalAudioPlays = data.totalAudioPlays;
   if (data.everUsedSpeedReview) STATE.everUsedSpeedReview = true;
   if (data.everUsedMatchGame) STATE.everUsedMatchGame = true;
+  if (data.modesUsed && typeof data.modesUsed === 'object') Object.assign(STATE.modesUsed, data.modesUsed);
   if (data.periodXp) Object.assign(STATE.periodXp, data.periodXp);
   if (data.daily) Object.assign(STATE.daily, data.daily);
   if (data.storyProgress) Object.assign(STATE.storyProgress, data.storyProgress);
@@ -1281,6 +1284,8 @@ function registerStudyToday(){
     STATE.streak = 1;
   }
   STATE.lastStudyDay = today;
+  // Marco de sequência (5, 10, 15... 365) para a atividade dos amigos (shared/friends.js, migration 086).
+  if (typeof friendsRecordStreakMilestone === 'function') friendsRecordStreakMilestone(STATE.streak, today);
   // Não mostra a tela de sequência AGORA -- isso interromperia no meio de
   // uma atividade (ex: no meio de uma sessão de revisão, competindo até com
   // o áudio automático da próxima carta). Só marca que tem uma comemoração
@@ -1664,32 +1669,52 @@ function addXP(amount){
 
 // showToast agora vem de shared/toast.js.
 
-const BADGES = [
-  { id:'first_step', get name(){ return t('badge.first_step.name'); }, icon:'🌱', get desc(){ return t('badge.first_step.desc'); }, check: s => s.totalReviews >= 1 },
-  { id:'streak_3', get name(){ return t('badge.streak_3.name'); }, icon:'🔥', get desc(){ return t('badge.streak_3.desc'); }, check: s => s.streak >= 3 },
-  { id:'streak_7', get name(){ return t('badge.streak_7.name'); }, icon:'⛩️', get desc(){ return t('badge.streak_7.desc'); }, check: s => s.streak >= 7 },
-  { id:'unit_1', get name(){ return t('badge.unit_1.name'); }, icon:'📖', get desc(){ return t('badge.unit_1.desc'); }, check: s => s.unitProgress[1]?.completed },
-  { id:'unit_7', get name(){ return t('badge.unit_7.name'); }, icon:'🏮', get desc(){ return t('badge.unit_7.desc'); }, check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= Math.ceil(UNITS.length/2) },
-  { id:'unit_14', get name(){ return t('badge.unit_14.name'); }, icon:'🐉', get desc(){ return t('badge.unit_14.desc'); }, check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= UNITS.length },
-  { id:'xp_100', get name(){ return t('badge.xp_100.name'); }, icon:'⭐', get desc(){ return t('badge.xp_100.desc'); }, check: s => s.xp >= 100 },
-  { id:'xp_500', get name(){ return t('badge.xp_500.name'); }, icon:'🌟', get desc(){ return t('badge.xp_500.desc'); }, check: s => s.xp >= 500 },
-  { id:'reviews_100', get name(){ return t('badge.reviews_100.name'); }, icon:'💪', get desc(){ return t('badge.reviews_100.desc'); }, check: s => s.totalReviews >= 100 },
-  // ---- Fase 4 (artefato §8): badges novos, cada um ligado a um
-  // comportamento específico -- não "badge por badge" genérico. ----
-  { id:'explorer', get name(){ return t('badge.explorer.name'); }, icon:'🧭', get desc(){ return t('badge.explorer.desc'); }, check: s => s.totalReviews >= 1 && s.everUsedSpeedReview && s.everUsedMatchGame },
-  { id:'trained_ear', get name(){ return t('badge.trained_ear.name'); }, icon:'🎧', get desc(){ return t('badge.trained_ear.desc'); }, check: s => (s.totalAudioPlays || 0) >= 100 },
-  { id:'comeback', get name(){ return t('badge.comeback.name'); }, icon:'🔄', get desc(){ return t('badge.comeback.desc'); }, check: s => !!s.hadStreakComeback },
-  { id:'multitasker', get name(){ return t('badge.multitasker.name'); }, icon:'🧩', get desc(){ return t('badge.multitasker.desc'); }, check: s => (s.daily?.exerciseFormatsSeen?.length || 0) >= 5 },
-  { id:'weekend', get name(){ return t('badge.weekend.name'); }, icon:'🌙', get desc(){ return t('badge.weekend.desc'); }, check: s => {
-      for (let i = 0; i < 14; i++){
-        const d = new Date(Date.now() - i*86400000);
-        if (d.getDay() !== 6) continue;
-        const key = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-        if (s.activityLog[key(d)] && s.activityLog[key(new Date(d.getTime() + 86400000))]) return true;
-      }
-      return false;
-    } },
-];
+// Conquistas com níveis (docs/conquistas-proposta-niveis.md): BADGES é preenchido por rebuildTrackBadges()
+// (shared/badge-tracks-app.js) a partir do catálogo shared/badge-tracks.js e das métricas abaixo.
+const BADGES = [];
+
+// Modos de estudo que contam para a trilha Explorar (chinês não tem Ditado nem Desafios).
+const BADGE_MODES = ['review', 'speed', 'match', 'hanzi', 'stories'];
+function badgeModesUsedCount(s){
+  const used = Object.assign({}, s.modesUsed || {});
+  if (s.totalReviews > 0) used.review = true;
+  if (s.everUsedSpeedReview) used.speed = true;
+  if (s.everUsedMatchGame) used.match = true;
+  if (Object.values(s.hanziLessonProgress || {}).some(p => p && p.completed)) used.hanzi = true;
+  if (Object.values(s.storyProgress || {}).some(p => p && p.completed)) used.stories = true;
+  return BADGE_MODES.filter(k => used[k]).length;
+}
+// Fins de semana com estudo no sábado E no domingo seguinte (dias do activityLog).
+function countStudyWeekends(log){
+  const key = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+  let n = 0;
+  Object.keys(log || {}).forEach(k => {
+    if (!(log[k] > 0)) return;
+    const d = new Date(k + 'T12:00:00');
+    if (d.getDay() !== 6) return;
+    if (log[key(new Date(d.getTime() + 86400000))] > 0) n++;
+  });
+  return n;
+}
+// Métricas das trilhas neste site (chinês). Unidade concluída de qualquer jeito conta para o nível.
+function collectBadgeMetrics(s){
+  const level = 'HSK1';
+  const units = UNITS.filter(u => u.level === level);
+  const cpUnits = units.filter(u => (u.lessons || []).some(l => l.isCheckpoint));
+  const checkpointsAced = cpUnits.filter(u => s.unitProgress[u.id]?.checkpointAced).length;
+  const words = studyTrailWordProgress(s.cards);
+  return {
+    studyDays: Object.keys(s.activityLog || {}).filter(k => s.activityLog[k] > 0).length,
+    reviews: s.totalReviews || 0, streak: s.streak || 0, xp: s.xp || 0,
+    courseDone: units.filter(u => s.unitProgress[u.id]?.completed).length, courseTotal: units.length,
+    courseAced: cpUnits.length > 0 && checkpointsAced >= cpUnits.length,
+    audioPlays: s.totalAudioPlays || 0, modesUsed: badgeModesUsedCount(s), modesTotal: BADGE_MODES.length,
+    weekends: countStudyWeekends(s.activityLog), wordsLearned: words.learned, wordsTotal: words.total,
+    checkpointsAced, checkpointsTotal: cpUnits.length,
+    dictationsAced: null, challengesDone: null, challengesTotal: 0,
+    comeback: !!s.hadStreakComeback, levelLabel: 'HSK 1'
+  };
+}
 
 // ---------- Detecção + celebração de nova conquista ----------
 // earnedBadgeIds é semeado uma vez, logo depois do estado carregar
@@ -1717,9 +1742,9 @@ function showBadgeUnlockCelebration(badge, onDone){
   el.setAttribute('role', 'status');
   el.setAttribute('aria-live', 'polite');
   el.innerHTML = `
-    <div class="badge-unlock-icon">${badge.icon}</div>
+    <div class="badge-unlock-icon${badge.tier ? ' tier-' + badge.tier : ''}">${typeof badgeIconHTML === 'function' ? badgeIconHTML(badge) : badge.icon}</div>
     <div class="badge-unlock-text">
-      <div class="badge-unlock-label">🏅 Nova conquista!</div>
+      <div class="badge-unlock-label">${badge.level > 1 ? t('badge.ui.levelUp') : t('badge.ui.newBadge')}</div>
       <div class="badge-unlock-name">${badge.name}</div>
       <div class="badge-unlock-desc">${badge.desc}</div>
     </div>
@@ -3466,6 +3491,8 @@ function finishCurrentLesson(u){
   // genérico (esse continua existindo pra outros caminhos de conclusão que
   // não passam por uma tela, ex. checkUnitCompletion via Flashcard/"Já sei").
   const xpBeforeUnitBonus = STATE.xp;
+  // Conquistas (trilha Gabaritou): 100% no ponto de verificação da unidade fica gravado, mesmo refazendo depois.
+  if (scorePct >= 100 && STATE.unitProgress[STATE.currentUnitId]) STATE.unitProgress[STATE.currentUnitId].checkpointAced = true;
   markUnitCompleted(STATE.currentUnitId, scorePct, { skipToast: true });
   const unitXpEarned = STATE.xp - xpBeforeUnitBonus;
   // Meta diária (§4 do artefato): mesma régua de "conteúdo real" (>=3 itens)
@@ -7878,17 +7905,17 @@ function renderProgressView(){
   ` : '';
 
   document.getElementById('stat-cards').innerHTML = guestWarning + `
-    <div class="stat-card"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">${t('zh.progress.statUnits')}</div></div>
-    <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">${t('zh.progress.statWords')}</div></div>
-    <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">${t('zh.progress.statStreak')}</div></div>
-    <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">${t('zh.progress.statReviews')}</div></div>
+    <div class="stat-card" data-stat="units"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">${t('zh.progress.statUnits')}</div></div>
+    <div class="stat-card" data-stat="words"><div class="num">${learnedCards}/${totalCards}</div><div class="label">${t('zh.progress.statWords')}</div></div>
+    <div class="stat-card" data-stat="streak"><div class="num">${effectiveStreak()}</div><div class="label">${t('zh.progress.statStreak')}</div></div>
+    <div class="stat-card" data-stat="reviews"><div class="num">${STATE.totalReviews}</div><div class="label">${t('zh.progress.statReviews')}</div></div>
     <div class="stat-card" data-stat="new"><div class="num">${sc.new}</div><div class="label">${t('progress.statNew')}</div></div>
     <div class="stat-card" data-stat="learning"><div class="num">${sc.learning}</div><div class="label">${t('progress.statLearning')}</div></div>
     <div class="stat-card" data-stat="review"><div class="num">${sc.review}</div><div class="label">${t('progress.statReview')}</div></div>
     <div class="stat-card" data-stat="due"><div class="num">${sc.due}</div><div class="label">${t('progress.statDueNow')}</div></div>
     <div class="stat-card" data-stat="today" title="${escapeHTML(t('progress.statTodayTitle'))}"><div class="num">${studyToday}</div><div class="label">${t('progress.statToday')}</div></div>
     ${ownContentCards}
-    <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
+    <div class="stat-card" data-stat="xp"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
   `;
 
   if (!CURRENT_USER){
@@ -7908,20 +7935,17 @@ function renderProgressView(){
   renderActivityHeatmap();
   renderProgressLineChart();
 
-  const earnedCount = BADGES.filter(b => badgeEarnedNow(b, STATE)).length;
-  document.getElementById('badge-grid-count').textContent = `${earnedCount}/${BADGES.length}`;
+  // Conquistas com níveis: um cartão por trilha (shared/badge-tracks-app.js), clássicas no fim.
+  const trackViews = badgeTrackViews(STATE);
+  const classics = BADGES.filter(b => b.classic && b.check(STATE)).map(b => ({ id: b.id, classic: true, icon: b.icon, fluent: b.fluent, name: b.name, desc: b.desc, tier: 'classic' }));
+  const levelsEarned = trackViews.reduce((a, v) => a + v.level, 0);
+  const levelsTotal = trackViews.reduce((a, v) => a + v.total, 0);
+  document.getElementById('badge-grid-count').textContent = t('badge.ui.count', { n: levelsEarned, total: levelsTotal });
   const badgeGridEl = document.getElementById('badge-grid');
-  badgeGridEl.innerHTML = BADGES.map(b => {
-    const earned = badgeEarnedNow(b, STATE);
-    return `<div class="badge ${earned?'earned':''}" data-badge-id="${b.id}"><div class="icon">${b.icon}</div><div class="name">${b.name}</div></div>`;
-  }).join('');
-  badgeGridEl.querySelectorAll('.badge[data-badge-id]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const b = BADGES.find(x => x.id === el.dataset.badgeId);
-      if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc);
-    });
-  });
+  badgeGridEl.classList.add('has-tracks');
+  badgeGridEl.innerHTML = trackViews.map(badgeTrackCardHTML).join('')
+    + (classics.length ? `<div class="track-classics"><div class="track-classics-title">${t('badge.ui.classicTitle')}</div><div class="track-showcase">${classics.map(badgeShowcaseItemHTML).join('')}</div></div>` : '');
+  wireTrackChips(badgeGridEl, trackViews.concat(classics));
 }
 
 // ---------- Gráfico de linha: palavras aprendidas ao longo do tempo ----------

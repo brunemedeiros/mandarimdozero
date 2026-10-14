@@ -634,12 +634,17 @@ async function saveState(){
 // de ser conquistado). Upsert é idempotente (onConflict na chave composta),
 // então repetir o backfill a cada load não duplica nem tem custo de leitura
 // -- só grava.
-async function upsertEarnedBadges(badgeIds){
+// backfill: níveis que a pessoa já tinha ao abrir a página (conquistas com níveis, shared/badge-tracks-app.js) entram
+// com data no passado e sem sobrescrever linha existente, para não aparecerem como novidade na Atividade dos amigos.
+async function upsertEarnedBadges(badgeIds, opts){
   if (!CURRENT_USER || !badgeIds || !badgeIds.length) return;
-  const rows = badgeIds.map(id => ({ user_id: CURRENT_USER.id, language_app_key: APP_KEY, badge_id: id }));
+  const backfill = !!(opts && opts.backfill) && typeof BADGE_BACKFILL_EARNED_AT !== 'undefined';
+  const rows = badgeIds.map(id => backfill
+    ? { user_id: CURRENT_USER.id, language_app_key: APP_KEY, badge_id: id, earned_at: BADGE_BACKFILL_EARNED_AT }
+    : { user_id: CURRENT_USER.id, language_app_key: APP_KEY, badge_id: id });
   const { error } = await supabaseClient
     .from('earned_badges')
-    .upsert(rows, { onConflict: 'user_id,language_app_key,badge_id' });
+    .upsert(rows, backfill ? { onConflict: 'user_id,language_app_key,badge_id', ignoreDuplicates: true } : { onConflict: 'user_id,language_app_key,badge_id' });
   if (error) console.error('Erro ao sincronizar badges públicos:', error);
 }
 

@@ -83,7 +83,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   `revisor-conteudo` (opus, revisa notas/traduções), `code-architecture-reviewer`/`principal-engineer`/
   `plan-reviewer`/`refactor-planner` (opus), `code-refactor-master`/`documentation-architect`/
   `web-research-specialist`/`auto-error-resolver` (sonnet).
-- Histórico completo (texto original, só leitura sob demanda): `docs/historico/01..14-*.md`.
+- Histórico completo (texto original, só leitura sob demanda): `docs/historico/01..15-*.md`.
   Comentários no código que citam "seção X do CLAUDE.md" apontam para esse texto: buscar com `grep -rn` em `docs/historico/`.
 
 ## Estado atual (1 linha por item; apagar ao fechar)
@@ -98,5 +98,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
 - 075/076 (papéis, permissões, regras da professora) na produção; telas (painéis Admin x Professora, Planos, Minhas aulas) publicadas pelo PR #302 (2026-10-12). Plano: 1) papel Professora, 2) Fase K final, 3) login obrigatório + perfil privado (077-080 na produção, telas pelo PR #304), 4) mural (087 no Staging e na produção em 2026-10-14; telas e menu Aluno na branch, falta PR) -- `docs/plano-professora-privacidade.md`.
 - Banco de Revisão (migrations 081 a 085): aplicadas no Staging e na produção (2026-10-13; versões 20261013105651 a 105731, a 081 no Staging aparece como `080_review_bank`). Tela em Professora > Cartões publicada pelo merge da branch. Falta: importar o arquivo JSON pela tela, vincular alunos, "Gerar cartões". App de português (`ptbr`) é urgente: 13 dos 24 alunos estudam português. Registro: `docs/historico/15-auditoria-banco-revisao.md`.
+- 086 (amigos: foguinho, marcos de sequência, parabéns) aplicada no Staging e na produção (2026-10-13). Conquistas com níveis
+  aprovadas (2026-10-14) e implementadas; 091 (parabéns por conquista) no Staging e na produção (2026-10-14):
+  `docs/historico/16-conquistas-com-niveis.md`. Ícones: Fluent Emoji, `docs/icones-fluent.md` (troca geral pendente).
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.

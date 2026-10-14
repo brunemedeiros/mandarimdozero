@@ -150,7 +150,13 @@ async function renderNotificationPreferencesView(){
         ${matrixRowsHTML}
       </div>
     </details>
+
+    <div class="section-label">${t('friends.prefs.sectionTitle')}</div>
+    <div class="friends-prefs-box" id="friends-prefs-body"></div>
   `;
+  // Preferências de Amigos (tabela friend_settings), antes uma seção solta na
+  // aba Perfil > Amigos. Desenhadas por shared/friends.js.
+  if (typeof loadFriendsPrefs === 'function') loadFriendsPrefs();
 
   document.getElementById('notif-pref-inapp-switch').addEventListener('click', async (e) => {
     const btn = e.currentTarget;
