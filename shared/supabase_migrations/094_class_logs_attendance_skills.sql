@@ -14,7 +14,8 @@ create table if not exists public.class_attendance_labels (
   id bigint generated always as identity primary key,
   teacher_id uuid not null references auth.users(id) on delete cascade,
   name text not null check (char_length(btrim(name)) between 1 and 40),
-  color text not null check (color in ('green', 'red', 'yellow', 'orange', 'blue', 'purple', 'gray')),
+  -- Mesmas cores do Notion (sem o "padrão"): a autora já usa rosa e marrom lá.
+  color text not null check (color in ('green', 'red', 'yellow', 'orange', 'blue', 'purple', 'gray', 'pink', 'brown')),
   -- Para contagens futuras (frequência): o rótulo conta como presença, falta ou nenhum dos dois.
   counts_as text not null default 'other' check (counts_as in ('present', 'absent', 'other')),
   sort_order int not null default 0,

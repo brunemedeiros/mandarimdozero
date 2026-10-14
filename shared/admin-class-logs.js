@@ -50,18 +50,26 @@ function classLogLabelById(id){
   return (CLASS_ATTENDANCE_LABELS || []).find(l => String(l.id) === String(id)) || null;
 }
 
-// Presença (rótulos ativos da professora; o atual aparece mesmo se arquivado) + Competências.
+// Presença no estilo do Notion (pedido da autora, 2026-10-14): sem seção separada. No próprio
+// campo: clicar escolhe, digitar um nome + Enter cria, "⋯" no rótulo renomeia, troca a cor e
+// arquiva (arquivado some da lista; aulas antigas continuam com ele). O rótulo atual da aula
+// aparece mesmo se arquivado. Mexer num rótulo atualiza só os seletores (DOM), nunca o formulário.
+function attChoicesHTML(prefix, current){
+  const labels = (CLASS_ATTENDANCE_LABELS || []).filter(l => !l.archived || String(l.id) === current);
+  return `
+    <label class="att-pill att-choice" data-color="gray"><input type="radio" name="${prefix}-att" value="" ${current ? '' : 'checked'}> ${t('panel.classLog.attendanceNone')}</label>
+    ${labels.map(l => `<span class="att-chip-wrap"><label class="att-pill att-choice" data-color="${escapeHTML(l.color)}"><input type="radio" name="${prefix}-att" value="${l.id}" ${String(l.id) === current ? 'checked' : ''}> ${escapeHTML(l.name)}</label><button type="button" class="att-more" data-att-more="${l.id}" aria-label="${escapeHTML(t('panel.classLog.labels.edit', { name: l.name }))}" title="${escapeHTML(t('panel.classLog.labels.edit', { name: l.name }))}">⋯</button></span>`).join('')}`;
+}
+
 function classLogExtrasFormHTML(prefix, log){
   const current = log && log.attendance_label_id != null ? String(log.attendance_label_id) : '';
-  const labels = (CLASS_ATTENDANCE_LABELS || []).filter(l => !l.archived || String(l.id) === current);
   const skills = new Set((log && log.skills) || []);
   return `
     <fieldset class="class-log-extras" data-class-log-extras="${prefix}">
       <legend class="profile-edit-label">${t('panel.classLog.attendance')}</legend>
-      <div class="att-choices">
-        <label class="att-pill att-choice" data-color="gray"><input type="radio" name="${prefix}-att" value="" ${current ? '' : 'checked'}> ${t('panel.classLog.attendanceNone')}</label>
-        ${labels.map(l => `<label class="att-pill att-choice" data-color="${escapeHTML(l.color)}"><input type="radio" name="${prefix}-att" value="${l.id}" ${String(l.id) === current ? 'checked' : ''}> ${escapeHTML(l.name)}</label>`).join('')}
-      </div>
+      <div class="att-choices" data-att-choices="${prefix}">${attChoicesHTML(prefix, current)}</div>
+      <input type="text" class="profile-edit-input att-new" data-att-new="${prefix}" maxlength="40" autocomplete="off" placeholder="${t('panel.classLog.labels.createPlaceholder')}" aria-label="${t('panel.classLog.labels.createPlaceholder')}">
+      <div class="att-menu" data-att-menu="${prefix}" hidden></div>
       <legend class="profile-edit-label">${t('panel.classLog.skills')}</legend>
       <div class="skill-toggles">
         ${CLASS_LOG_SKILLS.map(k => `<label class="skill-toggle"><input type="checkbox" data-skill value="${k}" ${skills.has(k) ? 'checked' : ''}> ${escapeHTML(classLogSkillLabel(k))}</label>`).join('')}
@@ -81,56 +89,111 @@ function classLogRowBadgesHTML(log){
   return classLogBadgesHTML({ attendanceName: label && label.name, attendanceColor: label && label.color, skills: log.skills, classroomName: log.__classroomName });
 }
 
-// ---------- Rótulos de Presença: editar, criar, arquivar ----------
-const CLASS_ATT_COLOR_KEYS = { green: 'panel.classLog.color.green', red: 'panel.classLog.color.red', yellow: 'panel.classLog.color.yellow', orange: 'panel.classLog.color.orange', blue: 'panel.classLog.color.blue', purple: 'panel.classLog.color.purple', gray: 'panel.classLog.color.gray' };
-function attendanceLabelRowHTML(l){
-  const id = l ? l.id : 'new';
-  const colorOpts = CLASS_ATTENDANCE_COLORS.map(c => `<option value="${c}" ${l && l.color === c ? 'selected' : ''}>${t(CLASS_ATT_COLOR_KEYS[c])}</option>`).join('');
-  const countsOpts = ['present', 'absent', 'other'].map(k => `<option value="${k}" ${(l ? l.counts_as : 'other') === k ? 'selected' : ''}>${t('panel.classLog.counts.' + k)}</option>`).join('');
+// Re-renderiza só os chips de Presença (todos os formulários abertos), mantendo a escolha de cada um.
+function refreshAttendanceChoices(selectIn){
+  document.querySelectorAll('[data-att-choices]').forEach(box => {
+    const prefix = box.dataset.attChoices;
+    const checked = box.querySelector(`input[name="${prefix}-att"]:checked`);
+    let current = checked ? checked.value : '';
+    if (selectIn && selectIn.prefix === prefix) current = String(selectIn.id);
+    // Aula nova não nasce com rótulo arquivado; aula já registrada mantém o dela.
+    if (prefix === 'new' && current && classLogLabelById(current)?.archived) current = '';
+    box.innerHTML = attChoicesHTML(prefix, current);
+  });
+  const listBox = document.getElementById('admin-classlogs-list-box');
+  if (listBox && ADMIN_CLASS_LOGS_STATE.editingId == null) refreshClassLogsListBox(listBox);
+}
+
+function attMenuHTML(l){
   return `
-    <div class="att-label-row" data-att-label-row="${id}">
-      ${l ? attendancePillHTML(l.name, l.color) : ''}
-      <input type="text" class="profile-edit-input" data-att-name maxlength="40" value="${l ? escapeHTML(l.name) : ''}" placeholder="${t('panel.classLog.labels.namePlaceholder')}" aria-label="${t('panel.classLog.labels.name')}">
-      <select class="profile-edit-input" data-att-color aria-label="${t('panel.classLog.labels.color')}">${colorOpts}</select>
-      <select class="profile-edit-input" data-att-counts aria-label="${t('panel.classLog.labels.counts')}">${countsOpts}</select>
-      <button type="button" class="btn btn-secondary" data-att-save="${id}">${l ? t('profile.save') : t('panel.classLog.labels.add')}</button>
-      ${l ? `<button type="button" class="admin-select-link" data-att-archive="${id}" style="background:none; border:none; cursor:pointer; padding:0;">${l.archived ? t('panel.classLog.labels.unarchive') : t('panel.classLog.labels.archive')}</button>` : ''}
+    <div class="att-menu-box" data-att-menu-label="${l.id}">
+      <input type="text" class="profile-edit-input" data-att-rename maxlength="40" value="${escapeHTML(l.name)}" aria-label="${escapeHTML(t('panel.classLog.labels.name'))}">
+      <div class="att-colors" role="group" aria-label="${escapeHTML(t('panel.classLog.labels.color'))}">
+        ${CLASS_ATTENDANCE_COLORS.map(c => `<button type="button" class="att-pill att-swatch" data-color="${c}" data-att-color="${c}" aria-pressed="${l.color === c}">${escapeHTML(t('panel.classLog.color.' + c))}</button>`).join('')}
+      </div>
+      <div class="att-menu-actions">
+        <button type="button" class="admin-select-link" data-att-archive style="background:none; border:none; cursor:pointer; padding:0;">${t('panel.classLog.labels.archive')}</button>
+        <button type="button" class="btn btn-secondary" data-att-close>${t('panel.classLog.labels.done')}</button>
+      </div>
+      <p class="profile-edit-error" data-att-error></p>
     </div>`;
 }
 
-function attendanceLabelsManagerHTML(){
-  const labels = CLASS_ATTENDANCE_LABELS || [];
-  return `
-    <details class="profile-section att-labels-manager" id="admin-att-labels">
-      <summary class="section-label">${t('panel.classLog.labels.title')}</summary>
-      <p class="profile-edit-hint">${t('panel.classLog.labels.hint')}</p>
-      ${labels.map(attendanceLabelRowHTML).join('')}
-      ${attendanceLabelRowHTML(null)}
-      <p class="profile-edit-error" id="admin-att-labels-error"></p>
-    </details>`;
+// Cor do rótulo novo: a primeira da lista que a professora ainda não usa (como o Notion, que varia as cores).
+function nextAttendanceColor(){
+  const used = new Set((CLASS_ATTENDANCE_LABELS || []).filter(l => !l.archived).map(l => l.color));
+  return CLASS_ATTENDANCE_COLORS.find(c => !used.has(c)) || CLASS_ATTENDANCE_COLORS[(CLASS_ATTENDANCE_LABELS || []).length % CLASS_ATTENDANCE_COLORS.length];
 }
 
-function wireAttendanceLabelsManager(wrap){
-  const box = wrap.querySelector('#admin-att-labels');
-  if (!box) return;
-  const errorEl = box.querySelector('#admin-att-labels-error');
-  const after = () => { renderAdminClassLogsView({ keepLabelsOpen: true }); };
-  box.querySelectorAll('[data-att-save]').forEach(btn => btn.addEventListener('click', async () => {
-    const row = btn.closest('[data-att-label-row]');
-    const id = btn.dataset.attSave === 'new' ? null : Number(btn.dataset.attSave);
-    const res = await saveAttendanceLabel({ id, name: row.querySelector('[data-att-name]').value, color: row.querySelector('[data-att-color]').value,
-      countsAs: row.querySelector('[data-att-counts]').value, sortOrder: (CLASS_ATTENDANCE_LABELS || []).length + 1 });
-    if (!res.ok){ errorEl.textContent = res.error; return; }
-    showToast(t('panel.classLog.labels.saved'));
-    after();
-  }));
-  box.querySelectorAll('[data-att-archive]').forEach(btn => btn.addEventListener('click', async () => {
-    const l = classLogLabelById(btn.dataset.attArchive);
-    if (!l) return;
-    const res = await saveAttendanceLabel({ id: l.id, name: l.name, color: l.color, countsAs: l.counts_as, archived: !l.archived });
-    if (!res.ok){ errorEl.textContent = res.error; return; }
-    after();
-  }));
+// Delegação no container da aba (ligada uma vez): vale para "Nova aula" e para as aulas em edição.
+function wireAttendancePicker(wrap){
+  if (wrap.dataset.attWired) return;
+  wrap.dataset.attWired = '1';
+  const menuOf = (el) => el.closest('[data-class-log-extras]')?.querySelector('[data-att-menu]');
+  const saveLabel = async (l, patch, errEl) => {
+    const res = await saveAttendanceLabel(Object.assign({ id: l.id, name: l.name, color: l.color, countsAs: l.counts_as, archived: l.archived }, patch));
+    if (!res.ok){ if (errEl) errEl.textContent = res.error; return false; }
+    refreshAttendanceChoices();
+    return true;
+  };
+  wrap.addEventListener('click', async (e) => {
+    const more = e.target.closest('[data-att-more]');
+    if (more){
+      const l = classLogLabelById(more.dataset.attMore);
+      const menu = menuOf(more);
+      if (!l || !menu) return;
+      menu.innerHTML = attMenuHTML(l);
+      menu.hidden = false;
+      menu.querySelector('[data-att-rename]').focus();
+      return;
+    }
+    const box = e.target.closest('[data-att-menu-label]');
+    if (!box) return;
+    const l = classLogLabelById(box.dataset.attMenuLabel);
+    const menu = box.closest('[data-att-menu]');
+    const errEl = box.querySelector('[data-att-error]');
+    const sw = e.target.closest('[data-att-color]');
+    if (sw && l){
+      if (await saveLabel(l, { color: sw.dataset.attColor }, errEl)){
+        box.querySelectorAll('[data-att-color]').forEach(b => b.setAttribute('aria-pressed', String(b === sw)));
+      }
+    } else if (e.target.closest('[data-att-archive]') && l){
+      if (await saveLabel(l, { archived: true }, errEl)){ menu.hidden = true; menu.innerHTML = ''; }
+    } else if (e.target.closest('[data-att-close]')){
+      const input = box.querySelector('[data-att-rename]');
+      if (l && input.value.trim() && input.value.trim() !== l.name && !(await saveLabel(l, { name: input.value }, errEl))) return;
+      menu.hidden = true; menu.innerHTML = '';
+    }
+  });
+  wrap.addEventListener('keydown', async (e) => {
+    if (e.key !== 'Enter') return;
+    const rename = e.target.closest('[data-att-rename]');
+    if (rename){
+      e.preventDefault();
+      const box = rename.closest('[data-att-menu-label]');
+      const l = classLogLabelById(box.dataset.attMenuLabel);
+      if (l && rename.value.trim() && rename.value.trim() !== l.name) await saveLabel(l, { name: rename.value }, box.querySelector('[data-att-error]'));
+      return;
+    }
+    const create = e.target.closest('[data-att-new]');
+    if (!create) return;
+    e.preventDefault(); // Enter no campo cria o rótulo, nunca envia o formulário da aula
+    const name = create.value.trim();
+    if (!name) return;
+    const prefix = create.dataset.attNew;
+    const existing = (CLASS_ATTENDANCE_LABELS || []).find(l => l.name.toLowerCase() === name.toLowerCase());
+    if (existing){
+      if (existing.archived && !(await saveLabel(existing, { archived: false }))) return;
+      create.value = '';
+      refreshAttendanceChoices({ prefix, id: existing.id });
+      return;
+    }
+    const res = await saveAttendanceLabel({ name, color: nextAttendanceColor(), countsAs: 'other', sortOrder: (CLASS_ATTENDANCE_LABELS || []).length + 1 });
+    if (!res.ok){ showToast(res.error); return; }
+    create.value = '';
+    const made = (CLASS_ATTENDANCE_LABELS || []).find(l => l.name === name.slice(0, 40));
+    refreshAttendanceChoices(made ? { prefix, id: made.id } : null);
+  });
 }
 
 function classLogStudentLabel(s){
@@ -297,7 +360,7 @@ function applyClassLogPickerFilters(wrap){
   });
 }
 
-async function renderAdminClassLogsView(opts){
+async function renderAdminClassLogsView(){
   const wrap = document.getElementById('admin-classlogs-content');
   if (!wrap) return;
   if (!isTeacherUser()){
@@ -376,7 +439,6 @@ async function renderAdminClassLogsView(opts){
       <p class="profile-edit-hint" id="admin-classlog-selection-counter" style="font-weight:700; margin-top:6px;">${selectionCountLabel}</p>
     </div>
 
-    ${attendanceLabelsManagerHTML()}
 
     <div class="profile-section">
       <div class="section-label">${t('admin.classLogs.newTitle')}<span id="admin-classlog-content-subtitle">${newLogSubtitle}</span></div>
@@ -404,8 +466,7 @@ async function renderAdminClassLogsView(opts){
   `;
 
   wireClassLogsListBox(document.getElementById('admin-classlogs-list-box'));
-  wireAttendanceLabelsManager(wrap);
-  if (opts && opts.keepLabelsOpen) wrap.querySelector('#admin-att-labels')?.setAttribute('open', '');
+  wireAttendancePicker(wrap);
 
   wrap.querySelectorAll('[data-classlog-classroom-checkbox]').forEach(cb => {
     cb.addEventListener('change', () => {

@@ -36,5 +36,5 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
   Aluno só vê com vínculo ativo; recado "só para um aluno" exige o aluno na turma. Anexos no bucket privado `mural`
   (`<professora>/<autor>/<arquivo>`), lidos por link assinado; apagar post devolve os caminhos e o app limpa o Storage.
 - Aulas (094, `shared/teacher-class-logs.js`, `admin-class-logs.js`): Presença = rótulo da professora (`class_attendance_labels`,
-  cores fixas, arquivar em vez de apagar), Competências = lista fixa `CLASS_LOG_SKILLS`. Aula de turma = 1 linha com
+  9 cores do Notion, seletor no próprio campo como no Notion, sem seção separada; arquivar em vez de apagar), Competências = lista fixa `CLASS_LOG_SKILLS`. Aula de turma = 1 linha com
   `classroom_id` e sem aluno; turma com aula registrada não se apaga (FK restrict). Aluno lê por `get_my_class_log_entries`.

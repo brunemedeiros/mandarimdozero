@@ -38,7 +38,7 @@ select pg_temp.as_user(pg_temp.g('T')); set local role authenticated;
 insert into r select (select string_agg(name || ':' || color || ':' || counts_as, ',' order by sort_order) from ensure_class_attendance_labels()) = 'Presente:green:present,Faltou:red:absent', 'padrão: Presente verde e Faltou vermelho';
 insert into r select (select count(*) from ensure_class_attendance_labels()) = 2, 'chamar de novo não duplica';
 insert into class_attendance_labels(teacher_id, name, color, sort_order) values (pg_temp.g('T')::uuid, 'Remarcada', 'yellow', 3);
-insert into r select pg_temp.try($q$insert into class_attendance_labels(teacher_id, name, color) values ('94000000-0000-0000-0000-0000000000a1', 'Rosa', 'pink')$q$) = '23514', 'cor fora da lista recusada';
+insert into r select pg_temp.try($q$insert into class_attendance_labels(teacher_id, name, color) values ('94000000-0000-0000-0000-0000000000a1', 'Rosa', 'magenta')$q$) = '23514', 'cor fora da lista recusada';
 insert into r select pg_temp.try($q$insert into class_attendance_labels(teacher_id, name, color) values ('94000000-0000-0000-0000-0000000000a2', 'Hack', 'red')$q$) = '42501', 'não cria rótulo em nome de outra professora';
 insert into v select 'L_PRES', id::text from class_attendance_labels where name = 'Presente';
 insert into v select 'L_FALT', id::text from class_attendance_labels where name = 'Faltou';

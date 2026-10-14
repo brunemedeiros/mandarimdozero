@@ -32,7 +32,7 @@ async function fetchClassLogs(studentId, languageAppKey){
 // membros com vínculo ativo veem). Os campos continuam opcionais um a um; basta 1
 // preenchido, e Presença ou Competência também contam (ex.: "Faltou" sozinho).
 const CLASS_LOG_SKILLS = ['conversacao', 'gramatica', 'escrita', 'leitura', 'vocabulario', 'escuta', 'pronuncia'];
-const CLASS_ATTENDANCE_COLORS = ['green', 'red', 'yellow', 'orange', 'blue', 'purple', 'gray'];
+const CLASS_ATTENDANCE_COLORS = ['gray', 'brown', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'red']; // as cores do Notion, na mesma ordem
 
 function cleanClassLogPayload({ classDate, topic, homework, observations, notes, attendanceLabelId, skills }){
   const out = {
@@ -106,7 +106,7 @@ async function fetchAttendanceLabels(force){
 async function saveAttendanceLabel({ id, name, color, countsAs, archived, sortOrder }){
   const clean = (name || '').trim();
   if (!clean) return { ok: false, error: t('panel.classLog.labels.needName') };
-  if (!CLASS_ATTENDANCE_COLORS.includes(color)) return { ok: false, error: t('panel.classLog.labels.needName') };
+  if (!CLASS_ATTENDANCE_COLORS.includes(color)) color = 'gray';
   const row = { name: clean.slice(0, 40), color, counts_as: ['present', 'absent', 'other'].includes(countsAs) ? countsAs : 'other' };
   if (archived != null) row.archived = !!archived;
   const q = id

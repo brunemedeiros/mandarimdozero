@@ -2663,21 +2663,11 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.skill.pronuncia': 'Pronunciation', // ALTA
   'panel.classLog.classrooms': 'Classes', // ALTA
   'panel.classLog.classroomsHint': 'A class lesson is logged once and shows up for every student in the class.', // ALTA
-  'panel.classLog.labels.title': 'Attendance labels', // ALTA
-  'panel.classLog.labels.hint': 'Create, rename and pick a color for each label. Archiving removes it from the list, but past lessons keep it.', // ALTA
   'panel.classLog.labels.name': 'Label name', // ALTA
-  'panel.classLog.labels.namePlaceholder': 'E.g. Rescheduled', // ALTA
   'panel.classLog.labels.color': 'Color', // ALTA
-  'panel.classLog.labels.counts': 'Counts as', // ALTA
-  'panel.classLog.labels.add': 'Add', // ALTA
   'panel.classLog.labels.archive': 'Archive', // ALTA
-  'panel.classLog.labels.unarchive': 'Restore', // ALTA
-  'panel.classLog.labels.saved': 'Label saved.', // ALTA
   'panel.classLog.labels.needName': 'Give the label a name.', // ALTA
   'panel.classLog.labels.duplicate': 'You already have a label with that name.', // ALTA
-  'panel.classLog.counts.present': 'Present', // ALTA
-  'panel.classLog.counts.absent': 'Absent', // ALTA
-  'panel.classLog.counts.other': 'Other', // ALTA
   'panel.classLog.color.green': 'Green', // ALTA
   'panel.classLog.color.red': 'Red', // ALTA
   'panel.classLog.color.yellow': 'Yellow', // ALTA
@@ -2685,6 +2675,11 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.color.blue': 'Blue', // ALTA
   'panel.classLog.color.purple': 'Purple', // ALTA
   'panel.classLog.color.gray': 'Gray', // ALTA
+  'panel.classLog.color.pink': 'Pink', // ALTA
+  'panel.classLog.color.brown': 'Brown', // ALTA
+  'panel.classLog.labels.createPlaceholder': 'Type a name and press Enter to create a label', // ALTA
+  'panel.classLog.labels.edit': 'Edit the {name} label', // ALTA
+  'panel.classLog.labels.done': 'Done', // ALTA
   'panel.classLog.classroomsSelected': { one: '{n} class', other: '{n} classes' }, // ALTA
   'panel.classLog.membersCount': { one: '{n} student', other: '{n} students' }, // ALTA
   'studentPanel.menu': '🎒 Student', // ALTA

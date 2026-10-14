@@ -428,3 +428,7 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   i18n unit 2033/2033 e Playwright 209/209, e4 13/13.
 - Próximo: aplicar a 094 na produção (com autorização), publicar; depois importação do Notion (Presença do Notion vira
   rótulo: Aula dada = Presente, Faltou/Cancelada = Faltou, os outros viram rótulos novos), calendário, avisos no Mural.
+- Ajuste pedido pela autora (2026-10-14): sem seção separada de rótulos. A Presença funciona como o seletor do Notion: clicar
+  escolhe, digitar + Enter cria, "⋯" renomeia, troca a cor (as 9 do Notion, com rosa e marrom) e arquiva. "Conta como"
+  (presença/falta/outro) ficou só no banco (Presente e Faltou já vêm marcados), sem tela. Painel-professora 409/409.
+- 094 na produção em 2026-10-14 (autorizada). Aba Turma no Ranking: só aparece para quem está em alguma turma.

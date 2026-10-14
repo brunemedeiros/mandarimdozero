@@ -285,4 +285,8 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - `student_id drop not null` passou pela ferramenta MCP sem travar (o travamento é com DELETE/DROP TABLE/FUNCTION).
 - Teste local: `tests/aulas-presenca/run.sh` 27/27.
 - Staging: aplicada em 2026-10-14 (ferramenta, `094_class_logs_attendance_skills`); conferido: coluna nula, 3 colunas novas,
-  3 funções, RLS ligada, 2 restrições. Produção: PENDENTE (precisa vir antes de publicar as telas).
+  3 funções, RLS ligada, 2 restrições. Rosa e marrom entraram depois (cores do Notion): no Staging por `094b_attendance_colors_pink_brown`
+  (troca da restrição de cor); o arquivo 094 já sai com as 9 cores.
+- Produção: aplicada em 2026-10-14 a pedido da autora (versão `20261014215716 094_class_logs_attendance_skills`, arquivo com as
+  9 cores). Antes: 0 aulas, 2 turmas, tabela de rótulos inexistente. Depois: student_id aceita nulo, 3 colunas, 3 funções com
+  security definer e search_path, anon sem EXECUTE, RLS ligada, 0 aulas e 2 turmas intactas.
