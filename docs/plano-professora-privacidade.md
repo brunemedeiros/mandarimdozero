@@ -414,3 +414,17 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   deck-browser 208/208, fase-h origem 54/54, fase-i Playwright 48/48 e unit 67/67 (o unit já falhava 4 antes, reescrito
   para o comportamento atual), k7 40/40, i18n unit 2040/2040. Sem mudança: painel-professora 277/277, fase-g, k2h, k3,
   k9, k10, revisao-ajustes, revisao-proposta-a, k4, k2. Pré-existentes: i18n card_variants_browser 14/16, content_en 29/30.
+
+### Presença, Competências e aula de turma (2026-10-14, branch; migration 094 no Staging)
+
+- Professora > Aulas: Presença com rótulos coloridos (padrão Presente/verde e Faltou/vermelho; criar, renomear, trocar a cor,
+  dizer se conta como presença/falta/outro e arquivar em "Rótulos de Presença") e Competências (Conversação, Gramática,
+  Escrita, Leitura, Vocabulário, Escuta, Pronúncia). Pontualidade e Uso da L1 fora, como decidido.
+- Turmas (as mesmas do Mural) entram no seletor: aula de turma é registrada uma vez e aparece para todos os membros com
+  vínculo (resolve "Sandra e Eduardo": Sandra vê quando criar conta e entrar na turma). Turma com aula não pode ser apagada.
+- Aluno > Aulas mostra a Presença colorida, as Competências e o nome da turma. Anotações continuam só da professora.
+- Grátis x Premium: registrar aulas faz parte do plano Professora (como antes); ver as aulas é grátis para aluno vinculado.
+- Testes: SQL local 27/27; painel-professora Playwright 367/367 (90 novas); mural 255/255, Banco 465/465, k10 114/114,
+  i18n unit 2033/2033 e Playwright 209/209, e4 13/13.
+- Próximo: aplicar a 094 na produção (com autorização), publicar; depois importação do Notion (Presença do Notion vira
+  rótulo: Aula dada = Presente, Faltou/Cancelada = Faltou, os outros viram rótulos novos), calendário, avisos no Mural.

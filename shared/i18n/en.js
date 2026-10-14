@@ -1341,7 +1341,7 @@ window.I18N_CATALOG['en'] = {
   'admin.materials.send': 'Send material', // ALTA
   'admin.materials.sentN': '✓ Material sent to {n} students.', // ALTA
   'admin.materials.sent': '✓ Material sent.', // ALTA
-  'teacherLogs.err.needOneField': 'Fill in at least one field (topic, homework, observations or free text).', // ALTA
+  'teacherLogs.err.needOneField': 'Fill in at least one field (attendance, skills, topic, homework, observations or free text).', // ALTA
   'teacherLogs.err.saveFailed': 'We couldn\'t save the record right now.', // ALTA
   'teacherMaterials.err.titleRequired': 'Enter a title for the material.', // ALTA
   'teacherMaterials.err.needContent': 'Fill in at least the description, a link or a file.', // ALTA
@@ -2651,6 +2651,42 @@ window.I18N_CATALOG['en'] = {
   'studentDecks.empty': 'The student has no cards in decks yet.', // ALTA
   'studentDecks.error': 'Couldn\'t load the student\'s decks right now.', // ALTA
   'panel.tab.mural': 'Board', // ALTA
+  'panel.classLog.attendance': 'Attendance', // ALTA
+  'panel.classLog.attendanceNone': 'Not recorded', // ALTA
+  'panel.classLog.skills': 'Skills practiced', // ALTA
+  'panel.classLog.skill.conversacao': 'Speaking', // ALTA
+  'panel.classLog.skill.gramatica': 'Grammar', // ALTA
+  'panel.classLog.skill.escrita': 'Writing', // ALTA
+  'panel.classLog.skill.leitura': 'Reading', // ALTA
+  'panel.classLog.skill.vocabulario': 'Vocabulary', // ALTA
+  'panel.classLog.skill.escuta': 'Listening', // ALTA
+  'panel.classLog.skill.pronuncia': 'Pronunciation', // ALTA
+  'panel.classLog.classrooms': 'Classes', // ALTA
+  'panel.classLog.classroomsHint': 'A class lesson is logged once and shows up for every student in the class.', // ALTA
+  'panel.classLog.labels.title': 'Attendance labels', // ALTA
+  'panel.classLog.labels.hint': 'Create, rename and pick a color for each label. Archiving removes it from the list, but past lessons keep it.', // ALTA
+  'panel.classLog.labels.name': 'Label name', // ALTA
+  'panel.classLog.labels.namePlaceholder': 'E.g. Rescheduled', // ALTA
+  'panel.classLog.labels.color': 'Color', // ALTA
+  'panel.classLog.labels.counts': 'Counts as', // ALTA
+  'panel.classLog.labels.add': 'Add', // ALTA
+  'panel.classLog.labels.archive': 'Archive', // ALTA
+  'panel.classLog.labels.unarchive': 'Restore', // ALTA
+  'panel.classLog.labels.saved': 'Label saved.', // ALTA
+  'panel.classLog.labels.needName': 'Give the label a name.', // ALTA
+  'panel.classLog.labels.duplicate': 'You already have a label with that name.', // ALTA
+  'panel.classLog.counts.present': 'Present', // ALTA
+  'panel.classLog.counts.absent': 'Absent', // ALTA
+  'panel.classLog.counts.other': 'Other', // ALTA
+  'panel.classLog.color.green': 'Green', // ALTA
+  'panel.classLog.color.red': 'Red', // ALTA
+  'panel.classLog.color.yellow': 'Yellow', // ALTA
+  'panel.classLog.color.orange': 'Orange', // ALTA
+  'panel.classLog.color.blue': 'Blue', // ALTA
+  'panel.classLog.color.purple': 'Purple', // ALTA
+  'panel.classLog.color.gray': 'Gray', // ALTA
+  'panel.classLog.classroomsSelected': { one: '{n} class', other: '{n} classes' }, // ALTA
+  'panel.classLog.membersCount': { one: '{n} student', other: '{n} students' }, // ALTA
   'studentPanel.menu': '🎒 Student', // ALTA
   'studentPanel.nav': 'Student', // ALTA
   'studentPanel.title': 'Student', // ALTA

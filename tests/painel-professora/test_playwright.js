@@ -38,6 +38,17 @@ const PANEL_STUB = (who) => {
   supabaseClient.rpc = async (name, args) => {
     (window.__rpcCalls = window.__rpcCalls || []).push([name, args]);
     if (name === 'my_permissions') return { data: { roles: roles.roles, admin: roles.admin, permissions: Object.fromEntries(CAT.map(c => [c.key, { enabled: perm(c.key), limit: null }])) }, error: null };
+    // 094: aulas com Presença, Competências e aula de turma.
+    if (name === 'get_my_class_log_entries') return { data: who === 'S' ? [
+      { id: 2, class_date: '2026-10-09', topic: 'Passé composé', homework: 'Exercícios 1 a 3', observations: null, attendance_name: 'Presente', attendance_color: 'green', skills: ['gramatica', 'escuta'], classroom_id: null, classroom_name: null },
+      { id: 1, class_date: '2026-10-02', topic: 'Apresentação', homework: null, observations: 'Livro, página 12', attendance_name: 'Faltou', attendance_color: 'red', skills: [], classroom_id: 501, classroom_name: 'Dupla' },
+    ] : [], error: null };
+    if (name === 'ensure_class_attendance_labels'){
+      const L = window.__DB.class_attendance_labels = window.__DB.class_attendance_labels || [];
+      if (!L.some(l => l.teacher_id === window.__uid)) L.push({ id: 61, teacher_id: window.__uid, name: 'Presente', color: 'green', counts_as: 'present', sort_order: 1, archived: false }, { id: 62, teacher_id: window.__uid, name: 'Faltou', color: 'red', counts_as: 'absent', sort_order: 2, archived: false });
+      return { data: L.filter(l => l.teacher_id === window.__uid).sort((a, b) => a.sort_order - b.sort_order || a.id - b.id), error: null };
+    }
+    if (name === 'mural_list') return { data: { as_teacher: roles.roles.includes('teacher') ? { classrooms: [{ id: 501, name: 'Dupla', members: ['S'], unread: 0 }], roster: [] } : null, as_student: null }, error: null };
     if (name === 'get_my_class_logs') return { data: who === 'S' ? [
       { id: 2, class_date: '2026-10-09', topic: 'Passé composé', homework: 'Exercícios 1 a 3', observations: null },
       { id: 1, class_date: '2026-10-02', topic: 'Apresentação', homework: null, observations: 'Livro, página 12' },
@@ -123,6 +134,10 @@ const PANEL_STUB = (who) => {
       L('aluna: 2 aulas, mais recente primeiro', logs.length === 2 && logs[0].includes('Passé composé'), logs);
       L('aluna: data no fuso local (9, não 8)', /\b9\b/.test(logs[0]), logs[0]);
       L('aluna: campo vazio não aparece', !logs[1].includes(lang === 'fr' ? 'Lição' : 'Lição'), logs[1]);
+      L('aluna: Presença colorida (verde = presente, vermelho = faltou)', await ev(() => { const p = [...document.querySelectorAll('.class-log-entry .att-pill')]; return p.length === 2 && p[0].dataset.color === 'green' && p[0].textContent.trim() === 'Presente' && p[1].dataset.color === 'red'; }));
+      L('aluna: Competências como etiquetas', await ev(() => [...document.querySelectorAll('.class-log-entry')][0].querySelectorAll('.skill-chip').length === 2 && [...document.querySelectorAll('.class-log-entry')][0].textContent.includes(t('panel.classLog.skill.gramatica'))));
+      L('aluna: aula da turma mostra o nome da turma', await ev(() => [...document.querySelectorAll('.class-log-entry')][1].querySelector('.class-log-classroom')?.textContent.includes('Dupla')));
+      L('aluna: cor do rótulo visível (borda com a cor)', await ev(() => getComputedStyle(document.querySelector('.class-log-entry .att-pill')).borderTopColor !== getComputedStyle(document.querySelectorAll('.class-log-entry .att-pill')[1]).borderTopColor));
       await shot('minhas-aulas');
       await ev(() => switchTab('support-materials'));
       await page.waitForFunction(() => document.getElementById('support-materials-content').textContent.includes('passé composé'));
@@ -202,6 +217,47 @@ const PANEL_STUB = (who) => {
       await page.click('[data-tinv-cancel]');
       await page.waitForFunction(() => !document.querySelector('.tinv-pending-row'));
       L('convite: cancelar tira da lista', await ev(() => window.__DB.teacher_students.some(r => r.student_id === 'S2' && r.status === 'removed')));
+      // ---- Aulas (094): Presença, Competências, turma, rótulos ----
+      await ev(() => { window.__DB.teacher_students.push({ id: 950, teacher_id: 'P', student_id: 'S', language_app_key: window.__appKey, status: 'active', created_at: '2026-10-01' }); window.__DB.teacher_class_logs = []; });
+      await ev(() => switchTeacherPanelSection('classlogs'));
+      await page.waitForSelector('#admin-create-class-log-form [data-class-log-extras="new"]');
+      L('aulas: Presença com Sem registro, Presente e Faltou', await ev(() => [...document.querySelectorAll('[data-class-log-extras="new"] .att-choice')].map(l => l.textContent.trim()).join('|') === `${t('panel.classLog.attendanceNone')}|Presente|Faltou`));
+      L('aulas: 7 Competências', await ev(() => document.querySelectorAll('[data-class-log-extras="new"] input[data-skill]').length === 7));
+      L('aulas: turma aparece para escolher', await ev(() => !!document.querySelector('[data-classlog-classroom-checkbox][value="501"]')));
+      await page.check('[data-classlog-student-checkbox][value="S"]');
+      await page.check('[data-class-log-extras="new"] input[name="new-att"][value="61"]');
+      await page.check('[data-class-log-extras="new"] input[data-skill][value="gramatica"]');
+      await page.check('[data-class-log-extras="new"] input[data-skill][value="escuta"]');
+      await page.fill('#admin-class-log-topic', 'Subjonctif');
+      await shot('aulas-form');
+      await page.click('#admin-create-class-log-btn');
+      await page.waitForFunction(() => (window.__DB.teacher_class_logs || []).length === 1);
+      L('aulas: grava Presença e Competências na aula do aluno', await ev(() => { const r = window.__DB.teacher_class_logs[0]; return r.student_id === 'S' && r.classroom_id === null && r.attendance_label_id === 61 && r.skills.join() === 'gramatica,escuta'; }), await ev(() => window.__DB.teacher_class_logs[0]));
+      await page.waitForSelector('#admin-classlogs-list-box .att-pill');
+      L('aulas: lista mostra a Presença colorida', await ev(() => document.querySelector('#admin-classlogs-list-box .att-pill').dataset.color === 'green'));
+      // só Presença (Faltou), para a turma
+      await page.uncheck('[data-classlog-student-checkbox][value="S"]');
+      await page.check('[data-classlog-classroom-checkbox][value="501"]');
+      await page.check('[data-class-log-extras="new"] input[name="new-att"][value="62"]');
+      await page.click('#admin-create-class-log-btn');
+      await page.waitForFunction(() => window.__DB.teacher_class_logs.length === 2);
+      L('aulas: aula de turma é 1 linha sem aluno e com a turma', await ev(() => { const r = window.__DB.teacher_class_logs[1]; return r.student_id === null && r.classroom_id === 501 && r.attendance_label_id === 62; }), await ev(() => window.__DB.teacher_class_logs[1]));
+      await page.waitForSelector('#admin-classlogs-list-box .class-log-classroom');
+      L('aulas: lista da turma mostra o nome da turma', await ev(() => document.querySelector('#admin-classlogs-list-box .class-log-classroom').textContent.includes('Dupla')));
+      // rótulo novo
+      await ev(() => { document.getElementById('admin-att-labels').open = true; });
+      await page.fill('[data-att-label-row="new"] [data-att-name]', 'Remarcada');
+      await page.selectOption('[data-att-label-row="new"] [data-att-color]', 'yellow');
+      await page.click('[data-att-save="new"]');
+      await page.waitForFunction(() => [...document.querySelectorAll('[data-class-log-extras="new"] .att-choice')].some(l => l.textContent.includes('Remarcada')));
+      L('rótulos: cria rótulo novo com cor e ele vira opção', await ev(() => window.__DB.class_attendance_labels.some(l => l.name === 'Remarcada' && l.color === 'yellow' && l.teacher_id === 'P') && document.querySelector('[data-class-log-extras="new"] .att-choice[data-color="yellow"]')));
+      L('rótulos: editor continua aberto depois de salvar', await ev(() => document.getElementById('admin-att-labels').open));
+      await shot('aulas-rotulos');
+      await ev(() => { const l = window.__DB.class_attendance_labels.find(x => x.name === 'Remarcada'); document.querySelector(`[data-att-archive="${l.id}"]`).click(); });
+      await page.waitForFunction(() => window.__DB.class_attendance_labels.find(x => x.name === 'Remarcada').archived === true);
+      await page.waitForFunction(() => ![...document.querySelectorAll('[data-class-log-extras="new"] .att-choice')].some(l => l.textContent.includes('Remarcada')));
+      L('rótulos: arquivar tira da lista de opções', true);
+      L('aulas: sem rolagem horizontal', await ev(() => document.documentElement.scrollWidth <= window.innerWidth + 1), await ev(() => [document.documentElement.scrollWidth, window.innerWidth]));
       await ev(() => switchTab('admin-badges'));
       L('professora: link antigo do Admin cai no painel da professora', await ev(() => document.getElementById('view-teacher-panel').classList.contains('active')));
       await shot('professora-alunos');

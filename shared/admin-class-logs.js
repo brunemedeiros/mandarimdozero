@@ -30,7 +30,108 @@
 //   - shared/srs.js                (todayStr)
 //   - languages/<lang>/app.js      (isAdminUser)
 
-let ADMIN_CLASS_LOGS_STATE = { studentIds: new Set(), langFilter: 'all', editingId: null, _studentsCache: [] };
+let ADMIN_CLASS_LOGS_STATE = { studentIds: new Set(), classroomIds: new Set(), langFilter: 'all', editingId: null, _studentsCache: [], _classroomsCache: [] };
+
+// 094: turmas da professora (as mesmas do Mural), em todos os idiomas em que ela tem aluno.
+async function fetchClassLogClassrooms(langs){
+  const lists = await Promise.all(langs.map(async lang => {
+    const { data, error } = await supabaseClient.rpc('mural_list', { p_lang: lang });
+    if (error || !data || !data.as_teacher) return [];
+    return (data.as_teacher.classrooms || []).map(c => ({ id: c.id, name: c.name, language_app_key: lang, members: c.members || [] }));
+  }));
+  return lists.flat();
+}
+
+function classLogSelectedClassrooms(){
+  return ADMIN_CLASS_LOGS_STATE._classroomsCache.filter(c => ADMIN_CLASS_LOGS_STATE.classroomIds.has(String(c.id)));
+}
+
+function classLogLabelById(id){
+  return (CLASS_ATTENDANCE_LABELS || []).find(l => String(l.id) === String(id)) || null;
+}
+
+// Presença (rótulos ativos da professora; o atual aparece mesmo se arquivado) + Competências.
+function classLogExtrasFormHTML(prefix, log){
+  const current = log && log.attendance_label_id != null ? String(log.attendance_label_id) : '';
+  const labels = (CLASS_ATTENDANCE_LABELS || []).filter(l => !l.archived || String(l.id) === current);
+  const skills = new Set((log && log.skills) || []);
+  return `
+    <fieldset class="class-log-extras" data-class-log-extras="${prefix}">
+      <legend class="profile-edit-label">${t('panel.classLog.attendance')}</legend>
+      <div class="att-choices">
+        <label class="att-pill att-choice" data-color="gray"><input type="radio" name="${prefix}-att" value="" ${current ? '' : 'checked'}> ${t('panel.classLog.attendanceNone')}</label>
+        ${labels.map(l => `<label class="att-pill att-choice" data-color="${escapeHTML(l.color)}"><input type="radio" name="${prefix}-att" value="${l.id}" ${String(l.id) === current ? 'checked' : ''}> ${escapeHTML(l.name)}</label>`).join('')}
+      </div>
+      <legend class="profile-edit-label">${t('panel.classLog.skills')}</legend>
+      <div class="skill-toggles">
+        ${CLASS_LOG_SKILLS.map(k => `<label class="skill-toggle"><input type="checkbox" data-skill value="${k}" ${skills.has(k) ? 'checked' : ''}> ${escapeHTML(classLogSkillLabel(k))}</label>`).join('')}
+      </div>
+    </fieldset>`;
+}
+
+function readClassLogExtras(root, prefix){
+  const box = root.querySelector(`[data-class-log-extras="${prefix}"]`);
+  if (!box) return { attendanceLabelId: null, skills: [] };
+  const att = box.querySelector(`input[name="${prefix}-att"]:checked`);
+  return { attendanceLabelId: att && att.value ? att.value : null, skills: [...box.querySelectorAll('input[data-skill]:checked')].map(i => i.value) };
+}
+
+function classLogRowBadgesHTML(log){
+  const label = log.attendance_label_id != null ? classLogLabelById(log.attendance_label_id) : null;
+  return classLogBadgesHTML({ attendanceName: label && label.name, attendanceColor: label && label.color, skills: log.skills, classroomName: log.__classroomName });
+}
+
+// ---------- Rótulos de Presença: editar, criar, arquivar ----------
+const CLASS_ATT_COLOR_KEYS = { green: 'panel.classLog.color.green', red: 'panel.classLog.color.red', yellow: 'panel.classLog.color.yellow', orange: 'panel.classLog.color.orange', blue: 'panel.classLog.color.blue', purple: 'panel.classLog.color.purple', gray: 'panel.classLog.color.gray' };
+function attendanceLabelRowHTML(l){
+  const id = l ? l.id : 'new';
+  const colorOpts = CLASS_ATTENDANCE_COLORS.map(c => `<option value="${c}" ${l && l.color === c ? 'selected' : ''}>${t(CLASS_ATT_COLOR_KEYS[c])}</option>`).join('');
+  const countsOpts = ['present', 'absent', 'other'].map(k => `<option value="${k}" ${(l ? l.counts_as : 'other') === k ? 'selected' : ''}>${t('panel.classLog.counts.' + k)}</option>`).join('');
+  return `
+    <div class="att-label-row" data-att-label-row="${id}">
+      ${l ? attendancePillHTML(l.name, l.color) : ''}
+      <input type="text" class="profile-edit-input" data-att-name maxlength="40" value="${l ? escapeHTML(l.name) : ''}" placeholder="${t('panel.classLog.labels.namePlaceholder')}" aria-label="${t('panel.classLog.labels.name')}">
+      <select class="profile-edit-input" data-att-color aria-label="${t('panel.classLog.labels.color')}">${colorOpts}</select>
+      <select class="profile-edit-input" data-att-counts aria-label="${t('panel.classLog.labels.counts')}">${countsOpts}</select>
+      <button type="button" class="btn btn-secondary" data-att-save="${id}">${l ? t('profile.save') : t('panel.classLog.labels.add')}</button>
+      ${l ? `<button type="button" class="admin-select-link" data-att-archive="${id}" style="background:none; border:none; cursor:pointer; padding:0;">${l.archived ? t('panel.classLog.labels.unarchive') : t('panel.classLog.labels.archive')}</button>` : ''}
+    </div>`;
+}
+
+function attendanceLabelsManagerHTML(){
+  const labels = CLASS_ATTENDANCE_LABELS || [];
+  return `
+    <details class="profile-section att-labels-manager" id="admin-att-labels">
+      <summary class="section-label">${t('panel.classLog.labels.title')}</summary>
+      <p class="profile-edit-hint">${t('panel.classLog.labels.hint')}</p>
+      ${labels.map(attendanceLabelRowHTML).join('')}
+      ${attendanceLabelRowHTML(null)}
+      <p class="profile-edit-error" id="admin-att-labels-error"></p>
+    </details>`;
+}
+
+function wireAttendanceLabelsManager(wrap){
+  const box = wrap.querySelector('#admin-att-labels');
+  if (!box) return;
+  const errorEl = box.querySelector('#admin-att-labels-error');
+  const after = () => { renderAdminClassLogsView({ keepLabelsOpen: true }); };
+  box.querySelectorAll('[data-att-save]').forEach(btn => btn.addEventListener('click', async () => {
+    const row = btn.closest('[data-att-label-row]');
+    const id = btn.dataset.attSave === 'new' ? null : Number(btn.dataset.attSave);
+    const res = await saveAttendanceLabel({ id, name: row.querySelector('[data-att-name]').value, color: row.querySelector('[data-att-color]').value,
+      countsAs: row.querySelector('[data-att-counts]').value, sortOrder: (CLASS_ATTENDANCE_LABELS || []).length + 1 });
+    if (!res.ok){ errorEl.textContent = res.error; return; }
+    showToast(t('panel.classLog.labels.saved'));
+    after();
+  }));
+  box.querySelectorAll('[data-att-archive]').forEach(btn => btn.addEventListener('click', async () => {
+    const l = classLogLabelById(btn.dataset.attArchive);
+    if (!l) return;
+    const res = await saveAttendanceLabel({ id: l.id, name: l.name, color: l.color, countsAs: l.counts_as, archived: !l.archived });
+    if (!res.ok){ errorEl.textContent = res.error; return; }
+    after();
+  }));
+}
 
 function classLogStudentLabel(s){
   return s.display_name
@@ -62,6 +163,7 @@ function classLogEditFormHTML(log){
       <input type="text" id="edit-class-log-observations-${log.id}" class="profile-edit-input" value="${escapeHTML(log.observations || '')}">
       <label class="profile-edit-label" for="edit-class-log-notes-${log.id}">${t('admin.classLogs.notesOpt')}</label>
       <textarea id="edit-class-log-notes-${log.id}" class="profile-edit-input" rows="3">${escapeHTML(log.notes || '')}</textarea>
+      ${classLogExtrasFormHTML(`edit-${log.id}`, log)}
       <p class="profile-edit-error" data-edit-class-log-error="${log.id}"></p>
       <div style="display:flex; gap:8px;">
         <button type="submit" class="btn btn-primary">${t('profile.save')}</button>
@@ -76,8 +178,8 @@ function classLogRowHTML(log, showUsername){
   return `
     <div class="admin-badge-row" style="align-items:flex-start;">
       <div class="admin-badge-info">
-        <div class="admin-badge-name">${showUsername ? `<span style="opacity:.6">@${escapeHTML(log.__studentUsername || '?')}</span> · ` : ''}${fmtDate(new Date(`${log.class_date}T00:00:00`))}</div>
-        ${!isEditing ? `<div class="admin-badge-desc">${classLogFieldRowsHTML(log) || `<em>${t('admin.classLogs.noFields')}</em>`}</div>` : classLogEditFormHTML(log)}
+        <div class="admin-badge-name">${showUsername && log.__studentUsername ? `<span style="opacity:.6">@${escapeHTML(log.__studentUsername)}</span> · ` : ''}${fmtDate(new Date(`${log.class_date}T00:00:00`))}</div>
+        ${!isEditing ? `${classLogRowBadgesHTML(log)}<div class="admin-badge-desc">${classLogFieldRowsHTML(log) || (classLogRowBadgesHTML(log) ? '' : `<em>${t('admin.classLogs.noFields')}</em>`)}</div>` : classLogEditFormHTML(log)}
       </div>
       ${!isEditing ? `
       <button class="admin-badge-delete-btn" data-edit-class-log="${log.id}" title="${t('myFlashcards.row.editTitle')}">✏️</button>
@@ -87,11 +189,15 @@ function classLogRowHTML(log, showUsername){
   `;
 }
 
-async function buildClassLogsListBoxHTML(selectedStudents){
+async function buildClassLogsListBoxHTML(selectedStudents, selectedClassrooms){
+  selectedClassrooms = selectedClassrooms || classLogSelectedClassrooms();
   const logLists = await Promise.all(selectedStudents.map(s => fetchClassLogs(s.student_id, s.language_app_key)));
-  const logs = logLists.flatMap((list, i) => list.map(log => ({ ...log, __studentUsername: selectedStudents[i].username })));
+  const roomLists = await Promise.all(selectedClassrooms.map(c => fetchClassroomLogs(c.id)));
+  const logs = logLists.flatMap((list, i) => list.map(log => ({ ...log, __studentUsername: selectedStudents[i].username })))
+    .concat(roomLists.flatMap((list, i) => list.map(log => ({ ...log, __classroomName: selectedClassrooms[i].name }))));
   logs.sort((a, b) => (b.class_date.localeCompare(a.class_date)) || (new Date(b.created_at) - new Date(a.created_at)));
-  const showUsername = selectedStudents.length > 1;
+  const showUsername = selectedStudents.length + selectedClassrooms.length > 1;
+  selectedStudents = selectedStudents.concat(selectedClassrooms);
 
   return `
     <div class="section-label">${t('admin.classLogs.listTitle', { n: logs.length })}</div>
@@ -132,6 +238,7 @@ function wireClassLogsListBox(listBox){
         homework: document.getElementById(`edit-class-log-homework-${id}`).value,
         observations: document.getElementById(`edit-class-log-observations-${id}`).value,
         notes: document.getElementById(`edit-class-log-notes-${id}`).value,
+        ...readClassLogExtras(form, `edit-${id}`),
       });
       if (!result.ok){ errorEl.textContent = result.error; return; }
       ADMIN_CLASS_LOGS_STATE.editingId = null;
@@ -154,7 +261,8 @@ async function refreshClassLogsListBox(listBox){
 async function updateClassLogsSelectionDependentUI(){
   const students = ADMIN_CLASS_LOGS_STATE._studentsCache;
   const selectedStudents = students.filter(s => ADMIN_CLASS_LOGS_STATE.studentIds.has(s.student_id));
-  const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length);
+  const selectedRooms = classLogSelectedClassrooms();
+  const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length) + (selectedRooms.length ? ` · ${tp('panel.classLog.classroomsSelected', selectedRooms.length)}` : '');
 
   const counterEl = document.getElementById('admin-classlog-selection-counter');
   if (counterEl) counterEl.textContent = selectionCountLabel;
@@ -165,12 +273,12 @@ async function updateClassLogsSelectionDependentUI(){
     : selectedStudents.length > 1 ? ` · ${tp('admin.common.selectedCount', selectedStudents.length)}` : '';
 
   const contentHint = document.getElementById('admin-classlog-content-hint');
-  if (contentHint) contentHint.style.display = selectedStudents.length ? 'none' : '';
+  if (contentHint) contentHint.style.display = selectedStudents.length || selectedRooms.length ? 'none' : '';
 
   const btn = document.getElementById('admin-create-class-log-btn');
   if (btn){
-    btn.disabled = !selectedStudents.length;
-    btn.textContent = `${t('admin.classLogs.register')}${adminForStudentsSuffix(selectedStudents.length)}`;
+    btn.disabled = !selectedStudents.length && !selectedRooms.length;
+    btn.textContent = `${t('admin.classLogs.register')}${adminForStudentsSuffix(selectedStudents.length)}${selectedRooms.length ? ` · ${tp('panel.classLog.classroomsSelected', selectedRooms.length)}` : ''}`;
   }
 
   const listBox = document.getElementById('admin-classlogs-list-box');
@@ -189,7 +297,7 @@ function applyClassLogPickerFilters(wrap){
   });
 }
 
-async function renderAdminClassLogsView(){
+async function renderAdminClassLogsView(opts){
   const wrap = document.getElementById('admin-classlogs-content');
   if (!wrap) return;
   if (!isTeacherUser()){
@@ -204,6 +312,14 @@ async function renderAdminClassLogsView(){
     return;
   }
   ADMIN_CLASS_LOGS_STATE._studentsCache = students;
+  const [rooms] = await Promise.all([
+    fetchClassLogClassrooms([...new Set(students.map(s => s.language_app_key))]),
+    fetchAttendanceLabels(),
+  ]);
+  ADMIN_CLASS_LOGS_STATE._classroomsCache = rooms;
+  const validRooms = new Set(rooms.map(c => String(c.id)));
+  ADMIN_CLASS_LOGS_STATE.classroomIds = new Set([...ADMIN_CLASS_LOGS_STATE.classroomIds].filter(id => validRooms.has(id)));
+  const selectedRooms = classLogSelectedClassrooms();
 
   // Mesmo padrão de admin-flashcards.js/admin-support-materials.js: seleção
   // vazia é um estado válido, nunca cai de volta pro primeiro aluno.
@@ -211,7 +327,7 @@ async function renderAdminClassLogsView(){
   ADMIN_CLASS_LOGS_STATE.studentIds = new Set([...ADMIN_CLASS_LOGS_STATE.studentIds].filter(id => validIds.has(id)));
 
   const selectedStudents = students.filter(s => ADMIN_CLASS_LOGS_STATE.studentIds.has(s.student_id));
-  const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length);
+  const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length) + (selectedRooms.length ? ` · ${tp('panel.classLog.classroomsSelected', selectedRooms.length)}` : '');
 
   const langsPresent = [...new Set(students.map(s => s.language_app_key))];
   const langFilterHTML = langsPresent.length > 1 ? `
@@ -248,12 +364,23 @@ async function renderAdminClassLogsView(){
       <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:flex; flex-direction:column;">
         ${studentCheckboxesHTML}
       </div>
+      ${rooms.length ? `
+      <div class="section-label" style="margin-top:12px;">${t('panel.classLog.classrooms')}</div>
+      <p class="profile-edit-hint">${t('panel.classLog.classroomsHint')}</p>
+      <div class="profile-edit-input" style="height:auto; max-height:140px; overflow-y:auto; display:flex; flex-direction:column;">
+        ${rooms.map(c => `<label data-classroom-row data-lang="${c.language_app_key}" style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0;">
+          <input type="checkbox" data-classlog-classroom-checkbox value="${c.id}" ${ADMIN_CLASS_LOGS_STATE.classroomIds.has(String(c.id)) ? 'checked' : ''}>
+          👥 ${escapeHTML(c.name)} · ${STUDENT_LANGUAGE_LABELS[c.language_app_key] || c.language_app_key} · ${tp('panel.classLog.membersCount', c.members.length)}
+        </label>`).join('')}
+      </div>` : ''}
       <p class="profile-edit-hint" id="admin-classlog-selection-counter" style="font-weight:700; margin-top:6px;">${selectionCountLabel}</p>
     </div>
 
+    ${attendanceLabelsManagerHTML()}
+
     <div class="profile-section">
       <div class="section-label">${t('admin.classLogs.newTitle')}<span id="admin-classlog-content-subtitle">${newLogSubtitle}</span></div>
-      <p class="profile-edit-hint" id="admin-classlog-content-hint" style="${selectedStudents.length ? 'display:none;' : ''}">${t('admin.classLogs.needStudent')}</p>
+      <p class="profile-edit-hint" id="admin-classlog-content-hint" style="${selectedStudents.length || selectedRooms.length ? 'display:none;' : ''}">${t('admin.classLogs.needStudent')}</p>
       <form id="admin-create-class-log-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-class-log-date">${t('admin.common.date')}</label>
         <input type="date" id="admin-class-log-date" class="profile-edit-input" value="${todayStr()}">
@@ -265,17 +392,28 @@ async function renderAdminClassLogsView(){
         <input type="text" id="admin-class-log-observations" class="profile-edit-input" placeholder="${t('admin.classLogs.observationsPlaceholder')}" autocomplete="off">
         <label class="profile-edit-label" for="admin-class-log-notes">${t('admin.classLogs.notesOpt')}</label>
         <textarea id="admin-class-log-notes" class="profile-edit-input" rows="3" placeholder="${t('admin.classLogs.notesPlaceholder')}"></textarea>
+        ${classLogExtrasFormHTML('new', null)}
         <p class="profile-edit-error" id="admin-create-class-log-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-class-log-btn" ${selectedStudents.length ? '' : 'disabled'}>${t('admin.classLogs.register')}${adminForStudentsSuffix(selectedStudents.length)}</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-create-class-log-btn" ${selectedStudents.length || selectedRooms.length ? '' : 'disabled'}>${t('admin.classLogs.register')}${adminForStudentsSuffix(selectedStudents.length)}${selectedRooms.length ? ` · ${tp('panel.classLog.classroomsSelected', selectedRooms.length)}` : ''}</button>
       </form>
     </div>
 
     <div class="profile-section" id="admin-classlogs-list-box">
-      ${await buildClassLogsListBoxHTML(selectedStudents)}
+      ${await buildClassLogsListBoxHTML(selectedStudents, selectedRooms)}
     </div>
   `;
 
   wireClassLogsListBox(document.getElementById('admin-classlogs-list-box'));
+  wireAttendanceLabelsManager(wrap);
+  if (opts && opts.keepLabelsOpen) wrap.querySelector('#admin-att-labels')?.setAttribute('open', '');
+
+  wrap.querySelectorAll('[data-classlog-classroom-checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) ADMIN_CLASS_LOGS_STATE.classroomIds.add(cb.value);
+      else ADMIN_CLASS_LOGS_STATE.classroomIds.delete(cb.value);
+      updateClassLogsSelectionDependentUI();
+    });
+  });
 
   wrap.querySelectorAll('[data-classlog-student-checkbox]').forEach(cb => {
     cb.addEventListener('change', () => {
@@ -317,7 +455,8 @@ async function renderAdminClassLogsView(){
     errorEl.textContent = '';
 
     const selectedNow = ADMIN_CLASS_LOGS_STATE._studentsCache.filter(s => ADMIN_CLASS_LOGS_STATE.studentIds.has(s.student_id));
-    if (!selectedNow.length){
+    const roomsNow = classLogSelectedClassrooms();
+    if (!selectedNow.length && !roomsNow.length){
       errorEl.textContent = t('admin.common.selectAtLeastOne');
       return;
     }
@@ -328,16 +467,22 @@ async function renderAdminClassLogsView(){
     const homework = document.getElementById('admin-class-log-homework').value;
     const observations = document.getElementById('admin-class-log-observations').value;
     const notes = document.getElementById('admin-class-log-notes').value;
+    const extras = readClassLogExtras(wrap, 'new');
 
     // Uma linha em teacher_class_logs POR aluno selecionado -- mesmo
     // conteúdo pra todos, mesmo padrão já usado em flashcards/material de
     // apoio (faz sentido pra uma aula em grupo com o mesmo tópico/lição de
     // casa pra todo mundo).
+    // Turma (094): UMA linha com classroom_id, vista por todos os membros da turma.
     const results = await Promise.all(selectedNow.map(s => createClassLog({
       studentId: s.student_id,
       languageAppKey: s.language_app_key,
-      classDate, topic, homework, observations, notes,
-    })));
+      classDate, topic, homework, observations, notes, ...extras,
+    })).concat(roomsNow.map(c => createClassLog({
+      classroomId: c.id,
+      languageAppKey: c.language_app_key,
+      classDate, topic, homework, observations, notes, ...extras,
+    }))));
     btn.disabled = false;
 
     const failed = results.filter(r => !r.ok);

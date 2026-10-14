@@ -68,7 +68,11 @@ const STUDENT_TEACHER_NAV = { logs: 0, materials: 0 };
 
 async function fetchMyClassLogs(languageAppKey){
   if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return [];
-  const { data, error } = await supabaseClient.rpc('get_my_class_logs', { p_language_app_key: languageAppKey });
+  // 094: aulas dele + da turma, com Presença e Competências. Sem a 094 no banco, cai na RPC antiga.
+  let { data, error } = await supabaseClient.rpc('get_my_class_log_entries', { p_language_app_key: languageAppKey });
+  if (error && /get_my_class_log_entries|PGRST202|42883/.test(`${error.code} ${error.message}`)){
+    ({ data, error } = await supabaseClient.rpc('get_my_class_logs', { p_language_app_key: languageAppKey }));
+  }
   if (error){ console.error('Erro ao carregar aulas:', error); return []; }
   return Array.isArray(data) ? data : [];
 }
@@ -184,9 +188,12 @@ function classLogEntryHTML(log){
   return `
     <li class="class-log-entry">
       <time class="class-log-date" datetime="${escapeHTML(String(log.class_date || ''))}">${escapeHTML(fmtDate(classLogLocalDate(log.class_date), { day: 'numeric', month: 'short', year: 'numeric' }))}</time>
-      <dl class="class-log-fields">
-        ${rows.map(([k, v]) => `<div class="class-log-field"><dt>${escapeHTML(k)}</dt><dd>${escapeHTML(v)}</dd></div>`).join('')}
-      </dl>
+      <div class="class-log-body">
+        ${typeof classLogBadgesHTML === 'function' ? classLogBadgesHTML({ attendanceName: log.attendance_name, attendanceColor: log.attendance_color, skills: log.skills, classroomName: log.classroom_name }) : ''}
+        <dl class="class-log-fields">
+          ${rows.map(([k, v]) => `<div class="class-log-field"><dt>${escapeHTML(k)}</dt><dd>${escapeHTML(v)}</dd></div>`).join('')}
+        </dl>
+      </div>
     </li>`;
 }
 
