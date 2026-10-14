@@ -227,7 +227,7 @@ const MURAL_FAKE = (who) => {
     await shot('aluna-menu');
     await ev(() => document.querySelector('.student-only-nav').click());
     await page.waitForSelector('#view-student-panel.active #my-mural-content .mural-post');
-    L('Aluno: 3 abas Mural, Aulas, Material', await ev(() => [...document.querySelectorAll('[data-student-section]')].map(b => b.dataset.studentSection).join() === 'mural,classlogs,materials'));
+    L('Aluno: 4 abas Mural, Aulas, Material, Revisão', await ev(() => [...document.querySelectorAll('[data-student-section]')].map(b => b.dataset.studentSection).join() === 'mural,classlogs,materials,revisao'));
     L('aluna: abre na turma com novidade', await ev(() => document.querySelector('#my-mural-content .mural-chip.is-active')?.textContent.includes('Turma de quinta')));
     L('aluna: vê os 2 recados (o dela inclusive)', await ev(() => document.querySelectorAll('#my-mural-content .mural-post').length === 2));
     L('aluna: não edita nem apaga recado da professora', await ev(() => !document.querySelector('#my-mural-content [data-mural-edit], #my-mural-content [data-mural-del-post]')));

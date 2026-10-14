@@ -10,5 +10,7 @@ for f in $(ls "$MIG" | sort | grep -E '^0(59|6[1-9]|7[0-4])_'); do
 done
 $P conquistas -f "$MIG/086_friends_streak_milestones_and_congrats.sql" >/dev/null 2>&1 || { echo "FALHA ao aplicar 086"; exit 1; }
 $P conquistas -f "$MIG/091_badge_congrats.sql" >/dev/null 2>&1 || { echo "FALHA ao aplicar 091"; $P conquistas -f "$MIG/091_badge_congrats.sql" 2>&1 | grep -i error | head -3; exit 1; }
-echo "migrations aplicadas (até 074 + 086 + 091)"
+$P conquistas -f "$MIG/092_podium_weeks.sql" >/dev/null 2>&1 || { echo "FALHA ao aplicar 092"; $P conquistas -f "$MIG/092_podium_weeks.sql" 2>&1 | grep -i error | head -3; exit 1; }
+echo "migrations aplicadas (até 074 + 086 + 091 + 092)"
 psql -h /tmp/pg -p 54329 -U pguser conquistas -q -At -f "$HERE/test_badge_congrats_091.sql" 2>&1 | grep -v '^\s*$'
+psql -h /tmp/pg -p 54329 -U pguser conquistas -q -At -f "$HERE/test_podium_092.sql" 2>&1 | grep -v '^\s*$'

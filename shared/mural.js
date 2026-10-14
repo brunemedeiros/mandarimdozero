@@ -106,13 +106,13 @@ function muralTeacherUnread(list){
   return (tch.classrooms || []).reduce((a, c) => a + (c.unread || 0), 0) + (tch.roster || []).reduce((a, s) => a + (s.unread || 0), 0);
 }
 
-function muralSetPill(el, n){
+function muralSetPill(el, n, labelKey){
   if (!el) return;
   let pill = el.querySelector(':scope > .mural-count');
   if (n > 0){
     if (!pill){ pill = document.createElement('span'); pill.className = 'mural-count'; el.appendChild(pill); }
     pill.textContent = n > 99 ? '99+' : String(n);
-    pill.setAttribute('aria-label', tp('mural.newCount', n));
+    pill.setAttribute('aria-label', tp(labelKey || 'mural.newCount', n));
   } else if (pill) pill.remove();
 }
 
@@ -123,8 +123,12 @@ function muralApplyBadges(){
   const list = MURAL_STATE.list;
   const sN = muralStudentUnread(list);
   const tN = muralTeacherUnread(list);
-  document.querySelectorAll('#student-panel-btn, .student-only-nav[data-tab="student-panel"], [data-student-section="mural"]').forEach(el => muralSetPill(el, sN));
-  muralSetPill(document.getElementById('mais-btn'), sN);
+  // Aluno (2026-10-14): o item soma tudo; dentro, Mural = mensagens novas e Revisão = cartões para hoje.
+  const rN = typeof classReviewTodayCount === 'function' ? classReviewTodayCount() : 0;
+  document.querySelectorAll('#student-panel-btn, .student-only-nav[data-tab="student-panel"]').forEach(el => muralSetPill(el, sN + rN, 'studentPanel.newCount'));
+  document.querySelectorAll('[data-student-section="mural"]').forEach(el => muralSetPill(el, sN));
+  document.querySelectorAll('[data-student-section="revisao"]').forEach(el => muralSetPill(el, rN, 'studentPanel.review.dueCount'));
+  muralSetPill(document.getElementById('mais-btn'), sN + rN, 'studentPanel.newCount');
   document.querySelectorAll('#teacher-panel-btn, .teacher-only-nav[data-tab="teacher-panel"], [data-teacher-section="mural"]').forEach(el => muralSetPill(el, tN));
   if (typeof applyStudentNavVisibility === 'function') applyStudentNavVisibility();
 }

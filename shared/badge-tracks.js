@@ -46,6 +46,9 @@
     { id: 'challenge', icon: '🏁', fluent: '1f3c1', scope: 'course', value: function(m){ return m.challengesDone; },
       goals: function(m){ return m.challengesTotal > 0 ? capGoals([10, 50, 200], m.challengesTotal) : [10, 50, 200]; },
       available: function(m){ return m.challengesDone != null; } },
+    // Pódio: semanas fechadas em 1º lugar entre os amigos (RPC my_podium_weeks, migration 092).
+    { id: 'podium', icon: '🏆', fluent: '1f3c6', scope: 'account', value: function(m){ return m.podiumWeeks; }, goals: function(){ return [1, 5, 10]; },
+      available: function(m){ return m.podiumWeeks != null; } },
     { id: 'friends', icon: '🤝', fluent: '1f91d', scope: 'account', value: function(m){ return m.friends; }, goals: function(){ return [1, 3, 10]; },
       available: function(m){ return m.friends != null; }, noCongrats: true },
     { id: 'comeback', icon: '🔄', fluent: '1f504', scope: 'account', value: function(m){ return m.comeback ? 1 : 0; }, goals: function(){ return [1]; } }
