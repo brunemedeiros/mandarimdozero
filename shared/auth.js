@@ -117,6 +117,8 @@ async function initAuth(){
       await renderStandalonePublicProfile(publicProfileUsername);
     } else if (typeof teacherInviteGateIfPending === 'function' && await teacherInviteGateIfPending()){
       // Link de convite da professora (?convite=): o cartão aparece antes do login (077).
+    } else if (typeof muralClassroomGateIfPending === 'function' && await muralClassroomGateIfPending()){
+      // Link da turma (?turma=): o cartão aparece antes do login (087).
     } else {
       goToNeutralGate();
     }
@@ -265,6 +267,8 @@ async function onUserLoggedIn(user){
   if (typeof friendsConsumePendingInvite === 'function') friendsConsumePendingInvite();
   // Convite da professora (link guardado ou convite pendente na Trilha).
   if (typeof teacherInvitesAfterLogin === 'function') teacherInvitesAfterLogin();
+  // Mural (087): link da turma guardado e o "+N" no Perfil.
+  if (typeof muralAfterLogin === 'function') muralAfterLogin();
 }
 
 // ---------- Admin Mode ON/OFF (topbar) ----------

@@ -1124,13 +1124,6 @@ document.getElementById('admin-badges-btn').addEventListener('click', () => {
 // avatar e ganhou um botão de verdade no topo da tela de Revisão
 // (#review-my-flashcards-btn, wired mais abaixo).
 
-// Fase 8b do sistema de alunas particulares (ver CLAUDE.md) -- "Material
-// de apoio" é pra TODA conta logada (mesmo raciocínio de my-flashcards-btn
-// acima), mas só LEITURA -- quem envia é a professora, não a própria conta.
-document.getElementById('support-materials-btn').addEventListener('click', () => {
-  document.getElementById('user-menu-dropdown').classList.remove('open');
-  switchTab('support-materials');
-});
 
 // Entrada geral da bandeira ⚑ (menu "Mais"/usuário) -- sem contexto de
 // exercício específico, captureReportContext() ainda pega unidade/lição
@@ -8099,9 +8092,8 @@ const switchTab = createTabSwitcher({
     settings: renderSettingsView,
     'admin-badges': renderAdminPanelView,
     'my-flashcards': renderMyFlashcardsView,
-    'support-materials': renderSupportMaterialsView,
     'teacher-panel': renderTeacherPanelView,
-    'my-class-logs': renderMyClassLogsView,
+    'student-panel': renderStudentPanelView,
     leaderboard: openLeaderboardView,
     friends: renderFriendsView,
     path: renderUnitsGrid,
