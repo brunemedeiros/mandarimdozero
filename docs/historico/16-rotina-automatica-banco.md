@@ -61,8 +61,14 @@ A ferramenta de segredos do MCP pede que a autora digite o valor no painel do Su
 3. No MESMO dia, antes da tarefa das 01:50: marcar "Atualizar automaticamente" no site e arquivar o aluno no artifact (a tarefa antiga ignora arquivados). Arquivar tira o acesso dele ao `#revisar`.
 4. A tarefa nova (texto próprio, chama a função) cuida só dos gerenciados. A antiga só sai do ar quando o último aluno migrar.
 
+## Teste de rede da tarefa agendada (2026-10-14): bloqueado pelo classificador
+A versão 1 do teste (`docs/rotina-banco/teste-de-rede.md`) foi recusada pela própria sessão da tarefa (modo Auto) como "Exfil Scouting / Data Exfiltration":
+tokens dentro de um `curl` para um endereço desconhecido e pedido de contagem de alunos. Não é firewall. Próximo passo: versão 2 (só ping, autorização da dona dita às claras);
+se também for bloqueada, plano B sem HTTP (conector do Supabase + tabela caixa de entrada processada dentro do Supabase). Segredos de produção conferidos: a função
+responde 401 (não 503) a um token inventado, então os dois segredos existem lá.
+
 ## Pendências
-- Teste ao vivo no Staging (secrets + `ping` + `ingest`) e teste de chamada de escrita a partir do ambiente da tarefa agendada (rede avaliada por chamada).
+- Teste de chamada de escrita a partir do ambiente da tarefa agendada: versão 1 bloqueada pelo classificador (ver acima); rodar a versão 2.
 - Escrever o texto da tarefa nova (passos: `state` -> agenda -> caderno -> `ingest`); só ligar depois de testada.
 - Produção: migrations e função feitas; falta a autora digitar os segredos lá e o merge da branch (caixa "Atualizar automaticamente" no formulário do aluno).
 - Interface: mostrar "última rodada" (lê `review_bank_agent_runs`).
