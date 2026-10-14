@@ -26,17 +26,6 @@ const TTS = {
   pollAttempts: 0
 };
 
-// Nem toda voz do mesmo idioma soa igual: o SO costuma expor tanto vozes
-// "neurais"/online (Google, Microsoft Natural/Online) quanto vozes locais
-// robóticas mais antigas, e a ordem que o navegador retorna é arbitrária.
-// Pontua pelo nome pra preferir a melhor voz disponível, não só a primeira.
-function voiceQualityScore(v){
-  const name = (v.name || '').toLowerCase();
-  if (/natural|neural/.test(name)) return 3;
-  if (/online/.test(name)) return 2;
-  if (/google/.test(name)) return 1;
-  return 0;
-}
 
 function loadFrenchVoice(){
   if (!TTS.supported) return;
@@ -65,17 +54,6 @@ if (TTS.supported){
   pollForVoices();
 }
 
-function warmUpTTSOnce(){
-  if (TTS.warmedUp || !TTS.supported) return;
-  TTS.warmedUp = true;
-  try{
-    const warm = new SpeechSynthesisUtterance(' ');
-    warm.volume = 0;
-    window.speechSynthesis.speak(warm);
-  }catch(e){ /* silencioso: warm-up é best-effort */ }
-  document.removeEventListener('click', warmUpTTSOnce);
-  document.removeEventListener('touchstart', warmUpTTSOnce);
-}
 document.addEventListener('click', warmUpTTSOnce, { once:true });
 document.addEventListener('touchstart', warmUpTTSOnce, { once:true });
 
@@ -107,16 +85,6 @@ let exerciseAudioEl = null;
 // LAST_AUDIO_BTN.isConnected já vira false sozinho.
 let LAST_AUDIO_BTN = null;
 
-// Contagem vitalícia de reproduções de áudio (clique manual ou atalho "r")
-// -- só pro badge "Ouvido Treinado" (artefato §8). Tocar áudio nunca passa
-// perto de nenhum addXP() sozinho, então dispara a checagem de badge aqui
-// mesmo em vez de confiar no próximo XP ganho (que pode demorar).
-function registerAudioPlay(){
-  STATE.totalAudioPlays = (STATE.totalAudioPlays || 0) + 1;
-  ensureDailyBucket();
-  STATE.daily.audioPlaysToday += 1;
-  checkAndCelebrateBadges();
-}
 
 function stopExerciseAudio(){
   if (exerciseAudioEl){
@@ -136,18 +104,8 @@ function stopExerciseAudio(){
 // Synthesis são players diferentes; um "ding" de ~200ms não precisa de
 // stopExerciseAudio()). Silenciável em Preferências (Seu progresso).
 const FEEDBACK_SOUND_KEY = 'frances_feedback_sound';
-function isFeedbackSoundEnabled(){
-  return localStorageSafeGet(FEEDBACK_SOUND_KEY) !== '0';
-}
 
 let feedbackAudioCtx = null;
-function getFeedbackAudioCtx(){
-  const Ctx = window.AudioContext || window.webkitAudioContext;
-  if (!Ctx) return null;
-  if (!feedbackAudioCtx) feedbackAudioCtx = new Ctx();
-  if (feedbackAudioCtx.state === 'suspended') feedbackAudioCtx.resume();
-  return feedbackAudioCtx;
-}
 
 function playFeedbackTone(ctx, freq, startTime, duration, peakGain){
   const osc = ctx.createOscillator();
@@ -163,21 +121,6 @@ function playFeedbackTone(ctx, freq, startTime, duration, peakGain){
   osc.stop(startTime + duration + 0.02);
 }
 
-// isCorrect === true: "ding" ascendente curto (2 notas). false: um tom só,
-// mais grave e mais curto -- neutro, não punitivo (a explicação do erro já
-// fica a cargo do painel de texto, o som só confirma o resultado).
-function playFeedbackSound(isCorrect){
-  if (!isFeedbackSoundEnabled()) return;
-  const ctx = getFeedbackAudioCtx();
-  if (!ctx) return;
-  const now = ctx.currentTime;
-  if (isCorrect){
-    playFeedbackTone(ctx, 587.33, now, 0.09, 0.16);
-    playFeedbackTone(ctx, 880.00, now + 0.08, 0.16, 0.16);
-  } else {
-    playFeedbackTone(ctx, 233.08, now, 0.18, 0.13);
-  }
-}
 
 // Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
 // API do navegador — qualidade consistente pra todo aluno, independente do
@@ -349,14 +292,6 @@ function audioBtnHTML(text, extraClass){
 function customAudioBtnHTML(url){
   return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="${t('fr.audio.listen')}" title="${t('fr.audio.listen')}">🎧</button>`;
 }
-function wireCustomAudioButtons(container){
-  container.querySelectorAll('.custom-audio-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      new Audio(btn.dataset.audioUrl).play().catch(() => showToast(t('toast.audioPlayFailedDot')));
-    });
-  });
-}
 
 // Botão de áudio devagar -- companheiro de qualquer "Écouter" manual
 // (desafios/exemplos onde o áudio NÃO toca sozinho, decisão explícita da
@@ -367,7 +302,7 @@ function wireCustomAudioButtons(container){
 // então não ganha este botão extra.
 const SLOW_AUDIO_RATE = 0.65;
 function slowAudioBtnHTML(id){
-  return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="${t('fr.audio.listenSlower')}">🐢 Lentement</button>`;
+  return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="${t('fr.audio.listenSlower')}">🐢 ${chT('ch.slow')}</button>`;
 }
 function slowAudioIconBtnHTML(id){
   return `<button class="audio-btn audio-btn-slow" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
@@ -1013,10 +948,6 @@ document.getElementById('cloze-mode-switch').addEventListener('click', () => {
 });
 updateClozeModeSwitch();
 
-function updateFeedbackSoundSwitch(){
-  const btn = document.getElementById('feedback-sound-switch');
-  if (btn) btn.setAttribute('aria-checked', isFeedbackSoundEnabled() ? 'true' : 'false');
-}
 document.getElementById('feedback-sound-switch').addEventListener('click', () => {
   localStorageSafeSet(FEEDBACK_SOUND_KEY, isFeedbackSoundEnabled() ? '0' : '1');
   updateFeedbackSoundSwitch();
@@ -1231,56 +1162,6 @@ function registerStudyToday(){
   STATE.pendingStreakCelebration = true;
 }
 
-function maybeShowStreakCelebration(){
-  if (!STATE.pendingStreakCelebration) return;
-  STATE.pendingStreakCelebration = false;
-  // Nem todo lugar que chama registerStudyToday() (que muda STATE.streak)
-  // também chama renderTopbarStats() logo em seguida -- vários caminhos só
-  // chegam até aqui, no momento em que a comemoração de fato aparece.
-  // Centralizar a atualização do pill aqui garante que ele nunca fique
-  // mostrando um número velho enquanto a tela de sequência já mostra o novo.
-  renderTopbarStats();
-  // showStreakCelebration() é sempre chamada ANTES do innerHTML da tela de
-  // conclusão (lição/unidade/sessão) ser escrito, no mesmo call site -- como
-  // as duas coisas rodam na mesma volta síncrona, o navegador só pinta UM
-  // quadro final, com o overlay de sequência já por cima, escondendo a tela
-  // de conclusão atrás dele até a pessoa fechar o modal. Resultado relatado:
-  // a tela de sequência parecia aparecer ANTES da tela de "Lição concluída",
-  // quando devia ser o contrário. Um pequeno atraso garante que o quadro da
-  // tela de conclusão pinte primeiro, e só depois o modal aparece por cima.
-  setTimeout(showStreakCelebration, 500);
-}
-
-// ---------- Tela de sequência de streak (estilo Duolingo) ----------
-// Aparece uma única vez por dia, na primeira atividade que ativa o streak
-// (lição, checkpoint, revisão, jogo de combinar, conjugação...) — nunca de
-// novo no mesmo dia, já que registerStudyToday() só chega até aqui na
-// primeira chamada depois da virada do dia.
-// STREAK_DAY_LABELS agora vem de shared/wizard.js (também usada por
-// buildMinutesWeekData lá).
-function buildStreakWeekData(){
-  const days = [];
-  for (let i = 6; i >= 0; i--){
-    const d = new Date(Date.now() - i*86400000);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    days.push({ label: STREAK_DAY_LABELS[d.getDay()], done: !!STATE.activityLog[key], isToday: i === 0 });
-  }
-  return days;
-}
-
-function showStreakCelebration(){
-  // Fase 1 do sistema de notificações.
-  fireNotificationEvent('streak_completed', 'streak', { days: STATE.streak });
-  document.getElementById('streak-days-num').textContent = STATE.streak;
-  { const u = document.getElementById('streak-days-unit'); if (u) u.textContent = STATE.streak === 1 ? 'dia' : 'dias'; }
-  document.getElementById('streak-week-row').innerHTML = buildStreakWeekData().map(d => `
-    <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
-      <div class="streak-day-circle">${d.done ? '✓' : ''}</div>
-      <div class="streak-day-label">${d.label}</div>
-    </div>
-  `).join('');
-  document.getElementById('streak-modal-overlay').style.display = 'flex';
-}
 
 document.getElementById('streak-modal-continue-btn').addEventListener('click', () => {
   document.getElementById('streak-modal-overlay').style.display = 'none';
@@ -1521,15 +1402,6 @@ const GENERAL_CHALLENGES = [
   { id:'translateBlocks2', icon:'🧱', get label(){ return t('fr.mission.translateBlocks2'); }, target:2, get: d => d.exerciseFormatCounts?.reorder || 0 }
 ];
 
-function dailySeed(str){
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
-  return h;
-}
-
-function pickDailyFromPool(pool, salt){
-  return pool[dailySeed(STATE.daily.date + ':' + salt) % pool.length];
-}
 
 // ---------- Feasibility das missões de estoque limitado (grilling "missões
 // do dia") ----------
@@ -1559,31 +1431,6 @@ function missionSpeedReviewFeasible(){
   return missionReviewSupply() >= 1;
 }
 
-// Resolve o item sorteado do pool revisão/conjugação contra o estoque real
-// do dia: devolve o item original (cabe), uma cópia com meta reduzida (tipo
-// quantidade, ainda acima do piso) ou o item seguro do pool (conj1 -- nunca
-// depende de estoque de revisão). Chamado uma única vez por dia dentro de
-// assignTodaysMissions() -- nunca recalculado depois, senão a meta ficaria
-// se movendo ao longo do dia conforme o estoque muda.
-function resolveRevisaoMission(picked, pool, safeFallbackId){
-  const fallback = () => pool.find(m => m.id === safeFallbackId) || picked;
-  if (picked.id === 'reviews15'){
-    const supply = missionReviewSupply();
-    if (supply >= picked.target) return picked;
-    if (supply >= MISSION_QUANTITY_FLOOR) return Object.assign({}, picked, { target: supply });
-    return fallback();
-  }
-  if (picked.id === 'overdue3'){
-    return missionOverdueSupply() >= picked.target ? picked : fallback();
-  }
-  if (picked.id === 'matchGame1'){
-    return missionMatchGameFeasible() ? picked : fallback();
-  }
-  if (picked.id === 'speedReview1'){
-    return missionSpeedReviewFeasible() ? picked : fallback();
-  }
-  return picked;
-}
 
 const ALL_CHALLENGE_POOLS = [EASY_CHALLENGES, REVISAO_CONJ_CHALLENGES, GENERAL_CHALLENGES];
 function challengeById(id){
@@ -1592,17 +1439,6 @@ function challengeById(id){
     if (found) return found;
   }
   return null;
-}
-// Reconstrói o objeto completo (icon/label/get) do desafio a partir do
-// registro persistido ({id, target}) -- state.daily.missions só guarda dados
-// serializáveis (sincroniza com o Supabase), nunca funções.
-function materializeMission(assigned){
-  const base = challengeById(assigned.id);
-  if (!base) return null; // pool mudou entre deploys -- atribuição órfã, ignora
-  if (assigned.target === base.target) return base;
-  const scaled = Object.assign({}, base, { target: assigned.target });
-  if (base.labelForTarget) scaled.label = base.labelForTarget(assigned.target);
-  return scaled;
 }
 
 function assignTodaysMissions(){
@@ -1628,38 +1464,6 @@ function todaysChallenges(){
   return STATE.daily.missions.map(materializeMission).filter(Boolean);
 }
 
-// Bônus por completar as 3 Missões do dia (não por missão individual --
-// cada ação que alimenta uma missão já dá XP por si só em outro lugar; o
-// bônus aqui é só pelo conjunto das 3). Chamado de dentro de addXP() (ver
-// comentário lá) pra ser checado depois de QUALQUER ganho de XP, já que
-// qualquer um deles pode ser o que fecha a última missão do dia.
-function checkDailyMissionsBonus(){
-  ensureDailyBucket();
-  if (STATE.daily.missionsBonusAwarded) return;
-  const allDone = todaysChallenges().every(c => (Number(c.get(STATE.daily)) || 0) >= c.target);
-  if (!allDone) return;
-  STATE.daily.missionsBonusAwarded = true;
-  addXP(30);
-  showToast(t('toast.dailyMissionsAllDone'));
-}
-
-// Notificação "Missão concluída" -- uma por Missão do dia individual (não
-// pelo conjunto das 3, isso já é o bônus acima). Guarda em
-// STATE.daily.missionsNotified pra disparar exatamente uma vez por missão
-// por dia, mesmo que addXP() rode várias vezes depois dela já ter batido a
-// meta (ex.: XP de exercícios seguintes na mesma sessão). Chamada do mesmo
-// lugar que checkDailyMissionsBonus() (dentro de addXP()), pelo mesmo
-// motivo: qualquer ganho de XP pode ser o que fecha uma missão.
-function checkDailyMissionCompletions(){
-  ensureDailyBucket();
-  todaysChallenges().forEach(c => {
-    if (STATE.daily.missionsNotified[c.id]) return;
-    const current = Number(c.get(STATE.daily)) || 0;
-    if (current < c.target) return;
-    STATE.daily.missionsNotified[c.id] = true;
-    fireNotificationEvent('mission_completed', 'desafios', { mission_label: c.label, mission_icon: c.icon }, 'path');
-  });
-}
 
 function renderDailyChallengesScreen(){
   const contentEl = document.getElementById('step-content');
@@ -1809,20 +1613,6 @@ const BADGES = [
 // já passam por addXP -- não precisa espalhar a checagem por unit/streak/
 // revisão separadamente.
 let earnedBadgeIds = new Set();
-function seedEarnedBadges(){
-  earnedBadgeIds = new Set(BADGES.filter(b => b.check(STATE)).map(b => b.id));
-  // C4: conquistas da conta ganhas em outro idioma também valem aqui (sem celebrar de novo).
-  loadAccountEarnedBadges().then(() => {
-    earnedBadgeIds = AccountProgress.unionBadgeIds(earnedBadgeIds, accountEarnedBadgeRows);
-    upsertEarnedBadges([...earnedBadgeIds]);
-    if (typeof renderProgressView === 'function' && document.getElementById('badge-grid')) renderProgressView();
-  });
-  // Backfill/sincronização: garante que a tabela pública earned_badges
-  // reflita tudo que já era verdade antes desta feature existir, ou que
-  // uma sessão anterior não tenha conseguido gravar -- upsert idempotente,
-  // sem custo de duplicar (ver shared/auth.js).
-  upsertEarnedBadges([...earnedBadgeIds]);
-}
 
 let badgeCelebrationQueue = [];
 let badgeCelebrationShowing = false;
@@ -1830,46 +1620,7 @@ let badgeCelebrationShowing = false;
 // Deck), a conquista fica guardada e aparece só na tela de fim ("Revisão
 // concluída"), para não cobrir o cartão. Fora da sessão, aparece na hora.
 let badgeCelebrationHeld = false;
-function holdBadgeCelebrations(){ badgeCelebrationHeld = true; }
-function releaseBadgeCelebrations(){
-  if (!badgeCelebrationHeld) return;
-  badgeCelebrationHeld = false;
-  processBadgeCelebrationQueue();
-}
 
-function checkAndCelebrateBadges(){
-  const newlyEarned = [];
-  BADGES.forEach(b => {
-    if (earnedBadgeIds.has(b.id)) return;
-    if (b.check(STATE)){
-      earnedBadgeIds.add(b.id);
-      newlyEarned.push(b);
-    }
-  });
-  if (newlyEarned.length){
-    badgeCelebrationQueue.push(...newlyEarned);
-    processBadgeCelebrationQueue();
-    // Fase 1 do sistema de notificações -- um evento por badge (não um só
-    // pro lote), mesma granularidade da celebração visual acima.
-    newlyEarned.forEach(b => {
-      fireNotificationEvent('achievement_unlocked', 'gamificacao', { badge_name: b.name, badge_icon: b.icon }, 'profile');
-    });
-    upsertEarnedBadges(newlyEarned.map(b => b.id));
-  }
-}
-
-// Fila (não pilha): se dois badges forem ganhos no mesmo instante (ex.: XP
-// cruza 500 no mesmo golpe que termina o nível), mostra um de cada vez --
-// nunca dois cartões sobrepostos brigando pela mesma área da tela.
-function processBadgeCelebrationQueue(){
-  if (badgeCelebrationHeld || badgeCelebrationShowing || !badgeCelebrationQueue.length) return;
-  badgeCelebrationShowing = true;
-  const badge = badgeCelebrationQueue.shift();
-  showBadgeUnlockCelebration(badge, () => {
-    badgeCelebrationShowing = false;
-    processBadgeCelebrationQueue();
-  });
-}
 
 function showBadgeUnlockCelebration(badge, onDone){
   const layer = document.getElementById('badge-unlock-layer');
@@ -10208,6 +9959,11 @@ async function importChallengesFromJSON(rawText){
       skipped.push(t('adminChallenges.import.badLevel', { id: item.id, level: item.level }));
       return;
     }
+    // Regra de 12/10/2026: toda expressão nova chega com registro (campo próprio).
+    if (item.type === 'expression' && !Object.prototype.hasOwnProperty.call(EXPRESSION_REGISTERS, item.register)){
+      skipped.push(t('adminChallenges.import.badRegister', { id: item.id }));
+      return;
+    }
     if (existingIds.has(item.id) || seenInBatch.has(item.id)){
       skipped.push(t('adminChallenges.import.dupId', { id: item.id }));
       return;
@@ -10391,7 +10147,7 @@ const CHALLENGE_I18N = {
     'ch.cloze.instruction': 'Escolha a forma certa para cada lacuna:',
     'ch.cloze.blank': 'Lacuna {n}',
     'ch.cloze.chooseAll': 'Escolha uma opção para cada lacuna antes de verificar.',
-    'ch.cloze.right': '✅ Bonne réponse.',
+    'ch.cloze.right': '✅ Resposta certa.',
     'ch.cloze.yourAnswer': 'Sua resposta',
     'ch.cloze.correct': 'Resposta certa',
     'ch.cloze.translation': 'Tradução',
@@ -10418,18 +10174,19 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': 'Você terminou todos os exercícios desse nível.',
     'ch.queue.back': 'Voltar aos níveis',
     'ch.listenPron': 'Ouvir pronúncia',
-    'ch.expr.reveal': 'Voir les réponses',
+    'ch.expr.reveal': 'Ver as respostas',
     'ch.expr.yourAnswer': 'Sua resposta: {chosen}<br>Resposta certa: <strong>{correct}</strong>',
-    'ch.expr.signifies': 'signifie <strong>{fr}</strong>.',
+    'ch.expr.signifies': 'significa <strong>{fr}</strong>.',
     'ch.expr.inPt': 'Em português: <strong>{pt}</strong>.',
-    'ch.expr.example1': 'Exemple 1',
-    'ch.expr.example2': 'Exemple 2',
-    'ch.listenFr': '▶ Écouter',
-    'ch.expr.yourTurn': 'À vous de jouer',
-    'ch.expr.showAnswer': 'Voir la réponse',
-    'ch.expr.right': '✅ Bonne réponse.',
-    'ch.notQuite': '❌ Pas tout à fait.',
-    'ch.lt.hint': 'Montrer un indice',
+    'ch.expr.example1': 'Exemplo 1',
+    'ch.expr.example2': 'Exemplo 2',
+    'ch.listenFr': '▶ Ouvir',
+    'ch.slow': 'Devagar',
+    'ch.expr.yourTurn': 'Sua vez',
+    'ch.expr.showAnswer': 'Ver a resposta',
+    'ch.expr.right': '✅ Resposta certa.',
+    'ch.notQuite': '❌ Ainda não.',
+    'ch.lt.hint': 'Mostrar dica',
     'ch.lt.label': 'Digite sua tradução:',
     'ch.lt.placeholder': 'Sua tradução em português...',
     'ch.verify': 'Vérifier',
@@ -10446,6 +10203,24 @@ const CHALLENGE_I18N = {
     'ch.filter.pending': 'Pendentes',
     'ch.filter.done': 'Concluídas',
     'ch.ring.aria': '{done} de {total} concluídas',
+    'ch.reg.formal': 'Formal',
+    'ch.reg.neutral': 'Dia a dia',
+    'ch.reg.familiar': 'Entre amigos',
+    'ch.reg.slang': 'Gíria',
+    'ch.reg.vulgar': 'Pode ofender',
+    'ch.reg.formal.hint': 'Registro formal: bom com desconhecidos e em situações sérias.',
+    'ch.reg.neutral.hint': 'Serve em quase qualquer situação.',
+    'ch.reg.familiar.hint': 'Informal: use com amigos e pessoas próximas.',
+    'ch.reg.slang.hint': 'Gíria: só com pessoas bem próximas.',
+    'ch.reg.vulgar.hint': 'Vulgar: bom reconhecer, melhor não usar.',
+    'ch.album.guess': 'O que será que significa?',
+    'ch.album.seal': 'no álbum',
+    'ch.album.locked': '🔒 Premium',
+    'ch.album.listen': 'Ouvir a expressão',
+    'ch.today.title': 'Expressão de hoje',
+    'ch.today.hint': 'Ouça e tente adivinhar antes de abrir.',
+    'ch.today.cta': 'Descobrir o sentido',
+    'ch.today.allDone': '🎉 Você já descobriu todas as expressões disponíveis.',
     'ch.lt.legend.bad': 'palavra errada',
     'ch.lt.legend.near': 'quase certa',
     'ch.lt.legend.miss': 'faltou',
@@ -10454,14 +10229,14 @@ const CHALLENGE_I18N = {
     'ch.lt.expected': 'Resposta esperada',
     'ch.lt.original': 'Frase original',
     'ch.lt.explanation': 'Explicação',
-    'ch.listenAgain': '▶ Écouter encore',
-    'ch.lt.right': '✅ Bonne traduction.',
-    'ch.lt.partial': '🟡 Presque : bonne idée, mais vérifiez les détails.',
+    'ch.listenAgain': '▶ Ouvir de novo',
+    'ch.lt.right': '✅ Tradução certa.',
+    'ch.lt.partial': '🟡 Quase: a ideia está certa, mas confira os detalhes.',
     'ch.accent.label': 'Digite o que você ouviu:',
     'ch.accent.yours': 'Sua resposta: <strong>{answer}</strong>',
-    'ch.accent.right': '✅ Correct.',
-    'ch.accent.partial': '🟡 Presque : vérifiez les accents.',
-    'ch.accent.wrong': '❌ Incorrect.',
+    'ch.accent.right': '✅ Certo.',
+    'ch.accent.partial': '🟡 Quase: confira os acentos.',
+    'ch.accent.wrong': '❌ Errado.',
     'ch.static.back': '← Voltar às categorias',
     'ch.static.backChallenges': '← Voltar aos desafios',
     'ch.static.backTrail': '← Voltar à trilha',
@@ -10550,7 +10325,7 @@ const CHALLENGE_I18N = {
     'ch.cloze.instruction': "Choose the right form for each blank:",
     'ch.cloze.blank': "Blank {n}",
     'ch.cloze.chooseAll': "Choose an option for each blank before checking.",
-    'ch.cloze.right': "✅ Bonne réponse.",
+    'ch.cloze.right': "✅ Correct answer.",
     'ch.cloze.yourAnswer': "Your answer",
     'ch.cloze.correct': "Correct answer",
     'ch.cloze.translation': "Translation",
@@ -10577,18 +10352,19 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': "You have finished all the exercises in this level.",
     'ch.queue.back': "Back to levels",
     'ch.listenPron': "Listen to pronunciation",
-    'ch.expr.reveal': "Voir les réponses",
+    'ch.expr.reveal': "See the answers",
     'ch.expr.yourAnswer': "Your answer: {chosen}<br>Correct answer: <strong>{correct}</strong>",
-    'ch.expr.signifies': "signifie <strong>{fr}</strong>.",
+    'ch.expr.signifies': "means <strong>{fr}</strong>.",
     'ch.expr.inPt': "In English: <strong>{pt}</strong>.",
-    'ch.expr.example1': "Exemple 1",
-    'ch.expr.example2': "Exemple 2",
-    'ch.listenFr': "▶ Écouter",
-    'ch.expr.yourTurn': "À vous de jouer",
-    'ch.expr.showAnswer': "Voir la réponse",
-    'ch.expr.right': "✅ Bonne réponse.",
-    'ch.notQuite': "❌ Pas tout à fait.",
-    'ch.lt.hint': "Montrer un indice",
+    'ch.expr.example1': "Example 1",
+    'ch.expr.example2': "Example 2",
+    'ch.listenFr': "▶ Listen",
+    'ch.slow': "Slowly",
+    'ch.expr.yourTurn': "Your turn",
+    'ch.expr.showAnswer': "See the answer",
+    'ch.expr.right': "✅ Correct answer.",
+    'ch.notQuite': "❌ Not quite.",
+    'ch.lt.hint': "Show a hint",
     'ch.lt.label': "Type your translation:",
     'ch.lt.placeholder': "Your translation in English...",
     'ch.verify': "Vérifier",
@@ -10602,13 +10378,31 @@ const CHALLENGE_I18N = {
     'ch.lt.expected': "Expected answer",
     'ch.lt.original': "Original sentence",
     'ch.lt.explanation': "Explanation",
-    'ch.listenAgain': "▶ Écouter encore",
-    'ch.lt.right': "✅ Bonne traduction.",
-    'ch.lt.partial': "🟡 Presque : bonne idée, mais vérifiez les détails.",
+    'ch.listenAgain': "▶ Listen again",
+    'ch.reg.formal': "Formal",
+    'ch.reg.neutral': "Everyday",
+    'ch.reg.familiar': "Among friends",
+    'ch.reg.slang': "Slang",
+    'ch.reg.vulgar': "Can offend",
+    'ch.reg.formal.hint': "Formal register: good with strangers and in serious situations.",
+    'ch.reg.neutral.hint': "Works in almost any situation.",
+    'ch.reg.familiar.hint': "Informal: use with friends and people close to you.",
+    'ch.reg.slang.hint': "Slang: only with people very close to you.",
+    'ch.reg.vulgar.hint': "Vulgar: good to recognize, better not to use.",
+    'ch.album.guess': "What could it mean?",
+    'ch.album.seal': "in your album",
+    'ch.album.locked': "🔒 Premium",
+    'ch.album.listen': "Listen to the expression",
+    'ch.today.title': "Expression of the day",
+    'ch.today.hint': "Listen and try to guess before opening it.",
+    'ch.today.cta': "Find out the meaning",
+    'ch.today.allDone': "🎉 You have discovered every available expression.",
+    'ch.lt.right': "✅ Correct translation.",
+    'ch.lt.partial': "🟡 Almost: right idea, but check the details.",
     'ch.accent.label': "Type what you heard:",
     'ch.accent.yours': "Your answer: <strong>{answer}</strong>",
     'ch.accent.right': "✅ Correct.",
-    'ch.accent.partial': "🟡 Presque : vérifiez les accents.",
+    'ch.accent.partial': "🟡 Almost: check the accents.",
     'ch.accent.wrong': "❌ Incorrect.",
     'ch.static.back': "← Back to categories",
     'ch.static.backChallenges': "← Back to challenges",
@@ -11032,7 +10826,110 @@ const CHALLENGE_LEVELS_ORDER = ['A1', 'A2', 'B1', 'B2'];
 // que o aluno já fechou, tudo aberto por padrão.
 const collapsedChallengeLevels = new Set();
 
+// Registro das expressões (campo próprio `register`, 12/10/2026). Mesmos
+// valores de REGISTER_KEY em fr/scripts/challenges_import/build_lote_expressoes.py.
+// Toda expressão nova precisa ter registro (skill criar-desafios).
+const EXPRESSION_REGISTERS = {
+  formal:   { icon: '🎩' },
+  neutral:  { icon: '🗣' },
+  familiar: { icon: '😎' },
+  slang:    { icon: '🤙' },
+  vulgar:   { icon: '⚠️' },
+};
+
+function expressionRegisterChipHTML(c){
+  const reg = c && Object.prototype.hasOwnProperty.call(EXPRESSION_REGISTERS, c.register) ? c.register : null;
+  if (!reg) return '';
+  return `<span class="expr-reg expr-reg-${reg}" title="${escapeHtmlChallenge(chT('ch.reg.' + reg + '.hint'))}">${EXPRESSION_REGISTERS[reg].icon} ${chT('ch.reg.' + reg)}</span>`;
+}
+
+// Sentido curto mostrado no cartão do álbum (só depois de concluir, para não
+// entregar a resposta). O aviso de registro no fim do texto sai: agora ele é
+// a etiqueta. Site em outro idioma: o sentido em francês.
+function expressionCardMeaning(c){
+  const lang = (typeof getUiLang === 'function' && getUiLang()) || 'pt-BR';
+  const m = c.meaning || {};
+  const raw = lang === 'pt-BR' ? (m.pt || m.fr) : (m.fr || m.pt);
+  return String(raw || '').replace(/\s*(⚠️\s*)?Registro:[\s\S]*$/, '').trim();
+}
+
+function expressionAudioBtnHTML(c, extraClass){
+  if (!c.expressionAudioFile) return '';
+  return `<button type="button" class="expr-play ${extraClass || ''}" data-expr-audio="${escapeHtmlChallenge(c.expressionAudioFile)}" aria-label="${chT('ch.album.listen')}: ${escapeHtmlChallenge(c.canonicalExpression)}" title="${chT('ch.album.listen')}">▶</button>`;
+}
+
+function wireExpressionAudioButtons(container){
+  container.querySelectorAll('[data-expr-audio]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playPregeneratedAudio(`challenges/${btn.dataset.exprAudio}`, btn);
+    });
+  });
+}
+
+// "Expressão de hoje": uma pendente (não trancada) sorteada pelo dia, do
+// nível mais baixo que ainda tem pendentes; "Pode ofender" só se não sobrar
+// outra. Concluir a do dia faz aparecer a próxima.
+function expressionOfTheDay(list){
+  let pending = list.filter(c => !isChallengeCompleted(c.id) && !isChallengeLocked(c));
+  if (!pending.length) return null;
+  const level = CHALLENGE_LEVELS_ORDER.find(lvl => pending.some(c => c.level === lvl));
+  if (level) pending = pending.filter(c => c.level === level);
+  const polite = pending.filter(c => c.register !== 'vulgar');
+  if (polite.length) pending = polite;
+  pending.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  const day = typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10);
+  let h = 0;
+  for (const ch of day) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return pending[h % pending.length];
+}
+
+function expressionTodayHTML(list){
+  const c = expressionOfTheDay(list);
+  if (!c){
+    return list.length ? `<section class="expr-today expr-today-done"><p>${chT('ch.today.allDone')}</p></section>` : '';
+  }
+  return `
+    <section class="expr-today" aria-labelledby="expr-today-title">
+      <div class="expr-today-eyebrow" id="expr-today-title">${chT('ch.today.title')}</div>
+      <div class="expr-today-row">
+        ${expressionAudioBtnHTML(c, 'expr-play-lg')}
+        <div class="expr-today-text">
+          <div class="expr-today-expr">${escapeHtmlChallenge(c.canonicalExpression)}</div>
+          <div class="expr-today-meta"><span class="challenge-card-level">${escapeHtmlChallenge(c.level || '')}</span>${expressionRegisterChipHTML(c)}</div>
+        </div>
+      </div>
+      <p class="expr-today-hint">${chT('ch.today.hint')}</p>
+      <button type="button" class="btn btn-primary expr-today-cta" data-today-open="${escapeHtmlChallenge(c.id)}">${chT('ch.today.cta')}</button>
+    </section>
+  `;
+}
+
+// Cartão de expressão no estilo álbum de figurinhas: pendente tracejada com
+// "O que será que significa?", concluída mostra o sentido e o selo. O áudio
+// fica fora do <button> do cartão (botão dentro de botão não é válido).
+function expressionCardHTML(c){
+  const done = isChallengeCompleted(c.id);
+  const locked = isChallengeLocked(c);
+  const middle = done
+    ? `<span class="expr-card-meaning">${escapeHtmlChallenge(expressionCardMeaning(c))}</span>`
+    : `<span class="expr-card-hint">${locked ? chT('ch.album.locked') : chT('ch.album.guess')}</span>`;
+  return `
+    <div class="expr-card-wrap">
+      <button class="challenge-card expr-card ${done ? 'completed' : ''} ${locked ? 'locked' : ''}" data-challenge-id="${c.id}">
+        ${done ? `<span class="expr-card-seal">${chT('ch.album.seal')}</span>` : ''}
+        <span class="challenge-card-level">${escapeHtmlChallenge(c.level || '')}</span>
+        <span class="challenge-card-expr">${escapeHtmlChallenge(c.canonicalExpression)}</span>
+        ${middle}
+        <span class="expr-card-foot">${expressionRegisterChipHTML(c)}${tierBadgeHTML(challengeTier(c))}</span>
+      </button>
+      ${locked ? '' : expressionAudioBtnHTML(c)}
+    </div>
+  `;
+}
+
 function challengeCardHTML(c){
+  if (c.type === 'expression') return expressionCardHTML(c);
   const done = isChallengeCompleted(c.id);
   const locked = isChallengeLocked(c);
   return `
@@ -11130,6 +11027,7 @@ function renderChallengesList(type){
   // próprios cards -- em vez de abas que escondem os outros níveis.
   cardsWrap.className = 'challenges-level-sections';
   cardsWrap.innerHTML = `
+    ${expressionTodayHTML(published)}
     <div class="challenges-toolbar">
       <input type="search" class="challenges-search" id="challenges-search" placeholder="${chT('ch.search.placeholder')}" aria-label="${chT('ch.search.label')}" autocomplete="off" value="${escapeHtmlChallenge(challengesListSearch)}">
       <div class="challenges-filter-chips" role="group" aria-label="${chT('ch.filter.label')}">
@@ -11139,6 +11037,10 @@ function renderChallengesList(type){
     <div id="challenges-level-sections-inner"></div>
   `;
   const fillSections = () => fillExpressionLevelSections(type, published);
+  wireExpressionAudioButtons(cardsWrap.querySelector('.expr-today') || document.createElement('div'));
+  cardsWrap.querySelectorAll('[data-today-open]').forEach(btn => {
+    btn.addEventListener('click', () => openChallengePlayer(btn.dataset.todayOpen));
+  });
   document.getElementById('challenges-search').addEventListener('input', e => {
     challengesListSearch = e.target.value;
     fillSections();
@@ -11204,6 +11106,7 @@ function fillExpressionLevelSections(type, published){
   inner.querySelectorAll('.challenge-card').forEach(card => {
     card.addEventListener('click', () => openChallengePlayer(card.dataset.challengeId));
   });
+  wireExpressionAudioButtons(inner);
   inner.querySelectorAll('.challenges-level-heading').forEach(btn => {
     btn.addEventListener('click', () => {
       const level = btn.dataset.level;
@@ -11375,6 +11278,7 @@ function renderExpressionQuestionScreen(c){
       <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="${chT('ch.listenPron')}" title="${chT('ch.listenPron')}">🔊</button>
       ${c.expressionAudioFile ? slowAudioIconBtnHTML('challenge-expression-play-slow-btn') : ''}
     </div>
+    ${c.register ? `<div class="expr-question-reg">${expressionRegisterChipHTML(c)}</div>` : ''}
     <div class="challenge-hypothesis">
       <p class="challenge-question">${escapeHtmlChallenge(c.question)}</p>
       <div class="challenge-choices-wrap">
@@ -11870,8 +11774,6 @@ function checkListenTranslateAnswer(c){
   const marked = (outcome !== 'ok' && studentAnswer && analysis) ? markTranslationWords(studentAnswer, analysis.bestRef || c.referenceTranslations[0]) : null;
   const yoursHTML = marked ? markedWordsHTML(marked.student) : escapeHtmlChallenge(studentAnswer || '—');
   const expectedHTML = marked ? markedWordsHTML(marked.reference) : escapeHtmlChallenge((analysis && analysis.bestRef) || lt.refs[0]);
-  const legendHTML = marked && (marked.student.some(p => p.cls === 'bad' || p.cls === 'near') || marked.reference.some(p => p.cls === 'miss'))
-    ? `<p class="tw-legend"><span class="tw-bad">${chT('ch.lt.legend.bad')}</span> <span class="tw-near">${chT('ch.lt.legend.near')}</span> <span class="tw-miss">${chT('ch.lt.legend.miss')}</span></p>` : '';
   const ltBodyHTML = `
       ${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
       ${analysis ? translationAlertsHTML(analysis, outcome) : ''}
@@ -11879,7 +11781,6 @@ function checkListenTranslateAnswer(c){
         <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${yoursHTML}</p>
         <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${expectedHTML}</p>
       </div>
-      ${legendHTML}
       <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
       ${lt.explanation ? `<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.explanation')}</strong>${escapeHtmlChallenge(lt.explanation)}</p>` : ''}
       <div class="audio-btn-row">

@@ -24,17 +24,6 @@ const TTS = {
   pollAttempts: 0
 };
 
-// Nem toda voz do mesmo idioma soa igual: o SO costuma expor tanto vozes
-// "neurais"/online (Google, Microsoft Natural/Online) quanto vozes locais
-// robóticas mais antigas, e a ordem que o navegador retorna é arbitrária.
-// Pontua pelo nome pra preferir a melhor voz disponível, não só a primeira.
-function voiceQualityScore(v){
-  const name = (v.name || '').toLowerCase();
-  if (/natural|neural/.test(name)) return 3;
-  if (/online/.test(name)) return 2;
-  if (/google/.test(name)) return 1;
-  return 0;
-}
 
 function loadChineseVoice(){
   if (!TTS.supported) return;
@@ -66,21 +55,6 @@ if (TTS.supported){
   pollForVoices();
 }
 
-// "Aquece" o synthesis engine com uma fala silenciosa disparada pela primeira
-// interação real do usuário na página. Em alguns navegadores Chromium, a
-// primeira chamada de speak() após o carregamento simplesmente não soa se não
-// tiver sido precedida de uma interação — isso resolve preventivamente.
-function warmUpTTSOnce(){
-  if (TTS.warmedUp || !TTS.supported) return;
-  TTS.warmedUp = true;
-  try{
-    const warm = new SpeechSynthesisUtterance(' ');
-    warm.volume = 0;
-    window.speechSynthesis.speak(warm);
-  }catch(e){ /* silencioso: warm-up é best-effort */ }
-  document.removeEventListener('click', warmUpTTSOnce);
-  document.removeEventListener('touchstart', warmUpTTSOnce);
-}
 document.addEventListener('click', warmUpTTSOnce, { once:true });
 document.addEventListener('touchstart', warmUpTTSOnce, { once:true });
 
@@ -111,16 +85,6 @@ let exerciseAudioEl = null;
 // LAST_AUDIO_BTN.isConnected já vira false sozinho.
 let LAST_AUDIO_BTN = null;
 
-// Contagem vitalícia de reproduções de áudio (clique manual ou atalho "r")
-// -- só pro badge "Ouvido Treinado" (artefato §8). Tocar áudio nunca passa
-// perto de nenhum addXP() sozinho, então dispara a checagem de badge aqui
-// mesmo em vez de confiar no próximo XP ganho (que pode demorar).
-function registerAudioPlay(){
-  STATE.totalAudioPlays = (STATE.totalAudioPlays || 0) + 1;
-  ensureDailyBucket();
-  STATE.daily.audioPlaysToday += 1;
-  checkAndCelebrateBadges();
-}
 
 function stopExerciseAudio(){
   if (exerciseAudioEl){
@@ -140,18 +104,8 @@ function stopExerciseAudio(){
 // Synthesis são players diferentes; um "ding" de ~200ms não precisa de
 // stopExerciseAudio()). Silenciável em Preferências (Seu progresso).
 const FEEDBACK_SOUND_KEY = 'mandarim_feedback_sound';
-function isFeedbackSoundEnabled(){
-  return localStorageSafeGet(FEEDBACK_SOUND_KEY) !== '0';
-}
 
 let feedbackAudioCtx = null;
-function getFeedbackAudioCtx(){
-  const Ctx = window.AudioContext || window.webkitAudioContext;
-  if (!Ctx) return null;
-  if (!feedbackAudioCtx) feedbackAudioCtx = new Ctx();
-  if (feedbackAudioCtx.state === 'suspended') feedbackAudioCtx.resume();
-  return feedbackAudioCtx;
-}
 
 function playFeedbackTone(ctx, freq, startTime, duration, peakGain){
   const osc = ctx.createOscillator();
@@ -167,21 +121,6 @@ function playFeedbackTone(ctx, freq, startTime, duration, peakGain){
   osc.stop(startTime + duration + 0.02);
 }
 
-// isCorrect === true: "ding" ascendente curto (2 notas). false: um tom só,
-// mais grave e mais curto -- neutro, não punitivo (a explicação do erro já
-// fica a cargo do painel de texto, o som só confirma o resultado).
-function playFeedbackSound(isCorrect){
-  if (!isFeedbackSoundEnabled()) return;
-  const ctx = getFeedbackAudioCtx();
-  if (!ctx) return;
-  const now = ctx.currentTime;
-  if (isCorrect){
-    playFeedbackTone(ctx, 587.33, now, 0.09, 0.16);
-    playFeedbackTone(ctx, 880.00, now + 0.08, 0.16, 0.16);
-  } else {
-    playFeedbackTone(ctx, 233.08, now, 0.18, 0.13);
-  }
-}
 
 // Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
 // API do navegador — qualidade consistente pra todo aluno, independente do
@@ -369,14 +308,6 @@ function wireAudioButtons(container, isPreview){
 // com data-speak indefinido se este botão compartilhasse a classe.
 function customAudioBtnHTML(url){
   return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="${t('zh.audio.listenAudio')}" title="${t('zh.audio.listenAudio')}">🎧</button>`;
-}
-function wireCustomAudioButtons(container){
-  container.querySelectorAll('.custom-audio-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      new Audio(btn.dataset.audioUrl).play().catch(() => showToast(t('toast.audioPlayFailedDot')));
-    });
-  });
 }
 
 // ---------- Ordem dos traços (Hanzi Writer) — modo animação ----------
@@ -1126,10 +1057,6 @@ document.getElementById('cloze-mode-switch').addEventListener('click', () => {
 });
 updateClozeModeSwitch();
 
-function updateFeedbackSoundSwitch(){
-  const btn = document.getElementById('feedback-sound-switch');
-  if (btn) btn.setAttribute('aria-checked', isFeedbackSoundEnabled() ? 'true' : 'false');
-}
 document.getElementById('feedback-sound-switch').addEventListener('click', () => {
   localStorageSafeSet(FEEDBACK_SOUND_KEY, isFeedbackSoundEnabled() ? '0' : '1');
   updateFeedbackSoundSwitch();
@@ -1362,54 +1289,6 @@ function registerStudyToday(){
   STATE.pendingStreakCelebration = true;
 }
 
-function maybeShowStreakCelebration(){
-  if (!STATE.pendingStreakCelebration) return;
-  STATE.pendingStreakCelebration = false;
-  // Nem todo lugar que chama registerStudyToday() (que muda STATE.streak)
-  // também chama renderTopbarStats() logo em seguida -- vários caminhos só
-  // chegam até aqui, no momento em que a comemoração de fato aparece.
-  // Centralizar a atualização do pill aqui garante que ele nunca fique
-  // mostrando um número velho enquanto a tela de sequência já mostra o novo.
-  renderTopbarStats();
-  // showStreakCelebration() é sempre chamada ANTES do innerHTML da tela de
-  // conclusão (lição/unidade/sessão) ser escrito, no mesmo call site -- como
-  // as duas coisas rodam na mesma volta síncrona, o navegador só pinta UM
-  // quadro final, com o overlay de sequência já por cima, escondendo a tela
-  // de conclusão atrás dele até a pessoa fechar o modal. Resultado relatado:
-  // a tela de sequência parecia aparecer ANTES da tela de "Lição concluída",
-  // quando devia ser o contrário. Um pequeno atraso garante que o quadro da
-  // tela de conclusão pinte primeiro, e só depois o modal aparece por cima.
-  setTimeout(showStreakCelebration, 500);
-}
-
-// ---------- Tela de sequência de streak (estilo Duolingo) ----------
-// Aparece uma única vez por dia, na primeira atividade que ativa o streak —
-// registerStudyToday() só chega até aqui na primeira chamada depois da
-// virada do dia, então essa função nunca dispara duas vezes no mesmo dia.
-// STREAK_DAY_LABELS agora vem de shared/wizard.js.
-function buildStreakWeekData(){
-  const days = [];
-  for (let i = 6; i >= 0; i--){
-    const d = new Date(Date.now() - i*86400000);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    days.push({ label: STREAK_DAY_LABELS[d.getDay()], done: !!STATE.activityLog[key], isToday: i === 0 });
-  }
-  return days;
-}
-
-function showStreakCelebration(){
-  // Fase 1 do sistema de notificações.
-  fireNotificationEvent('streak_completed', 'streak', { days: STATE.streak });
-  document.getElementById('streak-days-num').textContent = STATE.streak;
-  { const u = document.getElementById('streak-days-unit'); if (u) u.textContent = STATE.streak === 1 ? 'dia' : 'dias'; }
-  document.getElementById('streak-week-row').innerHTML = buildStreakWeekData().map(d => `
-    <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
-      <div class="streak-day-circle">${d.done ? '✓' : ''}</div>
-      <div class="streak-day-label">${d.label}</div>
-    </div>
-  `).join('');
-  document.getElementById('streak-modal-overlay').style.display = 'flex';
-}
 
 document.getElementById('streak-modal-continue-btn').addEventListener('click', () => {
   document.getElementById('streak-modal-overlay').style.display = 'none';
@@ -1617,15 +1496,6 @@ const GENERAL_CHALLENGES = [
   { id:'translateBlocks2', icon:'🧱', get label(){ return t('fr.mission.translateBlocks2'); }, target:2, get: d => d.exerciseFormatCounts?.reorder || 0 }
 ];
 
-function dailySeed(str){
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
-  return h;
-}
-
-function pickDailyFromPool(pool, salt){
-  return pool[dailySeed(STATE.daily.date + ':' + salt) % pool.length];
-}
 
 // ---------- Feasibility das missões de estoque limitado (grilling "missões
 // do dia") ----------
@@ -1654,31 +1524,6 @@ function missionSpeedReviewFeasible(){
   return missionReviewSupply() >= 1;
 }
 
-// Resolve o item sorteado do pool revisão/hanzi contra o estoque real do
-// dia: devolve o item original (cabe), uma cópia com meta reduzida (tipo
-// quantidade, ainda acima do piso) ou o item seguro do pool (hanzi1 -- nunca
-// depende de estoque de revisão). Chamado uma única vez por dia dentro de
-// assignTodaysMissions() -- nunca recalculado depois, senão a meta ficaria
-// se movendo ao longo do dia conforme o estoque muda.
-function resolveRevisaoMission(picked, pool, safeFallbackId){
-  const fallback = () => pool.find(m => m.id === safeFallbackId) || picked;
-  if (picked.id === 'reviews15'){
-    const supply = missionReviewSupply();
-    if (supply >= picked.target) return picked;
-    if (supply >= MISSION_QUANTITY_FLOOR) return Object.assign({}, picked, { target: supply });
-    return fallback();
-  }
-  if (picked.id === 'overdue3'){
-    return missionOverdueSupply() >= picked.target ? picked : fallback();
-  }
-  if (picked.id === 'matchGame1'){
-    return missionMatchGameFeasible() ? picked : fallback();
-  }
-  if (picked.id === 'speedReview1'){
-    return missionSpeedReviewFeasible() ? picked : fallback();
-  }
-  return picked;
-}
 
 const ALL_CHALLENGE_POOLS = [EASY_CHALLENGES, REVISAO_HANZI_CHALLENGES, GENERAL_CHALLENGES];
 function challengeById(id){
@@ -1687,17 +1532,6 @@ function challengeById(id){
     if (found) return found;
   }
   return null;
-}
-// Reconstrói o objeto completo (icon/label/get) do desafio a partir do
-// registro persistido ({id, target}) -- state.daily.missions só guarda dados
-// serializáveis (sincroniza com o Supabase), nunca funções.
-function materializeMission(assigned){
-  const base = challengeById(assigned.id);
-  if (!base) return null; // pool mudou entre deploys -- atribuição órfã, ignora
-  if (assigned.target === base.target) return base;
-  const scaled = Object.assign({}, base, { target: assigned.target });
-  if (base.labelForTarget) scaled.label = base.labelForTarget(assigned.target);
-  return scaled;
 }
 
 function assignTodaysMissions(){
@@ -1723,38 +1557,6 @@ function todaysChallenges(){
   return STATE.daily.missions.map(materializeMission).filter(Boolean);
 }
 
-// Bônus por completar as 3 Missões do dia (não por missão individual --
-// cada ação que alimenta uma missão já dá XP por si só em outro lugar; o
-// bônus aqui é só pelo conjunto das 3). Chamado de dentro de addXP() (ver
-// comentário lá) pra ser checado depois de QUALQUER ganho de XP, já que
-// qualquer um deles pode ser o que fecha a última missão do dia.
-function checkDailyMissionsBonus(){
-  ensureDailyBucket();
-  if (STATE.daily.missionsBonusAwarded) return;
-  const allDone = todaysChallenges().every(c => (Number(c.get(STATE.daily)) || 0) >= c.target);
-  if (!allDone) return;
-  STATE.daily.missionsBonusAwarded = true;
-  addXP(30);
-  showToast(t('toast.dailyMissionsAllDone'));
-}
-
-// Notificação "Missão concluída" -- uma por Missão do dia individual (não
-// pelo conjunto das 3, isso já é o bônus acima). Guarda em
-// STATE.daily.missionsNotified pra disparar exatamente uma vez por missão
-// por dia, mesmo que addXP() rode várias vezes depois dela já ter batido a
-// meta (ex.: XP de exercícios seguintes na mesma sessão). Chamada do mesmo
-// lugar que checkDailyMissionsBonus() (dentro de addXP()), pelo mesmo
-// motivo: qualquer ganho de XP pode ser o que fecha uma missão.
-function checkDailyMissionCompletions(){
-  ensureDailyBucket();
-  todaysChallenges().forEach(c => {
-    if (STATE.daily.missionsNotified[c.id]) return;
-    const current = Number(c.get(STATE.daily)) || 0;
-    if (current < c.target) return;
-    STATE.daily.missionsNotified[c.id] = true;
-    fireNotificationEvent('mission_completed', 'desafios', { mission_label: c.label, mission_icon: c.icon }, 'path');
-  });
-}
 
 function renderDailyChallengesScreen(){
   const contentEl = document.getElementById('step-content');
@@ -1898,20 +1700,6 @@ const BADGES = [
 // já passam por addXP -- não precisa espalhar a checagem por unit/streak/
 // revisão separadamente.
 let earnedBadgeIds = new Set();
-function seedEarnedBadges(){
-  earnedBadgeIds = new Set(BADGES.filter(b => b.check(STATE)).map(b => b.id));
-  // C4: conquistas da conta ganhas em outro idioma também valem aqui (sem celebrar de novo).
-  loadAccountEarnedBadges().then(() => {
-    earnedBadgeIds = AccountProgress.unionBadgeIds(earnedBadgeIds, accountEarnedBadgeRows);
-    upsertEarnedBadges([...earnedBadgeIds]);
-    if (typeof renderProgressView === 'function' && document.getElementById('badge-grid')) renderProgressView();
-  });
-  // Backfill/sincronização: garante que a tabela pública earned_badges
-  // reflita tudo que já era verdade antes desta feature existir, ou que
-  // uma sessão anterior não tenha conseguido gravar -- upsert idempotente,
-  // sem custo de duplicar (ver shared/auth.js).
-  upsertEarnedBadges([...earnedBadgeIds]);
-}
 
 let badgeCelebrationQueue = [];
 let badgeCelebrationShowing = false;
@@ -1919,46 +1707,7 @@ let badgeCelebrationShowing = false;
 // Deck), a conquista fica guardada e aparece só na tela de fim ("Revisão
 // concluída"), para não cobrir o cartão. Fora da sessão, aparece na hora.
 let badgeCelebrationHeld = false;
-function holdBadgeCelebrations(){ badgeCelebrationHeld = true; }
-function releaseBadgeCelebrations(){
-  if (!badgeCelebrationHeld) return;
-  badgeCelebrationHeld = false;
-  processBadgeCelebrationQueue();
-}
 
-function checkAndCelebrateBadges(){
-  const newlyEarned = [];
-  BADGES.forEach(b => {
-    if (earnedBadgeIds.has(b.id)) return;
-    if (b.check(STATE)){
-      earnedBadgeIds.add(b.id);
-      newlyEarned.push(b);
-    }
-  });
-  if (newlyEarned.length){
-    badgeCelebrationQueue.push(...newlyEarned);
-    processBadgeCelebrationQueue();
-    // Fase 1 do sistema de notificações -- um evento por badge (não um só
-    // pro lote), mesma granularidade da celebração visual acima.
-    newlyEarned.forEach(b => {
-      fireNotificationEvent('achievement_unlocked', 'gamificacao', { badge_name: b.name, badge_icon: b.icon }, 'profile');
-    });
-    upsertEarnedBadges(newlyEarned.map(b => b.id));
-  }
-}
-
-// Fila (não pilha): se dois badges forem ganhos no mesmo instante (ex.: XP
-// cruza 500 no mesmo golpe que termina o nível), mostra um de cada vez --
-// nunca dois cartões sobrepostos brigando pela mesma área da tela.
-function processBadgeCelebrationQueue(){
-  if (badgeCelebrationHeld || badgeCelebrationShowing || !badgeCelebrationQueue.length) return;
-  badgeCelebrationShowing = true;
-  const badge = badgeCelebrationQueue.shift();
-  showBadgeUnlockCelebration(badge, () => {
-    badgeCelebrationShowing = false;
-    processBadgeCelebrationQueue();
-  });
-}
 
 function showBadgeUnlockCelebration(badge, onDone){
   const layer = document.getElementById('badge-unlock-layer');

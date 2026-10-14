@@ -31,10 +31,10 @@
 
 ## Expressões
 
-| Unidade | Expressão | Significado | Exemplo |
-|---|---|---|---|
-| A1-2 | Enchanté ! | Prazer em conhecer. (Mulheres dizem "enchantée"; a pronúncia é a mesma.) | Bonjour, je m'appelle Léo. — Enchanté ! |
-| A1-1 | Comme ci, comme ça | Mais ou menos; assim, assim. | Ça va ? — Comme ci, comme ça. |
-| A1-1 | Pas mal | Nada mal; até que está bem. | Ça va ? — Pas mal, merci ! |
-| A1-1 | Ça marche ! | Combinado! Fechado! Beleza! Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais. | Un café ensemble ? — Ça marche ! |
-| A1-1 | Pas de problème ! | Sem problema! Tranquilo! | Pardon ! — Pas de problème ! |
+| Unidade | Expressão | Registro | Significado | Exemplo |
+|---|---|---|---|---|
+| A1-2 | Enchanté ! | neutral | Prazer em conhecer. (Mulheres dizem "enchantée"; a pronúncia é a mesma.) | Bonjour, je m'appelle Léo. — Enchanté ! |
+| A1-1 | Comme ci, comme ça | neutral | Mais ou menos; assim, assim. | Ça va ? — Comme ci, comme ça. |
+| A1-1 | Pas mal | neutral | Nada mal; até que está bem. | Ça va ? — Pas mal, merci ! |
+| A1-1 | Ça marche ! | familiar | Combinado! Fechado! Beleza! Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais. | Un café ensemble ? — Ça marche ! |
+| A1-1 | Pas de problème ! | neutral | Sem problema! Tranquilo! | Pardon ! — Pas de problème ! |

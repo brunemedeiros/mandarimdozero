@@ -53,12 +53,12 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
         await page.hover('#lang-switcher-btn'); await page.waitForTimeout(200);
         await page.click('.course-menu-add');
         await page.waitForSelector('#add-course-overlay .add-course-card');
-        let ov = await page.evaluate(() => ({ disp: document.getElementById('add-course-overlay').style.display, cards: [...document.querySelectorAll('.add-course-card')].map(c => c.textContent.replace(/\s+/g, ' ').trim()), sel: document.getElementById('add-course-speak').value, opts: [...document.querySelectorAll('#add-course-speak option')].map(o => o.textContent) }));
+        let ov = await page.evaluate(() => ({ disp: document.getElementById('add-course-overlay').style.display, cards: [...document.querySelectorAll('.add-course-card')].map(c => c.textContent.replace(/\s+/g, ' ').trim()), sel: document.querySelector('.add-course-speak button[aria-pressed="true"]').dataset.site, opts: [...document.querySelectorAll('.add-course-speak button')].map(o => o.textContent) }));
         check(`${tag}: "Adicionar curso" abre a tela com "Eu falo português" e os cursos`, ov.disp === 'flex' && ov.sel === 'pt-BR' && ov.cards.length === 2 && ov.cards.some(c => /^✓?\s*Francês/.test(c)) && ov.cards.some(c => /Chinês/.test(c)) && ov.opts.join('|') === 'Eu falo português|Eu falo inglês', ov);
         if (process.env.SHOTS) { await page.screenshot({ path: `${process.env.SHOTS}/${app}-adicionar-curso-pt.png` }); }
-        await page.selectOption('#add-course-speak', 'en');
+        await page.click('.add-course-speak button[data-site="en"]');
         await page.waitForTimeout(200);
-        ov = await page.evaluate(() => ({ cards: [...document.querySelectorAll('.add-course-card')].map(c => c.textContent.replace(/\s+/g, ' ').trim()), head: document.querySelector('#add-course-overlay strong').textContent }));
+        ov = await page.evaluate(() => ({ cards: [...document.querySelectorAll('.add-course-card')].map(c => c.textContent.replace(/\s+/g, ' ').trim()), head: document.querySelector('#add-course-overlay .add-course-group').textContent }));
         check(`${tag}: "Eu falo inglês" mostra French e Chinese`, ov.cards.length === 2 && ov.cards.some(c => /French/.test(c)) && ov.cards.some(c => /Chinese/.test(c)) && /falantes de inglês/.test(ov.head), ov);
         if (process.env.SHOTS) { await page.screenshot({ path: `${process.env.SHOTS}/${app}-adicionar-curso-en.png` }); }
         await page.evaluate(() => document.querySelector('.add-course-card').click());
@@ -86,6 +86,20 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     if (process.env.SHOTS) {
       for (const theme of ['light', 'dark']) { await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme); await page.screenshot({ path: `${process.env.SHOTS}/fr-${theme}-adicionar-curso-390.png` }); }
     }
+    await ctx.close();
+  }
+  // "Eu falo": até 3 idiomas do site = botões; com mais, lista
+  {
+    const ctx = await browser.newContext({ serviceWorkers: 'block' });
+    await ctx.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
+    const page = await ctx.newPage();
+    await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.goto(`${base}/fr/index.html`);
+    await page.waitForFunction(() => typeof speakControlHTML === 'function' && CURRENT_USER === false);
+    const r = await page.evaluate(() => { const a = speakControlHTML('en'); const orig = courseSiteLanguages; courseSiteLanguages = () => ['pt-BR', 'en', 'es', 'de']; const b = speakControlHTML('en'); courseSiteLanguages = orig; return { a, b }; });
+    check('Eu falo com 2 idiomas: botões', /<button/.test(r.a) && !/<select/.test(r.a));
+    check('Eu falo com mais de 3 idiomas: lista', /<select/.test(r.b) && !/<button/.test(r.b));
     await ctx.close();
   }
   await browser.close(); server.close();

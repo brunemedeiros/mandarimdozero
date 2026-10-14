@@ -27,10 +27,10 @@
 
 ## Expressões
 
-| Unidade | Expressão | Significado | Exemplo |
-|---|---|---|---|
-| A1-19 | Bon week-end ! | Bom fim de semana! | Au revoir, bon week-end ! |
-| A1-19 | Bonne soirée ! | Boa noite! Tenha uma boa noite! | Au revoir, bonne soirée ! |
-| A1-19 | C'est parti ! | Vamos lá! Começou! | Le film commence. C'est parti ! |
-| A1-20 | Quoi de neuf ? | Quais as novidades? E aí, novidades? Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais. | Salut ! Quoi de neuf ? |
-| A1-20 | Ça fait longtemps ! | Quanto tempo! Faz tempo! | Salut Marc ! Ça fait longtemps ! |
+| Unidade | Expressão | Registro | Significado | Exemplo |
+|---|---|---|---|---|
+| A1-19 | Bon week-end ! | neutral | Bom fim de semana! | Au revoir, bon week-end ! |
+| A1-19 | Bonne soirée ! | neutral | Boa noite! Tenha uma boa noite! | Au revoir, bonne soirée ! |
+| A1-19 | C'est parti ! | neutral | Vamos lá! Começou! | Le film commence. C'est parti ! |
+| A1-20 | Quoi de neuf ? | familiar | Quais as novidades? E aí, novidades? Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais. | Salut ! Quoi de neuf ? |
+| A1-20 | Ça fait longtemps ! | neutral | Quanto tempo! Faz tempo! | Salut Marc ! Ça fait longtemps ! |

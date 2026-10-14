@@ -77,7 +77,11 @@ window.I18N_CATALOG['en'] = {
   'courseMenu.speak.pt-BR': 'I speak Portuguese', // ALTA
   'courseMenu.speak.en': 'I speak English', // ALTA
   'courses.beta': 'beta', // ALTA
-  'courses.confirm.body': 'You are about to switch to the {course} course. It is a separate course with its own progress: if you have never studied in it, you start from zero. Your progress in the current course stays saved and comes back when you return to it. Your day streak and achievements stay the same.', // MÉDIA
+  'courses.confirm.title': 'Switch course?', // ALTA
+  'courses.confirm.intro': 'You are about to switch to the course', // ALTA
+  'courses.confirm.p1': 'It is a separate course with its own progress: if you have never studied in it, you start from zero.', // ALTA
+  'courses.confirm.p2': 'Your progress in the current course stays saved and comes back when you return to it.', // ALTA
+  'courses.confirm.p3': 'Your day streak and achievements stay the same.', // ALTA
   'courses.first.title': 'Which course do you want to start?', // ALTA
   'courses.first.sub': 'You can switch or add courses later from the flag at the top of the screen. Each course keeps its own progress.', // ALTA
 
@@ -686,8 +690,8 @@ window.I18N_CATALOG['en'] = {
   'review.deck.lang.portugues': 'Portuguese', // ALTA -- Revisão nova
   'review.deck.lang.fallback': 'Language', // ALTA -- Revisão nova
   'review.deck.myDecks': 'My Decks', // ALTA -- Revisão nova
-  'review.observation': 'Note from your teacher',
-  'review.almost': 'Almost there',
+  'review.observation': 'Note from your teacher', // ALTA
+  'review.almost': 'Almost there', // ALTA
   'review.deck.teacherCards': 'Teacher\'s cards', // MÉDIA -- Revisão nova
   'review.deck.studyPath': 'Study Path', // MÉDIA -- Revisão nova
   'review.deck.allDecks': 'All Decks', // ALTA -- Revisão nova
@@ -1750,6 +1754,7 @@ window.I18N_CATALOG['en'] = {
   'adminChallenges.import.missing': '{label}: missing id/type/level', // ALTA
   'adminChallenges.import.badType': '{id}: invalid type ("{type}")', // ALTA
   'adminChallenges.import.badLevel': '{id}: invalid level ("{level}")', // ALTA
+  'adminChallenges.import.badRegister': '{id}: expression without a valid register (register: formal, neutral, familiar, slang or vulgar)', // ALTA
   'adminChallenges.import.dupId': '{id}: id already exists (duplicate)', // ALTA
   'adminChallenges.persist.failed': 'Could not save to the database: ', // ALTA
   'adminChallenges.import.importing': 'Importing…', // ALTA
