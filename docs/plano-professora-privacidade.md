@@ -388,3 +388,17 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
 - Proposta enviada: B + avisos automáticos no Mural ("nova aula registrada", "novo material") e Revisão como 4ª aba:
   **Mural | Aulas e materiais (Calendário | Lista + biblioteca) | Revisão**. Perguntas abertas no chat.
 
+### Decisões da rodada de 2026-10-14 (reorganização do Aluno; nada codado ainda)
+
+- Estrutura **B** com avisos automáticos no Mural: **Mural | Aulas e materiais | Revisão**.
+- **"+N"**: o item Aluno soma tudo; dentro do Aluno cada aba tem o seu: Mural = mensagens novas, Revisão = cartões
+  para revisar hoje.
+- **Registro de aula** ganha **Presença** (cores: verde = presente, vermelho = faltou; a autora vai criar outros
+  rótulos depois, então os rótulos devem ser editáveis) e **Competências** (Conversação, Gramática, Escrita, Leitura,
+  Vocabulário, Escuta, Pronúncia, como no Notion). Pontualidade e Uso da L1 ficam de fora por enquanto.
+- **Calendário**: opção de lançar datas futuras (agenda), inclusive data avulsa. Verificar integração com Google Agenda
+  para quem entrou com Google.
+- **Histórico do Notion** ("Calendário de Aulas"): autorizado trazer para o site (alunos com conta e vínculo). Verificar
+  integração com o Notion só leitura ou leitura e escrita, para ela e outras professoras.
+- PR #312 (Mural, turmas, painel Aluno) mergeado e publicado em 2026-10-14.
+
