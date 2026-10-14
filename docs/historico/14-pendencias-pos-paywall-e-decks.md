@@ -11,6 +11,12 @@ Pedido da autora: guardar aqui o que só faz sentido (ou só é seguro) depois d
 3. Regra Free dos Desafios: **1 atividade por categoria, no total** (de preferência a do 1º módulo). Isso substitui o "1 ditado Free por módulo" (o Free do Ditado cai de 6 para 1): ajustar o campo `free` em `fr/dictations.js` e nos lotes de Desafios.
 4. Desafios do chinês: o zh não tem aba de Desafios nem módulos; decidir os módulos e criar a aba antes de aplicar a regra Free x Premium ao zh.
 
+**Conjugação (fr)**
+11. Jogos da Conjugação são Premium (decisão da autora, 2026-10-14); a prática normal da Conjugação é grátis. Hoje só o
+    cadeado aparece. Ao ligar o paywall: `CONJ_GAMES_PAYWALL_ENABLED = true` em `fr/app.js` (a trava fica em
+    `createConjGames` > `start`, via `isConjGameLocked`; quem não é Premium vê o aviso Premium). Trava só de tela, como a dos
+    Desafios antes da 008: os dados dos jogos estão no código público.
+
 **Premium / cobrança (nada disto existe ainda)**
 5. Não há Stripe nem checkout: o modal de aviso Premium só convida a entrar em contato. Decidir o fluxo de pagamento junto do paywall.
 6. TTS por Field (Google) é só Premium e tem cota de 300/mês por conta: conferir se a cota combina com o preço do plano.

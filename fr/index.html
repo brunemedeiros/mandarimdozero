@@ -4637,6 +4637,237 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   .panel-view .panel-nav{ flex-wrap:nowrap; overflow-x:auto; max-width:100%; justify-content:flex-start; }
   .panel-view .panel-nav .deck-topbar-btn{ white-space:nowrap; }
 }
+/* ---------- Conjugação: passada de design (escolha, prática, resultado) ----------
+   A tabela de prática imita a página de um livro de conjugação: pronome à
+   esquerda do campo, singular numa coluna (je, tu, il) e plural na outra
+   (nous, vous, ils). Listas da escolha agrupadas num painel, sem caixa alta. */
+#view-conjugaison .conj-select-col h3{ text-transform:none; letter-spacing:0; font-size:15px; color:var(--ink); margin:0 0 10px; }
+#view-conjugaison .conj-filter-row label{ text-transform:none; letter-spacing:0; font-size:12.5px; font-weight:700; }
+#view-conjugaison .conj-check-list{ gap:0; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); overflow:hidden; box-shadow:var(--shadow-card); }
+#view-conjugaison .conj-check-list > .conj-check-item{ border:none; border-radius:0; min-height:44px; padding:11px 14px; }
+#view-conjugaison .conj-check-list > .conj-check-item + .conj-check-item{ border-top:1px solid var(--paper-line); }
+#view-conjugaison .conj-check-item:hover, #view-conjugaison .conj-toggle-item:hover{ border-color:var(--paper-line); }
+@media (hover:hover){ #view-conjugaison .conj-check-list > .conj-check-item:hover{ background:color-mix(in srgb, var(--hover-gold) 10%, var(--paper)); } }
+#view-conjugaison .conj-check-item:has(input:checked){ background:color-mix(in srgb, var(--seal-red) 7%, var(--paper)); }
+#view-conjugaison .conj-toggle-item{ min-height:44px; }
+#view-conjugaison #conj-start-btn{ margin-top:6px !important; }
+
+/* Verbo atual em destaque; o próximo só avisa o que vem. */
+#view-conjugaison .conj-verb-header{ background:var(--paper); box-shadow:var(--shadow-card); }
+#view-conjugaison .conj-verb-header .conj-verb-label{ text-transform:none; letter-spacing:0; font-size:12.5px; font-weight:700; }
+#view-conjugaison .conj-verb-header .infinitif{ font-size:32px; letter-spacing:-.01em; }
+#view-conjugaison .conj-verb-header .tempo{ display:inline-block; text-transform:none; letter-spacing:0; font-size:12px; font-weight:700; margin-top:8px; padding:3px 10px; border-radius:999px; background:var(--paper-warm); border:1px solid var(--paper-line); }
+#view-conjugaison .conj-verb-header.next{ opacity:1; background:transparent; box-shadow:none; border-style:dashed; color:var(--ink-soft); }
+#view-conjugaison .conj-verb-header.next .infinitif{ font-size:22px; color:var(--ink-soft); }
+
+/* Tabela de conjugação */
+#view-conjugaison .conj-tense-grid:has(> .conj-tense-box:only-child){ grid-template-columns:minmax(0, 1fr); }
+#view-conjugaison .conj-tense-box{ padding:18px 20px 16px; box-shadow:var(--shadow-card); }
+#view-conjugaison .conj-tense-title{ text-align:left; font-size:16px; padding-bottom:10px; margin-bottom:12px; border-bottom:1px solid var(--paper-line); }
+/* Pessoas na vertical (je ... ils), uma coluna por tempo; linha = pronome | caixa | lado (áudio). */
+#view-conjugaison .conj-grid{ grid-template-columns:minmax(0, 1fr); row-gap:8px; }
+#view-conjugaison .conj-field{ display:grid; grid-template-columns:6.4em minmax(0, 1fr) 34px; column-gap:10px; row-gap:4px; align-items:center; }
+#view-conjugaison .conj-field label{ text-align:right; font-size:14px; line-height:1.25; font-weight:700; color:var(--ink-soft); font-style:italic; }
+#view-conjugaison .conj-field .expected{ grid-column:2 / 4; min-height:0; font-size:13px; font-weight:700; color:var(--ink); }
+#view-conjugaison .conj-field .expected:empty{ display:none; }
+#view-conjugaison .conj-field input{ font-size:15.5px; }
+#view-conjugaison .conj-side{ display:flex; align-items:center; justify-content:center; }
+@media (max-width:480px){
+  #view-conjugaison .conj-field{ grid-template-columns:5.6em minmax(0, 1fr) 34px; }
+  #view-conjugaison .conj-tense-box{ padding:16px 14px 14px; }
+}
+
+/* Resultado */
+#view-conjugaison .conj-session-result{ max-width:420px; margin:28px auto 0; padding:32px 24px; background:var(--paper); border:1px solid var(--paper-line); border-radius:18px; box-shadow:var(--shadow-card); }
+#view-conjugaison .conj-session-result .score-num{ font-size:44px; font-variant-numeric:tabular-nums; margin:8px 0 4px; }
+#view-conjugaison .conj-session-result p{ color:var(--ink-soft); margin:0 0 20px; }
+/* Conjugação, fase 1: barra de progresso, acentos, letras erradas, áudio por forma, revisão no fim. */
+#view-conjugaison .conj-progress{ display:flex; align-items:center; gap:12px; max-width:520px; margin:0 auto 14px; font-variant-numeric:tabular-nums; }
+#view-conjugaison .conj-progress > span:first-child{ white-space:nowrap; }
+#view-conjugaison .conj-progress-bar{ flex:1; height:6px; border-radius:99px; background:var(--paper-line); overflow:hidden; }
+#view-conjugaison .conj-progress-bar > i{ display:block; height:100%; border-radius:99px; background:var(--seal-red); transition:width .3s ease; }
+#view-conjugaison .conj-verb-nav{ grid-template-columns:minmax(0, 1fr); max-width:520px; margin-left:auto; margin-right:auto; }
+/* Tempos lado a lado (cada um uma coluna vertical); no celular, um embaixo do outro. */
+#view-conjugaison .conj-tense-grid{ grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 480px)); justify-content:center; }
+#view-conjugaison .conj-tense-box[data-tense="subjPresente"] .conj-field{ grid-template-columns:8.6em minmax(0, 1fr) 34px; }
+#view-conjugaison .conj-field .expected{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+#view-conjugaison .conj-field .audio-btn{ width:30px; height:30px; min-width:30px; font-size:13px; padding:0; }
+/* "Quase": o mesmo amarelo-escuro dos Desafios (claro / escuro). */
+#view-conjugaison{ --conj-quase:#B7791F; }
+:root[data-theme="dark"] #view-conjugaison{ --conj-quase:#E0A93B; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #view-conjugaison{ --conj-quase:#E0A93B; } }
+#view-conjugaison .conj-answer-view{
+  position:relative; min-height:46px; display:flex; align-items:center; padding:11px 38px 11px 12px; border-radius:10px; border:2px solid var(--error-red);
+  background:color-mix(in srgb, var(--error-red) 7%, var(--paper)); font-size:15.5px; color:var(--ink); letter-spacing:.02em; overflow-wrap:break-word;
+}
+#view-conjugaison .conj-answer-view.is-empty{ color:var(--ink-soft); }
+#view-conjugaison .conj-answer-view.is-ok{ border-color:var(--jade); background:color-mix(in srgb, var(--jade) 9%, var(--paper)); }
+#view-conjugaison .conj-answer-view.is-almost{ border-color:var(--conj-quase); background:color-mix(in srgb, var(--conj-quase) 12%, var(--paper)); }
+#view-conjugaison .conj-ic{ position:absolute; right:8px; top:50%; transform:translateY(-50%); width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; line-height:1; background:var(--error-red); color:var(--on-vivid); }
+#view-conjugaison .is-ok .conj-ic{ background:var(--jade); }
+#view-conjugaison .is-almost .conj-ic{ background:var(--conj-quase); }
+#view-conjugaison .conj-tag{ font-weight:800; color:var(--conj-quase); }
+#view-conjugaison .is-almost .conj-x{ color:var(--conj-quase); background:color-mix(in srgb, var(--conj-quase) 20%, transparent); }
+#view-conjugaison .conj-other-form{ flex-basis:100%; font-weight:600; color:var(--ink-soft); font-size:12.5px; }
+#view-conjugaison .conj-accents{ display:flex; justify-content:center; margin:-6px 0 14px; }
+#view-conjugaison .conj-size-hint{ margin:2px 0 0; font-size:12px; color:var(--ink-soft); }
+#view-conjugaison .conj-size-hint:empty{ display:none; }
+#view-conjugaison .conj-session-result:has(.conj-review){ max-width:560px; }
+#view-conjugaison .conj-review{ text-align:left; margin:18px 0 20px; border-top:1px solid var(--paper-line); padding-top:14px; }
+#view-conjugaison .conj-review-title{ font-weight:800; font-size:15px; margin-bottom:6px; }
+#view-conjugaison .conj-review-list{ list-style:none; margin:0; padding:0; }
+#view-conjugaison .conj-review-list li{ display:flex; flex-direction:column; gap:4px; padding:10px 0; border-bottom:1px solid var(--paper-line); }
+#view-conjugaison .conj-review-where{ font-size:12.5px; color:var(--ink-soft); font-weight:700; }
+#view-conjugaison .conj-review-form{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size:15px; }
+#view-conjugaison .conj-review-form i{ color:var(--ink-soft); }
+#view-conjugaison .conj-review-form .conj-answer-view{ min-height:0; display:inline-flex; padding:2px 8px; border-width:1px; border-radius:6px; }
+#view-conjugaison .conj-review-arrow{ color:var(--ink-soft); }
+#view-conjugaison .conj-result-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+/* Conjugação, fase 2: escolha com verbos em cima (busca com bandeira + filtros) e tempos em cartões com frase de exemplo. */
+#view-conjugaison #conj-select-wrap{ max-width:780px; margin:0 auto; }
+#view-conjugaison .conj-sel-block{ margin-bottom:22px; }
+#view-conjugaison .conj-sel-block > h3{ font-size:17px; font-weight:800; color:var(--ink); margin:0 0 10px; }
+#view-conjugaison .conj-sel-block:not(.conj-sel-tenses){ background:var(--paper); border:1px solid var(--paper-line); border-radius:18px; padding:18px 20px 20px; box-shadow:var(--shadow-card); }
+#view-conjugaison .conj-search{ position:relative; }
+#view-conjugaison .conj-search-label{ display:block; font-size:13px; font-weight:700; color:var(--ink-soft); margin-bottom:6px; }
+#view-conjugaison #conj-search-input{
+  width:100%; box-sizing:border-box; min-height:48px; padding:12px 14px 12px 42px; border-radius:12px; border:2px solid var(--paper-line);
+  background:var(--paper-warm) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%238A8F98' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='M15.5 15.5 21 21'/%3E%3C/svg%3E") no-repeat 14px 50%;
+  font-family:var(--font-body); font-size:16px; font-weight:700; color:var(--ink);
+}
+#view-conjugaison #conj-search-input::placeholder{ color:var(--ink-soft); font-weight:600; }
+#view-conjugaison #conj-search-input:focus{ outline:none; border-color:var(--seal-red); background-color:var(--paper); }
+#view-conjugaison .conj-search-list{
+  position:absolute; z-index:30; left:0; right:0; top:calc(100% + 6px); margin:0; padding:6px; list-style:none; max-height:320px; overflow-y:auto;
+  background:var(--paper); border:1px solid var(--paper-line); border-radius:14px; box-shadow:var(--shadow-lift);
+}
+#view-conjugaison .conj-search-opt{ display:grid; grid-template-columns:24px auto minmax(0, 1fr); align-items:center; gap:10px; min-height:44px; padding:6px 10px; border-radius:10px; cursor:pointer; }
+#view-conjugaison .conj-search-opt[aria-selected="true"]{ background:color-mix(in srgb, var(--seal-red) 12%, var(--paper)); }
+@media (hover:hover){ #view-conjugaison .conj-search-opt:hover{ background:color-mix(in srgb, var(--seal-red) 8%, var(--paper)); } }
+#view-conjugaison .conj-opt-word{ font-weight:800; font-size:15.5px; color:var(--ink); }
+#view-conjugaison .conj-opt-other{ font-size:13.5px; color:var(--ink-soft); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#view-conjugaison .conj-search-empty{ padding:12px 10px; color:var(--ink-soft); font-size:14px; }
+#view-conjugaison .conj-flag{ display:inline-flex; width:24px; height:16px; border-radius:3px; overflow:hidden; box-shadow:0 0 0 1px rgba(0,0,0,.14); }
+#view-conjugaison .conj-flag svg{ width:100%; height:100%; display:block; }
+#view-conjugaison .conj-picked:empty{ display:none; }
+#view-conjugaison .conj-picked{ margin-top:12px; }
+#view-conjugaison .conj-chips{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px; }
+#view-conjugaison .conj-chip{ display:inline-flex; align-items:center; gap:2px; padding:0 4px 0 14px; min-height:36px; border-radius:999px; font-weight:800; font-size:15px;
+  color:var(--ink); background:color-mix(in srgb, var(--seal-red) 12%, var(--paper)); border:1px solid color-mix(in srgb, var(--seal-red) 45%, transparent); }
+#view-conjugaison .conj-chip-x{ width:30px; height:30px; border-radius:50%; border:none; background:transparent; color:var(--ink-soft); font-size:19px; line-height:1; cursor:pointer; }
+#view-conjugaison .conj-chip-x:hover{ color:var(--ink); background:color-mix(in srgb, var(--seal-red) 18%, transparent); }
+#view-conjugaison .conj-picked-note{ margin:8px 0 0; font-size:13px; color:var(--ink-soft); }
+#view-conjugaison .conj-filters{ margin-top:18px; padding-top:16px; border-top:1px solid var(--paper-line); transition:opacity .2s ease; }
+#view-conjugaison .conj-filters.is-off{ opacity:.42; pointer-events:none; }
+#view-conjugaison .conj-filters-title{ margin:0 0 12px; font-size:14px; font-weight:800; color:var(--ink); }
+#view-conjugaison .conj-filter-pair, #view-conjugaison .conj-toggle-pair{ display:grid; grid-template-columns:1fr 1fr; gap:0 12px; }
+#view-conjugaison .conj-toggle-pair{ margin-bottom:8px; }
+#view-conjugaison .conj-toggle-item.active{ background:color-mix(in srgb, var(--seal-red) 7%, var(--paper)); }
+#view-conjugaison .conj-toggle-item:focus-visible, #view-conjugaison .conj-tense-card:has(input:focus-visible){ outline:2px solid var(--seal-red); outline-offset:2px; }
+#view-conjugaison .conj-tense-cards{ display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap:10px; }
+#view-conjugaison .conj-tense-card{
+  position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding:14px 16px 14px 44px; border-radius:14px;
+  border:1px solid var(--paper-line); background:var(--paper); box-shadow:var(--shadow-card); font-weight:400; transition:background .15s ease, box-shadow .15s ease;
+}
+#view-conjugaison .conj-tense-card input{ position:absolute; left:16px; top:17px; width:18px; height:18px; margin:0; }
+#view-conjugaison .conj-tense-card:has(input:checked){ border-color:var(--seal-red); box-shadow:inset 0 0 0 1px var(--seal-red), var(--shadow-card); background:color-mix(in srgb, var(--seal-red) 6%, var(--paper)); }
+@media (hover:hover){ #view-conjugaison .conj-tense-card:hover{ border-color:var(--seal-red); } }
+#view-conjugaison .conj-tense-name{ font-size:15.5px; font-weight:800; color:var(--ink); }
+#view-conjugaison .conj-ex{ font-size:14.5px; line-height:1.45; color:var(--ink); }
+#view-conjugaison .conj-ex-verb{ color:var(--seal-red-dark); font-weight:800; }
+#view-conjugaison .conj-ex-tr{ font-size:12.5px; line-height:1.4; color:var(--ink-soft); }
+#view-conjugaison #conj-size-hint{ text-align:center; margin:0 0 10px; font-size:13px; }
+@media (max-width:620px){
+  #view-conjugaison .conj-sel-block:not(.conj-sel-tenses){ padding:16px 14px 18px; border-radius:16px; }
+  #view-conjugaison .conj-filter-pair, #view-conjugaison .conj-toggle-pair{ grid-template-columns:1fr; }
+  #view-conjugaison .conj-chip{ min-height:44px; }
+  #view-conjugaison .conj-chip-x{ width:44px; height:44px; }
+  #view-conjugaison .conj-filter-row select{ min-height:44px; }
+}
+/* Modo foco na Conjugação, na Revisão e nos Desafios (shared/activity-focus.js): a sessão
+   fica numa coluna centralizada; no topo, o link de voltar e a ⚑ (a da topbar some no foco). */
+.activity-focus-bar{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.activity-focus-bar .back-link{ margin-bottom:0; }
+.activity-report-btn{ display:none; }
+body[data-activity-focus] .activity-report-btn{
+  display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:36px; height:36px; border-radius:50%;
+  border:1px solid var(--paper-line); background:var(--paper); color:var(--ink-soft); font-size:16px; cursor:pointer;
+}
+body[data-activity-focus] .activity-report-btn:hover{ color:var(--ink); }
+body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
+#app.lesson-focus #review-session-wrap, #app.lesson-focus #challenge-player-wrap{ max-width:760px; margin-left:auto; margin-right:auto; }
+#app.lesson-focus #conj-practice-wrap{ max-width:1040px; margin-left:auto; margin-right:auto; }
+#view-conjugaison .conj-actions, #view-conjugaison .conj-verb-pager{ max-width:640px; margin-left:auto; margin-right:auto; }
+@media (max-width:620px){ body[data-activity-focus] .activity-report-btn{ width:44px; height:44px; } }
+/* Conjugação: abas Praticar | Jogos e o jogo de escolha (shared/conj-games.js). */
+#view-conjugaison .conj-modes{ display:inline-flex; gap:4px; padding:4px; margin:0 0 18px; border-radius:999px; background:var(--paper-warm); border:1px solid var(--paper-line); }
+#view-conjugaison .conj-mode{ min-height:40px; padding:8px 20px; border:none; border-radius:999px; background:transparent; color:var(--ink-soft); font-family:var(--font-body); font-weight:800; font-size:14.5px; cursor:pointer; }
+#view-conjugaison .conj-mode.active{ background:var(--paper); color:var(--ink); box-shadow:var(--shadow-card); }
+#view-conjugaison .conj-mode:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }
+#view-conjugaison .cg-list{ display:grid; gap:12px; max-width:780px; }
+#view-conjugaison .cg-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:18px; padding:20px; box-shadow:var(--shadow-card); }
+#view-conjugaison .cg-card-title{ margin:0 0 6px; font-size:19px; font-weight:800; color:var(--ink); }
+#view-conjugaison .cg-card-lede{ margin:0 0 16px; color:var(--ink-soft); font-size:14.5px; line-height:1.5; max-width:62ch; }
+#view-conjugaison .cg-card-foot{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+#view-conjugaison .cg-card-meta{ font-size:13px; font-weight:700; color:var(--ink-soft); }
+#view-conjugaison .cg-card .cg-play{ min-width:140px; }
+#conj-game-wrap{ max-width:720px; margin:0 auto; }
+#view-conjugaison .cg-title{ font-size:18px; font-weight:800; margin:0 0 10px; color:var(--ink); }
+#view-conjugaison .cg-progress{ display:flex; align-items:center; gap:12px; margin-bottom:18px; font-size:13px; font-weight:700; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+#view-conjugaison .cg-progress > span{ white-space:nowrap; }
+#view-conjugaison .cg-progress-bar{ flex:1; height:6px; border-radius:99px; background:var(--paper-line); overflow:hidden; }
+#view-conjugaison .cg-progress-bar > i{ display:block; height:100%; border-radius:99px; background:var(--seal-red); transition:width .3s ease; }
+#view-conjugaison .cg-stage{ background:var(--paper); border:1px solid var(--paper-line); border-radius:20px; padding:26px 24px 22px; box-shadow:var(--shadow-card); }
+#view-conjugaison .cg-verb{ display:inline-block; font-size:13.5px; font-weight:700; color:var(--ink-soft); margin-bottom:6px; }
+#view-conjugaison .cg-sentence{ font-size:clamp(21px, 3.2vw, 27px); font-weight:700; line-height:1.5; color:var(--ink); margin:0 0 22px; }
+#view-conjugaison .cg-blank{ display:inline-block; min-width:4.2em; height:1.15em; vertical-align:-0.18em; margin:0 .12em; border-radius:8px; background:var(--paper-warm); border:2px dashed var(--paper-line); }
+#view-conjugaison .cg-fill{ color:var(--seal-red-dark); font-weight:900; }
+#view-conjugaison .cg-clue{ color:inherit; background:color-mix(in srgb, var(--imperial-gold) 24%, transparent); border-radius:5px; padding:0 .12em; }
+#view-conjugaison .cg-choices{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+#view-conjugaison .cg-choice{ display:flex; flex-direction:column; align-items:center; gap:4px; min-height:72px; padding:12px 10px; border-radius:16px; border:2px solid var(--paper-line);
+  background:var(--paper-warm); color:var(--ink); font-family:var(--font-body); cursor:pointer; transition:border-color .12s ease, transform .12s ease; overflow-wrap:anywhere; }
+@media (hover:hover){ #view-conjugaison .cg-choice:not(:disabled):hover{ border-color:var(--seal-red); transform:translateY(-1px); } }
+#view-conjugaison .cg-choice:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }
+#view-conjugaison .cg-choice-form{ font-size:clamp(18px, 2.6vw, 22px); font-weight:900; }
+#view-conjugaison .cg-choice-label{ font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+#view-conjugaison .cg-choice:disabled{ cursor:default; }
+#view-conjugaison .cg-choice.is-right{ border-color:var(--jade); background:color-mix(in srgb, var(--jade) 12%, var(--paper)); }
+#view-conjugaison .cg-choice.is-wrong{ border-color:var(--error-red); background:color-mix(in srgb, var(--error-red) 9%, var(--paper)); }
+#view-conjugaison .cg-choice.is-dim{ opacity:.5; }
+#view-conjugaison .cg-feedback:empty{ display:none; }
+#view-conjugaison .cg-feedback{ margin-top:20px; padding-top:18px; border-top:1px solid var(--paper-line); }
+#view-conjugaison .cg-verdict{ margin:0 0 14px; font-size:17px; font-weight:900; }
+#view-conjugaison .cg-verdict.ok{ color:var(--jade); }
+#view-conjugaison .cg-verdict.no{ color:var(--error-red); }
+#view-conjugaison .cg-verdict span{ color:var(--ink); font-weight:700; }
+#view-conjugaison .cg-why{ display:grid; grid-template-columns:150px minmax(0, 1fr); gap:16px; align-items:start; padding:14px 16px; border-radius:14px; background:var(--paper-warm); }
+#view-conjugaison .cg-why h3{ margin:0 0 4px; font-size:15px; font-weight:800; color:var(--ink); }
+#view-conjugaison .cg-why p{ margin:0; font-size:14.5px; line-height:1.55; color:var(--ink); }
+#view-conjugaison .cg-timeline{ margin:0; display:flex; flex-direction:column; gap:6px; color:var(--ink); }
+#view-conjugaison .cg-timeline svg{ width:134px; height:44px; display:block; }
+#view-conjugaison .cg-timeline figcaption{ font-size:12px; font-weight:800; color:var(--ink-soft); line-height:1.35; }
+#view-conjugaison .cg-tr{ display:flex; align-items:center; gap:10px; margin:14px 0 18px; font-size:14.5px; color:var(--ink-soft); }
+#view-conjugaison .cg-next{ width:100%; }
+#view-conjugaison .cg-result{ text-align:center; background:var(--paper); border:1px solid var(--paper-line); border-radius:20px; padding:28px 24px; box-shadow:var(--shadow-card); }
+#view-conjugaison .cg-score{ font-size:46px; margin:4px 0 16px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+#view-conjugaison .cg-score b{ color:var(--ink); }
+#view-conjugaison .cg-perfect{ color:var(--ink-soft); margin:0 0 20px; }
+#view-conjugaison .cg-review{ text-align:left; border-top:1px solid var(--paper-line); padding-top:14px; margin-bottom:20px; }
+#view-conjugaison .cg-review h3{ font-size:15px; font-weight:800; margin:0 0 6px; }
+#view-conjugaison .cg-review ul{ list-style:none; margin:0; padding:0; }
+#view-conjugaison .cg-review li{ padding:10px 0; border-bottom:1px solid var(--paper-line); }
+#view-conjugaison .cg-review .cg-sentence{ font-size:16px; margin:0 0 2px; }
+#view-conjugaison .cg-review-tr{ font-size:13px; color:var(--ink-soft); }
+#view-conjugaison .cg-result-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+@media (max-width:620px){
+  #view-conjugaison .cg-stage{ padding:20px 16px 18px; }
+  #view-conjugaison .cg-why{ grid-template-columns:1fr; }
+  #view-conjugaison .conj-mode{ min-height:44px; }
+  #view-conjugaison .cg-choices{ gap:8px; }
+}
+#view-conjugaison .conj-mode-lock{ font-size:12px; }
+#view-conjugaison .cg-premium{ display:inline-block; margin-right:10px; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:800;
+  color:var(--ink); background:color-mix(in srgb, var(--imperial-gold) 22%, var(--paper)); border:1px solid color-mix(in srgb, var(--imperial-gold) 45%, transparent); }
 /* ---------- Cara de jogo: telas (passo 4, docs/historico/15) ----------
    Bloco único com o visual "de jogo" das telas fora de Amigos: pódio e "faltam
    X XP" (Ranking e Amigos), Perfil, Progresso, Metas e o volume dos cartões
@@ -5074,31 +5305,63 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
     <div id="conj-select-wrap">
       <div class="path-header">
         <h2 data-i18n="admin.reports.screen.conjugaison">Conjugação</h2>
-        <p data-i18n="ui.conj.sub">Escolha os tempos verbais e as categorias de verbo. Você sempre pratica as 6 pessoas.</p>
+        <p data-i18n="ui.conj.sub">Escolha os verbos e os tempos verbais.</p>
       </div>
-      <div class="conj-select-grid">
-        <div class="conj-select-col">
-          <h3>Tempos verbais</h3>
-          <div class="conj-check-list" id="conj-tense-list"></div>
+      <div class="conj-modes" role="tablist" data-i18n-attr="aria-label:admin.reports.screen.conjugaison" aria-label="Conjugação">
+        <button type="button" role="tab" class="conj-mode active" id="conj-mode-practice" aria-selected="true" aria-controls="conj-practice-pane" data-i18n="games.tabPractice">Praticar</button>
+        <button type="button" role="tab" class="conj-mode" id="conj-mode-games" aria-selected="false" aria-controls="conj-games-pane"><span data-i18n="games.tabGames">Jogos</span> <span class="conj-mode-lock" aria-hidden="true">🔒</span></button>
+      </div>
+      <div id="conj-games-pane" role="tabpanel" aria-labelledby="conj-mode-games" hidden>
+        <div class="cg-list" id="conj-games-list"></div>
+      </div>
+      <div id="conj-practice-pane" role="tabpanel" aria-labelledby="conj-mode-practice">
+      <!-- Fase 2 (2026-10-13): verbos em cima (busca + filtros), tempos embaixo em cartões com frase de exemplo. -->
+      <section class="conj-sel-block" aria-labelledby="conj-verbs-h">
+        <h3 id="conj-verbs-h" data-i18n="fr.conj.sel.verbs">Verbos</h3>
+        <div class="conj-search">
+          <label class="conj-search-label" for="conj-search-input" data-i18n="fr.conj.sel.searchLabel">Praticar verbos específicos (em francês ou em português)</label>
+          <input id="conj-search-input" type="text" role="combobox" aria-expanded="false" aria-controls="conj-search-list" aria-autocomplete="list" autocomplete="off" autocapitalize="off" spellcheck="false"
+            data-i18n-attr="placeholder:fr.conj.sel.searchPh" placeholder="manger, comer, être...">
+          <ul class="conj-search-list" id="conj-search-list" role="listbox" hidden></ul>
         </div>
-        <div class="conj-select-col">
-          <h3>Verbos</h3>
-          <div class="conj-filter-row">
-            <label data-i18n="ui.conj.topN" for="conj-topn-select">Número de verbos (mais comuns primeiro)</label>
-            <select id="conj-topn-select"></select>
+        <div class="conj-picked" id="conj-picked" aria-live="polite"></div>
+        <div class="conj-filters" id="conj-filters">
+          <p class="conj-filters-title" id="conj-filters-title" data-i18n="fr.conj.sel.orFilters">Ou sorteie pelos filtros</p>
+          <div class="conj-filter-pair">
+            <div class="conj-filter-row" id="conj-size-row">
+              <label for="conj-size-select" data-i18n="fr.conj.sessionSize">Verbos por sessão</label>
+              <select id="conj-size-select"></select>
+            </div>
+            <div class="conj-filter-row">
+              <label data-i18n="ui.conj.topN" for="conj-topn-select">Número de verbos (mais comuns primeiro)</label>
+              <select id="conj-topn-select"></select>
+            </div>
           </div>
-          <div class="conj-toggle-item" id="conj-toggle-regular">
-            <span>Somente verbos regulares</span>
-            <div class="conj-toggle-switch"></div>
-          </div>
-          <div class="conj-toggle-item" id="conj-toggle-irregular">
-            <span>Somente verbos irregulares</span>
-            <div class="conj-toggle-switch"></div>
+          <div class="conj-toggle-pair">
+            <div class="conj-toggle-item" id="conj-toggle-regular" role="switch" tabindex="0" aria-checked="false">
+              <span data-i18n="fr.conj.sel.onlyRegular">Somente verbos regulares</span>
+              <div class="conj-toggle-switch"></div>
+            </div>
+            <div class="conj-toggle-item" id="conj-toggle-irregular" role="switch" tabindex="0" aria-checked="false">
+              <span data-i18n="fr.conj.sel.onlyIrregular">Somente verbos irregulares</span>
+              <div class="conj-toggle-switch"></div>
+            </div>
           </div>
           <div class="conj-check-list" id="conj-verb-list"></div>
         </div>
-      </div>
+      </section>
+      <section class="conj-sel-block conj-sel-tenses" aria-labelledby="conj-tenses-h">
+        <h3 id="conj-tenses-h" data-i18n="fr.conj.sel.tenses">Tempos verbais</h3>
+        <div class="conj-tense-cards" id="conj-tense-list"></div>
+      </section>
+      <p class="conj-size-hint" id="conj-size-hint" aria-live="polite"></p>
       <button data-i18n="ui.conj.start" class="btn btn-primary btn-block" id="conj-start-btn" style="max-width:320px; margin:0 auto; display:flex;">Começar prática</button>
+      </div>
+    </div>
+
+    <div id="conj-game-wrap" style="display:none;">
+      <button class="back-link" id="conj-game-back" data-i18n="games.backToGames">← Voltar aos jogos</button>
+      <div id="conj-game-content"></div>
     </div>
 
     <div id="conj-practice-wrap" style="display:none;">
@@ -5932,6 +6195,7 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 <script src="../shared/translation-compare.js"></script>
 <script src="content.js"></script>
 <script src="conjugation-data.js"></script>
+<script src="conj-games.js"></script>
 <script src="dictations.js"></script>
 <script src="../shared/course-layer.js"></script>
 <script src="../courses/fr-pt-BR/layer.js"></script>
@@ -6016,6 +6280,8 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 <script src="../shared/topbar-stats.js"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>
+<script src="../shared/activity-focus.js"></script>
+<script src="../shared/conj-games.js"></script>
 <script src="../shared/router.js"></script>
 <script src="../shared/anki-export.js"></script>
 <script src="../shared/pwa.js"></script>
@@ -6028,6 +6294,7 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 <script src="../shared/badge-tracks-app.js"></script>
 <script src="../shared/core/gamificacao.js"></script>
 <script src="../shared/core/revisao-decks.js"></script>
+<script src="../shared/core/exercicios-licao.js"></script>
 <script src="app.js"></script>
 <script src="../shared/language-switcher.js"></script>
 </body>

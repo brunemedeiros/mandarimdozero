@@ -651,6 +651,44 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.hintMore': '💡 More help', // ALTA
   'fr.conj.hintMoreTitle': 'Reveal most of the letters', // ALTA
   'fr.conj.hintMax': '💡 Maximum hint', // ALTA
+  'fr.conj.sessionSize': 'Verbs per session', // ALTA
+  'fr.conj.sessionForms': '≈ {n} forms to fill in', // ALTA
+  'fr.conj.reviewTitle': 'Forms to review ({n})', // ALTA
+  'fr.conj.practiceMistakes': 'Practice only the ones I missed', // ALTA
+  'fr.conj.almost': 'Almost', // ALTA
+  'fr.conj.otherForm': '"{form}" is the {tense} form.', // ALTA
+  'fr.conj.sel.verbs': 'Verbs', // ALTA
+  'fr.conj.sel.searchLabel': 'Practice specific verbs (in French or Portuguese)', // ALTA
+  'fr.conj.sel.searchPh': 'manger, être, aller...', // ALTA
+  'fr.conj.sel.noMatch': 'This verb is not on the list yet.', // ALTA
+  'fr.conj.sel.pickedNote': 'The session will use only these verbs. The filters below are set aside.', // ALTA
+  'fr.conj.sel.removeVerb': 'Remove {verb}', // ALTA
+  'fr.conj.sel.pickLimit': 'You can pick up to {n} verbs.', // ALTA
+  'fr.conj.sel.orFilters': 'Or draw verbs with the filters', // ALTA
+  'fr.conj.sel.onlyRegular': 'Regular verbs only', // ALTA
+  'fr.conj.sel.onlyIrregular': 'Irregular verbs only', // ALTA
+  'fr.conj.sel.tenses': 'Verb tenses', // ALTA
+  'fr.conj.sel.langFr': 'French', // ALTA
+  'fr.conj.sel.langPt': 'Portuguese', // ALTA
+  'games.tabPractice': 'Practice', // ALTA
+  'games.tabGames': 'Games', // ALTA
+  'games.premium': 'Premium', // ALTA
+  'games.perRound': '{n} sentences per round', // ALTA
+  'games.play': 'Play', // ALTA
+  'games.counter': 'Sentence {i} of {n}', // ALTA
+  'games.right': 'Right!', // ALTA
+  'games.wrong': 'Not this time.', // ALTA
+  'games.answerWas': 'The answer is "{form}".', // ALTA
+  'games.whyTense': 'Why {tense}?', // ALTA
+  'games.listen': 'Listen to the sentence', // ALTA
+  'games.next': 'Next sentence', // ALTA
+  'games.seeResult': 'See result', // ALTA
+  'games.resultTitle': 'End of round', // ALTA
+  'games.reviewTitle': 'Sentences to review ({n})', // ALTA
+  'games.perfect': 'You got them all right!', // ALTA
+  'games.practiceMistakes': 'Practice only my mistakes', // ALTA
+  'games.again': 'Play again', // ALTA
+  'games.backToGames': '← Back to games', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA
@@ -1920,7 +1958,7 @@ window.I18N_CATALOG['en'] = {
   'ui.review.intensity.light': 'Light (shorter sessions)', // ALTA
   'ui.review.intensity.intense': 'Intense (longer sessions)', // ALTA
   'ui.review.practiceHint': 'Keep practicing whenever you like, even with no reviews due.', // ALTA
-  'ui.conj.sub': 'Choose the verb tenses and verb categories. You always practice all 6 persons.', // ALTA
+  'ui.conj.sub': 'Choose the verbs and the verb tenses.', // ALTA
   'ui.conj.topN': 'Number of verbs (most common first)', // ALTA
   'ui.conj.start': 'Start practice', // ALTA
   'ui.conj.backToSelect': '← Back to selection', // ALTA
