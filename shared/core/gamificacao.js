@@ -138,18 +138,25 @@ function checkDailyMissionCompletions(){
 }
 
 function seedEarnedBadges(){
+  // Conquistas com níveis (shared/badge-tracks-app.js): BADGES é montado a partir do progresso já carregado.
+  if (typeof rebuildTrackBadges === 'function') rebuildTrackBadges();
   earnedBadgeIds = new Set(BADGES.filter(b => b.check(STATE)).map(b => b.id));
   // C4: conquistas da conta ganhas em outro idioma também valem aqui (sem celebrar de novo).
+  // Com os níveis, as conquistas antigas gravadas (ex.: 'streak_7') também contam como o nível equivalente,
+  // então os níveis são recalculados depois de ler earned_badges.
   loadAccountEarnedBadges().then(() => {
+    if (typeof rebuildTrackBadges === 'function') rebuildTrackBadges();
+    BADGES.filter(b => b.check(STATE)).forEach(b => earnedBadgeIds.add(b.id));
     earnedBadgeIds = AccountProgress.unionBadgeIds(earnedBadgeIds, accountEarnedBadgeRows);
-    upsertEarnedBadges([...earnedBadgeIds]);
+    upsertEarnedBadges([...earnedBadgeIds], { backfill: true });
     if (typeof renderProgressView === 'function' && document.getElementById('badge-grid')) renderProgressView();
+    if (typeof loadFriendsAcceptedCount === 'function') loadFriendsAcceptedCount();
   });
   // Backfill/sincronização: garante que a tabela pública earned_badges
   // reflita tudo que já era verdade antes desta feature existir, ou que
   // uma sessão anterior não tenha conseguido gravar -- upsert idempotente,
-  // sem custo de duplicar (ver shared/auth.js).
-  upsertEarnedBadges([...earnedBadgeIds]);
+  // sem custo de duplicar (ver shared/auth.js). Sem sobrescrever a data de quem já tinha.
+  upsertEarnedBadges([...earnedBadgeIds], { backfill: true });
 }
 
 function holdBadgeCelebrations(){ badgeCelebrationHeld = true; }

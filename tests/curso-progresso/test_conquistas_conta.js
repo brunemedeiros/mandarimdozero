@@ -10,16 +10,24 @@ global.LanguageRegistry = require(path.join(ROOT, 'languages/registry.js'));
 const AP = require(path.join(ROOT, 'shared/account-progress.js'));
 const COURSE = ['unit_1', 'unit_half', 'unit_all', 'explorer', 'trained_ear', 'multitasker'];
 
-// 1) classificação coerente com o catálogo real de cada idioma
+// 1) classificação coerente com o catálogo. Desde 2026-10-14 (conquistas com níveis) o catálogo é
+//    shared/badge-tracks.js e BADGES é montado em runtime: cada conquista antiga da conta vira nível de uma trilha
+//    da conta, e as de curso, de uma trilha de curso (a regra C4 continua a mesma).
+const BT = require(path.join(ROOT, 'shared/badge-tracks.js'));
+for (const id of AP.ACCOUNT_BADGE_IDS){
+  const p = BT.parseId(id);
+  check('conquista antiga da conta vira trilha da conta: ' + id, !!(p && p.track && BT.trackById(p.track).scope === 'account'), p);
+}
+for (const id of COURSE.filter(x => x !== 'multitasker')){
+  const p = BT.parseId(id);
+  check('conquista antiga de curso vira trilha de curso: ' + id, !!(p && p.track && BT.trackById(p.track).scope === 'course'), p);
+}
+check('Multitarefa é clássica (de curso)', !!BT.parseId('multitasker').classic && !AP.isAccountBadge('multitasker'));
+check('nível de trilha da conta é da conta; de curso, não', AP.isAccountBadge('review.3') && AP.isAccountBadge('streak.1') && !AP.isAccountBadge('course1.3') && !AP.isAccountBadge('ear.1'));
 for (const f of ['fr/app.js', 'zh/app.js']) {
   const src = read(f);
-  const block = src.slice(src.indexOf('const BADGES = ['), src.indexOf('// ---------- Detecção + celebração'));
-  const ids = [...block.matchAll(/\{ id:'([a-z_0-9]+)'/g)].map(m => m[1]);
-  check(f + ': catálogo lido', ids.length >= 14, ids.length);
-  for (const id of AP.ACCOUNT_BADGE_IDS) check(f + ': conquista da conta existe: ' + id, ids.includes(id));
-  const unclassified = ids.filter(id => !AP.isAccountBadge(id) && !COURSE.includes(id) && !/^unit_/.test(id));
-  check(f + ': toda conquista é de conta ou de curso', unclassified.length === 0, unclassified);
-  check(f + ': usa badgeEarnedNow na grade', /badgeEarnedNow\(b, STATE\)/.test(src));
+  check(f + ': BADGES vem das trilhas', /const BADGES = \[\];/.test(src) && /function collectBadgeMetrics\(s\)/.test(src));
+  check(f + ': grade usa as trilhas (badgeTrackViews)', /badgeTrackViews\(STATE\)/.test(src));
 }
 for (const id of COURSE) check('conquista de curso não é da conta: ' + id, !AP.isAccountBadge(id));
 

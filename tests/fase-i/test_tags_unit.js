@@ -126,7 +126,8 @@ for (const [label, appjs] of [['fr', 'fr/app.js'], ['zh', 'zh/app.js']]){
   const ctx = vm.createContext({ console, JSON, Array, Set, Object });
   vm.runInContext(read('languages/registry.js'), ctx);
   vm.runInContext(read('shared/flashcard-model.js'), ctx);
-  const src = read(appjs);
+  // E4 (2026-10-14): as funções da Revisão moraram para shared/core/revisao-decks.js; lê o app.js junto com o core.
+  const src = read(appjs) + '\n' + read('shared/core/revisao-decks.js');
   ['activeReviewTagFilter', 'matchesReviewTagFilter', 'eligibleReviewPool', 'reviewTagUniverse', 'isClassReviewCard', 'effectiveReviewOriginFilter', 'matchesReviewOriginFilter'].forEach(fn => vm.runInContext(extractFunction(src, fn), ctx));
   vm.runInContext(`var STATE = {studySettings:{reviewOriginFilter:'all', reviewTagFilter:[]}, cards:[
     {id:1, origin:'self', flashcardStatus:'active', tags:['a1']}, {id:2, origin:'teacher', flashcardStatus:'active', tags:['b2']},

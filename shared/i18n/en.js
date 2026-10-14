@@ -2087,6 +2087,117 @@ window.I18N_CATALOG['en'] = {
   'badge.catalog.pioneer.desc': 'Among the first people to use the app in its early phase', // MÉDIA
   'badge.catalog.student.name': 'Prof. Brune\'s student', // MÉDIA
   'badge.catalog.student.desc': 'Prof. Brune\'s student', // MÉDIA
+  'badge.track.days.title': 'First Step', // ALTA
+  'badge.track.days.1': 'First Step', // ALTA
+  'badge.track.days.2': 'Getting the Hang of It', // ALTA
+  'badge.track.days.3': 'Hitting the Road', // ALTA
+  'badge.track.days.4': 'Good Pace', // ALTA
+  'badge.track.days.5': 'Giant Leap', // ALTA
+  'badge.track.days.6': 'Unstoppable', // ALTA
+  'badge.track.days.goal': 'Study on {n} different days', // ALTA
+  'badge.track.days.goal.1': 'Study for the first time', // ALTA
+  'badge.track.review.title': 'Reviews', // ALTA
+  'badge.track.review.1': 'Review Apprentice', // ALTA
+  'badge.track.review.1.f': 'Review Apprentice', // ALTA
+  'badge.track.review.1.m': 'Review Apprentice', // ALTA
+  'badge.track.review.2': 'Junior Reviewer', // ALTA
+  'badge.track.review.2.f': 'Junior Reviewer', // ALTA
+  'badge.track.review.2.m': 'Junior Reviewer', // ALTA
+  'badge.track.review.3': 'Senior Reviewer', // ALTA
+  'badge.track.review.3.f': 'Senior Reviewer', // ALTA
+  'badge.track.review.3.m': 'Senior Reviewer', // ALTA
+  'badge.track.review.4': 'Review Master', // ALTA
+  'badge.track.review.goal': 'Do {n} reviews', // ALTA
+  'badge.track.streak.title': 'Streak', // ALTA
+  'badge.track.streak.1': 'Spark', // ALTA
+  'badge.track.streak.2': 'One Week!', // ALTA
+  'badge.track.streak.3': 'Flame On', // ALTA
+  'badge.track.streak.4': 'A Month on Fire', // ALTA
+  'badge.track.streak.5': 'Bonfire', // ALTA
+  'badge.track.streak.6': 'Volcano', // ALTA
+  'badge.track.streak.7': 'Eternal Flame', // ALTA
+  'badge.track.streak.goal': 'Study {n} days in a row', // ALTA
+  'badge.track.xp.title': 'XP', // ALTA
+  'badge.track.xp.1': 'First Points', // ALTA
+  'badge.track.xp.2': 'Adding Up', // ALTA
+  'badge.track.xp.3': 'A Thousand and Counting', // ALTA
+  'badge.track.xp.4': 'Pile of Points', // ALTA
+  'badge.track.xp.5': 'Mountain of XP', // ALTA
+  'badge.track.xp.6': 'XP Legend', // ALTA
+  'badge.track.xp.goal': 'Earn {n} XP', // ALTA
+  'badge.track.course1.title': 'Level {level}', // ALTA
+  'badge.track.course1.1': 'First Unit', // ALTA
+  'badge.track.course1.2': 'Halfway Through {level}', // ALTA
+  'badge.track.course1.3': '{level} Complete', // ALTA
+  'badge.track.course1.4': '{level} Aced', // ALTA
+  'badge.track.course1.goal.1': 'Finish the first unit of {level}', // ALTA
+  'badge.track.course1.goal.2': 'Finish {n} units of {level}', // ALTA
+  'badge.track.course1.goal.3': 'Finish every unit of {level}', // ALTA
+  'badge.track.course1.goal.4': 'Score 100% on every checkpoint of {level}', // ALTA
+  'badge.track.ear.title': 'Listening', // ALTA
+  'badge.track.ear.1': 'Curious Ear', // ALTA
+  'badge.track.ear.2': 'Trained Ear', // ALTA
+  'badge.track.ear.3': 'Sharp Ear', // ALTA
+  'badge.track.ear.4': 'Perfect Pitch', // ALTA
+  'badge.track.ear.goal': 'Play {n} audio clips', // ALTA
+  'badge.track.explore.title': 'Explorer', // ALTA
+  'badge.track.explore.1': 'Looking Around', // ALTA
+  'badge.track.explore.2': 'Exploring Everything', // ALTA
+  'badge.track.explore.3': 'Knows Every Corner', // ALTA
+  'badge.track.explore.goal': 'Use {n} different study modes', // ALTA
+  'badge.track.explore.goal.3': 'Use every study mode on the site', // ALTA
+  'badge.track.weekend.title': 'Weekends', // ALTA
+  'badge.track.weekend.1': 'Weekend', // ALTA
+  'badge.track.weekend.2': 'Sunday Study', // ALTA
+  'badge.track.weekend.3': 'No Days Off', // ALTA
+  'badge.track.weekend.4': 'Half a Year of Saturdays', // ALTA
+  'badge.track.weekend.5': 'A Year Without a Break', // ALTA
+  'badge.track.weekend.goal': 'Study on Saturday and Sunday on {n} weekends', // ALTA
+  'badge.track.weekend.goal.1': 'Study on both Saturday and Sunday of one weekend', // ALTA
+  'badge.track.vocab.title': 'Vocabulary', // ALTA
+  'badge.track.vocab.1': 'First Words', // ALTA
+  'badge.track.vocab.2': 'Word by Word', // ALTA
+  'badge.track.vocab.3': 'Pocket Dictionary', // ALTA
+  'badge.track.vocab.4': 'Walking Dictionary', // ALTA
+  'badge.track.vocab.goal': 'Learn {n} words', // ALTA
+  'badge.track.aced.title': 'Aced It', // ALTA
+  'badge.track.aced.1': 'Aced It!', // ALTA
+  'badge.track.aced.2': 'Bullseye', // ALTA
+  'badge.track.aced.3': 'Sharpshooter', // ALTA
+  'badge.track.aced.4': 'Perfect Score', // ALTA
+  'badge.track.aced.goal': 'Score 100% on {n} checkpoints', // ALTA
+  'badge.track.aced.goal.1': 'Score 100% on a checkpoint', // ALTA
+  'badge.track.aced.goal.4': 'Score 100% on every checkpoint of {level}', // ALTA
+  'badge.track.dictation.title': 'Dictation', // ALTA
+  'badge.track.dictation.1': 'Careful Listener', // ALTA
+  'badge.track.dictation.2': 'Sharp Listener', // ALTA
+  'badge.track.dictation.3': 'Perfect Listener', // ALTA
+  'badge.track.dictation.goal': 'Score 90% or more on {n} dictations (retries count too)', // ALTA
+  'badge.track.challenge.title': 'Challenges', // ALTA
+  'badge.track.challenge.1': 'Up for Anything', // ALTA
+  'badge.track.challenge.2': 'Challenger', // ALTA
+  'badge.track.challenge.3': 'Unbeatable', // ALTA
+  'badge.track.challenge.goal': 'Finish {n} challenges', // ALTA
+  'badge.track.challenge.goal.3': 'Finish every challenge', // ALTA
+  'badge.track.friends.title': 'Friends', // ALTA
+  'badge.track.friends.1': 'First Friend', // ALTA
+  'badge.track.friends.2': 'Study Crew', // ALTA
+  'badge.track.friends.3': 'Study Squad', // ALTA
+  'badge.track.friends.goal': 'Have {n} friends', // ALTA
+  'badge.track.friends.goal.1': 'Make your first friend', // ALTA
+  'badge.track.comeback.title': 'Back in the Game', // ALTA
+  'badge.track.comeback.1': 'Back in the Game', // ALTA
+  'badge.track.comeback.goal.1': 'Come back to studying a few days after stopping', // ALTA
+  'badge.ui.levelOf': 'Level {n} of {total}', // ALTA
+  'badge.ui.locked': 'Locked', // ALTA
+  'badge.ui.maxLevel': 'Max level', // ALTA
+  'badge.ui.classic': 'Classic', // ALTA
+  'badge.ui.newBadge': 'New achievement!', // ALTA
+  'badge.ui.levelUp': 'Level up!', // ALTA
+  'badge.ui.count': '{n} of {total} levels', // ALTA
+  'badge.ui.classicTitle': 'Classics', // ALTA
+  'friends.received.rowBadge': '{name} reacted {r} to your {badge} achievement', // ALTA
+  'friends.feed.badgeLevel': '{name} reached {badge}', // ALTA
 
   // Erros de envio de mídia e topo do site.
   'media.noFile': 'No file selected.', // ALTA
@@ -2129,23 +2240,11 @@ window.I18N_CATALOG['en'] = {
   'friends.loading': 'Loading friends...', // ALTA
   'friends.loadError': 'Couldn\'t load your friends right now.', // ALTA
   'friends.retry': 'Try again', // ALTA
-  'friends.section.incoming': 'Received requests', // ALTA
   'friends.inviteBanner': 'You opened {user}\'s invite. Tap "Add" to send the request.', // ALTA
-  'friends.section.add': 'Add a friend', // ALTA
   'friends.searchLabel': 'Search by name or @username', // ALTA
-  'friends.searchPlaceholder': 'Type at least 3 letters', // ALTA
   'friends.section.friends': 'Your friends', // ALTA
   'friends.btn.remove': 'Unfriend', // ALTA
-  'friends.empty': 'You don\'t have any friends yet. Search for someone above to send a request.', // ALTA
   'friends.section.outgoing': 'Sent requests', // ALTA
-  'friends.section.rank': 'Friends\' ranking (this week)', // ALTA
-  'friends.section.activity': 'Friends\' activity', // ALTA
-  'friends.section.invite': 'Invite friends', // ALTA
-  'friends.inviteHint': 'Want to study with someone? Send your link: whoever opens it finds your profile to send a request.', // ALTA
-  'friends.inviteCopy': 'Copy invite link', // ALTA
-  'friends.inviteShare': 'Share', // ALTA
-  'friends.section.prefs': 'Preferences', // ALTA
-  'friends.prefsSummary': 'Notifications and friend requests', // ALTA
   'friends.loadingShort': 'Loading...', // ALTA
   'friends.scopeAll': 'All', // ALTA
   'friends.scopeAria': 'Friends\' ranking language', // ALTA
@@ -2189,6 +2288,44 @@ window.I18N_CATALOG['en'] = {
   'friends.rank.noFriendsText': 'Add friends to see who is studying the most this week.', // ALTA
   'friends.rank.noFriendsBtn': 'Add a friend', // ALTA
   'friends.rank.footnoteFriends': 'The ranking resets every Monday. Friends who haven\'t earned XP yet appear at the end.', // ALTA
+  'friends.title': 'Friends', // ALTA
+  'friends.inviteBtn': '＋ Invite friends', // ALTA
+  'friends.requests.title': { one: '{n} person wants to study with you', other: '{n} people want to study with you' }, // ALTA
+  'friends.btn.notNow': 'Not now', // ALTA
+  'friends.week.title': 'This week\'s challenge', // ALTA
+  'friends.week.endsIn': { one: 'ends today', other: 'ends in {n} days' }, // ALTA
+  'friends.week.you': 'You', // ALTA
+  'friends.week.place': 'Place {n}', // ALTA
+  'friends.duel.behind': { one: '{n} XP to go to pass {name}', other: '{n} XP to go to pass {name}' }, // ALTA
+  'friends.duel.ahead': { one: 'You\'re in the lead, {n} XP ahead of {name}!', other: 'You\'re in the lead, {n} XP ahead of {name}!' }, // ALTA
+  'friends.duel.tie': 'Tied with {name}! A little more study and you take the lead.', // ALTA
+  'friends.duel.noOne': 'Nobody has scored yet this week. Study today and get ahead!', // ALTA
+  'friends.card.more': 'Options for {name}', // ALTA
+  'friends.card.viewProfile': 'View profile', // ALTA
+  'friends.empty.title': 'Studying together is more fun', // ALTA
+  'friends.empty.text': 'Invite someone to compete for XP with you every week.', // ALTA
+  'friends.empty.searchLabel': 'Or search by name or @username', // ALTA
+  'friends.empty.step1': 'A ranking just for you and your friends, every week', // ALTA
+  'friends.empty.step2': 'A heads-up when a friend passes you', // ALTA
+  'friends.empty.step3': 'See your friends\' achievements', // ALTA
+  'friends.prefs.sectionTitle': 'Friends', // ALTA
+  'friends.streak.aria': { one: '{n}-day streak', other: '{n}-day streak' }, // ALTA
+  'friends.streak.today': 'studied today', // ALTA
+  'friends.feed.streak': '{name} reached a {n}-day streak', // ALTA
+  'friends.cheer.btn': '👏 Congratulate', // ALTA
+  'friends.cheer.aria': 'Pick a reaction', // ALTA
+  'friends.cheer.done': 'You reacted {r}', // ALTA
+  'friends.cheer.thanked': '{name} said thanks 💛', // ALTA
+  'friends.cheer.count': { one: '{n} cheer', other: '{n} cheers' }, // ALTA
+  'friends.received.title': 'Cheers for you', // ALTA
+  'friends.received.row': '{name} reacted {r} to your {n}-day streak', // ALTA
+  'friends.received.thank': 'Say thanks 💛', // ALTA
+  'friends.received.thanked': 'You said thanks ✓', // ALTA
+  'friends.toast.cheered': 'Cheer sent! {r}', // ALTA
+  'friends.toast.thanked': 'Thanks sent 💛', // ALTA
+  'friends.error.daily_congrats_limit': 'You already sent 20 cheers today. More tomorrow!', // ALTA
+  'friends.error.target_not_found': 'This milestone is no longer available.', // ALTA
+  'friends.pref.notify_congrats': 'Notify me when a friend congratulates or thanks me', // ALTA
   'profile.tabFriends': 'Friends', // ALTA
   'panel.admin.sub': 'Badges, metrics, notifications, reports and plans.', // ALTA
   'panel.tab.badges': 'Badges', // ALTA

@@ -76,14 +76,16 @@ async function runExam(page, correct){
       state: unitBlockState(UNITS.find(u => u.id === u0)), xp: STATE.xp, stars: STATE.daily.stars + '|' + STATE.daily.lessons,
       repsSum: STATE.cards.reduce((a, c) => a + (c.reps || 0), 0), allNew: cards.every(c => (c.state || 'new') === 'new' && !c.reps),
       eligible: cards.filter(c => isCardLessonCompleted(c)).length, total: cards.length,
-      badge1: BADGES.find(b => b.id === 'unit_1').check(STATE), nextUnit: nextTrailItem(trailGroups(), STATE.unitProgress).unitId, nextLocked: !ids.includes(nextTrailItem(trailGroups(), STATE.unitProgress).unitId) };
+      badge1: (rebuildTrackBadges(), BADGES.find(b => b.id === 'course1.1').check(STATE)), nextUnit: nextTrailItem(trailGroups(), STATE.unitProgress).unitId, nextLocked: !ids.includes(nextTrailItem(trailGroups(), STATE.unitProgress).unitId) };
   });
   check('aprovado: checkpoint concluído com nota', r.cp && r.best >= 70, r);
   check('aprovado: todas as unidades viram "skipped"', r.allSkipped && r.state === 'skipped', r);
   check('aprovado: SEM XP e sem estrelas', r.xp === before.xp && r.stars === before.stars, [r.xp, before.xp]);
   check('aprovado: nenhum cartão recebeu nota (continuam New)', r.repsSum === before.repsSum && r.allNew, r);
   check('aprovado: cartões elegíveis para a Revisão (entram como novos)', r.eligible === r.total && r.total > 0, r);
-  check('aprovado: pulada não dá selo de unidade', r.badge1 === false, r.badge1);
+  // Mudança de propósito (2026-10-14, decisão da autora): unidade pulada pelo ponto de verificação conta para a
+  // conquista "Nível A1" (trilha course1). Antes, 'unit_1' exigia as lições.
+  check('aprovado: pulada conta para a conquista Nível A1', r.badge1 === true, r.badge1);
   check('aprovado: a próxima unidade é a 1ª depois do módulo', r.nextLocked, r.nextUnit);
 
   // ---- bloqueio por plano (flag desligada por padrão; ligar nos testes)

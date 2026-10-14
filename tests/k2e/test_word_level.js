@@ -8,7 +8,7 @@ for (const lang of ['fr', 'zh']){
   console.log('== ' + lang);
   const ctx = loadLang(lang);
   const run = c => vm.runInContext(c, ctx);
-  const src = read(lang + '/app.js');
+  const src = require('../e4/app-source').withCore(read(lang + '/app.js'));
   ['unitCardCounts', 'checkUnitCompletion', 'pickVocabFormat', 'vocabStrengthBuckets'].forEach(fn => run(extractFunction(src, fn)));
   const completed = [];
   ctx.markUnitCompleted = id => completed.push(id);

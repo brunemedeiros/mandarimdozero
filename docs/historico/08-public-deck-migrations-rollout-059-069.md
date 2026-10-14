@@ -244,3 +244,27 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 | Staging | ferramenta (partes sem `DELETE`) | `20261013153950` `087_mural` (tabelas e helpers), depois `087b_mural_list`, `087c_mural_feed`, `087d_mural_create_post` |
 | Staging | SQL Editor da autora (`docs/rollout-sql/087_sql_editor.sql`, o arquivo inteiro) | feito 2026-10-13, conferido |
 | Produção | SQL Editor da autora (mesmo arquivo) | feito 2026-10-14, conferido + teste em transação desfeita |
+## 088 -- ensure_user_decks fechada para anon (2026-10-13)
+
+- Achado no advisor de segurança da produção (lint 0028): `ensure_user_decks(uuid, text)` (SECURITY DEFINER, 049)
+  executável por `anon` só na produção. A 049 revogou de `public` mas não de `anon` (o Supabase dá grant direto a
+  `anon`). Risco real baixo: a função já recusa quando `auth.uid() <> p_owner_id` (anon cai em `not_authorized`).
+  O site só chama depois do login (`shared/deck-data.js`, `ensureDecksForCurrentUser`).
+- `shared/supabase_migrations/088_revoke_anon_ensure_user_decks.sql`: só `revoke ... from public, anon` + `grant ...
+  to authenticated`. Número 088 porque 086 e 087 já foram usados por outras conversas.
+- Aplicada no Staging (no-op lá) e na produção em 2026-10-13, a pedido da autora. Conferido: anon sem EXECUTE,
+  authenticated com EXECUTE, definição da função igual (md5 `dcd5bb52...`), 76 decks intactos, item sumiu do advisor.
+- Ainda executáveis por anon na produção (fora do escopo): `get_profile_card`, `get_public_deck`, `invite_code_info`
+  (públicas de propósito) e as funções de gatilho `decks_touch_parent`, `own_flashcards_touch_deck` (chamadas via
+  RPC falham por serem de trigger).
+
+## 091 -- Parabéns para conquistas com níveis (2026-10-14)
+
+- `shared/supabase_migrations/091_badge_congrats.sql`: `congratulate_friend` aceita `badge`; nova `friends_badge_feed(int)`.
+  Nasceu como 089, renomeada para 091 porque 089 e 090 já eram de outra conversa (`089_review_bank_agent`,
+  `090_review_bank_agent_deck_fix`, aplicadas na produção).
+- Staging: aplicada em 2026-10-14 (ferramenta; no histórico do Staging aparece com o nome antigo `089_badge_congrats`).
+- Detalhes: `docs/historico/16-conquistas-com-niveis.md`.
+- Produção: aplicada em 2026-10-14 a pedido da autora (versão `20261014175914 091_badge_congrats`). Antes: função igual à do
+  Staging (md5 `bca6c6d8…`). Depois: `friends_badge_feed` criada, anon sem EXECUTE, parabéns por sequência intacto,
+  0 linhas alteradas (110 earned_badges, 0 friend_congrats).
