@@ -1,19 +1,19 @@
 # E4, passo 1: levantamento por função de `fr/app.js` x `zh/app.js`
 
 Gerado por `scripts/e4-classify-functions.js` (parser do TypeScript sobre o código real; só leitura). Dados completos em `docs/i18n/e4-levantamento-funcoes.json`.
-Declarações de topo: 612 em `fr/app.js` (13131 linhas) e 369 em `zh/app.js` (9269 linhas). "Quase igual" = pelo menos 75% de semelhança em pares de símbolos do código (sem comentários e espaços).
+Declarações de topo: 590 em `fr/app.js` (12882 linhas) e 347 em `zh/app.js` (9018 linhas). "Quase igual" = pelo menos 75% de semelhança em pares de símbolos do código (sem comentários e espaços).
 
 ## 1. Resumo das funções (declarações de função)
 
 | Classe | Funções | Linhas no fr | Linhas no zh | % das linhas de função do fr | % do zh |
 |---|---:|---:|---:|---:|---:|
-| idêntica | 163 | 1971 | 1968 | 21.4% | 30.4% |
-| quase igual | 55 | 2541 | 2558 | 27.6% | 39.5% |
-| divergente | 19 | 732 | 596 | 8% | 9.2% |
-| só fr | 237 | 3963 | 0 | 43% | 0% |
-| só zh | 62 | 0 | 1358 | 0% | 21% |
+| idêntica | 141 | 1769 | 1766 | 19.6% | 28.1% |
+| quase igual | 55 | 2541 | 2558 | 28.2% | 40.7% |
+| divergente | 19 | 732 | 596 | 8.1% | 9.5% |
+| só fr | 237 | 3963 | 0 | 44% | 0% |
+| só zh | 62 | 0 | 1358 | 0% | 21.6% |
 
-Total de linhas em funções: fr 9207, zh 6480. Os blocos de dados e constantes (não função) somam 150 declarações e ficam fora desta conta.
+Total de linhas em funções: fr 9005, zh 6278. Os blocos de dados e constantes (não função) somam 150 declarações e ficam fora desta conta.
 
 ## 2. Por área (funções)
 
@@ -26,9 +26,9 @@ Total de linhas em funções: fr 9207, zh 6480. Os blocos de dados e constantes 
 | exercícios de lição | 39 | 19 | 8 | 32 | 15 |
 | mapa da trilha e unidades | 7 | 7 | 6 | 32 | 3 |
 | outros | 26 | 6 | 1 | 24 | 9 |
-| perfil, ranking e social | 17 | 3 | 1 | 2 | 0 |
+| perfil, ranking e social | 3 | 3 | 1 | 2 | 0 |
 | revisão e decks | 42 | 13 | 2 | 32 | 8 |
-| áudio e fala | 8 | 5 | 0 | 6 | 16 |
+| áudio e fala | 0 | 5 | 0 | 6 | 16 |
 
 ## 3. Idênticas (candidatas ao passo 3, extração primeiro)
 
@@ -53,11 +53,8 @@ Total de linhas em funções: fr 9207, zh 6480. Os blocos de dados e constantes 
 - `isCardLessonCompleted` (26 linhas, revisão e decks)
 - `renderVocabStrengthWidget` (24 linhas, exercícios de lição)
 - `loadStateAndRender` (20 linhas, estado e persistência)
-- `checkAndCelebrateBadges` (20 linhas, perfil, ranking e social)
 - `advanceConceptStep` (20 linhas, exercícios de lição)
 - `startMatchGame` (20 linhas, exercícios de lição)
-- `maybeShowStreakCelebration` (19 linhas, perfil, ranking e social)
-- `resolveRevisaoMission` (19 linhas, perfil, ranking e social)
 - `renderChallengeChipHTML` (19 linhas, desafios e ditados)
 - `buildConsolidationVocabExercises` (19 linhas, exercícios de lição)
 - `runSpeedTimer` (18 linhas, exercícios de lição)
@@ -71,36 +68,26 @@ Total de linhas em funções: fr 9207, zh 6480. Os blocos de dados e constantes 
 - `startBridgeQueue` (15 linhas, outros)
 - `animateCount` (15 linhas, outros)
 - `renderMatchTiles` (15 linhas, exercícios de lição)
-- `seedEarnedBadges` (14 linhas, perfil, ranking e social)
 - `startSpeedReview` (14 linhas, revisão e decks)
 - `gradeButtonsHTML` (14 linhas, outros)
 - `playFeedbackTone` (13 linhas, desafios e ditados)
 - `mergeTeacherFlashcardsIntoState` (13 linhas, estado e persistência)
 - `mergeSelfFlashcardsIntoState` (13 linhas, estado e persistência)
-- `showStreakCelebration` (13 linhas, perfil, ranking e social)
 - `pickVocabFormat` (13 linhas, exercícios de lição)
 - `lessonRecapItems` (13 linhas, exercícios de lição)
 - `reviewFilterQueue` (14 linhas, revisão e decks)
-- `playFeedbackSound` (12 linhas, áudio e fala)
 - `buildAcquisitionBlocks` (12 linhas, outros)
 - `advanceToNextBlockOrConsolidation` (12 linhas, desafios e ditados)
 - `reviewProgressBarHTML` (12 linhas, revisão e decks)
-- `warmUpTTSOnce` (11 linhas, áudio e fala)
 - `stopExerciseAudio` (11 linhas, exercícios de lição)
 - `checkUnitCompletion` (11 linhas, mapa da trilha e unidades)
 - `buildSpeedQueue` (13 linhas, exercícios de lição)
-- `checkDailyMissionCompletions` (10 linhas, perfil, ranking e social)
-- `buildStreakWeekData` (9 linhas, perfil, ranking e social)
 - `registerDailyExerciseFormat` (9 linhas, exercícios de lição)
-- `checkDailyMissionsBonus` (9 linhas, perfil, ranking e social)
-- `processBadgeCelebrationQueue` (9 linhas, perfil, ranking e social)
 - `unitProgressFraction` (9 linhas, mapa da trilha e unidades)
 - `pendingConceptsForBlock` (9 linhas, exercícios de lição)
 - `setAcqPhaseBanner` (9 linhas, outros)
 - `vocabStrengthBuckets` (9 linhas, exercícios de lição)
 - `updateStudySetting` (9 linhas, outros)
-- `wireCustomAudioButtons` (8 linhas, áudio e fala)
-- `materializeMission` (8 linhas, perfil, ranking e social)
 - `todaysChallenges` (8 linhas, desafios e ditados)
 - `unitCardCounts` (8 linhas, revisão e decks)
 - `lessonRowState` (8 linhas, estado e persistência)
@@ -115,8 +102,6 @@ Total de linhas em funções: fr 9207, zh 6480. Os blocos de dados e constantes 
 - `ensureDecksLoadedForReview` (8 linhas, estado e persistência)
 - `shuffle` (8 linhas, outros)
 - `switchSettingsSection` (8 linhas, perfil, ranking e social)
-- `voiceQualityScore` (7 linhas, áudio e fala)
-- `getFeedbackAudioCtx` (7 linhas, áudio e fala)
 - `addSelfFlashcardToState` (7 linhas, estado e persistência)
 - `registerDailyLessonForGoal` (7 linhas, exercícios de lição)
 - `challengeById` (7 linhas, desafios e ditados)
@@ -127,7 +112,6 @@ Total de linhas em funções: fr 9207, zh 6480. Os blocos de dados e constantes 
 - `acqPhaseBannerText` (7 linhas, outros)
 - `dueReviewQueueOptions` (7 linhas, revisão e decks)
 - `toggleReviewSettingsPanel` (7 linhas, revisão e decks)
-- `registerAudioPlay` (6 linhas, áudio e fala)
 - `missionReviewSupply` (6 linhas, revisão e decks)
 - `currentLessonIdx` (6 linhas, exercícios de lição)
 - `hardWordsPool` (6 linhas, outros)
@@ -136,9 +120,7 @@ Total de linhas em funções: fr 9207, zh 6480. Os blocos de dados e constantes 
 - `updateSelfFlashcardStatusInState` (5 linhas, estado e persistência)
 - `registerDailySpeedReview` (5 linhas, revisão e decks)
 - `registerDailyMatchGame` (5 linhas, exercícios de lição)
-- `dailySeed` (5 linhas, perfil, ranking e social)
 - `missionOverdueSupply` (5 linhas, revisão e decks)
-- `releaseBadgeCelebrations` (5 linhas, perfil, ranking e social)
 - `recalculateUnlockedUnits` (5 linhas, mapa da trilha e unidades)
 - `finishBlockIntro` (5 linhas, outros)
 - `reorderDistractorCount` (5 linhas, exercícios de lição)
@@ -148,7 +130,6 @@ Total de linhas em funções: fr 9207, zh 6480. Os blocos de dados e constantes 
 - `replaceSelfFlashcardInState` (4 linhas, estado e persistência)
 - `isRealityNoteCategoryAllowedAtLevel` (4 linhas, revisão e decks)
 - `updateClozeModeSwitch` (4 linhas, exercícios de lição)
-- `updateFeedbackSoundSwitch` (4 linhas, áudio e fala)
 - `registerDailyReviewCard` (4 linhas, revisão e decks)
 - `registerDailyOverdueReviewCard` (4 linhas, revisão e decks)
 - `missionMatchGameFeasible` (4 linhas, exercícios de lição)
@@ -165,13 +146,11 @@ Total de linhas em funções: fr 9207, zh 6480. Os blocos de dados e constantes 
 - `matchesReviewOriginFilter` (4 linhas, revisão e decks)
 - `syncReviewBackLink` (4 linhas, revisão e decks)
 - `normalizeNewCardsPerDay` (4 linhas, estado e persistência)
-- `isFeedbackSoundEnabled` (3 linhas, áudio e fala)
 - `flashcardIdForRow` (3 linhas, revisão e decks)
 - `buildCardFromTeacherFlashcard` (3 linhas, revisão e decks)
 - `buildCardFromSelfFlashcard` (3 linhas, revisão e decks)
 - `removeSelfFlashcardFromState` (3 linhas, estado e persistência)
 - `getClozeMode` (3 linhas, exercícios de lição)
-- `pickDailyFromPool` (3 linhas, perfil, ranking e social)
 - `unitBlockState` (3 linhas, estado e persistência)
 - `isAdminUser` (3 linhas, perfil, ranking e social)
 - `isLessonUnit` (3 linhas, exercícios de lição)
@@ -192,7 +171,6 @@ Total de linhas em funções: fr 9207, zh 6480. Os blocos de dados e constantes 
 - `deckCountsForReview` (3 linhas, revisão e decks)
 - `renderGoalsView` (3 linhas, mapa da trilha e unidades)
 - `acceptedForms` (3 linhas, outros)
-- `holdBadgeCelebrations` (1 linhas, perfil, ranking e social)
 - `dlgSleep` (1 linhas, exercícios de lição)
 - `clearKeyboardOptions` (1 linhas, exercícios de lição)
 

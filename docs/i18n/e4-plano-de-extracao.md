@@ -45,3 +45,11 @@ O lote 4 inclui o que toca salvar e carregar: só entra com teste de ida e volta
 - **Q-13** (confirmar): extração incremental, por lotes pequenos.
 - **Q-14** (confirmar): `<script>` globais, sem build, e **manter os nomes globais** nos lotes 1 a 4 (descoberta da seção 2).
 - **Começar pelo lote 1?** Cada lote é um PR separado; nenhum PR é aberto sem pedido.
+
+## 7. Registro dos lotes
+
+### Lote 1 (2026-10-14): feito, na branch, **sem PR**
+- 22 funções idênticas: `shared/core/audio-fala.js` (8: som de acerto/erro, aquecimento do TTS, botões de áudio) e `shared/core/gamificacao.js` (14: conquistas, celebração de sequência, missões do dia). Cerca de 250 linhas a menos em cada `app.js`.
+- Ficaram de fora de propósito `renderSettingsView`, `switchSettingsSection` e `isAdminUser` (Configurações e painel estão sendo editados por outras sessões) e as constantes/`let` idênticas (só funções neste lote).
+- Ferramenta: `scripts/e4-extract.js` (copia o texto exato; se o comentário difere entre fr e zh, fica o mais longo; aborta se o texto de uma função diferir ou se o conjunto de declarações de topo não bater).
+- Bateria completa (115 suítes) antes e depois: as mesmas 14 falhas de antes; a `test_i18n_unit` precisou ignorar os `<script>` novos na comparação de HTML (ajustado); `fase-j` falhou uma vez no lote e passou 62/62 em duas rodadas isoladas (instável).
