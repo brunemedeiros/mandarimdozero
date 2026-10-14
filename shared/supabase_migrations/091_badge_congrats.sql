@@ -1,4 +1,4 @@
--- 089 -- Parabéns para conquistas com níveis (2026-10-14).
+-- 091 -- Parabéns para conquistas com níveis (2026-10-14).
 --
 -- Decisões da autora (docs/conquistas-proposta-niveis.md): conquistas viram trilhas com níveis; amigos podem dar
 -- parabéns a partir do ouro e no nível máximo (Amigos nunca). A 086 deixou target_kind 'badge' preparado e recusado.
@@ -10,6 +10,8 @@
 --
 -- Níveis que a pessoa já tinha ao abrir o site entram em earned_badges com earned_at = 2026-10-01 (shared/auth.js,
 -- backfill), então não aparecem como novidade aqui.
+-- Número: nasceu como 089; 089 e 090 já eram de outra conversa (review_bank_agent), então virou 091.
+-- No Staging foi aplicada com o nome antigo '089_badge_congrats'.
 -- Sem DROP: só create or replace (assinaturas iguais) e uma função nova.
 -- ROLLBACK: reaplicar congratulate_friend da 086; drop function public.friends_badge_feed(int);
 
@@ -39,7 +41,7 @@ begin
     return jsonb_build_object('error', 'not_friends');
   end if;
   if p_kind = 'badge' then
-    -- 089: conquista com níveis. p_ref = id do nível ('review.3'); o amigo tem de ter ganhado nos últimos 7 dias.
+    -- 091: conquista com níveis. p_ref = id do nível ('review.3'); o amigo tem de ter ganhado nos últimos 7 dias.
     -- O site só oferece o botão no ouro e no nível máximo (shared/badge-tracks.js, allowsCongrats); Amigos nunca.
     if p_ref is null or p_ref !~ '^[a-z][a-z0-9]*\.[0-9]{1,2}$' or p_ref like 'friends.%' then
       return jsonb_build_object('error', 'invalid_target');

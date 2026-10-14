@@ -22,24 +22,25 @@ Decisões e metas: `docs/conquistas-proposta-niveis.md` (aprovado pela autora em
 - **Gênero**: nome no gênero do perfil (`.f`/`.m`), "(a)" sem gênero; nomes de outras pessoas sempre na forma neutra.
 - **Atividade dos amigos**: só ouro e máximo; conquista de curso só no site do mesmo idioma; Parabéns por conquista
   (exceto Amigos) pela RPC nova `friends_badge_feed` e `congratulate_friend(..., 'badge', '<nível>', ...)`.
-  Sem a 089, o site cai na lista antiga (`friends_activity`) sem botão.
+  Sem a 091, o site cai na lista antiga (`friends_activity`) sem botão.
 - **Nomes ajustados na implementação** (a confirmar com a autora): Ouvido ganhou o nível "Ouvido Afiado" (2.000) porque
   as metas aprovadas têm 4 níveis; Vocabulário ficou com 4 níveis (sem "Vocabulário Afiado"); Fim de Semana usa o
   ícone de calendário.
 
-## Migration 089 `badge_congrats`
+## Migration 091 `badge_congrats`
 
-`shared/supabase_migrations/089_badge_congrats.sql`: `congratulate_friend` aceita `badge` (nível ganho nos últimos 7 dias,
+`shared/supabase_migrations/091_badge_congrats.sql`: `congratulate_friend` aceita `badge` (nível ganho nos últimos 7 dias,
 id no formato novo, nunca `friends.*`); `friends_badge_feed(p_limit)`. Sem DROP.
 - Staging: aplicada em 2026-10-14 pela ferramenta (antes: `congratulate_friend` do Staging igual à 086, só sem um
   comentário). Conferido: função nova, anon sem EXECUTE, advisor sem alerta novo além do lint 0029 esperado.
-- Produção: **pendente** (precisa de autorização da autora). Só faz efeito com o site publicado.
+- Produção: aplicada em 2026-10-14 a pedido da autora (versão `20261014175914`). Renomeada de 089 para 091 antes de
+  aplicar: 089 e 090 já eram de outra conversa (`review_bank_agent`).
 
 ## Testes (2026-10-14)
 
 - `tests/conquistas/test_badge_tracks.js` (catálogo puro): 66/66.
 - `tests/conquistas/test_playwright.js` (fr/zh, claro/escuro, 1280 e 390): 64/64.
-- `tests/conquistas/run.sh` (Postgres local, 089): 25/25. `tests/amigos/run.sh` com a 089: 125 ok, 0 falhas.
+- `tests/conquistas/run.sh` (Postgres local, 091): 25/25. `tests/amigos/run.sh` com a 091: 125 ok, 0 falhas.
 - `tests/i18n/test_i18n_unit.js` 2034/2034; `tests/i18n/test_badges_i18n.js` 14/14;
   `tests/curso-progresso/test_conquistas_conta.js` 40/40; `tests/trilha/test_skip_checkpoint_ui.js` 19/19.
 - Testes antigos atualizados de propósito: `test_friends_086.sql` (conquista agora aceita parabéns),

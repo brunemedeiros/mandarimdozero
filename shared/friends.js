@@ -525,7 +525,7 @@ async function loadFriendsActivity(){
   if (!box) return;
   if (!box.children.length) box.innerHTML = loadingHTML(t('friends.loadingShort'));
   const appKey = (typeof APP_KEY !== 'undefined') ? APP_KEY : LanguageRegistry.defaultAppKey();
-  // Conquistas: friends_badge_feed (089, com Parabéns); sem ela, a lista antiga (friends_activity, sem botão).
+  // Conquistas: friends_badge_feed (091, com Parabéns); sem ela, a lista antiga (friends_activity, sem botão).
   let [badgesRes, streakRes] = await Promise.all([
     supabaseClient.rpc('friends_badge_feed', { p_limit: 30 }),
     supabaseClient.rpc('friends_streak_feed', { p_limit: 20 }),

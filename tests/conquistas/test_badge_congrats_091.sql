@@ -1,4 +1,4 @@
--- Teste da migration 089 (Parabéns para conquistas com níveis). Transação + ROLLBACK, Postgres local.
+-- Teste da migration 091 (Parabéns para conquistas com níveis). Transação + ROLLBACK, Postgres local.
 begin;
 create temp table r(ok boolean, name text) on commit drop;
 grant all on r to public;

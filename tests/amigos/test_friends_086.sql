@@ -78,7 +78,7 @@ insert into r select (congratulate_friend('78000000-0000-0000-0000-0000000000b1'
 insert into r select (congratulate_friend('78000000-0000-0000-0000-0000000000b1', 'streak', :'b_ref', '💪') ->> 'status') = 'updated', 'parabéns: tocar de novo troca a reação';
 insert into r select (select my_reaction from friends_streak_feed(20) where ref = :'b_ref') = '💪', 'feed mostra minha reação nova';
 insert into r select (congratulate_friend('78000000-0000-0000-0000-0000000000b1', 'streak', :'b_ref', '🍕') ->> 'error') = 'invalid_reaction', 'parabéns: reação fora da lista é recusada';
--- 089 (2026-10-14) liga os parabéns por conquista; id antigo ('frances:unit_1') continua recusado.
+-- 091 (2026-10-14) liga os parabéns por conquista; id antigo ('frances:unit_1') continua recusado.
 insert into r select (congratulate_friend('78000000-0000-0000-0000-0000000000b1', 'badge', 'frances:unit_1', '🎉') ->> 'error') in ('kind_not_enabled', 'invalid_target'), 'parabéns: id de conquista antigo é recusado';
 insert into r select (congratulate_friend('78000000-0000-0000-0000-0000000000b1', 'streak', '50@2020-01-01', '🎉') ->> 'error') = 'target_not_found', 'parabéns: marco inexistente';
 insert into r select (congratulate_friend('78000000-0000-0000-0000-0000000000a1', 'streak', :'b_ref', '🎉') ->> 'error') = 'invalid_target', 'parabéns: não dá para parabenizar a si mesmo';

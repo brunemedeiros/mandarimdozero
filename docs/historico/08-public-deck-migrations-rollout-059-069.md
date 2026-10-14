@@ -258,8 +258,13 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   (públicas de propósito) e as funções de gatilho `decks_touch_parent`, `own_flashcards_touch_deck` (chamadas via
   RPC falham por serem de trigger).
 
-## 089 -- Parabéns para conquistas com níveis (2026-10-14)
+## 091 -- Parabéns para conquistas com níveis (2026-10-14)
 
-- `shared/supabase_migrations/089_badge_congrats.sql`: `congratulate_friend` aceita `badge`; nova `friends_badge_feed(int)`.
-- Staging: aplicada em 2026-10-14 (ferramenta, nome `089_badge_congrats`). Produção: pendente de autorização.
+- `shared/supabase_migrations/091_badge_congrats.sql`: `congratulate_friend` aceita `badge`; nova `friends_badge_feed(int)`.
+  Nasceu como 089, renomeada para 091 porque 089 e 090 já eram de outra conversa (`089_review_bank_agent`,
+  `090_review_bank_agent_deck_fix`, aplicadas na produção).
+- Staging: aplicada em 2026-10-14 (ferramenta; no histórico do Staging aparece com o nome antigo `089_badge_congrats`).
 - Detalhes: `docs/historico/16-conquistas-com-niveis.md`.
+- Produção: aplicada em 2026-10-14 a pedido da autora (versão `20261014175914 091_badge_congrats`). Antes: função igual à do
+  Staging (md5 `bca6c6d8…`). Depois: `friends_badge_feed` criada, anon sem EXECUTE, parabéns por sequência intacto,
+  0 linhas alteradas (110 earned_badges, 0 friend_congrats).
