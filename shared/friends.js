@@ -525,10 +525,13 @@ async function loadFriendsActivity(){
   if (!box) return;
   if (!box.children.length) box.innerHTML = loadingHTML(t('friends.loadingShort'));
   const appKey = (typeof APP_KEY !== 'undefined') ? APP_KEY : LanguageRegistry.defaultAppKey();
-  const [badgesRes, streakRes] = await Promise.all([
-    supabaseClient.rpc('friends_activity', { p_language: appKey, p_limit: 20 }),
+  // Conquistas: friends_badge_feed (089, com Parabéns); sem ela, a lista antiga (friends_activity, sem botão).
+  let [badgesRes, streakRes] = await Promise.all([
+    supabaseClient.rpc('friends_badge_feed', { p_limit: 30 }),
     supabaseClient.rpc('friends_streak_feed', { p_limit: 20 }),
   ]);
+  const badgeCheers = !badgesRes.error;
+  if (!badgeCheers) badgesRes = await supabaseClient.rpc('friends_activity', { p_language: appKey, p_limit: 20 });
   const el = document.getElementById('friends-activity');
   if (!el) return;
   if (badgesRes.error && streakRes.error){
@@ -537,16 +540,28 @@ async function loadFriendsActivity(){
     return;
   }
   const since = Date.now() - FRIENDS_FEED_DAYS * 86400000;
-  const catalog = (typeof BADGES !== 'undefined' && Array.isArray(BADGES)) ? BADGES : [];
   const nameOf = (r) => r.display_name || r.username || t('friends.activity.aFriend');
+  // Conquistas com níveis: no feed só ouro e nível máximo (bronze e prata ficam no perfil). Conquista de curso só
+  // aparece no site do mesmo idioma. Nome na forma neutra (o gênero do amigo é privado).
+  const describe = (id) => (typeof describeBadgeId === 'function' ? describeBadgeId(id) : null);
+  const seen = new Set();
   const badgeItems = (badgesRes.data || [])
-    .map(r => ({ r, badge: catalog.find(b => b.id === r.badge_id), at: new Date(r.earned_at).getTime() }))
-    .filter(x => x.badge && x.at >= since)
-    .map(({ r, badge, at }) => ({ at, html: `<div class="friends-activity-row">
-      <span class="friends-medal" aria-hidden="true">${escapeHTML(badge.icon || '🏅')}</span>
-      <span class="friends-activity-text">${t('friends.activity.earned', { name: `<strong>${escapeHTML(nameOf(r))}</strong>`, badge: escapeHTML(badge.name || '') })}
-        <span class="friends-activity-when">· ${escapeHTML(friendsTimeAgo(r.earned_at))}</span></span>
-    </div>` }));
+    .map(r => ({ r, d: describe(r.badge_id), at: new Date(r.earned_at).getTime() }))
+    .filter(x => x.d && !x.d.classic && x.at >= since && (x.d.tier === 'gold' || x.d.tier === 'max'))
+    .filter(x => BadgeTracks.isAccountId(x.r.badge_id) || !x.r.langs || x.r.langs.includes(appKey))
+    .filter(x => { const k = x.r.user_id + '|' + x.r.badge_id; if (seen.has(k)) return false; seen.add(k); return true; })
+    .map(({ r, d, at }) => {
+      const cheer = badgeCheers && BadgeTracks.allowsCongrats(d.track, d.tier);
+      return { at, html: `<div class="friends-activity-row is-badge"${cheer ? ` data-cheer-friend="${escapeAttr(r.user_id)}" data-cheer-kind="badge" data-cheer-ref="${escapeAttr(r.badge_id)}"` : ''}>
+      ${badgeMedalHTML(d, { size: 'xs' })}
+      <span class="friends-activity-text">${t('friends.feed.badgeLevel', { name: `<strong>${escapeHTML(nameOf(r))}</strong>`, badge: `<strong>${escapeHTML(d.name)}</strong>` })}
+        <span class="friends-activity-when">· ${escapeHTML(friendsTimeAgo(r.earned_at))}</span>
+        ${Number(r.total_reactions) > 0 ? `<span class="friends-cheer-count">${tp('friends.cheer.count', Number(r.total_reactions))}</span>` : ''}
+        ${r.my_congrats_thanked ? `<span class="friends-cheer-thanked">${t('friends.cheer.thanked', { name: escapeHTML(leaderboardFirstName(r)) })}</span>` : ''}
+      </span>
+      ${cheer ? friendsCheerHTML(r) : ''}
+    </div>` };
+    });
   // Marcos de sequência: com "Parabenizar" (as conquistas ganham o botão quando o critério for definido).
   const streakItems = (streakRes.data || []).map(r => ({ at: new Date(r.reached_at).getTime(), html: `
     <div class="friends-activity-row is-streak" data-cheer-friend="${escapeAttr(r.user_id)}" data-cheer-ref="${escapeAttr(r.ref)}">
@@ -564,7 +579,7 @@ async function loadFriendsActivity(){
 
 async function friendsSendCheer(row, reaction, btn){
   if (btn) btn.disabled = true;
-  const res = await friendsRpc('congratulate_friend', { p_friend: row.dataset.cheerFriend, p_kind: 'streak', p_ref: row.dataset.cheerRef, p_reaction: reaction });
+  const res = await friendsRpc('congratulate_friend', { p_friend: row.dataset.cheerFriend, p_kind: row.dataset.cheerKind || 'streak', p_ref: row.dataset.cheerRef, p_reaction: reaction });
   if (!res.ok){ showToast(friendsErrorMessage(res.error)); if (btn) btn.disabled = false; return; }
   showToast(t('friends.toast.cheered', { r: reaction }));
   await loadFriendsActivity();
@@ -584,9 +599,15 @@ async function loadFriendsReceivedCongrats(){
   el.innerHTML = `<h3 class="friends-received-title">🎉 ${t('friends.received.title')}</h3>` + rows.map(r => {
     const name = r.display_name || r.username || t('friends.activity.aFriend');
     const days = Number(String(r.target_ref || '').split('@')[0]) || 0;
+    // Parabéns por conquista: o nome do nível vem do catálogo, no gênero da própria pessoa (ela está vendo).
+    const own = r.target_kind === 'badge' && typeof describeBadgeId === 'function' ? describeBadgeId(r.target_ref) : null;
+    const ownName = own ? (BadgeTracks.levelName(t, own.track, own.level, badgeOwnGender(), badgeNameVars(evaluateBadgeTracks(STATE).m)) || own.name) : '';
+    const text = own
+      ? t('friends.received.rowBadge', { name: `<strong>${escapeHTML(name)}</strong>`, r: escapeHTML(r.reaction), badge: `<strong>${escapeHTML(ownName)}</strong>` })
+      : t('friends.received.row', { name: `<strong>${escapeHTML(name)}</strong>`, r: escapeHTML(r.reaction), n: days });
     return `<div class="friends-received-row" data-congrats-id="${escapeAttr(String(r.id))}">
       ${friendAvatarHTML({ username: r.username, display_name: r.display_name, avatar_url: r.avatar_url }, r.from_user)}
-      <span class="friends-activity-text">${t('friends.received.row', { name: `<strong>${escapeHTML(name)}</strong>`, r: escapeHTML(r.reaction), n: days })}
+      <span class="friends-activity-text">${text}
         <span class="friends-activity-when">· ${escapeHTML(friendsTimeAgo(r.created_at))}</span></span>
       ${r.thanked
         ? `<span class="friends-thanked-chip">${t('friends.received.thanked')}</span>`
@@ -785,6 +806,8 @@ async function handleFriendAction(action, userId, btn){
   } else if (action === 'remove'){
     showToast(t('friends.toast.removed'));
   }
+  // Trilha Amigos (conquistas com níveis): recontar depois de aceitar ou desfazer amizade.
+  if (res.ok && typeof loadFriendsAcceptedCount === 'function') loadFriendsAcceptedCount();
   await renderFriendsView();
   refreshFriendRequestCount();
   if (typeof refreshFriendsRankingViews === 'function') refreshFriendsRankingViews();

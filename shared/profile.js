@@ -482,7 +482,8 @@ async function renderProfileView(){
   wrap.innerHTML = loadingHTML(t('profile.loading'));
 
   const langs = await buildLanguagesSummary();
-  const earnedBadges = BADGES.filter(b => earnedBadgeIds.has(b.id));
+  // Conquistas com níveis: uma por trilha (maior nível) + clássicas (shared/badge-tracks-app.js).
+  const earnedBadges = ownBadgeShowcase();
   const specialBadges = await computeEarnedSpecialBadges();
 
   if (!CURRENT_USER){
@@ -529,24 +530,13 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
   // completo em Progresso continua existindo à parte (com os badges ainda
   // NÃO conquistados também, pra dar meta) -- "Ver todas →" leva pra lá.
   const badgesHTML = earnedBadges.length ? `
-    <div class="profile-badge-showcase">
-      ${earnedBadges.slice().reverse().map(b => `
-        <div class="badge earned profile-badge" data-badge-id="${b.id}">
-          <div class="icon">${b.icon}</div>
-          <div class="name">${b.name}</div>
-        </div>
-      `).join('')}
+    <div class="track-showcase profile-track-showcase">
+      ${earnedBadges.map(badgeShowcaseItemHTML).join('')}
     </div>
   ` : `<p class="profile-empty-note">${t('profile.noBadges')}</p>
-    <div class="profile-badge-showcase is-locked-preview">
-      ${BADGES.slice(0, 4).map(b => `
-        <div class="badge profile-badge is-locked" data-badge-id="${b.id}">
-          <div class="icon">${b.icon}</div>
-          <div class="name">${b.name}</div>
-        </div>
-      `).join('')}
-    </div>`;
-  // Sem nenhuma conquista ainda: as 4 primeiras aparecem bloqueadas (em cinza,
+    <div class="track-showcase is-locked-preview">
+      ${badgeTrackViews(STATE).slice(0, 4).map(v => badgeShowcaseItemHTML(Object.assign({}, v, { name: v.nameNext, level: 0, tier: null }))).join('')}
+    </div>`;  // Sem nenhuma conquista ainda: as 4 primeiras aparecem bloqueadas (em cinza,
   // com cadeado) como meta, no lugar de só uma frase. Tocar mostra como ganhar.
 
   // Badges especiais (Fundadora, Beta Tester...) ficam junto da identidade,
@@ -595,7 +585,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
     </div>
 
     <div class="profile-section">
-      <div class="section-label">${t('profile.sectionBadges')} <span class="conquests-count">${earnedBadges.length}/${BADGES.length}</span></div>
+      <div class="section-label">${t('profile.sectionBadges')} <span class="conquests-count">${earnedBadges.filter(b => !b.classic).length}/${badgeTrackViews(STATE).length}</span></div>
       ${badgesHTML}
       <button class="profile-stats-link" id="profile-badges-link">${t('profile.badgesLink')}</button>
     </div>
@@ -604,13 +594,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
   document.getElementById('profile-stats-link')?.addEventListener('click', () => switchTab('progress'));
   document.getElementById('profile-badges-link')?.addEventListener('click', () => switchTab('progress'));
   document.getElementById('profile-edit-btn')?.addEventListener('click', () => openEditProfileModal(specialBadges));
-  wrap.querySelectorAll('.profile-badge[data-badge-id]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const b = BADGES.find(x => x.id === el.dataset.badgeId);
-      if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc);
-    });
-  });
+  wireTrackChips(wrap, earnedBadges.length ? earnedBadges : badgeTrackViews(STATE).map(v => Object.assign({}, v, { name: v.nameNext })));
   wrap.querySelectorAll('.profile-special-badge[data-special-badge-id]').forEach(el => {
     el.addEventListener('click', (e) => {
       e.stopPropagation();

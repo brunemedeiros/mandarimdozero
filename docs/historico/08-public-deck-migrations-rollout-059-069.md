@@ -257,3 +257,9 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Ainda executáveis por anon na produção (fora do escopo): `get_profile_card`, `get_public_deck`, `invite_code_info`
   (públicas de propósito) e as funções de gatilho `decks_touch_parent`, `own_flashcards_touch_deck` (chamadas via
   RPC falham por serem de trigger).
+
+## 089 -- Parabéns para conquistas com níveis (2026-10-14)
+
+- `shared/supabase_migrations/089_badge_congrats.sql`: `congratulate_friend` aceita `badge`; nova `friends_badge_feed(int)`.
+- Staging: aplicada em 2026-10-14 (ferramenta, nome `089_badge_congrats`). Produção: pendente de autorização.
+- Detalhes: `docs/historico/16-conquistas-com-niveis.md`.

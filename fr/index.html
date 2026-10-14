@@ -4715,6 +4715,58 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .study-plan-today-num{ font-size:22px; font-weight:900; }
 
 /* ---------- fim: cara de jogo, telas ---------- */
+/* ---------- Conquistas com níveis (shared/badge-tracks-app.js, docs/conquistas-proposta-niveis.md) ----------
+   Medalha = ícone do Fluent Emoji dentro da moldura do nível: bronze, prata, ouro; o nível máximo é todo dourado. */
+.badge-grid.has-tracks{ grid-template-columns: repeat(auto-fill, minmax(270px,1fr)); gap:12px; }
+.badge-ico{ display:block; width:38px; height:38px; }
+.badge-ico.is-emoji{ font-size:30px; line-height:38px; text-align:center; }
+.track-medal{ position:relative; flex-shrink:0; width:64px; height:64px; border-radius:50%; display:grid; place-items:center;
+  background:var(--paper-warm); box-shadow: inset 0 0 0 4px var(--tier-ring, var(--paper-line)); }
+.track-medal.tier-bronze{ --tier-ring: var(--medal-bronze); }
+.track-medal.tier-silver{ --tier-ring: var(--medal-silver); }
+.track-medal.tier-gold{ --tier-ring: var(--medal-gold); }
+.track-medal.tier-classic{ --tier-ring: var(--paper-line); }
+.track-medal.tier-max{ --tier-ring: var(--medal-gold);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--medal-gold) 55%, var(--paper)), color-mix(in srgb, var(--medal-gold) 22%, var(--paper-warm)));
+  box-shadow: inset 0 0 0 4px var(--medal-gold), 0 0 0 3px color-mix(in srgb, var(--medal-gold) 30%, transparent), 0 6px 18px color-mix(in srgb, var(--medal-gold) 40%, transparent); }
+.track-medal.tier-locked .badge-ico{ filter: grayscale(1); opacity:.4; }
+.track-medal-lock{ position:absolute; right:-2px; bottom:-2px; width:22px; height:22px; border-radius:50%; background:var(--paper); box-shadow: var(--shadow-card); display:grid; place-items:center; }
+.track-medal-lock img{ width:14px; height:14px; }
+.track-medal.is-sm{ width:50px; height:50px; }
+.track-medal.is-sm .badge-ico{ width:28px; height:28px; }
+.track-medal.is-xs{ width:34px; height:34px; box-shadow: inset 0 0 0 3px var(--tier-ring, var(--paper-line)); }
+.track-medal.is-xs.tier-max{ box-shadow: inset 0 0 0 3px var(--medal-gold), 0 3px 10px color-mix(in srgb, var(--medal-gold) 40%, transparent); }
+.track-medal.is-xs .badge-ico{ width:20px; height:20px; }
+.track-card{ display:flex; gap:14px; align-items:center; padding:14px; border-radius:18px; background:var(--paper);
+  border:1px solid var(--paper-line); box-shadow: var(--shadow-card); cursor:pointer; text-align:left; min-width:0; }
+.track-card.is-max{ border-color: var(--medal-gold); background: linear-gradient(160deg, color-mix(in srgb, var(--medal-gold) 18%, var(--paper)), var(--paper)); }
+.track-body{ flex:1; min-width:0; display:grid; gap:4px; }
+.track-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.track-title{ font-size:12px; font-weight:800; color:var(--ink-soft); }
+.track-level{ font-size:11px; font-weight:900; padding:2px 8px; border-radius:999px; white-space:nowrap; background:var(--paper-warm); color:var(--ink-soft); }
+.track-level.tier-bronze{ background:var(--medal-bronze); color:var(--on-medal); }
+.track-level.tier-silver{ background:var(--medal-silver); color:var(--on-medal); }
+.track-level.tier-gold, .track-level.tier-max{ background:var(--medal-gold); color:var(--on-medal); }
+.track-name{ font-family: var(--font-display); font-size:16px; font-weight:900; color:var(--ink); line-height:1.25; }
+.track-card.is-locked .track-name{ color:var(--ink-soft); }
+.track-progress{ display:flex; align-items:center; gap:8px; }
+.track-bar{ flex:1; height:10px; border-radius:999px; background:var(--paper-warm); overflow:hidden; box-shadow: inset 0 0 0 1px var(--paper-line); }
+.track-bar span{ display:block; height:100%; border-radius:inherit; background:var(--medal-gold); }
+.track-count{ font-size:12px; font-weight:800; color:var(--ink-soft); font-variant-numeric: tabular-nums; }
+.track-next{ font-size:12px; color:var(--ink-soft); }
+.track-max{ justify-self:start; font-size:12px; font-weight:900; padding:3px 10px; border-radius:999px; background:var(--medal-gold); color:var(--on-medal); }
+.track-showcase{ display:grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr)); gap:10px; margin-top:4px; }
+.track-chip{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 6px; border-radius:16px; background:var(--paper);
+  border:1px solid var(--paper-line); cursor:pointer; font:inherit; color:var(--ink); min-width:0; }
+.track-chip.tier-max{ border-color: var(--medal-gold); }
+.track-chip-name{ font-size:12px; font-weight:800; text-align:center; line-height:1.2; overflow-wrap:anywhere; }
+.track-chip-sub{ font-size:10.5px; font-weight:700; color:var(--ink-soft); }
+.track-showcase.is-locked-preview .track-chip{ opacity:.7; }
+.track-classics{ grid-column: 1 / -1; display:grid; gap:6px; margin-top:4px; }
+.track-classics-title{ font-size:13px; font-weight:800; color:var(--ink-soft); }
+.badge-unlock-icon .badge-ico{ width:40px; height:40px; }
+.friends-activity-row.is-badge .track-medal{ flex-shrink:0; }
+@media (max-width: 600px){ .badge-grid.has-tracks{ grid-template-columns: 1fr; } .track-medal{ width:56px; height:56px; } }
 </style>
 </head>
 <body>
@@ -5940,6 +5992,8 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 <script src="../shared/language-pref.js"></script>
 <script src="../shared/auth.js"></script>
 <script src="../shared/core/audio-fala.js"></script>
+<script src="../shared/badge-tracks.js"></script>
+<script src="../shared/badge-tracks-app.js"></script>
 <script src="../shared/core/gamificacao.js"></script>
 <script src="app.js"></script>
 <script src="../shared/language-switcher.js"></script>

@@ -259,13 +259,8 @@ async function renderPublicProfileInto(bodyEl, username){
         : `<p class="profile-empty-note">${t('publicProfile.noProgress')}</p>`);
 
   const conquestsHTML = earnedBadges.length ? `
-    <div class="public-profile-conquests profile-badge-showcase">
-      ${earnedBadges.slice().reverse().map(b => `
-        <div class="badge earned profile-badge" data-badge-id="${b.id}">
-          <div class="icon">${b.icon}</div>
-          <div class="name">${b.name}</div>
-        </div>
-      `).join('')}
+    <div class="public-profile-conquests track-showcase">
+      ${earnedBadges.map(badgeShowcaseItemHTML).join('')}
     </div>
   ` : `<p class="profile-empty-note">${t('publicProfile.noBadges')}</p>`;
 
@@ -321,12 +316,8 @@ async function renderPublicProfileInto(bodyEl, username){
       if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc || '');
     });
   });
-  bodyEl.querySelectorAll('.public-profile-conquests .profile-badge[data-badge-id]').forEach(el => {
-    el.addEventListener('click', () => {
-      const b = earnedBadges.find(x => x.id === el.dataset.badgeId);
-      if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc || '');
-    });
-  });
+  const conquestsEl = bodyEl.querySelector('.public-profile-conquests');
+  if (conquestsEl) wireTrackChips(conquestsEl, earnedBadges);
 
   if (isPublic && typeof renderPublicDecksSection === 'function'){
     renderPublicDecksSection(bodyEl.querySelector('#public-profile-decks-box'), profile.username);

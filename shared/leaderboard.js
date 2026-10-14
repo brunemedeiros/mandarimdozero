@@ -316,7 +316,8 @@ async function fetchUserEarnedBadges(userId){
   if (error){ console.error('Erro ao carregar conquistas do perfil:', error); return []; }
   // C4: conquista de curso só do idioma atual; conquista da conta, de qualquer idioma.
   const ids = new Set((data || []).filter(r => r.language_app_key === APP_KEY || AccountProgress.isAccountBadge(r.badge_id)).map(r => r.badge_id));
-  return BADGES.filter(b => ids.has(b.id));
+  // Conquistas com níveis: uma por trilha (maior nível, inclusive das conquistas antigas) + clássicas.
+  return summarizeBadgeIds([...ids]);
 }
 
 async function renderLeaderboardView(){
