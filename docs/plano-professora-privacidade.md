@@ -309,4 +309,108 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   - **Aviso**: só no sino + sinalizador no menu Perfil. Sem e-mail.
 - Em aberto para a auditoria: o que é uma turma (quem cria, aluno em várias turmas), quem liga o compartilhamento
   (professora ou aluno), recado individual dentro de turma compartilhada, Grátis x Premium.
+- 3ª rodada (2026-10-13), **turmas**:
+  - A professora cria a turma e põe os alunos, ou manda o link da turma (o aluno entra ou cria a conta já dentro dela).
+    Estar numa turma não dá permissão especial nenhuma.
+  - O mural é da professora; o aluno é inserido nele. O aluno não compartilha nada.
+  - Numa turma, o mural é um só para todos os alunos da turma (como no Google Classroom). Recado vai para a turma
+    toda por padrão, com opção de escolher um aluno só: aí só ele vê.
+  - **Grátis** para alunos vinculados a uma professora.
 
+### Proposta de desenho (2026-10-13; aprovada, ver a entrega abaixo)
+
+- Tabelas novas: `classrooms` (professora, idioma, nome, código do link), `classroom_members`, `mural_posts`
+  (professora, turma OU aluno, texto, anexos, editado_em), `mural_comments` (autor, texto; apagar = do autor ou da
+  professora), `mural_reads` (o que cada um já viu, para o "+N"). Tudo com RLS: vê quem é a professora dona, o aluno
+  destinatário, ou membro ativo da turma.
+- Anexos no Storage num bucket privado `mural` (PDF e imagem, 10 MB por arquivo, até 5 por recado), lidos por link
+  temporário assinado.
+- Sino: cada recado novo gera uma notificação in-app (sem e-mail), reaproveitando `shared/notifications.js`.
+- Link da turma reaproveita o convite da 077: entrar pelo link cria o vínculo com a professora (se ainda não houver)
+  e já põe o aluno na turma.
+- Telas: Professora ganha "Turmas" no painel (criar, pôr alunos, link, mural da turma). Aluno: "Mural" dentro de
+  "Minhas aulas", com o "+N" lá e no menu Perfil.
+- 4ª rodada (2026-10-13): na professora, área própria "Mural" (não "Turmas") com seletor **Turmas | Alunos**: Turmas lista
+  as turmas; Alunos lista só quem não está em turma (os nomes de todos ficam na aba Alunos). Aluno pode estar em mais
+  de uma turma. Aluno também **cria** post (não só comenta). Concordou com o resto das sugestões (turma de um idioma,
+  mural individual para aluno sem turma, desvincular tira das turmas). "Minhas aulas" fica no menu Mais.
+
+### Entrega da Etapa 4 (2026-10-13, branch; migration 087)
+
+- **087_mural.sql** (número 086 já usado por outras conversas): tabelas `classrooms`, `classroom_members`, `mural_posts`,
+  `mural_comments`, `mural_seen`, todas sem policy (só RPCs security definer): `mural_list`, `mural_feed` (marca visto),
+  `mural_create_post`, `mural_update_post` (só a professora, só o dela), `mural_delete_post` (autor ou professora),
+  `mural_add_comment`, `mural_delete_comment`, `mural_save_classroom`, `mural_delete_classroom`,
+  `mural_set_classroom_members`, `mural_classroom_link`, `classroom_code_info` (anon), `join_classroom_code` (cria o
+  vínculo se faltar). Trigger tira o aluno das turmas ao desvincular. Bucket privado `mural` (PDF/JPEG/PNG/WebP, 10 MB)
+  com policies `mural_files_*`. Sino: categoria `mural`, `action_tab` `my-mural` (aluno) e `teacher-mural` (abre o
+  Painel da professora na seção Mural). Limites: 50 posts e 200 comentários por pessoa por dia, 50 turmas.
+- **Telas** (`shared/mural.js`): Painel da professora > Mural; aluno: item "📌 Mural" no menu Mais, "+N" no Perfil (barra
+  e sidebar) e no Mais, atalho no topo do Perfil; link `?turma=CODIGO` com cartão (com e sem login).
+- **Grátis x Premium**: grátis para alunos vinculados; criar turma e postar como professora exige o papel Professora.
+- **Testes**: `tests/mural/run.sh` 80/80 (banco local, 087 aplicada duas vezes); `tests/mural/test_playwright.js`
+  235/235 (fr/zh, claro/escuro, 1200/390); regressão: painel-professora 277/277 (teste de "4 abas" virou 5),
+  login 100/100, perfil-privado 16/16, k10 114/114, painel-alunos 48/48, amigos 158/158, banco-revisao 387/387;
+  i18n unit sem falha nova (183 falhas já existiam na main).
+- **Staging**: aplicadas pela ferramenta só as partes sem `DELETE` (`087_mural` tabelas+helpers, `087b_mural_list`,
+  `087c_mural_feed`, `087d_mural_create_post`); o resto trava a ferramenta: a autora roda `docs/rollout-sql/087_sql_editor.sql`.
+
+### Menu Aluno e revisão Mural x Aulas x Material (2026-10-13)
+
+- Autora: item **"Aluno"** (como "Professora"), com o "+N" do mural; o Perfil deixa de mostrar o número.
+  Feito: item "🎒 Aluno" na barra lateral e no menu Mais (só para quem tem professora ou já recebeu aula/material),
+  painel com abas Mural | Aulas | Material de apoio; os 3 itens soltos saíram do menu Mais; abas antigas e avisos do sino
+  (`my-mural`, `my-class-logs`, `support-materials`) caem no painel Aluno na seção certa.
+- Revisão pedagógica e estrutural pedida pela autora (dados da produção em 2026-10-13: 0 aulas registradas, 2 materiais,
+  13 vínculos ativos):
+  - Mural = conversa e avisos (fluxo cronológico, duas vias, some com o tempo).
+  - Aulas = diário estruturado de cada aula (data, tema, tarefa, observações; notas privadas da professora fora),
+    só a professora escreve, por aluno; serve para rever o que foi visto e acompanhar a tarefa.
+  - Material = biblioteca de consulta (título, descrição, link/arquivo), por aluno; o aluno volta nela.
+  - Sobreposição: com anexo, um recado do Mural já entrega um material; um registro de aula pode virar recado. O risco de
+    juntar tudo num fluxo é o material e a tarefa sumirem no meio da conversa (o Google Classroom separa Mural de
+    Atividades por isso).
+  - Proposta: tudo no Mural, com tipos de cartão (Recado, Aula, Material) e filtros "Tudo | Aulas | Materiais"; o "+N"
+    passa a contar aula e material novos. Aguardando a escolha da autora (A manter 3 abas, B 2 abas, C tudo no Mural).
+
+### 087 na produção e nova rodada (2026-10-14)
+
+- 087 rodada pela autora no SQL Editor da produção; conferido: 24 funções, 5 tabelas sem acesso direto, bucket `mural`
+  privado (10 MB, PDF/JPEG/PNG/WebP), 3 policies, trigger; teste real com professora e aluna da produção dentro de
+  transação desfeita (turma, membros, post, link, +1, comentário, aluno não apaga post da professora): tudo ok, sem resíduo.
+- Pedidos da autora:
+  - Aulas com **visão de calendário**, como o "Calendário de Aulas" dela no Notion (campos lá: Data, Tópico, Aluno/a,
+    Presença [aula dada, remarcação, faltou/cancelada, cancelada com antecedência, cancelada pela professora, remarcada],
+    Pontualidade, Para a próxima aula, Competências, Uso da L1, Idioma).
+  - Tirar os **Cartões da professora** do menu Revisão e criar a aba **Revisão** no Aluno, no formato do Banco de Revisão
+    original (revisão do que foi trabalhado em aula, não é trilha nem flashcard comum).
+  - Indecisa entre B (Mural | Aulas e materiais) e C (tudo no Mural com filtros).
+- Proposta enviada: B + avisos automáticos no Mural ("nova aula registrada", "novo material") e Revisão como 4ª aba:
+  **Mural | Aulas e materiais (Calendário | Lista + biblioteca) | Revisão**. Perguntas abertas no chat.
+
+### Decisões da rodada de 2026-10-14 (reorganização do Aluno; nada codado ainda)
+
+- Estrutura **B** com avisos automáticos no Mural: **Mural | Aulas e materiais | Revisão**.
+- **"+N"**: o item Aluno soma tudo; dentro do Aluno cada aba tem o seu: Mural = mensagens novas, Revisão = cartões
+  para revisar hoje.
+- **Registro de aula** ganha **Presença** (cores: verde = presente, vermelho = faltou; a autora vai criar outros
+  rótulos depois, então os rótulos devem ser editáveis) e **Competências** (Conversação, Gramática, Escrita, Leitura,
+  Vocabulário, Escuta, Pronúncia, como no Notion). Pontualidade e Uso da L1 ficam de fora por enquanto.
+- **Calendário**: opção de lançar datas futuras (agenda), inclusive data avulsa. Verificar integração com Google Agenda
+  para quem entrou com Google.
+- **Histórico do Notion** ("Calendário de Aulas"): autorizado trazer para o site (alunos com conta e vínculo). Verificar
+  integração com o Notion só leitura ou leitura e escrita, para ela e outras professoras.
+- PR #312 (Mural, turmas, painel Aluno) mergeado e publicado em 2026-10-14.
+
+### Aba Aluno > Revisão (2026-10-14, branch; sem migration)
+
+- Cartões da professora (Banco de Revisão, origin 'teacher') saíram da Revisão geral: Estudar tudo, modos, contagens,
+  "Suas palavras", tabela de Decks, Painel e a opção de origem em Configurar (filtro salvo "teacher" vale como todos).
+- Nova aba **Revisão** no Aluno (depois de Mural, Aulas, Material de apoio): Novo/Aprendendo/Revisar e "Revisar (N)",
+  que abre a MESMA sessão de Flashcard (modos de resposta e Observação do Banco) só com esses cartões; "Voltar ao Aluno".
+- "+N": aba Revisão = cartões para hoje; item Aluno e botão Mais = Mural + Revisão. FSRS intacto (só muda onde aparece).
+- Grátis x Premium: tudo grátis para aluno vinculado.
+- Testes: banco-revisao Playwright 465/465 (78 novas); atualizados por mudança intencional: mural 255/255,
+  deck-browser 208/208, fase-h origem 54/54, fase-i Playwright 48/48 e unit 67/67 (o unit já falhava 4 antes, reescrito
+  para o comportamento atual), k7 40/40, i18n unit 2040/2040. Sem mudança: painel-professora 277/277, fase-g, k2h, k3,
+  k9, k10, revisao-ajustes, revisao-proposta-a, k4, k2. Pré-existentes: i18n card_variants_browser 14/16, content_en 29/30.

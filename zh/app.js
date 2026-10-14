@@ -24,17 +24,6 @@ const TTS = {
   pollAttempts: 0
 };
 
-// Nem toda voz do mesmo idioma soa igual: o SO costuma expor tanto vozes
-// "neurais"/online (Google, Microsoft Natural/Online) quanto vozes locais
-// robóticas mais antigas, e a ordem que o navegador retorna é arbitrária.
-// Pontua pelo nome pra preferir a melhor voz disponível, não só a primeira.
-function voiceQualityScore(v){
-  const name = (v.name || '').toLowerCase();
-  if (/natural|neural/.test(name)) return 3;
-  if (/online/.test(name)) return 2;
-  if (/google/.test(name)) return 1;
-  return 0;
-}
 
 function loadChineseVoice(){
   if (!TTS.supported) return;
@@ -66,21 +55,6 @@ if (TTS.supported){
   pollForVoices();
 }
 
-// "Aquece" o synthesis engine com uma fala silenciosa disparada pela primeira
-// interação real do usuário na página. Em alguns navegadores Chromium, a
-// primeira chamada de speak() após o carregamento simplesmente não soa se não
-// tiver sido precedida de uma interação — isso resolve preventivamente.
-function warmUpTTSOnce(){
-  if (TTS.warmedUp || !TTS.supported) return;
-  TTS.warmedUp = true;
-  try{
-    const warm = new SpeechSynthesisUtterance(' ');
-    warm.volume = 0;
-    window.speechSynthesis.speak(warm);
-  }catch(e){ /* silencioso: warm-up é best-effort */ }
-  document.removeEventListener('click', warmUpTTSOnce);
-  document.removeEventListener('touchstart', warmUpTTSOnce);
-}
 document.addEventListener('click', warmUpTTSOnce, { once:true });
 document.addEventListener('touchstart', warmUpTTSOnce, { once:true });
 
@@ -111,28 +85,6 @@ let exerciseAudioEl = null;
 // LAST_AUDIO_BTN.isConnected já vira false sozinho.
 let LAST_AUDIO_BTN = null;
 
-// Contagem vitalícia de reproduções de áudio (clique manual ou atalho "r")
-// -- só pro badge "Ouvido Treinado" (artefato §8). Tocar áudio nunca passa
-// perto de nenhum addXP() sozinho, então dispara a checagem de badge aqui
-// mesmo em vez de confiar no próximo XP ganho (que pode demorar).
-function registerAudioPlay(){
-  STATE.totalAudioPlays = (STATE.totalAudioPlays || 0) + 1;
-  ensureDailyBucket();
-  STATE.daily.audioPlaysToday += 1;
-  checkAndCelebrateBadges();
-}
-
-function stopExerciseAudio(){
-  if (exerciseAudioEl){
-    exerciseAudioEl.pause();
-    exerciseAudioEl.currentTime = 0;
-    exerciseAudioEl = null;
-  }
-  if (TTS.supported && window.speechSynthesis.speaking){
-    window.speechSynthesis.cancel();
-  }
-  document.querySelectorAll('.audio-btn.speaking').forEach(b => b.classList.remove('speaking'));
-}
 
 // ---------- Som curto de acerto/erro (feedback por exercício) ----------
 // Sintetizado via Web Audio API -- sem arquivo de áudio externo pra baixar/
@@ -140,18 +92,8 @@ function stopExerciseAudio(){
 // Synthesis são players diferentes; um "ding" de ~200ms não precisa de
 // stopExerciseAudio()). Silenciável em Preferências (Seu progresso).
 const FEEDBACK_SOUND_KEY = 'mandarim_feedback_sound';
-function isFeedbackSoundEnabled(){
-  return localStorageSafeGet(FEEDBACK_SOUND_KEY) !== '0';
-}
 
 let feedbackAudioCtx = null;
-function getFeedbackAudioCtx(){
-  const Ctx = window.AudioContext || window.webkitAudioContext;
-  if (!Ctx) return null;
-  if (!feedbackAudioCtx) feedbackAudioCtx = new Ctx();
-  if (feedbackAudioCtx.state === 'suspended') feedbackAudioCtx.resume();
-  return feedbackAudioCtx;
-}
 
 function playFeedbackTone(ctx, freq, startTime, duration, peakGain){
   const osc = ctx.createOscillator();
@@ -167,21 +109,6 @@ function playFeedbackTone(ctx, freq, startTime, duration, peakGain){
   osc.stop(startTime + duration + 0.02);
 }
 
-// isCorrect === true: "ding" ascendente curto (2 notas). false: um tom só,
-// mais grave e mais curto -- neutro, não punitivo (a explicação do erro já
-// fica a cargo do painel de texto, o som só confirma o resultado).
-function playFeedbackSound(isCorrect){
-  if (!isFeedbackSoundEnabled()) return;
-  const ctx = getFeedbackAudioCtx();
-  if (!ctx) return;
-  const now = ctx.currentTime;
-  if (isCorrect){
-    playFeedbackTone(ctx, 587.33, now, 0.09, 0.16);
-    playFeedbackTone(ctx, 880.00, now + 0.08, 0.16, 0.16);
-  } else {
-    playFeedbackTone(ctx, 233.08, now, 0.18, 0.13);
-  }
-}
 
 // Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
 // API do navegador — qualidade consistente pra todo aluno, independente do
@@ -370,14 +297,6 @@ function wireAudioButtons(container, isPreview){
 function customAudioBtnHTML(url){
   return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="${t('zh.audio.listenAudio')}" title="${t('zh.audio.listenAudio')}">🎧</button>`;
 }
-function wireCustomAudioButtons(container){
-  container.querySelectorAll('.custom-audio-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      new Audio(btn.dataset.audioUrl).play().catch(() => showToast(t('toast.audioPlayFailedDot')));
-    });
-  });
-}
 
 // ---------- Ordem dos traços (Hanzi Writer) — modo animação ----------
 const HANZI_WRITER_SUPPORTED = typeof HanziWriter !== 'undefined';
@@ -551,60 +470,7 @@ function buildCardsFromUnits(units, appKey = 'mandarim'){
   return cards;
 }
 
-// Fase 3 do sistema de alunas particulares (ver CLAUDE.md) -- cartão
-// autorado por uma professora (shared/teacher-flashcards.js, tabela
-// teacher_flashcards), atribuído a ESTA aluna. Mesmo shape de card que
-// buildCardsFromUnits() produz (mesmo motor de memória/FSRS, mesma
-// getStudyQueue()) -- só ORIGEM diferente. id `t${row.id}` -- namespace
-// separado de `u${unitId}-v${idx}`, nunca colide. `unitId`/`vocabIdx`
-// ficam `null` de propósito -- isCardLessonCompleted() trata
-// `origin==='teacher'` como caso à parte, sem o gate de lição.
-// `flashcardStatus` espelha `status` da linha (ativo/arquivado).
-//
-// Diferente do fr (um único campo `front`), o cartão de revisão do zh
-// exige hanzi e pinyin em campos SEPARADOS (front_pinyin/back_hanzi --
-// ver renderReviewView, sempre mostra os dois juntos, nunca um sozinho).
-// `row.front` (o que a professora digitou como "frente") mapeia pra
-// `back_hanzi`; `row.front_pinyin` (campo extra só pra mandarim, migration
-// 027) mapeia pra `front_pinyin` -- `|| ''` pra nunca renderizar a string
-// literal "undefined" se a professora deixou o pinyin em branco.
-// Prompt-mestre "flashcards -- 7 propostas" (ver CLAUDE.md) -- id ganha um
-// sufixo de revisão quando o cartão já foi editado (revision>0). Mesmo
-// mecanismo de fr/app.js -- ver comentário lá pra detalhe completo do
-// "reset via id novo". Prop 1+2 (seletor de direção idioma estudado/
-// nativo) NÃO se aplica ao zh -- ver nota em buildCardFromTeacherFlashcard
-// abaixo -- então frontIsTargetLanguage não é lido aqui de propósito.
-function flashcardIdForRow(prefix, row){
-  return row.revision > 0 ? `${prefix}${row.id}-r${row.revision}` : `${prefix}${row.id}`;
-}
 
-// Prop 1+2 (ver CLAUDE.md, "7 propostas") -- o seletor "qual lado é o
-// idioma estudado" NÃO se aplica ao zh: fr tem 2 campos simétricos (front/
-// back_trans, cada um uma string simples, qualquer um pode ser o idioma
-// estudado); zh tem 3 campos ASSIMÉTRICOS (front_pinyin+back_hanzi formam
-// um PAR fixo -- hanzi sempre vem com pinyin do lado, nunca sozinho --
-// enquanto back_trans é uma string solta). Não existe um "back_pinyin"
-// pra completar o par se a direção fosse invertida, então o zh continua
-// sempre back_hanzi=idioma estudado/back_trans=tradução, como já era --
-// front_is_target_language é gravado na tabela (mesma coluna que o fr
-// usa) mas nunca lido no client zh. shared/admin-flashcards.js esconde o
-// seletor da UI quando a aluna selecionada é de mandarim (ver lá).
-// Fase 4b do prompt-mestre "reestruturação inspirada no Anki" (ver
-// CLAUDE.md): esta função NÃO usa mais a ponte -- delega pra
-// buildEngineCardsFromRow() (shared/flashcard-model.js), que devolve o(s)
-// card(s) já no shape NATIVO (`note`+`cardInstance`, sem campo de
-// conteúdo legado solto).
-// Fase 5, fechamento (ver CLAUDE.md) -- ANTES desta correção, esta
-// função devolvia só `[0]` do array (correto até então, quando nenhuma
-// linha produzia mais de 1 CardInstance). O motor da Fase 5 passou a
-// produzir 2+ CardInstances por linha (normal_reversed, Cloze
-// multi-marca) -- `[0]` truncava silenciosamente as demais. Contrato
-// agora é `buildCardFromTeacherFlashcard(row) -> Card[]` (sempre um
-// array, 1 elemento pra todo dado legado -- zero mudança de
-// comportamento pra eles); quem chama espalha o array em STATE.cards.
-function buildCardFromTeacherFlashcard(row){
-  return buildEngineCardsFromRow(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' });
-}
 // Busca os flashcards atribuídos a esta conta (shared/teacher-flashcards.js)
 // e mescla em STATE.cards -- precisa rodar ANTES de loadState()/
 // applySerializedState(), pra que o merge por id lá (Fase 0: "cartão salvo
@@ -635,26 +501,6 @@ async function mergeTeacherFlashcardsIntoState(){
   });
 }
 
-// Fase 5 do sistema de alunas particulares (ver CLAUDE.md) -- cartão
-// autorado pela PRÓPRIA aluna (shared/own-flashcards.js, tabela
-// own_flashcards). Irmão de buildCardFromTeacherFlashcard() -- mesmo
-// shape de card, só ORIGEM diferente. id `s${row.id}` -- terceiro
-// namespace, nunca colide com `u${unitId}-v${idx}` (trilha) nem
-// `t${row.id}` (professora, tabela DIFERENTE). Mesmo mapeamento
-// hanzi/pinyin de buildCardFromTeacherFlashcard (front_pinyin/back_hanzi
-// separados, `|| ''` pra nunca renderizar "undefined").
-// Prompt-mestre "reformulação gratuito x premium" (ver CLAUDE.md) --
-// mesma extensão do irmão fr, com o mapeamento hanzi/pinyin de sempre
-// (clozeAnswerPinyin é o que a aluna digita, clozeAnswer/hanzi só revela a
-// resposta depois de julgada -- mesmo motivo de buildCardFromTeacherFlashcard
-// acima). Origin-agnóstico no motor de revisão, nenhuma mudança lá.
-// Fase 4b (ver comentário de buildCardFromTeacherFlashcard acima, mesmo
-// princípio) -- irmã gêmea, só troca origin/idPrefix.
-// Fase 5, fechamento -- mesmo contrato `-> Card[]` da irmã (ver comentário
-// completo em buildCardFromTeacherFlashcard acima).
-function buildCardFromSelfFlashcard(row){
-  return buildEngineCardsFromRow(row, { origin: 'self', appKey: APP_KEY, idPrefix: 's' });
-}
 
 // Busca os cartões que a PRÓPRIA aluna já criou (shared/own-flashcards.js)
 // e mescla em STATE.cards -- mesmo motivo/posicionamento de
@@ -853,15 +699,6 @@ const REALITY_NOTE_LEVEL_GUIDANCE = {
   },
 };
 
-// Único ponto de checagem "esta categoria pode aparecer neste nível" --
-// qualquer código futuro que filtre notas de realidade por nível deve
-// chamar isto em vez de reimplementar a lógica. Hoje só é chamável com
-// level='HSK1' de verdade (os outros níveis não têm unidade nenhuma), mas
-// já existe pronta pra quando isso deixar de ser verdade.
-function isRealityNoteCategoryAllowedAtLevel(category, level){
-  const guidance = REALITY_NOTE_LEVEL_GUIDANCE[level];
-  return !!guidance && guidance.categoriesAllowed.includes(category);
-}
 
 // Texto do banner (topo do cartão) quando um concept é uma nota de
 // realidade (concept.kind === 'reality') em vez de gramática comum --
@@ -926,6 +763,7 @@ const STATE = {
   totalAudioPlays: 0, // vitalício, nunca zera (badge "Ouvido treinado")
   everUsedSpeedReview: false, // vitalício (badge "Exploradora")
   everUsedMatchGame: false, // vitalício (badge "Exploradora")
+  modesUsed: {}, // conquistas: modos de estudo já usados (trilha Explorar)
   // XP da semana corrente -- preparação pra leaderboard futura (artefato
   // §9), NÃO implementa leaderboard nenhuma. Separado do XP vitalício
   // (acima) porque uma leaderboard semanal precisa de um número que reseta;
@@ -989,6 +827,10 @@ const STATE = {
   // já nulam reviewSessionUnitFilter -- nunca os dois setados ao mesmo tempo.
   // Nunca serializado -- estado de SESSÃO, não progresso salvo.
   reviewSessionDeckId: null,
+  // Aba Revisão do painel Aluno (2026-10-14): true só durante a sessão aberta
+  // por startClassReviewSession() -- o pool passa a ser SÓ os cartões da
+  // professora. switchTab() zera ao trocar de aba. Nunca serializado.
+  reviewSessionClassReview: false,
   cardVariants: {}, // progresso das palavras que trocam por idioma do site (shared/card-variants.js)
   // Fase D -- cache em memória da árvore de Decks do idioma atual, carregada
   // sob demanda por ensureDecksLoadedForReview() (só quando uma sessão
@@ -1110,14 +952,6 @@ loadPinyinPreference();
 // de cloze, não é escolhido por exercício.
 const CLOZE_MODE_KEY = 'mandarim_cloze_mode';
 
-function getClozeMode(){
-  return localStorageSafeGet(CLOZE_MODE_KEY) === 'type' ? 'type' : 'choice';
-}
-
-function updateClozeModeSwitch(){
-  const btn = document.getElementById('cloze-mode-switch');
-  if (btn) btn.setAttribute('aria-checked', getClozeMode() === 'type' ? 'true' : 'false');
-}
 
 document.getElementById('cloze-mode-switch').addEventListener('click', () => {
   const next = getClozeMode() === 'type' ? 'choice' : 'type';
@@ -1126,10 +960,6 @@ document.getElementById('cloze-mode-switch').addEventListener('click', () => {
 });
 updateClozeModeSwitch();
 
-function updateFeedbackSoundSwitch(){
-  const btn = document.getElementById('feedback-sound-switch');
-  if (btn) btn.setAttribute('aria-checked', isFeedbackSoundEnabled() ? 'true' : 'false');
-}
 document.getElementById('feedback-sound-switch').addEventListener('click', () => {
   localStorageSafeSet(FEEDBACK_SOUND_KEY, isFeedbackSoundEnabled() ? '0' : '1');
   updateFeedbackSoundSwitch();
@@ -1155,6 +985,8 @@ async function loadStateAndRender(){
   renderExportDeckSelect(ANKI_EXPORT_CONFIG);
   maybeShowReviewReminder();
   maybeSendStudyReminder();
+  // +N da aba Aluno > Revisão (cartões da professora) já com o progresso carregado.
+  if (typeof muralApplyBadges === 'function') muralApplyBadges();
 }
 
 // Login (Google/e-mail/convidado), menu do usuário e logout agora vêm de
@@ -1197,13 +1029,6 @@ document.getElementById('admin-badges-btn').addEventListener('click', () => {
 // avatar e ganhou um botão de verdade no topo da tela de Revisão
 // (#review-my-flashcards-btn, wired mais abaixo).
 
-// Fase 8b do sistema de alunas particulares (ver CLAUDE.md) -- "Material
-// de apoio" é pra TODA conta logada (mesmo raciocínio de my-flashcards-btn
-// acima), mas só LEITURA -- quem envia é a professora, não a própria conta.
-document.getElementById('support-materials-btn').addEventListener('click', () => {
-  document.getElementById('user-menu-dropdown').classList.remove('open');
-  switchTab('support-materials');
-});
 
 // Entrada geral da bandeira ⚑ (menu "Mais"/usuário) -- sem contexto de
 // exercício específico, captureReportContext() ainda pega unidade/lição
@@ -1272,6 +1097,7 @@ function serializeState(){
     totalAudioPlays: STATE.totalAudioPlays,
     everUsedSpeedReview: STATE.everUsedSpeedReview,
     everUsedMatchGame: STATE.everUsedMatchGame,
+    modesUsed: STATE.modesUsed,
     periodXp: STATE.periodXp,
     daily: STATE.daily,
     storyProgress: STATE.storyProgress,
@@ -1325,6 +1151,7 @@ function applySerializedState(data){
   if (typeof data.totalAudioPlays === 'number') STATE.totalAudioPlays = data.totalAudioPlays;
   if (data.everUsedSpeedReview) STATE.everUsedSpeedReview = true;
   if (data.everUsedMatchGame) STATE.everUsedMatchGame = true;
+  if (data.modesUsed && typeof data.modesUsed === 'object') Object.assign(STATE.modesUsed, data.modesUsed);
   if (data.periodXp) Object.assign(STATE.periodXp, data.periodXp);
   if (data.daily) Object.assign(STATE.daily, data.daily);
   if (data.storyProgress) Object.assign(STATE.storyProgress, data.storyProgress);
@@ -1361,6 +1188,8 @@ function registerStudyToday(){
     STATE.streak = 1;
   }
   STATE.lastStudyDay = today;
+  // Marco de sequência (5, 10, 15... 365) para a atividade dos amigos (shared/friends.js, migration 086).
+  if (typeof friendsRecordStreakMilestone === 'function') friendsRecordStreakMilestone(STATE.streak, today);
   // Não mostra a tela de sequência AGORA -- isso interromperia no meio de
   // uma atividade (ex: no meio de uma sessão de revisão, competindo até com
   // o áudio automático da próxima carta). Só marca que tem uma comemoração
@@ -1369,54 +1198,6 @@ function registerStudyToday(){
   STATE.pendingStreakCelebration = true;
 }
 
-function maybeShowStreakCelebration(){
-  if (!STATE.pendingStreakCelebration) return;
-  STATE.pendingStreakCelebration = false;
-  // Nem todo lugar que chama registerStudyToday() (que muda STATE.streak)
-  // também chama renderTopbarStats() logo em seguida -- vários caminhos só
-  // chegam até aqui, no momento em que a comemoração de fato aparece.
-  // Centralizar a atualização do pill aqui garante que ele nunca fique
-  // mostrando um número velho enquanto a tela de sequência já mostra o novo.
-  renderTopbarStats();
-  // showStreakCelebration() é sempre chamada ANTES do innerHTML da tela de
-  // conclusão (lição/unidade/sessão) ser escrito, no mesmo call site -- como
-  // as duas coisas rodam na mesma volta síncrona, o navegador só pinta UM
-  // quadro final, com o overlay de sequência já por cima, escondendo a tela
-  // de conclusão atrás dele até a pessoa fechar o modal. Resultado relatado:
-  // a tela de sequência parecia aparecer ANTES da tela de "Lição concluída",
-  // quando devia ser o contrário. Um pequeno atraso garante que o quadro da
-  // tela de conclusão pinte primeiro, e só depois o modal aparece por cima.
-  setTimeout(showStreakCelebration, 500);
-}
-
-// ---------- Tela de sequência de streak (estilo Duolingo) ----------
-// Aparece uma única vez por dia, na primeira atividade que ativa o streak —
-// registerStudyToday() só chega até aqui na primeira chamada depois da
-// virada do dia, então essa função nunca dispara duas vezes no mesmo dia.
-// STREAK_DAY_LABELS agora vem de shared/wizard.js.
-function buildStreakWeekData(){
-  const days = [];
-  for (let i = 6; i >= 0; i--){
-    const d = new Date(Date.now() - i*86400000);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    days.push({ label: STREAK_DAY_LABELS[d.getDay()], done: !!STATE.activityLog[key], isToday: i === 0 });
-  }
-  return days;
-}
-
-function showStreakCelebration(){
-  // Fase 1 do sistema de notificações.
-  fireNotificationEvent('streak_completed', 'streak', { days: STATE.streak });
-  document.getElementById('streak-days-num').textContent = STATE.streak;
-  { const u = document.getElementById('streak-days-unit'); if (u) u.textContent = STATE.streak === 1 ? 'dia' : 'dias'; }
-  document.getElementById('streak-week-row').innerHTML = buildStreakWeekData().map(d => `
-    <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
-      <div class="streak-day-circle">${d.done ? '✓' : ''}</div>
-      <div class="streak-day-label">${d.label}</div>
-    </div>
-  `).join('');
-  document.getElementById('streak-modal-overlay').style.display = 'flex';
-}
 
 document.getElementById('streak-modal-continue-btn').addEventListener('click', () => {
   document.getElementById('streak-modal-overlay').style.display = 'none';
@@ -1468,21 +1249,6 @@ function maybeSendStudyReminder(){
 // quem já revisa em dia.
 const REVIEW_REMINDER_THRESHOLD = 15;
 
-function maybeShowReviewReminder(){
-  const today = todayStr();
-  if (STATE.lastReviewReminderDay === today) return;
-
-  // K.7: Devido = não-New com due<=agora (structuralCounts). O antigo
-  // cardsDueNow() contava New (due=0) como pendente.
-  const dueCount = structuralCounts(eligibleReviewPool()).due;
-  if (dueCount < REVIEW_REMINDER_THRESHOLD) return;
-
-  STATE.lastReviewReminderDay = today;
-  saveState();
-
-  document.getElementById('review-reminder-count').textContent = dueCount;
-  document.getElementById('review-reminder-banner').style.display = 'flex';
-}
 
 document.getElementById('review-reminder-dismiss-btn').addEventListener('click', () => {
   document.getElementById('review-reminder-banner').style.display = 'none';
@@ -1537,55 +1303,9 @@ function registerDailyLessonCompleted(scorePct){
   if (scorePct >= 100) STATE.daily.perfectLessons += 1;
 }
 
-// Meta diária (plano de estudo) conta separado dos Desafios de hoje -- é uma
-// régua mais exigente (ver artefato, §4): só lições com conteúdo real
-// (`qualifies` filtra atalho degenerado, ex. lição minúscula demais) e nunca
-// a mesma lição 2x no mesmo dia (replay não soma -- `key` identifica a lição
-// de forma estável, ex. "u6:2" ou "u6:checkpoint").
-function registerDailyLessonForGoal(key, qualifies){
-  ensureDailyBucket();
-  if (!qualifies || STATE.daily.goalCountedLessonKeys.includes(key)) return;
-  STATE.daily.goalCountedLessonKeys.push(key);
-  STATE.daily.lessonsForGoal += 1;
-  STATE.dailyLessonsLog[todayStr()] = STATE.daily.lessonsForGoal;
-}
 function registerDailyHanziLesson(){
   ensureDailyBucket();
   STATE.daily.hanziLessons += 1;
-}
-function registerDailyReviewCard(){
-  ensureDailyBucket();
-  STATE.daily.reviewsDone += 1;
-}
-// Cartas que já estavam atrasadas (venceram antes de hoje, não só "due
-// agora") -- desafio "Revise cartas em atraso" (artefato §3), prioriza SRS
-// vencido de verdade em vez de qualquer revisão dentro do prazo normal.
-function registerDailyOverdueReviewCard(){
-  ensureDailyBucket();
-  STATE.daily.overdueReviewsDone += 1;
-}
-function registerDailySpeedReview(){
-  ensureDailyBucket();
-  STATE.daily.speedReviewSessions += 1;
-  STATE.everUsedSpeedReview = true;
-}
-function registerDailyMatchGame(){
-  ensureDailyBucket();
-  STATE.daily.matchGamesPlayed += 1;
-  STATE.everUsedMatchGame = true;
-}
-// Formatos de exercício distintos respondidos corretamente hoje -- só pro
-// badge "Multitarefa" (artefato §8: engajamento com a variedade do motor,
-// não só o formato mais fácil). Chamado de dentro de exerciseXP(), que já é
-// o único ponto por onde passam TODOS os formatos de exercício ao acertar.
-function registerDailyExerciseFormat(format){
-  ensureDailyBucket();
-  if (!format) return;
-  if (!STATE.daily.exerciseFormatsSeen.includes(format)) STATE.daily.exerciseFormatsSeen.push(format);
-  // Contagem por formato -- alimenta desafios ligados a um formato
-  // específico (ex. "Traduza a frase" = reorder), não só a checagem de
-  // diversidade do badge "Multitarefa".
-  STATE.daily.exerciseFormatCounts[format] = (STATE.daily.exerciseFormatCounts[format] || 0) + 1;
 }
 
 const EASY_CHALLENGES = [
@@ -1624,15 +1344,6 @@ const GENERAL_CHALLENGES = [
   { id:'translateBlocks2', icon:'🧱', get label(){ return t('fr.mission.translateBlocks2'); }, target:2, get: d => d.exerciseFormatCounts?.reorder || 0 }
 ];
 
-function dailySeed(str){
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
-  return h;
-}
-
-function pickDailyFromPool(pool, salt){
-  return pool[dailySeed(STATE.daily.date + ':' + salt) % pool.length];
-}
 
 // ---------- Feasibility das missões de estoque limitado (grilling "missões
 // do dia") ----------
@@ -1641,51 +1352,6 @@ function pickDailyFromPool(pool, salt){
 // hanzi...) não têm teto real no dia de hoje, ficam de fora desta checagem.
 const MISSION_QUANTITY_FLOOR = 3; // abaixo disso, trata como inviável (rodada 2)
 
-function missionReviewSupply(){
-  // Mesmo teto que gradeCurrentCard() consegue de fato tocar via
-  // Flashcard/Palavras Difíceis -- Speed Review grada os mesmos cartões
-  // (applyMemoryGrade), então não é um estoque à parte.
-  return trueDueReviewCount(eligibleReviewPool());
-}
-function missionOverdueSupply(){
-  // Mesmo critério de wasOverdue em gradeCurrentCard() (due < hoje 00:00).
-  const todayMidnight = new Date().setHours(0, 0, 0, 0);
-  return eligibleReviewPool().filter(c => c.due > 0 && c.due < todayMidnight).length;
-}
-function missionMatchGameFeasible(){
-  // Mesmo teto que desabilita o card "Combinar" na tela de Revisão.
-  return eligibleReviewPool().length >= 10;
-}
-function missionSpeedReviewFeasible(){
-  // Mesmo teto que esconde o card "Speed Review" na tela de Revisão.
-  return missionReviewSupply() >= 1;
-}
-
-// Resolve o item sorteado do pool revisão/hanzi contra o estoque real do
-// dia: devolve o item original (cabe), uma cópia com meta reduzida (tipo
-// quantidade, ainda acima do piso) ou o item seguro do pool (hanzi1 -- nunca
-// depende de estoque de revisão). Chamado uma única vez por dia dentro de
-// assignTodaysMissions() -- nunca recalculado depois, senão a meta ficaria
-// se movendo ao longo do dia conforme o estoque muda.
-function resolveRevisaoMission(picked, pool, safeFallbackId){
-  const fallback = () => pool.find(m => m.id === safeFallbackId) || picked;
-  if (picked.id === 'reviews15'){
-    const supply = missionReviewSupply();
-    if (supply >= picked.target) return picked;
-    if (supply >= MISSION_QUANTITY_FLOOR) return Object.assign({}, picked, { target: supply });
-    return fallback();
-  }
-  if (picked.id === 'overdue3'){
-    return missionOverdueSupply() >= picked.target ? picked : fallback();
-  }
-  if (picked.id === 'matchGame1'){
-    return missionMatchGameFeasible() ? picked : fallback();
-  }
-  if (picked.id === 'speedReview1'){
-    return missionSpeedReviewFeasible() ? picked : fallback();
-  }
-  return picked;
-}
 
 const ALL_CHALLENGE_POOLS = [EASY_CHALLENGES, REVISAO_HANZI_CHALLENGES, GENERAL_CHALLENGES];
 function challengeById(id){
@@ -1694,17 +1360,6 @@ function challengeById(id){
     if (found) return found;
   }
   return null;
-}
-// Reconstrói o objeto completo (icon/label/get) do desafio a partir do
-// registro persistido ({id, target}) -- state.daily.missions só guarda dados
-// serializáveis (sincroniza com o Supabase), nunca funções.
-function materializeMission(assigned){
-  const base = challengeById(assigned.id);
-  if (!base) return null; // pool mudou entre deploys -- atribuição órfã, ignora
-  if (assigned.target === base.target) return base;
-  const scaled = Object.assign({}, base, { target: assigned.target });
-  if (base.labelForTarget) scaled.label = base.labelForTarget(assigned.target);
-  return scaled;
 }
 
 function assignTodaysMissions(){
@@ -1730,38 +1385,6 @@ function todaysChallenges(){
   return STATE.daily.missions.map(materializeMission).filter(Boolean);
 }
 
-// Bônus por completar as 3 Missões do dia (não por missão individual --
-// cada ação que alimenta uma missão já dá XP por si só em outro lugar; o
-// bônus aqui é só pelo conjunto das 3). Chamado de dentro de addXP() (ver
-// comentário lá) pra ser checado depois de QUALQUER ganho de XP, já que
-// qualquer um deles pode ser o que fecha a última missão do dia.
-function checkDailyMissionsBonus(){
-  ensureDailyBucket();
-  if (STATE.daily.missionsBonusAwarded) return;
-  const allDone = todaysChallenges().every(c => (Number(c.get(STATE.daily)) || 0) >= c.target);
-  if (!allDone) return;
-  STATE.daily.missionsBonusAwarded = true;
-  addXP(30);
-  showToast(t('toast.dailyMissionsAllDone'));
-}
-
-// Notificação "Missão concluída" -- uma por Missão do dia individual (não
-// pelo conjunto das 3, isso já é o bônus acima). Guarda em
-// STATE.daily.missionsNotified pra disparar exatamente uma vez por missão
-// por dia, mesmo que addXP() rode várias vezes depois dela já ter batido a
-// meta (ex.: XP de exercícios seguintes na mesma sessão). Chamada do mesmo
-// lugar que checkDailyMissionsBonus() (dentro de addXP()), pelo mesmo
-// motivo: qualquer ganho de XP pode ser o que fecha uma missão.
-function checkDailyMissionCompletions(){
-  ensureDailyBucket();
-  todaysChallenges().forEach(c => {
-    if (STATE.daily.missionsNotified[c.id]) return;
-    const current = Number(c.get(STATE.daily)) || 0;
-    if (current < c.target) return;
-    STATE.daily.missionsNotified[c.id] = true;
-    fireNotificationEvent('mission_completed', 'desafios', { mission_label: c.label, mission_icon: c.icon }, 'path');
-  });
-}
 
 function renderDailyChallengesScreen(){
   const contentEl = document.getElementById('step-content');
@@ -1869,32 +1492,52 @@ function addXP(amount){
 
 // showToast agora vem de shared/toast.js.
 
-const BADGES = [
-  { id:'first_step', get name(){ return t('badge.first_step.name'); }, icon:'🌱', get desc(){ return t('badge.first_step.desc'); }, check: s => s.totalReviews >= 1 },
-  { id:'streak_3', get name(){ return t('badge.streak_3.name'); }, icon:'🔥', get desc(){ return t('badge.streak_3.desc'); }, check: s => s.streak >= 3 },
-  { id:'streak_7', get name(){ return t('badge.streak_7.name'); }, icon:'⛩️', get desc(){ return t('badge.streak_7.desc'); }, check: s => s.streak >= 7 },
-  { id:'unit_1', get name(){ return t('badge.unit_1.name'); }, icon:'📖', get desc(){ return t('badge.unit_1.desc'); }, check: s => s.unitProgress[1]?.completed },
-  { id:'unit_7', get name(){ return t('badge.unit_7.name'); }, icon:'🏮', get desc(){ return t('badge.unit_7.desc'); }, check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= Math.ceil(UNITS.length/2) },
-  { id:'unit_14', get name(){ return t('badge.unit_14.name'); }, icon:'🐉', get desc(){ return t('badge.unit_14.desc'); }, check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= UNITS.length },
-  { id:'xp_100', get name(){ return t('badge.xp_100.name'); }, icon:'⭐', get desc(){ return t('badge.xp_100.desc'); }, check: s => s.xp >= 100 },
-  { id:'xp_500', get name(){ return t('badge.xp_500.name'); }, icon:'🌟', get desc(){ return t('badge.xp_500.desc'); }, check: s => s.xp >= 500 },
-  { id:'reviews_100', get name(){ return t('badge.reviews_100.name'); }, icon:'💪', get desc(){ return t('badge.reviews_100.desc'); }, check: s => s.totalReviews >= 100 },
-  // ---- Fase 4 (artefato §8): badges novos, cada um ligado a um
-  // comportamento específico -- não "badge por badge" genérico. ----
-  { id:'explorer', get name(){ return t('badge.explorer.name'); }, icon:'🧭', get desc(){ return t('badge.explorer.desc'); }, check: s => s.totalReviews >= 1 && s.everUsedSpeedReview && s.everUsedMatchGame },
-  { id:'trained_ear', get name(){ return t('badge.trained_ear.name'); }, icon:'🎧', get desc(){ return t('badge.trained_ear.desc'); }, check: s => (s.totalAudioPlays || 0) >= 100 },
-  { id:'comeback', get name(){ return t('badge.comeback.name'); }, icon:'🔄', get desc(){ return t('badge.comeback.desc'); }, check: s => !!s.hadStreakComeback },
-  { id:'multitasker', get name(){ return t('badge.multitasker.name'); }, icon:'🧩', get desc(){ return t('badge.multitasker.desc'); }, check: s => (s.daily?.exerciseFormatsSeen?.length || 0) >= 5 },
-  { id:'weekend', get name(){ return t('badge.weekend.name'); }, icon:'🌙', get desc(){ return t('badge.weekend.desc'); }, check: s => {
-      for (let i = 0; i < 14; i++){
-        const d = new Date(Date.now() - i*86400000);
-        if (d.getDay() !== 6) continue;
-        const key = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-        if (s.activityLog[key(d)] && s.activityLog[key(new Date(d.getTime() + 86400000))]) return true;
-      }
-      return false;
-    } },
-];
+// Conquistas com níveis (docs/conquistas-proposta-niveis.md): BADGES é preenchido por rebuildTrackBadges()
+// (shared/badge-tracks-app.js) a partir do catálogo shared/badge-tracks.js e das métricas abaixo.
+const BADGES = [];
+
+// Modos de estudo que contam para a trilha Explorar (chinês não tem Ditado nem Desafios).
+const BADGE_MODES = ['review', 'speed', 'match', 'hanzi', 'stories'];
+function badgeModesUsedCount(s){
+  const used = Object.assign({}, s.modesUsed || {});
+  if (s.totalReviews > 0) used.review = true;
+  if (s.everUsedSpeedReview) used.speed = true;
+  if (s.everUsedMatchGame) used.match = true;
+  if (Object.values(s.hanziLessonProgress || {}).some(p => p && p.completed)) used.hanzi = true;
+  if (Object.values(s.storyProgress || {}).some(p => p && p.completed)) used.stories = true;
+  return BADGE_MODES.filter(k => used[k]).length;
+}
+// Fins de semana com estudo no sábado E no domingo seguinte (dias do activityLog).
+function countStudyWeekends(log){
+  const key = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+  let n = 0;
+  Object.keys(log || {}).forEach(k => {
+    if (!(log[k] > 0)) return;
+    const d = new Date(k + 'T12:00:00');
+    if (d.getDay() !== 6) return;
+    if (log[key(new Date(d.getTime() + 86400000))] > 0) n++;
+  });
+  return n;
+}
+// Métricas das trilhas neste site (chinês). Unidade concluída de qualquer jeito conta para o nível.
+function collectBadgeMetrics(s){
+  const level = 'HSK1';
+  const units = UNITS.filter(u => u.level === level);
+  const cpUnits = units.filter(u => (u.lessons || []).some(l => l.isCheckpoint));
+  const checkpointsAced = cpUnits.filter(u => s.unitProgress[u.id]?.checkpointAced).length;
+  const words = studyTrailWordProgress(s.cards);
+  return {
+    studyDays: Object.keys(s.activityLog || {}).filter(k => s.activityLog[k] > 0).length,
+    reviews: s.totalReviews || 0, streak: s.streak || 0, xp: s.xp || 0,
+    courseDone: units.filter(u => s.unitProgress[u.id]?.completed).length, courseTotal: units.length,
+    courseAced: cpUnits.length > 0 && checkpointsAced >= cpUnits.length,
+    audioPlays: s.totalAudioPlays || 0, modesUsed: badgeModesUsedCount(s), modesTotal: BADGE_MODES.length,
+    weekends: countStudyWeekends(s.activityLog), wordsLearned: words.learned, wordsTotal: words.total,
+    checkpointsAced, checkpointsTotal: cpUnits.length,
+    dictationsAced: null, challengesDone: null, challengesTotal: 0,
+    comeback: !!s.hadStreakComeback, levelLabel: 'HSK 1'
+  };
+}
 
 // ---------- Detecção + celebração de nova conquista ----------
 // earnedBadgeIds é semeado uma vez, logo depois do estado carregar
@@ -1905,20 +1548,6 @@ const BADGES = [
 // já passam por addXP -- não precisa espalhar a checagem por unit/streak/
 // revisão separadamente.
 let earnedBadgeIds = new Set();
-function seedEarnedBadges(){
-  earnedBadgeIds = new Set(BADGES.filter(b => b.check(STATE)).map(b => b.id));
-  // C4: conquistas da conta ganhas em outro idioma também valem aqui (sem celebrar de novo).
-  loadAccountEarnedBadges().then(() => {
-    earnedBadgeIds = AccountProgress.unionBadgeIds(earnedBadgeIds, accountEarnedBadgeRows);
-    upsertEarnedBadges([...earnedBadgeIds]);
-    if (typeof renderProgressView === 'function' && document.getElementById('badge-grid')) renderProgressView();
-  });
-  // Backfill/sincronização: garante que a tabela pública earned_badges
-  // reflita tudo que já era verdade antes desta feature existir, ou que
-  // uma sessão anterior não tenha conseguido gravar -- upsert idempotente,
-  // sem custo de duplicar (ver shared/auth.js).
-  upsertEarnedBadges([...earnedBadgeIds]);
-}
 
 let badgeCelebrationQueue = [];
 let badgeCelebrationShowing = false;
@@ -1926,46 +1555,7 @@ let badgeCelebrationShowing = false;
 // Deck), a conquista fica guardada e aparece só na tela de fim ("Revisão
 // concluída"), para não cobrir o cartão. Fora da sessão, aparece na hora.
 let badgeCelebrationHeld = false;
-function holdBadgeCelebrations(){ badgeCelebrationHeld = true; }
-function releaseBadgeCelebrations(){
-  if (!badgeCelebrationHeld) return;
-  badgeCelebrationHeld = false;
-  processBadgeCelebrationQueue();
-}
 
-function checkAndCelebrateBadges(){
-  const newlyEarned = [];
-  BADGES.forEach(b => {
-    if (earnedBadgeIds.has(b.id)) return;
-    if (b.check(STATE)){
-      earnedBadgeIds.add(b.id);
-      newlyEarned.push(b);
-    }
-  });
-  if (newlyEarned.length){
-    badgeCelebrationQueue.push(...newlyEarned);
-    processBadgeCelebrationQueue();
-    // Fase 1 do sistema de notificações -- um evento por badge (não um só
-    // pro lote), mesma granularidade da celebração visual acima.
-    newlyEarned.forEach(b => {
-      fireNotificationEvent('achievement_unlocked', 'gamificacao', { badge_name: b.name, badge_icon: b.icon }, 'profile');
-    });
-    upsertEarnedBadges(newlyEarned.map(b => b.id));
-  }
-}
-
-// Fila (não pilha): se dois badges forem ganhos no mesmo instante (ex.: XP
-// cruza 500 no mesmo golpe que termina o nível), mostra um de cada vez --
-// nunca dois cartões sobrepostos brigando pela mesma área da tela.
-function processBadgeCelebrationQueue(){
-  if (badgeCelebrationHeld || badgeCelebrationShowing || !badgeCelebrationQueue.length) return;
-  badgeCelebrationShowing = true;
-  const badge = badgeCelebrationQueue.shift();
-  showBadgeUnlockCelebration(badge, () => {
-    badgeCelebrationShowing = false;
-    processBadgeCelebrationQueue();
-  });
-}
 
 function showBadgeUnlockCelebration(badge, onDone){
   const layer = document.getElementById('badge-unlock-layer');
@@ -1975,9 +1565,9 @@ function showBadgeUnlockCelebration(badge, onDone){
   el.setAttribute('role', 'status');
   el.setAttribute('aria-live', 'polite');
   el.innerHTML = `
-    <div class="badge-unlock-icon">${badge.icon}</div>
+    <div class="badge-unlock-icon${badge.tier ? ' tier-' + badge.tier : ''}">${typeof badgeIconHTML === 'function' ? badgeIconHTML(badge) : badge.icon}</div>
     <div class="badge-unlock-text">
-      <div class="badge-unlock-label">🏅 Nova conquista!</div>
+      <div class="badge-unlock-label">${badge.level > 1 ? t('badge.ui.levelUp') : t('badge.ui.newBadge')}</div>
       <div class="badge-unlock-name">${badge.name}</div>
       <div class="badge-unlock-desc">${badge.desc}</div>
     </div>
@@ -2003,17 +1593,6 @@ function showBadgeUnlockCelebration(badge, onDone){
   setTimeout(finish, 4000);
 }
 
-// ============================================================
-// RENDER: Trilha (path)
-// ============================================================
-function unitCardCounts(unitId){
-  // K2-E: total/learned em PALAVRAS (Note = A+B contam 1); dueForReview
-  // continua por CardInstance (é fila de Review, A e B independentes).
-  const pool = STATE.cards.filter(c => c.unitId === unitId);
-  const { total, learned } = studyTrailWordProgress(pool); // mesma semântica de Progresso (Note, só trilha)
-  const dueForReview = structuralCounts(pool).due; // K.7: mesma definição de Devido (não-New vencido)
-  return { total, learned, dueForReview, totalCards: pool.length };
-}
 
 // Progresso fracionário de 0 a 1: concluída conta 1 mesmo depois do reset de
 // lessonIdx no fim da unidade (ver finishCurrentLesson); unidades com lições
@@ -2469,36 +2048,6 @@ function renderTrailMapView(container){
   renderTrailMap(container, { sections: [{ title: 'Unidades', nodes }] }, describe);
 }
 
-// Fase 2 da trilha: cartão "Continuar" no topo. Fonte única = nextTrailItem
-// (shared/trail-state-model.js); aqui só desenha. A métrica mostrada é a
-// oficial: lições concluídas.
-function buildTrailContinueCard(){
-  const groups = trailGroups();
-  const next = nextTrailItem(groups, STATE.unitProgress);
-  const { done, total } = trailLessonCounts(groups, STATE.unitProgress);
-  const card = document.createElement('div');
-  card.className = 'trail-continue';
-  const metric = `${done} de ${total} lições concluídas`;
-  if (!next){
-    card.classList.add('complete');
-    card.innerHTML = `<div class="tc-info"><div class="tc-eyebrow">Sua trilha</div><div class="tc-title">Você concluiu toda a trilha 🎉</div><div class="tc-sub">${metric}</div></div>`;
-    return card;
-  }
-  const u = UNITS.find(x => x.id === next.unitId);
-  const lessonLabel = next.lessonCount ? ` · lição ${next.lessonIdx + 1} de ${next.lessonCount}` : '';
-  const started = done > 0 || !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
-  card.innerHTML = `
-    <div class="tc-info">
-      <div class="tc-eyebrow">${started ? 'Continue de onde parou' : 'Comece por aqui'}</div>
-      <div class="tc-title">${u.title}${lessonLabel}</div>
-      <div class="tc-sub">${metric}</div>
-    </div>
-    <button type="button" class="btn btn-primary tc-cta">${started ? 'Continuar' : 'Começar'}</button>
-  `;
-  card.querySelector('.tc-cta').addEventListener('click', () => openUnitDetail(u.id));
-  setTimeout(() => watchTrailContinueCard(card), 0);
-  return card;
-}
 
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
@@ -2769,27 +2318,6 @@ function buildAcquisitionBlocks(unit){
   return blocks;
 }
 
-// ---------- Lições (Modelo B) ----------
-// Unidades migradas (ver "Redesenho da Granularidade") têm `unit.lessons`:
-// cada lição é autocontida (intro -> checagem -> prática, SEM misturar com
-// lições anteriores dentro da mesma sessão -- causa-raiz nº1 do redesenho).
-// Unidades ainda não migradas continuam com o motor antigo de blocos
-// mecânicos (buildAcquisitionBlocks), inalterado.
-function isLessonUnit(u){
-  return !!(u && Array.isArray(u.lessons) && u.lessons.length);
-}
-
-function currentLessonIdx(unitId){
-  if (STEP_STATE.lessonReview && STEP_STATE.lessonReview.unitId === unitId){
-    return STEP_STATE.lessonReview.reviewIdx;
-  }
-  return STATE.unitProgress[unitId]?.lessonIdx || 0;
-}
-
-function currentLesson(u){
-  const idx = Math.min(currentLessonIdx(u.id), u.lessons.length - 1);
-  return u.lessons[idx];
-}
 
 function freshAcquisitionState(unitId, unit){
   if (isLessonUnit(unit)){
@@ -2963,12 +2491,6 @@ function openUnitDetail(unitId){
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'unit', unitId });
 }
 
-// Abre uma lição JÁ CONCLUÍDA em modo revisão, sem mexer no ponteiro de
-// progresso real da unidade (ver comentário de STEP_STATE.lessonReview).
-function openLessonReview(unitId, lessonIdx){
-  STEP_STATE.lessonReview = { unitId, reviewIdx: lessonIdx };
-  openUnitDetail(unitId);
-}
 
 // Único jeito de sair de dentro de uma unidade -- topbar/tabs ficam
 // escondidas em modo foco (ver .lesson-focus), então isto SEMPRE roda antes
@@ -3127,17 +2649,6 @@ function renderStepProgress(){
   fillEl.style.width = `${Math.min(100, Math.max(0, pct))}%`;
 }
 
-// ---------- Modo foco de lição (estilo Busuu) ----------
-// Esconde topbar/tabs enquanto o aluno está numa lição — só a barra de
-// progresso e o X ficam visíveis por cima do exercício.
-function setLessonFocusMode(active){
-  document.getElementById('app').classList.toggle('lesson-focus', active);
-  // #review-reminder-banner é fixed e vive FORA de #app (irmão dele no
-  // documento, não descendente) -- a classe no <body> é o que dá pra essa
-  // regra de CSS (ver index.html) esconder o banner sem também precisar
-  // mover o elemento de lugar no HTML.
-  document.body.classList.toggle('lesson-focus', active);
-}
 
 // ---------- Dica pedagógica por exercício ----------
 // A dica NÃO é mais uma ação independente no topo da tela -- ela pertence
@@ -3238,25 +2749,6 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
   });
 }
 
-// XP de um acerto: um pouco menor quando o aluno pediu "Não sei" (e por
-// tabela recebeu a dica) nesse exercício -- preserva a distinção acerto
-// independente > acerto com ajuda sem criar um sistema de pontuação
-// complexo.
-function exerciseXP(ex, fullXP){
-  // Revisão de uma lição JÁ CONCLUÍDA (ver STEP_STATE.lessonReview, aberta
-  // clicando numa lição "done" na Trilha -- qualquer aluno pode, não só
-  // admin): o comentário original em finishCurrentLesson já dizia que
-  // "nenhum XP de lição/desafio/meta diária deve contar de novo" nesse
-  // modo, mas só o fechamento da lição (finishCurrentLesson) checava isso
-  // -- cada exercício respondido DENTRO da revisão continuava pagando XP
-  // normalmente (achado de auditoria: fonte de XP infinita, sem limite).
-  // Único ponto por onde passam TODOS os formatos de exercício ao acertar
-  // (ver os chamadores de addXP(exerciseXP(...))) -- aproveita pra fechar
-  // a brecha aqui, de uma vez, em vez de repetir a checagem em cada lugar.
-  if (STEP_STATE.lessonReview && STEP_STATE.lessonReview.unitId === STATE.currentUnitId) return 0;
-  registerDailyExerciseFormat(ex.format);
-  return ex.askedDontKnow ? Math.max(1, fullXP - 1) : fullXP;
-}
 
 // ---------- Vocabulário palavra-por-palavra (estilo Memrise) ----------
 // Mostra uma palavra de cada vez, junto da frase-modelo que a usa (quando
@@ -3337,48 +2829,6 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   nextBtn.textContent = posInBlock < block.length - 1 ? t('zh.path.nextWordArrow') : t('zh.path.seeWhatLearnedArrow');
 }
 
-// ---------- Construção das filas de exercício da sessão de aquisição ----------
-// Um exercício "de palavra" (múltipla escolha/digitar/ouvir), reaproveitado
-// tanto na prática de bloco quanto na mistura -- extraído do antigo
-// buildExerciseSet pra poder gerar UM item de cada vez, não só a unidade
-// inteira de uma tacada. `vocabIdx` fica anexado ao próprio exercício pra
-// permitir rastrear erro por palavra (ver showCorrectFeedbackPanel/showAnswerPanel).
-// Escolhe o formato do exercício pelo OBJETIVO PEDAGÓGICO do momento e pelo
-// estado real da palavra (exposição no SRS + erros nesta sessão) -- não mais
-// por posição no array (round-robin arbitrário, `idx % formats.length`, não
-// tinha nenhuma relação com o que a palavra precisava agora).
-//   - 'practice' (primeira prática, logo após a checagem do bloco): ainda é
-//     cedo pra cobrar produção de uma palavra genuinamente nova -- só entra
-//     "type" (digitar de ouvido) se a palavra já vinha exposta de fora desta
-//     sessão (SRS prévio ou "Já sei?").
-//   - 'mixed'/'consolidation' (a palavra já passou por checagem + prática
-//     nesta sessão): quem foi bem (sem erro na sessão) e já tem alguma
-//     exposição sobe pra produção; quem errou continua em reconhecimento --
-//     não empurra produção pra cima de quem ainda está com dificuldade.
-// Sem `intent` (chamada avulsa), mantém o comportamento mais conservador de
-// reconhecimento, igual ao de 'practice'.
-function pickVocabFormat(unit, idx, intent){
-  const cardId = `u${unit.id}-v${idx}`;
-  const card = STATE.cards.find(c => c.id === cardId);
-  const exposed = studyWordHasEvidence(studyWordCardsFor(STATE.cards, unit.id, idx)); // K2-E: nível de palavra
-  const misses = (STEP_STATE.acq && STEP_STATE.acq.wordMisses[idx]) || 0;
-
-  if (intent === 'mixed' || intent === 'consolidation'){
-    if (exposed && misses === 0) return shuffle(['type', 'listen', 'meaning'])[0];
-    return shuffle(['meaning', 'listen'])[0];
-  }
-  if (exposed) return shuffle(['meaning', 'type', 'listen'])[0];
-  return shuffle(['meaning', 'listen'])[0];
-}
-
-function buildVocabWordExercise(unit, idx, intent){
-  const item = unit.vocab[idx];
-  const format = pickVocabFormat(unit, idx, intent);
-  const pool = unit.vocab;
-  const distractors = shuffle(pool.filter(v => v !== item)).slice(0, 3);
-  const options = shuffle([item, ...distractors]);
-  return { format, item, options, vocabIdx: idx };
-}
 
 // Checagem imediata do bloco (ETAPA 2): recuperação ativa de reconhecimento
 // (formato "meaning") pra CADA palavra recém-introduzida no bloco, uma de
@@ -3417,36 +2867,6 @@ function buildMixedQueue(unit, introducedIndices){
 // uma forma de disparar o mesmo tipo de cartão NO MEIO de uma lição de
 // vocabulário, em vez de só numa unidade de gramática inteira.
 
-// Conceitos cujo gatilho é "depois deste bloco de vocabulário" (o mais comum
-// -- a palavra que motiva a explicação acabou de ser apresentada).
-function pendingConceptsForBlock(u, blockIdx){
-  if (!u.concepts || !u.concepts.length) return [];
-  const idxInBlock = new Set(STEP_STATE.acq.blocks[blockIdx]);
-  return u.concepts.filter(c =>
-    typeof c.trigger.afterVocabIdx === 'number' &&
-    idxInBlock.has(c.trigger.afterVocabIdx) &&
-    !STEP_STATE.conceptsShown.has(c.id)
-  );
-}
-
-// Conceitos cujo gatilho só existe em contexto (diálogo) -- a palavra em si
-// não é vocabulário novo da unidade, só aparece dentro da fala.
-function pendingConceptsAfterDialogue(u){
-  if (!u.concepts || !u.concepts.length) return [];
-  return u.concepts.filter(c => c.trigger.after === 'dialogue' && !STEP_STATE.conceptsShown.has(c.id));
-}
-
-// Mostra `list` (pode ser vazia) um cartão de cada vez e só chama `afterFn`
-// quando o aluno tiver passado por todos -- se `list` já vier vazia, chama
-// `afterFn` na hora, então quem chama isso não precisa checar antes.
-function runConceptQueueThen(list, afterFn){
-  if (!list.length){ afterFn(); return; }
-  STEP_STATE.conceptQueue = list;
-  STEP_STATE.conceptIdx = 0;
-  STEP_STATE.conceptBlockIdx = 0;
-  STEP_STATE.conceptAfterFn = afterFn;
-  renderConceptStep();
-}
 
 function renderConceptStep(){
   const contentEl = document.getElementById('step-content');
@@ -3504,26 +2924,6 @@ function renderConceptStep(){
   nextBtn.textContent = (isLastBlockOfConcept && isLastConcept) ? t('common.continueArrow') : t('zh.path.gotItArrow');
 }
 
-function advanceConceptStep(){
-  const concept = STEP_STATE.conceptQueue[STEP_STATE.conceptIdx];
-  if (STEP_STATE.conceptBlockIdx < concept.blocks.length - 1){
-    STEP_STATE.conceptBlockIdx += 1;
-    renderConceptStep();
-    return;
-  }
-  STEP_STATE.conceptsShown.add(concept.id);
-  if (STEP_STATE.conceptIdx < STEP_STATE.conceptQueue.length - 1){
-    STEP_STATE.conceptIdx += 1;
-    STEP_STATE.conceptBlockIdx = 0;
-    renderConceptStep();
-    return;
-  }
-  hideAcqPhaseBanner();
-  const afterFn = STEP_STATE.conceptAfterFn;
-  STEP_STATE.conceptQueue = [];
-  STEP_STATE.conceptAfterFn = null;
-  afterFn();
-}
 
 // Fim da introdução do bloco atual -> mostra os conceitos que esse bloco
 // libera (se houver) e só DEPOIS começa a checagem imediata (ETAPA 2). Sem
@@ -3724,6 +3124,8 @@ function finishCurrentLesson(u){
   // genérico (esse continua existindo pra outros caminhos de conclusão que
   // não passam por uma tela, ex. checkUnitCompletion via Flashcard/"Já sei").
   const xpBeforeUnitBonus = STATE.xp;
+  // Conquistas (trilha Gabaritou): 100% no ponto de verificação da unidade fica gravado, mesmo refazendo depois.
+  if (scorePct >= 100 && STATE.unitProgress[STATE.currentUnitId]) STATE.unitProgress[STATE.currentUnitId].checkpointAced = true;
   markUnitCompleted(STATE.currentUnitId, scorePct, { skipToast: true });
   const unitXpEarned = STATE.xp - xpBeforeUnitBonus;
   // Meta diária (§4 do artefato): mesma régua de "conteúdo real" (>=3 itens)
@@ -3814,35 +3216,6 @@ function renderChallengeChipHTML(before){
   return '';
 }
 
-// Vocabulário/frases da tela "Lição concluída!" -- SÓ o que ESTA lição
-// especificamente ensinou (lesson.vocabIdx), nunca a unidade inteira (ver
-// CLAUDE.md, "Coerência pedagógica entre funcionalidades": reaproveitar
-// conteúdo só porque está "por perto" no código, sem responder à pergunta
-// certa, é exatamente o erro que gerou aquela regra). O Ponto de
-// verificação não ensina vocabulário próprio (vocabIdx sempre []) -- em vez
-// de forjar uma lista ou reaproveitar a unidade toda, mostra as palavras que
-// o aluno ERROU NESTE PRÓPRIO Ponto de verificação (STEP_STATE.checkpointMisses,
-// contagem real por palavra desta sessão -- ver comentário em
-// STEP_STATE.checkpointMisses sobre por que NÃO é lessonMisses/lessonIdx:
-// aquele acumula por lição/unidade ao longo do tempo e ficava desatualizado
-// quando o checkpoint era aberto sem passar pelo passo 'vocab' antes na
-// mesma sessão, mostrando uma lista que não correspondia ao erro que o
-// aluno acabou de cometer -- bug relatado, 2026-09-15). Sem vocabIdx e sem
-// erro nenhum registrado nesta sessão (sessão perfeita), devolve lista
-// vazia -- honesto, não inventa.
-function lessonRecapItems(u, lesson){
-  if (lesson && lesson.vocabIdx && lesson.vocabIdx.length){
-    return lesson.vocabIdx.map(i => u.vocab[i]).filter(Boolean);
-  }
-  const misses = STEP_STATE.checkpointMisses || {};
-  return Object.keys(misses)
-    .map(Number)
-    .filter(i => misses[i] >= 1)
-    .sort((a, b) => misses[b] - misses[a])
-    .slice(0, 8)
-    .map(i => u.vocab[i])
-    .filter(Boolean);
-}
 
 // Tela "Lição concluída!" / "Ponto de verificação concluído!" -- ÚNICA
 // função, usada tanto no fim de uma lição intermediária quanto no fim do
@@ -4169,12 +3542,6 @@ function renderStep(){
 const DLG = { run: 0, check: null };
 const DLG_AUTOPLAY_KEY = 'dlg_autoplay';
 
-function dlgAutoplayOn(){
-  try { return localStorage.getItem(DLG_AUTOPLAY_KEY) !== '0'; } catch(e){ return true; }
-}
-function dlgSetAutoplay(on){
-  try { localStorage.setItem(DLG_AUTOPLAY_KEY, on ? '1' : '0'); } catch(e){}
-}
 
 // Termos do vocabulário da unidade que valem destaque nas falas (hanzi).
 function dlgVocabTerms(u){
@@ -4272,7 +3639,6 @@ function dlgPlayLine(text){
   });
 }
 
-function dlgSleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
 function dlgSpeakerSide(dlg, spk){
   const first = dlg.lines[0].spk;
@@ -4415,14 +3781,6 @@ function renderDialogueCheckStep(u, contentEl, nextBtn){
   renderDialogueCheck(u, dlg, who, checks, nextBtn, []);
 }
 
-function dlgShuffle(arr){
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
 // Micro-checagem "Você entendeu?" -- 3 perguntas, uma de cada vez. Não dá
 // para pular (o Continuar só aparece no fim); errar não reprova, mostra a
@@ -4652,38 +4010,7 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
 // primeiro; só dá uma 2ª rodada pra elas se ainda sobrar espaço dentro do
 // teto depois de cobrir as demais palavras da unidade pelo menos uma vez.
 const CONSOLIDATION_CAP = 10;
-function buildConsolidationVocabExercises(unit){
-  const acq = STEP_STATE.acq;
-  const total = unit.vocab.length;
-  if (!acq || acq.unitId !== unit.id || !acq.blocks.length){
-    return unit.vocab.map((_, i) => buildVocabWordExercise(unit, i, 'consolidation'));
-  }
 
-  const cap = Math.min(total, CONSOLIDATION_CAP);
-  const allIdx = Array.from({ length: total }, (_, i) => i);
-  const missedIdx = shuffle(allIdx.filter(i => (acq.wordMisses[i] || 0) >= 1));
-  const otherIdx = shuffle(allIdx.filter(i => !missedIdx.includes(i)));
-
-  const picks = [];
-  missedIdx.forEach(i => { if (picks.length < cap) picks.push(i); });
-  otherIdx.forEach(i => { if (picks.length < cap) picks.push(i); });
-  missedIdx.forEach(i => { if (picks.length < cap) picks.push(i); }); // reforço extra, só se sobrar espaço
-
-  return picks.map(i => buildVocabWordExercise(unit, i, 'consolidation'));
-}
-
-// ---------- Distratores do exercício "Ordene a frase" ----------
-// Quantos blocos-isca entram: cresce com a complexidade da frase (mais
-// blocos na frase certa = mais espaço pra isca sem virar uma sopa de
-// botões) e com o nível da unidade no currículo -- capado em 4. O chinês só
-// tem o nível HSK1 hoje (LEVELS.length === 1), então levelIdx fica sempre 0
-// -- a fórmula já fica pronta pra quando houver mais níveis, sem precisar
-// mexer aqui de novo.
-function reorderDistractorCount(unit, correctBlocks){
-  const levelIdx = Math.max(0, LEVELS.findIndex(l => l.id === unit.level));
-  const base = Math.max(1, Math.floor((correctBlocks.length - 1) / 2));
-  return Math.min(4, base + levelIdx);
-}
 
 // Duas camadas de "confundibilidade": blocos da MESMA unidade (tema já
 // visto nesta lição -- mais parecidos, mais difíceis de descartar de cara)
@@ -4936,52 +4263,6 @@ function currentStudentName(){
 // não faz nada.
 let KEYBOARD_OPTION_MAP = null;
 
-function clearKeyboardOptions(){ KEYBOARD_OPTION_MAP = null; }
-
-// buttons: os elementos já renderizados na tela.
-// mode 'grid2x2': só ativa com exatamente 4 opções E confirma, pela posição
-//   REAL na tela (getBoundingClientRect, não a ordem do array), que formam
-//   duas linhas de duas colunas -- se o layout não bater com isso (ex.: uma
-//   coluna só), desativa em vez de forçar uma correspondência errada. A
-//   numeração segue a ordem de leitura (1=superior esquerda, 2=superior
-//   direita, 3=inferior esquerda, 4=inferior direita).
-// mode 'sequential': 1 = primeira opção na ordem de leitura, 2 = segunda...
-// badgeSelector: elemento QUE JÁ EXISTE dentro do botão pra escrever o
-//   número -- evita duplicar um indicador onde a interface já mostra a posição.
-function wireKeyboardOptions(buttons, { mode = 'sequential', badgeSelector = null } = {}){
-  const list = Array.from(buttons);
-  if (!list.length || list.length > 4){ clearKeyboardOptions(); return; }
-
-  let ordered;
-  if (mode === 'grid2x2' && list.length === 4){
-    const withRect = list.map(el => ({ el, r: el.getBoundingClientRect() }));
-    withRect.sort((a, b) => (a.r.top - b.r.top) || (a.r.left - b.r.left));
-    const sameRow = (a, b) => Math.abs(a.r.top - b.r.top) < 4;
-    const isTwoByTwo = sameRow(withRect[0], withRect[1]) && sameRow(withRect[2], withRect[3])
-      && !sameRow(withRect[0], withRect[2])
-      && withRect[0].r.left < withRect[1].r.left && withRect[2].r.left < withRect[3].r.left;
-    if (!isTwoByTwo){ clearKeyboardOptions(); return; } // layout reorganizado (ex. mobile) -- não força
-    // withRect já está ordenado por posição real (linha, depois coluna) --
-    // é exatamente a ordem de leitura que queremos: 1=sup.esq, 2=sup.dir,
-    // 3=inf.esq, 4=inf.dir.
-    ordered = withRect.map((x, i) => ({ key: String(i + 1), el: x.el }));
-  } else {
-    ordered = list.map((el, i) => ({ key: String(i + 1), el }));
-  }
-
-  KEYBOARD_OPTION_MAP = ordered;
-  ordered.forEach(({ key, el }) => {
-    const existingBadge = badgeSelector ? el.querySelector(badgeSelector) : null;
-    if (existingBadge){
-      existingBadge.textContent = key;
-    } else if (!el.querySelector('.kbd-hint')){
-      const hint = document.createElement('span');
-      hint.className = 'kbd-hint';
-      hint.textContent = key;
-      el.appendChild(hint);
-    }
-  });
-}
 
 // Enter = avançar (estilo Memrise): sempre tenta clicar o botão de
 // continuar que estiver na tela agora, em ordem de prioridade -- painel de
@@ -6074,10 +5355,6 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 // Chaves do catálogo (i18n fase 9): o texto é resolvido no momento do uso.
 const CORRECT_FEEDBACK_PHRASES = Array.from({ length: 16 }, (_, i) => 'feedback.praise.' + (i + 1));
 let correctFeedbackQueue = [];
-function nextCorrectFeedbackPhrase(){
-  if (!correctFeedbackQueue.length) correctFeedbackQueue = shuffle([...CORRECT_FEEDBACK_PHRASES]);
-  return t(correctFeedbackQueue.pop());
-}
 
 // ---------- Combo de acertos seguidos (estilo Duolingo) ----------
 // A partir de COMBO_MIN acertos seguidos (ver STEP_STATE.comboCount, zerado
@@ -6088,10 +5365,6 @@ function nextCorrectFeedbackPhrase(){
 // resposta certa da sequência.
 const COMBO_PHRASES = ['feedback.combo.1', 'feedback.combo.2', 'feedback.combo.3'];
 let comboPhraseQueue = [];
-function nextComboPhrase(){
-  if (!comboPhraseQueue.length) comboPhraseQueue = shuffle([...COMBO_PHRASES]);
-  return t(comboPhraseQueue.pop());
-}
 const COMBO_MIN = 3;
 const COMBO_MILESTONE_STEP = 5;
 
@@ -6193,124 +5466,12 @@ function hasPlainFrontBack(card){
   return card.cardInstance.cardTypeId === 'normal' || card.cardInstance.cardTypeId === 'multiple_choice';
 }
 
-// Fase 4b -- únicos pontos que Speed Review/Combinar/export Anki usam pra
-// extrair texto de um card, trilha OU nativo (Note/CardInstance). Nunca
-// leem `card.back_hanzi`/`card.front_pinyin`/`card.back_trans` soltos --
-// esses campos não existem mais num card nativo (ver buildEngineCardsFromRow,
-// shared/flashcard-model.js). `cardOrPseudo` porque buildSpeedOptions()
-// também gera pseudo-objetos só com `displayAnswerText` pras opções erradas
-// de múltipla escolha.
-function cardPromptText(cardOrPseudo){
-  const view = resolveCardContentView(cardOrPseudo);
-  return (view.kind === 'multiple_choice' ? view.prompt : view.front).text;
-}
 function cardPromptPinyinText(cardOrPseudo){
   const view = resolveCardContentView(cardOrPseudo);
   const field = view.kind === 'multiple_choice' ? view.prompt : view.front;
   return (field && field.pinyinText) || '';
 }
-function cardAnswerText(cardOrPseudo){
-  if ('displayAnswerText' in cardOrPseudo) return cardOrPseudo.displayAnswerText;
-  const view = resolveCardContentView(cardOrPseudo);
-  return view.kind === 'multiple_choice' ? view.correctText : view.back.text;
-}
 
-function buildSpeedQueue(){
-  // Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" removido da
-  // UI; comportamento travado em 'oldest' (mesmo raciocínio de fr/app.js:
-  // é o único dos 3 que continua respeitando "Intensidade da sessão").
-  // K2-F: Speed é exercício de vocabulário -> projeção da palavra (A) para a
-  // trilha; B continua existindo para Review/FSRS/Deck, só não vira 2ª palavra.
-  return reviewFilterQueue('oldest', projectStudyWordsToA(eligibleReviewPool().filter(hasPlainFrontBack)));
-}
-
-function buildSpeedOptions(card){
-  // Fase 8a (ver CLAUDE.md) -- cartão de múltipla escolha autorado usa as
-  // opções ERRADAS que a professora escreveu, nunca os distratores
-  // automáticos abaixo (mais preciso/intencional pro que ela quis testar
-  // especificamente nesse cartão). Objetos pseudo-carta (`displayAnswerText`,
-  // lido por cardAnswerText() acima) -- o resto do fluxo (answerSpeedQuestion)
-  // compara identidade com `card` pra saber se ACERTOU, e só usa o texto
-  // pra exibição, então funciona sem mudança nenhuma lá.
-  if (card.cardInstance.cardTypeId === 'multiple_choice'){
-    const view = resolveCardContentView(card);
-    return shuffle([card, ...view.distractorTexts.map(text => ({ displayAnswerText: text }))]);
-  }
-  // hasPlainFrontBack() nos dois filtros abaixo -- achado no smoke test da
-  // Fase 4: cartões nativos (teacher/self) sempre compartilham `unitId:
-  // null`, então o agrupamento por unidade tratava TODOS os cartões
-  // nativos como "mesma unidade" entre si, inclusive um cloze/"digite a
-  // resposta" ao lado de um card 'normal'. Antes da Fase 4 isso nunca
-  // quebrava (o bridge legado sempre populava back_trans plano em
-  // qualquer tipo); agora resolveClozeCardView()/resolveTypeAnswerCardView()
-  // não têm `.back`, e cardAnswerText() quebraria ao tentar ler
-  // view.back.text de um distrator desse tipo. Nunca oferecer um cloze/
-  // "digite a resposta" como opção de múltipla escolha de qualquer forma
-  // (não são pares prompt/resposta curtos, mesmo critério de sempre).
-  // K2-F: distratores = 1 por palavra (projeção A); B nunca é distrator.
-  const pool = projectStudyWordsToA(STATE.cards.filter(c => c !== card && c.unitId === card.unitId && hasPlainFrontBack(c)));
-  let distractors = shuffle(pool).slice(0, 3);
-  if (distractors.length < 3){
-    // Fallback só quando a unidade não tem 3 outras cartas -- puxa de
-    // eligibleReviewPool() (não STATE.cards puro) pra não arriscar mostrar,
-    // mesmo como alternativa errada, uma palavra de uma unidade nunca aberta.
-    const extra = shuffle(projectStudyWordsToA(eligibleReviewPool()).filter(c => c !== card && hasPlainFrontBack(c) && !distractors.includes(c))).slice(0, 3 - distractors.length);
-    distractors = distractors.concat(extra);
-  }
-  return shuffle([card, ...distractors]);
-}
-
-// ---------- Tela de seleção de modo de revisão (cards com contagem, estilo Memrise) ----------
-// Fase 4 do sistema de alunas particulares (ver CLAUDE.md): filtro por
-// ORIGEM do cartão ('all'/'study'/'teacher'), aplicado aqui -- o único
-// pool base que TODA tela de revisão/prática já usa (Flashcard, Palavras
-// Difíceis, Speed Review, Combinar, hero widget, mode-select). Um só
-// ponto de checagem, mesmo padrão de isCardLessonCompleted() -- nunca
-// reimplementar este filtro solto em outro lugar.
-function matchesReviewOriginFilter(card){
-  const filter = STATE.studySettings.reviewOriginFilter || 'all';
-  return filter === 'all' || card.origin === filter;
-}
-
-// Fase I (Tags): filtro de Review por Tag -- estado PRÓPRIO
-// (STATE.studySettings.reviewTagFilter, lista de slugs), independente de
-// reviewOriginFilter. Semântica: vazio = sem restrição; 1+ tags = OR (o
-// card entra se a NOTE tiver pelo menos uma). A tag é da Note, então
-// CardInstances irmãos (reverso, Cloze) passam/ficam juntos. Só SELECIONA
-// cards elegíveis: nunca toca FSRS, Deck nem origem. cardMatchesTagFilter()
-// vive em shared/flashcard-model.js (fonte única).
-// 2026-10-06 (pedido da autora): o filtro de tags saiu de "Configurar" e
-// fica só no Painel. Sem tela para mudar o valor, um filtro salvo antes
-// restringiria a revisão sem a pessoa ver -- por isso a sessão não aplica
-// mais nenhum filtro de tag (o valor salvo é ignorado).
-function activeReviewTagFilter(){
-  return [];
-}
-function matchesReviewTagFilter(card){
-  return cardMatchesTagFilter(card, activeReviewTagFilter());
-}
-
-function eligibleReviewPool(){
-  return STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter).filter(matchesReviewTagFilter);
-}
-
-// Universo de onde a UI tira as tags disponíveis: o pool do Review geral
-// SEM o próprio filtro de tag (senão selecionar uma tag esconderia as outras).
-function reviewTagUniverse(){
-  return STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter);
-}
-
-// Fase H (hardening) -- precedência do Deck sobre reviewOriginFilter. Uma
-// sessão iniciada EXPLICITAMENTE por um Deck tem o Deck como escopo
-// autoritativo: elegibilidade normal (lição concluída / não arquivado, via
-// isCardLessonCompleted) SEM a exclusão adicional por origem. O filtro de
-// origem é preferência do Review GERAL (eligibleReviewPool acima, inalterada);
-// aqui ele nunca é lido nem alterado, então STATE.studySettings.reviewOriginFilter
-// continua persistido como estava ao entrar/sair de um Deck. Não é
-// autorização -- quem decide o que a conta pode ver é o Deck Engine/RLS.
-function eligibleDeckReviewPool(){
-  return STATE.cards.filter(isCardLessonCompleted);
-}
 
 function hardWordsPool(){
   // Fase 7: delega pra getStudyQueue(scope:'hard') -- fonte única do
@@ -6319,108 +5480,6 @@ function hardWordsPool(){
   return getStudyQueue(eligibleReviewPool(), { scope: 'hard' });
 }
 
-// ---------- Resumo "Suas palavras" (fracas/medianas/fortes) ----------
-// SOMENTE uma contagem visual do vocabulário já revisável (eligibleReviewPool,
-// a mesma base do Flashcard/Speed Review/Combinar/Palavras difíceis) -- não é
-// um SRS novo, não abre carta nenhuma, não é modo de revisão. Critérios
-// reaproveitados do que já existe:
-//   Fracas  = reps === 0 (nunca lembrada com sucesso) OU lapses >= 2 (regra
-//             independente da que define "Palavras difíceis" desde a Fase
-//             7 -- hardWordsPool() passou a usar difficulty do FSRS, sem
-//             filtro de due; este widget é escopo da Fase 12, não mudou).
-//   Fortes  = reps > 0 && lapses < 2 && interval >= 60 -- o mesmo corte de
-//             "revisão madura" que reviewXP() já usa pra dar menos XP.
-//   Medianas = o resto do pool.
-function vocabStrengthBuckets(){
-  const pool = eligibleReviewPool();
-  // K.3: força é por NOTE (conteúdo) -- A+B da trilha, reverso e Cloze contam
-  // uma vez. Nenhuma irmã estudada = notStarted (nunca "fraca"); com estudadas
-  // = a mais fraca entre elas. Fonte: shared/analytics-metrics.js.
-  // Cartões "Na frase" não são palavras: ficam fora de "Suas palavras".
-  const st = contentMetrics(pool.filter(c => !isStudyTrailPhraseCard(c))).strength;
-  return { notStarted: st.not_started, weak: st.weak, medium: st.medium, strong: st.strong };
-}
-
-// Fase 12: REVISÕES DE HOJE (o que o motor decidiu que é hora de revisar
-// agora) e SUAS PALAVRAS (estado geral do vocabulário, widget abaixo) são
-// duas perguntas diferentes -- um aluno pode ter várias palavras "medianas"
-// sem ter nenhuma revisão devida hoje, e isso não é um erro do app. Por
-// isso ficam em blocos visualmente separados, cada um com sua própria
-// legenda curta, em vez de um único número ambíguo.
-//
-// Fase 14 (teste de experiência real): "Revisões de hoje" precisa ser
-// exatamente o que uma sessão de Flashcard vai de fato entregar -- usar
-// cardsDueNow() aqui (sem teto) mostrava, por exemplo, "47 prontas" pra um
-// aluno com 47 palavras nunca estudadas, mas startReviewSession() só serve
-// até STATE.studySettings.newCardsPerDay novas por vez. O número que o
-// aluno vê ANTES de entrar precisa bater com o que ele recebe ao entrar
-// (mesmas opções de getStudyQueue que startReviewSession() usa).
-// Projeto "Reorganização da experiência de revisão e prática": fonte ÚNICA
-// da fila "devida agora" -- Flashcard (startReviewSession) e Speed Review
-// (buildSpeedQueue) chamam a MESMA função, com as MESMAS opções. Nenhuma
-// tela decide sozinha quem entra numa sessão de revisão (Fase 8 do
-// projeto: "não pode haver getDueCards() e outra função independente como
-// getMediumWords() pra determinar o Speed Review").
-function dueReviewQueueOptions(){
-  return {
-    scope: 'due',
-    newCardsLimit: STATE.studySettings.newCardsPerDay,
-    limit: sessionIntensityToLimit(STATE.studySettings.sessionIntensity)
-  };
-}
-
-function buildDueReviewQueue(pool){
-  return getStudyQueue(pool, dueReviewQueueOptions());
-}
-
-// Contagem HONESTA (Fase 8 do projeto): quantas revisões existem de
-// verdade (sem o teto de "Intensidade da sessão") vs quantas cabem nesta
-// sessão. Quando os dois números divergem, a interface precisa mostrar os
-// dois -- nunca esconder revisões reais atrás do teto de sessão como se
-// elas não existissem (ver renderReviewTodayWidget).
-function trueDueReviewCount(pool){
-  return getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length;
-}
-
-function todaysReviewCount(pool){
-  return buildDueReviewQueue(pool).length;
-}
-
-// ---------- Filtro de fila (2ª sessão de grilling) ----------
-// A primeira reformulação (acima: dueCount escondido atrás do teto de
-// sessão) resolveu a repetição mas escondeu demais -- a autora achou o
-// número "muito escondido" e pediu pra sempre mostrar o total REAL
-// (trueCount) em destaque, com um jeito explícito de escolher COMO
-// consumir essa fila, em vez de aceitar o corte da Intensidade da sessão
-// em silêncio.
-//
-// 'all'    -- ignora o teto de Intensidade da sessão (scope:'due' sem
-//             `limit`) -- ainda respeita newCardsPerDay, que é ritmo de
-//             aprendizado de palavra NOVA, não tamanho de sessão de
-//             revisão (não faz sentido "Todas" empurrar 50 palavras nunca
-//             vistas de uma vez só).
-// 'hard'   -- alias direto de getStudyQueue(scope:'hard') -- MESMA fila
-//             que "Palavras difíceis" em PRATICAR usa (Regra 6: nunca dois
-//             critérios diferentes disputando o nome "difícil"). Sem teto
-//             de sessão de propósito, igual ao modo dedicado já era.
-// 'oldest' (padrão) -- exatamente a seleção de sempre (devida + novas,
-//             capada pela Intensidade da sessão), só REORDENADA: entre as
-//             já estudadas, due mais antigo primeiro (novas, due
-//             irrelevante pra "atraso", continuam depois, na ordem que já
-//             tinham). Ver startReviewSession/buildSpeedQueue -- shuffle
-//             precisa ser pulado só pra este filtro, senão a ordem não
-//             sobrevive até a tela.
-function reviewFilterQueue(filter, pool){
-  // Prop 5 (ver CLAUDE.md, "7 propostas") -- não lê mais
-  // STATE.studySettings.reviewFilter como fallback (controle removido da
-  // UI); todo call site que não passa `filter` explícito recebe 'oldest'.
-  filter = filter || 'oldest';
-  if (filter === 'hard') return getStudyQueue(pool, { scope: 'hard' });
-  if (filter === 'all') return getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
-  const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
-  queue.sort((a, b) => (cardStudyBucket(a) !== 'new' ? a.due : Infinity) - (cardStudyBucket(b) !== 'new' ? b.due : Infinity));
-  return queue.slice(0, sessionIntensityToLimit(STATE.studySettings.sessionIntensity));
-}
 
 // Rótulos curtos reaproveitados em 2 lugares: as opções do <select> no
 // painel ⚙️ (com contagem entre parênteses) e o indicador discreto no
@@ -6443,154 +5502,6 @@ const REVIEW_ORIGIN_LABELS = {
   get self(){ return t('flashcards.origin.selfTitle'); }
 };
 
-// Bloco hero (topo da Revisão): número grande = trueCount, sempre o total
-// real pendente, nunca o cortado pela sessão -- fixo, não muda com nenhum
-// filtro. Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" (e o
-// indicador "Filtro: X" que ficava aqui embaixo do número) foi removido
-// da UI de propósito.
-// Filtros de sessão (origem/tag, em "Configurar") valem para "Estudar
-// tudo", mas não para a tabela de Decks. Resumo para avisar quando estão ativos.
-function reviewSessionFilterSummary(){
-  const parts = [];
-  const origin = STATE.studySettings.reviewOriginFilter || 'all';
-  if (origin !== 'all') parts.push(REVIEW_ORIGIN_LABELS[origin] || origin);
-  const tags = activeReviewTagFilter();
-  if (tags.length) parts.push(tags.map(t => friendlyTagLabel(t)).join(', '));
-  return parts.join(' · ');
-}
-
-// "Estudar tudo" (todos os Decks juntos) fica embaixo da tabela de Decks; as
-// contagens por Deck já estão na tabela, então aqui não há números. Aviso
-// quando um filtro de sessão (origem/tag, em "Configurar") está ativo.
-function renderReviewTodayWidget(){
-  const wrap = document.getElementById('review-today-widget');
-  if (!wrap) return;
-  const pool = eligibleReviewPool();
-  const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
-  const split = { new: 0, learning: 0, review: 0 };
-  queue.forEach(c => { split[cardStudyBucket(c)]++; });
-  const trueCount = queue.length;
-  const filterSummary = reviewSessionFilterSummary();
-  const filterNote = filterSummary
-    ? `<div class="review-today-filter">${t('review.today.filter', { filter: escapeHTML(filterSummary) })} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">${escapeHTML(t('review.today.clearFilter'))}</button></div>`
-    : '';
-  const num = (n, cls, label) => `<div class="review-today-col"><div class="review-today-count ${n ? cls : 'is-zero'}">${n}</div><div class="review-today-col-label">${label}</div></div>`;
-  wrap.innerHTML = `
-    <div class="review-today-strip">
-      <div class="review-today-split" aria-label="${escapeHTML(t('review.today.aria', { new: split.new, learning: split.learning, review: split.review }))}">
-        ${num(split.new, 'is-new', escapeHTML(t('review.count.new')))}${num(split.learning, 'is-learning', escapeHTML(t('review.count.learning')))}${num(split.review, 'is-review', escapeHTML(t('review.count.review')))}
-      </div>
-      <div class="review-today-go">
-        ${trueCount ? `<button class="btn btn-secondary review-short-btn" id="review-short-btn" title="${escapeHTML(t('review.today.shortTitle'))}">${escapeHTML(t('review.today.short'))}</button>
-        <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">${escapeHTML(t('review.today.studyAll', { n: trueCount }))}</button>`
-        : `<span class="review-today-done">${escapeHTML(t('review.today.upToDate'))}</span>`}
-      </div>
-    </div>
-    ${filterNote}
-  `;
-  document.getElementById('review-study-all-btn')?.addEventListener('click', () => openReviewSession('flashcard'));
-  document.getElementById('review-short-btn')?.addEventListener('click', () => openReviewSession('flashcard', { short: true }));
-  document.getElementById('review-today-filter-clear')?.addEventListener('click', () => {
-    updateStudySetting({ reviewOriginFilter: 'all', reviewTagFilter: [] });
-    renderReviewModeSelect();
-  });
-}
-
-// Altura do "pote" proporcional à maior das 3 categorias (não à contagem
-// absoluta) -- é isso que deixa claro de relance qual predomina, com um piso
-// de 10% pra uma categoria pequena continuar visível em vez de sumir.
-function renderVocabStrengthWidget(){
-  const wrap = document.getElementById('vocab-strength-widget');
-  if (!wrap) return;
-  const { notStarted, weak, medium, strong } = vocabStrengthBuckets();
-  if (notStarted + weak + medium + strong === 0){ wrap.innerHTML = ''; return; }
-  const max = Math.max(notStarted, weak, medium, strong, 1);
-  const h = n => Math.max(10, Math.round(n / max * 100));
-  const item = (tier, count, label) => `
-    <div class="vs-item">
-      <div class="vs-jar"><div class="vs-fill" data-tier="${tier}" style="height:${h(count)}%;"></div></div>
-      <div class="vs-text"><div class="vs-count">${count}</div><div class="vs-label">${label}</div></div>
-    </div>
-  `;
-  wrap.innerHTML = `
-    <div class="section-label">${t('review.strength.title')}</div>
-    <div class="vocab-strength-row">
-      ${item('none', notStarted, t('review.strength.notStarted'))}
-      ${item('weak', weak, t('review.strength.weak'))}
-      ${item('mid', medium, t('review.strength.medium'))}
-      ${item('strong', strong, t('review.strength.strong'))}
-    </div>
-    <p class="profile-edit-hint">${t('review.strength.hint')}</p>
-  `;
-}
-
-// Projeto "Reorganização da experiência de revisão e prática": a tela de
-// Revisão deixou de ser 4 blocos equivalentes. Agora responde só 2
-// perguntas: "o que eu preciso revisar agora?" (REVISAR -- Flashcard e
-// Speed Review, a MESMA fila devida, só apresentações diferentes) e "o que
-// eu posso praticar quando quiser, vencido ou não?" (PRATICAR -- Palavras
-// difíceis e Combinar, sempre disponíveis, nunca criam um 2º agendamento).
-function renderReviewModeSelect(){
-  const pool = eligibleReviewPool();
-  // trueCount (total real, sem teto de sessão) decide se há revisão --
-  // dueCount é só um subconjunto capado dele (2ª sessão de grilling: nunca
-  // usar o número cortado pra decidir "tem ou não tem revisão").
-  const trueCount = trueDueReviewCount(pool);
-  // Speed Review mostra a mesma divisão da tabela de Decks (Novo/Aprendendo/
-  // Revisar) em vez de um número só -- o total inclui as palavras novas do
-  // dia, e um número único parecia contradizer o "Revisar 0" da tabela.
-  const speedSplit = { new: 0, learning: 0, review: 0 };
-  getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay })
-    .forEach(c => { speedSplit[cardStudyBucket(c)]++; });
-  // Fase 7 (projeto anterior): Palavras Difíceis NÃO depende de estar due
-  // -- "precisa revisar agora" (REVISAR) e "é uma palavra difícil"
-  // (PRATICAR) são perguntas diferentes. getStudyQueue(scope:'hard') usa
-  // o difficulty do FSRS, nunca due.
-  const hardCards = getStudyQueue(pool, { scope: 'hard' });
-  const hardCount = hardCards.length;
-  // Recordes (shared/review-extras.js). Ja saíram da lista = palavras que já
-  // estiveram em Palavras difíceis e hoje não estão mais.
-  if (updateHardSeen(hardCards)) saveState();
-  const hardLeft = hardLeftCount(pool, hardCards);
-  const rec = reviewRecords();
-
-  renderReviewTodayWidget();
-  // Navegador de Decks (shared/deck-browser.js): tabela Deck | Novo | Aprendendo | Revisar.
-  if (typeof renderReviewDeckTable === 'function') renderReviewDeckTable();
-
-  // K2-F: Combinar é vocabulário -> conta palavras (projeção A na trilha), não CardInstances.
-  const matchWordCount = projectStudyWordsToA(pool).length;
-  const praticarEl = document.getElementById('review-mode-cards-praticar');
-  praticarEl.innerHTML = `
-    <button class="review-mode-card" id="mode-card-speed" ${trueCount === 0 ? 'disabled' : ''}>
-      <div class="icon">⚡</div>
-      <div class="name">${t('review.mode.speed.name')}</div>
-      <div class="count speed-split" aria-label="${escapeHTML(t('review.today.speedSplitAria', { new: speedSplit.new, learning: speedSplit.learning, review: speedSplit.review }))}">
-        <span class="${speedSplit.new ? 'is-new' : 'is-zero'}">${speedSplit.new}</span>
-        <span class="${speedSplit.learning ? 'is-learning' : 'is-zero'}">${speedSplit.learning}</span>
-        <span class="${speedSplit.review ? 'is-review' : 'is-zero'}">${speedSplit.review}</span>
-      </div>
-      <div class="desc">${rec.speedBestScore ? t('review.records.yourRecord', { record: speedRecordText(rec) }) : t('review.records.againstClock')}</div>
-    </button>
-    <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
-      <div class="icon">🔥</div>
-      <div class="name">${t('review.mode.hard.name')}</div>
-      <div class="count">${hardCount}</div>
-      <div class="desc">${hardLeft ? t('review.records.leftList', { n: hardLeft }) : t('review.mode.hard.desc')}</div>
-    </button>
-    <button class="review-mode-card" id="mode-card-match" ${matchWordCount < 10 ? 'disabled' : ''}>
-      <div class="icon">🧩</div>
-      <div class="name">${t('review.mode.match.name')}</div>
-      <div class="count">${matchWordCount}</div>
-      <div class="desc">${rec.matchBestMs ? t('review.records.yourRecord', { record: formatRecordSeconds(rec.matchBestMs) }) : t('review.mode.match.desc')}</div>
-    </button>
-  `;
-  const weekEl = document.getElementById('review-week');
-  if (weekEl) weekEl.innerHTML = reviewWeekHTML(pool);
-  document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
-  document.getElementById('mode-card-hard').addEventListener('click', () => openReviewSession('hard'));
-  document.getElementById('mode-card-match').addEventListener('click', () => openReviewSession('match'));
-}
 
 function openReviewSession(mode, opts){
   document.getElementById('review-mode-select-wrap').style.display = 'none';
@@ -6603,6 +5514,7 @@ function openReviewSession(mode, opts){
   // #review-content, sem isso não dava pra distinguir qual delas gerou o
   // report. Não afeta nenhuma lógica de revisão/memória.
   STATE.reviewActiveMode = mode;
+  STATE.reviewSessionClassReview = false; // modos da Revisão geral nunca herdam a sessão do Aluno
 
   if (mode === 'flashcard'){
     STATE.reviewSessionUnitFilter = null;
@@ -6640,14 +5552,14 @@ function reviewCardTagLabel(card){
   return cardOriginTitle(card);
 }
 
-// Link de voltar da sessão: "Voltar ao Deck" quando a sessão veio de um Deck.
-function syncReviewBackLink(){
-  const el = document.getElementById('review-back-to-modes');
-  if (el) el.textContent = t(STATE.reviewSessionDeckId != null ? 'review.backToDeck' : 'review.backToModes');
-}
 
 function backToReviewModeSelect(){
   releaseBadgeCelebrations();
+  if (STATE.reviewSessionClassReview){
+    STATE.reviewSessionStartedAt = null;
+    backToClassReviewTab();
+    return;
+  }
   const returnDeckId = STATE.reviewSessionDeckId;
   stopSpeedTimer();
   SPEED_STATE.active = false;
@@ -6686,67 +5598,6 @@ const MATCH_STATE = {
   busy: false
 };
 
-// Tela de escolha do tamanho da sessão -- aparece ao entrar no Combinar
-// (não ao clicar "Jogar de novo", que reaproveita o último tamanho
-// escolhido direto via startMatchGame).
-function renderMatchSizePicker(){
-  const el = document.getElementById('match-review-content');
-  const poolLen = projectStudyWordsToA(eligibleReviewPool()).length; // K2-F: palavras, não CardInstances da trilha
-  const minPairs = Math.min(...MATCH_SIZE_OPTIONS);
-  if (poolLen < minPairs * 2){
-    el.innerHTML = `
-      <div class="review-empty">
-        <div class="big-emoji">🧩</div>
-        <h3>${t('review.insufficientTitle')}</h3>
-        <p>${t('review.match.insufficientMin', { n: minPairs * 2 })}</p>
-      </div>
-    `;
-    return;
-  }
-  el.innerHTML = `
-    <div class="match-size-picker">
-      <div class="big-emoji">🧩</div>
-      <h3>${t('review.match.pickTitle')}</h3>
-      <div class="match-size-options">
-        ${MATCH_SIZE_OPTIONS.map(n => `
-          <button class="match-size-btn ${MATCH_STATE.pairSize === n ? 'selected' : ''}" data-pairs="${n}" ${poolLen < n * 2 ? 'disabled' : ''}>
-            <div class="match-size-num">${n}</div>
-            <div class="match-size-label">${t('review.match.pairsLabel', { cards: n * 2 })}</div>
-          </button>
-        `).join('')}
-      </div>
-      <button class="btn btn-primary" id="match-size-start-btn">${t('review.match.start')}</button>
-    </div>
-  `;
-  el.querySelectorAll('.match-size-btn:not([disabled])').forEach(btn => {
-    btn.addEventListener('click', () => {
-      MATCH_STATE.pairSize = parseInt(btn.dataset.pairs, 10);
-      renderMatchSizePicker();
-    });
-  });
-  document.getElementById('match-size-start-btn').addEventListener('click', startMatchGame);
-}
-
-function startMatchGame(){
-  trackEvent('lesson_start', 'match_game', null);
-  // Fase 4: seleção via getStudyQueue(scope:'all') -- mesmo pool de antes,
-  // Combinar é prática de reconhecimento, não revisão SRS.
-  // K2-F: Combinar = vocabulário -> 1 par por palavra (projeção A na trilha).
-  const pool = shuffle(getStudyQueue(projectStudyWordsToA(eligibleReviewPool().filter(hasPlainFrontBack)), { scope: 'all' }));
-  const pairCount = Math.min(MATCH_STATE.pairSize, pool.length);
-  MATCH_STATE.pairs = pool.slice(0, pairCount);
-  MATCH_STATE.tiles = shuffle([
-    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'front', text: cardPromptText(c) })),
-    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'back', text: cardAnswerText(c) }))
-  ]);
-  MATCH_STATE.selected = null;
-  MATCH_STATE.matchedCount = 0;
-  MATCH_STATE.attempts = 0;
-  MATCH_STATE.busy = false;
-  MATCH_STATE.startedAt = Date.now();
-
-  renderMatchGame();
-}
 
 function renderMatchGame(){
   const el = document.getElementById('match-review-content');
@@ -6772,21 +5623,6 @@ function renderMatchGame(){
   renderMatchTiles();
 }
 
-function renderMatchTiles(){
-  const gridEl = document.getElementById('match-grid');
-  gridEl.innerHTML = MATCH_STATE.tiles.map((t, i) => `
-    <button class="match-tile" data-idx="${i}" data-card-id="${t.cardId}" data-side="${t.side}">
-      <div class="match-tile-inner">
-        <div class="match-tile-face match-tile-back"><span>?</span></div>
-        <div class="match-tile-face match-tile-front">${t.text}</div>
-      </div>
-    </button>
-  `).join('');
-
-  gridEl.querySelectorAll('.match-tile').forEach(btn => {
-    btn.addEventListener('click', () => onMatchTileClick(btn));
-  });
-}
 
 function onMatchTileClick(btn){
   if (MATCH_STATE.busy) return;
@@ -6867,27 +5703,6 @@ function onMatchTileClick(btn){
   }
 }
 
-function startSpeedReview(){
-  holdBadgeCelebrations();
-  trackEvent('lesson_start', 'speed_review', null);
-  SPEED_STATE.queue = buildSpeedQueue();
-  SPEED_STATE.index = 0;
-  SPEED_STATE.hearts = 3;
-  SPEED_STATE.score = 0;
-  SPEED_STATE.correctCount = 0;
-  SPEED_STATE.streak = 0;
-  SPEED_STATE.bestStreak = 0;
-  SPEED_STATE.active = true;
-  SPEED_STATE.dailyCounted = false;
-  renderSpeedReview();
-}
-
-function stopSpeedTimer(){
-  if (SPEED_STATE.timerHandle){
-    clearInterval(SPEED_STATE.timerHandle);
-    SPEED_STATE.timerHandle = null;
-  }
-}
 
 function renderSpeedReview(){
   const el = document.getElementById('speed-review-content');
@@ -7041,24 +5856,6 @@ function renderSpeedReview(){
   runSpeedTimer(el, () => answerSpeedQuestion(false, el)); // tempo esgotado = errou
 }
 
-function runSpeedTimer(el, onTimeout){
-  stopSpeedTimer();
-  SPEED_STATE.timerStart = Date.now();
-  const fillEl = document.getElementById('speed-timer-fill');
-
-  SPEED_STATE.timerHandle = setInterval(() => {
-    const elapsed = Date.now() - SPEED_STATE.timerStart;
-    const pct = Math.max(0, 100 - (elapsed / SPEED_TIME_LIMIT) * 100);
-    if (fillEl){
-      fillEl.style.width = `${pct}%`;
-      fillEl.classList.toggle('urgent', pct < 30);
-    }
-    if (elapsed >= SPEED_TIME_LIMIT){
-      stopSpeedTimer();
-      if (!SPEED_STATE.answered) onTimeout();
-    }
-  }, 80);
-}
 
 function answerSpeedQuestion(isCorrect, el, chosenIdx){
   if (SPEED_STATE.answered) return;
@@ -7111,100 +5908,6 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
   setTimeout(() => renderSpeedReview(), 700);
 }
 
-// Em que lição da unidade (posição em u.lessons) um vocabIdx foi ensinado --
-// -1 se nenhuma lição declarar esse índice (não deveria acontecer com o
-// conteúdo atual, mas serve de guarda pro fallback abaixo).
-function lessonIndexForVocabIdx(unit, vocabIdx){
-  return (unit.lessons || []).findIndex(l => (l.vocabIdx || []).includes(vocabIdx));
-}
-
-// Um cartão só entra na revisão depois que a LIÇÃO que ensina aquela
-// palavra foi realmente concluída -- "unidade começada" sozinho não basta:
-// abrir a unidade e terminar só a lição 1 já marcava started=true pra
-// unidade inteira, e como todo cartão novo nasce com due=0 (sempre "vencido"
-// pra cardsDueNow), o vocabulário de lições 2+ nunca vistas entrava na fila
-// de revisão junto (bug relatado: "七" aparecendo antes da lição que
-// ensina até 8, com a unidade só na lição "até cinco").
-function isCardLessonCompleted(card){
-  // Fase 3 do sistema de alunas particulares (ver CLAUDE.md): cartão de
-  // professora não pertence a nenhuma unidade/lição -- o gate aqui não se
-  // aplica a ele. Elegibilidade própria: só entra na fila de revisão
-  // enquanto a professora não arquivou o cartão (flashcardStatus, espelha
-  // `teacher_flashcards.status`, atualizado a cada mergeTeacherFlashcardsIntoState()).
-  // Fase 5: cartão autorado pela própria aluna (origin==='self',
-  // own_flashcards) segue exatamente o mesmo caso.
-  if (card.origin === 'teacher' || card.origin === 'self') return card.flashcardStatus === 'active';
-  const prog = STATE.unitProgress[card.unitId];
-  // A0 (Fase 0 da trilha, 06/10/2026): unidade CONCLUÍDA libera todos os
-  // cartões dela. Antes só `lessonIdx < prog.lessonIdx` decidia, mas
-  // `lessonIdx` volta a 0 ao concluir a unidade -- o cartão saía da Revisão.
-  if (prog?.completed) return true;
-  if (!prog?.started) return false;
-  const unit = UNITS.find(u => u.id === card.unitId);
-  // Cartão "Na frase": entra com a lição da palavra que o apresenta (gateVocabIdx).
-  const gateIdx = card.vocabIdx != null ? card.vocabIdx : card.gateVocabIdx;
-  const lessonIdx = unit ? lessonIndexForVocabIdx(unit, gateIdx) : -1;
-  // Sem lição conhecida pra esse vocabIdx: só libera se a unidade inteira
-  // já foi concluída (mais seguro que arriscar mostrar algo nunca ensinado).
-  if (lessonIdx === -1) return !!prog.completed;
-  return lessonIdx < prog.lessonIdx;
-}
-
-function startReviewSession(opts){
-  holdBadgeCelebrations();
-  trackEvent('lesson_start', 'flashcard_review', null);
-  // eligibleReviewPool() (não STATE.cards.filter(isCardLessonCompleted)
-  // solto): mesma função que a tela de modo/hero widget já usa pra contar
-  // -- Fase 4 do sistema de alunas particulares (ver CLAUDE.md) adicionou
-  // o filtro por origem lá dentro, então a sessão de verdade precisa
-  // consumir a MESMA fonte, senão a prévia da tela de config mentiria
-  // sobre o que a sessão realmente inclui. Estudar uma unidade específica
-  // (STATE.reviewSessionUnitFilter) continua fora do filtro de origem --
-  // é uma ação deliberada vinda da trilha, e cartão de professora nunca
-  // pertence a uma unidade (`unitId: null`) mesmo, então nunca entraria
-  // aqui de qualquer forma.
-  const pool = STATE.reviewSessionUnitFilter
-    ? STATE.cards.filter(c => c.unitId === STATE.reviewSessionUnitFilter && isCardLessonCompleted(c))
-    // Revisão geral: só cartões de lições que você já concluiu de verdade.
-    : eligibleReviewPool();
-
-  // Fase 4 (projeto anterior): seleção centralizada em getStudyQueue()
-  // (shared/study-queue.js) -- due primeiro, mais um lote limitado de
-  // cartões novos (scope 'due'), ou due primeiro seguido do resto do pool
-  // ao estudar uma unidade específica (scope 'unit'). Estudar uma unidade
-  // específica mostra ela inteira, sem corte artificial de intensidade.
-  // Revisão geral usa reviewFilterQueue() (2ª sessão de grilling) -- a
-  // MESMA função que Speed Review chama (ver buildSpeedQueue) -- fonte
-  // única da fila REVISAR, agora sensível ao filtro escolhido na tela
-  // (Todas/Mais difíceis primeiro/Mais antigas primeiro).
-  // Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" removido da
-  // UI, comportamento travado em 'oldest' (ver buildSpeedQueue()).
-  const queue = STATE.reviewSessionUnitFilter
-    ? getStudyQueue(pool, { scope: 'unit', newCardsLimit: STATE.studySettings.newCardsPerDay })
-    : reviewFilterQueue('oldest', pool);
-
-  // K2-G: a sessão só decide QUAL CardInstance é estudado; a direção (A/B) é
-  // estrutural do próprio CardInstance (frontFieldIndex/backFieldIndex).
-
-  // "Mais antigas primeiro" só cumpre o que promete se a ordem sobreviver
-  // até a tela -- embaralhar (como sempre foi) destruiria exatamente essa
-  // ordem. Unidade específica continua embaralhada, como sempre.
-  const shouldShuffle = !!STATE.reviewSessionUnitFilter;
-  STATE.reviewQueue = shouldShuffle ? shuffle(queue) : queue;
-  // Sessão de 5 minutos (shared/review-extras.js): mesma fila, mais curta.
-  if (opts && opts.short && !STATE.reviewSessionUnitFilter) STATE.reviewQueue = shortReviewQueue(STATE.reviewQueue);
-  STATE.reviewIndex = 0;
-  // Fase 6C.1/6C.2/6C.3 -- descarta o localState (Normal/Múltipla escolha/
-  // Digite a resposta/Cloze) da sessão anterior, se houver; renderReviewView()
-  // cria um novo, tipado pro card atual, na primeira renderização. Fase
-  // 6C.2 eliminou STATE.reviewMCPicked/STATE.reviewMCCorrect; Fase 6C.3
-  // eliminou STATE.reviewClozeAnswered (Cloze migrou 100% pra este slot
-  // único, mesmo padrão dos outros 3 tipos) -- não há mais nenhum campo
-  // solto de tipo pra zerar aqui.
-  STATE.reviewSessionStartedAt = Date.now();
-  STATE.reviewCardState = null;
-  renderReviewView();
-}
 
 // ============================================================
 // Fase D ("Decks, Tags e Painel" -- Integração Deck <-> FSRS/Review, ver
@@ -7264,43 +5967,6 @@ async function ensureDecksLoadedForReview(){
   return ensureCourseDecksLoaded();
 }
 
-// D4 -- "integre getDeckCounts() ao domínio de Review": a única mudança
-// real é QUAL pool passar -- eligibleReviewPool() (lição concluída + não
-// arquivado + filtro de origem já aplicados), nunca STATE.cards cru. Zero
-// código de contagem novo -- getDeckCounts()/bucketCardState()/
-// countReviewCards() (shared/deck-engine.js) já fazem tudo, inclusive
-// separar ESTADO (New/Learning, via card.state) de DISPONIBILIDADE (Review
-// due-agora, via cardsDueNow()) -- ver comentário completo lá.
-function deckCountsForReview(deckId){
-  return getDeckCounts(STATE.decks, deckId, eligibleDeckReviewPool());
-}
-
-// D15 (estados vazios) -- domínio precisa diferenciar "Deck vazio" de
-// "Deck tem cards mas nada due" de "tem cards não elegíveis/arquivados",
-// sem inventar nenhuma UX nova (nenhuma tela consome isto ainda). Um único
-// objeto, computado 2x com o MESMO getStudyScopeForDeck() (nunca uma 2ª
-// implementação de filtro por subtree) -- 1x sobre STATE.cards cru (pra
-// enxergar arquivado/não-elegível também) e 1x sobre o pool elegível (pra
-// contar o que a Revisão de fato usaria). totalCards/eligibleCards/
-// archivedCards já bastam pra uma UI futura distinguir os 7 casos da seção
-// 15 sem recalcular nada por conta própria.
-function deckReviewSummary(deckId){
-  const decks = STATE.decks || [];
-  const allScoped = getStudyScopeForDeck(decks, deckId, STATE.cards);
-  const eligiblePool = eligibleDeckReviewPool();
-  const eligibleScoped = getStudyScopeForDeck(decks, deckId, eligiblePool);
-  const counts = getDeckCounts(decks, deckId, eligiblePool);
-  return {
-    deckId,
-    totalCards: allScoped.length,
-    eligibleCards: eligibleScoped.length,
-    archivedCards: allScoped.filter(c => c.flashcardStatus === 'archived').length,
-    new: counts.new,
-    learning: counts.learning,
-    review: counts.review,
-    due: counts.due,
-  };
-}
 
 // D1/D7 -- "forma explícita de iniciar Review com deckId". Espelha
 // byte-a-byte o padrão já usado por STATE.reviewSessionUnitFilter (a única
@@ -7386,31 +6052,6 @@ function gradeButtonsHTML(card){
   `;
 }
 
-// Fase 6D.7 (ver CLAUDE.md) -- helper compartilhado pelos 4 renderers
-// abaixo, extraindo a única leitura residual de STATE que eles ainda
-// tinham (STATE.reviewIndex/STATE.reviewQueue.length, só pra desenhar a
-// barra de progresso). Reutilizado tal e qual pelo Preview nativo do
-// editor: um card sintético de Preview nunca pertence a STATE.reviewQueue,
-// então marca `card.__isPreviewCard = true` (nunca setado em nenhum card
-// real de STATE.cards) e este helper mostra "Pré-visualização" em vez de
-// ler STATE.reviewQueue (que valeria 0/NaN fora de uma sessão de Review
-// de verdade). Esta é a alteração MÍNIMA necessária pra permitir o
-// contrato compartilhado renderer(mountEl, card, localState, callbacks)
-// sem alterar o comportamento real de Review -- quando
-// `card.__isPreviewCard` é falso/ausente (SEMPRE o caso pra cartão
-// real), o HTML produzido é byte a byte idêntico ao de antes desta fase.
-function reviewProgressBarHTML(card){
-  if (card.__isPreviewCard){
-    return `<div class="review-progress"><div class="review-progress-count">${t('review.previewLabel')}</div></div>`;
-  }
-  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
-  return `
-    <div class="review-progress">
-      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
-      <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
-    </div>
-  `;
-}
 
 // Fase 6C.2 (ver CLAUDE.md) -- renderer de "Múltipla escolha", extraído
 // pro contrato aprovado na Fase 6C: (mountEl, card, localState, callbacks)
@@ -7725,15 +6366,17 @@ function renderReviewView(){
     // -- senão esse número prometeria mais do que "Revisar tudo disponível"
     // realmente consegue puxar (o botão clicava e caía de volta nesta
     // mesma tela vazia).
-    const allDue = todaysReviewCount(STATE.cards.filter(isCardLessonCompleted));
+    const allDue = STATE.reviewSessionClassReview ? 0 : todaysReviewCount(STATE.cards.filter(isCardLessonCompleted).filter(c => !isClassReviewCard(c)));
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🍵</div>
-        <h3>${activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
+        <h3>${STATE.reviewSessionClassReview ? t('review.session.classEmptyTitle') : activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
         <p>${allDue > 0 ? tp('review.session.pendingOverall', allDue) : t('review.session.comeBackLater')}</p>
         ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">${t('review.session.reviewAllAvailable')}</button>` : ''}
+        ${STATE.reviewSessionClassReview ? `<button class="btn btn-secondary" id="review-class-back">${t('review.backToStudent')}</button>` : ''}
       </div>
     `;
+    document.getElementById('review-class-back')?.addEventListener('click', backToClassReviewTab);
     if (allDue > 0){
       document.getElementById('review-start-all').addEventListener('click', () => {
         STATE.reviewSessionUnitFilter = null;
@@ -7767,18 +6410,21 @@ function renderReviewView(){
         <h3>${t('review.complete.title')}</h3>
         <p>${tp('review.complete.reviewed', STATE.reviewQueue.length)}</p>
         <div class="review-complete-actions">
-          <button class="btn btn-secondary" id="review-again">${t('review.back')}</button>
-          <button class="btn btn-primary" id="review-go-practice">${t('review.practiceMore')}</button>
+          ${STATE.reviewSessionClassReview
+            ? `<button class="btn btn-primary" id="review-class-back">${t('review.backToStudent')}</button>`
+            : `<button class="btn btn-secondary" id="review-again">${t('review.back')}</button>
+          <button class="btn btn-primary" id="review-go-practice">${t('review.practiceMore')}</button>`}
         </div>
       </div>
     `;
     checkUnitCompletion();
-    document.getElementById('review-again').addEventListener('click', () => {
+    document.getElementById('review-class-back')?.addEventListener('click', backToClassReviewTab);
+    document.getElementById('review-again')?.addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
       switchTab('path');
     });
-    document.getElementById('review-go-practice').addEventListener('click', () => {
+    document.getElementById('review-go-practice')?.addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
       backToReviewModeSelect();
@@ -7998,61 +6644,6 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   }
 }
 
-// Rendimento decrescente de XP pra cartas maduras (artefato §5): uma carta
-// já dominada (intervalo alto) avaliada repetidamente não deve valer o
-// mesmo XP que uma carta ainda instável -- sem tirar XP de revisão nenhuma
-// (piso de 1), só reduzir o ganho marginal. `intervalBefore` é o intervalo
-// ANTES desta revisão (maturidade já acumulada), não o recalculado por ela.
-function reviewXP(intervalBefore, grade){
-  const base = XP_PER_GRADE[grade];
-  if (intervalBefore >= 60) return Math.max(1, Math.round(base * 0.4));
-  if (intervalBefore >= 21) return Math.max(1, Math.round(base * 0.7));
-  return base;
-}
-
-function gradeCurrentCard(grade){
-  const card = STATE.reviewQueue[STATE.reviewIndex];
-  // Atrasada de verdade = venceu ANTES de hoje, não só "due agora" (toda
-  // carta na fila já é due por definição -- ver eligibleReviewPool). Precisa
-  // ser lido antes de applyMemoryGrade/scheduleReview mutar card.due pra reavaliação.
-  const wasOverdue = card.due > 0 && card.due < new Date().setHours(0, 0, 0, 0);
-  const intervalBefore = card.interval;
-  // K2-G: nenhuma direção é gravada aqui -- A/B são CardInstances independentes
-  // e a direção é estrutural; a revisão só aplica o grau (FSRS) ao CardInstance mostrado.
-  // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
-  // de ser calculado por regras SM-2 fixas.
-  applyMemoryGrade(card, grade);
-  trackReviewAnswer('flashcard', card, grade);
-  STATE.totalReviews += 1;
-  // Streak só conta quando a SESSÃO inteira termina (ver renderReviewView),
-  // não a cada cartão avaliado -- senão avaliar 1 carta isolada já bastava
-  // pra "estudar hoje", regra boa demais até pra quem só está conferindo o
-  // app sem de fato revisar nada.
-  registerDailyReviewCard();
-  if (wasOverdue) registerDailyOverdueReviewCard();
-  addXP(reviewXP(intervalBefore, grade));
-
-  if (grade === 0){
-    // "Errei" só volta nesta MESMA sessão se sobrar separação real até o
-    // fim da fila -- empurrar pro fim sempre (comportamento antigo) fazia a
-    // carta reaparecer como a carta SEGUINTE (ou quase) sempre que o erro
-    // acontecia perto do fim da fila, sem nenhum valor pedagógico repetir
-    // uma palavra que acabou de ser errada segundos atrás. due (acima, via
-    // applyMemoryGrade) já agenda a revisão real pra pelo menos amanhã
-    // (fsrsIntervalFromStability nunca agenda em horas) -- este requeue é só
-    // reforço extra quando ainda cabe hoje com distância de verdade.
-    const remaining = STATE.reviewQueue.length - STATE.reviewIndex - 1;
-    if (remaining >= 3) STATE.reviewQueue.push(card);
-  }
-
-  STATE.reviewIndex += 1;
-  // Fase 6C.1 -- avançou a posição da fila, descarta o localState de
-  // Normal desta exibição (renderReviewView cria um novo pro próximo card).
-  STATE.reviewCardState = null;
-  saveState();
-  renderTopbarStats();
-  renderReviewView();
-}
 
 function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   if (STATE.unitProgress[unitId].completed) return;
@@ -8136,17 +6727,17 @@ function renderProgressView(){
   ` : '';
 
   document.getElementById('stat-cards').innerHTML = guestWarning + `
-    <div class="stat-card"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">${t('zh.progress.statUnits')}</div></div>
-    <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">${t('zh.progress.statWords')}</div></div>
-    <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">${t('zh.progress.statStreak')}</div></div>
-    <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">${t('zh.progress.statReviews')}</div></div>
+    <div class="stat-card" data-stat="units"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">${t('zh.progress.statUnits')}</div></div>
+    <div class="stat-card" data-stat="words"><div class="num">${learnedCards}/${totalCards}</div><div class="label">${t('zh.progress.statWords')}</div></div>
+    <div class="stat-card" data-stat="streak"><div class="num">${effectiveStreak()}</div><div class="label">${t('zh.progress.statStreak')}</div></div>
+    <div class="stat-card" data-stat="reviews"><div class="num">${STATE.totalReviews}</div><div class="label">${t('zh.progress.statReviews')}</div></div>
     <div class="stat-card" data-stat="new"><div class="num">${sc.new}</div><div class="label">${t('progress.statNew')}</div></div>
     <div class="stat-card" data-stat="learning"><div class="num">${sc.learning}</div><div class="label">${t('progress.statLearning')}</div></div>
     <div class="stat-card" data-stat="review"><div class="num">${sc.review}</div><div class="label">${t('progress.statReview')}</div></div>
     <div class="stat-card" data-stat="due"><div class="num">${sc.due}</div><div class="label">${t('progress.statDueNow')}</div></div>
     <div class="stat-card" data-stat="today" title="${escapeHTML(t('progress.statTodayTitle'))}"><div class="num">${studyToday}</div><div class="label">${t('progress.statToday')}</div></div>
     ${ownContentCards}
-    <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
+    <div class="stat-card" data-stat="xp"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
   `;
 
   if (!CURRENT_USER){
@@ -8166,20 +6757,17 @@ function renderProgressView(){
   renderActivityHeatmap();
   renderProgressLineChart();
 
-  const earnedCount = BADGES.filter(b => badgeEarnedNow(b, STATE)).length;
-  document.getElementById('badge-grid-count').textContent = `${earnedCount}/${BADGES.length}`;
+  // Conquistas com níveis: um cartão por trilha (shared/badge-tracks-app.js), clássicas no fim.
+  const trackViews = badgeTrackViews(STATE);
+  const classics = BADGES.filter(b => b.classic && b.check(STATE)).map(b => ({ id: b.id, classic: true, icon: b.icon, fluent: b.fluent, name: b.name, desc: b.desc, tier: 'classic' }));
+  const levelsEarned = trackViews.reduce((a, v) => a + v.level, 0);
+  const levelsTotal = trackViews.reduce((a, v) => a + v.total, 0);
+  document.getElementById('badge-grid-count').textContent = t('badge.ui.count', { n: levelsEarned, total: levelsTotal });
   const badgeGridEl = document.getElementById('badge-grid');
-  badgeGridEl.innerHTML = BADGES.map(b => {
-    const earned = badgeEarnedNow(b, STATE);
-    return `<div class="badge ${earned?'earned':''}" data-badge-id="${b.id}"><div class="icon">${b.icon}</div><div class="name">${b.name}</div></div>`;
-  }).join('');
-  badgeGridEl.querySelectorAll('.badge[data-badge-id]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const b = BADGES.find(x => x.id === el.dataset.badgeId);
-      if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc);
-    });
-  });
+  badgeGridEl.classList.add('has-tracks');
+  badgeGridEl.innerHTML = trackViews.map(badgeTrackCardHTML).join('')
+    + (classics.length ? `<div class="track-classics"><div class="track-classics-title">${t('badge.ui.classicTitle')}</div><div class="track-showcase">${classics.map(badgeShowcaseItemHTML).join('')}</div></div>` : '');
+  wireTrackChips(badgeGridEl, trackViews.concat(classics));
 }
 
 // ---------- Gráfico de linha: palavras aprendidas ao longo do tempo ----------
@@ -8350,9 +6938,8 @@ const switchTab = createTabSwitcher({
     settings: renderSettingsView,
     'admin-badges': renderAdminPanelView,
     'my-flashcards': renderMyFlashcardsView,
-    'support-materials': renderSupportMaterialsView,
     'teacher-panel': renderTeacherPanelView,
-    'my-class-logs': renderMyClassLogsView,
+    'student-panel': renderStudentPanelView,
     leaderboard: openLeaderboardView,
     friends: renderFriendsView,
     path: renderUnitsGrid,
@@ -8420,70 +7007,6 @@ function normalizeNewCardsPerDay(n){
     Math.abs(opt - n) < Math.abs(best - n) ? opt : best, NEW_CARDS_PER_DAY_OPTIONS[0]);
 }
 
-// Fase 10, movido pra Revisão na 2ª sessão de grilling, ícone de acesso
-// trocado na 3ª, filtro de fila entrou aqui na 4ª (ver
-// #review-header-settings-btn/#review-settings-panel): sincroniza os 4
-// controles de sessão com STATE.studySettings -- roda toda vez que o
-// painel "⚙️ Configurar sessão" é aberto ou qualquer um dos 4 muda.
-// Fase I (Tags): chips de seleção múltipla (OR) + "Limpar". Mostra as tags do
-// universo do Review geral E as já selecionadas (mesmo que não existam mais),
-// pra nunca prender o usuário num filtro que ele não consegue desfazer.
-function renderReviewTagFilter(){
-  const wrap = document.getElementById('review-tag-filter-wrap');
-  const chipsEl = document.getElementById('review-tag-chips');
-  if (!wrap || !chipsEl) return;
-  const selected = activeReviewTagFilter();
-  const universe = reviewTagUniverse();
-  // Tags finas da trilha (unidade/lição/palavra) ficam fora dos chips.
-  const available = reviewFilterVisibleTags(universe);
-  const all = Array.from(new Set(available.concat(selected))).sort();
-  wrap.hidden = all.length === 0;
-  chipsEl.innerHTML = all.map(t => {
-    const n = universe.filter(c => (c.tags || []).includes(t)).length;
-    const on = selected.includes(t);
-    return `<button type="button" class="leaderboard-tab ${on ? 'active' : ''}" data-review-tag="${escapeHTML(t)}" aria-pressed="${on}" title="#${escapeHTML(t)}">${escapeHTML(friendlyTagLabel(t))} (${n})</button>`;
-  }).join(' ');
-  const clearBtn = document.getElementById('review-tag-clear');
-  if (clearBtn) clearBtn.hidden = selected.length === 0;
-}
-
-function renderReviewSettingsView(){
-  const s = STATE.studySettings;
-
-  // Prop 5 (ver CLAUDE.md, "7 propostas") -- "Origem" (Fase 4 do sistema
-  // de alunas particulares) subiu pro TOPO do painel, "Filtro de fila"
-  // (que existia aqui) foi removido de vez.
-  const originWrap = document.getElementById('review-origin-select-wrap');
-  const originSelect = document.getElementById('review-origin-select');
-  const hasTeacherCards = STATE.cards.some(c => c.origin === 'teacher');
-  const hasSelfCards = STATE.cards.some(c => c.origin === 'self');
-  if (originWrap) originWrap.hidden = !hasTeacherCards && !hasSelfCards;
-  if (originSelect && (hasTeacherCards || hasSelfCards)){
-    const basePool = STATE.cards.filter(isCardLessonCompleted);
-    const originCounts = {
-      all: basePool.length,
-      study: basePool.filter(c => c.origin === 'study').length,
-      teacher: basePool.filter(c => c.origin === 'teacher').length,
-      self: basePool.filter(c => c.origin === 'self').length
-    };
-    const currentOrigin = s.reviewOriginFilter || 'all';
-    originSelect.innerHTML = `
-      <option value="all" ${currentOrigin === 'all' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.all} (${originCounts.all})</option>
-      <option value="study" ${currentOrigin === 'study' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.study} (${originCounts.study})</option>
-      ${hasTeacherCards ? `<option value="teacher" ${currentOrigin === 'teacher' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.teacher} (${originCounts.teacher})</option>` : ''}
-      ${hasSelfCards ? `<option value="self" ${currentOrigin === 'self' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.self} (${originCounts.self})</option>` : ''}
-    `;
-  }
-
-  renderReviewTagFilter();
-
-  const freqSelect = document.getElementById('review-frequency-select');
-  if (freqSelect) freqSelect.value = s.reviewFrequency;
-  const newCardsSelect = document.getElementById('review-newcards-select');
-  if (newCardsSelect) newCardsSelect.value = String(normalizeNewCardsPerDay(s.newCardsPerDay));
-  const intensitySelect = document.getElementById('review-intensity-select');
-  if (intensitySelect) intensitySelect.value = s.sessionIntensity;
-}
 
 // Persiste + reaplica ao motor imediatamente -- não precisa de botão "Salvar"
 // (mesmo padrão dos outros pref-switch/toggle desta tela). renderReviewTodayWidget()
@@ -8527,21 +7050,6 @@ document.getElementById('review-tag-chips')?.addEventListener('click', (e) => {
 document.getElementById('review-tag-clear')?.addEventListener('click', () => {
   updateStudySetting({ reviewTagFilter: [] });
 });
-// Ícone "⚙️" no cabeçalho da tela de Revisão (3ª sessão de grilling --
-// antes era um botão de texto solto entre o dropdown e REVISAR, a autora
-// não gostou) -- recolhido por padrão, sincroniza ao abrir (4 controles
-// de sessão, ver renderReviewSettingsView).
-// "Configurar" (barra Decks/Adicionar/Painel/Configurar, shared/deck-browser.js):
-// abre/fecha o painel de ajustes da sessão na tela inicial da Revisão.
-// Abre os ajustes numa janela por cima da tela atual (inclusive dentro
-// de um Deck), como Adicionar e Painel -- ver openReviewSettingsModal.
-function toggleReviewSettingsPanel(){
-  if (typeof openReviewSettingsModal === 'function'){ openReviewSettingsModal(); return; }
-  const panel = document.getElementById('review-settings-panel');
-  if (!panel) return;
-  panel.removeAttribute('hidden');
-  renderReviewSettingsView();
-}
 document.querySelectorAll('[data-settings-section]').forEach(btn => {
   btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));
 });
