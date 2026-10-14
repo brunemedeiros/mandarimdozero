@@ -43,5 +43,10 @@ fr/, zh/, shared/ (inclui i18n pt-BR/en), páginas iniciais e modelos de notific
   - 🈺 virou 🀄 nas lições de Hanzi;
   - a coroa da Fundadora virou a do Fluent.
 - Dado: `badge_catalog.icon` do Pioneiro/a mudou de 🌱 para 🚀 na produção (2026-10-14; no Staging essa linha não existe).
-- Testes: `tests/icones/test_playwright.js`.
+- `shared/i18n/i18n.js` (setElementText): antes de trocar o texto de um elemento, devolve os ícones para texto simples;
+  sem isso, trocar o idioma do site duplicava o emoji ("⚑ ⚑ Reportar").
+- Testes: `tests/icones/test_playwright.js` 43/43. Regressão de 123 arquivos: a única falha nova (i18n/test_playwright,
+  duplicação acima) foi corrigida, 209/209. O check de aviso do mesmo teste passou a aceitar filhos `.emo`. As falhas
+  restantes são iguais na `main` (desafios-progresso, card_variants, content_en, k2c, k2i, fase-j, registro e
+  arquivos que dependem do ambiente).
 - Falta: em Admin › Conquistas, trocar o campo livre de emoji por um seletor só com os ícones do mapa.

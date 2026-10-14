@@ -46,7 +46,7 @@ async function run(browser, port, lang){
       t1: document.getElementById('t1').textContent, t1n: document.querySelectorAll('#t1 .emo').length,
       t2: document.getElementById('t2').value, t3: document.querySelectorAll('#t3 .emo').length, t4: document.querySelectorAll('#t4 .emo').length,
       t5: document.querySelectorAll('#t5 .emo').length, t6: document.querySelectorAll('#t6 .emo').length,
-      label: document.querySelector('#t1 .emo').getAttribute('aria-label'),
+      label: document.querySelector('#t1 .emo').textContent,
       color: getComputedStyle(document.querySelector('#t1 .emo')).color }), 50));
   });
   check(`${L}: texto continua com o emoji (textContent)`, r.t1 === 'Muito bem 🔥 e ✓', r);
@@ -54,7 +54,7 @@ async function run(browser, port, lang){
   check(`${L}: campo de texto e <code> intactos`, r.t2 === '🔥' && r.t3 === 0 && r.t4 === 0, r);
   check(`${L}: emoji fora do mapa fica como está`, r.t5 === 0, r);
   check(`${L}: data-no-emoji-icons respeitado`, r.t6 === 0, r);
-  check(`${L}: leitor de tela lê o emoji`, r.label === '🔥', r);
+  check(`${L}: o emoji continua no texto do ícone (leitor de tela lê)`, r.label === '🔥', r);
   check(`${L}: caractere transparente`, /rgba\(0, 0, 0, 0\)|transparent/.test(r.color), r.color);
   // conteúdo que muda depois (toast) também vira ícone
   await page.evaluate(() => showToast('Teste ⭐'));

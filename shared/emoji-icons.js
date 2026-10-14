@@ -256,8 +256,6 @@
       if (m.index > last) frag.appendChild(document.createTextNode(t.slice(last, m.index)));
       var sp = document.createElement('span');
       sp.className = 'emo';
-      sp.setAttribute('role', 'img');
-      sp.setAttribute('aria-label', m[0]);
       sp.style.setProperty('--emo', 'url("' + BASE + f + '")');
       sp.textContent = m[0];
       frag.appendChild(sp);
