@@ -9043,7 +9043,9 @@ function conjExampleHTML(tenseKey){
   const ex = (typeof CONJ_TENSE_EXAMPLES !== 'undefined') && CONJ_TENSE_EXAMPLES[tenseKey];
   if (!ex || !ex.fr) return '';
   const fr = escapeHTML(ex.fr).replace(/\[([^\]]+)\]/g, '<b class="conj-ex-verb">$1</b>');
-  return `<span class="conj-ex" lang="fr">${fr}</span>${ex.t ? `<span class="conj-ex-tr">${escapeHTML(ex.t)}</span>` : ''}`;
+  // A tradução é da camada pt-BR: fora do site em português ela não aparece (o curso em inglês não mostra português).
+  const ptSite = typeof getUiLang !== 'function' || getUiLang() === 'pt-BR';
+  return `<span class="conj-ex" lang="fr">${fr}</span>${ex.t && ptSite ? `<span class="conj-ex-tr">${escapeHTML(ex.t)}</span>` : ''}`;
 }
 
 const conjFold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();

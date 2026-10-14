@@ -257,7 +257,10 @@ async function fill(page, wrongIdx){
     await page.waitForSelector('#conj-search-input');
     const ex = await page.evaluate(() => ({ pc: document.querySelector('.conj-tense-card input[data-tense="passeCompose"]').closest('label').querySelector('.conj-ex-verb').textContent,
       tr: document.querySelector('.conj-tense-card input[data-tense="condPresente"]').closest('label').querySelector('.conj-ex-tr').textContent }));
-    check('exemplo do passé composé destaca "ai mangé"; tradução da camada pt-BR', ex.pc === 'ai mangé' && ex.tr === 'Eu queria um café, por favor.', ex);
+    check('exemplo do passé composé destaca "ai mangé"; tradução da camada pt-BR', ex.pc === 'ai mangé' && ex.tr === 'Eu gostaria de um café, por favor.', ex);
+    const enTr = await page.evaluate(() => { const orig = window.getUiLang; window.getUiLang = () => 'en'; renderConjSelectScreen();
+      const n = document.querySelectorAll('.conj-ex-tr').length; window.getUiLang = orig; renderConjSelectScreen(); return n; });
+    check('site em inglês: frase sem a tradução em português', enTr === 0, enTr);
     await page.click('#conj-search-input');
     await page.keyboard.type('comer');
     const s1 = await page.evaluate(() => { const o = document.querySelector('#conj-search-list .conj-search-opt');

@@ -2189,10 +2189,10 @@
         "passeCompose": "Ontem, eu comi uma pizza.",
         "imparfait": "Quando eu era pequeno, eu jogava futebol todo domingo.",
         "plusQueParfait": "Quando eu cheguei, o filme já tinha começado.",
-        "futurSimple": "Ano que vem, eu vou para Paris.",
-        "condPresente": "Eu queria um café, por favor.",
+        "futurSimple": "Ano que vem, eu irei para Paris.",
+        "condPresente": "Eu gostaria de um café, por favor.",
         "subjPresente": "Você tem que vir amanhã.",
-        "imperatif": "Leva o guarda-chuva!"
+        "imperatif": "Leve o guarda-chuva!"
       },
       "groups": {
         "core": { "label": "Être / avoir / aller / faire", "desc": "Os 4 verbos mais irregulares e mais usados do francês" },

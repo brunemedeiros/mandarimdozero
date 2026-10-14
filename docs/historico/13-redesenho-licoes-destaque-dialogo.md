@@ -120,10 +120,13 @@ nível. Mapa da francofonia descartado. Jogos e busca de verbo ficam para as pr�
   (tamanho, top N, regulares/irregulares, grupos) ficam esmaecidos e desligados.
 - Frases de exemplo: as frases em francês ficam na base (`CONJ_TENSE_EXAMPLES` em `fr/conjugation-data.js`) e as
   traduções na camada `courses/fr-pt-BR/layer.js` (`conjugation.tenseExamples`). `shared/course-layer.js` passou a
-  extrair, limpar e aplicar esse campo. As frases aguardam a aprovação da autora.
-- Texto alterado: `ui.conj.sub` ("Escolha os verbos e os tempos verbais..."). Textos novos: `fr.conj.sel.*`. Os
+  extrair, limpar e aplicar esse campo. Frases aprovadas pela autora em 2026-10-14, com a tradução no registro da
+  gramática ("irei", "gostaria de", "Leve"); "petit" fica. Fora do site em português a tradução não aparece.
+- Texto alterado: `ui.conj.sub` ("Escolha os verbos e os tempos verbais."; a autora tirou "Você sempre pratica as 6 pessoas"). Textos novos: `fr.conj.sel.*`. Os
   títulos "Verbos"/"Tempos verbais" e os interruptores passaram a ter i18n (antes ficavam em português no inglês).
 - `tests/camada-curso/test_equivalence.js` agora aceita a correção deliberada "assiss" → "assis" (falhava desde a fase 1).
 - Grátis x Premium: tudo grátis.
-- Testes: conjugação 51/51 (11 novos), i18n unit 2040/2040, i18n navegador 209/209, camada do curso 75/75,
+- Pendente (decisão da autora, 2026-10-14): o curso em inglês não deve ter nada em português; hoje a busca acha pela
+  tradução em português e a tradução dos verbos aparece em português no site em inglês. Será consertado.
+- Testes: conjugação 52/52 (12 novos), i18n unit 2040/2040, i18n navegador 209/209, camada do curso 75/75,
   celular 108/108, validação de respostas 154/154. Screenshots fr claro, escuro e 390px conferidos.

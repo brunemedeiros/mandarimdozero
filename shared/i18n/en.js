@@ -1933,7 +1933,7 @@ window.I18N_CATALOG['en'] = {
   'ui.review.intensity.light': 'Light (shorter sessions)', // ALTA
   'ui.review.intensity.intense': 'Intense (longer sessions)', // ALTA
   'ui.review.practiceHint': 'Keep practicing whenever you like, even with no reviews due.', // ALTA
-  'ui.conj.sub': 'Choose the verbs and the verb tenses. You always practice all 6 persons.', // ALTA
+  'ui.conj.sub': 'Choose the verbs and the verb tenses.', // ALTA
   'ui.conj.topN': 'Number of verbs (most common first)', // ALTA
   'ui.conj.start': 'Start practice', // ALTA
   'ui.conj.backToSelect': '← Back to selection', // ALTA

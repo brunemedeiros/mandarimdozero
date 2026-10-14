@@ -1949,7 +1949,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'ui.review.intensity.light': 'Leve (sessões mais curtas)',
   'ui.review.intensity.intense': 'Intensa (sessões mais longas)',
   'ui.review.practiceHint': 'Continue treinando quando quiser, mesmo sem revisões pendentes.',
-  'ui.conj.sub': 'Escolha os verbos e os tempos verbais. Você sempre pratica as 6 pessoas.',
+  'ui.conj.sub': 'Escolha os verbos e os tempos verbais.',
   'ui.conj.topN': 'Número de verbos (mais comuns primeiro)',
   'ui.conj.start': 'Começar prática',
   'ui.conj.backToSelect': '← Voltar à seleção',
