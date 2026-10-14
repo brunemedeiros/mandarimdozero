@@ -168,3 +168,15 @@ nível. Mapa da francofonia descartado. Jogos e busca de verbo ficam para as pr�
   (`CONJ_GAMES_PAYWALL_ENABLED=false`, item 11 de `14-pendencias-pos-paywall-e-decks.md`). A Conjugação normal é grátis.
 - Testes: conjugação 62/62 (10 novos do jogo, inclusive o site em inglês), modo foco 19/19, i18n unit 2040/2040,
   i18n navegador 209/209, celular 108/108. Screenshots fr claro, escuro e 390px conferidos.
+
+## Ideia em espera: "Adicionar à Revisão" a partir de Jogos, Desafios e Conjugação (2026-10-14)
+
+A autora pensou em aposentar a ideia ("estamos criando coisas demais"). Nada foi implementado. Se voltar:
+- Já decidido: entra no limite de 20 cartões do grátis; Deck automático por origem (pode mover depois); cópia
+  independente e editável.
+- Prévia feita com o renderizador real (5 cartões). Correções da autora: Expressões com reverso não pode ter o exemplo
+  traduzido no lado em português; Acentuação = "Ouça e escreva com os acentos" + alto-falante, digitar "cinéma" sem
+  mostrar a palavra sem acento; Ouça e traduza = "Ouça e traduza" + alto-falante (Normal ou Digitar).
+- Achado: um Field com texto e áudio anexado mostra dois botões (🔊 lê o texto em voz sintética, 🎧 toca o áudio
+  anexado); nos cartões só de áudio isso confunde.
+- Conjugação: botão só na tela final ("Formas para revisar"), nunca um por forma durante a prática.
