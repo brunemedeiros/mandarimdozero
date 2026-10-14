@@ -67,6 +67,14 @@ tokens dentro de um `curl` para um endereço desconhecido e pedido de contagem d
 se também for bloqueada, plano B sem HTTP (conector do Supabase + tabela caixa de entrada processada dentro do Supabase). Segredos de produção conferidos: a função
 responde 401 (não 503) a um token inventado, então os dois segredos existem lá.
 
+### Versão 2 (2026-10-14): bloqueada de novo
+Mesmo com a autorização da dona dita às claras e só um ping, o classificador negou o `curl` (motivo `[Exfil Scouting]`). Conclusão: no modo Auto, sem ninguém para aprovar,
+qualquer POST a um endereço que não seja um conector já autorizado é barrado. Não insistir nem tentar outra ferramenta para mandar a mesma requisição.
+Caminho escolhido para propor (aguarda o aval da autora): plano B sem HTTP, com `pg_net`, `pg_cron` e `supabase_vault`, que já estão instalados na produção.
+Desenho: a tarefa lê o estado por uma função SQL e grava a entrega numa tabela caixa de entrada pelo conector do Supabase; um `pg_cron` chama a função `review-bank-agent`
+(ação `process_inbox`) por dentro do Supabase, com o token guardado no Vault. A função processa (itens, recap, cartões) e devolve o resultado na própria linha da caixa.
+Bônus: recap e geração de cartões podem rodar pelo cron mesmo que a tarefa falhe numa noite. Na tarefa nova, ligar só os conectores necessários (Drive, Agenda, Supabase).
+
 ## Pendências
 - Teste de chamada de escrita a partir do ambiente da tarefa agendada: versão 1 bloqueada pelo classificador (ver acima); rodar a versão 2.
 - Escrever o texto da tarefa nova (passos: `state` -> agenda -> caderno -> `ingest`); só ligar depois de testada.
