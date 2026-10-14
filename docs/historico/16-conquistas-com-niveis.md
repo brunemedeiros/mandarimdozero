@@ -68,5 +68,5 @@ id no formato novo, nunca `friends.*`); `friends_badge_feed(p_limit)`. Sem DROP.
   gravado não repete.
 - Testes: catálogo 71/71, navegador 66/66, SQL `tests/conquistas/run.sh` 31/31 (6 do Pódio), Amigos 210/210,
   `test_badges_i18n` 14/14, `test_conquistas_conta` 40/40, i18n 2034/2034.
-- 092: Staging em 2026-10-14 (anon sem EXECUTE). Produção: pendente de autorização. Na produção hoje há 0 amizades
+- 092: Staging e produção em 2026-10-14 (produção a pedido da autora, versão `20261014200735`; anon sem EXECUTE). Na produção hoje há 0 amizades
   aceitas, então ninguém começa com nível de Pódio.

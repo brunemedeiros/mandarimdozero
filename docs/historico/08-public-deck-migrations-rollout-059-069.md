@@ -272,4 +272,5 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 ## 092 -- Pódio (semanas em 1º entre amigos, 2026-10-14)
 
 - `shared/supabase_migrations/092_podium_weeks.sql`: função `my_podium_weeks()`, sem tabela nova.
-- Staging: aplicada em 2026-10-14 (ferramenta). Produção: pendente de autorização.
+- Staging: aplicada em 2026-10-14 (ferramenta). Produção: 2026-10-14 a pedido da autora (versão `20261014200735 092_podium_weeks`;
+  conferido: anon sem EXECUTE, nenhuma linha alterada).
