@@ -19,6 +19,23 @@ function listAvailableCourses(currentAppKey, currentSiteLang, admin){
 }
 
 // Nome do curso = nome do idioma estudado na língua do curso: Francês (pt-BR), French (en), Chinês, Chinese.
+// Idiomas do site que existem no registro (união dos `siteLanguages`), na ordem do registro. Hoje pt-BR e en.
+function courseSiteLanguages(){
+  const out = [];
+  LanguageRegistry.enabled().forEach(l => (l.siteLanguages || []).forEach(x => { if (out.indexOf(x) < 0) out.push(x); }));
+  return out;
+}
+
+// "Eu falo ...": até 3 idiomas do site, botões lado a lado; com mais, uma lista (como o "I speak English" do Duolingo).
+function speakControlHTML(site){
+  const sites = courseSiteLanguages();
+  const label = escapeHTML(t('courseMenu.speakLabel'));
+  if (sites.length <= 3){
+    return `<div class="add-course-speak" role="group" aria-label="${label}">${sites.map(x => `<button type="button" data-site="${x}" aria-pressed="${x === site}">${escapeHTML(t('courseMenu.speak.' + x))}</button>`).join('')}</div>`;
+  }
+  return `<select class="review-settings-select add-course-speak" aria-label="${label}">${sites.map(x => `<option value="${x}"${x === site ? ' selected' : ''}>${escapeHTML(t('courseMenu.speak.' + x))}</option>`).join('')}</select>`;
+}
+
 function courseDisplayName(appKey, siteLang){
   return LanguageRegistry.shortName(appKey, siteLang) || appKey;
 }
@@ -43,20 +60,33 @@ async function switchCourse(appKey, siteLang){
 }
 
 function confirmSwitchCourse(appKey, siteLang){
+  ensureCourseMenuStyles();
   const modal = document.getElementById('ui-language-confirm-modal');
   const body = document.getElementById('ui-language-confirm-body');
   const yes = document.getElementById('ui-language-confirm-yes');
   const no = document.getElementById('ui-language-confirm-no');
-  const text = t('courses.confirm.body', { course: courseDisplayName(appKey, siteLang) });
+  const title = modal && modal.querySelector('h3');
   if (!modal || !body || !yes || !no){ switchCourse(appKey, siteLang); return; }
-  body.textContent = text;
+  const oldTitle = title ? title.textContent : null;
+  if (title) title.textContent = t('courses.confirm.title');
+  body.innerHTML = `<div class="course-confirm">
+    <p class="course-confirm-intro">${escapeHTML(t('courses.confirm.intro'))}</p>
+    <p class="course-confirm-head">${courseFlag(appKey)}<span>${escapeHTML(courseDisplayName(appKey, siteLang))}</span></p>
+    <p class="course-confirm-p">${escapeHTML(t('courses.confirm.p1'))}</p>
+    <p class="course-confirm-p">${escapeHTML(t('courses.confirm.p2'))}</p>
+    <p class="course-confirm-keep"><span aria-hidden="true">🔥</span> ${escapeHTML(t('courses.confirm.p3'))}</p>
+  </div>`;
   const done = (ok) => {
     modal.style.display = 'none';
     yes.onclick = null; no.onclick = null;
+    if (title && oldTitle !== null) title.textContent = oldTitle;
     if (ok) switchCourse(appKey, siteLang);
   };
+  const closeBtn = document.getElementById('ui-language-confirm-close');
   yes.onclick = () => done(true);
   no.onclick = () => done(false);
+  if (closeBtn) closeBtn.onclick = () => done(false);
+  modal.onclick = (e) => { if (e.target === modal) done(false); };
   modal.style.display = 'flex';
 }
 
@@ -111,15 +141,16 @@ function startedCourses(raw){
   return started;
 }
 
-function courseFlag(appKey){ const l = LanguageRegistry.byAppKey(appKey); return l ? l.flagSvg : ''; }
+function courseFlag(appKey){ const l = LanguageRegistry.byAppKey(appKey); return l ? `<span class="course-flag" aria-hidden="true">${l.flagSvg}</span>` : ''; }
 
 async function paintCourseMenu(btn, dropdown){
+  ensureCourseMenuStyles();
   const render = (raw) => {
     const items = startedCourses(raw);
     dropdown.innerHTML = `<div class="lang-switcher-label">${escapeHTML(t('courseMenu.title'))}</div>
-      ${items.map(c => `<button type="button" class="lang-switcher-item course-menu-item${c.current ? ' is-current' : ''}" data-app="${escapeHTML(c.appKey)}" data-site="${escapeHTML(c.siteLang)}"${c.current ? ' aria-current="true"' : ''}>${courseFlag(c.appKey)} <span>${escapeHTML(courseDisplayName(c.appKey, c.siteLang))}</span>${c.current ? '<span class="course-menu-check" aria-hidden="true">✓</span>' : ''}</button>`).join('')}
+      ${items.map(c => `<button type="button" class="lang-switcher-item course-menu-item${c.current ? ' is-current' : ''}" data-app="${escapeHTML(c.appKey)}" data-site="${escapeHTML(c.siteLang)}"${c.current ? ' aria-current="true"' : ''}>${courseFlag(c.appKey)}<span class="course-name">${escapeHTML(courseDisplayName(c.appKey, c.siteLang))}</span>${c.current ? '<span class="course-menu-check" aria-hidden="true">✓</span>' : ''}</button>`).join('')}
       <div class="lang-switcher-sep"></div>
-      <button type="button" class="lang-switcher-item course-menu-add"><span class="course-menu-plus" aria-hidden="true">+</span> <span>${escapeHTML(t('courseMenu.add'))}</span></button>`;
+      <button type="button" class="lang-switcher-item course-menu-add"><span class="course-menu-plus" aria-hidden="true">+</span><span class="course-name">${escapeHTML(t('courseMenu.add'))}</span></button>`;
     dropdown.querySelectorAll('.course-menu-item:not(.is-current)').forEach(b => b.addEventListener('click', () => confirmSwitchCourse(b.dataset.app, b.dataset.site)));
     const add = dropdown.querySelector('.course-menu-add');
     if (add) add.addEventListener('click', () => { dropdown.classList.remove('open'); openAddCourse(); });
@@ -133,19 +164,39 @@ async function paintCourseMenu(btn, dropdown){
 function ensureCourseMenuStyles(){
   if (document.getElementById('course-menu-styles')) return;
   const st = document.createElement('style'); st.id = 'course-menu-styles';
-  st.textContent = `.course-menu-item span:first-of-type{ flex:1; }
-.course-menu-item.is-current{ background: var(--paper); }
-.course-menu-check{ font-weight:800; color: var(--ink); }
-.course-menu-plus{ display:inline-flex; width:20px; height:20px; align-items:center; justify-content:center; border:2px solid var(--ink-soft); border-radius:6px; font-weight:800; line-height:1; color: var(--ink-soft); }
+  // Só tokens do site (fr e zh têm os mesmos nomes, valores diferentes). A bandeira é a peça de destaque; o resto fica quieto.
+  st.textContent = `.course-flag{ display:inline-flex; flex:0 0 auto; width:30px; height:30px; border-radius:50%; overflow:hidden; border:1px solid var(--paper-line); background:var(--paper); align-items:center; justify-content:center; }
+.course-flag svg{ width:42px; height:30px; flex:0 0 auto; border-radius:0; }
+.course-menu-item{ min-height:44px; }
+.course-menu-item span.course-name{ flex:1; font-weight:800; }
+.course-menu-item.is-current{ background: var(--paper); box-shadow: inset 3px 0 0 var(--seal-red); }
+.course-menu-check{ font-weight:800; color: var(--jade); }
+.course-menu-add{ margin-top:2px; min-height:44px; border:1.5px dashed var(--paper-line) !important; justify-content:flex-start; }
+.course-menu-add:hover{ border-color: var(--seal-red) !important; }
+.course-menu-plus{ display:inline-flex; width:30px; height:30px; align-items:center; justify-content:center; border-radius:50%; background: var(--paper); border:1px solid var(--paper-line); font-weight:800; line-height:1; color: var(--ink-soft); font-size:18px; }
 .add-course-modal{ max-width:640px; width:calc(100% - 24px); max-height:90vh; overflow:auto; }
-.add-course-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-.add-course-speak{ min-height:44px; }
-.add-course-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:12px; margin-top:14px; }
-.add-course-card{ display:flex; flex-direction:column; align-items:center; gap:8px; padding:16px 10px; border:1px solid var(--paper-line); border-radius:14px; background: var(--paper-warm); color: var(--ink); cursor:pointer; position:relative; font-family:var(--font-body); font-weight:800; min-height:44px; }
-.add-course-card:hover{ border-color: var(--imperial-gold); }
-.add-course-card svg{ width:64px; height:auto; border-radius:4px; }
-.add-course-card .add-course-tag{ font-size:11px; font-weight:700; opacity:.8; text-transform:uppercase; }
-.add-course-card .add-course-done{ position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:6px; background: var(--ink); color: var(--paper); font-size:13px; display:flex; align-items:center; justify-content:center; }`;
+.add-course-speak{ display:inline-flex; gap:4px; padding:4px; background: var(--paper); border:1px solid var(--paper-line); border-radius:999px; }
+.add-course-speak button{ font:inherit; font-weight:800; font-size:14px; min-height:44px; padding:0 16px; border:0; border-radius:999px; background:transparent; color: var(--ink-soft); cursor:pointer; }
+.add-course-speak button[aria-pressed="true"]{ background: var(--seal-red); color: var(--on-seal-red); }
+.add-course-speak button:focus-visible, .add-course-card:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }
+.add-course-group{ margin:18px 0 0; font-size:14px; font-weight:800; color: var(--ink-soft); }
+.add-course-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:12px; margin-top:12px; }
+.add-course-card{ display:flex; flex-direction:column; align-items:center; gap:10px; padding:18px 10px 14px; border:1px solid var(--paper-line); border-radius: var(--radius); background: var(--paper-warm); color: var(--ink); cursor:pointer; position:relative; font-family:var(--font-body); font-weight:800; font-size:16px; min-height:44px; }
+.add-course-card:hover{ border-color: var(--seal-red); box-shadow: var(--shadow-lift); }
+.add-course-card[aria-current]{ border-color: var(--seal-red); box-shadow: 0 0 0 2px var(--seal-red) inset; }
+.add-course-card .course-flag{ width:72px; height:72px; }
+.add-course-card .course-flag svg{ width:104px; height:72px; }
+.add-course-tag{ font-size:12px; font-weight:700; padding:1px 10px; border-radius:999px; border:1px solid var(--paper-line); background: var(--paper); color: var(--ink-soft); }
+.add-course-done{ position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:50%; background: var(--jade); color: var(--on-vivid); font-size:13px; display:flex; align-items:center; justify-content:center; }
+.course-confirm{ display:flex; flex-direction:column; gap:12px; }
+.course-confirm p{ margin:0; }
+.course-confirm-intro{ font-size:14px; font-weight:700; color: var(--ink-soft); }
+.course-confirm-head{ display:flex; align-items:center; gap:12px; font-weight:900; font-size:26px; line-height:1.15; color: var(--ink); }
+.course-confirm-head .course-flag{ width:52px; height:52px; }
+.course-confirm-head .course-flag svg{ width:78px; height:52px; }
+.course-confirm-p{ font-size:16px; line-height:1.55; color: var(--ink); max-width:46ch; }
+.course-confirm-keep{ margin-top:2px !important; padding:10px 14px; border-radius: var(--radius); background: var(--paper); border:1px solid var(--paper-line); font-size:14.5px; font-weight:700; line-height:1.45; color: var(--ink); }
+@media (prefers-reduced-motion: no-preference){ .add-course-card{ transition: box-shadow .15s ease, border-color .15s ease; } }`;
   document.head.appendChild(st);
 }
 
@@ -161,7 +212,8 @@ function openAddCourse(){
   }
   const admin = typeof isAdminUser === 'function' && isAdminUser();
   const startSite = (typeof pageSiteLanguage === 'function' && typeof progressLoadedOk !== 'undefined' && progressLoadedOk) ? pageSiteLanguage(null) : getUiLang();
-  let site = startSite === 'en' ? 'en' : 'pt-BR';
+  const sites = courseSiteLanguages();
+  let site = sites.indexOf(startSite) >= 0 ? startSite : sites[0];
   const paint = async () => {
     let raw = null;
     try { if (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && typeof fetchOtherLanguagesRaw === 'function') raw = await fetchOtherLanguagesRaw(); } catch (e) {}
@@ -170,14 +222,14 @@ function openAddCourse(){
       <div class="app-modal-header add-course-head"><h3 id="add-course-title" style="margin:0;">${escapeHTML(t('courseMenu.add'))}</h3>
         <button type="button" class="app-modal-close" id="add-course-close" aria-label="${escapeHTML(t('settings.uiLanguage.confirm.cancel'))}">✕</button></div>
       <div class="app-modal-body">
-        <div class="add-course-head"><strong>${escapeHTML(t('courses.group.' + site))}</strong>
-          <select class="review-settings-select add-course-speak" id="add-course-speak" aria-label="${escapeHTML(t('courseMenu.speakLabel'))}">
-            ${['pt-BR', 'en'].map(x => `<option value="${x}"${x === site ? ' selected' : ''}>${escapeHTML(t('courseMenu.speak.' + x))}</option>`).join('')}</select></div>
+        <div class="add-course-head">${speakControlHTML(site)}</div>
+        <h4 class="add-course-group">${escapeHTML(t('courses.group.' + site))}</h4>
         <div class="add-course-grid">${items.map(c => { const done = raw && CourseStorage.blockFor(raw, c.appKey, c.siteLang); return `<button type="button" class="add-course-card" data-app="${escapeHTML(c.appKey)}" data-site="${escapeHTML(c.siteLang)}"${c.current ? ' aria-current="true"' : ''}>
           ${done || c.current ? '<span class="add-course-done" aria-hidden="true">✓</span>' : ''}${courseFlag(c.appKey)}<span>${escapeHTML(courseDisplayName(c.appKey, c.siteLang))}</span>${c.status === 'beta' ? `<span class="add-course-tag">${escapeHTML(t('courses.beta'))}</span>` : ''}</button>`; }).join('')}</div>
       </div></div>`;
     ov.querySelector('#add-course-close').addEventListener('click', () => { ov.style.display = 'none'; });
-    ov.querySelector('#add-course-speak').addEventListener('change', (e) => { site = e.target.value; paint(); });
+    ov.querySelectorAll('.add-course-speak button').forEach(b => b.addEventListener('click', () => { site = b.dataset.site; paint(); }));
+    const speakSel = ov.querySelector('select.add-course-speak'); if (speakSel) speakSel.addEventListener('change', () => { site = speakSel.value; paint(); });
     ov.querySelectorAll('.add-course-card:not([aria-current])').forEach(b => b.addEventListener('click', () => { ov.style.display = 'none'; confirmSwitchCourse(b.dataset.app, b.dataset.site); }));
     ov.querySelector('.add-course-card[aria-current]') && ov.querySelector('.add-course-card[aria-current]').addEventListener('click', () => { ov.style.display = 'none'; });
   };

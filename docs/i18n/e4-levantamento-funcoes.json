@@ -1,0 +1,6240 @@
+{
+ "gerado": "script: scripts/e4-classify-functions.js",
+ "limiteQuaseIgual": 0.75,
+ "linhasArquivo": {
+  "fr": 13131,
+  "zh": 9269
+ },
+ "resumo": {
+  "funcoes": {
+   "idêntica": {
+    "n": 163,
+    "linesFr": 1971,
+    "linesZh": 1968
+   },
+   "quase igual": {
+    "n": 55,
+    "linesFr": 2541,
+    "linesZh": 2558
+   },
+   "divergente": {
+    "n": 19,
+    "linesFr": 732,
+    "linesZh": 596
+   },
+   "só fr": {
+    "n": 237,
+    "linesFr": 3963,
+    "linesZh": 0
+   },
+   "só zh": {
+    "n": 62,
+    "linesFr": 0,
+    "linesZh": 1358
+   }
+  },
+  "dados": {
+   "idêntica": {
+    "n": 39,
+    "linesFr": 123,
+    "linesZh": 126
+   },
+   "quase igual": {
+    "n": 6,
+    "linesFr": 262,
+    "linesZh": 232
+   },
+   "divergente": {
+    "n": 13,
+    "linesFr": 165,
+    "linesZh": 141
+   },
+   "só fr": {
+    "n": 80,
+    "linesFr": 576,
+    "linesZh": 0
+   },
+   "só zh": {
+    "n": 12,
+    "linesFr": 0,
+    "linesZh": 57
+   }
+  }
+ },
+ "itens": [
+  {
+   "name": "CHALLENGE_I18N",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 347,
+   "linesZh": 0
+  },
+  {
+   "name": "renderSpeedReview",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.95,
+   "linesFr": 150,
+   "linesZh": 151
+  },
+  {
+   "name": "renderReorderExercise",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.85,
+   "linesFr": 147,
+   "linesZh": 140
+  },
+  {
+   "name": "renderReviewView",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.9,
+   "linesFr": 148,
+   "linesZh": 138
+  },
+  {
+   "name": "renderClozeExercise",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.84,
+   "linesFr": 112,
+   "linesZh": 126
+  },
+  {
+   "name": "renderDialogueStep",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.91,
+   "linesFr": 115,
+   "linesZh": 116
+  },
+  {
+   "name": "renderNormalCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "divergente",
+   "similarity": 0.74,
+   "linesFr": 117,
+   "linesZh": 107
+  },
+  {
+   "name": "renderStep",
+   "kind": "function",
+   "area": "outros",
+   "cls": "divergente",
+   "similarity": 0.75,
+   "linesFr": 108,
+   "linesZh": 102
+  },
+  {
+   "name": "buildUnitBlock",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "quase igual",
+   "similarity": 0.89,
+   "linesFr": 106,
+   "linesZh": 101
+  },
+  {
+   "name": "renderConjPracticeStep",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 204,
+   "linesZh": 0
+  },
+  {
+   "name": "STATE",
+   "kind": "dados",
+   "area": "estado e persistência",
+   "cls": "quase igual",
+   "similarity": 0.81,
+   "linesFr": 104,
+   "linesZh": 93
+  },
+  {
+   "name": "ANKI_EXPORT_CONFIG",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "divergente",
+   "similarity": 0.71,
+   "linesFr": 98,
+   "linesZh": 94
+  },
+  {
+   "name": "openDictationPlayer",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 185,
+   "linesZh": 0
+  },
+  {
+   "name": "renderMultipleChoiceCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.95,
+   "linesFr": 93,
+   "linesZh": 87
+  },
+  {
+   "name": "renderDialogueCheck",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.86,
+   "linesFr": 87,
+   "linesZh": 89
+  },
+  {
+   "name": "renderChallengesAdminList",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 171,
+   "linesZh": 0
+  },
+  {
+   "name": "renderMultipleChoiceExercise",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.92,
+   "linesFr": 82,
+   "linesZh": 88
+  },
+  {
+   "name": "onMatchTileClick",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.98,
+   "linesFr": 78,
+   "linesZh": 78
+  },
+  {
+   "name": "finishCurrentLesson",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.91,
+   "linesFr": 78,
+   "linesZh": 74
+  },
+  {
+   "name": "renderActivityHeatmap",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 73,
+   "linesZh": 78
+  },
+  {
+   "name": "renderProgressView",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 75,
+   "linesZh": 75
+  },
+  {
+   "name": "STEP_STATE",
+   "kind": "dados",
+   "area": "estado e persistência",
+   "cls": "quase igual",
+   "similarity": 0.83,
+   "linesFr": 78,
+   "linesZh": 71
+  },
+  {
+   "name": "renderVocabTypeExercise",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.86,
+   "linesFr": 72,
+   "linesZh": 75
+  },
+  {
+   "name": "renderTypeAnswerCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.81,
+   "linesFr": 72,
+   "linesZh": 75
+  },
+  {
+   "name": "renderClozeCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.78,
+   "linesFr": 69,
+   "linesZh": 74
+  },
+  {
+   "name": "renderLessonCompleteScreen",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.96,
+   "linesFr": 69,
+   "linesZh": 69
+  },
+  {
+   "name": "buildFullSentenceExercises",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 136
+  },
+  {
+   "name": "renderUnitCompleteScreen",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "quase igual",
+   "similarity": 0.97,
+   "linesFr": 68,
+   "linesZh": 67
+  },
+  {
+   "name": "renderUnitsGrid",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "divergente",
+   "similarity": 0.32,
+   "linesFr": 86,
+   "linesZh": 48
+  },
+  {
+   "name": "renderExerciseStep",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.95,
+   "linesFr": 63,
+   "linesZh": 63
+  },
+  {
+   "name": "renderReviewModeSelect",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 61,
+   "linesZh": 61
+  },
+  {
+   "name": "renderTrueFalseExercise",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.95,
+   "linesFr": 61,
+   "linesZh": 60
+  },
+  {
+   "name": "renderChallengesList",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 116,
+   "linesZh": 0
+  },
+  {
+   "name": "renderProgressLineChart",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "quase igual",
+   "similarity": 0.91,
+   "linesFr": 54,
+   "linesZh": 59
+  },
+  {
+   "name": "showAnswerPanel",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.88,
+   "linesFr": 55,
+   "linesZh": 55
+  },
+  {
+   "name": "startReviewSession",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 54,
+   "linesZh": 55
+  },
+  {
+   "name": "buildExerciseSet",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "divergente",
+   "similarity": 0.74,
+   "linesFr": 59,
+   "linesZh": 49
+  },
+  {
+   "name": "wireKnowButtons",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 53,
+   "linesZh": 53
+  },
+  {
+   "name": "applySerializedState",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "divergente",
+   "similarity": 0.69,
+   "linesFr": 58,
+   "linesZh": 48
+  },
+  {
+   "name": "renderConceptStep",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.95,
+   "linesFr": 51,
+   "linesZh": 55
+  },
+  {
+   "name": "renderDailyChallengesScreen",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 51,
+   "linesZh": 51
+  },
+  {
+   "name": "advanceAcquisitionPhase",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 48,
+   "linesZh": 52
+  },
+  {
+   "name": "freshAcquisitionState",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "quase igual",
+   "similarity": 0.98,
+   "linesFr": 42,
+   "linesZh": 57
+  },
+  {
+   "name": "answerSpeedQuestion",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.94,
+   "linesFr": 49,
+   "linesZh": 50
+  },
+  {
+   "name": "renderChallengeCategories",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 97,
+   "linesZh": 0
+  },
+  {
+   "name": "openUnitDetail",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "divergente",
+   "similarity": 0.72,
+   "linesFr": 51,
+   "linesZh": 41
+  },
+  {
+   "name": "renderBlockIntroCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.85,
+   "linesFr": 43,
+   "linesZh": 49
+  },
+  {
+   "name": "renderNextStoryBeat",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 90
+  },
+  {
+   "name": "renderHanziReviewView",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 89
+  },
+  {
+   "name": "gradeCurrentCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 43,
+   "linesZh": 43
+  },
+  {
+   "name": "renderDailyChallengesStrip",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 42,
+   "linesZh": 42
+  },
+  {
+   "name": "speakChineseAudioOnly",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 82
+  },
+  {
+   "name": "startDeckReviewSession",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.98,
+   "linesFr": 41,
+   "linesZh": 40
+  },
+  {
+   "name": "renderLevelTestQuizStep",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 80,
+   "linesZh": 0
+  },
+  {
+   "name": "renderReviewSettingsView",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 42,
+   "linesZh": 37
+  },
+  {
+   "name": "renderGrammarExerciseStep",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 78,
+   "linesZh": 0
+  },
+  {
+   "name": "renderCheckpointQuizStep",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 78,
+   "linesZh": 0
+  },
+  {
+   "name": "renderStepProgress",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "quase igual",
+   "similarity": 0.79,
+   "linesFr": 38,
+   "linesZh": 38
+  },
+  {
+   "name": "wireDontKnowButton",
+   "kind": "function",
+   "area": "outros",
+   "cls": "quase igual",
+   "similarity": 0.97,
+   "linesFr": 38,
+   "linesZh": 38
+  },
+  {
+   "name": "renderTrailMapView",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "divergente",
+   "similarity": 0.25,
+   "linesFr": 46,
+   "linesZh": 29
+  },
+  {
+   "name": "markUnitCompleted",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "divergente",
+   "similarity": 0.65,
+   "linesFr": 43,
+   "linesZh": 32
+  },
+  {
+   "name": "renderDictationResult",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 75,
+   "linesZh": 0
+  },
+  {
+   "name": "renderHanziWriteCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 75
+  },
+  {
+   "name": "addXP",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "quase igual",
+   "similarity": 0.81,
+   "linesFr": 37,
+   "linesZh": 37
+  },
+  {
+   "name": "renderMatchSizePicker",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 37,
+   "linesZh": 37
+  },
+  {
+   "name": "showBadgeUnlockCelebration",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 35,
+   "linesZh": 35
+  },
+  {
+   "name": "buildSpeedOptions",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 35,
+   "linesZh": 35
+  },
+  {
+   "name": "openReviewSession",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.96,
+   "linesFr": 36,
+   "linesZh": 34
+  },
+  {
+   "name": "wireKeyboardOptions",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 34,
+   "linesZh": 34
+  },
+  {
+   "name": "speakFrenchAudioOnly",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 67,
+   "linesZh": 0
+  },
+  {
+   "name": "REALITY_NOTE_CATEGORY",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 32,
+   "linesZh": 34
+  },
+  {
+   "name": "buildExerciseHint",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "divergente",
+   "similarity": 0.68,
+   "linesFr": 36,
+   "linesZh": 30
+  },
+  {
+   "name": "renderReviewTodayWidget",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 33,
+   "linesZh": 33
+  },
+  {
+   "name": "renderFullSentenceExercise",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 66
+  },
+  {
+   "name": "serializeState",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "quase igual",
+   "similarity": 0.78,
+   "linesFr": 34,
+   "linesZh": 31
+  },
+  {
+   "name": "renderSearchResults",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 64
+  },
+  {
+   "name": "dlgPlayLine",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.94,
+   "linesFr": 32,
+   "linesZh": 31
+  },
+  {
+   "name": "playPregeneratedAudio",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "quase igual",
+   "similarity": 0.93,
+   "linesFr": 31,
+   "linesZh": 31
+  },
+  {
+   "name": "answerExplanationHTML",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "divergente",
+   "similarity": 0.58,
+   "linesFr": 34,
+   "linesZh": 28
+  },
+  {
+   "name": "renderScenarioExercise",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 62,
+   "linesZh": 0
+  },
+  {
+   "name": "switchTab",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "divergente",
+   "similarity": 0.58,
+   "linesFr": 39,
+   "linesZh": 23
+  },
+  {
+   "name": "renderHanziTestStep",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 62
+  },
+  {
+   "name": "openStrokeModal",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 59
+  },
+  {
+   "name": "BADGES",
+   "kind": "dados",
+   "area": "perfil, ranking e social",
+   "cls": "quase igual",
+   "similarity": 0.86,
+   "linesFr": 32,
+   "linesZh": 26
+  },
+  {
+   "name": "registerStudyToday",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 27,
+   "linesZh": 30
+  },
+  {
+   "name": "renderExpressionFeedbackScreen",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 55,
+   "linesZh": 0
+  },
+  {
+   "name": "buildTrailContinueCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 27,
+   "linesZh": 27
+  },
+  {
+   "name": "buildReorderDistractors",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.94,
+   "linesFr": 27,
+   "linesZh": 27
+  },
+  {
+   "name": "showCorrectFeedbackPanel",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 27,
+   "linesZh": 27
+  },
+  {
+   "name": "flyBlockToSlot",
+   "kind": "function",
+   "area": "outros",
+   "cls": "quase igual",
+   "similarity": 0.96,
+   "linesFr": 26,
+   "linesZh": 26
+  },
+  {
+   "name": "md5Hex",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 52,
+   "linesZh": 0
+  },
+  {
+   "name": "REALITY_NOTE_LEVEL_GUIDANCE",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.9,
+   "linesFr": 28,
+   "linesZh": 22
+  },
+  {
+   "name": "isCardLessonCompleted",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 26,
+   "linesZh": 24
+  },
+  {
+   "name": "renderModuleCompleteScreen",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 49,
+   "linesZh": 0
+  },
+  {
+   "name": "renderConjSelectScreen",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 49,
+   "linesZh": 0
+  },
+  {
+   "name": "checkListenTranslateAnswer",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 49,
+   "linesZh": 0
+  },
+  {
+   "name": "renderVocabStrengthWidget",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 24,
+   "linesZh": 24
+  },
+  {
+   "name": "mapUnitDescribe",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "quase igual",
+   "similarity": 0.94,
+   "linesFr": 24,
+   "linesZh": 23
+  },
+  {
+   "name": "fillExpressionLevelSections",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 47,
+   "linesZh": 0
+  },
+  {
+   "name": "renderHanziViewCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 47
+  },
+  {
+   "name": "renderMatchGame",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.78,
+   "linesFr": 23,
+   "linesZh": 23
+  },
+  {
+   "name": "renderExpressionQuestionScreen",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 44,
+   "linesZh": 0
+  },
+  {
+   "name": "renderChallengePreviewBanner",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 44,
+   "linesZh": 0
+  },
+  {
+   "name": "renderLevelModalList",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 42,
+   "linesZh": 0
+  },
+  {
+   "name": "buildSearchIndex",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 42
+  },
+  {
+   "name": "backToReviewModeSelect",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.98,
+   "linesFr": 21,
+   "linesZh": 20
+  },
+  {
+   "name": "importChallengesFromJSON",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 41,
+   "linesZh": 0
+  },
+  {
+   "name": "loadStateAndRender",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 20,
+   "linesZh": 20
+  },
+  {
+   "name": "maybeSendStudyReminder",
+   "kind": "function",
+   "area": "outros",
+   "cls": "quase igual",
+   "similarity": 0.94,
+   "linesFr": 20,
+   "linesZh": 20
+  },
+  {
+   "name": "checkAndCelebrateBadges",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 20,
+   "linesZh": 20
+  },
+  {
+   "name": "advanceConceptStep",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 20,
+   "linesZh": 20
+  },
+  {
+   "name": "startMatchGame",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 20,
+   "linesZh": 20
+  },
+  {
+   "name": "playDictationSentence",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 40,
+   "linesZh": 0
+  },
+  {
+   "name": "diffDictationWords",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 40,
+   "linesZh": 0
+  },
+  {
+   "name": "openClozeGrammarPlayer",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 40,
+   "linesZh": 0
+  },
+  {
+   "name": "maybeShowStreakCelebration",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 19,
+   "linesZh": 19
+  },
+  {
+   "name": "resolveRevisaoMission",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 19,
+   "linesZh": 19
+  },
+  {
+   "name": "renderChallengeChipHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 19,
+   "linesZh": 19
+  },
+  {
+   "name": "buildConsolidationVocabExercises",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 19,
+   "linesZh": 19
+  },
+  {
+   "name": "renderUnitSummaryHTML",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 38
+  },
+  {
+   "name": "refreshStudyCardTexts",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "divergente",
+   "similarity": 0.51,
+   "linesFr": 15,
+   "linesZh": 22
+  },
+  {
+   "name": "buildModuleChallengesRow",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 37,
+   "linesZh": 0
+  },
+  {
+   "name": "runSpeedTimer",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 18,
+   "linesZh": 18
+  },
+  {
+   "name": "renderReviewTagFilter",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 18,
+   "linesZh": 18
+  },
+  {
+   "name": "spawnConfetti",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 17,
+   "linesZh": 17
+  },
+  {
+   "name": "deckReviewSummary",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 17,
+   "linesZh": 17
+  },
+  {
+   "name": "buildHanziCards",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 34
+  },
+  {
+   "name": "loadChallengesFromDB",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 33,
+   "linesZh": 0
+  },
+  {
+   "name": "openListenTranslatePlayer",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 33,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeQualityChecklist",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 33,
+   "linesZh": 0
+  },
+  {
+   "name": "findMatchingPhrase",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "divergente",
+   "similarity": 0.7,
+   "linesFr": 19,
+   "linesZh": 13
+  },
+  {
+   "name": "ensureCourseDecksLoaded",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 16,
+   "linesZh": 16
+  },
+  {
+   "name": "buildCardsFromUnits",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.82,
+   "linesFr": 16,
+   "linesZh": 15
+  },
+  {
+   "name": "buildLevelReviewRow",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 31,
+   "linesZh": 0
+  },
+  {
+   "name": "exerciseXP",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 16,
+   "linesZh": 15
+  },
+  {
+   "name": "renderDialogueCheckStep",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.82,
+   "linesFr": 15,
+   "linesZh": 16
+  },
+  {
+   "name": "wireChallengeCompleteButton",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 31,
+   "linesZh": 0
+  },
+  {
+   "name": "ptVerbPersonTags",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 31,
+   "linesZh": 0
+  },
+  {
+   "name": "analyzeTranslation",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 31,
+   "linesZh": 0
+  },
+  {
+   "name": "wireChallengesAdminFilterBar",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 31,
+   "linesZh": 0
+  },
+  {
+   "name": "dlgHighlightPinyin",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 31
+  },
+  {
+   "name": "maybeShowReviewReminder",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 15,
+   "linesZh": 15
+  },
+  {
+   "name": "ensureDailyBucket",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 15,
+   "linesZh": 15
+  },
+  {
+   "name": "currentStepDefs",
+   "kind": "function",
+   "area": "outros",
+   "cls": "quase igual",
+   "similarity": 0.84,
+   "linesFr": 16,
+   "linesZh": 14
+  },
+  {
+   "name": "startBridgeQueue",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 15,
+   "linesZh": 15
+  },
+  {
+   "name": "animateCount",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 15,
+   "linesZh": 15
+  },
+  {
+   "name": "renderMatchTiles",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 15,
+   "linesZh": 15
+  },
+  {
+   "name": "renderDictationList",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 30,
+   "linesZh": 0
+  },
+  {
+   "name": "markTranslationWords",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 30,
+   "linesZh": 0
+  },
+  {
+   "name": "renderGrammarExplanationStep",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 29,
+   "linesZh": 0
+  },
+  {
+   "name": "dlgHighlight",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "divergente",
+   "similarity": 0.67,
+   "linesFr": 15,
+   "linesZh": 14
+  },
+  {
+   "name": "PT_IRREGULAR_VERB_FORMS",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 29,
+   "linesZh": 0
+  },
+  {
+   "name": "openAccentPlayer",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 29,
+   "linesZh": 0
+  },
+  {
+   "name": "renderHanziLessonsGrid",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 29
+  },
+  {
+   "name": "GENERAL_CHALLENGES",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "quase igual",
+   "similarity": 0.91,
+   "linesFr": 14,
+   "linesZh": 14
+  },
+  {
+   "name": "seedEarnedBadges",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 14,
+   "linesZh": 14
+  },
+  {
+   "name": "SPEED_STATE",
+   "kind": "dados",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 14,
+   "linesZh": 14
+  },
+  {
+   "name": "startSpeedReview",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 14,
+   "linesZh": 14
+  },
+  {
+   "name": "gradeButtonsHTML",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 14,
+   "linesZh": 14
+  },
+  {
+   "name": "mergeSplitCompoundWords",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 28,
+   "linesZh": 0
+  },
+  {
+   "name": "checkAccentAnswer",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 28,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminEditViewExpression",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 27,
+   "linesZh": 0
+  },
+  {
+   "name": "playFeedbackTone",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 13,
+   "linesZh": 13
+  },
+  {
+   "name": "mergeTeacherFlashcardsIntoState",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 13,
+   "linesZh": 13
+  },
+  {
+   "name": "mergeSelfFlashcardsIntoState",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 13,
+   "linesZh": 13
+  },
+  {
+   "name": "showStreakCelebration",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 13,
+   "linesZh": 13
+  },
+  {
+   "name": "pickVocabFormat",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 13,
+   "linesZh": 13
+  },
+  {
+   "name": "lessonRecapItems",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 13,
+   "linesZh": 13
+  },
+  {
+   "name": "reviewFilterQueue",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 14,
+   "linesZh": 11
+  },
+  {
+   "name": "buildModuleReviewRow",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 25,
+   "linesZh": 0
+  },
+  {
+   "name": "openCheckpoint",
+   "kind": "function",
+   "area": "checkpoint e testes",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 25,
+   "linesZh": 0
+  },
+  {
+   "name": "openLevelTest",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 25,
+   "linesZh": 0
+  },
+  {
+   "name": "approveChallengeWithGate",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 25,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminPublishedCardHTML",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 25,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminPendingCardHTML",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 25,
+   "linesZh": 0
+  },
+  {
+   "name": "playFeedbackSound",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 12,
+   "linesZh": 12
+  },
+  {
+   "name": "buildAcquisitionBlocks",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 12,
+   "linesZh": 12
+  },
+  {
+   "name": "exitToPath",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "quase igual",
+   "similarity": 0.89,
+   "linesFr": 13,
+   "linesZh": 11
+  },
+  {
+   "name": "advanceToNextBlockOrConsolidation",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 12,
+   "linesZh": 12
+  },
+  {
+   "name": "reviewProgressBarHTML",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 12,
+   "linesZh": 12
+  },
+  {
+   "name": "renderClozeGrammarFeedback",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 24,
+   "linesZh": 0
+  },
+  {
+   "name": "prepareDictationUserText",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 23,
+   "linesZh": 0
+  },
+  {
+   "name": "gradeHanziCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 23
+  },
+  {
+   "name": "renderRadicalsGrid",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 23
+  },
+  {
+   "name": "warmUpTTSOnce",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 11,
+   "linesZh": 11
+  },
+  {
+   "name": "stopExerciseAudio",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 11,
+   "linesZh": 11
+  },
+  {
+   "name": "CULTURE_NOTE_CATEGORY",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 11,
+   "linesZh": 11
+  },
+  {
+   "name": "dlgVocabTerms",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "divergente",
+   "similarity": 0.36,
+   "linesFr": 16,
+   "linesZh": 6
+  },
+  {
+   "name": "checkUnitCompletion",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 11,
+   "linesZh": 11
+  },
+  {
+   "name": "noteOrConceptReviewHTML",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.87,
+   "linesFr": 10,
+   "linesZh": 11
+  },
+  {
+   "name": "buildSpeedQueue",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 13,
+   "linesZh": 8
+  },
+  {
+   "name": "startModuleReviewSession",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 21,
+   "linesZh": 0
+  },
+  {
+   "name": "completeModuleUnits",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 21,
+   "linesZh": 0
+  },
+  {
+   "name": "frenchNumberWords",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 21,
+   "linesZh": 0
+  },
+  {
+   "name": "translationHasPersonMismatch",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 21,
+   "linesZh": 0
+  },
+  {
+   "name": "openRadicalDetail",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 21
+  },
+  {
+   "name": "checkDailyMissionCompletions",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 10,
+   "linesZh": 10
+  },
+  {
+   "name": "findEnterAdvanceTarget",
+   "kind": "function",
+   "area": "outros",
+   "cls": "quase igual",
+   "similarity": 0.79,
+   "linesFr": 11,
+   "linesZh": 9
+  },
+  {
+   "name": "expressionTodayHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 20,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminReadViewExpression",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 20,
+   "linesZh": 0
+  },
+  {
+   "name": "freshDailyBucket",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "quase igual",
+   "similarity": 0.8,
+   "linesFr": 10,
+   "linesZh": 9
+  },
+  {
+   "name": "buildCheckpointRow",
+   "kind": "function",
+   "area": "checkpoint e testes",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 19,
+   "linesZh": 0
+  },
+  {
+   "name": "mergeDictationDiff",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 19,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationSentenceErrorFlags",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 19,
+   "linesZh": 0
+  },
+  {
+   "name": "expressionCardHTML",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 19,
+   "linesZh": 0
+  },
+  {
+   "name": "openStory",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 19
+  },
+  {
+   "name": "renderHanziStudyStep",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 19
+  },
+  {
+   "name": "wireAudioButtons",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "quase igual",
+   "similarity": 0.95,
+   "linesFr": 9,
+   "linesZh": 9
+  },
+  {
+   "name": "buildStreakWeekData",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 9,
+   "linesZh": 9
+  },
+  {
+   "name": "registerDailyExerciseFormat",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 9,
+   "linesZh": 9
+  },
+  {
+   "name": "checkDailyMissionsBonus",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 9,
+   "linesZh": 9
+  },
+  {
+   "name": "processBadgeCelebrationQueue",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 9,
+   "linesZh": 9
+  },
+  {
+   "name": "unitProgressFraction",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 9,
+   "linesZh": 9
+  },
+  {
+   "name": "pendingConceptsForBlock",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 9,
+   "linesZh": 9
+  },
+  {
+   "name": "advanceUnitStep",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "quase igual",
+   "similarity": 0.94,
+   "linesFr": 9,
+   "linesZh": 9
+  },
+  {
+   "name": "setAcqPhaseBanner",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 9,
+   "linesZh": 9
+  },
+  {
+   "name": "vocabStrengthBuckets",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 9,
+   "linesZh": 9
+  },
+  {
+   "name": "MATCH_STATE",
+   "kind": "dados",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 9,
+   "linesZh": 9
+  },
+  {
+   "name": "updateStudySetting",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 9,
+   "linesZh": 9
+  },
+  {
+   "name": "tokenizeDictationText",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 18,
+   "linesZh": 0
+  },
+  {
+   "name": "splitDictationSentences",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 18,
+   "linesZh": 0
+  },
+  {
+   "name": "openChallengePlayer",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 18,
+   "linesZh": 0
+  },
+  {
+   "name": "challengesAdminFilterBarHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 18,
+   "linesZh": 0
+  },
+  {
+   "name": "fillModuleChallengeRows",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 17,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminResourceHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 17,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminEditViewListenTranslate",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 17,
+   "linesZh": 0
+  },
+  {
+   "name": "challengesAdminBulkToolbarHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 17,
+   "linesZh": 0
+  },
+  {
+   "name": "startHanziReviewSession",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 17
+  },
+  {
+   "name": "pollForVoices",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "quase igual",
+   "similarity": 0.93,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "wireCustomAudioButtons",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "materializeMission",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "todaysChallenges",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "unitCardCounts",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "lessonRowState",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "wireHeaderActivation",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "setLessonFocusMode",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "buildVocabWordExercise",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "buildMixedQueue",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "runConceptQueueThen",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "startBlockCheckpoint",
+   "kind": "function",
+   "area": "checkpoint e testes",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "dlgShuffle",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "wireFrAccentPicker",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 16,
+   "linesZh": 0
+  },
+  {
+   "name": "reviewSessionFilterSummary",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "ensureDecksLoadedForReview",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "shuffle",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "switchSettingsSection",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 8,
+   "linesZh": 8
+  },
+  {
+   "name": "dictationWrongWords",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 16,
+   "linesZh": 0
+  },
+  {
+   "name": "validateClozeGrammarItem",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 16,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAudioFields",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 16,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminEditViewClozeGrammar",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 16,
+   "linesZh": 0
+  },
+  {
+   "name": "renderChallengesAdmin",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 16,
+   "linesZh": 0
+  },
+  {
+   "name": "convertNumberedPinyinSyllable",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 16
+  },
+  {
+   "name": "findHanziAppearances",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 16
+  },
+  {
+   "name": "REVISAO_CONJ_CHALLENGES",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 15,
+   "linesZh": 0
+  },
+  {
+   "name": "buildLevelTestCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 15,
+   "linesZh": 0
+  },
+  {
+   "name": "classifyDictationError",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 15,
+   "linesZh": 0
+  },
+  {
+   "name": "renderChallengeReviewDoneScreen",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 15,
+   "linesZh": 0
+  },
+  {
+   "name": "renderChallengeQueueLevelDoneScreen",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 15,
+   "linesZh": 0
+  },
+  {
+   "name": "translationAlertsHTML",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 15,
+   "linesZh": 0
+  },
+  {
+   "name": "openHanziLesson",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 15
+  },
+  {
+   "name": "renderHanziProgress",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 15
+  },
+  {
+   "name": "advanceHanziAfterWrite",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 15
+  },
+  {
+   "name": "TTS",
+   "kind": "dados",
+   "area": "áudio e fala",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "voiceQualityScore",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "getFeedbackAudioCtx",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "addSelfFlashcardToState",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "registerDailyLessonForGoal",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "challengeById",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "assignTodaysMissions",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "quase igual",
+   "similarity": 0.87,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "currentWeekStart",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "UNIT_ICONS",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "divergente",
+   "similarity": 0.25,
+   "linesFr": 8,
+   "linesZh": 6
+  },
+  {
+   "name": "computeProgressSummary",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "divergente",
+   "similarity": 0.68,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "isDailyChallengesStripCollapsed",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "acqPhaseSequence",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "buildBlockCheckpointQueue",
+   "kind": "function",
+   "area": "checkpoint e testes",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "acqPhaseBannerText",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "dueReviewQueueOptions",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "reviewCardTagLabel",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.95,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "completeLevelTest",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 14,
+   "linesZh": 0
+  },
+  {
+   "name": "toggleReviewSettingsPanel",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 7,
+   "linesZh": 7
+  },
+  {
+   "name": "evaluateDictation",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 14,
+   "linesZh": 0
+  },
+  {
+   "name": "DICT_HOMOPHONE_GROUPS",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 14,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationLightNoteText",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 14,
+   "linesZh": 0
+  },
+  {
+   "name": "translationEditDistance",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 14,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeQualityChecklistHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 14,
+   "linesZh": 0
+  },
+  {
+   "name": "unpublishChallenge",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 14,
+   "linesZh": 0
+  },
+  {
+   "name": "challengesAdminSectionHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 14,
+   "linesZh": 0
+  },
+  {
+   "name": "markHanziLessonCompleted",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 14
+  },
+  {
+   "name": "REALITY_NOTE_BANNER_TEXT",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 6,
+   "linesZh": 7
+  },
+  {
+   "name": "CONTENT_I18N",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "divergente",
+   "similarity": 0.71,
+   "linesFr": 7,
+   "linesZh": 6
+  },
+  {
+   "name": "registerDailyLessonCompleted",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "divergente",
+   "similarity": 0.75,
+   "linesFr": 7,
+   "linesZh": 6
+  },
+  {
+   "name": "renderGramTableHTML",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 13,
+   "linesZh": 0
+  },
+  {
+   "name": "clozeFeedbackDetailHTML",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "divergente",
+   "similarity": 0.32,
+   "linesFr": 7,
+   "linesZh": 6
+  },
+  {
+   "name": "CONJ_STATE",
+   "kind": "dados",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 13,
+   "linesZh": 0
+  },
+  {
+   "name": "expressionOfTheDay",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 13,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeCardHTML",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 13,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminReadViewListenTranslate",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 13,
+   "linesZh": 0
+  },
+  {
+   "name": "REVISAO_HANZI_CHALLENGES",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 13
+  },
+  {
+   "name": "finishStory",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 13
+  },
+  {
+   "name": "wirePinyinTonePicker",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 13
+  },
+  {
+   "name": "registerAudioPlay",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 6,
+   "linesZh": 6
+  },
+  {
+   "name": "missionReviewSupply",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 6,
+   "linesZh": 6
+  },
+  {
+   "name": "currentLessonIdx",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 6,
+   "linesZh": 6
+  },
+  {
+   "name": "hardWordsPool",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 6,
+   "linesZh": 6
+  },
+  {
+   "name": "REVIEW_ORIGIN_LABELS",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.9,
+   "linesFr": 6,
+   "linesZh": 6
+  },
+  {
+   "name": "stopSpeedTimer",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 6,
+   "linesZh": 6
+  },
+  {
+   "name": "reviewXP",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 6,
+   "linesZh": 6
+  },
+  {
+   "name": "updateDictationRecord",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 12,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeResourceCardHTML",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 12,
+   "linesZh": 0
+  },
+  {
+   "name": "renderChallengeQueueContinueScreen",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 12,
+   "linesZh": 0
+  },
+  {
+   "name": "listenTranslateSetup",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 12,
+   "linesZh": 0
+  },
+  {
+   "name": "wireChallengeAudioDurations",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 12,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminReadViewClozeGrammar",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 12,
+   "linesZh": 0
+  },
+  {
+   "name": "approveChallengeSilent",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 12,
+   "linesZh": 0
+  },
+  {
+   "name": "buildRadicalsIndex",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 12
+  },
+  {
+   "name": "buildHanziTestOptions",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 12
+  },
+  {
+   "name": "loadFrenchVoice",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 11,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_TENSES",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 11,
+   "linesZh": 0
+  },
+  {
+   "name": "sanitizeDictationRecord",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 11,
+   "linesZh": 0
+  },
+  {
+   "name": "parseChallengesImportInput",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 11,
+   "linesZh": 0
+  },
+  {
+   "name": "persistChallenge",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 11,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeFeedbackWrapperHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 11,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminEditViewAccent",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 11,
+   "linesZh": 0
+  },
+  {
+   "name": "loadChineseVoice",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 11
+  },
+  {
+   "name": "updateSelfFlashcardStatusInState",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "CULTURE_NOTE_BANNER_TEXT",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "registerDailySpeedReview",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "registerDailyMatchGame",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "dailySeed",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "missionOverdueSupply",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "releaseBadgeCelebrations",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "recalculateUnlockedUnits",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "renderLevelSelect",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 10,
+   "linesZh": 0
+  },
+  {
+   "name": "maskWordInText",
+   "kind": "function",
+   "area": "outros",
+   "cls": "quase igual",
+   "similarity": 0.84,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "finishBlockIntro",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "currentStudentName",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "divergente",
+   "similarity": 0.65,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "reorderDistractorCount",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "addStudyMinutes",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "cardAnswerText",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "REVIEW_FILTER_LABELS",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "renderSettingsView",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 5,
+   "linesZh": 5
+  },
+  {
+   "name": "normalizeDictationWord",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 10,
+   "linesZh": 0
+  },
+  {
+   "name": "dictLightReason",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 10,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationWordHtml",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 10,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeExternalResourcesHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 10,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminCardTitle",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 10,
+   "linesZh": 0
+  },
+  {
+   "name": "openChallengePreview",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 10,
+   "linesZh": 0
+  },
+  {
+   "name": "pinyinToneVowelIndex",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 10
+  },
+  {
+   "name": "HANZI_STUDY_STATE",
+   "kind": "dados",
+   "area": "estado e persistência",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 10
+  },
+  {
+   "name": "LEVEL_DESCRIPTIONS",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "divergente",
+   "similarity": 0.42,
+   "linesFr": 5,
+   "linesZh": 4
+  },
+  {
+   "name": "getStepDefs",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 9,
+   "linesZh": 0
+  },
+  {
+   "name": "buildLevelTestQueue",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 9,
+   "linesZh": 0
+  },
+  {
+   "name": "conjHintPlaceholder",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 9,
+   "linesZh": 0
+  },
+  {
+   "name": "stopDictationAudio",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 9,
+   "linesZh": 0
+  },
+  {
+   "name": "chT",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 9,
+   "linesZh": 0
+  },
+  {
+   "name": "updateChallengeReviewEntry",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 9,
+   "linesZh": 0
+  },
+  {
+   "name": "markChallengeCompleted",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 9,
+   "linesZh": 0
+  },
+  {
+   "name": "applyChallengesAdminFilters",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 9,
+   "linesZh": 0
+  },
+  {
+   "name": "applyPinyinVisibility",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 9
+  },
+  {
+   "name": "audioBtnHTML",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "quase igual",
+   "similarity": 0.85,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "replaceSelfFlashcardInState",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "isRealityNoteCategoryAllowedAtLevel",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "updateClozeModeSwitch",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "updateFeedbackSoundSwitch",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "registerDailyReviewCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "registerDailyOverdueReviewCard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "EASY_CHALLENGES",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "missionMatchGameFeasible",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "missionSpeedReviewFeasible",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "ensurePeriodXp",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "currentLesson",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "openLessonReview",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "pendingConceptsAfterDialogue",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "hideAcqPhaseBanner",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "FR_ACCENT_GROUPS",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "nextCorrectFeedbackPhrase",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "nextComboPhrase",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "hasPlainFrontBack",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "cardPromptText",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "matchesReviewOriginFilter",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "syncReviewBackLink",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "normalizeNewCardsPerDay",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 4,
+   "linesZh": 4
+  },
+  {
+   "name": "stopDictationSentenceAudio",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "DICT_SPOKEN_PUNCT",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "sanitizeChallengeReviewEntry",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeProgressHTML",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "wireExpressionAudioButtons",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "normalizeForTranslationCompare",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "translationSimilarity",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "translationNumbers",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "translationWordsAreNear",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminReadViewAccent",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "removePreviewWarningEl",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "wireStrokeButtons",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 8
+  },
+  {
+   "name": "PINYIN_TONE_MARKS",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 8
+  },
+  {
+   "name": "PINYIN_TONE_GROUPS",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 8
+  },
+  {
+   "name": "zhTypeAnswerExportColumns",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 8
+  },
+  {
+   "name": "CHECKPOINT_STATE",
+   "kind": "dados",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
+   "name": "LEVEL_TEST_STATE",
+   "kind": "dados",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
+   "name": "getConjForms",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGE_DB_COLUMNS",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeDataPayload",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
+   "name": "openChallengeReviewQueue",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeCardLabelHTML",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
+   "name": "EXPRESSION_REGISTERS",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
+   "name": "answerChallenge",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
+   "name": "listenTranslateOutcome",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
+   "name": "clozeGrammarOutcome",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
+   "name": "clozeGrammarFilled",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
+   "name": "STEP_DEFS",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 7
+  },
+  {
+   "name": "buildCumulativeVocabPool",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 7
+  },
+  {
+   "name": "isFeedbackSoundEnabled",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "playAudioPreview",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.79,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "customAudioBtnHTML",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "quase igual",
+   "similarity": 0.81,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "flashcardIdForRow",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "buildCardFromTeacherFlashcard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "buildCardFromSelfFlashcard",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "removeSelfFlashcardFromState",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "getClozeMode",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "registerDailyConjugationTense",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "pickDailyFromPool",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "unitOrdinalInfo",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "trailGroups",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "divergente",
+   "similarity": 0.17,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "unitBlockState",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "isAdminUser",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "getStepDefsGrammar",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "isLessonUnit",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "buildPracticeQueue",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "prefersReducedMotion",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "dlgAutoplayOn",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "dlgSetAutoplay",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "anyAppModalOpen",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "showWrongAnswerPanel",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "quase igual",
+   "similarity": 0.78,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "activeReviewTagFilter",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "matchesReviewTagFilter",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "eligibleReviewPool",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "reviewTagUniverse",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "eligibleDeckReviewPool",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "buildDueReviewQueue",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "trueDueReviewCount",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "todaysReviewCount",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "lessonIndexForVocabIdx",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "deckCountsForReview",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "renderGoalsView",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "acceptedForms",
+   "kind": "function",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 3,
+   "linesZh": 3
+  },
+  {
+   "name": "dictLooseNorm",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGE_CATEGORIES",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "dueChallengeReviewIds",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "recordChallengeReviewOutcome",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeRetryButtonsHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "expressionCardMeaning",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "PT_NUMBER_WORDS",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "accentAnswerOutcome",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGE_RESOURCE_TYPE_LABEL",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminReadView",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAdminEditView",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGE_TYPE_LABELS",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 6,
+   "linesZh": 0
+  },
+  {
+   "name": "phraseFeedbackDetailHTML",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 6
+  },
+  {
+   "name": "normalizePinyinAnswer",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 6
+  },
+  {
+   "name": "recalculateHanziLocks",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 6
+  },
+  {
+   "name": "SCENARIO_FLAG_SVG",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "frAccentPickerHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "ensureTrailTeacherLink",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "buildCheckpointQueue",
+   "kind": "function",
+   "area": "checkpoint e testes",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "recordCheckpointAttempt",
+   "kind": "function",
+   "area": "checkpoint e testes",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "recordLevelTestAttempt",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "moduleTitleFor",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationCardProgressHTML",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationScoreColorVar",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "openModuleChallenges",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "expressionRegisterChipHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "openChallengeQueueLevel",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "queueLevelProgressLabel",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "TRANSLATION_STOPWORDS_PT",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationTask",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGE_RESOURCE_QUALITY_LABEL",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "togglePinyinVisibility",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 5
+  },
+  {
+   "name": "STORY_STATE",
+   "kind": "dados",
+   "area": "estado e persistência",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 5
+  },
+  {
+   "name": "renderStoryProgress",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 5
+  },
+  {
+   "name": "isToneOnlyMiss",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 5
+  },
+  {
+   "name": "pinyinTonePickerHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 5
+  },
+  {
+   "name": "cardPromptPinyinText",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 5
+  },
+  {
+   "name": "speakFrench",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "scenarioSceneHTML",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "registerDailyStars",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "registerDailyConjugationSession",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "registerDailyConjugationCorrect",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "moduleProgressPct",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "levelCompleted",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "moduleReviewSelection",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "recordModuleReviewDone",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "trailSkipAllowed",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "conjPersonLabel",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationAudioPath",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "dictIsAbbreviation",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "listedChallenges",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "openPremiumChallengesModal",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeReviewDayNumber",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "isChallengeReviewDue",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "dueChallengeReviews",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "backToChallengesListOrCategories",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "isDictationDone",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "expressionAudioBtnHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "isTranslationAcceptable",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeOverlay",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeText",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "PT_SUBJECT_PRONOUN_PERSON",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeAudioIsFresh",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeSearchableText",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 4,
+   "linesZh": 0
+  },
+  {
+   "name": "speakChinese",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 4
+  },
+  {
+   "name": "strokeBtnHTML",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 4
+  },
+  {
+   "name": "registerDailyHanziLesson",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 4
+  },
+  {
+   "name": "dlgSpeakerSide",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 4
+  },
+  {
+   "name": "phraseForExercise",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 4
+  },
+  {
+   "name": "toneHintHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 4
+  },
+  {
+   "name": "canSpeakFrench",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "tpZero",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "slowAudioBtnHTML",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "slowAudioIconBtnHTML",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "isFirstOfLevel",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "unitsOfLevel",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "modulesOfLevel",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "moduleUnlocked",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "moduleCompleted",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "levelTestsOfLevel",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "lessonStars",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "flashcardUnitTitleText",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "showTrailSkipLocked",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "normalizeLoose",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "conjActiveMask",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationSentenceAudioPath",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "escapeHtmlDictation",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "dictBareWord",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "dictDisplayWord",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "isChallengesAdmin",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "escapeHtmlChallenge",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "publishedChallenges",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "pendingChallenges",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "applyChallengeI18n",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "challengesPremiumUnlocked",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "tierBadgeHTML",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationsVisible",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "isChallengeLocked",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "isDictationLocked",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "playableChallenges",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "ensureChallengesPlanLoaded",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "unpublishedButApprovedChallenges",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "isChallengeCompleted",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeReviewDueDay",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeCompleteButtonHTML",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeSearchHaystack",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "nextQueueChallenge",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "openExpressionPlayer",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "translationTokenSet",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "translationHasNegation",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "markedWordsHTML",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "normalizeForAccentCompare",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "isAccentAnswerCorrect",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "stripDiacriticsForAccentCompare",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "clozeGrammarParts",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "clozeGrammarBlanksText",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "canSpeakChinese",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 3
+  },
+  {
+   "name": "extractHanziChars",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 3
+  },
+  {
+   "name": "loadPinyinPreference",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 3
+  },
+  {
+   "name": "loadLegacyState",
+   "kind": "function",
+   "area": "estado e persistência",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 3
+  },
+  {
+   "name": "stripTones",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 3
+  },
+  {
+   "name": "currentStory",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 3
+  },
+  {
+   "name": "pinyinWithoutTones",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 3
+  },
+  {
+   "name": "convertNumberedPinyin",
+   "kind": "function",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 3
+  },
+  {
+   "name": "cardOriginTitle",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 3
+  },
+  {
+   "name": "currentHanziLesson",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 3
+  },
+  {
+   "name": "exerciseAudioEl",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "LAST_AUDIO_BTN",
+   "kind": "dados",
+   "area": "áudio e fala",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "FEEDBACK_SOUND_KEY",
+   "kind": "dados",
+   "area": "áudio e fala",
+   "cls": "divergente",
+   "similarity": 0.33,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "feedbackAudioCtx",
+   "kind": "dados",
+   "area": "áudio e fala",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "APP_KEY",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "divergente",
+   "similarity": 0.33,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "LANGUAGE_STUDY_NAME",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "divergente",
+   "similarity": 0.25,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "LANG_ID",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "divergente",
+   "similarity": 0.33,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "CLOZE_MODE_KEY",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "divergente",
+   "similarity": 0.33,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "REVIEW_REMINDER_THRESHOLD",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "MISSION_QUANTITY_FLOOR",
+   "kind": "dados",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "ALL_CHALLENGE_POOLS",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "divergente",
+   "similarity": 0.6,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "earnedBadgeIds",
+   "kind": "dados",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "badgeCelebrationQueue",
+   "kind": "dados",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "badgeCelebrationShowing",
+   "kind": "dados",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "badgeCelebrationHeld",
+   "kind": "dados",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "holdBadgeCelebrations",
+   "kind": "function",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "TRAIL_VIEW_KEY",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "divergente",
+   "similarity": 0.33,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "ADMIN_EMAIL",
+   "kind": "dados",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "UNIT_BLOCK_EXPAND_OVERRIDE",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "CHALLENGES_STRIP_COLLAPSE_KEY",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "divergente",
+   "similarity": 0.33,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "ACQ_BLOCK_SIZE",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "CONFETTI_COLORS",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "DLG",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "DLG_AUTOPLAY_KEY",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "dlgSleep",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "CONSOLIDATION_CAP",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "KEYBOARD_OPTION_MAP",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "clearKeyboardOptions",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "ESTIMATED_SECONDS_PER_EXERCISE",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "CORRECT_FEEDBACK_PHRASES",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "correctFeedbackQueue",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "COMBO_PHRASES",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "comboPhraseQueue",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "COMBO_MIN",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "COMBO_MILESTONE_STEP",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "SPEED_TIME_LIMIT",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "SPEED_REVIEW_XP_PER_CORRECT",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "MATCH_SIZE_OPTIONS",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "SIDEBAR_COLLAPSE_KEY",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "SETTINGS_SECTION",
+   "kind": "dados",
+   "area": "perfil, ranking e social",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "NEW_CARDS_PER_DAY_OPTIONS",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "idêntica",
+   "similarity": 1,
+   "linesFr": 1,
+   "linesZh": 1
+  },
+  {
+   "name": "PREGEN_AUDIO_RATE",
+   "kind": "dados",
+   "area": "áudio e fala",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "SLOW_AUDIO_RATE",
+   "kind": "dados",
+   "area": "áudio e fala",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "moduleChallengesLoadAttempted",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "stopMatchTimer",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CHECKPOINT_PASS_THRESHOLD",
+   "kind": "dados",
+   "area": "checkpoint e testes",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "TRAIL_SKIP_PAYWALL_ENABLED",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "TRAIL_TEACHER_LINK",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "LEVEL_TEST_PASS_THRESHOLD",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "LEVEL_TEST_QUESTIONS_PER_MODULE",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_PERSON_LABELS",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_IMPERATIF_ACTIVE",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_VERB_RANK",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_TOTAL_VERBS",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_TOPN_OPTIONS",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_REGULAR_GROUPS",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_IRREGULAR_GROUPS",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_SESSION_SIZE",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "isLevelReviewId",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationAudioEl",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationSentenceAudioEl",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationSentenceBtn",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationSentenceMissing",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "isDictationScrubbing",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationScrubHandler",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "DICT_FR_UNITS",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "DICT_MARKS_RE",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "dictMarksOf",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "dictBareWordRaw",
+   "kind": "function",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "DICT_WRONG_WORDS_MAX",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "DICT_SENT_END_RE",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "DICT_SENT_CLOSERS_RE",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "DICT_SENT_ONLY_CLOSERS_RE",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "DICT_SENT_INITIAL_RE",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "DICT_SENT_ABBREVIATIONS",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGES_ADMIN_EMAIL",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGES",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGE_VALID_TYPES",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGE_VALID_STATUSES",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengesLoadedAt",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGES_CACHE_MS",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "currentChallengesCategory",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CURRENT_CHALLENGE_PLAYER",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengesModuleFilter",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "pendingChallengesModuleFilter",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationModuleFilter",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "pendingDictationModuleFilter",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeModuleId",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGE_PAYWALL_ENABLED",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGES_SERVER_GATING",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeTier",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "dictationTier",
+   "kind": "function",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGE_REVIEW_BOX_DAYS",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeReviewQueueActive",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGE_RESOURCE_ICON",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGE_LEVELS_ORDER",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "collapsedChallengeLevels",
+   "kind": "dados",
+   "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengesListSearch",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengesListFilter",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengeQueueContext",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengePreviewMode",
+   "kind": "dados",
+   "area": "revisão e decks",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "PT_NEGATION_WORDS",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CLOZE_GRAMMAR_BLANK",
+   "kind": "dados",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengesAdminEditingId",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengesAdminSelectedIds",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengesAdminFilterState",
+   "kind": "dados",
+   "area": "estado e persistência",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CHALLENGES_ADMIN_PAGE_SIZE",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "challengesAdminVisibleCount",
+   "kind": "dados",
+   "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "HANZI_WRITER_SUPPORTED",
+   "kind": "dados",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 1
+  },
+  {
+   "name": "strokeWriterInstances",
+   "kind": "dados",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 1
+  },
+  {
+   "name": "PINYIN_TOGGLE_KEY",
+   "kind": "dados",
+   "area": "áudio e fala",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 1
+  },
+  {
+   "name": "SEARCH_PAGE_SIZE",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 1
+  },
+  {
+   "name": "searchVisibleCount",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 1
+  },
+  {
+   "name": "lastSearchQuery",
+   "kind": "dados",
+   "area": "outros",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 1
+  },
+  {
+   "name": "clozeExercisePhrase",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só zh",
+   "similarity": null,
+   "linesFr": 0,
+   "linesZh": 1
+  }
+ ]
+}
