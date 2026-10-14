@@ -94,12 +94,18 @@ async function refreshStudentTeacherNav(){
 function applyStudentNavVisibility(){
   const logged = typeof CURRENT_USER !== 'undefined' && !!CURRENT_USER;
   const hasTeacher = typeof MURAL_STATE !== 'undefined' && !!(MURAL_STATE.list && MURAL_STATE.list.as_student);
-  const on = logged && (hasTeacher || STUDENT_TEACHER_NAV.logs > 0 || STUDENT_TEACHER_NAV.materials > 0);
+  const on = logged && (hasTeacher || STUDENT_TEACHER_NAV.logs > 0 || STUDENT_TEACHER_NAV.materials > 0 || studentHasClassReviewCards());
   document.querySelectorAll('#student-panel-btn, .student-only-nav').forEach(el => { el.style.display = on ? '' : 'none'; });
 }
 
-// ---------- Aluno: Mural | Aulas | Material de apoio (decisão da autora, 2026-10-13) ----------
-const STUDENT_PANEL_SECTIONS = ['mural', 'classlogs', 'materials'];
+// Cartões da professora (Banco de Revisão) no idioma atual -- a aba Aluno > Revisão existe por causa deles.
+function studentHasClassReviewCards(){
+  return typeof STATE !== 'undefined' && Array.isArray(STATE.cards) && typeof isClassReviewCard === 'function'
+    && STATE.cards.some(c => isClassReviewCard(c) && c.flashcardStatus === 'active');
+}
+
+// ---------- Aluno: Mural | Aulas | Material de apoio | Revisão (decisões da autora, 2026-10-13 e 14) ----------
+const STUDENT_PANEL_SECTIONS = ['mural', 'classlogs', 'materials', 'revisao'];
 const STUDENT_PANEL_STATE = { section: 'mural' };
 
 function switchStudentPanelSection(section){
@@ -110,11 +116,48 @@ function switchStudentPanelSection(section){
     btn.classList.toggle('is-active', on);
     btn.setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  const ids = { mural: 'my-mural-content', classlogs: 'my-class-logs-content', materials: 'support-materials-content' };
+  const ids = { mural: 'my-mural-content', classlogs: 'my-class-logs-content', materials: 'support-materials-content', revisao: 'my-class-review-content' };
   STUDENT_PANEL_SECTIONS.forEach(s => { const el = document.getElementById(ids[s]); if (el) el.style.display = s === section ? '' : 'none'; });
   if (section === 'mural') renderMyMuralView();
   else if (section === 'classlogs') renderMyClassLogsView();
+  else if (section === 'revisao') renderClassReviewView();
   else renderSupportMaterialsView();
+}
+
+// ---------- Aluno > Revisão (2026-10-14) ----------
+// Cartões que a professora preparou a partir das aulas (Banco de Revisão). Saíram da
+// Revisão geral: aqui ficam as contagens de hoje e o botão que abre a MESMA sessão de
+// Flashcard (modos de resposta e observações do Banco), só com esses cartões.
+function renderClassReviewView(){
+  const wrap = document.getElementById('my-class-review-content');
+  if (!wrap) return;
+  const pool = typeof classReviewPool === 'function' ? classReviewPool() : [];
+  if (!pool.length){
+    wrap.innerHTML = `<p class="profile-empty-note">${escapeHTML(t('studentPanel.review.empty'))}</p>`;
+    if (typeof muralApplyBadges === 'function') muralApplyBadges();
+    return;
+  }
+  const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
+  const split = { new: 0, learning: 0, review: 0 };
+  queue.forEach(c => { split[cardStudyBucket(c)]++; });
+  const n = queue.length;
+  const num = (v, cls, label) => `<div class="review-today-col"><div class="review-today-count ${v ? cls : 'is-zero'}">${v}</div><div class="review-today-col-label">${escapeHTML(label)}</div></div>`;
+  wrap.innerHTML = `
+    <div class="class-review">
+      <p class="profile-edit-hint">${escapeHTML(t('studentPanel.review.hint'))}</p>
+      <div class="review-today-strip">
+        <div class="review-today-split" aria-label="${escapeHTML(t('review.today.aria', split))}">
+          ${num(split.new, 'is-new', t('review.count.new'))}${num(split.learning, 'is-learning', t('review.count.learning'))}${num(split.review, 'is-review', t('review.count.review'))}
+        </div>
+        <div class="review-today-go">
+          ${n ? `<button class="btn btn-primary" id="class-review-start-btn">${escapeHTML(t('studentPanel.review.start', { n }))}</button>`
+            : `<span class="review-today-done">${escapeHTML(t('review.today.upToDate'))}</span>`}
+        </div>
+      </div>
+      <p class="profile-edit-hint class-review-total">${escapeHTML(tp('studentPanel.review.total', pool.length))}</p>
+    </div>`;
+  document.getElementById('class-review-start-btn')?.addEventListener('click', () => startClassReviewSession());
+  if (typeof muralApplyBadges === 'function') muralApplyBadges();
 }
 
 function renderStudentPanelView(){

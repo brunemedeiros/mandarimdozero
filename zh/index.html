@@ -3314,6 +3314,9 @@ body.hide-pinyin .prompt-pinyin{
 .review-today-strip .review-today-col{ display:grid; line-height:1.1; }
 .review-today-strip .review-today-count{ font-size:26px; }
 .review-today-go{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+/* Aluno > Revisão (cartões da professora): mesma faixa de contagens da Revisão */
+.class-review{ display:grid; gap:10px; }
+.class-review .profile-edit-hint{ margin:0; }
 .review-today-done{ font-size:14px; color:var(--ink-soft); font-weight:700; }
 .review-today-go .btn{ margin:0; min-width:0; width:auto; padding:10px 16px; white-space:nowrap; }
 .review-short-btn{ background:transparent; color:var(--ink); border:1.5px solid var(--paper-line); }
@@ -4609,16 +4612,18 @@ body.hide-pinyin .prompt-pinyin{
   <div class="view panel-view" id="view-student-panel">
     <div class="path-header">
       <h2 data-i18n="studentPanel.title">Aluno</h2>
-      <p data-i18n="studentPanel.sub">Tudo o que vem da sua professora: recados, aulas e materiais.</p>
+      <p data-i18n="studentPanel.sub">Tudo o que vem da sua professora: recados, aulas, materiais e revisão.</p>
     </div>
     <div class="deck-topbar panel-nav" role="tablist" aria-label="Seção do Aluno" data-i18n-attr="aria-label:studentPanel.aria">
       <button class="deck-topbar-btn is-active" role="tab" aria-selected="true" data-student-section="mural" data-i18n="mural.title">Mural</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-student-section="classlogs" data-i18n="studentPanel.tab.classlogs">Aulas</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-student-section="materials" data-i18n="studentPanel.tab.materials">Material de apoio</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-student-section="revisao" data-i18n="studentPanel.tab.review">Revisão</button>
     </div>
     <div id="my-mural-content"></div>
     <div id="my-class-logs-content" style="display:none;"></div>
     <div id="support-materials-content" style="display:none;"></div>
+    <div id="my-class-review-content" style="display:none;"></div>
   </div>
 
 

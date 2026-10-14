@@ -242,6 +242,7 @@ window.I18N_CATALOG['en'] = {
   'review.complete.title': 'Review complete!', // ALTA
   'review.complete.reviewed': 'You reviewed {n} card(s) this session.', // ALTA
   'review.session.deckEmptyTitle': 'No cards in this Deck yet', // ALTA
+  'review.session.classEmptyTitle': 'No lesson cards to review right now', // ALTA
   'review.session.tagsEmptyTitle': 'No cards with the selected tags', // ALTA
   'review.session.unitEmptyTitle': 'No cards in this unit yet', // ALTA
   'review.session.allDoneTitle': 'All caught up!', // ALTA
@@ -855,6 +856,7 @@ window.I18N_CATALOG['en'] = {
   'review.today.upToDate': 'You\'re all caught up for today.', // ALTA -- Revisão nova
   'review.today.speedSplitAria': 'New {new}, Learning {learning}, Review {review}', // ALTA -- Revisão nova
   'review.backToDeck': '← Back to Deck', // ALTA -- Revisão nova
+  'review.backToStudent': '← Back to Student', // ALTA
   'review.backToModes': '← Back to modes', // ALTA -- Revisão nova
   'review.settings.origin': 'Source', // ALTA -- Revisão nova
   'review.settings.freq.balanced': 'Balanced (recommended)', // ALTA -- Revisão nova
@@ -2652,10 +2654,17 @@ window.I18N_CATALOG['en'] = {
   'studentPanel.menu': '🎒 Student', // ALTA
   'studentPanel.nav': 'Student', // ALTA
   'studentPanel.title': 'Student', // ALTA
-  'studentPanel.sub': 'Everything from your teacher: notes, lessons and materials.', // ALTA
+  'studentPanel.sub': 'Everything from your teacher: notes, lessons, materials and review.', // ALTA
   'studentPanel.aria': 'Student section', // ALTA
   'studentPanel.tab.classlogs': 'Lessons', // ALTA
   'studentPanel.tab.materials': 'Study materials', // ALTA
+  'studentPanel.tab.review': 'Review', // ALTA
+  'studentPanel.newCount': { one: '{n} new', other: '{n} new' }, // ALTA
+  'studentPanel.review.hint': 'Cards your teacher made from your lessons. Answer, read her note and the site schedules the next review.', // ALTA
+  'studentPanel.review.empty': 'Your teacher hasn\'t sent any review cards from your lessons yet.', // ALTA
+  'studentPanel.review.start': 'Review ({n})', // ALTA
+  'studentPanel.review.total': { one: '{n} lesson card in total', other: '{n} lesson cards in total' }, // ALTA
+  'studentPanel.review.dueCount': { one: '{n} card to review today', other: '{n} cards to review today' }, // ALTA
   'mural.menu': '📌 Board', // ALTA
   'mural.title': 'Board', // ALTA
   'mural.sub': 'Notes, materials and conversations with your teacher and your class.', // ALTA

@@ -21,6 +21,8 @@ function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
       tab = 'student-panel';
     }
     if (onBeforeSwitch) onBeforeSwitch(tab);
+    // Trocar de aba encerra o escopo da sessão Aluno > Revisão (cartões da professora).
+    if (typeof STATE !== 'undefined') STATE.reviewSessionClassReview = false;
     // Saiu da revisão: conquistas guardadas durante a sessão aparecem agora.
     if (typeof releaseBadgeCelebrations === 'function') releaseBadgeCelebrations();
     // Janelas da Revisão (Painel/Adicionar) nunca ficam abertas por cima de outra aba.

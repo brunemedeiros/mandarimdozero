@@ -490,6 +490,56 @@ const BANK_STUB = (who, appKey) => {
       });
       if (lang === 'fr') L('aluno: evento "acertou" do Modo aula aplicado no FSRS e confirmado', evt.applied === 1 && evt.after > evt.before && evt.acked === true && evt.saved === 1, evt);
 
+      // ---------- aluno: aba Aluno > Revisão (2026-10-14) -- cartões da professora fora da Revisão geral ----------
+      const cr = await ev(async (lang) => {
+        const target = lang === 'fr' ? 'fr' : 'zh';
+        const row = { id: 991, teacher_id: 'A', student_id: 'S1', language_app_key: APP_KEY, status: 'active', revision: 0, note: 'Observação da aula.', tags: [], front: 'x', back_trans: 'y', card_generation_mode: 'normal', deck_id: null, fields: [
+          { id: 'a', lang: 'pt', role: null, content: { value: 'cartão novo da aula' }, audio: null, image: null, pinyinFieldId: null }, { id: 'b', lang: target, role: null, content: { value: lang === 'fr' ? 'carte' : '卡片' }, audio: null, image: null, pinyinFieldId: null }] };
+        buildEngineCardsFromRow(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' }).forEach(c => STATE.cards.push(c));
+        STATE.studySettings.reviewOriginFilter = 'teacher'; // valor salvo antigo
+        saveState = async () => {};
+        switchTab('review');
+        const out = {};
+        out.poolHasTeacher = eligibleReviewPool().some(c => c.origin === 'teacher');
+        out.oldFilterActsAsAll = eligibleReviewPool().some(c => c.origin === 'study') || STATE.cards.every(c => c.origin !== 'study' || !isCardLessonCompleted(c));
+        out.deckRows = [...document.querySelectorAll('.deck-table')].map(e => e.textContent).join('|');
+        const fakeDecks = [{ id: 1, kind: 'root', parent_deck_id: null, owner_id: 'S1', language_app_key: APP_KEY }, { id: 2, kind: 'teacher_root', parent_deck_id: 1, owner_id: 'S1', language_app_key: APP_KEY, name: 'Cartões da professora' }, { id: 3, kind: 'personal_root', parent_deck_id: 1, owner_id: 'S1', language_app_key: APP_KEY }];
+        DECK_BROWSER.teacherLink['S1:' + APP_KEY] = true; // mesmo com vínculo ativo
+        out.childKinds = deckBrowserChildren(fakeDecks, 'lang').map(d => d.kind);
+        out.classPool = classReviewPool().length;
+        out.classToday = classReviewTodayCount();
+        if (typeof renderReviewSettingsView === 'function') renderReviewSettingsView();
+        out.originOptions = [...document.querySelectorAll('#review-origin-select option')].map(o => o.value);
+        return out;
+      }, lang);
+      L('Revisão geral: sem cartões da professora (e filtro salvo "teacher" vale como todos)', cr.poolHasTeacher === false && cr.oldFilterActsAsAll, cr);
+      L('Revisão geral: tabela de Decks sem "Cartões da professora"', !/Cartões da professora|Teacher cards/.test(cr.deckRows) && cr.childKinds.includes('personal_root') && !cr.childKinds.includes('teacher_root'), [cr.childKinds, cr.deckRows.slice(0, 200)]);
+      L('Configurar: opção de origem sem "professora"', !cr.originOptions.includes('teacher'), cr.originOptions);
+      L('cartões da professora contados só no escopo do Aluno', cr.classPool >= 2 && cr.classToday >= 1, cr);
+      await ev(() => { muralApplyBadges(); switchTab('student-panel'); });
+      L('item Aluno visível e com +N (soma inclui a Revisão)', await ev(() => { const el = document.getElementById('student-panel-btn'); const sb = document.querySelector('.student-only-nav[data-tab="student-panel"]'); return !!sb && sb.style.display !== 'none' && !!sb.querySelector('.mural-count') && !!el.querySelector('.mural-count'); }));
+      L('aba Revisão do Aluno com +N = cartões para hoje', await ev(() => { const b = document.querySelector('[data-student-section="revisao"] .mural-count'); return !!b && Number(b.textContent) === classReviewTodayCount(); }));
+      await page.click('[data-student-section="revisao"]');
+      await page.waitForSelector('#class-review-start-btn');
+      L('aba Revisão: contagens Novo/Aprendendo/Revisar e botão Revisar (N)', await ev(() => document.querySelectorAll('#my-class-review-content .review-today-col').length === 3 && /\(\d+\)/.test(document.getElementById('class-review-start-btn').textContent)));
+      await shot('aluno-revisao');
+      L('aba Revisão do Aluno sem rolagem horizontal da página', await ev(() => document.documentElement.scrollWidth <= window.innerWidth + 1), await ev(() => [document.documentElement.scrollWidth, window.innerWidth]));
+      await page.click('#class-review-start-btn');
+      await page.waitForFunction(() => document.getElementById('view-review').classList.contains('active') && document.getElementById('review-session-wrap').style.display === 'block');
+      const sess = await ev(() => ({ allTeacher: STATE.reviewQueue.length > 0 && STATE.reviewQueue.every(c => c.origin === 'teacher'), back: document.getElementById('review-back-to-modes').textContent, hash: location.hash }));
+      L('sessão do Aluno: só cartões da professora, mesmo motor da Revisão', sess.allTeacher, sess);
+      L('sessão do Aluno: link "Voltar ao Aluno" e rota #/review/class', /Aluno|Student/.test(sess.back) && sess.hash === '#/review/class', sess);
+      await shot('aluno-revisao-sessao');
+      await page.click('#review-back-to-modes');
+      await page.waitForFunction(() => document.getElementById('view-student-panel').classList.contains('active'));
+      L('voltar leva ao Aluno > Revisão e encerra o escopo', await ev(() => document.getElementById('my-class-review-content').style.display !== 'none' && STATE.reviewSessionClassReview === false && !eligibleReviewPool().some(c => c.origin === 'teacher')));
+      // terminar a sessão: tela de conclusão com "Voltar ao Aluno"
+      await ev(() => { startClassReviewSession(); STATE.reviewIndex = STATE.reviewQueue.length; renderReviewView(); });
+      L('fim da sessão do Aluno: só o botão Voltar ao Aluno', await ev(() => !!document.getElementById('review-class-back') && !document.getElementById('review-go-practice')));
+      await ev(() => document.getElementById('review-class-back').click());
+      L('fim da sessão: volta ao Aluno', await ev(() => document.getElementById('view-student-panel').classList.contains('active') && STATE.reviewSessionClassReview === false));
+      await ev(() => { switchTab('review'); STATE.studySettings.reviewOriginFilter = 'all'; });
+
       // sem erros de página
       allErrors.push(...errors.map(e => `${lang}-${theme}-${width}: ${e}`));
       L('sem erros de página', errors.length === 0, errors);

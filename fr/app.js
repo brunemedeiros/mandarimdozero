@@ -746,6 +746,10 @@ const STATE = {
   // Nunca serializado (ver serializeState() -- mesmo motivo de reviewQueue/
   // reviewIndex/reviewCardState: é estado de SESSÃO, não progresso salvo).
   reviewSessionDeckId: null,
+  // Aba Revisão do painel Aluno (2026-10-14): true só durante a sessão aberta
+  // por startClassReviewSession() -- o pool passa a ser SÓ os cartões da
+  // professora. switchTab() zera ao trocar de aba. Nunca serializado.
+  reviewSessionClassReview: false,
   cardVariants: {}, // progresso das palavras que trocam por idioma do site (shared/card-variants.js)
   // Fase D -- cache em memória da árvore de Decks do idioma atual, carregada
   // sob demanda por ensureDecksLoadedForReview() (só quando uma sessão
@@ -896,6 +900,8 @@ async function loadStateAndRender(){
   renderExportDeckSelect(ANKI_EXPORT_CONFIG);
   maybeShowReviewReminder();
   maybeSendStudyReminder();
+  // +N da aba Aluno > Revisão (cartões da professora) já com o progresso carregado.
+  if (typeof muralApplyBadges === 'function') muralApplyBadges();
 }
 
 // Login (Google/e-mail/convidado), menu do usuário e logout agora vêm de
@@ -5706,6 +5712,7 @@ function openReviewSession(mode, opts){
   // #review-content, sem isso não dava pra distinguir qual delas gerou o
   // report. Não afeta nenhuma lógica de revisão/memória.
   STATE.reviewActiveMode = mode;
+  STATE.reviewSessionClassReview = false; // modos da Revisão geral nunca herdam a sessão do Aluno
 
   if (mode === 'flashcard'){
     STATE.reviewSessionUnitFilter = null;
@@ -5748,6 +5755,11 @@ function reviewCardTagLabel(card){
 
 function backToReviewModeSelect(){
   releaseBadgeCelebrations();
+  if (STATE.reviewSessionClassReview){
+    STATE.reviewSessionStartedAt = null;
+    backToClassReviewTab();
+    return;
+  }
   const returnDeckId = STATE.reviewSessionDeckId;
   stopSpeedTimer();
   stopMatchTimer();
@@ -6720,15 +6732,17 @@ function renderReviewView(){
     // -- senão esse número prometeria mais do que "Revisar tudo disponível"
     // realmente consegue puxar (o botão clicava e caía de volta nesta
     // mesma tela vazia).
-    const allDue = todaysReviewCount(STATE.cards.filter(isCardLessonCompleted));
+    const allDue = STATE.reviewSessionClassReview ? 0 : todaysReviewCount(STATE.cards.filter(isCardLessonCompleted).filter(c => !isClassReviewCard(c)));
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">☕</div>
-        <h3>${activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
+        <h3>${STATE.reviewSessionClassReview ? t('review.session.classEmptyTitle') : activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
         <p>${allDue > 0 ? t('review.session.pendingOverall', { n: allDue }) : t('review.session.comeBackLater')}</p>
         ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">${t('review.session.reviewAllAvailable')}</button>` : ''}
+        ${STATE.reviewSessionClassReview ? `<button class="btn btn-secondary" id="review-class-back">${t('review.backToStudent')}</button>` : ''}
       </div>
     `;
+    document.getElementById('review-class-back')?.addEventListener('click', backToClassReviewTab);
     if (allDue > 0){
       document.getElementById('review-start-all').addEventListener('click', () => {
         STATE.reviewSessionUnitFilter = null;
@@ -6770,19 +6784,22 @@ function renderReviewView(){
         <h3>${t('review.complete.title')}</h3>
         <p>${t('review.complete.reviewed', { n: STATE.reviewQueue.length })}</p>
         <div class="review-complete-actions">
-          <button class="btn btn-secondary" id="review-again">${t('review.back')}</button>
-          <button class="btn btn-primary" id="review-go-practice">${t('review.practiceMore')}</button>
+          ${STATE.reviewSessionClassReview
+            ? `<button class="btn btn-primary" id="review-class-back">${t('review.backToStudent')}</button>`
+            : `<button class="btn btn-secondary" id="review-again">${t('review.back')}</button>
+          <button class="btn btn-primary" id="review-go-practice">${t('review.practiceMore')}</button>`}
         </div>
       </div>
     `;
     checkUnitCompletion();
-    document.getElementById('review-again').addEventListener('click', () => {
+    document.getElementById('review-class-back')?.addEventListener('click', backToClassReviewTab);
+    document.getElementById('review-again')?.addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
       STATE.reviewSessionMilestone = null;
       switchTab('path');
     });
-    document.getElementById('review-go-practice').addEventListener('click', () => {
+    document.getElementById('review-go-practice')?.addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
       STATE.reviewSessionMilestone = null;
