@@ -181,7 +181,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const NESTED_TEMPLATE_KEYS = ['review.deck.createdCount.other' /* original: criado${n === 1 ? '' : 's'} */, 'limitCut.main', 'limitCut.already', 'admin.reports.reply.lastSent', 'admin.reports.reply.lastSentTo'];
   const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k of ptKeys){
-    if (NEW_KEYS.includes(k) || DESIGN_PASS_KEYS.includes(k) || /^(panel|plans|perm|myClassLogs|tinvite|studentDecks|studentAnalytics|publicDeckCopies|rb|mural|studentPanel)\./.test(k) /* painéis Admin/Professora, aba Planos, Minhas aulas e convite de aluno (2026-10-12): textos novos */ || k.startsWith('badge.catalog.') || k.startsWith('friends.') || k.startsWith('courses.') || k.startsWith('courseMenu.') || k === 'profile.tabFriends' || k === 'notif.cat.amigos' || k === 'notif.pref.inAppOnly' || k === 'publicProfile.loginToSee' || k === 'publicProfile.loginCta' || k === 'deck.publish' || k === 'review.deck.publish' || k === 'ui.profileEdit.publicProfileSub' || k === 'review.observation' /* Banco de Revisão (2026-10-13): rb.* e a observação da professora são textos novos */) /* perfil privado (Etapa 3b, 2026-10-12) */ continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
+    if (NEW_KEYS.includes(k) || DESIGN_PASS_KEYS.includes(k) || /^(panel|plans|perm|myClassLogs|tinvite|studentDecks|studentAnalytics|publicDeckCopies|rb|mural|studentPanel)\./.test(k) /* painéis Admin/Professora, aba Planos, Minhas aulas e convite de aluno (2026-10-12): textos novos */ || k.startsWith('badge.catalog.') || k.startsWith('friends.') || k.startsWith('courses.') || k.startsWith('courseMenu.') || k === 'profile.tabFriends' || k === 'notif.cat.amigos' || k === 'notif.pref.inAppOnly' || k === 'publicProfile.loginToSee' || k === 'publicProfile.loginCta' || k === 'deck.publish' || k === 'review.deck.publish' || k === 'ui.profileEdit.publicProfileSub' || k === 'review.observation' || k === 'review.backToStudent' || k === 'review.session.classEmptyTitle' /* aba Aluno > Revisão (2026-10-14) */ /* Banco de Revisão (2026-10-13): rb.* e a observação da professora são textos novos */) /* perfil privado (Etapa 3b, 2026-10-12) */ continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
     const v = pt[k];
     // Plural por categoria ({one, other}): no original o plural era montado por código (módulo${n===1?'':'s'}).
     if (v && typeof v === 'object'){ check(`regressão: pt-BR '${k}' (plural) tem one e other`, typeof v.one === 'string' && typeof v.other === 'string'); continue; }
@@ -270,10 +270,13 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
       h = h.replace(/      <button class="tab-btn student-only-nav"[\s\S]*?<\/button>\n/, '')
         .replace(/      <button class="deck-topbar-btn"[^\n]*data-teacher-section="mural"[^\n]*\n/, '')
         .replace('    <div id="admin-mural-content" style="display:none;"></div>\n', '')
-        .replace(/<script src="..\/shared\/mural\.js"><\/script>\n/, '');
+        .replace(/<script src="..\/shared\/mural\.js"><\/script>\n/, '')
+        .replace('/* Aluno > Revisão (cartões da professora): mesma faixa de contagens da Revisão */\n.class-review{ display:grid; gap:10px; }\n.class-review .profile-edit-hint{ margin:0; }\n', '');
       const s1 = h.indexOf('  <!-- ===== ALUNO (vínculo ativo com professora)');
       if (s1 > 0){
-        const end = '<div id="support-materials-content" style="display:none;"></div>\n  </div>\n';
+        // Aba Aluno > Revisão (2026-10-14) fecha o bloco depois do Material de apoio.
+        const endNew = '<div id="my-class-review-content" style="display:none;"></div>\n  </div>\n';
+        const end = h.indexOf(endNew, s1) > 0 ? endNew : '<div id="support-materials-content" style="display:none;"></div>\n  </div>\n';
         const s2 = h.indexOf(end, s1) + end.length;
         h = h.slice(0, s1) + '  <!-- ===== MINHAS AULAS (aluno com vínculo ativo; só leitura, get_my_class_logs) ===== -->\n  <div class="view panel-view" id="view-my-class-logs">\n    <div class="path-header">\n      <h2 data-i18n="myClassLogs.title">Minhas aulas</h2>\n      <p data-i18n="myClassLogs.sub">O que você trabalhou em cada aula com sua professora.</p>\n    </div>\n    <div id="my-class-logs-content"></div>\n  </div>\n' + h.slice(s2);
         const before = lang === 'zh' ? '  <!-- ===== HANZI (trilha de caracteres) ===== -->' : '  <!-- ===== DITADOS ===== -->';

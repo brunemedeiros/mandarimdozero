@@ -402,3 +402,15 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   integração com o Notion só leitura ou leitura e escrita, para ela e outras professoras.
 - PR #312 (Mural, turmas, painel Aluno) mergeado e publicado em 2026-10-14.
 
+### Aba Aluno > Revisão (2026-10-14, branch; sem migration)
+
+- Cartões da professora (Banco de Revisão, origin 'teacher') saíram da Revisão geral: Estudar tudo, modos, contagens,
+  "Suas palavras", tabela de Decks, Painel e a opção de origem em Configurar (filtro salvo "teacher" vale como todos).
+- Nova aba **Revisão** no Aluno (depois de Mural, Aulas, Material de apoio): Novo/Aprendendo/Revisar e "Revisar (N)",
+  que abre a MESMA sessão de Flashcard (modos de resposta e Observação do Banco) só com esses cartões; "Voltar ao Aluno".
+- "+N": aba Revisão = cartões para hoje; item Aluno e botão Mais = Mural + Revisão. FSRS intacto (só muda onde aparece).
+- Grátis x Premium: tudo grátis para aluno vinculado.
+- Testes: banco-revisao Playwright 465/465 (78 novas); atualizados por mudança intencional: mural 255/255,
+  deck-browser 208/208, fase-h origem 54/54, fase-i Playwright 48/48 e unit 67/67 (o unit já falhava 4 antes, reescrito
+  para o comportamento atual), k7 40/40, i18n unit 2040/2040. Sem mudança: painel-professora 277/277, fase-g, k2h, k3,
+  k9, k10, revisao-ajustes, revisao-proposta-a, k4, k2. Pré-existentes: i18n card_variants_browser 14/16, content_en 29/30.
