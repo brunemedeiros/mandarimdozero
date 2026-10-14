@@ -2,15 +2,15 @@
  "gerado": "script: scripts/e4-classify-functions.js",
  "limiteQuaseIgual": 0.75,
  "linhasArquivo": {
-  "fr": 13131,
-  "zh": 9269
+  "fr": 12882,
+  "zh": 9018
  },
  "resumo": {
   "funcoes": {
    "idêntica": {
-    "n": 163,
-    "linesFr": 1971,
-    "linesZh": 1968
+    "n": 141,
+    "linesFr": 1769,
+    "linesZh": 1766
    },
    "quase igual": {
     "n": 55,
@@ -1044,15 +1044,6 @@
    "linesZh": 20
   },
   {
-   "name": "checkAndCelebrateBadges",
-   "kind": "function",
-   "area": "perfil, ranking e social",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 20,
-   "linesZh": 20
-  },
-  {
    "name": "advanceConceptStep",
    "kind": "function",
    "area": "exercícios de lição",
@@ -1096,24 +1087,6 @@
    "similarity": null,
    "linesFr": 40,
    "linesZh": 0
-  },
-  {
-   "name": "maybeShowStreakCelebration",
-   "kind": "function",
-   "area": "perfil, ranking e social",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 19,
-   "linesZh": 19
-  },
-  {
-   "name": "resolveRevisaoMission",
-   "kind": "function",
-   "area": "perfil, ranking e social",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 19,
-   "linesZh": 19
   },
   {
    "name": "renderChallengeChipHTML",
@@ -1458,15 +1431,6 @@
    "linesZh": 14
   },
   {
-   "name": "seedEarnedBadges",
-   "kind": "function",
-   "area": "perfil, ranking e social",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 14,
-   "linesZh": 14
-  },
-  {
    "name": "SPEED_STATE",
    "kind": "dados",
    "area": "estado e persistência",
@@ -1542,15 +1506,6 @@
    "name": "mergeSelfFlashcardsIntoState",
    "kind": "function",
    "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 13,
-   "linesZh": 13
-  },
-  {
-   "name": "showStreakCelebration",
-   "kind": "function",
-   "area": "perfil, ranking e social",
    "cls": "idêntica",
    "similarity": 1,
    "linesFr": 13,
@@ -1638,15 +1593,6 @@
    "linesZh": 0
   },
   {
-   "name": "playFeedbackSound",
-   "kind": "function",
-   "area": "áudio e fala",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 12,
-   "linesZh": 12
-  },
-  {
    "name": "buildAcquisitionBlocks",
    "kind": "function",
    "area": "outros",
@@ -1717,15 +1663,6 @@
    "similarity": null,
    "linesFr": 0,
    "linesZh": 23
-  },
-  {
-   "name": "warmUpTTSOnce",
-   "kind": "function",
-   "area": "áudio e fala",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 11,
-   "linesZh": 11
   },
   {
    "name": "stopExerciseAudio",
@@ -1827,15 +1764,6 @@
    "linesZh": 21
   },
   {
-   "name": "checkDailyMissionCompletions",
-   "kind": "function",
-   "area": "perfil, ranking e social",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 10,
-   "linesZh": 10
-  },
-  {
    "name": "findEnterAdvanceTarget",
    "kind": "function",
    "area": "outros",
@@ -1935,36 +1863,9 @@
    "linesZh": 9
   },
   {
-   "name": "buildStreakWeekData",
-   "kind": "function",
-   "area": "perfil, ranking e social",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 9,
-   "linesZh": 9
-  },
-  {
    "name": "registerDailyExerciseFormat",
    "kind": "function",
    "area": "exercícios de lição",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 9,
-   "linesZh": 9
-  },
-  {
-   "name": "checkDailyMissionsBonus",
-   "kind": "function",
-   "area": "perfil, ranking e social",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 9,
-   "linesZh": 9
-  },
-  {
-   "name": "processBadgeCelebrationQueue",
-   "kind": "function",
-   "area": "perfil, ranking e social",
    "cls": "idêntica",
    "similarity": 1,
    "linesFr": 9,
@@ -2120,24 +2021,6 @@
    "area": "áudio e fala",
    "cls": "quase igual",
    "similarity": 0.93,
-   "linesFr": 8,
-   "linesZh": 8
-  },
-  {
-   "name": "wireCustomAudioButtons",
-   "kind": "function",
-   "area": "áudio e fala",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 8,
-   "linesZh": 8
-  },
-  {
-   "name": "materializeMission",
-   "kind": "function",
-   "area": "perfil, ranking e social",
-   "cls": "idêntica",
-   "similarity": 1,
    "linesFr": 8,
    "linesZh": 8
   },
@@ -2423,24 +2306,6 @@
   {
    "name": "TTS",
    "kind": "dados",
-   "area": "áudio e fala",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 7,
-   "linesZh": 7
-  },
-  {
-   "name": "voiceQualityScore",
-   "kind": "function",
-   "area": "áudio e fala",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 7,
-   "linesZh": 7
-  },
-  {
-   "name": "getFeedbackAudioCtx",
-   "kind": "function",
    "area": "áudio e fala",
    "cls": "idêntica",
    "similarity": 1,
@@ -2763,15 +2628,6 @@
    "linesZh": 13
   },
   {
-   "name": "registerAudioPlay",
-   "kind": "function",
-   "area": "áudio e fala",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 6,
-   "linesZh": 6
-  },
-  {
    "name": "missionReviewSupply",
    "kind": "function",
    "area": "revisão e decks",
@@ -3015,27 +2871,9 @@
    "linesZh": 5
   },
   {
-   "name": "dailySeed",
-   "kind": "function",
-   "area": "perfil, ranking e social",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 5,
-   "linesZh": 5
-  },
-  {
    "name": "missionOverdueSupply",
    "kind": "function",
    "area": "revisão e decks",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 5,
-   "linesZh": 5
-  },
-  {
-   "name": "releaseBadgeCelebrations",
-   "kind": "function",
-   "area": "perfil, ranking e social",
    "cls": "idêntica",
    "similarity": 1,
    "linesFr": 5,
@@ -3324,15 +3162,6 @@
    "name": "updateClozeModeSwitch",
    "kind": "function",
    "area": "exercícios de lição",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 4,
-   "linesZh": 4
-  },
-  {
-   "name": "updateFeedbackSoundSwitch",
-   "kind": "function",
-   "area": "áudio e fala",
    "cls": "idêntica",
    "similarity": 1,
    "linesFr": 4,
@@ -3762,15 +3591,6 @@
    "linesZh": 7
   },
   {
-   "name": "isFeedbackSoundEnabled",
-   "kind": "function",
-   "area": "áudio e fala",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 3,
-   "linesZh": 3
-  },
-  {
    "name": "playAudioPreview",
    "kind": "function",
    "area": "revisão e decks",
@@ -3841,15 +3661,6 @@
    "similarity": null,
    "linesFr": 6,
    "linesZh": 0
-  },
-  {
-   "name": "pickDailyFromPool",
-   "kind": "function",
-   "area": "perfil, ranking e social",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 3,
-   "linesZh": 3
   },
   {
    "name": "unitOrdinalInfo",
@@ -5330,15 +5141,6 @@
   {
    "name": "badgeCelebrationHeld",
    "kind": "dados",
-   "area": "perfil, ranking e social",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 1,
-   "linesZh": 1
-  },
-  {
-   "name": "holdBadgeCelebrations",
-   "kind": "function",
    "area": "perfil, ranking e social",
    "cls": "idêntica",
    "similarity": 1,
