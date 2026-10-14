@@ -83,19 +83,21 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     // 6) Para estudar hoje = regra do Review; respeita filtro; Novos/Devidos ignoram o filtro
     await ev(() => { setCards([mk('teacher', 'ta', 1, { state: 'review', due: PAST }), mk('self', 'sa', 2, { state: 'review', due: PAST })]); progress(); });
     const today1 = await ev(() => ({ ui: stat('today'), rule: String(trueDueReviewCount(eligibleReviewPool())) }));
-    L('6 Para estudar hoje = trueDueReviewCount(eligibleReviewPool())', today1.ui === today1.rule && today1.ui === '2', today1);
-    await ev(() => { STATE.studySettings.reviewOriginFilter = 'teacher'; progress(); });
+    // 2026-10-14: cartão da professora fica na aba Aluno > Revisão, fora do "Para estudar hoje" da Revisão geral.
+    L('6 Para estudar hoje = trueDueReviewCount(eligibleReviewPool()) (sem o da professora)', today1.ui === today1.rule && today1.ui === '1', today1);
+    await ev(() => { STATE.studySettings.reviewOriginFilter = 'study'; progress(); });
     const today2 = await ev(() => ({ ui: stat('today'), rule: String(trueDueReviewCount(eligibleReviewPool())), d: stat('due') }));
-    L('6 filtro de origem muda Para estudar hoje (1) mas não Devidos (2)', today2.ui === '1' && today2.rule === '1' && today2.d === '2', today2);
+    L('6 filtro de origem muda Para estudar hoje (0) mas não Devidos (2)', today2.ui === '0' && today2.rule === '0' && today2.d === '2', today2);
 
     // 7) Strength Note-level: Não iniciada separada de Fraca; weakest; New não rebaixa
     const st = await ev(() => {
       STATE.studySettings.reviewOriginFilter = 'all';
       const only = (extra) => { STATE.cards = extra; return vocabStrengthBuckets(); };
       return {
-        notStarted: only([mk('teacher', 'a', 1, NEWC), mk('teacher', 'a-b', 1, NEWC)]),
-        newSibling: only([mk('teacher', 'a', 1, { interval: 90, state: 'review', due: FUT }), mk('teacher', 'a-b', 1, NEWC)]),
-        weakest: only([mk('teacher', 'a', 1, { interval: 90, state: 'review', due: FUT }), mk('teacher', 'a-b', 1, { lapses: 2 })]),
+        // Cartões próprios (self): os da professora não entram na força da Revisão geral desde 2026-10-14.
+        notStarted: only([mk('self', 'a', 1, NEWC), mk('self', 'a-b', 1, NEWC)]),
+        newSibling: only([mk('self', 'a', 1, { interval: 90, state: 'review', due: FUT }), mk('self', 'a-b', 1, NEWC)]),
+        weakest: only([mk('self', 'a', 1, { interval: 90, state: 'review', due: FUT }), mk('self', 'a-b', 1, { lapses: 2 })]),
       };
     });
     L('7 nenhuma irmã estudada = Não iniciada, não Fraca', st.notStarted.notStarted === 1 && st.notStarted.weak === 0, st.notStarted);

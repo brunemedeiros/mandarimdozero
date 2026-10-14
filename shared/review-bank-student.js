@@ -50,6 +50,7 @@ async function refreshTeacherDeliveries(){
     if (typeof mergeTeacherFlashcardsIntoState === 'function') await mergeTeacherFlashcardsIntoState();
     const n = await applyPendingBankReviews();
     if (typeof renderTopbarStats === 'function') renderTopbarStats();
+    if (typeof muralApplyBadges === 'function') muralApplyBadges(); // +N da aba Aluno > Revisão
     return n;
   } catch (e) { console.error('refreshTeacherDeliveries:', e); }
 }

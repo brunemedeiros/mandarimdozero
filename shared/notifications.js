@@ -215,7 +215,7 @@ async function fireNotificationEvent(eventType, category, payload, actionTab){
 const NOTIFICATION_CATEGORY_ICON = {
   sistema: '⚙️', estudo: '📘', revisao: '🔄', streak: '🔥', gamificacao: '⭐',
   ranking: '🏆', desafios: '🎯', social: '👥', conteudo: '📚', reengajamento: '👋',
-  perfil: '🏅', supervisao: '🎓', amigos: '🤝',
+  perfil: '🏅', supervisao: '🎓', amigos: '🤝', mural: '📌',
 };
 
 const NOTIFICATIONS_FETCH_LIMIT = 30;

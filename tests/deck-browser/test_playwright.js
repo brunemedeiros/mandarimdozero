@@ -203,7 +203,8 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     check(lang + ' cabeçalho Deck|Novo|Aprendendo|Revisar', table.head.join('|') === 'Deck|Novo|Aprendendo|Revisar', table.head);
     const ids = table.rows.map(r => r.id);
     check(lang + ' sem linha da raiz do idioma; começa pela Trilha de Estudo', !ids.includes('lang') && ids[0] === '9200' && table.rows[0].name === 'Trilha de Estudo', table.rows[0]);
-    check(lang + ' mostra Meus Decks, professora e subdecks pessoais', ['9001', '9100', '9002', '9003', '9004'].every(i => ids.includes(i)), ids);
+    // 2026-10-14: "Cartões da professora" saiu da Revisão (fica em Aluno > Revisão).
+    check(lang + ' mostra Meus Decks e subdecks pessoais, sem Cartões da professora', ['9001', '9002', '9003', '9004'].every(i => ids.includes(i)) && !ids.includes('9100'), ids);
     check(lang + ' Trilha começa fechada', !ids.includes('9201'), ids);
     check(lang + ' sem botão Estudar na tabela', table.studyBtns === 0, table.studyBtns);
     check(lang + ' números centralizados embaixo das colunas', table.align.join() === 'center,center', table.align);
@@ -246,7 +247,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
       return { ids, back };
     });
     check(lang + ' sem vínculo ativo: Cartões da professora não aparece', !noLink.ids.includes('9100') && noLink.ids.includes('9001'), noLink);
-    check(lang + ' com vínculo ativo: volta a aparecer', noLink.back.includes('9100'), noLink);
+    check(lang + ' com vínculo ativo: continua fora da Revisão (aba Aluno > Revisão)', !noLink.back.includes('9100') && noLink.back.includes('9001'), noLink);
 
     check(lang + ' sem linha de botões embaixo da tabela', table.homeBtns === 0, table.homeBtns);
     check(lang + ' "+ Criar Deck" é um link discreto logo abaixo de Meus Decks', table.createRow.text === '+ Criar Deck' && table.createRow.afterPersonal, table.createRow);
@@ -383,11 +384,8 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     const saved = await page.evaluate(() => ({ u: window.__updated[0], open: !!document.getElementById('deck-panel-modal'), still: !!document.querySelector('#deck-panel-modal #edit-my-native-flashcard-save') }));
     check(lang + ' salvar no Painel grava a Note, atualiza a lista e mantém a janela', saved.u.id === 501 && saved.open && saved.still, saved);
 
-    // Cartão da professora: só leitura
-    await page.click('#deck-panel-modal [data-panel-scope="9100"]');
-    await page.click('#deck-panel-modal [data-panel-open-note="teacher:601"]');
-    const ro = await page.evaluate(() => { const p = document.querySelector('#deck-panel-modal [data-panel-editor]'); return { cbs: document.querySelectorAll('#deck-panel-modal [data-panel-select]').length, form: !!p.querySelector('textarea, input[type=text]'), text: p.textContent }; });
-    check(lang + ' cartão da professora: só leitura', ro.cbs === 0 && !ro.form && ro.text.includes('prof') && ro.text.includes('Somente') === false && ro.text.includes('só ela pode editar'), ro);
+    // Cartões da professora saíram da Revisão (2026-10-14): o Painel não lista o Deck dela.
+    check(lang + ' Painel sem o Deck Cartões da professora', await page.evaluate(() => !document.querySelector('#deck-panel-modal [data-panel-scope="9100"]')));
 
     // Gerenciar tags abre no lado direito
     await page.click('#deck-panel-modal [data-panel-manage-tags]');

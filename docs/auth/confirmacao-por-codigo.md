@@ -45,3 +45,5 @@ Correção:
 - Aviso visual: a tela do código confere sozinha (a cada 15s e ao voltar para a aba) se a conta já foi ativada em
   outra aba ou janela e mostra "Sua conta foi ativada! Entrando..." antes de seguir. Teste: 100/100
   (`tests/login-obrigatorio/test_playwright.js`).
+
+PR #305 mergeado e publicado em 2026-10-12; a autora colou os 4 modelos novos em 2026-10-13.

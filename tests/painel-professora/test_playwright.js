@@ -110,12 +110,12 @@ const PANEL_STUB = (who) => {
       // ---- conta comum ----
       await login('U', 'u@x.com');
       L('comum: sem menu professora', !(await ev(() => [...document.querySelectorAll('.teacher-only-nav')].some(e => e.style.display !== 'none'))));
-      L('comum: sem Minhas aulas/Material', (await ev(() => ['my-class-logs-btn','support-materials-btn'].map(id => document.getElementById(id).style.display))).every(d => d === 'none'));
+      L('comum: sem item Aluno', await ev(() => document.getElementById('student-panel-btn').style.display === 'none'));
 
       // ---- aluna com aulas e material ----
       await login('S', 's@x.com');
-      await page.waitForFunction(() => document.getElementById('my-class-logs-btn').style.display === '');
-      L('aluna: Minhas aulas e Material no menu', (await ev(() => ['my-class-logs-btn','support-materials-btn'].map(id => document.getElementById(id).style.display))).every(d => d === ''));
+      await page.waitForFunction(() => document.getElementById('student-panel-btn').style.display === '');
+      L('aluna: item Aluno no menu (Aulas e Material ficam dentro)', true);
       L('aluna: sem menu professora', !(await ev(() => [...document.querySelectorAll('.teacher-only-nav')].some(e => e.style.display !== 'none'))));
       await ev(() => switchTab('my-class-logs'));
       await page.waitForSelector('.class-log-entry');
@@ -165,7 +165,7 @@ const PANEL_STUB = (who) => {
       await ev(() => switchTab('teacher-panel'));
       await page.waitForTimeout(400);
       const tabs = await ev(() => [...document.querySelectorAll('#view-teacher-panel [data-teacher-section]')].map(b => b.textContent.trim()));
-      L('professora: 4 abas', tabs.length === 4, tabs);
+      L('professora: 5 abas (Mural entrou na Etapa 4)', tabs.length === 5, tabs);
       L('professora: Alunos abre (sem aviso de acesso negado)', !(await ev(() => document.getElementById('admin-students-content').textContent.includes(t('admin.common.adminOnly')))));
       L('professora: sem formulário de vincular (só a admin vincula)', await ev(() => !document.querySelector('#admin-assign-student-form')));
       // ---- convite: link ----
