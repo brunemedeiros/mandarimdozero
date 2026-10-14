@@ -84,7 +84,7 @@ for (const lang of ['fr', 'zh']){
 
 // Documenta, por leitura do código real, que os consumidores K2-E continuam por CardInstance.
 for (const lang of ['fr', 'zh']){
-  const src = read(lang + '/app.js');
+  const src = require('../e4/app-source').withCore(read(lang + '/app.js'));
   check(lang + ' [K2-E migrado]: checkUnitCompletion opera por palavra (não exige reps>0 em todo card)', /studyWordGroups\(pool\)\.every\(studyWordHasEvidence\)/.test(src) && !/pool\.every\(c => c\.reps > 0\)/.test(src));
   check(lang + ' [K2-E]: unitCardCounts parte de STATE.cards por unitId (contagem de palavras via studyTrailWordProgress)', /function unitCardCounts[\s\S]{0,200}c\.unitId === unitId/.test(src));
   check(lang + ': nextCardDirection/reviewDirection/lastDirection removidos em K2-G (só comentários)',

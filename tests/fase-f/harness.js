@@ -67,7 +67,7 @@ function load(appKey, userId){
   ctx.escapeHTML = s => String(s);
   FILES.forEach(f => vm.runInContext(read(f), ctx, { filename: f }));
   // flashcardIdForRow vive em <lang>/app.js (app.js inteiro depende de DOM): extração da função REAL.
-  vm.runInContext(extractFunction(read((appKey === 'frances' ? 'fr' : 'zh') + '/app.js'), 'flashcardIdForRow'), ctx);
+  vm.runInContext(extractFunction(require('../e4/app-source').withCore(read((appKey === 'frances' ? 'fr' : 'zh') + '/app.js')), 'flashcardIdForRow'), ctx);
   return { ctx, db };
 }
 
