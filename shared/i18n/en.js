@@ -665,6 +665,24 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.sel.tenses': 'Verb tenses', // ALTA
   'fr.conj.sel.langFr': 'French', // ALTA
   'fr.conj.sel.langPt': 'Portuguese', // ALTA
+  'games.tabPractice': 'Practice', // ALTA
+  'games.tabGames': 'Games', // ALTA
+  'games.perRound': '{n} sentences per round', // ALTA
+  'games.play': 'Play', // ALTA
+  'games.counter': 'Sentence {i} of {n}', // ALTA
+  'games.right': 'Right!', // ALTA
+  'games.wrong': 'Not this time.', // ALTA
+  'games.answerWas': 'The answer is "{form}".', // ALTA
+  'games.whyTense': 'Why {tense}?', // ALTA
+  'games.listen': 'Listen to the sentence', // ALTA
+  'games.next': 'Next sentence', // ALTA
+  'games.seeResult': 'See result', // ALTA
+  'games.resultTitle': 'End of round', // ALTA
+  'games.reviewTitle': 'Sentences to review ({n})', // ALTA
+  'games.perfect': 'You got them all right!', // ALTA
+  'games.practiceMistakes': 'Practice only my mistakes', // ALTA
+  'games.again': 'Play again', // ALTA
+  'games.backToGames': '← Back to games', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA

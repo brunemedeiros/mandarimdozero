@@ -9302,6 +9302,34 @@ function startConjSession(verbs, tenses){
   renderConjPracticeStep();
 }
 
+// Abas da Conjugação: Praticar (escolha de verbos e tempos) | Jogos (shared/conj-games.js).
+const CONJ_GAMES_UI = (typeof createConjGames === 'function' && typeof CONJ_GAMES !== 'undefined')
+  ? createConjGames({ games: CONJ_GAMES, speak: (text, btn) => speakFrench(text, btn),
+      ids: { select: 'conj-select-wrap', wrap: 'conj-game-wrap', content: 'conj-game-content', list: 'conj-games-list', back: 'conj-game-back' } })
+  : null;
+function setConjMode(mode){
+  const games = mode === 'games';
+  document.getElementById('conj-practice-pane').hidden = games;
+  document.getElementById('conj-games-pane').hidden = !games;
+  const sub = document.querySelector('#conj-select-wrap .path-header p');
+  if (sub) sub.hidden = games; // "Escolha os verbos e os tempos" só vale para Praticar
+  [['conj-mode-practice', !games], ['conj-mode-games', games]].forEach(([id, on]) => {
+    const b = document.getElementById(id);
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', String(on));
+    b.tabIndex = on ? 0 : -1;
+  });
+  if (games && CONJ_GAMES_UI) CONJ_GAMES_UI.renderList();
+}
+document.getElementById('conj-mode-practice').addEventListener('click', () => setConjMode('practice'));
+document.getElementById('conj-mode-games').addEventListener('click', () => setConjMode('games'));
+document.querySelector('#view-conjugaison .conj-modes').addEventListener('keydown', e => {
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  const toGames = !document.getElementById('conj-mode-games').classList.contains('active');
+  setConjMode(toGames ? 'games' : 'practice');
+  document.getElementById(toGames ? 'conj-mode-games' : 'conj-mode-practice').focus();
+});
+
 document.getElementById('conj-back-to-select').addEventListener('click', () => {
   document.getElementById('conj-select-wrap').style.display = 'block';
   document.getElementById('conj-practice-wrap').style.display = 'none';

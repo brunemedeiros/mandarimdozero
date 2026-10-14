@@ -149,3 +149,21 @@ nível. Mapa da francofonia descartado. Jogos e busca de verbo ficam para as pr�
   celular 108/108, Desafios (cloze 38/38, conclusão 19/19, álbum 62/62, módulo 75/75), ditado 58/58, i18n unit
   2040/2040, i18n navegador 209/209. `desafios-progresso` 22/23 ("barra existe") falha igual sem esta mudança
   (pré-existente). Screenshots fr claro/escuro/celular e zh claro/escuro conferidos.
+
+## Conjugação: aba Jogos e "Passé composé ou Imparfait?" (fr, 2026-10-14)
+
+- Conjugação ganhou abas "Praticar | Jogos" (`#conj-mode-practice` / `#conj-mode-games`, setas trocam de aba).
+- Motor comum (`shared/conj-games.js`, `createConjGames`): jogo de escolha entre duas formas, no formato do Jogo de
+  Conjugações da autora (frase com lacuna; depois da resposta, a forma certa entra na lacuna, a pista fica marcada,
+  aparecem o desenho da linha do tempo (ponto/linha), a explicação, a tradução e o áudio da frase). Teclas 1 e 2
+  escolhem; o foco vai para "Próxima frase". Fim: placar, "Frases para revisar", "Praticar só os que errei",
+  "Jogar de novo". Entra no modo foco (área nova em `shared/activity-focus.js`). Sem XP (prática livre).
+- Dados: `fr/conj-games.js` (`CONJ_GAMES`). 22 frases aprovadas pela autora em 2026-10-14 (11 pares, 11 de cada
+  resposta), 10 sorteadas por partida. Com "je", o pronome vai dentro da opção (j'ai croisé / je croisais).
+  Tradução e explicação por idioma do site no próprio item (`text['pt-BR']`, `text.en`); inglês escrito por
+  mim (confiança alta). Decisão: jogo novo traz o texto dos idiomas do site junto, para servir a qualquer curso;
+  o curso em inglês não mostra português (o pt-BR só entra se faltar a chave).
+- Textos novos: `games.*` (pt/en).
+- Grátis x Premium: grátis.
+- Testes: conjugação 62/62 (10 novos do jogo, inclusive o site em inglês), modo foco 19/19, i18n unit 2040/2040,
+  i18n navegador 209/209, celular 108/108. Screenshots fr claro, escuro e 390px conferidos.

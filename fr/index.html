@@ -4546,6 +4546,72 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 #app.lesson-focus #conj-practice-wrap{ max-width:1040px; margin-left:auto; margin-right:auto; }
 #view-conjugaison .conj-actions, #view-conjugaison .conj-verb-pager{ max-width:640px; margin-left:auto; margin-right:auto; }
 @media (max-width:620px){ body[data-activity-focus] .activity-report-btn{ width:44px; height:44px; } }
+/* Conjugação: abas Praticar | Jogos e o jogo de escolha (shared/conj-games.js). */
+#view-conjugaison .conj-modes{ display:inline-flex; gap:4px; padding:4px; margin:0 0 18px; border-radius:999px; background:var(--paper-warm); border:1px solid var(--paper-line); }
+#view-conjugaison .conj-mode{ min-height:40px; padding:8px 20px; border:none; border-radius:999px; background:transparent; color:var(--ink-soft); font-family:var(--font-body); font-weight:800; font-size:14.5px; cursor:pointer; }
+#view-conjugaison .conj-mode.active{ background:var(--paper); color:var(--ink); box-shadow:var(--shadow-card); }
+#view-conjugaison .conj-mode:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }
+#view-conjugaison .cg-list{ display:grid; gap:12px; max-width:780px; }
+#view-conjugaison .cg-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:18px; padding:20px; box-shadow:var(--shadow-card); }
+#view-conjugaison .cg-card-title{ margin:0 0 6px; font-size:19px; font-weight:800; color:var(--ink); }
+#view-conjugaison .cg-card-lede{ margin:0 0 16px; color:var(--ink-soft); font-size:14.5px; line-height:1.5; max-width:62ch; }
+#view-conjugaison .cg-card-foot{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+#view-conjugaison .cg-card-meta{ font-size:13px; font-weight:700; color:var(--ink-soft); }
+#view-conjugaison .cg-card .cg-play{ min-width:140px; }
+#conj-game-wrap{ max-width:720px; margin:0 auto; }
+#view-conjugaison .cg-title{ font-size:18px; font-weight:800; margin:0 0 10px; color:var(--ink); }
+#view-conjugaison .cg-progress{ display:flex; align-items:center; gap:12px; margin-bottom:18px; font-size:13px; font-weight:700; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+#view-conjugaison .cg-progress > span{ white-space:nowrap; }
+#view-conjugaison .cg-progress-bar{ flex:1; height:6px; border-radius:99px; background:var(--paper-line); overflow:hidden; }
+#view-conjugaison .cg-progress-bar > i{ display:block; height:100%; border-radius:99px; background:var(--seal-red); transition:width .3s ease; }
+#view-conjugaison .cg-stage{ background:var(--paper); border:1px solid var(--paper-line); border-radius:20px; padding:26px 24px 22px; box-shadow:var(--shadow-card); }
+#view-conjugaison .cg-verb{ display:inline-block; font-size:13.5px; font-weight:700; color:var(--ink-soft); margin-bottom:6px; }
+#view-conjugaison .cg-sentence{ font-size:clamp(21px, 3.2vw, 27px); font-weight:700; line-height:1.5; color:var(--ink); margin:0 0 22px; }
+#view-conjugaison .cg-blank{ display:inline-block; min-width:4.2em; height:1.15em; vertical-align:-0.18em; margin:0 .12em; border-radius:8px; background:var(--paper-warm); border:2px dashed var(--paper-line); }
+#view-conjugaison .cg-fill{ color:var(--seal-red-dark); font-weight:900; }
+#view-conjugaison .cg-clue{ color:inherit; background:color-mix(in srgb, var(--imperial-gold) 24%, transparent); border-radius:5px; padding:0 .12em; }
+#view-conjugaison .cg-choices{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+#view-conjugaison .cg-choice{ display:flex; flex-direction:column; align-items:center; gap:4px; min-height:72px; padding:12px 10px; border-radius:16px; border:2px solid var(--paper-line);
+  background:var(--paper-warm); color:var(--ink); font-family:var(--font-body); cursor:pointer; transition:border-color .12s ease, transform .12s ease; overflow-wrap:anywhere; }
+@media (hover:hover){ #view-conjugaison .cg-choice:not(:disabled):hover{ border-color:var(--seal-red); transform:translateY(-1px); } }
+#view-conjugaison .cg-choice:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }
+#view-conjugaison .cg-choice-form{ font-size:clamp(18px, 2.6vw, 22px); font-weight:900; }
+#view-conjugaison .cg-choice-label{ font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+#view-conjugaison .cg-choice:disabled{ cursor:default; }
+#view-conjugaison .cg-choice.is-right{ border-color:var(--jade); background:color-mix(in srgb, var(--jade) 12%, var(--paper)); }
+#view-conjugaison .cg-choice.is-wrong{ border-color:var(--error-red); background:color-mix(in srgb, var(--error-red) 9%, var(--paper)); }
+#view-conjugaison .cg-choice.is-dim{ opacity:.5; }
+#view-conjugaison .cg-feedback:empty{ display:none; }
+#view-conjugaison .cg-feedback{ margin-top:20px; padding-top:18px; border-top:1px solid var(--paper-line); }
+#view-conjugaison .cg-verdict{ margin:0 0 14px; font-size:17px; font-weight:900; }
+#view-conjugaison .cg-verdict.ok{ color:var(--jade); }
+#view-conjugaison .cg-verdict.no{ color:var(--error-red); }
+#view-conjugaison .cg-verdict span{ color:var(--ink); font-weight:700; }
+#view-conjugaison .cg-why{ display:grid; grid-template-columns:150px minmax(0, 1fr); gap:16px; align-items:start; padding:14px 16px; border-radius:14px; background:var(--paper-warm); }
+#view-conjugaison .cg-why h3{ margin:0 0 4px; font-size:15px; font-weight:800; color:var(--ink); }
+#view-conjugaison .cg-why p{ margin:0; font-size:14.5px; line-height:1.55; color:var(--ink); }
+#view-conjugaison .cg-timeline{ margin:0; display:flex; flex-direction:column; gap:6px; color:var(--ink); }
+#view-conjugaison .cg-timeline svg{ width:134px; height:44px; display:block; }
+#view-conjugaison .cg-timeline figcaption{ font-size:12px; font-weight:800; color:var(--ink-soft); line-height:1.35; }
+#view-conjugaison .cg-tr{ display:flex; align-items:center; gap:10px; margin:14px 0 18px; font-size:14.5px; color:var(--ink-soft); }
+#view-conjugaison .cg-next{ width:100%; }
+#view-conjugaison .cg-result{ text-align:center; background:var(--paper); border:1px solid var(--paper-line); border-radius:20px; padding:28px 24px; box-shadow:var(--shadow-card); }
+#view-conjugaison .cg-score{ font-size:46px; margin:4px 0 16px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+#view-conjugaison .cg-score b{ color:var(--ink); }
+#view-conjugaison .cg-perfect{ color:var(--ink-soft); margin:0 0 20px; }
+#view-conjugaison .cg-review{ text-align:left; border-top:1px solid var(--paper-line); padding-top:14px; margin-bottom:20px; }
+#view-conjugaison .cg-review h3{ font-size:15px; font-weight:800; margin:0 0 6px; }
+#view-conjugaison .cg-review ul{ list-style:none; margin:0; padding:0; }
+#view-conjugaison .cg-review li{ padding:10px 0; border-bottom:1px solid var(--paper-line); }
+#view-conjugaison .cg-review .cg-sentence{ font-size:16px; margin:0 0 2px; }
+#view-conjugaison .cg-review-tr{ font-size:13px; color:var(--ink-soft); }
+#view-conjugaison .cg-result-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+@media (max-width:620px){
+  #view-conjugaison .cg-stage{ padding:20px 16px 18px; }
+  #view-conjugaison .cg-why{ grid-template-columns:1fr; }
+  #view-conjugaison .conj-mode{ min-height:44px; }
+  #view-conjugaison .cg-choices{ gap:8px; }
+}
 </style>
 </head>
 <body>
@@ -4821,6 +4887,14 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
         <h2 data-i18n="admin.reports.screen.conjugaison">Conjugação</h2>
         <p data-i18n="ui.conj.sub">Escolha os verbos e os tempos verbais.</p>
       </div>
+      <div class="conj-modes" role="tablist" data-i18n-attr="aria-label:admin.reports.screen.conjugaison" aria-label="Conjugação">
+        <button type="button" role="tab" class="conj-mode active" id="conj-mode-practice" aria-selected="true" aria-controls="conj-practice-pane" data-i18n="games.tabPractice">Praticar</button>
+        <button type="button" role="tab" class="conj-mode" id="conj-mode-games" aria-selected="false" aria-controls="conj-games-pane" data-i18n="games.tabGames">Jogos</button>
+      </div>
+      <div id="conj-games-pane" role="tabpanel" aria-labelledby="conj-mode-games" hidden>
+        <div class="cg-list" id="conj-games-list"></div>
+      </div>
+      <div id="conj-practice-pane" role="tabpanel" aria-labelledby="conj-mode-practice">
       <!-- Fase 2 (2026-10-13): verbos em cima (busca + filtros), tempos embaixo em cartões com frase de exemplo. -->
       <section class="conj-sel-block" aria-labelledby="conj-verbs-h">
         <h3 id="conj-verbs-h" data-i18n="fr.conj.sel.verbs">Verbos</h3>
@@ -4862,6 +4936,12 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
       </section>
       <p class="conj-size-hint" id="conj-size-hint" aria-live="polite"></p>
       <button data-i18n="ui.conj.start" class="btn btn-primary btn-block" id="conj-start-btn" style="max-width:320px; margin:0 auto; display:flex;">Começar prática</button>
+      </div>
+    </div>
+
+    <div id="conj-game-wrap" style="display:none;">
+      <button class="back-link" id="conj-game-back" data-i18n="games.backToGames">← Voltar aos jogos</button>
+      <div id="conj-game-content"></div>
     </div>
 
     <div id="conj-practice-wrap" style="display:none;">
@@ -5693,6 +5773,7 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 <script src="../shared/translation-compare.js"></script>
 <script src="content.js"></script>
 <script src="conjugation-data.js"></script>
+<script src="conj-games.js"></script>
 <script src="dictations.js"></script>
 <script src="../shared/course-layer.js"></script>
 <script src="../courses/fr-pt-BR/layer.js"></script>
@@ -5777,6 +5858,7 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>
 <script src="../shared/activity-focus.js"></script>
+<script src="../shared/conj-games.js"></script>
 <script src="../shared/router.js"></script>
 <script src="../shared/anki-export.js"></script>
 <script src="../shared/pwa.js"></script>

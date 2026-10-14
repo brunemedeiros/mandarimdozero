@@ -12,6 +12,7 @@
   const AREAS = [
     { tab: 'review', wrap: 'review-session-wrap', back: 'review-back-to-modes' },
     { tab: 'conjugaison', wrap: 'conj-practice-wrap', back: 'conj-back-to-select' },
+    { tab: 'conjugaison', wrap: 'conj-game-wrap', back: 'conj-game-back' },
     { tab: 'challenges', wrap: 'challenge-player-wrap', back: 'challenge-back-to-list' }
   ];
   const tr = (k, fb) => (typeof t === 'function' ? t(k) : fb);

@@ -294,6 +294,61 @@ async function fill(page, wrongIdx){
     await ctx.close();
   }
 
+  // ---- Jogos: Passé composé ou Imparfait? ----
+  {
+    const data = await (async () => { const { page, errors, ctx } = await bootPage(browser, 'fr', port, 'light');
+      await page.evaluate(() => switchTab('conjugaison'));
+      const d = await page.evaluate(() => { const g = CONJ_GAMES.find(x => x.id === 'pc-imparfait'); return {
+        n: g.items.length, per: g.perRound, a: g.items.filter(i => i.ans === 'a').length,
+        bad: g.items.filter(i => !['a', 'b'].includes(i.ans) || !i.text['pt-BR'] || !i.text.en || !i.text.en.tr || !i.text.en.why || !i.text['pt-BR'].why
+          || !(i.before + i[i.ans] + i.after).includes(i.clue)).map(i => i.id) }; });
+      check('jogo: 22 frases aprovadas (11 de cada), 10 por partida, pt e en completos, pista dentro da frase', d.n === 22 && d.a === 11 && d.per === 10 && d.bad.length === 0, d);
+      await page.click('#conj-mode-games');
+      const l = await page.evaluate(() => ({ practiceHidden: document.getElementById('conj-practice-pane').hidden, cards: document.querySelectorAll('#conj-games-list .cg-card').length,
+        sel: document.getElementById('conj-mode-games').getAttribute('aria-selected'), sub: document.querySelector('#conj-select-wrap .path-header p').hidden }));
+      check('aba Jogos: lista de jogos no lugar da escolha', l.practiceHidden && l.cards === 1 && l.sel === 'true' && l.sub, l);
+      await page.click('.cg-play');
+      await page.waitForSelector('.cg-choice');
+      const q = await page.evaluate(() => ({ n: CONJ_GAMES_UI.state.order.length, focus: document.body.dataset.activityFocus, blank: !!document.querySelector('.cg-blank'),
+        choices: document.querySelectorAll('.cg-choice').length }));
+      check('partida com 10 frases, em modo foco, lacuna e 2 opções', q.n === 10 && q.focus === 'conjugaison' && q.blank && q.choices === 2, q);
+      const right = await page.evaluate(() => CONJ_GAMES_UI.state.order[0].ans);
+      await page.keyboard.press(right === 'a' ? '2' : '1'); // tecla escolhe (errada, de propósito)
+      await page.waitForTimeout(60);
+      const f = await page.evaluate(() => ({ verdict: document.querySelector('.cg-verdict').className, fill: document.querySelector('.cg-sentence .cg-fill').textContent,
+        clue: !!document.querySelector('.cg-sentence .cg-clue'), why: document.querySelector('.cg-why p').textContent.length, tr: document.querySelector('.cg-tr span').textContent,
+        right: document.querySelector('.cg-choice.is-right').dataset.k, wrong: !!document.querySelector('.cg-choice.is-wrong'), svg: !!document.querySelector('.cg-timeline svg'),
+        nextFocus: document.activeElement && document.activeElement.id }));
+      const it0 = await page.evaluate(() => CONJ_GAMES_UI.state.order[0]);
+      check('resposta: forma certa na lacuna, pista marcada, desenho, explicação e tradução pt', /no/.test(f.verdict) && f.fill === it0[it0.ans] && f.clue && f.svg && f.why > 20
+        && f.tr === it0.text['pt-BR'].tr && f.right === it0.ans && f.wrong, f);
+      check('foco vai para "Próxima frase"', f.nextFocus === 'cg-next', f.nextFocus);
+      for (let i = 1; i <= 9; i++){
+        await page.waitForTimeout(370);
+        await page.click('#cg-next');
+        await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[CONJ_GAMES_UI.state.idx]; document.querySelector('.cg-choice[data-k="' + it.ans + '"]').click(); });
+      }
+      await page.waitForTimeout(370);
+      await page.click('#cg-next');
+      const r = await page.evaluate(() => ({ score: document.querySelector('.cg-score').textContent.replace(/\s/g, ''), review: document.querySelectorAll('.cg-review li').length }));
+      check('resultado 9/10 com 1 frase para revisar', r.score === '9/10' && r.review === 1, r);
+      await page.click('#cg-mistakes');
+      const m = await page.evaluate(() => CONJ_GAMES_UI.state.order.map(x => x.id));
+      check('"Praticar só os que errei" repete só a frase errada', m.length === 1 && m[0] === it0.id, m);
+      await page.click('#conj-game-back');
+      check('voltar aos jogos sai do foco', await page.evaluate(() => !document.body.dataset.activityFocus && document.getElementById('conj-select-wrap').style.display === 'block'));
+      // Site em inglês: nada em português no jogo.
+      await page.evaluate(() => { window.getUiLang = () => 'en'; });
+      await page.click('.cg-play');
+      await page.keyboard.press('1');
+      const en = await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[0];
+        return { tr: document.querySelector('.cg-tr span').textContent === it.text.en.tr, why: document.querySelector('.cg-why p').textContent === it.text.en.why,
+          tl: document.querySelector('.cg-timeline figcaption').textContent }; });
+      check('site em inglês: tradução, explicação e legenda em inglês', en.tr && en.why && /^a (point|line)/.test(en.tl), en);
+      check('jogos: zero pageerror', errors.length === 0, errors);
+      await ctx.close(); })();
+  }
+
   // Celular (390px): sem rolagem horizontal; tabela numa coluna só.
   const { page, errors, ctx } = await bootPage(browser, 'fr', port, 'light', { width: 390, height: 844 });
   await page.evaluate(() => switchTab('conjugaison'));
