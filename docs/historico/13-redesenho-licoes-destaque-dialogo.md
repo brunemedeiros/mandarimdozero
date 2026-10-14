@@ -179,4 +179,7 @@ A autora pensou em aposentar a ideia ("estamos criando coisas demais"). Nada foi
   mostrar a palavra sem acento; Ouça e traduza = "Ouça e traduza" + alto-falante (Normal ou Digitar).
 - Achado: um Field com texto e áudio anexado mostra dois botões (🔊 lê o texto em voz sintética, 🎧 toca o áudio
   anexado); nos cartões só de áudio isso confunde.
-- Conjugação: botão só na tela final ("Formas para revisar"), nunca um por forma durante a prática.
+- Conjugação: botão só na tela final ("Formas para revisar"), nunca um por forma durante a prática. A autora concordou
+  (2026-10-14) que, se voltar, começa enxuta: só "Adicionar estas N formas à Revisão" na tela final da Conjugação e do
+  Jogo, com o que a pessoa errou, sem mexer nos Desafios.
+- Os dois botões de áudio num mesmo Field (🔊 + 🎧) foram considerados "realmente muito confusos" pela autora.
