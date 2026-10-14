@@ -74,7 +74,9 @@ for (const lang of ['fr', 'zh']){
 
   if (lang === 'fr'){
     const tail = t => t.slice(t.indexOf('const CONJUGATION_VERBS'));
-    ok(tail(fs.readFileSync(path.join(ROOT, 'fr/conjugation-data.js'), 'utf8')) === tail(origFile('fr', 'conjugation-data')), 'fr: formas conjugadas (CONJUGATION_VERBS) byte a byte iguais ao original');
+    // Correção deliberada (Conjugação fase 1, 2026-10-13): s'asseoir tinha "assiss" no plural.
+    const fixes = t => t.split('assiss"').join('assis"');
+    ok(tail(fs.readFileSync(path.join(ROOT, 'fr/conjugation-data.js'), 'utf8')) === fixes(tail(origFile('fr', 'conjugation-data'))), 'fr: formas conjugadas (CONJUGATION_VERBS) byte a byte iguais ao original (com as correções deliberadas)');
   }
   // 5. as extras estão cobertas pela camada
   if (lang === 'zh') ok(Object.keys(layer.stories).length === orig.stories.length && Object.keys(layer.hanzi).length === orig.hanzi.flat().length, 'zh: camada cobre todas as histórias e todos os hanzi');

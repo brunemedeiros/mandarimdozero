@@ -3975,6 +3975,20 @@ body.hide-pinyin .prompt-pinyin{
   .panel-view .panel-nav{ flex-wrap:nowrap; overflow-x:auto; max-width:100%; justify-content:flex-start; }
   .panel-view .panel-nav .deck-topbar-btn{ white-space:nowrap; }
 }
+/* Modo foco na Conjugação, na Revisão e nos Desafios (shared/activity-focus.js): a sessão
+   fica numa coluna centralizada; no topo, o link de voltar e a ⚑ (a da topbar some no foco). */
+.activity-focus-bar{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.activity-focus-bar .back-link{ margin-bottom:0; }
+.activity-report-btn{ display:none; }
+body[data-activity-focus] .activity-report-btn{
+  display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:36px; height:36px; border-radius:50%;
+  border:1px solid var(--paper-line); background:var(--paper); color:var(--ink-soft); font-size:16px; cursor:pointer;
+}
+body[data-activity-focus] .activity-report-btn:hover{ color:var(--ink); }
+body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
+#app.lesson-focus #review-session-wrap, #app.lesson-focus #challenge-player-wrap{ max-width:760px; margin-left:auto; margin-right:auto; }
+#app.lesson-focus #conj-practice-wrap{ max-width:1040px; margin-left:auto; margin-right:auto; }
+@media (max-width:620px){ body[data-activity-focus] .activity-report-btn{ width:44px; height:44px; } }
 /* ---------- Cara de jogo: telas (passo 4, docs/historico/15) ----------
    Bloco único com o visual "de jogo" das telas fora de Amigos: pódio e "faltam
    X XP" (Ranking e Amigos), Perfil, Progresso, Metas e o volume dos cartões
@@ -5297,6 +5311,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/topbar-stats.js"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>
+<script src="../shared/activity-focus.js"></script>
 <script src="../shared/router.js"></script>
 <script src="../shared/anki-export.js"></script>
 <script src="../shared/pwa.js"></script>

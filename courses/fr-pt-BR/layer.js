@@ -2184,6 +2184,16 @@
       "r3": { "task": "Revisão do A1 · Casa, família e fim de semana" }
     },
     "conjugation": {
+      "tenseExamples": {
+        "presente": "Eu pego o metrô todas as manhãs.",
+        "passeCompose": "Ontem, eu comi uma pizza.",
+        "imparfait": "Quando eu era pequeno, eu jogava futebol todo domingo.",
+        "plusQueParfait": "Quando eu cheguei, o filme já tinha começado.",
+        "futurSimple": "Ano que vem, eu irei para Paris.",
+        "condPresente": "Eu gostaria de um café, por favor.",
+        "subjPresente": "Você tem que vir amanhã.",
+        "imperatif": "Leve o guarda-chuva!"
+      },
       "groups": {
         "core": { "label": "Être / avoir / aller / faire", "desc": "Os 4 verbos mais irregulares e mais usados do francês" },
         "g1": {
@@ -2451,6 +2461,6 @@
     stories: typeof STORIES !== 'undefined' ? STORIES : undefined,
     hanzi: typeof HANZI_LESSONS !== 'undefined' ? HANZI_LESSONS : undefined,
     dictations: typeof DICTATIONS !== 'undefined' ? DICTATIONS : undefined,
-    conjugation: typeof CONJUGATION_GROUPS !== 'undefined' ? { groups: CONJUGATION_GROUPS, verbTranslations: VERB_TRANSLATIONS } : undefined
+    conjugation: typeof CONJUGATION_GROUPS !== 'undefined' ? { groups: CONJUGATION_GROUPS, verbTranslations: VERB_TRANSLATIONS, tenseExamples: typeof CONJ_TENSE_EXAMPLES !== 'undefined' ? CONJ_TENSE_EXAMPLES : undefined } : undefined
   }, L);
 })();
