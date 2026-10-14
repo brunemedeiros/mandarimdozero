@@ -373,3 +373,18 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   - Proposta: tudo no Mural, com tipos de cartão (Recado, Aula, Material) e filtros "Tudo | Aulas | Materiais"; o "+N"
     passa a contar aula e material novos. Aguardando a escolha da autora (A manter 3 abas, B 2 abas, C tudo no Mural).
 
+### 087 na produção e nova rodada (2026-10-14)
+
+- 087 rodada pela autora no SQL Editor da produção; conferido: 24 funções, 5 tabelas sem acesso direto, bucket `mural`
+  privado (10 MB, PDF/JPEG/PNG/WebP), 3 policies, trigger; teste real com professora e aluna da produção dentro de
+  transação desfeita (turma, membros, post, link, +1, comentário, aluno não apaga post da professora): tudo ok, sem resíduo.
+- Pedidos da autora:
+  - Aulas com **visão de calendário**, como o "Calendário de Aulas" dela no Notion (campos lá: Data, Tópico, Aluno/a,
+    Presença [aula dada, remarcação, faltou/cancelada, cancelada com antecedência, cancelada pela professora, remarcada],
+    Pontualidade, Para a próxima aula, Competências, Uso da L1, Idioma).
+  - Tirar os **Cartões da professora** do menu Revisão e criar a aba **Revisão** no Aluno, no formato do Banco de Revisão
+    original (revisão do que foi trabalhado em aula, não é trilha nem flashcard comum).
+  - Indecisa entre B (Mural | Aulas e materiais) e C (tudo no Mural com filtros).
+- Proposta enviada: B + avisos automáticos no Mural ("nova aula registrada", "novo material") e Revisão como 4ª aba:
+  **Mural | Aulas e materiais (Calendário | Lista + biblioteca) | Revisão**. Perguntas abertas no chat.
+
