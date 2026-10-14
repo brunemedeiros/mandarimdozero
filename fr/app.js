@@ -9303,8 +9303,14 @@ function startConjSession(verbs, tenses){
 }
 
 // Abas da Conjugação: Praticar (escolha de verbos e tempos) | Jogos (shared/conj-games.js).
+// Jogos da Conjugação são PREMIUM (decisão da autora, 2026-10-14); a Conjugação normal é grátis.
+// Paywall DESLIGADO como o dos Desafios (CHALLENGE_PAYWALL_ENABLED): hoje só o cadeado aparece e
+// todo mundo joga. Ao ligar o paywall, trocar para true (lista em docs/historico/14-pendencias-...md).
+const CONJ_GAMES_PAYWALL_ENABLED = false;
+function isConjGameLocked(){ return CONJ_GAMES_PAYWALL_ENABLED && !challengesPremiumUnlocked(); }
 const CONJ_GAMES_UI = (typeof createConjGames === 'function' && typeof CONJ_GAMES !== 'undefined')
   ? createConjGames({ games: CONJ_GAMES, speak: (text, btn) => speakFrench(text, btn),
+      isLocked: g => isConjGameLocked(g), onLocked: () => openPremiumChallengesModal(),
       ids: { select: 'conj-select-wrap', wrap: 'conj-game-wrap', content: 'conj-game-content', list: 'conj-games-list', back: 'conj-game-back' } })
   : null;
 function setConjMode(mode){

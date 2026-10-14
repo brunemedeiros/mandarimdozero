@@ -683,6 +683,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'fr.conj.sel.langPt': 'português',
   'games.tabPractice': 'Praticar',
   'games.tabGames': 'Jogos',
+  'games.premium': 'Premium',
   'games.perRound': '{n} frases por partida',
   'games.play': 'Jogar',
   'games.counter': 'Frase {i} de {n}',

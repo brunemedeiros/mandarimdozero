@@ -667,6 +667,7 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.sel.langPt': 'Portuguese', // ALTA
   'games.tabPractice': 'Practice', // ALTA
   'games.tabGames': 'Games', // ALTA
+  'games.premium': 'Premium', // ALTA
   'games.perRound': '{n} sentences per round', // ALTA
   'games.play': 'Play', // ALTA
   'games.counter': 'Sentence {i} of {n}', // ALTA

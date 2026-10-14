@@ -307,6 +307,14 @@ async function fill(page, wrongIdx){
       const l = await page.evaluate(() => ({ practiceHidden: document.getElementById('conj-practice-pane').hidden, cards: document.querySelectorAll('#conj-games-list .cg-card').length,
         sel: document.getElementById('conj-mode-games').getAttribute('aria-selected'), sub: document.querySelector('#conj-select-wrap .path-header p').hidden }));
       check('aba Jogos: lista de jogos no lugar da escolha', l.practiceHidden && l.cards === 1 && l.sel === 'true' && l.sub, l);
+      const lock = await page.evaluate(() => ({ badge: (document.querySelector('.cg-card .cg-premium') || {}).textContent, tab: !!document.querySelector('#conj-mode-games .conj-mode-lock') }));
+      check('Jogos são Premium: cadeado no cartão e na aba', /🔒/.test(lock.badge || '') && /Premium/.test(lock.badge || '') && lock.tab, lock);
+      // Paywall ligado (simulado): tocar em Jogar abre o aviso Premium e não começa a partida.
+      await page.evaluate(() => { window.__origLock = isConjGameLocked; window.isConjGameLocked = () => true; });
+      await page.click('.cg-play');
+      const pw = await page.evaluate(() => ({ modal: getComputedStyle(document.getElementById('premium-challenges-modal')).display, playing: document.getElementById('conj-game-wrap').style.display }));
+      check('paywall ligado: abre o aviso Premium em vez do jogo', pw.modal === 'flex' && pw.playing !== 'block', pw);
+      await page.evaluate(() => { window.isConjGameLocked = window.__origLock; document.getElementById('premium-challenges-modal').style.display = 'none'; });
       await page.click('.cg-play');
       await page.waitForSelector('.cg-choice');
       const q = await page.evaluate(() => ({ n: CONJ_GAMES_UI.state.order.length, focus: document.body.dataset.activityFocus, blank: !!document.querySelector('.cg-blank'),

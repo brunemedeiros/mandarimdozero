@@ -164,6 +164,7 @@ nível. Mapa da francofonia descartado. Jogos e busca de verbo ficam para as pr�
   mim (confiança alta). Decisão: jogo novo traz o texto dos idiomas do site junto, para servir a qualquer curso;
   o curso em inglês não mostra português (o pt-BR só entra se faltar a chave).
 - Textos novos: `games.*` (pt/en).
-- Grátis x Premium: grátis.
+- Grátis x Premium: Jogos são Premium (decisão da autora, 2026-10-14), com cadeado na aba e no cartão; paywall desligado
+  (`CONJ_GAMES_PAYWALL_ENABLED=false`, item 11 de `14-pendencias-pos-paywall-e-decks.md`). A Conjugação normal é grátis.
 - Testes: conjugação 62/62 (10 novos do jogo, inclusive o site em inglês), modo foco 19/19, i18n unit 2040/2040,
   i18n navegador 209/209, celular 108/108. Screenshots fr claro, escuro e 390px conferidos.

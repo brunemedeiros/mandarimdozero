@@ -4,7 +4,8 @@
 // a explicação com o desenho da linha do tempo, a pista destacada, a tradução e o áudio.
 // Os dados ficam por idioma (fr/conj-games.js -> CONJ_GAMES); o texto de cada item vem
 // por idioma do site (text['pt-BR'], text.en). Sem XP: é prática livre, como a Conjugação.
-function createConjGames({ games, speak, ids }){
+function createConjGames({ games, speak, ids, isLocked, onLocked }){
+  // isLocked(game): paywall (Jogos são Premium); onLocked(game): o que fazer ao tocar num jogo trancado.
   const $ = id => document.getElementById(id);
   const esc = s => (typeof escapeHTML === 'function' ? escapeHTML(String(s == null ? '' : s))
     : String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
@@ -30,7 +31,7 @@ function createConjGames({ games, speak, ids }){
         <h3 class="cg-card-title">${esc(L(g.title))}</h3>
         <p class="cg-card-lede">${esc(L(g.lede))}</p>
         <div class="cg-card-foot">
-          <span class="cg-card-meta">${esc(tt('games.perRound', { n: Math.min(g.perRound, g.items.length) }))}</span>
+          <span class="cg-card-meta"><span class="cg-premium" title="${esc(tt('games.premium'))}">🔒 ${esc(tt('games.premium'))}</span>${esc(tt('games.perRound', { n: Math.min(g.perRound, g.items.length) }))}</span>
           <button type="button" class="btn btn-primary cg-play" data-game="${esc(g.id)}">${esc(tt('games.play'))}</button>
         </div>
       </article>`).join('');
@@ -45,6 +46,8 @@ function createConjGames({ games, speak, ids }){
   function start(gameId, onlyIds){
     const g = games.find(x => x.id === gameId);
     if (!g) return;
+    // PAYWALL: ponto único que trava os Jogos. Hoje isLocked devolve false (flag desligada no app.js).
+    if (isLocked && isLocked(g)){ if (onLocked) onLocked(g); return; }
     const pool = onlyIds ? g.items.filter(it => onlyIds.includes(it.id)) : g.items;
     Object.assign(S, { game: g, order: onlyIds ? shuffle(pool) : shuffle(pool).slice(0, g.perRound), idx: 0, hits: 0, log: [], answered: false });
     if (typeof trackEvent === 'function') trackEvent('lesson_start', 'conj_game', { game: g.id });
