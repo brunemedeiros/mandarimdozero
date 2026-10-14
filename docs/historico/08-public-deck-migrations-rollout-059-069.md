@@ -215,6 +215,35 @@ Detalhes e verificação: `docs/plano-professora-privacidade.md`.
 | Staging | ferramenta | `20261008020957` + correção `20261008021111` (`teacher_role_policies_link_check`) |
 | Produção | ferramenta (arquivo final, já corrigido) | `20261012123457` |
 
+## Migration 077 `teacher_invites_and_badges` (2026-10-12)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` (+ `_lang_label` com 'chinês' reaplicado por `execute_sql`) | `20261012182754` |
+| Produção | ferramenta `apply_migration` (autorizada pela autora 2026-10-12; conferido: 7 funções, trigger, índice, policy, grants; 13 vínculos e 13 badges intactos) | `20261012184454` |
+Detalhes e verificação: `docs/plano-professora-privacidade.md`.
+
+## Migrations 078 `teacher_student_deck_counts` e 079 `public_deck_copies` (Fase K final, 2026-10-12)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` (079: corpo de `copy_public_deck` com md5 `d0da8f9d…`, igual ao arquivo) | conferir em `list_migrations` |
+| Produção | ferramenta, autorizada pela autora 2026-10-12 (antes: md5 da 068 conferido; depois: `d0da8f9d…`, 3 funções, sem execute para anon, tabela fechada) | `20261012190508` (078), `20261012190559` (079) |
+Detalhes: `docs/K-analytics-contrato.md`, seção "Fase K final -- entrega".
+
+## Migration 080 `private_profile` (Etapa 3b, 2026-10-12)
+| Projeto | Como | Versão |
+|---|---|---|
+| Staging | ferramenta `apply_migration` (conferido: 8 funções com a condição nova, tabela fechada para anon, país fechado) | conferir em `list_migrations` |
+| Produção | ferramenta, depois do PR #304 publicado (deploy 2026-10-12 21:04); antes: 9 trechos conferidos (1 ocorrência cada); depois: 11 funções com a regra, anon sem tabela, país fechado, leitura como admin ok | `20261012210455` |
+
+## Migration 087 `mural` (Etapa 4, 2026-10-13)
+
+Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_congrats`, `086_review_bank_agent`).
+
+| Onde | Como | Versão |
+|---|---|---|
+| Staging | ferramenta (partes sem `DELETE`) | `20261013153950` `087_mural` (tabelas e helpers), depois `087b_mural_list`, `087c_mural_feed`, `087d_mural_create_post` |
+| Staging | SQL Editor da autora (`docs/rollout-sql/087_sql_editor.sql`, o arquivo inteiro) | feito 2026-10-13, conferido |
+| Produção | SQL Editor da autora (mesmo arquivo) | feito 2026-10-14, conferido + teste em transação desfeita |
 ## 088 -- ensure_user_decks fechada para anon (2026-10-13)
 
 - Achado no advisor de segurança da produção (lint 0028): `ensure_user_decks(uuid, text)` (SECURITY DEFINER, 049)

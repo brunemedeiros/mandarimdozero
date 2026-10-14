@@ -100,10 +100,8 @@ async function fetchLeaderboard(scope, weekStart){
   // featured_badge_id junto com o resto do perfil -- é o badge que a
   // própria pessoa escolheu destacar (ver "Badge em destaque" no modal de
   // editar perfil), não precisa de consulta separada.
-  const { data: profiles } = await supabaseClient
-    .from('profiles')
-    .select('user_id, username, display_name, avatar_url, featured_badge_id')
-    .in('user_id', ranked.map(r => r.user_id));
+  // 080: profile_cards (conta privada aparece com nome, sem foto).
+  const profiles = await fetchProfileCards(ranked.map(r => r.user_id));
   const byId = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
   return ranked.map((r, i) => ({ ...r, rank: i + 1, profile: byId[r.user_id] || null }));
 }
@@ -313,11 +311,11 @@ async function fetchUserBadgeGrants(userId){
 async function fetchUserEarnedBadges(userId){
   const { data, error } = await supabaseClient
     .from('earned_badges')
-    .select('badge_id')
-    .eq('user_id', userId)
-    .eq('language_app_key', APP_KEY);
+    .select('badge_id, language_app_key')
+    .eq('user_id', userId);
   if (error){ console.error('Erro ao carregar conquistas do perfil:', error); return []; }
-  const ids = new Set((data || []).map(r => r.badge_id));
+  // C4: conquista de curso só do idioma atual; conquista da conta, de qualquer idioma.
+  const ids = new Set((data || []).filter(r => r.language_app_key === APP_KEY || AccountProgress.isAccountBadge(r.badge_id)).map(r => r.badge_id));
   return BADGES.filter(b => ids.has(b.id));
 }
 

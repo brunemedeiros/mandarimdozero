@@ -86,7 +86,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       L('detalhes: linha do tempo', t1b.includes('Abriu a aba Revisão') && t1b.includes('Concluiu lição da trilha'), t1b);
       L('detalhes: unidade com título do site', lang === 'fr' ? t1b.includes('A1-1 · Cumprimentar') : /1 · /.test(t1b), t1b);
       L('detalhes: acertos 80% (7 dias)', t1b.includes('80%') && t1b.includes('85%'), t1b);
-      L('2 RPCs na 1ª abertura', (await page.evaluate(() => window.__rpc.filter(x => x.startsWith('get_teacher_student_')).length)) === 2);
+      L('3 RPCs na 1ª abertura (070, 059 e Decks da 078)', (await page.evaluate(() => window.__rpc.filter(x => x.startsWith('get_teacher_student_')).length)) === 3);
       if (OUT) await page.screenshot({ path: path.join(OUT, `painel-${lang}-${scheme}.png`), fullPage: false, clip: await page.$eval('#metrics-link-1', el => { const r = el.getBoundingClientRect(); return { x: Math.max(0, r.x - 10), y: Math.max(0, r.y - 60), width: Math.min(900, r.width + 20), height: Math.min(1000, r.height + 80) }; }) });
 
       const t2 = await open(2);

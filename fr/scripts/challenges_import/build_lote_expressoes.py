@@ -5,9 +5,11 @@ expressões do "lote de expressões" a partir do conteúdo-fonte
     python3 fr/scripts/challenges_import/build_lote_expressoes.py
 
 Gera lote-expressoes-80.json com status "needs_review" (nunca publica sozinho).
-O aviso de REGISTRO (familiar / muito familiar / vulgar) é acrescentado aqui,
-por regra única, em meaning.pt e explanation -- o app não tem campo de
-registro, então o aviso vai dentro do texto.
+O REGISTRO é obrigatório em toda expressão (regra de 12/10/2026): o campo
+`register` do conteúdo-fonte (neutre / familier / très familier / vulgaire /
+soutenu) vira o campo próprio `register` do desafio (neutral / familiar /
+slang / vulgar / formal), que o app mostra como etiqueta na lista. O aviso
+em texto continua sendo acrescentado em meaning.pt e explanation.
 
 Nomes de áudio: md5(texto exibido)[:12] + ".mp3", a mesma regra de
 challenges_pipeline/tts.py (synthesize). Os mp3 são gerados depois por
@@ -31,13 +33,26 @@ EXISTING = {
     "ne pas y aller de main morte", "poser un lapin",
 }
 
+# Registro do conteúdo-fonte (francês) -> campo `register` do desafio.
+# Mesmos valores de EXPRESSION_REGISTERS em fr/app.js.
+REGISTER_KEY = {
+    "soutenu": "formal",
+    "neutre": "neutral",
+    "familier": "familiar",
+    "très familier": "slang",
+    "vulgaire": "vulgar",
+}
+REGISTERS = set(REGISTER_KEY.values())
+
 PT_SUFFIX = {
+    "soutenu": "",
     "neutre": "",
     "familier": " Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
     "très familier": " ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
     "vulgaire": " ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos.",
 }
 FR_SUFFIX = {
+    "soutenu": "",
     "neutre": "",
     "familier": " Registre familier : à utiliser entre amis, pas dans un contexte formel.",
     "très familier": " Registre très familier : seulement avec des proches.",
@@ -65,12 +80,17 @@ def youglish(expression):
 
 
 def build_item(src):
-    expr, reg = src["expression"], src["register"]
+    expr, reg = src["expression"], src.get("register")
+    if reg not in REGISTER_KEY:
+        raise SystemExit(
+            f"ERRO {src.get('id') or expr}: 'register' obrigatório, um de {sorted(REGISTER_KEY)} (recebido: {reg!r})"
+        )
     return {
         "id": src["id"],
         "type": "expression",
         "canonicalExpression": expr,
         "level": src["level"],
+        "register": REGISTER_KEY[reg],
         "expressionAudioFile": audio_name(expr),
         "meaning": {
             "fr": src["meaningFr"],
@@ -102,6 +122,8 @@ def validate(items):
         if e in seen_expr or e in EXISTING:
             errors.append(f"{i}: expressão repetida/já existente ({e})")
         seen_expr.add(e)
+        if it.get("register") not in REGISTERS:
+            errors.append(f"{i}: register ausente ou inválido ({it.get('register')!r})")
         if it["level"] not in LEVELS:
             errors.append(f"{i}: nível inválido {it['level']}")
         opts = it["options"]

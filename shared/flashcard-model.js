@@ -29,7 +29,7 @@
 // porque nada neste arquivo roda no top-level, só declara funções):
 //   - flashcardIdForRow(prefix, row)
 
-const STUDY_LANG_FOR_APP_KEY = { frances: 'fr', mandarim: 'zh' };
+const STUDY_LANG_FOR_APP_KEY = LanguageRegistry.studyLangMap(); // derivado de languages/registry.json (fieldLang)
 
 // i18n Fase 7 -- idioma da TRADUÇÃO (back_trans) de uma linha LEGADA.
 // Todo cartão legado existente foi escrito com a tradução em português, então
@@ -328,7 +328,7 @@ const TTS_CONFIG_VERSION = 2;
 // Versão das regras de "texto falado" POR IDIOMA (tts_core.mjs /
 // spoken_text.py). Entra no generationKey junto com TTS_CONFIG_VERSION:
 // mudar a regra de um idioma invalida só os áudios daquele idioma.
-const TTS_SPOKEN_RULES_VERSION_BY_LANG = { fr: 4, pt: 1, zh: 0 };
+const TTS_SPOKEN_RULES_VERSION_BY_LANG = LanguageRegistry.spokenRulesVersionByLang(); // registry.json (tts.spokenRulesVersion); cópia no Deno: supabase/functions/tts-generate/index.ts
 function ttsConfigVersionFor(language){
   const l = String(language || '').trim().toLowerCase();
   const fam = l.startsWith('fr') ? 'fr' : l.startsWith('pt') ? 'pt' : (l.startsWith('zh') || l.startsWith('cmn')) ? 'zh' : 'x';
@@ -887,7 +887,7 @@ function interpretNativeNoteFromRow(row, { origin, appKey, idPrefix, cardId }){
 // nunca mais um objeto legado intermediário.
 function interpretNoteFromRow(row, opts){
   const { origin, appKey, idPrefix } = opts;
-  const isZh = appKey === 'mandarim';
+  const isZh = LanguageRegistry.isCjk(appKey);
   const studyLang = STUDY_LANG_FOR_APP_KEY[appKey];
   const translationLang = legacyTranslationLang(opts);
   const cardId = flashcardIdForRow(idPrefix, row);

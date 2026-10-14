@@ -113,3 +113,23 @@ Decisões da autora: amizade com pedido e aceite; busca por @username ou nome; p
 - **i18n**: textos de Amigos/Ranking de Amigos passaram para `shared/i18n` (chaves `friends.*`, `profile.tabFriends`, `notif.cat.amigos`, `notif.pref.inAppOnly`; en espelha pt-BR; es congelado). O teste `tests/i18n` isenta essas chaves da regressão byte a byte e o HTML de Amigos da comparação com o commit-base. A única falha restante do teste (zh, HTML) já existe na `main`.
 - **PR**: branch `claude/fervent-heisenberg-rlf8va` -> `main` aberto depois do merge com a `main`.
 
+
+## Passada de design no Perfil (2026-10-12)
+
+Telas: Visão geral, Metas, Progresso, Amigos, Editar perfil e perfil público. CSS num bloco "Perfil: passada de design"
+no fim do `<style>` de fr/zh (o teste de i18n já ignora tudo a partir do bloco "Janelas da Revisão").
+
+- Visão geral: identidade como carteirinha (foto à esquerda com anel, nome 22px, @usuário, bio, selos; "Editar perfil" no
+  canto; faixa de 6px na cor do idioma, `--seal-red`). No celular a foto fica ao lado do nome e o resto embaixo.
+- Títulos de seção em tom de frase (sem caixa alta) nas 4 abas e no perfil público; "dias seguidos/XP acumulado" idem.
+- Progresso: os números deixaram de ser 10 cartões iguais e viraram um painel com linhas finas entre as células.
+- Metas: escondido o subtítulo da página, que repetia o do cartão.
+- Editar perfil: sem o espaço vazio embaixo da foto quando não há erro.
+- Bug corrigido em `shared/friends.js`: a seção e a lista da atividade dos amigos usavam o mesmo id (`friends-activity`),
+  e preencher a lista apagava o título "Atividade dos amigos". A lista agora é `#friends-activity-list`.
+- zh nunca definiu `--error-red`: selo de pedidos de amizade, borda da opção errada, campo inválido e Excluir Deck ficavam
+  sem cor. Agora `--error-red: var(--seal-red)` no zh (segue o tema claro/escuro). Selo sobre a aba ativa usa fundo `--paper`.
+- Testes: amigos 158/158, identity 22/22, deck-browser 206/206, i18n unit 2107/2107, checkpoint zh 25/25, trilha
+  (ui 86, mapa 61, celular 108, marco 34+14, pular checkpoint 19, prova 43, helpers 6, histórias 4, a0 11, validador 8) OK.
+  `tests/trilha/test_trail_state_model.js` falha com `t is not defined` também sem esta mudança (pré-existente, i18n).
+  Prints conferidos em fr/zh × claro/escuro e 390px, 0 pageerrors.

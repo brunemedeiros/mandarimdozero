@@ -11,7 +11,7 @@ const ROOT = path.resolve(__dirname, '..', '..');
 
 function loadContent(){
   const ctx = {}; vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync(path.join(ROOT, 'fr/content.js'), 'utf8') + ';this.UNITS=UNITS;this.MODULES=MODULES;', ctx);
+  vm.runInContext(require(path.join(ROOT, 'scripts/lib/course-content.js')).composedSource('fr') + ';this.UNITS=UNITS;this.MODULES=MODULES;', ctx);
   return { UNITS: ctx.UNITS, MODULES: ctx.MODULES };
 }
 

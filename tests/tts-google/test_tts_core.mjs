@@ -102,10 +102,15 @@ const model = fs.readFileSync(path.join(root, 'shared/flashcard-model.js'), 'utf
 const pick = (src, name) => (src.match(new RegExp(`const ${name} = ([^;]+);`)) || [])[1];
 ok(pick(idx, 'TTS_PROVIDER_MODEL_ID') === "'google-chirp3-hd'" && pick(model, 'TTS_PROVIDER_MODEL_ID') === "'google-chirp3-hd'", 'model id nos 2 lados');
 ok(pick(idx, 'TTS_CONFIG_VERSION') === pick(model, 'TTS_CONFIG_VERSION'), 'config version igual');
-ok(pick(idx, 'TTS_SPOKEN_RULES_VERSION_BY_LANG: Record<string, number>') === pick(model, 'TTS_SPOKEN_RULES_VERSION_BY_LANG'), 'versão das regras por idioma igual');
+// A cópia do Deno (index.ts) precisa bater com languages/registry.json (tts.spokenRulesVersion); o cliente lê o registro.
+const regJson = JSON.parse(fs.readFileSync(path.join(root, 'languages/registry.json'), 'utf8'));
+const regVersions = Object.fromEntries(regJson.languages.map(l => [l.fieldLang, l.tts.spokenRulesVersion]));
+const tsVersions = Object.fromEntries([...(pick(idx, 'TTS_SPOKEN_RULES_VERSION_BY_LANG: Record<string, number>') || '').matchAll(/(\w+):\s*(\d+)/g)].map(m => [m[1], Number(m[2])]));
+ok(JSON.stringify(Object.entries(regVersions).sort()) === JSON.stringify(Object.entries(tsVersions).sort()), 'versão das regras por idioma: Deno == registro');
 ok(pick(idx, 'TTS_TEXT_MAX_LENGTH') === pick(model, 'TTS_TEXT_MAX_LENGTH'), 'max length igual');
 const ctx = { console, TextEncoder, crypto: globalThis.crypto };
 vm.createContext(ctx);
+vm.runInContext(fs.readFileSync(path.join(root, 'languages/registry.js'), 'utf8'), ctx);
 vm.runInContext(model + '\n;globalThis.__k = computeTtsGenerationKey; globalThis.__labels = TTS_GENERATION_ERROR_LABELS;', ctx);
 const clientKey = await ctx.__k('un / une', 'fr-FR', null, 1);
 const parts = ['un / une', 'fr-FR', '', '1', 'google-chirp3-hd', '2:fr4'].map(encodeURIComponent).join('\u001F');

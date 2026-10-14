@@ -21,8 +21,18 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
 - Visual dos painéis: classe `.panel-view` (seletor `.deck-topbar`, títulos `.panel-h`/`.section-label` sem caixa-alta).
 - Vínculo professora↔aluno é por idioma (`teacher_students`, `status='active'`); remover vínculo nunca apaga progresso.
 - Leitura de progresso de outra conta só por RPC `security definer` com checagem de vínculo (059, 070).
-- Decisão de produto: um aluno tem no máximo 1 professora por idioma (ainda não imposto no banco; se impor, índice
-  único parcial em `teacher_students (student_id, language_app_key) where status='active'`).
+- Um aluno tem no máximo 1 professora ativa por idioma (índice único parcial da 077). Professora convida (busca ou
+  link, `shared/teacher-invites.js`) e o aluno aceita; só a admin vincula direto; o aluno não sai sozinho.
+- Badge de aluno é por professora (`badge_catalog.teacher_id`) e acompanha o vínculo ativo pelo trigger da 077:
+  nunca dar/tirar esse badge pelo cliente.
 - Telas com seleção de alunos: seleção pode ficar vazia, filtro por idioma ativo, busca por nome/@usuário.
 - Notificações: categorias em `notification_rules`; novas categorias precisam decidir se aparecem na matriz de
   Configurações > Notificações.
+- Banco de Revisão (`shared/review-bank*.js`, permissão `review_bank` do plano Professora, migrations 081 a 085): aluno do Banco
+  (`review_bank_students`) existe com ou sem conta; só `linked_student_id` (conta com vínculo ativo, mesmo idioma) gera cartão em
+  "Cartões da professora". Aprovar = RPC `approve_review_bank_item` (atômica, 1 cartão por item); cortar arquiva, nunca apaga.
+  Item sensível ou com "Para conferir" nunca vira cartão sozinho. Doc: `docs/historico/15-auditoria-banco-revisao.md`.
+- Mural (087, `shared/mural.js`): turmas (`classrooms`) e murais individuais; tabelas sem policy, tudo por RPC `mural_*`.
+  Aluno só vê com vínculo ativo; recado "só para um aluno" exige o aluno na turma. Anexos no bucket privado `mural`
+  (`<professora>/<autor>/<arquivo>`), lidos por link assinado; apagar post devolve os caminhos e o app limpa o Storage.
+

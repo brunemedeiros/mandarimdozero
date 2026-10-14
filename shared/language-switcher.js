@@ -27,6 +27,9 @@ function paintLanguageSwitcher(){
   btn.innerHTML = current ? current.flagSvg : '🌐';
   btn.setAttribute('aria-label', current ? t('langSwitcher.ariaCurrent', { name: current.name }) : t('langSwitcher.ariaSwitch'));
 
+  // Cursos por idioma do site ligados: o menu vira "Meus cursos" (estilo Duolingo) + "Adicionar curso".
+  if (CourseStorage.isPerSiteLanguage() && typeof paintCourseMenu === 'function'){ paintCourseMenu(btn, dropdown); return; }
+
   const others = AVAILABLE_LANGUAGES.filter(l => l.enabled && l.id !== LANG_ID);
   dropdown.innerHTML = `
     <div class="lang-switcher-label">${t('langSwitcher.studying')}</div>
@@ -62,6 +65,17 @@ function renderLanguageSwitcher(){
     dropdown.classList.toggle('open', willOpen);
     btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
   });
+  // Cursos por idioma do site: passar o mouse na bandeira abre o menu (e sair fecha, com uma folga para alcançar o menu).
+  if (CourseStorage.isPerSiteLanguage() && window.matchMedia && window.matchMedia('(hover: hover)').matches){
+    const box = btn.closest('.lang-switcher') || btn;
+    let timer = null;
+    const open = () => { clearTimeout(timer); dropdown.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); };
+    const later = () => { clearTimeout(timer); timer = setTimeout(closeDropdown, 280); };
+    box.addEventListener('mouseenter', open);
+    box.addEventListener('mouseleave', later);
+    dropdown.addEventListener('mouseenter', open);
+    dropdown.addEventListener('mouseleave', later);
+  }
   document.addEventListener('click', closeDropdown);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDropdown(); });
 }

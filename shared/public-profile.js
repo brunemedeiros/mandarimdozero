@@ -95,11 +95,18 @@ async function fetchPublicProfileByUsername(username){
   const clean = String(username || '').trim().toLowerCase();
   if (!clean) return { notFound: true };
 
-  const { data: profile, error } = await supabaseClient
-    .from('profiles')
-    .select('user_id, username, display_name, avatar_url, bio, featured_badge_id')
-    .eq('username', clean)
-    .maybeSingle();
+  // 080: get_profile_card (também sem login). Perfil privado visto por estranho vem sem
+  // foto e bio; amigo/professora com vínculo recebem tudo. Sem a RPC, lê a tabela.
+  let profile = null, error = null;
+  const card = await supabaseClient.rpc('get_profile_card', { p_username: clean });
+  if (!card.error && card.data && typeof card.data === 'object'){ profile = card.data.user_id ? card.data : null; }
+  else {
+    ({ data: profile, error } = await supabaseClient
+      .from('profiles')
+      .select('user_id, username, display_name, avatar_url, bio, featured_badge_id')
+      .eq('username', clean)
+      .maybeSingle());
+  }
   if (error){ console.error('Erro ao carregar perfil público:', error); return { notFound: true }; }
   if (!profile) return { notFound: true };
 
@@ -216,6 +223,20 @@ async function renderPublicProfileInto(bodyEl, username){
     ? `<img class="public-profile-avatar" src="${escapeAttr(profile.avatar_url)}" alt="${t('publicProfile.avatarAlt')}">`
     : `<div class="public-profile-avatar" style="background:${color};">${initials}</div>`;
 
+  // Sem login (link compartilhado): só o cartão de apresentação + "Entrar".
+  // O resto do perfil exige conta (decisão da autora, 2026-10-12).
+  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER){
+    bodyEl.innerHTML = `
+      <div class="public-profile-header">
+        ${isPublic ? avatarHTML : `<div class="public-profile-avatar" style="background:${color};">${initials}</div>`}
+        <div class="public-profile-name">${escapeHTML(name)}</div>
+        <div class="public-profile-username">@${escapeHTML(profile.username)}</div>
+      </div>
+      <p class="profile-empty-note">${t('publicProfile.loginToSee')}</p>
+      <a class="btn btn-primary btn-block" href="../" data-login-cta>${t('publicProfile.loginCta')}</a>`;
+    return;
+  }
+
   const badgesHTML = badges.length ? `
     <div class="public-profile-badges">
       ${badges.map(b => `
@@ -274,6 +295,7 @@ async function renderPublicProfileInto(bodyEl, username){
       <div class="public-profile-username">@${escapeHTML(profile.username)}</div>
       ${profile.bio ? `<p class="public-profile-bio">${escapeHTML(profile.bio)}</p>` : ''}
       <div id="public-profile-friend-slot"></div>
+      <div id="public-profile-teacher-slot"></div>
     </div>
     ${badgesHTML}
     <div class="public-profile-langs-section">
@@ -290,6 +312,8 @@ async function renderPublicProfileInto(bodyEl, username){
 
   // Amigos: botão Adicionar/Aceitar/etc. (só logada e nunca na própria pessoa).
   if (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && typeof renderFriendProfileAction === 'function') renderFriendProfileAction(bodyEl, profile);
+  // K.10: Analytics do aluno, só para a professora com vínculo ativo com esta conta.
+  renderPublicProfileTeacherAction(bodyEl, profile);
 
   bodyEl.querySelectorAll('.public-profile-badge-chip').forEach(el => {
     el.addEventListener('click', () => {
@@ -323,6 +347,54 @@ async function renderPublicProfileInto(bodyEl, username){
       }
     });
   }
+}
+
+// ---------- K.10: botão "Analytics do aluno" no perfil público ----------
+// Só aparece para quem tem vínculo ATIVO de professora com esta conta (um
+// botão por idioma). Abre o mesmo painel 📊 da aba Alunos; quem barra de
+// verdade são as RPCs 070/059/078 (vínculo ativo com auth.uid()). A
+// privacidade do perfil não vale para a professora (decisão da autora).
+async function renderPublicProfileTeacherAction(bodyEl, profile){
+  const slot = bodyEl.querySelector('#public-profile-teacher-slot');
+  if (!slot || typeof CURRENT_USER === 'undefined' || !CURRENT_USER || profile.user_id === CURRENT_USER.id) return;
+  if (typeof loadMyPermissions === 'function') await loadMyPermissions();
+  if (typeof isTeacherUser !== 'function' || !isTeacherUser()) return;
+  const { data, error } = await supabaseClient
+    .from('teacher_students')
+    .select('language_app_key')
+    .eq('teacher_id', CURRENT_USER.id)
+    .eq('student_id', profile.user_id)
+    .eq('status', 'active');
+  if (error || !data || !data.length) return;
+  const langs = [...new Set(data.map(r => r.language_app_key))];
+  slot.innerHTML = `<div class="public-profile-teacher-actions">${langs.map(l => `
+    <button type="button" class="btn btn-secondary public-profile-analytics-btn" data-analytics-lang="${escapeHTML(l)}">📊 ${escapeHTML(t('studentAnalytics.open', { lang: typeof tinviteLangWord === 'function' ? tinviteLangWord(l) : l }))}</button>`).join('')}</div>`;
+  slot.querySelectorAll('[data-analytics-lang]').forEach(btn => btn.addEventListener('click', () => openStudentAnalyticsModal(profile, btn.dataset.analyticsLang)));
+}
+
+async function openStudentAnalyticsModal(profile, lang){
+  document.getElementById('student-analytics-modal')?.remove();
+  const name = profile.display_name || profile.username || '';
+  const overlay = document.createElement('div');
+  overlay.className = 'app-modal-overlay';
+  overlay.id = 'student-analytics-modal';
+  overlay.innerHTML = `
+    <div class="app-modal" role="dialog" aria-modal="true" aria-labelledby="student-analytics-title">
+      <div class="app-modal-header">
+        <h3 id="student-analytics-title">📊 ${escapeHTML(t('studentAnalytics.title', { name }))}</h3>
+        <button type="button" class="app-modal-close" aria-label="${escapeHTML(t('common.close'))}">✕</button>
+      </div>
+      <div class="app-modal-body" id="student-analytics-body">${loadingHTML()}</div>
+    </div>`;
+  document.body.appendChild(overlay);
+  const close = () => overlay.remove();
+  overlay.querySelector('.app-modal-close').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  overlay.querySelector('.app-modal-close').focus();
+  const data = await fetchStudentPanelData(profile.user_id, lang);
+  const body = document.getElementById('student-analytics-body');
+  if (body) body.innerHTML = `<div class="admin-badge-desc">${renderStudentPanelHTML(data.overview, data.metrics, data.decks)}</div>`;
 }
 
 // ---------- Fase 2: lista de flashcards públicos + importação ----------

@@ -4,7 +4,7 @@
 // no aparelho (localStorage), como pediu a professora.
 //
 // model = { sections: [{ title, nodes: [{ key, kind, icon, label, state, aria, current? }] }] }
-//   kind  : 'unit' | 'review' | 'checkpoint'
+//   kind  : 'unit' | 'review' | 'checkpoint' | 'story'
 //   state : 'done' | 'skipped' | 'current' | 'available' | 'locked' | 'empty'
 // describe(key) -> { eyebrow, title, goal, status, lines:[texto], actions:[{label, primary, onClick}] }
 function trailViewPref(storageKey){
@@ -34,7 +34,7 @@ function renderTrailMap(root, model, describe, opts){
   panel.className = 'tm-panel';
   panel.hidden = true;
   panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-modal', 'false');
+  panel.setAttribute('aria-modal', 'true');
   panel.setAttribute('aria-labelledby', 'tm-panel-title');
   const backdrop = document.createElement('div');
   backdrop.className = 'tm-backdrop';

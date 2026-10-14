@@ -43,3 +43,31 @@ Projeto e auditoria (Fase 0) em `docs/i18n/projeto-variantes-por-idioma.md`. Dec
 - Plural feito com chaves `.one`/`.other` escolhidas por `n === 1` (como o código antigo), não `tp()`: em pt-BR o `Intl.PluralRules` trata 0 como singular.
 - `tests/i18n/test_i18n_unit.js`: `PREV2 = '9969e3c'` cobre os arquivos convertidos; 2090/2090.
 - Sobras traduzidas (2026-10-07): etiqueta "Na frase · <unidade>" (`studyPhraseCardTitle`, shared/study-trail-model.js; atualizada também por `refreshStudyCardTexts` ao trocar o idioma), erros de envio de áudio/imagem/link (`mediaErrorText` + chaves `media.*`, shared/flashcard-model.js; sem `t()` fica o português), título do topo (`brand.title.fr`/`brand.title.zh`, `brand.byline`) e a aba "Desafios" da barra de baixo (`nav.challenges`). "Já saíram da lista" já usava `review.records.leftList` desde cdd1156 (só não estava publicado).
+
+## Passada de design em Configurações (2026-10-12)
+
+Abas Geral, Notificações e Exportar. CSS num bloco "Configurações: passada de design" no fim do `<style>` de fr/zh
+(coberto pela mesma exclusão do teste de i18n que vai do bloco "Janelas da Revisão" até o fim do estilo).
+
+- Títulos em tom de frase. Preferências e Notificações viraram um painel por grupo (linhas com traço fino, como "Conta"),
+  em vez de uma caixa solta por item. "Mais opções de conta em breve." escondido (texto vazio, sem ação).
+- "Personalizar por categoria" com o título no mesmo peso das seções e alvo de toque de 44px; cabeçalho da tabela sem caixa alta.
+- No celular, os seletores de "Não notificar entre" descem para baixo do texto.
+- Exportar: unidades numa lista em grade alinhada à esquerda (2 colunas no computador, 1 no celular), "Todas as unidades"
+  em cima; sem o emoji gigante e sem o fundo bege; botão alinhado à esquerda.
+- Textos (regra do projeto: sem "--", "pra", "pro"): `notif.pref.inApp.sub`, `push.sub`, `email.sub`, `quiet.sub` reescritos
+  com o mesmo conteúdo ("topbar" virou "topo da tela", "badge" virou "conquista"); en acompanhou. Registrados em
+  `DELIBERATE_PT_CHANGES` do teste de i18n.
+- Testes: i18n unit 2107/2107, deck-browser 206/206, amigos 158/158. `tests/i18n/test_playwright.js` continua com o tempo
+  esgotado conhecido em `triggerWouldGenerate` (pré-existente). Prints em fr/zh × claro/escuro e 390px, 0 pageerrors.
+
+## Teste i18n de volta ao verde depois do Banco de Revisão (2026-10-13)
+
+- Na `main`, `tests/i18n/test_i18n_unit.js` falhava em 183 de 2273 verificações desde a entrada do Banco de Revisão (PRs #305 a #307).
+  As causas eram textos novos tratados como regressão (`rb.*` e `review.observation`), `rb.none` igual nos dois idiomas (é só o traço "–"),
+  dois comentários de confiança faltando no `en.js` (`review.observation` e `review.almost`) e o HTML de fr/zh com CSS e scripts novos do Banco.
+- Correção (só teste e comentários, nenhum texto visível mudou): prefixo `rb` na lista de textos novos, `review.observation` liberada,
+  `rb.none` na lista de valores iguais permitidos, `// ALTA` nas duas linhas e o `strip` da comparação de HTML ignorando
+  `review-bank.css`, os scripts `review-answer-extras.js`/`review-bank*.js` e o bloco `.review-observation`/`.review-almost`.
+- Resultado: 2040/2040 (o total caiu porque as chaves `rb.*` não passam mais pela checagem de regressão).
+  Banco de Revisão: unitários 100/100 e playwright 387/387; Desafios e Ditado sem falha.

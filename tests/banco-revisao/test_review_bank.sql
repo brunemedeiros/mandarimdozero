@@ -1,0 +1,158 @@
+\set ON_ERROR_STOP 0
+\set QUIET on
+create temp table r(name text, ok boolean, got text);
+grant all on r to authenticated, anon;
+create or replace function pg_temp.u(uid text, email text) returns void language plpgsql as $$
+begin perform set_config('request.jwt.claims', json_build_object('sub',uid,'email',email)::text, false); end $$;
+-- a=autora(admin+prof), b=aluna da a, c=gratis, d=professora nova, e=aluna da d (fr)
+insert into auth.users values ('00000000-0000-0000-0000-00000000000e','e@x.com');
+insert into profiles(user_id, username) values ('00000000-0000-0000-0000-00000000000e','e');
+reset role; select pg_temp.u('00000000-0000-0000-0000-00000000000a','brunemed1310@gmail.com'); set role authenticated;
+select admin_grant_role('00000000-0000-0000-0000-00000000000d','teacher');
+insert into teacher_students(teacher_id, student_id, language_app_key) values ('00000000-0000-0000-0000-00000000000d','00000000-0000-0000-0000-00000000000e','frances');
+reset role;
+insert into r select 'catalogo: review_bank so no teacher', (select count(*) from role_permissions where permission_key='review_bank')=5
+  and (select count(*) from role_permissions where permission_key='review_bank' and enabled)=1, '';
+
+select pg_temp.u('00000000-0000-0000-0000-00000000000d','prof@x.com'); set role authenticated;
+-- lista do Banco: aluna SEM conta e aluna da conta e (ainda nao vinculada)
+insert into review_bank_students(id, teacher_id, name, language_app_key, reference_language, import_key) values
+ ('aaaaaaaa-0000-0000-0000-000000000001','00000000-0000-0000-0000-00000000000d','Sem Conta','portugues','en','semconta'),
+ ('aaaaaaaa-0000-0000-0000-000000000002','00000000-0000-0000-0000-00000000000d','Aluna E','frances','pt','alunae');
+insert into r select 'professora cria alunos do Banco (com e sem conta)', (select count(*) from review_bank_students)=2, '';
+do $$ begin insert into review_bank_students(teacher_id, name, language_app_key, import_key) values ('00000000-0000-0000-0000-00000000000d','Dup','frances','alunae');
+ insert into r values ('import_key duplicado bloqueado', false, 'passou'); exception when others then insert into r values ('import_key duplicado bloqueado', true, sqlerrm); end $$;
+do $$ begin insert into review_bank_students(teacher_id, name, language_app_key, linked_student_id) values ('00000000-0000-0000-0000-00000000000d','Falsa','frances','00000000-0000-0000-0000-00000000000b');
+ insert into r values ('nao cria aluno ligado a conta sem vinculo ativo', false, 'passou'); exception when others then insert into r values ('nao cria aluno ligado a conta sem vinculo ativo', true, sqlerrm); end $$;
+
+-- itens para aluno SEM conta funcionam; para conta nao vinculada tambem
+insert into review_bank_items(id, teacher_id, bank_student_id, language_app_key, item_type, question, answer, wrong_form, explanation, check_note, class_date)
+ values ('11111111-1111-1111-1111-111111111111','00000000-0000-0000-0000-00000000000d','aaaaaaaa-0000-0000-0000-000000000002','frances','erro','Eu fui ao mercado','Je suis allée','Je suis allé','Concordância do particípio','conferir','2026-09-11'),
+        ('33333333-3333-3333-3333-333333333333','00000000-0000-0000-0000-00000000000d','aaaaaaaa-0000-0000-0000-000000000001','portugues','vocabulario','to run (code)','rodar',null,'Nesse momento, a IA está rodando.',null,'2026-10-07');
+insert into r select 'itens para aluno sem conta e para aluno nao vinculado', (select count(*) from review_bank_items)=2, '';
+do $$ begin insert into review_bank_items(teacher_id, bank_student_id, language_app_key, item_type, question, answer) values ('00000000-0000-0000-0000-00000000000d','aaaaaaaa-0000-0000-0000-000000000002','portugues','vocabulario','x','y');
+ insert into r values ('idioma do item precisa bater com o do aluno', false, 'passou'); exception when others then insert into r values ('idioma do item precisa bater com o do aluno', true, sqlerrm); end $$;
+do $$ begin insert into review_bank_items(teacher_id, bank_student_id, language_app_key, item_type, question, answer) values ('00000000-0000-0000-0000-00000000000d','aaaaaaaa-0000-0000-0000-000000000002','frances','tipo_ruim','x','y');
+ insert into r values ('item_type invalido bloqueado', false, 'passou'); exception when others then insert into r values ('item_type invalido bloqueado', true, sqlerrm); end $$;
+
+-- sem vinculo nao gera cartao; aprovar so marca
+do $$ begin perform approve_review_bank_item('11111111-1111-1111-1111-111111111111','a','b','[{"id":"f1"}]'::jsonb,'type_answer',array['t'],'n');
+ insert into r values ('aprovar sem conta vinculada nao gera cartao', false, 'passou'); exception when others then insert into r values ('aprovar sem conta vinculada nao gera cartao', sqlerrm='student_not_linked', sqlerrm); end $$;
+select set_review_bank_item_status('33333333-3333-3333-3333-333333333333','aprovado');
+insert into r select 'aluno sem conta: aprovar marca o item, sem cartao', (select status='aprovado' and teacher_flashcard_id is null from review_bank_items where id='33333333-3333-3333-3333-333333333333') and (select count(*) from teacher_flashcards)=0, '';
+
+-- vincular: so com vinculo ativo no mesmo idioma
+do $$ begin perform link_review_bank_student('aaaaaaaa-0000-0000-0000-000000000001','00000000-0000-0000-0000-00000000000e');
+ insert into r values ('vincular exige vinculo ativo no idioma do aluno do Banco', false, 'passou'); exception when others then insert into r values ('vincular exige vinculo ativo no idioma do aluno do Banco', sqlerrm='link_inactive', sqlerrm); end $$;
+select link_review_bank_student('aaaaaaaa-0000-0000-0000-000000000002','00000000-0000-0000-0000-00000000000e');
+insert into r select 'vincular grava a conta no aluno do Banco', (select linked_student_id='00000000-0000-0000-0000-00000000000e' from review_bank_students where id='aaaaaaaa-0000-0000-0000-000000000002'), '';
+do $$ begin insert into review_bank_students(teacher_id, name, language_app_key, linked_student_id) values ('00000000-0000-0000-0000-00000000000d','Outra E','frances','00000000-0000-0000-0000-00000000000e');
+ insert into r values ('mesma conta nao liga a 2 alunos do Banco no idioma', false, 'passou'); exception when others then insert into r values ('mesma conta nao liga a 2 alunos do Banco no idioma', true, sqlerrm); end $$;
+
+-- aprovar agora: cria o cartao no deck Cartoes da professora, idempotente
+create temp table ids(k text, v bigint); grant all on ids to authenticated;
+insert into ids select 'c1', approve_review_bank_item('11111111-1111-1111-1111-111111111111','Je suis allé','Je suis allée','[{"id":"f1"}]'::jsonb,'type_answer',array['aula-2026-09-11'],'Concordância do particípio');
+insert into ids select 'c2', approve_review_bank_item('11111111-1111-1111-1111-111111111111','Je suis allé','Je suis allée','[{"id":"f1"}]'::jsonb,'type_answer',array['aula-2026-09-11'],'x');
+insert into r select 'aprovar 2x gera 1 cartao so', (select count(*) from teacher_flashcards where bank_item_id='11111111-1111-1111-1111-111111111111')=1 and (select count(distinct v) from ids)=1, '';
+insert into r select 'cartao no deck Cartoes da professora, ativo, com observacao, para a conta vinculada',
+  (select d.kind='teacher_root' and d.name='Cartões da professora' and t.status='active' and t.note='Concordância do particípio' and t.student_id='00000000-0000-0000-0000-00000000000e' and t.language_app_key='frances'
+     from teacher_flashcards t join decks d on d.id=t.deck_id where t.bank_item_id='11111111-1111-1111-1111-111111111111'), '';
+
+-- cortar arquiva (nunca apaga); reaprovar reativa o mesmo cartao; aluno vinculado: aprovar sem cartao exige approve
+select set_review_bank_item_status('11111111-1111-1111-1111-111111111111','cortado');
+insert into r select 'cortar arquiva o cartao', (select t.status='archived' from teacher_flashcards t where t.bank_item_id='11111111-1111-1111-1111-111111111111') and (select status='cortado' from review_bank_items where id='11111111-1111-1111-1111-111111111111'), '';
+select set_review_bank_item_status('11111111-1111-1111-1111-111111111111','aprovado');
+insert into r select 'reaprovar reativa o mesmo cartao', (select count(*)=1 and bool_and(status='active') from teacher_flashcards where bank_item_id='11111111-1111-1111-1111-111111111111'), '';
+insert into review_bank_items(id, teacher_id, bank_student_id, language_app_key, item_type, question, answer) values ('22222222-2222-2222-2222-222222222222','00000000-0000-0000-0000-00000000000d','aaaaaaaa-0000-0000-0000-000000000002','frances','vocabulario','escolher','choisir');
+do $$ begin perform set_review_bank_item_status('22222222-2222-2222-2222-222222222222','aprovado');
+ insert into r values ('aluno vinculado: aprovar sem cartao exige approve', false, 'passou'); exception when others then insert into r values ('aluno vinculado: aprovar sem cartao exige approve', sqlerrm='use_approve_review_bank_item', sqlerrm); end $$;
+
+-- Modo aula: respostas; a aluna consome so o que virou cartao
+insert into review_bank_reviews(item_id, teacher_id, bank_student_id, language_app_key, outcome, reason) values ('11111111-1111-1111-1111-111111111111','00000000-0000-0000-0000-00000000000d','aaaaaaaa-0000-0000-0000-000000000002','frances','errou','concordancia');
+insert into review_bank_reviews(item_id, teacher_id, bank_student_id, language_app_key, outcome) values ('22222222-2222-2222-2222-222222222222','00000000-0000-0000-0000-00000000000d','aaaaaaaa-0000-0000-0000-000000000002','frances','acertou');
+insert into review_bank_reviews(item_id, teacher_id, bank_student_id, language_app_key, outcome) values ('33333333-3333-3333-3333-333333333333','00000000-0000-0000-0000-00000000000d','aaaaaaaa-0000-0000-0000-000000000001','portugues','acertou');
+insert into review_bank_recaps(teacher_id, bank_student_id, language_app_key, class_date, item_ids) values ('00000000-0000-0000-0000-00000000000d','aaaaaaaa-0000-0000-0000-000000000002','frances','2026-09-11',array['11111111-1111-1111-1111-111111111111']::uuid[]);
+do $$ begin insert into review_bank_recaps(teacher_id, bank_student_id, language_app_key, class_date) values ('00000000-0000-0000-0000-00000000000d','aaaaaaaa-0000-0000-0000-000000000002','frances','2026-09-11');
+ insert into r values ('1 recap por aluno e aula', false, 'passou'); exception when others then insert into r values ('1 recap por aluno e aula', true, sqlerrm); end $$;
+insert into review_bank_settings(teacher_id, auto_generate, manual_markdown) values ('00000000-0000-0000-0000-00000000000d', true, '# Manual');
+insert into r select 'professora grava respostas (inclusive de aluno sem conta), recap e manual', (select count(*) from review_bank_reviews)=3 and (select count(*) from review_bank_recaps)=1 and (select count(*) from review_bank_settings)=1, '';
+
+-- 083: agendamento do Récap e modo da resposta
+update review_bank_items set level = 2, due_date = '2026-10-20', last_result = 'acertou', last_review_date = '2026-10-12' where id = '11111111-1111-1111-1111-111111111111';
+insert into r select 'item guarda nivel, proxima data e ultimo resultado', (select level=2 and due_date='2026-10-20' and last_result='acertou' from review_bank_items where id='11111111-1111-1111-1111-111111111111'), '';
+do $$ begin update review_bank_items set last_result = 'talvez' where id = '11111111-1111-1111-1111-111111111111';
+ insert into r values ('ultimo resultado invalido bloqueado', false, 'passou'); exception when others then insert into r values ('ultimo resultado invalido bloqueado', true, sqlerrm); end $$;
+update review_bank_reviews set mode = 'recap' where outcome = 'errou';
+do $$ begin update review_bank_reviews set mode = 'prova' where outcome = 'errou';
+ insert into r values ('modo de resposta invalido bloqueado', false, 'passou'); exception when others then insert into r values ('modo de resposta invalido bloqueado', true, sqlerrm); end $$;
+insert into r select 'resposta guarda modo e data', (select count(*)=1 from review_bank_reviews where mode='recap' and review_date is not null), '';
+
+-- 085: marca de sensível
+update review_bank_items set sensitive = true where id = '22222222-2222-2222-2222-222222222222';
+insert into r select 'item guarda a marca de sensivel (padrao falso)', (select sensitive from review_bank_items where id='22222222-2222-2222-2222-222222222222') and (select not sensitive from review_bank_items where id='11111111-1111-1111-1111-111111111111'), '';
+update review_bank_items set sensitive = false where id = '22222222-2222-2222-2222-222222222222';
+
+-- 084: o upsert da importação (ON CONFLICT nas colunas de import_key) funciona e não duplica nem sobrescreve
+insert into review_bank_students(teacher_id, name, language_app_key, import_key) values ('00000000-0000-0000-0000-00000000000d','Importada','portugues','imp1') on conflict (teacher_id, import_key) do nothing;
+insert into review_bank_students(teacher_id, name, language_app_key, import_key) values ('00000000-0000-0000-0000-00000000000d','Outro nome','portugues','imp1') on conflict (teacher_id, import_key) do nothing;
+insert into r select 'importar aluno 2x nao duplica nem sobrescreve', (select count(*)=1 and min(name)='Importada' from review_bank_students where import_key='imp1'), '';
+insert into review_bank_items(teacher_id, bank_student_id, language_app_key, item_type, question, answer, import_key) select '00000000-0000-0000-0000-00000000000d', id, 'portugues', 'vocabulario', 'q', 'a', 'i001' from review_bank_students where import_key='imp1' on conflict (bank_student_id, import_key) do nothing;
+insert into review_bank_items(teacher_id, bank_student_id, language_app_key, item_type, question, answer, import_key) select '00000000-0000-0000-0000-00000000000d', id, 'portugues', 'vocabulario', 'q2', 'a2', 'i001' from review_bank_students where import_key='imp1' on conflict (bank_student_id, import_key) do nothing;
+insert into r select 'importar item 2x nao duplica nem sobrescreve', (select count(*)=1 and min(question)='q' from review_bank_items where import_key='i001'), '';
+insert into review_bank_items(teacher_id, bank_student_id, language_app_key, item_type, question, answer) select '00000000-0000-0000-0000-00000000000d', id, 'portugues', 'vocabulario', 'a', 'b' from review_bank_students where import_key='imp1';
+insert into review_bank_items(teacher_id, bank_student_id, language_app_key, item_type, question, answer) select '00000000-0000-0000-0000-00000000000d', id, 'portugues', 'vocabulario', 'c', 'd' from review_bank_students where import_key='imp1';
+insert into r select 'itens criados a mao (sem import_key) nao colidem entre si', (select count(*)=3 from review_bank_items where bank_student_id=(select id from review_bank_students where import_key='imp1')), '';
+insert into review_bank_recaps(teacher_id, bank_student_id, language_app_key, class_date, item_ids) select '00000000-0000-0000-0000-00000000000d', id, 'portugues', '2026-10-09', '{}' from review_bank_students where import_key='imp1' on conflict (bank_student_id, class_date) do nothing;
+insert into review_bank_recaps(teacher_id, bank_student_id, language_app_key, class_date, item_ids) select '00000000-0000-0000-0000-00000000000d', id, 'portugues', '2026-10-09', '{}' from review_bank_students where import_key='imp1' on conflict (bank_student_id, class_date) do nothing;
+insert into r select 'importar recap 2x nao duplica', (select count(*)=1 from review_bank_recaps where bank_student_id=(select id from review_bank_students where import_key='imp1')), '';
+insert into review_bank_reviews(item_id, teacher_id, bank_student_id, language_app_key, outcome, source, applied_at) select i.id, i.teacher_id, i.bank_student_id, i.language_app_key, 'errou', 'importado', now() from review_bank_items i where import_key='i001';
+delete from review_bank_reviews where bank_student_id=(select id from review_bank_students where import_key='imp1') and source='importado';
+insert into r select 'respostas importadas podem ser apagadas e regravadas', (select count(*)=0 from review_bank_reviews where source='importado'), '';
+insert into r select 'respostas importadas nao chegam ao aluno como pendentes', (select count(*)=0 from review_bank_reviews where source='importado' and applied_at is null), '';
+
+select pg_temp.u('00000000-0000-0000-0000-00000000000e','e@x.com');
+insert into r select 'aluna nao le nada do Banco (itens, recaps, respostas, alunos, config)',
+  (select count(*) from review_bank_items)=0 and (select count(*) from review_bank_recaps)=0 and (select count(*) from review_bank_reviews)=0
+  and (select count(*) from review_bank_students)=0 and (select count(*) from review_bank_settings)=0, '';
+do $$ begin update review_bank_students set linked_student_id = null;
+ insert into r values ('aluna nao mexe no vinculo', (select count(*) from review_bank_students)=0, 'sem erro mas 0 linhas'); exception when others then insert into r values ('aluna nao mexe no vinculo', true, sqlerrm); end $$;
+do $$ begin perform approve_review_bank_item('22222222-2222-2222-2222-222222222222','a','b','[]'::jsonb,'normal',null,null);
+ insert into r values ('aluna nao aprova', false, 'passou'); exception when others then insert into r values ('aluna nao aprova', sqlerrm='not_authorized', sqlerrm); end $$;
+create temp table pend(id uuid); grant all on pend to authenticated;
+insert into pend select id from get_my_pending_bank_reviews('frances');
+insert into r select 'aluna ve 1 evento pendente (so o item que virou cartao, no idioma dela)', (select count(*) from pend)=1 and (select count(*) from get_my_pending_bank_reviews('portugues'))=0, '';
+select pg_temp.u('00000000-0000-0000-0000-00000000000c','gratis@x.com');
+insert into r select 'outra conta nao recebe nem confirma eventos alheios', (select count(*) from get_my_pending_bank_reviews('frances'))=0 and ack_my_bank_reviews(array(select id from pend))=0, '';
+select pg_temp.u('00000000-0000-0000-0000-00000000000e','e@x.com');
+insert into r select 'aluna confirma o evento', ack_my_bank_reviews(array(select id from pend))=1, '';
+insert into r select 'aluna nao recebe de novo', (select count(*) from get_my_pending_bank_reviews('frances'))=0, '';
+
+-- desvincular: o cartao e o progresso ficam; novos eventos deixam de chegar
+select pg_temp.u('00000000-0000-0000-0000-00000000000d','prof@x.com');
+select unlink_review_bank_student('aaaaaaaa-0000-0000-0000-000000000002');
+insert into r select 'desvincular mantem o cartao entregue', (select count(*)=1 from teacher_flashcards where bank_item_id='11111111-1111-1111-1111-111111111111'), '';
+select link_review_bank_student('aaaaaaaa-0000-0000-0000-000000000002','00000000-0000-0000-0000-00000000000e');
+
+-- FUROS: conta gratis e outra professora
+select pg_temp.u('00000000-0000-0000-0000-00000000000c','gratis@x.com');
+do $$ begin insert into review_bank_students(teacher_id, name, language_app_key) values ('00000000-0000-0000-0000-00000000000c','x','frances');
+ insert into r values ('conta gratis nao cria aluno do Banco', false, 'passou'); exception when others then insert into r values ('conta gratis nao cria aluno do Banco', true, sqlerrm); end $$;
+reset role; select pg_temp.u('00000000-0000-0000-0000-00000000000a','brunemed1310@gmail.com'); set role authenticated;
+do $$ begin perform approve_review_bank_item('22222222-2222-2222-2222-222222222222','a','b','[]'::jsonb,'normal',null,null);
+ insert into r values ('autora nao aprova item de outra professora', false, 'passou'); exception when others then insert into r values ('autora nao aprova item de outra professora', sqlerrm='not_authorized', sqlerrm); end $$;
+do $$ begin perform link_review_bank_student('aaaaaaaa-0000-0000-0000-000000000002','00000000-0000-0000-0000-00000000000b');
+ insert into r values ('autora nao vincula aluno de outra professora', false, 'passou'); exception when others then insert into r values ('autora nao vincula aluno de outra professora', sqlerrm='not_authorized', sqlerrm); end $$;
+do $$ begin insert into review_bank_items(teacher_id, bank_student_id, language_app_key, item_type, question, answer) values ('00000000-0000-0000-0000-00000000000a','aaaaaaaa-0000-0000-0000-000000000002','frances','vocabulario','x','y');
+ insert into r values ('autora nao cria item no aluno de outra professora', false, 'passou'); exception when others then insert into r values ('autora nao cria item no aluno de outra professora', true, sqlerrm); end $$;
+
+-- sem a permissao, a professora perde acesso
+select admin_set_role_permission('teacher','review_bank',false,null);
+select pg_temp.u('00000000-0000-0000-0000-00000000000d','prof@x.com');
+insert into r select 'sem a permissao nao le o banco', (select count(*) from review_bank_items)=0 and (select count(*) from review_bank_students)=0, '';
+do $$ begin perform approve_review_bank_item('22222222-2222-2222-2222-222222222222','a','b','[]'::jsonb,'normal',null,null);
+ insert into r values ('sem a permissao nao aprova', false, 'passou'); exception when others then insert into r values ('sem a permissao nao aprova', sqlerrm='not_authorized', sqlerrm); end $$;
+reset role; select pg_temp.u('00000000-0000-0000-0000-00000000000a','brunemed1310@gmail.com'); set role authenticated;
+select admin_set_role_permission('teacher','review_bank',true,null);
+reset role;
+select count(*) filter (where ok) passed, count(*) filter (where not ok or ok is null) failed from r;
+select name, got from r where not ok or ok is null;

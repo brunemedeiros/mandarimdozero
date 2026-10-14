@@ -1,4 +1,4 @@
-// ---------- Painel da professora + telas do aluno (Minhas aulas, Material) ----------
+// ---------- Painel da professora + painel do Aluno (Mural, Aulas, Material) ----------
 // Etapa 1 do plano Professora (docs/plano-professora-privacidade.md).
 // O painel depende do PAPEL Professora (isTeacherUser, shared/permissions.js),
 // nunca do Admin Mode. As abas reaproveitam os renders que já existiam
@@ -12,8 +12,8 @@
 // Depende de: shared/permissions.js, shared/supabase-client.js, shared/auth.js,
 // fr/zh app.js (switchTab, APP_KEY) e os renders das abas acima.
 
-const TEACHER_PANEL_SECTIONS = ['students', 'flashcards', 'classlogs', 'materials'];
-const TEACHER_PANEL_STATE = { section: 'students' };
+const TEACHER_PANEL_SECTIONS = ['students', 'flashcards', 'classlogs', 'materials', 'mural'];
+const TEACHER_PANEL_STATE = { section: 'students', cardsSub: 'cards' };
 
 function switchTeacherPanelSection(section){
   if (!TEACHER_PANEL_SECTIONS.includes(section)) section = 'students';
@@ -27,9 +27,24 @@ function switchTeacherPanelSection(section){
     const el = document.getElementById(`admin-${s}-content`);
     if (el) el.style.display = s === section ? '' : 'none';
   });
+  // Cartões tem 2 partes: Cartões e Banco de Revisão (só com a permissão review_bank, plano Professora).
+  const subnav = document.getElementById('admin-cards-subnav');
+  const bankOk = typeof hasPermission === 'function' && hasPermission('review_bank');
+  const bank = section === 'flashcards' && bankOk && TEACHER_PANEL_STATE.cardsSub === 'bank';
+  if (subnav) subnav.style.display = section === 'flashcards' && bankOk ? '' : 'none';
+  const cardsEl = document.getElementById('admin-flashcards-content');
+  const bankEl = document.getElementById('admin-reviewbank-content');
+  if (cardsEl) cardsEl.style.display = section === 'flashcards' && !bank ? '' : 'none';
+  if (bankEl) bankEl.style.display = bank ? '' : 'none';
+  document.querySelectorAll('[data-cards-sub]').forEach(btn => {
+    const on = btn.dataset.cardsSub === (bank ? 'bank' : 'cards');
+    btn.classList.toggle('is-active', on);
+    btn.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
   if (section === 'students') renderAdminStudentsView();
-  else if (section === 'flashcards') renderAdminFlashcardsView();
+  else if (section === 'flashcards') (bank ? renderReviewBankView() : renderAdminFlashcardsView());
   else if (section === 'classlogs') renderAdminClassLogsView();
+  else if (section === 'mural') renderTeacherMuralSection();
   else renderAdminSupportMaterialsView();
 }
 
@@ -40,6 +55,12 @@ async function renderTeacherPanelView(){
 
 document.querySelectorAll('[data-teacher-section]').forEach(btn => {
   btn.addEventListener('click', () => switchTeacherPanelSection(btn.dataset.teacherSection));
+});
+document.querySelectorAll('[data-cards-sub]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    TEACHER_PANEL_STATE.cardsSub = btn.dataset.cardsSub === 'bank' ? 'bank' : 'cards';
+    switchTeacherPanelSection('flashcards');
+  });
 });
 
 // ---------- Lado do aluno ----------
@@ -53,18 +74,56 @@ async function fetchMyClassLogs(languageAppKey){
 }
 
 async function refreshStudentTeacherNav(){
-  const show = (id, on) => { const el = document.getElementById(id); if (el) el.style.display = on ? '' : 'none'; };
-  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER){ show('my-class-logs-btn', false); show('support-materials-btn', false); return; }
+  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER){
+    STUDENT_TEACHER_NAV.logs = 0; STUDENT_TEACHER_NAV.materials = 0;
+    applyStudentNavVisibility();
+    return;
+  }
   const [logs, materials] = await Promise.all([
     hasPermission('class_logs_view') ? fetchMyClassLogs(APP_KEY) : Promise.resolve([]),
     hasPermission('support_materials_view') && typeof fetchSupportMaterialsForCurrentStudent === 'function'
       ? fetchSupportMaterialsForCurrentStudent(APP_KEY) : Promise.resolve([]),
+    typeof muralLoadList === 'function' ? muralLoadList() : Promise.resolve(null),
   ]);
   STUDENT_TEACHER_NAV.logs = logs.length;
   STUDENT_TEACHER_NAV.materials = (materials || []).length;
-  show('my-class-logs-btn', STUDENT_TEACHER_NAV.logs > 0);
-  show('support-materials-btn', STUDENT_TEACHER_NAV.materials > 0);
+  if (typeof muralApplyBadges === 'function') muralApplyBadges(); else applyStudentNavVisibility();
 }
+
+// Item "Aluno" (barra lateral + menu Mais): quem tem professora neste idioma (mural) ou já recebeu aula/material.
+function applyStudentNavVisibility(){
+  const logged = typeof CURRENT_USER !== 'undefined' && !!CURRENT_USER;
+  const hasTeacher = typeof MURAL_STATE !== 'undefined' && !!(MURAL_STATE.list && MURAL_STATE.list.as_student);
+  const on = logged && (hasTeacher || STUDENT_TEACHER_NAV.logs > 0 || STUDENT_TEACHER_NAV.materials > 0);
+  document.querySelectorAll('#student-panel-btn, .student-only-nav').forEach(el => { el.style.display = on ? '' : 'none'; });
+}
+
+// ---------- Aluno: Mural | Aulas | Material de apoio (decisão da autora, 2026-10-13) ----------
+const STUDENT_PANEL_SECTIONS = ['mural', 'classlogs', 'materials'];
+const STUDENT_PANEL_STATE = { section: 'mural' };
+
+function switchStudentPanelSection(section){
+  if (!STUDENT_PANEL_SECTIONS.includes(section)) section = 'mural';
+  STUDENT_PANEL_STATE.section = section;
+  document.querySelectorAll('[data-student-section]').forEach(btn => {
+    const on = btn.dataset.studentSection === section;
+    btn.classList.toggle('is-active', on);
+    btn.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  const ids = { mural: 'my-mural-content', classlogs: 'my-class-logs-content', materials: 'support-materials-content' };
+  STUDENT_PANEL_SECTIONS.forEach(s => { const el = document.getElementById(ids[s]); if (el) el.style.display = s === section ? '' : 'none'; });
+  if (section === 'mural') renderMyMuralView();
+  else if (section === 'classlogs') renderMyClassLogsView();
+  else renderSupportMaterialsView();
+}
+
+function renderStudentPanelView(){
+  switchStudentPanelSection(STUDENT_PANEL_STATE.section);
+}
+
+document.querySelectorAll('[data-student-section]').forEach(btn => {
+  btn.addEventListener('click', () => switchStudentPanelSection(btn.dataset.studentSection));
+});
 
 // class_date é só data ('AAAA-MM-DD'): monta no fuso local, senão vira o dia
 // anterior no Brasil (meia-noite UTC).
@@ -106,7 +165,7 @@ document.getElementById('teacher-panel-btn')?.addEventListener('click', () => {
   document.getElementById('user-menu-dropdown')?.classList.remove('open');
   switchTab('teacher-panel');
 });
-document.getElementById('my-class-logs-btn')?.addEventListener('click', () => {
+document.getElementById('student-panel-btn')?.addEventListener('click', () => {
   document.getElementById('user-menu-dropdown')?.classList.remove('open');
-  switchTab('my-class-logs');
+  switchTab('student-panel');
 });

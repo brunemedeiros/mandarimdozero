@@ -321,6 +321,12 @@
         if (SELECTABLE_UI_LANGS.indexOf(sel.value) < 0) return;
         var chosen = sel.value;
         if (chosen === currentLang) return;
+        // C5: com cursos por idioma do site ligados, trocar o idioma do site é trocar de curso (progresso próprio, recarrega a página).
+        if (window.CourseStorage && window.CourseStorage.isPerSiteLanguage() && typeof window.confirmSwitchCourse === 'function' && typeof APP_KEY !== 'undefined'){
+          syncUiLanguageSelect();
+          window.confirmSwitchCourse(APP_KEY, chosen);
+          return;
+        }
         // Antes de trocar, um aviso curto (progresso continua salvo). Sem o
         // modal na página (ou se ele falhar), troca direto como antes.
         confirmUiLanguageChange(chosen, function(){
