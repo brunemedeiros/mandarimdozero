@@ -8,7 +8,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const frBase = {
   studyDays: 8, reviews: 120, streak: 2, xp: 600, courseDone: 15, courseTotal: 30, courseAced: false, audioPlays: 40,
   modesUsed: 3, modesTotal: 6, weekends: 0, wordsLearned: 60, wordsTotal: 204, checkpointsAced: 0, checkpointsTotal: 26,
-  dictationsAced: 2, challengesDone: 0, challengesTotal: 12, friends: 1, comeback: false, levelLabel: 'A1'
+  dictationsAced: 2, challengesDone: 0, challengesTotal: 12, friends: 1, podiumWeeks: 2, comeback: false, levelLabel: 'A1'
 };
 const zhBase = Object.assign({}, frBase, { modesTotal: 5, courseTotal: 18, wordsTotal: 166, checkpointsTotal: 18,
   dictationsAced: null, challengesDone: null, challengesTotal: 0, levelLabel: 'HSK 1' });
@@ -29,6 +29,11 @@ check('challenge com 12 desafios: 10·12 (critério 8)', eq(by(fr, 'challenge').
 check('challenge com 231: 10·50·200', eq(by(BT.evaluate(Object.assign({}, frBase, { challengesTotal: 231 }), []), 'challenge').goals, [10, 50, 200]));
 check('challenge sem a lista carregada: 10·50·200', eq(by(BT.evaluate(Object.assign({}, frBase, { challengesTotal: 0 }), []), 'challenge').goals, [10, 50, 200]));
 check('friends: 1·3·10', eq(by(fr, 'friends').goals, [1, 3, 10]));
+check('podium: 1·5·10', eq(by(fr, 'podium').goals, [1, 5, 10]));
+check('podium 2 semanas -> nível 1', by(fr, 'podium').level === 1);
+check('podium sem dado carregado não aparece', !by(BT.evaluate(Object.assign({}, frBase, { podiumWeeks: null }), []), 'podium'));
+check('podium é da conta', BT.isAccountId('podium.1'));
+check('podium máximo recebe parabéns, prata não', BT.allowsCongrats('podium', 'max') && !BT.allowsCongrats('podium', 'silver'));
 check('course1 fr: 1·metade·todas·gabaritado', eq(by(fr, 'course1').goals, [1, 15, 30, 31]));
 check('explore fr (6 modos): 3·5·6', eq(by(fr, 'explore').goals, [3, 5, 6]));
 

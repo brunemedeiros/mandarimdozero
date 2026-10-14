@@ -14,6 +14,7 @@ const BADGE_BACKFILL_EARNED_AT = '2026-10-01T00:00:00Z';
 const BADGE_ICON_BASE = '../shared/icons/fluent/';
 
 let FRIENDS_ACCEPTED_COUNT = null; // null = ainda não carregado (a trilha Amigos só aparece depois)
+let PODIUM_WEEKS = null; // null = ainda não carregado (a trilha Pódio só aparece depois)
 let badgeTrackMemo = null;
 
 function badgeOwnGender(){
@@ -29,6 +30,7 @@ function badgeStoredIdsHere(){
 function badgeMetrics(s){
   const m = Object.assign({}, collectBadgeMetrics(s));
   m.friends = FRIENDS_ACCEPTED_COUNT;
+  m.podiumWeeks = PODIUM_WEEKS;
   return m;
 }
 
@@ -37,7 +39,7 @@ function badgeMetrics(s){
 function evaluateBadgeTracks(s){
   const now = Date.now();
   const stored = badgeStoredIdsHere();
-  const key = stored.length + '|' + FRIENDS_ACCEPTED_COUNT;
+  const key = stored.length + '|' + FRIENDS_ACCEPTED_COUNT + '|' + PODIUM_WEEKS;
   if (badgeTrackMemo && badgeTrackMemo.s === s && badgeTrackMemo.key === key && now - badgeTrackMemo.at < 60) return badgeTrackMemo.res;
   const m = badgeMetrics(s);
   const res = { m, tracks: BadgeTracks.evaluate(m, stored) };
@@ -225,4 +227,20 @@ async function loadFriendsAcceptedCount(){
       checkAndCelebrateBadges();
     }
   } catch (e) { console.error('Contagem de amigos (conquistas):', e); }
+}
+
+// Semanas em 1º lugar entre os amigos (trilha Pódio, RPC my_podium_weeks da 092). Só muda quando uma semana fecha,
+// então nível novo aqui é conquista de verdade: comemora (o que já estava gravado em earned_badges não repete).
+async function loadPodiumWeeks(){
+  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER || typeof supabaseClient === 'undefined') return;
+  try {
+    const { data, error } = await supabaseClient.rpc('my_podium_weeks');
+    if (error || typeof data !== 'number') return;
+    const first = PODIUM_WEEKS === null;
+    PODIUM_WEEKS = data;
+    if (first) rebuildTrackBadges(); else invalidateBadgeTracks();
+    const storedLevel = BadgeTracks.storedLevels(badgeStoredIdsHere()).podium || 0;
+    BADGES.filter(b => b.track === 'podium' && b.level <= storedLevel).forEach(b => earnedBadgeIds.add(b.id));
+    checkAndCelebrateBadges();
+  } catch (e) { console.error('Pódio (conquistas):', e); }
 }

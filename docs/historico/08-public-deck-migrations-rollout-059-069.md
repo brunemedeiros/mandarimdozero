@@ -268,3 +268,8 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Produção: aplicada em 2026-10-14 a pedido da autora (versão `20261014175914 091_badge_congrats`). Antes: função igual à do
   Staging (md5 `bca6c6d8…`). Depois: `friends_badge_feed` criada, anon sem EXECUTE, parabéns por sequência intacto,
   0 linhas alteradas (110 earned_badges, 0 friend_congrats).
+
+## 092 -- Pódio (semanas em 1º entre amigos, 2026-10-14)
+
+- `shared/supabase_migrations/092_podium_weeks.sql`: função `my_podium_weeks()`, sem tabela nova.
+- Staging: aplicada em 2026-10-14 (ferramenta). Produção: pendente de autorização.
