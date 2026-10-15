@@ -222,20 +222,20 @@ const PANEL_STUB = (who) => {
       L('convite: trocar idioma troca o link', true);
       await ev(() => document.querySelector(`[data-tinv-lang="${window.__appKey}"]`).click());
       await page.waitForFunction((c) => document.getElementById('tinv-link-input')?.value.includes(c), code0);
-      await page.click('#tinv-reset-btn');
+      await page.click('#tinv-reset-btn'); await page.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();   // confirmação do painel
       await page.waitForFunction(() => document.getElementById('tinv-link-input')?.value.includes('zzz999yyy8'));
       L('convite: gerar outro link', true);
       // ---- convite: busca ----
       await page.fill('#tinv-search-input', 'ana');
-      await page.waitForSelector('#tinv-search-list .plans-option');
-      L('convite: busca não mostra a própria conta', await ev(() => ![...document.querySelectorAll('#tinv-search-list .plans-option-user')].some(e => e.textContent === '@carla.prof')));
+      await page.waitForSelector('#tinv-search-list [data-tinv-opcao]');
+      L('convite: busca não mostra a própria conta', await ev(() => ![...document.querySelectorAll('#tinv-search-list [data-opcao-usuario]')].some(e => e.textContent === '@carla.prof')));
       await page.keyboard.press('Enter');
       await page.waitForSelector('#tinv-send-btn');
       await page.click('#tinv-send-btn');
       await page.waitForFunction(() => document.getElementById('tinv-send-error')?.textContent.length > 0);
       L('convite: aluno com professora mostra o motivo', await ev(() => document.getElementById('tinv-send-error').textContent === t('tinvite.err.student_has_teacher')));
       await page.fill('#tinv-search-input', 'anabela');
-      await page.waitForSelector('#tinv-search-list .plans-option');
+      await page.waitForSelector('#tinv-search-list [data-tinv-opcao]');
       await page.keyboard.press('Enter');
       await page.waitForSelector('#tinv-send-btn');
       await page.click('#tinv-send-btn');
@@ -243,7 +243,7 @@ const PANEL_STUB = (who) => {
       L('convite: pendente aparece na lista', await ev(() => document.querySelector('.tinv-pending-row').textContent.includes('@anabela')));
       L('convite: rpc com o idioma escolhido', await ev(() => window.__rpcCalls.some(c => c[0] === 'teacher_invite_student' && c[1].p_student === 'S2' && c[1].p_lang === window.__appKey)));
       await shot('professora-convite');
-      await page.click('[data-tinv-cancel]');
+      await page.click('[data-tinv-cancel]'); await page.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();   // confirmação do painel
       await page.waitForFunction(() => !document.querySelector('.tinv-pending-row'));
       L('convite: cancelar tira da lista', await ev(() => window.__DB.teacher_students.some(r => r.student_id === 'S2' && r.status === 'removed')));
       // ---- Aulas (094): Presença, Competências, turma, rótulos ----
@@ -373,17 +373,17 @@ const PANEL_STUB = (who) => {
       await page.waitForSelector('#plans-search-input');
       const adminTabs = await ev(() => [...document.querySelectorAll('#view-admin-badges [data-admin-section]')].map(b => b.dataset.adminSection));
       L('admin: 5 abas, sem as da professora e sem Tags', JSON.stringify(adminTabs) === '["badges","analytics","notifications","reports","premium"]', adminTabs);
-      await page.waitForSelector('.plans-matrix tbody tr');
-      L('matriz: 12 permissões x 5 tipos', await ev(() => document.querySelectorAll('.plans-matrix tbody tr').length === 12 && document.querySelectorAll('.plans-matrix thead th').length === 6));
+      await page.waitForSelector('[data-plano-matriz] tbody tr');
+      L('matriz: 12 permissões x 5 tipos', await ev(() => document.querySelectorAll('[data-plano-matriz] tbody tr').length === 12 && document.querySelectorAll('[data-plano-matriz] thead th').length === 6));
       await page.fill('#plans-search-input', 'a');
       await page.waitForTimeout(350);
       L('busca: 1 letra pede mais', (await ev(() => document.getElementById('plans-search-status').textContent)).length > 0);
       await page.fill('#plans-search-input', '@ana');
-      await page.waitForSelector('.plans-option');
-      const opts = await ev(() => [...document.querySelectorAll('.plans-option .plans-option-user')].map(e => e.textContent));
+      await page.waitForSelector('[data-plano-opcao]');
+      const opts = await ev(() => [...document.querySelectorAll('[data-plano-opcao] [data-opcao-usuario]')].map(e => e.textContent));
       L('busca: começa-com vem primeiro', opts[0] === '@ana' || opts[0] === '@anabela', opts);
       await page.keyboard.press('ArrowDown');
-      L('busca: seta move a seleção', await ev(() => document.querySelector('.plans-option[aria-selected="true"]')?.dataset.i === '1'));
+      L('busca: seta move a seleção', await ev(() => document.querySelector('.p-ativo[data-plano-opcao]')?.dataset.i === '1'));
       await page.keyboard.press('ArrowUp');
       await page.keyboard.press('Enter');
       await page.waitForSelector('[data-plan-role="teacher"]');
@@ -393,13 +393,14 @@ const PANEL_STUB = (who) => {
       L('conta: Professora concedida pela RPC', await ev(() => window.__grants.some(g => g[1] === 'teacher')));
       await shot('planos');
       await page.click('[data-plan-role="teacher"]');
+      await page.click('dialog.p-dialogo--alerta[open] .p-perigo');
       await page.waitForFunction(() => document.querySelector('[data-plan-role="teacher"]').getAttribute('aria-checked') === 'false');
       L('conta: Professora revogada', await ev(() => !window.__grants.some(g => g[1] === 'teacher')));
       // matriz: liga Formatos ricos para Grátis
-      await ev(() => { const c = document.querySelector('.plans-cell[data-role="user"][data-key="rich_card_formats"] input[type=checkbox]'); c.click(); });
-      await page.waitForFunction(() => document.querySelector('.plans-cell[data-role="user"][data-key="rich_card_formats"]').classList.contains('is-saved'));
+      await ev(() => { const c = document.querySelector('[data-plano-celula][data-role="user"][data-key="rich_card_formats"] input[type=checkbox]'); c.click(); });
+      await page.waitForFunction(() => document.querySelector('[data-plano-celula][data-role="user"][data-key="rich_card_formats"]').classList.contains('is-saved'));
       L('matriz: célula gravada', await ev(() => window.__DB.role_permissions.find(r => r.role === 'user' && r.permission_key === 'rich_card_formats').enabled === true));
-      await ev(() => { const n = document.querySelector('.plans-cell[data-role="premium_pro"][data-key="tts_monthly_quota"] .plans-limit'); n.value = '600'; n.dispatchEvent(new Event('change')); });
+      await ev(() => { const n = document.querySelector('[data-plano-celula][data-role="premium_pro"][data-key="tts_monthly_quota"] [data-plano-limite]'); n.value = '600'; n.dispatchEvent(new Event('change')); });
       await page.waitForFunction(() => window.__DB.role_permissions.find(r => r.role === 'premium_pro' && r.permission_key === 'tts_monthly_quota').limit_value === 600);
       L('matriz: limite numérico gravado', true);
       L('sem rolagem horizontal na página', await ev(() => document.documentElement.scrollWidth <= window.innerWidth + 1), await ev(() => [document.documentElement.scrollWidth, window.innerWidth]));

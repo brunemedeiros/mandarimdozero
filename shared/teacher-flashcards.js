@@ -331,3 +331,18 @@ async function setFlashcardStatus(id, status){
   const { error } = await supabaseClient.from('teacher_flashcards').update({ status }).eq('id', id);
   return { ok: !error };
 }
+
+// Todos os cartões da professora de uma vez (a tela Cartões filtra, busca e pagina no navegador). O RLS já limita aos dela;
+// o filtro por teacher_id é redundante de propósito. O limite do PostgREST é 1000 linhas: a tela avisa se chegar nele.
+const TEACHER_FLASHCARDS_FETCH_LIMIT = 1000;
+async function fetchAllTeacherFlashcards(){
+  if (!CURRENT_USER) return { cards: [], truncated: false };
+  const { data, error } = await supabaseClient
+    .from('teacher_flashcards')
+    .select('*')
+    .eq('teacher_id', CURRENT_USER.id)
+    .order('created_at', { ascending: false })
+    .limit(TEACHER_FLASHCARDS_FETCH_LIMIT);
+  if (error){ console.error('Erro ao carregar flashcards:', error); return { cards: null, truncated: false }; }
+  return { cards: data || [], truncated: (data || []).length >= TEACHER_FLASHCARDS_FETCH_LIMIT };
+}

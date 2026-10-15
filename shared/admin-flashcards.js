@@ -1,4 +1,11 @@
-// ---------- Flashcards (admin) -- Fase 2/3 do sistema de alunos particulares ----------
+// ---------- Cartões (painel da professora) -- Fase 2/3 do sistema de alunos particulares ----------
+// ATENÇÃO (2026-10-12): a TELA foi reconstruída no Design System do painel (abas Criar cartão / Cartões criados / Banco de
+// Revisão, lista em tabela, edição e mudança de Deck em janelas). As peças de HTML ficam em shared/teacher-cards-ui.js; o
+// controlador novo está no fim deste arquivo (renderAdminFlashcardsView, adminCardsBind...). Os comentários históricos abaixo
+// descrevem a lógica de domínio, que continua valendo, mas citam nomes antigos que não existem mais:
+//   updateFlashcardsSelectionDependentUI -> adminSelectionChanged; buildFlashcardsCardsBoxHTML/wireFlashcardsCardsBox ->
+//   adminCardsReload/adminCardsRefreshList + tccListBodyHTML; flashcardCardRowHTML -> tccRowHTML + adminOpenCardEditor.
+//
 // Autoria de flashcard pela professora, atribuído a um aluno específico.
 // Desde a Fase 3, o cartão criado aqui é mesclado em STATE.cards do aluno
 // (fr/zh app.js, mergeTeacherFlashcardsIntoState) e passa a ser revisável
@@ -163,7 +170,8 @@
 //   - shared/roles.js              (fetchMyStudents)
 //   - shared/teacher-flashcards.js (fetchFlashcardsForStudent, createFlashcard, setFlashcardStatus, uploadFlashcardMedia)
 //   - shared/admin-students.js     (STUDENT_LANGUAGE_LABELS -- reaproveitado)
-//   - shared/toast.js              (showToast)
+//   - shared/teacher-cards-ui.js   (tcc* -- peças de HTML da tela nova), shared/teacher-students-ui.js (tsuNorm, tsuTp)
+//   - shared/painel/painel-ui.js   (PainelUI.confirmar), shared/toast.js (showToast)
 //   - languages/<lang>/app.js      (isAdminUser)
 //
 // CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- SUPERA os históricos "Reestruturação
@@ -209,7 +217,7 @@
 // já usado pra edição nativa->nativa, nunca uma 2ª implementação de
 // comparação. `null` sempre que não há uma conversão em andamento nesta
 // sessão de edição -- limpo em todo ponto que também zera editingNativeState.
-let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [], editingCardId: null, editingNativeState: null, editingNativeConversionBaseline: null, _cardsCache: [], decksByLang: {}, destByStudent: {}, _ensuredKeys: new Set(), _destToken: 0, nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
+let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [], editingCardId: null, editingNativeState: null, editingNativeConversionBaseline: null, _cardsCache: [], _truncated: false, decksByLang: {}, destByStudent: {}, _ensuredKeys: new Set(), _destToken: 0, _renderToken: 0, _ligado: false, _destAbertos: new Set(), tab: 'criar', page: 1, filtros: { aluno: '', status: 'active', busca: '' }, preselect: null, nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
 
 // Prop 4 -- confirmação obrigatória antes de salvar uma edição (grillado
 // com a autora: editar reinicia o progresso de revisão, ela quer avisar
@@ -298,37 +306,6 @@ function adminFlashcardDirectionLabels(selectedStudents){
     nativeFirst: t('myFlashcards.dir.nativeFirst', { target: myFlashcardLangName(pair.target), native: myFlashcardLangName(pair.native) }),
   };
 }
-
-function flashcardStudentLabel(s){
-  return s.display_name
-    ? `${escapeHTML(s.display_name)} (@${escapeHTML(s.username || '?')})`
-    : `@${escapeHTML(s.username || t('admin.common.removedUser'))}`;
-}
-
-// Badges curtos indicando os formatos extras do cartão, só quando
-// presentes (cartão comum não ganha nenhum badge novo).
-function flashcardFormatBadgesHTML(c){
-  return [
-    c.image_url ? t('admin.flashcards.badge.image') : '',
-    c.audio_url ? t('admin.flashcards.badge.audio') : '',
-    (c.choices && c.choices.length) ? t('admin.flashcards.badge.mc') : '',
-    c.cloze_sentence ? t('admin.flashcards.badge.cloze') : '',
-  ].filter(Boolean).join(' · ');
-}
-
-// Fase 1 da reestruturação (ver CLAUDE.md) -- `front` deixou de ser
-// obrigatório no modo cloze (migration 035): um cartão "Completar a
-// frase" criado depois dessa mudança não tem `c.front`. Resumo cai pra
-// mostrar a frase-lacuna resolvida (com a resposta entre colchetes) em
-// vez de um "" → tradução vazio. Cartões cloze já existentes continuam
-// com `front` preenchido como sempre -- esse ramo nunca entra pra eles,
-// zero mudança visual.
-function flashcardFrontSummaryHTML(c){
-  if (c.front) return `${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''}`;
-  if (c.cloze_sentence) return escapeHTML(c.cloze_sentence.replace('___', `[${c.cloze_answer || '...'}]`));
-  return '';
-}
-
 // Prop 4 (ver CLAUDE.md, "7 propostas") -- edição real (TODOS os campos,
 // grillado explicitamente) de um cartão já criado, mais exclusão física.
 // Vive numa div própria em vez de <form> porque troca de conteúdo entre
@@ -472,18 +449,11 @@ function wireFlashcardEditForm(c, container){
     // mutar em seguida) -- é contra ISTO que o save compara pra decidir
     // se revision precisa incrementar (ver wireFlashcardNativeEditForm).
     ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(ADMIN_FLASHCARDS_STATE.editingNativeState);
-    const cardsBox = document.getElementById('admin-flashcards-cards-box');
-    const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
-    cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
-    wireFlashcardsCardsBox(cardsBox);
+    adminOpenCardEditor(c.id, { keepState: true });   // reabre a mesma edição, agora no editor novo
   });
 
   document.getElementById('edit-flashcard-cancel').addEventListener('click', () => {
-    ADMIN_FLASHCARDS_STATE.editingCardId = null;
-    ADMIN_FLASHCARDS_STATE.editingNativeState = null;
-    ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
-    if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-    updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
+    adminCloseCardEditor(false);
   });
 
   document.getElementById('edit-flashcard-save').addEventListener('click', () => {
@@ -509,7 +479,7 @@ function wireFlashcardEditForm(c, container){
       if (!document.getElementById('edit-flashcard-cloze-trans').value.trim()){ errorEl.textContent = t('admin.flashcards.edit.err.trans'); return; }
     }
 
-    openFlashcardResetConfirm(async () => {
+    adminConfirmReset(async () => {
       const saveBtn = document.getElementById('edit-flashcard-save');
       if (saveBtn) saveBtn.disabled = true;
       const imageFile = document.getElementById('edit-flashcard-image').files[0];
@@ -552,12 +522,11 @@ function wireFlashcardEditForm(c, container){
       if (saveBtn) saveBtn.disabled = false;
       if (!result.ok){ errorEl.textContent = result.error; return; }
       showToast(t('myFlashcards.toast.editedReset'));
-      ADMIN_FLASHCARDS_STATE.editingCardId = null;
-      updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
+      adminCloseCardEditor(true);
+      adminCardsAfterChange();
     });
   });
 }
-
 // ---------- Fase 6D.6 (ver CLAUDE.md) -- edição de um cartão NATIVO
 // (fields+card_generation_mode presentes) ou conversão explícita de um
 // legado (via o botão "Usar o novo editor de campos" acima) ----------
@@ -571,23 +540,20 @@ function wireFlashcardEditForm(c, container){
 // colidir com o form de criação nem com o form de edição legado ao lado.
 function flashcardNativeEditFormHTML(c, editorState){
   return `
-    <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:8px;">
-      <div class="section-label" style="margin:0;">${t('myFlashcards.native.title')}</div>
-      <p class="profile-edit-hint" style="margin:0;">${t('myFlashcards.native.hint')}</p>
-      <div class="section-label" style="margin:6px 0 4px;">${t('myFlashcards.native.cardType')}</div>
-      <select id="edit-native-flashcard-card-type" class="profile-edit-input">
+    <p class="p-subtitulo" style="margin:0 0 .5rem;">${t('myFlashcards.native.hint')}</p>
+    <label>${t('myFlashcards.native.cardType')}
+      <select id="edit-native-flashcard-card-type">
         ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
-      </select>
-      <div id="edit-native-flashcard-fields"></div>
-      <div id="edit-native-flashcard-tags"></div>
-      <button type="button" class="admin-select-link" id="edit-native-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">${t('myFlashcards.preview')}</button>
-      <label class="profile-edit-label">${t('admin.flashcards.native.privateNote')}</label>
-      <textarea id="edit-native-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea>
-      <p class="profile-edit-error" id="edit-native-flashcard-error"></p>
-      <div style="display:flex; gap:10px;">
-        <button type="button" class="btn btn-secondary" id="edit-native-flashcard-cancel" style="flex:1;">${t('myFlashcards.edit.cancel')}</button>
-        <button type="button" class="btn btn-primary" id="edit-native-flashcard-save" style="flex:1;">${t('profile.save')}</button>
-      </div>
+      </select></label>
+    <div id="edit-native-flashcard-fields"></div>
+    <div id="edit-native-flashcard-tags"></div>
+    <p style="margin:.6rem 0 0;"><button type="button" class="outline p-pequeno" id="edit-native-flashcard-preview-btn">${t('myFlashcards.preview')}</button></p>
+    <label>${t('admin.flashcards.native.privateNote')}
+      <textarea id="edit-native-flashcard-note" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea></label>
+    <p class="profile-edit-error" id="edit-native-flashcard-error" role="alert"></p>
+    <div class="p-acoes" style="justify-content:flex-end;">
+      <button type="button" class="secondary" id="edit-native-flashcard-cancel">${t('myFlashcards.edit.cancel')}</button>
+      <button type="button" id="edit-native-flashcard-save">${t('profile.save')}</button>
     </div>
   `;
 }
@@ -625,10 +591,10 @@ function wireFlashcardNativeEditForm(c, editorState, container){
   // languageAppKey já vem correto de createNativeNoteEditorStateFromRow()/
   // nativeNoteEditorStateFromLegacyRow() (row.language_app_key).
   document.getElementById('edit-native-flashcard-preview-btn')?.addEventListener('click', () => {
-    openFlashcardPreviewFromEditorState(editorState, {
+    adminPreviewOnTop(() => openFlashcardPreviewFromEditorState(editorState, {
       appKey: editorState.languageAppKey || c.language_app_key || LanguageRegistry.defaultAppKey(),
       origin: 'teacher',
-    });
+    }));
   });
 
   document.getElementById('edit-native-flashcard-cancel').addEventListener('click', () => {
@@ -637,12 +603,7 @@ function wireFlashcardNativeEditForm(c, editorState, container){
     // durante esta sessão de edição nunca chega a ser referenciado por
     // nenhuma linha real, mesmo tratamento de órfão que uma falha de
     // save já recebe.
-    compensateFreshMediaUploads(editorState);
-    ADMIN_FLASHCARDS_STATE.editingCardId = null;
-    ADMIN_FLASHCARDS_STATE.editingNativeState = null;
-    ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
-    if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-    updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
+    adminCloseCardEditor(false);   // descarta o rascunho (e compensa a mídia enviada nesta sessão)
   });
 
   document.getElementById('edit-native-flashcard-save').addEventListener('click', () => {
@@ -675,11 +636,8 @@ function wireFlashcardNativeEditForm(c, editorState, container){
       }
       clearFreshMediaUploads(editorState);
       showToast(nextRevision > (c.revision || 0) ? t('myFlashcards.toast.editedReset') : t('myFlashcards.toast.edited'));
-      ADMIN_FLASHCARDS_STATE.editingCardId = null;
-      ADMIN_FLASHCARDS_STATE.editingNativeState = null;
-      ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
-    if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-      updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
+      adminCloseCardEditor(true);
+      adminCardsAfterChange();
     };
 
     // Só assusta a professora com o aviso de reset quando um reset vai
@@ -690,13 +648,12 @@ function wireFlashcardNativeEditForm(c, editorState, container){
     // de fato mudou. Cancelar sem alterar nada, então, nunca reseta
     // progresso nem mostra o modal de confirmação.
     if (nextRevision > (c.revision || 0)){
-      openFlashcardResetConfirm(doSave);
+      adminConfirmReset(doSave);
     } else {
       doSave();
     }
   });
 }
-
 // ---------- Fase G -- Teacher Decks no Painel (destino por aluno) ----------
 //
 // Camada de UI mínima sobre shared/deck-engine.js (regras) e
@@ -745,63 +702,39 @@ function teacherDeckOptionsHTML(tree, selectedId){
   }).join('');
 }
 
-// Rótulo do Deck de um cartão já criado (destino sempre visível na lista).
-function teacherCardDeckLabelHTML(c){
-  if (c.deck_id == null) return t('admin.flashcards.dest.noDeck');
-  const deck = getDeckById(ADMIN_FLASHCARDS_STATE.decksByLang[c.language_app_key] || [], c.deck_id);
-  return `📂 ${escapeHTML(deck ? teacherDeckLabel(deck) : t('admin.flashcards.dest.deckFallback'))} · `;
-}
-
-// Mover cartão entre Teacher Decks do MESMO aluno (a Note inteira -- os
-// CardInstances irmãos de reverso/Cloze andam juntos, pois deck_id vive na
-// linha, nunca no CardInstance).
-function teacherCardMoveSelectHTML(c){
-  const tree = teacherTreeForStudent(c.student_id, c.language_app_key);
-  if (!tree.length) return '';
-  return `<select class="profile-edit-input" data-move-card="${c.id}" title="${t('admin.flashcards.dest.moveTitle')}" style="width:auto; max-width:190px; padding:2px 4px;">
-    <option value="">${t('admin.flashcards.dest.moveTo')}</option>
-    ${orderedTeacherDecks(tree, tree).filter(({ deck }) => deck.id !== c.deck_id).map(({ deck, depth }) =>
-      `<option value="${deck.id}">${'  '.repeat(depth)}${escapeHTML(teacherDeckLabel(deck))}</option>`).join('')}
-  </select>`;
-}
-
-// Fase H (H1/H4) -- árvore de Teacher Decks do aluno, com contagem de cartões
-// (Notes) por Deck e exclusão de Teacher Deck VAZIO. A UI só reflete a regra
-// (teacher_root nunca; teacher só sem subdecks e sem cartões); quem decide de
-// verdade é o trigger da migration 054 no banco. Nunca há "apagar e mover
-// cartões automaticamente" nem "substituir por outro Deck".
-async function fillTeacherTreeLists(box, selected, problems){
+// Fase H (H1/H4) -- árvore de Teacher Decks do aluno, com contagem de cartões (Notes) por Deck e exclusão de Teacher Deck VAZIO.
+// A UI só reflete a regra (teacher_root nunca; teacher só sem subdecks e sem cartões); quem decide de verdade é o trigger da
+// migration 054 no banco. Nunca há "apagar e mover cartões automaticamente" nem "substituir por outro Deck". A contagem vem da
+// lista de cartões já carregada (adminCardsReload), sem uma consulta por aluno.
+function fillTeacherTreeLists(box, selected, problems){
   const S = ADMIN_FLASHCARDS_STATE;
   for (const s of selected){
     if (problems && problems[`${s.student_id}|${s.language_app_key}`]) continue;
     const holder = box.querySelector(`[data-tree-list="${s.student_id}"]`);
     if (!holder) continue;
-    const notes = (await fetchFlashcardsForStudent(s.student_id)).filter(c => c.language_app_key === s.language_app_key);
-    if (!holder.isConnected) return;
+    const notes = S._cardsCache.filter(c => c.student_id === s.student_id && c.language_app_key === s.language_app_key);
     const tree = teacherTreeForStudent(s.student_id, s.language_app_key);
     const rows = orderedTeacherDecks(tree, tree).map(({ deck, depth }) => {
       const own = notes.filter(c => c.deck_id === deck.id).length;
       const kids = tree.filter(d => d.parent_deck_id === deck.id).length;
-      const deletable = deck.kind === 'teacher' && kids === 0 && own === 0;
-      const del = deck.kind === 'teacher'
-        ? `<button type="button" class="admin-badge-delete-btn" data-tree-delete="${deck.id}" ${deletable ? '' : 'disabled'} title="${deletable ? t('admin.flashcards.dest.deleteTitle') : t('admin.flashcards.dest.deleteDisabledTitle')}">🗑</button>`
-        : '';
-      return `<div class="admin-badge-row" data-tree-row="${deck.id}" style="padding-left:${depth * 16}px;">
-        <span style="flex:1;">${escapeHTML(teacherDeckLabel(deck))} <span class="profile-edit-hint">${t('admin.flashcards.dest.countCards', { n: own })}${kids ? t('admin.flashcards.dest.countSubdecks', { n: kids }) : ''})</span></span>${del}
-      </div>`;
-    }).join('');
-    holder.innerHTML = `<div class="section-label">${t('admin.flashcards.dest.treeTitle')}</div>${rows}`;
+      return { deck, depth, label: teacherDeckLabel(deck), own, kids, deletable: deck.kind === 'teacher' && kids === 0 && own === 0 };
+    });
+    holder.innerHTML = tccTreeHTML(rows);
     holder.querySelectorAll('[data-tree-delete]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const list = S.decksByLang[s.language_app_key] || [];
         const deck = getDeckById(list, Number(btn.dataset.treeDelete));
-        if (!deck || !confirm(t('admin.flashcards.dest.deleteConfirm', { name: deck.name }))) return;
+        if (!deck) return;
+        const opts = { titulo: t('cards.deck.delete.title'), descricao: t('cards.deck.delete.text', { name: deck.name }), confirmar: t('cards.deck.delete.confirm'), cancelar: t('cards.edit.cancel'), perigo: true };
+        const ok = (window.PainelUI && PainelUI.confirmar) ? await PainelUI.confirmar(opts) : confirm(t('admin.flashcards.dest.deleteConfirm', { name: deck.name }));
+        if (!ok) return;
         const res = await deleteTeacherDeck({ deck, decks: list });
         if (!res.ok){ showToast(res.error || t('admin.flashcards.dest.deleteFailed')); return; }
         S.decksByLang[s.language_app_key] = list.filter(d => d.id !== deck.id);
         if (S.destByStudent[adminDestKey(s)] === deck.id) delete S.destByStudent[adminDestKey(s)];
         showToast(t('admin.flashcards.dest.deleted'));
         renderTeacherDestinationRows(box, selected, problems || {});
+        adminCardsRefreshList();
       });
     });
   }
@@ -809,26 +742,18 @@ async function fillTeacherTreeLists(box, selected, problems){
 
 function renderTeacherDestinationRows(box, selected, problems){
   const S = ADMIN_FLASHCARDS_STATE;
+  // Refazer as linhas (trocar a seleção, criar subdeck) não pode fechar a árvore que a professora deixou aberta.
+  const abertos = S._destAbertos;
   box.innerHTML = selected.map(s => {
     const key = `${s.student_id}|${s.language_app_key}`;
-    const head = `<div class="admin-badge-name">${flashcardStudentLabel(s)} · ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}</div>`;
-    if (problems[key]) return `<div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:4px;">${head}<p class="profile-edit-error">${escapeHTML(problems[key])}</p></div>`;
+    if (problems[key]) return tccDestRowHTML(s, { problem: problems[key] });
     const tree = teacherTreeForStudent(s.student_id, s.language_app_key);
     const root = tree.find(d => d.kind === 'teacher_root');
     const chosen = tree.some(d => d.id === S.destByStudent[adminDestKey(s)]) ? S.destByStudent[adminDestKey(s)] : (root ? root.id : null);
-    return `<div class="admin-badge-row" data-dest-row="${s.student_id}" style="flex-direction:column; align-items:stretch; gap:6px;">
-      ${head}
-      <select class="profile-edit-input" data-dest-select="${s.student_id}" aria-label="${t('admin.flashcards.dest.destAria', { username: s.username || '' })}">${teacherDeckOptionsHTML(tree, chosen)}</select>
-      <div style="display:flex; gap:6px; flex-wrap:wrap;">
-        <input type="text" class="profile-edit-input" data-dest-subname="${s.student_id}" placeholder="${t('admin.flashcards.dest.subnamePlaceholder')}" maxlength="60" style="flex:1; min-width:140px;">
-        <button type="button" class="btn btn-secondary" data-dest-newsub="${s.student_id}">${t('admin.flashcards.dest.newSub')}</button>
-      </div>
-      <p class="profile-edit-error" data-dest-err="${s.student_id}"></p>
-      <div data-tree-list="${s.student_id}" aria-label="${t('admin.flashcards.dest.treeAria', { username: s.username || '' })}"></div>
-    </div>`;
+    return tccDestRowHTML(s, { options: teacherDeckOptionsHTML(tree, chosen) });
   }).join('');
-  // Fase H (H1/H4) -- árvore visível por aluno+idioma, com exclusão de
-  // Teacher Deck vazio (assíncrono: precisa contar os cartões de cada Deck).
+  box.querySelectorAll('[data-dest-row] > details').forEach(d => { if (abertos.has(d.parentElement.dataset.destRow)) d.open = true; });
+  // Fase H (H1/H4) -- árvore visível por aluno+idioma, com exclusão de Teacher Deck vazio.
   fillTeacherTreeLists(box, selected, problems);
   selected.forEach(s => {
     const sel = box.querySelector(`[data-dest-select="${s.student_id}"]`);
@@ -880,598 +805,354 @@ async function refreshTeacherDestinationsUI(){
   renderTeacherDestinationRows(box, selected, problems);
 }
 
-// CONSOLIDAÇÃO-3 (ver CLAUDE.md) -- "Arquivar" deixou de ser uma ação
-// normal de produto: um cartão ATIVO não tem mais nenhum botão de
-// arquivar aqui, em lugar nenhum. O único vestígio do mecanismo que
-// sobrevive é "Reativar" (↺), mostrado só em cartões JÁ arquivados
-// (`c.status === 'archived'`, herdados de antes desta fase) -- nunca um
-// substituto/nome novo pra "esconder"/"suspender": é a AÇÃO INVERSA
-// (devolver um cartão histórico pro estado ativo padrão), e uma vez
-// reativado o cartão não tem mais nenhum botão de status (vira
-// indistinguível de um cartão que nunca foi arquivado). `setFlashcardStatus`
-// (shared/teacher-flashcards.js) não mudou -- só quem chama com
-// `'archived'` deixou de existir na UI.
-function flashcardCardRowHTML(c, showUsername){
-  if (ADMIN_FLASHCARDS_STATE.editingCardId === c.id){
-    // Cartão já nativo -> sempre edita no editor novo (nunca mostra a
-    // versão legada de campos que nem existem mais pra ele -- choices/
-    // cloze_sentence ficam null numa Note nativa). Seedado LAZY (só quando
-    // ainda não existe um editingNativeState desta sessão de edição) --
-    // trocar de Card Type/editar Fields depois não deveria resetar o
-    // estado do editor a cada re-render da caixa de cartões.
-    if (!ADMIN_FLASHCARDS_STATE.editingNativeState && classifyFlashcardRowModel(c) === 'native'){
-      ADMIN_FLASHCARDS_STATE.editingNativeState = createNativeNoteEditorStateFromRow(c);
-    }
-    // Decisão da autora (2026-10-05): cartão LEGADO abre direto no editor
-    // novo (rascunho em memória; nada é gravado até "Salvar edição"). O
-    // formulário antigo só sobra se o conteúdo não puder ser convertido
-    // com segurança (preflight) -- aí o botão "Usar o novo editor" mostra
-    // o motivo.
-    if (!ADMIN_FLASHCARDS_STATE.editingNativeState && classifyFlashcardRowModel(c) === 'legacy'
-        && legacyFlashcardConversionPreflight(c).ok){
-      ADMIN_FLASHCARDS_STATE.editingNativeState = nativeNoteEditorStateFromLegacyRow(c);
-      ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(ADMIN_FLASHCARDS_STATE.editingNativeState);
-    }
-    if (ADMIN_FLASHCARDS_STATE.editingNativeState) return flashcardNativeEditFormHTML(c, ADMIN_FLASHCARDS_STATE.editingNativeState);
-    return flashcardEditFormHTML(c);
-  }
-  return `
-    <div class="admin-badge-row">
-      <div class="admin-badge-info">
-        <div class="admin-badge-name">${showUsername ? `<span style="opacity:.6">@${escapeHTML(c.__studentUsername || '?')}</span> · ` : ''}${flashcardFrontSummaryHTML(c)} → ${escapeHTML(c.back_trans)}</div>
-        <div class="admin-badge-desc">${teacherCardDeckLabelHTML(c)}${c.note ? escapeHTML(c.note) + ' · ' : ''}${t('myFlashcards.row.createdOn', { date: fmtDate(c.created_at) })}${flashcardFormatBadgesHTML(c) ? ' · ' + flashcardFormatBadgesHTML(c) : ''}</div>
-        ${(c.tags && c.tags.length) ? `<div data-row-tags style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${noteTagChipsHTML(c.tags)}</div>` : ''}
-      </div>
-      <div style="display:flex; gap:6px; align-items:center;">
-        ${teacherCardMoveSelectHTML(c)}
-        <button class="admin-badge-delete-btn" data-preview-flashcard="${c.id}" title="${t('admin.flashcards.row.previewTitle')}">👁</button>
-        <button class="admin-badge-delete-btn" data-edit-flashcard="${c.id}" title="${t('myFlashcards.row.editTitle')}">✏️</button>
-        ${c.status === 'archived' ? `<button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="active" title="${t('myFlashcards.row.reactivateTitle')}">↺</button>` : ''}
-        <button class="admin-badge-delete-btn" data-delete-flashcard="${c.id}" title="${t('myFlashcards.row.deleteTitle')}">🗑</button>
-      </div>
-    </div>
-  `;
+/* =====================================================================================================================
+   RECONSTRUÇÃO NO DESIGN SYSTEM DO PAINEL (Fase 2, tela Cartões, 2026-10-12)
+   Tudo daqui para baixo é a tela nova: abas "Criar cartão" / "Cartões criados" / "Banco de Revisão", lista em tabela com
+   filtros e paginação, edição e movimentação em janelas. A lógica de domínio (editor nativo de campos, Decks da professora,
+   preservar/reiniciar progresso, mídia) é a mesma de antes: só a apresentação mudou. HTML em shared/teacher-cards-ui.js.
+   Regra herdada (UX-fix 5): mudar seleção, digitar em filtro ou trocar de aba NUNCA refaz o formulário de criação.
+   ===================================================================================================================== */
+
+// Texto do Deck de um cartão (coluna "Deck" da lista).
+function adminCardDeckLabel(c){
+  if (c.deck_id == null) return t('cards.noDeck');
+  const deck = getDeckById(ADMIN_FLASHCARDS_STATE.decksByLang[c.language_app_key] || [], c.deck_id);
+  return deck ? teacherDeckLabel(deck) : t('admin.flashcards.dest.deckFallback');
 }
 
-// Busca + monta o HTML da caixa "Cartões" pra um conjunto de alunos
-// selecionados -- vive numa função própria porque é chamada tanto no
-// render completo quanto (re-fetch isolado) a cada mudança de seleção,
-// SEM tocar no <form> ao lado (ver comentário no topo do arquivo).
-async function buildFlashcardsCardsBoxHTML(selectedStudents){
-  await loadTeacherDecksByLang(selectedStudents);
-  const cardLists = await Promise.all(selectedStudents.map(s => fetchFlashcardsForStudent(s.student_id)));
-  const cards = cardLists.flatMap((list, i) => list.map(c => ({ ...c, __studentUsername: selectedStudents[i].username })));
-  cards.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  // Prop 4 (ver CLAUDE.md, "7 propostas") -- cacheia a lista buscada pra
-  // wireFlashcardsCardsBox() achar o objeto completo do cartão em edição
-  // sem precisar refazer a busca de rede.
-  ADMIN_FLASHCARDS_STATE._cardsCache = cards;
-  const activeCards = cards.filter(c => c.status === 'active');
-  const archivedCards = cards.filter(c => c.status === 'archived');
-  const showUsername = selectedStudents.length > 1;
+// Decks de destino possíveis para mover um cartão (os do mesmo aluno e idioma, menos o atual).
+function adminCardMoveTargets(c){
+  const tree = teacherTreeForStudent(c.student_id, c.language_app_key);
+  return orderedTeacherDecks(tree, tree).filter(({ deck }) => deck.id !== c.deck_id);
+}
+function adminCardCanMove(c){ return adminCardMoveTargets(c).length > 0; }
 
-  // CONSOLIDAÇÃO-3 (ver CLAUDE.md) -- esta seção "Arquivados" já era, desde
-  // antes desta fase, uma área visualmente SEPARADA de "Cartões ativos"
-  // (label própria, nunca misturada na mesma lista) -- exatamente o que
-  // §5 pede ("área separada de históricos arquivados"), então foi
-  // reaproveitada tal como estava, sem nenhuma reconstrução. O que mudou
-  // é só que nenhum cartão pode mais CHEGAR aqui por uma ação da UI --
-  // só existe o que já estava arquivado antes desta fase (ou um cartão
-  // que a professora reativou e arquivou de novo ANTES desta fase
-  // existir, mas nenhum daqui pra frente).
-  return `
-    <div class="profile-section">
-      <div class="section-label">${t('admin.flashcards.list.activeTitle', { n: activeCards.length })}</div>
-      ${activeCards.length ? activeCards.map(c => flashcardCardRowHTML(c, showUsername)).join('') : `<p class="profile-empty-note">${t('admin.flashcards.list.emptyFor')}${adminEmptyForSuffix(selectedStudents.length)}.</p>`}
-    </div>
-    ${archivedCards.length ? `
-    <div class="profile-section">
-      <div class="section-label">${t('myFlashcards.archived.title', { n: archivedCards.length })}</div>
-      ${archivedCards.map(c => flashcardCardRowHTML(c, showUsername)).join('')}
-    </div>` : ''}
-  `;
+// Cada cartão leva o vínculo do aluno (__student); cartões de quem deixou de ser aluno saem da lista.
+function adminCardsDecorate(cards){
+  const byKey = {}; ADMIN_FLASHCARDS_STATE._studentsCache.forEach(s => { byKey[adminDestKey(s)] = s; });
+  return cards.filter(c => byKey[`${c.student_id}|${c.language_app_key}`]).map(c => Object.assign(c, { __student: byKey[`${c.student_id}|${c.language_app_key}`] }));
 }
 
-function wireFlashcardsCardsBox(cardsBox){
-  // Fase 6D.7 (ver CLAUDE.md) -- Preview a partir de uma linha JÁ SALVA
-  // (nativa ou legada), sempre usando o idioma REAL daquela linha
-  // (c.language_app_key), nunca o idioma do site onde o Painel de Admin
-  // está sendo visto agora -- a professora pode estar em fr/index.html
-  // gerenciando um aluno de mandarim (anyMandarim já cobre esse cenário
-  // pra criação), e o Preview precisa resolver pronúncia/pinyin contra o
-  // idioma certo independente disso.
-  cardsBox.querySelectorAll('[data-preview-flashcard]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = Number(btn.dataset.previewFlashcard);
-      const card = ADMIN_FLASHCARDS_STATE._cardsCache.find(c => c.id === id);
-      if (!card){ openFlashcardPreviewWithError(t('myFlashcards.err.previewLoad')); return; }
-      openFlashcardPreviewFromRow(card, { appKey: card.language_app_key, origin: 'teacher' });
-    });
-  });
-  cardsBox.querySelectorAll('[data-move-card]').forEach(sel => {
-    sel.addEventListener('change', async () => {
-      if (!sel.value) return;
-      const card = ADMIN_FLASHCARDS_STATE._cardsCache.find(c => c.id === Number(sel.dataset.moveCard));
-      const list = card ? (ADMIN_FLASHCARDS_STATE.decksByLang[card.language_app_key] || []) : [];
-      const destination = getDeckById(list, Number(sel.value));
-      const res = card ? await setTeacherFlashcardDeck({ note: card, destination, decks: list }) : { ok: false, error: t('admin.flashcards.move.notFound') };
-      if (!res.ok){ showToast(res.error || t('admin.flashcards.move.failed')); sel.value = ''; return; }
-      showToast(t('admin.flashcards.move.moved'));
-      const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
-      cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
-      wireFlashcardsCardsBox(cardsBox);
-      const destBox = document.getElementById('admin-flashcard-destinations');
-      if (destBox) fillTeacherTreeLists(destBox, selectedStudents, {});
-    });
-  });
-  cardsBox.querySelectorAll('[data-toggle-flashcard]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      await setFlashcardStatus(btn.dataset.toggleFlashcard, btn.dataset.nextStatus);
-      const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
-      cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
-      wireFlashcardsCardsBox(cardsBox);
-    });
-  });
-  // Prop 4 (ver CLAUDE.md, "7 propostas") -- Editar/Apagar.
-  cardsBox.querySelectorAll('[data-edit-flashcard]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      ADMIN_FLASHCARDS_STATE.editingCardId = Number(btn.dataset.editFlashcard);
-      // Fase 6D.6 (ver CLAUDE.md) -- toda NOVA edição começa sem
-      // editingNativeState -- flashcardCardRowHTML() semeia de novo se o
-      // cartão for nativo, ou continua null (legado, sem toggle ainda
-      // clicado) até a professora explicitamente pedir o editor novo.
-      ADMIN_FLASHCARDS_STATE.editingNativeState = null;
-      ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
+function adminCardsWrap(){ return document.getElementById('admin-flashcards-content'); }
+function adminCardsListCtx(){ return { deckLabel: adminCardDeckLabel, canMove: adminCardCanMove }; }
+
+// Atualiza só a tabela (e a contagem da aba), sem tocar nos filtros nem no formulário de criação.
+function adminCardsRefreshList(){
+  const S = ADMIN_FLASHCARDS_STATE, wrap = adminCardsWrap(); if (!wrap) return;
+  const body = wrap.querySelector('[data-cards-lista]');
+  if (body) body.innerHTML = tccListBodyHTML(S._cardsCache, S.filtros, S._cardsCache.length, S.page, adminCardsListCtx());
+  const tabs = wrap.querySelector('[data-cards-tabs]');
+  if (tabs) tabs.innerHTML = tccTabsHTML(S.tab, S._cardsCache.filter(c => c.status === 'active').length);
+}
+
+// Busca todos os cartões de novo e atualiza a lista. false = a consulta falhou (a lista antiga continua na tela).
+async function adminCardsReload(){
+  const S = ADMIN_FLASHCARDS_STATE;
+  const r = await fetchAllTeacherFlashcards();
+  if (r.cards === null) return false;
+  S._cardsCache = adminCardsDecorate(r.cards); S._truncated = r.truncated;
+  adminCardsRefreshList();
+  return true;
+}
+
+// Depois de criar, editar, mover, reativar ou apagar: relê os cartões e refaz a árvore de Decks dos alunos escolhidos.
+async function adminCardsAfterChange(){
+  await adminCardsReload();
+  const box = document.getElementById('admin-flashcard-destinations');
+  if (box) fillTeacherTreeLists(box, adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache), {});
+}
+
+// Confirmação antes de gravar uma edição que reinicia o progresso (a do painel; o modal antigo só sobra para o lado do aluno).
+function adminConfirmReset(onConfirm){
+  if (window.PainelUI && PainelUI.confirmar){
+    PainelUI.confirmar({ titulo: t('cards.edit.resetTitle'), descricao: t('cards.edit.resetText'), confirmar: t('cards.edit.resetConfirm'), cancelar: t('cards.edit.cancel') }).then(ok => { if (ok) onConfirm(); });
+  } else openFlashcardResetConfirm(onConfirm);
+}
+
+// O Preview é um modal do site, fora da camada de cima; dentro da janela de edição ele ficaria atrás dela.
+// Enquanto a janela está aberta o modal vive dentro dela; ao fechar a janela, volta para o <body>.
+function adminPreviewOnTop(openFn){
+  const dlg = document.getElementById('dlg-editar-cartao'), modal = document.getElementById('flashcard-preview-modal');
+  if (dlg && dlg.open && modal && modal.parentNode !== dlg) dlg.appendChild(modal);
+  openFn();
+}
+
+function adminCloseCardEditor(saved){
+  const S = ADMIN_FLASHCARDS_STATE, d = document.getElementById('dlg-editar-cartao');
+  if (!saved && S.editingNativeState && typeof compensateFreshMediaUploads === 'function') compensateFreshMediaUploads(S.editingNativeState);
+  S.editingCardId = null; S.editingNativeState = null; S.editingNativeConversionBaseline = null;
+  if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
+  if (d && d.open) d.close();
+}
+
+// Abre a janela de edição. Cartão nativo, ou legado que converte com segurança, abre no editor novo (rascunho em memória: nada
+// é gravado até "Salvar"); só o legado que não converte (preflight) cai no formulário antigo. opts.keepState = reabrir a mesma
+// edição (botão "Usar o novo editor" do formulário antigo).
+function adminOpenCardEditor(cardId, opts){
+  opts = opts || {};
+  const S = ADMIN_FLASHCARDS_STATE, wrap = adminCardsWrap();
+  const c = S._cardsCache.find(x => x.id === Number(cardId));
+  if (!c || !wrap) return;
+  const old = document.getElementById('dlg-editar-cartao');
+  if (old){ old.dataset.reabrir = '1'; old.close(); old.remove(); }
+  S.editingCardId = c.id;
+  if (!opts.keepState){
+    S.editingNativeState = null; S.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-      const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
-      cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
-      wireFlashcardsCardsBox(cardsBox);
-    });
-  });
-  cardsBox.querySelectorAll('[data-delete-flashcard]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      if (!confirm(t('myFlashcards.confirm.delete'))) return;
-      await deleteFlashcardPermanently(btn.dataset.deleteFlashcard);
-      showToast(t('admin.flashcards.delete.deleted'));
-      const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
-      cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
-      wireFlashcardsCardsBox(cardsBox);
-      const destBox = document.getElementById('admin-flashcard-destinations');
-      if (destBox) fillTeacherTreeLists(destBox, selectedStudents, {});
-    });
-  });
-  // Se um cartão está em edição, o HTML acima já renderizou
-  // flashcardEditFormHTML()/flashcardNativeEditFormHTML() no lugar da
-  // linha normal (ver flashcardCardRowHTML) -- falta só wirear os
-  // handlers do form certo (Fase 6D.6: editingNativeState decide qual).
-  if (ADMIN_FLASHCARDS_STATE.editingCardId != null){
-    const editingCard = ADMIN_FLASHCARDS_STATE._cardsCache.find(c => c.id === ADMIN_FLASHCARDS_STATE.editingCardId);
-    if (editingCard){
-      if (ADMIN_FLASHCARDS_STATE.editingNativeState){
-        wireFlashcardNativeEditForm(editingCard, ADMIN_FLASHCARDS_STATE.editingNativeState, cardsBox);
-      } else {
-        wireFlashcardEditForm(editingCard, cardsBox);
-      }
+    if (classifyFlashcardRowModel(c) === 'native') S.editingNativeState = createNativeNoteEditorStateFromRow(c);
+    else if (classifyFlashcardRowModel(c) === 'legacy' && legacyFlashcardConversionPreflight(c).ok){
+      // Decisão da autora (2026-10-05): cartão LEGADO abre direto no editor novo.
+      S.editingNativeState = nativeNoteEditorStateFromLegacyRow(c);
+      S.editingNativeConversionBaseline = cloneNoteEditorState(S.editingNativeState);
     }
   }
+  const legacy = !S.editingNativeState;
+  const inner = legacy ? flashcardEditFormHTML(c) : flashcardNativeEditFormHTML(c, S.editingNativeState);
+  (wrap.querySelector('.painel') || wrap).insertAdjacentHTML('beforeend', tccEditDialogHTML(c, inner, legacy));
+  const d = document.getElementById('dlg-editar-cartao');
+  d.addEventListener('close', () => {
+    if (d.dataset.reabrir) return;
+    const modal = document.getElementById('flashcard-preview-modal');
+    if (modal && modal.parentNode === d) document.body.appendChild(modal);
+    if (S.editingCardId != null) adminCloseCardEditor(false);   // fechou no X, no Esc ou no fundo sem salvar: descarta o rascunho
+    d.remove();
+  });
+  d.showModal();
+  if (legacy) wireFlashcardEditForm(c, d); else wireFlashcardNativeEditForm(c, S.editingNativeState, d);
 }
 
-// Atualiza tudo que depende da seleção de alunos SEM recriar o <form> --
-// chamada por: mudar um checkbox, "Selecionar todos", "Limpar seleção",
-// e o filtro de idioma. Nunca toca em #admin-create-flashcard-form.
-async function updateFlashcardsSelectionDependentUI(wrap){
-  const students = ADMIN_FLASHCARDS_STATE._studentsCache;
-  // (langFilter normalizado ANTES de calcular a seleção efetiva -- H8)
+function adminOpenMoveDialog(cardId){
+  const S = ADMIN_FLASHCARDS_STATE, wrap = adminCardsWrap();
+  const c = S._cardsCache.find(x => x.id === Number(cardId));
+  if (!c || !wrap) return;
+  const old = document.getElementById('dlg-mover-cartao'); if (old) old.remove();
+  const options = adminCardMoveTargets(c).map(({ deck, depth }) => `<option value="${deck.id}">${'  '.repeat(depth)}${escapeHTML(teacherDeckLabel(deck))}</option>`).join('');
+  (wrap.querySelector('.painel') || wrap).insertAdjacentHTML('beforeend', tccMoveDialogHTML(c, options));
+  const d = document.getElementById('dlg-mover-cartao');
+  d.addEventListener('close', () => d.remove());
+  d.showModal();
+}
+
+async function adminMoveCard(form){
+  const S = ADMIN_FLASHCARDS_STATE;
+  const card = S._cardsCache.find(c => c.id === Number(form.dataset.cardId));
+  const list = card ? (S.decksByLang[card.language_app_key] || []) : [];
+  const destination = getDeckById(list, Number(document.getElementById('mover-cartao-deck').value));
+  const res = card ? await setTeacherFlashcardDeck({ note: card, destination, decks: list }) : { ok: false, error: t('admin.flashcards.move.notFound') };
+  if (!res.ok){ showToast(res.error || t('admin.flashcards.move.failed')); return; }
+  document.getElementById('dlg-mover-cartao').close();
+  showToast(t('admin.flashcards.move.moved'));
+  await adminCardsAfterChange();
+}
+
+async function adminDeleteCard(cardId){
+  const opts = { titulo: t('cards.delete.title'), descricao: t('cards.delete.text'), confirmar: t('cards.delete.confirm'), cancelar: t('cards.edit.cancel'), perigo: true };
+  const ok = (window.PainelUI && PainelUI.confirmar) ? await PainelUI.confirmar(opts) : confirm(t('myFlashcards.confirm.delete'));
+  if (!ok) return;
+  await deleteFlashcardPermanently(cardId);
+  showToast(t('admin.flashcards.delete.deleted'));
+  await adminCardsAfterChange();
+}
+
+// Atualiza tudo que depende da seleção de alunos SEM refazer o formulário: chips, resumo, botão, pessoas marcadas, destinos.
+async function adminSelectionChanged(){
+  const S = ADMIN_FLASHCARDS_STATE, wrap = adminCardsWrap(), students = S._studentsCache;
   const langsPresent = [...new Set(students.map(s => s.language_app_key))];
-  if (langsPresent.length > 1 && !langsPresent.includes(ADMIN_FLASHCARDS_STATE.langFilter)){
-    ADMIN_FLASHCARDS_STATE.langFilter = langsPresent[0];
-  }
-  const selectedStudents = adminSelectedStudents(students);
-  const anyMandarim = selectedStudents.some(s => LanguageRegistry.isCjk(s.language_app_key));
-  // Fase 6D.5 (ver CLAUDE.md) -- mesma regra do render inicial: só o
-  // booleano relevante pra validação (compareAnswer/pinyin obrigatório de
-  // um Cloze/Digite a resposta em mandarim), mutação pura de estado, NUNCA
-  // dispara re-render da caixa "Campos" (que só re-renderiza por sua
-  // própria mudança estrutural).
-  ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey = anyMandarim ? selectedStudents.find(s => LanguageRegistry.isCjk(s.language_app_key)).language_app_key : null;
-  const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length);
-
-  const counterEl = document.getElementById('admin-flashcard-selection-counter');
-  if (counterEl) counterEl.textContent = selectionCountLabel;
-
-  const subtitleEl = document.getElementById('admin-flashcard-content-subtitle');
-  if (subtitleEl) subtitleEl.textContent = selectedStudents.length === 1
-    ? ` · ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
-    : selectedStudents.length > 1 ? ` · ${tp('admin.common.selectedCount', selectedStudents.length)}` : '';
-
-  const contentHint = document.getElementById('admin-flashcard-content-hint');
-  if (contentHint) contentHint.style.display = selectedStudents.length ? 'none' : '';
-
+  if (langsPresent.length > 1 && !langsPresent.includes(S.langFilter)) S.langFilter = langsPresent[0];
+  const selected = adminSelectedStudents(students);
+  { const cjk = selected.find(s => LanguageRegistry.isCjk(s.language_app_key)); S.nativeCardState.languageAppKey = cjk ? cjk.language_app_key : null; }
+  const chips = wrap.querySelector('[data-cards-chips]'); if (chips) chips.innerHTML = tccChipsHTML(selected);
+  wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => { cb.checked = S.studentIds.has(cb.value); });
+  const resumo = wrap.querySelector('[data-cards-resumo]'); if (resumo) resumo.textContent = selected.length ? tsuTp('cards.summary.people', selected.length) : t('cards.summary.none');
   const btn = document.getElementById('admin-create-flashcard-btn');
-  if (btn){
-    btn.disabled = !selectedStudents.length;
-    btn.textContent = `${t('myFlashcards.create')}${adminForStudentsSuffix(selectedStudents.length)}`;
-  }
-
+  if (btn){ btn.disabled = !selected.length; btn.textContent = tccSubmitLabel(selected.length); }
   await refreshTeacherDestinationsUI();
-
-  const cardsBox = document.getElementById('admin-flashcards-cards-box');
-  if (cardsBox){
-    cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
-    wireFlashcardsCardsBox(cardsBox);
-  }
-
-  return selectedStudents;
 }
 
-// Busca (texto) + filtro de idioma combinados (AND) -- os dois são filtros
-// puros de DOM (style.display) sobre a lista de checkboxes já renderizada,
-// nunca re-renderizam nada (nem a lista de alunos, nem o form).
-function applyFlashcardPickerFilters(wrap){
+function adminApplyPickerFilters(wrap){
+  const S = ADMIN_FLASHCARDS_STATE;
   const q = (document.getElementById('admin-flashcard-search')?.value || '').trim().toLowerCase();
-  const lang = ADMIN_FLASHCARDS_STATE.langFilter;
+  const multi = new Set(S._studentsCache.map(s => s.language_app_key)).size > 1;
   wrap.querySelectorAll('[data-student-row]').forEach(row => {
-    const matchesText = !q || row.dataset.searchtext.includes(q);
-    const matchesLang = lang === 'all' || row.dataset.lang === lang;
-    row.style.display = (matchesText && matchesLang) ? '' : 'none';
+    row.hidden = !((!q || row.dataset.searchtext.includes(q)) && (!multi || row.dataset.lang === S.langFilter));
   });
 }
 
-// CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- markFlashcardFieldInvalid/
-// clearFlashcardFieldInvalid/FLASHCARD_FIELD_IDS/clearAllFlashcardFieldErrors/
-// validateFlashcardForm/wireFlashcardFieldValidation (validação contextual
-// por campo do formulário legado de CRIAÇÃO -- "Modo de prática"/Frente/
-// Verso/campos de MC/Cloze legados) foram removidas: existiam só pra
-// validar um formulário que não existe mais na tela de criação (ver
-// renderAdminFlashcardsView abaixo -- só o editor nativo, sem bifurcação
-// legacy/native). Nenhuma outra função deste arquivo as chamava.
+// (Re)monta o editor de campos e o de tags do cartão em criação, a partir de ADMIN_FLASHCARDS_STATE.nativeCardState.
+function adminMountCreateEditor(){
+  const S = ADMIN_FLASHCARDS_STATE;
+  refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), S.nativeCardState, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia, ttsFn: requestFieldAudioTTS, noteId: S.nativeCardState.noteId });
+  mountNoteTagsEditor(document.getElementById('admin-flashcard-tags'), S.nativeCardState);
+}
+
+function adminChangeCardType(newMode){
+  const S = ADMIN_FLASHCARDS_STATE, st = S.nativeCardState;
+  // Sair do cloze nunca deixa sintaxe {{cN::...}} presa num Field que o Card Type novo leria como texto puro.
+  if (st.cardGenerationMode === 'cloze' && newMode !== 'cloze') stripClozeMarksFromEditorState(st);
+  if (newMode === 'multiple_choice') transitionToMultipleChoice(st);
+  else if (newMode === 'type_answer') transitionToTypeAnswer(st);
+  else if (newMode === 'cloze') transitionToCloze(st);
+  else st.cardGenerationMode = newMode;
+  refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), st, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia, ttsFn: requestFieldAudioTTS, noteId: st.noteId });
+}
+
+async function adminCreateCards(){
+  const S = ADMIN_FLASHCARDS_STATE;
+  const btn = document.getElementById('admin-create-flashcard-btn'), errorEl = document.getElementById('admin-create-flashcard-error');
+  errorEl.textContent = '';
+  const selectedNow = adminSelectedStudents(S._studentsCache);
+  if (!selectedNow.length){ errorEl.textContent = t('admin.common.selectAtLeastOne'); return; }
+  const nativeState = S.nativeCardState;
+  nativeState.privateNote = (document.getElementById('admin-flashcard-note').value || '').trim() || null;
+  const v = validateNoteEditorStateForSave(nativeState);
+  if (!v.ok){ errorEl.textContent = v.error; return; }
+  btn.disabled = true;
+  // Uma Note por aluno escolhido, cada uma com o language_app_key e o Deck de destino do PRÓPRIO aluno. Não há atomicidade
+  // entre alunos: pode haver sucesso parcial, e uma falha nunca manda o cartão para o Deck de outro aluno.
+  const results = await Promise.all(selectedNow.map(async s => {
+    const dest = await resolveTeacherCreationDeck({ studentId: s.student_id, languageAppKey: s.language_app_key, deckId: S.destByStudent[adminDestKey(s)], decks: S.decksByLang[s.language_app_key] });
+    if (!dest.ok) return { ok: false, error: dest.error, student: s };
+    const r = await createFlashcard({ studentId: s.student_id, languageAppKey: s.language_app_key, nativeState, deckId: dest.deckId });
+    return Object.assign({ student: s }, r);
+  }));
+  btn.disabled = false;
+  const failed = results.filter(r => !r.ok);
+  if (failed.length === results.length){
+    // Nenhuma linha ficou de pé referenciando a mídia enviada nesta sessão: seguro compensar (se só parte falhou, não).
+    compensateFreshMediaUploads(nativeState);
+    errorEl.textContent = failed[0].error;
+    return;
+  }
+  clearFreshMediaUploads(nativeState);
+  const okCount = results.length - failed.length;
+  if (failed.length) showToast(t('admin.flashcards.createdPartial', { ok: okCount, failed: failed.map(f => '@' + (f.student.username || '?')).join(', ') }));
+  else showToast(results.length > 1 ? t('admin.flashcards.createdN', { n: okCount }) : t('admin.flashcards.created'));
+  // Só aqui o formulário é limpo (um envio bem-sucedido deve limpar); as pessoas e os Decks escolhidos continuam.
+  const cjkKey = S.nativeCardState.languageAppKey;
+  S.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal' });
+  S.nativeCardState.languageAppKey = cjkKey;
+  document.getElementById('admin-flashcard-note').value = '';
+  const normal = document.querySelector('[data-card-type][value="normal"]'); if (normal) normal.checked = true;
+  adminMountCreateEditor();
+  await adminCardsAfterChange();
+}
 
 async function renderAdminFlashcardsView(){
-  const wrap = document.getElementById('admin-flashcards-content');
+  const S = ADMIN_FLASHCARDS_STATE, wrap = adminCardsWrap();
   if (!wrap) return;
   if (!isTeacherUser()){
     wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
-  // Fase 6D.2 (ver CLAUDE.md) -- nativeCardState reinicia a cada render
-  // COMPLETO (carregamento inicial + depois de um submit bem sucedido),
-  // mesmo ciclo de vida do resto do formulário (frente/verso/modo voltam
-  // ao padrão). Nunca resetado por updateFlashcardsSelectionDependentUI()
-  // (re-render incremental por seleção de aluno/idioma) -- só aqui.
-  ADMIN_FLASHCARDS_STATE.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal' });
-  ADMIN_FLASHCARDS_STATE.editingNativeState = null;
-  ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
-  // Fase G -- Decks sempre relidos num render completo (ex.: depois de um
-  // submit); destByStudent (destino escolhido por aluno) é preservado pra
-  // professora continuar criando no mesmo Deck.
-  ADMIN_FLASHCARDS_STATE.decksByLang = {};
-  wrap.innerHTML = loadingHTML();
+  adminCardsBind(wrap);
+  const token = ++S._renderToken;
+  S.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal' });
+  S.editingCardId = null; S.editingNativeState = null; S.editingNativeConversionBaseline = null;
+  S.decksByLang = {};
+  wrap.innerHTML = tccLoadingHTML();
 
-  // Fase H (H6) -- só vínculos ATIVOS aparecem: professora sem vínculo ativo
-  // não cria Teacher Decks nem Teacher Cards (o banco também recusa, 055).
+  // Só vínculos ATIVOS: sem vínculo ativo a professora não cria Decks nem cartões (o banco também recusa, 055).
   const students = (await fetchMyStudents()).filter(x => x.status === 'active');
-  if (!students.length){
-    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.flashcards.linkFirst')}</p>`;
-    return;
-  }
-  ADMIN_FLASHCARDS_STATE._studentsCache = students;
+  if (token !== S._renderToken) return;
+  if (!students.length){ wrap.innerHTML = tccNoStudentsHTML(); return; }
+  S._studentsCache = students;
+  const [r] = await Promise.all([fetchAllTeacherFlashcards(), loadTeacherDecksByLang(students)]);
+  if (token !== S._renderToken) return;
+  if (r.cards === null){ wrap.innerHTML = tccFailHTML(); return; }
+  S._cardsCache = adminCardsDecorate(r.cards); S._truncated = r.truncated;
 
-  // Descarta seleções de alunos que não existem mais (vínculo removido
-  // entre um render e outro) -- SEM cair de volta pra "primeiro aluno"
-  // quando o resultado fica vazio (seleção vazia é um estado válido).
+  // Seleção vazia é um estado válido (nunca cai de volta para o primeiro aluno); some só quem deixou de ser aluno.
   const validIds = new Set(students.map(s => s.student_id));
-  ADMIN_FLASHCARDS_STATE.studentIds = new Set([...ADMIN_FLASHCARDS_STATE.studentIds].filter(id => validIds.has(id)));
-
-  // (langFilter normalizado ANTES de calcular a seleção efetiva -- H8)
+  S.studentIds = new Set([...S.studentIds].filter(id => validIds.has(id)));
   const langsPresent = [...new Set(students.map(s => s.language_app_key))];
-  if (langsPresent.length > 1 && !langsPresent.includes(ADMIN_FLASHCARDS_STATE.langFilter)){
-    ADMIN_FLASHCARDS_STATE.langFilter = langsPresent[0];
+  if (langsPresent.length > 1 && !langsPresent.includes(S.langFilter)) S.langFilter = langsPresent[0];
+  if (S.preselect){ // vindo da ficha do aluno (futuro): abre com a pessoa já escolhida
+    const s = students.find(x => x.student_id === S.preselect); if (s){ S.langFilter = s.language_app_key; S.studentIds = new Set([s.student_id]); }
+    S.preselect = null;
   }
-  const selectedStudents = adminSelectedStudents(students);
-  const anyMandarim = selectedStudents.some(s => LanguageRegistry.isCjk(s.language_app_key));
-  // Fase 6D.5 (ver CLAUDE.md) -- languageAppKey do editor nativo espelha o
-  // mesmo sinal `anyMandarim` que o resto desta função já usa pra decidir
-  // se pinyin é exigido (mistura fr+pt não precisa de compareAnswer, só
-  // mandarim precisa) -- nunca escolhe um idioma "representante" arbitrário
-  // pra seleção mista, só o booleano relevante pra validação.
-  ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey = anyMandarim ? selectedStudents.find(s => LanguageRegistry.isCjk(s.language_app_key)).language_app_key : null;
-  const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length);
+  const selected = adminSelectedStudents(students);
+  { const cjk = selected.find(s => LanguageRegistry.isCjk(s.language_app_key)); S.nativeCardState.languageAppKey = cjk ? cjk.language_app_key : null; }
 
-  // Filtro de idioma: pills construídas a partir dos idiomas REALMENTE
-  // presentes nos alunos desta professora (nunca hardcoded fr/pt/mandarim)
-  // -- reaproveita .leaderboard-tab/.active (mesma classe já usada nas
-  // sub-abas do Painel de Admin), zero CSS novo. Só aparece quando há mais
-  // de 1 idioma na lista (ruído puro com só 1).
-  //
-  // Sem pill "Todos" de propósito -- pedido explícito da autora: um cartão
-  // (áudio próprio + pronúncia automática/TTS) só faz sentido pra UM idioma
-  // por vez, então misturar alunos de idiomas diferentes na mesma seleção
-  // gera pronúncia errada pra quem não é do idioma escolhido no momento da
-  // criação. Sempre exatamente 1 idioma ativo quando há 2+ presentes -- o
-  // filtro deixa de ser "visualização", vira a própria trava de seleção.
-  const langFilterHTML = langsPresent.length > 1 ? `
-    <div class="leaderboard-tabs" role="tablist" aria-label="${t('admin.common.langFilterAria')}" style="justify-content:flex-start; margin-bottom:8px;">
-      ${langsPresent.map(key => `<button type="button" class="leaderboard-tab ${ADMIN_FLASHCARDS_STATE.langFilter === key ? 'active' : ''}" data-lang-filter="${key}">${STUDENT_LANGUAGE_LABELS[key] || key} (${students.filter(s => s.language_app_key === key).length})</button>`).join('')}
-    </div>
-  ` : '';
-
-  // Busca casa por nome E @usuário (data-searchtext combina os dois) --
-  // filtro só de DOM (data-student-row/data-searchtext, wired abaixo),
-  // nunca dispara renderAdminFlashcardsView() de novo.
-  const studentCheckboxesHTML = students.map(s => `
-    <label data-student-row data-lang="${s.language_app_key}" data-searchtext="${escapeHTML(`${s.display_name || ''} ${s.username || ''}`.toLowerCase())}" style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0; width:100%; box-sizing:border-box;">
-      <input type="checkbox" data-student-checkbox value="${s.student_id}" ${ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) ? 'checked' : ''}>
-      ${flashcardStudentLabel(s)} · ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}
-    </label>
-  `).join('');
-
-  const newCardSubtitle = selectedStudents.length === 1
-    ? ` · ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
-    : selectedStudents.length > 1
-      ? ` · ${tp('admin.common.selectedCount', selectedStudents.length)}`
-      : '';
-
-  wrap.innerHTML = `
-    <div class="profile-section">
-      <div class="section-label">${t('admin.common.students')}</div>
-      <p class="profile-edit-hint">${t('admin.flashcards.pickStudentsHint')}</p>
-      <div class="admin-recipients-summary">
-        <span class="pill" id="admin-flashcard-selection-counter">${selectionCountLabel}</span>
-        <div class="admin-recipients-actions">
-          <a href="#" id="admin-flashcard-select-all" class="admin-select-link">${t('publicProfile.selectAll')}</a>
-          <a href="#" id="admin-flashcard-select-none" class="admin-select-link">${t('publicProfile.clear')}</a>
-        </div>
-      </div>
-      ${langFilterHTML}
-      <input type="text" id="admin-flashcard-search" class="profile-edit-input" placeholder="${t('admin.common.searchPlaceholder')}" autocomplete="off" style="margin-bottom:8px;">
-      <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:flex; flex-direction:column;">
-        ${studentCheckboxesHTML}
-      </div>
-    </div>
-
-    <div class="profile-section" id="admin-flashcard-dest-section">
-      <div class="section-label">${t('admin.flashcards.destTitle')}</div>
-      <p class="profile-edit-hint">${t('admin.flashcards.destHint')}</p>
-      <div id="admin-flashcard-destinations"></div>
-    </div>
-
-    <div class="profile-section">
-      <div class="section-label">${t('admin.flashcards.cardTitle')}<span id="admin-flashcard-content-subtitle">${newCardSubtitle}</span></div>
-      <p class="profile-edit-hint" id="admin-flashcard-content-hint" style="${selectedStudents.length ? 'display:none;' : ''}">${t('admin.flashcards.needStudent')}</p>
-      <!-- CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- único fluxo de criação: Tipo de
-           cartão -> Campos -> Pré-visualizar -> Salvar. O formulário legado
-           (Modo de prática/Idioma de cada lado/Frente-Verso/Recursos
-           opcionais no nível do cartão) foi removido da CRIAÇÃO -- continua
-           existindo só pra EDIÇÃO de cartão legado já existente
-           (flashcardEditFormHTML, abaixo), nunca mais como opção de criar
-           um cartão novo. Direção de revisão deixou de ser um controle
-           próprio -- cada Field agora escolhe seu próprio idioma
-           (renderFieldEditorHTML, shared/flashcard-field-editor.js). -->
-      <form id="admin-create-flashcard-form" class="profile-edit-form">
-        <div class="section-label" style="margin:0 0 4px;">${t('myFlashcards.cardType')}</div>
-        <select id="admin-flashcard-card-type-preview" class="profile-edit-input">
-          ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
-        </select>
-
-        <div class="section-label" style="margin:14px 0 4px;">${t('myFlashcards.fields.title')}</div>
-        <p class="profile-edit-hint" style="margin-top:-2px;">${t('myFlashcards.fields.hint')}</p>
-        <div id="admin-flashcard-native-fields"></div>
-        <div id="admin-flashcard-tags"></div>
-        <button type="button" class="admin-select-link" id="admin-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">${t('myFlashcards.preview')}</button>
-
-        <label class="profile-edit-label" for="admin-flashcard-note" style="margin-top:14px;">${t('admin.flashcards.native.privateNote')}</label>
-        <textarea id="admin-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="${t('myFlashcards.note.placeholder')}"></textarea>
-
-        <p class="profile-edit-error" id="admin-create-flashcard-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-flashcard-btn" ${selectedStudents.length ? '' : 'disabled'}>${t('myFlashcards.create')}${adminForStudentsSuffix(selectedStudents.length)}</button>
-      </form>
-    </div>
-
-    <div class="profile-section" id="admin-flashcards-cards-box">
-      ${await buildFlashcardsCardsBoxHTML(selectedStudents)}
-    </div>
-  `;
-
-  wireFlashcardsCardsBox(document.getElementById('admin-flashcards-cards-box'));
-
-  wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => {
-    cb.addEventListener('change', () => {
-      if (cb.checked) ADMIN_FLASHCARDS_STATE.studentIds.add(cb.value);
-      else ADMIN_FLASHCARDS_STATE.studentIds.delete(cb.value);
-      updateFlashcardsSelectionDependentUI(wrap);
-    });
+  wrap.innerHTML = tccShellHTML(S.tab, S._cardsCache.filter(c => c.status === 'active').length, {
+    criar: tccCreateHTML({ students, langsPresent, langFilter: S.langFilter, selectedIds: S.studentIds, selected, type: 'normal' }),
+    lista: tccListHTML(students, S._cardsCache, S.filtros, S.page, adminCardsListCtx()),
   });
-
-  // "Selecionar todos" respeita o filtro de idioma ativo (quando há 2+
-  // idiomas presentes) -- sem isso, marcar "todos" poderia juntar alunos de
-  // idiomas diferentes na mesma seleção pela porta dos fundos, quebrando a
-  // mesma trava que a remoção da pill "Todos" (acima) existe pra garantir.
-  document.getElementById('admin-flashcard-select-all').addEventListener('click', (e) => {
-    e.preventDefault();
-    const eligible = langsPresent.length > 1
-      ? students.filter(s => s.language_app_key === ADMIN_FLASHCARDS_STATE.langFilter)
-      : students;
-    ADMIN_FLASHCARDS_STATE.studentIds = new Set(eligible.map(s => s.student_id));
-    wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => { cb.checked = eligible.some(s => s.student_id === cb.value); });
-    updateFlashcardsSelectionDependentUI(wrap);
-  });
-  document.getElementById('admin-flashcard-select-none').addEventListener('click', (e) => {
-    e.preventDefault();
-    ADMIN_FLASHCARDS_STATE.studentIds = new Set();
-    wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => { cb.checked = false; });
-    updateFlashcardsSelectionDependentUI(wrap);
-  });
-
-  wrap.querySelectorAll('[data-lang-filter]').forEach(pill => {
-    pill.addEventListener('click', () => {
-      if (ADMIN_FLASHCARDS_STATE.langFilter === pill.dataset.langFilter) return;
-      ADMIN_FLASHCARDS_STATE.langFilter = pill.dataset.langFilter;
-      // Trocar de idioma sempre zera a seleção -- é o que de fato GARANTE
-      // que nunca existe seleção mista entre idiomas (o filtro deixou de
-      // ser só uma lente de visualização, ver comentário acima de
-      // langFilterHTML). Sem isso, um aluno marcado em "Francês" continuaria
-      // marcado (só escondido) ao trocar pra "Português".
-      ADMIN_FLASHCARDS_STATE.studentIds = new Set();
-      wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => { cb.checked = false; });
-      wrap.querySelectorAll('[data-lang-filter]').forEach(p => p.classList.toggle('active', p === pill));
-      applyFlashcardPickerFilters(wrap);
-      updateFlashcardsSelectionDependentUI(wrap);
-    });
-  });
-
-  document.getElementById('admin-flashcard-search').addEventListener('input', () => applyFlashcardPickerFilters(wrap));
-
-  // CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- único seletor de Card Type: muta
-  // ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode, nunca cria
-  // um campo paralelo/duplicado (`selectedCardType`/`isReverse`/etc.). É
-  // este valor que decide de verdade o cartão salvo -- não existe mais
-  // nenhum "Modo de prática" concorrente nem bifurcação legacy/native no
-  // submit (ver handler abaixo).
-  document.getElementById('admin-flashcard-card-type-preview')?.addEventListener('change', (e) => {
-    const newMode = e.target.value;
-    // Fase 6D.5 (ver CLAUDE.md, restrição 12) -- sair do modo cloze pra
-    // qualquer outro nunca deixa sintaxe {{cN::...}} presa num Field que o
-    // Card Type novo vai ler como texto puro -- reverte todas as marcas
-    // pro próprio texto (answer) ANTES de trocar o modo. Checado ANTES da
-    // atribuição, porque depois dela `cardGenerationMode` já não seria
-    // mais 'cloze'.
-    const wasCloze = ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode === 'cloze';
-    if (wasCloze && newMode !== 'cloze') stripClozeMarksFromEditorState(ADMIN_FLASHCARDS_STATE.nativeCardState);
-    // Fase 6D.4a/6D.4b/6D.5 (ver CLAUDE.md) -- trocar PRA multiple_choice/
-    // type_answer/cloze passa pela transição dedicada de cada um
-    // (reaproveita Fields sem role existentes de forma determinística,
-    // nunca inventa conteúdo/distrator) em vez de só atribuir o modo;
-    // qualquer outra troca continua sendo a atribuição direta de sempre
-    // (normal_reversed não ganhou transição própria ainda -- fora do
-    // escopo destas subfases).
-    if (newMode === 'multiple_choice') transitionToMultipleChoice(ADMIN_FLASHCARDS_STATE.nativeCardState);
-    else if (newMode === 'type_answer') transitionToTypeAnswer(ADMIN_FLASHCARDS_STATE.nativeCardState);
-    else if (newMode === 'cloze') transitionToCloze(ADMIN_FLASHCARDS_STATE.nativeCardState);
-    else ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = newMode;
-    refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia, ttsFn: requestFieldAudioTTS, noteId: ADMIN_FLASHCARDS_STATE.nativeCardState.noteId });
-  });
-
-  // Fase 6D.7 (ver CLAUDE.md) -- Preview do RASCUNHO atual do editor
-  // nativo (não salvo) -- reaproveita o MESMO estado que o submit já lê
-  // (ADMIN_FLASHCARDS_STATE.nativeCardState), nunca uma cópia separada.
-  // `languageAppKey` já é mantido correto por updateFlashcardsSelectionDependentUI()
-  // a cada troca de seleção de aluno ('mandarim' ou null); 'frances' é o
-  // fallback quando null -- hoje o único outro caso real (nenhum aluno de
-  // mandarim selecionado).
-  document.getElementById('admin-flashcard-preview-btn')?.addEventListener('click', () => {
-    openFlashcardPreviewFromEditorState(ADMIN_FLASHCARDS_STATE.nativeCardState, {
-      appKey: ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey || LanguageRegistry.defaultAppKey(),
-      origin: 'teacher',
-    });
-  });
-
-  // Fase 6D.3/6D.4a (ver CLAUDE.md) -- caixa "Campos nativos", renderizada/
-  // wireada UMA vez aqui (carregamento inicial + depois de um submit bem
-  // sucedido, mesmo ciclo de vida de nativeCardState em si).
-  // refreshNativeCardTypeBox() decide entre o editor estruturado de
-  // Multiple Choice (6D.4a) e o Field editor genérico (6D.3) conforme o
-  // Card Type atual -- add/remove/mudança estrutural re-renderiza só esta
-  // caixa, nunca o form inteiro.
-  // Fase 7f (TTS explícito por Field, implementação -- ver CLAUDE.md) --
-  // ttsFn/noteId seguem o MESMO par uploadFn/deleteFn acima: `noteId` é
-  // sempre `null` aqui (o rascunho ainda não foi salvo) -- o botão "Gerar
-  // áudio" mostra "Salve o cartão primeiro" até o 1º submit bem-sucedido
-  // (mesmo motivo do upload real só existir depois de um Field ter um
-  // `rowId` real pra a Edge Function checar autorização contra).
-  refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia, ttsFn: requestFieldAudioTTS, noteId: ADMIN_FLASHCARDS_STATE.nativeCardState.noteId });
-
-  mountNoteTagsEditor(document.getElementById('admin-flashcard-tags'), ADMIN_FLASHCARDS_STATE.nativeCardState);
-
+  adminApplyPickerFilters(wrap);
+  adminMountCreateEditor();
   refreshTeacherDestinationsUI();
+}
 
-  document.getElementById('admin-create-flashcard-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('admin-create-flashcard-btn');
-    const errorEl = document.getElementById('admin-create-flashcard-error');
-    errorEl.textContent = '';
-
-    const selectedNow = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
-    if (!selectedNow.length){
-      errorEl.textContent = t('admin.common.selectAtLeastOne');
-      return;
+// Eventos delegados no contêiner da aba: ligados uma vez só, valem para toda renderização.
+function adminCardsBind(wrap){
+  const S = ADMIN_FLASHCARDS_STATE;
+  if (S._ligado) return;
+  S._ligado = true;
+  const closeMenu = (el) => { const d = el.closest('details'); if (d) d.removeAttribute('open'); };
+  const cardOf = (id) => S._cardsCache.find(c => c.id === Number(id));
+  wrap.addEventListener('click', (e) => {
+    const q = (sel) => e.target.closest(sel);
+    let el;
+    if ((el = q('[data-cards-tab]'))){
+      e.preventDefault(); S.tab = el.dataset.cardsTab;
+      wrap.querySelectorAll('[data-cards-pane]').forEach(p => { p.hidden = p.dataset.cardsPane !== S.tab; });
+      adminCardsRefreshList(); return;
     }
-
-    // Fase 6D.6 da reestruturação Note/CardType/CardInstance (ver
-    // CLAUDE.md) -- a "Campos nativos" (Fase 6D.2-6D.5) deixa de ser só
-    // pré-visualização a partir daqui: assim que a professora adicionou
-    // pelo menos 1 campo nela, ESSE é o cartão que "Criar cartão" salva --
-    // o "Modo de prática"/Frente/Verso legados abaixo são ignorados por
-    // completo nesse caso (nunca misturados como 2ª fonte de verdade,
-    // Seção 2). Com a caixa vazia (0 campos, o estado inicial de sempre),
-    // o comportamento continua 100% legado, byte a byte idêntico a antes
-    // desta fase -- "legacy aberto != automaticamente migrado" (Seção 6)
-    // cumprido por construção: nada aqui decide converter sozinho, só a
-    // presença de conteúdo que a própria professora escolheu criar no
-    // editor novo.
-    // CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- único caminho de criação: sempre
-    // nativo, sem bifurcação. "Nota" é a única leitura fora de
-    // nativeState/nativeState.fields -- texto simples sem ambiguidade de
-    // Card Type (lembrete privado da professora, nunca mostrado ao
-    // aluno). Imagem/áudio são recursos POR FIELD (dentro do editor
-    // nativo, ver "Campos" acima), nunca mais um upload solto no nível do
-    // cartão -- removidos daqui junto com o resto do formulário legado.
-    const nativeState = ADMIN_FLASHCARDS_STATE.nativeCardState;
-    nativeState.privateNote = (document.getElementById('admin-flashcard-note').value || '').trim() || null;
-    const v = validateNoteEditorStateForSave(nativeState);
-    if (!v.ok){
-      errorEl.textContent = v.error;
-      return;
+    if ((el = q('[data-pagina]'))){
+      e.preventDefault(); if (el.getAttribute('aria-disabled') === 'true') return;
+      S.page = Number(el.dataset.pagina); adminCardsRefreshList(); return;
     }
-    btn.disabled = true;
-    // Uma Note (linha em teacher_flashcards) POR aluno selecionado -- mesmo
-    // conteúdo/Fields, cada uma com o language_app_key do PRÓPRIO aluno
-    // (nunca compartilhando id/linha entre alunos, mesmo numa seleção
-    // mista fr+zh).
-    // Fase G -- cada aluno resolve o SEU destino (teacher_root dele por
-    // padrão, ou o subdeck escolhido pra ele) e cria a SUA linha: N criações
-    // independentes, cada uma atômica (Note+Fields+deck_id num só INSERT).
-    // NÃO existe atomicidade entre alunos: pode haver sucesso parcial, e uma
-    // falha nunca atribui o cartão ao Deck de outro aluno.
-    const results = await Promise.all(selectedNow.map(async s => {
-      const dest = await resolveTeacherCreationDeck({
-        studentId: s.student_id,
-        languageAppKey: s.language_app_key,
-        deckId: ADMIN_FLASHCARDS_STATE.destByStudent[adminDestKey(s)],
-        decks: ADMIN_FLASHCARDS_STATE.decksByLang[s.language_app_key],
-      });
-      if (!dest.ok) return { ok: false, error: dest.error, student: s };
-      const r = await createFlashcard({
-        studentId: s.student_id,
-        languageAppKey: s.language_app_key,
-        nativeState,
-        deckId: dest.deckId,
-      });
-      return Object.assign({ student: s }, r);
-    }));
-    btn.disabled = false;
-    const failed = results.filter(r => !r.ok);
-    if (failed.length === results.length){
-      // Fase 7e (ver CLAUDE.md, Seção 14) -- TODAS as inserções
-      // falharam -- nenhuma linha real ficou de pé referenciando o
-      // áudio recém-enviado nesta sessão, seguro compensar. Se só
-      // PARTE falhou (vários alunos selecionados), o mesmo áudio já
-      // está referenciado pela(s) linha(s) que teve(tiveram) sucesso --
-      // nunca compensa nesse caso.
-      compensateFreshMediaUploads(nativeState);
-      errorEl.textContent = failed[0].error;
-      return;
+    if ((el = q('[data-tirar-aluno]'))){ S.studentIds.delete(el.dataset.tirarAluno); adminSelectionChanged(); return; }
+    if (q('#admin-flashcard-select-all')){
+      e.preventDefault();
+      const multi = new Set(S._studentsCache.map(s => s.language_app_key)).size > 1;
+      const eligible = multi ? S._studentsCache.filter(s => s.language_app_key === S.langFilter) : S._studentsCache;
+      S.studentIds = new Set(eligible.map(s => s.student_id)); adminSelectionChanged(); return;
     }
-    clearFreshMediaUploads(nativeState);
-    const okCount = results.length - failed.length;
-    if (failed.length){
-      showToast(t('admin.flashcards.createdPartial', { ok: okCount, failed: failed.map(f => '@' + (f.student.username || '?')).join(', ') }));
-    } else {
-      showToast(results.length > 1 ? t('admin.flashcards.createdN', { n: okCount }) : t('admin.flashcards.created'));
+    if (q('#admin-flashcard-select-none')){ e.preventDefault(); S.studentIds = new Set(); adminSelectionChanged(); return; }
+    if ((el = q('[data-lang-filter]'))){
+      if (S.langFilter === el.dataset.langFilter) return;
+      S.langFilter = el.dataset.langFilter;
+      // Trocar de idioma zera a seleção: é o que garante que nunca existe seleção mista entre idiomas (um cartão vale para um idioma).
+      S.studentIds = new Set();
+      wrap.querySelectorAll('[data-lang-filter]').forEach(b => b.setAttribute('aria-pressed', String(b === el)));
+      adminApplyPickerFilters(wrap); adminSelectionChanged(); return;
     }
-    // Único ponto onde um re-render COMPLETO acontece por causa da seleção
-    // -- e é intencional aqui: um submit bem sucedido deve mesmo limpar o
-    // formulário (Card Type/Campos/Nota), diferente de marcar um
-    // checkbox, que não deveria apagar nada.
-    renderAdminFlashcardsView();
+    if (q('#admin-flashcard-preview-btn')){
+      openFlashcardPreviewFromEditorState(S.nativeCardState, { appKey: S.nativeCardState.languageAppKey || LanguageRegistry.defaultAppKey(), origin: 'teacher' }); return;
+    }
+    if ((el = q('[data-ir-secao]'))){ e.preventDefault(); switchTeacherPanelSection(el.dataset.irSecao); return; }
+    if ((el = q('[data-preview-flashcard]'))){
+      closeMenu(el); const card = cardOf(el.dataset.previewFlashcard);
+      if (!card){ openFlashcardPreviewWithError(t('myFlashcards.err.previewLoad')); return; }
+      openFlashcardPreviewFromRow(card, { appKey: card.language_app_key, origin: 'teacher' }); return;
+    }
+    if ((el = q('[data-edit-flashcard]'))){ closeMenu(el); adminOpenCardEditor(el.dataset.editFlashcard); return; }
+    if ((el = q('[data-move-flashcard]'))){ closeMenu(el); adminOpenMoveDialog(el.dataset.moveFlashcard); return; }
+    if ((el = q('[data-toggle-flashcard]'))){ closeMenu(el); setFlashcardStatus(el.dataset.toggleFlashcard, el.dataset.nextStatus).then(() => adminCardsAfterChange()); return; }
+    if ((el = q('[data-delete-flashcard]'))){ closeMenu(el); adminDeleteCard(el.dataset.deleteFlashcard); return; }
   });
+  wrap.addEventListener('input', (e) => {
+    if (e.target.matches('[data-cards-busca]')){ S.filtros.busca = e.target.value; S.page = 1; adminCardsRefreshList(); }
+    else if (e.target.id === 'admin-flashcard-search') adminApplyPickerFilters(wrap);
+  });
+  wrap.addEventListener('change', (e) => {
+    if (e.target.matches('[data-cards-aluno]')){ S.filtros.aluno = e.target.value; S.page = 1; adminCardsRefreshList(); }
+    else if (e.target.matches('[data-cards-status]')){ S.filtros.status = e.target.value; S.page = 1; adminCardsRefreshList(); }
+    else if (e.target.matches('[data-student-checkbox]')){
+      if (e.target.checked) S.studentIds.add(e.target.value); else S.studentIds.delete(e.target.value);
+      adminSelectionChanged();
+    }
+    else if (e.target.matches('[data-card-type]')) adminChangeCardType(e.target.value);
+  });
+  // Lembra quais árvores de Decks estão abertas (o evento toggle não borbulha: captura).
+  wrap.addEventListener('toggle', (e) => {
+    const d = e.target;
+    if (d.matches && d.matches('[data-dest-row] > details')){ if (d.open) S._destAbertos.add(d.parentElement.dataset.destRow); else S._destAbertos.delete(d.parentElement.dataset.destRow); }
+  }, true);
+  wrap.addEventListener('submit', (e) => {
+    if (e.target.id === 'admin-create-flashcard-form'){ e.preventDefault(); adminCreateCards(); }
+    else if (e.target.id === 'form-mover-cartao'){ e.preventDefault(); adminMoveCard(e.target); }
+  });
+  // Enter dentro da busca de pessoas não envia o formulário de criação.
+  wrap.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.id === 'admin-flashcard-search') e.preventDefault(); });
 }

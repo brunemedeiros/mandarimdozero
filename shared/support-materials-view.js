@@ -32,7 +32,7 @@ async function renderSupportMaterialsView(){
         <div class="admin-badge-name">${escapeHTML(m.title)}</div>
         <div class="admin-badge-desc">
           ${m.description ? `<span style="white-space:pre-wrap;">${escapeHTML(m.description)}</span><br>` : ''}
-          ${m.link_url ? `<a href="${escapeHTML(m.link_url)}" target="_blank" rel="noopener noreferrer">${t('supportMaterials.openLink')}</a><br>` : ''}
+          ${m.link_url && /^https?:\/\//i.test(m.link_url) ? `<a href="${escapeHTML(m.link_url)}" target="_blank" rel="noopener noreferrer">${t('supportMaterials.openLink')}</a><br>` : ''}
           ${m.file_url ? `<a href="${escapeHTML(m.file_url)}" target="_blank" rel="noopener noreferrer">📎 ${escapeHTML(m.file_name || t('supportMaterials.downloadFile'))}</a><br>` : ''}
           ${t('supportMaterials.sentOn', { date: fmtDate(m.created_at) })}
         </div>
