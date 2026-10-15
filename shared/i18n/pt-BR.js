@@ -168,6 +168,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'notif.cat.sistema': '⚙️ Sistema',
   'notif.cat.amigos': '👥 Amigos',
   'notif.pref.inAppOnly': 'Só existe aviso no app para Amigos',
+  'notif.pref.noEmail': 'Amigos não tem aviso por e-mail',
   'notif.pref.guest': 'Crie uma conta para configurar notificações. O modo convidado não guarda preferências.',
   'notif.pref.loadFailed': 'Não foi possível carregar suas preferências agora.',
   'notif.pref.sectionTitle': 'Notificações',

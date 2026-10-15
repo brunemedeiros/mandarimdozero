@@ -1,4 +1,4 @@
-// Amigos em dupla (101): sequência com amigo, cutucar e missão em dupla (shared/friends.js). Playwright, FR + ZH,
+// Amigos em dupla (102): sequência com amigo, cutucar e missão em dupla (shared/friends.js). Playwright, FR + ZH,
 // claro/escuro e celular. Supabase stubado em memória. Rodar: node tests/amigos-dupla/test_playwright.js  (SHOTS_DIR=... salva prints)
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
 const http = require('http'), fs = require('fs'), path = require('path');
@@ -63,7 +63,7 @@ async function boot(browser, lang, port, theme, viewport){
   return { page, errors, ctx };
 }
 
-// opt: mission (null = sem missão), noRpc (sem a 101 no banco)
+// opt: mission (null = sem missão), noRpc (sem a 102 no banco)
 async function setup(page, opt){
   await page.evaluate((opt) => {
     CURRENT_USER = { id: 'me' };
@@ -161,14 +161,14 @@ async function run(browser, port, lang){
   check(`${L}: sem erros (missão)`, errors.length === 0, errors);
   await ctx.close();
 
-  // 3. sem a 101 no banco: nada aparece, sem erro de página
+  // 3. sem a 102 no banco: nada aparece, sem erro de página
   ({ page, errors, ctx } = await boot(browser, lang, port));
   await setup(page, { noRpc: true });
   await openFriends(page);
   await page.waitForTimeout(300);
-  check(`${L}: sem 101: cartão da missão escondido`, await page.$eval('#friends-duo', e => e.hidden));
-  check(`${L}: sem 101: nada nos cartões`, (await text(page, '[data-friend-duo="bia"]')) === '');
-  check(`${L}: sem 101: sem erros`, errors.length === 0, errors);
+  check(`${L}: sem 102: cartão da missão escondido`, await page.$eval('#friends-duo', e => e.hidden));
+  check(`${L}: sem 102: nada nos cartões`, (await text(page, '[data-friend-duo="bia"]')) === '');
+  check(`${L}: sem 102: sem erros`, errors.length === 0, errors);
   // preferências novas
   await page.evaluate(() => { document.body.insertAdjacentHTML('beforeend', '<div id="friends-prefs-body"></div>'); return loadFriendsPrefs(); });
   for (const k of ['accept_nudges', 'notify_missions']){
@@ -179,6 +179,14 @@ async function run(browser, port, lang){
   await page.waitForTimeout(200);
   const up = await page.evaluate(() => window.__upserts.filter(u => u.table === 'friend_settings').pop());
   check(`${L}: desligar grava accept_nudges=false`, up && up.row.accept_nudges === false, up);
+  // matriz de Configurações > Notificações: Amigos agora tem push (padrão ligado) e continua sem e-mail
+  await page.evaluate(() => { window.__DB.notification_preferences = [{ user_id: 'me', channels: {}, quiet_hours_start: null, quiet_hours_end: null }];
+    getLocalPushSubscription = async () => null; switchTab('settings'); switchSettingsSection('notifications'); });
+  await page.waitForSelector('#settings-notifications-content [data-pref-category="amigos"][data-pref-channel="push"]', { state: 'attached', timeout: 8000 });
+  const mx = await page.evaluate(() => { const q = (ch) => document.querySelector(`[data-pref-category="amigos"][data-pref-channel="${ch}"]`);
+    return { push: q('push').checked, pushOff: q('push').disabled, email: q('email').checked, emailOff: q('email').disabled, title: q('email').title }; });
+  check(`${L}: matriz: push de Amigos ligado e liberado`, mx.push && !mx.pushOff, mx);
+  check(`${L}: matriz: e-mail de Amigos desligado e travado`, !mx.email && mx.emailOff && /e-mail/.test(mx.title), mx);
   await ctx.close();
 }
 

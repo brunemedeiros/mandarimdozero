@@ -15,7 +15,7 @@ const BADGE_ICON_BASE = '../shared/icons/fluent/';
 
 let FRIENDS_ACCEPTED_COUNT = null; // null = ainda não carregado (a trilha Amigos só aparece depois)
 let PODIUM_WEEKS = null; // null = ainda não carregado (a trilha Pódio só aparece depois)
-let DUO_MISSIONS = null; // missões em dupla cumpridas (101); null = ainda não carregado
+let DUO_MISSIONS = null; // missões em dupla cumpridas (102); null = ainda não carregado
 let badgeTrackMemo = null;
 
 function badgeOwnGender(){
@@ -247,7 +247,7 @@ async function loadPodiumWeeks(){
   } catch (e) { console.error('Pódio (conquistas):', e); }
 }
 
-// Missões em dupla cumpridas (trilha Missões em Dupla, RPC my_duo_missions_done da 101). Mesma lógica do Pódio:
+// Missões em dupla cumpridas (trilha Missões em Dupla, RPC my_duo_missions_done da 102). Mesma lógica do Pódio:
 // recarrega ao abrir o site e quando uma missão é cumprida na aba Amigos.
 async function loadDuoMissionsDone(){
   if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER || typeof supabaseClient === 'undefined') return;

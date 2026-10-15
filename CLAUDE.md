@@ -34,6 +34,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   produção; conferir ao vivo (MCP Supabase/Resend) ou dizer que está pendente.
 - **Edge Function só muda em produção após novo deploy**; deploy feito = registrar; não feito = avisar.
 - **Nunca apagar progresso de memória (FSRS) por engano**; mudanças de dado em produção só com autorização explícita.
+- **Site em inglês não tem NADA em português** (decisão da autora, 2026-10-15): inclui avisos gravados pelo banco, push e
+  e-mail; texto montado no servidor sai no idioma do site de quem recebe (`_ui_lang`, ver `.claude/rules/i18n.md`).
 - **Português do Brasil coloquial** em todo texto de interface e notas (ex.: "pechinchar", não "regatear");
   sem "--" e sem "pra" em texto visível.
 - **Terminologia**: "aluno/aluna" = vínculo ativo em `teacher_students`; "usuário/conta" = qualquer perfil.
@@ -107,6 +109,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   `docs/historico/16-conquistas-com-niveis.md`. Ícones: troca geral para o Fluent Emoji feita na branch (`shared/emoji-icons.js`, `docs/icones-fluent.md`).
 - App de loja (App Store/Google Play): antes de discutir, ler `docs/app-loja-lembretes.md` (agenda de contatos, telefone, LGPD).
 - Amigos: sugestões de amigos + QR code (095 no Staging e na produção, 2026-10-15; `docs/historico/17-sugestoes-de-amigos.md`).
-  Missão em dupla, sequência com amigo e cutucar feitos na branch; 101 no Staging, produção pendente (`docs/historico/18-amigos-em-dupla.md`).
+  Missão em dupla, sequência com amigo, cutucar e push de Amigos na hora (102 + Edge Function `push-dispatch`, Staging e produção,
+  2026-10-15; `docs/historico/18-amigos-em-dupla.md`). Avisos do Mural e do convite da professora ainda saem em português no site em inglês.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados (placeholders de perfil); Stripe. País dos alunos: já preenchido nos 13 alunos (conferido 2026-10-14).

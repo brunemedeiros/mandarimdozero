@@ -152,6 +152,7 @@ window.I18N_CATALOG['en'] = {
   'notif.cat.sistema': '⚙️ System', // ALTA
   'notif.cat.amigos': '👥 Friends', // ALTA
   'notif.pref.inAppOnly': 'Friends only has in-app notifications', // ALTA
+  'notif.pref.noEmail': 'Friends has no email notifications', // ALTA
   'notif.pref.guest': 'Create an account to set up notifications -- guest mode does not save preferences.', // ALTA
   'notif.pref.loadFailed': 'Could not load your preferences right now.', // ALTA
   'notif.pref.sectionTitle': 'Notifications', // ALTA

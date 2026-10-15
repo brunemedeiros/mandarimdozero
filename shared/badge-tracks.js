@@ -49,7 +49,7 @@
     // Pódio: semanas fechadas em 1º lugar entre os amigos (RPC my_podium_weeks, migration 092).
     { id: 'podium', icon: '🏆', fluent: '1f3c6', scope: 'account', value: function(m){ return m.podiumWeeks; }, goals: function(){ return [1, 5, 10]; },
       available: function(m){ return m.podiumWeeks != null; } },
-    // Missões em Dupla: missões da semana cumpridas com um amigo (RPC my_duo_missions_done, migration 101).
+    // Missões em Dupla: missões da semana cumpridas com um amigo (RPC my_duo_missions_done, migration 102).
     { id: 'duo', icon: '🫶', fluent: '1faf6', scope: 'account', value: function(m){ return m.duoMissions; }, goals: function(){ return [1, 5, 15]; },
       available: function(m){ return m.duoMissions != null; } },
     { id: 'friends', icon: '🤝', fluent: '1f91d', scope: 'account', value: function(m){ return m.friends; }, goals: function(){ return [1, 3, 10]; },

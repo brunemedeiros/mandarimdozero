@@ -1,4 +1,4 @@
--- Teste da migration 101 (sequência com amigo, cutucar, missão em dupla). Transação + ROLLBACK, Postgres local.
+-- Teste da migration 102 (sequência com amigo, cutucar, missão em dupla). Transação + ROLLBACK, Postgres local.
 begin;
 create temp table r(ok boolean, name text) on commit drop;
 grant all on r to public;
@@ -117,5 +117,64 @@ insert into r select not has_table_privilege('authenticated', 'public.friend_nud
   and not has_table_privilege('authenticated', 'public.duo_mission_members', 'SELECT'), 'tabelas sem leitura direta';
 insert into r select not has_function_privilege('authenticated', 'public._duo_check(bigint)', 'EXECUTE') and not has_function_privilege('authenticated', 'public._joint_streak(uuid,uuid)', 'EXECUTE'), 'funções internas fechadas';
 insert into r select (select h from snap) = (select md5(string_agg(user_id::text || data::text, ',' order by user_id)) from progress), 'progresso intacto';
+-- ---------- idioma de quem recebe + push ----------
+-- D passa a usar o site em inglês e tem aparelho com push; E tem push mas desligou push de Amigos; B tem push e horário silencioso o dia todo
+update progress set data = jsonb_set(data, '{_meta}', '{"uiLanguage":"en"}') where user_id = '10000000-0000-0000-0000-0000000000d1';
+insert into push_subscriptions(user_id, language_app_key, endpoint, keys) values
+  ('10000000-0000-0000-0000-0000000000d1', 'frances', 'https://push.example.invalid/d', '{}'),
+  ('10000000-0000-0000-0000-0000000000e1', 'frances', 'https://push.example.invalid/e', '{}'),
+  ('10000000-0000-0000-0000-0000000000b1', 'frances', 'https://push.example.invalid/b', '{}');
+insert into notification_preferences(user_id, channels) values ('10000000-0000-0000-0000-0000000000e1', '{"amigos":["in_app"]}')
+  on conflict (user_id) do update set channels = excluded.channels;
+insert into notification_preferences(user_id, channels, quiet_hours_start, quiet_hours_end) values ('10000000-0000-0000-0000-0000000000b1', '{}', 0, 23)
+  on conflict (user_id) do update set quiet_hours_start = 0, quiet_hours_end = 23;
+update notification_preferences set quiet_hours_start = 0, quiet_hours_end = 0 where user_id = '10000000-0000-0000-0000-0000000000b1'
+  and extract(hour from (now() at time zone 'America/Sao_Paulo')) = 23; -- às 23h a janela 0-23 não cobre: desliga o teste do silêncio
+select count(*) as ob0 from push_outbox \gset
+set local role authenticated;
+select pg_temp.as_user('10000000-0000-0000-0000-0000000000a1');
+insert into r select nudge_friend('10000000-0000-0000-0000-0000000000d1') ->> 'status' = 'sent', 'A cutuca D (site em inglês)';
+reset role;
+insert into r select (select body from notifications where user_id = '10000000-0000-0000-0000-0000000000d1' and event_type = 'friend_nudge' limit 1) = 'Pessoa A nudged you: time to study today? 👋', 'site em inglês: cutucada em inglês';
+insert into r select (select count(*) from push_outbox where user_id = '10000000-0000-0000-0000-0000000000d1' and title = 'Friends' and body like 'Pessoa A nudged you%') = 1, 'push na fila, em inglês';
+-- todos os avisos de Amigos em inglês (texto)
+insert into r select _friends_msg('friend_request', 'en', '{"name":"Bia"}') = 'Bia sent you a friend request 👋'
+  and _friends_msg('friend_request_accepted', 'en', '{"name":"Bia"}') = 'Bia accepted your friend request 🎉'
+  and _friends_msg('friend_overtake', 'en', '{"name":"Bia"}') = 'Bia passed you in this week''s ranking 🏃'
+  and _friends_msg('friend_thanks', 'en', '{"name":"Bia"}') = 'Bia thanked you for your congrats 💛'
+  and _friends_msg('friend_congrats', 'en', '{"name":"Bia","others":0,"kind":"streak","days":"25","reaction":"🎉"}') = 'Bia congratulated you on your 25-day streak 🎉'
+  and _friends_msg('friend_congrats', 'en', '{"name":"Bia","others":0,"kind":"badge","reaction":"👏"}') = 'Bia congratulated you on your achievement 👏'
+  and _friends_msg('friend_congrats', 'en', '{"name":"Bia","others":2,"reaction":"🎉"}') = 'Bia and 2 more friends congratulated you 🎉'
+  and _friends_msg('friend_nudge', 'en', '{"name":"Bia","others":1}') = 'Bia and 1 more friend nudged you: time to study today? 👋'
+  and _friends_msg('friend_nudge', 'en', '{"name":"Bia","joint":12}') = 'Bia nudged you: study today to keep your 12-day streak together 👋'
+  and _friends_msg('duo_mission_started', 'en', '{"name":"Bia","goal":300}') = 'Bia invited you to a duo mission: 300 XP together by Sunday 🤝'
+  and _friends_msg('duo_mission_done', 'en', '{"name":"Bia","goal":300}') = 'Duo mission complete! You and Bia earned 300 XP 🎉', 'textos em inglês de todos os avisos';
+insert into r select _friends_msg('friend_request', 'pt-BR', '{"name":"Bia"}') = 'Bia enviou um pedido de amizade 👋'
+  and _friends_msg('friend_congrats', 'pt-BR', '{"name":"Bia","others":0,"kind":"streak","days":"25","reaction":"🎉"}') = 'Bia parabenizou você por seus 25 dias seguidos 🎉'
+  and _friends_msg('friend_congrats', 'pt-BR', '{"name":"Bia","others":0,"kind":"badge","reaction":"👏"}') = 'Bia parabenizou você por sua conquista 👏'
+  and _friends_msg('friend_overtake', 'pt-BR', '{"name":"Bia"}') = 'Bia passou você no ranking da semana 🏃', 'português igual ao de antes';
+-- pedido de amizade para quem usa o site em inglês (função antiga recriada)
+set local role authenticated;
+select pg_temp.as_user('10000000-0000-0000-0000-0000000000f1');
+insert into r select send_friend_request('10000000-0000-0000-0000-0000000000d1') ->> 'status' = 'sent', 'pedido de amizade (função recriada) funciona';
+reset role;
+insert into r select (select body from notifications where user_id = '10000000-0000-0000-0000-0000000000d1' and event_type = 'friend_request' limit 1) = 'Pessoa F sent you a friend request 👋', 'pedido chega em inglês';
+set local role authenticated;
+select pg_temp.as_user('10000000-0000-0000-0000-0000000000d1');
+insert into r select respond_friend_request('10000000-0000-0000-0000-0000000000f1', true) ->> 'status' = 'accepted', 'aceitar (função recriada) funciona';
+reset role;
+insert into r select (select body from notifications where user_id = '10000000-0000-0000-0000-0000000000f1' and event_type = 'friend_request_accepted' limit 1) = 'Pessoa D aceitou seu pedido de amizade 🎉', 'aceite chega em português para quem usa português';
+select _friends_notify('10000000-0000-0000-0000-0000000000d1', 'friend_request_accepted', null, 'Zé Silva aceitou seu pedido de amizade 🎉', 'friends');
+insert into r select (select body from notifications where user_id = '10000000-0000-0000-0000-0000000000d1' and event_type = 'friend_request_accepted' limit 1) = 'Zé Silva accepted your friend request 🎉', 'texto pronto em português (aceite da 073) vira inglês para quem usa inglês';
+-- push respeita as preferências
+insert into r select not exists (select 1 from push_outbox where user_id = '10000000-0000-0000-0000-0000000000f1'), 'sem aparelho inscrito: sem push';
+select _friends_notify_msg('10000000-0000-0000-0000-0000000000e1', 'friend_thanks', '{"name":"X"}', 'friends');
+insert into r select exists (select 1 from notifications where user_id = '10000000-0000-0000-0000-0000000000e1' and event_type = 'friend_thanks')
+  and not exists (select 1 from push_outbox where user_id = '10000000-0000-0000-0000-0000000000e1'), 'push de Amigos desligado: só o sino';
+select _friends_notify_msg('10000000-0000-0000-0000-0000000000b1', 'friend_thanks', '{"name":"X"}', 'friends');
+insert into r select (select count(*) from push_outbox where user_id = '10000000-0000-0000-0000-0000000000b1') = case when extract(hour from (now() at time zone 'America/Sao_Paulo')) = 23 then 1 else 0 end, 'horário silencioso: sem push';
+-- fila: só a service role pega; pega uma vez só
+insert into r select not has_function_privilege('authenticated', 'public.push_outbox_claim(integer)', 'EXECUTE') and not has_table_privilege('authenticated', 'public.push_outbox', 'SELECT'), 'fila fechada para as contas';
+insert into r select (select count(*) from push_outbox_claim(50)) >= 1 and (select count(*) from push_outbox_claim(50)) = 0, 'claim marca enviado (não manda duas vezes)';
 select (case when ok then 'ok|' else 'FALHOU|' end) || name from r;
 rollback;

@@ -611,9 +611,9 @@ function friendsDecorateExtras(){
   });
 }
 
-// ---------- amigos em dupla (migration 101): sequência com amigo, cutucar e missão da semana ----------
+// ---------- amigos em dupla (migration 102): sequência com amigo, cutucar e missão da semana ----------
 // friends_duo: por amigo, dias seguidos em que os dois estudaram, se dá para cutucar (ainda não estudou hoje, aceita
-// cutucadas e eu não cutuquei hoje) e se já está numa missão. Sem a 101 no banco, nada disso aparece.
+// cutucadas e eu não cutuquei hoje) e se já está numa missão. Sem a 102 no banco, nada disso aparece.
 const FRIENDS_DUO_GOALS = [150, 300, 600];
 const FRIENDS_JOINT_MIN = 2; // "1 dia juntos" não diz nada: o chip aparece a partir de 2
 

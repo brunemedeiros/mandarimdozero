@@ -396,7 +396,7 @@ async function runNew(browser, lang, port){
   // serviceWorker.ready nunca resolve com o SW bloqueado no teste: sem inscrição de push.
   await page.evaluate(() => { getLocalPushSubscription = async () => null; switchTab('settings'); switchSettingsSection('notifications'); });
   await page.waitForSelector('#settings-notifications-content #friends-prefs-body [data-friends-pref]', { state: 'attached' });
-  // 095 (2026-10-15): entrou o 6º, "Aparecer nas sugestões de amigos". 101 (2026-10-15): cutucadas e missões em dupla.
+  // 095 (2026-10-15): entrou o 6º, "Aparecer nas sugestões de amigos". 102 (2026-10-15): cutucadas e missões em dupla.
   check(`${L}: 8 interruptores (com parabéns, sugestões, cutucadas e missões), todos ligados por padrão`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 8);
   await page.uncheck('#friends-prefs-body [data-friends-pref="accept_requests"]');
   // (Configurações também cria a linha de notification_preferences: filtra a de friend_settings.)
