@@ -264,3 +264,6 @@ Só front-end estático; **nenhuma migration**; **flag desligada para todos**: s
 - **Aviso de troca de curso reorganizado** (mesmas palavras aprovadas, em partes): "Você vai trocar para o curso" (pequeno), nome do curso grande com a bandeira, dois parágrafos curtos e um quadro destacado para "Sua sequência de dias e suas conquistas continuam as mesmas." Chaves `courses.confirm.intro/p1/p2/p3` (a antiga `courses.confirm.body` saiu).
 - **"Eu falo"** passa a ser montado a partir do registro (`siteLanguages`): até 3 idiomas do site = botões lado a lado; mais que isso = lista suspensa. Ao incluir um idioma do site novo, criar `courseMenu.speak.<idioma>` e `courses.group.<idioma>` nos catálogos.
 - Testes: menu 26/26, portão 21/21, i18n 2040/2040.
+
+## Q-12 respondida (2026-10-14)
+A dona aprovou a recomendação: os decks de curso (Course Decks) têm a estrutura pelo idioma estudado (as unidades são as mesmas para qualquer língua de origem) e os títulos são resolvidos pela camada do curso na hora de mostrar, sem gravar o nome em português no banco. Com isso, todas as perguntas Q-10 a Q-14 e P1 a P8 estão fechadas.
