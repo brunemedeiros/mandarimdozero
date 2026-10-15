@@ -2544,6 +2544,15 @@ window.I18N_CATALOG['en'] = {
   'rb.generatedPartial': '{ok} created, {fail} failed.', // ALTA
   'rb.gotIt': 'Got it', // ALTA
   'rb.keys': 'Space shows · right arrow got it · H with help · left arrow missed', // ALTA
+  'rb.classEmpty': 'No students in the class yet', // ALTA
+  'rb.classMembers': '{n} in the class: {names}', // ALTA
+  'rb.classPick': 'Class', // ALTA
+  'rb.linkClass': 'Link to class', // ALTA
+  'rb.linkedClass': 'Class', // ALTA
+  'rb.linkedClassDone': "Class linked. {n} cards delivered to whoever didn't have them yet.", // ALTA
+  'rb.noClassrooms': 'No class in this language (create one in Mural).', // ALTA
+  'rb.noRecipients': 'The class has no students yet: there is no one to deliver to.', // ALTA
+  'rb.orClass': 'or', // ALTA
   'rb.link': 'Link', // ALTA
   'rb.linkPick': 'Student account', // ALTA
   'rb.linked': 'Linked', // ALTA

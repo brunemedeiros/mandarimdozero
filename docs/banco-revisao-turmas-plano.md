@@ -93,3 +93,18 @@ cria o vínculo). Os cartões do Eduardo ficam como estão, com o progresso.
   (sem a 096: 44/44).
 - Detalhe aceito: se um aluno de conta única virar turma com respostas do Modo aula ainda não abertas no app, essas
   respostas antigas não chegam (a regra da turma só entrega respostas posteriores à entrada).
+
+## Etapa 2 entregue (2026-10-15)
+
+- Tela (`shared/review-bank.js`, `review-bank-model.js`, `review-bank-class.js`, `review-bank.css`): aluno do Banco sem
+  vínculo mostra "conta" OU "turma" (turmas do mesmo idioma, vindas de `mural_list`, com o número de membros); ligado à
+  turma mostra "Turma", o nome e os membros, e "Desvincular". "Gerar cartões", aprovar e a geração automática valem para
+  aluno de turma (`rbHasTarget`). Corrigir item entregue usa `sync_review_bank_item_cards` (cópias de todos). Textos
+  novos `rb.*` em pt-BR e en.
+- Testes: Banco Playwright 501/501 (36 novas: escolher turma, ligar, membros na tela, gerar = 1 cópia por membro,
+  desvincular; fr/zh, claro/escuro, 390px), modelo 45/45 (1 nova), demais do Banco iguais, painel-professora 409/409,
+  mural 255/255, i18n unit 2032/2032. O teste antigo do Banco ganhou os fakes de `mural_list`,
+  `link_review_bank_classroom` e `sync_review_bank_item_cards` (mudança intencional: a correção passou a ser por RPC).
+- Correção de uma resposta minha à autora: os cartões da professora NÃO voltam para a Revisão geral quando o vínculo
+  acaba. Desde o PR #316 eles só aparecem em Aluno > Revisão, e hoje, sem vínculo, o menu Aluno continua aparecendo só
+  por causa desses cartões (com Mural/Aulas/Material vazios). Decisão pendente da autora: o que fazer com eles nesse caso.

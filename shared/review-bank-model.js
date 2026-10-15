@@ -54,11 +54,14 @@ function rbHasPendingProposal(item){
   return !!(item && item.proposal && typeof item.proposal === 'object' && Object.keys(item.proposal).length);
 }
 
+// Aluno do Banco com destino para os cartões: uma conta vinculada ou uma Turma (096: cada membro recebe a sua cópia).
+function rbHasTarget(student){ return !!(student && (student.linked_student_id || student.classroom_id)); }
+
 // Geração automática: o item vira cartão direto quando não tem "Para conferir", tem os campos completos
-// e o aluno está vinculado a uma conta. Mandarim fica de fora (precisa de pinyin: o cartão é criado à mão).
+// e o aluno está vinculado a uma conta ou a uma Turma. Mandarim fica de fora (precisa de pinyin: o cartão é criado à mão).
 function rbReadyForAuto(item, student, settings){
   if (settings && settings.auto_generate === false) return { ok: false, reason: 'auto_off' };
-  if (!student || !student.linked_student_id) return { ok: false, reason: 'not_linked' };
+  if (!rbHasTarget(student)) return { ok: false, reason: 'not_linked' };
   if (student.status === 'arquivado') return { ok: false, reason: 'archived' };
   if (student.language_app_key === 'mandarim') return { ok: false, reason: 'needs_pinyin' };
   if (!item || item.status !== 'pendente') return { ok: false, reason: 'not_pending' };
@@ -184,7 +187,7 @@ function rbOverviewRow(student, items, reviews, recap, today){
   const lessons = (student.lesson_dates || []).filter(d => d >= today).sort();
   const lastRecapUsed = (reviews || []).filter(r => r.mode === 'recap').map(r => r.review_date).sort().pop() || '';
   return {
-    id: student.id, name: student.name, language: student.language_app_key, archived: student.status === 'arquivado', linked: !!student.linked_student_id,
+    id: student.id, name: student.name, language: student.language_app_key, archived: student.status === 'arquivado', linked: rbHasTarget(student),
     nextLesson: lessons[0] || '', hasAgenda: (student.lesson_dates || []).length > 0,
     pending: (items || []).filter(i => i.status === 'pendente').length, approved: (items || []).filter(i => i.status === 'aprovado').length,
     lastEntry: last, daysSinceEntry: days, recapGenerated: recap ? recap.class_date : '', recapUsed: lastRecapUsed,
