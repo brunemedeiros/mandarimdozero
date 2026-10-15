@@ -39,8 +39,9 @@ check('Acentuação: "très" certo', FR.resultadoAcentuacao('très', 'très'), '
 check('Acentuação: "tres" = quase', FR.resultadoAcentuacao('tres', 'très'), 'partial');
 check('Acentuação: "garcon" por "garçon" = quase', FR.resultadoAcentuacao('garcon', 'garçon'), 'partial');
 check('Acentuação: "Noel" por "Noël" = quase', FR.resultadoAcentuacao('Noel', 'Noël'), 'partial');
-check('ACHADO Acentuação: "soeur" por "sœur" = ERRADO hoje', FR.resultadoAcentuacao('soeur', 'sœur'), 'fail');
-check('Acentuação: com ligaduras ligadas, "soeur" seria quase (opção, não usada)', FL.resultadoAcentuacao('soeur', 'sœur', IDIOMAS.fr.ligaduras), 'partial');
+check('fr (a): Acentuação com a configuração real: "soeur" por "sœur" = quase (antes: errado)', FRC.resultadoAcentuacao('soeur', 'sœur'), 'partial');
+check('genérica sem ligaduras: "soeur" por "sœur" = errado', FL.resultadoAcentuacao('soeur', 'sœur'), 'fail');
+check('genérica com ligaduras: "soeur" = quase', FL.resultadoAcentuacao('soeur', 'sœur', IDIOMAS.fr.ligaduras), 'partial');
 check('tipos: "élève" x "elève" = faltou agudo', FL.tiposDeErroDeAcento('élève', 'elève').map(x => x.tipo + ':' + x.marca), ['faltou:agudo']);
 check('tipos: "òu" por "où" = acento na letra errada (sobrou no o, faltou no u)', FL.tiposDeErroDeAcento('où', 'òu').map(x => x.tipo + ':' + (x.marca || x.marcaDigitada) + '@' + x.posicao), ['sobrou:grave@0', 'faltou:grave@1']);
 

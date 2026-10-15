@@ -43,6 +43,9 @@ function runBlockAndExport(block, names){
   const sandbox = installT({});
   vm.createContext(sandbox);
   vm.runInContext(LATINA_SRC + '\n' + HOOKS_SRC, sandbox);
+  // latinaFr() (a instância do módulo) mora no bloco accent-answer-logic: os outros blocos precisam dele.
+  const accentAnswer = extractBlock('// BEGIN accent-answer-logic', '// END accent-answer-logic');
+  if (!block.includes('// BEGIN accent-answer-logic')) vm.runInContext(accentAnswer, sandbox);
   vm.runInContext(block + `\n;this.__exports = { ${names.join(', ')} };`, sandbox);
   return sandbox.__exports;
 }
@@ -244,6 +247,13 @@ check('Acentuação: acento trocado → partial', accentAnswerOutcome('ètudiant
 check('Acentuação: cedilha faltando → partial', accentAnswerOutcome('francais', 'français'), 'partial');
 check('Acentuação: palavra diferente → fail (não conclui)', accentAnswerOutcome('professeur', 'étudiant'), 'fail');
 check('Acentuação: vazio → fail', accentAnswerOutcome('', 'étudiant'), 'fail');
+// Família latina, fase 2 -- casos NOVOS: (a) "oe" no lugar de "œ" = Quase (antes: fail).
+check('NOVO (a) Acentuação: "soeur" por "sœur" → partial (antes: fail)', accentAnswerOutcome('soeur', 'sœur'), 'partial');
+check('NOVO (a) Acentuação: "Ma soeur est là" por "Ma sœur est là" → partial', accentAnswerOutcome('Ma soeur est là', 'Ma sœur est là'), 'partial');
+check('NOVO (a) Acentuação: "coeur" sem acento nenhum, frase "Le cœur à l\'école" → partial', accentAnswerOutcome("le coeur a l'ecole", "Le cœur à l'école"), 'partial');
+check('NOVO (a) Acentuação: "sœur" com œ → ok', accentAnswerOutcome('sœur', 'sœur'), 'ok');
+check('NOVO (a) Acentuação: "soeurs" por "sœur" → fail (letra a mais continua erro)', accentAnswerOutcome('soeurs', 'sœur'), 'fail');
+check('NOVO (a) Acentuação: isAccentAnswerCorrect("soeur", "sœur") continua false (não é acerto)', isAccentAnswerCorrect('soeur', 'sœur'), false);
 const refs = ['Hoje está chovendo.'];
 check('Traduzir: idêntico → ok', listenTranslateOutcome('Hoje está chovendo', refs, null), 'ok');
 check('Traduzir: vazio → fail', listenTranslateOutcome('  ', refs, null), 'fail');

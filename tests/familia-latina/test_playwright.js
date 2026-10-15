@@ -1,7 +1,8 @@
 // Família latina, fase 2: o fr de verdade no navegador (Chromium), com shared/core/familias/latina.js e a
 // configuração de fr/lang-hooks.js carregados pelo fr/index.html. Confere as telas que mudaram com as
 // decisões da dona (2026-10-15):
-//  (a) "oe" por "œ" = Quase no "Digite o que ouviu" e na lacuna digitada (meio ponto, mostra a forma certa);
+//  (a) "oe" por "œ" = Quase no "Digite o que ouviu" e na lacuna digitada (meio ponto, mostra a forma certa)
+//      e no desafio Acentuação;
 //  (c) apóstrofo curvo do celular aceito na lacuna digitada;
 // e que nada mais mudou nesses exercícios (acerto e erro de sempre).
 // Supabase do CDN trocado por um stub; boot em modo convidado. Rodar: node tests/familia-latina/test_playwright.js
@@ -104,6 +105,23 @@ async function clozeType(page, blockF, typed){
   check('lacuna: sem acento continua acerto (acento não conta)', r.score === 1 && !r.almost, r);
   r = await clozeType(page, 'école', 'chat');
   check('lacuna: palavra errada = erro', r.score === 0 && /incorrect/.test(r.blankClass), r);
+
+  // ---- (a) desafio Acentuação
+  const acentuacao = (alvo, typed) => page.evaluate(([alvo, typed]) => {
+    const c = { id: 'fl-accent-test', type: 'accent', level: 'A1', targetText: alvo, audioFile: '', explanation: '' };
+    openAccentPlayer(c);
+    document.getElementById('accent-answer-input').value = typed;
+    document.getElementById('accent-verify-btn').click();
+    return document.getElementById('accent-feedback-wrap').textContent.replace(/\s+/g, ' ').trim();
+  }, [alvo, typed]);
+  let txt = await acentuacao('Ma sœur', 'ma soeur');
+  check('Acentuação (a): "ma soeur" por "Ma sœur" = Quase (antes: Errado)', /Quase/.test(txt) && !/Errado/.test(txt), txt);
+  txt = await acentuacao('Ma sœur', 'ma sœur');
+  check('Acentuação: "ma sœur" = Certo', /Certo/.test(txt), txt);
+  txt = await acentuacao('très', 'tres');
+  check('Acentuação: "tres" por "très" continua Quase', /Quase/.test(txt), txt);
+  txt = await acentuacao('Ma sœur', 'ma soeurs');
+  check('Acentuação: letra a mais continua Errado', /Errado/.test(txt), txt);
 
   check('sem erro de página', errors.length === 0, errors);
   await ctx.close();

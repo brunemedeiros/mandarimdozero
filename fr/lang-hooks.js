@@ -38,5 +38,6 @@ const LANG_HOOKS = {
     elisao: true,                       // ditado: "j' ai" -> "j'ai" antes de comparar
     acentoNaDigitacao: 'tolerante',     // exercícios de digitar: acento NÃO conta (decisão de 2026-09-16)
     ligadurasNaDigitacao: true,         // "soeur" por "sœur" = Quase (decisão da dona, 2026-10-15)
+    ligadurasNaAcentuacao: true,        // desafio Acentuação: "soeur" por "sœur" = Quase (idem)
   },
 };

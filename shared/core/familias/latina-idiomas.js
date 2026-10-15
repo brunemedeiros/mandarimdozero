@@ -38,7 +38,7 @@
   var fr = {
     id: 'fr',
     ligaduras: [['œ', 'oe'], ['æ', 'ae']],
-    ligadurasNaAcentuacao: false,      // hoje "soeur" por "sœur" dá 'fail' no desafio Acentuação (achado, não mudado)
+    ligadurasNaAcentuacao: true,       // "soeur" por "sœur" = 'partial' no desafio Acentuação (decisão da dona, 2026-10-15)
     hifen: true,
     apostrofo: true,
     elisao: true,                       // "j' ai" -> "j'ai" antes de comparar o ditado

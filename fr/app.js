@@ -8632,26 +8632,25 @@ function checkListenTranslateAnswer(c){
 // BEGIN accent-challenge-logic (extraído literalmente por fr/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
 // Correção sensível a acentos/cedilha/trema -- nunca remove diacríticos
 // antes de comparar (só normaliza espaço/maiúsculas, que não são o alvo
-// da atividade).
+// da atividade). Família latina, fase 2: as regras moram em
+// shared/core/familias/latina.js (configuração do fr em LANG_HOOKS.familiaLatina).
 function normalizeForAccentCompare(s){
-  return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  return FamiliaLatina.normalizarParaAcentuacao(s);
 }
 
 function isAccentAnswerCorrect(studentAnswer, targetText){
-  return normalizeForAccentCompare(studentAnswer) === normalizeForAccentCompare(targetText);
+  return FamiliaLatina.acentuacaoCerta(studentAnswer, targetText);
 }
 
 function stripDiacriticsForAccentCompare(s){
-  return normalizeForAccentCompare(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return FamiliaLatina.semAcentoParaAcentuacao(s);
 }
 
-// 'ok' = igual; 'partial' = só o acento/cedilha/trema difere (erro leve,
-// conclui); 'fail' = palavra diferente ou vazio (erro total, não conclui).
+// 'ok' = igual; 'partial' = só o acento/cedilha/trema difere, ou "oe" no lugar
+// de "œ" (decisão da dona, 2026-10-15) -- erro leve, conclui; 'fail' = palavra
+// diferente ou vazio (erro total, não conclui).
 function accentAnswerOutcome(studentAnswer, targetText){
-  if (isAccentAnswerCorrect(studentAnswer, targetText)) return 'ok';
-  const typed = stripDiacriticsForAccentCompare(studentAnswer);
-  if (typed && typed === stripDiacriticsForAccentCompare(targetText)) return 'partial';
-  return 'fail';
+  return latinaFr().resultadoAcentuacao(studentAnswer, targetText);
 }
 // END accent-challenge-logic
 
