@@ -442,13 +442,13 @@ async function buildLanguagesSummary(){
   return AVAILABLE_LANGUAGES.filter(l => l.enabled).map(l => {
     if (l.id === LANG_ID){
       const s = computeProgressSummary();
-      return { id: l.id, name: l.name, flagSvg: l.flagSvg, levelLabel: s.levelLabel, pct: s.pct, isCurrent: true };
+      return { id: l.id, name: languageDisplayName(l), flagSvg: l.flagSvg, levelLabel: s.levelLabel, pct: s.pct, isCurrent: true };
     }
     const other = CourseStorage.isPerSiteLanguage() ? CourseStorage.blockFor(raw, l.appKey, getUiLang()) : raw[l.appKey];
     if (!other) return null;
     if (other.progressSummary){
       const s = other.progressSummary;
-      return { id: l.id, name: l.name, flagSvg: l.flagSvg, levelLabel: s.levelLabel, pct: s.pct, isCurrent: false };
+      return { id: l.id, name: languageDisplayName(l), flagSvg: l.flagSvg, levelLabel: s.levelLabel, pct: s.pct, isCurrent: false };
     }
     // Progresso salvo ANTES de progressSummary existir (contas com
     // histórico anterior a este recurso) -- sem isto, o card do outro
@@ -460,7 +460,7 @@ async function buildLanguagesSummary(){
     // content.js do outro site.
     const fallback = fallbackSummaryFromUnitProgress(other.unitProgress);
     if (!fallback) return null;
-    return { id: l.id, name: l.name, flagSvg: l.flagSvg, levelLabel: null, pct: fallback.pct, isCurrent: false };
+    return { id: l.id, name: languageDisplayName(l), flagSvg: l.flagSvg, levelLabel: null, pct: fallback.pct, isCurrent: false };
   }).filter(Boolean);
 }
 

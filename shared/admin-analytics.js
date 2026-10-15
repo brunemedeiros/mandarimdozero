@@ -826,7 +826,7 @@ function analyticsControlsHTML(since, until){
     `<option value="${key}" ${ANALYTICS_STATE.period === key ? 'selected' : ''}>${label}</option>`
   ).join('');
   const langOptions = AVAILABLE_LANGUAGES.map(l =>
-    `<option value="${l.appKey}" ${ANALYTICS_STATE.languageFilter === l.appKey ? 'selected' : ''}>${l.name}</option>`
+    `<option value="${l.appKey}" ${ANALYTICS_STATE.languageFilter === l.appKey ? 'selected' : ''}>${languageDisplayName(l)}</option>`
   ).join('');
 
   const customRangeHTML = ANALYTICS_STATE.period === 'custom' ? `
@@ -1027,14 +1027,14 @@ function renderExerciciosSectionHTML(stats){
 }
 
 function renderIdiomaSectionHTML(stats){
-  const langName = (appKey) => AVAILABLE_LANGUAGES.find(l => l.appKey === appKey)?.name || appKey;
+  const langName = (appKey) => languageDisplayName(AVAILABLE_LANGUAGES.find(l => l.appKey === appKey) || appKey);
   const rows = Object.entries(stats.byLanguageCounts)
     .map(([appKey, count]) => ({ name: appKey, count }))
     .sort((a, b) => b.count - a.count);
   return `
     <div class="profile-section">
       <div class="section-label">${t('admin.analytics.lang.events')}</div>
-      ${rows.length ? analyticsBarRowsHTML(rows, Object.fromEntries(AVAILABLE_LANGUAGES.map(l => [l.appKey, l.name]))) : analyticsEmptyNoteHTML()}
+      ${rows.length ? analyticsBarRowsHTML(rows, Object.fromEntries(AVAILABLE_LANGUAGES.map(l => [l.appKey, languageDisplayName(l)]))) : analyticsEmptyNoteHTML()}
       ${ANALYTICS_STATE.languageFilter !== 'all' ? `<p class="admin-badge-desc">${t('admin.analytics.lang.filterActive', { lang: langName(ANALYTICS_STATE.languageFilter) })}</p>` : ''}
       <p class="admin-badge-desc">${t('admin.analytics.lang.note')}</p>
     </div>
