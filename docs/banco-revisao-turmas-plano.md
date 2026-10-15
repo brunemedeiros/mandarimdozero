@@ -124,3 +124,17 @@ cria o vínculo). Os cartões do Eduardo ficam como estão, com o progresso.
   mudança intencional (fase-h origin filter 54/54: o aluno simulado passa a ter professora ativa; fase-i tags unit 67/67:
   extrai `isActiveClassReviewCard`). Pré-existentes iguais nos dois lados: k2c Playwright 12/14, trilha-tags unit e
   painel-alunos unit não rodam neste ambiente.
+
+## Antes do Staging (2026-10-15)
+
+- `main` trouxe a rotina automática do Banco (089/090 e 097 a 100, outra conversa). A 096 não toca nas funções dela
+  (`agent_*`, `_rb_agent_*`, `review_bank_agent_*`); a rotina só entrega cartão quando há `linked_student_id`
+  (`core.mjs`), então ignora aluno ligado a turma. `rbReadyToDeliver` (novo na `main`) passou a aceitar turma.
+  Motor da rotina regerado (`node scripts/build-review-bank-agent.js`): `test_agent_core` 49/49. **Ao publicar, a Edge
+  Function `review-bank-agent` precisa de novo deploy** (o arquivo gerado mudou; sem deploy ela segue com o motor antigo,
+  que funciona igual para alunos de conta).
+- Testes depois do merge: 096 49/49 (agora com 089, 090 e 095 antes, como no Staging), Mural 80/80, suíte antiga do
+  Banco com a 096 por cima 83/83 (inclui as partes da rotina; antes 83/83), Banco Playwright 519/519, modelo 49/49,
+  aluno com professora ativa 18/18, i18n unit 2032/2032.
+- Staging conferido (só leitura): todas as dependências existem, 096 ainda não aplicada; foto antes:
+  teacher_flashcards 8 linhas (md5 a90d5f4c...), review_bank_items 18, review_bank_students 5, review_bank_reviews 0.
