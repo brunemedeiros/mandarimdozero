@@ -2157,12 +2157,11 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
     // onze" = "soixante-et-onze") -- só a grafia do separador, nunca deve
     // custar o ponto de quem sabe a palavra. Acento errado continua "Quase!".
     const forms = [expected, ...(ex.alt || [])];
-    const canonSep = s => s.normalize('NFC').toLowerCase().trim().replace(/[\s\-‐‑–']+/g, ' ');
-    const looseSep = s => normalizeLoose(s).replace(/[\s\-‐‑–']+/g, ' ');
-    if (forms.some(f => canonSep(given) === canonSep(f))){
+    const sepResult = latinaFr().avaliarComSeparadores(given, forms);
+    if (sepResult === 'ok'){
       wrapEl.classList.add('ok');
       STEP_STATE.gramExerciseScore += 1;
-    } else if (forms.some(f => looseSep(given) === looseSep(f))){
+    } else if (sepResult === 'almost'){
       wrapEl.classList.add('almost');
       expectedEl.textContent = t('feedback.almostArrow', { expected });
       STEP_STATE.gramExerciseScore += 0.5;
@@ -3271,7 +3270,6 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   const inputEl = document.getElementById('vocab-type-input');
   inputEl.focus();
   wireFrAccentPicker(contentEl.querySelector('.fr-accent-picker'), inputEl);
-  const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
 
   function lockInputs(){
     inputEl.disabled = true;
@@ -3280,19 +3278,21 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
+  // isCorrect: true | false | 'quase' (só "oe" no lugar de "œ": meio ponto, mostra a forma certa).
   function finish(isCorrect){
+    const almost = isCorrect === 'quase';
     STEP_STATE.exerciseAnswered = true;
-    playFeedbackSound(isCorrect);
+    playFeedbackSound(!!isCorrect);
     lockInputs();
 
     if (isCorrect){
-      STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
+      STEP_STATE.exerciseScore += almost ? 0.5 : 1;
+      addXP(exerciseXP(ex, almost ? 2 : 4)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
       registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
       addStudyMinutes();
       // Detalhe extra vale a pena aqui -- o exercício testou só o som da
       // palavra, a forma escrita em francês nunca apareceu na tela antes.
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, `<strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)}`), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, `${almost ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>` : ''}<strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)}`), 500);
     } else {
       // A resposta certa já aparece dentro do próprio painel de resultado
       // (answerExplanationHTML mostra ex.item.f) -- sem repetir aqui como um
@@ -3308,8 +3308,8 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     if (STEP_STATE.exerciseAnswered) return;
     // Vocabulário com forma dupla (ex: "un / une") -- qualquer uma das duas
     // conta como resposta completa, não só a string inteira com a barra.
-    const typed = strip(inputEl.value);
-    finish(acceptedForms(ex.item.f).some(form => strip(form) === typed));
+    const result = lessonTypedAnswerResult(inputEl.value, ex.item.f);
+    finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false);
   });
 
   wireDontKnowButton(contentEl, ex, () => {
@@ -3438,16 +3438,20 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
+  // isCorrect: true | false | 'quase' (lacuna digitada com "oe" no lugar de "œ": meio ponto, mostra a forma certa).
   function finish(isCorrect){
+    const almost = isCorrect === 'quase';
     STEP_STATE.exerciseAnswered = true;
-    playFeedbackSound(isCorrect);
+    playFeedbackSound(!!isCorrect);
     revealBlank(isCorrect ? 'ok' : 'wrong');
 
     if (isCorrect){
-      STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4));
+      STEP_STATE.exerciseScore += almost ? 0.5 : 1;
+      addXP(exerciseXP(ex, almost ? 2 : 4));
       addStudyMinutes();
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, clozeFeedbackDetailHTML(ex, false)), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, almost
+        ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>${clozeFeedbackDetailHTML(ex, true)}`
+        : clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
@@ -3467,9 +3471,8 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     document.getElementById('cloze-verify-btn').addEventListener('click', () => {
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
-      const strip = s => normalizeLoose(s).replace(/[.,!?;:'"]/g, '').trim();
-      const typed = strip(inputEl.value);
-      finish(acceptedForms(ex.correctBlock.f).some(form => strip(form) === typed));
+      const result = lessonTypedAnswerResult(inputEl.value, ex.correctBlock.f);
+      finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false);
     });
   } else {
     contentEl.querySelectorAll('.cloze-option').forEach(btn => {
@@ -5213,25 +5216,9 @@ function conjOtherFormOf(verb, tenseKey, given, accepted){
 }
 
 // Alinhamento letra a letra (distância de edição), como no Jogo de Conjugações.
+// Família latina, fase 2: a conta mora em shared/core/familias/latina.js (alinharLetras).
 function conjAlign(a, b){
-  const A = [...(a || '')], B = [...(b || '')], la = A.map(c => c.toLowerCase()), lb = B.map(c => c.toLowerCase());
-  const n = A.length, m = B.length, d = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
-  for (let x = 0; x <= n; x++) d[x][0] = x;
-  for (let y = 0; y <= m; y++) d[0][y] = y;
-  for (let x = 1; x <= n; x++) for (let y = 1; y <= m; y++)
-    d[x][y] = Math.min(d[x - 1][y - 1] + (la[x - 1] === lb[y - 1] ? 0 : 1), d[x - 1][y] + 1, d[x][y - 1] + 1);
-  const ops = [];
-  let x = n, y = m;
-  while (x > 0 || y > 0){
-    if (x > 0 && y > 0 && d[x][y] === d[x - 1][y - 1] + (la[x - 1] === lb[y - 1] ? 0 : 1)){
-      ops.push({ t: la[x - 1] === lb[y - 1] ? 'same' : 'sub', a: A[x - 1] }); x--; y--;
-    } else if (x > 0 && d[x][y] === d[x - 1][y] + 1){
-      ops.push({ t: 'extra', a: A[x - 1] }); x--;
-    } else {
-      ops.push({ t: 'missing' }); y--;
-    }
-  }
-  return { ops: ops.reverse(), cost: d[n][m] };
+  return FamiliaLatina.alinharLetras(a, b);
 }
 
 // O que a pessoa digitou, com só as letras erradas em vermelho; o traço
@@ -5297,7 +5284,7 @@ function conjExampleHTML(tenseKey){
   return `<span class="conj-ex" lang="fr">${fr}</span>${ex.t && ptSite ? `<span class="conj-ex-tr">${escapeHTML(ex.t)}</span>` : ''}`;
 }
 
-const conjFold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+const conjFold = s => FamiliaLatina.dobrarBusca(s); // família latina (shared/core/familias/latina.js)
 
 // Busca pelo infinitivo (fr) ou pela tradução (pt), sem acento: "etre" acha être, "comer" acha manger.
 // Ordem: igual > começa com > contém; empate pelo verbo mais comum.
@@ -5609,8 +5596,23 @@ function getConjForms(verb, tense){
 // exercícios digitados de vocabulário/cloze/conjugação) -- preservado sem
 // alteração. Só o pinyin do chinês (zh/app.js) tinha esse mesmo padrão
 // aplicado errado -- ver normalizePinyinAnswer lá, tom não é decoração.
+// Família latina, fase 2 (docs/i18n/familia-latina-modulo.md): as regras moram em
+// shared/core/familias/latina.js; a configuração do francês, em LANG_HOOKS.familiaLatina (fr/lang-hooks.js).
 function normalizeLoose(str){
-  return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  return FamiliaLatina.normalizarFrouxo(str);
+}
+
+// Uma instância do módulo por página, criada no primeiro uso (o lang-hooks.js e o módulo já carregaram).
+let _latinaFr = null;
+function latinaFr(){
+  return _latinaFr || (_latinaFr = FamiliaLatina.criar(LANG_HOOKS.familiaLatina));
+}
+
+// Exercícios de digitar da trilha ("Digite o que ouviu" e a lacuna digitada): 'ok' | 'quase' | 'errou'.
+// Acento não conta (como sempre); "oe" por "œ" = 'quase' (decisão da dona, 2026-10-15); o apóstrofo
+// curvo do celular (’) é ignorado nos dois exercícios (antes só no "Digite o que ouviu").
+function lessonTypedAnswerResult(typed, expected){
+  return latinaFr().avaliarRespostaDigitada(typed, expected, FamiliaLatina.PONTUACAO_VOCAB_RE);
 }
 
 // END accent-answer-logic

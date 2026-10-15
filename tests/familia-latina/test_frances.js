@@ -7,6 +7,8 @@ const ROOT = path.resolve(__dirname, '../..');
 const FL = require(path.join(ROOT, 'shared/core/familias/latina.js'));
 const IDIOMAS = require(path.join(ROOT, 'shared/core/familias/latina-idiomas.js'));
 const FR = FL.criar(IDIOMAS.fr);
+// Configuração que a página usa de verdade (fr/lang-hooks.js), por cima do rascunho de latina-idiomas.js.
+const FRC = FL.criar(Object.assign({}, IDIOMAS.fr, require('./extrair-fr.js').configFr()));
 let ok = 0, ruim = 0;
 function check(desc, obtido, esperado) {
   const a = JSON.stringify(obtido), b = JSON.stringify(esperado);
@@ -19,9 +21,15 @@ check('vocab: "etudiant" por "étudiant" = certo', FL.respostaDigitadaCerta('etu
 check('vocab: "ou" por "où" = certo', FL.respostaDigitadaCerta('ou', 'où'), true);
 check('vocab: "un / une" aceita "une"', FL.respostaDigitadaCerta('une', 'un / une'), true);
 check('vocab: "prennons" por "prenons" = errado', FL.respostaDigitadaCerta('prennons', 'prenons'), false);
-check('ACHADO vocab: "la soeur" por "la sœur" = ERRADO hoje (œ não é acento para o NFD)', FL.respostaDigitadaCerta('la soeur', 'la sœur'), false);
+check('genérica respostaDigitadaCerta: "la soeur" por "la sœur" = errado (œ não é acento para o NFD)', FL.respostaDigitadaCerta('la soeur', 'la sœur'), false);
 check('vocab: apóstrofo curvo do celular ignorado no vocabulário ("l’école")', FL.respostaDigitadaCerta('l’école', "l'école"), true);
-check('ACHADO lacuna: o mesmo apóstrofo curvo NÃO é ignorado na lacuna digitada', FL.respostaDigitadaCerta('l’école', "l'école", FL.PONTUACAO_LACUNA_RE), false);
+check('genérica com a lista antiga da lacuna: o apóstrofo curvo não é ignorado', FL.respostaDigitadaCerta('l’école', "l'école", FL.PONTUACAO_LACUNA_RE), false);
+// Fase 2, configuração REAL do fr (fr/lang-hooks.js): decisões da dona de 2026-10-15.
+check('fr (a): "la soeur" por "la sœur" = quase no vocabulário e na lacuna digitados', FRC.avaliarRespostaDigitada('la soeur', 'la sœur'), 'quase');
+check('fr (a): "Coeur" por "cœur" = quase', FRC.avaliarRespostaDigitada('Coeur', 'cœur'), 'quase');
+check('fr: "etudiant" por "étudiant" continua ok (acento não conta)', FRC.avaliarRespostaDigitada('etudiant', 'étudiant'), 'ok');
+check('fr: "prennons" por "prenons" continua errado', FRC.avaliarRespostaDigitada('prennons', 'prenons'), 'errou');
+check('fr (c): "l’école" na lacuna digitada = ok (mesma lista do vocabulário)', FRC.avaliarRespostaDigitada('l’école', "l'école"), 'ok');
 check('gramática: "soixante dix" = "soixante-dix"', FR.avaliarComSeparadores('soixante dix', ['soixante-dix']), 'ok');
 check('gramática: "quatre vingts" sem acento nenhum = ok', FR.avaliarComSeparadores('quatre vingts', ['quatre-vingts']), 'ok');
 check('gramática: "zero" por "zéro" = quase', FR.avaliarComSeparadores('zero', ['zéro']), 'almost');

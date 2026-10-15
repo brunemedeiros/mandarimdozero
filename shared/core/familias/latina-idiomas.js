@@ -135,6 +135,9 @@
     hifen: true,                        // guarda-chuva, segunda-feira, ênclise (chame-me)
     apostrofo: true,                    // raro, mas existe: copo d'água, Sant'Ana, pau-d'alho
     elisao: false,                      // não há "j' ai": não junta apóstrofo + espaço
+    // Exercícios de digitar: falta de acento = Quase (decisão da dona, 2026-10-15), não certo nem erro total,
+    // porque avô/avó, pais/país, esta/está são palavras diferentes.
+    acentoNaDigitacao: 'quase',
     gruposDeAcentos: [
       ['á', 'à', 'â', 'ã'],
       ['ç'],

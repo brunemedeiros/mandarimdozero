@@ -28,4 +28,15 @@ const LANG_HOOKS = {
   revisaoFallbackId: 'conj1',
   dailyExtra: () => ({ stars: 0, grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0, conjugationTenses: [] }),
 // --- /E4 hooks ---
+  // Família latina (shared/core/familias/latina.js): configuração do FRANCÊS. O português, quando o /pt existir,
+  // terá a dele no pt/lang-hooks.js (rascunho em shared/core/familias/latina-idiomas.js). Ver docs/i18n/familia-latina-modulo.md.
+  familiaLatina: {
+    id: 'fr',
+    ligaduras: [['œ', 'oe'], ['æ', 'ae']],
+    hifen: true,
+    apostrofo: true,
+    elisao: true,                       // ditado: "j' ai" -> "j'ai" antes de comparar
+    acentoNaDigitacao: 'tolerante',     // exercícios de digitar: acento NÃO conta (decisão de 2026-09-16)
+    ligadurasNaDigitacao: true,         // "soeur" por "sœur" = Quase (decisão da dona, 2026-10-15)
+  },
 };

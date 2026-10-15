@@ -2,9 +2,10 @@
 // e teclado de acentos, em funções PURAS (sem DOM, sem STATE, sem t()). O que muda de um idioma para outro
 // vem num objeto de configuração (ver shared/core/familias/latina-idiomas.js).
 //
-// FASE 1 (docs/i18n/familia-latina-modulo.md): este arquivo NÃO é carregado por nenhuma página ainda.
-// O fr continua usando as funções do fr/app.js; tests/familia-latina/test_paridade_fr.js prova que,
-// configurado para o fr, o módulo dá exatamente o mesmo resultado que elas.
+// FASE 2 (docs/i18n/familia-latina-modulo.md): carregado pelo fr/index.html antes do app.js; as funções de
+// acento do fr/app.js viraram repasses para cá, com a configuração do francês em fr/lang-hooks.js
+// (LANG_HOOKS.familiaLatina). tests/familia-latina/test_paridade_fr.js compara com o fr/app.js ANTIGO
+// (commit de referência) e só aceita as diferenças autorizadas pela dona.
 //
 // Uso no Node:   const FL = require('shared/core/familias/latina.js');
 //                const fr = FL.criar(require('shared/core/familias/latina-idiomas.js').fr);
@@ -27,8 +28,9 @@
   }
 
   // = normalizeLoose do fr/app.js: sem acento, minúsculas, sem espaço nas pontas.
+  // Sem String(): como o normalizeLoose original, só aceita texto (null/undefined lançam erro do mesmo jeito).
   function normalizarFrouxo(str) {
-    return String(str).normalize('NFD').replace(MARCAS_RE, '').toLowerCase().trim();
+    return str.normalize('NFD').replace(MARCAS_RE, '').toLowerCase().trim();
   }
 
   // = conjFold do fr/app.js (busca de verbos): igual ao frouxo, mas aceita null/undefined.
@@ -55,18 +57,32 @@
     return formasAceitas(expected).some(function (form) { return strip(form) === t; });
   }
 
-  // Versão em 3 níveis, para o idioma que quiser "quase" em vez de aceitar sem acento (decisão do pt em aberto):
-  // 'ok' = igual (só maiúscula/pontuação diferem); 'quase' = só acento/cedilha/til; 'errou'.
+  // Versão em 3 níveis dos exercícios de digitar: 'ok' | 'quase' | 'errou'.
+  //  - acento 'tolerante' (fr, decisão de 2026-09-16): acento não conta; 'ok' exatamente quando a
+  //    respostaDigitadaCerta de sempre diria certo (mesma comparação, sem mudar nada).
+  //  - acento 'quase' (pt, decisão da dona de 2026-10-15: avó/avô, pais/país são palavras diferentes):
+  //    'ok' = igual (só maiúscula/pontuação diferem); 'quase' = só acento/cedilha/til; 'errou'.
+  //  - ligaduras (opcional, fr: [['œ','oe'],['æ','ae']]): "soeur" por "sœur" = 'quase' (decisão de 2026-10-15).
   function avaliarRespostaDigitada(typed, expected, opcoes) {
     var o = opcoes || {};
     var re = o.pontuacaoRe || PONTUACAO_VOCAB_RE;
     var estrito = function (s) { return String(s).normalize('NFC').toLowerCase().replace(re, '').trim(); };
     var frouxo = function (s) { return normalizarFrouxo(s).replace(re, '').trim(); };
     var forms = formasAceitas(expected);
-    var t = estrito(typed);
-    if (!t) return 'errou';
-    if (forms.some(function (f) { return estrito(f) === t; })) return 'ok';
-    if (forms.some(function (f) { return frouxo(f) === frouxo(typed); })) return o.acento === 'tolerante' ? 'ok' : 'quase';
+    if (o.acento === 'tolerante') {
+      var tf = frouxo(typed);
+      if (forms.some(function (f) { return frouxo(f) === tf; })) return 'ok';
+    } else {
+      var t = estrito(typed);
+      if (!t) return 'errou';
+      if (forms.some(function (f) { return estrito(f) === t; })) return 'ok';
+      if (forms.some(function (f) { return frouxo(f) === frouxo(typed); })) return 'quase';
+    }
+    if (o.ligaduras && o.ligaduras.length) {
+      var lig = function (s) { var x = frouxo(s); o.ligaduras.forEach(function (p) { x = x.split(p[0]).join(p[1]); }); return x; };
+      var tl = lig(typed);
+      if (tl && forms.some(function (f) { return lig(f) === tl; })) return 'quase';
+    }
     return 'errou';
   }
 
@@ -502,6 +518,13 @@
       classificarErroDitado: classificarErroDitado,
       textoErroLeve: textoErroLeve,
       // atalhos com a configuração do idioma
+      // Exercícios de digitar: cfg.acentoNaDigitacao ('tolerante' no fr, 'quase' no pt) e, se
+      // cfg.ligadurasNaDigitacao, "oe" por "œ" = 'quase'.
+      avaliarRespostaDigitada: function (typed, expected, pontuacaoRe) {
+        return avaliarRespostaDigitada(typed, expected, {
+          pontuacaoRe: pontuacaoRe, acento: cfg.acentoNaDigitacao || 'tolerante', ligaduras: cfg.ligadurasNaDigitacao ? LIG : null
+        });
+      },
       avaliarComSeparadores: function (given, forms) { return avaliarComSeparadores(given, forms, cfg); },
       resultadoAcentuacao: function (s, t) { return resultadoAcentuacao(s, t, cfg.ligadurasNaAcentuacao ? LIG : null); },
       htmlTecladoDeAcentos: function (classes) { return htmlTecladoDeAcentos(cfg.gruposDeAcentos, classes); },
