@@ -40,6 +40,7 @@
 .rb-head h3{ font-size:20px; font-weight:800; margin:0; color:var(--ink); }
 .rb-head-actions{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 .rb-linkline{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:13px; color:var(--ink-soft); }
+.rb-linkline-or{ padding:0 2px; color:var(--ink-soft); }
 .rb-pill{ display:inline-block; padding:1px 9px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper); font-size:12px; font-weight:800; color:var(--ink-soft); }
 .rb-pill.is-ok{ color:var(--jade); border-color:var(--jade); }
 .rb-ready{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; padding:10px 14px; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper-warm); font-size:14px; }

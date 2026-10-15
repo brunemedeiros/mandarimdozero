@@ -296,8 +296,8 @@ function applyStudentNavVisibility(){
 
 // Cartões da professora (Banco de Revisão) no idioma atual -- a aba Aluno > Revisão existe por causa deles.
 function studentHasClassReviewCards(){
-  return typeof STATE !== 'undefined' && Array.isArray(STATE.cards) && typeof isClassReviewCard === 'function'
-    && STATE.cards.some(c => isClassReviewCard(c) && c.flashcardStatus === 'active');
+  return typeof STATE !== 'undefined' && Array.isArray(STATE.cards) && typeof isActiveClassReviewCard === 'function'
+    && STATE.cards.some(c => isActiveClassReviewCard(c) && c.flashcardStatus === 'active');
 }
 
 // ---------- Aluno: Mural | Aulas | Material de apoio | Revisão (decisões da autora, 2026-10-13 e 14) ----------
