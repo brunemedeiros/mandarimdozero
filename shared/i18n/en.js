@@ -2459,6 +2459,27 @@ window.I18N_CATALOG['en'] = {
   'panel.teacher.aria': 'Teacher panel section', // ALTA
   'panel.teacher.nav': 'Teacher', // ALTA
   'panel.teacher.menu': '🎓 Teacher panel', // ALTA
+  'panel.tbell.title': 'Student notifications', // ALTA
+  'panel.tbell.hint': 'Notifications about your students in every language: who went quiet, board posts and invites. Notifications about your own studies stay in the bell at the top.', // ALTA
+  'panel.tbell.markAll': 'Mark all as read', // ALTA
+  'panel.tbell.empty': 'No notifications about students yet.', // ALTA
+  'panel.tbell.err': 'Couldn\'t load the notifications right now. Try again in a moment.', // ALTA
+  'panel.tbell.new': 'New', // ALTA
+  'panel.tbell.unread': { one: '{n} new student notification', other: '{n} new student notifications' }, // ALTA
+  'panel.tbell.otherLang': 'To reply, open the {lang} board.', // MÉDIA
+  'panel.tbell.lang.frances': 'French', // ALTA
+  'panel.tbell.lang.mandarim': 'Chinese', // ALTA
+  'panel.tbell.lang.portugues': 'Portuguese', // ALTA
+  'panel.tbell.ev.inactive': 'Haven\'t shown up in a few days: {list}. Maybe it\'s time to say hi 👋', // ALTA (mesma frase da 056)
+  'panel.tbell.days': { one: '{n} day', other: '{n} days' }, // ALTA
+  'panel.tbell.ev.accepted': '{name} accepted your invitation and is now your {lang} student 🎉', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.joinedLink': '{name} joined through your link and is now your {lang} student 🎉', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.declined': '{name} declined the invitation to {lang} classes.', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.post': '{name} posted on the board: {snippet}', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.postClass': '{name} posted on the board (class {classroom}): {snippet}', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.comment': '{name} commented on the board: {snippet}', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.joinClass': '{name} joined the class {classroom} through your link', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.joinClassNew': '{name} joined the class {classroom} through your link and is now your {lang} student 🎉', // ALTA (mesma frase da 104)
   'panel.tab.students': 'Students', // ALTA
   'panel.tab.cards': 'Cards', // ALTA
   'panel.tab.classlogs': 'Classes', // ALTA
@@ -2996,4 +3017,36 @@ window.I18N_CATALOG['en'] = {
   'tinvite.err.invalid_code': 'This invite link no longer works. Ask whoever invited you for a new one.', // ALTA
   'tinvite.err.not_authenticated': 'Log in to answer the invite.', // ALTA
   'tinvite.err.generic': 'That didn\'t work right now. Try again in a moment.', // ALTA
+
+  // Ditado do francês: explicação de cada erro (família latina, fase 2, 2026-10-15). needs_review: tradução nova,
+  // ainda não revisada pela dona; confiança no comentário de cada linha. Antes estes textos apareciam em
+  // português também no site em inglês.
+  'fr.dict.youWrote': 'you wrote “{typed}”', // ALTA
+  'fr.dict.light.hyphen': '“{core}” has a hyphen ({you}).', // ALTA
+  'fr.dict.light.apostrophe': '“{core}” has an apostrophe ({you}).', // ALTA
+  'fr.dict.light.ligature': '“{core}” uses the letter “œ”, which is a single letter ({you}).', // ALTA
+  'fr.dict.light.accent': '“{core}”: check the accents ({you}).', // ALTA
+  'fr.dict.light.spelling': '“{core}”: small spelling difference ({you}).', // ALTA
+  'fr.dict.light.multiple': '“{core}”: check {list} ({you}).', // ALTA
+  'fr.dict.part.hyphen': 'the hyphen', // ALTA
+  'fr.dict.part.apostrophe': 'the apostrophe', // ALTA
+  'fr.dict.part.ligature': 'the letter “œ”', // ALTA
+  'fr.dict.part.accent': 'the accents', // ALTA
+  'fr.dict.part.and': ' and ', // ALTA
+  'fr.dict.err.homophone': '“{shown}” (you wrote “{typed}”): words that sound alike. {note}', // ALTA
+  'fr.dict.err.agreement': '“{shown}” (you wrote “{typed}”): only the ending is different (-{suffix}). If the word agrees with another one, check gender, number or the verb form against the rest of the sentence; otherwise it may just be a typo.', // MÉDIA -- "concorda" sem equivalente curto; alternativa: "If it is a word that has to agree..."
+  'fr.dict.err.other': '“{shown}”: not the expected word (you wrote “{typed}”).', // ALTA
+  'fr.dict.punctMissing': 'This punctuation mark is missing (no points lost)', // ALTA
+  'fr.dict.hom.a': '“a” is the verb avoir (il a); “à” is a preposition (à Paris).', // ALTA
+  'fr.dict.hom.et': '“et” means “and”; “est” is the verb être (il est).', // ALTA
+  'fr.dict.hom.son': '“son” means “his/her”; “sont” is the verb être (ils sont).', // ALTA
+  'fr.dict.hom.ou': '“ou” means “or”; “où” means “where”.', // ALTA
+  'fr.dict.hom.on': '“on” is a pronoun (“we”, “one”); “ont” is the verb avoir (ils ont).', // MÉDIA -- "a gente" vira "we/one"
+  'fr.dict.hom.la': '“la” is an article or a pronoun; “là” means “there”.', // ALTA
+  'fr.dict.hom.ce': '“ce” is a demonstrative (“this/that”); “se” is a reflexive pronoun (il se lève).', // ALTA
+  'fr.dict.hom.ces': '“ces” = “these/those”; “ses” = “his/her” (plural); “c\'est” = “it is/this is”; “s\'est” = pronoun + être (il s\'est levé).', // ALTA
+  'fr.dict.hom.mes': '“mes” means “my” (plural); “mais” means “but”.', // ALTA
+  'fr.dict.hom.peu': '“peu” means “little, not much”; “peux”/“peut” are forms of pouvoir (je peux, il peut).', // ALTA
+  'fr.dict.hom.leur': '“leurs” goes before a plural noun; “leur” before a singular noun or as a pronoun (je leur parle).', // ALTA
+  'fr.dict.hom.quel': 'Same pronunciation: “quel” changes with the gender and number of the noun.', // ALTA
 };

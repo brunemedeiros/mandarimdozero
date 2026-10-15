@@ -641,3 +641,7 @@ Para iniciar uma etapa, a dona (ou outro projeto) pode usar:
 ## 15. Histórico deste documento
 
 - 2026-10-08: versão inicial, a partir das decisões D-01 a D-11.
+
+
+## Decisão da dona (2026-10-15): regra aberta dos idiomas no banco
+Adiar a troca das 15 listas fixas de idioma (Q-06/Dv-4) até o QUARTO idioma, que será **estudar inglês através do português** (curso `ingles@pt-BR`: idioma estudado `en`, idioma do site `pt-BR`). Até lá `frances`, `mandarim` e `portugues` já passam nos CHECK. Atenção ao planejar esse quarto idioma: é o primeiro curso com o site em português e idioma estudado novo, e a família do idioma estudado (inglês) é germânica, não latina nem logográfica.

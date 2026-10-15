@@ -93,6 +93,8 @@ const resendFromEmail = Deno.env.get('RESEND_FROM_EMAIL');
 const LANGUAGES = [
   { appKey: 'frances', id: 'fr' },
   { appKey: 'mandarim', id: 'zh' },
+  // E6 (2026-10-15): português. O progresso mora em `portugues@en` (registro: legacyStorage []); blockForLanguage já acha.
+  { appKey: 'portugues', id: 'pt' },
 ];
 
 // Mesmos valores de ADMIN_EMAIL (languages/<lang>/app.js) e
@@ -485,11 +487,14 @@ function uiLangFor(userId: string): string {
   return UI_LANG_BY_USER.get(userId) === 'en' ? 'en' : 'pt-BR';
 }
 
-// Escolhe a variante no idioma do site; se esse idioma não tiver variante
-// ATIVA para o evento (ex.: inglês ainda inativo/sem tradução), cai pro pt-BR.
+// Escolhe a variante no idioma do site. Decisão da dona (2026-10-15, vale para fr, zh e pt): site em inglês sem variante
+// ATIVA em inglês para o evento = SEM aviso (nunca cai no texto em português). Mesma regra de shared/notifications.js.
+function templateLangsFor(uiLang: string): string[] {
+  return uiLang === 'en' ? ['en'] : ['pt-BR'];
+}
+
 async function pickFromPool(supabase: any, channel: string, userId: string, eventType: string, languageAppKey: string): Promise<any> {
-  const uiLang = uiLangFor(userId);
-  for (const lang of uiLang === 'pt-BR' ? ['pt-BR'] : [uiLang, 'pt-BR']) {
+  for (const lang of templateLangsFor(uiLangFor(userId))) {
     const { data, error } = await supabase
       .from('notification_templates')
       .select('*')
@@ -761,7 +766,8 @@ async function processFeaturedBadgeReminders(
     if (!eligible) continue;
 
     const state = progressByUserId.get(userId);
-    const languageAppKey = blockForLanguage(state, 'frances') ? 'frances' : (blockForLanguage(state, 'mandarim') ? 'mandarim' : 'frances');
+    // E6/T5: idioma principal da conta (portugues incluído); 'frances' só para quem não tem bloco nenhum.
+    const languageAppKey = primaryLanguageAppKey(state) ?? 'frances';
     if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'featured_badge_reminder', 'perfil', {}, 'profile-edit')) created++;
   }
   return created;

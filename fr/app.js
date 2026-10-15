@@ -2157,12 +2157,11 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
     // onze" = "soixante-et-onze") -- só a grafia do separador, nunca deve
     // custar o ponto de quem sabe a palavra. Acento errado continua "Quase!".
     const forms = [expected, ...(ex.alt || [])];
-    const canonSep = s => s.normalize('NFC').toLowerCase().trim().replace(/[\s\-‐‑–']+/g, ' ');
-    const looseSep = s => normalizeLoose(s).replace(/[\s\-‐‑–']+/g, ' ');
-    if (forms.some(f => canonSep(given) === canonSep(f))){
+    const sepResult = latinaFr().avaliarComSeparadores(given, forms);
+    if (sepResult === 'ok'){
       wrapEl.classList.add('ok');
       STEP_STATE.gramExerciseScore += 1;
-    } else if (forms.some(f => looseSep(given) === looseSep(f))){
+    } else if (sepResult === 'almost'){
       wrapEl.classList.add('almost');
       expectedEl.textContent = t('feedback.almostArrow', { expected });
       STEP_STATE.gramExerciseScore += 0.5;
@@ -3206,43 +3205,35 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 // pede pra digitar de ouvido uma palavra ainda não exposta.
 // Ninguém tem acento fácil de digitar num teclado físico/mobile padrão --
 // isso dá um jeito de inserir a letra certa sem precisar trocar de layout
-// de teclado. Importante: o acento NÃO é exigido pra acertar (normalizeLoose
-// já remove diacríticos dos dois lados antes de comparar, ver strip() nos
+// de teclado. Importante: o acento NÃO é exigido pra acertar (a comparação
+// já remove diacríticos dos dois lados, ver lessonTypedAnswerResult nos
 // dois exercícios abaixo) -- isso é só pra quem quer treinar digitando com o
 // acento certo mesmo, não um requisito escondido. Minúsculas só (a
 // comparação já ignora maiúscula/minúscula) -- mesmo espírito do
 // PINYIN_TONE_GROUPS em zh/app.js, adaptado pro alfabeto francês.
-const FR_ACCENT_GROUPS = [
-  ['à', 'â'],
-  ['ç'],
-  ['é', 'è', 'ê', 'ë'],
-  ['î', 'ï'],
-  ['ô', 'œ'],
-  ['ù', 'û', 'ü'],
-];
-
+// Família latina, fase 2: as letras do teclado estão em LANG_HOOKS.familiaLatina.gruposDeAcentos
+// (fr/lang-hooks.js) e a marcação/inserção, em shared/core/familias/latina.js. As classes
+// continuam fr-accent-* (o CSS e as capturas de tela não mudam).
 function frAccentPickerHTML(){
-  return `<div class="fr-accent-picker">${FR_ACCENT_GROUPS.map(group => `
-    <div class="fr-accent-group">${group.map(ch => `<button type="button" class="fr-accent-key">${ch}</button>`).join('')}</div>
-  `).join('')}</div>`;
+  return latinaFr().htmlTecladoDeAcentos();
 }
 
-// Insere no CURSOR (não sempre no final) -- dá pra corrigir só a letra que
-// falta o acento no meio da palavra sem apagar o resto e redigitar.
+// Escreve a tecla no campo: insere no CURSOR (não sempre no final) -- dá pra
+// corrigir só a letra que falta o acento no meio da palavra sem apagar o resto.
+function insertAccentAtCursor(inputEl, ch){
+  const r = FamiliaLatina.inserirNoCursor(inputEl.value, inputEl.selectionStart, inputEl.selectionEnd, ch);
+  inputEl.value = r.value;
+  inputEl.focus();
+  inputEl.setSelectionRange(r.cursor, r.cursor);
+}
+
 function wireFrAccentPicker(pickerEl, inputEl){
   if (!pickerEl || !inputEl) return;
   pickerEl.querySelectorAll('.fr-accent-key').forEach(btn => {
     // Não deixa o toque na tecla tirar o foco/cursor do campo (no celular
     // isso fechava e reabria o teclado).
     btn.addEventListener('mousedown', e => e.preventDefault());
-    btn.addEventListener('click', () => {
-      const start = inputEl.selectionStart ?? inputEl.value.length;
-      const end = inputEl.selectionEnd ?? inputEl.value.length;
-      const ch = btn.textContent;
-      inputEl.value = inputEl.value.slice(0, start) + ch + inputEl.value.slice(end);
-      inputEl.focus();
-      inputEl.setSelectionRange(start + ch.length, start + ch.length);
-    });
+    btn.addEventListener('click', () => insertAccentAtCursor(inputEl, btn.textContent));
   });
 }
 
@@ -3271,7 +3262,6 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   const inputEl = document.getElementById('vocab-type-input');
   inputEl.focus();
   wireFrAccentPicker(contentEl.querySelector('.fr-accent-picker'), inputEl);
-  const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
 
   function lockInputs(){
     inputEl.disabled = true;
@@ -3280,19 +3270,21 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
+  // isCorrect: true | false | 'quase' (só "oe" no lugar de "œ": meio ponto, mostra a forma certa).
   function finish(isCorrect){
+    const almost = isCorrect === 'quase';
     STEP_STATE.exerciseAnswered = true;
-    playFeedbackSound(isCorrect);
+    playFeedbackSound(!!isCorrect);
     lockInputs();
 
     if (isCorrect){
-      STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
+      STEP_STATE.exerciseScore += almost ? 0.5 : 1;
+      addXP(exerciseXP(ex, almost ? 2 : 4)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
       registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
       addStudyMinutes();
       // Detalhe extra vale a pena aqui -- o exercício testou só o som da
       // palavra, a forma escrita em francês nunca apareceu na tela antes.
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, `<strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)}`), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, `${almost ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>` : ''}<strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)}`), 500);
     } else {
       // A resposta certa já aparece dentro do próprio painel de resultado
       // (answerExplanationHTML mostra ex.item.f) -- sem repetir aqui como um
@@ -3308,8 +3300,8 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     if (STEP_STATE.exerciseAnswered) return;
     // Vocabulário com forma dupla (ex: "un / une") -- qualquer uma das duas
     // conta como resposta completa, não só a string inteira com a barra.
-    const typed = strip(inputEl.value);
-    finish(acceptedForms(ex.item.f).some(form => strip(form) === typed));
+    const result = lessonTypedAnswerResult(inputEl.value, ex.item.f);
+    finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false);
   });
 
   wireDontKnowButton(contentEl, ex, () => {
@@ -3438,16 +3430,20 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
+  // isCorrect: true | false | 'quase' (lacuna digitada com "oe" no lugar de "œ": meio ponto, mostra a forma certa).
   function finish(isCorrect){
+    const almost = isCorrect === 'quase';
     STEP_STATE.exerciseAnswered = true;
-    playFeedbackSound(isCorrect);
+    playFeedbackSound(!!isCorrect);
     revealBlank(isCorrect ? 'ok' : 'wrong');
 
     if (isCorrect){
-      STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4));
+      STEP_STATE.exerciseScore += almost ? 0.5 : 1;
+      addXP(exerciseXP(ex, almost ? 2 : 4));
       addStudyMinutes();
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, clozeFeedbackDetailHTML(ex, false)), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, almost
+        ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>${clozeFeedbackDetailHTML(ex, true)}`
+        : clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
@@ -3467,9 +3463,8 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     document.getElementById('cloze-verify-btn').addEventListener('click', () => {
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
-      const strip = s => normalizeLoose(s).replace(/[.,!?;:'"]/g, '').trim();
-      const typed = strip(inputEl.value);
-      finish(acceptedForms(ex.correctBlock.f).some(form => strip(form) === typed));
+      const result = lessonTypedAnswerResult(inputEl.value, ex.correctBlock.f);
+      finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false);
     });
   } else {
     contentEl.querySelectorAll('.cloze-option').forEach(btn => {
@@ -5213,25 +5208,9 @@ function conjOtherFormOf(verb, tenseKey, given, accepted){
 }
 
 // Alinhamento letra a letra (distância de edição), como no Jogo de Conjugações.
+// Família latina, fase 2: a conta mora em shared/core/familias/latina.js (alinharLetras).
 function conjAlign(a, b){
-  const A = [...(a || '')], B = [...(b || '')], la = A.map(c => c.toLowerCase()), lb = B.map(c => c.toLowerCase());
-  const n = A.length, m = B.length, d = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
-  for (let x = 0; x <= n; x++) d[x][0] = x;
-  for (let y = 0; y <= m; y++) d[0][y] = y;
-  for (let x = 1; x <= n; x++) for (let y = 1; y <= m; y++)
-    d[x][y] = Math.min(d[x - 1][y - 1] + (la[x - 1] === lb[y - 1] ? 0 : 1), d[x - 1][y] + 1, d[x][y - 1] + 1);
-  const ops = [];
-  let x = n, y = m;
-  while (x > 0 || y > 0){
-    if (x > 0 && y > 0 && d[x][y] === d[x - 1][y - 1] + (la[x - 1] === lb[y - 1] ? 0 : 1)){
-      ops.push({ t: la[x - 1] === lb[y - 1] ? 'same' : 'sub', a: A[x - 1] }); x--; y--;
-    } else if (x > 0 && d[x][y] === d[x - 1][y] + 1){
-      ops.push({ t: 'extra', a: A[x - 1] }); x--;
-    } else {
-      ops.push({ t: 'missing' }); y--;
-    }
-  }
-  return { ops: ops.reverse(), cost: d[n][m] };
+  return FamiliaLatina.alinharLetras(a, b);
 }
 
 // O que a pessoa digitou, com só as letras erradas em vermelho; o traço
@@ -5297,7 +5276,7 @@ function conjExampleHTML(tenseKey){
   return `<span class="conj-ex" lang="fr">${fr}</span>${ex.t && ptSite ? `<span class="conj-ex-tr">${escapeHTML(ex.t)}</span>` : ''}`;
 }
 
-const conjFold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+const conjFold = s => FamiliaLatina.dobrarBusca(s); // família latina (shared/core/familias/latina.js)
 
 // Busca pelo infinitivo (fr) ou pela tradução (pt), sem acento: "etre" acha être, "comer" acha manger.
 // Ordem: igual > começa com > contém; empate pelo verbo mais comum.
@@ -5609,8 +5588,23 @@ function getConjForms(verb, tense){
 // exercícios digitados de vocabulário/cloze/conjugação) -- preservado sem
 // alteração. Só o pinyin do chinês (zh/app.js) tinha esse mesmo padrão
 // aplicado errado -- ver normalizePinyinAnswer lá, tom não é decoração.
+// Família latina, fase 2 (docs/i18n/familia-latina-modulo.md): as regras moram em
+// shared/core/familias/latina.js; a configuração do francês, em LANG_HOOKS.familiaLatina (fr/lang-hooks.js).
 function normalizeLoose(str){
-  return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  return FamiliaLatina.normalizarFrouxo(str);
+}
+
+// Uma instância do módulo por página, criada no primeiro uso (o lang-hooks.js e o módulo já carregaram).
+let _latinaFr = null;
+function latinaFr(){
+  return _latinaFr || (_latinaFr = FamiliaLatina.criar(LANG_HOOKS.familiaLatina));
+}
+
+// Exercícios de digitar da trilha ("Digite o que ouviu" e a lacuna digitada): 'ok' | 'quase' | 'errou'.
+// Acento não conta (como sempre); "oe" por "œ" = 'quase' (decisão da dona, 2026-10-15); o apóstrofo
+// curvo do celular (’) é ignorado nos dois exercícios (antes só no "Digite o que ouviu").
+function lessonTypedAnswerResult(typed, expected){
+  return latinaFr().avaliarRespostaDigitada(typed, expected, FamiliaLatina.PONTUACAO_VOCAB_RE);
 }
 
 // END accent-answer-logic
@@ -5723,10 +5717,7 @@ function renderConjPracticeStep(){
     btn.addEventListener('mousedown', e => e.preventDefault());
     btn.addEventListener('click', () => {
       if (!lastInput) return;
-      const a = lastInput.selectionStart ?? lastInput.value.length, z = lastInput.selectionEnd ?? lastInput.value.length;
-      lastInput.value = lastInput.value.slice(0, a) + btn.textContent + lastInput.value.slice(z);
-      lastInput.focus();
-      lastInput.setSelectionRange(a + btn.textContent.length, a + btn.textContent.length);
+      insertAccentAtCursor(lastInput, btn.textContent);
     });
   });
 
@@ -6215,269 +6206,71 @@ function openDictationPlayer(id){
 //    vale meio ponto e a tela explica o que faltou.
 // Pontuação não desconta ponto (só é marcada); número em dígito é aceito e a
 // tela mostra a escrita por extenso.
+// Família latina, fase 2 (docs/i18n/familia-latina-modulo.md): a correção mora em
+// shared/core/familias/latina.js; os dados do francês (pontuação falada, números,
+// homófonos, concordância) e as explicações (catálogo de tradução, t()) estão em
+// LANG_HOOKS.familiaLatina (fr/lang-hooks.js). Os nomes abaixo continuam os mesmos.
+// Mudanças autorizadas pela dona (2026-10-15): número em dígito que o próprio texto
+// escreve em dígito fica como está; dois erros leves na mesma palavra (reason
+// 'multiple', com a lista em `reasons`) citam os dois; a explicação sai no idioma do site.
 function normalizeDictationWord(w){
-  return w
-    .toLowerCase()
-    .normalize('NFC') // acentos digitados como sequência decomposta (a + ` )
-                       // via alguns teclados/IMEs viram a mesma forma que os
-                       // do texto original, em vez de "diferentes" por baixo.
-    .replace(/[‘’ʼ´`′]/g, "'") // apóstrofos/aspas do autocorretor do celular
-    .replace(/[‐‑‒]/g, '-')    // hífens especiais do teclado do celular
-    .replace(/[.,!?;:"()«»…—–]/g, '');
+  return latinaFr().normalizarPalavraDitado(w);
 }
 function dictLooseNorm(w){
-  return normalizeDictationWord(w)
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/œ/g, 'oe').replace(/æ/g, 'ae')
-    .replace(/['-]/g, '');
+  return latinaFr().palavraFrouxaDitado(w);
 }
 function dictLightReason(cs, us){
-  const nh = s => s.replace(/-/g, ''), na = s => s.replace(/'/g, '');
-  const lig = s => s.replace(/œ/g, 'oe').replace(/æ/g, 'ae');
-  const nd = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
-  if (nh(cs) === nh(us)) return 'hyphen';
-  if (na(cs) === na(us)) return 'apostrophe';
-  if (lig(cs) === lig(us)) return 'ligature';
-  if (nd(cs) === nd(us)) return 'accent';
-  return 'spelling';
+  return latinaFr().motivoErroLeve(cs, us);
 }
-
-const DICT_FR_UNITS = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];
 function frenchNumberWords(n){
-  if (!Number.isInteger(n) || n < 0 || n > 100) return null;
-  if (n <= 16) return DICT_FR_UNITS[n];
-  if (n < 20) return 'dix-' + DICT_FR_UNITS[n - 10];
-  if (n === 100) return 'cent';
-  const tens = { 2:'vingt', 3:'trente', 4:'quarante', 5:'cinquante', 6:'soixante' };
-  if (n < 70){
-    const t = Math.floor(n / 10), u = n % 10;
-    if (u === 0) return tens[t];
-    if (u === 1) return tens[t] + ' et un';
-    return tens[t] + '-' + DICT_FR_UNITS[u];
-  }
-  if (n < 80){
-    const r = n - 60;
-    if (r === 11) return 'soixante et onze';
-    return 'soixante-' + (r < 17 ? DICT_FR_UNITS[r] : 'dix-' + DICT_FR_UNITS[r - 10]);
-  }
-  const r = n - 80;
-  if (r === 0) return 'quatre-vingts';
-  return 'quatre-vingt-' + (r < 17 ? DICT_FR_UNITS[r] : 'dix-' + DICT_FR_UNITS[r - 10]);
+  return LANG_HOOKS.familiaLatina.numeroPorExtenso(n);
 }
-
-// A áudio dita a pontuação por extenso ("virgule", "point"...). Quem escreve
-// a palavra em vez do sinal comete um erro leve (a tela avisa).
-const DICT_SPOKEN_PUNCT = [
-  [/point[\s-]+d'\s*interrogation/gi, '?', "point d'interrogation"],
-  [/point[\s-]+d'\s*exclamation/gi, '!', "point d'exclamation"],
-  [/point[\s-]*virgule/gi, ';', 'point-virgule'],
-  [/deux[\s-]+points/gi, ':', 'deux points'],
-  [/\bvirgule\b/gi, ',', 'virgule'],
-  [/\bpoint\b/gi, '.', 'point']
-];
 
 // Limpa o que o teclado do celular costuma bagunçar, antes de comparar.
 function prepareDictationUserText(text, refText){
-  let t = String(text || '')
-    .replace(/[​-‍⁠﻿]/g, '')
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
-    .replace(/[‘’ʼ´`′]/g, "'")
-    .replace(/[‐‑‒]/g, '-')
-    .replace(/'\s+(?=\p{L})/gu, "'")                // "j' ai" -> "j'ai"
-    .replace(/(\p{L})([.!?;,])(?=\p{L})/gu, '$1$2 '); // "Sophie.J'ai" -> "Sophie. J'ai"
-  const refLower = String(refText || '').toLowerCase();
-  const spokenPunct = [];
-  for (const [re, symbol, said] of DICT_SPOKEN_PUNCT){
-    if (new RegExp(said.replace(/[-\s']+/g, '[-\\s\']+'), 'i').test(refLower)) continue; // palavra faz parte do texto
-    t = t.replace(re, () => { spokenPunct.push({ said, symbol }); return ' ' + symbol + ' '; });
-  }
-  const digitNotes = [];
-  t = t.replace(/(^|[\s(«"])(\d{1,3})(?=$|[\s.,!?;:)»"])/g, (m, pre, digits) => {
-    const words = frenchNumberWords(parseInt(digits, 10));
-    if (!words) return m;
-    digitNotes.push({ digits, words });
-    return pre + words;
-  });
-  return { text: t, spokenPunct, digitNotes };
+  return latinaFr().prepararTextoDitado(text, refText);
 }
 
 // Separa as palavras reais da pontuação "solta" (ex: "!" ou "?" digitados
 // com espaço antes, como manda a tipografia francesa). A pontuação solta
 // não participa do alinhamento: fica anexada à palavra anterior.
 function tokenizeDictationText(text){
-  const rawWords = text.trim().split(/\s+/).filter(w => w.length);
-  const words = [], strictWords = [], looseWords = [], punctAfter = [];
-  for (const w of rawWords){
-    const loose = dictLooseNorm(w);
-    if (loose === ''){
-      if (words.length > 0){
-        punctAfter[words.length - 1] = (punctAfter[words.length - 1] ? punctAfter[words.length - 1] + ' ' : '') + w;
-      }
-      continue;
-    }
-    words.push(w);
-    strictWords.push(normalizeDictationWord(w));
-    looseWords.push(loose);
-    punctAfter.push('');
-  }
-  return { words, strictWords, looseWords, normWords: looseWords, punctAfter };
+  return latinaFr().tokenizarDitado(text);
 }
 
 // "vingt cinq" digitado no lugar de "vingt-cinq": junta as palavras do aluno
 // (sem hífen, então conta como erro leve de hífen e não como 2 erros).
 function mergeSplitCompoundWords(userTok, refTok){
-  const targets = new Set();
-  refTok.words.forEach((w, i) => { if (refTok.strictWords[i].includes('-')) targets.add(refTok.looseWords[i]); });
-  if (!targets.size) return userTok;
-  const out = { words: [], strictWords: [], looseWords: [], punctAfter: [] };
-  let i = 0;
-  while (i < userTok.words.length){
-    let merged = false;
-    for (let k = 4; k >= 2 && !merged; k--){
-      if (i + k > userTok.words.length) continue;
-      if (!targets.has(userTok.looseWords.slice(i, i + k).join(''))) continue;
-      let ok = true;
-      for (let t = i; t < i + k - 1; t++) if (userTok.punctAfter[t]) ok = false;
-      if (!ok) continue;
-      out.words.push(userTok.words.slice(i, i + k).join(''));
-      out.strictWords.push(userTok.strictWords.slice(i, i + k).join(''));
-      out.looseWords.push(userTok.looseWords.slice(i, i + k).join(''));
-      out.punctAfter.push(userTok.punctAfter[i + k - 1]);
-      i += k; merged = true;
-    }
-    if (merged) continue;
-    out.words.push(userTok.words[i]); out.strictWords.push(userTok.strictWords[i]);
-    out.looseWords.push(userTok.looseWords[i]); out.punctAfter.push(userTok.punctAfter[i]);
-    i++;
-  }
-  out.normWords = out.looseWords;
-  return out;
+  return latinaFr().juntarCompostos(userTok, refTok);
 }
-
-const DICT_MARKS_RE = /[.,!?;:…]/g;
-function dictMarksOf(s){ return ((s || '').match(DICT_MARKS_RE) || []).join(''); }
 
 // Alinha as palavras do texto certo com as que o aluno digitou via LCS
 // (mesma ideia de um diff de texto), pra marcar acertos/erros mesmo quando
 // o aluno pula ou adianta uma palavra, sem desalinhar o resto da frase.
 function diffDictationWords(correctText, userText){
-  const correctTok = tokenizeDictationText(correctText);
-  const userTok = mergeSplitCompoundWords(tokenizeDictationText(userText), correctTok);
-  const cn = correctTok.looseWords, un = userTok.looseWords;
-  const n = cn.length, m = un.length;
-  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
-  for (let i = n - 1; i >= 0; i--){
-    for (let j = m - 1; j >= 0; j--){
-      dp[i][j] = cn[i] === un[j] ? dp[i+1][j+1] + 1 : Math.max(dp[i+1][j], dp[i][j+1]);
-    }
-  }
-  const missingMarksFor = (i, j) => {
-    const pool = (dictMarksOf(userTok.words[j]) + dictMarksOf(userTok.punctAfter[j])).split('');
-    let missing = '';
-    for (const ch of (dictMarksOf(correctTok.words[i]) + dictMarksOf(correctTok.punctAfter[i]))){
-      const at = pool.indexOf(ch);
-      if (at >= 0) pool.splice(at, 1); else missing += ch;
-    }
-    return missing;
-  };
-  const matchItem = (i, j) => {
-    const light = correctTok.strictWords[i] !== userTok.strictWords[j];
-    return {
-      type: 'match', word: correctTok.words[i], punctAfter: correctTok.punctAfter[i],
-      light, userWord: userTok.words[j],
-      reason: light ? dictLightReason(correctTok.strictWords[i], userTok.strictWords[j]) : null,
-      missingMarks: missingMarksFor(i, j)
-    };
-  };
-  let i = 0, j = 0;
-  const result = [];
-  while (i < n && j < m){
-    if (cn[i] === un[j]){ result.push(matchItem(i, j)); i++; j++; }
-    else if (dp[i+1][j] >= dp[i][j+1]){ result.push({ type: 'miss', word: correctTok.words[i], punctAfter: correctTok.punctAfter[i] }); i++; }
-    else { result.push({ type: 'extra', word: userTok.words[j] }); j++; }
-  }
-  while (i < n){ result.push({ type: 'miss', word: correctTok.words[i], punctAfter: correctTok.punctAfter[i] }); i++; }
-  while (j < m){ result.push({ type: 'extra', word: userTok.words[j] }); j++; }
-  return result;
+  return latinaFr().diffDitado(correctText, userText);
 }
 
 // Junta um "miss" (palavra certa que faltou) adjacente a um "extra" (palavra
 // errada que o aluno digitou) numa única substituição.
 function mergeDictationDiff(diff){
-  const merged = [];
-  let i = 0;
-  while (i < diff.length){
-    const cur = diff[i];
-    const next = diff[i + 1];
-    if (next && ((cur.type === 'miss' && next.type === 'extra') || (cur.type === 'extra' && next.type === 'miss'))){
-      const wrong = cur.type === 'extra' ? cur.word : next.word;
-      const correct = cur.type === 'miss' ? cur.word : next.word;
-      const punctAfter = cur.type === 'miss' ? cur.punctAfter : next.punctAfter;
-      merged.push({ type: 'sub', wrong, correct, punctAfter });
-      i += 2;
-      continue;
-    }
-    merged.push(cur);
-    i++;
-  }
-  return merged;
+  return latinaFr().juntarDiff(diff);
 }
 
 // Corrige um ditado inteiro. Nota: acerto exato = 1 ponto; erro leve = 0,5;
 // palavra a mais (que não é troca) e pontuação escrita por extenso = -0,5.
 // Pontuação faltando e número em dígito não descontam nada.
 function evaluateDictation(refText, userText){
-  const prep = prepareDictationUserText(userText, refText);
-  const diff = diffDictationWords(refText, prep.text);
-  const merged = mergeDictationDiff(diff);
-  const total = tokenizeDictationText(refText).words.length;
-  const exact = diff.filter(x => x.type === 'match' && !x.light).length;
-  const light = diff.filter(x => x.type === 'match' && x.light).length;
-  const extras = merged.filter(x => x.type === 'extra').length;
-  const missingMarks = diff.filter(x => x.type === 'match' && x.missingMarks).length;
-  const points = exact + 0.5 * light - 0.5 * extras - 0.5 * prep.spokenPunct.length;
-  const score = total > 0 ? Math.max(0, Math.min(100, Math.round((points / total) * 100))) : 0;
-  return { merged, total, exact, light, extras, missingMarks, score,
-           spokenPunct: prep.spokenPunct, digitNotes: prep.digitNotes };
+  return latinaFr().avaliarDitado(refText, userText);
 }
 
 // ---- Fatia 2: explicar o tipo de erro (só explicativo, NÃO muda a nota) ----
 // Conservador de propósito: só nomeia o erro quando há alta confiança.
-// Homófonos clássicos do francês (soam igual ou quase, escrita diferente).
-const DICT_HOMOPHONE_GROUPS = [
-  { words: ['a', 'à'], note: '«a» é o verbo avoir (il a); «à» é preposição (à Paris).' },
-  { words: ['et', 'est'], note: '«et» quer dizer "e"; «est» é o verbo être (il est).' },
-  { words: ['son', 'sont'], note: '«son» quer dizer "seu/sua"; «sont» é o verbo être (ils sont).' },
-  { words: ['ou', 'où'], note: '«ou» quer dizer "ou"; «où» quer dizer "onde".' },
-  { words: ['on', 'ont'], note: '«on» é pronome ("a gente"); «ont» é o verbo avoir (ils ont).' },
-  { words: ['la', 'là'], note: '«la» é artigo ou pronome; «là» quer dizer "lá/aí".' },
-  { words: ['ce', 'se'], note: '«ce» é demonstrativo ("isto/este"); «se» é pronome reflexivo (il se lève).' },
-  { words: ['ces', 'ses', "c'est", "s'est"], note: '«ces» = "estes/estas"; «ses» = "seus/suas"; «c\'est» = "é/isto é"; «s\'est» = pronome + être (il s\'est levé).' },
-  { words: ['mes', 'mais'], note: '«mes» quer dizer "meus/minhas"; «mais» quer dizer "mas".' },
-  { words: ['peu', 'peux', 'peut'], note: '«peu» quer dizer "pouco"; «peux»/«peut» são do verbo pouvoir (je peux, il peut).' },
-  { words: ['leur', 'leurs'], note: '«leurs» vai antes de substantivo no plural; «leur» antes de singular ou como pronome (je leur parle).' },
-  { words: ['quel', 'quelle', 'quels', 'quelles'], note: 'Mesma pronúncia: «quel» muda conforme o gênero e o número do substantivo.' }
-];
-function dictBareWord(w){
-  return normalizeDictationWord(String(w || '')).replace(/[«»"()\[\]]/g, '').trim();
-}
 // Devolve { kind: 'homophone'|'agreement'|'other', noteText } para uma troca
 // (token "sub"): refWord = palavra do texto, userWord = o que o aluno digitou.
-function dictBareWordRaw(w){ return String(w || '').replace(/^[^\p{L}]+/u, ''); }
 function classifyDictationError(refWord, userWord){
-  const r = dictBareWord(refWord), u = dictBareWord(userWord);
-  const shown = String(refWord || '').replace(/[.,!?;:…«»"()]+/g, '');
-  const typed = String(userWord || '').replace(/[.,!?;:…«»"()]+/g, '');
-  if (r && u && r !== u){
-    const g = DICT_HOMOPHONE_GROUPS.find(gr => gr.words.includes(r) && gr.words.includes(u));
-    if (g) return { kind: 'homophone', noteText: `«${shown}» (você escreveu «${typed}»): palavras que soam parecido. ${g.note}` };
-    const [shorter, longer] = r.length <= u.length ? [r, u] : [u, r];
-    const suffix = longer.slice(shorter.length);
-    if (shorter.length >= 3 && longer.startsWith(shorter) && ['e', 's', 'es', 'x'].includes(suffix) && /^\p{L}+$/u.test(longer) && !/^\p{Lu}/u.test(dictBareWordRaw(refWord))){
-      return { kind: 'agreement', noteText: `«${shown}» (você escreveu «${typed}»): a diferença está só na terminação (-${suffix}). Se for uma palavra que concorda, confira gênero, número ou conjugação com o resto da frase; senão, pode ser só um deslize de digitação.` };
-    }
-  }
-  return { kind: 'other', noteText: `«${shown}»: palavra diferente da esperada (você escreveu «${typed}»).` };
+  const r = latinaFr().classificarErroDitado(refWord, userWord);
+  return { kind: r.kind, noteText: r.noteText };
 }
 
 // ---- Fatia 2: progresso por ditado (puro, sem STATE) ----
@@ -6591,28 +6384,19 @@ function dictationScoreColorVar(score){
 
 function dictationWordHtml(word, punctAfter, missingMarks, cls, title){
   const esc = escapeHtmlDictation;
-  const t = title ? ` title="${esc(title)}"` : '';
+  const titleAttr = title ? ` title="${esc(title)}"` : '';
   if (!missingMarks){
-    return `<span class="${cls}"${t}>${esc(word)}</span>${punctAfter ? ' ' + esc(punctAfter) : ''}`;
+    return `<span class="${cls}"${titleAttr}>${esc(word)}</span>${punctAfter ? ' ' + esc(punctAfter) : ''}`;
   }
   const m = word.match(/^(.*?)([.,!?;:…]+)$/);
   const core = m ? m[1] : word, trail = m ? m[2] : '';
-  return `<span class="${cls}"${t}>${esc(core)}</span><span class="dictation-punct-missing" title="Faltou este sinal (não desconta pontos)">${esc(trail)}${punctAfter ? ' ' + esc(punctAfter) : ''}</span>`;
+  return `<span class="${cls}"${titleAttr}>${esc(core)}</span><span class="dictation-punct-missing" title="${esc(t('fr.dict.punctMissing'))}">${esc(trail)}${punctAfter ? ' ' + esc(punctAfter) : ''}</span>`;
 }
 
+// Explicação do erro leve (hífen, apóstrofo, ligadura, acento, ou mais de um na
+// mesma palavra), no idioma do site: shared/core/familias/latina.js + t().
 function dictationLightNoteText(x){
-  const core = x.word.replace(/[.,!?;:…]+$/, '');
-  const you = `você escreveu «${x.userWord.replace(/[.,!?;:…]+$/, '')}»`;
-  switch (x.reason){
-    case 'hyphen': return `«${core}» leva hífen (${you}).`;
-    case 'apostrophe': return `«${core}» leva apóstrofo (${you}).`;
-    case 'ligature': return `«${core}» usa a letra «œ», que é uma só (${you}).`;
-    case 'accent': {
-      const h = classifyDictationError(x.word, x.userWord);
-      return `«${core}»: confira os acentos (${you}).` + (h.kind === 'homophone' ? ' ' + h.noteText.replace(/^.*?parecido\. /, '') : '');
-    }
-    default: return `«${core}»: pequena diferença de grafia (${you}).`;
-  }
+  return latinaFr().textoErroLeve(x);
 }
 
 function renderDictationResult(d, userText){
@@ -8630,26 +8414,25 @@ function checkListenTranslateAnswer(c){
 // BEGIN accent-challenge-logic (extraído literalmente por fr/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
 // Correção sensível a acentos/cedilha/trema -- nunca remove diacríticos
 // antes de comparar (só normaliza espaço/maiúsculas, que não são o alvo
-// da atividade).
+// da atividade). Família latina, fase 2: as regras moram em
+// shared/core/familias/latina.js (configuração do fr em LANG_HOOKS.familiaLatina).
 function normalizeForAccentCompare(s){
-  return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  return FamiliaLatina.normalizarParaAcentuacao(s);
 }
 
 function isAccentAnswerCorrect(studentAnswer, targetText){
-  return normalizeForAccentCompare(studentAnswer) === normalizeForAccentCompare(targetText);
+  return FamiliaLatina.acentuacaoCerta(studentAnswer, targetText);
 }
 
 function stripDiacriticsForAccentCompare(s){
-  return normalizeForAccentCompare(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return FamiliaLatina.semAcentoParaAcentuacao(s);
 }
 
-// 'ok' = igual; 'partial' = só o acento/cedilha/trema difere (erro leve,
-// conclui); 'fail' = palavra diferente ou vazio (erro total, não conclui).
+// 'ok' = igual; 'partial' = só o acento/cedilha/trema difere, ou "oe" no lugar
+// de "œ" (decisão da dona, 2026-10-15) -- erro leve, conclui; 'fail' = palavra
+// diferente ou vazio (erro total, não conclui).
 function accentAnswerOutcome(studentAnswer, targetText){
-  if (isAccentAnswerCorrect(studentAnswer, targetText)) return 'ok';
-  const typed = stripDiacriticsForAccentCompare(studentAnswer);
-  if (typed && typed === stripDiacriticsForAccentCompare(targetText)) return 'partial';
-  return 'fail';
+  return latinaFr().resultadoAcentuacao(studentAnswer, targetText);
 }
 // END accent-challenge-logic
 
