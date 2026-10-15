@@ -121,9 +121,20 @@ function carregarNovo() {
   });
 }
 
+// t() de um catálogo de shared/i18n (com o pt-BR como reserva, como o i18n.js faz).
+function tDoCatalogo(lang) {
+  const sb = { window: {} }; sb.window = sb;
+  vm.runInNewContext(ler('shared/i18n/pt-BR.js'), sb);
+  if (lang !== 'pt-BR') vm.runInNewContext(ler('shared/i18n/' + lang + '.js'), sb);
+  const cat = Object.assign({}, sb.I18N_CATALOG['pt-BR'], sb.I18N_CATALOG[lang] || {});
+  return (k, p) => (k in cat) ? String(cat[k]).replace(/\{(\w+)\}/g, (m, x) => (p && p[x] !== undefined && p[x] !== null) ? String(p[x]) : m) : k;
+}
+
 // Configuração do francês como a página usa (fr/lang-hooks.js), para os testes do módulo.
-function configFr() {
+// lang = idioma do SITE dos textos de explicação ('pt-BR' padrão, ou 'en').
+function configFr(lang) {
   const ctx = installT({});
+  if (lang) ctx.t = tDoCatalogo(lang);
   vm.createContext(ctx);
   vm.runInContext(ler('fr/lang-hooks.js').replace('const LANG_HOOKS', 'var LANG_HOOKS'), ctx, { filename: 'fr/lang-hooks.js' });
   return ctx.LANG_HOOKS.familiaLatina;

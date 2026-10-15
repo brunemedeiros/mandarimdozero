@@ -154,6 +154,19 @@ check('números: 80 = quatre-vingts', frenchNumberWords(80), 'quatre-vingts');
 check('números: 97 = quatre-vingt-dix-sept', frenchNumberWords(97), 'quatre-vingt-dix-sept');
 check('números: 16 = seize / 17 = dix-sept', frenchNumberWords(16) + '/' + frenchNumberWords(17), 'seize/dix-sept');
 check('"21" no lugar de "vingt et un" → 100', evaluateDictation('Il a vingt et un ans.', 'Il a 21 ans.').score, 100);
+// Família latina, fase 2 -- casos NOVOS (decisões da dona, 2026-10-15).
+// (d) número em dígito que o PRÓPRIO texto escreve em dígito fica como está (antes virava "trente" e perdia ponto).
+check('NOVO (d) texto com "30", aluna digita "30" → 100 (antes: < 100)', evaluateDictation('Il fait 30 degrés.', 'Il fait 30 degrés.').score, 100);
+check('NOVO (d) ... e sem a nota "por extenso"', evaluateDictation('Il fait 30 degrés.', 'Il fait 30 degrés.').digitNotes.length, 0);
+check('NOVO (d) texto com "30", aluna digita "31" → troca (< 100)', evaluateDictation('Il fait 30 degrés.', 'Il fait 31 degrés.').score < 100, true);
+check('NOVO (d) texto por extenso continua aceitando o dígito com a nota', (r => r.score === 100 && r.digitNotes.length === 1)(evaluateDictation('Il fait trente degrés.', 'Il fait 30 degrés.')), true);
+// (e) dois erros leves na mesma palavra citam os dois (antes: "pequena diferença de grafia").
+const peutEtre = evaluateDictation('Peut-être.', 'peut etre.').merged[0];
+check('NOVO (e) "peut etre" por "Peut-être": reason multiple (antes: spelling)', peutEtre.reason, 'multiple');
+check('NOVO (e) ... com os dois motivos: hífen e acento', JSON.stringify(peutEtre.reasons), JSON.stringify(['hyphen', 'accent']));
+check('NOVO (e) ... continua erro leve (meio ponto)', evaluateDictation('Peut-être.', 'peut etre.').score, 50);
+// (b) a explicação do ditado vem do catálogo de tradução; em pt-BR o texto é o mesmo de antes.
+check('NOVO (b) explicação de troca em pt-BR igual à de antes', classifyDictationError('chat', 'chien').noteText, '«chat»: palavra diferente da esperada (você escreveu «chien»).');
 
 console.log('\n=== Ditado (Fatia 2) -- tipo de erro (só explicativo) ===\n');
 const kind = (a, b) => classifyDictationError(a, b).kind;

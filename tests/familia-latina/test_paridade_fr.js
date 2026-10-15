@@ -21,11 +21,19 @@ const { textos, ditados, verbos } = corpusFr();
 const grupos = {};
 const falhas = [];
 const J = JSON.stringify;
+const porRegra = {};
+const curto = (x) => x.length > 90 ? x.slice(0, 87) + '...' : x;
+// autorizada() devolve o NOME da regra que explica a diferença ('a', 'c', 'd', 'e') ou false.
 function compara(grupo, rotulo, a, b, autorizada) {
   const g = grupos[grupo] || (grupos[grupo] = { ok: 0, autorizadas: 0, falhou: 0, exemplos: [] });
   const ja = J(a), jb = J(b);
   if (ja === jb) { g.ok++; return; }
-  if (autorizada && autorizada()) { g.autorizadas++; if (g.exemplos.length < 3) g.exemplos.push(rotulo + ': ' + ja + ' -> ' + jb); return; }
+  const regra = autorizada && autorizada();
+  if (regra) {
+    g.autorizadas++; porRegra[grupo + ' (' + regra + ')'] = (porRegra[grupo + ' (' + regra + ')'] || 0) + 1;
+    if (g.exemplos.length < 2) g.exemplos.push(curto(rotulo) + ': ' + curto(ja) + ' -> ' + curto(jb));
+    return;
+  }
   g.falhou++;
   if (falhas.length < 15) falhas.push(`[${grupo}] ${rotulo}\n    antigo (${REF}): ${ja}\n    novo:           ${jb}`);
 }
@@ -82,10 +90,10 @@ for (const alvo of amostra) {
   for (const typed of variacoes(alvo).concat([''])) {
     const vOld = A.vocab(typed, alvo), vNew = N.vocab(typed, alvo);
     compara('vocab-type', alvo + ' | ' + typed, vOld, vNew,
-      () => vOld === 'errou' && vNew === 'quase' && A.vocab(semLigadura(typed), semLigadura(alvo)) === 'ok');
+      () => vOld === 'errou' && vNew === 'quase' && A.vocab(semLigadura(typed), semLigadura(alvo)) === 'ok' && 'a');
     const lOld = A.lacuna(typed, alvo), lNew = N.lacuna(typed, alvo);
     compara('lacuna-type', alvo + ' | ' + typed, lOld, lNew,
-      () => lOld === 'errou' && ((lNew === 'ok' && vOld === 'ok') || (lNew === 'quase' && A.vocab(semLigadura(typed), semLigadura(alvo)) === 'ok')));
+      () => lOld === 'errou' && ((lNew === 'ok' && vOld === 'ok' && 'c') || (lNew === 'quase' && A.vocab(semLigadura(typed), semLigadura(alvo)) === 'ok' && 'a')));
   }
 }
 
@@ -100,7 +108,7 @@ for (const alvo of amostra) {
     compara('acentuacao-certa', alvo + ' | ' + typed, A.isAccentAnswerCorrect(typed, alvo), N.isAccentAnswerCorrect(typed, alvo));
     const o = A.accentAnswerOutcome(typed, alvo), n = N.accentAnswerOutcome(typed, alvo);
     compara('acentuacao-resultado', alvo + ' | ' + typed, o, n,
-      () => o === 'fail' && n === 'partial' && A.accentAnswerOutcome(semLigadura(typed), semLigadura(alvo)) !== 'fail');
+      () => o === 'fail' && n === 'partial' && A.accentAnswerOutcome(semLigadura(typed), semLigadura(alvo)) !== 'fail' && 'a');
   }
 }
 
@@ -126,8 +134,8 @@ for (const ref of frasesDitado) {
   for (const typed of variacoes(ref)) {
     const a = tenta(() => A.evaluateDictation(ref, typed)), b = tenta(() => N.evaluateDictation(ref, typed));
     compara('evaluateDictation', ref + ' | ' + typed, a, b, () =>
-      (multiplosValidos(b) && J(comoAntigo(b)) === J(a)) ||                                              // (e)
-      (temDigito(ref) && temDigito(typed) && a.v && b.v && b.v.score >= a.v.score));                     // (d)
+      (multiplosValidos(b) && J(comoAntigo(b)) === J(a) && 'e') ||
+      (temDigito(ref) && temDigito(typed) && a.v && b.v && b.v.digitNotes.length < a.v.digitNotes.length && b.v.score >= a.v.score && 'd'));
     if (a.v) {
       for (const x of a.v.merged) {
         if (x.type === 'match' && x.light) compara('dictationLightNoteText', x.word + ' | ' + x.userWord, A.dictationLightNoteText(x), N.dictationLightNoteText(x));
@@ -135,7 +143,7 @@ for (const ref of frasesDitado) {
       }
     }
     const pa = A.prepareDictationUserText(typed, ref), pb = N.prepareDictationUserText(typed, ref);
-    compara('prepareDictationUserText', ref + ' | ' + typed, pa, pb, () => temDigito(ref) && temDigito(typed) && pb.digitNotes.length < pa.digitNotes.length);
+    compara('prepareDictationUserText', ref + ' | ' + typed, pa, pb, () => temDigito(ref) && temDigito(typed) && pb.digitNotes.length < pa.digitNotes.length && 'd');
   }
   for (const w of ref.split(/\s+/)) {
     compara('normalizeDictationWord', w, A.normalizeDictationWord(w), N.normalizeDictationWord(w));
@@ -149,7 +157,7 @@ for (const r of soltas) for (const u of soltas) {
   compara('classifyDictationError', r + ' | ' + u, A.classifyDictationError(r, u), N.classifyDictationError(r, u));
   const cs = A.normalizeDictationWord(r), us = A.normalizeDictationWord(u);
   const ra = A.dictLightReason(cs, us), rb = N.dictLightReason(cs, us);
-  compara('dictLightReason', r + ' | ' + u, ra, rb, () => ra === 'spelling' && rb === 'multiple');   // (e)
+  compara('dictLightReason', r + ' | ' + u, ra, rb, () => ra === 'spelling' && rb === 'multiple' && 'e');
 }
 for (let n = -2; n <= 105; n++) compara('frenchNumberWords', String(n), A.frenchNumberWords(n), N.frenchNumberWords(n));
 compara('frenchNumberWords', '1.5', A.frenchNumberWords(1.5), N.frenchNumberWords(1.5));
@@ -183,6 +191,7 @@ for (const [g, n] of Object.entries(grupos)) {
   total += n.ok + n.autorizadas + n.falhou; ruins += n.falhou; aut += n.autorizadas;
   console.log(`${n.falhou ? '✗' : '✓'} ${g}: ${n.ok + n.autorizadas}/${n.ok + n.autorizadas + n.falhou}${n.autorizadas ? ` (${n.autorizadas} diferenças autorizadas, ex.: ${n.exemplos.join(' ; ')})` : ''}`);
 }
+console.log('diferenças autorizadas por regra: ' + (Object.keys(porRegra).length ? Object.entries(porRegra).map(([k, v]) => k + ' = ' + v).join('; ') : 'nenhuma'));
 falhas.forEach(f => console.log('FALHOU ' + f));
 console.log(`paridade fr antigo (${REF}) x fr novo: ${total - ruins}/${total} comparações (${total - ruins - aut} iguais + ${aut} diferenças autorizadas; ${Object.keys(grupos).length} grupos; corpus: ${textos.length} textos, ${ditados.length} ditados, ${formas.length} formas verbais)`);
 process.exit(ruins ? 1 : 0);

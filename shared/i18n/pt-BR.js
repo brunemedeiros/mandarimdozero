@@ -2994,4 +2994,37 @@ window.I18N_CATALOG['pt-BR'] = {
   'tinvite.err.invalid_code': 'Esse link de convite não vale mais. Peça um novo para quem te convidou.',
   'tinvite.err.not_authenticated': 'Entre na sua conta para responder ao convite.',
   'tinvite.err.generic': 'Não deu certo agora. Tente de novo em instantes.',
+
+  // Ditado do francês: explicação de cada erro (família latina, fase 2, 2026-10-15). Texto IGUAL ao que estava
+  // escrito direto no fr/app.js (classifyDictationError, dictationLightNoteText, DICT_HOMOPHONE_GROUPS);
+  // usado pela configuração do fr em fr/lang-hooks.js (LANG_HOOKS.familiaLatina.textos).
+  'fr.dict.youWrote': 'você escreveu «{typed}»',
+  'fr.dict.light.hyphen': '«{core}» leva hífen ({you}).',
+  'fr.dict.light.apostrophe': '«{core}» leva apóstrofo ({you}).',
+  'fr.dict.light.ligature': '«{core}» usa a letra «œ», que é uma só ({you}).',
+  'fr.dict.light.accent': '«{core}»: confira os acentos ({you}).',
+  'fr.dict.light.spelling': '«{core}»: pequena diferença de grafia ({you}).',
+  // Novo (decisão da dona, 2026-10-15): dois erros leves na mesma palavra citam os dois.
+  'fr.dict.light.multiple': '«{core}»: confira {list} ({you}).',
+  'fr.dict.part.hyphen': 'o hífen',
+  'fr.dict.part.apostrophe': 'o apóstrofo',
+  'fr.dict.part.ligature': 'a letra «œ»',
+  'fr.dict.part.accent': 'os acentos',
+  'fr.dict.part.and': ' e ',
+  'fr.dict.err.homophone': '«{shown}» (você escreveu «{typed}»): palavras que soam parecido. {note}',
+  'fr.dict.err.agreement': '«{shown}» (você escreveu «{typed}»): a diferença está só na terminação (-{suffix}). Se for uma palavra que concorda, confira gênero, número ou conjugação com o resto da frase; senão, pode ser só um deslize de digitação.',
+  'fr.dict.err.other': '«{shown}»: palavra diferente da esperada (você escreveu «{typed}»).',
+  'fr.dict.punctMissing': 'Faltou este sinal (não desconta pontos)',
+  'fr.dict.hom.a': '«a» é o verbo avoir (il a); «à» é preposição (à Paris).',
+  'fr.dict.hom.et': '«et» quer dizer "e"; «est» é o verbo être (il est).',
+  'fr.dict.hom.son': '«son» quer dizer "seu/sua"; «sont» é o verbo être (ils sont).',
+  'fr.dict.hom.ou': '«ou» quer dizer "ou"; «où» quer dizer "onde".',
+  'fr.dict.hom.on': '«on» é pronome ("a gente"); «ont» é o verbo avoir (ils ont).',
+  'fr.dict.hom.la': '«la» é artigo ou pronome; «là» quer dizer "lá/aí".',
+  'fr.dict.hom.ce': '«ce» é demonstrativo ("isto/este"); «se» é pronome reflexivo (il se lève).',
+  'fr.dict.hom.ces': '«ces» = "estes/estas"; «ses» = "seus/suas"; «c\'est» = "é/isto é"; «s\'est» = pronome + être (il s\'est levé).',
+  'fr.dict.hom.mes': '«mes» quer dizer "meus/minhas"; «mais» quer dizer "mas".',
+  'fr.dict.hom.peu': '«peu» quer dizer "pouco"; «peux»/«peut» são do verbo pouvoir (je peux, il peut).',
+  'fr.dict.hom.leur': '«leurs» vai antes de substantivo no plural; «leur» antes de singular ou como pronome (je leur parle).',
+  'fr.dict.hom.quel': 'Mesma pronúncia: «quel» muda conforme o gênero e o número do substantivo.',
 };

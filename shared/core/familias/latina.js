@@ -225,14 +225,34 @@
       return cfg.hifen || cfg.apostrofo ? s.replace(SEPARADORES_FROUXOS, '') : s;
     }
     // Por que duas palavras que alinham pela forma frouxa diferem na estrita (= dictLightReason).
+    // Um motivo só: 'hyphen' | 'apostrophe' | 'ligature' | 'accent'. Dois ou mais na mesma palavra
+    // ("peut etre" por "peut-être": sem hífen E sem acento): 'multiple', com a lista em motivosCombinados
+    // (antes caía em 'spelling'; decisão da dona, 2026-10-15). Nenhuma combinação explica: 'spelling'.
+    var TIRA = {
+      hyphen: function (s) { return s.replace(/-/g, ''); },
+      apostrophe: function (s) { return s.replace(/'/g, ''); },
+      ligature: function (s) { return tiraLigaduras(s); },
+      accent: function (s) { return s.normalize('NFD').replace(MARCAS_RE, ''); }
+    };
+    var MOTIVOS = ['hyphen', 'apostrophe', 'ligature', 'accent'].filter(function (m) {
+      return m === 'hyphen' ? cfg.hifen : m === 'apostrophe' ? cfg.apostrofo : m === 'ligature' ? LIG.length > 0 : true;
+    });
     function motivoErroLeve(cs, us) {
-      var nh = function (s) { return s.replace(/-/g, ''); }, na = function (s) { return s.replace(/'/g, ''); };
-      var nd = function (s) { return s.normalize('NFD').replace(MARCAS_RE, ''); };
-      if (cfg.hifen && nh(cs) === nh(us)) return 'hyphen';
-      if (cfg.apostrofo && na(cs) === na(us)) return 'apostrophe';
-      if (LIG.length && tiraLigaduras(cs) === tiraLigaduras(us)) return 'ligature';
-      if (nd(cs) === nd(us)) return 'accent';
-      return 'spelling';
+      for (var i = 0; i < MOTIVOS.length; i++) if (TIRA[MOTIVOS[i]](cs) === TIRA[MOTIVOS[i]](us)) return MOTIVOS[i];
+      return motivosCombinados(cs, us) ? 'multiple' : 'spelling';
+    }
+    // A menor combinação de 2+ motivos que explica a diferença (na ordem de MOTIVOS), ou null.
+    function motivosCombinados(cs, us) {
+      var n = MOTIVOS.length;
+      for (var tam = 2; tam <= n; tam++) {
+        for (var mask = 0; mask < (1 << n); mask++) {
+          var lista = MOTIVOS.filter(function (_, k) { return mask & (1 << k); });
+          if (lista.length !== tam) continue;
+          var aplica = function (s) { lista.forEach(function (m) { s = TIRA[m](s); }); return s; };
+          if (aplica(cs) === aplica(us)) return lista;
+        }
+      }
+      return null;
     }
 
     // Número por extenso: o idioma devolve uma forma, uma lista (pt: "um"/"uma") ou null.
@@ -410,6 +430,7 @@
           missingMarks: missingMarksFor(i, j)
         };
         if (flag) item.contraction = flag;
+        if (item.reason === 'multiple') item.reasons = motivosCombinados(correctTok.strictWords[i], userTok.strictWords[j]);
         return item;
       };
       var i = 0, j = 0;
@@ -493,12 +514,13 @@
       var typed = x.userWord.replace(/[.,!?;:…]+$/, '');
       var T = cfg.textos;
       var extra = '';
-      if (x.reason === 'accent') {
+      if (x.reason === 'accent' || (x.reason === 'multiple' && (x.reasons || []).indexOf('accent') >= 0)) {
         var h = classificarErroDitado(x.word, x.userWord);
         if (h.kind === 'homophone') extra = ' ' + h.note;
         else if (h.kind === 'reform') extra = ' ' + T.reformaCurta();
       }
       if (x.reason === 'contraction') return T.leve.contraction(core, typed, x.contraction, CONTRACOES);
+      if (x.reason === 'multiple' && x.reasons && T.leve.multiple) return T.leve.multiple(core, typed, x.reasons) + extra;
       var f = T.leve[x.reason] || T.leve.spelling;
       return f(core, typed) + extra;
     }

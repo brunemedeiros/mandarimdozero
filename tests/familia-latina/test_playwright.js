@@ -4,6 +4,7 @@
 //  (a) "oe" por "œ" = Quase no "Digite o que ouviu" e na lacuna digitada (meio ponto, mostra a forma certa)
 //      e no desafio Acentuação;
 //  (c) apóstrofo curvo do celular aceito na lacuna digitada;
+//  (b) explicações do ditado no idioma do site; (d) dígito do próprio texto no ditado; (e) dois erros na mesma palavra;
 // e que nada mais mudou nesses exercícios (acerto e erro de sempre).
 // Supabase do CDN trocado por um stub; boot em modo convidado. Rodar: node tests/familia-latina/test_playwright.js
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
@@ -122,6 +123,30 @@ async function clozeType(page, blockF, typed){
   check('Acentuação: "tres" por "très" continua Quase', /Quase/.test(txt), txt);
   txt = await acentuacao('Ma sœur', 'ma soeurs');
   check('Acentuação: letra a mais continua Errado', /Errado/.test(txt), txt);
+
+  // ---- Ditado: (b) explicações no idioma do site, (d) dígito do próprio texto, (e) dois erros na mesma palavra
+  const ditado = (lang, userText) => page.evaluate(async ([lang, userText]) => {
+    await setUiLang(lang);
+    switchTab('dictation'); openDictationPlayer('d1');
+    renderDictationResult({ id: 'fl-test', text: 'Peut-être que ma sœur a 30 ans, et elle est là.' }, userText);
+    const wrap = document.getElementById('dictation-result-wrap');
+    const titles = Array.from(wrap.querySelectorAll('[title]')).map(e => e.getAttribute('title'));
+    const notes = Array.from(wrap.querySelectorAll('.dictation-notes li')).map(li => li.textContent);
+    const score = (wrap.querySelector('.dictation-score-text') || {}).textContent || '';
+    delete STATE.dictations['fl-test'];
+    return { titles, notes, score };
+  }, [lang, userText]);
+  const typed = 'peut etre que ma soeur a 30 ans et elle est la';
+  let d = await ditado('en', typed);
+  const PT_RE = /você|confira|palavra|leva |Faltou|pequena|quer dizer|desconta/;
+  check('ditado (b) site em inglês: nenhuma explicação em português', d.notes.concat(d.titles).every(x => !PT_RE.test(x)), d);
+  check('ditado (e) site em inglês: "peut etre" cita o hífen e os acentos', d.notes.some(n => /“Peut-être”: check the hyphen and the accents/.test(n)), d.notes);
+  check('ditado (b) site em inglês: ligadura e homófono la/là em inglês', d.notes.some(n => /uses the letter “œ”/.test(n)) && d.notes.some(n => /“là” means “there”/.test(n)), d.notes);
+  check('ditado (b) site em inglês: sinal faltando em inglês', d.titles.some(x => /punctuation mark is missing/.test(x)), d.titles);
+  check('ditado (d): "30" do próprio texto não vira "trente" (sem nota de número por extenso)', !d.notes.some(n => /trente/.test(n)), d.notes);
+  d = await ditado('pt-BR', typed);
+  check('ditado (b) site em português: textos de sempre', d.notes.some(n => n === '«sœur» usa a letra «œ», que é uma só (você escreveu «soeur»).') && d.notes.some(n => /^«là»: confira os acentos \(você escreveu «la»\)\. «la» é artigo ou pronome; «là» quer dizer "lá\/aí"\.$/.test(n)) && d.titles.includes('Faltou este sinal (não desconta pontos)'), d);
+  check('ditado (e) site em português: "peut etre" cita o hífen e os acentos', d.notes.some(n => /^«Peut-être»: confira o hífen e os acentos/.test(n)), d.notes);
 
   check('sem erro de página', errors.length === 0, errors);
   await ctx.close();
