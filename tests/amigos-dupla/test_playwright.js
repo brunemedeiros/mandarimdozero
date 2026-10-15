@@ -238,7 +238,7 @@ async function visual(browser, port){
         const small = await page.$$eval('#friends-duo button, .friend-nudge, .friend-duo-invite', els => els.filter(e => e.offsetParent && e.getBoundingClientRect().height < 44).length);
         check(`${tag}: alvos de toque >= 44px`, small === 0, small);
       }
-      if (SHOTS){ await page.$eval('#friends-duo', e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-${lang}-${theme}-${vp.width}-${mission ? 'missao' : 'convite'}.png`) }); }
+      if (SHOTS){ await page.$eval('#friends-duo', e => { e.scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-${lang}-${theme}-${vp.width}-${mission ? 'missao' : 'convite'}.png`) }); }
       if (SHOTS && !mission){ await page.$eval('#friends-list', e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-cards-${lang}-${theme}-${vp.width}.png`) }); }
       if (mission === DAYS && vp.width === 1280){
         // faixa do fim da lição + linha do quadro, desenhadas num canto da página para o print
@@ -246,7 +246,7 @@ async function visual(browser, port){
           FRIENDS_STATE.mission = JSON.parse(JSON.stringify(window.__daysMission));
           const box = document.createElement('div');
           box.id = 'tst-duo'; box.style.cssText = 'position:fixed;left:240px;top:110px;z-index:9999;width:460px;background:var(--paper);padding:16px;border-radius:16px';
-          box.innerHTML = `<div class="lesson-complete">${duoLessonStripHTML()}</div><div class="dcs-cards" style="margin-top:12px">${(FRIENDS_STATE.mission = window.__daysMission, duoDailyStripRowHTML())}</div>`;
+          box.innerHTML = `<div class="lesson-complete">${duoLessonStripHTML()}</div><div class="dcs-cards" style="margin-top:12px">${duoDailyStripRowHTML()}</div>`;
           document.body.appendChild(box);
         });
         const c2 = await page.$eval('#tst-duo .duo-lesson-strip', el => [getComputedStyle(el).backgroundColor, getComputedStyle(el).color]);
