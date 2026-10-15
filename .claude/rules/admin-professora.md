@@ -32,7 +32,7 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
   (`review_bank_students`) existe com ou sem conta; só `linked_student_id` (conta com vínculo ativo, mesmo idioma) gera cartão em
   "Cartões da professora". Aprovar = RPC `approve_review_bank_item` (atômica, 1 cartão por item); cortar arquiva, nunca apaga.
   Item sensível ou com "Para conferir" nunca vira cartão sozinho. Doc: `docs/historico/15-auditoria-banco-revisao.md`.
-- Rotina automática do Banco (`supabase/functions/review-bank-agent`, migrations 089 a 093): a tarefa da madrugada só INSERE itens/recaps de alunos
+- Rotina automática do Banco (`supabase/functions/review-bank-agent`, migrations 089, 090 e 097 a 099): a tarefa da madrugada só INSERE itens/recaps de alunos
   com `agent_managed = true` e gera cartões pelo mesmo motor do site; `engine.generated.mjs` é GERADO (`node scripts/build-review-bank-agent.js`,
   nunca editar à mão). Mudou `shared/review-bank*.js` ou o motor de cartões: regerar, rodar `tests/banco-revisao/test_agent_core.js`, novo deploy.
   Doc: `docs/historico/16-rotina-automatica-banco.md`.

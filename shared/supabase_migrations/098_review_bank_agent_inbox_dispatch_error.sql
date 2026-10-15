@@ -1,4 +1,4 @@
--- Correção da 091: se o aviso à função falhasse (extensão pg_net ausente, segredo faltando), o gatilho engolia o erro sem deixar rastro e a linha
+-- Correção da 097: se o aviso à função falhasse (extensão pg_net ausente, segredo faltando), o gatilho engolia o erro sem deixar rastro e a linha
 -- ficava "pendente" sem explicação (achado no teste do Staging, que não tinha pg_net). Agora o motivo vai para a coluna `error` da linha
 -- (o cron de reserva continua reenviando; ao processar com sucesso a função limpa o erro) e `_rb_agent_post` recusa em vez de ignorar quando falta segredo.
 -- Aditiva e idempotente (create or replace); nenhum DROP.

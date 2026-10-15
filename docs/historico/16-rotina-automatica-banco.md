@@ -76,12 +76,12 @@ Desenho: a tarefa lê o estado por uma função SQL e grava a entrega numa tabel
 Bônus: recap e geração de cartões podem rodar pelo cron mesmo que a tarefa falhe numa noite. Na tarefa nova, ligar só os conectores necessários (Drive, Agenda, Supabase).
 
 ## Plano B construído e testado no Staging (2026-10-15)
-Migrations `091` (caixa de entrada, funções `review_bank_agent_state`/`agent_inbox_submit`, gatilho com `pg_net`, `agent_inbox_sweep`, `agent_inbox_claim`), `092` (o motivo da falha de envio fica em `error`) e `093`
+Migrations `097` (no Staging aparece como `091`; renumerada porque as 091 a 096 já eram de outras conversas) (caixa de entrada, funções `review_bank_agent_state`/`agent_inbox_submit`, gatilho com `pg_net`, `agent_inbox_sweep`, `agent_inbox_claim`), `098` (no Staging `092`) (o motivo da falha de envio fica em `error`) e `099` (no Staging `093`)
 (estado leve + `review_bank_agent_items(aluno)`). Segredos do Vault: `rb_agent_url`, `rb_agent_anon`, `rb_agent_token`, `rb_agent_teacher`. Ações novas da função: `process_inbox` e `nightly`.
 Agendamentos: `docs/rotina-banco/agendar-cron.sql` (`rb-agent-sweep` a cada 5 min; `rb-agent-nightly` às 05:30 UTC = 02:30 em Brasília). Texto da tarefa: `docs/rotina-banco/tarefa-nova.md`.
 Teste ao vivo no Staging: `state` leve, entrega por `agent_inbox_submit`, o gatilho chamou a função (HTTP 200), a linha foi para `feito` com o resultado, aluno novo cadastrado, itens limpos aprovados e com cartão (vinculada),
 `[pessoal]`/dúvida/"cortado" pendentes, recap criado, `nightly` pelo cron OK. Lição: o Staging não tinha `pg_net` nem `pg_cron` (criados lá para o teste; a produção já os tinha) e o gatilho engolia o erro (corrigido na 092).
-Testes locais: SQL 83/83, lógica 44/44. Produção: ainda NÃO aplicado (091 a 093, segredos do Vault, cron, nova versão da função).
+Testes locais: SQL 83/83, lógica 44/44. Produção: ainda NÃO aplicado (097 a 099, segredos do Vault, cron, nova versão da função).
 
 ## Pendências
 - Teste de chamada de escrita a partir do ambiente da tarefa agendada: versão 1 bloqueada pelo classificador (ver acima); rodar a versão 2.
