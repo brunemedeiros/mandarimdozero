@@ -2450,6 +2450,27 @@ window.I18N_CATALOG['en'] = {
   'panel.teacher.aria': 'Teacher panel section', // ALTA
   'panel.teacher.nav': 'Teacher', // ALTA
   'panel.teacher.menu': '🎓 Teacher panel', // ALTA
+  'panel.tbell.title': 'Student notifications', // ALTA
+  'panel.tbell.hint': 'Notifications about your students in every language: who went quiet, board posts and invites. Notifications about your own studies stay in the bell at the top.', // ALTA
+  'panel.tbell.markAll': 'Mark all as read', // ALTA
+  'panel.tbell.empty': 'No notifications about students yet.', // ALTA
+  'panel.tbell.err': 'Couldn\'t load the notifications right now. Try again in a moment.', // ALTA
+  'panel.tbell.new': 'New', // ALTA
+  'panel.tbell.unread': { one: '{n} new student notification', other: '{n} new student notifications' }, // ALTA
+  'panel.tbell.otherLang': 'To reply, open the {lang} board.', // MÉDIA
+  'panel.tbell.lang.frances': 'French', // ALTA
+  'panel.tbell.lang.mandarim': 'Chinese', // ALTA
+  'panel.tbell.lang.portugues': 'Portuguese', // ALTA
+  'panel.tbell.ev.inactive': 'Haven\'t shown up in a few days: {list}. Maybe it\'s time to say hi 👋', // ALTA (mesma frase da 056)
+  'panel.tbell.days': { one: '{n} day', other: '{n} days' }, // ALTA
+  'panel.tbell.ev.accepted': '{name} accepted your invitation and is now your {lang} student 🎉', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.joinedLink': '{name} joined through your link and is now your {lang} student 🎉', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.declined': '{name} declined the invitation to {lang} classes.', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.post': '{name} posted on the board: {snippet}', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.postClass': '{name} posted on the board (class {classroom}): {snippet}', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.comment': '{name} commented on the board: {snippet}', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.joinClass': '{name} joined the class {classroom} through your link', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.joinClassNew': '{name} joined the class {classroom} through your link and is now your {lang} student 🎉', // ALTA (mesma frase da 104)
   'panel.tab.students': 'Students', // ALTA
   'panel.tab.cards': 'Cards', // ALTA
   'panel.tab.classlogs': 'Classes', // ALTA

@@ -4593,6 +4593,39 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   .mural-target-wrap{ flex:1 1 100%; }
   .mural-target-wrap select{ flex:1; max-width:none; }
 }
+/* Sino da professora (105, shared/teacher-panel.js): avisos sobre alunos, separado do sino do topo */
+.tbell{ margin:-4px 0 16px; }
+.tbell-btn{ display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:8px 14px; border-radius:999px; border:2px solid var(--paper-line); background:var(--paper-warm); color:var(--ink); font:inherit; font-weight:800; font-size:14px; cursor:pointer; }
+.tbell-btn:hover, .tbell-btn[aria-expanded="true"]{ border-color:var(--seal-red); }
+.tbell-btn .mural-count{ margin-left:2px; }
+.tbell-panel{ margin-top:10px; border:1px solid var(--paper-line); border-radius:12px; background:var(--paper); padding:10px; max-width:720px; }
+.tbell-panel[hidden]{ display:none; }
+.tbell-head{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 12px; padding:2px 4px 10px; border-bottom:1px solid var(--paper-line); }
+.tbell-hint{ margin:0; flex:1 1 220px; color:var(--ink-soft); font-size:13px; line-height:1.4; }
+.tbell-mark-all{ background:none; border:none; color:var(--seal-red-dark); font:inherit; font-weight:700; font-size:13px; cursor:pointer; padding:6px 4px; }
+.tbell-mark-all:hover:not(:disabled){ text-decoration:underline; }
+.tbell-mark-all:disabled{ opacity:.5; cursor:default; }
+.tbell-list{ max-height:min(60vh, 520px); overflow-y:auto; }
+.tbell-items{ list-style:none; margin:0; padding:0; }
+.tbell-items > li + li{ border-top:1px solid var(--paper-line); }
+.tbell-item{ display:flex; gap:10px; align-items:flex-start; width:100%; text-align:left; background:none; color:var(--ink); border:none; padding:12px 8px; font:inherit; cursor:pointer; border-radius:8px; }
+.tbell-item:hover{ background:var(--paper-warm); color:var(--ink); }
+.tbell-item.is-unread{ background:var(--paper-warm); color:var(--ink); box-shadow: inset 3px 0 0 var(--seal-red); }
+.tbell-item-icon{ font-size:18px; line-height:1.3; flex-shrink:0; }
+.tbell-item-body{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+.tbell-item-text{ font-size:14px; line-height:1.4; overflow-wrap:anywhere; }
+.tbell-item.is-unread .tbell-item-text{ font-weight:700; }
+.tbell-item-meta{ display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; font-size:12px; color:var(--ink-soft); }
+.tbell-lang{ text-transform:capitalize; border:1px solid var(--paper-line); border-radius:999px; padding:1px 8px; }
+.tbell-new{ font-weight:800; color:var(--seal-red-dark); }
+.tbell-item-note{ font-size:12px; color:var(--ink-soft); font-style:italic; }
+.tbell-empty{ padding:20px 8px; text-align:center; color:var(--ink-soft); font-size:14px; margin:0; }
+.tbell-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--seal-red); margin-left:8px; vertical-align:middle; }
+.tab-btn > .tbell-dot{ position:absolute; top:6px; left:6px; margin:0; border:2px solid var(--paper); box-sizing:content-box; }
+@media (max-width: 899px){
+  .tbell-btn, .tbell-mark-all, .tbell-item{ min-height:44px; }
+  .tbell-btn{ width:100%; justify-content:flex-start; }
+}
 /* K.10: Decks do aluno no painel 📊 e botão Analytics no perfil público */
 .student-decks-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); margin-top:6px; }
 .student-decks{ width:100%; border-collapse:collapse; font-size:13.5px; }
@@ -5643,6 +5676,7 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
       <h2 data-i18n="panel.teacher.title">Painel da professora</h2>
       <p data-i18n="panel.teacher.sub">Seus alunos, os cartões e as aulas de cada um e os materiais que você compartilha.</p>
     </div>
+    <div id="teacher-bell" class="tbell" hidden></div>
     <div class="deck-topbar panel-nav" role="tablist" aria-label="Seção do painel da professora" data-i18n-attr="aria-label:panel.teacher.aria">
       <button class="deck-topbar-btn is-active" role="tab" aria-selected="true" data-teacher-section="students" data-i18n="panel.tab.students">Alunos</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="flashcards" data-i18n="panel.tab.cards">Cartões</button>
