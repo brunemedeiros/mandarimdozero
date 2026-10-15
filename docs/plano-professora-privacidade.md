@@ -482,7 +482,7 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
 - Ajuste da autora: aula sem horário = 7h com 1h, no formulário (Horário já vem 07:00) e no link de agenda. A agenda
   assinada é só leitura: o ajuste fino é sempre no site. Horário sozinho só conta como agendamento de hoje em diante.
 - Pedido da autora (2026-10-15): o link técnico do Supabase com 64 caracteres "parecia vírus". Decisão: senha curta
-  (16 caracteres, 105) + domínio próprio `agenda.profbrune.com.br` com repasse grátis no Netlify (GitHub Pages não monta
+  (16 caracteres, 107) + domínio próprio `agenda.profbrune.com.br` com repasse grátis no Netlify (GitHub Pages não monta
   agenda; domínio próprio do Supabase custa US$ 10 + plano Pro e ainda mostraria `/functions/v1/`; Railway não tem plano
   grátis permanente). Um único Netlify para o site inteiro, configurado uma vez; outras professoras não fazem nada.
   Passo a passo: `docs/agenda-netlify-passo-a-passo.md`. Interruptor no site: `CALENDAR_FEED_HOST`.

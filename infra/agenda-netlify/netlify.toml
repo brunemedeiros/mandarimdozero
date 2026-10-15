@@ -1,4 +1,4 @@
-# agenda.profbrune.com.br -- link de agenda das aulas (migrations 103 e 105).
+# agenda.profbrune.com.br -- link de agenda das aulas (migrations 103 e 107).
 # Não guarda nada: cada pedido do Google Agenda/Apple/Outlook é repassado na hora para a Edge Function
 # class-calendar-feed do Supabase (produção), que monta o .ics da pessoa dona da senha.
 # Site do Netlify ligado ao repositório com "Base directory" = infra/agenda-netlify.

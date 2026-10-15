@@ -1,4 +1,4 @@
--- 105 (senha curta do link de agenda). Transação + ROLLBACK, Postgres local (tests/aulas-presenca/run.sh).
+-- 107 (senha curta do link de agenda). Transação + ROLLBACK, Postgres local (tests/aulas-presenca/run.sh).
 begin;
 create temp table r(ok boolean, name text) on commit drop;
 grant all on r to public;
@@ -54,5 +54,5 @@ insert into r select has_function_privilege('anon', 'class_calendar_feed_lang(te
   and has_function_privilege('authenticated', 'class_calendar_feed_lang(text)', 'execute') = false
   and has_function_privilege('authenticated', '_calendar_feed_new_token()', 'execute') = false, 'funções internas fechadas para o app';
 select case when ok then 'ok   ' else 'FALHOU ' end || name from r;
-select (select count(*) from r where ok) || '/' || (select count(*) from r) || ' verificações (105)';
+select (select count(*) from r where ok) || '/' || (select count(*) from r) || ' verificações (107)';
 rollback;

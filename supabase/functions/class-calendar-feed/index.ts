@@ -3,7 +3,7 @@
 // Devolve as aulas da conta em formato iCalendar (.ics) para assinatura no Google Agenda, Apple ou Outlook:
 //   GET https://agenda.profbrune.com.br/<senha>   (Netlify repassa para .../functions/v1/class-calendar-feed/<senha>)
 //   GET .../functions/v1/class-calendar-feed?t=<senha>[&lang=en]   (forma antiga, continua valendo)
-// Senha: 16 caracteres (105) ou 64 hex (103, até a pessoa abrir o bloco da agenda de novo).
+// Senha: 16 caracteres (107) ou 64 hex (103, até a pessoa abrir o bloco da agenda de novo).
 // O Google busca o link sozinho, sem login, por isso esta função roda com verify_jwt = false: a senha É a
 // autenticação (gerada por my_calendar_feed_token; "Gerar outro link" invalida a antiga).
 // Idioma: o do site do dono do link (class_calendar_feed_lang); ?lang=en ou ?lang=pt força.

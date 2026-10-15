@@ -1,4 +1,4 @@
--- 105 -- Link de agenda com senha curta (pedido da autora, 2026-10-15: o link de 64 caracteres "parecia vírus").
+-- 107 -- Link de agenda com senha curta (pedido da autora, 2026-10-15: o link de 64 caracteres "parecia vírus").
 -- Senha nova: 16 caracteres de um alfabeto sem letras/números que se confundem (sem i, l, o, 0, 1): ~79 bits,
 -- impossível de adivinhar por tentativa. Endereço final: https://agenda.profbrune.com.br/<senha> (Netlify repassa para
 -- a Edge Function class-calendar-feed). Senha antiga (64 hex) continua aceita até a pessoa abrir o bloco da agenda,
