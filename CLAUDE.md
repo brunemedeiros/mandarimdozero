@@ -1,6 +1,6 @@
 # Idiomas com Prof. Brune -- regras do repositório
 
-Site de estudo de idiomas (francês em `fr/`, mandarim em `zh/`, futuro português em `ptbr`), estático no
+Site de estudo de idiomas (francês em `fr/`, mandarim em `zh/`, futuro português em `pt/`, id `pt`, chave `portugues`), estático no
 GitHub Pages (publicado a partir da `main`), com Supabase (banco, Auth, Storage, Edge Functions).
 A dona do projeto é a professora Brune (conta admin `brunemed1310@gmail.com`). Responda em português do Brasil.
 
@@ -103,7 +103,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   Imparfait?") e modo foco na Conjugação/Revisão/Desafios. Ideia em espera: "Adicionar à Revisão" (versão enxuta só na
   tela final). Registro: `docs/historico/13-redesenho-licoes-destaque-dialogo.md`.
 - 075/076 (papéis, permissões, regras da professora) na produção; telas (painéis Admin x Professora, Planos, Minhas aulas) publicadas pelo PR #302 (2026-10-12). Plano: 1) papel Professora, 2) Fase K final, 3) login obrigatório + perfil privado (077-080 na produção, telas pelo PR #304), 4) mural (087 no Staging e na produção, telas e painel Aluno publicados pelo PR #312 em 2026-10-14; aba Aluno > Revisão publicada pelo PR #316; 094 Presença/Competências/aula de turma no Staging e na produção (2026-10-14); Notion importado em 2026-10-15 (393 aulas; 62 para a autora revisar no bloco "Revisar do Notion", publicado pelo PR #326); calendário com 101 no Staging e na produção (2026-10-15), publicado; link de agenda (103 + função `class-calendar-feed`, aula sem horário = 7h) no Staging e na produção (2026-10-15); depois: avisos no Mural, aba Turma no Ranking só para quem tem turma) -- `docs/plano-professora-privacidade.md`.
-- Banco de Revisão (migrations 081 a 085): aplicadas no Staging e na produção (2026-10-13; versões 20261013105651 a 105731, a 081 no Staging aparece como `080_review_bank`). Tela em Professora > Cartões publicada. Importação feita pela autora (produção, 2026-10-14: 24 alunos, 2076 itens, 8 vinculados, 635 cartões); 14 ativos ainda sem conta/vínculo. App de português (`ptbr`) é urgente: 13 dos 24 alunos estudam português. Registro: `docs/historico/15-auditoria-banco-revisao.md`.
+- Banco de Revisão (migrations 081 a 085): aplicadas no Staging e na produção (2026-10-13; versões 20261013105651 a 105731, a 081 no Staging aparece como `080_review_bank`). Tela em Professora > Cartões publicada. Importação feita pela autora (produção, 2026-10-14: 24 alunos, 2076 itens, 8 vinculados, 635 cartões); 14 ativos ainda sem conta/vínculo. App de português (`pt`) é urgente: 13 dos 24 alunos estudam português. Registro: `docs/historico/15-auditoria-banco-revisao.md`.
 - 086 (amigos: foguinho, marcos de sequência, parabéns) aplicada no Staging e na produção (2026-10-13). Conquistas com níveis
   aprovadas (2026-10-14) e publicadas (PR #313); 091 e 092 (Pódio) no Staging e na produção:
   `docs/historico/16-conquistas-com-niveis.md`. Ícones: troca geral para o Fluent Emoji feita na branch (`shared/emoji-icons.js`, `docs/icones-fluent.md`).
