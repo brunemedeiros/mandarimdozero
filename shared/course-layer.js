@@ -93,6 +93,10 @@
       layer.conjugation = { groups: {}, verbTranslations: {} };
       Object.keys(content.conjugation.groups || {}).forEach(function(k){ var g = content.conjugation.groups[k]; layer.conjugation.groups[k] = { label: g.label, desc: g.desc }; });
       Object.keys(content.conjugation.verbTranslations || {}).forEach(function(k){ layer.conjugation.verbTranslations[k] = content.conjugation.verbTranslations[k]; });
+      if (content.conjugation.tenseExamples){
+        layer.conjugation.tenseExamples = {};
+        Object.keys(content.conjugation.tenseExamples).forEach(function(k){ layer.conjugation.tenseExamples[k] = content.conjugation.tenseExamples[k].t; });
+      }
     }
   }
 
@@ -112,6 +116,7 @@
     if (content.conjugation){
       Object.keys(content.conjugation.groups || {}).forEach(function(k){ content.conjugation.groups[k] = {}; });
       content.conjugation.verbTranslations = {};
+      each(content.conjugation.tenseExamples && Object.keys(content.conjugation.tenseExamples).map(function(k){ return content.conjugation.tenseExamples[k]; }), function(ex){ delete ex.t; });
     }
   }
 
@@ -139,6 +144,8 @@
       Object.keys(g).forEach(function(k){ if (lg[k]){ set(g[k], 'label', lg[k].label); set(g[k], 'desc', lg[k].desc); } });
       var vt = content.conjugation.verbTranslations;
       if (vt) Object.keys(layer.conjugation.verbTranslations || {}).forEach(function(k){ vt[k] = layer.conjugation.verbTranslations[k]; });
+      var te = content.conjugation.tenseExamples, lte = layer.conjugation.tenseExamples || {};
+      if (te) Object.keys(te).forEach(function(k){ set(te[k], 't', lte[k]); });
     }
   }
 

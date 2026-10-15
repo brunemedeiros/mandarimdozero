@@ -3804,6 +3804,33 @@ body.hide-pinyin .prompt-pinyin{
 .class-log-fields{ margin:0; display:flex; flex-direction:column; gap:8px; }
 .class-log-field dt{ font-size:12px; font-weight:700; color:var(--ink-soft); }
 .class-log-field dd{ margin:2px 0 0; color:var(--ink); line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+/* Registro de aula (094): Presença com cor + Competências (professora e aluno) */
+.att-pill{ --att-c:#7A7F87; display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:700; line-height:1.4; color:var(--ink); background:color-mix(in srgb, var(--att-c) 16%, var(--paper)); border:1px solid var(--att-c); }
+span.att-pill::before{ content:''; width:8px; height:8px; border-radius:50%; background:var(--att-c); flex:none; }
+.att-pill[data-color="green"]{ --att-c:#2E9E5B; } .att-pill[data-color="red"]{ --att-c:#D64545; } .att-pill[data-color="yellow"]{ --att-c:#C99A06; }
+.att-pill[data-color="orange"]{ --att-c:#E07B24; } .att-pill[data-color="blue"]{ --att-c:#2F7FD1; } .att-pill[data-color="purple"]{ --att-c:#8A55C9; } .att-pill[data-color="gray"]{ --att-c:#7A7F87; } .att-pill[data-color="pink"]{ --att-c:#D4549A; } .att-pill[data-color="brown"]{ --att-c:#9A6B4F; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .att-pill[data-color="green"]{ --att-c:#4CC27F; } :root:not([data-theme="light"]) .att-pill[data-color="red"]{ --att-c:#F07070; } :root:not([data-theme="light"]) .att-pill[data-color="yellow"]{ --att-c:#E8C14A; } :root:not([data-theme="light"]) .att-pill[data-color="orange"]{ --att-c:#F29A4F; } :root:not([data-theme="light"]) .att-pill[data-color="blue"]{ --att-c:#6AA8F0; } :root:not([data-theme="light"]) .att-pill[data-color="purple"]{ --att-c:#B48AEB; } :root:not([data-theme="light"]) .att-pill[data-color="gray"]{ --att-c:#A3A8B0; } :root:not([data-theme="light"]) .att-pill[data-color="pink"]{ --att-c:#F08BC2; } :root:not([data-theme="light"]) .att-pill[data-color="brown"]{ --att-c:#C99878; } }
+:root[data-theme="dark"] .att-pill[data-color="green"]{ --att-c:#4CC27F; } :root[data-theme="dark"] .att-pill[data-color="red"]{ --att-c:#F07070; } :root[data-theme="dark"] .att-pill[data-color="yellow"]{ --att-c:#E8C14A; } :root[data-theme="dark"] .att-pill[data-color="orange"]{ --att-c:#F29A4F; } :root[data-theme="dark"] .att-pill[data-color="blue"]{ --att-c:#6AA8F0; } :root[data-theme="dark"] .att-pill[data-color="purple"]{ --att-c:#B48AEB; } :root[data-theme="dark"] .att-pill[data-color="gray"]{ --att-c:#A3A8B0; } :root[data-theme="dark"] .att-pill[data-color="pink"]{ --att-c:#F08BC2; } :root[data-theme="dark"] .att-pill[data-color="brown"]{ --att-c:#C99878; }
+label.att-choice{ cursor:pointer; padding:6px 12px; font-size:13px; }
+label.att-choice:not(:has(input:checked)){ background:transparent; font-weight:600; }
+.att-choices, .skill-toggles, .class-log-badges{ display:flex; flex-wrap:wrap; gap:6px; }
+.class-log-badges{ margin:2px 0 8px; }
+.class-log-extras{ border:0; padding:0; margin:6px 0 0; display:grid; gap:6px; }
+.skill-chip{ display:inline-flex; align-items:center; padding:3px 9px; border-radius:999px; font-size:12px; border:1px solid var(--paper-line); color:var(--ink-soft); background:var(--paper-warm); }
+.skill-toggle{ display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border:1px solid var(--paper-line); border-radius:999px; cursor:pointer; font-size:13px; color:var(--ink); background:var(--paper); }
+.skill-toggle input, label.att-choice input{ margin:0; accent-color:var(--ink); }
+.att-chip-wrap{ display:inline-flex; align-items:center; gap:2px; }
+.att-more{ border:0; background:none; color:var(--ink-soft); cursor:pointer; font-size:16px; line-height:1; padding:4px 6px; border-radius:8px; }
+.att-more:hover, .att-more:focus-visible{ background:var(--paper-warm); color:var(--ink); }
+.class-log-extras .att-new{ margin:2px 0 0; max-width:360px; }
+.att-menu-box{ display:grid; gap:8px; padding:10px 12px; border:1px solid var(--paper-line); border-radius:12px; background:var(--paper-warm); max-width:420px; }
+.att-menu-box .profile-edit-input{ margin:0; }
+.att-colors{ display:flex; flex-wrap:wrap; gap:6px; }
+button.att-swatch{ cursor:pointer; font-family:inherit; }
+button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600; }
+.att-menu-actions{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.att-menu-actions .btn{ width:auto; min-width:0; margin:0; padding:8px 14px; }
+@media (max-width: 600px){ label.att-choice, .skill-toggle, button.att-swatch, .att-more{ min-height:44px; } }
 /* Mural da professora (087, shared/mural.js) */
 .mural-count{ display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 6px; margin-left:6px; border-radius:999px; background:var(--seal-red); color:var(--on-seal-red); font-size:11.5px; font-weight:800; line-height:1; vertical-align:middle; }
 .tab-btn > .mural-count{ position:absolute; top:2px; right:4px; margin:0; min-width:18px; height:18px; font-size:10.5px; border:2px solid var(--paper); box-sizing:content-box; padding:0 4px; }
@@ -3975,6 +4002,20 @@ body.hide-pinyin .prompt-pinyin{
   .panel-view .panel-nav{ flex-wrap:nowrap; overflow-x:auto; max-width:100%; justify-content:flex-start; }
   .panel-view .panel-nav .deck-topbar-btn{ white-space:nowrap; }
 }
+/* Modo foco na Conjugação, na Revisão e nos Desafios (shared/activity-focus.js): a sessão
+   fica numa coluna centralizada; no topo, o link de voltar e a ⚑ (a da topbar some no foco). */
+.activity-focus-bar{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.activity-focus-bar .back-link{ margin-bottom:0; }
+.activity-report-btn{ display:none; }
+body[data-activity-focus] .activity-report-btn{
+  display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:36px; height:36px; border-radius:50%;
+  border:1px solid var(--paper-line); background:var(--paper); color:var(--ink-soft); font-size:16px; cursor:pointer;
+}
+body[data-activity-focus] .activity-report-btn:hover{ color:var(--ink); }
+body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
+#app.lesson-focus #review-session-wrap, #app.lesson-focus #challenge-player-wrap{ max-width:760px; margin-left:auto; margin-right:auto; }
+#app.lesson-focus #conj-practice-wrap{ max-width:1040px; margin-left:auto; margin-right:auto; }
+@media (max-width:620px){ body[data-activity-focus] .activity-report-btn{ width:44px; height:44px; } }
 /* ---------- Cara de jogo: telas (passo 4, docs/historico/15) ----------
    Bloco único com o visual "de jogo" das telas fora de Amigos: pódio e "faltam
    X XP" (Ranking e Amigos), Perfil, Progresso, Metas e o volume dos cartões
@@ -5297,6 +5338,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/topbar-stats.js"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>
+<script src="../shared/activity-focus.js"></script>
 <script src="../shared/router.js"></script>
 <script src="../shared/anki-export.js"></script>
 <script src="../shared/pwa.js"></script>
@@ -5311,6 +5353,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/core/gamificacao.js"></script>
 <script src="../shared/core/revisao-decks.js"></script>
 <script src="../shared/core/exercicios-licao.js"></script>
+<script src="../shared/core/estado-trilha-desafios.js"></script>
 <script src="app.js"></script>
 <script src="../shared/language-switcher.js"></script>
 </body>

@@ -2,20 +2,20 @@
  "gerado": "script: scripts/e4-classify-functions.js",
  "limiteQuaseIgual": 0.75,
  "linhasArquivo": {
-  "fr": 11621,
-  "zh": 7760
+  "fr": 10537,
+  "zh": 6653
  },
  "resumo": {
   "funcoes": {
    "idêntica": {
-    "n": 61,
-    "linesFr": 861,
-    "linesZh": 873
+    "n": 3,
+    "linesFr": 16,
+    "linesZh": 16
    },
    "quase igual": {
     "n": 55,
-    "linesFr": 2545,
-    "linesZh": 2561
+    "linesFr": 2556,
+    "linesZh": 2572
    },
    "divergente": {
     "n": 21,
@@ -41,8 +41,8 @@
    },
    "quase igual": {
     "n": 5,
-    "linesFr": 232,
-    "linesZh": 207
+    "linesFr": 236,
+    "linesZh": 211
    },
    "divergente": {
     "n": 14,
@@ -81,6 +81,15 @@
    "linesZh": 151
   },
   {
+   "name": "renderReviewView",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.91,
+   "linesFr": 153,
+   "linesZh": 143
+  },
+  {
    "name": "renderReorderExercise",
    "kind": "function",
    "area": "exercícios de lição",
@@ -88,15 +97,6 @@
    "similarity": 0.85,
    "linesFr": 147,
    "linesZh": 140
-  },
-  {
-   "name": "renderReviewView",
-   "kind": "function",
-   "area": "revisão e decks",
-   "cls": "quase igual",
-   "similarity": 0.9,
-   "linesFr": 148,
-   "linesZh": 138
   },
   {
    "name": "renderClozeExercise",
@@ -135,6 +135,15 @@
    "linesZh": 102
   },
   {
+   "name": "STATE",
+   "kind": "dados",
+   "area": "estado e persistência",
+   "cls": "quase igual",
+   "similarity": 0.8,
+   "linesFr": 110,
+   "linesZh": 98
+  },
+  {
    "name": "buildUnitBlock",
    "kind": "function",
    "area": "mapa da trilha e unidades",
@@ -151,15 +160,6 @@
    "similarity": null,
    "linesFr": 204,
    "linesZh": 0
-  },
-  {
-   "name": "STATE",
-   "kind": "dados",
-   "area": "estado e persistência",
-   "cls": "quase igual",
-   "similarity": 0.8,
-   "linesFr": 106,
-   "linesZh": 94
   },
   {
    "name": "ANKI_EXPORT_CONFIG",
@@ -234,15 +234,6 @@
    "linesZh": 78
   },
   {
-   "name": "renderActivityHeatmap",
-   "kind": "function",
-   "area": "mapa da trilha e unidades",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 73,
-   "linesZh": 78
-  },
-  {
    "name": "STEP_STATE",
    "kind": "dados",
    "area": "estado e persistência",
@@ -268,15 +259,6 @@
    "similarity": 0.81,
    "linesFr": 72,
    "linesZh": 75
-  },
-  {
-   "name": "renderProgressView",
-   "kind": "function",
-   "area": "mapa da trilha e unidades",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 72,
-   "linesZh": 72
   },
   {
    "name": "renderClozeCard",
@@ -387,15 +369,6 @@
    "linesZh": 49
   },
   {
-   "name": "wireKnowButtons",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 53,
-   "linesZh": 53
-  },
-  {
    "name": "renderConceptStep",
    "kind": "function",
    "area": "exercícios de lição",
@@ -403,24 +376,6 @@
    "similarity": 0.95,
    "linesFr": 51,
    "linesZh": 55
-  },
-  {
-   "name": "renderDailyChallengesScreen",
-   "kind": "function",
-   "area": "desafios e ditados",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 51,
-   "linesZh": 51
-  },
-  {
-   "name": "advanceAcquisitionPhase",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 48,
-   "linesZh": 52
   },
   {
    "name": "freshAcquisitionState",
@@ -484,15 +439,6 @@
    "similarity": null,
    "linesFr": 0,
    "linesZh": 89
-  },
-  {
-   "name": "renderDailyChallengesStrip",
-   "kind": "function",
-   "area": "desafios e ditados",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 42,
-   "linesZh": 42
   },
   {
    "name": "speakChineseAudioOnly",
@@ -603,22 +549,13 @@
    "linesZh": 37
   },
   {
-   "name": "showBadgeUnlockCelebration",
-   "kind": "function",
-   "area": "mapa da trilha e unidades",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 35,
-   "linesZh": 35
-  },
-  {
    "name": "openReviewSession",
    "kind": "function",
    "area": "revisão e decks",
    "cls": "quase igual",
    "similarity": 0.96,
-   "linesFr": 36,
-   "linesZh": 34
+   "linesFr": 37,
+   "linesZh": 35
   },
   {
    "name": "serializeState",
@@ -720,15 +657,6 @@
    "linesZh": 62
   },
   {
-   "name": "registerStudyToday",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 29,
-   "linesZh": 32
-  },
-  {
    "name": "switchTab",
    "kind": "dados",
    "area": "outros",
@@ -765,15 +693,6 @@
    "linesZh": 27
   },
   {
-   "name": "showCorrectFeedbackPanel",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 27,
-   "linesZh": 27
-  },
-  {
    "name": "flyBlockToSlot",
    "kind": "function",
    "area": "outros",
@@ -790,6 +709,15 @@
    "similarity": null,
    "linesFr": 52,
    "linesZh": 0
+  },
+  {
+   "name": "backToReviewModeSelect",
+   "kind": "function",
+   "area": "revisão e decks",
+   "cls": "quase igual",
+   "similarity": 0.98,
+   "linesFr": 26,
+   "linesZh": 25
   },
   {
    "name": "REALITY_NOTE_LEVEL_GUIDANCE",
@@ -909,15 +837,6 @@
    "linesZh": 42
   },
   {
-   "name": "backToReviewModeSelect",
-   "kind": "function",
-   "area": "revisão e decks",
-   "cls": "quase igual",
-   "similarity": 0.98,
-   "linesFr": 21,
-   "linesZh": 20
-  },
-  {
    "name": "importChallengesFromJSON",
    "kind": "function",
    "area": "desafios e ditados",
@@ -925,15 +844,6 @@
    "similarity": null,
    "linesFr": 41,
    "linesZh": 0
-  },
-  {
-   "name": "loadStateAndRender",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 20,
-   "linesZh": 20
   },
   {
    "name": "maybeSendStudyReminder",
@@ -972,15 +882,6 @@
    "linesZh": 0
   },
   {
-   "name": "renderChallengeChipHTML",
-   "kind": "function",
-   "area": "desafios e ditados",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 19,
-   "linesZh": 19
-  },
-  {
    "name": "renderUnitSummaryHTML",
    "kind": "function",
    "area": "mapa da trilha e unidades",
@@ -1006,15 +907,6 @@
    "similarity": null,
    "linesFr": 37,
    "linesZh": 0
-  },
-  {
-   "name": "spawnConfetti",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 17,
-   "linesZh": 17
   },
   {
    "name": "buildHanziCards",
@@ -1060,15 +952,6 @@
    "similarity": 0.7,
    "linesFr": 19,
    "linesZh": 13
-  },
-  {
-   "name": "ensureCourseDecksLoaded",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 16,
-   "linesZh": 16
   },
   {
    "name": "buildCardsFromUnits",
@@ -1143,15 +1026,6 @@
    "linesZh": 31
   },
   {
-   "name": "ensureDailyBucket",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 15,
-   "linesZh": 15
-  },
-  {
    "name": "currentStepDefs",
    "kind": "function",
    "area": "outros",
@@ -1159,24 +1033,6 @@
    "similarity": 0.84,
    "linesFr": 16,
    "linesZh": 14
-  },
-  {
-   "name": "startBridgeQueue",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 15,
-   "linesZh": 15
-  },
-  {
-   "name": "animateCount",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 15,
-   "linesZh": 15
   },
   {
    "name": "renderDictationList",
@@ -1260,15 +1116,6 @@
    "linesZh": 14
   },
   {
-   "name": "gradeButtonsHTML",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 14,
-   "linesZh": 14
-  },
-  {
    "name": "mergeSplitCompoundWords",
    "kind": "function",
    "area": "outros",
@@ -1294,33 +1141,6 @@
    "similarity": null,
    "linesFr": 27,
    "linesZh": 0
-  },
-  {
-   "name": "playFeedbackTone",
-   "kind": "function",
-   "area": "desafios e ditados",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 13,
-   "linesZh": 13
-  },
-  {
-   "name": "mergeTeacherFlashcardsIntoState",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 13,
-   "linesZh": 13
-  },
-  {
-   "name": "mergeSelfFlashcardsIntoState",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 13,
-   "linesZh": 13
   },
   {
    "name": "buildModuleReviewRow",
@@ -1377,15 +1197,6 @@
    "linesZh": 0
   },
   {
-   "name": "buildAcquisitionBlocks",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 12,
-   "linesZh": 12
-  },
-  {
    "name": "exitToPath",
    "kind": "function",
    "area": "mapa da trilha e unidades",
@@ -1393,15 +1204,6 @@
    "similarity": 0.89,
    "linesFr": 13,
    "linesZh": 11
-  },
-  {
-   "name": "advanceToNextBlockOrConsolidation",
-   "kind": "function",
-   "area": "desafios e ditados",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 12,
-   "linesZh": 12
   },
   {
    "name": "renderClozeGrammarFeedback",
@@ -1449,15 +1251,6 @@
    "linesZh": 11
   },
   {
-   "name": "countStudyWeekends",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 11,
-   "linesZh": 11
-  },
-  {
    "name": "dlgVocabTerms",
    "kind": "function",
    "area": "exercícios de lição",
@@ -1465,15 +1258,6 @@
    "similarity": 0.36,
    "linesFr": 16,
    "linesZh": 6
-  },
-  {
-   "name": "checkUnitCompletion",
-   "kind": "function",
-   "area": "mapa da trilha e unidades",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 11,
-   "linesZh": 11
   },
   {
    "name": "noteOrConceptReviewHTML",
@@ -1638,15 +1422,6 @@
    "linesZh": 9
   },
   {
-   "name": "unitProgressFraction",
-   "kind": "function",
-   "area": "mapa da trilha e unidades",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 9,
-   "linesZh": 9
-  },
-  {
    "name": "advanceUnitStep",
    "kind": "function",
    "area": "mapa da trilha e unidades",
@@ -1656,27 +1431,9 @@
    "linesZh": 9
   },
   {
-   "name": "setAcqPhaseBanner",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 9,
-   "linesZh": 9
-  },
-  {
    "name": "MATCH_STATE",
    "kind": "dados",
    "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 9,
-   "linesZh": 9
-  },
-  {
-   "name": "updateStudySetting",
-   "kind": "function",
-   "area": "outros",
    "cls": "idêntica",
    "similarity": 1,
    "linesFr": 9,
@@ -1773,51 +1530,6 @@
    "linesZh": 8
   },
   {
-   "name": "todaysChallenges",
-   "kind": "function",
-   "area": "desafios e ditados",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 8,
-   "linesZh": 8
-  },
-  {
-   "name": "lessonRowState",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 8,
-   "linesZh": 8
-  },
-  {
-   "name": "wireHeaderActivation",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 8,
-   "linesZh": 8
-  },
-  {
-   "name": "buildMixedQueue",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 8,
-   "linesZh": 8
-  },
-  {
-   "name": "startBlockCheckpoint",
-   "kind": "function",
-   "area": "checkpoint e testes",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 8,
-   "linesZh": 8
-  },
-  {
    "name": "wireFrAccentPicker",
    "kind": "function",
    "area": "desafios e ditados",
@@ -1825,24 +1537,6 @@
    "similarity": null,
    "linesFr": 16,
    "linesZh": 0
-  },
-  {
-   "name": "ensureDecksLoadedForReview",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 8,
-   "linesZh": 8
-  },
-  {
-   "name": "shuffle",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 8,
-   "linesZh": 8
   },
   {
    "name": "switchSettingsSection",
@@ -2007,38 +1701,11 @@
    "linesZh": 7
   },
   {
-   "name": "addSelfFlashcardToState",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 7,
-   "linesZh": 7
-  },
-  {
-   "name": "challengeById",
-   "kind": "function",
-   "area": "desafios e ditados",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 7,
-   "linesZh": 7
-  },
-  {
    "name": "assignTodaysMissions",
    "kind": "function",
    "area": "perfil, ranking e social",
    "cls": "quase igual",
    "similarity": 0.87,
-   "linesFr": 7,
-   "linesZh": 7
-  },
-  {
-   "name": "currentWeekStart",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
    "linesFr": 7,
    "linesZh": 7
   },
@@ -2057,42 +1724,6 @@
    "area": "mapa da trilha e unidades",
    "cls": "divergente",
    "similarity": 0.68,
-   "linesFr": 7,
-   "linesZh": 7
-  },
-  {
-   "name": "isDailyChallengesStripCollapsed",
-   "kind": "function",
-   "area": "desafios e ditados",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 7,
-   "linesZh": 7
-  },
-  {
-   "name": "acqPhaseSequence",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 7,
-   "linesZh": 7
-  },
-  {
-   "name": "buildBlockCheckpointQueue",
-   "kind": "function",
-   "area": "checkpoint e testes",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 7,
-   "linesZh": 7
-  },
-  {
-   "name": "acqPhaseBannerText",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
    "linesFr": 7,
    "linesZh": 7
   },
@@ -2295,15 +1926,6 @@
    "linesZh": 13
   },
   {
-   "name": "hardWordsPool",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 6,
-   "linesZh": 6
-  },
-  {
    "name": "REVIEW_ORIGIN_LABELS",
    "kind": "dados",
    "area": "revisão e decks",
@@ -2466,27 +2088,9 @@
    "linesZh": 11
   },
   {
-   "name": "updateSelfFlashcardStatusInState",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 5,
-   "linesZh": 5
-  },
-  {
    "name": "CULTURE_NOTE_BANNER_TEXT",
    "kind": "dados",
    "area": "revisão e decks",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 5,
-   "linesZh": 5
-  },
-  {
-   "name": "recalculateUnlockedUnits",
-   "kind": "function",
-   "area": "mapa da trilha e unidades",
    "cls": "idêntica",
    "similarity": 1,
    "linesFr": 5,
@@ -2511,29 +2115,11 @@
    "linesZh": 5
   },
   {
-   "name": "finishBlockIntro",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 5,
-   "linesZh": 5
-  },
-  {
    "name": "currentStudentName",
    "kind": "function",
    "area": "perfil, ranking e social",
    "cls": "divergente",
    "similarity": 0.65,
-   "linesFr": 5,
-   "linesZh": 5
-  },
-  {
-   "name": "addStudyMinutes",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
    "linesFr": 5,
    "linesZh": 5
   },
@@ -2727,36 +2313,9 @@
    "linesZh": 4
   },
   {
-   "name": "replaceSelfFlashcardInState",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 4,
-   "linesZh": 4
-  },
-  {
    "name": "EASY_CHALLENGES",
    "kind": "dados",
    "area": "desafios e ditados",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 4,
-   "linesZh": 4
-  },
-  {
-   "name": "ensurePeriodXp",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 4,
-   "linesZh": 4
-  },
-  {
-   "name": "hideAcqPhaseBanner",
-   "kind": "function",
-   "area": "outros",
    "cls": "idêntica",
    "similarity": 1,
    "linesFr": 4,
@@ -2770,24 +2329,6 @@
    "similarity": null,
    "linesFr": 8,
    "linesZh": 0
-  },
-  {
-   "name": "hasPlainFrontBack",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 4,
-   "linesZh": 4
-  },
-  {
-   "name": "normalizeNewCardsPerDay",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 4,
-   "linesZh": 4
   },
   {
    "name": "stopDictationSentenceAudio",
@@ -3069,15 +2610,6 @@
    "linesZh": 3
   },
   {
-   "name": "removeSelfFlashcardFromState",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 3,
-   "linesZh": 3
-  },
-  {
    "name": "registerDailyConjugationTense",
    "kind": "function",
    "area": "conjugação",
@@ -3105,15 +2637,6 @@
    "linesZh": 3
   },
   {
-   "name": "unitBlockState",
-   "kind": "function",
-   "area": "estado e persistência",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 3,
-   "linesZh": 3
-  },
-  {
    "name": "isAdminUser",
    "kind": "function",
    "area": "perfil, ranking e social",
@@ -3132,56 +2655,11 @@
    "linesZh": 0
   },
   {
-   "name": "buildPracticeQueue",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 3,
-   "linesZh": 3
-  },
-  {
-   "name": "prefersReducedMotion",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 3,
-   "linesZh": 3
-  },
-  {
-   "name": "anyAppModalOpen",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 3,
-   "linesZh": 3
-  },
-  {
    "name": "showWrongAnswerPanel",
    "kind": "function",
    "area": "exercícios de lição",
    "cls": "quase igual",
    "similarity": 0.78,
-   "linesFr": 3,
-   "linesZh": 3
-  },
-  {
-   "name": "renderGoalsView",
-   "kind": "function",
-   "area": "mapa da trilha e unidades",
-   "cls": "idêntica",
-   "similarity": 1,
-   "linesFr": 3,
-   "linesZh": 3
-  },
-  {
-   "name": "acceptedForms",
-   "kind": "function",
-   "area": "outros",
-   "cls": "idêntica",
-   "similarity": 1,
    "linesFr": 3,
    "linesZh": 3
   },

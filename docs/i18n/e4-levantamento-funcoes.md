@@ -1,106 +1,48 @@
 # E4, passo 1: levantamento por função de `fr/app.js` x `zh/app.js`
 
 Gerado por `scripts/e4-classify-functions.js` (parser do TypeScript sobre o código real; só leitura). Dados completos em `docs/i18n/e4-levantamento-funcoes.json`.
-Declarações de topo: 513 em `fr/app.js` (11621 linhas) e 270 em `zh/app.js` (7760 linhas). "Quase igual" = pelo menos 75% de semelhança em pares de símbolos do código (sem comentários e espaços).
+Declarações de topo: 455 em `fr/app.js` (10537 linhas) e 212 em `zh/app.js` (6653 linhas). "Quase igual" = pelo menos 75% de semelhança em pares de símbolos do código (sem comentários e espaços).
 
 ## 1. Resumo das funções (declarações de função)
 
 | Classe | Funções | Linhas no fr | Linhas no zh | % das linhas de função do fr | % do zh |
 |---|---:|---:|---:|---:|---:|
-| idêntica | 61 | 861 | 873 | 10.6% | 16.1% |
-| quase igual | 55 | 2545 | 2561 | 31.3% | 47.3% |
-| divergente | 21 | 771 | 624 | 9.5% | 11.5% |
-| só fr | 237 | 3965 | 0 | 48.7% | 0% |
-| só zh | 62 | 0 | 1358 | 0% | 25.1% |
+| idêntica | 3 | 16 | 16 | 0.2% | 0.4% |
+| quase igual | 55 | 2556 | 2572 | 35% | 56.3% |
+| divergente | 21 | 771 | 624 | 10.6% | 13.7% |
+| só fr | 237 | 3965 | 0 | 54.3% | 0% |
+| só zh | 62 | 0 | 1358 | 0% | 29.7% |
 
-Total de linhas em funções: fr 8142, zh 5416. Os blocos de dados e constantes (não função) somam 151 declarações e ficam fora desta conta.
+Total de linhas em funções: fr 7308, zh 4570. Os blocos de dados e constantes (não função) somam 151 declarações e ficam fora desta conta.
 
 ## 2. Por área (funções)
 
 | Área | Idênticas | Quase iguais | Divergentes | Só fr | Só zh |
 |---|---:|---:|---:|---:|---:|
-| checkpoint e testes | 2 | 0 | 0 | 4 | 0 |
+| checkpoint e testes | 0 | 0 | 0 | 4 | 0 |
 | conjugação | 0 | 0 | 0 | 9 | 0 |
-| desafios e ditados | 8 | 0 | 0 | 87 | 7 |
-| estado e persistência | 14 | 2 | 1 | 9 | 4 |
+| desafios e ditados | 0 | 0 | 0 | 87 | 7 |
+| estado e persistência | 0 | 2 | 1 | 9 | 4 |
 | exercícios de lição | 0 | 19 | 8 | 32 | 15 |
-| mapa da trilha e unidades | 7 | 7 | 6 | 32 | 3 |
-| outros | 27 | 6 | 1 | 24 | 9 |
+| mapa da trilha e unidades | 0 | 7 | 6 | 32 | 3 |
+| outros | 0 | 6 | 1 | 24 | 9 |
 | perfil, ranking e social | 3 | 3 | 3 | 2 | 0 |
 | revisão e decks | 0 | 13 | 2 | 32 | 8 |
 | áudio e fala | 0 | 5 | 0 | 6 | 16 |
 
 ## 3. Idênticas (candidatas ao passo 3, extração primeiro)
 
-- `renderActivityHeatmap` (73 linhas, mapa da trilha e unidades)
-- `renderProgressView` (72 linhas, mapa da trilha e unidades)
-- `wireKnowButtons` (53 linhas, outros)
-- `renderDailyChallengesScreen` (51 linhas, desafios e ditados)
-- `advanceAcquisitionPhase` (48 linhas, outros)
-- `renderDailyChallengesStrip` (42 linhas, desafios e ditados)
-- `showBadgeUnlockCelebration` (35 linhas, mapa da trilha e unidades)
-- `registerStudyToday` (29 linhas, outros)
-- `showCorrectFeedbackPanel` (27 linhas, outros)
-- `loadStateAndRender` (20 linhas, estado e persistência)
-- `renderChallengeChipHTML` (19 linhas, desafios e ditados)
-- `spawnConfetti` (17 linhas, outros)
-- `ensureCourseDecksLoaded` (16 linhas, estado e persistência)
-- `ensureDailyBucket` (15 linhas, estado e persistência)
-- `startBridgeQueue` (15 linhas, outros)
-- `animateCount` (15 linhas, outros)
-- `gradeButtonsHTML` (14 linhas, outros)
-- `playFeedbackTone` (13 linhas, desafios e ditados)
-- `mergeTeacherFlashcardsIntoState` (13 linhas, estado e persistência)
-- `mergeSelfFlashcardsIntoState` (13 linhas, estado e persistência)
-- `buildAcquisitionBlocks` (12 linhas, outros)
-- `advanceToNextBlockOrConsolidation` (12 linhas, desafios e ditados)
-- `countStudyWeekends` (11 linhas, outros)
-- `checkUnitCompletion` (11 linhas, mapa da trilha e unidades)
-- `unitProgressFraction` (9 linhas, mapa da trilha e unidades)
-- `setAcqPhaseBanner` (9 linhas, outros)
-- `updateStudySetting` (9 linhas, outros)
-- `todaysChallenges` (8 linhas, desafios e ditados)
-- `lessonRowState` (8 linhas, estado e persistência)
-- `wireHeaderActivation` (8 linhas, outros)
-- `buildMixedQueue` (8 linhas, outros)
-- `startBlockCheckpoint` (8 linhas, checkpoint e testes)
-- `ensureDecksLoadedForReview` (8 linhas, estado e persistência)
-- `shuffle` (8 linhas, outros)
 - `switchSettingsSection` (8 linhas, perfil, ranking e social)
-- `addSelfFlashcardToState` (7 linhas, estado e persistência)
-- `challengeById` (7 linhas, desafios e ditados)
-- `currentWeekStart` (7 linhas, outros)
-- `isDailyChallengesStripCollapsed` (7 linhas, desafios e ditados)
-- `acqPhaseSequence` (7 linhas, outros)
-- `buildBlockCheckpointQueue` (7 linhas, checkpoint e testes)
-- `acqPhaseBannerText` (7 linhas, outros)
-- `hardWordsPool` (6 linhas, outros)
-- `updateSelfFlashcardStatusInState` (5 linhas, estado e persistência)
-- `recalculateUnlockedUnits` (5 linhas, mapa da trilha e unidades)
-- `finishBlockIntro` (5 linhas, outros)
-- `addStudyMinutes` (5 linhas, outros)
 - `renderSettingsView` (5 linhas, perfil, ranking e social)
-- `replaceSelfFlashcardInState` (4 linhas, estado e persistência)
-- `ensurePeriodXp` (4 linhas, estado e persistência)
-- `hideAcqPhaseBanner` (4 linhas, outros)
-- `hasPlainFrontBack` (4 linhas, outros)
-- `normalizeNewCardsPerDay` (4 linhas, estado e persistência)
-- `removeSelfFlashcardFromState` (3 linhas, estado e persistência)
-- `unitBlockState` (3 linhas, estado e persistência)
 - `isAdminUser` (3 linhas, perfil, ranking e social)
-- `buildPracticeQueue` (3 linhas, outros)
-- `prefersReducedMotion` (3 linhas, outros)
-- `anyAppModalOpen` (3 linhas, outros)
-- `renderGoalsView` (3 linhas, mapa da trilha e unidades)
-- `acceptedForms` (3 linhas, outros)
 
 ## 4. Quase iguais (passo 4: extrair com ponto de extensão)
 
 | Função | Semelhança | Linhas fr / zh | Área |
 |---|---:|---:|---|
 | `renderSpeedReview` | 95% | 150 / 151 | revisão e decks |
+| `renderReviewView` | 91% | 153 / 143 | revisão e decks |
 | `renderReorderExercise` | 85% | 147 / 140 | exercícios de lição |
-| `renderReviewView` | 90% | 148 / 138 | revisão e decks |
 | `renderClozeExercise` | 84% | 112 / 126 | exercícios de lição |
 | `renderDialogueStep` | 91% | 115 / 116 | exercícios de lição |
 | `buildUnitBlock` | 89% | 106 / 101 | mapa da trilha e unidades |
@@ -126,15 +68,15 @@ Total de linhas em funções: fr 8142, zh 5416. Os blocos de dados e constantes 
 | `renderStepProgress` | 79% | 38 / 38 | mapa da trilha e unidades |
 | `wireDontKnowButton` | 97% | 38 / 38 | outros |
 | `addXP` | 81% | 37 / 37 | perfil, ranking e social |
-| `openReviewSession` | 96% | 36 / 34 | revisão e decks |
+| `openReviewSession` | 96% | 37 / 35 | revisão e decks |
 | `serializeState` | 76% | 36 / 32 | estado e persistência |
 | `dlgPlayLine` | 94% | 32 / 31 | exercícios de lição |
 | `playPregeneratedAudio` | 93% | 31 / 31 | áudio e fala |
 | `buildReorderDistractors` | 94% | 27 / 27 | exercícios de lição |
 | `flyBlockToSlot` | 96% | 26 / 26 | outros |
+| `backToReviewModeSelect` | 98% | 26 / 25 | revisão e decks |
 | `mapUnitDescribe` | 94% | 24 / 23 | mapa da trilha e unidades |
 | `renderMatchGame` | 78% | 23 / 23 | exercícios de lição |
-| `backToReviewModeSelect` | 98% | 21 / 20 | revisão e decks |
 | `maybeSendStudyReminder` | 94% | 20 / 20 | outros |
 | `buildCardsFromUnits` | 82% | 16 / 15 | revisão e decks |
 | `renderDialogueCheckStep` | 82% | 15 / 16 | exercícios de lição |
