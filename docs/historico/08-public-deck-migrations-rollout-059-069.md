@@ -298,3 +298,9 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Staging: 2026-10-15 (`095_friend_suggestions` + `095b_friend_suggestions_invited_by`, que é a versão final da função).
   Produção: 2026-10-15, arquivo inteiro, versão `20261015010133`.
 - Detalhes: `docs/historico/17-sugestoes-de-amigos.md`.
+
+## 101 -- Amigos em dupla: sequência com amigo, cutucar, missão em dupla (2026-10-15)
+
+- `shared/supabase_migrations/101_friends_duo.sql` (a 100 já era `100_review_bank_agent_other_students`, de outra conversa). Sem DROP.
+- Staging: 2026-10-15, versão `20261015012927`. Produção: pendente de autorização (aplicar o arquivo inteiro).
+- Detalhes: `docs/historico/18-amigos-em-dupla.md`.

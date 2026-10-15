@@ -396,17 +396,17 @@ async function runNew(browser, lang, port){
   // serviceWorker.ready nunca resolve com o SW bloqueado no teste: sem inscrição de push.
   await page.evaluate(() => { getLocalPushSubscription = async () => null; switchTab('settings'); switchSettingsSection('notifications'); });
   await page.waitForSelector('#settings-notifications-content #friends-prefs-body [data-friends-pref]', { state: 'attached' });
-  // 095 (2026-10-15): entrou o 6º, "Aparecer nas sugestões de amigos".
-  check(`${L}: 6 interruptores (com parabéns e sugestões), todos ligados por padrão`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 6);
+  // 095 (2026-10-15): entrou o 6º, "Aparecer nas sugestões de amigos". 101 (2026-10-15): cutucadas e missões em dupla.
+  check(`${L}: 8 interruptores (com parabéns, sugestões, cutucadas e missões), todos ligados por padrão`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 8);
   await page.uncheck('#friends-prefs-body [data-friends-pref="accept_requests"]');
   // (Configurações também cria a linha de notification_preferences: filtra a de friend_settings.)
   await page.waitForFunction(() => (window.__upserts || []).some(u => u.table === 'friend_settings'));
   const up = await page.evaluate(() => window.__upserts.find(u => u.table === 'friend_settings'));
   check(`${L}: desligar "aceitar pedidos" grava em friend_settings`, up.table === 'friend_settings' && up.row.user_id === 'me' && up.row.accept_requests === false, up);
   await page.evaluate(() => renderNotificationPreferencesView());
-  await page.waitForFunction(() => document.querySelectorAll('#friends-prefs-body [data-friends-pref]').length === 6);
+  await page.waitForFunction(() => document.querySelectorAll('#friends-prefs-body [data-friends-pref]').length === 8);
   check(`${L}: preferência persiste ao recarregar a aba`, (await page.locator('#friends-prefs-body [data-friends-pref="accept_requests"]').isChecked()) === false);
-  check(`${L}: os outros 5 continuam ligados`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 5);
+  check(`${L}: os outros 7 continuam ligados`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 7);
   // convite: o botão único copia o link quando o aparelho não tem "compartilhar"
   await page.evaluate(() => { Object.defineProperty(navigator, 'share', { value: undefined, configurable: true }); switchTab('friends'); });
   await page.waitForSelector('.friends-head [data-friends-invite]');

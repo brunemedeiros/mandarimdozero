@@ -15,6 +15,7 @@ const BADGE_ICON_BASE = '../shared/icons/fluent/';
 
 let FRIENDS_ACCEPTED_COUNT = null; // null = ainda não carregado (a trilha Amigos só aparece depois)
 let PODIUM_WEEKS = null; // null = ainda não carregado (a trilha Pódio só aparece depois)
+let DUO_MISSIONS = null; // missões em dupla cumpridas (101); null = ainda não carregado
 let badgeTrackMemo = null;
 
 function badgeOwnGender(){
@@ -31,6 +32,7 @@ function badgeMetrics(s){
   const m = Object.assign({}, collectBadgeMetrics(s));
   m.friends = FRIENDS_ACCEPTED_COUNT;
   m.podiumWeeks = PODIUM_WEEKS;
+  m.duoMissions = DUO_MISSIONS;
   return m;
 }
 
@@ -39,7 +41,7 @@ function badgeMetrics(s){
 function evaluateBadgeTracks(s){
   const now = Date.now();
   const stored = badgeStoredIdsHere();
-  const key = stored.length + '|' + FRIENDS_ACCEPTED_COUNT + '|' + PODIUM_WEEKS;
+  const key = stored.length + '|' + FRIENDS_ACCEPTED_COUNT + '|' + PODIUM_WEEKS + '|' + DUO_MISSIONS;
   if (badgeTrackMemo && badgeTrackMemo.s === s && badgeTrackMemo.key === key && now - badgeTrackMemo.at < 60) return badgeTrackMemo.res;
   const m = badgeMetrics(s);
   const res = { m, tracks: BadgeTracks.evaluate(m, stored) };
@@ -243,4 +245,21 @@ async function loadPodiumWeeks(){
     BADGES.filter(b => b.track === 'podium' && b.level <= storedLevel).forEach(b => earnedBadgeIds.add(b.id));
     checkAndCelebrateBadges();
   } catch (e) { console.error('Pódio (conquistas):', e); }
+}
+
+// Missões em dupla cumpridas (trilha Missões em Dupla, RPC my_duo_missions_done da 101). Mesma lógica do Pódio:
+// recarrega ao abrir o site e quando uma missão é cumprida na aba Amigos.
+async function loadDuoMissionsDone(){
+  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER || typeof supabaseClient === 'undefined') return;
+  try {
+    const { data, error } = await supabaseClient.rpc('my_duo_missions_done');
+    if (error || typeof data !== 'number') return;
+    const first = DUO_MISSIONS === null;
+    if (!first && DUO_MISSIONS === data) return;
+    DUO_MISSIONS = data;
+    if (first) rebuildTrackBadges(); else invalidateBadgeTracks();
+    const storedLevel = BadgeTracks.storedLevels(badgeStoredIdsHere()).duo || 0;
+    BADGES.filter(b => b.track === 'duo' && b.level <= storedLevel).forEach(b => earnedBadgeIds.add(b.id));
+    checkAndCelebrateBadges();
+  } catch (e) { console.error('Missões em dupla (conquistas):', e); }
 }
