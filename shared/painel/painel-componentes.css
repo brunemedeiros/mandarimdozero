@@ -672,3 +672,10 @@
 .painel .att-menu-actions button{ width: auto; margin: 0; }
 .painel .class-log-extras legend{ font-weight: 700; margin-bottom: .35rem; }
 .painel .class-log-extras{ margin: 0 0 .75rem; padding: 0; border: 0; }
+
+/* Convites pendentes (Alunos): lista simples com avatar, nome e ações */
+.painel .p-convites{ list-style: none; margin: 0; padding: 0; }
+.painel .p-convites li{ display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin: 0; padding: .7rem 0; border-top: 1px solid var(--p-linha); }
+.painel .p-convites li:first-child{ border-top: 0; }
+.painel .p-convites .p-acoes{ margin-left: auto; }
+.painel .p-convites .is-expired small{ color: var(--p-erro); }

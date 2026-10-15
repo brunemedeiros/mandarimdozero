@@ -2646,6 +2646,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'students.queue.empty': 'Nenhum cartão na fila ainda.',
   'students.block.created': 'Cartões que você criou',
   'students.created.empty.title': 'Nenhum cartão criado para {name} ainda',
+  'students.created.empty.titleBare': 'Nenhum cartão criado ainda',
   'students.created.empty.text': 'Os cartões que você criar aparecem aqui, com a força de cada um.',
   'students.created.empty.btn': 'Criar o primeiro cartão',
   'students.created.total': 'Conteúdos criados para este aluno',

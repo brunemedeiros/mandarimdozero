@@ -66,6 +66,12 @@ const check = (n, c, x) => { if (c) ok++; else { ruim++; console.log('  FALHOU:'
     await p.waitForFunction(() => { const b = document.querySelector('[data-bloco-criados]'); return b && !b.querySelector('.p-spinner'); });
     await p.waitForFunction(() => { const b = document.querySelector('[data-bloco-aulas]'); return b && !b.querySelector('.p-spinner'); });
     L('ficha: cartões criados chegaram (12 conteúdos)', /Conteúdos criados para este aluno\s*12/.test(await p.innerText('[data-bloco-criados]')));
+    // K.10 (078): Decks do aluno em árvore, só nome e números
+    await p.waitForFunction(() => { const b = document.querySelector('[data-bloco-decks]'); return b && !b.querySelector('.p-spinner'); });
+    L('Decks do aluno: Meus Decks e Cartões da professora com subdecks', await p.evaluate(() => { const r = [...document.querySelectorAll('[data-tsu-decks] tbody tr')].map(tr => tr.innerText.replace(/\s+/g, ' ').trim()); return r.length === 4 && r[0].startsWith('Meus Decks') && r[1].startsWith('Viagem') && r[2].startsWith('Cartões da professora') && r[3].startsWith('Verbos do dia a dia'); }), await p.innerText('[data-bloco-decks]'));
+    L('Decks do aluno: as 4 colunas (Novos, Aprendendo, Revisão, Devidos) e os números', await p.evaluate(() => { const th = [...document.querySelectorAll('[data-tsu-decks] thead th')].map(e => e.textContent.trim()); const td = [...document.querySelectorAll('[data-tsu-decks] tbody tr')[0].querySelectorAll('td')].map(e => e.textContent.trim()).join(); return th.length === 5 && td === '12,5,40,7'; }));
+    L('Decks do aluno: subdeck com recuo maior que o deck de cima', await p.evaluate(() => { const rows = [...document.querySelectorAll('[data-tsu-decks] tbody th')]; return parseFloat(getComputedStyle(rows[1]).paddingLeft) > parseFloat(getComputedStyle(rows[0]).paddingLeft); }));
+    L('Decks do aluno: zero aparece apagado', !!(await p.$('[data-tsu-decks] td.is-zero')));
     L('ficha: aula recente aparece', (await p.innerText('[data-bloco-aulas]')).includes('Passé composé com être'));
     L('ficha: 30 quadradinhos de atividade, 4 ativos', (await p.$$eval('.p-atividade i', l => l.length)) === 30 && (await p.$$eval('.p-atividade i.on', l => l.length)) === 4);
     L('ficha: a fila empilhada tem texto equivalente', (await p.getAttribute('.p-pilha', 'aria-label')).includes('novos'));
@@ -80,6 +86,8 @@ const check = (n, c, x) => { if (c) ok++; else { ruim++; console.log('  FALHOU:'
 
     // ---- ir para outras abas a partir da ficha ----
     await p.click('[data-abrir-aluno="2"]'); await p.waitForSelector('[data-tsu="ficha"] .p-resumo');
+    await p.waitForFunction(() => { const b = document.querySelector('[data-bloco-decks]'); return b && !b.querySelector('.p-spinner'); });
+    L('Decks do aluno sem cartões: mensagem explicando', (await p.innerText('[data-bloco-decks]')).includes('O aluno ainda não tem cartões nos Decks.'));
     await p.click('[data-ir-secao="classlogs"]');
     L('Registrar aula abre a aba Aulas', await p.evaluate(() => document.querySelector('[data-teacher-section="classlogs"]').classList.contains('is-active')));
     await p.evaluate(() => switchTeacherPanelSection('students')); await p.waitForSelector('[data-tsu="geral"]');
@@ -87,6 +95,8 @@ const check = (n, c, x) => { if (c) ok++; else { ruim++; console.log('  FALHOU:'
 
     // ---- remover vínculo ----
     await p.click('[data-abrir-aluno="3"]'); await p.waitForSelector('[data-tsu="ficha"] .p-resumo');
+    await p.waitForFunction(() => { const b = document.querySelector('[data-bloco-decks]'); return b && !b.querySelector('.p-spinner'); });
+    L('Decks do aluno que falhou: aviso (role=alert) sem derrubar a ficha', !!(await p.$('[data-bloco-decks] [role="alert"]')) && (await p.innerText('[data-bloco-decks]')).includes('Não foi possível carregar os Decks do aluno agora.'));
     await p.click('[data-tsu="ficha"] details.p-menu > summary'); await p.click('[data-remover-vinculo="3"]');
     const dlg = p.locator('dialog.p-dialogo--alerta[open]');
     L('remover: abre confirmação do painel (não o confirm do navegador) com o nome', await dlg.isVisible() && (await dlg.locator('h3').textContent()).includes('Helena Duarte'));
@@ -125,7 +135,43 @@ const check = (n, c, x) => { if (c) ok++; else { ruim++; console.log('  FALHOU:'
     const h = await abrir({ lang, scheme: 'light', admin: false, falhar: ['s4'] }); const p = h.page;
     await p.waitForSelector('[data-tsu="geral"]', { timeout: 15000 });
     L('professora: sem botão Vincular e sem janela de vínculo', !(await p.$('[data-abrir-dialogo="dlg-vincular-aluno"]')) && !(await p.$('#dlg-vincular-aluno')));
-    L('professora: aviso de que a administração vincula', (await p.textContent('[data-tsu="geral"]')).includes('quem vincula alunos é a administração'));
+    L('professora: seção Convidar aluno no lugar do aviso (a professora convida, o aluno aceita)', !!(await p.$('[data-tinv-secao] #tinv-search-input')) && !(await p.textContent('[data-tsu="geral"]')).includes('quem vincula alunos é a administração'));
+    // ---- convite (077): link, idioma, busca, envio e pendentes ----
+    const code0 = lang === 'fr' ? 'abc123def4' : 'mmm111nnn2', outroDir = lang === 'fr' ? 'zh' : 'fr', outroLang = lang === 'fr' ? 'mandarim' : 'frances', outroCode = lang === 'fr' ? 'mmm111nnn2' : 'abc123def4';
+    await p.waitForSelector('#tinv-link-input');
+    L('convite: link do idioma atual', (await p.inputValue('#tinv-link-input')).endsWith(`/${lang}/?convite=${code0}`), await p.inputValue('#tinv-link-input'));
+    L('convite: WhatsApp leva o link', await p.evaluate((c) => { const h = document.getElementById('tinv-whats-btn').href; return h.startsWith('https://wa.me/?text=') && decodeURIComponent(h).includes(c); }, code0));
+    L('convite: idioma atual marcado (aria-pressed) e só ele', await p.evaluate(() => [...document.querySelectorAll('[data-tinv-lang]')].filter(b => b.getAttribute('aria-pressed') === 'true').length === 1));
+    await p.click(`[data-tinv-lang="${outroLang}"]`);
+    await p.waitForFunction((d) => document.getElementById('tinv-link-input')?.value.includes(d), `/${outroDir}/?convite=${outroCode}`);
+    L('convite: trocar idioma troca o link', true);
+    await p.click(`[data-tinv-lang="${lang === 'fr' ? 'frances' : 'mandarim'}"]`);
+    await p.waitForFunction((c) => document.getElementById('tinv-link-input')?.value.includes(c), code0);
+    await p.click('#tinv-reset-btn');
+    const dcv = p.locator('dialog.p-dialogo--alerta[open]');
+    L('convite: gerar outro link pede confirmação do painel (não o confirm do navegador)', await dcv.isVisible());
+    await dcv.locator('button.secondary').click(); await p.waitForTimeout(150);
+    L('convite: cancelar não muda o link', (await p.inputValue('#tinv-link-input')).includes(code0));
+    await p.click('#tinv-reset-btn'); await p.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();
+    await p.waitForFunction(() => document.getElementById('tinv-link-input')?.value.includes('zzz999yyy8'));
+    L('convite: confirmar gera outro link', true);
+    await p.fill('#tinv-search-input', 'ana');
+    await p.waitForSelector('#tinv-search-list [data-tinv-opcao]');
+    L('convite: busca não mostra a própria conta', !(await p.$$eval('#tinv-search-list [data-opcao-usuario]', l => l.some(e => e.textContent === '@carla.prof'))));
+    await p.keyboard.press('Enter'); await p.waitForSelector('#tinv-send-btn');
+    await p.click('#tinv-send-btn');
+    await p.waitForFunction(() => document.getElementById('tinv-send-error')?.textContent.length > 0);
+    L('convite: aluno que já tem professora mostra o motivo', await p.evaluate(() => document.getElementById('tinv-send-error').textContent === t('tinvite.err.student_has_teacher')));
+    await p.fill('#tinv-search-input', 'anabela');
+    await p.waitForSelector('#tinv-search-list [data-tinv-opcao]'); await p.keyboard.press('Enter');
+    await p.waitForSelector('#tinv-send-btn'); await p.click('#tinv-send-btn');
+    await p.waitForSelector('.tinv-pending-row');
+    L('convite: pendente aparece na lista, com o idioma e os dias', (await p.innerText('.tinv-pending-row')).includes('@anabela') && /vence em \d+ dias?/.test(await p.innerText('.tinv-pending-row')), await p.innerText('.tinv-pending-row'));
+    L('convite: rpc com o idioma escolhido', await p.evaluate((k) => window.__convites.some(c => c.p_student === 'S2' && c.p_lang === k), lang === 'fr' ? 'frances' : 'mandarim'));
+    await p.click('[data-tinv-cancel]'); await p.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();
+    await p.waitForFunction(() => !document.querySelector('.tinv-pending-row'));
+    L('convite: cancelar (com confirmação) tira da lista', await p.evaluate(() => window.__removidos.length > 0));
+    L('convite: a seção não estoura a tela (sem rolagem horizontal)', await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
     L('consulta que falhou: aviso e "—" no lugar da situação (nunca "Parado")', (await p.textContent('[data-tsu="geral"]')).includes('Não foi possível carregar os dados de 1 aluno.') && /Tiago Nunes.*—/s.test(await p.textContent('[data-tabela-alunos] tr:nth-child(4)')) && !/Parado|Atenção/.test(await p.textContent('[data-tabela-alunos] tr:nth-child(4)')));
     await p.click('[data-abrir-aluno="4"]'); await p.waitForSelector('[data-tsu="ficha"]');
     L('ficha de quem falhou: mensagem de erro (role=alert) e ainda mostra cartões criados', !!(await p.$('[data-tsu="ficha"] [role="alert"]')) && !!(await p.$('[data-bloco-criados]')));

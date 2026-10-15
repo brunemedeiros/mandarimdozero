@@ -15,6 +15,16 @@ const STUB = `(function(){
     rpc: async (name, args) => { window.__rpc = (window.__rpc || []); window.__rpc.push(name);
       if (name === 'get_teacher_student_overview') return { data: window.__OV(args.p_student_id, args.p_language_app_key), error: null };
       if (name === 'get_teacher_student_metrics') return { data: window.__MET(args.p_student_id), error: null };
+      // Convite de aluno (077): busca de contas, link e envio (mesmos formatos validados nos testes SQL).
+      if (name === 'search_accounts') return { data: (window.__contas || []).filter(p => (p.username + ' ' + (p.display_name || '')).toLowerCase().includes(String(args.p_query).toLowerCase())), error: null };
+      if (name === 'teacher_invite_link') return { data: { ok: true, code: args.p_reset ? 'zzz999yyy8' : (args.p_lang === 'mandarim' ? 'mmm111nnn2' : 'abc123def4') }, error: null };
+      if (name === 'teacher_invite_student'){
+        window.__convites = (window.__convites || []); window.__convites.push(args);
+        if (args.p_student === 'S') return { data: { error: 'student_has_teacher' }, error: null };
+        const c = (window.__contas || []).find(p => p.user_id === args.p_student) || {};
+        window.__invites.push({ id: 900 + window.__invites.length, student_id: args.p_student, username: c.username, display_name: c.display_name, language_app_key: args.p_lang, status: 'invited', invited_at: new Date().toISOString() });
+        return { data: { ok: true, status: 'invited' }, error: null };
+      }
       return { data: null, error: null }; } };
   window.supabase = { createClient: () => client };
 })();`;
@@ -71,6 +81,12 @@ async function abrir({ lang = 'fr', scheme = 'light', width = 1280, height = 100
     CURRENT_USER = { id: 'T' }; isAdminUser = () => admin; try { hasPermission = () => true; isTeacherUser = () => true; } catch (e) {}
     const links = alunos.map(a => ({ id: a[0], student_id: 's' + a[0], username: a[1], display_name: a[2], language_app_key: a[3] === 'frances' ? appKey : a[3], status: 'active', created_at: new Date(Date.now() - a[0] * 9e7).toISOString() }));
     fetchMyStudents = async () => links.slice();
+    window.__invites = []; window.__contas = [{ user_id: 'S', username: 'ana.s', display_name: 'Ana S' }, { user_id: 'S2', username: 'anabela', display_name: 'Anabela' }, { user_id: 'T', username: 'carla.prof', display_name: 'Carla' }];
+    fetchMyPendingInvites = async () => window.__invites.map(x => ({ ...x }));
+    // K.10 (078): Decks do aluno em árvore (Meus Decks + Decks da professora).
+    const dk = (id, parentId, kind, name, total, n, l, r, d) => ({ id, parentId, kind, name, total, new: n, learning: l, review: r, due: d });
+    window.__deckCounts = (sid) => sid === 's1' ? [dk(1, null, 'personal_root', 'x', 70, 12, 5, 40, 7), dk(2, 1, 'personal', 'Viagem', 16, 4, 2, 10, 3), dk(3, null, 'teacher_root', 'x', 134, 30, 8, 96, 11), dk(4, 3, 'teacher', 'Verbos do dia a dia', 52, 0, 3, 44, 5)] : sid === 's2' ? [] : null;
+    fetchTeacherStudentDeckCounts = async (sid) => window.__deckCounts(sid);
     fetchAllProfiles = async () => [{ username: 'novaaluna', display_name: 'Nova Aluna' }, { username: 'marina.alves', display_name: 'Marina Alves' }];
     // Diário de aulas em memória: mesmas funções que o app usa, sem rede (aula em grupo = uma linha por aluno, mesmo created_at).
     const lang = appKey; let nid = 100; const L = (id, sid, d, topic, hw, obs, notes, at) => ({ id, student_id: sid, language_app_key: lang, class_date: d, topic, homework: hw, observations: obs, notes, created_at: at, updated_at: at });
@@ -119,7 +135,7 @@ async function abrir({ lang = 'fr', scheme = 'light', width = 1280, height = 100
     updateSupportMaterial = async (id, o) => { const li = (o.linkUrl || '').trim(); if (!(o.title || '').trim()) return { ok: false, error: t('teacherMaterials.err.titleRequired') }; if (li && !isHttpUrl(li)) return { ok: false, error: t('teacherMaterials.err.badLink') };
       Object.assign(window.__mats.find(x => x.id === id), { title: o.title.trim(), description: (o.description || '').trim() || null, link_url: li || null }); return { ok: true }; };
     deleteSupportMaterial = async (id) => { window.__mats = window.__mats.filter(x => String(x.id) !== String(id)); return { ok: true }; };
-    window.__removidos = []; removeStudentLink = async (id) => { window.__removidos.push(id); return { ok: true }; };
+    window.__removidos = []; removeStudentLink = async (id) => { window.__removidos.push(id); window.__invites = window.__invites.filter(i => i.id !== id); return { ok: true }; };
     assignStudentToTeacher = async (u, l) => { window.__vinculou = [u, l]; return { ok: true, target: { username: u } }; };
     // Cartões e Decks da professora em memória (mesmas funções que o app usa, sem rede).
     let did = 500, cid = 1000; const iso = (d) => `2026-10-${String(d).padStart(2, '0')}T12:00:00Z`;

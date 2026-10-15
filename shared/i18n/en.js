@@ -2630,6 +2630,7 @@ window.I18N_CATALOG['en'] = {
   'students.queue.empty': 'No cards in the queue yet.', // ALTA
   'students.block.created': 'Cards you created', // ALTA
   'students.created.empty.title': 'No cards created for {name} yet', // ALTA
+  'students.created.empty.titleBare': 'No cards created yet', // ALTA
   'students.created.empty.text': 'The cards you create appear here, with the strength of each one.', // ALTA
   'students.created.empty.btn': 'Create the first card', // ALTA
   'students.created.total': 'Items created for this student', // ALTA

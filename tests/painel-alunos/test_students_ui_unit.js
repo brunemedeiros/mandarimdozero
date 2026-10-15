@@ -66,8 +66,8 @@ const link = (id, user, name, key) => ({ id, student_id: 's' + id, username: use
   check('geral: seletor de curso só com mais de um curso', html.includes('data-filtro-curso') && !fr.tsuGeralHTML(rows.slice(0, 1), { busca: '', curso: '', soAtencao: false }, true, null).includes('data-filtro-curso'));
   check('geral: botão Abrir por aluno', (html.match(/data-abrir-aluno=/g) || []).length === 6);
   check('geral: colunas secundárias somem no celular', (html.match(/p-oculta-movel/g) || []).length >= 6);
-  check('geral: admin vê Vincular aluno e o diálogo; professora vê o aviso e nenhum diálogo', html.includes('data-abrir-dialogo="dlg-vincular-aluno"') && html.includes('id="dlg-vincular-aluno"')
-    && !fr.tsuGeralHTML(rows, { busca: '', curso: '', soAtencao: false }, false, null).includes('dlg-vincular-aluno') && fr.tsuGeralHTML(rows, { busca: '', curso: '', soAtencao: false }, false, null).includes('quem vincula alunos é a administração'));
+  check('geral: admin vê Vincular aluno e o diálogo; professora não vê o diálogo e recebe a seção de convite pronta', html.includes('data-abrir-dialogo="dlg-vincular-aluno"') && html.includes('id="dlg-vincular-aluno"')
+    && !fr.tsuGeralHTML(rows, { busca: '', curso: '', soAtencao: false }, false, null).includes('dlg-vincular-aluno') && fr.tsuGeralHTML(rows, { busca: '', curso: '', soAtencao: false }, false, null, '<article data-tinv-secao>X</article>').includes('data-tinv-secao') && !fr.tsuGeralHTML(rows, { busca: '', curso: '', soAtencao: false }, false, null).includes('data-tinv-secao'));
   check('geral: aviso de falha parcial', html.includes('Não foi possível carregar os dados de 1 aluno.'));
   const um = fr.tsuGeralHTML(rows.slice(0, 1), { busca: '', curso: '', soAtencao: false }, true, null);
   check('singular: 1 aluno ativo', um.includes('1 aluno ativo') && !um.includes('estão há 7 dias'));

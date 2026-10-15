@@ -140,7 +140,9 @@ function tsuTableHTML(rows, f){
 }
 
 // Quadro geral. rows já com os dados; canLink = admin (criar vínculo direto é só da admin, policy da 076).
-function tsuGeralHTML(rows, f, canLink, accounts){
+// convite = HTML já pronto da seção "Convidar aluno" e dos convites pendentes (shared/teacher-invites.js, a professora convida
+// e o aluno aceita; só a admin vincula direto, pela janela).
+function tsuGeralHTML(rows, f, canLink, accounts, convite){
   const s = tsuSummary(rows);
   const langs = Object.keys(s.byLang);
   const pct = s.total ? Math.round(s.studiedToday * 100 / s.total) : 0;
@@ -152,13 +154,12 @@ function tsuGeralHTML(rows, f, canLink, accounts){
   const failedNote = s.failed
     ? `<div class="p-alerta p-alerta--info" role="status"><span>${tsuEsc(tsuTp('students.error.partial', s.failed))}</span></div>` : '';
   const linkBtn = canLink ? `<button type="button" data-abrir-dialogo="dlg-vincular-aluno">${tsuEsc(t('students.link.btn'))}</button>` : '';
-  const inviteNote = canLink ? '' : `<div class="p-alerta p-alerta--info"><span>${tsuEsc(t('panel.students.inviteSoon'))}</span></div>`;
   const courseSelect = langs.length > 1
     ? `<select aria-label="${tsuEsc(t('students.filter.course.aria'))}" data-filtro-curso><option value="">${tsuEsc(t('students.filter.course.all'))}</option>${langs.map(k => `<option value="${tsuEsc(k)}"${f.curso === k ? ' selected' : ''}>${tsuLangLabel(k)}</option>`).join('')}</select>` : '';
   return `<div class="painel"><div class="p-pagina" data-tsu="geral">
     <header class="p-cabecalho"><div><h2>${tsuEsc(t('students.title'))}</h2><span class="p-subtitulo">${tsuEsc(tsuTp('students.count', s.total))}</span></div>
       <div class="p-acoes"><button type="button" class="outline" data-atualizar-alunos>${tsuEsc(t('students.refresh'))}</button>${linkBtn}</div></header>
-    ${inviteNote}${failedNote}${alert}
+    ${failedNote}${alert}${convite || ''}
     <div class="p-resumo">
       ${tsuIndicatorHTML(t('students.ind.active'), s.total, byLangText)}
       ${tsuIndicatorHTML(t('students.ind.today'), s.studiedToday, t('students.ind.todayPct', { pct }))}
@@ -247,10 +248,11 @@ function tsuModuleTitle(key, id){
   return String(s).replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
 }
 
-function tsuCreatedHTML(m, name){
+function tsuCreatedHTML(m, name, bare){
   if (m === undefined) return `<div class="p-carregando" role="status"><span class="p-spinner" aria-hidden="true"></span><span>${tsuEsc(t('students.loading'))}</span></div>`;
   if (!m || typeof m.contentsTotal !== 'number') return `<p class="p-subtitulo">${tsuEsc(t('students.created.failed'))}</p>`;
   if (!m.contentsTotal && !m.archivedNotes){
+    if (bare) return `<p class="p-subtitulo">${tsuEsc(t('students.created.empty.titleBare'))}</p>`;
     return `<div class="p-vazio"><strong>${tsuEsc(t('students.created.empty.title', { name }))}</strong><span>${tsuEsc(t('students.created.empty.text'))}</span><button type="button" data-ir-secao="flashcards">${tsuEsc(t('students.created.empty.btn'))}</button></div>`;
   }
   const arch = m.archivedNotes ? tsuListRow(t('students.created.archived'), tsuTp('students.n.items', tsuNum(m.archivedNotes)) + ' · ' + tsuTp('students.n.cards', tsuNum(m.archivedCards))) : '';
@@ -288,13 +290,36 @@ function tsuClassesHTML(logs, studentId){
   return `${list}<footer><a href="#" data-ir-secao="classlogs" data-aluno="${tsuEsc(studentId || '')}">${tsuEsc(t('students.classes.all'))}</a></footer>`;
 }
 
-// Ficha completa. st = { link, overview, metrics (undefined = carregando), logs (undefined = carregando), langKey }
+// K.10: Decks do aluno (Meus Decks + os Decks desta professora) em árvore, com as mesmas colunas da lista de Decks do próprio
+// aluno. Só nome e números. decks: undefined = carregando, null = falhou, [] = nenhum.
+function tsuDecksBlockHTML(st){
+  return `<article data-bloco-decks><header><h3>${tsuEsc(t('studentDecks.title'))}</h3></header>${tsuDecksHTML(st.decks)}</article>`;
+}
+function tsuDecksHTML(decks){
+  if (decks === undefined) return `<div class="p-carregando" role="status"><span class="p-spinner" aria-hidden="true"></span></div>`;
+  if (!Array.isArray(decks)) return `<div class="p-alerta p-alerta--erro" role="alert"><span>${tsuEsc(t('studentDecks.error'))}</span></div>`;
+  if (!decks.some(d => d.total > 0)) return `<p class="p-subtitulo" style="margin:0">${tsuEsc(t('studentDecks.empty'))}</p>`;
+  const byParent = new Map();
+  decks.forEach(d => { const k = d.parentId; if (!byParent.has(k)) byParent.set(k, []); byParent.get(k).push(d); });
+  const ids = new Set(decks.map(d => d.id));
+  const ordered = [];
+  const walk = (d, lvl) => { ordered.push([d, lvl]); (byParent.get(d.id) || []).forEach(c => walk(c, lvl + 1)); };
+  decks.filter(d => !ids.has(d.parentId)).forEach(r => walk(r, 0));
+  const name = (d) => d.kind === 'personal_root' ? t('deck.myDecks') : d.kind === 'teacher_root' ? t('deck.teacherRoot') : d.name;
+  const num = (n) => `<td${n ? '' : ' class="is-zero"'}>${tsuNum(n)}</td>`;
+  return `<p class="p-subtitulo" style="margin:0 0 .6rem">${tsuEsc(t('studentDecks.hint'))}</p>
+    <div class="p-tabela p-tabela--fluida"><table class="striped" data-tsu-decks><thead><tr><th scope="col">${tsuEsc(t('studentDecks.deck'))}</th><th scope="col">${tsuEsc(t('progress.statNew'))}</th><th scope="col">${tsuEsc(t('progress.statLearning'))}</th><th scope="col">${tsuEsc(t('progress.statReview'))}</th><th scope="col">${tsuEsc(t('progress.statDueNow'))}</th></tr></thead>
+      <tbody>${ordered.map(([d, lvl]) => `<tr${lvl === 0 ? ' class="is-root"' : ''}><th scope="row" style="padding-left:${0.75 + lvl * 1.1}rem">${tsuEsc(name(d))}</th>${num(d.new)}${num(d.learning)}${num(d.review)}${num(d.due)}</tr>`).join('')}</tbody></table></div>`;
+}
+
+// Ficha completa. st = { link, overview, metrics (undefined = carregando), logs (undefined = carregando), decks (undefined = carregando), langKey }
+// st.bare = true: só o corpo (sem trilha, cabeçalho nem Aulas), para a janela Analytics do perfil público (renderStudentPanelHTML).
 function tsuFichaHTML(st, canRemove){
-  const link = st.link, ov = st.overview, name = tsuName(link);
+  const link = st.link || { language_app_key: st.overview && st.overview.linkedLanguage, student_id: '' }, ov = st.overview, name = tsuName(link);
   const langs = ov && Array.isArray(ov.languages) ? ov.languages : [];
   const lang = langs.find(l => l.key === st.langKey) || tsuLangEntry(ov, link.language_app_key);
   const linkedLabel = tsuLangLabel(link.language_app_key);
-  const head = `<nav aria-label="${tsuEsc(t('students.crumb.aria'))}"><ol class="p-trilha"><li><a href="#" data-voltar-alunos>${tsuEsc(t('students.title'))}</a></li><li><span aria-current="page">${tsuEsc(name)}</span></li></ol></nav>
+  const head = st.bare ? '' : `<nav aria-label="${tsuEsc(t('students.crumb.aria'))}"><ol class="p-trilha"><li><a href="#" data-voltar-alunos>${tsuEsc(t('students.title'))}</a></li><li><span aria-current="page">${tsuEsc(name)}</span></li></ol></nav>
     <header class="p-cabecalho"><div class="p-pessoa"><span class="p-avatar p-avatar--grande" aria-hidden="true">${tsuEsc(tsuInitials(name))}</span><div>
       <span class="p-sobretitulo">${tsuEsc(t('students.ficha.kicker', { lang: STUDENT_LANGUAGE_LABELS[link.language_app_key] || link.language_app_key, date: fmtDate(link.created_at) }))}</span>
       <h2>${tsuEsc(name)}</h2><span class="p-subtitulo">@${tsuEsc(link.username || '')}${lang && lang.progressSummary && lang.progressSummary.levelLabel ? ' · ' + tsuEsc(t('students.ficha.level', { level: lang.progressSummary.levelLabel, pct: tsuNum(lang.progressSummary.pct) })) : ''}</span></div></div>
@@ -302,7 +327,7 @@ function tsuFichaHTML(st, canRemove){
         ${canRemove ? `<details class="p-menu" data-alinhar="fim"><summary role="button" class="outline secondary">${tsuEsc(t('students.act.more'))}</summary><div class="p-menu-lista" role="menu"><button type="button" class="p-menu-item p-menu-item--perigo" role="menuitem" data-remover-vinculo="${tsuEsc(link.id)}">${tsuEsc(t('students.act.remove'))}</button></div></details>` : ''}</div></header>`;
   if (!ov || !Array.isArray(ov.languages)){
     return `<div class="painel"><div class="p-pagina" data-tsu="ficha">${head}<div class="p-alerta p-alerta--erro" role="alert"><span>${tsuEsc(t('students.overviewFailed'))}</span></div>
-      <article data-bloco-criados><header><h3>${tsuEsc(t('students.block.created'))}</h3></header>${tsuCreatedHTML(st.metrics, name)}</article></div></div>`;
+      <article data-bloco-criados><header><h3>${tsuEsc(t('students.block.created'))}</h3></header>${tsuCreatedHTML(st.metrics, name, st.bare)}</article>${tsuDecksBlockHTML(st)}</div></div>`;
   }
   const switcher = langs.length > 1
     ? `<div class="p-seg" role="toolbar" aria-label="${tsuEsc(t('students.lang.switch.aria'))}">${langs.map(l => `<button type="button" data-ficha-idioma="${tsuEsc(l.key)}" aria-pressed="${lang && l.key === lang.key ? 'true' : 'false'}">${tsuLangLabel(l.key)}</button>`).join('')}</div>` : '';
@@ -332,14 +357,15 @@ function tsuFichaHTML(st, canRemove){
     </div>
     <div class="p-grade-2">
       <article><header><h3>${tsuEsc(t('students.block.queue'))}</h3></header>${tsuQueueHTML(q)}</article>
-      <article data-bloco-criados><header><h3>${tsuEsc(t('students.block.created'))}</h3></header>${tsuCreatedHTML(st.metrics, name)}</article>
+      <article data-bloco-criados><header><h3>${tsuEsc(t('students.block.created'))}</h3></header>${tsuCreatedHTML(st.metrics, name, st.bare)}</article>
     </div>
     <div class="p-grade-2">
       <article><header><h3>${tsuEsc(t('students.block.recent'))}</h3></header>${tsuRecentHTML(ov.timeline)}</article>
       <div style="display:grid;gap:1rem;min-width:0">
         <article><header><h3>${tsuEsc(t('students.block.answers'))}</h3></header>${tsuAnswersHTML(ov)}</article>
-        <article data-bloco-aulas><header><h3>${tsuEsc(t('students.block.classes'))}</h3></header>${tsuClassesHTML(st.logs, link.student_id)}</article>
+        ${st.bare ? '' : `<article data-bloco-aulas><header><h3>${tsuEsc(t('students.block.classes'))}</h3></header>${tsuClassesHTML(st.logs, link.student_id)}</article>`}
       </div>
     </div>
+    ${tsuDecksBlockHTML(st)}
   </div></div>`;
 }

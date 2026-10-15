@@ -124,7 +124,7 @@ async function renderAdminStudentsView(){
   STUDENT_VIEW.linkId = null;
   const canLink = typeof isAdminUser === 'function' && isAdminUser();
   wrap.innerHTML = tsuLoadingHTML(0, 0);
-  const [links, profiles] = await Promise.all([fetchMyStudents(), canLink ? fetchAllProfiles() : Promise.resolve([])]);
+  const [links, profiles, invites] = await Promise.all([fetchMyStudents(), canLink ? fetchAllProfiles() : Promise.resolve([]), fetchMyPendingInvites()]);
   if (token !== STUDENT_VIEW.token) return;
   STUDENT_VIEW.links = links;
   if (links.length){
@@ -139,7 +139,8 @@ async function renderAdminStudentsView(){
   }
   const accounts = canLink ? studentLinkAccountsHTML(profiles, links) : null;
   STUDENT_VIEW.accounts = accounts;
-  wrap.innerHTML = tsuGeralHTML(STUDENT_VIEW.rows, STUDENT_VIEW.filtros, canLink, accounts);
+  wrap.innerHTML = tsuGeralHTML(STUDENT_VIEW.rows, STUDENT_VIEW.filtros, canLink, accounts, teacherInviteSectionHTML() + teacherPendingInvitesHTML(invites));
+  wireTeacherInviteSection();
 }
 
 function studentRefreshTable(){
@@ -176,6 +177,11 @@ async function openStudentFicha(linkId){
     c.logs = logs || [];
     fill('[data-bloco-aulas]', `<header><h3>${escapeHTML(t('students.block.classes'))}</h3></header>${tsuClassesHTML(c.logs, link.student_id)}`);
   }
+  if (c.decks === undefined){
+    // K.10 (078): Decks do aluno, em árvore, só nome e números.
+    c.decks = typeof fetchTeacherStudentDeckCounts === 'function' ? await fetchTeacherStudentDeckCounts(link.student_id, link.language_app_key) : null;
+    fill('[data-bloco-decks]', `<header><h3>${escapeHTML(t('studentDecks.title'))}</h3></header>${tsuDecksHTML(c.decks)}`);
+  }
 }
 
 function studentRenderFicha(){
@@ -183,7 +189,7 @@ function studentRenderFicha(){
   const link = STUDENT_VIEW.links.find(l => String(l.id) === String(STUDENT_VIEW.linkId));
   if (!wrap || !link) return;
   const c = STUDENT_METRICS_CACHE[link.id] || {};
-  wrap.innerHTML = tsuFichaHTML({ link, overview: c.overview || null, metrics: c.metrics, logs: c.logs, langKey: STUDENT_VIEW.fichaLang }, true);
+  wrap.innerHTML = tsuFichaHTML({ link, overview: c.overview || null, metrics: c.metrics, logs: c.logs, decks: c.decks, langKey: STUDENT_VIEW.fichaLang }, true);
 }
 
 async function removeStudentFromFicha(linkId){
@@ -329,4 +335,20 @@ function studentPanelEventTime(at){
 function studentPanelPct(correct, total){
   const t = studentPanelNum(total);
   return t > 0 ? Math.round(studentPanelNum(correct) * 100 / t) : null;
+}
+
+// As 3 RPCs do painel de um aluno (070, 059 e 078), em paralelo. Também usado pelo botão Analytics do perfil público
+// (shared/public-profile.js), que mostra o resultado numa janela.
+async function fetchStudentPanelData(studentId, lang){
+  const [overview, metrics, decks] = await Promise.all([
+    fetchTeacherStudentOverview(studentId, lang),
+    fetchTeacherStudentMetrics(studentId, lang),
+    typeof fetchTeacherStudentDeckCounts === 'function' ? fetchTeacherStudentDeckCounts(studentId, lang) : Promise.resolve(null),
+  ]);
+  return { overview, metrics, decks };
+}
+
+// Corpo da ficha (indicadores, progresso, atividade, fila, cartões criados, respostas, Decks) sem cabeçalho nem Aulas.
+function renderStudentPanelHTML(overview, metrics, decks){
+  return tsuFichaHTML({ link: null, overview, metrics, logs: null, decks, langKey: null, bare: true }, false);
 }
