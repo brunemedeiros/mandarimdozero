@@ -84,6 +84,12 @@ Teste ao vivo no Staging: `state` leve, entrega por `agent_inbox_submit`, o gati
 Testes locais: SQL 83/83, lógica 44/44.
 Produção (2026-10-15, autorizado pela autora): 097, 098 e 099 aplicadas (versões 20261015005052, 005101, 005107), Vault com `rb_agent_url`, `rb_agent_anon` e `rb_agent_teacher`, cron `rb-agent-sweep` e `rb-agent-nightly`, função v4 (commit 2c39829). Falta o `rb_agent_token` no Vault (a autora cria; tem de ser igual ao segredo da função). Conferido: 24 alunos, 2076 itens e 635 cartões do Banco intactos, nenhum aluno gerenciado, clientes sem acesso às funções. A 097 foi aplicada com uma versão simplificada de `review_bank_agent_state` (estado sem alunos), logo substituída pela da 099, que é a do repositório.
 
+### 2026-10-15: token e tarefa nova
+`rb_agent_token` criado no Vault de produção pelo próprio banco (valor aleatório de 48 caracteres, nunca mostrado no chat); a autora o lê no SQL Editor e cola em `REVIEW_BANK_AGENT_TOKEN` (Edge Function secrets). Conferir depois com
+`select public._rb_agent_post('{"action":"ping"}'::jsonb)` e a resposta em `net._http_response` (200 `ok:true` = os dois lados batem).
+Tarefa nova criada em claude.ai sem agendamento: `trig_015AkoX1hyDJuWs1MimQDTbE` ("Banco de Revisão: rotina da madrugada (site)"). A ferramenta não consegue gravar conectores nesta organização, então ela nasceu SEM conectores:
+a autora precisa abri-la e ligar só Google Drive, Google Calendar e Supabase (Configurações avançadas > Conectores), escolher o modelo e rodar com "Executar agora" antes de agendar (01:50, America/Sao_Paulo).
+
 ## Pendências
 - Teste de chamada de escrita a partir do ambiente da tarefa agendada: versão 1 bloqueada pelo classificador (ver acima); rodar a versão 2.
 - Escrever o texto da tarefa nova (passos: `state` -> agenda -> caderno -> `ingest`); só ligar depois de testada.
