@@ -460,3 +460,4 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
 - Testes: SQL local 101 7/7 (094 27/27); painel-professora 499/499 (60 novas); mural 255/255; Banco 465/465; k10 114/114;
   i18n 2032/2032 e 209/209; e4 21/21.
 - Próximo: link de agenda (ICS) por aluno/professora e "Adicionar ao Google Agenda"; avisos no Mural; aba Turma no Ranking.
+- Ajuste da autora: duração é um campo livre com padrão de 60 min (5 a 600). 101 na produção em 2026-10-15 (autorizada).

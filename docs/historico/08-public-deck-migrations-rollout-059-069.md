@@ -304,5 +304,6 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - `shared/supabase_migrations/101_class_schedule.sql`: colunas `start_time`, `duration_minutes` (5 a 600), `time_zone` em
   `teacher_class_logs`, índice (teacher_id, class_date) e `get_my_class_schedule(text)` para o aluno (com horário). Aditiva.
   Número 101 porque 093 e 096 a 100 já foram usados por outras conversas no Staging.
-- Teste local: `tests/aulas-presenca/run.sh` (101 7/7). Staging: aplicada em 2026-10-15 (ferramenta). Produção: PENDENTE
-  (precisa vir antes de publicar: o formulário da professora grava as colunas novas).
+- Teste local: `tests/aulas-presenca/run.sh` (101 7/7). Staging: aplicada em 2026-10-15 (ferramenta).
+- Produção: aplicada em 2026-10-15 a pedido da autora (versão `20261015014421 101_class_schedule`). Conferido: 3 colunas,
+  2 restrições, função security definer, anon sem EXECUTE, 393 aulas intactas.
