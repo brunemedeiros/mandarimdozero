@@ -52,7 +52,7 @@ ok(core.toSpokenTextForTts('une bouteille (de)', 'fr-FR') === 'une bouteille (de
 ok(core.toSpokenTextForTts('bonito / bonita', 'pt-BR') === 'bonito, bonita', 'pt barra');
 ok(core.toSpokenTextForTts('o(a) aluno(a)', 'pt-BR') === 'o aluno, a aluna', 'pt gênero (vários)');
 ok(core.toSpokenTextForTts('Obrigado, Sra.', 'pt-BR') === 'Obrigado, Senhora.', 'pt título no fim');
-ok(core.toSpokenTextForTts('21º andar', 'pt-BR') === 'vigésimo primeiro andar', 'pt ordinal composto');
+ok(core.toSpokenTextForTts('21º andar', 'pt-BR') === '21º andar', 'pt ordinal fica como está (a voz lê bem)');
 ok(core.toSpokenTextForTts('obrigado(a)', 'cmn-CN') === 'obrigado(a)', 'zh sem regras de pt');
 // Paridade com spoken_text.py: TODAS as entradas do manifest fr e zh + os casos de pt.
 try {
@@ -95,17 +95,17 @@ try {
 // --- regras novas do pt: valores esperados explícitos (o Python tem os mesmos em test_spoken_text.py) ---
 {
   const PT_EXPECT = {
-    '14h30': '14 horas e 30 minutos', '14h00': '14 horas', '9h': '9 horas', '1h': '1 hora', '1h30': '1 hora e 30 minutos',
-    '00h': '0 horas', '14:30': '14 horas e 30 minutos', '9:05': '9 horas e 5 minutos', 'A aula é às 19:30h.': 'A aula é às 19 horas e 30 minutos.',
+    '14h30': '14h30', '14h00': '14 horas', '9h': '9 horas', '1h': '1 hora', '1h30': '1h30',
+    '00h': '0 horas', '14:30': '14h30', '9:05': '9h05', 'A aula é às 19:30h.': 'A aula é às 19h30.',
     'Fiz uma viagem de 5h de ônibus': 'Fiz uma viagem de 5 horas de ônibus',
     'placar 2:1': 'placar 2:1', '24:30': '24:30', '14h75': '14h75', '1,5h': '1,5h', '10:30:15': '10:30:15',
     'R$ 5,50': '5 reais e 50 centavos', 'R$5,50': '5 reais e 50 centavos', 'R$ 1,00': '1 real', 'R$ 12,00': '12 reais',
     'R$ 0,50': '50 centavos', 'R$ 1,01': '1 real e 1 centavo', 'R$ 1.250,00': '1.250 reais', 'R$ 5': '5 reais', 'R$': 'R$',
     'R$ abc': 'R$ abc', 'R$ 5 mil': 'R$ 5 mil',
-    'p.ex. café': 'por exemplo café', 'Tenho livros, canetas, etc.': 'Tenho livros, canetas, etcétera.',
-    'Compro pão, leite, etc. e vou embora': 'Compro pão, leite, etcétera e vou embora', 'etc': 'etc',
+    'p.ex. café': 'por exemplo café', 'Tenho livros, canetas, etc.': 'Tenho livros, canetas, etc.',
+    'Compro pão, leite, etc. e vou embora': 'Compro pão, leite, etc. e vou embora', 'etc': 'etc',
     'Obs.: traga o livro': 'Observação: traga o livro', 'vc tb vai? blz': 'vc tb vai? blz',
-    'Almoço: R$ 25,90 às 12h30 (p.ex. feijoada, etc.).': 'Almoço: 25 reais e 90 centavos às 12 horas e 30 minutos (por exemplo feijoada, etcétera).',
+    'Almoço: R$ 25,90 às 12h30 (p.ex. feijoada, etc.).': 'Almoço: 25 reais e 90 centavos às 12h30 (por exemplo feijoada, etc.).',
   };
   for (const [src, want] of Object.entries(PT_EXPECT)) {
     const got = core.toSpokenTextForTts(src, 'pt-BR');
@@ -156,8 +156,8 @@ const serverKey = Buffer.from(await crypto.subtle.digest('SHA-256', new TextEnco
 ok(clientKey === serverKey, 'generationKey inclui google-chirp3-hd e a versão por idioma');
 const ptKey = await ctx.__k('obrigado(a)', 'pt-BR', null, 1);
 const zhKey = await ctx.__k('obrigado(a)', 'zh-CN', null, 1);
-const ptParts = ['obrigado(a)', 'pt-BR', '', '1', 'google-chirp3-hd', '2:pt2'].map(encodeURIComponent).join('\u001F');
-ok(ptKey === Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ptParts))).toString('hex'), 'pt usa 2:pt2');
+const ptParts = ['obrigado(a)', 'pt-BR', '', '1', 'google-chirp3-hd', '2:pt3'].map(encodeURIComponent).join('\u001F');
+ok(ptKey === Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ptParts))).toString('hex'), 'pt usa 2:pt3');
 ok(ptKey !== zhKey, 'versão por idioma separa pt de zh');
 for (const code of ['monthly_quota_exceeded', 'provider_error', 'provider_rate_limited', 'provider_not_configured', 'quota_check_failed', 'unsupported_language', 'invalid_voice', 'rate_limited']) {
   ok(typeof ctx.__labels[code] === 'string' && ctx.__labels[code].length > 0, 'rótulo ' + code);
