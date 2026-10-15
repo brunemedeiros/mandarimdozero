@@ -1922,7 +1922,7 @@ function finishCurrentLesson(u){
     const challengesBefore = todaysChallenges().map(c => Math.min(c.get(STATE.daily), c.target));
     const lessonKey = `${u.id}:${currentLessonIdx(u.id)}`;
     STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
-    addXP(8);
+    addXP(LESSON_CLOSE_XP);
     // Terminar esta lição intermediária já conta como "estudei hoje" pro
     // streak -- antes só o Ponto de verificação (fim da unidade inteira)
     // contava, deixando quem completa 1-2 lições de uma unidade grande sem
@@ -1948,7 +1948,7 @@ function finishCurrentLesson(u){
     renderTopbarStats();
     // XP real da lição (não hardcoded, não estrelas): delta entre o XP
     // atual e o snapshot tirado quando a lição começou (xpAtLessonStart),
-    // cobrindo tanto o XP dos exercícios respondidos quanto o +8 de
+    // cobrindo tanto o XP dos exercícios respondidos quanto o bônus de fechar a lição (LESSON_CLOSE_XP) de
     // conclusão logo acima -- STATE.xp só muda dentro de addXP() (ver
     // Fase 1), então esse delta é exatamente o que esta lição concedeu.
     const xpEarned = STATE.xp - STEP_STATE.acq.xpAtLessonStart;
@@ -3182,7 +3182,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
       revealCorrectVisual(chosenIdx);
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
-        addXP(exerciseXP(ex, 3));
+        addXP(exerciseXP(ex, EXERCISE_XP_RECOGNIZE));
         registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
         addStudyMinutes();
         setTimeout(() => showCorrectFeedbackPanel(contentEl, null), 500);
@@ -3279,7 +3279,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
 
     if (isCorrect){
       STEP_STATE.exerciseScore += almost ? 0.5 : 1;
-      addXP(exerciseXP(ex, almost ? 2 : 4)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
+      addXP(exerciseXP(ex, almost ? EXERCISE_XP_ALMOST : EXERCISE_XP_PRODUCE)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
       registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
       addStudyMinutes();
       // Detalhe extra vale a pena aqui -- o exercício testou só o som da
@@ -3366,7 +3366,7 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
 
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
-        addXP(exerciseXP(ex, 4));
+        addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE));
         addStudyMinutes();
         // Sem detalhe extra -- a opção certa já ficou marcada em verde na
         // tela (revealCorrectVisual), repetir o texto no painel seria redundante.
@@ -3439,7 +3439,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 
     if (isCorrect){
       STEP_STATE.exerciseScore += almost ? 0.5 : 1;
-      addXP(exerciseXP(ex, almost ? 2 : 4));
+      addXP(exerciseXP(ex, almost ? EXERCISE_XP_ALMOST : EXERCISE_XP_PRODUCE));
       addStudyMinutes();
       setTimeout(() => showCorrectFeedbackPanel(contentEl, almost
         ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>${clozeFeedbackDetailHTML(ex, true)}`
@@ -3612,7 +3612,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4));
+      addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE));
       addStudyMinutes();
       // No modo "traduzir", o português já apareceu como pergunta --
       // repeti-lo aqui seria redundante; mostra a frase francesa completa

@@ -2010,7 +2010,7 @@ function finishCurrentLesson(u){
     const challengesBefore = todaysChallenges().map(c => Math.min(c.get(STATE.daily), c.target));
     const lessonKey = `${u.id}:${currentLessonIdx(u.id)}`;
     STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
-    addXP(8);
+    addXP(LESSON_CLOSE_XP);
     // Terminar esta lição intermediária já conta como "estudei hoje" pro
     // streak -- antes só o Ponto de verificação (fim da unidade inteira)
     // contava, deixando quem completa 1-2 lições de uma unidade grande sem
@@ -2036,7 +2036,7 @@ function finishCurrentLesson(u){
     renderTopbarStats();
     // XP real da lição (não hardcoded, não estrelas): delta entre o XP
     // atual e o snapshot tirado quando a lição começou (xpAtLessonStart),
-    // cobrindo tanto o XP dos exercícios respondidos quanto o +8 de
+    // cobrindo tanto o XP dos exercícios respondidos quanto o bônus de fechar a lição (LESSON_CLOSE_XP) de
     // conclusão logo acima -- STATE.xp só muda dentro de addXP() (ver
     // Fase 1), então esse delta é exatamente o que esta lição concedeu.
     const xpEarned = STATE.xp - STEP_STATE.acq.xpAtLessonStart;
@@ -3260,7 +3260,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
       revealCorrectVisual(chosenIdx);
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
-        addXP(exerciseXP(ex, 3));
+        addXP(exerciseXP(ex, EXERCISE_XP_RECOGNIZE));
         registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
         addStudyMinutes();
         setTimeout(() => showCorrectFeedbackPanel(contentEl, null), 500);
@@ -3325,7 +3325,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
+      addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
       registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
       addStudyMinutes();
       // Detalhe extra vale a pena aqui (diferente da múltipla escolha): o
@@ -3553,7 +3553,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4));
+      addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE));
       addStudyMinutes();
       setTimeout(() => showCorrectFeedbackPanel(contentEl, clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
@@ -3672,7 +3672,7 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
       addStudyMinutes();
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
-        addXP(exerciseXP(ex, 4)); // vale um pouco mais que múltipla escolha simples, mesmo critério do reorder
+        addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE)); // vale um pouco mais que múltipla escolha simples, mesmo critério do reorder
         setTimeout(() => showCorrectFeedbackPanel(contentEl, phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t)), 500);
       } else {
         setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
@@ -3799,7 +3799,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4)); // ordenar frase vale um pouco mais que múltipla escolha simples
+      addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE)); // ordenar frase vale um pouco mais que múltipla escolha simples
       addStudyMinutes();
       setTimeout(() => showCorrectFeedbackPanel(contentEl, phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t)), 500);
     } else {

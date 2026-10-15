@@ -7,7 +7,13 @@
 - Teste: `tests/xp/test_review_xp.js` (10/10).
 - Modo aula (professora no Banco) não dá XP; o aluno estudando sozinho dá.
 
-## Fontes de XP hoje (antes de qualquer mudança além da Revisão)
+## Trilha: exercícios e fechar lição (decidido e feito, 2026-10-15)
+- Reconhecer (múltipla escolha) 3 -> **1**; produzir (digitar, lacuna, ordenar, cenário) 4 -> **2**; "quase" 2 -> **1**; fechar lição 8 -> **4**.
+  "Não sei" tira 1 (mínimo 1) e refazer lição concluída dá 0, como antes. Uma lição (~12 exercícios) vai de ~50 para ~25 XP.
+- Ponto de verificação (25), Missões do dia (30) e a meta "Ganhe 50 XP hoje" ficam como estavam, por decisão da autora (uma lição sozinha não fecha a meta: incentiva lição + revisão).
+- Constantes em `shared/srs.js` (`EXERCISE_XP_*`, `LESSON_CLOSE_XP`); fr, zh e `shared/core/quase-iguais-pinyin.js` usam as constantes. Testes: `tests/xp/test_trilha_xp.js` (18/18), `tests/xp/test_xp_navegador.js` (fr e zh, 10/10).
+
+## Fontes de XP (tabela abaixo = valores ANTES desta rodada; a rodada da trilha está acima)
 | Fonte | XP | Onde |
 |---|---|---|
 | Exercício de lição certo | 3 a 4 (2 se "quase" em digitar; -1, mínimo 1, se pediu "Não sei"); 0 ao refazer lição concluída | `exerciseXP` em `shared/core/exercicios-licao.js` |

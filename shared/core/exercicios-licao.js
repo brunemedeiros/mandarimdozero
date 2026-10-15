@@ -99,7 +99,7 @@ function setLessonFocusMode(active){
   document.body.classList.toggle('lesson-focus', active);
 }
 
-// XP de um acerto: um pouco menor quando o aluno pediu "Não sei" (e por
+// XP de um acerto (valores em shared/srs.js: EXERCISE_XP_RECOGNIZE/PRODUCE/ALMOST, decisão de 2026-10-15): um pouco menor quando o aluno pediu "Não sei" (e por
 // tabela recebeu a dica) nesse exercício -- preserva a distinção acerto
 // independente > acerto com ajuda sem criar um sistema de pontuação
 // complexo.

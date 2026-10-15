@@ -12,5 +12,10 @@ site novo parte do molde da família (ver `docs/i18n/e4-plano-de-extracao.md`) e
 
 - **Revisão** (`XP_PER_GRADE`, `shared/srs.js`; `reviewXP()`): Errei 0, Difícil 2, Bom 4, Fácil 8. Valor fixo, sem redução para cartão maduro.
   Vale também para cartões da professora em Aluno > Revisão. Modo aula (professora no Banco) NÃO dá XP.
+- **Trilha** (constantes em `shared/srs.js`; `exerciseXP()` em `shared/core/exercicios-licao.js`): exercício de lição certo = reconhecer (múltipla escolha)
+  `EXERCISE_XP_RECOGNIZE` 1, produzir (digitar, lacuna, ordenar, cenário) `EXERCISE_XP_PRODUCE` 2, "quase" (erro só de acento) `EXERCISE_XP_ALMOST` 1;
+  "Não sei" tira 1 (mínimo 1); refazer lição concluída 0; fechar lição `LESSON_CLOSE_XP` 4. Ponto de verificação 25 e bônus das Missões 30 ficam como estavam
+  (decisão de 2026-10-15). Meta "Ganhe 50 XP hoje" mantida de propósito: uma lição sozinha não fecha, incentiva lição + revisão.
+  Nunca escrever número solto em `addXP(...)` de exercício ou de fechar lição: usar as constantes.
 - O toast "+N XP" aparece para todo ganho maior que 0. A notificação do sino usa `notification_rules.min_xp_amount` (categoria `gamificacao`, 15 na produção).
 - Demais fontes e valores atuais, e o que está em revisão: `docs/historico/21-auditoria-xp.md`. Ao mexer em qualquer XP, atualizar esse arquivo e o teste `tests/xp/`.

@@ -68,6 +68,13 @@ function newCards(pool){
 // ---------- Gamificação ----------
 // XP por nota na Revisão (decisão da autora, 2026-10-15): Errei 0, Difícil 2, Bom 4, Fácil 8. Vale para todos os sites.
 const XP_PER_GRADE = { 0: 0, 1: 2, 2: 4, 3: 8 };
+// XP da trilha (decisão da autora, 2026-10-15; vale para todos os sites): exercício de lição certo = reconhecer (múltipla
+// escolha) 1, produzir (digitar, lacuna, ordenar, cenário) 2, "quase" (erro só de acento) 1; fechar lição 4.
+// Ponto de verificação (25) e Missões do dia ficam como estavam.
+const EXERCISE_XP_RECOGNIZE = 1;
+const EXERCISE_XP_PRODUCE = 2;
+const EXERCISE_XP_ALMOST = 1;
+const LESSON_CLOSE_XP = 4;
 
 function todayStr(){
   const d = new Date();
