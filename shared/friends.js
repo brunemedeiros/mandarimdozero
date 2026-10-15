@@ -15,7 +15,7 @@
 // (showToast). openPublicProfileModalForUsername/switchTab são só chamados
 // dentro de funções.
 
-const FRIENDS_STATE = { pendingCount: 0, searchSeq: 0, rankScope: 'all', rankSeq: 0, inviteUsername: null, extras: null };
+const FRIENDS_STATE = { pendingCount: 0, searchSeq: 0, rankScope: 'all', rankSeq: 0, inviteUsername: null, extras: null, duo: null, friends: [] };
 
 // ---------- convite por link (?amigo=usuario) ----------
 // O link de convite abre o site com ?amigo=<usuario>. Guardamos o usuário no
@@ -84,6 +84,12 @@ const FRIENDS_ERROR_LABELS = {
   not_accepting_requests: () => t('friends.error.not_accepting_requests'),
   daily_congrats_limit: () => t('friends.error.daily_congrats_limit'),
   target_not_found: () => t('friends.error.target_not_found'),
+  nudges_off: () => t('friends.error.nudges_off'),
+  already_studied: () => t('friends.error.already_studied'),
+  daily_nudge_limit: () => t('friends.error.daily_nudge_limit'),
+  invalid_goal: () => t('friends.error.invalid_goal'),
+  already_in_mission: () => t('friends.error.already_in_mission'),
+  friend_in_mission: () => t('friends.error.friend_in_mission'),
 };
 
 function friendsErrorMessage(code){
@@ -341,6 +347,7 @@ function friendCardHTML(item){
         <span class="friend-card-user">@${escapeHTML(username)}</span>
       </button>
       <span class="friend-card-xp" data-friend-xp="${id}">…</span>
+      <div class="friend-card-duo" data-friend-duo="${id}" data-friend-name="${escapeAttr(name)}"></div>
     </div>`;
 }
 
@@ -466,10 +473,11 @@ async function renderFriendsView(){
     bodyHTML = friendsEmptyHTML(keepQuery, inviteUser) + pending;
   }
 
-  wrap.innerHTML = `${subnav}${headHTML}${friendsRequestsHTML(ov.incoming)}<section class="friends-received" id="friends-received" hidden></section><section class="friends-suggest" id="friends-suggest" hidden></section>${bodyHTML}`;
+  wrap.innerHTML = `${subnav}${headHTML}${friendsRequestsHTML(ov.incoming)}<section class="friends-received" id="friends-received" hidden></section>${hasFriends ? '<section class="friends-duo" id="friends-duo" hidden></section>' : ''}<section class="friends-suggest" id="friends-suggest" hidden></section>${bodyHTML}`;
+  FRIENDS_STATE.friends = ov.friends;
   renderFriendsBadges();
   wireFriendsView(wrap);
-  if (hasFriends){ loadFriendsMiniRank(); loadFriendsActivity(); loadFriendsExtras(); }
+  if (hasFriends){ loadFriendsMiniRank(); loadFriendsActivity(); loadFriendsExtras(); loadFriendsDuo(); }
   loadFriendsReceivedCongrats();
   loadFriendsSuggestions();
   if (keepQuery.trim().length >= 3) runFriendsSearch(keepQuery);
@@ -601,6 +609,175 @@ function friendsDecorateExtras(){
     const chip = friendsStreakChipHTML(map[el.dataset.podiumUser]);
     if (chip) el.querySelector('.lb-pod-avatar')?.insertAdjacentHTML('afterend', chip);
   });
+}
+
+// ---------- amigos em dupla (migration 102): sequência com amigo, cutucar e missão da semana ----------
+// friends_duo: por amigo, dias seguidos em que os dois estudaram, se dá para cutucar (ainda não estudou hoje, aceita
+// cutucadas e eu não cutuquei hoje) e se já está numa missão. Sem a 102 no banco, nada disso aparece.
+const FRIENDS_DUO_GOALS = [150, 300, 600];
+const FRIENDS_JOINT_MIN = 2; // "1 dia juntos" não diz nada: o chip aparece a partir de 2
+
+async function loadFriendsDuo(){
+  const [duoRes] = await Promise.all([supabaseClient.rpc('friends_duo'), loadFriendsDuoMission()]);
+  if (duoRes.error){ console.error('Erro ao carregar amigos em dupla:', duoRes.error); return; }
+  FRIENDS_STATE.duo = Object.fromEntries((duoRes.data || []).map(r => [r.user_id, r]));
+  friendsDecorateDuo();
+  friendsRenderDuoPicker();
+}
+
+function friendsJointChipHTML(x){
+  const n = Number(x?.joint_streak || 0);
+  if (n < FRIENDS_JOINT_MIN) return '';
+  const label = tp('friends.joint.aria', n);
+  return `<span class="friend-joint" title="${escapeAttr(label)}" aria-label="${escapeAttr(label)}">🤝 ${escapeHTML(tp('friends.joint.label', n))}</span>`;
+}
+
+function friendsNudgeHTML(x, userId, name){
+  if (!x || x.studied_today) return '';
+  if (x.nudged_today) return `<span class="friend-nudged">👋 ${t('friends.nudge.done')}</span>`;
+  if (!x.can_nudge) return '';
+  const risk = Number(x.joint_streak || 0) >= FRIENDS_JOINT_MIN ? t('friends.nudge.atRisk', { name }) : '';
+  return `<button type="button" class="btn btn-secondary btn-sm friend-nudge" data-friend-nudge="${escapeAttr(userId)}"
+    aria-label="${escapeAttr(t('friends.nudge.aria', { name }))}"${risk ? ` title="${escapeAttr(risk)}"` : ''}>👋 ${t('friends.nudge.btn')}</button>`;
+}
+
+function friendsDecorateDuo(){
+  const map = FRIENDS_STATE.duo;
+  if (!map) return;
+  document.querySelectorAll('#friends-content [data-friend-duo]').forEach(el => {
+    const id = el.dataset.friendDuo;
+    const x = map[id];
+    el.innerHTML = friendsJointChipHTML(x) + friendsNudgeHTML(x, id, el.dataset.friendName || '');
+  });
+}
+
+async function friendsNudge(userId, btn){
+  btn.disabled = true;
+  const res = await friendsRpc('nudge_friend', { p_friend: userId });
+  if (!res.ok){
+    showToast(friendsErrorMessage(res.error));
+    if (res.error !== 'network' && FRIENDS_STATE.duo?.[userId]){
+      FRIENDS_STATE.duo[userId].can_nudge = false;
+      if (res.error === 'already_studied') FRIENDS_STATE.duo[userId].studied_today = true;
+      friendsDecorateDuo();
+    } else btn.disabled = false;
+    return;
+  }
+  showToast(t('friends.toast.nudged'));
+  if (FRIENDS_STATE.duo?.[userId]) Object.assign(FRIENDS_STATE.duo[userId], { can_nudge: false, nudged_today: true });
+  friendsDecorateDuo();
+}
+
+function friendsDaysLeftInWeek(){
+  if (typeof leaderboardDaysRemaining === 'function' && typeof leaderboardCurrentWeekStart === 'function'){
+    return leaderboardDaysRemaining(leaderboardCurrentWeekStart());
+  }
+  const d = new Date().getDay(); // 0 = domingo
+  return d === 0 ? 0 : 7 - d;
+}
+
+// Cartão da missão: progresso dos dois, ou o convite para começar (amigo + meta).
+async function loadFriendsDuoMission(){
+  const box = document.getElementById('friends-duo');
+  if (!box) return;
+  const { data, error } = await supabaseClient.rpc('my_duo_mission');
+  const el = document.getElementById('friends-duo');
+  if (!el) return;
+  if (error){ console.error('Erro ao carregar a missão em dupla:', error); el.hidden = true; return; }
+  FRIENDS_STATE.mission = data || null;
+  el.hidden = false;
+  el.innerHTML = data ? friendsDuoMissionHTML(data) : friendsDuoPickerHTML();
+  if (data && data.completed_at && typeof loadDuoMissionsDone === 'function') loadDuoMissionsDone();
+  friendsRenderDuoPicker();
+}
+
+function friendsDuoMissionHTML(m){
+  const p = m.partner || {};
+  const name = p.display_name || p.username || t('friends.activity.aFriend');
+  const first = (typeof leaderboardFirstName === 'function') ? leaderboardFirstName(p) : name;
+  const goal = Number(m.goal_xp) || 0;
+  const mine = Number(m.my_xp) || 0;
+  const theirs = Number(m.partner_xp) || 0;
+  const done = Math.min(mine + theirs, goal);
+  const pct = goal ? Math.round((done / goal) * 100) : 0;
+  const pctMine = goal ? Math.min(100, Math.round((Math.min(mine, goal) / goal) * 100)) : 0;
+  const pctTheirs = Math.max(0, pct - pctMine);
+  const me = (typeof PROFILE_CACHE !== 'undefined' && PROFILE_CACHE) || {};
+  const days = friendsDaysLeftInWeek();
+  const when = m.completed_at ? '' : (days > 0 ? tp('friends.duo.endsIn', days) : t('friends.duo.endsToday'));
+  return `
+    <div class="friends-duo-card ${m.completed_at ? 'is-done' : ''}">
+      <div class="friends-duo-top">
+        <h3 class="friends-duo-title">🤝 ${t('friends.duo.title')}</h3>
+        ${when ? `<span class="friends-week-days">${escapeHTML(when)}</span>` : ''}
+      </div>
+      <div class="friends-duo-pair">
+        <span class="friends-duo-avatars">${friendAvatarHTML(me, CURRENT_USER && CURRENT_USER.id)}${friendAvatarHTML(p, p.user_id)}</span>
+        <span class="friends-duo-with">${t('friends.duo.with', { name: `<strong>${escapeHTML(first)}</strong>` })}</span>
+        <span class="friends-duo-count">${escapeHTML(t('friends.duo.progress', { done, goal }))}</span>
+      </div>
+      <div class="friends-duo-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${goal}" aria-valuenow="${done}" aria-label="${escapeAttr(t('friends.duo.barAria', { done, goal }))}">
+        <span class="friends-duo-bar-mine" style="width:${pctMine}%"></span><span class="friends-duo-bar-theirs" style="width:${pctTheirs}%"></span>
+      </div>
+      <div class="friends-duo-legend">
+        <span><i class="friends-duo-dot is-mine" aria-hidden="true"></i>${escapeHTML(t('friends.duo.mine', { n: mine }))}</span>
+        <span><i class="friends-duo-dot is-theirs" aria-hidden="true"></i>${escapeHTML(t('friends.duo.theirs', { name: first, n: theirs }))}</span>
+      </div>
+      ${m.completed_at ? `<p class="friends-duo-done"><strong>${t('friends.duo.done')}</strong> ${escapeHTML(t('friends.duo.doneText', { goal }))}</p>` : ''}
+    </div>`;
+}
+
+function friendsDuoPickerHTML(){
+  return `
+    <div class="friends-duo-card is-new">
+      <div class="friends-duo-top">
+        <h3 class="friends-duo-title">🤝 ${t('friends.duo.title')}</h3>
+      </div>
+      <p class="friends-duo-pitch">${t('friends.duo.pitch')}</p>
+      <div class="friends-duo-form" data-duo-form="1">
+        <label class="friends-duo-field"><span>${t('friends.duo.friendLabel')}</span><select data-duo-friend></select></label>
+        <label class="friends-duo-field"><span>${t('friends.duo.goalLabel')}</span><select data-duo-goal>
+          ${FRIENDS_DUO_GOALS.map(g => `<option value="${g}" ${g === 300 ? 'selected' : ''}>${t('friends.duo.goalOpt.' + g)}</option>`).join('')}
+        </select></label>
+        <button type="button" class="btn btn-primary friends-duo-start" data-duo-start="1">${t('friends.duo.start')}</button>
+      </div>
+      <p class="friends-duo-pitch" data-duo-none hidden>${t('friends.duo.noneFree')}</p>
+    </div>`;
+}
+
+// Preenche só a lista de amigos do convite (sem redesenhar o formulário): quem já está em missão fica de fora.
+function friendsRenderDuoPicker(){
+  const sel = document.querySelector('#friends-duo [data-duo-friend]');
+  if (!sel) return;
+  const map = FRIENDS_STATE.duo || {};
+  const keep = sel.value;
+  const free = (FRIENDS_STATE.friends || []).filter(f => !map[f.userId]?.in_mission);
+  sel.innerHTML = free.map(f => {
+    const n = f.profile?.display_name || f.profile?.username || t('leaderboard.anonymous');
+    return `<option value="${escapeAttr(f.userId)}" ${f.userId === keep ? 'selected' : ''}>${escapeHTML(n)}</option>`;
+  }).join('');
+  const none = !free.length;
+  const form = document.querySelector('#friends-duo [data-duo-form]');
+  const msg = document.querySelector('#friends-duo [data-duo-none]');
+  if (form) form.hidden = none;
+  if (msg) msg.hidden = !none;
+}
+
+async function friendsStartDuo(btn){
+  const box = document.getElementById('friends-duo');
+  const friend = box?.querySelector('[data-duo-friend]')?.value;
+  const goal = Number(box?.querySelector('[data-duo-goal]')?.value);
+  if (!friend) return;
+  btn.disabled = true;
+  const res = await friendsRpc('start_duo_mission', { p_friend: friend, p_goal: goal });
+  if (!res.ok){
+    showToast(friendsErrorMessage(res.error));
+    btn.disabled = false;
+    if (res.error === 'friend_in_mission' || res.error === 'already_in_mission') loadFriendsDuo();
+    return;
+  }
+  showToast(t('friends.duo.toast.started'));
+  loadFriendsDuo();
 }
 
 // ---------- marco de sequência (chamado por registerStudyToday em fr/zh app.js) ----------
@@ -741,6 +918,8 @@ const FRIENDS_PREF_FIELDS = [
   { key: 'notify_congrats', label: () => t('friends.pref.notify_congrats') },
   { key: 'accept_requests', label: () => t('friends.pref.accept_requests') },
   { key: 'suggest_me', label: () => t('friends.pref.suggest_me') },
+  { key: 'accept_nudges', label: () => t('friends.pref.accept_nudges') },
+  { key: 'notify_missions', label: () => t('friends.pref.notify_missions') },
 ];
 
 // Mora em Configurações > Notificações (shared/notification-preferences.js
@@ -847,6 +1026,10 @@ function wireFriendsView(wrap){
   wrap.dataset.friendsWired = '1';
   wrap.addEventListener('click', async (e) => {
     if (e.target.closest('[data-friends-qr]')){ friendsShowInviteQr(); return; }
+    const nudge = e.target.closest('[data-friend-nudge]');
+    if (nudge){ if (!nudge.disabled) friendsNudge(nudge.dataset.friendNudge, nudge); return; }
+    const duoStart = e.target.closest('[data-duo-start]');
+    if (duoStart){ if (!duoStart.disabled) friendsStartDuo(duoStart); return; }
     const dismiss = e.target.closest('[data-suggest-dismiss]');
     if (dismiss){ friendsDismissSuggestion(dismiss.dataset.suggestDismiss, dismiss); return; }
     const menuBtn = e.target.closest('[data-friend-menu]');
