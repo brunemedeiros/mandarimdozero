@@ -51,7 +51,7 @@ const MISSION = { id: 7, week_start: '2026-10-12', goal_xp: 300, started_by_me: 
 // Missão de dias (109): montada na página a partir de hoje (segunda da semana; você 3 dias antes de hoje, Bia 2).
 const DAYS = 'days';
 
-async function boot(browser, lang, port, theme, viewport){
+async function boot(browser, lang, port, theme, viewport, ui){
   const ctx = await browser.newContext({ serviceWorkers: 'block', viewport: viewport || { width: 1280, height: 900 }, colorScheme: theme || 'light' });
   const page = await ctx.newPage();
   const errors = [];
@@ -59,7 +59,7 @@ async function boot(browser, lang, port, theme, viewport){
   page.on('dialog', d => d.accept());
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
-  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
+  await page.addInitScript((ui) => { try { sessionStorage.setItem('guest_mode', '1'); if (ui) localStorage.setItem('ui-language', ui); } catch (e) {} }, ui || null);
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
   return { page, errors, ctx };
@@ -222,13 +222,19 @@ async function run(browser, port, lang){
 }
 
 async function visual(browser, port){
-  for (const lang of ['fr', 'zh']) for (const theme of ['light', 'dark']) for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]){
+  for (const ui of ['pt-BR', 'en']) for (const lang of ['fr', 'zh']) for (const theme of ['light', 'dark']) for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]){
     for (const mission of [null, DAYS]){
-      const { page, errors, ctx } = await boot(browser, lang, port, theme, vp);
+      const { page, errors, ctx } = await boot(browser, lang, port, theme, vp, ui);
+      const sfx = ui === 'en' ? '-en' : '';
       await setup(page, { mission });
       await openFriends(page);
       await page.waitForSelector('#friends-duo:not([hidden])', { timeout: 5000 });
-      const tag = `${lang} ${theme} ${vp.width} ${mission ? 'missão' : 'convite'}`;
+      const tag = `${ui} ${lang} ${theme} ${vp.width} ${mission ? 'missão' : 'convite'}`;
+      if (ui === 'en'){
+        // site em inglês: nada em português no cartão da dupla, nos cartões dos amigos e na linha das Missões do dia
+        const pt = await page.evaluate(() => [...document.querySelectorAll('#friends-duo, #friends-list, .dcs-duo')].map(e => e.innerText).join(' ').match(/\b(Você|dupla|dias|semana|Cutucar|Chamar|missão|juntos|Termina|até domingo)\b/gi));
+        check(`${tag}: sem português`, !pt, pt);
+      }
       const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
       check(`${tag}: sem rolagem lateral da página`, over <= 0, over);
       // contraste mínimo: texto do cartão não pode ter a mesma cor do fundo
@@ -238,8 +244,8 @@ async function visual(browser, port){
         const small = await page.$$eval('#friends-duo button, .friend-nudge, .friend-duo-invite', els => els.filter(e => e.offsetParent && e.getBoundingClientRect().height < 44).length);
         check(`${tag}: alvos de toque >= 44px`, small === 0, small);
       }
-      if (SHOTS){ await page.$eval('#friends-duo', e => { e.scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-${lang}-${theme}-${vp.width}-${mission ? 'missao' : 'convite'}.png`) }); }
-      if (SHOTS && !mission){ await page.$eval('#friends-list', e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-cards-${lang}-${theme}-${vp.width}.png`) }); }
+      if (SHOTS){ await page.$eval('#friends-duo', e => { e.scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-${lang}-${theme}-${vp.width}-${mission ? 'missao' : 'convite'}${sfx}.png`) }); }
+      if (SHOTS && !mission){ await page.$eval('#friends-list', e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-cards-${lang}-${theme}-${vp.width}${sfx}.png`) }); }
       if (mission === DAYS && vp.width === 1280){
         // faixa do fim da lição + linha do quadro, desenhadas num canto da página para o print
         await page.evaluate(() => {
@@ -251,7 +257,7 @@ async function visual(browser, port){
         });
         const c2 = await page.$eval('#tst-duo .duo-lesson-strip', el => [getComputedStyle(el).backgroundColor, getComputedStyle(el).color]);
         check(`${tag}: faixa do fim da lição legível`, c2[0] !== c2[1], c2);
-        if (SHOTS) await page.$eval('#tst-duo', e => e).then(() => page.locator('#tst-duo').screenshot({ path: path.join(SHOTS, `dupla-faixa-${lang}-${theme}.png`) }));
+        if (SHOTS) await page.$eval('#tst-duo', e => e).then(() => page.locator('#tst-duo').screenshot({ path: path.join(SHOTS, `dupla-faixa-${lang}-${theme}${sfx}.png`) }));
       }
       check(`${tag}: sem erros`, errors.length === 0, errors);
       await ctx.close();
