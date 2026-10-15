@@ -155,7 +155,7 @@ async function fetchPublicProfileByUsername(username){
 function publicProfileLangCardHTML(l){
   const lang = (typeof AVAILABLE_LANGUAGES !== 'undefined') ? AVAILABLE_LANGUAGES.find(x => x.appKey === l.languageAppKey) : null;
   const flagSvg = lang ? lang.flagSvg : '';
-  const name = lang ? lang.name : l.languageAppKey;
+  const name = languageDisplayName(lang || l.languageAppKey);
   const streak = effectiveStreakFor(l.streak, l.lastStudyDay);
   return `
     <div class="public-profile-lang-card">

@@ -221,6 +221,54 @@ async function run(browser, port, lang){
   await ctx.close();
 }
 
+// Site em inglês não tem NADA em português (CLAUDE.md): nome do idioma (filtros da disputa da semana, bandeira do
+// amigo, Ranking, troca de idioma, Perfil, perfil público) e o rótulo "Convidado" do topo. Claro e escuro.
+const PT_WORDS = /Francês|Chinês|Português|Mandarim|Convidado|\bConta\b/; // com acento: "Chinese" contém "Chines"
+async function english(browser, port){
+  for (const lang of ['fr', 'zh']) for (const theme of ['light', 'dark']){
+    const { page, errors, ctx } = await boot(browser, lang, port, theme, null, 'en');
+    const tag = `${lang} en ${theme}`;
+    await page.waitForFunction(() => getUiLang() === 'en' && t('auth.guestLabel') === 'Guest', null, { timeout: 8000 });
+    check(`${tag}: topo do convidado em inglês`, (await text(page, '#user-label')) === 'Guest', await text(page, '#user-label'));
+    check(`${tag}: aria-label da conta em inglês`, !PT_WORDS.test(await page.$eval('#user-menu-btn', e => e.getAttribute('aria-label') + ' ' + e.title)));
+    await setup(page, { mission: null });
+    await page.evaluate(() => { window.__RPC.friends_extras = () => [{ user_id: 'bia', streak: 2, studied_today: true, languages: ['frances', 'mandarim'] }]; });
+    await openFriends(page);
+    await page.waitForSelector('#friends-mini-rank .friends-rank-scopes', { timeout: 5000 });
+    await page.waitForSelector('#friends-content .friend-flag', { timeout: 5000 });
+    const chips = await text(page, '#friends-mini-rank .friends-rank-scopes');
+    check(`${tag}: filtros da disputa da semana em inglês`, /French/.test(chips) && /Chinese/.test(chips) && !PT_WORDS.test(chips), chips);
+    const flags = await page.$$eval('#friends-content .friend-flag', els => els.map(e => e.title).join(' '));
+    check(`${tag}: bandeira do amigo em inglês`, /French/.test(flags) && !PT_WORDS.test(flags), flags);
+    const out = await page.evaluate(async () => {
+      const r = {};
+      document.getElementById('leaderboard-content').innerHTML = '';
+      await renderLeaderboardView();
+      r.rank = document.querySelector('#leaderboard-content')?.innerText || '';
+      const per = CourseStorage.isPerSiteLanguage;
+      CourseStorage.isPerSiteLanguage = () => false;
+      try { paintLanguageSwitcher(); r.switcher = document.getElementById('lang-switcher-dropdown').innerHTML; } finally { CourseStorage.isPerSiteLanguage = per; }
+      r.profile = (await buildLanguagesSummary()).map(l => l.name).join(' ');
+      r.publicCard = publicProfileLangCardHTML({ languageAppKey: 'mandarim', streak: 1, lastStudyDay: todayStr() });
+      r.name = languageDisplayName('frances') + ' ' + languageDisplayName('mandarim');
+      return r;
+    });
+    check(`${tag}: abas do Ranking em inglês`, /French/.test(out.rank) && !PT_WORDS.test(out.rank), out.rank.slice(0, 200));
+    check(`${tag}: menu de troca de idioma em inglês`, /French|Chinese/.test(out.switcher) && !PT_WORDS.test(out.switcher));
+    check(`${tag}: idiomas do Perfil em inglês`, /French|Chinese/.test(out.profile) && !PT_WORDS.test(out.profile), out.profile);
+    check(`${tag}: perfil público em inglês`, /Chinese/.test(out.publicCard) && !PT_WORDS.test(out.publicCard));
+    check(`${tag}: helper com maiúscula`, out.name === 'French Chinese', out.name);
+    if (SHOTS){ await page.evaluate(() => switchTab('profile')); await page.click('#profile-content .profile-subnav [data-tab="friends"]'); await page.waitForTimeout(400);
+      await page.$eval('#friends-mini-rank', e => e.scrollIntoView({ block: 'start' })); await page.screenshot({ path: path.join(SHOTS, `en-amigos-${lang}-${theme}.png`) }); }
+    check(`${tag}: sem erros`, errors.length === 0, errors);
+    await ctx.close();
+  }
+  // Em português continua "Francês"/"Chinês" (o helper só troca o idioma, não o conteúdo pt).
+  const { page, ctx } = await boot(browser, 'fr', port);
+  check('pt-BR: helper segue em português', (await page.evaluate(() => languageDisplayName('frances') + ' ' + languageDisplayName('mandarim'))) === 'Francês Chinês');
+  await ctx.close();
+}
+
 async function visual(browser, port){
   for (const ui of ['pt-BR', 'en']) for (const lang of ['fr', 'zh']) for (const theme of ['light', 'dark']) for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]){
     for (const mission of [null, DAYS]){
@@ -269,7 +317,7 @@ async function visual(browser, port){
   await new Promise(r => server.listen(0, '127.0.0.1', r));
   const port = server.address().port;
   const browser = await chromium.launch();
-  try { await run(browser, port, 'fr'); await run(browser, port, 'zh'); await visual(browser, port); }
+  try { await run(browser, port, 'fr'); await run(browser, port, 'zh'); await english(browser, port); await visual(browser, port); }
   catch (e) { failed++; console.log('  ERRO:', e.message); }
   await browser.close(); server.close();
   console.log(`Amigos em dupla (navegador): ${passed} ok, ${failed} falhas`);
