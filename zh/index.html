@@ -494,8 +494,6 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   .right-cards{ grid-area:cards; display:flex; flex-direction:column; gap:16px; position:sticky; top:97px; }
   .side-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-card); }
   .side-card-title{ font-size:15px; font-weight:900; letter-spacing:0; color:var(--ink); margin:0 0 12px; display:flex; align-items:center; gap:6px; }
-  .side-status-row{ display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:700; padding:4px 0; }
-  .side-status-row + .side-status-row{ border-top:1px solid var(--paper-line); }
   /* Card de Missões do dia usa o mesmo .dcs-card/.dcs-caption-btn da faixa
      da Trilha (renderDailyChallengesStrip renderiza nos dois lugares) --
      sem padding extra do .side-card aqui em cima, o botão de recolher já
@@ -4909,11 +4907,6 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
     <div class="side-card" id="side-card-ranking">
       <div class="side-card-title">🏆 Ranking</div>
       <div id="side-ranking-body"></div>
-    </div>
-    <div class="side-card" id="side-card-status">
-      <div class="side-card-title">Status</div>
-      <div class="side-status-row"><span>⭐</span><span id="side-xp-count" class="stat-count">0</span><span>XP</span></div>
-      <div class="side-status-row"><span>🔥</span><span id="side-streak-count" class="stat-count">0</span><span data-i18n="side.streakDays">dias seguidos</span></div>
     </div>
     <div class="side-card" id="side-card-missions">
       <div id="side-missions-body"></div>

@@ -2081,7 +2081,6 @@ window.I18N_CATALOG['en'] = {
   'nav.study': 'Study', // ALTA
   'nav.challenges': 'Challenges', // ALTA
   'nav.profile': 'Profile', // ALTA
-  'side.streakDays': 'day streak', // ALTA
 
   // Fase 11: nomes/descrições de conquistas.
   'badge.first_step.name': 'First Step', // ALTA

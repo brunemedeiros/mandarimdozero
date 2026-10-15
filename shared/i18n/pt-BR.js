@@ -2097,7 +2097,6 @@ window.I18N_CATALOG['pt-BR'] = {
   'nav.study': 'Estudo',
   'nav.challenges': 'Desafios',
   'nav.profile': 'Perfil',
-  'side.streakDays': 'dias seguidos',
 
   // Fase 11: nomes/descrições de conquistas.
   'badge.first_step.name': 'Primeiro Passo',

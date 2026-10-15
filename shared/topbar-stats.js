@@ -42,9 +42,4 @@ function renderTopbarStats(){
   const streak = effectiveStreak();
   animateStatPill(document.getElementById('streak-count'), streak);
   animateStatPill(document.getElementById('xp-count'), STATE.xp);
-  // Card "Status" da sidebar desktop (Fase 3) só existe a partir de 900px,
-  // mas o elemento sempre está no DOM (escondido por CSS abaixo disso) --
-  // atualiza junto, sem precisar de um segundo hook em outro lugar.
-  animateStatPill(document.getElementById('side-xp-count'), STATE.xp);
-  animateStatPill(document.getElementById('side-streak-count'), streak);
 }
