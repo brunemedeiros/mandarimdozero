@@ -1,0 +1,9 @@
+{
+  "name": "painel-ds-ferramentas",
+  "private": true,
+  "description": "Gera shared/painel/vendor/pico.painel.css (Pico CSS limitado a .painel). Só roda quando o Pico for atualizado; o site não tem build.",
+  "dependencies": {
+    "@picocss/pico": "2.1.1",
+    "postcss": "8.5.6"
+  }
+}

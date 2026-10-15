@@ -1,4 +1,5 @@
 // Fase H -- Playwright (Chromium real), FR + ZH.
+const CARTOES = require('../painel-cartoes/helpers.js');
 // Professora (Painel > Flashcards): árvore por aluno+idioma, subdeck, cartão no
 // subdeck, troca de aluno/idioma sem vazar Deck, mover, excluir Teacher Deck
 // vazio, vínculo inativo fora do seletor, duas professoras isoladas.
@@ -168,22 +169,24 @@ async function bootPage(browser, lang, port){
       switchTab('teacher-panel');
       switchTeacherPanelSection('flashcards');
     }, [appKey, otherKey]);
-    await page.waitForSelector('[data-student-checkbox]');
+    await page.waitForSelector('[data-tcc="pagina"]');
     L('H6 vínculo removido não aparece no seletor de alunos', await ev(() => ![...document.querySelectorAll('[data-student-row]')].some(r => r.textContent.includes('cris')) && document.querySelectorAll('[data-student-checkbox]').length === 3));
     L('bootstrap é lazy: nenhum Teacher Deck no boot', await ev(() => window.__DB.decks.filter(d => d.kind === 'teacher_root').length === 0));
 
     // H8: aluno em 2 idiomas -- só a linha do idioma ativo é selecionada
     const activeLang = await ev(() => ADMIN_FLASHCARDS_STATE.langFilter);
     L('H8 idioma ativo inicial é 1 dos idiomas presentes', [appKey, otherKey].includes(activeLang), activeLang);
-    await page.click(`[data-lang-filter="${appKey}"]`).catch(() => {});
-    await page.check('[data-student-checkbox][value="S1"]:visible');
+    await CARTOES.setLang(page, appKey);
+    await CARTOES.pickStudent(page, 'S1');
     await page.waitForSelector('[data-dest-select="S1"]');
     L('H8 aluno em 2 idiomas: 1 seletor de destino, só do idioma ativo', await ev(a => document.querySelectorAll('[data-dest-select="S1"]').length === 1 && window.__DB.decks.filter(d => d.kind === 'teacher_root').every(d => d.language_app_key === a), appKey));
     // H1: árvore visível
+    await CARTOES.openTree(page, 'S1');
     await page.waitForSelector('[data-tree-list="S1"] [data-tree-row]');
     L('H1 árvore do aluno aparece com o teacher_root como raiz', await ev(() => { const rows = document.querySelectorAll('[data-tree-list="S1"] [data-tree-row]'); return rows.length === 1 && rows[0].textContent.includes('Cartões da professora'); }));
     L('H4 teacher_root não tem botão de excluir', await ev(() => document.querySelectorAll('[data-tree-list="S1"] [data-tree-delete]').length === 0));
     // H2: subdeck
+    await CARTOES.openTree(page, 'S1');
     await page.fill('[data-dest-subname="S1"]', 'Verbos');
     await page.click('[data-dest-newsub="S1"]');
     await page.waitForFunction(() => document.querySelectorAll('[data-dest-select="S1"] option').length === 2);
@@ -194,7 +197,7 @@ async function bootPage(browser, lang, port){
     await page.click('[data-dest-newsub="S1"]');
     L('H2 nome vazio rejeitado na UI (mensagem, nada criado)', await ev(() => document.querySelector('[data-dest-err="S1"]').textContent.length > 0 && window.__DB.decks.filter(d => d.kind === 'teacher').length === 1));
     // H1: card criado no subdeck
-    await page.selectOption('#admin-flashcard-card-type-preview', 'normal');
+    await CARTOES.setType(page, 'normal');
     for (let i = 0; i < 2; i++) await page.click('#admin-flashcard-native-fields [data-field-add]');
     const inp = page.locator('#admin-flashcard-native-fields [data-field-content]');
     await inp.nth(0).fill(lang === 'fr' ? 'le chat' : '猫'); await inp.nth(1).fill('o gato');
@@ -207,15 +210,16 @@ async function bootPage(browser, lang, port){
     L('H11 histórico (deck_id nulo) intocado', await ev(() => { const h = window.__DB.teacher_flashcards.find(r => r.id === 1); return h.deck_id === null && h.front === 'hist'; }));
 
     // H8: trocar de aluno -> Deck anterior some do contexto
-    await page.uncheck('[data-student-checkbox][value="S1"]');
-    await page.check('[data-student-checkbox][value="S2"]');
+    await CARTOES.pickStudent(page, 'S1', false);
+    await CARTOES.pickStudent(page, 'S2');
     await page.waitForSelector('[data-dest-select="S2"]');
     await page.waitForFunction(() => document.querySelectorAll('[data-dest-select="S1"]').length === 0);
     L('H8 trocar de aluno: contexto do aluno anterior desaparece (seletor e árvore)', await ev(() => document.querySelectorAll('[data-dest-select="S1"],[data-tree-list="S1"]').length === 0 && ![...document.querySelectorAll('#admin-flashcard-destinations option')].some(o => o.textContent.includes('Verbos'))));
+    await CARTOES.openTree(page, 'S2');
     await page.waitForSelector('[data-tree-list="S2"] [data-tree-row]');
     L('H8 S2 mostra só a própria árvore (só teacher_root)', await ev(() => document.querySelectorAll('[data-tree-list="S2"] [data-tree-row]').length === 1));
     // card p/ S2 vai pro teacher_root DELE (não herda deck do S1)
-    await page.selectOption('#admin-flashcard-card-type-preview', 'normal');
+    await CARTOES.setType(page, 'normal');
     for (let i = 0; i < 2; i++) await page.click('#admin-flashcard-native-fields [data-field-add]');
     const inp2 = page.locator('#admin-flashcard-native-fields [data-field-content]');
     await inp2.nth(0).fill('a'); await inp2.nth(1).fill('b');
@@ -226,23 +230,22 @@ async function bootPage(browser, lang, port){
     L('H8/H7 cartão do S2 no teacher_root do S2 (nunca no deck do S1)', c2.student_id === 'S2' && c2.deck_id === troot2 && c2.deck_id !== c1.deck_id);
 
     // H8: trocar de IDIOMA do mesmo aluno
-    await page.click(`[data-lang-filter="${otherKey}"]`);
-    await page.check('[data-student-checkbox][value="S1"]:visible');
+    await CARTOES.setLang(page, otherKey);
+    await CARTOES.pickStudent(page, 'S1');
     await page.waitForSelector('[data-dest-select="S1"]');
     L('H8 trocar de idioma zera a seleção e mostra a árvore do OUTRO idioma do aluno', await ev(o => document.querySelectorAll('[data-dest-select]').length === 1 && window.__DB.decks.filter(d => d.kind === 'teacher_root' && d.owner_id === 'S1').some(d => d.language_app_key === o) && ![...document.querySelectorAll('#admin-flashcard-destinations option')].some(x => x.textContent.includes('Verbos')), otherKey));
     L('H8 nenhum Deck do idioma anterior vaza no destino', await ev(o => { const id = Number(document.querySelector('[data-dest-select="S1"]').value); return window.__DB.decks.find(d => d.id === id).language_app_key === o; }, otherKey));
-    await page.click(`[data-lang-filter="${appKey}"]`);
-    await page.check('[data-student-checkbox][value="S1"]:visible');
+    await CARTOES.setLang(page, appKey);
+    await CARTOES.pickStudent(page, 'S1');
     await page.waitForSelector('[data-dest-select="S1"]');
 
     // H3: mover cartão entre Teacher Decks; opções só do próprio aluno
-    await page.waitForSelector(`[data-move-card="${c1.id}"]`);
     const troot1 = await ev(() => window.__DB.decks.find(d => d.kind === 'teacher_root' && d.owner_id === 'S1' && d.language_app_key === window.__appKey).id).catch(() => null);
     const troot1b = await ev(a => window.__DB.decks.find(d => d.kind === 'teacher_root' && d.owner_id === 'S1' && d.language_app_key === a).id, appKey);
-    const moveOpts = await ev(id => [...document.querySelectorAll(`[data-move-card="${id}"] option`)].map(o => o.value).filter(Boolean), c1.id);
+    const moveOpts = await CARTOES.moveOptions(page, c1.id);
     L('H3 opções de mover: só Decks do mesmo aluno/idioma (e diferentes do atual)', moveOpts.length === 1 && moveOpts[0] === String(troot1b), moveOpts);
     const before = await ev(id => JSON.stringify({ ...window.__DB.teacher_flashcards.find(r => r.id === id), deck_id: null }), c1.id);
-    await page.selectOption(`[data-move-card="${c1.id}"]`, String(troot1b));
+    await CARTOES.moveCardUI(page, c1.id, troot1b);
     await page.waitForFunction(([id, t]) => window.__DB.teacher_flashcards.find(r => r.id === id).deck_id === t, [c1.id, troot1b]);
     const after = await ev(id => JSON.stringify({ ...window.__DB.teacher_flashcards.find(r => r.id === id), deck_id: null }), c1.id);
     L('H3 mover a Note muda SÓ deck_id (id/revision/fields/modo intactos)', before === after);
@@ -252,6 +255,7 @@ async function bootPage(browser, lang, port){
     // H4: excluir subdeck vazio pela árvore
     const delsBefore = await ev(() => window.__deletes || 0);
     await page.click('[data-tree-list="S1"] [data-tree-delete]');
+    await page.click('dialog.p-dialogo--alerta[open] .p-perigo');
     await page.waitForFunction(() => document.querySelectorAll('[data-tree-list="S1"] [data-tree-row]').length === 1);
     L('H4 subdeck vazio excluído pela UI (1 DELETE), teacher_root e cartões intactos', await ev(n => (window.__deletes || 0) === n + 1 && !window.__DB.decks.some(d => d.name === 'Verbos') && window.__DB.teacher_flashcards.length === 3 && window.__DB.teacher_flashcards.every(r => r.id === 1 || r.deck_id != null), delsBefore));
 
@@ -297,14 +301,15 @@ async function bootPage(browser, lang, port){
       fetchMyStudents = async () => [{ student_id: 'S1', username: 'ana', display_name: 'Ana', language_app_key: a, status: 'active' }];
       switchTab('teacher-panel'); switchTeacherPanelSection('flashcards');
     }, appKey);
-    await page.waitForSelector('[data-student-checkbox]');
-    await page.check('[data-student-checkbox][value="S1"]');
+    await page.waitForSelector('[data-tcc="pagina"]');
+    await CARTOES.pickStudent(page, 'S1');
+    await CARTOES.openTree(page, 'S1');
     await page.waitForSelector('[data-tree-list="S1"] [data-tree-row]');
     const rootB = await ev(a => window.__DB.decks.find(d => d.kind === 'teacher_root' && d.teacher_id === 'T2' && d.language_app_key === a), appKey);
     L('H9 professora B tem a SUA raiz para o mesmo aluno/idioma', !!rootB && rootB.id !== rootId);
     L('H9 árvore de B não mostra nada da árvore de A', await ev(() => document.querySelectorAll('[data-tree-list="S1"] [data-tree-row]').length === 1));
     L('H9 destino de B só oferece a raiz de B', await ev(id => [...document.querySelectorAll('[data-dest-select="S1"] option')].every(o => Number(o.value) === id), rootB.id));
-    L('H9 B não vê os cartões de A (lista de cartões vazia)', await ev(() => !document.getElementById('admin-flashcards-cards-box').textContent.includes('le chat') && !document.getElementById('admin-flashcards-cards-box').textContent.includes('猫')));
+    L('H9 B não vê os cartões de A (lista de cartões vazia)', (t => !t.includes('le chat') && !t.includes('猫'))(await CARTOES.listText(page)));
     // aluno enxerga as duas
     await ev(() => { CURRENT_USER = { id: 'S1' }; window.__uid = 'S1'; isAdminUser = () => false; switchTab('my-flashcards'); });
     await page.waitForSelector('#teacher-decks-section', { timeout: 8000 });

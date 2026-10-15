@@ -66,60 +66,63 @@ function tinviteDaysLeft(invitedAt){
   return ms > 0 ? Math.max(1, Math.ceil(ms / 86400000)) : 0;
 }
 
-// ---------- Professora: seção "Convidar aluno" ----------
+// ---------- Professora: seção "Convidar aluno" (Design System do painel) ----------
+// Confirmação do painel (PainelUI.confirmar); sem o painel na tela cai no confirm() do navegador.
+async function tinviteConfirm(titulo, confirmar){
+  const opts = { titulo, confirmar, cancelar: t('students.dialog.cancel'), perigo: true };
+  return (window.PainelUI && PainelUI.confirmar) ? PainelUI.confirmar(opts) : confirm(titulo);
+}
+
 function teacherInviteSectionHTML(){
   if (!TINVITE_STATE.lang) TINVITE_STATE.lang = TINVITE_LANG_DIR[typeof APP_KEY !== 'undefined' ? APP_KEY : ''] ? APP_KEY : 'frances';
   TINVITE_STATE.selected = null;
   const langs = Object.keys(TINVITE_LANG_DIR);
   return `
-    <section class="panel-section tinv-section" aria-labelledby="tinv-title-h">
-      <h3 class="panel-h" id="tinv-title-h">${t('tinvite.title')}</h3>
-      <p class="panel-hint">${t('tinvite.hint')}</p>
-      <div class="tinv-lang" role="radiogroup" aria-label="${escapeHTML(t('tinvite.langLabel'))}">
-        ${langs.map(l => `<button type="button" class="deck-chip${l === TINVITE_STATE.lang ? ' active' : ''}" role="radio" aria-checked="${l === TINVITE_STATE.lang}" data-tinv-lang="${l}">${escapeHTML(tinviteLangLabel(l))}</button>`).join('')}
+    <article aria-labelledby="tinv-title-h" data-tinv-secao>
+      <header><h3 id="tinv-title-h">${t('tinvite.title')}</h3></header>
+      <p class="p-subtitulo" style="margin-top:0">${t('tinvite.hint')}</p>
+      <div class="p-seg" role="toolbar" aria-label="${escapeHTML(t('tinvite.langLabel'))}" style="margin-bottom:1rem">
+        ${langs.map(l => `<button type="button" data-tinv-lang="${l}" aria-pressed="${l === TINVITE_STATE.lang}">${escapeHTML(tinviteLangLabel(l))}</button>`).join('')}
       </div>
-      <div class="tinv-grid">
-        <div class="tinv-box">
-          <h4 class="tinv-box-h">${t('tinvite.search.title')}</h4>
-          <div class="plans-search" role="combobox" aria-expanded="false" aria-owns="tinv-search-list" aria-haspopup="listbox" id="tinv-search-box">
-            <label class="sr-only" for="tinv-search-input">${t('plans.search.label')}</label>
-            <input type="search" id="tinv-search-input" class="profile-edit-input plans-search-input" placeholder="${escapeHTML(t('plans.search.placeholder'))}"
-              autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="tinv-search-list">
-            <ul class="plans-search-list" id="tinv-search-list" role="listbox" hidden></ul>
-            <p class="plans-search-status" id="tinv-search-status" aria-live="polite"></p>
+      <div class="p-grade-2">
+        <div>
+          <h4 style="margin:0 0 .5rem">${t('tinvite.search.title')}</h4>
+          <div class="p-busca" id="tinv-search-box">
+            <label class="p-so-leitor" for="tinv-search-input">${t('plans.search.label')}</label>
+            <input type="search" id="tinv-search-input" role="combobox" aria-expanded="false" aria-controls="tinv-search-list" aria-autocomplete="list" aria-haspopup="listbox"
+              placeholder="${escapeHTML(t('plans.search.placeholder'))}" autocomplete="off" spellcheck="false">
+            <ul class="p-combo-lista" id="tinv-search-list" role="listbox" aria-label="${escapeHTML(t('plans.search.label'))}" hidden></ul>
+            <small id="tinv-search-status" aria-live="polite"></small>
           </div>
           <div id="tinv-picked" aria-live="polite"></div>
         </div>
-        <div class="tinv-box tinv-linkbox">
-          <h4 class="tinv-box-h">${t('tinvite.link.title')}</h4>
-          <p class="panel-hint">${t('tinvite.link.hint')}</p>
-          <div id="tinv-link">${loadingHTML()}</div>
+        <div>
+          <h4 style="margin:0 0 .5rem">${t('tinvite.link.title')}</h4>
+          <p class="p-subtitulo" style="margin:0 0 .5rem">${t('tinvite.link.hint')}</p>
+          <div id="tinv-link"><div class="p-carregando" role="status"><span class="p-spinner" aria-hidden="true"></span></div></div>
         </div>
       </div>
-    </section>`;
+    </article>`;
 }
 
 function teacherPendingInvitesHTML(invites){
   if (!invites || !invites.length) return '';
   return `
-    <section class="panel-section" aria-labelledby="tinv-pending-h">
-      <h3 class="panel-h" id="tinv-pending-h">${t('tinvite.pending.title', { n: invites.length })}</h3>
-      <ul class="tinv-pending">
+    <article aria-labelledby="tinv-pending-h" data-tinv-pendentes>
+      <header><h3 id="tinv-pending-h">${t('tinvite.pending.title', { n: invites.length })}</h3></header>
+      <ul class="p-convites">
         ${invites.map(i => {
           const left = tinviteDaysLeft(i.invited_at);
           return `
           <li class="tinv-pending-row${left ? '' : ' is-expired'}">
-            ${tinviteAvatarHTML(i, i.student_id, 'tinv-avatar')}
-            <span class="tinv-pending-text">
-              <span class="tinv-pending-name">${escapeHTML(i.display_name || i.username || t('admin.common.removedUser'))}</span>
-              <span class="tinv-pending-meta">@${escapeHTML(i.username || '')} · ${escapeHTML(tinviteLangLabel(i.language_app_key))} · ${left ? tp('tinvite.pending.daysLeft', left) : t('tinvite.pending.expired')}</span>
-            </span>
-            ${left ? '' : `<button type="button" class="btn btn-secondary tinv-small-btn" data-tinv-resend="${escapeHTML(i.student_id)}" data-tinv-resend-lang="${escapeHTML(i.language_app_key)}">${t('tinvite.pending.resend')}</button>`}
-            <button type="button" class="btn tinv-ghost tinv-small-btn" data-tinv-cancel="${i.id}">${t('tinvite.pending.cancel')}</button>
+            ${tinviteAvatarHTML(i, i.student_id, 'p-avatar')}
+            <span class="p-op-texto"><b>${escapeHTML(i.display_name || i.username || t('admin.common.removedUser'))}</b>
+              <small>@${escapeHTML(i.username || '')} · ${escapeHTML(tinviteLangLabel(i.language_app_key))} · ${left ? tp('tinvite.pending.daysLeft', left) : t('tinvite.pending.expired')}</small></span>
+            <span class="p-acoes">${left ? '' : `<button type="button" class="outline p-pequeno" data-tinv-resend="${escapeHTML(i.student_id)}" data-tinv-resend-lang="${escapeHTML(i.language_app_key)}">${t('tinvite.pending.resend')}</button>`}<button type="button" class="outline secondary p-pequeno" data-tinv-cancel="${i.id}">${t('tinvite.pending.cancel')}</button></span>
           </li>`;
         }).join('')}
       </ul>
-    </section>`;
+    </article>`;
 }
 
 function wireTeacherInviteSection(){
@@ -128,9 +131,7 @@ function wireTeacherInviteSection(){
   document.querySelectorAll('[data-tinv-lang]').forEach(btn => btn.addEventListener('click', () => {
     TINVITE_STATE.lang = btn.dataset.tinvLang;
     document.querySelectorAll('[data-tinv-lang]').forEach(b => {
-      const on = b === btn;
-      b.classList.toggle('active', on);
-      b.setAttribute('aria-checked', String(on));
+      b.setAttribute('aria-pressed', String(b === btn));
     });
     if (TINVITE_STATE.selected) renderTinvPicked(TINVITE_STATE.selected);
     loadTinvLink(false);
@@ -153,7 +154,7 @@ function wireTeacherInviteSection(){
   });
   input.addEventListener('blur', () => setTimeout(closeTinvList, 120));
   document.querySelectorAll('[data-tinv-cancel]').forEach(btn => btn.addEventListener('click', async () => {
-    if (!confirm(t('tinvite.pending.cancelConfirm'))) return;
+    if (!(await tinviteConfirm(t('tinvite.pending.cancelConfirm'), t('tinvite.pending.cancel')))) return;
     btn.disabled = true;
     await removeStudentLink(Number(btn.dataset.tinvCancel));
     renderAdminStudentsView();
@@ -169,7 +170,7 @@ function wireTeacherInviteSection(){
 async function runTinvSearch(raw, pickFirst){
   const status = document.getElementById('tinv-search-status');
   if (!status) return;
-  const q = planSearchTerm(raw);
+  const q = plnSearchTerm(raw);
   TINVITE_STATE.query = String(raw || '').trim();
   if (q.length < 2){
     TINVITE_STATE.results = [];
@@ -205,27 +206,24 @@ async function runTinvSearch(raw, pickFirst){
 
 function renderTinvList(){
   const list = document.getElementById('tinv-search-list');
-  const box = document.getElementById('tinv-search-box');
+  const box = document.getElementById('tinv-search-input');
   const rows = TINVITE_STATE.results;
   if (!list || !rows.length){ closeTinvList(); return; }
   list.innerHTML = rows.map((p, i) => `
-    <li class="plans-option" role="option" id="tinv-opt-${i}" data-i="${i}" aria-selected="${i === TINVITE_STATE.active}">
-      ${tinviteAvatarHTML(p, p.user_id, 'plans-avatar')}
-      <span class="plans-option-text">
-        <span class="plans-option-name">${escapeHTML(p.display_name || p.username)}</span>
-        <span class="plans-option-user">@${escapeHTML(p.username || '')}</span>
-      </span>
+    <li role="option" id="tinv-opt-${i}" data-tinv-opcao data-i="${i}" aria-selected="${i === TINVITE_STATE.active}"${i === TINVITE_STATE.active ? ' class="p-ativo"' : ''}>
+      ${tinviteAvatarHTML(p, p.user_id, 'p-avatar')}
+      <span class="p-op-texto"><b>${escapeHTML(p.display_name || p.username)}</b><small data-opcao-usuario>@${escapeHTML(p.username || '')}</small></span>
     </li>`).join('');
   list.hidden = false;
   box.setAttribute('aria-expanded', 'true');
-  list.querySelectorAll('.plans-option').forEach(li => {
+  list.querySelectorAll('[data-tinv-opcao]').forEach(li => {
     li.addEventListener('mousedown', (e) => { e.preventDefault(); pickTinvAccount(TINVITE_STATE.results[+li.dataset.i]); });
   });
 }
 
 function setTinvActive(i){
   TINVITE_STATE.active = i;
-  document.querySelectorAll('#tinv-search-list .plans-option').forEach(li => li.setAttribute('aria-selected', String(+li.dataset.i === i)));
+  document.querySelectorAll('#tinv-search-list [data-tinv-opcao]').forEach(li => { li.setAttribute('aria-selected', String(+li.dataset.i === i)); li.classList.toggle('p-ativo', +li.dataset.i === i); });
   document.getElementById('tinv-search-input')?.setAttribute('aria-activedescendant', `tinv-opt-${i}`);
   document.getElementById(`tinv-opt-${i}`)?.scrollIntoView({ block: 'nearest' });
 }
@@ -233,7 +231,7 @@ function setTinvActive(i){
 function closeTinvList(){
   const list = document.getElementById('tinv-search-list');
   if (list){ list.hidden = true; list.innerHTML = ''; }
-  document.getElementById('tinv-search-box')?.setAttribute('aria-expanded', 'false');
+  document.getElementById('tinv-search-input')?.setAttribute('aria-expanded', 'false');
 }
 
 function pickTinvAccount(profile){
@@ -251,14 +249,11 @@ function renderTinvPicked(profile){
   const box = document.getElementById('tinv-picked');
   if (!box) return;
   box.innerHTML = `
-    <div class="tinv-picked">
-      ${tinviteAvatarHTML(profile, profile.user_id, 'tinv-avatar')}
-      <span class="tinv-pending-text">
-        <span class="tinv-pending-name">${escapeHTML(profile.display_name || profile.username)}</span>
-        <span class="tinv-pending-meta">@${escapeHTML(profile.username || '')}</span>
-      </span>
-      <button type="button" class="btn btn-primary tinv-small-btn" id="tinv-send-btn">${t('tinvite.send', { lang: tinviteLangWord(TINVITE_STATE.lang) })}</button>
+    <div class="p-conta p-pessoa" style="gap:.7rem;padding:.6rem;border:1px solid var(--p-linha);border-radius:12px;margin-top:.5rem">
+      ${tinviteAvatarHTML(profile, profile.user_id, 'p-avatar')}
+      <span class="p-op-texto"><b>${escapeHTML(profile.display_name || profile.username)}</b><small>@${escapeHTML(profile.username || '')}</small></span>
     </div>
+    <button type="button" id="tinv-send-btn" style="margin-top:.7rem">${t('tinvite.send', { lang: tinviteLangWord(TINVITE_STATE.lang) })}</button>
     <p class="profile-edit-error" id="tinv-send-error" role="alert"></p>`;
   document.getElementById('tinv-send-btn').addEventListener('click', async (e) => {
     e.target.disabled = true;
@@ -293,7 +288,7 @@ async function loadTinvLink(reset){
   const lang = TINVITE_STATE.lang;
   let code = !reset && TINVITE_STATE.links[lang];
   if (!code){
-    box.innerHTML = loadingHTML();
+    box.innerHTML = '<div class="p-carregando" role="status"><span class="p-spinner" aria-hidden="true"></span></div>';
     const { data, error } = await supabaseClient.rpc('teacher_invite_link', { p_lang: lang, p_reset: !!reset });
     if (error || !data?.code){
       if (error) console.error('Erro ao gerar link de convite:', error);
@@ -306,22 +301,20 @@ async function loadTinvLink(reset){
   const url = teacherInviteURL(code, lang);
   const msg = t('tinvite.link.whatsText', { lang: tinviteLangWord(lang), url });
   box.innerHTML = `
-    <div class="tinv-link-field">
-      <label class="sr-only" for="tinv-link-input">${t('tinvite.link.title')}</label>
-      <input id="tinv-link-input" class="profile-edit-input" readonly value="${escapeHTML(url)}">
-    </div>
-    <div class="tinv-link-actions">
-      <button type="button" class="btn btn-primary tinv-small-btn" id="tinv-copy-btn">${t('tinvite.link.copy')}</button>
-      <a class="btn btn-secondary tinv-small-btn" id="tinv-whats-btn" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${t('tinvite.link.whatsapp')}</a>
-      <button type="button" class="btn tinv-ghost tinv-small-btn" id="tinv-reset-btn">${t('tinvite.link.reset')}</button>
+    <label class="p-so-leitor" for="tinv-link-input">${t('tinvite.link.title')}</label>
+    <input id="tinv-link-input" readonly value="${escapeHTML(url)}" style="margin-bottom:.5rem">
+    <div class="p-acoes" style="justify-content:flex-start">
+      <button type="button" class="outline" id="tinv-copy-btn">${t('tinvite.link.copy')}</button>
+      <a role="button" class="outline" id="tinv-whats-btn" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${t('tinvite.link.whatsapp')}</a>
+      <button type="button" class="outline secondary" id="tinv-reset-btn">${t('tinvite.link.reset')}</button>
     </div>`;
   document.getElementById('tinv-link-input').addEventListener('focus', (e) => e.target.select());
   document.getElementById('tinv-copy-btn').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText(url); showToast(t('tinvite.link.copied')); }
     catch (e) { const el = document.getElementById('tinv-link-input'); el.focus(); el.select(); }
   });
-  document.getElementById('tinv-reset-btn').addEventListener('click', () => {
-    if (!confirm(t('tinvite.link.resetConfirm'))) return;
+  document.getElementById('tinv-reset-btn').addEventListener('click', async () => {
+    if (!(await tinviteConfirm(t('tinvite.link.resetConfirm'), t('tinvite.link.reset')))) return;
     loadTinvLink(true);
   });
 }

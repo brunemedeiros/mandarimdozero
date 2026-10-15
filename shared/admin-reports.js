@@ -1,6 +1,7 @@
 // ---------- Painel de Admin: Reports (bandeira ⚑) ----------
-// Quarta seção do Painel de Admin (Badges / Analytics / Notificações /
-// Reports -- troca gerida por shared/admin-analytics.js:switchAdminPanelSection).
+// Quarta seção do Painel de Admin (troca gerida por shared/admin-panel.js:switchAdminPanelSection). Visual no Design System do
+// painel (shared/admin-reports-ui.js): filtros e busca, tabela com status em cor, janela de detalhe com status/prioridade/nota e
+// resposta por e-mail. Enviar a resposta pede confirmação (o e-mail sai na hora e não volta).
 // Lista + edita a tabela `reports` (ver shared/supabase_migrations/
 // 020_create_reports_table.sql) -- reports de bug/sugestão enviados pela
 // bandeira ⚑ (shared/reports.js), tanto de contas logadas quanto de
@@ -23,6 +24,7 @@
 //   - shared/utils.js           (loadingHTML)
 //   - shared/profile.js         (escapeHTML)
 //   - shared/reports.js         (REPORT_CATEGORIES, REPORT_SEVERITIES -- pra reaproveitar os mesmos rótulos do formulário, nunca duplicar)
+//   - shared/admin-reports-ui.js, shared/painel/painel-ui.js (PainelUI.confirmar)
 //   - languages/<lang>/app.js   (isAdminUser)
 
 const REPORT_STATUS_LABELS = {
@@ -72,7 +74,7 @@ const REPORT_SCREEN_LABELS = {
   get 'admin-badges'(){ return t('admin.reports.screen.admin_badges'); },
 };
 
-const ADMIN_REPORTS_STATE = { statusFilter: 'all', kindFilter: 'all', languageFilter: 'all' };
+const ADMIN_REPORTS_STATE = { statusFilter: 'all', kindFilter: 'all', languageFilter: 'all', busca: '' };
 let ADMIN_REPORTS_CACHE = [];
 // user_id -> { username, display_name }. `profiles` é publicamente legível
 // (ver profiles_public_read, migration 001 -- não guarda nada sensível), só
@@ -80,8 +82,9 @@ let ADMIN_REPORTS_CACHE = [];
 // si, que continua só resolvido sob demanda pela Edge Function ao responder.
 let ADMIN_REPORTS_PROFILES = {};
 
+const ADMIN_REPORTS_LIMIT = 200;   // a tela avisa quando chega nele (há mais reports do que os mostrados)
 async function fetchAdminReports(){
-  let query = supabaseClient.from('reports').select('*').order('created_at', { ascending: false }).limit(200);
+  let query = supabaseClient.from('reports').select('*').order('created_at', { ascending: false }).limit(ADMIN_REPORTS_LIMIT);
   if (ADMIN_REPORTS_STATE.statusFilter !== 'all') query = query.eq('status', ADMIN_REPORTS_STATE.statusFilter);
   if (ADMIN_REPORTS_STATE.kindFilter !== 'all') query = query.eq('kind', ADMIN_REPORTS_STATE.kindFilter);
   if (ADMIN_REPORTS_STATE.languageFilter !== 'all') query = query.eq('language_app_key', ADMIN_REPORTS_STATE.languageFilter);
@@ -126,149 +129,6 @@ function reportDetailContextLines(context){
   }).join('');
 }
 
-async function renderAdminReportsView(){
-  const wrap = document.getElementById('admin-reports-content');
-  if (!wrap) return;
-  if (!isAdminUser()){
-    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
-    return;
-  }
-  wrap.innerHTML = loadingHTML();
-
-  ADMIN_REPORTS_CACHE = await fetchAdminReports();
-  await fetchReporterProfiles(ADMIN_REPORTS_CACHE);
-
-  const statusOptionsHTML = ['all', ...Object.keys(REPORT_STATUS_LABELS)].map(s =>
-    `<option value="${s}" ${ADMIN_REPORTS_STATE.statusFilter === s ? 'selected' : ''}>${s === 'all' ? t('admin.reports.filter.allStatus') : REPORT_STATUS_LABELS[s]}</option>`
-  ).join('');
-  const kindOptionsHTML = [
-    ['all', t('admin.reports.filter.kindAll')], ['problema', t('admin.reports.filter.kindProblems')], ['sugestao', t('admin.reports.filter.kindSuggestions')],
-  ].map(([k, label]) => `<option value="${k}" ${ADMIN_REPORTS_STATE.kindFilter === k ? 'selected' : ''}>${label}</option>`).join('');
-  // Fase 7: filtro de idioma -- a lista de opções vem do próprio mapa de
-  // rótulos (nunca hardcoded em outro lugar), então um idioma novo só
-  // precisa ser adicionado em REPORT_LANGUAGE_LABELS pra aparecer aqui.
-  const languageOptionsHTML = ['all', ...Object.keys(REPORT_LANGUAGE_LABELS)].map(l =>
-    `<option value="${l}" ${ADMIN_REPORTS_STATE.languageFilter === l ? 'selected' : ''}>${l === 'all' ? t('admin.reports.filter.allLanguages') : REPORT_LANGUAGE_LABELS[l]}</option>`
-  ).join('');
-
-  const rowsHTML = ADMIN_REPORTS_CACHE.length ? ADMIN_REPORTS_CACHE.map(r => {
-    const catLabel = reportCategoryLabel(r.category) || r.category;
-    const dateLabel = fmtDate(r.created_at, { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
-    const who = escapeHTML(reporterLabel(r));
-    const snippet = (r.description || '').slice(0, 90) + ((r.description || '').length > 90 ? '…' : '');
-    // Fase 7: idioma e origem/tela direto na linha da lista -- antes só
-    // apareciam abrindo o detalhe (idioma nem aparecia lá, "screen" só
-    // existe no context desde a Fase 3-4). Reports antigos sem
-    // language_app_key/context.screen caem no fallback, nunca quebram.
-    const langLabel = REPORT_LANGUAGE_LABELS[r.language_app_key] || r.language_app_key || '?';
-    const screenKey = r.context?.screen;
-    const screenLabel = screenKey ? (REPORT_SCREEN_LABELS[screenKey] || screenKey) : null;
-    return `
-      <div class="admin-badge-row" data-report-row="${r.id}">
-        <span class="admin-badge-icon">${r.kind === 'sugestao' ? '💡' : '⚑'}</span>
-        <div class="admin-badge-info">
-          <div class="admin-badge-name">${escapeHTML(catLabel)} -- ${escapeHTML(snippet)}</div>
-          <div class="admin-badge-desc">${dateLabel} · ${who} · ${escapeHTML(langLabel)}${screenLabel ? ` · ${escapeHTML(screenLabel)}` : ''} · <span class="admin-report-status-pill" data-status="${r.status}">${REPORT_STATUS_LABELS[r.status] || r.status}</span></div>
-        </div>
-        <button class="admin-badge-edit-btn" data-report-detail="${r.id}" title="${t('admin.reports.row.details')}">✏️</button>
-      </div>
-    `;
-  }).join('') : `<p class="profile-empty-note">${t('admin.reports.empty')}</p>`;
-
-  wrap.innerHTML = `
-    <div class="profile-section">
-      <div class="section-label">${t('admin.reports.title')}</div>
-      <p class="profile-edit-hint">${t('admin.reports.hint')}</p>
-      <div class="admin-report-filters">
-        <select id="admin-report-status-filter" class="profile-edit-input">${statusOptionsHTML}</select>
-        <select id="admin-report-kind-filter" class="profile-edit-input">${kindOptionsHTML}</select>
-        <select id="admin-report-language-filter" class="profile-edit-input">${languageOptionsHTML}</select>
-      </div>
-    </div>
-    <div class="profile-section">
-      ${rowsHTML}
-    </div>
-  `;
-
-  document.getElementById('admin-report-status-filter').addEventListener('change', (e) => {
-    ADMIN_REPORTS_STATE.statusFilter = e.target.value;
-    renderAdminReportsView();
-  });
-  document.getElementById('admin-report-kind-filter').addEventListener('change', (e) => {
-    ADMIN_REPORTS_STATE.kindFilter = e.target.value;
-    renderAdminReportsView();
-  });
-  document.getElementById('admin-report-language-filter').addEventListener('change', (e) => {
-    ADMIN_REPORTS_STATE.languageFilter = e.target.value;
-    renderAdminReportsView();
-  });
-  wrap.querySelectorAll('[data-report-detail]').forEach(btn => {
-    btn.addEventListener('click', () => openAdminReportDetail(btn.dataset.reportDetail));
-  });
-}
-
-function openAdminReportDetail(reportId){
-  const report = ADMIN_REPORTS_CACHE.find(r => String(r.id) === String(reportId));
-  const modal = document.getElementById('admin-report-detail-modal');
-  if (!report || !modal) return;
-
-  document.getElementById('admin-report-detail-category').textContent = `${report.kind === 'sugestao' ? t('admin.reports.detail.suggestion') : t('admin.reports.detail.problem')} -- ${reportCategoryLabel(report.category) || report.category}`;
-  document.getElementById('admin-report-detail-reporter').textContent = reporterLabel(report);
-  document.getElementById('admin-report-detail-description').textContent = report.description || '';
-  document.getElementById('admin-report-detail-expected').textContent = report.expected_behavior || t('admin.reports.detail.notInformed');
-  document.getElementById('admin-report-detail-severity').textContent = reportSeverityLabel(report.severity_reported) || t('admin.reports.detail.notInformed');
-  document.getElementById('admin-report-detail-context').innerHTML = reportDetailContextLines(report.context);
-
-  const screenshotWrap = document.getElementById('admin-report-detail-screenshot');
-  screenshotWrap.innerHTML = report.screenshot_url
-    ? `<a href="${report.screenshot_url}" target="_blank" rel="noopener">${t('admin.reports.detail.screenshotView')}</a>`
-    : t('admin.reports.detail.screenshotNone');
-
-  document.getElementById('admin-report-detail-status').value = report.status || 'novo';
-  document.getElementById('admin-report-detail-priority').value = report.priority || '';
-  document.getElementById('admin-report-detail-note').value = report.internal_note || '';
-  document.getElementById('admin-report-detail-error').textContent = '';
-  document.getElementById('admin-report-detail-save-btn').dataset.reportId = report.id;
-
-  renderAdminReportReplySection(report);
-
-  modal.style.display = 'flex';
-}
-
-// "Sem e-mail" só quando é convidado (sem user_id) que não deixou
-// reporter_email -- conta logada SEMPRE pode ser respondida, mesmo que
-// reporter_email ainda esteja null aqui: a Edge Function resolve o e-mail
-// na hora via auth.admin.getUserById() (ver report-reply-send) e só
-// grava de volta como cache depois do primeiro envio.
-function renderAdminReportReplySection(report){
-  const canReply = !!report.reporter_email || !!report.user_id;
-  document.getElementById('admin-report-reply-composer').style.display = canReply ? '' : 'none';
-  document.getElementById('admin-report-reply-noemail').style.display = canReply ? 'none' : '';
-
-  const historyEl = document.getElementById('admin-report-reply-history');
-  if (report.admin_reply_sent_at){
-    const dateLabel = fmtDate(report.admin_reply_sent_at, { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
-    const lastSent = report.reporter_email
-      ? t('admin.reports.reply.lastSentTo', { date: dateLabel, email: escapeHTML(report.reporter_email) })
-      : t('admin.reports.reply.lastSent', { date: dateLabel });
-    historyEl.innerHTML = `<em>${lastSent}</em><br>"${escapeHTML(report.admin_reply_subject || '')}" -- ${escapeHTML(report.admin_reply || '')}`;
-    historyEl.style.display = '';
-  } else {
-    historyEl.innerHTML = '';
-    historyEl.style.display = 'none';
-  }
-
-  document.getElementById('admin-report-reply-subject').value = '';
-  document.getElementById('admin-report-reply-body').value = '';
-  document.getElementById('admin-report-reply-error').textContent = '';
-  document.getElementById('admin-report-reply-send-btn').dataset.reportId = report.id;
-}
-
-function closeAdminReportDetail(){
-  const modal = document.getElementById('admin-report-detail-modal');
-  if (modal) modal.style.display = 'none';
-}
-
 // Mensagens amigáveis pros erros que a Edge Function report-reply-send
 // pode devolver (ver supabase/functions/report-reply-send/index.ts) --
 // nunca mostra o código cru pra admin.
@@ -297,50 +157,116 @@ async function sendAdminReportReply(reportId, subject, body){
   return { ok: true, to: data.to };
 }
 
-function wireAdminReportDetailModal(){
-  const modal = document.getElementById('admin-report-detail-modal');
-  if (!modal) return;
-  document.getElementById('admin-report-detail-modal-close')?.addEventListener('click', closeAdminReportDetail);
-  modal.addEventListener('click', (e) => { if (e.target === modal) closeAdminReportDetail(); });
+const ADMIN_REPORTS_VIEW = { token: 0, ligado: false, truncated: false, enviando: false };
 
-  document.getElementById('admin-report-detail-save-btn')?.addEventListener('click', async (e) => {
-    const btn = e.currentTarget;
-    const id = btn.dataset.reportId;
-    const errorEl = document.getElementById('admin-report-detail-error');
-    errorEl.textContent = '';
-    btn.disabled = true;
-    const result = await updateReportAdminFields(id, {
-      status: document.getElementById('admin-report-detail-status').value,
-      priority: document.getElementById('admin-report-detail-priority').value || null,
-      internal_note: document.getElementById('admin-report-detail-note').value.trim() || null,
-    });
-    btn.disabled = false;
-    if (!result.ok){ errorEl.textContent = t('teacherMaterials.err.saveFailed'); return; }
-    showToast(t('admin.reports.toast.updated'));
-    closeAdminReportDetail();
-    renderAdminReportsView();
-  });
+// Rótulos para as peças de tela (a partir das tabelas de rótulos acima e de shared/reports.js).
+const ADMIN_REPORTS_LABELS = {
+  statusKeys: ['novo', 'em_analise', 'confirmado', 'em_desenvolvimento', 'resolvido', 'nao_reproduzido', 'recusado', 'duplicado'],
+  priorityKeys: ['baixa', 'media', 'alta', 'critica'],
+  status: (s) => REPORT_STATUS_LABELS[s] || s,
+  priority: (p) => REPORT_PRIORITY_LABELS[p] || p,
+  category: (id) => reportCategoryLabel(id),
+  severity: (id) => reportSeverityLabel(id),
+  lang: (k) => REPORT_LANGUAGE_LABELS[k] || k || '?',
+  screen: (k) => REPORT_SCREEN_LABELS[k] || k,
+  reporter: (r) => reporterLabel(r),
+};
 
-  document.getElementById('admin-report-reply-send-btn')?.addEventListener('click', async (e) => {
-    const btn = e.currentTarget;
-    const id = btn.dataset.reportId;
-    const errorEl = document.getElementById('admin-report-reply-error');
-    errorEl.textContent = '';
-    const subject = document.getElementById('admin-report-reply-subject').value.trim();
-    const body = document.getElementById('admin-report-reply-body').value.trim();
-    if (!subject || !body){
-      errorEl.textContent = t('admin.reports.reply.err.missing_fields');
-      return;
-    }
-    btn.disabled = true;
-    btn.textContent = t('report.modal.sending');
-    const result = await sendAdminReportReply(id, subject, body);
-    btn.disabled = false;
-    btn.textContent = t('admin.reports.reply.send');
-    if (!result.ok){ errorEl.textContent = result.error; return; }
-    showToast(t('admin.reports.toast.replySent', { to: result.to }));
-    closeAdminReportDetail();
-    renderAdminReportsView();
-  });
+function reportsWrap(){ return document.getElementById('admin-reports-content'); }
+
+function reportsRefreshList(){
+  const box = document.querySelector('[data-reports-lista]');
+  if (!box) return;
+  const L = ADMIN_REPORTS_LABELS;
+  box.innerHTML = trpListHTML(trpFilterReports(ADMIN_REPORTS_CACHE, ADMIN_REPORTS_STATE.busca, L), ADMIN_REPORTS_CACHE.length, L, ADMIN_REPORTS_VIEW.truncated);
 }
-wireAdminReportDetailModal();
+
+// Busca de novo no servidor (filtros de status, tipo e idioma) e atualiza só a lista, sem refazer a página (mantém o foco e a busca).
+async function reportsReload(){
+  const token = ++ADMIN_REPORTS_VIEW.token;
+  ADMIN_REPORTS_CACHE = await fetchAdminReports();
+  await fetchReporterProfiles(ADMIN_REPORTS_CACHE);
+  if (token !== ADMIN_REPORTS_VIEW.token) return;
+  ADMIN_REPORTS_VIEW.truncated = ADMIN_REPORTS_CACHE.length >= ADMIN_REPORTS_LIMIT;
+  reportsRefreshList();
+}
+
+async function renderAdminReportsView(){
+  const wrap = reportsWrap();
+  if (!wrap) return;
+  if (!isAdminUser()){
+    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
+    return;
+  }
+  reportsBind(wrap);
+  wrap.innerHTML = trpLoadingHTML();
+  const token = ++ADMIN_REPORTS_VIEW.token;
+  const reports = await fetchAdminReports();
+  await fetchReporterProfiles(reports);
+  if (token !== ADMIN_REPORTS_VIEW.token) return;
+  ADMIN_REPORTS_CACHE = reports;
+  ADMIN_REPORTS_VIEW.truncated = reports.length >= ADMIN_REPORTS_LIMIT;
+  wrap.innerHTML = trpPageHTML({ reports, filtros: ADMIN_REPORTS_STATE, L: ADMIN_REPORTS_LABELS, languageKeys: Object.keys(REPORT_LANGUAGE_LABELS), truncated: ADMIN_REPORTS_VIEW.truncated });
+}
+
+function reportsOpenDetail(id){
+  const r = ADMIN_REPORTS_CACHE.find(x => String(x.id) === String(id)); const wrap = reportsWrap(); if (!r || !wrap) return;
+  const old = document.getElementById('dlg-report'); if (old) old.remove();
+  (wrap.querySelector('.painel') || wrap).insertAdjacentHTML('beforeend', trpDetailDialogHTML(r, ADMIN_REPORTS_LABELS));
+  const d = document.getElementById('dlg-report');
+  d.addEventListener('close', () => d.remove());
+  d.showModal();
+}
+
+async function reportsSaveFields(form){
+  const errorEl = document.getElementById('report-erro'); errorEl.textContent = '';
+  const btn = form.querySelector('[type=submit]'); btn.disabled = true;
+  const result = await updateReportAdminFields(form.dataset.id, {
+    status: document.getElementById('report-status').value, priority: document.getElementById('report-prioridade').value || null,
+    internal_note: document.getElementById('report-nota').value.trim() || null,
+  });
+  btn.disabled = false;
+  if (!result.ok){ errorEl.textContent = t('teacherMaterials.err.saveFailed'); return; }
+  document.getElementById('dlg-report').close();
+  showToast(t('admin.reports.toast.updated'));
+  await reportsReload();
+}
+
+// Responder por e-mail: pede confirmação antes (o e-mail sai na hora e não dá para desfazer).
+async function reportsSendReply(id){
+  if (ADMIN_REPORTS_VIEW.enviando) return;
+  const r = ADMIN_REPORTS_CACHE.find(x => String(x.id) === String(id)); if (!r) return;
+  const errorEl = document.getElementById('report-resp-erro'), btn = document.getElementById('report-resp-enviar');
+  errorEl.textContent = '';
+  const subject = document.getElementById('report-resp-assunto').value.trim(), body = document.getElementById('report-resp-msg').value.trim();
+  if (!subject || !body){ errorEl.textContent = t('admin.reports.reply.err.missing_fields'); return; }
+  const opts = { titulo: t('reports.reply.confirm.title', { who: reporterLabel(r) }), descricao: t('reports.reply.confirm.text', { subject }), confirmar: t('reports.reply.confirm.ok'), cancelar: t('reports.reply.confirm.cancel'), perigo: false };
+  const ok = (window.PainelUI && PainelUI.confirmar) ? await PainelUI.confirmar(opts) : confirm(opts.descricao);
+  if (!ok) return;
+  ADMIN_REPORTS_VIEW.enviando = true; btn.disabled = true; btn.setAttribute('aria-busy', 'true');
+  const result = await sendAdminReportReply(id, subject, body);
+  ADMIN_REPORTS_VIEW.enviando = false; btn.removeAttribute('aria-busy'); btn.disabled = false;
+  if (!result.ok){ errorEl.textContent = result.error; return; }
+  document.getElementById('dlg-report').close();
+  showToast(t('admin.reports.toast.replySent', { to: result.to }));
+  await reportsReload();
+}
+
+// Eventos delegados no contêiner da aba: ligados uma vez só.
+function reportsBind(wrap){
+  if (ADMIN_REPORTS_VIEW.ligado) return;
+  ADMIN_REPORTS_VIEW.ligado = true;
+  const S = ADMIN_REPORTS_STATE;
+  wrap.addEventListener('click', (e) => {
+    let el;
+    if ((el = e.target.closest('[data-ver-report]'))) return reportsOpenDetail(el.dataset.verReport);
+    if ((el = e.target.closest('[data-enviar-resposta]'))) return reportsSendReply(el.dataset.enviarResposta);
+  });
+  wrap.addEventListener('input', (e) => { if (e.target.matches('[data-reports-busca]')){ S.busca = e.target.value; reportsRefreshList(); } });
+  wrap.addEventListener('change', (e) => {
+    if (e.target.matches('[data-reports-status]')){ S.statusFilter = e.target.value; reportsReload(); }
+    else if (e.target.matches('[data-reports-tipo]')){ S.kindFilter = e.target.value; reportsReload(); }
+    else if (e.target.matches('[data-reports-idioma]')){ S.languageFilter = e.target.value; reportsReload(); }
+  });
+  wrap.addEventListener('submit', (e) => { if (e.target.id === 'form-report'){ e.preventDefault(); reportsSaveFields(e.target); } });
+}

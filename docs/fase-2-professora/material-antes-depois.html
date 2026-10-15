@@ -1,0 +1,15 @@
+<title>Material de apoio antes e depois</title>
+<style>
+:root{--bg:#f7f3ea;--card:#fffdf8;--fg:#2b2140;--soft:#5d5275;--line:#e4d9c3;--accent:#1f6fb2}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#18141f;--card:#221c2c;--fg:#f0eaf8;--soft:#b8add0;--line:#3a3149;--accent:#6db3ec;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#18141f;--card:#221c2c;--fg:#f0eaf8;--soft:#b8add0;--line:#3a3149;--accent:#6db3ec;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 Nunito,system-ui,sans-serif;padding-inline:max(16px,4vw);padding-block:1.5rem 3rem;max-width:1400px;margin-inline:auto}
+h1{margin:0 0 .3rem;font-size:1.7rem;text-wrap:balance}h2{margin:2.2rem 0 .3rem;font-size:1.25rem;text-wrap:balance}h3{margin:1.1rem 0 .5rem;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--soft)}
+.sub{color:var(--soft);max-width:70ch;margin:0 0 .5rem}
+.grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:1rem}
+figure{margin:0;min-width:0}img{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block;background:var(--card)}
+figcaption{font-size:.85rem;color:var(--soft);margin-top:.3rem}
+.par{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:1rem;margin-top:.5rem}
+.lbl{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.1rem .6rem;border-radius:999px;border:1px solid var(--line);color:var(--soft);margin-bottom:.35rem}
+</style>
+<h1>Tela Material de apoio: antes e depois</h1><p class="sub">O antes escolhe os alunos numa lista de caixas e mostra os materiais só depois, no fim da página. O depois mostra a lista por mês de envio com o formulário ao lado. Um material enviado a duas pessoas aparece como um só.</p><h2>Antes</h2><div class="par"><figure><img loading="lazy" src="docs/fase-2-professora/antes-material-fr-light.jpg" alt="Material de apoio antes, Francês claro"><figcaption>Francês, claro</figcaption></figure><figure><img loading="lazy" src="docs/fase-2-professora/antes-material-zh-dark.jpg" alt="Material de apoio antes, Mandarim escuro"><figcaption>Mandarim, escuro</figcaption></figure></div><h2>Depois</h2><div class="grade"><figure><img loading="lazy" src="docs/fase-2-professora/depois-material-fr-light.jpg" alt="Material de apoio, Francês, claro"><figcaption>Francês, claro</figcaption></figure><figure><img loading="lazy" src="docs/fase-2-professora/depois-material-zh-dark.jpg" alt="Material de apoio, Mandarim, escuro"><figcaption>Mandarim, escuro</figcaption></figure><figure><img loading="lazy" src="docs/fase-2-professora/depois-material-fr-dark.jpg" alt="Material de apoio, Francês, escuro"><figcaption>Francês, escuro</figcaption></figure><figure><img loading="lazy" src="docs/fase-2-professora/depois-material-zh-light.jpg" alt="Material de apoio, Mandarim, claro"><figcaption>Mandarim, claro</figcaption></figure></div>
