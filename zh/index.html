@@ -4238,6 +4238,19 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 .friends-qr-link{ font-size:12px; color:var(--ink-soft); word-break:break-all; }
 .friends-head-actions{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
 .friends-empty .btn-block + .btn-block{ margin-top:8px; }
+/* ---------- Convite para ativar as notificações (102, shared/friends.js loadFriendsPushInvite) ---------- */
+.friends-push-invite{ margin-top:16px; }
+.friends-push-card{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:var(--paper); border:1px solid var(--paper-line);
+  border-radius:22px; padding:14px 18px; box-shadow:var(--shadow-card); }
+.friends-push-icon{ font-size:28px; line-height:1; flex:0 0 auto; }
+.friends-push-text{ flex:1 1 260px; min-width:0; color:var(--ink); }
+.friends-push-text p{ margin:4px 0 0; color:var(--ink-soft); font-size:14px; line-height:1.4; }
+.friends-push-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+.friends-push-modal .friends-push-card{ box-shadow:none; border:0; padding:0; }
+@media (max-width: 600px){
+  .friends-push-actions{ width:100%; }
+  .friends-push-actions .btn{ flex:1 1 auto; min-height:44px; }
+}
 /* ---------- Amigos em dupla (102, shared/friends.js loadFriendsDuo) ---------- */
 .friends-duo{ margin-top:16px; }
 .friends-duo-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:22px; padding:16px 18px; box-shadow:var(--shadow-card); }
@@ -4271,6 +4284,7 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 .friend-nudge{ min-height:32px; }
 @media (max-width: 600px){
   .friends-duo-form{ flex-direction:column; align-items:stretch; }
+  .friends-duo-field{ flex:0 0 auto; }
   .friends-duo-field select, .friends-duo-start, .friend-nudge{ min-height:44px; }
 }
 </style>
