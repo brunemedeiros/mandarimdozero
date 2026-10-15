@@ -2787,7 +2787,7 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.labels.edit': 'Edit the {name} label', // ALTA
   'panel.classLog.labels.done': 'Done', // ALTA
   'panel.classLog.time': 'Time (optional)', // ALTA
-  'panel.classLog.durationMin': 'Length (minutes)', // ALTA
+  'panel.classLog.durationMin': 'Length', // ALTA
   'panel.classLog.repeatWeekly': 'Repeat every week', // ALTA
   'panel.classLog.repeatUntil': 'Until', // ALTA
   'panel.classLog.repeatHint': 'Creates one lesson a week, same day and time, until that date (52 at most).', // ALTA
@@ -2801,6 +2801,19 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.cal.empty': 'No lessons on this day.', // ALTA
   'panel.classLog.cal.schedule': 'Schedule a lesson on this day', // ALTA
   'myClassLogs.upcoming': 'Upcoming lessons', // ALTA
+  'myClassLogs.feed.title': 'See your lessons in your calendar (Google, Apple, Outlook)', // ALTA
+  'myClassLogs.feed.intro': 'Subscribe to this link once and your lessons show up in your calendar on their own, in your time zone. When a lesson changes here, your calendar follows.', // ALTA
+  'myClassLogs.feed.google': 'Open in Google Calendar', // ALTA
+  'myClassLogs.feed.apple': 'Apple or Outlook', // ALTA
+  'myClassLogs.feed.linkLabel': 'Or copy the link and paste it into "Add calendar from URL"', // ALTA
+  'myClassLogs.feed.copy': 'Copy link', // ALTA
+  'myClassLogs.feed.copied': 'Link copied', // ALTA
+  'myClassLogs.feed.delayHint': 'Google Calendar checks the link on its own every few hours, so a new lesson may take a while to show up there.', // ALTA
+  'myClassLogs.feed.privacyHint': 'Anyone with this link can see your lesson dates, topics and homework. Don\'t share it. Shared it by mistake?', // ALTA
+  'myClassLogs.feed.reset': 'Create a new link', // ALTA
+  'myClassLogs.feed.resetConfirm': 'Create a new link? The old one will stop working and you\'ll need to subscribe to the new one in your calendar.', // ALTA
+  'myClassLogs.feed.resetDone': 'New link created. Subscribe to it again in your calendar.', // ALTA
+  'myClassLogs.feed.error': 'Couldn\'t create the link right now. Please try again in a moment.', // ALTA
   'myClassLogs.view.list': 'List', // ALTA
   'myClassLogs.classLabel': 'Lesson', // ALTA
   'panel.classLog.cal.count': { one: '{n} lesson', other: '{n} lessons' }, // ALTA
