@@ -290,3 +290,11 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Produção: aplicada em 2026-10-14 a pedido da autora (versão `20261014215716 094_class_logs_attendance_skills`, arquivo com as
   9 cores). Antes: 0 aulas, 2 turmas, tabela de rótulos inexistente. Depois: student_id aceita nulo, 3 colunas, 3 funções com
   security definer e search_path, anon sem EXECUTE, RLS ligada, 0 aulas e 2 turmas intactas.
+
+## 095 -- Sugestões de amigos (2026-10-15)
+
+- `shared/supabase_migrations/095_friend_suggestions.sql`: `friend_suggestions`, `dismiss_friend_suggestion`, `record_friend_invite`,
+  tabelas `friend_suggestion_dismissals` e `friend_invites`, coluna `friend_settings.suggest_me`. Sem DROP.
+- Staging: 2026-10-15 (`095_friend_suggestions` + `095b_friend_suggestions_invited_by`, que é a versão final da função).
+  Produção: pendente de autorização (aplicar o arquivo inteiro).
+- Detalhes: `docs/historico/17-sugestoes-de-amigos.md`.

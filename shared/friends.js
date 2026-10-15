@@ -43,6 +43,8 @@ function friendsConsumePendingInvite(){
   if (!u || !FRIENDS_INVITE_RE.test(u)) return;
   if (typeof PROFILE_CACHE !== 'undefined' && PROFILE_CACHE && PROFILE_CACHE.username === u) return; // convite do próprio link
   FRIENDS_STATE.inviteUsername = u;
+  // 095: grava de quem veio o convite (vira sugestão "Entrou pelo seu convite" para quem convidou). Best-effort.
+  if (typeof supabaseClient !== 'undefined') supabaseClient.rpc('record_friend_invite', { p_username: u }).then(() => {}, () => {});
   if (typeof switchTab === 'function') switchTab('friends');
 }
 
@@ -252,6 +254,53 @@ function friendsInviteButtonHTML(extraClass){
   return `<button type="button" class="btn btn-primary ${extraClass || ''}" data-friends-invite="${navigator.share ? 'share' : 'copy'}">${t('friends.inviteBtn')}</button>`;
 }
 
+// QR code do mesmo link de convite (mostrar na aula). A biblioteca só carrega quando a pessoa abre.
+function friendsQrButtonHTML(extraClass){
+  return `<button type="button" class="btn btn-secondary ${extraClass || ''}" data-friends-qr="1">📱 ${t('friends.qr.btn')}</button>`;
+}
+
+function friendsLoadQrLib(){
+  if (typeof window.qrcode === 'function') return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const sc = document.createElement('script');
+    sc.src = '../shared/vendor/qrcode-generator.js'; // MIT, Kazuhiko Arase (cabeçalho do arquivo)
+    sc.onload = resolve; sc.onerror = reject;
+    document.head.appendChild(sc);
+  });
+}
+
+async function friendsShowInviteQr(){
+  const link = await friendsMyInviteLink();
+  if (!link){ showToast(t('friends.qr.noLink')); return; }
+  try { await friendsLoadQrLib(); } catch (e){ showToast(t('friends.qr.error')); return; }
+  const qr = window.qrcode(0, 'M');
+  qr.addData(link);
+  qr.make();
+  const svg = qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true, alt: t('friends.qr.alt') });
+  document.getElementById('friends-qr-modal')?.remove();
+  const ov = document.createElement('div');
+  ov.id = 'friends-qr-modal';
+  ov.className = 'app-modal-overlay';
+  ov.innerHTML = `
+    <div class="app-modal friends-qr-modal" role="dialog" aria-modal="true" aria-labelledby="friends-qr-title">
+      <div class="app-modal-header">
+        <h3 id="friends-qr-title">${t('friends.qr.title')}</h3>
+        <button type="button" class="app-modal-close" data-no-emoji-icons data-qr-close="1" aria-label="${escapeAttr(t('friends.qr.close'))}">✕</button>
+      </div>
+      <div class="app-modal-body">
+        <p>${t('friends.qr.text')}</p>
+        <div class="friends-qr-box">${svg}</div>
+        <p class="friends-qr-link">${escapeHTML(link)}</p>
+      </div>
+    </div>`;
+  const close = () => { ov.remove(); document.removeEventListener('keydown', onKey); };
+  const onKey = (e) => { if (e.key === 'Escape') close(); };
+  ov.addEventListener('click', (e) => { if (e.target === ov || e.target.closest('[data-qr-close]')) close(); });
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(ov);
+  ov.querySelector('[data-qr-close]')?.focus();
+}
+
 // Campo de busca + (opcional) aviso de convite e resultados. Na lista com
 // amigos o campo fica à direita do título e o resto vai para a largura toda
 // (friendsSearchExtrasHTML), para os resultados não ficarem espremidos.
@@ -357,6 +406,7 @@ function friendsEmptyHTML(keepQuery, inviteUser){
       <h3 class="friends-empty-title">${t('friends.empty.title')}</h3>
       <p class="friends-empty-text">${t('friends.empty.text')}</p>
       ${friendsInviteButtonHTML('btn-block')}
+      ${friendsQrButtonHTML('btn-block')}
       <div class="friends-empty-search">${friendsSearchFieldHTML(keepQuery, t('friends.empty.searchLabel'))}${friendsSearchExtrasHTML(inviteUser)}</div>
       <ul class="friends-empty-steps">
         <li><span aria-hidden="true">🏆</span>${t('friends.empty.step1')}</li>
@@ -393,7 +443,7 @@ async function renderFriendsView(){
   const headHTML = `
     <div class="friends-head">
       <h2 class="friends-title">${t('friends.title')}</h2>
-      ${hasFriends ? friendsInviteButtonHTML('friends-head-invite') : ''}
+      ${hasFriends ? `<div class="friends-head-actions">${friendsInviteButtonHTML('friends-head-invite')}${friendsQrButtonHTML('friends-head-invite')}</div>` : ''}
     </div>`;
 
   let bodyHTML;
@@ -416,12 +466,71 @@ async function renderFriendsView(){
     bodyHTML = friendsEmptyHTML(keepQuery, inviteUser) + pending;
   }
 
-  wrap.innerHTML = `${subnav}${headHTML}${friendsRequestsHTML(ov.incoming)}<section class="friends-received" id="friends-received" hidden></section>${bodyHTML}`;
+  wrap.innerHTML = `${subnav}${headHTML}${friendsRequestsHTML(ov.incoming)}<section class="friends-received" id="friends-received" hidden></section><section class="friends-suggest" id="friends-suggest" hidden></section>${bodyHTML}`;
   renderFriendsBadges();
   wireFriendsView(wrap);
   if (hasFriends){ loadFriendsMiniRank(); loadFriendsActivity(); loadFriendsExtras(); }
   loadFriendsReceivedCongrats();
+  loadFriendsSuggestions();
   if (keepQuery.trim().length >= 3) runFriendsSearch(keepQuery);
+}
+
+// ---------- sugestões de amigos (095, docs/amigos-seguir-x-amizade.md) ----------
+// Cartões com o motivo ("Estuda com a mesma professora", "2 amigos em comum"...), Adicionar (mesmo pedido de
+// sempre) e X para dispensar. Sem a 095 no banco, a seção simplesmente não aparece.
+function friendsLangName(appKey){
+  const ui = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+  const name = (typeof LanguageRegistry !== 'undefined' && LanguageRegistry.shortName) ? LanguageRegistry.shortName(appKey, ui) : '';
+  if (!name) return appKey || '';
+  return ui === 'en' ? name : name.toLowerCase();
+}
+
+function friendSuggestReasonText(r){
+  switch (r.reason){
+    case 'invite': return t('friends.suggest.reason.invite');
+    case 'invited_by': return t('friends.suggest.reason.invitedBy');
+    case 'classmate': return t('friends.suggest.reason.classmate');
+    case 'mutual': return tp('friends.suggest.reason.mutual', Number(r.mutual_count) || 1);
+    case 'partner': return t('friends.suggest.reason.partner', { lang: escapeHTML(friendsLangName(r.language_app_key)) });
+    case 'ranking': return t('friends.suggest.reason.ranking');
+    default: return '';
+  }
+}
+
+function friendSuggestCardHTML(r){
+  const name = r.display_name || r.username || t('leaderboard.anonymous');
+  const id = escapeAttr(r.user_id);
+  const username = r.username || '';
+  return `
+    <div class="friend-suggest-card" role="listitem" data-suggest-row="${id}">
+      <button type="button" class="friend-suggest-x" data-no-emoji-icons data-suggest-dismiss="${id}" aria-label="${escapeAttr(t('friends.suggest.dismissAria', { name }))}">✕</button>
+      <button type="button" class="friend-card-person" data-open-profile="${escapeAttr(username)}" ${username ? '' : 'disabled'}>
+        <span class="friend-avatar-wrap">${friendAvatarHTML({ username: r.username, display_name: r.display_name, avatar_url: r.avatar_url }, r.user_id)}</span>
+        <span class="friend-card-name">${escapeHTML(name)}</span>
+        <span class="friend-suggest-reason">${friendSuggestReasonText(r)}</span>
+      </button>
+      <button type="button" class="btn btn-primary btn-sm friend-suggest-add" data-friend-action="add" data-user-id="${id}">${t('friends.suggest.add')}</button>
+    </div>`;
+}
+
+async function loadFriendsSuggestions(){
+  if (!document.getElementById('friends-suggest')) return;
+  const { data, error } = await supabaseClient.rpc('friend_suggestions', { p_limit: 12 });
+  const el = document.getElementById('friends-suggest');
+  if (!el) return;
+  if (error || !Array.isArray(data) || !data.length){ el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  el.innerHTML = `<h3 class="section-label friends-suggest-title">${t('friends.suggest.title')}</h3>
+    <div class="friends-suggest-row" role="list">${data.map(friendSuggestCardHTML).join('')}</div>`;
+}
+
+async function friendsDismissSuggestion(userId, btn){
+  const card = btn && btn.closest('[data-suggest-row]');
+  if (card) card.remove();
+  const el = document.getElementById('friends-suggest');
+  if (el && !el.querySelector('[data-suggest-row]')){ el.hidden = true; el.innerHTML = ''; }
+  const res = await friendsRpc('dismiss_friend_suggestion', { p_user: userId });
+  if (!res.ok) showToast(friendsErrorMessage(res.error));
 }
 
 async function loadFriendsMiniRank(){
@@ -631,6 +740,7 @@ const FRIENDS_PREF_FIELDS = [
   { key: 'notify_overtakes', label: () => t('friends.pref.notify_overtakes') },
   { key: 'notify_congrats', label: () => t('friends.pref.notify_congrats') },
   { key: 'accept_requests', label: () => t('friends.pref.accept_requests') },
+  { key: 'suggest_me', label: () => t('friends.pref.suggest_me') },
 ];
 
 // Mora em Configurações > Notificações (shared/notification-preferences.js
@@ -736,6 +846,9 @@ function wireFriendsView(wrap){
   if (wrap.dataset.friendsWired === '1') return;
   wrap.dataset.friendsWired = '1';
   wrap.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-friends-qr]')){ friendsShowInviteQr(); return; }
+    const dismiss = e.target.closest('[data-suggest-dismiss]');
+    if (dismiss){ friendsDismissSuggestion(dismiss.dataset.suggestDismiss, dismiss); return; }
     const menuBtn = e.target.closest('[data-friend-menu]');
     if (menuBtn){
       const menu = menuBtn.parentElement.querySelector('.friend-card-menu');

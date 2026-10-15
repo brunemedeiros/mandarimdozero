@@ -102,6 +102,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   aprovadas (2026-10-14) e publicadas (PR #313); 091 e 092 (Pódio) no Staging e na produção:
   `docs/historico/16-conquistas-com-niveis.md`. Ícones: troca geral para o Fluent Emoji feita na branch (`shared/emoji-icons.js`, `docs/icones-fluent.md`).
 - App de loja (App Store/Google Play): antes de discutir, ler `docs/app-loja-lembretes.md` (agenda de contatos, telefone, LGPD).
-- Amigos: aprovados missão em dupla, sequência com amigo, cutucar e as 6 sugestões de amigos sem agenda (`docs/amigos-seguir-x-amizade.md`); implementação não iniciada.
+- Amigos: sugestões de amigos + QR code feitos na branch, 095 no Staging, produção pendente (`docs/historico/17-sugestoes-de-amigos.md`).
+  Ainda não iniciados: missão em dupla, sequência com amigo, cutucar (`docs/amigos-seguir-x-amizade.md`).
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados (placeholders de perfil); Stripe. País dos alunos: já preenchido nos 13 alunos (conferido 2026-10-14).
