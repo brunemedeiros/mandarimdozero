@@ -3,6 +3,7 @@
 begin;
 delete from public.teacher_flashcards where teacher_id = '02bd4956-c8f4-4705-84f3-7b2b18831972' and bank_item_id is not null;
 delete from public.review_bank_students where teacher_id = '02bd4956-c8f4-4705-84f3-7b2b18831972' and name like 'ZZ %';
+delete from public.review_bank_agent_inbox where teacher_id = '02bd4956-c8f4-4705-84f3-7b2b18831972';
 delete from public.review_bank_agent_runs where teacher_id = '02bd4956-c8f4-4705-84f3-7b2b18831972';
 delete from public.review_bank_settings where teacher_id = '02bd4956-c8f4-4705-84f3-7b2b18831972';
 delete from public.decks where kind = 'teacher_root' and teacher_id = '02bd4956-c8f4-4705-84f3-7b2b18831972' and owner_id = '1403fbd4-d0f8-4127-84d7-2b72e68ba022';

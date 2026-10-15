@@ -214,8 +214,9 @@ insert into vault.decrypted_secrets(name, decrypted_secret) values
 insert into r select '091: state devolve so aluno gerenciado, com e-mail da conta vinculada e itens compactos',
   (review_bank_agent_state() ->> 'ok') = 'true' and jsonb_array_length(review_bank_agent_state() -> 'students') = 1
   and (review_bank_agent_state() -> 'students' -> 0 ->> 'linked_email') = 'e@x.com'
-  and jsonb_typeof(review_bank_agent_state() -> 'students' -> 0 -> 'items') = 'array'
-  and (review_bank_agent_state() -> 'students' -> 0 -> 'items' -> 0 ? 'has_card')
+  and (review_bank_agent_state() -> 'students' -> 0 ->> 'item_count')::int >= 1
+  and not ((review_bank_agent_state() -> 'students' -> 0) ? 'items')
+  and (review_bank_agent_items('aaaaaaaa-0000-0000-0000-000000000002') -> 0 ? 'has_card')
   and (review_bank_agent_state() ->> 'today') ~ '^\d{4}-\d{2}-\d{2}$', '';
 insert into r select '091: state nao vaza segredo nem dados de aluno nao gerenciado',
   position('token-secreto' in review_bank_agent_state()::text) = 0 and position('Sem Conta' in review_bank_agent_state()::text) = 0, '';
@@ -234,6 +235,7 @@ do $$ begin perform agent_inbox_submit(jsonb_build_object('students', jsonb_buil
 select pg_temp.u('00000000-0000-0000-0000-00000000000d','prof@x.com'); set role authenticated;
 do $$ begin perform agent_inbox_submit('{"students":[]}'::jsonb); insert into r values ('091: professora logada NAO entrega pela funcao da tarefa', false, 'passou'); exception when others then insert into r values ('091: professora logada NAO entrega pela funcao da tarefa', sqlstate = '42501', sqlerrm); end $$;
 do $$ begin perform review_bank_agent_state(); insert into r values ('091: professora logada NAO le o state da tarefa', false, 'passou'); exception when others then insert into r values ('091: professora logada NAO le o state da tarefa', sqlstate = '42501', sqlerrm); end $$;
+do $$ begin perform review_bank_agent_items('aaaaaaaa-0000-0000-0000-000000000002'); insert into r values ('091: professora logada NAO lê itens pela funcao da tarefa', false, 'passou'); exception when others then insert into r values ('091: professora logada NAO lê itens pela funcao da tarefa', sqlstate = '42501', sqlerrm); end $$;
 do $$ begin perform _rb_agent_secret('rb_agent_token'); insert into r values ('091: ninguem logado le segredo do Vault', false, 'passou'); exception when others then insert into r values ('091: ninguem logado le segredo do Vault', sqlstate = '42501', sqlerrm); end $$;
 do $$ begin insert into review_bank_agent_inbox(teacher_id, payload) values ('00000000-0000-0000-0000-00000000000d', '{"students":[]}'::jsonb); insert into r values ('091: professora nao grava direto na caixa', false, 'passou'); exception when others then insert into r values ('091: professora nao grava direto na caixa', true, sqlerrm); end $$;
 insert into r select '091: professora le so a propria caixa', (select count(*) from review_bank_agent_inbox) = 1, '';
@@ -243,6 +245,7 @@ reset role;
 select pg_temp.u('00000000-0000-0000-0000-00000000000a','brunemed1310@gmail.com'); set role authenticated;
 insert into r select '091: outra professora (admin) nao ve a caixa da primeira', (select count(*) from review_bank_agent_inbox) = 0, '';
 reset role; select set_config('request.jwt.claims', '', false);
+do $$ begin perform review_bank_agent_items('aaaaaaaa-0000-0000-0000-000000000001'); insert into r values ('093: itens de aluno NAO gerenciado sao recusados', false, 'passou'); exception when others then insert into r values ('093: itens de aluno NAO gerenciado sao recusados', sqlerrm = 'not_managed', sqlerrm); end $$;
 -- reivindicar: 3 tentativas, depois erro
 set role service_role;
 insert into r select '091: reivindicar devolve a linha como processando (tentativa 1) e nao entrega 2 vezes', (select count(*) = 1 and bool_and(status = 'processando' and attempts = 1) from agent_inbox_claim('00000000-0000-0000-0000-00000000000d', (select id from sub))), '';
@@ -271,10 +274,10 @@ insert into r select '091: sweep nao chama a funcao quando nao ha nada parado', 
 -- sem segredos, entregar falha e o gatilho nunca derruba nada
 delete from vault.decrypted_secrets where name = 'rb_agent_url'; delete from net.calls;
 insert into review_bank_agent_inbox(teacher_id, payload) values ('00000000-0000-0000-0000-00000000000d', '{"students":[]}'::jsonb);
-insert into r select '091: sem a url no Vault a entrega ainda grava e nenhuma chamada sai', (select count(*) = 0 from net.calls), '';
+insert into r select '091: sem a url no Vault a entrega ainda grava, nenhuma chamada sai e o motivo fica na linha', (select count(*) = 0 from net.calls) and (select count(*) = 1 and bool_and(error like 'envio: rb_agent_nao_configurado%' and status = 'pendente') from review_bank_agent_inbox where id = (select id from review_bank_agent_inbox order by created_at desc limit 1)), '';
 delete from vault.decrypted_secrets where name = 'rb_agent_teacher';
 do $$ begin perform review_bank_agent_state(); insert into r values ('091: sem professora configurada o state recusa', false, 'passou'); exception when others then insert into r values ('091: sem professora configurada o state recusa', sqlerrm = 'not_configured', sqlerrm); end $$;
 do $$ begin perform agent_inbox_submit('{"students":[]}'::jsonb); insert into r values ('091: sem professora configurada a entrega recusa', false, 'passou'); exception when others then insert into r values ('091: sem professora configurada a entrega recusa', sqlerrm = 'not_configured', sqlerrm); end $$;
 select count(*) filter (where ok) passed, count(*) filter (where not ok or ok is null) failed from r;
 select name, got from r where not ok or ok is null;
-select count(*) filter (where name like '089:%') as checks_089, count(*) filter (where name like '091:%') as checks_091, count(*) as total from r;
+select count(*) filter (where name like '089:%') as checks_089, count(*) filter (where name like '091:%' or name like '093:%') as checks_091_093, count(*) as total from r;
