@@ -2,8 +2,8 @@
  "gerado": "script: scripts/e4-classify-functions.js",
  "limiteQuaseIgual": 0.75,
  "linhasArquivo": {
-  "fr": 10537,
-  "zh": 6653
+  "fr": 10641,
+  "zh": 6430
  },
  "resumo": {
   "funcoes": {
@@ -13,9 +13,9 @@
     "linesZh": 16
    },
    "quase igual": {
-    "n": 55,
-    "linesFr": 2556,
-    "linesZh": 2572
+    "n": 43,
+    "linesFr": 2392,
+    "linesZh": 2414
    },
    "divergente": {
     "n": 21,
@@ -23,8 +23,8 @@
     "linesZh": 624
    },
    "só fr": {
-    "n": 237,
-    "linesFr": 3965,
+    "n": 257,
+    "linesFr": 4191,
     "linesZh": 0
    },
    "só zh": {
@@ -50,8 +50,8 @@
     "linesZh": 141
    },
    "só fr": {
-    "n": 80,
-    "linesFr": 576,
+    "n": 86,
+    "linesFr": 593,
     "linesZh": 0
    },
    "só zh": {
@@ -153,15 +153,6 @@
    "linesZh": 101
   },
   {
-   "name": "renderConjPracticeStep",
-   "kind": "function",
-   "area": "conjugação",
-   "cls": "só fr",
-   "similarity": null,
-   "linesFr": 204,
-   "linesZh": 0
-  },
-  {
    "name": "ANKI_EXPORT_CONFIG",
    "kind": "dados",
    "area": "revisão e decks",
@@ -196,6 +187,15 @@
    "similarity": 0.86,
    "linesFr": 87,
    "linesZh": 89
+  },
+  {
+   "name": "renderConjPracticeStep",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 173,
+   "linesZh": 0
   },
   {
    "name": "renderChallengesAdminList",
@@ -450,15 +450,6 @@
    "linesZh": 82
   },
   {
-   "name": "startDeckReviewSession",
-   "kind": "function",
-   "area": "revisão e decks",
-   "cls": "quase igual",
-   "similarity": 0.98,
-   "linesFr": 41,
-   "linesZh": 40
-  },
-  {
    "name": "renderLevelTestQuizStep",
    "kind": "function",
    "area": "exercícios de lição",
@@ -547,15 +538,6 @@
    "similarity": 0.81,
    "linesFr": 37,
    "linesZh": 37
-  },
-  {
-   "name": "openReviewSession",
-   "kind": "function",
-   "area": "revisão e decks",
-   "cls": "quase igual",
-   "similarity": 0.96,
-   "linesFr": 37,
-   "linesZh": 35
   },
   {
    "name": "serializeState",
@@ -675,6 +657,15 @@
    "linesZh": 59
   },
   {
+   "name": "renderConjSelectScreen",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 57,
+   "linesZh": 0
+  },
+  {
    "name": "renderExpressionFeedbackScreen",
    "kind": "function",
    "area": "desafios e ditados",
@@ -711,15 +702,6 @@
    "linesZh": 0
   },
   {
-   "name": "backToReviewModeSelect",
-   "kind": "function",
-   "area": "revisão e decks",
-   "cls": "quase igual",
-   "similarity": 0.98,
-   "linesFr": 26,
-   "linesZh": 25
-  },
-  {
    "name": "REALITY_NOTE_LEVEL_GUIDANCE",
    "kind": "dados",
    "area": "revisão e decks",
@@ -732,15 +714,6 @@
    "name": "renderModuleCompleteScreen",
    "kind": "function",
    "area": "mapa da trilha e unidades",
-   "cls": "só fr",
-   "similarity": null,
-   "linesFr": 49,
-   "linesZh": 0
-  },
-  {
-   "name": "renderConjSelectScreen",
-   "kind": "function",
-   "area": "conjugação",
    "cls": "só fr",
    "similarity": null,
    "linesFr": 49,
@@ -822,6 +795,15 @@
    "name": "renderLevelModalList",
    "kind": "function",
    "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 42,
+   "linesZh": 0
+  },
+  {
+   "name": "renderConjSessionResult",
+   "kind": "function",
+   "area": "conjugação",
    "cls": "só fr",
    "similarity": null,
    "linesFr": 42,
@@ -1197,15 +1179,6 @@
    "linesZh": 0
   },
   {
-   "name": "exitToPath",
-   "kind": "function",
-   "area": "mapa da trilha e unidades",
-   "cls": "quase igual",
-   "similarity": 0.89,
-   "linesFr": 13,
-   "linesZh": 11
-  },
-  {
    "name": "renderClozeGrammarFeedback",
    "kind": "function",
    "area": "exercícios de lição",
@@ -1258,6 +1231,15 @@
    "similarity": 0.36,
    "linesFr": 16,
    "linesZh": 6
+  },
+  {
+   "name": "renderConjSearchList",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 22,
+   "linesZh": 0
   },
   {
    "name": "noteOrConceptReviewHTML",
@@ -1323,6 +1305,15 @@
    "linesZh": 9
   },
   {
+   "name": "conjAlign",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 20,
+   "linesZh": 0
+  },
+  {
    "name": "expressionTodayHTML",
    "kind": "function",
    "area": "desafios e ditados",
@@ -1353,6 +1344,15 @@
    "name": "buildCheckpointRow",
    "kind": "function",
    "area": "checkpoint e testes",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 19,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_STATE",
+   "kind": "dados",
+   "area": "estado e persistência",
    "cls": "só fr",
    "similarity": null,
    "linesFr": 19,
@@ -1404,29 +1404,11 @@
    "linesZh": 19
   },
   {
-   "name": "wireAudioButtons",
-   "kind": "function",
-   "area": "áudio e fala",
-   "cls": "quase igual",
-   "similarity": 0.95,
-   "linesFr": 9,
-   "linesZh": 9
-  },
-  {
    "name": "badgeModesUsedCount",
    "kind": "function",
    "area": "perfil, ranking e social",
    "cls": "divergente",
    "similarity": 0.67,
-   "linesFr": 9,
-   "linesZh": 9
-  },
-  {
-   "name": "advanceUnitStep",
-   "kind": "function",
-   "area": "mapa da trilha e unidades",
-   "cls": "quase igual",
-   "similarity": 0.94,
    "linesFr": 9,
    "linesZh": 9
   },
@@ -1438,6 +1420,15 @@
    "similarity": 1,
    "linesFr": 9,
    "linesZh": 9
+  },
+  {
+   "name": "conjSearchVerbs",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 18,
+   "linesZh": 0
   },
   {
    "name": "tokenizeDictationText",
@@ -1521,15 +1512,6 @@
    "linesZh": 17
   },
   {
-   "name": "pollForVoices",
-   "kind": "function",
-   "area": "áudio e fala",
-   "cls": "quase igual",
-   "similarity": 0.93,
-   "linesFr": 8,
-   "linesZh": 8
-  },
-  {
    "name": "wireFrAccentPicker",
    "kind": "function",
    "area": "desafios e ditados",
@@ -1546,6 +1528,15 @@
    "similarity": 1,
    "linesFr": 8,
    "linesZh": 8
+  },
+  {
+   "name": "conjEvaluate",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 16,
+   "linesZh": 0
   },
   {
    "name": "dictationWrongWords",
@@ -1728,18 +1719,36 @@
    "linesZh": 7
   },
   {
-   "name": "reviewCardTagLabel",
-   "kind": "function",
-   "area": "revisão e decks",
-   "cls": "quase igual",
-   "similarity": 0.95,
-   "linesFr": 7,
-   "linesZh": 7
-  },
-  {
    "name": "completeLevelTest",
    "kind": "function",
    "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 14,
+   "linesZh": 0
+  },
+  {
+   "name": "conjExpectedInfo",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 14,
+   "linesZh": 0
+  },
+  {
+   "name": "startConjSession",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 14,
+   "linesZh": 0
+  },
+  {
+   "name": "setConjMode",
+   "kind": "function",
+   "area": "conjugação",
    "cls": "só fr",
    "similarity": null,
    "linesFr": 14,
@@ -1863,9 +1872,9 @@
    "linesZh": 6
   },
   {
-   "name": "CONJ_STATE",
-   "kind": "dados",
-   "area": "estado e persistência",
+   "name": "conjOtherFormOf",
+   "kind": "function",
+   "area": "conjugação",
    "cls": "só fr",
    "similarity": null,
    "linesFr": 13,
@@ -1933,6 +1942,24 @@
    "similarity": 0.9,
    "linesFr": 6,
    "linesZh": 6
+  },
+  {
+   "name": "CONJ_TENSES",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 12,
+   "linesZh": 0
+  },
+  {
+   "name": "renderConjPicked",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 12,
+   "linesZh": 0
   },
   {
    "name": "updateDictationRecord",
@@ -2025,15 +2052,6 @@
    "linesZh": 0
   },
   {
-   "name": "CONJ_TENSES",
-   "kind": "dados",
-   "area": "conjugação",
-   "cls": "só fr",
-   "similarity": null,
-   "linesFr": 11,
-   "linesZh": 0
-  },
-  {
    "name": "sanitizeDictationRecord",
    "kind": "function",
    "area": "desafios e ditados",
@@ -2106,15 +2124,6 @@
    "linesZh": 0
   },
   {
-   "name": "maskWordInText",
-   "kind": "function",
-   "area": "outros",
-   "cls": "quase igual",
-   "similarity": 0.84,
-   "linesFr": 5,
-   "linesZh": 5
-  },
-  {
    "name": "currentStudentName",
    "kind": "function",
    "area": "perfil, ranking e social",
@@ -2140,6 +2149,24 @@
    "similarity": 1,
    "linesFr": 5,
    "linesZh": 5
+  },
+  {
+   "name": "conjAnswerViewHTML",
+   "kind": "function",
+   "area": "exercícios de lição",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 10,
+   "linesZh": 0
+  },
+  {
+   "name": "pickConjVerb",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 10,
+   "linesZh": 0
   },
   {
    "name": "normalizeDictationWord",
@@ -2241,6 +2268,24 @@
    "linesZh": 0
   },
   {
+   "name": "conjPersonLabel",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 9,
+   "linesZh": 0
+  },
+  {
+   "name": "setConjSearchActive",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 9,
+   "linesZh": 0
+  },
+  {
    "name": "conjHintPlaceholder",
    "kind": "function",
    "area": "conjugação",
@@ -2325,6 +2370,15 @@
    "name": "FR_ACCENT_GROUPS",
    "kind": "dados",
    "area": "desafios e ditados",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 8,
+   "linesZh": 0
+  },
+  {
+   "name": "conjExampleHTML",
+   "kind": "function",
+   "area": "conjugação",
    "cls": "só fr",
    "similarity": null,
    "linesFr": 8,
@@ -2484,6 +2538,15 @@
    "linesZh": 0
   },
   {
+   "name": "updateConjSizeHint",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 7,
+   "linesZh": 0
+  },
+  {
    "name": "getConjForms",
    "kind": "function",
    "area": "conjugação",
@@ -2592,24 +2655,6 @@
    "linesZh": 7
   },
   {
-   "name": "playAudioPreview",
-   "kind": "function",
-   "area": "revisão e decks",
-   "cls": "quase igual",
-   "similarity": 0.79,
-   "linesFr": 3,
-   "linesZh": 3
-  },
-  {
-   "name": "customAudioBtnHTML",
-   "kind": "function",
-   "area": "áudio e fala",
-   "cls": "quase igual",
-   "similarity": 0.81,
-   "linesFr": 3,
-   "linesZh": 3
-  },
-  {
    "name": "registerDailyConjugationTense",
    "kind": "function",
    "area": "conjugação",
@@ -2653,15 +2698,6 @@
    "similarity": null,
    "linesFr": 6,
    "linesZh": 0
-  },
-  {
-   "name": "showWrongAnswerPanel",
-   "kind": "function",
-   "area": "exercícios de lição",
-   "cls": "quase igual",
-   "similarity": 0.78,
-   "linesFr": 3,
-   "linesZh": 3
   },
   {
    "name": "dictLooseNorm",
@@ -2856,6 +2892,33 @@
    "name": "recordLevelTestAttempt",
    "kind": "function",
    "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "conjSpeakText",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "toggleConjRegularity",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 5,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_GAMES_UI",
+   "kind": "dados",
+   "area": "conjugação",
    "cls": "só fr",
    "similarity": null,
    "linesFr": 5,
@@ -3081,15 +3144,6 @@
    "name": "trailSkipAllowed",
    "kind": "function",
    "area": "mapa da trilha e unidades",
-   "cls": "só fr",
-   "similarity": null,
-   "linesFr": 4,
-   "linesZh": 0
-  },
-  {
-   "name": "conjPersonLabel",
-   "kind": "function",
-   "area": "conjugação",
    "cls": "só fr",
    "similarity": null,
    "linesFr": 4,
@@ -3405,6 +3459,15 @@
    "name": "showTrailSkipLocked",
    "kind": "function",
    "area": "mapa da trilha e unidades",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 3,
+   "linesZh": 0
+  },
+  {
+   "name": "conjFlagHTML",
+   "kind": "function",
+   "area": "conjugação",
    "cls": "só fr",
    "similarity": null,
    "linesFr": 3,
@@ -4302,9 +4365,72 @@
    "linesZh": 0
   },
   {
+   "name": "CONJ_SESSION_SIZES",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
    "name": "CONJ_SESSION_SIZE",
    "kind": "dados",
    "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_ETRE_AUX",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_PICK_MAX",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_LANG_FLAG",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "conjFold",
+   "kind": "function",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "CONJ_GAMES_PAYWALL_ENABLED",
+   "kind": "dados",
+   "area": "conjugação",
+   "cls": "só fr",
+   "similarity": null,
+   "linesFr": 1,
+   "linesZh": 0
+  },
+  {
+   "name": "isConjGameLocked",
+   "kind": "function",
+   "area": "mapa da trilha e unidades",
    "cls": "só fr",
    "similarity": null,
    "linesFr": 1,
