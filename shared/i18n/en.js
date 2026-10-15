@@ -152,6 +152,7 @@ window.I18N_CATALOG['en'] = {
   'notif.cat.sistema': '⚙️ System', // ALTA
   'notif.cat.amigos': '👥 Friends', // ALTA
   'notif.pref.inAppOnly': 'Friends only has in-app notifications', // ALTA
+  'notif.pref.noEmail': 'Friends has no email notifications', // ALTA
   'notif.pref.guest': 'Create an account to set up notifications -- guest mode does not save preferences.', // ALTA
   'notif.pref.loadFailed': 'Could not load your preferences right now.', // ALTA
   'notif.pref.sectionTitle': 'Notifications', // ALTA
@@ -2388,6 +2389,63 @@ window.I18N_CATALOG['en'] = {
   'friends.suggest.reason.partner': 'Also studies {lang}', // ALTA
   'friends.suggest.reason.ranking': 'Close to you in this week\'s ranking', // ALTA
   'friends.pref.suggest_me': 'Show me in other people\'s friend suggestions', // ALTA
+  'badge.track.duo.title': 'Duo Missions', // ALTA
+  'badge.track.duo.1': 'Dynamic Duo', // ALTA
+  'badge.track.duo.2': 'Power Partnership', // ALTA
+  'badge.track.duo.3': 'Unbeatable Duo', // ALTA
+  'badge.track.duo.goal': 'Complete {n} duo missions', // ALTA
+  'badge.track.duo.goal.1': 'Complete a duo mission', // ALTA
+  'friends.duo.title': 'Duo mission', // ALTA
+  'friends.duo.invite': 'Invite to a mission', // ALTA
+  'friends.duo.inviteAria': 'Invite {name} to a duo mission', // ALTA
+  'friends.duo.emptyText': 'Every Monday the site pairs you with a friend who studied the week before, and you each study 4 days by Sunday. No partner this week? Invite a friend from their card.', // ALTA
+  'friends.duo.offText': 'You\'re not taking part in duo missions. To join again, turn on "Take part in duo missions" in Settings > Notifications > Friends.', // ALTA
+  'friends.duo.pairTitle': 'Your partner this week: {name}', // ALTA
+  'friends.duo.weekdays': 'M,T,W,T,F,S,S', // ALTA
+  'friends.duo.you': 'You', // ALTA
+  'friends.duo.weekAria': 'You studied {mine} of {goal} days and {name} {theirs} of {goal}', // ALTA
+  'friends.duo.stripTitle': 'Duo mission with {name}', // ALTA
+  'friends.duo.stripSub': 'You {mine}/{goal} days · {name} {theirs}/{goal}', // ALTA
+  'friends.duo.lessonDay': 'Day {n} of {goal} in your mission with {name} ✓', // ALTA
+  'friends.duo.lessonDone': 'Duo mission with {name} complete! 🎉', // ALTA
+  'friends.pref.join_duo_missions': 'Take part in duo missions (every Monday, with a friend)', // ALTA
+  'friends.duo.doneDays': { one: 'You each studied {n} day. A new partner comes on Monday.', other: 'You each studied {n} days. A new partner comes on Monday.' }, // ALTA
+  'friends.duo.goalText': { one: 'You each study {n} day by Sunday.', other: 'You each study {n} days by Sunday.' }, // ALTA
+  'friends.duo.toast.startedDays': { one: 'Mission started! You each study {n} day by Sunday 🤝', other: 'Mission started! You each study {n} days by Sunday 🤝' }, // ALTA
+  'friends.duo.lessonRest': { one: '{n} more day for you by Sunday.', other: '{n} more days for you by Sunday.' }, // ALTA
+  'friends.duo.lessonWaitPartner': { one: 'Your part is done! {name} needs {n} more day.', other: 'Your part is done! {name} needs {n} more days.' }, // ALTA
+  'friends.duo.with': 'You and {name}', // ALTA
+  'friends.duo.progress': '{done} of {goal} XP', // ALTA
+  'friends.duo.barAria': 'Mission progress: {done} of {goal} XP', // ALTA
+  'friends.duo.mine': 'You: {n} XP', // ALTA
+  'friends.duo.theirs': '{name}: {n} XP', // ALTA
+  'friends.duo.endsToday': 'Ends today', // ALTA
+  'friends.duo.done': 'Mission complete! 🎉', // ALTA
+  'friends.duo.doneText': 'You earned {goal} XP together. A new mission starts next week.', // ALTA
+  'friends.nudge.btn': 'Nudge', // ALTA
+  'friends.nudge.aria': 'Nudge {name} to study today', // ALTA
+  'friends.nudge.done': 'Nudged', // ALTA
+  'friends.nudge.atRisk': 'Your streak together ends if {name} doesn\'t study today', // ALTA
+  'friends.toast.nudged': 'Nudge sent 👋', // ALTA
+  'friends.error.nudges_off': 'This person chose not to get nudges.', // ALTA
+  'friends.error.already_studied': 'This person already studied today 🎉', // ALTA
+  'friends.error.daily_nudge_limit': 'You\'ve already nudged 20 friends today. More tomorrow!', // ALTA
+  'friends.error.invalid_goal': 'Pick one of the goals.', // ALTA
+  'friends.error.already_in_mission': 'You\'re already on a duo mission this week.', // ALTA
+  'friends.error.friend_in_mission': 'This friend is already on a mission this week. Pick someone else.', // ALTA
+  'friends.pref.accept_nudges': 'Get nudges from friends (study reminders)', // ALTA
+  'friends.pref.notify_missions': 'Notify me about duo missions (start and goal reached)', // ALTA
+  'friends.push.title': 'Know right away what your friends are up to', // ALTA
+  'friends.push.firstTitle': 'You\'ve got a friend! 🎉', // ALTA
+  'friends.push.text': 'Turn on notifications on this device to get nudges, duo mission invites and congrats from your friends right away, even with the site closed.', // ALTA
+  'friends.push.enable': 'Turn on notifications', // ALTA
+  'friends.push.later': 'Not now', // ALTA
+  'friends.push.done': 'Done! Your friends\' notifications will reach this device 🔔', // ALTA
+  'friends.push.iosText': 'On iPhone and iPad, notifications only work with the site on your Home Screen: tap Share, then "Add to Home Screen". Then open the site from there and turn on notifications.', // ALTA
+  'friends.push.iosOk': 'Got it', // ALTA
+  'friends.duo.endsIn': { one: 'Ends in {n} day', other: 'Ends in {n} days' }, // ALTA
+  'friends.joint.label': { one: '{n} day together', other: '{n} days together' }, // ALTA
+  'friends.joint.aria': { one: 'You both studied {n} day in a row', other: 'You both studied {n} days in a row' }, // ALTA
   'friends.suggest.reason.mutual': { one: '{n} mutual friend', other: '{n} mutual friends' }, // ALTA
   'profile.tabFriends': 'Friends', // ALTA
   'panel.admin.sub': 'Badges, metrics, notifications, reports and plans.', // ALTA
@@ -2401,6 +2459,27 @@ window.I18N_CATALOG['en'] = {
   'panel.teacher.aria': 'Teacher panel section', // ALTA
   'panel.teacher.nav': 'Teacher', // ALTA
   'panel.teacher.menu': '🎓 Teacher panel', // ALTA
+  'panel.tbell.title': 'Student notifications', // ALTA
+  'panel.tbell.hint': 'Notifications about your students in every language: who went quiet, board posts and invites. Notifications about your own studies stay in the bell at the top.', // ALTA
+  'panel.tbell.markAll': 'Mark all as read', // ALTA
+  'panel.tbell.empty': 'No notifications about students yet.', // ALTA
+  'panel.tbell.err': 'Couldn\'t load the notifications right now. Try again in a moment.', // ALTA
+  'panel.tbell.new': 'New', // ALTA
+  'panel.tbell.unread': { one: '{n} new student notification', other: '{n} new student notifications' }, // ALTA
+  'panel.tbell.otherLang': 'To reply, open the {lang} board.', // MÉDIA
+  'panel.tbell.lang.frances': 'French', // ALTA
+  'panel.tbell.lang.mandarim': 'Chinese', // ALTA
+  'panel.tbell.lang.portugues': 'Portuguese', // ALTA
+  'panel.tbell.ev.inactive': 'Haven\'t shown up in a few days: {list}. Maybe it\'s time to say hi 👋', // ALTA (mesma frase da 056)
+  'panel.tbell.days': { one: '{n} day', other: '{n} days' }, // ALTA
+  'panel.tbell.ev.accepted': '{name} accepted your invitation and is now your {lang} student 🎉', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.joinedLink': '{name} joined through your link and is now your {lang} student 🎉', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.declined': '{name} declined the invitation to {lang} classes.', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.post': '{name} posted on the board: {snippet}', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.postClass': '{name} posted on the board (class {classroom}): {snippet}', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.comment': '{name} commented on the board: {snippet}', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.joinClass': '{name} joined the class {classroom} through your link', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.joinClassNew': '{name} joined the class {classroom} through your link and is now your {lang} student 🎉', // ALTA (mesma frase da 104)
   'panel.tab.students': 'Students', // ALTA
   'panel.tab.cards': 'Cards', // ALTA
   'panel.tab.classlogs': 'Classes', // ALTA
@@ -2561,7 +2640,16 @@ window.I18N_CATALOG['en'] = {
   'rb.generatedPartial': '{ok} created, {fail} failed.', // ALTA
   'rb.gotIt': 'Got it', // ALTA
   'rb.keys': 'Space shows · right arrow got it · H with help · left arrow missed', // ALTA
-  'rb.link': 'Link', // ALTA
+  'rb.classEmpty': 'No students in the class yet', // ALTA
+  'rb.classMembers': '{n} in the class: {names}', // ALTA
+  'rb.classPick': 'Class', // ALTA
+  'rb.linkClass': 'Link to class', // ALTA
+  'rb.linkedClass': 'Class', // ALTA
+  'rb.linkedClassDone': "Class linked. {n} cards delivered to whoever didn't have them yet.", // ALTA
+  'rb.noClassrooms': 'No class in this language (create one in Mural).', // ALTA
+  'rb.noRecipients': 'The class has no students yet: there is no one to deliver to.', // ALTA
+  'rb.orClass': 'or', // ALTA
+  'rb.link': 'Link to student', // ALTA
   'rb.linkPick': 'Student account', // ALTA
   'rb.linked': 'Linked', // ALTA
   'rb.linkedAccount': 'Linked account', // ALTA
@@ -2576,7 +2664,7 @@ window.I18N_CATALOG['en'] = {
   'rb.modesAria': 'What to review', // ALTA
   'rb.more': 'Show more', // ALTA
   'rb.newItem': '+ New item', // ALTA
-  'rb.noAccount': 'No account on the site', // ALTA
+  'rb.noAccount': 'No account on the site yet', // ALTA
   'rb.noLinkable': 'No account with an active link in this language to connect.', // ALTA
   'rb.noPermission': 'The Review Bank is part of the Teacher plan.', // ALTA
   'rb.noReason': 'No reason', // ALTA
@@ -2737,6 +2825,37 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.labels.createPlaceholder': 'Type a name and press Enter to create a label', // ALTA
   'panel.classLog.labels.edit': 'Edit the {name} label', // ALTA
   'panel.classLog.labels.done': 'Done', // ALTA
+  'panel.classLog.time': 'Time (optional)', // ALTA
+  'panel.classLog.durationMin': 'Length', // ALTA
+  'panel.classLog.repeatWeekly': 'Repeat every week', // ALTA
+  'panel.classLog.repeatUntil': 'Until', // ALTA
+  'panel.classLog.repeatHint': 'Creates one lesson a week, same day and time, until that date (52 at most).', // ALTA
+  'panel.classLog.views': 'How to see the lessons', // ALTA
+  'panel.classLog.view.register': 'Log', // ALTA
+  'panel.classLog.view.calendar': 'Calendar', // ALTA
+  'panel.classLog.cal.prev': 'Previous month', // ALTA
+  'panel.classLog.cal.next': 'Next month', // ALTA
+  'panel.classLog.cal.today': 'Today', // ALTA
+  'panel.classLog.cal.legend': 'The color is the attendance one; no color = scheduled lesson or not logged yet.', // ALTA
+  'panel.classLog.cal.empty': 'No lessons on this day.', // ALTA
+  'panel.classLog.cal.schedule': 'Schedule a lesson on this day', // ALTA
+  'myClassLogs.upcoming': 'Upcoming lessons', // ALTA
+  'myClassLogs.feed.title': 'See your lessons in your calendar (Google, Apple, Outlook)', // ALTA
+  'myClassLogs.feed.intro': 'Subscribe to this link once and your lessons show up in your calendar on their own, in your time zone. When a lesson changes here, your calendar follows.', // ALTA
+  'myClassLogs.feed.google': 'Open in Google Calendar', // ALTA
+  'myClassLogs.feed.apple': 'Apple or Outlook', // ALTA
+  'myClassLogs.feed.linkLabel': 'Or copy the link and paste it into "Add calendar from URL"', // ALTA
+  'myClassLogs.feed.copy': 'Copy link', // ALTA
+  'myClassLogs.feed.copied': 'Link copied', // ALTA
+  'myClassLogs.feed.delayHint': 'Google Calendar checks the link on its own every few hours, so a new lesson may take a while to show up there.', // ALTA
+  'myClassLogs.feed.privacyHint': 'Anyone with this link can see your lesson dates, topics and homework. Don\'t share it. Shared it by mistake?', // ALTA
+  'myClassLogs.feed.reset': 'Create a new link', // ALTA
+  'myClassLogs.feed.resetConfirm': 'Create a new link? The old one will stop working and you\'ll need to subscribe to the new one in your calendar.', // ALTA
+  'myClassLogs.feed.resetDone': 'New link created. Subscribe to it again in your calendar.', // ALTA
+  'myClassLogs.feed.error': 'Couldn\'t create the link right now. Please try again in a moment.', // ALTA
+  'myClassLogs.view.list': 'List', // ALTA
+  'myClassLogs.classLabel': 'Lesson', // ALTA
+  'panel.classLog.cal.count': { one: '{n} lesson', other: '{n} lessons' }, // ALTA
   'panel.classLog.review.title': { one: 'Review from Notion ({n} lesson)', other: 'Review from Notion ({n} lessons)' }, // ALTA
   'panel.classLog.review.hint': 'These texts came from Notion and may include notes meant only for you, so the student can\'t see them yet. Edit anything you want and choose: show to the student or keep for yourself. The original text stays in your Notes.', // ALTA
   'panel.classLog.review.toTopic': 'Topic (the student sees it)', // ALTA
@@ -2898,4 +3017,36 @@ window.I18N_CATALOG['en'] = {
   'tinvite.err.invalid_code': 'This invite link no longer works. Ask whoever invited you for a new one.', // ALTA
   'tinvite.err.not_authenticated': 'Log in to answer the invite.', // ALTA
   'tinvite.err.generic': 'That didn\'t work right now. Try again in a moment.', // ALTA
+
+  // Ditado do francês: explicação de cada erro (família latina, fase 2, 2026-10-15). needs_review: tradução nova,
+  // ainda não revisada pela dona; confiança no comentário de cada linha. Antes estes textos apareciam em
+  // português também no site em inglês.
+  'fr.dict.youWrote': 'you wrote “{typed}”', // ALTA
+  'fr.dict.light.hyphen': '“{core}” has a hyphen ({you}).', // ALTA
+  'fr.dict.light.apostrophe': '“{core}” has an apostrophe ({you}).', // ALTA
+  'fr.dict.light.ligature': '“{core}” uses the letter “œ”, which is a single letter ({you}).', // ALTA
+  'fr.dict.light.accent': '“{core}”: check the accents ({you}).', // ALTA
+  'fr.dict.light.spelling': '“{core}”: small spelling difference ({you}).', // ALTA
+  'fr.dict.light.multiple': '“{core}”: check {list} ({you}).', // ALTA
+  'fr.dict.part.hyphen': 'the hyphen', // ALTA
+  'fr.dict.part.apostrophe': 'the apostrophe', // ALTA
+  'fr.dict.part.ligature': 'the letter “œ”', // ALTA
+  'fr.dict.part.accent': 'the accents', // ALTA
+  'fr.dict.part.and': ' and ', // ALTA
+  'fr.dict.err.homophone': '“{shown}” (you wrote “{typed}”): words that sound alike. {note}', // ALTA
+  'fr.dict.err.agreement': '“{shown}” (you wrote “{typed}”): only the ending is different (-{suffix}). If the word agrees with another one, check gender, number or the verb form against the rest of the sentence; otherwise it may just be a typo.', // MÉDIA -- "concorda" sem equivalente curto; alternativa: "If it is a word that has to agree..."
+  'fr.dict.err.other': '“{shown}”: not the expected word (you wrote “{typed}”).', // ALTA
+  'fr.dict.punctMissing': 'This punctuation mark is missing (no points lost)', // ALTA
+  'fr.dict.hom.a': '“a” is the verb avoir (il a); “à” is a preposition (à Paris).', // ALTA
+  'fr.dict.hom.et': '“et” means “and”; “est” is the verb être (il est).', // ALTA
+  'fr.dict.hom.son': '“son” means “his/her”; “sont” is the verb être (ils sont).', // ALTA
+  'fr.dict.hom.ou': '“ou” means “or”; “où” means “where”.', // ALTA
+  'fr.dict.hom.on': '“on” is a pronoun (“we”, “one”); “ont” is the verb avoir (ils ont).', // MÉDIA -- "a gente" vira "we/one"
+  'fr.dict.hom.la': '“la” is an article or a pronoun; “là” means “there”.', // ALTA
+  'fr.dict.hom.ce': '“ce” is a demonstrative (“this/that”); “se” is a reflexive pronoun (il se lève).', // ALTA
+  'fr.dict.hom.ces': '“ces” = “these/those”; “ses” = “his/her” (plural); “c\'est” = “it is/this is”; “s\'est” = pronoun + être (il s\'est levé).', // ALTA
+  'fr.dict.hom.mes': '“mes” means “my” (plural); “mais” means “but”.', // ALTA
+  'fr.dict.hom.peu': '“peu” means “little, not much”; “peux”/“peut” are forms of pouvoir (je peux, il peut).', // ALTA
+  'fr.dict.hom.leur': '“leurs” goes before a plural noun; “leur” before a singular noun or as a pronoun (je leur parle).', // ALTA
+  'fr.dict.hom.quel': 'Same pronunciation: “quel” changes with the gender and number of the noun.', // ALTA
 };

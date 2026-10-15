@@ -88,44 +88,6 @@ const FEEDBACK_SOUND_KEY = 'frances_feedback_sound';
 let feedbackAudioCtx = null;
 
 
-// Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
-// API do navegador — qualidade consistente pra todo aluno, independente do
-// SO/navegador. Ver audio-manifest.js (texto -> arquivo) e speakFrench().
-// rate (opcional): playbackRate do <audio> -- usado pelo botão "🐢 devagar"
-// (ver SLOW_AUDIO_RATE) em qualquer tela de Écouter manual (o Ditado já tem
-// seu próprio seletor 0.75x/1x/1.5x, não precisa deste botão extra).
-function playPregeneratedAudio(file, btnEl, isAutoplay, rate){
-  stopExerciseAudio();
-  const audio = new Audio('audio/' + file);
-  if (rate) audio.playbackRate = rate;
-  exerciseAudioEl = audio;
-  if (btnEl){ btnEl.classList.add('speaking'); LAST_AUDIO_BTN = btnEl; }
-  const clear = () => {
-    if (btnEl) btnEl.classList.remove('speaking');
-    if (exerciseAudioEl === audio) exerciseAudioEl = null;
-  };
-  audio.addEventListener('ended', clear);
-  audio.addEventListener('error', () => {
-    clear();
-    showToast(t('toast.audioPlayFailed'));
-    trackTechnicalError('audio_load_failed', { file });
-  });
-  audio.play().catch(() => {
-    clear();
-    // Autoplay bloqueado pelo navegador (comum em mobile -- o clique em
-    // "Continuar" que dispara o próximo exercício quebra a "janela" de
-    // gesto do usuário que o play() automático depende) -- diferente de um erro real de arquivo/rede, por
-    // isso um aviso mais brando em vez do toast de erro acima: basta tocar
-    // manualmente no botão pra funcionar. Só conta como falha TÉCNICA
-    // quando NÃO é autoplay -- um clique manual que falha é sempre
-    // inesperado; autoplay bloqueado é comportamento normal do navegador,
-    // não um bug, e contá-lo inflaria "erros" com algo que acontece toda
-    // sessão em boa parte dos celulares.
-    if (isAutoplay) showToast(t('toast.audioTapSpeaker'));
-    else trackTechnicalError('audio_play_failed', { file });
-  });
-}
-
 // Reports reais de alunos ("o audio está muito rápido") em cima do áudio
 // pré-gerado (voz neural fr-FR-Chirp3-HD-Achernar), que toca na velocidade
 // nativa (playbackRate 1.0, sem ajuste nenhum) diferente do fallback de
@@ -233,11 +195,6 @@ function tpZero(key, n, params){
   return tp(key, n === 0 ? 2 : n, Object.assign({ n: 0 === n ? 0 : n }, params || {}));
 }
 
-function audioBtnHTML(text, extraClass){
-  const safe = text.replace(/"/g, '&quot;');
-  return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="${t('fr.audio.listenPronunciation')}" title="${t('fr.audio.listenPronunciation')}">🔊</button>`;
-}
-
 
 // Botão de áudio devagar -- companheiro de qualquer "Écouter" manual
 // (desafios/exemplos onde o áudio NÃO toca sozinho, decisão explícita da
@@ -268,26 +225,6 @@ const SCENARIO_FLAG_SVG = {
 function scenarioSceneHTML(emoji){
   const svg = SCENARIO_FLAG_SVG[emoji];
   return svg ? `<span class="scenario-flag">${svg}</span>` : emoji;
-}
-
-
-// ---------- Construção do banco de cartões a partir do content.js ----------
-// Cada cartão SRS = 1 item de vocabulário (frente: francês, com áudio; verso: tradução)
-function buildCardsFromUnits(units, appKey = 'frances'){
-  // K2-C: cada palavra vira uma Note nativa `normal_reversed` com dois
-  // CardInstances (A = id legado, B = `-b`), montados por
-  // shared/study-trail-model.js sobre o motor existente. appKey tem default
-  // literal: este construtor roda no init de STATE, antes de `const APP_KEY`.
-  const cards = [];
-  units.forEach(u => {
-    if (u.type === 'grammar') return; // unidades de gramática não têm vocabulário/flashcards
-    u.vocab.forEach((v, idx) => {
-      buildStudyWordCards(u, v, idx, appKey).forEach(c => cards.push(c));
-    });
-  });
-  // Cartões "Na frase": 1 por frase de exemplo do curso (shared/study-trail-model.js).
-  buildStudyPhraseCards(units, appKey).forEach(c => cards.push(c));
-  return cards;
 }
 
 
@@ -830,30 +767,6 @@ const LEVEL_DESCRIPTIONS = {
 // (STUDY_WIZARD_STEPS até saveStudyWizard) e o wiring do modal vêm de
 // shared/wizard.js.
 
-// Lembrete local best-effort: só dispara se a pessoa tiver o app aberto numa
-// janela de ~30min depois do horário escolhido, com permissão já concedida —
-// não existe servidor de push aqui, então não há aviso quando o app está
-// fechado ou o navegador nem está aberto.
-function maybeSendStudyReminder(){
-  const goal = STATE.studyGoal;
-  if (!goal.notifications || !goal.dailyLessonsGoal) return;
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-
-  const now = new Date();
-  if (!goal.days[DAY_KEY_BY_JS_INDEX[now.getDay()]]) return;
-
-  const scheduled = new Date(now);
-  scheduled.setHours(goal.hour, goal.minute, 0, 0);
-  const diffMin = (now - scheduled) / 60000;
-  if (diffMin < 0 || diffMin > 30) return;
-
-  if (localStorageSafeGet('frances_last_study_notif') === todayStr()) return;
-  new Notification(t('fr.reminder.title'), {
-    body: tp('zh.reminder.body', goal.dailyLessonsGoal),
-    icon: 'icons/icon-192.png'
-  });
-  localStorageSafeSet('frances_last_study_notif', todayStr());
-}
 
 // ---------- Lembrete de revisão acumulada (estilo Busuu) ----------
 // Pop-up não bloqueante no rodapé, avisando que há palavras vistas em lições
@@ -872,29 +785,6 @@ document.getElementById('review-reminder-cta-btn').addEventListener('click', () 
   switchTab('review');
   openReviewSession('flashcard');
 });
-
-// ---------- Desafios de hoje (estilo Busuu) ----------
-// Contadores do dia (zeram sozinhos quando a data muda). Todo dia mostra
-// exatamente 3 desafios, um de cada categoria — sorteados de forma
-// determinística a partir da data (mudam de dia pra dia, mas são sempre os
-// mesmos dentro do mesmo dia):
-//   1. Fácil (EASY_CHALLENGES) — uma vitória rápida, garantida todo dia.
-//   2. Revisão OU Conjugação (REVISAO_CONJ_CHALLENGES) — sempre puxa o aluno
-//      pra uma dessas duas abas, que ele não necessariamente abriria sozinho.
-//   3. Geral (GENERAL_CHALLENGES) — mais variado, ligado à Trilha em geral.
-// Balde-padrão construído do zero a cada chamada -- nunca reaproveita
-// arrays/objetos entre chamadas (um array compartilhado entre dois "dias"
-// diferentes viraria um vazamento de estado sutil).
-function freshDailyBucket(today){
-  return {
-    date: today, xp: 0, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
-    grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
-    conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
-    lessonsForGoal: 0, goalCountedLessonKeys: [], exerciseFormatsSeen: [],
-    exerciseFormatCounts: {}, audioPlaysToday: 0, overdueReviewsDone: 0,
-    missionsBonusAwarded: false, missionsNotified: {}, missions: null
-  };
-}
 
 
 // Fase 6 da tarefa de conclusão de lição/unidade: retirada do desafio
@@ -983,14 +873,6 @@ const MISSION_QUANTITY_FLOOR = 3; // abaixo disso, trata como inviável (rodada 
 
 
 const ALL_CHALLENGE_POOLS = [EASY_CHALLENGES, REVISAO_CONJ_CHALLENGES, GENERAL_CHALLENGES];
-
-function assignTodaysMissions(){
-  const easy = pickDailyFromPool(EASY_CHALLENGES, 'easy');
-  const pickedRevisao = pickDailyFromPool(REVISAO_CONJ_CHALLENGES, 'revcon');
-  const revisao = resolveRevisaoMission(pickedRevisao, REVISAO_CONJ_CHALLENGES, 'conj1');
-  const general = pickDailyFromPool(GENERAL_CHALLENGES, 'general');
-  return [easy, revisao, general].map(c => ({ id: c.id, target: c.target }));
-}
 
 
 // showToast agora vem de shared/toast.js.
@@ -1699,49 +1581,6 @@ function currentStepDefs(){
 const ACQ_BLOCK_SIZE = 3;
 
 
-function freshAcquisitionState(unitId, unit){
-  if (isLessonUnit(unit)){
-    const lesson = currentLesson(unit);
-    if (!STATE.unitProgress[unitId].lessonMisses) STATE.unitProgress[unitId].lessonMisses = {};
-    return {
-      unitId,
-      lessonIdx: currentLessonIdx(unitId),
-      blocks: (lesson.vocabIdx && lesson.vocabIdx.length) ? [lesson.vocabIdx] : [],
-      blockIdx: 0,
-      phase: currentLessonIdx(unitId) > 0 ? 'bridge' : 'intro',
-      introIdx: 0,
-      wordMisses: STATE.unitProgress[unitId].lessonMisses,
-      introduced: {},
-      // Acerto/total acumulado das fases realmente avaliadas desta lição
-      // (checkpoint + practice/mixed -- NUNCA a ponte com a lição anterior,
-      // que testa recall de conteúdo já ensinado antes, não desta lição).
-      // Usado em finishCurrentLesson pra dar uma nota de verdade a uma
-      // lição intermediária, que antes nunca contava pra desafios de nota
-      // (ex: "Pontue mais de 80% em N lições") -- só o Ponto de verificação
-      // do fim da unidade contava, o que na prática deixava esses desafios
-      // quase impossíveis de bater num dia normal de estudo por lições.
-      lessonScore: { correct: 0, total: 0 },
-      // XP real da tela "Lição concluída" (Fase 1/3 da tarefa de conclusão
-      // de lição/unidade): STATE.xp só cresce dentro de addXP() (nenhum
-      // outro lugar escreve nele durante uma sessão, conferido), então o
-      // delta contra este valor no momento em que a lição termina é
-      // exatamente o XP concedido NESTA lição -- sem duplicar nenhum
-      // cálculo paralelo, só lendo o que o motor já concedeu de verdade.
-      xpAtLessonStart: STATE.xp
-    };
-  }
-  return {
-    unitId,
-    blocks: buildAcquisitionBlocks(unit),
-    blockIdx: 0,
-    phase: 'intro', // 'intro' | 'checkpoint' | 'practice' | 'mixed'
-    introIdx: 0,
-    wordMisses: {},
-    introduced: {},
-    xpAtLessonStart: STATE.xp
-  };
-}
-
 const STEP_STATE = {
   currentStep: 0,
   acq: { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {}, lessonScore: { correct: 0, total: 0 }, xpAtLessonStart: 0 },
@@ -1971,56 +1810,6 @@ function buildExerciseHint(ex, unit){
   return null;
 }
 
-// ---------- "Não sei" / dica / ver resposta (mecânica compartilhada) ----------
-// "Não sei" preserva o esforço de recuperação: existe desde o início do
-// exercício (não só depois de um erro), mas NUNCA é tratado como resposta
-// errada -- não conta erro, não conta acerto. Ao clicar, o próprio botão
-// "Não sei" é SUBSTITUÍDO (não fica ao lado de outro controle) pelo bloco da
-// dica, no mesmo lugar em que o aluno pediu ajuda -- sem pular pro topo da
-// tela, sem exigir que ele procure a dica em outro lugar. Desse bloco saem
-// duas ações: "Tentar novamente" (fecha a dica, a pergunta continua ali,
-// intacta) ou "Ver resposta" (única forma de finalizar sem ter acertado
-// sozinho -- sem XP, sem contar como acerto, com a mesma explicação/retomada
-// de conteúdo usada quando o aluno erra de verdade).
-function wireDontKnowButton(contentEl, ex, onRevealAnswer){
-  const btn = contentEl.querySelector('#exercise-dontknow-btn');
-  if (!btn) return;
-  const row = btn.parentElement;
-  btn.addEventListener('click', () => {
-    if (STEP_STATE.exerciseAnswered || ex.askedDontKnow) return;
-    ex.askedDontKnow = true;
-    const unit = UNITS.find(u => u.id === STATE.currentUnitId);
-    const hintText = buildExerciseHint(ex, unit);
-    btn.outerHTML = `
-      <div class="inline-hint-block" id="inline-hint-block">
-        ${hintText ? `
-          <div class="inline-hint-label">${t('fr.hint.label')}</div>
-          <p class="inline-hint-text">${hintText}</p>
-        ` : ''}
-        <div class="inline-hint-actions">
-          <button class="btn btn-secondary inline-hint-retry-btn" id="inline-hint-retry-btn">${t('fr.hint.retry')}</button>
-          <button class="btn btn-secondary exercise-reveal-btn" id="exercise-reveal-btn">${t('fr.hint.reveal')}</button>
-        </div>
-      </div>
-    `;
-    const block = row.querySelector('#inline-hint-block');
-    block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    block.querySelector('#inline-hint-retry-btn').addEventListener('click', () => {
-      block.remove();
-    });
-    block.querySelector('#exercise-reveal-btn').addEventListener('click', () => {
-      if (STEP_STATE.exerciseAnswered) return;
-      ex.revealed = true;
-      // O painel "Resposta revelada" (via onRevealAnswer) já cumpre a função
-      // de "tentar de novo" ou "ver resposta" -- remove as duas ações daqui
-      // pra não deixar "Tentar novamente" como um controle sem sentido
-      // depois que a resposta já foi revelada.
-      block.querySelector('.inline-hint-actions')?.remove();
-      onRevealAnswer();
-    });
-  });
-}
-
 
 // ---------- Vocabulário palavra-por-palavra (estilo Memrise) ----------
 // Procura um exemplo real de uso da palavra — nas frases da unidade, depois
@@ -2107,59 +1896,6 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
 // não é um segundo sistema paralelo, só uma forma de disparar o mesmo tipo
 // de cartão NO MEIO de uma lição de vocabulário, em vez de só numa unidade
 // de gramática inteira.
-
-
-function renderConceptStep(){
-  const contentEl = document.getElementById('step-content');
-  const nextBtn = document.getElementById('step-next-btn');
-  const backBtn = document.getElementById('step-back-btn');
-  backBtn.style.display = 'none'; // sem "voltar" no meio de uma explicação, igual ao checkpoint/prática
-
-  const concept = STEP_STATE.conceptQueue[STEP_STATE.conceptIdx];
-  const block = concept.blocks[STEP_STATE.conceptBlockIdx];
-  const isReality = concept.kind === 'reality';
-  const isCulture = concept.kind === 'culture';
-  setAcqPhaseBanner(
-    isReality ? (REALITY_NOTE_BANNER_TEXT[concept.category] || t('concept.banner.reality.default')) :
-    isCulture ? (CULTURE_NOTE_BANNER_TEXT[concept.category] || t('concept.banner.culture.default')) :
-    t('concept.banner.understand')
-  );
-  const isLastBlockOfConcept = STEP_STATE.conceptBlockIdx === concept.blocks.length - 1;
-  const isLastConcept = STEP_STATE.conceptIdx === STEP_STATE.conceptQueue.length - 1;
-
-  const examplesHTML = (block.examples && block.examples.length) ? `
-    <div class="gram-block-examples">
-      ${block.examples.map(ex => `
-        <div class="gram-block-example">
-          <div class="french">${ex.f} ${audioBtnHTML(ex.f)}</div>
-          <div class="trans">${ex.t}</div>
-        </div>
-      `).join('')}
-    </div>` : '';
-
-  // `variants` é exclusivo da categoria 'regional' -- ao contrário de
-  // `examples` (par forma/tradução), aqui não há forma "oficial": cada item
-  // é só {region, form}, uma das variações igualmente válidas. Reaproveita
-  // a lista comum em vez de um componente de badge/cor novo (ver CLAUDE.md,
-  // "MVP = card passivo").
-  const variantsHTML = (block.variants && block.variants.length) ? `
-    <ul class="gram-block-variants">
-      ${block.variants.map(v => `<li><strong>${v.region}:</strong> ${v.form}</li>`).join('')}
-    </ul>` : '';
-
-  contentEl.innerHTML = `
-    ${concept.blocks.length > 1 ? `<div class="gram-block-counter">${t('concept.counter.of', { i: STEP_STATE.conceptBlockIdx + 1, n: concept.blocks.length })}</div>` : ''}
-    <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
-      <h3 class="gram-block-title">${block.title}</h3>
-      <p class="gram-block-body">${block.body}</p>
-      ${examplesHTML}
-      ${variantsHTML}
-    </div>
-  `;
-  wireAudioButtons(contentEl);
-  nextBtn.style.display = 'flex';
-  nextBtn.textContent = (isLastBlockOfConcept && isLastConcept) ? t('common.continueArrow') : t('zh.path.gotItArrow');
-}
 
 
 // Fecha a lição/unidade atual. Unidades sem `lessons` (gramática, ou
@@ -2421,12 +2157,11 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
     // onze" = "soixante-et-onze") -- só a grafia do separador, nunca deve
     // custar o ponto de quem sabe a palavra. Acento errado continua "Quase!".
     const forms = [expected, ...(ex.alt || [])];
-    const canonSep = s => s.normalize('NFC').toLowerCase().trim().replace(/[\s\-‐‑–']+/g, ' ');
-    const looseSep = s => normalizeLoose(s).replace(/[\s\-‐‑–']+/g, ' ');
-    if (forms.some(f => canonSep(given) === canonSep(f))){
+    const sepResult = latinaFr().avaliarComSeparadores(given, forms);
+    if (sepResult === 'ok'){
       wrapEl.classList.add('ok');
       STEP_STATE.gramExerciseScore += 1;
-    } else if (forms.some(f => looseSep(given) === looseSep(f))){
+    } else if (sepResult === 'almost'){
       wrapEl.classList.add('almost');
       expectedEl.textContent = t('feedback.almostArrow', { expected });
       STEP_STATE.gramExerciseScore += 0.5;
@@ -2606,41 +2341,6 @@ function dlgHighlight(text, terms){
     last = m.index + m[1].length;
   }
   return out + escapeHTML(text.slice(last));
-}
-
-// Toca UMA fala e resolve quando ela termina: true = terminou, false =
-// interrompida/erro, 'blocked' = o navegador bloqueou o autoplay.
-function dlgPlayLine(text){
-  return new Promise(resolve => {
-    registerAudioPlay();
-    stopExerciseAudio();
-    const file = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
-    if (file){
-      const a = new Audio('audio/' + file);
-      a.playbackRate = PREGEN_AUDIO_RATE;
-      exerciseAudioEl = a;
-      let done = false;
-      const fin = v => { if (done) return; done = true; if (exerciseAudioEl === a) exerciseAudioEl = null; resolve(v); };
-      a.addEventListener('ended', () => fin(true));
-      a.addEventListener('pause', () => fin(a.ended));
-      a.addEventListener('error', () => fin(false));
-      a.play().catch(() => fin('blocked'));
-      return;
-    }
-    if (!TTS.supported) return resolve(false);
-    if (!TTS.voice) loadFrenchVoice();
-    if (!TTS.voice) return resolve(false);
-    window.speechSynthesis.resume();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'fr-FR'; u.voice = TTS.voice; u.rate = 0.9;
-    let started = false, done = false;
-    const fin = v => { if (done) return; done = true; resolve(v); };
-    u.onstart = () => { started = true; };
-    u.onend = () => fin(true);
-    u.onerror = () => fin(false);
-    window.speechSynthesis.speak(u);
-    setTimeout(() => { if (!started){ window.speechSynthesis.cancel(); fin(false); } }, 1800);
-  });
 }
 
 
@@ -3505,43 +3205,35 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 // pede pra digitar de ouvido uma palavra ainda não exposta.
 // Ninguém tem acento fácil de digitar num teclado físico/mobile padrão --
 // isso dá um jeito de inserir a letra certa sem precisar trocar de layout
-// de teclado. Importante: o acento NÃO é exigido pra acertar (normalizeLoose
-// já remove diacríticos dos dois lados antes de comparar, ver strip() nos
+// de teclado. Importante: o acento NÃO é exigido pra acertar (a comparação
+// já remove diacríticos dos dois lados, ver lessonTypedAnswerResult nos
 // dois exercícios abaixo) -- isso é só pra quem quer treinar digitando com o
 // acento certo mesmo, não um requisito escondido. Minúsculas só (a
 // comparação já ignora maiúscula/minúscula) -- mesmo espírito do
 // PINYIN_TONE_GROUPS em zh/app.js, adaptado pro alfabeto francês.
-const FR_ACCENT_GROUPS = [
-  ['à', 'â'],
-  ['ç'],
-  ['é', 'è', 'ê', 'ë'],
-  ['î', 'ï'],
-  ['ô', 'œ'],
-  ['ù', 'û', 'ü'],
-];
-
+// Família latina, fase 2: as letras do teclado estão em LANG_HOOKS.familiaLatina.gruposDeAcentos
+// (fr/lang-hooks.js) e a marcação/inserção, em shared/core/familias/latina.js. As classes
+// continuam fr-accent-* (o CSS e as capturas de tela não mudam).
 function frAccentPickerHTML(){
-  return `<div class="fr-accent-picker">${FR_ACCENT_GROUPS.map(group => `
-    <div class="fr-accent-group">${group.map(ch => `<button type="button" class="fr-accent-key">${ch}</button>`).join('')}</div>
-  `).join('')}</div>`;
+  return latinaFr().htmlTecladoDeAcentos();
 }
 
-// Insere no CURSOR (não sempre no final) -- dá pra corrigir só a letra que
-// falta o acento no meio da palavra sem apagar o resto e redigitar.
+// Escreve a tecla no campo: insere no CURSOR (não sempre no final) -- dá pra
+// corrigir só a letra que falta o acento no meio da palavra sem apagar o resto.
+function insertAccentAtCursor(inputEl, ch){
+  const r = FamiliaLatina.inserirNoCursor(inputEl.value, inputEl.selectionStart, inputEl.selectionEnd, ch);
+  inputEl.value = r.value;
+  inputEl.focus();
+  inputEl.setSelectionRange(r.cursor, r.cursor);
+}
+
 function wireFrAccentPicker(pickerEl, inputEl){
   if (!pickerEl || !inputEl) return;
   pickerEl.querySelectorAll('.fr-accent-key').forEach(btn => {
     // Não deixa o toque na tecla tirar o foco/cursor do campo (no celular
     // isso fechava e reabria o teclado).
     btn.addEventListener('mousedown', e => e.preventDefault());
-    btn.addEventListener('click', () => {
-      const start = inputEl.selectionStart ?? inputEl.value.length;
-      const end = inputEl.selectionEnd ?? inputEl.value.length;
-      const ch = btn.textContent;
-      inputEl.value = inputEl.value.slice(0, start) + ch + inputEl.value.slice(end);
-      inputEl.focus();
-      inputEl.setSelectionRange(start + ch.length, start + ch.length);
-    });
+    btn.addEventListener('click', () => insertAccentAtCursor(inputEl, btn.textContent));
   });
 }
 
@@ -3570,7 +3262,6 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   const inputEl = document.getElementById('vocab-type-input');
   inputEl.focus();
   wireFrAccentPicker(contentEl.querySelector('.fr-accent-picker'), inputEl);
-  const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
 
   function lockInputs(){
     inputEl.disabled = true;
@@ -3579,19 +3270,21 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
+  // isCorrect: true | false | 'quase' (só "oe" no lugar de "œ": meio ponto, mostra a forma certa).
   function finish(isCorrect){
+    const almost = isCorrect === 'quase';
     STEP_STATE.exerciseAnswered = true;
-    playFeedbackSound(isCorrect);
+    playFeedbackSound(!!isCorrect);
     lockInputs();
 
     if (isCorrect){
-      STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
+      STEP_STATE.exerciseScore += almost ? 0.5 : 1;
+      addXP(exerciseXP(ex, almost ? 2 : 4)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
       registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
       addStudyMinutes();
       // Detalhe extra vale a pena aqui -- o exercício testou só o som da
       // palavra, a forma escrita em francês nunca apareceu na tela antes.
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, `<strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)}`), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, `${almost ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>` : ''}<strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)}`), 500);
     } else {
       // A resposta certa já aparece dentro do próprio painel de resultado
       // (answerExplanationHTML mostra ex.item.f) -- sem repetir aqui como um
@@ -3607,8 +3300,8 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     if (STEP_STATE.exerciseAnswered) return;
     // Vocabulário com forma dupla (ex: "un / une") -- qualquer uma das duas
     // conta como resposta completa, não só a string inteira com a barra.
-    const typed = strip(inputEl.value);
-    finish(acceptedForms(ex.item.f).some(form => strip(form) === typed));
+    const result = lessonTypedAnswerResult(inputEl.value, ex.item.f);
+    finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false);
   });
 
   wireDontKnowButton(contentEl, ex, () => {
@@ -3685,70 +3378,6 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
   });
 }
 
-// ---------- Exercício de verdadeiro ou falso (uso real, não tradução) ----------
-// Mostra uma frase/palavra já ensinada e uma afirmação em português sobre
-// QUANDO/COMO ela é usada na vida real; o aluno julga se é verdadeira ou falsa.
-function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
-  contentEl.innerHTML = `
-    <div class="exercise-wrap">
-      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
-      <div class="tf-scene">
-        <div class="tf-scene-emoji">${ex.emoji || '💬'}</div>
-        <div class="tf-subject">${ex.subject}</div>
-        ${audioBtnHTML(ex.subject)}
-      </div>
-      <div class="tf-claim">${ex.claim}</div>
-      <div class="tf-options">
-        <button class="tf-option" data-val="true">${t('fr.exercise.true')}</button>
-        <button class="tf-option" data-val="false">${t('fr.exercise.false')}</button>
-      </div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
-    </div>
-  `;
-
-  wireAudioButtons(contentEl);
-  nextBtn.style.display = 'none';
-
-  function revealCorrectVisual(chosenBtn){
-    contentEl.querySelectorAll('.tf-option').forEach(b => {
-      b.classList.add('disabled');
-      const val = b.dataset.val === 'true';
-      if (val === ex.answer) b.classList.add('correct');
-      else if (b === chosenBtn) b.classList.add('incorrect');
-    });
-    document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
-    contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
-  }
-
-  wireDontKnowButton(contentEl, ex, () => {
-    STEP_STATE.exerciseAnswered = true;
-    revealCorrectVisual(null);
-    setTimeout(() => showAnswerPanel(contentEl, ex, { revealed: true }), 300);
-  });
-
-  contentEl.querySelectorAll('.tf-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (STEP_STATE.exerciseAnswered) return;
-      STEP_STATE.exerciseAnswered = true;
-      const chosen = btn.dataset.val === 'true';
-      const isCorrect = chosen === ex.answer;
-      playFeedbackSound(isCorrect);
-
-      revealCorrectVisual(btn);
-
-      if (isCorrect){
-        STEP_STATE.exerciseScore += 1;
-        addXP(exerciseXP(ex, 4));
-        addStudyMinutes();
-        // Sem detalhe extra -- a resposta certa já ficou marcada em verde na
-        // tela (revealCorrectVisual), repetir o texto no painel seria redundante.
-        setTimeout(() => showCorrectFeedbackPanel(contentEl, null), 500);
-      } else {
-        setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
-      }
-    });
-  });
-}
 
 // ---------- Exercício de completar frase (cloze, estilo Clozemaster) ----------
 // Esconde uma palavra de uma frase já ensinada e pede pra completar — múltipla
@@ -3801,16 +3430,20 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
+  // isCorrect: true | false | 'quase' (lacuna digitada com "oe" no lugar de "œ": meio ponto, mostra a forma certa).
   function finish(isCorrect){
+    const almost = isCorrect === 'quase';
     STEP_STATE.exerciseAnswered = true;
-    playFeedbackSound(isCorrect);
+    playFeedbackSound(!!isCorrect);
     revealBlank(isCorrect ? 'ok' : 'wrong');
 
     if (isCorrect){
-      STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4));
+      STEP_STATE.exerciseScore += almost ? 0.5 : 1;
+      addXP(exerciseXP(ex, almost ? 2 : 4));
       addStudyMinutes();
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, clozeFeedbackDetailHTML(ex, false)), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, almost
+        ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>${clozeFeedbackDetailHTML(ex, true)}`
+        : clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
@@ -3830,9 +3463,8 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     document.getElementById('cloze-verify-btn').addEventListener('click', () => {
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
-      const strip = s => normalizeLoose(s).replace(/[.,!?;:'"]/g, '').trim();
-      const typed = strip(inputEl.value);
-      finish(acceptedForms(ex.correctBlock.f).some(form => strip(form) === typed));
+      const result = lessonTypedAnswerResult(inputEl.value, ex.correctBlock.f);
+      finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false);
     });
   } else {
     contentEl.querySelectorAll('.cloze-option').forEach(btn => {
@@ -3866,36 +3498,6 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
   });
 }
 
-// Anima um clone do bloco escolhido "voando" da posição de origem
-// (sourceRect, medido ANTES do slot existir) até o slot de destino recém
-// criado -- estilo Duolingo. Sem isso o bloco só sumia do banco e o texto
-// aparecia pronto no slot, sem nenhuma transição visual entre os dois.
-function flyBlockToSlot(sourceRect, text, targetSlotEl){
-  if (!targetSlotEl || prefersReducedMotion()) return;
-  const endRect = targetSlotEl.getBoundingClientRect();
-  const clone = document.createElement('div');
-  clone.className = 'reorder-fly-clone';
-  clone.textContent = text;
-  clone.style.left = `${sourceRect.left}px`;
-  clone.style.top = `${sourceRect.top}px`;
-  clone.style.width = `${sourceRect.width}px`;
-  clone.style.height = `${sourceRect.height}px`;
-  document.body.appendChild(clone);
-  // Esconde o slot real enquanto o clone "voa" por cima -- revelado de novo
-  // logo abaixo, cross-fade com o clone sumindo, não um corte seco.
-  targetSlotEl.style.visibility = 'hidden';
-
-  requestAnimationFrame(() => {
-    clone.style.transform = `translate(${endRect.left - sourceRect.left}px, ${endRect.top - sourceRect.top}px)`;
-    clone.style.width = `${endRect.width}px`;
-    clone.style.height = `${endRect.height}px`;
-  });
-  setTimeout(() => {
-    targetSlotEl.style.visibility = '';
-    clone.style.opacity = '0';
-  }, 200);
-  setTimeout(() => clone.remove(), 350);
-}
 
 // ---------- Exercício de ordenar palavras (reorder) ----------
 function renderReorderExercise(ex, contentEl, nextBtn, total){
@@ -4159,31 +3761,6 @@ const MATCH_STATE = {
 function stopMatchTimer(){}
 
 
-function renderMatchGame(){
-  const el = document.getElementById('match-review-content');
-
-  if (MATCH_STATE.pairs.length < 4){
-    el.innerHTML = `
-      <div class="review-empty">
-        <div class="big-emoji">🧩</div>
-        <h3>${t('review.insufficientTitle')}</h3>
-        <p>${t('review.match.insufficientSome')}</p>
-      </div>
-    `;
-    return;
-  }
-
-  el.innerHTML = `
-    <div class="match-header">
-      <span class="match-pairs">Pares: ${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length}</span>
-      <span class="match-attempts">Tentativas: ${MATCH_STATE.attempts}</span>
-    </div>
-    <div class="match-grid" id="match-grid"></div>
-  `;
-  renderMatchTiles();
-}
-
-
 function renderSpeedReview(){
   const el = document.getElementById('speed-review-content');
 
@@ -4411,123 +3988,6 @@ function buildModuleReviewRow(module, unlocked){
 //   Fase D: "Deck define o ESCOPO, Review define quem do escopo entra").
 // ============================================================
 
-
-// Fase 6C.2 (ver CLAUDE.md) -- renderer de "Múltipla escolha", extraído
-// pro contrato aprovado na Fase 6C: (mountEl, card, localState, callbacks)
-// -- mesmo espírito da extração de Normal (Fase 6C.1). Reutilizável tal e
-// qual pelo Preview do editor (Fase 6D.7, ver reviewProgressBarHTML
-// acima): o Preview chama esta MESMA função, só trocando localState
-// (variável local do Preview, nunca STATE) e callbacks (onAnswered vira
-// um no-op visual, nunca gradeCurrentCard). O renderer não sabe -- nem
-// precisa saber -- se está em Review ou Preview.
-//
-// localState: {kind:'multiple_choice', shuffledOptions, selectedIndex,
-// answered, wasCorrect}. `shuffledOptions` substitui `card.mcOptions`
-// (Fase 8a) -- antes era mutação direta de uma entrada REAL de
-// STATE.cards (objeto durável, potencialmente serializado se alguém
-// esquecesse de limpar); agora é gerado 1x na 1ª renderização desta
-// EXIBIÇÃO e vive só no localState, que nunca é persistido. `view.
-// correctText`/`view.distractorTexts` (resolveCardContentView, Fase 4b,
-// intocado) sempre vêm do MESMO CardInstance -- a mesma pergunta sempre
-// produz as mesmas alternativas e a mesma resposta certa; só a ORDEM do
-// shuffle muda entre exibições.
-//
-// Interação intermediária (marcar uma opção): o PRÓPRIO renderer se
-// chama de novo com os mesmos 4 parâmetros -- sem envolver a sessão. Só
-// a transição FINAL (clicar "Continuar") chama callbacks.onAnswered.
-function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
-  // Fase 4b -- lê Note/CardInstance via resolveCardContentView(), nunca
-  // `card.front`/`card.back_trans`/`card.choices` (não existem mais no
-  // card nativo). `view.prompt`/`view.correct` são Fields já resolvidos
-  // (texto+lang+áudio), `view.correctText`/`view.distractorTexts` são as
-  // strings prontas pros botões.
-  const view = resolveCardContentView(card);
-
-  if (!localState.shuffledOptions){
-    localState.shuffledOptions = shuffle([
-      { text: view.correctText, correct: true },
-      ...view.distractorTexts.map(text => ({ text, correct: false })),
-    ]);
-  }
-  const answered = localState.answered;
-  // isStudyLanguageField() aqui é exatamente o uso que a ressalva da Fase 2
-  // sempre permitiu ("helper pra regras que genuinamente dependem do idioma
-  // do app") -- a DIREÇÃO já foi decidida pelo CardInstance antes deste
-  // ponto (view.prompt já é o campo certo); isto só decide se o motor de
-  // pronúncia (que só sabe falar UM idioma real) pode tentar esse campo
-  // específico, nunca qual campo é o prompt.
-  const promptSpeakable = isStudyLanguageField(view.prompt, APP_KEY);
-  // Fase 7a (ver CLAUDE.md) -- áudio/imagem customizados vêm SÓ do Field
-  // do prompt agora, nunca mais com fallback pro `correct` (achado da
-  // auditoria da Fase 7: o fallback antigo, `prompt.audioUrl ||
-  // correct.audioUrl`, podia tocar a pronúncia da RESPOSTA CERTA antes da
-  // aluna sequer ver as opções, se só o Field de resposta tivesse áudio/
-  // imagem próprio -- um vazamento real). O prompt é sempre visível desde
-  // o início (não há "revelação" nele), então usar só sua própria mídia é
-  // seguro em qualquer direção do cartão. `view.correct`/os distratores
-  // continuam sem exibir mídia própria nesta subfase (nenhum slot de UI
-  // pra isso hoje, e distratores nem carregam Field/mídia -- ver
-  // CLAUDE.md, achado #3 da Fase 7).
-  const customAudioUrl = view.prompt.audioUrl || null;
-  const promptImageUrl = card.imageUrl || view.prompt.imageUrl || null;
-
-  mountEl.innerHTML = `
-    ${reviewProgressBarHTML(card)}
-    <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
-      ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
-      <div class="flashcard-french">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${customAudioUrl ? customAudioBtnHTML(customAudioUrl) : ''}</div>
-    </div>
-    <div class="mc-options">
-      ${localState.shuffledOptions.map((opt, i) => {
-        let cls = 'mc-option';
-        if (answered){
-          cls += ' disabled';
-          if (opt.correct) cls += ' correct';
-          else if (i === localState.selectedIndex) cls += ' incorrect';
-        }
-        const mark = answered ? (opt.correct ? '<span class="mc-mark" aria-hidden="true">✓ </span>' : (i === localState.selectedIndex ? '<span class="mc-mark" aria-hidden="true">✗ </span>' : '')) : '';
-        return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${mark}${escapeHTML(opt.text)}</button>`;
-      }).join('')}
-    </div>
-    ${answered ? `${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}</button>` : ''}
-  `;
-
-  wireAudioButtons(mountEl, card.__isPreviewCard);
-  wireCustomAudioButtons(mountEl);
-  // Prop 1+2 (ver CLAUDE.md, "7 propostas") -- só tenta pronunciar
-  // automaticamente quando o prompt é de fato o idioma estudado. Quando
-  // invertido (prompt=tradução, opções no idioma estudado), NÃO existe
-  // pronúncia automática de opção nenhuma -- tocar a opção certa antes da
-  // aluna responder entregaria a resposta.
-  // Fase 7a -- `card.__isPreviewCard` suprime só o AUTOPLAY (registerAudioPlay()
-  // real não deveria disparar por abrir um Preview) -- ver mesmo comentário
-  // em renderNormalCard().
-  if (!card.__isPreviewCard && promptSpeakable && canSpeakFrench(view.prompt.text)) speakFrench(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
-
-  if (!answered){
-    mountEl.querySelectorAll('.mc-option').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = parseInt(btn.dataset.idx);
-        // Interação intermediária -- muta localState e o renderer se
-        // autochama, sem envolver a sessão (nunca STATE.reviewMCPicked/
-        // reviewMCCorrect, eliminados nesta fase).
-        localState.selectedIndex = idx;
-        localState.answered = true;
-        localState.wasCorrect = localState.shuffledOptions[idx].correct;
-        renderMultipleChoiceCard(mountEl, card, localState, callbacks);
-      });
-    });
-  } else {
-    mountEl.querySelector('#mc-continue-btn').addEventListener('click', () => {
-      // Transição FINAL -- sobe pra sessão via callback. A sessão (não
-      // este renderer) é quem descarta STATE.reviewCardState ao avançar
-      // STATE.reviewIndex (gradeCurrentCard), mesmo ciclo de vida já
-      // estabelecido pra Normal na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
-    });
-  }
-}
 
 // Fase 6C.3 (ver CLAUDE.md) -- renderer de "Cloze" (completar a frase),
 // extraído pro contrato aprovado na Fase 6C: (mountEl, card, localState,
@@ -5396,63 +4856,6 @@ function renderLevelTestQuizStep(){
 }
 
 
-// ---------- Gráfico de linha: palavras aprendidas ao longo do tempo ----------
-function renderProgressLineChart(){
-  const wrap = document.getElementById('progress-line-chart-wrap');
-  if (!wrap) return;
-
-  // K2-E: uma data por PALAVRA (A+B = 1; vale a mais antiga das irmãs).
-  const learnedDates = wordLevelFirstLearnedDates(STATE.cards);
-
-  if (!learnedDates.length){
-    wrap.innerHTML = `<div style="text-align:center; padding:30px 20px; color:var(--ink-soft);"><p>${t('zh.progress.chartEmpty')}</p></div>`;
-    return;
-  }
-
-  const countByDate = {};
-  learnedDates.forEach(d => { countByDate[d] = (countByDate[d] || 0) + 1; });
-  const sortedDates = Object.keys(countByDate).sort();
-
-  let running = 0;
-  const points = sortedDates.map(d => {
-    running += countByDate[d];
-    return { date: d, total: running };
-  });
-
-  const W = 600, H = 220, PAD = 36;
-  const maxVal = points[points.length - 1].total;
-  const minVal = 0;
-
-  const xStep = points.length > 1 ? (W - PAD*2) / (points.length - 1) : 0;
-  const yScale = (val) => H - PAD - ((val - minVal) / (maxVal - minVal || 1)) * (H - PAD*2);
-
-  const pathD = points.map((p, i) => {
-    const x = PAD + i * xStep;
-    const y = yScale(p.total);
-    return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-  }).join(' ');
-
-  const areaD = pathD + ` L ${(PAD + (points.length-1)*xStep).toFixed(1)} ${H-PAD} L ${PAD} ${H-PAD} Z`;
-
-  const labelIndices = points.length > 1 ? [0, Math.floor((points.length-1)/2), points.length-1] : [0];
-  const dateLabels = labelIndices.map(i => {
-    const [y,m,d] = points[i].date.split('-');
-    return { x: PAD + i * xStep, text: `${d}/${m}` };
-  });
-
-  wrap.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" class="progress-line-svg">
-      <line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" class="chart-axis"/>
-      <path d="${areaD}" class="chart-area"/>
-      <path d="${pathD}" class="chart-line"/>
-      ${points.map((p,i) => `<circle cx="${(PAD + i*xStep).toFixed(1)}" cy="${yScale(p.total).toFixed(1)}" r="3" class="chart-dot"><title>${t('zh.progress.chartPoint', { date: p.date, n: p.total })}</title></circle>`).join('')}
-      ${dateLabels.map(l => `<text x="${l.x.toFixed(1)}" y="${H-10}" class="chart-label" text-anchor="middle">${l.text}</text>`).join('')}
-    </svg>
-    <div class="chart-total">${t('zh.progress.chartTotal')} <strong>${maxVal}</strong> ${t('fr.progress.chartTotalSuffix')}</div>
-  `;
-}
-
-
 // renderTopbarStats() agora vem de shared/topbar-stats.js (idêntico nos dois idiomas).
 
 // ============================================================
@@ -5805,25 +5208,9 @@ function conjOtherFormOf(verb, tenseKey, given, accepted){
 }
 
 // Alinhamento letra a letra (distância de edição), como no Jogo de Conjugações.
+// Família latina, fase 2: a conta mora em shared/core/familias/latina.js (alinharLetras).
 function conjAlign(a, b){
-  const A = [...(a || '')], B = [...(b || '')], la = A.map(c => c.toLowerCase()), lb = B.map(c => c.toLowerCase());
-  const n = A.length, m = B.length, d = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
-  for (let x = 0; x <= n; x++) d[x][0] = x;
-  for (let y = 0; y <= m; y++) d[0][y] = y;
-  for (let x = 1; x <= n; x++) for (let y = 1; y <= m; y++)
-    d[x][y] = Math.min(d[x - 1][y - 1] + (la[x - 1] === lb[y - 1] ? 0 : 1), d[x - 1][y] + 1, d[x][y - 1] + 1);
-  const ops = [];
-  let x = n, y = m;
-  while (x > 0 || y > 0){
-    if (x > 0 && y > 0 && d[x][y] === d[x - 1][y - 1] + (la[x - 1] === lb[y - 1] ? 0 : 1)){
-      ops.push({ t: la[x - 1] === lb[y - 1] ? 'same' : 'sub', a: A[x - 1] }); x--; y--;
-    } else if (x > 0 && d[x][y] === d[x - 1][y] + 1){
-      ops.push({ t: 'extra', a: A[x - 1] }); x--;
-    } else {
-      ops.push({ t: 'missing' }); y--;
-    }
-  }
-  return { ops: ops.reverse(), cost: d[n][m] };
+  return FamiliaLatina.alinharLetras(a, b);
 }
 
 // O que a pessoa digitou, com só as letras erradas em vermelho; o traço
@@ -5889,7 +5276,7 @@ function conjExampleHTML(tenseKey){
   return `<span class="conj-ex" lang="fr">${fr}</span>${ex.t && ptSite ? `<span class="conj-ex-tr">${escapeHTML(ex.t)}</span>` : ''}`;
 }
 
-const conjFold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+const conjFold = s => FamiliaLatina.dobrarBusca(s); // família latina (shared/core/familias/latina.js)
 
 // Busca pelo infinitivo (fr) ou pela tradução (pt), sem acento: "etre" acha être, "comer" acha manger.
 // Ordem: igual > começa com > contém; empate pelo verbo mais comum.
@@ -6201,8 +5588,23 @@ function getConjForms(verb, tense){
 // exercícios digitados de vocabulário/cloze/conjugação) -- preservado sem
 // alteração. Só o pinyin do chinês (zh/app.js) tinha esse mesmo padrão
 // aplicado errado -- ver normalizePinyinAnswer lá, tom não é decoração.
+// Família latina, fase 2 (docs/i18n/familia-latina-modulo.md): as regras moram em
+// shared/core/familias/latina.js; a configuração do francês, em LANG_HOOKS.familiaLatina (fr/lang-hooks.js).
 function normalizeLoose(str){
-  return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  return FamiliaLatina.normalizarFrouxo(str);
+}
+
+// Uma instância do módulo por página, criada no primeiro uso (o lang-hooks.js e o módulo já carregaram).
+let _latinaFr = null;
+function latinaFr(){
+  return _latinaFr || (_latinaFr = FamiliaLatina.criar(LANG_HOOKS.familiaLatina));
+}
+
+// Exercícios de digitar da trilha ("Digite o que ouviu" e a lacuna digitada): 'ok' | 'quase' | 'errou'.
+// Acento não conta (como sempre); "oe" por "œ" = 'quase' (decisão da dona, 2026-10-15); o apóstrofo
+// curvo do celular (’) é ignorado nos dois exercícios (antes só no "Digite o que ouviu").
+function lessonTypedAnswerResult(typed, expected){
+  return latinaFr().avaliarRespostaDigitada(typed, expected, FamiliaLatina.PONTUACAO_VOCAB_RE);
 }
 
 // END accent-answer-logic
@@ -6315,10 +5717,7 @@ function renderConjPracticeStep(){
     btn.addEventListener('mousedown', e => e.preventDefault());
     btn.addEventListener('click', () => {
       if (!lastInput) return;
-      const a = lastInput.selectionStart ?? lastInput.value.length, z = lastInput.selectionEnd ?? lastInput.value.length;
-      lastInput.value = lastInput.value.slice(0, a) + btn.textContent + lastInput.value.slice(z);
-      lastInput.focus();
-      lastInput.setSelectionRange(a + btn.textContent.length, a + btn.textContent.length);
+      insertAccentAtCursor(lastInput, btn.textContent);
     });
   });
 
@@ -6807,269 +6206,71 @@ function openDictationPlayer(id){
 //    vale meio ponto e a tela explica o que faltou.
 // Pontuação não desconta ponto (só é marcada); número em dígito é aceito e a
 // tela mostra a escrita por extenso.
+// Família latina, fase 2 (docs/i18n/familia-latina-modulo.md): a correção mora em
+// shared/core/familias/latina.js; os dados do francês (pontuação falada, números,
+// homófonos, concordância) e as explicações (catálogo de tradução, t()) estão em
+// LANG_HOOKS.familiaLatina (fr/lang-hooks.js). Os nomes abaixo continuam os mesmos.
+// Mudanças autorizadas pela dona (2026-10-15): número em dígito que o próprio texto
+// escreve em dígito fica como está; dois erros leves na mesma palavra (reason
+// 'multiple', com a lista em `reasons`) citam os dois; a explicação sai no idioma do site.
 function normalizeDictationWord(w){
-  return w
-    .toLowerCase()
-    .normalize('NFC') // acentos digitados como sequência decomposta (a + ` )
-                       // via alguns teclados/IMEs viram a mesma forma que os
-                       // do texto original, em vez de "diferentes" por baixo.
-    .replace(/[‘’ʼ´`′]/g, "'") // apóstrofos/aspas do autocorretor do celular
-    .replace(/[‐‑‒]/g, '-')    // hífens especiais do teclado do celular
-    .replace(/[.,!?;:"()«»…—–]/g, '');
+  return latinaFr().normalizarPalavraDitado(w);
 }
 function dictLooseNorm(w){
-  return normalizeDictationWord(w)
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/œ/g, 'oe').replace(/æ/g, 'ae')
-    .replace(/['-]/g, '');
+  return latinaFr().palavraFrouxaDitado(w);
 }
 function dictLightReason(cs, us){
-  const nh = s => s.replace(/-/g, ''), na = s => s.replace(/'/g, '');
-  const lig = s => s.replace(/œ/g, 'oe').replace(/æ/g, 'ae');
-  const nd = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
-  if (nh(cs) === nh(us)) return 'hyphen';
-  if (na(cs) === na(us)) return 'apostrophe';
-  if (lig(cs) === lig(us)) return 'ligature';
-  if (nd(cs) === nd(us)) return 'accent';
-  return 'spelling';
+  return latinaFr().motivoErroLeve(cs, us);
 }
-
-const DICT_FR_UNITS = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];
 function frenchNumberWords(n){
-  if (!Number.isInteger(n) || n < 0 || n > 100) return null;
-  if (n <= 16) return DICT_FR_UNITS[n];
-  if (n < 20) return 'dix-' + DICT_FR_UNITS[n - 10];
-  if (n === 100) return 'cent';
-  const tens = { 2:'vingt', 3:'trente', 4:'quarante', 5:'cinquante', 6:'soixante' };
-  if (n < 70){
-    const t = Math.floor(n / 10), u = n % 10;
-    if (u === 0) return tens[t];
-    if (u === 1) return tens[t] + ' et un';
-    return tens[t] + '-' + DICT_FR_UNITS[u];
-  }
-  if (n < 80){
-    const r = n - 60;
-    if (r === 11) return 'soixante et onze';
-    return 'soixante-' + (r < 17 ? DICT_FR_UNITS[r] : 'dix-' + DICT_FR_UNITS[r - 10]);
-  }
-  const r = n - 80;
-  if (r === 0) return 'quatre-vingts';
-  return 'quatre-vingt-' + (r < 17 ? DICT_FR_UNITS[r] : 'dix-' + DICT_FR_UNITS[r - 10]);
+  return LANG_HOOKS.familiaLatina.numeroPorExtenso(n);
 }
-
-// A áudio dita a pontuação por extenso ("virgule", "point"...). Quem escreve
-// a palavra em vez do sinal comete um erro leve (a tela avisa).
-const DICT_SPOKEN_PUNCT = [
-  [/point[\s-]+d'\s*interrogation/gi, '?', "point d'interrogation"],
-  [/point[\s-]+d'\s*exclamation/gi, '!', "point d'exclamation"],
-  [/point[\s-]*virgule/gi, ';', 'point-virgule'],
-  [/deux[\s-]+points/gi, ':', 'deux points'],
-  [/\bvirgule\b/gi, ',', 'virgule'],
-  [/\bpoint\b/gi, '.', 'point']
-];
 
 // Limpa o que o teclado do celular costuma bagunçar, antes de comparar.
 function prepareDictationUserText(text, refText){
-  let t = String(text || '')
-    .replace(/[​-‍⁠﻿]/g, '')
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
-    .replace(/[‘’ʼ´`′]/g, "'")
-    .replace(/[‐‑‒]/g, '-')
-    .replace(/'\s+(?=\p{L})/gu, "'")                // "j' ai" -> "j'ai"
-    .replace(/(\p{L})([.!?;,])(?=\p{L})/gu, '$1$2 '); // "Sophie.J'ai" -> "Sophie. J'ai"
-  const refLower = String(refText || '').toLowerCase();
-  const spokenPunct = [];
-  for (const [re, symbol, said] of DICT_SPOKEN_PUNCT){
-    if (new RegExp(said.replace(/[-\s']+/g, '[-\\s\']+'), 'i').test(refLower)) continue; // palavra faz parte do texto
-    t = t.replace(re, () => { spokenPunct.push({ said, symbol }); return ' ' + symbol + ' '; });
-  }
-  const digitNotes = [];
-  t = t.replace(/(^|[\s(«"])(\d{1,3})(?=$|[\s.,!?;:)»"])/g, (m, pre, digits) => {
-    const words = frenchNumberWords(parseInt(digits, 10));
-    if (!words) return m;
-    digitNotes.push({ digits, words });
-    return pre + words;
-  });
-  return { text: t, spokenPunct, digitNotes };
+  return latinaFr().prepararTextoDitado(text, refText);
 }
 
 // Separa as palavras reais da pontuação "solta" (ex: "!" ou "?" digitados
 // com espaço antes, como manda a tipografia francesa). A pontuação solta
 // não participa do alinhamento: fica anexada à palavra anterior.
 function tokenizeDictationText(text){
-  const rawWords = text.trim().split(/\s+/).filter(w => w.length);
-  const words = [], strictWords = [], looseWords = [], punctAfter = [];
-  for (const w of rawWords){
-    const loose = dictLooseNorm(w);
-    if (loose === ''){
-      if (words.length > 0){
-        punctAfter[words.length - 1] = (punctAfter[words.length - 1] ? punctAfter[words.length - 1] + ' ' : '') + w;
-      }
-      continue;
-    }
-    words.push(w);
-    strictWords.push(normalizeDictationWord(w));
-    looseWords.push(loose);
-    punctAfter.push('');
-  }
-  return { words, strictWords, looseWords, normWords: looseWords, punctAfter };
+  return latinaFr().tokenizarDitado(text);
 }
 
 // "vingt cinq" digitado no lugar de "vingt-cinq": junta as palavras do aluno
 // (sem hífen, então conta como erro leve de hífen e não como 2 erros).
 function mergeSplitCompoundWords(userTok, refTok){
-  const targets = new Set();
-  refTok.words.forEach((w, i) => { if (refTok.strictWords[i].includes('-')) targets.add(refTok.looseWords[i]); });
-  if (!targets.size) return userTok;
-  const out = { words: [], strictWords: [], looseWords: [], punctAfter: [] };
-  let i = 0;
-  while (i < userTok.words.length){
-    let merged = false;
-    for (let k = 4; k >= 2 && !merged; k--){
-      if (i + k > userTok.words.length) continue;
-      if (!targets.has(userTok.looseWords.slice(i, i + k).join(''))) continue;
-      let ok = true;
-      for (let t = i; t < i + k - 1; t++) if (userTok.punctAfter[t]) ok = false;
-      if (!ok) continue;
-      out.words.push(userTok.words.slice(i, i + k).join(''));
-      out.strictWords.push(userTok.strictWords.slice(i, i + k).join(''));
-      out.looseWords.push(userTok.looseWords.slice(i, i + k).join(''));
-      out.punctAfter.push(userTok.punctAfter[i + k - 1]);
-      i += k; merged = true;
-    }
-    if (merged) continue;
-    out.words.push(userTok.words[i]); out.strictWords.push(userTok.strictWords[i]);
-    out.looseWords.push(userTok.looseWords[i]); out.punctAfter.push(userTok.punctAfter[i]);
-    i++;
-  }
-  out.normWords = out.looseWords;
-  return out;
+  return latinaFr().juntarCompostos(userTok, refTok);
 }
-
-const DICT_MARKS_RE = /[.,!?;:…]/g;
-function dictMarksOf(s){ return ((s || '').match(DICT_MARKS_RE) || []).join(''); }
 
 // Alinha as palavras do texto certo com as que o aluno digitou via LCS
 // (mesma ideia de um diff de texto), pra marcar acertos/erros mesmo quando
 // o aluno pula ou adianta uma palavra, sem desalinhar o resto da frase.
 function diffDictationWords(correctText, userText){
-  const correctTok = tokenizeDictationText(correctText);
-  const userTok = mergeSplitCompoundWords(tokenizeDictationText(userText), correctTok);
-  const cn = correctTok.looseWords, un = userTok.looseWords;
-  const n = cn.length, m = un.length;
-  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
-  for (let i = n - 1; i >= 0; i--){
-    for (let j = m - 1; j >= 0; j--){
-      dp[i][j] = cn[i] === un[j] ? dp[i+1][j+1] + 1 : Math.max(dp[i+1][j], dp[i][j+1]);
-    }
-  }
-  const missingMarksFor = (i, j) => {
-    const pool = (dictMarksOf(userTok.words[j]) + dictMarksOf(userTok.punctAfter[j])).split('');
-    let missing = '';
-    for (const ch of (dictMarksOf(correctTok.words[i]) + dictMarksOf(correctTok.punctAfter[i]))){
-      const at = pool.indexOf(ch);
-      if (at >= 0) pool.splice(at, 1); else missing += ch;
-    }
-    return missing;
-  };
-  const matchItem = (i, j) => {
-    const light = correctTok.strictWords[i] !== userTok.strictWords[j];
-    return {
-      type: 'match', word: correctTok.words[i], punctAfter: correctTok.punctAfter[i],
-      light, userWord: userTok.words[j],
-      reason: light ? dictLightReason(correctTok.strictWords[i], userTok.strictWords[j]) : null,
-      missingMarks: missingMarksFor(i, j)
-    };
-  };
-  let i = 0, j = 0;
-  const result = [];
-  while (i < n && j < m){
-    if (cn[i] === un[j]){ result.push(matchItem(i, j)); i++; j++; }
-    else if (dp[i+1][j] >= dp[i][j+1]){ result.push({ type: 'miss', word: correctTok.words[i], punctAfter: correctTok.punctAfter[i] }); i++; }
-    else { result.push({ type: 'extra', word: userTok.words[j] }); j++; }
-  }
-  while (i < n){ result.push({ type: 'miss', word: correctTok.words[i], punctAfter: correctTok.punctAfter[i] }); i++; }
-  while (j < m){ result.push({ type: 'extra', word: userTok.words[j] }); j++; }
-  return result;
+  return latinaFr().diffDitado(correctText, userText);
 }
 
 // Junta um "miss" (palavra certa que faltou) adjacente a um "extra" (palavra
 // errada que o aluno digitou) numa única substituição.
 function mergeDictationDiff(diff){
-  const merged = [];
-  let i = 0;
-  while (i < diff.length){
-    const cur = diff[i];
-    const next = diff[i + 1];
-    if (next && ((cur.type === 'miss' && next.type === 'extra') || (cur.type === 'extra' && next.type === 'miss'))){
-      const wrong = cur.type === 'extra' ? cur.word : next.word;
-      const correct = cur.type === 'miss' ? cur.word : next.word;
-      const punctAfter = cur.type === 'miss' ? cur.punctAfter : next.punctAfter;
-      merged.push({ type: 'sub', wrong, correct, punctAfter });
-      i += 2;
-      continue;
-    }
-    merged.push(cur);
-    i++;
-  }
-  return merged;
+  return latinaFr().juntarDiff(diff);
 }
 
 // Corrige um ditado inteiro. Nota: acerto exato = 1 ponto; erro leve = 0,5;
 // palavra a mais (que não é troca) e pontuação escrita por extenso = -0,5.
 // Pontuação faltando e número em dígito não descontam nada.
 function evaluateDictation(refText, userText){
-  const prep = prepareDictationUserText(userText, refText);
-  const diff = diffDictationWords(refText, prep.text);
-  const merged = mergeDictationDiff(diff);
-  const total = tokenizeDictationText(refText).words.length;
-  const exact = diff.filter(x => x.type === 'match' && !x.light).length;
-  const light = diff.filter(x => x.type === 'match' && x.light).length;
-  const extras = merged.filter(x => x.type === 'extra').length;
-  const missingMarks = diff.filter(x => x.type === 'match' && x.missingMarks).length;
-  const points = exact + 0.5 * light - 0.5 * extras - 0.5 * prep.spokenPunct.length;
-  const score = total > 0 ? Math.max(0, Math.min(100, Math.round((points / total) * 100))) : 0;
-  return { merged, total, exact, light, extras, missingMarks, score,
-           spokenPunct: prep.spokenPunct, digitNotes: prep.digitNotes };
+  return latinaFr().avaliarDitado(refText, userText);
 }
 
 // ---- Fatia 2: explicar o tipo de erro (só explicativo, NÃO muda a nota) ----
 // Conservador de propósito: só nomeia o erro quando há alta confiança.
-// Homófonos clássicos do francês (soam igual ou quase, escrita diferente).
-const DICT_HOMOPHONE_GROUPS = [
-  { words: ['a', 'à'], note: '«a» é o verbo avoir (il a); «à» é preposição (à Paris).' },
-  { words: ['et', 'est'], note: '«et» quer dizer "e"; «est» é o verbo être (il est).' },
-  { words: ['son', 'sont'], note: '«son» quer dizer "seu/sua"; «sont» é o verbo être (ils sont).' },
-  { words: ['ou', 'où'], note: '«ou» quer dizer "ou"; «où» quer dizer "onde".' },
-  { words: ['on', 'ont'], note: '«on» é pronome ("a gente"); «ont» é o verbo avoir (ils ont).' },
-  { words: ['la', 'là'], note: '«la» é artigo ou pronome; «là» quer dizer "lá/aí".' },
-  { words: ['ce', 'se'], note: '«ce» é demonstrativo ("isto/este"); «se» é pronome reflexivo (il se lève).' },
-  { words: ['ces', 'ses', "c'est", "s'est"], note: '«ces» = "estes/estas"; «ses» = "seus/suas"; «c\'est» = "é/isto é"; «s\'est» = pronome + être (il s\'est levé).' },
-  { words: ['mes', 'mais'], note: '«mes» quer dizer "meus/minhas"; «mais» quer dizer "mas".' },
-  { words: ['peu', 'peux', 'peut'], note: '«peu» quer dizer "pouco"; «peux»/«peut» são do verbo pouvoir (je peux, il peut).' },
-  { words: ['leur', 'leurs'], note: '«leurs» vai antes de substantivo no plural; «leur» antes de singular ou como pronome (je leur parle).' },
-  { words: ['quel', 'quelle', 'quels', 'quelles'], note: 'Mesma pronúncia: «quel» muda conforme o gênero e o número do substantivo.' }
-];
-function dictBareWord(w){
-  return normalizeDictationWord(String(w || '')).replace(/[«»"()\[\]]/g, '').trim();
-}
 // Devolve { kind: 'homophone'|'agreement'|'other', noteText } para uma troca
 // (token "sub"): refWord = palavra do texto, userWord = o que o aluno digitou.
-function dictBareWordRaw(w){ return String(w || '').replace(/^[^\p{L}]+/u, ''); }
 function classifyDictationError(refWord, userWord){
-  const r = dictBareWord(refWord), u = dictBareWord(userWord);
-  const shown = String(refWord || '').replace(/[.,!?;:…«»"()]+/g, '');
-  const typed = String(userWord || '').replace(/[.,!?;:…«»"()]+/g, '');
-  if (r && u && r !== u){
-    const g = DICT_HOMOPHONE_GROUPS.find(gr => gr.words.includes(r) && gr.words.includes(u));
-    if (g) return { kind: 'homophone', noteText: `«${shown}» (você escreveu «${typed}»): palavras que soam parecido. ${g.note}` };
-    const [shorter, longer] = r.length <= u.length ? [r, u] : [u, r];
-    const suffix = longer.slice(shorter.length);
-    if (shorter.length >= 3 && longer.startsWith(shorter) && ['e', 's', 'es', 'x'].includes(suffix) && /^\p{L}+$/u.test(longer) && !/^\p{Lu}/u.test(dictBareWordRaw(refWord))){
-      return { kind: 'agreement', noteText: `«${shown}» (você escreveu «${typed}»): a diferença está só na terminação (-${suffix}). Se for uma palavra que concorda, confira gênero, número ou conjugação com o resto da frase; senão, pode ser só um deslize de digitação.` };
-    }
-  }
-  return { kind: 'other', noteText: `«${shown}»: palavra diferente da esperada (você escreveu «${typed}»).` };
+  const r = latinaFr().classificarErroDitado(refWord, userWord);
+  return { kind: r.kind, noteText: r.noteText };
 }
 
 // ---- Fatia 2: progresso por ditado (puro, sem STATE) ----
@@ -7183,28 +6384,19 @@ function dictationScoreColorVar(score){
 
 function dictationWordHtml(word, punctAfter, missingMarks, cls, title){
   const esc = escapeHtmlDictation;
-  const t = title ? ` title="${esc(title)}"` : '';
+  const titleAttr = title ? ` title="${esc(title)}"` : '';
   if (!missingMarks){
-    return `<span class="${cls}"${t}>${esc(word)}</span>${punctAfter ? ' ' + esc(punctAfter) : ''}`;
+    return `<span class="${cls}"${titleAttr}>${esc(word)}</span>${punctAfter ? ' ' + esc(punctAfter) : ''}`;
   }
   const m = word.match(/^(.*?)([.,!?;:…]+)$/);
   const core = m ? m[1] : word, trail = m ? m[2] : '';
-  return `<span class="${cls}"${t}>${esc(core)}</span><span class="dictation-punct-missing" title="Faltou este sinal (não desconta pontos)">${esc(trail)}${punctAfter ? ' ' + esc(punctAfter) : ''}</span>`;
+  return `<span class="${cls}"${titleAttr}>${esc(core)}</span><span class="dictation-punct-missing" title="${esc(t('fr.dict.punctMissing'))}">${esc(trail)}${punctAfter ? ' ' + esc(punctAfter) : ''}</span>`;
 }
 
+// Explicação do erro leve (hífen, apóstrofo, ligadura, acento, ou mais de um na
+// mesma palavra), no idioma do site: shared/core/familias/latina.js + t().
 function dictationLightNoteText(x){
-  const core = x.word.replace(/[.,!?;:…]+$/, '');
-  const you = `você escreveu «${x.userWord.replace(/[.,!?;:…]+$/, '')}»`;
-  switch (x.reason){
-    case 'hyphen': return `«${core}» leva hífen (${you}).`;
-    case 'apostrophe': return `«${core}» leva apóstrofo (${you}).`;
-    case 'ligature': return `«${core}» usa a letra «œ», que é uma só (${you}).`;
-    case 'accent': {
-      const h = classifyDictationError(x.word, x.userWord);
-      return `«${core}»: confira os acentos (${you}).` + (h.kind === 'homophone' ? ' ' + h.noteText.replace(/^.*?parecido\. /, '') : '');
-    }
-    default: return `«${core}»: pequena diferença de grafia (${you}).`;
-  }
+  return latinaFr().textoErroLeve(x);
 }
 
 function renderDictationResult(d, userText){
@@ -9222,26 +8414,25 @@ function checkListenTranslateAnswer(c){
 // BEGIN accent-challenge-logic (extraído literalmente por fr/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
 // Correção sensível a acentos/cedilha/trema -- nunca remove diacríticos
 // antes de comparar (só normaliza espaço/maiúsculas, que não são o alvo
-// da atividade).
+// da atividade). Família latina, fase 2: as regras moram em
+// shared/core/familias/latina.js (configuração do fr em LANG_HOOKS.familiaLatina).
 function normalizeForAccentCompare(s){
-  return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  return FamiliaLatina.normalizarParaAcentuacao(s);
 }
 
 function isAccentAnswerCorrect(studentAnswer, targetText){
-  return normalizeForAccentCompare(studentAnswer) === normalizeForAccentCompare(targetText);
+  return FamiliaLatina.acentuacaoCerta(studentAnswer, targetText);
 }
 
 function stripDiacriticsForAccentCompare(s){
-  return normalizeForAccentCompare(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return FamiliaLatina.semAcentoParaAcentuacao(s);
 }
 
-// 'ok' = igual; 'partial' = só o acento/cedilha/trema difere (erro leve,
-// conclui); 'fail' = palavra diferente ou vazio (erro total, não conclui).
+// 'ok' = igual; 'partial' = só o acento/cedilha/trema difere, ou "oe" no lugar
+// de "œ" (decisão da dona, 2026-10-15) -- erro leve, conclui; 'fail' = palavra
+// diferente ou vazio (erro total, não conclui).
 function accentAnswerOutcome(studentAnswer, targetText){
-  if (isAccentAnswerCorrect(studentAnswer, targetText)) return 'ok';
-  const typed = stripDiacriticsForAccentCompare(studentAnswer);
-  if (typed && typed === stripDiacriticsForAccentCompare(targetText)) return 'partial';
-  return 'fail';
+  return latinaFr().resultadoAcentuacao(studentAnswer, targetText);
 }
 // END accent-challenge-logic
 

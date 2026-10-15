@@ -17,7 +17,8 @@ const path = require('path');
 const vm = require('vm');
 
 const APP_JS_PATH = path.join(__dirname, '..', 'app.js');
-const SRC = fs.readFileSync(APP_JS_PATH, 'utf8');
+// E4: parte do app.js passou para shared/core/*.js (carregado antes do app.js); o teste enxerga os dois.
+const SRC = require('../../tests/e4/app-source').withCore(fs.readFileSync(APP_JS_PATH, 'utf8'));
 
 function extractBlock(beginMarker, endMarker){
   const start = SRC.indexOf(beginMarker);
@@ -31,16 +32,31 @@ function extractBlock(beginMarker, endMarker){
   return SRC.slice(start, end + endMarker.length);
 }
 
+// Família latina, fase 2: as funções dos blocos repassam para shared/core/familias/latina.js com a
+// configuração do francês de fr/lang-hooks.js (LANG_HOOKS.familiaLatina) e textos de shared/i18n (t()).
+// O sandbox carrega os três como a página (fr/index.html); o t() é o pt-BR real (tests/i18n/vm-t.js).
+const ROOT_DIR = path.join(__dirname, '..', '..');
+const LATINA_SRC = fs.readFileSync(path.join(ROOT_DIR, 'shared', 'core', 'familias', 'latina.js'), 'utf8');
+const HOOKS_SRC = fs.readFileSync(path.join(__dirname, '..', 'lang-hooks.js'), 'utf8').replace('const LANG_HOOKS', 'var LANG_HOOKS');
+const { installT } = require('../../tests/i18n/vm-t');
 function runBlockAndExport(block, names){
-  const sandbox = {};
+  const sandbox = installT({});
   vm.createContext(sandbox);
+  vm.runInContext(LATINA_SRC + '\n' + HOOKS_SRC, sandbox);
+  // latinaFr() (a instância do módulo) mora no bloco accent-answer-logic: os outros blocos precisam dele.
+  const accentAnswer = extractBlock('// BEGIN accent-answer-logic', '// END accent-answer-logic');
+  if (!block.includes('// BEGIN accent-answer-logic')) vm.runInContext(accentAnswer, sandbox);
   vm.runInContext(block + `\n;this.__exports = { ${names.join(', ')} };`, sandbox);
   return sandbox.__exports;
 }
 
-const { normalizeLoose, acceptedForms } = runBlockAndExport(
-  extractBlock('// BEGIN accent-answer-logic', '// END accent-answer-logic'),
-  ['normalizeLoose', 'acceptedForms']
+// E4: acceptedForms passou para shared/core (fora do bloco marcado); entra junto com o bloco.
+const CORE_SRC = require('../../tests/e4/app-source').coreText();
+const acceptedFormsStart = CORE_SRC.indexOf('function acceptedForms(');
+const ACCEPTED_FORMS_FN = CORE_SRC.slice(acceptedFormsStart, CORE_SRC.indexOf('\n}\n', acceptedFormsStart) + 3);
+const { normalizeLoose, acceptedForms, lessonTypedAnswerResult } = runBlockAndExport(
+  extractBlock('// BEGIN accent-answer-logic', '// END accent-answer-logic') + '\n' + ACCEPTED_FORMS_FN,
+  ['normalizeLoose', 'acceptedForms', 'lessonTypedAnswerResult']
 );
 const { normalizeDictationWord, evaluateDictation, frenchNumberWords, classifyDictationError, updateDictationRecord, sanitizeDictationRecord, dictationWrongWords, splitDictationSentences, dictationSentenceErrorFlags } = runBlockAndExport(
   extractBlock('// BEGIN dictation-answer-logic', '// END dictation-answer-logic'),
@@ -69,9 +85,10 @@ function check(desc, actual, expected){
 
 console.log('=== Requisito 1: francês -- preservar comportamento atual (acento tolerado nos exercícios digitados de vocabulário/cloze/conjugação) ===\n');
 
+// Família latina, fase 2: usa a função REAL do fr/app.js (antes o teste tinha uma cópia da seta `strip`).
+// "Correto" = 'ok'; as asserções abaixo são as mesmas de antes.
 function vocabAnswerCorrect(typed, expected){
-  const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
-  return acceptedForms(expected).some(form => strip(form) === strip(typed));
+  return lessonTypedAnswerResult(typed, expected) === 'ok';
 }
 
 check('"étudiant" vs "etudiant" (sem acento) → correto -- comportamento já existente, preservado', vocabAnswerCorrect('etudiant', 'étudiant'), true);
@@ -79,6 +96,18 @@ check('"où" vs "ou" (sem acento) → correto -- mesmo motivo', vocabAnswerCorre
 check('maiúscula não afeta: "Étudiant" vs "étudiant" → correto', vocabAnswerCorrect('Étudiant', 'étudiant'), true);
 check('erro de verdade continua errado: "prennons" vs "prenons" → incorreto', vocabAnswerCorrect('prennons', 'prenons'), false);
 check('forma dupla aceita: "un" vs "un / une" → correto (uma das formas basta)', vocabAnswerCorrect('un', 'un / une'), true);
+
+console.log('\n=== Família latina, fase 2 (decisões da dona, 2026-10-15) -- casos NOVOS ===\n');
+// (a) "oe" no lugar de "œ" = Quase (meio ponto, mostra a forma certa). Antes: errado.
+check('NOVO (a) digitar: "la soeur" vs "la sœur" → quase (antes: errado)', lessonTypedAnswerResult('la soeur', 'la sœur'), 'quase');
+check('NOVO (a) digitar: "coeur" sem acento nenhum vs "cœur" → quase', lessonTypedAnswerResult('coeur', 'cœur'), 'quase');
+check('NOVO (a) digitar: "OEUVRE" vs "œuvre" → quase (maiúscula não conta)', lessonTypedAnswerResult('OEUVRE', 'œuvre'), 'quase');
+check('NOVO (a) digitar: "soeurs" vs "sœur" → errado (letra a mais continua erro)', lessonTypedAnswerResult('soeurs', 'sœur'), 'errou');
+check('NOVO (a) digitar: "la sœur" com œ → ok', lessonTypedAnswerResult('la sœur', 'la sœur'), 'ok');
+check('NOVO (a) digitar: campo vazio → errado', lessonTypedAnswerResult('', 'sœur'), 'errou');
+// (c) apóstrofo curvo do celular aceito também na lacuna digitada (as duas usam a mesma função agora).
+check('NOVO (c) lacuna: "l’école" (apóstrofo curvo) vs "l\'école" → ok (antes: errado na lacuna)', lessonTypedAnswerResult('l’école', "l'école"), 'ok');
+check('NOVO (c) lacuna: "s’il vous plaît" vs "s\'il vous plaît" → ok', lessonTypedAnswerResult('s’il vous plaît', "s'il vous plaît"), 'ok');
 
 console.log('\n=== Ditado -- deve continuar EXIGINDO acento correto (normalizeDictationWord nunca removeu diacrítico) ===\n');
 check('"étudiant" vs "etudiant" (sem acento) → diferentes (ditado é estrito)', normalizeDictationWord('étudiant') === normalizeDictationWord('etudiant'), false);
@@ -125,6 +154,19 @@ check('números: 80 = quatre-vingts', frenchNumberWords(80), 'quatre-vingts');
 check('números: 97 = quatre-vingt-dix-sept', frenchNumberWords(97), 'quatre-vingt-dix-sept');
 check('números: 16 = seize / 17 = dix-sept', frenchNumberWords(16) + '/' + frenchNumberWords(17), 'seize/dix-sept');
 check('"21" no lugar de "vingt et un" → 100', evaluateDictation('Il a vingt et un ans.', 'Il a 21 ans.').score, 100);
+// Família latina, fase 2 -- casos NOVOS (decisões da dona, 2026-10-15).
+// (d) número em dígito que o PRÓPRIO texto escreve em dígito fica como está (antes virava "trente" e perdia ponto).
+check('NOVO (d) texto com "30", aluna digita "30" → 100 (antes: < 100)', evaluateDictation('Il fait 30 degrés.', 'Il fait 30 degrés.').score, 100);
+check('NOVO (d) ... e sem a nota "por extenso"', evaluateDictation('Il fait 30 degrés.', 'Il fait 30 degrés.').digitNotes.length, 0);
+check('NOVO (d) texto com "30", aluna digita "31" → troca (< 100)', evaluateDictation('Il fait 30 degrés.', 'Il fait 31 degrés.').score < 100, true);
+check('NOVO (d) texto por extenso continua aceitando o dígito com a nota', (r => r.score === 100 && r.digitNotes.length === 1)(evaluateDictation('Il fait trente degrés.', 'Il fait 30 degrés.')), true);
+// (e) dois erros leves na mesma palavra citam os dois (antes: "pequena diferença de grafia").
+const peutEtre = evaluateDictation('Peut-être.', 'peut etre.').merged[0];
+check('NOVO (e) "peut etre" por "Peut-être": reason multiple (antes: spelling)', peutEtre.reason, 'multiple');
+check('NOVO (e) ... com os dois motivos: hífen e acento', JSON.stringify(peutEtre.reasons), JSON.stringify(['hyphen', 'accent']));
+check('NOVO (e) ... continua erro leve (meio ponto)', evaluateDictation('Peut-être.', 'peut etre.').score, 50);
+// (b) a explicação do ditado vem do catálogo de tradução; em pt-BR o texto é o mesmo de antes.
+check('NOVO (b) explicação de troca em pt-BR igual à de antes', classifyDictationError('chat', 'chien').noteText, '«chat»: palavra diferente da esperada (você escreveu «chien»).');
 
 console.log('\n=== Ditado (Fatia 2) -- tipo de erro (só explicativo) ===\n');
 const kind = (a, b) => classifyDictationError(a, b).kind;
@@ -218,6 +260,13 @@ check('Acentuação: acento trocado → partial', accentAnswerOutcome('ètudiant
 check('Acentuação: cedilha faltando → partial', accentAnswerOutcome('francais', 'français'), 'partial');
 check('Acentuação: palavra diferente → fail (não conclui)', accentAnswerOutcome('professeur', 'étudiant'), 'fail');
 check('Acentuação: vazio → fail', accentAnswerOutcome('', 'étudiant'), 'fail');
+// Família latina, fase 2 -- casos NOVOS: (a) "oe" no lugar de "œ" = Quase (antes: fail).
+check('NOVO (a) Acentuação: "soeur" por "sœur" → partial (antes: fail)', accentAnswerOutcome('soeur', 'sœur'), 'partial');
+check('NOVO (a) Acentuação: "Ma soeur est là" por "Ma sœur est là" → partial', accentAnswerOutcome('Ma soeur est là', 'Ma sœur est là'), 'partial');
+check('NOVO (a) Acentuação: "coeur" sem acento nenhum, frase "Le cœur à l\'école" → partial', accentAnswerOutcome("le coeur a l'ecole", "Le cœur à l'école"), 'partial');
+check('NOVO (a) Acentuação: "sœur" com œ → ok', accentAnswerOutcome('sœur', 'sœur'), 'ok');
+check('NOVO (a) Acentuação: "soeurs" por "sœur" → fail (letra a mais continua erro)', accentAnswerOutcome('soeurs', 'sœur'), 'fail');
+check('NOVO (a) Acentuação: isAccentAnswerCorrect("soeur", "sœur") continua false (não é acerto)', isAccentAnswerCorrect('soeur', 'sœur'), false);
 const refs = ['Hoje está chovendo.'];
 check('Traduzir: idêntico → ok', listenTranslateOutcome('Hoje está chovendo', refs, null), 'ok');
 check('Traduzir: vazio → fail', listenTranslateOutcome('  ', refs, null), 'fail');

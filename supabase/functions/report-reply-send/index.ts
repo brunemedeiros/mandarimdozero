@@ -42,17 +42,41 @@ const resendFromEmail = Deno.env.get('RESEND_FROM_EMAIL');
 // confiar só em o front-end esconder o botão de responder.
 const ADMIN_EMAIL = 'brunemed1310@gmail.com';
 
-// Nome de exibição do curso por idioma, pro rodapé do e-mail de resposta --
-// mesmo mapeamento key->rótulo já usado em shared/admin-reports.js
-// (REPORT_LANGUAGE_LABELS) e mesmo texto gerado por course_name() em
-// scripts/generate_pwa_assets.py, mas repetido aqui porque Edge Functions
-// rodam isoladas (Deno, sem bundler) e não importam os arquivos JS do
-// front-end (ver Bloco 6/Fase B6 da tarefa de rebranding -- antes o texto
-// era fixo "Francês/Chinês" pros dois idiomas ao mesmo tempo).
-const LANGUAGE_APP_KEY_TO_COURSE_NAME: Record<string, string> = {
-  frances: 'Francês com Prof. Brune',
-  mandarim: 'Chinês com Prof. Brune',
+// Nome de exibição do curso por idioma estudado e rodapé do e-mail de resposta, no idioma do SITE de quem recebe
+// (progress.data._meta.uiLanguage; regra do projeto: site em inglês não tem nada em português). Mesmo mapeamento
+// key->rótulo de shared/admin-reports.js (REPORT_LANGUAGE_LABELS) e de course_name() em scripts/generate_pwa_assets.py,
+// repetido aqui porque Edge Functions rodam isoladas (Deno, sem bundler) e não importam os arquivos JS do front-end.
+const COURSE_NAME_BY_UI_LANG: Record<string, Record<string, string>> = {
+  'pt-BR': {
+    frances: 'Francês com Prof. Brune',
+    mandarim: 'Chinês com Prof. Brune',
+    portugues: 'Português com Prof. Brune',
+    _default: 'Idiomas com Prof. Brune',
+  },
+  en: {
+    frances: 'French with Prof. Brune',
+    mandarim: 'Chinese with Prof. Brune',
+    portugues: 'Portuguese with Prof. Brune',
+    _default: 'Languages with Prof. Brune',
+  },
 };
+
+// Idioma do e-mail: o do site da conta, se conhecido; senão (convidado ou conta sem a preferência) o idioma do curso
+// manda: o curso de português só existe em inglês (Q-04); fr e zh seguem em português como sempre.
+function replyUiLanguage(languageAppKey: string | null | undefined, accountUiLanguage: string | null | undefined): 'pt-BR' | 'en' {
+  if (accountUiLanguage === 'en') return 'en';
+  if (accountUiLanguage === 'pt-BR') return 'pt-BR';
+  return languageAppKey === 'portugues' ? 'en' : 'pt-BR';
+}
+
+function replyFooter(languageAppKey: string | null | undefined, accountUiLanguage: string | null | undefined): string {
+  const ui = replyUiLanguage(languageAppKey, accountUiLanguage);
+  const names = COURSE_NAME_BY_UI_LANG[ui];
+  const courseName = names[languageAppKey || ''] || names._default;
+  return ui === 'en'
+    ? `Reply to the report you sent in ${courseName}.`
+    : `Resposta ao report que você enviou no ${courseName}.`;
+}
 
 function jsonResponse(body: Record<string, unknown>, status: number): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -97,11 +121,21 @@ Deno.serve(async (req: Request) => {
   }
 
   let to: string | null = report.reporter_email || null;
-  if (!to && report.user_id) {
+  let accountUiLanguage: string | null = null;
+  if (report.user_id) {
     const serviceRole = createClient(supabaseUrl, serviceRoleKey);
-    const { data: userData, error: userError } = await serviceRole.auth.admin.getUserById(report.user_id);
-    if (userError) console.error('report-reply-send: falha ao buscar e-mail da conta', report.user_id, userError.message);
-    to = userData?.user?.email || null;
+    if (!to) {
+      const { data: userData, error: userError } = await serviceRole.auth.admin.getUserById(report.user_id);
+      if (userError) console.error('report-reply-send: falha ao buscar e-mail da conta', report.user_id, userError.message);
+      to = userData?.user?.email || null;
+    }
+    // Idioma do site da conta (só esse campo do progresso, nunca o blob inteiro). Falhou ou não tem: cai no idioma do curso.
+    try {
+      const { data: prog } = await serviceRole.from('progress').select('ui:data->_meta->>uiLanguage').eq('user_id', report.user_id).maybeSingle();
+      accountUiLanguage = (prog as { ui?: string | null } | null)?.ui || null;
+    } catch (e: unknown) {
+      console.error('report-reply-send: falha ao ler o idioma do site da conta', report.user_id, String((e as Error)?.message || e));
+    }
   }
   if (!to) {
     return jsonResponse({ ok: false, error: 'no_email' }, 422);
@@ -111,13 +145,13 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ ok: false, error: 'email_not_configured' }, 500);
   }
 
-  const courseName = LANGUAGE_APP_KEY_TO_COURSE_NAME[report.language_app_key] || 'Idiomas com Prof. Brune';
+  const footer = replyFooter(report.language_app_key, accountUiLanguage);
 
   // white-space:pre-wrap preserva as quebras de linha que a admin digitou
   // no textarea, sem precisar converter \n em <br> manualmente.
   const html = `<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px;">
     <p style="font-size:15px;line-height:1.6;color:#241A15;white-space:pre-wrap;">${body.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</p>
-    <p style="font-size:12px;color:#93856F;margin-top:32px;">Resposta ao report que você enviou no ${courseName}.</p>
+    <p style="font-size:12px;color:#93856F;margin-top:32px;">${footer}</p>
   </div>`;
 
   try {

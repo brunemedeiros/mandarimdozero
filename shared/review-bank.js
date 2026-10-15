@@ -1,4 +1,4 @@
-// Banco de Revisão da professora (Professora > Cartões > Banco de Revisão). Migrations 081 a 083.
+// Banco de Revisão da professora (Professora > Cartões > Banco de Revisão). Migrations 081 a 085 e 096 (Turma).
 // Lista de alunos do Banco (com ou sem conta), itens (pendente/aprovado/cortado), Récap, estatísticas do Modo aula,
 // Visão geral e Manual. Aprovar item de aluno vinculado gera o cartão em "Cartões da professora" (RPC atômica).
 // Modo aula (tela cheia): shared/review-bank-class.js. Modelo puro: shared/review-bank-model.js.
@@ -7,7 +7,7 @@
 
 const RB = {
   ready: false, loading: false,
-  students: [], settings: { auto_generate: true, manual_markdown: '' }, links: [],
+  students: [], settings: { auto_generate: true, manual_markdown: '' }, links: [], classrooms: [],
   summary: null, itemsBy: {}, reviewsBy: {}, recapBy: {},
   view: 'students', cur: null, filter: 'pendente', type: '', q: '', limit: 60,
   editingId: null, adding: false, studentForm: null, manualEditing: false, importPlan: null, importOpen: false,
@@ -46,6 +46,7 @@ async function rbLoadBase(){
   RB.students = students;
   RB.settings = Object.assign({ auto_generate: true, manual_markdown: '' }, settingsRes && settingsRes.data ? settingsRes.data : {});
   RB.links = (links || []).filter(l => l.status === 'active');
+  RB.classrooms = await rbLoadClassrooms(students);
   RB.summary = {};
   summaryItems.forEach(i => {
     const s = RB.summary[i.bank_student_id] || (RB.summary[i.bank_student_id] = { total: 0, pendente: 0, aprovado: 0, cortado: 0 });
@@ -53,6 +54,25 @@ async function rbLoadBase(){
   });
   RB.ready = true;
 }
+// Turmas da professora (as do Mural) nos idiomas dos alunos do Banco. Membros só com vínculo ativo (mural_list).
+async function rbLoadClassrooms(students){
+  const langs = [...new Set((students || []).map(s => s.language_app_key))];
+  const out = [];
+  await Promise.all(langs.map(async lang => {
+    try {
+      const { data } = await supabaseClient.rpc('mural_list', { p_lang: lang });
+      const list = data && data.as_teacher && data.as_teacher.classrooms;
+      (list || []).forEach(c => out.push({ id: c.id, name: c.name, language_app_key: lang, members: c.members || [] }));
+    } catch (e) {}
+  }));
+  return out.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+}
+const rbClassroomById = id => RB.classrooms.find(c => String(c.id) === String(id)) || null;
+const rbPersonLabel = (sid, lang) => {
+  const l = RB.links.find(x => x.student_id === sid && x.language_app_key === lang);
+  return l ? (l.display_name || '@' + (l.username || '?')) : '?';
+};
+
 async function rbLoadStudentData(id){
   const [items, reviews, recaps] = await Promise.all([
     rbFetchAll(() => supabaseClient.from('review_bank_items').select('*').eq('bank_student_id', id).order('class_date', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false })),
@@ -166,6 +186,12 @@ async function rbImportRunNow(btn){
 }
 
 function rbLinkLineHTML(s){
+  if (s.classroom_id){
+    const c = rbClassroomById(s.classroom_id);
+    const names = c ? c.members.map(m => rbPersonLabel(m, s.language_app_key)) : [];
+    const who = c ? `${rbH(c.name)} <span class="rb-meta">${rbH(names.length ? rbt('classMembers', { n: names.length, names: names.join(', ') }) : rbt('classEmpty'))}</span>` : rbH(rbt('linkedClass'));
+    return `<span class="rb-pill is-ok">${rbH(rbt('linkedClass'))}</span> <span>${who}</span> <button class="rb-link" data-rb="unlink" data-id="${rbH(s.id)}">${rbH(rbt('unlink'))}</button>`;
+  }
   if (s.linked_student_id){
     const l = RB.links.find(x => x.student_id === s.linked_student_id && x.language_app_key === s.language_app_key);
     const who = l ? (l.display_name ? `${rbH(l.display_name)} (@${rbH(l.username || '?')})` : `@${rbH(l.username || '?')}`) : rbH(rbt('linkedAccount'));
@@ -176,7 +202,11 @@ function rbLinkLineHTML(s){
   const pick = cands.length
     ? `<select id="rb-link-pick" aria-label="${rbH(rbt('linkPick'))}">${cands.map(l => `<option value="${rbH(l.student_id)}">${l.display_name ? rbH(l.display_name) + ' ' : ''}@${rbH(l.username || '?')}</option>`).join('')}</select> <button class="rb-btn" data-rb="link" data-id="${rbH(s.id)}">${rbH(rbt('link'))}</button>`
     : `<span>${rbH(rbt('noLinkable'))}</span>`;
-  return `<span class="rb-pill">${rbH(rbt('noAccount'))}</span> ${pick}`;
+  const rooms = RB.classrooms.filter(c => c.language_app_key === s.language_app_key);
+  const classPick = rooms.length
+    ? `<select id="rb-class-pick" aria-label="${rbH(rbt('classPick'))}">${rooms.map(c => `<option value="${rbH(c.id)}">${rbH(c.name)} (${c.members.length})</option>`).join('')}</select> <button class="rb-btn" data-rb="link-class" data-id="${rbH(s.id)}">${rbH(rbt('linkClass'))}</button>`
+    : `<span class="rb-meta">${rbH(rbt('noClassrooms'))}</span>`;
+  return `<span class="rb-pill">${rbH(rbt('noAccount'))}</span> ${pick}<span class="rb-linkline-or">${rbH(rbt('orClass'))}</span>${classPick}`;
 }
 
 function rbReadyItems(s){
@@ -192,7 +222,7 @@ function rbStudentPanelHTML(s){
     <div class="rb-head"><h3>${rbH(s.name)} <span class="rb-pill">${rbH(rbLangLabel(s.language_app_key))}${s.status === 'arquivado' ? ' · ' + rbH(rbt('archived')) : ''}</span></h3>
       <div class="rb-head-actions"><button class="rb-link" data-rb="student-edit" data-id="${rbH(s.id)}">${rbH(rbt('editStudent'))}</button><button class="rb-btn rb-btn-blue" data-rb="class" data-id="${rbH(s.id)}">${rbH(rbt('openClass'))}</button></div></div>
     <div class="rb-linkline">${rbLinkLineHTML(s)}</div>
-    ${ready.length && s.linked_student_id ? `<div class="rb-ready"><span>${rbH(rbt('readyBanner', { n: ready.length }))}</span><button class="rb-btn rb-btn-blue" data-rb="generate-ready" data-id="${rbH(s.id)}">${rbH(rbt('generateReady'))}</button></div>` : ''}
+    ${ready.length && rbHasTarget(s) ? `<div class="rb-ready"><span>${rbH(rbt('readyBanner', { n: ready.length }))}</span><button class="rb-btn rb-btn-blue" data-rb="generate-ready" data-id="${rbH(s.id)}">${rbH(rbt('generateReady'))}</button></div>` : ''}
     <div class="rb-counts" aria-live="polite">${counts.map(([v, k]) => `<div class="rb-count"><b>${v}</b><span>${rbH(rbt(k))}</span></div>`).join('')}</div>
     ${rbStatsHTML(s)}
     ${rbRecapHTML(s)}
@@ -346,20 +376,22 @@ function rbFindItem(id){ for (const k of Object.keys(RB.itemsBy)){ const f = RB.
 async function rbApproveItem(item){
   const s = rbStudentById(item.bank_student_id);
   if (!s) return { ok: false, error: 'student' };
-  if (!s.linked_student_id){
+  if (!rbHasTarget(s)){
     const { error } = await supabaseClient.rpc('set_review_bank_item_status', { p_item_id: item.id, p_status: 'aprovado' });
     return error ? { ok: false, error: error.message } : { ok: true, card: false };
   }
   const card = rbBuildCard(item, s);
   if (!card.ok) return { ok: false, error: card.error };
   const { error } = await supabaseClient.rpc('approve_review_bank_item', { p_item_id: item.id, p_front: card.front, p_back_trans: card.back_trans, p_fields: card.fields, p_mode: card.mode, p_tags: card.tags, p_note: card.note });
+  if (error && /no_recipients/.test(error.message || '')) return { ok: false, error: rbt('noRecipients') };
   return error ? { ok: false, error: error.message } : { ok: true, card: true };
 }
 
 async function rbReloadCur(){ if (RB.cur) await rbLoadStudentData(RB.cur); }
 
-// Atualiza o cartão já entregue com o conteúdo corrigido do item. Mesmo id (corrige sem zerar o progresso);
-// só muda de tipo de cartão ou "reiniciar progresso" marcado sobem a revisão (cartão novo, FSRS do zero).
+// Atualiza o cartão já entregue com o conteúdo corrigido do item, nas cópias de TODOS (aluno de Turma: uma por membro;
+// RPC sync_review_bank_item_cards, 096). Mesmo id (corrige sem zerar o progresso); só muda de tipo de cartão ou
+// "reiniciar progresso" marcado sobem a revisão (cartão novo, FSRS do zero). Ids dos campos vêm do cartão de referência.
 async function rbSyncDeliveredCard(item, s, resetProgress){
   if (!item.teacher_flashcard_id || !s || s.language_app_key === 'mandarim') return { ok: true, skipped: true };
   const card = rbBuildCard(item, s);
@@ -369,9 +401,9 @@ async function rbSyncDeliveredCard(item, s, resetProgress){
   const oldIds = (row.fields || []).map(f => f.id);
   const fields = card.fields.map((f, k) => (oldIds.length === card.fields.length ? Object.assign({}, f, { id: oldIds[k] }) : f));
   const modeChanged = row.card_generation_mode !== card.mode;
-  const revision = (row.revision || 0) + ((modeChanged || resetProgress) ? 1 : 0);
-  const { error } = await supabaseClient.from('teacher_flashcards').update({ fields, card_generation_mode: card.mode, front: card.front, back_trans: card.back_trans, note: card.note, tags: card.tags, revision }).eq('id', row.id);
-  return error ? { ok: false, error: error.message } : { ok: true, reset: modeChanged || !!resetProgress };
+  const bump = modeChanged || !!resetProgress;
+  const { error } = await supabaseClient.rpc('sync_review_bank_item_cards', { p_item_id: item.id, p_front: card.front, p_back_trans: card.back_trans, p_fields: fields, p_mode: card.mode, p_tags: card.tags, p_note: card.note, p_bump_revision: bump });
+  return error ? { ok: false, error: error.message } : { ok: true, reset: bump };
 }
 
 function rbReadForm(box){
@@ -392,7 +424,7 @@ async function rbSaveItem(box, approve){
   if (existing){
     const r = await supabaseClient.from('review_bank_items').update(cols).eq('id', existing.id).select().maybeSingle(); err = r.error; saved = r.data || Object.assign({}, existing, cols);
   } else {
-    const r = await supabaseClient.from('review_bank_items').insert(Object.assign({ teacher_id: CURRENT_USER.id, bank_student_id: s.id, language_app_key: s.language_app_key, student_id: s.linked_student_id || null, status: 'pendente' }, cols)).select().maybeSingle(); err = r.error; saved = r.data;
+    const r = await supabaseClient.from('review_bank_items').insert(Object.assign({ teacher_id: CURRENT_USER.id, bank_student_id: s.id, language_app_key: s.language_app_key, student_id: s.classroom_id ? null : (s.linked_student_id || null), status: 'pendente' }, cols)).select().maybeSingle(); err = r.error; saved = r.data;
   }
   if (err || !saved){ if (msg) msg.textContent = rbt('error') + ' ' + rbErrMsg(err); return; }
   let note = '';
@@ -584,7 +616,8 @@ function rbWire(wrap){
       else if (a === 'proposal-dismiss'){ await supabaseClient.from('review_bank_items').update({ proposal: null }).eq('id', id); await rbReloadCur(); rbRender(); }
       else if (a === 'generate-ready'){ b.disabled = true; await rbGenerateReady(id); }
       else if (a === 'link'){ const pick = document.getElementById('rb-link-pick'); if (!pick) return; const { error } = await supabaseClient.rpc('link_review_bank_student', { p_bank_student_id: id, p_student_id: pick.value }); if (error) { rbToastErr(error); return; } const s = rbStudentById(id); s.linked_student_id = pick.value; await rbReloadCur(); rbRender(); showToast(rbt('linkedDone')); }
-      else if (a === 'unlink'){ const { error } = await supabaseClient.rpc('unlink_review_bank_student', { p_bank_student_id: id }); if (error) { rbToastErr(error); return; } rbStudentById(id).linked_student_id = null; rbRender(); showToast(rbt('unlinkedDone')); }
+      else if (a === 'link-class'){ const pick = document.getElementById('rb-class-pick'); if (!pick) return; const { data, error } = await supabaseClient.rpc('link_review_bank_classroom', { p_bank_student_id: id, p_classroom_id: Number(pick.value) }); if (error) { rbToastErr(error); return; } const s = rbStudentById(id); s.classroom_id = Number(pick.value); s.linked_student_id = null; await rbReloadCur(); rbRender(); showToast(rbt('linkedClassDone', { n: data || 0 })); }
+      else if (a === 'unlink'){ const { error } = await supabaseClient.rpc('unlink_review_bank_student', { p_bank_student_id: id }); if (error) { rbToastErr(error); return; } const s = rbStudentById(id); s.linked_student_id = null; s.classroom_id = null; rbRender(); showToast(rbt('unlinkedDone')); }
       else if (a === 'student-new'){ RB.studentForm = { id: null, name: '', language_app_key: 'portugues', reference_language: 'en', agent_managed: false, lesson_dates: [] }; rbRender(); }
       else if (a === 'student-edit'){ const s = rbStudentById(id); RB.studentForm = { id: s.id, name: s.name, language_app_key: s.language_app_key, reference_language: s.reference_language, status: s.status, agent_managed: !!s.agent_managed, lesson_dates: (s.lesson_dates || []).slice() }; rbRender(); }
       else if (a === 'student-cancel'){ RB.studentForm = null; rbRender(); }

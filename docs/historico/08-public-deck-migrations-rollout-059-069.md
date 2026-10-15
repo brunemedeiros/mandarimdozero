@@ -298,3 +298,74 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Staging: 2026-10-15 (`095_friend_suggestions` + `095b_friend_suggestions_invited_by`, que é a versão final da função).
   Produção: 2026-10-15, arquivo inteiro, versão `20261015010133`.
 - Detalhes: `docs/historico/17-sugestoes-de-amigos.md`.
+
+## 101 -- Calendário de aulas: horário, duração e fuso (2026-10-15)
+
+- `shared/supabase_migrations/101_class_schedule.sql`: colunas `start_time`, `duration_minutes` (5 a 600), `time_zone` em
+  `teacher_class_logs`, índice (teacher_id, class_date) e `get_my_class_schedule(text)` para o aluno (com horário). Aditiva.
+  Número 101 porque 093 e 096 a 100 já foram usados por outras conversas no Staging.
+- Teste local: `tests/aulas-presenca/run.sh` (101 7/7). Staging: aplicada em 2026-10-15 (ferramenta).
+- Produção: aplicada em 2026-10-15 a pedido da autora (versão `20261015014421 101_class_schedule`). Conferido: 3 colunas,
+  2 restrições, função security definer, anon sem EXECUTE, 393 aulas intactas.
+
+## 102 -- Amigos em dupla + avisos de Amigos no idioma de quem recebe + push na hora (2026-10-15)
+
+- Arquivo: `shared/supabase_migrations/102_friends_duo.sql`. A 100 e a 101 foram usadas por outras conversas
+  (`100_review_bank_agent_other_students`, `101_class_schedule`). Sem DROP.
+- Staging: `101_friends_duo` (`20261015012927`, primeira versão) + `102b_friends_i18n_push_1/2/3b/3c/3e/3f`.
+- Produção (2026-10-15): `102_friends_duo_a`, `_b1`, `_b2`, `_b3`, `_c1`, `_c2`, `_c3`, em partes por causa do tempo
+  da ferramenta. Depois: Edge Function `push-dispatch` v1 e segredos `push_dispatch_url`/`push_dispatch_anon` no Vault.
+- Detalhes: `docs/historico/19-amigos-em-dupla.md`.
+
+## 103 -- Link de agenda (assinatura ICS) (2026-10-15)
+
+- `shared/supabase_migrations/103_class_calendar_feed.sql`: tabela `calendar_feed_tokens` (sem policy), RPCs
+  `my_calendar_feed_token(boolean)` (authenticated) e `class_calendar_feed(text)` (só service_role). Aditiva.
+  Número 103 porque 101 e 102 já foram usados por outra conversa (amigos) no Staging.
+- Edge Function `supabase/functions/class-calendar-feed` (verify_jwt false; token = autenticação).
+- Teste local: `tests/aulas-presenca/run.sh` (103 22/22). Staging: aplicada em 2026-10-15 (ferramenta) e função v1 publicada.
+  Sobraram 2 aulas de teste "TESTE-103" no Staging: o DELETE pelo MCP pede uma confirmação que não aparece e trava
+  (tentado de novo em 2026-10-15); apagar pelo SQL Editor do Staging.
+- Ajuste da autora: aula sem horário entra às 7h (fuso da aula ou São Paulo) com 1h; reaplicado no Staging.
+- Produção: aplicada em 2026-10-15 a pedido da autora (`103_class_calendar_feed`, já com as 7h) e Edge Function
+  `class-calendar-feed` v1 (verify_jwt false, mesmo hash do Staging). Conferido: RLS ligada, anon/authenticated sem acesso
+  ao feed nem à tabela, token falso = calendário vazio (200 text/calendar), token malformado = 404, 393 aulas intactas.
+
+## 104 -- Avisos do Mural e do convite da professora no idioma de quem recebe (2026-10-15)
+
+- `shared/supabase_migrations/104_server_notifications_en.sql` (a 103 é `103_class_calendar_feed`, de outra conversa). Sem DROP.
+- Staging e produção: 2026-10-15, arquivo inteiro, nome `104_server_notifications_en`. Detalhes: `docs/historico/19-amigos-em-dupla.md`.
+
+## 109 -- Missão em dupla automática da semana (2026-10-15)
+
+- `shared/supabase_migrations/109_duo_weekly_auto.sql` (105 a 107 são de outras conversas; 108 está numa branch). Sem DROP.
+- Staging: 2026-10-15 em 3 partes (`109_duo_weekly_auto_1`, `_2`, `_3`), md5 das funções conferido; depois `_4_studied_languages`. Produção: 2026-10-15 em 4 partes (`_1`, `_1b`, `_2`, `_3`), md5 conferido.
+  Detalhes: `docs/historico/19-amigos-em-dupla.md`.
+
+## 096_review_bank_classrooms (Banco de Revisão ligado a uma Turma)
+
+- Arquivo `shared/supabase_migrations/096_review_bank_classrooms.sql` (SQL Editor: `docs/rollout-sql/096_sql_editor.sql`,
+  tem `DROP INDEX`). Plano e testes: `docs/banco-revisao-turmas-plano.md`.
+- Staging: colada pela autora no SQL Editor em 2026-10-15 ("Success"). Não aparece em `schema_migrations` (SQL Editor).
+  Conferido: 8 funções novas `security definer` com `search_path=public`, internas sem grant (só `postgres`),
+  `link_review_bank_classroom` só para `authenticated`; índice antigo removido e o novo (item, aluno) criado; gatilho de
+  entrada na turma; coluna `classroom_id`; `review_bank_review_acks` com RLS e sem grant para anon/authenticated;
+  `approve`/`pendentes` na versão nova. Dados iguais aos de antes: teacher_flashcards 8 (md5 igual), review_bank_items 18
+  (md5 igual), review_bank_students 5 (md5 igual sem a coluna nova), reviews 0.
+- Produção: colada pela autora no SQL Editor em 2026-10-15 (autorizada). Conferido: as 8 funções, índice novo, gatilho, acks com RLS e sem grant
+  para anon/authenticated, approve/pendentes na versão nova; 703 cartões (697 do Banco) e 2.134 itens intactos, nenhuma duplicata.
+
+## 107 -- Link de agenda com senha curta (2026-10-15)
+
+- `shared/supabase_migrations/107_calendar_feed_short_token.sql`: senha de 16 caracteres (alfabeto sem i/l/o/0/1,
+  `_calendar_feed_new_token()`), restrição aceita 64 hex (antiga) ou 16; `my_calendar_feed_token` troca a antiga
+  sozinha; `class_calendar_feed_lang(text)` (idioma do site do dono, `_ui_lang`). Única parte com DROP: troca da restrição.
+- Edge Function `class-calendar-feed` v2: senha no caminho (`/class-calendar-feed/<senha>`, para o Netlify) ou `?t=`.
+- Teste local: `tests/aulas-presenca/run.sh` (107 14/14); `.ics` 22/22. Staging: 107 aplicada (nome `105_calendar_feed_short_token`; renumerada para 107 porque outra conversa reservou 105, 106 e 108) e função v2 (2026-10-15),
+  testado ponta a ponta (200 text/calendar, `.ics` opcional, senha inválida 404, `?lang=en`).
+- Produção: aplicada em 2026-10-15 a pedido da autora (`107_calendar_feed_short_token`) e função v2. Conferido: anon e
+  authenticated sem acesso às funções internas, gerador dá 16 caracteres, senha inexistente = agenda vazia (200),
+  inválida = 404, 393 aulas intactas; a senha antiga da autora (64 hex) troca sozinha ao abrir o bloco.
+  Domínio `agenda.profbrune.com.br` (Netlify, pendente):
+  `docs/agenda-netlify-passo-a-passo.md`.
+

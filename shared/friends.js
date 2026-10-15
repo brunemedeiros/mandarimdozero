@@ -15,7 +15,7 @@
 // (showToast). openPublicProfileModalForUsername/switchTab são só chamados
 // dentro de funções.
 
-const FRIENDS_STATE = { pendingCount: 0, searchSeq: 0, rankScope: 'all', rankSeq: 0, inviteUsername: null, extras: null };
+const FRIENDS_STATE = { pendingCount: 0, searchSeq: 0, rankScope: 'all', rankSeq: 0, inviteUsername: null, extras: null, duo: null, friends: [] };
 
 // ---------- convite por link (?amigo=usuario) ----------
 // O link de convite abre o site com ?amigo=<usuario>. Guardamos o usuário no
@@ -84,6 +84,12 @@ const FRIENDS_ERROR_LABELS = {
   not_accepting_requests: () => t('friends.error.not_accepting_requests'),
   daily_congrats_limit: () => t('friends.error.daily_congrats_limit'),
   target_not_found: () => t('friends.error.target_not_found'),
+  nudges_off: () => t('friends.error.nudges_off'),
+  already_studied: () => t('friends.error.already_studied'),
+  daily_nudge_limit: () => t('friends.error.daily_nudge_limit'),
+  invalid_goal: () => t('friends.error.invalid_goal'),
+  already_in_mission: () => t('friends.error.already_in_mission'),
+  friend_in_mission: () => t('friends.error.friend_in_mission'),
 };
 
 function friendsErrorMessage(code){
@@ -341,6 +347,7 @@ function friendCardHTML(item){
         <span class="friend-card-user">@${escapeHTML(username)}</span>
       </button>
       <span class="friend-card-xp" data-friend-xp="${id}">…</span>
+      <div class="friend-card-duo" data-friend-duo="${id}" data-friend-name="${escapeAttr(name)}"></div>
     </div>`;
 }
 
@@ -466,10 +473,11 @@ async function renderFriendsView(){
     bodyHTML = friendsEmptyHTML(keepQuery, inviteUser) + pending;
   }
 
-  wrap.innerHTML = `${subnav}${headHTML}${friendsRequestsHTML(ov.incoming)}<section class="friends-received" id="friends-received" hidden></section><section class="friends-suggest" id="friends-suggest" hidden></section>${bodyHTML}`;
+  wrap.innerHTML = `${subnav}${headHTML}${friendsRequestsHTML(ov.incoming)}<section class="friends-received" id="friends-received" hidden></section>${hasFriends ? '<section class="friends-push-invite" id="friends-push-invite" hidden></section><section class="friends-duo" id="friends-duo" hidden></section>' : ''}<section class="friends-suggest" id="friends-suggest" hidden></section>${bodyHTML}`;
+  FRIENDS_STATE.friends = ov.friends;
   renderFriendsBadges();
   wireFriendsView(wrap);
-  if (hasFriends){ loadFriendsMiniRank(); loadFriendsActivity(); loadFriendsExtras(); }
+  if (hasFriends){ loadFriendsMiniRank(); loadFriendsActivity(); loadFriendsExtras(); loadFriendsDuo(); loadFriendsPushInvite(); }
   loadFriendsReceivedCongrats();
   loadFriendsSuggestions();
   if (keepQuery.trim().length >= 3) runFriendsSearch(keepQuery);
@@ -601,6 +609,410 @@ function friendsDecorateExtras(){
     const chip = friendsStreakChipHTML(map[el.dataset.podiumUser]);
     if (chip) el.querySelector('.lb-pod-avatar')?.insertAdjacentHTML('afterend', chip);
   });
+}
+
+// ---------- amigos em dupla (migration 102): sequência com amigo, cutucar e missão da semana ----------
+// friends_duo: por amigo, dias seguidos em que os dois estudaram, se dá para cutucar (ainda não estudou hoje, aceita
+// cutucadas e eu não cutuquei hoje) e se já está numa missão. Sem a 102 no banco, nada disso aparece.
+const FRIENDS_JOINT_MIN = 2; // "1 dia juntos" não diz nada: o chip aparece a partir de 2
+// Missão da semana (109): toda segunda o site forma a dupla e a meta é estudar N dias cada (4, ou o que faltar até domingo
+// quando a pessoa chama um amigo no meio da semana). Missões de XP da 102 ainda aparecem até o fim da semana delas.
+// FRIENDS_STATE.mission também alimenta a linha do quadro "Missões do dia" e a faixa do fim da lição.
+
+async function loadFriendsDuo(){
+  let duoRes = await supabaseClient.rpc('friends_duo_state');
+  if (duoRes.error) duoRes = await supabaseClient.rpc('friends_duo'); // sem a 109 no banco
+  await loadFriendsDuoMission();
+  if (duoRes.error){ console.error('Erro ao carregar amigos em dupla:', duoRes.error); return; }
+  FRIENDS_STATE.duo = Object.fromEntries((duoRes.data || []).map(r => [r.user_id, r]));
+  friendsDecorateDuo();
+  if (FRIENDS_STATE.mission) friendsRefreshDuoMissionCard();
+}
+
+function friendsJointChipHTML(x){
+  const n = Number(x?.joint_streak || 0);
+  if (n < FRIENDS_JOINT_MIN) return '';
+  const label = tp('friends.joint.aria', n);
+  return `<span class="friend-joint" title="${escapeAttr(label)}" aria-label="${escapeAttr(label)}">🤝 ${escapeHTML(tp('friends.joint.label', n))}</span>`;
+}
+
+function friendsNudgeHTML(x, userId, name){
+  if (!x || x.studied_today) return '';
+  if (x.nudged_today) return `<span class="friend-nudged">👋 ${t('friends.nudge.done')}</span>`;
+  if (!x.can_nudge) return '';
+  const risk = Number(x.joint_streak || 0) >= FRIENDS_JOINT_MIN ? t('friends.nudge.atRisk', { name }) : '';
+  return `<button type="button" class="btn btn-secondary btn-sm friend-nudge" data-friend-nudge="${escapeAttr(userId)}"
+    aria-label="${escapeAttr(t('friends.nudge.aria', { name }))}"${risk ? ` title="${escapeAttr(risk)}"` : ''}>👋 ${t('friends.nudge.btn')}</button>`;
+}
+
+function friendsInviteDuoHTML(x, userId, name){
+  if (!x || !x.can_invite || FRIENDS_STATE.mission) return '';
+  return `<button type="button" class="btn btn-secondary btn-sm friend-duo-invite" data-duo-invite="${escapeAttr(userId)}"
+    aria-label="${escapeAttr(t('friends.duo.inviteAria', { name }))}">${t('friends.duo.invite')}</button>`;
+}
+
+function friendsDecorateDuo(){
+  const map = FRIENDS_STATE.duo;
+  if (!map) return;
+  document.querySelectorAll('#friends-content [data-friend-duo]').forEach(el => {
+    const id = el.dataset.friendDuo;
+    const x = map[id];
+    const name = el.dataset.friendName || '';
+    el.innerHTML = friendsJointChipHTML(x) + friendsNudgeHTML(x, id, name) + friendsInviteDuoHTML(x, id, name);
+  });
+}
+
+async function friendsNudge(userId, btn){
+  btn.disabled = true;
+  const res = await friendsRpc('nudge_friend', { p_friend: userId });
+  if (!res.ok){
+    showToast(friendsErrorMessage(res.error));
+    if (res.error !== 'network' && FRIENDS_STATE.duo?.[userId]){
+      FRIENDS_STATE.duo[userId].can_nudge = false;
+      if (res.error === 'already_studied') FRIENDS_STATE.duo[userId].studied_today = true;
+      friendsDecorateDuo();
+    } else btn.disabled = false;
+    return;
+  }
+  showToast(t('friends.toast.nudged'));
+  if (FRIENDS_STATE.duo?.[userId]) Object.assign(FRIENDS_STATE.duo[userId], { can_nudge: false, nudged_today: true });
+  friendsDecorateDuo();
+  if (FRIENDS_STATE.mission) friendsRefreshDuoMissionCard();
+}
+
+function friendsDaysLeftInWeek(){
+  if (typeof leaderboardDaysRemaining === 'function' && typeof leaderboardCurrentWeekStart === 'function'){
+    return leaderboardDaysRemaining(leaderboardCurrentWeekStart());
+  }
+  const d = new Date().getDay(); // 0 = domingo
+  return d === 0 ? 0 : 7 - d;
+}
+
+// Dias da semana da missão (segunda a domingo), em texto ISO 'AAAA-MM-DD'.
+function friendsWeekDates(weekStart){
+  const out = [];
+  const base = new Date(String(weekStart) + 'T12:00:00Z');
+  for (let i = 0; i < 7; i++){ const d = new Date(base.getTime() + i * 86400000); out.push(d.toISOString().slice(0, 10)); }
+  return out;
+}
+
+// Missão desta semana (my_duo_mission). Guarda em FRIENDS_STATE.mission para o quadro "Missões do dia" e o fim da lição.
+async function friendsFetchDuoMission(){
+  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER || typeof supabaseClient === 'undefined') return undefined;
+  const { data, error } = await supabaseClient.rpc('my_duo_mission');
+  if (error){ console.error('Erro ao carregar a missão em dupla:', error); return undefined; }
+  FRIENDS_STATE.mission = data || null;
+  FRIENDS_STATE.missionLoaded = true;
+  if (data && data.completed_at && typeof loadDuoMissionsDone === 'function') loadDuoMissionsDone();
+  if (typeof renderDailyChallengesStrip === 'function') renderDailyChallengesStrip();
+  return FRIENDS_STATE.mission;
+}
+
+async function loadFriendsDuoMission(){
+  if (!document.getElementById('friends-duo')) return;
+  const m = await friendsFetchDuoMission();
+  const el = document.getElementById('friends-duo');
+  if (!el) return;
+  if (m === undefined){ el.hidden = true; return; }
+  if (!m){
+    // Saiu das missões? (friend_settings.join_duo_missions) Muda só o texto do cartão vazio.
+    let off = false;
+    try {
+      const { data } = await supabaseClient.from('friend_settings').select('join_duo_missions').eq('user_id', CURRENT_USER.id).maybeSingle();
+      off = data && data.join_duo_missions === false;
+    } catch (e) { /* sem a coluna: participa */ }
+    el.hidden = false;
+    el.innerHTML = friendsDuoEmptyHTML(off);
+    return;
+  }
+  el.hidden = false;
+  friendsRefreshDuoMissionCard();
+}
+
+function friendsRefreshDuoMissionCard(){
+  const el = document.getElementById('friends-duo');
+  const m = FRIENDS_STATE.mission;
+  if (!el || !m) return;
+  el.innerHTML = m.kind === 'days' ? friendsDuoDaysMissionHTML(m) : friendsDuoXpMissionHTML(m);
+}
+
+function friendsDuoEmptyHTML(off){
+  return `
+    <div class="friends-duo-card is-new">
+      <div class="friends-duo-top"><h3 class="friends-duo-title">🤝 ${t('friends.duo.title')}</h3></div>
+      <p class="friends-duo-pitch">${off ? t('friends.duo.offText') : t('friends.duo.emptyText')}</p>
+    </div>`;
+}
+
+// Quantos dias cada um já estudou e se a missão está cumprida.
+function friendsDuoDaysStatus(m){
+  const mine = (m.my_days || []).length, theirs = (m.partner_days || []).length, goal = Number(m.goal_days) || 4;
+  return { mine, theirs, goal, done: !!m.completed_at || (mine >= goal && theirs >= goal) };
+}
+
+function friendsDuoDaysMissionHTML(m){
+  const p = m.partner || {};
+  const first = (typeof leaderboardFirstName === 'function') ? leaderboardFirstName(p) : (p.display_name || p.username || '');
+  const st = friendsDuoDaysStatus(m);
+  const dates = friendsWeekDates(m.week_start);
+  const from = String(m.start_day || m.week_start), today = String(m.today || '');
+  const mineSet = new Set((m.my_days || []).map(String)), theirSet = new Set((m.partner_days || []).map(String));
+  const dayLabels = t('friends.duo.weekdays').split(',');
+  const row = (label, set, count) => `
+      <div class="duo-week-row">
+        <span class="duo-week-name">${escapeHTML(label)}</span>
+        ${dates.map(d => `<span class="duo-dot ${set.has(d) ? 'is-on' : ''} ${d === today ? 'is-today' : ''} ${d < from ? 'is-out' : ''}" aria-hidden="true"></span>`).join('')}
+        <span class="duo-week-count">${Math.min(count, st.goal)}/${st.goal}</span>
+      </div>`;
+  const x = FRIENDS_STATE.duo && FRIENDS_STATE.duo[p.user_id];
+  const days = friendsDaysLeftInWeek();
+  const when = st.done ? '' : (days > 0 ? tp('friends.duo.endsIn', days) : t('friends.duo.endsToday'));
+  const aria = t('friends.duo.weekAria', { mine: Math.min(st.mine, st.goal), theirs: Math.min(st.theirs, st.goal), goal: st.goal, name: first });
+  return `
+    <div class="friends-duo-card ${st.done ? 'is-done' : ''}">
+      <div class="friends-duo-top">
+        <h3 class="friends-duo-title">🤝 ${t('friends.duo.pairTitle', { name: escapeHTML(first) })}</h3>
+        ${when ? `<span class="friends-week-days">${escapeHTML(when)}</span>` : ''}
+      </div>
+      <div class="duo-week" role="img" aria-label="${escapeAttr(aria)}">
+        <div class="duo-week-row duo-week-head" aria-hidden="true"><span></span>${dayLabels.map(l => `<span>${escapeHTML(l)}</span>`).join('')}<span></span></div>
+        ${row(t('friends.duo.you'), mineSet, st.mine)}
+        ${row(first, theirSet, st.theirs)}
+      </div>
+      ${st.done
+        ? `<p class="friends-duo-done"><strong>${t('friends.duo.done')}</strong> ${escapeHTML(tp('friends.duo.doneDays', st.goal))}</p>`
+        : `<p class="friends-duo-pitch">${escapeHTML(tp('friends.duo.goalText', st.goal))}</p>`}
+      ${!st.done && x && x.can_nudge ? `<div>${friendsNudgeHTML(x, p.user_id, p.display_name || p.username || '')}</div>` : ''}
+    </div>`;
+}
+
+function friendsDuoXpMissionHTML(m){
+  const p = m.partner || {};
+  const name = p.display_name || p.username || t('friends.activity.aFriend');
+  const first = (typeof leaderboardFirstName === 'function') ? leaderboardFirstName(p) : name;
+  const goal = Number(m.goal_xp) || 0;
+  const mine = Number(m.my_xp) || 0;
+  const theirs = Number(m.partner_xp) || 0;
+  const done = Math.min(mine + theirs, goal);
+  const pct = goal ? Math.round((done / goal) * 100) : 0;
+  const pctMine = goal ? Math.min(100, Math.round((Math.min(mine, goal) / goal) * 100)) : 0;
+  const pctTheirs = Math.max(0, pct - pctMine);
+  const me = (typeof PROFILE_CACHE !== 'undefined' && PROFILE_CACHE) || {};
+  const days = friendsDaysLeftInWeek();
+  const when = m.completed_at ? '' : (days > 0 ? tp('friends.duo.endsIn', days) : t('friends.duo.endsToday'));
+  return `
+    <div class="friends-duo-card ${m.completed_at ? 'is-done' : ''}">
+      <div class="friends-duo-top">
+        <h3 class="friends-duo-title">🤝 ${t('friends.duo.title')}</h3>
+        ${when ? `<span class="friends-week-days">${escapeHTML(when)}</span>` : ''}
+      </div>
+      <div class="friends-duo-pair">
+        <span class="friends-duo-avatars">${friendAvatarHTML(me, CURRENT_USER && CURRENT_USER.id)}${friendAvatarHTML(p, p.user_id)}</span>
+        <span class="friends-duo-with">${t('friends.duo.with', { name: `<strong>${escapeHTML(first)}</strong>` })}</span>
+        <span class="friends-duo-count">${escapeHTML(t('friends.duo.progress', { done, goal }))}</span>
+      </div>
+      <div class="friends-duo-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${goal}" aria-valuenow="${done}" aria-label="${escapeAttr(t('friends.duo.barAria', { done, goal }))}">
+        <span class="friends-duo-bar-mine" style="width:${pctMine}%"></span><span class="friends-duo-bar-theirs" style="width:${pctTheirs}%"></span>
+      </div>
+      <div class="friends-duo-legend">
+        <span><i class="friends-duo-dot is-mine" aria-hidden="true"></i>${escapeHTML(t('friends.duo.mine', { n: mine }))}</span>
+        <span><i class="friends-duo-dot is-theirs" aria-hidden="true"></i>${escapeHTML(t('friends.duo.theirs', { name: first, n: theirs }))}</span>
+      </div>
+      ${m.completed_at ? `<p class="friends-duo-done"><strong>${t('friends.duo.done')}</strong> ${escapeHTML(t('friends.duo.doneText', { goal }))}</p>` : ''}
+    </div>`;
+}
+
+// "Chamar para missão" no cartão do amigo (para quem ficou sem dupla na segunda).
+async function friendsStartDuo(userId, btn){
+  if (btn) btn.disabled = true;
+  const res = await friendsRpc('start_duo_mission', { p_friend: userId, p_goal: 0 });
+  if (!res.ok){
+    showToast(friendsErrorMessage(res.error));
+    if (btn) btn.disabled = false;
+    if (res.error === 'friend_in_mission' || res.error === 'already_in_mission') loadFriendsDuo();
+    return;
+  }
+  showToast(tp('friends.duo.toast.startedDays', Number(res.data?.goal_days) || 4));
+  await loadFriendsDuo();
+  document.getElementById('friends-duo')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+// Linha da missão no quadro "Missões do dia" (estado-trilha-desafios.js chama). Só missão de dias.
+function duoDailyStripRowHTML(){
+  const m = FRIENDS_STATE.mission;
+  if (!m || m.kind !== 'days') return '';
+  const p = m.partner || {};
+  const first = (typeof leaderboardFirstName === 'function') ? leaderboardFirstName(p) : (p.display_name || p.username || '');
+  const st = friendsDuoDaysStatus(m);
+  const total = st.goal * 2, cur = Math.min(st.mine, st.goal) + Math.min(st.theirs, st.goal);
+  const pct = Math.round((cur / total) * 100);
+  const sub = st.done ? t('friends.duo.done')
+    : t('friends.duo.stripSub', { mine: Math.min(st.mine, st.goal), theirs: Math.min(st.theirs, st.goal), goal: st.goal, name: first });
+  return `
+      <button type="button" class="dcs-card dcs-duo ${st.done ? 'done' : ''}" data-mission-go="duo">
+        <div class="dcs-icon-sq dcs-duo-icon">🤝</div>
+        <div class="dcs-body">
+          <div class="dcs-card-label">${escapeHTML(t('friends.duo.stripTitle', { name: first }))}</div>
+          <div class="dcs-duo-sub">${escapeHTML(sub)}</div>
+          <div class="dcs-progress-row">
+            <div class="dcs-track"><div class="dcs-fill" style="width:${pct}%"></div></div>
+            <div class="dcs-fraction">${cur}/${total}</div>
+          </div>
+        </div>
+      </button>`;
+}
+
+// Faixa da missão no fim da lição: só quando esta lição é o 1º estudo do dia (é ela que conta o dia na missão).
+// Atualiza a missão guardada na hora (o servidor confirma no próximo carregamento).
+function duoLessonStripHTML(){
+  const m = FRIENDS_STATE.mission;
+  if (!m || m.kind !== 'days' || m.completed_at) return '';
+  const today = (typeof todayStr === 'function') ? todayStr() : new Date().toISOString().slice(0, 10);
+  const mine = (m.my_days || []).map(String);
+  if (mine.includes(today) || today < String(m.start_day || m.week_start)) return '';
+  m.my_days = mine.concat(today);
+  const p = m.partner || {};
+  const first = (typeof leaderboardFirstName === 'function') ? leaderboardFirstName(p) : (p.display_name || p.username || '');
+  const st = friendsDuoDaysStatus(m);
+  if (typeof renderDailyChallengesStrip === 'function') setTimeout(renderDailyChallengesStrip, 0);
+  const me = (typeof PROFILE_CACHE !== 'undefined' && PROFILE_CACHE) || {};
+  const head = st.done ? t('friends.duo.lessonDone', { name: escapeHTML(first) })
+    : t('friends.duo.lessonDay', { n: Math.min(st.mine, st.goal), goal: st.goal, name: escapeHTML(first) });
+  const restMine = Math.max(st.goal - st.mine, 0), restTheirs = Math.max(st.goal - st.theirs, 0);
+  const sub = st.done ? '' : (restMine === 0 ? tp('friends.duo.lessonWaitPartner', restTheirs, { name: first }) : tp('friends.duo.lessonRest', restMine));
+  return `
+    <div class="duo-lesson-strip">
+      <span class="friends-duo-avatars">${friendAvatarHTML(me, CURRENT_USER && CURRENT_USER.id)}${friendAvatarHTML(p, p.user_id)}</span>
+      <div><strong>${head}</strong>${sub ? `<br><small>${escapeHTML(sub)}</small>` : ''}</div>
+    </div>`;
+}
+
+// ---------- convite para ativar as notificações (avisos de Amigos com o site fechado, 102) ----------
+// O push só chega a quem ativou as notificações NESTE aparelho (push_subscriptions). Convite em dois lugares:
+//   - faixa na aba Amigos (quem tem amigo e ainda não ativou aqui), com "Agora não" (some por 14 dias);
+//   - janela UMA vez quando a pessoa ganha o primeiro amigo (loadFriendsAcceptedCount, badge-tracks-app.js),
+//     depois da comemoração da conquista.
+// iPhone/iPad: o navegador só tem push com o site na Tela de Início; aí o convite explica como adicionar.
+// O pedido de permissão do navegador só sai do clique em "Ativar" (regra da seção 11: nunca sozinho).
+const FRIENDS_PUSH_SNOOZE_KEY = 'friendsPushInviteSnoozedAt';
+const FRIENDS_PUSH_FIRST_KEY = 'friendsPushInviteFirstFriendShown';
+const FRIENDS_PUSH_SNOOZE_DAYS = 14;
+
+function friendsLsGet(k){ try { return localStorage.getItem(k); } catch (e) { return null; } }
+function friendsLsSet(k, v){ try { localStorage.setItem(k, v); } catch (e) { /* aba anônima */ } }
+function friendsIsIOS(){
+  const ua = navigator.userAgent || '';
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function friendsIsStandalone(){
+  try { return !!(navigator.standalone || window.matchMedia('(display-mode: standalone)').matches); } catch (e) { return false; }
+}
+
+// 'push' = dá para pedir; 'ios' = iPhone/iPad sem o site na Tela de Início; null = não mostrar.
+async function friendsPushInviteMode(){
+  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return null;
+  const snoozed = Number(friendsLsGet(FRIENDS_PUSH_SNOOZE_KEY) || 0);
+  if (snoozed && Date.now() - snoozed < FRIENDS_PUSH_SNOOZE_DAYS * 86400000) return null;
+  const supported = typeof pushSupported === 'function' && pushSupported();
+  if (!supported) return (friendsIsIOS() && !friendsIsStandalone()) ? 'ios' : null;
+  if (Notification.permission === 'denied') return null; // bloqueado no navegador: o clique não resolve
+  if (typeof getLocalPushSubscription !== 'function') return null;
+  // serviceWorker.ready não resolve sem service worker: sem resposta em 4 s, não mostra (também não daria para ativar).
+  const sub = await Promise.race([getLocalPushSubscription(), new Promise(r => setTimeout(() => r('timeout'), 4000))]);
+  if (sub === 'timeout') return null;
+  return sub ? null : 'push';
+}
+
+function friendsPushInviteHTML(mode, firstFriend){
+  // Na janela do 1º amigo o título vai no cabeçalho da janela.
+  const title = firstFriend ? '' : t('friends.push.title');
+  if (mode === 'ios'){
+    return `<div class="friends-push-card">
+      <span class="friends-push-icon" aria-hidden="true">📱</span>
+      <div class="friends-push-text">${title ? `<strong>${title}</strong>` : ''}<p>${t('friends.push.iosText')}</p></div>
+      <div class="friends-push-actions"><button type="button" class="btn btn-secondary btn-sm" data-push-invite="later">${t('friends.push.iosOk')}</button></div>
+    </div>`;
+  }
+  return `<div class="friends-push-card">
+      <span class="friends-push-icon" aria-hidden="true">🔔</span>
+      <div class="friends-push-text">${title ? `<strong>${title}</strong>` : ''}<p>${t('friends.push.text')}</p></div>
+      <div class="friends-push-actions">
+        <button type="button" class="btn btn-primary btn-sm" data-push-invite="enable">${t('friends.push.enable')}</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-push-invite="later">${t('friends.push.later')}</button>
+      </div>
+    </div>`;
+}
+
+async function loadFriendsPushInvite(){
+  const mode = await friendsPushInviteMode();
+  const el = document.getElementById('friends-push-invite');
+  if (!el) return;
+  el.hidden = !mode;
+  el.innerHTML = mode ? friendsPushInviteHTML(mode, false) : '';
+}
+
+function friendsPushInviteClose(){
+  const el = document.getElementById('friends-push-invite');
+  if (el){ el.hidden = true; el.innerHTML = ''; }
+  document.getElementById('friends-push-modal')?.remove();
+}
+
+async function friendsPushInviteAction(action, btn){
+  if (action === 'later'){
+    friendsLsSet(FRIENDS_PUSH_SNOOZE_KEY, String(Date.now()));
+    friendsPushInviteClose();
+    return;
+  }
+  if (action !== 'enable' || typeof subscribeToPush !== 'function') return;
+  if (btn) btn.disabled = true;
+  const res = await subscribeToPush();
+  if (!res.ok){
+    showToast(typeof notificationPushErrorMessage === 'function' ? notificationPushErrorMessage(res.reason) : t('notif.pref.push.error'));
+    if (res.reason === 'blocked' || res.reason === 'denied' || res.reason === 'unsupported'){
+      friendsLsSet(FRIENDS_PUSH_SNOOZE_KEY, String(Date.now()));
+      friendsPushInviteClose();
+    } else if (btn) btn.disabled = false;
+    return;
+  }
+  // Amigos por push (o padrão já é ligado; grava para valer mesmo se a pessoa tinha salvo só o sino).
+  if (typeof setCategoryChannel === 'function'){
+    try { await setCategoryChannel('amigos', 'push', true); } catch (e) { console.error('Push de Amigos:', e); }
+  }
+  showToast(t('friends.push.done'));
+  friendsPushInviteClose();
+}
+
+// Primeiro amigo: janela uma vez, depois da comemoração da conquista e de qualquer outra janela aberta.
+async function friendsMaybeOfferPushFirstFriend(){
+  if (friendsLsGet(FRIENDS_PUSH_FIRST_KEY)) return;
+  const mode = await friendsPushInviteMode();
+  if (!mode) return;
+  friendsLsSet(FRIENDS_PUSH_FIRST_KEY, '1');
+  const busy = () => document.querySelector('.app-modal-overlay')
+    || (typeof badgeCelebrationShowing !== 'undefined' && badgeCelebrationShowing)
+    || (typeof badgeCelebrationQueue !== 'undefined' && badgeCelebrationQueue.length);
+  const started = Date.now();
+  while (busy() && Date.now() - started < 60000) await new Promise(r => setTimeout(r, 500));
+  if (busy()) return;
+  const ov = document.createElement('div');
+  ov.id = 'friends-push-modal';
+  ov.className = 'app-modal-overlay';
+  ov.innerHTML = `
+    <div class="app-modal friends-push-modal" role="dialog" aria-modal="true" aria-labelledby="friends-push-modal-title">
+      <div class="app-modal-header"><h3 id="friends-push-modal-title">${t('friends.push.firstTitle')}</h3>
+        <button type="button" class="app-modal-close" data-no-emoji-icons data-push-invite="later" aria-label="${escapeAttr(t('friends.push.later'))}">✕</button>
+      </div>
+      <div class="app-modal-body">${friendsPushInviteHTML(mode, true)}</div>
+    </div>`;
+  const onKey = (e) => { if (e.key === 'Escape'){ document.removeEventListener('keydown', onKey); friendsPushInviteAction('later'); } };
+  ov.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-push-invite]');
+    if (b){ document.removeEventListener('keydown', onKey); friendsPushInviteAction(b.dataset.pushInvite, b); return; }
+    if (e.target === ov){ document.removeEventListener('keydown', onKey); friendsPushInviteAction('later'); }
+  });
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(ov);
+  ov.querySelector('[data-push-invite="enable"], [data-push-invite="later"]')?.focus();
 }
 
 // ---------- marco de sequência (chamado por registerStudyToday em fr/zh app.js) ----------
@@ -741,6 +1153,9 @@ const FRIENDS_PREF_FIELDS = [
   { key: 'notify_congrats', label: () => t('friends.pref.notify_congrats') },
   { key: 'accept_requests', label: () => t('friends.pref.accept_requests') },
   { key: 'suggest_me', label: () => t('friends.pref.suggest_me') },
+  { key: 'accept_nudges', label: () => t('friends.pref.accept_nudges') },
+  { key: 'notify_missions', label: () => t('friends.pref.notify_missions') },
+  { key: 'join_duo_missions', label: () => t('friends.pref.join_duo_missions') },
 ];
 
 // Mora em Configurações > Notificações (shared/notification-preferences.js
@@ -847,6 +1262,12 @@ function wireFriendsView(wrap){
   wrap.dataset.friendsWired = '1';
   wrap.addEventListener('click', async (e) => {
     if (e.target.closest('[data-friends-qr]')){ friendsShowInviteQr(); return; }
+    const nudge = e.target.closest('[data-friend-nudge]');
+    if (nudge){ if (!nudge.disabled) friendsNudge(nudge.dataset.friendNudge, nudge); return; }
+    const pushBtn = e.target.closest('#friends-push-invite [data-push-invite]');
+    if (pushBtn){ if (!pushBtn.disabled) friendsPushInviteAction(pushBtn.dataset.pushInvite, pushBtn); return; }
+    const duoInvite = e.target.closest('[data-duo-invite]');
+    if (duoInvite){ if (!duoInvite.disabled) friendsStartDuo(duoInvite.dataset.duoInvite, duoInvite); return; }
     const dismiss = e.target.closest('[data-suggest-dismiss]');
     if (dismiss){ friendsDismissSuggestion(dismiss.dataset.suggestDismiss, dismiss); return; }
     const menuBtn = e.target.closest('[data-friend-menu]');

@@ -4471,6 +4471,43 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .notion-review-actions{ display:flex; flex-wrap:wrap; gap:8px; }
 .notion-review-actions .btn{ width:auto; min-width:0; margin:0; padding:8px 14px; }
 .notion-review summary{ cursor:pointer; }
+.class-log-when{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; }
+.class-log-when .profile-edit-input{ margin:0; }
+.class-log-repeat{ align-self:flex-start; margin:4px 0; }
+.class-log-views{ margin-bottom:12px; }
+.cal{ border:1px solid var(--paper-line); border-radius:14px; background:var(--paper); padding:10px; }
+.cal-head{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.cal-title{ flex:1; text-align:center; font-weight:800; color:var(--ink); }
+.cal-nav, .cal-today-btn{ border:1px solid var(--paper-line); background:var(--paper-warm); color:var(--ink); border-radius:10px; padding:4px 10px; cursor:pointer; font:inherit; font-weight:700; }
+.cal-grid{ display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:4px; }
+.cal-wd{ text-align:center; font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:capitalize; padding:2px 0; }
+.cal-cell{ min-height:74px; display:flex; flex-direction:column; align-items:stretch; gap:2px; padding:4px; border:1px solid var(--paper-line); border-radius:8px; background:var(--paper); color:var(--ink); font:inherit; text-align:left; cursor:pointer; overflow:hidden; }
+.cal-cell.is-pad{ border:0; background:transparent; cursor:default; }
+.cal-cell.is-today .cal-num{ background:var(--ink); color:var(--paper); border-radius:999px; padding:0 6px; }
+.cal-cell.is-selected{ outline:2px solid var(--ink); outline-offset:-1px; }
+.cal-num{ font-size:12px; font-weight:800; align-self:flex-start; }
+.cal-chip{ --att-c:#7A7F87; display:block; font-size:10.5px; line-height:1.3; padding:1px 4px; border-radius:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink); background:transparent; border:1px dashed var(--ink-soft); }
+.cal-chip:not([data-color=""]){ border:0; border-left:3px solid var(--att-c); background:color-mix(in srgb, var(--att-c) 16%, var(--paper)); }
+.cal-chip[data-color="green"]{ --att-c:#2E9E5B; } .cal-chip[data-color="red"]{ --att-c:#D64545; } .cal-chip[data-color="yellow"]{ --att-c:#C99A06; } .cal-chip[data-color="orange"]{ --att-c:#E07B24; } .cal-chip[data-color="blue"]{ --att-c:#2F7FD1; } .cal-chip[data-color="purple"]{ --att-c:#8A55C9; } .cal-chip[data-color="pink"]{ --att-c:#D4549A; } .cal-chip[data-color="brown"]{ --att-c:#9A6B4F; }
+.cal-more{ font-size:10.5px; color:var(--ink-soft); font-weight:700; }
+.cal-legend{ margin:6px 0 10px; }
+.cal-day .btn{ width:auto; min-width:0; margin-top:8px; }
+.my-upcoming-list{ margin:0; padding-left:18px; display:grid; gap:4px; color:var(--ink); }
+@media (max-width: 600px){
+  .cal{ padding:6px; } .cal-grid{ gap:2px; } .cal-cell{ min-height:52px; padding:2px; }
+  .cal-chip{ font-size:0; padding:0; height:6px; border-radius:3px; } .cal-chip b{ display:none; }
+  .cal-nav, .cal-today-btn{ min-height:44px; min-width:44px; }
+}
+/* Link de agenda (103): assinatura ICS em Aulas (professora e aluno) */
+.calendar-feed-box > summary { cursor: pointer; list-style: revert; }
+.calendar-feed-body { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.calendar-feed-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.calendar-feed-actions .btn { text-decoration: none; }
+.calendar-feed-copy { display: flex; gap: 8px; align-items: center; }
+.calendar-feed-copy input { flex: 1; min-width: 0; font-size: 0.8rem; }
+@media (max-width: 600px) {
+  .calendar-feed-actions .btn, .calendar-feed-copy .btn { min-height: 44px; }
+}
 /* Mural da professora (087, shared/mural.js) */
 .mural-count{ display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 6px; margin-left:6px; border-radius:999px; background:var(--seal-red); color:var(--on-seal-red); font-size:11.5px; font-weight:800; line-height:1; vertical-align:middle; }
 .tab-btn > .mural-count{ position:absolute; top:2px; right:4px; margin:0; min-width:18px; height:18px; font-size:10.5px; border:2px solid var(--paper); box-sizing:content-box; padding:0 4px; }
@@ -4555,6 +4592,39 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   .mural-composer-bar .mural-publish{ flex:1 1 100%; margin-left:0; }
   .mural-target-wrap{ flex:1 1 100%; }
   .mural-target-wrap select{ flex:1; max-width:none; }
+}
+/* Sino da professora (105, shared/teacher-panel.js): avisos sobre alunos, separado do sino do topo */
+.tbell{ margin:-4px 0 16px; }
+.tbell-btn{ display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:8px 14px; border-radius:999px; border:2px solid var(--paper-line); background:var(--paper-warm); color:var(--ink); font:inherit; font-weight:800; font-size:14px; cursor:pointer; }
+.tbell-btn:hover, .tbell-btn[aria-expanded="true"]{ border-color:var(--seal-red); }
+.tbell-btn .mural-count{ margin-left:2px; }
+.tbell-panel{ margin-top:10px; border:1px solid var(--paper-line); border-radius:12px; background:var(--paper); padding:10px; max-width:720px; }
+.tbell-panel[hidden]{ display:none; }
+.tbell-head{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 12px; padding:2px 4px 10px; border-bottom:1px solid var(--paper-line); }
+.tbell-hint{ margin:0; flex:1 1 220px; color:var(--ink-soft); font-size:13px; line-height:1.4; }
+.tbell-mark-all{ background:none; border:none; color:var(--seal-red-dark); font:inherit; font-weight:700; font-size:13px; cursor:pointer; padding:6px 4px; }
+.tbell-mark-all:hover:not(:disabled){ text-decoration:underline; }
+.tbell-mark-all:disabled{ opacity:.5; cursor:default; }
+.tbell-list{ max-height:min(60vh, 520px); overflow-y:auto; }
+.tbell-items{ list-style:none; margin:0; padding:0; }
+.tbell-items > li + li{ border-top:1px solid var(--paper-line); }
+.tbell-item{ display:flex; gap:10px; align-items:flex-start; width:100%; text-align:left; background:none; color:var(--ink); border:none; padding:12px 8px; font:inherit; cursor:pointer; border-radius:8px; }
+.tbell-item:hover{ background:var(--paper-warm); color:var(--ink); }
+.tbell-item.is-unread{ background:var(--paper-warm); color:var(--ink); box-shadow: inset 3px 0 0 var(--seal-red); }
+.tbell-item-icon{ font-size:18px; line-height:1.3; flex-shrink:0; }
+.tbell-item-body{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+.tbell-item-text{ font-size:14px; line-height:1.4; overflow-wrap:anywhere; }
+.tbell-item.is-unread .tbell-item-text{ font-weight:700; }
+.tbell-item-meta{ display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; font-size:12px; color:var(--ink-soft); }
+.tbell-lang{ text-transform:capitalize; border:1px solid var(--paper-line); border-radius:999px; padding:1px 8px; }
+.tbell-new{ font-weight:800; color:var(--seal-red-dark); }
+.tbell-item-note{ font-size:12px; color:var(--ink-soft); font-style:italic; }
+.tbell-empty{ padding:20px 8px; text-align:center; color:var(--ink-soft); font-size:14px; margin:0; }
+.tbell-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--seal-red); margin-left:8px; vertical-align:middle; }
+.tab-btn > .tbell-dot{ position:absolute; top:6px; left:6px; margin:0; border:2px solid var(--paper); box-sizing:content-box; }
+@media (max-width: 899px){
+  .tbell-btn, .tbell-mark-all, .tbell-item{ min-height:44px; }
+  .tbell-btn{ width:100%; justify-content:flex-start; }
 }
 /* K.10: Decks do aluno no painel 📊 e botão Analytics no perfil público */
 .student-decks-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); margin-top:6px; }
@@ -5053,6 +5123,81 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 .friends-qr-link{ font-size:12px; color:var(--ink-soft); word-break:break-all; }
 .friends-head-actions{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
 .friends-empty .btn-block + .btn-block{ margin-top:8px; }
+/* ---------- Convite para ativar as notificações (102, shared/friends.js loadFriendsPushInvite) ---------- */
+.friends-push-invite{ margin-top:16px; }
+.friends-push-card{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:var(--paper); border:1px solid var(--paper-line);
+  border-radius:22px; padding:14px 18px; box-shadow:var(--shadow-card); }
+.friends-push-icon{ font-size:28px; line-height:1; flex:0 0 auto; }
+.friends-push-text{ flex:1 1 260px; min-width:0; color:var(--ink); }
+.friends-push-text p{ margin:4px 0 0; color:var(--ink-soft); font-size:14px; line-height:1.4; }
+.friends-push-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+.friends-push-modal .friends-push-card{ box-shadow:none; border:0; padding:0; }
+@media (max-width: 600px){
+  .friends-push-actions{ width:100%; }
+  .friends-push-actions .btn{ flex:1 1 auto; min-height:44px; }
+}
+/* ---------- Missão em dupla automática (109): grade da semana, quadro "Missões do dia" clicável, fim da lição ---------- */
+button.dcs-card{ width:100%; font:inherit; color:inherit; text-align:left; cursor:pointer; transition: border-color .15s ease, transform .15s ease; }
+button.dcs-card:hover{ border-color: var(--seal-red); transform: translateY(-1px); }
+button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offset: 2px; }
+.dcs-duo{ border-color: var(--seal-red); background: color-mix(in srgb, var(--seal-red) 8%, var(--paper)); }
+.dcs-duo-icon{ background: color-mix(in srgb, var(--seal-red) 18%, var(--paper)); }
+.dcs-duo .dcs-fill{ background: var(--seal-red); }
+.dcs-duo-sub{ font-size:11px; color: var(--ink-soft); margin:-3px 0 5px; }
+.duo-week{ display:grid; gap:6px; margin-top:12px; }
+.duo-week-row{ display:grid; grid-template-columns: minmax(48px, 88px) repeat(7, minmax(0, 1fr)) 34px; gap:4px; align-items:center; font-size:13px; }
+.duo-week-head{ font-size:11px; font-weight:800; color: var(--ink-soft); text-align:center; }
+.duo-week-name{ font-weight:800; color: var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.duo-dot{ justify-self:center; width:100%; max-width:24px; aspect-ratio:1; border-radius:50%; border:2px solid var(--paper-line); background: var(--paper); }
+.duo-dot.is-on{ background: var(--seal-red); border-color: var(--seal-red); }
+.duo-dot.is-today{ border-color: var(--medal-gold); border-style: dashed; }
+.duo-dot.is-on.is-today{ border-style: solid; }
+.duo-dot.is-out{ opacity:.35; }
+.duo-week-count{ font-size:12px; font-weight:800; color: var(--ink-soft); text-align:right; font-variant-numeric: tabular-nums; }
+.friend-duo-invite{ min-height:32px; font-size:12.5px; padding:6px 10px; white-space:nowrap; }
+.duo-lesson-strip{ display:flex; align-items:center; gap:12px; text-align:left; margin:14px auto 0; max-width:440px; padding:10px 14px;
+  border:1px solid var(--seal-red); border-radius:14px; background: color-mix(in srgb, var(--seal-red) 10%, var(--paper)); color: var(--ink); }
+.duo-lesson-strip small{ color: var(--ink-soft); }
+.duo-lesson-strip .friends-avatar{ width:32px; height:32px; font-size:12px; border:2px solid var(--paper); }
+.duo-lesson-strip .friends-avatar + .friends-avatar{ margin-left:-9px; }
+@media (max-width: 600px){ .friend-duo-invite{ min-height:44px; } }
+@media (prefers-reduced-motion: reduce){ button.dcs-card{ transition:none; } button.dcs-card:hover{ transform:none; } }
+/* ---------- Amigos em dupla (102, shared/friends.js loadFriendsDuo) ---------- */
+.friends-duo{ margin-top:16px; }
+.friends-duo-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:22px; padding:16px 18px; box-shadow:var(--shadow-card); }
+.friends-duo-card.is-done{ border-color:var(--medal-gold); }
+.friends-duo-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.friends-duo-title{ margin:0; font-size:17px; font-weight:900; color:var(--ink); }
+.friends-duo-pitch{ margin:8px 0 0; color:var(--ink-soft); font-size:14px; line-height:1.4; }
+.friends-duo-pair{ display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap; }
+.friends-duo-avatars{ display:inline-flex; }
+.friends-duo-avatars .friends-avatar{ width:36px; height:36px; font-size:14px; border:2px solid var(--paper); }
+.friends-duo-avatars .friends-avatar + .friends-avatar{ margin-left:-10px; }
+.friends-duo-with{ color:var(--ink); flex:1 1 auto; }
+.friends-duo-count{ font-weight:900; color:var(--ink); font-variant-numeric:tabular-nums; }
+.friends-duo-bar{ display:flex; height:14px; margin-top:10px; border-radius:999px; background:var(--paper-warm); border:1px solid var(--paper-line); overflow:hidden; }
+.friends-duo-bar-mine{ background:var(--seal-red); }
+.friends-duo-bar-theirs{ background:var(--jade); }
+.friends-duo-legend{ display:flex; gap:16px; flex-wrap:wrap; margin-top:8px; font-size:13px; color:var(--ink-soft); }
+.friends-duo-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+.friends-duo-dot.is-mine{ background:var(--seal-red); }
+.friends-duo-dot.is-theirs{ background:var(--jade); }
+.friends-duo-done{ margin:10px 0 0; color:var(--ink); }
+.friends-duo-form{ display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-top:12px; }
+.friends-duo-form[hidden]{ display:none; }
+.friends-duo-field{ display:flex; flex-direction:column; gap:4px; font-size:13px; font-weight:700; color:var(--ink-soft); flex:1 1 140px; min-width:0; }
+.friends-duo-field select{ min-height:40px; padding:6px 10px; border-radius:12px; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink); font:inherit; font-weight:600; max-width:100%; }
+.friends-duo-start{ flex:0 0 auto; }
+.friend-card-duo{ display:flex; flex-direction:column; align-items:center; gap:6px; margin-top:6px; }
+.friend-card-duo:empty{ display:none; }
+.friend-joint{ font-size:12px; font-weight:800; color:var(--ink); background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px; padding:2px 8px; white-space:nowrap; }
+.friend-nudged{ font-size:12px; color:var(--ink-soft); }
+.friend-nudge{ min-height:32px; }
+@media (max-width: 600px){
+  .friends-duo-form{ flex-direction:column; align-items:stretch; }
+  .friends-duo-field{ flex:0 0 auto; }
+  .friends-duo-field select, .friends-duo-start, .friend-nudge{ min-height:44px; }
+}
 </style>
 </head>
 <body>
@@ -5557,6 +5702,7 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
       <h2 data-i18n="panel.teacher.title">Painel da professora</h2>
       <p data-i18n="panel.teacher.sub">Seus alunos, os cartões e as aulas de cada um e os materiais que você compartilha.</p>
     </div>
+    <div id="teacher-bell" class="tbell" hidden></div>
     <div class="deck-topbar panel-nav" role="tablist" aria-label="Seção do painel da professora" data-i18n-attr="aria-label:panel.teacher.aria">
       <button class="deck-topbar-btn is-active" role="tab" aria-selected="true" data-teacher-section="students" data-i18n="panel.tab.students">Alunos</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="flashcards" data-i18n="panel.tab.cards">Cartões</button>
@@ -6322,9 +6468,13 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 <script src="../shared/core/revisao-decks.js"></script>
 <script src="../shared/core/exercicios-licao.js"></script>
 <script src="../shared/core/estado-trilha-desafios.js"></script>
+<script src="../shared/core/familias/latina.js"></script>
 <script src="lang-hooks.js"></script>
 <script src="../shared/core/quase-iguais-simples.js"></script>
 <script src="../shared/core/quase-iguais-textos.js"></script>
+<script src="../shared/core/quase-iguais-chaves.js"></script>
+<script src="../shared/core/quase-iguais-pinyin.js"></script>
+<script src="../shared/core/quase-iguais-dados.js"></script>
 <script src="app.js"></script>
 <script src="../shared/language-switcher.js"></script>
 </body>

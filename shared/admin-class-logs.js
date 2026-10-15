@@ -30,7 +30,8 @@
 //   - shared/srs.js                (todayStr)
 //   - languages/<lang>/app.js      (isAdminUser)
 
-let ADMIN_CLASS_LOGS_STATE = { studentIds: new Set(), classroomIds: new Set(), langFilter: 'all', editingId: null, _studentsCache: [], _classroomsCache: [] };
+let ADMIN_CLASS_LOGS_STATE = { studentIds: new Set(), classroomIds: new Set(), langFilter: 'all', editingId: null, _studentsCache: [], _classroomsCache: [],
+  view: 'register', cal: null, calSelected: null, calEditingId: null };
 
 // 094: turmas da professora (as mesmas do Mural), em todos os idiomas em que ela tem aluno.
 async function fetchClassLogClassrooms(langs){
@@ -298,11 +299,46 @@ function classLogFieldRowsHTML(log){
   return rows.map(([label, value]) => `<div><strong>${label}:</strong> <span style="white-space:pre-wrap;">${escapeHTML(value)}</span></div>`).join('');
 }
 
+// 101: horário (opcional) e duração. Aula sem horário vale para o dia inteiro.
+// Duração: padrão 60 min, a professora muda para qualquer valor de 5 a 600 (pedido da autora, 2026-10-15).
+// Duração (decisão da autora, 2026-10-15): seletor de 30 em 30 min, de 30 min a 5h, padrão 1h. Um valor fora da
+// lista (aula antiga ou importada) entra como opção extra para não se perder ao editar.
+const CLASS_LOG_DEFAULT_TIME = '07:00';
+const CLASS_LOG_DURATIONS = [30, 60, 90, 120, 150, 180, 210, 240, 270, 300];
+function classLogDurationLabel(min){
+  const m = Number(min) || 0;
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60), r = m % 60;
+  return r ? `${h}h${String(r).padStart(2, '0')}` : `${h}h`;
+}
+function classLogDurationOptionsHTML(current){
+  const cur = Number(current) || 60;
+  const list = CLASS_LOG_DURATIONS.includes(cur) ? CLASS_LOG_DURATIONS : [...CLASS_LOG_DURATIONS, cur].sort((a, b) => a - b);
+  return list.map(m => `<option value="${m}"${m === cur ? ' selected' : ''}>${classLogDurationLabel(m)}</option>`).join('');
+}
+
+function classLogWhenFieldsHTML(timeId, durId, log){
+  // Padrão da autora (2026-10-15): aula sem horário = 7h, 1h de duração (o mesmo que o link de agenda usa).
+  const time = log && log.start_time ? String(log.start_time).slice(0, 5) : CLASS_LOG_DEFAULT_TIME;
+  const dur = (log && log.duration_minutes) || 60;
+  return `
+    <div class="class-log-when">
+      <div><label class="profile-edit-label" for="${timeId}">${t('panel.classLog.time')}</label>
+        <input type="time" id="${timeId}" class="profile-edit-input" value="${time}"></div>
+      <div><label class="profile-edit-label" for="${durId}">${t('panel.classLog.durationMin')}</label>
+        <select id="${durId}" class="profile-edit-input">${classLogDurationOptionsHTML(dur)}</select></div>
+    </div>`;
+}
+function classLogTimeLabel(log){
+  return log && log.start_time ? ` · ${String(log.start_time).slice(0, 5)}` : '';
+}
+
 function classLogEditFormHTML(log){
   return `
     <form class="profile-edit-form" data-edit-class-log-form="${log.id}" style="margin-top:8px;">
       <label class="profile-edit-label" for="edit-class-log-date-${log.id}">${t('admin.common.date')}</label>
       <input type="date" id="edit-class-log-date-${log.id}" class="profile-edit-input" value="${log.class_date}">
+      ${classLogWhenFieldsHTML(`edit-class-log-time-${log.id}`, `edit-class-log-duration-${log.id}`, log)}
       <label class="profile-edit-label" for="edit-class-log-topic-${log.id}">${t('admin.classLogs.topicOpt')}</label>
       <input type="text" id="edit-class-log-topic-${log.id}" class="profile-edit-input" value="${escapeHTML(log.topic || '')}">
       <label class="profile-edit-label" for="edit-class-log-homework-${log.id}">${t('admin.classLogs.homeworkOpt')}</label>
@@ -326,7 +362,7 @@ function classLogRowHTML(log, showUsername){
   return `
     <div class="admin-badge-row" style="align-items:flex-start;">
       <div class="admin-badge-info">
-        <div class="admin-badge-name">${showUsername && log.__studentUsername ? `<span style="opacity:.6">@${escapeHTML(log.__studentUsername)}</span> · ` : ''}${fmtDate(new Date(`${log.class_date}T00:00:00`))}</div>
+        <div class="admin-badge-name">${showUsername && log.__studentUsername ? `<span style="opacity:.6">@${escapeHTML(log.__studentUsername)}</span> · ` : ''}${fmtDate(new Date(`${log.class_date}T00:00:00`))}${classLogTimeLabel(log)}</div>
         ${!isEditing ? `${classLogRowBadgesHTML(log)}<div class="admin-badge-desc">${classLogFieldRowsHTML(log) || (classLogRowBadgesHTML(log) ? '' : `<em>${t('admin.classLogs.noFields')}</em>`)}</div>` : classLogEditFormHTML(log)}
       </div>
       ${!isEditing ? `
@@ -382,6 +418,8 @@ function wireClassLogsListBox(listBox){
       errorEl.textContent = '';
       const result = await updateClassLog(id, {
         classDate: document.getElementById(`edit-class-log-date-${id}`).value,
+        startTime: document.getElementById(`edit-class-log-time-${id}`).value,
+        durationMinutes: document.getElementById(`edit-class-log-duration-${id}`).value,
         topic: document.getElementById(`edit-class-log-topic-${id}`).value,
         homework: document.getElementById(`edit-class-log-homework-${id}`).value,
         observations: document.getElementById(`edit-class-log-observations-${id}`).value,
@@ -445,6 +483,126 @@ function applyClassLogPickerFilters(wrap){
   });
 }
 
+// Datas semanais a partir de `from` até `until` (inclusive), no máximo 52 aulas. Sem `until`: só `from`.
+function classLogRepeatDates(from, until){
+  const out = [from];
+  if (!until || until <= from) return out;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(from);
+  if (!m) return out;
+  const d = new Date(+m[1], +m[2] - 1, +m[3]);
+  while (out.length < 52){
+    d.setDate(d.getDate() + 7);
+    const key = classLogLocalYMD(d);
+    if (key > until) break;
+    out.push(key);
+  }
+  return out;
+}
+
+// ---------- Calendário da professora (101): todas as aulas do mês, alunos e turmas ----------
+function classLogWhoShort(log){
+  if (log.classroom_id){
+    const c = ADMIN_CLASS_LOGS_STATE._classroomsCache.find(x => String(x.id) === String(log.classroom_id));
+    return c ? c.name : '?';
+  }
+  const st = ADMIN_CLASS_LOGS_STATE._studentsCache.find(x => x.student_id === log.student_id);
+  const name = st ? (st.display_name || st.username || '?') : '?';
+  return String(name).split(/\s+/)[0];
+}
+
+async function renderTeacherClassCalendar(){
+  const host = document.getElementById('admin-classlogs-calendar');
+  if (!host) return;
+  const now = new Date();
+  const cal = ADMIN_CLASS_LOGS_STATE.cal || (ADMIN_CLASS_LOGS_STATE.cal = { y: now.getFullYear(), m: now.getMonth() });
+  const range = classCalendarMonthRange(cal.y, cal.m);
+  const logs = await fetchTeacherClassLogsRange(range.from, range.to);
+  const entries = logs.map(l => {
+    const label = l.attendance_label_id != null ? classLogLabelById(l.attendance_label_id) : null;
+    return { id: l.id, date: String(l.class_date), time: l.start_time ? String(l.start_time).slice(0, 5) : '', label: classLogWhoShort(l), color: label ? label.color : '', log: l };
+  });
+  const sel = ADMIN_CLASS_LOGS_STATE.calSelected;
+  const dayList = sel ? entries.filter(e => e.date === sel).sort((a, b) => (a.time || '99').localeCompare(b.time || '99')) : [];
+  host.innerHTML = `
+    ${classCalendarHTML(cal.y, cal.m, entries, { selected: sel })}
+    <p class="profile-edit-hint cal-legend">${t('panel.classLog.cal.legend')}</p>
+    ${sel ? `
+      <div class="profile-section cal-day" data-cal-day-panel="${sel}">
+        <div class="section-label">${escapeHTML(fmtDate(new Date(`${sel}T00:00:00`), { weekday: 'long', day: 'numeric', month: 'long' }))}</div>
+        ${dayList.length ? dayList.map(e => {
+          const l = e.log;
+          const editing = ADMIN_CLASS_LOGS_STATE.calEditingId === l.id;
+          return `<div class="admin-badge-row" style="align-items:flex-start;" data-cal-log="${l.id}">
+            <div class="admin-badge-info">
+              <div class="admin-badge-name">${e.time ? `${escapeHTML(e.time)} · ` : ''}${l.classroom_id ? '👥 ' : ''}${escapeHTML(classLogWhoShort(l))}</div>
+              ${editing ? classLogEditFormHTML(l) : `${classLogRowBadgesHTML(l)}<div class="admin-badge-desc">${classLogFieldRowsHTML(l)}</div>`}
+            </div>
+            ${editing ? '' : `<button class="admin-badge-delete-btn" data-cal-edit="${l.id}" title="${t('myFlashcards.row.editTitle')}">✏️</button>
+            <button class="admin-badge-delete-btn" data-cal-delete="${l.id}" title="${t('admin.common.delete')}">✕</button>`}
+          </div>`;
+        }).join('') : `<p class="profile-empty-note">${t('panel.classLog.cal.empty')}</p>`}
+        <button type="button" class="btn btn-secondary" data-cal-schedule="${sel}">${t('panel.classLog.cal.schedule')}</button>
+      </div>` : ''}`;
+  host.querySelectorAll('[data-cal-nav]').forEach(b => b.addEventListener('click', () => {
+    const step = Number(b.dataset.calNav);
+    if (step === 0){ const n = new Date(); cal.y = n.getFullYear(); cal.m = n.getMonth(); }
+    else { const d = new Date(cal.y, cal.m + step, 1); cal.y = d.getFullYear(); cal.m = d.getMonth(); }
+    ADMIN_CLASS_LOGS_STATE.calSelected = null; ADMIN_CLASS_LOGS_STATE.calEditingId = null;
+    renderTeacherClassCalendar();
+  }));
+  host.querySelectorAll('[data-cal-day]').forEach(b => b.addEventListener('click', () => {
+    ADMIN_CLASS_LOGS_STATE.calSelected = b.dataset.calDay; ADMIN_CLASS_LOGS_STATE.calEditingId = null;
+    renderTeacherClassCalendar();
+  }));
+  host.querySelectorAll('[data-cal-edit]').forEach(b => b.addEventListener('click', () => {
+    ADMIN_CLASS_LOGS_STATE.calEditingId = Number(b.dataset.calEdit); renderTeacherClassCalendar();
+  }));
+  host.querySelectorAll('[data-cal-delete]').forEach(b => b.addEventListener('click', async () => {
+    if (!confirm(t('admin.classLogs.deleteConfirm'))) return;
+    await deleteClassLog(b.dataset.calDelete);
+    showToast(t('admin.classLogs.deleted'));
+    renderTeacherClassCalendar();
+  }));
+  host.querySelectorAll('[data-cancel-edit-log]').forEach(b => b.addEventListener('click', () => {
+    ADMIN_CLASS_LOGS_STATE.calEditingId = null; renderTeacherClassCalendar();
+  }));
+  host.querySelectorAll('[data-edit-class-log-form]').forEach(form => form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = form.dataset.editClassLogForm;
+    const res = await updateClassLog(id, {
+      classDate: form.querySelector(`#edit-class-log-date-${id}`).value,
+      startTime: form.querySelector(`#edit-class-log-time-${id}`).value,
+      durationMinutes: form.querySelector(`#edit-class-log-duration-${id}`).value,
+      topic: form.querySelector(`#edit-class-log-topic-${id}`).value,
+      homework: form.querySelector(`#edit-class-log-homework-${id}`).value,
+      observations: form.querySelector(`#edit-class-log-observations-${id}`).value,
+      notes: form.querySelector(`#edit-class-log-notes-${id}`).value,
+      ...readClassLogExtras(form, `edit-${id}`),
+    });
+    if (!res.ok){ form.querySelector(`[data-edit-class-log-error="${id}"]`).textContent = res.error; return; }
+    ADMIN_CLASS_LOGS_STATE.calEditingId = null;
+    showToast(t('admin.classLogs.updated'));
+    renderTeacherClassCalendar();
+  }));
+  host.querySelector('[data-cal-schedule]')?.addEventListener('click', (e) => {
+    switchClassLogsView('register');
+    const input = document.getElementById('admin-class-log-date');
+    if (input){ input.value = e.currentTarget.dataset.calSchedule; input.scrollIntoView({ block: 'center' }); input.focus(); }
+  });
+}
+
+function switchClassLogsView(view){
+  ADMIN_CLASS_LOGS_STATE.view = view === 'calendar' ? 'calendar' : 'register';
+  document.querySelectorAll('[data-classlog-view]').forEach(b => {
+    const on = b.dataset.classlogView === ADMIN_CLASS_LOGS_STATE.view;
+    b.classList.toggle('is-active', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  const reg = document.getElementById('admin-classlogs-register'), calHost = document.getElementById('admin-classlogs-calendar-wrap');
+  if (reg) reg.hidden = ADMIN_CLASS_LOGS_STATE.view !== 'register';
+  if (calHost) calHost.hidden = ADMIN_CLASS_LOGS_STATE.view !== 'calendar';
+  if (ADMIN_CLASS_LOGS_STATE.view === 'calendar') renderTeacherClassCalendar();
+}
+
 async function renderAdminClassLogsView(){
   const wrap = document.getElementById('admin-classlogs-content');
   if (!wrap) return;
@@ -500,6 +658,12 @@ async function renderAdminClassLogsView(){
       : '';
 
   wrap.innerHTML = `
+    <div class="deck-topbar panel-nav class-log-views" role="tablist" aria-label="${t('panel.classLog.views')}">
+      <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="register">${t('panel.classLog.view.register')}</button>
+      <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="calendar">${t('panel.classLog.view.calendar')}</button>
+    </div>
+    <div id="admin-classlogs-calendar-wrap" hidden>${calendarFeedBoxHTML()}<div id="admin-classlogs-calendar"></div></div>
+    <div id="admin-classlogs-register">
     <div id="admin-notion-review"></div>
     <div class="profile-section">
       <div class="section-label">${t('admin.common.students')}</div>
@@ -532,6 +696,13 @@ async function renderAdminClassLogsView(){
       <form id="admin-create-class-log-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-class-log-date">${t('admin.common.date')}</label>
         <input type="date" id="admin-class-log-date" class="profile-edit-input" value="${todayStr()}">
+        ${classLogWhenFieldsHTML('admin-class-log-time', 'admin-class-log-duration', null)}
+        <label class="skill-toggle class-log-repeat"><input type="checkbox" id="admin-class-log-repeat"> ${t('panel.classLog.repeatWeekly')}</label>
+        <div id="admin-class-log-repeat-box" hidden>
+          <label class="profile-edit-label" for="admin-class-log-repeat-until">${t('panel.classLog.repeatUntil')}</label>
+          <input type="date" id="admin-class-log-repeat-until" class="profile-edit-input">
+          <p class="profile-edit-hint">${t('panel.classLog.repeatHint')}</p>
+        </div>
         <label class="profile-edit-label" for="admin-class-log-topic">${t('admin.classLogs.topicOpt')}</label>
         <input type="text" id="admin-class-log-topic" class="profile-edit-input" placeholder="${t('admin.classLogs.topicPlaceholder')}" autocomplete="off">
         <label class="profile-edit-label" for="admin-class-log-homework">${t('admin.classLogs.homeworkOpt')}</label>
@@ -549,7 +720,13 @@ async function renderAdminClassLogsView(){
     <div class="profile-section" id="admin-classlogs-list-box">
       ${await buildClassLogsListBoxHTML(selectedStudents, selectedRooms)}
     </div>
+    </div>
   `;
+  wrap.querySelectorAll('[data-classlog-view]').forEach(b => b.addEventListener('click', () => switchClassLogsView(b.dataset.classlogView)));
+  wireCalendarFeedBox(wrap);
+  const repeatCb = document.getElementById('admin-class-log-repeat');
+  repeatCb?.addEventListener('change', () => { document.getElementById('admin-class-log-repeat-box').hidden = !repeatCb.checked; });
+  switchClassLogsView(ADMIN_CLASS_LOGS_STATE.view);
 
   wireClassLogsListBox(document.getElementById('admin-classlogs-list-box'));
   wireAttendancePicker(wrap);
@@ -611,6 +788,10 @@ async function renderAdminClassLogsView(){
     btn.disabled = true;
 
     const classDate = document.getElementById('admin-class-log-date').value;
+    const startTime = document.getElementById('admin-class-log-time').value;
+    const durationMinutes = document.getElementById('admin-class-log-duration').value;
+    const dates = classLogRepeatDates(classDate || todayStr(), document.getElementById('admin-class-log-repeat').checked
+      ? document.getElementById('admin-class-log-repeat-until').value : '');
     const topic = document.getElementById('admin-class-log-topic').value;
     const homework = document.getElementById('admin-class-log-homework').value;
     const observations = document.getElementById('admin-class-log-observations').value;
@@ -622,15 +803,16 @@ async function renderAdminClassLogsView(){
     // apoio (faz sentido pra uma aula em grupo com o mesmo tópico/lição de
     // casa pra todo mundo).
     // Turma (094): UMA linha com classroom_id, vista por todos os membros da turma.
-    const results = await Promise.all(selectedNow.map(s => createClassLog({
+    // 101: "Repetir toda semana" cria uma aula por semana até a data escolhida (agenda).
+    const results = await Promise.all(dates.flatMap(d => selectedNow.map(s => createClassLog({
       studentId: s.student_id,
       languageAppKey: s.language_app_key,
-      classDate, topic, homework, observations, notes, ...extras,
+      classDate: d, startTime, durationMinutes, topic, homework, observations, notes, ...extras,
     })).concat(roomsNow.map(c => createClassLog({
       classroomId: c.id,
       languageAppKey: c.language_app_key,
-      classDate, topic, homework, observations, notes, ...extras,
-    }))));
+      classDate: d, startTime, durationMinutes, topic, homework, observations, notes, ...extras,
+    })))));
     btn.disabled = false;
 
     const failed = results.filter(r => !r.ok);

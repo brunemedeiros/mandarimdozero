@@ -1,0 +1,47 @@
+{{ $en := false }}{{ if eq (printf "%v" .Data.ui_language) "en" }}{{ $en = true }}{{ end }}
+<!-- Versão bilíngue (pt-BR e en). O idioma vem de user_metadata.ui_language, gravado no cadastro pelo portão (index.html). Sem a chave, ou com qualquer valor diferente de en, sai em português. Explicação: docs/email/supabase/bilingue/LEIA-ME.md -->
+<!doctype html>
+<html lang="{{ if $en }}en{{ else }}pt-BR{{ end }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ if $en }}Confirm your new email{{ else }}Confirme o novo e-mail{{ end }}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@400;700;800;900&display=swap">
+<style>@media (max-width:520px){.px{padding-left:18px!important;padding-right:18px!important}.h1{font-size:30px!important}.codigo{font-size:30px!important;letter-spacing:.22em!important}}</style>
+</head>
+<body style="margin:0;padding:0;background:#FAF5EA">
+<!-- Padrão de e-mail Prof Brune (variação 1c, docs/email/PADRAO-EMAIL.md). Modelo: Supabase Auth > Change Email Address.
+     Variáveis do Supabase: {{ .Email }} (atual), {{ .NewEmail }} (novo) e {{ .TokenHash }} (botão; não usa ConfirmationURL porque antivírus de e-mail
+     abrem links sozinhos e gastariam o link: o portão index.html só usa com um toque). -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">{{ if $en }}Confirm the new address for your account.{{ else }}Confirme o novo endereço da sua conta.{{ end }}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAF5EA"><tr><td align="center" style="padding:24px 10px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:22px;overflow:hidden;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;color:#22113f">
+
+<!-- Faixa roxa: marca, etiqueta e título (o trecho rosa é o destaque) -->
+<tr><td class="px" style="background:#3D167B;color:#FAF5EA;padding:34px 36px 30px">
+<div style="font-weight:900;font-size:14px;letter-spacing:.04em;opacity:.9">{{ if $en }}LANGUAGES WITH PROF BRUNE{{ else }}IDIOMAS COM PROF BRUNE{{ end }}</div>
+<div style="margin-top:22px"><span style="display:inline-block;border:1px solid #E36BCA;color:#f6c4ec;border-radius:999px;padding:3px 12px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase">{{ if $en }}New email{{ else }}Novo e-mail{{ end }}</span></div>
+<div class="h1" style="font-family:'Anton','Impact','Arial Narrow',sans-serif;font-weight:400;font-size:38px;line-height:1.05;margin:12px 0 0;letter-spacing:.01em;text-transform:uppercase">{{ if $en }}Confirm {{ else }}Confirme {{ end }}<span style="color:#E36BCA">{{ if $en }}the new address.{{ else }}o novo endereço.{{ end }}</span></div>
+</td></tr>
+
+<tr><td class="px" style="padding:28px 28px 8px">
+<p style="margin:0 0 16px;font-size:16px;line-height:1.65">{{ if $en }}You asked to change your account email from <b>{{ .Email }}</b> to <b>{{ .NewEmail }}</b>.{{ else }}Você pediu para trocar o e-mail da sua conta de <b>{{ .Email }}</b> para <b>{{ .NewEmail }}</b>.{{ end }}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAF5EA;border-radius:16px;margin:0 0 22px"><tr><td style="padding:18px 20px;font-size:15px;line-height:1.7"><span style="color:#3498D6;font-weight:900">✓</span> {{ if $en }}After you confirm, you'll sign in with the new email.{{ else }}Depois de confirmar, você entra com o novo e-mail.{{ end }}<br><span style="color:#3498D6;font-weight:900">✓</span> {{ if $en }}Your progress, your cards and your Decks stay exactly the same.{{ else }}Seu progresso, seus cartões e seus Decks continuam iguais.{{ end }}</td></tr></table>
+
+<!-- Botão rosa -->
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:6px auto 22px"><tr><td align="center" style="border-radius:999px;background:#E36BCA;border:2px solid #22113f;box-shadow:4px 4px 0 #22113f">
+<a href="https://app.profbrune.com.br/?trocar-email={{ .TokenHash }}" style="display:inline-block;padding:15px 32px;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;font-size:16px;font-weight:900;color:#22113f;text-decoration:none">{{ if $en }}Confirm email{{ else }}Confirmar e-mail{{ end }}</a></td></tr></table>
+
+<p style="margin:0 0 4px;text-align:center;font-size:14px;line-height:1.6;color:#5d4f72">{{ if $en }}Didn't ask for this change? Don't tap the button, and change your password in the app.{{ else }}Não pediu essa troca? Não toque no botão e mude sua senha no app.{{ end }}</p>
+
+<!-- Assinatura com foto -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #ece4f2;margin-top:18px"><tr>
+<td width="72" valign="middle" style="padding:20px 14px 6px 0"><img src="https://app.profbrune.com.br/icons/brune-email.jpg" width="60" height="60" alt="Brune" style="display:block;border-radius:50%;border:2.5px solid #E36BCA"></td>
+<td valign="middle" style="padding:20px 0 6px;font-size:15px;line-height:1.5"><b>{{ if $en }}See you soon!{{ else }}Até já!{{ end }}</b><br>{{ if $en }}Brune, your language teacher{{ else }}Brune, sua professora de idiomas{{ end }}<br><a href="https://www.instagram.com/prof.brune/" style="color:#1d6fa5">Instagram</a> · <a href="https://app.profbrune.com.br" style="color:#1d6fa5">app.profbrune.com.br</a></td>
+</tr></table>
+<div style="height:22px"></div>
+</td></tr></table>
+<p style="max-width:560px;margin:16px auto 0;text-align:center;color:#5d4f72;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;font-size:12px;line-height:1.6">{{ if $en }}@prof.brune · online language classes{{ else }}@prof.brune · aulas de idiomas online{{ end }}</p>
+</td></tr></table>
+</body>
+</html>
