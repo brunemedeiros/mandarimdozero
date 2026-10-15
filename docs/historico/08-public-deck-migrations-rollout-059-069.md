@@ -331,3 +331,15 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   `class-calendar-feed` v1 (verify_jwt false, mesmo hash do Staging). Conferido: RLS ligada, anon/authenticated sem acesso
   ao feed nem à tabela, token falso = calendário vazio (200 text/calendar), token malformado = 404, 393 aulas intactas.
 
+
+## 096_review_bank_classrooms (Banco de Revisão ligado a uma Turma)
+
+- Arquivo `shared/supabase_migrations/096_review_bank_classrooms.sql` (SQL Editor: `docs/rollout-sql/096_sql_editor.sql`,
+  tem `DROP INDEX`). Plano e testes: `docs/banco-revisao-turmas-plano.md`.
+- Staging: colada pela autora no SQL Editor em 2026-10-15 ("Success"). Não aparece em `schema_migrations` (SQL Editor).
+  Conferido: 8 funções novas `security definer` com `search_path=public`, internas sem grant (só `postgres`),
+  `link_review_bank_classroom` só para `authenticated`; índice antigo removido e o novo (item, aluno) criado; gatilho de
+  entrada na turma; coluna `classroom_id`; `review_bank_review_acks` com RLS e sem grant para anon/authenticated;
+  `approve`/`pendentes` na versão nova. Dados iguais aos de antes: teacher_flashcards 8 (md5 igual), review_bank_items 18
+  (md5 igual), review_bank_students 5 (md5 igual sem a coluna nova), reviews 0.
+- Produção: NÃO aplicada (etapa 4, só com autorização).
