@@ -3,6 +3,7 @@
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.resolve(__dirname, '..', '..');
 const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
+const readApp = f => require('../e4/app-source').withCore(read(f));
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x) : ''); } };
 
@@ -25,7 +26,7 @@ for (const id of COURSE.filter(x => x !== 'multitasker')){
 check('Multitarefa é clássica (de curso)', !!BT.parseId('multitasker').classic && !AP.isAccountBadge('multitasker'));
 check('nível de trilha da conta é da conta; de curso, não', AP.isAccountBadge('review.3') && AP.isAccountBadge('streak.1') && !AP.isAccountBadge('course1.3') && !AP.isAccountBadge('ear.1'));
 for (const f of ['fr/app.js', 'zh/app.js']) {
-  const src = read(f);
+  const src = readApp(f);
   check(f + ': BADGES vem das trilhas', /const BADGES = \[\];/.test(src) && /function collectBadgeMetrics\(s\)/.test(src));
   check(f + ': grade usa as trilhas (badgeTrackViews)', /badgeTrackViews\(STATE\)/.test(src));
 }
