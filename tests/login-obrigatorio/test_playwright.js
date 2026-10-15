@@ -66,6 +66,8 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     await page.click('#gate-submit-btn');
     await page.waitForSelector('#gate-verify', { state: 'visible' });
     L('cadastro abre a tela do código', await page.evaluate(() => document.getElementById('gate-verify-email').textContent === 'nova@x.com'));
+    // idioma do site vai no cadastro (user_metadata.ui_language) para o e-mail do Supabase Auth sair no idioma certo
+    L('cadastro grava ui_language (navegador em inglês sem escolha guardada = en)', await page.evaluate(() => window.__calls.some(c => c[0] === 'signUp' && c[1].email === 'nova@x.com' && c[1].options && c[1].options.data && c[1].options.data.ui_language === 'en')));
     L('reenviar começa bloqueado (60s)', await page.evaluate(() => document.getElementById('gate-resend-btn').disabled));
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/gate-codigo-${theme}-${width}.png` });
     await page.fill('#gate-code', '999999'); await page.click('#gate-verify-btn');
@@ -74,6 +76,18 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     await page.fill('#gate-code', '123456'); await page.click('#gate-verify-btn');
     await page.waitForSelector('#gate-choose-language', { state: 'visible' });
     L('código certo confirma e segue para a escolha de idioma', await page.evaluate(() => window.__calls.some(c => c[0] === 'verifyOtp' && c[1].email === 'nova@x.com' && c[1].token === '123456' && c[1].type === 'email')));
+    // escolha guardada no navegador (ui-language) vence o idioma do navegador; valor desconhecido (es) cai em pt-BR
+    for (const [saved, esperado] of [['pt-BR', 'pt-BR'], ['en', 'en'], ['es', 'pt-BR']]){
+      await page.goto(`http://127.0.0.1:${port}/index.html`);
+      await page.waitForSelector('#gate-login', { state: 'visible' });
+      await page.evaluate((v) => localStorage.setItem('ui-language', v), saved);
+      await page.click('#gate-toggle-mode-btn');
+      await page.fill('#gate-email', 'idioma@x.com'); await page.fill('#gate-password', 'segredo1');
+      await page.click('#gate-submit-btn');
+      await page.waitForSelector('#gate-verify', { state: 'visible' });
+      L(`cadastro com ui-language=${saved} grava ui_language=${esperado}`, await page.evaluate((e) => window.__calls.some(c => c[0] === 'signUp' && c[1].options.data.ui_language === e), esperado));
+      await page.evaluate(() => localStorage.removeItem('ui-language'));
+    }
     // conta que o antivírus do e-mail já ativou (abriu o link sozinho): código falha, mas a senha entra direto
     for (const via of ['codigo', 'reenviar']){
       await page.goto(`http://127.0.0.1:${port}/index.html`);
