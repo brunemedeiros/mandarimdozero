@@ -104,10 +104,10 @@ function fillNotificationPlaceholders(text, payload){
 }
 
 async function pickNotificationTemplate(eventType){
-  // Idioma do SITE (Fase 11 i18n): tenta a variante nesse idioma; sem variante
-  // ATIVA cai no português (mesma regra do notification-cron).
+  // Idioma do SITE (Fase 11 i18n): só a variante nesse idioma. Decisão da dona (2026-10-15, fr, zh e pt): site em
+  // inglês sem variante ATIVA em inglês = sem aviso, nunca o texto em português (mesma regra do notification-cron).
   const uiLang = (typeof getUiLang === 'function') ? getUiLang() : 'pt-BR';
-  for (const lang of uiLang === 'en' ? ['en', 'pt-BR'] : ['pt-BR']) {
+  for (const lang of uiLang === 'en' ? ['en'] : ['pt-BR']) {
     const { data, error } = await supabaseClient
       .from('notification_templates')
       .select('*')

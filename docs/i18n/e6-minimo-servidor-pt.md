@@ -159,3 +159,26 @@ anterior da `notification-cron`.
 - **P6.** E-mails de cadastro/senha (Supabase Auth) em inglês para quem usa o site em inglês: aceita um modelo com condição
   por idioma, que você cola no painel do Supabase?
 - **P7.** Q-06 (regra aberta nos CHECKs): confirma adiar até o 4º idioma, já que `portugues` passa em todos (Dv-4)?
+
+## 7. Implementação do mínimo (2026-10-15, branch `e6-pt-servidor-minimo`, NADA aplicado nem publicado)
+
+Autorizado pela dona: Q1, Q2, Q3, T1 (decisão: site em inglês sem modelo em inglês ativo = sem aviso, para fr, zh e pt) e T5.
+
+- `shared/supabase_migrations/105_pt_server_minimum.sql` (só `create or replace`, sem DROP/DELETE, aplicável pela MCP):
+  `_progress_block(data, idioma, idioma_do_site?)` com a regra de `blockForLanguage` (cron) e `blockFor`
+  (`shared/course-storage.js`); `get_teacher_student_metrics` e `get_teacher_student_deck_counts` leem o bloco por ela;
+  `_studied_languages(conta)` + `_friends_notify`/`_friends_notify_msg` gravam o aviso de Amigos só nos idiomas com bloco
+  (conta sem bloco: 1 linha, no idioma atual ou em `frances`).
+- `notification-cron` (repo e `docs/deploy/notification-cron-para-colar-no-painel.ts`, que vira a v25 quando colado):
+  `portugues` em `LANGUAGES`; `templateLangsFor` (en só en, pt-BR só pt-BR, também no e-mail); lembrete de badge pelo idioma
+  principal. A cópia do painel ganhou também os 3 textos em inglês que já estavam no repo e faltavam na v24 (rodapé do e-mail,
+  título do push, alerta da professora).
+- `shared/notifications.js` (`pickNotificationTemplate`): mesma regra T1 no cliente (vale depois do merge na `main`).
+- Testes: `tests/pt-servidor/run.sh` (SQL com a 105 aplicada dentro da transação + ROLLBACK, comparação antes x depois; e o
+  Node `test_cron_pt.js`, que roda o handler real do cron com banco falso nos dois arquivos e confere os mesmos casos de
+  `progress_block_cases.json` contra o cron e o `course-storage.js`).
+- Achado: o sino (`fetchRecentNotifications`) NÃO filtra por idioma: mostra todas as linhas da conta. Por isso o aviso de
+  Amigos gravado em 2 idiomas já aparecia 2 vezes para quem tem 2 blocos (antes da 105: para TODO mundo). A 105 reduz isso
+  a 1 linha para quem estuda 1 idioma; quem estuda 2 ainda vê 2. Correção possível (não feita, decisão da dona): 1 linha só
+  no idioma principal, ou o sino agrupar linhas iguais.
+- Depende de Q4 (modelos `en` de `portugues`): sem eles o cron só grava `notification_events` para o português.
