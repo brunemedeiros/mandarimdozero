@@ -14,6 +14,23 @@
 
   // emoji (sem o seletor de variação U+FE0F) -> arquivo em shared/icons/
   var MAP = {
+    "👩": "fluent/1f469.svg",
+    "🙂": "fluent/1f642.svg",
+    "🏫": "fluent/1f3eb.svg",
+    "🙋‍♀": "fluent/1f64b-200d-2640.svg",
+    "📄": "fluent/1f4c4.svg",
+    "🧑‍🍳": "fluent/1f9d1-200d-1f373.svg",
+    "🧑‍💼": "fluent/1f9d1-200d-1f4bc.svg",
+    "🧑‍🌾": "fluent/1f9d1-200d-1f33e.svg",
+    "🎩": "fluent/1f3a9.svg",
+    "😎": "fluent/1f60e.svg",
+    "🤙": "fluent/1f919.svg",
+    "🧒": "fluent/1f9d2.svg",
+    "🧑‍🦱": "fluent/1f9d1-200d-1f9b1.svg",
+    "👵": "fluent/1f475.svg",
+    "🧳": "fluent/1f9f3.svg",
+    "👩‍💼": "fluent/1f469-200d-1f4bc.svg",
+    "🏁": "fluent/1f3c1.svg",
     "🚀": "fluent/1f680.svg",
     "🀄": "fluent/1f004.svg",
     "🧑": "fluent/1f9d1.svg",
