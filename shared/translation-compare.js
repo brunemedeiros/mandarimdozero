@@ -113,7 +113,34 @@
       .replace(/'ve\b/g, ' have').replace(/'ll\b/g, ' will').replace(/'d\b/g, ' would')
       .replace(/\b(he|she|it|that|there|what|who|here|where)'s\b/g, '$1 is');
   }
-  function normalizeEn(s){ return normalizeBase(expandEnContractions(s)); }
+  // Americano x britânico (só grafia, nunca vocabulário diferente): tudo vira americano.
+  var EN_UK_US = {
+    colour:'color', colours:'colors', favourite:'favorite', favourites:'favorites', neighbour:'neighbor', neighbours:'neighbors',
+    flavour:'flavor', honour:'honor', humour:'humor', behaviour:'behavior', labour:'labor', theatre:'theater', theatres:'theaters',
+    centre:'center', centres:'centers', metre:'meter', metres:'meters', litre:'liter', litres:'liters', grey:'gray',
+    practise:'practice', practised:'practiced', practising:'practicing', organise:'organize', organised:'organized',
+    realise:'realize', realised:'realized', recognise:'recognize', apologise:'apologize', analyse:'analyze',
+    travelled:'traveled', travelling:'traveling', traveller:'traveler', cancelled:'canceled', programme:'program',
+    defence:'defense', mum:'mom', towards:'toward', whilst:'while', jewellery:'jewelry', catalogue:'catalog'
+  };
+  var EN_ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen',
+    'fifteen','sixteen','seventeen','eighteen','nineteen'];
+  var EN_TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  function enDigitsToWords(n){
+    if (n < 20) return EN_ONES[n];
+    if (n === 100) return 'one hundred';
+    return EN_TENS[Math.floor(n / 10)] + (n % 10 ? ' ' + EN_ONES[n % 10] : '');
+  }
+  // Números (0 a 100) em dígitos viram palavras; "a hundred" = "one hundred".
+  var EN_NUMBER_WORDS = new Set(EN_ONES.concat(EN_TENS.filter(Boolean), ['hundred','thousand','million']));
+  function normalizeEn(s){
+    var t = expandEnContractions(s).replace(/[-\u2010-\u2015]/g, ' ');
+    t = normalizeBase(t).replace(/\b(a|an) (hundred|thousand|million)\b/g, 'one $2');
+    return t.split(' ').map(function(w){
+      if (/^\d{1,3}$/.test(w) && +w <= 100) return enDigitsToWords(+w);
+      return EN_UK_US[w] || w;
+    }).join(' ').replace(/\s+/g, ' ').trim();
+  }
 
   // Só formas de be/have/do: o erro mais comum e o menos ambíguo. "were" com
   // sujeito singular fica de fora (subjuntivo: "if I were"); "was" com
@@ -127,6 +154,7 @@
     'we':   { bad: ['am','is','has','does'] },
     'they': { bad: ['am','is','has','does'] }
   };
+  var EN_ADVERBS = ['never','always','often','usually','sometimes','also','just','already','still','really'];
   function enPersonMismatch(text){
     // Perguntas têm inversão ("Does it have...?", "What does she do?"): não checa.
     if (/\?/.test(String(text || ''))) return null;
@@ -135,7 +163,11 @@
       var spec = EN_SUBJECT_FORMS[words[i]];
       if (!spec) continue;
       // O verbo precisa vir logo depois ("I never is" não é coberto, de propósito).
+      // Sujeito composto ("You and I are", "He and I are late"): o verbo concorda com o conjunto.
+      if (i > 0 && ['and','or','nor'].indexOf(words[i - 1]) >= 0) continue;
       var cand = words[i + 1];
+      // Advérbio entre sujeito e verbo ("he never have", "she always are").
+      if (cand && EN_ADVERBS.indexOf(cand) >= 0) cand = words[i + 2];
       if (cand && EN_SUBJECT_FORMS[cand]) continue;
       if (i > 0 && ['do','does','did','will','would','can','could','should','may','might','must'].indexOf(words[i - 1]) >= 0) continue; // inversão sem "?"
       if (cand && spec.bad.indexOf(cand) >= 0) return { pronoun: words[i], verb: cand, expected: null, got: [] };
@@ -143,9 +175,32 @@
     return null;
   }
 
+  // Palavras que a sobreposição ignora ou dilui mas que MUDAM o sentido. Só entra aqui o que é
+  // seguro: negação (liga/desliga), números (conjunto igual) e pronome-sujeito em CONFLITO
+  // (he x she, I x you, we x they). Tempo verbal e possessivos ficam de fora de propósito
+  // ("We will go" x "We are going to" é paráfrase válida): ver docs/i18n/comparador-en-adversarial.md.
+  var EN_NEG = new Set(['not','no','never','nobody','nothing','none','neither','nor','nowhere']);
+  var EN_SUBJ = ['i','you','he','she','we','they'];
+  // "one" fica de fora: "a coffee" = "one coffee" (os lotes reais têm as duas formas).
+  function enFacts(text){
+    var words = normalizeEn(text).split(' ').filter(Boolean);
+    return {
+      neg: words.some(function(w){ return EN_NEG.has(w); }),
+      nums: words.filter(function(w){ return w !== 'one' && EN_NUMBER_WORDS.has(w); }).sort().join(','),
+      subj: EN_SUBJ.filter(function(p){ return words.indexOf(p) >= 0; })
+    };
+  }
+  function enCriticalOk(student, ref){
+    var a = enFacts(student), b = enFacts(ref);
+    if (a.neg !== b.neg) return false;
+    if (a.nums !== b.nums) return false;
+    if (a.subj.length && b.subj.length && !a.subj.some(function(p){ return b.subj.indexOf(p) >= 0; })) return false;
+    return true;
+  }
+
   var LANGS = {
     'pt-BR': { stop: STOP_PT, normalize: normalizeBase, mismatch: ptPersonMismatch },
-    'en':    { stop: STOP_EN, normalize: normalizeEn,   mismatch: enPersonMismatch }
+    'en':    { stop: STOP_EN, normalize: normalizeEn,   mismatch: enPersonMismatch, critical: enCriticalOk }
   };
 
   function forLang(lang){
@@ -160,7 +215,12 @@
     }
     function isAcceptable(student, refs){
       if (!student || !String(student).trim()) return false;
-      return (refs || []).some(function(r){ return similarity(student, r) >= 0.55; });
+      return (refs || []).some(function(r){
+        if (cfg.critical && !cfg.critical(student, r)) return false;
+        // Frase só de palavras funcionais ("Is it you?"): sem tokens de conteúdo, compara o texto inteiro.
+        if (cfg.critical && !tokens(student).length && !tokens(r).length) return cfg.normalize(student) === cfg.normalize(r);
+        return similarity(student, r) >= 0.55;
+      });
     }
     return { lang: LANGS[lang] ? lang : 'pt-BR', normalize: cfg.normalize, tokens: tokens, similarity: similarity, isAcceptable: isAcceptable, personMismatch: cfg.mismatch };
   }
