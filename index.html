@@ -481,6 +481,15 @@ document.getElementById('gate-google-btn').addEventListener('click', async () =>
   if (error){ note.textContent = 'Não foi possível conectar com o Google. Tente novamente.'; note.className = 'gate-note err'; }
 });
 
+// Idioma do site de quem está se cadastrando (vira user_metadata.ui_language, lido pelos modelos de e-mail do Supabase
+// Auth em docs/email/supabase/bilingue/). Ordem: escolha guardada no navegador > idioma do navegador > pt-BR.
+function gateUiLanguage(){
+  try { const saved = window.localStorage.getItem('ui-language'); if (saved) return saved === 'en' ? 'en' : 'pt-BR'; } catch (e) {}
+  try {
+    const langs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+    return String(langs[0] || '').toLowerCase().startsWith('en') ? 'en' : 'pt-BR';
+  } catch (e) { return 'pt-BR'; }
+}
 let gateSignupMode = false;
 document.getElementById('gate-toggle-mode-btn').addEventListener('click', () => {
   gateSignupMode = !gateSignupMode;
@@ -497,7 +506,7 @@ document.getElementById('gate-email-form').addEventListener('submit', async (e) 
   note.textContent = ''; note.className = 'gate-note';
 
   if (gateSignupMode){
-    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { ui_language: gateUiLanguage() } } });
     if (error){
       note.textContent = error.message === 'User already registered' ? 'Este e-mail já tem conta. Tente entrar.' : 'Não foi possível criar sua conta agora.';
       note.className = 'gate-note err';

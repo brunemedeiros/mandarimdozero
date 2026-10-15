@@ -52,7 +52,7 @@ ok(core.toSpokenTextForTts('une bouteille (de)', 'fr-FR') === 'une bouteille (de
 ok(core.toSpokenTextForTts('bonito / bonita', 'pt-BR') === 'bonito, bonita', 'pt barra');
 ok(core.toSpokenTextForTts('o(a) aluno(a)', 'pt-BR') === 'o aluno, a aluna', 'pt gênero (vários)');
 ok(core.toSpokenTextForTts('Obrigado, Sra.', 'pt-BR') === 'Obrigado, Senhora.', 'pt título no fim');
-ok(core.toSpokenTextForTts('21º andar', 'pt-BR') === 'vigésimo primeiro andar', 'pt ordinal composto');
+ok(core.toSpokenTextForTts('21º andar', 'pt-BR') === '21º andar', 'pt ordinal fica como está (a voz lê bem)');
 ok(core.toSpokenTextForTts('obrigado(a)', 'cmn-CN') === 'obrigado(a)', 'zh sem regras de pt');
 // Paridade com spoken_text.py: TODAS as entradas do manifest fr e zh + os casos de pt.
 try {
@@ -65,7 +65,23 @@ try {
     'Sr.(a) Silva', 'Sr(a).', 'Prof.ª Ana', 'Profª Maria', 'Dr Paulo chegou', 'Drs. Ana e Rui', 'a Sra. é daqui',
     '1º andar', 'a 2ª aula', '21º andar', '1.º de maio', '25ª edição', '100º', '101º', '0º', '1° andar', 'nº 5', 'n.º 12',
     'Nº 3', 'Oi 👋 → tudo ✓', '* item', '• um • dois', 'Os carros azuis.', 'Vou chamá-lo amanhã.', 'Tudo bem?',
-    'Moro nos EUA.', 'Tenho 25 anos.', 'você', 'R$ 5,00', '14h30', 'NÃO!', 'É a 3ª vez, Sra. Lima: o(a) aluno(a) / a turma (de) hoje'];
+    'Moro nos EUA.', 'Tenho 25 anos.', 'você', 'R$ 5,00', '14h30', 'NÃO!', 'É a 3ª vez, Sra. Lima: o(a) aluno(a) / a turma (de) hoje',
+    // Português real, com acentos/cedilha/til (\w ASCII x \p{L}): frases de PLE para falantes de inglês.
+    'Sr. Gonçalves, o(a) senhor(a) é brasileiro(a)?', 'Eu sou do Brasil / de Portugal', 'coração', 'Ação e reação, são três.',
+    'Pão(ães)', 'João e Maria são irmão(ã)s', 'Bem-vindo(a) à nossa casa!', 'Moro no 3º andar, apartamento nº 12.',
+    'Preciso (de) ajuda e gosto (de) café / chá', 'Olá! Tudo bem com você(s)?', 'A Dra. Ângela é médica.', 'Prof. Álvaro, bom dia.',
+    'Ele é o 2º / ela é a 2ª', 'à vista (informal)', 'ônibus nº 8 → Centro',
+    // horas 24h, moeda e abreviações (2026-10-15)
+    '14h30', 'Chego às 14h30.', '14h00', '14h', '9h00', '9h', '09h', '1h', '1h30', '0h', '00h', '00h30', '14h01', '24h',
+    'O banco abre às 8h e fecha às 17h.', '14:30', '9:05', '00:00', '23:59', 'A aula é às 19:30h.', 'Fiz uma viagem de 5h de ônibus',
+    'placar 2:1', 'O jogo terminou 3:0.', '24:30', '14:75', '14h75', '25h30', '30h de estudo', '10:30:15', '1,5h',
+    'km2h', '14 h', '9h5', 'OK 14hs', 'Às 9h, às 10:15 e às 18h45 há aula.',
+    'R$ 5,50', 'R$5,50', 'R$ 1,00', 'R$ 12,00', 'R$ 0,50', 'R$ 1,01', 'R$ 1.250,00', 'R$ 5', 'R$ 1', 'R$ 0,00', 'R$ 1.250,75',
+    'R$ 2,05', 'Custa R$ 5,50 o quilo.', 'De R$ 3,00 a R$ 4,50', 'R$', 'Quanto custa em R$?', 'R$ abc', 'US$ 5,00', 'R$ 5,5',
+    'R$ 5 mil', 'R$ 2 milhões', 'Almoço: R$ 25,90 às 12h30 (p.ex. feijoada, etc.).',
+    'p.ex. café', 'P.ex. café', 'p. ex. chá', 'Frutas, p.ex. maçã.', 'Tenho livros, canetas, etc.', 'Compro pão, leite, etc. e vou embora',
+    'livros, etc., e mais', '(maçã, uva, etc.)', 'Compro pão, etc. Depois volto.', 'Etc.', 'etc', 'o etcetera', 'Obs.: traga o livro',
+    'obs. importante', 'Veja a obs.', 'Obs. Chegue cedo', 'vc tb vai? blz', 'site.etc.br', 'inobs.', 'Ação às 14h, é útil p.ex. em São João.'];
   const groups = [['fr', 'fr-FR', frKeys], ['zh', 'cmn-CN', zhKeys], ['pt', 'pt-BR', ptKeys]];
   const py = `import sys,json; sys.path.insert(0, ${JSON.stringify(path.join(root, 'fr/scripts/challenges_pipeline'))})\nfrom spoken_text import to_spoken_text\nd=json.load(sys.stdin)\nprint(json.dumps({k:[to_spoken_text(t,k) for t in v] for k,v in d.items()}))`;
   const out = JSON.parse(execFileSync('python3', ['-c', py], { input: JSON.stringify(Object.fromEntries(groups.map(([k, , v]) => [k, v]))) }).toString());
@@ -75,6 +91,28 @@ try {
     console.log(`paridade spoken_text.py ${k}: ${keys.length} entradas comparadas`);
   }
 } catch (e) { ok(false, 'paridade spoken_text.py: ' + e.message); }
+
+// --- regras novas do pt: valores esperados explícitos (o Python tem os mesmos em test_spoken_text.py) ---
+{
+  const PT_EXPECT = {
+    '14h30': '14h30', '14h00': '14 horas', '9h': '9 horas', '1h': '1 hora', '1h30': '1h30',
+    '00h': '0 horas', '14:30': '14h30', '9:05': '9h05', 'A aula é às 19:30h.': 'A aula é às 19h30.',
+    'Fiz uma viagem de 5h de ônibus': 'Fiz uma viagem de 5 horas de ônibus',
+    'placar 2:1': 'placar 2:1', '24:30': '24:30', '14h75': '14h75', '1,5h': '1,5h', '10:30:15': '10:30:15',
+    'R$ 5,50': '5 reais e 50 centavos', 'R$5,50': '5 reais e 50 centavos', 'R$ 1,00': '1 real', 'R$ 12,00': '12 reais',
+    'R$ 0,50': '50 centavos', 'R$ 1,01': '1 real e 1 centavo', 'R$ 1.250,00': '1.250 reais', 'R$ 5': '5 reais', 'R$': 'R$',
+    'R$ abc': 'R$ abc', 'R$ 5 mil': 'R$ 5 mil',
+    'p.ex. café': 'por exemplo café', 'Tenho livros, canetas, etc.': 'Tenho livros, canetas, etc.',
+    'Compro pão, leite, etc. e vou embora': 'Compro pão, leite, etc. e vou embora', 'etc': 'etc',
+    'Obs.: traga o livro': 'Observação: traga o livro', 'vc tb vai? blz': 'vc tb vai? blz',
+    'Almoço: R$ 25,90 às 12h30 (p.ex. feijoada, etc.).': 'Almoço: 25 reais e 90 centavos às 12h30 (por exemplo feijoada, etc.).',
+  };
+  for (const [src, want] of Object.entries(PT_EXPECT)) {
+    const got = core.toSpokenTextForTts(src, 'pt-BR');
+    ok(got === want, `pt JS: ${JSON.stringify(src)} -> ${JSON.stringify(want)} (veio ${JSON.stringify(got)})`);
+  }
+  ok(core.toSpokenTextForTts('14h30 R$ 5,50 etc.', 'fr-FR') === '14h30 R$ 5,50 etc.' && core.toSpokenTextForTts('14h30 R$ 5,50 etc.', 'cmn-CN') === '14h30 R$ 5,50 etc.', 'hora/moeda/abreviação não vazam para fr e zh');
+}
 
 // --- corpo da requisição / erros ---
 const body = core.buildGoogleSynthesizeBody({ text: 'Bonjour', languageCode: 'fr-FR', voiceName: 'fr-FR-Chirp3-HD-Achernar', speakingRate: 0.9 });
@@ -108,7 +146,7 @@ const regVersions = Object.fromEntries(regJson.languages.map(l => [l.fieldLang, 
 const tsVersions = Object.fromEntries([...(pick(idx, 'TTS_SPOKEN_RULES_VERSION_BY_LANG: Record<string, number>') || '').matchAll(/(\w+):\s*(\d+)/g)].map(m => [m[1], Number(m[2])]));
 ok(JSON.stringify(Object.entries(regVersions).sort()) === JSON.stringify(Object.entries(tsVersions).sort()), 'versão das regras por idioma: Deno == registro');
 ok(pick(idx, 'TTS_TEXT_MAX_LENGTH') === pick(model, 'TTS_TEXT_MAX_LENGTH'), 'max length igual');
-const ctx = { console, TextEncoder, crypto: globalThis.crypto };
+const ctx = { console, TextEncoder, crypto: globalThis.crypto, t: (k) => { const m = fs.readFileSync(path.join(root, 'shared/i18n/pt-BR.js'), 'utf8').match(new RegExp("'" + k.replace(/\./g, '\\.') + "': '((?:[^'\\\\]|\\\\.)*)'")); return m ? m[1] : k; } }; // t() do i18n: lê o texto de pt-BR.js
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(root, 'languages/registry.js'), 'utf8'), ctx);
 vm.runInContext(model + '\n;globalThis.__k = computeTtsGenerationKey; globalThis.__labels = TTS_GENERATION_ERROR_LABELS;', ctx);
@@ -118,8 +156,8 @@ const serverKey = Buffer.from(await crypto.subtle.digest('SHA-256', new TextEnco
 ok(clientKey === serverKey, 'generationKey inclui google-chirp3-hd e a versão por idioma');
 const ptKey = await ctx.__k('obrigado(a)', 'pt-BR', null, 1);
 const zhKey = await ctx.__k('obrigado(a)', 'zh-CN', null, 1);
-const ptParts = ['obrigado(a)', 'pt-BR', '', '1', 'google-chirp3-hd', '2:pt1'].map(encodeURIComponent).join('\u001F');
-ok(ptKey === Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ptParts))).toString('hex'), 'pt usa 2:pt1');
+const ptParts = ['obrigado(a)', 'pt-BR', '', '1', 'google-chirp3-hd', '2:pt3'].map(encodeURIComponent).join('\u001F');
+ok(ptKey === Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ptParts))).toString('hex'), 'pt usa 2:pt3');
 ok(ptKey !== zhKey, 'versão por idioma separa pt de zh');
 for (const code of ['monthly_quota_exceeded', 'provider_error', 'provider_rate_limited', 'provider_not_configured', 'quota_check_failed', 'unsupported_language', 'invalid_voice', 'rate_limited']) {
   ok(typeof ctx.__labels[code] === 'string' && ctx.__labels[code].length > 0, 'rótulo ' + code);

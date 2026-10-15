@@ -235,13 +235,22 @@ function cardAnswerText(cardOrPseudo){
 function isClassReviewCard(card){
   return !!card && card.origin === 'teacher';
 }
+// Sem vínculo ativo com a professora do cartão, ele some da aba Aluno > Revisão (e o item Aluno some se não sobrar nada),
+// mas continua em STATE.cards e no save: o progresso volta junto com o vínculo (decisão da autora, 2026-10-15).
+// undefined = ainda não se sabe (antes do boot ou offline): não esconde.
+let CLASS_ACTIVE_TEACHER_ID;
+function isActiveClassReviewCard(card){
+  if (!isClassReviewCard(card)) return false;
+  if (CLASS_ACTIVE_TEACHER_ID === undefined || !card.teacherId) return true;
+  return card.teacherId === CLASS_ACTIVE_TEACHER_ID;
+}
 // Valor salvo 'teacher' (de antes da aba) vale como 'all'.
 function effectiveReviewOriginFilter(){
   const filter = STATE.studySettings.reviewOriginFilter || 'all';
   return filter === 'teacher' ? 'all' : filter;
 }
 function matchesReviewOriginFilter(card){
-  if (STATE.reviewSessionClassReview) return isClassReviewCard(card);
+  if (STATE.reviewSessionClassReview) return isActiveClassReviewCard(card);
   if (isClassReviewCard(card)) return false;
   const filter = effectiveReviewOriginFilter();
   return filter === 'all' || card.origin === filter;
@@ -249,7 +258,7 @@ function matchesReviewOriginFilter(card){
 
 // Pool da aba Aluno > Revisão (mesma elegibilidade, só cartões da professora).
 function classReviewPool(){
-  return STATE.cards.filter(c => isClassReviewCard(c) && isCardLessonCompleted(c));
+  return STATE.cards.filter(c => isActiveClassReviewCard(c) && isCardLessonCompleted(c));
 }
 // +N da aba Revisão do Aluno: o que a sessão entregaria hoje (mesma fila do "Estudar tudo").
 function classReviewTodayCount(){

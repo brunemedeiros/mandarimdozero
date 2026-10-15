@@ -215,7 +215,7 @@ function studentViewBind(wrap){
     if (q('[data-voltar-alunos]')){ e.preventDefault(); return renderAdminStudentsView(); }
     if ((el = q('[data-ir-secao]'))){
       e.preventDefault();
-      if (el.dataset.irSecao === 'classlogs' && el.dataset.aluno && typeof CLASSLOGS_VIEW !== 'undefined') CLASSLOGS_VIEW.preselect = el.dataset.aluno;   // abre Aulas já filtrada e com o aluno escolhido
+      if (el.dataset.irSecao === 'classlogs' && el.dataset.aluno && typeof ADMIN_CLASS_LOGS_STATE !== 'undefined') ADMIN_CLASS_LOGS_STATE.studentIds = new Set([el.dataset.aluno]);   // abre Aulas já filtrada e com o aluno escolhido
       return switchTeacherPanelSection(el.dataset.irSecao);
     }
     if ((el = q('[data-remover-vinculo]'))) return removeStudentFromFicha(el.dataset.removerVinculo);

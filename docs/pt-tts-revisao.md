@@ -97,3 +97,27 @@ com espaço) > barra > ordinais > símbolos > tidy (colapsar espaços, igual nos
 "Obrigado, Sra." → "Obrigado, Senhora.", "Sr. e Sra. Silva", "Prof.ª Ana", "21º andar",
 "1.º de maio", "1° andar" (cru), "nº 5", "você (informal)" (cru), "gostar (de)", "e/ou" (cru),
 "bem-vindo(a)" e "você" no teste de paridade JS (Unicode), fr "l'œuf" e "l'âge" na paridade JS.
+
+## 4. Estado da implementação (2026-10-15)
+- Já na `main` (commit 53c1037): regras de pt em `spoken_text.py` e `tts_core.mjs` (mesma ordem, `\p{L}` com flag u no JS e `[^\W\d_]` no Python), `fr.oe-ligature-elision` e `fr.age-elision` portadas ao JS (paridade fr fechada), versão por idioma (`TTS_SPOKEN_RULES_VERSION_BY_LANG`, hoje fr 4, pt 1, zh 0; `languages/registry.json`) e mapa 'pt' x 'pt-BR' em `spokenLangKey`.
+- Testes: `fr/scripts/test_spoken_text.py` (90) e `tests/tts-google/test_tts_core.mjs` (73; paridade fr 781, zh 495, pt 67 entradas).
+- PENDENTE (decisão da dona): (1) tabela única de dados `spoken_rules.json` lida por Python e JS: não feita, as regras com função (gênero, títulos, ordinais) não cabem numa tabela só de regex e exigiria reescrever o fr; a paridade testada cobre o risco hoje. (2) Segunda forma capitalizada quando o marcador de gênero abre a frase: "Bem-vindo(a) à casa" vira "Bem-vindo, Bem-vinda à casa" (o "B" maiúsculo é inofensivo para a voz, mas pode-se baixar a caixa); ouvir no laboratório. (3) Nada de áudio ouvido ainda: regras de partícula, ordinais e títulos continuam "lab" até a voz `pt-BR-Chirp3-HD-Achernar` ser confirmada ao vivo. (4) `pt.time-24h`, `pt.currency-brl`, `pt.common-abbreviations`: implementadas em 2026-10-15 (ver abaixo).
+
+### Regras de hora, moeda e abreviações (2026-10-15, branch local, NÃO publicada)
+Decisões da dona, implementadas em `spoken_text.py` e `tts_core.mjs` (mesma ordem, mesma regex; depois de `pt.ordinal-indicators` e antes de `pt.strip-symbols`). Versão do pt subiu de 1 para 2 (`TTS_SPOKEN_RULES_VERSION_BY_LANG` em `index.ts`, `languages/registry.json`, com `registry.js` e `engine.generated.mjs` regenerados): invalida só os áudios de pt já gerados por Field.
+- `pt.time-24h`: lê só o número, nunca "duas e meia". "14h30" e "14:30" = "14 horas e 30 minutos"; "14h", "14h00" = "14 horas"; "1h" = "1 hora"; "9:05" = "9 horas e 5 minutos"; "5h de viagem" = "5 horas". Com minutos: hora 0 a 23, minutos 00 a 59 (dois pontos exige 2 dígitos). Sem minutos: 0 a 24. Fora disso fica igual ("25h30", "24:30", "14h75", "1,5h", "10:30:15", "2:1"). LIMITE CONHECIDO: "Mateus 3:16" ou razão "1:10" viram hora (indistinguíveis); se aparecer, usar `SPOKEN_OVERRIDES["pt"]`.
+- `pt.currency-brl`: "R$ 5,50" = "5 reais e 50 centavos"; "R$ 1,00" = "1 real"; "R$ 0,50" = "50 centavos"; "R$ 1,01" = "1 real e 1 centavo"; "R$ 1.250,00" = "1.250 reais"; "R$ 5" e "R$5,50" também. "R$" sem número, "US$", "R$ 5,5" e "R$ 5 mil" ficam iguais.
+- `pt.common-abbreviations`: só "p.ex." = "por exemplo", "etc." = "etcétera", "obs." = "observação". O ponto de "etc."/"obs." só fica se fechar a frase (fim do texto ou frase nova com maiúscula); "etc" sem ponto fica igual. Internetês (vc, tb, blz) NÃO tem regra global: usar `SPOKEN_OVERRIDES["pt"]` (texto exibido exato -> texto falado, em `spoken_text.py` e `tts_core.mjs`), subindo a versão do pt.
+- Testes: `python3 fr/scripts/test_spoken_text.py` 91 -> 171; `node tests/tts-google/test_tts_core.mjs` 73 -> 107 (paridade fr 781, zh 495 sem divergência; pt 67 -> 144).
+- PENDENTE: exige NOVO DEPLOY da Edge Function `tts-generate` (2 arquivos: `index.ts` e `tts_core.mjs`); sem deploy a produção segue com as regras antigas. Nenhum áudio foi gerado. Ouvir no `audio_lab` antes de gerar: "14 horas e 30 minutos", "1 hora", "0 horas"; "5 reais e 50 centavos", "1.250 reais" (milhar), "50 centavos"; "por exemplo", "etcétera." no fim de frase e "observação:".
+
+### 4.x Escolhas da dona depois de ouvir o laboratório (2026-10-15)
+Decisões (rodada do laboratório `laboratorio-pt-regras`, voz `pt-BR-Chirp3-HD-Achernar`); o que mudou no código está marcado:
+- **Hora cheia** ("8h", "14h00", "14:00", "5h de viagem") vira "8 horas" (c1v1). Igual ao que já estava.
+- **Hora com minutos** ("14h30", "21h15"): **fica como está** (a voz lê "duas e meia da tarde", "nove e quinze da noite", c0v0/c0v3 e c1v2). MUDOU: antes virava "14 horas e 30 minutos". "14:30" é reescrito como "14h30" para a voz ler igual (decisão minha, não ouvida: conferir no laboratório).
+- **Moeda** ("R$ 5,50" lê "5 reais e 50 centavos"; "R$ 1,00" lê "1 real"; "R$ 1.250,00" lê "1.250 reais"): como estava (c2, c3).
+- **"p.ex."** vira "por exemplo" (c4v1). **"etc."** NÃO tem regra: fica "etc." e a voz lê "etcétera". MUDOU: a regra `etc. -> etcétera` foi removida. **"Obs."** vira "Observação" (c4v4): como estava.
+- **Gênero entre parênteses** "Bem-vindo(a)" lê "Bem-vindo, bem-vinda" (c5v1; a variante com "ou", c5v3, é a alternativa se um dia quiser), "obrigado(a)" (c6v1) e **barra** "bonito / bonita" lê "bonito, bonita" (c7v1): como estavam.
+- **Ordinais** ("3º andar", "1ª vez"): ficam como estão, a voz lê bem. MUDOU: a regra `pt.ordinal-indicators` foi removida. Só 3º e 1ª foram ouvidos; ordinais compostos ("21º", "25ª") não foram testados.
+- **Títulos** "Dra. Ângela" lê "Doutora Ângela" (c9v1) e "Sr. e Sra." lê "Senhor e Senhora" (c9v3): como estavam.
+Versão das regras do pt subiu para 3 (a 2, das regras antigas, está no ar na produção desde a `tts-generate` v9). Testes: `fr/scripts/test_spoken_text.py` 172/172; `tests/tts-google/test_tts_core.mjs` com paridade Python x JS.

@@ -103,7 +103,14 @@ const BANK_STUB = (who, appKey) => {
     if (name === 'approve_review_bank_item'){
       const it = item(args.p_item_id); if (!it) return { data: null, error: { message: 'not_authorized' } };
       if (it.teacher_flashcard_id){ const c = D.teacher_flashcards.find(x => x.id === it.teacher_flashcard_id); c.status = 'active'; it.status = 'aprovado'; return { data: c.id, error: null }; }
-      const s = roster(it.bank_student_id); if (!s.linked_student_id) return { data: null, error: { message: 'student_not_linked' } };
+      const s = roster(it.bank_student_id);
+      if (s.classroom_id){
+        const c = (D.classrooms || []).find(x => x.id === s.classroom_id); if (!c || !c.members.length) return { data: null, error: { message: 'no_recipients' } };
+        let first = null;
+        c.members.forEach(m => { const card = { id: 700 + D.teacher_flashcards.length, teacher_id: 'A', student_id: m, language_app_key: s.language_app_key, front: args.p_front, back_trans: args.p_back_trans, note: args.p_note, status: 'active', fields: args.p_fields, card_generation_mode: args.p_mode, tags: args.p_tags || [], deck_id: null, bank_item_id: it.id, revision: 0 }; D.teacher_flashcards.push(card); first = first || card.id; });
+        it.status = 'aprovado'; it.teacher_flashcard_id = first; it.student_id = null; return { data: first, error: null };
+      }
+      if (!s.linked_student_id) return { data: null, error: { message: 'student_not_linked' } };
       let root = D.decks.find(d => d.kind === 'teacher_root' && d.owner_id === s.linked_student_id && d.teacher_id === 'A' && d.language_app_key === s.language_app_key);
       if (!root){ root = { id: 9000 + D.decks.length, kind: 'teacher_root', owner_id: s.linked_student_id, teacher_id: 'A', language_app_key: s.language_app_key, name: 'Cartões da professora', parent_deck_id: null }; D.decks.push(root); }
       const card = { id: 700 + D.teacher_flashcards.length, teacher_id: 'A', student_id: s.linked_student_id, language_app_key: s.language_app_key, front: args.p_front, back_trans: args.p_back_trans, note: args.p_note, status: 'active', fields: args.p_fields, card_generation_mode: args.p_mode, tags: args.p_tags || [], deck_id: root.id, bank_item_id: it.id, revision: 0 };
@@ -115,7 +122,21 @@ const BANK_STUB = (who, appKey) => {
       if (!D.teacher_students.some(l => l.teacher_id === 'A' && l.student_id === args.p_student_id && l.language_app_key === s.language_app_key && l.status === 'active')) return { data: null, error: { message: 'link_inactive' } };
       s.linked_student_id = args.p_student_id; return { data: null, error: null };
     }
-    if (name === 'unlink_review_bank_student'){ roster(args.p_bank_student_id).linked_student_id = null; return { data: null, error: null }; }
+    if (name === 'unlink_review_bank_student'){ const s = roster(args.p_bank_student_id); s.linked_student_id = null; s.classroom_id = null; return { data: null, error: null }; }
+    // 096: Turmas (as do Mural) e correção nas cópias de todos
+    if (name === 'mural_list'){
+      const rooms = (D.classrooms || []).filter(c => c.language_app_key === args.p_lang);
+      return { data: { as_teacher: A ? { classrooms: rooms.map(c => ({ id: c.id, name: c.name, members: c.members.slice(), unread: 0 })), roster: [] } : null, as_student: null }, error: null };
+    }
+    if (name === 'link_review_bank_classroom'){
+      const s = roster(args.p_bank_student_id); const c = (D.classrooms || []).find(x => x.id === args.p_classroom_id && x.language_app_key === s.language_app_key);
+      if (!c) return { data: null, error: { message: 'classroom_invalid' } };
+      s.classroom_id = c.id; s.linked_student_id = null; return { data: 0, error: null };
+    }
+    if (name === 'sync_review_bank_item_cards'){
+      let n = 0; D.teacher_flashcards.forEach(c => { if (c.bank_item_id === args.p_item_id){ Object.assign(c, { front: args.p_front, back_trans: args.p_back_trans, fields: args.p_fields, card_generation_mode: args.p_mode, tags: args.p_tags || [], note: args.p_note }); if (args.p_bump_revision) c.revision = (c.revision || 0) + 1; n++; } });
+      return { data: n, error: null };
+    }
     if (name === 'get_my_pending_bank_reviews'){
       const out = D.review_bank_reviews.filter(r => !r.applied_at).map(r => ({ r, s: roster(r.bank_student_id), i: item(r.item_id) }))
         .filter(x => x.s && x.s.linked_student_id === who && x.s.language_app_key === args.p_language_app_key && x.i && x.i.teacher_flashcard_id)
@@ -170,6 +191,7 @@ const BANK_STUB = (who, appKey) => {
           { id: 4, teacher_id: 'A', student_id: 'S1', language_app_key: 'mandarim', status: 'active' },
         ];
         eval(`(${stub})`)(who, appKey);
+        D.classrooms = [{ id: 51, name: 'Dupla', language_app_key: 'portugues', members: ['S2', 'S3'] }];
         D.review_bank_students.push(
           { id: 'rb-carol', teacher_id: 'A', name: 'Carol', language_app_key: 'frances', reference_language: 'pt', status: 'ativo', linked_student_id: 'S1', lesson_dates: [d2], last_entry_read: d0, created_at: '2026-01-01', updated_at: '2026-01-01' },
           { id: 'rb-evan', teacher_id: 'A', name: 'Evan', language_app_key: 'portugues', reference_language: 'en', status: 'ativo', linked_student_id: 'S2', lesson_dates: [], last_entry_read: null, created_at: '2026-01-01', updated_at: '2026-01-01' },
@@ -338,6 +360,28 @@ const BANK_STUB = (who, appKey) => {
       await page.waitForFunction(() => window.__DB.teacher_flashcards.filter(c => c.student_id === 'S3').length === 2);
       const s3 = await ev(() => window.__DB.teacher_flashcards.filter(c => c.student_id === 'S3').map(c => ({ lang: c.language_app_key, f0: c.fields[0].lang, f1: c.fields[1].lang, note: c.note })));
       L('cartões do aluno de português: idioma e línguas dos campos (en -> pt)', s3.every(c => c.lang === 'portugues' && c.f0 === 'en' && c.f1 === 'pt') && s3.some(c => c.note && c.note.includes('rodando')), s3);
+
+      // 096: trocar a conta pela Turma; "Gerar cartões" entrega uma cópia a cada membro
+      await page.click('[data-rb="unlink"]');
+      await page.waitForSelector('#rb-class-pick');
+      L('sem vínculo: dá para escolher conta OU turma do mesmo idioma', await ev(() => !!document.querySelector('#rb-link-pick') && document.querySelector('#rb-class-pick').textContent.includes('Dupla (2)')));
+      await shot('turma-escolher');
+      await page.selectOption('#rb-class-pick', '51');
+      await page.click('[data-rb="link-class"]');
+      await page.waitForFunction(() => !!document.querySelector('.rb-linkline .rb-pill.is-ok'));
+      L('ligado à turma: mostra a turma e os membros', await ev(() => { const t = document.querySelector('.rb-linkline').textContent; return t.includes('Dupla') && t.includes('Evan') && t.includes('Marina'); }), await ev(() => document.querySelector('.rb-linkline').textContent));
+      L('ligado à turma: grava a turma e tira a conta', await ev(() => { const s = window.__DB.review_bank_students.find(x => x.id === 'rb-sem'); return s.classroom_id === 51 && !s.linked_student_id; }));
+      await ev(() => { window.__DB.review_bank_items.push({ id: 'i8', teacher_id: 'A', bank_student_id: 'rb-sem', language_app_key: 'portugues', student_id: null, item_type: 'vocabulario', question: 'to be worth', answer: 'valer', wrong_form: null, gap_word: null, explanation: null, check_note: null, class_date: '2026-10-07', status: 'pendente', teacher_flashcard_id: null, level: 0, due_date: null, last_result: null, last_review_date: null, proposal: null, sensitive: false, created_at: '2026-10-07', updated_at: '2026-10-07' }); });
+      await ev(async () => { await rbReloadCur(); rbRender(); });
+      await page.waitForSelector('.rb-ready');
+      L('turma: item pronto aparece para gerar', await ev(() => document.querySelector('.rb-ready').textContent.includes('1')));
+      await shot('turma-ligada');
+      await page.click('[data-rb="generate-ready"]');
+      await page.waitForFunction(() => window.__DB.teacher_flashcards.filter(c => c.bank_item_id === 'i8').length === 2);
+      L('turma: "Gerar cartões" entrega uma cópia para cada membro', await ev(() => window.__DB.teacher_flashcards.filter(c => c.bank_item_id === 'i8').map(c => c.student_id).sort().join(',') === 'S2,S3'));
+      await page.click('[data-rb="unlink"]');
+      await page.waitForSelector('#rb-class-pick');
+      L('desvincular a turma volta para "sem conta"', await ev(() => { const s = window.__DB.review_bank_students.find(x => x.id === 'rb-sem'); return !s.classroom_id && !s.linked_student_id; }));
 
       // Visão geral
       await page.click('[data-rb="view"][data-v="overview"]');
@@ -513,6 +557,7 @@ const BANK_STUB = (who, appKey) => {
           { id: 'a', lang: 'pt', role: null, content: { value: 'cartão novo da aula' }, audio: null, image: null, pinyinFieldId: null }, { id: 'b', lang: target, role: null, content: { value: lang === 'fr' ? 'carte' : '卡片' }, audio: null, image: null, pinyinFieldId: null }] };
         buildEngineCardsFromRow(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' }).forEach(c => STATE.cards.push(c));
         STATE.studySettings.reviewOriginFilter = 'teacher'; // valor salvo antigo
+        CLASS_ACTIVE_TEACHER_ID = 'A'; // o aluno simulado tem vínculo ativo com a professora A (2026-10-15: só ela aparece no Aluno)
         saveState = async () => {};
         switchTab('review');
         const out = {};

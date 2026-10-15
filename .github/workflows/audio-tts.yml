@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       modo:
-        description: "laboratorio = gera variantes pra ouvir | regenerar = refaz os mp3 afetados pelas regras | gerar-faltantes = cria mp3 para textos sem áudio (zh e fr) | desafios-expressoes = gera os mp3 das 80 expressões novas dos Desafios | desafios-a1-m1 = gera os mp3 dos desafios do Módulo 1 do A1 | desafios-a1-todos = gera os mp3 dos desafios dos Módulos 1 a 6 do A1 (fr/scripts/challenges_import) | ditados-frases = gera 1 mp3 por FRASE de cada ditado (dictation-<id>-s<N>.mp3) | ditados = refaz o áudio guiado de TODOS os ditados de fr/dictations.js (com a locução de instruções em português) | ditados-en = gera a versão com as instruções em INGLÊS (dictation-<id>-guided.en.mp3) para o site em inglês"
+        description: "laboratorio = gera variantes pra ouvir | laboratorio-pt-regras = português: ouvir as regras de texto falado (hora, moeda, abreviações...) | laboratorio-pt-vozes = português: comparar várias vozes pt-BR (não grava nada no repositório) | regenerar = refaz os mp3 afetados pelas regras | gerar-faltantes = cria mp3 para textos sem áudio (zh e fr) | desafios-expressoes = gera os mp3 das 80 expressões novas dos Desafios | desafios-a1-m1 = gera os mp3 dos desafios do Módulo 1 do A1 | desafios-a1-todos = gera os mp3 dos desafios dos Módulos 1 a 6 do A1 (fr/scripts/challenges_import) | ditados-frases = gera 1 mp3 por FRASE de cada ditado (dictation-<id>-s<N>.mp3) | ditados = refaz o áudio guiado de TODOS os ditados de fr/dictations.js (com a locução de instruções em português) | ditados-en = gera a versão com as instruções em INGLÊS (dictation-<id>-guided.en.mp3) para o site em inglês"
         type: choice
-        options: [laboratorio, regenerar, gerar-faltantes, desafios-expressoes, desafios-a1-m1, desafios-a1-todos, ditados, ditados-frases, ditados-en]
+        options: [laboratorio, laboratorio-pt-regras, laboratorio-pt-vozes, regenerar, gerar-faltantes, desafios-expressoes, desafios-a1-m1, desafios-a1-todos, ditados, ditados-frases, ditados-en]
         default: laboratorio
 
 permissions:
@@ -36,6 +36,17 @@ jobs:
         with:
           name: laboratorio-audio
           path: fr/scripts/lab_output/
+      - name: Laboratório pt (regras de texto falado)
+        if: inputs.modo == 'laboratorio-pt-regras'
+        run: python3 fr/scripts/audio_lab.py --lang pt --modo regras
+      - name: Laboratório pt (comparação de vozes)
+        if: inputs.modo == 'laboratorio-pt-vozes'
+        run: python3 fr/scripts/audio_lab.py --lang pt --modo vozes
+      - uses: actions/upload-artifact@v6
+        if: startsWith(inputs.modo, 'laboratorio-pt')
+        with:
+          name: laboratorio-audio-pt
+          path: fr/scripts/lab_output_pt/
       - name: Regenerar
         if: inputs.modo == 'regenerar'
         run: python3 fr/scripts/regenerate_spoken_audio.py
@@ -76,7 +87,7 @@ jobs:
         run: python3 fr/scripts/gen_dictation_sentence_audio.py
 
       - name: Commitar
-        if: always() && inputs.modo != 'laboratorio'
+        if: always() && !startsWith(inputs.modo, 'laboratorio')
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
@@ -94,7 +105,7 @@ jobs:
       # Commits feitos pelo próprio workflow (GITHUB_TOKEN) NÃO disparam a
       # publicação do site sozinhos -- pede explicitamente.
       - name: Publicar o site
-        if: always() && inputs.modo != 'laboratorio'
+        if: always() && !startsWith(inputs.modo, 'laboratorio')
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run deploy-pages.yml --ref main

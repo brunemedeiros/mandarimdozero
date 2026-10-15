@@ -38,6 +38,14 @@ const PANEL_STUB = (who) => {
   supabaseClient.rpc = async (name, args) => {
     (window.__rpcCalls = window.__rpcCalls || []).push([name, args]);
     if (name === 'my_permissions') return { data: { roles: roles.roles, admin: roles.admin, permissions: Object.fromEntries(CAT.map(c => [c.key, { enabled: perm(c.key), limit: null }])) }, error: null };
+    // 103: link de agenda (token de 64 hex; gerar outro devolve um novo).
+    if (name === 'my_calendar_feed_token') return { data: (args && args.p_regenerate ? 'b' : 'a').repeat(16), error: null };
+    // 101: com horário; inclui 1 aula futura (próximas aulas) marcada em São Paulo.
+    if (name === 'get_my_class_schedule') return { data: who === 'S' ? [
+      { id: 3, class_date: '2099-01-05', start_time: '19:00:00', duration_minutes: 60, time_zone: 'America/Sao_Paulo', topic: 'Aula futura', homework: null, observations: null, attendance_name: null, attendance_color: null, skills: [], classroom_id: null, classroom_name: null },
+      { id: 2, class_date: '2026-10-09', start_time: null, topic: 'Passé composé', homework: 'Exercícios 1 a 3', observations: null, attendance_name: 'Presente', attendance_color: 'green', skills: ['gramatica', 'escuta'], classroom_id: null, classroom_name: null },
+      { id: 1, class_date: '2026-10-02', start_time: null, topic: 'Apresentação', homework: null, observations: 'Livro, página 12', attendance_name: 'Faltou', attendance_color: 'red', skills: [], classroom_id: 501, classroom_name: 'Dupla' },
+    ] : [], error: null };
     // 094: aulas com Presença, Competências e aula de turma.
     if (name === 'get_my_class_log_entries') return { data: who === 'S' ? [
       { id: 2, class_date: '2026-10-09', topic: 'Passé composé', homework: 'Exercícios 1 a 3', observations: null, attendance_name: 'Presente', attendance_color: 'green', skills: ['gramatica', 'escuta'], classroom_id: null, classroom_name: null },
@@ -137,6 +145,27 @@ const PANEL_STUB = (who) => {
       L('aluna: Presença colorida (verde = presente, vermelho = faltou)', await ev(() => { const p = [...document.querySelectorAll('.class-log-entry .att-pill')]; return p.length === 2 && p[0].dataset.color === 'green' && p[0].textContent.trim() === 'Presente' && p[1].dataset.color === 'red'; }));
       L('aluna: Competências como etiquetas', await ev(() => [...document.querySelectorAll('.class-log-entry')][0].querySelectorAll('.skill-chip').length === 2 && [...document.querySelectorAll('.class-log-entry')][0].textContent.includes(t('panel.classLog.skill.gramatica'))));
       L('aluna: aula da turma mostra o nome da turma', await ev(() => [...document.querySelectorAll('.class-log-entry')][1].querySelector('.class-log-classroom')?.textContent.includes('Dupla')));
+      L('aluna: próximas aulas no topo, com dia e horário no fuso de quem vê', await ev(() => { const u = document.querySelector('.my-upcoming-list li'); return !!u && u.textContent.includes('Aula futura') && /\d{2}:\d{2}/.test(u.textContent); }));
+      L('aluna: aula futura não entra no histórico', await ev(() => ![...document.querySelectorAll('.class-log-entry')].some(e => e.textContent.includes('Aula futura'))));
+      L('aluna: link de agenda fechado até ela abrir', await ev(() => { const b = document.querySelector('#my-class-logs-content [data-calendar-feed]'); return !!b && !b.open && !(window.__rpcCalls || []).some(c => c[0] === 'my_calendar_feed_token'); }));
+      await ev(() => { const b = document.querySelector('#my-class-logs-content [data-calendar-feed]'); b.open = true; });
+      await page.waitForSelector('#my-class-logs-content [data-calendar-feed-url]');
+      L('aluna: link de agenda aponta para a Edge Function com o token', await ev(() => /\/functions\/v1\/class-calendar-feed\/a{16}$/.test(document.querySelector('[data-calendar-feed-url]').value)), await ev(() => document.querySelector('[data-calendar-feed-url]').value));
+      L('aluna: botão do Google Agenda assina o link (webcal) em nova aba', await ev(() => { const a = document.querySelector('[data-calendar-feed-google]'); const u = new URL(a.href); return u.host === 'calendar.google.com' && decodeURIComponent(u.searchParams.get('cid')).startsWith('webcal://') && a.target === '_blank'; }));
+      L('aluna: Apple/Outlook abre o webcal', await ev(() => document.querySelector('[data-calendar-feed-webcal]').getAttribute('href').startsWith('webcal://')));
+      await ev(() => document.querySelector('[data-my-classlog-view="calendar"]').click());
+      L('aluna: trocar Lista/Calendário não fecha o bloco da agenda', await ev(() => document.querySelector('#my-class-logs-content [data-calendar-feed]').open));
+      await ev(() => document.querySelector('[data-my-classlog-view="list"]').click());
+      await ev(() => document.querySelector('[data-calendar-feed-reset]').click());
+      await page.waitForFunction(() => /class-calendar-feed\/b{16}$/.test(document.querySelector('[data-calendar-feed-url]')?.value || ''));
+      L('aluna: "Gerar outro link" (com confirmação) troca o token', await ev(() => (window.__rpcCalls || []).some(c => c[0] === 'my_calendar_feed_token' && c[1] && c[1].p_regenerate === true)));
+      if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#my-class-logs-content [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
+      await shot('aluna-link-agenda');
+      await ev(() => document.querySelector('[data-my-classlog-view="calendar"]').click());
+      await page.waitForSelector('#my-class-logs-content .cal');
+      L('aluna: calendário do mês com Hoje e setas', await ev(() => !!document.querySelector('#my-class-logs-content [data-cal-nav="0"]') && document.querySelectorAll('#my-class-logs-content .cal-wd').length === 7));
+      await shot('aluna-calendario');
+      await ev(() => document.querySelector('[data-my-classlog-view="list"]').click());
       L('aluna: cor do rótulo visível (borda com a cor)', await ev(() => getComputedStyle(document.querySelector('.class-log-entry .att-pill')).borderTopColor !== getComputedStyle(document.querySelectorAll('.class-log-entry .att-pill')[1]).borderTopColor));
       await shot('minhas-aulas');
       await ev(() => switchTab('support-materials'));
@@ -182,7 +211,157 @@ const PANEL_STUB = (who) => {
       const tabs = await ev(() => [...document.querySelectorAll('#view-teacher-panel [data-teacher-section]')].map(b => b.textContent.trim()));
       L('professora: 5 abas (Mural entrou na Etapa 4)', tabs.length === 5, tabs);
       L('professora: Alunos abre (sem aviso de acesso negado)', !(await ev(() => document.getElementById('admin-students-content').textContent.includes(t('admin.common.adminOnly')))));
-      L('professora: sem formulário nem botão de vincular (só a admin vincula)', await ev(() => !document.querySelector('#admin-assign-student-form') && !document.querySelector('[data-abrir-dialogo="dlg-vincular-aluno"]')));
+      L('professora: sem formulário de vincular (só a admin vincula)', await ev(() => !document.querySelector('#admin-assign-student-form')));
+      // ---- convite: link ----
+      await page.waitForSelector('#tinv-link-input');
+      const dir = lang, code0 = lang === 'fr' ? 'abc123def4' : 'mmm111nnn2';
+      L('convite: link do idioma atual', (await ev(() => document.getElementById('tinv-link-input').value)).endsWith(`/${dir}/?convite=${code0}`), await ev(() => document.getElementById('tinv-link-input').value));
+      L('convite: WhatsApp leva o link', await ev((c) => { const h = document.getElementById('tinv-whats-btn').href; return h.startsWith('https://wa.me/?text=') && decodeURIComponent(h).includes(c); }, code0));
+      await ev(() => document.querySelector(`[data-tinv-lang="${window.__appKey === 'frances' ? 'mandarim' : 'frances'}"]`).click());
+      await page.waitForFunction((d) => document.getElementById('tinv-link-input')?.value.includes(d), lang === 'fr' ? '/zh/?convite=mmm111nnn2' : '/fr/?convite=abc123def4');
+      L('convite: trocar idioma troca o link', true);
+      await ev(() => document.querySelector(`[data-tinv-lang="${window.__appKey}"]`).click());
+      await page.waitForFunction((c) => document.getElementById('tinv-link-input')?.value.includes(c), code0);
+      await page.click('#tinv-reset-btn');
+      await page.waitForFunction(() => document.getElementById('tinv-link-input')?.value.includes('zzz999yyy8'));
+      L('convite: gerar outro link', true);
+      // ---- convite: busca ----
+      await page.fill('#tinv-search-input', 'ana');
+      await page.waitForSelector('#tinv-search-list [data-tinv-opcao]');
+      L('convite: busca não mostra a própria conta', await ev(() => ![...document.querySelectorAll('#tinv-search-list [data-opcao-usuario]')].some(e => e.textContent === '@carla.prof')));
+      await page.keyboard.press('Enter');
+      await page.waitForSelector('#tinv-send-btn');
+      await page.click('#tinv-send-btn');
+      await page.waitForFunction(() => document.getElementById('tinv-send-error')?.textContent.length > 0);
+      L('convite: aluno com professora mostra o motivo', await ev(() => document.getElementById('tinv-send-error').textContent === t('tinvite.err.student_has_teacher')));
+      await page.fill('#tinv-search-input', 'anabela');
+      await page.waitForSelector('#tinv-search-list [data-tinv-opcao]');
+      await page.keyboard.press('Enter');
+      await page.waitForSelector('#tinv-send-btn');
+      await page.click('#tinv-send-btn');
+      await page.waitForSelector('.tinv-pending-row');
+      L('convite: pendente aparece na lista', await ev(() => document.querySelector('.tinv-pending-row').textContent.includes('@anabela')));
+      L('convite: rpc com o idioma escolhido', await ev(() => window.__rpcCalls.some(c => c[0] === 'teacher_invite_student' && c[1].p_student === 'S2' && c[1].p_lang === window.__appKey)));
+      await shot('professora-convite');
+      await page.click('[data-tinv-cancel]');
+      await page.waitForFunction(() => !document.querySelector('.tinv-pending-row'));
+      L('convite: cancelar tira da lista', await ev(() => window.__DB.teacher_students.some(r => r.student_id === 'S2' && r.status === 'removed')));
+      // ---- Aulas (094): Presença, Competências, turma, rótulos ----
+      await ev(() => { window.__DB.teacher_students.push({ id: 950, teacher_id: 'P', student_id: 'S', language_app_key: window.__appKey, status: 'active', created_at: '2026-10-01' });
+        window.__DB.teacher_class_logs = [
+          { id: 9001, teacher_id: 'P', student_id: 'S', classroom_id: null, language_app_key: window.__appKey, class_date: '2026-09-25', topic: null, homework: null, notes: '[Notion] Conversa sobre eleições e voltar com o ex\n[Notion] Para a próxima aula: ler o texto que ela esqueceu', attendance_label_id: 61, skills: [] },
+          { id: 9002, teacher_id: 'P', student_id: 'S', classroom_id: null, language_app_key: window.__appKey, class_date: '2026-09-26', topic: null, homework: null, notes: '[Notion] fofoca', attendance_label_id: 61, skills: [] }]; });
+      await ev(() => switchTeacherPanelSection('classlogs'));
+      await page.waitForSelector('#admin-create-class-log-form [data-class-log-extras="new"]');
+      // Revisar do Notion: editar e mostrar ao aluno / deixar só para mim
+      await page.waitForSelector('#admin-notion-review [data-notion-review="9001"]');
+      L('Notion: bloco de revisão com as 2 aulas marcadas', await ev(() => document.querySelectorAll('#admin-notion-review [data-notion-review]').length === 2 && document.querySelector('#admin-notion-review summary').textContent.includes('2')));
+      L('Notion: tópico e "para a próxima aula" em caixas separadas', await ev(() => [...document.querySelectorAll('[data-notion-review="9001"] [data-notion-field]')].map(x => x.dataset.notionField + ':' + x.value).join('|') === 'topic:Conversa sobre eleições e voltar com o ex|homework:ler o texto que ela esqueceu'));
+      await ev(() => { document.querySelector('#admin-notion-review details').open = true; });
+      await page.fill('[data-notion-review="9001"] [data-notion-field="topic"]', 'Conversa sobre eleições');
+      await page.fill('[data-notion-review="9001"] [data-notion-field="homework"]', 'Ler o texto');
+      await shot('aulas-notion-revisao');
+      await page.click('[data-notion-show="9001"]');
+      await page.waitForFunction(() => window.__DB.teacher_class_logs.find(l => l.id === 9001).topic === 'Conversa sobre eleições');
+      L('Notion: mostrar ao aluno grava só o texto editado e tira a marca das Anotações', await ev(() => { const l = window.__DB.teacher_class_logs.find(x => x.id === 9001); return l.homework === 'Ler o texto' && l.notes === 'Conversa sobre eleições e voltar com o ex\nPara a próxima aula: ler o texto que ela esqueceu'; }), await ev(() => window.__DB.teacher_class_logs.find(x => x.id === 9001)));
+      await page.waitForFunction(() => document.querySelectorAll('#admin-notion-review [data-notion-review]').length === 1);
+      await page.click('[data-notion-keep="9002"]');
+      await page.waitForFunction(() => window.__DB.teacher_class_logs.find(l => l.id === 9002).notes === 'fofoca');
+      L('Notion: deixar só para mim não mostra nada ao aluno', await ev(() => { const l = window.__DB.teacher_class_logs.find(x => x.id === 9002); return l.topic === null && l.homework === null; }));
+      await page.waitForFunction(() => !document.querySelector('#admin-notion-review details'));
+      L('Notion: bloco some quando acaba a revisão', true);
+      await ev(() => { window.__DB.teacher_class_logs = []; });
+      L('aulas: Presença com Sem registro, Presente e Faltou', await ev(() => [...document.querySelectorAll('[data-class-log-extras="new"] .att-choice')].map(l => l.textContent.trim()).join('|') === `${t('panel.classLog.attendanceNone')}|Presente|Faltou`));
+      L('aulas: 7 Competências', await ev(() => document.querySelectorAll('[data-class-log-extras="new"] input[data-skill]').length === 7));
+      L('aulas: turma aparece para escolher', await ev(() => !!document.querySelector('[data-classlog-classroom-checkbox][value="501"]')));
+      await page.check('[data-classlog-student-checkbox][value="S"]');
+      await page.check('[data-class-log-extras="new"] input[name="new-att"][value="61"]');
+      await page.check('[data-class-log-extras="new"] input[data-skill][value="gramatica"]');
+      await page.check('[data-class-log-extras="new"] input[data-skill][value="escuta"]');
+      await page.fill('#admin-class-log-topic', 'Subjonctif');
+      await shot('aulas-form');
+      await page.click('#admin-create-class-log-btn');
+      await page.waitForFunction(() => (window.__DB.teacher_class_logs || []).length === 1);
+      L('aulas: grava Presença e Competências na aula do aluno', await ev(() => { const r = window.__DB.teacher_class_logs[0]; return r.student_id === 'S' && r.classroom_id === null && r.attendance_label_id === 61 && r.skills.join() === 'gramatica,escuta'; }), await ev(() => window.__DB.teacher_class_logs[0]));
+      await page.waitForSelector('#admin-classlogs-list-box .att-pill');
+      L('aulas: lista mostra a Presença colorida', await ev(() => document.querySelector('#admin-classlogs-list-box .att-pill').dataset.color === 'green'));
+      // só Presença (Faltou), para a turma
+      await page.uncheck('[data-classlog-student-checkbox][value="S"]');
+      await page.check('[data-classlog-classroom-checkbox][value="501"]');
+      await page.check('[data-class-log-extras="new"] input[name="new-att"][value="62"]');
+      await page.click('#admin-create-class-log-btn');
+      await page.waitForFunction(() => window.__DB.teacher_class_logs.length === 2);
+      L('aulas: aula de turma é 1 linha sem aluno e com a turma', await ev(() => { const r = window.__DB.teacher_class_logs[1]; return r.student_id === null && r.classroom_id === 501 && r.attendance_label_id === 62; }), await ev(() => window.__DB.teacher_class_logs[1]));
+      await page.waitForSelector('#admin-classlogs-list-box .class-log-classroom');
+      L('aulas: lista da turma mostra o nome da turma', await ev(() => document.querySelector('#admin-classlogs-list-box .class-log-classroom').textContent.includes('Dupla')));
+      // rótulos no estilo do Notion: criar digitando, ⋯ para cor/nome/arquivar, sem perder o que já foi digitado
+      await page.fill('#admin-class-log-topic', 'Texto que não pode sumir');
+      await page.fill('[data-att-new="new"]', 'Remarcada');
+      await page.press('[data-att-new="new"]', 'Enter');
+      await page.waitForFunction(() => [...document.querySelectorAll('[data-att-choices="new"] .att-choice')].some(l => l.textContent.includes('Remarcada')));
+      L('rótulos: digitar + Enter cria e já seleciona', await ev(() => { const l = window.__DB.class_attendance_labels.find(x => x.name === 'Remarcada'); return !!l && l.teacher_id === 'P' && document.querySelector(`[data-att-choices="new"] input[value="${l.id}"]`).checked; }));
+      L('rótulos: Enter no campo não registra aula', await ev(() => window.__DB.teacher_class_logs.length === 2));
+      L('rótulos: o que já estava digitado continua lá', await ev(() => document.getElementById('admin-class-log-topic').value === 'Texto que não pode sumir'));
+      L('rótulos: sem seção separada de rótulos', await ev(() => !document.getElementById('admin-att-labels')));
+      const remId = await ev(() => window.__DB.class_attendance_labels.find(x => x.name === 'Remarcada').id);
+      await page.click(`[data-att-choices="new"] [data-att-more="${remId}"]`);
+      await page.waitForSelector('[data-att-menu="new"] .att-menu-box');
+      L('rótulos: ⋯ abre nome + 9 cores (como no Notion)', await ev(() => document.querySelectorAll('[data-att-menu="new"] [data-att-color]').length === 9));
+      await page.click('[data-att-menu="new"] [data-att-color="pink"]');
+      await page.waitForFunction((id) => window.__DB.class_attendance_labels.find(x => x.id === id).color === 'pink', remId);
+      L('rótulos: cor nova na hora no seletor', await ev((id) => document.querySelector(`[data-att-choices="new"] input[value="${id}"]`).closest('.att-choice').dataset.color === 'pink', remId));
+      await shot('aulas-rotulos');
+      await page.fill('[data-att-menu="new"] [data-att-rename]', 'Remarcada pela aluna');
+      await page.click('[data-att-menu="new"] [data-att-close]');
+      await page.waitForFunction((id) => window.__DB.class_attendance_labels.find(x => x.id === id).name === 'Remarcada pela aluna', remId);
+      L('rótulos: renomear e Pronto fecha o menu', await ev(() => document.querySelector('[data-att-menu="new"]').hidden && [...document.querySelectorAll('[data-att-choices="new"] .att-choice')].some(l => l.textContent.includes('Remarcada pela aluna'))));
+      L('rótulos: escolha continua marcada depois de editar', await ev((id) => document.querySelector(`[data-att-choices="new"] input[value="${id}"]`).checked, remId));
+      await page.click(`[data-att-choices="new"] [data-att-more="${remId}"]`);
+      await page.click('[data-att-menu="new"] [data-att-archive]');
+      await page.waitForFunction((id) => window.__DB.class_attendance_labels.find(x => x.id === id).archived === true, remId);
+      await page.waitForFunction(() => ![...document.querySelectorAll('[data-att-choices="new"] .att-choice')].some(l => l.textContent.includes('Remarcada')));
+      L('rótulos: arquivar tira da lista de opções', true);
+      L('rótulos: o texto digitado sobreviveu a tudo', await ev(() => document.getElementById('admin-class-log-topic').value === 'Texto que não pode sumir'));
+      // 101: horário, repetir toda semana e calendário
+      await page.fill('#admin-class-log-topic', '');
+      await page.check('[data-classlog-student-checkbox][value="S"]');
+      await page.uncheck('[data-classlog-classroom-checkbox][value="501"]');
+      const startDay = await ev(() => { const d = new Date(); d.setDate(d.getDate() + 2); return classLogLocalYMD(d); });
+      const untilDay = await ev(() => { const d = new Date(); d.setDate(d.getDate() + 16); return classLogLocalYMD(d); });
+      await page.fill('#admin-class-log-date', startDay);
+      L('agenda: horário já vem com 7h (padrão da autora)', await ev(() => document.getElementById('admin-class-log-time').value === '07:00'));
+      L('agenda: só o horário padrão não registra aula passada vazia, mas agenda hoje', await ev(() => cleanClassLogPayload({ classDate: '2020-01-01', startTime: '07:00', durationMinutes: 60 }).empty === true && cleanClassLogPayload({ classDate: todayStr(), startTime: '07:00', durationMinutes: 60 }).empty === false));
+      await page.fill('#admin-class-log-time', '19:30');
+      L('agenda: duração é um seletor de 30 min a 5h, começando em 1h', await ev(() => { const d = document.getElementById('admin-class-log-duration'); const o = [...d.options]; return d.tagName === 'SELECT' && d.value === '60' && o.length === 10 && o[0].text === '30 min' && o[1].text === '1h' && o[2].text === '1h30' && o[9].text === '5h'; }));
+      await page.selectOption('#admin-class-log-duration', '90');
+      L('agenda: duração fora da lista (aula antiga de 45 min) continua como opção ao editar', await ev(() => { const h = classLogDurationOptionsHTML(45); return /value="45" selected>45 min</.test(h) && (h.match(/<option/g) || []).length === 11; }));
+      await page.check('#admin-class-log-repeat');
+      L('agenda: "Até" aparece ao marcar repetir', await ev(() => !document.getElementById('admin-class-log-repeat-box').hidden));
+      await page.fill('#admin-class-log-repeat-until', untilDay);
+      const before = await ev(() => window.__DB.teacher_class_logs.length);
+      await page.click('#admin-create-class-log-btn');
+      await page.waitForFunction((n) => window.__DB.teacher_class_logs.length === n + 3, before);
+      L('agenda: repetir toda semana cria 1 aula por semana (3) com horário, duração e fuso', await ev((n) => { const r = window.__DB.teacher_class_logs.slice(n); return r.length === 3 && r.every(x => x.start_time === '19:30' && x.duration_minutes === 90 && !!x.time_zone && x.student_id === 'S') && new Set(r.map(x => x.class_date)).size === 3; }, before), await ev((n) => window.__DB.teacher_class_logs.slice(n).map(x => [x.class_date, x.start_time, x.duration_minutes, x.time_zone]), before));
+      L('agenda: aula futura só com data e horário é aceita (sem tópico)', true);
+      await ev(() => document.querySelector('[data-classlog-view="calendar"]').click());
+      await page.waitForSelector('#admin-classlogs-calendar .cal');
+      L('calendário: Registrar some e o mês aparece', await ev(() => document.getElementById('admin-classlogs-register').hidden && !document.getElementById('admin-classlogs-calendar-wrap').hidden));
+      L('calendário: link de agenda da professora acima do mês', await ev(() => !!document.querySelector('#admin-classlogs-calendar-wrap > [data-calendar-feed]')));
+      await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').open = true; });
+      await page.waitForSelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]');
+      L('calendário: professora recebe o link dela', await ev(() => /class-calendar-feed\/[ab]{16}$/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
+      if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
+      await shot('aulas-link-agenda');
+      // a aula agendada pode cair no mês seguinte: avança até achar
+      for (let i = 0; i < 2 && !(await ev((d) => !!document.querySelector(`[data-cal-day="${d}"] .cal-chip`), startDay)); i++){ await ev(() => document.querySelector('#admin-classlogs-calendar [data-cal-nav="1"]').click()); await page.waitForTimeout(300); }
+      L('calendário: aula agendada no dia certo, com horário e nome', await ev((d) => { const c = document.querySelector(`[data-cal-day="${d}"] .cal-chip`); return !!c && c.textContent.includes('19:30') && c.textContent.includes('Ana'); }, startDay));
+      await ev((d) => document.querySelector(`[data-cal-day="${d}"]`).click(), startDay);
+      await page.waitForSelector('[data-cal-day-panel]');
+      L('calendário: clicar no dia mostra as aulas do dia e "Agendar aula neste dia"', await ev(() => document.querySelectorAll('[data-cal-day-panel] [data-cal-log]').length >= 1 && !!document.querySelector('[data-cal-schedule]')));
+      await shot('aulas-calendario');
+      await ev(() => document.querySelector('[data-cal-schedule]').click());
+      L('calendário: "Agendar neste dia" volta ao Registrar com a data preenchida', await ev((d) => !document.getElementById('admin-classlogs-register').hidden && document.getElementById('admin-class-log-date').value === d, startDay));
+      L('aulas: sem rolagem horizontal', await ev(() => document.documentElement.scrollWidth <= window.innerWidth + 1), await ev(() => [document.documentElement.scrollWidth, window.innerWidth]));
       await ev(() => switchTab('admin-badges'));
       L('professora: link antigo do Admin cai no painel da professora', await ev(() => document.getElementById('view-teacher-panel').classList.contains('active')));
       await shot('professora-alunos');

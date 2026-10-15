@@ -253,7 +253,7 @@ function serializeCardsForSave(cards){
 //    fresco vence -- é dado derivado do banco).
 const NOTE_LEVEL_FRESH_FIELDS = [
   'flashcardStatus', 'teacherNote', 'tags', 'imageUrl', 'note', 'cardInstance', 'deckId',
-  'rowId', 'unitTitle', 'unitTitleKey', 'origin',
+  'rowId', 'unitTitle', 'unitTitleKey', 'origin', 'teacherId',
 ];
 function mergeSavedCards(cards, savedCards){
   const byId = {};

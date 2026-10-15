@@ -148,7 +148,7 @@ async function bootPage(browser, lang, port){
     }
     const gAll = await ev(() => { STATE.studySettings.reviewOriginFilter = 'all'; return [...new Set(eligibleReviewPool().map(c => c.origin))].sort(); });
     check(lang + ' Review geral filtro all: todas as origens menos a da professora', gAll.join() === 'self,study', gAll);
-    const gClass = await ev(() => { STATE.reviewSessionClassReview = true; const p = [...new Set(eligibleReviewPool().map(c => c.origin))]; STATE.reviewSessionClassReview = false; return p; });
+    const gClass = await ev(() => { CLASS_ACTIVE_TEACHER_ID = (STATE.cards.find(c => c.origin === 'teacher') || {}).teacherId; /* 2026-10-15: só a professora com vínculo ativo aparece no Aluno */ STATE.reviewSessionClassReview = true; const p = [...new Set(eligibleReviewPool().map(c => c.origin))]; STATE.reviewSessionClassReview = false; return p; });
     check(lang + ' sessão Aluno > Revisão: só origem teacher', gClass.join() === 'teacher', gClass);
 
     // 8) valor persistido intacto entrar/sair de Deck (inclusive serializado)
