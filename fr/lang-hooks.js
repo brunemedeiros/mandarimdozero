@@ -19,5 +19,10 @@ const LANG_HOOKS = {
   pregenRate: () => PREGEN_AUDIO_RATE,
   ttsLang: 'fr-FR',
   ttsRate: 0.9,
+  conceptExampleHTML: (ex) => `<div class="french">${ex.f} ${audioBtnHTML(ex.f)}</div>`,
+  tfPinyinHTML: () => '',
+  promptClass: 'flashcard-french',
+  promptPinyinHTML: () => '',
+  canSpeak: (s) => canSpeakFrench(s),
 // --- /E4 hooks ---
 };
