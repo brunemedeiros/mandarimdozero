@@ -17,3 +17,8 @@ psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_094.sql" 2>&1 |
 psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_101.sql" 2>&1 | grep -v '^\s*$'
 $P aulas94 -f "$MIG/103_class_calendar_feed.sql" >/dev/null
 psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_103.sql" 2>&1 | grep -v '^\s*$'
+# 105 precisa de _ui_lang (102); o 102 inteiro depende de amigos, então só a função aqui.
+$P aulas94 -c "create or replace function public._ui_lang(p_user uuid) returns text language sql stable security definer set search_path = public as \$\$ select case when (select g.data #>> '{_meta,uiLanguage}' from progress g where g.user_id = p_user) = 'en' then 'en' else 'pt-BR' end; \$\$" >/dev/null
+$P aulas94 -f "$MIG/105_calendar_feed_short_token.sql" >/dev/null
+$P aulas94 -f "$MIG/105_calendar_feed_short_token.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_105.sql" 2>&1 | grep -v '^\s*$'

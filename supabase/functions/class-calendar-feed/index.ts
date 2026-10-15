@@ -1,9 +1,12 @@
 // ---------- Link de agenda (migration 103) ----------
 //
 // Devolve as aulas da conta em formato iCalendar (.ics) para assinatura no Google Agenda, Apple ou Outlook:
-//   GET .../functions/v1/class-calendar-feed?t=<token de 64 hex>[&lang=en]
-// O Google busca o link sozinho, sem login, por isso esta função roda com verify_jwt = false: o token É a
-// autenticação (256 bits, gerado por my_calendar_feed_token; "Gerar outro link" invalida o antigo).
+//   GET https://agenda.profbrune.com.br/<senha>   (Netlify repassa para .../functions/v1/class-calendar-feed/<senha>)
+//   GET .../functions/v1/class-calendar-feed?t=<senha>[&lang=en]   (forma antiga, continua valendo)
+// Senha: 16 caracteres (105) ou 64 hex (103, até a pessoa abrir o bloco da agenda de novo).
+// O Google busca o link sozinho, sem login, por isso esta função roda com verify_jwt = false: a senha É a
+// autenticação (gerada por my_calendar_feed_token; "Gerar outro link" invalida a antiga).
+// Idioma: o do site do dono do link (class_calendar_feed_lang); ?lang=en ou ?lang=pt força.
 // Lê com a service role a RPC class_calendar_feed, que só devolve tema, tarefa e presença (nunca Anotações
 // nem Observações). Nunca loga o token.
 
@@ -62,6 +65,13 @@ function ymd(dateStr: string, plusDays = 0): string {
   return d.toISOString().slice(0, 10).replace(/-/g, '');
 }
 
+// Senha vinda do caminho (/class-calendar-feed/<senha>, com ou sem .ics) ou de ?t= (forma antiga).
+export function feedToken(u: URL): string | null {
+  const last = decodeURIComponent(u.pathname.split('/').filter(Boolean).pop() || '').replace(/\.ics$/i, '');
+  const raw = (u.searchParams.get('t') || (last !== 'class-calendar-feed' ? last : '')).trim().toLowerCase();
+  return /^([0-9a-f]{64}|[a-z2-9]{16})$/.test(raw) ? raw : null;
+}
+
 export function buildIcs(rows: Row[], lang: 'pt' | 'en', now = new Date()): string {
   const T = TEXTS[lang];
   const L: string[] = [
@@ -102,11 +112,16 @@ Deno.serve(async (req: Request) => {
     return new Response('method_not_allowed', { status: 405, headers: CORS });
   }
   const u = new URL(req.url);
-  const token = (u.searchParams.get('t') || '').trim().toLowerCase();
-  const lang = u.searchParams.get('lang') === 'en' ? 'en' : 'pt';
-  if (!/^[0-9a-f]{64}$/.test(token)) return new Response('not_found', { status: 404, headers: CORS });
+  const token = feedToken(u);
+  if (!token) return new Response('not_found', { status: 404, headers: CORS });
 
   const sb = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+  const qLang = u.searchParams.get('lang');
+  let lang: 'pt' | 'en' = qLang === 'en' ? 'en' : 'pt';
+  if (qLang !== 'en' && qLang !== 'pt') {
+    const { data: owner } = await sb.rpc('class_calendar_feed_lang', { p_token: token });
+    if (owner === 'en') lang = 'en';
+  }
   const { data, error } = await sb.rpc('class_calendar_feed', { p_token: token });
   if (error) {
     console.error('class_calendar_feed falhou:', error.code, error.message);

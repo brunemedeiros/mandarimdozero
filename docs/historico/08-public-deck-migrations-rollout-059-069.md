@@ -335,3 +335,15 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 
 - `shared/supabase_migrations/104_server_notifications_en.sql` (a 103 é `103_class_calendar_feed`, de outra conversa). Sem DROP.
 - Staging e produção: 2026-10-15, arquivo inteiro, nome `104_server_notifications_en`. Detalhes: `docs/historico/19-amigos-em-dupla.md`.
+
+## 105 -- Link de agenda com senha curta (2026-10-15)
+
+- `shared/supabase_migrations/105_calendar_feed_short_token.sql`: senha de 16 caracteres (alfabeto sem i/l/o/0/1,
+  `_calendar_feed_new_token()`), restrição aceita 64 hex (antiga) ou 16; `my_calendar_feed_token` troca a antiga
+  sozinha; `class_calendar_feed_lang(text)` (idioma do site do dono, `_ui_lang`). Única parte com DROP: troca da restrição.
+- Edge Function `class-calendar-feed` v2: senha no caminho (`/class-calendar-feed/<senha>`, para o Netlify) ou `?t=`.
+- Teste local: `tests/aulas-presenca/run.sh` (105 14/14); `.ics` 22/22. Staging: 105 aplicada e função v2 (2026-10-15),
+  testado ponta a ponta (200 text/calendar, `.ics` opcional, senha inválida 404, `?lang=en`).
+- Produção: pendente (aguardando autorização). Domínio `agenda.profbrune.com.br` (Netlify):
+  `docs/agenda-netlify-passo-a-passo.md`.
+

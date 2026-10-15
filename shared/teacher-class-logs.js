@@ -248,9 +248,13 @@ function classCalendarMonthRange(year, month){
 // ---------- Link de agenda (103): assinatura ICS no Google Agenda / Apple / Outlook ----------
 // 1 link por conta (my_calendar_feed_token); a Edge Function class-calendar-feed devolve o .ics. Professora vê as aulas
 // que deu; aluno, as dele e as das turmas. Grátis para quem tem aulas (não há Premium aqui).
+// Endereço bonito (105): agenda.profbrune.com.br/<senha>, repassado pelo Netlify para a Edge Function
+// (infra/agenda-netlify). Fica vazio até o domínio estar no ar; aí o link sai direto do Supabase, também sem ?t=.
+// O idioma do .ics vem do site do dono do link (o servidor decide), então a URL não leva &lang.
+const CALENDAR_FEED_HOST = '';
 function calendarFeedURL(token){
-  const en = typeof getUiLang === 'function' && String(getUiLang() || '').toLowerCase().startsWith('en');
-  return `${SUPABASE_URL}/functions/v1/class-calendar-feed?t=${encodeURIComponent(token)}${en ? '&lang=en' : ''}`;
+  const t = encodeURIComponent(token);
+  return CALENDAR_FEED_HOST ? `${CALENDAR_FEED_HOST}/${t}` : `${SUPABASE_URL}/functions/v1/class-calendar-feed/${t}`;
 }
 async function fetchCalendarFeedToken(regenerate){
   const { data, error } = await supabaseClient.rpc('my_calendar_feed_token', { p_regenerate: !!regenerate });
