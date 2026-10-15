@@ -17,7 +17,8 @@ const path = require('path');
 const vm = require('vm');
 
 const APP_JS_PATH = path.join(__dirname, '..', 'app.js');
-const SRC = fs.readFileSync(APP_JS_PATH, 'utf8');
+// E4: parte do app.js passou para shared/core/*.js (carregado antes do app.js); o teste enxerga os dois.
+const SRC = require('../../tests/e4/app-source').withCore(fs.readFileSync(APP_JS_PATH, 'utf8'));
 
 function extractBlock(beginMarker, endMarker){
   const start = SRC.indexOf(beginMarker);
@@ -38,8 +39,12 @@ function runBlockAndExport(block, names){
   return sandbox.__exports;
 }
 
+// E4: acceptedForms passou para shared/core (fora do bloco marcado); entra junto com o bloco.
+const CORE_SRC = require('../../tests/e4/app-source').coreText();
+const acceptedFormsStart = CORE_SRC.indexOf('function acceptedForms(');
+const ACCEPTED_FORMS_FN = CORE_SRC.slice(acceptedFormsStart, CORE_SRC.indexOf('\n}\n', acceptedFormsStart) + 3);
 const { normalizeLoose, acceptedForms } = runBlockAndExport(
-  extractBlock('// BEGIN accent-answer-logic', '// END accent-answer-logic'),
+  extractBlock('// BEGIN accent-answer-logic', '// END accent-answer-logic') + '\n' + ACCEPTED_FORMS_FN,
   ['normalizeLoose', 'acceptedForms']
 );
 const { normalizeDictationWord, evaluateDictation, frenchNumberWords, classifyDictationError, updateDictationRecord, sanitizeDictationRecord, dictationWrongWords, splitDictationSentences, dictationSentenceErrorFlags } = runBlockAndExport(

@@ -190,7 +190,11 @@ def _pt_gender(text: str) -> str:
         out.append(text[pos:end])
         return "".join(out)
 
-    return text[:start] + build(0) + ", " + build(1) + text[end:]
+    # A 2a forma repete o trecho: se a frase abre com maiúscula ("Bem-vindo(a) à casa"), a repetição vai em minúscula.
+    second = build(1)
+    if second[:1].isupper():
+        second = second[:1].lower() + second[1:]
+    return text[:start] + build(0) + ", " + second + text[end:]
 
 
 _PT_UNITS = ["", "primeiro", "segundo", "terceiro", "quarto", "quinto", "sexto", "sétimo", "oitavo", "nono"]
