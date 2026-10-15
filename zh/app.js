@@ -85,41 +85,6 @@ const FEEDBACK_SOUND_KEY = 'mandarim_feedback_sound';
 let feedbackAudioCtx = null;
 
 
-// Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
-// API do navegador — qualidade consistente pra todo aluno, independente do
-// SO/navegador. Ver audio-manifest.js (texto -> arquivo) e speakChinese().
-function playPregeneratedAudio(file, btnEl, isAutoplay){
-  stopExerciseAudio();
-  const audio = new Audio('audio/' + file);
-  exerciseAudioEl = audio;
-  if (btnEl){ btnEl.classList.add('speaking'); LAST_AUDIO_BTN = btnEl; }
-  const clear = () => {
-    if (btnEl) btnEl.classList.remove('speaking');
-    if (exerciseAudioEl === audio) exerciseAudioEl = null;
-  };
-  audio.addEventListener('ended', clear);
-  audio.addEventListener('error', () => {
-    clear();
-    showToast(t('toast.audioPlayFailed'));
-    trackTechnicalError('audio_load_failed', { file });
-  });
-  audio.play().catch(() => {
-    clear();
-    // Autoplay bloqueado pelo navegador (comum em mobile -- o clique em
-    // "Continuar" que dispara o próximo exercício quebra a "janela" de
-    // gesto do usuário que o play() automático depende) -- diferente de um
-    // erro real de arquivo/rede, por
-    // isso um aviso mais brando em vez do toast de erro acima: basta tocar
-    // manualmente no botão pra funcionar. Só conta como falha TÉCNICA
-    // quando NÃO é autoplay -- um clique manual que falha é sempre
-    // inesperado; autoplay bloqueado é comportamento normal do navegador,
-    // não um bug, e contá-lo inflaria "erros" com algo que acontece toda
-    // sessão em boa parte dos celulares.
-    if (isAutoplay) showToast(t('toast.audioTapSpeaker'));
-    else trackTechnicalError('audio_play_failed', { file });
-  });
-}
-
 // Fase 7d (ver CLAUDE.md) -- reprodução PURA de áudio (mp3 pré-gerado ou
 // Web Speech API), sem o efeito colateral de analytics (registerAudioPlay).
 // Extraída de dentro do que era o corpo de speakChinese() -- byte a byte o
@@ -227,13 +192,6 @@ if (TTS.supported){
   }, 10000);
 }
 
-// Gera o HTML de um botão de áudio; texto chinês vai em data-speak (evita
-// problemas de aspas dentro do atributo onclick ao usar addEventListener depois)
-function audioBtnHTML(hanziText, extraClass){
-  const safe = hanziText.replace(/"/g, '&quot;');
-  return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="${t('zh.audio.listenPronunciation')}" title="${t('zh.audio.listenPronunciation')}">🔊</button>`;
-}
-
 
 // ---------- Ordem dos traços (Hanzi Writer) — modo animação ----------
 const HANZI_WRITER_SUPPORTED = typeof HanziWriter !== 'undefined';
@@ -330,24 +288,6 @@ document.getElementById('stroke-modal').addEventListener('click', (e) => {
     document.getElementById('stroke-modal').style.display = 'none';
   }
 });
-
-// ---------- Construção do banco de cartões a partir do content.js ----------
-// Cada cartão SRS = 1 item de vocabulário (frente: pinyin, verso: caractere + tradução)
-function buildCardsFromUnits(units, appKey = 'mandarim'){
-  // K2-C: cada palavra vira uma Note nativa `normal_reversed` com dois
-  // CardInstances (A = id legado, B = `-b`), montados por
-  // shared/study-trail-model.js sobre o motor existente. appKey tem default
-  // literal: este construtor roda no init de STATE, antes de `const APP_KEY`.
-  const cards = [];
-  units.forEach(u => {
-    u.vocab.forEach((v, idx) => {
-      buildStudyWordCards(u, v, idx, appKey).forEach(c => cards.push(c));
-    });
-  });
-  // Cartões "Na frase": 1 por frase de exemplo do curso (shared/study-trail-model.js).
-  buildStudyPhraseCards(units, appKey).forEach(c => cards.push(c));
-  return cards;
-}
 
 
 // Um cartão SRS por caractere (do banco completo de hanzi), reaproveitando a mesma estrutura de
@@ -943,30 +883,6 @@ const LEVEL_DESCRIPTIONS = {
   HSK1: { get tier(){ return t('level.tier.beginner'); }, get text(){ return t('zh.level.HSK1.text'); } }
 };
 
-// Lembrete local best-effort: só dispara se a pessoa tiver o app aberto numa
-// janela de ~30min depois do horário escolhido, com permissão já concedida —
-// não existe servidor de push aqui, então não há aviso quando o app está
-// fechado ou o navegador nem está aberto.
-function maybeSendStudyReminder(){
-  const goal = STATE.studyGoal;
-  if (!goal.notifications || !goal.dailyLessonsGoal) return;
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-
-  const now = new Date();
-  if (!goal.days[DAY_KEY_BY_JS_INDEX[now.getDay()]]) return;
-
-  const scheduled = new Date(now);
-  scheduled.setHours(goal.hour, goal.minute, 0, 0);
-  const diffMin = (now - scheduled) / 60000;
-  if (diffMin < 0 || diffMin > 30) return;
-
-  if (localStorageSafeGet('mandarim_last_study_notif') === todayStr()) return;
-  new Notification(t('zh.reminder.title'), {
-    body: tp('zh.reminder.body', goal.dailyLessonsGoal),
-    icon: 'icons/icon-192.png'
-  });
-  localStorageSafeSet('mandarim_last_study_notif', todayStr());
-}
 
 // ---------- Lembrete de revisão acumulada (estilo Busuu) ----------
 // Pop-up não bloqueante no rodapé, avisando que há palavras vistas em lições
@@ -1731,64 +1647,6 @@ function currentStepDefs(u){
 const ACQ_BLOCK_SIZE = 3;
 
 
-function freshAcquisitionState(unitId, unit){
-  if (isLessonUnit(unit)){
-    const lesson = currentLesson(unit);
-    if (!STATE.unitProgress[unitId].lessonMisses) STATE.unitProgress[unitId].lessonMisses = {};
-    return {
-      unitId,
-      lessonIdx: currentLessonIdx(unitId),
-      blocks: (lesson.vocabIdx && lesson.vocabIdx.length) ? [lesson.vocabIdx] : [],
-      blockIdx: 0,
-      // Lição 1 da unidade começa direto em 'intro'; a partir da 2ª, uma
-      // "ponte" curta (reconhecer 1-2 itens da lição anterior) roda antes --
-      // ver startBridgeQueue. Nunca mistura TODAS as lições anteriores
-      // (isso é papel do SRS agora, não da sessão de aquisição).
-      phase: currentLessonIdx(unitId) > 0 ? 'bridge' : 'intro',
-      introIdx: 0,
-      // Acumula por UNIDADE (persistido em unitProgress.lessonMisses,
-      // mesma referência -- não uma cópia), não só pela sessão local, pra
-      // alimentar a Revisão dos Erros dimensionada no Ponto de verificação
-      // no fim da unidade. Resetado só quando a unidade é concluída.
-      wordMisses: STATE.unitProgress[unitId].lessonMisses,
-      introduced: {},
-      // Acerto/total acumulado das fases realmente avaliadas desta lição
-      // (checkpoint + practice/mixed -- NUNCA a ponte com a lição anterior,
-      // que testa recall de conteúdo já ensinado antes, não desta lição).
-      // Usado em finishCurrentLesson pra dar uma nota de verdade a uma
-      // lição intermediária, que antes nunca contava pra desafios de nota
-      // (ex: "Pontue mais de 80% em N lições") -- só o Ponto de verificação
-      // do fim da unidade contava, o que na prática deixava esses desafios
-      // quase impossíveis de bater num dia normal de estudo por lições.
-      lessonScore: { correct: 0, total: 0 },
-      // XP real da tela "Lição concluída" (Fase 1/3 da tarefa de conclusão
-      // de lição/unidade): STATE.xp só cresce dentro de addXP() (nenhum
-      // outro lugar escreve nele durante uma sessão, conferido), então o
-      // delta contra este valor no momento em que a lição termina é
-      // exatamente o XP concedido NESTA lição -- sem duplicar nenhum
-      // cálculo paralelo, só lendo o que o motor já concedeu de verdade.
-      xpAtLessonStart: STATE.xp
-    };
-  }
-  return {
-    unitId,
-    blocks: buildAcquisitionBlocks(unit),
-    blockIdx: 0,
-    phase: 'intro', // 'intro' | 'checkpoint' | 'practice' | 'mixed'
-    introIdx: 0,
-    xpAtLessonStart: STATE.xp,
-    // Contagem de erro LOCAL à sessão (não é o mesmo que card.lapses do SM-2,
-    // que é histórico entre sessões) -- usada só pra decidir, dentro desta
-    // sessão, que palavra merece reaparecer mais e entrar priorizada na
-    // consolidação final. Ver ETAPA 7 / buildExerciseSet.
-    wordMisses: {},
-    // "Apresentada" != "aprendida": isto só registra que a palavra já foi
-    // mostrada nesta sessão (pra eventual UI/telemetria futura); o sinal de
-    // aprendizagem de verdade continua sendo card.reps>0 (SM-2), inalterado.
-    introduced: {}
-  };
-}
-
 const STEP_STATE = {
   currentStep: 0,
   acq: { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {}, lessonScore: { correct: 0, total: 0 }, xpAtLessonStart: 0 },
@@ -2059,56 +1917,6 @@ function buildExerciseHint(ex, unit){
       : t('zh.hint.trueFalseDefault');
   }
   return null;
-}
-
-// ---------- "Não sei" / dica / ver resposta (mecânica compartilhada) ----------
-// "Não sei" preserva o esforço de recuperação: existe desde o início do
-// exercício (não só depois de um erro), mas NUNCA é tratado como resposta
-// errada -- não conta erro, não conta acerto. Ao clicar, o próprio botão
-// "Não sei" é SUBSTITUÍDO (não fica ao lado de outro controle) pelo bloco da
-// dica, no mesmo lugar em que o aluno pediu ajuda -- sem pular pro topo da
-// tela, sem exigir que ele procure a dica em outro lugar. Desse bloco saem
-// duas ações: "Tentar novamente" (fecha a dica, a pergunta continua ali,
-// intacta) ou "Ver resposta" (única forma de finalizar sem ter acertado
-// sozinho -- sem XP, sem contar como acerto, com a mesma explicação/retomada
-// de conteúdo usada quando o aluno erra de verdade).
-function wireDontKnowButton(contentEl, ex, onRevealAnswer){
-  const btn = contentEl.querySelector('#exercise-dontknow-btn');
-  if (!btn) return;
-  const row = btn.parentElement;
-  btn.addEventListener('click', () => {
-    if (STEP_STATE.exerciseAnswered || ex.askedDontKnow) return;
-    ex.askedDontKnow = true;
-    const unit = UNITS.find(u => u.id === STATE.currentUnitId);
-    const hintText = buildExerciseHint(ex, unit);
-    btn.outerHTML = `
-      <div class="inline-hint-block" id="inline-hint-block">
-        ${hintText ? `
-          <div class="inline-hint-label">${t('zh.hint.label')}</div>
-          <p class="inline-hint-text">${hintText}</p>
-        ` : ''}
-        <div class="inline-hint-actions">
-          <button class="btn btn-secondary inline-hint-retry-btn" id="inline-hint-retry-btn">${t('zh.hint.retry')}</button>
-          <button class="btn btn-secondary exercise-reveal-btn" id="exercise-reveal-btn">${t('zh.hint.reveal')}</button>
-        </div>
-      </div>
-    `;
-    const block = row.querySelector('#inline-hint-block');
-    block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    block.querySelector('#inline-hint-retry-btn').addEventListener('click', () => {
-      block.remove();
-    });
-    block.querySelector('#exercise-reveal-btn').addEventListener('click', () => {
-      if (STEP_STATE.exerciseAnswered) return;
-      ex.revealed = true;
-      // O painel "Resposta revelada" (via onRevealAnswer) já cumpre a função
-      // de "tentar de novo" ou "ver resposta" -- remove as duas ações daqui
-      // pra não deixar "Tentar novamente" como um controle sem sentido
-      // depois que a resposta já foi revelada.
-      block.querySelector('.inline-hint-actions')?.remove();
-      onRevealAnswer();
-    });
-  });
 }
 
 
@@ -2525,40 +2333,6 @@ function dlgHighlightPinyin(c, p, terms){
     out += escapeHTML(p.slice(last, a)) + `<span class="dlg-new-py">${escapeHTML(p.slice(a, b))}</span>`; last = b;
   });
   return out + escapeHTML(p.slice(last));
-}
-
-// Toca UMA fala e resolve quando ela termina: true = terminou, false =
-// interrompida/erro, 'blocked' = o navegador bloqueou o autoplay.
-function dlgPlayLine(text){
-  return new Promise(resolve => {
-    registerAudioPlay();
-    stopExerciseAudio();
-    const file = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
-    if (file){
-      const a = new Audio('audio/' + file);
-      exerciseAudioEl = a;
-      let done = false;
-      const fin = v => { if (done) return; done = true; if (exerciseAudioEl === a) exerciseAudioEl = null; resolve(v); };
-      a.addEventListener('ended', () => fin(true));
-      a.addEventListener('pause', () => fin(a.ended));
-      a.addEventListener('error', () => fin(false));
-      a.play().catch(() => fin('blocked'));
-      return;
-    }
-    if (!TTS.supported) return resolve(false);
-    if (!TTS.voice) loadChineseVoice();
-    if (!TTS.voice) return resolve(false);
-    window.speechSynthesis.resume();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'zh-CN'; u.voice = TTS.voice; u.rate = 0.85;
-    let started = false, done = false;
-    const fin = v => { if (done) return; done = true; resolve(v); };
-    u.onstart = () => { started = true; };
-    u.onend = () => fin(true);
-    u.onerror = () => fin(false);
-    window.speechSynthesis.speak(u);
-    setTimeout(() => { if (!started){ window.speechSynthesis.cancel(); fin(false); } }, 1800);
-  });
 }
 
 
@@ -4062,39 +3836,6 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
   });
 }
 
-// Anima um clone do bloco escolhido "voando" da posição de origem
-// (sourceRect, medido ANTES do slot existir) até o slot de destino recém
-// criado -- estilo Duolingo. Sem isso o bloco só sumia do banco e o
-// pinyin/hanzi apareciam prontos no slot, sem nenhuma transição visual
-// entre os dois. html preserva a estrutura pinyin+hanzi em duas linhas
-// (não dá pra usar textContent aqui como no francês -- ver .reorder-block
-// acima, cada bloco tem dois <div> internos).
-function flyBlockToSlot(sourceRect, html, targetSlotEl){
-  if (!targetSlotEl || prefersReducedMotion()) return;
-  const endRect = targetSlotEl.getBoundingClientRect();
-  const clone = document.createElement('div');
-  clone.className = 'reorder-fly-clone';
-  clone.innerHTML = html;
-  clone.style.left = `${sourceRect.left}px`;
-  clone.style.top = `${sourceRect.top}px`;
-  clone.style.width = `${sourceRect.width}px`;
-  clone.style.height = `${sourceRect.height}px`;
-  document.body.appendChild(clone);
-  // Esconde o slot real enquanto o clone "voa" por cima -- revelado de novo
-  // logo abaixo, cross-fade com o clone sumindo, não um corte seco.
-  targetSlotEl.style.visibility = 'hidden';
-
-  requestAnimationFrame(() => {
-    clone.style.transform = `translate(${endRect.left - sourceRect.left}px, ${endRect.top - sourceRect.top}px)`;
-    clone.style.width = `${endRect.width}px`;
-    clone.style.height = `${endRect.height}px`;
-  });
-  setTimeout(() => {
-    targetSlotEl.style.visibility = '';
-    clone.style.opacity = '0';
-  }, 200);
-  setTimeout(() => clone.remove(), 350);
-}
 
 function renderReorderExercise(ex, contentEl, nextBtn, total){
   const correctOrder = ex.phrase.blocks;
@@ -4349,31 +4090,6 @@ const MATCH_STATE = {
   attempts: 0,
   busy: false
 };
-
-
-function renderMatchGame(){
-  const el = document.getElementById('match-review-content');
-
-  if (MATCH_STATE.pairs.length < 4){
-    el.innerHTML = `
-      <div class="review-empty">
-        <div class="big-emoji">🧩</div>
-        <h3>${t('review.insufficientTitle')}</h3>
-        <p>${t('review.match.insufficientSome')}</p>
-      </div>
-    `;
-    return;
-  }
-
-  el.innerHTML = `
-    <div class="match-header">
-      <span class="match-pairs">${t('zh.review.match.pairs', { done: MATCH_STATE.matchedCount, total: MATCH_STATE.pairs.length })}</span>
-      <span class="match-attempts">${t('zh.review.match.attempts', { n: MATCH_STATE.attempts })}</span>
-    </div>
-    <div class="match-grid" id="match-grid"></div>
-  `;
-  renderMatchTiles();
-}
 
 
 function renderSpeedReview(){
@@ -5178,70 +4894,6 @@ function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
     setTimeout(() => showToast(t('zh.toast.unitDone')), 450);
   }
   saveState();
-}
-
-
-// ---------- Gráfico de linha: palavras aprendidas ao longo do tempo ----------
-// Soma vocabulário + hanzi por data de "primeira vez aprendida" (firstLearnedDate),
-// acumulando dia a dia, para mostrar a curva de crescimento do vocabulário total.
-function renderProgressLineChart(){
-  const wrap = document.getElementById('progress-line-chart-wrap');
-  if (!wrap) return;
-
-  const allCards = [...STATE.cards, ...STATE.hanziCards];
-  // K2-E: vocabulário da trilha por PALAVRA (A+B = 1); hanzi seguem por card.
-  const learnedDates = [...wordLevelFirstLearnedDates(STATE.cards), ...STATE.hanziCards.filter(c => c.firstLearnedDate).map(c => c.firstLearnedDate)];
-
-  if (!learnedDates.length){
-    wrap.innerHTML = `<div class="manual-empty" style="padding:30px 20px;"><p>${t('zh.progress.chartEmpty')}</p></div>`;
-    return;
-  }
-
-  // Conta quantas palavras foram aprendidas em cada dia, depois ordena por data
-  const countByDate = {};
-  learnedDates.forEach(d => { countByDate[d] = (countByDate[d] || 0) + 1; });
-  const sortedDates = Object.keys(countByDate).sort();
-
-  // Constrói a curva acumulada
-  let running = 0;
-  const points = sortedDates.map(d => {
-    running += countByDate[d];
-    return { date: d, total: running };
-  });
-
-  const W = 600, H = 220, PAD = 36;
-  const maxVal = points[points.length - 1].total;
-  const minVal = 0;
-
-  const xStep = points.length > 1 ? (W - PAD*2) / (points.length - 1) : 0;
-  const yScale = (val) => H - PAD - ((val - minVal) / (maxVal - minVal || 1)) * (H - PAD*2);
-
-  const pathD = points.map((p, i) => {
-    const x = PAD + i * xStep;
-    const y = yScale(p.total);
-    return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-  }).join(' ');
-
-  // Área preenchida sob a linha
-  const areaD = pathD + ` L ${(PAD + (points.length-1)*xStep).toFixed(1)} ${H-PAD} L ${PAD} ${H-PAD} Z`;
-
-  // Labels de data: mostra só início, meio e fim para não poluir
-  const labelIndices = points.length > 1 ? [0, Math.floor((points.length-1)/2), points.length-1] : [0];
-  const dateLabels = labelIndices.map(i => {
-    const [y,m,d] = points[i].date.split('-');
-    return { x: PAD + i * xStep, text: `${d}/${m}` };
-  });
-
-  wrap.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" class="progress-line-svg">
-      <line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" class="chart-axis"/>
-      <path d="${areaD}" class="chart-area"/>
-      <path d="${pathD}" class="chart-line"/>
-      ${points.map((p,i) => `<circle cx="${(PAD + i*xStep).toFixed(1)}" cy="${yScale(p.total).toFixed(1)}" r="3" class="chart-dot"><title>${t('zh.progress.chartPoint', { date: p.date, n: p.total })}</title></circle>`).join('')}
-      ${dateLabels.map(l => `<text x="${l.x.toFixed(1)}" y="${H-10}" class="chart-label" text-anchor="middle">${l.text}</text>`).join('')}
-    </svg>
-    <div class="chart-total">${t('zh.progress.chartTotal')} <strong>${maxVal}</strong> ${t('zh.progress.chartTotalSuffix')}</div>
-  `;
 }
 
 
