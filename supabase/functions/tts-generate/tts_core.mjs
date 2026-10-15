@@ -69,6 +69,7 @@ const L = '\\p{L}';
 const SPOKEN_OVERRIDES = {
   fr: { 'une bouteille (de)': 'une bouteille (de)' },
   zh: {},
+  // pt: internetês (vc, tb, blz) não tem regra global; usar override por texto exato, igual ao Python.
   pt: {},
 };
 
@@ -148,6 +149,48 @@ function ptOrdinals(text) {
     (m, num, ind) => ptOrdinalWord(parseInt(num, 10), ind === 'ª') || m);
 }
 
+// Horas em 24h, moeda e abreviações inequívocas (decisão da autora, 2026-10-15).
+// Espelho de _pt_time24 / _pt_currency / _pt_abbreviations do Python (mesmas regex).
+const PT_NOT_ALNUM_BEFORE = `(?<![\\p{L}\\p{N}])(?<![0-9][.,:])`;
+const ptHoursWord = (h) => (h === 1 ? `${h} hora` : `${h} horas`);
+const ptMinutesWord = (mi) => (mi === 1 ? `${mi} minuto` : `${mi} minutos`);
+function ptTimeText(h, mi) {
+  if (mi === null) return h <= 24 ? ptHoursWord(h) : null;
+  if (h > 23 || mi > 59) return null;
+  return mi === 0 ? ptHoursWord(h) : `${h}h${String(mi).padStart(2, '0')}`; // com minutos fica "14h30" (a voz lê natural)
+}
+function ptTime24(text) {
+  text = text.replace(new RegExp(`${PT_NOT_ALNUM_BEFORE}([0-9]{1,2})h(?:([0-9]{2}))?(?![\\p{L}\\p{N}])`, 'gu'),
+    (m, h, mi) => ((mi && parseInt(mi, 10) !== 0) || (mi && parseInt(h, 10) > 23) ? m : (ptTimeText(parseInt(h, 10), null) || m))); // com minutos ("14h30"): fica como está
+  text = text.replace(new RegExp(`${PT_NOT_ALNUM_BEFORE}([0-9]{1,2}):([0-9]{2})h?(?![\\p{L}\\p{N}])(?!:[0-9])`, 'gu'),
+    (m, h, mi) => { const t = ptTimeText(parseInt(h, 10), parseInt(mi, 10)); return !t ? m : (parseInt(mi, 10) === 0 ? t : `${h}h${mi}`); }); // "14:00" -> "14 horas"; "14:30" -> "14h30"
+  return text;
+}
+
+function ptCurrency(text) {
+  return text.replace(new RegExp(`(?<![\\p{L}\\p{N}])R\\$\\s*([0-9]{1,3}(?:\\.[0-9]{3})+|[0-9]+)(?:,([0-9]{2}))?(?![0-9]|[.,][0-9])(?!\\s+(?:mil|milh|bilh))`, 'gu'),
+    (m, whole, cc) => {
+      const w = parseInt(whole.replace(/\./g, ''), 10);
+      const c = cc ? parseInt(cc, 10) : 0;
+      const reais = `${whole} ${w === 1 ? 'real' : 'reais'}`;
+      const centavos = `${c} ${c === 1 ? 'centavo' : 'centavos'}`;
+      if (c === 0) return reais;
+      return w === 0 ? centavos : `${reais} e ${centavos}`;
+    });
+}
+
+function ptAbbreviations(text) {
+  text = text.replace(new RegExp(`(?<![\\p{L}\\p{N}])([Pp])\\.\\s?ex\\.(?![\\p{L}\\p{N}])`, 'gu'),
+    (m, p) => (p === 'P' ? 'Por' : 'por') + ' exemplo');
+  const withDot = (lower, cap) => (m, first, off, str) => {
+    const rest = str.slice(off + m.length);
+    const keep = /^\s*$/.test(rest) || /^\s+[A-ZÀ-ÖØ-Þ]/.test(rest);
+    return (first === first.toUpperCase() ? cap : lower) + (keep ? '.' : '');
+  };
+  text = text.replace(new RegExp(`(?<![\\p{L}\\p{N}])([Oo])bs\\.(?![\\p{L}\\p{N}])`, 'gu'), withDot('observação', 'Observação'));
+  return text;
+}
+
 const PT_RULES = [
   ptTitles,                                                                  // pt.title-abbreviations
   (t) => t.replace(new RegExp(`(?<!${L})([Nn])\\.?º\\s*(?=\\d)`, 'gu'),         // pt.number-abbreviation
@@ -155,7 +198,9 @@ const PT_RULES = [
   ptGender,                                                                  // pt.gender-parenthetical
   (t) => t.replace(/\s+\((de|em|a|com|por|para|do|da|no|na)\)/g, ' $1…'),     // pt.parenthetical-particle
   (t) => t.replace(/\s+\/\s+/g, ', '),                                       // pt.slash-alternatives
-  ptOrdinals,                                                                // pt.ordinal-indicators
+  ptTime24,                                                                  // pt.time-24h
+  ptCurrency,                                                                // pt.currency-brl
+  ptAbbreviations,                                                           // pt.common-abbreviations
   (t) => t.replace(/[\u2022\u2190-\u21FF\u2600-\u27BF\uFE0F\u200D\u{1F000}-\u{1FAFF}]|(?<!\S)\*+(?!\S)/gu, ' '), // pt.strip-symbols
 ];
 

@@ -18,8 +18,9 @@ const STUB = `(function(){
   const client = { auth: { getSession: async () => ({ data: { session: null } }), onAuthStateChange: () => ({ data: { subscription: { unsubscribe(){} } } }), signOut: async () => ({}) },
     from: () => b, channel: () => ({ on(){ return this; }, subscribe(){ return this; } }),
     storage: { from: () => ({}) }, functions: { invoke: async () => ({ data: null, error: null }) },
-    rpc: async (name, args) => { window.__rpcCalls = (window.__rpcCalls || 0) + 1;
+    rpc: async (name, args) => {
       if (name !== 'get_teacher_student_metrics') return { data: null, error: null };
+      window.__rpcCalls = (window.__rpcCalls || 0) + 1;
       return { data: window.__FIX[args.p_student_id] || { error: 'not_authorized' }, error: null }; } };
   window.supabase = { createClient: () => client };
 })();`;
@@ -50,23 +51,30 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       fetchAllProfiles = async () => [];
       switchTab('teacher-panel'); switchTeacherPanelSection('students');
     }, appKey);
-    await page.waitForSelector('[data-toggle-metrics]');
-    const open = async (n) => { await page.click(`[data-toggle-metrics="${n}"]`); await page.waitForFunction((n) => { const t = document.getElementById('metrics-link-' + n).textContent; return t && !t.includes('Carregando'); }, n); return page.evaluate((n) => document.getElementById('metrics-link-' + n).innerText, n); };
+    await page.waitForSelector('[data-abrir-aluno]');
+    // A ficha do aluno (Alunos > Abrir) mostra o bloco "Cartões que você criou"; o resto da ficha não importa aqui.
+    const open = async (n) => {
+      await page.click(`[data-abrir-aluno="${n}"]`);
+      await page.waitForFunction(() => { const b = document.querySelector('[data-bloco-criados]'); return b && !b.querySelector('.p-spinner'); });
+      const txt = await page.evaluate(() => document.querySelector('[data-bloco-criados]').innerText);
+      await page.click('[data-voltar-alunos]'); await page.waitForSelector('[data-abrir-aluno]');
+      return txt;
+    };
 
-    const t1 = await open(1); L('sem conteúdo: mensagem vazia', t1.includes('ainda não criou nenhum cartão'), t1);
-    const t2 = await open(2); L('nada estudado: 0 de 2, 2 não iniciados, 0 fracos', t2.includes('Conteúdos estudados: 0 de 2') && t2.includes('2 não iniciados') && /0 fracos/.test(t2) && t2.includes('2 novos'), t2);
+    const t1 = await open(1); L('sem conteúdo: mensagem vazia', t1.includes('Nenhum cartão criado para Aluno 1 ainda'), t1);
+    const t2 = await open(2); L('nada estudado: 0 de 2, 2 não iniciados, 0 fracos', /Conteúdos estudados\s*0 de 2 \(2 não iniciados\)/.test(t2) && /0 fracos/.test(t2) && t2.includes('2 novos'), t2);
     L('nada estudado: "fracos" não inclui não iniciados', /2 não iniciados · 0 fracos/.test(t2), t2);
-    const t3 = await open(3); L('Reverse+Cloze+Normal: 3 conteúdos, 6 cartões', t3.includes('3 ativos') && t3.includes('Cartões gerados desses conteúdos: 6'), t3);
+    const t3 = await open(3); L('Reverse+Cloze+Normal: 3 conteúdos, 6 cartões', /Conteúdos criados para este aluno\s*3/.test(t3) && /Cartões gerados\s*6 /.test(t3), t3);
     L('sibling New não rebaixa: 2 estudados de 3; 1 médio 1 forte; Cloze não iniciado', t3.includes('2 de 3') && /1 não iniciados · 0 fracos · 1 médios · 1 fortes/.test(t3), t3);
-    L('N/L/R/Devidos por cartão: 4 novos, 1 aprendendo, 1 para revisar, 2 devidos', t3.includes('4 novos') && t3.includes('1 aprendendo') && t3.includes('1 para revisar') && t3.includes('2 devidos'), t3);
-    const t4 = await open(4); L('arquivado fora do ativo e mostrado como informativo', t4.includes('1 ativos') && t4.includes('Arquivados') && t4.includes('1 conteúdos') && t4.includes('1 cartões') && t4.includes('Cartões gerados desses conteúdos: 1'), t4);
+    L('N/L/R/Vencidos por cartão: 4 novos, 1 aprendendo, 1 para revisar, 2 vencidos', t3.includes('4 novos') && t3.includes('1 aprendendo') && t3.includes('1 para revisar') && t3.includes('2 vencidos'), t3);
+    const t4 = await open(4); L('arquivado fora do ativo e mostrado como informativo', /Conteúdos criados para este aluno\s*1\b/.test(t4) && t4.includes('Arquivados') && t4.includes('1 conteúdo') && t4.includes('1 cartão') && /Cartões gerados\s*1 /.test(t4), t4);
     L('relearning conta como aprendendo; força fraca', t4.includes('1 aprendendo') && /1 fracos/.test(t4), t4);
-    const t5 = await open(5); L('Self e Study com mesmo rowId não entram', t5.includes('Cartões gerados desses conteúdos: 1') && t5.includes('1 para revisar') && t5.includes('0 devidos') && !/Study|trilha/i.test(t5), t5);
+    const t5 = await open(5); L('Self e Study com mesmo rowId não entram', /Cartões gerados\s*1 /.test(t5) && t5.includes('1 para revisar') && t5.includes('0 vencidos') && !/Study|trilha/i.test(t5), t5);
     const t6 = await open(6); L('vários estados: 5 conteúdos, 4 estudados, 1 não iniciado', t6.includes('4 de 5') && /1 não iniciados · 1 fracos · 2 médios · 1 fortes/.test(t6), t6);
-    L('sem XP/streak na tela', !/xp|streak|sequência/i.test(t6 + t3));
-    L('rotulos: conteúdos x cartões', t6.includes('Conteúdos que você criou') && t6.includes('Cartões gerados desses conteúdos'));
-    // cache: abrir de novo não refaz a RPC
-    const calls = await page.evaluate(() => window.__rpcCalls); await page.click('[data-toggle-metrics="6"]'); await page.click('[data-toggle-metrics="6"]');
+    L('sem XP/streak no bloco', !/xp|streak|sequência/i.test(t6 + t3));
+    L('rótulos: conteúdos x cartões', t6.includes('Conteúdos criados para este aluno') && t6.includes('Cartões gerados'));
+    // cache: abrir de novo não refaz a RPC de métricas
+    const calls = await page.evaluate(() => window.__rpcCalls); await open(6);
     L('cache por vínculo: sem nova RPC', (await page.evaluate(() => window.__rpcCalls)) === calls);
     L('nenhum erro de página', errors.length === 0, errors);
     await ctx.close();
