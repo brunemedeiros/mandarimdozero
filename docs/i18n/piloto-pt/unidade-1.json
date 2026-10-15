@@ -36,12 +36,12 @@
     ]
    },
    {
-    "id": "voce-ce-tu",
+    "id": "voce-e-tu",
     "kind": "reality",
     "category": "informal",
     "trigger": { "afterVocabIdx": 6 },
     "blocks": [
-     { "examples": [ { "f": "E você?" }, { "f": "E cê?" } ], "wrapup": true }
+     { "examples": [ { "f": "E você?" } ], "wrapup": true }
     ]
    },
    {
@@ -314,13 +314,12 @@
      ]
     }
    ],
-   "voce-ce-tu": [
+   "voce-e-tu": [
     {
-     "title": "\"Você\", \"cê\" and \"tu\"",
-     "body": "<strong>Você</strong> (roughly \"voh-SAY\") is the everyday word for \"you\" in Brazil. It is not formal: you use it with friends, family and strangers alike. In fast, casual speech it often shrinks to <strong>cê</strong>: <strong>E cê?</strong> You only need to recognize <strong>cê</strong> when you hear it; in the exercises, keep writing <strong>você</strong>. You may also hear <strong>tu</strong>, but in most of the country it's much less common than <strong>você</strong>, so this course uses <strong>você</strong>.",
+     "title": "\"Você\" or \"tu\"?",
+     "body": "<strong>Você</strong> (roughly \"voh-SAY\") is the everyday word for \"you\" in Brazil. It is not formal: you use it with friends, family and strangers alike. You may also hear <strong>tu</strong>, but in most of the country it's much less common than <strong>você</strong>, so this course uses <strong>você</strong>.",
      "examples": [
-      "And you?",
-      "And you? (fast, casual speech)"
+      "And you?"
      ]
     }
    ],
@@ -439,13 +438,13 @@
   "decisoesDaDona": [
    "Rodada 3 (2026-10-15), todas fechadas.",
    "1. Oi / olá entram como tradução direta de hi / hello, sem nota (sai a nota oi-ou-ola).",
-   "2. 'Tudo bem? / Tudo bom?' = how are you? / I'm good, um cartão (normal com reverso); uma nota de realidade com formas de perguntar e de responder. 'Cê' só como reconhecimento; 'valeu', 'e aí' e 'beleza' entram como expressões nesta unidade. Respelling quando relevante.",
+   "2. 'Tudo bem? / Tudo bom?' = how are you? / I'm good, um cartão (normal com reverso); uma nota de realidade com formas de perguntar e de responder. 'Valeu', 'e aí' e 'beleza' entram como expressões nesta unidade (confirmado de novo pela dona). 'Cê' SAI da unidade por completo, nem como reconhecimento (ajuste da dona; vai para a lista de reconhecimento futuro do catálogo, seção 13). Respelling quando relevante.",
    "3. 'obrigado / obrigada' num cartão só; o exercício de digitar aceita as duas formas. Nota: mulheres às vezes dizem 'obrigado' e não é mal visto. Sem marcador de gênero do aluno.",
    "4. 'Bem-vinda!' com hífen, sem 'ao Brasil'; nota de que 'bem-vindo' é comum no dia a dia.",
    "5. Sai a nota de beijo no rosto; fica 'Abraço' como despedida de e-mail.",
    "6. 'Você é de onde?' e 'Sou de Chicago / dos Estados Unidos' vão para a futura unidade de origem; aqui fica 'Eu sou' + nacionalidade (duas formas de gênero no mesmo cartão), sem preposição. Sem marcador de país e de gênero do aluno. Lucas e Emily ficam.",
    "7. Pronomes A1: 'você'; 'tu' só em nota curta, sem regiões. Tabela ensinada: Eu / Você, ele, ela, a gente / Nós / Vocês, eles, elas.",
-   "8. Título descritivo em inglês ('Greetings and introductions'). Em aberto: título como frase aprendida só se virar critério de todas as unidades.",
+   "8. Título 'Greetings and introductions', confirmado pela dona (fechado). Título como frase aprendida não é critério.",
    "9. Sem IPA para o aluno, só respelling para falantes de inglês e nasais descritas em palavras; pronúncia comparando Rio x SP (vozes próximas da paulista); 'Quase' quando faltar acento ou hífen; fontes só SAMBA 1 e 2 e Novo Avenida Brasil.",
    "10. Áudio do diálogo: duas vozes alternando por fala (Emily = pt-BR-Chirp3-HD-Achernar, Lucas = pt-BR-Chirp3-HD-Charon), campo 'voice' em cada fala."
   ],
@@ -456,7 +455,7 @@
    "vocab[3] boa tarde": { "confianca": "alta", "conferir": "" },
    "vocab[4] boa noite = good evening / good night": { "confianca": "alta", "conferir": "" },
    "vocab[5] tudo bem / tudo bom = how are you? / I'm good": { "confianca": "alta", "conferir": "Decisão da dona. O exercício de digitar aceita 'tudo bem' ou 'tudo bom' (acceptedForms divide por '/')." },
-   "vocab[6] e você? = and you?": { "confianca": "alta", "conferir": "Item novo: já aparecia em frases e no diálogo; virou cartão para a nota de você/cê/tu ter gatilho." },
+   "vocab[6] e você? = and you?": { "confianca": "alta", "conferir": "Item novo: já aparecia em frases e no diálogo; virou cartão para a nota de você/tu ter gatilho." },
    "vocab[7] e aí? = hey! / what's up? (casual)": { "confianca": "alta", "conferir": "Entra como expressão (decisão da dona). Tradução 'hey! / what's up?': média-alta." },
    "vocab[8] beleza = all good? / cool! (casual)": { "confianca": "média-alta", "conferir": "Entra como expressão (decisão da dona). Melhor tradução curta em inglês a confirmar." },
    "vocab[9] obrigado / obrigada = thank you": { "confianca": "alta", "conferir": "Um cartão só (decisão da dona); digitar aceita as duas formas." },
@@ -489,7 +488,7 @@
    "concept som-de-bom-dia (pronúncia)": { "confianca": "média-alta", "conferir": "Respelling 'JEE-ah', 'NOY-chee', 'BOH-ah' e d/t palatalizados em SP e no Rio: média-alta, não verificada. 'Bom' nasal e não rima com 'bomb': média-alta. 'Vozes próximas da paulista': decisão da dona." },
    "concept som-de-boa-tarde (pronúncia, Rio x SP)": { "confianca": "média", "conferir": "Nota nova. R de 'tarde': tepe (ou som próximo do r inglês) em SP, fricativo tipo 'h' no Rio. Sem fonte aberta; a professora confirma as aproximações 'TAR-jee' e 'TAHH-jee'. Candidata a sair se a unidade ficar com notas demais." },
    "concept bom-dia-tarde-noite": { "confianca": "média-alta", "conferir": "Sem mudança. Não verificada: a professora confirma." },
-   "concept voce-ce-tu (realidade, informal)": { "confianca": "média", "conferir": "Substitui voce-e-tu e a parte de 'cê' de voce-e-de-onde. 'Você' padrão e não formal: média-alta. 'Cê' só reconhecimento: média-alta. 'Tu' bem menos comum que 'você' na maior parte do país: média (afirmação da dona, sem fonte; sem regiões). Respelling 'voh-SAY': média-alta." },
+   "concept voce-e-tu (realidade, informal)": { "confianca": "média", "conferir": "Nota curta (decisão 7). Substitui a voce-e-tu antiga; 'cê' saiu por completo (ajuste da dona). 'Você' padrão e não formal: média-alta. 'Tu' bem menos comum que 'você' na maior parte do país: média (afirmação da dona, sem fonte; sem regiões). Respelling 'voh-SAY': média-alta." },
    "concept tudo-bem-pergunta-e-resposta (realidade, informal)": { "confianca": "média-alta", "conferir": "Reescrita (decisão 2): formas de perguntar (Tudo bem? / Tudo bom? / Como vai? / Tudo certo? / E aí? / Beleza?) e de responder (Tudo bem! E você? / Tudo ótimo! / Tudo certo! / Tudo tranquilo! / Beleza! / Vou bem sim, e você?). Acrescentei 'Tudo certo?' e 'Tudo tranquilo!' como 'outras'. 'Como vai?' um pouco mais educado: média-alta. Respellings 'TOO-doo bayn', 'ee ah-EE', 'beh-LEH-zah': média-alta." },
    "concept obrigado-obrigada": { "confianca": "alta", "conferir": "Regra (concorda com quem fala) como norma-padrão: alta. Mulheres que às vezes dizem 'obrigado' sem ser mal visto: média-alta (afirmação da dona, sem fonte). Respelling 'oh-bree-GAH-doo': média-alta." },
    "concept valeu (realidade, informal)": { "confianca": "média-alta", "conferir": "Nota nova. 'Valeu' = obrigado informal, igual para homem e mulher: alta. 'Valeu' sozinho como 'obrigado, tchau' na saída: média-alta. Respelling 'vah-LAY-oo': média-alta." },
