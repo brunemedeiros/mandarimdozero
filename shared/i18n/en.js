@@ -2795,7 +2795,6 @@ window.I18N_CATALOG['en'] = {
   'cards.tab.aria': 'Cards sections', // ALTA
   'cards.tab.create': 'Create card', // ALTA
   'cards.tab.list': 'Created cards', // ALTA
-  'cards.tab.bank': 'Review Bank', // ALTA
   'cards.step.who': '1. Who is it for', // ALTA
   'cards.step.type': '2. Card type', // ALTA
   'cards.step.content': '3. Content', // ALTA
@@ -2866,8 +2865,6 @@ window.I18N_CATALOG['en'] = {
   'cards.deck.delete.confirm': 'Delete Deck', // ALTA
   'cards.deck.folders': 'See Decks and cards of {name}', // ALTA
   'cards.deck.newSub': 'New subdeck', // ALTA
-  'cards.bank.title': 'Review Bank', // ALTA
-  'cards.bank.text': 'Cards generated automatically from each student\'s Google Doc will show up here, for you to check, approve or cut before they go to their review. This part is still being moved to the site and is not active yet.', // ALTA
 
   // ---- Banco de Revisão (Professora > Cartões) ----
   'rb.sub.cards': 'Cards', // ALTA

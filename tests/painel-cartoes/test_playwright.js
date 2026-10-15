@@ -30,10 +30,14 @@ async function abrirCartoes(opts){
 
     // ---- quadro e abas ----
     L('tela cheia: sem Ranking ao lado', await p.evaluate(() => getComputedStyle(document.querySelector('.right-cards')).display === 'none'));
-    L('título e 3 abas, com a contagem de ativos', (await p.$$eval('[data-cards-tabs] a', l => l.map(a => a.textContent.trim()))).join('|') === 'Criar cartão|Cartões criados (16)|Banco de Revisão');
-    L('abre em Criar cartão; lista e banco escondidos', await p.isVisible('[data-cards-pane="criar"]') && !(await p.isVisible('[data-cards-pane="lista"]')) && !(await p.isVisible('[data-cards-pane="banco"]')));
-    await p.click('[data-cards-tab="banco"]');
-    L('Banco de Revisão: explica o que vai ser e que ainda não está ativo', (await p.innerText('[data-cards-pane="banco"]')).includes('Google Docs') && (await p.innerText('[data-cards-pane="banco"]')).includes('não está ativa'));
+    L('título e 2 abas, com a contagem de ativos', (await p.$$eval('[data-cards-tabs] a', l => l.map(a => a.textContent.trim()))).join('|') === 'Criar cartão|Cartões criados (16)');
+    L('abre em Criar cartão; a lista fica escondida', await p.isVisible('[data-cards-pane="criar"]') && !(await p.isVisible('[data-cards-pane="lista"]')));
+    // Banco de Revisão: continua com a aparência dele, na sub-navegação "Cartões | Banco de Revisão" do painel (só com a permissão)
+    L('Banco de Revisão: sub-navegação Cartões | Banco de Revisão aparece para quem tem a permissão', await p.isVisible('#admin-cards-subnav') && (await p.$$eval('#admin-cards-subnav [data-cards-sub]', l => l.map(b => b.textContent.trim()).join('|'))) === 'Cartões|Banco de Revisão');
+    await p.click('#admin-cards-subnav [data-cards-sub="bank"]');
+    L('Banco de Revisão: abre o bloco dele e esconde o dos cartões', await p.isVisible('#admin-reviewbank-content') && !(await p.isVisible('#admin-flashcards-content')));
+    await p.click('#admin-cards-subnav [data-cards-sub="cards"]');
+    L('voltar a Cartões: tela nova de volta e o formulário continua montado', await p.isVisible('#admin-flashcards-content') && !(await p.isVisible('#admin-reviewbank-content')) && !!(await p.$('[data-cards-pane="criar"]')));
     await p.click('[data-cards-tab="criar"]');
 
     // ---- criar: estado inicial ----

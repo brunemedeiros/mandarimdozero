@@ -1076,7 +1076,6 @@ async function renderAdminFlashcardsView(){
   wrap.innerHTML = tccShellHTML(S.tab, S._cardsCache.filter(c => c.status === 'active').length, {
     criar: tccCreateHTML({ students, langsPresent, langFilter: S.langFilter, selectedIds: S.studentIds, selected, type: 'normal' }),
     lista: tccListHTML(students, S._cardsCache, S.filtros, S.page, adminCardsListCtx()),
-    banco: tccBankHTML(),
   });
   adminApplyPickerFilters(wrap);
   adminMountCreateEditor();

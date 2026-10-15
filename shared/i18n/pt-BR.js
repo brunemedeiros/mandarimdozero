@@ -2811,7 +2811,6 @@ window.I18N_CATALOG['pt-BR'] = {
   'cards.tab.aria': 'Seções de Cartões',
   'cards.tab.create': 'Criar cartão',
   'cards.tab.list': 'Cartões criados',
-  'cards.tab.bank': 'Banco de Revisão',
   'cards.step.who': '1. Para quem',
   'cards.step.type': '2. Tipo de cartão',
   'cards.step.content': '3. Conteúdo',
@@ -2882,8 +2881,6 @@ window.I18N_CATALOG['pt-BR'] = {
   'cards.deck.delete.confirm': 'Apagar Deck',
   'cards.deck.folders': 'Ver Decks e cartões de {name}',
   'cards.deck.newSub': 'Novo subdeck',
-  'cards.bank.title': 'Banco de Revisão',
-  'cards.bank.text': 'Aqui vão aparecer os cartões gerados automaticamente a partir do Google Docs de cada aluno, para você conferir, aprovar ou cortar antes de irem para a revisão dele. Esta parte ainda está sendo migrada para o site e não está ativa.',
 
   // ---- Banco de Revisão (Professora > Cartões) ----
   'rb.sub.cards': 'Cartões',

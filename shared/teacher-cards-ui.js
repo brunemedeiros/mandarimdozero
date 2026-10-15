@@ -47,17 +47,18 @@ function tccSummary(c){
 
 function tccTabsHTML(tab, count){
   const a = (id, label) => `<a href="#" role="tab" data-cards-tab="${id}"${tab === id ? ' aria-current="page"' : ''}>${tccEsc(label)}</a>`;
-  return `<nav class="p-abas" aria-label="${tccEsc(t('cards.tab.aria'))}">${a('criar', t('cards.tab.create'))}${a('lista', `${t('cards.tab.list')}${count === null || count === undefined ? '' : ` (${count})`}`)}${a('banco', t('cards.tab.bank'))}</nav>`;
+  return `<nav class="p-abas" aria-label="${tccEsc(t('cards.tab.aria'))}">${a('criar', t('cards.tab.create'))}${a('lista', `${t('cards.tab.list')}${count === null || count === undefined ? '' : ` (${count})`}`)}</nav>`;
 }
 
-// panes = { criar, lista, banco } (HTML já pronto); só o da aba atual fica visível, os outros ficam montados e escondidos
-// (o formulário de criação nunca é refeito ao trocar de aba).
+// panes = { criar, lista } (HTML já pronto); só o da aba atual fica visível, o outro fica montado e escondido (o formulário de
+// criação nunca é refeito ao trocar de aba). O Banco de Revisão não é aba daqui: ele aparece na sub-navegação "Cartões | Banco de
+// Revisão" do painel (shared/teacher-panel.js, #admin-reviewbank-content) e mantém a aparência dele.
 function tccShellHTML(tab, count, panes){
   const pane = (id, html) => `<section data-cards-pane="${id}"${tab === id ? '' : ' hidden'}>${html}</section>`;
   return `<div class="painel"><div class="p-pagina" data-tcc="pagina">
     <header class="p-cabecalho"><div><h2>${tccEsc(t('cards.title'))}</h2><span class="p-subtitulo">${tccEsc(t('cards.sub'))}</span></div></header>
     <div data-cards-tabs>${tccTabsHTML(tab, count)}</div>
-    ${pane('criar', panes.criar)}${pane('lista', panes.lista)}${pane('banco', panes.banco)}
+    ${pane('criar', panes.criar)}${pane('lista', panes.lista)}
   </div></div>`;
 }
 
@@ -71,10 +72,6 @@ function tccNoStudentsHTML(){
 function tccFailHTML(){
   return `<div class="painel"><div class="p-pagina"><div class="p-alerta p-alerta--erro" role="alert"><span>${tccEsc(t('cards.fail'))}</span></div></div></div>`;
 }
-function tccBankHTML(){
-  return `<div class="p-vazio"><strong>${tccEsc(t('cards.bank.title'))}</strong><span>${tccEsc(t('cards.bank.text'))}</span></div>`;
-}
-
 /* ---------------- Criar cartão ---------------- */
 
 function tccChipsHTML(selected){

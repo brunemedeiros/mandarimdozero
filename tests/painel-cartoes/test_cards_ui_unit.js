@@ -70,10 +70,10 @@ check('chips: botão de tirar com o id', chips.includes('data-tirar-aluno="s1"')
 
 // ---- abas ----
 const abas = run('tccTabsHTML("lista", 7)');
-check('abas: 3 abas, lista marcada com a contagem', (abas.match(/data-cards-tab=/g) || []).length === 3 && /data-cards-tab="lista" aria-current="page"/.test(abas) && abas.includes('(7)'));
+check('abas: 2 abas, lista marcada com a contagem', (abas.match(/data-cards-tab=/g) || []).length === 2 && /data-cards-tab="lista" aria-current="page"/.test(abas) && abas.includes('(7)'));
 check('abas: sem contagem quando ainda carrega', !run('tccTabsHTML("criar", null)').includes('('));
-const casco = run('tccShellHTML("lista", 7, { criar: "<i>c</i>", lista: "<i>l</i>", banco: "<i>b</i>" })');
-check('quadro: só a aba atual visível', /data-cards-pane="criar" hidden/.test(casco) && /data-cards-pane="banco" hidden/.test(casco) && !/data-cards-pane="lista" hidden/.test(casco));
+const casco = run('tccShellHTML("lista", 7, { criar: "<i>c</i>", lista: "<i>l</i>" })');
+check('quadro: só a aba atual visível', /data-cards-pane="criar" hidden/.test(casco) && !/data-cards-pane="lista" hidden/.test(casco));
 
 // ---- linha e lista ----
 const ctxLista = { canMove: c => c.id === 1, deckLabel: c => 'Deck <x>' };
@@ -95,7 +95,6 @@ check('lista: página fora do limite volta para a última', (run('tccListBodyHTM
 // ---- diálogos ----
 const mv = run('tccMoveDialogHTML(c, "<option value=\\"9\\">Verbos</option>")', { c: card(5) });
 check('mover: janela com o id do cartão e a opção', mv.includes('data-card-id="5"') && mv.includes('Verbos') && mv.includes('id="mover-cartao-deck"'));
-check('banco: avisa que ainda não está ativo', run('tccBankHTML()').includes('não está ativa'));
 
 console.log(`painel-cartoes (peças de tela): ${pass}/${pass + fail} checks`);
 process.exit(fail ? 1 : 0);
