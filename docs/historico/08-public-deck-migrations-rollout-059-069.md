@@ -296,5 +296,5 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - `shared/supabase_migrations/095_friend_suggestions.sql`: `friend_suggestions`, `dismiss_friend_suggestion`, `record_friend_invite`,
   tabelas `friend_suggestion_dismissals` e `friend_invites`, coluna `friend_settings.suggest_me`. Sem DROP.
 - Staging: 2026-10-15 (`095_friend_suggestions` + `095b_friend_suggestions_invited_by`, que é a versão final da função).
-  Produção: pendente de autorização (aplicar o arquivo inteiro).
+  Produção: 2026-10-15, arquivo inteiro, versão `20261015010133`.
 - Detalhes: `docs/historico/17-sugestoes-de-amigos.md`.

@@ -51,4 +51,6 @@ amigos sem usar a agenda do celular. Pedido: "começar pelas sugestões de amigo
 
 - Staging: 095 aplicada em 2026-10-15 (`095_friend_suggestions`) e, em seguida, `095b_friend_suggestions_invited_by`
   (mesma função, já separando "te convidou").
-- Produção: pendente de autorização. O arquivo do repositório já é a versão final.
+- Produção: aplicada em 2026-10-15 (arquivo inteiro, versão `20261015010133`), com autorização da autora. Número conferido antes:
+  a produção ia de 094 direto para 097 a 099 e a 096 está numa branch de outra conversa. Conferido depois: `anon` sem EXECUTE,
+  `authenticated` sem leitura das tabelas novas, `friend_settings` com as mesmas linhas, e a função rodando (só leitura, ROLLBACK).
