@@ -159,3 +159,18 @@ anterior da `notification-cron`.
 - **P6.** E-mails de cadastro/senha (Supabase Auth) em inglês para quem usa o site em inglês: aceita um modelo com condição
   por idioma, que você cola no painel do Supabase?
 - **P7.** Q-06 (regra aberta nos CHECKs): confirma adiar até o 4º idioma, já que `portugues` passa em todos (Dv-4)?
+
+## 7. Andamento (2026-10-15, branch `i18n-pt-en-avisos-emails`, nada aplicado nem publicado)
+
+- **Q4 (modelos de aviso do `portugues`)**: rascunho em inglês pronto e INATIVO. Migration `105_pt_notification_templates_en_draft.sql`
+  (só INSERT, 21 linhas) e tabela de revisão em `docs/i18n/modelos-aviso-pt-en-revisao.md`. Falta a dona revisar, aplicar e ativar, e o
+  deploy da `notification-cron` com `portugues` (Q1) para algo sair.
+- **T7 (e-mails de cadastro e senha)**: modelos bilíngues em `docs/email/supabase/bilingue/` (com `LEIA-ME.md`); o portão grava
+  `user_metadata.ui_language` no cadastro. Falta a dona colar no painel do Supabase depois do merge.
+- **T2 (Mural)**: já estava resolvido pela 104 (frases reconhecidas em `_mural_notify`/`_teacher_notify`), inclusive para
+  `portugues`; não precisa recriar as funções com DELETE. `docs/rollout-sql/106_mural_en_sql_editor.sql` só dá o acabamento do
+  nome de reserva "Professora". Opcional.
+- **T6 (`report-reply-send`)**: mapa com `portugues` e rodapé no idioma do site de quem recebe (`tests/report-reply/test_footer.js`).
+  Falta o deploy (Edge Function só muda depois dele).
+- Fora desta entrega: T1/P2 (sem modelo `en` ativo = sem aviso), Q5, T3 e T10 (convites, outra sessão).
+
