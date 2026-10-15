@@ -77,7 +77,7 @@ PT_CASES = {
     "bem-vindo(a)": "bem-vindo, bem-vinda",
     "livro(s)": "livro, livros",
     "o(a) aluno(a)": "o aluno, a aluna",
-    "Caro(a) professor(a), bom dia.": "Caro professor, Cara professora, bom dia.",
+    "Caro(a) professor(a), bom dia.": "Caro professor, cara professora, bom dia.",
     "professor(es)": "professor, professores",
     "os(as) alunos(as)": "os alunos, as alunas",
     "inglês(a)": "inglês(a)",
@@ -124,6 +124,7 @@ for src, want in PT_CASES.items():
     check(f"pt: {src!r} -> {want!r} (veio {got!r})", got == want)
 check("fr não é afetado por pt", st.to_spoken_text("Bom dia, Sra. Silva, 1º andar", "fr") == "Bom dia, Sra. Silva, 1º andar")
 check("pt não aplica regra do fr", st.to_spoken_text("l'œuf", "pt") == "l'œuf")
+check("pt gênero: 2a forma em minúscula quando a frase abre com maiúscula", st.to_spoken_text("Bem-vindo(a) à nossa casa!", "pt") == "Bem-vindo, bem-vinda à nossa casa!")
 check("explain pt gênero", st.explain_spoken_text("obrigado(a)", "pt") == ["pt.gender-parenthetical"])
 check("regras de pt são só pt", all(r.lang == "pt" for r in st.RULES_BY_LANG["pt"]))
 
