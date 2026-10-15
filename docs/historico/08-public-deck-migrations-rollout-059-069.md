@@ -354,3 +354,18 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   (md5 igual), review_bank_students 5 (md5 igual sem a coluna nova), reviews 0.
 - Produção: colada pela autora no SQL Editor em 2026-10-15 (autorizada). Conferido: as 8 funções, índice novo, gatilho, acks com RLS e sem grant
   para anon/authenticated, approve/pendentes na versão nova; 703 cartões (697 do Banco) e 2.134 itens intactos, nenhuma duplicata.
+
+## 107 -- Link de agenda com senha curta (2026-10-15)
+
+- `shared/supabase_migrations/107_calendar_feed_short_token.sql`: senha de 16 caracteres (alfabeto sem i/l/o/0/1,
+  `_calendar_feed_new_token()`), restrição aceita 64 hex (antiga) ou 16; `my_calendar_feed_token` troca a antiga
+  sozinha; `class_calendar_feed_lang(text)` (idioma do site do dono, `_ui_lang`). Única parte com DROP: troca da restrição.
+- Edge Function `class-calendar-feed` v2: senha no caminho (`/class-calendar-feed/<senha>`, para o Netlify) ou `?t=`.
+- Teste local: `tests/aulas-presenca/run.sh` (107 14/14); `.ics` 22/22. Staging: 107 aplicada (nome `105_calendar_feed_short_token`; renumerada para 107 porque outra conversa reservou 105, 106 e 108) e função v2 (2026-10-15),
+  testado ponta a ponta (200 text/calendar, `.ics` opcional, senha inválida 404, `?lang=en`).
+- Produção: aplicada em 2026-10-15 a pedido da autora (`107_calendar_feed_short_token`) e função v2. Conferido: anon e
+  authenticated sem acesso às funções internas, gerador dá 16 caracteres, senha inexistente = agenda vazia (200),
+  inválida = 404, 393 aulas intactas; a senha antiga da autora (64 hex) troca sozinha ao abrir o bloco.
+  Domínio `agenda.profbrune.com.br` (Netlify, pendente):
+  `docs/agenda-netlify-passo-a-passo.md`.
+

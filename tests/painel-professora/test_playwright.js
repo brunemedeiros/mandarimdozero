@@ -39,7 +39,7 @@ const PANEL_STUB = (who) => {
     (window.__rpcCalls = window.__rpcCalls || []).push([name, args]);
     if (name === 'my_permissions') return { data: { roles: roles.roles, admin: roles.admin, permissions: Object.fromEntries(CAT.map(c => [c.key, { enabled: perm(c.key), limit: null }])) }, error: null };
     // 103: link de agenda (token de 64 hex; gerar outro devolve um novo).
-    if (name === 'my_calendar_feed_token') return { data: (args && args.p_regenerate ? 'b' : 'a').repeat(64), error: null };
+    if (name === 'my_calendar_feed_token') return { data: (args && args.p_regenerate ? 'b' : 'a').repeat(16), error: null };
     // 101: com horário; inclui 1 aula futura (próximas aulas) marcada em São Paulo.
     if (name === 'get_my_class_schedule') return { data: who === 'S' ? [
       { id: 3, class_date: '2099-01-05', start_time: '19:00:00', duration_minutes: 60, time_zone: 'America/Sao_Paulo', topic: 'Aula futura', homework: null, observations: null, attendance_name: null, attendance_color: null, skills: [], classroom_id: null, classroom_name: null },
@@ -150,14 +150,14 @@ const PANEL_STUB = (who) => {
       L('aluna: link de agenda fechado até ela abrir', await ev(() => { const b = document.querySelector('#my-class-logs-content [data-calendar-feed]'); return !!b && !b.open && !(window.__rpcCalls || []).some(c => c[0] === 'my_calendar_feed_token'); }));
       await ev(() => { const b = document.querySelector('#my-class-logs-content [data-calendar-feed]'); b.open = true; });
       await page.waitForSelector('#my-class-logs-content [data-calendar-feed-url]');
-      L('aluna: link de agenda aponta para a Edge Function com o token', await ev(() => /\/functions\/v1\/class-calendar-feed\?t=a{64}$/.test(document.querySelector('[data-calendar-feed-url]').value)), await ev(() => document.querySelector('[data-calendar-feed-url]').value));
+      L('aluna: link de agenda aponta para a Edge Function com o token', await ev(() => /\/functions\/v1\/class-calendar-feed\/a{16}$/.test(document.querySelector('[data-calendar-feed-url]').value)), await ev(() => document.querySelector('[data-calendar-feed-url]').value));
       L('aluna: botão do Google Agenda assina o link (webcal) em nova aba', await ev(() => { const a = document.querySelector('[data-calendar-feed-google]'); const u = new URL(a.href); return u.host === 'calendar.google.com' && decodeURIComponent(u.searchParams.get('cid')).startsWith('webcal://') && a.target === '_blank'; }));
       L('aluna: Apple/Outlook abre o webcal', await ev(() => document.querySelector('[data-calendar-feed-webcal]').getAttribute('href').startsWith('webcal://')));
       await ev(() => document.querySelector('[data-my-classlog-view="calendar"]').click());
       L('aluna: trocar Lista/Calendário não fecha o bloco da agenda', await ev(() => document.querySelector('#my-class-logs-content [data-calendar-feed]').open));
       await ev(() => document.querySelector('[data-my-classlog-view="list"]').click());
       await ev(() => document.querySelector('[data-calendar-feed-reset]').click());
-      await page.waitForFunction(() => /t=b{64}/.test(document.querySelector('[data-calendar-feed-url]')?.value || ''));
+      await page.waitForFunction(() => /class-calendar-feed\/b{16}$/.test(document.querySelector('[data-calendar-feed-url]')?.value || ''));
       L('aluna: "Gerar outro link" (com confirmação) troca o token', await ev(() => (window.__rpcCalls || []).some(c => c[0] === 'my_calendar_feed_token' && c[1] && c[1].p_regenerate === true)));
       if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#my-class-logs-content [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aluna-link-agenda');
@@ -349,7 +349,7 @@ const PANEL_STUB = (who) => {
       L('calendário: link de agenda da professora acima do mês', await ev(() => !!document.querySelector('#admin-classlogs-calendar-wrap > [data-calendar-feed]')));
       await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').open = true; });
       await page.waitForSelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]');
-      L('calendário: professora recebe o link dela', await ev(() => /class-calendar-feed\?t=[ab]{64}/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
+      L('calendário: professora recebe o link dela', await ev(() => /class-calendar-feed\/[ab]{16}$/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
       if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aulas-link-agenda');
       // a aula agendada pode cair no mês seguinte: avança até achar
