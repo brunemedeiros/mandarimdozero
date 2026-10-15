@@ -902,26 +902,6 @@ document.getElementById('review-reminder-cta-btn').addEventListener('click', () 
   openReviewSession('flashcard');
 });
 
-// ---------- Desafios de hoje (estilo Busuu) ----------
-// 3 desafios por dia, sorteados de 3 grupos fixos (mesma semente todo dia,
-// pra não trocar sozinho se a tela for recarregada):
-//   1. Fácil (EASY_CHALLENGES) — uma vitória rápida, garantida todo dia.
-//   2. Revisão/Hanzi (REVISAO_HANZI_CHALLENGES) — sempre puxa o aluno pra
-//      uma dessas abas, que ele não necessariamente abriria sozinho.
-//   3. Geral (GENERAL_CHALLENGES) — mais variado, ligado à Trilha em geral.
-// Balde-padrão construído do zero a cada chamada -- nunca reaproveita
-// arrays/objetos entre chamadas (um array compartilhado entre dois "dias"
-// diferentes viraria um vazamento de estado sutil).
-function freshDailyBucket(today){
-  return {
-    date: today, xp: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
-    hanziLessons: 0, reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
-    lessonsForGoal: 0, goalCountedLessonKeys: [], exerciseFormatsSeen: [],
-    exerciseFormatCounts: {}, audioPlaysToday: 0, overdueReviewsDone: 0,
-    missionsBonusAwarded: false, missionsNotified: {}, missions: null
-  };
-}
-
 
 function registerDailyLessonCompleted(scorePct){
   ensureDailyBucket();
@@ -981,14 +961,6 @@ const MISSION_QUANTITY_FLOOR = 3; // abaixo disso, trata como inviável (rodada 
 
 
 const ALL_CHALLENGE_POOLS = [EASY_CHALLENGES, REVISAO_HANZI_CHALLENGES, GENERAL_CHALLENGES];
-
-function assignTodaysMissions(){
-  const easy = pickDailyFromPool(EASY_CHALLENGES, 'easy');
-  const pickedRevisao = pickDailyFromPool(REVISAO_HANZI_CHALLENGES, 'revcon');
-  const revisao = resolveRevisaoMission(pickedRevisao, REVISAO_HANZI_CHALLENGES, 'hanzi1');
-  const general = pickDailyFromPool(GENERAL_CHALLENGES, 'general');
-  return [easy, revisao, general].map(c => ({ id: c.id, target: c.target }));
-}
 
 
 // showToast agora vem de shared/toast.js.

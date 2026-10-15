@@ -25,5 +25,8 @@ const LANG_HOOKS = {
   promptClass: 'flashcard-hanzi',
   promptPinyinHTML: (view) => `<div class="flashcard-pinyin pinyin">${escapeHTML(view.prompt.pinyinText || '')}</div>`,
   canSpeak: (s) => canSpeakChinese(s),
+  revisaoPool: () => REVISAO_HANZI_CHALLENGES,
+  revisaoFallbackId: 'hanzi1',
+  dailyExtra: () => ({ hanziLessons: 0 }),
 // --- /E4 hooks ---
 };

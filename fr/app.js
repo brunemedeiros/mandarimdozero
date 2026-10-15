@@ -786,29 +786,6 @@ document.getElementById('review-reminder-cta-btn').addEventListener('click', () 
   openReviewSession('flashcard');
 });
 
-// ---------- Desafios de hoje (estilo Busuu) ----------
-// Contadores do dia (zeram sozinhos quando a data muda). Todo dia mostra
-// exatamente 3 desafios, um de cada categoria — sorteados de forma
-// determinística a partir da data (mudam de dia pra dia, mas são sempre os
-// mesmos dentro do mesmo dia):
-//   1. Fácil (EASY_CHALLENGES) — uma vitória rápida, garantida todo dia.
-//   2. Revisão OU Conjugação (REVISAO_CONJ_CHALLENGES) — sempre puxa o aluno
-//      pra uma dessas duas abas, que ele não necessariamente abriria sozinho.
-//   3. Geral (GENERAL_CHALLENGES) — mais variado, ligado à Trilha em geral.
-// Balde-padrão construído do zero a cada chamada -- nunca reaproveita
-// arrays/objetos entre chamadas (um array compartilhado entre dois "dias"
-// diferentes viraria um vazamento de estado sutil).
-function freshDailyBucket(today){
-  return {
-    date: today, xp: 0, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
-    grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
-    conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
-    lessonsForGoal: 0, goalCountedLessonKeys: [], exerciseFormatsSeen: [],
-    exerciseFormatCounts: {}, audioPlaysToday: 0, overdueReviewsDone: 0,
-    missionsBonusAwarded: false, missionsNotified: {}, missions: null
-  };
-}
-
 
 // Fase 6 da tarefa de conclusão de lição/unidade: retirada do desafio
 // diário 'stars40' (GENERAL_CHALLENGES) removeu o ÚNICO chamador desta
@@ -896,14 +873,6 @@ const MISSION_QUANTITY_FLOOR = 3; // abaixo disso, trata como inviável (rodada 
 
 
 const ALL_CHALLENGE_POOLS = [EASY_CHALLENGES, REVISAO_CONJ_CHALLENGES, GENERAL_CHALLENGES];
-
-function assignTodaysMissions(){
-  const easy = pickDailyFromPool(EASY_CHALLENGES, 'easy');
-  const pickedRevisao = pickDailyFromPool(REVISAO_CONJ_CHALLENGES, 'revcon');
-  const revisao = resolveRevisaoMission(pickedRevisao, REVISAO_CONJ_CHALLENGES, 'conj1');
-  const general = pickDailyFromPool(GENERAL_CHALLENGES, 'general');
-  return [easy, revisao, general].map(c => ({ id: c.id, target: c.target }));
-}
 
 
 // showToast agora vem de shared/toast.js.

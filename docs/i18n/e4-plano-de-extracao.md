@@ -114,3 +114,14 @@ Restam 38 quase iguais (`docs/i18n/e4-quase-iguais.md`; as 5 primeiras linhas de
 - 3 funções com marcação de pinyin para `shared/core/quase-iguais-pinyin.js`: `renderConceptStep` (gancho `conceptExampleHTML`), `renderTrueFalseExercise` (`tfPinyinHTML` e as chaves `uiKey`) e `renderMultipleChoiceCard` (`promptClass`, `promptPinyinHTML`, `canSpeak`). O texto das funções com os ganchos trocados volta exatamente ao original de cada idioma (gate textual).
 - Português: nada mudou. Teste novo `tests/e4/test_lote5d_pinyin.js` (12 checks: marcação de cada idioma e voz do idioma). Bateria completa (128 suítes): 14 falhas antes e 14 depois, as mesmas; 18 capturas iguais; ida e volta 22/22; core 25/25.
 - Restam 25 quase iguais: grupo C (10, estrutura de lição diferente por idioma) e grupo D (14 grandes) mais `renderConceptStep`-like que sobrarem. Daqui em diante, só depois de conversar com a dona.
+
+### Lote 5e (2026-10-15): feito (teste do grupo C)
+- 2 funções para `shared/core/quase-iguais-dados.js`: `assignTodaysMissions` (ganchos `revisaoPool`, `revisaoFallbackId`) e `freshDailyBucket` (gancho `dailyExtra`: `stars`, gramática e conjugação no fr; `hanziLessons` no zh). A ordem das chaves do objeto do dia muda; os campos e valores são os mesmos (teste `tests/e4/test_lote5e_dados.js`, 10 checks).
+- Bateria completa (130 suítes): 16 falhas antes e 15 depois, nenhuma nova; 18 capturas iguais; ida e volta 22/22; core 27/27. Restam 23 quase iguais.
+
+## 10. Famílias de idiomas (decisão da dona, 2026-10-15)
+A dona propôs agrupar por FAMÍLIA em vez de deixar o grupo D separado: idiomas parecidos (ex.: línguas latinas) compartilham o jeito de exercício e cada um só ajusta o que é próprio. Direção adotada:
+- **Família alfabética/latina** (fr hoje; pt, es, it depois): o `fr/app.js` é o molde. Acento, gênero, artigo, conjugação e o teclado de acentos entram como ganchos, como já é feito com `LANG_HOOKS`.
+- **Família logográfica** (zh hoje; ja depois): hanzi + pinyin/leitura, tons, traços.
+- **Quando fazer:** a extração dos exercícios grandes (grupo D) para um módulo da família latina só é feita junto com o app de português (E5), porque só com o segundo membro da família dá para ver o que é de fato comum e o que é do francês. Extrair antes seria adivinhar. O zh fica como está até existir um segundo idioma logográfico.
+- A estrutura prevista: `shared/core/` (igual para todos) + `shared/core/familias/latina/` + `<idioma>/lang-hooks.js` (o que é só daquele idioma).
