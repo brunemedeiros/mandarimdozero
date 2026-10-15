@@ -2,113 +2,140 @@
  "unit": "A1-1",
  "course": "portugues@en",
  "status": "needs_review",
- "about": "Rascunho da unidade-piloto do curso portugues@en (português do Brasil para falantes de inglês). Nada disto está ligado ao app. 'base' segue o formato de uma unidade de fr/content.js (o campo 'f' guarda o texto no idioma estudado, aqui o português); 'en' segue o formato da camada do curso (docs/i18n/content-en/A1-1.json e courses/fr-pt-BR/layer.js), escrita para quem fala inglês. 'review' traz a confiança de cada item e o que a professora precisa conferir. Leitura humana: unidade-1.md.",
+ "about": "Rascunho da unidade-piloto do curso portugues@en (português do Brasil para falantes de inglês). Nada disto está ligado ao app. 'base' segue o formato de uma unidade de fr/content.js (o campo 'f' guarda o texto no idioma estudado, aqui o português); 'en' segue o formato da camada do curso (docs/i18n/content-en/A1-1.json e courses/fr-pt-BR/layer.js), escrita para quem fala inglês. 'review' traz a confiança de cada item, o que a professora precisa conferir e as decisões da dona. Leitura humana: unidade-1.md. Campo novo: 'voice' em cada fala do diálogo (voz do TTS por locutor; o app ainda não lê esse campo, ver audio-tts). Cartões com ' / ' (obrigado / obrigada, tudo bem / tudo bom, nacionalidades) aceitam qualquer uma das formas no exercício de digitar (acceptedForms em shared/core/estado-trilha-desafios.js).",
  "base": {
   "id": "A1-1",
   "level": "A1",
   "lessons": [
-   { "id": "oi-e-bom-dia", "vocabIdx": [0, 1, 2, 3] },
-   { "id": "tudo-bem-e-tchau", "vocabIdx": [4, 5, 6, 7] },
-   { "id": "nome-e-origem", "vocabIdx": [8, 9, 10, 11], "includesDialogue": true },
+   { "id": "oi-e-bom-dia", "vocabIdx": [0, 1, 2, 3, 4] },
+   { "id": "tudo-bem", "vocabIdx": [5, 6, 7, 8] },
+   { "id": "obrigado-e-tchau", "vocabIdx": [9, 10, 11] },
+   { "id": "nome-e-nacionalidade", "vocabIdx": [12, 13, 14, 15, 16, 17, 18], "includesDialogue": true },
    { "id": "checkpoint", "vocabIdx": [], "isCheckpoint": true }
   ],
   "concepts": [
    {
-    "id": "oi-ou-ola",
-    "kind": "reality",
-    "category": "informal",
-    "trigger": { "afterVocabIdx": 0 },
-    "blocks": [
-     { "examples": [ { "f": "oi" }, { "f": "olá" } ], "wrapup": true }
-    ]
-   },
-   {
     "id": "som-de-bom-dia",
-    "trigger": { "afterVocabIdx": 1 },
+    "trigger": { "afterVocabIdx": 2 },
     "blocks": [
      { "examples": [ { "f": "bom dia" }, { "f": "boa noite" } ], "wrapup": true }
     ]
    },
    {
-    "id": "bom-dia-tarde-noite",
+    "id": "som-de-boa-tarde",
     "trigger": { "afterVocabIdx": 3 },
+    "blocks": [
+     { "examples": [ { "f": "boa tarde" } ], "wrapup": true }
+    ]
+   },
+   {
+    "id": "bom-dia-tarde-noite",
+    "trigger": { "afterVocabIdx": 4 },
     "blocks": [
      { "examples": [ { "f": "boa tarde" }, { "f": "boa noite" } ], "wrapup": true }
     ]
    },
    {
-    "id": "tudo-bem-pergunta-e-resposta",
-    "trigger": { "afterVocabIdx": 4 },
+    "id": "voce-ce-tu",
+    "kind": "reality",
+    "category": "informal",
+    "trigger": { "afterVocabIdx": 6 },
     "blocks": [
-     { "examples": [ { "f": "Tudo bem? — Tudo bem!" }, { "f": "Tudo bom? — Tudo, e você?" } ], "wrapup": true }
+     { "examples": [ { "f": "E você?" }, { "f": "E cê?" } ], "wrapup": true }
+    ]
+   },
+   {
+    "id": "tudo-bem-pergunta-e-resposta",
+    "kind": "reality",
+    "category": "informal",
+    "trigger": { "afterVocabIdx": 8 },
+    "blocks": [
+     { "examples": [ { "f": "Tudo bem?" }, { "f": "Tudo bom?" }, { "f": "Como vai?" }, { "f": "Tudo certo?" }, { "f": "E aí?" }, { "f": "Beleza?" } ] },
+     { "examples": [ { "f": "Tudo bem! E você?" }, { "f": "Tudo ótimo!" }, { "f": "Tudo certo!" }, { "f": "Tudo tranquilo!" }, { "f": "Beleza!" }, { "f": "Vou bem sim, e você?" } ], "wrapup": true }
     ]
    },
    {
     "id": "obrigado-obrigada",
-    "trigger": { "afterVocabIdx": 6 },
+    "trigger": { "afterVocabIdx": 9 },
     "blocks": [
      { "examples": [ { "f": "obrigado" }, { "f": "obrigada" }, { "f": "de nada" } ], "wrapup": true }
     ]
    },
    {
-    "id": "voce-e-tu",
+    "id": "valeu",
     "kind": "reality",
-    "category": "regional",
+    "category": "informal",
     "trigger": { "afterVocabIdx": 10 },
     "blocks": [
+     { "examples": [ { "f": "Valeu!" }, { "f": "Valeu, tchau!" } ], "wrapup": true }
+    ]
+   },
+   {
+    "id": "abraco",
+    "kind": "culture",
+    "category": "costume",
+    "trigger": { "afterVocabIdx": 11 },
+    "blocks": [
+     { "examples": [ { "f": "Abraço!" }, { "f": "Abraços!" } ], "wrapup": true }
+    ]
+   },
+   {
+    "id": "ser-eu-sou",
+    "trigger": { "afterVocabIdx": 14 },
+    "blocks": [
      {
-      "variants": [
-       { "form": "Você é de onde?" },
-       { "form": "Tu é de onde?" },
-       { "form": "Tu és de onde?" }
-      ],
+      "examples": [ { "f": "Meu nome é Lucas." } ],
+      "table": {
+       "0": [
+        { "form": "sou" },
+        { "form": "é" },
+        { "form": "somos" },
+        { "form": "são" }
+       ]
+      },
       "wrapup": true
      }
     ]
    },
    {
-    "id": "eu-sou-de-do-da",
-    "trigger": { "afterVocabIdx": 11 },
+    "id": "nacionalidade-genero",
+    "trigger": { "afterVocabIdx": 15 },
     "blocks": [
-     { "examples": [ { "f": "Eu sou de Chicago." }, { "f": "Eu sou do Canadá." }, { "f": "Eu sou da Inglaterra." }, { "f": "Eu sou dos Estados Unidos." } ], "wrapup": true }
+     { "examples": [ { "f": "Ele é americano." }, { "f": "Ela é americana." }, { "f": "Eu sou canadense." } ], "wrapup": true }
     ]
    },
    {
-    "id": "voce-e-de-onde",
-    "kind": "reality",
-    "category": "informal",
+    "id": "bem-vinda",
     "trigger": { "after": "dialogue" },
     "blocks": [
-     { "examples": [ { "f": "Você é de onde?" }, { "f": "Cê é de onde?" } ], "wrapup": true }
-    ]
-   },
-   {
-    "id": "beijo-e-abraco",
-    "kind": "culture",
-    "category": "costume",
-    "trigger": { "after": "dialogue" },
-    "blocks": [
-     { "examples": [ { "f": "Beijo!" }, { "f": "Abraço!" } ], "wrapup": true }
+     { "examples": [ { "f": "Bem-vinda!" }, { "f": "Bem-vindo!" } ], "wrapup": true }
     ]
    }
   ],
   "trueFalseExercises": [
-   { "subject": "Obrigado!", "emoji": "🙏", "answer": false },
+   { "subject": "Obrigada!", "emoji": "🙏", "answer": false },
    { "subject": "Boa noite!", "emoji": "🌙", "answer": true }
   ],
   "vocab": [
    { "f": "oi" },
+   { "f": "olá" },
    { "f": "bom dia" },
    { "f": "boa tarde" },
    { "f": "boa noite" },
-   { "f": "tudo bem" },
-   { "f": "obrigado" },
-   { "f": "obrigada" },
+   { "f": "tudo bem / tudo bom" },
+   { "f": "e você?" },
+   { "f": "e aí?" },
+   { "f": "beleza" },
+   { "f": "obrigado / obrigada" },
+   { "f": "valeu" },
    { "f": "tchau" },
    { "f": "meu nome é" },
    { "f": "prazer" },
-   { "f": "de onde você é?" },
-   { "f": "eu sou de" }
+   { "f": "eu sou" },
+   { "f": "americano / americana" },
+   { "f": "canadense" },
+   { "f": "francês / francesa" },
+   { "f": "brasileiro / brasileira" }
   ],
   "phrases": [
    {
@@ -127,21 +154,26 @@
     "scenarioEmoji": "🙂"
    },
    {
+    "f": "E aí? Beleza?",
+    "blocks": [ { "f": "E aí?" }, { "f": "Beleza?" } ],
+    "scenarioEmoji": "🏖️"
+   },
+   {
     "f": "Obrigada! Tchau!",
     "blocks": [ { "f": "Obrigada!" }, { "f": "Tchau!" } ],
     "scenarioEmoji": "☕"
    },
    {
-    "f": "De onde você é?",
-    "blocks": [ { "f": "De onde" }, { "f": "você é?" } ]
+    "f": "Valeu, tchau!",
+    "blocks": [ { "f": "Valeu," }, { "f": "tchau!" } ]
    },
    {
-    "f": "Eu sou de Chicago.",
-    "blocks": [ { "f": "Eu sou" }, { "f": "de Chicago." } ]
+    "f": "Eu sou americano.",
+    "blocks": [ { "f": "Eu sou" }, { "f": "americano." } ]
    },
    {
-    "f": "Eu sou dos Estados Unidos.",
-    "blocks": [ { "f": "Eu sou" }, { "f": "dos Estados Unidos." } ]
+    "f": "Eu sou canadense.",
+    "blocks": [ { "f": "Eu sou" }, { "f": "canadense." } ]
    },
    {
     "f": "Muito obrigado!",
@@ -158,43 +190,51 @@
     "B": { "n": "Emily", "e": "👩" }
    },
    "check": [
-    { "k": "fill", "line": 5, "bad": ["Obrigado! Boa noite, tchau!", "Bom dia! Tudo bem?"] },
-    { "k": "listen", "line": 0, "bad": ["Obrigada! Tchau!", "Eu sou de Chicago."] },
+    { "k": "fill", "line": 5, "bad": ["Eu sou canadense. Tchau!", "Bom dia! Tudo bem?"] },
+    { "k": "listen", "line": 0, "bad": ["Obrigada! Tchau!", "Eu sou americana."] },
     { "k": "understand", "ok": 0 }
    ],
    "lines": [
-    { "spk": "A", "f": "Oi! Tudo bem?" },
-    { "spk": "B", "f": "Tudo bem, e você?" },
-    { "spk": "A", "f": "Tudo bem! Meu nome é Lucas. Você é de onde?" },
-    { "spk": "B", "f": "Prazer, Lucas! Meu nome é Emily. Eu sou de Chicago." },
-    { "spk": "A", "f": "Prazer, Emily! Bem-vinda ao Brasil!" },
-    { "spk": "B", "f": "Obrigada! Boa noite, tchau!" }
+    { "spk": "A", "f": "Oi! Tudo bem?", "voice": "pt-BR-Chirp3-HD-Charon" },
+    { "spk": "B", "f": "Tudo bem, e você?", "voice": "pt-BR-Chirp3-HD-Achernar" },
+    { "spk": "A", "f": "Tudo bem! Meu nome é Lucas. Eu sou brasileiro.", "voice": "pt-BR-Chirp3-HD-Charon" },
+    { "spk": "B", "f": "Prazer, Lucas! Meu nome é Emily. Eu sou americana.", "voice": "pt-BR-Chirp3-HD-Achernar" },
+    { "spk": "A", "f": "Prazer, Emily! Bem-vinda!", "voice": "pt-BR-Chirp3-HD-Charon" },
+    { "spk": "B", "f": "Obrigada! Boa noite, tchau!", "voice": "pt-BR-Chirp3-HD-Achernar" }
    ]
   }
  },
  "en": {
   "levelLabel": "Level 1 · Beginner",
-  "title": "Hi! How are you?",
-  "goal": "Greet someone, ask how they are, say your name and where you're from, and say goodbye.",
+  "title": "Greetings and introductions",
+  "goal": "Greet someone, ask how they are, say thank you and goodbye, and introduce yourself with your name and nationality.",
   "lessons": {
    "oi-e-bom-dia": "Hi and good morning",
-   "tudo-bem-e-tchau": "How are you, thank you and bye",
-   "nome-e-origem": "Your name and where you're from",
+   "tudo-bem": "How are you?",
+   "obrigado-e-tchau": "Thanks and bye",
+   "nome-e-nacionalidade": "Your name and nationality",
    "checkpoint": "Checkpoint"
   },
   "vocab": [
-   "hi / hello",
+   "hi",
+   "hello",
    "good morning",
    "good afternoon",
    "good evening / good night",
    "how are you? / I'm good",
-   "thank you (said by a man)",
-   "thank you (said by a woman)",
+   "and you?",
+   "hey! / what's up? (casual)",
+   "all good? / cool! (casual)",
+   "thank you",
+   "thanks! (casual)",
    "bye",
    "my name is",
    "nice to meet you",
-   "where are you from?",
-   "I'm from"
+   "I am",
+   "American (man / woman)",
+   "Canadian (man or woman)",
+   "French (man / woman)",
+   "Brazilian (man / woman)"
   ],
   "phrases": [
    {
@@ -210,12 +250,16 @@
     "scenario": "A friend asks you \"Tudo bem?\". You want to say you're fine and ask back. What do you say?"
    },
    {
-    "t": "Thanks! Bye!",
+    "t": "Hey! All good?",
+    "scenario": "You run into a friend at the beach. How do you say hi the casual way?"
+   },
+   {
+    "t": "Thank you! Bye!",
     "scenario": "Ana is leaving a café in Rio. She thanks the server and says goodbye. What does she say?"
    },
-   { "t": "Where are you from?" },
-   { "t": "I'm from Chicago." },
-   { "t": "I'm from the United States." },
+   { "t": "Thanks, bye! (casual)" },
+   { "t": "I'm American. (said by a man)" },
+   { "t": "I'm Canadian." },
    { "t": "Thank you very much! (said by a man)" },
    { "t": "Good night, bye!" }
   ],
@@ -225,9 +269,9 @@
    "lines": [
     "Hi! How are you?",
     "I'm good, and you?",
-    "I'm good! My name is Lucas. Where are you from?",
-    "Nice to meet you, Lucas! My name is Emily. I'm from Chicago.",
-    "Nice to meet you, Emily! Welcome to Brazil!",
+    "I'm good! My name is Lucas. I'm Brazilian.",
+    "Nice to meet you, Lucas! My name is Emily. I'm American.",
+    "Nice to meet you, Emily! Welcome!",
     "Thank you! Good night, bye!"
    ],
    "speakers": ["A", "B", "A", "B", "A", "B"],
@@ -235,29 +279,28 @@
     null,
     null,
     {
-     "q": "Where is Emily from?",
-     "opts": ["Chicago", "São Paulo", "Lisbon"]
+     "q": "What is Emily's nationality?",
+     "opts": ["American", "Brazilian", "Canadian"]
     }
    ]
   },
   "concepts": {
-   "oi-ou-ola": [
-    {
-     "title": "\"Oi\" or \"olá\"?",
-     "body": "Many textbooks start with <strong>olá</strong>, but in everyday speech Brazilians say <strong>oi</strong> to almost everyone, at any time of day: friends, the cashier at the supermarket, even your teacher. <strong>Olá</strong> is correct, but it sounds more like writing: emails, signs, a TV host greeting the audience. If you're not sure, <strong>oi</strong> is the safe choice in conversation.",
-     "examples": [
-      "hi (in speech, with almost anyone)",
-      "hello (more common in writing or on TV)"
-     ]
-    }
-   ],
    "som-de-bom-dia": [
     {
      "title": "How do you say \"bom dia\"?",
-     "body": "Two sounds trip up English speakers here. First, <strong>bom</strong> is a nasal sound: the air goes out through your nose, and the <strong>m</strong> at the end is not a full \"m\". It does not rhyme with English \"bomb\". Second, in many Brazilian accents a <strong>d</strong> before an \"ee\" sound sounds like the \"j\" of \"jeep\", as in <strong>dia</strong>. The same happens with <strong>t</strong>, which sounds like the \"ch\" of \"cheese\", as in <strong>noite</strong> (a final <strong>e</strong> often sounds like \"ee\"). Not every accent does this, so you may hear a plain d and t from some speakers. Listen to the audio and copy it.",
+     "body": "Two sounds trip up English speakers here. First, <strong>bom</strong> is nasal: the vowel goes out through your nose, and the <strong>m</strong> at the end is not a full \"m\". It does not rhyme with English \"bomb\". Second, in São Paulo and in Rio, a <strong>d</strong> before an \"ee\" sound sounds like the \"j\" in \"jeep\": <strong>dia</strong> sounds like \"JEE-ah\". The same happens with <strong>t</strong>, which sounds like the \"ch\" in \"cheese\": <strong>noite</strong> sounds like \"NOY-chee\" (a final <strong>e</strong> often sounds like \"ee\"). In some other regions you may hear a plain d and t. The audio in this course sounds close to São Paulo speech: listen and copy it.",
      "examples": [
-      "good morning",
-      "good evening / good night"
+      "good morning (sounds like \"bom JEE-ah\", with bom said through your nose)",
+      "good evening / good night (sounds like \"BOH-ah NOY-chee\")"
+     ]
+    }
+   ],
+   "som-de-boa-tarde": [
+    {
+     "title": "\"Boa tarde\" in São Paulo and in Rio",
+     "body": "Here's a sound that changes from city to city: the <strong>r</strong> in <strong>tarde</strong>. In São Paulo, it's usually a quick tap of the tongue, like the \"tt\" in American \"butter\", and some speakers use a sound closer to the English r: roughly \"TAR-jee\". In Rio, it sounds more like a breathy \"h\" from the back of the throat: roughly \"TAHH-jee\". Both are correct, and in both cities the <strong>de</strong> at the end sounds like \"jee\". The audio in this course sounds close to São Paulo speech.",
+     "examples": [
+      "good afternoon (São Paulo: roughly \"BOH-ah TAR-jee\"; Rio: roughly \"BOH-ah TAHH-jee\")"
      ]
     }
    ],
@@ -271,76 +314,119 @@
      ]
     }
    ],
+   "voce-ce-tu": [
+    {
+     "title": "\"Você\", \"cê\" and \"tu\"",
+     "body": "<strong>Você</strong> (roughly \"voh-SAY\") is the everyday word for \"you\" in Brazil. It is not formal: you use it with friends, family and strangers alike. In fast, casual speech it often shrinks to <strong>cê</strong>: <strong>E cê?</strong> You only need to recognize <strong>cê</strong> when you hear it; in the exercises, keep writing <strong>você</strong>. You may also hear <strong>tu</strong>, but in most of the country it's much less common than <strong>você</strong>, so this course uses <strong>você</strong>.",
+     "examples": [
+      "And you?",
+      "And you? (fast, casual speech)"
+     ]
+    }
+   ],
    "tudo-bem-pergunta-e-resposta": [
     {
-     "title": "\"Tudo bem?\" \"Tudo bem!\"",
-     "body": "<strong>Tudo bem</strong> literally means \"all well\", and it works as both the question and the answer: only your voice changes. Going up at the end, it's a question; going down, it's the answer. Just like \"How are you?\" in English, it's a greeting more than a real question, so people answer <strong>tudo bem</strong> even on an average day, and then ask back: <strong>e você?</strong> You'll also hear <strong>tudo bom?</strong>, which means the same thing, and the short answer <strong>tudo!</strong>",
+     "title": "\"Tudo bem?\" \"Tudo bom?\"",
+     "body": "<strong>Tudo bem</strong> (roughly \"TOO-doo bayn\", with the end of <strong>bem</strong> going through your nose) literally means \"all well\". It works as both the question and the answer: only your voice changes. Going up at the end, it's a question; going down, it's the answer. Just like \"How are you?\" in English, it's a greeting more than a real question. <strong>Tudo bom?</strong> means the same thing. Here are other common ways to ask. <strong>E aí?</strong> (\"ee ah-EE\") and <strong>Beleza?</strong> (\"beh-LEH-zah\") are casual: use them with friends and in relaxed situations.",
      "examples": [
-      "How are you? — I'm good!",
-      "How's it going? — Good, and you?"
+      "How are you?",
+      "How are you? (same thing)",
+      "How are you doing? (a little more polite)",
+      "All good?",
+      "Hey! What's up? (casual)",
+      "All good? (casual)"
+     ]
+    },
+    {
+     "title": "How to answer",
+     "body": "Most of the time, people answer with something positive, even on an average day, and then ask back with <strong>e você?</strong> To a casual <strong>E aí?</strong> or <strong>Beleza?</strong>, a casual answer like <strong>Beleza!</strong> or <strong>Tudo certo!</strong> fits best.",
+     "examples": [
+      "I'm good! And you?",
+      "Everything's great!",
+      "All good!",
+      "All good, no stress!",
+      "All good! / Cool! (casual)",
+      "I'm doing well, and you?"
      ]
     }
    ],
    "obrigado-obrigada": [
     {
      "title": "\"Obrigado\" or \"obrigada\"?",
-     "body": "In Portuguese, \"thank you\" changes with the person who is <strong>speaking</strong>, not the person you're thanking. A man says <strong>obrigado</strong>; a woman says <strong>obrigada</strong>, even when she's thanking a man. The word literally means \"obliged\". The usual answer is <strong>de nada</strong>: \"you're welcome\".",
+     "body": "In Portuguese, \"thank you\" usually changes with the person who is <strong>speaking</strong>, not the person you're thanking. A man says <strong>obrigado</strong> (roughly \"oh-bree-GAH-doo\"); a woman says <strong>obrigada</strong> (\"oh-bree-GAH-dah\"), even when she's thanking a man. You'll also hear some women say <strong>obrigado</strong>, and it isn't seen as a mistake. That's why this card shows both forms, and either one counts as correct when you type. The word literally means \"obliged\". The usual answer is <strong>de nada</strong>: \"you're welcome\".",
      "examples": [
-      "thank you (said by a man)",
-      "thank you (said by a woman)",
+      "thank you (men; some women too)",
+      "thank you (women)",
       "you're welcome"
      ]
     }
    ],
-   "voce-e-tu": [
+   "valeu": [
     {
-     "title": "\"Você\" or \"tu\"?",
-     "body": "In Brazil, the everyday word for \"you\" is <strong>você</strong>. It is not formal: you use it with friends, family and strangers alike. In some parts of the country, people also say <strong>tu</strong> in casual speech, often with the same verb form as <strong>você</strong> (<strong>tu é</strong>, <strong>tu vai</strong>). The traditional form is <strong>tu és</strong>, <strong>tu vais</strong>; <strong>tu é</strong> is what you often hear, but it is not the standard conjugation. How common <strong>tu</strong> is depends on the region and on the person. In Portugal, <strong>tu</strong> with <strong>és</strong> is the normal informal form. In this course we use <strong>você</strong>: everyone in Brazil understands it.",
-     "examples": [],
-     "variants": [
-      "The form this course uses",
-      "Often heard in casual speech where tu is used",
-      "The traditional conjugation of tu (also normal in Portugal)"
+     "title": "\"Valeu!\"",
+     "body": "<strong>Valeu</strong> (roughly \"vah-LAY-oo\") is a casual \"thanks!\": with friends, in text messages, with someone who holds the door for you. It's the same for everyone, man or woman. In a formal situation, stick with <strong>obrigado</strong> or <strong>obrigada</strong>. When you're leaving, <strong>valeu</strong> can also work as \"thanks, bye!\" all by itself.",
+     "examples": [
+      "Thanks! (casual)",
+      "Thanks, bye! (casual)"
      ]
     }
    ],
-   "eu-sou-de-do-da": [
+   "abraco": [
     {
-     "title": "\"De\", \"do\" or \"da\"?",
-     "body": "With a city, it's just <strong>de</strong>: <strong>Eu sou de Chicago.</strong> With most countries, <strong>de</strong> joins the word for \"the\" that the country carries: <strong>do</strong> (masculine), <strong>da</strong> (feminine) or <strong>dos</strong> (plural). So: <strong>do Canadá</strong>, <strong>da Inglaterra</strong>, <strong>dos Estados Unidos</strong>, and of course <strong>do Brasil</strong>. No need to memorize the rule now: just learn your own country as one chunk.",
+     "title": "\"Abraço!\"",
+     "body": "In emails and text messages, Brazilians often sign off with <strong>Abraço!</strong> (roughly \"ah-BRAH-soo\"), literally \"a hug\". It's friendly without being too personal, so you'll see it in emails to coworkers too, a bit like \"Best\" or \"Cheers\" in English. You'll also see the plural, <strong>Abraços!</strong>",
      "examples": [
-      "I'm from Chicago.",
-      "I'm from Canada.",
-      "I'm from England.",
-      "I'm from the United States."
+      "a hug (a friendly sign-off)",
+      "hugs (same thing)"
      ]
     }
    ],
-   "voce-e-de-onde": [
+   "ser-eu-sou": [
     {
-     "title": "\"De onde você é?\" or \"Você é de onde?\"",
-     "body": "You learned <strong>De onde você é?</strong>, and it's correct. But in conversation Brazilians often keep the normal word order and put the question at the end: <strong>Você é de onde?</strong> That's exactly what Lucas said in the dialogue. In fast, casual speech, <strong>você</strong> often shrinks to <strong>cê</strong>: <strong>Cê é de onde?</strong> In the exercises, keep writing the full word <strong>você</strong>: <strong>cê</strong> is for recognizing when you hear it.",
+     "title": "\"Eu sou\": the verb ser",
+     "body": "<strong>Eu sou</strong> means \"I am\". It comes from <strong>ser</strong> (to be), the verb you use to say who you are: your name, your nationality, your job. In this course, every verb is shown in four forms. <strong>Você</strong> (you), <strong>ele</strong> (he), <strong>ela</strong> (she) and <strong>a gente</strong> (we, very common in everyday speech) all share one form, and so do <strong>vocês</strong> (you, plural), <strong>eles</strong> and <strong>elas</strong> (they). Watch the accent: <strong>é</strong> means \"is\", while <strong>e</strong> means \"and\".",
      "examples": [
-      "Where are you from? (very common in conversation)",
-      "Where are you from? (fast, casual speech)"
+      "My name is Lucas. (é = is)"
+     ],
+     "table": [
+      {
+       "label": "ser",
+       "pronouns": [
+        "eu",
+        "você / ele / ela / a gente",
+        "nós",
+        "vocês / eles / elas"
+       ]
+      }
      ]
     }
    ],
-   "beijo-e-abraco": [
+   "nacionalidade-genero": [
     {
-     "title": "Why do Brazilians greet with a kiss on the cheek?",
-     "body": "Greetings in Brazil are warm and physical. Among friends and acquaintances, women often greet women and men with a <strong>beijo</strong>: a light touch of the cheeks with a kiss sound, not a real kiss. It's one or two, depending on the region and the person. Men often greet each other with a handshake or a hug with a pat on the back. In a formal or work setting, a handshake is the safe start. The same warmth shows up when people say goodbye: in messages and on the phone, friends and family often finish with <strong>Beijo!</strong> or <strong>Abraço!</strong> instead of \"bye\".",
+     "title": "\"Americano\" or \"americana\"?",
+     "body": "Most nationalities change with the person: <strong>-o</strong> for a man, <strong>-a</strong> for a woman. Some stay the same for everyone, like <strong>canadense</strong> (Canadian). Others change in their own way, like <strong>francês</strong> and <strong>francesa</strong> (the accent goes away). One more difference from English: in Portuguese, nationalities start with a lowercase letter.",
      "examples": [
-      "a kiss (bye, with friends and family)",
-      "a hug (bye, a little more neutral; also in work emails)"
+      "He's American.",
+      "She's American.",
+      "I'm Canadian. (the same for a man or a woman)"
+     ]
+    }
+   ],
+   "bem-vinda": [
+    {
+     "title": "\"Bem-vinda!\"",
+     "body": "Lucas says <strong>Bem-vinda!</strong> (\"welcome!\") because Emily is a woman. To a man, it's <strong>bem-vindo</strong>. You may already know <strong>bem-vindo</strong>: it's everywhere in daily life, from welcome signs to people greeting their guests. Notice the hyphen in both: <strong>bem-vindo</strong>, <strong>bem-vinda</strong>.",
+     "examples": [
+      "Welcome! (to a woman)",
+      "Welcome! (to a man, and very common in general)"
      ]
     }
    ]
   },
   "trueFalse": [
    {
-    "claim": "A woman says this to thank someone.",
-    "whyNote": "Not quite: a woman says <strong>obrigada</strong>. <strong>Obrigado</strong> is what a man says. The ending matches the person speaking, not the person being thanked."
+    "claim": "Men usually say this to thank someone.",
+    "whyNote": "Not quite: <strong>obrigada</strong> is the form women use. Men say <strong>obrigado</strong>. The ending matches the person speaking, not the person being thanked."
    },
    {
     "claim": "You can say this both when you arrive somewhere at night and when you leave.",
@@ -349,42 +435,72 @@
   ]
  },
  "review": {
-  "legend": "alta = forma e uso que qualquer brasileiro confirma, ou regra de norma-padrão; média-alta = muito provável, mas sem fonte aberta verificada (a professora confirma); média = correto, mas o detalhe (região, frequência, melhor tradução, variedade dos áudios) merece o olho da professora; baixa = dúvida real ou sem fonte, conferir antes de publicar. 'não verificada' = nenhuma fonte aberta apoia nem contradiz (ver docs/i18n/catalogo-erros-en-pt-verificacao.md). 'conferir' = o que a professora precisa olhar. Revisado depois da verificação externa em 2026-10-15 (docs/i18n/piloto-pt/revisao-pos-verificacao.md).",
+  "legend": "alta = forma e uso que qualquer brasileiro confirma, regra de norma-padrão ou decisão da dona; média-alta = muito provável, mas sem fonte aberta verificada (a professora confirma); média = correto, mas o detalhe (região, frequência, melhor tradução, pronúncia aproximada) merece o olho da professora; baixa = dúvida real ou sem fonte, conferir antes de publicar. 'não verificada' = nenhuma fonte aberta apoia nem contradiz. Fontes aceitas pela dona: só SAMBA 1 e 2 e Novo Avenida Brasil (nenhum livro foi consultado nesta revisão). Revisado em 2026-10-15 com as decisões da dona, rodada 3 (CHANGELOG-pos-verificacao.md).",
+  "decisoesDaDona": [
+   "Rodada 3 (2026-10-15), todas fechadas.",
+   "1. Oi / olá entram como tradução direta de hi / hello, sem nota (sai a nota oi-ou-ola).",
+   "2. 'Tudo bem? / Tudo bom?' = how are you? / I'm good, um cartão (normal com reverso); uma nota de realidade com formas de perguntar e de responder. 'Cê' só como reconhecimento; 'valeu', 'e aí' e 'beleza' entram como expressões nesta unidade. Respelling quando relevante.",
+   "3. 'obrigado / obrigada' num cartão só; o exercício de digitar aceita as duas formas. Nota: mulheres às vezes dizem 'obrigado' e não é mal visto. Sem marcador de gênero do aluno.",
+   "4. 'Bem-vinda!' com hífen, sem 'ao Brasil'; nota de que 'bem-vindo' é comum no dia a dia.",
+   "5. Sai a nota de beijo no rosto; fica 'Abraço' como despedida de e-mail.",
+   "6. 'Você é de onde?' e 'Sou de Chicago / dos Estados Unidos' vão para a futura unidade de origem; aqui fica 'Eu sou' + nacionalidade (duas formas de gênero no mesmo cartão), sem preposição. Sem marcador de país e de gênero do aluno. Lucas e Emily ficam.",
+   "7. Pronomes A1: 'você'; 'tu' só em nota curta, sem regiões. Tabela ensinada: Eu / Você, ele, ela, a gente / Nós / Vocês, eles, elas.",
+   "8. Título descritivo em inglês ('Greetings and introductions'). Em aberto: título como frase aprendida só se virar critério de todas as unidades.",
+   "9. Sem IPA para o aluno, só respelling para falantes de inglês e nasais descritas em palavras; pronúncia comparando Rio x SP (vozes próximas da paulista); 'Quase' quando faltar acento ou hífen; fontes só SAMBA 1 e 2 e Novo Avenida Brasil.",
+   "10. Áudio do diálogo: duas vozes alternando por fala (Emily = pt-BR-Chirp3-HD-Achernar, Lucas = pt-BR-Chirp3-HD-Charon), campo 'voice' em cada fala."
+  ],
   "items": {
-   "vocab[0] oi": { "confianca": "alta", "conferir": "" },
-   "vocab[1] bom dia": { "confianca": "alta", "conferir": "" },
-   "vocab[2] boa tarde": { "confianca": "alta", "conferir": "" },
-   "vocab[3] boa noite = good evening / good night": { "confianca": "alta", "conferir": "" },
-   "vocab[4] tudo bem = how are you? / I'm good": { "confianca": "média", "conferir": "Tradução: no francês a dona aprovou 'all good? / all good.' para 'ça va'. Usar o mesmo padrão aqui ou 'how are you? / I'm good'?" },
-   "vocab[5..6] obrigado / obrigada como dois itens": { "confianca": "média", "conferir": "Decisão pedagógica: dois cartões separados (escolhido para o exercício de digitar não exigir a barra) ou um só 'obrigado / obrigada'?" },
-   "vocab[7] tchau": { "confianca": "alta", "conferir": "" },
-   "vocab[8] meu nome é": { "confianca": "alta", "conferir": "" },
-   "vocab[9] prazer = nice to meet you": { "confianca": "alta", "conferir": "" },
-   "vocab[10] de onde você é?": { "confianca": "alta", "conferir": "" },
-   "vocab[11] eu sou de": { "confianca": "alta", "conferir": "" },
+   "vocab[0] oi = hi": { "confianca": "alta", "conferir": "" },
+   "vocab[1] olá = hello": { "confianca": "alta", "conferir": "Entra sem nota (decisão da dona)." },
+   "vocab[2] bom dia": { "confianca": "alta", "conferir": "" },
+   "vocab[3] boa tarde": { "confianca": "alta", "conferir": "" },
+   "vocab[4] boa noite = good evening / good night": { "confianca": "alta", "conferir": "" },
+   "vocab[5] tudo bem / tudo bom = how are you? / I'm good": { "confianca": "alta", "conferir": "Decisão da dona. O exercício de digitar aceita 'tudo bem' ou 'tudo bom' (acceptedForms divide por '/')." },
+   "vocab[6] e você? = and you?": { "confianca": "alta", "conferir": "Item novo: já aparecia em frases e no diálogo; virou cartão para a nota de você/cê/tu ter gatilho." },
+   "vocab[7] e aí? = hey! / what's up? (casual)": { "confianca": "alta", "conferir": "Entra como expressão (decisão da dona). Tradução 'hey! / what's up?': média-alta." },
+   "vocab[8] beleza = all good? / cool! (casual)": { "confianca": "média-alta", "conferir": "Entra como expressão (decisão da dona). Melhor tradução curta em inglês a confirmar." },
+   "vocab[9] obrigado / obrigada = thank you": { "confianca": "alta", "conferir": "Um cartão só (decisão da dona); digitar aceita as duas formas." },
+   "vocab[10] valeu = thanks! (casual)": { "confianca": "alta", "conferir": "Entra como expressão (decisão da dona)." },
+   "vocab[11] tchau": { "confianca": "alta", "conferir": "" },
+   "vocab[12] meu nome é": { "confianca": "alta", "conferir": "" },
+   "vocab[13] prazer = nice to meet you": { "confianca": "alta", "conferir": "" },
+   "vocab[14] eu sou = I am": { "confianca": "alta", "conferir": "" },
+   "vocab[15] americano / americana = American (man / woman)": { "confianca": "alta", "conferir": "'Americano' para quem é dos EUA é o uso comum; 'estadunidense' existe, mas não entra no A1 (sugestão)." },
+   "vocab[16] canadense = Canadian (man or woman)": { "confianca": "alta", "conferir": "" },
+   "vocab[17] francês / francesa = French (man / woman)": { "confianca": "alta", "conferir": "Exemplo da dona. O acento some no feminino: digitar 'frances' cai no 'Quase'." },
+   "vocab[18] brasileiro / brasileira = Brazilian (man / woman)": { "confianca": "alta", "conferir": "Usado pelo Lucas no diálogo." },
    "phrases[0] Oi! Meu nome é {nome}.": { "confianca": "alta", "conferir": "" },
    "phrases[1] Bom dia! Tudo bem?": { "confianca": "alta", "conferir": "" },
    "phrases[2] Tudo bem, e você?": { "confianca": "alta", "conferir": "" },
-   "phrases[3] Obrigada! Tchau!": { "confianca": "alta", "conferir": "Cenário com personagem mulher (Ana) porque o app não tem marcador de gênero do aluno para 'obrigado/obrigada'." },
-   "phrases[6] Eu sou dos Estados Unidos.": { "confianca": "alta", "conferir": "Contração 'dos' aparece antes da gramática de artigos; a nota eu-sou-de-do-da explica como bloco pronto." },
-   "phrases[7] Muito obrigado!": { "confianca": "alta", "conferir": "'muito' não está no vocabulário (o francês faz o mesmo com 'beaucoup')." },
-   "dialogue.lines[2] Você é de onde?": { "confianca": "média-alta", "conferir": "De propósito na ordem falada; a nota voce-e-de-onde explica depois do diálogo. Ordem 'Você é de onde?' como muito comum na conversa: não verificada (sem fonte aberta)." },
-   "dialogue.lines[4] Bem-vinda ao Brasil!": { "confianca": "média", "conferir": "Palavra nova (bem-vinda) fora do vocabulário. Alternativa sem palavra nova: 'Prazer, Emily! Tchau, boa noite!' / 'Tchau!'. Se ficar, conferir a grafia com hífen 'bem-vinda' no VOLP da ABL antes de publicar (o hífen não tem regra única)." },
+   "phrases[3] E aí? Beleza?": { "confianca": "alta", "conferir": "Frase nova (gírias da decisão 2). Tradução 'Hey! All good?': média-alta." },
+   "phrases[4] Obrigada! Tchau!": { "confianca": "alta", "conferir": "Cenário com personagem mulher (Ana); sem marcador de gênero do aluno (decisão 3)." },
+   "phrases[5] Valeu, tchau!": { "confianca": "alta", "conferir": "Frase nova. Inglês com '(casual)' para não confundir com 'Obrigado! Tchau!' na tradução." },
+   "phrases[6] Eu sou americano.": { "confianca": "alta", "conferir": "Frase nova (decisão 6); o inglês avisa '(said by a man)'." },
+   "phrases[7] Eu sou canadense.": { "confianca": "alta", "conferir": "Frase nova; serve para homem ou mulher." },
+   "phrases[8] Muito obrigado!": { "confianca": "alta", "conferir": "'muito' não está no vocabulário (o francês faz o mesmo com 'beaucoup')." },
+   "phrases[9] Boa noite, tchau!": { "confianca": "alta", "conferir": "" },
+   "dialogue.lines[2] Tudo bem! Meu nome é Lucas. Eu sou brasileiro.": { "confianca": "alta", "conferir": "Trocou 'Você é de onde?' (foi para a unidade de origem)." },
+   "dialogue.lines[3] Prazer, Lucas! Meu nome é Emily. Eu sou americana.": { "confianca": "alta", "conferir": "Trocou 'Eu sou de Chicago.'." },
+   "dialogue.lines[4] Prazer, Emily! Bem-vinda!": { "confianca": "alta", "conferir": "Decisão da dona: com hífen, sem 'ao Brasil'. 'Bem-vinda' é palavra fora do vocabulário, explicada na nota bem-vinda." },
    "dialogue.lines[5] Obrigada! Boa noite, tchau!": { "confianca": "alta", "conferir": "" },
-   "dialogue.check fill: distrator 'Obrigado! Boa noite, tchau!'": { "confianca": "alta", "conferir": "Distrator de gênero de propósito (Emily é mulher)." },
-   "concept oi-ou-ola (realidade, informal)": { "confianca": "média-alta", "conferir": "Não verificada: 'olá' soa mais escrito e 'oi' serve para quase todo mundo. A professora confirma." },
-   "concept som-de-bom-dia (pronúncia)": { "confianca": "média", "conferir": "Fica média até a dona escolher a variedade dos áudios (decisão pendente). d/t antes de 'i' é fenômeno variável: o texto diz 'in many Brazilian accents' e 'not every accent does this'; 'most of Brazil' e a menção ao Nordeste saíram (sem fonte). As transcrições 'bõ JEE-ah' e 'BOH-ah NOY-chee' saíram até a variedade ser escolhida e a professora confirmar que soam certas nela. 'Bom' nasal e não rima com 'bomb': média-alta, não verificada. 'The m is not really pronounced' (hipótese didática sem fonte) virou 'is not a full m'." },
-   "concept bom-dia-tarde-noite": { "confianca": "média-alta", "conferir": "Faixas de horário escritas como aproximadas (até o almoço / até escurecer); 'boa noite' para chegar e para sair. Não verificada: a professora confirma." },
-   "concept tudo-bem-pergunta-e-resposta": { "confianca": "média-alta", "conferir": "Não verificada: mesma expressão para pergunta e resposta, 'tudo bom?', resposta 'tudo!' e a subida/descida da entonação. O catálogo também só tem a prática de ensino como apoio." },
-   "concept obrigado-obrigada": { "confianca": "alta", "conferir": "Alta como regra de norma-padrão (concordância com quem fala), não verificada (a verificação externa não tratou este ponto). Uso efetivo de mulheres que dizem 'obrigado' e de pessoas não binárias: não coberto pela nota; manter fora? 'Erro frequente do anglófono': baixa (afirmação de ensino sem fonte; a nota não a faz)." },
-   "concept voce-e-tu (realidade, regional)": { "confianca": "média", "conferir": "Lista de regiões removida (sem fonte que a apoie). 'Você' padrão e não formal: média-alta, não verificada. 'Tu' com verbo de 'você' ('tu é', 'tu vai') na fala: média. 'Tu és/tu vais' = concordância tradicional, 'tu é' = uso na fala, não a conjugação padrão: média-alta (distinção confirmada pela verificação). 'Tu és' como informal normal em Portugal: média, não verificada." },
-   "concept eu-sou-de-do-da": { "confianca": "alta", "conferir": "Alta como norma-padrão (cidade = de; país com artigo = do/da/dos). 'A maioria dos países pede artigo': média-alta, não verificada." },
-   "concept voce-e-de-onde (realidade, informal)": { "confianca": "média-alta", "conferir": "'Cê' como redução falada de 'você', ensinada só como reconhecimento: média-alta. Frequência por região: removida (sem apoio). Ordem 'Você é de onde?' como muito comum na conversa: média, não verificada. A classificação de 'cê' depende da decisão da dona sobre gírias e formas de fala." },
-   "concept beijo-e-abraco (cultura, costume)": { "confianca": "média", "conferir": "Nenhuma fonte verificada sobre cumprimento. O costume em si (beijo no rosto, aperto de mão/abraço entre homens) e 'Beijo!'/'Abraço!' na despedida: média, não verificada. 'Usually' virou 'often'. Número de beijos ('one or two, depending on the region and the person', sem citar cidades): baixa. 'Also in work emails' no exemplo de 'Abraço!': baixa e OPCIONAL, tirar se a professora não confirmar." },
-   "trueFalse[0] Obrigado! / falso": { "confianca": "alta", "conferir": "" },
+   "dialogue.lines[*].voice": { "confianca": "alta", "conferir": "Decisão da dona: Emily = pt-BR-Chirp3-HD-Achernar, Lucas = pt-BR-Chirp3-HD-Charon. Campo novo; o app e o gerador de áudio ainda não o leem." },
+   "dialogue.check fill: distratores 'Eu sou canadense. Tchau!' e 'Bom dia! Tudo bem?'": { "confianca": "alta", "conferir": "Saiu o distrator 'Obrigado! ...' (com a decisão 3, mulher dizendo 'obrigado' não é erro)." },
+   "dialogue.check understand: 'What is Emily's nationality?'": { "confianca": "alta", "conferir": "Era 'Where is Emily from?' (Chicago saiu do diálogo)." },
+   "concept som-de-bom-dia (pronúncia)": { "confianca": "média-alta", "conferir": "Respelling 'JEE-ah', 'NOY-chee', 'BOH-ah' e d/t palatalizados em SP e no Rio: média-alta, não verificada. 'Bom' nasal e não rima com 'bomb': média-alta. 'Vozes próximas da paulista': decisão da dona." },
+   "concept som-de-boa-tarde (pronúncia, Rio x SP)": { "confianca": "média", "conferir": "Nota nova. R de 'tarde': tepe (ou som próximo do r inglês) em SP, fricativo tipo 'h' no Rio. Sem fonte aberta; a professora confirma as aproximações 'TAR-jee' e 'TAHH-jee'. Candidata a sair se a unidade ficar com notas demais." },
+   "concept bom-dia-tarde-noite": { "confianca": "média-alta", "conferir": "Sem mudança. Não verificada: a professora confirma." },
+   "concept voce-ce-tu (realidade, informal)": { "confianca": "média", "conferir": "Substitui voce-e-tu e a parte de 'cê' de voce-e-de-onde. 'Você' padrão e não formal: média-alta. 'Cê' só reconhecimento: média-alta. 'Tu' bem menos comum que 'você' na maior parte do país: média (afirmação da dona, sem fonte; sem regiões). Respelling 'voh-SAY': média-alta." },
+   "concept tudo-bem-pergunta-e-resposta (realidade, informal)": { "confianca": "média-alta", "conferir": "Reescrita (decisão 2): formas de perguntar (Tudo bem? / Tudo bom? / Como vai? / Tudo certo? / E aí? / Beleza?) e de responder (Tudo bem! E você? / Tudo ótimo! / Tudo certo! / Tudo tranquilo! / Beleza! / Vou bem sim, e você?). Acrescentei 'Tudo certo?' e 'Tudo tranquilo!' como 'outras'. 'Como vai?' um pouco mais educado: média-alta. Respellings 'TOO-doo bayn', 'ee ah-EE', 'beh-LEH-zah': média-alta." },
+   "concept obrigado-obrigada": { "confianca": "alta", "conferir": "Regra (concorda com quem fala) como norma-padrão: alta. Mulheres que às vezes dizem 'obrigado' sem ser mal visto: média-alta (afirmação da dona, sem fonte). Respelling 'oh-bree-GAH-doo': média-alta." },
+   "concept valeu (realidade, informal)": { "confianca": "média-alta", "conferir": "Nota nova. 'Valeu' = obrigado informal, igual para homem e mulher: alta. 'Valeu' sozinho como 'obrigado, tchau' na saída: média-alta. Respelling 'vah-LAY-oo': média-alta." },
+   "concept abraco (cultura, costume)": { "confianca": "média-alta", "conferir": "Substitui beijo-e-abraco (sai o beijo no rosto, decisão 5). 'Abraço!' como despedida de e-mail e mensagem: alta (decisão da dona). Também em e-mail de trabalho: média-alta. Comparação com 'Best'/'Cheers': média." },
+   "concept ser-eu-sou (explicação com tabela)": { "confianca": "alta", "conferir": "Nota nova (decisão 6 e 7): tabela Eu / Você, ele, ela, a gente / Nós / Vocês, eles, elas. 'A gente' muito comum na fala: média-alta. Só ser: o rascunho não tinha estar." },
+   "concept nacionalidade-genero": { "confianca": "alta", "conferir": "Nota nova. -o/-a, canadense invariável, francês/francesa sem acento no feminino, minúscula: norma-padrão." },
+   "concept bem-vinda": { "confianca": "alta", "conferir": "Nota nova (decisão 4). Concordância e hífen: alta. 'Bem-vindo' comum no dia a dia e talvez já conhecido: média-alta (afirmação da dona)." },
+   "trueFalse[0] Obrigada! / 'Men usually say this' / falso": { "confianca": "alta", "conferir": "Era 'Obrigado! / A woman says this / falso', que contradiz a decisão 3." },
    "trueFalse[1] Boa noite! / verdadeiro": { "confianca": "alta", "conferir": "" },
-   "title 'Hi! How are you?'": { "confianca": "média", "conferir": "Título curto e informal; alternativa mais descritiva: 'Greetings and introductions'." },
-   "dialogue.speakers Lucas e Emily": { "confianca": "alta", "conferir": "Emily (americana) para o aluno se ver no diálogo; trocar se a dona preferir dois brasileiros." }
+   "title 'Greetings and introductions'": { "confianca": "alta", "conferir": "Decisão da dona (título descritivo)." },
+   "dialogue.speakers Lucas e Emily": { "confianca": "alta", "conferir": "Mantidos (decisão 6)." }
   }
  }
 }
