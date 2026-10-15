@@ -38,3 +38,27 @@ Referência, o francês: 30 unidades (20 de vocabulário + 10 de gramática), 20
 4. **Módulos do começo:** Desafios, Ditados e Conjugação entram já, ou só trilha, revisão e decks?
 5. **Nome da marca:** "Portuguese with Prof. Brune" (recomendado no plano) ou outro?
 6. **Ordem:** fazer a E5 (regras de acento, comparador em inglês, TTS) antes da E7, ou o mínimo dela junto com o piloto?
+
+## 7. Decisões da dona (2026-10-15) e estado da E5
+**Decisões:** primeira entrega = unidade-piloto (1 unidade completa + esqueleto); conteúdo = rascunho do Claude + revisão da dona; módulos do começo = trilha, revisão, conjugação e decks (Desafios e Ditados entram aos poucos depois); marca = "Portuguese with Prof. Brune"; **sem pressa com o piloto: antes dele vêm as etapas que ainda faltam** (E5 e o mínimo da E6).
+
+**A E5 já foi feita? Não, só em parte** (conferido no código):
+| Subtarefa da E5 | Estado |
+|---|---|
+| Família latina: acentos, teclado de acentos, normalização, "Acentuação", Ditado | Só existe para o francês e dentro de `fr/app.js` (`frAccentPickerHTML`, validação de resposta). Nada extraído para a família, nada para o português |
+| Família de caracteres (tons, pinyin) | Do zh, funciona; nada a fazer agora |
+| Português como idioma estudado (cedilha, til, crase, contrações, artigos) | Não feito |
+| Texto falado (TTS) do português | Só proposta e revisão (`docs/pt-tts-*.md`); `tts_core.mjs` tem a voz `pt-BR`, mas nenhuma regra de pt |
+| Comparador do "Ouça e traduza" por língua de origem | **Existe** em `shared/translation-compare.js` (pt-BR e en, 18 testes passando). Falta conferir se os casos adversariais (negação, número) estão cobertos |
+| Áudio de instrução dos ditados na língua do site | Não conferido (provavelmente não feito) |
+| Catálogo de erros típicos por par (falante de inglês estudando português) | Não feito (é insumo do conteúdo) |
+
+## 8. Ordem proposta: só o que não depende do `/pt` primeiro
+O risco ("o `/pt` revela pontos que supõem fr/zh") some quando se faz primeiro o que é função pura ou dado, testável sozinho:
+1. **Texto falado do português** (regras, paridade Python x JS, testes com palavras acentuadas): sem `/pt`.
+2. **Módulo da família latina** (acentos, normalização, comparação de resposta tolerante a acento) extraído do francês, com testes escritos a partir de exemplos reais do português. É também o que resolve os exercícios grandes que sobraram da E4 (grupo D).
+3. **Comparador em inglês**: suíte adversarial (negação, número, concordância).
+4. **Catálogo de erros típicos** de falantes de inglês no português (pesquisa; vira insumo do conteúdo).
+5. **Mínimo da E6** (servidor): o que o `pt` precisa para existir no banco, notificações e painel da professora.
+6. Só então a **E7** (`/pt` + unidade-piloto).
+Em paralelo, sem código: **o rascunho da unidade-piloto** (vocabulário, frases, diálogo, notas do Brasil, para falantes de inglês), para a dona ir revisando enquanto as etapas acima andam.
