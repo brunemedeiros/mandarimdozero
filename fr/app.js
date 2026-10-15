@@ -3205,43 +3205,35 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 // pede pra digitar de ouvido uma palavra ainda não exposta.
 // Ninguém tem acento fácil de digitar num teclado físico/mobile padrão --
 // isso dá um jeito de inserir a letra certa sem precisar trocar de layout
-// de teclado. Importante: o acento NÃO é exigido pra acertar (normalizeLoose
-// já remove diacríticos dos dois lados antes de comparar, ver strip() nos
+// de teclado. Importante: o acento NÃO é exigido pra acertar (a comparação
+// já remove diacríticos dos dois lados, ver lessonTypedAnswerResult nos
 // dois exercícios abaixo) -- isso é só pra quem quer treinar digitando com o
 // acento certo mesmo, não um requisito escondido. Minúsculas só (a
 // comparação já ignora maiúscula/minúscula) -- mesmo espírito do
 // PINYIN_TONE_GROUPS em zh/app.js, adaptado pro alfabeto francês.
-const FR_ACCENT_GROUPS = [
-  ['à', 'â'],
-  ['ç'],
-  ['é', 'è', 'ê', 'ë'],
-  ['î', 'ï'],
-  ['ô', 'œ'],
-  ['ù', 'û', 'ü'],
-];
-
+// Família latina, fase 2: as letras do teclado estão em LANG_HOOKS.familiaLatina.gruposDeAcentos
+// (fr/lang-hooks.js) e a marcação/inserção, em shared/core/familias/latina.js. As classes
+// continuam fr-accent-* (o CSS e as capturas de tela não mudam).
 function frAccentPickerHTML(){
-  return `<div class="fr-accent-picker">${FR_ACCENT_GROUPS.map(group => `
-    <div class="fr-accent-group">${group.map(ch => `<button type="button" class="fr-accent-key">${ch}</button>`).join('')}</div>
-  `).join('')}</div>`;
+  return latinaFr().htmlTecladoDeAcentos();
 }
 
-// Insere no CURSOR (não sempre no final) -- dá pra corrigir só a letra que
-// falta o acento no meio da palavra sem apagar o resto e redigitar.
+// Escreve a tecla no campo: insere no CURSOR (não sempre no final) -- dá pra
+// corrigir só a letra que falta o acento no meio da palavra sem apagar o resto.
+function insertAccentAtCursor(inputEl, ch){
+  const r = FamiliaLatina.inserirNoCursor(inputEl.value, inputEl.selectionStart, inputEl.selectionEnd, ch);
+  inputEl.value = r.value;
+  inputEl.focus();
+  inputEl.setSelectionRange(r.cursor, r.cursor);
+}
+
 function wireFrAccentPicker(pickerEl, inputEl){
   if (!pickerEl || !inputEl) return;
   pickerEl.querySelectorAll('.fr-accent-key').forEach(btn => {
     // Não deixa o toque na tecla tirar o foco/cursor do campo (no celular
     // isso fechava e reabria o teclado).
     btn.addEventListener('mousedown', e => e.preventDefault());
-    btn.addEventListener('click', () => {
-      const start = inputEl.selectionStart ?? inputEl.value.length;
-      const end = inputEl.selectionEnd ?? inputEl.value.length;
-      const ch = btn.textContent;
-      inputEl.value = inputEl.value.slice(0, start) + ch + inputEl.value.slice(end);
-      inputEl.focus();
-      inputEl.setSelectionRange(start + ch.length, start + ch.length);
-    });
+    btn.addEventListener('click', () => insertAccentAtCursor(inputEl, btn.textContent));
   });
 }
 
@@ -5725,10 +5717,7 @@ function renderConjPracticeStep(){
     btn.addEventListener('mousedown', e => e.preventDefault());
     btn.addEventListener('click', () => {
       if (!lastInput) return;
-      const a = lastInput.selectionStart ?? lastInput.value.length, z = lastInput.selectionEnd ?? lastInput.value.length;
-      lastInput.value = lastInput.value.slice(0, a) + btn.textContent + lastInput.value.slice(z);
-      lastInput.focus();
-      lastInput.setSelectionRange(a + btn.textContent.length, a + btn.textContent.length);
+      insertAccentAtCursor(lastInput, btn.textContent);
     });
   });
 

@@ -106,6 +106,7 @@ function carregarNovo() {
     declaracao('conjAlign'),
     declaracao('conjFold'),
     opcional('FR_ACCENT_GROUPS'),
+    opcional('insertAccentAtCursor'),
     declaracao('frAccentPickerHTML'),
     declaracao('wireFrAccentPicker'),
     declaracao('dictationLightNoteText'),

@@ -148,6 +148,24 @@ async function clozeType(page, blockF, typed){
   check('ditado (b) site em português: textos de sempre', d.notes.some(n => n === '«sœur» usa a letra «œ», que é uma só (você escreveu «soeur»).') && d.notes.some(n => /^«là»: confira os acentos \(você escreveu «la»\)\. «la» é artigo ou pronome; «là» quer dizer "lá\/aí"\.$/.test(n)) && d.titles.includes('Faltou este sinal (não desconta pontos)'), d);
   check('ditado (e) site em português: "peut etre" cita o hífen e os acentos', d.notes.some(n => /^«Peut-être»: confira o hífen e os acentos/.test(n)), d.notes);
 
+  // ---- Lote 4: teclado de acentos (marcação de sempre, insere no cursor)
+  const teclado = await page.evaluate(() => {
+    const box = document.createElement('div'); document.body.appendChild(box);
+    box.innerHTML = '<input id="fl-in" value="ecole">' + frAccentPickerHTML();
+    const input = document.getElementById('fl-in');
+    wireFrAccentPicker(box.querySelector('.fr-accent-picker'), input);
+    const keys = Array.from(box.querySelectorAll('.fr-accent-key')).map(b => b.textContent);
+    input.focus(); input.setSelectionRange(0, 1);
+    const e = Array.from(box.querySelectorAll('.fr-accent-key')).find(b => b.textContent === 'é');
+    const md = new MouseEvent('mousedown', { bubbles: true, cancelable: true }); e.dispatchEvent(md);
+    e.click();
+    const out = { keys: keys.join(''), groups: box.querySelectorAll('.fr-accent-group').length, value: input.value, cursor: [input.selectionStart, input.selectionEnd], prevented: md.defaultPrevented };
+    box.remove();
+    return out;
+  });
+  check('teclado: as 14 teclas de sempre, em 6 grupos', teclado.keys === 'àâçéèêëîïôœùûü' && teclado.groups === 6, teclado);
+  check('teclado: "é" com o "e" selecionado vira "école", cursor depois do é, sem tirar o foco', teclado.value === 'école' && teclado.cursor[0] === 1 && teclado.cursor[1] === 1 && teclado.prevented, teclado);
+
   check('sem erro de página', errors.length === 0, errors);
   await ctx.close();
   await browser.close(); server.close();
