@@ -4,11 +4,11 @@ Gerado por `scripts/e4-diff-near.js`. Ordem: menos linhas diferentes primeiro. `
 
 | # | Função | Linhas fr/zh | Linhas diferentes |
 |---:|---|---:|---:|
-| 1 | `addXP` | 14/14 | 2 |
-| 2 | `answerSpeedQuestion` | 38/38 | 2 |
-| 3 | `renderLessonCompleteScreen` | 52/52 | 2 |
-| 4 | `renderUnitCompleteScreen` | 60/60 | 2 |
-| 5 | `onMatchTileClick` | 68/68 | 2 |
+| 1 | `onMatchTileClick` | 1/1 | 0 |
+| 2 | `renderLessonCompleteScreen` | 1/1 | 0 |
+| 3 | `renderUnitCompleteScreen` | 1/1 | 0 |
+| 4 | `answerSpeedQuestion` | 1/1 | 0 |
+| 5 | `addXP` | 1/1 | 0 |
 | 6 | `noteOrConceptReviewHTML` | 13/14 | 3 |
 | 7 | `findEnterAdvanceTarget` | 15/12 | 3 |
 | 8 | `renderConceptStep` | 40/41 | 3 |
@@ -48,54 +48,29 @@ Gerado por `scripts/e4-diff-near.js`. Ordem: menos linhas diferentes primeiro. `
 | 42 | `renderDialogueCheck` | 95/97 | 34 |
 | 43 | `renderClozeExercise` | 105/117 | 42 |
 
-## `addXP` (2 linhas diferentes)
+## `onMatchTileClick` (0 linhas diferentes)
 
 ```diff
-...
-      STATE.daily.xp += amount;
--     showToast(t('toast.xpGain', { amount }));
-+     showToast(`+${amount} XP`);
-      fireNotificationEvent('xp_earned', 'gamificacao', { amount });
 ```
 
-## `answerSpeedQuestion` (2 linhas diferentes)
+## `renderLessonCompleteScreen` (0 linhas diferentes)
 
 ```diff
-...
-          }
--         showToast(t('toast.pointsGain', { n: speedBonus }));
-+         showToast(`+${speedBonus} pts`);
-      }
 ```
 
-## `renderLessonCompleteScreen` (2 linhas diferentes)
+## `renderUnitCompleteScreen` (0 linhas diferentes)
 
 ```diff
-...
-              <div class="lesson-recap-item">
--               <div class="lesson-recap-french">${audioBtnHTML(item.f)}<span>${item.f}</span></div>
-+               <div class="lesson-recap-french">${audioBtnHTML(item.c)}<span>${item.c}</span><span class="lesson-recap-pinyin">${item.p}</span></div>
-                <div class="lesson-recap-trans">${item.t}</div>
 ```
 
-## `renderUnitCompleteScreen` (2 linhas diferentes)
+## `answerSpeedQuestion` (0 linhas diferentes)
 
 ```diff
-...
-              <div class="lesson-recap-item">
--               <div class="lesson-recap-french">${audioBtnHTML(item.f)}<span>${item.f}</span></div>
-+               <div class="lesson-recap-french">${audioBtnHTML(item.c)}<span>${item.c}</span><span class="lesson-recap-pinyin">${item.p}</span></div>
-                <div class="lesson-recap-trans">${item.t}</div>
 ```
 
-## `onMatchTileClick` (2 linhas diferentes)
+## `addXP` (0 linhas diferentes)
 
 ```diff
-...
-                <h3>${t('review.match.allMatched')}</h3>
--               <div class="score-num">${t('review.match.attempts', { n: MATCH_STATE.attempts })}</div>
-+               <div class="score-num">${tp('review.match.attempts', MATCH_STATE.attempts)}</div>
-                ${matchMs ? `<p class="review-record-line">${t('review.records.time', { time: formatRecordSeconds(matchMs) })} · ${matchIsRecord ? t('review.records.newRecord') : t('review.records.yourRecord', { record: formatRecordSeconds(reviewRecords().matchBestMs) })}</p>` : ''}
 ```
 
 ## `noteOrConceptReviewHTML` (3 linhas diferentes)

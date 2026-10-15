@@ -88,44 +88,6 @@ const FEEDBACK_SOUND_KEY = 'frances_feedback_sound';
 let feedbackAudioCtx = null;
 
 
-// Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
-// API do navegador — qualidade consistente pra todo aluno, independente do
-// SO/navegador. Ver audio-manifest.js (texto -> arquivo) e speakFrench().
-// rate (opcional): playbackRate do <audio> -- usado pelo botão "🐢 devagar"
-// (ver SLOW_AUDIO_RATE) em qualquer tela de Écouter manual (o Ditado já tem
-// seu próprio seletor 0.75x/1x/1.5x, não precisa deste botão extra).
-function playPregeneratedAudio(file, btnEl, isAutoplay, rate){
-  stopExerciseAudio();
-  const audio = new Audio('audio/' + file);
-  if (rate) audio.playbackRate = rate;
-  exerciseAudioEl = audio;
-  if (btnEl){ btnEl.classList.add('speaking'); LAST_AUDIO_BTN = btnEl; }
-  const clear = () => {
-    if (btnEl) btnEl.classList.remove('speaking');
-    if (exerciseAudioEl === audio) exerciseAudioEl = null;
-  };
-  audio.addEventListener('ended', clear);
-  audio.addEventListener('error', () => {
-    clear();
-    showToast(t('toast.audioPlayFailed'));
-    trackTechnicalError('audio_load_failed', { file });
-  });
-  audio.play().catch(() => {
-    clear();
-    // Autoplay bloqueado pelo navegador (comum em mobile -- o clique em
-    // "Continuar" que dispara o próximo exercício quebra a "janela" de
-    // gesto do usuário que o play() automático depende) -- diferente de um erro real de arquivo/rede, por
-    // isso um aviso mais brando em vez do toast de erro acima: basta tocar
-    // manualmente no botão pra funcionar. Só conta como falha TÉCNICA
-    // quando NÃO é autoplay -- um clique manual que falha é sempre
-    // inesperado; autoplay bloqueado é comportamento normal do navegador,
-    // não um bug, e contá-lo inflaria "erros" com algo que acontece toda
-    // sessão em boa parte dos celulares.
-    if (isAutoplay) showToast(t('toast.audioTapSpeaker'));
-    else trackTechnicalError('audio_play_failed', { file });
-  });
-}
-
 // Reports reais de alunos ("o audio está muito rápido") em cima do áudio
 // pré-gerado (voz neural fr-FR-Chirp3-HD-Achernar), que toca na velocidade
 // nativa (playbackRate 1.0, sem ajuste nenhum) diferente do fallback de
@@ -233,11 +195,6 @@ function tpZero(key, n, params){
   return tp(key, n === 0 ? 2 : n, Object.assign({ n: 0 === n ? 0 : n }, params || {}));
 }
 
-function audioBtnHTML(text, extraClass){
-  const safe = text.replace(/"/g, '&quot;');
-  return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="${t('fr.audio.listenPronunciation')}" title="${t('fr.audio.listenPronunciation')}">🔊</button>`;
-}
-
 
 // Botão de áudio devagar -- companheiro de qualquer "Écouter" manual
 // (desafios/exemplos onde o áudio NÃO toca sozinho, decisão explícita da
@@ -268,26 +225,6 @@ const SCENARIO_FLAG_SVG = {
 function scenarioSceneHTML(emoji){
   const svg = SCENARIO_FLAG_SVG[emoji];
   return svg ? `<span class="scenario-flag">${svg}</span>` : emoji;
-}
-
-
-// ---------- Construção do banco de cartões a partir do content.js ----------
-// Cada cartão SRS = 1 item de vocabulário (frente: francês, com áudio; verso: tradução)
-function buildCardsFromUnits(units, appKey = 'frances'){
-  // K2-C: cada palavra vira uma Note nativa `normal_reversed` com dois
-  // CardInstances (A = id legado, B = `-b`), montados por
-  // shared/study-trail-model.js sobre o motor existente. appKey tem default
-  // literal: este construtor roda no init de STATE, antes de `const APP_KEY`.
-  const cards = [];
-  units.forEach(u => {
-    if (u.type === 'grammar') return; // unidades de gramática não têm vocabulário/flashcards
-    u.vocab.forEach((v, idx) => {
-      buildStudyWordCards(u, v, idx, appKey).forEach(c => cards.push(c));
-    });
-  });
-  // Cartões "Na frase": 1 por frase de exemplo do curso (shared/study-trail-model.js).
-  buildStudyPhraseCards(units, appKey).forEach(c => cards.push(c));
-  return cards;
 }
 
 
@@ -830,30 +767,6 @@ const LEVEL_DESCRIPTIONS = {
 // (STUDY_WIZARD_STEPS até saveStudyWizard) e o wiring do modal vêm de
 // shared/wizard.js.
 
-// Lembrete local best-effort: só dispara se a pessoa tiver o app aberto numa
-// janela de ~30min depois do horário escolhido, com permissão já concedida —
-// não existe servidor de push aqui, então não há aviso quando o app está
-// fechado ou o navegador nem está aberto.
-function maybeSendStudyReminder(){
-  const goal = STATE.studyGoal;
-  if (!goal.notifications || !goal.dailyLessonsGoal) return;
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-
-  const now = new Date();
-  if (!goal.days[DAY_KEY_BY_JS_INDEX[now.getDay()]]) return;
-
-  const scheduled = new Date(now);
-  scheduled.setHours(goal.hour, goal.minute, 0, 0);
-  const diffMin = (now - scheduled) / 60000;
-  if (diffMin < 0 || diffMin > 30) return;
-
-  if (localStorageSafeGet('frances_last_study_notif') === todayStr()) return;
-  new Notification(t('fr.reminder.title'), {
-    body: tp('zh.reminder.body', goal.dailyLessonsGoal),
-    icon: 'icons/icon-192.png'
-  });
-  localStorageSafeSet('frances_last_study_notif', todayStr());
-}
 
 // ---------- Lembrete de revisão acumulada (estilo Busuu) ----------
 // Pop-up não bloqueante no rodapé, avisando que há palavras vistas em lições
@@ -992,44 +905,6 @@ function assignTodaysMissions(){
   return [easy, revisao, general].map(c => ({ id: c.id, target: c.target }));
 }
 
-
-function addXP(amount){
-  // amount 0 (ex: exerciseXP() em modo de revisão de lição, ver comentário
-  // lá) nunca deve gerar toast/notificação/checagem de badge -- não é XP
-  // de verdade, é só o funil compartilhado sendo chamado com nada a somar.
-  if (!amount) return;
-  STATE.xp += amount;
-  ensurePeriodXp();
-  STATE.periodXp.amount += amount;
-  // Fase 6 da tarefa de conclusão de lição/unidade: alimenta o desafio
-  // diário 'xp50' (GENERAL_CHALLENGES), que substituiu 'stars40'.
-  ensureDailyBucket();
-  STATE.daily.xp += amount;
-  showToast(t('toast.xpGain', { amount }));
-  // Fase 1 do sistema de notificações (evento "Cliente" -- ver
-  // shared/notifications.js): fire-and-forget, o anti-spam (cooldown/
-  // daily_cap da categoria "gamificacao") já evita virar spam a cada
-  // exercício respondido.
-  fireNotificationEvent('xp_earned', 'gamificacao', { amount });
-  // Quase todo badge depende de streak, unidade, XP ou revisões -- e todos
-  // esses caminhos já chamam addXP() em algum ponto (mesmo os de streak, via
-  // registerStudyToday() logo antes/depois). Centralizar a checagem aqui
-  // evita espalhar "será que ganhei um badge?" em cada função separada.
-  // Exceção: "Ouvido Treinado" depende só de tocar áudio, que nunca passa
-  // perto de addXP() sozinho -- registerAudioPlay() dispara a checagem
-  // direto, sem esperar o próximo XP ganho.
-  checkAndCelebrateBadges();
-  // Checa cada Missão do dia individualmente ANTES do bônus do conjunto --
-  // "Missão concluída" de cada uma, depois (se for o caso) o toast de +30XP
-  // por ter fechado as 3.
-  checkDailyMissionCompletions();
-  // Checa a cada ganho de XP -- qualquer ação pode ser a que fecha a
-  // última das 3 Missões do dia (ver checkDailyMissionsBonus). A função já
-  // se protege contra rodar duas vezes no mesmo dia; addXP(30) chamando
-  // addXP() de novo aqui dentro é seguro (não reentra infinitamente porque
-  // missionsBonusAwarded já fica true ANTES desse addXP(30)).
-  checkDailyMissionsBonus();
-}
 
 // showToast agora vem de shared/toast.js.
 
@@ -1737,49 +1612,6 @@ function currentStepDefs(){
 const ACQ_BLOCK_SIZE = 3;
 
 
-function freshAcquisitionState(unitId, unit){
-  if (isLessonUnit(unit)){
-    const lesson = currentLesson(unit);
-    if (!STATE.unitProgress[unitId].lessonMisses) STATE.unitProgress[unitId].lessonMisses = {};
-    return {
-      unitId,
-      lessonIdx: currentLessonIdx(unitId),
-      blocks: (lesson.vocabIdx && lesson.vocabIdx.length) ? [lesson.vocabIdx] : [],
-      blockIdx: 0,
-      phase: currentLessonIdx(unitId) > 0 ? 'bridge' : 'intro',
-      introIdx: 0,
-      wordMisses: STATE.unitProgress[unitId].lessonMisses,
-      introduced: {},
-      // Acerto/total acumulado das fases realmente avaliadas desta lição
-      // (checkpoint + practice/mixed -- NUNCA a ponte com a lição anterior,
-      // que testa recall de conteúdo já ensinado antes, não desta lição).
-      // Usado em finishCurrentLesson pra dar uma nota de verdade a uma
-      // lição intermediária, que antes nunca contava pra desafios de nota
-      // (ex: "Pontue mais de 80% em N lições") -- só o Ponto de verificação
-      // do fim da unidade contava, o que na prática deixava esses desafios
-      // quase impossíveis de bater num dia normal de estudo por lições.
-      lessonScore: { correct: 0, total: 0 },
-      // XP real da tela "Lição concluída" (Fase 1/3 da tarefa de conclusão
-      // de lição/unidade): STATE.xp só cresce dentro de addXP() (nenhum
-      // outro lugar escreve nele durante uma sessão, conferido), então o
-      // delta contra este valor no momento em que a lição termina é
-      // exatamente o XP concedido NESTA lição -- sem duplicar nenhum
-      // cálculo paralelo, só lendo o que o motor já concedeu de verdade.
-      xpAtLessonStart: STATE.xp
-    };
-  }
-  return {
-    unitId,
-    blocks: buildAcquisitionBlocks(unit),
-    blockIdx: 0,
-    phase: 'intro', // 'intro' | 'checkpoint' | 'practice' | 'mixed'
-    introIdx: 0,
-    wordMisses: {},
-    introduced: {},
-    xpAtLessonStart: STATE.xp
-  };
-}
-
 const STEP_STATE = {
   currentStep: 0,
   acq: { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {}, lessonScore: { correct: 0, total: 0 }, xpAtLessonStart: 0 },
@@ -2009,56 +1841,6 @@ function buildExerciseHint(ex, unit){
   return null;
 }
 
-// ---------- "Não sei" / dica / ver resposta (mecânica compartilhada) ----------
-// "Não sei" preserva o esforço de recuperação: existe desde o início do
-// exercício (não só depois de um erro), mas NUNCA é tratado como resposta
-// errada -- não conta erro, não conta acerto. Ao clicar, o próprio botão
-// "Não sei" é SUBSTITUÍDO (não fica ao lado de outro controle) pelo bloco da
-// dica, no mesmo lugar em que o aluno pediu ajuda -- sem pular pro topo da
-// tela, sem exigir que ele procure a dica em outro lugar. Desse bloco saem
-// duas ações: "Tentar novamente" (fecha a dica, a pergunta continua ali,
-// intacta) ou "Ver resposta" (única forma de finalizar sem ter acertado
-// sozinho -- sem XP, sem contar como acerto, com a mesma explicação/retomada
-// de conteúdo usada quando o aluno erra de verdade).
-function wireDontKnowButton(contentEl, ex, onRevealAnswer){
-  const btn = contentEl.querySelector('#exercise-dontknow-btn');
-  if (!btn) return;
-  const row = btn.parentElement;
-  btn.addEventListener('click', () => {
-    if (STEP_STATE.exerciseAnswered || ex.askedDontKnow) return;
-    ex.askedDontKnow = true;
-    const unit = UNITS.find(u => u.id === STATE.currentUnitId);
-    const hintText = buildExerciseHint(ex, unit);
-    btn.outerHTML = `
-      <div class="inline-hint-block" id="inline-hint-block">
-        ${hintText ? `
-          <div class="inline-hint-label">${t('fr.hint.label')}</div>
-          <p class="inline-hint-text">${hintText}</p>
-        ` : ''}
-        <div class="inline-hint-actions">
-          <button class="btn btn-secondary inline-hint-retry-btn" id="inline-hint-retry-btn">${t('fr.hint.retry')}</button>
-          <button class="btn btn-secondary exercise-reveal-btn" id="exercise-reveal-btn">${t('fr.hint.reveal')}</button>
-        </div>
-      </div>
-    `;
-    const block = row.querySelector('#inline-hint-block');
-    block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    block.querySelector('#inline-hint-retry-btn').addEventListener('click', () => {
-      block.remove();
-    });
-    block.querySelector('#exercise-reveal-btn').addEventListener('click', () => {
-      if (STEP_STATE.exerciseAnswered) return;
-      ex.revealed = true;
-      // O painel "Resposta revelada" (via onRevealAnswer) já cumpre a função
-      // de "tentar de novo" ou "ver resposta" -- remove as duas ações daqui
-      // pra não deixar "Tentar novamente" como um controle sem sentido
-      // depois que a resposta já foi revelada.
-      block.querySelector('.inline-hint-actions')?.remove();
-      onRevealAnswer();
-    });
-  });
-}
-
 
 // ---------- Vocabulário palavra-por-palavra (estilo Memrise) ----------
 // Procura um exemplo real de uso da palavra — nas frases da unidade, depois
@@ -2145,59 +1927,6 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
 // não é um segundo sistema paralelo, só uma forma de disparar o mesmo tipo
 // de cartão NO MEIO de uma lição de vocabulário, em vez de só numa unidade
 // de gramática inteira.
-
-
-function renderConceptStep(){
-  const contentEl = document.getElementById('step-content');
-  const nextBtn = document.getElementById('step-next-btn');
-  const backBtn = document.getElementById('step-back-btn');
-  backBtn.style.display = 'none'; // sem "voltar" no meio de uma explicação, igual ao checkpoint/prática
-
-  const concept = STEP_STATE.conceptQueue[STEP_STATE.conceptIdx];
-  const block = concept.blocks[STEP_STATE.conceptBlockIdx];
-  const isReality = concept.kind === 'reality';
-  const isCulture = concept.kind === 'culture';
-  setAcqPhaseBanner(
-    isReality ? (REALITY_NOTE_BANNER_TEXT[concept.category] || t('concept.banner.reality.default')) :
-    isCulture ? (CULTURE_NOTE_BANNER_TEXT[concept.category] || t('concept.banner.culture.default')) :
-    t('concept.banner.understand')
-  );
-  const isLastBlockOfConcept = STEP_STATE.conceptBlockIdx === concept.blocks.length - 1;
-  const isLastConcept = STEP_STATE.conceptIdx === STEP_STATE.conceptQueue.length - 1;
-
-  const examplesHTML = (block.examples && block.examples.length) ? `
-    <div class="gram-block-examples">
-      ${block.examples.map(ex => `
-        <div class="gram-block-example">
-          <div class="french">${ex.f} ${audioBtnHTML(ex.f)}</div>
-          <div class="trans">${ex.t}</div>
-        </div>
-      `).join('')}
-    </div>` : '';
-
-  // `variants` é exclusivo da categoria 'regional' -- ao contrário de
-  // `examples` (par forma/tradução), aqui não há forma "oficial": cada item
-  // é só {region, form}, uma das variações igualmente válidas. Reaproveita
-  // a lista comum em vez de um componente de badge/cor novo (ver CLAUDE.md,
-  // "MVP = card passivo").
-  const variantsHTML = (block.variants && block.variants.length) ? `
-    <ul class="gram-block-variants">
-      ${block.variants.map(v => `<li><strong>${v.region}:</strong> ${v.form}</li>`).join('')}
-    </ul>` : '';
-
-  contentEl.innerHTML = `
-    ${concept.blocks.length > 1 ? `<div class="gram-block-counter">${t('concept.counter.of', { i: STEP_STATE.conceptBlockIdx + 1, n: concept.blocks.length })}</div>` : ''}
-    <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
-      <h3 class="gram-block-title">${block.title}</h3>
-      <p class="gram-block-body">${block.body}</p>
-      ${examplesHTML}
-      ${variantsHTML}
-    </div>
-  `;
-  wireAudioButtons(contentEl);
-  nextBtn.style.display = 'flex';
-  nextBtn.textContent = (isLastBlockOfConcept && isLastConcept) ? t('common.continueArrow') : t('zh.path.gotItArrow');
-}
 
 
 // Fecha a lição/unidade atual. Unidades sem `lessons` (gramática, ou
@@ -2289,186 +2018,6 @@ function finishCurrentLesson(u){
 
 const CONFETTI_COLORS = ['#d64545', '#e3b341', '#2f8f6e', '#3498d6', '#a15fc9'];
 
-
-// Tela "Lição concluída!" / "Ponto de verificação concluído!" -- ÚNICA
-// função, usada tanto no fim de uma lição intermediária quanto no fim do
-// Ponto de verificação (checkpoint) de uma unidade Modelo B, mas com
-// título/recap DIFERENTES pra cada caso (ver isCheckpoint abaixo) -- antes
-// os dois casos mostravam o mesmo título "Lição concluída!", o que é
-// literalmente errado pro checkpoint (ele conclui a unidade inteira, não
-// uma lição) e confundia quem via essa tela logo antes da tela de "Unidade
-// concluída/Parabéns" (renderUnitCompleteScreen) com um título quase
-// idêntico ao dela (bug relatado, 2026-09-15). XP e nota são sempre reais
-// (delta contra o snapshot tirado no início da lição/checkpoint, ver
-// xpAtLessonStart/checkpointXpAtStart em freshAcquisitionState/renderStep;
-// nunca hardcoded). Sem estrelas -- eram um sistema paralelo de pontuação,
-// não uma representação do XP real (retirado do fluxo de UNIDADE na Fase 6
-// -- ver GENERAL_CHALLENGES/addXP; lessonStars/registerDailyStars continuam
-// existindo só pro Ponto de verificação de MÓDULO, sistema fr-only
-// separado). trackHistory=false (usado pelo checkpoint, == isCheckpoint
-// aqui) pula o cache de navegação/roteamento de Voltar-Avançar e a rota pro
-// Flashcard -- concluir o Ponto de verificação já tem seu próprio fluxo em
-// finishCurrentLesson (markUnitCompleted + renderUnitCompleteScreen +
-// Desafios de hoje), que não deve ser desviado por aqui. Streak (maybeShow-
-// StreakCelebration) só dispara aqui quando NÃO é checkpoint -- o caso
-// checkpoint é sempre seguido por renderUnitCompleteScreen (que já chama a
-// mesma função), e mostrar a comemoração de sequência entre o resultado do
-// checkpoint e a tela de Unidade concluída/objetivos comunicacionais estava
-// fora de ordem (mesmo bug relatado): a sequência deve aparecer só DEPOIS
-// da tela de Unidade concluída, nunca entre ela e o resultado do checkpoint.
-function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, scorePct, trackHistory = true }){
-  const contentEl = document.getElementById('step-content');
-  const nextBtn = document.getElementById('step-next-btn');
-  const backBtn = document.getElementById('step-back-btn');
-  const isCheckpoint = !trackHistory;
-  hideAcqPhaseBanner();
-  backBtn.style.display = 'none';
-  document.getElementById('step-progress-fill').style.width = '100%';
-  if (!isCheckpoint) maybeShowStreakCelebration();
-
-  const recapItems = lessonRecapItems(u, lesson);
-  const recapLabel = (lesson && lesson.vocabIdx && lesson.vocabIdx.length)
-    ? t('zh.path.lessonDone.recapVocab')
-    : t('zh.path.lessonDone.recapMissed');
-
-  // reps > 0 exclui as palavras que a PRÓPRIA lição acabou de ensinar --
-  // todo cartão nasce com due=0, então cardsDueNow() sozinho as contaria
-  // como "devidas" (0 <= agora é sempre verdade) no exato instante em que
-  // isCardLessonCompleted() passa a liberá-las, fazendo esta tela dizer que
-  // há cartões pra revisar (e mandar direto pro Flashcard) depois de toda
-  // lição com vocabulário novo -- mesmo critério já usado em
-  // unitCardCounts() pra "dueForReview".
-  const dueCount = structuralCounts(eligibleReviewPool()).due; // K.7: Devido estrutural (não-New vencido)
-  contentEl.innerHTML = `
-    <div class="lesson-complete">
-      <div class="lesson-complete-icon tier-pop">✅</div>
-      <h2>${isCheckpoint ? t('zh.path.lessonDone.checkpointTitle') : t('zh.path.lessonDone.lessonTitle')}</h2>
-      <p class="lesson-boundary-title">${(!isCheckpoint && lesson) ? lesson.title : ''}</p>
-      <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.xpEarned')}</div><div class="lc-stat-value">+${xpEarned} ⚡</div></div>
-        ${scorePct !== undefined && scorePct !== null ? `<div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.score')}</div><div class="lc-stat-value">${scorePct}%</div></div>` : ''}
-      </div>
-      ${dueCount > 0 ? `<p class="lesson-boundary-due">${tp('zh.path.lessonDone.cardsWaiting', dueCount)}</p>` : ''}
-      ${challengesBefore ? renderChallengeChipHTML(challengesBefore) : ''}
-      ${recapItems.length ? `
-        <div class="lesson-recap">
-          <div class="lesson-recap-label">${recapLabel}</div>
-          ${recapItems.map(item => `
-            <div class="lesson-recap-item">
-              <div class="lesson-recap-french">${audioBtnHTML(item.f)}<span>${item.f}</span></div>
-              <div class="lesson-recap-trans">${item.t}</div>
-            </div>
-          `).join('')}
-        </div>
-      ` : ''}
-    </div>
-  `;
-  wireAudioButtons(contentEl);
-
-  if (!trackHistory){
-    nextBtn.textContent = t('common.continueArrow');
-    nextBtn.style.display = 'flex';
-    return;
-  }
-
-  STEP_STATE.onLessonBoundaryScreen = { dueCount };
-  // Cache SEPARADO (não onLessonBoundaryScreen, que openUnitDetail() zera
-  // toda vez que a unidade é reaberta -- inclusive quando é o PRÓPRIO
-  // router reabrindo pra restaurar um Voltar) -- ver shared/router.js:
-  // Voltar até "Lição" e depois Avançar até "Resultado" de novo precisa
-  // reconstruir a MESMA tela (mesmo chip de desafio), sem recalcular nada
-  // (nunca reexecuta finishCurrentLesson nem mexe em XP/progresso -- só
-  // repete este render com os mesmos insumos).
-  STEP_STATE.lastUnitResultCache = { unitId: u.id, lesson, challengesBefore, xpEarned, scorePct, trackHistory };
-  nextBtn.textContent = dueCount > 0 ? t('zh.path.reviewNowArrow', { n: dueCount }) : t('common.continueArrow');
-  nextBtn.style.display = 'flex';
-
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitResult', unitId: u.id });
-}
-
-// Tela "Unidade concluída!" (Fase 4 da tarefa de conclusão de lição/unidade;
-// Tier 3 da hierarquia de celebração) -- SEMPRE aparece ao concluir uma
-// unidade (decisão explícita, ver Q6 da grilagem), substituindo o toast
-// "Unidade concluída! 🏮" que markUnitCompleted mostrava antes (Q5). Roda
-// DEPOIS da tela de "Lição concluída" do checkpoint (que já mostrou
-// vocabulário/nota daquela lição) -- a lista "O que você aprendeu" (todas as
-// palavras da unidade, uma vez) foi pedida pela autora; o resto é só o que a
-// unidade como um todo desenvolveu: competências (títulos das
-// lições não-checkpoint desta unidade) e o objetivo comunicacional
-// (unit.goal), ambos já autorados em content.js, nunca inventados (ver
-// CLAUDE.md, "Coerência pedagógica entre funcionalidades").
-// XP sempre real: delta contra o snapshot tirado ANTES de markUnitCompleted
-// rodar (ver finishCurrentLesson) -- mesmo mecanismo de delta usado desde a
-// Fase 1, nunca hardcoded. Se por algum motivo o delta for 0, a tela ainda
-// aparece com "+0 XP" (Q4) -- nunca é pulada silenciosamente.
-function renderUnitCompleteScreen(u, xpEarned){
-  const contentEl = document.getElementById('step-content');
-  const nextBtn = document.getElementById('step-next-btn');
-  const backBtn = document.getElementById('step-back-btn');
-  hideAcqPhaseBanner();
-  backBtn.style.display = 'none';
-  document.getElementById('step-progress-fill').style.width = '100%';
-  maybeShowStreakCelebration();
-
-  const competencies = (u.lessons || []).filter(l => !l.isCheckpoint).map(l => l.title).filter(Boolean);
-  // Todas as palavras novas da unidade, na ordem das lições (decisão da
-  // autora: sem agrupar e sem destacar erradas), com áudio e tradução.
-  // Sem vocabIdx nas lições, cai na ordem do próprio vocabulário.
-  const seenWords = new Set();
-  const unitWords = [];
-  const pushWord = i => { const v = u.vocab && u.vocab[i]; if (v && !seenWords.has(i)){ seenWords.add(i); unitWords.push(v); } };
-  (u.lessons || []).forEach(l => (l.vocabIdx || []).forEach(pushWord));
-  (u.vocab || []).forEach((_, i) => pushWord(i));
-
-  contentEl.innerHTML = `
-    <div class="lesson-complete tier-bounce">
-      <div class="lesson-complete-icon">🎉</div>
-      <h2>${t('zh.path.unitDone.congrats', { name: currentStudentName() })}</h2>
-      <p class="lesson-boundary-title">${u.title}</p>
-      <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.xpEarned')}</div><div class="lc-stat-value" id="uc-stat-xp">+0 ⚡</div></div>
-      </div>
-      ${competencies.length ? `
-        <div class="unit-skills">
-          <div class="unit-skills-label">${t('zh.path.unitDone.skills')}</div>
-          ${competencies.map(c => `<div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${c}</span></div>`).join('')}
-        </div>
-      ` : ''}
-      ${unitWords.length ? `
-        <div class="lesson-recap">
-          <div class="lesson-recap-label">O que você aprendeu: ${unitWords.length} ${unitWords.length > 1 ? 'palavras novas' : 'palavra nova'}</div>
-          ${unitWords.map(item => `
-            <div class="lesson-recap-item">
-              <div class="lesson-recap-french">${audioBtnHTML(item.f)}<span>${item.f}</span></div>
-              <div class="lesson-recap-trans">${item.t}</div>
-            </div>
-          `).join('')}
-        </div>
-      ` : ''}
-      ${u.goal ? `
-        <div class="unit-skills">
-          <div class="unit-skills-label">${t('zh.path.unitDone.goalReached')}</div>
-          <div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${u.goal}</span></div>
-        </div>
-      ` : ''}
-    </div>
-  `;
-  // Marco de fim de UNIDADE (tier 3) -- confete + contador subindo, o peso
-  // que antes (por engano) a tela de "Lição concluída" do checkpoint levava
-  // pra si mesma (ver comentário histórico removido de renderLessonCompleteScreen).
-  wireAudioButtons(contentEl);
-  spawnConfetti(20, 1800);
-  animateCount(document.getElementById('uc-stat-xp'), xpEarned, { prefix: '+', suffix: ' ⚡' });
-
-  STEP_STATE.onUnitCompleteScreen = true;
-  // Cache pra restaurar via Voltar/Avançar (mesmo padrão de lastUnitResultCache)
-  // -- nunca reexecuta markUnitCompleted nem recalcula XP.
-  STEP_STATE.lastUnitCompleteCache = { unitId: u.id, xpEarned };
-  nextBtn.textContent = t('common.continueArrow');
-  nextBtn.style.display = 'flex';
-
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitComplete', unitId: u.id });
-}
 
 // ---------- Unidades de gramática (Explicação em blocos, estilo Busuu → Exercícios) ----------
 function renderGramTableHTML(table){
@@ -2824,41 +2373,6 @@ function dlgHighlight(text, terms){
     last = m.index + m[1].length;
   }
   return out + escapeHTML(text.slice(last));
-}
-
-// Toca UMA fala e resolve quando ela termina: true = terminou, false =
-// interrompida/erro, 'blocked' = o navegador bloqueou o autoplay.
-function dlgPlayLine(text){
-  return new Promise(resolve => {
-    registerAudioPlay();
-    stopExerciseAudio();
-    const file = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
-    if (file){
-      const a = new Audio('audio/' + file);
-      a.playbackRate = PREGEN_AUDIO_RATE;
-      exerciseAudioEl = a;
-      let done = false;
-      const fin = v => { if (done) return; done = true; if (exerciseAudioEl === a) exerciseAudioEl = null; resolve(v); };
-      a.addEventListener('ended', () => fin(true));
-      a.addEventListener('pause', () => fin(a.ended));
-      a.addEventListener('error', () => fin(false));
-      a.play().catch(() => fin('blocked'));
-      return;
-    }
-    if (!TTS.supported) return resolve(false);
-    if (!TTS.voice) loadFrenchVoice();
-    if (!TTS.voice) return resolve(false);
-    window.speechSynthesis.resume();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'fr-FR'; u.voice = TTS.voice; u.rate = 0.9;
-    let started = false, done = false;
-    const fin = v => { if (done) return; done = true; resolve(v); };
-    u.onstart = () => { started = true; };
-    u.onend = () => fin(true);
-    u.onerror = () => fin(false);
-    window.speechSynthesis.speak(u);
-    setTimeout(() => { if (!started){ window.speechSynthesis.cancel(); fin(false); } }, 1800);
-  });
 }
 
 
@@ -3903,70 +3417,6 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
   });
 }
 
-// ---------- Exercício de verdadeiro ou falso (uso real, não tradução) ----------
-// Mostra uma frase/palavra já ensinada e uma afirmação em português sobre
-// QUANDO/COMO ela é usada na vida real; o aluno julga se é verdadeira ou falsa.
-function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
-  contentEl.innerHTML = `
-    <div class="exercise-wrap">
-      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
-      <div class="tf-scene">
-        <div class="tf-scene-emoji">${ex.emoji || '💬'}</div>
-        <div class="tf-subject">${ex.subject}</div>
-        ${audioBtnHTML(ex.subject)}
-      </div>
-      <div class="tf-claim">${ex.claim}</div>
-      <div class="tf-options">
-        <button class="tf-option" data-val="true">${t('fr.exercise.true')}</button>
-        <button class="tf-option" data-val="false">${t('fr.exercise.false')}</button>
-      </div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
-    </div>
-  `;
-
-  wireAudioButtons(contentEl);
-  nextBtn.style.display = 'none';
-
-  function revealCorrectVisual(chosenBtn){
-    contentEl.querySelectorAll('.tf-option').forEach(b => {
-      b.classList.add('disabled');
-      const val = b.dataset.val === 'true';
-      if (val === ex.answer) b.classList.add('correct');
-      else if (b === chosenBtn) b.classList.add('incorrect');
-    });
-    document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
-    contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
-  }
-
-  wireDontKnowButton(contentEl, ex, () => {
-    STEP_STATE.exerciseAnswered = true;
-    revealCorrectVisual(null);
-    setTimeout(() => showAnswerPanel(contentEl, ex, { revealed: true }), 300);
-  });
-
-  contentEl.querySelectorAll('.tf-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (STEP_STATE.exerciseAnswered) return;
-      STEP_STATE.exerciseAnswered = true;
-      const chosen = btn.dataset.val === 'true';
-      const isCorrect = chosen === ex.answer;
-      playFeedbackSound(isCorrect);
-
-      revealCorrectVisual(btn);
-
-      if (isCorrect){
-        STEP_STATE.exerciseScore += 1;
-        addXP(exerciseXP(ex, 4));
-        addStudyMinutes();
-        // Sem detalhe extra -- a resposta certa já ficou marcada em verde na
-        // tela (revealCorrectVisual), repetir o texto no painel seria redundante.
-        setTimeout(() => showCorrectFeedbackPanel(contentEl, null), 500);
-      } else {
-        setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
-      }
-    });
-  });
-}
 
 // ---------- Exercício de completar frase (cloze, estilo Clozemaster) ----------
 // Esconde uma palavra de uma frase já ensinada e pede pra completar — múltipla
@@ -4084,36 +3534,6 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
   });
 }
 
-// Anima um clone do bloco escolhido "voando" da posição de origem
-// (sourceRect, medido ANTES do slot existir) até o slot de destino recém
-// criado -- estilo Duolingo. Sem isso o bloco só sumia do banco e o texto
-// aparecia pronto no slot, sem nenhuma transição visual entre os dois.
-function flyBlockToSlot(sourceRect, text, targetSlotEl){
-  if (!targetSlotEl || prefersReducedMotion()) return;
-  const endRect = targetSlotEl.getBoundingClientRect();
-  const clone = document.createElement('div');
-  clone.className = 'reorder-fly-clone';
-  clone.textContent = text;
-  clone.style.left = `${sourceRect.left}px`;
-  clone.style.top = `${sourceRect.top}px`;
-  clone.style.width = `${sourceRect.width}px`;
-  clone.style.height = `${sourceRect.height}px`;
-  document.body.appendChild(clone);
-  // Esconde o slot real enquanto o clone "voa" por cima -- revelado de novo
-  // logo abaixo, cross-fade com o clone sumindo, não um corte seco.
-  targetSlotEl.style.visibility = 'hidden';
-
-  requestAnimationFrame(() => {
-    clone.style.transform = `translate(${endRect.left - sourceRect.left}px, ${endRect.top - sourceRect.top}px)`;
-    clone.style.width = `${endRect.width}px`;
-    clone.style.height = `${endRect.height}px`;
-  });
-  setTimeout(() => {
-    targetSlotEl.style.visibility = '';
-    clone.style.opacity = '0';
-  }, 200);
-  setTimeout(() => clone.remove(), 350);
-}
 
 // ---------- Exercício de ordenar palavras (reorder) ----------
 function renderReorderExercise(ex, contentEl, nextBtn, total){
@@ -4377,111 +3797,6 @@ const MATCH_STATE = {
 function stopMatchTimer(){}
 
 
-function renderMatchGame(){
-  const el = document.getElementById('match-review-content');
-
-  if (MATCH_STATE.pairs.length < 4){
-    el.innerHTML = `
-      <div class="review-empty">
-        <div class="big-emoji">🧩</div>
-        <h3>${t('review.insufficientTitle')}</h3>
-        <p>${t('review.match.insufficientSome')}</p>
-      </div>
-    `;
-    return;
-  }
-
-  el.innerHTML = `
-    <div class="match-header">
-      <span class="match-pairs">Pares: ${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length}</span>
-      <span class="match-attempts">Tentativas: ${MATCH_STATE.attempts}</span>
-    </div>
-    <div class="match-grid" id="match-grid"></div>
-  `;
-  renderMatchTiles();
-}
-
-
-function onMatchTileClick(btn){
-  if (MATCH_STATE.busy) return;
-  if (btn.classList.contains('matched') || btn.classList.contains('flipped')) return;
-
-  btn.classList.add('flipped');
-
-  if (!MATCH_STATE.selected){
-    MATCH_STATE.selected = btn;
-    return;
-  }
-
-  const first = MATCH_STATE.selected;
-  const second = btn;
-  MATCH_STATE.selected = null;
-  MATCH_STATE.busy = true;
-
-  const isMatch = first.dataset.cardId === second.dataset.cardId && first.dataset.side !== second.dataset.side;
-  MATCH_STATE.attempts += 1;
-  document.querySelector('.match-attempts').textContent = t('zh.review.match.attempts', { n: MATCH_STATE.attempts });
-
-  if (isMatch){
-    first.classList.add('match-ok');
-    second.classList.add('match-ok');
-    MATCH_STATE.matchedCount += 1;
-    document.querySelector('.match-pairs').textContent = t('zh.review.match.pairs', { done: MATCH_STATE.matchedCount, total: MATCH_STATE.pairs.length });
-    addXP(2);
-    // Fase 8: mesma regra explícita da Fase 6 (Speed Review) -- um par
-    // certo num cartão NUNCA estudado é evidência suficiente pra promovê-lo
-    // pro motor de memória (mesmo critério de registerExerciseCorrect()).
-    // Um cartão já em ciclo de revisão continua intocado -- combinar pares
-    // é reconhecimento, não recuperação ativa (Princípio 4), e reagendar
-    // due aqui recriaria o 2º sistema de memória que a Regra 6 proíbe.
-    const matchedCard = MATCH_STATE.pairs.find(c => c.id === first.dataset.cardId);
-    if (matchedCard && matchedCard.reps === 0){
-      applyMemoryGrade(matchedCard, 2); // grade 2 = "Bom"
-    }
-
-    setTimeout(() => {
-      first.classList.add('matched');
-      second.classList.add('matched');
-      MATCH_STATE.busy = false;
-
-      if (MATCH_STATE.matchedCount === MATCH_STATE.pairs.length){
-        registerStudyToday();
-        STATE.totalReviews += MATCH_STATE.pairs.length;
-        registerDailyMatchGame();
-        trackEvent('lesson_complete', 'match_game', { pairs: MATCH_STATE.pairs.length });
-        const matchMs = MATCH_STATE.startedAt ? Date.now() - MATCH_STATE.startedAt : 0;
-        const matchIsRecord = recordMatchTime(matchMs);
-        saveState();
-        renderTopbarStats();
-        setTimeout(() => {
-          maybeShowStreakCelebration();
-          document.getElementById('match-review-content').innerHTML = `
-            <div class="match-complete">
-              <div class="big-emoji">🎉</div>
-              <h3>${t('review.match.allMatched')}</h3>
-              <div class="score-num">${t('review.match.attempts', { n: MATCH_STATE.attempts })}</div>
-              ${matchMs ? `<p class="review-record-line">${t('review.records.time', { time: formatRecordSeconds(matchMs) })} · ${matchIsRecord ? t('review.records.newRecord') : t('review.records.yourRecord', { record: formatRecordSeconds(reviewRecords().matchBestMs) })}</p>` : ''}
-              <button class="btn btn-primary" id="match-restart-btn">${t('review.match.playAgain')}</button>
-            </div>
-          `;
-          document.getElementById('match-restart-btn').addEventListener('click', startMatchGame);
-        }, 300);
-      }
-    }, 550);
-  } else {
-    setTimeout(() => {
-      first.classList.add('wrong');
-      second.classList.add('wrong');
-    }, 400);
-    setTimeout(() => {
-      first.classList.remove('flipped', 'wrong');
-      second.classList.remove('flipped', 'wrong');
-      MATCH_STATE.busy = false;
-    }, 1100);
-  }
-}
-
-
 function renderSpeedReview(){
   const el = document.getElementById('speed-review-content');
 
@@ -4634,57 +3949,6 @@ function renderSpeedReview(){
 }
 
 
-function answerSpeedQuestion(isCorrect, el, chosenIdx){
-  if (SPEED_STATE.answered) return;
-  SPEED_STATE.answered = true;
-  stopSpeedTimer();
-
-  const elapsed = Date.now() - SPEED_STATE.timerStart;
-  const card = SPEED_STATE.queue[SPEED_STATE.index];
-  const options = Array.from(el.querySelectorAll('.speed-option'));
-  const correctText = cardAnswerText(card);
-
-  options.forEach((btn, i) => {
-    btn.classList.add('disabled');
-    if (btn.textContent === correctText) btn.classList.add('correct');
-    else if (i === chosenIdx) btn.classList.add('incorrect');
-  });
-
-  // Projeto "Reorganização da experiência de revisão e prática": Speed
-  // Review agora É revisão (a mesma fila devida do Flashcard, ver
-  // buildSpeedQueue) -- toda resposta grada o cartão de verdade, não só as
-  // de cartões nunca estudados. Escala simplificada (a UI de múltipla
-  // escolha não tem como distinguir "Difícil" de "Fácil"): certo = Bom(2),
-  // errado/tempo esgotado = Errei(0). Regra explícita, só pra Speed Review
-  // -- Combinar continua NÃO fazendo isso (reconhecimento, não revisão;
-  // só promove cartão nunca estudado, ver onMatchTileClick).
-  applyMemoryGrade(card, isCorrect ? 2 : 0);
-  trackReviewAnswer('speed_review', card, isCorrect ? 2 : 0);
-
-  if (isCorrect){
-    const speedBonus = Math.max(10, Math.round(100 * (1 - elapsed / SPEED_TIME_LIMIT)));
-    SPEED_STATE.score += speedBonus;
-    SPEED_STATE.correctCount += 1;
-    SPEED_STATE.streak += 1;
-    if (SPEED_STATE.streak > (SPEED_STATE.bestStreak || 0)) SPEED_STATE.bestStreak = SPEED_STATE.streak;
-    if (SPEED_STATE.streak > 0 && SPEED_STATE.streak % 15 === 0 && SPEED_STATE.hearts < 3){
-      SPEED_STATE.hearts += 1;
-      showToast(t('toast.extraLife'));
-    }
-    showToast(t('toast.pointsGain', { n: speedBonus }));
-  } else {
-    SPEED_STATE.hearts -= 1;
-    SPEED_STATE.streak = 0;
-  }
-
-  // Streak só conta no fim da SESSÃO (ver renderSpeedReview), não a cada
-  // resposta isolada -- mesmo raciocínio do Flashcard (ver gradeCurrentCard).
-  SPEED_STATE.index += 1;
-
-  setTimeout(() => renderSpeedReview(), 700);
-}
-
-
 // ---------- Fase 5 da trilha: marco de Revisão do módulo ----------
 // Seleção/ordem/teto em shared/review-milestone.js (puro). Aqui só liga à
 // Revisão existente (renderReviewView) e guarda a data da última sessão.
@@ -4760,123 +4024,6 @@ function buildModuleReviewRow(module, unlocked){
 //   Fase D: "Deck define o ESCOPO, Review define quem do escopo entra").
 // ============================================================
 
-
-// Fase 6C.2 (ver CLAUDE.md) -- renderer de "Múltipla escolha", extraído
-// pro contrato aprovado na Fase 6C: (mountEl, card, localState, callbacks)
-// -- mesmo espírito da extração de Normal (Fase 6C.1). Reutilizável tal e
-// qual pelo Preview do editor (Fase 6D.7, ver reviewProgressBarHTML
-// acima): o Preview chama esta MESMA função, só trocando localState
-// (variável local do Preview, nunca STATE) e callbacks (onAnswered vira
-// um no-op visual, nunca gradeCurrentCard). O renderer não sabe -- nem
-// precisa saber -- se está em Review ou Preview.
-//
-// localState: {kind:'multiple_choice', shuffledOptions, selectedIndex,
-// answered, wasCorrect}. `shuffledOptions` substitui `card.mcOptions`
-// (Fase 8a) -- antes era mutação direta de uma entrada REAL de
-// STATE.cards (objeto durável, potencialmente serializado se alguém
-// esquecesse de limpar); agora é gerado 1x na 1ª renderização desta
-// EXIBIÇÃO e vive só no localState, que nunca é persistido. `view.
-// correctText`/`view.distractorTexts` (resolveCardContentView, Fase 4b,
-// intocado) sempre vêm do MESMO CardInstance -- a mesma pergunta sempre
-// produz as mesmas alternativas e a mesma resposta certa; só a ORDEM do
-// shuffle muda entre exibições.
-//
-// Interação intermediária (marcar uma opção): o PRÓPRIO renderer se
-// chama de novo com os mesmos 4 parâmetros -- sem envolver a sessão. Só
-// a transição FINAL (clicar "Continuar") chama callbacks.onAnswered.
-function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
-  // Fase 4b -- lê Note/CardInstance via resolveCardContentView(), nunca
-  // `card.front`/`card.back_trans`/`card.choices` (não existem mais no
-  // card nativo). `view.prompt`/`view.correct` são Fields já resolvidos
-  // (texto+lang+áudio), `view.correctText`/`view.distractorTexts` são as
-  // strings prontas pros botões.
-  const view = resolveCardContentView(card);
-
-  if (!localState.shuffledOptions){
-    localState.shuffledOptions = shuffle([
-      { text: view.correctText, correct: true },
-      ...view.distractorTexts.map(text => ({ text, correct: false })),
-    ]);
-  }
-  const answered = localState.answered;
-  // isStudyLanguageField() aqui é exatamente o uso que a ressalva da Fase 2
-  // sempre permitiu ("helper pra regras que genuinamente dependem do idioma
-  // do app") -- a DIREÇÃO já foi decidida pelo CardInstance antes deste
-  // ponto (view.prompt já é o campo certo); isto só decide se o motor de
-  // pronúncia (que só sabe falar UM idioma real) pode tentar esse campo
-  // específico, nunca qual campo é o prompt.
-  const promptSpeakable = isStudyLanguageField(view.prompt, APP_KEY);
-  // Fase 7a (ver CLAUDE.md) -- áudio/imagem customizados vêm SÓ do Field
-  // do prompt agora, nunca mais com fallback pro `correct` (achado da
-  // auditoria da Fase 7: o fallback antigo, `prompt.audioUrl ||
-  // correct.audioUrl`, podia tocar a pronúncia da RESPOSTA CERTA antes da
-  // aluna sequer ver as opções, se só o Field de resposta tivesse áudio/
-  // imagem próprio -- um vazamento real). O prompt é sempre visível desde
-  // o início (não há "revelação" nele), então usar só sua própria mídia é
-  // seguro em qualquer direção do cartão. `view.correct`/os distratores
-  // continuam sem exibir mídia própria nesta subfase (nenhum slot de UI
-  // pra isso hoje, e distratores nem carregam Field/mídia -- ver
-  // CLAUDE.md, achado #3 da Fase 7).
-  const customAudioUrl = view.prompt.audioUrl || null;
-  const promptImageUrl = card.imageUrl || view.prompt.imageUrl || null;
-
-  mountEl.innerHTML = `
-    ${reviewProgressBarHTML(card)}
-    <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
-      ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
-      <div class="flashcard-french">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${customAudioUrl ? customAudioBtnHTML(customAudioUrl) : ''}</div>
-    </div>
-    <div class="mc-options">
-      ${localState.shuffledOptions.map((opt, i) => {
-        let cls = 'mc-option';
-        if (answered){
-          cls += ' disabled';
-          if (opt.correct) cls += ' correct';
-          else if (i === localState.selectedIndex) cls += ' incorrect';
-        }
-        const mark = answered ? (opt.correct ? '<span class="mc-mark" aria-hidden="true">✓ </span>' : (i === localState.selectedIndex ? '<span class="mc-mark" aria-hidden="true">✗ </span>' : '')) : '';
-        return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${mark}${escapeHTML(opt.text)}</button>`;
-      }).join('')}
-    </div>
-    ${answered ? `${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}</button>` : ''}
-  `;
-
-  wireAudioButtons(mountEl, card.__isPreviewCard);
-  wireCustomAudioButtons(mountEl);
-  // Prop 1+2 (ver CLAUDE.md, "7 propostas") -- só tenta pronunciar
-  // automaticamente quando o prompt é de fato o idioma estudado. Quando
-  // invertido (prompt=tradução, opções no idioma estudado), NÃO existe
-  // pronúncia automática de opção nenhuma -- tocar a opção certa antes da
-  // aluna responder entregaria a resposta.
-  // Fase 7a -- `card.__isPreviewCard` suprime só o AUTOPLAY (registerAudioPlay()
-  // real não deveria disparar por abrir um Preview) -- ver mesmo comentário
-  // em renderNormalCard().
-  if (!card.__isPreviewCard && promptSpeakable && canSpeakFrench(view.prompt.text)) speakFrench(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
-
-  if (!answered){
-    mountEl.querySelectorAll('.mc-option').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = parseInt(btn.dataset.idx);
-        // Interação intermediária -- muta localState e o renderer se
-        // autochama, sem envolver a sessão (nunca STATE.reviewMCPicked/
-        // reviewMCCorrect, eliminados nesta fase).
-        localState.selectedIndex = idx;
-        localState.answered = true;
-        localState.wasCorrect = localState.shuffledOptions[idx].correct;
-        renderMultipleChoiceCard(mountEl, card, localState, callbacks);
-      });
-    });
-  } else {
-    mountEl.querySelector('#mc-continue-btn').addEventListener('click', () => {
-      // Transição FINAL -- sobe pra sessão via callback. A sessão (não
-      // este renderer) é quem descarta STATE.reviewCardState ao avançar
-      // STATE.reviewIndex (gradeCurrentCard), mesmo ciclo de vida já
-      // estabelecido pra Normal na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
-    });
-  }
-}
 
 // Fase 6C.3 (ver CLAUDE.md) -- renderer de "Cloze" (completar a frase),
 // extraído pro contrato aprovado na Fase 6C: (mountEl, card, localState,
@@ -5742,63 +4889,6 @@ function renderLevelTestQuizStep(){
     });
     contentEl.appendChild(goNextBtn);
   });
-}
-
-
-// ---------- Gráfico de linha: palavras aprendidas ao longo do tempo ----------
-function renderProgressLineChart(){
-  const wrap = document.getElementById('progress-line-chart-wrap');
-  if (!wrap) return;
-
-  // K2-E: uma data por PALAVRA (A+B = 1; vale a mais antiga das irmãs).
-  const learnedDates = wordLevelFirstLearnedDates(STATE.cards);
-
-  if (!learnedDates.length){
-    wrap.innerHTML = `<div style="text-align:center; padding:30px 20px; color:var(--ink-soft);"><p>${t('zh.progress.chartEmpty')}</p></div>`;
-    return;
-  }
-
-  const countByDate = {};
-  learnedDates.forEach(d => { countByDate[d] = (countByDate[d] || 0) + 1; });
-  const sortedDates = Object.keys(countByDate).sort();
-
-  let running = 0;
-  const points = sortedDates.map(d => {
-    running += countByDate[d];
-    return { date: d, total: running };
-  });
-
-  const W = 600, H = 220, PAD = 36;
-  const maxVal = points[points.length - 1].total;
-  const minVal = 0;
-
-  const xStep = points.length > 1 ? (W - PAD*2) / (points.length - 1) : 0;
-  const yScale = (val) => H - PAD - ((val - minVal) / (maxVal - minVal || 1)) * (H - PAD*2);
-
-  const pathD = points.map((p, i) => {
-    const x = PAD + i * xStep;
-    const y = yScale(p.total);
-    return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-  }).join(' ');
-
-  const areaD = pathD + ` L ${(PAD + (points.length-1)*xStep).toFixed(1)} ${H-PAD} L ${PAD} ${H-PAD} Z`;
-
-  const labelIndices = points.length > 1 ? [0, Math.floor((points.length-1)/2), points.length-1] : [0];
-  const dateLabels = labelIndices.map(i => {
-    const [y,m,d] = points[i].date.split('-');
-    return { x: PAD + i * xStep, text: `${d}/${m}` };
-  });
-
-  wrap.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" class="progress-line-svg">
-      <line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" class="chart-axis"/>
-      <path d="${areaD}" class="chart-area"/>
-      <path d="${pathD}" class="chart-line"/>
-      ${points.map((p,i) => `<circle cx="${(PAD + i*xStep).toFixed(1)}" cy="${yScale(p.total).toFixed(1)}" r="3" class="chart-dot"><title>${t('zh.progress.chartPoint', { date: p.date, n: p.total })}</title></circle>`).join('')}
-      ${dateLabels.map(l => `<text x="${l.x.toFixed(1)}" y="${H-10}" class="chart-label" text-anchor="middle">${l.text}</text>`).join('')}
-    </svg>
-    <div class="chart-total">${t('zh.progress.chartTotal')} <strong>${maxVal}</strong> ${t('fr.progress.chartTotalSuffix')}</div>
-  `;
 }
 
 

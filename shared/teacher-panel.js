@@ -68,11 +68,11 @@ const STUDENT_TEACHER_NAV = { logs: 0, materials: 0 };
 
 async function fetchMyClassLogs(languageAppKey){
   if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return [];
-  // 094: aulas dele + da turma, com Presença e Competências. Sem a 094 no banco, cai na RPC antiga.
-  let { data, error } = await supabaseClient.rpc('get_my_class_log_entries', { p_language_app_key: languageAppKey });
-  if (error && /get_my_class_log_entries|PGRST202|42883/.test(`${error.code} ${error.message}`)){
-    ({ data, error } = await supabaseClient.rpc('get_my_class_logs', { p_language_app_key: languageAppKey }));
-  }
+  // 101: com horário (get_my_class_schedule); 094: Presença e Competências; sem as duas, a RPC antiga.
+  const missing = (err) => err && /PGRST202|42883|Could not find the function/.test(`${err.code} ${err.message}`);
+  let { data, error } = await supabaseClient.rpc('get_my_class_schedule', { p_language_app_key: languageAppKey });
+  if (missing(error)) ({ data, error } = await supabaseClient.rpc('get_my_class_log_entries', { p_language_app_key: languageAppKey }));
+  if (missing(error)) ({ data, error } = await supabaseClient.rpc('get_my_class_logs', { p_language_app_key: languageAppKey }));
   if (error){ console.error('Erro ao carregar aulas:', error); return []; }
   return Array.isArray(data) ? data : [];
 }
@@ -179,6 +179,12 @@ function classLogLocalDate(d){
   return m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(d);
 }
 
+// Data e hora no fuso de quem vê (101); aula sem horário mostra só o dia.
+function myClassLogWhen(log){
+  const slot = typeof classLogViewerSlot === 'function' ? classLogViewerSlot(log) : { date: String(log.class_date), time: '' };
+  return { slot, label: fmtDate(classLogLocalDate(slot.date), { day: 'numeric', month: 'short', year: 'numeric' }) + (slot.time ? ` · ${slot.time}` : '') };
+}
+
 function classLogEntryHTML(log){
   const rows = [
     [t('myClassLogs.topic'), log.topic],
@@ -187,7 +193,7 @@ function classLogEntryHTML(log){
   ].filter(([, v]) => v && String(v).trim());
   return `
     <li class="class-log-entry">
-      <time class="class-log-date" datetime="${escapeHTML(String(log.class_date || ''))}">${escapeHTML(fmtDate(classLogLocalDate(log.class_date), { day: 'numeric', month: 'short', year: 'numeric' }))}</time>
+      <time class="class-log-date" datetime="${escapeHTML(String(log.class_date || ''))}">${escapeHTML(myClassLogWhen(log).label)}</time>
       <div class="class-log-body">
         ${typeof classLogBadgesHTML === 'function' ? classLogBadgesHTML({ attendanceName: log.attendance_name, attendanceColor: log.attendance_color, skills: log.skills, classroomName: log.classroom_name }) : ''}
         <dl class="class-log-fields">
@@ -206,9 +212,51 @@ async function renderMyClassLogsView(){
   }
   wrap.innerHTML = loadingHTML();
   const logs = await fetchMyClassLogs(APP_KEY);
-  wrap.innerHTML = logs.length
-    ? `<ol class="class-log-list">${logs.map(classLogEntryHTML).join('')}</ol>`
-    : `<p class="profile-empty-note">${t('myClassLogs.empty')}</p>`;
+  MY_CLASS_LOGS_STATE.logs = logs;
+  // Link de agenda (103) fora do corpo que se redesenha (Lista | Calendário), para não fechar a cada clique.
+  if (!logs.length){ renderMyClassLogsBody(wrap); return; }
+  wrap.innerHTML = `${calendarFeedBoxHTML()}<div data-my-class-logs-body></div>`;
+  wireCalendarFeedBox(wrap);
+  renderMyClassLogsBody(wrap.querySelector('[data-my-class-logs-body]'));
+}
+
+// Aluno > Aulas (101): próximas aulas no topo + Lista | Calendário.
+const MY_CLASS_LOGS_STATE = { logs: [], view: 'list', cal: null, selected: null };
+function renderMyClassLogsBody(wrap){
+  const logs = MY_CLASS_LOGS_STATE.logs;
+  if (!logs.length){ wrap.innerHTML = `<p class="profile-empty-note">${t('myClassLogs.empty')}</p>`; return; }
+  const today = todayStr();
+  const withSlot = logs.map(l => ({ log: l, slot: myClassLogWhen(l).slot }));
+  const upcoming = withSlot.filter(x => x.slot.date > today || (x.slot.date === today && x.slot.at && x.slot.at > new Date()))
+    .sort((a, b) => (a.slot.date + (a.slot.time || '')).localeCompare(b.slot.date + (b.slot.time || '')));
+  const past = withSlot.filter(x => !upcoming.includes(x)).map(x => x.log);
+  const now = new Date();
+  const cal = MY_CLASS_LOGS_STATE.cal || (MY_CLASS_LOGS_STATE.cal = { y: now.getFullYear(), m: now.getMonth() });
+  const entries = withSlot.map(x => ({ id: x.log.id, date: x.slot.date, time: x.slot.time, color: x.log.attendance_color || '',
+    label: x.log.classroom_name || x.log.topic || t('myClassLogs.classLabel') }));
+  const sel = MY_CLASS_LOGS_STATE.selected;
+  const view = MY_CLASS_LOGS_STATE.view;
+  wrap.innerHTML = `
+    ${upcoming.length ? `<div class="profile-section my-upcoming">
+      <div class="section-label">${t('myClassLogs.upcoming')}</div>
+      <ul class="my-upcoming-list">${upcoming.slice(0, 5).map(x => `<li><b>${escapeHTML(fmtDate(classLogLocalDate(x.slot.date), { weekday: 'short', day: 'numeric', month: 'short' }))}${x.slot.time ? ` · ${escapeHTML(x.slot.time)}` : ''}</b>${x.log.classroom_name ? ` · 👥 ${escapeHTML(x.log.classroom_name)}` : ''}${x.log.topic ? ` · ${escapeHTML(x.log.topic)}` : ''}</li>`).join('')}</ul>
+    </div>` : ''}
+    <div class="deck-topbar panel-nav class-log-views" role="tablist" aria-label="${t('panel.classLog.views')}">
+      <button type="button" class="deck-topbar-btn ${view === 'list' ? 'is-active' : ''}" role="tab" aria-selected="${view === 'list'}" data-my-classlog-view="list">${t('myClassLogs.view.list')}</button>
+      <button type="button" class="deck-topbar-btn ${view === 'calendar' ? 'is-active' : ''}" role="tab" aria-selected="${view === 'calendar'}" data-my-classlog-view="calendar">${t('panel.classLog.view.calendar')}</button>
+    </div>
+    ${view === 'calendar'
+      ? `${classCalendarHTML(cal.y, cal.m, entries, { selected: sel })}
+         ${sel ? `<ol class="class-log-list">${withSlot.filter(x => x.slot.date === sel).map(x => classLogEntryHTML(x.log)).join('') || `<li class="profile-empty-note">${t('panel.classLog.cal.empty')}</li>`}</ol>` : ''}`
+      : (past.length ? `<ol class="class-log-list">${past.map(classLogEntryHTML).join('')}</ol>` : `<p class="profile-empty-note">${t('myClassLogs.empty')}</p>`)}`;
+  wrap.querySelectorAll('[data-my-classlog-view]').forEach(b => b.addEventListener('click', () => { MY_CLASS_LOGS_STATE.view = b.dataset.myClasslogView; renderMyClassLogsBody(wrap); }));
+  wrap.querySelectorAll('[data-cal-nav]').forEach(b => b.addEventListener('click', () => {
+    const step = Number(b.dataset.calNav);
+    if (step === 0){ const n = new Date(); cal.y = n.getFullYear(); cal.m = n.getMonth(); }
+    else { const d = new Date(cal.y, cal.m + step, 1); cal.y = d.getFullYear(); cal.m = d.getMonth(); }
+    MY_CLASS_LOGS_STATE.selected = null; renderMyClassLogsBody(wrap);
+  }));
+  wrap.querySelectorAll('[data-cal-day]').forEach(b => b.addEventListener('click', () => { MY_CLASS_LOGS_STATE.selected = b.dataset.calDay; renderMyClassLogsBody(wrap); }));
 }
 
 document.getElementById('teacher-panel-btn')?.addEventListener('click', () => {

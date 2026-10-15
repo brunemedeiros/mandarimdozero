@@ -298,3 +298,36 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Staging: 2026-10-15 (`095_friend_suggestions` + `095b_friend_suggestions_invited_by`, que é a versão final da função).
   Produção: 2026-10-15, arquivo inteiro, versão `20261015010133`.
 - Detalhes: `docs/historico/17-sugestoes-de-amigos.md`.
+
+## 101 -- Calendário de aulas: horário, duração e fuso (2026-10-15)
+
+- `shared/supabase_migrations/101_class_schedule.sql`: colunas `start_time`, `duration_minutes` (5 a 600), `time_zone` em
+  `teacher_class_logs`, índice (teacher_id, class_date) e `get_my_class_schedule(text)` para o aluno (com horário). Aditiva.
+  Número 101 porque 093 e 096 a 100 já foram usados por outras conversas no Staging.
+- Teste local: `tests/aulas-presenca/run.sh` (101 7/7). Staging: aplicada em 2026-10-15 (ferramenta).
+- Produção: aplicada em 2026-10-15 a pedido da autora (versão `20261015014421 101_class_schedule`). Conferido: 3 colunas,
+  2 restrições, função security definer, anon sem EXECUTE, 393 aulas intactas.
+
+## 102 -- Amigos em dupla + avisos de Amigos no idioma de quem recebe + push na hora (2026-10-15)
+
+- Arquivo: `shared/supabase_migrations/102_friends_duo.sql`. A 100 e a 101 foram usadas por outras conversas
+  (`100_review_bank_agent_other_students`, `101_class_schedule`). Sem DROP.
+- Staging: `101_friends_duo` (`20261015012927`, primeira versão) + `102b_friends_i18n_push_1/2/3b/3c/3e/3f`.
+- Produção (2026-10-15): `102_friends_duo_a`, `_b1`, `_b2`, `_b3`, `_c1`, `_c2`, `_c3`, em partes por causa do tempo
+  da ferramenta. Depois: Edge Function `push-dispatch` v1 e segredos `push_dispatch_url`/`push_dispatch_anon` no Vault.
+- Detalhes: `docs/historico/19-amigos-em-dupla.md`.
+
+## 103 -- Link de agenda (assinatura ICS) (2026-10-15)
+
+- `shared/supabase_migrations/103_class_calendar_feed.sql`: tabela `calendar_feed_tokens` (sem policy), RPCs
+  `my_calendar_feed_token(boolean)` (authenticated) e `class_calendar_feed(text)` (só service_role). Aditiva.
+  Número 103 porque 101 e 102 já foram usados por outra conversa (amigos) no Staging.
+- Edge Function `supabase/functions/class-calendar-feed` (verify_jwt false; token = autenticação).
+- Teste local: `tests/aulas-presenca/run.sh` (103 22/22). Staging: aplicada em 2026-10-15 (ferramenta) e função v1 publicada.
+  Sobraram 2 aulas de teste "TESTE-103" no Staging: o DELETE pelo MCP pede uma confirmação que não aparece e trava
+  (tentado de novo em 2026-10-15); apagar pelo SQL Editor do Staging.
+- Ajuste da autora: aula sem horário entra às 7h (fuso da aula ou São Paulo) com 1h; reaplicado no Staging.
+- Produção: aplicada em 2026-10-15 a pedido da autora (`103_class_calendar_feed`, já com as 7h) e Edge Function
+  `class-calendar-feed` v1 (verify_jwt false, mesmo hash do Staging). Conferido: RLS ligada, anon/authenticated sem acesso
+  ao feed nem à tabela, token falso = calendário vazio (200 text/calendar), token malformado = 404, 393 aulas intactas.
+

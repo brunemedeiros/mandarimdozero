@@ -98,4 +98,12 @@ check('motivos por tipo de item', JSON.stringify(J(R('RB_REASONS_BY_TYPE.erro'))
 const md = R('rbMarkdownToHTML(__m)', { m: '# Manual\n\nTexto com **negrito**, `código` e <script>x</script>.\n\n- um\n- dois\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\n1. primeiro\n2. segundo\n\n```\n<b>cru</b>\n```\n---' });
 check('markdown: títulos, listas, tabela, código, negrito', md.includes('<h2>Manual</h2>') && md.includes('<strong>negrito</strong>') && md.includes('<ul><li>um</li><li>dois</li></ul>') && md.includes('<th>a</th>') && md.includes('<td>2</td>') && md.includes('<ol>') && md.includes('<hr>'));
 check('markdown nunca deixa HTML cru passar', !md.includes('<script>') && md.includes('&lt;script&gt;') && md.includes('&lt;b&gt;cru&lt;/b&gt;'));
+// --- quem entra em "Gerar cartões" e na rotina da madrugada
+const okStu = { language_app_key: 'frances', status: 'ativo', linked_student_id: 'u1', reference_language: 'pt' };
+const pendOk = { item_type: 'vocabulario', question: 'door', answer: 'porte', status: 'pendente' };
+check('entrega: pendente completo, sem dúvida, de aluno vinculado entra', R('rbReadyToDeliver(__i, __s, {})', { i: pendOk, s: okStu }) === true);
+check('entrega: aprovado ainda sem cartão entra; aprovado com cartão não', R('rbReadyToDeliver(__i, __s, {})', { i: { ...pendOk, status: 'aprovado' }, s: okStu }) === true && R('rbReadyToDeliver(__i, __s, {})', { i: { ...pendOk, status: 'aprovado', teacher_flashcard_id: 5 }, s: okStu }) === false);
+check('entrega: sensível, com dúvida, sem vínculo, mandarim e cortado ficam de fora', [{ ...pendOk, sensitive: true }, { ...pendOk, check_note: 'conferir' }, { ...pendOk, status: 'cortado' }].every(x => R('rbReadyToDeliver(__i, __s, {})', { i: x, s: okStu }) === false) && R('rbReadyToDeliver(__i, __s, {})', { i: pendOk, s: { ...okStu, linked_student_id: null } }) === false && R('rbReadyToDeliver(__i, __s, {})', { i: pendOk, s: { ...okStu, language_app_key: 'mandarim' } }) === false);
+check('entrega: geração automática desligada não entrega pendente (mas aprovado sim)', R('rbReadyToDeliver(__i, __s, { auto_generate: false })', { i: pendOk, s: okStu }) === false && R('rbReadyToDeliver(__i, __s, { auto_generate: false })', { i: { ...pendOk, status: 'aprovado' }, s: okStu }) === true);
+
 summary();

@@ -38,6 +38,14 @@ const PANEL_STUB = (who) => {
   supabaseClient.rpc = async (name, args) => {
     (window.__rpcCalls = window.__rpcCalls || []).push([name, args]);
     if (name === 'my_permissions') return { data: { roles: roles.roles, admin: roles.admin, permissions: Object.fromEntries(CAT.map(c => [c.key, { enabled: perm(c.key), limit: null }])) }, error: null };
+    // 103: link de agenda (token de 64 hex; gerar outro devolve um novo).
+    if (name === 'my_calendar_feed_token') return { data: (args && args.p_regenerate ? 'b' : 'a').repeat(64), error: null };
+    // 101: com horário; inclui 1 aula futura (próximas aulas) marcada em São Paulo.
+    if (name === 'get_my_class_schedule') return { data: who === 'S' ? [
+      { id: 3, class_date: '2099-01-05', start_time: '19:00:00', duration_minutes: 60, time_zone: 'America/Sao_Paulo', topic: 'Aula futura', homework: null, observations: null, attendance_name: null, attendance_color: null, skills: [], classroom_id: null, classroom_name: null },
+      { id: 2, class_date: '2026-10-09', start_time: null, topic: 'Passé composé', homework: 'Exercícios 1 a 3', observations: null, attendance_name: 'Presente', attendance_color: 'green', skills: ['gramatica', 'escuta'], classroom_id: null, classroom_name: null },
+      { id: 1, class_date: '2026-10-02', start_time: null, topic: 'Apresentação', homework: null, observations: 'Livro, página 12', attendance_name: 'Faltou', attendance_color: 'red', skills: [], classroom_id: 501, classroom_name: 'Dupla' },
+    ] : [], error: null };
     // 094: aulas com Presença, Competências e aula de turma.
     if (name === 'get_my_class_log_entries') return { data: who === 'S' ? [
       { id: 2, class_date: '2026-10-09', topic: 'Passé composé', homework: 'Exercícios 1 a 3', observations: null, attendance_name: 'Presente', attendance_color: 'green', skills: ['gramatica', 'escuta'], classroom_id: null, classroom_name: null },
@@ -137,6 +145,27 @@ const PANEL_STUB = (who) => {
       L('aluna: Presença colorida (verde = presente, vermelho = faltou)', await ev(() => { const p = [...document.querySelectorAll('.class-log-entry .att-pill')]; return p.length === 2 && p[0].dataset.color === 'green' && p[0].textContent.trim() === 'Presente' && p[1].dataset.color === 'red'; }));
       L('aluna: Competências como etiquetas', await ev(() => [...document.querySelectorAll('.class-log-entry')][0].querySelectorAll('.skill-chip').length === 2 && [...document.querySelectorAll('.class-log-entry')][0].textContent.includes(t('panel.classLog.skill.gramatica'))));
       L('aluna: aula da turma mostra o nome da turma', await ev(() => [...document.querySelectorAll('.class-log-entry')][1].querySelector('.class-log-classroom')?.textContent.includes('Dupla')));
+      L('aluna: próximas aulas no topo, com dia e horário no fuso de quem vê', await ev(() => { const u = document.querySelector('.my-upcoming-list li'); return !!u && u.textContent.includes('Aula futura') && /\d{2}:\d{2}/.test(u.textContent); }));
+      L('aluna: aula futura não entra no histórico', await ev(() => ![...document.querySelectorAll('.class-log-entry')].some(e => e.textContent.includes('Aula futura'))));
+      L('aluna: link de agenda fechado até ela abrir', await ev(() => { const b = document.querySelector('#my-class-logs-content [data-calendar-feed]'); return !!b && !b.open && !(window.__rpcCalls || []).some(c => c[0] === 'my_calendar_feed_token'); }));
+      await ev(() => { const b = document.querySelector('#my-class-logs-content [data-calendar-feed]'); b.open = true; });
+      await page.waitForSelector('#my-class-logs-content [data-calendar-feed-url]');
+      L('aluna: link de agenda aponta para a Edge Function com o token', await ev(() => /\/functions\/v1\/class-calendar-feed\?t=a{64}$/.test(document.querySelector('[data-calendar-feed-url]').value)), await ev(() => document.querySelector('[data-calendar-feed-url]').value));
+      L('aluna: botão do Google Agenda assina o link (webcal) em nova aba', await ev(() => { const a = document.querySelector('[data-calendar-feed-google]'); const u = new URL(a.href); return u.host === 'calendar.google.com' && decodeURIComponent(u.searchParams.get('cid')).startsWith('webcal://') && a.target === '_blank'; }));
+      L('aluna: Apple/Outlook abre o webcal', await ev(() => document.querySelector('[data-calendar-feed-webcal]').getAttribute('href').startsWith('webcal://')));
+      await ev(() => document.querySelector('[data-my-classlog-view="calendar"]').click());
+      L('aluna: trocar Lista/Calendário não fecha o bloco da agenda', await ev(() => document.querySelector('#my-class-logs-content [data-calendar-feed]').open));
+      await ev(() => document.querySelector('[data-my-classlog-view="list"]').click());
+      await ev(() => document.querySelector('[data-calendar-feed-reset]').click());
+      await page.waitForFunction(() => /t=b{64}/.test(document.querySelector('[data-calendar-feed-url]')?.value || ''));
+      L('aluna: "Gerar outro link" (com confirmação) troca o token', await ev(() => (window.__rpcCalls || []).some(c => c[0] === 'my_calendar_feed_token' && c[1] && c[1].p_regenerate === true)));
+      if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#my-class-logs-content [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
+      await shot('aluna-link-agenda');
+      await ev(() => document.querySelector('[data-my-classlog-view="calendar"]').click());
+      await page.waitForSelector('#my-class-logs-content .cal');
+      L('aluna: calendário do mês com Hoje e setas', await ev(() => !!document.querySelector('#my-class-logs-content [data-cal-nav="0"]') && document.querySelectorAll('#my-class-logs-content .cal-wd').length === 7));
+      await shot('aluna-calendario');
+      await ev(() => document.querySelector('[data-my-classlog-view="list"]').click());
       L('aluna: cor do rótulo visível (borda com a cor)', await ev(() => getComputedStyle(document.querySelector('.class-log-entry .att-pill')).borderTopColor !== getComputedStyle(document.querySelectorAll('.class-log-entry .att-pill')[1]).borderTopColor));
       await shot('minhas-aulas');
       await ev(() => switchTab('support-materials'));
@@ -293,6 +322,45 @@ const PANEL_STUB = (who) => {
       await page.waitForFunction(() => ![...document.querySelectorAll('[data-att-choices="new"] .att-choice')].some(l => l.textContent.includes('Remarcada')));
       L('rótulos: arquivar tira da lista de opções', true);
       L('rótulos: o texto digitado sobreviveu a tudo', await ev(() => document.getElementById('admin-class-log-topic').value === 'Texto que não pode sumir'));
+      // 101: horário, repetir toda semana e calendário
+      await page.fill('#admin-class-log-topic', '');
+      await page.check('[data-classlog-student-checkbox][value="S"]');
+      await page.uncheck('[data-classlog-classroom-checkbox][value="501"]');
+      const startDay = await ev(() => { const d = new Date(); d.setDate(d.getDate() + 2); return classLogLocalYMD(d); });
+      const untilDay = await ev(() => { const d = new Date(); d.setDate(d.getDate() + 16); return classLogLocalYMD(d); });
+      await page.fill('#admin-class-log-date', startDay);
+      L('agenda: horário já vem com 7h (padrão da autora)', await ev(() => document.getElementById('admin-class-log-time').value === '07:00'));
+      L('agenda: só o horário padrão não registra aula passada vazia, mas agenda hoje', await ev(() => cleanClassLogPayload({ classDate: '2020-01-01', startTime: '07:00', durationMinutes: 60 }).empty === true && cleanClassLogPayload({ classDate: todayStr(), startTime: '07:00', durationMinutes: 60 }).empty === false));
+      await page.fill('#admin-class-log-time', '19:30');
+      L('agenda: duração é um seletor de 30 min a 5h, começando em 1h', await ev(() => { const d = document.getElementById('admin-class-log-duration'); const o = [...d.options]; return d.tagName === 'SELECT' && d.value === '60' && o.length === 10 && o[0].text === '30 min' && o[1].text === '1h' && o[2].text === '1h30' && o[9].text === '5h'; }));
+      await page.selectOption('#admin-class-log-duration', '90');
+      L('agenda: duração fora da lista (aula antiga de 45 min) continua como opção ao editar', await ev(() => { const h = classLogDurationOptionsHTML(45); return /value="45" selected>45 min</.test(h) && (h.match(/<option/g) || []).length === 11; }));
+      await page.check('#admin-class-log-repeat');
+      L('agenda: "Até" aparece ao marcar repetir', await ev(() => !document.getElementById('admin-class-log-repeat-box').hidden));
+      await page.fill('#admin-class-log-repeat-until', untilDay);
+      const before = await ev(() => window.__DB.teacher_class_logs.length);
+      await page.click('#admin-create-class-log-btn');
+      await page.waitForFunction((n) => window.__DB.teacher_class_logs.length === n + 3, before);
+      L('agenda: repetir toda semana cria 1 aula por semana (3) com horário, duração e fuso', await ev((n) => { const r = window.__DB.teacher_class_logs.slice(n); return r.length === 3 && r.every(x => x.start_time === '19:30' && x.duration_minutes === 90 && !!x.time_zone && x.student_id === 'S') && new Set(r.map(x => x.class_date)).size === 3; }, before), await ev((n) => window.__DB.teacher_class_logs.slice(n).map(x => [x.class_date, x.start_time, x.duration_minutes, x.time_zone]), before));
+      L('agenda: aula futura só com data e horário é aceita (sem tópico)', true);
+      await ev(() => document.querySelector('[data-classlog-view="calendar"]').click());
+      await page.waitForSelector('#admin-classlogs-calendar .cal');
+      L('calendário: Registrar some e o mês aparece', await ev(() => document.getElementById('admin-classlogs-register').hidden && !document.getElementById('admin-classlogs-calendar-wrap').hidden));
+      L('calendário: link de agenda da professora acima do mês', await ev(() => !!document.querySelector('#admin-classlogs-calendar-wrap > [data-calendar-feed]')));
+      await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').open = true; });
+      await page.waitForSelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]');
+      L('calendário: professora recebe o link dela', await ev(() => /class-calendar-feed\?t=[ab]{64}/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
+      if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
+      await shot('aulas-link-agenda');
+      // a aula agendada pode cair no mês seguinte: avança até achar
+      for (let i = 0; i < 2 && !(await ev((d) => !!document.querySelector(`[data-cal-day="${d}"] .cal-chip`), startDay)); i++){ await ev(() => document.querySelector('#admin-classlogs-calendar [data-cal-nav="1"]').click()); await page.waitForTimeout(300); }
+      L('calendário: aula agendada no dia certo, com horário e nome', await ev((d) => { const c = document.querySelector(`[data-cal-day="${d}"] .cal-chip`); return !!c && c.textContent.includes('19:30') && c.textContent.includes('Ana'); }, startDay));
+      await ev((d) => document.querySelector(`[data-cal-day="${d}"]`).click(), startDay);
+      await page.waitForSelector('[data-cal-day-panel]');
+      L('calendário: clicar no dia mostra as aulas do dia e "Agendar aula neste dia"', await ev(() => document.querySelectorAll('[data-cal-day-panel] [data-cal-log]').length >= 1 && !!document.querySelector('[data-cal-schedule]')));
+      await shot('aulas-calendario');
+      await ev(() => document.querySelector('[data-cal-schedule]').click());
+      L('calendário: "Agendar neste dia" volta ao Registrar com a data preenchida', await ev((d) => !document.getElementById('admin-classlogs-register').hidden && document.getElementById('admin-class-log-date').value === d, startDay));
       L('aulas: sem rolagem horizontal', await ev(() => document.documentElement.scrollWidth <= window.innerWidth + 1), await ev(() => [document.documentElement.scrollWidth, window.innerWidth]));
       await ev(() => switchTab('admin-badges'));
       L('professora: link antigo do Admin cai no painel da professora', await ev(() => document.getElementById('view-teacher-panel').classList.contains('active')));

@@ -79,3 +79,38 @@ Ferramentas: `scripts/e4-diff-near.js` (relatório `docs/i18n/e4-quase-iguais.md
 - 12 funções com diferença de 1 ou 2 linhas para `shared/core/quase-iguais-simples.js`: `playAudioPreview`, `wireAudioButtons`, `pollForVoices`, `customAudioBtnHTML`, `reviewCardTagLabel`, `maskWordInText` (com ganchos); `showWrongAnswerPanel`, `advanceUnitStep`, `backToReviewModeSelect`, `startDeckReviewSession`, `openReviewSession`, `exitToPath` (com guarda ou argumento ignorado).
 - Bateria completa (122 suítes) antes e depois: as mesmas falhas, nenhuma nova (`test_ui_language_first_access_browser`, instável, passou). Ida e volta do progresso 22/22; 18 capturas iguais antes e depois; teste de i18n 2033/2033 (ignora `lang-hooks.js`).
 - Próximos lotes (diferença de 2 a 3 linhas com texto de interface ou marcação por idioma): textos de toast e plural (`addXP`, `answerSpeedQuestion`, `onMatchTileClick`: conferir os catálogos), recapitulação da lição com pinyin (`renderLessonCompleteScreen`, `renderUnitCompleteScreen`: gancho de marcação), assinatura diferente (`noteOrConceptReviewHTML`).
+
+### Lote 5b (2026-10-15): feito, na branch, **sem PR**
+- 5 funções para `shared/core/quase-iguais-textos.js`: `addXP` e `answerSpeedQuestion` (o zh escrevia `+N XP` e `+N pts` direto; as chaves `toast.xpGain` e `toast.pointsGain` valem exatamente isso em pt-BR e en, então o texto não muda), `onMatchTileClick` (fr usava `t`, zh usa `tp`; a chave é texto simples, igual até 999 tentativas; a unificada usa `tp`), `renderLessonCompleteScreen` e `renderUnitCompleteScreen` (ganchos `recapText` e `recapExtra`: o zh mostra o pinyin ao lado do hanzi).
+- Português: nenhum texto mudou (conferido nos catálogos pelo teste `tests/e4/test_lote5b_textos.js`, 11 checks).
+- Bateria completa (123 suítes) antes e depois: nenhuma falha nova (16 antes, 15 depois, por instabilidade). Ida e volta do progresso 22/22; core carregado 21/21; 18 capturas iguais.
+
+## 9. Levantamento do lote 5c (2026-10-15, só leitura, nada mudou no código)
+Restam 38 quase iguais (`docs/i18n/e4-quase-iguais.md`; as 5 primeiras linhas dessa tabela, com 0 diferenças, são as do lote 5b, já unificadas). Por tipo de diferença:
+
+**A. Só a chave de texto muda (`fr.*` x `zh.*`) ou um valor fixo por idioma. Mais fácil, proposta do 5c.**
+- `audioBtnHTML`, `wireDontKnowButton`, `renderMatchGame`: as chaves `fr.*` e `zh.*` têm o MESMO texto em pt-BR e en (conferido: `audio.listenPronunciation`, `hint.label/retry/reveal`). O `renderMatchGame` do fr tem "Pares:" e "Tentativas:" escritos direto; o do zh usa as chaves `zh.review.match.*` (mesmo texto). Unificar com as chaves comuns, sem mudar o que a aluna lê.
+- `maybeSendStudyReminder`: título do lembrete e chave do localStorage por idioma (o texto é diferente por ser "francês" x "mandarim": vira gancho, texto igual ao de hoje).
+- `renderProgressLineChart` (`chartTotalSuffix` diverge de propósito: "palavras aprendidas" x "palavras e caracteres aprendidos") e `buildCardsFromUnits` (`appKey` padrão): ganchos simples. `renderProgressLineChart` ainda soma `hanziCards` só no zh.
+- `freshAcquisitionState`: só a ORDEM das chaves do objeto muda; unificável direto (o conteúdo é o mesmo).
+- `playPregeneratedAudio` (fr aceita `rate`; zh ignora), `flyBlockToSlot` (fr `textContent`, zh `innerHTML` por causa do pinyin), `dlgPlayLine` (voz, `lang`, velocidade 0,9 x 0,85, e `PREGEN_AUDIO_RATE` só no fr): ganchos de áudio/voz, mesmo estilo do 5a.
+
+**B. Marcação com pinyin (zh mostra o pinyin, fr não). Padrão do 5b, com gancho de marcação.**
+- `renderConceptStep`, `renderTrueFalseExercise`, `renderMultipleChoiceCard` (esta ainda troca `canSpeakFrench`/`speakFrench` por `canSpeakChinese`/`speakChinese`, que já têm gancho).
+
+**C. A lição tem estrutura diferente por idioma (gramática do fr, cenário do fr, frase completa do zh). Mais arriscado: pede decisão minha caso a caso, com teste de comportamento.**
+- `currentStepDefs`, `finishCurrentLesson`, `renderExerciseStep`, `mapUnitDescribe`, `findEnterAdvanceTarget`, `noteOrConceptReviewHTML`, `renderDialogueCheckStep`, `showAnswerPanel` (o zh tem "tom errado/faltando" e "frase completa"), `assignTodaysMissions` (revisão de conjugação x de hanzi), `freshDailyBucket` (campos diferentes por idioma).
+
+**D. Grandes (10 a 42 linhas diferentes): `serializeState`, `renderBlockIntroCard`, `renderSpeedReview`, `renderStepProgress`, `buildUnitBlock`, `renderReviewView`, `renderMultipleChoiceExercise`, `renderDialogueStep`, `renderClozeCard`, `renderTypeAnswerCard`, `renderVocabTypeExercise`, `renderReorderExercise`, `renderDialogueCheck`, `renderClozeExercise`.** Não vale forçar uma versão única: a recomendação é decidir uma a uma depois dos lotes A e B, e talvez deixar parte delas separada de propósito (cada idioma com o seu jeito de exercício).
+
+**Proposta:** lote 5c = grupo A (10 funções), com os mesmos gates dos anteriores (bateria completa antes/depois, ida e volta do progresso, capturas, e um teste de que os textos saem iguais). Lote 5d = grupo B (3 funções). Os grupos C e D só depois de uma conversa com a dona.
+
+### Lote 5c (2026-10-15): feito, na branch, **sem PR**
+- 10 funções para `shared/core/quase-iguais-chaves.js`: `audioBtnHTML`, `wireDontKnowButton`, `maybeSendStudyReminder` (chave de texto por idioma pelo gancho `uiKey`, mais a chave do `localStorage` do lembrete), `renderMatchGame`, `renderProgressLineChart` (gancho de datas, de aviso vazio e de sufixo), `buildCardsFromUnits` (gancho `appKey`), `freshAcquisitionState` (só a ordem das chaves mudava), `playPregeneratedAudio` (argumento `rate` que o zh nunca passa), `flyBlockToSlot` (gancho `setFlyContent`: `textContent` no fr, `innerHTML` no zh) e `dlgPlayLine` (ganchos `pregenRate`, `ttsLang`, `ttsRate`).
+- Português: nenhum texto mudou. Única diferença visível: o jogo de pares do fr tinha "Pares:" e "Tentativas:" escritos direto e agora usa as chaves `zh.review.match.*` (mesmo texto em pt-BR; em inglês passa a aparecer traduzido, como o fr já fazia depois do primeiro clique).
+- Teste novo `tests/e4/test_lote5c_chaves.js` (20 checks, executa o core com os ganchos reais de fr e zh). O `tests/fase-e/harness.js` passou a carregar `<idioma>/lang-hooks.js` (11 suítes que montam o app em VM precisavam dele).
+
+### Lote 5d (2026-10-15): feito
+- 3 funções com marcação de pinyin para `shared/core/quase-iguais-pinyin.js`: `renderConceptStep` (gancho `conceptExampleHTML`), `renderTrueFalseExercise` (`tfPinyinHTML` e as chaves `uiKey`) e `renderMultipleChoiceCard` (`promptClass`, `promptPinyinHTML`, `canSpeak`). O texto das funções com os ganchos trocados volta exatamente ao original de cada idioma (gate textual).
+- Português: nada mudou. Teste novo `tests/e4/test_lote5d_pinyin.js` (12 checks: marcação de cada idioma e voz do idioma). Bateria completa (128 suítes): 14 falhas antes e 14 depois, as mesmas; 18 capturas iguais; ida e volta 22/22; core 25/25.
+- Restam 25 quase iguais: grupo C (10, estrutura de lição diferente por idioma) e grupo D (14 grandes) mais `renderConceptStep`-like que sobrarem. Daqui em diante, só depois de conversar com a dona.
