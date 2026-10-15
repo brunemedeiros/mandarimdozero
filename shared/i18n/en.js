@@ -2738,7 +2738,7 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.labels.edit': 'Edit the {name} label', // ALTA
   'panel.classLog.labels.done': 'Done', // ALTA
   'panel.classLog.time': 'Time (optional)', // ALTA
-  'panel.classLog.durationMin': 'Length (minutes)', // ALTA
+  'panel.classLog.durationMin': 'Length', // ALTA
   'panel.classLog.repeatWeekly': 'Repeat every week', // ALTA
   'panel.classLog.repeatUntil': 'Until', // ALTA
   'panel.classLog.repeatHint': 'Creates one lesson a week, same day and time, until that date (52 at most).', // ALTA

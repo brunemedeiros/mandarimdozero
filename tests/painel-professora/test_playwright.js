@@ -314,8 +314,9 @@ const PANEL_STUB = (who) => {
       const untilDay = await ev(() => { const d = new Date(); d.setDate(d.getDate() + 16); return classLogLocalYMD(d); });
       await page.fill('#admin-class-log-date', startDay);
       await page.fill('#admin-class-log-time', '19:30');
-      L('agenda: duração começa em 60 min e aceita qualquer valor', await ev(() => { const d = document.getElementById('admin-class-log-duration'); return d.type === 'number' && d.value === '60'; }));
-      await page.fill('#admin-class-log-duration', '90');
+      L('agenda: duração é um seletor de 30 min a 5h, começando em 1h', await ev(() => { const d = document.getElementById('admin-class-log-duration'); const o = [...d.options]; return d.tagName === 'SELECT' && d.value === '60' && o.length === 10 && o[0].text === '30 min' && o[1].text === '1h' && o[2].text === '1h30' && o[9].text === '5h'; }));
+      await page.selectOption('#admin-class-log-duration', '90');
+      L('agenda: duração fora da lista (aula antiga de 45 min) continua como opção ao editar', await ev(() => { const h = classLogDurationOptionsHTML(45); return /value="45" selected>45 min</.test(h) && (h.match(/<option/g) || []).length === 11; }));
       await page.check('#admin-class-log-repeat');
       L('agenda: "Até" aparece ao marcar repetir', await ev(() => !document.getElementById('admin-class-log-repeat-box').hidden));
       await page.fill('#admin-class-log-repeat-until', untilDay);

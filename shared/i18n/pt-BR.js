@@ -2754,7 +2754,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'panel.classLog.labels.edit': 'Editar o rótulo {name}',
   'panel.classLog.labels.done': 'Pronto',
   'panel.classLog.time': 'Horário (opcional)',
-  'panel.classLog.durationMin': 'Duração (minutos)',
+  'panel.classLog.durationMin': 'Duração',
   'panel.classLog.repeatWeekly': 'Repetir toda semana',
   'panel.classLog.repeatUntil': 'Até',
   'panel.classLog.repeatHint': 'Cria uma aula por semana, no mesmo dia e horário, até essa data (no máximo 52).',
