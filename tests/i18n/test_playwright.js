@@ -317,7 +317,7 @@ async function triggerWouldGenerate(page){
       U('relato: categoria/gravidade por id estável', sent[0] && sent[0].category === 'traducao' && sent[0].severity_reported === 'pequeno' && sent[0].kind === 'problema');
       U('relato: idioma ESTUDADO preservado', sent[0] && sent[0].language_app_key === appKey);
       U('relato: e-mail do convidado', sent[0] && sent[0].reporter_email === 'a@b.co');
-      U('toast de sucesso traduzido', await page.evaluate(m => [...document.querySelectorAll('*')].some(e => e.children.length === 0 && e.textContent === m), C['report.toast.success']));
+      U('toast de sucesso traduzido', await page.evaluate(m => [...document.querySelectorAll('*')].some(e => [...e.children].every(c => c.classList.contains('emo')) /* ícones do Fluent (shared/emoji-icons.js) */ && e.textContent === m), C['report.toast.success']));
       U('APP_KEY não mudou', await page.evaluate(k => APP_KEY === k, appKey) && before.appKey === appKey);
       // reenviar o mesmo -> duplicata traduzida
       await page.evaluate(() => document.getElementById('report-topbar-btn').click());

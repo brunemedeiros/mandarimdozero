@@ -381,7 +381,7 @@ window.I18N_CATALOG['en'] = {
   'zh.toast.operaAudioFailed': '🔇 Opera couldn\'t play this audio', // ALTA
   'zh.toast.storyDone': 'Story completed! 🎉', // ALTA
   'zh.toast.unitDone': 'Unit completed! 🏮', // ALTA
-  'zh.toast.hanziLessonDone': 'Hanzi lesson completed! 🈺', // ALTA
+  'zh.toast.hanziLessonDone': 'Hanzi lesson completed! 🀄', // ALTA
   'zh.review.cloze.placeholder': 'Type the missing pinyin', // ALTA
   'zh.review.typeAnswer.placeholder': 'Type the answer in pinyin', // ALTA
   'zh.review.match.pairs': 'Pairs: {done}/{total}', // ALTA
@@ -651,6 +651,44 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.hintMore': '💡 More help', // ALTA
   'fr.conj.hintMoreTitle': 'Reveal most of the letters', // ALTA
   'fr.conj.hintMax': '💡 Maximum hint', // ALTA
+  'fr.conj.sessionSize': 'Verbs per session', // ALTA
+  'fr.conj.sessionForms': '≈ {n} forms to fill in', // ALTA
+  'fr.conj.reviewTitle': 'Forms to review ({n})', // ALTA
+  'fr.conj.practiceMistakes': 'Practice only the ones I missed', // ALTA
+  'fr.conj.almost': 'Almost', // ALTA
+  'fr.conj.otherForm': '"{form}" is the {tense} form.', // ALTA
+  'fr.conj.sel.verbs': 'Verbs', // ALTA
+  'fr.conj.sel.searchLabel': 'Practice specific verbs (in French or Portuguese)', // ALTA
+  'fr.conj.sel.searchPh': 'manger, être, aller...', // ALTA
+  'fr.conj.sel.noMatch': 'This verb is not on the list yet.', // ALTA
+  'fr.conj.sel.pickedNote': 'The session will use only these verbs. The filters below are set aside.', // ALTA
+  'fr.conj.sel.removeVerb': 'Remove {verb}', // ALTA
+  'fr.conj.sel.pickLimit': 'You can pick up to {n} verbs.', // ALTA
+  'fr.conj.sel.orFilters': 'Or draw verbs with the filters', // ALTA
+  'fr.conj.sel.onlyRegular': 'Regular verbs only', // ALTA
+  'fr.conj.sel.onlyIrregular': 'Irregular verbs only', // ALTA
+  'fr.conj.sel.tenses': 'Verb tenses', // ALTA
+  'fr.conj.sel.langFr': 'French', // ALTA
+  'fr.conj.sel.langPt': 'Portuguese', // ALTA
+  'games.tabPractice': 'Practice', // ALTA
+  'games.tabGames': 'Games', // ALTA
+  'games.premium': 'Premium', // ALTA
+  'games.perRound': '{n} sentences per round', // ALTA
+  'games.play': 'Play', // ALTA
+  'games.counter': 'Sentence {i} of {n}', // ALTA
+  'games.right': 'Right!', // ALTA
+  'games.wrong': 'Not this time.', // ALTA
+  'games.answerWas': 'The answer is "{form}".', // ALTA
+  'games.whyTense': 'Why {tense}?', // ALTA
+  'games.listen': 'Listen to the sentence', // ALTA
+  'games.next': 'Next sentence', // ALTA
+  'games.seeResult': 'See result', // ALTA
+  'games.resultTitle': 'End of round', // ALTA
+  'games.reviewTitle': 'Sentences to review ({n})', // ALTA
+  'games.perfect': 'You got them all right!', // ALTA
+  'games.practiceMistakes': 'Practice only my mistakes', // ALTA
+  'games.again': 'Play again', // ALTA
+  'games.backToGames': '← Back to games', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA
@@ -1341,7 +1379,7 @@ window.I18N_CATALOG['en'] = {
   'admin.materials.send': 'Send material', // ALTA
   'admin.materials.sentN': '✓ Material sent to {n} students.', // ALTA
   'admin.materials.sent': '✓ Material sent.', // ALTA
-  'teacherLogs.err.needOneField': 'Fill in at least one field (topic, homework, observations or free text).', // ALTA
+  'teacherLogs.err.needOneField': 'Fill in at least one field (attendance, skills, topic, homework, observations or free text).', // ALTA
   'teacherLogs.err.saveFailed': 'We couldn\'t save the record right now.', // ALTA
   'teacherMaterials.err.titleRequired': 'Enter a title for the material.', // ALTA
   'teacherMaterials.err.needContent': 'Fill in at least the description, a link or a file.', // ALTA
@@ -1920,7 +1958,7 @@ window.I18N_CATALOG['en'] = {
   'ui.review.intensity.light': 'Light (shorter sessions)', // ALTA
   'ui.review.intensity.intense': 'Intense (longer sessions)', // ALTA
   'ui.review.practiceHint': 'Keep practicing whenever you like, even with no reviews due.', // ALTA
-  'ui.conj.sub': 'Choose the verb tenses and verb categories. You always practice all 6 persons.', // ALTA
+  'ui.conj.sub': 'Choose the verbs and the verb tenses.', // ALTA
   'ui.conj.topN': 'Number of verbs (most common first)', // ALTA
   'ui.conj.start': 'Start practice', // ALTA
   'ui.conj.backToSelect': '← Back to selection', // ALTA
@@ -2651,6 +2689,37 @@ window.I18N_CATALOG['en'] = {
   'studentDecks.empty': 'The student has no cards in decks yet.', // ALTA
   'studentDecks.error': 'Couldn\'t load the student\'s decks right now.', // ALTA
   'panel.tab.mural': 'Board', // ALTA
+  'panel.classLog.attendance': 'Attendance', // ALTA
+  'panel.classLog.attendanceNone': 'Not recorded', // ALTA
+  'panel.classLog.skills': 'Skills practiced', // ALTA
+  'panel.classLog.skill.conversacao': 'Speaking', // ALTA
+  'panel.classLog.skill.gramatica': 'Grammar', // ALTA
+  'panel.classLog.skill.escrita': 'Writing', // ALTA
+  'panel.classLog.skill.leitura': 'Reading', // ALTA
+  'panel.classLog.skill.vocabulario': 'Vocabulary', // ALTA
+  'panel.classLog.skill.escuta': 'Listening', // ALTA
+  'panel.classLog.skill.pronuncia': 'Pronunciation', // ALTA
+  'panel.classLog.classrooms': 'Classes', // ALTA
+  'panel.classLog.classroomsHint': 'A class lesson is logged once and shows up for every student in the class.', // ALTA
+  'panel.classLog.labels.name': 'Label name', // ALTA
+  'panel.classLog.labels.color': 'Color', // ALTA
+  'panel.classLog.labels.archive': 'Archive', // ALTA
+  'panel.classLog.labels.needName': 'Give the label a name.', // ALTA
+  'panel.classLog.labels.duplicate': 'You already have a label with that name.', // ALTA
+  'panel.classLog.color.green': 'Green', // ALTA
+  'panel.classLog.color.red': 'Red', // ALTA
+  'panel.classLog.color.yellow': 'Yellow', // ALTA
+  'panel.classLog.color.orange': 'Orange', // ALTA
+  'panel.classLog.color.blue': 'Blue', // ALTA
+  'panel.classLog.color.purple': 'Purple', // ALTA
+  'panel.classLog.color.gray': 'Gray', // ALTA
+  'panel.classLog.color.pink': 'Pink', // ALTA
+  'panel.classLog.color.brown': 'Brown', // ALTA
+  'panel.classLog.labels.createPlaceholder': 'Type a name and press Enter to create a label', // ALTA
+  'panel.classLog.labels.edit': 'Edit the {name} label', // ALTA
+  'panel.classLog.labels.done': 'Done', // ALTA
+  'panel.classLog.classroomsSelected': { one: '{n} class', other: '{n} classes' }, // ALTA
+  'panel.classLog.membersCount': { one: '{n} student', other: '{n} students' }, // ALTA
   'studentPanel.menu': '🎒 Student', // ALTA
   'studentPanel.nav': 'Student', // ALTA
   'studentPanel.title': 'Student', // ALTA
@@ -2736,6 +2805,7 @@ window.I18N_CATALOG['en'] = {
   'mural.join.done': 'Done! You are in the {classroom} class 🏫', // ALTA
   'mural.join.already': 'You are already in this class.', // ALTA
   'mural.err.generic': 'That did not work. Try again.', // ALTA
+  'mural.err.has_class_logs': 'This class has lessons logged, so it can\'t be deleted. The lessons stay in the history.', // ALTA
   'mural.err.not_authorized': 'You do not have access to this board.', // ALTA
   'mural.err.not_member': 'This student is not in the class.', // ALTA
   'mural.err.empty': 'Write something or attach a file.', // ALTA

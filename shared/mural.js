@@ -41,13 +41,18 @@ const MURAL_STATE = {
 // ---------- Utilidades ----------
 async function muralRpc(name, args){
   const { data, error } = await supabaseClient.rpc(name, args || {});
-  if (error){ console.error(`Erro em ${name}:`, error); return { error: 'generic' }; }
+  if (error){
+    console.error(`Erro em ${name}:`, error);
+    // 094: turma com aula registrada não se apaga (o histórico de aulas fica).
+    if (name === 'mural_delete_classroom' && error.code === '23503') return { error: 'has_class_logs' };
+    return { error: 'generic' };
+  }
   return data && typeof data === 'object' ? data : { error: 'generic' };
 }
 
 function muralErrorText(code){
   const known = ['not_authorized', 'not_member', 'empty', 'too_long', 'daily_limit', 'invalid_attachments', 'invalid_name',
-    'classroom_limit', 'not_found', 'no_teacher', 'upload', 'invalid_code', 'student_has_teacher', 'invalid_target'];
+    'classroom_limit', 'not_found', 'no_teacher', 'upload', 'invalid_code', 'student_has_teacher', 'invalid_target', 'has_class_logs'];
   return t(`mural.err.${known.includes(code) ? code : 'generic'}`);
 }
 
