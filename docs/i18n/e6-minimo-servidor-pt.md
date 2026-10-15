@@ -160,17 +160,40 @@ anterior da `notification-cron`.
   por idioma, que você cola no painel do Supabase?
 - **P7.** Q-06 (regra aberta nos CHECKs): confirma adiar até o 4º idioma, já que `portugues` passa em todos (Dv-4)?
 
-## 7. Andamento (2026-10-15, branch `i18n-pt-en-avisos-emails`, nada aplicado nem publicado)
+## 7a. Andamento (2026-10-15, branch `i18n-pt-en-avisos-emails`, nada aplicado nem publicado)
 
-- **Q4 (modelos de aviso do `portugues`)**: rascunho em inglês pronto e INATIVO. Migration `105_pt_notification_templates_en_draft.sql`
+- **Q4 (modelos de aviso do `portugues`)**: rascunho em inglês pronto e INATIVO. Migration `106_pt_notification_templates_en_draft.sql`
   (só INSERT, 21 linhas) e tabela de revisão em `docs/i18n/modelos-aviso-pt-en-revisao.md`. Falta a dona revisar, aplicar e ativar, e o
   deploy da `notification-cron` com `portugues` (Q1) para algo sair.
 - **T7 (e-mails de cadastro e senha)**: modelos bilíngues em `docs/email/supabase/bilingue/` (com `LEIA-ME.md`); o portão grava
   `user_metadata.ui_language` no cadastro. Falta a dona colar no painel do Supabase depois do merge.
 - **T2 (Mural)**: já estava resolvido pela 104 (frases reconhecidas em `_mural_notify`/`_teacher_notify`), inclusive para
-  `portugues`; não precisa recriar as funções com DELETE. `docs/rollout-sql/106_mural_en_sql_editor.sql` só dá o acabamento do
+  `portugues`; não precisa recriar as funções com DELETE. `docs/rollout-sql/107_mural_en_sql_editor.sql` só dá o acabamento do
   nome de reserva "Professora". Opcional.
 - **T6 (`report-reply-send`)**: mapa com `portugues` e rodapé no idioma do site de quem recebe (`tests/report-reply/test_footer.js`).
   Falta o deploy (Edge Function só muda depois dele).
 - Fora desta entrega: T1/P2 (sem modelo `en` ativo = sem aviso), Q5, T3 e T10 (convites, outra sessão).
 
+
+## 7b. Implementação do mínimo (2026-10-15, branch `e6-pt-servidor-minimo`, NADA aplicado nem publicado)
+
+Autorizado pela dona: Q1, Q2, Q3, T1 (decisão: site em inglês sem modelo em inglês ativo = sem aviso, para fr, zh e pt) e T5.
+
+- `shared/supabase_migrations/105_pt_server_minimum.sql` (só `create or replace`, sem DROP/DELETE, aplicável pela MCP):
+  `_progress_block(data, idioma, idioma_do_site?)` com a regra de `blockForLanguage` (cron) e `blockFor`
+  (`shared/course-storage.js`); `get_teacher_student_metrics` e `get_teacher_student_deck_counts` leem o bloco por ela;
+  `_studied_languages(conta)` + `_friends_notify`/`_friends_notify_msg` gravam o aviso de Amigos só nos idiomas com bloco
+  (conta sem bloco: 1 linha, no idioma atual ou em `frances`).
+- `notification-cron` (repo e `docs/deploy/notification-cron-para-colar-no-painel.ts`, que vira a v25 quando colado):
+  `portugues` em `LANGUAGES`; `templateLangsFor` (en só en, pt-BR só pt-BR, também no e-mail); lembrete de badge pelo idioma
+  principal. A cópia do painel ganhou também os 3 textos em inglês que já estavam no repo e faltavam na v24 (rodapé do e-mail,
+  título do push, alerta da professora).
+- `shared/notifications.js` (`pickNotificationTemplate`): mesma regra T1 no cliente (vale depois do merge na `main`).
+- Testes: `tests/pt-servidor/run.sh` (SQL com a 105 aplicada dentro da transação + ROLLBACK, comparação antes x depois; e o
+  Node `test_cron_pt.js`, que roda o handler real do cron com banco falso nos dois arquivos e confere os mesmos casos de
+  `progress_block_cases.json` contra o cron e o `course-storage.js`).
+- Achado: o sino (`fetchRecentNotifications`) NÃO filtra por idioma: mostra todas as linhas da conta. Por isso o aviso de
+  Amigos gravado em 2 idiomas já aparecia 2 vezes para quem tem 2 blocos (antes da 105: para TODO mundo). A 105 reduz isso
+  a 1 linha para quem estuda 1 idioma; quem estuda 2 ainda vê 2. Correção possível (não feita, decisão da dona): 1 linha só
+  no idioma principal, ou o sino agrupar linhas iguais.
+- Depende de Q4 (modelos `en` de `portugues`): sem eles o cron só grava `notification_events` para o português.

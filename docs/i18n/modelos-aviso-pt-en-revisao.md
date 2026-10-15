@@ -1,7 +1,7 @@
 # Modelos de aviso do português em inglês: rascunho para revisão
 
-Rascunho de 2026-10-15. Nada foi aplicado em banco nenhum. Migration: `shared/supabase_migrations/105_pt_notification_templates_en_draft.sql`
-(só INSERT, 21 linhas, **todas inativas**: `active = false`). Teste local: `tests/avisos-idioma/test_105.sql` (rodado por `tests/avisos-idioma/run.sh`).
+Rascunho de 2026-10-15. Nada foi aplicado em banco nenhum. Migration: `shared/supabase_migrations/106_pt_notification_templates_en_draft.sql`
+(só INSERT, 21 linhas, **todas inativas**: `active = false`). Teste local: `tests/avisos-idioma/test_106.sql` (rodado por `tests/avisos-idioma/run.sh`).
 Contexto: `docs/i18n/e6-minimo-servidor-pt.md` (achado Q4, perguntas P2 e P3). O curso de português é só em inglês (Q-04), então tudo é `ui_language = 'en'` e `language_app_key = 'portugues'`.
 
 **O que é grátis e o que é Premium:** tudo grátis (avisos de sequência, meta e reengajamento nunca foram Premium).
@@ -9,7 +9,7 @@ Contexto: `docs/i18n/e6-minimo-servidor-pt.md` (achado Q4, perguntas P2 e P3). O
 ## O que você precisa fazer
 
 1. **Revisar os textos da tabela abaixo.** Para trocar um texto, edite este arquivo (ou me diga) e eu gero a migration de novo; depois de aplicada, também dá para editar pelo Painel de Admin > Notificações.
-2. **Aplicar a migration 105** (Staging e depois produção, ferramenta de migration; não tem DROP nem DELETE). Ela só cria as linhas inativas, nada muda para ninguém.
+2. **Aplicar a migration 106** (Staging e depois produção, ferramenta de migration; não tem DROP nem DELETE). Ela só cria as linhas inativas, nada muda para ninguém.
 3. **Ativar** só depois de aprovar os textos *e* de a `notification-cron` ser publicada com `portugues` (achado Q1, ainda pendente: sem isso as linhas ficam paradas mesmo ativas). Comando, no SQL Editor (Staging antes):
 
 ```sql

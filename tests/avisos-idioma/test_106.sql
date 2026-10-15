@@ -1,43 +1,46 @@
--- Teste do 106 (SQL Editor): acabamento da 104. Aviso do Mural de turma de PORTUGUÊS chega em inglês para quem usa o site
--- em inglês; a palavra 'Professora' (nome de reserva) não fica solta na frase em inglês. Roda depois de aplicar o 106 duas vezes. ROLLBACK.
+-- Teste da 105: modelos de aviso do português em inglês, todos inativos. Roda depois de aplicar a 105 DUAS vezes. ROLLBACK.
 begin;
 create temp table r(ok boolean, name text) on commit drop;
-insert into auth.users(id, email) values
-  ('10600000-0000-0000-0000-0000000000e1', 'en106@example.invalid'),
-  ('10600000-0000-0000-0000-0000000000b1', 'pt106@example.invalid');
-insert into progress(user_id, data) values
-  ('10600000-0000-0000-0000-0000000000e1', '{"_meta":{"uiLanguage":"en"}}'),
-  ('10600000-0000-0000-0000-0000000000b1', '{"_meta":{"uiLanguage":"pt-BR"}}');
+create temp table p on commit drop as
+  select * from notification_templates where language_app_key = 'portugues';
 
--- 1. nome de reserva 'Professora'
-insert into r select _notif_text_en('mural_post', '📌 Professora postou no mural (turma Turma P): oi') = '📌 Your teacher posted on the board (class Turma P): oi', 'Professora vira "Your teacher" no post';
-insert into r select _notif_text_en('mural_comment', '💬 Professora comentou no mural: ok') = '💬 Your teacher commented on the board: ok', 'Professora vira "Your teacher" no comentário';
-insert into r select _notif_text_en('mural_classroom', '🏫 Professora colocou você na turma Sábado.') = '🏫 Your teacher added you to the class Sábado.', 'Professora vira "Your teacher" ao entrar na turma';
-insert into r select _notif_text_en('mural_classroom_join', '🏫 Professora entrou pelo link na turma T e agora é seu aluno/a de português 🎉') = '🏫 A student joined the class T through your link and is now your Portuguese student 🎉', 'aluno sem nome vira "A student" (turma de português)';
-insert into r select _notif_text_en('teacher_invite_accepted', 'Professora aceitou seu convite e agora é seu aluno/a de português 🎉') = 'A student accepted your invitation and is now your Portuguese student 🎉', 'aluno sem nome vira "A student" (convite)';
-insert into r select _notif_text_en('teacher_invite_declined', 'Professora recusou o convite para as aulas de francês.') = 'A student declined the invitation to French classes.', 'aluno sem nome vira "A student" (recusa)';
-insert into r select _notif_text_en('teacher_invite', 'Professora te convidou para ser aluno/a de chinês 🎓') = 'Your teacher invited you to be their Chinese student 🎓', 'convite da professora sem nome continua "Your teacher" (igual à 104)';
+insert into r select (select count(*) from p) = 21, '21 linhas de portugues (duas aplicações não duplicam)';
+insert into r select not exists (select 1 from p where active), 'todas inativas (nada sai antes da revisão)';
+insert into r select not exists (select 1 from p where ui_language <> 'en'), 'todas ui_language = en (nenhuma pt-BR)';
+insert into r select not exists (select 1 from p where created_by <> 'i18n-pt-en-rascunho'), 'marca created_by para ativar/reverter em bloco';
+insert into r select (select count(*) from p where channel = 'in_app') = 17 and (select count(*) from p where channel = 'email') = 4,
+  '17 do sino e 4 de e-mail';
+insert into r select (select count(distinct body) from p) = 21, 'nenhum texto repetido';
 
--- 2. nomes de verdade não mudam
-insert into r select _notif_text_en('mural_post', '📌 Ana Prof postou no mural: 📎') = '📌 Ana Prof posted on the board: 📎', 'nome de verdade fica como está';
+-- cobertura por evento e canal
+insert into r select (select count(*) from p where event_type = 'streak_at_risk' and channel = 'in_app') = 2, 'streak_at_risk: 2 variantes no sino';
+insert into r select (select count(*) from p where event_type = 'study_goal_remaining' and channel = 'in_app') = 2, 'study_goal_remaining: 2 variantes no sino';
+insert into r select (select count(*) from p where event_type like 'user\_inactive\_%' and channel = 'in_app' and event_type in
+  ('user_inactive_1','user_inactive_3','user_inactive_5','user_inactive_7','user_inactive_9','user_inactive_15','user_inactive_20','user_inactive_30')) = 13,
+  'reengajamento no sino: dias 1,3,5,7,9 (2 variantes) e 15,20,30 (1)';
+insert into r select (select array_agg(event_type order by event_type) from p where channel = 'email') = array['user_inactive_15','user_inactive_20','user_inactive_30','user_inactive_9'],
+  'e-mail só nos dias 9, 15, 20 e 30 (como no francês/mandarim)';
 
--- 3. idioma `portugues`: quem usa o site em inglês recebe em inglês; quem usa em português recebe como veio
-select _mural_notify('10600000-0000-0000-0000-0000000000e1', 'portugues', 'mural_post', '📌 Ana Prof postou no mural (turma Turma P): Leiam a página 3', 'my-mural');
-select _mural_notify('10600000-0000-0000-0000-0000000000e1', 'portugues', 'mural_classroom', '🏫 Professora colocou você na turma Turma P.', 'my-mural');
-select _mural_notify('10600000-0000-0000-0000-0000000000b1', 'portugues', 'mural_post', '📌 Ana Prof postou no mural (turma Turma P): Leiam a página 3', 'my-mural');
-insert into r select (select count(*) from notifications where user_id = '10600000-0000-0000-0000-0000000000e1' and language_app_key = 'portugues'
-  and body in ('📌 Ana Prof posted on the board (class Turma P): Leiam a página 3', '🏫 Your teacher added you to the class Turma P.')) = 2,
-  'turma de português: avisos em inglês no sino do portugues';
-insert into r select not exists (select 1 from notifications n where n.user_id = '10600000-0000-0000-0000-0000000000e1' and n.body ~ '(postou|colocou você|Professora)'),
-  'site em inglês: nenhuma palavra em português nos avisos do Mural';
-insert into r select (select body from notifications where user_id = '10600000-0000-0000-0000-0000000000b1' and language_app_key = 'portugues') =
-  '📌 Ana Prof postou no mural (turma Turma P): Leiam a página 3', 'site em português: aviso igual ao de antes';
+-- formato igual ao das linhas de francês: sino do reengajamento sem título; e-mail com título; streak/meta com título e ícone
+insert into r select not exists (select 1 from p where event_type like 'user\_inactive\_%' and channel = 'in_app' and title is not null), 'reengajamento no sino sem título (igual ao francês)';
+insert into r select not exists (select 1 from p where channel = 'email' and (title is null or btrim(title) = '')), 'e-mail com assunto';
+insert into r select not exists (select 1 from p where event_type in ('streak_at_risk', 'study_goal_remaining') and (title is null or icon is null)), 'streak e meta com título e ícone';
 
--- 4. frase desconhecida continua sem tradução; funções internas fechadas
-insert into r select _notif_text_en('mural_post', 'frase nova qualquer') is null, 'frase desconhecida: sem tradução (fica como veio)';
-insert into r select not has_function_privilege('authenticated', 'public._who_en(text,text)', 'EXECUTE')
-  and not has_function_privilege('anon', 'public._who_en(text,text)', 'EXECUTE')
-  and not has_function_privilege('anon', 'public._notif_text_en(text,text)', 'EXECUTE'), 'funções internas fechadas';
+-- variáveis: só as que o cron preenche
+insert into r select not exists (select 1 from p where event_type = 'streak_at_risk' and body not like '%{{days}}%'), 'streak_at_risk usa {{days}}';
+insert into r select not exists (select 1 from p where event_type = 'study_goal_remaining' and body not like '%{{lessonsRemaining}}%'), 'study_goal_remaining usa {{lessonsRemaining}}';
+insert into r select not exists (select 1 from p where (coalesce(title, '') || body) ~ '\{\{' and (regexp_replace(coalesce(title, '') || body, '\{\{(days|lessonsRemaining)\}\}', '', 'g')) ~ '\{\{'),
+  'nenhuma variável desconhecida';
+
+-- regra do projeto: site em inglês sem nada em português; sem "--" nem " pra "
+insert into r select not exists (select 1 from p where (coalesce(title, '') || ' ' || body) ~* '[ãõçáàâéêíóôú]'), 'nenhum caractere acentuado do português';
+insert into r select not exists (select 1 from p where (coalesce(title, '') || ' ' || body) ~* '(^|[^a-z])(você|voce|seu|sua|dias|pra|para|não|nao|tá|aqui é|obrigad[oa])([^a-z]|$)'), 'nenhuma palavra do português';
+insert into r select not exists (select 1 from p where (coalesce(title, '') || ' ' || body) like '%--%' or (coalesce(title, '') || ' ' || body) ~* ' pra '), 'sem "--" nem "pra"';
+
+-- o que existe de outros idiomas não mudou e o cron ainda não acha modelo ativo de português
+insert into r select (select count(*) from notification_templates where language_app_key <> 'portugues') =
+                     (select count(*) from notification_templates where language_app_key in ('frances', 'mandarim')), 'só frances, mandarim e portugues na tabela';
+insert into r select (select count(*) from notification_templates where language_app_key = 'portugues' and active) = 0, 'cron/cliente não acham modelo ativo de portugues';
 
 select (case when ok then 'ok|' else 'FALHOU|' end) || name from r;
 rollback;

@@ -1,4 +1,4 @@
--- 105 -- Modelos de aviso do português (`portugues`) em inglês: RASCUNHO, TODOS INATIVOS (2026-10-15).
+-- 106 -- Modelos de aviso do português (`portugues`) em inglês: RASCUNHO, TODOS INATIVOS (2026-10-15).
 --
 -- Contexto: docs/i18n/e6-minimo-servidor-pt.md (achado Q4, pergunta P3) e docs/i18n/modelos-aviso-pt-en-revisao.md
 -- (tabela legível para a dona revisar). O curso de português é só em inglês (Q-04): linhas `ui_language = 'en'`.
