@@ -1028,9 +1028,9 @@ async function adminCreateCards(){
   if (failed.length) showToast(t('admin.flashcards.createdPartial', { ok: okCount, failed: failed.map(f => '@' + (f.student.username || '?')).join(', ') }));
   else showToast(results.length > 1 ? t('admin.flashcards.createdN', { n: okCount }) : t('admin.flashcards.created'));
   // Só aqui o formulário é limpo (um envio bem-sucedido deve limpar); as pessoas e os Decks escolhidos continuam.
-  const mandarim = S.nativeCardState.languageAppKey;
+  const cjkKey = S.nativeCardState.languageAppKey;
   S.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal' });
-  S.nativeCardState.languageAppKey = mandarim;
+  S.nativeCardState.languageAppKey = cjkKey;
   document.getElementById('admin-flashcard-note').value = '';
   const normal = document.querySelector('[data-card-type][value="normal"]'); if (normal) normal.checked = true;
   adminMountCreateEditor();

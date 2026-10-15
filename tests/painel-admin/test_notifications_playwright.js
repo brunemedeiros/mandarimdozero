@@ -25,7 +25,7 @@ const SEED = {
     const h = await abrirAdmin({ lang, scheme, aba: 'notifications', seed: SEED }); const p = h.page;
     await p.waitForSelector('[data-tnt="pagina"]');
     const cards = () => p.$$eval('[data-notif-lista] .p-variante', l => l.map(e => e.innerText.replace(/\s+/g, ' ').trim()));
-    const heads = () => p.$$eval('[data-notif-lista] .p-mes', l => l.map(e => e.childNodes[0].textContent.trim()));
+    const heads = () => p.$$eval('[data-notif-lista] .p-mes', l => l.map(e => e.innerText.trim().replace(/\s+\d+$/, '')));
     const tabela = (n) => p.evaluate(x => window.__T[x].map(r => ({ ...r })), n);
     const dlg = p.locator('dialog.p-dialogo--alerta[open]');
 

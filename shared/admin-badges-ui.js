@@ -11,8 +11,8 @@
 function tbdEsc(v){ return escapeHTML(v == null ? '' : String(v)); }
 // Ícone: emoji vira texto escapado; o ícone SVG dos badges automáticos (constante do app, nunca vem do banco) entra como é.
 // Em campos que só aceitam texto (opções de lista) o SVG não aparece.
-function tbdIconHTML(b, builtin){ const i = b && b.icon; return (builtin || []).includes(b) && /^<svg/i.test(String(i || '')) ? i : tbdEsc(i); }
-function tbdIconText(b){ return /^<svg/i.test(String(b && b.icon || '')) ? '' : String((b && b.icon) || ''); }
+function tbdIconHTML(b, builtin){ const i = b && b.icon; return (builtin || []).includes(b) && /^<(svg|img)/i.test(String(i || '')) ? i : tbdEsc(i); }
+function tbdIconText(b){ return /^<(svg|img)/i.test(String(b && b.icon || '')) ? '' : String((b && b.icon) || ''); }
 function tbdFindBadge(id, catalog, builtin){ return (catalog || []).find(b => b.id === id) || (builtin || []).find(b => b.id === id) || null; }
 
 // Concessões filtradas por badge e busca (usuário, nome, nota, nome do badge).

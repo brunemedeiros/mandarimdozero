@@ -1,6 +1,6 @@
 // Aba "Analytics" do Painel de Admin (Design System do painel) no navegador real, FR + ZH x claro/escuro + celular.
 // Banco em memória (tests/painel-admin/harness.js) com eventos de uso relativos a hoje. Cobre: indicadores do Resumo, filtros (período,
-// idioma, dispositivo, datas, comparação), as 10 sub-abas, carregamento sob demanda e cache (Retenção, Engajamento, Tecnologia),
+// idioma, dispositivo, datas, comparação), as 11 sub-abas, carregamento sob demanda e cache (Retenção, Engajamento, Tecnologia),
 // aviso quando a consulta chega ao teto, texto de evento sem executar HTML, interruptor de excluir minha atividade, acesso negado e celular.
 // Rodar: node tests/painel-admin/test_analytics_playwright.js   (SHOT_DIR=/tmp/x salva capturas)
 const path = require('path');
@@ -51,7 +51,7 @@ const ANTES = () => {
     // ---- quadro ----
     L('tela cheia: sem Ranking ao lado', await p.evaluate(() => getComputedStyle(document.querySelector('.right-cards')).display === 'none'));
     L('título, as 5 abas do Admin e Analytics ativa', (await p.innerText('[data-tan="pagina"] header')).includes('Analytics') && JSON.stringify(await p.$$eval('#view-admin-badges [data-admin-section]', l => l.map(b => b.dataset.adminSection))) === '["badges","analytics","notifications","reports","premium"]' && await p.$eval('[data-admin-section="analytics"]', b => b.classList.contains('is-active')));
-    L('10 sub-abas, Resumo aberta e só o painel dela visível', (await p.$$eval('[data-analytics-tab]', l => l.length)) === 10 && (await visiblePanel()) === 'resumo' && await p.$eval('[data-analytics-tab="resumo"]', a => a.getAttribute('aria-current') === 'page'));
+    L('11 sub-abas, Resumo aberta e só o painel dela visível', (await p.$$eval('[data-analytics-tab]', l => l.length)) === 11 && (await visiblePanel()) === 'resumo' && await p.$eval('[data-analytics-tab="resumo"]', a => a.getAttribute('aria-current') === 'page'));
     L('filtros: Últimos 30 dias, todos os idiomas e dispositivos; comparação desligada', (await p.inputValue('#analytics-period-select')) === 'last30' && (await p.inputValue('#analytics-language-select')) === 'all' && (await p.inputValue('#analytics-device-select')) === 'all' && !(await p.isChecked('#analytics-compare-switch')));
     L('linha do período mostra de e até', (await p.textContent('[data-analytics-periodo]')).includes(' – '));
 

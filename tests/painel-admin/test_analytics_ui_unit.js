@@ -43,7 +43,7 @@ check('interruptor de excluir minha atividade', /id="analytics-exclude-own-switc
 
 // ---- sub-abas ----
 const nav = run('tanSubnavHTML("engajamento")');
-check('sub-abas: 10 abas, só a atual marcada', (nav.match(/data-analytics-tab=/g) || []).length === 10 && (nav.match(/aria-current="page"/g) || []).length === 1 && /data-analytics-tab="engajamento" aria-selected="true" aria-current="page"/.test(nav));
+check('sub-abas: 11 abas, só a atual marcada', (nav.match(/data-analytics-tab=/g) || []).length === 11 && (nav.match(/aria-current="page"/g) || []).length === 1 && /data-analytics-tab="engajamento" aria-selected="true" aria-current="page"/.test(nav));
 
 // ---- seções ----
 const stats = { activeStudents: 5, newStudents: 2, sessions: 7, exercisesStarted: 4, exercisesCompleted: 9, overallCompletionRate: 75, estimatedStudyMinutes: 125, newActiveCount: 1, returningActiveCount: 4,
@@ -83,7 +83,7 @@ check('retenção vazia avisa', run('tanRetencaoHTML([])').includes('p-nota'));
 
 // ---- página ----
 const pg = run('tanPageHTML(s)', { s: { controls: st, excludeOwn: false, tab: 'resumo', stats, prevStats: null, truncated: true, limit: 5000, emptyEvents: false } });
-check('página: tudo sob .painel, filtros, aviso de corte, 10 sub-abas e 10 painéis (3 vazios para carregar depois)', pg.startsWith('<div class="painel">') && pg.includes('data-analytics-filtros') && pg.includes('data-analytics-cortado') && (pg.match(/data-analytics-tab=/g) || []).length === 10 && (pg.match(/data-analytics-panel=/g) || []).length === 10 && /data-analytics-panel="retencao"><\/div>/.test(pg));
+check('página: tudo sob .painel, filtros, aviso de corte, 11 sub-abas e 11 painéis (4 vazios para carregar depois)', pg.startsWith('<div class="painel">') && pg.includes('data-analytics-filtros') && pg.includes('data-analytics-cortado') && (pg.match(/data-analytics-tab=/g) || []).length === 11 && (pg.match(/data-analytics-panel=/g) || []).length === 11 && /data-analytics-panel="retencao"><\/div>/.test(pg));
 check('página: sem corte e com eventos, sem avisos', !run('tanPageHTML(s)', { s: { controls: st, excludeOwn: true, tab: 'resumo', stats, prevStats: null, truncated: false, limit: 5000, emptyEvents: false } }).includes('data-analytics-cortado'));
 check('página: sem eventos mostra o aviso de período vazio', run('tanPageHTML(s)', { s: { controls: st, excludeOwn: true, tab: 'resumo', stats, prevStats: null, truncated: false, limit: 5000, emptyEvents: true } }).includes('p-alerta--info'));
 
