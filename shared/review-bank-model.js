@@ -69,6 +69,15 @@ function rbReadyForAuto(item, student, settings){
   return { ok: true, reason: null };
 }
 
+// Item que deve virar cartão agora (usado pela tela "Gerar cartões" e pela rotina da madrugada): pendente que passa
+// na geração automática, ou aprovado sem cartão ainda (aluno vinculado, não sensível, campos completos, não mandarim).
+function rbReadyToDeliver(item, student, settings){
+  if (!item || !student) return false;
+  if (item.status === 'pendente') return rbReadyForAuto(item, student, settings).ok;
+  return item.status === 'aprovado' && !item.teacher_flashcard_id && !item.sensitive && !!student.linked_student_id
+    && !rbItemIssues(item).length && student.language_app_key !== 'mandarim';
+}
+
 // Primeira forma de `gap_word` (aceita "a / b") que aparece na frase; devolve a frase com {{c1::...}} ou null.
 function rbMakeCloze(sentence, gapWord){
   const s = rbStr(sentence), alts = rbStr(gapWord).split('/').map(x => x.trim()).filter(Boolean);

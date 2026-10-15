@@ -181,7 +181,7 @@ function rbLinkLineHTML(s){
 
 function rbReadyItems(s){
   const items = RB.itemsBy[s.id] || [];
-  return items.filter(i => (i.status === 'pendente' && rbReadyForAuto(i, s, RB.settings).ok) || (i.status === 'aprovado' && !i.teacher_flashcard_id && !i.sensitive && s.linked_student_id && !rbItemIssues(i).length && s.language_app_key !== 'mandarim'));
+  return items.filter(i => rbReadyToDeliver(i, s, RB.settings));
 }
 
 function rbStudentPanelHTML(s){
@@ -328,6 +328,7 @@ function rbStudentFormHTML(){
     <label>${rbH(rbt('sfLang'))}<select data-f="language_app_key" ${edit && (RB.itemsBy[f.id] || []).length ? 'disabled' : ''}>${['frances', 'portugues', 'mandarim'].map(k => `<option value="${k}"${f.language_app_key === k ? ' selected' : ''}>${rbH(rbLangLabel(k))}</option>`).join('')}</select></label>
     <label>${rbH(rbt('sfRef'))}<select data-f="reference_language">${['pt', 'en', 'fr'].map(k => `<option value="${k}"${f.reference_language === k ? ' selected' : ''}>${rbH(rbt('ref.' + k))}</option>`).join('')}</select></label>
     ${edit ? `<label>${rbH(rbt('sfStatus'))}<select data-f="status"><option value="ativo"${f.status === 'ativo' ? ' selected' : ''}>${rbH(rbt('active'))}</option><option value="arquivado"${f.status === 'arquivado' ? ' selected' : ''}>${rbH(rbt('archived'))}</option></select></label>` : ''}
+    <label class="rb-wide rb-check"><input type="checkbox" data-f="agent_managed"${f.agent_managed ? ' checked' : ''}> <span><b>${rbH(rbt('sfAgent'))}</b><br><span class="rb-meta">${rbH(rbt('sfAgentHint'))}</span></span></label>
     <div class="rb-wide"><span class="rb-meta" style="font-weight:800;">${rbH(rbt('sfDates'))}</span>
       <div class="rb-datechips" id="rb-datechips">${rbDateChipsHTML(f.lesson_dates)}</div>
       <div style="display:flex;gap:8px;align-items:center;margin-top:6px;"><input type="date" id="rb-date-add" aria-label="${rbH(rbt('sfDateAdd'))}"><button class="rb-btn" data-rb="date-add" type="button">${rbH(rbt('sfDateAdd'))}</button></div></div>
@@ -421,7 +422,7 @@ async function rbSaveStudent(box){
   const f = rbReadForm(box), msg = document.getElementById('rb-form-msg'), cur = RB.studentForm;
   const name = (f.name || '').trim();
   if (!name){ if (msg) msg.textContent = rbt('sfNeedName'); return; }
-  const cols = { name, reference_language: f.reference_language, lesson_dates: cur.lesson_dates || [], updated_at: new Date().toISOString() };
+  const cols = { name, reference_language: f.reference_language, agent_managed: !!f.agent_managed, lesson_dates: cur.lesson_dates || [], updated_at: new Date().toISOString() };
   let r;
   if (cur.id){ cols.status = f.status || 'ativo'; if (!box.querySelector('[data-f=language_app_key]').disabled) cols.language_app_key = f.language_app_key; r = await supabaseClient.from('review_bank_students').update(cols).eq('id', cur.id).select().maybeSingle(); }
   else r = await supabaseClient.from('review_bank_students').insert(Object.assign({ teacher_id: CURRENT_USER.id, language_app_key: f.language_app_key }, cols)).select().maybeSingle();
@@ -584,8 +585,8 @@ function rbWire(wrap){
       else if (a === 'generate-ready'){ b.disabled = true; await rbGenerateReady(id); }
       else if (a === 'link'){ const pick = document.getElementById('rb-link-pick'); if (!pick) return; const { error } = await supabaseClient.rpc('link_review_bank_student', { p_bank_student_id: id, p_student_id: pick.value }); if (error) { rbToastErr(error); return; } const s = rbStudentById(id); s.linked_student_id = pick.value; await rbReloadCur(); rbRender(); showToast(rbt('linkedDone')); }
       else if (a === 'unlink'){ const { error } = await supabaseClient.rpc('unlink_review_bank_student', { p_bank_student_id: id }); if (error) { rbToastErr(error); return; } rbStudentById(id).linked_student_id = null; rbRender(); showToast(rbt('unlinkedDone')); }
-      else if (a === 'student-new'){ RB.studentForm = { id: null, name: '', language_app_key: 'portugues', reference_language: 'en', lesson_dates: [] }; rbRender(); }
-      else if (a === 'student-edit'){ const s = rbStudentById(id); RB.studentForm = { id: s.id, name: s.name, language_app_key: s.language_app_key, reference_language: s.reference_language, status: s.status, lesson_dates: (s.lesson_dates || []).slice() }; rbRender(); }
+      else if (a === 'student-new'){ RB.studentForm = { id: null, name: '', language_app_key: 'portugues', reference_language: 'en', agent_managed: false, lesson_dates: [] }; rbRender(); }
+      else if (a === 'student-edit'){ const s = rbStudentById(id); RB.studentForm = { id: s.id, name: s.name, language_app_key: s.language_app_key, reference_language: s.reference_language, status: s.status, agent_managed: !!s.agent_managed, lesson_dates: (s.lesson_dates || []).slice() }; rbRender(); }
       else if (a === 'student-cancel'){ RB.studentForm = null; rbRender(); }
       else if (a === 'student-save'){ b.disabled = true; await rbSaveStudent(b.closest('[data-form=student]')); }
       else if (a === 'date-add'){ const inp = document.getElementById('rb-date-add'); if (inp && inp.value && !RB.studentForm.lesson_dates.includes(inp.value)){ RB.studentForm.lesson_dates.push(inp.value); document.getElementById('rb-datechips').innerHTML = rbDateChipsHTML(RB.studentForm.lesson_dates); inp.value = ''; } }

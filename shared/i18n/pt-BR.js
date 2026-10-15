@@ -2652,6 +2652,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'rb.sfName': 'Nome',
   'rb.sfNeedName': 'Escreva o nome do aluno.',
   'rb.sfNoDates': 'Nenhuma data ainda.',
+  'rb.sfAgent': 'Atualizar automaticamente toda madrugada',
+  'rb.sfAgentHint': 'Marque só quando este aluno já usa o site (conta vinculada). A rotina da madrugada passa a trazer itens novos do caderno e a gerar os cartões. Enquanto estiver desmarcado, o dono dos dados é o Banco antigo (artifact).',
   'rb.sfRef': 'Língua de referência do aluno',
   'rb.sfStatus': 'Situação',
   'rb.showAnswer': 'Mostrar resposta',
