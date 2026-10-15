@@ -274,3 +274,19 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - `shared/supabase_migrations/092_podium_weeks.sql`: função `my_podium_weeks()`, sem tabela nova.
 - Staging: aplicada em 2026-10-14 (ferramenta). Produção: 2026-10-14 a pedido da autora (versão `20261014200735 092_podium_weeks`;
   conferido: anon sem EXECUTE, nenhuma linha alterada).
+
+## 094 -- Registro de aula: Presença, Competências e aula de turma (2026-10-14)
+
+- `shared/supabase_migrations/094_class_logs_attendance_skills.sql`: tabela `class_attendance_labels` (rótulos da professora,
+  cor numa lista fixa, `counts_as`), RPC `ensure_class_attendance_labels()` (cria Presente/verde e Faltou/vermelho na 1ª vez),
+  colunas `attendance_label_id`, `skills`, `classroom_id` em `teacher_class_logs` (`student_id` passa a aceitar nulo: aula de
+  turma), policy de escrita refeita (`alter policy`), `get_my_class_log_entries(text)` para o aluno (a antiga
+  `get_my_class_logs` continua). Número 094 para não colidir com 093 de outra conversa.
+- `student_id drop not null` passou pela ferramenta MCP sem travar (o travamento é com DELETE/DROP TABLE/FUNCTION).
+- Teste local: `tests/aulas-presenca/run.sh` 27/27.
+- Staging: aplicada em 2026-10-14 (ferramenta, `094_class_logs_attendance_skills`); conferido: coluna nula, 3 colunas novas,
+  3 funções, RLS ligada, 2 restrições. Rosa e marrom entraram depois (cores do Notion): no Staging por `094b_attendance_colors_pink_brown`
+  (troca da restrição de cor); o arquivo 094 já sai com as 9 cores.
+- Produção: aplicada em 2026-10-14 a pedido da autora (versão `20261014215716 094_class_logs_attendance_skills`, arquivo com as
+  9 cores). Antes: 0 aulas, 2 turmas, tabela de rótulos inexistente. Depois: student_id aceita nulo, 3 colunas, 3 funções com
+  security definer e search_path, anon sem EXECUTE, RLS ligada, 0 aulas e 2 turmas intactas.
