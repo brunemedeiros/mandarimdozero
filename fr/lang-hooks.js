@@ -24,5 +24,8 @@ const LANG_HOOKS = {
   promptClass: 'flashcard-french',
   promptPinyinHTML: () => '',
   canSpeak: (s) => canSpeakFrench(s),
+  revisaoPool: () => REVISAO_CONJ_CHALLENGES,
+  revisaoFallbackId: 'conj1',
+  dailyExtra: () => ({ stars: 0, grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0, conjugationTenses: [] }),
 // --- /E4 hooks ---
 };
