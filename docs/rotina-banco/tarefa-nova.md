@@ -30,7 +30,7 @@ Use SOMENTE a ferramenta execute_sql do conector Supabase, no projeto PROJETO, e
 Nunca rode update, delete, drop, insert direto, apply_migration nem outra consulta. Se algo falhar, não improvise outro caminho: relate a mensagem exata no final.
 
 ## Passo 1: estado
-Rode a consulta 1. Ela devolve `today`, `manual_markdown` (o Manual de anotações da professora, a referência principal de como ela anota) e `students` (id, name, language_app_key (`frances`, `portugues` ou `mandarim`), reference_language, notebook_id, agenda_names, lesson_dates, last_entry_read, linked_email, item_count). Salve o resultado em arquivo e leia com python.
+Rode a consulta 1. Ela devolve `today`, `manual_markdown` (o Manual de anotações da professora, a referência principal de como ela anota) e `students` (id, name, language_app_key (`frances`, `portugues` ou `mandarim`), reference_language, notebook_id, agenda_names, lesson_dates, last_entry_read, linked_email, item_count) e `other_students` (alunos que JÁ existem no Banco mas ainda são do artifact antigo). Salve o resultado em arquivo e leia com python.
 Se não houver nenhum aluno, vá para o Passo 4 só com cadastros novos (se houver) e termine.
 
 ## Passo 2: agenda
@@ -38,7 +38,7 @@ Liste os eventos de hoje até hoje + 6 dias (00:00 de hoje até 23:59 do sétimo
 agenda "Trabalho" com todos os eventos, e a agenda principal só com eventos que começam com "Agendamento" ou têm convidado aluno). Ignore eventos cancelados.
 Um evento pertence a um aluno quando (1) algum convidado tem o `linked_email` dele ou (2) o título contém, sem diferenciar maiúsculas, um dos `agenda_names` dele como palavra inteira.
 Para CADA aluno, junte as datas AAAA-MM-DD das aulas encontradas (sem repetir, em ordem): será `lesson_dates` (lista vazia se não houver aula).
-Alunos com aula HOJE são os do Passo 3. Eventos de hoje sem aluno: procure no Drive um Google Doc (nas pastas dos alunos, fora de "Inativos" e "Template") com o primeiro nome da pessoa; se achar exatamente um caderno,
+Alunos com aula HOJE são os do Passo 3. Evento de alguém de `other_students` (critérios iguais ou mesmo `notebook_id`) é IGNORADO por completo (ainda é do artifact). Só cadastre quando o evento não pertence a ninguém de `students` nem de `other_students`. Eventos de hoje sem aluno nenhum: procure no Drive um Google Doc (nas pastas dos alunos, fora de "Inativos" e "Template") com o primeiro nome da pessoa; se achar exatamente um caderno,
 cadastre o aluno no Passo 4 (`register_students`): name = nome como aparece no evento, language = `frances` ou `portugues` pela pasta, reference = `pt` (francês) ou a língua das explicações do caderno (português, normalmente `en`),
 agenda_names = [primeiro nome, nome do evento], notebook_id = id do Doc. Sem caderno, só anote o título do evento no relatório final.
 Se o Calendar falhar, não leia cadernos; mande só o que já tiver e relate o erro.

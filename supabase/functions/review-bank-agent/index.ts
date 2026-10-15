@@ -77,7 +77,17 @@ Deno.serve(async (req: Request) => {
       ok(await sb.rpc('agent_approve_review_bank_item', { p_teacher: t, p_item_id: itemId, p_front: c.front, p_back_trans: c.back_trans, p_fields: c.fields, p_mode: c.mode, p_tags: c.tags, p_note: c.note }));
     },
     getUserEmail: async (userId: string) => { const r = await sb.auth.admin.getUserById(userId); return (r && r.data && r.data.user && r.data.user.email) || null; },
-    findStudentByName: async (t: string, name: string, lang: string) => ok(await sb.from('review_bank_students').select('id,agent_managed').eq('teacher_id', t).eq('language_app_key', lang).ilike('name', name.replace(/[\\%_]/g, '\\$&')).maybeSingle()),
+    findStudent: async (t: string, name: string, lang: string, notebook: string | null, agenda: string[]) => {
+      const base = () => sb.from('review_bank_students').select('id,agent_managed,status').eq('teacher_id', t);
+      if (notebook) { const r = ok(await base().eq('notebook_id', notebook).limit(1)) as any[]; if (r && r.length) return r[0]; }
+      const byName = ok(await base().eq('language_app_key', lang).ilike('name', name.replace(/[\\%_]/g, '\\$&')).limit(1)) as any[];
+      if (byName && byName.length) return byName[0];
+      for (const n of [name, ...agenda]) {
+        const r = ok(await base().eq('language_app_key', lang).contains('agenda_names', [n]).limit(1)) as any[];
+        if (r && r.length) return r[0];
+      }
+      return null;
+    },
     insertStudent: async (row: unknown) => ok(await sb.from('review_bank_students').insert(row).select('id').single()),
     insertRun: async (row: unknown) => { ok(await sb.from('review_bank_agent_runs').insert(row)); },
     claimInbox: async (t: string, id: string | null) => ok(await sb.rpc('agent_inbox_claim', { p_teacher: t, p_id: id })) || [],

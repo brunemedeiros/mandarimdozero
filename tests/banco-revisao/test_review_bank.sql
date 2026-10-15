@@ -218,8 +218,11 @@ insert into r select '097: state devolve so aluno gerenciado, com e-mail da cont
   and not ((review_bank_agent_state() -> 'students' -> 0) ? 'items')
   and (review_bank_agent_items('aaaaaaaa-0000-0000-0000-000000000002') -> 0 ? 'has_card')
   and (review_bank_agent_state() ->> 'today') ~ '^\d{4}-\d{2}-\d{2}$', '';
-insert into r select '097: state nao vaza segredo nem dados de aluno nao gerenciado',
-  position('token-secreto' in review_bank_agent_state()::text) = 0 and position('Sem Conta' in review_bank_agent_state()::text) = 0, '';
+insert into r select '097: state nao vaza segredo; aluno nao gerenciado aparece so em other_students (nome, caderno, agenda), sem itens nem e-mail',
+  position('token-secreto' in review_bank_agent_state()::text) = 0
+  and not exists (select 1 from jsonb_array_elements(review_bank_agent_state() -> 'students') a where a ->> 'name' = 'Sem Conta')
+  and exists (select 1 from jsonb_array_elements(review_bank_agent_state() -> 'other_students') a where a ->> 'name' = 'Sem Conta')
+  and not exists (select 1 from jsonb_array_elements(review_bank_agent_state() -> 'other_students') a where a ? 'items' or a ? 'linked_email' or a ? 'id'), '';
 create temp table sub(id uuid); grant all on sub to service_role;
 insert into sub select agent_inbox_submit('{"students":[{"student_id":"aaaaaaaa-0000-0000-0000-000000000002","items":[{"type":"vocabulario","q":"a","a":"b"}]}]}'::jsonb);
 insert into r select '097: entrega valida cai na caixa como pendente, da professora do segredo',

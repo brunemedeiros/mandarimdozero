@@ -63,12 +63,15 @@ export function createAgent({ engine, db, teacherId, now }) {
     const language = body.language;
     if (!name || !['frances', 'portugues', 'mandarim'].includes(language)) return bad(400, 'invalid_student');
     const ref = ['pt', 'en', 'fr'].includes(body.reference) ? body.reference : 'pt';
-    const existing = await db.findStudentByName(teacherId, name, language);
-    if (existing) return { status: 200, json: { ok: true, created: false, id: existing.id, agent_managed: !!existing.agent_managed } };
+    // nunca duplicar: o aluno já existe se bate o caderno (id do Google Doc), o nome no mesmo idioma ou algum nome da agenda (gerenciado ou não)
+    const notebook = clean(body.notebook_id, 200) || null;
+    const agenda = (Array.isArray(body.agenda_names) ? body.agenda_names : []).map((x) => clean(x, 120)).filter(Boolean).slice(0, 10);
+    const existing = await db.findStudent(teacherId, name, language, notebook, agenda);
+    if (existing) return { status: 200, json: { ok: true, created: false, id: existing.id, agent_managed: !!existing.agent_managed, existing: true } };
     const row = {
       teacher_id: teacherId, name, language_app_key: language, reference_language: ref, status: 'ativo', agent_managed: true,
-      notebook_id: clean(body.notebook_id, 200) || null,
-      agenda_names: (Array.isArray(body.agenda_names) ? body.agenda_names : []).map((x) => clean(x, 120)).filter(Boolean).slice(0, 10),
+      notebook_id: notebook,
+      agenda_names: agenda,
       lesson_dates: [], last_entry_read: isDate(body.last_entry_read) ? body.last_entry_read : null, started_on: isDate(body.started_on) ? body.started_on : today(),
       import_key: 'agent:' + norm(name).replace(/[^a-z0-9]+/g, '-') + ':' + language,
     };

@@ -28,7 +28,7 @@ const DIR = path.join(__dirname, '../../supabase/functions/review-bank-agent');
       insertRecap: async (row) => { d.recaps.push(row); },
       approveCard: async (t, itemId, c) => { const it = d.items.find(i => i.id === itemId); if (it.teacher_flashcard_id) return; it.teacher_flashcard_id = 900 + d.cards.length; it.status = 'aprovado'; d.cards.push({ itemId, ...c }); },
       getUserEmail: async (u) => u + '@aluno.test',
-      findStudentByName: async (t, name, lang) => d.students.find(s => s.teacher_id === t && s.language_app_key === lang && s.name.toLowerCase() === name.toLowerCase()) || null,
+      findStudent: async (t, name, lang, notebook, agenda) => d.students.find(s => s.teacher_id === t && ((notebook && s.notebook_id === notebook) || (s.language_app_key === lang && (s.name.toLowerCase() === name.toLowerCase() || [name, ...agenda].some(n => (s.agenda_names || []).includes(n)))))) || null,
       insertStudent: async (row) => { const s = Object.assign({ id: id('s') }, row); d.students.push(s); return s; },
       insertRun: async (row) => { d.runs.push(row); },
       claimInbox: async (t, iid) => { const rows = d.inbox.filter(r => r.status === 'pendente' && (!iid || r.id === iid)).slice(0, 5); rows.forEach(r => { r.status = 'processando'; r.attempts = (r.attempts || 0) + 1; }); return rows; },
@@ -146,6 +146,22 @@ const DIR = path.join(__dirname, '../../supabase/functions/review-bank-agent');
   ({ d, agent } = mk());
   r = await call(agent, { action: 'nightly' });
   check('noturna: sem aula hoje não cria recap (mas entrega cartões pendentes)', d.recaps.length === 0);
+
+  // --- aluno que já existe (do artifact) nunca é cadastrado de novo
+  ({ d, agent } = mk());
+  const antes = d.students.length;
+  d.students.find(x => x.id === 'sC').notebook_id = 'nbC';
+  r = await call(agent, { action: 'register_student', name: 'Caio Silva da Costa', language: 'frances', notebook_id: 'nbC', agenda_names: ['Caio'] });
+  check('cadastro: mesmo caderno de aluno que já existe (do artifact) NÃO duplica, mesmo com nome diferente', r.json.created === false && r.json.id === 'sC' && r.json.agent_managed === false && r.json.existing === true, JSON.stringify(r.json));
+  d.students.find(x => x.id === 'sC').agenda_names = ['Caio'];
+  r = await call(agent, { action: 'register_student', name: 'Caio Fulano', language: 'frances', agenda_names: ['Caio'] });
+  check('cadastro: nome da agenda que já existe no mesmo idioma NÃO duplica', r.json.created === false && r.json.id === 'sC', JSON.stringify(r.json));
+  r = await call(agent, { action: 'register_student', name: 'Caio Fulano', language: 'portugues', agenda_names: ['Caio'] });
+  check('cadastro: outro idioma é outro aluno (cria)', r.json.created === true);
+  check('cadastro duplicado não criou linha nova para o aluno existente', d.students.filter(x => x.notebook_id === 'nbC').length === 1);
+  d.inbox.push({ id: '44444444-4444-4444-4444-444444444444', status: 'pendente', payload: { register_students: [{ name: 'Caio Silva da Costa', language: 'frances', notebook_id: 'nbC' }], students: [{ student_key: 'Caio Silva da Costa|frances', items: [{ type: 'vocabulario', q: 'x', a: 'y' }] }] } });
+  r = await call(agent, { action: 'process_inbox' });
+  check('caixa: item para aluno do artifact (não gerenciado) é rejeitado, sem criar aluno nem item', d.inbox[0].status === 'feito' && d.inbox[0].result.summary.students.length === 0 && !d.items.some(i => i.question === 'x' && i.answer === 'y'), JSON.stringify(d.inbox[0].result));
   const real = createAgent({ engine, db: { listManagedStudents: async () => [], getSettings: async () => null, getUserEmail: async () => null }, teacherId: T });
   const sp = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
   check('hoje padrão é a data de São Paulo (não UTC)', (await real.handle({ action: 'state' })).json.today === sp, sp);

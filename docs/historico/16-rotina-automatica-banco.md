@@ -90,6 +90,11 @@ Produção (2026-10-15, autorizado pela autora): 097, 098 e 099 aplicadas (vers�
 Tarefa nova criada em claude.ai sem agendamento: `trig_015AkoX1hyDJuWs1MimQDTbE` ("Banco de Revisão: rotina da madrugada (site)"). A ferramenta não consegue gravar conectores nesta organização, então ela nasceu SEM conectores:
 a autora precisa abri-la e ligar só Google Drive, Google Calendar e Supabase (Configurações avançadas > Conectores), escolher o modelo e rodar com "Executar agora" antes de agendar (01:50, America/Sao_Paulo).
 
+### 2026-10-15: primeira execução em produção achou duplicatas
+A primeira rodada da tarefa (22:12 de 14/10, "Executar agora") cadastrou "Luana Baionne" e "Makena Bento de Azevedo" como alunos NOVOS, embora "Luana" e "Makena" já existissem (importados do artifact, não gerenciados). Causa: o estado só mostrava alunos gerenciados e
+`register_student` só comparava o nome exato. Contenção: as duas linhas (sem itens) foram arquivadas e desmarcadas como gerenciadas; apagar de vez exige o SQL Editor (`delete from review_bank_students where import_key like 'agent:%' and name in ('Luana Baionne','Makena Bento de Azevedo')`).
+Correção: migration `100_review_bank_agent_other_students` (o estado devolve `other_students`, só identificação), `register_student` recusa duplicata por caderno, nome ou agenda, e o texto da tarefa manda ignorar `other_students`. O ping de produção deu 200 (token do Vault = segredo da função).
+
 ## Pendências
 - Teste de chamada de escrita a partir do ambiente da tarefa agendada: versão 1 bloqueada pelo classificador (ver acima); rodar a versão 2.
 - Escrever o texto da tarefa nova (passos: `state` -> agenda -> caderno -> `ingest`); só ligar depois de testada.
