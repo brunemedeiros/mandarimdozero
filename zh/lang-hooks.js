@@ -19,5 +19,11 @@ const LANG_HOOKS = {
   pregenRate: () => 0,
   ttsLang: 'zh-CN',
   ttsRate: 0.85,
+  conceptExampleHTML: (ex) => `<div class="hanzi">${ex.c} ${audioBtnHTML(ex.c)}</div>
+          <div class="pinyin">${ex.p}</div>`,
+  tfPinyinHTML: (ex) => `<div class="tf-pinyin">${ex.pinyin || ''}</div>`,
+  promptClass: 'flashcard-hanzi',
+  promptPinyinHTML: (view) => `<div class="flashcard-pinyin pinyin">${escapeHTML(view.prompt.pinyinText || '')}</div>`,
+  canSpeak: (s) => canSpeakChinese(s),
 // --- /E4 hooks ---
 };
