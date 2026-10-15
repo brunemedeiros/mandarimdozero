@@ -432,3 +432,18 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   escolhe, digitar + Enter cria, "⋯" renomeia, troca a cor (as 9 do Notion, com rosa e marrom) e arquiva. "Conta como"
   (presença/falta/outro) ficou só no banco (Presente e Faltou já vêm marcados), sem tela. Painel-professora 409/409.
 - 094 na produção em 2026-10-14 (autorizada). Aba Turma no Ranking: só aparece para quem está em alguma turma.
+
+### Importação do Notion "Calendário de Aulas" (2026-10-15, produção, autorizada)
+
+- Lidas 395 linhas dos 11 alunos com conta (sem "Pitch de vendas"); 2 sem data ficaram de fora. Gravadas 393 aulas em
+  `teacher_class_logs` da professora (Sandra e Eduardo = 25 aulas da turma, 1 linha cada). Marca do lote para desfazer:
+  `updated_at = '2026-10-15 03:00:00+00'` (enquanto não forem editadas). Corpo das páginas do Notion não foi importado.
+- Presença: "Aula dada" = Presente, "Faltou/Cancelada" = Faltou; criados Cancelada com antecedência (laranja), Cancelada pela
+  professora (rosa), Remarcada (amarelo), Aula de remarcação (cinza). Competências mapeadas 1 a 1. Pontualidade e Uso da L1 não.
+- Critério do Tópico: só ficou visível ao aluno o que era claramente conteúdo de aula (páginas, lições, gramática, títulos e links
+  de material, temas de conversa neutros). Texto com vida pessoal, saúde, comentários sobre o aluno, autocrítica da professora ou
+  motivo de falta foi para as Anotações (privadas). 62 aulas ficaram marcadas `[Notion] ` para a professora revisar no bloco
+  "Revisar do Notion" (Professora > Aulas): editar e mostrar ao aluno, ou deixar só para ela. Motivos de falta ficaram só nas
+  Anotações, sem revisão.
+- Conferido como aluno (Eduardo): vê as 25 aulas da turma com Presença, nada das Anotações.
+- Nenhum dado de aluno foi para o repositório.

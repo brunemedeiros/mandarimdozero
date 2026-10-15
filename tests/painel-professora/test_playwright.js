@@ -218,9 +218,30 @@ const PANEL_STUB = (who) => {
       await page.waitForFunction(() => !document.querySelector('.tinv-pending-row'));
       L('convite: cancelar tira da lista', await ev(() => window.__DB.teacher_students.some(r => r.student_id === 'S2' && r.status === 'removed')));
       // ---- Aulas (094): Presença, Competências, turma, rótulos ----
-      await ev(() => { window.__DB.teacher_students.push({ id: 950, teacher_id: 'P', student_id: 'S', language_app_key: window.__appKey, status: 'active', created_at: '2026-10-01' }); window.__DB.teacher_class_logs = []; });
+      await ev(() => { window.__DB.teacher_students.push({ id: 950, teacher_id: 'P', student_id: 'S', language_app_key: window.__appKey, status: 'active', created_at: '2026-10-01' });
+        window.__DB.teacher_class_logs = [
+          { id: 9001, teacher_id: 'P', student_id: 'S', classroom_id: null, language_app_key: window.__appKey, class_date: '2026-09-25', topic: null, homework: null, notes: '[Notion] Conversa sobre eleições e voltar com o ex\n[Notion] Para a próxima aula: ler o texto que ela esqueceu', attendance_label_id: 61, skills: [] },
+          { id: 9002, teacher_id: 'P', student_id: 'S', classroom_id: null, language_app_key: window.__appKey, class_date: '2026-09-26', topic: null, homework: null, notes: '[Notion] fofoca', attendance_label_id: 61, skills: [] }]; });
       await ev(() => switchTeacherPanelSection('classlogs'));
       await page.waitForSelector('#admin-create-class-log-form [data-class-log-extras="new"]');
+      // Revisar do Notion: editar e mostrar ao aluno / deixar só para mim
+      await page.waitForSelector('#admin-notion-review [data-notion-review="9001"]');
+      L('Notion: bloco de revisão com as 2 aulas marcadas', await ev(() => document.querySelectorAll('#admin-notion-review [data-notion-review]').length === 2 && document.querySelector('#admin-notion-review summary').textContent.includes('2')));
+      L('Notion: tópico e "para a próxima aula" em caixas separadas', await ev(() => [...document.querySelectorAll('[data-notion-review="9001"] [data-notion-field]')].map(x => x.dataset.notionField + ':' + x.value).join('|') === 'topic:Conversa sobre eleições e voltar com o ex|homework:ler o texto que ela esqueceu'));
+      await ev(() => { document.querySelector('#admin-notion-review details').open = true; });
+      await page.fill('[data-notion-review="9001"] [data-notion-field="topic"]', 'Conversa sobre eleições');
+      await page.fill('[data-notion-review="9001"] [data-notion-field="homework"]', 'Ler o texto');
+      await shot('aulas-notion-revisao');
+      await page.click('[data-notion-show="9001"]');
+      await page.waitForFunction(() => window.__DB.teacher_class_logs.find(l => l.id === 9001).topic === 'Conversa sobre eleições');
+      L('Notion: mostrar ao aluno grava só o texto editado e tira a marca das Anotações', await ev(() => { const l = window.__DB.teacher_class_logs.find(x => x.id === 9001); return l.homework === 'Ler o texto' && l.notes === 'Conversa sobre eleições e voltar com o ex\nPara a próxima aula: ler o texto que ela esqueceu'; }), await ev(() => window.__DB.teacher_class_logs.find(x => x.id === 9001)));
+      await page.waitForFunction(() => document.querySelectorAll('#admin-notion-review [data-notion-review]').length === 1);
+      await page.click('[data-notion-keep="9002"]');
+      await page.waitForFunction(() => window.__DB.teacher_class_logs.find(l => l.id === 9002).notes === 'fofoca');
+      L('Notion: deixar só para mim não mostra nada ao aluno', await ev(() => { const l = window.__DB.teacher_class_logs.find(x => x.id === 9002); return l.topic === null && l.homework === null; }));
+      await page.waitForFunction(() => !document.querySelector('#admin-notion-review details'));
+      L('Notion: bloco some quando acaba a revisão', true);
+      await ev(() => { window.__DB.teacher_class_logs = []; });
       L('aulas: Presença com Sem registro, Presente e Faltou', await ev(() => [...document.querySelectorAll('[data-class-log-extras="new"] .att-choice')].map(l => l.textContent.trim()).join('|') === `${t('panel.classLog.attendanceNone')}|Presente|Faltou`));
       L('aulas: 7 Competências', await ev(() => document.querySelectorAll('[data-class-log-extras="new"] input[data-skill]').length === 7));
       L('aulas: turma aparece para escolher', await ev(() => !!document.querySelector('[data-classlog-classroom-checkbox][value="501"]')));

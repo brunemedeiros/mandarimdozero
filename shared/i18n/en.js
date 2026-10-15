@@ -2372,6 +2372,23 @@ window.I18N_CATALOG['en'] = {
   'friends.error.daily_congrats_limit': 'You already sent 20 cheers today. More tomorrow!', // ALTA
   'friends.error.target_not_found': 'This milestone is no longer available.', // ALTA
   'friends.pref.notify_congrats': 'Notify me when a friend congratulates or thanks me', // ALTA
+  'friends.qr.btn': 'Show QR code', // ALTA
+  'friends.qr.title': 'Your invite QR code', // ALTA
+  'friends.qr.text': 'Show it to someone next to you: they point their phone camera at it, open the site and can add you right away.', // ALTA
+  'friends.qr.alt': 'QR code of your invite link', // ALTA
+  'friends.qr.close': 'Close', // ALTA
+  'friends.qr.noLink': 'Couldn\'t create your link right now.', // ALTA
+  'friends.qr.error': 'Couldn\'t show the QR code right now.', // ALTA
+  'friends.suggest.title': 'Friend suggestions', // ALTA
+  'friends.suggest.add': 'Add', // ALTA
+  'friends.suggest.dismissAria': 'Don\'t suggest {name}', // ALTA
+  'friends.suggest.reason.invite': 'Joined from your invite', // ALTA
+  'friends.suggest.reason.invitedBy': 'Invited you to the site', // ALTA
+  'friends.suggest.reason.classmate': 'Studies with the same teacher', // ALTA
+  'friends.suggest.reason.partner': 'Also studies {lang}', // ALTA
+  'friends.suggest.reason.ranking': 'Close to you in this week\'s ranking', // ALTA
+  'friends.pref.suggest_me': 'Show me in other people\'s friend suggestions', // ALTA
+  'friends.suggest.reason.mutual': { one: '{n} mutual friend', other: '{n} mutual friends' }, // ALTA
   'profile.tabFriends': 'Friends', // ALTA
   'panel.admin.sub': 'Badges, metrics, notifications, reports and plans.', // ALTA
   'panel.tab.badges': 'Badges', // ALTA
@@ -2727,6 +2744,14 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.labels.createPlaceholder': 'Type a name and press Enter to create a label', // ALTA
   'panel.classLog.labels.edit': 'Edit the {name} label', // ALTA
   'panel.classLog.labels.done': 'Done', // ALTA
+  'panel.classLog.review.title': { one: 'Review from Notion ({n} lesson)', other: 'Review from Notion ({n} lessons)' }, // ALTA
+  'panel.classLog.review.hint': 'These texts came from Notion and may include notes meant only for you, so the student can\'t see them yet. Edit anything you want and choose: show to the student or keep for yourself. The original text stays in your Notes.', // ALTA
+  'panel.classLog.review.toTopic': 'Topic (the student sees it)', // ALTA
+  'panel.classLog.review.toHomework': 'For next lesson (the student sees it)', // ALTA
+  'panel.classLog.review.show': 'Show to student', // ALTA
+  'panel.classLog.review.keep': 'Keep for myself', // ALTA
+  'panel.classLog.review.shown': 'The student can see this text now.', // ALTA
+  'panel.classLog.review.kept': 'Kept only in your Notes.', // ALTA
   'panel.classLog.classroomsSelected': { one: '{n} class', other: '{n} classes' }, // ALTA
   'panel.classLog.membersCount': { one: '{n} student', other: '{n} students' }, // ALTA
   'studentPanel.menu': '🎒 Student', // ALTA
