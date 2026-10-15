@@ -222,7 +222,7 @@ const PANEL_STUB = (who) => {
       L('convite: trocar idioma troca o link', true);
       await ev(() => document.querySelector(`[data-tinv-lang="${window.__appKey}"]`).click());
       await page.waitForFunction((c) => document.getElementById('tinv-link-input')?.value.includes(c), code0);
-      await page.click('#tinv-reset-btn');
+      await page.click('#tinv-reset-btn'); await page.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();   // confirmação do painel
       await page.waitForFunction(() => document.getElementById('tinv-link-input')?.value.includes('zzz999yyy8'));
       L('convite: gerar outro link', true);
       // ---- convite: busca ----
@@ -243,7 +243,7 @@ const PANEL_STUB = (who) => {
       L('convite: pendente aparece na lista', await ev(() => document.querySelector('.tinv-pending-row').textContent.includes('@anabela')));
       L('convite: rpc com o idioma escolhido', await ev(() => window.__rpcCalls.some(c => c[0] === 'teacher_invite_student' && c[1].p_student === 'S2' && c[1].p_lang === window.__appKey)));
       await shot('professora-convite');
-      await page.click('[data-tinv-cancel]');
+      await page.click('[data-tinv-cancel]'); await page.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();   // confirmação do painel
       await page.waitForFunction(() => !document.querySelector('.tinv-pending-row'));
       L('convite: cancelar tira da lista', await ev(() => window.__DB.teacher_students.some(r => r.student_id === 'S2' && r.status === 'removed')));
       // ---- Aulas (094): Presença, Competências, turma, rótulos ----

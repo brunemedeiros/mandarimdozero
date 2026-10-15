@@ -158,3 +158,7 @@ Depois do PR aberto, a `main` recebeu trabalho de outras sessões nas mesmas tel
 - **Notificações:** bandeira do idioma pelo registro; **Badges:** ícone dos badges automáticos agora é `<img>` (Fluent); **idiomas:** `LanguageRegistry` no lugar de `frances`/`mandarim` escritos nas peças novas (teste `tests/registro`).
 - **Testes que mudaram de propósito:** painel-ds (zh passou a definir `--error-red`), fase-k0 (stub com `.range`), k10 (ficha nova), notificações (cabeçalho com ícone Fluent), vm-t (registro de idiomas).
 - **Já falhavam na `main`** (conferido num checkout da `main`): fase-identity, fase-public-deck, desafios-progresso, i18n (card_variants, content_en, playwright), conjugacao, k2c, k2f (2), k2i, trilha-tags, tts-google, fase-j e o lint de `mural.js` em `tests/registro`.
+
+### Decisão de 2026-10-15 (opção 1): Aulas ficam fora do PR 319
+
+A sessão das Aulas (calendário, horário e duração, repetir toda semana, visão do mês, link de agenda ICS) continuou mexendo na tela enquanto o PR esperava. Para o PR ficar mergeável, `admin-class-logs.js` e `teacher-class-logs.js` voltaram à versão da `main`, e a tela nova de Aulas (com Presença, Competências, turma e "Revisar do Notion", 57 + 262 testes) ficou na branch `claude/aulas-design-system`. Para trazê-la de volta: prévia do calendário e do link de agenda, aprovação da autora e integração, sem outra sessão mexendo na tela ao mesmo tempo.
