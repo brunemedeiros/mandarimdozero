@@ -541,6 +541,7 @@ const BANK_STUB = (who, appKey) => {
           { id: 'a', lang: 'pt', role: null, content: { value: 'cartão novo da aula' }, audio: null, image: null, pinyinFieldId: null }, { id: 'b', lang: target, role: null, content: { value: lang === 'fr' ? 'carte' : '卡片' }, audio: null, image: null, pinyinFieldId: null }] };
         buildEngineCardsFromRow(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' }).forEach(c => STATE.cards.push(c));
         STATE.studySettings.reviewOriginFilter = 'teacher'; // valor salvo antigo
+        CLASS_ACTIVE_TEACHER_ID = 'A'; // o aluno simulado tem vínculo ativo com a professora A (2026-10-15: só ela aparece no Aluno)
         saveState = async () => {};
         switchTab('review');
         const out = {};

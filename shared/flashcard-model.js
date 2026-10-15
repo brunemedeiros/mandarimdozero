@@ -1382,6 +1382,9 @@ function buildEngineCardsFromRow(row, opts){
       // é isto que shared/deck-engine.js::getStudyScopeForDeck() usa pra
       // filtrar STATE.cards por subtree de Deck.
       deckId: row.deck_id != null ? row.deck_id : null,
+      // Professora dona do cartão (só origin 'teacher'): a aba Aluno > Revisão só mostra os cartões da professora com
+      // vínculo ATIVO (decisão da autora, 2026-10-15). O cartão continua em STATE.cards (e salvo) para o progresso não se perder.
+      teacherId: row.teacher_id || null,
       note,
       cardInstance,
       ef, interval, reps, due, lapses, stability, difficulty, state, lastReview, fsrsReps, fsrsLapses,

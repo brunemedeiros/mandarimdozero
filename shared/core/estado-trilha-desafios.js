@@ -97,7 +97,11 @@ function wireKnowButtons(container){
 // guard de idempotência nunca bater, duplicando cartões numa 2ª chamada.
 async function mergeTeacherFlashcardsIntoState(){
   if (typeof fetchFlashcardsForCurrentStudent !== 'function') return;
-  const rows = await fetchFlashcardsForCurrentStudent(APP_KEY);
+  const [rows, activeTeacher] = await Promise.all([
+    fetchFlashcardsForCurrentStudent(APP_KEY),
+    typeof fetchMyActiveTeacherId === 'function' ? fetchMyActiveTeacherId(APP_KEY) : Promise.resolve(undefined),
+  ]);
+  CLASS_ACTIVE_TEACHER_ID = activeTeacher;
   if (!rows.length) return;
   const existingIds = new Set(STATE.cards.map(c => c.id));
   rows.forEach(row => {
