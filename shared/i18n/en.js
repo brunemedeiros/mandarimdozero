@@ -2999,4 +2999,36 @@ window.I18N_CATALOG['en'] = {
   'tinvite.err.invalid_code': 'This invite link no longer works. Ask whoever invited you for a new one.', // ALTA
   'tinvite.err.not_authenticated': 'Log in to answer the invite.', // ALTA
   'tinvite.err.generic': 'That didn\'t work right now. Try again in a moment.', // ALTA
+
+  // Ditado do francês: explicação de cada erro (família latina, fase 2, 2026-10-15). needs_review: tradução nova,
+  // ainda não revisada pela dona; confiança no comentário de cada linha. Antes estes textos apareciam em
+  // português também no site em inglês.
+  'fr.dict.youWrote': 'you wrote “{typed}”', // ALTA
+  'fr.dict.light.hyphen': '“{core}” has a hyphen ({you}).', // ALTA
+  'fr.dict.light.apostrophe': '“{core}” has an apostrophe ({you}).', // ALTA
+  'fr.dict.light.ligature': '“{core}” uses the letter “œ”, which is a single letter ({you}).', // ALTA
+  'fr.dict.light.accent': '“{core}”: check the accents ({you}).', // ALTA
+  'fr.dict.light.spelling': '“{core}”: small spelling difference ({you}).', // ALTA
+  'fr.dict.light.multiple': '“{core}”: check {list} ({you}).', // ALTA
+  'fr.dict.part.hyphen': 'the hyphen', // ALTA
+  'fr.dict.part.apostrophe': 'the apostrophe', // ALTA
+  'fr.dict.part.ligature': 'the letter “œ”', // ALTA
+  'fr.dict.part.accent': 'the accents', // ALTA
+  'fr.dict.part.and': ' and ', // ALTA
+  'fr.dict.err.homophone': '“{shown}” (you wrote “{typed}”): words that sound alike. {note}', // ALTA
+  'fr.dict.err.agreement': '“{shown}” (you wrote “{typed}”): only the ending is different (-{suffix}). If the word agrees with another one, check gender, number or the verb form against the rest of the sentence; otherwise it may just be a typo.', // MÉDIA -- "concorda" sem equivalente curto; alternativa: "If it is a word that has to agree..."
+  'fr.dict.err.other': '“{shown}”: not the expected word (you wrote “{typed}”).', // ALTA
+  'fr.dict.punctMissing': 'This punctuation mark is missing (no points lost)', // ALTA
+  'fr.dict.hom.a': '“a” is the verb avoir (il a); “à” is a preposition (à Paris).', // ALTA
+  'fr.dict.hom.et': '“et” means “and”; “est” is the verb être (il est).', // ALTA
+  'fr.dict.hom.son': '“son” means “his/her”; “sont” is the verb être (ils sont).', // ALTA
+  'fr.dict.hom.ou': '“ou” means “or”; “où” means “where”.', // ALTA
+  'fr.dict.hom.on': '“on” is a pronoun (“we”, “one”); “ont” is the verb avoir (ils ont).', // MÉDIA -- "a gente" vira "we/one"
+  'fr.dict.hom.la': '“la” is an article or a pronoun; “là” means “there”.', // ALTA
+  'fr.dict.hom.ce': '“ce” is a demonstrative (“this/that”); “se” is a reflexive pronoun (il se lève).', // ALTA
+  'fr.dict.hom.ces': '“ces” = “these/those”; “ses” = “his/her” (plural); “c\'est” = “it is/this is”; “s\'est” = pronoun + être (il s\'est levé).', // ALTA
+  'fr.dict.hom.mes': '“mes” means “my” (plural); “mais” means “but”.', // ALTA
+  'fr.dict.hom.peu': '“peu” means “little, not much”; “peux”/“peut” are forms of pouvoir (je peux, il peut).', // ALTA
+  'fr.dict.hom.leur': '“leurs” goes before a plural noun; “leur” before a singular noun or as a pronoun (je leur parle).', // ALTA
+  'fr.dict.hom.quel': 'Same pronunciation: “quel” changes with the gender and number of the noun.', // ALTA
 };

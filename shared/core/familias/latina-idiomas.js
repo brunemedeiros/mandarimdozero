@@ -1,101 +1,14 @@
 // Configuração de cada idioma da família latina para shared/core/familias/latina.js.
-// FASE 1: não é carregado por nenhuma página. Na fase 2, a parte de cada idioma vai para <idioma>/lang-hooks.js
-// (ver docs/i18n/familia-latina-modulo.md) e os textos de explicação passam para os catálogos de shared/i18n.
+// FASE 2 (docs/i18n/familia-latina-modulo.md): a configuração do FRANCÊS saiu daqui e mora em fr/lang-hooks.js
+// (LANG_HOOKS.familiaLatina), que é o que a página carrega; os textos das explicações do fr estão nos catálogos
+// de shared/i18n. Este arquivo NÃO é carregado por nenhuma página: guarda só o português até o /pt existir
+// (aí a parte do pt vai para pt/lang-hooks.js).
 //
-// fr = cópia EXATA do que está hoje em fr/app.js (FR_ACCENT_GROUPS, DICT_SPOKEN_PUNCT, frenchNumberWords,
-//      DICT_HOMOPHONE_GROUPS, regra de concordância e os textos em pt-BR das explicações do ditado).
-//      tests/familia-latina/test_paridade_fr.js confere contra o próprio fr/app.js.
 // pt = português do Brasil como IDIOMA ESTUDADO, para quem fala inglês (o /pt só tem site em inglês:
 //      os textos de explicação são em inglês). Escrito a partir de exemplos reais do português, não copiado
 //      do francês. Rascunho para a revisão da dona (ver o relatório).
 (function (root) {
   'use strict';
-
-  // ------------------------------------------------------------------ francês (molde: igual ao fr/app.js)
-  var FR_UNITS = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];
-  function frNumero(n) {
-    if (!Number.isInteger(n) || n < 0 || n > 100) return null;
-    if (n <= 16) return FR_UNITS[n];
-    if (n < 20) return 'dix-' + FR_UNITS[n - 10];
-    if (n === 100) return 'cent';
-    var tens = { 2: 'vingt', 3: 'trente', 4: 'quarante', 5: 'cinquante', 6: 'soixante' };
-    if (n < 70) {
-      var t = Math.floor(n / 10), u = n % 10;
-      if (u === 0) return tens[t];
-      if (u === 1) return tens[t] + ' et un';
-      return tens[t] + '-' + FR_UNITS[u];
-    }
-    if (n < 80) {
-      var r = n - 60;
-      if (r === 11) return 'soixante et onze';
-      return 'soixante-' + (r < 17 ? FR_UNITS[r] : 'dix-' + FR_UNITS[r - 10]);
-    }
-    var r2 = n - 80;
-    if (r2 === 0) return 'quatre-vingts';
-    return 'quatre-vingt-' + (r2 < 17 ? FR_UNITS[r2] : 'dix-' + FR_UNITS[r2 - 10]);
-  }
-
-  var fr = {
-    id: 'fr',
-    ligaduras: [['œ', 'oe'], ['æ', 'ae']],
-    ligadurasNaAcentuacao: false,      // hoje "soeur" por "sœur" dá 'fail' no desafio Acentuação (achado, não mudado)
-    hifen: true,
-    apostrofo: true,
-    elisao: true,                       // "j' ai" -> "j'ai" antes de comparar o ditado
-    gruposDeAcentos: [
-      ['à', 'â'],
-      ['ç'],
-      ['é', 'è', 'ê', 'ë'],
-      ['î', 'ï'],
-      ['ô', 'œ'],
-      ['ù', 'û', 'ü'],
-    ],
-    nomesDasMarcas: { agudo: 'acento agudo', grave: 'acento grave', circunflexo: 'acento circunflexo', trema: 'trema', cedilha: 'cedilha' },
-    pontuacaoFalada: [
-      [/point[\s-]+d'\s*interrogation/gi, '?', "point d'interrogation"],
-      [/point[\s-]+d'\s*exclamation/gi, '!', "point d'exclamation"],
-      [/point[\s-]*virgule/gi, ';', 'point-virgule'],
-      [/deux[\s-]+points/gi, ':', 'deux points'],
-      [/\bvirgule\b/gi, ',', 'virgule'],
-      [/\bpoint\b/gi, '.', 'point']
-    ],
-    numeroPorExtenso: frNumero,
-    digitosDoTextoFicam: false,         // igual ao fr de hoje (recomendação: ligar na fase 2; ver o relatório)
-    homofonos: [
-      { words: ['a', 'à'], note: '«a» é o verbo avoir (il a); «à» é preposição (à Paris).' },
-      { words: ['et', 'est'], note: '«et» quer dizer "e"; «est» é o verbo être (il est).' },
-      { words: ['son', 'sont'], note: '«son» quer dizer "seu/sua"; «sont» é o verbo être (ils sont).' },
-      { words: ['ou', 'où'], note: '«ou» quer dizer "ou"; «où» quer dizer "onde".' },
-      { words: ['on', 'ont'], note: '«on» é pronome ("a gente"); «ont» é o verbo avoir (ils ont).' },
-      { words: ['la', 'là'], note: '«la» é artigo ou pronome; «là» quer dizer "lá/aí".' },
-      { words: ['ce', 'se'], note: '«ce» é demonstrativo ("isto/este"); «se» é pronome reflexivo (il se lève).' },
-      { words: ['ces', 'ses', "c'est", "s'est"], note: '«ces» = "estes/estas"; «ses» = "seus/suas"; «c\'est» = "é/isto é"; «s\'est» = pronome + être (il s\'est levé).' },
-      { words: ['mes', 'mais'], note: '«mes» quer dizer "meus/minhas"; «mais» quer dizer "mas".' },
-      { words: ['peu', 'peux', 'peut'], note: '«peu» quer dizer "pouco"; «peux»/«peut» são do verbo pouvoir (je peux, il peut).' },
-      { words: ['leur', 'leurs'], note: '«leurs» vai antes de substantivo no plural; «leur» antes de singular ou como pronome (je leur parle).' },
-      { words: ['quel', 'quelle', 'quels', 'quelles'], note: 'Mesma pronúncia: «quel» muda conforme o gênero e o número do substantivo.' }
-    ],
-    // Concordância do francês: a palavra mais longa = a mais curta + -e/-s/-es/-x (petit/petite, ami/amis).
-    concordancia: function (r, u) {
-      var shorter = r.length <= u.length ? r : u, longer = r.length <= u.length ? u : r;
-      var suffix = longer.slice(shorter.length);
-      if (shorter.length >= 3 && longer.startsWith(shorter) && ['e', 's', 'es', 'x'].includes(suffix) && /^\p{L}+$/u.test(longer)) return suffix;
-      return null;
-    },
-    // Textos de hoje (pt-BR, escritos direto no fr/app.js; achado: aparecem em português também no site em inglês).
-    textos: {
-      homofono: function (shown, typed, note) { return '«' + shown + '» (você escreveu «' + typed + '»): palavras que soam parecido. ' + note; },
-      concordancia: function (shown, typed, suffix) { return '«' + shown + '» (você escreveu «' + typed + '»): a diferença está só na terminação (-' + suffix + '). Se for uma palavra que concorda, confira gênero, número ou conjugação com o resto da frase; senão, pode ser só um deslize de digitação.'; },
-      outro: function (shown, typed) { return '«' + shown + '»: palavra diferente da esperada (você escreveu «' + typed + '»).'; },
-      leve: {
-        hyphen: function (core, typed) { return '«' + core + '» leva hífen (você escreveu «' + typed + '»).'; },
-        apostrophe: function (core, typed) { return '«' + core + '» leva apóstrofo (você escreveu «' + typed + '»).'; },
-        ligature: function (core, typed) { return '«' + core + '» usa a letra «œ», que é uma só (você escreveu «' + typed + '»).'; },
-        accent: function (core, typed) { return '«' + core + '»: confira os acentos (você escreveu «' + typed + '»).'; },
-        spelling: function (core, typed) { return '«' + core + '»: pequena diferença de grafia (você escreveu «' + typed + '»).'; }
-      }
-    }
-  };
 
   // ------------------------------------------------------------------ português do Brasil (idioma estudado)
   // Números: "um/uma" e "dois/duas" mudam com o gênero; "catorze" e "quatorze" são as duas aceitas.
@@ -135,6 +48,9 @@
     hifen: true,                        // guarda-chuva, segunda-feira, ênclise (chame-me)
     apostrofo: true,                    // raro, mas existe: copo d'água, Sant'Ana, pau-d'alho
     elisao: false,                      // não há "j' ai": não junta apóstrofo + espaço
+    // Exercícios de digitar: falta de acento = Quase (decisão da dona, 2026-10-15), não certo nem erro total,
+    // porque avô/avó, pais/país, esta/está são palavras diferentes.
+    acentoNaDigitacao: 'quase',
     gruposDeAcentos: [
       ['á', 'à', 'â', 'ã'],
       ['ç'],
@@ -230,6 +146,13 @@
         apostrophe: function (core, typed) { return '“' + core + '” has an apostrophe (you wrote “' + typed + '”).'; },
         accent: function (core, typed) { return '“' + core + '”: check the accents (you wrote “' + typed + '”).'; },
         spelling: function (core, typed) { return '“' + core + '”: small spelling difference (you wrote “' + typed + '”).'; },
+        // Dois erros leves na mesma palavra (ex.: "guarda chuva" sem hífen E "ate" sem acento juntos): cita os dois.
+        multiple: function (core, typed, reasons) {
+          var nomes = { hyphen: 'the hyphen', apostrophe: 'the apostrophe', accent: 'the accents', ligature: 'the ligature' };
+          var p = reasons.map(function (r) { return nomes[r] || r; });
+          var lista = p.length > 1 ? p.slice(0, -1).join(', ') + ' and ' + p[p.length - 1] : p[0];
+          return '“' + core + '”: check ' + lista + ' (you wrote “' + typed + '”).';
+        },
         contraction: function (core, typed, sentido, C) {
           var p = C[core.toLowerCase()];
           if (sentido === 'separou' && p) return '“' + core + '” is one word: ' + p[0] + ' + ' + p[1] + ' = ' + core.toLowerCase() + ' (you wrote “' + typed + '”).';
@@ -239,7 +162,7 @@
     }
   };
 
-  var api = { fr: fr, pt: pt };
+  var api = { pt: pt };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.FamiliaLatinaIdiomas = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

@@ -1,27 +1,47 @@
-// PARIDADE: shared/core/familias/latina.js configurado para o fr dá EXATAMENTE o mesmo resultado que as
-// funções de hoje do fr/app.js (extraídas do texto, ver extrair-fr.js), num conjunto grande de entradas:
-// todo o texto do curso de francês (vocabulário, frases, diálogos, desafios, conjugação, ditados) e
-// variações dele que imitam o que a aluna digita (sem acento, sem hífen, "oe" por "œ", apóstrofo curvo,
-// palavra trocada, número em dígito, pontuação ditada por extenso...).
+// PARIDADE: o fr/app.js de AGORA (que repassa para shared/core/familias/latina.js com a configuração de
+// fr/lang-hooks.js) dá o MESMO resultado que o fr/app.js ANTIGO (commit de referência, ver extrair-fr.js),
+// num conjunto grande de entradas: todo o texto do curso de francês (vocabulário, frases, diálogos,
+// desafios, conjugação, ditados) e variações dele que imitam o que a aluna digita (sem acento, sem hífen,
+// "oe" por "œ", apóstrofo curvo, palavra trocada, número em dígito, pontuação ditada por extenso...).
+//
+// Única exceção: as mudanças que a dona AUTORIZOU na fase 2 (2026-10-15). Cada diferença é conferida por
+// uma regra própria (autorizada()) e contada à parte; qualquer outra diferença falha o teste.
+//   (a) "oe" por "œ" (e "ae" por "æ"): 'quase' no "Digite o que ouviu", na lacuna digitada e na Acentuação.
+//   (c) apóstrofo curvo do celular (’) aceito também na lacuna digitada (igual ao "Digite o que ouviu").
+//   (d) ditado: número em dígito que o PRÓPRIO texto escreve em dígito fica como está.
+//   (e) ditado: dois erros leves na mesma palavra (ex.: sem hífen E sem acento) citam os dois.
+// (b) (explicações do ditado no catálogo de tradução) não muda o texto em português: aqui, com o t() em
+//     pt-BR, os textos têm de sair byte a byte iguais.
 // Rodar: node tests/familia-latina/test_paridade_fr.js
-const path = require('path');
-const { carregarFr, corpusFr, ROOT } = require('./extrair-fr.js');
-const FL = require(path.join(ROOT, 'shared/core/familias/latina.js'));
-const IDIOMAS = require(path.join(ROOT, 'shared/core/familias/latina-idiomas.js'));
-const FR = carregarFr();
-const M = FL.criar(IDIOMAS.fr);
+const { carregarAntigo, carregarNovo, corpusFr, REF } = require('./extrair-fr.js');
+const A = carregarAntigo();
+const N = carregarNovo();
 const { textos, ditados, verbos } = corpusFr();
 
 const grupos = {};
 const falhas = [];
-function igual(grupo, rotulo, a, b) {
-  const g = grupos[grupo] || (grupos[grupo] = { ok: 0, falhou: 0 });
-  const ja = JSON.stringify(a), jb = JSON.stringify(b);
-  if (ja === jb) g.ok++;
-  else { g.falhou++; if (falhas.length < 15) falhas.push(`[${grupo}] ${rotulo}\n    fr/app.js: ${ja}\n    módulo:    ${jb}`); }
+const J = JSON.stringify;
+const porRegra = {};
+const curto = (x) => x.length > 90 ? x.slice(0, 87) + '...' : x;
+// autorizada() devolve o NOME da regra que explica a diferença ('a', 'c', 'd', 'e') ou false.
+function compara(grupo, rotulo, a, b, autorizada) {
+  const g = grupos[grupo] || (grupos[grupo] = { ok: 0, autorizadas: 0, falhou: 0, exemplos: [] });
+  const ja = J(a), jb = J(b);
+  if (ja === jb) { g.ok++; return; }
+  const regra = autorizada && autorizada();
+  if (regra) {
+    g.autorizadas++; porRegra[grupo + ' (' + regra + ')'] = (porRegra[grupo + ' (' + regra + ')'] || 0) + 1;
+    if (g.exemplos.length < 2) g.exemplos.push(curto(rotulo) + ': ' + curto(ja) + ' -> ' + curto(jb));
+    return;
+  }
+  g.falhou++;
+  if (falhas.length < 15) falhas.push(`[${grupo}] ${rotulo}\n    antigo (${REF}): ${ja}\n    novo:           ${jb}`);
 }
-// Algumas funções do fr lançam erro com entrada estranha: a paridade inclui lançar (ou não) do mesmo jeito.
+// Algumas funções lançam erro com entrada estranha: a paridade inclui lançar (ou não) do mesmo jeito.
 function tenta(f) { try { return { v: f() }; } catch (e) { return { erro: true }; } }
+
+const semLigadura = (s) => s == null ? s : String(s).replace(/œ/g, 'oe').replace(/Œ/g, 'OE').replace(/æ/g, 'ae').replace(/Æ/g, 'AE');
+const temDigito = (s) => /\d/.test(String(s || ''));
 
 // PRNG fixo (mesmas variações a cada rodada).
 let semente = 1234567;
@@ -41,6 +61,7 @@ function variacoes(s) {
     s.replace(/\. /g, '.'), s.replace(/[aeiou]/, ''), s + ' ' + escolhe(pal), s.replace(/ /g, '​ '),
     s.replace(/é/g, 'è'), s.replace(/è/g, 'é'), s.replace(/ç/g, 'c'), s.replace(/ê/g, 'e'),
     s.replace(/«|»/g, '"'), s.replace(/-/g, '‑'),
+    semAc.replace(/-/g, ''), semAc.replace(/œ/g, 'oe').replace(/'/g, ''),   // dois erros na mesma palavra
   ];
   // palavra trocada por homófono, terminação de concordância, número em dígito, palavra faltando, troca de vizinhas
   v.push(pal.map(w => HOMOFONOS[w.toLowerCase()] || w).join(' '));
@@ -54,41 +75,40 @@ function variacoes(s) {
 // ---------------------------------------------------------------- 1. normalização e comparação tolerante
 for (const s of textos) {
   for (const x of [s, s.normalize('NFD'), s.toUpperCase()]) {
-    igual('normalizeLoose', x, FR.normalizeLoose(x), FL.normalizarFrouxo(x));
-    igual('conjFold', x, FR.conjFold(x), FL.dobrarBusca(x));
-    igual('acceptedForms', x, FR.acceptedForms(x), FL.formasAceitas(x));
+    compara('normalizeLoose', x, A.normalizeLoose(x), N.normalizeLoose(x));
+    compara('conjFold', x, A.conjFold(x), N.conjFold(x));
+    compara('acceptedForms', x, A.acceptedForms(x), N.acceptedForms(x));
   }
 }
-igual('conjFold', 'null', FR.conjFold(null), FL.dobrarBusca(null));
-igual('acceptedForms', 'vazio', FR.acceptedForms(''), FL.formasAceitas(''));
+compara('conjFold', 'null', A.conjFold(null), N.conjFold(null));
+compara('normalizeLoose', 'null lança erro igual', tenta(() => A.normalizeLoose(null)), tenta(() => N.normalizeLoose(null)));
+compara('acceptedForms', 'vazio', A.acceptedForms(''), N.acceptedForms(''));
 
-// vocabulário de ouvido e lacuna digitada: certo/errado com acento tolerado
+// vocabulário de ouvido e lacuna digitada: acento tolerado; (a) ligadura = quase; (c) ’ na lacuna
 const amostra = textos.filter(t => t.length < 60);
 for (const alvo of amostra) {
-  for (const typed of variacoes(alvo)) {
-    const fv = FR.acceptedForms(alvo).some(f => FR.vocabStrip(f) === FR.vocabStrip(typed));
-    igual('vocab-type', alvo + ' | ' + typed, fv, FL.respostaDigitadaCerta(typed, alvo, FL.PONTUACAO_VOCAB_RE));
-    const fl = FR.acceptedForms(alvo).some(f => FR.lacunaStrip(f) === FR.lacunaStrip(typed));
-    igual('lacuna-type', alvo + ' | ' + typed, fl, FL.respostaDigitadaCerta(typed, alvo, FL.PONTUACAO_LACUNA_RE));
+  for (const typed of variacoes(alvo).concat([''])) {
+    const vOld = A.vocab(typed, alvo), vNew = N.vocab(typed, alvo);
+    compara('vocab-type', alvo + ' | ' + typed, vOld, vNew,
+      () => vOld === 'errou' && vNew === 'quase' && A.vocab(semLigadura(typed), semLigadura(alvo)) === 'ok' && 'a');
+    const lOld = A.lacuna(typed, alvo), lNew = N.lacuna(typed, alvo);
+    compara('lacuna-type', alvo + ' | ' + typed, lOld, lNew,
+      () => lOld === 'errou' && ((lNew === 'ok' && vOld === 'ok' && 'c') || (lNew === 'quase' && A.vocab(semLigadura(typed), semLigadura(alvo)) === 'ok' && 'a')));
   }
 }
 
 // exercício de gramática digitado (hífen = espaço = apóstrofo)
 for (const alvo of amostra.slice(0, 2500)) {
-  for (const given of variacoes(alvo)) {
-    const forms = [alvo];
-    const { canonSep, looseSep } = FR.gramSep;
-    const esperado = forms.some(f => canonSep(given) === canonSep(f)) ? 'ok' : forms.some(f => looseSep(given) === looseSep(f)) ? 'almost' : 'wrong';
-    igual('gram-separadores', alvo + ' | ' + given, esperado, M.avaliarComSeparadores(given, forms));
-  }
+  for (const given of variacoes(alvo)) compara('gram-separadores', alvo + ' | ' + given, A.gram(given, [alvo]), N.gram(given, [alvo]));
 }
 
 // ---------------------------------------------------------------- 2. desafio Acentuação (acento exigido)
 for (const alvo of amostra) {
   for (const typed of variacoes(alvo).concat(['', '   ', null])) {
-    igual('acentuacao-certa', alvo + ' | ' + typed, FR.isAccentAnswerCorrect(typed, alvo), FL.acentuacaoCerta(typed, alvo));
-    igual('acentuacao-resultado', alvo + ' | ' + typed, FR.accentAnswerOutcome(typed, alvo), M.resultadoAcentuacao(typed, alvo));
-    igual('acentuacao-resultado-generico', alvo + ' | ' + typed, FR.accentAnswerOutcome(typed, alvo), FL.resultadoAcentuacao(typed, alvo));
+    compara('acentuacao-certa', alvo + ' | ' + typed, A.isAccentAnswerCorrect(typed, alvo), N.isAccentAnswerCorrect(typed, alvo));
+    const o = A.accentAnswerOutcome(typed, alvo), n = N.accentAnswerOutcome(typed, alvo);
+    compara('acentuacao-resultado', alvo + ' | ' + typed, o, n,
+      () => o === 'fail' && n === 'partial' && A.accentAnswerOutcome(semLigadura(typed), semLigadura(alvo)) !== 'fail' && 'a');
   }
 }
 
@@ -97,64 +117,81 @@ const formas = [];
 for (const v of Object.values(verbos)) for (const lista of Object.values(v.f || {})) (lista || []).forEach(f => f && formas.push(...String(f).split('/').map(x => x.trim())));
 for (const alvo of formas) {
   for (const typed of [alvo, alvo.normalize('NFD').replace(/[̀-ͯ]/g, ''), alvo.slice(1), alvo + 's', alvo.replace(/e/, 'é'), alvo.toUpperCase()]) {
-    igual('conjAlign', alvo + ' | ' + typed, FR.conjAlign(typed, alvo), FL.alinharLetras(typed, alvo));
+    compara('conjAlign', alvo + ' | ' + typed, A.conjAlign(typed, alvo), N.conjAlign(typed, alvo));
   }
 }
 
 // ---------------------------------------------------------------- 4. ditado
-const frasesDitado = ditados.concat(textos.filter(t => t.length >= 15 && t.length < 300 && /\s/.test(t)).slice(0, 1500));
+// (e): o novo pode trocar reason 'spelling' por 'multiple' (+ reasons) num item leve; o resto tem de ser igual.
+const comoAntigo = (r) => r && r.v ? { v: Object.assign({}, r.v, { merged: r.v.merged.map(x => {
+  if (x.reason !== 'multiple') return x;
+  const y = Object.assign({}, x, { reason: 'spelling' }); delete y.reasons; return y;
+}) }) } : r;
+const multiplosValidos = (r) => r && r.v && r.v.merged.every(x => x.reason !== 'multiple' || (Array.isArray(x.reasons) && x.reasons.length >= 2));
+const frasesDitado = ditados.concat(textos.filter(t => t.length >= 15 && t.length < 300 && /\s/.test(t)).slice(0, 1500))
+  .concat(['Il fait 30 degrés.', "J'ai 25 ans et 3 chats.", 'Le 14 juillet, il y a 2 fêtes.']);   // (d): texto com dígito
 for (const ref of frasesDitado) {
   for (const typed of variacoes(ref)) {
-    const a = tenta(() => FR.evaluateDictation(ref, typed)), b = tenta(() => M.avaliarDitado(ref, typed));
-    igual('evaluateDictation', ref + ' | ' + typed, a, b);
+    const a = tenta(() => A.evaluateDictation(ref, typed)), b = tenta(() => N.evaluateDictation(ref, typed));
+    compara('evaluateDictation', ref + ' | ' + typed, a, b, () =>
+      (multiplosValidos(b) && J(comoAntigo(b)) === J(a) && 'e') ||
+      (temDigito(ref) && temDigito(typed) && a.v && b.v && b.v.digitNotes.length < a.v.digitNotes.length && b.v.score >= a.v.score && 'd'));
     if (a.v) {
       for (const x of a.v.merged) {
-        if (x.type === 'match' && x.light) igual('dictationLightNoteText', x.word + ' | ' + x.userWord, FR.dictationLightNoteText(x), M.textoErroLeve(x));
-        if (x.type === 'sub') igual('classifyDictationError', x.correct + ' | ' + x.wrong, FR.classifyDictationError(x.correct, x.wrong), (({ kind, noteText }) => ({ kind, noteText }))(M.classificarErroDitado(x.correct, x.wrong)));
+        if (x.type === 'match' && x.light) compara('dictationLightNoteText', x.word + ' | ' + x.userWord, A.dictationLightNoteText(x), N.dictationLightNoteText(x));
+        if (x.type === 'sub') compara('classifyDictationError', x.correct + ' | ' + x.wrong, A.classifyDictationError(x.correct, x.wrong), N.classifyDictationError(x.correct, x.wrong));
       }
     }
-    igual('prepareDictationUserText', ref + ' | ' + typed, FR.prepareDictationUserText(typed, ref), M.prepararTextoDitado(typed, ref));
+    const pa = A.prepareDictationUserText(typed, ref), pb = N.prepareDictationUserText(typed, ref);
+    compara('prepareDictationUserText', ref + ' | ' + typed, pa, pb, () => temDigito(ref) && temDigito(typed) && pb.digitNotes.length < pa.digitNotes.length && 'd');
   }
   for (const w of ref.split(/\s+/)) {
-    igual('normalizeDictationWord', w, FR.normalizeDictationWord(w), M.normalizarPalavraDitado(w));
-    igual('dictLooseNorm', w, FR.dictLooseNorm(w), M.palavraFrouxaDitado(w));
+    compara('normalizeDictationWord', w, A.normalizeDictationWord(w), N.normalizeDictationWord(w));
+    compara('dictLooseNorm', w, A.dictLooseNorm(w), N.dictLooseNorm(w));
   }
 }
 // pares de palavras soltas (todas as combinações de homófonos e de terminação)
 const soltas = ['a', 'à', 'et', 'est', 'son', 'sont', 'ou', 'où', 'on', 'ont', 'la', 'là', 'ce', 'se', 'ces', 'ses', "c'est", "s'est", 'mes', 'mais', 'peu', 'peux', 'peut', 'leur', 'leurs', 'quel', 'quelle', 'quels', 'quelles',
   'petit', 'petite', 'petits', 'petites', 'ami', 'amie', 'amis', 'heureux', 'Paris', 'Parise', 'sœur', 'soeur', 'peut-être', 'peutetre', "aujourd'hui", 'aujourdhui', 'grand-mère', 'grand mère', 'élève', 'eleve', 'Été', 'été,', '«été»', 'chat.', 'chats!'];
 for (const r of soltas) for (const u of soltas) {
-  igual('classifyDictationError', r + ' | ' + u, FR.classifyDictationError(r, u), (({ kind, noteText }) => ({ kind, noteText }))(M.classificarErroDitado(r, u)));
-  const cs = FR.normalizeDictationWord(r), us = FR.normalizeDictationWord(u);
-  igual('dictLightReason', r + ' | ' + u, FR.dictLightReason(cs, us), M.motivoErroLeve(cs, us));
+  compara('classifyDictationError', r + ' | ' + u, A.classifyDictationError(r, u), N.classifyDictationError(r, u));
+  const cs = A.normalizeDictationWord(r), us = A.normalizeDictationWord(u);
+  const ra = A.dictLightReason(cs, us), rb = N.dictLightReason(cs, us);
+  compara('dictLightReason', r + ' | ' + u, ra, rb, () => ra === 'spelling' && rb === 'multiple' && 'e');
 }
-for (let n = -2; n <= 105; n++) igual('frenchNumberWords', String(n), FR.frenchNumberWords(n), IDIOMAS.fr.numeroPorExtenso(n));
-igual('frenchNumberWords', '1.5', FR.frenchNumberWords(1.5), IDIOMAS.fr.numeroPorExtenso(1.5));
+for (let n = -2; n <= 105; n++) compara('frenchNumberWords', String(n), A.frenchNumberWords(n), N.frenchNumberWords(n));
+compara('frenchNumberWords', '1.5', A.frenchNumberWords(1.5), N.frenchNumberWords(1.5));
 
 // ---------------------------------------------------------------- 5. teclado de acentos
-igual('FR_ACCENT_GROUPS', 'grupos', FR.FR_ACCENT_GROUPS, IDIOMAS.fr.gruposDeAcentos);
-igual('frAccentPickerHTML', 'html', FR.frAccentPickerHTML(), M.htmlTecladoDeAcentos());
+compara('teclado-grupos', 'grupos', A.accentGroups, N.accentGroups);
+compara('teclado-html', 'html', A.accentPickerHTML(), N.accentPickerHTML());
 // wireFrAccentPicker com DOM falso: cada tecla em cada posição do cursor dá o mesmo texto e o mesmo cursor
 function campoFalso(valor, ini, fim) {
   return { value: valor, selectionStart: ini, selectionEnd: fim, focus() {}, setSelectionRange(a, b) { this.cursor = [a, b]; } };
 }
-const teclas = IDIOMAS.fr.gruposDeAcentos.flat();
+function clica(wire, valor, ini, fim, ch) {
+  const handlers = [];
+  let impedido = 0;
+  const botao = { textContent: ch, addEventListener(tipo, h) { handlers.push([tipo, h]); } };
+  const input = campoFalso(valor, ini, fim);
+  wire({ querySelectorAll: () => [botao] }, input);
+  handlers.forEach(([tipo, h]) => { if (tipo === 'mousedown') h({ preventDefault() { impedido++; } }); else h(); });
+  return [input.value, input.cursor, impedido];
+}
 for (const valor of ['', 'ecole', 'tres bien', 'garcon', 'ou est']) {
   const posicoes = [[null, null], [0, 0], [valor.length, valor.length], [1, Math.min(3, valor.length)], [Math.floor(valor.length / 2), Math.floor(valor.length / 2)]];
-  for (const [ini, fim] of posicoes) for (const ch of teclas) {
-    const handlers = [];
-    const botao = { textContent: ch, addEventListener(tipo, h) { if (tipo === 'click') handlers.push(h); } };
-    const input = campoFalso(valor, ini, fim);
-    FR.wireFrAccentPicker({ querySelectorAll: () => [botao] }, input);
-    handlers.forEach(h => h());
-    const r = FL.inserirNoCursor(valor, ini, fim, ch);
-    igual('wireFrAccentPicker', `${valor}|${ini}|${fim}|${ch}`, [input.value, input.cursor], [r.value, [r.cursor, r.cursor]]);
+  for (const [ini, fim] of posicoes) for (const ch of A.accentGroups.flat()) {
+    compara('teclado-clique', `${valor}|${ini}|${fim}|${ch}`, clica(A.wireAccentPicker, valor, ini, fim, ch), clica(N.wireAccentPicker, valor, ini, fim, ch));
   }
 }
 
 // ---------------------------------------------------------------- resumo
-let total = 0, ruins = 0;
-for (const [g, n] of Object.entries(grupos)) { total += n.ok + n.falhou; ruins += n.falhou; console.log(`${n.falhou ? '✗' : '✓'} ${g}: ${n.ok}/${n.ok + n.falhou}`); }
+let total = 0, ruins = 0, aut = 0;
+for (const [g, n] of Object.entries(grupos)) {
+  total += n.ok + n.autorizadas + n.falhou; ruins += n.falhou; aut += n.autorizadas;
+  console.log(`${n.falhou ? '✗' : '✓'} ${g}: ${n.ok + n.autorizadas}/${n.ok + n.autorizadas + n.falhou}${n.autorizadas ? ` (${n.autorizadas} diferenças autorizadas, ex.: ${n.exemplos.join(' ; ')})` : ''}`);
+}
+console.log('diferenças autorizadas por regra: ' + (Object.keys(porRegra).length ? Object.entries(porRegra).map(([k, v]) => k + ' = ' + v).join('; ') : 'nenhuma'));
 falhas.forEach(f => console.log('FALHOU ' + f));
-console.log(`paridade fr x módulo: ${total - ruins}/${total} comparações iguais (${Object.keys(grupos).length} grupos; corpus: ${textos.length} textos, ${ditados.length} ditados, ${formas.length} formas verbais)`);
+console.log(`paridade fr antigo (${REF}) x fr novo: ${total - ruins}/${total} comparações (${total - ruins - aut} iguais + ${aut} diferenças autorizadas; ${Object.keys(grupos).length} grupos; corpus: ${textos.length} textos, ${ditados.length} ditados, ${formas.length} formas verbais)`);
 process.exit(ruins ? 1 : 0);
