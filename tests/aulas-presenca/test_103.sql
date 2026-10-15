@@ -59,7 +59,7 @@ insert into r select (select string_agg(role || ':' || topic || ':' || coalesce(
 insert into r select (select count(*) from class_calendar_feed(pg_temp.g('TX'))) = 0, 'membro da turma sem vínculo ativo não vê nada';
 insert into r select (select start_at from class_calendar_feed(pg_temp.g('TT')) where topic = 'Subjonctif') = ((current_date + 7) + time '19:30') at time zone 'America/Sao_Paulo', 'início convertido do fuso da aula para UTC';
 insert into r select (select start_at from class_calendar_feed(pg_temp.g('TT')) where topic = 'Aula da dupla') = ((current_date + 1) + time '10:00') at time zone 'America/New_York', 'fuso de Nova York respeitado';
-insert into r select (select start_at is null from class_calendar_feed(pg_temp.g('TT')) where topic = 'Sem horário'), 'aula sem horário = dia inteiro';
+insert into r select (select start_at from class_calendar_feed(pg_temp.g('TT')) where topic = 'Sem horário') = ((current_date - 3) + time '07:00') at time zone 'America/Sao_Paulo', 'aula sem horário entra às 7h (São Paulo)';
 insert into r select pg_temp.try(format('select notes from class_calendar_feed(%L)', pg_temp.g('TT'))) = '42703', 'nunca devolve as Anotações';
 insert into r select pg_temp.try(format('select observations from class_calendar_feed(%L)', pg_temp.g('TT'))) = '42703', 'nem as Observações';
 insert into r select (select count(*) from class_calendar_feed(repeat('0', 64))) = 0, 'token inexistente: vazio';

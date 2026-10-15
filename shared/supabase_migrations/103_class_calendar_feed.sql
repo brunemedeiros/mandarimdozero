@@ -43,7 +43,7 @@ revoke execute on function public.my_calendar_feed_token(boolean) from public, a
 grant execute on function public.my_calendar_feed_token(boolean) to authenticated;
 
 -- Aulas do dono do token, de 120 dias atrás em diante. role = 'teacher' (aula que ela deu) ou 'student'.
--- start_at = início em UTC (só quando há horário; sem horário = evento de dia inteiro em class_date).
+-- start_at = início em UTC; aula sem horário entra às 7h (fuso da aula ou de São Paulo), com 1h de duração.
 create or replace function public.class_calendar_feed(p_token text)
 returns table (id bigint, role text, language_app_key text, class_date date, start_at timestamptz,
                duration_minutes smallint, topic text, homework text, attendance_name text,
@@ -60,8 +60,8 @@ begin
   select l.id,
          case when l.teacher_id = v_user then 'teacher' else 'student' end,
          l.language_app_key, l.class_date,
-         case when l.start_time is null then null
-              else ((l.class_date + l.start_time) at time zone coalesce(l.time_zone, 'America/Sao_Paulo')) end,
+         -- Sem horário: 7h no fuso da aula (padrão da autora; a professora ajusta no site, a agenda assinada é só leitura).
+         ((l.class_date + coalesce(l.start_time, time '07:00')) at time zone coalesce(l.time_zone, 'America/Sao_Paulo')),
          l.duration_minutes, l.topic, l.homework, a.name,
          case when l.teacher_id = v_user then coalesce(c.name, nullif(btrim(ps.display_name), ''), ps.username)
               else coalesce(c.name, nullif(btrim(pt.display_name), ''), pt.username) end,

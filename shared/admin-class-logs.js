@@ -303,6 +303,7 @@ function classLogFieldRowsHTML(log){
 // Duração: padrão 60 min, a professora muda para qualquer valor de 5 a 600 (pedido da autora, 2026-10-15).
 // Duração (decisão da autora, 2026-10-15): seletor de 30 em 30 min, de 30 min a 5h, padrão 1h. Um valor fora da
 // lista (aula antiga ou importada) entra como opção extra para não se perder ao editar.
+const CLASS_LOG_DEFAULT_TIME = '07:00';
 const CLASS_LOG_DURATIONS = [30, 60, 90, 120, 150, 180, 210, 240, 270, 300];
 function classLogDurationLabel(min){
   const m = Number(min) || 0;
@@ -317,7 +318,8 @@ function classLogDurationOptionsHTML(current){
 }
 
 function classLogWhenFieldsHTML(timeId, durId, log){
-  const time = log && log.start_time ? String(log.start_time).slice(0, 5) : '';
+  // Padrão da autora (2026-10-15): aula sem horário = 7h, 1h de duração (o mesmo que o link de agenda usa).
+  const time = log && log.start_time ? String(log.start_time).slice(0, 5) : CLASS_LOG_DEFAULT_TIME;
   const dur = (log && log.duration_minutes) || 60;
   return `
     <div class="class-log-when">

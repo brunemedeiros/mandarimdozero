@@ -57,9 +57,11 @@ function cleanClassLogPayload({ classDate, topic, homework, observations, notes,
     out.duration_minutes = out.start_time && dur >= 5 && dur <= 600 ? Math.round(dur) : null;
     out.time_zone = out.start_time ? classLogTimeZone() : null;
   }
+  // Horário já vem preenchido (7h): sozinho ele só vale como agendamento de hoje em diante, nunca para aula passada.
   const future = out.class_date > todayStr();
+  const scheduled = !!out.start_time && out.class_date >= todayStr();
   const empty = !out.topic && !out.homework && !out.observations && !out.notes && !out.attendance_label_id && !out.skills.length
-    && !out.start_time && !future;
+    && !scheduled && !future;
   return { out, empty };
 }
 
