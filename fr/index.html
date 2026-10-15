@@ -505,7 +505,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   /* .tabs já fica escondida sempre agora (ver regra global acima) --
      e os pills de Ranking/Conta na topbar voltam aqui (só mobile os
      esconde, ver regra global também). */
-  #user-menu-btn{ display:flex; }
+  /* Conta/Sair: o pill com o nome saiu no desktop; "Sair da conta" fica no fim da
+     sidebar (#sidebar-logout-btn) e Reportar já tem o ⚑ da topbar. */
   /* XP some do topbar aqui -- fica só no card de Status à direita, sem
      repetição (decisão #1). No mobile (fora desta media query) continua
      no topbar, como já decidido pra lá (decisão #4). */
@@ -5362,6 +5363,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="tab-btn admin-only-nav" data-tab="admin-badges" style="display:none;">
         <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6e0.svg" alt="" aria-hidden="true">
         <span class="sidebar-label">Admin</span>
+      </button>
+      <button class="tab-btn sidebar-logout-btn" id="sidebar-logout-btn" type="button">
+        <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6aa.svg" alt="" aria-hidden="true">
+        <span class="sidebar-label" data-i18n="menu.logout">Sair da conta</span>
       </button>
     </nav>
   </div>
