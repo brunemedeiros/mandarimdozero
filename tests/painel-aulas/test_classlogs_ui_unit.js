@@ -12,7 +12,7 @@ const ctx = { console, Date, Math, JSON, Number, String, Array, Object, Set, isN
 installT(ctx);
 ctx.fmtDate = (d, o) => new Intl.DateTimeFormat('pt-BR', o || {}).format(d instanceof Date ? d : new Date(d));
 vm.createContext(ctx);
-for (const f of ['shared/srs.js', 'shared/admin-students.js', 'shared/teacher-students-ui.js', 'shared/teacher-classlogs-ui.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, f), 'utf8'), ctx);
+for (const f of ['shared/srs.js', 'shared/admin-students.js', 'shared/teacher-students-ui.js', 'shared/teacher-class-logs.js', 'shared/teacher-classlogs-ui.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, f), 'utf8'), ctx);
 const link = (id, user, name, lang) => ({ id, student_id: 's' + id, username: user, display_name: name, language_app_key: lang || 'frances' });
 const links = [link(1, 'ana', 'Ana Paula'), link(2, 'bia', 'Bia Lima'), link(3, 'caio', 'Caio Prado'), link(4, 'duda', 'Duda', 'mandarim')];
 const log = (id, sid, date, topic, extra) => Object.assign({ id, student_id: 's' + sid, language_app_key: sid === 4 ? 'mandarim' : 'frances', class_date: date, topic, homework: null, observations: null, notes: null, created_at: `${date}T15:00:00.${String(id).padStart(3, '0')}Z` }, extra || {});
@@ -60,14 +60,14 @@ const log = (id, sid, date, topic, extra) => Object.assign({ id, student_id: 's'
 
   // ---- 4. Tela, formulário, diálogo ----
   const sel = new Set(['s1|frances', 's2|frances']);
-  const page = ctx.tclPageHTML({ links, groups: G, filtros: { aluno: '', curso: '', busca: '' }, selected: sel, today: '2026-10-12' });
+  const page = ctx.tclPageHTML({ links, rooms: [], labels: [], groups: G, filtros: { aluno: '', curso: '', busca: '' }, selected: sel, today: '2026-10-12' });
   check('tela: título, subtítulo de privacidade e formulário ao lado', page.includes('<h2>Aulas</h2>') && page.includes('Só você vê estes registros.') && page.includes('id="form-aula"'));
   check('tela: filtro de aluno com 4 pessoas e filtro de curso (2 cursos)', (page.match(/<option value="s\d/g) || []).length === 4 && page.includes('data-aulas-curso'));
   check('formulário: chips das 2 pessoas e botão no plural', (page.match(/data-tirar-pessoa=/g) || []).length === 2 && page.includes('Registrar aula para 2 alunos') && !/id="aula-enviar" disabled/.test(page));
-  const vazio = ctx.tclFormHTML(links, new Set(), '2026-10-12');
+  const vazio = ctx.tclFormHTML(links, [], new Set(), '2026-10-12', []);
   check('formulário sem ninguém: botão desligado e texto de apoio', /id="aula-enviar" disabled/.test(vazio) && vazio.includes('Ninguém escolhido ainda') && vazio.includes('Preencha pelo menos um campo.'));
-  check('formulário: data de hoje preenchida; 4 caixas de pessoas; as escolhidas marcadas', vazio.includes('value="2026-10-12"') && (vazio.match(/data-escolher-pessoa/g) || []).length === 4 && ctx.tclFormHTML(links, sel, 'x').includes('value="s1|frances" checked'));
-  check('formulário com um vínculo só: sem filtro de curso', !ctx.tclPageHTML({ links: links.slice(0, 2), groups: [], filtros: { aluno: '', curso: '', busca: '' }, selected: new Set(), today: 'x' }).includes('data-aulas-curso'));
+  check('formulário: data de hoje preenchida; 4 caixas de pessoas; as escolhidas marcadas', vazio.includes('value="2026-10-12"') && (vazio.match(/data-escolher-pessoa/g) || []).length === 4 && ctx.tclFormHTML(links, [], sel, 'x', []).includes('value="s1|frances" checked'));
+  check('formulário com um vínculo só: sem filtro de curso', !ctx.tclPageHTML({ links: links.slice(0, 2), rooms: [], labels: [], groups: [], filtros: { aluno: '', curso: '', busca: '' }, selected: new Set(), today: 'x' }).includes('data-aulas-curso'));
   const dlg = ctx.tclEditDialogHTML(grp);
   check('diálogo de edição: campos preenchidos e aviso de grupo', dlg.includes('value="Verbos"') && dlg.includes('Esta aula foi registrada para 3 pessoas. A mudança vale para todas.') && dlg.includes('data-gid="2"'));
   check('diálogo de edição de aula individual: sem aviso de grupo', !ctx.tclEditDialogHTML(G.find(g => g.logs.length === 1)).includes('p-alerta'));
@@ -80,9 +80,48 @@ const log = (id, sid, date, topic, extra) => Object.assign({ id, student_id: 's'
   const ev = [link(1, evil, evil)];
   const logs = [{ id: 1, student_id: 's1', language_app_key: 'frances', class_date: '2026-10-09', topic: evil, homework: evil, observations: evil, notes: evil, created_at: '2026-10-09T10:00:00Z' }];
   const G = ctx.tclGroupLogs(logs, ev);
-  const html = ctx.tclPageHTML({ links: ev, groups: G, filtros: { aluno: '', curso: '', busca: '"><script>' }, selected: new Set(['s1|frances']), today: '2026-10-09' }) + ctx.tclEditDialogHTML(G[0]);
+  const html = ctx.tclPageHTML({ links: ev, rooms: [], labels: [], groups: G, filtros: { aluno: '', curso: '', busca: '"><script>' }, selected: new Set(['s1|frances']), today: '2026-10-09' }) + ctx.tclEditDialogHTML(G[0]);
   check('nenhum <img nem <script crus (tópico, lição, notas, nome, busca)', !html.includes('<img') && !html.includes('<script'), html.match(/<(img|script)[^>]*>/));
   check('aspas do valor da busca escapadas', html.includes('value="&quot;&gt;&lt;script&gt;"'));
+}
+// ---- 6. 094: Presença, Competências e aula de turma ----
+{
+  const rooms = [{ id: 501, name: 'Dupla <b>', language_app_key: 'frances', members: ['s1', 's2'] }, { id: 502, name: 'Sábado', language_app_key: 'mandarim', members: ['s4'] }];
+  const labels = [{ id: 61, name: 'Presente', color: 'green', counts_as: 'present', archived: false }, { id: 62, name: 'Faltou', color: 'red', counts_as: 'absent', archived: false }, { id: 63, name: 'Velho', color: 'pink', counts_as: 'other', archived: true }];
+  const L1 = (id, o) => Object.assign({ id, student_id: 's1', classroom_id: null, language_app_key: 'frances', class_date: '2026-10-09', topic: 'Aula', homework: null, observations: null, notes: null, attendance_label_id: null, skills: [], created_at: `2026-10-09T15:00:0${id}Z` }, o || {});
+  const logs = [L1(1, { attendance_label_id: 61, skills: ['gramatica', 'escuta'] }), L1(2, { student_id: null, classroom_id: 501, class_date: '2026-10-08', attendance_label_id: 62 }), L1(3, { student_id: null, classroom_id: 999, class_date: '2026-10-07' })];
+  const G = ctx.tclGroupLogs(logs, links, rooms);
+  check('turma: aula de turma é um grupo sozinho, sem alunos, com a turma', G.length === 3 && G[1].classroom.name === 'Dupla <b>' && G[1].links.length === 0 && G[1].logs.length === 1);
+  check('turma que não existe mais: aparece com "?" em vez de sumir', G[2].classroom.name === '?');
+  check('Presença e Competências vão para o grupo', G[0].attendance_label_id === 61 && G[0].skills.join() === 'gramatica,escuta');
+  check('mesma aula com Presença diferente não junta no grupo', ctx.tclGroupLogs([L1(1, { attendance_label_id: 61 }), L1(2, { student_id: 's2', attendance_label_id: 62 })], links, rooms).length === 2);
+  const F = (f) => ctx.tclFilterGroups(G, Object.assign({ aluno: '', curso: '', busca: '' }, f)).map(g => g.gid).join();
+  check('filtro por aluno inclui a turma da qual ele é membro', F({ aluno: 's2' }) === '2' && F({ aluno: 's1' }) === '1,2', [F({ aluno: 's2' }), F({ aluno: 's1' })]);
+  check('filtro por curso inclui aula de turma do idioma', F({ curso: 'mandarim' }) === '' && F({ curso: 'frances' }) === '1,2,3');
+  check('busca pelo nome da turma', F({ busca: 'dupla' }) === '2');
+  const list = ctx.tclListHTML(G, G.length, labels);
+  check('cartão: Presença com a cor do rótulo e Competências em selos', list.includes('class="att-pill" data-color="green">Presente</span>') && list.includes('>Gramática</span>') && list.includes('>Escuta</span>'));
+  check('cartão de turma: 👥, nome escapado e contagem de membros', list.includes('Dupla &lt;b&gt; · 2 alunos') && list.includes('class-log-classroom') && !list.includes('<b>Dupla'));
+  check('rótulo desconhecido não quebra o cartão', !ctx.tclCardHTML(G[2], []).includes('att-pill'));
+  const sel = new Set(['s1|frances', 'turma|501']);
+  const form = ctx.tclFormHTML(links, rooms, sel, '2026-10-12', labels);
+  check('formulário: Presença com Sem registro, Presente e Faltou (o arquivado não aparece)', form.includes('name="new-att" value="" checked') && form.includes('value="61"') && form.includes('value="62"') && !form.includes('value="63"'));
+  check('formulário: cada rótulo tem o ⋯ de edição', (form.match(/data-att-more=/g) || []).length === 2);
+  check('formulário: campo para criar rótulo digitando e área do menu escondida', form.includes('data-att-new="new"') && form.includes('data-att-menu="new" hidden'));
+  check('formulário: 7 Competências', (form.match(/data-skill value=/g) || []).length === 7);
+  check('formulário: bloco Turmas com 2 turmas, a escolhida marcada, nome escapado', form.includes('Aula de turma fica registrada uma vez só') && (form.match(/data-turma /g) || []).length === 2 && form.includes('value="turma|501" checked') && !form.includes('Dupla <b>'));
+  check('formulário: chips misturam pessoa e turma', (form.match(/data-tirar-pessoa=/g) || []).length === 2 && form.includes('data-tirar-pessoa="turma|501"'));
+  check('botão: "Registrar aula · 1 turma" com pessoas e turmas contadas', ctx.tclSubmitLabel(1, 1) === 'Registrar aula · 1 turma' && ctx.tclSubmitLabel(2, 0) === 'Registrar aula para 2 alunos' && ctx.tclSubmitLabel(2, 2) === 'Registrar aula para 2 alunos · 2 turmas', [ctx.tclSubmitLabel(1, 1), ctx.tclSubmitLabel(2, 2)]);
+  check('só turma escolhida: botão ligado', !/id="aula-enviar" disabled/.test(ctx.tclFormHTML(links, rooms, new Set(['turma|502']), 'x', labels)));
+  check('sem turmas: sem bloco Turmas', !ctx.tclFormHTML(links, [], new Set(), 'x', labels).includes('data-turma'));
+  const dlg = ctx.tclEditDialogHTML(G[0], labels);
+  check('edição: Presença atual marcada e Competências marcadas', dlg.includes('name="editar-att" value="61" checked') && /data-skill value="gramatica" checked/.test(dlg) && /data-skill value="escuta" checked/.test(dlg) && !/data-skill value="escrita" checked/.test(dlg));
+  const arq = ctx.tclPresencaHTML('editar', labels, 63);
+  check('rótulo arquivado aparece só enquanto é o da aula', arq.includes('value="63" checked') && !ctx.tclPresencaHTML('editar', labels, 61).includes('value="63"'));
+  const menu = ctx.tclMenuRotuloHTML(labels[1]);
+  check('menu do rótulo: nome, 9 cores (a atual marcada), arquivar e Pronto', (menu.match(/data-att-color=/g) || []).length === 9 && menu.includes('data-att-color="red" aria-pressed="true"') && menu.includes('data-att-archive') && menu.includes('data-att-close') && menu.includes('value="Faltou"'));
+  check('nome do rótulo escapado', ctx.tclPresencaHTML('new', [{ id: 9, name: '<i>x</i>', color: 'blue', archived: false }], '').includes('&lt;i&gt;x&lt;/i&gt;'));
+  check('página tem o lugar do bloco "Revisar do Notion"', ctx.tclPageHTML({ links, rooms, labels, groups: G, filtros: { aluno: '', curso: '', busca: '' }, selected: sel, today: 'x' }).includes('data-aulas-notion'));
 }
 check('iniciais usadas nos avatares', ctx.tsuInitials('Ana Paula') === 'AP');
 console.log(`${pass} ok, ${fail} falha(s)`);

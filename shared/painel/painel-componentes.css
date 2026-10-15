@@ -657,3 +657,18 @@
 .painel .p-funil > div > span{ font-size: 1.4rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 .painel .p-funil > div > small{ color: var(--p-tinta-suave); }
 .painel .p-funil > i{ font-style: normal; color: var(--p-tinta-suave); }
+
+/* Aulas (094): Presença e Competências usam as classes do site (.att-pill, .skill-toggle, .skill-chip, definidas no index de
+   fr e zh e iguais às da tela da aluna). Aqui só se desfaz o que o Pico faz com botão e campo dentro do painel. */
+.painel .att-choices, .painel .skill-toggles{ display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin: 0 0 .5rem; }
+.painel :is(.att-choice, .skill-toggle) input{ width: 1rem; height: 1rem; margin: 0; flex: none; }
+.painel label.att-choice, .painel label.skill-toggle{ margin: 0; }
+.painel button.att-more{ width: auto; margin: 0; padding: .1rem .45rem; border: 0; background: transparent; box-shadow: none; color: var(--p-tinta-suave); font-size: 1rem; line-height: 1; }
+.painel button.att-more:hover, .painel button.att-more:focus-visible{ background: var(--p-superficie); color: var(--p-tinta); }
+.painel button.att-swatch{ width: auto; margin: 0; padding: .1rem .6rem; border: 1px solid var(--p-linha); box-shadow: none; }
+.painel input.att-new, .painel .att-menu-box input[type="text"]{ width: 100%; margin: 0 0 .75rem; }
+.painel .att-menu{ margin: 0 0 .75rem; }
+.painel .att-menu-box{ margin: 0; }
+.painel .att-menu-actions button{ width: auto; margin: 0; }
+.painel .class-log-extras legend{ font-weight: 700; margin-bottom: .35rem; }
+.painel .class-log-extras{ margin: 0 0 .75rem; padding: 0; border: 0; }

@@ -82,12 +82,25 @@ async function abrir({ lang = 'fr', scheme = 'light', width = 1280, height = 100
       L(5, 's4', '2026-09-30', 'Números', null, 'Usou o livro azul', null, '2026-09-30T15:00:00Z'),
     ];
     const clean = (o) => ['topic', 'homework', 'observations', 'notes'].map(k => (o[k] || '').trim());
+    // 094: rótulos de Presença (da professora), turmas e aulas de turma em memória.
+    window.__labels = [{ id: 61, teacher_id: 'T', name: 'Presente', color: 'green', counts_as: 'present', sort_order: 1, archived: false }, { id: 62, teacher_id: 'T', name: 'Faltou', color: 'red', counts_as: 'absent', sort_order: 2, archived: false }];
+    window.__rooms = [{ id: 501, name: 'Dupla', language_app_key: lang, members: ['s1', 's2'] }];
+    fetchAttendanceLabels = async () => window.__labels.map(x => ({ ...x }));
+    window.__labelsSalvos = [];
+    saveAttendanceLabel = async ({ id, name, color, countsAs, archived, sortOrder }) => { const n = (name || '').trim(); if (!n) return { ok: false, error: t('panel.classLog.labels.needName') };
+      if (window.__labels.some(l => l.name === n.slice(0, 40) && l.id !== id)) return { ok: false, error: t('panel.classLog.labels.duplicate') };
+      if (id){ Object.assign(window.__labels.find(l => l.id === id), { name: n.slice(0, 40), color, counts_as: countsAs, archived: !!archived }); }
+      else window.__labels.push({ id: 70 + window.__labels.length, teacher_id: 'T', name: n.slice(0, 40), color, counts_as: countsAs || 'other', sort_order: sortOrder || 99, archived: false });
+      window.__labelsSalvos.push({ id, name: n, color, archived }); return { ok: true }; };
+    fetchClassLogClassrooms = async () => window.__rooms.map(x => ({ ...x }));
     fetchAllClassLogs = async () => ({ logs: window.__logs.map(x => ({ ...x })), truncated: false });
     fetchClassLogs = async (sid) => window.__logs.filter(x => x.student_id === sid).map(x => ({ ...x }));
-    createClassLog = async (o) => { const c = clean(o); if (!c.some(Boolean)) return { ok: false, error: t('teacherLogs.err.needOneField') };
-      window.__logs.push({ id: nid++, student_id: o.studentId, language_app_key: o.languageAppKey, class_date: o.classDate, topic: c[0] || null, homework: c[1] || null, observations: c[2] || null, notes: c[3] || null, created_at: new Date().toISOString() }); return { ok: true }; };
-    updateClassLog = async (id, o) => { const c = clean(o); if (!c.some(Boolean)) return { ok: false, error: t('teacherLogs.err.needOneField') };
-      Object.assign(window.__logs.find(x => x.id === id), { class_date: o.classDate, topic: c[0] || null, homework: c[1] || null, observations: c[2] || null, notes: c[3] || null }); return { ok: true }; };
+    const extras = (o) => ({ attendance_label_id: o.attendanceLabelId ? Number(o.attendanceLabelId) : null, skills: o.skills || [] });
+    const vazio = (c, o) => !c.some(Boolean) && !o.attendanceLabelId && !(o.skills || []).length;
+    createClassLog = async (o) => { const c = clean(o); if (vazio(c, o)) return { ok: false, error: t('teacherLogs.err.needOneField') };
+      window.__logs.push(Object.assign({ id: nid++, student_id: o.classroomId ? null : o.studentId, classroom_id: o.classroomId || null, language_app_key: o.languageAppKey, class_date: o.classDate, topic: c[0] || null, homework: c[1] || null, observations: c[2] || null, notes: c[3] || null, created_at: new Date().toISOString() }, extras(o))); return { ok: true }; };
+    updateClassLog = async (id, o) => { const c = clean(o); if (vazio(c, o)) return { ok: false, error: t('teacherLogs.err.needOneField') };
+      Object.assign(window.__logs.find(x => x.id === id), { class_date: o.classDate, topic: c[0] || null, homework: c[1] || null, observations: c[2] || null, notes: c[3] || null }, extras(o)); return { ok: true }; };
     deleteClassLog = async (id) => { window.__logs = window.__logs.filter(x => String(x.id) !== String(id)); return { ok: true }; };
     // Material de apoio em memória (envio a várias pessoas = uma linha por aluno, mesmo created_at).
     window.__mats = [

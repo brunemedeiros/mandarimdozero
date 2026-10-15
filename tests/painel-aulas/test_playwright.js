@@ -94,11 +94,85 @@ async function abrirAulas(opts){
     await p.locator('dialog.p-dialogo--alerta[open] .p-perigo').click(); await p.waitForFunction(() => window.__logs.length === 5);
     L('confirmar apaga as 2 linhas e a aula some da lista', (await cards()).length === 4 && !(await cards()).some(c => c.includes('Futuro')), await cards());
 
+    // ---- 094: Presença, Competências, turma e rótulos no estilo do Notion ----
+    const appKey = lang === 'fr' ? 'frances' : 'mandarim';
+    for (const k of await p.$$eval('[data-tirar-pessoa]', l => l.map(e => e.dataset.tirarPessoa))) await p.click(`[data-tirar-pessoa="${k}"]`);
+    L('094: Presença com Sem registro, Presente e Faltou', (await p.$$eval('[data-class-log-extras="new"] .att-choice', l => l.map(e => e.textContent.trim()).join('|'))) === 'Sem registro|Presente|Faltou');
+    L('094: 7 Competências', (await p.$$eval('[data-class-log-extras="new"] input[data-skill]', l => l.length)) === 7);
+    await p.click('#form-aula details.p-popover > summary');
+    L('094: turma aparece para escolher (bloco Turmas)', !!(await p.$('[data-escolher-pessoa][value="turma|501"]')) && (await p.textContent('#form-aula details.p-popover')).includes('Aula de turma fica registrada uma vez só'));
+    await p.check(`[data-escolher-pessoa][value="s1|${appKey}"]`);
+    await p.check('[data-class-log-extras="new"] input[name="new-att"][value="61"]');
+    await p.check('[data-class-log-extras="new"] input[data-skill][value="gramatica"]');
+    await p.check('[data-class-log-extras="new"] input[data-skill][value="escuta"]');
+    await p.fill('#aula-topico', 'Subjonctif');
+    await p.click('#aula-enviar'); await p.waitForFunction(() => window.__logs.length === 6);
+    L('094: grava Presença e Competências na aula do aluno', await p.evaluate(() => { const r = window.__logs[5]; return r.student_id === 's1' && r.classroom_id === null && r.attendance_label_id === 61 && r.skills.join() === 'gramatica,escuta'; }));
+    await p.waitForSelector('[data-aulas-lista] .att-pill[data-color="green"]');
+    L('094: lista mostra a Presença colorida e as Competências', (await cards())[0].includes('Presente') && (await cards())[0].includes('Gramática') && (await cards())[0].includes('Escuta'), (await cards())[0]);
+    // só Presença (Faltou), para a turma
+    if (!(await p.$eval('#form-aula details.p-popover', d => d.open))) await p.click('#form-aula details.p-popover > summary');
+    await p.uncheck(`[data-escolher-pessoa][value="s1|${appKey}"]`); await p.check('[data-escolher-pessoa][value="turma|501"]');
+    L('094: botão com a turma contada', (await p.textContent('#aula-enviar')).includes('1 turma'), await p.textContent('#aula-enviar'));
+    await p.check('[data-class-log-extras="new"] input[name="new-att"][value="62"]');
+    await p.click('#aula-enviar'); await p.waitForFunction(() => window.__logs.length === 7);
+    L('094: aula de turma é 1 linha sem aluno e com a turma', await p.evaluate(() => { const r = window.__logs[6]; return r.student_id === null && r.classroom_id === 501 && r.attendance_label_id === 62; }));
+    await p.waitForSelector('[data-aulas-lista] .class-log-classroom');
+    L('094: lista da turma mostra o nome da turma e a contagem', (await cards())[0].includes('Dupla') && (await cards())[0].includes('2 alunos'), (await cards())[0]);
+    await p.selectOption('[data-aulas-aluno]', 's2'); L('094: filtro de aluno mostra a aula da turma dele', (await cards()).some(c => c.includes('Dupla'))); await p.selectOption('[data-aulas-aluno]', '');
+    // rótulos: criar digitando, ⋯ para nome/cor/arquivar, sem perder o que já foi digitado
+    await p.fill('#aula-topico', 'Texto que não pode sumir');
+    await p.fill('[data-att-new="new"]', 'Remarcada');
+    await p.press('[data-att-new="new"]', 'Enter');
+    await p.waitForFunction(() => [...document.querySelectorAll('[data-att-choices="new"] .att-choice')].some(l => l.textContent.includes('Remarcada')));
+    const remId = await p.evaluate(() => window.__labels.find(x => x.name === 'Remarcada').id);
+    L('094: digitar + Enter cria o rótulo e já o seleciona', await p.evaluate((id) => document.querySelector(`[data-att-choices="new"] input[value="${id}"]`).checked, remId));
+    L('094: Enter no campo não registra aula', (await logs()).length === 7);
+    L('094: o que já estava digitado continua lá', (await p.inputValue('#aula-topico')) === 'Texto que não pode sumir');
+    L('094: sem seção separada de rótulos', !(await p.$('#admin-att-labels')));
+    await p.click(`[data-att-choices="new"] [data-att-more="${remId}"]`);
+    await p.waitForSelector('[data-att-menu="new"] .att-menu-box');
+    L('094: ⋯ abre nome + 9 cores', (await p.$$eval('[data-att-menu="new"] [data-att-color]', l => l.length)) === 9);
+    await p.click('[data-att-menu="new"] [data-att-color="pink"]');
+    await p.waitForFunction((id) => window.__labels.find(x => x.id === id).color === 'pink', remId);
+    L('094: cor nova na hora no seletor', await p.evaluate((id) => document.querySelector(`[data-att-choices="new"] input[value="${id}"]`).closest('.att-choice').dataset.color === 'pink', remId));
+    await p.fill('[data-att-menu="new"] [data-att-rename]', 'Remarcada pela aluna');
+    await p.click('[data-att-menu="new"] [data-att-close]');
+    await p.waitForFunction((id) => window.__labels.find(x => x.id === id).name === 'Remarcada pela aluna', remId);
+    L('094: renomear e Pronto fecha o menu, e a escolha continua marcada', await p.evaluate((id) => document.querySelector('[data-att-menu="new"]').hidden && document.querySelector(`[data-att-choices="new"] input[value="${id}"]`).checked, remId));
+    await p.click(`[data-att-choices="new"] [data-att-more="${remId}"]`); await p.click('[data-att-menu="new"] [data-att-archive]');
+    await p.waitForFunction((id) => window.__labels.find(x => x.id === id).archived === true, remId);
+    await p.waitForFunction(() => ![...document.querySelectorAll('[data-att-choices="new"] .att-choice')].some(l => l.textContent.includes('Remarcada')));
+    L('094: arquivar tira da lista de opções e o texto digitado sobrevive', (await p.inputValue('#aula-topico')) === 'Texto que não pode sumir');
+    // editar uma aula com Presença/Competências
+    await p.click('[data-aula] >> nth=1 >> summary'); await p.click('[data-aula] >> nth=1 >> [data-editar-aula]');
+    L('094: edição abre com a Presença e as Competências da aula', await p.evaluate(() => document.querySelector('#dlg-editar-aula input[name="editar-att"]:checked').value === '61' && [...document.querySelectorAll('#dlg-editar-aula input[data-skill]:checked')].map(i => i.value).join() === 'gramatica,escuta'));
+    await p.check('#dlg-editar-aula input[name="editar-att"][value="62"]'); await p.uncheck('#dlg-editar-aula input[data-skill][value="escuta"]');
+    await p.click('#form-editar-aula button[type=submit]'); await p.waitForFunction(() => !document.getElementById('dlg-editar-aula'));
+    L('094: salvar a edição grava Presença e Competências novas', await p.evaluate(() => { const r = window.__logs.find(x => x.topic === 'Subjonctif'); return r.attendance_label_id === 62 && r.skills.join() === 'gramatica'; }));
+    // revisar do Notion: editar e mostrar ao aluno / deixar só para mim
+    await p.evaluate(() => { window.__notion = [{ id: 9001, student_id: 's1', classroom_id: null, class_date: '2026-09-25', topic: null, homework: null, notes: '[Notion] Conversa sobre eleições\n[Notion] Para a próxima aula: Ler o texto' }, { id: 9002, student_id: 's1', classroom_id: null, class_date: '2026-09-26', topic: null, homework: null, notes: '[Notion] fofoca' }];
+      window.__notionPatches = []; fetchNotionReviewLogs = async () => window.__notion.map(x => ({ ...x }));
+      supabaseClient.from = () => ({ update: (patch) => ({ eq: async (c, id) => { window.__notionPatches.push({ id, patch }); window.__notion = window.__notion.filter(x => x.id !== id); return { error: null }; } }) });
+      switchTeacherPanelSection('students'); switchTeacherPanelSection('classlogs'); });
+    await p.waitForSelector('[data-aulas-notion] [data-notion-review="9001"]');
+    L('Notion: bloco de revisão com as 2 aulas marcadas', (await p.$$eval('[data-aulas-notion] [data-notion-review]', l => l.length)) === 2 && (await p.textContent('[data-aulas-notion] summary')).includes('2 aulas'));
+    L('Notion: tópico e "para a próxima aula" em caixas separadas', (await p.$$eval('[data-notion-review="9001"] [data-notion-field]', l => l.map(x => x.dataset.notionField + ':' + x.value).join('|'))) === 'topic:Conversa sobre eleições|homework:Ler o texto');
+    await p.fill('[data-notion-review="9001"] [data-notion-field="topic"]', 'Conversa sobre eleições (editado)');
+    await p.click('[data-notion-show="9001"]'); await p.waitForFunction(() => window.__notionPatches.length === 1);
+    L('Notion: mostrar ao aluno grava o texto editado e tira a marca das Anotações', await p.evaluate(() => { const x = window.__notionPatches[0].patch; return x.topic === 'Conversa sobre eleições (editado)' && x.homework === 'Ler o texto' && x.notes === 'Conversa sobre eleições\nPara a próxima aula: Ler o texto'; }));
+    await p.waitForFunction(() => document.querySelectorAll('[data-aulas-notion] [data-notion-review]').length === 1);
+    await p.click('[data-notion-keep="9002"]'); await p.waitForFunction(() => window.__notionPatches.length === 2);
+    L('Notion: deixar só para mim não mostra nada ao aluno', await p.evaluate(() => { const x = window.__notionPatches[1].patch; return x.notes === 'fofoca' && x.topic === undefined && x.homework === undefined; }));
+    await p.waitForFunction(() => !document.querySelector('[data-aulas-notion] details'));
+    L('Notion: bloco some quando acaba a revisão', true);
+    L('094: sem rolagem horizontal', await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+
     // ---- vindo da ficha do aluno ----
     await p.evaluate(() => switchTeacherPanelSection('students')); await p.waitForSelector('[data-abrir-aluno="1"]');
     await p.click('[data-abrir-aluno="1"]'); await p.waitForSelector('[data-tsu="ficha"] .p-resumo'); await p.click('[data-tsu="ficha"] [data-ir-secao="classlogs"]');
     await p.waitForSelector('[data-tcl="pagina"]');
-    L('Registrar aula da ficha: Aulas abre filtrada na Marina e com ela escolhida', (await p.inputValue('[data-aulas-aluno]')) === 's1' && (await p.$$eval('[data-chips] .p-chip', l => l.map(e => e.textContent.trim())))[0].startsWith('Marina') && (await cards()).length === 2, await cards());
+    L('Registrar aula da ficha: Aulas abre filtrada na Marina e com ela escolhida', (await p.inputValue('[data-aulas-aluno]')) === 's1' && (await p.$$eval('[data-chips] .p-chip', l => l.map(e => e.textContent.trim())))[0].startsWith('Marina') && (await cards()).length === 4 && (await cards()).every(c => c.includes('Marina') || c.includes('Dupla')), await cards());   // 094: inclui as aulas de turma de que ela é membro
     if (OUT) await p.screenshot({ path: path.join(OUT, `aulas-${lang}-${scheme}.png`), fullPage: true });
 
     // ---- celular ----
