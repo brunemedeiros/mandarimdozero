@@ -1,6 +1,6 @@
 #!/bin/bash
-# 105 (sino da professora) -- Postgres LOCAL (nunca produção): banco com 001..087 + 102 + 104, avisos ANTIGOS gravados
-# antes da 105 (para provar a migração dos antigos), depois a 105 duas vezes (idempotente) e o teste em transação
+# 108 (sino da professora) -- Postgres LOCAL (nunca produção): banco com 001..087 + 102 + 104, avisos ANTIGOS gravados
+# antes da 108 (para provar a migração dos antigos), depois a 108 duas vezes (idempotente) e o teste em transação
 # com ROLLBACK. Uso: bash tests/sino-professora/run.sh
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd); ROOT="$HERE/../.."; MIG="$ROOT/shared/supabase_migrations"
@@ -15,9 +15,9 @@ done
 for f in 102_friends_duo.sql 104_server_notifications_en.sql; do
   $P "$DB" -f "$MIG/$f" >/dev/null 2>&1 || { echo "FALHA ao aplicar $f"; exit 1; }
 done
-$P "$DB" -f "$HERE/seed_antes_105.sql" >/dev/null
-for f in 105_teacher_bell.sql 105_teacher_bell.sql; do
+$P "$DB" -f "$HERE/seed_antes_108.sql" >/dev/null
+for f in 108_teacher_bell.sql 108_teacher_bell.sql; do
   $P "$DB" -f "$MIG/$f" >/dev/null 2>&1 || { echo "FALHA ao aplicar $f"; $P "$DB" -f "$MIG/$f" 2>&1 | grep -i error | head -3; exit 1; }
 done
-echo "migrations aplicadas (até 087 + 102 + 104, avisos antigos, 105 duas vezes)"
-psql -h /tmp/pg -p 54329 -U pguser "$DB" -q -At -f "$HERE/test_105.sql" 2>&1 | grep -v '^\s*$'
+echo "migrations aplicadas (até 087 + 102 + 104, avisos antigos, 108 duas vezes)"
+psql -h /tmp/pg -p 54329 -U pguser "$DB" -q -At -f "$HERE/test_108.sql" 2>&1 | grep -v '^\s*$'

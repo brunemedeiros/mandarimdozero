@@ -1,4 +1,4 @@
--- 105 -- Sino da professora (Menu Professora), separado do sino do aluno (2026-10-15).
+-- 108 -- Sino da professora (Menu Professora), separado do sino do aluno (2026-10-15).
 --
 -- Decisão da autora (2026-10-15): os avisos sobre ALUNOS (aluno sumido, post/comentário de aluno no mural, aluno entrou
 -- pela turma, convite aceito ou recusado) ficam num sino próprio dentro do Painel da professora, e não no sino normal.
@@ -21,7 +21,7 @@
 --
 -- O que é grátis e o que é Premium: tudo grátis (é ferramenta do papel Professora, que já é um plano à parte).
 -- Sem remoção de objeto nem de linha (aplicável pela ferramenta de migration). Idempotente (pode rodar duas vezes).
--- Desfazer: docs/rollout-sql/105_rollback_sql_editor.sql (SQL Editor; o app novo continua funcionando sem a 105,
+-- Desfazer: docs/rollout-sql/108_rollback_sql_editor.sql (SQL Editor; o app novo continua funcionando sem a 108,
 -- porque cai no comportamento antigo quando a coluna audience não existe).
 
 -- 1. Colunas novas -------------------------------------------------------------------------------------------------
@@ -163,7 +163,7 @@ revoke all on function public._mural_notify(uuid, text, text, text, text) from p
 
 -- 6. "Aluno sumido" para aluno de português: mesmos modelos do francês (mesmo idioma do site e mesmo active).
 insert into public.notification_templates (event_type, channel, language_app_key, icon, title, body, active, ui_language, created_by)
-select s.event_type, s.channel, 'portugues', s.icon, s.title, s.body, s.active, s.ui_language, 'teacher-bell-105'
+select s.event_type, s.channel, 'portugues', s.icon, s.title, s.body, s.active, s.ui_language, 'teacher-bell-108'
   from public.notification_templates s
  where s.event_type = 'student_inactive_alert' and s.language_app_key = 'frances'
    and not exists (select 1 from public.notification_templates x

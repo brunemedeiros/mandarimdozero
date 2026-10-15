@@ -1,4 +1,4 @@
-// Sino da professora (105): Painel da professora > "Avisos dos alunos", separado do sino do topo.
+// Sino da professora (108): Painel da professora > "Avisos dos alunos", separado do sino do topo.
 // Reaproveita o stub em memória do Supabase de tests/fase-i; a tabela notifications ganha aqui um stub próprio com
 // os filtros que o app usa (eq/neq/is/order/limit/head/update). Rodar: node tests/sino-professora/test_playwright.js
 // (SHOTS=dir para salvar prints).
@@ -18,7 +18,7 @@ let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x) : ''); } };
 
 // Rede: papéis (my_permissions), mural vazio e a tabela notifications com filtros de verdade.
-// noAudience = banco sem a 105 (coluna audience não existe): qualquer filtro por audience devolve erro 42703.
+// noAudience = banco sem a 108 (coluna audience não existe): qualquer filtro por audience devolve erro 42703.
 const BELL_STUB = ([who, noAudience]) => {
   const ago = (min) => new Date(Date.now() - min * 60000).toISOString();
   window.__NOTIF = [
@@ -182,22 +182,22 @@ const BELL_STUB = ([who, noAudience]) => {
       await shot('en');
       await ev(() => setUiLang('pt-BR'));
 
-      // ---- banco sem a 105: tudo volta ao sino do topo, sem sino da professora ----
+      // ---- banco sem a 108: tudo volta ao sino do topo, sem sino da professora ----
       await login('P', true);
       await ev(() => { TEACHER_PANEL_STATE.section = 'students'; return renderTeacherPanelView(); });
       await page.waitForTimeout(150);
-      L('sem a 105: sino do topo mostra tudo (5 não lidos: 4 da professora + 1 da conta), sem erro', await ev(() => document.getElementById('notifications-badge').textContent === '5' && NOTIFICATION_AUDIENCE_COLUMN === false), await ev(() => document.getElementById('notifications-badge').textContent));
-      L('sem a 105: sino da professora escondido', await ev(() => document.getElementById('teacher-bell').hidden && !document.querySelector('.tbell-dot')));
+      L('sem a 108: sino do topo mostra tudo (5 não lidos: 4 da professora + 1 da conta), sem erro', await ev(() => document.getElementById('notifications-badge').textContent === '5' && NOTIFICATION_AUDIENCE_COLUMN === false), await ev(() => document.getElementById('notifications-badge').textContent));
+      L('sem a 108: sino da professora escondido', await ev(() => document.getElementById('teacher-bell').hidden && !document.querySelector('.tbell-dot')));
       await ev(() => toggleNotificationDropdown());
       await page.waitForSelector('.notification-item');
-      L('sem a 105: lista do topo com os 7 avisos da conta (como antes)', await ev(() => document.querySelectorAll('#notifications-list .notification-item').length === 7));
+      L('sem a 108: lista do topo com os 7 avisos da conta (como antes)', await ev(() => document.querySelectorAll('#notifications-list .notification-item').length === 7));
       await ev(() => document.getElementById('notifications-dropdown').classList.remove('open'));
 
-      // ---- com a 105: sino do topo só com os avisos da própria conta ----
+      // ---- com a 108: sino do topo só com os avisos da própria conta ----
       await login('P');
       await ev(() => toggleNotificationDropdown());
       await page.waitForSelector('.notification-item');
-      L('com a 105: lista do topo só com o aviso da conta', await ev(() => document.querySelectorAll('#notifications-list .notification-item').length === 1));
+      L('com a 108: lista do topo só com o aviso da conta', await ev(() => document.querySelectorAll('#notifications-list .notification-item').length === 1));
       await ev(() => document.getElementById('notifications-dropdown').classList.remove('open'));
 
       // ---- aluno: sem sino da professora ----

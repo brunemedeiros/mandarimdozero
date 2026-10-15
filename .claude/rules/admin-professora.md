@@ -28,7 +28,7 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
 - Telas com seleção de alunos: seleção pode ficar vazia, filtro por idioma ativo, busca por nome/@usuário.
 - Notificações: categorias em `notification_rules`; novas categorias precisam decidir se aparecem na matriz de
   Configurações > Notificações.
-- Sino da professora (105, `shared/teacher-panel.js`): aviso sobre aluno = `notifications.audience='teacher'` (gatilho: categoria
+- Sino da professora (108, `shared/teacher-panel.js`): aviso sobre aluno = `notifications.audience='teacher'` (gatilho: categoria
   `supervisao` ou aba `teacher-mural`/`teacher-panel`), de qualquer idioma; o sino do topo filtra `audience<>'teacher'`.
   Aviso novo para a professora: frase nova também em `_teacher_notice_params` + chave `panel.tbell.ev.*`. Doc: `docs/historico/20-*`.
 - Banco de Revisão (`shared/review-bank*.js`, permissão `review_bank` do plano Professora, migrations 081 a 086): aluno do Banco

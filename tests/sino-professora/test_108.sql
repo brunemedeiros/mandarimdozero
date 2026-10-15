@@ -1,4 +1,4 @@
--- Teste da 105 (sino da professora). Transação + ROLLBACK, Postgres local (tests/sino-professora/run.sh).
+-- Teste da 108 (sino da professora). Transação + ROLLBACK, Postgres local (tests/sino-professora/run.sh).
 begin;
 create temp table r(ok boolean, name text) on commit drop;
 grant all on r to public;
@@ -20,7 +20,7 @@ insert into r select exists (select 1 from information_schema.columns where tabl
 insert into r select exists (select 1 from information_schema.columns where table_name = 'notifications' and column_name = 'params' and data_type = 'jsonb'), 'coluna params (jsonb)';
 insert into r select pg_temp.try($q$insert into notifications(user_id, language_app_key, category, event_type, body, audience)
                                    values ('10500000-0000-0000-0000-0000000000f1', 'frances', 'x', 'x', 'x', 'outro')$q$) = '23514', 'audience só aceita self/teacher';
-insert into r select (select count(*) from pg_trigger where tgname = 'notifications_audience_fill') = 1, 'gatilho criado uma vez só (105 aplicada duas vezes)';
+insert into r select (select count(*) from pg_trigger where tgname = 'notifications_audience_fill') = 1, 'gatilho criado uma vez só (108 aplicada duas vezes)';
 insert into r select (select count(*) from pg_constraint where conname = 'notifications_audience_check') = 1, 'check criado uma vez só';
 insert into r select exists (select 1 from pg_indexes where indexname = 'notifications_user_audience_created_idx'), 'índice do sino da professora';
 insert into r select not has_function_privilege('authenticated', 'public._teacher_notify(uuid,text,text,text,text,text)', 'EXECUTE')
@@ -43,7 +43,7 @@ insert into r select (select array_agg(params::text order by id)::text from noti
 insert into r select (select read_at from notifications where event_type = 'teacher_invite_accepted' and user_id = '10500000-0000-0000-0000-0000000000f1') is not null
   and (select count(*) from notifications where user_id = '10500000-0000-0000-0000-0000000000f1' and audience = 'teacher' and read_at is null) = 2, 'antigo lido continua lido; não lidos continuam não lidos';
 insert into r select (select h from _t105_tmpl_before) = (select md5(string_agg(concat_ws('|', id, event_type, channel, language_app_key, title, body, active, ui_language), ',' order by id))
-                                                          from notification_templates where created_by is distinct from 'teacher-bell-105'), 'modelos antigos intocados';
+                                                          from notification_templates where created_by is distinct from 'teacher-bell-108'), 'modelos antigos intocados';
 
 -- ===== 3. Contas =====
 -- T professora (site em português), E professora (site em inglês), A aluno de português, B aluno de francês, C aluno de chinês
@@ -187,5 +187,5 @@ insert into r select (select count(*) from notifications where audience = 'teach
 reset role;
 
 select (case when ok then 'ok|' else 'FALHOU|' end) || name from r;
-select 'RESULTADO 105 ' || count(*) filter (where ok) || '/' || count(*) from r;
+select 'RESULTADO 108 ' || count(*) filter (where ok) || '/' || count(*) from r;
 rollback;

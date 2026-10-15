@@ -1,4 +1,4 @@
--- Desfaz a 105 (sino da professora). Colar no SQL Editor SÓ se for preciso voltar atrás.
+-- Desfaz a 108 (sino da professora). Colar no SQL Editor SÓ se for preciso voltar atrás.
 -- Antes: publicar a versão do app sem o sino da professora (ou deixar a nova: ela funciona sem a coluna audience).
 -- Os avisos continuam todos na tabela; só voltam a aparecer juntos no sino normal.
 begin;
@@ -33,5 +33,5 @@ drop index if exists public.notifications_user_audience_created_idx;
 alter table public.notifications drop constraint if exists notifications_audience_check;
 alter table public.notifications drop column if exists audience;
 alter table public.notifications drop column if exists params;
-delete from public.notification_templates where created_by = 'teacher-bell-105';
+delete from public.notification_templates where created_by = 'teacher-bell-108';
 commit;
