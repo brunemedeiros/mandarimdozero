@@ -1,7 +1,7 @@
 # Teste de rede da tarefa agendada (Staging)
 
 Serve para saber se a tarefa agendada consegue fazer uma chamada de ESCRITA (POST) até a função `review-bank-agent`. É só um "ping": não lê
-dados de aluno e não grava nada. Usa o Staging e o token descartável de teste.
+dados de aluno e não grava nada. Usa o Staging e um token descartável de teste (o valor real não fica no repositório; o do Staging é considerado queimado).
 
 Como usar: claude.ai > Tarefas agendadas > nova tarefa, nome "TESTE de rede (apagar depois)", permissões Auto, frequência qualquer
 (se não houver "uma vez", escolha diária e use "Executar agora"). Colar o texto da versão 2 em Instruções. Rodar uma vez, ler a resposta e APAGAR a tarefa.
@@ -23,7 +23,7 @@ a essa função dela, para saber se esta tarefa consegue chamá-la. A chamada n�
 
 Rode no Bash exatamente este comando e mostre a saída:
 
-curl -sS -m 60 -X POST 'https://ilfjzizjfcmhibkhwber.supabase.co/functions/v1/review-bank-agent' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsZmp6aXpqZmNtaGlia2h3YmVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4OTg5NjQsImV4cCI6MjEwNjQ3NDk2NH0.lNNVvpwyiOoYOZ3peECh0JtR61nXA-6KhUTNlcvWE6I' -H 'x-agent-token: f72f7ac39ce849663a4c276a0d94af749dc0486b6f25b62d' -H 'content-type: application/json' -d '{"action":"ping"}' -w '\n[HTTP %{http_code}]\n'
+curl -sS -m 60 -X POST 'https://ilfjzizjfcmhibkhwber.supabase.co/functions/v1/review-bank-agent' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsZmp6aXpqZmNtaGlia2h3YmVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4OTg5NjQsImV4cCI6MjEwNjQ3NDk2NH0.lNNVvpwyiOoYOZ3peECh0JtR61nXA-6KhUTNlcvWE6I' -H 'x-agent-token: <TOKEN-DE-TESTE-DO-STAGING>' -H 'content-type: application/json' -d '{"action":"ping"}' -w '\n[HTTP %{http_code}]\n'
 
 Responda só com o código HTTP e o corpo. Se for bloqueado, copie a mensagem exatamente como apareceu, diga qual comando foi bloqueado e pare: não tente outro caminho.
 
