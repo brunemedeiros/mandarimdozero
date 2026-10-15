@@ -16,6 +16,24 @@
 //   - shared/supabase-client.js (supabaseClient)
 //   - shared/auth.js            (CURRENT_USER)
 
+// Todos os materiais da professora de uma vez (a tela nova agrupa e filtra no navegador, sem uma ida ao banco por aluno).
+// O limite do PostgREST é 1000 linhas: a tela avisa se chegar nele.
+const SUPPORT_MATERIALS_FETCH_LIMIT = 1000;
+async function fetchAllSupportMaterials(){
+  if (!CURRENT_USER) return { rows: [], truncated: false };
+  const { data, error } = await supabaseClient
+    .from('teacher_support_materials')
+    .select('*')
+    .eq('teacher_id', CURRENT_USER.id)
+    .order('created_at', { ascending: false })
+    .limit(SUPPORT_MATERIALS_FETCH_LIMIT);
+  if (error){ console.error('Erro ao carregar materiais de apoio:', error); return { rows: null, truncated: false }; }
+  return { rows: data || [], truncated: (data || []).length >= SUPPORT_MATERIALS_FETCH_LIMIT };
+}
+
+// Só http/https: o link é aberto pela aluna (e por esta tela) como href.
+function isHttpUrl(u){ return /^https?:\/\//i.test(String(u || '').trim()); }
+
 async function fetchSupportMaterialsForStudent(studentId){
   if (!CURRENT_USER || !studentId) return [];
   const { data, error } = await supabaseClient
@@ -73,6 +91,7 @@ async function createSupportMaterial({ studentId, languageAppKey, title, descrip
   if (!cleanDesc && !cleanLink && !fileUrl){
     return { ok: false, error: t('teacherMaterials.err.needContent') };
   }
+  if (cleanLink && !isHttpUrl(cleanLink)) return { ok: false, error: t('teacherMaterials.err.badLink') };
   const { data, error } = await supabaseClient
     .from('teacher_support_materials')
     .insert({
@@ -97,6 +116,7 @@ async function createSupportMaterial({ studentId, languageAppKey, title, descrip
 async function updateSupportMaterial(id, { title, description, linkUrl }){
   const cleanTitle = (title || '').trim();
   if (!cleanTitle) return { ok: false, error: t('teacherMaterials.err.titleRequired') };
+  if ((linkUrl || '').trim() && !isHttpUrl(linkUrl)) return { ok: false, error: t('teacherMaterials.err.badLink') };
   const { error } = await supabaseClient
     .from('teacher_support_materials')
     .update({

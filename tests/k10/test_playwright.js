@@ -112,18 +112,18 @@ const PANEL_STUB = (who) => {
         await ev(async () => { await applyAdminModeUI(); await applyRoleNavUI(); });
       };
 
-      // ---- painel 📊 na aba Alunos ----
+      // ---- ficha do aluno (Design System): bloco Decks do aluno ----
       await login('P');
       await ev(() => { switchTab('teacher-panel'); });
-      await page.waitForSelector('[data-toggle-metrics]');
-      await page.click('[data-toggle-metrics]');
-      await page.waitForSelector('.student-decks tbody tr');
-      const rows = await ev(() => [...document.querySelectorAll('.student-decks tbody tr')].map(tr => [tr.querySelector('th').textContent.trim(), parseInt(tr.querySelector('th').style.paddingLeft), [...tr.querySelectorAll('td')].map(td => td.textContent.trim()).join('/')]));
+      await page.waitForSelector('[data-abrir-aluno]');
+      await page.click('[data-abrir-aluno]');
+      await page.waitForSelector('[data-tsu-decks] tbody tr');
+      const rows = await ev(() => [...document.querySelectorAll('[data-tsu-decks] tbody tr')].map(tr => [tr.querySelector('th').textContent.trim(), parseFloat(tr.querySelector('th').style.paddingLeft), [...tr.querySelectorAll('td')].map(td => td.textContent.trim()).join('/')]));
       L('árvore em ordem (pai antes dos filhos, professora depois)', JSON.stringify(rows.map(r => r[0])) === JSON.stringify([t_('deck.myDecks', lang), 'Viagem', 'Aeroporto <b>', 'Vazio', t_('deck.teacherRoot', lang), 'Unidade 1']), rows);
       L('recuo por nível', rows[1][1] > rows[0][1] && rows[2][1] > rows[1][1] && rows[3][1] === rows[1][1], rows);
       L('números Novos/Aprendendo/Para revisar/Devidos', rows[0][2] === '2/4/3/5' && rows[3][2] === '0/0/0/0', rows);
-      L('nome escapado', await ev(() => !document.querySelector('.student-decks b')));
-      L('4 colunas de número', await ev(() => document.querySelectorAll('.student-decks thead th').length === 5));
+      L('nome escapado', await ev(() => !document.querySelector('[data-tsu-decks] b')));
+      L('4 colunas de número', await ev(() => document.querySelectorAll('[data-tsu-decks] thead th').length === 5));
       L('sem rolagem horizontal da página', await ev(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
       await shot('painel-decks');
 
@@ -137,7 +137,7 @@ const PANEL_STUB = (who) => {
       }, uid);
       L('perfil do aluno: botão para a professora', JSON.stringify(await renderSlot('S')) === JSON.stringify([appKey]));
       await page.click('#k10-host [data-analytics-lang]');
-      await page.waitForSelector('#student-analytics-modal .student-decks');
+      await page.waitForSelector('#student-analytics-modal [data-tsu-decks]');
       L('modal abre o mesmo painel com os Decks', await ev(() => document.querySelector('#student-analytics-title').textContent.includes('Ana Souza')));
       await shot('perfil-modal');
       await page.keyboard.press('Escape');
@@ -151,7 +151,7 @@ const PANEL_STUB = (who) => {
       L('dono Premium vê "3 pessoas adicionaram"', /3 /.test(await copies()) && (await ev(() => !!document.querySelector('#k8-box .public-copies-line:not(.is-locked)'))), await copies());
       await shot('k8-dono');
       // ---- K.8: subaba da admin ----
-      const adminHTML = await ev(async () => { const r = await supabaseClient.rpc('admin_public_deck_copy_stats'); const d = document.createElement('div'); d.id = 'k8-admin'; d.innerHTML = renderPublicDeckCopiesSectionHTML(r.data.decks); document.body.prepend(d); return d.innerHTML; });
+      const adminHTML = await ev(async () => { const r = await supabaseClient.rpc('admin_public_deck_copy_stats'); const d = document.createElement('div'); d.id = 'k8-admin'; d.innerHTML = tanDecksHTML(r.data.decks); document.body.prepend(d); return d.innerHTML; });
       L('admin: tabela com pessoas/cópias e nome escapado', adminHTML.includes('&lt;i&gt;') && (await ev(() => document.querySelectorAll('#k8-admin tbody tr').length === 2 && !document.querySelector('#k8-admin tbody i'))));
       L('admin: Deck despublicado marcado', await ev(() => document.querySelector('#k8-admin tbody tr:nth-child(2)').textContent.includes(t('publicDeckCopies.unpublished'))));
       L('admin: aba Decks públicos registrada', await ev(() => ANALYTICS_TABS.some(x => x.key === 'decks') && ANALYTICS_LAZY_TABS.has('decks')));

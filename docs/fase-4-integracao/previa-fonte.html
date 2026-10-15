@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pt-BR" data-curso="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prévia da integração</title>
+<link rel="stylesheet" href="../../shared/fonts/nunito.css">
+<link rel="stylesheet" href="../../shared/painel/guia-paletas.css">
+<link rel="stylesheet" href="../../shared/painel/vendor/pico.painel.css">
+<link rel="stylesheet" href="../../shared/painel/painel-tokens.css">
+<link rel="stylesheet" href="../../shared/painel/painel-componentes.css">
+<style>
+html,body{margin:0;background:var(--paper)}
+.painel{padding:1rem}
+.peca{margin:0 0 1.5rem}
+/* PROPOSTA: cores dos rótulos de presença (as 9 do Notion), claras e escuras pelo mesmo cálculo */
+.rot{--h:#9b9a97;display:inline-flex;align-items:center;gap:.3rem;padding:.12rem .7rem;border-radius:999px;font-size:.84rem;font-weight:700;border:1px solid color-mix(in srgb,var(--h) 55%,var(--p-linha));background:color-mix(in srgb,var(--h) 24%,var(--p-elevado));color:var(--p-tinta);cursor:pointer}
+.rot[data-c=brown]{--h:#9f6b53}.rot[data-c=orange]{--h:#d9730d}.rot[data-c=yellow]{--h:#cb912f}.rot[data-c=green]{--h:#448361}.rot[data-c=blue]{--h:#337ea9}.rot[data-c=purple]{--h:#9065b0}.rot[data-c=pink]{--h:#c14c8a}.rot[data-c=red]{--h:#d44c47}
+.rot[aria-checked=true]{outline:2px solid var(--p-marca);outline-offset:1px}
+.rot .mais{opacity:.6;font-weight:800;letter-spacing:.05em}
+.linha{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center}
+.campo{display:grid;gap:.4rem;margin:0 0 1rem}
+.campo>legend,.campo>.rotulo{font-weight:800;font-size:.9rem}
+.menu-rotulo{display:grid;gap:.6rem;max-width:22rem;padding:.8rem;border:1px solid var(--p-linha);border-radius:12px;background:var(--p-elevado);box-shadow:var(--p-sombra)}
+.menu-rotulo input{margin:0}
+.cores{display:flex;gap:.35rem;flex-wrap:wrap}
+.cores .rot{padding:.1rem .5rem;font-size:.78rem}
+.competencia{display:inline-flex;align-items:center;gap:.4rem;padding:.2rem .7rem;border:1px solid var(--p-linha);border-radius:999px;font-weight:700;font-size:.86rem;background:var(--p-elevado)}
+.competencia input,.turma input{margin:0;flex:none}
+.turma{white-space:nowrap;display:inline-flex;align-items:center;gap:.4rem;padding:.2rem .7rem;border:1px solid var(--p-linha);border-radius:999px;font-weight:700;font-size:.86rem;background:var(--p-elevado)}
+.dois{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:1rem}
+.pequeno{font-size:.85rem;color:var(--p-tinta-suave)}
+.arvore th[scope=row]{font-weight:700}
+.zero{color:var(--p-tinta-suave)}
+.cols{display:grid;grid-template-columns:repeat(5,auto);gap:0 1.2rem;align-items:center}
+.card-destaque{border:1px dashed var(--p-linha);border-radius:14px;padding:1rem;background:color-mix(in srgb,var(--p-marca) 6%,var(--p-elevado))}
+</style>
+</head>
+<body>
+<div class="painel">
+
+<section id="aulas" class="peca">
+  <header class="p-cabecalho"><div><span class="p-sobretitulo">Painel da professora</span><h1>Aulas</h1><span class="p-subtitulo">Mesma tela de hoje, com o que a main trouxe: turma, presença e competências</span></div></header>
+  <div class="dois" style="grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:start">
+    <div>
+      <h3 style="margin-top:0">Lista de aulas (um cartão com os selos)</h3>
+      <article class="p-aula" style="display:grid;grid-template-columns:3.4rem 1fr auto;gap:.9rem;align-items:start">
+        <div style="text-align:center;font-weight:800;border:1px solid var(--p-linha);border-radius:10px;padding:.3rem">14<br><small>OUT</small></div>
+        <div>
+          <h3 style="margin:0 0 .25rem">Pedir comida no restaurante</h3>
+          <div class="linha" style="margin-bottom:.35rem"><span class="competencia" style="padding:.05rem .6rem">👥 Turma Quarta 19h</span><span class="rot" data-c="green" style="cursor:default">Presente</span><span class="competencia" style="padding:.05rem .6rem">Conversação</span><span class="competencia" style="padding:.05rem .6rem">Vocabulário</span></div>
+          <span class="pequeno">Aula de turma · Marina Alves, Tiago Nunes, Helena Duarte</span>
+          <dl style="margin:.35rem 0 0"><dt class="pequeno" style="display:inline;font-weight:800">Lição de casa </dt><dd style="display:inline;margin:0">Gravar um áudio</dd></dl>
+        </div>
+        <button class="outline" style="padding:.3rem .8rem">Ações</button>
+      </article>
+      <article class="p-aula" style="display:grid;grid-template-columns:3.4rem 1fr auto;gap:.9rem;align-items:start;margin-top:.8rem">
+        <div style="text-align:center;font-weight:800;border:1px solid var(--p-linha);border-radius:10px;padding:.3rem">09<br><small>OUT</small></div>
+        <div>
+          <h3 style="margin:0 0 .25rem">Passé composé com être</h3>
+          <div class="linha" style="margin-bottom:.35rem"><span class="rot" data-c="red" style="cursor:default">Faltou</span></div>
+          <span class="pequeno">Marina Alves · Francês</span>
+        </div>
+        <button class="outline" style="padding:.3rem .8rem">Ações</button>
+      </article>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Formulário "Registrar aula" (lado direito)</h3>
+      <article style="margin:0">
+        <strong>Quem teve a aula</strong>
+        <div class="linha" style="margin:.4rem 0"><span class="competencia" style="padding:.05rem .6rem">Marina Alves</span><span class="competencia" style="padding:.05rem .6rem">👥 Turma Quarta 19h</span></div>
+        <button class="outline" type="button" style="padding:.3rem .9rem">Escolher pessoas</button>
+        <label style="margin-top:.8rem">Data<input type="date" value="2026-10-14"></label>
+        <label>Tópico<input type="text" value="Pedir comida no restaurante"></label>
+        <fieldset class="campo">
+          <legend>Presença</legend>
+          <div class="linha" role="radiogroup">
+            <span class="rot" data-c="gray" role="radio" aria-checked="false">Sem registro</span>
+            <span class="rot" data-c="green" role="radio" aria-checked="true">Presente <span class="mais">⋯</span></span>
+            <span class="rot" data-c="red" role="radio" aria-checked="false">Faltou <span class="mais">⋯</span></span>
+            <span class="rot" data-c="yellow" role="radio" aria-checked="false">Reposição <span class="mais">⋯</span></span>
+          </div>
+          <input type="text" placeholder="Digite um nome e aperte Enter para criar um rótulo" style="margin:0">
+        </fieldset>
+        <fieldset class="campo">
+          <legend>Competências trabalhadas</legend>
+          <div class="linha">
+            <label class="competencia"><input type="checkbox" checked> Conversação</label>
+            <label class="competencia"><input type="checkbox" checked> Vocabulário</label>
+            <label class="competencia"><input type="checkbox"> Gramática</label>
+            <label class="competencia"><input type="checkbox"> Escrita</label>
+            <label class="competencia"><input type="checkbox"> Leitura</label>
+            <label class="competencia"><input type="checkbox"> Escuta</label>
+            <label class="competencia"><input type="checkbox"> Pronúncia</label>
+          </div>
+        </fieldset>
+        <div class="linha" style="justify-content:flex-end"><button class="outline" type="button">Limpar</button><button type="button">Registrar aula · 1 aluno · 1 turma</button></div>
+      </article>
+    </div>
+  </div>
+
+  <div class="dois" style="margin-top:1.2rem;align-items:start">
+    <div>
+      <h3 style="margin-top:0">Janela "Escolher pessoas" (ganha o bloco Turmas)</h3>
+      <article style="margin:0">
+        <strong>Alunos</strong>
+        <input type="search" placeholder="Buscar por nome ou @usuário" style="margin:.4rem 0">
+        <div class="linha" style="margin-bottom:.4rem"><span class="pequeno">Francês</span><span class="pequeno">·</span><a href="#" class="pequeno">Marcar todos</a><a href="#" class="pequeno">Limpar</a></div>
+        <div style="display:grid;gap:.3rem;margin-bottom:.9rem">
+          <label class="turma"><input type="checkbox" checked> Marina Alves · @marina.alves</label>
+          <label class="turma"><input type="checkbox"> Tiago Nunes · @tiagonunes</label>
+        </div>
+        <strong>Turmas</strong>
+        <p class="pequeno" style="margin:.2rem 0 .4rem">Aula de turma fica registrada uma vez só e aparece para todos os alunos da turma.</p>
+        <div style="display:grid;gap:.3rem">
+          <label class="turma"><input type="checkbox" checked> 👥 Turma Quarta 19h · Francês · 3 alunos</label>
+          <label class="turma"><input type="checkbox"> 👥 Turma Sábado · Mandarim · 5 alunos</label>
+        </div>
+        <p class="pequeno" style="margin:.7rem 0 0;font-weight:800">1 aluno · 1 turma</p>
+      </article>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Menu do rótulo (ao clicar no ⋯)</h3>
+      <div class="menu-rotulo">
+        <input type="text" value="Reposição" aria-label="Nome do rótulo">
+        <div class="cores"><span class="rot" data-c="gray">Cinza</span><span class="rot" data-c="brown">Marrom</span><span class="rot" data-c="orange">Laranja</span><span class="rot" data-c="yellow" aria-checked="true">Amarelo</span><span class="rot" data-c="green">Verde</span><span class="rot" data-c="blue">Azul</span><span class="rot" data-c="purple">Roxo</span><span class="rot" data-c="pink">Rosa</span><span class="rot" data-c="red">Vermelho</span></div>
+        <div class="linha" style="justify-content:space-between"><a href="#" class="pequeno">Arquivar</a><button type="button" class="outline" style="padding:.3rem .9rem">Pronto</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="alunos" class="peca">
+  <header class="p-cabecalho"><div><span class="p-sobretitulo">Painel da professora</span><h1>Alunos</h1><span class="p-subtitulo">Convite (seção na própria tela, como hoje) e Decks do aluno</span></div></header>
+  <article>
+    <h3 style="margin-top:0">Convidar aluno</h3>
+    <p class="pequeno">Escolha o idioma e convide pela busca ou mande o link. O aluno aceita, ganha o seu badge e passa a aparecer aqui. O convite vale 14 dias.</p>
+    <div class="linha" style="margin:.4rem 0 1rem"><span class="rot" data-c="blue" aria-checked="true" role="radio">🇫🇷 Francês</span><span class="rot" data-c="gray" role="radio" aria-checked="false">🇨🇳 Mandarim</span></div>
+    <div class="dois">
+      <div>
+        <strong>Pela busca</strong>
+        <div class="p-ferramentas" style="margin:.4rem 0"><input class="p-cresce" type="search" placeholder="Buscar por nome ou @usuário"></div>
+        <div class="p-conta" style="display:flex;gap:.7rem;align-items:center;padding:.6rem;border:1px solid var(--p-linha);border-radius:12px"><span class="p-avatar">LB</span><div><strong>Lara Barros</strong><br><small class="pequeno">@lara.barros</small></div></div>
+        <button style="margin-top:.7rem">Convidar para Francês</button>
+      </div>
+      <div>
+        <strong>Pelo link</strong>
+        <p class="pequeno" style="margin:.3rem 0">Quem abrir este link e aceitar vira seu aluno na hora. Serve para mandar no WhatsApp ou no grupo da turma.</p>
+        <input type="text" readonly value="https://idiomascombrune.com/fr/?convite=k3f9a82xqd" style="margin-bottom:.5rem">
+        <div class="linha"><button class="outline">Copiar link</button><button class="outline">Mandar no WhatsApp</button></div>
+      </div>
+    </div>
+  </article>
+  <h3>Convites pendentes (2)</h3>
+  <article class="p-tabela" style="margin:0"><table><tbody>
+    <tr><td style="width:3rem"><span class="p-avatar">LB</span></td><td style="text-align:left"><strong>Lara Barros</strong><br><small class="pequeno">@lara.barros · Francês · faltam 12 dias</small></td><td style="text-align:right"><button class="outline" style="padding:.25rem .8rem">Cancelar</button></td></tr>
+    <tr><td><span class="p-avatar">BR</span></td><td style="text-align:left"><strong>Bruno Reis</strong><br><small class="pequeno">@bruno.reis · Mandarim · expirou</small></td><td style="text-align:right"><button class="outline" style="padding:.25rem .8rem">Reenviar</button> <button class="outline" style="padding:.25rem .8rem">Cancelar</button></td></tr>
+  </tbody></table></article>
+  <h3>Ficha do aluno: Decks do aluno</h3>
+  <article>
+    <p class="pequeno" style="margin-top:0">Você vê o nome e os números de cada Deck (com os subdecks somados), sem abrir os cartões. Conta só o que o aluno já sincronizou.</p>
+    <article class="p-tabela" style="margin:0"><table class="striped arvore"><thead><tr><th>Deck</th><th>Novos</th><th>Aprendendo</th><th>Revisão</th><th>Devidos</th></tr></thead><tbody>
+      <tr><th scope="row">Meus Decks</th><td>12</td><td>5</td><td>40</td><td>7</td></tr>
+      <tr><th scope="row" style="padding-left:1.8rem">Viagem</th><td>4</td><td>2</td><td>10</td><td>3</td></tr>
+      <tr><th scope="row">Decks da professora</th><td>30</td><td>8</td><td>96</td><td>11</td></tr>
+      <tr><th scope="row" style="padding-left:1.8rem">Verbos do dia a dia</th><td class="zero">0</td><td>3</td><td>44</td><td>5</td></tr>
+    </tbody></table></article>
+  </article>
+</section>
+
+<section id="analytics" class="peca">
+  <header class="p-cabecalho"><div><span class="p-sobretitulo">Painel de Admin</span><h1>Analytics</h1><span class="p-subtitulo">Sub-aba "Decks públicos" (a última da fila, como hoje)</span></div></header>
+  <nav class="p-abas" style="margin-bottom:1rem"><a href="#">Resumo</a><a href="#">Atividade</a><a href="#">Progressão</a><a href="#">Exercícios</a><a href="#">Retenção</a><a href="#">Engajamento</a><a href="#">Tecnologia</a><a href="#" aria-current="true">Decks públicos</a></nav>
+  <p class="pequeno">Quantas pessoas adicionaram cada Deck público (cada conta conta uma vez; recópias entram só em "Cópias"). Conta desde 12/10/2026.</p>
+  <article class="p-tabela"><table class="striped"><thead><tr><th>Deck</th><th>Pessoas</th><th>Cópias</th><th>Última cópia</th></tr></thead><tbody>
+    <tr><td><strong>Verbos do dia a dia</strong><br><small class="pequeno">@brune · Francês</small></td><td>18</td><td>21</td><td>13/10/2026</td></tr>
+    <tr><td><strong>Restaurante</strong><br><small class="pequeno">@brune · Mandarim</small></td><td>7</td><td>7</td><td>11/10/2026</td></tr>
+    <tr><td><strong>Números</strong><br><small class="pequeno">@marina.alves · Francês</small></td><td class="zero">0</td><td class="zero">0</td><td>—</td></tr>
+  </tbody></table></article>
+</section>
+
+<section id="cartoes" class="peca">
+  <header class="p-cabecalho"><div><span class="p-sobretitulo">Painel da professora</span><h1>Cartões</h1><span class="p-subtitulo">Onde fica o Banco de Revisão</span></div></header>
+  <div class="p-abas" style="margin-bottom:1rem"><a href="#" aria-current="true">Cartões</a><a href="#">Banco de Revisão</a></div>
+  <div class="card-destaque"><strong>Banco de Revisão</strong>
+    <p class="pequeno" style="margin:.3rem 0 0">Continua exatamente como está hoje (mesma tela, mesma lógica, mesma aparência), só que aberto dentro do Cartões novo. O visual novo fica para a outra sessão, ou para depois, como você decidiu.</p></div>
+</section>
+
+</div>
+</body>
+</html>

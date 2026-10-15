@@ -1,4 +1,5 @@
 // Fase G -- Playwright (Chromium real), FR + ZH.
+const CARTOES = require('../painel-cartoes/helpers.js');
 // Professora (Painel > Flashcards): seleciona alunos -> destino por aluno
 // (teacher_root padrão, subdeck opcional) -> Card Type -> Fields -> Preview ->
 // salva -> cartão no Deck certo -> mover. Aluno (Meus Cartões > "Cartões da
@@ -152,10 +153,10 @@ async function bootPage(browser, lang, port){
       switchTab('teacher-panel');
       switchTeacherPanelSection('flashcards');
     }, appKey);
-    await page.waitForSelector('[data-student-checkbox]');
+    await page.waitForSelector('[data-tcc="pagina"]');
     L('nenhum Teacher Deck é criado no boot/abertura (bootstrap é lazy)', await ev(() => window.__DB.decks.filter(d => d.kind === 'teacher_root').length === 0));
     L('sem aluno selecionado: destino pede seleção', (await page.textContent('#admin-flashcard-destinations')).includes('Selecione'));
-    await page.check('[data-student-checkbox][value="S1"]');
+    await CARTOES.pickStudent(page, 'S1');
     await page.waitForSelector('[data-dest-select="S1"]');
     L('S1 selecionado: teacher_root criado sob demanda, só o dele', await ev(() => window.__DB.decks.filter(d => d.kind === 'teacher_root').map(d => d.owner_id).join() === 'S1'));
     let opts = await ev(() => [...document.querySelectorAll('[data-dest-select="S1"] option')].map(o => o.textContent.trim()));
@@ -163,6 +164,7 @@ async function bootPage(browser, lang, port){
     L('destino identifica claramente o aluno', (await page.textContent('[data-dest-row="S1"]')).includes('Ana'));
 
     // subdeck pela UI
+    await CARTOES.openTree(page, 'S1');
     await page.fill('[data-dest-subname="S1"]', 'Verbos');
     await page.click('[data-dest-newsub="S1"]');
     await page.waitForFunction(() => document.querySelectorAll('[data-dest-select="S1"] option').length === 2);
@@ -171,14 +173,14 @@ async function bootPage(browser, lang, port){
     L('subdeck vira o destino selecionado do aluno', await ev(() => document.querySelector('[data-dest-select="S1"]').selectedOptions[0].textContent.includes('Verbos')));
 
     // segundo aluno: destino próprio, sem herdar o subdeck do S1
-    await page.check('[data-student-checkbox][value="S2"]');
+    await CARTOES.pickStudent(page, 'S2');
     await page.waitForSelector('[data-dest-select="S2"]');
     L('cada aluno tem SEU seletor de destino (não um global)', await ev(() => document.querySelectorAll('[data-dest-select]').length === 2));
     L('S2 usa o próprio teacher_root; S1 continua no subdeck', await ev(() => document.querySelector('[data-dest-select="S2"]').options.length === 1 && document.querySelector('[data-dest-select="S1"]').selectedOptions[0].textContent.includes('Verbos')));
     L('S2 não enxerga Decks do S1 e vice-versa', await ev(() => [...document.querySelectorAll('[data-dest-select="S2"] option')].every(o => !o.textContent.includes('Verbos'))));
 
     // A) Normal p/ 2 alunos (com Preview)
-    await page.selectOption('#admin-flashcard-card-type-preview', 'normal');
+    await CARTOES.setType(page, 'normal');
     for (let i = 0; i < 2; i++) await page.click('#admin-flashcard-native-fields [data-field-add]');
     const inputs = page.locator('#admin-flashcard-native-fields [data-field-content]');
     await inputs.nth(0).fill(lang === 'fr' ? 'le chat' : '猫'); await inputs.nth(1).fill('o gato');
@@ -194,33 +196,32 @@ async function bootPage(browser, lang, port){
     L('A Normal: 2 linhas independentes, nativas, com o Deck de cada aluno', r1.deck_id === sub.id && r2.deck_id === troot2 && r1.id !== r2.id && r1.card_generation_mode === 'normal' && Array.isArray(r1.fields), { r1: r1.deck_id, r2: r2.deck_id });
     L('A nenhum deck_id compartilhado entre alunos', r1.deck_id !== r2.deck_id);
     L('A histórico (deck_id nulo) intocado', await ev(() => { const h = window.__DB.teacher_flashcards.find(r => r.id === 1); return h.deck_id === null && h.front === 'hist' && h.status === 'active'; }));
-    await page.waitForSelector('[data-move-card]');
-    const chips = await page.textContent('#admin-flashcards-cards-box');
+    const chips = await CARTOES.listText(page);
     L('lista mostra o Deck de cada cartão (destino visível) e "sem Deck" p/ o histórico', chips.includes('Verbos') && chips.includes('Cartões da professora') && chips.includes('sem Deck'));
 
     // mover cartão do S1 (Verbos -> teacher_root)
     const troot1 = await ev(() => window.__DB.decks.find(d => d.kind === 'teacher_root' && d.owner_id === 'S1').id);
-    await page.selectOption(`[data-move-card="${r1.id}"]`, String(troot1));
+    await CARTOES.moveCardUI(page, r1.id, troot1);
     await page.waitForFunction(([id, t]) => window.__DB.teacher_flashcards.find(r => r.id === id).deck_id === t, [r1.id, troot1]);
     L('mover cartão entre Teacher Decks do mesmo aluno', true);
-    L('opções de mover só listam Decks do próprio aluno', await ev(id => [...document.querySelectorAll(`[data-move-card="${id}"] option`)].every(o => !o.textContent.includes('Cartões da professora (padrão)') || true), r1.id));
+    L('opções de mover só listam Decks do próprio aluno', (await CARTOES.moveOptions(page, r1.id)).every(v => !!v && Number(v) !== troot1));
 
     // B) Normal com reverso p/ S1 apenas (desmarca S2) -> 2 CardInstances no mesmo Deck
-    await page.uncheck('[data-student-checkbox][value="S2"]');
+    await CARTOES.pickStudent(page, 'S2', false);
     await page.waitForFunction(() => document.querySelectorAll('[data-dest-select]').length === 1);
-    await page.selectOption('#admin-flashcard-card-type-preview', 'normal_reversed');
+    await CARTOES.setType(page, 'normal_reversed');
     for (let i = 0; i < 2; i++) await page.click('#admin-flashcard-native-fields [data-field-add]');
     const rin = page.locator('#admin-flashcard-native-fields [data-field-content]');
     await rin.nth(0).fill('la maison'); await rin.nth(1).fill('a casa');
     await page.click('#admin-create-flashcard-btn');
     await page.waitForFunction(() => window.__DB.teacher_flashcards.length === 4, null, { timeout: 8000 });
-    await page.waitForSelector('[data-student-checkbox]');
+    await page.waitForSelector('[data-tcc="pagina"]');
     const rev = await ev(() => window.__DB.teacher_flashcards[3]);
     L('B Reverso: 1 linha nativa normal_reversed no destino do aluno', rev.card_generation_mode === 'normal_reversed' && rev.student_id === 'S1' && rev.deck_id != null);
     L('B Reverso gera 2 CardInstances (mesmo Deck)', await ev(r => { const c = buildCardFromTeacherFlashcard(r); return c.length === 2 && c[0].deckId === r.deck_id && c[1].deckId === r.deck_id; }, rev));
 
     // C) Cloze (estado nativo montado com as funções reais do editor) p/ S1 -> N CardInstances
-    await page.check('[data-student-checkbox][value="S1"]');
+    await CARTOES.pickStudent(page, 'S1');
     await page.waitForSelector('[data-dest-select="S1"]');
     await ev(() => {
       const st = createNativeNoteEditorState({ cardGenerationMode: 'cloze', languageAppKey: APP_KEY });
@@ -236,7 +237,7 @@ async function bootPage(browser, lang, port){
     // D) falha de destino: Deck escolhido some/estranho -> só aquele aluno falha, nada gravado
     const nBefore = await ev(() => window.__DB.teacher_flashcards.length);
     await ev(() => { ADMIN_FLASHCARDS_STATE.destByStudent[adminDestKey({ student_id: 'S1', language_app_key: APP_KEY })] = 999999; });
-    await page.selectOption('#admin-flashcard-card-type-preview', 'normal').catch(() => {});
+    await CARTOES.setType(page, 'normal');
     await ev(() => { const st = createNativeNoteEditorState({ cardGenerationMode: 'normal', languageAppKey: APP_KEY }); addFieldToEditorState(st, { content: { value: 'x' } }); addFieldToEditorState(st, { content: { value: 'y' } }); ADMIN_FLASHCARDS_STATE.nativeCardState = st; });
     await page.click('#admin-create-flashcard-btn');
     await page.waitForTimeout(600);

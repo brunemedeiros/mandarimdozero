@@ -1,5 +1,6 @@
 // ---------- Badges (admin) -- criar badges e concedê-los a contas ----------
-// Tela só visível/alcançável pra conta da autora (isAdminUser). Cria
+// Tela só visível/alcançável pra conta da autora (isAdminUser), no Design System do painel (shared/admin-badges-ui.js: catálogo em
+// cartões, concessões em tabela com filtro, formulários ao lado, janelas de editar e de gerenciar pessoas). Cria
 // entradas em badge_catalog (definição do badge) e badge_grants (quem
 // recebeu), ambas lidas por shared/profile.js pra montar a lista de
 // "badges especiais" de cada Perfil -- ver computeEarnedSpecialBadges().
@@ -9,6 +10,7 @@
 //   - shared/supabase-client.js (supabaseClient)
 //   - shared/auth.js            (CURRENT_USER)
 //   - shared/toast.js           (showToast)
+//   - shared/admin-badges-ui.js, shared/painel/painel-ui.js (PainelUI.confirmar)
 //   - languages/<lang>/app.js   (isAdminUser, switchTab)
 
 // Resolve um @username pra { user_id, username, display_name } -- usado
@@ -125,8 +127,10 @@ async function updateGrantNote(userId, badgeId, note){
 async function deleteCatalogBadge(badgeId){
   // Apaga o badge do catálogo E todas as concessões dele -- sem isso, uma
   // concessão "órfã" (apontando pra um badge que não existe mais)
-  // continuaria contando como earned pra quem já tinha recebido.
-  await supabaseClient.from('badge_grants').delete().eq('badge_id', badgeId);
+  // continuaria contando como earned pra quem já tinha recebido. Se as
+  // concessões não puderem ser apagadas, o catálogo fica como está.
+  const { error: grantsError } = await supabaseClient.from('badge_grants').delete().eq('badge_id', badgeId);
+  if (grantsError){ console.error('Erro ao apagar concessões do badge:', grantsError); return { ok: false }; }
   const { error } = await supabaseClient.from('badge_catalog').delete().eq('id', badgeId);
   return { ok: !error };
 }
@@ -158,15 +162,20 @@ async function revokeBadgeGrant(userId, badgeId){
 // sequencial deixa mais fácil saber exatamente onde parou se algo falhar
 // no meio.
 async function applyBadgeMembership(badgeId, adds, removes, noteChanges){
+  let failed = 0;
   for (const add of adds){
-    await supabaseClient.from('badge_grants').insert({ user_id: add.userId, badge_id: badgeId, granted_by: CURRENT_USER?.email || null, note: add.note?.trim() || null });
+    const { error } = await supabaseClient.from('badge_grants').insert({ user_id: add.userId, badge_id: badgeId, granted_by: CURRENT_USER?.email || null, note: add.note?.trim() || null });
+    if (error) failed++;
   }
   for (const userId of removes){
-    await supabaseClient.from('badge_grants').delete().eq('user_id', userId).eq('badge_id', badgeId);
+    const { error } = await supabaseClient.from('badge_grants').delete().eq('user_id', userId).eq('badge_id', badgeId);
+    if (error) failed++;
   }
   for (const change of (noteChanges || [])){
-    await updateGrantNote(change.userId, badgeId, change.note);
+    const r = await updateGrantNote(change.userId, badgeId, change.note);
+    if (!r.ok) failed++;
   }
+  return { ok: failed === 0, failed };
 }
 
 // Junta badge_grants com profiles num só JS (as duas tabelas referenciam
@@ -187,295 +196,183 @@ async function fetchAllGrantsWithUsernames(){
   return grants.map(g => ({ ...g, username: byId[g.user_id]?.username, display_name: byId[g.user_id]?.display_name }));
 }
 
+const BADGES_VIEW = { catalog: [], grants: [], profiles: [], filtros: { badge: '', busca: '' }, token: 0, ligado: false };
+
+function badgesWrap(){ return document.getElementById('admin-badges-content'); }
+
+function badgesRefreshGrants(){
+  const box = document.querySelector('[data-badges-concessoes]');
+  if (!box) return;
+  const V = BADGES_VIEW;
+  box.innerHTML = tbdGrantsTableHTML(tbdFilterGrants(V.grants, V.filtros, V.catalog, SPECIAL_BADGES), V.grants.length, V.catalog, SPECIAL_BADGES);
+}
+
+// Busca tudo de novo e atualiza só as partes que dependem dos dados (catálogo, concessões, filtro e opções do formulário de
+// conceder), sem refazer os formulários (apagaria o que foi digitado).
+async function badgesReload(){
+  const V = BADGES_VIEW;
+  const [catalog, grants, profiles] = await Promise.all([fetchBadgeCatalog(), fetchAllGrantsWithUsernames(), fetchAllProfiles()]);
+  V.catalog = catalog; V.grants = grants; V.profiles = profiles;
+  if (V.filtros.badge && !tbdFindBadge(V.filtros.badge, catalog, SPECIAL_BADGES)) V.filtros.badge = '';
+  const cat = document.querySelector('[data-badges-catalogo]'); if (cat) cat.innerHTML = tbdCatalogHTML(catalog, grants);
+  const filtro = document.querySelector('[data-badges-filtro]');
+  if (filtro){
+    const used = new Set(grants.map(g => g.badge_id));
+    filtro.innerHTML = `<option value="">${escapeHTML(t('badges.filter.all'))}</option>` + catalog.concat(SPECIAL_BADGES.filter(b => used.has(b.id))).map(b => `<option value="${escapeHTML(b.id)}"${V.filtros.badge === b.id ? ' selected' : ''}>${escapeHTML(tbdIconText(b))} ${escapeHTML(b.name)}</option>`).join('');
+  }
+  const sel = document.getElementById('conceder-badge');
+  if (sel){
+    const keep = sel.value;
+    sel.innerHTML = catalog.length ? catalog.map(b => `<option value="${escapeHTML(b.id)}">${escapeHTML(b.icon)} ${escapeHTML(b.name)}</option>`).join('') : `<option value="">${escapeHTML(t('admin.badges.grant.createFirst'))}</option>`;
+    if (catalog.some(b => b.id === keep)) sel.value = keep;
+    const btn = document.getElementById('conceder-enviar'); if (btn) btn.disabled = !catalog.length;
+  }
+  const dl = document.getElementById('conceder-usuarios');
+  if (dl) dl.innerHTML = profiles.map(p => `<option value="${escapeHTML(p.username)}">${escapeHTML(p.display_name || '')}</option>`).join('');
+  badgesRefreshGrants();
+}
+
 async function renderAdminBadgesView(){
-  const wrap = document.getElementById('admin-badges-content');
+  const wrap = badgesWrap();
   if (!wrap) return;
   if (!isAdminUser()){
     wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
-  wrap.innerHTML = loadingHTML();
-
+  badgesBind(wrap);
+  const token = ++BADGES_VIEW.token;
+  wrap.innerHTML = tbdLoadingHTML();
   const [catalog, grants, profiles] = await Promise.all([fetchBadgeCatalog(), fetchAllGrantsWithUsernames(), fetchAllProfiles()]);
-
-  const catalogOptionsHTML = catalog.map(b => `<option value="${b.id}">${b.icon} ${b.name}</option>`).join('');
-  // <datalist> nativo -- some idiomas/navegadores mostram como uma lista
-  // "toggle" ao clicar no campo, filtrando conforme digita, sem precisar
-  // de nenhum JS de dropdown customizado.
-  const usernameDatalistHTML = profiles.map(p => `<option value="${p.username}">${p.display_name ? escapeHTML(p.display_name) : ''}</option>`).join('');
-
-  const builtInHTML = SPECIAL_BADGES.map(b => `
-    <div class="admin-badge-row">
-      <span class="admin-badge-icon">${b.icon}</span>
-      <div class="admin-badge-info">
-        <div class="admin-badge-name">${b.name}</div>
-        <div class="admin-badge-desc">${b.desc} · ${t('admin.badges.builtin.auto')}</div>
-      </div>
-    </div>
-  `).join('');
-
-  const catalogHTML = catalog.length ? catalog.map(b => {
-    const memberCount = grants.filter(g => g.badge_id === b.id).length;
-    return `
-    <div class="admin-badge-row clickable" data-manage-badge-id="${b.id}">
-      <span class="admin-badge-icon">${b.icon}</span>
-      <div class="admin-badge-info">
-        <div class="admin-badge-name">${b.name}</div>
-        <div class="admin-badge-desc">${b.description ? b.description + ' · ' : ''}${tp('admin.badges.members', memberCount)} · ${t('admin.badges.catalog.clickManage')}</div>
-      </div>
-      <button class="admin-badge-edit-btn" data-edit-badge-id="${b.id}" title="${t('admin.badges.catalog.editTitle')}">✏️</button>
-      <button class="admin-badge-delete-btn" data-badge-id="${b.id}" title="${t('admin.badges.catalog.deleteTitle')}">🗑️</button>
-    </div>
-  `;
-  }).join('') : `<p class="profile-empty-note">${t('admin.badges.catalog.empty')}</p>`;
-
-  const grantsHTML = grants.length ? grants.map(g => {
-    const badge = catalog.find(b => b.id === g.badge_id) || SPECIAL_BADGES.find(b => b.id === g.badge_id);
-    return `
-      <div class="admin-grant-row">
-        <span class="admin-badge-icon">${badge?.icon || '🏅'}</span>
-        <div class="admin-badge-info">
-          <div class="admin-badge-name">@${g.username || t('admin.common.removedUser')} <span class="admin-grant-badge-name">— ${badge?.name || g.badge_id}</span></div>
-          <div class="admin-badge-desc">${g.note ? escapeHTML(g.note) + ' · ' : ''}${t('admin.badges.grants.grantedOn', { date: fmtDate(g.granted_at) })}</div>
-        </div>
-        <button class="admin-badge-delete-btn" data-revoke-user="${g.user_id}" data-revoke-badge="${g.badge_id}" title="${t('admin.badges.grants.revoke')}">✕</button>
-      </div>
-    `;
-  }).join('') : `<p class="profile-empty-note">${t('admin.badges.grants.empty')}</p>`;
-
-  wrap.innerHTML = `
-    <div class="profile-section">
-      <div class="section-label">${t('admin.badges.create.title')}</div>
-      <form id="admin-create-badge-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-badge-id">${t('admin.badges.create.id')}</label>
-        <input type="text" id="admin-badge-id" class="profile-edit-input" maxlength="32" placeholder="${t('admin.badges.create.idPh')}">
-        <label class="profile-edit-label" for="admin-badge-name">${t('admin.badges.create.name')}</label>
-        <input type="text" id="admin-badge-name" class="profile-edit-input" maxlength="40" placeholder="${t('admin.badges.create.namePh')}">
-        <label class="profile-edit-label" for="admin-badge-icon">${t('admin.badges.create.icon')}</label>
-        <input type="text" id="admin-badge-icon" class="profile-edit-input" maxlength="8" placeholder="🛠️">
-        <label class="profile-edit-label" for="admin-badge-desc">${t('admin.materials.descOpt')}</label>
-        <input type="text" id="admin-badge-desc" class="profile-edit-input" maxlength="120" placeholder="${t('admin.badges.create.descPh')}">
-        <p class="profile-edit-error" id="admin-create-badge-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-badge-btn">${t('admin.badges.create.btn')}</button>
-      </form>
-    </div>
-
-    <div class="profile-section">
-      <div class="section-label">${t('admin.badges.grant.title')}</div>
-      <form id="admin-grant-badge-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-grant-badge-select">${t('admin.badges.grant.badge')}</label>
-        <select id="admin-grant-badge-select" class="profile-edit-input">${catalogOptionsHTML || `<option value="">${t('admin.badges.grant.createFirst')}</option>`}</select>
-        <label class="profile-edit-label" for="admin-grant-username">${t('admin.badges.grant.username')}</label>
-        <div class="profile-edit-username-wrap">
-          <span class="profile-edit-at">@</span>
-          <input type="text" id="admin-grant-username" class="profile-edit-input" maxlength="24" placeholder="${t('admin.badges.grant.usernamePh')}" list="admin-username-datalist" autocomplete="off">
-        </div>
-        <datalist id="admin-username-datalist">${usernameDatalistHTML}</datalist>
-        <label class="profile-edit-label" for="admin-grant-note">${t('admin.badges.grant.note')}</label>
-        <input type="text" id="admin-grant-note" class="profile-edit-input" maxlength="120" placeholder="${t('admin.badges.grant.notePh')}">
-        <p class="profile-edit-error" id="admin-grant-badge-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-grant-badge-btn" ${catalog.length ? '' : 'disabled'}>${t('admin.badges.grant.btn')}</button>
-      </form>
-    </div>
-
-    <div class="profile-section">
-      <div class="section-label">${t('admin.badges.builtin.title')}</div>
-      ${builtInHTML}
-    </div>
-
-    <div class="profile-section">
-      <div class="section-label">${t('admin.badges.catalog.title')}</div>
-      ${catalogHTML}
-    </div>
-
-    <div class="profile-section">
-      <div class="section-label">${t('admin.badges.grants.title')}</div>
-      ${grantsHTML}
-    </div>
-  `;
-
-  document.getElementById('admin-create-badge-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('admin-create-badge-btn');
-    const errorEl = document.getElementById('admin-create-badge-error');
-    errorEl.textContent = '';
-    btn.disabled = true;
-    const result = await createCatalogBadge({
-      id: document.getElementById('admin-badge-id').value,
-      name: document.getElementById('admin-badge-name').value,
-      icon: document.getElementById('admin-badge-icon').value,
-      description: document.getElementById('admin-badge-desc').value,
-    });
-    btn.disabled = false;
-    if (!result.ok){ errorEl.textContent = result.error; return; }
-    showToast(t('admin.badges.toast.created', { name: result.badge.name }));
-    renderAdminBadgesView();
-  });
-
-  document.getElementById('admin-grant-badge-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('admin-grant-badge-btn');
-    const errorEl = document.getElementById('admin-grant-badge-error');
-    errorEl.textContent = '';
-    const badgeId = document.getElementById('admin-grant-badge-select').value;
-    if (!badgeId){ errorEl.textContent = t('admin.badges.grant.createBefore'); return; }
-    btn.disabled = true;
-    const result = await grantBadgeByUsername(
-      badgeId,
-      document.getElementById('admin-grant-username').value,
-      document.getElementById('admin-grant-note').value
-    );
-    btn.disabled = false;
-    if (!result.ok){ errorEl.textContent = result.error; return; }
-    showToast(t('admin.badges.toast.granted', { username: result.target.username }));
-    renderAdminBadgesView();
-  });
-
-  wrap.querySelectorAll('[data-edit-badge-id]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation(); // não deixa o clique "vazar" pro data-manage-badge-id da linha por baixo
-      const badge = catalog.find(b => b.id === btn.dataset.editBadgeId);
-      if (badge) openEditBadgeModal(badge);
-    });
-  });
-
-  wrap.querySelectorAll('[data-badge-id]').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.stopPropagation(); // não deixa o clique "vazar" pro data-manage-badge-id da linha por baixo
-      if (!confirm(t('admin.badges.confirm.delete'))) return;
-      await deleteCatalogBadge(btn.dataset.badgeId);
-      renderAdminBadgesView();
-    });
-  });
-
-  wrap.querySelectorAll('[data-revoke-user]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      await revokeBadgeGrant(btn.dataset.revokeUser, btn.dataset.revokeBadge);
-      renderAdminBadgesView();
-    });
-  });
-
-  wrap.querySelectorAll('[data-manage-badge-id]').forEach(row => {
-    row.addEventListener('click', () => openManageBadgeMembersModal(row.dataset.manageBadgeId, catalog, profiles, grants));
-  });
+  if (token !== BADGES_VIEW.token) return;
+  const V = BADGES_VIEW;
+  V.catalog = catalog; V.grants = grants; V.profiles = profiles;
+  if (V.filtros.badge && !tbdFindBadge(V.filtros.badge, catalog, SPECIAL_BADGES)) V.filtros.badge = '';
+  wrap.innerHTML = tbdPageHTML({ catalog, grants, profiles, builtin: SPECIAL_BADGES, filtros: V.filtros });
 }
 
-// Modal "Gerenciar badge": lista todo mundo que já tem @username criado,
-// pré-marcado quem já tem o badge. Salvar concede pra quem passou a
-// marcar e revoga de quem passou a desmarcar -- é o "clicar no badge e
-// desselecionar o nome" pedido, sem precisar sair da lista de badges.
-function openManageBadgeMembersModal(badgeId, catalog, profiles, grants){
-  const badge = catalog.find(b => b.id === badgeId);
-  if (!badge) return;
-  const holders = new Map(grants.filter(g => g.badge_id === badgeId).map(g => [g.user_id, g]));
-
-  const modal = document.getElementById('admin-manage-badge-modal');
-  document.getElementById('admin-manage-badge-title').textContent = `${badge.icon} ${badge.name}`;
-  const listEl = document.getElementById('admin-manage-badge-list');
-  listEl.innerHTML = profiles.length ? profiles.map(p => `
-    <div class="admin-member-row">
-      <label class="admin-member-check">
-        <input type="checkbox" data-user-id="${p.user_id}" ${holders.has(p.user_id) ? 'checked data-was-checked="1"' : ''}>
-        <span>@${p.username}${p.display_name ? ` <span class="admin-member-name">${escapeHTML(p.display_name)}</span>` : ''}</span>
-      </label>
-      <input type="text" class="admin-member-note-input" data-user-id="${p.user_id}" maxlength="120" placeholder="${t('admin.badges.manage.notePh')}">
-    </div>
-  `).join('') : `<p class="profile-empty-note">${t('admin.badges.manage.empty')}</p>`;
-  // Valor da nota preenchido via JS (.value), não interpolado num atributo
-  // HTML -- é texto livre digitado pela autora, e um "aspas dentro da nota"
-  // quebraria o atributo se fosse por template string.
-  listEl.querySelectorAll('.admin-member-note-input').forEach(input => {
-    const note = holders.get(input.dataset.userId)?.note || '';
-    input.value = note;
-    input.dataset.originalNote = note;
+async function badgesCreate(form){
+  const btn = document.getElementById('badge-criar'), errorEl = document.getElementById('badge-criar-erro');
+  errorEl.textContent = '';
+  btn.disabled = true;
+  const result = await createCatalogBadge({
+    id: document.getElementById('badge-id').value, name: document.getElementById('badge-nome').value,
+    icon: document.getElementById('badge-icone').value, description: document.getElementById('badge-desc').value,
   });
-  modal.dataset.badgeId = badgeId;
-  modal.style.display = 'flex';
+  btn.disabled = false;
+  if (!result.ok){ errorEl.textContent = result.error; return; }
+  showToast(t('admin.badges.toast.created', { name: result.badge.name }));
+  form.reset();
+  await badgesReload();
 }
 
-function closeManageBadgeMembersModal(){
-  document.getElementById('admin-manage-badge-modal').style.display = 'none';
+async function badgesGrant(form){
+  const btn = document.getElementById('conceder-enviar'), errorEl = document.getElementById('conceder-erro');
+  errorEl.textContent = '';
+  const badgeId = document.getElementById('conceder-badge').value;
+  if (!badgeId){ errorEl.textContent = t('admin.badges.grant.createBefore'); return; }
+  btn.disabled = true;
+  const result = await grantBadgeByUsername(badgeId, document.getElementById('conceder-usuario').value, document.getElementById('conceder-nota').value);
+  btn.disabled = false;
+  if (!result.ok){ errorEl.textContent = result.error; return; }
+  showToast(t('admin.badges.toast.granted', { username: result.target.username }));
+  document.getElementById('conceder-usuario').value = ''; document.getElementById('conceder-nota').value = '';
+  await badgesReload();
 }
 
-function wireManageBadgeMembersModal(){
-  const modal = document.getElementById('admin-manage-badge-modal');
-  if (!modal) return;
+function badgesOpenEdit(id){
+  const b = BADGES_VIEW.catalog.find(x => x.id === id); const wrap = badgesWrap(); if (!b || !wrap) return;
+  const old = document.getElementById('dlg-editar-badge'); if (old) old.remove();
+  (wrap.querySelector('.painel') || wrap).insertAdjacentHTML('beforeend', tbdEditDialogHTML(b));
+  const d = document.getElementById('dlg-editar-badge');
+  d.addEventListener('close', () => d.remove());
+  d.showModal();
+}
 
-  document.getElementById('admin-manage-badge-modal-close').addEventListener('click', closeManageBadgeMembersModal);
-  modal.addEventListener('click', (e) => { if (e.target === modal) closeManageBadgeMembersModal(); });
+async function badgesSaveEdit(form){
+  const errorEl = document.getElementById('editar-berro'); errorEl.textContent = '';
+  const btn = form.querySelector('[type=submit]'); btn.disabled = true;
+  const result = await updateCatalogBadge({
+    oldId: form.dataset.id, newId: document.getElementById('editar-bid').value, name: document.getElementById('editar-bnome').value,
+    icon: document.getElementById('editar-bicone').value, description: document.getElementById('editar-bdesc').value,
+  });
+  btn.disabled = false;
+  if (!result.ok){ errorEl.textContent = result.error; return; }
+  document.getElementById('dlg-editar-badge').close();
+  showToast(t('admin.badges.toast.updated', { name: result.badge.name }));
+  await badgesReload();
+}
 
-  document.getElementById('admin-manage-badge-save-btn').addEventListener('click', async () => {
-    const badgeId = modal.dataset.badgeId;
-    const checkboxes = modal.querySelectorAll('input[type="checkbox"]');
-    const adds = [], removes = [], noteChanges = [];
-    checkboxes.forEach(cb => {
-      const userId = cb.dataset.userId;
-      const wasChecked = cb.dataset.wasChecked === '1';
-      const noteInput = modal.querySelector(`.admin-member-note-input[data-user-id="${userId}"]`);
-      const note = noteInput ? noteInput.value : '';
-      if (cb.checked && !wasChecked){
-        adds.push({ userId, note });
-      } else if (!cb.checked && wasChecked){
-        removes.push(userId);
-      } else if (cb.checked && wasChecked && noteInput && note !== noteInput.dataset.originalNote){
-        noteChanges.push({ userId, note });
-      }
-    });
-    const btn = document.getElementById('admin-manage-badge-save-btn');
-    btn.disabled = true;
-    await applyBadgeMembership(badgeId, adds, removes, noteChanges);
-    btn.disabled = false;
-    closeManageBadgeMembersModal();
-    showToast(t('admin.badges.toast.members'));
-    renderAdminBadgesView();
+function badgesOpenMembers(id){
+  const b = BADGES_VIEW.catalog.find(x => x.id === id); const wrap = badgesWrap(); if (!b || !wrap) return;
+  const old = document.getElementById('dlg-membros-badge'); if (old) old.remove();
+  (wrap.querySelector('.painel') || wrap).insertAdjacentHTML('beforeend', tbdMembersDialogHTML(b, BADGES_VIEW.profiles, BADGES_VIEW.grants));
+  const d = document.getElementById('dlg-membros-badge');
+  d.addEventListener('close', () => d.remove());
+  d.showModal();
+}
+
+async function badgesSaveMembers(form){
+  const badgeId = form.dataset.id, errorEl = document.getElementById('membros-erro'); errorEl.textContent = '';
+  const adds = [], removes = [], noteChanges = [];
+  form.querySelectorAll('input[type="checkbox"][data-user]').forEach(cb => {
+    const userId = cb.dataset.user, was = cb.dataset.tinha === '1';
+    const noteInput = form.querySelector(`[data-nota-membro="${CSS.escape(userId)}"]`);
+    const note = noteInput ? noteInput.value : '';
+    if (cb.checked && !was) adds.push({ userId, note });
+    else if (!cb.checked && was) removes.push(userId);
+    else if (cb.checked && was && noteInput && note !== noteInput.dataset.notaOriginal) noteChanges.push({ userId, note });
+  });
+  const btn = form.querySelector('[type=submit]'); btn.disabled = true;
+  const r = await applyBadgeMembership(badgeId, adds, removes, noteChanges);
+  btn.disabled = false;
+  await badgesReload();
+  if (!r.ok){ errorEl.textContent = t('badges.members.partial', { n: r.failed }); return; }
+  document.getElementById('dlg-membros-badge').close();
+  showToast(t('admin.badges.toast.members'));
+}
+
+async function badgesDelete(id){
+  const b = BADGES_VIEW.catalog.find(x => x.id === id); if (!b) return;
+  const n = BADGES_VIEW.grants.filter(g => g.badge_id === id).length;
+  const opts = { titulo: t('badges.delete.title', { name: b.name }), descricao: t(n ? 'badges.delete.textWith' : 'badges.delete.textNone', { n }), confirmar: t('badges.delete.confirm'), cancelar: t('badges.edit.cancel'), perigo: true };
+  const ok = (window.PainelUI && PainelUI.confirmar) ? await PainelUI.confirmar(opts) : confirm(t('admin.badges.confirm.delete'));
+  if (!ok) return;
+  const r = await deleteCatalogBadge(id);
+  if (!r.ok) showToast(t('plans.failed'));
+  await badgesReload();
+}
+
+async function badgesRevoke(userId, badgeId){
+  const r = await revokeBadgeGrant(userId, badgeId);
+  if (!r.ok){ showToast(t('plans.failed')); return; }
+  showToast(t('badges.toast.revoked'));
+  await badgesReload();
+}
+
+// Eventos delegados no contêiner da aba: ligados uma vez só.
+function badgesBind(wrap){
+  if (BADGES_VIEW.ligado) return;
+  BADGES_VIEW.ligado = true;
+  const V = BADGES_VIEW;
+  wrap.addEventListener('click', (e) => {
+    let el;
+    if ((el = e.target.closest('[data-gerenciar-badge]'))) return badgesOpenMembers(el.dataset.gerenciarBadge);
+    if ((el = e.target.closest('[data-editar-badge]'))){ el.closest('details')?.removeAttribute('open'); return badgesOpenEdit(el.dataset.editarBadge); }
+    if ((el = e.target.closest('[data-apagar-badge]'))){ el.closest('details')?.removeAttribute('open'); return badgesDelete(el.dataset.apagarBadge); }
+    if ((el = e.target.closest('[data-revogar]'))){ const tr = el.closest('[data-concessao]'); return badgesRevoke(tr.dataset.user, tr.dataset.badgeId); }
+  });
+  wrap.addEventListener('input', (e) => {
+    if (e.target.matches('[data-badges-busca]')){ V.filtros.busca = e.target.value; badgesRefreshGrants(); }
+    else if (e.target.matches('[data-buscar-membro]')){
+      const q = e.target.value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+      wrap.querySelectorAll('[data-membro]').forEach(m => { m.hidden = !!q && !m.dataset.busca.includes(q); });
+    }
+  });
+  wrap.addEventListener('change', (e) => { if (e.target.matches('[data-badges-filtro]')){ V.filtros.badge = e.target.value; badgesRefreshGrants(); } });
+  wrap.addEventListener('submit', (e) => {
+    if (e.target.id === 'form-criar-badge'){ e.preventDefault(); badgesCreate(e.target); }
+    else if (e.target.id === 'form-conceder-badge'){ e.preventDefault(); badgesGrant(e.target); }
+    else if (e.target.id === 'form-editar-badge'){ e.preventDefault(); badgesSaveEdit(e.target); }
+    else if (e.target.id === 'form-membros-badge'){ e.preventDefault(); badgesSaveMembers(e.target); }
   });
 }
-
-// Modal "Editar badge": mesmos campos da criação (id/nome/emoji/descrição),
-// pré-preenchidos -- salvar chama updateCatalogBadge, que trata id mudado
-// como um caso especial (migra as concessões, ver updateCatalogBadge).
-function openEditBadgeModal(badge){
-  const modal = document.getElementById('admin-edit-badge-modal');
-  modal.dataset.originalId = badge.id;
-  document.getElementById('admin-edit-badge-id').value = badge.id;
-  document.getElementById('admin-edit-badge-name').value = badge.name;
-  document.getElementById('admin-edit-badge-icon').value = badge.icon;
-  document.getElementById('admin-edit-badge-desc').value = badge.description || '';
-  document.getElementById('admin-edit-badge-error').textContent = '';
-  modal.style.display = 'flex';
-}
-
-function closeEditBadgeModal(){
-  document.getElementById('admin-edit-badge-modal').style.display = 'none';
-}
-
-function wireEditBadgeModal(){
-  const modal = document.getElementById('admin-edit-badge-modal');
-  if (!modal) return;
-
-  document.getElementById('admin-edit-badge-modal-close').addEventListener('click', closeEditBadgeModal);
-  modal.addEventListener('click', (e) => { if (e.target === modal) closeEditBadgeModal(); });
-
-  document.getElementById('admin-edit-badge-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('admin-edit-badge-save-btn');
-    const errorEl = document.getElementById('admin-edit-badge-error');
-    errorEl.textContent = '';
-    btn.disabled = true;
-    const result = await updateCatalogBadge({
-      oldId: modal.dataset.originalId,
-      newId: document.getElementById('admin-edit-badge-id').value,
-      name: document.getElementById('admin-edit-badge-name').value,
-      icon: document.getElementById('admin-edit-badge-icon').value,
-      description: document.getElementById('admin-edit-badge-desc').value,
-    });
-    btn.disabled = false;
-    if (!result.ok){ errorEl.textContent = result.error; return; }
-    closeEditBadgeModal();
-    showToast(t('admin.badges.toast.updated', { name: result.badge.name }));
-    renderAdminBadgesView();
-  });
-}
-
-wireManageBadgeMembersModal();
-wireEditBadgeModal();
