@@ -8,5 +8,7 @@ const LANG_HOOKS = {
   audioListenKey: 'zh.audio.listenAudio',
   cardOriginTitle: (c) => cardOriginTitle(c),
   foldCase: (s) => s,
+  recapText: (i) => i.c,
+  recapExtra: (i) => `<span class="lesson-recap-pinyin">${i.p}</span>`,
 // --- /E4 hooks ---
 };

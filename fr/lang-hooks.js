@@ -8,5 +8,7 @@ const LANG_HOOKS = {
   audioListenKey: 'fr.audio.listen',
   cardOriginTitle: (c) => flashcardUnitTitleText(c),
   foldCase: (s) => s.toLowerCase(),
+  recapText: (i) => i.f,
+  recapExtra: () => '',
 // --- /E4 hooks ---
 };
