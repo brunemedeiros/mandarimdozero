@@ -108,3 +108,19 @@ cria o vínculo). Os cartões do Eduardo ficam como estão, com o progresso.
 - Correção de uma resposta minha à autora: os cartões da professora NÃO voltam para a Revisão geral quando o vínculo
   acaba. Desde o PR #316 eles só aparecem em Aluno > Revisão, e hoje, sem vínculo, o menu Aluno continua aparecendo só
   por causa desses cartões (com Mural/Aulas/Material vazios). Decisão pendente da autora: o que fazer com eles nesse caso.
+
+## Opção 2 da autora (2026-10-15): sem vínculo, os cartões da professora somem do Aluno
+
+- Decisão: sem vínculo ativo, o item Aluno some e os cartões da professora param de aparecer; o progresso fica guardado e
+  volta com o vínculo.
+- Por que no app e não no banco: se o banco escondesse as linhas, `mergeSavedCards` descartaria o cartão e o próximo
+  salvamento apagaria o progresso (FSRS). Então os cartões continuam carregados e salvos; só a tela filtra.
+- Como: cartão da professora ganha `teacherId` (fresco do banco, `NOTE_LEVEL_FRESH_FIELDS`); no boot o app busca a
+  professora ativa do idioma (`fetchMyActiveTeacherId`, `CLASS_ACTIVE_TEACHER_ID`); `isActiveClassReviewCard` filtra a aba
+  Aluno > Revisão e o "segurar" o item Aluno. Sem saber (offline), não esconde. Cartões de uma professora antiga também
+  somem quando o aluno tem outra professora no idioma.
+- Testes: `tests/banco-revisao/test_active_teacher.js` 18/18 (novo). Banco Playwright 501/501. Regressão de 46 suítes
+  comparada antes x depois (cópia do repositório no commit anterior): iguais, exceto 2 testes antigos atualizados por
+  mudança intencional (fase-h origin filter 54/54: o aluno simulado passa a ter professora ativa; fase-i tags unit 67/67:
+  extrai `isActiveClassReviewCard`). Pré-existentes iguais nos dois lados: k2c Playwright 12/14, trilha-tags unit e
+  painel-alunos unit não rodam neste ambiente.
