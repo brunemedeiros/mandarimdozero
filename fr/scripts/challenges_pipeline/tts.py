@@ -137,15 +137,18 @@ def audio_is_healthy(data, min_peak=0.15, min_voiced_s=0.15, min_rms=0.02):
 _VOICE_BY_LANG = {
     "fr": ("fr-FR", None),  # None = usa config.TTS_VOICE
     "zh": ("cmn-CN", "cmn-CN-Chirp3-HD-Achernar"),
+    "pt": ("pt-BR", "pt-BR-Chirp3-HD-Achernar"),
 }
-_STT_LOCALE_BY_LANG = {"fr": "fr-FR", "zh": "cmn-Hans-CN"}
+_STT_LOCALE_BY_LANG = {"fr": "fr-FR", "zh": "cmn-Hans-CN", "pt": "pt-BR"}
 
 
-def _synthesize_raw(text, retries=3, lang="fr"):
+def _synthesize_raw(text, retries=3, lang="fr", voice=None, language_code=None):
+    """`voice`/`language_code` são opcionais (laboratório de vozes): sem eles,
+    o comportamento é o de sempre (voz e locale do idioma `lang`)."""
     body = json.dumps({
         "input": {"text": text},
-        "voice": {"languageCode": _VOICE_BY_LANG[lang][0],
-                  "name": _VOICE_BY_LANG[lang][1] or config.TTS_VOICE},
+        "voice": {"languageCode": language_code or _VOICE_BY_LANG[lang][0],
+                  "name": voice or _VOICE_BY_LANG[lang][1] or config.TTS_VOICE},
         "audioConfig": {"audioEncoding": "MP3"},
     })
     last_error = None
