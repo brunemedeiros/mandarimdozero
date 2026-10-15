@@ -22,3 +22,8 @@ Histórico e decisão: `docs/historico/15-*`, `docs/levantamento-design-system-p
 - Fonte Nunito é hospedada (`shared/fonts/`), igual em todos os cursos; só a paleta muda.
 - Em uso no app: `fr/index.html` e `zh/index.html` carregam o CSS do painel e `painel-ui.js` (a home não). A aba Alunos (`shared/teacher-students-ui.js` + `shared/admin-students.js`) é a primeira tela no sistema novo; texto visível sempre por `t()` (chaves `students.*`). O painel da professora ocupa a largura toda (regra `#app[data-active-tab="teacher-panel"]` nos dois index).
 - Plural com zero: usar `tsuTp` (zero vai para a forma plural; o Intl em pt-BR diz "0 dia"). Dentro do app o `.painel` fica sem fundo próprio (`.panel-view .painel`).
+
+## Prévia antes de implementar (decisão da autora, 2026-10-15)
+Toda tela ou mudança visual nova passa por uma prévia (imagens com dados de exemplo, fr claro e zh escuro) que a autora
+aprova ANTES do código. Banco de Revisão: fica com a aparência atual dentro do Cartões; a parte do aluno
+(`review-bank-student.js`) fica para depois.
