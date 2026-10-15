@@ -56,4 +56,5 @@ async function applyRoleNavUI(){
   const teacher = isTeacherUser();
   document.querySelectorAll('.teacher-only-nav').forEach(el => { el.style.display = teacher ? '' : 'none'; });
   if (typeof refreshStudentTeacherNav === 'function') refreshStudentTeacherNav();
+  if (typeof refreshTeacherBell === 'function') refreshTeacherBell(); // sino da professora (105)
 }
