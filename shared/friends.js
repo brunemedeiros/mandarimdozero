@@ -473,11 +473,11 @@ async function renderFriendsView(){
     bodyHTML = friendsEmptyHTML(keepQuery, inviteUser) + pending;
   }
 
-  wrap.innerHTML = `${subnav}${headHTML}${friendsRequestsHTML(ov.incoming)}<section class="friends-received" id="friends-received" hidden></section>${hasFriends ? '<section class="friends-duo" id="friends-duo" hidden></section>' : ''}<section class="friends-suggest" id="friends-suggest" hidden></section>${bodyHTML}`;
+  wrap.innerHTML = `${subnav}${headHTML}${friendsRequestsHTML(ov.incoming)}<section class="friends-received" id="friends-received" hidden></section>${hasFriends ? '<section class="friends-push-invite" id="friends-push-invite" hidden></section><section class="friends-duo" id="friends-duo" hidden></section>' : ''}<section class="friends-suggest" id="friends-suggest" hidden></section>${bodyHTML}`;
   FRIENDS_STATE.friends = ov.friends;
   renderFriendsBadges();
   wireFriendsView(wrap);
-  if (hasFriends){ loadFriendsMiniRank(); loadFriendsActivity(); loadFriendsExtras(); loadFriendsDuo(); }
+  if (hasFriends){ loadFriendsMiniRank(); loadFriendsActivity(); loadFriendsExtras(); loadFriendsDuo(); loadFriendsPushInvite(); }
   loadFriendsReceivedCongrats();
   loadFriendsSuggestions();
   if (keepQuery.trim().length >= 3) runFriendsSearch(keepQuery);
@@ -780,6 +780,134 @@ async function friendsStartDuo(btn){
   loadFriendsDuo();
 }
 
+// ---------- convite para ativar as notificações (avisos de Amigos com o site fechado, 102) ----------
+// O push só chega a quem ativou as notificações NESTE aparelho (push_subscriptions). Convite em dois lugares:
+//   - faixa na aba Amigos (quem tem amigo e ainda não ativou aqui), com "Agora não" (some por 14 dias);
+//   - janela UMA vez quando a pessoa ganha o primeiro amigo (loadFriendsAcceptedCount, badge-tracks-app.js),
+//     depois da comemoração da conquista.
+// iPhone/iPad: o navegador só tem push com o site na Tela de Início; aí o convite explica como adicionar.
+// O pedido de permissão do navegador só sai do clique em "Ativar" (regra da seção 11: nunca sozinho).
+const FRIENDS_PUSH_SNOOZE_KEY = 'friendsPushInviteSnoozedAt';
+const FRIENDS_PUSH_FIRST_KEY = 'friendsPushInviteFirstFriendShown';
+const FRIENDS_PUSH_SNOOZE_DAYS = 14;
+
+function friendsLsGet(k){ try { return localStorage.getItem(k); } catch (e) { return null; } }
+function friendsLsSet(k, v){ try { localStorage.setItem(k, v); } catch (e) { /* aba anônima */ } }
+function friendsIsIOS(){
+  const ua = navigator.userAgent || '';
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function friendsIsStandalone(){
+  try { return !!(navigator.standalone || window.matchMedia('(display-mode: standalone)').matches); } catch (e) { return false; }
+}
+
+// 'push' = dá para pedir; 'ios' = iPhone/iPad sem o site na Tela de Início; null = não mostrar.
+async function friendsPushInviteMode(){
+  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return null;
+  const snoozed = Number(friendsLsGet(FRIENDS_PUSH_SNOOZE_KEY) || 0);
+  if (snoozed && Date.now() - snoozed < FRIENDS_PUSH_SNOOZE_DAYS * 86400000) return null;
+  const supported = typeof pushSupported === 'function' && pushSupported();
+  if (!supported) return (friendsIsIOS() && !friendsIsStandalone()) ? 'ios' : null;
+  if (Notification.permission === 'denied') return null; // bloqueado no navegador: o clique não resolve
+  if (typeof getLocalPushSubscription !== 'function') return null;
+  // serviceWorker.ready não resolve sem service worker: sem resposta em 4 s, não mostra (também não daria para ativar).
+  const sub = await Promise.race([getLocalPushSubscription(), new Promise(r => setTimeout(() => r('timeout'), 4000))]);
+  if (sub === 'timeout') return null;
+  return sub ? null : 'push';
+}
+
+function friendsPushInviteHTML(mode, firstFriend){
+  // Na janela do 1º amigo o título vai no cabeçalho da janela.
+  const title = firstFriend ? '' : t('friends.push.title');
+  if (mode === 'ios'){
+    return `<div class="friends-push-card">
+      <span class="friends-push-icon" aria-hidden="true">📱</span>
+      <div class="friends-push-text">${title ? `<strong>${title}</strong>` : ''}<p>${t('friends.push.iosText')}</p></div>
+      <div class="friends-push-actions"><button type="button" class="btn btn-secondary btn-sm" data-push-invite="later">${t('friends.push.iosOk')}</button></div>
+    </div>`;
+  }
+  return `<div class="friends-push-card">
+      <span class="friends-push-icon" aria-hidden="true">🔔</span>
+      <div class="friends-push-text">${title ? `<strong>${title}</strong>` : ''}<p>${t('friends.push.text')}</p></div>
+      <div class="friends-push-actions">
+        <button type="button" class="btn btn-primary btn-sm" data-push-invite="enable">${t('friends.push.enable')}</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-push-invite="later">${t('friends.push.later')}</button>
+      </div>
+    </div>`;
+}
+
+async function loadFriendsPushInvite(){
+  const mode = await friendsPushInviteMode();
+  const el = document.getElementById('friends-push-invite');
+  if (!el) return;
+  el.hidden = !mode;
+  el.innerHTML = mode ? friendsPushInviteHTML(mode, false) : '';
+}
+
+function friendsPushInviteClose(){
+  const el = document.getElementById('friends-push-invite');
+  if (el){ el.hidden = true; el.innerHTML = ''; }
+  document.getElementById('friends-push-modal')?.remove();
+}
+
+async function friendsPushInviteAction(action, btn){
+  if (action === 'later'){
+    friendsLsSet(FRIENDS_PUSH_SNOOZE_KEY, String(Date.now()));
+    friendsPushInviteClose();
+    return;
+  }
+  if (action !== 'enable' || typeof subscribeToPush !== 'function') return;
+  if (btn) btn.disabled = true;
+  const res = await subscribeToPush();
+  if (!res.ok){
+    showToast(typeof notificationPushErrorMessage === 'function' ? notificationPushErrorMessage(res.reason) : t('notif.pref.push.error'));
+    if (res.reason === 'blocked' || res.reason === 'denied' || res.reason === 'unsupported'){
+      friendsLsSet(FRIENDS_PUSH_SNOOZE_KEY, String(Date.now()));
+      friendsPushInviteClose();
+    } else if (btn) btn.disabled = false;
+    return;
+  }
+  // Amigos por push (o padrão já é ligado; grava para valer mesmo se a pessoa tinha salvo só o sino).
+  if (typeof setCategoryChannel === 'function'){
+    try { await setCategoryChannel('amigos', 'push', true); } catch (e) { console.error('Push de Amigos:', e); }
+  }
+  showToast(t('friends.push.done'));
+  friendsPushInviteClose();
+}
+
+// Primeiro amigo: janela uma vez, depois da comemoração da conquista e de qualquer outra janela aberta.
+async function friendsMaybeOfferPushFirstFriend(){
+  if (friendsLsGet(FRIENDS_PUSH_FIRST_KEY)) return;
+  const mode = await friendsPushInviteMode();
+  if (!mode) return;
+  friendsLsSet(FRIENDS_PUSH_FIRST_KEY, '1');
+  const busy = () => document.querySelector('.app-modal-overlay')
+    || (typeof badgeCelebrationShowing !== 'undefined' && badgeCelebrationShowing)
+    || (typeof badgeCelebrationQueue !== 'undefined' && badgeCelebrationQueue.length);
+  const started = Date.now();
+  while (busy() && Date.now() - started < 60000) await new Promise(r => setTimeout(r, 500));
+  if (busy()) return;
+  const ov = document.createElement('div');
+  ov.id = 'friends-push-modal';
+  ov.className = 'app-modal-overlay';
+  ov.innerHTML = `
+    <div class="app-modal friends-push-modal" role="dialog" aria-modal="true" aria-labelledby="friends-push-modal-title">
+      <div class="app-modal-header"><h3 id="friends-push-modal-title">${t('friends.push.firstTitle')}</h3>
+        <button type="button" class="app-modal-close" data-no-emoji-icons data-push-invite="later" aria-label="${escapeAttr(t('friends.push.later'))}">✕</button>
+      </div>
+      <div class="app-modal-body">${friendsPushInviteHTML(mode, true)}</div>
+    </div>`;
+  const onKey = (e) => { if (e.key === 'Escape'){ document.removeEventListener('keydown', onKey); friendsPushInviteAction('later'); } };
+  ov.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-push-invite]');
+    if (b){ document.removeEventListener('keydown', onKey); friendsPushInviteAction(b.dataset.pushInvite, b); return; }
+    if (e.target === ov){ document.removeEventListener('keydown', onKey); friendsPushInviteAction('later'); }
+  });
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(ov);
+  ov.querySelector('[data-push-invite="enable"], [data-push-invite="later"]')?.focus();
+}
+
 // ---------- marco de sequência (chamado por registerStudyToday em fr/zh app.js) ----------
 // O servidor registra só o maior marco ainda não registrado nesta sequência
 // (5, 10, 15, 25, 50... 365) e é ele que aparece para os amigos.
@@ -1028,6 +1156,8 @@ function wireFriendsView(wrap){
     if (e.target.closest('[data-friends-qr]')){ friendsShowInviteQr(); return; }
     const nudge = e.target.closest('[data-friend-nudge]');
     if (nudge){ if (!nudge.disabled) friendsNudge(nudge.dataset.friendNudge, nudge); return; }
+    const pushBtn = e.target.closest('#friends-push-invite [data-push-invite]');
+    if (pushBtn){ if (!pushBtn.disabled) friendsPushInviteAction(pushBtn.dataset.pushInvite, pushBtn); return; }
     const duoStart = e.target.closest('[data-duo-start]');
     if (duoStart){ if (!duoStart.disabled) friendsStartDuo(duoStart); return; }
     const dismiss = e.target.closest('[data-suggest-dismiss]');

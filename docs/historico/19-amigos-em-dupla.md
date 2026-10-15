@@ -54,9 +54,8 @@ Pedido da autora: "pode fazer todos eles" (2026-10-15), sobre os três itens apr
    - `respond_friend_request` (da 073) não foi recriada, porque tem um DELETE e a ferramenta de migration trava
      esperando confirmação. O texto pronto em português que ela manda passa pela `_friends_notify`, que reconhece o
      final da frase e reescreve no idioma de quem recebe.
-   - **Ainda em português no site em inglês** (fora de Amigos, em código de outras conversas): avisos do Mural
-     (`_mural_notify`, 087) e do convite da professora (`_teacher_notify`, 077). Ficam pendentes, para corrigir com o
-     mesmo modelo.
+   - Mural (`_mural_notify`, 087) e convite da professora (`_teacher_notify`, 077): corrigidos depois, na 104 (seção
+     abaixo).
 2. **"O aviso tem de chegar a quem NÃO abriu o app."** Cada aviso de Amigos também vai para a fila `push_outbox`, e o
    banco chama na hora (pg_net) a Edge Function nova `push-dispatch`, que manda o push para os aparelhos da pessoa.
    - Recebe quem ativou notificações no aparelho (Configurações > Notificações > Push).
@@ -119,3 +118,47 @@ Pedido da autora: "pode fazer todos eles" (2026-10-15), sobre os três itens apr
 Testes antigos mudados de propósito:
 - `tests/amigos/test_playwright.js`: de 6 para 8 interruptores de Amigos.
 - `tests/i18n/test_i18n_unit.js`: `friends.duo.theirs` ("{name}: {n} XP") é igual nos dois idiomas.
+
+## Depois: Mural, convite da professora e convite para ativar as notificações (2026-10-15)
+
+Pedidos da autora: corrigir também os outros avisos ("obviamente") e fazer o convite para ativar o push ("SIM").
+
+### Migration `104_server_notifications_en.sql` (a 103 foi usada por outra conversa)
+
+- `_mural_notify` e `_teacher_notify` gravam o aviso em inglês para quem usa o site em inglês (`_ui_lang`). As frases
+  vêm prontas das funções do Mural e do convite (outras conversas; algumas com DELETE, que trava a ferramenta).
+  `_notif_text_en` reconhece as 9 frases da produção de 2026-10-15 e devolve a versão em inglês:
+  - Mural: post (com e sem turma), comentário, "colocou você na turma", "entrou pelo link na turma" (com e sem
+    vínculo novo);
+  - convite da professora: convite, aceite pelo link, aceite pelo convite, recusa.
+- Vocabulário igual ao do site em inglês: "board" (Mural) e "class" (turma). Idiomas: French, Chinese, Portuguese.
+  Quando a conta não tem nome nem @, "Professora" vira "Your teacher".
+- **Frase nova num aviso desses precisa entrar na `_notif_text_en`** e no teste `tests/avisos-idioma/`. Senão sai
+  como veio, em português.
+- **Staging e produção:** aplicada em 2026-10-15 pela ferramenta, arquivo inteiro, sem DROP. As funções são
+  idênticas às do arquivo (md5); contas comuns continuam sem acesso às funções de aviso; tradução conferida na
+  produção.
+- **Testes:**
+
+  | Teste | Resultado |
+  |---|---|
+  | `tests/avisos-idioma/run.sh` | 19/19 |
+  | Mural (`tests/mural/run.sh`) com a 104 por cima | 80/80, igual a antes |
+  | Convite da professora (077) com a 104 por cima | 0 falhas, igual a antes |
+
+### Convite para ativar as notificações (`shared/friends.js`)
+
+- **Faixa na aba Amigos**, para quem tem amigo e ainda não ativou o push neste aparelho:
+  - "Ativar notificações" pede a permissão do navegador e liga Amigos por push.
+  - "Agora não" esconde por 14 dias.
+- **Janela uma vez só** quando a pessoa ganha o primeiro amigo ("Você ganhou um amigo! 🎉"). Ela espera a comemoração
+  da conquista e qualquer outra janela fecharem.
+- **iPhone/iPad sem o site na Tela de Início:** o navegador não tem push. A faixa explica "Compartilhar > Adicionar à
+  Tela de Início", com o botão "Entendi".
+- **Não aparece** quando o push já está ativado neste aparelho, quando as notificações estão bloqueadas no navegador
+  (o clique não resolveria) ou quando o aparelho não tem suporte.
+- **Grátis x Premium:** tudo grátis.
+- **Também corrigido:** no celular, o formulário da missão em dupla tinha buracos entre os campos (CSS da entrega
+  anterior).
+- **Teste:** `tests/amigos-push/test_playwright.js`, 72/72 (fr e zh, claro e escuro, computador e celular, iPhone,
+  bloqueado, primeiro amigo).

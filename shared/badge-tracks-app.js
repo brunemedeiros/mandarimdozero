@@ -227,6 +227,8 @@ async function loadFriendsAcceptedCount(){
     } else if (FRIENDS_ACCEPTED_COUNT !== before){
       invalidateBadgeTracks();
       checkAndCelebrateBadges();
+      // Primeiro amigo: convite para ativar as notificações (shared/friends.js, uma vez só).
+      if (before === 0 && FRIENDS_ACCEPTED_COUNT > 0 && typeof friendsMaybeOfferPushFirstFriend === 'function') friendsMaybeOfferPushFirstFriend();
     }
   } catch (e) { console.error('Contagem de amigos (conquistas):', e); }
 }

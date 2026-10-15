@@ -316,3 +316,8 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Produção (2026-10-15): `102_friends_duo_a`, `_b1`, `_b2`, `_b3`, `_c1`, `_c2`, `_c3`, em partes por causa do tempo
   da ferramenta. Depois: Edge Function `push-dispatch` v1 e segredos `push_dispatch_url`/`push_dispatch_anon` no Vault.
 - Detalhes: `docs/historico/19-amigos-em-dupla.md`.
+
+## 104 -- Avisos do Mural e do convite da professora no idioma de quem recebe (2026-10-15)
+
+- `shared/supabase_migrations/104_server_notifications_en.sql` (a 103 é `103_class_calendar_feed`, de outra conversa). Sem DROP.
+- Staging e produção: 2026-10-15, arquivo inteiro, nome `104_server_notifications_en`. Detalhes: `docs/historico/19-amigos-em-dupla.md`.
