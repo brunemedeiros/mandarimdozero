@@ -14,7 +14,7 @@ const server = http.createServer((req, res) => {
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x).slice(0, 500) : ''); } };
 const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', ok: 'rgb(58, 115, 89)', erro: 'rgb(214, 38, 25)' }, dark: { marca: 'rgb(77, 169, 232)', ok: 'rgb(82, 180, 135)', erro: 'rgb(255, 107, 92)' } },
-              zh: { light: { marca: 'rgb(192, 35, 31)', ok: 'rgb(58, 115, 89)', erro: 'rgb(168, 58, 46)' }, dark: { marca: 'rgb(225, 82, 75)', ok: 'rgb(82, 180, 135)', erro: 'rgb(255, 123, 110)' } } };
+              zh: { light: { marca: 'rgb(192, 35, 31)', ok: 'rgb(58, 115, 89)', erro: 'rgb(192, 35, 31)' }, dark: { marca: 'rgb(225, 82, 75)', ok: 'rgb(82, 180, 135)', erro: 'rgb(255, 107, 92)' } } };   // o zh passou a definir --error-red (claro = --seal-red, escuro = #FF6B5C)
 
 (async () => {
   await new Promise(r => server.listen(0, '127.0.0.1', r));
@@ -116,7 +116,7 @@ const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', ok: 'rgb(58, 115, 89)',
     const cor = await page.evaluate(() => getComputedStyle(document.querySelector('.painel')).getPropertyValue('--p-marca').trim());
     check('clicar Mandarim + Escuro troca --p-marca para o vermelho escuro do zh', cor.toUpperCase() === '#E1524B', cor);
     const erro = await page.evaluate(() => getComputedStyle(document.querySelector('.p-selo--erro')).backgroundColor);
-    check('zh usa --grade-again-bg como erro (fallback de --error-red)', erro === 'rgb(255, 123, 110)', erro);
+    check('zh escuro usa o --error-red do site no selo de erro', erro === 'rgb(255, 107, 92)', erro);
     await ctx.close(); }
 
   // ---------- 3. Prova de que NADA fora de .painel muda ----------

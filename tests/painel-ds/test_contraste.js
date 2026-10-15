@@ -5,6 +5,8 @@ const path = require('path'); const { paletaSite } = require('./_css');
 const ROOT = path.resolve(__dirname, '..', '..');
 let ok = 0, ruim = 0; const check = (n, c, x) => { if (c) ok++; else { ruim++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x) : ''); } };
 const rgb = h => { h = h.trim(); if (/^#[0-9a-f]{3}$/i.test(h)) h = '#' + [...h.slice(1)].map(c => c + c).join(''); const m = h.match(/^#([0-9a-f]{6})/i); if (!m) throw new Error('cor não hex: ' + h); const n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+// o site pode definir um token como var(--outro) (ex.: --error-red no zh claro = --seal-red): segue a referência até a cor
+const viaVar = (s, v) => { for (let i = 0; i < 5 && v && /^var\(/.test(v.trim()); i++) v = s[v.trim().match(/var\((--[\w-]+)/)[1]]; return v; };
 const mix = (a, b, pa) => a.map((v, i) => v * pa + b[i] * (1 - pa)); // color-mix(in srgb, a pa%, b)
 const lum = c => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]); };
 const razao = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
@@ -24,7 +26,7 @@ for (const curso of ['fr', 'zh']){
     const s = P[tema], c = k => rgb(s[k]);
     const bg = c('--paper'), sup = c('--paper-warm'), linha = c('--paper-line'), tinta = c('--ink'), suave = c('--ink-soft');
     const marca = c('--seal-red'), marcaEsc = c('--seal-red-dark'), sobreMarca = c('--on-seal-red');
-    const ok_ = c('--jade'), aviso = c('--grade-hard-bg'), erro = rgb(s['--error-red'] || s['--grade-again-bg']), info = c('--count-new'), vivo = c('--on-vivid');
+    const ok_ = c('--jade'), aviso = c('--grade-hard-bg'), erro = rgb(viaVar(s, s['--error-red'] || s['--grade-again-bg'])), info = c('--count-new'), vivo = c('--on-vivid');
     const elev = tema === 'luz' ? mix(sup, BRANCO, .55) : mix(sup, BRANCO, .92);   // = --p-elevado
     const textoBotao = tema === 'luz' ? BRANCO : sobreMarca;                          // = --p-texto-botao (claro: branco, como o Ranking)
     const marcaHover = tema === 'luz' ? mix(marca, [0, 0, 0], .85) : mix(marca, BRANCO, .88); // = --p-botao-hover

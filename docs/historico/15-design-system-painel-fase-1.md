@@ -146,3 +146,15 @@ Decisões da autora: janela do Design System para editar e ver detalhe; confirma
 - **Alinhamento:** no guia, o link "Ranking" do menu com painéis ficava 6px acima de Professora/Admin (o Pico dá margem embaixo ao `details`), e o campo de busca da barra de ferramentas ficava 6px acima do seletor (margem embaixo do `input`). Corrigido em `painel-componentes.css`; teste `tests/painel-ds/test_alinhamento.js` (falhava antes, 4/4 depois).
 - **Analytics sem corte:** o Supabase devolve no máximo 1000 linhas por pedido, então o teto antigo de 5000 podia cortar em 1000 sem avisar. Agora `analyticsFetchPaged` busca páginas de 1000 até o teto de 50000 (técnicos 10000) e só então mostra o aviso. Decisão: sem migration/RPC; um resumo em SQL exigiria reescrever os cálculos testados e só vale se o volume passar do teto.
 - Textos do Analytics em pt-BR conferidos: não há "pra" nem "--" (só no en.js, em inglês), nada a trocar.
+
+## Integração com a main (2026-10-15, PR 319)
+
+Depois do PR aberto, a `main` recebeu trabalho de outras sessões nas mesmas telas (PRs 317, 318 e 320). A branch mesclou a `main` mantendo os dois lados e recriou as funções novas nas telas do Design System. A prévia aprovada pela autora: `docs/fase-4-integracao/previa-integracao.html`.
+
+- **Aulas (094):** Presença em rótulos coloridos no estilo do Notion (escolher, criar digitando, ⋯ para nome, cor e arquivar), Competências, aula de turma (1 linha com `classroom_id`, escolhida no bloco "Turmas" da janela de pessoas), selos na lista e na edição. Usa as classes do site (`.att-pill`, `.skill-toggle`, `.skill-chip`) para ficar igual à tela da aluna. Bloco "Revisar do Notion" mantido com o visual antigo (prévia no Design System ainda não aprovada). Testes: `tests/painel-aulas/` (57 + 262).
+- **Alunos:** seção "Convidar aluno" (idioma, busca de conta, link, pendentes) no lugar do aviso "só a admin vincula"; confirmações pelo `PainelUI.confirmar`; Decks do aluno em árvore na ficha; `fetchStudentPanelData` e `renderStudentPanelHTML` voltaram (o botão Analytics do perfil público usa). Testes: `tests/painel-alunos/` (61 + 256), `tests/k10/`.
+- **Analytics:** aba "Decks públicos" (11 sub-abas).
+- **Cartões:** o Banco de Revisão volta a ser a sub-navegação "Cartões | Banco de Revisão" do painel, com a aparência atual (a aba-aviso da tela nova saiu). A parte do aluno (`review-bank-student.js`) fica para depois.
+- **Notificações:** bandeira do idioma pelo registro; **Badges:** ícone dos badges automáticos agora é `<img>` (Fluent); **idiomas:** `LanguageRegistry` no lugar de `frances`/`mandarim` escritos nas peças novas (teste `tests/registro`).
+- **Testes que mudaram de propósito:** painel-ds (zh passou a definir `--error-red`), fase-k0 (stub com `.range`), k10 (ficha nova), notificações (cabeçalho com ícone Fluent), vm-t (registro de idiomas).
+- **Já falhavam na `main`** (conferido num checkout da `main`): fase-identity, fase-public-deck, desafios-progresso, i18n (card_variants, content_en, playwright), conjugacao, k2c, k2f (2), k2i, trilha-tags, tts-google, fase-j e o lint de `mural.js` em `tests/registro`.

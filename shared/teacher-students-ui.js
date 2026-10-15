@@ -334,7 +334,8 @@ function tsuFichaHTML(st, canRemove){
   const note = !langs.some(l => l.key === link.language_app_key) && langs.length
     ? `<div class="p-alerta p-alerta--info"><span>${tsuEsc(t('students.otherSite', { lang: linkedLabel.replace(/<[^>]*>/g, ''), others: langs.map(l => tsuLangLabel(l.key)).join(', ') }))}</span></div>` : '';
   if (!lang){
-    return `<div class="painel"><div class="p-pagina" data-tsu="ficha">${head}<div class="p-vazio"><strong>${tsuEsc(t('students.noProgress'))}</strong></div></div></div>`;
+    return `<div class="painel"><div class="p-pagina" data-tsu="ficha">${head}<div class="p-vazio"><strong>${tsuEsc(t('students.noProgress'))}</strong></div>
+      <article data-bloco-criados><header><h3>${tsuEsc(t('students.block.created'))}</h3></header>${tsuCreatedHTML(st.metrics, name, st.bare)}</article>${tsuDecksBlockHTML(st)}</div></div>`;
   }
   const days = tsuDaysSince(lang.lastStudyDay);
   const q = lang.queue && typeof lang.queue === 'object' ? lang.queue : {};

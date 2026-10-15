@@ -92,7 +92,7 @@ const link = (id, user, name, key) => ({ id, student_id: 's' + id, username: use
   check('ficha: unidades, pontos de verificação, desafios e média das lições', html.includes('2') && html.includes('Primeiros contatos: melhor nota 85%') && html.includes('Desafios concluídos') && html.includes('70%'));
   check('ficha: fila empilhada com os 3 estados e fracos', html.includes('p-pilha') && html.includes('2</b> novos') && html.includes('4 fracos') === false && html.includes('1</b> fracos (errados 2+ vezes)'));
   check('ficha: linha do tempo com unidade e nota', html.includes('Concluiu lição da trilha (A1-1 · Cumprimentar) · acerto 80%') && html.includes('Abriu a aba Revisão'));
-  check('ficha: cartões criados e aulas começam carregando', (html.match(/p-spinner/g) || []).length === 2);
+  check('ficha: cartões criados, aulas e Decks começam carregando', (html.match(/p-spinner/g) || []).length === 3);
   check('ficha: admin/professora com vínculo vê Remover (menu de risco)', html.includes('data-remover-vinculo="1"') && html.includes('p-menu-item--perigo'));
   check('ficha: sem remoção quando canRemove=false', !fr.tsuFichaHTML({ link: l, overview: ov, langKey: null }, false).includes('data-remover-vinculo'));
   check('ficha: lição singular', html.includes('2 lições concluídas') && fr.tsuFichaHTML({ link: l, overview: ovOf(lang({ dailyLessons: { [today]: 1 } })), langKey: null }, true).includes('1 lição concluída'));

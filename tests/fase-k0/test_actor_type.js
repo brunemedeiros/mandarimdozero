@@ -8,7 +8,7 @@ const t = (n, ok) => { ok ? pass++ : (fail++, console.log('FAIL', n)); };
 // Fake PostgREST-like builder sobre um array de linhas.
 function makeClient(rows, inserted){
   return { from(tbl){
-    const f = []; let lim = Infinity; let ord = null;
+    const f = []; let lim = Infinity; let ord = null; let faixa = null;
     const b = {
       select(){ return b; },
       eq(c,v){ f.push(r => r[c] === v); return b; },
@@ -18,8 +18,9 @@ function makeClient(rows, inserted){
       lte(c,v){ f.push(r => r[c] <= v); return b; },
       order(c,o){ ord = [c,o]; return b; },
       limit(n){ lim = n; return b; },
+      range(a, z){ faixa = [a, z]; return b; },   // a tela busca em páginas (analyticsFetchPaged)
       insert(p){ inserted.push(p); return { then(cb){ cb({error:null}); } }; },
-      then(res){ let out = rows.filter(r => f.every(fn => fn(r))); if (ord) out = out.sort((a,b)=> a[ord[0]]<b[ord[0]]?1:-1); res({ data: out.slice(0, lim), error: null }); },
+      then(res){ let out = rows.filter(r => f.every(fn => fn(r))); if (ord) out = out.sort((a,b)=> a[ord[0]]<b[ord[0]]?1:-1); res({ data: faixa ? out.slice(faixa[0], faixa[1] + 1) : out.slice(0, lim), error: null }); },
     };
     return b;
   } };
