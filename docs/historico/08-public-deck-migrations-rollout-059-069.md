@@ -336,6 +336,12 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - `shared/supabase_migrations/104_server_notifications_en.sql` (a 103 é `103_class_calendar_feed`, de outra conversa). Sem DROP.
 - Staging e produção: 2026-10-15, arquivo inteiro, nome `104_server_notifications_en`. Detalhes: `docs/historico/19-amigos-em-dupla.md`.
 
+## 109 -- Missão em dupla automática da semana (2026-10-15)
+
+- `shared/supabase_migrations/109_duo_weekly_auto.sql` (105 a 107 são de outras conversas; 108 está numa branch). Sem DROP.
+- Staging: 2026-10-15 em 3 partes (`109_duo_weekly_auto_1`, `_2`, `_3`), md5 das funções conferido; depois `_4_studied_languages`. Produção: 2026-10-15 em 4 partes (`_1`, `_1b`, `_2`, `_3`), md5 conferido.
+  Detalhes: `docs/historico/19-amigos-em-dupla.md`.
+
 ## 096_review_bank_classrooms (Banco de Revisão ligado a uma Turma)
 
 - Arquivo `shared/supabase_migrations/096_review_bank_classrooms.sql` (SQL Editor: `docs/rollout-sql/096_sql_editor.sql`,

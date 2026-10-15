@@ -162,3 +162,50 @@ Pedidos da autora: corrigir também os outros avisos ("obviamente") e fazer o co
   anterior).
 - **Teste:** `tests/amigos-push/test_playwright.js`, 72/72 (fr e zh, claro e escuro, computador e celular, iPhone,
   bloqueado, primeiro amigo).
+
+## Missão em dupla automática da semana (109, 2026-10-15)
+
+Redesenho aprovado pela autora a partir da prévia (https://claude.ai/artifact/MdWXEhK4cZN5REQLPAxXWY).
+
+- **Como funciona:** toda segunda às 8h (Brasília) o site forma as duplas sozinho entre amigos. Meta: 4 dias de estudo de
+  **cada um** até domingo. Não tem formulário. Dia de estudo = dia em que a conta ganhou XP (tabela `study_days`, gravada
+  pelo gatilho de `weekly_xp`, só para XP da semana atual).
+- **Quem entra no sorteio:** quem estudou na semana anterior e deixou ligada "Participar das missões em dupla"
+  (`friend_settings.join_duo_missions`, ligada por padrão). Desligar tira a pessoa a partir da segunda seguinte, sem aviso
+  para ninguém. Não existe botão de recusar ou trocar dupla (decisão da autora: seria agressivo para o outro).
+- **Rodízio:** a cada semana a dupla muda; preferência por quem nunca fez dupla com a pessoa, depois por quem fez há mais
+  tempo; empate no acaso. Com um só amigo ativo, repete.
+- **Cumpriu:** aviso para os dois ("Missão em dupla cumprida! Você e X estudaram 4 dias cada 🎉"), +1 na conquista Missões em
+  Dupla, cartão fica "Cumprida" até domingo. Não cumpriu: termina sem culpa (nenhum aviso de "fulano não cumpriu").
+- **Sobrou sem dupla:** botão "Chamar para missão" no cartão do amigo (`start_duo_mission`): missão de dias começando hoje,
+  meta 4 ou os dias que faltam até domingo. Amigo que não participa aparece igual a "já está em missão" (`can_invite` falso),
+  sem expor a escolha dele.
+- **Onde aparece:** linha da dupla no quadro "Missões do dia"; faixa na tela de lição concluída (só no 1º estudo do dia);
+  cartão na aba Amigos com a semana dos dois (7 bolinhas por pessoa) e o cutucar dentro do cartão.
+- **Missões do dia clicáveis:** cada linha abre a atividade que ela pede (`DAILY_MISSION_TARGETS` em
+  `shared/core/estado-trilha-desafios.js`): dupla → Amigos; conjugação → Conjugação; revisões/atrasados → Revisão;
+  revisão rápida e jogo de combinar → o modo certo da Revisão; hanzi → Hanzi; o resto → próxima lição da trilha.
+- **Sorteio:** `duo_pair_week()` (uma vez por semana, `duo_pairing_runs`, trava contra duas chamadas juntas), agendado no
+  pg_cron (`duo-pair-weekly`, `0 11 * * 1`) e também chamado na primeira abertura depois de segunda 8h, se o cron não rodou
+  (`_duo_maybe_pair`). **Atenção na produção:** a primeira abertura depois de aplicar já forma as duplas desta semana e manda
+  os avisos (quem estudou na semana passada).
+- Missões antigas de XP (102) continuam valendo até o fim da semana delas.
+- **Grátis x Premium:** tudo grátis.
+- **Staging:** aplicada em 2026-10-15 em 3 partes (`109_duo_weekly_auto_1/2/3`; o arquivo inteiro trava a ferramenta).
+  As 10 funções conferidas por md5 com o banco local; cron criado; sem DROP. Depois veio a parte
+  `109_duo_weekly_auto_4_studied_languages` (abaixo).
+- **Produção:** aplicada em 2026-10-15 a pedido da autora, em 4 partes (`109_duo_weekly_auto_1`, `_1b`, `_2`, `_3`). As 10
+  funções conferidas por md5 com o banco local; cron `duo-pair-weekly` ativo; `study_days` e `duo_pairing_runs` com RLS e
+  sem acesso das contas; 9 dias de estudo desta semana vindos das sequências; sorteio ainda não rodado na hora da aplicação.
+- **Convivência com a 105 de outra conversa (`105b_pt_server_minimum`, só no Staging):** ela recria `_friends_notify_msg`
+  para gravar o aviso só nos idiomas que a pessoa estuda (`_studied_languages`). A 109 junta os dois lados: usa
+  `_studied_languages` quando a função existe; senão, frances e mandarim. **Se a 105 for aplicada na produção depois da
+  109, a versão dela tira `duo_week_paired` da chave "missões" das preferências:** aplicar a `_friends_notify_msg` da 109
+  de novo depois (ou acrescentar `'duo_week_paired'` na lista da 105).
+- **Testes:**
+
+  | Teste | Resultado |
+  |---|---|
+  | `tests/amigos-dupla/run_109.sh` (sorteio, rodízio, exclusões, textos pt/en, dia de estudo, XP de semana antiga, cumprida, chamar, permissões) | 25/25 |
+  | `tests/amigos-dupla/test_playwright.js` (cartão, semana, chamar, linha nas Missões do dia, faixa no fim da lição, fr/zh, claro/escuro, celular) | 138/138 |
+  | `tests/amigos/test_playwright.js` (9 preferências agora) | 210/210 |

@@ -2396,14 +2396,24 @@ window.I18N_CATALOG['en'] = {
   'badge.track.duo.goal': 'Complete {n} duo missions', // ALTA
   'badge.track.duo.goal.1': 'Complete a duo mission', // ALTA
   'friends.duo.title': 'Duo mission', // ALTA
-  'friends.duo.pitch': 'Team up with a friend to earn XP together by Sunday. Only XP earned after you start counts.', // ALTA
-  'friends.duo.friendLabel': 'Friend', // ALTA
-  'friends.duo.goalLabel': 'Goal', // ALTA
-  'friends.duo.goalOpt.150': '150 XP (light)', // ALTA
-  'friends.duo.goalOpt.300': '300 XP (regular)', // ALTA
-  'friends.duo.goalOpt.600': '600 XP (tough)', // ALTA
-  'friends.duo.start': 'Start mission', // ALTA
-  'friends.duo.noneFree': 'Your friends are already on missions this week. More next week!', // ALTA
+  'friends.duo.invite': 'Invite to a mission', // ALTA
+  'friends.duo.inviteAria': 'Invite {name} to a duo mission', // ALTA
+  'friends.duo.emptyText': 'Every Monday the site pairs you with a friend who studied the week before, and you each study 4 days by Sunday. No partner this week? Invite a friend from their card.', // ALTA
+  'friends.duo.offText': 'You\'re not taking part in duo missions. To join again, turn on "Take part in duo missions" in Settings > Notifications > Friends.', // ALTA
+  'friends.duo.pairTitle': 'Your partner this week: {name}', // ALTA
+  'friends.duo.weekdays': 'M,T,W,T,F,S,S', // ALTA
+  'friends.duo.you': 'You', // ALTA
+  'friends.duo.weekAria': 'You studied {mine} of {goal} days and {name} {theirs} of {goal}', // ALTA
+  'friends.duo.stripTitle': 'Duo mission with {name}', // ALTA
+  'friends.duo.stripSub': 'You {mine}/{goal} days · {name} {theirs}/{goal}', // ALTA
+  'friends.duo.lessonDay': 'Day {n} of {goal} in your mission with {name} ✓', // ALTA
+  'friends.duo.lessonDone': 'Duo mission with {name} complete! 🎉', // ALTA
+  'friends.pref.join_duo_missions': 'Take part in duo missions (every Monday, with a friend)', // ALTA
+  'friends.duo.doneDays': { one: 'You each studied {n} day. A new partner comes on Monday.', other: 'You each studied {n} days. A new partner comes on Monday.' }, // ALTA
+  'friends.duo.goalText': { one: 'You each study {n} day by Sunday.', other: 'You each study {n} days by Sunday.' }, // ALTA
+  'friends.duo.toast.startedDays': { one: 'Mission started! You each study {n} day by Sunday 🤝', other: 'Mission started! You each study {n} days by Sunday 🤝' }, // ALTA
+  'friends.duo.lessonRest': { one: '{n} more day for you by Sunday.', other: '{n} more days for you by Sunday.' }, // ALTA
+  'friends.duo.lessonWaitPartner': { one: 'Your part is done! {name} needs {n} more day.', other: 'Your part is done! {name} needs {n} more days.' }, // ALTA
   'friends.duo.with': 'You and {name}', // ALTA
   'friends.duo.progress': '{done} of {goal} XP', // ALTA
   'friends.duo.barAria': 'Mission progress: {done} of {goal} XP', // ALTA
@@ -2412,7 +2422,6 @@ window.I18N_CATALOG['en'] = {
   'friends.duo.endsToday': 'Ends today', // ALTA
   'friends.duo.done': 'Mission complete! 🎉', // ALTA
   'friends.duo.doneText': 'You earned {goal} XP together. A new mission starts next week.', // ALTA
-  'friends.duo.toast.started': 'Mission started! Happy studying 🤝', // ALTA
   'friends.nudge.btn': 'Nudge', // ALTA
   'friends.nudge.aria': 'Nudge {name} to study today', // ALTA
   'friends.nudge.done': 'Nudged', // ALTA
