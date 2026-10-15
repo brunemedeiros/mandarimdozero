@@ -196,6 +196,91 @@ function wireAttendancePicker(wrap){
   });
 }
 
+// ---------- Revisar do Notion (importação de 2026-10-15) ----------
+// Tópicos que podiam ter anotação pessoal entraram SÓ nas Anotações (privadas), marcados com
+// "[Notion] ". Aqui a professora edita o texto e decide: "Mostrar ao aluno" (vira Tópico ou Para
+// a próxima aula; o original continua nas Anotações, sem a marca) ou "Deixar só para mim".
+const NOTION_MARK = '[Notion] ';
+const NOTION_HW_MARK = '[Notion] Para a próxima aula: ';
+
+function notionReviewParts(notes){
+  return String(notes || '').split('\n').filter(l => l.startsWith(NOTION_MARK)).map(l => l.startsWith(NOTION_HW_MARK)
+    ? { field: 'homework', text: l.slice(NOTION_HW_MARK.length) }
+    : { field: 'topic', text: l.slice(NOTION_MARK.length) });
+}
+function notionCleanNotes(notes){
+  return String(notes || '').split('\n').map(l => l.startsWith(NOTION_HW_MARK) ? `Para a próxima aula: ${l.slice(NOTION_HW_MARK.length)}` : l.startsWith(NOTION_MARK) ? l.slice(NOTION_MARK.length) : l).join('\n').trim() || null;
+}
+
+async function fetchNotionReviewLogs(){
+  if (!CURRENT_USER) return [];
+  const { data, error } = await supabaseClient.from('teacher_class_logs')
+    .select('id, student_id, classroom_id, class_date, topic, homework, notes')
+    .eq('teacher_id', CURRENT_USER.id).like('notes', '[Notion]%')
+    .order('class_date', { ascending: true });
+  if (error){ console.error('Erro ao carregar aulas para revisar:', error); return []; }
+  return (data || []).filter(l => String(l.notes || '').startsWith('[Notion]'));
+}
+
+function notionReviewWho(log){
+  if (log.classroom_id){
+    const c = ADMIN_CLASS_LOGS_STATE._classroomsCache.find(x => String(x.id) === String(log.classroom_id));
+    return `👥 ${escapeHTML(c ? c.name : '?')}`;
+  }
+  const st = ADMIN_CLASS_LOGS_STATE._studentsCache.find(x => x.student_id === log.student_id);
+  return st ? classLogStudentLabel(st) : '?';
+}
+
+function notionReviewItemHTML(log){
+  return `
+    <div class="notion-review-item" data-notion-review="${log.id}">
+      <div class="admin-badge-name">${notionReviewWho(log)} · ${fmtDate(new Date(`${log.class_date}T00:00:00`))}</div>
+      ${notionReviewParts(log.notes).map((p, i) => `
+        <label class="profile-edit-label" for="notion-rv-${log.id}-${i}">${p.field === 'homework' ? t('panel.classLog.review.toHomework') : t('panel.classLog.review.toTopic')}</label>
+        <textarea id="notion-rv-${log.id}-${i}" class="profile-edit-input" rows="2" data-notion-field="${p.field}">${escapeHTML(p.text)}</textarea>`).join('')}
+      <div class="notion-review-actions">
+        <button type="button" class="btn btn-primary" data-notion-show="${log.id}">${t('panel.classLog.review.show')}</button>
+        <button type="button" class="btn btn-secondary" data-notion-keep="${log.id}">${t('panel.classLog.review.keep')}</button>
+      </div>
+    </div>`;
+}
+
+async function renderNotionReviewBox(host){
+  if (!host) return;
+  const logs = await fetchNotionReviewLogs();
+  if (!logs.length){ host.innerHTML = ''; return; }
+  host.innerHTML = `
+    <details class="profile-section notion-review" ${host.dataset.open === '0' ? '' : 'open'}>
+      <summary class="section-label">${escapeHTML(tp('panel.classLog.review.title', logs.length))}</summary>
+      <p class="profile-edit-hint">${t('panel.classLog.review.hint')}</p>
+      ${logs.map(notionReviewItemHTML).join('')}
+    </details>`;
+  host.querySelector('details').addEventListener('toggle', (e) => { host.dataset.open = e.target.open ? '1' : '0'; });
+  const finish = async (log, showToStudent, item) => {
+    const patch = { notes: notionCleanNotes(log.notes), updated_at: new Date().toISOString() };
+    if (showToStudent){
+      item.querySelectorAll('[data-notion-field]').forEach(tx => {
+        const v = tx.value.trim();
+        if (!v) return;
+        const f = tx.dataset.notionField;
+        const cur = (f === 'topic' ? log.topic : log.homework) || '';
+        patch[f] = cur ? `${cur}\n${v}` : v;
+      });
+    }
+    const { error } = await supabaseClient.from('teacher_class_logs').update(patch).eq('id', log.id);
+    if (error){ console.error('Erro ao revisar aula:', error); showToast(t('teacherLogs.err.saveFailed')); return; }
+    showToast(showToStudent ? t('panel.classLog.review.shown') : t('panel.classLog.review.kept'));
+    await renderNotionReviewBox(host);
+    const listBox = document.getElementById('admin-classlogs-list-box');
+    if (listBox && ADMIN_CLASS_LOGS_STATE.editingId == null) refreshClassLogsListBox(listBox);
+  };
+  logs.forEach(log => {
+    const item = host.querySelector(`[data-notion-review="${log.id}"]`);
+    item.querySelector('[data-notion-show]').addEventListener('click', () => finish(log, true, item));
+    item.querySelector('[data-notion-keep]').addEventListener('click', () => finish(log, false, item));
+  });
+}
+
 function classLogStudentLabel(s){
   return s.display_name
     ? `${escapeHTML(s.display_name)} (@${escapeHTML(s.username || '?')})`
@@ -415,6 +500,7 @@ async function renderAdminClassLogsView(){
       : '';
 
   wrap.innerHTML = `
+    <div id="admin-notion-review"></div>
     <div class="profile-section">
       <div class="section-label">${t('admin.common.students')}</div>
       <p class="profile-edit-hint">${t('admin.classLogs.pickStudentsHint')}</p>
@@ -467,6 +553,7 @@ async function renderAdminClassLogsView(){
 
   wireClassLogsListBox(document.getElementById('admin-classlogs-list-box'));
   wireAttendancePicker(wrap);
+  renderNotionReviewBox(document.getElementById('admin-notion-review'));
 
   wrap.querySelectorAll('[data-classlog-classroom-checkbox]').forEach(cb => {
     cb.addEventListener('change', () => {
