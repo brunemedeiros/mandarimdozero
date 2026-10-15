@@ -127,6 +127,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'menu.supportMaterials': '📚 Material de apoio',
   'menu.settings': '⚙️ Configurações',
   'menu.admin': '🛠️ Painel de Admin',
+  'sidebar.collapse': 'Recolher menu',
+  'sidebar.expand': 'Expandir menu',
   'menu.logout': 'Sair da conta',
   'menu.conjugation': '✍️ Conjugação',
   'menu.challenges': '🎯 Desafios',

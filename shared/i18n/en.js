@@ -111,6 +111,8 @@ window.I18N_CATALOG['en'] = {
   'menu.supportMaterials': '📚 Study materials', // MÉDIA
   'menu.settings': '⚙️ Settings', // ALTA
   'menu.admin': '🛠️ Admin panel', // ALTA
+  'sidebar.collapse': 'Collapse menu', // ALTA
+  'sidebar.expand': 'Expand menu', // ALTA
   'menu.logout': 'Sign out', // ALTA
   'menu.conjugation': '✍️ Conjugation', // ALTA
   'menu.challenges': '🎯 Challenges', // ALTA

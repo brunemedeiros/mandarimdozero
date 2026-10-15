@@ -4683,9 +4683,16 @@ const SIDEBAR_COLLAPSE_KEY = 'sidebar_collapsed';
 if (localStorageSafeGet(SIDEBAR_COLLAPSE_KEY) === '1'){
   document.getElementById('app').classList.add('sidebar-collapsed');
 }
+function syncSidebarToggleLabel(){
+  const btn = document.getElementById('sidebar-toggle-btn');
+  const txt = t(document.getElementById('app').classList.contains('sidebar-collapsed') ? 'sidebar.expand' : 'sidebar.collapse');
+  btn.title = txt; btn.setAttribute('aria-label', txt);
+}
+syncSidebarToggleLabel();
 document.getElementById('sidebar-toggle-btn').addEventListener('click', () => {
   const collapsed = document.getElementById('app').classList.toggle('sidebar-collapsed');
   localStorageSafeSet(SIDEBAR_COLLAPSE_KEY, collapsed ? '1' : '0');
+  syncSidebarToggleLabel();
 });
 
 // Popula os campos de Configurações -- roda em QUALQUER entrada na aba
