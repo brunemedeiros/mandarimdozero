@@ -4,169 +4,49 @@ Gerado por `scripts/e4-diff-near.js`. Ordem: menos linhas diferentes primeiro. `
 
 | # | Função | Linhas fr/zh | Linhas diferentes |
 |---:|---|---:|---:|
-| 1 | `backToReviewModeSelect` | 27/26 | 1 |
-| 2 | `startDeckReviewSession` | 35/34 | 1 |
-| 3 | `playAudioPreview` | 3/3 | 2 |
-| 4 | `customAudioBtnHTML` | 3/3 | 2 |
-| 5 | `showWrongAnswerPanel` | 3/3 | 2 |
-| 6 | `maskWordInText` | 6/6 | 2 |
-| 7 | `reviewCardTagLabel` | 8/8 | 2 |
-| 8 | `pollForVoices` | 9/9 | 2 |
-| 9 | `advanceUnitStep` | 10/10 | 2 |
-| 10 | `wireAudioButtons` | 11/11 | 2 |
-| 11 | `exitToPath` | 13/11 | 2 |
-| 12 | `addXP` | 14/14 | 2 |
-| 13 | `openReviewSession` | 34/32 | 2 |
-| 14 | `answerSpeedQuestion` | 38/38 | 2 |
-| 15 | `renderLessonCompleteScreen` | 52/52 | 2 |
-| 16 | `renderUnitCompleteScreen` | 60/60 | 2 |
-| 17 | `onMatchTileClick` | 68/68 | 2 |
-| 18 | `noteOrConceptReviewHTML` | 13/14 | 3 |
-| 19 | `findEnterAdvanceTarget` | 15/12 | 3 |
-| 20 | `renderConceptStep` | 40/41 | 3 |
-| 21 | `assignTodaysMissions` | 7/7 | 4 |
-| 22 | `buildCardsFromUnits` | 12/10 | 4 |
-| 23 | `renderMatchGame` | 21/21 | 4 |
-| 24 | `flyBlockToSlot` | 24/24 | 4 |
-| 25 | `freshAcquisitionState` | 29/29 | 4 |
-| 26 | `playPregeneratedAudio` | 30/28 | 4 |
-| 27 | `showAnswerPanel` | 40/40 | 4 |
-| 28 | `freshDailyBucket` | 10/9 | 5 |
-| 29 | `renderDialogueCheckStep` | 16/17 | 5 |
-| 30 | `mapUnitDescribe` | 29/28 | 5 |
-| 31 | `finishCurrentLesson` | 39/38 | 5 |
-| 32 | `audioBtnHTML` | 4/4 | 6 |
-| 33 | `maybeSendStudyReminder` | 22/22 | 6 |
-| 34 | `wireDontKnowButton` | 37/37 | 6 |
-| 35 | `currentStepDefs` | 20/17 | 7 |
-| 36 | `dlgPlayLine` | 43/42 | 7 |
-| 37 | `renderProgressLineChart` | 44/45 | 7 |
-| 38 | `renderExerciseStep` | 52/51 | 7 |
-| 39 | `renderMultipleChoiceCard` | 56/57 | 7 |
-| 40 | `renderTrueFalseExercise` | 57/58 | 7 |
-| 41 | `buildReorderDistractors` | 24/24 | 8 |
-| 42 | `serializeState` | 34/30 | 10 |
-| 43 | `renderBlockIntroCard` | 38/41 | 11 |
-| 44 | `renderSpeedReview` | 115/116 | 11 |
-| 45 | `renderStepProgress` | 33/27 | 12 |
-| 46 | `buildUnitBlock` | 95/90 | 13 |
-| 47 | `renderReviewView` | 108/102 | 14 |
-| 48 | `renderMultipleChoiceExercise` | 74/75 | 19 |
-| 49 | `renderDialogueStep` | 126/128 | 20 |
-| 50 | `renderClozeCard` | 53/58 | 25 |
-| 51 | `renderTypeAnswerCard` | 58/61 | 25 |
-| 52 | `renderVocabTypeExercise` | 62/64 | 30 |
-| 53 | `renderReorderExercise` | 110/109 | 31 |
-| 54 | `renderDialogueCheck` | 95/97 | 34 |
-| 55 | `renderClozeExercise` | 105/117 | 42 |
-
-## `backToReviewModeSelect` (1 linhas diferentes)
-
-```diff
-...
-      stopSpeedTimer();
--     stopMatchTimer();
-      SPEED_STATE.active = false;
-```
-
-## `startDeckReviewSession` (1 linhas diferentes)
-
-```diff
-...
-      STATE.reviewSessionUnitFilter = null;
--     STATE.reviewSessionMilestone = null;
-      STATE.reviewSessionDeckId = deckId;
-```
-
-## `playAudioPreview` (2 linhas diferentes)
-
-```diff
-...
-  function playAudioPreview(text, btnEl) {
--     speakFrenchAudioOnly(text, btnEl, false);
-+     speakChineseAudioOnly(text, btnEl, false);
-  }
-```
-
-## `customAudioBtnHTML` (2 linhas diferentes)
-
-```diff
-...
-  function customAudioBtnHTML(url) {
--     return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="${t('fr.audio.listen')}" title="${t('fr.audio.listen')}">🎧</button>`;
-+     return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="${t('zh.audio.listenAudio')}" title="${t('zh.audio.listenAudio')}">🎧</button>`;
-  }
-```
-
-## `showWrongAnswerPanel` (2 linhas diferentes)
-
-```diff
-...
-  function showWrongAnswerPanel(contentEl, ex, opts = {}) {
--     showAnswerPanel(contentEl, ex, { revealed: false, attemptHTML: opts.attemptHTML });
-+     showAnswerPanel(contentEl, ex, { revealed: false, toneOnly: opts.toneOnly || false, attemptHTML: opts.attemptHTML });
-  }
-```
-
-## `maskWordInText` (2 linhas diferentes)
-
-```diff
-...
-  function maskWordInText(text, word) {
--     const idx = text.toLowerCase().indexOf(word.toLowerCase());
-+     const idx = text.indexOf(word);
-      if (idx === -1)
-```
-
-## `reviewCardTagLabel` (2 linhas diferentes)
-
-```diff
-...
-      }
--     return flashcardUnitTitleText(card);
-+     return cardOriginTitle(card);
-  }
-```
-
-## `pollForVoices` (2 linhas diferentes)
-
-```diff
-...
-      TTS.pollAttempts++;
--     loadFrenchVoice();
-+     loadChineseVoice();
-      if (!TTS.voice && TTS.pollAttempts < 20) {
-```
-
-## `advanceUnitStep` (2 linhas diferentes)
-
-```diff
-...
-  function advanceUnitStep(u) {
--     const stepDefs = currentStepDefs();
-+     const stepDefs = currentStepDefs(u);
-      if (STEP_STATE.currentStep < stepDefs.length - 1) {
-```
-
-## `wireAudioButtons` (2 linhas diferentes)
-
-```diff
-...
-              else
--                 speakFrench(btn.dataset.speak, btn);
-+                 speakChinese(btn.dataset.speak, btn);
-          });
-```
-
-## `exitToPath` (2 linhas diferentes)
-
-```diff
-...
-      STEP_STATE.onChallengesScreen = false;
--     STEP_STATE.onCheckpoint = null;
--     STEP_STATE.onLevelTest = null;
-      STEP_STATE.lessonReview = null;
-```
+| 1 | `addXP` | 14/14 | 2 |
+| 2 | `answerSpeedQuestion` | 38/38 | 2 |
+| 3 | `renderLessonCompleteScreen` | 52/52 | 2 |
+| 4 | `renderUnitCompleteScreen` | 60/60 | 2 |
+| 5 | `onMatchTileClick` | 68/68 | 2 |
+| 6 | `noteOrConceptReviewHTML` | 13/14 | 3 |
+| 7 | `findEnterAdvanceTarget` | 15/12 | 3 |
+| 8 | `renderConceptStep` | 40/41 | 3 |
+| 9 | `assignTodaysMissions` | 7/7 | 4 |
+| 10 | `buildCardsFromUnits` | 12/10 | 4 |
+| 11 | `renderMatchGame` | 21/21 | 4 |
+| 12 | `flyBlockToSlot` | 24/24 | 4 |
+| 13 | `freshAcquisitionState` | 29/29 | 4 |
+| 14 | `playPregeneratedAudio` | 30/28 | 4 |
+| 15 | `showAnswerPanel` | 40/40 | 4 |
+| 16 | `freshDailyBucket` | 10/9 | 5 |
+| 17 | `renderDialogueCheckStep` | 16/17 | 5 |
+| 18 | `mapUnitDescribe` | 29/28 | 5 |
+| 19 | `finishCurrentLesson` | 39/38 | 5 |
+| 20 | `audioBtnHTML` | 4/4 | 6 |
+| 21 | `maybeSendStudyReminder` | 22/22 | 6 |
+| 22 | `wireDontKnowButton` | 37/37 | 6 |
+| 23 | `currentStepDefs` | 20/17 | 7 |
+| 24 | `dlgPlayLine` | 43/42 | 7 |
+| 25 | `renderProgressLineChart` | 44/45 | 7 |
+| 26 | `renderExerciseStep` | 52/51 | 7 |
+| 27 | `renderMultipleChoiceCard` | 56/57 | 7 |
+| 28 | `renderTrueFalseExercise` | 57/58 | 7 |
+| 29 | `buildReorderDistractors` | 24/24 | 8 |
+| 30 | `serializeState` | 34/30 | 10 |
+| 31 | `renderBlockIntroCard` | 38/41 | 11 |
+| 32 | `renderSpeedReview` | 115/116 | 11 |
+| 33 | `renderStepProgress` | 33/27 | 12 |
+| 34 | `buildUnitBlock` | 95/90 | 13 |
+| 35 | `renderReviewView` | 108/102 | 14 |
+| 36 | `renderMultipleChoiceExercise` | 74/75 | 19 |
+| 37 | `renderDialogueStep` | 126/128 | 20 |
+| 38 | `renderClozeCard` | 53/58 | 25 |
+| 39 | `renderTypeAnswerCard` | 58/61 | 25 |
+| 40 | `renderVocabTypeExercise` | 62/64 | 30 |
+| 41 | `renderReorderExercise` | 110/109 | 31 |
+| 42 | `renderDialogueCheck` | 95/97 | 34 |
+| 43 | `renderClozeExercise` | 105/117 | 42 |
 
 ## `addXP` (2 linhas diferentes)
 
@@ -176,19 +56,6 @@ Gerado por `scripts/e4-diff-near.js`. Ordem: menos linhas diferentes primeiro. `
 -     showToast(t('toast.xpGain', { amount }));
 +     showToast(`+${amount} XP`);
       fireNotificationEvent('xp_earned', 'gamificacao', { amount });
-```
-
-## `openReviewSession` (2 linhas diferentes)
-
-```diff
-...
-          STATE.reviewSessionDeckId = null;
--         STATE.reviewSessionMilestone = null;
-          startReviewSession(opts);
-...
-          STATE.reviewSessionDeckId = null;
--         STATE.reviewSessionMilestone = null;
-          STATE.reviewQueue = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'hard' }));
 ```
 
 ## `answerSpeedQuestion` (2 linhas diferentes)

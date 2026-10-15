@@ -1,19 +1,19 @@
 # E4, passo 1: levantamento por função de `fr/app.js` x `zh/app.js`
 
 Gerado por `scripts/e4-classify-functions.js` (parser do TypeScript sobre o código real; só leitura). Dados completos em `docs/i18n/e4-levantamento-funcoes.json`.
-Declarações de topo: 481 em `fr/app.js` (10864 linhas) e 212 em `zh/app.js` (6653 linhas). "Quase igual" = pelo menos 75% de semelhança em pares de símbolos do código (sem comentários e espaços).
+Declarações de topo: 469 em `fr/app.js` (10641 linhas) e 200 em `zh/app.js` (6430 linhas). "Quase igual" = pelo menos 75% de semelhança em pares de símbolos do código (sem comentários e espaços).
 
 ## 1. Resumo das funções (declarações de função)
 
 | Classe | Funções | Linhas no fr | Linhas no zh | % das linhas de função do fr | % do zh |
 |---|---:|---:|---:|---:|---:|
 | idêntica | 3 | 16 | 16 | 0.2% | 0.4% |
-| quase igual | 55 | 2556 | 2572 | 33.9% | 56.3% |
-| divergente | 21 | 771 | 624 | 10.2% | 13.7% |
-| só fr | 257 | 4191 | 0 | 55.6% | 0% |
-| só zh | 62 | 0 | 1358 | 0% | 29.7% |
+| quase igual | 43 | 2392 | 2414 | 32.5% | 54.7% |
+| divergente | 21 | 771 | 624 | 10.5% | 14.1% |
+| só fr | 257 | 4191 | 0 | 56.9% | 0% |
+| só zh | 62 | 0 | 1358 | 0% | 30.8% |
 
-Total de linhas em funções: fr 7534, zh 4570. Os blocos de dados e constantes (não função) somam 157 declarações e ficam fora desta conta.
+Total de linhas em funções: fr 7370, zh 4412. Os blocos de dados e constantes (não função) somam 157 declarações e ficam fora desta conta.
 
 ## 2. Por área (funções)
 
@@ -23,12 +23,12 @@ Total de linhas em funções: fr 7534, zh 4570. Os blocos de dados e constantes 
 | conjugação | 0 | 0 | 0 | 27 | 0 |
 | desafios e ditados | 0 | 0 | 0 | 87 | 7 |
 | estado e persistência | 0 | 2 | 1 | 9 | 4 |
-| exercícios de lição | 0 | 19 | 8 | 33 | 15 |
-| mapa da trilha e unidades | 0 | 7 | 6 | 33 | 3 |
-| outros | 0 | 6 | 1 | 24 | 9 |
+| exercícios de lição | 0 | 18 | 8 | 33 | 15 |
+| mapa da trilha e unidades | 0 | 5 | 6 | 33 | 3 |
+| outros | 0 | 5 | 1 | 24 | 9 |
 | perfil, ranking e social | 3 | 3 | 3 | 2 | 0 |
-| revisão e decks | 0 | 13 | 2 | 32 | 8 |
-| áudio e fala | 0 | 5 | 0 | 6 | 16 |
+| revisão e decks | 0 | 8 | 2 | 32 | 8 |
+| áudio e fala | 0 | 2 | 0 | 6 | 16 |
 
 ## 3. Idênticas (candidatas ao passo 3, extração primeiro)
 
@@ -64,37 +64,25 @@ Total de linhas em funções: fr 7534, zh 4570. Os blocos de dados e constantes 
 | `freshAcquisitionState` | 98% | 42 / 57 | estado e persistência |
 | `answerSpeedQuestion` | 94% | 49 / 50 | exercícios de lição |
 | `renderBlockIntroCard` | 85% | 43 / 49 | revisão e decks |
-| `startDeckReviewSession` | 98% | 41 / 40 | revisão e decks |
 | `renderStepProgress` | 79% | 38 / 38 | mapa da trilha e unidades |
 | `wireDontKnowButton` | 97% | 38 / 38 | outros |
 | `addXP` | 81% | 37 / 37 | perfil, ranking e social |
-| `openReviewSession` | 96% | 37 / 35 | revisão e decks |
 | `serializeState` | 76% | 36 / 32 | estado e persistência |
 | `dlgPlayLine` | 94% | 32 / 31 | exercícios de lição |
 | `playPregeneratedAudio` | 93% | 31 / 31 | áudio e fala |
 | `buildReorderDistractors` | 94% | 27 / 27 | exercícios de lição |
 | `flyBlockToSlot` | 96% | 26 / 26 | outros |
-| `backToReviewModeSelect` | 98% | 26 / 25 | revisão e decks |
 | `mapUnitDescribe` | 94% | 24 / 23 | mapa da trilha e unidades |
 | `renderMatchGame` | 78% | 23 / 23 | exercícios de lição |
 | `maybeSendStudyReminder` | 94% | 20 / 20 | outros |
 | `buildCardsFromUnits` | 82% | 16 / 15 | revisão e decks |
 | `renderDialogueCheckStep` | 82% | 15 / 16 | exercícios de lição |
 | `currentStepDefs` | 84% | 16 / 14 | outros |
-| `exitToPath` | 89% | 13 / 11 | mapa da trilha e unidades |
 | `noteOrConceptReviewHTML` | 87% | 10 / 11 | revisão e decks |
 | `findEnterAdvanceTarget` | 79% | 11 / 9 | outros |
 | `freshDailyBucket` | 80% | 10 / 9 | perfil, ranking e social |
-| `wireAudioButtons` | 95% | 9 / 9 | áudio e fala |
-| `advanceUnitStep` | 94% | 9 / 9 | mapa da trilha e unidades |
-| `pollForVoices` | 93% | 8 / 8 | áudio e fala |
 | `assignTodaysMissions` | 87% | 7 / 7 | perfil, ranking e social |
-| `reviewCardTagLabel` | 95% | 7 / 7 | revisão e decks |
-| `maskWordInText` | 84% | 5 / 5 | outros |
 | `audioBtnHTML` | 85% | 4 / 4 | áudio e fala |
-| `playAudioPreview` | 79% | 3 / 3 | revisão e decks |
-| `customAudioBtnHTML` | 81% | 3 / 3 | áudio e fala |
-| `showWrongAnswerPanel` | 78% | 3 / 3 | exercícios de lição |
 
 ## 5. Divergentes (passo 5: unificar ou assumir como regra do idioma)
 

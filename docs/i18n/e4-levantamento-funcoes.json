@@ -2,8 +2,8 @@
  "gerado": "script: scripts/e4-classify-functions.js",
  "limiteQuaseIgual": 0.75,
  "linhasArquivo": {
-  "fr": 10864,
-  "zh": 6653
+  "fr": 10641,
+  "zh": 6430
  },
  "resumo": {
   "funcoes": {
@@ -13,9 +13,9 @@
     "linesZh": 16
    },
    "quase igual": {
-    "n": 55,
-    "linesFr": 2556,
-    "linesZh": 2572
+    "n": 43,
+    "linesFr": 2392,
+    "linesZh": 2414
    },
    "divergente": {
     "n": 21,
@@ -450,15 +450,6 @@
    "linesZh": 82
   },
   {
-   "name": "startDeckReviewSession",
-   "kind": "function",
-   "area": "revisão e decks",
-   "cls": "quase igual",
-   "similarity": 0.98,
-   "linesFr": 41,
-   "linesZh": 40
-  },
-  {
    "name": "renderLevelTestQuizStep",
    "kind": "function",
    "area": "exercícios de lição",
@@ -547,15 +538,6 @@
    "similarity": 0.81,
    "linesFr": 37,
    "linesZh": 37
-  },
-  {
-   "name": "openReviewSession",
-   "kind": "function",
-   "area": "revisão e decks",
-   "cls": "quase igual",
-   "similarity": 0.96,
-   "linesFr": 37,
-   "linesZh": 35
   },
   {
    "name": "serializeState",
@@ -718,15 +700,6 @@
    "similarity": null,
    "linesFr": 52,
    "linesZh": 0
-  },
-  {
-   "name": "backToReviewModeSelect",
-   "kind": "function",
-   "area": "revisão e decks",
-   "cls": "quase igual",
-   "similarity": 0.98,
-   "linesFr": 26,
-   "linesZh": 25
   },
   {
    "name": "REALITY_NOTE_LEVEL_GUIDANCE",
@@ -1206,15 +1179,6 @@
    "linesZh": 0
   },
   {
-   "name": "exitToPath",
-   "kind": "function",
-   "area": "mapa da trilha e unidades",
-   "cls": "quase igual",
-   "similarity": 0.89,
-   "linesFr": 13,
-   "linesZh": 11
-  },
-  {
    "name": "renderClozeGrammarFeedback",
    "kind": "function",
    "area": "exercícios de lição",
@@ -1440,29 +1404,11 @@
    "linesZh": 19
   },
   {
-   "name": "wireAudioButtons",
-   "kind": "function",
-   "area": "áudio e fala",
-   "cls": "quase igual",
-   "similarity": 0.95,
-   "linesFr": 9,
-   "linesZh": 9
-  },
-  {
    "name": "badgeModesUsedCount",
    "kind": "function",
    "area": "perfil, ranking e social",
    "cls": "divergente",
    "similarity": 0.67,
-   "linesFr": 9,
-   "linesZh": 9
-  },
-  {
-   "name": "advanceUnitStep",
-   "kind": "function",
-   "area": "mapa da trilha e unidades",
-   "cls": "quase igual",
-   "similarity": 0.94,
    "linesFr": 9,
    "linesZh": 9
   },
@@ -1564,15 +1510,6 @@
    "similarity": null,
    "linesFr": 0,
    "linesZh": 17
-  },
-  {
-   "name": "pollForVoices",
-   "kind": "function",
-   "area": "áudio e fala",
-   "cls": "quase igual",
-   "similarity": 0.93,
-   "linesFr": 8,
-   "linesZh": 8
   },
   {
    "name": "wireFrAccentPicker",
@@ -1778,15 +1715,6 @@
    "area": "mapa da trilha e unidades",
    "cls": "divergente",
    "similarity": 0.68,
-   "linesFr": 7,
-   "linesZh": 7
-  },
-  {
-   "name": "reviewCardTagLabel",
-   "kind": "function",
-   "area": "revisão e decks",
-   "cls": "quase igual",
-   "similarity": 0.95,
    "linesFr": 7,
    "linesZh": 7
   },
@@ -2194,15 +2122,6 @@
    "similarity": null,
    "linesFr": 10,
    "linesZh": 0
-  },
-  {
-   "name": "maskWordInText",
-   "kind": "function",
-   "area": "outros",
-   "cls": "quase igual",
-   "similarity": 0.84,
-   "linesFr": 5,
-   "linesZh": 5
   },
   {
    "name": "currentStudentName",
@@ -2736,24 +2655,6 @@
    "linesZh": 7
   },
   {
-   "name": "playAudioPreview",
-   "kind": "function",
-   "area": "revisão e decks",
-   "cls": "quase igual",
-   "similarity": 0.79,
-   "linesFr": 3,
-   "linesZh": 3
-  },
-  {
-   "name": "customAudioBtnHTML",
-   "kind": "function",
-   "area": "áudio e fala",
-   "cls": "quase igual",
-   "similarity": 0.81,
-   "linesFr": 3,
-   "linesZh": 3
-  },
-  {
    "name": "registerDailyConjugationTense",
    "kind": "function",
    "area": "conjugação",
@@ -2797,15 +2698,6 @@
    "similarity": null,
    "linesFr": 6,
    "linesZh": 0
-  },
-  {
-   "name": "showWrongAnswerPanel",
-   "kind": "function",
-   "area": "exercícios de lição",
-   "cls": "quase igual",
-   "similarity": 0.78,
-   "linesFr": 3,
-   "linesZh": 3
   },
   {
    "name": "dictLooseNorm",

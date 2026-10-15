@@ -1,80 +1,8 @@
 [
  {
-  "name": "backToReviewModeSelect",
-  "linesFr": 27,
-  "linesZh": 26,
-  "changed": 1
- },
- {
-  "name": "startDeckReviewSession",
-  "linesFr": 35,
-  "linesZh": 34,
-  "changed": 1
- },
- {
-  "name": "playAudioPreview",
-  "linesFr": 3,
-  "linesZh": 3,
-  "changed": 2
- },
- {
-  "name": "customAudioBtnHTML",
-  "linesFr": 3,
-  "linesZh": 3,
-  "changed": 2
- },
- {
-  "name": "showWrongAnswerPanel",
-  "linesFr": 3,
-  "linesZh": 3,
-  "changed": 2
- },
- {
-  "name": "maskWordInText",
-  "linesFr": 6,
-  "linesZh": 6,
-  "changed": 2
- },
- {
-  "name": "reviewCardTagLabel",
-  "linesFr": 8,
-  "linesZh": 8,
-  "changed": 2
- },
- {
-  "name": "pollForVoices",
-  "linesFr": 9,
-  "linesZh": 9,
-  "changed": 2
- },
- {
-  "name": "advanceUnitStep",
-  "linesFr": 10,
-  "linesZh": 10,
-  "changed": 2
- },
- {
-  "name": "wireAudioButtons",
-  "linesFr": 11,
-  "linesZh": 11,
-  "changed": 2
- },
- {
-  "name": "exitToPath",
-  "linesFr": 13,
-  "linesZh": 11,
-  "changed": 2
- },
- {
   "name": "addXP",
   "linesFr": 14,
   "linesZh": 14,
-  "changed": 2
- },
- {
-  "name": "openReviewSession",
-  "linesFr": 34,
-  "linesZh": 32,
   "changed": 2
  },
  {
