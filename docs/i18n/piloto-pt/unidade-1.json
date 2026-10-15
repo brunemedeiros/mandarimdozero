@@ -254,10 +254,10 @@
    "som-de-bom-dia": [
     {
      "title": "How do you say \"bom dia\"?",
-     "body": "Two sounds trip up English speakers here. First, <strong>bom</strong> is a nasal sound: the air goes out through your nose, and the <strong>m</strong> at the end is not really pronounced. It does not rhyme with English \"bomb\". Second, in most of Brazil a <strong>d</strong> before an \"ee\" sound becomes the \"j\" of \"jeep\", so <strong>dia</strong> sounds like \"JEE-ah\". The same happens with <strong>t</strong>: <strong>noite</strong> sounds like \"NOY-chee\" (a final <strong>e</strong> usually sounds like \"ee\"). In some parts of the Northeast you'll hear a plain d and t instead. Listen to the audio and copy it.",
+     "body": "Two sounds trip up English speakers here. First, <strong>bom</strong> is a nasal sound: the air goes out through your nose, and the <strong>m</strong> at the end is not a full \"m\". It does not rhyme with English \"bomb\". Second, in many Brazilian accents a <strong>d</strong> before an \"ee\" sound sounds like the \"j\" of \"jeep\", as in <strong>dia</strong>. The same happens with <strong>t</strong>, which sounds like the \"ch\" of \"cheese\", as in <strong>noite</strong> (a final <strong>e</strong> often sounds like \"ee\"). Not every accent does this, so you may hear a plain d and t from some speakers. Listen to the audio and copy it.",
      "examples": [
-      "good morning (sounds like \"bõ JEE-ah\")",
-      "good evening / good night (sounds like \"BOH-ah NOY-chee\")"
+      "good morning",
+      "good evening / good night"
      ]
     }
    ],
@@ -295,12 +295,12 @@
    "voce-e-tu": [
     {
      "title": "\"Você\" or \"tu\"?",
-     "body": "In Brazil, the everyday word for \"you\" is <strong>você</strong>. It is not formal: you use it with friends, family and strangers alike. In some regions, people say <strong>tu</strong> in casual speech instead, usually with the same verb form as <strong>você</strong> (<strong>tu é</strong>, not the textbook <strong>tu és</strong>). In Portugal, <strong>tu</strong> with <strong>és</strong> is the normal informal form. In this course we use <strong>você</strong>: everyone in Brazil understands it.",
+     "body": "In Brazil, the everyday word for \"you\" is <strong>você</strong>. It is not formal: you use it with friends, family and strangers alike. In some parts of the country, people also say <strong>tu</strong> in casual speech, often with the same verb form as <strong>você</strong> (<strong>tu é</strong>, <strong>tu vai</strong>). The traditional form is <strong>tu és</strong>, <strong>tu vais</strong>; <strong>tu é</strong> is what you often hear, but it is not the standard conjugation. How common <strong>tu</strong> is depends on the region and on the person. In Portugal, <strong>tu</strong> with <strong>és</strong> is the normal informal form. In this course we use <strong>você</strong>: everyone in Brazil understands it.",
      "examples": [],
      "variants": [
-      "Most of Brazil (for example São Paulo and Minas Gerais)",
-      "Rio Grande do Sul and parts of the North and Northeast, in casual speech",
-      "Portugal (and the Brazilian textbook form of \"tu\")"
+      "The form this course uses",
+      "Often heard in casual speech where tu is used",
+      "The traditional conjugation of tu (also normal in Portugal)"
      ]
     }
    ],
@@ -329,7 +329,7 @@
    "beijo-e-abraco": [
     {
      "title": "Why do Brazilians greet with a kiss on the cheek?",
-     "body": "Greetings in Brazil are warm and physical. Among friends and acquaintances, women usually greet women and men with a <strong>beijo</strong>: a light touch of the cheeks with a kiss sound, not a real kiss. It's one or two, depending on the region and the person. Men often greet each other with a handshake or a hug with a pat on the back. In a formal or work setting, a handshake is the safe start. The same warmth shows up when people say goodbye: in messages and on the phone, friends and family often finish with <strong>Beijo!</strong> or <strong>Abraço!</strong> instead of \"bye\".",
+     "body": "Greetings in Brazil are warm and physical. Among friends and acquaintances, women often greet women and men with a <strong>beijo</strong>: a light touch of the cheeks with a kiss sound, not a real kiss. It's one or two, depending on the region and the person. Men often greet each other with a handshake or a hug with a pat on the back. In a formal or work setting, a handshake is the safe start. The same warmth shows up when people say goodbye: in messages and on the phone, friends and family often finish with <strong>Beijo!</strong> or <strong>Abraço!</strong> instead of \"bye\".",
      "examples": [
       "a kiss (bye, with friends and family)",
       "a hug (bye, a little more neutral; also in work emails)"
@@ -349,7 +349,7 @@
   ]
  },
  "review": {
-  "legend": "alta = forma e uso que qualquer brasileiro confirma; média = correto, mas o detalhe (região, frequência, melhor tradução) merece o olho da professora; baixa = dúvida real, conferir antes de publicar. 'conferir' = o que a professora precisa olhar.",
+  "legend": "alta = forma e uso que qualquer brasileiro confirma, ou regra de norma-padrão; média-alta = muito provável, mas sem fonte aberta verificada (a professora confirma); média = correto, mas o detalhe (região, frequência, melhor tradução, variedade dos áudios) merece o olho da professora; baixa = dúvida real ou sem fonte, conferir antes de publicar. 'não verificada' = nenhuma fonte aberta apoia nem contradiz (ver docs/i18n/catalogo-erros-en-pt-verificacao.md). 'conferir' = o que a professora precisa olhar. Revisado depois da verificação externa em 2026-10-15 (docs/i18n/piloto-pt/revisao-pos-verificacao.md).",
   "items": {
    "vocab[0] oi": { "confianca": "alta", "conferir": "" },
    "vocab[1] bom dia": { "confianca": "alta", "conferir": "" },
@@ -368,19 +368,19 @@
    "phrases[3] Obrigada! Tchau!": { "confianca": "alta", "conferir": "Cenário com personagem mulher (Ana) porque o app não tem marcador de gênero do aluno para 'obrigado/obrigada'." },
    "phrases[6] Eu sou dos Estados Unidos.": { "confianca": "alta", "conferir": "Contração 'dos' aparece antes da gramática de artigos; a nota eu-sou-de-do-da explica como bloco pronto." },
    "phrases[7] Muito obrigado!": { "confianca": "alta", "conferir": "'muito' não está no vocabulário (o francês faz o mesmo com 'beaucoup')." },
-   "dialogue.lines[2] Você é de onde?": { "confianca": "alta", "conferir": "De propósito na ordem falada; a nota voce-e-de-onde explica depois do diálogo." },
-   "dialogue.lines[4] Bem-vinda ao Brasil!": { "confianca": "média", "conferir": "Palavra nova (bem-vinda) fora do vocabulário. Alternativa sem palavra nova: 'Prazer, Emily! Tchau, boa noite!' / 'Tchau!'." },
+   "dialogue.lines[2] Você é de onde?": { "confianca": "média-alta", "conferir": "De propósito na ordem falada; a nota voce-e-de-onde explica depois do diálogo. Ordem 'Você é de onde?' como muito comum na conversa: não verificada (sem fonte aberta)." },
+   "dialogue.lines[4] Bem-vinda ao Brasil!": { "confianca": "média", "conferir": "Palavra nova (bem-vinda) fora do vocabulário. Alternativa sem palavra nova: 'Prazer, Emily! Tchau, boa noite!' / 'Tchau!'. Se ficar, conferir a grafia com hífen 'bem-vinda' no VOLP da ABL antes de publicar (o hífen não tem regra única)." },
    "dialogue.lines[5] Obrigada! Boa noite, tchau!": { "confianca": "alta", "conferir": "" },
    "dialogue.check fill: distrator 'Obrigado! Boa noite, tchau!'": { "confianca": "alta", "conferir": "Distrator de gênero de propósito (Emily é mulher)." },
-   "concept oi-ou-ola (realidade, informal)": { "confianca": "alta", "conferir": "" },
-   "concept som-de-bom-dia (pronúncia)": { "confianca": "alta", "conferir": "'Em partes do Nordeste d e t não viram j/tch': confiança média nesse detalhe regional. As transcrições aproximadas ('bõ JEE-ah', 'BOH-ah NOY-chee') servem ao aluno?" },
-   "concept bom-dia-tarde-noite": { "confianca": "alta", "conferir": "Faixas de horário escritas como aproximadas (até o almoço / até escurecer)." },
-   "concept tudo-bem-pergunta-e-resposta": { "confianca": "alta", "conferir": "" },
-   "concept obrigado-obrigada": { "confianca": "alta", "conferir": "Não mencionei pessoas não binárias nem mulheres que dizem 'obrigado' (uso que existe, mas não sei medir): manter fora?" },
-   "concept voce-e-tu (realidade, regional)": { "confianca": "média", "conferir": "Alta: 'você' é o padrão e 'tu' com verbo de 'você' ('tu é') no Sul e em partes do Norte/Nordeste. Média: a lista exata de regiões; deixei o Rio de fora de propósito (lá também se ouve 'tu'). 'Tu és' como forma de Portugal: alta." },
-   "concept eu-sou-de-do-da": { "confianca": "alta", "conferir": "" },
-   "concept voce-e-de-onde (realidade, informal)": { "confianca": "alta", "conferir": "'Cê' é muito comum no Sudeste/Centro-Oeste; frequência em outras regiões: média." },
-   "concept beijo-e-abraco (cultura, costume)": { "confianca": "média", "conferir": "Alta: beijo no rosto entre mulheres e entre mulher e homem, aperto de mão/abraço entre homens, 'Beijo!'/'Abraço!' como despedida. Média: 'um ou dois, conforme a região' (não citei cidades de propósito) e 'Abraço' em e-mail de trabalho." },
+   "concept oi-ou-ola (realidade, informal)": { "confianca": "média-alta", "conferir": "Não verificada: 'olá' soa mais escrito e 'oi' serve para quase todo mundo. A professora confirma." },
+   "concept som-de-bom-dia (pronúncia)": { "confianca": "média", "conferir": "Fica média até a dona escolher a variedade dos áudios (decisão pendente). d/t antes de 'i' é fenômeno variável: o texto diz 'in many Brazilian accents' e 'not every accent does this'; 'most of Brazil' e a menção ao Nordeste saíram (sem fonte). As transcrições 'bõ JEE-ah' e 'BOH-ah NOY-chee' saíram até a variedade ser escolhida e a professora confirmar que soam certas nela. 'Bom' nasal e não rima com 'bomb': média-alta, não verificada. 'The m is not really pronounced' (hipótese didática sem fonte) virou 'is not a full m'." },
+   "concept bom-dia-tarde-noite": { "confianca": "média-alta", "conferir": "Faixas de horário escritas como aproximadas (até o almoço / até escurecer); 'boa noite' para chegar e para sair. Não verificada: a professora confirma." },
+   "concept tudo-bem-pergunta-e-resposta": { "confianca": "média-alta", "conferir": "Não verificada: mesma expressão para pergunta e resposta, 'tudo bom?', resposta 'tudo!' e a subida/descida da entonação. O catálogo também só tem a prática de ensino como apoio." },
+   "concept obrigado-obrigada": { "confianca": "alta", "conferir": "Alta como regra de norma-padrão (concordância com quem fala), não verificada (a verificação externa não tratou este ponto). Uso efetivo de mulheres que dizem 'obrigado' e de pessoas não binárias: não coberto pela nota; manter fora? 'Erro frequente do anglófono': baixa (afirmação de ensino sem fonte; a nota não a faz)." },
+   "concept voce-e-tu (realidade, regional)": { "confianca": "média", "conferir": "Lista de regiões removida (sem fonte que a apoie). 'Você' padrão e não formal: média-alta, não verificada. 'Tu' com verbo de 'você' ('tu é', 'tu vai') na fala: média. 'Tu és/tu vais' = concordância tradicional, 'tu é' = uso na fala, não a conjugação padrão: média-alta (distinção confirmada pela verificação). 'Tu és' como informal normal em Portugal: média, não verificada." },
+   "concept eu-sou-de-do-da": { "confianca": "alta", "conferir": "Alta como norma-padrão (cidade = de; país com artigo = do/da/dos). 'A maioria dos países pede artigo': média-alta, não verificada." },
+   "concept voce-e-de-onde (realidade, informal)": { "confianca": "média-alta", "conferir": "'Cê' como redução falada de 'você', ensinada só como reconhecimento: média-alta. Frequência por região: removida (sem apoio). Ordem 'Você é de onde?' como muito comum na conversa: média, não verificada. A classificação de 'cê' depende da decisão da dona sobre gírias e formas de fala." },
+   "concept beijo-e-abraco (cultura, costume)": { "confianca": "média", "conferir": "Nenhuma fonte verificada sobre cumprimento. O costume em si (beijo no rosto, aperto de mão/abraço entre homens) e 'Beijo!'/'Abraço!' na despedida: média, não verificada. 'Usually' virou 'often'. Número de beijos ('one or two, depending on the region and the person', sem citar cidades): baixa. 'Also in work emails' no exemplo de 'Abraço!': baixa e OPCIONAL, tirar se a professora não confirmar." },
    "trueFalse[0] Obrigado! / falso": { "confianca": "alta", "conferir": "" },
    "trueFalse[1] Boa noite! / verdadeiro": { "confianca": "alta", "conferir": "" },
    "title 'Hi! How are you?'": { "confianca": "média", "conferir": "Título curto e informal; alternativa mais descritiva: 'Greetings and introductions'." },

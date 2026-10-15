@@ -3,6 +3,24 @@
 > Status: **needs_review** em tudo. Rascunho para a professora revisar; nada está ligado ao app (sem pasta `pt/`, sem
 > registro, sem áudio). Versão estruturada: `unidade-1.json` (mesmo formato de uma unidade de `fr/content.js` em `base`
 > e da camada do curso em `en`).
+>
+> Revisado em 2026-10-15 depois da verificação externa do catálogo, com a autorização da dona: correções propostas em
+> `revisao-pos-verificacao.md`, aplicadas aqui e no `.json`. Antes x depois de cada mudança: `CHANGELOG-pos-verificacao.md`.
+
+## Decisões que faltam
+
+Decisões da dona que ainda não existem. Até elas saírem, o texto ficou neutro (sem escolher por ela):
+
+1. **Variedade dos áudios** (decisão 1 do catálogo: qual sotaque urbano vai nos áudios?). Afeta a nota `som-de-bom-dia`: hoje ela
+   fala em "many Brazilian accents" e "not every accent does this", sem transcrição. As transcrições aproximadas ("bõ JEE-ah",
+   "BOH-ah NOY-chee") saíram e só voltam se a professora confirmar que soam certas na variedade escolhida. A confiança da nota
+   fica **média** até lá. Afeta também o áudio de todas as palavras, frases e falas da unidade.
+2. **Gírias e formas de fala** (decisão 5 do catálogo: quais entram, em qual unidade, cada uma classificada à parte). Nesta unidade
+   só aparece "cê" (nota `voce-e-de-onde`), já como reconhecimento; "valeu", "e aí" e "beleza" continuam de fora.
+3. **Oblíquos por nível** (decisão 4 do catálogo). A unidade não usa pronome oblíquo; se a dona aprovar "me chamo" como expressão
+   frequente do A1, ele pode entrar ao lado de "meu nome é". Nada foi acrescentado.
+4. **Pronomes** (decisão 3 do catálogo: só "você" + verbo na 3ª pessoa no A1, nota de "tu" sem lista de regiões). A unidade já
+   segue a recomendação; falta a dona confirmar.
 
 ## Como foi feito
 
@@ -17,9 +35,11 @@
   (`fill`, `listen`, `understand`). Os demais exercícios o app gera a partir do vocabulário e das frases.
 - Só um marcador de perfil: `{nome}`. Não usei `{nacionalidade}` porque a frase "Eu sou de..." pede o nome do país com
   do/da/dos, e o app ainda não tem esse marcador (ver perguntas).
-- Confiança: **alta** = forma e uso que qualquer brasileiro confirma; **média** = correto, mas um detalhe (região,
-  frequência, melhor tradução) merece o seu olho; **baixa** = dúvida real. Não ficou nenhum item em "baixa".
-  Itens marcados com ⚠ pedem conferência.
+- Confiança: **alta** = forma e uso que qualquer brasileiro confirma, ou regra de norma-padrão; **média-alta** = muito
+  provável, mas sem fonte aberta verificada (a professora confirma); **média** = correto, mas um detalhe (região,
+  frequência, melhor tradução, variedade dos áudios) merece o seu olho; **baixa** = dúvida real ou sem fonte.
+  **Não verificada** = nenhuma fonte aberta apoia nem contradiz. Depois da verificação, alguns detalhes ficaram em "baixa"
+  (ver "Resumo de confiança"). Itens marcados com ⚠ pedem conferência.
 
 ## Título, objetivo e lições
 
@@ -75,9 +95,9 @@ Personagens: Lucas 👨 (A, brasileiro) e Emily 👩 (B, americana, para o aluno
 |---|---|---|---|---|
 | 0 | Lucas | Oi! Tudo bem? | Hi! How are you? | alta |
 | 1 | Emily | Tudo bem, e você? | I'm good, and you? | alta |
-| 2 | Lucas | Tudo bem! Meu nome é Lucas. Você é de onde? | I'm good! My name is Lucas. Where are you from? | alta (ordem falada de propósito; a nota `voce-e-de-onde` explica logo depois) |
+| 2 | Lucas | Tudo bem! Meu nome é Lucas. Você é de onde? | I'm good! My name is Lucas. Where are you from? | média-alta (ordem falada de propósito; a nota `voce-e-de-onde` explica logo depois; "muito comum na conversa" não verificada) |
 | 3 | Emily | Prazer, Lucas! Meu nome é Emily. Eu sou de Chicago. | Nice to meet you, Lucas! My name is Emily. I'm from Chicago. | alta |
-| 4 | Lucas | Prazer, Emily! Bem-vinda ao Brasil! | Nice to meet you, Emily! Welcome to Brazil! | média ⚠ "bem-vinda" é palavra nova; alternativa sem palavra nova: "Prazer, Emily! Tchau, boa noite!" |
+| 4 | Lucas | Prazer, Emily! Bem-vinda ao Brasil! | Nice to meet you, Emily! Welcome to Brazil! | média ⚠ "bem-vinda" é palavra nova; alternativa sem palavra nova: "Prazer, Emily! Tchau, boa noite!". Se ficar, conferir a grafia com hífen no VOLP da ABL antes de publicar |
 | 5 | Emily | Obrigada! Boa noite, tchau! | Thank you! Good night, bye! | alta |
 
 Checagens do diálogo:
@@ -98,7 +118,7 @@ Checagens do diálogo:
 
 Ordem em que aparecem na trilha. "R" = nota de realidade, "C" = nota cultural, sem letra = explicação comum.
 
-### 1. `oi-ou-ola` (R, `informal`), depois de "oi" (vocab 0). Confiança: **alta**
+### 1. `oi-ou-ola` (R, `informal`), depois de "oi" (vocab 0). Confiança: **média-alta** (não verificada)
 Resumo: os livros começam com "olá", mas na fala o brasileiro diz "oi" para quase todo mundo e a qualquer hora; "olá"
 soa escrito (e-mail, placa, apresentador de TV).
 > **"Oi" or "olá"?** Many textbooks start with **olá**, but in everyday speech Brazilians say **oi** to almost everyone,
@@ -107,20 +127,26 @@ soa escrito (e-mail, placa, apresentador de TV).
 > - oi: hi (in speech, with almost anyone)
 > - olá: hello (more common in writing or on TV)
 
-### 2. `som-de-bom-dia` (pronúncia), depois de "bom dia" (vocab 1). Confiança: **alta** (detalhe regional: média ⚠)
-Resumo: "bom" é nasal (não rima com "bomb"); na maior parte do Brasil d/t antes de som de "i" viram "dj"/"tch"
-("JEE-ah", "NOY-chee"); "e" final soa "i". Em partes do Nordeste d e t ficam "duros".
+### 2. `som-de-bom-dia` (pronúncia), depois de "bom dia" (vocab 1). Confiança: **média** ⚠ (até a dona escolher a variedade dos áudios)
+Resumo: "bom" é nasal (não rima com "bomb", e o "m" final não é um "m" completo); em muitos sotaques brasileiros d/t antes
+de som de "i" viram "dj"/"tch"; "e" final muitas vezes soa "i". Nem todo sotaque faz isso: alguns falantes dizem d e t
+"duros". Ouvir o áudio e imitar.
 > **How do you say "bom dia"?** Two sounds trip up English speakers here. First, **bom** is a nasal sound: the air goes
-> out through your nose, and the **m** at the end is not really pronounced. It does not rhyme with English "bomb".
-> Second, in most of Brazil a **d** before an "ee" sound becomes the "j" of "jeep", so **dia** sounds like "JEE-ah". The
-> same happens with **t**: **noite** sounds like "NOY-chee" (a final **e** usually sounds like "ee"). In some parts of the
-> Northeast you'll hear a plain d and t instead. Listen to the audio and copy it.
-> - bom dia: good morning (sounds like "bõ JEE-ah")
-> - boa noite: good evening / good night (sounds like "BOH-ah NOY-chee")
+> out through your nose, and the **m** at the end is not a full "m". It does not rhyme with English "bomb".
+> Second, in many Brazilian accents a **d** before an "ee" sound sounds like the "j" of "jeep", as in **dia**. The same
+> happens with **t**, which sounds like the "ch" of "cheese", as in **noite** (a final **e** often sounds like "ee").
+> Not every accent does this, so you may hear a plain d and t from some speakers. Listen to the audio and copy it.
+> - bom dia: good morning
+> - boa noite: good evening / good night
 
-⚠ Conferir: as transcrições aproximadas ajudam ou atrapalham? A frase sobre o Nordeste está genérica de propósito.
+Confiança por parte: "bom" nasal e não rima com "bomb": média-alta (não verificada). d/t antes de "i" como fenômeno
+variável: média. "Most of Brazil" e a menção ao Nordeste: **removidas** (sem fonte). "The m is not really pronounced" era
+hipótese didática sem fonte: virou "is not a full m".
 
-### 3. `bom-dia-tarde-noite`, depois de "boa noite" (vocab 3). Confiança: **alta**
+⚠ Pendente da decisão 1 (variedade dos áudios): as transcrições "bõ JEE-ah" e "BOH-ah NOY-chee" saíram dos exemplos e do
+texto; voltam só se a professora confirmar que soam certas na variedade escolhida.
+
+### 3. `bom-dia-tarde-noite`, depois de "boa noite" (vocab 3). Confiança: **média-alta** (não verificada)
 Resumo: horários aproximados (bom dia até o almoço, boa tarde até escurecer, boa noite depois); "boa noite" serve para
 chegar e para sair (o inglês separa "good evening" e "good night"); bom x boa porque dia é masculino.
 > **"Bom dia", "boa tarde" or "boa noite"?** Use **bom dia** in the morning, until about lunchtime. From noon until it
@@ -130,7 +156,7 @@ chegar e para sair (o inglês separa "good evening" e "good night"); bom x boa p
 > - boa tarde: good afternoon (from noon until dark)
 > - boa noite: good evening (arriving) / good night (leaving)
 
-### 4. `tudo-bem-pergunta-e-resposta`, depois de "tudo bem" (vocab 4). Confiança: **alta**
+### 4. `tudo-bem-pergunta-e-resposta`, depois de "tudo bem" (vocab 4). Confiança: **média-alta** (não verificada)
 Resumo: a mesma expressão é pergunta e resposta, só a entonação muda; é cumprimento, não pergunta de verdade (como
 "How are you?"); variantes "Tudo bom?" e a resposta curta "Tudo!".
 > **"Tudo bem?" "Tudo bem!"** **Tudo bem** literally means "all well", and it works as both the question and the answer:
@@ -140,7 +166,7 @@ Resumo: a mesma expressão é pergunta e resposta, só a entonação muda; é cu
 > - Tudo bem? — Tudo bem!: How are you? — I'm good!
 > - Tudo bom? — Tudo, e você?: How's it going? — Good, and you?
 
-### 5. `obrigado-obrigada`, depois de "obrigada" (vocab 6). Confiança: **alta**
+### 5. `obrigado-obrigada`, depois de "obrigada" (vocab 6). Confiança: **alta** como regra de norma-padrão (não verificada)
 Resumo: concorda com quem FALA, não com quem recebe o agradecimento; significa "obrigado(a)" no sentido de "grato,
 em dívida"; resposta "de nada".
 > **"Obrigado" or "obrigada"?** In Portuguese, "thank you" changes with the person who is **speaking**, not the person
@@ -148,26 +174,29 @@ em dívida"; resposta "de nada".
 > means "obliged". The usual answer is **de nada**: "you're welcome".
 
 ⚠ Conferir: deixei de fora pessoas não binárias e o uso de "obrigado" por algumas mulheres (existe, mas não sei medir).
+Categoria: norma-padrão (concordância com quem fala). A verificação externa não tratou este ponto, então a regra fica
+"alta, não verificada". A ideia de que é "erro frequente do anglófono" (só do catálogo, a nota não a faz) é **baixa**.
 
 ### 6. `voce-e-tu` (R, `regional`), depois de "de onde você é?" (vocab 10). Confiança: **média** ⚠
-Resumo: no Brasil o "you" do dia a dia é "você", e não é formal; em algumas regiões se diz "tu", quase sempre com o verbo
-de "você" ("tu é"); em Portugal "tu és" é o informal normal. O curso usa "você".
+Resumo: no Brasil o "you" do dia a dia é "você", e não é formal; "tu" aparece em parte do país, muitas vezes com o verbo
+de "você" ("tu é"); a concordância tradicional é "tu és", e em Portugal é a forma informal normal. O curso usa "você".
 > **"Você" or "tu"?** In Brazil, the everyday word for "you" is **você**. It is not formal: you use it with friends,
-> family and strangers alike. In some regions, people say **tu** in casual speech instead, usually with the same verb form
-> as **você** (**tu é**, not the textbook **tu és**). In Portugal, **tu** with **és** is the normal informal form. In this
-> course we use **você**: everyone in Brazil understands it.
+> family and strangers alike. In some parts of the country, people also say **tu** in casual speech, often with the same
+> verb form as **você** (**tu é**, **tu vai**). The traditional form is **tu és**, **tu vais**; **tu é** is what you often
+> hear, but it is not the standard conjugation. How common **tu** is depends on the region and on the person. In Portugal,
+> **tu** with **és** is the normal informal form. In this course we use **você**: everyone in Brazil understands it.
 
-| região (inglês) | forma |
+| situação (inglês) | forma |
 |---|---|
-| Most of Brazil (for example São Paulo and Minas Gerais) | Você é de onde? |
-| Rio Grande do Sul and parts of the North and Northeast, in casual speech | Tu é de onde? |
-| Portugal (and the Brazilian textbook form of "tu") | Tu és de onde? |
+| The form this course uses | Você é de onde? |
+| Often heard in casual speech where tu is used | Tu é de onde? |
+| The traditional conjugation of tu (also normal in Portugal) | Tu és de onde? |
 
-Confiança por parte: "você" padrão e não formal: alta. "Tu" + verbo de "você" no Sul e em partes do Norte/Nordeste:
-alta. Lista exata de regiões: **média** (deixei o Rio de fora de propósito, embora lá também se ouça "tu"; a senhora
-quer incluir?). "Tu és" em Portugal: alta.
+Confiança por parte: "você" padrão e não formal: média-alta (não verificada). "Tu" + verbo de "você" na fala: média.
+"Tu és/tu vais" = concordância tradicional e "tu é" = uso na fala, não a conjugação padrão: média-alta (distinção
+confirmada pela verificação). Lista de regiões: **removida** (nenhuma fonte a apoia). "Tu és" em Portugal: média (não verificada).
 
-### 7. `eu-sou-de-do-da`, depois de "eu sou de" (vocab 11). Confiança: **alta**
+### 7. `eu-sou-de-do-da`, depois de "eu sou de" (vocab 11). Confiança: **alta** (norma-padrão; "a maioria dos países pede artigo": média-alta, não verificada)
 Resumo: cidade = "de"; a maioria dos países pede artigo, então vira do/da/dos; aprender o próprio país como bloco.
 > **"De", "do" or "da"?** With a city, it's just **de**: **Eu sou de Chicago.** With most countries, **de** joins the word
 > for "the" that the country carries: **do** (masculine), **da** (feminine) or **dos** (plural). So: **do Canadá**,
@@ -175,20 +204,24 @@ Resumo: cidade = "de"; a maioria dos países pede artigo, então vira do/da/dos;
 > your own country as one chunk.
 > - Eu sou de Chicago. / Eu sou do Canadá. / Eu sou da Inglaterra. / Eu sou dos Estados Unidos.
 
-### 8. `voce-e-de-onde` (R, `informal`), depois do diálogo. Confiança: **alta** (frequência de "cê" fora do Sudeste/Centro-Oeste: média)
-Resumo: na conversa é muito comum "Você é de onde?" (pergunta no fim, como Lucas disse) e, na fala rápida, "Cê é de
-onde?". Nos exercícios, escrever "você".
+### 8. `voce-e-de-onde` (R, `informal`), depois do diálogo. Confiança: **média-alta**
+Resumo: na conversa é comum "Você é de onde?" (pergunta no fim, como Lucas disse) e, na fala rápida, "Cê é de
+onde?". "Cê" é só para reconhecer; nos exercícios, escrever "você".
 > **"De onde você é?" or "Você é de onde?"** You learned **De onde você é?**, and it's correct. But in conversation
 > Brazilians often keep the normal word order and put the question at the end: **Você é de onde?** That's exactly what
 > Lucas said in the dialogue. In fast, casual speech, **você** often shrinks to **cê**: **Cê é de onde?** In the
 > exercises, keep writing the full word **você**: **cê** is for recognizing when you hear it.
 
+Confiança por parte: "cê" como redução falada, ensinada como reconhecimento: média-alta. Frequência de "cê" por região:
+**removida** (sem apoio). Ordem "Você é de onde?" como muito comum na conversa: média (não verificada). A classificação de
+"cê" acompanha a decisão da dona sobre gírias e formas de fala.
+
 ### 9. `beijo-e-abraco` (C, `costume`), depois do diálogo. Confiança: **média** ⚠
-Resumo: entre amigos e conhecidos, mulher cumprimenta mulher e homem com beijo no rosto (encostar de bochechas com
+Resumo: entre amigos e conhecidos, mulher muitas vezes cumprimenta mulher e homem com beijo no rosto (encostar de bochechas com
 som de beijo), um ou dois conforme região e pessoa; homens costumam dar aperto de mão ou abraço com tapinha; em
 contexto formal, aperto de mão. Na despedida por mensagem ou telefone, "Beijo!" ou "Abraço!".
 > **Why do Brazilians greet with a kiss on the cheek?** Greetings in Brazil are warm and physical. Among friends and
-> acquaintances, women usually greet women and men with a **beijo**: a light touch of the cheeks with a kiss sound, not
+> acquaintances, women often greet women and men with a **beijo**: a light touch of the cheeks with a kiss sound, not
 > a real kiss. It's one or two, depending on the region and the person. Men often greet each other with a handshake or a
 > hug with a pat on the back. In a formal or work setting, a handshake is the safe start. The same warmth shows up when
 > people say goodbye: in messages and on the phone, friends and family often finish with **Beijo!** or **Abraço!**
@@ -196,31 +229,42 @@ contexto formal, aperto de mão. Na despedida por mensagem ou telefone, "Beijo!"
 > - Beijo!: a kiss (bye, with friends and family)
 > - Abraço!: a hug (bye, a little more neutral; also in work emails)
 
-Confiança por parte: o costume em si e "Beijo!/Abraço!" na despedida: alta. "Um ou dois conforme a região": média (não
-citei cidades de propósito para não arriscar). "Abraço" em e-mail de trabalho: média.
+Confiança por parte (nenhuma fonte verificada sobre cumprimento): o costume em si e "Beijo!/Abraço!" na despedida: média
+(não verificada). "Um ou dois conforme a região e a pessoa": **baixa** (sem fonte; não citei cidades de propósito).
+"Abraço" em e-mail de trabalho: **baixa**. ⚠ O trecho "also in work emails" é opcional: tirar se a professora não confirmar.
+Nota cultural: passa pela professora, com a confiança reportada no chat (skill `notas-de-realidade`).
 
 ## Resumo de confiança
+
+Revisado depois da verificação externa (2026-10-15). Antes dela, o rascunho dizia que nenhum item estava em "baixa"; agora
+alguns detalhes dentro das notas estão.
 
 | item | confiança |
 |---|---|
 | 12 palavras | 11 alta, 1 média (tradução de "tudo bem") |
 | 9 frases | 9 alta |
-| 6 falas do diálogo | 5 alta, 1 média ("bem-vinda", palavra nova) |
+| 6 falas do diálogo | 4 alta, 1 média-alta (fala 2, "Você é de onde?"), 1 média (fala 4, "bem-vinda": palavra nova e hífen a conferir no VOLP) |
 | 3 checagens + 2 verdadeiro/falso | alta |
-| 9 notas | 7 alta, 2 média (`voce-e-tu`, `beijo-e-abraco`) |
+| 9 notas | 2 alta (`eu-sou-de-do-da` como norma-padrão; `obrigado-obrigada` como norma-padrão, não verificada), 4 média-alta (`oi-ou-ola`, `bom-dia-tarde-noite`, `tudo-bem-pergunta-e-resposta`, `voce-e-de-onde`), 3 média (`som-de-bom-dia`, `voce-e-tu`, `beijo-e-abraco`) |
+| detalhes em baixa | número de beijos por região; "Abraço" em e-mail de trabalho. Removidos por falta de apoio: lista de regiões do "tu", "Nordeste" e "most of Brazil" no som de d/t, frequência de "cê" por região |
 
 ## Perguntas para a professora
 
-1. **"tudo bem" em inglês**: "how are you? / I'm good" (como está) ou o padrão aprovado para "ça va", "all good? / all good."?
-2. **obrigado / obrigada**: dois cartões separados (como está) ou um só com barra?
-3. **Nove notas numa unidade de 12 palavras** é muito para um iniciante? Se for, candidatas a sair ou ir para a unidade 2: `voce-e-de-onde`, `eu-sou-de-do-da`.
+1. **"tudo bem" em inglês**: "how are you? / I'm good" (como está) ou o padrão do francês, "all good? / all good."? Sugestão do Claude: manter como está, que é como o inglês cumprimenta.
+2. **obrigado / obrigada**: dois cartões separados (como está) ou um só com barra? Sugestão do Claude: dois cartões, para o exercício de digitar não exigir a barra.
+3. **Nove notas numa unidade de 12 palavras** é muito para um iniciante? Sugestão do Claude: se for, levar `voce-e-de-onde` e `eu-sou-de-do-da` para a unidade 2.
 4. **Fala 4 do diálogo**: manter "Bem-vinda ao Brasil!" (palavra nova, mas reforça o feminino) ou trocar pela alternativa sem palavra nova?
-5. **você x tu**: incluir o Rio de Janeiro na linha do "tu"? Concorda com "Rio Grande do Sul e partes do Norte e do Nordeste"?
-6. **Beijo no rosto**: quer citar número de beijos por cidade (ex.: São Paulo x Rio) ou manter "um ou dois, conforme a região"?
-7. **Gênero do aluno**: o app não tem marcador para obrigado/obrigada; por isso a frase 3 usa uma personagem (Ana). Vale pedir um marcador novo (ex.: `{obrigado}` que vira obrigado/obrigada pelo gênero do perfil) para o aluno falar de si?
-8. **País do aluno**: para "Eu sou do/da/dos + país" com o país do perfil seria preciso um marcador novo que já traga a contração. Pedir, ou deixar "Chicago/Estados Unidos" fixos?
-9. **Personagens**: Lucas (brasileiro) e Emily (americana) estão bons, ou prefere dois brasileiros?
-10. **Título**: "Hi! How are you?" ou "Greetings and introductions"?
+5. **Grafia "bem-vinda"**: se a fala 4 ficar, a senhora confere no VOLP da ABL antes de publicar? (o hífen não tem regra única)
+6. **Beijo no rosto**: citar número de beijos por cidade ou manter "um ou dois, conforme a região e a pessoa"? Sugestão do Claude: manter sem cidades, porque não há fonte.
+7. **"Abraço" em e-mail de trabalho**: a senhora confirma? Sugestão do Claude: se não confirmar, tirar "also in work emails" do exemplo.
+8. **obrigado / obrigada e quem diz "obrigado"**: mencionar mulheres que dizem "obrigado" e pessoas não binárias? Sugestão do Claude: deixar fora do A1.
+9. **Gênero do aluno**: vale pedir um marcador novo (ex.: `{obrigado}`, que vira obrigado/obrigada pelo gênero do perfil) para o aluno falar de si? Hoje a frase 3 usa uma personagem (Ana).
+10. **País do aluno**: pedir um marcador novo que já traga a contração (do/da/dos + país) ou deixar "Chicago/Estados Unidos" fixos?
+11. **Personagens**: Lucas (brasileiro) e Emily (americana) estão bons, ou prefere dois brasileiros?
+12. **Título**: "Hi! How are you?" ou "Greetings and introductions"?
+
+Saiu a antiga pergunta 5 (incluir o Rio na linha do "tu"): a lista de regiões foi removida. As decisões grandes (variedade dos
+áudios, gírias, oblíquos, pronomes) estão em "Decisões que faltam", no topo.
 
 ## Grátis x Premium
 Unidade 1 da trilha: grátis, como a A1-1 do francês.
