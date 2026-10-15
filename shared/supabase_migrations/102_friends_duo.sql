@@ -1,7 +1,7 @@
 -- 102 -- Amigos em dupla: sequência com amigo, cutucar e missão em dupla da semana (2026-10-15).
 --
 -- Aprovado pela autora em 2026-10-14 (docs/amigos-seguir-x-amizade.md, seção 3) e liberado em 2026-10-15 ("pode fazer
--- todos eles"). Detalhes decididos na implementação: docs/historico/18-amigos-em-dupla.md. Tudo grátis.
+-- todos eles"). Detalhes decididos na implementação: docs/historico/19-amigos-em-dupla.md. Tudo grátis.
 --
 -- 1. Sequência com amigo: dias seguidos em que os dois estudaram. Não precisa de tabela: a sequência de cada conta
 --    (_account_streak, 086) é um bloco de dias seguidos terminando no último dia de estudo; os dias em que os dois
@@ -24,7 +24,7 @@
 -- só a linha do aviso. respond_friend_request fica como está (o aceite passa pela _friends_notify).
 -- O gatilho em weekly_xp nunca impede o XP de ser salvo (erro dentro dele é engolido).
 -- Depois de aplicar: segredos push_dispatch_url e push_dispatch_anon no Vault + deploy de push-dispatch
---   (docs/historico/18-amigos-em-dupla.md). Sem eles o sino funciona e a fila de push só acumula.
+--   (docs/historico/19-amigos-em-dupla.md). Sem eles o sino funciona e a fila de push só acumula.
 -- ROLLBACK (manual): drop trigger weekly_xp_duo_check on weekly_xp; drop das funções novas abaixo; drop table
 --   duo_mission_members, duo_missions, friend_nudges, push_outbox; alter table friend_settings drop column
 --   accept_nudges, drop column notify_missions; _friends_notify de volta à versão da 086; as 4 funções antigas de

@@ -8,5 +8,16 @@ const LANG_HOOKS = {
   audioListenKey: 'zh.audio.listenAudio',
   cardOriginTitle: (c) => cardOriginTitle(c),
   foldCase: (s) => s,
+  recapText: (i) => i.c,
+  recapExtra: (i) => `<span class="lesson-recap-pinyin">${i.p}</span>`,
+  uiKey: (k) => 'zh.' + k,
+  studyNotifKey: 'mandarim_last_study_notif',
+  appKey: 'mandarim',
+  chartLearnedDates: () => [...wordLevelFirstLearnedDates(STATE.cards), ...STATE.hanziCards.filter(c => c.firstLearnedDate).map(c => c.firstLearnedDate)],
+  chartEmptyHTML: (msg) => `<div class="manual-empty" style="padding:30px 20px;"><p>${msg}</p></div>`,
+  setFlyContent: (el, v) => { el.innerHTML = v; },
+  pregenRate: () => 0,
+  ttsLang: 'zh-CN',
+  ttsRate: 0.85,
 // --- /E4 hooks ---
 };

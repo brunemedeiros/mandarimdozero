@@ -1,4 +1,4 @@
-# 18 -- Amigos em dupla: sequência com amigo, cutucar e missão em dupla (2026-10-15)
+# 19 -- Amigos em dupla: sequência com amigo, cutucar e missão em dupla (2026-10-15)
 
 Pedido da autora: "pode fazer todos eles" (2026-10-15), sobre os três itens aprovados em 2026-10-14 em
 `docs/amigos-seguir-x-amizade.md` (seção 3). "Seguir" só para contas oficiais continua fora (só se um dia fizer sentido).

@@ -8,5 +8,16 @@ const LANG_HOOKS = {
   audioListenKey: 'fr.audio.listen',
   cardOriginTitle: (c) => flashcardUnitTitleText(c),
   foldCase: (s) => s.toLowerCase(),
+  recapText: (i) => i.f,
+  recapExtra: () => '',
+  uiKey: (k) => 'fr.' + k,
+  studyNotifKey: 'frances_last_study_notif',
+  appKey: 'frances',
+  chartLearnedDates: () => wordLevelFirstLearnedDates(STATE.cards),
+  chartEmptyHTML: (msg) => `<div style="text-align:center; padding:30px 20px; color:var(--ink-soft);"><p>${msg}</p></div>`,
+  setFlyContent: (el, v) => { el.textContent = v; },
+  pregenRate: () => PREGEN_AUDIO_RATE,
+  ttsLang: 'fr-FR',
+  ttsRate: 0.9,
 // --- /E4 hooks ---
 };

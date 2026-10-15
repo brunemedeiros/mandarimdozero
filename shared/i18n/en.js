@@ -2677,6 +2677,8 @@ window.I18N_CATALOG['en'] = {
   'rb.sfName': 'Name', // ALTA
   'rb.sfNeedName': 'Write the student\'s name.', // ALTA
   'rb.sfNoDates': 'No dates yet.', // ALTA
+  'rb.sfAgent': 'Update automatically every night', // ALTA
+  'rb.sfAgentHint': "Turn this on only when this student already uses the site (linked account). The nightly routine then brings new items from the notebook and creates the cards. While it is off, the old Bank (artifact) owns this student's data.", // ALTA
   'rb.sfRef': 'Student\'s reference language', // ALTA
   'rb.sfStatus': 'Status', // ALTA
   'rb.showAnswer': 'Show answer', // ALTA
@@ -2776,6 +2778,24 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.labels.createPlaceholder': 'Type a name and press Enter to create a label', // ALTA
   'panel.classLog.labels.edit': 'Edit the {name} label', // ALTA
   'panel.classLog.labels.done': 'Done', // ALTA
+  'panel.classLog.time': 'Time (optional)', // ALTA
+  'panel.classLog.durationMin': 'Length (minutes)', // ALTA
+  'panel.classLog.repeatWeekly': 'Repeat every week', // ALTA
+  'panel.classLog.repeatUntil': 'Until', // ALTA
+  'panel.classLog.repeatHint': 'Creates one lesson a week, same day and time, until that date (52 at most).', // ALTA
+  'panel.classLog.views': 'How to see the lessons', // ALTA
+  'panel.classLog.view.register': 'Log', // ALTA
+  'panel.classLog.view.calendar': 'Calendar', // ALTA
+  'panel.classLog.cal.prev': 'Previous month', // ALTA
+  'panel.classLog.cal.next': 'Next month', // ALTA
+  'panel.classLog.cal.today': 'Today', // ALTA
+  'panel.classLog.cal.legend': 'The color is the attendance one; no color = scheduled lesson or not logged yet.', // ALTA
+  'panel.classLog.cal.empty': 'No lessons on this day.', // ALTA
+  'panel.classLog.cal.schedule': 'Schedule a lesson on this day', // ALTA
+  'myClassLogs.upcoming': 'Upcoming lessons', // ALTA
+  'myClassLogs.view.list': 'List', // ALTA
+  'myClassLogs.classLabel': 'Lesson', // ALTA
+  'panel.classLog.cal.count': { one: '{n} lesson', other: '{n} lessons' }, // ALTA
   'panel.classLog.review.title': { one: 'Review from Notion ({n} lesson)', other: 'Review from Notion ({n} lessons)' }, // ALTA
   'panel.classLog.review.hint': 'These texts came from Notion and may include notes meant only for you, so the student can\'t see them yet. Edit anything you want and choose: show to the student or keep for yourself. The original text stays in your Notes.', // ALTA
   'panel.classLog.review.toTopic': 'Topic (the student sees it)', // ALTA
