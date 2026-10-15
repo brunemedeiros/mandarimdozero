@@ -415,7 +415,7 @@ function buildSpeedOptions(card){
 //             7 -- hardWordsPool() passou a usar difficulty do FSRS, sem
 //             filtro de due; este widget é escopo da Fase 12, não mudou).
 //   Fortes  = reps > 0 && lapses < 2 && interval >= 60 -- o mesmo corte de
-//             "revisão madura" que reviewXP() já usa pra dar menos XP.
+//             "revisão madura" (cartão que o aluno já domina).
 //   Medianas = o resto do pool.
 function vocabStrengthBuckets(){
   const pool = eligibleReviewPool();

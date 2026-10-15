@@ -715,16 +715,11 @@ function reviewProgressBarHTML(card){
   `;
 }
 
-// Rendimento decrescente de XP pra cartas maduras (artefato §5): uma carta
-// já dominada (intervalo alto) avaliada repetidamente não deve valer o
-// mesmo XP que uma carta ainda instável -- sem tirar XP de revisão nenhuma
-// (piso de 1), só reduzir o ganho marginal. `intervalBefore` é o intervalo
-// ANTES desta revisão (maturidade já acumulada), não o recalculado por ela.
+// XP da Revisão (decisão da autora, 2026-10-15): valor fixo por nota (XP_PER_GRADE em shared/srs.js), SEM redução
+// para cartão maduro, para não desestimular a revisão ao longo do tempo. Errei = 0 (addXP(0) não faz nada).
+// `intervalBefore` continua na assinatura só porque os chamadores (fr e zh) já o passam; não entra mais no cálculo.
 function reviewXP(intervalBefore, grade){
-  const base = XP_PER_GRADE[grade];
-  if (intervalBefore >= 60) return Math.max(1, Math.round(base * 0.4));
-  if (intervalBefore >= 21) return Math.max(1, Math.round(base * 0.7));
-  return base;
+  return XP_PER_GRADE[grade] || 0;
 }
 
 function gradeCurrentCard(grade){

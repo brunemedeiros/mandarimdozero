@@ -66,7 +66,8 @@ function newCards(pool){
 }
 
 // ---------- Gamificação ----------
-const XP_PER_GRADE = { 0: 1, 1: 4, 2: 8, 3: 10 };
+// XP por nota na Revisão (decisão da autora, 2026-10-15): Errei 0, Difícil 1, Bom 2, Fácil 4.
+const XP_PER_GRADE = { 0: 0, 1: 1, 2: 2, 3: 4 };
 
 function todayStr(){
   const d = new Date();
