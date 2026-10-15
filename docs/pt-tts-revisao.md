@@ -120,4 +120,4 @@ Decisões (rodada do laboratório `laboratorio-pt-regras`, voz `pt-BR-Chirp3-HD-
 - **Gênero entre parênteses** "Bem-vindo(a)" lê "Bem-vindo, bem-vinda" (c5v1; a variante com "ou", c5v3, é a alternativa se um dia quiser), "obrigado(a)" (c6v1) e **barra** "bonito / bonita" lê "bonito, bonita" (c7v1): como estavam.
 - **Ordinais** ("3º andar", "1ª vez"): ficam como estão, a voz lê bem. MUDOU: a regra `pt.ordinal-indicators` foi removida. Só 3º e 1ª foram ouvidos; ordinais compostos ("21º", "25ª") não foram testados.
 - **Títulos** "Dra. Ângela" lê "Doutora Ângela" (c9v1) e "Sr. e Sra." lê "Senhor e Senhora" (c9v3): como estavam.
-Versão das regras do pt segue 2 (a 2 nunca foi publicada). Testes: `fr/scripts/test_spoken_text.py` 172/172; `tests/tts-google/test_tts_core.mjs` com paridade Python x JS.
+Versão das regras do pt subiu para 3 (a 2, das regras antigas, está no ar na produção desde a `tts-generate` v9). Testes: `fr/scripts/test_spoken_text.py` 172/172; `tests/tts-google/test_tts_core.mjs` com paridade Python x JS.

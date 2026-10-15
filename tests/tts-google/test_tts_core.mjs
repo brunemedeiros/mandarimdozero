@@ -156,8 +156,8 @@ const serverKey = Buffer.from(await crypto.subtle.digest('SHA-256', new TextEnco
 ok(clientKey === serverKey, 'generationKey inclui google-chirp3-hd e a versão por idioma');
 const ptKey = await ctx.__k('obrigado(a)', 'pt-BR', null, 1);
 const zhKey = await ctx.__k('obrigado(a)', 'zh-CN', null, 1);
-const ptParts = ['obrigado(a)', 'pt-BR', '', '1', 'google-chirp3-hd', '2:pt2'].map(encodeURIComponent).join('\u001F');
-ok(ptKey === Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ptParts))).toString('hex'), 'pt usa 2:pt2');
+const ptParts = ['obrigado(a)', 'pt-BR', '', '1', 'google-chirp3-hd', '2:pt3'].map(encodeURIComponent).join('\u001F');
+ok(ptKey === Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ptParts))).toString('hex'), 'pt usa 2:pt3');
 ok(ptKey !== zhKey, 'versão por idioma separa pt de zh');
 for (const code of ['monthly_quota_exceeded', 'provider_error', 'provider_rate_limited', 'provider_not_configured', 'quota_check_failed', 'unsupported_language', 'invalid_voice', 'rate_limited']) {
   ok(typeof ctx.__labels[code] === 'string' && ctx.__labels[code].length > 0, 'rótulo ' + code);

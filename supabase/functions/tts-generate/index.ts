@@ -82,7 +82,7 @@ const TTS_CONFIG_VERSION = 2;
 // Versão das regras de "texto falado" POR IDIOMA (tts_core.mjs /
 // spoken_text.py). Entra no generationKey junto com TTS_CONFIG_VERSION:
 // mudar a regra de um idioma invalida só os áudios daquele idioma.
-const TTS_SPOKEN_RULES_VERSION_BY_LANG: Record<string, number> = { fr: 4, pt: 2, zh: 0 };
+const TTS_SPOKEN_RULES_VERSION_BY_LANG: Record<string, number> = { fr: 4, pt: 3, zh: 0 };
 function ttsConfigVersionFor(language: string | null): string {
   const l = String(language || '').trim().toLowerCase();
   const fam = l.startsWith('fr') ? 'fr' : l.startsWith('pt') ? 'pt' : (l.startsWith('zh') || l.startsWith('cmn')) ? 'zh' : 'x';

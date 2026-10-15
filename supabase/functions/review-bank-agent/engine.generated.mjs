@@ -153,7 +153,7 @@ const LANGUAGE_REGISTRY_DATA = {
       "tts": {
         "voice": "pt-BR",
         "baseRate": 1,
-        "spokenRulesVersion": 2
+        "spokenRulesVersion": 3
       },
       "modules": [],
       "hasLevelTest": false,
