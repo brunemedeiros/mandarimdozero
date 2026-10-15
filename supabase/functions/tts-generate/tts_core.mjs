@@ -157,13 +157,13 @@ const ptMinutesWord = (mi) => (mi === 1 ? `${mi} minuto` : `${mi} minutos`);
 function ptTimeText(h, mi) {
   if (mi === null) return h <= 24 ? ptHoursWord(h) : null;
   if (h > 23 || mi > 59) return null;
-  return mi === 0 ? ptHoursWord(h) : `${ptHoursWord(h)} e ${ptMinutesWord(mi)}`;
+  return mi === 0 ? ptHoursWord(h) : `${h}h${String(mi).padStart(2, '0')}`; // com minutos fica "14h30" (a voz lê natural)
 }
 function ptTime24(text) {
   text = text.replace(new RegExp(`${PT_NOT_ALNUM_BEFORE}([0-9]{1,2})h(?:([0-9]{2}))?(?![\\p{L}\\p{N}])`, 'gu'),
-    (m, h, mi) => ptTimeText(parseInt(h, 10), mi ? parseInt(mi, 10) : null) || m);
+    (m, h, mi) => ((mi && parseInt(mi, 10) !== 0) || (mi && parseInt(h, 10) > 23) ? m : (ptTimeText(parseInt(h, 10), null) || m))); // com minutos ("14h30"): fica como está
   text = text.replace(new RegExp(`${PT_NOT_ALNUM_BEFORE}([0-9]{1,2}):([0-9]{2})h?(?![\\p{L}\\p{N}])(?!:[0-9])`, 'gu'),
-    (m, h, mi) => ptTimeText(parseInt(h, 10), parseInt(mi, 10)) || m);
+    (m, h, mi) => { const t = ptTimeText(parseInt(h, 10), parseInt(mi, 10)); return !t ? m : (parseInt(mi, 10) === 0 ? t : `${h}h${mi}`); }); // "14:00" -> "14 horas"; "14:30" -> "14h30"
   return text;
 }
 
@@ -187,7 +187,6 @@ function ptAbbreviations(text) {
     const keep = /^\s*$/.test(rest) || /^\s+[A-ZÀ-ÖØ-Þ]/.test(rest);
     return (first === first.toUpperCase() ? cap : lower) + (keep ? '.' : '');
   };
-  text = text.replace(new RegExp(`(?<![\\p{L}\\p{N}])([Ee])tc\\.(?![\\p{L}\\p{N}])`, 'gu'), withDot('etcétera', 'Etcétera'));
   text = text.replace(new RegExp(`(?<![\\p{L}\\p{N}])([Oo])bs\\.(?![\\p{L}\\p{N}])`, 'gu'), withDot('observação', 'Observação'));
   return text;
 }
@@ -199,7 +198,6 @@ const PT_RULES = [
   ptGender,                                                                  // pt.gender-parenthetical
   (t) => t.replace(/\s+\((de|em|a|com|por|para|do|da|no|na)\)/g, ' $1…'),     // pt.parenthetical-particle
   (t) => t.replace(/\s+\/\s+/g, ', '),                                       // pt.slash-alternatives
-  ptOrdinals,                                                                // pt.ordinal-indicators
   ptTime24,                                                                  // pt.time-24h
   ptCurrency,                                                                // pt.currency-brl
   ptAbbreviations,                                                           // pt.common-abbreviations

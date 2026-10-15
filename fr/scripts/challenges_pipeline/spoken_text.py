@@ -236,23 +236,31 @@ def _pt_minutes_word(mi: int) -> str:
 
 
 def _pt_time_text(h: int, mi: Optional[int]) -> Optional[str]:
-    """None = não é hora válida (fica como está). Com minutos: hora 0-23, minutos 0-59;
-    sem minutos (14h, 5h de viagem): 0-24."""
+    """None = não é hora válida (fica como está). Decisão da dona (2026-10-15, depois de ouvir o laboratório): hora cheia
+    ("8h", "14h00", "5h de viagem") vira "8 horas"; com minutos fica "14h30" (a voz lê "duas e meia da tarde", "nove e
+    quinze da noite"), e "14:30" é reescrito como "14h30" para a voz ler igual. Com minutos vale hora 0-23, minutos 0-59;
+    sem minutos: 0-24."""
     if mi is None:
         return _pt_hours_word(h) if h <= 24 else None
     if h > 23 or mi > 59:
         return None
-    return _pt_hours_word(h) if mi == 0 else f"{_pt_hours_word(h)} e {_pt_minutes_word(mi)}"
+    return _pt_hours_word(h) if mi == 0 else f"{h}h{mi:02d}"
 
 
 def _pt_time24(text: str) -> str:
     def repl_h(m):
-        out = _pt_time_text(int(m.group(1)), int(m.group(2)) if m.group(2) else None)
+        if m.group(2) and int(m.group(2)) != 0:  # com minutos ("14h30", "00h30"): fica como está
+            return m.group(0)
+        if m.group(2) and int(m.group(1)) > 23:  # "24h00" não é hora válida com minutos
+            return m.group(0)
+        out = _pt_time_text(int(m.group(1)), None)
         return out if out else m.group(0)
 
     def repl_colon(m):
         out = _pt_time_text(int(m.group(1)), int(m.group(2)))
-        return out if out else m.group(0)
+        if not out:
+            return m.group(0)  # hora/minuto inválido fica
+        return out if int(m.group(2)) == 0 else f"{m.group(1)}h{m.group(2)}"  # "14:00" -> "14 horas"; "14:30" -> "14h30"
     # "14h30", "14h", "9h00", "5h de viagem"
     text = re.sub(rf"{_PT_NOT_ALNUM_BEFORE}([0-9]{{1,2}})h(?:([0-9]{{2}}))?(?![^\W_])", repl_h, text)
     # "14:30", "9:05", "14:30h": minutos sempre com 2 dígitos ("2:1" é placar, fica igual)
@@ -287,8 +295,7 @@ def _pt_abbreviations(text: str) -> str:
             keep = re.match(r"\s*$", rest) or re.match(r"\s+[A-ZÀ-ÖØ-Þ]", rest)
             return (word_cap if m.group(1).isupper() else word_lower) + ("." if keep else "")
         return repl
-    # "etc." / "obs." : o ponto final fica só se fechar a frase (fim do texto ou frase nova)
-    text = re.sub(r"(?<![^\W_])([Ee])tc\.(?![^\W_])", with_dot("etcétera", "Etcétera"), text)
+    # "obs." : o ponto final fica só se fechar a frase (fim do texto ou frase nova). "etc." NÃO tem regra: a voz já lê "etcétera"
     text = re.sub(r"(?<![^\W_])([Oo])bs\.(?![^\W_])", with_dot("observação", "Observação"), text)
     return text
 
@@ -324,13 +331,8 @@ _PT_RULES: List[SpokenRule] = [
         replacement=", ",
     ),
     SpokenRule(
-        id="pt.ordinal-indicators", lang="pt",
-        reason='"1º andar", "2ª aula", "21º": lê "primeiro", "segunda", "vigésimo primeiro" (1 a 100). "1°" (grau) fica igual.',
-        pattern="", replacement="", fn=_pt_ordinals,
-    ),
-    SpokenRule(
         id="pt.time-24h", lang="pt",
-        reason='"14h30", "14:30", "9h", "5h de viagem": lê o número ("14 horas e 30 minutos", "9 horas"). Não vira "duas e meia". Minutos com 2 dígitos no formato com dois pontos ("2:1" fica igual).',
+        reason='"9h", "14h00", "5h de viagem": lê "9 horas". Com minutos ("14h30") fica como está (a voz lê "duas e meia da tarde"); "14:30" vira "14h30". Minutos com 2 dígitos no formato com dois pontos ("2:1" fica igual).',
         pattern="", replacement="", fn=_pt_time24,
     ),
     SpokenRule(
@@ -340,7 +342,7 @@ _PT_RULES: List[SpokenRule] = [
     ),
     SpokenRule(
         id="pt.common-abbreviations", lang="pt",
-        reason='Só as inequívocas: "p.ex." -> "por exemplo", "etc." -> "etcétera", "obs." -> "observação". Internetês (vc, tb, blz) NÃO tem regra: usar SPOKEN_OVERRIDES por texto.',
+        reason='Só as inequívocas: "p.ex." -> "por exemplo" e "obs." -> "observação" ("etc." fica como está: a voz já lê "etcétera"). Internetês (vc, tb, blz) NÃO tem regra: usar SPOKEN_OVERRIDES por texto.',
         pattern="", replacement="", fn=_pt_abbreviations,
     ),
     SpokenRule(

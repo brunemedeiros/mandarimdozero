@@ -89,11 +89,11 @@ PT_CASES = {
     "Sr.(a) Silva": "Senhor ou Senhora Silva",
     "Prof.ª Ana": "Professora Ana",
     "Dr Paulo chegou": "Doutor Paulo chegou",
-    "1º andar": "primeiro andar",
-    "a 2ª aula": "a segunda aula",
-    "21º andar": "vigésimo primeiro andar",
-    "1.º de maio": "primeiro de maio",
-    "25ª edição": "vigésima quinta edição",
+    "1º andar": "1º andar",
+    "a 2ª aula": "a 2ª aula",
+    "21º andar": "21º andar",
+    "1.º de maio": "1.º de maio",
+    "25ª edição": "25ª edição",
     "101º": "101º",
     "1° andar": "1° andar",
     "nº 5": "número 5",
@@ -109,24 +109,24 @@ PT_CASES = {
     "Sr. Gonçalves, o(a) senhor(a) é brasileiro(a)?": "Senhor Gonçalves, o senhor é brasileiro, a senhora é brasileira?",
     "Eu sou do Brasil / de Portugal": "Eu sou do Brasil, de Portugal",
     "alemão(ã)": "alemão(ã)", "Pão(ães)": "Pão(ães)",
-    "Moro no 3º andar, apartamento nº 12.": "Moro no terceiro andar, apartamento número 12.",
+    "Moro no 3º andar, apartamento nº 12.": "Moro no 3º andar, apartamento número 12.",
     "Preciso (de) ajuda e gosto (de) café / chá": "Preciso de… ajuda e gosto de… café, chá",
     "Olá! Tudo bem com você(s)?": "Olá! Tudo bem com você, vocês?",
     "A Dra. Ângela é médica.": "A Doutora Ângela é médica.",
     "Prof. Álvaro, bom dia.": "Professor Álvaro, bom dia.",
-    "Ele é o 2º / ela é a 2ª": "Ele é o segundo, ela é a segunda",
+    "Ele é o 2º / ela é a 2ª": "Ele é o 2º, ela é a 2ª",
     "à vista (informal)": "à vista (informal)",
     "ônibus nº 8 → Centro": "ônibus número 8 Centro",
     "você": "você",
     # Horas 24h (a leitura só diz o número; "duas e meia" o curso ensina à parte)
-    "14h30": "14 horas e 30 minutos", "Chego às 14h30.": "Chego às 14 horas e 30 minutos.",
+    "14h30": "14h30", "Chego às 14h30.": "Chego às 14h30.",
     "14h00": "14 horas", "14h": "14 horas", "9h00": "9 horas", "9h": "9 horas", "09h": "9 horas",
-    "1h": "1 hora", "1h30": "1 hora e 30 minutos", "0h": "0 horas", "00h": "0 horas", "00h30": "0 horas e 30 minutos",
-    "14h01": "14 horas e 1 minuto", "24h": "24 horas", "O banco abre às 8h e fecha às 17h.": "O banco abre às 8 horas e fecha às 17 horas.",
-    "14:30": "14 horas e 30 minutos", "9:05": "9 horas e 5 minutos", "00:00": "0 horas", "23:59": "23 horas e 59 minutos",
-    "A aula é às 19:30h.": "A aula é às 19 horas e 30 minutos.",
+    "1h": "1 hora", "1h30": "1h30", "0h": "0 horas", "00h": "0 horas", "00h30": "00h30",
+    "14h01": "14h01", "24h": "24 horas", "O banco abre às 8h e fecha às 17h.": "O banco abre às 8 horas e fecha às 17 horas.",
+    "14:30": "14h30", "9:05": "9h05", "00:00": "0 horas", "14:00": "14 horas", "23:59": "23h59",
+    "A aula é às 19:30h.": "A aula é às 19h30.",
     "Fiz uma viagem de 5h de ônibus": "Fiz uma viagem de 5 horas de ônibus",
-    "placar 2:1": "placar 2:1", "O jogo terminou 3:0.": "O jogo terminou 3:0.", "Mateus 3:16": "Mateus 3 horas e 16 minutos",  # limite conhecido: com minutos de 2 dígitos não há como distinguir de versículo/razão
+    "placar 2:1": "placar 2:1", "O jogo terminou 3:0.": "O jogo terminou 3:0.", "Mateus 3:16": "Mateus 3h16",  # limite conhecido: com minutos de 2 dígitos não há como distinguir de versículo/razão
     "24:30": "24:30", "14:75": "14:75", "14h75": "14h75", "25h30": "25h30", "30h de estudo": "30h de estudo",
     "10:30:15": "10:30:15", "1,5h": "1,5h", "km2h": "km2h", "14 h": "14 h", "9h5": "9h5", "OK 14hs": "OK 14hs",
     # Moeda
@@ -139,9 +139,9 @@ PT_CASES = {
     # Abreviações inequívocas
     "p.ex. café": "por exemplo café", "P.ex. café": "Por exemplo café", "p. ex. chá": "por exemplo chá",
     "Frutas, p.ex. maçã.": "Frutas, por exemplo maçã.",
-    "Tenho livros, canetas, etc.": "Tenho livros, canetas, etcétera.", "Compro pão, leite, etc. e vou embora": "Compro pão, leite, etcétera e vou embora",
-    "livros, etc., e mais": "livros, etcétera, e mais", "(maçã, uva, etc.)": "(maçã, uva, etcétera)",
-    "Compro pão, etc. Depois volto.": "Compro pão, etcétera. Depois volto.", "Etc.": "Etcétera.", "etc": "etc", "o etcetera": "o etcetera",
+    "Tenho livros, canetas, etc.": "Tenho livros, canetas, etc.", "Compro pão, leite, etc. e vou embora": "Compro pão, leite, etc. e vou embora",
+    "livros, etc., e mais": "livros, etc., e mais", "(maçã, uva, etc.)": "(maçã, uva, etc.)",
+    "Compro pão, etc. Depois volto.": "Compro pão, etc. Depois volto.", "Etc.": "Etc.", "etc": "etc", "o etcetera": "o etcetera",
     "Obs.: traga o livro": "Observação: traga o livro", "obs. importante": "observação importante", "Veja a obs.": "Veja a observação.",
     "vc tb vai? blz": "vc tb vai? blz", "site.etc.br": "site.etc.br", "inobs.": "inobs.", "tipo p.exemplo": "tipo p.exemplo",
 }
@@ -154,7 +154,7 @@ check("pt gênero: 2a forma em minúscula quando a frase abre com maiúscula", s
 check("explain pt gênero", st.explain_spoken_text("obrigado(a)", "pt") == ["pt.gender-parenthetical"])
 check("pt: SPOKEN_OVERRIDES serve para internetês (vc, tb)", (st.SPOKEN_OVERRIDES["pt"].update({"vc tb vai?": "você também vai?"}) or True) and st.to_spoken_text("vc tb vai?", "pt") == "você também vai?")
 del st.SPOKEN_OVERRIDES["pt"]["vc tb vai?"]
-check("explain pt hora", st.explain_spoken_text("às 14h30", "pt") == ["pt.time-24h"])
+check("explain pt hora", st.explain_spoken_text("às 14h", "pt") == ["pt.time-24h"])
 check("explain pt moeda", st.explain_spoken_text("R$ 5,50", "pt") == ["pt.currency-brl"])
 check("explain pt abreviação", st.explain_spoken_text("p.ex. etc.", "pt") == ["pt.common-abbreviations"])
 check("hora/moeda/abreviação não vazam para fr e zh",

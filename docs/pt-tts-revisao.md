@@ -110,3 +110,14 @@ Decisões da dona, implementadas em `spoken_text.py` e `tts_core.mjs` (mesma ord
 - `pt.common-abbreviations`: só "p.ex." = "por exemplo", "etc." = "etcétera", "obs." = "observação". O ponto de "etc."/"obs." só fica se fechar a frase (fim do texto ou frase nova com maiúscula); "etc" sem ponto fica igual. Internetês (vc, tb, blz) NÃO tem regra global: usar `SPOKEN_OVERRIDES["pt"]` (texto exibido exato -> texto falado, em `spoken_text.py` e `tts_core.mjs`), subindo a versão do pt.
 - Testes: `python3 fr/scripts/test_spoken_text.py` 91 -> 171; `node tests/tts-google/test_tts_core.mjs` 73 -> 107 (paridade fr 781, zh 495 sem divergência; pt 67 -> 144).
 - PENDENTE: exige NOVO DEPLOY da Edge Function `tts-generate` (2 arquivos: `index.ts` e `tts_core.mjs`); sem deploy a produção segue com as regras antigas. Nenhum áudio foi gerado. Ouvir no `audio_lab` antes de gerar: "14 horas e 30 minutos", "1 hora", "0 horas"; "5 reais e 50 centavos", "1.250 reais" (milhar), "50 centavos"; "por exemplo", "etcétera." no fim de frase e "observação:".
+
+### 4.x Escolhas da dona depois de ouvir o laboratório (2026-10-15)
+Decisões (rodada do laboratório `laboratorio-pt-regras`, voz `pt-BR-Chirp3-HD-Achernar`); o que mudou no código está marcado:
+- **Hora cheia** ("8h", "14h00", "14:00", "5h de viagem") vira "8 horas" (c1v1). Igual ao que já estava.
+- **Hora com minutos** ("14h30", "21h15"): **fica como está** (a voz lê "duas e meia da tarde", "nove e quinze da noite", c0v0/c0v3 e c1v2). MUDOU: antes virava "14 horas e 30 minutos". "14:30" é reescrito como "14h30" para a voz ler igual (decisão minha, não ouvida: conferir no laboratório).
+- **Moeda** ("R$ 5,50" lê "5 reais e 50 centavos"; "R$ 1,00" lê "1 real"; "R$ 1.250,00" lê "1.250 reais"): como estava (c2, c3).
+- **"p.ex."** vira "por exemplo" (c4v1). **"etc."** NÃO tem regra: fica "etc." e a voz lê "etcétera". MUDOU: a regra `etc. -> etcétera` foi removida. **"Obs."** vira "Observação" (c4v4): como estava.
+- **Gênero entre parênteses** "Bem-vindo(a)" lê "Bem-vindo, bem-vinda" (c5v1; a variante com "ou", c5v3, é a alternativa se um dia quiser), "obrigado(a)" (c6v1) e **barra** "bonito / bonita" lê "bonito, bonita" (c7v1): como estavam.
+- **Ordinais** ("3º andar", "1ª vez"): ficam como estão, a voz lê bem. MUDOU: a regra `pt.ordinal-indicators` foi removida. Só 3º e 1ª foram ouvidos; ordinais compostos ("21º", "25ª") não foram testados.
+- **Títulos** "Dra. Ângela" lê "Doutora Ângela" (c9v1) e "Sr. e Sra." lê "Senhor e Senhora" (c9v3): como estavam.
+Versão das regras do pt segue 2 (a 2 nunca foi publicada). Testes: `fr/scripts/test_spoken_text.py` 172/172; `tests/tts-google/test_tts_core.mjs` com paridade Python x JS.
