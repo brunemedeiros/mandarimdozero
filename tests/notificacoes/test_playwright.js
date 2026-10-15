@@ -153,7 +153,7 @@ const SHOTS = process.env.SHOTS;
       const one = await page.evaluate(() => ({ read: !!window.__DB.notifications.find(n => n.id === 3).read_at,
         open: document.getElementById('notifications-dropdown').classList.contains('open'), dots: document.querySelectorAll('.notification-unread-dot').length,
         badge: document.getElementById('notifications-badge').textContent, label: document.querySelector('.notification-unread-dot').getAttribute('aria-label') }));
-      check('bolinha marca só aquele aviso como lido, sem fechar o painel', one.read && one.open && one.dots === 1 && one.badge === '1' && one.label === 'Marcar como lida', one);
+      check('bolinha marca só aquele aviso como lido, sem fechar o painel', one.read && one.open && one.dots === 1 && one.badge === '1' && one.label === 'Nova: Marcar como lida', one);
       await page.click('.notification-item[data-twin-at]');
       await page.waitForTimeout(200);
       const db = await page.evaluate(() => window.__DB.notifications.filter(n => n.category === 'amigos').map(n => !!n.read_at));

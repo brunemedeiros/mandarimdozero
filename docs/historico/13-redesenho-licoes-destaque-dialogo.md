@@ -196,11 +196,14 @@ A autora pensou em aposentar a ideia ("estamos criando coisas demais"). Nada foi
 - Ícones: todos os emojis dos avisos estão no mapa do Fluent (`shared/emoji-icons.js`); conferido no teste.
 - A bolinha de não lido é um botão (`notification-unread-dot`, "Marcar como lida"): marca só aquele aviso, sem abrir nem fechar
   o painel (área de toque de 44px no celular). O menu Professora não tem lista própria: o sino é o mesmo em todo o site.
-- Prévia A x B (tokens do site x Pico CSS do painel, arquivos reais da branch `claude/epic-fermat-ulyw5j`) enviada à autora
-  em 2026-10-15, aguardando decisão. O Pico (decidido em 2026-10-12, `docs/levantamento-design-system-painel.md` naquela
-  branch) é só para o painel interno (Professora e Admin) e ainda não foi mesclado na `main`.
-- Pico CSS: não se aplica. É a recomendação do "Design System do Painel" (painel interno da Professora); as telas de
-  aluno seguem os tokens do site (decisão da dona, `docs/historico/15-i18n-cursos-por-par-e0.md`).
+- Decisão da autora (2026-10-15): versão B, Design System do painel (Pico, já na `main` pelo PR #319). O sino do topo
+  (`#notifications-dropdown.painel`) e o "Avisos dos alunos" do menu Professora (`.tbell-panel.painel`,
+  `shared/teacher-panel.js`, de outra sessão: 105/108) usam `p-itens`/`p-item` (não lido = `p-item--suave`), grupos
+  Hoje/Ontem/Antes e o selo "Nova"/"Novo" (`p-selo--info`) que marca só aquele aviso como lido (área de toque ampliada
+  por `::before`). O sino da professora continua mostrando todos os idiomas (com o selo do idioma); o do topo só o site aberto.
+- `tests/sino-professora`: as 16 verificações "sem a 108" esperavam o sino do topo com avisos de todos os idiomas;
+  atualizadas para o filtro por site (fr: 3 avisos, 2 não lidos; zh: 3 e 3).
+- A autora pediu para descobrir o que mais pode ganhar o Pico: levantamento entregue no chat em 2026-10-15.
 - Grátis x Premium: tudo grátis.
-- Testes: `tests/notificacoes/test_playwright.js` 36/36 (novo; fr/zh, claro/escuro, celular), i18n 2032/2032 e 209/209,
+- Testes: `tests/notificacoes/test_playwright.js` 36/36, `tests/sino-professora` 272/272, painel-alunos 256/256, painel-cartoes 264/264 (novo; fr/zh, claro/escuro, celular), i18n 2032/2032 e 209/209,
   celular 108/108, ícones 43/43, amigos 210/210, modo foco 19/19. `registro` 88/89 igual na `main` (pré-existente).

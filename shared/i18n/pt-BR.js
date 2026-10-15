@@ -163,6 +163,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'notif.unread': 'Não lida',
   'notif.markAll': 'Ler todas',
   'notif.markOne': 'Marcar como lida',
+  'notif.new': 'Nova',
   'notif.cat.estudo': '📘 Estudo',
   'notif.cat.revisao': '🔄 Revisão',
   'notif.cat.streak': '🔥 Sequência',

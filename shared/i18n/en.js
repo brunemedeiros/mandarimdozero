@@ -147,6 +147,7 @@ window.I18N_CATALOG['en'] = {
   'notif.unread': 'Unread', // ALTA
   'notif.markAll': 'Mark all as read', // ALTA
   'notif.markOne': 'Mark as read', // ALTA
+  'notif.new': 'New', // ALTA
   'notif.cat.estudo': '📘 Study', // ALTA
   'notif.cat.revisao': '🔄 Review', // ALTA
   'notif.cat.streak': '🔥 Streak', // ALTA
