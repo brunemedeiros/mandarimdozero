@@ -40,6 +40,8 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
   `classroom_id` e sem aluno; turma com aula registrada não se apaga (FK restrict). Aluno lê por `get_my_class_log_entries`.
 - Calendário (101): horário opcional + duração + `time_zone` de quem registrou; mostrar sempre no fuso de quem vê
   (`classLogViewerSlot`). Grade do mês comum a professora e aluno: `classCalendarHTML` em `shared/teacher-class-logs.js`.
+  Duração = seletor 30 min a 5h (`CLASS_LOG_DURATIONS`). Link de agenda (103): `class_calendar_feed` + Edge Function
+  `class-calendar-feed` (verify_jwt false, token de 256 bits); o feed nunca leva Anotações nem Observações.
 - Rotina automática do Banco (`supabase/functions/review-bank-agent`, migrations 089, 090 e 097 a 100): a tarefa da madrugada só INSERE itens/recaps de alunos
   com `agent_managed = true` e gera cartões pelo mesmo motor do site; `engine.generated.mjs` é GERADO (`node scripts/build-review-bank-agent.js`,
   nunca editar à mão). Mudou `shared/review-bank*.js` ou o motor de cartões: regerar, rodar `tests/banco-revisao/test_agent_core.js`, novo deploy.

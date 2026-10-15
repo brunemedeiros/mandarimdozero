@@ -595,7 +595,7 @@ function switchClassLogsView(view){
     const on = b.dataset.classlogView === ADMIN_CLASS_LOGS_STATE.view;
     b.classList.toggle('is-active', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  const reg = document.getElementById('admin-classlogs-register'), calHost = document.getElementById('admin-classlogs-calendar');
+  const reg = document.getElementById('admin-classlogs-register'), calHost = document.getElementById('admin-classlogs-calendar-wrap');
   if (reg) reg.hidden = ADMIN_CLASS_LOGS_STATE.view !== 'register';
   if (calHost) calHost.hidden = ADMIN_CLASS_LOGS_STATE.view !== 'calendar';
   if (ADMIN_CLASS_LOGS_STATE.view === 'calendar') renderTeacherClassCalendar();
@@ -660,7 +660,7 @@ async function renderAdminClassLogsView(){
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="register">${t('panel.classLog.view.register')}</button>
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="calendar">${t('panel.classLog.view.calendar')}</button>
     </div>
-    <div id="admin-classlogs-calendar" hidden></div>
+    <div id="admin-classlogs-calendar-wrap" hidden>${calendarFeedBoxHTML()}<div id="admin-classlogs-calendar"></div></div>
     <div id="admin-classlogs-register">
     <div id="admin-notion-review"></div>
     <div class="profile-section">
@@ -721,6 +721,7 @@ async function renderAdminClassLogsView(){
     </div>
   `;
   wrap.querySelectorAll('[data-classlog-view]').forEach(b => b.addEventListener('click', () => switchClassLogsView(b.dataset.classlogView)));
+  wireCalendarFeedBox(wrap);
   const repeatCb = document.getElementById('admin-class-log-repeat');
   repeatCb?.addEventListener('change', () => { document.getElementById('admin-class-log-repeat-box').hidden = !repeatCb.checked; });
   switchClassLogsView(ADMIN_CLASS_LOGS_STATE.view);

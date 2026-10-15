@@ -213,7 +213,11 @@ async function renderMyClassLogsView(){
   wrap.innerHTML = loadingHTML();
   const logs = await fetchMyClassLogs(APP_KEY);
   MY_CLASS_LOGS_STATE.logs = logs;
-  renderMyClassLogsBody(wrap);
+  // Link de agenda (103) fora do corpo que se redesenha (Lista | Calendário), para não fechar a cada clique.
+  if (!logs.length){ renderMyClassLogsBody(wrap); return; }
+  wrap.innerHTML = `${calendarFeedBoxHTML()}<div data-my-class-logs-body></div>`;
+  wireCalendarFeedBox(wrap);
+  renderMyClassLogsBody(wrap.querySelector('[data-my-class-logs-body]'));
 }
 
 // Aluno > Aulas (101): próximas aulas no topo + Lista | Calendário.
