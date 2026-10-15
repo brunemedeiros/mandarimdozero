@@ -57,6 +57,7 @@ function loadLang(lang, overrides){
   run(read('shared/deck-engine.js'), 'shared/deck-engine.js');
   run(read('shared/deck-data.js'), 'shared/deck-data.js');
   run(require('../../scripts/lib/course-content.js').composedSource(lang) + '\n;this.UNITS = UNITS;', lang + '/content.js');
+  run(read(lang + '/lang-hooks.js'), lang + '/lang-hooks.js'); // E4: ganchos por idioma que o shared/core usa
   const appSrc = require('../e4/app-source').withCore(read(lang + '/app.js'));
   APP_FUNCTIONS.forEach(fn => {
     try { run(extractFunction(appSrc, fn), lang + '/app.js#' + fn); }
