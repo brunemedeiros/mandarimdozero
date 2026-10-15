@@ -397,7 +397,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'zh.toast.operaAudioFailed': '🔇 O Opera não conseguiu reproduzir este áudio',
   'zh.toast.storyDone': 'História concluída! 🎉',
   'zh.toast.unitDone': 'Unidade concluída! 🏮',
-  'zh.toast.hanziLessonDone': 'Lição de Hanzi concluída! 🈺',
+  'zh.toast.hanziLessonDone': 'Lição de Hanzi concluída! 🀄',
   'zh.review.cloze.placeholder': 'Digite o pinyin que falta',
   'zh.review.typeAnswer.placeholder': 'Digite a resposta em pinyin',
   'zh.review.match.pairs': 'Pares: {done}/{total}',
