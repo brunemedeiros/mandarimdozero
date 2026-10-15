@@ -19,7 +19,7 @@ function load(appKey, userId, sharedDb){
   const noop = () => {}; const el = { addEventListener: noop, style: {}, classList: { add: noop, remove: noop, toggle: noop }, querySelector: () => null, querySelectorAll: () => [] };
   ctx.document = { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], addEventListener: noop, createElement: () => el, body: el };
   [...FILES, 'shared/admin-flashcards.js'].forEach(f => vm.runInContext(read(f), ctx, { filename: f }));
-  vm.runInContext(extractFunction(read((appKey === 'frances' ? 'fr' : 'zh') + '/app.js'), 'flashcardIdForRow'), ctx);
+  vm.runInContext(extractFunction(require('../e4/app-source').withCore(read((appKey === 'frances' ? 'fr' : 'zh') + '/app.js')), 'flashcardIdForRow'), ctx);
   return { ctx, db };
 }
 module.exports = { load, check, summary, read };

@@ -38,6 +38,17 @@ const PANEL_STUB = (who) => {
   supabaseClient.rpc = async (name, args) => {
     (window.__rpcCalls = window.__rpcCalls || []).push([name, args]);
     if (name === 'my_permissions') return { data: { roles: roles.roles, admin: roles.admin, permissions: Object.fromEntries(CAT.map(c => [c.key, { enabled: perm(c.key), limit: null }])) }, error: null };
+    // 094: aulas com Presença, Competências e aula de turma.
+    if (name === 'get_my_class_log_entries') return { data: who === 'S' ? [
+      { id: 2, class_date: '2026-10-09', topic: 'Passé composé', homework: 'Exercícios 1 a 3', observations: null, attendance_name: 'Presente', attendance_color: 'green', skills: ['gramatica', 'escuta'], classroom_id: null, classroom_name: null },
+      { id: 1, class_date: '2026-10-02', topic: 'Apresentação', homework: null, observations: 'Livro, página 12', attendance_name: 'Faltou', attendance_color: 'red', skills: [], classroom_id: 501, classroom_name: 'Dupla' },
+    ] : [], error: null };
+    if (name === 'ensure_class_attendance_labels'){
+      const L = window.__DB.class_attendance_labels = window.__DB.class_attendance_labels || [];
+      if (!L.some(l => l.teacher_id === window.__uid)) L.push({ id: 61, teacher_id: window.__uid, name: 'Presente', color: 'green', counts_as: 'present', sort_order: 1, archived: false }, { id: 62, teacher_id: window.__uid, name: 'Faltou', color: 'red', counts_as: 'absent', sort_order: 2, archived: false });
+      return { data: L.filter(l => l.teacher_id === window.__uid).sort((a, b) => a.sort_order - b.sort_order || a.id - b.id), error: null };
+    }
+    if (name === 'mural_list') return { data: { as_teacher: roles.roles.includes('teacher') ? { classrooms: [{ id: 501, name: 'Dupla', members: ['S'], unread: 0 }], roster: [] } : null, as_student: null }, error: null };
     if (name === 'get_my_class_logs') return { data: who === 'S' ? [
       { id: 2, class_date: '2026-10-09', topic: 'Passé composé', homework: 'Exercícios 1 a 3', observations: null },
       { id: 1, class_date: '2026-10-02', topic: 'Apresentação', homework: null, observations: 'Livro, página 12' },
@@ -110,12 +121,12 @@ const PANEL_STUB = (who) => {
       // ---- conta comum ----
       await login('U', 'u@x.com');
       L('comum: sem menu professora', !(await ev(() => [...document.querySelectorAll('.teacher-only-nav')].some(e => e.style.display !== 'none'))));
-      L('comum: sem Minhas aulas/Material', (await ev(() => ['my-class-logs-btn','support-materials-btn'].map(id => document.getElementById(id).style.display))).every(d => d === 'none'));
+      L('comum: sem item Aluno', await ev(() => document.getElementById('student-panel-btn').style.display === 'none'));
 
       // ---- aluna com aulas e material ----
       await login('S', 's@x.com');
-      await page.waitForFunction(() => document.getElementById('my-class-logs-btn').style.display === '');
-      L('aluna: Minhas aulas e Material no menu', (await ev(() => ['my-class-logs-btn','support-materials-btn'].map(id => document.getElementById(id).style.display))).every(d => d === ''));
+      await page.waitForFunction(() => document.getElementById('student-panel-btn').style.display === '');
+      L('aluna: item Aluno no menu (Aulas e Material ficam dentro)', true);
       L('aluna: sem menu professora', !(await ev(() => [...document.querySelectorAll('.teacher-only-nav')].some(e => e.style.display !== 'none'))));
       await ev(() => switchTab('my-class-logs'));
       await page.waitForSelector('.class-log-entry');
@@ -123,6 +134,10 @@ const PANEL_STUB = (who) => {
       L('aluna: 2 aulas, mais recente primeiro', logs.length === 2 && logs[0].includes('Passé composé'), logs);
       L('aluna: data no fuso local (9, não 8)', /\b9\b/.test(logs[0]), logs[0]);
       L('aluna: campo vazio não aparece', !logs[1].includes(lang === 'fr' ? 'Lição' : 'Lição'), logs[1]);
+      L('aluna: Presença colorida (verde = presente, vermelho = faltou)', await ev(() => { const p = [...document.querySelectorAll('.class-log-entry .att-pill')]; return p.length === 2 && p[0].dataset.color === 'green' && p[0].textContent.trim() === 'Presente' && p[1].dataset.color === 'red'; }));
+      L('aluna: Competências como etiquetas', await ev(() => [...document.querySelectorAll('.class-log-entry')][0].querySelectorAll('.skill-chip').length === 2 && [...document.querySelectorAll('.class-log-entry')][0].textContent.includes(t('panel.classLog.skill.gramatica'))));
+      L('aluna: aula da turma mostra o nome da turma', await ev(() => [...document.querySelectorAll('.class-log-entry')][1].querySelector('.class-log-classroom')?.textContent.includes('Dupla')));
+      L('aluna: cor do rótulo visível (borda com a cor)', await ev(() => getComputedStyle(document.querySelector('.class-log-entry .att-pill')).borderTopColor !== getComputedStyle(document.querySelectorAll('.class-log-entry .att-pill')[1]).borderTopColor));
       await shot('minhas-aulas');
       await ev(() => switchTab('support-materials'));
       await page.waitForFunction(() => document.getElementById('support-materials-content').textContent.includes('passé composé'));
@@ -165,7 +180,7 @@ const PANEL_STUB = (who) => {
       await ev(() => switchTab('teacher-panel'));
       await page.waitForTimeout(400);
       const tabs = await ev(() => [...document.querySelectorAll('#view-teacher-panel [data-teacher-section]')].map(b => b.textContent.trim()));
-      L('professora: 4 abas', tabs.length === 4, tabs);
+      L('professora: 5 abas (Mural entrou na Etapa 4)', tabs.length === 5, tabs);
       L('professora: Alunos abre (sem aviso de acesso negado)', !(await ev(() => document.getElementById('admin-students-content').textContent.includes(t('admin.common.adminOnly')))));
       L('professora: sem formulário de vincular (só a admin vincula)', await ev(() => !document.querySelector('#admin-assign-student-form')));
       // ---- convite: link ----
@@ -202,6 +217,83 @@ const PANEL_STUB = (who) => {
       await page.click('[data-tinv-cancel]');
       await page.waitForFunction(() => !document.querySelector('.tinv-pending-row'));
       L('convite: cancelar tira da lista', await ev(() => window.__DB.teacher_students.some(r => r.student_id === 'S2' && r.status === 'removed')));
+      // ---- Aulas (094): Presença, Competências, turma, rótulos ----
+      await ev(() => { window.__DB.teacher_students.push({ id: 950, teacher_id: 'P', student_id: 'S', language_app_key: window.__appKey, status: 'active', created_at: '2026-10-01' });
+        window.__DB.teacher_class_logs = [
+          { id: 9001, teacher_id: 'P', student_id: 'S', classroom_id: null, language_app_key: window.__appKey, class_date: '2026-09-25', topic: null, homework: null, notes: '[Notion] Conversa sobre eleições e voltar com o ex\n[Notion] Para a próxima aula: ler o texto que ela esqueceu', attendance_label_id: 61, skills: [] },
+          { id: 9002, teacher_id: 'P', student_id: 'S', classroom_id: null, language_app_key: window.__appKey, class_date: '2026-09-26', topic: null, homework: null, notes: '[Notion] fofoca', attendance_label_id: 61, skills: [] }]; });
+      await ev(() => switchTeacherPanelSection('classlogs'));
+      await page.waitForSelector('#admin-create-class-log-form [data-class-log-extras="new"]');
+      // Revisar do Notion: editar e mostrar ao aluno / deixar só para mim
+      await page.waitForSelector('#admin-notion-review [data-notion-review="9001"]');
+      L('Notion: bloco de revisão com as 2 aulas marcadas', await ev(() => document.querySelectorAll('#admin-notion-review [data-notion-review]').length === 2 && document.querySelector('#admin-notion-review summary').textContent.includes('2')));
+      L('Notion: tópico e "para a próxima aula" em caixas separadas', await ev(() => [...document.querySelectorAll('[data-notion-review="9001"] [data-notion-field]')].map(x => x.dataset.notionField + ':' + x.value).join('|') === 'topic:Conversa sobre eleições e voltar com o ex|homework:ler o texto que ela esqueceu'));
+      await ev(() => { document.querySelector('#admin-notion-review details').open = true; });
+      await page.fill('[data-notion-review="9001"] [data-notion-field="topic"]', 'Conversa sobre eleições');
+      await page.fill('[data-notion-review="9001"] [data-notion-field="homework"]', 'Ler o texto');
+      await shot('aulas-notion-revisao');
+      await page.click('[data-notion-show="9001"]');
+      await page.waitForFunction(() => window.__DB.teacher_class_logs.find(l => l.id === 9001).topic === 'Conversa sobre eleições');
+      L('Notion: mostrar ao aluno grava só o texto editado e tira a marca das Anotações', await ev(() => { const l = window.__DB.teacher_class_logs.find(x => x.id === 9001); return l.homework === 'Ler o texto' && l.notes === 'Conversa sobre eleições e voltar com o ex\nPara a próxima aula: ler o texto que ela esqueceu'; }), await ev(() => window.__DB.teacher_class_logs.find(x => x.id === 9001)));
+      await page.waitForFunction(() => document.querySelectorAll('#admin-notion-review [data-notion-review]').length === 1);
+      await page.click('[data-notion-keep="9002"]');
+      await page.waitForFunction(() => window.__DB.teacher_class_logs.find(l => l.id === 9002).notes === 'fofoca');
+      L('Notion: deixar só para mim não mostra nada ao aluno', await ev(() => { const l = window.__DB.teacher_class_logs.find(x => x.id === 9002); return l.topic === null && l.homework === null; }));
+      await page.waitForFunction(() => !document.querySelector('#admin-notion-review details'));
+      L('Notion: bloco some quando acaba a revisão', true);
+      await ev(() => { window.__DB.teacher_class_logs = []; });
+      L('aulas: Presença com Sem registro, Presente e Faltou', await ev(() => [...document.querySelectorAll('[data-class-log-extras="new"] .att-choice')].map(l => l.textContent.trim()).join('|') === `${t('panel.classLog.attendanceNone')}|Presente|Faltou`));
+      L('aulas: 7 Competências', await ev(() => document.querySelectorAll('[data-class-log-extras="new"] input[data-skill]').length === 7));
+      L('aulas: turma aparece para escolher', await ev(() => !!document.querySelector('[data-classlog-classroom-checkbox][value="501"]')));
+      await page.check('[data-classlog-student-checkbox][value="S"]');
+      await page.check('[data-class-log-extras="new"] input[name="new-att"][value="61"]');
+      await page.check('[data-class-log-extras="new"] input[data-skill][value="gramatica"]');
+      await page.check('[data-class-log-extras="new"] input[data-skill][value="escuta"]');
+      await page.fill('#admin-class-log-topic', 'Subjonctif');
+      await shot('aulas-form');
+      await page.click('#admin-create-class-log-btn');
+      await page.waitForFunction(() => (window.__DB.teacher_class_logs || []).length === 1);
+      L('aulas: grava Presença e Competências na aula do aluno', await ev(() => { const r = window.__DB.teacher_class_logs[0]; return r.student_id === 'S' && r.classroom_id === null && r.attendance_label_id === 61 && r.skills.join() === 'gramatica,escuta'; }), await ev(() => window.__DB.teacher_class_logs[0]));
+      await page.waitForSelector('#admin-classlogs-list-box .att-pill');
+      L('aulas: lista mostra a Presença colorida', await ev(() => document.querySelector('#admin-classlogs-list-box .att-pill').dataset.color === 'green'));
+      // só Presença (Faltou), para a turma
+      await page.uncheck('[data-classlog-student-checkbox][value="S"]');
+      await page.check('[data-classlog-classroom-checkbox][value="501"]');
+      await page.check('[data-class-log-extras="new"] input[name="new-att"][value="62"]');
+      await page.click('#admin-create-class-log-btn');
+      await page.waitForFunction(() => window.__DB.teacher_class_logs.length === 2);
+      L('aulas: aula de turma é 1 linha sem aluno e com a turma', await ev(() => { const r = window.__DB.teacher_class_logs[1]; return r.student_id === null && r.classroom_id === 501 && r.attendance_label_id === 62; }), await ev(() => window.__DB.teacher_class_logs[1]));
+      await page.waitForSelector('#admin-classlogs-list-box .class-log-classroom');
+      L('aulas: lista da turma mostra o nome da turma', await ev(() => document.querySelector('#admin-classlogs-list-box .class-log-classroom').textContent.includes('Dupla')));
+      // rótulos no estilo do Notion: criar digitando, ⋯ para cor/nome/arquivar, sem perder o que já foi digitado
+      await page.fill('#admin-class-log-topic', 'Texto que não pode sumir');
+      await page.fill('[data-att-new="new"]', 'Remarcada');
+      await page.press('[data-att-new="new"]', 'Enter');
+      await page.waitForFunction(() => [...document.querySelectorAll('[data-att-choices="new"] .att-choice')].some(l => l.textContent.includes('Remarcada')));
+      L('rótulos: digitar + Enter cria e já seleciona', await ev(() => { const l = window.__DB.class_attendance_labels.find(x => x.name === 'Remarcada'); return !!l && l.teacher_id === 'P' && document.querySelector(`[data-att-choices="new"] input[value="${l.id}"]`).checked; }));
+      L('rótulos: Enter no campo não registra aula', await ev(() => window.__DB.teacher_class_logs.length === 2));
+      L('rótulos: o que já estava digitado continua lá', await ev(() => document.getElementById('admin-class-log-topic').value === 'Texto que não pode sumir'));
+      L('rótulos: sem seção separada de rótulos', await ev(() => !document.getElementById('admin-att-labels')));
+      const remId = await ev(() => window.__DB.class_attendance_labels.find(x => x.name === 'Remarcada').id);
+      await page.click(`[data-att-choices="new"] [data-att-more="${remId}"]`);
+      await page.waitForSelector('[data-att-menu="new"] .att-menu-box');
+      L('rótulos: ⋯ abre nome + 9 cores (como no Notion)', await ev(() => document.querySelectorAll('[data-att-menu="new"] [data-att-color]').length === 9));
+      await page.click('[data-att-menu="new"] [data-att-color="pink"]');
+      await page.waitForFunction((id) => window.__DB.class_attendance_labels.find(x => x.id === id).color === 'pink', remId);
+      L('rótulos: cor nova na hora no seletor', await ev((id) => document.querySelector(`[data-att-choices="new"] input[value="${id}"]`).closest('.att-choice').dataset.color === 'pink', remId));
+      await shot('aulas-rotulos');
+      await page.fill('[data-att-menu="new"] [data-att-rename]', 'Remarcada pela aluna');
+      await page.click('[data-att-menu="new"] [data-att-close]');
+      await page.waitForFunction((id) => window.__DB.class_attendance_labels.find(x => x.id === id).name === 'Remarcada pela aluna', remId);
+      L('rótulos: renomear e Pronto fecha o menu', await ev(() => document.querySelector('[data-att-menu="new"]').hidden && [...document.querySelectorAll('[data-att-choices="new"] .att-choice')].some(l => l.textContent.includes('Remarcada pela aluna'))));
+      L('rótulos: escolha continua marcada depois de editar', await ev((id) => document.querySelector(`[data-att-choices="new"] input[value="${id}"]`).checked, remId));
+      await page.click(`[data-att-choices="new"] [data-att-more="${remId}"]`);
+      await page.click('[data-att-menu="new"] [data-att-archive]');
+      await page.waitForFunction((id) => window.__DB.class_attendance_labels.find(x => x.id === id).archived === true, remId);
+      await page.waitForFunction(() => ![...document.querySelectorAll('[data-att-choices="new"] .att-choice')].some(l => l.textContent.includes('Remarcada')));
+      L('rótulos: arquivar tira da lista de opções', true);
+      L('rótulos: o texto digitado sobreviveu a tudo', await ev(() => document.getElementById('admin-class-log-topic').value === 'Texto que não pode sumir'));
+      L('aulas: sem rolagem horizontal', await ev(() => document.documentElement.scrollWidth <= window.innerWidth + 1), await ev(() => [document.documentElement.scrollWidth, window.innerWidth]));
       await ev(() => switchTab('admin-badges'));
       L('professora: link antigo do Admin cai no painel da professora', await ev(() => document.getElementById('view-teacher-panel').classList.contains('active')));
       await shot('professora-alunos');

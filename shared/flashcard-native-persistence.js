@@ -353,7 +353,7 @@ function attachLegacyMediaToFields(fields, row, languageAppKey){
 function nativeNoteEditorStateFromLegacyRow(row){
   const isCloze = !!row.cloze_sentence;
   const isMC = !isCloze && !!(row.choices && row.choices.length);
-  const isZh = row.language_app_key === 'mandarim';
+  const isZh = LanguageRegistry.isCjk(row.language_app_key);
   const studyLang = STUDY_LANG_FOR_APP_KEY[row.language_app_key] || null;
   const base = {
     noteId: row.id,

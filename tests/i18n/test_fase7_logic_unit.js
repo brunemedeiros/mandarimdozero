@@ -3,7 +3,7 @@
 // Rodar: node tests/i18n/test_fase7_logic_unit.js
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.resolve(__dirname, '..', '..');
-const FILES = ['shared/flashcard-model.js', 'shared/flashcard-editor-state.js', 'shared/deck-engine.js', 'shared/anki-import.js'];
+const FILES = ['languages/registry.js', 'shared/flashcard-model.js', 'shared/flashcard-editor-state.js', 'shared/deck-engine.js', 'shared/anki-import.js'];
 
 const ctx = { console, crypto: require('crypto').webcrypto, TextEncoder, TextDecoder };
 ctx.flashcardIdForRow = (p, row) => (row.revision > 0 ? `${p}${row.id}-r${row.revision}` : `${p}${row.id}`);

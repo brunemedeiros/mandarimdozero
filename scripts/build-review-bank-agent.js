@@ -4,7 +4,7 @@
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..');
 const OUT = path.join(ROOT, 'supabase/functions/review-bank-agent/engine.generated.mjs');
-const FILES = ['shared/flashcard-model.js', 'shared/flashcard-editor-state.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-native-persistence.js',
+const FILES = ['languages/registry.js', 'shared/flashcard-model.js', 'shared/flashcard-editor-state.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-native-persistence.js',
   'shared/flashcard-cloze-editor.js', 'shared/flashcard-mc-editor.js', 'shared/flashcard-typeanswer-editor.js', 'shared/review-bank-model.js', 'shared/review-bank-import.js'];
 const EXPORTS = ['rbBuildCard', 'rbReadyToDeliver', 'rbReadyForAuto', 'rbSelectRecap', 'rbItemIssues', 'rbNormalizeItem', 'rbiParse', 'RB_RECAP_SIZE', 'RB_STATUSES', 'RB_ITEM_TYPES'];
 // No navegador cada arquivo é um <script> e a ÚLTIMA função de mesmo nome vence; num módulo isso é erro de sintaxe.

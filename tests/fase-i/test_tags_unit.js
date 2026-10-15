@@ -124,25 +124,30 @@ check('Anki round-trip: exportar -> importar preserva o conjunto', plan.notes[0]
 // ---------- Filtro no Review (fr + zh): funções REAIS de app.js ----------
 for (const [label, appjs] of [['fr', 'fr/app.js'], ['zh', 'zh/app.js']]){
   const ctx = vm.createContext({ console, JSON, Array, Set, Object });
+  vm.runInContext(read('languages/registry.js'), ctx);
   vm.runInContext(read('shared/flashcard-model.js'), ctx);
-  const src = read(appjs);
-  ['activeReviewTagFilter', 'matchesReviewTagFilter', 'eligibleReviewPool', 'reviewTagUniverse', 'matchesReviewOriginFilter'].forEach(fn => vm.runInContext(extractFunction(src, fn), ctx));
+  // E4 (2026-10-14): as funções da Revisão moraram para shared/core/revisao-decks.js; lê o app.js junto com o core.
+  const src = read(appjs) + '\n' + read('shared/core/revisao-decks.js');
+  ['activeReviewTagFilter', 'matchesReviewTagFilter', 'eligibleReviewPool', 'reviewTagUniverse', 'isClassReviewCard', 'effectiveReviewOriginFilter', 'matchesReviewOriginFilter'].forEach(fn => vm.runInContext(extractFunction(src, fn), ctx));
   vm.runInContext(`var STATE = {studySettings:{reviewOriginFilter:'all', reviewTagFilter:[]}, cards:[
     {id:1, origin:'self', flashcardStatus:'active', tags:['a1']}, {id:2, origin:'teacher', flashcardStatus:'active', tags:['b2']},
     {id:3, origin:'study', tags:[]}, {id:4, origin:'self', flashcardStatus:'archived', tags:['a1']}]};
     function isCardLessonCompleted(c){ return c.origin === 'study' ? true : c.flashcardStatus === 'active'; }`, ctx);
   const ids = () => JSON.parse(JSON.stringify(vm.runInContext('eligibleReviewPool().map(c=>c.id)', ctx))).join();
-  check(label + ' sem filtro = comportamento atual', ids() === '1,2,3');
+  // 2026-10-06: a sessão ignora o filtro de tag salvo (só o Painel filtra).
+  // 2026-10-14: cartão da professora (id 2) fica só na aba Aluno > Revisão.
+  check(label + ' sem filtro: arquivado e cartão da professora fora', ids() === '1,3');
   vm.runInContext(`STATE.studySettings.reviewTagFilter = ['a1']`, ctx);
-  check(label + ' filtro [a1]: só o ativo com a1 (arquivado fora, trilha fora)', ids() === '1');
-  vm.runInContext(`STATE.studySettings.reviewTagFilter = ['a1','b2']`, ctx);
-  check(label + ' filtro OR [a1,b2]', ids() === '1,2');
+  check(label + ' filtro de tag salvo é ignorado na sessão', ids() === '1,3');
   vm.runInContext(`STATE.studySettings.reviewOriginFilter = 'teacher'`, ctx);
-  check(label + ' composição com origem (AND): teacher + [a1,b2] -> só 2', ids() === '2');
+  check(label + ' filtro salvo "teacher" (antigo) vale como todos', ids() === '1,3');
   check(label + ' reviewOriginFilter não é alterado pelo filtro de tag', vm.runInContext('STATE.studySettings.reviewOriginFilter', ctx) === 'teacher');
-  vm.runInContext(`STATE.studySettings.reviewOriginFilter = 'all'; STATE.studySettings.reviewTagFilter = [];`, ctx);
-  check(label + ' limpar filtro restaura tudo', ids() === '1,2,3');
-  check(label + ' universo de tags não inclui a própria seleção como restrição', JSON.parse(JSON.stringify(vm.runInContext(`STATE.studySettings.reviewTagFilter=['a1']; collectTagsFromCards(reviewTagUniverse())`, ctx))).join() === 'a1,b2');
+  vm.runInContext(`STATE.studySettings.reviewOriginFilter = 'self'`, ctx);
+  check(label + ' filtro self: só os próprios', ids() === '1');
+  vm.runInContext(`STATE.studySettings.reviewOriginFilter = 'all'; STATE.reviewSessionClassReview = true;`, ctx);
+  check(label + ' sessão Aluno > Revisão: só o cartão da professora', ids() === '2');
+  vm.runInContext(`STATE.reviewSessionClassReview = false; STATE.studySettings.reviewTagFilter = [];`, ctx);
+  check(label + ' universo de tags da Revisão geral sem as tags da professora', JSON.parse(JSON.stringify(vm.runInContext(`collectTagsFromCards(reviewTagUniverse())`, ctx))).join() === 'a1');
   check(label + ' eligibleDeckReviewPool NÃO usa filtro de tag (contagens do Deck intactas)', !/matchesReviewTag/.test(extractFunction(src, 'eligibleDeckReviewPool')));
 }
 summary('Fase I -- unit');

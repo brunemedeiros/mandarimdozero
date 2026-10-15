@@ -24,4 +24,6 @@ Fonte de verdade: `docs/arquitetura-total-decks-tags-painel.md` (30 invariantes,
   Contagens de Deck são estruturais (sem filtros de sessão).
 - Trilha: Course Decks por unidade (`course_unit_id`), cartões "Na frase" (1 por frase de exemplo, ids `u{u}-p{i}`/
   `u{u}-d{i}`), tags derivadas não salvas. Cartão só entra na revisão quando a lição terminou (`isCardLessonCompleted`).
+- Cartões da professora (origin 'teacher') ficam FORA da Revisão geral (pool, tabela de Decks, Painel, opção de origem):
+  só na aba Aluno > Revisão (`startClassReviewSession`, `STATE.reviewSessionClassReview`, rota `#/review/class`). 2026-10-14.
 - Tela da Revisão: tabela estilo Anki (`shared/deck-browser.js`), Painel em janela, rotas `#/review/decks/...`.

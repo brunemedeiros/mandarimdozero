@@ -32,7 +32,13 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
   (`review_bank_students`) existe com ou sem conta; só `linked_student_id` (conta com vínculo ativo, mesmo idioma) gera cartão em
   "Cartões da professora". Aprovar = RPC `approve_review_bank_item` (atômica, 1 cartão por item); cortar arquiva, nunca apaga.
   Item sensível ou com "Para conferir" nunca vira cartão sozinho. Doc: `docs/historico/15-auditoria-banco-revisao.md`.
-- Rotina automática do Banco (`supabase/functions/review-bank-agent`, migrations 089, 090 e 097 a 099): a tarefa da madrugada só INSERE itens/recaps de alunos
+- Mural (087, `shared/mural.js`): turmas (`classrooms`) e murais individuais; tabelas sem policy, tudo por RPC `mural_*`.
+  Aluno só vê com vínculo ativo; recado "só para um aluno" exige o aluno na turma. Anexos no bucket privado `mural`
+  (`<professora>/<autor>/<arquivo>`), lidos por link assinado; apagar post devolve os caminhos e o app limpa o Storage.
+- Aulas (094, `shared/teacher-class-logs.js`, `admin-class-logs.js`): Presença = rótulo da professora (`class_attendance_labels`,
+  9 cores do Notion, seletor no próprio campo como no Notion, sem seção separada; arquivar em vez de apagar), Competências = lista fixa `CLASS_LOG_SKILLS`. Aula de turma = 1 linha com
+  `classroom_id` e sem aluno; turma com aula registrada não se apaga (FK restrict). Aluno lê por `get_my_class_log_entries`.
+- Rotina automática do Banco (`supabase/functions/review-bank-agent`, migrations 089, 090 e 097 a 100): a tarefa da madrugada só INSERE itens/recaps de alunos
   com `agent_managed = true` e gera cartões pelo mesmo motor do site; `engine.generated.mjs` é GERADO (`node scripts/build-review-bank-agent.js`,
   nunca editar à mão). Mudou `shared/review-bank*.js` ou o motor de cartões: regerar, rodar `tests/banco-revisao/test_agent_core.js`, novo deploy.
-  Doc: `docs/historico/16-rotina-automatica-banco.md`.
+  Doc: `docs/historico/18-rotina-automatica-banco.md`.

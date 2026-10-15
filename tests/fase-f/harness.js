@@ -8,7 +8,7 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const { extractFunction } = require('../fase-e/harness');
 const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 
-const FILES = ['shared/srs.js', 'shared/fsrs.js', 'shared/study-queue.js', 'shared/flashcard-model.js', 'shared/study-trail-model.js', 'shared/analytics-metrics.js', 'shared/deck-engine.js',
+const FILES = ['languages/registry.js', 'shared/srs.js', 'shared/fsrs.js', 'shared/study-queue.js', 'shared/flashcard-model.js', 'shared/study-trail-model.js', 'shared/analytics-metrics.js', 'shared/deck-engine.js',
   'shared/flashcard-editor-state.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-native-persistence.js',
   'shared/own-flashcards.js', 'shared/deck-data.js', 'shared/anki-import.js'];
 
@@ -67,7 +67,7 @@ function load(appKey, userId){
   ctx.escapeHTML = s => String(s);
   FILES.forEach(f => vm.runInContext(read(f), ctx, { filename: f }));
   // flashcardIdForRow vive em <lang>/app.js (app.js inteiro depende de DOM): extração da função REAL.
-  vm.runInContext(extractFunction(read((appKey === 'frances' ? 'fr' : 'zh') + '/app.js'), 'flashcardIdForRow'), ctx);
+  vm.runInContext(extractFunction(require('../e4/app-source').withCore(read((appKey === 'frances' ? 'fr' : 'zh') + '/app.js')), 'flashcardIdForRow'), ctx);
   return { ctx, db };
 }
 

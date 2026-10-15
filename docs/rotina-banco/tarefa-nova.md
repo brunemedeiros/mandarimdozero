@@ -1,7 +1,7 @@
 # Tarefa agendada nova: rotina da madrugada do Banco de Revisão (versão do site)
 
 Substitui, aluno por aluno, a tarefa "Recap dos alunos" (que continua cuidando dos alunos do artifact). Esta fala SÓ com o conector do Supabase
-(a chamada HTTP direta é barrada pelo classificador do modo Auto). Detalhes do desenho: `docs/historico/16-rotina-automatica-banco.md`.
+(a chamada HTTP direta é barrada pelo classificador do modo Auto). Detalhes do desenho: `docs/historico/18-rotina-automatica-banco.md`.
 
 ## Como criar
 claude.ai > Tarefas agendadas > nova tarefa.

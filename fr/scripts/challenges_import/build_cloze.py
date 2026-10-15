@@ -28,7 +28,7 @@ CAP_PER_MODULE = 8
 
 def allowed_tokens_up_to(module_id):
     js = r"""
-    const fs=require('fs');const src=fs.readFileSync(process.argv[1],'utf8');
+    const src=require(process.argv[1]).composedSource('fr');
     const w=new Function(src+';return {UNITS,MODULES};')();
     const target=w.MODULES.find(x=>x.id===process.argv[2]);
     const mods=w.MODULES.filter(m=>m.level===target.level);
@@ -42,7 +42,7 @@ def allowed_tokens_up_to(module_id):
     }
     console.log(JSON.stringify({units:target.unitIds,texts:out}));
     """
-    res = subprocess.run(["node", "-e", js, os.path.join(ROOT, "fr", "content.js"), module_id],
+    res = subprocess.run(["node", "-e", js, os.path.join(ROOT, "scripts", "lib", "course-content.js"), module_id],
                          capture_output=True, text=True, check=True)
     data = json.loads(res.stdout)
     allowed = set()

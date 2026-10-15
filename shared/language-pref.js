@@ -14,7 +14,7 @@
 // antes desta feature existir). Mapeia APP_KEY (chave de progresso) -> id do
 // idioma em AVAILABLE_LANGUAGES. Se um novo idioma for adicionado, seu
 // APP_KEY entra aqui também.
-const APP_KEY_TO_LANG_ID = { frances: 'fr', mandarim: 'zh' };
+const APP_KEY_TO_LANG_ID = LanguageRegistry.langIdMap(true); // derivado de languages/registry.json
 
 // Lê data._meta.currentLearningLanguage da conta. Se nunca foi definido mas
 // a conta já tem progresso salvo em algum idioma (formato anterior a esta

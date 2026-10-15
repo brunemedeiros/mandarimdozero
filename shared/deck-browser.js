@@ -136,6 +136,15 @@ function deckBrowserLangLabel(){
   return DECK_BROWSER_LANG_LABELS[APP_KEY] || t('review.deck.lang.fallback');
 }
 
+// Unidades da Trilha de Estudo que o aluno ainda não começou (bloqueadas ou
+// nunca abertas) não aparecem na lista de Decks; só as em andamento e as
+// concluídas. Decks que não são unidade da Trilha passam sempre.
+function deckBrowserUnitVisible(deck){
+  if (!deck || deck.kind !== 'course' || deck.course_unit_id == null) return true;
+  const prog = (typeof STATE !== 'undefined' && STATE.unitProgress) ? STATE.unitProgress[deck.course_unit_id] : null;
+  return !!(prog && (prog.started || prog.completed));
+}
+
 // Filhos exibidos. 'lang' é a raiz virtual (todos os Decks do idioma): a
 // Trilha de Estudo + os filhos do Deck raiz da conta. Ela NÃO aparece como
 // linha na tabela (não há outro Deck do mesmo nível); continua existindo
@@ -148,11 +157,12 @@ function deckBrowserChildren(decks, nodeId){
     if (course) out.push(course);
     const root = deckBrowserRootDeck(decks);
     if (root) getDeckChildren(decks, root.id)
-      .filter(d => d.kind !== 'teacher_root' || deckBrowserHasTeacherLink())
+      // Cartões da professora saíram da Revisão: ficam na aba Aluno > Revisão (2026-10-14).
+      .filter(d => d.kind !== 'teacher_root')
       .forEach(d => out.push(d));
     return out.sort((a, b) => (kindOrder[a.kind] ?? 9) - (kindOrder[b.kind] ?? 9) || a.id - b.id);
   }
-  return getDeckChildren(decks, nodeId).slice().sort((a, b) => {
+  return getDeckChildren(decks, nodeId).filter(deckBrowserUnitVisible).sort((a, b) => {
     // Unidades da Trilha seguem a ordem do currículo (UNITS); o resto por id.
     if (a.kind === 'course' && b.kind === 'course' && typeof UNITS !== 'undefined'){
       const ia = UNITS.findIndex(u => String(u.id) === String(a.course_unit_id));
@@ -164,7 +174,9 @@ function deckBrowserChildren(decks, nodeId){
 }
 
 function deckBrowserPool(){
-  if (typeof eligibleDeckReviewPool === 'function') return eligibleDeckReviewPool();
+  // Sem os cartões da professora (aba Aluno > Revisão), senão o total do idioma os contaria.
+  const notClass = c => typeof isClassReviewCard !== 'function' || !isClassReviewCard(c);
+  if (typeof eligibleDeckReviewPool === 'function') return eligibleDeckReviewPool().filter(notClass);
   return ((typeof STATE !== 'undefined' && STATE.cards) || []).filter(c => typeof isCardLessonCompleted !== 'function' || isCardLessonCompleted(c));
 }
 
@@ -586,7 +598,7 @@ async function restoreDeckBrowserRoute(route){
   const app = document.getElementById('app');
   if (app && app.dataset.activeTab && app.dataset.activeTab !== 'review') return; // a pessoa já saiu da Revisão
   const routeDeck = route.nodeId !== 'lang' ? getDeckById(deckBrowserDecks(), route.nodeId) : null;
-  if (route.nodeId !== 'lang' && (!routeDeck || (deckBrowserIsTeacherDeck(routeDeck) && !deckBrowserHasTeacherLink()))){ backToDeckTable(); return; }
+  if (route.nodeId !== 'lang' && (!routeDeck || deckBrowserIsTeacherDeck(routeDeck))){ backToDeckTable(); return; }
   if (route.view === 'panel') openDeckPanel(route.nodeId);
   else openDeckDetail(route.nodeId);
 }

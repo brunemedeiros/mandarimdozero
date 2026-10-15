@@ -176,7 +176,7 @@ async function renderAdminNotificationsView(){
       <div class="admin-badge-row" data-template-id="${tpl.id}">
         <span class="admin-badge-icon">${tpl.icon || '🔔'}</span>
         <div class="admin-badge-info">
-          <div class="admin-badge-name">${tpl.channel === 'email' ? '📧' : '📱'} ${tpl.language_app_key === 'frances' ? '🇫🇷' : '🇨🇳'} ${tpl.title ? escapeHTML(tpl.title) + ' -- ' : ''}${escapeHTML(tpl.body)}</div>
+          <div class="admin-badge-name">${tpl.channel === 'email' ? '📧' : '📱'} ${LanguageRegistry.flagEmoji(tpl.language_app_key)} ${tpl.title ? escapeHTML(tpl.title) + ' -- ' : ''}${escapeHTML(tpl.body)}</div>
           <div class="admin-badge-desc">${tpl.channel === 'email' ? t('admin.notifications.channel.emailLower') : t('admin.notifications.channel.inAppLower')} · ${tpl.active ? t('admin.notifications.status.active') : t('admin.notifications.status.inactive')}</div>
         </div>
         <button class="admin-badge-edit-btn" data-template-toggle="${tpl.id}" data-template-active="${tpl.active}" title="${tpl.active ? t('admin.notifications.btn.deactivate') : t('admin.notifications.btn.activate')}">${tpl.active ? '👁️' : '🚫'}</button>

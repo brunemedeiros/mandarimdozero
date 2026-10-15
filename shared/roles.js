@@ -67,7 +67,7 @@ async function fetchMyTeacherLinks(status){
 async function assignStudentToTeacher(studentUsername, languageAppKey){
   const clean = slugifyUsername(studentUsername);
   if (!clean) return { ok: false, error: 'Digite o @username da aluna.' };
-  if (!['frances', 'mandarim', 'portugues'].includes(languageAppKey)){
+  if (!LanguageRegistry.isKnownAppKey(languageAppKey)){
     return { ok: false, error: 'Idioma inválido.' };
   }
   const target = await resolveProfileByUsername(clean);

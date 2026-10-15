@@ -1,0 +1,86 @@
+// C4 da E3: conquistas da CONTA valem em qualquer idioma (união por badge_id); conquistas de CURSO seguem por idioma.
+// Rodar: node tests/curso-progresso/test_conquistas_conta.js
+const fs = require('fs'), path = require('path'), vm = require('vm');
+const ROOT = path.resolve(__dirname, '..', '..');
+const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
+const readApp = f => require('../e4/app-source').withCore(read(f));
+let passed = 0, failed = 0;
+const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x) : ''); } };
+
+global.LanguageRegistry = require(path.join(ROOT, 'languages/registry.js'));
+const AP = require(path.join(ROOT, 'shared/account-progress.js'));
+const COURSE = ['unit_1', 'unit_half', 'unit_all', 'explorer', 'trained_ear', 'multitasker'];
+
+// 1) classificação coerente com o catálogo. Desde 2026-10-14 (conquistas com níveis) o catálogo é
+//    shared/badge-tracks.js e BADGES é montado em runtime: cada conquista antiga da conta vira nível de uma trilha
+//    da conta, e as de curso, de uma trilha de curso (a regra C4 continua a mesma).
+const BT = require(path.join(ROOT, 'shared/badge-tracks.js'));
+for (const id of AP.ACCOUNT_BADGE_IDS){
+  const p = BT.parseId(id);
+  check('conquista antiga da conta vira trilha da conta: ' + id, !!(p && p.track && BT.trackById(p.track).scope === 'account'), p);
+}
+for (const id of COURSE.filter(x => x !== 'multitasker')){
+  const p = BT.parseId(id);
+  check('conquista antiga de curso vira trilha de curso: ' + id, !!(p && p.track && BT.trackById(p.track).scope === 'course'), p);
+}
+check('Multitarefa é clássica (de curso)', !!BT.parseId('multitasker').classic && !AP.isAccountBadge('multitasker'));
+check('nível de trilha da conta é da conta; de curso, não', AP.isAccountBadge('review.3') && AP.isAccountBadge('streak.1') && !AP.isAccountBadge('course1.3') && !AP.isAccountBadge('ear.1'));
+for (const f of ['fr/app.js', 'zh/app.js']) {
+  const src = readApp(f);
+  check(f + ': BADGES vem das trilhas', /const BADGES = \[\];/.test(src) && /function collectBadgeMetrics\(s\)/.test(src));
+  check(f + ': grade usa as trilhas (badgeTrackViews)', /badgeTrackViews\(STATE\)/.test(src));
+}
+for (const id of COURSE) check('conquista de curso não é da conta: ' + id, !AP.isAccountBadge(id));
+
+// 2) união
+const own = new Set(['first_step']);
+const rows = [{ badge_id: 'streak_7', language_app_key: 'mandarim' }, { badge_id: 'unit_1', language_app_key: 'mandarim' }, { badge_id: 'xp_500', language_app_key: 'mandarim' }];
+const u = AP.unionBadgeIds(own, rows);
+check('união traz conquista da conta de outro idioma', u.has('streak_7') && u.has('xp_500'));
+check('união NÃO traz conquista de curso de outro idioma', !u.has('unit_1'));
+check('união mantém as do idioma atual', u.has('first_step'));
+check('união não remove nada (entrada vazia)', AP.unionBadgeIds(own, []).has('first_step') && AP.unionBadgeIds(own, null).size === 1);
+check('entrada não é alterada', own.size === 1);
+check('linhas inválidas ignoradas', AP.unionBadgeIds([], [null, {}, { badge_id: 'nada' }]).size === 0);
+// propriedade: união ⊇ próprios, idempotente
+let ok = true;
+const all = [...AP.ACCOUNT_BADGE_IDS, ...COURSE];
+for (let i = 0; i < 300; i++) {
+  const o = all.filter(() => Math.random() < .3), r = all.filter(() => Math.random() < .3).map(b => ({ badge_id: b }));
+  const a = AP.unionBadgeIds(o, r), b = AP.unionBadgeIds(a, r);
+  if (!o.every(x => a.has(x)) || a.size !== b.size || [...a].some(x => !o.includes(x) && (!AP.isAccountBadge(x)))) ok = false;
+}
+check('propriedade (300 casos): contém os próprios, idempotente, só acrescenta conquistas da conta', ok);
+
+// 3) badgeEarnedNow (auth.js) em sandbox
+const auth = read('shared/auth.js');
+const start = auth.indexOf('let accountEarnedBadgeRows'), end = auth.indexOf('// Tenta de novo (rede instável');
+const ctx = { AccountProgress: AP, CURRENT_USER: { id: 'u1' }, console, result: null };
+ctx.supabaseClient = { from: () => ({ select: () => ({ eq: async () => ctx.__resp }) }) };
+vm.createContext(ctx);
+vm.runInContext(auth.slice(start, end) + '\nthis.fns={loadAccountEarnedBadges,badgeEarnedNow,rows:()=>accountEarnedBadgeRows};', ctx);
+(async () => {
+  const b = id => ({ id, check: s => !!s[id] });
+  ctx.__resp = { data: rows, error: null };
+  await ctx.fns.loadAccountEarnedBadges();
+  check('badge da conta ganho em outro idioma aparece como ganho', ctx.fns.badgeEarnedNow(b('streak_7'), {}));
+  check('badge de curso de outro idioma NÃO aparece', !ctx.fns.badgeEarnedNow(b('unit_1'), {}));
+  check('badge calculado no idioma atual continua ganho', ctx.fns.badgeEarnedNow(b('unit_1'), { unit_1: true }));
+  ctx.__resp = { data: null, error: { message: 'rede' } };
+  await ctx.fns.loadAccountEarnedBadges();
+  check('erro de rede mantém o que já tinha (não perde conquista)', ctx.fns.rows().length === 3);
+  ctx.CURRENT_USER = null;
+  await ctx.fns.loadAccountEarnedBadges();
+  check('sem conta: lista vazia, idioma atual segue calculando', ctx.fns.rows().length === 0 && ctx.fns.badgeEarnedNow(b('first_step'), { first_step: true }));
+
+  // 4) perfil público de outra pessoa: conquista de curso só do idioma atual, da conta de qualquer um
+  const pp = read('shared/leaderboard.js');
+  check('perfil público: não filtra mais por idioma no SQL', !/fetchUserEarnedBadges[\s\S]{0,400}\.eq\('language_app_key', APP_KEY\)/.test(pp));
+  check('perfil público: filtra no cliente por idioma ou conquista da conta', /language_app_key === APP_KEY \|\| AccountProgress\.isAccountBadge/.test(pp));
+  // 5) tabela earned_badges inalterada: nenhuma migration nova
+  const migDir = path.join(ROOT, 'shared/supabase_migrations');
+  const migs = fs.readdirSync(migDir).filter(f => /^07[5-9]|^0[89]/.test(f) && /(create|alter)\s+table[^;]*earned_badges/i.test(fs.readFileSync(path.join(migDir, f), 'utf8')) && !/^075_/.test(f));
+  check('nenhuma migration posterior ao 017 altera a tabela earned_badges (a união é feita na leitura)', migs.length === 0, migs);
+  console.log(`conquistas da conta: ${passed} passaram, ${failed} falharam`);
+  process.exit(failed ? 1 : 0);
+})();

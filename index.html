@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Idiomas com Prof. Brune</title>
+<!-- Nunito de verdade: antes o @font-face só usava local('Nunito'), então quase
+     ninguém via a fonte (caía em Arial/Segoe). display=swap mostra o texto na
+     fonte do sistema até a Nunito chegar; offline, fica a do sistema. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap">
 <meta name="description" content="Plataforma de idiomas com Prof. Brune. Entre para continuar aprendendo.">
 <!-- Open Graph / Twitter Card -- precisam ser HTML estático (crawlers de
      redes sociais não executam JS), por isso os valores são digitados aqui
@@ -34,10 +40,6 @@ try{
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-@font-face{
-  font-family:'Nunito';
-  src: local('Nunito');
-}
 :root{
   --ink: #201A2C;
   --ink-soft: #6B6478;
@@ -251,6 +253,8 @@ h1{
   </div>
 </div>
 
+<script src="shared/emoji-icons.js"></script>
+<script src="languages/registry.js"></script>
 <script src="languages/index.js"></script>
 <script src="shared/app-identity.js"></script>
 <script src="shared/utils.js"></script>

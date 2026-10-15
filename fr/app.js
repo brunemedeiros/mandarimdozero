@@ -26,17 +26,6 @@ const TTS = {
   pollAttempts: 0
 };
 
-// Nem toda voz do mesmo idioma soa igual: o SO costuma expor tanto vozes
-// "neurais"/online (Google, Microsoft Natural/Online) quanto vozes locais
-// robóticas mais antigas, e a ordem que o navegador retorna é arbitrária.
-// Pontua pelo nome pra preferir a melhor voz disponível, não só a primeira.
-function voiceQualityScore(v){
-  const name = (v.name || '').toLowerCase();
-  if (/natural|neural/.test(name)) return 3;
-  if (/online/.test(name)) return 2;
-  if (/google/.test(name)) return 1;
-  return 0;
-}
 
 function loadFrenchVoice(){
   if (!TTS.supported) return;
@@ -50,14 +39,6 @@ function loadFrenchVoice(){
   return !!TTS.voice;
 }
 
-function pollForVoices(){
-  if (!TTS.supported || TTS.voice) return;
-  TTS.pollAttempts++;
-  loadFrenchVoice();
-  if (!TTS.voice && TTS.pollAttempts < 20){
-    setTimeout(pollForVoices, 300);
-  }
-}
 
 if (TTS.supported){
   loadFrenchVoice();
@@ -65,17 +46,6 @@ if (TTS.supported){
   pollForVoices();
 }
 
-function warmUpTTSOnce(){
-  if (TTS.warmedUp || !TTS.supported) return;
-  TTS.warmedUp = true;
-  try{
-    const warm = new SpeechSynthesisUtterance(' ');
-    warm.volume = 0;
-    window.speechSynthesis.speak(warm);
-  }catch(e){ /* silencioso: warm-up é best-effort */ }
-  document.removeEventListener('click', warmUpTTSOnce);
-  document.removeEventListener('touchstart', warmUpTTSOnce);
-}
 document.addEventListener('click', warmUpTTSOnce, { once:true });
 document.addEventListener('touchstart', warmUpTTSOnce, { once:true });
 
@@ -107,28 +77,6 @@ let exerciseAudioEl = null;
 // LAST_AUDIO_BTN.isConnected já vira false sozinho.
 let LAST_AUDIO_BTN = null;
 
-// Contagem vitalícia de reproduções de áudio (clique manual ou atalho "r")
-// -- só pro badge "Ouvido Treinado" (artefato §8). Tocar áudio nunca passa
-// perto de nenhum addXP() sozinho, então dispara a checagem de badge aqui
-// mesmo em vez de confiar no próximo XP ganho (que pode demorar).
-function registerAudioPlay(){
-  STATE.totalAudioPlays = (STATE.totalAudioPlays || 0) + 1;
-  ensureDailyBucket();
-  STATE.daily.audioPlaysToday += 1;
-  checkAndCelebrateBadges();
-}
-
-function stopExerciseAudio(){
-  if (exerciseAudioEl){
-    exerciseAudioEl.pause();
-    exerciseAudioEl.currentTime = 0;
-    exerciseAudioEl = null;
-  }
-  if (TTS.supported && window.speechSynthesis.speaking){
-    window.speechSynthesis.cancel();
-  }
-  document.querySelectorAll('.audio-btn.speaking').forEach(b => b.classList.remove('speaking'));
-}
 
 // ---------- Som curto de acerto/erro (feedback por exercício) ----------
 // Sintetizado via Web Audio API -- sem arquivo de áudio externo pra baixar/
@@ -136,48 +84,9 @@ function stopExerciseAudio(){
 // Synthesis são players diferentes; um "ding" de ~200ms não precisa de
 // stopExerciseAudio()). Silenciável em Preferências (Seu progresso).
 const FEEDBACK_SOUND_KEY = 'frances_feedback_sound';
-function isFeedbackSoundEnabled(){
-  return localStorageSafeGet(FEEDBACK_SOUND_KEY) !== '0';
-}
 
 let feedbackAudioCtx = null;
-function getFeedbackAudioCtx(){
-  const Ctx = window.AudioContext || window.webkitAudioContext;
-  if (!Ctx) return null;
-  if (!feedbackAudioCtx) feedbackAudioCtx = new Ctx();
-  if (feedbackAudioCtx.state === 'suspended') feedbackAudioCtx.resume();
-  return feedbackAudioCtx;
-}
 
-function playFeedbackTone(ctx, freq, startTime, duration, peakGain){
-  const osc = ctx.createOscillator();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(freq, startTime);
-  const g = ctx.createGain();
-  g.gain.setValueAtTime(0.0001, startTime);
-  g.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.012);
-  g.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-  osc.connect(g);
-  g.connect(ctx.destination);
-  osc.start(startTime);
-  osc.stop(startTime + duration + 0.02);
-}
-
-// isCorrect === true: "ding" ascendente curto (2 notas). false: um tom só,
-// mais grave e mais curto -- neutro, não punitivo (a explicação do erro já
-// fica a cargo do painel de texto, o som só confirma o resultado).
-function playFeedbackSound(isCorrect){
-  if (!isFeedbackSoundEnabled()) return;
-  const ctx = getFeedbackAudioCtx();
-  if (!ctx) return;
-  const now = ctx.currentTime;
-  if (isCorrect){
-    playFeedbackTone(ctx, 587.33, now, 0.09, 0.16);
-    playFeedbackTone(ctx, 880.00, now + 0.08, 0.16, 0.16);
-  } else {
-    playFeedbackTone(ctx, 233.08, now, 0.18, 0.13);
-  }
-}
 
 // Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
 // API do navegador — qualidade consistente pra todo aluno, independente do
@@ -308,18 +217,6 @@ function speakFrench(text, btnEl, isAutoplay){
   speakFrenchAudioOnly(text, btnEl, isAutoplay);
 }
 
-// Fase 7d (ver CLAUDE.md) -- porta de reprodução ISOLADA pro Preview do
-// editor de flashcards (Fase 6D.7): toca o áudio de verdade (mesmo
-// mecanismo de sempre -- mp3 pré-gerado ou Web Speech API, via
-// speakFrenchAudioOnly acima), mas NUNCA chama registerAudioPlay() --
-// nunca incrementa STATE.totalAudioPlays/daily.audioPlaysToday, nunca
-// dispara checkAndCelebrateBadges(). Preview é uma simulação visual/
-// interativa de Review, não Review de verdade -- nenhuma reprodução de
-// áudio dentro dele deveria contar como estudo real. Sempre isAutoplay:
-// false (um clique manual, nunca um autoplay automático).
-function playAudioPreview(text, btnEl){
-  speakFrenchAudioOnly(text, btnEl, false);
-}
 
 if (TTS.supported){
   setInterval(() => {
@@ -341,22 +238,6 @@ function audioBtnHTML(text, extraClass){
   return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="${t('fr.audio.listenPronunciation')}" title="${t('fr.audio.listenPronunciation')}">🔊</button>`;
 }
 
-// Fase 8a (ver CLAUDE.md) -- áudio PRÓPRIO enviado pela professora
-// (teacher_flashcards.audio_url), diferente do botão acima (TTS
-// automático da pronúncia). Classe própria (não "audio-btn") de propósito
-// -- wireAudioButtons() casa por `.audio-btn` e chamaria speakFrench()
-// com data-speak indefinido se este botão compartilhasse a classe.
-function customAudioBtnHTML(url){
-  return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="${t('fr.audio.listen')}" title="${t('fr.audio.listen')}">🎧</button>`;
-}
-function wireCustomAudioButtons(container){
-  container.querySelectorAll('.custom-audio-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      new Audio(btn.dataset.audioUrl).play().catch(() => showToast(t('toast.audioPlayFailedDot')));
-    });
-  });
-}
 
 // Botão de áudio devagar -- companheiro de qualquer "Écouter" manual
 // (desafios/exemplos onde o áudio NÃO toca sozinho, decisão explícita da
@@ -367,7 +248,7 @@ function wireCustomAudioButtons(container){
 // então não ganha este botão extra.
 const SLOW_AUDIO_RATE = 0.65;
 function slowAudioBtnHTML(id){
-  return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="${t('fr.audio.listenSlower')}">🐢 Lentement</button>`;
+  return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="${t('fr.audio.listenSlower')}">🐢 ${chT('ch.slow')}</button>`;
 }
 function slowAudioIconBtnHTML(id){
   return `<button class="audio-btn audio-btn-slow" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
@@ -389,77 +270,6 @@ function scenarioSceneHTML(emoji){
   return svg ? `<span class="scenario-flag">${svg}</span>` : emoji;
 }
 
-// Fase 7d (ver CLAUDE.md) -- `isPreview` (booleano, opcional -- default
-// falso/ausente preserva 100% o comportamento de sempre) é o ÚNICO ponto
-// que decide se um clique MANUAL em `.audio-btn` conta como reprodução
-// real (speakFrench, com registerAudioPlay) ou isolada (playAudioPreview,
-// sem nenhum efeito colateral) -- nunca espalhado em `if(isPreview)` pelos
-// 4 renderers/pontos de chamada; cada um só passa `card.__isPreviewCard`
-// (Fase 6D.7) como 2º argumento, a decisão em si mora só aqui.
-function wireAudioButtons(container, isPreview){
-  container.querySelectorAll('.audio-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (isPreview) playAudioPreview(btn.dataset.speak, btn);
-      else speakFrench(btn.dataset.speak, btn);
-    });
-  });
-}
-
-// ---------- "Já sei?" — marca um cartão de vocabulário como já dominado ----------
-function wireKnowButtons(container){
-  container.querySelectorAll('.know-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const cardId = btn.dataset.cardId;
-      const card = STATE.cards.find(c => c.id === cardId);
-      if (!card) return;
-      // K2-E: "já sei" é da PALAVRA. O botão grada/reseta o card A (o do id
-      // recebido); se a palavra só tem evidência via a irmã B, não há o que
-      // desmarcar em A -- avisa em vez de reescrever o histórico de B.
-      const siblings = studyWordCardsFor(STATE.cards, card.unitId, card.vocabIdx);
-      if (card.reps === 0 && studyWordHasEvidence(siblings)){
-        showToast('Esta palavra já foi estudada pelo cartão inverso.');
-        return;
-      }
-
-      if (card.reps > 0){
-        // já estava marcado — permite desmarcar caso tenha sido engano.
-        // Fase 15: precisa resetar TAMBÉM os campos do motor FSRS (não só
-        // os legados de compatibilidade) -- senão o cartão ficava num
-        // estado inconsistente (reps=0/due=0 mas state='review' e
-        // stability>0), e desmarcar+remarcar de novo reaproveitava a
-        // stability antiga em vez de tratar como aprendizagem nova.
-        card.reps = 0;
-        card.interval = 0;
-        card.due = 0;
-        card.ef = 2.5;
-        card.firstLearnedDate = null;
-        card.stability = 0;
-        card.difficulty = 0;
-        card.state = 'new';
-        card.lastReview = null;
-        card.fsrsReps = 0;
-        card.fsrsLapses = 0;
-        btn.classList.remove('known');
-        btn.textContent = t('zh.path.knownAsk');
-      } else {
-        applyMemoryGrade(card, 3); // grade 3 = "Fácil" -- Fase 5: motor novo
-        btn.classList.add('known');
-        btn.textContent = t('zh.path.knownDone');
-        showToast(t('toast.markedKnown'));
-      }
-      // K2-E: o rótulo reflete a PALAVRA (A ou B com histórico).
-      const wordKnown = studyWordHasEvidence(siblings);
-      btn.classList.toggle('known', wordKnown);
-      btn.textContent = wordKnown ? '✓ Já sei' : 'Já sei?';
-
-      saveState();
-      checkUnitCompletion(STATE.currentUnitId);
-      renderUnitsGrid();
-    });
-  });
-}
 
 // ---------- Construção do banco de cartões a partir do content.js ----------
 // Cada cartão SRS = 1 item de vocabulário (frente: francês, com áudio; verso: tradução)
@@ -480,181 +290,6 @@ function buildCardsFromUnits(units, appKey = 'frances'){
   return cards;
 }
 
-// Fase 3 do sistema de alunas particulares (ver CLAUDE.md) -- cartão
-// autorado por uma professora (shared/teacher-flashcards.js, tabela
-// teacher_flashcards), atribuído a ESTA aluna. Mesmo shape de card que
-// buildCardsFromUnits() produz (mesmo motor de memória/FSRS, mesma
-// getStudyQueue()) -- só ORIGEM diferente. id `t${row.id}` -- namespace
-// separado de `u${unitId}-v${idx}`, nunca colide. `unitId`/`vocabIdx`
-// ficam `null` de propósito (não pertence a nenhuma unidade/lição) --
-// isCardLessonCompleted() trata `origin==='teacher'` como um caso à
-// parte, sem o gate de lição. `flashcardStatus` espelha `status` da linha
-// (ativo/arquivado) -- também consultado por isCardLessonCompleted() pra
-// decidir se o cartão entra na fila de revisão hoje.
-// Prompt-mestre "flashcards -- 7 propostas" (ver CLAUDE.md) -- id ganha um
-// sufixo de revisão quando o cartão já foi editado (revision>0). Um id
-// novo nunca bate com nenhum já salvo em STATE.cards, então
-// applySerializedState() descarta o progresso de memória antigo pelo
-// MESMO mecanismo que já descarta qualquer cartão sem correspondência
-// (Fase 0) -- "reset ao editar" sem nenhum código especial de reset.
-// revision=0 (todo cartão nunca editado, inclusive os já existentes antes
-// desta migration) produz o id de sempre, `${prefix}${id}` -- zero
-// mudança de comportamento pra quem nunca usar a edição.
-function flashcardIdForRow(prefix, row){
-  return row.revision > 0 ? `${prefix}${row.id}-r${row.revision}` : `${prefix}${row.id}`;
-}
-
-// Fase 4b do prompt-mestre "reestruturação inspirada no Anki" (ver
-// CLAUDE.md): esta função NÃO usa mais a ponte (legacyFlashcardRowToCard/
-// bridgeNoteCardsToLegacyShape) -- delega pra buildEngineCardsFromRow()
-// (shared/flashcard-model.js), que devolve o(s) card(s) já no shape
-// NATIVO (`note`+`cardInstance`, sem nenhum campo de conteúdo legado
-// solto tipo `front`/`back_trans`/`choices`).
-// Fase 5, fechamento (ver CLAUDE.md) -- ANTES desta correção, esta
-// função devolvia só `[0]` do array (assumindo, corretamente até então,
-// que nenhuma linha produzia mais de 1 CardInstance). O motor da Fase 5
-// passou a produzir 2+ CardInstances por linha (normal_reversed, Cloze
-// multi-marca) -- `[0]` truncava silenciosamente as demais antes de
-// chegarem perto de STATE.cards. Contrato agora é
-// `buildCardFromTeacherFlashcard(row) -> Card[]` (sempre um array, 1
-// elemento pra todo dado legado -- zero mudança de comportamento pra
-// eles) -- quem chama precisa espalhar o array em STATE.cards, nunca
-// fazer `.push()` direto do retorno.
-function buildCardFromTeacherFlashcard(row){
-  return buildEngineCardsFromRow(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' });
-}
-
-// Busca os flashcards atribuídos a esta conta (shared/teacher-flashcards.js)
-// e mescla em STATE.cards -- precisa rodar ANTES de loadState()/
-// applySerializedState(), pra que o merge por id lá (Fase 0: "cartão salvo
-// sem correspondência na lista fresca é descartado silenciosamente")
-// encontre esses ids já presentes e restaure o progresso de memória já
-// acumulado. Busca TODOS os status (ativo e arquivado) de propósito --
-// arquivar não pode apagar progresso já salvo, só tirar o cartão da fila
-// de revisão (ver isCardLessonCompleted). Idempotente dentro da mesma
-// sessão -- não recarrega uma edição feita pela professora no meio da
-// sessão, mesmo princípio de STATE.units não recarregar ao vivo.
-// Fase 5, fechamento -- dedup agora é POR CARD (checa `card.id` de cada
-// elemento do array devolvido por buildCardFromTeacherFlashcard), não
-// mais por um único id "representante" da linha. Isso é estritamente
-// necessário pra normal_reversed/Cloze multi-marca: o id "representante"
-// de uma linha cloze multi-marca (`t${row.id}`) nunca existe de verdade
-// (os ids reais são `t${row.id}-c1`/`-c2`/...) -- checar só ele faria o
-// guard de idempotência nunca bater, duplicando cartões numa 2ª chamada.
-async function mergeTeacherFlashcardsIntoState(){
-  if (typeof fetchFlashcardsForCurrentStudent !== 'function') return;
-  const rows = await fetchFlashcardsForCurrentStudent(APP_KEY);
-  if (!rows.length) return;
-  const existingIds = new Set(STATE.cards.map(c => c.id));
-  rows.forEach(row => {
-    buildCardFromTeacherFlashcard(row).forEach(card => {
-      if (existingIds.has(card.id)) return;
-      STATE.cards.push(card);
-      existingIds.add(card.id);
-    });
-  });
-}
-
-// Fase 5 do sistema de alunas particulares (ver CLAUDE.md) -- cartão
-// autorado pela PRÓPRIA aluna (shared/own-flashcards.js, tabela
-// own_flashcards). Irmão de buildCardFromTeacherFlashcard() -- mesmo
-// shape de card (mesmo motor de memória/FSRS, mesma getStudyQueue()), só
-// ORIGEM diferente. id `s${row.id}` -- terceiro namespace, nunca colide com
-// `u${unitId}-v${idx}` (trilha) nem `t${row.id}` (professora, tabela
-// DIFERENTE -- ids podem coincidir numericamente entre as duas tabelas sem
-// problema, o prefixo já resolve). `unitId`/`vocabIdx` ficam `null` pelo
-// mesmo motivo do cartão de professora -- isCardLessonCompleted() trata
-// `origin==='self'` igual a `origin==='teacher'` (mesmo gate por
-// `flashcardStatus`, sem o gate de lição).
-// Prompt-mestre "reformulação gratuito x premium" (ver CLAUDE.md) --
-// imageUrl/audioUrl/choices/clozeSentence/clozeAnswer: mesmos 4 campos
-// opcionais já usados por buildCardFromTeacherFlashcard() acima (Fase
-// 8a/8c), agora também presentes em cartão próprio (migration 040). Gate
-// de "é premium?" fica só na UI de criação (shared/my-flashcards.js) --
-// renderReviewView()/buildSpeedOptions() já são origin-agnósticos (checam
-// card.choices/card.clozeSentence direto, nunca card.origin), então um
-// cartão próprio com esses campos populados já funciona sem nenhuma
-// mudança no motor de revisão.
-// Fase 4b (ver comentário de buildCardFromTeacherFlashcard acima, mesmo
-// princípio) -- irmã gêmea, só troca origin/idPrefix.
-// Fase 5, fechamento -- mesmo contrato `-> Card[]` da irmã (ver comentário
-// completo em buildCardFromTeacherFlashcard acima).
-function buildCardFromSelfFlashcard(row){
-  return buildEngineCardsFromRow(row, { origin: 'self', appKey: APP_KEY, idPrefix: 's' });
-}
-
-// Busca os cartões que a PRÓPRIA aluna já criou (shared/own-flashcards.js)
-// e mescla em STATE.cards -- mesmo motivo/posicionamento de
-// mergeTeacherFlashcardsIntoState() (precisa rodar ANTES de loadState(),
-// ver comentário lá). Busca todos os status de propósito, mesma razão.
-// Fase 5, fechamento -- dedup por card, mesmo motivo/mecanismo de
-// mergeTeacherFlashcardsIntoState() acima.
-async function mergeSelfFlashcardsIntoState(){
-  if (typeof fetchMyOwnFlashcards !== 'function') return;
-  const rows = await fetchMyOwnFlashcards(APP_KEY);
-  if (!rows.length) return;
-  const existingIds = new Set(STATE.cards.map(c => c.id));
-  rows.forEach(row => {
-    buildCardFromSelfFlashcard(row).forEach(card => {
-      if (existingIds.has(card.id)) return;
-      STATE.cards.push(card);
-      existingIds.add(card.id);
-    });
-  });
-}
-
-// Empurra um cartão recém-criado por shared/my-flashcards.js direto em
-// STATE.cards, sem esperar o próximo boot (mergeSelfFlashcardsIntoState()
-// só roda no carregamento do app) -- assim ele já entra na fila de revisão
-// nesta mesma sessão. Idempotente pelo mesmo padrão do merge acima.
-// Fase 5, fechamento -- buildCardFromSelfFlashcard() agora devolve `Card[]`
-// (normal_reversed/Cloze multi-marca podem produzir 2+ cartões pra uma
-// única linha criada); espalha TODOS em STATE.cards, checando cada id
-// individualmente -- nunca `.push()` do array inteiro como 1 elemento só.
-function addSelfFlashcardToState(row){
-  const existingIds = new Set(STATE.cards.map(c => c.id));
-  buildCardFromSelfFlashcard(row).forEach(card => {
-    if (existingIds.has(card.id)) return;
-    STATE.cards.push(card);
-  });
-}
-
-// Espelha um arquivar/reativar feito em shared/my-flashcards.js direto no
-// STATE.cards já carregado, mesmo motivo de addSelfFlashcardToState() --
-// sem isto, isCardLessonCompleted() só veria o novo status no próximo boot.
-// Casa por `rowId` (não pelo id com sufixo de revisão) -- arquivar/reativar
-// nunca muda a revisão, mas o card já pode ter um id `s${id}-r${n}` se já
-// foi editado antes, então reconstruir `s${rowId}` sem checar a revisão
-// atual não encontraria o cartão certo.
-// Fase 5, fechamento -- `.forEach()` em vez de `.find()`: uma linha agora
-// pode ter gerado 2+ cartões que compartilham o MESMO rowId (as 2 metades
-// de normal_reversed, ou c1/c2/... de um Cloze multi-marca) -- `.find()`
-// só atualizaria o primeiro que aparecesse, deixando os demais com
-// `flashcardStatus` desatualizado até o próximo reload.
-function updateSelfFlashcardStatusInState(rowId, status){
-  STATE.cards.forEach(c => {
-    if (c.origin === 'self' && String(c.rowId) === String(rowId)) c.flashcardStatus = status;
-  });
-}
-
-// Prop 4 (ver CLAUDE.md, "7 propostas") -- remove um cartão apagado de
-// verdade (deleteOwnFlashcardPermanently) do STATE.cards JÁ CARREGADO
-// nesta sessão -- sem isto, o cartão só sumiria da fila de revisão no
-// próximo boot (mesmo motivo de updateSelfFlashcardStatusInState acima).
-function removeSelfFlashcardFromState(rowId){
-  STATE.cards = STATE.cards.filter(c => !(c.origin === 'self' && String(c.rowId) === String(rowId)));
-}
-
-// Prop 4 -- espelha uma EDIÇÃO de conteúdo (updateOwnFlashcardContent) na
-// MESMA sessão: remove a entrada antiga (progresso de memória descartado
-// de propósito, grillado com a autora) e insere uma fresca a partir da
-// linha já atualizada (com `revision` incrementado) -- reaproveita
-// addSelfFlashcardToState(), que já computa o id novo via
-// flashcardIdForRow(). Sem isto, a edição só "resetaria" no próximo boot.
-function replaceSelfFlashcardInState(rowId, updatedRow){
-  removeSelfFlashcardFromState(rowId);
-  addSelfFlashcardToState(updatedRow);
-}
 
 // ---------- Taxonomia de "notas de realidade" (sociolinguística) ----------
 // Grilling 2026-09-17: proposta de mostrar contraste "forma ensinada vs
@@ -752,15 +387,6 @@ const REALITY_NOTE_LEVEL_GUIDANCE = {
   },
 };
 
-// Único ponto de checagem "esta categoria pode aparecer neste nível" --
-// qualquer código futuro que filtre notas de realidade por nível deve
-// chamar isto em vez de reimplementar a lógica. Hoje só é chamável com
-// level='A1' de verdade (os outros níveis não têm unidade nenhuma), mas já
-// existe pronta pra quando isso deixar de ser verdade.
-function isRealityNoteCategoryAllowedAtLevel(category, level){
-  const guidance = REALITY_NOTE_LEVEL_GUIDANCE[level];
-  return !!guidance && guidance.categoriesAllowed.includes(category);
-}
 
 // Texto do banner (topo do cartão) quando um concept é uma nota de
 // realidade (concept.kind === 'reality') em vez de gramática comum --
@@ -825,6 +451,8 @@ const STATE = {
   totalAudioPlays: 0, // vitalício, nunca zera (badge "Ouvido treinado")
   everUsedSpeedReview: false, // vitalício (badge "Exploradora")
   everUsedMatchGame: false, // vitalício (badge "Exploradora")
+  modesUsed: {}, // conquistas: modos de estudo já usados (trilha Explorar), ex.: { conjugation: true }
+  dictationsAced: 0, // conquistas: ditados com 90% ou mais, contando repetições (trilha Ditado)
   // XP da semana corrente -- preparação pra leaderboard futura (artefato
   // §9), NÃO implementa leaderboard nenhuma. Separado do XP vitalício
   // (acima) porque uma leaderboard semanal precisa de um número que reseta;
@@ -888,6 +516,10 @@ const STATE = {
   // Nunca serializado (ver serializeState() -- mesmo motivo de reviewQueue/
   // reviewIndex/reviewCardState: é estado de SESSÃO, não progresso salvo).
   reviewSessionDeckId: null,
+  // Aba Revisão do painel Aluno (2026-10-14): true só durante a sessão aberta
+  // por startClassReviewSession() -- o pool passa a ser SÓ os cartões da
+  // professora. switchTab() zera ao trocar de aba. Nunca serializado.
+  reviewSessionClassReview: false,
   cardVariants: {}, // progresso das palavras que trocam por idioma do site (shared/card-variants.js)
   // Fase D -- cache em memória da árvore de Decks do idioma atual, carregada
   // sob demanda por ensureDecksLoadedForReview() (só quando uma sessão
@@ -997,14 +629,6 @@ const LANG_ID = 'fr';
 // de cloze, não é escolhido por exercício.
 const CLOZE_MODE_KEY = 'frances_cloze_mode';
 
-function getClozeMode(){
-  return localStorageSafeGet(CLOZE_MODE_KEY) === 'type' ? 'type' : 'choice';
-}
-
-function updateClozeModeSwitch(){
-  const btn = document.getElementById('cloze-mode-switch');
-  if (btn) btn.setAttribute('aria-checked', getClozeMode() === 'type' ? 'true' : 'false');
-}
 
 document.getElementById('cloze-mode-switch').addEventListener('click', () => {
   const next = getClozeMode() === 'type' ? 'choice' : 'type';
@@ -1013,36 +637,12 @@ document.getElementById('cloze-mode-switch').addEventListener('click', () => {
 });
 updateClozeModeSwitch();
 
-function updateFeedbackSoundSwitch(){
-  const btn = document.getElementById('feedback-sound-switch');
-  if (btn) btn.setAttribute('aria-checked', isFeedbackSoundEnabled() ? 'true' : 'false');
-}
 document.getElementById('feedback-sound-switch').addEventListener('click', () => {
   localStorageSafeSet(FEEDBACK_SOUND_KEY, isFeedbackSoundEnabled() ? '0' : '1');
   updateFeedbackSoundSwitch();
 });
 updateFeedbackSoundSwitch();
 
-async function loadStateAndRender(){
-  // Fase 3 do sistema de alunas particulares (ver CLAUDE.md): precisa
-  // rodar ANTES de loadState(), pra que os cartões de professora já
-  // estejam em STATE.cards quando applySerializedState() fizer o merge
-  // por id (senão um cartão salvo sem correspondência na lista fresca é
-  // descartado -- exatamente o bloqueio identificado na Fase 0).
-  await mergeTeacherFlashcardsIntoState();
-  await mergeSelfFlashcardsIntoState();
-  await loadState();
-  if (typeof applyPendingBankReviews === 'function') await applyPendingBankReviews();
-  // Fase 10: aplica a preferência de frequência de revisão (padrão ou
-  // salva) no motor FSRS -- precisa rodar antes de qualquer grading real.
-  setDesiredRetention(reviewFrequencyToRetention(STATE.studySettings.reviewFrequency));
-  seedEarnedBadges();
-  renderTopbarStats();
-  renderUnitsGrid();
-  renderExportDeckSelect(ANKI_EXPORT_CONFIG);
-  maybeShowReviewReminder();
-  maybeSendStudyReminder();
-}
 
 // Login (Google/e-mail/convidado), menu do usuário e logout agora vêm de
 // shared/auth.js -- os botões/formulários abaixo continuam no HTML de cada
@@ -1089,13 +689,6 @@ document.getElementById('admin-badges-btn').addEventListener('click', () => {
 // botão de verdade no topo da tela de Revisão (#review-my-flashcards-btn,
 // wired mais abaixo, perto de renderReviewModeSelect).
 
-// Fase 8b do sistema de alunas particulares (ver CLAUDE.md) -- "Material
-// de apoio" é pra TODA conta logada (mesmo raciocínio de my-flashcards-btn
-// acima), mas só LEITURA -- quem envia é a professora, não a própria conta.
-document.getElementById('support-materials-btn').addEventListener('click', () => {
-  document.getElementById('user-menu-dropdown').classList.remove('open');
-  switchTab('support-materials');
-});
 
 // Entrada geral da bandeira ⚑ (menu "Mais"/usuário) -- sem contexto de
 // exercício específico, captureReportContext() ainda pega unidade/lição
@@ -1130,6 +723,8 @@ function serializeState(){
     totalAudioPlays: STATE.totalAudioPlays,
     everUsedSpeedReview: STATE.everUsedSpeedReview,
     everUsedMatchGame: STATE.everUsedMatchGame,
+    modesUsed: STATE.modesUsed,
+    dictationsAced: STATE.dictationsAced,
     periodXp: STATE.periodXp,
     daily: STATE.daily,
     checkpointProgress: STATE.checkpointProgress,
@@ -1180,6 +775,8 @@ function applySerializedState(data){
   if (typeof data.totalAudioPlays === 'number') STATE.totalAudioPlays = data.totalAudioPlays;
   if (data.everUsedSpeedReview) STATE.everUsedSpeedReview = true;
   if (data.everUsedMatchGame) STATE.everUsedMatchGame = true;
+  if (data.modesUsed && typeof data.modesUsed === 'object') Object.assign(STATE.modesUsed, data.modesUsed);
+  if (typeof data.dictationsAced === 'number') STATE.dictationsAced = Math.max(STATE.dictationsAced || 0, data.dictationsAced);
   if (data.periodXp) Object.assign(STATE.periodXp, data.periodXp);
   if (data.daily) Object.assign(STATE.daily, data.daily);
   if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, data.checkpointProgress);
@@ -1210,84 +807,6 @@ function applySerializedState(data){
 // shared/study-queue.js -- mesmo motor, mesmo formato de STATE.cards nos
 // dois idiomas. Ver ARCHITECTURE.md na raiz do repo.
 
-function registerStudyToday(){
-  const today = todayStr();
-  STATE.activityLog[today] = (STATE.activityLog[today] || 0) + 1;
-
-  if (STATE.lastStudyDay === today) return;
-  const yStr = dateStrDaysAgo(1);
-  if (STATE.lastStudyDay === yStr){
-    STATE.streak += 1;
-  } else {
-    // Perdeu o streak (não é a primeira vez estudando nem um dia normal de
-    // continuação) -- se voltou depois de um hiato curto (perdeu 1 a 3 dias),
-    // registra pro badge "De volta ao jogo" (artefato §8): recompensa
-    // retomada rápida em vez de só punir a quebra.
-    if (STATE.lastStudyDay){
-      const gapDays = Math.round((new Date(today) - new Date(STATE.lastStudyDay)) / 86400000);
-      if (gapDays >= 2 && gapDays <= 4) STATE.hadStreakComeback = true;
-    }
-    STATE.streak = 1;
-  }
-  STATE.lastStudyDay = today;
-  // Não mostra a tela de sequência AGORA -- isso interromperia no meio de
-  // uma atividade (ex: no meio de uma sessão de revisão, competindo até com
-  // o áudio automático da próxima carta). Só marca que tem uma comemoração
-  // pendente; maybeShowStreakCelebration() é quem decide o momento certo
-  // (fim da atividade), chamada nas telas de "sessão concluída".
-  STATE.pendingStreakCelebration = true;
-}
-
-function maybeShowStreakCelebration(){
-  if (!STATE.pendingStreakCelebration) return;
-  STATE.pendingStreakCelebration = false;
-  // Nem todo lugar que chama registerStudyToday() (que muda STATE.streak)
-  // também chama renderTopbarStats() logo em seguida -- vários caminhos só
-  // chegam até aqui, no momento em que a comemoração de fato aparece.
-  // Centralizar a atualização do pill aqui garante que ele nunca fique
-  // mostrando um número velho enquanto a tela de sequência já mostra o novo.
-  renderTopbarStats();
-  // showStreakCelebration() é sempre chamada ANTES do innerHTML da tela de
-  // conclusão (lição/unidade/sessão) ser escrito, no mesmo call site -- como
-  // as duas coisas rodam na mesma volta síncrona, o navegador só pinta UM
-  // quadro final, com o overlay de sequência já por cima, escondendo a tela
-  // de conclusão atrás dele até a pessoa fechar o modal. Resultado relatado:
-  // a tela de sequência parecia aparecer ANTES da tela de "Lição concluída",
-  // quando devia ser o contrário. Um pequeno atraso garante que o quadro da
-  // tela de conclusão pinte primeiro, e só depois o modal aparece por cima.
-  setTimeout(showStreakCelebration, 500);
-}
-
-// ---------- Tela de sequência de streak (estilo Duolingo) ----------
-// Aparece uma única vez por dia, na primeira atividade que ativa o streak
-// (lição, checkpoint, revisão, jogo de combinar, conjugação...) — nunca de
-// novo no mesmo dia, já que registerStudyToday() só chega até aqui na
-// primeira chamada depois da virada do dia.
-// STREAK_DAY_LABELS agora vem de shared/wizard.js (também usada por
-// buildMinutesWeekData lá).
-function buildStreakWeekData(){
-  const days = [];
-  for (let i = 6; i >= 0; i--){
-    const d = new Date(Date.now() - i*86400000);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    days.push({ label: STREAK_DAY_LABELS[d.getDay()], done: !!STATE.activityLog[key], isToday: i === 0 });
-  }
-  return days;
-}
-
-function showStreakCelebration(){
-  // Fase 1 do sistema de notificações.
-  fireNotificationEvent('streak_completed', 'streak', { days: STATE.streak });
-  document.getElementById('streak-days-num').textContent = STATE.streak;
-  { const u = document.getElementById('streak-days-unit'); if (u) u.textContent = STATE.streak === 1 ? 'dia' : 'dias'; }
-  document.getElementById('streak-week-row').innerHTML = buildStreakWeekData().map(d => `
-    <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
-      <div class="streak-day-circle">${d.done ? '✓' : ''}</div>
-      <div class="streak-day-label">${d.label}</div>
-    </div>
-  `).join('');
-  document.getElementById('streak-modal-overlay').style.display = 'flex';
-}
 
 document.getElementById('streak-modal-continue-btn').addEventListener('click', () => {
   document.getElementById('streak-modal-overlay').style.display = 'none';
@@ -1343,21 +862,6 @@ function maybeSendStudyReminder(){
 // quem já revisa em dia.
 const REVIEW_REMINDER_THRESHOLD = 15;
 
-function maybeShowReviewReminder(){
-  const today = todayStr();
-  if (STATE.lastReviewReminderDay === today) return;
-
-  // K.7: Devido = não-New com due<=agora (structuralCounts). O antigo
-  // cardsDueNow() contava New (due=0) como pendente.
-  const dueCount = structuralCounts(eligibleReviewPool()).due;
-  if (dueCount < REVIEW_REMINDER_THRESHOLD) return;
-
-  STATE.lastReviewReminderDay = today;
-  saveState();
-
-  document.getElementById('review-reminder-count').textContent = dueCount;
-  document.getElementById('review-reminder-banner').style.display = 'flex';
-}
 
 document.getElementById('review-reminder-dismiss-btn').addEventListener('click', () => {
   document.getElementById('review-reminder-banner').style.display = 'none';
@@ -1392,21 +896,6 @@ function freshDailyBucket(today){
   };
 }
 
-function ensureDailyBucket(){
-  const today = todayStr();
-  if (STATE.daily.date !== today){
-    STATE.daily = freshDailyBucket(today);
-  } else {
-    // Reconcilia: preenche só os campos que ainda NÃO existem no balde de
-    // hoje -- cobre a conta que já tinha usado o app hoje antes de um
-    // deploy adicionar um campo novo (ver auditoria "O problema dos 100%").
-    // Nunca sobrescreve um campo que já tem valor real.
-    const fresh = freshDailyBucket(today);
-    Object.keys(fresh).forEach(key => {
-      if (!(key in STATE.daily)) STATE.daily[key] = fresh[key];
-    });
-  }
-}
 
 // Fase 6 da tarefa de conclusão de lição/unidade: retirada do desafio
 // diário 'stars40' (GENERAL_CHALLENGES) removeu o ÚNICO chamador desta
@@ -1429,21 +918,10 @@ function registerDailyLessonCompleted(scorePct, isGrammar){
   if (isGrammar) STATE.daily.grammarLessons += 1;
 }
 
-// Meta diária (plano de estudo) conta separado dos Desafios de hoje -- é uma
-// régua mais exigente (ver artefato, §4): só lições com conteúdo real
-// (`qualifies` filtra atalho degenerado, ex. lição minúscula demais) e nunca
-// a mesma lição 2x no mesmo dia (replay não soma -- `key` identifica a lição
-// de forma estável, ex. "A1-1:2" ou "A1-1:checkpoint").
-function registerDailyLessonForGoal(key, qualifies){
-  ensureDailyBucket();
-  if (!qualifies || STATE.daily.goalCountedLessonKeys.includes(key)) return;
-  STATE.daily.goalCountedLessonKeys.push(key);
-  STATE.daily.lessonsForGoal += 1;
-  STATE.dailyLessonsLog[todayStr()] = STATE.daily.lessonsForGoal;
-}
 function registerDailyConjugationSession(){
   ensureDailyBucket();
   STATE.daily.conjugationSessions += 1;
+  STATE.modesUsed.conjugation = true; // conquistas: trilha Explorar
 }
 function registerDailyConjugationCorrect(count){
   ensureDailyBucket();
@@ -1454,40 +932,6 @@ function registerDailyConjugationTense(tenseKey){
   if (!STATE.daily.conjugationTenses.includes(tenseKey)){
     STATE.daily.conjugationTenses.push(tenseKey);
   }
-}
-function registerDailyReviewCard(){
-  ensureDailyBucket();
-  STATE.daily.reviewsDone += 1;
-}
-// Cartas que já estavam atrasadas (venceram antes de hoje, não só "due
-// agora") -- desafio "Revise cartas em atraso" (artefato §3), prioriza SRS
-// vencido de verdade em vez de qualquer revisão dentro do prazo normal.
-function registerDailyOverdueReviewCard(){
-  ensureDailyBucket();
-  STATE.daily.overdueReviewsDone += 1;
-}
-function registerDailySpeedReview(){
-  ensureDailyBucket();
-  STATE.daily.speedReviewSessions += 1;
-  STATE.everUsedSpeedReview = true;
-}
-function registerDailyMatchGame(){
-  ensureDailyBucket();
-  STATE.daily.matchGamesPlayed += 1;
-  STATE.everUsedMatchGame = true;
-}
-// Formatos de exercício distintos respondidos corretamente hoje -- só pro
-// badge "Multitarefa" (artefato §8: engajamento com a variedade do motor,
-// não só o formato mais fácil). Chamado de dentro de exerciseXP(), que já é
-// o único ponto por onde passam TODOS os formatos de exercício ao acertar.
-function registerDailyExerciseFormat(format){
-  ensureDailyBucket();
-  if (!format) return;
-  if (!STATE.daily.exerciseFormatsSeen.includes(format)) STATE.daily.exerciseFormatsSeen.push(format);
-  // Contagem por formato -- alimenta desafios ligados a um formato
-  // específico (ex. "Traduza a frase" = reorder), não só a checagem de
-  // diversidade do badge "Multitarefa".
-  STATE.daily.exerciseFormatCounts[format] = (STATE.daily.exerciseFormatCounts[format] || 0) + 1;
 }
 
 const EASY_CHALLENGES = [
@@ -1528,15 +972,6 @@ const GENERAL_CHALLENGES = [
   { id:'translateBlocks2', icon:'🧱', get label(){ return t('fr.mission.translateBlocks2'); }, target:2, get: d => d.exerciseFormatCounts?.reorder || 0 }
 ];
 
-function dailySeed(str){
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
-  return h;
-}
-
-function pickDailyFromPool(pool, salt){
-  return pool[dailySeed(STATE.daily.date + ':' + salt) % pool.length];
-}
 
 // ---------- Feasibility das missões de estoque limitado (grilling "missões
 // do dia") ----------
@@ -1546,71 +981,8 @@ function pickDailyFromPool(pool, salt){
 // checagem.
 const MISSION_QUANTITY_FLOOR = 3; // abaixo disso, trata como inviável (rodada 2)
 
-function missionReviewSupply(){
-  // Mesmo teto que gradeCurrentCard() consegue de fato tocar via
-  // Flashcard/Palavras Difíceis -- Speed Review grada os mesmos cartões
-  // (applyMemoryGrade), então não é um estoque à parte.
-  return trueDueReviewCount(eligibleReviewPool());
-}
-function missionOverdueSupply(){
-  // Mesmo critério de wasOverdue em gradeCurrentCard() (due < hoje 00:00).
-  const todayMidnight = new Date().setHours(0, 0, 0, 0);
-  return eligibleReviewPool().filter(c => c.due > 0 && c.due < todayMidnight).length;
-}
-function missionMatchGameFeasible(){
-  // Mesmo teto que desabilita o card "Combinar" na tela de Revisão.
-  return eligibleReviewPool().length >= 10;
-}
-function missionSpeedReviewFeasible(){
-  // Mesmo teto que esconde o card "Speed Review" na tela de Revisão.
-  return missionReviewSupply() >= 1;
-}
-
-// Resolve o item sorteado do pool revisão/conjugação contra o estoque real
-// do dia: devolve o item original (cabe), uma cópia com meta reduzida (tipo
-// quantidade, ainda acima do piso) ou o item seguro do pool (conj1 -- nunca
-// depende de estoque de revisão). Chamado uma única vez por dia dentro de
-// assignTodaysMissions() -- nunca recalculado depois, senão a meta ficaria
-// se movendo ao longo do dia conforme o estoque muda.
-function resolveRevisaoMission(picked, pool, safeFallbackId){
-  const fallback = () => pool.find(m => m.id === safeFallbackId) || picked;
-  if (picked.id === 'reviews15'){
-    const supply = missionReviewSupply();
-    if (supply >= picked.target) return picked;
-    if (supply >= MISSION_QUANTITY_FLOOR) return Object.assign({}, picked, { target: supply });
-    return fallback();
-  }
-  if (picked.id === 'overdue3'){
-    return missionOverdueSupply() >= picked.target ? picked : fallback();
-  }
-  if (picked.id === 'matchGame1'){
-    return missionMatchGameFeasible() ? picked : fallback();
-  }
-  if (picked.id === 'speedReview1'){
-    return missionSpeedReviewFeasible() ? picked : fallback();
-  }
-  return picked;
-}
 
 const ALL_CHALLENGE_POOLS = [EASY_CHALLENGES, REVISAO_CONJ_CHALLENGES, GENERAL_CHALLENGES];
-function challengeById(id){
-  for (const pool of ALL_CHALLENGE_POOLS){
-    const found = pool.find(c => c.id === id);
-    if (found) return found;
-  }
-  return null;
-}
-// Reconstrói o objeto completo (icon/label/get) do desafio a partir do
-// registro persistido ({id, target}) -- state.daily.missions só guarda dados
-// serializáveis (sincroniza com o Supabase), nunca funções.
-function materializeMission(assigned){
-  const base = challengeById(assigned.id);
-  if (!base) return null; // pool mudou entre deploys -- atribuição órfã, ignora
-  if (assigned.target === base.target) return base;
-  const scaled = Object.assign({}, base, { target: assigned.target });
-  if (base.labelForTarget) scaled.label = base.labelForTarget(assigned.target);
-  return scaled;
-}
 
 function assignTodaysMissions(){
   const easy = pickDailyFromPool(EASY_CHALLENGES, 'easy');
@@ -1620,192 +992,53 @@ function assignTodaysMissions(){
   return [easy, revisao, general].map(c => ({ id: c.id, target: c.target }));
 }
 
-// As 3 missões do dia são sorteadas e a feasibility da secundária resolvida
-// UMA VEZ (no primeiro acesso do dia), depois congeladas em
-// STATE.daily.missions -- nunca recalculadas de novo no mesmo dia (rodada 1
-// de grilling: "freeze feasibility once at day-start"). Isso também é o que
-// o notification-cron passa a ler direto (state.daily.missions), em vez de
-// resortear sozinho com sua própria cópia de dailySeed()/pickDailyFromPool().
-function todaysChallenges(){
-  ensureDailyBucket();
-  if (!STATE.daily.missions){
-    STATE.daily.missions = assignTodaysMissions();
-    saveState();
-  }
-  return STATE.daily.missions.map(materializeMission).filter(Boolean);
-}
-
-// Bônus por completar as 3 Missões do dia (não por missão individual --
-// cada ação que alimenta uma missão já dá XP por si só em outro lugar; o
-// bônus aqui é só pelo conjunto das 3). Chamado de dentro de addXP() (ver
-// comentário lá) pra ser checado depois de QUALQUER ganho de XP, já que
-// qualquer um deles pode ser o que fecha a última missão do dia.
-function checkDailyMissionsBonus(){
-  ensureDailyBucket();
-  if (STATE.daily.missionsBonusAwarded) return;
-  const allDone = todaysChallenges().every(c => (Number(c.get(STATE.daily)) || 0) >= c.target);
-  if (!allDone) return;
-  STATE.daily.missionsBonusAwarded = true;
-  addXP(30);
-  showToast(t('toast.dailyMissionsAllDone'));
-}
-
-// Notificação "Missão concluída" -- uma por Missão do dia individual (não
-// pelo conjunto das 3, isso já é o bônus acima). Guarda em
-// STATE.daily.missionsNotified pra disparar exatamente uma vez por missão
-// por dia, mesmo que addXP() rode várias vezes depois dela já ter batido a
-// meta (ex.: XP de exercícios seguintes na mesma sessão). Chamada do mesmo
-// lugar que checkDailyMissionsBonus() (dentro de addXP()), pelo mesmo
-// motivo: qualquer ganho de XP pode ser o que fecha uma missão.
-function checkDailyMissionCompletions(){
-  ensureDailyBucket();
-  todaysChallenges().forEach(c => {
-    if (STATE.daily.missionsNotified[c.id]) return;
-    const current = Number(c.get(STATE.daily)) || 0;
-    if (current < c.target) return;
-    STATE.daily.missionsNotified[c.id] = true;
-    fireNotificationEvent('mission_completed', 'desafios', { mission_label: c.label, mission_icon: c.icon }, 'path');
-  });
-}
-
-function renderDailyChallengesScreen(){
-  const contentEl = document.getElementById('step-content');
-  const nextBtn = document.getElementById('step-next-btn');
-  document.getElementById('step-back-btn').style.display = 'none';
-  document.getElementById('step-progress-fill').style.width = '100%';
-
-  contentEl.innerHTML = `
-    <div class="challenges-screen">
-      <h2>${t('trail.dailyMissions.caption')}</h2>
-      ${todaysChallenges().map((c, i) => {
-        // Number(...)||0: um campo ausente nunca mais vira NaN silencioso
-        // (ver auditoria "O problema dos 100%") -- current fica sempre um
-        // número válido entre 0 e c.target.
-        const current = Math.min(Number(c.get(STATE.daily)) || 0, c.target);
-        const pct = Math.round((current / c.target) * 100);
-        return `
-          <div class="daily-challenge-card">
-            <div class="daily-challenge-icon-sq slot-${i}">${c.icon}</div>
-            <div class="daily-challenge-body">
-              <div class="daily-challenge-label">${c.label}</div>
-              <div class="daily-challenge-progress-row">
-                <div class="daily-challenge-progress-track"><div class="daily-challenge-progress-fill" style="width:${pct}%"></div></div>
-                <div class="daily-challenge-fraction">${current}/${c.target}</div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('')}
-    </div>
-  `;
-  nextBtn.textContent = t('common.continueArrow');
-  nextBtn.style.display = 'flex';
-
-  // BUG real corrigido aqui (relatado pela autora, 2026-09-15): esta tela é
-  // SEMPRE a próxima depois de "Unidade concluída!" (renderUnitCompleteScreen,
-  // que já empurrou a rota 'unitComplete'). Empurrar a MESMA rota
-  // 'unitComplete' de novo aqui é um no-op silencioso (routerNavigate só
-  // ignora rotas iguais à atual) -- o hash da URL nunca avançava, ficando
-  // travado em #/unit/X/complete pelo resto da sessão (Desafios -> Trilha
-  // -> qualquer coisa), até a próxima navegação que de fato mude de rota.
-  // Resultado: qualquer reload/restauração de aba nesse meio-tempo (aba em
-  // segundo plano descartada e recarregada, ou um popstate espúrio com o
-  // heap de JS ainda vivo) reexecutava a rota 'unitComplete' -- com o cache
-  // ainda válido, isso literalmente reabria a tela "Parabéns" do zero, sem
-  // nenhum clique do aluno. "Continuar" aqui sempre leva pra Trilha (ver
-  // onChallengesScreen no listener de #step-next-btn), então a rota certa
-  // pra esta tela é 'tab'/'path' (mesmo destino, hash vazio) -- se um reload
-  // acontecer enquanto esta tela ainda está aberta, cai direto na Trilha,
-  // nunca replay da celebração.
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'path' });
-}
-
-// Segunda-feira da semana corrente, formato 'YYYY-MM-DD' -- mesmo padrão de
-// chave usado no resto do app (activityLog, dailyLessonsLog etc.).
-function currentWeekStart(){
-  const d = new Date();
-  const diffToMonday = d.getDay() === 0 ? -6 : 1 - d.getDay();
-  const monday = new Date(d);
-  monday.setDate(d.getDate() + diffToMonday);
-  return `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
-}
-function ensurePeriodXp(){
-  const weekStart = currentWeekStart();
-  if (STATE.periodXp.weekStart !== weekStart) STATE.periodXp = { weekStart, amount: 0 };
-}
-
-function addXP(amount){
-  // amount 0 (ex: exerciseXP() em modo de revisão de lição, ver comentário
-  // lá) nunca deve gerar toast/notificação/checagem de badge -- não é XP
-  // de verdade, é só o funil compartilhado sendo chamado com nada a somar.
-  if (!amount) return;
-  STATE.xp += amount;
-  ensurePeriodXp();
-  STATE.periodXp.amount += amount;
-  // Fase 6 da tarefa de conclusão de lição/unidade: alimenta o desafio
-  // diário 'xp50' (GENERAL_CHALLENGES), que substituiu 'stars40'.
-  ensureDailyBucket();
-  STATE.daily.xp += amount;
-  showToast(t('toast.xpGain', { amount }));
-  // Fase 1 do sistema de notificações (evento "Cliente" -- ver
-  // shared/notifications.js): fire-and-forget, o anti-spam (cooldown/
-  // daily_cap da categoria "gamificacao") já evita virar spam a cada
-  // exercício respondido.
-  fireNotificationEvent('xp_earned', 'gamificacao', { amount });
-  // Quase todo badge depende de streak, unidade, XP ou revisões -- e todos
-  // esses caminhos já chamam addXP() em algum ponto (mesmo os de streak, via
-  // registerStudyToday() logo antes/depois). Centralizar a checagem aqui
-  // evita espalhar "será que ganhei um badge?" em cada função separada.
-  // Exceção: "Ouvido Treinado" depende só de tocar áudio, que nunca passa
-  // perto de addXP() sozinho -- registerAudioPlay() dispara a checagem
-  // direto, sem esperar o próximo XP ganho.
-  checkAndCelebrateBadges();
-  // Checa cada Missão do dia individualmente ANTES do bônus do conjunto --
-  // "Missão concluída" de cada uma, depois (se for o caso) o toast de +30XP
-  // por ter fechado as 3.
-  checkDailyMissionCompletions();
-  // Checa a cada ganho de XP -- qualquer ação pode ser a que fecha a
-  // última das 3 Missões do dia (ver checkDailyMissionsBonus). A função já
-  // se protege contra rodar duas vezes no mesmo dia; addXP(30) chamando
-  // addXP() de novo aqui dentro é seguro (não reentra infinitamente porque
-  // missionsBonusAwarded já fica true ANTES desse addXP(30)).
-  checkDailyMissionsBonus();
-}
 
 // showToast agora vem de shared/toast.js.
 
-const BADGES = [
-  { id:'first_step', get name(){ return t('badge.first_step.name'); }, icon:'🌱', get desc(){ return t('badge.first_step.desc'); }, check: s => s.totalReviews >= 1 },
-  { id:'streak_3', get name(){ return t('badge.streak_3.name'); }, icon:'🔥', get desc(){ return t('badge.streak_3.desc'); }, check: s => s.streak >= 3 },
-  { id:'streak_7', get name(){ return t('badge.streak_7.name'); }, icon:'🥐', get desc(){ return t('badge.streak_7.desc'); }, check: s => s.streak >= 7 },
-  { id:'unit_1', get name(){ return t('badge.unit_1.name'); }, icon:'📖', get desc(){ return t('badge.unit_1.desc'); }, check: s => s.unitProgress['A1-1']?.completed && unitCompletedVia(s.unitProgress['A1-1']) === 'lessons' },
-  { id:'unit_half', get name(){ return t('badge.unit_half.name'); }, icon:'🗼', get desc(){ return t('badge.unit_half.desc'); }, check: s => {
-      const a1 = UNITS.filter(u => u.level === 'A1');
-      return a1.filter(u => unitCompletedVia(s.unitProgress[u.id]) === 'lessons').length >= Math.ceil(a1.length/2);
-    } },
-  { id:'unit_all', get name(){ return t('badge.unit_all.name'); }, icon:'🇫🇷', get desc(){ return t('badge.unit_all.desc'); }, check: s => {
-      const a1 = UNITS.filter(u => u.level === 'A1');
-      return a1.every(u => unitCompletedVia(s.unitProgress[u.id]) === 'lessons');
-    } },
-  { id:'xp_100', get name(){ return t('badge.xp_100.name'); }, icon:'⭐', get desc(){ return t('badge.xp_100.desc'); }, check: s => s.xp >= 100 },
-  { id:'xp_500', get name(){ return t('badge.xp_500.name'); }, icon:'🌟', get desc(){ return t('badge.xp_500.desc'); }, check: s => s.xp >= 500 },
-  { id:'reviews_100', get name(){ return t('badge.reviews_100.name'); }, icon:'💪', get desc(){ return t('badge.reviews_100.desc'); }, check: s => s.totalReviews >= 100 },
-  // ---- Fase 4 (artefato §8): badges novos, cada um ligado a um
-  // comportamento específico -- não "badge por badge" genérico. ----
-  { id:'explorer', get name(){ return t('badge.explorer.name'); }, icon:'🧭', get desc(){ return t('badge.explorer.desc'); }, check: s => s.totalReviews >= 1 && s.everUsedSpeedReview && s.everUsedMatchGame },
-  { id:'trained_ear', get name(){ return t('badge.trained_ear.name'); }, icon:'🎧', get desc(){ return t('badge.trained_ear.desc'); }, check: s => (s.totalAudioPlays || 0) >= 100 },
-  { id:'comeback', get name(){ return t('badge.comeback.name'); }, icon:'🔄', get desc(){ return t('badge.comeback.desc'); }, check: s => !!s.hadStreakComeback },
-  { id:'multitasker', get name(){ return t('badge.multitasker.name'); }, icon:'🧩', get desc(){ return t('badge.multitasker.desc'); }, check: s => (s.daily?.exerciseFormatsSeen?.length || 0) >= 5 },
-  { id:'weekend', get name(){ return t('badge.weekend.name'); }, icon:'🌙', get desc(){ return t('badge.weekend.desc'); }, check: s => {
-      for (let i = 0; i < 14; i++){
-        const d = new Date(Date.now() - i*86400000);
-        if (d.getDay() !== 6) continue;
-        const key = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-        if (s.activityLog[key(d)] && s.activityLog[key(new Date(d.getTime() + 86400000))]) return true;
-      }
-      return false;
-    } },
-];
+// Conquistas com níveis (docs/conquistas-proposta-niveis.md): BADGES é preenchido por rebuildTrackBadges()
+// (shared/badge-tracks-app.js) a partir do catálogo shared/badge-tracks.js e das métricas abaixo.
+const BADGES = [];
+
+// Modos de estudo que contam para a trilha Explorar.
+const BADGE_MODES = ['review', 'speed', 'match', 'conjugation', 'challenges', 'dictation'];
+function badgeModesUsedCount(s){
+  const used = Object.assign({}, s.modesUsed || {});
+  if (s.totalReviews > 0) used.review = true;
+  if (s.everUsedSpeedReview) used.speed = true;
+  if (s.everUsedMatchGame) used.match = true;
+  if (Object.keys(s.completedChallenges || {}).length) used.challenges = true;
+  if (Object.keys(s.dictations || {}).length) used.dictation = true;
+  return BADGE_MODES.filter(k => used[k]).length;
+}
+// Métricas das trilhas neste site (francês). Unidade pulada pelo ponto de verificação conta para o nível.
+function collectBadgeMetrics(s){
+  const level = 'A1';
+  const units = UNITS.filter(u => u.level === level);
+  const cpUnits = units.filter(u => (u.lessons || []).some(l => l.isCheckpoint));
+  const mods = (typeof MODULES !== 'undefined' ? MODULES : []).filter(m => m.level === level);
+  const checkpointsTotal = cpUnits.length + mods.length;
+  const checkpointsAced = cpUnits.filter(u => s.unitProgress[u.id]?.checkpointAced).length
+    + mods.filter(m => (s.checkpointProgress?.[m.id]?.bestScore || 0) >= 100).length;
+  const words = studyTrailWordProgress(s.cards);
+  const dictAced = Object.values(s.dictations || {}).filter(r => (r && r.bestScore || 0) >= 90).length;
+  // Desafios vêm do banco (loadChallengesFromDB, ao abrir a aba): sem a lista, conta tudo o que foi concluído.
+  const published = (typeof CHALLENGES !== 'undefined' && Array.isArray(CHALLENGES) ? CHALLENGES : []).filter(c => c.status === 'published');
+  const challengeIds = new Set(published.map(c => c.id));
+  const doneIds = Object.keys(s.completedChallenges || {}).filter(id => s.completedChallenges[id]);
+  return {
+    studyDays: Object.keys(s.activityLog || {}).filter(k => s.activityLog[k] > 0).length,
+    reviews: s.totalReviews || 0, streak: s.streak || 0, xp: s.xp || 0,
+    courseDone: units.filter(u => s.unitProgress[u.id]?.completed).length, courseTotal: units.length,
+    courseAced: checkpointsTotal > 0 && checkpointsAced >= checkpointsTotal,
+    audioPlays: s.totalAudioPlays || 0, modesUsed: badgeModesUsedCount(s), modesTotal: BADGE_MODES.length,
+    weekends: countStudyWeekends(s.activityLog), wordsLearned: words.learned, wordsTotal: words.total,
+    checkpointsAced, checkpointsTotal,
+    dictationsAced: Math.max(s.dictationsAced || 0, dictAced),
+    challengesDone: challengeIds.size ? doneIds.filter(id => challengeIds.has(id)).length : doneIds.length,
+    challengesTotal: challengeIds.size,
+    comeback: !!s.hadStreakComeback, levelLabel: 'A1'
+  };
+}
 
 // ---------- Detecção + celebração de nova conquista ----------
 // earnedBadgeIds é semeado uma vez, logo depois do estado carregar
@@ -1816,14 +1049,6 @@ const BADGES = [
 // já passam por addXP -- não precisa espalhar a checagem por unit/streak/
 // revisão separadamente.
 let earnedBadgeIds = new Set();
-function seedEarnedBadges(){
-  earnedBadgeIds = new Set(BADGES.filter(b => b.check(STATE)).map(b => b.id));
-  // Backfill/sincronização: garante que a tabela pública earned_badges
-  // reflita tudo que já era verdade antes desta feature existir, ou que
-  // uma sessão anterior não tenha conseguido gravar -- upsert idempotente,
-  // sem custo de duplicar (ver shared/auth.js).
-  upsertEarnedBadges([...earnedBadgeIds]);
-}
 
 let badgeCelebrationQueue = [];
 let badgeCelebrationShowing = false;
@@ -1831,94 +1056,7 @@ let badgeCelebrationShowing = false;
 // Deck), a conquista fica guardada e aparece só na tela de fim ("Revisão
 // concluída"), para não cobrir o cartão. Fora da sessão, aparece na hora.
 let badgeCelebrationHeld = false;
-function holdBadgeCelebrations(){ badgeCelebrationHeld = true; }
-function releaseBadgeCelebrations(){
-  if (!badgeCelebrationHeld) return;
-  badgeCelebrationHeld = false;
-  processBadgeCelebrationQueue();
-}
 
-function checkAndCelebrateBadges(){
-  const newlyEarned = [];
-  BADGES.forEach(b => {
-    if (earnedBadgeIds.has(b.id)) return;
-    if (b.check(STATE)){
-      earnedBadgeIds.add(b.id);
-      newlyEarned.push(b);
-    }
-  });
-  if (newlyEarned.length){
-    badgeCelebrationQueue.push(...newlyEarned);
-    processBadgeCelebrationQueue();
-    // Fase 1 do sistema de notificações -- um evento por badge (não um só
-    // pro lote), mesma granularidade da celebração visual acima.
-    newlyEarned.forEach(b => {
-      fireNotificationEvent('achievement_unlocked', 'gamificacao', { badge_name: b.name, badge_icon: b.icon }, 'profile');
-    });
-    upsertEarnedBadges(newlyEarned.map(b => b.id));
-  }
-}
-
-// Fila (não pilha): se dois badges forem ganhos no mesmo instante (ex.: XP
-// cruza 500 no mesmo golpe que termina o nível), mostra um de cada vez --
-// nunca dois cartões sobrepostos brigando pela mesma área da tela.
-function processBadgeCelebrationQueue(){
-  if (badgeCelebrationHeld || badgeCelebrationShowing || !badgeCelebrationQueue.length) return;
-  badgeCelebrationShowing = true;
-  const badge = badgeCelebrationQueue.shift();
-  showBadgeUnlockCelebration(badge, () => {
-    badgeCelebrationShowing = false;
-    processBadgeCelebrationQueue();
-  });
-}
-
-function showBadgeUnlockCelebration(badge, onDone){
-  const layer = document.getElementById('badge-unlock-layer');
-  if (!layer){ onDone?.(); return; }
-  const el = document.createElement('div');
-  el.className = 'badge-unlock-toast';
-  el.setAttribute('role', 'status');
-  el.setAttribute('aria-live', 'polite');
-  el.innerHTML = `
-    <div class="badge-unlock-icon">${badge.icon}</div>
-    <div class="badge-unlock-text">
-      <div class="badge-unlock-label">🏅 Nova conquista!</div>
-      <div class="badge-unlock-name">${badge.name}</div>
-      <div class="badge-unlock-desc">${badge.desc}</div>
-    </div>
-  `;
-  let done = false;
-  const finish = () => {
-    if (done) return;
-    done = true;
-    el.remove();
-    onDone?.();
-  };
-  el.addEventListener('click', () => {
-    finish();
-    // Em modo foco de lição (ver setLessonFocusMode), switchTab() sozinho
-    // não desfaz o .lesson-focus no #app/body -- a Trilha some, a tela de
-    // Progresso renderiza sem o shell normal (topbar/sidebar) por baixo e
-    // fica esticada. Fora de uma lição não tem esse estado pra limpar, e o
-    // clique continua levando pra Progresso normalmente.
-    if (document.body.classList.contains('lesson-focus')) return;
-    switchTab('progress');
-  });
-  layer.appendChild(el);
-  setTimeout(finish, 4000);
-}
-
-// ============================================================
-// RENDER: Trilha (path)
-// ============================================================
-function unitCardCounts(unitId){
-  // K2-E: total/learned em PALAVRAS (Note = A+B contam 1); dueForReview
-  // continua por CardInstance (é fila de Review, A e B independentes).
-  const pool = STATE.cards.filter(c => c.unitId === unitId);
-  const { total, learned } = studyTrailWordProgress(pool); // mesma semântica de Progresso (Note, só trilha)
-  const dueForReview = structuralCounts(pool).due; // K.7: mesma definição de Devido (não-New vencido)
-  return { total, learned, dueForReview, totalCards: pool.length };
-}
 
 // Unidades de um nível, na ordem — usado tanto pro desbloqueio sequencial
 // quanto pra numeração relativa exibida ("Unidade 2 de 16" dentro do nível).
@@ -1942,11 +1080,6 @@ function trailGroups(){
   return LEVELS.map(lvl => unitsOfLevel(lvl.id)).filter(g => g.length);
 }
 
-function recalculateUnlockedUnits(){
-  // Regra única em shared/trail-state-model.js (recalcUnlocked): 1ª unidade de
-  // cada nível liberada; as demais quando a anterior do nível foi concluída.
-  recalcUnlocked(trailGroups(), STATE.unitProgress);
-}
 
 const UNIT_ICONS = {
   'A1-1': '👋', 'A1-2': '🙋', 'A1-3': '🔢', 'A1-g1': '🧠', 'A1-4': '👨‍👩‍👧',
@@ -2032,19 +1165,6 @@ function modulesOfLevel(level){
 function moduleUnlocked(module){
   return !!STATE.unitProgress[module.unitIds[0]]?.unlocked;
 }
-// Progresso fracionário de 0 a 1: concluída conta 1 mesmo depois do reset de
-// lessonIdx no fim da unidade (ver finishCurrentLesson); unidades com lições
-// usam lessonIdx/lessons.length; as demais (motor antigo) usam a fração de
-// palavras já aprendidas no SRS, como sempre foi.
-function unitProgressFraction(u){
-  const prog = STATE.unitProgress[u.id];
-  if (prog.completed) return 1;
-  if (isLessonUnit(u)){
-    return u.lessons.length ? currentLessonIdx(u.id) / u.lessons.length : 0;
-  }
-  const { total, learned } = unitCardCounts(u.id);
-  return total ? learned / total : 0;
-}
 
 function moduleProgressPct(module){
   const sum = module.unitIds.reduce((acc, id) => acc + unitProgressFraction(UNITS.find(u => u.id === id)), 0);
@@ -2078,36 +1198,6 @@ function levelTestsOfLevel(level){
   return LEVEL_TESTS.filter(t => t.level === level);
 }
 
-// Fase 2 da trilha: cartão "Continuar" no topo. Fonte única = nextTrailItem
-// (shared/trail-state-model.js); aqui só desenha. A métrica mostrada é a
-// oficial: lições concluídas.
-function buildTrailContinueCard(){
-  const groups = trailGroups();
-  const next = nextTrailItem(groups, STATE.unitProgress);
-  const { done, total } = trailLessonCounts(groups, STATE.unitProgress);
-  const card = document.createElement('div');
-  card.className = 'trail-continue';
-  const metric = `${done} de ${total} lições concluídas`;
-  if (!next){
-    card.classList.add('complete');
-    card.innerHTML = `<div class="tc-info"><div class="tc-eyebrow">Sua trilha</div><div class="tc-title">Você concluiu toda a trilha 🎉</div><div class="tc-sub">${metric}</div></div>`;
-    return card;
-  }
-  const u = UNITS.find(x => x.id === next.unitId);
-  const lessonLabel = next.lessonCount ? ` · lição ${next.lessonIdx + 1} de ${next.lessonCount}` : '';
-  const started = done > 0 || !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
-  card.innerHTML = `
-    <div class="tc-info">
-      <div class="tc-eyebrow">${started ? 'Continue de onde parou' : 'Comece por aqui'}</div>
-      <div class="tc-title">${u.title}${lessonLabel}</div>
-      <div class="tc-sub">${metric}</div>
-    </div>
-    <button type="button" class="btn btn-primary tc-cta">${started ? 'Continuar' : 'Começar'}</button>
-  `;
-  card.querySelector('.tc-cta').addEventListener('click', () => openUnitDetail(u.id));
-  setTimeout(() => watchTrailContinueCard(card), 0);
-  return card;
-}
 
 // ---------- Fase 7 da trilha: modo Mapa ----------
 // DOM/seleção/painel em shared/trail-map.js; aqui só o modelo (estados reais) e o que cada botão faz.
@@ -2201,17 +1291,6 @@ function buildLevelTestCard(test){
   return card;
 }
 
-// Estado da Unidade na trilha: "done" (concluída), "current" (desbloqueada,
-// a próxima da fila) ou "locked". Note que precisa checar completed ANTES de
-// olhar lessonIdx -- finishCurrentLesson zera lessonIdx ao fechar a unidade
-// (pra permitir reabrir do início como revisão), então lessonIdx sozinho
-// mentiria "0 de 4" numa unidade que na verdade já terminou.
-// Fase 2: agora vem de trailItemState (shared/trail-state-model.js) --
-// 'done' | 'skipped' | 'current' (só UMA por trilha) | 'available' | 'locked'.
-function unitBlockState(u){
-  return trailItemState(u, trailGroups(), STATE.unitProgress);
-}
-
 
 // Modo admin: só a conta da autora do curso -- deixa REVISAR qualquer lição
 // de qualquer unidade (mesmo travada pros demais usuários), sem nunca
@@ -2231,15 +1310,6 @@ function isAdminUser(){
   return !!(typeof CURRENT_USER !== 'undefined' && CURRENT_USER && CURRENT_USER.email === ADMIN_EMAIL);
 }
 
-// Estado de UMA lição dentro do bloco expandido da unidade.
-function lessonRowState(u, idx){
-  if (unitBlockState(u) === 'skipped') return 'skipped';
-  if (STATE.unitProgress[u.id].completed) return 'done';
-  const cur = currentLessonIdx(u.id);
-  if (idx < cur) return 'done';
-  if (idx === cur) return 'current';
-  return 'locked';
-}
 
 // Lembra se o aluno abriu/fechou manualmente o bloco de uma unidade nesta
 // sessão (não é salvo -- é só estado de UI). Sem entrada aqui, o bloco usa o
@@ -2247,17 +1317,6 @@ function lessonRowState(u, idx){
 // expandida.
 const UNIT_BLOCK_EXPAND_OVERRIDE = {};
 
-// .ub-header é uma div (não um <button>, porque contém a seta que é seu
-// próprio botão -- button dentro de button é inválido) -- isto devolve a
-// ela a ativação por teclado que um <button> teria de graça.
-function wireHeaderActivation(el, handler){
-  el.setAttribute('role', 'button');
-  el.setAttribute('tabindex', '0');
-  el.addEventListener('click', handler);
-  el.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); handler(e); }
-  });
-}
 
 function buildUnitBlock(u){
   const state = unitBlockState(u);
@@ -2488,65 +1547,7 @@ function buildLevelReviewRow(level){
 // interface, não progresso, então localStorage puro (nunca precisa
 // sincronizar entre dispositivos).
 const CHALLENGES_STRIP_COLLAPSE_KEY = 'frances_challenges_collapsed';
-function isDailyChallengesStripCollapsed(){
-  const v = localStorageSafeGet(CHALLENGES_STRIP_COLLAPSE_KEY);
-  // Fase 3: sem preferência salva, a faixa começa recolhida no celular (ocupava
-  // ~208px antes da primeira unidade) e aberta no desktop.
-  if (v === null || v === undefined) return !!(window.matchMedia && window.matchMedia('(max-width: 899px)').matches);
-  return v === '1';
-}
 
-// Faixa compacta e SEMPRE visível com as 3 Missões do dia (ex-"Desafios de
-// hoje" -- ver artefato de navegação, rastreador) -- diferente de
-// renderDailyChallengesScreen (tela cheia, só aparece ao terminar uma
-// unidade), essa dá visibilidade contínua sem exigir terminar nada primeiro.
-// Reaproveita a mesma fonte de dados (todaysChallenges()) -- não duplica
-// lógica, só um resumo visual mais compacto dela. O título funciona como
-// botão de recolher/expandir. Renderiza no MESMO markup em dois lugares
-// (Trilha no mobile + card da sidebar no desktop, Fase 3): CSS decide qual
-// dos dois fica visível conforme a largura da tela, nunca os dois juntos.
-function renderDailyChallengesStrip(){
-  const targets = ['daily-challenges-strip', 'side-missions-body']
-    .map(id => document.getElementById(id))
-    .filter(Boolean);
-  if (!targets.length) return;
-  ensureDailyBucket();
-  const collapsed = isDailyChallengesStripCollapsed();
-  const cardsHTML = todaysChallenges().map((c, i) => {
-    // Number(...)||0: um campo ausente nunca mais vira NaN silencioso (ver
-    // auditoria "O problema dos 100%") -- current fica sempre um número
-    // válido entre 0 e c.target.
-    const current = Math.min(Number(c.get(STATE.daily)) || 0, c.target);
-    const pct = Math.round((current / c.target) * 100);
-    const done = current >= c.target;
-    return `
-      <div class="dcs-card ${done ? 'done' : ''}">
-        <div class="dcs-icon-sq slot-${i}">${c.icon}</div>
-        <div class="dcs-body">
-          <div class="dcs-card-label">${c.label}</div>
-          <div class="dcs-progress-row">
-            <div class="dcs-track"><div class="dcs-fill" style="width:${pct}%"></div></div>
-            <div class="dcs-fraction">${current}/${c.target}</div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-  const html = `
-    <button class="dcs-caption-btn" type="button" aria-expanded="${collapsed ? 'false' : 'true'}">
-      <span class="dcs-caption">${t('trail.dailyMissions.caption')}</span>
-      <span class="dcs-caption-chevron">▾</span>
-    </button>
-    <div class="dcs-cards" ${collapsed ? 'style="display:none;"' : ''}>${cardsHTML}</div>
-  `;
-  targets.forEach(strip => {
-    strip.innerHTML = html;
-    strip.querySelector('.dcs-caption-btn').addEventListener('click', () => {
-      localStorageSafeSet(CHALLENGES_STRIP_COLLAPSE_KEY, isDailyChallengesStripCollapsed() ? '0' : '1');
-      renderDailyChallengesStrip();
-    });
-  });
-}
 
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
@@ -2680,26 +1681,6 @@ function currentStepDefs(){
   return getStepDefs().filter(s => (s.key !== 'usage' || (u && u.usageNote)) && (s.key !== 'dialogueCheck' || (u && u.dialogue && Array.isArray(u.dialogue.check) && u.dialogue.check.length)));
 }
 
-// ---------- Lições (Modelo B) ----------
-// Ver zh/app.js pro mesmo motor, comentado em detalhe -- idêntico em
-// espírito, só adaptado à assinatura sem parâmetro de currentStepDefs()
-// que o francês já usava (lê STATE.currentUnitId internamente) e ao fato
-// de que unidades de gramática (u.type==='grammar') nunca são lesson-mode.
-function isLessonUnit(u){
-  return !!(u && Array.isArray(u.lessons) && u.lessons.length);
-}
-
-function currentLessonIdx(unitId){
-  if (STEP_STATE.lessonReview && STEP_STATE.lessonReview.unitId === unitId){
-    return STEP_STATE.lessonReview.reviewIdx;
-  }
-  return STATE.unitProgress[unitId]?.lessonIdx || 0;
-}
-
-function currentLesson(u){
-  const idx = Math.min(currentLessonIdx(u.id), u.lessons.length - 1);
-  return u.lessons[idx];
-}
 
 // ---------- Sessão de aquisição de vocabulário (introdução + prática intercalada) ----------
 // Substitui o antigo fluxo linear "Palavra 1 de N ... Palavra N de N" seguido
@@ -2717,18 +1698,6 @@ function currentLesson(u){
 // dentro da mesma sessão -- não uma cópia de interface, só do princípio.
 const ACQ_BLOCK_SIZE = 3;
 
-function buildAcquisitionBlocks(unit){
-  const n = unit.vocab.length;
-  const blocks = [];
-  let i = 0;
-  while (i < n){
-    let size = Math.min(ACQ_BLOCK_SIZE, n - i);
-    if (n - (i + size) === 1) size += 1;
-    blocks.push(Array.from({ length: size }, (_, k) => i + k));
-    i += size;
-  }
-  return blocks;
-}
 
 function freshAcquisitionState(unitId, unit){
   if (isLessonUnit(unit)){
@@ -2904,30 +1873,6 @@ function openUnitDetail(unitId){
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'unit', unitId });
 }
 
-// Abre uma lição JÁ CONCLUÍDA em modo revisão, sem mexer no ponteiro de
-// progresso real da unidade (ver comentário de STEP_STATE.lessonReview).
-function openLessonReview(unitId, lessonIdx){
-  STEP_STATE.lessonReview = { unitId, reviewIdx: lessonIdx };
-  openUnitDetail(unitId);
-}
-
-// Único jeito de sair de dentro de uma unidade -- topbar/tabs ficam
-// escondidas em modo foco (ver .lesson-focus), então isto SEMPRE roda antes
-// de voltar pra Trilha, o que garante que uma revisão de lição em
-// andamento nunca sobrevive de volta pra lá.
-function exitToPath(){
-  stopExerciseAudio();
-  STEP_STATE.onChallengesScreen = false;
-  STEP_STATE.onCheckpoint = null;
-  STEP_STATE.onLevelTest = null;
-  STEP_STATE.lessonReview = null;
-  setLessonFocusMode(false);
-  document.getElementById('path-list-wrap').style.display = 'block';
-  document.getElementById('unit-detail-wrap').style.display = 'none';
-  renderUnitsGrid();
-
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'path' });
-}
 
 document.getElementById('back-to-path').addEventListener('click', exitToPath);
 
@@ -2943,28 +1888,6 @@ document.getElementById('kbd-shortcuts-modal').addEventListener('click', (e) => 
   }
 });
 
-// Progresso real dentro da lição: cada etapa (vocabulário/diálogo/dica de
-// uso/exercícios, ou explicação/exercícios na gramática) vale uma fatia
-// igual da barra -- mas dentro da etapa atual soma a fração já percorrida
-// (carta de vocabulário atual, exercício atual), em vez de pular direto pra
-// o fim da fatia assim que a etapa começa. Sem isso, a barra aparecia quase
-// toda preenchida logo no 1º exercício, só porque "Exercícios" é a última
-// das 4 etapas -- media a POSIÇÃO da etapa, não o que já foi de fato feito
-// dentro dela.
-// Fases que a sessão de aquisição do bloco ATUAL vai percorrer, na ordem --
-// determinístico a partir do estado (não precisa adivinhar o futuro):
-// "bridge" só existe pra unidades com lições, a partir da 2ª; "mixed" só
-// entra quando este não é o primeiro bloco da unidade (mesma condição de
-// advanceAcquisitionPhase). Cada fase recebe uma fatia igual da barra --
-// simples e previsível, sem precisar conhecer de antemão quantos exercícios
-// cada fase vai ter.
-function acqPhaseSequence(u, acq){
-  const seq = [];
-  if (isLessonUnit(u) && currentLessonIdx(u.id) > 0) seq.push('bridge');
-  seq.push('intro', 'checkpoint', 'practice');
-  if (acq.blockIdx > 0) seq.push('mixed');
-  return seq;
-}
 
 function renderStepProgress(){
   const fillEl = document.getElementById('step-progress-fill');
@@ -3005,31 +1928,6 @@ function renderStepProgress(){
   fillEl.style.width = `${Math.min(100, Math.max(0, pct))}%`;
 }
 
-// ---------- Modo foco de lição (estilo Busuu) ----------
-// Esconde topbar/tabs enquanto o aluno está numa lição, checkpoint ou teste
-// de nível — só a barra de progresso e o X ficam visíveis por cima do
-// exercício em si.
-function setLessonFocusMode(active){
-  document.getElementById('app').classList.toggle('lesson-focus', active);
-  // #review-reminder-banner é fixed e vive FORA de #app (irmão dele no
-  // documento, não descendente) -- a classe no <body> é o que dá pra essa
-  // regra de CSS (ver index.html) esconder o banner sem também precisar
-  // mover o elemento de lugar no HTML.
-  document.body.classList.toggle('lesson-focus', active);
-}
-
-// ---------- Dica pedagógica por exercício ----------
-// A dica NÃO é mais uma ação independente no topo da tela -- ela pertence
-// ao estado de "Não sei" (ver wireDontKnowButton). buildExerciseHint só
-// gera o TEXTO, a partir do CONTEÚDO do próprio exercício (a frase de
-// exemplo já usada no card de vocabulário via findMatchingPhrase, o tema da
-// unidade, o primeiro bloco de uma frase de ordenar...) -- nunca a resposta
-// pronta, e nunca um texto genérico igual pra tudo.
-function maskWordInText(text, word){
-  const idx = text.toLowerCase().indexOf(word.toLowerCase());
-  if (idx === -1) return null;
-  return text.slice(0, idx) + '_____' + text.slice(idx + word.length);
-}
 
 // Regra pedagógica: a dica ajuda a PENSAR (contexto, estratégia, função
 // comunicativa), nunca entrega uma característica formal da resposta (letra
@@ -3123,26 +2021,6 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
   });
 }
 
-// XP de um acerto: um pouco menor quando o aluno pediu "Não sei" (e por
-// tabela recebeu a dica) nesse exercício -- preserva a distinção acerto
-// independente > acerto com ajuda sem criar um sistema de pontuação
-// complexo.
-function exerciseXP(ex, fullXP){
-  // Revisão de uma lição JÁ CONCLUÍDA (ver STEP_STATE.lessonReview, aberta
-  // clicando numa lição "done" na Trilha -- qualquer aluno pode, não só
-  // admin): o comentário original em finishCurrentLesson já dizia que
-  // "nenhum XP de lição/desafio/meta diária deve contar de novo" nesse
-  // modo, mas só o fechamento da lição (finishCurrentLesson) checava isso
-  // -- cada exercício respondido DENTRO da revisão continuava pagando XP
-  // normalmente (achado de auditoria: fonte de XP infinita, sem limite).
-  // Único ponto por onde passam TODOS os formatos de exercício ao acertar
-  // (ver os 6 chamadores de addXP(exerciseXP(...))) -- aproveita pra
-  // fechar a brecha aqui, de uma vez, em vez de repetir a checagem em cada
-  // um dos 6 lugares.
-  if (STEP_STATE.lessonReview && STEP_STATE.lessonReview.unitId === STATE.currentUnitId) return 0;
-  registerDailyExerciseFormat(ex.format);
-  return ex.askedDontKnow ? Math.max(1, fullXP - 1) : fullXP;
-}
 
 // ---------- Vocabulário palavra-por-palavra (estilo Memrise) ----------
 // Procura um exemplo real de uso da palavra — nas frases da unidade, depois
@@ -3218,69 +2096,6 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   nextBtn.textContent = posInBlock < block.length - 1 ? t('zh.path.nextWordArrow') : t('zh.path.seeWhatLearnedArrow');
 }
 
-// ---------- Construção das filas de exercício da sessão de aquisição ----------
-// Escolhe o formato do exercício pelo OBJETIVO PEDAGÓGICO do momento e pelo
-// estado real da palavra (exposição no SRS + erros nesta sessão) -- não mais
-// por posição no array (round-robin arbitrário, `idx % formats.length`, não
-// tinha nenhuma relação com o que a palavra precisava agora).
-//   - 'practice' (primeira prática, logo após a checagem do bloco): ainda é
-//     cedo pra cobrar produção de uma palavra genuinamente nova -- só entra
-//     "type" (digitar de ouvido) se a palavra já vinha exposta de fora desta
-//     sessão (SRS prévio ou "Já sei?").
-//   - 'mixed'/'consolidation' (a palavra já passou por checagem + prática
-//     nesta sessão): quem foi bem (sem erro na sessão) e já tem alguma
-//     exposição sobe pra produção; quem errou continua em reconhecimento --
-//     não empurra produção pra cima de quem ainda está com dificuldade.
-// Sem `intent` (chamada avulsa), mantém o comportamento mais conservador de
-// reconhecimento, igual ao de 'practice'.
-function pickVocabFormat(unit, idx, intent){
-  const cardId = `u${unit.id}-v${idx}`;
-  const card = STATE.cards.find(c => c.id === cardId);
-  const exposed = studyWordHasEvidence(studyWordCardsFor(STATE.cards, unit.id, idx)); // K2-E: nível de palavra
-  const misses = (STEP_STATE.acq && STEP_STATE.acq.wordMisses[idx]) || 0;
-
-  if (intent === 'mixed' || intent === 'consolidation'){
-    if (exposed && misses === 0) return shuffle(['type', 'listen', 'meaning'])[0];
-    return shuffle(['meaning', 'listen'])[0];
-  }
-  if (exposed) return shuffle(['meaning', 'type', 'listen'])[0];
-  return shuffle(['meaning', 'listen'])[0];
-}
-
-function buildVocabWordExercise(unit, idx, intent){
-  const item = unit.vocab[idx];
-  const format = pickVocabFormat(unit, idx, intent);
-  const pool = unit.vocab;
-  const distractors = shuffle(pool.filter(v => v !== item)).slice(0, 3);
-  const options = shuffle([item, ...distractors]);
-  return { format, item, options, vocabIdx: idx };
-}
-
-// Checagem imediata do bloco (ETAPA 2): recuperação ativa de reconhecimento
-// (formato "meaning") pra CADA palavra recém-introduzida no bloco.
-function buildBlockCheckpointQueue(unit, blockIndices){
-  return blockIndices.map(idx => {
-    const item = unit.vocab[idx];
-    const distractors = shuffle(unit.vocab.filter(v => v !== item)).slice(0, 3);
-    return { format: 'meaning', item, options: shuffle([item, ...distractors]), vocabIdx: idx };
-  });
-}
-
-// Prática mista (ETAPA 5): uma rodada por palavra já introduzida (bloco atual
-// + todos os anteriores), embaralhada. Palavras com erro nesta sessão ganham
-// uma repetição extra.
-function buildMixedQueue(unit, introducedIndices){
-  const acq = STEP_STATE.acq;
-  const base = introducedIndices.map(idx => buildVocabWordExercise(unit, idx, 'mixed'));
-  const extra = introducedIndices
-    .filter(idx => (acq.wordMisses[idx] || 0) >= 1)
-    .map(idx => buildVocabWordExercise(unit, idx, 'mixed'));
-  return shuffle([...base, ...extra]);
-}
-
-function buildPracticeQueue(unit, blockIndices){
-  return blockIndices.map(idx => buildVocabWordExercise(unit, idx, 'practice'));
-}
 
 // ---------- Explicação contextual (cartões de conceito) ----------
 // Substitui o antigo `usageNote` mostrado só no fim, depois de todo o
@@ -3293,36 +2108,6 @@ function buildPracticeQueue(unit, blockIndices){
 // de cartão NO MEIO de uma lição de vocabulário, em vez de só numa unidade
 // de gramática inteira.
 
-// Conceitos cujo gatilho é "depois deste bloco de vocabulário" (o mais comum
-// -- a palavra que motiva a explicação acabou de ser apresentada).
-function pendingConceptsForBlock(u, blockIdx){
-  if (!u.concepts || !u.concepts.length) return [];
-  const idxInBlock = new Set(STEP_STATE.acq.blocks[blockIdx]);
-  return u.concepts.filter(c =>
-    typeof c.trigger.afterVocabIdx === 'number' &&
-    idxInBlock.has(c.trigger.afterVocabIdx) &&
-    !STEP_STATE.conceptsShown.has(c.id)
-  );
-}
-
-// Conceitos cujo gatilho só existe em contexto (diálogo) -- o padrão em si
-// não é vocabulário novo da unidade, só aparece dentro da fala.
-function pendingConceptsAfterDialogue(u){
-  if (!u.concepts || !u.concepts.length) return [];
-  return u.concepts.filter(c => c.trigger.after === 'dialogue' && !STEP_STATE.conceptsShown.has(c.id));
-}
-
-// Mostra `list` (pode ser vazia) um cartão de cada vez e só chama `afterFn`
-// quando o aluno tiver passado por todos -- se `list` já vier vazia, chama
-// `afterFn` na hora, então quem chama isso não precisa checar antes.
-function runConceptQueueThen(list, afterFn){
-  if (!list.length){ afterFn(); return; }
-  STEP_STATE.conceptQueue = list;
-  STEP_STATE.conceptIdx = 0;
-  STEP_STATE.conceptBlockIdx = 0;
-  STEP_STATE.conceptAfterFn = afterFn;
-  renderConceptStep();
-}
 
 function renderConceptStep(){
   const contentEl = document.getElementById('step-content');
@@ -3376,144 +2161,6 @@ function renderConceptStep(){
   nextBtn.textContent = (isLastBlockOfConcept && isLastConcept) ? t('common.continueArrow') : t('zh.path.gotItArrow');
 }
 
-function advanceConceptStep(){
-  const concept = STEP_STATE.conceptQueue[STEP_STATE.conceptIdx];
-  if (STEP_STATE.conceptBlockIdx < concept.blocks.length - 1){
-    STEP_STATE.conceptBlockIdx += 1;
-    renderConceptStep();
-    return;
-  }
-  STEP_STATE.conceptsShown.add(concept.id);
-  if (STEP_STATE.conceptIdx < STEP_STATE.conceptQueue.length - 1){
-    STEP_STATE.conceptIdx += 1;
-    STEP_STATE.conceptBlockIdx = 0;
-    renderConceptStep();
-    return;
-  }
-  hideAcqPhaseBanner();
-  const afterFn = STEP_STATE.conceptAfterFn;
-  STEP_STATE.conceptQueue = [];
-  STEP_STATE.conceptAfterFn = null;
-  afterFn();
-}
-
-// Fim da introdução do bloco atual -> mostra os conceitos que esse bloco
-// libera (se houver) e só DEPOIS começa a checagem imediata (ETAPA 2). Sem
-// conceito pendente, comporta-se exatamente como antes (checagem na hora).
-function finishBlockIntro(){
-  const acq = STEP_STATE.acq;
-  const u = UNITS.find(x => x.id === STATE.currentUnitId);
-  runConceptQueueThen(pendingConceptsForBlock(u, acq.blockIdx), () => startBlockCheckpoint(u, acq));
-}
-
-// Ponte com a lição anterior (†, Modelo B): reconhece rapidamente 1-2
-// itens da lição imediatamente anterior antes de entrar na introdução da
-// lição atual -- substitui a mistura cumulativa antiga, com escopo bem
-// menor (só entre lições consecutivas).
-function startBridgeQueue(u){
-  const idx = currentLessonIdx(u.id);
-  const prevLesson = idx > 0 ? u.lessons[idx - 1] : null;
-  const bridgeVocab = (prevLesson && prevLesson.vocabIdx || []).slice(0, 2);
-  if (!bridgeVocab.length){
-    STEP_STATE.acq.phase = 'intro';
-    renderStep();
-    return;
-  }
-  STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, bridgeVocab);
-  STEP_STATE.exerciseIndex = 0;
-  STEP_STATE.exerciseScore = 0;
-  setAcqPhaseBanner(t('zh.path.banner.recall'));
-  renderExerciseStep();
-}
-
-function startBlockCheckpoint(u, acq){
-  acq.phase = 'checkpoint';
-  STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, acq.blocks[acq.blockIdx]);
-  STEP_STATE.exerciseIndex = 0;
-  STEP_STATE.exerciseScore = 0;
-  setAcqPhaseBanner(acqPhaseBannerText('checkpoint'));
-  renderExerciseStep();
-}
-
-// Chamado quando a fila de exercícios da fase atual (checkpoint/practice/
-// mixed) se esgota -- decide a PRÓXIMA fase da sessão de aquisição.
-function advanceAcquisitionPhase(){
-  const acq = STEP_STATE.acq;
-  const u = UNITS.find(x => x.id === STATE.currentUnitId);
-
-  if (acq.phase === 'bridge'){
-    acq.phase = 'intro';
-    renderStep();
-    return;
-  }
-
-  if (acq.phase === 'checkpoint'){
-    // Conta pra nota da lição (ver lessonScore em freshAcquisitionState) --
-    // a ponte com a lição anterior, acima, nunca conta, só as fases que
-    // testam o conteúdo desta lição de verdade.
-    acq.lessonScore.correct += STEP_STATE.exerciseScore;
-    acq.lessonScore.total += STEP_STATE.exerciseList.length;
-    acq.phase = 'practice';
-    STEP_STATE.exerciseList = buildPracticeQueue(u, acq.blocks[acq.blockIdx]);
-    STEP_STATE.exerciseIndex = 0;
-    STEP_STATE.exerciseScore = 0;
-    setAcqPhaseBanner(acqPhaseBannerText('practice'));
-    renderExerciseStep();
-    return;
-  }
-
-  if (acq.phase === 'practice'){
-    acq.lessonScore.correct += STEP_STATE.exerciseScore;
-    acq.lessonScore.total += STEP_STATE.exerciseList.length;
-    if (acq.blockIdx > 0){
-      acq.phase = 'mixed';
-      const introducedIdx = acq.blocks.slice(0, acq.blockIdx + 1).flat();
-      STEP_STATE.exerciseList = buildMixedQueue(u, introducedIdx);
-      STEP_STATE.exerciseIndex = 0;
-      STEP_STATE.exerciseScore = 0;
-      setAcqPhaseBanner(acqPhaseBannerText('mixed'));
-      renderExerciseStep();
-      return;
-    }
-    advanceToNextBlockOrConsolidation();
-    return;
-  }
-
-  if (acq.phase === 'mixed'){
-    acq.lessonScore.correct += STEP_STATE.exerciseScore;
-    acq.lessonScore.total += STEP_STATE.exerciseList.length;
-    advanceToNextBlockOrConsolidation();
-  }
-}
-
-// Acabou o ciclo do bloco atual: introduz o próximo bloco (ETAPA 4/6), ou,
-// se não houver mais blocos, segue o fluxo normal da unidade.
-function advanceToNextBlockOrConsolidation(){
-  const acq = STEP_STATE.acq;
-  if (acq.blockIdx < acq.blocks.length - 1){
-    acq.blockIdx += 1;
-    acq.phase = 'intro';
-    acq.introIdx = 0;
-    renderStep();
-  } else {
-    const u = UNITS.find(x => x.id === STATE.currentUnitId);
-    advanceUnitStep(u);
-  }
-}
-
-// Avança pro próximo passo da unidade (currentStepDefs), ou -- se já era o
-// último -- fecha a LIÇÃO atual (não necessariamente a unidade inteira,
-// ver finishCurrentLesson). Só entra em jogo pra unidades de vocabulário
-// (grammar continua no fluxo antigo, que nunca chama isto).
-function advanceUnitStep(u){
-  const stepDefs = currentStepDefs();
-  if (STEP_STATE.currentStep < stepDefs.length - 1){
-    STEP_STATE.currentStep += 1;
-    renderStep();
-  } else {
-    finishCurrentLesson(u);
-  }
-}
 
 // Fecha a lição/unidade atual. Unidades sem `lessons` (gramática, ou
 // vocabulário ainda não migrado) e a última lição (isCheckpoint) de uma
@@ -3585,6 +2232,8 @@ function finishCurrentLesson(u){
   // genérico (esse continua existindo pra outros caminhos de conclusão que
   // não passam por uma tela, ex. checkUnitCompletion via Flashcard/"Já sei").
   const xpBeforeUnitBonus = STATE.xp;
+  // Conquistas (trilha Gabaritou): 100% no ponto de verificação da unidade fica gravado, mesmo refazendo depois.
+  if (scorePct >= 100 && STATE.unitProgress[STATE.currentUnitId]) STATE.unitProgress[STATE.currentUnitId].checkpointAced = true;
   markUnitCompleted(STATE.currentUnitId, scorePct, { skipToast: true });
   const unitXpEarned = STATE.xp - xpBeforeUnitBonus;
   // Meta diária (§4 do artefato): mesma régua de "conteúdo real" (>=3 itens)
@@ -3599,290 +2248,9 @@ function finishCurrentLesson(u){
   renderUnitCompleteScreen(u, unitXpEarned);
 }
 
-// ---------- Celebração visual (confete + contador animado) ----------
-// Sistema compartilhado pelos tiers 2/3/4/6 da hierarquia de celebração (ver
-// artefato "A Gramática da Recompensa"): peças de papel coloridas caindo em
-// CSS puro (sem biblioteca externa), com intensidade (quantidade/duração)
-// parametrizável por tier, e um contador que sobe de 0 até o valor final em
-// vez de aparecer pronto -- dá peso ao número sem precisar de confete.
-// Ambos respeitam prefers-reduced-motion: o confete nem chega a ser criado
-// e o contador mostra o valor final direto, sem pular quadros.
-function prefersReducedMotion(){
-  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
 
 const CONFETTI_COLORS = ['#d64545', '#e3b341', '#2f8f6e', '#3498d6', '#a15fc9'];
 
-function spawnConfetti(count, durationMs){
-  if (prefersReducedMotion() || !count) return;
-  const layer = document.getElementById('confetti-layer');
-  if (!layer) return;
-  layer.innerHTML = '';
-  for (let i = 0; i < count; i++){
-    const piece = document.createElement('div');
-    piece.className = 'confetti-piece';
-    piece.style.left = `${Math.random() * 100}%`;
-    piece.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
-    piece.style.animationDuration = `${durationMs + Math.random() * 400}ms`;
-    piece.style.animationDelay = `${Math.random() * 200}ms`;
-    piece.style.setProperty('--rot', `${Math.random() * 360}deg`);
-    layer.appendChild(piece);
-  }
-  setTimeout(() => { layer.innerHTML = ''; }, durationMs + 700);
-}
-
-// Conta de 0 até `to` dentro de `el`, com easing de desaceleração.
-function animateCount(el, to, { duration = 650, suffix = '', prefix = '' } = {}){
-  if (!el) return;
-  if (prefersReducedMotion() || !to){
-    el.textContent = `${prefix}${to}${suffix}`;
-    return;
-  }
-  const start = performance.now();
-  function tick(now){
-    const p = Math.min(1, (now - start) / duration);
-    const eased = 1 - Math.pow(1 - p, 3);
-    el.textContent = `${prefix}${Math.round(to * eased)}${suffix}`;
-    if (p < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-
-// Chip contextual dos Desafios de hoje (tier 2) -- só aparece quando ESSA
-// lição fez de fato algum desafio avançar (comparando com `before`, tirado
-// antes das atualizações em finishCurrentLesson). Mostra só o primeiro que
-// avançou, nunca os 3: isso é um lembrete pontual e ligado ao que acabou de
-// acontecer, não um resumo genérico -- esse já existe na tela/aba própria
-// "Desafios de hoje".
-function renderChallengeChipHTML(before){
-  if (!before) return '';
-  const challenges = todaysChallenges();
-  for (let i = 0; i < challenges.length; i++){
-    const c = challenges[i];
-    const beforeVal = before[i] || 0;
-    const afterVal = Math.min(c.get(STATE.daily), c.target);
-    if (afterVal <= beforeVal) continue;
-    const justCompleted = afterVal >= c.target && beforeVal < c.target;
-    return `
-      <div class="lesson-boundary-challenge-chip ${justCompleted ? 'done' : ''}">
-        <span class="lbc-chip-icon">${c.icon}</span>
-        <span class="lbc-chip-label">${justCompleted ? t('zh.path.missionDonePrefix') : t('zh.path.missionDayPrefix')}${c.label}</span>
-        ${justCompleted ? '<span class="lbc-chip-check">✓</span>' : `<span class="lbc-chip-count">${afterVal}/${c.target}</span>`}
-      </div>
-    `;
-  }
-  return '';
-}
-
-// Vocabulário/frases da tela "Lição concluída!" -- SÓ o que ESTA lição
-// especificamente ensinou (lesson.vocabIdx), nunca a unidade inteira (ver
-// CLAUDE.md, "Coerência pedagógica entre funcionalidades": reaproveitar
-// conteúdo só porque está "por perto" no código, sem responder à pergunta
-// certa, é exatamente o erro que gerou aquela regra). O Ponto de
-// verificação não ensina vocabulário próprio (vocabIdx sempre []) -- em vez
-// de forjar uma lista ou reaproveitar a unidade toda, mostra as palavras que
-// o aluno ERROU NESTE PRÓPRIO Ponto de verificação (STEP_STATE.checkpointMisses,
-// contagem real por palavra desta sessão -- ver comentário em
-// STEP_STATE.checkpointMisses sobre por que NÃO é lessonMisses/lessonIdx:
-// aquele acumula por lição/unidade ao longo do tempo e ficava desatualizado
-// quando o checkpoint era aberto sem passar pelo passo 'vocab' antes na
-// mesma sessão, mostrando uma lista que não correspondia ao erro que o
-// aluno acabou de cometer -- bug relatado, 2026-09-15). Sem vocabIdx e sem
-// erro nenhum registrado nesta sessão (sessão perfeita), devolve lista
-// vazia -- honesto, não inventa.
-function lessonRecapItems(u, lesson){
-  if (lesson && lesson.vocabIdx && lesson.vocabIdx.length){
-    return lesson.vocabIdx.map(i => u.vocab[i]).filter(Boolean);
-  }
-  const misses = STEP_STATE.checkpointMisses || {};
-  return Object.keys(misses)
-    .map(Number)
-    .filter(i => misses[i] >= 1)
-    .sort((a, b) => misses[b] - misses[a])
-    .slice(0, 8)
-    .map(i => u.vocab[i])
-    .filter(Boolean);
-}
-
-// Tela "Lição concluída!" / "Ponto de verificação concluído!" -- ÚNICA
-// função, usada tanto no fim de uma lição intermediária quanto no fim do
-// Ponto de verificação (checkpoint) de uma unidade Modelo B, mas com
-// título/recap DIFERENTES pra cada caso (ver isCheckpoint abaixo) -- antes
-// os dois casos mostravam o mesmo título "Lição concluída!", o que é
-// literalmente errado pro checkpoint (ele conclui a unidade inteira, não
-// uma lição) e confundia quem via essa tela logo antes da tela de "Unidade
-// concluída/Parabéns" (renderUnitCompleteScreen) com um título quase
-// idêntico ao dela (bug relatado, 2026-09-15). XP e nota são sempre reais
-// (delta contra o snapshot tirado no início da lição/checkpoint, ver
-// xpAtLessonStart/checkpointXpAtStart em freshAcquisitionState/renderStep;
-// nunca hardcoded). Sem estrelas -- eram um sistema paralelo de pontuação,
-// não uma representação do XP real (retirado do fluxo de UNIDADE na Fase 6
-// -- ver GENERAL_CHALLENGES/addXP; lessonStars/registerDailyStars continuam
-// existindo só pro Ponto de verificação de MÓDULO, sistema fr-only
-// separado). trackHistory=false (usado pelo checkpoint, == isCheckpoint
-// aqui) pula o cache de navegação/roteamento de Voltar-Avançar e a rota pro
-// Flashcard -- concluir o Ponto de verificação já tem seu próprio fluxo em
-// finishCurrentLesson (markUnitCompleted + renderUnitCompleteScreen +
-// Desafios de hoje), que não deve ser desviado por aqui. Streak (maybeShow-
-// StreakCelebration) só dispara aqui quando NÃO é checkpoint -- o caso
-// checkpoint é sempre seguido por renderUnitCompleteScreen (que já chama a
-// mesma função), e mostrar a comemoração de sequência entre o resultado do
-// checkpoint e a tela de Unidade concluída/objetivos comunicacionais estava
-// fora de ordem (mesmo bug relatado): a sequência deve aparecer só DEPOIS
-// da tela de Unidade concluída, nunca entre ela e o resultado do checkpoint.
-function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, scorePct, trackHistory = true }){
-  const contentEl = document.getElementById('step-content');
-  const nextBtn = document.getElementById('step-next-btn');
-  const backBtn = document.getElementById('step-back-btn');
-  const isCheckpoint = !trackHistory;
-  hideAcqPhaseBanner();
-  backBtn.style.display = 'none';
-  document.getElementById('step-progress-fill').style.width = '100%';
-  if (!isCheckpoint) maybeShowStreakCelebration();
-
-  const recapItems = lessonRecapItems(u, lesson);
-  const recapLabel = (lesson && lesson.vocabIdx && lesson.vocabIdx.length)
-    ? t('zh.path.lessonDone.recapVocab')
-    : t('zh.path.lessonDone.recapMissed');
-
-  // reps > 0 exclui as palavras que a PRÓPRIA lição acabou de ensinar --
-  // todo cartão nasce com due=0, então cardsDueNow() sozinho as contaria
-  // como "devidas" (0 <= agora é sempre verdade) no exato instante em que
-  // isCardLessonCompleted() passa a liberá-las, fazendo esta tela dizer que
-  // há cartões pra revisar (e mandar direto pro Flashcard) depois de toda
-  // lição com vocabulário novo -- mesmo critério já usado em
-  // unitCardCounts() pra "dueForReview".
-  const dueCount = structuralCounts(eligibleReviewPool()).due; // K.7: Devido estrutural (não-New vencido)
-  contentEl.innerHTML = `
-    <div class="lesson-complete">
-      <div class="lesson-complete-icon tier-pop">✅</div>
-      <h2>${isCheckpoint ? t('zh.path.lessonDone.checkpointTitle') : t('zh.path.lessonDone.lessonTitle')}</h2>
-      <p class="lesson-boundary-title">${(!isCheckpoint && lesson) ? lesson.title : ''}</p>
-      <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.xpEarned')}</div><div class="lc-stat-value">+${xpEarned} ⚡</div></div>
-        ${scorePct !== undefined && scorePct !== null ? `<div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.score')}</div><div class="lc-stat-value">${scorePct}%</div></div>` : ''}
-      </div>
-      ${dueCount > 0 ? `<p class="lesson-boundary-due">${tp('zh.path.lessonDone.cardsWaiting', dueCount)}</p>` : ''}
-      ${challengesBefore ? renderChallengeChipHTML(challengesBefore) : ''}
-      ${recapItems.length ? `
-        <div class="lesson-recap">
-          <div class="lesson-recap-label">${recapLabel}</div>
-          ${recapItems.map(item => `
-            <div class="lesson-recap-item">
-              <div class="lesson-recap-french">${audioBtnHTML(item.f)}<span>${item.f}</span></div>
-              <div class="lesson-recap-trans">${item.t}</div>
-            </div>
-          `).join('')}
-        </div>
-      ` : ''}
-    </div>
-  `;
-  wireAudioButtons(contentEl);
-
-  if (!trackHistory){
-    nextBtn.textContent = t('common.continueArrow');
-    nextBtn.style.display = 'flex';
-    return;
-  }
-
-  STEP_STATE.onLessonBoundaryScreen = { dueCount };
-  // Cache SEPARADO (não onLessonBoundaryScreen, que openUnitDetail() zera
-  // toda vez que a unidade é reaberta -- inclusive quando é o PRÓPRIO
-  // router reabrindo pra restaurar um Voltar) -- ver shared/router.js:
-  // Voltar até "Lição" e depois Avançar até "Resultado" de novo precisa
-  // reconstruir a MESMA tela (mesmo chip de desafio), sem recalcular nada
-  // (nunca reexecuta finishCurrentLesson nem mexe em XP/progresso -- só
-  // repete este render com os mesmos insumos).
-  STEP_STATE.lastUnitResultCache = { unitId: u.id, lesson, challengesBefore, xpEarned, scorePct, trackHistory };
-  nextBtn.textContent = dueCount > 0 ? t('zh.path.reviewNowArrow', { n: dueCount }) : t('common.continueArrow');
-  nextBtn.style.display = 'flex';
-
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitResult', unitId: u.id });
-}
-
-// Tela "Unidade concluída!" (Fase 4 da tarefa de conclusão de lição/unidade;
-// Tier 3 da hierarquia de celebração) -- SEMPRE aparece ao concluir uma
-// unidade (decisão explícita, ver Q6 da grilagem), substituindo o toast
-// "Unidade concluída! 🏮" que markUnitCompleted mostrava antes (Q5). Roda
-// DEPOIS da tela de "Lição concluída" do checkpoint (que já mostrou
-// vocabulário/nota daquela lição) -- a lista "O que você aprendeu" (todas as
-// palavras da unidade, uma vez) foi pedida pela autora; o resto é só o que a
-// unidade como um todo desenvolveu: competências (títulos das
-// lições não-checkpoint desta unidade) e o objetivo comunicacional
-// (unit.goal), ambos já autorados em content.js, nunca inventados (ver
-// CLAUDE.md, "Coerência pedagógica entre funcionalidades").
-// XP sempre real: delta contra o snapshot tirado ANTES de markUnitCompleted
-// rodar (ver finishCurrentLesson) -- mesmo mecanismo de delta usado desde a
-// Fase 1, nunca hardcoded. Se por algum motivo o delta for 0, a tela ainda
-// aparece com "+0 XP" (Q4) -- nunca é pulada silenciosamente.
-function renderUnitCompleteScreen(u, xpEarned){
-  const contentEl = document.getElementById('step-content');
-  const nextBtn = document.getElementById('step-next-btn');
-  const backBtn = document.getElementById('step-back-btn');
-  hideAcqPhaseBanner();
-  backBtn.style.display = 'none';
-  document.getElementById('step-progress-fill').style.width = '100%';
-  maybeShowStreakCelebration();
-
-  const competencies = (u.lessons || []).filter(l => !l.isCheckpoint).map(l => l.title).filter(Boolean);
-  // Todas as palavras novas da unidade, na ordem das lições (decisão da
-  // autora: sem agrupar e sem destacar erradas), com áudio e tradução.
-  // Sem vocabIdx nas lições, cai na ordem do próprio vocabulário.
-  const seenWords = new Set();
-  const unitWords = [];
-  const pushWord = i => { const v = u.vocab && u.vocab[i]; if (v && !seenWords.has(i)){ seenWords.add(i); unitWords.push(v); } };
-  (u.lessons || []).forEach(l => (l.vocabIdx || []).forEach(pushWord));
-  (u.vocab || []).forEach((_, i) => pushWord(i));
-
-  contentEl.innerHTML = `
-    <div class="lesson-complete tier-bounce">
-      <div class="lesson-complete-icon">🎉</div>
-      <h2>${t('zh.path.unitDone.congrats', { name: currentStudentName() })}</h2>
-      <p class="lesson-boundary-title">${u.title}</p>
-      <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.xpEarned')}</div><div class="lc-stat-value" id="uc-stat-xp">+0 ⚡</div></div>
-      </div>
-      ${competencies.length ? `
-        <div class="unit-skills">
-          <div class="unit-skills-label">${t('zh.path.unitDone.skills')}</div>
-          ${competencies.map(c => `<div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${c}</span></div>`).join('')}
-        </div>
-      ` : ''}
-      ${unitWords.length ? `
-        <div class="lesson-recap">
-          <div class="lesson-recap-label">O que você aprendeu: ${unitWords.length} ${unitWords.length > 1 ? 'palavras novas' : 'palavra nova'}</div>
-          ${unitWords.map(item => `
-            <div class="lesson-recap-item">
-              <div class="lesson-recap-french">${audioBtnHTML(item.f)}<span>${item.f}</span></div>
-              <div class="lesson-recap-trans">${item.t}</div>
-            </div>
-          `).join('')}
-        </div>
-      ` : ''}
-      ${u.goal ? `
-        <div class="unit-skills">
-          <div class="unit-skills-label">${t('zh.path.unitDone.goalReached')}</div>
-          <div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${u.goal}</span></div>
-        </div>
-      ` : ''}
-    </div>
-  `;
-  // Marco de fim de UNIDADE (tier 3) -- confete + contador subindo, o peso
-  // que antes (por engano) a tela de "Lição concluída" do checkpoint levava
-  // pra si mesma (ver comentário histórico removido de renderLessonCompleteScreen).
-  wireAudioButtons(contentEl);
-  spawnConfetti(20, 1800);
-  animateCount(document.getElementById('uc-stat-xp'), xpEarned, { prefix: '+', suffix: ' ⚡' });
-
-  STEP_STATE.onUnitCompleteScreen = true;
-  // Cache pra restaurar via Voltar/Avançar (mesmo padrão de lastUnitResultCache)
-  // -- nunca reexecuta markUnitCompleted nem recalcula XP.
-  STEP_STATE.lastUnitCompleteCache = { unitId: u.id, xpEarned };
-  nextBtn.textContent = t('common.continueArrow');
-  nextBtn.style.display = 'flex';
-
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitComplete', unitId: u.id });
-}
 
 // ---------- Unidades de gramática (Explicação em blocos, estilo Busuu → Exercícios) ----------
 function renderGramTableHTML(table){
@@ -3948,35 +2316,6 @@ function lessonStars(pct){
   return Math.max(1, Math.round((pct / 100) * 5));
 }
 
-// Comunica em que fase da sessão de aquisição o aluno está agora -- pra que
-// a experiência pareça uma sessão contínua ("estou aprendendo -> agora
-// consigo usar -> agora misturando") em vez de uma sequência de telas soltas
-// sem relação entre si. Escondido por padrão a cada renderStep(); cada fase
-// que precisa dele liga explicitamente.
-// Some fases (checkpoint/practice/mixed/consolidação) são iniciadas por
-// funções que chamam renderExerciseStep() diretamente (não renderStep()),
-// pra não reconstruir a fila à toa -- então também escondem aqui o botão
-// "Voltar" global, que só tem sentido na introdução do bloco.
-function setAcqPhaseBanner(text){
-  const el = document.getElementById('acq-phase-banner');
-  if (el){
-    el.textContent = text;
-    el.style.display = 'block';
-  }
-  const backBtn = document.getElementById('step-back-btn');
-  if (backBtn) backBtn.style.display = 'none';
-}
-function hideAcqPhaseBanner(){
-  const el = document.getElementById('acq-phase-banner');
-  if (el) el.style.display = 'none';
-}
-function acqPhaseBannerText(phase){
-  return {
-    checkpoint: t('zh.path.banner.quickCheck'),
-    practice: t('zh.path.banner.practice'),
-    mixed: t('zh.path.banner.mixed')
-  }[phase] || null;
-}
 
 // ---------- Tela de conclusão de módulo/nível (checkpoint e teste de nível) ----------
 // Diferente da tela de fim de lição normal: não repete vocabulário isolado,
@@ -4231,12 +2570,6 @@ function renderStep(){
 const DLG = { run: 0, check: null };
 const DLG_AUTOPLAY_KEY = 'dlg_autoplay';
 
-function dlgAutoplayOn(){
-  try { return localStorage.getItem(DLG_AUTOPLAY_KEY) !== '0'; } catch(e){ return true; }
-}
-function dlgSetAutoplay(on){
-  try { localStorage.setItem(DLG_AUTOPLAY_KEY, on ? '1' : '0'); } catch(e){}
-}
 
 // Termos do vocabulário da unidade que valem destaque nas falas. "français /
 // française" vira dois termos; "(de)" e outros parênteses saem do termo.
@@ -4310,7 +2643,6 @@ function dlgPlayLine(text){
   });
 }
 
-function dlgSleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
 function renderDialogueStep(u, contentEl, nextBtn){
   const dlg = u.dialogue;
@@ -4446,14 +2778,6 @@ function renderDialogueCheckStep(u, contentEl, nextBtn){
   renderDialogueCheck(u, dlg, sp, checks, nextBtn, []);
 }
 
-function dlgShuffle(arr){
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
 // Micro-checagem "Você entendeu?" -- 3 perguntas, uma de cada vez. Não dá
 // para pular (o Continuar só aparece no fim); errar não reprova, mostra a
@@ -4708,36 +3032,7 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
 // aluno erra). Cobre cada palavra errada 1x primeiro; só dá uma 2ª rodada
 // pra elas se ainda sobrar espaço dentro do teto.
 const CONSOLIDATION_CAP = 10;
-function buildConsolidationVocabExercises(unit){
-  const acq = STEP_STATE.acq;
-  const total = unit.vocab.length;
-  if (!acq || acq.unitId !== unit.id || !acq.blocks.length){
-    return unit.vocab.map((_, i) => buildVocabWordExercise(unit, i, 'consolidation'));
-  }
 
-  const cap = Math.min(total, CONSOLIDATION_CAP);
-  const allIdx = Array.from({ length: total }, (_, i) => i);
-  const missedIdx = shuffle(allIdx.filter(i => (acq.wordMisses[i] || 0) >= 1));
-  const otherIdx = shuffle(allIdx.filter(i => !missedIdx.includes(i)));
-
-  const picks = [];
-  missedIdx.forEach(i => { if (picks.length < cap) picks.push(i); });
-  otherIdx.forEach(i => { if (picks.length < cap) picks.push(i); });
-  missedIdx.forEach(i => { if (picks.length < cap) picks.push(i); }); // reforço extra, só se sobrar espaço
-
-  return picks.map(i => buildVocabWordExercise(unit, i, 'consolidation'));
-}
-
-// ---------- Distratores dos exercícios de blocos ("ordenar"/"traduzir") ----------
-// Quantos blocos-isca entram no exercício: cresce com a complexidade da
-// frase (mais blocos na frase certa = "espaço" pra mais isca sem virar uma
-// sopa de botões) e com o nível da unidade no currículo (A1 mais raso, B2
-// mais denso) -- capado em 4 pra nunca sobrecarregar a grade visualmente.
-function reorderDistractorCount(unit, correctBlocks){
-  const levelIdx = Math.max(0, LEVELS.findIndex(l => l.id === unit.level));
-  const base = Math.max(1, Math.floor((correctBlocks.length - 1) / 2));
-  return Math.min(4, base + levelIdx);
-}
 
 // Escolhe os blocos-isca em duas camadas de "confundibilidade": blocos da
 // MESMA unidade (tema/vocabulário já visto nesta lição -- mais parecidos,
@@ -4843,53 +3138,6 @@ function buildExerciseSet(unit){
 // listener não faz nada.
 let KEYBOARD_OPTION_MAP = null;
 
-function clearKeyboardOptions(){ KEYBOARD_OPTION_MAP = null; }
-
-// buttons: os elementos já renderizados na tela.
-// mode 'grid2x2': só ativa com exatamente 4 opções E confirma, pela posição
-//   REAL na tela (getBoundingClientRect, não a ordem do array), que formam
-//   duas linhas de duas colunas -- se o layout não bater com isso (ex.: uma
-//   coluna só), desativa em vez de forçar uma correspondência errada. A
-//   numeração segue a ordem de leitura (1=superior esquerda, 2=superior
-//   direita, 3=inferior esquerda, 4=inferior direita).
-// mode 'sequential': 1 = primeira opção na ordem de leitura, 2 = segunda...
-// badgeSelector: elemento QUE JÁ EXISTE dentro do botão pra escrever o
-//   número (ex. ".scenario-option-num", que já aparece na tela) -- evita
-//   duplicar um indicador onde a interface já mostra a posição.
-function wireKeyboardOptions(buttons, { mode = 'sequential', badgeSelector = null } = {}){
-  const list = Array.from(buttons);
-  if (!list.length || list.length > 4){ clearKeyboardOptions(); return; }
-
-  let ordered;
-  if (mode === 'grid2x2' && list.length === 4){
-    const withRect = list.map(el => ({ el, r: el.getBoundingClientRect() }));
-    withRect.sort((a, b) => (a.r.top - b.r.top) || (a.r.left - b.r.left));
-    const sameRow = (a, b) => Math.abs(a.r.top - b.r.top) < 4;
-    const isTwoByTwo = sameRow(withRect[0], withRect[1]) && sameRow(withRect[2], withRect[3])
-      && !sameRow(withRect[0], withRect[2])
-      && withRect[0].r.left < withRect[1].r.left && withRect[2].r.left < withRect[3].r.left;
-    if (!isTwoByTwo){ clearKeyboardOptions(); return; } // layout reorganizado (ex. mobile) -- não força
-    // withRect já está ordenado por posição real (linha, depois coluna) --
-    // é exatamente a ordem de leitura que queremos: 1=sup.esq, 2=sup.dir,
-    // 3=inf.esq, 4=inf.dir.
-    ordered = withRect.map((x, i) => ({ key: String(i + 1), el: x.el }));
-  } else {
-    ordered = list.map((el, i) => ({ key: String(i + 1), el }));
-  }
-
-  KEYBOARD_OPTION_MAP = ordered;
-  ordered.forEach(({ key, el }) => {
-    const existingBadge = badgeSelector ? el.querySelector(badgeSelector) : null;
-    if (existingBadge){
-      existingBadge.textContent = key;
-    } else if (!el.querySelector('.kbd-hint')){
-      const hint = document.createElement('span');
-      hint.className = 'kbd-hint';
-      hint.textContent = key;
-      el.appendChild(hint);
-    }
-  });
-}
 
 // Enter = avançar (estilo Memrise): sempre tenta clicar o botão de
 // continuar que estiver na tela agora, em ordem de prioridade -- painel de
@@ -4919,13 +3167,6 @@ function findEnterAdvanceTarget(){
   return null;
 }
 
-// Nenhum atalho (1-4, "r", Enter) deve agir se um modal (ex.: "Atalhos do
-// teclado", seletor de nível) estiver aberto por cima do exercício -- sem
-// isso, um Enter ou número pressionado ali clicaria/selecionaria algo na
-// tela de trás, escondida atrás do modal, sem o aluno perceber.
-function anyAppModalOpen(){
-  return Array.from(document.querySelectorAll('.app-modal-overlay')).some(m => m.style.display === 'flex');
-}
 
 // Registrado uma única vez, no carregamento do script -- nunca por render.
 document.addEventListener('keydown', (e) => {
@@ -5038,11 +3279,6 @@ function renderExerciseStep(){
 // ou menos), é uma aproximação, igual optamos ao invés de medir tempo de tela.
 const ESTIMATED_SECONDS_PER_EXERCISE = 20;
 
-function addStudyMinutes(){
-  const today = todayStr();
-  STATE.dailyMinutesLog[today] = (STATE.dailyMinutesLog[today] || 0) + ESTIMATED_SECONDS_PER_EXERCISE / 60;
-  saveState();
-}
 
 // Feedback do painel de erro/revelação, dividido em duas partes bem
 // diferentes (ver seção 14 do pedido: "Por que errei?" != "Rever
@@ -5178,9 +3414,6 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function showWrongAnswerPanel(contentEl, ex, opts = {}){
-  showAnswerPanel(contentEl, ex, { revealed: false, attemptHTML: opts.attemptHTML });
-}
 
 // ---------- Exercício de múltipla escolha (meaning / listen) ----------
 function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
@@ -5829,10 +4062,6 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 // Chaves do catálogo (i18n fase 9): o texto é resolvido no momento do uso.
 const CORRECT_FEEDBACK_PHRASES = Array.from({ length: 16 }, (_, i) => 'feedback.praise.' + (i + 1));
 let correctFeedbackQueue = [];
-function nextCorrectFeedbackPhrase(){
-  if (!correctFeedbackQueue.length) correctFeedbackQueue = shuffle([...CORRECT_FEEDBACK_PHRASES]);
-  return t(correctFeedbackQueue.pop());
-}
 
 // ---------- Combo de acertos seguidos (estilo Duolingo) ----------
 // A partir de COMBO_MIN acertos seguidos (ver STEP_STATE.comboCount, zerado
@@ -5843,44 +4072,9 @@ function nextCorrectFeedbackPhrase(){
 // resposta certa da sequência.
 const COMBO_PHRASES = ['feedback.combo.1', 'feedback.combo.2', 'feedback.combo.3'];
 let comboPhraseQueue = [];
-function nextComboPhrase(){
-  if (!comboPhraseQueue.length) comboPhraseQueue = shuffle([...COMBO_PHRASES]);
-  return t(comboPhraseQueue.pop());
-}
 const COMBO_MIN = 3;
 const COMBO_MILESTONE_STEP = 5;
 
-// addStudyMinutes() é responsabilidade de quem chama (cada formato já
-// registra o próprio minuto de estudo no momento em que marca a resposta
-// como certa -- ver os pontos que chamam esta função), não desta função:
-// ela só cuida da tela, pra não contar o minuto duas vezes.
-function showCorrectFeedbackPanel(contentEl, detail){
-  STEP_STATE.comboCount = (STEP_STATE.comboCount || 0) + 1;
-  const combo = STEP_STATE.comboCount;
-  const isMilestone = combo >= COMBO_MILESTONE_STEP && combo % COMBO_MILESTONE_STEP === 0;
-  const inCombo = combo >= COMBO_MIN;
-  const headerText = isMilestone ? t('feedback.combo.milestone', { n: combo }) : (inCombo ? nextComboPhrase() : nextCorrectFeedbackPhrase());
-  const comboBadgeHTML = inCombo ? `<span class="correct-feedback-combo-badge">⚡ Combo x${combo}</span>` : '';
-
-  const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
-  const panel = document.createElement('div');
-  panel.className = 'correct-feedback';
-  panel.innerHTML = `
-    <div class="feedback-card-body">
-      <div class="correct-feedback-header">${comboBadgeHTML}✅ ${headerText}</div>
-      ${detail ? `<div class="correct-feedback-trans feedback-inner-box">${detail}</div>` : ''}
-      <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">${t('common.continueArrow')}</button>
-    </div>
-  `;
-  wrap.appendChild(panel);
-  wireAudioButtons(panel);
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-  document.getElementById('correct-continue-btn').addEventListener('click', () => {
-    STEP_STATE.exerciseIndex += 1;
-    renderExerciseStep();
-  });
-}
 
 // ============================================================
 // RENDER: Revisão (SRS)
@@ -5912,268 +4106,6 @@ const SPEED_STATE = {
   dailyCounted: false
 };
 
-// Projeto "Reorganização da experiência de revisão e prática": Speed
-// Review deixou de ser jogo de reconhecimento livre e virou REVISÃO de
-// verdade -- "revisão rápida", a MESMA fila que o filtro de Revisão
-// selecionou (reviewFilterQueue -- 2ª sessão de grilling), nunca mais
-// getStudyQueue(scope:'all') nem uma seleção paralela própria. Isso
-// resolve a inconsistência relatada ("cartas para revisão hoje: 12" mas
-// "Speed Review: 32 palavras") -- os dois números eram fontes diferentes;
-// agora são a mesma função, o mesmo número.
-//
-// Embaralhar destruiria a ordem que "Mais antigas primeiro" promete --
-// só embaralha pros outros 2 filtros (mesmo princípio de startReviewSession).
-// Fase 1 da reestruturação do formulário de flashcards do admin (ver
-// CLAUDE.md) -- desde a migration 035, um cartão de professora "Completar
-// a frase" pode não ter `front` (esse modo nunca exibiu Frente em
-// nenhuma tela, ver renderClozeCard). Combinar e Speed Review nunca
-// entendem cloze -- os dois pressupõem um par frente/verso simples (front
-// como prompt/tile, back_trans como resposta) -- então um cartão cloze
-// SEM front quebraria a exibição deles (tile/prompt em branco). Cartões
-// cloze já existentes continuam com front preenchido (nunca migrados) e
-// continuam elegíveis aqui, sem mudança de comportamento -- este filtro só
-// passa a excluir cartões NOVOS criados sem front.
-// Fase 4b -- reescrita em cima do motor de tipos (não mais presença de
-// `front`, que nem existe mais no card nativo). Elegível = tipos com par
-// prompt/resposta curto e fixo (normal, múltipla escolha) -- cloze e
-// "digite a resposta" ficam de fora (resposta aberta/digitada, sem texto
-// curto pronto pra virar tile/opção), mesmo critério de sempre.
-function hasPlainFrontBack(card){
-  // K2-I: todo card de STATE.cards tem cardInstance (study/teacher/self nascem de buildEngineCardsFromRow).
-  return card.cardInstance.cardTypeId === 'normal' || card.cardInstance.cardTypeId === 'multiple_choice';
-}
-
-// Fase 4b -- únicos pontos que Speed Review/Combinar/export Anki usam pra
-// extrair texto de um card, trilha OU nativo (Note/CardInstance). Nunca
-// leem `card.front`/`card.back_trans` soltos -- esses campos não existem
-// mais num card nativo (ver buildEngineCardsFromRow, shared/flashcard-model.js).
-// `cardOrPseudo` porque buildSpeedOptions() também gera pseudo-objetos só
-// com `displayAnswerText` pras opções erradas de múltipla escolha (ver
-// abaixo) -- cardAnswerText() aceita os dois sem o chamador precisar saber
-// qual é qual.
-function cardPromptText(cardOrPseudo){
-  const view = resolveCardContentView(cardOrPseudo);
-  return (view.kind === 'multiple_choice' ? view.prompt : view.front).text;
-}
-function cardAnswerText(cardOrPseudo){
-  if ('displayAnswerText' in cardOrPseudo) return cardOrPseudo.displayAnswerText;
-  const view = resolveCardContentView(cardOrPseudo);
-  return view.kind === 'multiple_choice' ? view.correctText : view.back.text;
-}
-
-function buildSpeedQueue(){
-  // Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" removido da
-  // UI (Todas/Mais difíceis primeiro/Mais antigas primeiro deixaram de ser
-  // escolha da aluna); comportamento travado em 'oldest' -- era o padrão
-  // de sempre, o único dos 3 que continua respeitando "Intensidade da
-  // sessão" (ver reviewFilterQueue), diferente de 'all' (que ignoraria
-  // esse teto e tornaria o controle de Intensidade sem efeito nenhum).
-  // Valor salvo em STATE.studySettings.reviewFilter não é apagado (só
-  // deixou de ser lido) -- ver reviewFilterQueue().
-  // K2-F: Speed é exercício de vocabulário -> projeção da palavra (A) para a
-  // trilha; B continua existindo para Review/FSRS/Deck, só não vira 2ª palavra.
-  return reviewFilterQueue('oldest', projectStudyWordsToA(eligibleReviewPool().filter(hasPlainFrontBack)));
-}
-
-function buildSpeedOptions(card){
-  // Fase 8a (ver CLAUDE.md) -- cartão de múltipla escolha autorado usa as
-  // opções ERRADAS que a professora escreveu, nunca os distratores
-  // automáticos abaixo (mais preciso/intencional pro que ela quis testar
-  // especificamente nesse cartão). Objetos pseudo-carta (`displayAnswerText`,
-  // lido por cardAnswerText() acima) -- o resto do fluxo (answerSpeedQuestion)
-  // compara identidade com `card` pra saber se ACERTOU, e só usa o texto
-  // pra exibição, então funciona sem mudança nenhuma lá.
-  if (card.cardInstance.cardTypeId === 'multiple_choice'){
-    const view = resolveCardContentView(card);
-    return shuffle([card, ...view.distractorTexts.map(text => ({ displayAnswerText: text }))]);
-  }
-  // hasPlainFrontBack() nos dois filtros abaixo -- achado no smoke test da
-  // Fase 4: cartões nativos (teacher/self) sempre compartilham `unitId:
-  // null`, então o agrupamento por unidade tratava TODOS os cartões
-  // nativos como "mesma unidade" entre si, inclusive um cloze/"digite a
-  // resposta" ao lado de um card 'normal'. Antes da Fase 4 isso nunca
-  // quebrava (o bridge legado sempre populava back_trans plano em
-  // qualquer tipo); agora resolveClozeCardView()/resolveTypeAnswerCardView()
-  // não têm `.back`, e cardAnswerText() quebraria ao tentar ler
-  // view.back.text de um distrator desse tipo. Nunca oferecer um cloze/
-  // "digite a resposta" como opção de múltipla escolha de qualquer forma
-  // (não são pares prompt/resposta curtos, mesmo critério de sempre).
-  // K2-F: distratores = 1 por palavra (projeção A); B nunca é distrator.
-  const pool = projectStudyWordsToA(STATE.cards.filter(c => c !== card && c.unitId === card.unitId && hasPlainFrontBack(c)));
-  let distractors = shuffle(pool).slice(0, 3);
-  if (distractors.length < 3){
-    // Fallback só quando a unidade não tem 3 outras cartas -- puxa de
-    // eligibleReviewPool() (não STATE.cards puro) pra não arriscar mostrar,
-    // mesmo como alternativa errada, uma palavra de uma unidade nunca aberta.
-    const extra = shuffle(projectStudyWordsToA(eligibleReviewPool()).filter(c => c !== card && hasPlainFrontBack(c) && !distractors.includes(c))).slice(0, 3 - distractors.length);
-    distractors = distractors.concat(extra);
-  }
-  return shuffle([card, ...distractors]);
-}
-
-// Fase 4 do sistema de alunas particulares (ver CLAUDE.md): filtro por
-// ORIGEM do cartão ('all'/'study'/'teacher'), aplicado aqui -- o único
-// pool base que TODA tela de revisão/prática já usa (Flashcard, Palavras
-// Difíceis, Speed Review, Combinar, hero widget, mode-select). Um só
-// ponto de checagem, mesmo padrão de isCardLessonCompleted() -- nunca
-// reimplementar este filtro solto em outro lugar.
-function matchesReviewOriginFilter(card){
-  const filter = STATE.studySettings.reviewOriginFilter || 'all';
-  return filter === 'all' || card.origin === filter;
-}
-
-// Fase I (Tags): filtro de Review por Tag -- estado PRÓPRIO
-// (STATE.studySettings.reviewTagFilter, lista de slugs), independente de
-// reviewOriginFilter. Semântica: vazio = sem restrição; 1+ tags = OR (o
-// card entra se a NOTE tiver pelo menos uma). A tag é da Note, então
-// CardInstances irmãos (reverso, Cloze) passam/ficam juntos. Só SELECIONA
-// cards elegíveis: nunca toca FSRS, Deck nem origem. cardMatchesTagFilter()
-// vive em shared/flashcard-model.js (fonte única).
-// 2026-10-06 (pedido da autora): o filtro de tags saiu de "Configurar" e
-// fica só no Painel. Sem tela para mudar o valor, um filtro salvo antes
-// restringiria a revisão sem a pessoa ver -- por isso a sessão não aplica
-// mais nenhum filtro de tag (o valor salvo é ignorado).
-function activeReviewTagFilter(){
-  return [];
-}
-function matchesReviewTagFilter(card){
-  return cardMatchesTagFilter(card, activeReviewTagFilter());
-}
-
-function eligibleReviewPool(){
-  return STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter).filter(matchesReviewTagFilter);
-}
-
-// Universo de onde a UI tira as tags disponíveis: o pool do Review geral
-// SEM o próprio filtro de tag (senão selecionar uma tag esconderia as outras).
-function reviewTagUniverse(){
-  return STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter);
-}
-
-// Fase H (hardening) -- precedência do Deck sobre reviewOriginFilter. Uma
-// sessão iniciada EXPLICITAMENTE por um Deck tem o Deck como escopo
-// autoritativo: elegibilidade normal (lição concluída / não arquivado, via
-// isCardLessonCompleted) SEM a exclusão adicional por origem. O filtro de
-// origem é preferência do Review GERAL (eligibleReviewPool acima, inalterada);
-// aqui ele nunca é lido nem alterado, então STATE.studySettings.reviewOriginFilter
-// continua persistido como estava ao entrar/sair de um Deck. Não é
-// autorização -- quem decide o que a conta pode ver é o Deck Engine/RLS.
-function eligibleDeckReviewPool(){
-  return STATE.cards.filter(isCardLessonCompleted);
-}
-
-function hardWordsPool(){
-  // Fase 7: delega pra getStudyQueue(scope:'hard') -- fonte única do
-  // critério de "Palavras difíceis" (difficulty do FSRS + lapses, não
-  // filtra por due). Mantido como wrapper só por compatibilidade de nome.
-  return getStudyQueue(eligibleReviewPool(), { scope: 'hard' });
-}
-
-// ---------- Resumo "Suas palavras" (fracas/medianas/fortes) ----------
-// SOMENTE uma contagem visual do vocabulário já revisável (eligibleReviewPool,
-// a mesma base do Flashcard/Speed Review/Combinar/Palavras difíceis) -- não é
-// um SRS novo, não abre carta nenhuma, não é modo de revisão. Critérios
-// reaproveitados do que já existe:
-//   Fracas  = reps === 0 (nunca lembrada com sucesso) OU lapses >= 2 (regra
-//             independente da que define "Palavras difíceis" desde a Fase
-//             7 -- hardWordsPool() passou a usar difficulty do FSRS, sem
-//             filtro de due; este widget é escopo da Fase 12, não mudou).
-//   Fortes  = reps > 0 && lapses < 2 && interval >= 60 -- o mesmo corte de
-//             "revisão madura" que reviewXP() já usa pra dar menos XP.
-//   Medianas = o resto do pool.
-function vocabStrengthBuckets(){
-  const pool = eligibleReviewPool();
-  // K.3: força é por NOTE (conteúdo) -- A+B da trilha, reverso e Cloze contam
-  // uma vez. Nenhuma irmã estudada = notStarted (nunca "fraca"); com estudadas
-  // = a mais fraca entre elas. Fonte: shared/analytics-metrics.js.
-  // Cartões "Na frase" não são palavras: ficam fora de "Suas palavras".
-  const st = contentMetrics(pool.filter(c => !isStudyTrailPhraseCard(c))).strength;
-  return { notStarted: st.not_started, weak: st.weak, medium: st.medium, strong: st.strong };
-}
-
-// Fase 12: REVISÕES DE HOJE (o que o motor decidiu que é hora de revisar
-// agora) e SUAS PALAVRAS (estado geral do vocabulário, widget abaixo) são
-// duas perguntas diferentes -- um aluno pode ter várias palavras "medianas"
-// sem ter nenhuma revisão devida hoje, e isso não é um erro do app. Por
-// isso ficam em blocos visualmente separados, cada um com sua própria
-// legenda curta, em vez de um único número ambíguo.
-//
-// Fase 14 (teste de experiência real): "Revisões de hoje" precisa ser
-// exatamente o que uma sessão de Flashcard vai de fato entregar -- usar
-// cardsDueNow() aqui (sem teto) mostrava, por exemplo, "47 prontas" pra um
-// aluno com 47 palavras nunca estudadas, mas startReviewSession() só serve
-// até STATE.studySettings.newCardsPerDay novas por vez. O número que o
-// aluno vê ANTES de entrar precisa bater com o que ele recebe ao entrar
-// (mesmas opções de getStudyQueue que startReviewSession() usa).
-// Projeto "Reorganização da experiência de revisão e prática": fonte ÚNICA
-// da fila "devida agora" -- Flashcard (startReviewSession) e Speed Review
-// (buildSpeedQueue) chamam a MESMA função, com as MESMAS opções. Nenhuma
-// tela decide sozinha quem entra numa sessão de revisão (Fase 8 do
-// projeto: "não pode haver getDueCards() e outra função independente como
-// getMediumWords() pra determinar o Speed Review").
-function dueReviewQueueOptions(){
-  return {
-    scope: 'due',
-    newCardsLimit: STATE.studySettings.newCardsPerDay,
-    limit: sessionIntensityToLimit(STATE.studySettings.sessionIntensity)
-  };
-}
-
-function buildDueReviewQueue(pool){
-  return getStudyQueue(pool, dueReviewQueueOptions());
-}
-
-// Contagem HONESTA (Fase 8 do projeto): quantas revisões existem de
-// verdade (sem o teto de "Intensidade da sessão") vs quantas cabem nesta
-// sessão. Quando os dois números divergem, a interface precisa mostrar os
-// dois -- nunca esconder revisões reais atrás do teto de sessão como se
-// elas não existissem (ver renderReviewTodayWidget).
-function trueDueReviewCount(pool){
-  return getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length;
-}
-
-function todaysReviewCount(pool){
-  return buildDueReviewQueue(pool).length;
-}
-
-// ---------- Filtro de fila (2ª sessão de grilling) ----------
-// A primeira reformulação (acima: dueCount escondido atrás do teto de
-// sessão) resolveu a repetição mas escondeu demais -- a autora achou o
-// número "muito escondido" e pediu pra sempre mostrar o total REAL
-// (trueCount) em destaque, com um jeito explícito de escolher COMO
-// consumir essa fila, em vez de aceitar o corte da Intensidade da sessão
-// em silêncio.
-//
-// 'all'    -- ignora o teto de Intensidade da sessão (scope:'due' sem
-//             `limit`) -- ainda respeita newCardsPerDay, que é ritmo de
-//             aprendizado de palavra NOVA, não tamanho de sessão de
-//             revisão (não faz sentido "Todas" empurrar 50 palavras nunca
-//             vistas de uma vez só).
-// 'hard'   -- alias direto de getStudyQueue(scope:'hard') -- MESMA fila
-//             que "Palavras difíceis" em PRATICAR usa (Regra 6: nunca dois
-//             critérios diferentes disputando o nome "difícil"). Sem teto
-//             de sessão de propósito, igual ao modo dedicado já era.
-// 'oldest' (padrão) -- exatamente a seleção de sempre (devida + novas,
-//             capada pela Intensidade da sessão), só REORDENADA: entre as
-//             já estudadas, due mais antigo primeiro (novas, due
-//             irrelevante pra "atraso", continuam depois, na ordem que já
-//             tinham). Ver startReviewSession/buildSpeedQueue -- shuffle
-//             precisa ser pulado só pra este filtro, senão a ordem não
-//             sobrevive até a tela.
-function reviewFilterQueue(filter, pool){
-  // Prop 5 (ver CLAUDE.md, "7 propostas") -- não lê mais
-  // STATE.studySettings.reviewFilter como fallback (o controle que
-  // escrevia esse valor foi removido da UI); todo call site que não passa
-  // `filter` explícito recebe 'oldest' sempre, mesmo se a conta tiver um
-  // valor diferente salvo de antes da remoção (nunca apagado do banco, só
-  // parou de ser aplicado).
-  filter = filter || 'oldest';
-  if (filter === 'hard') return getStudyQueue(pool, { scope: 'hard' });
-  if (filter === 'all') return getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
-  const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
-  queue.sort((a, b) => (cardStudyBucket(a) !== 'new' ? a.due : Infinity) - (cardStudyBucket(b) !== 'new' ? b.due : Infinity));
-  return queue.slice(0, sessionIntensityToLimit(STATE.studySettings.sessionIntensity));
-}
 
 // Rótulos curtos reaproveitados em 2 lugares: as opções do <select> no
 // painel ⚙️ (com contagem entre parênteses) e o indicador discreto no
@@ -6202,234 +4134,6 @@ function flashcardUnitTitleText(card){
   return card.unitTitleKey ? t(card.unitTitleKey) : card.unitTitle;
 }
 
-// Bloco hero (topo da Revisão): número grande = trueCount, sempre o total
-// real pendente, nunca o cortado pela sessão -- fixo, não muda com nenhum
-// filtro. Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" (e o
-// indicador "Filtro: X" que ficava aqui embaixo do número) foi removido
-// da UI de propósito; REVIEW_FILTER_LABELS continua existindo só porque
-// reviewFilterQueue()/getStudyQueue() ainda usam os 3 valores
-// internamente (o que mudou é que a aluna não escolhe mais entre eles).
-// Filtros de sessão (origem/tag, em "Configurar") valem para "Estudar
-// tudo", mas não para a tabela de Decks. Resumo para avisar quando estão ativos.
-function reviewSessionFilterSummary(){
-  const parts = [];
-  const origin = STATE.studySettings.reviewOriginFilter || 'all';
-  if (origin !== 'all') parts.push(REVIEW_ORIGIN_LABELS[origin] || origin);
-  const tags = activeReviewTagFilter();
-  if (tags.length) parts.push(tags.map(t => friendlyTagLabel(t)).join(', '));
-  return parts.join(' · ');
-}
-
-// "Estudar tudo" (todos os Decks juntos) fica embaixo da tabela de Decks; as
-// contagens por Deck já estão na tabela, então aqui não há números. Aviso
-// quando um filtro de sessão (origem/tag, em "Configurar") está ativo.
-function renderReviewTodayWidget(){
-  const wrap = document.getElementById('review-today-widget');
-  if (!wrap) return;
-  const pool = eligibleReviewPool();
-  const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
-  const split = { new: 0, learning: 0, review: 0 };
-  queue.forEach(c => { split[cardStudyBucket(c)]++; });
-  const trueCount = queue.length;
-  const filterSummary = reviewSessionFilterSummary();
-  const filterNote = filterSummary
-    ? `<div class="review-today-filter">${t('review.today.filter', { filter: escapeHTML(filterSummary) })} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">${escapeHTML(t('review.today.clearFilter'))}</button></div>`
-    : '';
-  const num = (n, cls, label) => `<div class="review-today-col"><div class="review-today-count ${n ? cls : 'is-zero'}">${n}</div><div class="review-today-col-label">${label}</div></div>`;
-  wrap.innerHTML = `
-    <div class="review-today-strip">
-      <div class="review-today-split" aria-label="${escapeHTML(t('review.today.aria', { new: split.new, learning: split.learning, review: split.review }))}">
-        ${num(split.new, 'is-new', escapeHTML(t('review.count.new')))}${num(split.learning, 'is-learning', escapeHTML(t('review.count.learning')))}${num(split.review, 'is-review', escapeHTML(t('review.count.review')))}
-      </div>
-      <div class="review-today-go">
-        ${trueCount ? `<button class="btn btn-secondary review-short-btn" id="review-short-btn" title="${escapeHTML(t('review.today.shortTitle'))}">${escapeHTML(t('review.today.short'))}</button>
-        <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">${escapeHTML(t('review.today.studyAll', { n: trueCount }))}</button>`
-        : `<span class="review-today-done">${escapeHTML(t('review.today.upToDate'))}</span>`}
-      </div>
-    </div>
-    ${filterNote}
-  `;
-  document.getElementById('review-study-all-btn')?.addEventListener('click', () => openReviewSession('flashcard'));
-  document.getElementById('review-short-btn')?.addEventListener('click', () => openReviewSession('flashcard', { short: true }));
-  document.getElementById('review-today-filter-clear')?.addEventListener('click', () => {
-    updateStudySetting({ reviewOriginFilter: 'all', reviewTagFilter: [] });
-    renderReviewModeSelect();
-  });
-}
-
-// Altura do "pote" proporcional à maior das 3 categorias (não à contagem
-// absoluta) -- é isso que deixa claro de relance qual predomina, com um piso
-// de 10% pra uma categoria pequena continuar visível em vez de sumir.
-function renderVocabStrengthWidget(){
-  const wrap = document.getElementById('vocab-strength-widget');
-  if (!wrap) return;
-  const { notStarted, weak, medium, strong } = vocabStrengthBuckets();
-  if (notStarted + weak + medium + strong === 0){ wrap.innerHTML = ''; return; }
-  const max = Math.max(notStarted, weak, medium, strong, 1);
-  const h = n => Math.max(10, Math.round(n / max * 100));
-  const item = (tier, count, label) => `
-    <div class="vs-item">
-      <div class="vs-jar"><div class="vs-fill" data-tier="${tier}" style="height:${h(count)}%;"></div></div>
-      <div class="vs-text"><div class="vs-count">${count}</div><div class="vs-label">${label}</div></div>
-    </div>
-  `;
-  wrap.innerHTML = `
-    <div class="section-label">${t('review.strength.title')}</div>
-    <div class="vocab-strength-row">
-      ${item('none', notStarted, t('review.strength.notStarted'))}
-      ${item('weak', weak, t('review.strength.weak'))}
-      ${item('mid', medium, t('review.strength.medium'))}
-      ${item('strong', strong, t('review.strength.strong'))}
-    </div>
-    <p class="profile-edit-hint">${t('review.strength.hint')}</p>
-  `;
-}
-
-// Projeto "Reorganização da experiência de revisão e prática": a tela de
-// Revisão deixou de ser 4 blocos equivalentes. Agora responde só 2
-// perguntas: "o que eu preciso revisar agora?" (REVISAR -- Flashcard e
-// Speed Review, a MESMA fila devida, só apresentações diferentes) e "o que
-// eu posso praticar quando quiser, vencido ou não?" (PRATICAR -- Palavras
-// difíceis e Combinar, sempre disponíveis, nunca criam um 2º agendamento).
-function renderReviewModeSelect(){
-  const pool = eligibleReviewPool();
-  // trueCount (total real, sem teto de sessão) decide se há revisão --
-  // dueCount é só um subconjunto capado dele (2ª sessão de grilling: nunca
-  // usar o número cortado pra decidir "tem ou não tem revisão").
-  const trueCount = trueDueReviewCount(pool);
-  // Speed Review mostra a mesma divisão da tabela de Decks (Novo/Aprendendo/
-  // Revisar) em vez de um número só -- o total inclui as palavras novas do
-  // dia, e um número único parecia contradizer o "Revisar 0" da tabela.
-  const speedSplit = { new: 0, learning: 0, review: 0 };
-  getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay })
-    .forEach(c => { speedSplit[cardStudyBucket(c)]++; });
-  // Fase 7 (projeto anterior): Palavras Difíceis NÃO depende de estar due
-  // -- "precisa revisar agora" (REVISAR) e "é uma palavra difícil"
-  // (PRATICAR) são perguntas diferentes. getStudyQueue(scope:'hard') usa
-  // o difficulty do FSRS, nunca due.
-  const hardCards = getStudyQueue(pool, { scope: 'hard' });
-  const hardCount = hardCards.length;
-  // Recordes (shared/review-extras.js). Ja saíram da lista = palavras que já
-  // estiveram em Palavras difíceis e hoje não estão mais.
-  if (updateHardSeen(hardCards)) saveState();
-  const hardLeft = hardLeftCount(pool, hardCards);
-  const rec = reviewRecords();
-
-  renderReviewTodayWidget();
-  // Navegador de Decks (shared/deck-browser.js): tabela Deck | Novo | Aprendendo | Revisar.
-  if (typeof renderReviewDeckTable === 'function') renderReviewDeckTable();
-
-  // K2-F: Combinar é vocabulário -> conta palavras (projeção A na trilha), não CardInstances.
-  const matchWordCount = projectStudyWordsToA(pool).length;
-  const praticarEl = document.getElementById('review-mode-cards-praticar');
-  praticarEl.innerHTML = `
-    <button class="review-mode-card" id="mode-card-speed" ${trueCount === 0 ? 'disabled' : ''}>
-      <div class="icon">⚡</div>
-      <div class="name">${t('review.mode.speed.name')}</div>
-      <div class="count speed-split" aria-label="${escapeHTML(t('review.today.speedSplitAria', { new: speedSplit.new, learning: speedSplit.learning, review: speedSplit.review }))}">
-        <span class="${speedSplit.new ? 'is-new' : 'is-zero'}">${speedSplit.new}</span>
-        <span class="${speedSplit.learning ? 'is-learning' : 'is-zero'}">${speedSplit.learning}</span>
-        <span class="${speedSplit.review ? 'is-review' : 'is-zero'}">${speedSplit.review}</span>
-      </div>
-      <div class="desc">${rec.speedBestScore ? t('review.records.yourRecord', { record: speedRecordText(rec) }) : t('review.records.againstClock')}</div>
-    </button>
-    <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
-      <div class="icon">🔥</div>
-      <div class="name">${t('review.mode.hard.name')}</div>
-      <div class="count">${hardCount}</div>
-      <div class="desc">${hardLeft ? t('review.records.leftList', { n: hardLeft }) : t('review.mode.hard.desc')}</div>
-    </button>
-    <button class="review-mode-card" id="mode-card-match" ${matchWordCount < 10 ? 'disabled' : ''}>
-      <div class="icon">🧩</div>
-      <div class="name">${t('review.mode.match.name')}</div>
-      <div class="count">${matchWordCount}</div>
-      <div class="desc">${rec.matchBestMs ? t('review.records.yourRecord', { record: formatRecordSeconds(rec.matchBestMs) }) : t('review.mode.match.desc')}</div>
-    </button>
-  `;
-  const weekEl = document.getElementById('review-week');
-  if (weekEl) weekEl.innerHTML = reviewWeekHTML(pool);
-  document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
-  document.getElementById('mode-card-hard').addEventListener('click', () => openReviewSession('hard'));
-  document.getElementById('mode-card-match').addEventListener('click', () => openReviewSession('match'));
-}
-
-function openReviewSession(mode, opts){
-  document.getElementById('review-mode-select-wrap').style.display = 'none';
-  document.getElementById('review-session-wrap').style.display = 'block';
-  document.getElementById('review-content').style.display = mode === 'speed' || mode === 'match' ? 'none' : 'block';
-  document.getElementById('speed-review-content').style.display = mode === 'speed' ? 'block' : 'none';
-  document.getElementById('match-review-content').style.display = mode === 'match' ? 'block' : 'none';
-  // Só pra diagnóstico de report (ver captureReportContext em
-  // shared/reports.js) -- Flashcard e Palavras difíceis usam a mesma tela
-  // #review-content, sem isso não dava pra distinguir qual delas gerou o
-  // report. Não afeta nenhuma lógica de revisão/memória.
-  STATE.reviewActiveMode = mode;
-
-  if (mode === 'flashcard'){
-    STATE.reviewSessionUnitFilter = null;
-    STATE.reviewSessionDeckId = null; // Fase D -- entrada normal (sem Deck) nunca herda escopo de uma sessão anterior
-    STATE.reviewSessionMilestone = null;
-    startReviewSession(opts);
-  } else if (mode === 'hard'){
-    holdBadgeCelebrations();
-    STATE.reviewSessionUnitFilter = null;
-    STATE.reviewSessionDeckId = null; // Fase D -- idem
-    STATE.reviewSessionMilestone = null;
-    // Fase 4: getStudyQueue(scope:'hard') -- mesmo critério de hardWordsPool()
-    STATE.reviewQueue = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'hard' }));
-    STATE.reviewIndex = 0;
-    STATE.reviewCardState = null;
-    STATE.reviewSessionStartedAt = Date.now(); // nunca herda o início de uma sessão anterior abandonada
-    renderReviewView();
-  } else if (mode === 'match'){
-    renderMatchSizePicker();
-  } else {
-    startSpeedReview();
-  }
-
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode });
-}
-
-// Volta da sessão (Flashcard/Speed Review/Palavras difíceis/Combinar) pra
-// tela de escolha -- usada pelo link "← Voltar aos modos" e pelos botões
-// "Praticar mais" das telas de conclusão (Fase 6 do projeto: terminar uma
-// revisão leva pra PRATICAR, nunca repete a mesma bateria sozinha).
-// Rótulo do cartão: cartões próprios/da professora mostram o nome do Deck.
-function reviewCardTagLabel(card){
-  if (card && card.deckId != null && Array.isArray(STATE.decks)){
-    const d = STATE.decks.find(x => x.id === card.deckId);
-    if (d && d.name) return d.name;
-  }
-  return flashcardUnitTitleText(card);
-}
-
-// Link de voltar da sessão: "Voltar ao Deck" quando a sessão veio de um Deck.
-function syncReviewBackLink(){
-  const el = document.getElementById('review-back-to-modes');
-  if (el) el.textContent = t(STATE.reviewSessionDeckId != null ? 'review.backToDeck' : 'review.backToModes');
-}
-
-function backToReviewModeSelect(){
-  releaseBadgeCelebrations();
-  const returnDeckId = STATE.reviewSessionDeckId;
-  stopSpeedTimer();
-  stopMatchTimer();
-  SPEED_STATE.active = false;
-  document.getElementById('review-mode-select-wrap').style.display = 'block';
-  document.getElementById('review-session-wrap').style.display = 'none';
-  const deckWrap = document.getElementById('review-deck-wrap');
-  if (deckWrap) deckWrap.style.display = 'none';
-  STATE.reviewSessionDeckId = null; // K2-H: sair da sessão não deixa escopo de Deck stale
-  STATE.reviewSessionStartedAt = null; // sessão abandonada não entra na média de tempo
-  syncReviewBackLink();
-  renderReviewModeSelect();
-
-  if (returnDeckId != null && typeof openDeckDetail === 'function'){
-    openDeckDetail(returnDeckId);
-    return;
-  }
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'review' });
-}
 
 document.getElementById('review-back-to-modes').addEventListener('click', backToReviewModeSelect);
 
@@ -6454,67 +4158,6 @@ const MATCH_STATE = {
 // (review-back-to-modes, switchTab) — o jogo não usa mais timer.
 function stopMatchTimer(){}
 
-// Tela de escolha do tamanho da sessão -- aparece ao entrar no Combinar
-// (não ao clicar "Jogar de novo", que reaproveita o último tamanho
-// escolhido direto via startMatchGame).
-function renderMatchSizePicker(){
-  const el = document.getElementById('match-review-content');
-  const poolLen = projectStudyWordsToA(eligibleReviewPool()).length; // K2-F: palavras, não CardInstances da trilha
-  const minPairs = Math.min(...MATCH_SIZE_OPTIONS);
-  if (poolLen < minPairs * 2){
-    el.innerHTML = `
-      <div class="review-empty">
-        <div class="big-emoji">🧩</div>
-        <h3>${t('review.insufficientTitle')}</h3>
-        <p>${t('review.match.insufficientMin', { n: minPairs * 2 })}</p>
-      </div>
-    `;
-    return;
-  }
-  el.innerHTML = `
-    <div class="match-size-picker">
-      <div class="big-emoji">🧩</div>
-      <h3>${t('review.match.pickTitle')}</h3>
-      <div class="match-size-options">
-        ${MATCH_SIZE_OPTIONS.map(n => `
-          <button class="match-size-btn ${MATCH_STATE.pairSize === n ? 'selected' : ''}" data-pairs="${n}" ${poolLen < n * 2 ? 'disabled' : ''}>
-            <div class="match-size-num">${n}</div>
-            <div class="match-size-label">${t('review.match.pairsLabel', { cards: n * 2 })}</div>
-          </button>
-        `).join('')}
-      </div>
-      <button class="btn btn-primary" id="match-size-start-btn">${t('review.match.start')}</button>
-    </div>
-  `;
-  el.querySelectorAll('.match-size-btn:not([disabled])').forEach(btn => {
-    btn.addEventListener('click', () => {
-      MATCH_STATE.pairSize = parseInt(btn.dataset.pairs, 10);
-      renderMatchSizePicker();
-    });
-  });
-  document.getElementById('match-size-start-btn').addEventListener('click', startMatchGame);
-}
-
-function startMatchGame(){
-  trackEvent('lesson_start', 'match_game', null);
-  // Fase 4: seleção via getStudyQueue(scope:'all') -- mesmo pool de antes,
-  // Combinar é prática de reconhecimento, não revisão SRS.
-  // K2-F: Combinar = vocabulário -> 1 par por palavra (projeção A na trilha).
-  const pool = shuffle(getStudyQueue(projectStudyWordsToA(eligibleReviewPool().filter(hasPlainFrontBack)), { scope: 'all' }));
-  const pairCount = Math.min(MATCH_STATE.pairSize, pool.length);
-  MATCH_STATE.pairs = pool.slice(0, pairCount);
-  MATCH_STATE.tiles = shuffle([
-    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'front', text: cardPromptText(c) })),
-    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'back', text: cardAnswerText(c) }))
-  ]);
-  MATCH_STATE.selected = null;
-  MATCH_STATE.matchedCount = 0;
-  MATCH_STATE.attempts = 0;
-  MATCH_STATE.busy = false;
-  MATCH_STATE.startedAt = Date.now();
-
-  renderMatchGame();
-}
 
 function renderMatchGame(){
   const el = document.getElementById('match-review-content');
@@ -6540,122 +4183,6 @@ function renderMatchGame(){
   renderMatchTiles();
 }
 
-function renderMatchTiles(){
-  const gridEl = document.getElementById('match-grid');
-  gridEl.innerHTML = MATCH_STATE.tiles.map((t, i) => `
-    <button class="match-tile" data-idx="${i}" data-card-id="${t.cardId}" data-side="${t.side}">
-      <div class="match-tile-inner">
-        <div class="match-tile-face match-tile-back"><span>?</span></div>
-        <div class="match-tile-face match-tile-front">${t.text}</div>
-      </div>
-    </button>
-  `).join('');
-
-  gridEl.querySelectorAll('.match-tile').forEach(btn => {
-    btn.addEventListener('click', () => onMatchTileClick(btn));
-  });
-}
-
-function onMatchTileClick(btn){
-  if (MATCH_STATE.busy) return;
-  if (btn.classList.contains('matched') || btn.classList.contains('flipped')) return;
-
-  btn.classList.add('flipped');
-
-  if (!MATCH_STATE.selected){
-    MATCH_STATE.selected = btn;
-    return;
-  }
-
-  const first = MATCH_STATE.selected;
-  const second = btn;
-  MATCH_STATE.selected = null;
-  MATCH_STATE.busy = true;
-
-  const isMatch = first.dataset.cardId === second.dataset.cardId && first.dataset.side !== second.dataset.side;
-  MATCH_STATE.attempts += 1;
-  document.querySelector('.match-attempts').textContent = t('zh.review.match.attempts', { n: MATCH_STATE.attempts });
-
-  if (isMatch){
-    first.classList.add('match-ok');
-    second.classList.add('match-ok');
-    MATCH_STATE.matchedCount += 1;
-    document.querySelector('.match-pairs').textContent = t('zh.review.match.pairs', { done: MATCH_STATE.matchedCount, total: MATCH_STATE.pairs.length });
-    addXP(2);
-    // Fase 8: mesma regra explícita da Fase 6 (Speed Review) -- um par
-    // certo num cartão NUNCA estudado é evidência suficiente pra promovê-lo
-    // pro motor de memória (mesmo critério de registerExerciseCorrect()).
-    // Um cartão já em ciclo de revisão continua intocado -- combinar pares
-    // é reconhecimento, não recuperação ativa (Princípio 4), e reagendar
-    // due aqui recriaria o 2º sistema de memória que a Regra 6 proíbe.
-    const matchedCard = MATCH_STATE.pairs.find(c => c.id === first.dataset.cardId);
-    if (matchedCard && matchedCard.reps === 0){
-      applyMemoryGrade(matchedCard, 2); // grade 2 = "Bom"
-    }
-
-    setTimeout(() => {
-      first.classList.add('matched');
-      second.classList.add('matched');
-      MATCH_STATE.busy = false;
-
-      if (MATCH_STATE.matchedCount === MATCH_STATE.pairs.length){
-        registerStudyToday();
-        STATE.totalReviews += MATCH_STATE.pairs.length;
-        registerDailyMatchGame();
-        trackEvent('lesson_complete', 'match_game', { pairs: MATCH_STATE.pairs.length });
-        const matchMs = MATCH_STATE.startedAt ? Date.now() - MATCH_STATE.startedAt : 0;
-        const matchIsRecord = recordMatchTime(matchMs);
-        saveState();
-        renderTopbarStats();
-        setTimeout(() => {
-          maybeShowStreakCelebration();
-          document.getElementById('match-review-content').innerHTML = `
-            <div class="match-complete">
-              <div class="big-emoji">🎉</div>
-              <h3>${t('review.match.allMatched')}</h3>
-              <div class="score-num">${t('review.match.attempts', { n: MATCH_STATE.attempts })}</div>
-              ${matchMs ? `<p class="review-record-line">${t('review.records.time', { time: formatRecordSeconds(matchMs) })} · ${matchIsRecord ? t('review.records.newRecord') : t('review.records.yourRecord', { record: formatRecordSeconds(reviewRecords().matchBestMs) })}</p>` : ''}
-              <button class="btn btn-primary" id="match-restart-btn">${t('review.match.playAgain')}</button>
-            </div>
-          `;
-          document.getElementById('match-restart-btn').addEventListener('click', startMatchGame);
-        }, 300);
-      }
-    }, 550);
-  } else {
-    setTimeout(() => {
-      first.classList.add('wrong');
-      second.classList.add('wrong');
-    }, 400);
-    setTimeout(() => {
-      first.classList.remove('flipped', 'wrong');
-      second.classList.remove('flipped', 'wrong');
-      MATCH_STATE.busy = false;
-    }, 1100);
-  }
-}
-
-function startSpeedReview(){
-  holdBadgeCelebrations();
-  trackEvent('lesson_start', 'speed_review', null);
-  SPEED_STATE.queue = buildSpeedQueue();
-  SPEED_STATE.index = 0;
-  SPEED_STATE.hearts = 3;
-  SPEED_STATE.score = 0;
-  SPEED_STATE.correctCount = 0;
-  SPEED_STATE.streak = 0;
-  SPEED_STATE.bestStreak = 0;
-  SPEED_STATE.active = true;
-  SPEED_STATE.dailyCounted = false;
-  renderSpeedReview();
-}
-
-function stopSpeedTimer(){
-  if (SPEED_STATE.timerHandle){
-    clearInterval(SPEED_STATE.timerHandle);
-    SPEED_STATE.timerHandle = null;
-  }
-}
 
 function renderSpeedReview(){
   const el = document.getElementById('speed-review-content');
@@ -6808,115 +4335,6 @@ function renderSpeedReview(){
   runSpeedTimer(el, () => answerSpeedQuestion(false, el));
 }
 
-function runSpeedTimer(el, onTimeout){
-  stopSpeedTimer();
-  SPEED_STATE.timerStart = Date.now();
-  const fillEl = document.getElementById('speed-timer-fill');
-
-  SPEED_STATE.timerHandle = setInterval(() => {
-    const elapsed = Date.now() - SPEED_STATE.timerStart;
-    const pct = Math.max(0, 100 - (elapsed / SPEED_TIME_LIMIT) * 100);
-    if (fillEl){
-      fillEl.style.width = `${pct}%`;
-      fillEl.classList.toggle('urgent', pct < 30);
-    }
-    if (elapsed >= SPEED_TIME_LIMIT){
-      stopSpeedTimer();
-      if (!SPEED_STATE.answered) onTimeout();
-    }
-  }, 80);
-}
-
-function answerSpeedQuestion(isCorrect, el, chosenIdx){
-  if (SPEED_STATE.answered) return;
-  SPEED_STATE.answered = true;
-  stopSpeedTimer();
-
-  const elapsed = Date.now() - SPEED_STATE.timerStart;
-  const card = SPEED_STATE.queue[SPEED_STATE.index];
-  const options = Array.from(el.querySelectorAll('.speed-option'));
-  const correctText = cardAnswerText(card);
-
-  options.forEach((btn, i) => {
-    btn.classList.add('disabled');
-    if (btn.textContent === correctText) btn.classList.add('correct');
-    else if (i === chosenIdx) btn.classList.add('incorrect');
-  });
-
-  // Projeto "Reorganização da experiência de revisão e prática": Speed
-  // Review agora É revisão (a mesma fila devida do Flashcard, ver
-  // buildSpeedQueue) -- toda resposta grada o cartão de verdade, não só as
-  // de cartões nunca estudados. Escala simplificada (a UI de múltipla
-  // escolha não tem como distinguir "Difícil" de "Fácil"): certo = Bom(2),
-  // errado/tempo esgotado = Errei(0). Regra explícita, só pra Speed Review
-  // -- Combinar continua NÃO fazendo isso (reconhecimento, não revisão;
-  // só promove cartão nunca estudado, ver onMatchTileClick).
-  applyMemoryGrade(card, isCorrect ? 2 : 0);
-  trackReviewAnswer('speed_review', card, isCorrect ? 2 : 0);
-
-  if (isCorrect){
-    const speedBonus = Math.max(10, Math.round(100 * (1 - elapsed / SPEED_TIME_LIMIT)));
-    SPEED_STATE.score += speedBonus;
-    SPEED_STATE.correctCount += 1;
-    SPEED_STATE.streak += 1;
-    if (SPEED_STATE.streak > (SPEED_STATE.bestStreak || 0)) SPEED_STATE.bestStreak = SPEED_STATE.streak;
-    if (SPEED_STATE.streak > 0 && SPEED_STATE.streak % 15 === 0 && SPEED_STATE.hearts < 3){
-      SPEED_STATE.hearts += 1;
-      showToast(t('toast.extraLife'));
-    }
-    showToast(t('toast.pointsGain', { n: speedBonus }));
-  } else {
-    SPEED_STATE.hearts -= 1;
-    SPEED_STATE.streak = 0;
-  }
-
-  // Streak só conta no fim da SESSÃO (ver renderSpeedReview), não a cada
-  // resposta isolada -- mesmo raciocínio do Flashcard (ver gradeCurrentCard).
-  SPEED_STATE.index += 1;
-
-  setTimeout(() => renderSpeedReview(), 700);
-}
-
-// Em que lição da unidade (posição em u.lessons) um vocabIdx foi ensinado --
-// -1 se nenhuma lição declarar esse índice (unidades de gramática, que não
-// têm lessons, nunca chegam aqui -- buildCardsFromUnits já pula esse tipo
-// de unidade inteiramente; serve só de guarda defensiva).
-function lessonIndexForVocabIdx(unit, vocabIdx){
-  return (unit.lessons || []).findIndex(l => (l.vocabIdx || []).includes(vocabIdx));
-}
-
-// Um cartão só entra na revisão depois que a LIÇÃO que ensina aquela
-// palavra foi realmente concluída -- "unidade começada" sozinho não basta:
-// abrir a unidade e terminar só a lição 1 já marcava started=true pra
-// unidade inteira, e como todo cartão novo nasce com due=0 (sempre "vencido"
-// pra cardsDueNow), o vocabulário de lições 2+ nunca vistas entrava na fila
-// de revisão junto.
-function isCardLessonCompleted(card){
-  // Fase 3 do sistema de alunas particulares (ver CLAUDE.md): cartão de
-  // professora não pertence a nenhuma unidade/lição -- o gate aqui não se
-  // aplica a ele. Elegibilidade própria: só entra na fila de revisão
-  // enquanto a professora não arquivou o cartão (flashcardStatus, espelha
-  // `teacher_flashcards.status`, atualizado a cada mergeTeacherFlashcardsIntoState()).
-  // Fase 5: cartão autorado pela própria aluna (origin==='self',
-  // own_flashcards) segue exatamente o mesmo caso -- também não
-  // pertence a unidade nenhuma, também usa `flashcardStatus` (espelha
-  // `own_flashcards.status`) como único critério de elegibilidade.
-  if (card.origin === 'teacher' || card.origin === 'self') return card.flashcardStatus === 'active';
-  const prog = STATE.unitProgress[card.unitId];
-  // A0 (Fase 0 da trilha, 06/10/2026): unidade CONCLUÍDA libera todos os
-  // cartões dela. Antes só `lessonIdx < prog.lessonIdx` decidia, mas
-  // `lessonIdx` volta a 0 ao concluir a unidade -- o cartão saía da Revisão.
-  if (prog?.completed) return true;
-  if (!prog?.started) return false;
-  const unit = UNITS.find(u => u.id === card.unitId);
-  // Cartão "Na frase": entra com a lição da palavra que o apresenta (gateVocabIdx).
-  const gateIdx = card.vocabIdx != null ? card.vocabIdx : card.gateVocabIdx;
-  const lessonIdx = unit ? lessonIndexForVocabIdx(unit, gateIdx) : -1;
-  // Sem lição conhecida pra esse vocabIdx: só libera se a unidade inteira
-  // já foi concluída (mais seguro que arriscar mostrar algo nunca ensinado).
-  if (lessonIdx === -1) return !!prog.completed;
-  return lessonIdx < prog.lessonIdx;
-}
 
 // ---------- Fase 5 da trilha: marco de Revisão do módulo ----------
 // Seleção/ordem/teto em shared/review-milestone.js (puro). Aqui só liga à
@@ -6979,60 +4397,6 @@ function buildModuleReviewRow(module, unlocked){
   return block;
 }
 
-function startReviewSession(opts){
-  holdBadgeCelebrations();
-  trackEvent('lesson_start', 'flashcard_review', null);
-  // eligibleReviewPool() (não STATE.cards.filter(isCardLessonCompleted)
-  // solto): mesma função que a tela de modo/hero widget já usa pra contar
-  // -- Fase 4 do sistema de alunas particulares (ver CLAUDE.md) adicionou
-  // o filtro por origem lá dentro, então a sessão de verdade precisa
-  // consumir a MESMA fonte, senão a prévia da tela de config mentiria
-  // sobre o que a sessão realmente inclui. Estudar uma unidade específica
-  // (STATE.reviewSessionUnitFilter) continua fora do filtro de origem --
-  // é uma ação deliberada vinda da trilha, e cartão de professora nunca
-  // pertence a uma unidade (`unitId: null`) mesmo, então nunca entraria
-  // aqui de qualquer forma.
-  const pool = STATE.reviewSessionUnitFilter
-    ? STATE.cards.filter(c => c.unitId === STATE.reviewSessionUnitFilter && isCardLessonCompleted(c))
-    : eligibleReviewPool();
-
-  // Fase 4 (projeto anterior): seleção centralizada em getStudyQueue()
-  // (shared/study-queue.js) -- due primeiro, mais um lote limitado de
-  // cartões novos (scope 'due'), ou due primeiro seguido do resto do pool
-  // ao estudar uma unidade específica (scope 'unit'). Estudar uma unidade
-  // específica mostra ela inteira, sem corte artificial de intensidade.
-  // Revisão geral usa reviewFilterQueue() (2ª sessão de grilling) -- a
-  // MESMA função que Speed Review chama (ver buildSpeedQueue) -- fonte
-  // única da fila REVISAR, agora sensível ao filtro escolhido na tela
-  // (Todas/Mais difíceis primeiro/Mais antigas primeiro).
-  // Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" removido da
-  // UI, comportamento travado em 'oldest' (ver buildSpeedQueue()).
-  const queue = STATE.reviewSessionUnitFilter
-    ? getStudyQueue(pool, { scope: 'unit', newCardsLimit: STATE.studySettings.newCardsPerDay })
-    : reviewFilterQueue('oldest', pool);
-
-  // K2-G: a sessão só decide QUAL CardInstance é estudado; a direção (A/B) é
-  // estrutural do próprio CardInstance (frontFieldIndex/backFieldIndex).
-
-  // "Mais antigas primeiro" só cumpre o que promete se a ordem sobreviver
-  // até a tela -- embaralhar (como sempre foi) destruiria exatamente essa
-  // ordem. Unidade específica continua embaralhada, como sempre.
-  const shouldShuffle = !!STATE.reviewSessionUnitFilter;
-  STATE.reviewQueue = shouldShuffle ? shuffle(queue) : queue;
-  // Sessão de 5 minutos (shared/review-extras.js): mesma fila, mais curta.
-  if (opts && opts.short && !STATE.reviewSessionUnitFilter) STATE.reviewQueue = shortReviewQueue(STATE.reviewQueue);
-  STATE.reviewIndex = 0;
-  // Fase 6C.1/6C.2/6C.3 -- descarta o localState (Normal/Múltipla escolha/
-  // Digite a resposta/Cloze) da sessão anterior, se houver; renderReviewView()
-  // cria um novo, tipado pro card atual, na primeira renderização. Fase
-  // 6C.2 eliminou STATE.reviewMCPicked/STATE.reviewMCCorrect; Fase 6C.3
-  // eliminou STATE.reviewClozeAnswered (Cloze migrou 100% pra este slot
-  // único, mesmo padrão dos outros 3 tipos) -- não há mais nenhum campo
-  // solto de tipo pra zerar aqui.
-  STATE.reviewSessionStartedAt = Date.now();
-  STATE.reviewCardState = null;
-  renderReviewView();
-}
 
 // ============================================================
 // Fase D ("Decks, Tags e Painel" -- Integração Deck <-> FSRS/Review, ver
@@ -7047,194 +4411,6 @@ function startReviewSession(opts){
 //   Fase D: "Deck define o ESCOPO, Review define quem do escopo entra").
 // ============================================================
 
-// Carrega a árvore de Decks do idioma atual sob demanda -- só quando uma
-// sessão/contagem Deck-scoped é de fato solicitada (nunca no boot, nunca em
-// resposta a re-render de UI -- não existe nenhuma tela de Deck ainda pra
-// disparar isso sozinha). ensureDecksForCurrentUser()/fetchDecksForLanguage()
-// (shared/deck-data.js, Fase C) já tratam "sem sessão"/"sem Deck ainda"
-// graciosamente (devolvem vazio/erro estruturado, nunca lançam) -- nenhuma
-// guarda extra precisa ser duplicada aqui. Cache simples em STATE.decks
-// (nunca serializado, nunca uma contagem materializada -- só a leitura mais
-// recente da árvore real) -- reaproveitado enquanto a sessão do app durar;
-// isso é uma otimização pragmática (evita um round-trip por clique), nunca
-// o cache de contagem que a seção "Performance" da Fase D proíbe.
-// Fase E -- Study Trail <-> Course Decks. Liga cada card de trilha ao Course
-// Unit Deck da sua unidade (unitId -> String(unitId) -> course_unit_id ->
-// deck.id), SÓ mexendo em `deckId`. Bootstrap (ensure_course_decks) apenas
-// pra conta autenticada; convidado só LÊ (SELECT público de kind='course')
-// e, se os Decks ainda não existirem, os cards simplesmente ficam sem
-// deckId (Study Trail intacto). Idempotente; carrega 1x por sessão do app
-// quando bem sucedido. Nunca chamado no boot -- só sob demanda, junto do
-// resto do fluxo Deck-scoped (ensureDecksLoadedForReview).
-async function ensureCourseDecksLoaded(){
-  if (typeof fetchCourseDecksForLanguage !== 'function' || typeof buildCourseDeckIndex !== 'function') return [];
-  if (!STATE.courseDecksLoaded){
-    if (CURRENT_USER && typeof ensureCourseDecksForCurrentUser === 'function'){
-      await ensureCourseDecksForCurrentUser(APP_KEY, UNITS);
-    }
-    const courseDecks = await fetchCourseDecksForLanguage(APP_KEY);
-    if (courseDecks.length){
-      const known = new Set((STATE.decks || []).map(d => d.id));
-      STATE.decks = (STATE.decks || []).concat(courseDecks.filter(d => !known.has(d.id)));
-      STATE.courseDecksLoaded = true;
-    }
-  }
-  assignCourseDeckIds(STATE.cards, buildCourseDeckIndex(STATE.decks || [], APP_KEY));
-  return STATE.decks || [];
-}
-
-async function ensureDecksLoadedForReview(){
-  if (!(STATE.decks && STATE.decks.length)){
-    if (typeof ensureDecksForCurrentUser !== 'function' || typeof fetchDecksForLanguage !== 'function') return [];
-    await ensureDecksForCurrentUser(APP_KEY);
-    STATE.decks = await fetchDecksForLanguage(APP_KEY);
-  }
-  return ensureCourseDecksLoaded();
-}
-
-// D4 -- "integre getDeckCounts() ao domínio de Review": a única mudança
-// real é QUAL pool passar -- eligibleReviewPool() (lição concluída + não
-// arquivado + filtro de origem já aplicados), nunca STATE.cards cru. Zero
-// código de contagem novo -- getDeckCounts()/bucketCardState()/
-// countReviewCards() (shared/deck-engine.js) já fazem tudo, inclusive
-// separar ESTADO (New/Learning, via card.state) de DISPONIBILIDADE (Review
-// due-agora, via cardsDueNow()) -- ver comentário completo lá.
-function deckCountsForReview(deckId){
-  return getDeckCounts(STATE.decks, deckId, eligibleDeckReviewPool());
-}
-
-// D15 (estados vazios) -- domínio precisa diferenciar "Deck vazio" de
-// "Deck tem cards mas nada due" de "tem cards não elegíveis/arquivados",
-// sem inventar nenhuma UX nova (nenhuma tela consome isto ainda). Um único
-// objeto, computado 2x com o MESMO getStudyScopeForDeck() (nunca uma 2ª
-// implementação de filtro por subtree) -- 1x sobre STATE.cards cru (pra
-// enxergar arquivado/não-elegível também) e 1x sobre o pool elegível (pra
-// contar o que a Revisão de fato usaria). totalCards/eligibleCards/
-// archivedCards já bastam pra uma UI futura distinguir os 7 casos da seção
-// 15 sem recalcular nada por conta própria.
-function deckReviewSummary(deckId){
-  const decks = STATE.decks || [];
-  const allScoped = getStudyScopeForDeck(decks, deckId, STATE.cards);
-  const eligiblePool = eligibleDeckReviewPool();
-  const eligibleScoped = getStudyScopeForDeck(decks, deckId, eligiblePool);
-  const counts = getDeckCounts(decks, deckId, eligiblePool);
-  return {
-    deckId,
-    totalCards: allScoped.length,
-    eligibleCards: eligibleScoped.length,
-    archivedCards: allScoped.filter(c => c.flashcardStatus === 'archived').length,
-    new: counts.new,
-    learning: counts.learning,
-    review: counts.review,
-    due: counts.due,
-  };
-}
-
-// D1/D7 -- "forma explícita de iniciar Review com deckId". Espelha
-// byte-a-byte o padrão já usado por STATE.reviewSessionUnitFilter (a única
-// diferença de composição é a origem do pool: getStudyScopeForDeck() em vez
-// de um filtro de unitId solto) -- reviewFilterQueue('oldest', pool) é a
-// MESMA função que startReviewSession()/buildSpeedQueue() já usam pro fluxo
-// normal REVISAR, então newCardsPerDay/sessionIntensity/"mais antigas
-// primeiro" continuam valendo sem nenhum código de limite novo (D6). Direção
-// (K2-G): estrutural do CardInstance -- a sessão de Deck só escolhe quais entram.
-async function startDeckReviewSession(deckId, opts){
-  holdBadgeCelebrations();
-  const restore = !!(opts && opts.restore);
-  trackEvent('lesson_start', 'flashcard_review', null);
-  const decks = await ensureDecksLoadedForReview();
-  // Fase I (Tags): Deck scope AND Tag filter -- o Deck decide o universo, a tag só reduz.
-  const pool = getStudyScopeForDeck(decks, deckId, eligibleDeckReviewPool()).filter(matchesReviewTagFilter);
-  const queue = reviewFilterQueue('oldest', pool);
-
-  STATE.reviewSessionUnitFilter = null;
-  STATE.reviewSessionMilestone = null;
-  STATE.reviewSessionDeckId = deckId;
-  STATE.reviewActiveMode = 'flashcard';
-  STATE.reviewQueue = queue;
-  STATE.reviewIndex = 0;
-  STATE.reviewCardState = null;
-
-  // K2-H: o botão vive fora da aba Review (ex.: "Meus Cartões"); sem trocar
-  // a view ativa a fila era montada numa tela invisível. switchTab('review')
-  // vem ANTES de mostrar a sessão (ele reseta os wrappers para o seletor de
-  // modos); reviewSessionUnitFilter já está nulo, então não dispara a sessão
-  // de unidade. A rota carrega o deckId para voltar/recarregar não perder o escopo.
-  // restore=true (Voltar/recarregar): a parte pós-await roda depois do fim de
-  // renderRoute(), então suprime o router aqui para não empilhar histórico.
-  const wasRestoring = (typeof ROUTER !== 'undefined') ? ROUTER.restoring : false;
-  if (restore && typeof ROUTER !== 'undefined') ROUTER.restoring = true;
-  try {
-  if (typeof switchTab === 'function') switchTab('review');
-  document.getElementById('review-mode-select-wrap').style.display = 'none';
-  document.getElementById('review-session-wrap').style.display = 'block';
-  document.getElementById('review-content').style.display = 'block';
-  document.getElementById('speed-review-content').style.display = 'none';
-  document.getElementById('match-review-content').style.display = 'none';
-
-  STATE.reviewSessionStartedAt = Date.now();
-  renderReviewView();
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard', deckId });
-  } finally {
-    if (restore && typeof ROUTER !== 'undefined') ROUTER.restoring = wasRestoring;
-  }
-}
-
-function shuffle(arr){
-  const a = arr.slice();
-  for (let i = a.length -1; i>0; i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
-  }
-  return a;
-}
-
-// Projeto "Aprimoramento do Flashcard": os 4 botões de resposta mostram o
-// intervalo REAL que o motor agendaria (previewNextIntervalDays, mesma
-// função que scheduleReview usa de verdade -- shared/fsrs.js), nunca texto
-// estático.
-function gradeButtonsHTML(card){
-  const now = Date.now();
-  const GRADES = [
-    { grade: 0, label: t('review.grade.again'), cls: 'grade-again' },
-    { grade: 1, label: t('review.grade.hard'), cls: 'grade-hard' },
-    { grade: 2, label: t('review.grade.good'), cls: 'grade-good' },
-    { grade: 3, label: t('review.grade.easy'), cls: 'grade-easy' },
-  ];
-  return `
-    <div class="grade-buttons">
-      ${GRADES.map(g => `<button class="grade-btn ${g.cls}" data-grade="${g.grade}">${g.label}<small>${formatReviewInterval(previewNextIntervalDays(card, g.grade, now))}</small></button>`).join('')}
-    </div>
-  `;
-}
-
-// Fase 6D.7 (ver CLAUDE.md) -- único ponto de acoplamento residual dos 4
-// renderers extraídos na Fase 6C a STATE.reviewQueue/reviewIndex (posição
-// na fila real de Review -- contabilidade de SESSÃO, nunca estado
-// efêmero de interação; a proibição da Fase 6C nunca foi sobre isto, ver
-// comentário original de renderNormalCard mais abaixo). Preview (Fase
-// 6D.7, shared/flashcard-preview.js) nunca tem uma fila real de Review --
-// `card.__isPreviewCard` (setado SÓ por aquele arquivo, nunca por nenhum
-// card real de STATE.cards) troca a barra de progresso por um rótulo
-// "Pré-visualização" em vez de ler STATE.reviewQueue (que valeria 0/NaN
-// fora de uma sessão de Review de verdade). Esta é a alteração MÍNIMA
-// necessária pra permitir o contrato compartilhado renderer(mountEl,
-// card, localState, callbacks) sem alterar o comportamento real de
-// Review -- quando `card.__isPreviewCard` é falso/ausente (SEMPRE o caso
-// pra cartão real), o HTML produzido é byte a byte idêntico ao de antes
-// desta fase.
-function reviewProgressBarHTML(card){
-  if (card.__isPreviewCard){
-    return `<div class="review-progress"><div class="review-progress-count">${t('review.previewLabel')}</div></div>`;
-  }
-  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
-  return `
-    <div class="review-progress">
-      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
-      <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
-    </div>
-  `;
-}
 
 // Fase 6C.2 (ver CLAUDE.md) -- renderer de "Múltipla escolha", extraído
 // pro contrato aprovado na Fase 6C: (mountEl, card, localState, callbacks)
@@ -7547,15 +4723,17 @@ function renderReviewView(){
     // -- senão esse número prometeria mais do que "Revisar tudo disponível"
     // realmente consegue puxar (o botão clicava e caía de volta nesta
     // mesma tela vazia).
-    const allDue = todaysReviewCount(STATE.cards.filter(isCardLessonCompleted));
+    const allDue = STATE.reviewSessionClassReview ? 0 : todaysReviewCount(STATE.cards.filter(isCardLessonCompleted).filter(c => !isClassReviewCard(c)));
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">☕</div>
-        <h3>${activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
+        <h3>${STATE.reviewSessionClassReview ? t('review.session.classEmptyTitle') : activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
         <p>${allDue > 0 ? t('review.session.pendingOverall', { n: allDue }) : t('review.session.comeBackLater')}</p>
         ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">${t('review.session.reviewAllAvailable')}</button>` : ''}
+        ${STATE.reviewSessionClassReview ? `<button class="btn btn-secondary" id="review-class-back">${t('review.backToStudent')}</button>` : ''}
       </div>
     `;
+    document.getElementById('review-class-back')?.addEventListener('click', backToClassReviewTab);
     if (allDue > 0){
       document.getElementById('review-start-all').addEventListener('click', () => {
         STATE.reviewSessionUnitFilter = null;
@@ -7597,19 +4775,22 @@ function renderReviewView(){
         <h3>${t('review.complete.title')}</h3>
         <p>${t('review.complete.reviewed', { n: STATE.reviewQueue.length })}</p>
         <div class="review-complete-actions">
-          <button class="btn btn-secondary" id="review-again">${t('review.back')}</button>
-          <button class="btn btn-primary" id="review-go-practice">${t('review.practiceMore')}</button>
+          ${STATE.reviewSessionClassReview
+            ? `<button class="btn btn-primary" id="review-class-back">${t('review.backToStudent')}</button>`
+            : `<button class="btn btn-secondary" id="review-again">${t('review.back')}</button>
+          <button class="btn btn-primary" id="review-go-practice">${t('review.practiceMore')}</button>`}
         </div>
       </div>
     `;
     checkUnitCompletion();
-    document.getElementById('review-again').addEventListener('click', () => {
+    document.getElementById('review-class-back')?.addEventListener('click', backToClassReviewTab);
+    document.getElementById('review-again')?.addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
       STATE.reviewSessionMilestone = null;
       switchTab('path');
     });
-    document.getElementById('review-go-practice').addEventListener('click', () => {
+    document.getElementById('review-go-practice')?.addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
       STATE.reviewSessionMilestone = null;
@@ -7840,61 +5021,6 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   }
 }
 
-// Rendimento decrescente de XP pra cartas maduras (artefato §5): uma carta
-// já dominada (intervalo alto) avaliada repetidamente não deve valer o
-// mesmo XP que uma carta ainda instável -- sem tirar XP de revisão nenhuma
-// (piso de 1), só reduzir o ganho marginal. `intervalBefore` é o intervalo
-// ANTES desta revisão (maturidade já acumulada), não o recalculado por ela.
-function reviewXP(intervalBefore, grade){
-  const base = XP_PER_GRADE[grade];
-  if (intervalBefore >= 60) return Math.max(1, Math.round(base * 0.4));
-  if (intervalBefore >= 21) return Math.max(1, Math.round(base * 0.7));
-  return base;
-}
-
-function gradeCurrentCard(grade){
-  const card = STATE.reviewQueue[STATE.reviewIndex];
-  // Atrasada de verdade = venceu ANTES de hoje, não só "due agora" (toda
-  // carta na fila já é due por definição -- ver eligibleReviewPool). Precisa
-  // ser lido antes de applyMemoryGrade/scheduleReview mutar card.due pra reavaliação.
-  const wasOverdue = card.due > 0 && card.due < new Date().setHours(0, 0, 0, 0);
-  const intervalBefore = card.interval;
-  // K2-G: nenhuma direção é gravada aqui -- A/B são CardInstances independentes
-  // e a direção é estrutural; a revisão só aplica o grau (FSRS) ao CardInstance mostrado.
-  // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
-  // de ser calculado por regras SM-2 fixas.
-  applyMemoryGrade(card, grade);
-  trackReviewAnswer('flashcard', card, grade);
-  STATE.totalReviews += 1;
-  // Streak só conta quando a SESSÃO inteira termina (ver renderReviewView),
-  // não a cada cartão avaliado -- senão avaliar 1 carta isolada já bastava
-  // pra "estudar hoje", regra boa demais até pra quem só está conferindo o
-  // app sem de fato revisar nada.
-  registerDailyReviewCard();
-  if (wasOverdue) registerDailyOverdueReviewCard();
-  addXP(reviewXP(intervalBefore, grade));
-
-  if (grade === 0){
-    // "Errei" só volta nesta MESMA sessão se sobrar separação real até o
-    // fim da fila -- empurrar pro fim sempre (comportamento antigo) fazia a
-    // carta reaparecer como a carta SEGUINTE (ou quase) sempre que o erro
-    // acontecia perto do fim da fila, sem nenhum valor pedagógico repetir
-    // uma palavra que acabou de ser errada segundos atrás. due (acima, via
-    // applyMemoryGrade) já agenda a revisão real pra pelo menos amanhã
-    // (fsrsIntervalFromStability nunca agenda em horas) -- este requeue é só
-    // reforço extra quando ainda cabe hoje com distância de verdade.
-    const remaining = STATE.reviewQueue.length - STATE.reviewIndex - 1;
-    if (remaining >= 3) STATE.reviewQueue.push(card);
-  }
-
-  STATE.reviewIndex += 1;
-  // Fase 6C.1 -- avançou a posição da fila, descarta o localState de
-  // Normal desta exibição (renderReviewView cria um novo pro próximo card).
-  STATE.reviewCardState = null;
-  saveState();
-  renderTopbarStats();
-  renderReviewView();
-}
 
 function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   const prog0 = STATE.unitProgress[unitId];
@@ -8269,100 +5395,6 @@ function renderLevelTestQuizStep(){
   });
 }
 
-function checkUnitCompletion(explicitUnitId){
-  const unitId = explicitUnitId || STATE.reviewSessionUnitFilter;
-  if (!unitId) return;
-  // K2-E: a unidade está aprendida quando TODA palavra tem evidência de
-  // estudo em alguma CardInstance irmã -- B New não bloqueia mais.
-  const pool = STATE.cards.filter(c => c.unitId === unitId);
-  const allLearned = studyWordGroups(pool).every(studyWordHasEvidence);
-  if (allLearned){
-    markUnitCompleted(unitId);
-  }
-}
-
-// ============================================================
-// RENDER: Progresso / gamificação
-// ============================================================
-function renderGoalsView(){
-  renderStudyPlanCard();
-}
-
-function renderProgressView(){
-  const completedUnits = Object.values(STATE.unitProgress).filter(u=>u.completed).length;
-  // K.3: "Palavras aprendidas" = SÓ Study Trail, em palavras (Note), com o
-  // curso inteiro como denominador (Teacher/Self não entram aqui).
-  const { total: totalCards, learned: learnedCards } = studyTrailWordProgress(STATE.cards);
-  // K.3: o antigo "Pendentes agora" era cardsDueNow(STATE.cards) = qualquer card
-  // com due<=agora, inclusive New (due=0) e lições ainda não concluídas -- uma
-  // mistura. Agora: contagens ESTRUTURAIS (CardInstance) do universo estudável,
-  // sem os filtros de sessão (origem/tag), e "Para estudar hoje" = a fila que
-  // uma sessão entrega (mesma definição/número do hero da Revisão).
-  const sc = structuralCounts(eligibleDeckReviewPool());
-  const studyToday = trueDueReviewCount(eligibleReviewPool());
-
-  // K.7: "Conteúdos estudados" (Note) de Teacher e Self, SEMPRE separados e
-  // fora de "Palavras aprendidas"; só aparece a origem que tem conteúdo ativo.
-  const ownContentCards = ['teacher', 'self'].map(o => {
-    const m = ownContentProgress(STATE.cards, o);
-    if (!m.total) return '';
-    const label = o === 'teacher' ? 'Conteúdos da professora estudados' : 'Meus conteúdos estudados';
-    return `<div class="stat-card" data-stat="content-${o}"><div class="num">${m.studied}/${m.total}</div><div class="label">${label}</div></div>`;
-  }).join('');
-
-  const guestWarning = !CURRENT_USER ? `
-    <div class="guest-warning">
-      ${t('zh.progress.guestWarning')}
-      <button class="guest-warning-link" id="guest-login-prompt">${t('zh.progress.guestLogin')}</button>
-    </div>
-  ` : '';
-
-  document.getElementById('stat-cards').innerHTML = guestWarning + `
-    <div class="stat-card"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">${t('zh.progress.statUnits')}</div></div>
-    <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">${t('zh.progress.statWords')}</div></div>
-    <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">${t('zh.progress.statStreak')}</div></div>
-    <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">${t('zh.progress.statReviews')}</div></div>
-    <div class="stat-card" data-stat="new"><div class="num">${sc.new}</div><div class="label">${t('progress.statNew')}</div></div>
-    <div class="stat-card" data-stat="learning"><div class="num">${sc.learning}</div><div class="label">${t('progress.statLearning')}</div></div>
-    <div class="stat-card" data-stat="review"><div class="num">${sc.review}</div><div class="label">${t('progress.statReview')}</div></div>
-    <div class="stat-card" data-stat="due"><div class="num">${sc.due}</div><div class="label">${t('progress.statDueNow')}</div></div>
-    <div class="stat-card" data-stat="today" title="${escapeHTML(t('progress.statTodayTitle'))}"><div class="num">${studyToday}</div><div class="label">${t('progress.statToday')}</div></div>
-    ${ownContentCards}
-    <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
-  `;
-
-  if (!CURRENT_USER){
-    document.getElementById('guest-login-prompt')?.addEventListener('click', () => {
-      localStorageSafeRemove(LAST_LANGUAGE_KEY);
-      sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
-      CURRENT_USER = null;
-      goToNeutralGate();
-    });
-  }
-
-  // Projeto "Reorganização da experiência de revisão e prática", Fase 3:
-  // "Suas palavras" (fracas/medianas/fortes) responde "como está meu
-  // vocabulário", não "o que eu devo estudar agora" -- mora em Progresso,
-  // não mais na tela de Revisão (ver renderReviewModeSelect).
-  renderVocabStrengthWidget();
-  renderActivityHeatmap();
-  renderProgressLineChart();
-
-  const earnedCount = BADGES.filter(b => b.check(STATE)).length;
-  document.getElementById('badge-grid-count').textContent = `${earnedCount}/${BADGES.length}`;
-  const badgeGridEl = document.getElementById('badge-grid');
-  badgeGridEl.innerHTML = BADGES.map(b => {
-    const earned = b.check(STATE);
-    return `<div class="badge ${earned?'earned':''}" data-badge-id="${b.id}"><div class="icon">${b.icon}</div><div class="name">${b.name}</div></div>`;
-  }).join('');
-  badgeGridEl.querySelectorAll('.badge[data-badge-id]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const b = BADGES.find(x => x.id === el.dataset.badgeId);
-      if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc);
-    });
-  });
-}
 
 // ---------- Gráfico de linha: palavras aprendidas ao longo do tempo ----------
 function renderProgressLineChart(){
@@ -8420,80 +5452,6 @@ function renderProgressLineChart(){
   `;
 }
 
-// ---------- Heatmap de atividade diária (estilo GitHub) ----------
-function renderActivityHeatmap(){
-  const wrap = document.getElementById('heatmap-wrap');
-  const WEEKS = 18;
-  const totalDays = WEEKS * 7;
-
-  const realDays = [];
-  for (let i = totalDays - 1; i >= 0; i--){
-    const d = new Date(Date.now() - i*86400000);
-    const mm = String(d.getMonth()+1).padStart(2,'0');
-    const dd = String(d.getDate()).padStart(2,'0');
-    const key = `${d.getFullYear()}-${mm}-${dd}`;
-    realDays.push({ key, count: STATE.activityLog[key] || 0, date: d, dow: d.getDay() });
-  }
-
-  const firstDow = realDays[0].dow;
-  const lastDow = realDays[realDays.length-1].dow;
-  const startPadding = Array.from({length: firstDow}, () => null);
-  const endPadding = Array.from({length: 6 - lastDow}, () => null);
-  const days = [...startPadding, ...realDays, ...endPadding];
-
-  const weeks = [];
-  for (let i = 0; i < days.length; i += 7){
-    weeks.push(days.slice(i, i+7));
-  }
-
-  function intensityClass(count){
-    if (count === 0) return 'lvl-0';
-    if (count <= 3) return 'lvl-1';
-    if (count <= 8) return 'lvl-2';
-    if (count <= 15) return 'lvl-3';
-    return 'lvl-4';
-  }
-
-  const monthLabels = [];
-  let lastMonth = null;
-  weeks.forEach((week, wi) => {
-    const firstRealDay = week.find(d => d !== null);
-    if (firstRealDay){
-      const m = firstRealDay.date.getMonth();
-      if (m !== lastMonth){
-        monthLabels.push({ weekIndex: wi, label: fmtDate(firstRealDay.date, { month:'short' }) });
-        lastMonth = m;
-      }
-    }
-  });
-
-  const gridHTML = weeks.map(week => `
-    <div class="heatmap-col">
-      ${week.map(day => day === null
-        ? `<div class="heatmap-cell lvl-0 empty"></div>`
-        : `<div class="heatmap-cell ${intensityClass(day.count)}" title="${tp('zh.progress.heatCell', day.count, { date: fmtDate(day.date) })}"></div>`
-      ).join('')}
-    </div>
-  `).join('');
-
-  const labelsHTML = monthLabels.map(m =>
-    `<span style="grid-column-start:${m.weekIndex + 1};">${m.label}</span>`
-  ).join('');
-
-  wrap.innerHTML = `
-    <div class="heatmap-months" style="grid-template-columns: repeat(${weeks.length}, 1fr);">${labelsHTML}</div>
-    <div class="heatmap-grid">${gridHTML}</div>
-    <div class="heatmap-legend">
-      <span>${t('zh.progress.heatLess')}</span>
-      <div class="heatmap-cell lvl-0"></div>
-      <div class="heatmap-cell lvl-1"></div>
-      <div class="heatmap-cell lvl-2"></div>
-      <div class="heatmap-cell lvl-3"></div>
-      <div class="heatmap-cell lvl-4"></div>
-      <span>${t('zh.progress.heatMore')}</span>
-    </div>
-  `;
-}
 
 // renderTopbarStats() agora vem de shared/topbar-stats.js (idêntico nos dois idiomas).
 
@@ -8521,9 +5479,8 @@ const switchTab = createTabSwitcher({
     settings: renderSettingsView,
     'admin-badges': renderAdminPanelView,
     'my-flashcards': renderMyFlashcardsView,
-    'support-materials': renderSupportMaterialsView,
     'teacher-panel': renderTeacherPanelView,
-    'my-class-logs': renderMyClassLogsView,
+    'student-panel': renderStudentPanelView,
     leaderboard: openLeaderboardView,
     friends: renderFriendsView,
     path: renderUnitsGrid,
@@ -8598,101 +5555,6 @@ function switchSettingsSection(section){
 // sobrevive normalmente a JSON.stringify (Supabase/localStorage).
 const NEW_CARDS_PER_DAY_OPTIONS = [0, 5, 10, 15, 20, 9999];
 
-// Valor herdado do antigo stepper (0-50 livre) pode não bater com
-// nenhuma das 6 opções fixas -- aproxima pro mais próximo só pra exibição
-// no <select> (não reescreve STATE, getStudyQueue aceita qualquer número
-// como newCardsLimit normalmente).
-function normalizeNewCardsPerDay(n){
-  return NEW_CARDS_PER_DAY_OPTIONS.reduce((best, opt) =>
-    Math.abs(opt - n) < Math.abs(best - n) ? opt : best, NEW_CARDS_PER_DAY_OPTIONS[0]);
-}
-
-// Fase 10, movido pra Revisão na 2ª sessão de grilling, ícone de acesso
-// trocado na 3ª. Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de
-// fila" (que entrou aqui na 4ª rodada de grilling anterior) foi removido
-// de vez, e "Origem" (Fase 4 do sistema de alunas particulares) subiu
-// pro TOPO do painel -- sincroniza os 3 controles restantes + Origem com
-// STATE.studySettings, roda toda vez que o painel "⚙️ Configurar sessão"
-// é aberto ou qualquer um deles muda.
-// Fase I (Tags): chips de seleção múltipla (OR) + "Limpar". Mostra as tags do
-// universo do Review geral E as já selecionadas (mesmo que não existam mais),
-// pra nunca prender o usuário num filtro que ele não consegue desfazer.
-function renderReviewTagFilter(){
-  const wrap = document.getElementById('review-tag-filter-wrap');
-  const chipsEl = document.getElementById('review-tag-chips');
-  if (!wrap || !chipsEl) return;
-  const selected = activeReviewTagFilter();
-  const universe = reviewTagUniverse();
-  // Tags finas da trilha (unidade/lição/palavra) ficam fora dos chips.
-  const available = reviewFilterVisibleTags(universe);
-  const all = Array.from(new Set(available.concat(selected))).sort();
-  wrap.hidden = all.length === 0;
-  chipsEl.innerHTML = all.map(t => {
-    const n = universe.filter(c => (c.tags || []).includes(t)).length;
-    const on = selected.includes(t);
-    return `<button type="button" class="leaderboard-tab ${on ? 'active' : ''}" data-review-tag="${escapeHTML(t)}" aria-pressed="${on}" title="#${escapeHTML(t)}">${escapeHTML(friendlyTagLabel(t))} (${n})</button>`;
-  }).join(' ');
-  const clearBtn = document.getElementById('review-tag-clear');
-  if (clearBtn) clearBtn.hidden = selected.length === 0;
-}
-
-function renderReviewSettingsView(){
-  const s = STATE.studySettings;
-
-  // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): o filtro de
-  // origem só aparece pra quem TEM pelo menos um cartão de professora ou
-  // (Fase 5) autorado por ela mesma -- pra maioria das alunas (só cartão de
-  // trilha) esse controle seria ruído puro, oferecendo uma escolha sem
-  // efeito nenhum. 'teacher'/'self' só entram nas <option>s quando aquela
-  // origem específica tem pelo menos 1 cartão -- diferente da Fase 4
-  // original (só 2 origens possíveis, sempre as duas juntas), agora com 3
-  // origens possíveis mostrar uma opção sempre-zero seria confuso.
-  const originWrap = document.getElementById('review-origin-select-wrap');
-  const originSelect = document.getElementById('review-origin-select');
-  const hasTeacherCards = STATE.cards.some(c => c.origin === 'teacher');
-  const hasSelfCards = STATE.cards.some(c => c.origin === 'self');
-  if (originWrap) originWrap.hidden = !hasTeacherCards && !hasSelfCards;
-  if (originSelect && (hasTeacherCards || hasSelfCards)){
-    const basePool = STATE.cards.filter(isCardLessonCompleted);
-    const originCounts = {
-      all: basePool.length,
-      study: basePool.filter(c => c.origin === 'study').length,
-      teacher: basePool.filter(c => c.origin === 'teacher').length,
-      self: basePool.filter(c => c.origin === 'self').length
-    };
-    const currentOrigin = s.reviewOriginFilter || 'all';
-    originSelect.innerHTML = `
-      <option value="all" ${currentOrigin === 'all' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.all} (${originCounts.all})</option>
-      <option value="study" ${currentOrigin === 'study' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.study} (${originCounts.study})</option>
-      ${hasTeacherCards ? `<option value="teacher" ${currentOrigin === 'teacher' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.teacher} (${originCounts.teacher})</option>` : ''}
-      ${hasSelfCards ? `<option value="self" ${currentOrigin === 'self' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.self} (${originCounts.self})</option>` : ''}
-    `;
-  }
-
-  renderReviewTagFilter();
-
-  const freqSelect = document.getElementById('review-frequency-select');
-  if (freqSelect) freqSelect.value = s.reviewFrequency;
-  const newCardsSelect = document.getElementById('review-newcards-select');
-  if (newCardsSelect) newCardsSelect.value = String(normalizeNewCardsPerDay(s.newCardsPerDay));
-  const intensitySelect = document.getElementById('review-intensity-select');
-  if (intensitySelect) intensitySelect.value = s.sessionIntensity;
-}
-
-// Persiste + reaplica ao motor imediatamente -- não precisa de botão "Salvar"
-// (mesmo padrão dos outros pref-switch/toggle desta tela). renderReviewTodayWidget()
-// também roda aqui porque newCardsPerDay entra direto no cálculo de trueCount
-// (achado da 4ª rodada: o stepper antigo não atualizava o hero até o próximo
-// render de tab -- número passava a hora sem refletir a mudança).
-function updateStudySetting(patch){
-  Object.assign(STATE.studySettings, patch);
-  if (patch.reviewFrequency){
-    setDesiredRetention(reviewFrequencyToRetention(patch.reviewFrequency));
-  }
-  renderReviewSettingsView();
-  renderReviewTodayWidget();
-  saveState();
-}
 
 document.getElementById('review-frequency-select').addEventListener('change', (e) => {
   updateStudySetting({ reviewFrequency: e.target.value });
@@ -8721,21 +5583,6 @@ document.getElementById('review-tag-chips')?.addEventListener('click', (e) => {
 document.getElementById('review-tag-clear')?.addEventListener('click', () => {
   updateStudySetting({ reviewTagFilter: [] });
 });
-// Ícone "⚙️" no cabeçalho da tela de Revisão (3ª sessão de grilling --
-// antes era um botão de texto solto entre o dropdown e REVISAR, a autora
-// não gostou) -- recolhido por padrão, sincroniza ao abrir (4 controles
-// de sessão, ver renderReviewSettingsView).
-// "Configurar" (barra Decks/Adicionar/Painel/Configurar, shared/deck-browser.js):
-// abre/fecha o painel de ajustes da sessão na tela inicial da Revisão.
-// Abre os ajustes numa janela por cima da tela atual (inclusive dentro
-// de um Deck), como Adicionar e Painel -- ver openReviewSettingsModal.
-function toggleReviewSettingsPanel(){
-  if (typeof openReviewSettingsModal === 'function'){ openReviewSettingsModal(); return; }
-  const panel = document.getElementById('review-settings-panel');
-  if (!panel) return;
-  panel.removeAttribute('hidden');
-  renderReviewSettingsView();
-}
 document.querySelectorAll('[data-settings-section]').forEach(btn => {
   btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));
 });
@@ -8860,24 +5707,30 @@ wireAnkiExport(ANKI_EXPORT_CONFIG);
 // pontuação de fim de sessão, sem fila de repetição espaçada.
 // ============================================================
 const CONJ_TENSES = [
+  // Ordem pedida pela autora (2026-10-13): por modo. Futur proche saiu da
+  // prática: é só "aller" no présent + infinitivo, que não muda.
   { key: 'presente',       label: 'Présent' },
-  { key: 'futurProche',    label: 'Futur proche' }, // construído em runtime (aller + infinitif)
   { key: 'passeCompose',   label: 'Passé composé' },
-  { key: 'imperatif',      label: 'Impératif' },     // só tu / nous / vous
   { key: 'imparfait',      label: 'Imparfait' },
+  { key: 'plusQueParfait', label: 'Plus-que-parfait' },
   { key: 'futurSimple',    label: 'Futur simple' },
   { key: 'condPresente',   label: 'Conditionnel présent' },
   { key: 'subjPresente',   label: 'Subjonctif présent' },
-  { key: 'plusQueParfait', label: 'Plus-que-parfait' }
-];
+  { key: 'imperatif',      label: 'Impératif' }      // só tu / nous / vous
+]
 
 const CONJ_PERSON_LABELS = ['je', 'tu', 'il / elle / on', 'nous', 'vous', 'ils / elles'];
 
 // "je" vira "j'" antes de forma que começa com vogal ou h mudo (j'ai, j'habite) —
 // depende do tempo/verbo, não é fixo, então é calculado a partir da forma esperada.
-function conjPersonLabel(personIdx, expectedForm){
+function conjPersonLabel(personIdx, expectedForm, tenseKey){
+  const vowel = /^[aeiouâàäéèêëîïôöûüh]/i.test(expectedForm || '');
+  // Subjonctif é ensinado com "que" (que je parle), senão fica igual ao présent.
+  if (tenseKey === 'subjPresente'){
+    return [vowel ? "que j'" : 'que je', 'que tu', "qu'il / qu'elle / qu'on", 'que nous', 'que vous', "qu'ils / qu'elles"][personIdx];
+  }
   if (personIdx !== 0) return CONJ_PERSON_LABELS[personIdx];
-  return /^[aeiouâàäéèêëîïôöûüh]/i.test(expectedForm || '') ? "j'" : 'je';
+  return vowel ? "j'" : 'je';
 }
 // impératif não tem 1ª/3ª pessoa do singular nem 3ª do plural — só tu/nous/vous
 const CONJ_IMPERATIF_ACTIVE = [false, true, false, true, true, false];
@@ -8893,13 +5746,117 @@ CONJ_TOPN_OPTIONS.push(CONJ_TOTAL_VERBS); // "Todos"
 const CONJ_REGULAR_GROUPS = ['g1', 'g2'];
 const CONJ_IRREGULAR_GROUPS = ['core', 'g3ir', 'g3re', 'g3oir'];
 
-const CONJ_SESSION_SIZE = 8; // verbos por sessão — cada página agora cobre todos os tempos escolhidos de uma vez
+// Verbos por sessão (cada página cobre todos os tempos escolhidos de uma vez).
+const CONJ_SESSION_SIZES = [3, 5, 8, 12];
+const CONJ_SESSION_SIZE = 8;
+
+// Tempos compostos com être: o banco guarda só o masculino (suis allé,
+// sommes allés). A concordância também vale: allée, allées. A correção
+// mostra "allé(e)" / "allé(e)s"; il/elle/on e vous aceitam as quatro.
+const CONJ_ETRE_AUX = /^(suis|es|est|sommes|êtes|sont|étais|était|étions|étiez|étaient)$/;
+function conjExpectedInfo(verb, tenseKey, idx){
+  const expected = (getConjForms(verb, tenseKey) || [])[idx] || '';
+  const plain = { display: expected, accepted: acceptedForms(expected) };
+  if (tenseKey !== 'passeCompose' && tenseKey !== 'plusQueParfait') return plain;
+  const words = expected.split(' ');
+  if (words.length < 2 || !words.slice(0, -1).some(w => CONJ_ETRE_AUX.test(w))) return plain;
+  const sg = ((CONJUGATION_VERBS[verb].f[tenseKey] || [])[2] || '').split(' ').pop();
+  if (!sg) return plain;
+  const head = words.slice(0, -1).join(' ');
+  const forms = { m: sg, f: sg + 'e', mp: sg.endsWith('s') ? sg : sg + 's', fp: sg + 'es' };
+  const keys = (idx === 2 || idx === 4) ? ['m', 'f', 'mp', 'fp'] : (idx < 2 ? ['m', 'f'] : ['mp', 'fp']);
+  const shown = idx === 4 ? `${sg}(e)(s)` : idx < 3 ? `${sg}(e)` : (sg.endsWith('s') ? `${sg}(es)` : `${sg}(e)s`);
+  return { display: `${head} ${shown}`, accepted: keys.map(k => `${head} ${forms[k]}`) };
+}
+
+// Status de uma forma digitada: certa, só acento/maiúscula diferente, ou errada.
+function conjEvaluate(verb, tenseKey, idx, given){
+  const info = conjExpectedInfo(verb, tenseKey, idx);
+  const g = (given || '').trim();
+  let status = 'wrong', otherForm = null;
+  if (info.accepted.includes(g)) status = 'ok';
+  else if (info.accepted.some(f => normalizeLoose(g) === normalizeLoose(f))){
+    // "Quase" é só acento/maiúscula. Se a palavra digitada é outra forma do
+    // mesmo verbo (a parle x a parlé: "parle" é do présent), o aluno trocou
+    // de tempo, e isso é erro (decisão da autora, 2026-10-13).
+    otherForm = conjOtherFormOf(verb, tenseKey, g, info.accepted);
+    status = otherForm ? 'wrong' : 'almost';
+  }
+  // Forma mais parecida com o que foi digitado, para marcar as letras.
+  const target = info.accepted.slice().sort((a, b) => conjAlign(g, a).cost - conjAlign(g, b).cost)[0] || '';
+  return Object.assign({ status, target, otherForm }, info);
+}
+
+// Palavra digitada que é, letra por letra, outra forma do mesmo verbo:
+// devolve { word, tenseKey } do primeiro tempo (na ordem de CONJ_TENSES)
+// em que ela aparece, ou null.
+function conjOtherFormOf(verb, tenseKey, given, accepted){
+  const gw = given.toLowerCase().split(/\s+/);
+  const tw = (accepted.find(f => normalizeLoose(f) === normalizeLoose(given)) || '').toLowerCase().split(/\s+/);
+  const diff = gw.filter((w, i) => w !== tw[i]);
+  if (!diff.length) return null;
+  for (const t of CONJ_TENSES){
+    const forms = (CONJUGATION_VERBS[verb].f[t.key] || []).filter(Boolean)
+      .flatMap(f => f.split('/')).flatMap(f => f.trim().toLowerCase().split(/\s+/));
+    const word = diff.find(w => forms.includes(w));
+    if (word && !(t.key === tenseKey && tw.includes(word))) return { word, tenseKey: t.key };
+  }
+  return null;
+}
+
+// Alinhamento letra a letra (distância de edição), como no Jogo de Conjugações.
+function conjAlign(a, b){
+  const A = [...(a || '')], B = [...(b || '')], la = A.map(c => c.toLowerCase()), lb = B.map(c => c.toLowerCase());
+  const n = A.length, m = B.length, d = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let x = 0; x <= n; x++) d[x][0] = x;
+  for (let y = 0; y <= m; y++) d[0][y] = y;
+  for (let x = 1; x <= n; x++) for (let y = 1; y <= m; y++)
+    d[x][y] = Math.min(d[x - 1][y - 1] + (la[x - 1] === lb[y - 1] ? 0 : 1), d[x - 1][y] + 1, d[x][y - 1] + 1);
+  const ops = [];
+  let x = n, y = m;
+  while (x > 0 || y > 0){
+    if (x > 0 && y > 0 && d[x][y] === d[x - 1][y - 1] + (la[x - 1] === lb[y - 1] ? 0 : 1)){
+      ops.push({ t: la[x - 1] === lb[y - 1] ? 'same' : 'sub', a: A[x - 1] }); x--; y--;
+    } else if (x > 0 && d[x][y] === d[x - 1][y] + 1){
+      ops.push({ t: 'extra', a: A[x - 1] }); x--;
+    } else {
+      ops.push({ t: 'missing' }); y--;
+    }
+  }
+  return { ops: ops.reverse(), cost: d[n][m] };
+}
+
+// O que a pessoa digitou, com só as letras erradas em vermelho; o traço
+// marca uma letra que faltou.
+function conjAnswerViewHTML(given, target, status){
+  const icon = status ? `<span class="conj-ic" aria-hidden="true">${status === 'ok' ? '✓' : status === 'almost' ? '~' : '✕'}</span>` : '';
+  const cls = 'conj-answer-view' + (status ? ' is-' + status : '');
+  if (!(given || '').trim()) return `<div class="${cls} is-empty" role="img" aria-label="—">—${icon}</div>`;
+  const html = status === 'ok' ? escapeHTML(given.trim()) : conjAlign(given, target).ops.map(o =>
+    o.t === 'same' ? escapeHTML(o.a)
+    : o.t === 'missing' ? '<span class="conj-gap"></span>'
+    : `<span class="conj-x">${escapeHTML(o.a)}</span>`).join('');
+  return `<div class="${cls}" role="img" aria-label="${escapeHTML(t('feedback.label.yourAnswer') + ': ' + given)}"><span class="conj-answer-text">${html}</span>${icon}</div>`;
+}
+
+// Texto falado de uma forma: pronome + forma (sem pronome no impératif).
+function conjSpeakText(idx, tenseKey, form){
+  if (tenseKey === 'imperatif') return form;
+  const pron = conjPersonLabel(idx, form, tenseKey).split(' / ')[0];
+  return pron.endsWith("'") ? pron + form : `${pron} ${form}`;
+}
 
 const CONJ_STATE = {
   selectedTenses: ['presente'],
   selectedGroups: Object.keys(CONJUGATION_GROUPS),
   topN: CONJ_TOTAL_VERBS,
   regularity: null, // null | 'regular' | 'irregular'
+  pickedVerbs: [],     // verbos escolhidos na busca (a sessão usa só eles)
+  searchHits: [],
+  searchActive: -1,
+  sessionSize: CONJ_SESSION_SIZE,
+  sessionTenses: [],   // tempos desta sessão (na ordem de CONJ_TENSES); "só os que errei" usa um subconjunto
+  mistakes: [],        // formas erradas/quase da sessão, para a revisão no fim
   verbQueue: [],
   verbIndex: 0,
   score: 0,
@@ -8909,24 +5866,138 @@ const CONJ_STATE = {
   hintLevel: 0          // 0/1/2 — nível de dica na página do verbo atual (não persiste entre verbos)
 };
 
+// Verbos escolhidos pela busca: quando há algum, a sessão usa só eles e os filtros ficam de lado.
+const CONJ_PICK_MAX = 12;
+// Bandeira do idioma da palavra encontrada (como no Reverso, mas com a do Brasil para o português).
+const CONJ_LANG_FLAG = { fr: '🇫🇷', pt: '🇧🇷' };
+
+function updateConjSizeHint(){
+  const el = document.getElementById('conj-size-hint');
+  if (!el) return;
+  const perVerb = CONJ_STATE.selectedTenses.reduce((n, k) => n + conjActiveMask(k).filter(Boolean).length, 0);
+  const verbs = CONJ_STATE.pickedVerbs.length || CONJ_STATE.sessionSize;
+  el.textContent = perVerb ? t('fr.conj.sessionForms', { n: perVerb * verbs }) : '';
+}
+
+// Frase de exemplo do tempo: [ ] marca o verbo, que vai em cor + negrito (mesma convenção do diálogo).
+function conjExampleHTML(tenseKey){
+  const ex = (typeof CONJ_TENSE_EXAMPLES !== 'undefined') && CONJ_TENSE_EXAMPLES[tenseKey];
+  if (!ex || !ex.fr) return '';
+  const fr = escapeHTML(ex.fr).replace(/\[([^\]]+)\]/g, '<b class="conj-ex-verb">$1</b>');
+  // A tradução é da camada pt-BR: fora do site em português ela não aparece (o curso em inglês não mostra português).
+  const ptSite = typeof getUiLang !== 'function' || getUiLang() === 'pt-BR';
+  return `<span class="conj-ex" lang="fr">${fr}</span>${ex.t && ptSite ? `<span class="conj-ex-tr">${escapeHTML(ex.t)}</span>` : ''}`;
+}
+
+const conjFold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+
+// Busca pelo infinitivo (fr) ou pela tradução (pt), sem acento: "etre" acha être, "comer" acha manger.
+// Ordem: igual > começa com > contém; empate pelo verbo mais comum.
+function conjSearchVerbs(query, limit){
+  const q = conjFold(query).replace(/^(se |s')/, '');
+  if (!q) return [];
+  const out = [];
+  Object.keys(CONJUGATION_VERBS).forEach(verb => {
+    if (CONJ_STATE.pickedVerbs.includes(verb)) return;
+    const bare = conjFold(verb).replace(/^(se |s')/, '');
+    const score = w => w === q ? 0 : w.startsWith(q) ? 1 : (q.length >= 3 && w.includes(q)) ? 2 : 9;
+    let best = { score: score(bare), lang: 'fr', word: verb };
+    String(VERB_TRANSLATIONS[verb] || '').split('/').map(x => x.trim()).filter(Boolean).forEach(tr => {
+      const sc = score(conjFold(tr));
+      if (sc < best.score) best = { score: sc, lang: 'pt', word: tr };
+    });
+    if (best.score < 9) out.push(Object.assign({ verb, rank: CONJ_VERB_RANK[verb] }, best));
+  });
+  out.sort((x, y) => x.score - y.score || x.rank - y.rank);
+  return out.slice(0, limit || 8);
+}
+
+function conjFlagHTML(lang){
+  return `<span class="conj-flag" role="img" aria-label="${t(lang === 'pt' ? 'fr.conj.sel.langPt' : 'fr.conj.sel.langFr')}">${SCENARIO_FLAG_SVG[CONJ_LANG_FLAG[lang]]}</span>`;
+}
+
+function renderConjSearchList(){
+  const input = document.getElementById('conj-search-input');
+  const list = document.getElementById('conj-search-list');
+  const q = input.value;
+  const hits = conjSearchVerbs(q);
+  CONJ_STATE.searchHits = hits;
+  CONJ_STATE.searchActive = hits.length ? 0 : -1;
+  if (!conjFold(q)){
+    list.hidden = true; list.innerHTML = '';
+    input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant');
+    return;
+  }
+  list.innerHTML = hits.length ? hits.map((h, i) => {
+    const other = h.lang === 'fr' ? (VERB_TRANSLATIONS[h.verb] || '') : h.verb;
+    return `<li role="option" id="conj-opt-${i}" class="conj-search-opt" data-verb="${escapeHTML(h.verb)}" aria-selected="${i === 0}">
+      ${conjFlagHTML(h.lang)}<span class="conj-opt-word" ${h.lang === 'fr' ? 'lang="fr"' : ''}>${escapeHTML(h.word)}</span>
+      <span class="conj-opt-other" ${h.lang === 'pt' ? 'lang="fr"' : ''}>${escapeHTML(other)}</span></li>`;
+  }).join('') : `<li class="conj-search-empty" role="presentation">${t('fr.conj.sel.noMatch')}</li>`;
+  list.hidden = false;
+  input.setAttribute('aria-expanded', 'true');
+  if (hits.length) input.setAttribute('aria-activedescendant', 'conj-opt-0'); else input.removeAttribute('aria-activedescendant');
+}
+
+function setConjSearchActive(i){
+  const list = document.getElementById('conj-search-list');
+  const opts = list.querySelectorAll('.conj-search-opt');
+  if (!opts.length) return;
+  CONJ_STATE.searchActive = (i + opts.length) % opts.length;
+  opts.forEach((o, k) => o.setAttribute('aria-selected', String(k === CONJ_STATE.searchActive)));
+  document.getElementById('conj-search-input').setAttribute('aria-activedescendant', 'conj-opt-' + CONJ_STATE.searchActive);
+  opts[CONJ_STATE.searchActive].scrollIntoView({ block: 'nearest' });
+}
+
+function pickConjVerb(verb){
+  if (!verb || CONJ_STATE.pickedVerbs.includes(verb)) return;
+  if (CONJ_STATE.pickedVerbs.length >= CONJ_PICK_MAX){ showToast(t('fr.conj.sel.pickLimit', { n: CONJ_PICK_MAX })); return; }
+  CONJ_STATE.pickedVerbs.push(verb);
+  const input = document.getElementById('conj-search-input');
+  input.value = '';
+  renderConjSearchList();
+  renderConjPicked();
+  input.focus();
+}
+
+// Só o pedaço dependente muda (chips + estado dos filtros); o resto do formulário fica como está.
+function renderConjPicked(){
+  const el = document.getElementById('conj-picked');
+  const picked = CONJ_STATE.pickedVerbs;
+  el.innerHTML = picked.length ? `<ul class="conj-chips">${picked.map(v => `<li class="conj-chip">
+      <span lang="fr">${escapeHTML(v)}</span><button type="button" class="conj-chip-x" data-verb="${escapeHTML(v)}" aria-label="${escapeHTML(t('fr.conj.sel.removeVerb', { verb: v }))}">×</button></li>`).join('')}</ul>
+    <p class="conj-picked-note">${t('fr.conj.sel.pickedNote')}</p>` : '';
+  const filters = document.getElementById('conj-filters');
+  filters.classList.toggle('is-off', picked.length > 0);
+  filters.querySelectorAll('select, input').forEach(x => { x.disabled = picked.length > 0; });
+  filters.querySelectorAll('.conj-toggle-item').forEach(x => { x.setAttribute('aria-disabled', String(picked.length > 0)); x.tabIndex = picked.length ? -1 : 0; });
+  updateConjSizeHint();
+}
+
 function renderConjSelectScreen(){
+  if (!Array.isArray(CONJ_STATE.pickedVerbs)) CONJ_STATE.pickedVerbs = [];
   const tenseListEl = document.getElementById('conj-tense-list');
-  tenseListEl.innerHTML = CONJ_TENSES.map(t => `
-    <label class="conj-check-item">
-      <input type="checkbox" data-tense="${t.key}" ${CONJ_STATE.selectedTenses.includes(t.key) ? 'checked' : ''}>
-      <span>${t.label}</span>
+  tenseListEl.innerHTML = CONJ_TENSES.map(x => `
+    <label class="conj-check-item conj-tense-card">
+      <input type="checkbox" data-tense="${x.key}" ${CONJ_STATE.selectedTenses.includes(x.key) ? 'checked' : ''}>
+      <span class="conj-tense-name">${x.label}</span>
+      ${conjExampleHTML(x.key)}
     </label>
   `).join('');
+
+  document.getElementById('conj-size-select').innerHTML = CONJ_SESSION_SIZES.map(n =>
+    `<option value="${n}" ${CONJ_STATE.sessionSize === n ? 'selected' : ''}>${n}</option>`).join('');
 
   const topnSelectEl = document.getElementById('conj-topn-select');
   topnSelectEl.innerHTML = CONJ_TOPN_OPTIONS.map(n =>
     `<option value="${n}" ${CONJ_STATE.topN === n ? 'selected' : ''}>${n === CONJ_TOTAL_VERBS ? t('fr.conj.topAll', { n }) : `Top ${n}`}</option>`
   ).join('');
 
-  const regularToggleEl = document.getElementById('conj-toggle-regular');
-  const irregularToggleEl = document.getElementById('conj-toggle-irregular');
-  regularToggleEl.classList.toggle('active', CONJ_STATE.regularity === 'regular');
-  irregularToggleEl.classList.toggle('active', CONJ_STATE.regularity === 'irregular');
+  [['conj-toggle-regular', 'regular'], ['conj-toggle-irregular', 'irregular']].forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    el.classList.toggle('active', CONJ_STATE.regularity === val);
+    el.setAttribute('aria-checked', String(CONJ_STATE.regularity === val));
+  });
 
   const verbListEl = document.getElementById('conj-verb-list');
   verbListEl.innerHTML = Object.entries(CONJUGATION_GROUPS).map(([key, info]) => `
@@ -8944,6 +6015,7 @@ function renderConjSelectScreen(){
       } else {
         CONJ_STATE.selectedTenses = CONJ_STATE.selectedTenses.filter(t => t !== key);
       }
+      updateConjSizeHint();
     });
   });
 
@@ -8957,6 +6029,7 @@ function renderConjSelectScreen(){
       }
     });
   });
+  renderConjPicked();
 }
 
 // Estes elementos são fixos no HTML (renderConjSelectScreen só atualiza seu
@@ -8969,23 +6042,69 @@ document.getElementById('conj-topn-select').addEventListener('change', function(
   CONJ_STATE.topN = parseInt(this.value);
 });
 
-document.getElementById('conj-toggle-regular').addEventListener('click', () => {
-  CONJ_STATE.regularity = CONJ_STATE.regularity === 'regular' ? null : 'regular';
-  renderConjSelectScreen();
+document.getElementById('conj-size-select').addEventListener('change', function(){
+  CONJ_STATE.sessionSize = parseInt(this.value);
+  updateConjSizeHint();
 });
 
-document.getElementById('conj-toggle-irregular').addEventListener('click', () => {
-  CONJ_STATE.regularity = CONJ_STATE.regularity === 'irregular' ? null : 'irregular';
+function toggleConjRegularity(val){
+  if (CONJ_STATE.pickedVerbs.length) return;
+  CONJ_STATE.regularity = CONJ_STATE.regularity === val ? null : val;
   renderConjSelectScreen();
+}
+[['conj-toggle-regular', 'regular'], ['conj-toggle-irregular', 'irregular']].forEach(([id, val]) => {
+  const el = document.getElementById(id);
+  el.addEventListener('click', () => toggleConjRegularity(val));
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleConjRegularity(val); document.getElementById(id).focus(); }
+  });
 });
+
+(function wireConjSearch(){
+  const input = document.getElementById('conj-search-input');
+  const list = document.getElementById('conj-search-list');
+  input.addEventListener('input', renderConjSearchList);
+  input.addEventListener('focus', () => { if (input.value) renderConjSearchList(); });
+  input.addEventListener('keydown', e => {
+    const open = !list.hidden && (CONJ_STATE.searchHits || []).length;
+    if (e.key === 'ArrowDown' && open){ e.preventDefault(); setConjSearchActive(CONJ_STATE.searchActive + 1); }
+    else if (e.key === 'ArrowUp' && open){ e.preventDefault(); setConjSearchActive(CONJ_STATE.searchActive - 1); }
+    else if (e.key === 'Enter'){
+      e.preventDefault(); e.stopPropagation();
+      if (open && CONJ_STATE.searchActive >= 0) pickConjVerb(CONJ_STATE.searchHits[CONJ_STATE.searchActive].verb);
+    }
+    else if (e.key === 'Escape' && !list.hidden){ e.preventDefault(); input.value = ''; renderConjSearchList(); }
+    else if (e.key === 'Backspace' && !input.value && CONJ_STATE.pickedVerbs.length){
+      CONJ_STATE.pickedVerbs.pop(); renderConjPicked();
+    }
+  });
+  // mousedown (não click): escolhe antes do blur fechar a lista.
+  list.addEventListener('mousedown', e => {
+    const opt = e.target.closest('.conj-search-opt');
+    if (!opt) return;
+    e.preventDefault();
+    pickConjVerb(opt.dataset.verb);
+  });
+  input.addEventListener('blur', () => setTimeout(() => {
+    if (document.activeElement !== input){ list.hidden = true; input.setAttribute('aria-expanded', 'false'); }
+  }, 120));
+  document.getElementById('conj-picked').addEventListener('click', e => {
+    const x = e.target.closest('.conj-chip-x');
+    if (!x) return;
+    CONJ_STATE.pickedVerbs = CONJ_STATE.pickedVerbs.filter(v => v !== x.dataset.verb);
+    renderConjPicked();
+    input.focus();
+  });
+})();
 
 document.getElementById('conj-start-btn').addEventListener('click', () => {
-  if (!CONJ_STATE.selectedTenses.length || !CONJ_STATE.selectedGroups.length){
+  const picked = CONJ_STATE.pickedVerbs;
+  if (!CONJ_STATE.selectedTenses.length || (!picked.length && !CONJ_STATE.selectedGroups.length)){
     showToast(t('toast.conjPickOne'));
     return;
   }
 
-  const eligibleVerbs = Object.entries(CONJUGATION_VERBS)
+  const eligibleVerbs = picked.length ? picked.slice() : Object.entries(CONJUGATION_VERBS)
     .filter(([name, v]) => CONJ_STATE.selectedGroups.includes(v.g))
     .filter(([name]) => CONJ_VERB_RANK[name] <= CONJ_STATE.topN)
     .filter(([name, v]) => {
@@ -9003,18 +6122,59 @@ document.getElementById('conj-start-btn').addEventListener('click', () => {
   trackEvent('lesson_start', 'conjugation_session', null);
 
   // Fila de prática: um verbo por página, com todos os tempos escolhidos
-  // juntos (estilo Verbugata) — embaralhada, limitada por sessão.
-  CONJ_STATE.verbQueue = shuffle(eligibleVerbs).slice(0, CONJ_SESSION_SIZE);
+  // juntos (estilo Verbugata). Verbos escolhidos na busca vêm na ordem em que
+  // foram escolhidos; sorteio pelos filtros é embaralhado e limitado por sessão.
+  startConjSession(picked.length ? eligibleVerbs : shuffle(eligibleVerbs).slice(0, CONJ_STATE.sessionSize),
+    CONJ_TENSES.map(x => x.key).filter(k => CONJ_STATE.selectedTenses.includes(k)));
+});
+
+function startConjSession(verbs, tenses){
+  CONJ_STATE.verbQueue = verbs;
+  CONJ_STATE.sessionTenses = tenses;
   CONJ_STATE.verbIndex = 0;
   CONJ_STATE.score = 0;
   CONJ_STATE.totalFields = 0;
   CONJ_STATE.checked = new Set();
   CONJ_STATE.answers = {};
+  CONJ_STATE.mistakes = [];
   CONJ_STATE.hintLevel = 0;
-
   document.getElementById('conj-select-wrap').style.display = 'none';
   document.getElementById('conj-practice-wrap').style.display = 'block';
   renderConjPracticeStep();
+}
+
+// Abas da Conjugação: Praticar (escolha de verbos e tempos) | Jogos (shared/conj-games.js).
+// Jogos da Conjugação são PREMIUM (decisão da autora, 2026-10-14); a Conjugação normal é grátis.
+// Paywall DESLIGADO como o dos Desafios (CHALLENGE_PAYWALL_ENABLED): hoje só o cadeado aparece e
+// todo mundo joga. Ao ligar o paywall, trocar para true (lista em docs/historico/14-pendencias-...md).
+const CONJ_GAMES_PAYWALL_ENABLED = false;
+function isConjGameLocked(){ return CONJ_GAMES_PAYWALL_ENABLED && !challengesPremiumUnlocked(); }
+const CONJ_GAMES_UI = (typeof createConjGames === 'function' && typeof CONJ_GAMES !== 'undefined')
+  ? createConjGames({ games: CONJ_GAMES, speak: (text, btn) => speakFrench(text, btn),
+      isLocked: g => isConjGameLocked(g), onLocked: () => openPremiumChallengesModal(),
+      ids: { select: 'conj-select-wrap', wrap: 'conj-game-wrap', content: 'conj-game-content', list: 'conj-games-list', back: 'conj-game-back' } })
+  : null;
+function setConjMode(mode){
+  const games = mode === 'games';
+  document.getElementById('conj-practice-pane').hidden = games;
+  document.getElementById('conj-games-pane').hidden = !games;
+  const sub = document.querySelector('#conj-select-wrap .path-header p');
+  if (sub) sub.hidden = games; // "Escolha os verbos e os tempos" só vale para Praticar
+  [['conj-mode-practice', !games], ['conj-mode-games', games]].forEach(([id, on]) => {
+    const b = document.getElementById(id);
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', String(on));
+    b.tabIndex = on ? 0 : -1;
+  });
+  if (games && CONJ_GAMES_UI) CONJ_GAMES_UI.renderList();
+}
+document.getElementById('conj-mode-practice').addEventListener('click', () => setConjMode('practice'));
+document.getElementById('conj-mode-games').addEventListener('click', () => setConjMode('games'));
+document.querySelector('#view-conjugaison .conj-modes').addEventListener('keydown', e => {
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  const toGames = !document.getElementById('conj-mode-games').classList.contains('active');
+  setConjMode(toGames ? 'games' : 'practice');
+  document.getElementById(toGames ? 'conj-mode-games' : 'conj-mode-practice').focus();
 });
 
 document.getElementById('conj-back-to-select').addEventListener('click', () => {
@@ -9045,14 +6205,6 @@ function normalizeLoose(str){
   return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
 
-// Algumas respostas têm mais de uma forma aceita, armazenadas juntas
-// separadas por "/" (conjugação "paie/paye", vocabulário "un / une" etc.) --
-// dar só UMA das formas é uma resposta completa, não deve ser tratado como
-// diferente da string inteira "un / une". Usado tanto na conjugação quanto
-// nos exercícios de digitar de ouvido (vocab-type/cloze).
-function acceptedForms(expected){
-  return (expected || '').split('/').map(s => s.trim()).filter(Boolean);
-}
 // END accent-answer-logic
 
 function conjActiveMask(tenseKey){
@@ -9075,39 +6227,56 @@ function conjHintPlaceholder(expected, level){
 
 function renderConjPracticeStep(){
   const contentEl = document.getElementById('conj-practice-content');
+  const tenses = CONJ_STATE.sessionTenses;
 
   if (CONJ_STATE.verbIndex >= CONJ_STATE.verbQueue.length){
-    const pct = CONJ_STATE.totalFields ? Math.round((CONJ_STATE.score / CONJ_STATE.totalFields) * 100) : 0;
-    registerDailyConjugationSession();
-    registerStudyToday();
-    maybeShowStreakCelebration();
-    trackEvent('lesson_complete', 'conjugation_session', { score: CONJ_STATE.score, total: CONJ_STATE.totalFields, pct });
-    contentEl.innerHTML = `
-      <div class="conj-session-result">
-        <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
-        <h3>${t('fr.conj.sessionDone')}</h3>
-        <div class="score-num">${Math.round(CONJ_STATE.score)}/${CONJ_STATE.totalFields}</div>
-        <p>${pct >= 70 ? t('fr.conj.wellDone') : t('fr.conj.keepPracticing')}</p>
-        <button class="btn btn-primary" id="conj-restart-btn">${t('fr.conj.newSession')}</button>
-      </div>
-    `;
-    document.getElementById('conj-restart-btn').addEventListener('click', () => {
-      document.getElementById('conj-select-wrap').style.display = 'block';
-      document.getElementById('conj-practice-wrap').style.display = 'none';
-      renderConjSelectScreen();
-    });
+    renderConjSessionResult(contentEl);
     return;
   }
 
   const verb = CONJ_STATE.verbQueue[CONJ_STATE.verbIndex];
-  const nextVerb = CONJ_STATE.verbQueue[CONJ_STATE.verbIndex + 1];
   const verbInfo = CONJUGATION_VERBS[verb];
   const alreadyChecked = CONJ_STATE.checked.has(verb);
   const savedAnswers = CONJ_STATE.answers[verb] || {};
+  const total = CONJ_STATE.verbQueue.length;
   CONJ_STATE.hintLevel = 0;
 
+  const fieldHTML = (tenseKey, i) => {
+    const expectedForms = getConjForms(verb, tenseKey);
+    const label = conjPersonLabel(i, expectedForms[i], tenseKey);
+    if (!conjActiveMask(tenseKey)[i]) return `
+      <div class="conj-field" data-tense="${tenseKey}" data-idx="${i}">
+        <label>${label}</label>
+        <input type="text" disabled placeholder="—">
+        <div class="conj-side"></div>
+      </div>`;
+    const given = (savedAnswers[tenseKey] || [])[i] || '';
+    const id = `conj-in-${tenseKey}-${i}`;
+    if (!alreadyChecked) return `
+      <div class="conj-field" data-tense="${tenseKey}" data-idx="${i}">
+        <label for="${id}">${label}</label>
+        <input type="text" id="${id}" data-tense="${tenseKey}" data-idx="${i}" value="${escapeHTML(given)}" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <div class="conj-side"></div>
+      </div>`;
+    const ev = conjEvaluate(verb, tenseKey, i, given);
+    const speak = audioBtnHTML(conjSpeakText(i, tenseKey, ev.accepted[0] || ''));
+    const note = ev.otherForm ? `<span class="conj-other-form">${escapeHTML(t('fr.conj.otherForm', { form: ev.otherForm.word, tense: CONJ_TENSES.find(x => x.key === ev.otherForm.tenseKey).label }))}</span>` : '';
+    // Certa: caixa verde + ✓, áudio ao lado. Quase/errada: caixa amarela ou
+    // vermelha com as letras marcadas; embaixo, a forma certa com o áudio.
+    return `
+      <div class="conj-field ${ev.status}" data-tense="${tenseKey}" data-idx="${i}">
+        <label>${label}</label>
+        ${conjAnswerViewHTML(given, ev.target, ev.status)}
+        <div class="conj-side">${ev.status === 'ok' ? speak : ''}</div>
+        ${ev.status === 'ok' ? '' : `<div class="expected">${ev.status === 'almost' ? `<span class="conj-tag">${escapeHTML(t('fr.conj.almost'))}</span>` : ''}<span>→ ${escapeHTML(ev.display)}</span>${speak}${note}</div>`}
+      </div>`;
+  };
+
   contentEl.innerHTML = `
-    <div class="conj-progress">${t('fr.conj.verbCounter', { i: CONJ_STATE.verbIndex + 1, n: CONJ_STATE.verbQueue.length })}</div>
+    <div class="conj-progress">
+      <span>${t('fr.conj.verbCounter', { i: CONJ_STATE.verbIndex + 1, n: total })}</span>
+      <span class="conj-progress-bar" aria-hidden="true"><i style="width:${(CONJ_STATE.checked.size / total) * 100}%"></i></span>
+    </div>
     <div class="conj-verb-nav">
       <div class="conj-verb-header">
         <div class="conj-verb-label">${t('fr.conj.currentVerb')}</div>
@@ -9115,58 +6284,16 @@ function renderConjPracticeStep(){
         <div class="conj-verb-translation">${VERB_TRANSLATIONS[verb] || ''}</div>
         <div class="tempo">${CONJ_REGULAR_GROUPS.includes(verbInfo.g) ? t('fr.conj.regular') : t('fr.conj.irregular')}</div>
       </div>
-      ${nextVerb ? `
-        <div class="conj-verb-header next">
-          <div class="conj-verb-label">${t('fr.conj.nextVerbLabel')}</div>
-          <div class="infinitif">${nextVerb}</div>
-          <div class="conj-verb-translation">${VERB_TRANSLATIONS[nextVerb] || ''}</div>
-        </div>
-      ` : ''}
     </div>
     <div class="conj-tense-grid">
-      ${CONJ_STATE.selectedTenses.map(tenseKey => {
-        const tenseInfo = CONJ_TENSES.find(t => t.key === tenseKey);
-        const activeMask = conjActiveMask(tenseKey);
-        const expectedForms = getConjForms(verb, tenseKey);
-        const savedForTense = savedAnswers[tenseKey] || [];
-        return `
-          <div class="conj-tense-box" data-tense="${tenseKey}">
-            <div class="conj-tense-title">${tenseInfo.label}</div>
-            <div class="conj-grid">
-              ${CONJ_PERSON_LABELS.map((_, i) => {
-                const label = conjPersonLabel(i, expectedForms[i]);
-                if (!activeMask[i]) return `
-                  <div class="conj-field" data-tense="${tenseKey}" data-idx="${i}">
-                    <label>${label}</label>
-                    <input type="text" disabled placeholder="—">
-                    <div class="expected"></div>
-                  </div>
-                `;
-                const given = savedForTense[i] || '';
-                let statusClass = '';
-                let expectedText = '';
-                if (alreadyChecked){
-                  const expected = expectedForms[i] || '';
-                  const accepted = acceptedForms(expected);
-                  if (accepted.includes(given.trim())){ statusClass = 'ok'; }
-                  else if (accepted.some(f => normalizeLoose(given) === normalizeLoose(f))){ statusClass = 'almost'; expectedText = t('feedback.almostArrow', { expected }); }
-                  else { statusClass = 'wrong'; expectedText = `→ ${expected}`; }
-                }
-                return `
-                  <div class="conj-field ${statusClass}" data-tense="${tenseKey}" data-idx="${i}">
-                    <label>${label}</label>
-                    <input type="text" data-tense="${tenseKey}" data-idx="${i}" value="${given.replace(/"/g,'&quot;')}"
-                      ${alreadyChecked ? 'disabled' : ''} autocomplete="off" autocapitalize="off" spellcheck="false">
-                    <div class="expected">${expectedText}</div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `;
-      }).join('')}
+      ${tenses.map(tenseKey => `
+        <div class="conj-tense-box" data-tense="${tenseKey}">
+          <div class="conj-tense-title">${CONJ_TENSES.find(x => x.key === tenseKey).label}</div>
+          <div class="conj-grid">${CONJ_PERSON_LABELS.map((_, i) => fieldHTML(tenseKey, i)).join('')}</div>
+        </div>`).join('')}
     </div>
     ${alreadyChecked ? '' : `
+      <div class="conj-accents">${frAccentPickerHTML()}</div>
       <div class="conj-actions">
         <button class="btn btn-primary btn-block" id="conj-verify-btn">${t('fr.conj.checkAnswers')}</button>
         <button class="btn btn-secondary" id="conj-hint-btn" title="${t('fr.conj.hintTitle')}">${t('fr.conj.hintShow')}</button>
@@ -9174,23 +6301,41 @@ function renderConjPracticeStep(){
     `}
     <div class="conj-verb-pager">
       <button class="btn btn-secondary" id="conj-prev-verb-btn" ${CONJ_STATE.verbIndex === 0 ? 'disabled' : ''}>${t('fr.conj.prevVerb')}</button>
-      <button class="btn btn-secondary" id="conj-next-verb-btn">${CONJ_STATE.verbIndex < CONJ_STATE.verbQueue.length - 1 ? t('fr.conj.nextVerbArrow') : t('common.seeResultArrow')}</button>
+      <button class="btn btn-secondary" id="conj-next-verb-btn">${CONJ_STATE.verbIndex < total - 1 ? t('fr.conj.nextVerbArrow') : t('common.seeResultArrow')}</button>
     </div>
   `;
 
   wireAudioButtons(contentEl);
+  const inputs = Array.from(contentEl.querySelectorAll('.conj-field input[data-idx]:not(:disabled)'));
+
+  // Acentos: escrevem no último campo que teve o cursor.
+  let lastInput = inputs[0] || null;
+  inputs.forEach(inp => inp.addEventListener('focus', () => { lastInput = inp; }));
+  contentEl.querySelectorAll('.conj-accents .fr-accent-key').forEach(btn => {
+    btn.addEventListener('mousedown', e => e.preventDefault());
+    btn.addEventListener('click', () => {
+      if (!lastInput) return;
+      const a = lastInput.selectionStart ?? lastInput.value.length, z = lastInput.selectionEnd ?? lastInput.value.length;
+      lastInput.value = lastInput.value.slice(0, a) + btn.textContent + lastInput.value.slice(z);
+      lastInput.focus();
+      lastInput.setSelectionRange(a + btn.textContent.length, a + btn.textContent.length);
+    });
+  });
+
+  // Enter passa para o próximo campo; no último, corrige.
+  inputs.forEach((inp, k) => inp.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    if (inputs[k + 1]) inputs[k + 1].focus();
+    else document.getElementById('conj-verify-btn')?.click();
+  }));
 
   document.getElementById('conj-hint-btn')?.addEventListener('click', function(){
     CONJ_STATE.hintLevel = Math.min(2, CONJ_STATE.hintLevel + 1);
-    CONJ_STATE.selectedTenses.forEach(tenseKey => {
-      const expectedForms = getConjForms(verb, tenseKey);
-      conjActiveMask(tenseKey).forEach((active, i) => {
-        if (!active) return;
-        const inputEl = contentEl.querySelector(`input[data-tense="${tenseKey}"][data-idx="${i}"]`);
-        if (inputEl && !inputEl.value){
-          inputEl.placeholder = conjHintPlaceholder(expectedForms[i] || '', CONJ_STATE.hintLevel);
-        }
-      });
+    inputs.forEach(inputEl => {
+      if (inputEl.value) return;
+      const expected = (getConjForms(verb, inputEl.dataset.tense) || [])[Number(inputEl.dataset.idx)] || '';
+      inputEl.placeholder = conjHintPlaceholder(expected, CONJ_STATE.hintLevel);
     });
     if (CONJ_STATE.hintLevel === 1){
       this.textContent = t('fr.conj.hintMore');
@@ -9202,63 +6347,40 @@ function renderConjPracticeStep(){
   });
 
   document.getElementById('conj-verify-btn')?.addEventListener('click', () => {
-    let correctCount = 0;
-    let activeCount = 0;
-    const answersForVerb = {};
     // XP por forma verbal certa: irregulares valem o dobro (mais difícil
     // de decorar do que aplicar uma regra) -- "quase" (erro de acento/
     // grafia solto) não conta pra XP, só pro score exibido.
     const isIrregular = !CONJ_REGULAR_GROUPS.includes(verbInfo.g);
-    let earnedXP = 0;
-
-    CONJ_STATE.selectedTenses.forEach(tenseKey => {
-      const expectedForms = getConjForms(verb, tenseKey);
+    let correctCount = 0, activeCount = 0, earnedXP = 0;
+    const answersForVerb = {};
+    tenses.forEach(tenseKey => {
       const tenseGiven = [];
       let tenseCorrect = 0;
-      let tenseActive = 0;
-
       conjActiveMask(tenseKey).forEach((active, i) => {
         if (!active) return;
-        tenseActive++;
         activeCount++;
-        const fieldEl = contentEl.querySelector(`.conj-field[data-tense="${tenseKey}"][data-idx="${i}"]`);
-        const inputEl = fieldEl.querySelector('input');
-        const expectedEl = fieldEl.querySelector('.expected');
-        const expected = expectedForms[i] || '';
-        const accepted = acceptedForms(expected);
-        const given = inputEl.value;
+        const given = (contentEl.querySelector(`input[data-tense="${tenseKey}"][data-idx="${i}"]`) || {}).value || '';
         tenseGiven[i] = given;
-
-        inputEl.disabled = true;
-        fieldEl.classList.remove('ok','almost','wrong');
-
-        if (accepted.includes(given.trim())){
-          fieldEl.classList.add('ok');
+        const ev = conjEvaluate(verb, tenseKey, i, given);
+        if (ev.status === 'ok'){
           correctCount++; tenseCorrect++;
           earnedXP += isIrregular ? 2 : 1;
-        } else if (accepted.some(f => normalizeLoose(given) === normalizeLoose(f))){
-          fieldEl.classList.add('almost');
-          expectedEl.textContent = t('feedback.almostArrow', { expected });
-          correctCount += 0.5; tenseCorrect += 0.5;
         } else {
-          fieldEl.classList.add('wrong');
-          expectedEl.textContent = `→ ${expected}`;
+          if (ev.status === 'almost'){ correctCount += 0.5; tenseCorrect += 0.5; }
+          CONJ_STATE.mistakes.push({ verb, tenseKey, idx: i, given, target: ev.target, display: ev.display });
         }
       });
-
       answersForVerb[tenseKey] = tenseGiven;
       registerDailyConjugationCorrect(Math.round(tenseCorrect));
       registerDailyConjugationTense(tenseKey);
     });
-
     CONJ_STATE.answers[verb] = answersForVerb;
     CONJ_STATE.checked.add(verb);
     CONJ_STATE.score += correctCount;
     CONJ_STATE.totalFields += activeCount;
     if (earnedXP > 0) addXP(earnedXP);
-
-    document.getElementById('conj-verify-btn').style.display = 'none';
-    document.getElementById('conj-hint-btn').style.display = 'none';
+    renderConjPracticeStep();
+    document.getElementById('conj-next-verb-btn')?.focus();
   });
 
   document.getElementById('conj-prev-verb-btn').addEventListener('click', () => {
@@ -9274,8 +6396,52 @@ function renderConjPracticeStep(){
   });
 
   // Foca o primeiro campo ativo e vazio, pra já poder digitar direto.
-  const firstActive = contentEl.querySelector('.conj-field input:not(:disabled)');
-  if (firstActive) firstActive.focus();
+  if (inputs[0]) inputs[0].focus();
+}
+
+// Fim da sessão: placar, a lista das formas que precisam de revisão e
+// "Praticar só os que errei" (só esses verbos, só esses tempos).
+function renderConjSessionResult(contentEl){
+  const pct = CONJ_STATE.totalFields ? Math.round((CONJ_STATE.score / CONJ_STATE.totalFields) * 100) : 0;
+  registerDailyConjugationSession();
+  registerStudyToday();
+  maybeShowStreakCelebration();
+  trackEvent('lesson_complete', 'conjugation_session', { score: CONJ_STATE.score, total: CONJ_STATE.totalFields, pct });
+  const mistakes = CONJ_STATE.mistakes;
+  const tenseLabel = k => CONJ_TENSES.find(x => x.key === k).label;
+  contentEl.innerHTML = `
+    <div class="conj-session-result">
+      <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
+      <h3>${t('fr.conj.sessionDone')}</h3>
+      <div class="score-num">${Math.round(CONJ_STATE.score)}/${CONJ_STATE.totalFields}</div>
+      <p>${pct >= 70 ? t('fr.conj.wellDone') : t('fr.conj.keepPracticing')}</p>
+      ${mistakes.length ? `
+        <div class="conj-review">
+          <div class="conj-review-title">${t('fr.conj.reviewTitle', { n: mistakes.length })}</div>
+          <ul class="conj-review-list">${mistakes.map(m => {
+            const pron = m.tenseKey === 'imperatif' ? '' : conjPersonLabel(m.idx, m.target, m.tenseKey).split(' / ')[0];
+            return `<li>
+              <span class="conj-review-where">${escapeHTML(m.verb)}, ${escapeHTML(tenseLabel(m.tenseKey))}</span>
+              <span class="conj-review-form">${pron ? `<i>${escapeHTML(pron)}</i> ` : ''}${m.given.trim() ? conjAnswerViewHTML(m.given, m.target) : '<span class="conj-review-empty">—</span>'} <span class="conj-review-arrow">→</span> <b>${escapeHTML(m.display)}</b></span>
+            </li>`;
+          }).join('')}</ul>
+        </div>` : ''}
+      <div class="conj-result-actions">
+        ${mistakes.length ? `<button class="btn btn-primary" id="conj-practice-mistakes-btn">${t('fr.conj.practiceMistakes')}</button>` : ''}
+        <button class="btn ${mistakes.length ? 'btn-secondary' : 'btn-primary'}" id="conj-restart-btn">${t('fr.conj.newSession')}</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('conj-restart-btn').addEventListener('click', () => {
+    document.getElementById('conj-select-wrap').style.display = 'block';
+    document.getElementById('conj-practice-wrap').style.display = 'none';
+    renderConjSelectScreen();
+  });
+  document.getElementById('conj-practice-mistakes-btn')?.addEventListener('click', () => {
+    const verbs = [...new Set(mistakes.map(m => m.verb))];
+    const tenses = CONJ_TENSES.map(x => x.key).filter(k => mistakes.some(m => m.tenseKey === k));
+    startConjSession(verbs, tenses);
+  });
 }
 
 // ============================================================
@@ -10048,6 +7214,7 @@ function renderDictationResult(d, userText){
   // Fatia 2: grava a tentativa (melhor nota nunca diminui).
   const rec = updateDictationRecord(STATE.dictations[d.id], ev, new Date());
   STATE.dictations[d.id] = rec;
+  if (score >= 90) STATE.dictationsAced = (STATE.dictationsAced || 0) + 1; // conquistas: trilha Ditado
   saveState();
 
   const wordsHtml = merged.map(x => {
@@ -10208,6 +7375,11 @@ async function importChallengesFromJSON(rawText){
     }
     if (!CHALLENGE_LEVELS_ORDER.includes(item.level)){
       skipped.push(t('adminChallenges.import.badLevel', { id: item.id, level: item.level }));
+      return;
+    }
+    // Regra de 12/10/2026: toda expressão nova chega com registro (campo próprio).
+    if (item.type === 'expression' && !Object.prototype.hasOwnProperty.call(EXPRESSION_REGISTERS, item.register)){
+      skipped.push(t('adminChallenges.import.badRegister', { id: item.id }));
       return;
     }
     if (existingIds.has(item.id) || seenInBatch.has(item.id)){
@@ -10393,7 +7565,7 @@ const CHALLENGE_I18N = {
     'ch.cloze.instruction': 'Escolha a forma certa para cada lacuna:',
     'ch.cloze.blank': 'Lacuna {n}',
     'ch.cloze.chooseAll': 'Escolha uma opção para cada lacuna antes de verificar.',
-    'ch.cloze.right': '✅ Bonne réponse.',
+    'ch.cloze.right': '✅ Resposta certa.',
     'ch.cloze.yourAnswer': 'Sua resposta',
     'ch.cloze.correct': 'Resposta certa',
     'ch.cloze.translation': 'Tradução',
@@ -10420,18 +7592,19 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': 'Você terminou todos os exercícios desse nível.',
     'ch.queue.back': 'Voltar aos níveis',
     'ch.listenPron': 'Ouvir pronúncia',
-    'ch.expr.reveal': 'Voir les réponses',
+    'ch.expr.reveal': 'Ver as respostas',
     'ch.expr.yourAnswer': 'Sua resposta: {chosen}<br>Resposta certa: <strong>{correct}</strong>',
-    'ch.expr.signifies': 'signifie <strong>{fr}</strong>.',
+    'ch.expr.signifies': 'significa <strong>{fr}</strong>.',
     'ch.expr.inPt': 'Em português: <strong>{pt}</strong>.',
-    'ch.expr.example1': 'Exemple 1',
-    'ch.expr.example2': 'Exemple 2',
-    'ch.listenFr': '▶ Écouter',
-    'ch.expr.yourTurn': 'À vous de jouer',
-    'ch.expr.showAnswer': 'Voir la réponse',
-    'ch.expr.right': '✅ Bonne réponse.',
-    'ch.notQuite': '❌ Pas tout à fait.',
-    'ch.lt.hint': 'Montrer un indice',
+    'ch.expr.example1': 'Exemplo 1',
+    'ch.expr.example2': 'Exemplo 2',
+    'ch.listenFr': '▶ Ouvir',
+    'ch.slow': 'Devagar',
+    'ch.expr.yourTurn': 'Sua vez',
+    'ch.expr.showAnswer': 'Ver a resposta',
+    'ch.expr.right': '✅ Resposta certa.',
+    'ch.notQuite': '❌ Ainda não.',
+    'ch.lt.hint': 'Mostrar dica',
     'ch.lt.label': 'Digite sua tradução:',
     'ch.lt.placeholder': 'Sua tradução em português...',
     'ch.verify': 'Vérifier',
@@ -10448,6 +7621,24 @@ const CHALLENGE_I18N = {
     'ch.filter.pending': 'Pendentes',
     'ch.filter.done': 'Concluídas',
     'ch.ring.aria': '{done} de {total} concluídas',
+    'ch.reg.formal': 'Formal',
+    'ch.reg.neutral': 'Dia a dia',
+    'ch.reg.familiar': 'Entre amigos',
+    'ch.reg.slang': 'Gíria',
+    'ch.reg.vulgar': 'Pode ofender',
+    'ch.reg.formal.hint': 'Registro formal: bom com desconhecidos e em situações sérias.',
+    'ch.reg.neutral.hint': 'Serve em quase qualquer situação.',
+    'ch.reg.familiar.hint': 'Informal: use com amigos e pessoas próximas.',
+    'ch.reg.slang.hint': 'Gíria: só com pessoas bem próximas.',
+    'ch.reg.vulgar.hint': 'Vulgar: bom reconhecer, melhor não usar.',
+    'ch.album.guess': 'O que será que significa?',
+    'ch.album.seal': 'no álbum',
+    'ch.album.locked': '🔒 Premium',
+    'ch.album.listen': 'Ouvir a expressão',
+    'ch.today.title': 'Expressão de hoje',
+    'ch.today.hint': 'Ouça e tente adivinhar antes de abrir.',
+    'ch.today.cta': 'Descobrir o sentido',
+    'ch.today.allDone': '🎉 Você já descobriu todas as expressões disponíveis.',
     'ch.lt.legend.bad': 'palavra errada',
     'ch.lt.legend.near': 'quase certa',
     'ch.lt.legend.miss': 'faltou',
@@ -10456,14 +7647,14 @@ const CHALLENGE_I18N = {
     'ch.lt.expected': 'Resposta esperada',
     'ch.lt.original': 'Frase original',
     'ch.lt.explanation': 'Explicação',
-    'ch.listenAgain': '▶ Écouter encore',
-    'ch.lt.right': '✅ Bonne traduction.',
-    'ch.lt.partial': '🟡 Presque : bonne idée, mais vérifiez les détails.',
+    'ch.listenAgain': '▶ Ouvir de novo',
+    'ch.lt.right': '✅ Tradução certa.',
+    'ch.lt.partial': '🟡 Quase: a ideia está certa, mas confira os detalhes.',
     'ch.accent.label': 'Digite o que você ouviu:',
     'ch.accent.yours': 'Sua resposta: <strong>{answer}</strong>',
-    'ch.accent.right': '✅ Correct.',
-    'ch.accent.partial': '🟡 Presque : vérifiez les accents.',
-    'ch.accent.wrong': '❌ Incorrect.',
+    'ch.accent.right': '✅ Certo.',
+    'ch.accent.partial': '🟡 Quase: confira os acentos.',
+    'ch.accent.wrong': '❌ Errado.',
     'ch.static.back': '← Voltar às categorias',
     'ch.static.backChallenges': '← Voltar aos desafios',
     'ch.static.backTrail': '← Voltar à trilha',
@@ -10552,7 +7743,7 @@ const CHALLENGE_I18N = {
     'ch.cloze.instruction': "Choose the right form for each blank:",
     'ch.cloze.blank': "Blank {n}",
     'ch.cloze.chooseAll': "Choose an option for each blank before checking.",
-    'ch.cloze.right': "✅ Bonne réponse.",
+    'ch.cloze.right': "✅ Correct answer.",
     'ch.cloze.yourAnswer': "Your answer",
     'ch.cloze.correct': "Correct answer",
     'ch.cloze.translation': "Translation",
@@ -10579,18 +7770,19 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': "You have finished all the exercises in this level.",
     'ch.queue.back': "Back to levels",
     'ch.listenPron': "Listen to pronunciation",
-    'ch.expr.reveal': "Voir les réponses",
+    'ch.expr.reveal': "See the answers",
     'ch.expr.yourAnswer': "Your answer: {chosen}<br>Correct answer: <strong>{correct}</strong>",
-    'ch.expr.signifies': "signifie <strong>{fr}</strong>.",
+    'ch.expr.signifies': "means <strong>{fr}</strong>.",
     'ch.expr.inPt': "In English: <strong>{pt}</strong>.",
-    'ch.expr.example1': "Exemple 1",
-    'ch.expr.example2': "Exemple 2",
-    'ch.listenFr': "▶ Écouter",
-    'ch.expr.yourTurn': "À vous de jouer",
-    'ch.expr.showAnswer': "Voir la réponse",
-    'ch.expr.right': "✅ Bonne réponse.",
-    'ch.notQuite': "❌ Pas tout à fait.",
-    'ch.lt.hint': "Montrer un indice",
+    'ch.expr.example1': "Example 1",
+    'ch.expr.example2': "Example 2",
+    'ch.listenFr': "▶ Listen",
+    'ch.slow': "Slowly",
+    'ch.expr.yourTurn': "Your turn",
+    'ch.expr.showAnswer': "See the answer",
+    'ch.expr.right': "✅ Correct answer.",
+    'ch.notQuite': "❌ Not quite.",
+    'ch.lt.hint': "Show a hint",
     'ch.lt.label': "Type your translation:",
     'ch.lt.placeholder': "Your translation in English...",
     'ch.verify': "Vérifier",
@@ -10604,13 +7796,31 @@ const CHALLENGE_I18N = {
     'ch.lt.expected': "Expected answer",
     'ch.lt.original': "Original sentence",
     'ch.lt.explanation': "Explanation",
-    'ch.listenAgain': "▶ Écouter encore",
-    'ch.lt.right': "✅ Bonne traduction.",
-    'ch.lt.partial': "🟡 Presque : bonne idée, mais vérifiez les détails.",
+    'ch.listenAgain': "▶ Listen again",
+    'ch.reg.formal': "Formal",
+    'ch.reg.neutral': "Everyday",
+    'ch.reg.familiar': "Among friends",
+    'ch.reg.slang': "Slang",
+    'ch.reg.vulgar': "Can offend",
+    'ch.reg.formal.hint': "Formal register: good with strangers and in serious situations.",
+    'ch.reg.neutral.hint': "Works in almost any situation.",
+    'ch.reg.familiar.hint': "Informal: use with friends and people close to you.",
+    'ch.reg.slang.hint': "Slang: only with people very close to you.",
+    'ch.reg.vulgar.hint': "Vulgar: good to recognize, better not to use.",
+    'ch.album.guess': "What could it mean?",
+    'ch.album.seal': "in your album",
+    'ch.album.locked': "🔒 Premium",
+    'ch.album.listen': "Listen to the expression",
+    'ch.today.title': "Expression of the day",
+    'ch.today.hint': "Listen and try to guess before opening it.",
+    'ch.today.cta': "Find out the meaning",
+    'ch.today.allDone': "🎉 You have discovered every available expression.",
+    'ch.lt.right': "✅ Correct translation.",
+    'ch.lt.partial': "🟡 Almost: right idea, but check the details.",
     'ch.accent.label': "Type what you heard:",
     'ch.accent.yours': "Your answer: <strong>{answer}</strong>",
     'ch.accent.right': "✅ Correct.",
-    'ch.accent.partial': "🟡 Presque : vérifiez les accents.",
+    'ch.accent.partial': "🟡 Almost: check the accents.",
     'ch.accent.wrong': "❌ Incorrect.",
     'ch.static.back': "← Back to categories",
     'ch.static.backChallenges': "← Back to challenges",
@@ -11034,7 +8244,110 @@ const CHALLENGE_LEVELS_ORDER = ['A1', 'A2', 'B1', 'B2'];
 // que o aluno já fechou, tudo aberto por padrão.
 const collapsedChallengeLevels = new Set();
 
+// Registro das expressões (campo próprio `register`, 12/10/2026). Mesmos
+// valores de REGISTER_KEY em fr/scripts/challenges_import/build_lote_expressoes.py.
+// Toda expressão nova precisa ter registro (skill criar-desafios).
+const EXPRESSION_REGISTERS = {
+  formal:   { icon: '🎩' },
+  neutral:  { icon: '🗣' },
+  familiar: { icon: '😎' },
+  slang:    { icon: '🤙' },
+  vulgar:   { icon: '⚠️' },
+};
+
+function expressionRegisterChipHTML(c){
+  const reg = c && Object.prototype.hasOwnProperty.call(EXPRESSION_REGISTERS, c.register) ? c.register : null;
+  if (!reg) return '';
+  return `<span class="expr-reg expr-reg-${reg}" title="${escapeHtmlChallenge(chT('ch.reg.' + reg + '.hint'))}">${EXPRESSION_REGISTERS[reg].icon} ${chT('ch.reg.' + reg)}</span>`;
+}
+
+// Sentido curto mostrado no cartão do álbum (só depois de concluir, para não
+// entregar a resposta). O aviso de registro no fim do texto sai: agora ele é
+// a etiqueta. Site em outro idioma: o sentido em francês.
+function expressionCardMeaning(c){
+  const lang = (typeof getUiLang === 'function' && getUiLang()) || 'pt-BR';
+  const m = c.meaning || {};
+  const raw = lang === 'pt-BR' ? (m.pt || m.fr) : (m.fr || m.pt);
+  return String(raw || '').replace(/\s*(⚠️\s*)?Registro:[\s\S]*$/, '').trim();
+}
+
+function expressionAudioBtnHTML(c, extraClass){
+  if (!c.expressionAudioFile) return '';
+  return `<button type="button" class="expr-play ${extraClass || ''}" data-expr-audio="${escapeHtmlChallenge(c.expressionAudioFile)}" aria-label="${chT('ch.album.listen')}: ${escapeHtmlChallenge(c.canonicalExpression)}" title="${chT('ch.album.listen')}">▶</button>`;
+}
+
+function wireExpressionAudioButtons(container){
+  container.querySelectorAll('[data-expr-audio]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playPregeneratedAudio(`challenges/${btn.dataset.exprAudio}`, btn);
+    });
+  });
+}
+
+// "Expressão de hoje": uma pendente (não trancada) sorteada pelo dia, do
+// nível mais baixo que ainda tem pendentes; "Pode ofender" só se não sobrar
+// outra. Concluir a do dia faz aparecer a próxima.
+function expressionOfTheDay(list){
+  let pending = list.filter(c => !isChallengeCompleted(c.id) && !isChallengeLocked(c));
+  if (!pending.length) return null;
+  const level = CHALLENGE_LEVELS_ORDER.find(lvl => pending.some(c => c.level === lvl));
+  if (level) pending = pending.filter(c => c.level === level);
+  const polite = pending.filter(c => c.register !== 'vulgar');
+  if (polite.length) pending = polite;
+  pending.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  const day = typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10);
+  let h = 0;
+  for (const ch of day) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return pending[h % pending.length];
+}
+
+function expressionTodayHTML(list){
+  const c = expressionOfTheDay(list);
+  if (!c){
+    return list.length ? `<section class="expr-today expr-today-done"><p>${chT('ch.today.allDone')}</p></section>` : '';
+  }
+  return `
+    <section class="expr-today" aria-labelledby="expr-today-title">
+      <div class="expr-today-eyebrow" id="expr-today-title">${chT('ch.today.title')}</div>
+      <div class="expr-today-row">
+        ${expressionAudioBtnHTML(c, 'expr-play-lg')}
+        <div class="expr-today-text">
+          <div class="expr-today-expr">${escapeHtmlChallenge(c.canonicalExpression)}</div>
+          <div class="expr-today-meta"><span class="challenge-card-level">${escapeHtmlChallenge(c.level || '')}</span>${expressionRegisterChipHTML(c)}</div>
+        </div>
+      </div>
+      <p class="expr-today-hint">${chT('ch.today.hint')}</p>
+      <button type="button" class="btn btn-primary expr-today-cta" data-today-open="${escapeHtmlChallenge(c.id)}">${chT('ch.today.cta')}</button>
+    </section>
+  `;
+}
+
+// Cartão de expressão no estilo álbum de figurinhas: pendente tracejada com
+// "O que será que significa?", concluída mostra o sentido e o selo. O áudio
+// fica fora do <button> do cartão (botão dentro de botão não é válido).
+function expressionCardHTML(c){
+  const done = isChallengeCompleted(c.id);
+  const locked = isChallengeLocked(c);
+  const middle = done
+    ? `<span class="expr-card-meaning">${escapeHtmlChallenge(expressionCardMeaning(c))}</span>`
+    : `<span class="expr-card-hint">${locked ? chT('ch.album.locked') : chT('ch.album.guess')}</span>`;
+  return `
+    <div class="expr-card-wrap">
+      <button class="challenge-card expr-card ${done ? 'completed' : ''} ${locked ? 'locked' : ''}" data-challenge-id="${c.id}">
+        ${done ? `<span class="expr-card-seal">${chT('ch.album.seal')}</span>` : ''}
+        <span class="challenge-card-level">${escapeHtmlChallenge(c.level || '')}</span>
+        <span class="challenge-card-expr">${escapeHtmlChallenge(c.canonicalExpression)}</span>
+        ${middle}
+        <span class="expr-card-foot">${expressionRegisterChipHTML(c)}${tierBadgeHTML(challengeTier(c))}</span>
+      </button>
+      ${locked ? '' : expressionAudioBtnHTML(c)}
+    </div>
+  `;
+}
+
 function challengeCardHTML(c){
+  if (c.type === 'expression') return expressionCardHTML(c);
   const done = isChallengeCompleted(c.id);
   const locked = isChallengeLocked(c);
   return `
@@ -11132,6 +8445,7 @@ function renderChallengesList(type){
   // próprios cards -- em vez de abas que escondem os outros níveis.
   cardsWrap.className = 'challenges-level-sections';
   cardsWrap.innerHTML = `
+    ${expressionTodayHTML(published)}
     <div class="challenges-toolbar">
       <input type="search" class="challenges-search" id="challenges-search" placeholder="${chT('ch.search.placeholder')}" aria-label="${chT('ch.search.label')}" autocomplete="off" value="${escapeHtmlChallenge(challengesListSearch)}">
       <div class="challenges-filter-chips" role="group" aria-label="${chT('ch.filter.label')}">
@@ -11141,6 +8455,10 @@ function renderChallengesList(type){
     <div id="challenges-level-sections-inner"></div>
   `;
   const fillSections = () => fillExpressionLevelSections(type, published);
+  wireExpressionAudioButtons(cardsWrap.querySelector('.expr-today') || document.createElement('div'));
+  cardsWrap.querySelectorAll('[data-today-open]').forEach(btn => {
+    btn.addEventListener('click', () => openChallengePlayer(btn.dataset.todayOpen));
+  });
   document.getElementById('challenges-search').addEventListener('input', e => {
     challengesListSearch = e.target.value;
     fillSections();
@@ -11206,6 +8524,7 @@ function fillExpressionLevelSections(type, published){
   inner.querySelectorAll('.challenge-card').forEach(card => {
     card.addEventListener('click', () => openChallengePlayer(card.dataset.challengeId));
   });
+  wireExpressionAudioButtons(inner);
   inner.querySelectorAll('.challenges-level-heading').forEach(btn => {
     btn.addEventListener('click', () => {
       const level = btn.dataset.level;
@@ -11377,6 +8696,7 @@ function renderExpressionQuestionScreen(c){
       <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="${chT('ch.listenPron')}" title="${chT('ch.listenPron')}">🔊</button>
       ${c.expressionAudioFile ? slowAudioIconBtnHTML('challenge-expression-play-slow-btn') : ''}
     </div>
+    ${c.register ? `<div class="expr-question-reg">${expressionRegisterChipHTML(c)}</div>` : ''}
     <div class="challenge-hypothesis">
       <p class="challenge-question">${escapeHtmlChallenge(c.question)}</p>
       <div class="challenge-choices-wrap">
@@ -11872,8 +9192,6 @@ function checkListenTranslateAnswer(c){
   const marked = (outcome !== 'ok' && studentAnswer && analysis) ? markTranslationWords(studentAnswer, analysis.bestRef || c.referenceTranslations[0]) : null;
   const yoursHTML = marked ? markedWordsHTML(marked.student) : escapeHtmlChallenge(studentAnswer || '—');
   const expectedHTML = marked ? markedWordsHTML(marked.reference) : escapeHtmlChallenge((analysis && analysis.bestRef) || lt.refs[0]);
-  const legendHTML = marked && (marked.student.some(p => p.cls === 'bad' || p.cls === 'near') || marked.reference.some(p => p.cls === 'miss'))
-    ? `<p class="tw-legend"><span class="tw-bad">${chT('ch.lt.legend.bad')}</span> <span class="tw-near">${chT('ch.lt.legend.near')}</span> <span class="tw-miss">${chT('ch.lt.legend.miss')}</span></p>` : '';
   const ltBodyHTML = `
       ${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
       ${analysis ? translationAlertsHTML(analysis, outcome) : ''}
@@ -11881,7 +9199,6 @@ function checkListenTranslateAnswer(c){
         <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${yoursHTML}</p>
         <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${expectedHTML}</p>
       </div>
-      ${legendHTML}
       <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
       ${lt.explanation ? `<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.explanation')}</strong>${escapeHtmlChallenge(lt.explanation)}</p>` : ''}
       <div class="audio-btn-row">

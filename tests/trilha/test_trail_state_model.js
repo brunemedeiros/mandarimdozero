@@ -34,8 +34,8 @@ function load(lang){
   const ctx = vm.createContext({ console, Date, Math, JSON, Object, Array, Set, Map });
   const run = (c, f) => vm.runInContext(c, ctx, { filename: f });
   run(read('shared/trail-state-model.js'), 'trail-state-model.js');
-  run(read(lang + '/content.js') + '\n;this.UNITS=UNITS;this.LEVELS=LEVELS;' + (lang === 'fr' ? 'this.MODULES=MODULES;' : ''), 'content.js');
-  const src = read(lang + '/app.js');
+  run(require('../../scripts/lib/course-content.js').composedSource(lang) + '\n;this.UNITS=UNITS;this.LEVELS=LEVELS;' + (lang === 'fr' ? 'this.MODULES=MODULES;' : ''), 'content.js');
+  const src = require('../e4/app-source').withCore(read(lang + '/app.js'));
   const fns = ['trailGroups', 'recalculateUnlockedUnits', 'markUnitCompleted'].concat(lang === 'fr' ? ['unitsOfLevel', 'completeModuleUnits'] : []);
   fns.forEach(f => run(extractFunction(src, f), lang + '/app.js#' + f));
   // dependências com efeitos colaterais: stubs que só contam chamadas

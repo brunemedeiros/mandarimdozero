@@ -33,7 +33,7 @@ for (const lang of ['fr', 'zh']){
   // D. mesmo deck, sem colapso
   check(lang + ' A e B são CardInstances distintos', A !== B && A.cardInstance.id !== B.cardInstance.id && A.id !== B.id);
   // Fonte: caminhos de Review não impõem direção legada a card nativo
-  const src = read(lang + '/app.js');
+  const src = require('../e4/app-source').withCore(read(lang + '/app.js'));
   const code = src.split('\n').filter(l => !l.trim().startsWith('//')).join('\n');
   check(lang + ' fonte (K2-G): sessão não escolhe direção (sem nextCardDirection/reviewDirection)', !/nextCardDirection|reviewDirection/.test(code));
   check(lang + ' fonte (K2-G): gradeCurrentCard não grava lastDirection', !/lastDirection/.test(code));

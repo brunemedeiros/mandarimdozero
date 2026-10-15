@@ -88,7 +88,7 @@ async function boot(browser, port, lang, query){
   page.on('dialog', d => d.accept());
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
-  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
+  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('courses-per-site-language', '0'); } catch (e) {} }); // comportamento antigo (chave de emergência)
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html${query || ''}`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 20000 });
   return { ctx, page, errors };
@@ -167,7 +167,7 @@ async function boot2(ctx, port, lang, query){
   page.on('dialog', d => d.accept());
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB2 }));
-  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
+  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('courses-per-site-language', '0'); } catch (e) {} }); // comportamento antigo (chave de emergência)
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html${query || ''}`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 20000 });
   await page.evaluate(() => window.i18nReady);
@@ -317,7 +317,7 @@ async function triggerWouldGenerate(page){
       U('relato: categoria/gravidade por id estável', sent[0] && sent[0].category === 'traducao' && sent[0].severity_reported === 'pequeno' && sent[0].kind === 'problema');
       U('relato: idioma ESTUDADO preservado', sent[0] && sent[0].language_app_key === appKey);
       U('relato: e-mail do convidado', sent[0] && sent[0].reporter_email === 'a@b.co');
-      U('toast de sucesso traduzido', await page.evaluate(m => [...document.querySelectorAll('*')].some(e => e.children.length === 0 && e.textContent === m), C['report.toast.success']));
+      U('toast de sucesso traduzido', await page.evaluate(m => [...document.querySelectorAll('*')].some(e => [...e.children].every(c => c.classList.contains('emo')) /* ícones do Fluent (shared/emoji-icons.js) */ && e.textContent === m), C['report.toast.success']));
       U('APP_KEY não mudou', await page.evaluate(k => APP_KEY === k, appKey) && before.appKey === appKey);
       // reenviar o mesmo -> duplicata traduzida
       await page.evaluate(() => document.getElementById('report-topbar-btn').click());

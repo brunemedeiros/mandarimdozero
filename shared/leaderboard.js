@@ -203,6 +203,65 @@ async function renderSideRankingCard(){
   });
 }
 
+// ---------- pódio + "faltam X XP" (Ranking completo e Perfil > Amigos) ----------
+// Mesmo formato de linha de fetchLeaderboard/fetchFriendsLeaderboard ({user_id,
+// amount, rank, profile}). Textos com prefixo friends.* porque nasceram na aba
+// Amigos (docs/historico/15); valem para os dois rankings.
+function leaderboardFirstName(profile){
+  const full = profile?.display_name || profile?.username || t('leaderboard.anonymous');
+  return full.split(/\s+/)[0];
+}
+
+function leaderboardAvatarHTML(profile, userId){
+  const name = profile?.display_name || profile?.username || t('leaderboard.anonymous');
+  return profile?.avatar_url
+    ? `<img class="lb-pod-avatar" src="${escapeAttr(profile.avatar_url)}" alt="">`
+    : `<div class="lb-pod-avatar" style="background:${avatarColor(userId)};" aria-hidden="true">${avatarInitials(name)}</div>`;
+}
+
+function leaderboardPodiumHTML(rows, me){
+  const top = rows.slice(0, 3);
+  if (top.length < 2) return '';
+  // Ordem visual de pódio: 2º, 1º, 3º.
+  const order = [top[1], top[0], top[2]].filter(Boolean);
+  return `<div class="lb-podium" style="--pods:${order.length}">${order.map(r => {
+    const isMe = r.user_id === me;
+    const name = isMe ? t('friends.week.you') : leaderboardFirstName(r.profile);
+    return `<div class="lb-pod pos-${r.rank} ${isMe ? 'is-me' : ''}" data-podium-user="${escapeAttr(r.user_id)}">
+      ${leaderboardAvatarHTML(r.profile, r.user_id)}
+      <span class="lb-pod-name">${escapeHTML(name)}</span>
+      <span class="lb-pod-xp">${Number(r.amount || 0)} XP</span>
+      <div class="lb-pod-step" aria-label="${escapeAttr(t('friends.week.place', { n: r.rank }))}">${r.rank}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// "Faltam X XP para você passar Fulano" = XP de quem está logo acima - meu XP + 1
+// (passar, não empatar). Líder vê a vantagem; empate no topo e semana zerada têm frase própria.
+function leaderboardDuelHTML(rows, me){
+  const i = rows.findIndex(r => r.user_id === me);
+  if (i < 0 || rows.length < 2) return '';
+  const mine = Number(rows[i].amount || 0);
+  if (rows.every(r => !Number(r.amount))) return `<div class="lb-duel"><p>${t('friends.duel.noOne')}</p></div>`;
+  if (i === 0){
+    const second = rows[1];
+    const lead = mine - Number(second.amount || 0);
+    const secondName = `<strong>${escapeHTML(leaderboardFirstName(second.profile))}</strong>`;
+    const text = lead > 0 ? tp('friends.duel.ahead', lead, { name: secondName }) : t('friends.duel.tie', { name: secondName });
+    return `<div class="lb-duel is-ahead"><p>${text}</p></div>`;
+  }
+  const above = rows[i - 1];
+  const target = Number(above.amount || 0);
+  const need = target - mine + 1;
+  const pct = target > 0 ? Math.max(4, Math.min(100, Math.round((mine / target) * 100))) : 0;
+  const aboveName = escapeHTML(leaderboardFirstName(above.profile));
+  return `<div class="lb-duel">
+    <p>${tp('friends.duel.behind', need, { name: `<strong>${aboveName}</strong>` })}</p>
+    <div class="lb-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${target}" aria-valuenow="${mine}"><i style="width:${pct}%"></i></div>
+    <div class="lb-bar-labels"><span>${t('friends.week.you')} ${mine}</span><span>${aboveName} ${target}</span></div>
+  </div>`;
+}
+
 function leaderboardRankBadge(rank){
   if (rank === 1) return '🥇';
   if (rank === 2) return '🥈';
@@ -252,12 +311,13 @@ async function fetchUserBadgeGrants(userId){
 async function fetchUserEarnedBadges(userId){
   const { data, error } = await supabaseClient
     .from('earned_badges')
-    .select('badge_id')
-    .eq('user_id', userId)
-    .eq('language_app_key', APP_KEY);
+    .select('badge_id, language_app_key')
+    .eq('user_id', userId);
   if (error){ console.error('Erro ao carregar conquistas do perfil:', error); return []; }
-  const ids = new Set((data || []).map(r => r.badge_id));
-  return BADGES.filter(b => ids.has(b.id));
+  // C4: conquista de curso só do idioma atual; conquista da conta, de qualquer idioma.
+  const ids = new Set((data || []).filter(r => r.language_app_key === APP_KEY || AccountProgress.isAccountBadge(r.badge_id)).map(r => r.badge_id));
+  // Conquistas com níveis: uma por trilha (maior nível, inclusive das conquistas antigas) + clássicas.
+  return summarizeBadgeIds([...ids]);
 }
 
 async function renderLeaderboardView(){
@@ -352,10 +412,17 @@ async function renderLeaderboardView(){
     `;
   }).join('') : emptyHTML;
 
+  // Pódio dos 3 primeiros e "faltam X XP" acima da lista (cara de jogo, docs/historico/15).
+  // A lista continua completa embaixo (leitor de tela e posição de cada um).
+  const meId = (CURRENT_USER && CURRENT_USER.id) || null;
+  const showGame = rows.length >= 2 && !noFriendsYet && !loadFailed;
+  const gameHTML = showGame ? `<div class="lb-game">${leaderboardPodiumHTML(rows, meId)}${leaderboardDuelHTML(rows, meId)}</div>` : '';
+
   wrap.innerHTML = `
-    <div class="leaderboard-week-label">${leaderboardDaysRemainingLabel(weekStart)}</div>
+    <div class="leaderboard-week-label"><span class="lb-days-pill">⏳ ${leaderboardDaysRemainingLabel(weekStart)}</span></div>
     ${modeTabsHTML}
     <div class="leaderboard-tabs" role="tablist" aria-label="${t('leaderboard.scopeAria')}">${scopeTabsHTML}</div>
+    ${gameHTML}
     <div class="leaderboard-list" role="list">${rowsHTML}</div>
     <p class="leaderboard-footnote">${mode === 'friends' ? t('friends.rank.footnoteFriends') : t('leaderboard.footnote')}</p>
   `;
@@ -379,9 +446,9 @@ async function renderLeaderboardView(){
   // por idioma via @username, não mais posição/XP da semana desta linha) --
   // shared/public-profile.js faz sua PRÓPRIA busca a partir do @username,
   // então não precisa mais do `row`/`catalog` já carregados aqui.
-  wrap.querySelectorAll('.leaderboard-row[data-user-id]').forEach(el => {
+  wrap.querySelectorAll('.leaderboard-row[data-user-id], .lb-pod[data-podium-user]').forEach(el => {
     el.addEventListener('click', () => {
-      const row = rows.find(r => r.user_id === el.dataset.userId);
+      const row = rows.find(r => r.user_id === (el.dataset.userId || el.dataset.podiumUser));
       const username = row?.profile?.username;
       if (username && typeof openPublicProfileModalForUsername === 'function') openPublicProfileModalForUsername(username);
     });

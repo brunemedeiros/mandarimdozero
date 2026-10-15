@@ -1,0 +1,260 @@
+[
+ {
+  "name": "addXP",
+  "linesFr": 14,
+  "linesZh": 14,
+  "changed": 2
+ },
+ {
+  "name": "answerSpeedQuestion",
+  "linesFr": 38,
+  "linesZh": 38,
+  "changed": 2
+ },
+ {
+  "name": "renderLessonCompleteScreen",
+  "linesFr": 52,
+  "linesZh": 52,
+  "changed": 2
+ },
+ {
+  "name": "renderUnitCompleteScreen",
+  "linesFr": 60,
+  "linesZh": 60,
+  "changed": 2
+ },
+ {
+  "name": "onMatchTileClick",
+  "linesFr": 68,
+  "linesZh": 68,
+  "changed": 2
+ },
+ {
+  "name": "noteOrConceptReviewHTML",
+  "linesFr": 13,
+  "linesZh": 14,
+  "changed": 3
+ },
+ {
+  "name": "findEnterAdvanceTarget",
+  "linesFr": 15,
+  "linesZh": 12,
+  "changed": 3
+ },
+ {
+  "name": "renderConceptStep",
+  "linesFr": 40,
+  "linesZh": 41,
+  "changed": 3
+ },
+ {
+  "name": "assignTodaysMissions",
+  "linesFr": 7,
+  "linesZh": 7,
+  "changed": 4
+ },
+ {
+  "name": "buildCardsFromUnits",
+  "linesFr": 12,
+  "linesZh": 10,
+  "changed": 4
+ },
+ {
+  "name": "renderMatchGame",
+  "linesFr": 21,
+  "linesZh": 21,
+  "changed": 4
+ },
+ {
+  "name": "flyBlockToSlot",
+  "linesFr": 24,
+  "linesZh": 24,
+  "changed": 4
+ },
+ {
+  "name": "freshAcquisitionState",
+  "linesFr": 29,
+  "linesZh": 29,
+  "changed": 4
+ },
+ {
+  "name": "playPregeneratedAudio",
+  "linesFr": 30,
+  "linesZh": 28,
+  "changed": 4
+ },
+ {
+  "name": "showAnswerPanel",
+  "linesFr": 40,
+  "linesZh": 40,
+  "changed": 4
+ },
+ {
+  "name": "freshDailyBucket",
+  "linesFr": 10,
+  "linesZh": 9,
+  "changed": 5
+ },
+ {
+  "name": "renderDialogueCheckStep",
+  "linesFr": 16,
+  "linesZh": 17,
+  "changed": 5
+ },
+ {
+  "name": "mapUnitDescribe",
+  "linesFr": 29,
+  "linesZh": 28,
+  "changed": 5
+ },
+ {
+  "name": "finishCurrentLesson",
+  "linesFr": 39,
+  "linesZh": 38,
+  "changed": 5
+ },
+ {
+  "name": "audioBtnHTML",
+  "linesFr": 4,
+  "linesZh": 4,
+  "changed": 6
+ },
+ {
+  "name": "maybeSendStudyReminder",
+  "linesFr": 22,
+  "linesZh": 22,
+  "changed": 6
+ },
+ {
+  "name": "wireDontKnowButton",
+  "linesFr": 37,
+  "linesZh": 37,
+  "changed": 6
+ },
+ {
+  "name": "currentStepDefs",
+  "linesFr": 20,
+  "linesZh": 17,
+  "changed": 7
+ },
+ {
+  "name": "dlgPlayLine",
+  "linesFr": 43,
+  "linesZh": 42,
+  "changed": 7
+ },
+ {
+  "name": "renderProgressLineChart",
+  "linesFr": 44,
+  "linesZh": 45,
+  "changed": 7
+ },
+ {
+  "name": "renderExerciseStep",
+  "linesFr": 52,
+  "linesZh": 51,
+  "changed": 7
+ },
+ {
+  "name": "renderMultipleChoiceCard",
+  "linesFr": 56,
+  "linesZh": 57,
+  "changed": 7
+ },
+ {
+  "name": "renderTrueFalseExercise",
+  "linesFr": 57,
+  "linesZh": 58,
+  "changed": 7
+ },
+ {
+  "name": "buildReorderDistractors",
+  "linesFr": 24,
+  "linesZh": 24,
+  "changed": 8
+ },
+ {
+  "name": "serializeState",
+  "linesFr": 34,
+  "linesZh": 30,
+  "changed": 10
+ },
+ {
+  "name": "renderBlockIntroCard",
+  "linesFr": 38,
+  "linesZh": 41,
+  "changed": 11
+ },
+ {
+  "name": "renderSpeedReview",
+  "linesFr": 115,
+  "linesZh": 116,
+  "changed": 11
+ },
+ {
+  "name": "renderStepProgress",
+  "linesFr": 33,
+  "linesZh": 27,
+  "changed": 12
+ },
+ {
+  "name": "buildUnitBlock",
+  "linesFr": 95,
+  "linesZh": 90,
+  "changed": 13
+ },
+ {
+  "name": "renderReviewView",
+  "linesFr": 108,
+  "linesZh": 102,
+  "changed": 14
+ },
+ {
+  "name": "renderMultipleChoiceExercise",
+  "linesFr": 74,
+  "linesZh": 75,
+  "changed": 19
+ },
+ {
+  "name": "renderDialogueStep",
+  "linesFr": 126,
+  "linesZh": 128,
+  "changed": 20
+ },
+ {
+  "name": "renderClozeCard",
+  "linesFr": 53,
+  "linesZh": 58,
+  "changed": 25
+ },
+ {
+  "name": "renderTypeAnswerCard",
+  "linesFr": 58,
+  "linesZh": 61,
+  "changed": 25
+ },
+ {
+  "name": "renderVocabTypeExercise",
+  "linesFr": 62,
+  "linesZh": 64,
+  "changed": 30
+ },
+ {
+  "name": "renderReorderExercise",
+  "linesFr": 110,
+  "linesZh": 109,
+  "changed": 31
+ },
+ {
+  "name": "renderDialogueCheck",
+  "linesFr": 95,
+  "linesZh": 97,
+  "changed": 34
+ },
+ {
+  "name": "renderClozeExercise",
+  "linesFr": 105,
+  "linesZh": 117,
+  "changed": 42
+ }
+]

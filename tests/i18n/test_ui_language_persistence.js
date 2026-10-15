@@ -44,6 +44,9 @@ function makeAuthEnv({ row = null, search = '', uiLang = 'pt-BR', upsertDelayMs 
   };
   sb.window = sb;
   vm.createContext(sb);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'languages/registry.js'), 'utf8'), sb);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'shared/course-storage.js'), 'utf8'), sb);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'shared/account-progress.js'), 'utf8'), sb);
   vm.runInContext(fs.readFileSync(path.join(ROOT, 'shared/language-pref.js'), 'utf8'), sb);
   vm.runInContext(fs.readFileSync(path.join(ROOT, 'shared/auth.js'), 'utf8'), sb);
   const run = code => vm.runInContext(code, sb);

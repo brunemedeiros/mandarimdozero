@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Gera os artefatos de PWA/identidade visual a partir de TRÊS fontes:
-languages/index.js (id/name/appKey de cada idioma -- fonte de verdade já
+languages/registry.json (id/name/appKey de cada idioma -- fonte de verdade já
 existente do sistema de idiomas, ver Fase A3/B1 da tarefa de rebranding),
 shared/app-identity.json (dados realmente globais da plataforma: marca
 pessoal, cor/descrição por app) e shared/brand/ (logo/ícone-mestre).
@@ -52,12 +52,12 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IDENTITY_PATH = os.path.join(ROOT, 'shared', 'app-identity.json')
-LANGUAGES_JS_PATH = os.path.join(ROOT, 'languages', 'index.js')
+LANGUAGES_JSON_PATH = os.path.join(ROOT, 'languages', 'registry.json')
 BRAND_DIR = os.path.join(ROOT, 'shared', 'brand')
 
 # Molde único de "[Idioma] com Prof. Brune" (Fase A3/B1 da tarefa de
 # rebranding) -- nunca digitado à mão por idioma, sempre derivado do nome
-# puro que languages/index.js já guarda (id/name/appKey continuam morando
+# puro que languages/registry.json já guarda (id/name/appKey continuam morando
 # só lá -- este script NUNCA duplica esses três campos, só lê).
 COURSE_NAME_TEMPLATE = '{name} com Prof. Brune'
 
@@ -83,52 +83,23 @@ def load_identity():
         return json.load(f)
 
 
-# languages/index.js é JS de verdade (tem SVG de bandeira inline, cor,
-# path...), não dá pra importar de Python sem motor de JS -- mas os únicos
-# três campos que este script precisa (id/name/appKey) são simples o
-# bastante pra extrair com regex de forma confiável: cada objeto de
-# AVAILABLE_LANGUAGES começa com `id: '...'`, e sempre tem `appKey: '...'`
-# e `name: '...'` logo depois (antes do próximo `id:` ou do fim do array).
-# Nunca reescreve languages/index.js -- só lê. Se a estrutura do arquivo
-# mudar de um jeito que quebre essa suposição, o assert abaixo falha alto
-# e visível, em vez de gerar manifest errado silenciosamente.
-_LANG_BLOCK_RE = re.compile(
-    r"id:\s*'([^']+)'.*?appKey:\s*'([^']+)'.*?name:\s*'([^']+)'",
-    re.DOTALL,
-)
-
-
+# A fonte de id/name/appKey é languages/registry.json (JSON puro, lido direto;
+# languages/registry.js é gerado a partir dele). Idiomas desabilitados (ex.: pt
+# antes da E7) entram na lista, mas só geram manifest se estiverem em
+# shared/app-identity.json.
 def parse_languages_core():
-    with open(LANGUAGES_JS_PATH, encoding='utf-8') as f:
-        js = f.read()
-    array_start = js.index('AVAILABLE_LANGUAGES')
-    array_end = js.index('\n];', array_start)
-    array_src = js[array_start:array_end]
-
-    languages = []
-    for id_match in re.finditer(r"\bid:\s*'([^']+)'", array_src):
-        # Janela desta linguagem até o próximo `id:` (ou o fim do array),
-        # pra nunca vazar appKey/name de um idioma seguinte se algum campo
-        # novo empurrar a distância entre eles.
-        window_end = array_src.find("id: '", id_match.end())
-        window = array_src[id_match.start():window_end if window_end != -1 else len(array_src)]
-        block = _LANG_BLOCK_RE.search(window)
-        if not block:
-            raise ValueError(
-                f"Não consegui achar appKey/name pro idioma '{id_match.group(1)}' em "
-                f"{os.path.relpath(LANGUAGES_JS_PATH, ROOT)} -- estrutura do arquivo mudou?"
-            )
-        languages.append({'id': block.group(1), 'appKey': block.group(2), 'name': block.group(3)})
-
+    with open(LANGUAGES_JSON_PATH, encoding='utf-8') as f:
+        data = json.load(f)
+    languages = [{'id': l['id'], 'appKey': l['appKey'], 'name': l['name']} for l in data['languages']]
     if not languages:
-        raise ValueError(f"Nenhum idioma encontrado em {os.path.relpath(LANGUAGES_JS_PATH, ROOT)}")
+        raise ValueError(f"Nenhum idioma encontrado em {os.path.relpath(LANGUAGES_JSON_PATH, ROOT)}")
     return languages
 
 
 def write_manifest(lang_id, app, brand):
     manifest = {
         'name': app['name'],  # já injetado por main() a partir de course_name() -- ver ali
-        'short_name': app['shortName'],  # idem -- vem de languages/index.js, nunca digitado aqui
+        'short_name': app['shortName'],  # idem -- vem de languages/registry.json, nunca digitado aqui
         'description': app['description'],
         'start_url': './',
         'scope': './',
@@ -228,7 +199,7 @@ def main():
     languages_core = parse_languages_core()
     print(f"Gerando assets de PWA/marca pra \"{brand['productName']}\"...")
 
-    # Injeta name/shortName computados a partir de languages/index.js
+    # Injeta name/shortName computados a partir de languages/registry.json
     # (fonte de verdade de id/name/appKey) dentro de cada app -- nunca
     # digitados à mão em shared/app-identity.json, que guarda só o que é
     # realmente por-app e não-derivável (description/themeColor/
@@ -240,7 +211,7 @@ def main():
         if lang_id not in languages_by_id:
             raise ValueError(
                 f"shared/app-identity.json tem o app '{lang_id}' mas ele não existe em "
-                f"languages/index.js -- os dois precisam concordar em quais idiomas existem."
+                f"languages/registry.json -- os dois precisam concordar em quais idiomas existem."
             )
         app['name'] = course_name(languages_by_id[lang_id]['name'])
         app['shortName'] = languages_by_id[lang_id]['name']

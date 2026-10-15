@@ -22,7 +22,7 @@ async function modal(browser, port, lang){
   page.on('pageerror', e => errors.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
-  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
+  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('courses-per-site-language', '0'); } catch (e) {} }); // comportamento antigo (chave de emergência); o novo está em tests/curso-progresso/test_*_cursos_browser.js
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 20000 });
   const vis = () => page.evaluate(() => document.getElementById('ui-language-confirm-modal').style.display);
@@ -39,6 +39,8 @@ async function modal(browser, port, lang){
   await page.waitForFunction(() => getUiLang() === 'en', null, { timeout: 10000 });
   check(`${lang}: confirmar troca para inglês`, (await vis()) === 'none');
   await sel('pt-BR');
+  // o catálogo em inglês pode chegar um instante depois de getUiLang() virar 'en' (corrida que fazia o teste falhar sob carga)
+  await page.waitForFunction(() => /Portuguese.*progress stays saved/.test(document.getElementById('ui-language-confirm-body').textContent), null, { timeout: 5000 }).catch(() => {});
   check(`${lang}: aviso de volta já em inglês`, /Portuguese.*progress stays saved/.test(await body()), await body());
   await page.click('#ui-language-confirm-yes');
   await page.waitForFunction(() => getUiLang() === 'pt-BR', null, { timeout: 10000 });

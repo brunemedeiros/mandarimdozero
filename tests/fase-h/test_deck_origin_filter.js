@@ -141,12 +141,15 @@ async function bootPage(browser, lang, port){
     check(lang + ' filtro study não altera escopo: nada de fora do Deck', r.n === 3 && r.origins.join() === 'teacher', r);
 
     // 7) Review geral fora de Deck: filtro continua funcionando
-    for (const [f, origin] of [['teacher', 'teacher'], ['self', 'self'], ['study', 'study']]){
+    // 2026-10-14: cartões da professora saíram da Revisão geral (aba Aluno > Revisão); filtro salvo 'teacher' vale como 'all'.
+    for (const [f, origin] of [['teacher', 'self,study'], ['self', 'self'], ['study', 'study']]){
       const g = await ev(([f]) => { STATE.studySettings.reviewOriginFilter = f; const p = eligibleReviewPool(); STATE.reviewSessionUnitFilter = null; STATE.reviewSessionDeckId = null; /* mesma entrada de openReviewSession */ startReviewSession(); return { pool: [...new Set(p.map(c => c.origin))].sort(), queue: [...new Set(STATE.reviewQueue.map(c => c.origin))].sort(), deckSession: STATE.reviewSessionDeckId }; }, [f]);
-      check(`${lang} Review geral filtro ${f}: só origem ${origin}`, g.pool.join() === origin && g.queue.every(o => o === origin) && g.deckSession === null, g);
+      check(`${lang} Review geral filtro ${f}: origens ${origin}`, g.pool.join() === origin && g.queue.every(o => origin.split(',').includes(o)) && g.deckSession === null, g);
     }
     const gAll = await ev(() => { STATE.studySettings.reviewOriginFilter = 'all'; return [...new Set(eligibleReviewPool().map(c => c.origin))].sort(); });
-    check(lang + ' Review geral filtro all: todas as origens', gAll.join() === 'self,study,teacher', gAll);
+    check(lang + ' Review geral filtro all: todas as origens menos a da professora', gAll.join() === 'self,study', gAll);
+    const gClass = await ev(() => { STATE.reviewSessionClassReview = true; const p = [...new Set(eligibleReviewPool().map(c => c.origin))]; STATE.reviewSessionClassReview = false; return p; });
+    check(lang + ' sessão Aluno > Revisão: só origem teacher', gClass.join() === 'teacher', gClass);
 
     // 8) valor persistido intacto entrar/sair de Deck (inclusive serializado)
     r = await ev(async () => {
@@ -181,7 +184,7 @@ async function bootPage(browser, lang, port){
     r = await ev(async () => { STATE.studySettings.reviewOriginFilter = 'all'; await startDeckReviewSession(99999); return { n: STATE.reviewQueue.length }; });
     check(lang + ' Deck inexistente/alheio: nada entra', r.n === 0, r);
     // Estrutura: eligibleReviewPool geral inalterada e eligibleDeckReviewPool sem origem
-    r = await ev(() => { STATE.studySettings.reviewOriginFilter = 'teacher'; return { gen: eligibleReviewPool().every(c => c.origin === 'teacher'), deck: [...new Set(eligibleDeckReviewPool().map(c => c.origin))].sort() }; });
+    r = await ev(() => { STATE.studySettings.reviewOriginFilter = 'self'; return { gen: eligibleReviewPool().every(c => c.origin === 'self'), deck: [...new Set(eligibleDeckReviewPool().map(c => c.origin))].sort() }; });
     check(lang + ' estrutura: geral filtra, pool do Deck não filtra origem', r.gen && r.deck.join() === 'self,study,teacher', r);
 
     check(lang + ' nenhum pageerror', errors.length === 0, errors.slice(0, 3));
