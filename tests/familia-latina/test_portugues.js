@@ -66,6 +66,18 @@ check('modo "quase": Está. para está = ok (maiúscula e ponto não contam)', F
 check('modo "quase": "obrigada" aceita em "obrigado / obrigada"', FL.avaliarRespostaDigitada('obrigada', 'obrigado / obrigada', { acento: 'quase' }), 'ok');
 check('modo "quase": erro de letra = errou', FL.avaliarRespostaDigitada('abrigado', 'obrigado', { acento: 'quase' }), 'errou');
 check('modo "tolerante": sem til = ok', FL.avaliarRespostaDigitada('pao', 'pão', { acento: 'tolerante' }), 'ok');
+// Decisão da dona (2026-10-15): no pt, falta de acento nos exercícios de digitar = Quase. A configuração do pt já vem assim.
+check('pt (decisão): configuração com acentoNaDigitacao = quase', IDIOMAS.pt.acentoNaDigitacao, 'quase');
+check('pt: "avô" por "avó" = quase', PT.avaliarRespostaDigitada('avô', 'avó'), 'quase');
+check('pt: "pais" por "país" = quase', PT.avaliarRespostaDigitada('pais', 'país'), 'quase');
+check('pt: "pao" por "pão" = quase (nem certo, nem erro total)', PT.avaliarRespostaDigitada('pao', 'pão'), 'quase');
+check('pt: "coracao" por "coração" = quase', PT.avaliarRespostaDigitada('coracao', 'coração'), 'quase');
+check('pt: "Coração!" = ok (maiúscula e pontuação não contam)', PT.avaliarRespostaDigitada('Coração!', 'coração'), 'ok');
+check('pt: "copo d’água" (apóstrofo do celular) = ok', PT.avaliarRespostaDigitada('copo d’água', "copo d'água"), 'ok');
+check('pt: "corasão" = errou (s por ç é grafia)', PT.avaliarRespostaDigitada('corasão', 'coração'), 'errou');
+check('pt: vazio = errou', PT.avaliarRespostaDigitada('', 'pão'), 'errou');
+check('pt: todos os pares de acento da config viram quase entre si',
+  IDIOMAS.pt.paresDeAcento.every(p => p.every(a => p.every(b => a === b || PT.avaliarRespostaDigitada(a, b) === 'quase'))), true);
 check('todos os pares de acento da config diferem só no acento',
   IDIOMAS.pt.paresDeAcento.every(p => p.every(w => FL.semAcento(w) === FL.semAcento(p[0])) && new Set(p).size === p.length), true);
 check('separadores: "segunda feira" por "segunda-feira" = ok (hífen = espaço)', PT.avaliarComSeparadores('segunda feira', ['segunda-feira']), 'ok');

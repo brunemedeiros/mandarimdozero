@@ -18,6 +18,11 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
   Material) gate `isTeacherUser()` (papel, `shared/permissions.js` + RPC `my_permissions`), nunca o Admin Mode.
 - Papéis/permissões vêm do banco (075/076: `account_roles`, `role_permissions`); a tela só esconde, quem barra é RLS/RPC.
   Dar/tirar plano só pelas RPCs `admin_grant_role`/`admin_revoke_role` (UPDATE direto em `profiles.plan_tier` falha).
+- Aba **Alunos** (Design System novo): quadro geral com situação (Em dia 0 a 3 dias, Atenção 4 a 6, Parado 7+) e ficha em página própria; peças HTML em `shared/teacher-students-ui.js`, dados e eventos em `shared/admin-students.js`. Vincular direto (janela) é só da admin; a professora convida pela seção "Convidar aluno" (`shared/teacher-invites.js`, DS: busca, link, pendentes; confirmações pelo `PainelUI.confirmar`). Ficha tem Decks do aluno em árvore; `fetchStudentPanelData`/`renderStudentPanelHTML` alimentam o Analytics do perfil público. Remover vínculo usa `PainelUI.confirmar`. Testes: `tests/painel-alunos/`, `tests/k10/`.
+- Aba **Aulas**: continua com a tela antiga da `main` (`shared/admin-class-logs.js`, calendário, Presença, Notion, link de agenda). A versão no Design System (`shared/teacher-classlogs-ui.js`) ficou na branch `claude/aulas-design-system`, para um PR separado quando a sessão das Aulas parar de mexer na tela; precisa de prévia do calendário e do link de agenda.
+- Aba **Cartões** (Design System novo): abas Criar cartão / Cartões criados; o Banco de Revisão é a sub-navegação "Cartões | Banco de Revisão" do painel e mantém o visual antigo. HTML em `shared/teacher-cards-ui.js`, dados e eventos em `shared/admin-flashcards.js` (ganchos `data-*` preservados; testes fase-g/h/i usam `tests/painel-cartoes/helpers.js`). Testes: `tests/painel-cartoes/`.
+- Aba **Material de apoio** (Design System novo): lista por mês de envio + formulário ao lado; envio a várias pessoas = 1 linha por aluno, agrupadas na tela (`tmtGroupMaterials`); editar/apagar vale para o envio todo; editar não troca o arquivo; link só vira href se for http(s) (também na vista da aluna). HTML em `shared/teacher-materials-ui.js`, dados e eventos em `shared/admin-support-materials.js`. Testes: `tests/painel-materiais/`.
+- **Painel de Admin** (Design System novo, 5 abas): navegação em `shared/admin-panel.js`; cada aba tem peças de HTML `shared/admin-<aba>-ui.js` (dado -> string, testadas em Node) e controlador `shared/admin-<aba>.js` (dados, eventos delegados). Analytics ainda divide cálculos em `admin-analytics-calc.js`. Janelas são `<dialog class="p-dialogo">` montadas pela tela (nada de modais no index.html); apagar/tirar acesso/enviar e-mail usam `PainelUI.confirmar`. Admin Mode só no botão 🔒 do topo. Manter `data-admin-section`, `#view-admin-badges` e `isAdminUser` (testes antigos). Testes: `tests/painel-admin/` (harness com banco em memória). Analytics busca em páginas de 1000 (teto 50000 eventos, 10000 técnicos) e Reports tem teto de 200: os dois avisam na tela quando cortam.
 - Visual dos painéis: classe `.panel-view` (seletor `.deck-topbar`, títulos `.panel-h`/`.section-label` sem caixa-alta).
 - Vínculo professora↔aluno é por idioma (`teacher_students`, `status='active'`); remover vínculo nunca apaga progresso.
 - Leitura de progresso de outra conta só por RPC `security definer` com checagem de vínculo (059, 070).
@@ -28,6 +33,9 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
 - Telas com seleção de alunos: seleção pode ficar vazia, filtro por idioma ativo, busca por nome/@usuário.
 - Notificações: categorias em `notification_rules`; novas categorias precisam decidir se aparecem na matriz de
   Configurações > Notificações.
+- Sino da professora (108, `shared/teacher-panel.js`): aviso sobre aluno = `notifications.audience='teacher'` (gatilho: categoria
+  `supervisao` ou aba `teacher-mural`/`teacher-panel`), de qualquer idioma; o sino do topo filtra `audience<>'teacher'`.
+  Aviso novo para a professora: frase nova também em `_teacher_notice_params` + chave `panel.tbell.ev.*`. Doc: `docs/historico/20-*`.
 - Banco de Revisão (`shared/review-bank*.js`, permissão `review_bank` do plano Professora, migrations 081 a 086): aluno do Banco
   (`review_bank_students`) existe com ou sem conta; só `linked_student_id` (conta com vínculo ativo, mesmo idioma) gera cartão em
   "Cartões da professora". Aprovar = RPC `approve_review_bank_item` (atômica, 1 cartão por item); cortar arquiva, nunca apaga.
@@ -41,7 +49,8 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
 - Calendário (101): horário opcional + duração + `time_zone` de quem registrou; mostrar sempre no fuso de quem vê
   (`classLogViewerSlot`). Grade do mês comum a professora e aluno: `classCalendarHTML` em `shared/teacher-class-logs.js`.
   Duração = seletor 30 min a 5h (`CLASS_LOG_DURATIONS`). Link de agenda (103): `class_calendar_feed` + Edge Function
-  `class-calendar-feed` (verify_jwt false, token de 256 bits); o feed nunca leva Anotações nem Observações.
+  `class-calendar-feed` (verify_jwt false; senha de 16 caracteres, 107); o feed nunca leva Anotações nem Observações.
+  Endereço bonito `agenda.profbrune.com.br/<senha>` via Netlify (`infra/agenda-netlify`), ligado por `CALENDAR_FEED_HOST`.
 - Rotina automática do Banco (`supabase/functions/review-bank-agent`, migrations 089, 090 e 097 a 100): a tarefa da madrugada só INSERE itens/recaps de alunos
   com `agent_managed = true` e gera cartões pelo mesmo motor do site; `engine.generated.mjs` é GERADO (`node scripts/build-review-bank-agent.js`,
   nunca editar à mão). Mudou `shared/review-bank*.js` ou o motor de cartões: regerar, rodar `tests/banco-revisao/test_agent_core.js`, novo deploy.

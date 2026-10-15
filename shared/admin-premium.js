@@ -12,18 +12,15 @@
 // banco para outra conta (falhava em silêncio); a RPC mantém plan_tier/role
 // como espelho para o código antigo.
 //
-// Depende de: shared/supabase-client.js, shared/toast.js (showToast),
-// shared/profile.js (escapeHTML), shared/utils.js (loadingHTML).
+// Visual (Design System do painel): peças de HTML em shared/admin-plans-ui.js. Desligar o que alguém já tem (tirar um plano,
+// desligar uma permissão de um tipo de conta) pede confirmação (PainelUI.confirmar); ligar não pede.
+//
+// Depende de: shared/supabase-client.js, shared/toast.js (showToast), shared/admin-plans-ui.js, shared/painel/painel-ui.js.
 
 const ADMIN_PLANS_STATE = { query: '', results: [], active: -1, selected: null, timer: null, seq: 0 };
-const PLAN_GRANTABLE_ROLES = ['premium_basic', 'premium_pro', 'teacher'];
-const PLAN_MATRIX_ROLES = ['user', 'student', 'premium_basic', 'premium_pro', 'teacher'];
 
-function planRoleLabel(role){ return t(`plans.role.${role}`); }
-
-function planInitial(p){
-  const s = String(p.display_name || p.username || '?').trim();
-  return escapeHTML((s[0] || '?').toUpperCase());
+async function plansConfirm(opts){
+  return (window.PainelUI && PainelUI.confirmar) ? PainelUI.confirmar(Object.assign({ cancelar: t('plans.confirm.cancel'), perigo: true }, opts)) : confirm(opts.descricao);
 }
 
 async function renderAdminPremiumView(){
@@ -33,26 +30,8 @@ async function renderAdminPremiumView(){
     wrap.innerHTML = `<p class="profile-empty-note">${t('admin.premium.adminOnly')}</p>`;
     return;
   }
-  ADMIN_PLANS_STATE.selected = null;
-  wrap.innerHTML = `
-    <section class="panel-section" aria-labelledby="plans-grant-title">
-      <h3 class="panel-h" id="plans-grant-title">${t('plans.grant.title')}</h3>
-      <p class="panel-hint">${t('plans.grant.hint')}</p>
-      <div class="plans-search" role="combobox" aria-expanded="false" aria-owns="plans-search-list" aria-haspopup="listbox" id="plans-search-box">
-        <label class="sr-only" for="plans-search-input">${t('plans.search.label')}</label>
-        <input type="search" id="plans-search-input" class="profile-edit-input plans-search-input" placeholder="${t('plans.search.placeholder')}"
-          autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="plans-search-list">
-        <ul class="plans-search-list" id="plans-search-list" role="listbox" hidden></ul>
-        <p class="plans-search-status" id="plans-search-status" aria-live="polite"></p>
-      </div>
-      <div id="plans-account" aria-live="polite"></div>
-    </section>
-    <section class="panel-section" aria-labelledby="plans-matrix-title">
-      <h3 class="panel-h" id="plans-matrix-title">${t('plans.matrix.title')}</h3>
-      <p class="panel-hint">${t('plans.matrix.hint')}</p>
-      <div id="plans-matrix">${loadingHTML()}</div>
-    </section>
-  `;
+  ADMIN_PLANS_STATE.selected = null; ADMIN_PLANS_STATE.results = []; ADMIN_PLANS_STATE.active = -1;
+  wrap.innerHTML = plnPageHTML();
   wirePlansSearch();
   renderPlansMatrix();
 }
@@ -64,6 +43,7 @@ function wirePlansSearch(){
     clearTimeout(ADMIN_PLANS_STATE.timer);
     ADMIN_PLANS_STATE.timer = setTimeout(() => runPlansSearch(input.value), 220);
   });
+  input.addEventListener('blur', () => setTimeout(closePlansList, 120));
   input.addEventListener('keydown', (e) => {
     const n = ADMIN_PLANS_STATE.results.length;
     if (e.key === 'ArrowDown' && n){ e.preventDefault(); setPlansActive((ADMIN_PLANS_STATE.active + 1) % n); }
@@ -78,13 +58,9 @@ function wirePlansSearch(){
   });
 }
 
-function planSearchTerm(raw){
-  return String(raw || '').trim().replace(/^@+/, '').replace(/[%,()*\\]/g, '');
-}
-
 async function runPlansSearch(raw, pickFirst){
   const status = document.getElementById('plans-search-status');
-  const q = planSearchTerm(raw);
+  const q = plnSearchTerm(raw);
   ADMIN_PLANS_STATE.query = String(raw || '').trim();
   if (q.length < 2){
     ADMIN_PLANS_STATE.results = [];
@@ -117,30 +93,24 @@ async function runPlansSearch(raw, pickFirst){
 
 function renderPlansList(){
   const list = document.getElementById('plans-search-list');
-  const box = document.getElementById('plans-search-box');
+  const input = document.getElementById('plans-search-input');
   const rows = ADMIN_PLANS_STATE.results;
-  if (!rows.length){ closePlansList(); return; }
-  list.innerHTML = rows.map((p, i) => `
-    <li class="plans-option" role="option" id="plans-opt-${i}" data-i="${i}" aria-selected="${i === ADMIN_PLANS_STATE.active}">
-      <span class="plans-avatar" aria-hidden="true">${planInitial(p)}</span>
-      <span class="plans-option-text">
-        <span class="plans-option-name">${escapeHTML(p.display_name || p.username)}</span>
-        <span class="plans-option-user">@${escapeHTML(p.username || '')}</span>
-      </span>
-      ${p.plan_tier === 'premium' ? `<span class="plans-chip">${t('plans.chip.premium')}</span>` : ''}
-      ${p.role === 'teacher' || p.role === 'admin' ? `<span class="plans-chip">${planRoleLabel(p.role === 'admin' ? 'admin' : 'teacher')}</span>` : ''}
-    </li>`).join('');
+  if (!list || !rows.length){ closePlansList(); return; }
+  list.innerHTML = plnOptionsHTML(rows, ADMIN_PLANS_STATE.active);
   list.hidden = false;
-  box.setAttribute('aria-expanded', 'true');
-  document.getElementById('plans-search-input').setAttribute('aria-activedescendant', ADMIN_PLANS_STATE.active >= 0 ? `plans-opt-${ADMIN_PLANS_STATE.active}` : '');
-  list.querySelectorAll('.plans-option').forEach(li => {
+  input.setAttribute('aria-expanded', 'true');
+  input.setAttribute('aria-activedescendant', ADMIN_PLANS_STATE.active >= 0 ? `plans-opt-${ADMIN_PLANS_STATE.active}` : '');
+  list.querySelectorAll('[data-plano-opcao]').forEach(li => {
     li.addEventListener('mousedown', (e) => { e.preventDefault(); selectPlansAccount(ADMIN_PLANS_STATE.results[+li.dataset.i]); });
   });
 }
 
 function setPlansActive(i){
   ADMIN_PLANS_STATE.active = i;
-  document.querySelectorAll('#plans-search-list .plans-option').forEach(li => li.setAttribute('aria-selected', String(+li.dataset.i === i)));
+  document.querySelectorAll('#plans-search-list [data-plano-opcao]').forEach(li => {
+    const on = +li.dataset.i === i;
+    li.classList.toggle('p-ativo', on); li.setAttribute('aria-selected', String(on));
+  });
   document.getElementById('plans-search-input').setAttribute('aria-activedescendant', `plans-opt-${i}`);
   document.getElementById(`plans-opt-${i}`)?.scrollIntoView({ block: 'nearest' });
 }
@@ -148,7 +118,7 @@ function setPlansActive(i){
 function closePlansList(){
   const list = document.getElementById('plans-search-list');
   if (list){ list.hidden = true; list.innerHTML = ''; }
-  document.getElementById('plans-search-box')?.setAttribute('aria-expanded', 'false');
+  document.getElementById('plans-search-input')?.setAttribute('aria-expanded', 'false');
 }
 
 // ---------- Conta escolhida ----------
@@ -160,51 +130,33 @@ async function selectPlansAccount(profile){
   ADMIN_PLANS_STATE.query = input.value;
   ADMIN_PLANS_STATE.selected = profile;
   const box = document.getElementById('plans-account');
-  box.innerHTML = loadingHTML();
+  box.innerHTML = `<div class="p-carregando" role="status"><span class="p-spinner" aria-hidden="true"></span><span>${escapeHTML(t('plans.loading'))}</span></div>`;
   const { data, error } = await supabaseClient.rpc('admin_get_account_roles', { p_user: profile.user_id });
   if (ADMIN_PLANS_STATE.selected !== profile) return;
-  if (error || !data){ box.innerHTML = `<p class="profile-empty-note">${t('plans.loadFailed')}</p>`; return; }
+  if (error || !data){ box.innerHTML = `<div class="p-alerta p-alerta--erro" role="alert"><span>${escapeHTML(t('plans.loadFailed'))}</span></div>`; return; }
   renderPlansAccount(profile, data);
 }
 
 function renderPlansAccount(profile, info){
   const box = document.getElementById('plans-account');
-  const roles = Array.isArray(info.roles) ? info.roles : [];
-  const isStudent = roles.includes('student');
-  box.innerHTML = `
-    <div class="settings-card plans-account-card">
-      <div class="settings-row plans-account-head">
-        <span class="plans-avatar plans-avatar-lg" aria-hidden="true">${planInitial(profile)}</span>
-        <div class="plans-option-text">
-          <span class="plans-option-name">${escapeHTML(profile.display_name || profile.username)}</span>
-          <span class="plans-option-user">@${escapeHTML(profile.username || '')}</span>
-        </div>
-      </div>
-      ${info.admin ? `<div class="settings-row"><div class="pref-row-text"><div class="pref-row-title">${planRoleLabel('admin')}</div><div class="pref-row-sub">${t('plans.role.adminNote')}</div></div></div>` : ''}
-      ${PLAN_GRANTABLE_ROLES.map(role => `
-        <div class="settings-row">
-          <div class="pref-row-text"><div class="pref-row-title" id="plans-role-${role}">${planRoleLabel(role)}</div></div>
-          <button type="button" class="pref-switch" role="switch" aria-labelledby="plans-role-${role}" data-plan-role="${role}" aria-checked="${roles.includes(role)}"><span class="pref-switch-knob"></span></button>
-        </div>`).join('')}
-      <div class="settings-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title">${planRoleLabel('student')}${isStudent ? ' ✓' : ''}</div>
-          <div class="pref-row-sub">${t('plans.role.studentNote')}</div>
-        </div>
-      </div>
-    </div>`;
+  box.innerHTML = plnAccountHTML(profile, info);
   box.querySelectorAll('[data-plan-role]').forEach(sw => {
-    sw.addEventListener('click', async () => {
+    sw.addEventListener('change', async () => {
       const role = sw.dataset.planRole;
-      const turnOn = sw.getAttribute('aria-checked') !== 'true';
+      const turnOn = sw.checked;
+      const undo = () => { sw.checked = !turnOn; sw.setAttribute('aria-checked', String(!turnOn)); };
+      if (!turnOn){
+        const ok = await plansConfirm({ titulo: t('plans.confirm.revoke.title', { role: plnRoleLabel(role), username: profile.username }), descricao: t('plans.confirm.revoke.text'), confirmar: t('plans.confirm.revoke.confirm') });
+        if (!ok){ undo(); return; }
+      }
       sw.disabled = true;
       const { error } = await supabaseClient.rpc(turnOn ? 'admin_grant_role' : 'admin_revoke_role', turnOn
         ? { p_user: profile.user_id, p_role: role, p_expires_at: null }
         : { p_user: profile.user_id, p_role: role });
       sw.disabled = false;
-      if (error){ showToast(t('plans.failed')); return; }
+      if (error){ undo(); showToast(t('plans.failed')); return; }
       sw.setAttribute('aria-checked', String(turnOn));
-      showToast(t(turnOn ? 'plans.granted' : 'plans.revoked', { role: planRoleLabel(role), username: profile.username }));
+      showToast(t(turnOn ? 'plans.granted' : 'plans.revoked', { role: plnRoleLabel(role), username: profile.username }));
     });
   });
 }
@@ -218,40 +170,15 @@ async function renderPlansMatrix(){
     supabaseClient.from('role_permissions').select('role, permission_key, enabled, limit_value'),
   ]);
   if (cat.error || perms.error || !Array.isArray(cat.data)){
-    box.innerHTML = `<p class="profile-empty-note">${t('plans.matrix.loadFailed')}</p>`;
+    box.innerHTML = `<div class="p-alerta p-alerta--erro" role="alert"><span>${escapeHTML(t('plans.matrix.loadFailed'))}</span></div>`;
     return;
   }
-  const cell = {};
-  (perms.data || []).forEach(r => { cell[`${r.role}|${r.permission_key}`] = r; });
-  const label = (c) => { const k = `perm.${c.key}`; const v = t(k); return v === k ? c.label_pt : v; };
-  box.innerHTML = `
-    <div class="plans-matrix-scroll">
-      <table class="plans-matrix">
-        <thead><tr>
-          <th scope="col">${t('plans.matrix.permission')}</th>
-          ${PLAN_MATRIX_ROLES.map(r => `<th scope="col">${planRoleLabel(r)}</th>`).join('')}
-        </tr></thead>
-        <tbody>
-          ${cat.data.map(c => `<tr>
-            <th scope="row">${escapeHTML(label(c))}</th>
-            ${PLAN_MATRIX_ROLES.map(r => {
-              const v = cell[`${r}|${c.key}`] || { enabled: false, limit_value: null };
-              const id = `pm-${r}-${c.key}`;
-              const name = `${label(c)}: ${planRoleLabel(r)}`;
-              return `<td><span class="plans-cell" data-role="${r}" data-key="${c.key}" data-kind="${c.kind}">
-                <input type="checkbox" id="${id}" ${v.enabled ? 'checked' : ''} aria-label="${escapeHTML(name)}">
-                ${c.kind === 'limit' ? `<input type="number" min="0" step="1" inputmode="numeric" class="plans-limit" value="${v.limit_value == null ? '' : v.limit_value}"
-                    placeholder="∞" title="${t('plans.matrix.unlimited')}" aria-label="${escapeHTML(name)}" ${v.enabled ? '' : 'disabled'}>` : ''}
-              </span></td>`;
-            }).join('')}
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>`;
-  box.querySelectorAll('.plans-cell').forEach(c => {
+  const names = {}; cat.data.forEach(c => { names[c.key] = plnPermLabel(c); });
+  box.innerHTML = plnMatrixHTML(cat.data, perms.data);
+  box.querySelectorAll('[data-plano-celula]').forEach(c => {
     const chk = c.querySelector('input[type="checkbox"]');
-    const num = c.querySelector('.plans-limit');
-    const save = async () => {
+    const num = c.querySelector('[data-plano-limite]');
+    const save = async (desfazer) => {
       const raw = num ? num.value.trim() : '';
       const limit = raw === '' ? null : Math.max(0, parseInt(raw, 10) || 0);
       if (num) num.disabled = !chk.checked;
@@ -259,11 +186,17 @@ async function renderPlansMatrix(){
       const { error } = await supabaseClient.rpc('admin_set_role_permission', {
         p_role: c.dataset.role, p_key: c.dataset.key, p_enabled: chk.checked, p_limit: c.dataset.kind === 'limit' ? limit : null,
       });
-      if (error){ showToast(t('plans.failed')); return; }
+      if (error){ if (desfazer) desfazer(); showToast(t('plans.failed')); return; }
       c.classList.add('is-saved');
       c.title = t('plans.matrix.saved');
     };
-    chk.addEventListener('change', save);
-    if (num) num.addEventListener('change', save);
+    chk.addEventListener('change', async () => {
+      if (!chk.checked){
+        const ok = await plansConfirm({ titulo: t('plans.confirm.perm.title', { perm: names[c.dataset.key], role: plnRoleLabel(c.dataset.role) }), descricao: t('plans.confirm.perm.text'), confirmar: t('plans.confirm.perm.confirm') });
+        if (!ok){ chk.checked = true; return; }
+      }
+      save(() => { chk.checked = !chk.checked; if (num) num.disabled = !chk.checked; });
+    });
+    if (num) num.addEventListener('change', () => save());
   });
 }

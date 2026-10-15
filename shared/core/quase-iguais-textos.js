@@ -230,6 +230,7 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
       </div>
       ${dueCount > 0 ? `<p class="lesson-boundary-due">${tp('zh.path.lessonDone.cardsWaiting', dueCount)}</p>` : ''}
       ${challengesBefore ? renderChallengeChipHTML(challengesBefore) : ''}
+      ${typeof duoLessonStripHTML === 'function' ? duoLessonStripHTML() : ''}
       ${recapItems.length ? `
         <div class="lesson-recap">
           <div class="lesson-recap-label">${recapLabel}</div>

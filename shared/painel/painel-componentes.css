@@ -1,0 +1,681 @@
+/* Componentes e padrões de página do painel, em cima do Pico (limitado a .painel).
+   Só o que o Pico NÃO traz: selo, alerta, abas, avatar, indicador, padrões de página.
+   Tudo usa os tokens de painel-tokens.css (nenhuma cor escrita à mão). Prefixo p- para não colidir com o CSS do site.
+   Regra: peça nova entra primeiro em guia-de-estilo.html e só depois nas telas. */
+
+.painel{ line-height: 1.5; }
+.painel *:focus-visible{ outline: 2px solid var(--p-marca-escura); outline-offset: 2px; }
+
+/* ---------- Padrões de página ---------- */
+/* Página: coluna de blocos com espaçamento fixo. Cada tela do painel = .p-pagina com cabeçalho, resumo e blocos. */
+.painel .p-pagina{ display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; padding: 1.5rem; }
+.painel .p-pagina > *{ margin: 0; min-width: 0; }
+
+/* Cabeçalho: sobretítulo (onde estou), título, subtítulo (contexto) e ações à direita. */
+.painel .p-cabecalho{ display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.painel .p-cabecalho :is(h1, h2){ margin: 0; font-size: 1.9rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+.painel .p-sobretitulo{ display: block; font-size: .75rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--p-tinta-suave); }
+.painel .p-subtitulo{ display: block; margin-top: .15rem; font-size: .9rem; color: var(--p-tinta-suave); }
+.painel .p-acoes{ display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+.painel .p-acoes > *{ margin: 0; width: auto; }
+
+/* Resumo: faixa de indicadores no topo (o "quadro geral" antes do detalhe). */
+.painel .p-resumo{ display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; }
+.painel .p-indicador{ margin: 0; display: grid; gap: .2rem; align-content: start; }
+.painel .p-indicador-rotulo{ font-size: .85rem; color: var(--p-tinta-suave); }
+.painel .p-indicador-valor{ font-size: 2rem; line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; }
+.painel .p-indicador-detalhe{ font-size: .85rem; color: var(--p-tinta-suave); }
+
+/* Grades de blocos. */
+.painel .p-grade{ display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
+.painel .p-grade-2{ display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: start; }
+.painel .p-grade > *, .painel .p-grade-2 > *{ margin: 0; min-width: 0; }
+@media (max-width: 900px){ .painel .p-grade-2{ grid-template-columns: 1fr; } .painel .p-pagina{ padding: 1rem; } }
+
+/* Bloco = <article> do Pico. Título dentro de <header>. */
+.painel article > header > h2, .painel article > header > h3{ margin: 0; font-size: 1.05rem; font-weight: 800; }
+
+/* Barra de ferramentas: busca, filtros e interruptores acima de uma tabela. */
+.painel .p-ferramentas{ display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+.painel .p-ferramentas.p-ferramentas > *{ margin: 0; width: auto; } /* classe dobrada: o Pico põe margem embaixo em campos */
+.painel .p-ferramentas .p-cresce{ flex: 1 1 220px; min-width: 180px; }
+.painel .p-ferramentas label{ display: flex; align-items: center; gap: .5rem; }
+
+/* Tabela com rolagem lateral só nela, nunca na página. */
+.painel .p-tabela{ overflow-x: auto; margin: 0; padding: 0; }
+.painel .p-tabela table{ margin: 0; min-width: 640px; }
+.painel .p-tabela th, .painel .p-tabela td{ white-space: nowrap; vertical-align: middle; }
+
+/* Lista de itens com um selo ou ação à direita. */
+.painel .p-lista{ display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
+.painel .p-lista li{ display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; margin: 0; padding: 0; }
+
+/* Estado vazio: nunca uma tela em branco. */
+.painel .p-vazio{ display: grid; gap: .4rem; justify-items: center; text-align: center; padding: 2rem 1rem; color: var(--p-tinta-suave); }
+.painel .p-vazio strong{ color: var(--p-tinta); font-size: 1.05rem; }
+.painel .p-vazio-icone{ display: inline-grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 12px; background: var(--p-superficie); color: var(--p-tinta); font-size: 1.15rem; }
+.painel .p-vazio-acoes{ display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; margin-top: .4rem; }
+.painel .p-vazio-acoes > *{ margin: 0; width: auto; }
+.painel .p-vazio-mais{ margin-top: .3rem; font-size: .85rem; font-weight: 700; color: var(--p-tinta-suave); text-decoration: none; }
+.painel .p-vazio-mais::after{ content: " \2197"; }
+.painel .p-vazio-mais:hover{ color: var(--p-tinta); }
+
+/* ---------- Selo de situação ---------- */
+.painel .p-selo{ display: inline-flex; align-items: center; padding: .1rem .65rem; border-radius: 999px; font-size: .8rem; font-weight: 800; white-space: nowrap; background: var(--p-linha); color: var(--p-tinta); }
+.painel .p-selo--ok{ background: var(--p-ok); color: var(--p-sobre-vivo); }
+.painel .p-selo--aviso{ background: var(--p-aviso); color: var(--p-sobre-vivo); }
+.painel .p-selo--erro{ background: var(--p-erro); color: var(--p-sobre-vivo); }
+.painel .p-selo--info{ background: var(--p-info); color: var(--p-sobre-vivo); }
+
+/* ---------- Alerta ---------- */
+.painel .p-alerta{ --c: var(--p-aviso); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: .8rem 1.1rem; border-radius: var(--p-raio); border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); background: color-mix(in srgb, var(--c) 14%, var(--p-bg)); color: var(--p-tinta); }
+.painel .p-alerta--ok{ --c: var(--p-ok); }
+.painel .p-alerta--erro{ --c: var(--p-erro); }
+.painel .p-alerta--info{ --c: var(--p-info); }
+.painel .p-alerta > *{ margin: 0; }
+
+/* ---------- Abas ---------- */
+.painel .p-abas{ display: flex; justify-content: flex-start; align-items: stretch; gap: .25rem; margin: 0; padding: 0; border-bottom: 1px solid var(--p-linha); overflow-x: auto; list-style: none; }
+.painel .p-abas a{ padding: .5rem .9rem; text-decoration: none; font-weight: 700; white-space: nowrap; color: var(--p-tinta-suave); border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.painel .p-abas a:hover{ color: var(--p-tinta); }
+.painel .p-abas a[aria-current]{ color: var(--p-tinta); border-bottom-color: var(--p-marca); }
+
+/* ---------- Avatar (iniciais) ---------- */
+.painel .p-avatar{ display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; flex: none; font-size: .85rem; font-weight: 800; background: var(--p-marca-escura); color: var(--p-bg); }
+.painel .p-avatar--grande{ width: 4rem; height: 4rem; font-size: 1.2rem; }
+/* No escuro, --p-marca-escura é claro: vira contorno sobre a superfície para manter contraste com as iniciais. */
+:root[data-theme="dark"] .painel .p-avatar{ background: var(--p-elevado); color: var(--p-tinta); outline: 1px solid var(--p-linha); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .painel .p-avatar{ background: var(--p-elevado); color: var(--p-tinta); outline: 1px solid var(--p-linha); } }
+.painel .p-pessoa{ display: flex; align-items: center; gap: .75rem; min-width: 200px; }
+.painel .p-pessoa small{ display: block; color: var(--p-tinta-suave); }
+
+/* ---------- Botões: pílula em negrito, como as abas do Ranking ---------- */
+/* Primário = azul do curso com texto branco (claro). Secundário e contorno = pílula bege com borda fina e texto suave. */
+.painel :is(button, [type=submit], [type=button], [type=reset], [role=button]){ border-radius: 999px; font-weight: 800; font-size: .92rem; padding: .5rem 1.15rem; }
+.painel :is(button, [type=submit], [type=button], [type=reset], [role=button]):is(.outline, .secondary):not(.contrast){
+  --pico-background-color: var(--p-elevado); --pico-border-color: var(--p-linha); --pico-color: var(--p-tinta-suave);
+}
+.painel :is(button, [type=submit], [type=button], [type=reset], [role=button]):is(.outline, .secondary):not(.contrast):is(:hover, :active, :focus){
+  --pico-background-color: var(--p-linha); --pico-border-color: var(--p-linha); --pico-color: var(--p-tinta);
+}
+
+/* ---------- Seletor em pílulas (abas do Ranking: Amigos | Geral) ---------- */
+.painel .p-seg{ display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; width: auto; }
+.painel .p-seg[role=group]{ display: flex; width: auto; }
+.painel .p-seg[role=group] :is(button, a):is(:first-child, :not(:first-child), :last-child){ border-radius: 999px; margin: 0; }
+.painel .p-seg :is(button, a){ margin: 0; width: auto; flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 2.4rem; padding: .35rem 1rem; border: 1px solid var(--p-linha); border-radius: 999px; background: var(--p-bg); color: var(--p-tinta-suave); font-size: .9rem; font-weight: 800; text-decoration: none; cursor: pointer; }
+.painel .p-seg :is(button, a):hover{ background: var(--p-superficie); color: var(--p-tinta); }
+.painel .p-seg :is([aria-pressed="true"], [aria-current]){ background: var(--p-marca); border-color: var(--p-marca); color: var(--p-texto-botao); }
+.painel .p-seg :is([aria-pressed="true"], [aria-current]):hover{ background: var(--p-botao-hover); border-color: var(--p-botao-hover); color: var(--p-texto-botao); }
+
+/* ---------- Tabela: dados centralizados sob o título (menos a primeira coluna, que é a pessoa) ---------- */
+.painel .p-tabela th:not(:first-child), .painel .p-tabela td:not(:first-child){ text-align: center; }
+.painel .p-tabela td:not(:first-child) progress{ margin-inline: auto; }
+.painel .p-tabela td:not(:first-child) .p-acoes{ justify-content: center; }
+
+/* ---------- Trilha de navegação (Breadcrumb do shadcn) ---------- */
+.painel .p-trilha{ display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 0; padding: 0; list-style: none; font-size: .9rem; color: var(--p-tinta-suave); }
+.painel .p-trilha li{ display: flex; align-items: center; gap: .4rem; margin: 0; padding: 0; list-style: none; }
+.painel .p-trilha li + li::before{ content: "\203A"; font-size: 1.25em; line-height: 1; opacity: .75; }
+.painel .p-trilha a{ color: inherit; text-decoration: none; }
+.painel .p-trilha a:hover{ color: var(--p-tinta); }
+.painel .p-trilha [aria-current="page"]{ color: var(--p-tinta); font-weight: 700; }
+.painel .p-trilha-mais{ letter-spacing: .12em; font-weight: 800; }
+
+/* ---------- Dica (Tooltip do shadcn): usa o data-tooltip do Pico, com o visual escuro e pequeno ---------- */
+.painel [data-tooltip]::before{ font-size: .75rem; font-weight: 700; padding: .35rem .7rem; border-radius: 8px; line-height: 1.3; }
+
+/* ---------- Aviso temporário (Toast do shadcn) ---------- */
+/* .p-toasts é o canto fixo da tela, onde os avisos empilham. .p-toast sozinho serve para mostrar ou testar o visual. */
+.painel .p-toasts{ position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: var(--z-toast, 999); display: grid; gap: .6rem; }
+.painel .p-toast{ display: flex; align-items: center; gap: 1rem; min-width: 280px; max-width: 420px; padding: .85rem 1rem .85rem 1.15rem; border: 1px solid var(--p-linha); border-radius: var(--p-raio); background: var(--p-elevado); color: var(--p-tinta); box-shadow: var(--p-sombra), 0 8px 24px color-mix(in srgb, var(--p-tinta) 14%, transparent); }
+.painel .p-toast-texto{ flex: 1; display: grid; gap: .1rem; min-width: 0; }
+.painel .p-toast-texto strong{ font-size: .95rem; }
+.painel .p-toast-texto small{ color: var(--p-tinta-suave); }
+.painel .p-toast-acoes{ display: flex; align-items: center; gap: .35rem; }
+.painel .p-toast button{ margin: 0; width: auto; padding: .3rem .85rem; font-size: .85rem; }
+.painel .p-toast button.p-toast-fechar{ width: 1.9rem; height: 1.9rem; padding: 0; border-color: transparent; background: transparent; color: var(--p-tinta-suave); font-size: 1.1rem; line-height: 1; }
+
+/* ---------- Indicador de carregamento (Spinner do shadcn) ---------- */
+.painel .p-spinner{ display: inline-block; flex: none; width: 1.1rem; height: 1.1rem; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; vertical-align: middle; animation: p-giro .8s linear infinite; }
+.painel .p-spinner--grande{ width: 2rem; height: 2rem; border-width: 3px; }
+@keyframes p-giro{ to{ transform: rotate(360deg); } }
+/* Quem pediu menos movimento ainda vê que está carregando, só que mais devagar. */
+/* O Pico desliga todas as animações com !important nesse modo; para o spinner isso esconderia que algo está carregando. */
+@media (prefers-reduced-motion: reduce){ .painel .p-spinner{ animation-duration: 2.4s !important; animation-iteration-count: infinite !important; animation-delay: 0s !important; } }
+.painel .p-carregando{ display: flex; align-items: center; gap: .75rem; padding: .6rem 1rem; border-radius: 14px; background: var(--p-superficie); }
+.painel .p-carregando > span:last-child{ margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ---------- Separador (Separator do shadcn) ---------- */
+.painel .p-separador{ width: 100%; height: 1px; margin: 1rem 0; border: 0; background: var(--p-linha); }
+.painel .p-separador--vertical{ width: 1px; height: auto; align-self: stretch; margin: 0 .6rem; }
+
+/* ---------- Seleção em lista (Select do shadcn) ---------- */
+/* Usa o details.dropdown do Pico. Cada opção é um rádio dentro de um label; painel-ui.js troca o texto do gatilho e fecha. */
+.painel details.dropdown.p-selecao{ margin: 0; }
+.painel details.dropdown.p-selecao > summary{ margin: 0; }
+.painel details.dropdown.p-selecao > ul{ min-width: 100%; max-height: 18rem; overflow-y: auto; margin-top: .35rem; padding: .35rem; border: 1px solid var(--p-linha); border-radius: 12px; background: var(--p-elevado); box-shadow: var(--p-sombra), 0 8px 24px color-mix(in srgb, var(--p-tinta) 14%, transparent); }
+.painel details.dropdown.p-selecao li{ margin: 0; padding: 0; list-style: none; }
+.painel details.dropdown.p-selecao li.p-selecao-grupo{ margin: .35rem -.35rem .2rem; padding: .4rem .95rem; font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--p-tinta); background: var(--p-superficie); border-top: 1px solid var(--p-linha); border-bottom: 1px solid var(--p-linha); }
+.painel details.dropdown.p-selecao li.p-selecao-grupo:first-child{ margin-top: -.35rem; border-top: 0; border-radius: 10px 10px 0 0; }
+.painel details.dropdown.p-selecao label{ position: relative; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 0; padding: .5rem .6rem; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.painel details.dropdown.p-selecao label:has(input){ width: 100%; }
+.painel details.dropdown.p-selecao label:hover, .painel details.dropdown.p-selecao label:has(input:focus-visible){ background: var(--p-superficie); }
+.painel details.dropdown.p-selecao label input{ position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+.painel details.dropdown.p-selecao label:has(input:checked){ font-weight: 800; }
+.painel details.dropdown.p-selecao label:has(input:checked)::after{ content: "\2713"; color: var(--p-marca-escura); font-weight: 800; }
+
+/* ---------- Área de rolagem (Scroll Area do shadcn) ---------- */
+.painel .p-rolagem{ max-height: 15rem; overflow-y: auto; margin: 0; padding: 0 1rem; border: 1px solid var(--p-linha); border-radius: 12px; background: var(--p-elevado); scrollbar-width: thin; scrollbar-color: var(--p-borda-campo) transparent; }
+.painel .p-rolagem::-webkit-scrollbar{ width: 10px; }
+.painel .p-rolagem::-webkit-scrollbar-thumb{ background: var(--p-borda-campo); border-radius: 999px; border: 2px solid var(--p-elevado); }
+.painel .p-rolagem > h3, .painel .p-rolagem > .p-rolagem-titulo{ position: sticky; top: 0; margin: 0; padding: .8rem 0 .5rem; background: var(--p-elevado); font-size: .95rem; font-weight: 800; }
+.painel .p-rolagem ul{ margin: 0; padding: 0; list-style: none; }
+.painel .p-rolagem li{ margin: 0; padding: .6rem 0; list-style: none; border-top: 1px solid var(--p-linha); font-size: .9rem; }
+.painel .p-rolagem li:first-child{ border-top: 0; }
+
+/* ---------- Painéis redimensionáveis (Resizable do shadcn) ---------- */
+/* Contêiner em linha (padrão) ou em coluna (data-direcao="coluna"). A alça é um role=separator que o painel-ui.js arrasta. */
+.painel .p-redimensionavel{ display: flex; min-height: 12rem; border: 1px solid var(--p-linha); border-radius: 12px; background: var(--p-elevado); overflow: hidden; }
+.painel .p-redimensionavel[data-direcao="coluna"]{ flex-direction: column; }
+.painel .p-redimensionavel > .p-painel-r{ flex: 1 1 50%; min-width: 0; min-height: 0; padding: 1rem; overflow: auto; }
+.painel .p-alca{ flex: none; position: relative; background: var(--p-linha); touch-action: none; }
+.painel .p-redimensionavel:not([data-direcao="coluna"]) > .p-alca{ width: 1px; cursor: col-resize; }
+.painel .p-redimensionavel[data-direcao="coluna"] > .p-alca{ height: 1px; cursor: row-resize; }
+.painel .p-alca::before{ content: ""; position: absolute; inset: -6px; }
+.painel .p-alca::after{ content: ""; position: absolute; top: 50%; left: 50%; width: 6px; height: 1.5rem; transform: translate(-50%, -50%); border-radius: 999px; background: var(--p-borda-campo); }
+.painel .p-redimensionavel[data-direcao="coluna"] > .p-alca::after{ width: 1.5rem; height: 6px; }
+.painel .p-alca:hover::after, .painel .p-alca:focus-visible::after, .painel .p-alca.p-arrastando::after{ background: var(--p-marca-escura); }
+.painel .p-alca:focus-visible{ outline: 2px solid var(--p-marca-escura); outline-offset: 2px; }
+.painel .p-redimensionavel.p-arrastando{ user-select: none; }
+
+/* ---------- Questionário em passos (Questionnaire do shadcn) ---------- */
+.painel .p-questionario{ display: grid; gap: .9rem; max-width: 34rem; margin: 0; }
+.painel .p-questionario .p-passo{ display: block; margin: 0; padding: 0; border: 0; min-width: 0; }
+.painel .p-questionario .p-passo[hidden]{ display: none; }
+.painel .p-questionario .p-contador{ font-size: .8rem; color: var(--p-tinta-suave); font-weight: 700; }
+.painel .p-questionario legend{ padding: 0; margin: 0 0 .25rem; font-size: 1.05rem; font-weight: 800; }
+.painel .p-questionario .p-dica{ margin: 0 0 .6rem; font-size: .88rem; color: var(--p-tinta-suave); }
+.painel .p-opcao{ position: relative; display: flex; align-items: center; gap: .7rem; margin: 0 0 .5rem; padding: .7rem .85rem; border: 1px solid var(--p-linha); border-radius: 12px; background: var(--p-elevado); cursor: pointer; font-weight: 600; }
+.painel label.p-opcao[class]:has([type]){ width: 100%; } /* o Pico dá fit-content a todo label com caixa ou rádio */
+.painel .p-opcao:hover{ background: var(--p-superficie); }
+.painel .p-opcao:has(input:checked){ border-color: var(--p-marca-escura); background: color-mix(in srgb, var(--p-marca) 10%, var(--p-elevado)); }
+.painel .p-opcao:has(input:focus-visible){ outline: 2px solid var(--p-marca-escura); outline-offset: 2px; }
+.painel .p-opcao input{ margin: 0; flex: none; }
+.painel .p-opcao .p-letra{ margin-left: auto; display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border: 1px solid var(--p-linha); border-radius: 50%; font-size: .72rem; font-weight: 800; color: var(--p-tinta-suave); }
+.painel .p-questionario .p-rodape{ display: flex; gap: .6rem; align-items: center; }
+.painel .p-questionario .p-rodape .p-espaco{ margin-left: auto; }
+.painel .p-questionario .p-rodape button{ margin: 0; width: auto; }
+.painel .p-questionario .p-fim{ padding: 1rem; border-radius: 12px; background: var(--p-superficie); }
+
+/* ---------- Balão com conteúdo (Popover do shadcn) ---------- */
+/* details.p-popover: o summary é o gatilho e .p-popover-corpo abre logo abaixo. painel-ui.js fecha com Esc e clique fora. */
+.painel details.p-popover{ position: relative; display: inline-block; margin: 0; }
+.painel details.p-popover > summary{ margin: 0; list-style: none; }
+.painel details.p-popover > summary::-webkit-details-marker{ display: none; }
+.painel details.p-popover > summary::after{ display: none; }
+.painel .p-popover-corpo{ position: absolute; z-index: 30; top: calc(100% + .45rem); left: 0; min-width: 18rem; display: grid; gap: .75rem; padding: 1rem; border: 1px solid var(--p-linha); border-radius: 12px; background: var(--p-elevado); color: var(--p-tinta); box-shadow: var(--p-sombra), 0 8px 24px color-mix(in srgb, var(--p-tinta) 14%, transparent); }
+.painel details.p-popover[data-alinhar="fim"] .p-popover-corpo{ left: auto; right: 0; }
+.painel .p-popover-corpo > *{ margin: 0; }
+.painel .p-popover-corpo h3{ font-size: 1rem; }
+.painel .p-popover-corpo p{ color: var(--p-tinta-suave); font-size: .9rem; }
+.painel .p-popover-linha{ display: grid; grid-template-columns: 7rem 1fr; gap: .75rem; align-items: center; }
+.painel .p-popover-linha label, .painel .p-popover-linha input{ margin: 0; }
+
+/* ---------- Select nativo: mais arredondado que o do shadcn, como a busca ---------- */
+/* A lista que abre é do navegador (não dá para estilizar); o campo fechado fica em pílula. */
+.painel select:not([multiple]):not([size]){ border-radius: 999px; padding-inline: 1.1rem 2.4rem; font-weight: 600; }
+
+/* ---------- Paginação (Pagination do shadcn) ---------- */
+.painel .p-paginacao ul{ display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .3rem; margin: 0; padding: 0; list-style: none; }
+.painel .p-paginacao li{ margin: 0; padding: 0; list-style: none; }
+.painel .p-paginacao :is(a, span){ display: inline-flex; align-items: center; justify-content: center; gap: .35rem; min-width: 2.3rem; height: 2.3rem; padding: 0 .7rem; border: 1px solid transparent; border-radius: 10px; color: var(--p-tinta); font-weight: 700; font-size: .92rem; text-decoration: none; }
+.painel .p-paginacao a{ margin: 0; } /* o Pico dá margem negativa a links dentro de nav */
+.painel .p-paginacao a:hover{ background: var(--p-superficie); }
+.painel .p-paginacao a[aria-current="page"]{ border-color: var(--p-borda-campo); background: var(--p-elevado); box-shadow: var(--p-sombra); }
+.painel .p-paginacao [aria-disabled="true"]{ opacity: .45; pointer-events: none; }
+.painel .p-paginacao .p-pag-mais{ min-width: 1.6rem; padding: 0; color: var(--p-tinta-suave); letter-spacing: .1em; }
+.painel .p-paginacao .p-pag-ant::before{ content: "\2039"; font-size: 1.3em; line-height: 1; }
+.painel .p-paginacao .p-pag-prox::after{ content: "\203A"; font-size: 1.3em; line-height: 1; }
+
+/* ---------- Lista de ações em menu (compartilhada por Menu de navegação e Barra de menus) ---------- */
+.painel .p-menu-lista{ position: absolute; z-index: 30; top: calc(100% + .4rem); left: 0; width: max-content; min-width: 14rem; display: grid; gap: 1px; padding: .3rem; border: 1px solid var(--p-linha); border-radius: 12px; background: var(--p-elevado); color: var(--p-tinta); box-shadow: var(--p-sombra), 0 8px 24px color-mix(in srgb, var(--p-tinta) 14%, transparent); }
+.painel .p-menu-lista .p-menu-item{ position: relative; display: flex; align-items: center; gap: 1rem; width: 100%; margin: 0; padding: .45rem .7rem .45rem 1.9rem; border: 0; border-radius: 8px; background: transparent; box-shadow: none; color: var(--p-tinta); font-size: .9rem; font-weight: 600; text-align: left; text-decoration: none; white-space: nowrap; cursor: pointer; }
+.painel .p-menu-lista .p-menu-item:hover, .painel .p-menu-lista .p-menu-item:focus-visible{ background: var(--p-superficie); color: var(--p-tinta); }
+.painel .p-menu-lista .p-menu-item[aria-disabled="true"]{ opacity: .45; pointer-events: none; }
+.painel .p-menu-lista .p-menu-item--perigo{ color: var(--p-erro); }
+.painel .p-menu-lista .p-menu-item[aria-checked="true"]::before{ content: "\2713"; position: absolute; left: .7rem; color: var(--p-marca-escura); font-weight: 800; }
+.painel .p-menu-atalho{ margin-left: auto; color: var(--p-tinta-suave); font-size: .75rem; font-weight: 700; letter-spacing: .04em; }
+.painel .p-menu-sep{ height: 1px; margin: .3rem -.3rem; background: var(--p-linha); }
+.painel .p-menu-rotulo{ padding: .35rem .7rem .15rem 1.9rem; font-size: .75rem; font-weight: 800; color: var(--p-tinta-suave); }
+
+/* ---------- Menu de navegação (Navigation Menu do shadcn) ---------- */
+.painel .p-menunav > ul{ display: flex; flex-wrap: wrap; align-items: center; gap: .15rem; margin: 0; padding: 0; list-style: none; }
+.painel .p-menunav > ul > li{ position: relative; display: flex; margin: 0; padding: 0; list-style: none; }
+.painel .p-menunav :is(summary, a.p-menunav-link){ display: inline-flex; align-items: center; gap: .3rem; height: 2.4rem; margin: 0; padding: 0 .85rem; border: 0; border-radius: 10px; background: transparent; color: var(--p-tinta); font-size: .92rem; font-weight: 700; text-decoration: none; cursor: pointer; list-style: none; }
+.painel .p-menunav details{ margin: 0; } /* o Pico dá margem embaixo ao details e desalinha o link simples */
+.painel .p-menunav :is(summary, a){ margin: 0; } /* idem: margem negativa do Pico em nav */
+.painel .p-menunav summary::-webkit-details-marker{ display: none; }
+.painel .p-menunav details > summary::after{ content: ""; display: inline-block; float: none; flex: none; width: .45rem; height: .45rem; margin: 0 0 .2rem .25rem; border: 0; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; background: none; background-image: none; opacity: .7; transform: rotate(45deg); transition: transform .15s ease; }
+.painel .p-menunav details[open] > summary::after{ transform: translateY(.2rem) rotate(-135deg); }
+.painel .p-menunav :is(summary, a.p-menunav-link):hover, .painel .p-menunav details[open] > summary{ background: var(--p-superficie); }
+.painel .p-menunav a[aria-current="page"]{ background: var(--p-superficie); }
+.painel .p-menunav-painel{ position: absolute; z-index: 30; top: calc(100% + .4rem); left: 0; display: grid; grid-template-columns: repeat(2, minmax(13rem, 1fr)); gap: .25rem; width: max-content; max-width: min(40rem, 90vw); padding: .5rem; border: 1px solid var(--p-linha); border-radius: 12px; background: var(--p-elevado); box-shadow: var(--p-sombra), 0 8px 24px color-mix(in srgb, var(--p-tinta) 14%, transparent); }
+.painel .p-menunav-painel a{ display: grid; gap: .15rem; padding: .65rem .75rem; border-radius: 8px; color: var(--p-tinta); text-decoration: none; }
+.painel .p-menunav-painel a:hover, .painel .p-menunav-painel a:focus-visible{ background: var(--p-superficie); }
+.painel .p-menunav-painel a strong{ font-size: .92rem; }
+.painel .p-menunav-painel a span{ font-size: .82rem; line-height: 1.35; color: var(--p-tinta-suave); }
+
+/* ---------- Barra de menus (Menubar do shadcn) ---------- */
+.painel .p-barramenus{ display: inline-flex; align-items: center; gap: .1rem; padding: .25rem; border: 1px solid var(--p-linha); border-radius: 12px; background: var(--p-elevado); }
+.painel .p-barramenus details{ position: relative; margin: 0; }
+.painel .p-barramenus summary{ display: inline-flex; align-items: center; height: 2.1rem; margin: 0; padding: 0 .75rem; border: 0; border-radius: 8px; background: transparent; color: var(--p-tinta); font-size: .9rem; font-weight: 700; list-style: none; cursor: pointer; }
+.painel .p-barramenus summary::-webkit-details-marker{ display: none; }
+.painel .p-barramenus summary::after{ display: none; }
+.painel .p-barramenus summary:hover, .painel .p-barramenus details[open] > summary{ background: var(--p-superficie); }
+
+/* ---------- Mensagens (Message do shadcn) ---------- */
+.painel .p-mensagens{ display: flex; flex-direction: column; gap: 1rem; margin: 0; padding: 0; list-style: none; }
+.painel .p-mensagem{ display: flex; align-items: flex-end; gap: .6rem; max-width: 88%; margin: 0; padding: 0; list-style: none; }
+.painel .p-mensagem > .p-avatar{ flex: none; width: 2.2rem; height: 2.2rem; font-size: .72rem; }
+.painel .p-mensagem-bloco{ display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
+.painel .p-mensagem-corpo{ display: grid; gap: .5rem; line-height: 1.5; padding: .65rem 1rem; border-radius: 18px; overflow-wrap: anywhere; }
+.painel .p-mensagem-corpo > *{ margin: 0; }
+.painel .p-mensagem-meta{ font-size: .75rem; color: var(--p-tinta-suave); font-weight: 700; padding: 0 .4rem; }
+/* enviada = a pessoa que usa o painel (balão na cor do curso, à direita); recebida = a outra pessoa (balão neutro, à esquerda). Os dois têm avatar. */
+.painel .p-mensagem--enviada{ align-self: flex-end; flex-direction: row-reverse; }
+.painel .p-mensagem--enviada .p-mensagem-bloco{ align-items: flex-end; }
+.painel .p-mensagem--enviada .p-mensagem-corpo{ background: var(--p-balao-enviada); color: white; border-bottom-right-radius: 6px; }
+.painel .p-mensagem--recebida{ align-self: flex-start; }
+.painel .p-mensagem--recebida .p-mensagem-corpo{ background: var(--p-superficie); color: var(--p-tinta); border: 1px solid var(--p-linha); border-bottom-left-radius: 6px; }
+
+/* ---------- Rolagem de mensagens (Message Scroller do shadcn) ---------- */
+/* Conversa com altura fixa que começa embaixo, acompanha as mensagens novas e mostra um botão para voltar ao fim. */
+.painel .p-conversa{ position: relative; display: flex; flex-direction: column; height: 24rem; border: 1px solid var(--p-linha); border-radius: var(--p-raio); background: var(--p-elevado); overflow: hidden; }
+.painel .p-conversa-topo{ padding: .8rem 1.1rem; border-bottom: 1px solid var(--p-linha); }
+.painel .p-conversa-topo strong{ display: block; }
+.painel .p-conversa-topo span{ font-size: .85rem; color: var(--p-tinta-suave); }
+.painel .p-conversa-rolagem{ flex: 1; overflow-y: auto; padding: 1rem 1.1rem; scrollbar-width: thin; scrollbar-color: var(--p-borda-campo) transparent; }
+.painel .p-conversa-rolagem::-webkit-scrollbar{ width: 10px; }
+.painel .p-conversa-rolagem::-webkit-scrollbar-thumb{ background: var(--p-borda-campo); border-radius: 999px; border: 2px solid var(--p-elevado); }
+.painel .p-ir-ao-fim{ position: absolute; left: 50%; bottom: 5.2rem; transform: translateX(-50%); margin: 0; width: 2.4rem; height: 2.4rem; padding: 0; border-radius: 50%; font-size: 1.1rem; line-height: 1; box-shadow: var(--p-sombra); }
+.painel .p-ir-ao-fim[hidden]{ display: none; }
+.painel .p-compositor{ display: flex; align-items: flex-end; gap: .6rem; margin: 0; padding: .7rem; border-top: 1px solid var(--p-linha); }
+.painel .p-compositor textarea{ flex: 1; margin: 0; min-height: 2.6rem; max-height: 8rem; resize: none; }
+.painel .p-compositor button{ margin: 0; width: auto; flex: none; }
+
+/* ---------- Campo completo: rótulo, controle, ajuda e erro (Field e Label do shadcn) ---------- */
+/* O Label do shadcn é o label do Pico (rótulo envolvendo ou ligado por for). Aqui o conjunto Field. */
+.painel .p-grupo{ display: grid; gap: .9rem; margin: 0; padding: 0; border: 0; min-width: 0; }
+.painel .p-grupo > legend{ padding: 0; font-size: 1.05rem; font-weight: 800; }
+.painel .p-grupo > legend{ margin-bottom: .35rem; }
+.painel .p-descricao, .painel .p-ajuda{ margin: 0; color: var(--p-tinta-suave); font-size: .85rem; }
+.painel .p-campo{ display: grid; gap: .3rem; margin: 0; min-width: 0; align-content: start; }
+.painel .p-campo > label{ margin: 0; font-size: .9rem; font-weight: 700; }
+.painel .p-campo > :is(input, select, textarea){ margin: 0; }
+.painel .p-campo .p-erro{ margin: 0; color: var(--p-erro); font-size: .85rem; font-weight: 700; }
+.painel .p-campo--erro > :is(input, select, textarea){ border-color: var(--p-erro); }
+.painel .p-linha-campos{ display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: .75rem; }
+
+/* ---------- Item: linha com ícone, título, descrição e ação (Item do shadcn) ---------- */
+.painel .p-itens{ display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
+.painel .p-itens > li{ margin: 0; padding: 0; list-style: none; }
+.painel .p-item{ display: flex; align-items: center; gap: .85rem; margin: 0; padding: .8rem 1rem; border: 1px solid var(--p-linha); border-radius: 12px; background: transparent; color: var(--p-tinta); text-decoration: none; }
+.painel .p-item--suave{ background: var(--p-superficie); border-color: transparent; }
+.painel .p-item-media{ display: inline-grid; place-items: center; flex: none; width: 2.3rem; height: 2.3rem; border-radius: 10px; background: var(--p-superficie); color: var(--p-tinta); }
+.painel .p-item-conteudo{ flex: 1; min-width: 0; display: grid; gap: .1rem; }
+.painel .p-item-titulo{ font-weight: 800; font-size: .95rem; }
+.painel .p-item-descricao{ color: var(--p-tinta-suave); font-size: .85rem; }
+.painel .p-item-acoes{ display: flex; align-items: center; gap: .4rem; flex: none; }
+.painel .p-item-acoes button{ margin: 0; width: auto; padding: .3rem .9rem; font-size: .85rem; }
+.painel a.p-item:hover{ background: var(--p-superficie); }
+.painel a.p-item::after{ content: "\203A"; margin-left: auto; font-size: 1.4em; line-height: 1; color: var(--p-tinta-suave); }
+
+/* ---------- Campo com extras: ícone, texto e botão dentro da borda (Input Group do shadcn) ---------- */
+.painel .p-grupo-entrada{ display: flex; align-items: center; gap: .6rem; min-height: 2.8rem; margin: 0; padding: 0 1rem; border: 1px solid var(--p-borda-campo); border-radius: 999px; background: var(--p-elevado); }
+.painel .p-grupo-entrada:focus-within{ border-color: var(--p-marca-escura); box-shadow: 0 0 0 3px color-mix(in srgb, var(--p-marca-escura) 28%, transparent); }
+.painel .p-grupo-entrada input{ flex: 1; min-width: 0; margin: 0; padding: .55rem 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; outline: none; }
+.painel .p-grupo-entrada input:is(:focus, :active){ box-shadow: none; border: 0; background: transparent; }
+.painel .p-grupo-entrada input[type=search]{ background-image: none; padding-inline: 0; } /* o Pico põe a própria lupa em type=search */
+.painel .p-grupo-entrada svg{ flex: none; width: 1.1rem; height: 1.1rem; color: var(--p-tinta-suave); }
+.painel .p-adicional{ flex: none; color: var(--p-tinta-suave); font-size: .85rem; font-weight: 700; white-space: nowrap; }
+.painel .p-grupo-entrada button{ flex: none; margin: 0 -.5rem 0 0; width: auto; padding: .25rem .85rem; font-size: .82rem; }
+
+/* ---------- Código de dígitos (Input OTP do shadcn) ---------- */
+/* Uma caixa por dígito, coladas. painel-ui.js passa para a próxima ao digitar, volta no Backspace e distribui um código colado. */
+.painel .p-otp{ display: inline-flex; align-items: center; margin: 0; }
+.painel .p-otp input{ width: 2.7rem; height: 3rem; margin: 0 0 0 -1px; padding: 0; border: 1px solid var(--p-borda-campo); border-radius: 0; background: var(--p-elevado); text-align: center; font-size: 1.15rem; font-weight: 800; box-shadow: none; position: relative; }
+.painel .p-otp input:first-child, .painel .p-otp .p-otp-sep + input{ margin-left: 0; border-radius: 10px 0 0 10px; }
+.painel .p-otp input:last-child, .painel .p-otp input:has(+ .p-otp-sep){ border-radius: 0 10px 10px 0; }
+.painel .p-otp input:only-child{ border-radius: 10px; }
+.painel .p-otp input:focus{ z-index: 1; border-color: var(--p-marca-escura); box-shadow: 0 0 0 3px color-mix(in srgb, var(--p-marca-escura) 28%, transparent); }
+.painel .p-otp[role=group] > :is(input, .p-otp-sep){ flex: none; } /* o Pico estica os filhos de role=group */
+.painel .p-otp-sep{ width: .9rem; height: 2px; margin: 0 .35rem; background: var(--p-borda-campo); border-radius: 2px; }
+
+/* ---------- Cartão ao passar o mouse (Hover Card do shadcn) ---------- */
+/* Só CSS: abre no hover e no foco do teclado (e ao tocar, no celular, que dá foco ao link). */
+.painel .p-hover{ position: relative; display: inline-block; }
+.painel .p-hover-gatilho{ color: var(--p-tinta); font-weight: 700; text-decoration: underline; text-underline-offset: .2em; text-decoration-color: color-mix(in srgb, var(--p-tinta) 45%, transparent); }
+.painel .p-hover-corpo{ position: absolute; z-index: 30; top: calc(100% + .5rem); left: 50%; width: 16rem; display: grid; gap: .35rem; padding: .9rem 1rem; border: 1px solid var(--p-linha); border-radius: 12px; background: var(--p-elevado); color: var(--p-tinta); box-shadow: var(--p-sombra), 0 8px 24px color-mix(in srgb, var(--p-tinta) 14%, transparent); opacity: 0; visibility: hidden; transform: translate(-50%, 4px); transition: opacity .15s ease, transform .15s ease, visibility 0s linear .15s; }
+.painel .p-hover:is(:hover, :focus-within) .p-hover-corpo{ opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: .2s, .2s, 0s; }
+.painel .p-hover-corpo > *{ margin: 0; }
+.painel .p-hover-corpo strong{ font-size: .95rem; }
+.painel .p-hover-corpo small{ color: var(--p-tinta-suave); }
+@media (prefers-reduced-motion: reduce){ .painel .p-hover-corpo{ transition: none; } }
+
+/* ---------- Menu de ações (Dropdown Menu do shadcn) ---------- */
+.painel details.p-menu{ position: relative; display: inline-block; margin: 0; }
+.painel details.p-menu > summary{ margin: 0; list-style: none; }
+.painel details.p-menu > summary::-webkit-details-marker{ display: none; }
+.painel details.p-menu > summary::after{ display: none; }
+.painel details.p-menu[data-alinhar="fim"] > .p-menu-lista{ left: auto; right: 0; }
+
+/* ---------- Tecla (KBD do shadcn) ---------- */
+.painel kbd{ display: inline-flex; align-items: center; justify-content: center; min-width: 1.5rem; height: 1.5rem; padding: 0 .4rem; border: 1px solid var(--p-linha); border-bottom-width: 2px; border-radius: 6px; background: var(--p-superficie); color: var(--p-tinta-suave); font-family: inherit; font-size: .75rem; font-weight: 800; line-height: 1; }
+.painel .p-teclas{ display: inline-flex; align-items: center; gap: .25rem; }
+
+/* ---------- Janela (Dialog do shadcn): <dialog> do navegador com a estrutura de modal do Pico ---------- */
+/* painel-ui.js abre com showModal() e fecha com Esc, no X, em [data-fechar-dialogo] e no clique fora. */
+.painel dialog article{ position: relative; width: min(30rem, calc(100vw - 2rem)); max-height: calc(100vh - 2rem); overflow-y: auto; margin: 0; border: 1px solid var(--p-linha); border-radius: var(--p-raio); background: var(--p-elevado); box-shadow: var(--p-sombra), 0 16px 48px color-mix(in srgb, var(--p-tinta) 22%, transparent); }
+.painel dialog article > header{ display: grid; gap: .25rem; padding-right: 2rem; }
+.painel dialog article > header h3{ margin: 0; font-size: 1.1rem; font-weight: 800; }
+.painel dialog article > header p{ margin: 0; color: var(--p-tinta-suave); font-size: .9rem; }
+.painel dialog article > header > button[rel="prev"], .painel dialog article > header > .p-dialogo-fechar{ position: absolute; top: 1rem; right: 1rem; margin: 0; }
+.painel dialog article > footer{ display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .6rem; }
+.painel dialog article > footer > *{ margin: 0; width: auto; }
+/* o formulário pode ficar dentro do article: o rodapé e os campos dele recebem o mesmo estilo */
+.painel dialog article > form{ margin: 0; }
+.painel dialog article > form > footer{ display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .6rem; }
+.painel dialog article :is(footer, form > footer) > :is(button, [type=submit], [role=button]){ margin: 0; width: auto; }
+.painel dialog article > form > :is(label, .p-campo, .p-alerta){ margin-bottom: .75rem; }
+.painel dialog article > :is(label, .p-campo){ margin-bottom: .75rem; }
+
+/* ---------- Escolher data (Date Picker do shadcn) ---------- */
+/* details.p-popover.p-data: o botão mostra a data; o calendário é montado pelo painel-ui.js (meses e dias em português). */
+.painel details.p-data > summary{ min-width: 13rem; justify-content: space-between; gap: 1rem; }
+.painel details.p-data > summary[data-vazio]{ color: var(--p-tinta-suave); }
+.painel details.p-data > summary::after{ display: inline-block; content: "\2304"; background: none; width: auto; height: auto; margin: 0; font-size: 1.1em; line-height: 1; opacity: .7; }
+.painel .p-calendario{ min-width: 18.5rem; }
+.painel .p-cal-topo{ display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.painel .p-cal-topo strong{ font-size: .95rem; }
+.painel .p-cal-nav{ margin: 0; width: 2rem; height: 2rem; padding: 0; border-radius: 10px; font-size: 1.2rem; line-height: 1; }
+.painel .p-cal-grade{ display: grid; grid-template-columns: repeat(7, 2.3rem); gap: 2px; justify-content: center; }
+.painel .p-cal-sem{ display: grid; place-items: center; height: 1.8rem; font-size: .75rem; font-weight: 800; color: var(--p-tinta-suave); }
+.painel .p-calendario .p-dia{ display: grid; place-items: center; width: 2.3rem; height: 2.3rem; margin: 0; padding: 0; border: 0; border-radius: 10px; background: transparent; box-shadow: none; color: var(--p-tinta); font-size: .9rem; font-weight: 700; }
+.painel .p-calendario .p-dia:hover{ background: var(--p-superficie); }
+.painel .p-calendario .p-dia.p-fora{ color: var(--p-tinta-suave); opacity: .6; }
+.painel .p-calendario .p-dia.p-hoje{ box-shadow: inset 0 0 0 1px var(--p-borda-campo); }
+.painel .p-calendario .p-dia[aria-pressed="true"]{ background: var(--p-marca); color: var(--p-texto-botao); box-shadow: none; opacity: 1; }
+.painel .p-calendario .p-dia:focus-visible{ outline: 2px solid var(--p-marca-escura); outline-offset: 1px; }
+
+/* ---------- Menu de contexto (Context Menu do shadcn) ---------- */
+/* Abre com o botão direito (ou a tecla de menu) sobre um elemento com data-menu-contexto="id do menu". */
+.painel .p-contexto-area{ display: grid; place-items: center; min-height: 8rem; padding: 1rem; border: 1px dashed var(--p-borda-campo); border-radius: 12px; color: var(--p-tinta-suave); font-size: .92rem; user-select: none; }
+.painel .p-contexto-menu{ position: fixed; z-index: 1000; top: 0; left: 0; }
+.painel .p-contexto-menu[hidden]{ display: none; }
+
+/* ---------- Combobox: campo com busca e lista de sugestões (Combobox do shadcn) ---------- */
+.painel .p-combo{ position: relative; max-width: 22rem; margin: 0; }
+.painel .p-combo .p-grupo-entrada::after{ content: "\2304"; flex: none; color: var(--p-tinta-suave); font-size: 1.1em; line-height: 1; }
+.painel .p-combo-lista{ position: absolute; z-index: 30; top: calc(100% + .35rem); left: 0; right: 0; max-height: 14rem; overflow-y: auto; margin: 0; padding: .35rem; list-style: none; border: 1px solid var(--p-linha); border-radius: 12px; background: var(--p-elevado); box-shadow: var(--p-sombra), 0 8px 24px color-mix(in srgb, var(--p-tinta) 14%, transparent); }
+.painel .p-combo-lista[hidden]{ display: none; }
+.painel .p-combo-lista li{ display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 0; padding: .5rem .7rem; border-radius: 8px; list-style: none; font-weight: 600; cursor: pointer; }
+.painel .p-combo-lista li[hidden]{ display: none; }
+.painel .p-combo-lista li.p-ativo{ background: var(--p-superficie); }
+.painel .p-combo-lista li[aria-selected="true"]{ font-weight: 800; }
+.painel .p-combo-lista li[aria-selected="true"]::after{ content: "\2713"; color: var(--p-marca-escura); font-weight: 800; }
+.painel .p-combo-vazio{ margin: 0; padding: .6rem .7rem; color: var(--p-tinta-suave); font-size: .88rem; }
+.painel .p-combo-vazio[hidden]{ display: none; }
+
+/* ---------- Bloco que abre e fecha (Collapsible do shadcn) ---------- */
+.painel .p-colapsavel{ display: grid; gap: .5rem; max-width: 26rem; margin: 0; }
+.painel .p-colapsavel-topo{ display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 .25rem; }
+.painel .p-colapsavel-topo strong{ font-size: .95rem; }
+.painel .p-colapsavel-botao{ display: inline-grid; place-items: center; width: 2.1rem; height: 2.1rem; margin: 0; padding: 0; border-radius: 10px; font-size: 1rem; line-height: 1; }
+.painel .p-colapsavel-botao svg{ width: 1rem; height: 1rem; }
+.painel .p-linha-info{ display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 0; padding: .65rem .9rem; border: 1px solid var(--p-linha); border-radius: 10px; background: var(--p-elevado); font-size: .9rem; }
+.painel .p-linha-info > span:first-child{ color: var(--p-tinta-suave); }
+.painel .p-linha-info > :last-child{ font-weight: 700; text-align: right; }
+.painel .p-colapsavel-corpo{ display: grid; gap: .5rem; }
+.painel .p-colapsavel-corpo[hidden]{ display: none; }
+
+/* ---------- Balões de conversa (Bubble do shadcn) ---------- */
+/* Diferente de Mensagem (texto solto): aqui os dois lados são balões. --enviada = quem usa o painel (cor do curso, à direita). */
+.painel .p-balaos{ display: flex; flex-direction: column; gap: 1rem; margin: 0; padding: 0; list-style: none; }
+.painel .p-balao-grupo{ display: flex; flex-direction: column; gap: .25rem; max-width: 80%; margin: 0; padding: 0; list-style: none; }
+.painel .p-balao-grupo--enviada{ align-self: flex-end; align-items: flex-end; }
+.painel .p-balao-grupo--recebida{ align-self: flex-start; align-items: flex-start; }
+.painel .p-balao{ position: relative; margin: 0; padding: .6rem 1rem; border-radius: 18px; line-height: 1.45; font-size: .95rem; overflow-wrap: anywhere; }
+.painel .p-balao > *{ margin: 0; }
+.painel .p-balao--enviada{ background: var(--p-balao-enviada); color: white; }
+.painel .p-balao--recebida{ background: var(--p-superficie); color: var(--p-tinta); }
+.painel .p-balao-grupo--enviada .p-balao:not(:last-of-type){ border-bottom-right-radius: 6px; }
+.painel .p-balao-grupo--recebida .p-balao:not(:last-of-type){ border-bottom-left-radius: 6px; }
+.painel .p-reacoes{ display: inline-flex; align-items: center; gap: .3rem; margin: -.55rem .6rem 0; padding: .1rem .5rem; border: 1px solid var(--p-linha); border-radius: 999px; background: var(--p-elevado); box-shadow: var(--p-sombra); font-size: .85rem; line-height: 1.5; position: relative; z-index: 1; color: var(--p-tinta); }
+.painel .p-reacoes small{ font-weight: 800; color: var(--p-tinta-suave); }
+
+/* ---------- Anexos (Attachment do shadcn): arquivo, imagem e envio em andamento ---------- */
+.painel .p-anexos{ display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
+.painel .p-anexos--grade{ grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); }
+.painel .p-anexo{ position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; margin: 0; padding: .55rem .7rem .55rem .55rem; border: 1px solid var(--p-linha); border-radius: 16px; background: var(--p-elevado); animation: p-entrar .28s ease both; }
+.painel .p-anexo-media{ display: inline-grid; place-items: center; flex: none; width: 2.6rem; height: 2.6rem; border-radius: 12px; background: var(--p-superficie); color: var(--p-tinta); }
+.painel .p-anexo-media svg{ width: 1.2rem; height: 1.2rem; }
+.painel .p-anexo-texto{ flex: 1; min-width: 0; display: grid; gap: .1rem; }
+.painel .p-anexo-nome{ font-weight: 700; font-size: .92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.painel .p-anexo-detalhe{ font-size: .8rem; color: var(--p-tinta-suave); }
+.painel .p-anexo-remover{ flex: none; margin: 0; width: 1.8rem; height: 1.8rem; padding: 0; border-color: transparent; background: transparent; color: var(--p-tinta-suave); font-size: 1.1rem; line-height: 1; }
+.painel .p-anexo--imagem{ flex-direction: column; align-items: stretch; gap: .5rem; padding: .55rem; }
+.painel .p-anexo--imagem .p-anexo-media{ width: 100%; height: auto; aspect-ratio: 1; border-radius: 12px; overflow: hidden; }
+.painel .p-anexo--imagem .p-anexo-media img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+.painel .p-anexo--imagem .p-anexo-remover{ position: absolute; top: .9rem; right: .9rem; background: color-mix(in srgb, var(--p-bg) 80%, transparent); }
+.painel .p-anexo-barra{ flex: 0 0 100%; height: 4px; border-radius: 999px; background: var(--p-linha); overflow: hidden; }
+.painel .p-anexo-barra > i{ display: block; height: 100%; width: var(--v, 0%); border-radius: 999px; background: var(--p-marca-escura); transition: width .35s ease; }
+.painel .p-anexo--enviando .p-anexo-barra > i{ background: linear-gradient(90deg, var(--p-marca-escura) 0%, color-mix(in srgb, var(--p-marca-escura) 55%, white) 50%, var(--p-marca-escura) 100%); background-size: 200% 100%; animation: p-brilho-barra 1.2s linear infinite; }
+.painel .p-anexo--erro{ border-color: var(--p-erro); }
+.painel .p-anexo--erro .p-anexo-detalhe{ color: var(--p-erro); font-weight: 700; }
+.painel .p-anexo--saindo{ animation: p-sair .2s ease forwards; }
+@keyframes p-entrar{ from{ opacity: 0; transform: translateY(6px) scale(.98); } to{ opacity: 1; transform: none; } }
+@keyframes p-sair{ to{ opacity: 0; transform: scale(.96); } }
+@keyframes p-brilho-barra{ to{ background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce){ .painel .p-anexo{ animation: none; } .painel .p-anexo--enviando .p-anexo-barra > i{ animation-duration: 3s !important; animation-iteration-count: infinite !important; animation-delay: 0s !important; } }
+
+/* ---------- Alerta em caixa (Alert do shadcn): ícone, título e descrição ---------- */
+.painel .p-alerta--caixa{ justify-content: flex-start; align-items: flex-start; gap: .75rem; background: var(--p-elevado); border-color: var(--p-linha); }
+.painel .p-alerta--caixa > svg{ flex: none; width: 1.15rem; height: 1.15rem; margin-top: .15rem; color: var(--c); }
+.painel .p-alerta--caixa > div{ display: grid; gap: .15rem; min-width: 0; }
+.painel .p-alerta--caixa strong{ font-size: .95rem; }
+.painel .p-alerta--caixa span{ color: var(--p-tinta-suave); font-size: .9rem; }
+
+/* ---------- Botão de ação que apaga ou remove (usado no Alert Dialog) ---------- */
+.painel :is(button, [type=submit], [type=button], [role=button]).p-perigo{ --pico-background-color: var(--p-erro); --pico-border-color: var(--p-erro); --pico-color: var(--p-sobre-vivo); }
+.painel :is(button, [type=submit], [type=button], [role=button]).p-perigo:is(:hover, :active, :focus){ --pico-background-color: color-mix(in srgb, var(--p-erro) 86%, black); --pico-border-color: color-mix(in srgb, var(--p-erro) 86%, black); --pico-color: var(--p-sobre-vivo); }
+
+/* ---------- Janela de alerta (Alert Dialog do shadcn): exige uma resposta, sem X e sem fechar no fundo ---------- */
+.painel dialog.p-dialogo--alerta article{ width: min(28rem, calc(100vw - 2rem)); }
+
+/* cor do ícone do alerta em caixa, por tipo */
+.painel .p-alerta--caixa{ --c: var(--p-info); }
+.painel .p-alerta--caixa.p-alerta--ok{ --c: var(--p-ok); }
+.painel .p-alerta--caixa.p-alerta--erro{ --c: var(--p-erro); }
+.painel .p-alerta--caixa.p-alerta--aviso{ --c: var(--p-aviso); }
+
+/* o marcador de lista que o Pico põe em li não pode virar um item solto dentro de anexo e balão */
+.painel .p-anexo::before, .painel .p-balao-grupo::before{ content: none; display: none; }
+.painel li.p-anexo[aria-busy="true"]:not(input, select, textarea)::before{ content: none; display: none; }
+
+/* ---------- Atividade em quadradinhos, barra empilhada e legenda (usadas na ficha do aluno) ---------- */
+.painel .p-atividade{ display: flex; flex-wrap: wrap; gap: 3px; margin: 0; }
+.painel .p-atividade i{ display: block; width: 14px; height: 14px; border-radius: 3px; background: var(--p-linha); }
+.painel .p-atividade i.on{ background: var(--p-ok); }
+.painel .p-pilha{ display: flex; height: .9rem; border-radius: 999px; overflow: hidden; background: var(--p-linha); }
+.painel .p-pilha i{ display: block; height: 100%; }
+.painel .p-legenda{ display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; margin: .5rem 0 0; font-size: .85rem; color: var(--p-tinta-suave); }
+.painel .p-legenda b{ color: var(--p-tinta); }
+.painel .p-legenda span::before{ content: ""; display: inline-block; width: .6rem; height: .6rem; margin-right: .35rem; border-radius: 50%; background: var(--k, var(--p-linha)); }
+
+/* Botão pequeno (dentro de linhas de tabela e alertas) e texto só para leitor de tela */
+.painel :is(button, [type=button], [role=button]).p-pequeno{ padding: .3rem .8rem; font-size: .85rem; min-height: 0; width: auto; }
+.painel .p-so-leitor{ position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.painel .p-lista li > small{ flex-basis: 100%; color: var(--p-tinta-suave); font-size: .82rem; }
+.painel .p-tabela{ position: relative; }
+.painel .p-so-leitor{ left: 0; top: 0; }
+/* No celular a tabela mostra só o essencial: as colunas marcadas somem (a ficha mostra o resto). */
+@media (max-width: 640px){ .painel .p-oculta-movel{ display: none; } }
+
+/* ---------- Aula no diário, mês, pessoas escolhidas (chips) e avatares em grupo ---------- */
+.painel .p-chips{ display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; list-style: none; }
+.painel .p-chip{ display: inline-flex; align-items: center; gap: .4rem; margin: 0; padding: .2rem .35rem .2rem .7rem; border: 1px solid var(--p-linha); border-radius: 999px; background: var(--p-elevado); font-size: .88rem; font-weight: 700; }
+.painel .p-chip button{ margin: 0; flex: none; width: 1.4rem; height: 1.4rem; min-height: 0; padding: 0; border-radius: 50%; background: var(--p-linha); border-color: transparent; color: var(--p-tinta); font-size: .8rem; line-height: 1; }
+.painel .p-avatares{ display: flex; }
+.painel .p-avatares .p-avatar{ width: 2.1rem; height: 2.1rem; font-size: .7rem; margin-left: -.45rem; outline: 2px solid var(--p-bg); }
+.painel .p-avatares .p-avatar:first-child{ margin-left: 0; }
+.painel .p-mes{ margin: .5rem 0 0; font-size: .75rem; letter-spacing: .09em; text-transform: uppercase; font-weight: 800; color: var(--p-tinta-suave); }
+.painel .p-aula{ display: grid; grid-template-columns: 3.4rem minmax(0, 1fr) auto; gap: .9rem; align-items: start; margin: 0; }
+.painel .p-aula-dia{ display: grid; place-items: center; width: 3.4rem; padding: .3rem 0; border-radius: var(--p-raio-controle); background: var(--p-superficie); border: 1px solid var(--p-linha); text-align: center; line-height: 1.1; }
+.painel .p-aula-dia b{ font-size: 1.3rem; }
+.painel .p-aula-dia span{ font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--p-tinta-suave); font-weight: 800; }
+.painel .p-aula h3{ margin: 0 0 .25rem; font-size: 1.02rem; }
+.painel .p-aula dl{ margin: .35rem 0 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .15rem .75rem; font-size: .9rem; }
+.painel .p-aula dt{ color: var(--p-tinta-suave); font-weight: 700; }
+.painel .p-aula dd{ margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.painel .p-aula p.p-material-texto{ margin: .4rem 0 0; font-size: .9rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.painel .p-material-anexos{ display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .5rem; }
+.painel .p-material-anexos a.p-selo{ text-decoration: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 760px){ .painel .p-aula{ grid-template-columns: 3.4rem minmax(0, 1fr); } .painel .p-aula > :last-child{ grid-column: 2; } }
+
+/* Duas colunas com a principal maior; a lateral (formulário) fica fixa ao rolar e vai para baixo no celular. */
+.painel .p-grade-2.p-grade-2--larga{ grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
+.painel .p-lateral{ position: sticky; top: 5.5rem; align-self: start; min-width: 0; }
+@media (max-width: 900px){ .painel .p-grade-2.p-grade-2--larga{ grid-template-columns: 1fr; } .painel .p-lateral{ position: static; } }
+/* botão de envio (type=submit) dentro de .p-acoes não ocupa a linha toda: os botões ficam lado a lado */
+.painel .p-acoes > :is(button, [type=submit], [role=button]){ width: auto; margin: 0; }
+
+/* ---------- Tipos de cartão como peças escolháveis (rádios com título e descrição) ---------- */
+.painel .p-tipos{ display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .6rem; margin: 0; }
+.painel .p-tipos label{ position: relative; display: grid; gap: .15rem; width: 100%; margin: 0; padding: .7rem .8rem; border: 1px solid var(--p-linha); border-radius: var(--p-raio-controle); background: var(--p-elevado); cursor: pointer; }
+.painel .p-tipos label:has(input:checked){ border-color: var(--p-marca-escura); box-shadow: 0 0 0 2px color-mix(in srgb, var(--p-marca-escura) 35%, transparent); }
+.painel .p-tipos label:has(input:focus-visible){ outline: 2px solid var(--p-marca-escura); outline-offset: 2px; }
+.painel .p-tipos input{ position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.painel .p-tipos b{ font-size: .92rem; }
+.painel .p-tipos span{ font-size: .8rem; color: var(--p-tinta-suave); }
+
+/* ---------- Envoltório dos editores de campo (marcação antiga, compartilhada com o lado do aluno) ----------
+   Os editores de campos, de múltipla escolha, de lacunas e de tags geram HTML com classes do site (btn, admin-select-link,
+   field-image-link...). Dentro de .p-editor esses botões ficam no tamanho e no tom das ações secundárias do painel. */
+.painel .p-editor :is(button.admin-select-link, button.btn, button.field-image-link, button.admin-badge-delete-btn){ width: auto; min-height: 0; margin: .2rem .3rem .2rem 0; padding: .3rem .8rem; border: 1px solid var(--p-borda-campo); border-radius: 999px; background: transparent; color: var(--p-tinta); font-size: .85rem; font-weight: 700; text-decoration: none; }
+.painel .p-editor :is(button.admin-select-link, button.btn, button.field-image-link, button.admin-badge-delete-btn):hover{ background: var(--p-linha); }
+.painel .p-editor .field-editor-row{ border-radius: var(--p-raio-controle); background: var(--p-superficie); }
+.painel .p-editor :is(label.profile-edit-label, .section-label){ display: block; margin: .6rem 0 .2rem; font-size: .85rem; font-weight: 800; color: var(--p-tinta); }
+.painel .p-editor .profile-edit-hint, .painel .p-editor .profile-edit-field-error{ font-size: .82rem; color: var(--p-tinta-suave); }
+.painel .p-editor .profile-edit-error{ color: var(--p-erro); font-weight: 700; }
+
+/* Destino de um aluno (Deck onde o cartão entra) e janela larga para formulários longos. */
+.painel .p-destino{ display: grid; gap: .5rem; padding: .8rem 0; border-top: 1px solid var(--p-linha); }
+.painel .p-destino:first-child{ border-top: 0; padding-top: 0; }
+.painel .p-destino select{ margin: 0; }
+.painel dialog.p-dialogo--larga article{ width: min(46rem, calc(100vw - 2rem)); }
+.painel .p-tabela--compacta :is(th, td){ padding: .55rem .6rem; font-size: .9rem; }
+.painel .p-tabela--compacta td small{ font-size: .78rem; color: var(--p-tinta-suave); }
+.painel .p-editor form > label{ margin-top: 1rem; }
+
+/* ---------- Planos (painel de Admin) ---------- */
+.painel .p-busca{ position: relative; max-width: 28rem; }
+.painel .p-busca input{ margin-bottom: .25rem; }
+.painel .p-busca > small{ display: block; min-height: 1.1em; color: var(--p-tinta-suave); }
+.painel .p-op-texto{ display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.25; }
+.painel .p-op-texto b{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.painel .p-op-texto small{ color: var(--p-tinta-suave); font-weight: 600; }
+.painel .p-combo-lista li .p-avatar{ width: 2rem; height: 2rem; font-size: .75rem; }
+.painel .p-conta{ max-width: 28rem; margin-top: 1rem; }
+.painel .p-linha-opcao{ display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 0; padding: .75rem 0; border-top: 1px solid var(--p-linha); }
+.painel .p-linha-opcao input[role=switch]{ margin: 0; flex: none; }
+.painel .p-tabela--matriz table{ min-width: 720px; }
+.painel .p-tabela--matriz tbody th{ min-width: 14rem; max-width: 22rem; white-space: normal; text-align: left; font-weight: 700; }
+@media (max-width: 760px){ .painel .p-tabela--matriz :is(thead th:first-child, tbody th){ position: sticky; left: 0; z-index: 1; background: var(--p-elevado); } }
+.painel .p-celula{ display: inline-flex; flex-direction: column; align-items: center; gap: .35rem; padding: .25rem; border-radius: 8px; }
+.painel .p-celula input{ margin: 0; }
+.painel .p-celula input[type=number]{ width: 5.2rem; min-height: 2rem; padding: .2rem .4rem; text-align: center; }
+.painel .p-celula input:disabled{ opacity: .45; }
+.painel .p-celula.is-saved{ outline: 2px solid var(--p-ok); outline-offset: 1px; }
+@media (max-width: 760px){ .painel .p-celula input[type=checkbox]{ min-width: 1.4rem; min-height: 1.4rem; } }
+.painel .p-variante[data-inativa]{ opacity: .72; }
+.painel .p-variante .p-aula-dia b{ font-size: 1.5rem; }
+.painel article form > small{ display: block; margin: 0 0 1rem; }
+
+/* ---------- Badges (painel de Admin) ---------- */
+.painel .p-grade-badges{ display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 1rem; }
+.painel .p-badge{ display: grid; grid-template-columns: 3.4rem minmax(0, 1fr); gap: .9rem; align-items: start; margin: 0; }
+.painel .p-badge-icone{ display: grid; place-items: center; width: 3.4rem; height: 3.4rem; font-size: 1.8rem; border-radius: var(--p-raio-controle); background: var(--p-superficie); border: 1px solid var(--p-linha); }
+.painel .p-badge h3{ margin: 0; font-size: 1.02rem; }
+.painel .p-badge small{ display: block; color: var(--p-tinta-suave); }
+.painel .p-badge > .p-acoes{ grid-column: 2; margin: 0; }
+.painel .p-automaticos summary{ font-weight: 800; cursor: pointer; }
+.painel .p-lista-simples{ list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.painel .p-lista-simples li{ display: flex; gap: .7rem; align-items: flex-start; margin: 0; padding: 0; }
+.painel .p-lista-simples li > span:first-child{ font-size: 1.4rem; line-height: 1.2; }
+.painel .p-lista-simples small{ display: block; color: var(--p-tinta-suave); }
+.painel .p-membros{ display: grid; gap: .3rem; }
+.painel .p-membro{ display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 11rem); gap: .6rem; align-items: center; padding: .25rem 0; border-bottom: 1px solid var(--p-linha); }
+.painel .p-membro[hidden]{ display: none; }
+.painel .p-membro > label{ margin: 0; overflow-wrap: anywhere; }
+.painel .p-membro > input[type=text]{ margin: 0; min-height: 2.2rem; }
+@media (max-width: 760px){ .painel .p-membro{ grid-template-columns: 1fr; } }
+.painel .p-tabela--fluida table{ min-width: 0; }
+.painel .p-tabela--fluida :is(th, td){ white-space: normal; overflow-wrap: anywhere; }
+.painel .p-tabela--fluida td:last-child{ white-space: nowrap; }
+.painel :is(.p-tabela td, .p-lista-simples, .p-badge-icone) svg{ width: 1.4rem; height: 1.4rem; vertical-align: -.3em; flex: none; }
+.painel .p-lista-simples li > span:first-child{ display: inline-flex; }
+
+/* ---------- Reports (painel de Admin) ---------- */
+.painel .p-detalhe-report{ display: grid; gap: .9rem; }
+.painel .p-detalhe-report h4{ margin: .5rem 0 0; }
+.painel .p-bloco{ display: grid; gap: .15rem; }
+.painel .p-bloco > small{ font-weight: 800; color: var(--p-tinta-suave); text-transform: uppercase; letter-spacing: .05em; font-size: .72rem; }
+.painel .p-contexto{ display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .15rem .75rem; margin: .5rem 0 0; font-size: .85rem; }
+.painel .p-contexto dt{ font-weight: 700; color: var(--p-tinta-suave); }
+.painel .p-contexto dd{ margin: 0; overflow-wrap: anywhere; }
+.painel .p-resposta{ border-top: 1px solid var(--p-linha); padding-top: .5rem; display: grid; gap: .5rem; }
+
+/* ---------- Analytics (painel de Admin) ---------- */
+.painel .p-indicadores{ display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr)); gap: 1rem; margin-bottom: .75rem; }
+.painel .p-indicadores .p-indicador-valor .p-selo{ vertical-align: middle; font-size: .72rem; margin-left: .25rem; }
+.painel .p-campos-linha{ display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: end; margin-bottom: .5rem; }
+.painel .p-campos-linha > label{ margin: 0; min-width: 11rem; flex: 1 1 11rem; }
+.painel .p-campos-linha select, .painel .p-campos-linha input{ margin-bottom: 0; }
+.painel .p-nota{ display: block; margin: .35rem 0 0; }
+.painel .p-secoes{ display: grid; gap: 1rem; }
+.painel .p-barras{ display: grid; gap: .7rem; }
+.painel .p-barra-linha{ display: grid; gap: .25rem; }
+.painel .p-barra-topo{ display: flex; justify-content: space-between; gap: 1rem; font-size: .9rem; font-weight: 700; }
+.painel .p-barra-topo > span:last-child{ color: var(--p-tinta-suave); font-weight: 600; text-align: right; }
+.painel .p-barra{ height: .6rem; border-radius: 999px; background: var(--p-linha); overflow: hidden; }
+.painel .p-barra > i{ display: block; height: 100%; width: var(--v, 0%); min-width: 2px; border-radius: inherit; background: var(--p-marca); }
+.painel .p-funil-linha{ display: grid; gap: .35rem; padding: .6rem 0; border-top: 1px solid var(--p-linha); }
+.painel .p-funil-linha:first-of-type{ border-top: 0; }
+.painel .p-funil{ display: flex; flex-wrap: wrap; gap: .5rem .9rem; align-items: center; }
+.painel .p-funil > div{ display: grid; gap: .1rem; }
+.painel .p-funil > div > span{ font-size: 1.4rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.painel .p-funil > div > small{ color: var(--p-tinta-suave); }
+.painel .p-funil > i{ font-style: normal; color: var(--p-tinta-suave); }
+
+/* Aulas (094): Presença e Competências usam as classes do site (.att-pill, .skill-toggle, .skill-chip, definidas no index de
+   fr e zh e iguais às da tela da aluna). Aqui só se desfaz o que o Pico faz com botão e campo dentro do painel. */
+.painel .att-choices, .painel .skill-toggles{ display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin: 0 0 .5rem; }
+.painel :is(.att-choice, .skill-toggle) input{ width: 1rem; height: 1rem; margin: 0; flex: none; }
+.painel label.att-choice, .painel label.skill-toggle{ margin: 0; }
+.painel button.att-more{ width: auto; margin: 0; padding: .1rem .45rem; border: 0; background: transparent; box-shadow: none; color: var(--p-tinta-suave); font-size: 1rem; line-height: 1; }
+.painel button.att-more:hover, .painel button.att-more:focus-visible{ background: var(--p-superficie); color: var(--p-tinta); }
+.painel button.att-swatch{ width: auto; margin: 0; padding: .1rem .6rem; border: 1px solid var(--p-linha); box-shadow: none; }
+.painel input.att-new, .painel .att-menu-box input[type="text"]{ width: 100%; margin: 0 0 .75rem; }
+.painel .att-menu{ margin: 0 0 .75rem; }
+.painel .att-menu-box{ margin: 0; }
+.painel .att-menu-actions button{ width: auto; margin: 0; }
+.painel .class-log-extras legend{ font-weight: 700; margin-bottom: .35rem; }
+.painel .class-log-extras{ margin: 0 0 .75rem; padding: 0; border: 0; }
+
+/* Convites pendentes (Alunos): lista simples com avatar, nome e ações */
+.painel .p-convites{ list-style: none; margin: 0; padding: 0; }
+.painel .p-convites li{ display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin: 0; padding: .7rem 0; border-top: 1px solid var(--p-linha); }
+.painel .p-convites li:first-child{ border-top: 0; }
+.painel .p-convites .p-acoes{ margin-left: auto; }
+.painel .p-convites .is-expired small{ color: var(--p-erro); }

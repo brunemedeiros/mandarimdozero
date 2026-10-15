@@ -50,7 +50,199 @@ function switchTeacherPanelSection(section){
 
 async function renderTeacherPanelView(){
   await loadMyPermissions();
+  renderTeacherBell();
+  refreshTeacherBell();
   switchTeacherPanelSection(TEACHER_PANEL_STATE.section);
+}
+
+// ---------- Sino da professora (105) ----------
+// Decisão da autora (2026-10-15): os avisos sobre ALUNOS (aluno sumido, post/comentário de aluno no mural, entrou pela
+// turma, convite aceito/recusado) ficam aqui, separados do sino do topo (que é o do estudo da própria conta), e chegam de
+// alunos de QUALQUER idioma, seja qual for o site aberto. O banco marca esses avisos com audience='teacher' (105).
+// O texto é montado aqui pelo idioma do site de quem lê (t() + notifications.params); sem params, mostra o body gravado.
+const TBELL = { open: false, items: [], unread: 0, available: true, loaded: false, error: false, timer: null };
+const TBELL_LIMIT = 50;
+const TBELL_ICON = { supervisao: '🎓', mural: '📌' };
+const TBELL_EVENT_ICON = { mural_comment: '💬', mural_classroom_join: '🏫', student_inactive_alert: '👋' };
+
+function teacherBellActive(){
+  return TBELL.available && typeof CURRENT_USER !== 'undefined' && !!CURRENT_USER
+    && typeof isTeacherUser === 'function' && isTeacherUser();
+}
+
+// Coluna audience ainda não existe (105 não aplicada): o sino da professora some e tudo continua no sino do topo.
+function teacherBellMissing(error){
+  return !!error && /audience|params/.test(`${error.message || ''} ${error.details || ''}`);
+}
+
+function teacherBellQuery(){
+  return supabaseClient.from('notifications');
+}
+
+async function refreshTeacherBell(){
+  if (!teacherBellActive()){ TBELL.unread = 0; applyTeacherBellBadges(); return; }
+  const { count, error } = await teacherBellQuery().select('id', { count: 'exact', head: true })
+    .eq('user_id', CURRENT_USER.id).eq('audience', 'teacher').is('read_at', null);
+  if (teacherBellMissing(error)){ TBELL.available = false; TBELL.unread = 0; renderTeacherBell(); applyTeacherBellBadges(); return; }
+  TBELL.unread = error ? 0 : (count || 0);
+  applyTeacherBellBadges();
+  if (!TBELL.timer) TBELL.timer = setInterval(() => { if (document.visibilityState === 'visible') refreshTeacherBell(); }, 180000);
+}
+
+async function loadTeacherBellItems(){
+  if (!teacherBellActive()) return;
+  const { data, error } = await teacherBellQuery().select('*')
+    .eq('user_id', CURRENT_USER.id).eq('audience', 'teacher')
+    .order('created_at', { ascending: false }).limit(TBELL_LIMIT);
+  if (teacherBellMissing(error)){ TBELL.available = false; renderTeacherBell(); return; }
+  TBELL.error = !!error;
+  TBELL.items = error ? [] : (data || []);
+  TBELL.loaded = true;
+  TBELL.unread = TBELL.items.filter(n => !n.read_at).length;
+  applyTeacherBellBadges();
+}
+
+function teacherBellLangName(key){
+  return ['frances', 'mandarim', 'portugues'].includes(key) ? t(`panel.tbell.lang.${key}`) : String(key || '');
+}
+
+// Frase no idioma do site de quem lê. Nome, turma e trecho vêm do banco (escapados por quem chama).
+function teacherBellText(n){
+  const p = n && n.params && typeof n.params === 'object' ? n.params : null;
+  if (p && n.event_type === 'student_inactive_alert' && Array.isArray(p.students) && p.students.length){
+    const list = p.students.map(s => `${s && s.name ? s.name : ''} (${tp('panel.tbell.days', Number(s && s.days) || 0)})`).join(', ');
+    return t('panel.tbell.ev.inactive', { list });
+  }
+  if (p && p.name){
+    const v = { name: p.name, lang: teacherBellLangName(n.language_app_key), classroom: p.classroom || '', snippet: p.snippet || '' };
+    if (n.event_type === 'teacher_invite_accepted') return t(p.via === 'link' ? 'panel.tbell.ev.joinedLink' : 'panel.tbell.ev.accepted', v);
+    if (n.event_type === 'teacher_invite_declined') return t('panel.tbell.ev.declined', v);
+    if (n.event_type === 'mural_post') return t(p.classroom ? 'panel.tbell.ev.postClass' : 'panel.tbell.ev.post', v);
+    if (n.event_type === 'mural_comment') return t('panel.tbell.ev.comment', v);
+    if (n.event_type === 'mural_classroom_join') return t(p.new_link ? 'panel.tbell.ev.joinClassNew' : 'panel.tbell.ev.joinClass', v);
+  }
+  return String((n && n.body) || '');
+}
+
+function teacherBellIsMural(n){ return n.category === 'mural' || n.action_tab === 'teacher-mural'; }
+
+function teacherBellItemHTML(n){
+  const icon = TBELL_EVENT_ICON[n.event_type] || TBELL_ICON[n.category] || '🔔';
+  const otherLang = teacherBellIsMural(n) && typeof APP_KEY !== 'undefined' && n.language_app_key !== APP_KEY;
+  const time = typeof notificationTimeAgoLabel === 'function' ? notificationTimeAgoLabel(n.created_at) : '';
+  return `
+    <li><button type="button" class="tbell-item ${n.read_at ? '' : 'is-unread'}" data-tbell-id="${escapeHTML(String(n.id))}">
+      <span class="tbell-item-icon" aria-hidden="true">${icon}</span>
+      <span class="tbell-item-body">
+        <span class="tbell-item-text">${escapeHTML(teacherBellText(n))}</span>
+        <span class="tbell-item-meta">
+          <span class="tbell-lang">${escapeHTML(teacherBellLangName(n.language_app_key))}</span>
+          ${time ? `<span>${escapeHTML(time)}</span>` : ''}
+          ${n.read_at ? '' : `<span class="tbell-new">${escapeHTML(t('panel.tbell.new'))}</span>`}
+        </span>
+        ${otherLang ? `<span class="tbell-item-note">${escapeHTML(t('panel.tbell.otherLang', { lang: teacherBellLangName(n.language_app_key) }))}</span>` : ''}
+      </span>
+    </button></li>`;
+}
+
+function teacherBellListHTML(){
+  if (!TBELL.loaded) return typeof loadingHTML === 'function' ? loadingHTML() : '';
+  if (TBELL.error) return `<p class="tbell-empty">${escapeHTML(t('panel.tbell.err'))}</p>`;
+  if (!TBELL.items.length) return `<p class="tbell-empty">${escapeHTML(t('panel.tbell.empty'))}</p>`;
+  return `<ul class="tbell-items" aria-label="${escapeHTML(t('panel.tbell.title'))}">${TBELL.items.map(teacherBellItemHTML).join('')}</ul>`;
+}
+
+function renderTeacherBell(){
+  const host = document.getElementById('teacher-bell');
+  if (!host) return;
+  if (!teacherBellActive()){ host.innerHTML = ''; host.hidden = true; return; }
+  host.hidden = false;
+  const n = TBELL.unread;
+  host.innerHTML = `
+    <button type="button" class="tbell-btn" id="tbell-btn" aria-expanded="${TBELL.open}" aria-controls="tbell-panel">
+      <span class="tbell-btn-icon" aria-hidden="true">🔔</span>
+      <span class="tbell-btn-label">${escapeHTML(t('panel.tbell.title'))}</span>
+      ${n ? `<span class="mural-count" aria-label="${escapeHTML(tp('panel.tbell.unread', n))}">${n > 99 ? '99+' : n}</span>` : ''}
+    </button>
+    <div class="tbell-panel" id="tbell-panel" ${TBELL.open ? '' : 'hidden'}>
+      <div class="tbell-head">
+        <p class="tbell-hint">${escapeHTML(t('panel.tbell.hint'))}</p>
+        <button type="button" class="tbell-mark-all" id="tbell-mark-all" ${n ? '' : 'disabled'}>${escapeHTML(t('panel.tbell.markAll'))}</button>
+      </div>
+      <div class="tbell-list">${TBELL.open ? teacherBellListHTML() : ''}</div>
+    </div>`;
+  host.querySelector('#tbell-btn').addEventListener('click', toggleTeacherBell);
+  host.querySelector('#tbell-mark-all').addEventListener('click', markAllTeacherBellRead);
+  host.querySelectorAll('[data-tbell-id]').forEach(el => el.addEventListener('click', () => openTeacherBellItem(el.dataset.tbellId)));
+}
+
+async function toggleTeacherBell(){
+  TBELL.open = !TBELL.open;
+  renderTeacherBell();
+  if (TBELL.open){
+    await loadTeacherBellItems();
+    renderTeacherBell();
+  }
+}
+
+async function openTeacherBellItem(id){
+  const n = TBELL.items.find(x => String(x.id) === String(id));
+  if (!n) return;
+  if (!n.read_at){
+    const at = new Date().toISOString();
+    const { error } = await teacherBellQuery().update({ read_at: at }).eq('id', n.id).is('read_at', null);
+    if (!error){ n.read_at = at; TBELL.unread = Math.max(0, TBELL.unread - 1); }
+  }
+  applyTeacherBellBadges();
+  // Aviso de mural de OUTRO idioma: o mural daqui é o do idioma aberto, então só marca como lido (a frase diz onde ver).
+  if (teacherBellIsMural(n)){
+    if (typeof APP_KEY === 'undefined' || n.language_app_key === APP_KEY){ TBELL.open = false; renderTeacherBell(); switchTeacherPanelSection('mural'); return; }
+    renderTeacherBell();
+    return;
+  }
+  TBELL.open = false;
+  renderTeacherBell();
+  switchTeacherPanelSection('students');
+}
+
+async function markAllTeacherBellRead(){
+  if (!teacherBellActive()) return;
+  const at = new Date().toISOString();
+  const { error } = await teacherBellQuery().update({ read_at: at })
+    .eq('user_id', CURRENT_USER.id).eq('audience', 'teacher').is('read_at', null);
+  if (!error){ TBELL.items.forEach(n => { if (!n.read_at) n.read_at = at; }); TBELL.unread = 0; }
+  applyTeacherBellBadges();
+  renderTeacherBell();
+}
+
+// Trocou o idioma do site: a frase dos avisos é montada aqui, então redesenha.
+window.addEventListener('i18n:change', () => {
+  const host = document.getElementById('teacher-bell');
+  if (host && !host.hidden){ renderTeacherBell(); applyTeacherBellBadges(); }
+});
+
+// Contador no botão do sino (dentro do painel) e um ponto no item "Painel da professora" do menu, separado do "+N" do mural.
+function applyTeacherBellBadges(){
+  const n = teacherBellActive() ? TBELL.unread : 0;
+  const btn = document.getElementById('tbell-btn');
+  if (btn){
+    let pill = btn.querySelector(':scope > .mural-count');
+    if (n > 0){
+      if (!pill){ pill = document.createElement('span'); pill.className = 'mural-count'; btn.appendChild(pill); }
+      pill.textContent = n > 99 ? '99+' : String(n);
+      pill.setAttribute('aria-label', tp('panel.tbell.unread', n));
+    } else if (pill) pill.remove();
+    const all = document.getElementById('tbell-mark-all');
+    if (all) all.disabled = !n;
+  }
+  // #mais-btn: no celular o item da professora fica dentro do menu Mais.
+  document.querySelectorAll('#teacher-panel-btn, .teacher-only-nav[data-tab="teacher-panel"], #mais-btn').forEach(el => {
+    let dot = el.querySelector(':scope > .tbell-dot');
+    if (n > 0){
+      if (!dot){ dot = document.createElement('span'); dot.className = 'tbell-dot'; dot.setAttribute('role', 'img'); el.appendChild(dot); }
+      dot.setAttribute('aria-label', tp('panel.tbell.unread', n));
+    } else if (dot) dot.remove();
+  });
 }
 
 document.querySelectorAll('[data-teacher-section]').forEach(btn => {
@@ -104,8 +296,8 @@ function applyStudentNavVisibility(){
 
 // Cartões da professora (Banco de Revisão) no idioma atual -- a aba Aluno > Revisão existe por causa deles.
 function studentHasClassReviewCards(){
-  return typeof STATE !== 'undefined' && Array.isArray(STATE.cards) && typeof isClassReviewCard === 'function'
-    && STATE.cards.some(c => isClassReviewCard(c) && c.flashcardStatus === 'active');
+  return typeof STATE !== 'undefined' && Array.isArray(STATE.cards) && typeof isActiveClassReviewCard === 'function'
+    && STATE.cards.some(c => isActiveClassReviewCard(c) && c.flashcardStatus === 'active');
 }
 
 // ---------- Aluno: Mural | Aulas | Material de apoio | Revisão (decisões da autora, 2026-10-13 e 14) ----------

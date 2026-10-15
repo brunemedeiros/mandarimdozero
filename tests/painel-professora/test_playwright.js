@@ -39,7 +39,7 @@ const PANEL_STUB = (who) => {
     (window.__rpcCalls = window.__rpcCalls || []).push([name, args]);
     if (name === 'my_permissions') return { data: { roles: roles.roles, admin: roles.admin, permissions: Object.fromEntries(CAT.map(c => [c.key, { enabled: perm(c.key), limit: null }])) }, error: null };
     // 103: link de agenda (token de 64 hex; gerar outro devolve um novo).
-    if (name === 'my_calendar_feed_token') return { data: (args && args.p_regenerate ? 'b' : 'a').repeat(64), error: null };
+    if (name === 'my_calendar_feed_token') return { data: (args && args.p_regenerate ? 'b' : 'a').repeat(16), error: null };
     // 101: com horário; inclui 1 aula futura (próximas aulas) marcada em São Paulo.
     if (name === 'get_my_class_schedule') return { data: who === 'S' ? [
       { id: 3, class_date: '2099-01-05', start_time: '19:00:00', duration_minutes: 60, time_zone: 'America/Sao_Paulo', topic: 'Aula futura', homework: null, observations: null, attendance_name: null, attendance_color: null, skills: [], classroom_id: null, classroom_name: null },
@@ -150,14 +150,14 @@ const PANEL_STUB = (who) => {
       L('aluna: link de agenda fechado até ela abrir', await ev(() => { const b = document.querySelector('#my-class-logs-content [data-calendar-feed]'); return !!b && !b.open && !(window.__rpcCalls || []).some(c => c[0] === 'my_calendar_feed_token'); }));
       await ev(() => { const b = document.querySelector('#my-class-logs-content [data-calendar-feed]'); b.open = true; });
       await page.waitForSelector('#my-class-logs-content [data-calendar-feed-url]');
-      L('aluna: link de agenda aponta para a Edge Function com o token', await ev(() => /\/functions\/v1\/class-calendar-feed\?t=a{64}$/.test(document.querySelector('[data-calendar-feed-url]').value)), await ev(() => document.querySelector('[data-calendar-feed-url]').value));
+      L('aluna: link de agenda aponta para a Edge Function com o token', await ev(() => /\/functions\/v1\/class-calendar-feed\/a{16}$/.test(document.querySelector('[data-calendar-feed-url]').value)), await ev(() => document.querySelector('[data-calendar-feed-url]').value));
       L('aluna: botão do Google Agenda assina o link (webcal) em nova aba', await ev(() => { const a = document.querySelector('[data-calendar-feed-google]'); const u = new URL(a.href); return u.host === 'calendar.google.com' && decodeURIComponent(u.searchParams.get('cid')).startsWith('webcal://') && a.target === '_blank'; }));
       L('aluna: Apple/Outlook abre o webcal', await ev(() => document.querySelector('[data-calendar-feed-webcal]').getAttribute('href').startsWith('webcal://')));
       await ev(() => document.querySelector('[data-my-classlog-view="calendar"]').click());
       L('aluna: trocar Lista/Calendário não fecha o bloco da agenda', await ev(() => document.querySelector('#my-class-logs-content [data-calendar-feed]').open));
       await ev(() => document.querySelector('[data-my-classlog-view="list"]').click());
       await ev(() => document.querySelector('[data-calendar-feed-reset]').click());
-      await page.waitForFunction(() => /t=b{64}/.test(document.querySelector('[data-calendar-feed-url]')?.value || ''));
+      await page.waitForFunction(() => /class-calendar-feed\/b{16}$/.test(document.querySelector('[data-calendar-feed-url]')?.value || ''));
       L('aluna: "Gerar outro link" (com confirmação) troca o token', await ev(() => (window.__rpcCalls || []).some(c => c[0] === 'my_calendar_feed_token' && c[1] && c[1].p_regenerate === true)));
       if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#my-class-logs-content [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aluna-link-agenda');
@@ -222,20 +222,20 @@ const PANEL_STUB = (who) => {
       L('convite: trocar idioma troca o link', true);
       await ev(() => document.querySelector(`[data-tinv-lang="${window.__appKey}"]`).click());
       await page.waitForFunction((c) => document.getElementById('tinv-link-input')?.value.includes(c), code0);
-      await page.click('#tinv-reset-btn');
+      await page.click('#tinv-reset-btn'); await page.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();   // confirmação do painel
       await page.waitForFunction(() => document.getElementById('tinv-link-input')?.value.includes('zzz999yyy8'));
       L('convite: gerar outro link', true);
       // ---- convite: busca ----
       await page.fill('#tinv-search-input', 'ana');
-      await page.waitForSelector('#tinv-search-list .plans-option');
-      L('convite: busca não mostra a própria conta', await ev(() => ![...document.querySelectorAll('#tinv-search-list .plans-option-user')].some(e => e.textContent === '@carla.prof')));
+      await page.waitForSelector('#tinv-search-list [data-tinv-opcao]');
+      L('convite: busca não mostra a própria conta', await ev(() => ![...document.querySelectorAll('#tinv-search-list [data-opcao-usuario]')].some(e => e.textContent === '@carla.prof')));
       await page.keyboard.press('Enter');
       await page.waitForSelector('#tinv-send-btn');
       await page.click('#tinv-send-btn');
       await page.waitForFunction(() => document.getElementById('tinv-send-error')?.textContent.length > 0);
       L('convite: aluno com professora mostra o motivo', await ev(() => document.getElementById('tinv-send-error').textContent === t('tinvite.err.student_has_teacher')));
       await page.fill('#tinv-search-input', 'anabela');
-      await page.waitForSelector('#tinv-search-list .plans-option');
+      await page.waitForSelector('#tinv-search-list [data-tinv-opcao]');
       await page.keyboard.press('Enter');
       await page.waitForSelector('#tinv-send-btn');
       await page.click('#tinv-send-btn');
@@ -243,7 +243,7 @@ const PANEL_STUB = (who) => {
       L('convite: pendente aparece na lista', await ev(() => document.querySelector('.tinv-pending-row').textContent.includes('@anabela')));
       L('convite: rpc com o idioma escolhido', await ev(() => window.__rpcCalls.some(c => c[0] === 'teacher_invite_student' && c[1].p_student === 'S2' && c[1].p_lang === window.__appKey)));
       await shot('professora-convite');
-      await page.click('[data-tinv-cancel]');
+      await page.click('[data-tinv-cancel]'); await page.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();   // confirmação do painel
       await page.waitForFunction(() => !document.querySelector('.tinv-pending-row'));
       L('convite: cancelar tira da lista', await ev(() => window.__DB.teacher_students.some(r => r.student_id === 'S2' && r.status === 'removed')));
       // ---- Aulas (094): Presença, Competências, turma, rótulos ----
@@ -349,7 +349,7 @@ const PANEL_STUB = (who) => {
       L('calendário: link de agenda da professora acima do mês', await ev(() => !!document.querySelector('#admin-classlogs-calendar-wrap > [data-calendar-feed]')));
       await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').open = true; });
       await page.waitForSelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]');
-      L('calendário: professora recebe o link dela', await ev(() => /class-calendar-feed\?t=[ab]{64}/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
+      L('calendário: professora recebe o link dela', await ev(() => /class-calendar-feed\/[ab]{16}$/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
       if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aulas-link-agenda');
       // a aula agendada pode cair no mês seguinte: avança até achar
@@ -373,17 +373,17 @@ const PANEL_STUB = (who) => {
       await page.waitForSelector('#plans-search-input');
       const adminTabs = await ev(() => [...document.querySelectorAll('#view-admin-badges [data-admin-section]')].map(b => b.dataset.adminSection));
       L('admin: 5 abas, sem as da professora e sem Tags', JSON.stringify(adminTabs) === '["badges","analytics","notifications","reports","premium"]', adminTabs);
-      await page.waitForSelector('.plans-matrix tbody tr');
-      L('matriz: 12 permissões x 5 tipos', await ev(() => document.querySelectorAll('.plans-matrix tbody tr').length === 12 && document.querySelectorAll('.plans-matrix thead th').length === 6));
+      await page.waitForSelector('[data-plano-matriz] tbody tr');
+      L('matriz: 12 permissões x 5 tipos', await ev(() => document.querySelectorAll('[data-plano-matriz] tbody tr').length === 12 && document.querySelectorAll('[data-plano-matriz] thead th').length === 6));
       await page.fill('#plans-search-input', 'a');
       await page.waitForTimeout(350);
       L('busca: 1 letra pede mais', (await ev(() => document.getElementById('plans-search-status').textContent)).length > 0);
       await page.fill('#plans-search-input', '@ana');
-      await page.waitForSelector('.plans-option');
-      const opts = await ev(() => [...document.querySelectorAll('.plans-option .plans-option-user')].map(e => e.textContent));
+      await page.waitForSelector('[data-plano-opcao]');
+      const opts = await ev(() => [...document.querySelectorAll('[data-plano-opcao] [data-opcao-usuario]')].map(e => e.textContent));
       L('busca: começa-com vem primeiro', opts[0] === '@ana' || opts[0] === '@anabela', opts);
       await page.keyboard.press('ArrowDown');
-      L('busca: seta move a seleção', await ev(() => document.querySelector('.plans-option[aria-selected="true"]')?.dataset.i === '1'));
+      L('busca: seta move a seleção', await ev(() => document.querySelector('.p-ativo[data-plano-opcao]')?.dataset.i === '1'));
       await page.keyboard.press('ArrowUp');
       await page.keyboard.press('Enter');
       await page.waitForSelector('[data-plan-role="teacher"]');
@@ -393,13 +393,14 @@ const PANEL_STUB = (who) => {
       L('conta: Professora concedida pela RPC', await ev(() => window.__grants.some(g => g[1] === 'teacher')));
       await shot('planos');
       await page.click('[data-plan-role="teacher"]');
+      await page.click('dialog.p-dialogo--alerta[open] .p-perigo');
       await page.waitForFunction(() => document.querySelector('[data-plan-role="teacher"]').getAttribute('aria-checked') === 'false');
       L('conta: Professora revogada', await ev(() => !window.__grants.some(g => g[1] === 'teacher')));
       // matriz: liga Formatos ricos para Grátis
-      await ev(() => { const c = document.querySelector('.plans-cell[data-role="user"][data-key="rich_card_formats"] input[type=checkbox]'); c.click(); });
-      await page.waitForFunction(() => document.querySelector('.plans-cell[data-role="user"][data-key="rich_card_formats"]').classList.contains('is-saved'));
+      await ev(() => { const c = document.querySelector('[data-plano-celula][data-role="user"][data-key="rich_card_formats"] input[type=checkbox]'); c.click(); });
+      await page.waitForFunction(() => document.querySelector('[data-plano-celula][data-role="user"][data-key="rich_card_formats"]').classList.contains('is-saved'));
       L('matriz: célula gravada', await ev(() => window.__DB.role_permissions.find(r => r.role === 'user' && r.permission_key === 'rich_card_formats').enabled === true));
-      await ev(() => { const n = document.querySelector('.plans-cell[data-role="premium_pro"][data-key="tts_monthly_quota"] .plans-limit'); n.value = '600'; n.dispatchEvent(new Event('change')); });
+      await ev(() => { const n = document.querySelector('[data-plano-celula][data-role="premium_pro"][data-key="tts_monthly_quota"] [data-plano-limite]'); n.value = '600'; n.dispatchEvent(new Event('change')); });
       await page.waitForFunction(() => window.__DB.role_permissions.find(r => r.role === 'premium_pro' && r.permission_key === 'tts_monthly_quota').limit_value === 600);
       L('matriz: limite numérico gravado', true);
       L('sem rolagem horizontal na página', await ev(() => document.documentElement.scrollWidth <= window.innerWidth + 1), await ev(() => [document.documentElement.scrollWidth, window.innerWidth]));

@@ -1,102 +1,182 @@
-// Painel do aluno ampliado (070) -- Playwright (Chromium real), FR + ZH, tela
-// real "🎓 Alunos" > 📊. Mesmo harness de tests/fase-k6/test_playwright.js: só
-// a rede é substituída; a RPC get_teacher_student_overview devolve um objeto no
-// MESMO formato validado por tests/painel-alunos/test_rpc.sql.
-// Rodar: node tests/painel-alunos/test_playwright.js
-const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
-const http = require('http'), fs = require('fs'), path = require('path');
-const ROOT = path.resolve(__dirname, '..', '..');
+// Aba "Alunos" do painel da professora (Design System do painel) no navegador real, FR + ZH x claro/escuro + celular.
+// Só a rede é trocada (tests/painel-alunos/harness.js). Cobre: layout em tela cheia, quadro geral (indicadores, alerta,
+// busca/filtros, situação), cache e "Atualizar dados", ficha do aluno, remover vínculo (diálogo de confirmação),
+// vincular aluno (admin) x professora, falha de uma consulta e ausência de rolagem horizontal no celular.
+// Rodar: node tests/painel-alunos/test_playwright.js   (SHOT_DIR=/tmp/x salva capturas)
+const path = require('path');
+const { abrir } = require('./harness.js');
 const OUT = process.env.SHOT_DIR || null;
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.mp3': 'audio/mpeg', '.svg': 'image/svg+xml' };
-const server = http.createServer((req, res) => {
-  let p = decodeURIComponent(req.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html';
-  const f = path.join(ROOT, p);
-  if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()){ res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(res);
-});
-const STUB = `(function(){
-  const b = new Proxy({}, { get(_, p){ if (p === 'then') return (ok) => Promise.resolve({ data: [], error: null }).then(ok); return () => b; } });
-  const client = { auth: { getSession: async () => ({ data: { session: null } }), onAuthStateChange: () => ({ data: { subscription: { unsubscribe(){} } } }), signOut: async () => ({}) },
-    from: () => b, channel: () => ({ on(){ return this; }, subscribe(){ return this; } }),
-    storage: { from: () => ({}) }, functions: { invoke: async () => ({ data: null, error: null }) },
-    rpc: async (name, args) => { window.__rpc = (window.__rpc || []); window.__rpc.push(name);
-      if (name === 'get_teacher_student_overview') return { data: window.__OV(args.p_student_id, args.p_language_app_key), error: null };
-      if (name === 'get_teacher_student_metrics') return { data: { lastStudyDay: null, contentsTotal: 0, archivedNotes: 0 }, error: null };
-      return { data: null, error: null }; } };
-  window.supabase = { createClient: () => client };
-})();`;
-let passed = 0, failed = 0;
-const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x).slice(0, 600) : ''); } };
+let ok = 0, ruim = 0;
+const check = (n, c, x) => { if (c) ok++; else { ruim++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x).slice(0, 400) : ''); } };
 
 (async () => {
-  await new Promise(r => server.listen(0, '127.0.0.1', r));
-  const port = server.address().port;
-  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
-  for (const lang of ['fr', 'zh']){
-    for (const scheme of ['light', 'dark']){
-      console.log('== ' + lang + ' ' + scheme);
-      const appKey = lang === 'fr' ? 'frances' : 'mandarim';
-      const ctx = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 1200, height: 1100 }, colorScheme: scheme });
-      const page = await ctx.newPage(); const errors = [];
-      page.on('pageerror', e => errors.push(e.message));
-      await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-      await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
-      await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
-      await page.addInitScript((appKey) => {
-        const day = n => { const d = new Date(Date.now() - n * 86400000); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
-        const firstUnit = appKey === 'frances' ? 'A1-1' : '1';
-        const lg = (key, extra) => Object.assign({ key, lastStudyDay: day(0), streak: 6, xp: 450, totalReviews: 30,
-          progressSummary: { levelId: 'A1', levelLabel: 'A1', pct: 20 }, unitsCompleted: [firstUnit], unitsStarted: 2,
-          checkpoints: {}, activityDays: { [day(0)]: 2, [day(1)]: 1, [day(10)]: 1 }, dailyLessons: { [day(0)]: 1 },
-          dictations: [], challengesCompleted: 3, queue: { total: 10, new: 4, learning: 2, review: 4, due: 3, weak: 1 }, ownCardsActive: 5 }, extra || {});
-        window.__OV = (student, link) => {
-          if (student === 'p1') return { linkedLanguage: 'portugues', languages: [lg('frances')], timeline: [], answers: { allTotal: 0 }, lessonScores: { last30Count: 0 } };
-          return { linkedLanguage: link, languages: [lg(appKey)],
-            timeline: [{ at: new Date().toISOString(), type: 'lesson_complete', name: 'vocab_lesson', lang: appKey, meta: { unitId: firstUnit, scorePct: 90 } },
-                       { at: new Date(Date.now() - 3600e3).toISOString(), type: 'tab_switch', name: 'review', lang: appKey, meta: {} }],
-            answers: { allTotal: 20, last7Total: 10, last7Correct: 8, last30Total: 20, last30Correct: 15 },
-            lessonScores: { last30Count: 3, last30AvgPct: 85 } };
-        };
-      }, appKey);
-      await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
-      await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
-      const L = (n, c, x) => check(`${lang}/${scheme} ${n}`, c, x);
-      await page.evaluate((appKey) => {
-        CURRENT_USER = { id: 'T' }; isAdminUser = () => true;
-        fetchMyStudents = async () => [
-          { id: 1, student_id: 's1', username: 'al1', display_name: 'Aluno 1', language_app_key: appKey, status: 'active', created_at: new Date().toISOString() },
-          { id: 2, student_id: 'p1', username: 'al2', display_name: 'Aluno PT', language_app_key: 'portugues', status: 'active', created_at: new Date().toISOString() }];
-        fetchAllProfiles = async () => [];
-        switchTab('teacher-panel'); switchTeacherPanelSection('students');
-      }, appKey);
-      await page.waitForSelector('[data-toggle-metrics]');
-      const open = async (n) => { await page.click(`[data-toggle-metrics="${n}"]`); await page.waitForFunction((n) => { const t = document.getElementById('metrics-link-' + n).textContent; return t && !t.includes('Carregando'); }, n); return page.evaluate((n) => document.getElementById('metrics-link-' + n).innerText, n); };
+  for (const [lang, scheme] of [['fr', 'light'], ['fr', 'dark'], ['zh', 'light'], ['zh', 'dark']]){
+    const R = `${lang}/${scheme}`;
+    const L = (n, c, x) => check(`[${R}] ${n}`, c, x);
+    const h = await abrir({ lang, scheme, width: 1280, height: 1000 }); const p = h.page;
+    await p.waitForSelector('[data-tsu="geral"]', { timeout: 15000 });
+    const rpcOv = () => p.evaluate(() => window.__rpc.filter(x => x === 'get_teacher_student_overview').length);
+    const linhas = () => p.$$eval('[data-tabela-alunos] tbody tr', trs => trs.map(tr => tr.innerText.replace(/\s+/g, ' ').trim()));
 
-      const t1 = await open(1);
-      L('resumo: último estudo hoje, sequência, XP', t1.includes('Último estudo: hoje') && t1.includes('🔥 6') && t1.includes('450'), t1);
-      L('resumo: dias ativos 7 = 2', t1.includes('2 nos últimos 7'), t1);
-      L('resumo: fila e cartões próprios', t1.includes('3 devidos') && t1.includes('Cartões próprios do aluno: 5'), t1);
-      L('0 cartões da professora ainda mostra última atividade', t1.includes('Última atividade geral da conta') && t1.includes('ainda não criou nenhum cartão'), t1);
-      L('detalhes fechados por padrão', !t1.includes('Abriu a aba Revisão'), t1);
-      // abrir todos os <details> (clique real em cada summary)
-      const n = await page.$$eval('#metrics-link-1 summary', s => s.length);
-      for (let i = 0; i < n; i++) await page.click(`#metrics-link-1 details:nth-of-type(${i + 1}) > summary`).catch(() => {});
-      await page.$$eval('#metrics-link-1 details', ds => ds.forEach(d => { d.open = true; }));
-      const t1b = await page.evaluate(() => document.getElementById('metrics-link-1').innerText);
-      L('detalhes: linha do tempo', t1b.includes('Abriu a aba Revisão') && t1b.includes('Concluiu lição da trilha'), t1b);
-      L('detalhes: unidade com título do site', lang === 'fr' ? t1b.includes('A1-1 · Cumprimentar') : /1 · /.test(t1b), t1b);
-      L('detalhes: acertos 80% (7 dias)', t1b.includes('80%') && t1b.includes('85%'), t1b);
-      L('3 RPCs na 1ª abertura (070, 059 e Decks da 078)', (await page.evaluate(() => window.__rpc.filter(x => x.startsWith('get_teacher_student_')).length)) === 3);
-      if (OUT) await page.screenshot({ path: path.join(OUT, `painel-${lang}-${scheme}.png`), fullPage: false, clip: await page.$eval('#metrics-link-1', el => { const r = el.getBoundingClientRect(); return { x: Math.max(0, r.x - 10), y: Math.max(0, r.y - 60), width: Math.min(900, r.width + 20), height: Math.min(1000, r.height + 80) }; }) });
+    // ---- layout ----
+    L('painel em tela cheia: Ranking/Status ao lado escondidos', await p.evaluate(() => getComputedStyle(document.querySelector('.right-cards')).display === 'none'));
+    L('o conteúdo usa a largura (mais de 900px)', (await p.$eval('[data-tsu="geral"]', e => e.getBoundingClientRect().width)) > 900);
+    L('fora do painel da professora o Ranking continua aparecendo', await p.evaluate(() => { switchTab('profile'); const d = getComputedStyle(document.querySelector('.right-cards')).display; switchTab('teacher-panel'); return d !== 'none'; }));
+    await p.waitForSelector('[data-tsu="geral"]');
 
-      const t2 = await open(2);
-      L('vínculo portugues: nota + dados do francês', t2.includes('Sem progresso em Português') && t2.includes('estudando no site de Francês') && t2.includes('450'), t2);
-      const t2raw = await page.evaluate(() => document.getElementById('metrics-link-2').textContent); // <details> fechado
-      L('sem acertos ainda: data de início', t2raw.includes('começa a ser registrado'), t2raw);
-      L('nenhum erro de página', errors.length === 0, errors);
-      await ctx.close();
+    // ---- quadro geral ----
+    L('7 alunos na tabela', (await linhas()).length === 7);
+    L('uma consulta de overview por aluno (7)', (await rpcOv()) === 7, await rpcOv());
+    const ind = await p.$$eval('[data-tsu="geral"] .p-indicador', l => l.map(e => e.querySelector('.p-indicador-valor').textContent.trim()));
+    L('indicadores: 7 ativos, 1 estudou hoje, 96 vencidas, 3 precisam de atenção', ind.join() === '7,1,96,3', ind);
+    L('alerta de 2 parados', (await p.textContent('[data-tsu="geral"] .p-alerta')).includes('2 alunos estão há 7 dias ou mais sem estudar.'));
+    const rows = await linhas();
+    const sit = (nome) => rows.find(r => r.includes(nome));
+    L('situação: Marina e Rafael e Camila (3 dias) em dia', ['Marina', 'Rafael', 'Camila'].every(n => /Em dia/.test(sit(n))), rows);
+    L('situação: Tiago (4 dias) em atenção', /Atenção/.test(sit('Tiago')));
+    L('situação: Helena (9) e Bruno (12) parados', /Parado/.test(sit('Helena')) && /Parado/.test(sit('Bruno')));
+    L('situação: quem nunca estudou fica "Sem estudo" (neutro)', /Sem estudo/.test(sit('Novo Aluno')) && /sem registro/.test(sit('Novo Aluno')));
+    L('títulos de coluna alinhados com o conteúdo (texto, não só cor)', await p.$$eval('[data-tabela-alunos] .p-selo', l => l.every(e => e.textContent.trim().length > 2)));
+    L('cabeçalho: botão Vincular só aparece para a admin (aqui é admin)', !!(await p.$('[data-abrir-dialogo="dlg-vincular-aluno"]')));
+
+    // ---- filtros: só a tabela muda; o campo de busca nunca é refeito ----
+    await p.click('[data-busca-aluno]'); await p.keyboard.type('helena');
+    L('busca "helena": 1 linha', (await linhas()).length === 1 && (await linhas())[0].includes('Helena'), await linhas());
+    L('o campo de busca continua o mesmo, com foco e texto', await p.evaluate(() => document.activeElement === document.querySelector('[data-busca-aluno]') && document.activeElement.value === 'helena'));
+    await p.fill('[data-busca-aluno]', 'xyz'); L('busca sem resultado: mensagem própria', (await p.textContent('[data-tabela-alunos]')).includes('Nenhum aluno com esses filtros.'));
+    await p.fill('[data-busca-aluno]', ''); L('limpar a busca volta aos 7', (await linhas()).length === 7);
+    await p.click('[data-so-atencao]'); L('só quem precisa de atenção: Tiago, Helena e Bruno', (await linhas()).length === 3, await linhas());
+    await p.click('[data-so-atencao]'); L('desligar o interruptor volta aos 7', (await linhas()).length === 7);
+    await p.click('[data-ver-parados]'); L('"Ver quem são" liga o filtro de atenção', (await p.isChecked('[data-so-atencao]')) && (await linhas()).length === 3);
+    await p.click('[data-so-atencao]');
+    if (lang === 'fr'){
+      L('seletor de curso aparece (francês e chinês na turma)', !!(await p.$('[data-filtro-curso]')));
+      await p.selectOption('[data-filtro-curso]', 'mandarim'); L('filtro por curso: só o Bruno', (await linhas()).length === 1 && (await linhas())[0].includes('Bruno'), await linhas());
+      await p.selectOption('[data-filtro-curso]', '');
     }
+    L('filtros não refizeram a tela inteira (ainda 7 consultas)', (await rpcOv()) === 7);
+
+    // ---- ficha ----
+    await p.click('[data-abrir-aluno="1"]'); await p.waitForSelector('[data-tsu="ficha"] .p-resumo');
+    L('ficha: trilha Alunos / Marina Alves', (await p.textContent('[data-tsu="ficha"] .p-trilha')).replace(/\s+/g, ' ').trim() === 'Alunos › Marina Alves' || (await p.textContent('[data-tsu="ficha"] .p-trilha')).includes('Marina Alves'));
+    L('ficha: o título recebe o foco (leitor de tela anuncia a mudança)', await p.evaluate(() => document.activeElement && document.activeElement.tagName === 'H2' && document.activeElement.textContent === 'Marina Alves'));
+    const ficha = await p.innerText('[data-tsu="ficha"]');
+    L('ficha: indicadores (hoje, 23 dias, 12 vencidas, 80%)', ficha.includes('hoje') && ficha.includes('23 dias') && /\b12\b/.test(ficha) && ficha.includes('80%'), ficha.slice(0, 300));
+    L('ficha: nada de ranking, XP ou gamificação do aluno no painel', !/\bXP\b/.test(ficha));
+    await p.waitForFunction(() => { const b = document.querySelector('[data-bloco-criados]'); return b && !b.querySelector('.p-spinner'); });
+    await p.waitForFunction(() => { const b = document.querySelector('[data-bloco-aulas]'); return b && !b.querySelector('.p-spinner'); });
+    L('ficha: cartões criados chegaram (12 conteúdos)', /Conteúdos criados para este aluno\s*12/.test(await p.innerText('[data-bloco-criados]')));
+    // K.10 (078): Decks do aluno em árvore, só nome e números
+    await p.waitForFunction(() => { const b = document.querySelector('[data-bloco-decks]'); return b && !b.querySelector('.p-spinner'); });
+    L('Decks do aluno: Meus Decks e Cartões da professora com subdecks', await p.evaluate(() => { const r = [...document.querySelectorAll('[data-tsu-decks] tbody tr')].map(tr => tr.innerText.replace(/\s+/g, ' ').trim()); return r.length === 4 && r[0].startsWith('Meus Decks') && r[1].startsWith('Viagem') && r[2].startsWith('Cartões da professora') && r[3].startsWith('Verbos do dia a dia'); }), await p.innerText('[data-bloco-decks]'));
+    L('Decks do aluno: as 4 colunas (Novos, Aprendendo, Revisão, Devidos) e os números', await p.evaluate(() => { const th = [...document.querySelectorAll('[data-tsu-decks] thead th')].map(e => e.textContent.trim()); const td = [...document.querySelectorAll('[data-tsu-decks] tbody tr')[0].querySelectorAll('td')].map(e => e.textContent.trim()).join(); return th.length === 5 && td === '12,5,40,7'; }));
+    L('Decks do aluno: subdeck com recuo maior que o deck de cima', await p.evaluate(() => { const rows = [...document.querySelectorAll('[data-tsu-decks] tbody th')]; return parseFloat(getComputedStyle(rows[1]).paddingLeft) > parseFloat(getComputedStyle(rows[0]).paddingLeft); }));
+    L('Decks do aluno: zero aparece apagado', !!(await p.$('[data-tsu-decks] td.is-zero')));
+    L('ficha: aula recente aparece', (await p.innerText('[data-bloco-aulas]')).includes('Passé composé com être'));
+    L('ficha: 30 quadradinhos de atividade, 4 ativos', (await p.$$eval('.p-atividade i', l => l.length)) === 30 && (await p.$$eval('.p-atividade i.on', l => l.length)) === 4);
+    L('ficha: a fila empilhada tem texto equivalente', (await p.getAttribute('.p-pilha', 'aria-label')).includes('novos'));
+    L('ficha: botões Registrar aula e Criar cartão levam às outras abas', await p.evaluate(() => !!document.querySelector('[data-ir-secao="classlogs"]') && !!document.querySelector('[data-ir-secao="flashcards"]')));
+    L('ficha: sem consulta nova ao voltar para ela (cache)', (await rpcOv()) === 7);
+    if (OUT) await p.screenshot({ path: path.join(OUT, `alunos-ficha-${lang}-${scheme}.png`), fullPage: true });
+    await p.click('[data-voltar-alunos]'); await p.waitForSelector('[data-tsu="geral"]');
+    L('voltar: quadro geral de novo, sem refazer as 7 consultas (cache)', (await linhas()).length === 7 && (await rpcOv()) === 7, await rpcOv());
+    if (OUT) await p.screenshot({ path: path.join(OUT, `alunos-geral-${lang}-${scheme}.png`), fullPage: true });
+    await p.click('[data-atualizar-alunos]'); await p.waitForFunction(() => document.querySelector('[data-tsu="geral"]')); await p.waitForTimeout(200);
+    L('"Atualizar dados" busca tudo de novo (14 consultas)', (await rpcOv()) === 14, await rpcOv());
+
+    // ---- ir para outras abas a partir da ficha ----
+    await p.click('[data-abrir-aluno="2"]'); await p.waitForSelector('[data-tsu="ficha"] .p-resumo');
+    await p.waitForFunction(() => { const b = document.querySelector('[data-bloco-decks]'); return b && !b.querySelector('.p-spinner'); });
+    L('Decks do aluno sem cartões: mensagem explicando', (await p.innerText('[data-bloco-decks]')).includes('O aluno ainda não tem cartões nos Decks.'));
+    await p.click('[data-ir-secao="classlogs"]');
+    L('Registrar aula abre a aba Aulas', await p.evaluate(() => document.querySelector('[data-teacher-section="classlogs"]').classList.contains('is-active')));
+    await p.evaluate(() => switchTeacherPanelSection('students')); await p.waitForSelector('[data-tsu="geral"]');
+    L('voltar à aba Alunos mostra o quadro geral (não fica preso na ficha)', !(await p.$('[data-tsu="ficha"]')));
+
+    // ---- remover vínculo ----
+    await p.click('[data-abrir-aluno="3"]'); await p.waitForSelector('[data-tsu="ficha"] .p-resumo');
+    await p.waitForFunction(() => { const b = document.querySelector('[data-bloco-decks]'); return b && !b.querySelector('.p-spinner'); });
+    L('Decks do aluno que falhou: aviso (role=alert) sem derrubar a ficha', !!(await p.$('[data-bloco-decks] [role="alert"]')) && (await p.innerText('[data-bloco-decks]')).includes('Não foi possível carregar os Decks do aluno agora.'));
+    await p.click('[data-tsu="ficha"] details.p-menu > summary'); await p.click('[data-remover-vinculo="3"]');
+    const dlg = p.locator('dialog.p-dialogo--alerta[open]');
+    L('remover: abre confirmação do painel (não o confirm do navegador) com o nome', await dlg.isVisible() && (await dlg.locator('h3').textContent()).includes('Helena Duarte'));
+    L('remover: Cancelar tem o foco e o texto explica que o progresso é mantido', (await p.evaluate(() => document.activeElement.textContent.trim())).length > 0 && (await dlg.innerText()).includes('progresso'));
+    await dlg.locator('button.secondary').click(); await p.waitForTimeout(150);
+    L('remover: Cancelar não remove nada', (await p.evaluate(() => window.__removidos.length)) === 0);
+    await p.click('[data-tsu="ficha"] details.p-menu > summary'); await p.click('[data-remover-vinculo="3"]');
+    await p.locator('dialog.p-dialogo--alerta[open] .p-perigo').click(); await p.waitForSelector('[data-tsu="geral"]');
+    L('remover: confirmar chama removeStudentLink(3) e volta ao quadro geral', (await p.evaluate(() => window.__removidos.join())) === '3' && !(await p.$('[data-tsu="ficha"]')));
+
+    // ---- vincular (admin) ----
+    await p.click('[data-abrir-dialogo="dlg-vincular-aluno"]'); const vd = p.locator('#dlg-vincular-aluno');
+    L('vincular: janela abre com conta e idioma', await vd.isVisible() && !!(await p.$('#admin-student-username')) && !!(await p.$('#admin-student-language')));
+    await p.selectOption('#admin-student-language', lang === 'fr' ? 'frances' : 'mandarim');
+    L('vincular: X no canto e botões do rodapé lado a lado', await p.evaluate(() => { const x = document.querySelector('#dlg-vincular-aluno header button'), f = [...document.querySelectorAll('#dlg-vincular-aluno footer button')]; return getComputedStyle(x).position === 'absolute' && x.getBoundingClientRect().width < 60 && f.length === 2 && Math.abs(f[0].getBoundingClientRect().top - f[1].getBoundingClientRect().top) < 4; }));
+    const opts = await p.$$eval('#admin-student-username option', o => o.map(x => x.value));
+    L('vincular: quem já é aluno naquele idioma não aparece na lista (Marina fora, Nova Aluna dentro)', opts.includes('novaaluna') && !opts.includes('marina.alves'), opts);
+    await p.selectOption('#admin-student-username', 'novaaluna'); await p.click('#admin-assign-student-btn'); await p.waitForTimeout(300);
+    L('vincular: envia conta e idioma, fecha a janela e recarrega', (await p.evaluate(() => window.__vinculou.join())).startsWith('novaaluna,') && !(await vd.isVisible()));
+
+    // ---- celular ----
+    await p.setViewportSize({ width: 390, height: 800 }); await p.evaluate(() => switchTeacherPanelSection('students')); await p.waitForSelector('[data-tsu="geral"]'); await p.waitForTimeout(200);
+    L('celular: sem rolagem horizontal no quadro geral', await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), await p.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]));
+    L('celular: colunas secundárias escondidas, situação visível', await p.evaluate(() => { const th = [...document.querySelectorAll('[data-tabela-alunos] th')].filter(e => getComputedStyle(e).display !== 'none').map(e => e.textContent.trim()); return th.length <= 4 && th.some(x => /Situação|Status/.test(x)); }));
+    L('celular: botão Abrir com alvo de toque de pelo menos 32px de altura', (await p.$eval('[data-abrir-aluno]', e => e.getBoundingClientRect().height)) >= 28);
+    await p.click('[data-abrir-aluno="1"]'); await p.waitForSelector('[data-tsu="ficha"] .p-resumo'); await p.waitForTimeout(300);
+    L('celular: sem rolagem horizontal na ficha', await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), await p.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]));
+    if (OUT) await p.screenshot({ path: path.join(OUT, `alunos-ficha-mobile-${lang}-${scheme}.png`), fullPage: true });
+    L('nenhum erro de página', h.errors.length === 0, h.errors);
+    await h.close();
   }
-  await browser.close(); server.close();
-  console.log(`${passed} ok, ${failed} falhas`); process.exit(failed ? 1 : 0);
-})();
+
+  // ---- professora (não admin) e consulta que falha ----
+  for (const lang of ['fr', 'zh']){
+    const R = `${lang}/professora`; const L = (n, c, x) => check(`[${R}] ${n}`, c, x);
+    const h = await abrir({ lang, scheme: 'light', admin: false, falhar: ['s4'] }); const p = h.page;
+    await p.waitForSelector('[data-tsu="geral"]', { timeout: 15000 });
+    L('professora: sem botão Vincular e sem janela de vínculo', !(await p.$('[data-abrir-dialogo="dlg-vincular-aluno"]')) && !(await p.$('#dlg-vincular-aluno')));
+    L('professora: seção Convidar aluno no lugar do aviso (a professora convida, o aluno aceita)', !!(await p.$('[data-tinv-secao] #tinv-search-input')) && !(await p.textContent('[data-tsu="geral"]')).includes('quem vincula alunos é a administração'));
+    // ---- convite (077): link, idioma, busca, envio e pendentes ----
+    const code0 = lang === 'fr' ? 'abc123def4' : 'mmm111nnn2', outroDir = lang === 'fr' ? 'zh' : 'fr', outroLang = lang === 'fr' ? 'mandarim' : 'frances', outroCode = lang === 'fr' ? 'mmm111nnn2' : 'abc123def4';
+    await p.waitForSelector('#tinv-link-input');
+    L('convite: link do idioma atual', (await p.inputValue('#tinv-link-input')).endsWith(`/${lang}/?convite=${code0}`), await p.inputValue('#tinv-link-input'));
+    L('convite: WhatsApp leva o link', await p.evaluate((c) => { const h = document.getElementById('tinv-whats-btn').href; return h.startsWith('https://wa.me/?text=') && decodeURIComponent(h).includes(c); }, code0));
+    L('convite: idioma atual marcado (aria-pressed) e só ele', await p.evaluate(() => [...document.querySelectorAll('[data-tinv-lang]')].filter(b => b.getAttribute('aria-pressed') === 'true').length === 1));
+    await p.click(`[data-tinv-lang="${outroLang}"]`);
+    await p.waitForFunction((d) => document.getElementById('tinv-link-input')?.value.includes(d), `/${outroDir}/?convite=${outroCode}`);
+    L('convite: trocar idioma troca o link', true);
+    await p.click(`[data-tinv-lang="${lang === 'fr' ? 'frances' : 'mandarim'}"]`);
+    await p.waitForFunction((c) => document.getElementById('tinv-link-input')?.value.includes(c), code0);
+    await p.click('#tinv-reset-btn');
+    const dcv = p.locator('dialog.p-dialogo--alerta[open]');
+    L('convite: gerar outro link pede confirmação do painel (não o confirm do navegador)', await dcv.isVisible());
+    await dcv.locator('button.secondary').click(); await p.waitForTimeout(150);
+    L('convite: cancelar não muda o link', (await p.inputValue('#tinv-link-input')).includes(code0));
+    await p.click('#tinv-reset-btn'); await p.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();
+    await p.waitForFunction(() => document.getElementById('tinv-link-input')?.value.includes('zzz999yyy8'));
+    L('convite: confirmar gera outro link', true);
+    await p.fill('#tinv-search-input', 'ana');
+    await p.waitForSelector('#tinv-search-list [data-tinv-opcao]');
+    L('convite: busca não mostra a própria conta', !(await p.$$eval('#tinv-search-list [data-opcao-usuario]', l => l.some(e => e.textContent === '@carla.prof'))));
+    await p.keyboard.press('Enter'); await p.waitForSelector('#tinv-send-btn');
+    await p.click('#tinv-send-btn');
+    await p.waitForFunction(() => document.getElementById('tinv-send-error')?.textContent.length > 0);
+    L('convite: aluno que já tem professora mostra o motivo', await p.evaluate(() => document.getElementById('tinv-send-error').textContent === t('tinvite.err.student_has_teacher')));
+    await p.fill('#tinv-search-input', 'anabela');
+    await p.waitForSelector('#tinv-search-list [data-tinv-opcao]'); await p.keyboard.press('Enter');
+    await p.waitForSelector('#tinv-send-btn'); await p.click('#tinv-send-btn');
+    await p.waitForSelector('.tinv-pending-row');
+    L('convite: pendente aparece na lista, com o idioma e os dias', (await p.innerText('.tinv-pending-row')).includes('@anabela') && /vence em \d+ dias?/.test(await p.innerText('.tinv-pending-row')), await p.innerText('.tinv-pending-row'));
+    L('convite: rpc com o idioma escolhido', await p.evaluate((k) => window.__convites.some(c => c.p_student === 'S2' && c.p_lang === k), lang === 'fr' ? 'frances' : 'mandarim'));
+    await p.click('[data-tinv-cancel]'); await p.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();
+    await p.waitForFunction(() => !document.querySelector('.tinv-pending-row'));
+    L('convite: cancelar (com confirmação) tira da lista', await p.evaluate(() => window.__removidos.length > 0));
+    L('convite: a seção não estoura a tela (sem rolagem horizontal)', await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+    L('consulta que falhou: aviso e "—" no lugar da situação (nunca "Parado")', (await p.textContent('[data-tsu="geral"]')).includes('Não foi possível carregar os dados de 1 aluno.') && /Tiago Nunes.*—/s.test(await p.textContent('[data-tabela-alunos] tr:nth-child(4)')) && !/Parado|Atenção/.test(await p.textContent('[data-tabela-alunos] tr:nth-child(4)')));
+    await p.click('[data-abrir-aluno="4"]'); await p.waitForSelector('[data-tsu="ficha"]');
+    L('ficha de quem falhou: mensagem de erro (role=alert) e ainda mostra cartões criados', !!(await p.$('[data-tsu="ficha"] [role="alert"]')) && !!(await p.$('[data-bloco-criados]')));
+    L('professora: nenhum erro de página', h.errors.length === 0, h.errors);
+    await h.close();
+  }
+  console.log(`painel-alunos (navegador): ${ok}/${ok + ruim} checks`); process.exit(ruim ? 1 : 0);
+})().catch(e => { console.error(e); process.exit(1); });

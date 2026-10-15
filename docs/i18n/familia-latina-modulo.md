@@ -1,4 +1,7 @@
-# Módulo da família latina, fase 1 (2026-10-15)
+# Módulo da família latina, fases 1 e 2 (2026-10-15)
+
+> **Fase 2 feita** (seção 10): o fr usa o módulo de verdade. As seções 1 a 9 são o relatório da fase 1 (algumas frases
+> sobre "não carregado" e "achados" valem só para aquele momento; o que mudou está na seção 10).
 
 Pedido: extrair as regras de acento do francês para um módulo da família latina, com testes do português escritos a partir de exemplos reais, **sem religar o fr** (nenhuma mudança em produção). Base: decisão de famílias (`e4-plano-de-extracao.md`, seção 10) e ordem da E5 (`auditoria-app-portugues.md`, seções 7 e 8, passo 2).
 
@@ -91,3 +94,52 @@ Ordem (menos arriscado primeiro), cada lote com os mesmos gates dos lotes da E4:
 - `test_portugues.js`: **111/111** (inclui 571 frases reais em pt-BR da dona: ditado da própria frase = 100, sem acento só gera erro leve de acento, Acentuação sem acento = "Quase").
 - `test_frances.js`: **31/31**.
 - Sem regressão nos vizinhos: `tests/e4/test_core_carregado.js` 27/27, `tests/i18n/test_i18n_unit.js` 2032/2032, `tests/i18n/test_translation_compare.js` 18/18, `tests/e4/test_lote5e_dados.js` 10/10.
+
+## 10. Fase 2 (2026-10-15, autorizada pela dona): o fr religado ao módulo
+
+Branch local `familia-latina-fase2`, um commit por lote. Nada em Supabase/produção, zh sem mudança.
+
+### Como ficou
+- `fr/index.html` carrega `../shared/core/familias/latina.js` antes do `lang-hooks.js` (o `latina-idiomas.js` não entra
+  na página: agora só guarda o rascunho do pt).
+- A configuração do francês está em `fr/lang-hooks.js`, `LANG_HOOKS.familiaLatina` (ligaduras, hífen, apóstrofo,
+  elisão, regra de acento nos exercícios de digitar, teclado, pontuação falada, números, homófonos, concordância e os
+  textos das explicações via `t()`).
+- No `fr/app.js`, as funções mantêm o nome (e os marcadores BEGIN/END) e só repassam: `normalizeLoose`, `conjFold`,
+  `conjAlign`, `lessonTypedAnswerResult` (nova: "Digite o que ouviu" e lacuna digitada), o exercício de gramática,
+  o bloco `accent-challenge-logic`, o bloco `dictation-answer-logic`, `dictationLightNoteText`, `frAccentPickerHTML`,
+  `wireFrAccentPicker` e o teclado da Conjugação (`insertAccentAtCursor`, nova). `latinaFr()` cria a instância.
+- Explicações do ditado: chaves `fr.dict.*` em `shared/i18n/pt-BR.js` (texto igual ao de antes) e `en.js`
+  (tradução nova, needs_review, confiança em cada linha). Inclui o título "Faltou este sinal (não desconta pontos)".
+
+### Mudanças de comportamento do francês (todas autorizadas)
+| | Onde | Antes | Agora |
+|---|---|---|---|
+| (a) | "Digite o que ouviu" e lacuna digitada: "soeur" por "sœur" | errado | Quase: meio ponto, painel de acerto com "Quase lá" e a forma certa; XP pela metade (2 em vez de 4) |
+| (a) | Desafio Acentuação: "soeur" por "sœur" | Errado (fail) | Quase (partial), com o texto de sempre "Quase: confira os acentos." |
+| (a) | Ditado: "soeur" | erro leve de ligadura (meio ponto) | igual (já era erro leve) |
+| (b) | Explicações do ditado no site em inglês | em português | em inglês; no site em português, texto idêntico |
+| (c) | Lacuna digitada com apóstrofo curvo ("l’école") | errado | certo (mesma lista do "Digite o que ouviu") |
+| (d) | Ditado cujo texto tem número em dígito ("30") e a aluna digita "30" | perdia ponto (o "30" dela virava "trente") | acerto, sem a nota "por extenso" |
+| (e) | Ditado: dois erros leves na mesma palavra ("peut etre") | "pequena diferença de grafia" | "confira o hífen e os acentos" (`reason: 'multiple'`, `reasons`), nota igual (meio ponto) |
+
+Português (só o módulo, sem página): `acentoNaDigitacao: 'quase'` (avô/avó, pais/país), textos em inglês para dois erros na
+mesma palavra. Contrações e grafia antiga ficam como estavam (meio ponto com explicação).
+
+### Testes
+- `tests/familia-latina/extrair-fr.js` lê o fr ANTIGO do commit `675f824` (gabarito, `FAMILIA_LATINA_REF` troca) e o novo
+  (fr/app.js + módulo + lang-hooks). `test_paridade_fr.js` compara os dois e só aceita as diferenças das regras (a), (c),
+  (d) e (e), contadas à parte por regra. Conferido que ele pega diferença: com `acentoNaDigitacao: 'quase'` no fr,
+  2 grupos falham (24.502 comparações).
+- `tests/familia-latina/test_playwright.js` (novo): telas do Quase, Acentuação, ditado no site em inglês e em português,
+  teclado. `run.sh` roda os quatro.
+- `fr/scripts/test_answer_validation.js`: o helper do vocabulário passou a usar a função real do app (antes era uma cópia da
+  seta `strip`); as 154 asserções antigas continuam iguais e passam; 22 casos NOVOS marcados "NOVO (a)..(e)".
+- `tests/i18n/test_i18n_unit.js`: chaves novas na lista NEW_KEYS (`fr.dict.light.multiple`, `fr.dict.part.*`, e
+  `fr.dict.hom.ces`, cujo texto só perde o escape `\'` do código antigo).
+
+### Pendente
+- Revisão da dona: traduções em inglês `fr.dict.*` (needs_review) e o texto "Quase: confira os acentos." aparecendo
+  também quando a diferença é só o "œ" (pode merecer texto próprio; não criei texto novo em português sem aprovação).
+- No ditado, a palavra composta digitada separada aparece junta na explicação ("você escreveu «peutetre»"): já era assim.
+- O `/pt` (página, `pt/lang-hooks.js`) e o grupo D da E4 continuam para depois.

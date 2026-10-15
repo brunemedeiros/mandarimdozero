@@ -29,6 +29,16 @@ async function fetchFlashcardsForStudent(studentId){
 // acumulado (ver applySerializedState/merge por id, Fase 0) -- só ficam de
 // fora da FILA DE REVISÃO (isCardLessonCompleted checa `status` na
 // origem 'teacher', fr/zh app.js).
+// Professora com vínculo ATIVO neste idioma (no máximo 1, índice da 077): id, null (sem vínculo) ou undefined (não deu para
+// saber, ex.: offline -- quem usa trata como "não esconder"). Usado para mostrar só os cartões da professora atual.
+async function fetchMyActiveTeacherId(languageAppKey){
+  if (!CURRENT_USER) return null;
+  const { data, error } = await supabaseClient.from('teacher_students').select('teacher_id')
+    .eq('student_id', CURRENT_USER.id).eq('language_app_key', languageAppKey).eq('status', 'active').limit(1);
+  if (error) return undefined;
+  return (data && data[0] && data[0].teacher_id) || null;
+}
+
 async function fetchFlashcardsForCurrentStudent(languageAppKey){
   if (!CURRENT_USER) return [];
   const { data, error } = await supabaseClient
@@ -320,4 +330,19 @@ async function requestFieldAudioTTS({ rowId, fieldId, text, language, voiceId, r
 async function setFlashcardStatus(id, status){
   const { error } = await supabaseClient.from('teacher_flashcards').update({ status }).eq('id', id);
   return { ok: !error };
+}
+
+// Todos os cartões da professora de uma vez (a tela Cartões filtra, busca e pagina no navegador). O RLS já limita aos dela;
+// o filtro por teacher_id é redundante de propósito. O limite do PostgREST é 1000 linhas: a tela avisa se chegar nele.
+const TEACHER_FLASHCARDS_FETCH_LIMIT = 1000;
+async function fetchAllTeacherFlashcards(){
+  if (!CURRENT_USER) return { cards: [], truncated: false };
+  const { data, error } = await supabaseClient
+    .from('teacher_flashcards')
+    .select('*')
+    .eq('teacher_id', CURRENT_USER.id)
+    .order('created_at', { ascending: false })
+    .limit(TEACHER_FLASHCARDS_FETCH_LIMIT);
+  if (error){ console.error('Erro ao carregar flashcards:', error); return { cards: null, truncated: false }; }
+  return { cards: data || [], truncated: (data || []).length >= TEACHER_FLASHCARDS_FETCH_LIMIT };
 }

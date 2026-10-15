@@ -104,10 +104,10 @@ function fillNotificationPlaceholders(text, payload){
 }
 
 async function pickNotificationTemplate(eventType){
-  // Idioma do SITE (Fase 11 i18n): tenta a variante nesse idioma; sem variante
-  // ATIVA cai no português (mesma regra do notification-cron).
+  // Idioma do SITE (Fase 11 i18n): só a variante nesse idioma. Decisão da dona (2026-10-15, fr, zh e pt): site em
+  // inglês sem variante ATIVA em inglês = sem aviso, nunca o texto em português (mesma regra do notification-cron).
   const uiLang = (typeof getUiLang === 'function') ? getUiLang() : 'pt-BR';
-  for (const lang of uiLang === 'en' ? ['en', 'pt-BR'] : ['pt-BR']) {
+  for (const lang of uiLang === 'en' ? ['en'] : ['pt-BR']) {
     const { data, error } = await supabaseClient
       .from('notification_templates')
       .select('*')
@@ -220,15 +220,26 @@ const NOTIFICATION_CATEGORY_ICON = {
 
 const NOTIFICATIONS_FETCH_LIMIT = 30;
 
+// 105: avisos sobre alunos (audience='teacher') ficam no sino do Painel da professora (shared/teacher-panel.js),
+// não aqui. Sem a coluna (105 ainda não aplicada), este sino mostra tudo, como antes.
+let NOTIFICATION_AUDIENCE_COLUMN = true;
+function notificationsOwnBell(query){ return NOTIFICATION_AUDIENCE_COLUMN ? query.neq('audience', 'teacher') : query; }
+function notificationAudienceMissing(error){
+  if (!error || !NOTIFICATION_AUDIENCE_COLUMN || !/audience/.test(`${error.message || ''} ${error.details || ''}`)) return false;
+  NOTIFICATION_AUDIENCE_COLUMN = false;
+  return true;
+}
+
 async function fetchRecentNotifications(){
   if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return [];
-  const { data, error } = await supabaseClient
+  const run = () => notificationsOwnBell(supabaseClient
     .from('notifications')
     .select('*')
-    .eq('user_id', CURRENT_USER.id)
-    .eq('language_app_key', APP_KEY) // cada site mostra os avisos dele (Amigos são gravados 1 vez por site)
+    .eq('user_id', CURRENT_USER.id).eq('language_app_key', APP_KEY)) // cada site mostra os avisos dele (Amigos são gravados 1 vez por site)
     .order('created_at', { ascending: false })
     .limit(NOTIFICATIONS_FETCH_LIMIT);
+  let { data, error } = await run();
+  if (notificationAudienceMissing(error)) ({ data, error } = await run());
   if (error){ console.error('Erro ao carregar notificações:', error); return []; }
   return data || [];
 }
@@ -239,12 +250,13 @@ async function refreshNotificationUnreadCount(){
     renderNotificationBellBadge();
     return;
   }
-  const { count, error } = await supabaseClient
+  const run = () => notificationsOwnBell(supabaseClient
     .from('notifications')
     .select('id', { count: 'exact', head: true })
-    .eq('user_id', CURRENT_USER.id)
-    .eq('language_app_key', APP_KEY)
+    .eq('user_id', CURRENT_USER.id).eq('language_app_key', APP_KEY)) // cada site mostra os avisos dele (Amigos são gravados 1 vez por site)
     .is('read_at', null);
+  let { count, error } = await run();
+  if (notificationAudienceMissing(error)) ({ count, error } = await run());
   NOTIFICATION_UNREAD_COUNT = error ? 0 : (count || 0);
   renderNotificationBellBadge();
 }
@@ -365,8 +377,10 @@ async function markNotificationRead(id, twin){
 
 async function markAllNotificationsRead(){
   if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
-  await supabaseClient.from('notifications').update({ read_at: new Date().toISOString() })
-    .eq('user_id', CURRENT_USER.id).eq('language_app_key', APP_KEY).is('read_at', null);
+  const run = () => notificationsOwnBell(supabaseClient.from('notifications').update({ read_at: new Date().toISOString() })
+    .eq('user_id', CURRENT_USER.id).eq('language_app_key', APP_KEY)).is('read_at', null);
+  const { error } = await run();
+  if (notificationAudienceMissing(error)) await run();
   refreshNotificationUnreadCount();
   renderNotificationDropdown();
 }

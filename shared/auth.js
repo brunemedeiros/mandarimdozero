@@ -382,11 +382,27 @@ async function applyAccountUiLanguage(){
   if (!CURRENT_USER || !progressLoadedOk) return;
   if (pendingAccountUiLanguage){ await flushAccountUiLanguage(); return; }
   const acct = progressAccountUiLanguage;
+  if (acct) syncAuthUiLanguageMetadata(acct); // conta antiga: grava o idioma no cadastro de e-mails uma vez
   // ?ui= na URL (ferramenta de teste) vence a conta nesta aba.
   if (!acct || accountUiLangFromQuery()) return;
   if (typeof getUiLang === 'function' && typeof setUiLang === 'function' && getUiLang() !== acct){
     await setUiLang(acct);
   }
+}
+
+// Os e-mails do Supabase Auth (confirmar conta, link mágico, senha, trocar e-mail) escolhem o idioma por
+// user_metadata.ui_language. Decisão da dona: vale o idioma do site que a pessoa está usando NO MOMENTO, então
+// regrava ao trocar (e uma vez ao carregar, para contas antigas). Falha aqui nunca atrapalha o estudo.
+function syncAuthUiLanguageMetadata(lang){
+  try{
+    if (!CURRENT_USER || !lang || typeof supabaseClient === 'undefined' || !supabaseClient.auth || !supabaseClient.auth.updateUser) return;
+    const current = CURRENT_USER.user_metadata && CURRENT_USER.user_metadata.ui_language;
+    if (current === lang) return;
+    supabaseClient.auth.updateUser({ data: { ui_language: lang } }).then(function(res){
+      if (!res || res.error) return;
+      CURRENT_USER.user_metadata = Object.assign({}, CURRENT_USER.user_metadata, { ui_language: lang });
+    }).catch(function(){});
+  }catch(e){}
 }
 
 async function flushAccountUiLanguage(){
@@ -399,6 +415,7 @@ async function flushAccountUiLanguage(){
     const saved = await setAccountUiLanguage(CURRENT_USER.id, lang);
     progressAccountUiLanguage = saved;
     if (pendingAccountUiLanguage === lang) pendingAccountUiLanguage = null;
+    syncAuthUiLanguageMetadata(saved || lang);
     return true;
   }catch(e){
     console.error('Erro ao salvar idioma do site na conta:', e);
