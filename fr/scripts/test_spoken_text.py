@@ -105,6 +105,18 @@ PT_CASES = {
     "Tudo bem?": "Tudo bem?",
     "Moro nos EUA.": "Moro nos EUA.",
     "Tenho 25 anos.": "Tenho 25 anos.",
+    # Frases de PLE com acento/cedilha/til (Unicode: \w ASCII do JS x \p{L}); a paridade com o JS está em tests/tts-google.
+    "Sr. Gonçalves, o(a) senhor(a) é brasileiro(a)?": "Senhor Gonçalves, o senhor é brasileiro, a senhora é brasileira?",
+    "Eu sou do Brasil / de Portugal": "Eu sou do Brasil, de Portugal",
+    "alemão(ã)": "alemão(ã)", "Pão(ães)": "Pão(ães)",
+    "Moro no 3º andar, apartamento nº 12.": "Moro no terceiro andar, apartamento número 12.",
+    "Preciso (de) ajuda e gosto (de) café / chá": "Preciso de… ajuda e gosto de… café, chá",
+    "Olá! Tudo bem com você(s)?": "Olá! Tudo bem com você, vocês?",
+    "A Dra. Ângela é médica.": "A Doutora Ângela é médica.",
+    "Prof. Álvaro, bom dia.": "Professor Álvaro, bom dia.",
+    "Ele é o 2º / ela é a 2ª": "Ele é o segundo, ela é a segunda",
+    "à vista (informal)": "à vista (informal)",
+    "ônibus nº 8 → Centro": "ônibus número 8 Centro",
     "você": "você",
 }
 for src, want in PT_CASES.items():

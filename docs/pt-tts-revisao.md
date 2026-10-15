@@ -97,3 +97,8 @@ com espaço) > barra > ordinais > símbolos > tidy (colapsar espaços, igual nos
 "Obrigado, Sra." → "Obrigado, Senhora.", "Sr. e Sra. Silva", "Prof.ª Ana", "21º andar",
 "1.º de maio", "1° andar" (cru), "nº 5", "você (informal)" (cru), "gostar (de)", "e/ou" (cru),
 "bem-vindo(a)" e "você" no teste de paridade JS (Unicode), fr "l'œuf" e "l'âge" na paridade JS.
+
+## 4. Estado da implementação (2026-10-15)
+- Já na `main` (commit 53c1037): regras de pt em `spoken_text.py` e `tts_core.mjs` (mesma ordem, `\p{L}` com flag u no JS e `[^\W\d_]` no Python), `fr.oe-ligature-elision` e `fr.age-elision` portadas ao JS (paridade fr fechada), versão por idioma (`TTS_SPOKEN_RULES_VERSION_BY_LANG`, hoje fr 4, pt 1, zh 0; `languages/registry.json`) e mapa 'pt' x 'pt-BR' em `spokenLangKey`.
+- Testes: `fr/scripts/test_spoken_text.py` (90) e `tests/tts-google/test_tts_core.mjs` (73; paridade fr 781, zh 495, pt 67 entradas).
+- PENDENTE (decisão da dona): (1) tabela única de dados `spoken_rules.json` lida por Python e JS: não feita, as regras com função (gênero, títulos, ordinais) não cabem numa tabela só de regex e exigiria reescrever o fr; a paridade testada cobre o risco hoje. (2) Segunda forma capitalizada quando o marcador de gênero abre a frase: "Bem-vindo(a) à casa" vira "Bem-vindo, Bem-vinda à casa" (o "B" maiúsculo é inofensivo para a voz, mas pode-se baixar a caixa); ouvir no laboratório. (3) Nada de áudio ouvido ainda: regras de partícula, ordinais e títulos continuam "lab" até a voz `pt-BR-Chirp3-HD-Achernar` ser confirmada ao vivo. (4) `pt.time-24h`, `pt.currency-brl`, `pt.common-abbreviations` seguem adiadas.
