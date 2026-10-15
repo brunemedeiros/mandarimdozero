@@ -226,6 +226,7 @@ async function fetchRecentNotifications(){
     .from('notifications')
     .select('*')
     .eq('user_id', CURRENT_USER.id)
+    .eq('language_app_key', APP_KEY) // cada site mostra os avisos dele (Amigos são gravados 1 vez por site)
     .order('created_at', { ascending: false })
     .limit(NOTIFICATIONS_FETCH_LIMIT);
   if (error){ console.error('Erro ao carregar notificações:', error); return []; }
@@ -242,6 +243,7 @@ async function refreshNotificationUnreadCount(){
     .from('notifications')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', CURRENT_USER.id)
+    .eq('language_app_key', APP_KEY)
     .is('read_at', null);
   NOTIFICATION_UNREAD_COUNT = error ? 0 : (count || 0);
   renderNotificationBellBadge();
@@ -271,6 +273,20 @@ function notificationTimeAgoLabel(iso){
   return t('notif.time.day', { n: Math.floor(hr / 24) });
 }
 
+// "Hoje" / "Ontem" / "Antes", pelo dia local de quem vê.
+function notificationDayGroup(iso){
+  const d = new Date(iso), today = new Date();
+  const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((day(today) - day(d)) / 86400000);
+  return diff <= 0 ? 'today' : diff === 1 ? 'yesterday' : 'earlier';
+}
+
+// O ícone já fica à esquerda: o emoji no começo do texto ("📌 Fulana postou...") sai para não repetir.
+const NOTIFICATION_LEADING_EMOJI = /^(?:\p{Extended_Pictographic}️?(?:‍\p{Extended_Pictographic}️?)*\s*)+/u;
+function notificationBodyText(body){
+  return String(body || '').replace(NOTIFICATION_LEADING_EMOJI, '');
+}
+
 async function renderNotificationDropdown(){
   const list = document.getElementById('notifications-list');
   if (!list) return;
@@ -280,21 +296,30 @@ async function renderNotificationDropdown(){
     list.innerHTML = `<p class="notifications-empty">${t('notif.empty')}</p>`;
     return;
   }
-  list.innerHTML = items.map(n => `
-    <button class="notification-item ${n.read_at ? '' : 'unread'}" data-notification-id="${n.id}" data-action-tab="${n.action_tab || ''}">
-      <span class="notification-item-icon">${n.icon || NOTIFICATION_CATEGORY_ICON[n.category] || '🔔'}</span>
+  let lastGroup = null;
+  list.innerHTML = items.map(n => {
+    const group = notificationDayGroup(n.created_at);
+    const head = group !== lastGroup ? `<p class="notification-group" role="presentation">${t('notif.group.' + group)}</p>` : '';
+    lastGroup = group;
+    const unread = !n.read_at;
+    return `${head}
+    <button class="notification-item ${unread ? 'unread' : ''}" data-notification-id="${n.id}" data-action-tab="${escapeHTML(n.action_tab || '')}"
+      ${n.category === 'amigos' ? `data-twin-at="${escapeHTML(n.created_at)}" data-twin-body="${escapeHTML(n.body || '')}"` : ''}>
+      <span class="notification-item-icon" aria-hidden="true">${n.icon || NOTIFICATION_CATEGORY_ICON[n.category] || '🔔'}</span>
       <span class="notification-item-body">
         ${n.title ? `<span class="notification-item-title">${escapeHTML(n.title)}</span>` : ''}
-        <span class="notification-item-text">${escapeHTML(n.body)}</span>
+        <span class="notification-item-text">${escapeHTML(notificationBodyText(n.body))}</span>
         <span class="notification-item-time">${notificationTimeAgoLabel(n.created_at)}</span>
       </span>
-    </button>
-  `).join('');
+      ${unread ? `<span class="notification-unread-dot"><span class="sr-only">${t('notif.unread')}</span></span>` : ''}
+    </button>`;
+  }).join('');
 
   list.querySelectorAll('[data-notification-id]').forEach(el => {
     el.addEventListener('click', async () => {
-      await markNotificationRead(el.dataset.notificationId);
+      await markNotificationRead(el.dataset.notificationId, el.dataset.twinAt ? { createdAt: el.dataset.twinAt, body: el.dataset.twinBody } : null);
       el.classList.remove('unread');
+      el.querySelector('.notification-unread-dot')?.remove();
       const tab = el.dataset.actionTab;
       document.getElementById('notifications-dropdown')?.classList.remove('open');
       if (tab === 'profile-edit'){
@@ -315,15 +340,21 @@ async function renderNotificationDropdown(){
   });
 }
 
-async function markNotificationRead(id){
-  const { error } = await supabaseClient.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id).is('read_at', null);
+async function markNotificationRead(id, twin){
+  const now = new Date().toISOString();
+  const { error } = await supabaseClient.from('notifications').update({ read_at: now }).eq('id', id).is('read_at', null);
+  // Aviso de Amigos é da conta, gravado uma vez em cada site: lido aqui, lido lá também.
+  if (twin && typeof CURRENT_USER !== 'undefined' && CURRENT_USER){
+    await supabaseClient.from('notifications').update({ read_at: now })
+      .eq('user_id', CURRENT_USER.id).eq('category', 'amigos').eq('created_at', twin.createdAt).eq('body', twin.body).is('read_at', null);
+  }
   if (!error) refreshNotificationUnreadCount();
 }
 
 async function markAllNotificationsRead(){
   if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
   await supabaseClient.from('notifications').update({ read_at: new Date().toISOString() })
-    .eq('user_id', CURRENT_USER.id).is('read_at', null);
+    .eq('user_id', CURRENT_USER.id).eq('language_app_key', APP_KEY).is('read_at', null);
   refreshNotificationUnreadCount();
   renderNotificationDropdown();
 }

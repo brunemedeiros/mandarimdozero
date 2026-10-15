@@ -4287,6 +4287,29 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
   .friends-duo-field{ flex:0 0 auto; }
   .friends-duo-field select, .friends-duo-start, .friend-nudge{ min-height:44px; }
 }
+/* Painel de Notificações (2026-10-15): avisos agrupados por dia (Hoje/Ontem/Antes), ícone num círculo,
+   não lido = fundo leve + ponto na cor da marca (antes era tudo rosa), lido = texto mais apagado. */
+.notifications-dropdown{ width:min(380px, calc(100vw - 24px)); min-width:0; max-width:none; max-height:min(72vh, 560px); padding:0 8px 8px; }
+.notifications-dropdown-header{ position:sticky; top:0; z-index:1; background:var(--paper-warm); padding:12px 8px 10px; margin:0 -8px 2px; padding-left:16px; padding-right:12px; font-size:15px; }
+.notifications-mark-all-btn{ border-radius:8px; padding:4px 8px; }
+.notifications-mark-all-btn:hover{ text-decoration:none; background:color-mix(in srgb, var(--seal-red) 10%, var(--paper-warm)); }
+.notification-group{ margin:12px 8px 4px; font-size:12px; font-weight:800; color:var(--ink-soft); }
+.notification-item{ position:relative; gap:12px; padding:10px 30px 10px 8px; border-radius:12px; color:var(--ink); font-family:var(--font-body); }
+.notification-item + .notification-item{ margin-top:2px; border-top:none; padding-top:10px; }
+.notification-item:hover{ background:color-mix(in srgb, var(--ink) 5%, var(--paper-warm)); }
+.notification-item:focus-visible{ outline:2px solid var(--seal-red); outline-offset:-2px; }
+.notification-item.unread{ background:color-mix(in srgb, var(--seal-red) 8%, var(--paper-warm)); }
+.notification-item-icon{ width:36px; height:36px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:19px; line-height:1; background:var(--paper); border:1px solid var(--paper-line); }
+.notification-item-title{ font-size:13.5px; }
+.notification-item-text{ font-size:13.5px; color:var(--ink); line-height:1.45; }
+.notification-item:not(.unread) .notification-item-text{ color:var(--ink-soft); }
+.notification-item-time{ font-size:11.5px; opacity:1; margin-top:3px; }
+.notification-unread-dot{ position:absolute; right:12px; top:18px; width:9px; height:9px; border-radius:50%; background:var(--seal-red); }
+@media (max-width:620px){
+  .notifications-mark-all-btn{ min-height:44px; padding:0 10px; }
+  .notification-item{ min-height:56px; }
+}
 </style>
 </head>
 <body>
@@ -4866,7 +4889,7 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 <div id="notifications-dropdown" class="user-dropdown notifications-dropdown">
   <div class="notifications-dropdown-header">
     <span data-i18n="notif.pref.sectionTitle">Notificações</span>
-    <button class="notifications-mark-all-btn" id="notifications-mark-all-btn">Ler todas</button>
+    <button class="notifications-mark-all-btn" id="notifications-mark-all-btn" data-i18n="notif.markAll">Ler todas</button>
   </div>
   <div id="notifications-list"></div>
 </div>

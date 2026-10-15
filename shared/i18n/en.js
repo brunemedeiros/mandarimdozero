@@ -141,6 +141,11 @@ window.I18N_CATALOG['en'] = {
   'notif.time.hour': '{n}h', // ALTA
   'notif.time.day': '{n}d', // ALTA
   'notif.empty': 'No notifications yet. Keep studying! 📚', // ALTA
+  'notif.group.today': 'Today', // ALTA
+  'notif.group.yesterday': 'Yesterday', // ALTA
+  'notif.group.earlier': 'Earlier', // ALTA
+  'notif.unread': 'Unread', // ALTA
+  'notif.markAll': 'Mark all as read', // ALTA
   'notif.cat.estudo': '📘 Study', // ALTA
   'notif.cat.revisao': '🔄 Review', // ALTA
   'notif.cat.streak': '🔥 Streak', // ALTA

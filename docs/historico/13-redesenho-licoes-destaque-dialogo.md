@@ -183,3 +183,19 @@ A autora pensou em aposentar a ideia ("estamos criando coisas demais"). Nada foi
   (2026-10-14) que, se voltar, começa enxuta: só "Adicionar estas N formas à Revisão" na tela final da Conjugação e do
   Jogo, com o que a pessoa errou, sem mexer nos Desafios.
 - Os dois botões de áudio num mesmo Field (🔊 + 🎧) foram considerados "realmente muito confusos" pela autora.
+
+## Painel de Notificações (fr e zh, 2026-10-15)
+
+- Bug: avisos de Amigos são gravados uma vez por site (`_friends_notify`, 102: `frances` e `mandarim`) e o painel não
+  filtrava pelo idioma, então cada pedido de amizade aparecia duas vezes (produção, 7 dias: 4 + 4). Lembretes de
+  sequência/revisão do chinês também apareciam no site de francês. Agora a lista, o contador do sino e "Ler todas"
+  filtram por `language_app_key = APP_KEY`; abrir um aviso de Amigos marca a cópia do outro site como lida.
+- Visual: grupos Hoje/Ontem/Antes; ícone num círculo; não lido = fundo leve na cor da marca + ponto (antes tudo ficava
+  rosa com `rgba` fixo); lido = texto mais apagado; cabeçalho fixo ao rolar; o emoji do começo do texto ("📌 Fulana
+  postou...") sai porque o ícone já está à esquerda. "Ler todas" passou a ter i18n (`notif.markAll`).
+- Ícones: todos os emojis dos avisos estão no mapa do Fluent (`shared/emoji-icons.js`); conferido no teste.
+- Pico CSS: não se aplica. É a recomendação do "Design System do Painel" (painel interno da Professora); as telas de
+  aluno seguem os tokens do site (decisão da dona, `docs/historico/15-i18n-cursos-por-par-e0.md`).
+- Grátis x Premium: tudo grátis.
+- Testes: `tests/notificacoes/test_playwright.js` 35/35 (novo; fr/zh, claro/escuro, celular), i18n 2032/2032 e 209/209,
+  celular 108/108, ícones 43/43, amigos 210/210, modo foco 19/19. `registro` 88/89 igual na `main` (pré-existente).
