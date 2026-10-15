@@ -192,7 +192,16 @@ Redesenho aprovado pela autora a partir da prévia (https://claude.ai/artifact/M
 - Missões antigas de XP (102) continuam valendo até o fim da semana delas.
 - **Grátis x Premium:** tudo grátis.
 - **Staging:** aplicada em 2026-10-15 em 3 partes (`109_duo_weekly_auto_1/2/3`; o arquivo inteiro trava a ferramenta).
-  As 10 funções conferidas por md5 com o banco local; cron criado; sem DROP. **Produção: pendente (aguardando a autora).**
+  As 10 funções conferidas por md5 com o banco local; cron criado; sem DROP. Depois veio a parte
+  `109_duo_weekly_auto_4_studied_languages` (abaixo).
+- **Produção:** aplicada em 2026-10-15 a pedido da autora, em 4 partes (`109_duo_weekly_auto_1`, `_1b`, `_2`, `_3`). As 10
+  funções conferidas por md5 com o banco local; cron `duo-pair-weekly` ativo; `study_days` e `duo_pairing_runs` com RLS e
+  sem acesso das contas; 9 dias de estudo desta semana vindos das sequências; sorteio ainda não rodado na hora da aplicação.
+- **Convivência com a 105 de outra conversa (`105b_pt_server_minimum`, só no Staging):** ela recria `_friends_notify_msg`
+  para gravar o aviso só nos idiomas que a pessoa estuda (`_studied_languages`). A 109 junta os dois lados: usa
+  `_studied_languages` quando a função existe; senão, frances e mandarim. **Se a 105 for aplicada na produção depois da
+  109, a versão dela tira `duo_week_paired` da chave "missões" das preferências:** aplicar a `_friends_notify_msg` da 109
+  de novo depois (ou acrescentar `'duo_week_paired'` na lista da 105).
 - **Testes:**
 
   | Teste | Resultado |

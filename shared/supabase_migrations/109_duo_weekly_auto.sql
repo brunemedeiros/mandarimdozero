@@ -15,6 +15,7 @@
 -- "Chamar para missão" (start_duo_mission) agora cria missão de dias: meta = 4, ou os dias que faltam até domingo.
 -- Missões antigas de XP (102) continuam valendo até o fim da semana em que foram criadas.
 -- Sem DROP. Nenhuma linha existente muda (só colunas novas com padrão).
+-- Staging: partes _1, _2, _3 e _4_studied_languages. Produção (2026-10-15): partes _1, _1b, _2, _3.
 -- ROLLBACK: cron.unschedule('duo-pair-weekly'); drop das funções novas; drop table study_days, duo_pairing_runs;
 --   colunas novas de duo_missions e friend_settings; funções recriadas de volta às versões da 102.
 
@@ -113,6 +114,7 @@ declare
   v_lang text;
   v_set friend_settings%rowtype;
   v_body text;
+  v_langs text[];
 begin
   select * into v_set from friend_settings where user_id = p_user;
   if found then
@@ -129,7 +131,13 @@ begin
   end if;
   v_body := _friends_msg(p_event, _ui_lang(p_user), coalesce(p_params, '{}'::jsonb));
   if v_body is null then return; end if;
-  foreach v_lang in array array['frances', 'mandarim'] loop
+  -- 105 (outra conversa): só nos idiomas que a pessoa estuda, quando _studied_languages já existe; senão os dois sites.
+  if to_regprocedure('public._studied_languages(uuid)') is not null then
+    v_langs := public._studied_languages(p_user);
+  else
+    v_langs := array['frances', 'mandarim'];
+  end if;
+  foreach v_lang in array v_langs loop
     insert into notifications (user_id, language_app_key, category, event_type, title, body, action_tab)
     values (p_user, v_lang, 'amigos', p_event, null, v_body, p_action_tab);
   end loop;
