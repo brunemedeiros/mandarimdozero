@@ -25,7 +25,7 @@ for (const l of json.languages) {
 ok(JSON.stringify(L.studyLangMap()) === JSON.stringify({ frances: 'fr', mandarim: 'zh', portugues: 'pt' }), 'studyLangMap');
 ok(JSON.stringify(L.langIdMap(true)) === JSON.stringify({ frances: 'fr', mandarim: 'zh' }), 'langIdMap(true)');
 ok(JSON.stringify(L.folderMap(true)) === JSON.stringify({ frances: 'fr', mandarim: 'zh' }), 'folderMap(true)');
-ok(JSON.stringify(L.spokenRulesVersionByLang()) === JSON.stringify({ fr: 4, zh: 0, pt: 1 }), 'spokenRulesVersionByLang (deve ser igual ao antigo { fr:4, pt:1, zh:0 })');
+ok(JSON.stringify(L.spokenRulesVersionByLang()) === JSON.stringify({ fr: 4, zh: 0, pt: 2 }), 'spokenRulesVersionByLang (deve ser igual ao antigo { fr:4, pt:2, zh:0 })');
 ok(L.deckLabel('frances') === 'Francês' && L.deckLabel('mandarim') === 'Mandarim' && L.deckLabel('portugues') === 'Português', 'deckLabel');
 ok(L.flagEmoji('frances') === '🇫🇷' && L.flagEmoji('mandarim') === '🇨🇳', 'flagEmoji');
 ok(L.isCjk('mandarim') && !L.isCjk('frances') && !L.isCjk('portugues') && !L.isCjk('x'), 'isCjk');
