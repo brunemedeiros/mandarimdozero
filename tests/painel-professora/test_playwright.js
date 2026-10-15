@@ -159,6 +159,7 @@ const PANEL_STUB = (who) => {
       await ev(() => document.querySelector('[data-calendar-feed-reset]').click());
       await page.waitForFunction(() => /t=b{64}/.test(document.querySelector('[data-calendar-feed-url]')?.value || ''));
       L('aluna: "Gerar outro link" (com confirmação) troca o token', await ev(() => (window.__rpcCalls || []).some(c => c[0] === 'my_calendar_feed_token' && c[1] && c[1].p_regenerate === true)));
+      if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#my-class-logs-content [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aluna-link-agenda');
       await ev(() => document.querySelector('[data-my-classlog-view="calendar"]').click());
       await page.waitForSelector('#my-class-logs-content .cal');
@@ -328,6 +329,8 @@ const PANEL_STUB = (who) => {
       const startDay = await ev(() => { const d = new Date(); d.setDate(d.getDate() + 2); return classLogLocalYMD(d); });
       const untilDay = await ev(() => { const d = new Date(); d.setDate(d.getDate() + 16); return classLogLocalYMD(d); });
       await page.fill('#admin-class-log-date', startDay);
+      L('agenda: horário já vem com 7h (padrão da autora)', await ev(() => document.getElementById('admin-class-log-time').value === '07:00'));
+      L('agenda: só o horário padrão não registra aula passada vazia, mas agenda hoje', await ev(() => cleanClassLogPayload({ classDate: '2020-01-01', startTime: '07:00', durationMinutes: 60 }).empty === true && cleanClassLogPayload({ classDate: todayStr(), startTime: '07:00', durationMinutes: 60 }).empty === false));
       await page.fill('#admin-class-log-time', '19:30');
       L('agenda: duração é um seletor de 30 min a 5h, começando em 1h', await ev(() => { const d = document.getElementById('admin-class-log-duration'); const o = [...d.options]; return d.tagName === 'SELECT' && d.value === '60' && o.length === 10 && o[0].text === '30 min' && o[1].text === '1h' && o[2].text === '1h30' && o[9].text === '5h'; }));
       await page.selectOption('#admin-class-log-duration', '90');
@@ -347,6 +350,8 @@ const PANEL_STUB = (who) => {
       await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').open = true; });
       await page.waitForSelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]');
       L('calendário: professora recebe o link dela', await ev(() => /class-calendar-feed\?t=[ab]{64}/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
+      if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
+      await shot('aulas-link-agenda');
       // a aula agendada pode cair no mês seguinte: avança até achar
       for (let i = 0; i < 2 && !(await ev((d) => !!document.querySelector(`[data-cal-day="${d}"] .cal-chip`), startDay)); i++){ await ev(() => document.querySelector('#admin-classlogs-calendar [data-cal-nav="1"]').click()); await page.waitForTimeout(300); }
       L('calendário: aula agendada no dia certo, com horário e nome', await ev((d) => { const c = document.querySelector(`[data-cal-day="${d}"] .cal-chip`); return !!c && c.textContent.includes('19:30') && c.textContent.includes('Ana'); }, startDay));
