@@ -461,3 +461,23 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   i18n 2032/2032 e 209/209; e4 21/21.
 - Próximo: link de agenda (ICS) por aluno/professora e "Adicionar ao Google Agenda"; avisos no Mural; aba Turma no Ranking.
 - Ajuste da autora: duração é um campo livre com padrão de 60 min (5 a 600). 101 na produção em 2026-10-15 (autorizada).
+- Ajuste da autora (2026-10-15, depois): duração volta a ser seletor, de 30 em 30 min de 30 min a 5h, padrão 1h
+  (`CLASS_LOG_DURATIONS`); valor fora da lista (aula antiga/importada) aparece como opção extra ao editar.
+
+### Link de agenda (2026-10-15; migration 103 e função `class-calendar-feed` no Staging e na produção)
+
+- Decisão da autora: assinatura ICS primeiro (sem OAuth); botão "Adicionar ao Google Agenda" de aula avulsa fica para depois.
+- 1 link por conta (`calendar_feed_tokens`, RPC `my_calendar_feed_token(p_regenerate)`): a professora vê as aulas que deu
+  (título "Aula de francês · Aluno/Turma"); o aluno, as dele e as das turmas, com vínculo ativo ("Aula de francês · Prof").
+  Janela: 120 dias atrás em diante. Sai tema, tarefa e Presença; nunca Anotações nem Observações. Aula cancelada (rótulo com
+  "Cancel") fica com o rótulo no título e não ocupa o horário; aula sem horário = dia inteiro. `&lang=en` para o site em inglês.
+- Edge Function `class-calendar-feed` com `verify_jwt = false` (o Google busca sem login; o token de 256 bits é a senha) e
+  service role só para a RPC `class_calendar_feed` (que anon/authenticated não executam). "Gerar outro link" invalida o antigo.
+- Tela: bloco recolhido "Ver as aulas na sua agenda" em Professora > Aulas > Calendário e no topo de Aluno > Aulas (só quando há
+  aula): Abrir no Google Agenda, Apple ou Outlook (webcal), Copiar link, Gerar outro link.
+- Grátis x Premium: tudo grátis para quem tem aula (aluno vinculado ou professora); não há Premium aqui.
+- Testes: SQL local 103 22/22 (094 27/27, 101 7/7); `.ics` 17/17 (`tests/aulas-presenca/test_ics.mjs`); painel-professora
+  559/559; mural 255/255; i18n 2032/2032 e 209/209. Staging ponta a ponta: `text/calendar`, 19:30 de São Paulo = 22:30 UTC,
+  sem notas privadas, token errado vazio/404.
+- Ajuste da autora: aula sem horário = 7h com 1h, no formulário (Horário já vem 07:00) e no link de agenda. A agenda
+  assinada é só leitura: o ajuste fino é sempre no site. Horário sozinho só conta como agendamento de hoje em diante.
