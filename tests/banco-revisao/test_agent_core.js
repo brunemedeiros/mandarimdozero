@@ -13,7 +13,7 @@ const DIR = path.join(__dirname, '../../supabase/functions/review-bank-agent');
   const T = 'teacher-1', TODAY = '2026-10-14';
   let seq = 0; const id = (p) => p + (++seq);
   const mk = () => {
-    const d = { students: [], items: [], recaps: [], runs: [], cards: [], mutations: 0, settings: { auto_generate: true, manual_markdown: '# Manual' } };
+    const d = { students: [], items: [], recaps: [], runs: [], cards: [], mutations: 0, inbox: [], settings: { auto_generate: true, manual_markdown: '# Manual' } };
     d.students.push({ id: 'sA', teacher_id: T, name: 'Ana', language_app_key: 'frances', reference_language: 'pt', status: 'ativo', agent_managed: true, linked_student_id: 'uA', notebook_id: 'nbA', agenda_names: ['Ana'], lesson_dates: ['2026-10-01', '2026-10-15'], last_entry_read: '2026-10-10', started_on: '2026-06-01' });
     d.students.push({ id: 'sB', teacher_id: T, name: 'Bia', language_app_key: 'portugues', reference_language: 'en', status: 'ativo', agent_managed: true, linked_student_id: null, agenda_names: [], lesson_dates: [] });
     d.students.push({ id: 'sC', teacher_id: T, name: 'Caio', language_app_key: 'frances', reference_language: 'pt', status: 'ativo', agent_managed: false, linked_student_id: 'uC', lesson_dates: [] });
@@ -31,6 +31,8 @@ const DIR = path.join(__dirname, '../../supabase/functions/review-bank-agent');
       findStudentByName: async (t, name, lang) => d.students.find(s => s.teacher_id === t && s.language_app_key === lang && s.name.toLowerCase() === name.toLowerCase()) || null,
       insertStudent: async (row) => { const s = Object.assign({ id: id('s') }, row); d.students.push(s); return s; },
       insertRun: async (row) => { d.runs.push(row); },
+      claimInbox: async (t, iid) => { const rows = d.inbox.filter(r => r.status === 'pendente' && (!iid || r.id === iid)).slice(0, 5); rows.forEach(r => { r.status = 'processando'; r.attempts = (r.attempts || 0) + 1; }); return rows; },
+      finishInbox: async (iid, status, result, error) => { const r = d.inbox.find(x => x.id === iid); Object.assign(r, { status, result, error }); },
     };
     return { d, agent: createAgent({ engine, db, teacherId: T, now: () => TODAY }) };
   };
@@ -109,5 +111,43 @@ const DIR = path.join(__dirname, '../../supabase/functions/review-bank-agent');
   r = await call(agent, { action: 'register_student', name: 'dora', language: 'portugues' });
   check('cadastrar de novo o mesmo aluno não duplica', r.json.created === false && d.students.filter(s => /dora/i.test(s.name)).length === 1);
   check('cadastro com idioma inválido é recusado', (await call(agent, { action: 'register_student', name: 'X', language: 'klingon' })).status === 400);
+
+  // --- caixa de entrada (plano B) e rodada noturna
+  ({ d, agent } = mk());
+  d.inbox.push({ id: '11111111-1111-1111-1111-111111111111', status: 'pendente', payload: { register_students: [{ name: 'Zed', language: 'portugues', reference: 'en', agenda_names: ['Zed'] }], students: [
+    { student_key: 'Zed|portugues', items: [{ type: 'vocabulario', q: 'traffic', a: 'o trânsito' }, { type: 'vocabulario', q: 'mom\'s friend', a: 'a amiga da mãe', doubt: 'conferir' }], lesson_dates: ['2026-10-14'], recap_date: '2026-10-14' },
+    { student_id: 'sA', items: [{ type: 'vocabulario', q: 'the sea', a: 'la mer' }] }] } });
+  r = await call(agent, { action: 'process_inbox' });
+  const inb = d.inbox[0];
+  check('caixa: processa a linha pendente e marca como feita, com o resultado dentro', r.status === 200 && r.json.processed === 1 && inb.status === 'feito' && inb.result && inb.result.summary.students.length === 2, JSON.stringify(r.json).slice(0, 200));
+  check('caixa: aluno novo cadastrado pela entrega nasce gerenciado e recebe os itens pela chave "nome|idioma"', inb.result.registered[0].created === true && d.students.find(x => x.name === 'Zed').agent_managed === true && d.items.filter(i => i.bank_student_id === d.students.find(x => x.name === 'Zed').id).length === 2);
+  check('caixa: aluno vinculado da mesma entrega ganha item e cartão pelo motor do site', d.items.some(i => i.question === 'the sea' && i.teacher_flashcard_id) && d.cards.length === 1);
+  check('caixa: recap e datas de aula valem para o aluno recém-cadastrado', d.recaps.some(x => x.class_date === '2026-10-14') && d.students.find(x => x.name === 'Zed').lesson_dates.includes('2026-10-14'));
+  r = await call(agent, { action: 'process_inbox' });
+  check('caixa: linha já processada não é processada de novo', r.json.processed === 0 && d.items.filter(i => i.question === 'the sea').length === 1);
+  d.inbox.push({ id: '22222222-2222-2222-2222-222222222222', status: 'pendente', payload: { x: 1 } });
+  r = await call(agent, { action: 'process_inbox', inbox_id: '22222222-2222-2222-2222-222222222222' });
+  check('caixa: payload sem students/register_students vira erro na linha (não derruba)', r.status === 200 && d.inbox[1].status === 'erro' && /invalid_payload/.test(d.inbox[1].error));
+  d.inbox.push({ id: '33333333-3333-3333-3333-333333333333', status: 'pendente', payload: { students: [{ student_id: 'sA', items: [] }] } });
+  const realList = d.students;
+  const agentBroken = createAgent({ engine, teacherId: T, now: () => TODAY, db: { ...{}, listManagedStudents: async () => { throw new Error('banco fora do ar'); }, getSettings: async () => d.settings, claimInbox: async () => d.inbox.filter(x => x.id === '33333333-3333-3333-3333-333333333333'), finishInbox: async (iid, status, result, error) => { Object.assign(d.inbox.find(x => x.id === iid), { status, result, error }); } } });
+  r = await agentBroken.handle({ action: 'process_inbox' });
+  check('caixa: falha do banco vira erro na linha, com a mensagem', d.inbox[2].status === 'erro' && /banco fora do ar/.test(d.inbox[2].error), JSON.stringify(d.inbox[2]));
+  check('caixa: id que não é uuid é ignorado (processa as pendentes)', (await call(agent, { action: 'process_inbox', inbox_id: "x'; drop table" })).status === 200);
+
+  ({ d, agent } = mk());
+  d.students[0].lesson_dates = [TODAY];
+  d.items.push({ id: 'i9', teacher_id: T, bank_student_id: 'sA', import_key: 'c009', item_type: 'vocabulario', question: 'the tree', answer: "l'arbre", status: 'aprovado', level: 0, due_date: TODAY, last_result: null, teacher_flashcard_id: null, class_date: '2026-10-10', explanation: null, check_note: null, sensitive: false, proposal: null, wrong_form: null, gap_word: null });
+  r = await call(agent, { action: 'nightly' });
+  check('noturna: gera o cartão do item aprovado sem cartão e o recap da aula de hoje', r.status === 200 && d.items.find(i => i.id === 'i9').teacher_flashcard_id != null && d.recaps.length === 1 && d.recaps[0].class_date === TODAY, JSON.stringify(r.json.summary.students[0]));
+  check('noturna: aluno do artifact (não gerenciado) fica de fora', !r.json.summary.students.some(x => x.student_id === 'sC') && r.json.summary.rejected.length === 0);
+  r = await call(agent, { action: 'nightly' });
+  check('noturna: rodar de novo não duplica recap nem cartão', d.recaps.length === 1 && d.cards.length === 1);
+  ({ d, agent } = mk());
+  r = await call(agent, { action: 'nightly' });
+  check('noturna: sem aula hoje não cria recap (mas entrega cartões pendentes)', d.recaps.length === 0);
+  const real = createAgent({ engine, db: { listManagedStudents: async () => [], getSettings: async () => null, getUserEmail: async () => null }, teacherId: T });
+  const sp = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+  check('hoje padrão é a data de São Paulo (não UTC)', (await real.handle({ action: 'state' })).json.today === sp, sp);
   summary('Banco de Revisão: rotina automática (core)');
 })().catch(e => { console.error(e); process.exit(1); });

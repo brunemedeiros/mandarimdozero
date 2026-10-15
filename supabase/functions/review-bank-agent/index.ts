@@ -9,6 +9,7 @@
 // secret REVIEW_BANK_AGENT_TEACHER_ID (nunca do corpo da requisição). Usa service role, por isso toda consulta aqui
 // é filtrada por teacher_id; sem token ou sem secrets configurados a função recusa tudo.
 //
+// Ações: ping, state, register_student, ingest, process_inbox (caixa de entrada, plano B), nightly (recap e cartões sem a tarefa).
 // Secrets: REVIEW_BANK_AGENT_TOKEN, REVIEW_BANK_AGENT_TEACHER_ID (SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY já existem).
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
@@ -79,6 +80,10 @@ Deno.serve(async (req: Request) => {
     findStudentByName: async (t: string, name: string, lang: string) => ok(await sb.from('review_bank_students').select('id,agent_managed').eq('teacher_id', t).eq('language_app_key', lang).ilike('name', name.replace(/[\\%_]/g, '\\$&')).maybeSingle()),
     insertStudent: async (row: unknown) => ok(await sb.from('review_bank_students').insert(row).select('id').single()),
     insertRun: async (row: unknown) => { ok(await sb.from('review_bank_agent_runs').insert(row)); },
+    claimInbox: async (t: string, id: string | null) => ok(await sb.rpc('agent_inbox_claim', { p_teacher: t, p_id: id })) || [],
+    finishInbox: async (id: string, status: string, result: unknown, error: string | null) => {
+      ok(await sb.from('review_bank_agent_inbox').update({ status, result, error, processed_at: new Date().toISOString() }).eq('id', id).eq('teacher_id', teacherId));
+    },
   };
 
   try {

@@ -23,10 +23,12 @@ export function itemKey(it) {
 
 const contentSig = (type, q, a) => [norm(type), norm(q), norm(a)].join('|');
 const isDate = (d) => typeof d === 'string' && DATE.test(d);
+const isUuid = (u) => typeof u === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(u);
 const bad = (status, error, detail) => ({ status, json: { ok: false, error, ...(detail ? { detail } : {}) } });
 
 export function createAgent({ engine, db, teacherId, now }) {
-  const today = () => (now ? now() : new Date().toISOString().slice(0, 10));
+  // data de hoje no fuso da professora (a rotina roda de madrugada; em UTC a data viraria às 21h de Brasília)
+  const today = () => (now ? now() : new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' }));
 
   async function managedStudent(id) {
     const list = await db.listManagedStudents(teacherId);
@@ -153,18 +155,79 @@ export function createAgent({ engine, db, teacherId, now }) {
     }
   }
 
-  async function ingest(body) {
-    const entries = Array.isArray(body.students) ? body.students : null;
-    if (!entries) return bad(400, 'invalid_payload');
-    if (entries.length > MAX_STUDENTS) return bad(413, 'too_many_students');
-    const settings = await db.getSettings(teacherId);
+  async function runIngest(entries, settings) {
     const summary = { students: [], rejected: [] };
     for (const e of entries) {
       try { await ingestStudent(e, settings, summary); }
       catch (err) { summary.rejected.push({ student_id: e && e.student_id, reason: 'error', detail: String((err && err.message) || err).slice(0, 200) }); }
     }
     try { await db.insertRun({ teacher_id: teacherId, summary }); } catch (_) { /* registro é auditoria: não derruba a rodada */ }
+    return summary;
+  }
+
+  async function ingest(body) {
+    const entries = Array.isArray(body.students) ? body.students : null;
+    if (!entries) return bad(400, 'invalid_payload');
+    if (entries.length > MAX_STUDENTS) return bad(413, 'too_many_students');
+    const settings = await db.getSettings(teacherId);
+    const summary = await runIngest(entries, settings);
     return { status: 200, json: { ok: true, today: today(), summary } };
+  }
+
+  // Caixa de entrada (plano B): a tarefa agendada grava o payload no banco pelo conector e esta ação o processa por dentro do Supabase.
+  // Payload: { register_students?: [{name, language, reference, agenda_names, notebook_id, last_entry_read, started_on}], students: [ {student_id | student_key: "nome|idioma", ...mesmo formato do ingest} ] }
+  async function processOne(row, settings) {
+    const payload = row.payload && typeof row.payload === 'object' ? row.payload : {};
+    if (!Array.isArray(payload.students) && !Array.isArray(payload.register_students)) throw new Error('invalid_payload');
+    const entries = Array.isArray(payload.students) ? payload.students : [];
+    if (entries.length > MAX_STUDENTS) throw new Error('too_many_students');
+    const keyToId = {};
+    const registered = [];
+    for (const r of (Array.isArray(payload.register_students) ? payload.register_students : []).slice(0, 20)) {
+      const out = await registerStudent(r || {});
+      if (out.status !== 200) { registered.push({ name: r && r.name, error: out.json.error }); continue; }
+      keyToId[norm(r.name) + '|' + r.language] = out.json.id;
+      registered.push({ name: clean(r.name, 120), id: out.json.id, created: out.json.created, agent_managed: out.json.agent_managed });
+    }
+    const managed = await db.listManagedStudents(teacherId);
+    managed.forEach((s) => { keyToId[norm(s.name) + '|' + s.language_app_key] = s.id; });
+    const resolved = entries.map((e) => {
+      if (e && !e.student_id && typeof e.student_key === 'string') {
+        const [name, lang] = e.student_key.split('|');
+        return Object.assign({}, e, { student_id: keyToId[norm(name) + '|' + (lang || '').trim()] || null });
+      }
+      return e;
+    });
+    const summary = await runIngest(resolved, settings);
+    return { registered, summary };
+  }
+
+  async function processInbox(body) {
+    const settings = await db.getSettings(teacherId);
+    const rows = await db.claimInbox(teacherId, isUuid(body.inbox_id) ? body.inbox_id : null);
+    const results = [];
+    for (const row of rows) {
+      try {
+        const result = await processOne(row, settings);
+        await db.finishInbox(row.id, 'feito', result, null);
+        results.push({ id: row.id, status: 'feito' });
+      } catch (err) {
+        const msg = String((err && err.message) || err).slice(0, 300);
+        await db.finishInbox(row.id, 'erro', null, msg);
+        results.push({ id: row.id, status: 'erro', error: msg });
+      }
+    }
+    return { status: 200, json: { ok: true, processed: results.length, results } };
+  }
+
+  // Rodada noturna sem a tarefa: recap das aulas de hoje e cartões dos itens prontos (nada de itens novos).
+  async function nightly() {
+    const settings = await db.getSettings(teacherId);
+    const t = today();
+    const students = (await db.listManagedStudents(teacherId)).filter((s) => s.status === 'ativo');
+    const entries = students.map((s) => ({ student_id: s.id, recap_date: (s.lesson_dates || []).includes(t) ? t : undefined }));
+    const summary = await runIngest(entries, settings);
+    return { status: 200, json: { ok: true, today: t, summary } };
   }
 
   async function handle(body) {
@@ -174,6 +237,8 @@ export function createAgent({ engine, db, teacherId, now }) {
       case 'state': return state(body);
       case 'register_student': return registerStudent(body);
       case 'ingest': return ingest(body);
+      case 'process_inbox': return processInbox(body);
+      case 'nightly': return nightly();
       default: return bad(400, 'unknown_action');
     }
   }
