@@ -281,6 +281,30 @@ function todaysChallenges(){
   return STATE.daily.missions.map(materializeMission).filter(Boolean);
 }
 
+// Tocar numa missão do dia leva à atividade dela (pedido da autora, 2026-10-15). Missão sem destino próprio
+// (primeira lição, XP, nota alta, gramática, áudios, blocos, sequência) abre a próxima lição da trilha.
+const DAILY_MISSION_TARGETS = {
+  duo: 'friends',
+  conj1: 'conjugaison', conjCorrect10: 'conjugaison', conjTenses2: 'conjugaison',
+  reviews15: 'review', overdue3: 'review', speedReview1: 'review:speed', matchGame1: 'review:match',
+  hanzi1: 'hanzi', hanzi2: 'hanzi',
+};
+function openDailyMissionTarget(id){
+  const target = DAILY_MISSION_TARGETS[id] || 'path';
+  const [tab, mode] = target.split(':');
+  if (tab !== 'path' && !document.getElementById(`view-${tab}`)) return; // aba que não existe neste idioma
+  if (typeof switchTab !== 'function') return;
+  switchTab(tab);
+  if (tab === 'friends'){
+    setTimeout(() => document.getElementById('friends-duo')?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 400);
+  } else if (tab === 'review' && mode && typeof openReviewSession === 'function'){
+    openReviewSession(mode);
+  } else if (tab === 'path' && typeof nextTrailItem === 'function' && typeof trailGroups === 'function' && typeof openUnitDetail === 'function'){
+    const next = nextTrailItem(trailGroups(), STATE.unitProgress);
+    if (next) openUnitDetail(next.unitId);
+  }
+}
+
 function renderDailyChallengesScreen(){
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
@@ -482,7 +506,7 @@ function renderDailyChallengesStrip(){
     const pct = Math.round((current / c.target) * 100);
     const done = current >= c.target;
     return `
-      <div class="dcs-card ${done ? 'done' : ''}">
+      <button type="button" class="dcs-card ${done ? 'done' : ''}" data-mission-go="${escapeAttr(String(c.id || ''))}">
         <div class="dcs-icon-sq slot-${i}">${c.icon}</div>
         <div class="dcs-body">
           <div class="dcs-card-label">${c.label}</div>
@@ -491,9 +515,9 @@ function renderDailyChallengesStrip(){
             <div class="dcs-fraction">${current}/${c.target}</div>
           </div>
         </div>
-      </div>
+      </button>
     `;
-  }).join('');
+  }).join('') + (typeof duoDailyStripRowHTML === 'function' ? duoDailyStripRowHTML() : '');
   const html = `
     <button class="dcs-caption-btn" type="button" aria-expanded="${collapsed ? 'false' : 'true'}">
       <span class="dcs-caption">${t('trail.dailyMissions.caption')}</span>
@@ -507,6 +531,7 @@ function renderDailyChallengesStrip(){
       localStorageSafeSet(CHALLENGES_STRIP_COLLAPSE_KEY, isDailyChallengesStripCollapsed() ? '0' : '1');
       renderDailyChallengesStrip();
     });
+    strip.querySelectorAll('[data-mission-go]').forEach(card => card.addEventListener('click', () => openDailyMissionTarget(card.dataset.missionGo)));
   });
 }
 

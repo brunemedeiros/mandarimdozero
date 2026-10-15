@@ -5136,6 +5136,32 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
   .friends-push-actions{ width:100%; }
   .friends-push-actions .btn{ flex:1 1 auto; min-height:44px; }
 }
+/* ---------- Missão em dupla automática (109): grade da semana, quadro "Missões do dia" clicável, fim da lição ---------- */
+button.dcs-card{ width:100%; font:inherit; color:inherit; text-align:left; cursor:pointer; transition: border-color .15s ease, transform .15s ease; }
+button.dcs-card:hover{ border-color: var(--seal-red); transform: translateY(-1px); }
+button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offset: 2px; }
+.dcs-duo{ border-color: var(--seal-red); background: color-mix(in srgb, var(--seal-red) 8%, var(--paper)); }
+.dcs-duo-icon{ background: color-mix(in srgb, var(--seal-red) 18%, var(--paper)); }
+.dcs-duo .dcs-fill{ background: var(--seal-red); }
+.dcs-duo-sub{ font-size:11px; color: var(--ink-soft); margin:-3px 0 5px; }
+.duo-week{ display:grid; gap:6px; margin-top:12px; }
+.duo-week-row{ display:grid; grid-template-columns: minmax(48px, 88px) repeat(7, minmax(0, 1fr)) 34px; gap:4px; align-items:center; font-size:13px; }
+.duo-week-head{ font-size:11px; font-weight:800; color: var(--ink-soft); text-align:center; }
+.duo-week-name{ font-weight:800; color: var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.duo-dot{ justify-self:center; width:100%; max-width:24px; aspect-ratio:1; border-radius:50%; border:2px solid var(--paper-line); background: var(--paper); }
+.duo-dot.is-on{ background: var(--seal-red); border-color: var(--seal-red); }
+.duo-dot.is-today{ border-color: var(--medal-gold); border-style: dashed; }
+.duo-dot.is-on.is-today{ border-style: solid; }
+.duo-dot.is-out{ opacity:.35; }
+.duo-week-count{ font-size:12px; font-weight:800; color: var(--ink-soft); text-align:right; font-variant-numeric: tabular-nums; }
+.friend-duo-invite{ min-height:32px; font-size:12.5px; padding:6px 10px; white-space:nowrap; }
+.duo-lesson-strip{ display:flex; align-items:center; gap:12px; text-align:left; margin:14px auto 0; max-width:440px; padding:10px 14px;
+  border:1px solid var(--seal-red); border-radius:14px; background: color-mix(in srgb, var(--seal-red) 10%, var(--paper)); color: var(--ink); }
+.duo-lesson-strip small{ color: var(--ink-soft); }
+.duo-lesson-strip .friends-avatar{ width:32px; height:32px; font-size:12px; border:2px solid var(--paper); }
+.duo-lesson-strip .friends-avatar + .friends-avatar{ margin-left:-9px; }
+@media (max-width: 600px){ .friend-duo-invite{ min-height:44px; } }
+@media (prefers-reduced-motion: reduce){ button.dcs-card{ transition:none; } button.dcs-card:hover{ transform:none; } }
 /* ---------- Amigos em dupla (102, shared/friends.js loadFriendsDuo) ---------- */
 .friends-duo{ margin-top:16px; }
 .friends-duo-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:22px; padding:16px 18px; box-shadow:var(--shadow-card); }
