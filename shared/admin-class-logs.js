@@ -300,17 +300,16 @@ function classLogFieldRowsHTML(log){
 }
 
 // 101: horário (opcional) e duração. Aula sem horário vale para o dia inteiro.
-const CLASS_LOG_DURATIONS = [30, 45, 60, 90, 120];
+// Duração: padrão 60 min, a professora muda para qualquer valor de 5 a 600 (pedido da autora, 2026-10-15).
 function classLogWhenFieldsHTML(timeId, durId, log){
   const time = log && log.start_time ? String(log.start_time).slice(0, 5) : '';
   const dur = (log && log.duration_minutes) || 60;
-  const opts = CLASS_LOG_DURATIONS.concat(CLASS_LOG_DURATIONS.includes(dur) ? [] : [dur]).sort((a, b) => a - b);
   return `
     <div class="class-log-when">
       <div><label class="profile-edit-label" for="${timeId}">${t('panel.classLog.time')}</label>
         <input type="time" id="${timeId}" class="profile-edit-input" value="${time}"></div>
-      <div><label class="profile-edit-label" for="${durId}">${t('panel.classLog.duration')}</label>
-        <select id="${durId}" class="profile-edit-input">${opts.map(m => `<option value="${m}" ${m === dur ? 'selected' : ''}>${escapeHTML(t('panel.classLog.minutes', { n: m }))}</option>`).join('')}</select></div>
+      <div><label class="profile-edit-label" for="${durId}">${t('panel.classLog.durationMin')}</label>
+        <input type="number" id="${durId}" class="profile-edit-input" min="5" max="600" step="5" inputmode="numeric" value="${dur}"></div>
     </div>`;
 }
 function classLogTimeLabel(log){

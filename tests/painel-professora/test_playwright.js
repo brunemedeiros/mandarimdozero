@@ -314,7 +314,8 @@ const PANEL_STUB = (who) => {
       const untilDay = await ev(() => { const d = new Date(); d.setDate(d.getDate() + 16); return classLogLocalYMD(d); });
       await page.fill('#admin-class-log-date', startDay);
       await page.fill('#admin-class-log-time', '19:30');
-      await page.selectOption('#admin-class-log-duration', '90');
+      L('agenda: duração começa em 60 min e aceita qualquer valor', await ev(() => { const d = document.getElementById('admin-class-log-duration'); return d.type === 'number' && d.value === '60'; }));
+      await page.fill('#admin-class-log-duration', '90');
       await page.check('#admin-class-log-repeat');
       L('agenda: "Até" aparece ao marcar repetir', await ev(() => !document.getElementById('admin-class-log-repeat-box').hidden));
       await page.fill('#admin-class-log-repeat-until', untilDay);

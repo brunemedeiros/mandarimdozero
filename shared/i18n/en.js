@@ -2636,6 +2636,8 @@ window.I18N_CATALOG['en'] = {
   'rb.sfName': 'Name', // ALTA
   'rb.sfNeedName': 'Write the student\'s name.', // ALTA
   'rb.sfNoDates': 'No dates yet.', // ALTA
+  'rb.sfAgent': 'Update automatically every night', // ALTA
+  'rb.sfAgentHint': "Turn this on only when this student already uses the site (linked account). The nightly routine then brings new items from the notebook and creates the cards. While it is off, the old Bank (artifact) owns this student's data.", // ALTA
   'rb.sfRef': 'Student\'s reference language', // ALTA
   'rb.sfStatus': 'Status', // ALTA
   'rb.showAnswer': 'Show answer', // ALTA
@@ -2736,8 +2738,7 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.labels.edit': 'Edit the {name} label', // ALTA
   'panel.classLog.labels.done': 'Done', // ALTA
   'panel.classLog.time': 'Time (optional)', // ALTA
-  'panel.classLog.duration': 'Length', // ALTA
-  'panel.classLog.minutes': '{n} min', // ALTA
+  'panel.classLog.durationMin': 'Length (minutes)', // ALTA
   'panel.classLog.repeatWeekly': 'Repeat every week', // ALTA
   'panel.classLog.repeatUntil': 'Until', // ALTA
   'panel.classLog.repeatHint': 'Creates one lesson a week, same day and time, until that date (52 at most).', // ALTA
