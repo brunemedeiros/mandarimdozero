@@ -118,6 +118,32 @@ PT_CASES = {
     "à vista (informal)": "à vista (informal)",
     "ônibus nº 8 → Centro": "ônibus número 8 Centro",
     "você": "você",
+    # Horas 24h (a leitura só diz o número; "duas e meia" o curso ensina à parte)
+    "14h30": "14 horas e 30 minutos", "Chego às 14h30.": "Chego às 14 horas e 30 minutos.",
+    "14h00": "14 horas", "14h": "14 horas", "9h00": "9 horas", "9h": "9 horas", "09h": "9 horas",
+    "1h": "1 hora", "1h30": "1 hora e 30 minutos", "0h": "0 horas", "00h": "0 horas", "00h30": "0 horas e 30 minutos",
+    "14h01": "14 horas e 1 minuto", "24h": "24 horas", "O banco abre às 8h e fecha às 17h.": "O banco abre às 8 horas e fecha às 17 horas.",
+    "14:30": "14 horas e 30 minutos", "9:05": "9 horas e 5 minutos", "00:00": "0 horas", "23:59": "23 horas e 59 minutos",
+    "A aula é às 19:30h.": "A aula é às 19 horas e 30 minutos.",
+    "Fiz uma viagem de 5h de ônibus": "Fiz uma viagem de 5 horas de ônibus",
+    "placar 2:1": "placar 2:1", "O jogo terminou 3:0.": "O jogo terminou 3:0.", "Mateus 3:16": "Mateus 3 horas e 16 minutos",  # limite conhecido: com minutos de 2 dígitos não há como distinguir de versículo/razão
+    "24:30": "24:30", "14:75": "14:75", "14h75": "14h75", "25h30": "25h30", "30h de estudo": "30h de estudo",
+    "10:30:15": "10:30:15", "1,5h": "1,5h", "km2h": "km2h", "14 h": "14 h", "9h5": "9h5", "OK 14hs": "OK 14hs",
+    # Moeda
+    "R$ 5,50": "5 reais e 50 centavos", "R$5,50": "5 reais e 50 centavos", "R$ 1,00": "1 real", "R$ 12,00": "12 reais",
+    "R$ 0,50": "50 centavos", "R$ 1,01": "1 real e 1 centavo", "R$ 1.250,00": "1.250 reais", "R$ 5": "5 reais",
+    "R$ 1": "1 real", "R$ 0,00": "0 reais", "R$ 1.250,75": "1.250 reais e 75 centavos", "R$ 2,05": "2 reais e 5 centavos",
+    "Custa R$ 5,50 o quilo.": "Custa 5 reais e 50 centavos o quilo.", "De R$ 3,00 a R$ 4,50": "De 3 reais a 4 reais e 50 centavos",
+    "R$": "R$", "Quanto custa em R$?": "Quanto custa em R$?", "R$ abc": "R$ abc", "US$ 5,00": "US$ 5,00",
+    "R$ 5,5": "R$ 5,5", "R$ 5 mil": "R$ 5 mil", "R$ 2 milhões": "R$ 2 milhões",
+    # Abreviações inequívocas
+    "p.ex. café": "por exemplo café", "P.ex. café": "Por exemplo café", "p. ex. chá": "por exemplo chá",
+    "Frutas, p.ex. maçã.": "Frutas, por exemplo maçã.",
+    "Tenho livros, canetas, etc.": "Tenho livros, canetas, etcétera.", "Compro pão, leite, etc. e vou embora": "Compro pão, leite, etcétera e vou embora",
+    "livros, etc., e mais": "livros, etcétera, e mais", "(maçã, uva, etc.)": "(maçã, uva, etcétera)",
+    "Compro pão, etc. Depois volto.": "Compro pão, etcétera. Depois volto.", "Etc.": "Etcétera.", "etc": "etc", "o etcetera": "o etcetera",
+    "Obs.: traga o livro": "Observação: traga o livro", "obs. importante": "observação importante", "Veja a obs.": "Veja a observação.",
+    "vc tb vai? blz": "vc tb vai? blz", "site.etc.br": "site.etc.br", "inobs.": "inobs.", "tipo p.exemplo": "tipo p.exemplo",
 }
 for src, want in PT_CASES.items():
     got = st.to_spoken_text(src, "pt")
@@ -126,6 +152,13 @@ check("fr não é afetado por pt", st.to_spoken_text("Bom dia, Sra. Silva, 1º a
 check("pt não aplica regra do fr", st.to_spoken_text("l'œuf", "pt") == "l'œuf")
 check("pt gênero: 2a forma em minúscula quando a frase abre com maiúscula", st.to_spoken_text("Bem-vindo(a) à nossa casa!", "pt") == "Bem-vindo, bem-vinda à nossa casa!")
 check("explain pt gênero", st.explain_spoken_text("obrigado(a)", "pt") == ["pt.gender-parenthetical"])
+check("pt: SPOKEN_OVERRIDES serve para internetês (vc, tb)", (st.SPOKEN_OVERRIDES["pt"].update({"vc tb vai?": "você também vai?"}) or True) and st.to_spoken_text("vc tb vai?", "pt") == "você também vai?")
+del st.SPOKEN_OVERRIDES["pt"]["vc tb vai?"]
+check("explain pt hora", st.explain_spoken_text("às 14h30", "pt") == ["pt.time-24h"])
+check("explain pt moeda", st.explain_spoken_text("R$ 5,50", "pt") == ["pt.currency-brl"])
+check("explain pt abreviação", st.explain_spoken_text("p.ex. etc.", "pt") == ["pt.common-abbreviations"])
+check("hora/moeda/abreviação não vazam para fr e zh",
+      all(st.to_spoken_text(x, l) == x for l in ("fr", "zh") for x in ("14h30", "R$ 5,50", "etc.", "p.ex. 9:05")))
 check("regras de pt são só pt", all(r.lang == "pt" for r in st.RULES_BY_LANG["pt"]))
 
 # --- contra o manifest REAL --------------------------------------------------

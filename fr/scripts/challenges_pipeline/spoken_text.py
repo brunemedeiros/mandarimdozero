@@ -221,6 +221,78 @@ def _pt_ordinals(text: str) -> str:
     return re.sub(rf"(?<!\d)(?<!{_L})(\d{{1,3}})\.?([ºª])(?!\d)(?!{_L})", repl, text)
 
 
+# Horas em 24h, moeda e abreviações inequívocas (decisão da autora, 2026-10-15).
+# Só dizem o NÚMERO ("14 horas e 30 minutos"): "duas e meia" / "catorze e trinta"
+# o curso ensina à parte. Dígitos = [0-9] (o \d do Python aceita outros alfabetos).
+_PT_NOT_ALNUM_BEFORE = r"(?<![^\W_])(?<![0-9][.,:])"
+
+
+def _pt_hours_word(h: int) -> str:
+    return f"{h} hora" if h == 1 else f"{h} horas"
+
+
+def _pt_minutes_word(mi: int) -> str:
+    return f"{mi} minuto" if mi == 1 else f"{mi} minutos"
+
+
+def _pt_time_text(h: int, mi: Optional[int]) -> Optional[str]:
+    """None = não é hora válida (fica como está). Com minutos: hora 0-23, minutos 0-59;
+    sem minutos (14h, 5h de viagem): 0-24."""
+    if mi is None:
+        return _pt_hours_word(h) if h <= 24 else None
+    if h > 23 or mi > 59:
+        return None
+    return _pt_hours_word(h) if mi == 0 else f"{_pt_hours_word(h)} e {_pt_minutes_word(mi)}"
+
+
+def _pt_time24(text: str) -> str:
+    def repl_h(m):
+        out = _pt_time_text(int(m.group(1)), int(m.group(2)) if m.group(2) else None)
+        return out if out else m.group(0)
+
+    def repl_colon(m):
+        out = _pt_time_text(int(m.group(1)), int(m.group(2)))
+        return out if out else m.group(0)
+    # "14h30", "14h", "9h00", "5h de viagem"
+    text = re.sub(rf"{_PT_NOT_ALNUM_BEFORE}([0-9]{{1,2}})h(?:([0-9]{{2}}))?(?![^\W_])", repl_h, text)
+    # "14:30", "9:05", "14:30h": minutos sempre com 2 dígitos ("2:1" é placar, fica igual)
+    text = re.sub(rf"{_PT_NOT_ALNUM_BEFORE}([0-9]{{1,2}}):([0-9]{{2}})h?(?![^\W_])(?!:[0-9])", repl_colon, text)
+    return text
+
+
+_PT_CURRENCY_RE = (r"(?<![^\W_])R\$\s*([0-9]{1,3}(?:\.[0-9]{3})+|[0-9]+)(?:,([0-9]{2}))?"
+                   r"(?![0-9]|[.,][0-9])(?!\s+(?:mil|milh|bilh))")
+
+
+def _pt_currency(text: str) -> str:
+    def repl(m):
+        whole = int(m.group(1).replace(".", ""))
+        cents = int(m.group(2)) if m.group(2) else 0
+        reais = f"{m.group(1)} {'real' if whole == 1 else 'reais'}"
+        centavos = f"{cents} {'centavo' if cents == 1 else 'centavos'}"
+        if cents == 0:
+            return reais
+        return centavos if whole == 0 else f"{reais} e {centavos}"
+    return re.sub(_PT_CURRENCY_RE, repl, text)
+
+
+def _pt_abbreviations(text: str) -> str:
+    # "p.ex." / "p. ex." -> "por exemplo" (o ponto final da abreviação some)
+    text = re.sub(r"(?<![^\W_])([Pp])\.\s?ex\.(?![^\W_])",
+                  lambda m: ("Por" if m.group(1) == "P" else "por") + " exemplo", text)
+
+    def with_dot(word_lower, word_cap):
+        def repl(m):
+            rest = m.string[m.end():]
+            keep = re.match(r"\s*$", rest) or re.match(r"\s+[A-ZÀ-ÖØ-Þ]", rest)
+            return (word_cap if m.group(1).isupper() else word_lower) + ("." if keep else "")
+        return repl
+    # "etc." / "obs." : o ponto final fica só se fechar a frase (fim do texto ou frase nova)
+    text = re.sub(r"(?<![^\W_])([Ee])tc\.(?![^\W_])", with_dot("etcétera", "Etcétera"), text)
+    text = re.sub(r"(?<![^\W_])([Oo])bs\.(?![^\W_])", with_dot("observação", "Observação"), text)
+    return text
+
+
 _PT_RULES: List[SpokenRule] = [
     SpokenRule(
         id="pt.title-abbreviations", lang="pt",
@@ -257,6 +329,21 @@ _PT_RULES: List[SpokenRule] = [
         pattern="", replacement="", fn=_pt_ordinals,
     ),
     SpokenRule(
+        id="pt.time-24h", lang="pt",
+        reason='"14h30", "14:30", "9h", "5h de viagem": lê o número ("14 horas e 30 minutos", "9 horas"). Não vira "duas e meia". Minutos com 2 dígitos no formato com dois pontos ("2:1" fica igual).',
+        pattern="", replacement="", fn=_pt_time24,
+    ),
+    SpokenRule(
+        id="pt.currency-brl", lang="pt",
+        reason='"R$ 5,50" -> "5 reais e 50 centavos"; "R$ 1,00" -> "1 real"; "R$ 1.250,00" -> "1.250 reais". "R$" sem número fica igual.',
+        pattern="", replacement="", fn=_pt_currency,
+    ),
+    SpokenRule(
+        id="pt.common-abbreviations", lang="pt",
+        reason='Só as inequívocas: "p.ex." -> "por exemplo", "etc." -> "etcétera", "obs." -> "observação". Internetês (vc, tb, blz) NÃO tem regra: usar SPOKEN_OVERRIDES por texto.',
+        pattern="", replacement="", fn=_pt_abbreviations,
+    ),
+    SpokenRule(
         id="pt.strip-symbols", lang="pt",
         reason="Emoji, setas e marcadores de lista (•, →, ✓, * solto) não devem ser lidos.",
         pattern="[\u2022\u2190-\u21FF\u2600-\u27BF\uFE0F\u200D\U0001F000-\U0001FAFF]|(?<!\S)\*+(?!\S)",
@@ -279,6 +366,10 @@ SPOKEN_OVERRIDES: Dict[str, Dict[str, str]] = {
         "une bouteille (de)": "une bouteille (de)",
     },
     "zh": {},
+    # pt: internetês e outras formas informais NÃO têm regra global (ambíguas).
+    # Para ler uma frase específica de outro jeito, texto EXIBIDO -> texto falado:
+    #   "pt": {"vc tb vai?": "você também vai?"}
+    # e subir a versão do pt (registry.json + index.ts) para regenerar.
     "pt": {},
 }
 
