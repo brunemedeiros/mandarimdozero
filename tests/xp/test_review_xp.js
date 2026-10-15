@@ -1,4 +1,4 @@
-// XP da Revisão (decisão da autora, 2026-10-15): Errei 0, Difícil 1, Bom 2, Fácil 4, sem redução por maturidade.
+// XP da Revisão (decisão da autora, 2026-10-15): Errei 0, Difícil 2, Bom 4, Fácil 8, sem redução por maturidade.
 const fs = require('fs'), vm = require('vm'), path = require('path');
 const root = path.join(__dirname, '..', '..');
 let pass = 0, fail = 0;
@@ -13,10 +13,10 @@ vm.createContext(ctx);
 vm.runInContext(srs.match(/const XP_PER_GRADE = [^;]+;/)[0].replace('const ', 'var '), ctx);
 vm.runInContext(m[0], ctx);
 
-check('tabela XP_PER_GRADE', JSON.stringify(ctx.XP_PER_GRADE) === JSON.stringify({ 0: 0, 1: 1, 2: 2, 3: 4 }), ctx.XP_PER_GRADE);
+check('tabela XP_PER_GRADE', JSON.stringify(ctx.XP_PER_GRADE) === JSON.stringify({ 0: 0, 1: 2, 2: 4, 3: 8 }), ctx.XP_PER_GRADE);
 for (const interval of [0, 1, 20, 21, 59, 60, 365]) {
-  check(`intervalo ${interval}: Errei=0 Difícil=1 Bom=2 Fácil=4`,
-    ctx.reviewXP(interval, 0) === 0 && ctx.reviewXP(interval, 1) === 1 && ctx.reviewXP(interval, 2) === 2 && ctx.reviewXP(interval, 3) === 4,
+  check(`intervalo ${interval}: Errei=0 Difícil=2 Bom=4 Fácil=8`,
+    ctx.reviewXP(interval, 0) === 0 && ctx.reviewXP(interval, 1) === 2 && ctx.reviewXP(interval, 2) === 4 && ctx.reviewXP(interval, 3) === 8,
     [0, 1, 2, 3].map(g => ctx.reviewXP(interval, g)));
 }
 check('nota inválida não gera XP', ctx.reviewXP(0, 9) === 0 && ctx.reviewXP(0, undefined) === 0);

@@ -1,7 +1,7 @@
 # XP: revisão reajustada e auditoria das outras fontes (2026-10-15)
 
 ## Decidido pela autora e feito
-- Revisão (Flashcard, inclusive cartões da professora em Aluno > Revisão): **Errei 0, Difícil 1, Bom 2, Fácil 4**, sem redução
+- Revisão (Flashcard, inclusive cartões da professora em Aluno > Revisão): **Errei 0, Difícil 2, Bom 4, Fácil 8** (primeiro ajuste foi 0/1/2/4; a autora dobrou por querer valorizar a revisão mais que o resto), sem redução
   para cartão maduro. Antes: 1, 4, 8, 10, com 70% a partir de 21 dias e 40% a partir de 60.
 - Onde: `XP_PER_GRADE` em `shared/srs.js` e `reviewXP()` em `shared/core/revisao-decks.js` (fr e zh usam a mesma). `addXP(0)` não faz nada.
 - Teste: `tests/xp/test_review_xp.js` (10/10).
@@ -22,6 +22,9 @@
 Sem XP: Desafios (fr), Jogos da Conjugação, Modo aula, pular Ponto de verificação.
 
 ## Efeitos colaterais da mudança na Revisão
-- Missão "Ganhe 50 XP hoje" (`xp50`): 15 revisões "Bom" agora dão 30 em vez de 120.
-- Notificação de XP: `min_xp_amount = 5` (migration 016): revisão de 1 cartão (0 a 4 XP) não gera mais notificação.
+- Missão "Ganhe 50 XP hoje" (`xp50`): 15 revisões "Bom" agora dão 60 em vez de 120.
+- Notificação de XP (sino, não o toast): `min_xp_amount` da categoria `gamificacao` está em **15** na produção (conferido 2026-10-15; cooldown 15 min, 2 por dia). Nenhuma nota de revisão (máx. 8) chega ao sino. O toast "+N XP" aparece para qualquer ganho maior que 0.
 - Conquistas por XP acumulado (100, 500...) e missão em dupla (por dias): ficam mais lentas só pelo XP de revisão.
+
+## Regra de produto
+Tudo o que for decidido sobre XP vale para todos os sites (fr, zh, pt e futuros). Ver `.claude/rules/xp.md`.

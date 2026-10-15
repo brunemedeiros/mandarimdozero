@@ -36,6 +36,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - **Nunca apagar progresso de memória (FSRS) por engano**; mudanças de dado em produção só com autorização explícita.
 - **Site em inglês não tem NADA em português** (decisão da autora, 2026-10-15): inclui avisos gravados pelo banco, push e
   e-mail; texto montado no servidor sai no idioma do site de quem recebe (`_ui_lang`, ver `.claude/rules/i18n.md`).
+- **Decisão vale para todos os sites** (fr, zh, pt e futuros), como padrão (2026-10-15): regra de produto decidida aqui (XP, missões, regras de Revisão...)
+  não é só de fr/zh. Código em `shared/` já vale para todos; site novo herda o molde. Exceção só com a autora aprovando. XP: `.claude/rules/xp.md`.
 - **Português do Brasil coloquial** em todo texto de interface e notas (ex.: "pechinchar", não "regatear");
   sem "--" e sem "pra" em texto visível.
 - **Terminologia**: "aluno/aluna" = vínculo ativo em `teacher_students`; "usuário/conta" = qualquer perfil.
@@ -78,7 +80,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 ## Índice
 
 - Regras por área (carregam sozinhas): `.claude/rules/` -- frontend-fr-zh, flashcards-motor, decks-review,
-  supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora, email.
+  supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora, email, xp.
 - Skills do projeto: `migration-supabase`, `notas-de-realidade`, `criar-desafios`, `audio-tts`,
   `teste-navegador`, `registrar-entrega`.
 - Agentes (`.claude/agents/`, `model:` pela dificuldade): `regressao` (haiku, roda testes),
