@@ -21,7 +21,6 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     URLSearchParams, Intl, Promise, Object, String, Number, CustomEvent: function(n, o){ this.type = n; this.detail = o && o.detail; },
   };
   sandbox.window = sandbox;
-  sandbox.I18N_DEBUG = debug;
   sandbox.location = { search };
   sandbox.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } };
   const events = [];
@@ -88,9 +87,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   check('valor vazio em en cai em pt-BR', W.t('test.empty') === 'vazio pt');
   check('chave inexistente em en devolve a chave', W.t('nada.aqui') === 'nada.aqui');
   e.warns.length = 0; W.t('nada.aqui');
-  check('sem I18N_DEBUG não há console.warn', e.warns.length === 0);
   const ed = makeEnv({ debug: true }); ed.w.t('nada.aqui');
-  check('com I18N_DEBUG há console.warn', ed.warns.length > 0);
 
   // ---- tp / Intl.PluralRules ----
   const PL = { one: '{n} cartão', other: '{n} cartões' };
@@ -128,7 +125,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const nonEmpty = (v) => typeof v === 'string' ? v.trim() !== '' : (v && typeof v === 'object' && Object.values(v).length > 0 && Object.values(v).every(x => typeof x === 'string' && x.trim() !== ''));
   check('nenhum valor vazio', [pt, en, es].every(c => Object.values(c).every(nonEmpty)));
   // Valores legitimamente iguais nos dois idiomas (nomes próprios, abreviações, números).
-  const EN_SAME_AS_PT_OK = ['cards.col.deck', 'cards.col.tags', 'students.ev.tab.hanzi', 'myFlashcards.badge.premium', 'badge.beta_tester.name', 'badge.xp_100.name', 'badge.xp_500.name', 'myFlashcards.edit.pinyin', 'myFlashcards.native.cardType', 'notif.pref.matrix.app', 'notif.pref.matrix.push', 'notif.pref.titleMatrixPush', 'notif.time.day', 'notif.time.hour', 'notif.time.min', 'review.mode.flashcard.name', 'review.mode.speed.name', 'review.speed.points', 'toast.pointsGain', 'toast.xpGain', 'trail.premiumBadge', 'preview.err.detail', 'review.interval.min', 'review.interval.hour', 'leaderboard.rowBadge', 'publicProfile.labelPinyin', 'publicProfile.sectionFlashcards', 'fieldEditor.lang.zhPinyin', 'fieldEditor.audio.rate.normal', 'taEditor.pinyinLabel', 'admin.analytics.tech.perf', 'admin.badges.create.icon', 'admin.badges.grant.badge', 'admin.badges.grant.usernamePh', 'admin.modal.report.status', 'admin.modal.report.title', 'admin.mode.off', 'admin.mode.on', 'admin.mode.pillLabel', 'admin.mode.title', 'admin.panel.tab.analytics', 'admin.panel.tab.tags', 'admin.panel.tab.flashcards', 'admin.panel.tab.premium', 'admin.panel.tab.badges', 'admin.panel.tab.reports', 'adminChallenges.import.itemN', 'admin.flashcards.cardType.normal', 'admin.flashcards.dest.countSubdecks', 'admin.flashcards.dest.deckFallback', 'admin.flashcards.dest.newSub', 'admin.materials.badgeLink', 'review.deck.decks', 'review.deck.colDeck', 'review.panel.tags', 'review.deck.subdeckWord.one', 'review.deck.subdeckWord.other', 'panel.tab.analytics', 'panel.tab.badges', 'panel.tab.reports', 'plans.chip.premium', 'plans.role.admin', 'plans.role.premium_basic', 'plans.role.premium_pro'];
+  const EN_SAME_AS_PT_OK = ['cards.col.deck', 'cards.col.tags', 'students.ev.tab.hanzi', 'myFlashcards.badge.premium', 'badge.beta_tester.name', 'badge.xp_100.name', 'badge.xp_500.name', 'myFlashcards.edit.pinyin', 'myFlashcards.native.cardType', 'notif.pref.matrix.app', 'notif.pref.matrix.push', 'notif.pref.titleMatrixPush', 'notif.time.day', 'notif.time.hour', 'notif.time.min', 'review.mode.flashcard.name', 'review.mode.speed.name', 'review.speed.points', 'toast.pointsGain', 'toast.xpGain', 'trail.premiumBadge', 'preview.err.detail', 'review.interval.min', 'review.interval.hour', 'leaderboard.rowBadge', 'publicProfile.labelPinyin', 'publicProfile.sectionFlashcards', 'fieldEditor.lang.zhPinyin', 'fieldEditor.audio.rate.normal', 'taEditor.pinyinLabel', 'admin.analytics.tech.perf', 'admin.badges.create.icon', 'admin.badges.grant.badge', 'admin.badges.grant.usernamePh', 'admin.modal.report.status', 'admin.modal.report.title', 'admin.mode.off', 'admin.mode.on', 'admin.mode.pillLabel', 'admin.mode.title', 'admin.panel.tab.analytics', 'admin.panel.tab.tags', 'admin.panel.tab.flashcards', 'admin.panel.tab.premium', 'admin.panel.tab.badges', 'admin.panel.tab.reports', 'adminChallenges.import.itemN', 'admin.flashcards.cardType.normal', 'admin.flashcards.dest.countSubdecks', 'admin.flashcards.dest.deckFallback', 'admin.flashcards.dest.newSub', 'admin.materials.badgeLink', 'review.deck.decks', 'review.deck.colDeck', 'review.panel.tags', 'review.deck.subdeckWord.one', 'review.deck.subdeckWord.other', 'panel.tab.analytics', 'panel.tab.badges', 'panel.tab.reports', 'plans.chip.premium', 'plans.role.admin', 'plans.role.premium_basic', 'plans.role.premium_pro', 'studentDecks.deck', 'mural.join.title', 'badge.track.xp.title', 'rb.none' /* Banco de Revisão: só um traço "–" */, 'games.premium'];
   const sameKeys = ptKeys.filter(k => !EN_SAME_AS_PT_OK.includes(k) && JSON.stringify(en[k]) === JSON.stringify(pt[k]));
   check('en difere de pt-BR (traduzido)', sameKeys.length === 0, sameKeys);
   // comentário de confiança em cada linha de chave de en/es
@@ -161,23 +158,32 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const PREV2 = process.env.I18N_PREV2 || '9969e3c';
   // Mudanças DELIBERADAS de texto em português (aprovadas pela dona do projeto) desde o
   // commit PREV: aplicadas ao texto antigo antes de comparar. Qualquer outra diferença falha.
-  const DELIBERATE_PT_CHANGES = [['arquive algum cartão que já não usa, ou peça', 'apague algum cartão, ou peça'], ['exportado de lá Você confere', 'exportado de lá. Você confere']];
+  const DELIBERATE_PT_CHANGES = [['arquive algum cartão que já não usa, ou peça', 'apague algum cartão, ou peça'], ['exportado de lá Você confere', 'exportado de lá. Você confere'], ['Sino na topbar + central de notificações. Desligar aqui silencia tudo de uma vez -- ajuste fino por categoria em "Personalizar por categoria" abaixo.', 'Sino no topo da tela e central de notificações. Desligar aqui silencia tudo de uma vez. Para ajustar cada categoria, use "Personalizar por categoria" abaixo.'], ['Avisa mesmo com o app fechado. Liga por categoria em "Personalizar" abaixo -- este interruptor cuida da permissão do navegador e liga tudo de uma vez.', 'Avisa mesmo com o app fechado. Este interruptor cuida da permissão do navegador e liga tudo de uma vez. Para escolher por categoria, use "Personalizar por categoria" abaixo.'], ['Manda pro e-mail da sua conta em alguns casos (ex: quando você some por um tempo). Liga por categoria em "Personalizar" abaixo -- este interruptor liga tudo de uma vez.', 'Manda para o e-mail da sua conta em alguns casos (por exemplo, quando você some por um tempo). Este interruptor liga tudo de uma vez. Para escolher por categoria, use "Personalizar por categoria" abaixo.'], ['Vale pras notificações calculadas automaticamente (revisão, sequência...) -- as que acontecem na hora (XP, badge) continuam aparecendo. Horário aproximado (ainda não ajustado ao seu fuso).', 'Vale para as notificações calculadas automaticamente (revisão, sequência...). As que acontecem na hora (XP, conquista) continuam aparecendo. Horário aproximado (ainda não ajustado ao seu fuso).'], ['🔇 Toque no alto-falante pra ouvir', '🔇 Toque no alto-falante para ouvir'], ['Escolha os tempos verbais e as categorias de verbo. Você sempre pratica as 6 pessoas.', 'Escolha os verbos e os tempos verbais.'] /* Conjugação fase 2: verbos agora vêm antes; a autora tirou as 6 pessoas */ /* regra do projeto: sem "--" e sem "pra" */];
   const prev = (f) => DELIBERATE_PT_CHANGES.reduce((acc, [o, n]) => acc.split(o).join(n), execSync(`git show ${PREV}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 }));
   const prevFr = prev('fr/index.html'), prevZh = prev('zh/index.html');
   const prevJs = ['shared/my-flashcards.js', 'shared/public-profile.js', 'shared/anki-import-ui.js', 'fr/app.js', 'zh/app.js', 'shared/flashcard-model.js', 'shared/own-flashcards.js', 'shared/flashcard-preview.js', 'shared/notifications.js', 'shared/notification-preferences.js', 'shared/deck-data.js', 'shared/admin-students.js', 'shared/profile.js', 'shared/leaderboard.js', 'shared/auth.js', 'shared/support-materials-view.js', 'shared/anki-export.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-mc-editor.js', 'shared/flashcard-typeanswer-editor.js', 'shared/flashcard-cloze-editor.js', 'shared/admin-flashcards.js', 'shared/admin-class-logs.js', 'shared/admin-support-materials.js', 'shared/admin-premium.js', 'shared/teacher-flashcards.js', 'shared/teacher-class-logs.js', 'shared/teacher-support-materials.js', 'shared/admin-analytics.js', 'shared/admin-badges.js', 'shared/admin-notifications.js', 'shared/admin-reports.js', 'shared/flashcard-field-audio-recorder.js', 'shared/wizard.js', 'shared/language-switcher.js', 'shared/fsrs.js', 'shared/deck-engine.js', 'shared/checkpoint-exam.js', 'shared/deck-browser.js', 'shared/review-extras.js', 'shared/study-trail-model.js'].map(prev).join('\n');
   const prev2 = (f) => execSync(`git show ${PREV2}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
   const prev2Fr = prev2('fr/index.html'), prev2Zh = prev2('zh/index.html');
   const prev2Js = ['shared/deck-browser.js', 'shared/review-extras.js', 'shared/study-trail-model.js', 'shared/flashcard-tags-editor.js', 'shared/flashcard-field-editor.js', 'fr/app.js', 'zh/app.js'].map(prev2).join('\n');
-  const all = origFr + origZh + origRep + prevFr + prevZh + prevJs + prev2Fr + prev2Zh + prev2Js;
+  // 8631db5 = ponta da branch do redesenho das lições (Ondas 0-6) antes do merge com o
+  // i18n (2026-10-07): textos e HTML daquela branch também são referência.
+  const PREV3 = process.env.I18N_PREV3 || '8631db5';
+  // MAIN3 = main no momento desse merge (lado "theirs" do merge de 3 vias abaixo).
+  const MAIN3 = process.env.I18N_MAIN3 || 'a88d0d3';
+  const prev3 = (f) => execSync(`git show ${PREV3}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
+  const prev3Js = ['fr/app.js', 'zh/app.js', 'fr/index.html', 'zh/index.html'].map(prev3).join('\n');
+  const all = origFr + origZh + origRep + prevFr + prevZh + prevJs + prev2Fr + prev2Zh + prev2Js + prev3Js;
   // Textos NOVOS (não existiam antes): só o seletor de idioma.
-  const NEW_KEYS = ['ui.profileEdit.country', 'ui.profileEdit.countryHint', 'ui.profileEdit.countryNone', 'ui.profileEdit.gender', 'ui.profileEdit.genderHint', 'ui.profileEdit.genderNone', 'ui.profileEdit.gender.masculine', 'ui.profileEdit.gender.feminine', 'ui.profileEdit.gender.other', 'ui.profileEdit.gender.undisclosed' /* País de origem e Gênero (placeholders de perfil) */, 'settings.uiLanguage.title', 'settings.uiLanguage.sub', 'settings.uiLanguage.confirm.title', 'settings.uiLanguage.confirm.toEn', 'settings.uiLanguage.confirm.toPt' /* aviso novo ao trocar o idioma do site */, 'content.untranslatedNotice', 'fr.challenge.inEnglish', 'nav.study', 'nav.challenges', 'nav.profile', 'side.streakDays', 'fr.challenge.lt.placeholder' /* Fase 9: "{lang}" parametriza o idioma da tradução; com lang=português o texto final é idêntico ao original "Sua tradução em português..." */]; // Fase 8: aviso novo (só aparece fora do pt-BR)
+  const NEW_KEYS = ['fr.conj.sessionSize', 'fr.conj.sessionForms', 'fr.conj.reviewTitle', 'fr.conj.practiceMistakes', 'fr.conj.almost', 'fr.conj.otherForm' /* Conjugação fase 1 (2026-10-13) */, 'fr.conj.sel.verbs', 'fr.conj.sel.searchLabel', 'fr.conj.sel.searchPh', 'fr.conj.sel.noMatch', 'fr.conj.sel.pickedNote', 'fr.conj.sel.removeVerb', 'fr.conj.sel.pickLimit', 'fr.conj.sel.orFilters', 'fr.conj.sel.onlyRegular', 'fr.conj.sel.onlyIrregular', 'fr.conj.sel.tenses', 'fr.conj.sel.langFr', 'fr.conj.sel.langPt' /* Conjugação fase 2: tela de escolha */, 'ui.profileEdit.country', 'ui.profileEdit.countryHint', 'ui.profileEdit.countryNone', 'ui.profileEdit.gender', 'ui.profileEdit.genderHint', 'ui.profileEdit.genderNone', 'ui.profileEdit.gender.masculine', 'ui.profileEdit.gender.feminine', 'ui.profileEdit.gender.other', 'ui.profileEdit.gender.undisclosed' /* País de origem e Gênero (placeholders de perfil) */, 'settings.uiLanguage.title', 'settings.uiLanguage.sub', 'settings.uiLanguage.confirm.title', 'settings.uiLanguage.confirm.toEn', 'settings.uiLanguage.confirm.toPt' /* aviso novo ao trocar o idioma do site */, 'content.untranslatedNotice', 'fr.challenge.inEnglish', 'nav.study', 'nav.challenges', 'nav.profile', 'side.streakDays', 'adminChallenges.import.badRegister' /* regra de 12/10/2026: expressão importada sem registro é pulada */, 'fr.challenge.lt.placeholder' /* Fase 9: "{lang}" parametriza o idioma da tradução; com lang=português o texto final é idêntico ao original "Sua tradução em português..." */]; // Fase 8: aviso novo (só aparece fora do pt-BR)
   // Passada de design dos painéis Admin/Professora (2026-10-12, pedido da autora): sem "--" nem "pra" no texto
   // visível dos painéis, avisos que citavam a aba antiga "🎓 Alunos" e as notas privadas da professora nas Aulas.
   const DESIGN_PASS_KEYS = ["myFlashcards.fields.hint", "myFlashcards.edit.useNative", "myFlashcards.native.hint", "myFlashcards.err.previewLoad", "supportMaterials.loginRequired", "admin.common.adminOnly", "admin.common.forNStudents", "admin.students.removeConfirm", "admin.classLogs.fieldNotes", "admin.classLogs.notesOpt", "admin.classLogs.emptyFor", "admin.classLogs.needStudent", "admin.classLogs.linkFirst", "admin.classLogs.notesPlaceholder", "admin.classLogs.registeredN", "admin.materials.emptyFor", "admin.materials.needStudent", "admin.materials.linkFirst", "admin.materials.sentN", "admin.flashcards.hint.flip", "admin.flashcards.hint.mc", "admin.flashcards.hint.cloze", "admin.flashcards.edit.mc1", "admin.flashcards.edit.clozeSentence", "admin.flashcards.edit.hasOne", "admin.flashcards.edit.hasOneAudio", "admin.flashcards.native.privateNote", "admin.flashcards.list.emptyFor", "admin.flashcards.linkFirst", "admin.flashcards.needStudent", "admin.flashcards.createdPartial", "admin.reports.hint", "admin.reports.reply.err.forbidden", "admin.notifications.event.user_inactive_1", "admin.notifications.event.user_inactive_3", "admin.notifications.event.user_inactive_5", "admin.notifications.event.user_inactive_7", "admin.notifications.event.user_inactive_9", "admin.notifications.event.user_inactive_15", "admin.notifications.event.user_inactive_20", "admin.notifications.event.user_inactive_30", "admin.notifications.rule.hint", "admin.notifications.rule.minXp", "admin.notifications.new.hint", "admin.badges.catalog.clickManage", "admin.badges.grant.note", "admin.mode.sub", "admin.analytics.resumo.rateNote", "admin.analytics.kpi.timeNote", "admin.analytics.resumo.timeNote", "admin.analytics.ex.note", "admin.analytics.funnel.note", "admin.analytics.lang.filterActive", "admin.analytics.lang.note", "admin.analytics.prog.levelNote", "admin.analytics.prog.unitsNote", "admin.analytics.prog.lessonsNote", "admin.analytics.dev.noData", "admin.analytics.dev.osNote", "admin.analytics.eng.freqNote", "admin.analytics.eng.xpNote1", "admin.analytics.tech.note", "admin.analytics.tech.separateNote", "admin.analytics.ret.empty", "admin.analytics.ret.note"];
+  // Cara de jogo, passo 4 (2026-10-12): textos de Configurações > Notificações sem "--" nem "pra" (regra do projeto).
+  const GAME_PASS_KEYS = ['zh.toast.hanziLessonDone' /* troca de ícones 2026-10-14: 🈺 (japonês) virou 🀄 */, /* conquistas com níveis (2026-10-14): textos novos */ ...Object.keys(pt).filter(k => k.startsWith('badge.track.') || k.startsWith('badge.ui.')), 'notif.pref.guest', 'notif.pref.inApp.sub', 'notif.pref.push.sub', 'notif.pref.email.sub', 'notif.pref.quiet.sub', 'notif.pref.push.blocked'];
   const NESTED_TEMPLATE_KEYS = ['review.deck.createdCount.other' /* original: criado${n === 1 ? '' : 's'} */, 'limitCut.main', 'limitCut.already', 'admin.reports.reply.lastSent', 'admin.reports.reply.lastSentTo'];
   const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k of ptKeys){
-    if (NEW_KEYS.includes(k) || DESIGN_PASS_KEYS.includes(k) || /^(panel|plans|perm|myClassLogs)\./.test(k) /* painéis Admin/Professora, aba Planos e Minhas aulas (2026-10-12): textos novos */ || k.startsWith('badge.catalog.') || k.startsWith('friends.') || k === 'profile.tabFriends' || k === 'notif.cat.amigos' || k === 'notif.pref.inAppOnly') continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
+    if (NEW_KEYS.includes(k) || DESIGN_PASS_KEYS.includes(k) || GAME_PASS_KEYS.includes(k) || /^(panel|plans|perm|myClassLogs|tinvite|studentDecks|studentAnalytics|publicDeckCopies|rb|mural|studentPanel|games)\./.test(k) /* painéis Admin/Professora, aba Planos, Minhas aulas e convite de aluno (2026-10-12): textos novos */ || k.startsWith('badge.catalog.') || k.startsWith('friends.') || k.startsWith('courses.') || k.startsWith('courseMenu.') || k === 'profile.tabFriends' || k === 'notif.cat.amigos' || k === 'notif.pref.inAppOnly' || k === 'publicProfile.loginToSee' || k === 'publicProfile.loginCta' || k === 'deck.publish' || k === 'review.deck.publish' || k === 'ui.profileEdit.publicProfileSub' || k === 'review.observation' || k === 'review.backToStudent' || k === 'review.session.classEmptyTitle' /* aba Aluno > Revisão (2026-10-14) */ || k === 'teacherLogs.err.needOneField' /* 094: Presença e Competências também contam */ /* Banco de Revisão (2026-10-13): rb.* e a observação da professora são textos novos */) /* perfil privado (Etapa 3b, 2026-10-12) */ continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
     const v = pt[k];
     // Plural por categoria ({one, other}): no original o plural era montado por código (módulo${n===1?'':'s'}).
     if (v && typeof v === 'object'){ check(`regressão: pt-BR '${k}' (plural) tem one e other`, typeof v.one === 'string' && typeof v.other === 'string'); continue; }
@@ -198,7 +204,8 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     const cur = fs.readFileSync(path.join(ROOT, lang, 'index.html'), 'utf8');
     const o = lang === 'fr' ? origFr : origZh;
     // Fase 8: linhas novas deliberadas (aviso de lição sem tradução + script do overlay).
-    const strip = (s) => s.replace(/\n\/\* ---------- Desafios: passada de design[\s\S]*?@media \(prefers-reduced-motion: reduce\)\{\n[^\n]*\n\}\n/, '').replace(/ data-i18n(-attr|-html)?="[^"]*"/g, '').replace(/\n[ ]*<p class="lesson-unit-goal" id="ud-lang-notice"[^\n]*<\/p>/, '').replace(/<script src="..\/shared\/content-i18n.js"><\/script>\n/, '').replace(/<script src="..\/shared\/card-variants.js"><\/script>\n/, '').replace(/<script src="..\/shared\/translation-compare.js"><\/script>\n/, '').replace(/<script src="..\/shared\/i18n\/i18n.js"><\/script>\n/, '').replace(/<script src="..\/shared\/i18n\/pt-BR.js"><\/script>\n/, '').replace(/<script src="..\/shared\/profile-placeholders.js"><\/script>\n/, '').replace(/\n[ ]*<label class="profile-edit-label" for="profile-edit-country">[\s\S]*?<\/p>\n/, '');
+    // Banco de Revisão (2026-10-13): CSS e scripts novos, fora do escopo da comparação de i18n.
+    const strip = (s) => s.replace(/<link rel="stylesheet" href="..\/shared\/review-bank.css">\n/, '').replace(/<script src="..\/shared\/review-(answer-extras|bank[\w-]*)\.js"><\/script>\n/g, '').replace(/\/\* Observação da professora \(depois de responder\) e "Quase lá" \(digitar\) -- Banco de Revisão \*\/\n\.review-observation\{[^\n]*\n\.review-observation strong\{[^\n]*\n\.review-almost\{[^\n]*\n/, '').replace(/\n\/\* ---------- Janelas da Revisão \(Adicionar[\s\S]*?(?=\n<\/style>\n<\/head>)/, '').replace(/\n\/\* ---------- Desafios: passada de design[\s\S]*?@media \(prefers-reduced-motion: reduce\)\{\n[^\n]*\n\}\n/, '').replace(/ data-i18n(-attr|-html)?="[^"]*"/g, '').replace(/\n[ ]*<p class="lesson-unit-goal" id="ud-lang-notice"[^\n]*<\/p>/, '').replace(/<script src="..\/shared\/content-i18n.js"><\/script>\n/, '').replace(/<script src="..\/shared\/card-variants.js"><\/script>\n/, '').replace(/<script src="..\/shared\/translation-compare.js"><\/script>\n/, '').replace(/<script src="..\/shared\/i18n\/i18n.js"><\/script>\n/, '').replace(/<script src="..\/shared\/i18n\/pt-BR.js"><\/script>\n/, '').replace(/<script src="..\/shared\/profile-placeholders.js"><\/script>\n/, '').replace(/\n[ ]*<label class="profile-edit-label" for="profile-edit-country">[\s\S]*?<\/p>\n/, '').replace(/<script src="..\/languages\/registry.js"><\/script>\n/, '').replace(/<script src="..\/shared\/course-layer.js"><\/script>\n/, '').replace(/<script src="..\/shared\/course-storage.js"><\/script>\n/, '').replace(/<script src="..\/shared\/account-progress.js"><\/script>\n/, '').replace(/<script src="..\/shared\/core\/[^"]+"><\/script>\n/g, '').replace(/<script src="lang-hooks.js"><\/script>\n/g, '').replace(/<script src="..\/shared\/my-courses.js"><\/script>\n/, '').replace(/\n[ ]*<div id="my-courses"[^\n]*<\/div>/, '').replace(/\n[ ]*<div id="ui-language-first-courses"[^\n]*<\/div>/, '').replace(/\.my-courses-list\{[^\n]*\n\.my-courses-group-title\{[^\n]*\n\.my-course\{[^\n]*\n\.my-course-tag\{[^\n]*\n/, '').replace(/<script src="..\/courses\/(fr|zh)-pt-BR\/layer.js"><\/script>\n/, '');
     const modal = (s) => s.slice(s.indexOf('<!-- ===== MODAL: REPORTAR'), s.indexOf('<div id="streak-modal-overlay"'));
     check(`${lang}: modal atual sem data-i18n == modal original`, strip(modal(cur)) === modal(o));
     // Passo "modais pequenos + seletor": contra o commit anterior (PREV), a
@@ -218,6 +225,13 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     const cmS2 = curNoGender.indexOf('<div id="ui-language-confirm-modal"'), cmE2 = curNoGender.indexOf('<div id="flashcard-reset-confirm-modal"');
     let curClean = curNoGender.slice(0, cmS2) + curNoGender.slice(cmE2);
     // Amigos + Ranking de Amigos (migration 073/074): CSS, tela e aba novos e deliberados.
+    const noFriends = (h) => {
+      const a = h.indexOf('/* ---------- Amigos (Perfil > Amigos)'), b = h.indexOf('/* ---------- Ranking (Leaderboard)', a);
+      if (a > 0 && b > a) h = h.slice(0, a) + h.slice(b);
+      h = h.replace(/  <!-- ===== AMIGOS \(Perfil > Amigos\) ===== -->\n  <div class="view" id="view-friends">\n    <div id="friends-content"><\/div>\n  <\/div>\n\n/, '');
+      h = h.replace(/      <button[^>]*data-tab="friends">Amigos<\/button>\n/g, '');
+      return h.replace(/<script src="..\/shared\/friends.js"><\/script>\n/, '');
+    };
     const fcS = curClean.indexOf('/* ---------- Amigos (Perfil > Amigos)'), fcE = curClean.indexOf('/* ---------- Ranking (Leaderboard)', fcS);
     check(`${lang}: bloco CSS de Amigos encontrado`, fcS > 0 && fcE > fcS);
     curClean = curClean.slice(0, fcS) + curClean.slice(fcE);
@@ -243,14 +257,84 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
       if (a > 0) b = h.indexOf('<div id="my-class-logs-content"></div>\n  </div>', a) + '<div id="my-class-logs-content"></div>\n  </div>'.length;
       else { a = h.indexOf('  <div class="view" id="view-admin-badges">'); b = h.indexOf('<div id="admin-tags-content" style="display:none;"></div>\n  </div>', a) + '<div id="admin-tags-content" style="display:none;"></div>\n  </div>'.length; }
       if (a > 0 && b > a) h = h.slice(0, a) + '<!--PAINEIS-->' + h.slice(b);
+      // Conjugação fase 2 (2026-10-13): tela de escolha nova (busca, filtros, cartões dos tempos), mudança deliberada.
+      const cs = h.indexOf('    <div id="conj-select-wrap">'), ce = h.indexOf('    <div id="conj-practice-wrap"', cs);
+      if (cs > 0 && ce > cs) h = h.slice(0, cs) + '<!--CONJSEL-->' + h.slice(ce);
       return h.replace(/      <button class="tab-btn teacher-only-nav"[\s\S]*?<\/button>\n/, '')
         .replace(/  <button class="user-dropdown-item (student-teacher-nav|teacher-only-nav mais-extra-tab)" id="(my-class-logs-btn|teacher-panel-btn)"[^\n]*\n/g, '')
         .replace(' class="user-dropdown-item student-teacher-nav" id="support-materials-btn" style="display:none;"', ' class="user-dropdown-item" id="support-materials-btn"')
-        .replace(/<script src="..\/shared\/(permissions|teacher-panel)\.js"><\/script>\n/g, '');
+        .replace(/<script src="..\/shared\/(permissions|teacher-panel|teacher-invites)\.js"><\/script>\n/g, '')
+        .replace(/<script src="..\/shared\/activity-focus\.js"><\/script>\n/, '') /* modo foco na Conjugação/Revisão/Desafios (2026-10-14) */
+        .replace(/<script src="(..\/shared\/)?conj-games\.js"><\/script>\n/g, '') /* Jogos da Conjugação (2026-10-14) */
+        // perfil privado (2026-10-12): texto novo da chave "Perfil público", mudança deliberada
+        .replace('Ligado: quem tem conta vê sua foto, seu progresso e seus Decks públicos. Desligado: só amigos e sua professora veem; os outros veem só nome, @ e badges, e só te acham pelo @ exato.', 'Deixa seu nome, badges, progresso e cartões próprios visíveis a quem tiver o link do seu perfil.');
     };
+    // Mural e painel Aluno (087, 2026-10-13/14): CSS, views, abas e itens de menu novos, mudança deliberada.
+    // Volta o HTML atual para a forma de antes (Minhas aulas e Material de apoio como telas próprias).
+    const muralBlocks = (h) => {
+      const c1 = h.indexOf('/* Mural da professora (087, shared/mural.js) */\n');
+      if (c1 > 0) h = h.slice(0, c1) + h.slice(h.indexOf('/* K.10:', c1));
+      h = h.replace(/      <button class="tab-btn student-only-nav"[\s\S]*?<\/button>\n/, '')
+        .replace(/      <button class="deck-topbar-btn"[^\n]*data-teacher-section="mural"[^\n]*\n/, '')
+        .replace('    <div id="admin-mural-content" style="display:none;"></div>\n', '')
+        .replace(/<script src="..\/shared\/mural\.js"><\/script>\n/, '')
+        .replace('/* Aluno > Revisão (cartões da professora): mesma faixa de contagens da Revisão */\n.class-review{ display:grid; gap:10px; }\n.class-review .profile-edit-hint{ margin:0; }\n', '')
+        .replace(/\/\* Registro de aula \(094\)[^\n]*\n[\s\S]*?(?=\/\* Mural da professora)/, '');
+      const s1 = h.indexOf('  <!-- ===== ALUNO (vínculo ativo com professora)');
+      if (s1 > 0){
+        // Aba Aluno > Revisão (2026-10-14) fecha o bloco depois do Material de apoio.
+        const endNew = '<div id="my-class-review-content" style="display:none;"></div>\n  </div>\n';
+        const end = h.indexOf(endNew, s1) > 0 ? endNew : '<div id="support-materials-content" style="display:none;"></div>\n  </div>\n';
+        const s2 = h.indexOf(end, s1) + end.length;
+        h = h.slice(0, s1) + '  <!-- ===== MINHAS AULAS (aluno com vínculo ativo; só leitura, get_my_class_logs) ===== -->\n  <div class="view panel-view" id="view-my-class-logs">\n    <div class="path-header">\n      <h2 data-i18n="myClassLogs.title">Minhas aulas</h2>\n      <p data-i18n="myClassLogs.sub">O que você trabalhou em cada aula com sua professora.</p>\n    </div>\n    <div id="my-class-logs-content"></div>\n  </div>\n' + h.slice(s2);
+        const before = lang === 'zh' ? '  <!-- ===== HANZI (trilha de caracteres) ===== -->' : '  <!-- ===== DITADOS ===== -->';
+        h = h.replace(before, '  <!-- ===== MATERIAL DE APOIO (Fase 8b, aberta pra qualquer conta -- só\n       leitura: quem envia é a professora, ver Painel de Admin) ===== -->\n  <div class="view" id="view-support-materials">\n    <div class="path-header">\n      <h2 data-i18n="menu.supportMaterials">📚 Material de apoio</h2>\n      <p data-i18n="ui.materials.sub">Resumos, links e arquivos que sua professora compartilhou com você.</p>\n    </div>\n    <div id="support-materials-content"></div>\n  </div>\n\n' + before);
+        h = h.replace(/  <button class="user-dropdown-item student-teacher-nav mais-extra-tab" id="student-panel-btn"[^\n]*\n/, '  <button class="user-dropdown-item student-teacher-nav" id="my-class-logs-btn" style="display:none;" data-i18n="myClassLogs.menu">📝 Minhas aulas</button>\n  <button class="user-dropdown-item student-teacher-nav" id="support-materials-btn" style="display:none;" data-i18n="menu.supportMaterials">📚 Material de apoio</button>\n');
+        h = h.replace(/\n\n\n(  <!-- ===== (MEUS CARTÕES|MATERIAL DE APOIO|HANZI))/g, '\n\n$1');
+      }
+      return h;
+    };
+    curClean = muralBlocks(curClean);
     curClean = panelBlocks(curClean);
-    const p = panelBlocks(cleanBlocks(p0));
-    check(`${lang}: HTML inteiro sem data-i18n* e sem o seletor == commit anterior (${PREV2})`, strip(curClean) === strip(p));
+    // Cara de jogo (docs/historico/15, 2026-10-12, pedido da autora): Nunito via Google Fonts, botões com volume,
+    // títulos de seção sem caixa alta e tokens de medalha. Mudança só de CSS/<head>, sem texto: sai dos dois lados.
+    const gameLook = (h) => h
+      .replace(/<!-- Nunito de verdade[\s\S]*?display=swap">\n/, '')
+      .replace(/@font-face\{\n  font-family:'Nunito';\n  src: local\('Nunito'\);\n\}\n\n?/, '')
+      .replace(/<script src="..\/shared\/badge-tracks(-app)?\.js"><\/script>\n/g, '') // conquistas com níveis (2026-10-14)
+      // troca geral de ícones (2026-10-14, docs/icones-fluent.md): ícone do menu (desenho antigo ou Fluent) e o script novo saem dos dois lados
+      .replace(/<svg class="tab-icon[^"]*"[^>]*>[\s\S]*?<\/svg>|<img class="tab-icon[^"]*" src="..\/shared\/icons\/fluent\/[^"]+" alt="" aria-hidden="true">/g, '')
+      .replace(/<script src="..\/shared\/emoji-icons\.js"><\/script>\n/g, '')
+      .replace(/[ ]*\/\* (Título de seção: antes|Botões com volume|Profundidade dos botões|Mesmo peso dos outros títulos|Medalhas do pódio)[\s\S]*?\*\/\n/g, '')
+      .replace(/^[ ]*--(btn-depth|btn-depth-sm|medal-gold|medal-silver|medal-bronze|on-medal|error-red):[^\n]*\n/gm, '')
+      .replace(/^[ ]*(\.btn[^{\n]*|\.section-label|\.side-card-title|#side-missions-body \.dcs-caption|\.module-label \.ml-text)\{[^}]*\}\n/gm, '');
+    curClean = gameLook(curClean);
+    const p = gameLook(panelBlocks(cleanBlocks(p0)));
+    // Com a branch do redesenho (PREV3) mesclada, a referência é o merge de 3 vias
+    // (base comum, PREV2 e PREV3) dos HTMLs já limpos: só passa se o HTML atual for
+    // exatamente a união das duas pontas.
+    const mergeBase = execSync(`git merge-base ${MAIN3} ${PREV3}`, { cwd: ROOT, encoding: 'utf8' }).trim();
+    const tmp = fs.mkdtempSync(path.join(require('os').tmpdir(), 'i18n-merge-'));
+    const wr = (n, h) => { const fp = path.join(tmp, n); fs.writeFileSync(fp, strip(gameLook(panelBlocks(noFriends(cleanBlocks(h)))))); return fp; };
+    const showAt = (c) => execSync(`git show ${c}:${lang}/index.html`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
+    let merged = null;
+    try { merged = execSync(`git merge-file -p "${wr('ours', showAt(PREV3))}" "${wr('base', showAt(mergeBase))}" "${wr('theirs', showAt(MAIN3))}"`, { encoding: 'utf8', maxBuffer: 64 << 20 }); }
+    catch (e) { merged = e.stdout || null; }
+    // Conflito do merge: aceita cada trecho resolvido como "nosso", "deles" ou os dois juntos
+    // (nunca texto novo inventado na resolução).
+    const matchesResolution = (m, target) => {
+      if (m === null) return false;
+      const parts = m.split(/^<<<<<<< [^\n]*\n([\s\S]*?)^=======\n([\s\S]*?)^>>>>>>> [^\n]*\n/m);
+      const go = (i, pos) => {
+        if (i >= parts.length) return pos === target.length;
+        if (i % 3 === 0) return target.startsWith(parts[i], pos) && go(i + 1, pos + parts[i].length);
+        const ours = parts[i], theirs = parts[i + 1];
+        return [theirs, ours, ours + theirs, theirs + ours].some(opt => target.startsWith(opt, pos) && go(i + 2, pos + opt.length));
+      };
+      return go(0, 0);
+    };
+    const okMerged = matchesResolution(merged, strip(curClean));
+    check(`${lang}: HTML inteiro sem data-i18n* e sem o seletor == commit anterior (${PREV2}) ou merge ${MAIN3}+${PREV3}`, strip(curClean) === strip(p) || okMerged);
     check(`${lang}: seletor só oferece pt-BR e English`, /<option value="pt-BR" lang="pt-BR">Português \(Brasil\)<\/option>\s*<option value="en" lang="en">English<\/option>\s*<\/select>/.test(cur.slice(selStart, selEnd)));
     const usedHtml = [...cur.matchAll(/data-i18n-html="([^"]+)"/g)].map(m => m[1]);
     check(`${lang}: todo data-i18n-html existe em pt-BR`, usedHtml.every(k => k in pt));

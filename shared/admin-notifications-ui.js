@@ -9,7 +9,7 @@
 // Depende de: shared/i18n (t), shared/profile.js (escapeHTML).
 
 function tntEsc(v){ return escapeHTML(v == null ? '' : String(v)); }
-function tntLangLabel(k){ return k === 'frances' ? '🇫🇷 ' + t('notifications.lang.fr') : k === 'mandarim' ? '🇨🇳 ' + t('notifications.lang.zh') : String(k || ''); }
+function tntLangLabel(k){ return (LanguageRegistry.flagEmoji(k) ? LanguageRegistry.flagEmoji(k) + ' ' : '') + ((LanguageRegistry.byAppKey(k) || {}).name || String(k || '')); }
 function tntChannelLabel(c){ return c === 'email' ? t('admin.notifications.channel.emailLower') : t('admin.notifications.channel.inAppLower'); }
 
 // Eventos em ordem natural (user_inactive_3 antes de user_inactive_15).
@@ -63,7 +63,7 @@ function tntFiltersHTML(templates, f, labelOf){
   const events = [...new Set((templates || []).map(x => x.event_type))].sort(tntCompareEvents);
   return `<div class="p-ferramentas">
     <select aria-label="${tntEsc(t('notifications.filter.event.aria'))}" data-notif-evento><option value="">${tntEsc(t('notifications.filter.event.all'))}</option>${events.map(e => `<option value="${tntEsc(e)}"${f.evento === e ? ' selected' : ''}>${tntEsc(labelOf(e))}</option>`).join('')}</select>
-    <select aria-label="${tntEsc(t('notifications.filter.lang.aria'))}" data-notif-idioma><option value="">${tntEsc(t('notifications.filter.lang.all'))}</option><option value="frances"${f.idioma === 'frances' ? ' selected' : ''}>${tntEsc(tntLangLabel('frances'))}</option><option value="mandarim"${f.idioma === 'mandarim' ? ' selected' : ''}>${tntEsc(tntLangLabel('mandarim'))}</option></select>
+    <select aria-label="${tntEsc(t('notifications.filter.lang.aria'))}" data-notif-idioma><option value="">${tntEsc(t('notifications.filter.lang.all'))}</option>${LanguageRegistry.enabled().map(l => `<option value="${l.appKey}"${f.idioma === l.appKey ? ' selected' : ''}>${tntEsc(tntLangLabel(l.appKey))}</option>`).join('')}</select>
     <select aria-label="${tntEsc(t('notifications.filter.channel.aria'))}" data-notif-canal><option value="">${tntEsc(t('notifications.filter.channel.all'))}</option><option value="in_app"${f.canal === 'in_app' ? ' selected' : ''}>${tntEsc(t('admin.notifications.new.channelInApp'))}</option><option value="email"${f.canal === 'email' ? ' selected' : ''}>${tntEsc(t('admin.notifications.new.channelEmail'))}</option></select>
     <input class="p-cresce" type="search" placeholder="${tntEsc(t('notifications.search.placeholder'))}" aria-label="${tntEsc(t('notifications.search.aria'))}" value="${tntEsc(f.busca || '')}" data-notif-busca>
   </div>`;
@@ -75,7 +75,7 @@ function tntNewFormHTML(eventTypes, labelOf){
       <label>${tntEsc(t('admin.notifications.new.event'))}<input id="variante-evento" list="variante-eventos" autocomplete="off" placeholder="${tntEsc(t('admin.notifications.new.eventPh'))}"></label>
       <datalist id="variante-eventos">${eventTypes.map(e => `<option value="${tntEsc(e)}">${tntEsc(labelOf(e))}</option>`).join('')}</datalist>
       <div class="p-grade-2" style="gap:.75rem">
-        <label>${tntEsc(t('admin.notifications.new.lang'))}<select id="variante-idioma"><option value="frances">${tntEsc(t('admin.notifications.new.langFr'))}</option><option value="mandarim">${tntEsc(t('admin.notifications.new.langZh'))}</option></select></label>
+        <label>${tntEsc(t('admin.notifications.new.lang'))}<select id="variante-idioma">${LanguageRegistry.enabled().map(l => `<option value="${l.appKey}">${tntEsc(tntLangLabel(l.appKey))}</option>`).join('')}</select></label>
         <label>${tntEsc(t('admin.notifications.new.channel'))}<select id="variante-canal"><option value="in_app">${tntEsc(t('admin.notifications.new.channelInApp'))}</option><option value="email">${tntEsc(t('admin.notifications.new.channelEmail'))}</option></select></label>
       </div>
       <small>${tntEsc(t('admin.notifications.new.hint'))}</small>

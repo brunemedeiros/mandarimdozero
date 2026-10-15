@@ -15,7 +15,7 @@
 // (showToast). openPublicProfileModalForUsername/switchTab são só chamados
 // dentro de funções.
 
-const FRIENDS_STATE = { pendingCount: 0, searchSeq: 0, rankScope: 'all', rankSeq: 0, inviteUsername: null };
+const FRIENDS_STATE = { pendingCount: 0, searchSeq: 0, rankScope: 'all', rankSeq: 0, inviteUsername: null, extras: null };
 
 // ---------- convite por link (?amigo=usuario) ----------
 // O link de convite abre o site com ?amigo=<usuario>. Guardamos o usuário no
@@ -43,6 +43,8 @@ function friendsConsumePendingInvite(){
   if (!u || !FRIENDS_INVITE_RE.test(u)) return;
   if (typeof PROFILE_CACHE !== 'undefined' && PROFILE_CACHE && PROFILE_CACHE.username === u) return; // convite do próprio link
   FRIENDS_STATE.inviteUsername = u;
+  // 095: grava de quem veio o convite (vira sugestão "Entrou pelo seu convite" para quem convidou). Best-effort.
+  if (typeof supabaseClient !== 'undefined') supabaseClient.rpc('record_friend_invite', { p_username: u }).then(() => {}, () => {});
   if (typeof switchTab === 'function') switchTab('friends');
 }
 
@@ -80,6 +82,8 @@ const FRIENDS_ERROR_LABELS = {
   no_pending_request: () => t('friends.error.no_pending_request'),
   not_friends: () => t('friends.error.not_friends'),
   not_accepting_requests: () => t('friends.error.not_accepting_requests'),
+  daily_congrats_limit: () => t('friends.error.daily_congrats_limit'),
+  target_not_found: () => t('friends.error.target_not_found'),
 };
 
 function friendsErrorMessage(code){
@@ -119,8 +123,8 @@ async function fetchFriendshipOverview(){
   const ids = [...new Set((rows || []).map(otherId))];
   let byId = {};
   if (ids.length){
-    const { data: profiles } = await supabaseClient
-      .from('profiles').select('user_id, username, display_name, avatar_url').in('user_id', ids);
+    // 080: pedido de quem tem perfil privado também mostra o nome (profile_cards).
+    const profiles = await fetchProfileCards(ids);
     byId = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
   }
   const out = { friends: [], incoming: [], outgoing: [] };
@@ -232,7 +236,7 @@ function friendsRelationActionsHTML(relation, userId){
 function friendsSectionHTML(title, count, bodyHTML, id){
   return `
     <section class="friends-section" ${id ? `id="${id}"` : ''}>
-      <div class="section-label">${title}${count != null ? ` (${count})` : ''}</div>
+      <h3 class="section-label">${title}${count != null ? ` (${count})` : ''}</h3>
       ${bodyHTML}
     </section>`;
 }
@@ -242,6 +246,174 @@ function friendsSubnavHTML(active){
   return `<div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="${t('profile.subnavAria')}">
     ${tabs.map(([k, l]) => `<button class="leaderboard-tab ${k === active ? 'active' : ''}" data-tab="${k}">${l}</button>`).join('')}
   </div>`;
+}
+
+// Um único botão de convite: abre o compartilhar do aparelho quando existe,
+// senão copia o link (friendsInviteAction decide).
+function friendsInviteButtonHTML(extraClass){
+  return `<button type="button" class="btn btn-primary ${extraClass || ''}" data-friends-invite="${navigator.share ? 'share' : 'copy'}">${t('friends.inviteBtn')}</button>`;
+}
+
+// QR code do mesmo link de convite (mostrar na aula). A biblioteca só carrega quando a pessoa abre.
+function friendsQrButtonHTML(extraClass){
+  return `<button type="button" class="btn btn-secondary ${extraClass || ''}" data-friends-qr="1">📱 ${t('friends.qr.btn')}</button>`;
+}
+
+function friendsLoadQrLib(){
+  if (typeof window.qrcode === 'function') return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const sc = document.createElement('script');
+    sc.src = '../shared/vendor/qrcode-generator.js'; // MIT, Kazuhiko Arase (cabeçalho do arquivo)
+    sc.onload = resolve; sc.onerror = reject;
+    document.head.appendChild(sc);
+  });
+}
+
+async function friendsShowInviteQr(){
+  const link = await friendsMyInviteLink();
+  if (!link){ showToast(t('friends.qr.noLink')); return; }
+  try { await friendsLoadQrLib(); } catch (e){ showToast(t('friends.qr.error')); return; }
+  const qr = window.qrcode(0, 'M');
+  qr.addData(link);
+  qr.make();
+  const svg = qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true, alt: t('friends.qr.alt') });
+  document.getElementById('friends-qr-modal')?.remove();
+  const ov = document.createElement('div');
+  ov.id = 'friends-qr-modal';
+  ov.className = 'app-modal-overlay';
+  ov.innerHTML = `
+    <div class="app-modal friends-qr-modal" role="dialog" aria-modal="true" aria-labelledby="friends-qr-title">
+      <div class="app-modal-header">
+        <h3 id="friends-qr-title">${t('friends.qr.title')}</h3>
+        <button type="button" class="app-modal-close" data-no-emoji-icons data-qr-close="1" aria-label="${escapeAttr(t('friends.qr.close'))}">✕</button>
+      </div>
+      <div class="app-modal-body">
+        <p>${t('friends.qr.text')}</p>
+        <div class="friends-qr-box">${svg}</div>
+        <p class="friends-qr-link">${escapeHTML(link)}</p>
+      </div>
+    </div>`;
+  const close = () => { ov.remove(); document.removeEventListener('keydown', onKey); };
+  const onKey = (e) => { if (e.key === 'Escape') close(); };
+  ov.addEventListener('click', (e) => { if (e.target === ov || e.target.closest('[data-qr-close]')) close(); });
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(ov);
+  ov.querySelector('[data-qr-close]')?.focus();
+}
+
+// Campo de busca + (opcional) aviso de convite e resultados. Na lista com
+// amigos o campo fica à direita do título e o resto vai para a largura toda
+// (friendsSearchExtrasHTML), para os resultados não ficarem espremidos.
+function friendsSearchFieldHTML(keepQuery, label){
+  return `
+    <div class="friends-search">
+      <label class="sr-only" for="friends-search-input">${t('friends.searchLabel')}</label>
+      <span class="friends-search-icon" aria-hidden="true">🔍</span>
+      <input type="search" id="friends-search-input" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="40" placeholder="${escapeAttr(label)}" value="${escapeAttr(keepQuery)}">
+    </div>`;
+}
+
+function friendsSearchExtrasHTML(inviteUser){
+  const banner = inviteUser
+    ? `<p class="friends-invite-banner" role="status">👋 ${t('friends.inviteBanner', { user: '<strong>@' + escapeHTML(inviteUser) + '</strong>' })}</p>`
+    : '';
+  return `${banner}<div id="friends-search-results" aria-live="polite"></div>`;
+}
+
+// Cartão de amigo: avatar grande, nome, XP da semana (preenchido pelo
+// ranking) e menu ⋯ com "Desfazer amizade" (fica fora da vista de propósito).
+function friendCardHTML(item){
+  const p = item.profile;
+  const name = p?.display_name || p?.username || t('leaderboard.anonymous');
+  const username = p?.username || '';
+  const id = escapeAttr(item.userId);
+  return `
+    <div class="friend-card" data-friend-row="${id}">
+      <button type="button" class="friend-card-more" data-friend-menu="${id}" aria-haspopup="true" aria-expanded="false" aria-label="${escapeAttr(t('friends.card.more', { name }))}">⋯</button>
+      <div class="friend-card-menu" role="menu" hidden>
+        ${username ? `<button type="button" role="menuitem" data-open-profile="${escapeAttr(username)}">${t('friends.card.viewProfile')}</button>` : ''}
+        <button type="button" role="menuitem" class="friends-danger" data-friend-action="remove" data-user-id="${id}">${t('friends.btn.remove')}</button>
+      </div>
+      <span class="friend-card-flags" data-friend-flags="${id}"></span>
+      <button type="button" class="friend-card-person" data-open-profile="${escapeAttr(username)}" ${username ? '' : 'disabled'}>
+        <span class="friend-avatar-wrap" data-friend-avatar="${id}">${friendAvatarHTML(p, item.userId)}</span>
+        <span class="friend-card-name">${escapeHTML(name)}</span>
+        <span class="friend-card-user">@${escapeHTML(username)}</span>
+      </button>
+      <span class="friend-card-xp" data-friend-xp="${id}">…</span>
+    </div>`;
+}
+
+function friendPendingCardHTML(item){
+  const p = item.profile;
+  const name = p?.display_name || p?.username || t('leaderboard.anonymous');
+  const username = p?.username || '';
+  return `
+    <div class="friend-card is-pending" data-friend-row="${escapeAttr(item.userId)}">
+      <button type="button" class="friend-card-person" data-open-profile="${escapeAttr(username)}" ${username ? '' : 'disabled'}>
+        ${friendAvatarHTML(p, item.userId)}
+        <span class="friend-card-name">${escapeHTML(name)}</span>
+        <span class="friend-card-wait">${t('friends.chip.sent')}</span>
+      </button>
+      ${friendActionButtonHTML(t('friends.btn.cancel'), 'cancel', item.userId, 'btn-secondary btn-sm')}
+    </div>`;
+}
+
+function friendsRequestsHTML(incoming){
+  if (!incoming.length) return '';
+  return `
+    <section class="friends-requests" id="friends-incoming">
+      <h3 class="friends-requests-title"><span class="friends-dot" aria-hidden="true"></span>${tp('friends.requests.title', incoming.length)}</h3>
+      ${incoming.map(i => `
+        <div class="friends-row" data-friend-row="${escapeAttr(i.userId)}">
+          ${friendPersonHTML(i.profile, i.userId)}
+          <div class="friends-row-actions">
+            ${friendActionButtonHTML(t('friends.btn.accept'), 'accept', i.userId, 'btn-primary')}
+            ${friendActionButtonHTML(t('friends.btn.notNow'), 'decline', i.userId)}
+          </div>
+        </div>`).join('')}
+    </section>`;
+}
+
+function friendsWeekHTML(){
+  const days = (typeof leaderboardDaysRemaining === 'function' && typeof leaderboardCurrentWeekStart === 'function')
+    ? leaderboardDaysRemaining(leaderboardCurrentWeekStart()) : null;
+  return `
+    <section class="friends-week" id="friends-rank">
+      <div class="friends-week-top">
+        <h3 class="friends-week-title">${t('friends.week.title')}</h3>
+        ${days != null ? `<span class="friends-week-days">${tp('friends.week.endsIn', days)}</span>` : ''}
+      </div>
+      <div id="friends-mini-rank"></div>
+      <div class="friends-feed" id="friends-activity"></div>
+      <button type="button" class="friends-link" data-friends-rank-more="1">${t('friends.rank.seeFull')} →</button>
+    </section>`;
+}
+
+function friendsEmptyHTML(keepQuery, inviteUser){
+  const me = (typeof PROFILE_CACHE !== 'undefined' && PROFILE_CACHE) || {};
+  const myName = me.display_name || me.username || '';
+  const meAvatar = me.avatar_url
+    ? `<img class="friends-avatar friends-crowd-me" src="${escapeAttr(me.avatar_url)}" alt="">`
+    : `<div class="friends-avatar friends-crowd-me" aria-hidden="true">${myName ? avatarInitials(myName) : '🙂'}</div>`;
+  return `
+    <section class="friends-empty" id="friends-invite">
+      <div class="friends-crowd" aria-hidden="true">
+        <div class="friends-avatar friends-crowd-other" style="background:${avatarColor('a')};">?</div>
+        ${meAvatar}
+        <div class="friends-avatar friends-crowd-other" style="background:${avatarColor('b')};">?</div>
+      </div>
+      <h3 class="friends-empty-title">${t('friends.empty.title')}</h3>
+      <p class="friends-empty-text">${t('friends.empty.text')}</p>
+      ${friendsInviteButtonHTML('btn-block')}
+      ${friendsQrButtonHTML('btn-block')}
+      <div class="friends-empty-search">${friendsSearchFieldHTML(keepQuery, t('friends.empty.searchLabel'))}${friendsSearchExtrasHTML(inviteUser)}</div>
+      <ul class="friends-empty-steps">
+        <li><span aria-hidden="true">🏆</span>${t('friends.empty.step1')}</li>
+        <li><span aria-hidden="true">🔔</span>${t('friends.empty.step2')}</li>
+        <li><span aria-hidden="true">🎉</span>${t('friends.empty.step3')}</li>
+      </ul>
+    </section>`;
 }
 
 async function renderFriendsView(){
@@ -265,59 +437,102 @@ async function renderFriendsView(){
     return;
   }
   FRIENDS_STATE.pendingCount = ov.incoming.length;
+  const hasFriends = ov.friends.length > 0;
 
-  const incomingHTML = ov.incoming.length ? friendsSectionHTML(t('friends.section.incoming'), ov.incoming.length, ov.incoming.map(i => `
-    <div class="friends-row" data-friend-row="${escapeAttr(i.userId)}">
-      ${friendPersonHTML(i.profile, i.userId)}
-      <div class="friends-row-actions">${friendsRelationActionsHTML('received', i.userId)}</div>
-    </div>`).join(''), 'friends-incoming') : '';
+  // Ordem: o que pede ação (pedidos), a disputa da semana e os amigos.
+  const headHTML = `
+    <div class="friends-head">
+      <h2 class="friends-title">${t('friends.title')}</h2>
+      ${hasFriends ? `<div class="friends-head-actions">${friendsInviteButtonHTML('friends-head-invite')}${friendsQrButtonHTML('friends-head-invite')}</div>` : ''}
+    </div>`;
 
-  const inviteBannerHTML = inviteUser
-    ? `<p class="friends-invite-banner" role="status">👋 ${t('friends.inviteBanner', { user: '<strong>@' + escapeHTML(inviteUser) + '</strong>' })}</p>`
-    : '';
-  const searchHTML = friendsSectionHTML(t('friends.section.add'), null, `
-    ${inviteBannerHTML}
-    <label class="profile-edit-label" for="friends-search-input">${t('friends.searchLabel')}</label>
-    <input type="search" class="profile-edit-input" id="friends-search-input" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="40" placeholder="${t('friends.searchPlaceholder')}" value="${escapeAttr(keepQuery)}">
-    <div id="friends-search-results" aria-live="polite"></div>`, 'friends-add');
+  let bodyHTML;
+  if (hasFriends){
+    const cards = ov.friends.map(friendCardHTML).join('') + ov.outgoing.map(friendPendingCardHTML).join('');
+    bodyHTML = `
+      ${friendsWeekHTML()}
+      <section class="friends-section" id="friends-list">
+        <div class="friends-list-head">
+          <h3 class="section-label">${t('friends.section.friends')} (${ov.friends.length})</h3>
+          <div class="friends-list-search">${friendsSearchFieldHTML(keepQuery, t('friends.searchLabel'))}</div>
+        </div>
+        ${friendsSearchExtrasHTML(inviteUser)}
+        <div class="friends-grid">${cards}</div>
+      </section>`;
+  } else {
+    const pending = ov.outgoing.length
+      ? friendsSectionHTML(t('friends.section.outgoing'), ov.outgoing.length, `<div class="friends-grid">${ov.outgoing.map(friendPendingCardHTML).join('')}</div>`, 'friends-outgoing')
+      : '';
+    bodyHTML = friendsEmptyHTML(keepQuery, inviteUser) + pending;
+  }
 
-  const friendsHTML = friendsSectionHTML(t('friends.section.friends'), ov.friends.length, ov.friends.length
-    ? ov.friends.map(i => `
-      <div class="friends-row" data-friend-row="${escapeAttr(i.userId)}">
-        ${friendPersonHTML(i.profile, i.userId)}
-        <div class="friends-row-actions">${friendActionButtonHTML(t('friends.btn.remove'), 'remove', i.userId, 'btn-secondary friends-danger')}</div>
-      </div>`).join('')
-    : `<p class="profile-empty-note">${t('friends.empty')}</p>`, 'friends-list');
-
-  const outgoingHTML = ov.outgoing.length ? friendsSectionHTML(t('friends.section.outgoing'), ov.outgoing.length, ov.outgoing.map(i => `
-    <div class="friends-row" data-friend-row="${escapeAttr(i.userId)}">
-      ${friendPersonHTML(i.profile, i.userId)}
-      <div class="friends-row-actions">${friendsRelationActionsHTML('sent', i.userId)}</div>
-    </div>`).join(''), 'friends-outgoing') : '';
-
-  const rankHTML = ov.friends.length ? friendsSectionHTML(t('friends.section.rank'), null, '<div id="friends-mini-rank"></div>', 'friends-rank') : '';
-  const activityHTML = ov.friends.length ? friendsSectionHTML(t('friends.section.activity'), null, '<div id="friends-activity"></div>', 'friends-activity') : '';
-  const inviteHTML = friendsSectionHTML(t('friends.section.invite'), null, `
-    <p class="profile-edit-hint">${t('friends.inviteHint')}</p>
-    <div class="friends-invite-actions">
-      <button type="button" class="btn btn-secondary friends-action" data-friends-invite="copy">🔗 ${t('friends.inviteCopy')}</button>
-      <button type="button" class="btn btn-secondary friends-action" data-friends-invite="share" ${navigator.share ? '' : 'hidden'}>📤 ${t('friends.inviteShare')}</button>
-    </div>`, 'friends-invite');
-  const prefsHTML = friendsSectionHTML(t('friends.section.prefs'), null, `
-    <details class="friends-prefs" id="friends-prefs">
-      <summary>${t('friends.prefsSummary')}</summary>
-      <div id="friends-prefs-body">${loadingHTML(t('friends.loadingShort'))}</div>
-    </details>`, 'friends-prefs-section');
-
-  wrap.innerHTML = `${subnav}${incomingHTML}${rankHTML}${searchHTML}${friendsHTML}${activityHTML}${outgoingHTML}${inviteHTML}${prefsHTML}`;
+  wrap.innerHTML = `${subnav}${headHTML}${friendsRequestsHTML(ov.incoming)}<section class="friends-received" id="friends-received" hidden></section><section class="friends-suggest" id="friends-suggest" hidden></section>${bodyHTML}`;
   renderFriendsBadges();
   wireFriendsView(wrap);
-  if (ov.friends.length){ loadFriendsMiniRank(); loadFriendsActivity(); }
-  loadFriendsPrefs();
+  if (hasFriends){ loadFriendsMiniRank(); loadFriendsActivity(); loadFriendsExtras(); }
+  loadFriendsReceivedCongrats();
+  loadFriendsSuggestions();
   if (keepQuery.trim().length >= 3) runFriendsSearch(keepQuery);
 }
 
-// ---------- ranking dos amigos (resumo no topo da aba) ----------
+// ---------- sugestões de amigos (095, docs/amigos-seguir-x-amizade.md) ----------
+// Cartões com o motivo ("Estuda com a mesma professora", "2 amigos em comum"...), Adicionar (mesmo pedido de
+// sempre) e X para dispensar. Sem a 095 no banco, a seção simplesmente não aparece.
+function friendsLangName(appKey){
+  const ui = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+  const name = (typeof LanguageRegistry !== 'undefined' && LanguageRegistry.shortName) ? LanguageRegistry.shortName(appKey, ui) : '';
+  if (!name) return appKey || '';
+  return ui === 'en' ? name : name.toLowerCase();
+}
+
+function friendSuggestReasonText(r){
+  switch (r.reason){
+    case 'invite': return t('friends.suggest.reason.invite');
+    case 'invited_by': return t('friends.suggest.reason.invitedBy');
+    case 'classmate': return t('friends.suggest.reason.classmate');
+    case 'mutual': return tp('friends.suggest.reason.mutual', Number(r.mutual_count) || 1);
+    case 'partner': return t('friends.suggest.reason.partner', { lang: escapeHTML(friendsLangName(r.language_app_key)) });
+    case 'ranking': return t('friends.suggest.reason.ranking');
+    default: return '';
+  }
+}
+
+function friendSuggestCardHTML(r){
+  const name = r.display_name || r.username || t('leaderboard.anonymous');
+  const id = escapeAttr(r.user_id);
+  const username = r.username || '';
+  return `
+    <div class="friend-suggest-card" role="listitem" data-suggest-row="${id}">
+      <button type="button" class="friend-suggest-x" data-no-emoji-icons data-suggest-dismiss="${id}" aria-label="${escapeAttr(t('friends.suggest.dismissAria', { name }))}">✕</button>
+      <button type="button" class="friend-card-person" data-open-profile="${escapeAttr(username)}" ${username ? '' : 'disabled'}>
+        <span class="friend-avatar-wrap">${friendAvatarHTML({ username: r.username, display_name: r.display_name, avatar_url: r.avatar_url }, r.user_id)}</span>
+        <span class="friend-card-name">${escapeHTML(name)}</span>
+        <span class="friend-suggest-reason">${friendSuggestReasonText(r)}</span>
+      </button>
+      <button type="button" class="btn btn-primary btn-sm friend-suggest-add" data-friend-action="add" data-user-id="${id}">${t('friends.suggest.add')}</button>
+    </div>`;
+}
+
+async function loadFriendsSuggestions(){
+  if (!document.getElementById('friends-suggest')) return;
+  const { data, error } = await supabaseClient.rpc('friend_suggestions', { p_limit: 12 });
+  const el = document.getElementById('friends-suggest');
+  if (!el) return;
+  if (error || !Array.isArray(data) || !data.length){ el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  el.innerHTML = `<h3 class="section-label friends-suggest-title">${t('friends.suggest.title')}</h3>
+    <div class="friends-suggest-row" role="list">${data.map(friendSuggestCardHTML).join('')}</div>`;
+}
+
+async function friendsDismissSuggestion(userId, btn){
+  const card = btn && btn.closest('[data-suggest-row]');
+  if (card) card.remove();
+  const el = document.getElementById('friends-suggest');
+  if (el && !el.querySelector('[data-suggest-row]')){ el.hidden = true; el.innerHTML = ''; }
+  const res = await friendsRpc('dismiss_friend_suggestion', { p_user: userId });
+  if (!res.ok) showToast(friendsErrorMessage(res.error));
+}
+
 async function loadFriendsMiniRank(){
   const box = document.getElementById('friends-mini-rank');
   if (!box) return;
@@ -335,44 +550,187 @@ async function loadFriendsMiniRank(){
   if (!rowsBox) return;
   if (rows == null){ rowsBox.innerHTML = `<p class="profile-edit-error">${t('friends.rank.miniError')}</p>`; return; }
   const me = CURRENT_USER && CURRENT_USER.id;
-  const top = rows.slice(0, 5);
-  const meRow = rows.find(r => r.user_id === me);
-  const shown = (meRow && !top.includes(meRow)) ? [...top, meRow] : top;
-  rowsBox.innerHTML = shown.map(r => {
-    const name = r.profile?.display_name || r.profile?.username || 'Aluno(a)';
-    const isMe = r.user_id === me;
-    return `<div class="friends-row friends-rank-row ${isMe ? 'is-me' : ''}">
-      <span class="friends-rank-pos">${typeof leaderboardRankBadge === 'function' ? leaderboardRankBadge(r.rank) : r.rank}</span>
-      ${friendAvatarHTML(r.profile, r.user_id)}
-      <span class="friends-person-text"><span class="friends-person-name">${escapeHTML(name)}${isMe ? ' ' + t('leaderboard.youTag') : ''}</span></span>
-      <span class="friends-rank-xp">${Number(r.amount || 0)} XP</span>
-    </div>`;
-  }).join('') + `<button type="button" class="btn btn-secondary friends-action friends-rank-more" data-friends-rank-more="1">${t('friends.rank.seeFull')}</button>`;
+  rowsBox.innerHTML = leaderboardPodiumHTML(rows, me) + leaderboardDuelHTML(rows, me);
+  // XP da semana (mesmo escopo) nos cartões dos amigos.
+  const byId = Object.fromEntries(rows.map(r => [r.user_id, Number(r.amount || 0)]));
+  document.querySelectorAll('[data-friend-xp]').forEach(el => {
+    el.textContent = `${byId[el.dataset.friendXp] || 0} XP`;
+  });
+  friendsDecorateExtras();
 }
 
-// ---------- atividade dos amigos (conquistas dos últimos 30 dias) ----------
+// ---------- foguinho e bandeiras (migration 086: friends_extras) ----------
+// Sequência efetiva (zera se a pessoa pulou um dia) de você + amigos, se estudou
+// hoje e os idiomas que estuda. Amigos veem mesmo quem tem perfil privado.
+async function loadFriendsExtras(){
+  const { data, error } = await supabaseClient.rpc('friends_extras');
+  if (error){ console.error('Erro ao carregar sequência dos amigos:', error); return; }
+  FRIENDS_STATE.extras = Object.fromEntries((data || []).map(r => [r.user_id, r]));
+  friendsDecorateExtras();
+}
+
+function friendsStreakChipHTML(x){
+  const n = Number(x?.streak || 0);
+  if (!n) return '';
+  const label = tp('friends.streak.aria', n) + (x.studied_today ? ` · ${t('friends.streak.today')}` : '');
+  return `<span class="friend-streak ${x.studied_today ? 'is-today' : ''}" title="${escapeAttr(label)}" aria-label="${escapeAttr(label)}">🔥${n}</span>`;
+}
+
+function friendsLangFlagsHTML(langs){
+  const all = (typeof AVAILABLE_LANGUAGES !== 'undefined') ? AVAILABLE_LANGUAGES : [];
+  return (langs || []).map(k => all.find(l => l.appKey === k)).filter(Boolean)
+    .map(l => `<span class="friend-flag" title="${escapeAttr(l.name)}">${l.flagSvg}</span>`).join('');
+}
+
+// Põe o foguinho nos avatares (cartões e pódio) e as bandeiras nos cartões.
+// Idempotente: roda quando chegam os extras e de novo quando o pódio é redesenhado.
+function friendsDecorateExtras(){
+  const map = FRIENDS_STATE.extras;
+  if (!map) return;
+  document.querySelectorAll('#friends-content [data-friend-avatar]').forEach(el => {
+    el.querySelector('.friend-streak')?.remove();
+    const x = map[el.dataset.friendAvatar];
+    el.classList.toggle('is-today', !!x?.studied_today && !!x?.streak);
+    el.insertAdjacentHTML('beforeend', friendsStreakChipHTML(x));
+  });
+  document.querySelectorAll('#friends-content [data-friend-flags]').forEach(el => {
+    el.innerHTML = friendsLangFlagsHTML(map[el.dataset.friendFlags]?.languages);
+  });
+  document.querySelectorAll('#friends-rank .lb-pod[data-podium-user]').forEach(el => {
+    el.querySelector('.friend-streak')?.remove();
+    const chip = friendsStreakChipHTML(map[el.dataset.podiumUser]);
+    if (chip) el.querySelector('.lb-pod-avatar')?.insertAdjacentHTML('afterend', chip);
+  });
+}
+
+// ---------- marco de sequência (chamado por registerStudyToday em fr/zh app.js) ----------
+// O servidor registra só o maior marco ainda não registrado nesta sequência
+// (5, 10, 15, 25, 50... 365) e é ele que aparece para os amigos.
+function friendsRecordStreakMilestone(streak, lastDay){
+  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER || !(Number(streak) >= 5) || !lastDay) return;
+  try {
+    Promise.resolve(supabaseClient.rpc('record_streak_milestone', { p_streak: Number(streak), p_last_day: lastDay }))
+      .then(({ error } = {}) => { if (error) console.error('Erro ao registrar marco de sequência:', error); })
+      .catch(e => console.error('Erro ao registrar marco de sequência:', e));
+  } catch (e) { console.error('Erro ao registrar marco de sequência:', e); }
+}
+
+// ---------- atividade dos amigos: marcos de sequência + conquistas (últimos 7 dias) ----------
+const FRIENDS_REACTIONS = ['🎉', '👏', '💪', '❤️'];
+const FRIENDS_FEED_DAYS = 7;
+
+function friendsCheerHTML(item){
+  const picker = `<div class="friends-reactions" role="group" aria-label="${escapeAttr(t('friends.cheer.aria'))}" hidden>
+      ${FRIENDS_REACTIONS.map(r => `<button type="button" class="friends-reaction ${item.my_reaction === r ? 'is-mine' : ''}" data-cheer-reaction="${r}" aria-label="${r}">${r}</button>`).join('')}
+    </div>`;
+  const btn = item.my_reaction
+    ? `<button type="button" class="friends-cheer is-done" data-cheer-open="1" aria-expanded="false">${t('friends.cheer.done', { r: item.my_reaction })}</button>`
+    : `<button type="button" class="btn btn-secondary btn-sm friends-cheer" data-cheer-open="1" aria-expanded="false">${t('friends.cheer.btn')}</button>`;
+  return `<div class="friends-cheer-wrap">${btn}${picker}</div>`;
+}
+
 async function loadFriendsActivity(){
   const box = document.getElementById('friends-activity');
   if (!box) return;
-  box.innerHTML = loadingHTML(t('friends.loadingShort'));
-  const appKey = (typeof APP_KEY !== 'undefined') ? APP_KEY : 'frances';
-  const { data, error } = await supabaseClient.rpc('friends_activity', { p_language: appKey, p_limit: 20 });
+  if (!box.children.length) box.innerHTML = loadingHTML(t('friends.loadingShort'));
+  const appKey = (typeof APP_KEY !== 'undefined') ? APP_KEY : LanguageRegistry.defaultAppKey();
+  // Conquistas: friends_badge_feed (091, com Parabéns); sem ela, a lista antiga (friends_activity, sem botão).
+  let [badgesRes, streakRes] = await Promise.all([
+    supabaseClient.rpc('friends_badge_feed', { p_limit: 30 }),
+    supabaseClient.rpc('friends_streak_feed', { p_limit: 20 }),
+  ]);
+  const badgeCheers = !badgesRes.error && Array.isArray(badgesRes.data);
+  if (!badgeCheers) badgesRes = await supabaseClient.rpc('friends_activity', { p_language: appKey, p_limit: 20 });
   const el = document.getElementById('friends-activity');
   if (!el) return;
-  if (error){ console.error('Erro ao carregar atividade dos amigos:', error); el.innerHTML = `<p class="profile-edit-error">${t('friends.activity.error')}</p>`; return; }
-  const catalog = (typeof BADGES !== 'undefined' && Array.isArray(BADGES)) ? BADGES : [];
-  const items = (data || []).map(r => ({ r, badge: catalog.find(b => b.id === r.badge_id) })).filter(x => x.badge);
-  if (!items.length){ el.innerHTML = `<p class="profile-empty-note">${t('friends.activity.empty')}</p>`; return; }
-  el.innerHTML = items.slice(0, 10).map(({ r, badge }) => {
-    const name = r.display_name || r.username || t('friends.activity.aFriend');
-    return `<div class="friends-row friends-activity-row">
-      ${friendAvatarHTML({ username: r.username, display_name: r.display_name, avatar_url: r.avatar_url }, r.user_id)}
-      <span class="friends-person-text">
-        <span class="friends-person-name">${t('friends.activity.earned', { name: escapeHTML(name), badge: escapeHTML(badge.icon || '🏅') + ' ' + escapeHTML(badge.name || '') })}</span>
-        <span class="friends-person-user">${escapeHTML(friendsTimeAgo(r.earned_at))}</span>
+  if (badgesRes.error && streakRes.error){
+    console.error('Erro ao carregar atividade dos amigos:', badgesRes.error, streakRes.error);
+    el.innerHTML = `<p class="profile-edit-error">${t('friends.activity.error')}</p>`;
+    return;
+  }
+  const since = Date.now() - FRIENDS_FEED_DAYS * 86400000;
+  const nameOf = (r) => r.display_name || r.username || t('friends.activity.aFriend');
+  // Conquistas com níveis: no feed só ouro e nível máximo (bronze e prata ficam no perfil). Conquista de curso só
+  // aparece no site do mesmo idioma. Nome na forma neutra (o gênero do amigo é privado).
+  const describe = (id) => (typeof describeBadgeId === 'function' ? describeBadgeId(id) : null);
+  const seen = new Set();
+  const badgeItems = (badgesRes.data || [])
+    .map(r => ({ r, d: describe(r.badge_id), at: new Date(r.earned_at).getTime() }))
+    .filter(x => x.d && !x.d.classic && x.at >= since && (x.d.tier === 'gold' || x.d.tier === 'max'))
+    .filter(x => BadgeTracks.isAccountId(x.r.badge_id) || !x.r.langs || x.r.langs.includes(appKey))
+    .filter(x => { const k = x.r.user_id + '|' + x.r.badge_id; if (seen.has(k)) return false; seen.add(k); return true; })
+    .map(({ r, d, at }) => {
+      const cheer = badgeCheers && BadgeTracks.allowsCongrats(d.track, d.tier);
+      return { at, html: `<div class="friends-activity-row is-badge"${cheer ? ` data-cheer-friend="${escapeAttr(r.user_id)}" data-cheer-kind="badge" data-cheer-ref="${escapeAttr(r.badge_id)}"` : ''}>
+      ${badgeMedalHTML(d, { size: 'xs' })}
+      <span class="friends-activity-text">${t('friends.feed.badgeLevel', { name: `<strong>${escapeHTML(nameOf(r))}</strong>`, badge: `<strong>${escapeHTML(d.name)}</strong>` })}
+        <span class="friends-activity-when">· ${escapeHTML(friendsTimeAgo(r.earned_at))}</span>
+        ${Number(r.total_reactions) > 0 ? `<span class="friends-cheer-count">${tp('friends.cheer.count', Number(r.total_reactions))}</span>` : ''}
+        ${r.my_congrats_thanked ? `<span class="friends-cheer-thanked">${t('friends.cheer.thanked', { name: escapeHTML(leaderboardFirstName(r)) })}</span>` : ''}
       </span>
+      ${cheer ? friendsCheerHTML(r) : ''}
+    </div>` };
+    });
+  // Marcos de sequência: com "Parabenizar" (as conquistas ganham o botão quando o critério for definido).
+  const streakItems = (streakRes.data || []).map(r => ({ at: new Date(r.reached_at).getTime(), html: `
+    <div class="friends-activity-row is-streak" data-cheer-friend="${escapeAttr(r.user_id)}" data-cheer-ref="${escapeAttr(r.ref)}">
+      <span class="friends-medal is-fire" aria-hidden="true">🔥</span>
+      <span class="friends-activity-text">${t('friends.feed.streak', { name: `<strong>${escapeHTML(nameOf(r))}</strong>`, n: Number(r.days) })}
+        <span class="friends-activity-when">· ${escapeHTML(friendsTimeAgo(r.reached_at))}</span>
+        ${Number(r.total_reactions) > 0 ? `<span class="friends-cheer-count">${tp('friends.cheer.count', Number(r.total_reactions))}</span>` : ''}
+        ${r.my_congrats_thanked ? `<span class="friends-cheer-thanked">${t('friends.cheer.thanked', { name: escapeHTML(leaderboardFirstName(r)) })}</span>` : ''}
+      </span>
+      ${friendsCheerHTML(r)}
+    </div>` }));
+  const items = [...streakItems, ...badgeItems].sort((a, b) => b.at - a.at).slice(0, 6);
+  el.innerHTML = items.length ? items.map(i => i.html).join('') : `<p class="friends-feed-empty">${t('friends.activity.empty')}</p>`;
+}
+
+async function friendsSendCheer(row, reaction, btn){
+  if (btn) btn.disabled = true;
+  const res = await friendsRpc('congratulate_friend', { p_friend: row.dataset.cheerFriend, p_kind: row.dataset.cheerKind || 'streak', p_ref: row.dataset.cheerRef, p_reaction: reaction });
+  if (!res.ok){ showToast(friendsErrorMessage(res.error)); if (btn) btn.disabled = false; return; }
+  showToast(t('friends.toast.cheered', { r: reaction }));
+  await loadFriendsActivity();
+}
+
+// ---------- parabéns que eu recebi (com "Agradecer") ----------
+async function loadFriendsReceivedCongrats(){
+  const box = document.getElementById('friends-received');
+  if (!box) return;
+  const { data, error } = await supabaseClient.rpc('my_received_congrats', { p_limit: 20 });
+  const el = document.getElementById('friends-received');
+  if (!el) return;
+  if (error){ console.error('Erro ao carregar parabéns recebidos:', error); el.hidden = true; return; }
+  const rows = data || [];
+  if (!rows.length){ el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  el.innerHTML = `<h3 class="friends-received-title">🎉 ${t('friends.received.title')}</h3>` + rows.map(r => {
+    const name = r.display_name || r.username || t('friends.activity.aFriend');
+    const days = Number(String(r.target_ref || '').split('@')[0]) || 0;
+    // Parabéns por conquista: o nome do nível vem do catálogo, no gênero da própria pessoa (ela está vendo).
+    const own = r.target_kind === 'badge' && typeof describeBadgeId === 'function' ? describeBadgeId(r.target_ref) : null;
+    const ownName = own ? (BadgeTracks.levelName(t, own.track, own.level, badgeOwnGender(), badgeNameVars(evaluateBadgeTracks(STATE).m)) || own.name) : '';
+    const text = own
+      ? t('friends.received.rowBadge', { name: `<strong>${escapeHTML(name)}</strong>`, r: escapeHTML(r.reaction), badge: `<strong>${escapeHTML(ownName)}</strong>` })
+      : t('friends.received.row', { name: `<strong>${escapeHTML(name)}</strong>`, r: escapeHTML(r.reaction), n: days });
+    return `<div class="friends-received-row" data-congrats-id="${escapeAttr(String(r.id))}">
+      ${friendAvatarHTML({ username: r.username, display_name: r.display_name, avatar_url: r.avatar_url }, r.from_user)}
+      <span class="friends-activity-text">${text}
+        <span class="friends-activity-when">· ${escapeHTML(friendsTimeAgo(r.created_at))}</span></span>
+      ${r.thanked
+        ? `<span class="friends-thanked-chip">${t('friends.received.thanked')}</span>`
+        : `<button type="button" class="btn btn-primary btn-sm friends-thank" data-thank-congrats="${escapeAttr(String(r.id))}">${t('friends.received.thank')}</button>`}
     </div>`;
   }).join('');
+}
+
+async function friendsThank(id, btn){
+  if (btn) btn.disabled = true;
+  const res = await friendsRpc('thank_friend_congrats', { p_congrats_id: Number(id) });
+  if (!res.ok){ showToast(friendsErrorMessage(res.error)); if (btn) btn.disabled = false; return; }
+  showToast(t('friends.toast.thanked'));
+  await loadFriendsReceivedCongrats();
 }
 
 // ---------- preferências (avisos + "aceitar novos pedidos") ----------
@@ -380,12 +738,18 @@ const FRIENDS_PREF_FIELDS = [
   { key: 'notify_requests', label: () => t('friends.pref.notify_requests') },
   { key: 'notify_accepts', label: () => t('friends.pref.notify_accepts') },
   { key: 'notify_overtakes', label: () => t('friends.pref.notify_overtakes') },
+  { key: 'notify_congrats', label: () => t('friends.pref.notify_congrats') },
   { key: 'accept_requests', label: () => t('friends.pref.accept_requests') },
+  { key: 'suggest_me', label: () => t('friends.pref.suggest_me') },
 ];
 
+// Mora em Configurações > Notificações (shared/notification-preferences.js
+// chama esta função depois de desenhar a aba). O contêiner é recriado a cada
+// render de lá, então o listener é ligado de novo junto com ele.
 async function loadFriendsPrefs(){
   const body = document.getElementById('friends-prefs-body');
   if (!body || typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
+  body.innerHTML = loadingHTML(t('friends.loadingShort'));
   const { data, error } = await supabaseClient.from('friend_settings').select('*').eq('user_id', CURRENT_USER.id).maybeSingle();
   const box = document.getElementById('friends-prefs-body');
   if (!box) return;
@@ -396,6 +760,13 @@ async function loadFriendsPrefs(){
       <input type="checkbox" data-friends-pref="${f.key}" ${cur[f.key] === false ? '' : 'checked'}>
       <span>${escapeHTML(f.label())}</span>
     </label>`).join('') + `<p class="profile-edit-hint">${t('friends.prefs.hint')}</p>`;
+  if (box.dataset.friendsPrefsWired !== '1'){
+    box.dataset.friendsPrefsWired = '1';
+    box.addEventListener('change', (e) => {
+      const pref = e.target.closest('[data-friends-pref]');
+      if (pref) saveFriendsPref(pref.dataset.friendsPref, pref.checked, pref);
+    });
+  }
 }
 
 async function saveFriendsPref(key, value, input){
@@ -447,6 +818,21 @@ async function runFriendsSearch(rawQuery){
     </div>`).join('');
 }
 
+function friendsCloseMenus(refocus){
+  document.querySelectorAll('.friends-reactions:not([hidden])').forEach(p => {
+    p.hidden = true;
+    const btn = p.parentElement.querySelector('[data-cheer-open]');
+    btn?.setAttribute('aria-expanded', 'false');
+    if (refocus) btn?.focus();
+  });
+  document.querySelectorAll('.friend-card-menu:not([hidden])').forEach(m => {
+    m.hidden = true;
+    const btn = m.parentElement.querySelector('[data-friend-menu]');
+    btn?.setAttribute('aria-expanded', 'false');
+    if (refocus) btn?.focus();
+  });
+}
+
 function wireFriendsView(wrap){
   const input = wrap.querySelector('#friends-search-input');
   let timer = null;
@@ -460,11 +846,39 @@ function wireFriendsView(wrap){
   if (wrap.dataset.friendsWired === '1') return;
   wrap.dataset.friendsWired = '1';
   wrap.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-friends-qr]')){ friendsShowInviteQr(); return; }
+    const dismiss = e.target.closest('[data-suggest-dismiss]');
+    if (dismiss){ friendsDismissSuggestion(dismiss.dataset.suggestDismiss, dismiss); return; }
+    const menuBtn = e.target.closest('[data-friend-menu]');
+    if (menuBtn){
+      const menu = menuBtn.parentElement.querySelector('.friend-card-menu');
+      const opening = menu.hidden;
+      friendsCloseMenus();
+      menu.hidden = !opening;
+      menuBtn.setAttribute('aria-expanded', String(opening));
+      if (opening) menu.querySelector('button')?.focus();
+      return;
+    }
+    if (e.target.closest('.friend-card-menu')) friendsCloseMenus();
     const person = e.target.closest('[data-open-profile]');
     if (person && person.dataset.openProfile && !e.target.closest('[data-friend-action]')){
       if (typeof openPublicProfileModalForUsername === 'function') openPublicProfileModalForUsername(person.dataset.openProfile);
       return;
     }
+    const cheerOpen = e.target.closest('[data-cheer-open]');
+    if (cheerOpen){
+      const picker = cheerOpen.parentElement.querySelector('.friends-reactions');
+      const opening = picker.hidden;
+      document.querySelectorAll('#friends-content .friends-reactions:not([hidden])').forEach(p => { p.hidden = true; p.parentElement.querySelector('[data-cheer-open]')?.setAttribute('aria-expanded', 'false'); });
+      picker.hidden = !opening;
+      cheerOpen.setAttribute('aria-expanded', String(opening));
+      if (opening) picker.querySelector('button')?.focus();
+      return;
+    }
+    const reactionBtn = e.target.closest('[data-cheer-reaction]');
+    if (reactionBtn){ friendsSendCheer(reactionBtn.closest('[data-cheer-ref]'), reactionBtn.dataset.cheerReaction, reactionBtn); return; }
+    const thankBtn = e.target.closest('[data-thank-congrats]');
+    if (thankBtn){ friendsThank(thankBtn.dataset.thankCongrats, thankBtn); return; }
     const chip = e.target.closest('[data-friends-rank-scope]');
     if (chip){ FRIENDS_STATE.rankScope = chip.dataset.friendsRankScope; loadFriendsMiniRank(); return; }
     if (e.target.closest('[data-friends-rank-more]')){
@@ -478,10 +892,9 @@ function wireFriendsView(wrap){
     if (!btn || btn.disabled) return;
     await handleFriendAction(btn.dataset.friendAction, btn.dataset.userId, btn);
   });
-  wrap.addEventListener('change', (e) => {
-    const pref = e.target.closest('[data-friends-pref]');
-    if (pref) saveFriendsPref(pref.dataset.friendsPref, pref.checked, pref);
-  });
+  // Fecha o menu ⋯ aberto ao clicar fora dele ou apertar Esc.
+  document.addEventListener('click', (e) => { if (!e.target.closest('.friend-card-more, .friend-card-menu, .friends-cheer-wrap')) friendsCloseMenus(); });
+  wrap.addEventListener('keydown', (e) => { if (e.key === 'Escape') friendsCloseMenus(true); });
 }
 
 // Faz a ação, mostra o resultado e redesenha a tela. Botão fica desabilitado
@@ -506,6 +919,8 @@ async function handleFriendAction(action, userId, btn){
   } else if (action === 'remove'){
     showToast(t('friends.toast.removed'));
   }
+  // Trilha Amigos (conquistas com níveis): recontar depois de aceitar ou desfazer amizade.
+  if (res.ok && typeof loadFriendsAcceptedCount === 'function') loadFriendsAcceptedCount();
   await renderFriendsView();
   refreshFriendRequestCount();
   if (typeof refreshFriendsRankingViews === 'function') refreshFriendsRankingViews();

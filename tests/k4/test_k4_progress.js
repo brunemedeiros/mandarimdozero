@@ -4,7 +4,7 @@ const { loadLang, read, extractFunction, check, summary } = require('../fase-e/h
 const vm = require('vm');
 for (const lang of ['fr', 'zh']){
   console.log('== ' + lang);
-  const ctx = loadLang(lang), run = c => vm.runInContext(c, ctx), src = read(lang + '/app.js');
+  const ctx = loadLang(lang), run = c => vm.runInContext(c, ctx), src = require('../e4/app-source').withCore(read(lang + '/app.js'));
   ['unitCardCounts', 'checkUnitCompletion'].forEach(fn => run(extractFunction(src, fn)));
   const completed = []; ctx.markUnitCompleted = id => completed.push(id);
   const fresh = () => { ctx.STATE.cards = ctx.buildCardsFromUnits(ctx.UNITS); completed.length = 0; };

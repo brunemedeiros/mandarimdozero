@@ -44,7 +44,8 @@ let OTHER_LANGUAGES_RAW_CACHE = null;
 // shared/language-switcher.js): renderização consistente em qualquer
 // navegador/SO, sem depender da fonte de emoji do sistema ter um glifo
 // de coroa "bonito o suficiente".
-const FOUNDER_CROWN_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Coroa de fundadora"><path d="M3,18 L5.5,7 L9,13 L12,5 L15,13 L18.5,7 L21,18 Z" fill="#F0BF3A" stroke="#B8860B" stroke-width="0.6" stroke-linejoin="round"/><rect x="2.5" y="17" width="19" height="3" rx="1.2" fill="#E0A825" stroke="#B8860B" stroke-width="0.4"/><circle cx="5.5" cy="7.2" r="1.15" fill="#D6483A"/><circle cx="12" cy="5.2" r="1.3" fill="#3D6FBF"/><circle cx="18.5" cy="7.2" r="1.15" fill="#3F8F5C"/><circle cx="12" cy="18.5" r="1" fill="#D6483A"/></svg>';
+// Coroa da Fundadora: Fluent Emoji (troca geral de ícones, docs/icones-fluent.md). Nome mantido por compatibilidade.
+const FOUNDER_CROWN_SVG = '<img src="../shared/icons/fluent/1f451.svg" alt="" width="16" height="16" style="display:block;width:16px;height:16px" role="img" aria-label="Coroa de fundadora">';
 
 // "Beta tester" = qualquer conta criada antes do lançamento deste sistema
 // de badges -- ou seja, todo mundo que já estava usando o app e ajudando a
@@ -167,14 +168,41 @@ function refreshProfilePlaceholders(){
   try { if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); } catch (e) { console.error('placeholders de perfil:', e); }
 }
 
+// Perfil privado (migration 080): a tabela não deixa mais ler país/admin_mode/
+// exclude_own_activity de NENHUMA linha; a própria conta lê a linha inteira por
+// get_my_profile(). Sem a RPC (banco ainda sem a 080), cai na leitura antiga.
+async function fetchMyProfileRow(){
+  const rpc = await supabaseClient.rpc('get_my_profile');
+  if (!rpc.error && rpc.data && typeof rpc.data === 'object' && rpc.data.user_id) return { data: rpc.data, error: null };
+  return supabaseClient.from('profiles').select('*').eq('user_id', CURRENT_USER.id).maybeSingle();
+}
+
+// UPDATE da própria linha SEM devolver a linha (devolver pediria ler colunas que a
+// 080 fechou). O cache recebe o que foi gravado.
+async function updateMyProfile(payload){
+  const { error } = await supabaseClient.from('profiles').update(payload).eq('user_id', CURRENT_USER.id);
+  if (error) return { data: null, error };
+  PROFILE_CACHE = Object.assign({}, PROFILE_CACHE || { user_id: CURRENT_USER.id }, payload);
+  return { data: PROFILE_CACHE, error: null };
+}
+
+// Nome/@/foto de várias contas (ranking, amizades, alunos). A 080 esconde a LINHA
+// de conta privada de quem não é amigo/professora; profile_cards devolve nome e @
+// de qualquer conta e a foto só quando pode. Sem a RPC, lê a tabela como antes.
+async function fetchProfileCards(ids){
+  const list = [...new Set((ids || []).filter(Boolean))];
+  if (!list.length) return [];
+  const rpc = await supabaseClient.rpc('profile_cards', { p_ids: list });
+  if (!rpc.error && Array.isArray(rpc.data)) return rpc.data;
+  const { data } = await supabaseClient.from('profiles')
+    .select('user_id, username, display_name, avatar_url, featured_badge_id').in('user_id', list);
+  return data || [];
+}
+
 async function ensureProfileLoaded(){
   if (!CURRENT_USER) return null;
   if (PROFILE_CACHE) return PROFILE_CACHE;
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .select('*')
-    .eq('user_id', CURRENT_USER.id)
-    .maybeSingle();
+  const { data, error } = await fetchMyProfileRow();
   if (error){ console.error('Erro ao carregar perfil:', error); return null; }
   PROFILE_CACHE = data || await createInitialProfile();
   await loadProfilePrivate();
@@ -239,12 +267,7 @@ async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfi
   if (country !== undefined && PROFILE_CACHE && Object.prototype.hasOwnProperty.call(PROFILE_CACHE, 'country')){
     payload.country = /^[A-Z]{2}$/.test(country || '') ? country : null;
   }
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .update(payload)
-    .eq('user_id', CURRENT_USER.id)
-    .select()
-    .single();
+  const { data, error } = await updateMyProfile(payload);
   if (error){
     console.error('Erro ao salvar perfil:', error);
     return { ok: false, error: t('profile.err.saveFailed') };
@@ -271,12 +294,7 @@ async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfi
 // preferência de conta, mesmo padrão de leitura/escrita de
 // saveProfileEdits() acima -- só que aqui é um campo só, sem formulário.
 async function setExcludeOwnActivity(value){
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .update({ exclude_own_activity: !!value })
-    .eq('user_id', CURRENT_USER.id)
-    .select()
-    .single();
+  const { data, error } = await updateMyProfile({ exclude_own_activity: !!value });
   if (error){ console.error('Erro ao salvar preferência de Analytics:', error); return false; }
   PROFILE_CACHE = data;
   return true;
@@ -300,12 +318,7 @@ function isAdminModeOn(){
 }
 
 async function setAdminMode(value){
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .update({ admin_mode: !!value })
-    .eq('user_id', CURRENT_USER.id)
-    .select()
-    .single();
+  const { data, error } = await updateMyProfile({ admin_mode: !!value });
   if (error){ console.error('Erro ao salvar Admin Mode:', error); return false; }
   PROFILE_CACHE = data;
   return true;
@@ -373,12 +386,7 @@ async function uploadAvatar(file){
   // navegador continuaria mostrando a foto antiga em cache depois de trocar.
   const avatarUrl = `${pub.publicUrl}?t=${Date.now()}`;
 
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .update({ avatar_url: avatarUrl })
-    .eq('user_id', CURRENT_USER.id)
-    .select()
-    .single();
+  const { data, error } = await updateMyProfile({ avatar_url: avatarUrl });
   if (error){
     console.error('Erro ao salvar avatar no perfil:', error);
     return { ok: false, error: t('profile.err.photoSaveProfile') };
@@ -393,12 +401,7 @@ async function removeAvatar(){
   // remoção falhar por algum motivo), ainda limpamos avatar_url no
   // perfil -- o dado que a UI realmente lê é a coluna, não o arquivo.
   await supabaseClient.storage.from('avatars').remove([avatarStoragePath()]);
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .update({ avatar_url: null })
-    .eq('user_id', CURRENT_USER.id)
-    .select()
-    .single();
+  const { data, error } = await updateMyProfile({ avatar_url: null });
   if (error){
     console.error('Erro ao remover avatar:', error);
     return { ok: false, error: t('profile.err.photoRemove') };
@@ -441,7 +444,7 @@ async function buildLanguagesSummary(){
       const s = computeProgressSummary();
       return { id: l.id, name: l.name, flagSvg: l.flagSvg, levelLabel: s.levelLabel, pct: s.pct, isCurrent: true };
     }
-    const other = raw[l.appKey];
+    const other = CourseStorage.isPerSiteLanguage() ? CourseStorage.blockFor(raw, l.appKey, getUiLang()) : raw[l.appKey];
     if (!other) return null;
     if (other.progressSummary){
       const s = other.progressSummary;
@@ -480,7 +483,8 @@ async function renderProfileView(){
   wrap.innerHTML = loadingHTML(t('profile.loading'));
 
   const langs = await buildLanguagesSummary();
-  const earnedBadges = BADGES.filter(b => earnedBadgeIds.has(b.id));
+  // Conquistas com níveis: uma por trilha (maior nível) + clássicas (shared/badge-tracks-app.js).
+  const earnedBadges = ownBadgeShowcase();
   const specialBadges = await computeEarnedSpecialBadges();
 
   if (!CURRENT_USER){
@@ -527,15 +531,14 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
   // completo em Progresso continua existindo à parte (com os badges ainda
   // NÃO conquistados também, pra dar meta) -- "Ver todas →" leva pra lá.
   const badgesHTML = earnedBadges.length ? `
-    <div class="profile-badge-showcase">
-      ${earnedBadges.slice().reverse().map(b => `
-        <div class="badge earned profile-badge" data-badge-id="${b.id}">
-          <div class="icon">${b.icon}</div>
-          <div class="name">${b.name}</div>
-        </div>
-      `).join('')}
+    <div class="track-showcase profile-track-showcase">
+      ${earnedBadges.map(badgeShowcaseItemHTML).join('')}
     </div>
-  ` : `<p class="profile-empty-note">${t('profile.noBadges')}</p>`;
+  ` : `<p class="profile-empty-note">${t('profile.noBadges')}</p>
+    <div class="track-showcase is-locked-preview">
+      ${badgeTrackViews(STATE).slice(0, 4).map(v => badgeShowcaseItemHTML(Object.assign({}, v, { name: v.nameNext, level: 0, tier: null }))).join('')}
+    </div>`;  // Sem nenhuma conquista ainda: as 4 primeiras aparecem bloqueadas (em cinza,
+  // com cadeado) como meta, no lugar de só uma frase. Tocar mostra como ganhar.
 
   // Badges especiais (Fundadora, Beta Tester...) ficam junto da identidade,
   // não misturados com a grade de conquistas por gameplay -- são sobre
@@ -563,7 +566,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
       <button class="leaderboard-tab" data-tab="friends">${t('profile.tabFriends')}</button>
     </div>
     ${guestNote}
-    <div class="profile-identity">
+    <div class="profile-identity profile-hero">
       ${avatarHTML}
       <div class="profile-name">${name}</div>
       ${profile ? `<div class="profile-username">@${profile.username}</div>` : ''}
@@ -576,14 +579,14 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
       <div class="section-label">${t('profile.sectionLangs')}</div>
       <div class="profile-langs-row">${langsHTML}</div>
       <div class="profile-nums-row">
-        <div class="profile-num"><div class="v">🔥 ${effectiveStreak()}</div><div class="l">${t('profile.streakLabel')}</div></div>
-        <div class="profile-num"><div class="v">${STATE.xp}</div><div class="l">${t('profile.xpLabel')}</div></div>
+        <div class="profile-num is-streak"><span class="profile-num-icon" aria-hidden="true">🔥</span><div class="v">${effectiveStreak()}</div><div class="l">${t('profile.streakLabel')}</div></div>
+        <div class="profile-num is-xp"><span class="profile-num-icon" aria-hidden="true">⭐</span><div class="v">${STATE.xp}</div><div class="l">${t('profile.xpLabel')}</div></div>
       </div>
       <button class="profile-stats-link" id="profile-stats-link">${t('profile.statsLink')}</button>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">${t('profile.sectionBadges')} <span class="conquests-count">${earnedBadges.length}/${BADGES.length}</span></div>
+      <div class="section-label">${t('profile.sectionBadges')} <span class="conquests-count">${earnedBadges.filter(b => !b.classic).length}/${badgeTrackViews(STATE).length}</span></div>
       ${badgesHTML}
       <button class="profile-stats-link" id="profile-badges-link">${t('profile.badgesLink')}</button>
     </div>
@@ -592,13 +595,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
   document.getElementById('profile-stats-link')?.addEventListener('click', () => switchTab('progress'));
   document.getElementById('profile-badges-link')?.addEventListener('click', () => switchTab('progress'));
   document.getElementById('profile-edit-btn')?.addEventListener('click', () => openEditProfileModal(specialBadges));
-  wrap.querySelectorAll('.profile-badge[data-badge-id]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const b = BADGES.find(x => x.id === el.dataset.badgeId);
-      if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc);
-    });
-  });
+  wireTrackChips(wrap, earnedBadges.length ? earnedBadges : badgeTrackViews(STATE).map(v => Object.assign({}, v, { name: v.nameNext })));
   wrap.querySelectorAll('.profile-special-badge[data-special-badge-id]').forEach(el => {
     el.addEventListener('click', (e) => {
       e.stopPropagation();

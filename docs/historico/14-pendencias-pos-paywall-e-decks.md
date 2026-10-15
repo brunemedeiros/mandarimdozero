@@ -11,6 +11,12 @@ Pedido da autora: guardar aqui o que só faz sentido (ou só é seguro) depois d
 3. Regra Free dos Desafios: **1 atividade por categoria, no total** (de preferência a do 1º módulo). Isso substitui o "1 ditado Free por módulo" (o Free do Ditado cai de 6 para 1): ajustar o campo `free` em `fr/dictations.js` e nos lotes de Desafios.
 4. Desafios do chinês: o zh não tem aba de Desafios nem módulos; decidir os módulos e criar a aba antes de aplicar a regra Free x Premium ao zh.
 
+**Conjugação (fr)**
+11. Jogos da Conjugação são Premium (decisão da autora, 2026-10-14); a prática normal da Conjugação é grátis. Hoje só o
+    cadeado aparece. Ao ligar o paywall: `CONJ_GAMES_PAYWALL_ENABLED = true` em `fr/app.js` (a trava fica em
+    `createConjGames` > `start`, via `isConjGameLocked`; quem não é Premium vê o aviso Premium). Trava só de tela, como a dos
+    Desafios antes da 008: os dados dos jogos estão no código público.
+
 **Premium / cobrança (nada disto existe ainda)**
 5. Não há Stripe nem checkout: o modal de aviso Premium só convida a entrar em contato. Decidir o fluxo de pagamento junto do paywall.
 6. TTS por Field (Google) é só Premium e tem cota de 300/mês por conta: conferir se a cota combina com o preço do plano.
@@ -23,4 +29,7 @@ Pedido da autora: guardar aqui o que só faz sentido (ou só é seguro) depois d
 
 ## Decks: migração dos cartões antigos e regra de 1 professora por aluno (2026-10-07)
 - **Migração feita em produção (autorizada pela autora)**: os 5 `own_flashcards` e os 5 `teacher_flashcards` com `deck_id` NULL foram colocados no `personal_root` do dono / `teacher_root` do aluno (criados antes com `ensure_user_decks`/`ensure_teacher_decks`). Um único bloco transacional, só `deck_id` mudou: hash de id/front/back/fields/modo/tags/revision/status idêntico antes e depois; hoje 0 cartões sem Deck.
-- **Decisão de produto: um aluno não pode ter duas professoras** (por idioma). Hoje não existe nenhum caso (0 alunos com 2 vínculos ativos no mesmo idioma), então não há raízes "Cartões da professora" duplicadas. Ainda NÃO imposto no banco; se for impor, índice único parcial em `teacher_students (student_id, language_app_key) where status='active'` (migration nova, com autorização).
+- **Decisão de produto (revista em 2026-10-07)**: hoje só existe uma professora, a Brune atuando como Professora (não como Admin); o vínculo professora <-> aluno se refere apenas aos alunos dela. Não há regra de "um aluno, uma professora" no banco. Quando o papel Professor(a)/Teacher (nome neutro em inglês preferido) puder ser atribuído a outras contas, isso será revisto (se virar regra: índice único parcial em `teacher_students (student_id, language_app_key) where status='active'`, migration nova com autorização). Hoje nenhum aluno tem 2 vínculos ativos no mesmo idioma.
+
+## Trilha de Estudo: unidades não vistas ocultas (2026-10-07)
+- Na lista de Decks e no Painel (`deckBrowserUnitVisible`, shared/deck-browser.js), unidades da Trilha de Estudo só aparecem se o aluno já começou (`started`) ou concluiu. Bloqueadas/nunca abertas ficam ocultas; Decks que não são unidade da Trilha não mudam. Teste: tests/deck-browser (208/208, FR+ZH).

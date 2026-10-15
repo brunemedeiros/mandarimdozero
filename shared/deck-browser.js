@@ -136,6 +136,15 @@ function deckBrowserLangLabel(){
   return DECK_BROWSER_LANG_LABELS[APP_KEY] || t('review.deck.lang.fallback');
 }
 
+// Unidades da Trilha de Estudo que o aluno ainda não começou (bloqueadas ou
+// nunca abertas) não aparecem na lista de Decks; só as em andamento e as
+// concluídas. Decks que não são unidade da Trilha passam sempre.
+function deckBrowserUnitVisible(deck){
+  if (!deck || deck.kind !== 'course' || deck.course_unit_id == null) return true;
+  const prog = (typeof STATE !== 'undefined' && STATE.unitProgress) ? STATE.unitProgress[deck.course_unit_id] : null;
+  return !!(prog && (prog.started || prog.completed));
+}
+
 // Filhos exibidos. 'lang' é a raiz virtual (todos os Decks do idioma): a
 // Trilha de Estudo + os filhos do Deck raiz da conta. Ela NÃO aparece como
 // linha na tabela (não há outro Deck do mesmo nível); continua existindo
@@ -148,11 +157,12 @@ function deckBrowserChildren(decks, nodeId){
     if (course) out.push(course);
     const root = deckBrowserRootDeck(decks);
     if (root) getDeckChildren(decks, root.id)
-      .filter(d => d.kind !== 'teacher_root' || deckBrowserHasTeacherLink())
+      // Cartões da professora saíram da Revisão: ficam na aba Aluno > Revisão (2026-10-14).
+      .filter(d => d.kind !== 'teacher_root')
       .forEach(d => out.push(d));
     return out.sort((a, b) => (kindOrder[a.kind] ?? 9) - (kindOrder[b.kind] ?? 9) || a.id - b.id);
   }
-  return getDeckChildren(decks, nodeId).slice().sort((a, b) => {
+  return getDeckChildren(decks, nodeId).filter(deckBrowserUnitVisible).sort((a, b) => {
     // Unidades da Trilha seguem a ordem do currículo (UNITS); o resto por id.
     if (a.kind === 'course' && b.kind === 'course' && typeof UNITS !== 'undefined'){
       const ia = UNITS.findIndex(u => String(u.id) === String(a.course_unit_id));
@@ -164,7 +174,9 @@ function deckBrowserChildren(decks, nodeId){
 }
 
 function deckBrowserPool(){
-  if (typeof eligibleDeckReviewPool === 'function') return eligibleDeckReviewPool();
+  // Sem os cartões da professora (aba Aluno > Revisão), senão o total do idioma os contaria.
+  const notClass = c => typeof isClassReviewCard !== 'function' || !isClassReviewCard(c);
+  if (typeof eligibleDeckReviewPool === 'function') return eligibleDeckReviewPool().filter(notClass);
   return ((typeof STATE !== 'undefined' && STATE.cards) || []).filter(c => typeof isCardLessonCompleted !== 'function' || isCardLessonCompleted(c));
 }
 
@@ -303,7 +315,7 @@ function openReviewSettingsModal(){
   overlay.className = 'app-modal-overlay';
   overlay.style.zIndex = 'calc(var(--z-modal-backdrop) - 1)';
   overlay.innerHTML = `
-    <div class="app-modal review-settings-modal" role="dialog" aria-modal="true" aria-labelledby="review-settings-modal-title">
+    <div class="app-modal deck-window deck-window-sm review-settings-modal" role="dialog" aria-modal="true" aria-labelledby="review-settings-modal-title">
       <div class="app-modal-header">
         <h3 id="review-settings-modal-title">${escapeHTML(t('review.deck.settings'))}</h3>
         <button type="button" class="app-modal-close" data-review-settings-close aria-label="${escapeHTML(t('common.close'))}">✕</button>
@@ -440,6 +452,7 @@ function openCreateDeckForm(box, parentId){
   const options = (typeof orderedPersonalDecks === 'function' ? orderedPersonalDecks(decks) : []);
   if (!options.length){ box.innerHTML = `<p class="profile-edit-error">${escapeHTML(t('review.deck.createLoadError'))}</p>`; return; }
   box.innerHTML = `<div class="deck-inline-form" role="group" aria-label="${escapeHTML(t('review.deck.create'))}">
+      <p class="deck-inline-title" aria-hidden="true">${escapeHTML(t('review.deck.create'))}</p>
       <label class="profile-edit-label" for="deck-create-name">${escapeHTML(t('review.deck.nameLabel'))}</label>
       <input type="text" id="deck-create-name" class="profile-edit-input" maxlength="60" placeholder="${escapeHTML(t('review.deck.namePlaceholder'))}">
       <label class="profile-edit-label" for="deck-create-parent">${escapeHTML(t('review.deck.insideLabel'))}</label>
@@ -458,7 +471,7 @@ function openCreateDeckForm(box, parentId){
     const btn = box.querySelector('[data-deck-create-save]');
     errEl.textContent = '';
     btn.disabled = true;
-    const res = await createPersonalDeck({ name: nameEl.value, parentDeckId: Number(box.querySelector('#deck-create-parent').value), languageAppKey: APP_KEY, decks });
+    const res = await createPersonalDeck({ name: nameEl.value, parentDeckId: Number(box.querySelector('#deck-create-parent').value), languageAppKey: APP_KEY, decks, source: 'manual' });
     btn.disabled = false;
     if (!res.ok){ errEl.textContent = res.error; return; }
     STATE.decks = (STATE.decks || []).concat([res.deck]);
@@ -474,6 +487,7 @@ function openCreateDeckForm(box, parentId){
 function openRenameDeckForm(box, deck){
   if (!box) return;
   box.innerHTML = `<div class="deck-inline-form" role="group" aria-label="${escapeHTML(t('review.deck.renameAria'))}">
+      <p class="deck-inline-title" aria-hidden="true">${escapeHTML(t('review.deck.renameAria'))}</p>
       <label class="profile-edit-label" for="deck-rename-name">${escapeHTML(t('review.deck.newName'))}</label>
       <input type="text" id="deck-rename-name" class="profile-edit-input" maxlength="60" value="${escapeHTML(deck.name || '')}">
       <p class="profile-edit-error" data-deck-rename-error></p>
@@ -584,7 +598,7 @@ async function restoreDeckBrowserRoute(route){
   const app = document.getElementById('app');
   if (app && app.dataset.activeTab && app.dataset.activeTab !== 'review') return; // a pessoa já saiu da Revisão
   const routeDeck = route.nodeId !== 'lang' ? getDeckById(deckBrowserDecks(), route.nodeId) : null;
-  if (route.nodeId !== 'lang' && (!routeDeck || (deckBrowserIsTeacherDeck(routeDeck) && !deckBrowserHasTeacherLink()))){ backToDeckTable(); return; }
+  if (route.nodeId !== 'lang' && (!routeDeck || deckBrowserIsTeacherDeck(routeDeck))){ backToDeckTable(); return; }
   if (route.view === 'panel') openDeckPanel(route.nodeId);
   else openDeckDetail(route.nodeId);
 }
@@ -717,7 +731,7 @@ async function openAddCardModal(opts){
   // podem abrir por cima desta; acima do Painel.
   overlay.style.zIndex = 'calc(var(--z-modal-backdrop) - 1)';
   overlay.innerHTML = `
-    <div class="app-modal add-card-modal" role="dialog" aria-modal="true" aria-labelledby="add-card-modal-title">
+    <div class="app-modal deck-window add-card-modal" role="dialog" aria-modal="true" aria-labelledby="add-card-modal-title">
       <div class="app-modal-header">
         <h3 id="add-card-modal-title">${escapeHTML(t('review.deck.addCard'))}</h3>
         <button type="button" class="app-modal-close" data-add-card-close aria-label="${escapeHTML(t('common.close'))}">✕</button>
@@ -781,14 +795,14 @@ function openDeckDeleteDialog(deck, box){
   const targets = deckBrowserMoveTargets(decks, deck);
   box.innerHTML = `
     <div class="deck-delete-dialog" role="alertdialog" aria-labelledby="deck-delete-title">
-      <p id="deck-delete-title"><strong>${escapeHTML(t('review.deck.deleteTitle'))}</strong></p>
+      <p id="deck-delete-title" class="deck-inline-title">${escapeHTML(t('review.deck.deleteTitle'))}</p>
       <p class="profile-edit-hint">${escapeHTML(t('review.deck.deleteHas', { name: deck.name }))} ${noteCount} ${deckBrowserWord('review.deck.cardWord', noteCount)}${subdecks ? `${escapeHTML(t('review.deck.and'))}${subdecks} ${deckBrowserWord('review.deck.subdeckWord', subdecks)}${escapeHTML(t('review.deck.alsoDeleted'))}` : ''}${escapeHTML(t('review.deck.moveFirst'))}</p>
       ${noteCount ? `<label class="profile-edit-label" for="deck-delete-target">${escapeHTML(t('review.deck.moveCardsTo'))}</label>
       <select id="deck-delete-target" class="profile-edit-input">${targets.map(d => `<option value="${d.id}">${escapeHTML(deckBrowserDeckLabel(d))}</option>`).join('')}</select>` : ''}
       <div class="deck-inline-actions">
-        ${noteCount ? `<button type="button" class="btn btn-secondary" data-deck-delete-move>${escapeHTML(t('review.deck.moveToOther'))}</button>` : ''}
-        <button type="button" class="btn btn-primary deck-delete-confirm" data-deck-delete-perm>${escapeHTML(t('review.deck.deletePermanently'))}</button>
         <button type="button" class="btn btn-secondary" data-deck-delete-cancel>${escapeHTML(t('review.deck.cancel'))}</button>
+        ${noteCount ? `<button type="button" class="btn btn-secondary" data-deck-delete-move>${escapeHTML(t('review.deck.moveToOther'))}</button>` : ''}
+        <button type="button" class="btn deck-delete-confirm" data-deck-delete-perm>${escapeHTML(t('review.deck.deletePermanently'))}</button>
       </div>
       <p class="profile-edit-error" data-deck-delete-error></p>
     </div>`;
@@ -941,7 +955,7 @@ function deckPanelMount(){
   overlay.className = 'app-modal-overlay deck-panel-overlay';
   overlay.style.zIndex = 'calc(var(--z-modal-backdrop) - 2)';
   overlay.innerHTML = `
-    <div class="app-modal deck-panel-modal" role="dialog" aria-modal="true" aria-labelledby="deck-panel-title">
+    <div class="app-modal deck-window deck-panel-modal" role="dialog" aria-modal="true" aria-labelledby="deck-panel-title">
       <div class="deck-panel-head">
         <h3 id="deck-panel-title">${escapeHTML(t('review.deck.browse'))}</h3>
         <input type="search" class="profile-edit-input deck-panel-search" data-panel-search placeholder="${escapeHTML(t('review.panel.searchPlaceholder'))}" aria-label="${escapeHTML(t('review.panel.searchAria'))}">

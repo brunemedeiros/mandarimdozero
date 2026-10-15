@@ -38,6 +38,17 @@ const PANEL_STUB = (who) => {
   supabaseClient.rpc = async (name, args) => {
     (window.__rpcCalls = window.__rpcCalls || []).push([name, args]);
     if (name === 'my_permissions') return { data: { roles: roles.roles, admin: roles.admin, permissions: Object.fromEntries(CAT.map(c => [c.key, { enabled: perm(c.key), limit: null }])) }, error: null };
+    // 094: aulas com Presença, Competências e aula de turma.
+    if (name === 'get_my_class_log_entries') return { data: who === 'S' ? [
+      { id: 2, class_date: '2026-10-09', topic: 'Passé composé', homework: 'Exercícios 1 a 3', observations: null, attendance_name: 'Presente', attendance_color: 'green', skills: ['gramatica', 'escuta'], classroom_id: null, classroom_name: null },
+      { id: 1, class_date: '2026-10-02', topic: 'Apresentação', homework: null, observations: 'Livro, página 12', attendance_name: 'Faltou', attendance_color: 'red', skills: [], classroom_id: 501, classroom_name: 'Dupla' },
+    ] : [], error: null };
+    if (name === 'ensure_class_attendance_labels'){
+      const L = window.__DB.class_attendance_labels = window.__DB.class_attendance_labels || [];
+      if (!L.some(l => l.teacher_id === window.__uid)) L.push({ id: 61, teacher_id: window.__uid, name: 'Presente', color: 'green', counts_as: 'present', sort_order: 1, archived: false }, { id: 62, teacher_id: window.__uid, name: 'Faltou', color: 'red', counts_as: 'absent', sort_order: 2, archived: false });
+      return { data: L.filter(l => l.teacher_id === window.__uid).sort((a, b) => a.sort_order - b.sort_order || a.id - b.id), error: null };
+    }
+    if (name === 'mural_list') return { data: { as_teacher: roles.roles.includes('teacher') ? { classrooms: [{ id: 501, name: 'Dupla', members: ['S'], unread: 0 }], roster: [] } : null, as_student: null }, error: null };
     if (name === 'get_my_class_logs') return { data: who === 'S' ? [
       { id: 2, class_date: '2026-10-09', topic: 'Passé composé', homework: 'Exercícios 1 a 3', observations: null },
       { id: 1, class_date: '2026-10-02', topic: 'Apresentação', homework: null, observations: 'Livro, página 12' },
@@ -45,6 +56,17 @@ const PANEL_STUB = (who) => {
     if (name === 'admin_get_account_roles') return { data: { roles: ['user'].concat(window.__grants.filter(g => g[0] === args.p_user).map(g => g[1])), admin: args.p_user === 'A', grants: [] }, error: null };
     if (name === 'admin_grant_role'){ window.__grants.push([args.p_user, args.p_role]); return { data: {}, error: null }; }
     if (name === 'admin_revoke_role'){ window.__grants = window.__grants.filter(g => !(g[0] === args.p_user && g[1] === args.p_role)); return { data: {}, error: null }; }
+    // Convite de aluno (077)
+    if (name === 'teacher_invite_student'){
+      if (args.p_student === 'S') return { data: { error: 'student_has_teacher' }, error: null };
+      window.__DB.teacher_students.push({ id: 900 + window.__DB.teacher_students.length, teacher_id: window.__uid, student_id: args.p_student, language_app_key: args.p_lang, status: 'invited', invited_at: new Date().toISOString(), created_at: new Date().toISOString() });
+      return { data: { ok: true, status: 'invited' }, error: null };
+    }
+    if (name === 'teacher_invite_link') return { data: { ok: true, code: args.p_reset ? 'zzz999yyy8' : (args.p_lang === 'mandarim' ? 'mmm111nnn2' : 'abc123def4') }, error: null };
+    if (name === 'my_teacher_invites') return { data: who === 'S' && !window.__answered ? [{ link_id: 77, teacher_id: 'P', teacher_name: 'Carla', teacher_username: 'carla.prof', teacher_avatar: null, language_app_key: window.__appKey, invited_at: new Date(Date.now() - 2 * 86400000).toISOString() }] : [], error: null };
+    if (name === 'respond_teacher_invite'){ window.__answered = args; return { data: { ok: true, status: args.p_accept ? 'active' : 'removed' }, error: null }; }
+    if (name === 'invite_code_info') return { data: args.p_code === 'abc123def4' ? { teacher_name: 'Carla', teacher_username: 'carla.prof', teacher_avatar: null, language_app_key: 'frances' } : { error: 'invalid_code' }, error: null };
+    if (name === 'accept_invite_code'){ window.__acceptedCode = args.p_code; return { data: { ok: true, status: 'active', language_app_key: 'frances' }, error: null }; }
     if (name === 'admin_set_role_permission'){ const r = window.__DB.role_permissions.find(x => x.role === args.p_role && x.permission_key === args.p_key); if (r){ r.enabled = args.p_enabled; r.limit_value = args.p_limit; } return { data: null, error: null }; }
     return orig(name, args);
   };
@@ -54,6 +76,17 @@ const PANEL_STUB = (who) => {
   await new Promise(r => server.listen(0, '127.0.0.1', r));
   const port = server.address().port;
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
+  {
+    const ctx = await browser.newContext({ serviceWorkers: 'block' });
+    const page = await ctx.newPage();
+    await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
+    await page.goto(`http://127.0.0.1:${port}/fr/index.html?convite=ABC123def4&x=1`);
+    await page.waitForFunction(() => typeof teacherInvitesAfterLogin === 'function');
+    check('link ?convite= guardado e tirado do endereço', await page.evaluate(() => localStorage.getItem('pendingTeacherInvite') === 'abc123def4' && location.search === '?x=1'), await page.evaluate(() => [localStorage.getItem('pendingTeacherInvite'), location.search]));
+    await ctx.close();
+  }
   const combos = [['fr','light'],['fr','dark'],['zh','light'],['zh','dark']];
   for (const [lang, theme] of combos){
     const appKey = lang === 'fr' ? 'frances' : 'mandarim';
@@ -88,12 +121,12 @@ const PANEL_STUB = (who) => {
       // ---- conta comum ----
       await login('U', 'u@x.com');
       L('comum: sem menu professora', !(await ev(() => [...document.querySelectorAll('.teacher-only-nav')].some(e => e.style.display !== 'none'))));
-      L('comum: sem Minhas aulas/Material', (await ev(() => ['my-class-logs-btn','support-materials-btn'].map(id => document.getElementById(id).style.display))).every(d => d === 'none'));
+      L('comum: sem item Aluno', await ev(() => document.getElementById('student-panel-btn').style.display === 'none'));
 
       // ---- aluna com aulas e material ----
       await login('S', 's@x.com');
-      await page.waitForFunction(() => document.getElementById('my-class-logs-btn').style.display === '');
-      L('aluna: Minhas aulas e Material no menu', (await ev(() => ['my-class-logs-btn','support-materials-btn'].map(id => document.getElementById(id).style.display))).every(d => d === ''));
+      await page.waitForFunction(() => document.getElementById('student-panel-btn').style.display === '');
+      L('aluna: item Aluno no menu (Aulas e Material ficam dentro)', true);
       L('aluna: sem menu professora', !(await ev(() => [...document.querySelectorAll('.teacher-only-nav')].some(e => e.style.display !== 'none'))));
       await ev(() => switchTab('my-class-logs'));
       await page.waitForSelector('.class-log-entry');
@@ -101,10 +134,44 @@ const PANEL_STUB = (who) => {
       L('aluna: 2 aulas, mais recente primeiro', logs.length === 2 && logs[0].includes('Passé composé'), logs);
       L('aluna: data no fuso local (9, não 8)', /\b9\b/.test(logs[0]), logs[0]);
       L('aluna: campo vazio não aparece', !logs[1].includes(lang === 'fr' ? 'Lição' : 'Lição'), logs[1]);
+      L('aluna: Presença colorida (verde = presente, vermelho = faltou)', await ev(() => { const p = [...document.querySelectorAll('.class-log-entry .att-pill')]; return p.length === 2 && p[0].dataset.color === 'green' && p[0].textContent.trim() === 'Presente' && p[1].dataset.color === 'red'; }));
+      L('aluna: Competências como etiquetas', await ev(() => [...document.querySelectorAll('.class-log-entry')][0].querySelectorAll('.skill-chip').length === 2 && [...document.querySelectorAll('.class-log-entry')][0].textContent.includes(t('panel.classLog.skill.gramatica'))));
+      L('aluna: aula da turma mostra o nome da turma', await ev(() => [...document.querySelectorAll('.class-log-entry')][1].querySelector('.class-log-classroom')?.textContent.includes('Dupla')));
+      L('aluna: cor do rótulo visível (borda com a cor)', await ev(() => getComputedStyle(document.querySelector('.class-log-entry .att-pill')).borderTopColor !== getComputedStyle(document.querySelectorAll('.class-log-entry .att-pill')[1]).borderTopColor));
       await shot('minhas-aulas');
       await ev(() => switchTab('support-materials'));
       await page.waitForFunction(() => document.getElementById('support-materials-content').textContent.includes('passé composé'));
       L('aluna: material aparece', true);
+      // ---- convite pendente na Trilha ----
+      await ev(() => switchTab('path'));
+      await ev(() => refreshTeacherInviteBanner());
+      await page.waitForSelector('#teacher-invite-banner .tinv-banner');
+      L('aluna: faixa do convite na Trilha', await ev(() => document.querySelector('#view-path > #teacher-invite-banner').textContent.includes('Carla')));
+      await page.click('[data-tinv-open]');
+      await page.waitForSelector('#teacher-invite-modal .tinv-card');
+      L('aluna: cartão com Aceitar e Recusar', await ev(() => [...document.querySelectorAll('#teacher-invite-modal [data-tinv-act]')].map(b => b.dataset.tinvAct).join() === 'accept,decline'));
+      await shot('aluna-cartao-convite');
+      await page.click('#teacher-invite-modal [data-tinv-act="accept"]');
+      await page.waitForFunction(() => !document.getElementById('teacher-invite-modal'));
+      L('aluna: aceitar chama a RPC', await ev(() => window.__answered && window.__answered.p_link_id === 77 && window.__answered.p_accept === true));
+      await page.waitForFunction(() => document.getElementById('teacher-invite-banner').hidden);
+      L('aluna: faixa some depois de responder', true);
+      // ---- link guardado: logada ----
+      await ev(() => { localStorage.setItem('pendingTeacherInvite', 'abc123def4'); teacherInvitesAfterLogin(); });
+      await page.waitForSelector('#teacher-invite-modal .tinv-card');
+      L('link: cartão com Agora não', await ev(() => !!document.querySelector('#teacher-invite-modal [data-tinv-act="later"]')));
+      await page.click('#teacher-invite-modal [data-tinv-act="accept"]');
+      await page.waitForFunction(() => !document.getElementById('teacher-invite-modal'));
+      L('link: aceitar pelo código e esquecer o código', await ev(() => window.__acceptedCode === 'abc123def4' && !localStorage.getItem('pendingTeacherInvite')));
+      // ---- link guardado: sem login ----
+      await ev(async () => { CURRENT_USER = false; window.__gate = 0; goToNeutralGate = () => { window.__gate++; }; localStorage.setItem('pendingTeacherInvite', 'abc123def4'); window.__gateShown = await teacherInviteGateIfPending(); });
+      L('sem login: cartão aparece', await ev(() => window.__gateShown === true && !!document.getElementById('teacher-invite-modal')));
+      L('sem login: botão Entrar para aceitar', await ev(() => document.querySelector('#teacher-invite-modal [data-tinv-act="accept"]').textContent === t('tinvite.card.loginToAccept')));
+      await shot('visitante-cartao-convite');
+      await page.click('#teacher-invite-modal [data-tinv-act="accept"]');
+      L('sem login: vai para o portão e guarda o código', await ev(() => window.__gate === 1 && localStorage.getItem('pendingTeacherInvite') === 'abc123def4'));
+      await ev(() => { closeTeacherInviteCard(); localStorage.setItem('pendingTeacherInvite', 'xxxxxxxxxx'); });
+      L('sem login: código inválido não mostra cartão', !(await ev(() => teacherInviteGateIfPending())) && await ev(() => !localStorage.getItem('pendingTeacherInvite')));
 
       // ---- professora (não admin) ----
       await login('P', 'p@x.com');
@@ -113,7 +180,7 @@ const PANEL_STUB = (who) => {
       await ev(() => switchTab('teacher-panel'));
       await page.waitForTimeout(400);
       const tabs = await ev(() => [...document.querySelectorAll('#view-teacher-panel [data-teacher-section]')].map(b => b.textContent.trim()));
-      L('professora: 4 abas', tabs.length === 4, tabs);
+      L('professora: 5 abas (Mural entrou na Etapa 4)', tabs.length === 5, tabs);
       L('professora: Alunos abre (sem aviso de acesso negado)', !(await ev(() => document.getElementById('admin-students-content').textContent.includes(t('admin.common.adminOnly')))));
       L('professora: sem formulário nem botão de vincular (só a admin vincula)', await ev(() => !document.querySelector('#admin-assign-student-form') && !document.querySelector('[data-abrir-dialogo="dlg-vincular-aluno"]')));
       await ev(() => switchTab('admin-badges'));

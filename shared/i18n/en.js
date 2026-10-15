@@ -69,6 +69,21 @@ window.I18N_CATALOG['en'] = {
   'settings.uiLanguage.confirm.toPt': 'Text, explanations, and translations will now appear in Portuguese. Your progress stays saved.', // ALTA
   'settings.uiLanguage.confirm.cancel': 'Cancel', // ALTA
   'settings.uiLanguage.confirm.yes': 'Change', // ALTA
+  'courses.group.pt-BR': 'Courses for Portuguese speakers', // ALTA
+  'courses.group.en': 'Courses for English speakers', // ALTA
+  'courseMenu.title': 'My courses', // ALTA
+  'courseMenu.add': 'Add a course', // ALTA
+  'courseMenu.speakLabel': 'Language you speak', // ALTA
+  'courseMenu.speak.pt-BR': 'I speak Portuguese', // ALTA
+  'courseMenu.speak.en': 'I speak English', // ALTA
+  'courses.beta': 'beta', // ALTA
+  'courses.confirm.title': 'Switch course?', // ALTA
+  'courses.confirm.intro': 'You are about to switch to the course', // ALTA
+  'courses.confirm.p1': 'It is a separate course with its own progress: if you have never studied in it, you start from zero.', // ALTA
+  'courses.confirm.p2': 'Your progress in the current course stays saved and comes back when you return to it.', // ALTA
+  'courses.confirm.p3': 'Your day streak and achievements stay the same.', // ALTA
+  'courses.first.title': 'Which course do you want to start?', // ALTA
+  'courses.first.sub': 'You can switch or add courses later from the flag at the top of the screen. Each course keeps its own progress.', // ALTA
 
   // Fase 6 lote 1
   'settings.title': 'Settings', // ALTA
@@ -141,14 +156,14 @@ window.I18N_CATALOG['en'] = {
   'notif.pref.loadFailed': 'Could not load your preferences right now.', // ALTA
   'notif.pref.sectionTitle': 'Notifications', // ALTA
   'notif.pref.inApp.title': 'In-app notifications', // ALTA
-  'notif.pref.inApp.sub': 'Bell in the top bar + notification center. Turning this off silences everything at once -- fine-tune by category under "Customize by category" below.', // ALTA
+  'notif.pref.inApp.sub': 'Bell at the top of the screen and notification center. Turning this off silences everything at once. To adjust each category, use "Customize by category" below.', // ALTA
   'notif.pref.push.title': 'Browser alerts (push)', // ALTA
-  'notif.pref.push.sub': 'Notifies you even when the app is closed. Turn on by category under "Customize" below -- this switch handles the browser permission and turns everything on at once.', // MÉDIA
+  'notif.pref.push.sub': 'Notifies you even when the app is closed. This switch handles the browser permission and turns everything on at once. To choose by category, use "Customize by category" below.', // MÉDIA
   'notif.pref.email.title': 'Emails', // ALTA
-  'notif.pref.email.sub': 'Sends to your account email in some cases (e.g., when you disappear for a while). Turn on by category under "Customize" below -- this switch turns everything on at once.', // MÉDIA
+  'notif.pref.email.sub': 'Sends to your account email in some cases (for example, when you disappear for a while). This switch turns everything on at once. To choose by category, use "Customize by category" below.', // MÉDIA
   'notif.pref.quiet.section': 'Quiet hours', // ALTA
   'notif.pref.quiet.title': 'Do not notify between', // ALTA
-  'notif.pref.quiet.sub': 'Applies to automatically calculated notifications (review, streak...) -- instant ones (XP, badge) still appear. Approximate time (not yet adjusted to your time zone).', // MÉDIA
+  'notif.pref.quiet.sub': 'Applies to automatically calculated notifications (review, streak...). Instant ones (XP, badge) still appear. Approximate time (not yet adjusted to your time zone).', // MÉDIA
   'notif.pref.quiet.startAria': 'Start of quiet hours', // ALTA
   'notif.pref.quiet.endAria': 'End of quiet hours', // ALTA
   'notif.pref.quiet.until': 'to', // ALTA
@@ -227,6 +242,7 @@ window.I18N_CATALOG['en'] = {
   'review.complete.title': 'Review complete!', // ALTA
   'review.complete.reviewed': 'You reviewed {n} card(s) this session.', // ALTA
   'review.session.deckEmptyTitle': 'No cards in this Deck yet', // ALTA
+  'review.session.classEmptyTitle': 'No lesson cards to review right now', // ALTA
   'review.session.tagsEmptyTitle': 'No cards with the selected tags', // ALTA
   'review.session.unitEmptyTitle': 'No cards in this unit yet', // ALTA
   'review.session.allDoneTitle': 'All caught up!', // ALTA
@@ -281,7 +297,7 @@ window.I18N_CATALOG['en'] = {
   'deck.studyThis': 'Study this Deck', // ALTA
   'deck.countsFull': '{total} cards · {new} new · {learning} learning · {review} to review · {due} due', // ALTA
   'deck.publicBadge': '🌐 Public', // ALTA
-  'deck.publish': 'Publish', // ALTA
+  'deck.publish': '🔒 Private', // ALTA
   'deck.cardsCount': { one: '{n} card', other: '{n} cards' }, // ALTA
   'deck.countsDetail': { one: '{n} card · {new} new · {learning} learning · {review} to review', other: '{n} cards · {new} new · {learning} learning · {review} to review' }, // MÉDIA
   'myFlashcards.lang.fr': 'French', // ALTA
@@ -304,7 +320,7 @@ window.I18N_CATALOG['en'] = {
   'myFlashcards.free.hint': '🔒 On the free plan you create Normal cards, with image/audio upload per field (external URL also available). <strong>Premium</strong> unlocks Normal with reverse, Multiple choice, Fill in the blank, Type the answer, plus generating audio from text and recording audio with the microphone.', // MÉDIA
   'myFlashcards.cardType': 'Card type', // ALTA
   'myFlashcards.fields.title': 'Fields', // ALTA
-  'myFlashcards.fields.hint': 'Add this card\'s fields -- for example, Front and Back for a Normal card. Each field has its own language and its own audio options.', // ALTA
+  'myFlashcards.fields.hint': 'Add this card\'s fields, for example Front and Back for a Normal card. Each field has its own language and its own audio options.', // ALTA
   'myFlashcards.preview': '👁️ Preview', // ALTA
   'myFlashcards.deckDest': 'Destination Deck', // ALTA
   'myFlashcards.note.label': 'Note (optional)', // ALTA
@@ -365,7 +381,7 @@ window.I18N_CATALOG['en'] = {
   'zh.toast.operaAudioFailed': '🔇 Opera couldn\'t play this audio', // ALTA
   'zh.toast.storyDone': 'Story completed! 🎉', // ALTA
   'zh.toast.unitDone': 'Unit completed! 🏮', // ALTA
-  'zh.toast.hanziLessonDone': 'Hanzi lesson completed! 🈺', // ALTA
+  'zh.toast.hanziLessonDone': 'Hanzi lesson completed! 🀄', // ALTA
   'zh.review.cloze.placeholder': 'Type the missing pinyin', // ALTA
   'zh.review.typeAnswer.placeholder': 'Type the answer in pinyin', // ALTA
   'zh.review.match.pairs': 'Pairs: {done}/{total}', // ALTA
@@ -635,6 +651,44 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.hintMore': '💡 More help', // ALTA
   'fr.conj.hintMoreTitle': 'Reveal most of the letters', // ALTA
   'fr.conj.hintMax': '💡 Maximum hint', // ALTA
+  'fr.conj.sessionSize': 'Verbs per session', // ALTA
+  'fr.conj.sessionForms': '≈ {n} forms to fill in', // ALTA
+  'fr.conj.reviewTitle': 'Forms to review ({n})', // ALTA
+  'fr.conj.practiceMistakes': 'Practice only the ones I missed', // ALTA
+  'fr.conj.almost': 'Almost', // ALTA
+  'fr.conj.otherForm': '"{form}" is the {tense} form.', // ALTA
+  'fr.conj.sel.verbs': 'Verbs', // ALTA
+  'fr.conj.sel.searchLabel': 'Practice specific verbs (in French or Portuguese)', // ALTA
+  'fr.conj.sel.searchPh': 'manger, être, aller...', // ALTA
+  'fr.conj.sel.noMatch': 'This verb is not on the list yet.', // ALTA
+  'fr.conj.sel.pickedNote': 'The session will use only these verbs. The filters below are set aside.', // ALTA
+  'fr.conj.sel.removeVerb': 'Remove {verb}', // ALTA
+  'fr.conj.sel.pickLimit': 'You can pick up to {n} verbs.', // ALTA
+  'fr.conj.sel.orFilters': 'Or draw verbs with the filters', // ALTA
+  'fr.conj.sel.onlyRegular': 'Regular verbs only', // ALTA
+  'fr.conj.sel.onlyIrregular': 'Irregular verbs only', // ALTA
+  'fr.conj.sel.tenses': 'Verb tenses', // ALTA
+  'fr.conj.sel.langFr': 'French', // ALTA
+  'fr.conj.sel.langPt': 'Portuguese', // ALTA
+  'games.tabPractice': 'Practice', // ALTA
+  'games.tabGames': 'Games', // ALTA
+  'games.premium': 'Premium', // ALTA
+  'games.perRound': '{n} sentences per round', // ALTA
+  'games.play': 'Play', // ALTA
+  'games.counter': 'Sentence {i} of {n}', // ALTA
+  'games.right': 'Right!', // ALTA
+  'games.wrong': 'Not this time.', // ALTA
+  'games.answerWas': 'The answer is "{form}".', // ALTA
+  'games.whyTense': 'Why {tense}?', // ALTA
+  'games.listen': 'Listen to the sentence', // ALTA
+  'games.next': 'Next sentence', // ALTA
+  'games.seeResult': 'See result', // ALTA
+  'games.resultTitle': 'End of round', // ALTA
+  'games.reviewTitle': 'Sentences to review ({n})', // ALTA
+  'games.perfect': 'You got them all right!', // ALTA
+  'games.practiceMistakes': 'Practice only my mistakes', // ALTA
+  'games.again': 'Play again', // ALTA
+  'games.backToGames': '← Back to games', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA
@@ -675,6 +729,8 @@ window.I18N_CATALOG['en'] = {
   'review.deck.lang.portugues': 'Portuguese', // ALTA -- Revisão nova
   'review.deck.lang.fallback': 'Language', // ALTA -- Revisão nova
   'review.deck.myDecks': 'My Decks', // ALTA -- Revisão nova
+  'review.observation': 'Note from your teacher', // ALTA
+  'review.almost': 'Almost there', // ALTA
   'review.deck.teacherCards': 'Teacher\'s cards', // MÉDIA -- Revisão nova
   'review.deck.studyPath': 'Study Path', // MÉDIA -- Revisão nova
   'review.deck.allDecks': 'All Decks', // ALTA -- Revisão nova
@@ -726,7 +782,7 @@ window.I18N_CATALOG['en'] = {
   'review.deck.createSubdeck': 'Create subdeck', // ALTA -- Revisão nova
   'review.deck.rename': 'Rename', // ALTA -- Revisão nova
   'review.deck.isPublic': '🌐 Public', // ALTA -- Revisão nova
-  'review.deck.publish': 'Publish', // ALTA -- Revisão nova
+  'review.deck.publish': '🔒 Private', // ALTA -- Revisão nova
   'review.deck.delete': 'Delete', // ALTA -- Revisão nova
   'review.deck.loading': 'Loading…', // ALTA -- Revisão nova
   'review.deck.loadError': 'Couldn\'t load. Try again.', // ALTA -- Revisão nova
@@ -838,6 +894,7 @@ window.I18N_CATALOG['en'] = {
   'review.today.upToDate': 'You\'re all caught up for today.', // ALTA -- Revisão nova
   'review.today.speedSplitAria': 'New {new}, Learning {learning}, Review {review}', // ALTA -- Revisão nova
   'review.backToDeck': '← Back to Deck', // ALTA -- Revisão nova
+  'review.backToStudent': '← Back to Student', // ALTA
   'review.backToModes': '← Back to modes', // ALTA -- Revisão nova
   'review.settings.origin': 'Source', // ALTA -- Revisão nova
   'review.settings.freq.balanced': 'Balanced (recommended)', // ALTA -- Revisão nova
@@ -1258,7 +1315,7 @@ window.I18N_CATALOG['en'] = {
   'admin.students.link': 'Link', // ALTA
   'admin.students.yourStudents': 'Your students ({n})', // ALTA
   'admin.students.linkedToast': '✓ @{username} linked as a student.', // ALTA
-  'admin.students.removeConfirm': 'Remove this link? The student\'s progress and history are preserved -- they just stop appearing in your list.', // ALTA
+  'admin.students.removeConfirm': 'End the link with this student? Their progress and history are kept; they leave your list and lose your student badge.', // ALTA
   'admin.students.metrics.failed': 'We couldn\'t load the metrics right now.', // ALTA
   'admin.students.metrics.noCards': 'You haven\'t created any cards for this student yet, in the "📇 Flashcards" tab.', // ALTA
   'admin.students.metrics.noRecord': 'no record', // ALTA
@@ -1322,7 +1379,7 @@ window.I18N_CATALOG['en'] = {
   'admin.materials.send': 'Send material', // ALTA
   'admin.materials.sentN': '✓ Material sent to {n} students.', // ALTA
   'admin.materials.sent': '✓ Material sent.', // ALTA
-  'teacherLogs.err.needOneField': 'Fill in at least one field (topic, homework, observations or free text).', // ALTA
+  'teacherLogs.err.needOneField': 'Fill in at least one field (attendance, skills, topic, homework, observations or free text).', // ALTA
   'teacherLogs.err.saveFailed': 'We couldn\'t save the record right now.', // ALTA
   'teacherMaterials.err.titleRequired': 'Enter a title for the material.', // ALTA
   'teacherMaterials.err.needContent': 'Fill in at least the description, a link or a file.', // ALTA
@@ -1344,9 +1401,9 @@ window.I18N_CATALOG['en'] = {
   'flashcardModel.tts.missingText': 'Enter the text to synthesize.', // ALTA
   'flashcardModel.tts.missingLanguage': 'Choose the synthesis language.', // ALTA
   'flashcardModel.tts.uploadFailed': 'Audio generated, but it could not be saved -- try again.', // ALTA
-  'admin.flashcards.hint.flip': 'Image and audio appear next to the front of the card. Note is a reminder just for you -- the student never sees it.', // ALTA
-  'admin.flashcards.hint.mc': 'Image and audio appear next to the question, above the multiple-choice options. Note is a reminder just for you -- the student never sees it.', // ALTA
-  'admin.flashcards.hint.cloze': 'Image and audio appear next to the sentence with the blank. Note is a reminder just for you -- the student never sees it.', // ALTA
+  'admin.flashcards.hint.flip': 'Image and audio appear next to the front of the card. Notes show up for the student after they answer.', // ALTA
+  'admin.flashcards.hint.mc': 'Image and audio appear next to the question, above the multiple-choice options. Notes show up for the student after they answer.', // ALTA
+  'admin.flashcards.hint.cloze': 'Image and audio appear next to the sentence with the blank. Notes show up for the student after they answer.', // ALTA
   'admin.flashcards.cardType.normal': 'Normal', // ALTA
   'admin.flashcards.cardType.normalReversed': 'Normal with reverse', // ALTA
   'admin.flashcards.cardType.multipleChoice': 'Multiple choice', // ALTA
@@ -1378,7 +1435,7 @@ window.I18N_CATALOG['en'] = {
   'admin.flashcards.edit.err.answer': 'Enter the correct answer.', // ALTA
   'admin.flashcards.edit.err.pinyin': 'Enter the answer pinyin.', // ALTA
   'admin.flashcards.edit.err.trans': 'Enter the translation.', // ALTA
-  'admin.flashcards.native.privateNote': 'Note (private -- the student never sees it)', // ALTA
+  'admin.flashcards.native.privateNote': 'Notes (the student sees them after answering)', // ALTA
   'admin.flashcards.dest.rootDefault': 'Teacher cards (default)', // ALTA
   'admin.flashcards.dest.noDeck': '📂 <em>no Deck (card created before Decks)</em> · ', // ALTA
   'admin.flashcards.dest.deckFallback': 'Deck', // ALTA
@@ -1737,6 +1794,7 @@ window.I18N_CATALOG['en'] = {
   'adminChallenges.import.missing': '{label}: missing id/type/level', // ALTA
   'adminChallenges.import.badType': '{id}: invalid type ("{type}")', // ALTA
   'adminChallenges.import.badLevel': '{id}: invalid level ("{level}")', // ALTA
+  'adminChallenges.import.badRegister': '{id}: expression without a valid register (register: formal, neutral, familiar, slang or vulgar)', // ALTA
   'adminChallenges.import.dupId': '{id}: id already exists (duplicate)', // ALTA
   'adminChallenges.persist.failed': 'Could not save to the database: ', // ALTA
   'adminChallenges.import.importing': 'Importing…', // ALTA
@@ -1900,7 +1958,7 @@ window.I18N_CATALOG['en'] = {
   'ui.review.intensity.light': 'Light (shorter sessions)', // ALTA
   'ui.review.intensity.intense': 'Intense (longer sessions)', // ALTA
   'ui.review.practiceHint': 'Keep practicing whenever you like, even with no reviews due.', // ALTA
-  'ui.conj.sub': 'Choose the verb tenses and verb categories. You always practice all 6 persons.', // ALTA
+  'ui.conj.sub': 'Choose the verbs and the verb tenses.', // ALTA
   'ui.conj.topN': 'Number of verbs (most common first)', // ALTA
   'ui.conj.start': 'Start practice', // ALTA
   'ui.conj.backToSelect': '← Back to selection', // ALTA
@@ -1922,7 +1980,7 @@ window.I18N_CATALOG['en'] = {
   'ui.challenges.backToCategories': '← Back to categories', // ALTA
   'ui.profileEdit.username': 'Your public identifier (permanent)', // ALTA
   'ui.profileEdit.publicProfile': 'Public profile', // ALTA
-  'ui.profileEdit.publicProfileSub': 'Makes your name, badges, progress and your own cards visible to anyone with your profile link.', // ALTA
+  'ui.profileEdit.publicProfileSub': 'On: anyone with an account sees your photo, progress and public decks. Off: only friends and your teacher do; others see just your name, @ and badges, and can only find you by your exact @.', // ALTA
   'ui.profileEdit.featuredBadge': 'Featured badge (shown in the Leaderboard)', // ALTA
   'ui.kbd.title': '⌨️ Keyboard shortcuts', // ALTA
   'ui.kbd.choose': 'Pick an option by its position on screen', // ALTA
@@ -1961,6 +2019,11 @@ window.I18N_CATALOG['en'] = {
   'ui.zh.searchPh': 'Search by pinyin, hanzi or translation...', // ALTA
   'feedback.almostArrow': 'Almost! → {expected}', // ALTA
   'feedback.correctAnswerColon': 'Correct answer:', // ALTA
+  'feedback.label.yourAnswer': 'Your answer', // ALTA
+  'lesson.step.dialogueCheck': 'Did you understand?', // ALTA
+  'lesson.vocabDots.aria': 'Word {pos} of {total}', // ALTA
+  'zh.exercise.translateToChinese': 'Translate into Chinese', // ALTA
+  'zh.reorder.tapHint': 'Tap the blocks in the right order. Tap a placed one to send it back.', // ALTA
   'feedback.whereSeen': 'Where you saw this before', // ALTA
   'feedback.header.revealed': '👀 Answer revealed', // ALTA
   'feedback.header.notThisTime': '❌ Not this time', // ALTA
@@ -2062,6 +2125,125 @@ window.I18N_CATALOG['en'] = {
   'badge.catalog.pioneer.desc': 'Among the first people to use the app in its early phase', // MÉDIA
   'badge.catalog.student.name': 'Prof. Brune\'s student', // MÉDIA
   'badge.catalog.student.desc': 'Prof. Brune\'s student', // MÉDIA
+  'badge.track.days.title': 'First Step', // ALTA
+  'badge.track.days.1': 'First Step', // ALTA
+  'badge.track.days.2': 'Getting the Hang of It', // ALTA
+  'badge.track.days.3': 'Hitting the Road', // ALTA
+  'badge.track.days.4': 'Good Pace', // ALTA
+  'badge.track.days.5': 'Giant Leap', // ALTA
+  'badge.track.days.6': 'Unstoppable', // ALTA
+  'badge.track.days.goal': 'Study on {n} different days', // ALTA
+  'badge.track.days.goal.1': 'Study for the first time', // ALTA
+  'badge.track.review.title': 'Reviews', // ALTA
+  'badge.track.review.1': 'Review Apprentice', // ALTA
+  'badge.track.review.1.f': 'Review Apprentice', // ALTA
+  'badge.track.review.1.m': 'Review Apprentice', // ALTA
+  'badge.track.review.2': 'Junior Reviewer', // ALTA
+  'badge.track.review.2.f': 'Junior Reviewer', // ALTA
+  'badge.track.review.2.m': 'Junior Reviewer', // ALTA
+  'badge.track.review.3': 'Senior Reviewer', // ALTA
+  'badge.track.review.3.f': 'Senior Reviewer', // ALTA
+  'badge.track.review.3.m': 'Senior Reviewer', // ALTA
+  'badge.track.review.4': 'Review Master', // ALTA
+  'badge.track.review.goal': 'Do {n} reviews', // ALTA
+  'badge.track.streak.title': 'Streak', // ALTA
+  'badge.track.streak.1': 'Spark', // ALTA
+  'badge.track.streak.2': 'One Week!', // ALTA
+  'badge.track.streak.3': 'Flame On', // ALTA
+  'badge.track.streak.4': 'A Month on Fire', // ALTA
+  'badge.track.streak.5': 'Bonfire', // ALTA
+  'badge.track.streak.6': 'Volcano', // ALTA
+  'badge.track.streak.7': 'Eternal Flame', // ALTA
+  'badge.track.streak.goal': 'Study {n} days in a row', // ALTA
+  'badge.track.xp.title': 'XP', // ALTA
+  'badge.track.xp.1': 'First Points', // ALTA
+  'badge.track.xp.2': 'Adding Up', // ALTA
+  'badge.track.xp.3': 'A Thousand and Counting', // ALTA
+  'badge.track.xp.4': 'Pile of Points', // ALTA
+  'badge.track.xp.5': 'Mountain of XP', // ALTA
+  'badge.track.xp.6': 'XP Legend', // ALTA
+  'badge.track.xp.goal': 'Earn {n} XP', // ALTA
+  'badge.track.course1.title': 'Level {level}', // ALTA
+  'badge.track.course1.1': 'First Unit', // ALTA
+  'badge.track.course1.2': 'Halfway Through {level}', // ALTA
+  'badge.track.course1.3': '{level} Complete', // ALTA
+  'badge.track.course1.4': '{level} Aced', // ALTA
+  'badge.track.course1.goal.1': 'Finish the first unit of {level}', // ALTA
+  'badge.track.course1.goal.2': 'Finish {n} units of {level}', // ALTA
+  'badge.track.course1.goal.3': 'Finish every unit of {level}', // ALTA
+  'badge.track.course1.goal.4': 'Score 100% on every checkpoint of {level}', // ALTA
+  'badge.track.ear.title': 'Listening', // ALTA
+  'badge.track.ear.1': 'Curious Ear', // ALTA
+  'badge.track.ear.2': 'Trained Ear', // ALTA
+  'badge.track.ear.3': 'Sharp Ear', // ALTA
+  'badge.track.ear.4': 'Perfect Pitch', // ALTA
+  'badge.track.ear.goal': 'Play {n} audio clips', // ALTA
+  'badge.track.explore.title': 'Explorer', // ALTA
+  'badge.track.explore.1': 'Looking Around', // ALTA
+  'badge.track.explore.2': 'Exploring Everything', // ALTA
+  'badge.track.explore.3': 'Knows Every Corner', // ALTA
+  'badge.track.explore.goal': 'Use {n} different study modes', // ALTA
+  'badge.track.explore.goal.3': 'Use every study mode on the site', // ALTA
+  'badge.track.weekend.title': 'Weekends', // ALTA
+  'badge.track.weekend.1': 'Weekend', // ALTA
+  'badge.track.weekend.2': 'Sunday Study', // ALTA
+  'badge.track.weekend.3': 'No Days Off', // ALTA
+  'badge.track.weekend.4': 'Half a Year of Saturdays', // ALTA
+  'badge.track.weekend.5': 'A Year Without a Break', // ALTA
+  'badge.track.weekend.goal': 'Study on Saturday and Sunday on {n} weekends', // ALTA
+  'badge.track.weekend.goal.1': 'Study on both Saturday and Sunday of one weekend', // ALTA
+  'badge.track.vocab.title': 'Vocabulary', // ALTA
+  'badge.track.vocab.1': 'First Words', // ALTA
+  'badge.track.vocab.2': 'Word by Word', // ALTA
+  'badge.track.vocab.3': 'Pocket Dictionary', // ALTA
+  'badge.track.vocab.4': 'Walking Dictionary', // ALTA
+  'badge.track.vocab.goal': 'Learn {n} words', // ALTA
+  'badge.track.aced.title': 'Aced It', // ALTA
+  'badge.track.aced.1': 'Aced It!', // ALTA
+  'badge.track.aced.2': 'Bullseye', // ALTA
+  'badge.track.aced.3': 'Sharpshooter', // ALTA
+  'badge.track.aced.4': 'Perfect Score', // ALTA
+  'badge.track.aced.goal': 'Score 100% on {n} checkpoints', // ALTA
+  'badge.track.aced.goal.1': 'Score 100% on a checkpoint', // ALTA
+  'badge.track.aced.goal.4': 'Score 100% on every checkpoint of {level}', // ALTA
+  'badge.track.dictation.title': 'Dictation', // ALTA
+  'badge.track.dictation.1': 'Careful Listener', // ALTA
+  'badge.track.dictation.2': 'Sharp Listener', // ALTA
+  'badge.track.dictation.3': 'Perfect Listener', // ALTA
+  'badge.track.dictation.goal': 'Score 90% or more on {n} dictations (retries count too)', // ALTA
+  'badge.track.challenge.title': 'Challenges', // ALTA
+  'badge.track.challenge.1': 'Up for Anything', // ALTA
+  'badge.track.challenge.2': 'Challenger', // ALTA
+  'badge.track.challenge.3': 'Unbeatable', // ALTA
+  'badge.track.challenge.goal': 'Finish {n} challenges', // ALTA
+  'badge.track.challenge.goal.3': 'Finish every challenge', // ALTA
+  'badge.track.podium.title': 'Podium', // ALTA
+  'badge.track.podium.1': 'Top of the Podium', // ALTA
+  'badge.track.podium.2': 'Champion of the Week', // ALTA
+  'badge.track.podium.2.f': 'Champion of the Week', // ALTA
+  'badge.track.podium.2.m': 'Champion of the Week', // ALTA
+  'badge.track.podium.3': 'Dynasty', // ALTA
+  'badge.track.podium.goal': 'Finish {n} weeks in 1st place among your friends', // ALTA
+  'badge.track.podium.goal.1': 'Finish a week in 1st place among your friends', // ALTA
+  'badge.track.friends.title': 'Friends', // ALTA
+  'badge.track.friends.1': 'First Friend', // ALTA
+  'badge.track.friends.2': 'Study Crew', // ALTA
+  'badge.track.friends.3': 'Study Squad', // ALTA
+  'badge.track.friends.goal': 'Have {n} friends', // ALTA
+  'badge.track.friends.goal.1': 'Make your first friend', // ALTA
+  'badge.track.comeback.title': 'Back in the Game', // ALTA
+  'badge.track.comeback.1': 'Back in the Game', // ALTA
+  'badge.track.comeback.goal.1': 'Come back to studying a few days after stopping', // ALTA
+  'badge.ui.levelOf': 'Level {n} of {total}', // ALTA
+  'badge.ui.locked': 'Locked', // ALTA
+  'badge.ui.maxLevel': 'Max level', // ALTA
+  'badge.ui.classic': 'Classic', // ALTA
+  'badge.ui.newBadge': 'New achievement!', // ALTA
+  'badge.ui.levelUp': 'Level up!', // ALTA
+  'badge.ui.count': '{n} of {total} levels', // ALTA
+  'badge.ui.classicTitle': 'Classics', // ALTA
+  'friends.received.rowBadge': '{name} reacted {r} to your {badge} achievement', // ALTA
+  'friends.feed.badgeLevel': '{name} reached {badge}', // ALTA
 
   // Erros de envio de mídia e topo do site.
   'media.noFile': 'No file selected.', // ALTA
@@ -2104,23 +2286,11 @@ window.I18N_CATALOG['en'] = {
   'friends.loading': 'Loading friends...', // ALTA
   'friends.loadError': 'Couldn\'t load your friends right now.', // ALTA
   'friends.retry': 'Try again', // ALTA
-  'friends.section.incoming': 'Received requests', // ALTA
   'friends.inviteBanner': 'You opened {user}\'s invite. Tap "Add" to send the request.', // ALTA
-  'friends.section.add': 'Add a friend', // ALTA
   'friends.searchLabel': 'Search by name or @username', // ALTA
-  'friends.searchPlaceholder': 'Type at least 3 letters', // ALTA
   'friends.section.friends': 'Your friends', // ALTA
   'friends.btn.remove': 'Unfriend', // ALTA
-  'friends.empty': 'You don\'t have any friends yet. Search for someone above to send a request.', // ALTA
   'friends.section.outgoing': 'Sent requests', // ALTA
-  'friends.section.rank': 'Friends\' ranking (this week)', // ALTA
-  'friends.section.activity': 'Friends\' activity', // ALTA
-  'friends.section.invite': 'Invite friends', // ALTA
-  'friends.inviteHint': 'Want to study with someone? Send your link: whoever opens it finds your profile to send a request.', // ALTA
-  'friends.inviteCopy': 'Copy invite link', // ALTA
-  'friends.inviteShare': 'Share', // ALTA
-  'friends.section.prefs': 'Preferences', // ALTA
-  'friends.prefsSummary': 'Notifications and friend requests', // ALTA
   'friends.loadingShort': 'Loading...', // ALTA
   'friends.scopeAll': 'All', // ALTA
   'friends.scopeAria': 'Friends\' ranking language', // ALTA
@@ -2164,6 +2334,61 @@ window.I18N_CATALOG['en'] = {
   'friends.rank.noFriendsText': 'Add friends to see who is studying the most this week.', // ALTA
   'friends.rank.noFriendsBtn': 'Add a friend', // ALTA
   'friends.rank.footnoteFriends': 'The ranking resets every Monday. Friends who haven\'t earned XP yet appear at the end.', // ALTA
+  'friends.title': 'Friends', // ALTA
+  'friends.inviteBtn': '＋ Invite friends', // ALTA
+  'friends.requests.title': { one: '{n} person wants to study with you', other: '{n} people want to study with you' }, // ALTA
+  'friends.btn.notNow': 'Not now', // ALTA
+  'friends.week.title': 'This week\'s challenge', // ALTA
+  'friends.week.endsIn': { one: 'ends today', other: 'ends in {n} days' }, // ALTA
+  'friends.week.you': 'You', // ALTA
+  'friends.week.place': 'Place {n}', // ALTA
+  'friends.duel.behind': { one: '{n} XP to go to pass {name}', other: '{n} XP to go to pass {name}' }, // ALTA
+  'friends.duel.ahead': { one: 'You\'re in the lead, {n} XP ahead of {name}!', other: 'You\'re in the lead, {n} XP ahead of {name}!' }, // ALTA
+  'friends.duel.tie': 'Tied with {name}! A little more study and you take the lead.', // ALTA
+  'friends.duel.noOne': 'Nobody has scored yet this week. Study today and get ahead!', // ALTA
+  'friends.card.more': 'Options for {name}', // ALTA
+  'friends.card.viewProfile': 'View profile', // ALTA
+  'friends.empty.title': 'Studying together is more fun', // ALTA
+  'friends.empty.text': 'Invite someone to compete for XP with you every week.', // ALTA
+  'friends.empty.searchLabel': 'Or search by name or @username', // ALTA
+  'friends.empty.step1': 'A ranking just for you and your friends, every week', // ALTA
+  'friends.empty.step2': 'A heads-up when a friend passes you', // ALTA
+  'friends.empty.step3': 'See your friends\' achievements', // ALTA
+  'friends.prefs.sectionTitle': 'Friends', // ALTA
+  'friends.streak.aria': { one: '{n}-day streak', other: '{n}-day streak' }, // ALTA
+  'friends.streak.today': 'studied today', // ALTA
+  'friends.feed.streak': '{name} reached a {n}-day streak', // ALTA
+  'friends.cheer.btn': '👏 Congratulate', // ALTA
+  'friends.cheer.aria': 'Pick a reaction', // ALTA
+  'friends.cheer.done': 'You reacted {r}', // ALTA
+  'friends.cheer.thanked': '{name} said thanks 💛', // ALTA
+  'friends.cheer.count': { one: '{n} cheer', other: '{n} cheers' }, // ALTA
+  'friends.received.title': 'Cheers for you', // ALTA
+  'friends.received.row': '{name} reacted {r} to your {n}-day streak', // ALTA
+  'friends.received.thank': 'Say thanks 💛', // ALTA
+  'friends.received.thanked': 'You said thanks ✓', // ALTA
+  'friends.toast.cheered': 'Cheer sent! {r}', // ALTA
+  'friends.toast.thanked': 'Thanks sent 💛', // ALTA
+  'friends.error.daily_congrats_limit': 'You already sent 20 cheers today. More tomorrow!', // ALTA
+  'friends.error.target_not_found': 'This milestone is no longer available.', // ALTA
+  'friends.pref.notify_congrats': 'Notify me when a friend congratulates or thanks me', // ALTA
+  'friends.qr.btn': 'Show QR code', // ALTA
+  'friends.qr.title': 'Your invite QR code', // ALTA
+  'friends.qr.text': 'Show it to someone next to you: they point their phone camera at it, open the site and can add you right away.', // ALTA
+  'friends.qr.alt': 'QR code of your invite link', // ALTA
+  'friends.qr.close': 'Close', // ALTA
+  'friends.qr.noLink': 'Couldn\'t create your link right now.', // ALTA
+  'friends.qr.error': 'Couldn\'t show the QR code right now.', // ALTA
+  'friends.suggest.title': 'Friend suggestions', // ALTA
+  'friends.suggest.add': 'Add', // ALTA
+  'friends.suggest.dismissAria': 'Don\'t suggest {name}', // ALTA
+  'friends.suggest.reason.invite': 'Joined from your invite', // ALTA
+  'friends.suggest.reason.invitedBy': 'Invited you to the site', // ALTA
+  'friends.suggest.reason.classmate': 'Studies with the same teacher', // ALTA
+  'friends.suggest.reason.partner': 'Also studies {lang}', // ALTA
+  'friends.suggest.reason.ranking': 'Close to you in this week\'s ranking', // ALTA
+  'friends.pref.suggest_me': 'Show me in other people\'s friend suggestions', // ALTA
+  'friends.suggest.reason.mutual': { one: '{n} mutual friend', other: '{n} mutual friends' }, // ALTA
   'profile.tabFriends': 'Friends', // ALTA
   'panel.admin.sub': 'Badges, metrics, notifications, reports and plans.', // ALTA
   'panel.tab.badges': 'Badges', // ALTA
@@ -2642,4 +2867,451 @@ window.I18N_CATALOG['en'] = {
   'cards.deck.newSub': 'New subdeck', // ALTA
   'cards.bank.title': 'Review Bank', // ALTA
   'cards.bank.text': 'Cards generated automatically from each student\'s Google Doc will show up here, for you to check, approve or cut before they go to their review. This part is still being moved to the site and is not active yet.', // ALTA
+
+  // ---- Banco de Revisão (Professora > Cartões) ----
+  'rb.sub.cards': 'Cards', // ALTA
+  'rb.sub.bank': 'Review Bank', // ALTA
+  'rb.intro': 'Everything that comes out of your class notebooks. Pick a student, then approve or cut items. Items for students with an account become cards in Teacher cards. Items with a doubt stay in Pending for you to check.', // ALTA
+  'rb.autoLabel': 'Create cards automatically', // ALTA
+  'rb.autoOn': 'Automatic creation is on.', // ALTA
+  'rb.autoOff': 'Automatic creation is off.', // ALTA
+  'rb.tabStudents': 'Students', // ALTA
+  'rb.tabOverview': 'Overview', // ALTA
+  'rb.tabManual': 'Notes manual', // ALTA
+  'rb.lang.frances': 'French', // ALTA
+  'rb.lang.portugues': 'Portuguese', // ALTA
+  'rb.lang.mandarim': 'Mandarin', // ALTA
+  'rb.type.vocabulario': 'Vocabulary', // ALTA
+  'rb.type.estrutura': 'Structure', // ALTA
+  'rb.type.verbo': 'Verb', // ALTA
+  'rb.type.erro': 'Corrected mistake', // ALTA
+  'rb.type.pronuncia': 'Pronunciation', // ALTA
+  'rb.f.pendente': 'Pending', // ALTA
+  'rb.f.aprovado': 'Approved', // ALTA
+  'rb.f.cortado': 'Cut', // ALTA
+  'rb.f.todos': 'All', // ALTA
+  'rb.st.pendente': 'pending', // ALTA
+  'rb.st.cortado': 'cut', // ALTA
+  'rb.field.question': 'meaning / prompt', // ALTA
+  'rb.field.answer': 'correct form', // ALTA
+  'rb.field.wrong_form': 'wrong form', // ALTA
+  'rb.ref.pt': 'Portuguese', // ALTA
+  'rb.ref.en': 'English', // ALTA
+  'rb.ref.fr': 'French', // ALTA
+  'rb.mode.recap': 'Recap', // ALTA
+  'rb.mode.ultima': 'Last class', // ALTA
+  'rb.mode.erros': 'Mistakes', // ALTA
+  'rb.classEmpty.recap': 'There is no Recap for this student yet. Approve some items and create the Recap in the panel.', // ALTA
+  'rb.classEmpty.ultima': 'There are no approved items with a class date for this student yet.', // ALTA
+  'rb.classEmpty.erros': 'No recent mistakes to go over. Good sign!', // ALTA
+  'rb.oAttOpt0': 'All', // ALTA
+  'rb.oAttOpt1': 'With pending items', // ALTA
+  'rb.oAttOpt2': 'Notebook idle (3 weeks or more)', // ALTA
+  'rb.oAttOpt3': 'Accuracy under 60%', // ALTA
+  'rb.oAttOpt4': 'Recap created and unused', // ALTA
+  'rb.oLessonOpt0': 'Any date', // ALTA
+  'rb.oLessonOpt1': 'Today', // ALTA
+  'rb.oLessonOpt2': 'In the next 7 days', // ALTA
+  'rb.cItems': 'items', // ALTA
+  'rb.cApproved': 'approved', // ALTA
+  'rb.cToCheck': 'to check', // ALTA
+  'rb.cCut': 'cut', // ALTA
+  'rb.oStudents': 'active students', // ALTA
+  'rb.oPending': 'pending items', // ALTA
+  'rb.oStale': 'notebook idle', // ALTA
+  'rb.oAccuracy': 'accuracy, 30 days', // ALTA
+  'rb.colName': 'Student', // ALTA
+  'rb.colNext': 'Next class', // ALTA
+  'rb.colPending': 'Pending', // ALTA
+  'rb.colApproved': 'Approved', // ALTA
+  'rb.colEntry': 'Last notebook read', // ALTA
+  'rb.colRecap': 'Recap used', // ALTA
+  'rb.colAccuracy': 'Accuracy (30 days)', // ALTA
+  'rb.colErrors': 'Mistakes (30 days)', // ALTA
+  'rb.colReason': 'Most common reason', // ALTA
+  'rb.active': 'Active', // ALTA
+  'rb.addStudent': '+ Add student', // ALTA
+  'rb.all': 'All', // ALTA
+  'rb.allTypes': 'All types', // ALTA
+  'rb.answerHidden': 'Answer hidden', // ALTA
+  'rb.approve': 'Approve', // ALTA
+  'rb.approved': 'Item approved.', // ALTA
+  'rb.archived': 'Archived', // ALTA
+  'rb.backToPanel': 'Back to the panel', // ALTA
+  'rb.backToPending': 'Back to pending', // ALTA
+  'rb.cancel': 'Cancel', // ALTA
+  'rb.cardDelivered': 'This item already became a card for the student', // ALTA
+  'rb.cardTag': 'Card delivered', // ALTA
+  'rb.chooseStudent': 'Choose a student', // ALTA
+  'rb.classNoAccount': 'This student has no linked account yet: answers are only kept in the class record.', // ALTA
+  'rb.classOf': 'class of {d}', // ALTA
+  'rb.cut': 'Cut', // ALTA
+  'rb.cutDone': 'Item cut.', // ALTA
+  'rb.daysAgo': '{n} days ago', // ALTA
+  'rb.edit': 'Edit', // ALTA
+  'rb.editStudent': 'Edit student', // ALTA
+  'rb.emptyFilter': 'No items in this filter.', // ALTA
+  'rb.emptyStudent': 'No items for this student yet. Add the first one with "+ New item".', // ALTA
+  'rb.endAll': 'All correct this round.', // ALTA
+  'rb.endHelped': 'Got it with help', // ALTA
+  'rb.endMissed': 'To go over again', // ALTA
+  'rb.endRedo': 'Review the missed ones', // ALTA
+  'rb.endSome': '{n} to go over again.', // ALTA
+  'rb.endTitle': 'End of the round', // ALTA
+  'rb.error': 'Could not finish.', // ALTA
+  'rb.fAnswer': 'Correct form', // ALTA
+  'rb.fCheck': 'To check (only for you)', // ALTA
+  'rb.fDate': 'Class date', // ALTA
+  'rb.fGap': 'Gap word (alternatives: separate with /)', // ALTA
+  'rb.fObservation': 'Notes (the student sees them after answering)', // ALTA
+  'rb.fQuestion': 'Meaning / prompt', // ALTA
+  'rb.fReset': 'The meaning changed: restart the student\'s progress on this card', // ALTA
+  'rb.fResetHint': 'Leave it unchecked to fix typos, accents or the explanation: the student keeps their progress.', // ALTA
+  'rb.fType': 'Type', // ALTA
+  'rb.fWrong': 'Wrong form (mistakes only)', // ALTA
+  'rb.filterAria': 'Filter by status', // ALTA
+  'rb.fix': 'Fix it:', // ALTA
+  'rb.fullscreen': 'Full screen', // ALTA
+  'rb.generateReady': 'Create cards', // ALTA
+  'rb.generated': '{n} cards created.', // ALTA
+  'rb.generatedPartial': '{ok} created, {fail} failed.', // ALTA
+  'rb.gotIt': 'Got it', // ALTA
+  'rb.keys': 'Space shows · right arrow got it · H with help · left arrow missed', // ALTA
+  'rb.link': 'Link', // ALTA
+  'rb.linkPick': 'Student account', // ALTA
+  'rb.linked': 'Linked', // ALTA
+  'rb.linkedAccount': 'Linked account', // ALTA
+  'rb.linkedDone': 'Student linked.', // ALTA
+  'rb.loadError': 'Could not load the Review Bank. Reload the page.', // ALTA
+  'rb.loading': 'Loading…', // ALTA
+  'rb.manualEdit': 'Edit manual', // ALTA
+  'rb.manualEmpty': 'There is no manual yet. Click "Edit manual" to write your note-taking rules.', // ALTA
+  'rb.manualHint': 'Write in simple markdown: headings with #, lists with -, **bold** and tables with |.', // ALTA
+  'rb.missed': 'Missed it', // ALTA
+  'rb.missing': 'Missing: {f}.', // ALTA
+  'rb.modesAria': 'What to review', // ALTA
+  'rb.more': 'Show more', // ALTA
+  'rb.newItem': '+ New item', // ALTA
+  'rb.noAccount': 'No account on the site', // ALTA
+  'rb.noLinkable': 'No account with an active link in this language to connect.', // ALTA
+  'rb.noPermission': 'The Review Bank is part of the Teacher plan.', // ALTA
+  'rb.noReason': 'No reason', // ALTA
+  'rb.noStudents': 'There are no students in the Review Bank yet.', // ALTA
+  'rb.none': '–', // ALTA
+  'rb.oAtt': 'Attention', // ALTA
+  'rb.oEmpty': 'No students in this filter.', // ALTA
+  'rb.oLesson': 'Class', // ALTA
+  'rb.openClass': 'Open class mode', // ALTA
+  'rb.popupBlocked': 'The browser blocked the print window. Allow pop-ups for this site.', // ALTA
+  'rb.preview': 'Preview', // ALTA
+  'rb.printAnswers': 'Print with answers', // ALTA
+  'rb.printStudent': 'Print for the student', // ALTA
+  'rb.proposal': 'Review suggestion', // ALTA
+  'rb.proposalApplied': 'Suggestion applied.', // ALTA
+  'rb.proposalApply': 'Apply', // ALTA
+  'rb.proposalDismiss': 'Dismiss', // ALTA
+  'rb.readyBanner': '{n} items are ready to become cards.', // ALTA
+  'rb.recapDone': 'Recap created with {n} items.', // ALTA
+  'rb.recapEmpty': 'The Recap shows up here. Approve some items and create the Recap for the next class.', // ALTA
+  'rb.recapHint': 'Ask, then wait for the answer in the target language.', // ALTA
+  'rb.recapMake': 'Create Recap for the class of {d}', // ALTA
+  'rb.recapNext': 'Next Recap', // ALTA
+  'rb.recapNone': 'No approved item is ready for the Recap.', // ALTA
+  'rb.recapRemake': 'Create again for {d}', // ALTA
+  'rb.recapTitle': 'Recap of the class of {d}', // ALTA
+  'rb.recapUnused': 'created on {d}, not used', // ALTA
+  'rb.refresh': 'Refresh', // ALTA
+  'rb.restore': 'Restore', // ALTA
+  'rb.restored': 'Item went back to pending.', // ALTA
+  'rb.sByClass': 'Accuracy per class', // ALTA
+  'rb.sByType': 'Mistakes by item type', // ALTA
+  'rb.sDays': 'classes reviewed', // ALTA
+  'rb.sHelp': 'with help', // ALTA
+  'rb.sHint': 'since tracking started', // ALTA
+  'rb.sNoMiss': 'No mistakes recorded.', // ALTA
+  'rb.sNoReason': 'No reasons noted.', // ALTA
+  'rb.sOk': 'got it', // ALTA
+  'rb.sReasons': 'Reasons for mistakes', // ALTA
+  'rb.sTip': '{d}: {a} correct, {h} with help, {e} mistakes', // ALTA
+  'rb.sTitle': 'Class-mode performance', // ALTA
+  'rb.sTop': 'Most missed', // ALTA
+  'rb.sTotal': 'answers', // ALTA
+  'rb.sWrong': 'missed', // ALTA
+  'rb.save': 'Save', // ALTA
+  'rb.saveApprove': 'Save and approve', // ALTA
+  'rb.saved': 'Saved.', // ALTA
+  'rb.savedDelivered': 'Saved and delivered to the student.', // ALTA
+  'rb.savedReset': 'Saved. The student\'s progress on this card was restarted.', // ALTA
+  'rb.say': 'How do you say:', // ALTA
+  'rb.search': 'Search items', // ALTA
+  'rb.searchStudent': 'Search student', // ALTA
+  'rb.sfDateAdd': 'Add date', // ALTA
+  'rb.sfDateDel': 'Remove date', // ALTA
+  'rb.sfDates': 'Dates of the next classes', // ALTA
+  'rb.sfLang': 'Language studied', // ALTA
+  'rb.sfName': 'Name', // ALTA
+  'rb.sfNeedName': 'Write the student\'s name.', // ALTA
+  'rb.sfNoDates': 'No dates yet.', // ALTA
+  'rb.sfAgent': 'Update automatically every night', // ALTA
+  'rb.sfAgentHint': "Turn this on only when this student already uses the site (linked account). The nightly routine then brings new items from the notebook and creates the cards. While it is off, the old Bank (artifact) owns this student's data.", // ALTA
+  'rb.sfRef': 'Student\'s reference language', // ALTA
+  'rb.sfStatus': 'Status', // ALTA
+  'rb.showAnswer': 'Show answer', // ALTA
+  'rb.skip': 'Skip', // ALTA
+  'rb.statsEmpty': 'No answers recorded yet. Numbers show up after the next class mode.', // ALTA
+  'rb.studentsAria': 'Students', // ALTA
+  'rb.toCheck': 'To check', // ALTA
+  'rb.toCheckColon': 'To check:', // ALTA
+  'rb.today': 'Today', // ALTA
+  'rb.typeAria': 'Type', // ALTA
+  'rb.unlink': 'Unlink', // ALTA
+  'rb.unlinkedDone': 'Student unlinked. Cards already delivered stay with them.', // ALTA
+  'rb.updatedAt': 'Updated {d}', // ALTA
+  'rb.whyMissed': 'Why was it missed?', // ALTA
+  'rb.withHelp': 'With help', // ALTA
+  'rb.imp.title': 'Import data from the old Review Bank', // ALTA
+  'rb.imp.hint': 'Choose the .json file exported from the old Review Bank. Nothing is delivered to anyone: items come in as they were, and cards are only created after you link the student and click Create cards.', // ALTA
+  'rb.imp.note': 'Importing again is safe: what already exists here is not overwritten or duplicated.', // ALTA
+  'rb.imp.cStudents': 'students', // ALTA
+  'rb.imp.cItems': 'items', // ALTA
+  'rb.imp.cPending': 'pending', // ALTA
+  'rb.imp.cRecaps': 'recaps', // ALTA
+  'rb.imp.cReviews': 'answers', // ALTA
+  'rb.imp.warn': '{n} records in the file were skipped because data was missing.', // ALTA
+  'rb.imp.manual': 'Replace the current Manual with the one in the file', // ALTA
+  'rb.imp.run': 'Import', // ALTA
+  'rb.imp.progress': 'Importing {name}…', // ALTA
+  'rb.imp.done': 'Imported: {s} students and {i} items. Now link the students who have an account.', // ALTA
+  'rb.imp.errRun': 'The import stopped.', // ALTA
+  'rb.imp.err.json': 'This file is not valid JSON.', // ALTA
+  'rb.imp.err.format': 'This file is not in the Review Bank format.', // ALTA
+  'rb.imp.err.empty': 'The file has no students to import.', // ALTA
+  'rb.reason.nao_lembrou': 'Didn\'t remember', // ALTA
+  'rb.reason.em_parte': 'Partly remembered', // ALTA
+  'rb.reason.confundiu': 'Mixed up with another word', // ALTA
+  'rb.reason.genero': 'Gender or article', // ALTA
+  'rb.reason.conjugacao': 'Wrong conjugation', // ALTA
+  'rb.reason.tempo': 'Wrong tense', // ALTA
+  'rb.reason.auxiliar': 'Wrong auxiliary', // ALTA
+  'rb.reason.ordem': 'Word order', // ALTA
+  'rb.reason.preposicao': 'Preposition', // ALTA
+  'rb.reason.concordancia': 'Agreement', // ALTA
+  'rb.reason.repetiu': 'Made the same mistake', // ALTA
+  'rb.reason.corrigiu_parte': 'Partly corrected', // ALTA
+  'rb.reason.som': 'Wrong sound', // ALTA
+  'rb.reason.tonico': 'Stress', // ALTA
+  'rb.sensitiveTag': 'Sensitive', // ALTA
+  'rb.sensitiveHint': 'Personal content or strong language: it does not become a card on its own.', // ALTA
+  'rb.fSensitive': 'Sensitive content: it does not become a card on its own, you decide', // ALTA
+  'publicProfile.loginToSee': 'Log in to see the full profile.', // ALTA
+  'publicProfile.loginCta': 'Log in or sign up', // ALTA
+  'publicDeckCopies.tab': 'Public decks', // ALTA
+  'publicDeckCopies.adminHint': 'How many people added each public deck (each account counts once; re-copies only add to "Copies"). Counted since Oct 12, 2026.', // ALTA
+  'publicDeckCopies.none': 'No public decks yet.', // ALTA
+  'publicDeckCopies.error': 'Couldn\'t load public decks right now.', // ALTA
+  'publicDeckCopies.people': 'People', // ALTA
+  'publicDeckCopies.copies': 'Copies', // ALTA
+  'publicDeckCopies.last': 'Last copy', // ALTA
+  'publicDeckCopies.unpublished': 'unpublished', // ALTA
+  'publicDeckCopies.ownerCount': { one: '{n} person added this deck', other: '{n} people added this deck' }, // ALTA
+  'publicDeckCopies.lastOn': 'Last time on {date}', // ALTA
+  'publicDeckCopies.premiumHint': 'With Premium you can see how many people added this deck.', // ALTA
+  'studentAnalytics.open': 'Student analytics ({lang})', // ALTA
+  'studentAnalytics.title': '{name}\'s analytics', // ALTA
+  'studentDecks.title': 'Student decks', // ALTA
+  'studentDecks.deck': 'Deck', // ALTA
+  'studentDecks.hint': 'You see each deck\'s name and numbers (subdecks included), without opening the cards. Only what the student has already synced counts.', // ALTA
+  'studentDecks.empty': 'The student has no cards in decks yet.', // ALTA
+  'studentDecks.error': 'Couldn\'t load the student\'s decks right now.', // ALTA
+  'panel.tab.mural': 'Board', // ALTA
+  'panel.classLog.attendance': 'Attendance', // ALTA
+  'panel.classLog.attendanceNone': 'Not recorded', // ALTA
+  'panel.classLog.skills': 'Skills practiced', // ALTA
+  'panel.classLog.skill.conversacao': 'Speaking', // ALTA
+  'panel.classLog.skill.gramatica': 'Grammar', // ALTA
+  'panel.classLog.skill.escrita': 'Writing', // ALTA
+  'panel.classLog.skill.leitura': 'Reading', // ALTA
+  'panel.classLog.skill.vocabulario': 'Vocabulary', // ALTA
+  'panel.classLog.skill.escuta': 'Listening', // ALTA
+  'panel.classLog.skill.pronuncia': 'Pronunciation', // ALTA
+  'panel.classLog.classrooms': 'Classes', // ALTA
+  'panel.classLog.classroomsHint': 'A class lesson is logged once and shows up for every student in the class.', // ALTA
+  'panel.classLog.labels.name': 'Label name', // ALTA
+  'panel.classLog.labels.color': 'Color', // ALTA
+  'panel.classLog.labels.archive': 'Archive', // ALTA
+  'panel.classLog.labels.needName': 'Give the label a name.', // ALTA
+  'panel.classLog.labels.duplicate': 'You already have a label with that name.', // ALTA
+  'panel.classLog.color.green': 'Green', // ALTA
+  'panel.classLog.color.red': 'Red', // ALTA
+  'panel.classLog.color.yellow': 'Yellow', // ALTA
+  'panel.classLog.color.orange': 'Orange', // ALTA
+  'panel.classLog.color.blue': 'Blue', // ALTA
+  'panel.classLog.color.purple': 'Purple', // ALTA
+  'panel.classLog.color.gray': 'Gray', // ALTA
+  'panel.classLog.color.pink': 'Pink', // ALTA
+  'panel.classLog.color.brown': 'Brown', // ALTA
+  'panel.classLog.labels.createPlaceholder': 'Type a name and press Enter to create a label', // ALTA
+  'panel.classLog.labels.edit': 'Edit the {name} label', // ALTA
+  'panel.classLog.labels.done': 'Done', // ALTA
+  'panel.classLog.review.title': { one: 'Review from Notion ({n} lesson)', other: 'Review from Notion ({n} lessons)' }, // ALTA
+  'panel.classLog.review.hint': 'These texts came from Notion and may include notes meant only for you, so the student can\'t see them yet. Edit anything you want and choose: show to the student or keep for yourself. The original text stays in your Notes.', // ALTA
+  'panel.classLog.review.toTopic': 'Topic (the student sees it)', // ALTA
+  'panel.classLog.review.toHomework': 'For next lesson (the student sees it)', // ALTA
+  'panel.classLog.review.show': 'Show to student', // ALTA
+  'panel.classLog.review.keep': 'Keep for myself', // ALTA
+  'panel.classLog.review.shown': 'The student can see this text now.', // ALTA
+  'panel.classLog.review.kept': 'Kept only in your Notes.', // ALTA
+  'panel.classLog.classroomsSelected': { one: '{n} class', other: '{n} classes' }, // ALTA
+  'panel.classLog.membersCount': { one: '{n} student', other: '{n} students' }, // ALTA
+  'studentPanel.menu': '🎒 Student', // ALTA
+  'studentPanel.nav': 'Student', // ALTA
+  'studentPanel.title': 'Student', // ALTA
+  'studentPanel.sub': 'Everything from your teacher: notes, lessons, materials and review.', // ALTA
+  'studentPanel.aria': 'Student section', // ALTA
+  'studentPanel.tab.classlogs': 'Lessons', // ALTA
+  'studentPanel.tab.materials': 'Study materials', // ALTA
+  'studentPanel.tab.review': 'Review', // ALTA
+  'studentPanel.newCount': { one: '{n} new', other: '{n} new' }, // ALTA
+  'studentPanel.review.hint': 'Cards your teacher made from your lessons. Answer, read her note and the site schedules the next review.', // ALTA
+  'studentPanel.review.empty': 'Your teacher hasn\'t sent any review cards from your lessons yet.', // ALTA
+  'studentPanel.review.start': 'Review ({n})', // ALTA
+  'studentPanel.review.total': { one: '{n} lesson card in total', other: '{n} lesson cards in total' }, // ALTA
+  'studentPanel.review.dueCount': { one: '{n} card to review today', other: '{n} cards to review today' }, // ALTA
+  'mural.menu': '📌 Board', // ALTA
+  'mural.title': 'Board', // ALTA
+  'mural.sub': 'Notes, materials and conversations with your teacher and your class.', // ALTA
+  'mural.newCount': { one: '{n} new', other: '{n} new' }, // ALTA
+  'mural.teacherIntro': 'Pick a class (a note for everyone or just one student) or a student who is not in a class. New notes show up in the bell, no e-mail.', // ALTA
+  'mural.studentIntro': '{lang} board with {name}', // ALTA
+  'mural.mode.classrooms': 'Classes', // ALTA
+  'mural.mode.students': 'Students', // ALTA
+  'mural.newClassroom': '+ New class', // ALTA
+  'mural.newClassroomPh': 'Class name (e.g. Thursday class)', // ALTA
+  'mural.create': 'Create', // ALTA
+  'mural.cancel': 'Cancel', // ALTA
+  'mural.save': 'Save', // ALTA
+  'mural.edit': 'Edit', // ALTA
+  'mural.delete': 'Delete', // ALTA
+  'mural.edited': 'edited', // ALTA
+  'mural.teacherTag': 'Teacher', // ALTA
+  'mural.onlyFor': '🔒 Only for {name}', // ALTA
+  'mural.individualChip': 'With {name}', // ALTA
+  'mural.noClassrooms': 'You have no classes yet. Create one, add your students or send the class link.', // ALTA
+  'mural.pickClassroom': 'Pick a class to see its board.', // ALTA
+  'mural.noStudents': 'You have no students in this language yet. Invite them in the Students tab.', // ALTA
+  'mural.allInClassrooms': 'All your students are in a class. To talk to just one, open the class and pick the student under "To".', // ALTA
+  'mural.pickStudent': 'Pick a student to see their personal board.', // ALTA
+  'mural.noTeacher': 'The board shows up when you have a teacher in this language.', // ALTA
+  'mural.empty': 'Nothing on the board yet. Why not start?', // ALTA
+  'mural.composer.label': 'New post', // ALTA
+  'mural.composer.placeholderTeacher': 'Write a note', // ALTA
+  'mural.composer.placeholderStudent': 'Write on the board', // ALTA
+  'mural.composer.attach': '📎 Attach', // ALTA
+  'mural.composer.attachHint': 'Attachments: PDF or image, up to 5 files of 10 MB.', // ALTA
+  'mural.composer.toLabel': 'To', // ALTA
+  'mural.composer.toAll': 'The whole class', // ALTA
+  'mural.composer.toOne': 'Only {name}', // ALTA
+  'mural.composer.publish': 'Post', // ALTA
+  'mural.composer.sending': 'Sending...', // ALTA
+  'mural.composer.removeFile': 'Remove {name}', // ALTA
+  'mural.comment.label': 'Comment', // ALTA
+  'mural.comment.placeholder': 'Write a comment', // ALTA
+  'mural.comment.send': 'Send', // ALTA
+  'mural.deletePostConfirm': 'Delete this post? Its comments and attachments go too.', // ALTA
+  'mural.deleteCommentConfirm': 'Delete this comment?', // ALTA
+  'mural.file.badType': '"{name}" is not a PDF or an image.', // ALTA
+  'mural.file.tooBig': '"{name}" is over 10 MB.', // ALTA
+  'mural.file.tooMany': 'Up to 5 files per post.', // ALTA
+  'mural.manage.summary': '⚙️ Students ({n}), link and class name', // ALTA
+  'mural.manage.name': 'Class name', // ALTA
+  'mural.manage.saveName': 'Save name', // ALTA
+  'mural.manage.members': 'Students in this class', // ALTA
+  'mural.manage.membersHint': 'Only your students with an active link in this language show up. A student can be in several classes.', // ALTA
+  'mural.manage.filter': 'Search by name or @', // ALTA
+  'mural.manage.saveMembers': 'Save students', // ALTA
+  'mural.manage.saved': 'Class updated!', // ALTA
+  'mural.manage.link': 'Class link', // ALTA
+  'mural.manage.linkHint': 'Whoever opens the link joins the class and, if not your student yet, becomes one.', // ALTA
+  'mural.manage.linkCreate': 'Create class link', // ALTA
+  'mural.manage.linkWhatsText': 'Hi! This is the link for the {name} class. Just open it and join: {url}', // ALTA
+  'mural.manage.delete': 'Delete class', // ALTA
+  'mural.manage.deleteConfirm': 'Delete the class "{name}"? Its notes, comments and attachments disappear for everyone. The students remain your students.', // ALTA
+  'mural.join.kicker': 'Class invite', // ALTA
+  'mural.join.title': '{classroom}', // ALTA
+  'mural.join.sub': 'With {name}, {lang} lessons', // ALTA
+  'mural.join.perkMural': 'Class board with notes and materials', // ALTA
+  'mural.join.perkTalk': 'Post and comment with the class', // ALTA
+  'mural.join.perkTeacher': 'Your teacher follows your {lang} progress', // ALTA
+  'mural.join.accept': 'Join the class', // ALTA
+  'mural.join.login': 'Sign in to join', // ALTA
+  'mural.join.later': 'Not now', // ALTA
+  'mural.join.done': 'Done! You are in the {classroom} class 🏫', // ALTA
+  'mural.join.already': 'You are already in this class.', // ALTA
+  'mural.err.generic': 'That did not work. Try again.', // ALTA
+  'mural.err.has_class_logs': 'This class has lessons logged, so it can\'t be deleted. The lessons stay in the history.', // ALTA
+  'mural.err.not_authorized': 'You do not have access to this board.', // ALTA
+  'mural.err.not_member': 'This student is not in the class.', // ALTA
+  'mural.err.empty': 'Write something or attach a file.', // ALTA
+  'mural.err.too_long': 'Text too long.', // ALTA
+  'mural.err.daily_limit': 'You reached today\'s limit. Try tomorrow.', // ALTA
+  'mural.err.invalid_attachments': 'An attachment was not accepted (PDF or image, up to 10 MB).', // ALTA
+  'mural.err.invalid_name': 'Use a name with 1 to 60 characters.', // ALTA
+  'mural.err.classroom_limit': 'You reached the limit of 50 classes.', // ALTA
+  'mural.err.not_found': 'Class not found.', // ALTA
+  'mural.err.no_teacher': 'You do not have a teacher in this language.', // ALTA
+  'mural.err.upload': 'Could not upload the file. Try again.', // ALTA
+  'mural.err.invalid_code': 'This class link no longer works. Ask your teacher for a new one.', // ALTA
+  'mural.err.student_has_teacher': 'You already have a teacher in this language (one per language).', // ALTA
+  'mural.err.invalid_target': 'This class is yours.', // ALTA
+  'tinvite.lang.frances': 'French', // ALTA
+  'tinvite.lang.mandarim': 'Chinese', // ALTA
+  'tinvite.lang.portugues': 'Portuguese', // ALTA
+  'tinvite.title': 'Invite a student', // ALTA
+  'tinvite.hint': 'Pick the language and invite through search or send the link. The student accepts, gets your badge and shows up here. Invites last 14 days.', // ALTA
+  'tinvite.langLabel': 'Class language', // ALTA
+  'tinvite.search.title': 'By search', // ALTA
+  'tinvite.send': 'Invite for {lang}', // ALTA
+  'tinvite.sentToast': 'Invite sent! The student sees it in the bell and at the top of the Path.', // ALTA
+  'tinvite.link.title': 'By link', // ALTA
+  'tinvite.link.hint': 'Anyone who opens this link and accepts becomes your student right away. Good for WhatsApp or your class group.', // ALTA
+  'tinvite.link.copy': 'Copy link', // ALTA
+  'tinvite.link.copied': 'Link copied!', // ALTA
+  'tinvite.link.whatsapp': 'Send on WhatsApp', // ALTA
+  'tinvite.link.reset': 'Make a new link', // ALTA
+  'tinvite.link.resetConfirm': 'Make a new link? The old link stops working right away.', // ALTA
+  'tinvite.link.whatsText': 'Hi! Here is my invite to the {lang} classes. Just open it and accept: {url}', // ALTA
+  'tinvite.pending.title': 'Pending invites ({n})', // ALTA
+  'tinvite.pending.daysLeft': { one: 'expires in {n} day', other: 'expires in {n} days' }, // ALTA
+  'tinvite.pending.expired': 'expired', // ALTA
+  'tinvite.pending.resend': 'Resend', // ALTA
+  'tinvite.pending.cancel': 'Cancel', // ALTA
+  'tinvite.pending.cancelConfirm': 'Cancel this invite? The student will no longer see it.', // ALTA
+  'tinvite.direct.title': 'Link directly (admin only)', // ALTA
+  'tinvite.direct.hint': 'Creates the link right away, without the student accepting. Only use it for someone who already agreed to classes with you.', // ALTA
+  'tinvite.banner.title': '{name} invited you to {lang} classes', // ALTA
+  'tinvite.banner.see': 'See invite', // ALTA
+  'tinvite.card.kicker': 'Class invite', // ALTA
+  'tinvite.card.title': '{name} invited you to be their {lang} student', // ALTA
+  'tinvite.card.perkProgress': 'Follow-up on your {lang} progress', // ALTA
+  'tinvite.card.perkCards': 'Cards and class notes made for you', // ALTA
+  'tinvite.card.perkBadge': 'A student badge on your profile', // ALTA
+  'tinvite.card.accept': 'Accept invite', // ALTA
+  'tinvite.card.loginToAccept': 'Log in to accept', // ALTA
+  'tinvite.card.decline': 'Decline', // ALTA
+  'tinvite.card.later': 'Not now', // ALTA
+  'tinvite.card.foot': 'To end the link later, just talk to whoever invited you.', // ALTA
+  'tinvite.acceptedToast': 'Done! You are now {name}\'s {lang} student 🎓', // ALTA
+  'tinvite.declinedToast': 'Invite declined.', // ALTA
+  'tinvite.err.not_authorized': 'Only accounts with the Teacher plan can invite students.', // ALTA
+  'tinvite.err.invalid_language': 'Invalid language.', // ALTA
+  'tinvite.err.invalid_target': 'This invite is yours: you can\'t be your own student.', // ALTA
+  'tinvite.err.not_found': 'I couldn\'t find that account.', // ALTA
+  'tinvite.err.student_has_teacher': 'This account already has a teacher for this language. Only one per language.', // ALTA
+  'tinvite.err.already_student': 'This account is already your student for this language.', // ALTA
+  'tinvite.err.already_invited': 'You already invited this account. The invite is still valid.', // ALTA
+  'tinvite.err.daily_invite_limit': 'You reached the limit of 30 invites per day. Try again tomorrow or send the link.', // ALTA
+  'tinvite.err.no_pending_invite': 'This invite is no longer valid.', // ALTA
+  'tinvite.err.invalid_code': 'This invite link no longer works. Ask whoever invited you for a new one.', // ALTA
+  'tinvite.err.not_authenticated': 'Log in to answer the invite.', // ALTA
+  'tinvite.err.generic': 'That didn\'t work right now. Try again in a moment.', // ALTA
 };

@@ -428,7 +428,7 @@ function validateNativeClozeStructure(editorState){
     if (!mark.answer || !mark.answer.trim()){
       return { ok: false, error: t('clozeEditor.err.emptyMark') };
     }
-    if (editorState.languageAppKey === 'mandarim' && (!mark.compareAnswer || !mark.compareAnswer.trim())){
+    if (LanguageRegistry.isCjk(editorState.languageAppKey) && (!mark.compareAnswer || !mark.compareAnswer.trim())){
       return { ok: false, error: t('clozeEditor.err.missingPinyin', { answer: mark.answer }) };
     }
   }
@@ -511,7 +511,7 @@ function clozeMarkPanelHTML(mark, namePrefix, isMandarim){
 function renderClozeEditorHTML(editorState, opts){
   opts = opts || {};
   const namePrefix = opts.namePrefix || 'cloze-editor';
-  const isMandarim = editorState.languageAppKey === 'mandarim';
+  const isMandarim = LanguageRegistry.isCjk(editorState.languageAppKey);
   const fields = editorState.fields || [];
   const slots = contentFieldIndices(fields);
   const textField = fields[slots[0]] || null;

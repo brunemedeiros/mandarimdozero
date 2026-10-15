@@ -93,7 +93,7 @@ function hashToRoute(hash){
       return { type: 'deckBrowser', view: parts[3] === 'panel' ? 'panel' : 'detail', nodeId: parts[2] === 'lang' ? 'lang' : parseInt(parts[2], 10) };
     }
     if (parts[1] === 'deck' && /^\d+$/.test(parts[2] || '')) return { type: 'reviewSession', mode: 'flashcard', deckId: parseInt(parts[2], 10) };
-    if (['flashcard', 'speed', 'hard', 'match'].includes(parts[1])) return { type: 'reviewSession', mode: parts[1] };
+    if (['flashcard', 'speed', 'hard', 'match', 'class'].includes(parts[1])) return { type: 'reviewSession', mode: parts[1] };
     return { type: 'tab', tab: 'review' };
   }
   if (parts[0] === 'unit' && parts[1]){
@@ -163,6 +163,10 @@ function renderRoute(route){
       case 'reviewSession': {
         if (route.deckId != null && typeof startDeckReviewSession === 'function'){
           startDeckReviewSession(route.deckId, { restore: true }); // K2-H: restaura a sessão COM o escopo do Deck
+          break;
+        }
+        if (route.mode === 'class' && typeof startClassReviewSession === 'function'){
+          startClassReviewSession(); // Aluno > Revisão (cartões da professora)
           break;
         }
         if (typeof switchTab === 'function') switchTab('review');
@@ -262,3 +266,27 @@ function applyInitialRoute(){
   if (!window.location.hash) return;
   renderRoute(hashToRoute(window.location.hash));
 }
+
+// ---------- Link compartilhado sem login (perfil/Deck público) ----------
+// Sem modo convidado (2026-10-12), quem abre #/user/<nome> ou #/deck/<id> sem
+// sessão vê só um cartão de apresentação com "Entrar". O botão (data-login-cta)
+// guarda a rota no aparelho; depois do login, shared/auth.js devolve a pessoa a ela.
+const PENDING_ROUTE_KEY = 'pendingRouteAfterLogin';
+const PENDING_ROUTE_RE = /^#\/(user|deck)\/[^\s<>"']{1,80}$/;
+function rememberRouteForLogin(){
+  try { if (PENDING_ROUTE_RE.test(window.location.hash)) window.localStorage.setItem(PENDING_ROUTE_KEY, window.location.hash); } catch (e) { /* sem storage: só não volta */ }
+}
+function consumePendingRouteAfterLogin(){
+  let h = null;
+  try { h = window.localStorage.getItem(PENDING_ROUTE_KEY); window.localStorage.removeItem(PENDING_ROUTE_KEY); } catch (e) { return; }
+  if (h && !window.location.hash && PENDING_ROUTE_RE.test(h)){
+    window.history.replaceState(null, '', window.location.pathname + window.location.search + h);
+  }
+}
+document.addEventListener('click', (e) => {
+  const cta = e.target.closest && e.target.closest('[data-login-cta]');
+  if (!cta) return;
+  e.preventDefault();
+  rememberRouteForLogin();
+  window.location.href = '../';
+});

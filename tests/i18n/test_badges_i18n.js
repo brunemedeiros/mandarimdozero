@@ -19,18 +19,26 @@ const STUB = `window.supabase={createClient(){return{auth:{getSession:async()=>(
   await new Promise(r => cur.listen(0, r)); await new Promise(r => prev.listen(0, r));
   const browser = await chromium.launch();
   const grab = async (port, site, q) => { const ctx = await browser.newContext({ serviceWorkers: 'block' }); const page = await ctx.newPage();
-    await page.route('**/*supabase*', r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    // Só o CDN do Supabase (antes '**/*supabase*' pegava também ../shared/supabase-client.js e o app não iniciava).
+    await page.route(/^https?:\/\/(?!localhost)/, r => r.abort());
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} }); // convidado: o app inicia e semeia as conquistas
     await page.goto(`http://localhost:${port}/${site}/${q}`); await page.waitForFunction(() => typeof BADGES !== 'undefined' && typeof SPECIAL_BADGES !== 'undefined', null, { timeout: 15000 });
     await page.waitForTimeout(800);
+    // Conquistas com níveis: BADGES é preenchido ao semear (depois de carregar o progresso).
+    await page.waitForFunction(() => BADGES.length > 0, null, { timeout: 15000 }).catch(() => {});
     const r = await page.evaluate(() => ({ b: BADGES.map(b => [b.id, b.name, b.desc]), s: SPECIAL_BADGES.map(b => [b.id, b.name, b.desc]),
       cat: typeof catalogBadgeText === 'function' ? [catalogBadgeText('student', 'name', 'X'), catalogBadgeText('novo-sem-traducao', 'name', 'Texto do banco')] : null }));
     await ctx.close(); return r; };
   for (const site of ['fr', 'zh']) {
     const before = await grab(prev.address().port, site, ''); const pt = await grab(cur.address().port, site, '');
     const en = await grab(cur.address().port, site, '?ui=en');
-    check(`${site}: BADGES pt-BR idêntico ao commit anterior (${before.b.length} itens)`, JSON.stringify(pt.b) === JSON.stringify(before.b));
+    // 2026-10-14: conquistas com níveis (docs/conquistas-proposta-niveis.md) trocaram os nomes de propósito. BADGES virou a
+    // lista de níveis das trilhas; o texto de antes continua só na clássica Multitarefa.
+    check(`${site}: BADGES pt-BR com os nomes aprovados (${pt.b.length} níveis)`, pt.b.length >= 40 && ['Revisor(a) Aprendiz', 'Uma Semana!', 'Primeiro Passo', 'Mestre da Revisão'].every(n => pt.b.some(x => x[1] === n)), pt.b.slice(0, 3));
+    check(`${site}: Multitarefa (clássica) com o texto de antes`, JSON.stringify(pt.b.find(x => x[0] === 'multitasker')) === JSON.stringify(before.b.find(x => x[0] === 'multitasker')));
     check(`${site}: SPECIAL_BADGES pt-BR idêntico`, JSON.stringify(pt.s) === JSON.stringify(before.s));
-    check(`${site}: em inglês, nomes mudam e nenhum vira chave`, en.b.every((x, i) => x[1] !== pt.b[i][1] || ['xp_100', 'xp_500'].includes(x[0])) && en.b.every(x => !x[1].startsWith('badge.') && !x[2].startsWith('badge.')));
+    check(`${site}: em inglês, nomes mudam e nenhum vira chave`, en.b.length === pt.b.length && en.b.every((x, i) => x[1] !== pt.b[i][1]) && en.b.every(x => !x[1].startsWith('badge.') && !x[2].startsWith('badge.')));
     check(`${site}: Fundadora/Beta em inglês`, en.s[0][1] === 'Founder' && en.s[1][2].startsWith('Helped test'));
     check(`${site}: catálogo traduzido e fallback pro banco`, en.cat && en.cat[0] === "Prof. Brune's student" && en.cat[1] === 'Texto do banco');
     check(`${site}: pt-BR do catálogo igual ao banco`, pt.cat && pt.cat[0] === 'Aluno/a da Prof. Brune');

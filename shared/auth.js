@@ -50,6 +50,28 @@ let progressLoadedOk = false;
 // página inteira.
 const MONOTONIC_PROGRESS_FIELDS = ['xp', 'totalReviews', 'totalAudioPlays'];
 
+// Chave do bloco deste curso dentro de progress.data (E3/C1, ver shared/course-storage.js). Com os cursos por idioma do
+// site desligados é sempre APP_KEY ('frances', 'mandarim'), igual a antes. `progressData` = a linha lida do servidor.
+// C5: com os cursos por idioma do site ligados, o curso desta página é FIXADO no primeiro carregamento (idioma do site da conta, ou o da
+// URL ?ui=) e nunca muda enquanto a página viver: trocar de curso recarrega a página. Assim uma aba antiga não grava o progresso de um
+// curso na chave de outro quando a conta muda de idioma em outra aba.
+let pageCourseSiteLang = null;
+function pageSiteLanguage(progressData){
+  if (!pageCourseSiteLang){
+    const live = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+    const acct = (typeof uiLanguageFromProgressData === 'function') ? uiLanguageFromProgressData(progressData) : null;
+    pageCourseSiteLang = (!accountUiLangFromQuery() && acct) ? acct : live;
+  }
+  return pageCourseSiteLang;
+}
+function progressBlockKey(progressData){
+  if (CourseStorage.isPerSiteLanguage()) return CourseStorage.courseStorageKeyFor(APP_KEY, pageSiteLanguage(progressData), progressData);
+  return CourseStorage.courseStorageKeyFor(APP_KEY, typeof getUiLang === 'function' ? getUiLang() : 'pt-BR', progressData);
+}
+
+// E3/C2: o que o bloco deste idioma tinha ao carregar (só dias estudados neste idioma) x a união da conta; ver saveState.
+let progressAccountBase = null;
+
 const GUEST_MODE_FLAG = 'guest_mode';
 // (antes cada site tinha sua própria chave -- 'frances_zero_guest_mode' /
 // 'mandarim_guest_mode'; sessionStorage é por aba E por origem, então
@@ -93,6 +115,10 @@ async function initAuth(){
       await renderStandalonePublicDeck(publicDeckId);
     } else if (publicProfileUsername && typeof renderStandalonePublicProfile === 'function'){
       await renderStandalonePublicProfile(publicProfileUsername);
+    } else if (typeof teacherInviteGateIfPending === 'function' && await teacherInviteGateIfPending()){
+      // Link de convite da professora (?convite=): o cartão aparece antes do login (077).
+    } else if (typeof muralClassroomGateIfPending === 'function' && await muralClassroomGateIfPending()){
+      // Link da turma (?turma=): o cartão aparece antes do login (087).
     } else {
       goToNeutralGate();
     }
@@ -234,9 +260,15 @@ async function onUserLoggedIn(user){
   // aba default do carregamento normal.
   applyPendingLevelTestOffer();
   if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
+  // Link de perfil/Deck aberto antes do login: volta para ele (shared/router.js).
+  if (typeof consumePendingRouteAfterLogin === 'function') consumePendingRouteAfterLogin();
   if (typeof applyInitialRoute === 'function') applyInitialRoute();
   // Convite por link (?amigo=usuario): abre Amigos já buscando a pessoa.
   if (typeof friendsConsumePendingInvite === 'function') friendsConsumePendingInvite();
+  // Convite da professora (link guardado ou convite pendente na Trilha).
+  if (typeof teacherInvitesAfterLogin === 'function') teacherInvitesAfterLogin();
+  // Mural (087): link da turma guardado e o "+N" no Perfil.
+  if (typeof muralAfterLogin === 'function') muralAfterLogin();
 }
 
 // ---------- Admin Mode ON/OFF (topbar) ----------
@@ -397,11 +429,13 @@ function askUiLanguageOnFirstAccess(){
     const isSuggested = btn.getAttribute('data-lang') === suggested;
     btn.classList.toggle('btn-primary', isSuggested);
     btn.classList.toggle('btn-secondary', !isSuggested);
-    btn.onclick = () => {
+    btn.onclick = async () => {
       const lang = btn.getAttribute('data-lang');
-      modal.style.display = 'none';
-      setUiLang(lang);
       persistUiLanguageToAccount(lang);
+      try { await setUiLang(lang); } catch (e) {}
+      // C6: com cursos por idioma do site, segue para "Qual curso você quer começar?" (só quando há mais de um para escolher).
+      if (CourseStorage.isPerSiteLanguage() && typeof showFirstCoursePick === 'function' && showFirstCoursePick(lang, modal)) return;
+      modal.style.display = 'none';
     };
   });
   modal.style.display = 'flex';
@@ -511,7 +545,8 @@ async function saveState(){
     // progressLoadedOk acima) quanto duas abas/dispositivos da mesma conta
     // salvando ao mesmo tempo (a mais antiga tende a ter um valor
     // vitalício menor que o que a mais nova já gravou).
-    const existingPayload = existing && existing.data && existing.data[APP_KEY];
+    const blockKey = progressBlockKey(existing && existing.data);
+    const existingPayload = existing && existing.data && existing.data[blockKey];
     if (existingPayload){
       const regressed = MONOTONIC_PROGRESS_FIELDS.find(field => Number(payload[field]) < Number(existingPayload[field] || 0));
       if (regressed){
@@ -527,9 +562,27 @@ async function saveState(){
       }
     }
 
-    const merged = Object.assign({}, existing && existing.data, { [APP_KEY]: payload });
+    // E3/C2: sequência de dias e afins são da CONTA (união de todos os blocos); o bloco continua com o espelho, mas só com
+    // os dias estudados NESTE idioma (a união fica em _account).
+    let blockPayload = payload;
+    let accountMerged = null;
+    if (typeof AccountProgress !== 'undefined'){
+      accountMerged = AccountProgress.mergeAccount(AccountProgress.deriveAccountFromRow(existing && existing.data), AccountProgress.pickAccount(payload));
+      if (progressAccountBase) blockPayload = Object.assign({}, payload, AccountProgress.mirrorForBlock(payload, progressAccountBase));
+    }
+    const merged = Object.assign({}, existing && existing.data, { [blockKey]: blockPayload });
+    if (accountMerged) merged._account = accountMerged;
     if (pendingAccountUiLanguage){
       merged._meta = Object.assign({}, merged._meta, { uiLanguage: pendingAccountUiLanguage });
+    }
+    if (CourseStorage.isPerSiteLanguage()){
+      // C5: registra o curso iniciado e qual é o atual (só acrescenta; nunca muda registro existente).
+      const courseId = CourseStorage.activeCourseId(APP_KEY, pageSiteLanguage(existing && existing.data));
+      const hadBlock = !!(existing && existing.data && existing.data[blockKey]);
+      const meta = Object.assign({}, merged._meta);
+      meta.courses = CourseStorage.registerCourse(meta.courses, courseId, blockKey, hadBlock, new Date().toISOString());
+      meta.currentCourse = courseId;
+      merged._meta = meta;
     }
     const { error } = await supabaseClient
       .from('progress')
@@ -553,7 +606,10 @@ async function saveState(){
           user_id: CURRENT_USER.id,
           week_start: STATE.periodXp.weekStart,
           language_app_key: APP_KEY,
-          amount: STATE.periodXp.amount,
+          // C5: soma dos cursos do idioma na semana (frances@pt-BR + frances@en), senão um sobrescreve o outro.
+          amount: CourseStorage.isPerSiteLanguage()
+            ? CourseStorage.weeklyXpForLanguage(merged, APP_KEY, blockKey, STATE.periodXp)
+            : STATE.periodXp.amount,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id,week_start,language_app_key' });
       if (weeklyError) console.error('Erro ao atualizar XP semanal (ranking):', weeklyError);
@@ -578,13 +634,35 @@ async function saveState(){
 // de ser conquistado). Upsert é idempotente (onConflict na chave composta),
 // então repetir o backfill a cada load não duplica nem tem custo de leitura
 // -- só grava.
-async function upsertEarnedBadges(badgeIds){
+// backfill: níveis que a pessoa já tinha ao abrir a página (conquistas com níveis, shared/badge-tracks-app.js) entram
+// com data no passado e sem sobrescrever linha existente, para não aparecerem como novidade na Atividade dos amigos.
+async function upsertEarnedBadges(badgeIds, opts){
   if (!CURRENT_USER || !badgeIds || !badgeIds.length) return;
-  const rows = badgeIds.map(id => ({ user_id: CURRENT_USER.id, language_app_key: APP_KEY, badge_id: id }));
+  const backfill = !!(opts && opts.backfill) && typeof BADGE_BACKFILL_EARNED_AT !== 'undefined';
+  const rows = badgeIds.map(id => backfill
+    ? { user_id: CURRENT_USER.id, language_app_key: APP_KEY, badge_id: id, earned_at: BADGE_BACKFILL_EARNED_AT }
+    : { user_id: CURRENT_USER.id, language_app_key: APP_KEY, badge_id: id });
   const { error } = await supabaseClient
     .from('earned_badges')
-    .upsert(rows, { onConflict: 'user_id,language_app_key,badge_id' });
+    .upsert(rows, backfill ? { onConflict: 'user_id,language_app_key,badge_id', ignoreDuplicates: true } : { onConflict: 'user_id,language_app_key,badge_id' });
   if (error) console.error('Erro ao sincronizar badges públicos:', error);
+}
+
+// C4: conquistas da CONTA ganhas em qualquer idioma (earned_badges de todos os idiomas, só os ids de conta). Falha de rede = lista vazia
+// (o idioma atual continua mostrando o que ele mesmo calcula). Nunca remove conquista.
+let accountEarnedBadgeRows = [];
+async function loadAccountEarnedBadges(){
+  if (!CURRENT_USER) { accountEarnedBadgeRows = []; return accountEarnedBadgeRows; }
+  const { data, error } = await supabaseClient
+    .from('earned_badges')
+    .select('badge_id, language_app_key')
+    .eq('user_id', CURRENT_USER.id);
+  if (error){ console.error('Erro ao carregar conquistas da conta:', error); return accountEarnedBadgeRows; }
+  accountEarnedBadgeRows = data || [];
+  return accountEarnedBadgeRows;
+}
+function badgeEarnedNow(b, s){
+  return !!b.check(s) || accountEarnedBadgeRows.some(r => r.badge_id === b.id && AccountProgress.isAccountBadge(b.id));
 }
 
 // Tenta de novo (rede instável é comum logo no carregamento da página,
@@ -614,10 +692,12 @@ async function loadState(){
 
       progressAccountUiLanguage = (typeof uiLanguageFromProgressData === 'function' && data)
         ? uiLanguageFromProgressData(data.data) : null;
-      progressAccountIsNew = !(data && data.data && Object.keys(data.data).some(k => k !== '_meta'));
-      if (data && data.data && data.data[APP_KEY]){
-        applySerializedState(data.data[APP_KEY]);
-      } else if (typeof loadLegacyState === 'function' && data && data.data){
+      progressAccountIsNew = !(data && data.data && Object.keys(data.data).some(k => k !== '_meta' && k !== '_account'));
+      const blockKey = progressBlockKey(data && data.data);
+      if (data && data.data && data.data[blockKey]){
+        applySerializedState(data.data[blockKey]);
+      } else if (typeof loadLegacyState === 'function' && data && data.data
+        && (!CourseStorage.isPerSiteLanguage() || CourseStorage.isLegacyCourse(APP_KEY, pageSiteLanguage(data.data)))){
         // Hook opcional: um idioma que já persistia progresso ANTES do
         // namespacing por APP_KEY existir pode definir loadLegacyState(data)
         // pra reconhecer o formato antigo (salvo direto na raiz do JSON) e
@@ -625,6 +705,16 @@ async function loadState(){
         // definida, este ramo simplesmente não faz nada (caso comum: idioma
         // novo, nunca teve formato antigo pra migrar).
         loadLegacyState(data.data);
+      }
+      // E3/C2: sequência de dias, lições do dia e afins vêm da CONTA (soma dos blocos), por cima do que o bloco trouxe.
+      // Guarda antes o que é só DESTE idioma, para o espelho do bloco não receber dias estudados no outro (ver saveState).
+      if (data && data.data && typeof AccountProgress !== 'undefined'){
+        try {
+          const ownSnapshot = { activityLog: Object.assign({}, STATE.activityLog), dailyLessonsLog: Object.assign({}, STATE.dailyLessonsLog), lastStudyDay: STATE.lastStudyDay };
+          AccountProgress.applyAccountToState(STATE, AccountProgress.deriveAccountFromRow(data.data));
+          progressAccountBase = AccountProgress.snapshotBase(ownSnapshot, STATE);
+        }
+        catch (e) { console.error('Erro ao aplicar progresso da conta:', e); }
       }
       // Só chega aqui depois de uma leitura bem-sucedida (com ou sem dado
       // pra essa conta -- as duas são um resultado válido, "conta nova"

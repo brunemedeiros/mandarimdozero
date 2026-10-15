@@ -153,7 +153,9 @@
 // já usada em UX-fix 4/6): Imagem/Áudio (card.imageUrl/audioUrl) JÁ renderizam
 // corretamente nos 3 modos de revisão hoje (flip/mc/cloze, fr+zh app.js) --
 // escondê-los por modo seria regressão, não melhoria. Nota (card.note/
-// teacherNote) nunca aparece pro aluno em NENHUM modo, mas isso também não é
+// teacherNote) JÁ NÃO é privada (2026-10-12, decisão da autora, Banco de Revisão): vira "Observações" e o aluno a vê
+// DEPOIS de responder (reviewObservationHTML, shared/review-answer-extras.js). O texto abaixo é o histórico da fase,
+// quando ela nunca aparecia pro aluno em NENHUM modo, mas isso também não é
 // bug de modo -- é o único ponto de leitura confirmado (buildFlashcardsCardsBoxHTML
 // acima), um lembrete privado da própria professora, não um campo destinado
 // ao aluno. Ou seja: nenhum dos 3 campos genuinamente varia por modo hoje.
@@ -314,7 +316,7 @@ function adminFlashcardDirectionLabels(selectedStudents){
 // motivo do form de criação (ver comentário lá): não existe um
 // "back_pinyin" pra completar o par hanzi+pinyin se invertido no zh.
 function flashcardEditFormHTML(c){
-  const isMandarim = c.language_app_key === 'mandarim';
+  const isMandarim = LanguageRegistry.isCjk(c.language_app_key);
   const isMC = !!(c.choices && c.choices.length);
   const isCloze = !!c.cloze_sentence;
   const mode = isCloze ? 'cloze' : (isMC ? 'mc' : 'flip');
@@ -403,7 +405,7 @@ function flashcardEditFormHTML(c){
 // (openFlashcardResetConfirm) ANTES de chamar updateFlashcardContent --
 // só depois do "Sim" a chamada de rede acontece de verdade.
 function wireFlashcardEditForm(c, container){
-  const isMandarim = c.language_app_key === 'mandarim';
+  const isMandarim = LanguageRegistry.isCjk(c.language_app_key);
 
   container.querySelectorAll('input[name="edit-flashcard-mode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
@@ -590,7 +592,7 @@ function wireFlashcardNativeEditForm(c, editorState, container){
   // nativeNoteEditorStateFromLegacyRow() (row.language_app_key).
   document.getElementById('edit-native-flashcard-preview-btn')?.addEventListener('click', () => {
     adminPreviewOnTop(() => openFlashcardPreviewFromEditorState(editorState, {
-      appKey: editorState.languageAppKey || c.language_app_key || 'frances',
+      appKey: editorState.languageAppKey || c.language_app_key || LanguageRegistry.defaultAppKey(),
       origin: 'teacher',
     }));
   });
@@ -958,7 +960,7 @@ async function adminSelectionChanged(){
   const langsPresent = [...new Set(students.map(s => s.language_app_key))];
   if (langsPresent.length > 1 && !langsPresent.includes(S.langFilter)) S.langFilter = langsPresent[0];
   const selected = adminSelectedStudents(students);
-  S.nativeCardState.languageAppKey = selected.some(s => s.language_app_key === 'mandarim') ? 'mandarim' : null;
+  { const cjk = selected.find(s => LanguageRegistry.isCjk(s.language_app_key)); S.nativeCardState.languageAppKey = cjk ? cjk.language_app_key : null; }
   const chips = wrap.querySelector('[data-cards-chips]'); if (chips) chips.innerHTML = tccChipsHTML(selected);
   wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => { cb.checked = S.studentIds.has(cb.value); });
   const resumo = wrap.querySelector('[data-cards-resumo]'); if (resumo) resumo.textContent = selected.length ? tsuTp('cards.summary.people', selected.length) : t('cards.summary.none');
@@ -1069,7 +1071,7 @@ async function renderAdminFlashcardsView(){
     S.preselect = null;
   }
   const selected = adminSelectedStudents(students);
-  S.nativeCardState.languageAppKey = selected.some(s => s.language_app_key === 'mandarim') ? 'mandarim' : null;
+  { const cjk = selected.find(s => LanguageRegistry.isCjk(s.language_app_key)); S.nativeCardState.languageAppKey = cjk ? cjk.language_app_key : null; }
 
   wrap.innerHTML = tccShellHTML(S.tab, S._cardsCache.filter(c => c.status === 'active').length, {
     criar: tccCreateHTML({ students, langsPresent, langFilter: S.langFilter, selectedIds: S.studentIds, selected, type: 'normal' }),
@@ -1117,7 +1119,7 @@ function adminCardsBind(wrap){
       adminApplyPickerFilters(wrap); adminSelectionChanged(); return;
     }
     if (q('#admin-flashcard-preview-btn')){
-      openFlashcardPreviewFromEditorState(S.nativeCardState, { appKey: S.nativeCardState.languageAppKey || 'frances', origin: 'teacher' }); return;
+      openFlashcardPreviewFromEditorState(S.nativeCardState, { appKey: S.nativeCardState.languageAppKey || LanguageRegistry.defaultAppKey(), origin: 'teacher' }); return;
     }
     if ((el = q('[data-ir-secao]'))){ e.preventDefault(); switchTeacherPanelSection(el.dataset.irSecao); return; }
     if ((el = q('[data-preview-flashcard]'))){

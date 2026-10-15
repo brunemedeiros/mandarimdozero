@@ -8,7 +8,7 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const { extractFunction } = require('../fase-e/harness');
 const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 
-const FILES = ['shared/srs.js', 'shared/fsrs.js', 'shared/study-queue.js', 'shared/flashcard-model.js', 'shared/study-trail-model.js', 'shared/analytics-metrics.js', 'shared/deck-engine.js',
+const FILES = ['languages/registry.js', 'shared/srs.js', 'shared/fsrs.js', 'shared/study-queue.js', 'shared/flashcard-model.js', 'shared/study-trail-model.js', 'shared/analytics-metrics.js', 'shared/deck-engine.js',
   'shared/flashcard-editor-state.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-native-persistence.js',
   'shared/own-flashcards.js', 'shared/teacher-flashcards.js', 'shared/deck-data.js', 'shared/my-flashcards.js'];
 
@@ -96,7 +96,7 @@ function load(appKey, userId){
   const noop = () => {}; const el = { addEventListener: noop, style: {}, classList: { add: noop, remove: noop, toggle: noop }, querySelector: () => null, querySelectorAll: () => [] };
   ctx.document = { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], addEventListener: noop, createElement: () => el, body: el };
   FILES.forEach(f => vm.runInContext(read(f), ctx, { filename: f }));
-  vm.runInContext(extractFunction(read((appKey === 'frances' ? 'fr' : 'zh') + '/app.js'), 'flashcardIdForRow'), ctx);
+  vm.runInContext(extractFunction(require('../e4/app-source').withCore(read((appKey === 'frances' ? 'fr' : 'zh') + '/app.js')), 'flashcardIdForRow'), ctx);
   return { ctx, db };
 }
 

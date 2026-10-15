@@ -162,6 +162,13 @@
   // preservando espaços nas pontas e elementos filhos (ex.:
   // "Quanto isso atrapalhou? <span>(opcional)</span>").
   function setElementText(el, text){
+    // Ícones (shared/emoji-icons.js): o emoji do texto vira <span class="emo">. Antes de trocar o texto, volta a ser
+    // texto simples; senão o emoji velho fica ao lado do novo ("⚑ ⚑ Reportar"). O ícone é refeito logo depois.
+    if (el.querySelector && el.querySelector(':scope > .emo')){
+      var spans = el.querySelectorAll(':scope > .emo');
+      for (var k = 0; k < spans.length; k++) spans[k].parentNode.replaceChild(document.createTextNode(spans[k].textContent), spans[k]);
+      el.normalize();
+    }
     var hasElementChild = false;
     for (var i = 0; i < el.childNodes.length; i++){
       if (el.childNodes[i].nodeType === 1){ hasElementChild = true; break; }
@@ -321,6 +328,12 @@
         if (SELECTABLE_UI_LANGS.indexOf(sel.value) < 0) return;
         var chosen = sel.value;
         if (chosen === currentLang) return;
+        // C5: com cursos por idioma do site ligados, trocar o idioma do site é trocar de curso (progresso próprio, recarrega a página).
+        if (window.CourseStorage && window.CourseStorage.isPerSiteLanguage() && typeof window.confirmSwitchCourse === 'function' && typeof APP_KEY !== 'undefined'){
+          syncUiLanguageSelect();
+          window.confirmSwitchCourse(APP_KEY, chosen);
+          return;
+        }
         // Antes de trocar, um aviso curto (progresso continua salvo). Sem o
         // modal na página (ou se ele falhar), troca direto como antes.
         confirmUiLanguageChange(chosen, function(){

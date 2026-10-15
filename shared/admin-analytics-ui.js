@@ -79,6 +79,7 @@ const ANALYTICS_TABS = [
   { key: 'idioma', get label(){ return t('admin.analytics.subtab.idioma'); } },
   { key: 'dispositivos', get label(){ return t('admin.analytics.subtab.dispositivos'); } },
   { key: 'tecnologia', get label(){ return t('admin.analytics.subtab.tecnologia'); } },
+  { key: 'decks', get label(){ return t('publicDeckCopies.tab'); } },
 ];
 
 function tanSubnavHTML(current){
@@ -171,6 +172,18 @@ function tanEngajamentoHTML(stats, weeklyXp, badgeGrants){
       + tanNoteHTML(`${t('admin.analytics.eng.xpNote1')} ${t('admin.analytics.eng.xpNote2')} ${badgedStudents ? `${tp('admin.analytics.eng.badgedStudents', badgedStudents)} ${t('admin.analytics.eng.badgedSuffix')}` : ''}`.trim()));
 }
 
+// Decks públicos: quantas PESSOAS adicionaram cada Deck (uma por conta; recópias só em "Cópias"). Não depende do período escolhido.
+function tanDecksHTML(decks){
+  if (!Array.isArray(decks)) return tanSectionHTML(t('publicDeckCopies.tab'), tanEmptyHTML(t('publicDeckCopies.error')));
+  if (!decks.length) return tanSectionHTML(t('publicDeckCopies.tab'), tanNoteHTML(t('publicDeckCopies.adminHint')) + tanEmptyHTML(t('publicDeckCopies.none')));
+  const rows = decks.map(d => {
+    const lang = (LanguageRegistry.byAppKey(d.language_app_key) || {}).name || d.language_app_key || '';
+    return `<tr><th scope="row">${tanEsc(d.name || '')}<br><small class="p-subtitulo">@${tanEsc(d.owner_username || '')} · ${tanEsc(lang)}${d.is_public ? '' : ' · ' + tanEsc(t('publicDeckCopies.unpublished'))}</small></th>`
+      + `<td>${d.people || 0}</td><td>${d.copies || 0}</td><td>${d.last_copied_at ? tanEsc(fmtDate(d.last_copied_at)) : '—'}</td></tr>`;
+  }).join('');
+  return tanSectionHTML(t('publicDeckCopies.tab'), tanNoteHTML(t('publicDeckCopies.adminHint')) + tanTableHTML([t('studentDecks.deck'), t('publicDeckCopies.people'), t('publicDeckCopies.copies'), t('publicDeckCopies.last')], rows));
+}
+
 function tanTecnologiaHTML(tech){
   return tanSectionHTML(t('admin.analytics.tech.errors'), tanKpisHTML([tanKpiHTML(tech.totalErrors, t('admin.analytics.tech.total')), tanKpiHTML(tech.affectedStudents, t('admin.analytics.tech.affected'))])
       + (tech.errorRows.length ? tanBarsHTML(tech.errorRows, ANALYTICS_TECHNICAL_ERROR_LABELS) : tanEmptyHTML(t('admin.analytics.tech.noErrors'))) + tanNoteHTML(t('admin.analytics.tech.note')))
@@ -204,6 +217,6 @@ function tanPageHTML(st){
     ${tanSubnavHTML(st.tab)}
     ${panel('resumo', tanResumoHTML(st.stats, st.prevStats))}${panel('atividade', tanAtividadeHTML(st.stats))}${panel('retencao', '')}${panel('navegacao', tanNavegacaoHTML(st.stats))}
     ${panel('exercicios', tanExerciciosHTML(st.stats))}${panel('progressao', tanProgressaoHTML(st.stats))}${panel('engajamento', '')}${panel('idioma', tanIdiomaHTML(st.stats, st.controls.languageFilter))}
-    ${panel('dispositivos', tanDispositivosHTML(st.stats))}${panel('tecnologia', '')}
+    ${panel('dispositivos', tanDispositivosHTML(st.stats))}${panel('tecnologia', '')}${panel('decks', '')}
   </div></div>`;
 }

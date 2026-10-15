@@ -102,7 +102,7 @@ function _validateFlashcardContent({ languageAppKey, front, backTrans, choices, 
       return { ok: false, error: t('ownFlashcards.err.clozeOneBlank') };
     }
     if (!cleanClozeAnswer) return { ok: false, error: t('ownFlashcards.err.clozeAnswerRequired') };
-    if (languageAppKey === 'mandarim' && !(clozeAnswerPinyin || '').trim()){
+    if (LanguageRegistry.isCjk(languageAppKey) && !(clozeAnswerPinyin || '').trim()){
       return { ok: false, error: t('teacherFlashcards.err.clozePinyinRequired') };
     }
   }
@@ -184,7 +184,7 @@ async function updateFlashcardContent(id, { languageAppKey, front, backTrans, no
     choices: v.cleanChoices.length ? v.cleanChoices : null,
     cloze_sentence: v.cleanClozeSentence || null,
     cloze_answer: v.cleanClozeAnswer || null,
-    cloze_answer_pinyin: languageAppKey === 'mandarim' ? ((clozeAnswerPinyin || '').trim() || null) : null,
+    cloze_answer_pinyin: LanguageRegistry.isCjk(languageAppKey) ? ((clozeAnswerPinyin || '').trim() || null) : null,
     front_is_target_language: frontIsTargetLanguage !== false,
     revision,
   };

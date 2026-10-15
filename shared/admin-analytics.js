@@ -92,7 +92,7 @@ const ANALYTICS_TRUNCATED = { main: false, retencao: false, tecnologia: false };
 // custo de Retenção/Engajamento/Tecnologia em toda troca de filtro se a
 // autora nunca chega a olhar essas abas. Cache limpo a cada novo período/
 // idioma/dispositivo/comparação (início de renderAdminAnalyticsView()).
-const ANALYTICS_LAZY_TABS = new Set(['retencao', 'engajamento', 'tecnologia']);
+const ANALYTICS_LAZY_TABS = new Set(['retencao', 'engajamento', 'tecnologia', 'decks']);
 
 
 
@@ -326,6 +326,11 @@ async function switchAnalyticsTab(tab){
     const events = await fetchTechnicalEventsForWindow(ANALYTICS_CURRENT.sinceIso, ANALYTICS_CURRENT.untilIso);
     ANALYTICS_LAZY_CACHE.tecnologia = computeTechnicalStats(events);
     html = (ANALYTICS_TRUNCATED.tecnologia ? tanTruncatedHTML('analytics.truncated.tech', ANALYTICS_TECH_LIMIT) : '') + tanTecnologiaHTML(ANALYTICS_LAZY_CACHE.tecnologia);
+  } else if (tab === 'decks'){
+    // K.8 (079): total desde a 079 (cópias de antes não foram registradas); não depende do período.
+    const { data, error } = await supabaseClient.rpc('admin_public_deck_copy_stats');
+    ANALYTICS_LAZY_CACHE.decks = (!error && data && Array.isArray(data.decks)) ? data.decks : null;
+    html = tanDecksHTML(ANALYTICS_LAZY_CACHE.decks);
   }
   if (token === ANALYTICS_VIEW.token) panel.innerHTML = html;   // a tela pode ter sido refeita (filtro novo) enquanto buscava
 }

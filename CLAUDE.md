@@ -42,6 +42,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - **Notas de realidade/culturais**: toda nota nova ou editada é reportada no chat com nível de confiança
   (alta/média/baixa). Procedimento na skill `notas-de-realidade`.
 - **Conteúdo novo (nível/módulo/unidade)**: decidir os Desafios por categoria (skill `criar-desafios`).
+- **E-mails**: todo e-mail do site (Supabase Auth, Edge Functions, Resend) segue o padrão Prof Brune
+  (`docs/email/PADRAO-EMAIL.md`, modelo `docs/email/supabase/confirmar-conta.html`; detalhes em `.claude/rules/email.md`).
 
 ## Processo
 
@@ -74,14 +76,14 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 ## Índice
 
 - Regras por área (carregam sozinhas): `.claude/rules/` -- frontend-fr-zh, flashcards-motor, decks-review,
-  supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora, painel-design-system.
+  supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora, painel-design-system, email.
 - Skills do projeto: `migration-supabase`, `notas-de-realidade`, `criar-desafios`, `audio-tts`,
   `teste-navegador`, `registrar-entrega`.
 - Agentes (`.claude/agents/`, `model:` pela dificuldade): `regressao` (haiku, roda testes),
   `revisor-conteudo` (opus, revisa notas/traduções), `code-architecture-reviewer`/`principal-engineer`/
   `plan-reviewer`/`refactor-planner` (opus), `code-refactor-master`/`documentation-architect`/
   `web-research-specialist`/`auto-error-resolver` (sonnet).
-- Histórico completo (texto original, só leitura sob demanda): `docs/historico/01..14-*.md`.
+- Histórico completo (texto original, só leitura sob demanda): `docs/historico/01..15-*.md`.
   Comentários no código que citam "seção X do CLAUDE.md" apontam para esse texto: buscar com `grep -rn` em `docs/historico/`.
 
 ## Estado atual (1 linha por item; apagar ao fechar)
@@ -91,9 +93,22 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   (ambas aplicadas). 074 aplicada no Staging e na produção.
 - Desafios: `fr/scripts/supabase_migrations/007` (`cloze_grammar`) aplicada pela autora em 2026-10-07; `008` (gating
   Premium) NÃO aplicar antes do paywall. Lista do que fazer ao ligar o paywall: `docs/historico/14-pendencias-pos-paywall-e-decks.md`.
-- Todos os cartões antigos já têm Deck (migração de 2026-10-07). Regra "1 professora por aluno por idioma" ainda não imposta no banco.
-- Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`).
+- Todos os cartões antigos já têm Deck (migração de 2026-10-07).
+- Cursos por par (idioma estudado × idioma do site), notas escritas para cada língua de origem, URLs `/fr` `/zh` `/pt`: `docs/i18n/decisao-cursos-por-par.md`; plano em etapas E0 a E10: `docs/i18n/arquitetura-multi-idioma-cursos.md`. E0 a E3 e C0 a C6 entregues e **mesclados na main (PR 309, 2026-10-13)** com a flag `COURSE_PROGRESS_PER_SITE_LANGUAGE = true` (curso por idioma do site, menu da bandeira, portão "Eu falo..."); migration 075 e `notification-cron` v24 em produção; chave de emergência `localStorage['courses-per-site-language']='0'`. E4: passos 1 e 2 (levantamento e plano em `docs/i18n/e4-*.md`) e lote 1 (22 funções para `shared/core/`, PR 311) mesclados; lote 2 (42 funções de revisão e decks, PR 314) mesclado; lote 3 (39 funções de exercícios de lição, PR 317) mesclado; lote 4 (58 funções de estado, trilha, checkpoint e desafios, PR 321, com teste de ida e volta do progresso e capturas antes x depois) mesclado: as funções idênticas acabaram (restam 3 de Configurações/admin, de outras sessões); lote 5a (12 quase iguais simples, ganchos `LANG_HOOKS`, PR 324) mesclado. lote 5b (5 funções de toast/plural e recapitulação com pinyin) pronto na branch, aguardando PR. Próximo: as 38 quase iguais restantes (pontos de extensão), só com a autorização da dona; Q-10 a Q-14 a dona já respondeu em outra sessão. Próximas: E4 em diante (Banco de Revisão e `teacher-invites.js` com lista de idiomas fixa: tratados em outra sessão); aguardando respostas da dona (Q-10..12, P1..P8; seguindo as recomendações). Histórico: `docs/historico/15-i18n-cursos-por-par-e0.md`.
+- Paywall dos Desafios desligado (`CHALLENGE_PAYWALL_ENABLED=false`, `CHALLENGES_SERVER_GATING=false`) e dos Jogos da
+  Conjugação também (`CONJ_GAMES_PAYWALL_ENABLED=false`: Jogos são Premium, com cadeado; a prática da Conjugação é grátis).
+- Conjugação (fr) publicada pelo PR #318 (2026-10-14): prática revisada, busca de verbos, aba Jogos ("Passé composé ou
+  Imparfait?") e modo foco na Conjugação/Revisão/Desafios. Ideia em espera: "Adicionar à Revisão" (versão enxuta só na
+  tela final). Registro: `docs/historico/13-redesenho-licoes-destaque-dialogo.md`.
+- 075/076 (papéis, permissões, regras da professora) na produção; telas (painéis Admin x Professora, Planos, Minhas aulas) publicadas pelo PR #302 (2026-10-12). Plano: 1) papel Professora, 2) Fase K final, 3) login obrigatório + perfil privado (077-080 na produção, telas pelo PR #304), 4) mural (087 no Staging e na produção, telas e painel Aluno publicados pelo PR #312 em 2026-10-14; aba Aluno > Revisão publicada pelo PR #316; 094 Presença/Competências/aula de turma no Staging e na produção (2026-10-14); Notion importado em 2026-10-15 (393 aulas; 62 para a autora revisar no bloco "Revisar do Notion", publicar a tela); depois: calendário, avisos no Mural, aba Turma no Ranking só para quem tem turma) -- `docs/plano-professora-privacidade.md`.
+- Banco de Revisão (migrations 081 a 085): aplicadas no Staging e na produção (2026-10-13; versões 20261013105651 a 105731, a 081 no Staging aparece como `080_review_bank`). Tela em Professora > Cartões publicada. Importação feita pela autora (produção, 2026-10-14: 24 alunos, 2076 itens, 8 vinculados, 635 cartões); 14 ativos ainda sem conta/vínculo. App de português (`ptbr`) é urgente: 13 dos 24 alunos estudam português. Registro: `docs/historico/15-auditoria-banco-revisao.md`.
+- 086 (amigos: foguinho, marcos de sequência, parabéns) aplicada no Staging e na produção (2026-10-13). Conquistas com níveis
+  aprovadas (2026-10-14) e publicadas (PR #313); 091 e 092 (Pódio) no Staging e na produção:
+  `docs/historico/16-conquistas-com-niveis.md`. Ícones: troca geral para o Fluent Emoji feita na branch (`shared/emoji-icons.js`, `docs/icones-fluent.md`).
+- App de loja (App Store/Google Play): antes de discutir, ler `docs/app-loja-lembretes.md` (agenda de contatos, telefone, LGPD).
+- Amigos: sugestões de amigos + QR code (095 no Staging e na produção, 2026-10-15; `docs/historico/17-sugestoes-de-amigos.md`).
+  Ainda não iniciados: missão em dupla, sequência com amigo, cutucar (`docs/amigos-seguir-x-amizade.md`).
+- Rotina automática do Banco (tarefa da madrugada -> Edge Function `review-bank-agent`, caixa de entrada e cron; migrations 089, 090 e 097 a 100 na produção, função v6, Vault e cron criados em 2026-10-15, token conferido): tarefa nova `trig_015AkoX1hyDJuWs1MimQDTbE` (sem agendamento; texto em `docs/rotina-banco/tarefa-nova-producao.txt`, colar de novo se mudar). Nenhum aluno é gerenciado ainda: ao migrar cada um, marcar "Atualizar automaticamente" no formulário do aluno (Banco > Alunos > Editar aluno) e arquivá-lo no artifact. Duplicatas "Luana Baionne" e "Makena Bento de Azevedo" arquivadas (apagar pelo SQL Editor). Detalhes: `docs/historico/18-rotina-automatica-banco.md`.
 - Design System do painel: Pico CSS escopado, sem React e sem build (`shared/painel/`, guia em `shared/painel/guia-de-estilo.html`, ~40 peças inspiradas no shadcn). Nunito hospedada em `shared/fonts/`. Fase 2 (área da Professora): **telas Alunos, Aulas, Cartões e Material de apoio prontas na branch** (fr e zh, testadas; `docs/historico/15-*`), nada publicado na `main`; Banco de Revisão (geração automática de cartões a partir do Google Docs) aguarda auditoria e respostas da autora (`docs/fase-2-professora/banco-de-revisao-auditoria.md`); o Banco de Revisão está sendo tratado em outra sessão. Botão primário fica no azul atual (igual ao Ranking). Admin (Fase 3): **5 abas prontas na branch** (Planos, Notificações, Badges, Reports, Analytics; `docs/historico/15-*`, auditoria em `docs/fase-3-admin/auditoria.md`), nada publicado; guia de estilo com as peças novas e páginas antes e depois (Cartões, Material, Admin) já publicadas como artifacts; confirmações de Planos aprovadas pela autora. Analytics busca em páginas de 1000 (teto 50000 eventos, 10000 técnicos), sem migration.
-- 075/076 (papéis, permissões, regras da professora) na produção; telas novas (painéis Admin x Professora, Planos, Minhas aulas) na branch, não publicadas. Plano: 1) papel Professora, 2) Fase K final, 3) perfil privado, 4) mural -- `docs/plano-professora-privacidade.md`.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
-  diálogos com personagens nomeados e preenchimento de país dos alunos (placeholders de perfil); Stripe.
+  diálogos com personagens nomeados (placeholders de perfil); Stripe. País dos alunos: já preenchido nos 13 alunos (conferido 2026-10-14).

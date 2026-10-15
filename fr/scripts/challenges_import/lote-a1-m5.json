@@ -184,6 +184,7 @@
     "type": "expression",
     "canonicalExpression": "Fais comme chez toi",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "697c5f906460.mp3",
     "meaning": {
       "fr": "On dit à un invité de se sentir à l'aise.",
@@ -233,6 +234,7 @@
     "type": "expression",
     "canonicalExpression": "Chez moi",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "5efcc25cd4d0.mp3",
     "meaning": {
       "fr": "À la maison ; dans mon logement.",
@@ -282,6 +284,7 @@
     "type": "expression",
     "canonicalExpression": "Bienvenue !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "5c00d1f8c26a.mp3",
     "meaning": {
       "fr": "On accueille quelqu'un.",
@@ -331,6 +334,7 @@
     "type": "expression",
     "canonicalExpression": "Ça te va bien !",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "7ffb44fa9de1.mp3",
     "meaning": {
       "fr": "Ce vêtement ou cette couleur te va bien.",
@@ -380,6 +384,7 @@
     "type": "expression",
     "canonicalExpression": "Ça te plaît ?",
     "level": "A1",
+    "register": "neutral",
     "expressionAudioFile": "9366d2c6cb03.mp3",
     "meaning": {
       "fr": "On demande si quelqu'un aime quelque chose.",

@@ -88,7 +88,7 @@ async function boot(browser, port, lang, query){
   page.on('dialog', d => d.accept());
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
-  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
+  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('courses-per-site-language', '0'); } catch (e) {} }); // comportamento antigo (chave de emergência)
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html${query || ''}`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 20000 });
   return { ctx, page, errors };
@@ -167,7 +167,7 @@ async function boot2(ctx, port, lang, query){
   page.on('dialog', d => d.accept());
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB2 }));
-  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
+  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('courses-per-site-language', '0'); } catch (e) {} }); // comportamento antigo (chave de emergência)
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html${query || ''}`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 20000 });
   await page.evaluate(() => window.i18nReady);
@@ -220,9 +220,15 @@ async function triggerWouldGenerate(page){
     ensureProfileLoaded = async () => ({ plan_tier: 'premium' });
     window.__DB.own_flashcards = [];
     for (let i = 0; i < 19; i++) window.__DB.own_flashcards.push({ id: 9000 + i, owner_id: 'u-i18n', language_app_key: APP_KEY, status: 'active', deck_id: null, front: 'a' + i, back_trans: 'b', fields: null, card_generation_mode: null, revision: 0, tags: [], created_at: new Date().toISOString() });
-    switchTab('my-flashcards');
+    // "Meus Cartões" virou a janela Adicionar da Revisão (mesmo formulário);
+    // o commit de referência antigo ainda tem a aba.
+    if (typeof openAddCardModal === 'function') openAddCardModal({});
+    else switchTab('my-flashcards');
   });
   await page.waitForSelector('#my-flashcard-deck', { timeout: 8000 });
+  // Hoje Premium não tem teto (regra atual); o teste só confere o TEXTO do aviso,
+  // então força o caminho do teto na janela nova (o tipo "com reverso" pede Premium).
+  await page.evaluate(() => { if (document.getElementById('add-card-modal')) MY_FLASHCARDS_STATE._hasLink = false; });
   await page.selectOption('#my-flashcard-card-type-preview', 'normal_reversed');
   const before = await page.locator('#my-flashcard-native-fields [data-field-content]').count();
   for (let i = before; i < 2; i++) await page.click('#my-flashcard-native-fields [data-field-add]');
@@ -233,7 +239,7 @@ async function triggerWouldGenerate(page){
   await page.waitForFunction(() => document.getElementById('flashcard-limit-modal').style.display === 'flex', null, { timeout: 8000 });
   const r = await page.evaluate(() => ({ err: document.getElementById('my-create-flashcard-error').textContent, n: window.__DB.own_flashcards.length,
     title: document.querySelector('#flashcard-limit-modal h3').textContent }));
-  await page.evaluate(() => { document.getElementById('flashcard-limit-modal').style.display = 'none'; CURRENT_USER = false; });
+  await page.evaluate(() => { document.getElementById('flashcard-limit-modal').style.display = 'none'; if (typeof closeAddCardModal === 'function') closeAddCardModal(); CURRENT_USER = false; });
   return Object.assign(r, { n0 });
 }
 
@@ -311,7 +317,7 @@ async function triggerWouldGenerate(page){
       U('relato: categoria/gravidade por id estável', sent[0] && sent[0].category === 'traducao' && sent[0].severity_reported === 'pequeno' && sent[0].kind === 'problema');
       U('relato: idioma ESTUDADO preservado', sent[0] && sent[0].language_app_key === appKey);
       U('relato: e-mail do convidado', sent[0] && sent[0].reporter_email === 'a@b.co');
-      U('toast de sucesso traduzido', await page.evaluate(m => [...document.querySelectorAll('*')].some(e => e.children.length === 0 && e.textContent === m), C['report.toast.success']));
+      U('toast de sucesso traduzido', await page.evaluate(m => [...document.querySelectorAll('*')].some(e => [...e.children].every(c => c.classList.contains('emo')) /* ícones do Fluent (shared/emoji-icons.js) */ && e.textContent === m), C['report.toast.success']));
       U('APP_KEY não mudou', await page.evaluate(k => APP_KEY === k, appKey) && before.appKey === appKey);
       // reenviar o mesmo -> duplicata traduzida
       await page.evaluate(() => document.getElementById('report-topbar-btn').click());

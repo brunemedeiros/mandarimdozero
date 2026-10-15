@@ -209,11 +209,12 @@ async function bootPage(browser, lang, port){
     const pool = () => ev(() => eligibleReviewPool().filter(c => c.origin !== 'study').map(c => c.rowId).sort((a, b) => a - b));
     const deckQ = (d) => ev(async (d) => { await startDeckReviewSession(d); return STATE.reviewQueue.map(c => c.rowId).sort((a, b) => a - b); }, d);
     const setF = (f) => ev((f) => { STATE.studySettings.reviewTagFilter = f; }, f);
-    L('sem filtro: comportamento atual (todos)', JSON.stringify(await pool()) === '[1,2,3,4,5,5,6,7,8]', await pool());
+    // 2026-10-14: cartões da professora (6, 7) ficam na aba Aluno > Revisão, fora da Revisão geral.
+    L('sem filtro: comportamento atual (todos menos os da professora)', JSON.stringify(await pool()) === '[1,2,3,4,5,5,8]', await pool());
     // 2026-10-06 (pedido da autora): o filtro de tags saiu de "Configurar" e só
     // existe no Painel. A sessão de revisão ignora qualquer reviewTagFilter salvo.
-    await setF(['a1']); L('filtro salvo é ignorado na revisão geral', JSON.stringify(await pool()) === '[1,2,3,4,5,5,6,7,8]', await pool());
-    await setF(['nao-existe']); L('filtro inexistente salvo não esvazia a revisão', (await pool()).length === 9);
+    await setF(['a1']); L('filtro salvo é ignorado na revisão geral', JSON.stringify(await pool()) === '[1,2,3,4,5,5,8]', await pool());
+    await setF(['nao-existe']); L('filtro inexistente salvo não esvazia a revisão', (await pool()).length === 7);
     L('sessão de Deck ignora filtro de tag salvo (Deck P1 inteiro)', JSON.stringify(await deckQ(7001)) === '[1,2,5,5,8]', await deckQ(7001));
     L('Deck nunca traz card de outro Deck', !(await deckQ(7001)).includes(3));
     L('Teacher Deck inteiro', JSON.stringify(await deckQ(7100)) === '[6,7]', await deckQ(7100));
