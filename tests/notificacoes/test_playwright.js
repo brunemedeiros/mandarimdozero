@@ -21,7 +21,7 @@ const STUB = `
   function builder(table){
     const st = { table, filters: [], ins: [], op: 'select', patch: null };
     const match = (row) => st.filters.every(([k, v]) => d(row, k, v)) && st.ins.every(([k, vs]) => vs.includes(row[k]));
-    function d(row, k, v){ return v === null ? row[k] == null : row[k] === v; }
+    function d(row, k, v){ return v === null ? row[k] == null : String(row[k]) === String(v); }
     const exec = () => {
       const rows = (window.__DB[table] || []);
       if (st.op === 'update'){
@@ -148,6 +148,12 @@ const SHOTS = process.env.SHOTS;
     check(tag + ': painel cabe na tela', r.noOverflow && r.panelRight, r);
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/${lang}-${theme}${vp ? '-mobile' : ''}.png` });
     if (lang === 'fr' && theme === 'light' && !vp){
+      await page.click('.notification-unread-dot[data-mark-read="3"]');
+      await page.waitForTimeout(200);
+      const one = await page.evaluate(() => ({ read: !!window.__DB.notifications.find(n => n.id === 3).read_at,
+        open: document.getElementById('notifications-dropdown').classList.contains('open'), dots: document.querySelectorAll('.notification-unread-dot').length,
+        badge: document.getElementById('notifications-badge').textContent, label: document.querySelector('.notification-unread-dot').getAttribute('aria-label') }));
+      check('bolinha marca só aquele aviso como lido, sem fechar o painel', one.read && one.open && one.dots === 1 && one.badge === '1' && one.label === 'Marcar como lida', one);
       await page.click('.notification-item[data-twin-at]');
       await page.waitForTimeout(200);
       const db = await page.evaluate(() => window.__DB.notifications.filter(n => n.category === 'amigos').map(n => !!n.read_at));

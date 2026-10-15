@@ -162,6 +162,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'notif.group.earlier': 'Antes',
   'notif.unread': 'Não lida',
   'notif.markAll': 'Ler todas',
+  'notif.markOne': 'Marcar como lida',
   'notif.cat.estudo': '📘 Estudo',
   'notif.cat.revisao': '🔄 Revisão',
   'notif.cat.streak': '🔥 Sequência',

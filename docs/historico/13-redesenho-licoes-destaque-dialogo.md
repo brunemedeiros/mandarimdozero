@@ -194,8 +194,13 @@ A autora pensou em aposentar a ideia ("estamos criando coisas demais"). Nada foi
   rosa com `rgba` fixo); lido = texto mais apagado; cabeçalho fixo ao rolar; o emoji do começo do texto ("📌 Fulana
   postou...") sai porque o ícone já está à esquerda. "Ler todas" passou a ter i18n (`notif.markAll`).
 - Ícones: todos os emojis dos avisos estão no mapa do Fluent (`shared/emoji-icons.js`); conferido no teste.
+- A bolinha de não lido é um botão (`notification-unread-dot`, "Marcar como lida"): marca só aquele aviso, sem abrir nem fechar
+  o painel (área de toque de 44px no celular). O menu Professora não tem lista própria: o sino é o mesmo em todo o site.
+- Prévia A x B (tokens do site x Pico CSS do painel, arquivos reais da branch `claude/epic-fermat-ulyw5j`) enviada à autora
+  em 2026-10-15, aguardando decisão. O Pico (decidido em 2026-10-12, `docs/levantamento-design-system-painel.md` naquela
+  branch) é só para o painel interno (Professora e Admin) e ainda não foi mesclado na `main`.
 - Pico CSS: não se aplica. É a recomendação do "Design System do Painel" (painel interno da Professora); as telas de
   aluno seguem os tokens do site (decisão da dona, `docs/historico/15-i18n-cursos-por-par-e0.md`).
 - Grátis x Premium: tudo grátis.
-- Testes: `tests/notificacoes/test_playwright.js` 35/35 (novo; fr/zh, claro/escuro, celular), i18n 2032/2032 e 209/209,
+- Testes: `tests/notificacoes/test_playwright.js` 36/36 (novo; fr/zh, claro/escuro, celular), i18n 2032/2032 e 209/209,
   celular 108/108, ícones 43/43, amigos 210/210, modo foco 19/19. `registro` 88/89 igual na `main` (pré-existente).

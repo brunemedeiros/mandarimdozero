@@ -302,24 +302,36 @@ async function renderNotificationDropdown(){
     const head = group !== lastGroup ? `<p class="notification-group" role="presentation">${t('notif.group.' + group)}</p>` : '';
     lastGroup = group;
     const unread = !n.read_at;
+    const twin = n.category === 'amigos' ? `data-twin-at="${escapeHTML(n.created_at)}" data-twin-body="${escapeHTML(n.body || '')}"` : '';
     return `${head}
-    <button class="notification-item ${unread ? 'unread' : ''}" data-notification-id="${n.id}" data-action-tab="${escapeHTML(n.action_tab || '')}"
-      ${n.category === 'amigos' ? `data-twin-at="${escapeHTML(n.created_at)}" data-twin-body="${escapeHTML(n.body || '')}"` : ''}>
+    <div class="notification-row">
+    <button class="notification-item ${unread ? 'unread' : ''}" data-notification-id="${n.id}" data-action-tab="${escapeHTML(n.action_tab || '')}" ${twin}>
       <span class="notification-item-icon" aria-hidden="true">${n.icon || NOTIFICATION_CATEGORY_ICON[n.category] || '🔔'}</span>
       <span class="notification-item-body">
         ${n.title ? `<span class="notification-item-title">${escapeHTML(n.title)}</span>` : ''}
         <span class="notification-item-text">${escapeHTML(notificationBodyText(n.body))}</span>
         <span class="notification-item-time">${notificationTimeAgoLabel(n.created_at)}</span>
       </span>
-      ${unread ? `<span class="notification-unread-dot"><span class="sr-only">${t('notif.unread')}</span></span>` : ''}
-    </button>`;
+    </button>
+    ${unread ? `<button type="button" class="notification-unread-dot" data-mark-read="${n.id}" ${twin} aria-label="${escapeHTML(t('notif.markOne'))}" title="${escapeHTML(t('notif.markOne'))}"></button>` : ''}
+    </div>`;
   }).join('');
+
+  // A bolinha marca só aquele aviso como lido, sem abrir nada.
+  list.querySelectorAll('[data-mark-read]').forEach(dot => {
+    dot.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await markNotificationRead(dot.dataset.markRead, dot.dataset.twinAt ? { createdAt: dot.dataset.twinAt, body: dot.dataset.twinBody } : null);
+      dot.parentElement.querySelector('.notification-item')?.classList.remove('unread');
+      dot.remove();
+    });
+  });
 
   list.querySelectorAll('[data-notification-id]').forEach(el => {
     el.addEventListener('click', async () => {
       await markNotificationRead(el.dataset.notificationId, el.dataset.twinAt ? { createdAt: el.dataset.twinAt, body: el.dataset.twinBody } : null);
       el.classList.remove('unread');
-      el.querySelector('.notification-unread-dot')?.remove();
+      el.parentElement.querySelector('.notification-unread-dot')?.remove();
       const tab = el.dataset.actionTab;
       document.getElementById('notifications-dropdown')?.classList.remove('open');
       if (tab === 'profile-edit'){
