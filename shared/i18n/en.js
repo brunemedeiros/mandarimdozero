@@ -152,6 +152,7 @@ window.I18N_CATALOG['en'] = {
   'notif.cat.sistema': '⚙️ System', // ALTA
   'notif.cat.amigos': '👥 Friends', // ALTA
   'notif.pref.inAppOnly': 'Friends only has in-app notifications', // ALTA
+  'notif.pref.noEmail': 'Friends has no email notifications', // ALTA
   'notif.pref.guest': 'Create an account to set up notifications -- guest mode does not save preferences.', // ALTA
   'notif.pref.loadFailed': 'Could not load your preferences right now.', // ALTA
   'notif.pref.sectionTitle': 'Notifications', // ALTA
@@ -2388,6 +2389,46 @@ window.I18N_CATALOG['en'] = {
   'friends.suggest.reason.partner': 'Also studies {lang}', // ALTA
   'friends.suggest.reason.ranking': 'Close to you in this week\'s ranking', // ALTA
   'friends.pref.suggest_me': 'Show me in other people\'s friend suggestions', // ALTA
+  'badge.track.duo.title': 'Duo Missions', // ALTA
+  'badge.track.duo.1': 'Dynamic Duo', // ALTA
+  'badge.track.duo.2': 'Power Partnership', // ALTA
+  'badge.track.duo.3': 'Unbeatable Duo', // ALTA
+  'badge.track.duo.goal': 'Complete {n} duo missions', // ALTA
+  'badge.track.duo.goal.1': 'Complete a duo mission', // ALTA
+  'friends.duo.title': 'Duo mission', // ALTA
+  'friends.duo.pitch': 'Team up with a friend to earn XP together by Sunday. Only XP earned after you start counts.', // ALTA
+  'friends.duo.friendLabel': 'Friend', // ALTA
+  'friends.duo.goalLabel': 'Goal', // ALTA
+  'friends.duo.goalOpt.150': '150 XP (light)', // ALTA
+  'friends.duo.goalOpt.300': '300 XP (regular)', // ALTA
+  'friends.duo.goalOpt.600': '600 XP (tough)', // ALTA
+  'friends.duo.start': 'Start mission', // ALTA
+  'friends.duo.noneFree': 'Your friends are already on missions this week. More next week!', // ALTA
+  'friends.duo.with': 'You and {name}', // ALTA
+  'friends.duo.progress': '{done} of {goal} XP', // ALTA
+  'friends.duo.barAria': 'Mission progress: {done} of {goal} XP', // ALTA
+  'friends.duo.mine': 'You: {n} XP', // ALTA
+  'friends.duo.theirs': '{name}: {n} XP', // ALTA
+  'friends.duo.endsToday': 'Ends today', // ALTA
+  'friends.duo.done': 'Mission complete! 🎉', // ALTA
+  'friends.duo.doneText': 'You earned {goal} XP together. A new mission starts next week.', // ALTA
+  'friends.duo.toast.started': 'Mission started! Happy studying 🤝', // ALTA
+  'friends.nudge.btn': 'Nudge', // ALTA
+  'friends.nudge.aria': 'Nudge {name} to study today', // ALTA
+  'friends.nudge.done': 'Nudged', // ALTA
+  'friends.nudge.atRisk': 'Your streak together ends if {name} doesn\'t study today', // ALTA
+  'friends.toast.nudged': 'Nudge sent 👋', // ALTA
+  'friends.error.nudges_off': 'This person chose not to get nudges.', // ALTA
+  'friends.error.already_studied': 'This person already studied today 🎉', // ALTA
+  'friends.error.daily_nudge_limit': 'You\'ve already nudged 20 friends today. More tomorrow!', // ALTA
+  'friends.error.invalid_goal': 'Pick one of the goals.', // ALTA
+  'friends.error.already_in_mission': 'You\'re already on a duo mission this week.', // ALTA
+  'friends.error.friend_in_mission': 'This friend is already on a mission this week. Pick someone else.', // ALTA
+  'friends.pref.accept_nudges': 'Get nudges from friends (study reminders)', // ALTA
+  'friends.pref.notify_missions': 'Notify me about duo missions (start and goal reached)', // ALTA
+  'friends.duo.endsIn': { one: 'Ends in {n} day', other: 'Ends in {n} days' }, // ALTA
+  'friends.joint.label': { one: '{n} day together', other: '{n} days together' }, // ALTA
+  'friends.joint.aria': { one: 'You both studied {n} day in a row', other: 'You both studied {n} days in a row' }, // ALTA
   'friends.suggest.reason.mutual': { one: '{n} mutual friend', other: '{n} mutual friends' }, // ALTA
   'profile.tabFriends': 'Friends', // ALTA
   'panel.admin.sub': 'Badges, metrics, notifications, reports and plans.', // ALTA

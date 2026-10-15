@@ -2,7 +2,8 @@
 
 Exploração pedida pela autora em 2026-10-14. **Decisões da autora (2026-10-14):** manter pedido e aceite; aprovados
 missão em dupla, sequência com amigo, cutucar e "seguir" só para contas oficiais; aprovadas as seis sugestões de
-amigos da seção 4. Nada implementado ainda. Base: `shared/friends.js`, migrations 073/074/086.
+amigos da seção 4. Sugestões + QR code entregues (095, `docs/historico/17-sugestoes-de-amigos.md`); missão em
+dupla, sequência com amigo e cutucar entregues em 2026-10-15 (102, `docs/historico/19-amigos-em-dupla.md`). Base: `shared/friends.js`, migrations 073/074/086.
 
 ## 1. Como cada um funciona
 

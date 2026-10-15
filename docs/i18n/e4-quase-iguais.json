@@ -1,33 +1,33 @@
 [
  {
-  "name": "addXP",
-  "linesFr": 14,
-  "linesZh": 14,
-  "changed": 2
- },
- {
-  "name": "answerSpeedQuestion",
-  "linesFr": 38,
-  "linesZh": 38,
-  "changed": 2
+  "name": "onMatchTileClick",
+  "linesFr": 1,
+  "linesZh": 1,
+  "changed": 0
  },
  {
   "name": "renderLessonCompleteScreen",
-  "linesFr": 52,
-  "linesZh": 52,
-  "changed": 2
+  "linesFr": 1,
+  "linesZh": 1,
+  "changed": 0
  },
  {
   "name": "renderUnitCompleteScreen",
-  "linesFr": 60,
-  "linesZh": 60,
-  "changed": 2
+  "linesFr": 1,
+  "linesZh": 1,
+  "changed": 0
  },
  {
-  "name": "onMatchTileClick",
-  "linesFr": 68,
-  "linesZh": 68,
-  "changed": 2
+  "name": "answerSpeedQuestion",
+  "linesFr": 1,
+  "linesZh": 1,
+  "changed": 0
+ },
+ {
+  "name": "addXP",
+  "linesFr": 1,
+  "linesZh": 1,
+  "changed": 0
  },
  {
   "name": "noteOrConceptReviewHTML",

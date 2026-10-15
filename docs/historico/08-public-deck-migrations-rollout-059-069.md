@@ -308,6 +308,15 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Produção: aplicada em 2026-10-15 a pedido da autora (versão `20261015014421 101_class_schedule`). Conferido: 3 colunas,
   2 restrições, função security definer, anon sem EXECUTE, 393 aulas intactas.
 
+## 102 -- Amigos em dupla + avisos de Amigos no idioma de quem recebe + push na hora (2026-10-15)
+
+- Arquivo: `shared/supabase_migrations/102_friends_duo.sql`. A 100 e a 101 foram usadas por outras conversas
+  (`100_review_bank_agent_other_students`, `101_class_schedule`). Sem DROP.
+- Staging: `101_friends_duo` (`20261015012927`, primeira versão) + `102b_friends_i18n_push_1/2/3b/3c/3e/3f`.
+- Produção (2026-10-15): `102_friends_duo_a`, `_b1`, `_b2`, `_b3`, `_c1`, `_c2`, `_c3`, em partes por causa do tempo
+  da ferramenta. Depois: Edge Function `push-dispatch` v1 e segredos `push_dispatch_url`/`push_dispatch_anon` no Vault.
+- Detalhes: `docs/historico/19-amigos-em-dupla.md`.
+
 ## 103 -- Link de agenda (assinatura ICS) (2026-10-15)
 
 - `shared/supabase_migrations/103_class_calendar_feed.sql`: tabela `calendar_feed_tokens` (sem policy), RPCs
