@@ -2372,6 +2372,23 @@ window.I18N_CATALOG['en'] = {
   'friends.error.daily_congrats_limit': 'You already sent 20 cheers today. More tomorrow!', // ALTA
   'friends.error.target_not_found': 'This milestone is no longer available.', // ALTA
   'friends.pref.notify_congrats': 'Notify me when a friend congratulates or thanks me', // ALTA
+  'friends.qr.btn': 'Show QR code', // ALTA
+  'friends.qr.title': 'Your invite QR code', // ALTA
+  'friends.qr.text': 'Show it to someone next to you: they point their phone camera at it, open the site and can add you right away.', // ALTA
+  'friends.qr.alt': 'QR code of your invite link', // ALTA
+  'friends.qr.close': 'Close', // ALTA
+  'friends.qr.noLink': 'Couldn\'t create your link right now.', // ALTA
+  'friends.qr.error': 'Couldn\'t show the QR code right now.', // ALTA
+  'friends.suggest.title': 'Friend suggestions', // ALTA
+  'friends.suggest.add': 'Add', // ALTA
+  'friends.suggest.dismissAria': 'Don\'t suggest {name}', // ALTA
+  'friends.suggest.reason.invite': 'Joined from your invite', // ALTA
+  'friends.suggest.reason.invitedBy': 'Invited you to the site', // ALTA
+  'friends.suggest.reason.classmate': 'Studies with the same teacher', // ALTA
+  'friends.suggest.reason.partner': 'Also studies {lang}', // ALTA
+  'friends.suggest.reason.ranking': 'Close to you in this week\'s ranking', // ALTA
+  'friends.pref.suggest_me': 'Show me in other people\'s friend suggestions', // ALTA
+  'friends.suggest.reason.mutual': { one: '{n} mutual friend', other: '{n} mutual friends' }, // ALTA
   'profile.tabFriends': 'Friends', // ALTA
   'panel.admin.sub': 'Badges, metrics, notifications, reports and plans.', // ALTA
   'panel.tab.badges': 'Badges', // ALTA
