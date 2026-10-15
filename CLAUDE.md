@@ -34,6 +34,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   produção; conferir ao vivo (MCP Supabase/Resend) ou dizer que está pendente.
 - **Edge Function só muda em produção após novo deploy**; deploy feito = registrar; não feito = avisar.
 - **Nunca apagar progresso de memória (FSRS) por engano**; mudanças de dado em produção só com autorização explícita.
+- **Site em inglês não tem NADA em português** (decisão da autora, 2026-10-15): inclui avisos gravados pelo banco, push e
+  e-mail; texto montado no servidor sai no idioma do site de quem recebe (`_ui_lang`, ver `.claude/rules/i18n.md`).
 - **Português do Brasil coloquial** em todo texto de interface e notas (ex.: "pechinchar", não "regatear");
   sem "--" e sem "pra" em texto visível.
 - **Terminologia**: "aluno/aluna" = vínculo ativo em `teacher_students`; "usuário/conta" = qualquer perfil.
@@ -107,7 +109,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   `docs/historico/16-conquistas-com-niveis.md`. Ícones: troca geral para o Fluent Emoji feita na branch (`shared/emoji-icons.js`, `docs/icones-fluent.md`).
 - App de loja (App Store/Google Play): antes de discutir, ler `docs/app-loja-lembretes.md` (agenda de contatos, telefone, LGPD).
 - Amigos: sugestões de amigos + QR code (095 no Staging e na produção, 2026-10-15; `docs/historico/17-sugestoes-de-amigos.md`).
-  Ainda não iniciados: missão em dupla, sequência com amigo, cutucar (`docs/amigos-seguir-x-amizade.md`).
+  Missão em dupla, sequência com amigo, cutucar e push de Amigos na hora (102 + Edge Function `push-dispatch`, Staging e produção,
+  2026-10-15; `docs/historico/19-amigos-em-dupla.md`). Avisos do Mural e do convite da professora ainda saem em português no site em inglês.
 - Rotina automática do Banco (tarefa da madrugada -> Edge Function `review-bank-agent`, caixa de entrada e cron; migrations 089, 090 e 097 a 100 na produção, função v6, Vault e cron criados em 2026-10-15, token conferido): tarefa nova `trig_015AkoX1hyDJuWs1MimQDTbE` (sem agendamento; texto em `docs/rotina-banco/tarefa-nova-producao.txt`, colar de novo se mudar). Nenhum aluno é gerenciado ainda: ao migrar cada um, marcar "Atualizar automaticamente" no formulário do aluno (Banco > Alunos > Editar aluno) e arquivá-lo no artifact. Duplicatas "Luana Baionne" e "Makena Bento de Azevedo" arquivadas (apagar pelo SQL Editor). Detalhes: `docs/historico/18-rotina-automatica-banco.md`.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados (placeholders de perfil); Stripe. País dos alunos: já preenchido nos 13 alunos (conferido 2026-10-14).

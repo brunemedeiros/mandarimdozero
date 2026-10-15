@@ -4228,6 +4228,41 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 .friends-qr-link{ font-size:12px; color:var(--ink-soft); word-break:break-all; }
 .friends-head-actions{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
 .friends-empty .btn-block + .btn-block{ margin-top:8px; }
+/* ---------- Amigos em dupla (102, shared/friends.js loadFriendsDuo) ---------- */
+.friends-duo{ margin-top:16px; }
+.friends-duo-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:22px; padding:16px 18px; box-shadow:var(--shadow-card); }
+.friends-duo-card.is-done{ border-color:var(--medal-gold); }
+.friends-duo-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.friends-duo-title{ margin:0; font-size:17px; font-weight:900; color:var(--ink); }
+.friends-duo-pitch{ margin:8px 0 0; color:var(--ink-soft); font-size:14px; line-height:1.4; }
+.friends-duo-pair{ display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap; }
+.friends-duo-avatars{ display:inline-flex; }
+.friends-duo-avatars .friends-avatar{ width:36px; height:36px; font-size:14px; border:2px solid var(--paper); }
+.friends-duo-avatars .friends-avatar + .friends-avatar{ margin-left:-10px; }
+.friends-duo-with{ color:var(--ink); flex:1 1 auto; }
+.friends-duo-count{ font-weight:900; color:var(--ink); font-variant-numeric:tabular-nums; }
+.friends-duo-bar{ display:flex; height:14px; margin-top:10px; border-radius:999px; background:var(--paper-warm); border:1px solid var(--paper-line); overflow:hidden; }
+.friends-duo-bar-mine{ background:var(--seal-red); }
+.friends-duo-bar-theirs{ background:var(--jade); }
+.friends-duo-legend{ display:flex; gap:16px; flex-wrap:wrap; margin-top:8px; font-size:13px; color:var(--ink-soft); }
+.friends-duo-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+.friends-duo-dot.is-mine{ background:var(--seal-red); }
+.friends-duo-dot.is-theirs{ background:var(--jade); }
+.friends-duo-done{ margin:10px 0 0; color:var(--ink); }
+.friends-duo-form{ display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-top:12px; }
+.friends-duo-form[hidden]{ display:none; }
+.friends-duo-field{ display:flex; flex-direction:column; gap:4px; font-size:13px; font-weight:700; color:var(--ink-soft); flex:1 1 140px; min-width:0; }
+.friends-duo-field select{ min-height:40px; padding:6px 10px; border-radius:12px; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink); font:inherit; font-weight:600; max-width:100%; }
+.friends-duo-start{ flex:0 0 auto; }
+.friend-card-duo{ display:flex; flex-direction:column; align-items:center; gap:6px; margin-top:6px; }
+.friend-card-duo:empty{ display:none; }
+.friend-joint{ font-size:12px; font-weight:800; color:var(--ink); background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px; padding:2px 8px; white-space:nowrap; }
+.friend-nudged{ font-size:12px; color:var(--ink-soft); }
+.friend-nudge{ min-height:32px; }
+@media (max-width: 600px){
+  .friends-duo-form{ flex-direction:column; align-items:stretch; }
+  .friends-duo-field select, .friends-duo-start, .friend-nudge{ min-height:44px; }
+}
 </style>
 </head>
 <body>
