@@ -507,10 +507,13 @@ a.pill:hover{ border-color: var(--imperial-gold); }
      esconde, ver regra global também). */
   /* Conta/Sair: o pill com o nome saiu no desktop; "Sair da conta" fica no fim da
      sidebar (#sidebar-logout-btn) e Reportar já tem o ⚑ da topbar. */
-  /* XP some do topbar aqui -- fica só no card de Status à direita, sem
-     repetição (decisão #1). No mobile (fora desta media query) continua
-     no topbar, como já decidido pra lá (decisão #4). */
-  .stats-pills .pill.xp{ display:none; }
+  /* Topbar "flutuando" (estilo Duolingo): no desktop os itens ficam sem caixinha,
+     só ícone + número. O XP volta à topbar (o card Status saiu). O pill de
+     Admin Mode ligado em OFF (.active, roxo) mantém o fundo: é um aviso. */
+  :root:root .stats-pills .pill:not(.admin-mode-toggle-btn.active),
+  :root:root .stats-pills .lang-switcher-btn{ background:none; border-color:transparent; box-shadow:none; }
+  :root:root .stats-pills .pill:not(.admin-mode-toggle-btn.active):hover,
+  :root:root .stats-pills .lang-switcher-btn:hover{ background:var(--paper-warm); }
   /* A faixa de Missões do dia na Trilha vira redundante aqui -- o mesmo
      conteúdo já mora no card fixo da sidebar direita (renderDailyChallengesStrip
      renderiza nos dois; CSS decide qual aparece). Some só a partir daqui;
