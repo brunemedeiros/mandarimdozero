@@ -18,12 +18,10 @@ O Supabase deixa o modelo ler `{{ .Data }}`, que é o `user_metadata` da conta. 
 idioma do navegador. Só quem se cadastrar **depois do deploy deste código** tem a chave. Vale para o e-mail de
 confirmação do cadastro, que é o que o aluno do `/pt` recebe primeiro.
 
-Limite honesto: o modelo não consegue descobrir o idioma sozinho (o Supabase não manda o idioma da página). Contas
-antigas e contas que trocarem o idioma do site depois do cadastro continuam com o valor do cadastro (ou sem valor, em
-português). Para esses casos há duas saídas, nenhuma feita ainda: (a) gravar `ui_language` de novo quando a pessoa trocar o
-idioma do site (uma linha `auth.updateUser({ data: { ui_language } })` em `shared/auth.js`, me peça); (b) ajustar uma
-conta específica à mão, só com a sua autorização (`update auth.users set raw_user_meta_data = raw_user_meta_data || '{"ui_language":"en"}'`
-para o `id` da conta).
+Limite e solução: o modelo não consegue descobrir o idioma sozinho (o Supabase não manda o idioma da página). Por decisão
+da dona (2026-10-15), vale o idioma do site que a pessoa está usando NO MOMENTO: `shared/auth.js` regrava
+`user_metadata.ui_language` ao trocar o idioma do site e uma vez ao carregar (contas antigas ganham a chave sozinhas no primeiro
+acesso depois do deploy). Quem nunca mais entrar continua sem a chave e recebe em português, como hoje.
 
 ## Passo a passo para colar (você faz; leva uns 5 minutos)
 
