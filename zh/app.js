@@ -1024,7 +1024,7 @@ const EASY_CHALLENGES = [
   { id:'firstLesson', icon:'🌅', get label(){ return t('fr.mission.firstLesson'); }, target:1, get: d => d.lessons }
 ];
 const REVISAO_HANZI_CHALLENGES = [
-  { id:'hanzi1', icon:'🈺', get label(){ return t('zh.mission.hanzi1'); }, target:1, get: d => d.hanziLessons },
+  { id:'hanzi1', icon:'🀄', get label(){ return t('zh.mission.hanzi1'); }, target:1, get: d => d.hanziLessons },
   // labelForTarget: usado só quando resolveRevisaoMission() escala a meta
   // pra baixo (estoque real menor que o alvo original) -- sem isso o texto
   // continuaria dizendo "15"/"3" enquanto a barra de progresso mostra um
@@ -1048,7 +1048,7 @@ const GENERAL_CHALLENGES = [
   { id:'xp50', icon:'⚡', get label(){ return t('fr.mission.xp50'); }, target:50, get: d => d.xp },
   { id:'highscore2', icon:'📈', get label(){ return t('fr.mission.highscore2'); }, target:2, get: d => d.highScoreLessons },
   { id:'perfect1', icon:'🎯', get label(){ return t('fr.mission.perfect1'); }, target:1, get: d => d.perfectLessons },
-  { id:'hanzi2', icon:'🈺', get label(){ return t('zh.mission.hanzi2'); }, target:2, get: d => d.hanziLessons },
+  { id:'hanzi2', icon:'🀄', get label(){ return t('zh.mission.hanzi2'); }, target:2, get: d => d.hanziLessons },
   // Fase 4 (artefato §3): ligados a recursos reais do produto (ouvir,
   // traduzir por blocos), não só contadores genéricos de progresso.
   { id:'listen10', icon:'🎧', get label(){ return t('fr.mission.listen10'); }, target:10, get: d => d.audioPlaysToday },
@@ -5881,7 +5881,7 @@ function renderHanziReviewView(){
     const allDue = cardsDueNow(pool).length;
     el.innerHTML = `
       <div class="review-empty">
-        <div class="big-emoji">🈺</div>
+        <div class="big-emoji">🀄</div>
         <h3>${t('zh.hanzi.allCaughtUp')}</h3>
         <p>${allDue > 0 ? t('zh.hanzi.pendingChars', { n: allDue }) : t('zh.hanzi.comeBackLater')}</p>
       </div>

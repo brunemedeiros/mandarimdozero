@@ -162,6 +162,13 @@
   // preservando espaços nas pontas e elementos filhos (ex.:
   // "Quanto isso atrapalhou? <span>(opcional)</span>").
   function setElementText(el, text){
+    // Ícones (shared/emoji-icons.js): o emoji do texto vira <span class="emo">. Antes de trocar o texto, volta a ser
+    // texto simples; senão o emoji velho fica ao lado do novo ("⚑ ⚑ Reportar"). O ícone é refeito logo depois.
+    if (el.querySelector && el.querySelector(':scope > .emo')){
+      var spans = el.querySelectorAll(':scope > .emo');
+      for (var k = 0; k < spans.length; k++) spans[k].parentNode.replaceChild(document.createTextNode(spans[k].textContent), spans[k]);
+      el.normalize();
+    }
     var hasElementChild = false;
     for (var i = 0; i < el.childNodes.length; i++){
       if (el.childNodes[i].nodeType === 1){ hasElementChild = true; break; }
