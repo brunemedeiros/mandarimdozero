@@ -127,7 +127,10 @@ function ptGender(text) {
     for (const [s0, e0, v] of valid) { out += text.slice(pos, s0) + v[idx]; pos = e0; }
     return out + text.slice(pos, end);
   };
-  return text.slice(0, start) + build(0) + ', ' + build(1) + text.slice(end);
+  // A 2a forma repete o trecho: se a frase abre com maiúscula ("Bem-vindo(a) à casa"), a repetição vai em minúscula.
+  let second = build(1);
+  if (second.length && second[0] !== second[0].toLowerCase() && second[0] === second[0].toUpperCase()) second = second[0].toLowerCase() + second.slice(1);
+  return text.slice(0, start) + build(0) + ', ' + second + text.slice(end);
 }
 
 const PT_UNITS = ['', 'primeiro', 'segundo', 'terceiro', 'quarto', 'quinto', 'sexto', 'sétimo', 'oitavo', 'nono'];

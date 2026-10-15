@@ -65,7 +65,12 @@ try {
     'Sr.(a) Silva', 'Sr(a).', 'Prof.ª Ana', 'Profª Maria', 'Dr Paulo chegou', 'Drs. Ana e Rui', 'a Sra. é daqui',
     '1º andar', 'a 2ª aula', '21º andar', '1.º de maio', '25ª edição', '100º', '101º', '0º', '1° andar', 'nº 5', 'n.º 12',
     'Nº 3', 'Oi 👋 → tudo ✓', '* item', '• um • dois', 'Os carros azuis.', 'Vou chamá-lo amanhã.', 'Tudo bem?',
-    'Moro nos EUA.', 'Tenho 25 anos.', 'você', 'R$ 5,00', '14h30', 'NÃO!', 'É a 3ª vez, Sra. Lima: o(a) aluno(a) / a turma (de) hoje'];
+    'Moro nos EUA.', 'Tenho 25 anos.', 'você', 'R$ 5,00', '14h30', 'NÃO!', 'É a 3ª vez, Sra. Lima: o(a) aluno(a) / a turma (de) hoje',
+    // Português real, com acentos/cedilha/til (\w ASCII x \p{L}): frases de PLE para falantes de inglês.
+    'Sr. Gonçalves, o(a) senhor(a) é brasileiro(a)?', 'Eu sou do Brasil / de Portugal', 'coração', 'Ação e reação, são três.',
+    'Pão(ães)', 'João e Maria são irmão(ã)s', 'Bem-vindo(a) à nossa casa!', 'Moro no 3º andar, apartamento nº 12.',
+    'Preciso (de) ajuda e gosto (de) café / chá', 'Olá! Tudo bem com você(s)?', 'A Dra. Ângela é médica.', 'Prof. Álvaro, bom dia.',
+    'Ele é o 2º / ela é a 2ª', 'à vista (informal)', 'ônibus nº 8 → Centro'];
   const groups = [['fr', 'fr-FR', frKeys], ['zh', 'cmn-CN', zhKeys], ['pt', 'pt-BR', ptKeys]];
   const py = `import sys,json; sys.path.insert(0, ${JSON.stringify(path.join(root, 'fr/scripts/challenges_pipeline'))})\nfrom spoken_text import to_spoken_text\nd=json.load(sys.stdin)\nprint(json.dumps({k:[to_spoken_text(t,k) for t in v] for k,v in d.items()}))`;
   const out = JSON.parse(execFileSync('python3', ['-c', py], { input: JSON.stringify(Object.fromEntries(groups.map(([k, , v]) => [k, v]))) }).toString());
@@ -108,7 +113,7 @@ const regVersions = Object.fromEntries(regJson.languages.map(l => [l.fieldLang, 
 const tsVersions = Object.fromEntries([...(pick(idx, 'TTS_SPOKEN_RULES_VERSION_BY_LANG: Record<string, number>') || '').matchAll(/(\w+):\s*(\d+)/g)].map(m => [m[1], Number(m[2])]));
 ok(JSON.stringify(Object.entries(regVersions).sort()) === JSON.stringify(Object.entries(tsVersions).sort()), 'versão das regras por idioma: Deno == registro');
 ok(pick(idx, 'TTS_TEXT_MAX_LENGTH') === pick(model, 'TTS_TEXT_MAX_LENGTH'), 'max length igual');
-const ctx = { console, TextEncoder, crypto: globalThis.crypto };
+const ctx = { console, TextEncoder, crypto: globalThis.crypto, t: (k) => { const m = fs.readFileSync(path.join(root, 'shared/i18n/pt-BR.js'), 'utf8').match(new RegExp("'" + k.replace(/\./g, '\\.') + "': '((?:[^'\\\\]|\\\\.)*)'")); return m ? m[1] : k; } }; // t() do i18n: lê o texto de pt-BR.js
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(root, 'languages/registry.js'), 'utf8'), ctx);
 vm.runInContext(model + '\n;globalThis.__k = computeTtsGenerationKey; globalThis.__labels = TTS_GENERATION_ERROR_LABELS;', ctx);

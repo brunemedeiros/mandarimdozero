@@ -331,6 +331,10 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   `class-calendar-feed` v1 (verify_jwt false, mesmo hash do Staging). Conferido: RLS ligada, anon/authenticated sem acesso
   ao feed nem à tabela, token falso = calendário vazio (200 text/calendar), token malformado = 404, 393 aulas intactas.
 
+## 104 -- Avisos do Mural e do convite da professora no idioma de quem recebe (2026-10-15)
+
+- `shared/supabase_migrations/104_server_notifications_en.sql` (a 103 é `103_class_calendar_feed`, de outra conversa). Sem DROP.
+- Staging e produção: 2026-10-15, arquivo inteiro, nome `104_server_notifications_en`. Detalhes: `docs/historico/19-amigos-em-dupla.md`.
 
 ## 096_review_bank_classrooms (Banco de Revisão ligado a uma Turma)
 
@@ -342,4 +346,5 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   entrada na turma; coluna `classroom_id`; `review_bank_review_acks` com RLS e sem grant para anon/authenticated;
   `approve`/`pendentes` na versão nova. Dados iguais aos de antes: teacher_flashcards 8 (md5 igual), review_bank_items 18
   (md5 igual), review_bank_students 5 (md5 igual sem a coluna nova), reviews 0.
-- Produção: NÃO aplicada (etapa 4, só com autorização).
+- Produção: colada pela autora no SQL Editor em 2026-10-15 (autorizada). Conferido: as 8 funções, índice novo, gatilho, acks com RLS e sem grant
+  para anon/authenticated, approve/pendentes na versão nova; 703 cartões (697 do Banco) e 2.134 itens intactos, nenhuma duplicata.

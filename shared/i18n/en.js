@@ -2426,6 +2426,14 @@ window.I18N_CATALOG['en'] = {
   'friends.error.friend_in_mission': 'This friend is already on a mission this week. Pick someone else.', // ALTA
   'friends.pref.accept_nudges': 'Get nudges from friends (study reminders)', // ALTA
   'friends.pref.notify_missions': 'Notify me about duo missions (start and goal reached)', // ALTA
+  'friends.push.title': 'Know right away what your friends are up to', // ALTA
+  'friends.push.firstTitle': 'You\'ve got a friend! 🎉', // ALTA
+  'friends.push.text': 'Turn on notifications on this device to get nudges, duo mission invites and congrats from your friends right away, even with the site closed.', // ALTA
+  'friends.push.enable': 'Turn on notifications', // ALTA
+  'friends.push.later': 'Not now', // ALTA
+  'friends.push.done': 'Done! Your friends\' notifications will reach this device 🔔', // ALTA
+  'friends.push.iosText': 'On iPhone and iPad, notifications only work with the site on your Home Screen: tap Share, then "Add to Home Screen". Then open the site from there and turn on notifications.', // ALTA
+  'friends.push.iosOk': 'Got it', // ALTA
   'friends.duo.endsIn': { one: 'Ends in {n} day', other: 'Ends in {n} days' }, // ALTA
   'friends.joint.label': { one: '{n} day together', other: '{n} days together' }, // ALTA
   'friends.joint.aria': { one: 'You both studied {n} day in a row', other: 'You both studied {n} days in a row' }, // ALTA
