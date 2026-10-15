@@ -447,3 +447,16 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   Anotações, sem revisão.
 - Conferido como aluno (Eduardo): vê as 25 aulas da turma com Presença, nada das Anotações.
 - Nenhum dado de aluno foi para o repositório.
+
+### Calendário de aulas (2026-10-15, branch; migration 101 no Staging)
+
+- Aula ganha horário (opcional), duração (30/45/60/90/120 min) e o fuso de quem registrou (`start_time`, `duration_minutes`,
+  `time_zone`). Aula futura só com data e horário vale como agendamento; sem horário, vale para o dia todo.
+- Professora > Aulas: seletor **Registrar | Calendário**. Calendário do mês com todas as aulas (alunos e turmas), cor da
+  Presença (sem cor = agendada ou sem registro); clicar no dia mostra as aulas, com editar e apagar, e "Agendar aula neste dia".
+  No formulário: Horário, Duração e "Repetir toda semana até..." (até 52 aulas).
+- Aluno > Aulas: "Próximas aulas" no topo e **Lista | Calendário**; horário mostrado no fuso de quem vê (alunos nos EUA).
+- Grátis x Premium: agendar e ver o calendário é do plano Professora; o aluno vinculado vê grátis.
+- Testes: SQL local 101 7/7 (094 27/27); painel-professora 499/499 (60 novas); mural 255/255; Banco 465/465; k10 114/114;
+  i18n 2032/2032 e 209/209; e4 21/21.
+- Próximo: link de agenda (ICS) por aluno/professora e "Adicionar ao Google Agenda"; avisos no Mural; aba Turma no Ranking.

@@ -38,3 +38,5 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
 - Aulas (094, `shared/teacher-class-logs.js`, `admin-class-logs.js`): Presença = rótulo da professora (`class_attendance_labels`,
   9 cores do Notion, seletor no próprio campo como no Notion, sem seção separada; arquivar em vez de apagar), Competências = lista fixa `CLASS_LOG_SKILLS`. Aula de turma = 1 linha com
   `classroom_id` e sem aluno; turma com aula registrada não se apaga (FK restrict). Aluno lê por `get_my_class_log_entries`.
+- Calendário (101): horário opcional + duração + `time_zone` de quem registrou; mostrar sempre no fuso de quem vê
+  (`classLogViewerSlot`). Grade do mês comum a professora e aluno: `classCalendarHTML` em `shared/teacher-class-logs.js`.

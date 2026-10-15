@@ -38,6 +38,12 @@ const PANEL_STUB = (who) => {
   supabaseClient.rpc = async (name, args) => {
     (window.__rpcCalls = window.__rpcCalls || []).push([name, args]);
     if (name === 'my_permissions') return { data: { roles: roles.roles, admin: roles.admin, permissions: Object.fromEntries(CAT.map(c => [c.key, { enabled: perm(c.key), limit: null }])) }, error: null };
+    // 101: com horário; inclui 1 aula futura (próximas aulas) marcada em São Paulo.
+    if (name === 'get_my_class_schedule') return { data: who === 'S' ? [
+      { id: 3, class_date: '2099-01-05', start_time: '19:00:00', duration_minutes: 60, time_zone: 'America/Sao_Paulo', topic: 'Aula futura', homework: null, observations: null, attendance_name: null, attendance_color: null, skills: [], classroom_id: null, classroom_name: null },
+      { id: 2, class_date: '2026-10-09', start_time: null, topic: 'Passé composé', homework: 'Exercícios 1 a 3', observations: null, attendance_name: 'Presente', attendance_color: 'green', skills: ['gramatica', 'escuta'], classroom_id: null, classroom_name: null },
+      { id: 1, class_date: '2026-10-02', start_time: null, topic: 'Apresentação', homework: null, observations: 'Livro, página 12', attendance_name: 'Faltou', attendance_color: 'red', skills: [], classroom_id: 501, classroom_name: 'Dupla' },
+    ] : [], error: null };
     // 094: aulas com Presença, Competências e aula de turma.
     if (name === 'get_my_class_log_entries') return { data: who === 'S' ? [
       { id: 2, class_date: '2026-10-09', topic: 'Passé composé', homework: 'Exercícios 1 a 3', observations: null, attendance_name: 'Presente', attendance_color: 'green', skills: ['gramatica', 'escuta'], classroom_id: null, classroom_name: null },
@@ -137,6 +143,13 @@ const PANEL_STUB = (who) => {
       L('aluna: Presença colorida (verde = presente, vermelho = faltou)', await ev(() => { const p = [...document.querySelectorAll('.class-log-entry .att-pill')]; return p.length === 2 && p[0].dataset.color === 'green' && p[0].textContent.trim() === 'Presente' && p[1].dataset.color === 'red'; }));
       L('aluna: Competências como etiquetas', await ev(() => [...document.querySelectorAll('.class-log-entry')][0].querySelectorAll('.skill-chip').length === 2 && [...document.querySelectorAll('.class-log-entry')][0].textContent.includes(t('panel.classLog.skill.gramatica'))));
       L('aluna: aula da turma mostra o nome da turma', await ev(() => [...document.querySelectorAll('.class-log-entry')][1].querySelector('.class-log-classroom')?.textContent.includes('Dupla')));
+      L('aluna: próximas aulas no topo, com dia e horário no fuso de quem vê', await ev(() => { const u = document.querySelector('.my-upcoming-list li'); return !!u && u.textContent.includes('Aula futura') && /\d{2}:\d{2}/.test(u.textContent); }));
+      L('aluna: aula futura não entra no histórico', await ev(() => ![...document.querySelectorAll('.class-log-entry')].some(e => e.textContent.includes('Aula futura'))));
+      await ev(() => document.querySelector('[data-my-classlog-view="calendar"]').click());
+      await page.waitForSelector('#my-class-logs-content .cal');
+      L('aluna: calendário do mês com Hoje e setas', await ev(() => !!document.querySelector('#my-class-logs-content [data-cal-nav="0"]') && document.querySelectorAll('#my-class-logs-content .cal-wd').length === 7));
+      await shot('aluna-calendario');
+      await ev(() => document.querySelector('[data-my-classlog-view="list"]').click());
       L('aluna: cor do rótulo visível (borda com a cor)', await ev(() => getComputedStyle(document.querySelector('.class-log-entry .att-pill')).borderTopColor !== getComputedStyle(document.querySelectorAll('.class-log-entry .att-pill')[1]).borderTopColor));
       await shot('minhas-aulas');
       await ev(() => switchTab('support-materials'));
@@ -293,6 +306,35 @@ const PANEL_STUB = (who) => {
       await page.waitForFunction(() => ![...document.querySelectorAll('[data-att-choices="new"] .att-choice')].some(l => l.textContent.includes('Remarcada')));
       L('rótulos: arquivar tira da lista de opções', true);
       L('rótulos: o texto digitado sobreviveu a tudo', await ev(() => document.getElementById('admin-class-log-topic').value === 'Texto que não pode sumir'));
+      // 101: horário, repetir toda semana e calendário
+      await page.fill('#admin-class-log-topic', '');
+      await page.check('[data-classlog-student-checkbox][value="S"]');
+      await page.uncheck('[data-classlog-classroom-checkbox][value="501"]');
+      const startDay = await ev(() => { const d = new Date(); d.setDate(d.getDate() + 2); return classLogLocalYMD(d); });
+      const untilDay = await ev(() => { const d = new Date(); d.setDate(d.getDate() + 16); return classLogLocalYMD(d); });
+      await page.fill('#admin-class-log-date', startDay);
+      await page.fill('#admin-class-log-time', '19:30');
+      await page.selectOption('#admin-class-log-duration', '90');
+      await page.check('#admin-class-log-repeat');
+      L('agenda: "Até" aparece ao marcar repetir', await ev(() => !document.getElementById('admin-class-log-repeat-box').hidden));
+      await page.fill('#admin-class-log-repeat-until', untilDay);
+      const before = await ev(() => window.__DB.teacher_class_logs.length);
+      await page.click('#admin-create-class-log-btn');
+      await page.waitForFunction((n) => window.__DB.teacher_class_logs.length === n + 3, before);
+      L('agenda: repetir toda semana cria 1 aula por semana (3) com horário, duração e fuso', await ev((n) => { const r = window.__DB.teacher_class_logs.slice(n); return r.length === 3 && r.every(x => x.start_time === '19:30' && x.duration_minutes === 90 && !!x.time_zone && x.student_id === 'S') && new Set(r.map(x => x.class_date)).size === 3; }, before), await ev((n) => window.__DB.teacher_class_logs.slice(n).map(x => [x.class_date, x.start_time, x.duration_minutes, x.time_zone]), before));
+      L('agenda: aula futura só com data e horário é aceita (sem tópico)', true);
+      await ev(() => document.querySelector('[data-classlog-view="calendar"]').click());
+      await page.waitForSelector('#admin-classlogs-calendar .cal');
+      L('calendário: Registrar some e o mês aparece', await ev(() => document.getElementById('admin-classlogs-register').hidden && !document.getElementById('admin-classlogs-calendar').hidden));
+      // a aula agendada pode cair no mês seguinte: avança até achar
+      for (let i = 0; i < 2 && !(await ev((d) => !!document.querySelector(`[data-cal-day="${d}"] .cal-chip`), startDay)); i++){ await ev(() => document.querySelector('#admin-classlogs-calendar [data-cal-nav="1"]').click()); await page.waitForTimeout(300); }
+      L('calendário: aula agendada no dia certo, com horário e nome', await ev((d) => { const c = document.querySelector(`[data-cal-day="${d}"] .cal-chip`); return !!c && c.textContent.includes('19:30') && c.textContent.includes('Ana'); }, startDay));
+      await ev((d) => document.querySelector(`[data-cal-day="${d}"]`).click(), startDay);
+      await page.waitForSelector('[data-cal-day-panel]');
+      L('calendário: clicar no dia mostra as aulas do dia e "Agendar aula neste dia"', await ev(() => document.querySelectorAll('[data-cal-day-panel] [data-cal-log]').length >= 1 && !!document.querySelector('[data-cal-schedule]')));
+      await shot('aulas-calendario');
+      await ev(() => document.querySelector('[data-cal-schedule]').click());
+      L('calendário: "Agendar neste dia" volta ao Registrar com a data preenchida', await ev((d) => !document.getElementById('admin-classlogs-register').hidden && document.getElementById('admin-class-log-date').value === d, startDay));
       L('aulas: sem rolagem horizontal', await ev(() => document.documentElement.scrollWidth <= window.innerWidth + 1), await ev(() => [document.documentElement.scrollWidth, window.innerWidth]));
       await ev(() => switchTab('admin-badges'));
       L('professora: link antigo do Admin cai no painel da professora', await ev(() => document.getElementById('view-teacher-panel').classList.contains('active')));
