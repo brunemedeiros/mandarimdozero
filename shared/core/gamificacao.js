@@ -153,6 +153,7 @@ function seedEarnedBadges(){
     if (typeof loadFriendsAcceptedCount === 'function') loadFriendsAcceptedCount();
     if (typeof loadPodiumWeeks === 'function') loadPodiumWeeks();
     if (typeof loadDuoMissionsDone === 'function') loadDuoMissionsDone();
+    if (typeof friendsFetchDuoMission === 'function') friendsFetchDuoMission(); // linha da dupla em "Missões do dia"
   });
   // Backfill/sincronização: garante que a tabela pública earned_badges
   // reflita tudo que já era verdade antes desta feature existir, ou que

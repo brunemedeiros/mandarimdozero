@@ -86,7 +86,7 @@ function rbcStageHTML(s){
   return `<div class="rb-kind"><span class="rb-tag">${rbH(rbt('type.' + it.item_type))}</span>${it.class_date ? `<span>${rbH(rbt('classOf', { d: rbDateFmt(it.class_date) }))}</span>` : ''}<span>${RBC.idx + 1} / ${RBC.slides.length}</span></div>
     <div class="rb-slide">${q}${RBC.shown ? `<div class="rb-sa">${rbH(it.answer)}</div>${it.explanation ? `<div class="rb-sn">${rbH(it.explanation)}</div>` : ''}` : `<div class="rb-hidden">${rbH(rbt('answerHidden'))}</div>`}</div>
     ${ctrl}<div class="rb-keys">${rbH(rbt('keys'))}</div>
-    ${s.linked_student_id ? '' : `<div class="rb-keys">${rbH(rbt('classNoAccount'))}</div>`}`;
+    ${rbHasTarget(s) ? '' : `<div class="rb-keys">${rbH(rbt('classNoAccount'))}</div>`}`;
 }
 
 function rbcEndHTML(){

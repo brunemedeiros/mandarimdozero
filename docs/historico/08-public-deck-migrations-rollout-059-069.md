@@ -336,6 +336,25 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - `shared/supabase_migrations/104_server_notifications_en.sql` (a 103 é `103_class_calendar_feed`, de outra conversa). Sem DROP.
 - Staging e produção: 2026-10-15, arquivo inteiro, nome `104_server_notifications_en`. Detalhes: `docs/historico/19-amigos-em-dupla.md`.
 
+## 109 -- Missão em dupla automática da semana (2026-10-15)
+
+- `shared/supabase_migrations/109_duo_weekly_auto.sql` (105 a 107 são de outras conversas; 108 está numa branch). Sem DROP.
+- Staging: 2026-10-15 em 3 partes (`109_duo_weekly_auto_1`, `_2`, `_3`), md5 das funções conferido; depois `_4_studied_languages`. Produção: 2026-10-15 em 4 partes (`_1`, `_1b`, `_2`, `_3`), md5 conferido.
+  Detalhes: `docs/historico/19-amigos-em-dupla.md`.
+
+## 096_review_bank_classrooms (Banco de Revisão ligado a uma Turma)
+
+- Arquivo `shared/supabase_migrations/096_review_bank_classrooms.sql` (SQL Editor: `docs/rollout-sql/096_sql_editor.sql`,
+  tem `DROP INDEX`). Plano e testes: `docs/banco-revisao-turmas-plano.md`.
+- Staging: colada pela autora no SQL Editor em 2026-10-15 ("Success"). Não aparece em `schema_migrations` (SQL Editor).
+  Conferido: 8 funções novas `security definer` com `search_path=public`, internas sem grant (só `postgres`),
+  `link_review_bank_classroom` só para `authenticated`; índice antigo removido e o novo (item, aluno) criado; gatilho de
+  entrada na turma; coluna `classroom_id`; `review_bank_review_acks` com RLS e sem grant para anon/authenticated;
+  `approve`/`pendentes` na versão nova. Dados iguais aos de antes: teacher_flashcards 8 (md5 igual), review_bank_items 18
+  (md5 igual), review_bank_students 5 (md5 igual sem a coluna nova), reviews 0.
+- Produção: colada pela autora no SQL Editor em 2026-10-15 (autorizada). Conferido: as 8 funções, índice novo, gatilho, acks com RLS e sem grant
+  para anon/authenticated, approve/pendentes na versão nova; 703 cartões (697 do Banco) e 2.134 itens intactos, nenhuma duplicata.
+
 ## 107 -- Link de agenda com senha curta (2026-10-15)
 
 - `shared/supabase_migrations/107_calendar_feed_short_token.sql`: senha de 16 caracteres (alfabeto sem i/l/o/0/1,

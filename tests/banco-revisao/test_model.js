@@ -55,6 +55,7 @@ check('com "Para conferir" fica em Pendentes', ready({ ...vocab, check_note: 'co
 check('com proposta de revisão fica em Pendentes', ready({ ...vocab, proposal: { acao: 'editar' } }, frAluna).reason === 'has_proposal');
 check('erro sem forma errada não é automático', ready({ ...erro, wrong_form: '' }, frAluna).reason === 'incomplete');
 check('aluno sem conta não gera cartão', ready(vocab, semConta).reason === 'not_linked');
+check('aluno ligado a uma Turma (096) também gera', ready(vocab, { ...semConta, language_app_key: 'frances', classroom_id: 51 }).ok === true);
 check('mandarim não é automático', ready(vocab, zhAluno).reason === 'needs_pinyin');
 check('aluno arquivado não gera', ready(vocab, { ...frAluna, status: 'arquivado' }).reason === 'archived');
 check('configuração desligada para tudo', ready(vocab, frAluna, { auto_generate: false }).reason === 'auto_off');

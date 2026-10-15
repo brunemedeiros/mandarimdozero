@@ -1,6 +1,8 @@
 // Notification Cron (versão publicada: mesma lógica de supabase/functions/notification-cron/index.ts do repositório, com os comentários longos encurtados).
 // E3/C3 (2026-10-12): + sequência da conta (_account) para streak_at_risk, meta do dia e reengajamento, uma vez por pessoa.
 // Roda fora do navegador com service role; fuso: usa UTC (agendar entre 21h-23h UTC).
+// v25 (E6, 2026-10-15): + português (portugues@en); site em inglês sem modelo em inglês ativo = sem aviso (fr, zh e pt);
+// lembrete de badge pelo idioma principal; rodapé do e-mail, título do push e alerta da professora no idioma do site.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import webpush from 'npm:web-push@3';
@@ -18,6 +20,8 @@ const resendFromEmail = Deno.env.get('RESEND_FROM_EMAIL');
 const LANGUAGES = [
   { appKey: 'frances', id: 'fr' },
   { appKey: 'mandarim', id: 'zh' },
+  // E6 (2026-10-15): português. O progresso mora em `portugues@en` (registro: legacyStorage []); blockForLanguage já acha.
+  { appKey: 'portugues', id: 'pt' },
 ];
 
 const FOUNDER_EMAIL = 'brunemed1310@gmail.com';
@@ -245,7 +249,7 @@ async function sendEmailToUser(supabase: any, cache: Map<string, string | null>,
 
   const html = `<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px;">
     <p style="font-size:15px;line-height:1.6;color:#241A15;">${body}</p>
-    <p style="font-size:12px;color:#93856F;margin-top:32px;">Você pode ajustar quais e-mails recebe em Configurações &gt; Notificações, dentro do app.</p>
+    <p style="font-size:12px;color:#93856F;margin-top:32px;">${uiLangFor(userId) === 'en' ? 'You can adjust which emails you receive in Settings &gt; Notifications, inside the app.' : 'Você pode ajustar quais e-mails recebe em Configurações &gt; Notificações, dentro do app.'}</p>
   </div>`;
 
   try {
@@ -304,10 +308,14 @@ function uiLangFor(userId: string): string {
   return UI_LANG_BY_USER.get(userId) === 'en' ? 'en' : 'pt-BR';
 }
 
-// Escolhe a variante no idioma do site; se esse idioma não tiver variante ATIVA para o evento, cai pro pt-BR.
+// Escolhe a variante no idioma do site. Decisão da dona (2026-10-15, vale para fr, zh e pt): site em inglês sem variante
+// ATIVA em inglês para o evento = SEM aviso (nunca cai no texto em português). Mesma regra de shared/notifications.js.
+function templateLangsFor(uiLang: string): string[] {
+  return uiLang === 'en' ? ['en'] : ['pt-BR'];
+}
+
 async function pickFromPool(supabase: any, channel: string, userId: string, eventType: string, languageAppKey: string): Promise<any> {
-  const uiLang = uiLangFor(userId);
-  for (const lang of uiLang === 'pt-BR' ? ['pt-BR'] : [uiLang, 'pt-BR']) {
+  for (const lang of templateLangsFor(uiLangFor(userId))) {
     const { data, error } = await supabase
       .from('notification_templates')
       .select('*')
@@ -354,12 +362,12 @@ async function maybeNotify(
   });
   if (error) return false;
 
-  if (categoryAllowsPush(prefs, category)) await sendPushToUser(supabase, userId, title || 'Notificação', body, actionTab);
+  if (categoryAllowsPush(prefs, category)) await sendPushToUser(supabase, userId, title || (uiLangFor(userId) === 'en' ? 'Notification' : 'Notificação'), body, actionTab);
 
   if (categoryAllowsEmail(prefs, category)) {
     const emailTemplate = await pickEmailTemplate(supabase, userId, eventType, languageAppKey);
     if (emailTemplate) {
-      const emailSubject = fillPlaceholders(emailTemplate.title, payload) || title || 'Notificação';
+      const emailSubject = fillPlaceholders(emailTemplate.title, payload) || title || (uiLangFor(userId) === 'en' ? 'Notification' : 'Notificação');
       const emailBody = fillPlaceholders(emailTemplate.body, payload);
       if (emailBody) await sendEmailToUser(supabase, emailCache, userId, emailSubject, emailBody);
     }
@@ -525,7 +533,8 @@ async function processFeaturedBadgeReminders(
     if (!eligible) continue;
 
     const state = progressByUserId.get(userId);
-    const languageAppKey = blockForLanguage(state, 'frances') ? 'frances' : (blockForLanguage(state, 'mandarim') ? 'mandarim' : 'frances');
+    // E6/T5: idioma principal da conta (portugues incluído); 'frances' só para quem não tem bloco nenhum.
+    const languageAppKey = primaryLanguageAppKey(state) ?? 'frances';
     if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'featured_badge_reminder', 'perfil', {}, 'profile-edit')) created++;
   }
   return created;
@@ -562,8 +571,9 @@ async function processTeacherStudentAlerts(
 
   let created = 0;
   for (const group of groups.values()) {
+    const en = uiLangFor(group.teacherId) === 'en'; // idioma do site de QUEM RECEBE (a professora)
     const studentList = group.hits
-      .map((h) => `${nameById.get(h.studentId) || 'aluna'} (${h.days} dias)`)
+      .map((h) => `${nameById.get(h.studentId) || (en ? 'student' : 'aluna')} (${h.days} ${en ? (h.days === 1 ? 'day' : 'days') : 'dias'})`)
       .join(', ');
     if (await maybeNotify(
       supabase, rules, prefsCache, emailCache, group.teacherId, group.languageAppKey,

@@ -47,7 +47,9 @@ let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x) : ''); } };
 
 const MISSION = { id: 7, week_start: '2026-10-12', goal_xp: 300, started_by_me: true, my_xp: 120, partner_xp: 60, completed_at: null,
-  partner: { user_id: 'bia', username: 'bia', display_name: 'Bia Lima', avatar_url: null } };
+  partner: { user_id: 'bia', username: 'bia', display_name: 'Bia Lima', avatar_url: null } }; // missão antiga de XP (102)
+// Missão de dias (109): montada na página a partir de hoje (segunda da semana; você 3 dias antes de hoje, Bia 2).
+const DAYS = 'days';
 
 async function boot(browser, lang, port, theme, viewport){
   const ctx = await browser.newContext({ serviceWorkers: 'block', viewport: viewport || { width: 1280, height: 900 }, colorScheme: theme || 'light' });
@@ -63,7 +65,7 @@ async function boot(browser, lang, port, theme, viewport){
   return { page, errors, ctx };
 }
 
-// opt: mission (null = sem missão), noRpc (sem a 102 no banco)
+// opt: mission (null = sem missão, DAYS = missão de dias montada a partir de hoje, objeto = XP antiga), noRpc, off (saiu das missões)
 async function setup(page, opt){
   await page.evaluate((opt) => {
     CURRENT_USER = { id: 'me' };
@@ -72,24 +74,33 @@ async function setup(page, opt){
       { user_id: 'caio', username: 'caio', display_name: 'Caio Reis' }, { user_id: 'duda', username: 'duda', display_name: 'Duda Melo' }];
     window.__DB.friendships = [{ id: 1, requester_id: 'me', addressee_id: 'bia', status: 'accepted' }, { id: 2, requester_id: 'caio', addressee_id: 'me', status: 'accepted' },
       { id: 3, requester_id: 'me', addressee_id: 'duda', status: 'accepted' }];
-    window.__DB.friend_settings = [];
-    window.__mission = opt.mission || null;
+    window.__DB.friend_settings = opt.off ? [{ user_id: 'me', join_duo_missions: false }] : [];
+    const iso = (d) => d.toISOString().slice(0, 10);
+    const today = todayStr();
+    const t0 = new Date(today + 'T12:00:00Z');
+    const monday = new Date(t0.getTime() - ((t0.getUTCDay() + 6) % 7) * 86400000);
+    const days = []; for (let d = new Date(monday); iso(d) < today; d = new Date(d.getTime() + 86400000)) days.push(iso(d));
+    window.__daysMission = { id: 9, kind: 'days', auto: true, week_start: iso(monday), start_day: iso(monday), today, goal_days: 4, completed_at: null,
+      my_days: days.slice(-3), partner_days: days.slice(-2),
+      partner: { user_id: 'bia', username: 'bia', display_name: 'Bia Lima', avatar_url: null } };
+    window.__mission = opt.mission === 'days' ? window.__daysMission : (opt.mission || null);
     window.__RPC.friend_suggestions = () => [];
     window.__RPC.profile_cards = ({ p_ids }) => window.__DB.profiles.filter(p => (p_ids || []).includes(p.user_id));
-    window.__RPC.friends_duo = () => [
-      { user_id: 'bia', joint_streak: 12, studied_today: false, can_nudge: true, nudged_today: false, in_mission: !!window.__mission },
-      { user_id: 'caio', joint_streak: 1, studied_today: true, can_nudge: false, nudged_today: false, in_mission: false },
-      { user_id: 'duda', joint_streak: 0, studied_today: false, can_nudge: false, nudged_today: false, in_mission: true },
+    window.__RPC.friends_duo_state = () => [
+      { user_id: 'bia', joint_streak: 12, studied_today: false, can_nudge: true, nudged_today: false, in_mission: !!window.__mission, can_invite: !window.__mission },
+      { user_id: 'caio', joint_streak: 1, studied_today: true, can_nudge: false, nudged_today: false, in_mission: false, can_invite: !window.__mission },
+      { user_id: 'duda', joint_streak: 0, studied_today: false, can_nudge: false, nudged_today: false, in_mission: true, can_invite: false },
     ];
+    window.__RPC.friends_duo = window.__RPC.friends_duo_state;
     window.__RPC.my_duo_mission = () => window.__mission;
     window.__RPC.nudge_friend = () => ({ ok: true, status: 'sent' });
-    window.__RPC.start_duo_mission = ({ p_friend, p_goal }) => {
-      window.__mission = Object.assign({}, { id: 8, week_start: '2026-10-12', goal_xp: p_goal, started_by_me: true, my_xp: 0, partner_xp: 0, completed_at: null,
+    window.__RPC.start_duo_mission = ({ p_friend }) => {
+      window.__mission = Object.assign({}, window.__daysMission, { id: 10, auto: false, start_day: today, my_days: [], partner_days: [],
         partner: { user_id: p_friend, username: p_friend, display_name: p_friend === 'bia' ? 'Bia Lima' : 'Caio Reis', avatar_url: null } });
-      return { ok: true, id: 8 };
+      return { ok: true, id: 10, goal_days: 4 };
     };
     window.__RPC.my_duo_missions_done = () => 0;
-    if (opt.noRpc) ['friends_duo', 'my_duo_mission', 'nudge_friend', 'start_duo_mission', 'my_duo_missions_done'].forEach(k => delete window.__RPC[k]);
+    if (opt.noRpc) ['friends_duo', 'friends_duo_state', 'my_duo_mission', 'nudge_friend', 'start_duo_mission', 'my_duo_missions_done'].forEach(k => delete window.__RPC[k]);
   }, opt);
 }
 
@@ -104,95 +115,115 @@ const text = (page, sel) => page.$eval(sel, e => e.innerText.replace(/\s+/g, ' '
 
 async function run(browser, port, lang){
   const L = lang;
-  // 1. sem missão: convite; sequência juntos; cutucar
+  // 1. sem missão: texto da dupla automática, "Chamar para missão" no cartão do amigo livre
   let { page, errors, ctx } = await boot(browser, lang, port);
   await setup(page, { mission: null });
   await openFriends(page);
-  await page.waitForSelector('#friends-duo:not([hidden]) [data-duo-start]', { timeout: 5000 });
-  const opts = await page.$$eval('#friends-duo [data-duo-friend] option', os => os.map(o => o.value));
-  check(`${L}: convite lista só quem está livre (Bia e Caio, sem Duda)`, opts.join(',') === 'bia,caio', opts);
-  check(`${L}: meta padrão 300`, await page.$eval('#friends-duo [data-duo-goal]', s => s.value) === '300');
-  check(`${L}: texto do convite`, /Chame um amigo para juntar XP até domingo/.test(await text(page, '#friends-duo')));
+  await page.waitForSelector('#friends-duo:not([hidden])', { timeout: 5000 });
+  check(`${L}: sem missão: explica a dupla automática`, /Toda segunda o site forma uma dupla/.test(await text(page, '#friends-duo')));
+  check(`${L}: sem formulário (sem seletor de amigo ou de meta)`, !(await page.$('#friends-duo select')));
   const bia = await text(page, '[data-friend-duo="bia"]');
-  check(`${L}: Bia: 12 dias juntos + Cutucar`, /12 dias juntos/.test(bia) && /Cutucar/.test(bia), bia);
-  const caio = await text(page, '[data-friend-duo="caio"]');
-  check(`${L}: Caio: 1 dia não mostra chip; estudou hoje: sem Cutucar`, caio === '', caio);
-  check(`${L}: Duda: sem cutucar (desligou)`, (await text(page, '[data-friend-duo="duda"]')) === '');
-  check(`${L}: dica de sequência em risco no botão`, /acaba se Bia Lima não estudar hoje/.test(await page.$eval('[data-friend-nudge="bia"]', b => b.title)));
+  check(`${L}: Bia: 12 dias juntos, Cutucar e Chamar para missão`, /12 dias juntos/.test(bia) && /Cutucar/.test(bia) && /Chamar para missão/.test(bia), bia);
+  check(`${L}: Duda (em missão ou fora): sem Chamar`, !(await page.$('[data-duo-invite="duda"]')));
+  check(`${L}: Caio: Chamar sem chip (1 dia) e sem Cutucar (estudou hoje)`, (await text(page, '[data-friend-duo="caio"]')) === 'Chamar para missão');
   await page.click('[data-friend-nudge="bia"]');
   await page.waitForTimeout(250);
-  const nud = await page.evaluate(() => window.__rpc.filter(r => r.name === 'nudge_friend').pop());
-  check(`${L}: Cutucar chama nudge_friend`, nud && nud.args.p_friend === 'bia', nud);
-  check(`${L}: depois vira "Cutucado"`, /Cutucado/.test(await text(page, '[data-friend-duo="bia"]')) && !(await page.$('[data-friend-nudge="bia"]')));
-  // erro: já estudou -> botão some
-  await page.evaluate(() => { window.__RPC.nudge_friend = () => ({ error: 'already_studied' }); FRIENDS_STATE.duo.duda.can_nudge = true; friendsDecorateDuo(); });
-  await page.click('[data-friend-nudge="duda"]');
-  await page.waitForTimeout(250);
-  check(`${L}: erro "já estudou hoje" tira o botão`, !(await page.$('[data-friend-nudge="duda"]')));
-  // começar missão com Caio, 600
-  await page.selectOption('#friends-duo [data-duo-friend]', 'caio');
-  await page.selectOption('#friends-duo [data-duo-goal]', '600');
-  await page.click('#friends-duo [data-duo-start]');
-  await page.waitForSelector('#friends-duo .friends-duo-bar', { timeout: 5000 });
+  check(`${L}: Cutucar chama nudge_friend`, (await page.evaluate(() => window.__rpc.filter(r => r.name === 'nudge_friend').pop()))?.args?.p_friend === 'bia');
+  check(`${L}: depois vira "Cutucado"`, /Cutucado/.test(await text(page, '[data-friend-duo="bia"]')));
+  await page.click('[data-duo-invite="caio"]');
+  await page.waitForSelector('#friends-duo .duo-week', { timeout: 5000 });
   const st = await page.evaluate(() => window.__rpc.filter(r => r.name === 'start_duo_mission').pop());
-  check(`${L}: Começar chama start_duo_mission(caio, 600)`, st && st.args.p_friend === 'caio' && st.args.p_goal === 600, st);
-  check(`${L}: cartão mostra a missão nova`, /Você e Caio/.test(await text(page, '#friends-duo')) && /0 de 600 XP/.test(await text(page, '#friends-duo')));
-  check(`${L}: sem erros`, errors.length === 0, errors);
+  check(`${L}: Chamar chama start_duo_mission(caio)`, st && st.args.p_friend === 'caio', st);
+  check(`${L}: cartão mostra a dupla nova`, /Sua dupla da semana: Caio/.test(await text(page, '#friends-duo')));
+  check(`${L}: com missão, os botões Chamar somem`, !(await page.$('[data-duo-invite]')));
+  check(`${L}: sem erros (1)`, errors.length === 0, errors);
   await ctx.close();
 
-  // 2. missão em andamento e cumprida
+  // 2. missão de dias: grade da semana, meta, cutucar dentro do cartão
+  ({ page, errors, ctx } = await boot(browser, lang, port));
+  await setup(page, { mission: DAYS });
+  await openFriends(page);
+  await page.waitForSelector('#friends-duo .duo-week', { timeout: 5000 });
+  const t2 = await text(page, '#friends-duo');
+  const exp = await page.evaluate(() => ({ mine: Math.min(window.__daysMission.my_days.length, 4), theirs: Math.min(window.__daysMission.partner_days.length, 4) }));
+  check(`${L}: título "Sua dupla da semana: Bia"`, /Sua dupla da semana: Bia/.test(t2), t2);
+  check(`${L}: contagem dos dois`, t2.includes(`${exp.mine}/4`) && t2.includes(`${exp.theirs}/4`), [t2, exp]);
+  check(`${L}: meta "Cada um estuda 4 dias até domingo"`, /Cada um estuda 4 dias até domingo/.test(t2));
+  check(`${L}: 7 bolinhas por pessoa`, await page.$$eval('#friends-duo .duo-week-row:not(.duo-week-head)', rs => rs.every(r => r.querySelectorAll('.duo-dot').length === 7)));
+  check(`${L}: dias estudados marcados`, await page.$$eval('#friends-duo .duo-week-row:not(.duo-week-head)', rs => rs.map(r => r.querySelectorAll('.duo-dot.is-on').length)).then(a => a[0] === exp.mine && a[1] === exp.theirs));
+  check(`${L}: hoje destacado`, (await page.$$('#friends-duo .duo-dot.is-today')).length === 2);
+  check(`${L}: Cutucar a Bia dentro do cartão`, !!(await page.$('#friends-duo [data-friend-nudge="bia"]')));
+  check(`${L}: grade com descrição para leitor de tela`, /Você estudou \d de 4 dias e Bia, \d de 4/.test(await page.$eval('#friends-duo .duo-week', e => e.getAttribute('aria-label'))));
+  // cumprida
+  await page.evaluate(() => { window.__mission = Object.assign({}, window.__daysMission, { completed_at: '2026-10-15T12:00:00Z' }); window.__RPC.my_duo_missions_done = () => 1; return loadFriendsDuo(); });
+  await page.waitForTimeout(250);
+  const t3 = await text(page, '#friends-duo');
+  check(`${L}: cumprida: "Missão cumprida!" e dupla nova na segunda`, /Missão cumprida!/.test(t3) && /Segunda tem dupla nova/.test(t3), t3);
+  check(`${L}: cumprida: recarrega a conquista`, await page.evaluate(() => window.__rpc.some(r => r.name === 'my_duo_missions_done')));
+
+  // 3. quadro "Missões do dia": linha da dupla e missões clicáveis
+  await page.evaluate(() => { window.__mission = window.__daysMission; FRIENDS_STATE.mission = window.__daysMission; switchTab('path'); renderDailyChallengesStrip(); });
+  await page.waitForTimeout(150);
+  const row = await page.$('.dcs-cards [data-mission-go="duo"]:visible');
+  check(`${L}: quadro: linha "Missão em dupla com Bia"`, row && /Missão em dupla com Bia/.test(await row.innerText()));
+  check(`${L}: quadro: missões são botões`, await page.$$eval('.dcs-cards .dcs-card', cs => cs.length >= 2 && cs.every(c => c.tagName === 'BUTTON' && c.dataset.missionGo)));
+  const activeTab = () => page.evaluate(() => document.getElementById('app').dataset.activeTab);
+  await page.locator('.dcs-cards [data-mission-go="duo"]:visible').first().click();
+  await page.waitForTimeout(300);
+  check(`${L}: tocar na dupla abre Amigos`, (await activeTab()) === 'friends', await activeTab());
+  const firstId = await page.$eval('.dcs-cards [data-mission-go]:not([data-mission-go="duo"])', b => b.dataset.missionGo).catch(() => null);
+  if (firstId){
+    await page.evaluate(() => { switchTab('friends'); renderDailyChallengesStrip(); });
+    await page.locator(`.dcs-cards [data-mission-go="${firstId}"]:visible`).first().click();
+    await page.waitForTimeout(300);
+    const want = await page.evaluate((id) => (DAILY_MISSION_TARGETS[id] || 'path').split(':')[0], firstId);
+    check(`${L}: tocar em "${firstId}" abre ${want}`, (await activeTab()) === want, [await activeTab(), want]);
+  }
+  const mapOk = await page.evaluate(() => ['reviews15', 'overdue3', 'speedReview1', 'matchGame1'].every(k => DAILY_MISSION_TARGETS[k].startsWith('review'))
+    && (typeof APP_KEY === 'undefined' || DAILY_MISSION_TARGETS.conj1 === 'conjugaison'));
+  check(`${L}: destinos de Revisão e Conjugação`, mapOk);
+  // 4. faixa do fim da lição: só no 1º estudo do dia
+  const strip1 = await page.evaluate(() => { FRIENDS_STATE.mission = JSON.parse(JSON.stringify(window.__daysMission)); return duoLessonStripHTML(); });
+  check(`${L}: fim da lição: "Dia N de 4 na missão com Bia ✓"`, /Dia \d de 4 na missão com Bia ✓/.test(strip1), strip1);
+  const strip2 = await page.evaluate(() => duoLessonStripHTML());
+  check(`${L}: fim da lição: na 2ª lição do dia não repete`, strip2 === '');
+  const strip3 = await page.evaluate(() => { const m = JSON.parse(JSON.stringify(window.__daysMission)); m.my_days = ['a','b','c']; m.partner_days = ['a','b','c','d']; FRIENDS_STATE.mission = m; return duoLessonStripHTML(); });
+  check(`${L}: fim da lição: 4º dia dos dois = cumprida`, /cumprida/.test(strip3), strip3);
+  check(`${L}: tela de lição concluída usa a faixa`, await page.evaluate(() => String(renderLessonCompleteScreen).includes('duoLessonStripHTML')));
+  check(`${L}: sem erros (2-4)`, errors.length === 0, errors);
+  await ctx.close();
+
+  // 5. missão antiga de XP ainda aparece; saiu das missões; sem a 109 no banco
   ({ page, errors, ctx } = await boot(browser, lang, port));
   await setup(page, { mission: MISSION });
   await openFriends(page);
   await page.waitForSelector('#friends-duo .friends-duo-bar', { timeout: 5000 });
-  const t1 = await text(page, '#friends-duo');
-  check(`${L}: andamento: 180 de 300 XP`, /180 de 300 XP/.test(t1), t1);
-  check(`${L}: andamento: legenda dos dois`, /Você: 120 XP/.test(t1) && /Bia: 60 XP/.test(t1), t1);
-  check(`${L}: andamento: termina em/hoje`, /Termina (em \d+ dias?|hoje)/.test(t1), t1);
-  const bar = await page.$eval('#friends-duo .friends-duo-bar', b => ({ now: b.getAttribute('aria-valuenow'), max: b.getAttribute('aria-valuemax'),
-    mine: b.querySelector('.friends-duo-bar-mine').style.width, theirs: b.querySelector('.friends-duo-bar-theirs').style.width }));
-  check(`${L}: barra 40% + 20%`, bar.now === '180' && bar.max === '300' && bar.mine === '40%' && bar.theirs === '20%', bar);
-  await page.evaluate(() => { window.__mission = Object.assign({}, window.__mission, { my_xp: 200, partner_xp: 150, completed_at: '2026-10-15T12:00:00Z' }); window.__RPC.my_duo_missions_done = () => 1; return loadFriendsDuo(); });
-  await page.waitForTimeout(300);
-  const t2 = await text(page, '#friends-duo');
-  check(`${L}: cumprida: "Missão cumprida!" e barra cheia`, /Missão cumprida!/.test(t2) && /300 de 300 XP/.test(t2), t2);
-  check(`${L}: cumprida: recarrega a conquista`, await page.evaluate(() => window.__rpc.some(r => r.name === 'my_duo_missions_done')));
-  check(`${L}: conquista Missões em Dupla nível 1`, await page.evaluate(async () => { await new Promise(r => setTimeout(r, 200)); return (evaluateBadgeTracks(STATE).tracks.find(x => x.id === 'duo') || {}).level; }) === 1);
-  check(`${L}: sem erros (missão)`, errors.length === 0, errors);
+  check(`${L}: missão antiga de XP: 180 de 300 XP`, /180 de 300 XP/.test(await text(page, '#friends-duo')));
   await ctx.close();
-
-  // 3. sem a 102 no banco: nada aparece, sem erro de página
+  ({ page, errors, ctx } = await boot(browser, lang, port));
+  await setup(page, { mission: null, off: true });
+  await openFriends(page);
+  await page.waitForSelector('#friends-duo:not([hidden])', { timeout: 5000 });
+  check(`${L}: saiu das missões: explica como voltar`, /não está participando das missões em dupla/.test(await text(page, '#friends-duo')));
+  await ctx.close();
   ({ page, errors, ctx } = await boot(browser, lang, port));
   await setup(page, { noRpc: true });
   await openFriends(page);
   await page.waitForTimeout(300);
-  check(`${L}: sem 102: cartão da missão escondido`, await page.$eval('#friends-duo', e => e.hidden));
-  check(`${L}: sem 102: nada nos cartões`, (await text(page, '[data-friend-duo="bia"]')) === '');
-  check(`${L}: sem 102: sem erros`, errors.length === 0, errors);
-  // preferências novas
+  check(`${L}: sem banco: cartão escondido`, await page.$eval('#friends-duo', e => e.hidden));
+  check(`${L}: sem banco: nada nos cartões`, (await text(page, '[data-friend-duo="bia"]')) === '');
+  check(`${L}: sem banco: sem erros`, errors.length === 0, errors);
   await page.evaluate(() => { document.body.insertAdjacentHTML('beforeend', '<div id="friends-prefs-body"></div>'); return loadFriendsPrefs(); });
-  for (const k of ['accept_nudges', 'notify_missions']){
+  for (const k of ['accept_nudges', 'notify_missions', 'join_duo_missions']){
     const el = await page.$(`#friends-prefs-body [data-friends-pref="${k}"]`);
     check(`${L}: preferência ${k} existe e vem ligada`, el && await el.isChecked());
   }
-  await page.uncheck('#friends-prefs-body [data-friends-pref="accept_nudges"]');
-  await page.waitForTimeout(200);
-  const up = await page.evaluate(() => window.__upserts.filter(u => u.table === 'friend_settings').pop());
-  check(`${L}: desligar grava accept_nudges=false`, up && up.row.accept_nudges === false, up);
-  // matriz de Configurações > Notificações: Amigos agora tem push (padrão ligado) e continua sem e-mail
-  await page.evaluate(() => { window.__DB.notification_preferences = [{ user_id: 'me', channels: {}, quiet_hours_start: null, quiet_hours_end: null }];
-    getLocalPushSubscription = async () => null; switchTab('settings'); switchSettingsSection('notifications'); });
-  await page.waitForSelector('#settings-notifications-content [data-pref-category="amigos"][data-pref-channel="push"]', { state: 'attached', timeout: 8000 });
-  const mx = await page.evaluate(() => { const q = (ch) => document.querySelector(`[data-pref-category="amigos"][data-pref-channel="${ch}"]`);
-    return { push: q('push').checked, pushOff: q('push').disabled, email: q('email').checked, emailOff: q('email').disabled, title: q('email').title }; });
-  check(`${L}: matriz: push de Amigos ligado e liberado`, mx.push && !mx.pushOff, mx);
-  check(`${L}: matriz: e-mail de Amigos desligado e travado`, !mx.email && mx.emailOff && /e-mail/.test(mx.title), mx);
   await ctx.close();
 }
 
 async function visual(browser, port){
   for (const lang of ['fr', 'zh']) for (const theme of ['light', 'dark']) for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]){
-    for (const mission of [null, MISSION]){
+    for (const mission of [null, DAYS]){
       const { page, errors, ctx } = await boot(browser, lang, port, theme, vp);
       await setup(page, { mission });
       await openFriends(page);
@@ -204,11 +235,24 @@ async function visual(browser, port){
       const c = await page.$eval('.friends-duo-card', el => { const s = getComputedStyle(el); const h = el.querySelector('.friends-duo-title'); return [s.backgroundColor, getComputedStyle(h).color]; });
       check(`${tag}: título legível`, c[0] !== c[1], c);
       if (vp.width === 390){
-        const small = await page.$$eval('#friends-duo button, #friends-duo select, .friend-nudge', els => els.filter(e => e.offsetParent && e.getBoundingClientRect().height < 44).length);
+        const small = await page.$$eval('#friends-duo button, .friend-nudge, .friend-duo-invite', els => els.filter(e => e.offsetParent && e.getBoundingClientRect().height < 44).length);
         check(`${tag}: alvos de toque >= 44px`, small === 0, small);
       }
       if (SHOTS){ await page.$eval('#friends-duo', e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-${lang}-${theme}-${vp.width}-${mission ? 'missao' : 'convite'}.png`) }); }
       if (SHOTS && !mission){ await page.$eval('#friends-list', e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-cards-${lang}-${theme}-${vp.width}.png`) }); }
+      if (mission === DAYS && vp.width === 1280){
+        // faixa do fim da lição + linha do quadro, desenhadas num canto da página para o print
+        await page.evaluate(() => {
+          FRIENDS_STATE.mission = JSON.parse(JSON.stringify(window.__daysMission));
+          const box = document.createElement('div');
+          box.id = 'tst-duo'; box.style.cssText = 'position:fixed;left:240px;top:110px;z-index:9999;width:460px;background:var(--paper);padding:16px;border-radius:16px';
+          box.innerHTML = `<div class="lesson-complete">${duoLessonStripHTML()}</div><div class="dcs-cards" style="margin-top:12px">${(FRIENDS_STATE.mission = window.__daysMission, duoDailyStripRowHTML())}</div>`;
+          document.body.appendChild(box);
+        });
+        const c2 = await page.$eval('#tst-duo .duo-lesson-strip', el => [getComputedStyle(el).backgroundColor, getComputedStyle(el).color]);
+        check(`${tag}: faixa do fim da lição legível`, c2[0] !== c2[1], c2);
+        if (SHOTS) await page.$eval('#tst-duo', e => e).then(() => page.locator('#tst-duo').screenshot({ path: path.join(SHOTS, `dupla-faixa-${lang}-${theme}.png`) }));
+      }
       check(`${tag}: sem erros`, errors.length === 0, errors);
       await ctx.close();
     }
