@@ -8,7 +8,7 @@ claude.ai > Tarefas agendadas > nova tarefa.
 - Nome: `Banco de Revisão: rotina da madrugada (site)`
 - Frequência: diária, 01:50 (America/Sao_Paulo). Permissões: **Auto** (não use "Ignorar todas as aprovações").
 - Conectores: ligar SÓ Google Drive, Google Calendar e Supabase (tirar Notion, Gmail, Resend, Canva, Claude_Docs, Claude_Code_Remote).
-- Instruções: o texto abaixo, depois de trocar `PROJETO` (produção: `eigjocalzwamisgqilhg`; teste: `ilfjzizjfcmhibkhwber`) e conferir as pastas e agendas da sua tarefa atual.
+- Instruções: cole o conteúdo de `docs/rotina-banco/tarefa-nova-producao.txt` (já vem com o projeto de produção, as agendas, as pastas e a lista de ignorados da sua tarefa atual; nada para trocar). O texto abaixo é o modelo com `PROJETO` no lugar do id (use só se for testar com o Staging, `ilfjzizjfcmhibkhwber`).
 - Só ligar (agendar) depois de rodar uma vez com "Executar agora" e conferir o resultado no site.
 
 ## Texto das instruções

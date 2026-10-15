@@ -81,7 +81,8 @@ Migrations `097` (no Staging aparece como `091`; renumerada porque as 091 a 096 
 Agendamentos: `docs/rotina-banco/agendar-cron.sql` (`rb-agent-sweep` a cada 5 min; `rb-agent-nightly` às 05:30 UTC = 02:30 em Brasília). Texto da tarefa: `docs/rotina-banco/tarefa-nova.md`.
 Teste ao vivo no Staging: `state` leve, entrega por `agent_inbox_submit`, o gatilho chamou a função (HTTP 200), a linha foi para `feito` com o resultado, aluno novo cadastrado, itens limpos aprovados e com cartão (vinculada),
 `[pessoal]`/dúvida/"cortado" pendentes, recap criado, `nightly` pelo cron OK. Lição: o Staging não tinha `pg_net` nem `pg_cron` (criados lá para o teste; a produção já os tinha) e o gatilho engolia o erro (corrigido na 092).
-Testes locais: SQL 83/83, lógica 44/44. Produção: ainda NÃO aplicado (097 a 099, segredos do Vault, cron, nova versão da função).
+Testes locais: SQL 83/83, lógica 44/44.
+Produção (2026-10-15, autorizado pela autora): 097, 098 e 099 aplicadas (versões 20261015005052, 005101, 005107), Vault com `rb_agent_url`, `rb_agent_anon` e `rb_agent_teacher`, cron `rb-agent-sweep` e `rb-agent-nightly`, função v4 (commit 2c39829). Falta o `rb_agent_token` no Vault (a autora cria; tem de ser igual ao segredo da função). Conferido: 24 alunos, 2076 itens e 635 cartões do Banco intactos, nenhum aluno gerenciado, clientes sem acesso às funções. A 097 foi aplicada com uma versão simplificada de `review_bank_agent_state` (estado sem alunos), logo substituída pela da 099, que é a do repositório.
 
 ## Pendências
 - Teste de chamada de escrita a partir do ambiente da tarefa agendada: versão 1 bloqueada pelo classificador (ver acima); rodar a versão 2.
