@@ -111,7 +111,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - Amigos: sugestões de amigos + QR code (095 no Staging e na produção, 2026-10-15; `docs/historico/17-sugestoes-de-amigos.md`).
   Missão em dupla, sequência com amigo, cutucar e push de Amigos na hora (102 + Edge Function `push-dispatch`, Staging e produção,
   2026-10-15; `docs/historico/19-amigos-em-dupla.md`). Mural e convite da professora no idioma de quem recebe (104, Staging e produção);
-  convite para ativar as notificações (faixa em Amigos + janela no 1º amigo) feito na branch, aguardando merge.
+  convite para ativar as notificações (faixa em Amigos + janela no 1º amigo) publicado (2026-10-15).
 - Rotina automática do Banco (tarefa da madrugada -> Edge Function `review-bank-agent`, caixa de entrada e cron; migrations 089, 090 e 097 a 100 na produção, função v6, Vault e cron criados em 2026-10-15, token conferido): tarefa nova `trig_015AkoX1hyDJuWs1MimQDTbE` (sem agendamento; texto em `docs/rotina-banco/tarefa-nova-producao.txt`, colar de novo se mudar). Nenhum aluno é gerenciado ainda: ao migrar cada um, marcar "Atualizar automaticamente" no formulário do aluno (Banco > Alunos > Editar aluno) e arquivá-lo no artifact. Duplicatas "Luana Baionne" e "Makena Bento de Azevedo" arquivadas (apagar pelo SQL Editor). Detalhes: `docs/historico/18-rotina-automatica-banco.md`.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados (placeholders de perfil); Stripe. País dos alunos: já preenchido nos 13 alunos (conferido 2026-10-14).
