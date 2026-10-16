@@ -531,10 +531,13 @@ a.pill:hover{ border-color: var(--imperial-gold); }
     /* Linha de separação da sidebar, estilo Duolingo. */
     border-right:1px solid var(--paper-line); padding-right:20px;
   }
-  /* Recolher menu: item da própria sidebar (último, depois de Sair da conta), igual aos
-     outros -- antes era um quadradinho solto sem texto no topo. O ícone « vira » ao recolher. */
-  .sidebar-toggle-btn{ color:var(--ink-soft); }
-  .sidebar-toggle-btn:hover{ color:var(--ink); }
+  /* Recolher menu: ícone « solto no topo (sem caixinha, como a topbar); vira » ao recolher. */
+  .sidebar-toggle-btn{
+    align-self:flex-end; width:32px; height:32px; border-radius:8px; flex-shrink:0; border:none; background:none;
+    color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; justify-content:center; margin-bottom:10px;
+  }
+  .sidebar-toggle-btn:hover{ color:var(--ink); background:var(--paper-warm); }
+  #app.sidebar-collapsed .sidebar-toggle-btn{ align-self:center; }
   .sidebar-toggle-icon{ transition:transform .2s ease; }
   #app.sidebar-collapsed .sidebar-toggle-icon{ transform:rotate(180deg); }
   @media (prefers-reduced-motion: reduce){ .sidebar-toggle-icon{ transition:none; } }
@@ -557,8 +560,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
      da Trilha (renderDailyChallengesStrip renderiza nos dois lugares) --
      sem padding extra do .side-card aqui em cima, o botão de recolher já
      tem o próprio respiro. */
-  /* Missões do dia sem moldura (as missões já são cartões): lista solta na coluna. */
-  #side-card-missions{ background:none; border:none; box-shadow:none; padding:0; }
+  /* Ranking e Missões do dia sem moldura: lista solta na coluna (as missões já são cartões). */
+  #side-card-missions, #side-card-ranking{ background:none; border:none; box-shadow:none; padding:0; }
   #side-missions-body .dcs-caption-btn{ padding-top:0; }
   /* Mesmo peso dos outros títulos da coluna (.side-card-title). */
   #side-missions-body .dcs-caption{ font-size:15px; font-weight:900; letter-spacing:0; text-transform:none; color:var(--ink); }
@@ -5321,6 +5324,9 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
        existente (shared/tabs.js) sincroniza clique e estado ativo dos dois
        conjuntos de botões sem nenhum JS novo. -->
   <div class="sidebar" id="app-sidebar">
+    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" type="button" aria-label="Recolher menu" title="Recolher menu">
+      <svg class="sidebar-toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+    </button>
     <nav class="sidebar-nav">
       <button class="tab-btn" data-tab="path">
         <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f4da.svg" alt="" aria-hidden="true">
@@ -5368,10 +5374,6 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="tab-btn sidebar-logout-btn" id="sidebar-logout-btn" type="button">
         <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6aa.svg" alt="" aria-hidden="true">
         <span class="sidebar-label" data-i18n="menu.logout">Sair da conta</span>
-      </button>
-      <button class="tab-btn sidebar-toggle-btn" id="sidebar-toggle-btn" type="button" aria-label="Recolher menu" title="Recolher menu">
-        <svg class="tab-icon sidebar-icon sidebar-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
-        <span class="sidebar-label" data-i18n="sidebar.collapse">Recolher menu</span>
       </button>
     </nav>
   </div>
