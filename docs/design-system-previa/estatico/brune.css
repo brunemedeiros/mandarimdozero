@@ -1,0 +1,53 @@
+/* Tokens da Brune (extraídos de fr/index.html e zh/index.html). Todas as bibliotecas leem daqui. */
+:root{
+  --b-primary:#3498D6; --b-primary-dark:#1D5A82; --b-on-primary:#201335;
+  --b-accent:#E36BCA; --b-accent-soft:#F2A8DE;
+  --b-bg:#FAF5EA; --b-surface:#F0E8D8; --b-raised:#FFFCF5; --b-line:#E1D6C0;
+  --b-ink:#201335; --b-ink-soft:#5C4E73;
+  --b-ok:#3A7359; --b-warn:#8C5F0E; --b-err:#B81F13; --b-on-vivid:#FFFFFF;
+  --b-radius:14px; --b-shadow:0 2px 8px rgba(33,23,20,.08),0 1px 2px rgba(33,23,20,.06);
+  --b-font:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --b-font-display:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --b-primary:#4DA9E8; --b-primary-dark:#7FC4F5; --b-on-primary:#201335;
+  --b-accent:#F08FE0; --b-accent-soft:#F7C2ED;
+  --b-bg:#17121F; --b-surface:#201A2C; --b-raised:#2A2238; --b-line:#362C42;
+  --b-ink:#EDE6F5; --b-ink-soft:#C5B8D9;
+  --b-ok:#52B487; --b-warn:#C9973A; --b-err:#FF6B5C; --b-on-vivid:#201335;
+  --b-shadow:0 8px 24px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.05);
+  color-scheme:dark;
+}
+:root[data-lang="zh"]{
+  --b-primary:#C0231F; --b-primary-dark:#8E1915; --b-on-primary:#FFFFFF;
+  --b-accent:#D4A017; --b-accent-soft:#F0C444;
+  --b-bg:#FBF4E8; --b-surface:#F3E6CE; --b-raised:#FFFBF2; --b-line:#E2CFA6;
+  --b-ink:#211714; --b-ink-soft:#5C4A3F;
+  --b-err:#A83A2E;
+}
+:root[data-lang="zh"][data-theme="dark"]{
+  --b-primary:#E1524B; --b-primary-dark:#FF8078; --b-on-primary:#1A0605;
+  --b-accent:#E3B23C; --b-accent-soft:#F5CE66;
+  --b-bg:#1B1512; --b-surface:#251C17; --b-raised:#30251F; --b-line:#3C2F27;
+  --b-ink:#F1E4D6; --b-ink-soft:#C7B5A5;
+  --b-err:#FF7B6E; --b-on-vivid:#1B1512;
+}
+/* Layout comum às quatro telas (as bibliotecas cuidam só dos componentes) */
+*{box-sizing:border-box}
+html,body{margin:0}
+.app{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:100vh}
+.app{--side:210px;grid-template-columns:var(--side) minmax(0,1fr)}
+.side{padding:20px 14px;display:flex;flex-direction:column;gap:6px}
+.main{padding:28px 28px 40px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.head h1{margin:0}
+.hbox{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.stats4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.tablewrap{overflow-x:auto}
+.who{display:flex;align-items:center;gap:12px;min-width:200px}
+.who small{display:block}
+.grow{flex:1 1 220px;min-width:180px}
+.num{font-variant-numeric:tabular-nums}
+@media (max-width:900px){.app{grid-template-columns:1fr}.side{flex-direction:row;flex-wrap:wrap;padding:12px 16px}.main{padding:20px 16px 32px}.stats4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.stats4{grid-template-columns:1fr}}

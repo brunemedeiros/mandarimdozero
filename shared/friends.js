@@ -548,7 +548,7 @@ async function loadFriendsMiniRank(){
   const seq = ++FRIENDS_STATE.rankSeq;
   const scope = FRIENDS_STATE.rankScope;
   const langs = (typeof AVAILABLE_LANGUAGES !== 'undefined' ? AVAILABLE_LANGUAGES.filter(l => l.enabled) : []);
-  const scopes = [{ key: 'all', label: t('friends.scopeAll') }, ...langs.map(l => ({ key: l.appKey, label: l.name }))];
+  const scopes = [{ key: 'all', label: t('friends.scopeAll') }, ...langs.map(l => ({ key: l.appKey, label: languageDisplayName(l) }))];
   const chips = `<div class="leaderboard-tabs friends-rank-scopes" role="tablist" aria-label="${t('friends.scopeAria')}">${scopes.map(sc =>
     `<button type="button" class="leaderboard-tab ${sc.key === scope ? 'active' : ''}" role="tab" aria-selected="${sc.key === scope}" data-friends-rank-scope="${escapeAttr(sc.key)}">${escapeHTML(sc.label)}</button>`).join('')}</div>`;
   box.innerHTML = `${chips}<div id="friends-mini-rank-rows">${loadingHTML(t('friends.loadingShort'))}</div>`;
@@ -587,7 +587,7 @@ function friendsStreakChipHTML(x){
 function friendsLangFlagsHTML(langs){
   const all = (typeof AVAILABLE_LANGUAGES !== 'undefined') ? AVAILABLE_LANGUAGES : [];
   return (langs || []).map(k => all.find(l => l.appKey === k)).filter(Boolean)
-    .map(l => `<span class="friend-flag" title="${escapeAttr(l.name)}">${l.flagSvg}</span>`).join('');
+    .map(l => `<span class="friend-flag" title="${escapeAttr(languageDisplayName(l))}">${l.flagSvg}</span>`).join('');
 }
 
 // Põe o foguinho nos avatares (cartões e pódio) e as bandeiras nos cartões.

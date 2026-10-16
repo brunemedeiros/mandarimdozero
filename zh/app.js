@@ -2861,8 +2861,8 @@ function buildFullSentenceExercises(unit){
 
 // ---------- Tela final "Parabéns" (estilo Busuu) ----------
 function currentStudentName(){
-  if (!CURRENT_USER) return 'Convidado';
-  const full = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || 'Convidado';
+  if (!CURRENT_USER) return t('common.guest');
+  const full = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || t('common.guest');
   return full.split(' ')[0].split('@')[0];
 }
 

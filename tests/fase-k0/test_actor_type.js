@@ -8,7 +8,7 @@ const t = (n, ok) => { ok ? pass++ : (fail++, console.log('FAIL', n)); };
 // Fake PostgREST-like builder sobre um array de linhas.
 function makeClient(rows, inserted){
   return { from(tbl){
-    const f = []; let lim = Infinity; let ord = null;
+    const f = []; let lim = Infinity; let ord = null; let faixa = null;
     const b = {
       select(){ return b; },
       eq(c,v){ f.push(r => r[c] === v); return b; },
@@ -18,8 +18,9 @@ function makeClient(rows, inserted){
       lte(c,v){ f.push(r => r[c] <= v); return b; },
       order(c,o){ ord = [c,o]; return b; },
       limit(n){ lim = n; return b; },
+      range(a, z){ faixa = [a, z]; return b; },   // a tela busca em páginas (analyticsFetchPaged)
       insert(p){ inserted.push(p); return { then(cb){ cb({error:null}); } }; },
-      then(res){ let out = rows.filter(r => f.every(fn => fn(r))); if (ord) out = out.sort((a,b)=> a[ord[0]]<b[ord[0]]?1:-1); res({ data: out.slice(0, lim), error: null }); },
+      then(res){ let out = rows.filter(r => f.every(fn => fn(r))); if (ord) out = out.sort((a,b)=> a[ord[0]]<b[ord[0]]?1:-1); res({ data: faixa ? out.slice(faixa[0], faixa[1] + 1) : out.slice(0, lim), error: null }); },
     };
     return b;
   } };
@@ -36,7 +37,8 @@ const ROWS = [
 ];
 
 // ---- carrega admin-analytics.js real
-const src = fs.readFileSync(path.join(root,'shared/admin-analytics.js'),'utf8');
+// admin-analytics.js foi dividido (cálculos e rótulos em admin-analytics-calc.js, HTML em admin-analytics-ui.js): carrega calc + controlador
+const src = ['shared/admin-analytics-calc.js','shared/admin-analytics.js'].map(f => fs.readFileSync(path.join(root,f),'utf8')).join('\n');
 const ctx = { console, document: { getElementById(){ return null; }, querySelectorAll(){ return []; } }, supabaseClient: makeClient(ROWS, []) };
 vm.createContext(ctx);
 vm.runInContext(src + `
@@ -87,7 +89,7 @@ ctx.setState({ languageFilter:'all', deviceFilter:'all' });
   ins = await run(true, false);
   t('admin com exclude=false: grava actor_type=admin', ins.length===1 && ins[0].actor_type==='admin');
   // arquitetura: nenhum 'student' restante em código executável
-  const code = ['shared/analytics.js','shared/admin-analytics.js'].map(f=>fs.readFileSync(path.join(root,f),'utf8').split('\n').filter(l=>!/^\s*\/\//.test(l)).join('\n')).join('\n');
+  const code = ['shared/analytics.js','shared/admin-analytics-calc.js','shared/admin-analytics.js'].map(f=>fs.readFileSync(path.join(root,f),'utf8').split('\n').filter(l=>!/^\s*\/\//.test(l)).join('\n')).join('\n');
   t("único 'student' executável é o valor legado da constante", (code.match(/'student'/g)||[]).length === 1);
   t('nenhum .eq actor_type restante', !/\.eq\('actor_type'/.test(code));
   console.log(`K.0-A: ${pass} ok, ${fail} falhas`); process.exit(fail?1:0);

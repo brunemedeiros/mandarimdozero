@@ -12,6 +12,10 @@ function installT(ctx){
     const s = typeof v === 'object' ? (n === 1 ? v.one : v.other) : v;
     return interp(s, Object.assign({ n }, p));
   };
+  // registro de idiomas real (languages/registry.js), para peças que usam LanguageRegistry/AVAILABLE_LANGUAGES
+  const R = require('../../languages/registry.js');
+  if (!ctx.LanguageRegistry) ctx.LanguageRegistry = R.LanguageRegistry;
+  if (!ctx.AVAILABLE_LANGUAGES) ctx.AVAILABLE_LANGUAGES = R.AVAILABLE_LANGUAGES;
   ctx.fmtDate = (d) => new Intl.DateTimeFormat('pt-BR').format(d instanceof Date ? d : new Date(d));
   return ctx;
 }

@@ -186,11 +186,14 @@ const BELL_STUB = ([who, noAudience]) => {
       await login('P', true);
       await ev(() => { TEACHER_PANEL_STATE.section = 'students'; return renderTeacherPanelView(); });
       await page.waitForTimeout(150);
-      L('sem a 108: sino do topo mostra tudo (5 não lidos: 4 da professora + 1 da conta), sem erro', await ev(() => document.getElementById('notifications-badge').textContent === '5' && NOTIFICATION_AUDIENCE_COLUMN === false), await ev(() => document.getElementById('notifications-badge').textContent));
+      // O sino do topo mostra só os avisos do site aberto (2026-10-15: Amigos eram gravados 1 vez por site e duplicavam).
+      // Do idioma aberto: fr = ids 2, 5 e 6 (2 não lidos); zh = ids 2, 4 e 6 (3 não lidos).
+      const topUnread = lang === 'fr' ? '2' : '3';
+      L('sem a 108: sino do topo mostra os avisos do site aberto, inclusive os da professora, sem erro', await ev((u) => document.getElementById('notifications-badge').textContent === u && NOTIFICATION_AUDIENCE_COLUMN === false, topUnread), await ev(() => document.getElementById('notifications-badge').textContent));
       L('sem a 108: sino da professora escondido', await ev(() => document.getElementById('teacher-bell').hidden && !document.querySelector('.tbell-dot')));
       await ev(() => toggleNotificationDropdown());
       await page.waitForSelector('.notification-item');
-      L('sem a 108: lista do topo com os 7 avisos da conta (como antes)', await ev(() => document.querySelectorAll('#notifications-list .notification-item').length === 7));
+      L('sem a 108: lista do topo com os 3 avisos do site aberto', await ev(() => document.querySelectorAll('#notifications-list .notification-item').length === 3));
       await ev(() => document.getElementById('notifications-dropdown').classList.remove('open'));
 
       // ---- com a 108: sino do topo só com os avisos da própria conta ----

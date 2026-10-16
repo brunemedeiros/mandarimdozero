@@ -130,26 +130,40 @@ function teacherBellItemHTML(n){
   const icon = TBELL_EVENT_ICON[n.event_type] || TBELL_ICON[n.category] || '🔔';
   const otherLang = teacherBellIsMural(n) && typeof APP_KEY !== 'undefined' && n.language_app_key !== APP_KEY;
   const time = typeof notificationTimeAgoLabel === 'function' ? notificationTimeAgoLabel(n.created_at) : '';
+  const unread = !n.read_at;
+  // Peças do Design System do painel (Pico): p-item + p-selo; o selo "Novo" marca só aquele aviso como lido.
   return `
-    <li><button type="button" class="tbell-item ${n.read_at ? '' : 'is-unread'}" data-tbell-id="${escapeHTML(String(n.id))}">
-      <span class="tbell-item-icon" aria-hidden="true">${icon}</span>
-      <span class="tbell-item-body">
-        <span class="tbell-item-text">${escapeHTML(teacherBellText(n))}</span>
-        <span class="tbell-item-meta">
-          <span class="tbell-lang">${escapeHTML(teacherBellLangName(n.language_app_key))}</span>
+    <li class="tbell-row"><button type="button" class="p-item tbell-item ${unread ? 'p-item--suave is-unread' : ''}" data-tbell-id="${escapeHTML(String(n.id))}">
+      <span class="p-item-media tbell-item-icon" aria-hidden="true">${icon}</span>
+      <span class="p-item-conteudo tbell-item-body">
+        <span class="p-item-titulo tbell-item-text">${escapeHTML(teacherBellText(n))}</span>
+        <span class="p-item-descricao tbell-item-meta">
+          <span class="p-selo tbell-lang">${escapeHTML(teacherBellLangName(n.language_app_key))}</span>
           ${time ? `<span>${escapeHTML(time)}</span>` : ''}
-          ${n.read_at ? '' : `<span class="tbell-new">${escapeHTML(t('panel.tbell.new'))}</span>`}
         </span>
-        ${otherLang ? `<span class="tbell-item-note">${escapeHTML(t('panel.tbell.otherLang', { lang: teacherBellLangName(n.language_app_key) }))}</span>` : ''}
+        ${otherLang ? `<span class="p-item-descricao tbell-item-note">${escapeHTML(t('panel.tbell.otherLang', { lang: teacherBellLangName(n.language_app_key) }))}</span>` : ''}
       </span>
-    </button></li>`;
+    </button>
+    ${unread ? `<button type="button" class="p-selo p-selo--info tbell-new" data-tbell-read="${escapeHTML(String(n.id))}" title="${escapeHTML(t('notif.markOne'))}" aria-label="${escapeHTML(t('panel.tbell.new') + ': ' + t('notif.markOne'))}">${escapeHTML(t('panel.tbell.new'))}</button>` : ''}
+    </li>`;
 }
 
 function teacherBellListHTML(){
   if (!TBELL.loaded) return typeof loadingHTML === 'function' ? loadingHTML() : '';
   if (TBELL.error) return `<p class="tbell-empty">${escapeHTML(t('panel.tbell.err'))}</p>`;
   if (!TBELL.items.length) return `<p class="tbell-empty">${escapeHTML(t('panel.tbell.empty'))}</p>`;
-  return `<ul class="tbell-items" aria-label="${escapeHTML(t('panel.tbell.title'))}">${TBELL.items.map(teacherBellItemHTML).join('')}</ul>`;
+  // Agrupados por dia, como o sino do topo (notificationDayGroup em shared/notifications.js).
+  const groupOf = n => (typeof notificationDayGroup === 'function' ? notificationDayGroup(n.created_at) : 'earlier');
+  let html = '', last = null;
+  TBELL.items.forEach(n => {
+    const g = groupOf(n);
+    if (g !== last){
+      html += `${last ? '</ul>' : ''}<p class="p-subtitulo tbell-group">${escapeHTML(t('notif.group.' + g))}</p><ul class="p-itens tbell-items" aria-label="${escapeHTML(t('panel.tbell.title'))}">`;
+      last = g;
+    }
+    html += teacherBellItemHTML(n);
+  });
+  return html + '</ul>';
 }
 
 function renderTeacherBell(){
@@ -164,16 +178,17 @@ function renderTeacherBell(){
       <span class="tbell-btn-label">${escapeHTML(t('panel.tbell.title'))}</span>
       ${n ? `<span class="mural-count" aria-label="${escapeHTML(tp('panel.tbell.unread', n))}">${n > 99 ? '99+' : n}</span>` : ''}
     </button>
-    <div class="tbell-panel" id="tbell-panel" ${TBELL.open ? '' : 'hidden'}>
+    <div class="tbell-panel painel" id="tbell-panel" ${TBELL.open ? '' : 'hidden'}>
       <div class="tbell-head">
         <p class="tbell-hint">${escapeHTML(t('panel.tbell.hint'))}</p>
-        <button type="button" class="tbell-mark-all" id="tbell-mark-all" ${n ? '' : 'disabled'}>${escapeHTML(t('panel.tbell.markAll'))}</button>
+        <button type="button" class="outline p-pequeno tbell-mark-all" id="tbell-mark-all" ${n ? '' : 'disabled'}>${escapeHTML(t('panel.tbell.markAll'))}</button>
       </div>
       <div class="tbell-list">${TBELL.open ? teacherBellListHTML() : ''}</div>
     </div>`;
   host.querySelector('#tbell-btn').addEventListener('click', toggleTeacherBell);
   host.querySelector('#tbell-mark-all').addEventListener('click', markAllTeacherBellRead);
   host.querySelectorAll('[data-tbell-id]').forEach(el => el.addEventListener('click', () => openTeacherBellItem(el.dataset.tbellId)));
+  host.querySelectorAll('[data-tbell-read]').forEach(el => el.addEventListener('click', (e) => { e.stopPropagation(); markTeacherBellItemRead(el.dataset.tbellRead); }));
 }
 
 async function toggleTeacherBell(){
@@ -203,6 +218,17 @@ async function openTeacherBellItem(id){
   TBELL.open = false;
   renderTeacherBell();
   switchTeacherPanelSection('students');
+}
+
+// O selo "Novo" marca só aquele aviso como lido, sem abrir nada (a lista continua aberta).
+async function markTeacherBellItemRead(id){
+  const n = TBELL.items.find(x => String(x.id) === String(id));
+  if (!n || n.read_at) return;
+  const at = new Date().toISOString();
+  const { error } = await teacherBellQuery().update({ read_at: at }).eq('id', n.id).is('read_at', null);
+  if (!error){ n.read_at = at; TBELL.unread = Math.max(0, TBELL.unread - 1); }
+  applyTeacherBellBadges();
+  renderTeacherBell();
 }
 
 async function markAllTeacherBellRead(){

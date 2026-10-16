@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@source "./shadcn.tsx";
+@source "./ui";
+@source "./shadcn-aluno.tsx";
+@source "./shadcn-comp.tsx";
+@source "./shadcn-shell.tsx";
+@source "./gamecommon.tsx";
+@custom-variant dark (&:is([data-theme=dark] *));
+/* Tema padrão do shadcn (variáveis --background, --primary...) apontando para os tokens da Brune */
+:root{--background:var(--b-bg);--foreground:var(--b-ink);--card:var(--b-surface);--card-foreground:var(--b-ink);--popover:var(--b-raised);--popover-foreground:var(--b-ink);--primary:var(--b-primary);--primary-foreground:var(--b-on-primary);--secondary:var(--b-surface);--secondary-foreground:var(--b-ink);--muted:var(--b-line);--muted-foreground:var(--b-ink-soft);--accent:var(--b-line);--accent-foreground:var(--b-ink);--destructive:var(--b-err);--border:var(--b-line);--input:var(--b-line);--ring:var(--b-primary);--radius:.625rem}
+@theme inline{--color-background:var(--background);--color-foreground:var(--foreground);--color-card:var(--card);--color-card-foreground:var(--card-foreground);--color-popover:var(--popover);--color-popover-foreground:var(--popover-foreground);--color-primary:var(--primary);--color-primary-foreground:var(--primary-foreground);--color-secondary:var(--secondary);--color-secondary-foreground:var(--secondary-foreground);--color-muted:var(--muted);--color-muted-foreground:var(--muted-foreground);--color-accent:var(--accent);--color-accent-foreground:var(--accent-foreground);--color-destructive:var(--destructive);--color-border:var(--border);--color-input:var(--input);--color-ring:var(--ring);--radius-sm:calc(var(--radius) - 4px);--radius-md:calc(var(--radius) - 2px);--radius-lg:var(--radius);--radius-xl:calc(var(--radius) + 4px);--font-sans:var(--b-font)}
+body{background:var(--background);color:var(--foreground);font-family:var(--b-font)}
+*{border-color:var(--border)}
