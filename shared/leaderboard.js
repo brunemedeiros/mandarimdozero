@@ -348,7 +348,7 @@ async function renderLeaderboardView(){
   // anunciar "aba X de Y, selecionada" em vez de só "botão".
   const scopeTabsHTML = [
     { key: 'all', label: t('leaderboard.tabAll') },
-    ...AVAILABLE_LANGUAGES.filter(l => l.enabled).map(l => ({ key: l.appKey, label: l.name })),
+    ...AVAILABLE_LANGUAGES.filter(l => l.enabled).map(l => ({ key: l.appKey, label: languageDisplayName(l) })),
   ].map(tab => `<button class="leaderboard-tab ${tab.key === scope ? 'active' : ''}" role="tab" aria-selected="${tab.key === scope}" data-scope="${tab.key}">${tab.label}</button>`).join('');
 
   const modeTabsHTML = loggedIn ? `

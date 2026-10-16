@@ -57,3 +57,15 @@ function showBadgeInfo(anchorEl, name, desc){
   setTimeout(() => document.addEventListener('click', onOutsideClick, true), 0);
   setTimeout(remove, 4000);
 }
+
+// Nome do idioma estudado no idioma do SITE ("French" com o site em inglês,
+// "Francês" em português), com a 1ª letra maiúscula. Aceita o objeto de
+// AVAILABLE_LANGUAGES ou o appKey. AVAILABLE_LANGUAGES[].name é sempre pt-BR:
+// não usar direto em texto visível (site em inglês não tem nada em português).
+function languageDisplayName(lang, uiLang){
+  const appKey = typeof lang === 'string' ? lang : (lang && lang.appKey);
+  const ui = uiLang || (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR');
+  let name = (typeof LanguageRegistry !== 'undefined' && LanguageRegistry.shortName && appKey) ? LanguageRegistry.shortName(appKey, ui) : '';
+  if (!name) name = (lang && typeof lang === 'object' && lang.name) || appKey || '';
+  return name ? name.charAt(0).toUpperCase() + name.slice(1) : '';
+}

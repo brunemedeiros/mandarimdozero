@@ -48,7 +48,7 @@ function tanTruncatedHTML(msgKey, n){ return `<div class="p-alerta p-alerta--avi
 // st = { period, languageFilter, deviceFilter, compare, customSince, customUntil, since, until, previous: {since, until} }
 function tanControlsHTML(st){
   const periodOptions = Object.entries(ANALYTICS_PERIOD_LABELS).map(([key, label]) => `<option value="${tanEsc(key)}"${st.period === key ? ' selected' : ''}>${tanEsc(label)}</option>`).join('');
-  const langOptions = AVAILABLE_LANGUAGES.map(l => `<option value="${tanEsc(l.appKey)}"${st.languageFilter === l.appKey ? ' selected' : ''}>${tanEsc(l.name)}</option>`).join('');
+  const langOptions = AVAILABLE_LANGUAGES.map(l => `<option value="${tanEsc(l.appKey)}"${st.languageFilter === l.appKey ? ' selected' : ''}>${tanEsc(typeof languageDisplayName === "function" ? languageDisplayName(l) : l.name)}</option>`).join('');
   const deviceOptions = Object.entries(ANALYTICS_DEVICE_LABELS).map(([key, label]) => `<option value="${tanEsc(key)}"${st.deviceFilter === key ? ' selected' : ''}>${tanEsc(label)}</option>`).join('');
   const range = `${analyticsFormatDate(st.since)} – ${analyticsFormatDate(st.until)}`;
   const compareLabel = st.compare ? ` · ${t('admin.analytics.compareWith', { since: analyticsFormatDate(st.previous.since), until: analyticsFormatDate(st.previous.until) })}` : '';
@@ -133,7 +133,7 @@ function tanExerciciosHTML(stats){
 }
 
 function tanIdiomaHTML(stats, languageFilter){
-  const names = Object.fromEntries(AVAILABLE_LANGUAGES.map(l => [l.appKey, l.name]));
+  const names = Object.fromEntries(AVAILABLE_LANGUAGES.map(l => [l.appKey, typeof languageDisplayName === "function" ? languageDisplayName(l) : l.name]));
   const rows = Object.entries(stats.byLanguageCounts).map(([appKey, count]) => ({ name: appKey, count })).sort((a, b) => b.count - a.count);
   return tanSectionHTML(t('admin.analytics.lang.events'), (rows.length ? tanBarsHTML(rows, names) : tanEmptyHTML())
     + (languageFilter !== 'all' ? tanNoteHTML(t('admin.analytics.lang.filterActive', { lang: names[languageFilter] || languageFilter })) : '') + tanNoteHTML(t('admin.analytics.lang.note')));
