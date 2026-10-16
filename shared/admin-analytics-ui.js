@@ -8,6 +8,8 @@
 // analyticsFormatMinutes, analyticsFormatDate, ANALYTICS_COHORT_OFFSETS), languages/index.js (AVAILABLE_LANGUAGES).
 
 function tanEsc(v){ return escapeHTML(v == null ? '' : String(v)); }
+// Nome do idioma no idioma do site (languageDisplayName, shared/utils.js); sem ele (teste unitário), o nome do registro.
+function tanLangName(l){ return typeof languageDisplayName === 'function' ? languageDisplayName(l) : ((l && l.name) || l || ''); }
 
 // ---- peças pequenas ----
 function tanDeltaHTML(delta){
@@ -48,7 +50,7 @@ function tanTruncatedHTML(msgKey, n){ return `<div class="p-alerta p-alerta--avi
 // st = { period, languageFilter, deviceFilter, compare, customSince, customUntil, since, until, previous: {since, until} }
 function tanControlsHTML(st){
   const periodOptions = Object.entries(ANALYTICS_PERIOD_LABELS).map(([key, label]) => `<option value="${tanEsc(key)}"${st.period === key ? ' selected' : ''}>${tanEsc(label)}</option>`).join('');
-  const langOptions = AVAILABLE_LANGUAGES.map(l => `<option value="${tanEsc(l.appKey)}"${st.languageFilter === l.appKey ? ' selected' : ''}>${tanEsc(typeof languageDisplayName === "function" ? languageDisplayName(l) : l.name)}</option>`).join('');
+  const langOptions = AVAILABLE_LANGUAGES.map(l => `<option value="${tanEsc(l.appKey)}"${st.languageFilter === l.appKey ? ' selected' : ''}>${tanEsc(tanLangName(l))}</option>`).join('');
   const deviceOptions = Object.entries(ANALYTICS_DEVICE_LABELS).map(([key, label]) => `<option value="${tanEsc(key)}"${st.deviceFilter === key ? ' selected' : ''}>${tanEsc(label)}</option>`).join('');
   const range = `${analyticsFormatDate(st.since)} – ${analyticsFormatDate(st.until)}`;
   const compareLabel = st.compare ? ` · ${t('admin.analytics.compareWith', { since: analyticsFormatDate(st.previous.since), until: analyticsFormatDate(st.previous.until) })}` : '';
@@ -133,7 +135,7 @@ function tanExerciciosHTML(stats){
 }
 
 function tanIdiomaHTML(stats, languageFilter){
-  const names = Object.fromEntries(AVAILABLE_LANGUAGES.map(l => [l.appKey, typeof languageDisplayName === "function" ? languageDisplayName(l) : l.name]));
+  const names = Object.fromEntries(AVAILABLE_LANGUAGES.map(l => [l.appKey, tanLangName(l)]));
   const rows = Object.entries(stats.byLanguageCounts).map(([appKey, count]) => ({ name: appKey, count })).sort((a, b) => b.count - a.count);
   return tanSectionHTML(t('admin.analytics.lang.events'), (rows.length ? tanBarsHTML(rows, names) : tanEmptyHTML())
     + (languageFilter !== 'all' ? tanNoteHTML(t('admin.analytics.lang.filterActive', { lang: names[languageFilter] || languageFilter })) : '') + tanNoteHTML(t('admin.analytics.lang.note')));
@@ -177,7 +179,7 @@ function tanDecksHTML(decks){
   if (!Array.isArray(decks)) return tanSectionHTML(t('publicDeckCopies.tab'), tanEmptyHTML(t('publicDeckCopies.error')));
   if (!decks.length) return tanSectionHTML(t('publicDeckCopies.tab'), tanNoteHTML(t('publicDeckCopies.adminHint')) + tanEmptyHTML(t('publicDeckCopies.none')));
   const rows = decks.map(d => {
-    const lang = (LanguageRegistry.byAppKey(d.language_app_key) || {}).name || d.language_app_key || '';
+    const lang = tanLangName(LanguageRegistry.byAppKey(d.language_app_key) || d.language_app_key || '');
     return `<tr><th scope="row">${tanEsc(d.name || '')}<br><small class="p-subtitulo">@${tanEsc(d.owner_username || '')} · ${tanEsc(lang)}${d.is_public ? '' : ' · ' + tanEsc(t('publicDeckCopies.unpublished'))}</small></th>`
       + `<td>${d.people || 0}</td><td>${d.copies || 0}</td><td>${d.last_copied_at ? tanEsc(fmtDate(d.last_copied_at)) : '—'}</td></tr>`;
   }).join('');
