@@ -3951,6 +3951,34 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .tbell-new{ font-weight:800; color:var(--seal-red-dark); }
 .tbell-item-note{ font-size:12px; color:var(--ink-soft); font-style:italic; }
 .tbell-empty{ padding:20px 8px; text-align:center; color:var(--ink-soft); font-size:14px; margin:0; }
+/* Itens no Design System do painel (Pico): p-item + selo "Novo" que marca só aquele aviso (2026-10-15). */
+.tbell-panel.painel{ padding:0; background:var(--p-bg); border-color:var(--p-linha); overflow:hidden; }
+.tbell-panel.painel .tbell-head{ padding:.85rem 1rem .7rem; margin:0; border-bottom:1px solid var(--p-linha); }
+.tbell-panel.painel .tbell-mark-all{ margin:0; }
+.tbell-panel.painel .tbell-list{ padding:0 .6rem .6rem; }
+.tbell-panel.painel .tbell-group{ margin:.85rem .4rem .4rem; font-weight:800; font-size:.8rem; }
+.tbell-panel.painel .tbell-items{ gap:.4rem; }
+.tbell-panel.painel .tbell-items > li + li{ border-top:none; }
+.tbell-panel.painel .tbell-row{ position:relative; }
+.tbell-panel.painel button.tbell-item{ width:100%; margin:0; align-items:flex-start; text-align:left; padding:.7rem 2.2rem .7rem .8rem; border:1px solid var(--p-linha);
+  border-radius:12px; background:transparent; color:var(--p-tinta); font-weight:400; font-size:inherit; box-shadow:none; cursor:pointer; }
+.tbell-panel.painel button.tbell-item.p-item--suave{ background:var(--p-superficie); border-color:transparent; padding-right:4.8rem; }
+.tbell-panel.painel button.tbell-item:hover{ background:var(--p-superficie); color:var(--p-tinta); }
+.tbell-panel.painel button.tbell-item:not(.is-unread)::after{ content:"\203A"; position:absolute; right:.9rem; top:.75rem; font-size:1.4em; line-height:1; color:var(--p-tinta-suave); }
+.tbell-panel.painel button.tbell-item:focus-visible{ outline:2px solid var(--p-marca); outline-offset:2px; }
+.tbell-panel.painel .tbell-item-icon{ font-size:1.2rem; }
+.tbell-panel.painel .tbell-item-text{ overflow-wrap:anywhere; }
+.tbell-panel.painel .tbell-item:not(.is-unread) .tbell-item-text{ font-weight:600; }
+.tbell-panel.painel .tbell-item-meta{ display:flex; flex-wrap:wrap; align-items:center; gap:.3rem .6rem; margin-top:.15rem; }
+.tbell-panel.painel .tbell-lang{ font-size:.72rem; text-transform:capitalize; }
+.tbell-panel.painel .tbell-item-note{ font-style:italic; }
+.tbell-panel.painel button.tbell-new{ position:absolute; right:.75rem; top:.8rem; margin:0; width:auto; min-height:0; padding:.1rem .6rem; border:none; border-radius:999px;
+  font-size:.72rem; font-weight:800; line-height:1.5; cursor:pointer; box-shadow:none; background:var(--p-info); color:var(--p-sobre-vivo); }
+.tbell-panel.painel button.tbell-new:hover{ background:color-mix(in srgb, var(--p-info) 85%, black); color:var(--p-sobre-vivo); }
+.tbell-panel.painel button.tbell-new:focus-visible{ outline:2px solid var(--p-marca); outline-offset:2px; }
+/* Área de toque de 44px no selo, sem aumentar o desenho. */
+.tbell-panel.painel button.tbell-new::before, .notifications-dropdown.painel button.notification-unread-dot::before{ content:''; position:absolute; inset:-8px -8px; }
+@media (max-width:620px){ .tbell-panel.painel button.tbell-new{ min-height:32px; padding:.3rem .8rem; } .tbell-panel.painel .tbell-mark-all{ min-height:44px; } }
 .tbell-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--seal-red); margin-left:8px; vertical-align:middle; }
 .tab-btn > .tbell-dot{ position:absolute; top:6px; left:6px; margin:0; border:2px solid var(--paper); box-sizing:content-box; }
 @media (max-width: 899px){
@@ -4309,6 +4337,33 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   .friends-duo-form{ flex-direction:column; align-items:stretch; }
   .friends-duo-field{ flex:0 0 auto; }
   .friends-duo-field select, .friends-duo-start, .friend-nudge{ min-height:44px; }
+}
+/* Painel de Notificações (2026-10-15): Design System do painel (Pico, classe .painel no #notifications-dropdown).
+   Itens p-item agrupados por dia; não lido = p-item--suave + selo "Nova" (que marca só aquele aviso como lido). */
+.notifications-dropdown.painel{ width:min(400px, calc(100vw - 24px)); min-width:0; max-width:none; max-height:min(74vh, 580px); padding:0; background:var(--p-bg); }
+.notifications-dropdown.painel .notifications-dropdown-header{ position:sticky; top:0; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+  margin:0; padding:.85rem 1rem .7rem; background:var(--p-bg); border-bottom:1px solid var(--p-linha); font-size:1.05rem; font-weight:800; color:var(--p-tinta); }
+.notifications-dropdown.painel .notifications-mark-all-btn{ margin:0; }
+.notifications-dropdown.painel .notification-group{ margin:.85rem 1rem .4rem; font-weight:800; font-size:.8rem; }
+.notifications-dropdown.painel .notification-items{ padding:0 .6rem; gap:.4rem; }
+.notifications-dropdown.painel #notifications-list{ padding-bottom:.6rem; }
+.notifications-dropdown.painel .notification-row{ position:relative; }
+.notifications-dropdown.painel .notification-item{ align-items:flex-start; padding:.7rem .8rem; }
+.notifications-dropdown.painel .notification-item.unread{ padding-right:4.6rem; }
+.notifications-dropdown.painel .notification-item.unread::after{ content:none; }
+.notifications-dropdown.painel .notification-item:focus-visible{ outline:2px solid var(--p-marca); outline-offset:2px; }
+.notifications-dropdown.painel .notification-item-icon{ font-size:1.2rem; }
+.notifications-dropdown.painel .notification-item:not(.unread) .notification-item-text.p-item-titulo{ font-weight:600; }
+.notifications-dropdown.painel .notification-item-time{ margin-top:.15rem; }
+.notifications-dropdown.painel button.notification-unread-dot{ position:absolute; right:.75rem; top:.8rem; margin:0; width:auto; min-height:0;
+  padding:.1rem .6rem; border:none; border-radius:999px; font-size:.72rem; font-weight:800; line-height:1.5; cursor:pointer; box-shadow:none;
+  background:var(--p-info); color:var(--p-sobre-vivo); }
+.notifications-dropdown.painel button.notification-unread-dot:hover{ background:color-mix(in srgb, var(--p-info) 85%, black); color:var(--p-sobre-vivo); }
+.notifications-dropdown.painel button.notification-unread-dot:focus-visible{ outline:2px solid var(--p-marca); outline-offset:2px; }
+.notifications-dropdown.painel .notifications-empty{ padding:1.5rem 1rem; color:var(--p-tinta-suave); }
+@media (max-width:620px){
+  .notifications-dropdown.painel .notifications-mark-all-btn{ min-height:44px; }
+  .notifications-dropdown.painel button.notification-unread-dot{ min-height:32px; padding:.3rem .8rem; }
 }
 </style>
 </head>
@@ -4887,10 +4942,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 
 <div id="mais-backdrop" class="mais-backdrop"></div>
 
-<div id="notifications-dropdown" class="user-dropdown notifications-dropdown">
+<div id="notifications-dropdown" class="user-dropdown notifications-dropdown painel">
   <div class="notifications-dropdown-header">
     <span data-i18n="notif.pref.sectionTitle">Notificações</span>
-    <button class="notifications-mark-all-btn" id="notifications-mark-all-btn">Ler todas</button>
+    <button type="button" class="outline p-pequeno notifications-mark-all-btn" id="notifications-mark-all-btn" data-i18n="notif.markAll">Ler todas</button>
   </div>
   <div id="notifications-list"></div>
 </div>
