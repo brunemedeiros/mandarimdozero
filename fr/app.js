@@ -4069,7 +4069,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      const verdict = typedAnswerVerdict(inputEl.value, acceptedForms(view.compareAnswerText));
+      const verdict = typedAnswerVerdictForExpected(inputEl.value, view.compareAnswerText);
       localState.wasCorrect = verdict !== 'errou';
       localState.almost = verdict === 'quase';
       renderClozeCard(mountEl, card, localState, callbacks);
@@ -4155,7 +4155,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      const verdict = typedAnswerVerdict(inputEl.value, acceptedForms(view.compareAnswerText));
+      const verdict = typedAnswerVerdictForExpected(inputEl.value, view.compareAnswerText);
       localState.wasCorrect = verdict !== 'errou';
       localState.almost = verdict === 'quase';
       renderTypeAnswerCard(mountEl, card, localState, callbacks);

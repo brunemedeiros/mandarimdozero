@@ -2,7 +2,7 @@
 // Rodar: node tests/banco-revisao/test_answer_extras.js
 const vm = require('vm'), fs = require('fs'), path = require('path');
 const { check, summary } = require('../fase-g/harness');
-const ctx = vm.createContext({ escapeHTML: s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])), t: k => ({ 'review.observation': 'Observação', 'review.almost': 'Quase lá' }[k] || k) });
+const ctx = vm.createContext({ acceptedForms: (e) => (e || '').split('/').map(x => x.trim()).filter(Boolean), escapeHTML: s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])), t: k => ({ 'review.observation': 'Observação', 'review.almost': 'Quase lá' }[k] || k) });
 vm.runInContext(fs.readFileSync(path.join(__dirname, '../../shared/review-answer-extras.js'), 'utf8'), ctx);
 const R = (src) => vm.runInContext(src, ctx);
 
@@ -28,4 +28,12 @@ check('vazio = errou', V('', ['choisir']) === 'errou' && V('   ', ['choisir']) =
 check('resposta totalmente errada = errou', V('bonjour', ['choisir']) === 'errou');
 check('notas: ok 2, quase 1, errou 0', R("typedAnswerGrade('ok')") === 2 && R("typedAnswerGrade('quase')") === 1 && R("typedAnswerGrade('errou')") === 0);
 check('rótulo "Quase lá" só quando almost', R("reviewAlmostHTML({ almost: true })").includes('Quase lá') && R("reviewAlmostHTML({ almost: false })") === '' && R('reviewAlmostHTML(null)') === '');
+// Cartão com duas formas ("allemand / allemande"): uma só, o texto inteiro ou sem espaço na barra (2026-10-16)
+const E = (typed, expected) => R(`typedAnswerVerdictForExpected(${JSON.stringify(typed)}, ${JSON.stringify(expected)})`);
+check('duas formas: texto inteiro = ok', E('allemand / allemande', 'allemand / allemande') === 'ok');
+check('duas formas: barra sem espaço = ok', E('allemand/allemande', 'allemand / allemande') === 'ok');
+check('duas formas: só uma forma = ok', E('allemande', 'allemand / allemande') === 'ok' && E('allemand', 'allemand / allemande') === 'ok');
+check('duas formas: sem acento no texto inteiro = quase', E('francais / francaise', 'français / française') === 'quase');
+check('duas formas: errada = errou', E('allemand / italien', 'allemand / allemande') === 'errou');
+check('uma forma só continua igual', E('bonjour', 'bonjour') === 'ok' && E('', 'bonjour') === 'errou');
 summary();
