@@ -369,3 +369,12 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   Domínio `agenda.profbrune.com.br` (Netlify, pendente):
   `docs/agenda-netlify-passo-a-passo.md`.
 
+
+## 110 -- get_my_profile cria o perfil que faltar (2026-10-16)
+
+- `shared/supabase_migrations/110_get_my_profile_creates_missing.sql`. Sem DROP. Causa: conta nova sem linha em `profiles`
+  (site caía na leitura da tabela fechada pela 080, 403, e nunca chamava `ensure_my_profile`): sem @/nome, "Aluno(a)" no
+  Ranking, Perfil sem edição e "Aceitar convite" com erro (aviso com body null). 21 contas assim na produção.
+- Staging: aplicada em 2026-10-16 (teste com rollback: conta sem perfil ganhou @, 2ª chamada devolve a mesma linha).
+  Produção: pendente (aguardando a autora). Site: `shared/profile.js` não depende mais da leitura da tabela;
+  teste `tests/perfil-faltando/test_unit.js` (7/7; 5 falhas no código antigo).
