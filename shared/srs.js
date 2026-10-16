@@ -66,7 +66,23 @@ function newCards(pool){
 }
 
 // ---------- Gamificação ----------
-const XP_PER_GRADE = { 0: 1, 1: 4, 2: 8, 3: 10 };
+// XP por nota na Revisão (decisão da autora, 2026-10-15): Errei 0, Difícil 2, Bom 4, Fácil 8. Vale para todos os sites.
+const XP_PER_GRADE = { 0: 0, 1: 2, 2: 4, 3: 8 };
+// XP da trilha (decisão da autora, 2026-10-15; vale para todos os sites): exercício de lição certo = reconhecer (múltipla
+// escolha) 1, produzir (digitar, lacuna, ordenar, cenário) 2, "quase" (erro só de acento) 1; fechar lição 4.
+// Ponto de verificação (25) e Missões do dia ficam como estavam.
+const EXERCISE_XP_RECOGNIZE = 1;
+const EXERCISE_XP_PRODUCE = 2;
+const EXERCISE_XP_ALMOST = 1;
+const LESSON_CLOSE_XP = 4;
+// Hanzi e histórias (existem só no zh hoje; valem para qualquer site que ganhe essas atividades; decisão de 2026-10-15):
+// escrever um hanzi (produzir) 2, acerto no teste de hanzi (reconhecer) 1, concluir lição de hanzi = LESSON_CLOSE_XP,
+// pergunta de história certa (reconhecer) 1, concluir história 20 (marco, como o Ponto de verificação).
+// Lição de hanzi ou história JÁ concluída não paga XP de novo (mesma regra de refazer lição da trilha).
+const HANZI_WRITE_XP = 2;
+const HANZI_TEST_XP = 1;
+const STORY_QUESTION_XP = 1;
+const STORY_DONE_XP = 20;
 
 function todayStr(){
   const d = new Date();

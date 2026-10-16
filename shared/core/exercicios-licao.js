@@ -99,7 +99,7 @@ function setLessonFocusMode(active){
   document.body.classList.toggle('lesson-focus', active);
 }
 
-// XP de um acerto: um pouco menor quando o aluno pediu "Não sei" (e por
+// XP de um acerto (valores em shared/srs.js: EXERCISE_XP_RECOGNIZE/PRODUCE/ALMOST, decisão de 2026-10-15): um pouco menor quando o aluno pediu "Não sei" (e por
 // tabela recebeu a dica) nesse exercício -- preserva a distinção acerto
 // independente > acerto com ajuda sem criar um sistema de pontuação
 // complexo.
@@ -415,7 +415,7 @@ function buildSpeedOptions(card){
 //             7 -- hardWordsPool() passou a usar difficulty do FSRS, sem
 //             filtro de due; este widget é escopo da Fase 12, não mudou).
 //   Fortes  = reps > 0 && lapses < 2 && interval >= 60 -- o mesmo corte de
-//             "revisão madura" que reviewXP() já usa pra dar menos XP.
+//             "revisão madura" (cartão que o aluno já domina).
 //   Medianas = o resto do pool.
 function vocabStrengthBuckets(){
   const pool = eligibleReviewPool();
