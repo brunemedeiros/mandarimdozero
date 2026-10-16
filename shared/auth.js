@@ -366,6 +366,9 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
   }
 });
 
+// Sair da conta também na sidebar do desktop (o pill com o nome não existe lá).
+document.getElementById('sidebar-logout-btn')?.addEventListener('click', () => document.getElementById('logout-btn').click());
+
 // ---------- Persistência: Supabase (usuário logado) ou memória local (convidado) ----------
 let saveInFlight = false;
 let savePending = false;

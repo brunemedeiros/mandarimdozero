@@ -127,6 +127,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'menu.supportMaterials': '📚 Material de apoio',
   'menu.settings': '⚙️ Configurações',
   'menu.admin': '🛠️ Painel de Admin',
+  'sidebar.collapse': 'Recolher menu',
+  'sidebar.expand': 'Expandir menu',
   'menu.logout': 'Sair da conta',
   'menu.conjugation': '✍️ Conjugação',
   'menu.challenges': '🎯 Desafios',
@@ -2104,7 +2106,6 @@ window.I18N_CATALOG['pt-BR'] = {
   'nav.study': 'Estudo',
   'nav.challenges': 'Desafios',
   'nav.profile': 'Perfil',
-  'side.streakDays': 'dias seguidos',
 
   // Fase 11: nomes/descrições de conquistas.
   'badge.first_step.name': 'Primeiro Passo',

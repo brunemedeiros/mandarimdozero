@@ -111,6 +111,8 @@ window.I18N_CATALOG['en'] = {
   'menu.supportMaterials': '📚 Study materials', // MÉDIA
   'menu.settings': '⚙️ Settings', // ALTA
   'menu.admin': '🛠️ Admin panel', // ALTA
+  'sidebar.collapse': 'Collapse menu', // ALTA
+  'sidebar.expand': 'Expand menu', // ALTA
   'menu.logout': 'Sign out', // ALTA
   'menu.conjugation': '✍️ Conjugation', // ALTA
   'menu.challenges': '🎯 Challenges', // ALTA
@@ -2088,7 +2090,6 @@ window.I18N_CATALOG['en'] = {
   'nav.study': 'Study', // ALTA
   'nav.challenges': 'Challenges', // ALTA
   'nav.profile': 'Profile', // ALTA
-  'side.streakDays': 'day streak', // ALTA
 
   // Fase 11: nomes/descrições de conquistas.
   'badge.first_step.name': 'First Step', // ALTA

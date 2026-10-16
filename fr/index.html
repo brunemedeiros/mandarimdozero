@@ -506,11 +506,15 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   /* .tabs já fica escondida sempre agora (ver regra global acima) --
      e os pills de Ranking/Conta na topbar voltam aqui (só mobile os
      esconde, ver regra global também). */
-  #user-menu-btn{ display:flex; }
-  /* XP some do topbar aqui -- fica só no card de Status à direita, sem
-     repetição (decisão #1). No mobile (fora desta media query) continua
-     no topbar, como já decidido pra lá (decisão #4). */
-  .stats-pills .pill.xp{ display:none; }
+  /* Conta/Sair: o pill com o nome saiu no desktop; "Sair da conta" fica no fim da
+     sidebar (#sidebar-logout-btn) e Reportar já tem o ⚑ da topbar. */
+  /* Topbar "flutuando" (estilo Duolingo): no desktop os itens ficam sem caixinha,
+     só ícone + número. O XP volta à topbar (o card Status saiu). O pill de
+     Admin Mode ligado em OFF (.active, roxo) mantém o fundo: é um aviso. */
+  :root:root .stats-pills .pill:not(.admin-mode-toggle-btn.active),
+  :root:root .stats-pills .lang-switcher-btn{ background:none; border-color:transparent; box-shadow:none; }
+  :root:root .stats-pills .pill:not(.admin-mode-toggle-btn.active):hover,
+  :root:root .stats-pills .lang-switcher-btn:hover{ background:var(--paper-warm); }
   /* A faixa de Missões do dia na Trilha vira redundante aqui -- o mesmo
      conteúdo já mora no card fixo da sidebar direita (renderDailyChallengesStrip
      renderiza nos dois; CSS decide qual aparece). Some só a partir daqui;
@@ -528,12 +532,16 @@ a.pill:hover{ border-color: var(--imperial-gold); }
     /* Linha de separação da sidebar, estilo Duolingo. */
     border-right:1px solid var(--paper-line); padding-right:20px;
   }
+  /* Recolher menu: ícone « solto no topo (sem caixinha, como a topbar); vira » ao recolher. */
   .sidebar-toggle-btn{
-    align-self:flex-end; width:32px; height:32px; border-radius:8px; flex-shrink:0;
-    border:1px solid var(--paper-line); background:var(--paper); color:var(--ink-soft);
-    cursor:pointer; display:flex; align-items:center; justify-content:center; margin-bottom:10px;
+    align-self:flex-end; width:32px; height:32px; border-radius:8px; flex-shrink:0; border:none; background:none;
+    color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; justify-content:center; margin-bottom:10px;
   }
-  .sidebar-toggle-btn:hover{ color:var(--ink); border-color:var(--imperial-gold); }
+  .sidebar-toggle-btn:hover{ color:var(--ink); background:var(--paper-warm); }
+  #app.sidebar-collapsed .sidebar-toggle-btn{ align-self:center; }
+  .sidebar-toggle-icon{ transition:transform .2s ease; }
+  #app.sidebar-collapsed .sidebar-toggle-icon{ transform:rotate(180deg); }
+  @media (prefers-reduced-motion: reduce){ .sidebar-toggle-icon{ transition:none; } }
   .sidebar-nav{ display:flex; flex-direction:column; gap:2px; }
   .sidebar .tab-btn{ flex:none; width:100%; justify-content:flex-start; padding:10px 12px; }
   /* Ícones da sidebar são coloridos (flat, 2-3 tons), não monocromáticos
@@ -549,13 +557,12 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   .right-cards{ grid-area:cards; display:flex; flex-direction:column; gap:16px; position:sticky; top:97px; }
   .side-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-card); }
   .side-card-title{ font-size:15px; font-weight:900; letter-spacing:0; color:var(--ink); margin:0 0 12px; display:flex; align-items:center; gap:6px; }
-  .side-status-row{ display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:700; padding:4px 0; }
-  .side-status-row + .side-status-row{ border-top:1px solid var(--paper-line); }
   /* Card de Missões do dia usa o mesmo .dcs-card/.dcs-caption-btn da faixa
      da Trilha (renderDailyChallengesStrip renderiza nos dois lugares) --
      sem padding extra do .side-card aqui em cima, o botão de recolher já
      tem o próprio respiro. */
-  #side-card-missions{ padding-top:10px; }
+  /* Ranking e Missões do dia sem moldura: lista solta na coluna (as missões já são cartões). */
+  #side-card-missions, #side-card-ranking{ background:none; border:none; box-shadow:none; padding:0; }
   #side-missions-body .dcs-caption-btn{ padding-top:0; }
   /* Mesmo peso dos outros títulos da coluna (.side-card-title). */
   #side-missions-body .dcs-caption{ font-size:15px; font-weight:900; letter-spacing:0; text-transform:none; color:var(--ink); }
@@ -569,7 +576,6 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   #app.sidebar-collapsed{ grid-template-columns:64px minmax(0,1fr) 280px; }
   #app.sidebar-collapsed .sidebar-label{ display:none; }
   #app.sidebar-collapsed .sidebar .tab-btn{ justify-content:center; padding:10px; }
-  #app.sidebar-collapsed .sidebar-toggle-btn{ align-self:center; }
 
   /* Painéis da professora e do Admin ocupam a largura toda: sem Ranking, Status e Missões do dia ao lado (são do aluno). */
   #app:is([data-active-tab="teacher-panel"], [data-active-tab="admin-badges"]){ grid-template-columns:220px minmax(0,1fr); grid-template-areas:"topbar topbar" "sidebar content"; padding-right:32px; }
@@ -5337,8 +5343,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
        existente (shared/tabs.js) sincroniza clique e estado ativo dos dois
        conjuntos de botões sem nenhum JS novo. -->
   <div class="sidebar" id="app-sidebar">
-    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" aria-label="Mostrar/ocultar barra lateral" title="Mostrar/ocultar barra lateral">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
+    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" type="button" aria-label="Recolher menu" title="Recolher menu">
+      <svg class="sidebar-toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
     </button>
     <nav class="sidebar-nav">
       <button class="tab-btn" data-tab="path">
@@ -5383,6 +5389,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="tab-btn admin-only-nav" data-tab="admin-badges" style="display:none;">
         <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6e0.svg" alt="" aria-hidden="true">
         <span class="sidebar-label">Admin</span>
+      </button>
+      <button class="tab-btn sidebar-logout-btn" id="sidebar-logout-btn" type="button">
+        <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6aa.svg" alt="" aria-hidden="true">
+        <span class="sidebar-label" data-i18n="menu.logout">Sair da conta</span>
       </button>
     </nav>
   </div>
@@ -5848,11 +5858,6 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
     <div class="side-card" id="side-card-ranking">
       <div class="side-card-title">🏆 Ranking</div>
       <div id="side-ranking-body"></div>
-    </div>
-    <div class="side-card" id="side-card-status">
-      <div class="side-card-title">Status</div>
-      <div class="side-status-row"><span>⭐</span><span id="side-xp-count" class="stat-count">0</span><span>XP</span></div>
-      <div class="side-status-row"><span>🔥</span><span id="side-streak-count" class="stat-count">0</span><span data-i18n="side.streakDays">dias seguidos</span></div>
     </div>
     <div class="side-card" id="side-card-missions">
       <div id="side-missions-body"></div>
