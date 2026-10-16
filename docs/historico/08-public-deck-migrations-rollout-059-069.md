@@ -376,5 +376,13 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   (site caía na leitura da tabela fechada pela 080, 403, e nunca chamava `ensure_my_profile`): sem @/nome, "Aluno(a)" no
   Ranking, Perfil sem edição e "Aceitar convite" com erro (aviso com body null). 21 contas assim na produção.
 - Staging: aplicada em 2026-10-16 (teste com rollback: conta sem perfil ganhou @, 2ª chamada devolve a mesma linha).
-  Produção: pendente (aguardando a autora). Site: `shared/profile.js` não depende mais da leitura da tabela;
+  Produção: aplicada em 2026-10-16 a pedido da autora (simulação com rollback da conta afetada: perfil criado e
+  `accept_invite_code` ok). Site: `shared/profile.js` não depende mais da leitura da tabela;
   teste `tests/perfil-faltando/test_unit.js` (7/7; 5 falhas no código antigo).
+
+### CSS do celular (achado junto, 2026-10-16)
+
+- `fr/index.html` e `zh/index.html`: um `@media (hover:hover){` (regra dourada das opções de exercício) ficou sem `}` desde o
+  merge de 2026-10-12 (`7cb42f6`). Todo o CSS depois dele só valia em aparelho com mouse: no celular os painéis, o cartão do
+  convite ("Recusar" ilegível) e as regras do fim do `<style>` ficavam sem estilo. Chave fechada; guarda nova
+  `tests/css-equilibrio/test_unit.js` (falha no código antigo). Os testes de navegador não pegavam (Chromium de teste tem hover).
