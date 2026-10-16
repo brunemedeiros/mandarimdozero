@@ -1,706 +1,909 @@
-# Lacunas e propostas do currículo de francês (A1 revisado e A2 novo)
+# Lacunas e propostas do currículo de francês (A1 revisado e A2 novo), versão 2
 
-Data: 2026-10-15. Documento de proposta: **nenhum arquivo do site foi alterado**.
-Base: `01-auditoria-fr-atual.md` (o que o site tem), `02-referencia-livros-fr.md` (livros da dona), `03-delf-cefr-a1-a2.md` (DELF/CEFR),
-mais conferências pontuais feitas agora em `fr/content.js`, `courses/fr-pt-BR/layer.js`, `fr/conjugation-data.js`, `fr/app.js`,
-`shared/study-trail-model.js` e `fr/scripts/grammar_input_map.json` (citadas onde usadas).
+Data: 2026-10-16. **Versão 2**, reescrita a partir do retorno da dona sobre a v1. A v1 está guardada em
+`04-v1-lacunas-e-propostas-fr.md` (a matriz de cobertura completa e o molde para o português continuam lá e valem como estão,
+salvo o que a seção 0 lista). Documento de proposta: **nenhum arquivo do site foi alterado**.
+Base: `01-auditoria-fr-atual.md`, `02-referencia-livros-fr.md` (já com a atualização de 2026-10-16: seções 8.4 a 8.7, linhas ⟳ e seção 12),
+`03-delf-cefr-a1-a2.md`, mais conferências feitas agora no código (citadas com arquivo e linha) e dois scripts rodados nesta sessão
+(listados onde usados).
 
-Siglas das fontes (as mesmas do `02`, seção 9): **AE** Alter Ego+ 1 (dossiê.lição); **D1** Défi 1 (unidade.dossiê); **D2** Défi 2 (unidade);
-**GP** Grammaire Progressive A1 (capítulo, títulos deduzidos); **GEF** Grammaire Essentielle A1-A2 (capítulo); **VP** Vocabulaire Progressif A1
-(capítulo); **CPI** Communication Progressive Intermédiaire; **VPI** Vocabulaire Progressif Intermédiaire; **DELF A1/A2** e **CEFR** = `03`.
-Siglas do site: unidade `A1-N` (vocabulário), `A1-gN` (gramática), módulo `A1-mN`. Proposta nova: `A1-21`... e `A1-g11`... (ids novos, nunca
-reaproveitados), `A2-N` / `A2-gN` / `A2-mN`.
+Siglas das fontes (as do `02`, seção 9): **AE** Alter Ego+ 1; **D1** Défi 1; **D2** Défi 2; **D3** Défi 3 (B1, só como teto); **GP** Grammaire
+Progressive A1; **GPI** Grammaire Progressive Intermédiaire A2-B1; **GEF** Grammaire Essentielle A1-A2; **GeDD** Grammaire en Dialogues
+Débutant; **VP** / **VPI** Vocabulaire Progressif A1 / Intermédiaire; **CPD** / **CPI** Communication Progressive Débutant / Intermédiaire.
+Siglas do site: unidade `A1-N` (vocabulário), `A1-gN` (gramática), módulo `A1-mN`. Ids novos nunca reaproveitam um id que já existiu.
+
+> ### Dúvidas respondidas
+>
+> **(a) O que é a "etiqueta de nível" no jogo "Passé composé ou Imparfait?" e nos tempos da Conjugação?**
+> Um selinho só informativo, tipo **A2** ou **B1**, ao lado do nome do jogo e ao lado de cada tempo no seletor da Conjugação
+> (ex.: "Imparfait · A2", "Subjonctif · B1"). Ele **não tranca nada**: o aluno do A1 continua podendo abrir o jogo e praticar qualquer tempo.
+> Serve para o aluno entender por que aquilo parece difícil ("isso é matéria do A2, normal estranhar").
+> **Alternativa:** não mostrar selo nenhum (como hoje) e só ordenar os tempos do mais básico ao mais avançado, ou pôr uma frase na
+> abertura do jogo ("Este jogo treina um tempo do A2."). A decisão fica registrada aqui (decisão 15) e o trabalho vai para a sessão
+> da Conjugação (`05-mensagem-sessao-conjugacao.md`).
+>
+> **(b) O que são as "5 notas iguais sobre pergunta in situ" e por que encurtar?**
+> "In situ" quer dizer "no lugar": na fala, o francês costuma deixar a palavra de pergunta **no fim**, sem inverter a frase
+> (*Tu t'appelles comment ?* em vez de *Comment tu t'appelles ?*). O site tem **5 notas de realidade** que explicam exatamente isso, cada uma
+> com outra pergunta: A1-2 (*tu t'appelles comment ?*), A1-3 (*t'as quel âge ?*), A1-9 (*tu es d'où ?*), A1-10 (*ça coûte combien ?*) e
+> A1-20 (*t'as fait quoi hier ?*) (`01`, linha 426; ids `comment-tappelles-wh-in-situ`, `quel-age-wh-in-situ`, `dou-viens-tu-wh-in-situ`,
+> `combien-ca-coute-wh-in-situ`, `quest-ce-que-tu-as-fait-wh-in-situ` em `fr/content.js`). São 5 das 15 notas de realidade do A1: o aluno lê o
+> mesmo parágrafo 5 vezes, e a regra da skill `notas-de-realidade` pede nota nova só quando ensina algo novo.
+> Proposta: a 1ª (A1-2) fica inteira; a do A1-20 fica (é a única no passado e traz *quoi*); as 3 do meio viram **uma linha** que aponta para a
+> primeira; e, quando existir a gramática de perguntas (A1-g12), a regra mora numa tela própria lá.
+> Exemplo de como ficaria a do A1-3, hoje com título + parágrafo de 3 frases:
+> *Título:* "Na fala: **t'as quel âge ?**" · *Texto:* "Igual a *tu t'appelles comment ?* (unidade 2): na conversa, a pergunta vai para o fim."
+>
+> **(c) Por que o A2 da v1 ficou menor que o A1, e qual é a correção?**
+> Você tem razão: era incoerente. Eu dimensionei o A2 copiando o molde de uma unidade por tema e listando só os temas que as fontes
+> marcavam claramente como A2, sem olhar a carga de horas. O CEFR estima ~60 a 100 horas guiadas para chegar ao A1 e ~180 a 200 horas
+> acumuladas para o A2: o A2 sozinho pede **mais horas que o A1 inteiro**. A v2 refaz o cálculo (seção 6.1) com um fator ajustável:
+> recomendo **10 módulos, 60 unidades e ~408 palavras** (contra 8 módulos, 44 unidades e ~291 palavras do A1 revisado), com mais
+> competências por unidade.
 
 ---
 
-## 1. Critérios
+## 0. O que mudou da v1 para a v2
 
-### 1.1 Como decidi o nível de cada tópico
+| Ponto | v1 | v2 |
+|---|---|---|
+| Ids de cartão | "Só acrescentar no fim; nunca reordenar, mover, fundir ou apagar" | **Etapa 0 nova (seção 2):** chave estável por item + tabela de fusões + arquivo de progresso. Libera reordenar, mover, fundir, excluir e reescrever |
+| Unidade inserida antes de unidade já concluída | precisava de "reparo de desbloqueio" como bloqueio | regra simples: **nasce aberta, não concluída** (seção 2.10) |
+| Zona cinza A1/A2 | futuro simples, imperfeito, COI, *en*, relativos como "A1+" | **decidido pela dona: tudo isso é A2**, como no Défi 1 (seção 1) |
+| A1 revisado | 43 unidades, 8 módulos, "só acrescentar" | **44 unidades, 8 módulos recompostos**, com fusões, movimentos e reordenações (seções 4, 5 e 11) |
+| A2 | 8 módulos, 34 unidades, ~190 palavras | **10 módulos, 60 unidades, ~408 palavras**, com cálculo e parâmetro (seção 6) |
+| Fim de módulo | mini-prova DELF opcional | **atividade final Premium em cada módulo** (formulário, soletrar, cartão-postal...), com análise da correção (seção 7) |
+| Exercícios novos | tabela curta | cada um com descrição e **exemplo concreto** (seção 9) |
+| Conjugação | seção 6.1 da v1 | **fora deste plano**: mensagem para outra sessão em `05-mensagem-sessao-conjugacao.md` |
+| Fontes | `02` de 2026-10-15 | `02` com GPI, GeDD, CPD e Défi 3: subjuntivo só em fórmula no fim do A2, gerúndio no fim do A2, passiva = B1, protestar/desculpar-se/negar no fim do A1 → A2 |
+| Decisões | 17 | 26, consolidadas e renumeradas, com a origem de cada uma (seção 13) |
+
+Matriz de cobertura (v1, seção 2): continua válida. Mudanças de rótulo por causa das decisões e do `02` novo: G24, G29, G34 a G36, G39 e G40
+deixam de ser "A1+" e passam a **A2**; C40 (reclamar, desculpar-se) passa a **fim do A1 → A2** (CPD 13, 22, 25); G43 ganha a separação
+"discurso indireto no presente = A2, no passado = B1" e "*si* + presente/futuro = A2, *si* + imperfeito = B1" (`02`, 12.3); a linha da
+Conjugação (v1, 2.6) sai deste documento.
+
+---
+
+## 1. Critérios (atualizados)
 
 | Rótulo | Regra | Exemplo |
 |---|---|---|
-| **A1 (núcleo)** | Aparece nos **dois métodos A1** (AE dossiês 0 a 6 **e** D1) ou é exigido por uma tarefa do **DELF A1** (formulário, cartão-postal, entrevista, troca de informações, compra com preços). Para gramática/léxico puro, vale também GP/VP + um dos métodos | artigos, *ne... pas*, futuro próximo, passé composé com *avoir* e *être*, dados pessoais |
-| **A1+ (zona cinza)** | Aparece no AE e/ou na GP, mas **não** no D1; ou o AE só o traz nos dossiês 7 a 9, que o próprio livro chama "vers le DELF A2" | pronomes COI, *en*, relativos *qui/que*, futuro simples, comparativo, negação complexa |
-| **A2** | Só nas fontes A2 (D2, GEF marcados A2 pelo conteúdo, CPI, VPI) ou só nos dossiês 8 e 9 do AE, ou é a tarefa típica do **DELF A2** (relato no passado, carta com função, monólogo de 2 min, interação com negociação) | imperfeito x passé composé, condicional, *si*, discurso indireto, superlativo |
-| **B1 (teto)** | Só na Grammaire en Dialogues Intermédiaire (B1) | mais-que-perfeito, futuro anterior, pronomes duplos, relativos compostos |
+| **A1** | Aparece nos dois métodos A1 (AE dossiês 0 a 6 **e** D1) ou é exigido por uma tarefa do DELF A1. Para gramática/léxico puro, GP/VP + um método | artigos, *ne... pas*, futuro próximo, passé composé, dados pessoais |
+| **A2** | Fontes A2 (D2, CPI, VPI, GPI até o cap. 47) ou tarefa típica do DELF A2. **Inclui, por decisão da dona (2026-10-16), o que só o AE põe no A1: futuro simples, imperfeito, COI, *en*, relativos *qui/que/où*** ("eu também prefiro deixar para depois") | imperfeito x passé composé, condicional, *si* + presente, discurso indireto no presente |
+| **Teto do A2** | Os "rappels" do Défi 3 (futuro simples, COD/COI, *en/y*, condicional presente, imperfeito x PC) = o que se espera no fim do A2 (`02`, 8.7 e 12.3) | |
+| **B1** | O que o Défi 3 introduz como novo: subjuntivo como sistema, relativos compostos e *dont*, *si* + imperfeito, mais-que-perfeito, **passiva**, discurso relatado no passado, condicional passado | |
 
-**Recomendação padrão para a zona cinza** (aplicada item a item nas seções 3 a 5):
-1. Se o site **já usa** a estrutura num input (frase, diálogo) e ela resolve uma situação A1, ela fica no A1 como **bloco memorizado com nota de explicação** (reconhecer e usar a fórmula, sem tabela), e é **sistematizada no A2**. Ex.: *je la prends* (A1-10).
-2. Se o site **não usa** e o DELF A1 não cobra, vai para o **começo do A2**. Ex.: futuro simples, COI, *en*.
-3. Exceção explícita: o **comparativo** (A1-g7 já existe) fica no A1 por decisão de custo zero, mas com input corrigido (decisão 2 da seção 11).
+Consequências diretas para o A1 revisado: **nada de futuro simples, imperfeito, COI, *en* nem relativos no A1** (nem como tela de gramática).
+O que já aparece em frase continua como fórmula memorizada sem explicação de sistema (ex.: *je voudrais*). O COD *je la prends* (A1-10) fica
+como fórmula com nota curta de reconhecimento (o D1 traz COD no A1: D1 7.1). O *y* de lugar fica como fórmula (*On y va !*), também no D1.
+O comparativo não foi citado pela dona: segue como decisão aberta (decisão 9), com recomendação de ficar no A1.
 
-### 1.2 O que é fonte lida e o que é inferência
+**Prioridades P0 confirmadas pela dona:** números 4 a 19, artigos e gênero, negação, perguntas, *aller* + futuro próximo.
+Os outros itens que a v1 marcava P0 (dados pessoais e formulário, produção escrita, ordem do passé composé, dias e meses, profissões) aparecem
+abaixo como **P0 proposto** até a dona confirmar ou rebaixar (decisão 12).
 
-| Afirmação | Origem | Confiança |
+**Grammaire Essentielle:** a dona confirmou que o livro não tem divisão A1/A2 definida. Ele não decide fronteira; vale como lista de tópicos.
+
+---
+
+## 2. ETAPA 0: ids estáveis (antes de qualquer mudança de conteúdo)
+
+### 2.1 Como funciona hoje (conferido no código)
+
+**Onde o id nasce**
+
+| Item | Id | Onde é montado |
 |---|---|---|
-| O que o site tem (contagens, unidades, anomalias numeradas "anomalia N") | `01`, conferido por script; conferências extras minhas com `grep`/Node nesta sessão (marcadas "conferido agora") | alta |
-| Nível dos tópicos nos livros | `02`, seção 9 (cada linha tem a sua confiança: AE/D1/VP/GEF alta; GP e D2 média) | alta/média |
-| Exigências do DELF A1/A2 e descritores CEFR | `03` (sites oficiais não abriram; resumos de busca + memória) | alta nas durações e partes; média nos detalhes |
-| Classificação A1 / A1+ / A2 | Regra da tabela 1.1 aplicada às linhas do `02` | média-alta (é inferência minha, mas sobre dados de confiança alta) |
-| Listas de palavras das unidades propostas | **Inferência minha** a partir dos temas dos livros (VP e AE) e da necessidade de não duplicar vocabulário já existente no site | média (é proposta para a dona revisar) |
-| Ordem e posição das unidades novas | **Inferência minha** com dois limites técnicos do site: ids estáveis e "input antes da gramática" (`grammar_input_map.json`) | média |
-| Notas culturais e de realidade sugeridas (seção 8) | Conhecimento meu; confiança anotada nota a nota | variável |
-| Ranking de frequência de verbos (seção 6) | Memória de listas de frequência do francês; **conferir com uma fonte** (ex.: Lexique 3) antes de usar | média |
+| Palavra (cartão A, frente → verso) | `u{unit.id}-v{posição}` (ex.: `uA1-3-v5`) | `shared/study-trail-model.js:31` (`studyNoteRowForWord`) e `:124` (`buildStudyWordCards`, `idPrefix`) |
+| Palavra (cartão B, verso → frente) | `u{unit.id}-v{posição}-b` | mesmo lugar (motor `buildEngineCardsFromRow`) |
+| Frase "Na frase" | `u{unidade-fonte}-p{posição}` ou `-d{posição}` (fala do diálogo) | `shared/study-trail-model.js:203-231` (`buildStudyPhraseCards`) |
+| Id refeito "na mão" a partir da posição | `` `u${unit.id}-v${idx}` `` | `shared/srs.js:25` (`registerExerciseCorrect`), `shared/core/exercicios-licao.js:144`, `fr/app.js:1850` (introdução da palavra) |
 
-### 1.3 Limites técnicos que moldaram as propostas (conferido agora no código)
+Hoje há 204 palavras (408 cartões A/B), 182 frases e 87 falas de diálogo no francês (contagem feita agora com Node sobre `fr/content.js`).
 
-- O cartão de palavra da trilha tem id **`u{unidade}-v{índice}`** (`shared/study-trail-model.js:31`, `shared/srs.js:25`) e o de frase usa o
-  índice da frase (`shared/study-trail-model.js:211`). **Trocar a ordem, apagar ou mover uma palavra/frase entre unidades muda o id e
-  deixa o histórico FSRS do aluno órfão.** Por isso toda proposta abaixo é **"só acrescentar no fim"** dentro de unidades existentes;
-  conteúdo novo grande vai em **unidade nova com id novo**.
-- Lições (`lessons[].vocabIdx`) só apontam índices: dá para **reagrupar lições** sem mudar id de cartão (afeta só o `lessonIdx` de quem
-  está no meio daquela unidade).
-- O número do módulo exibido é a **posição** no array (`fr/app.js:1128`, "Módulo ${mIdx + 1}"), não o id. Dá para inserir módulo novo com id
-  novo (`A1-m7`) em qualquer posição.
-- O desbloqueio é sequencial pela ordem do array `UNITS` dentro do nível (`fr/app.js:4497-4501`): **unidade inserida antes de uma já
-  concluída nasce trancada** para quem já passou dali. Precisa de um "reparo de desbloqueio" no carregamento (ver seção 11, etapa D).
+**Onde o progresso é salvo e lido**
 
----
+- Só no servidor: tabela `progress`, uma linha por conta, um bloco por curso dentro de `progress.data` (`frances` para o curso antigo,
+  `frances@en` etc.; chave escolhida por `progressBlockKey`, `shared/auth.js:67`). Não existe progresso local persistente
+  (convidado não salva; login é obrigatório).
+- Save: `saveState` (`shared/auth.js:519`) → `serializeState` (`fr/app.js:642`) → `serializeCardsForSave`
+  (`shared/study-trail-model.js:244`): cartão da trilha vira só `{id, ...progresso}` (lista `STUDY_PROGRESS_FIELDS`, linha 21).
+- Load: `loadState` (`shared/auth.js:694`) → `applySerializedState` (`fr/app.js:679`) → `mergeSavedCards`
+  (`shared/study-trail-model.js:258`): copia o progresso **por id** para os cartões recém-construídos a partir do `content.js`.
+- Servidor que lê os cartões do save: `notification-cron` (`supabase/functions/notification-cron/index.ts`: regex de id na linha 299,
+  mapa `LESSON_VOCAB_MAP` na linha 223, portão de lição na 280: "N palavras prontas para revisar"); painel da professora e visão geral
+  (`get_teacher_student_metrics`, migrations 059/070/075/105, função `_progress_block`): só contam buckets, não leem o formato do id.
 
-## 2. Matriz de cobertura
+**Achado importante: hoje, um item apagado perde o progresso para sempre no save seguinte.** `mergeSavedCards` só aplica o que bate com um
+cartão que existe; o save seguinte grava só `STATE.cards`. Um id que sumiu do conteúdo some do banco na próxima ação do aluno. Por isso a
+v1 travou tudo.
 
-Legenda de **Status**: **BEM** = ensinado explicitamente (gramática ou nota) e praticado; **USO** = aparece em frases/diálogos sem ensino;
-**PARCIAL** = parte do tópico está, parte não; **AUSENTE** = não aparece (ou aparece por acaso, 1 ou 2 linhas).
-**Nível** = conclusão pela regra 1.1. Contagens "N linhas" = `grep -c` em `fr/content.js` (francês da trilha), conferido agora.
+**O que depende da posição (`vocabIdx` / `phraseIdx`)**
 
-### 2.1 Comunicação e temas
-
-| # | Tópico | Nível | Status | Onde no site | Observação |
-|---|---|---|---|---|---|
-| C1 | Cumprimentar, despedir-se, *tu* x *vous* | A1 | BEM | A1-1, A1-2 (nota tu/vous), A1-7 (nota despedidas) | |
-| C2 | Apresentar-se: nome, nacionalidade, idade | A1 | BEM | A1-2, A1-3, A1-9 | nacionalidades repetidas em A1-2 e A1-9 (anomalia 7) |
-| C3 | Apresentar-se: **profissão** | A1 | AUSENTE | nenhuma (`professeur` 0, `étudiant` 0; `médecin` só como saúde) | DELF A1 PO parte 1 pede |
-| C4 | **Soletrar / alfabeto** | A1 | AUSENTE | nenhuma (`alphabet` 0) | AE 0, D1 1.1 abrem por aqui |
-| C5 | **Dados pessoais, formulário** (endereço, telefone, e-mail, data de nascimento) | A1 | AUSENTE | `adresse` 0, `e-mail` 0, `téléphone` 2 linhas | DELF A1 PE parte 1 |
-| C6 | Números | A1 | PARCIAL | A1-3 (0, 1, 2, 3, 10, 20), A1-10 (30 a 100), A1-g10 (70 a 99) | 4 a 9 e 11 a 19 nunca são vocabulário (anomalia 24) |
-| C7 | Gostos (*aimer, adorer, détester*) | A1 | PARCIAL | A1-5 (aimer, détester), A1-19 | *adorer* sem vocabulário; *aimer* + infinitivo sem explicação; "moi non plus" 0 |
-| C8 | Família | A1 | BEM | A1-4 (núcleo + cônjuges) | faltam avós, filhos (*les enfants*), estado civil (`marié` 0) |
-| C9 | Descrição física e caráter | A1 | PARCIAL | A1-16 (grand, petit, joli, gentil) | `yeux` 0, `cheveux` 2 linhas; caráter só *gentil/sympa* |
-| C10 | Cidade, lugares, caminho | A1 | BEM | A1-8, A1-18 | |
-| C11 | Transportes | A1 | BEM | A1-14, A1-g5 | |
-| C12 | Hora e horários | A1 | PARCIAL | A1-6 | *et quart* 1 linha, *et demie* 2; horários de abertura (AE 4.1) ausentes |
-| C13 | Dias, meses, datas | A1 | PARCIAL | A1-7 | só lundi, mardi, janvier, décembre; `jeudi`, `vendredi`, `dimanche` 0 linhas na base; 8 meses ausentes (anomalia 25) |
-| C14 | Rotina e hábitos | A1 | BEM | A1-6, A1-g3, A1-g8 | |
-| C15 | Lazer e esportes | A1 | BEM | A1-19 (jouer de/à) | *faire du sport* usado sem explicar o contraído |
-| C16 | **Propor, aceitar, recusar, convidar** | A1 | PARCIAL | A1-7 (marcar/recusar encontro), A1-19 (combinar) | `d'accord` 0, `désolé` 0, `volontiers` 0 |
-| C17 | Moradia (cômodos, móveis) | A1 | BEM | A1-17, A1-18 | |
-| C18 | Comida e bebida (café, gostos) | A1 | BEM | A1-5 | |
-| C19 | **Refeições do dia, cardápio, restaurante** | A1 (restaurante completo A2) | PARCIAL | `petit-déjeuner` 0, `déjeuner` 1, `dîner` 2; *l'addition* em A1-5 | VP 14, AE 7.1 |
-| C20 | Compras: loja, preço, tamanho, mercado, quantidade | A1 | BEM | A1-10, A1-11, A1-12 | |
-| C21 | Formas de pagamento | A1 | AUSENTE | `carte` 0, `espèces` 0 | AE 8.1; DELF A1 PO parte 3 (pagar) |
-| C22 | Roupas e cores | A1 | PARCIAL | roupas: só pantalon, robe (vocabulário); cores BEM (A1-16) | VP 9 |
-| C23 | Corpo e saúde básica (*avoir mal à*) | A1 | BEM | A1-15 | consulta completa = A2 |
-| C24 | Clima e estações | A1 | BEM | A1-13 | |
-| C25 | **Cartão-postal, mensagem curta** | A1 | AUSENTE | nenhuma produção escrita na trilha | DELF A1 PE parte 2; CEFR A1 PE |
-| C26 | **Viagem, férias, hospedagem** | A1 | AUSENTE | `hôtel` 0, `vacances` 0, `plage` 0 | AE 2.2-2.3, D1 6.2, VP 26 |
-| C27 | **Festas e rituais** | A1 | AUSENTE | `fête` 0; `anniversaire` 4 linhas soltas | AE 5.1 |
-| C28 | Telefonar | A1-A2 | AUSENTE | `allô` 0 | AE 5.2 (A1); CPI (A2) |
-| C29 | Contar o passado (um dia, um fim de semana) | fim do A1 | PARCIAL | A1-20, A1-g9 | ordem invertida (anomalias 17, 26, 27) |
-| C30 | Lembranças, infância, antes x agora | A2 | AUSENTE | | correto para o A1 |
-| C31 | Descrever um objeto (forma, função) | A1+/A2 | AUSENTE | | vai para o A2 |
-| C32 | Dar conselho | A1 (imperativo) → A2 | USO | "Vous devez vous reposer" (A1-15) | imperativo nunca ensinado |
-| C33 | Opinar, apreciar, criticar | A1 simples → A2 | USO | Expressões "C'est trop cher !", "Ça te plaît ?" | |
-| C34 | Emoções | A1 simples → A2 | PARCIAL | *avoir peur/faim* (A1-g1) | |
-| C35 | Obrigação (*il faut*, *devoir*) | A1 | BEM | A1-g6 | proibição/permissão = A2 |
-| C36 | Trabalho | A1 básico → A2 | USO | *travailler* (A1-6), `travail` 27 linhas | sem unidade |
-| C37 | Estudos e formação | A2 | AUSENTE | `école` 3 linhas | correto para o A1 |
-| C38 | Cultura (livro, filme, museu) | A2 | PARCIAL | A1-19 (cinéma, film), A1-8 (musée) | |
-| C39 | Meio ambiente, consumo | A2 | AUSENTE | | correto para o A1 |
-| C40 | Reclamar, desculpar-se | A2 | PARCIAL | *pardon*, *excusez-moi* (A1-1, A1-8) | correto para o A1 |
-| C41 | Mediação simples (repassar uma informação) | A1/A2 (CEFR CV) | PARCIAL | o "Ouça e traduza" já é mediação de língua para língua (Desafios) | nenhuma tarefa de "repassar um horário/preço" |
-
-### 2.2 Gramática
-
-| # | Tópico | Nível | Status | Onde no site | Observação |
-|---|---|---|---|---|---|
-| G1 | *être*, *avoir* no presente | A1 | BEM | A1-g1 | |
-| G2 | *s'appeler* e pronominais | A1 | BEM | A1-g3 | *se lever/se réveiller* não existem na Conjugação |
-| G3 | Presente dos verbos em *-er* | A1 | BEM | A1-g3 | letras mudas da terminação não são explicadas (AE 1.3) |
-| G4 | *aller* | A1 | USO | desde A1-1 | sem tabela nem explicação (anomalia 11) |
-| G5 | *venir* | A1 | PARCIAL | A1-9 (nota *venir de*) | sem tabela |
-| G6 | *faire*, *prendre* | A1 | BEM | A1-g5 | |
-| G7 | *vouloir, pouvoir, devoir, savoir*, *il faut* | A1 | BEM | A1-g6 | |
-| G8 | Outros irregulares A1 (*sortir, dormir, partir, dire, lire, écrire, boire, mettre*) | A1 | USO | vocabulário de A1-5, A1-6, A1-19 | nenhuma tabela (GP 36-39) |
-| G9 | **Gênero dos nomes, artigos definidos e indefinidos, plural** | A1 | USO | todo o vocabulário vem com artigo | nunca explicado (anomalia 13) |
-| G10 | Artigos contraídos (*au, du, aux, des*) | A1 | PARCIAL | A1-g4 (au/aux com países); *au cinéma* 6 linhas, *du sport* 3 | sem regra geral (*à + le*, *de + le*) |
-| G11 | Partitivos, *pas de*, quantidade | A1 | PARCIAL | notas em A1-5, A1-11, A1-12, A1-17 | bem explicado em notas, sem tabela nem exercício de gramática |
-| G12 | Possessivos | A1 | BEM | A1-4 (nota), A1-g2 | |
-| G13 | Demonstrativos (*ce, cet, cette, ces*) | A1 | USO | A1-5, A1-10 e mais 6 | nunca explicado |
-| G14 | Gênero e número dos adjetivos | A1 | PARCIAL | pares de nacionalidade (A1-9) | sem regra geral |
-| G15 | Lugar do adjetivo | A1 → A2 | PARCIAL | A1-16 (nota) | |
-| G16 | *c'est* x *il est* | A1 | USO | `c'est` 28 linhas, `il est` 13 | nunca contrastado (AE 5.3, D1 3.2, GP 25-27) |
-| G17 | *il y a* | A1 | BEM | A1-17 (vocabulário + nota) | nota antecipada no A1-8 com palavra de outra unidade (anomalias 18, 31) |
-| G18 | Preposições + cidade/país | A1 | BEM | A1-g4 | 0 input antes (anomalia 21) |
-| G19 | Preposições de lugar | A1 | BEM | A1-18 | |
-| G20 | **Pergunta** (entonação, *est-ce que*, *qu'est-ce que*, interrogativos, *quel*) | A1 | USO | desde A1-1 | só 5 notas de realidade sobre a forma *in situ* (anomalia 14) |
-| G21 | Pergunta por inversão | A1 (reconhecer) → A2 (produzir) | USO | 8 unidades | sem explicação |
-| G22 | **Negação *ne... pas*** | A1 | USO | desde A1-1 | sem explicação própria (anomalia 12) |
-| G23 | *ne... jamais* | A1 | BEM | A1-g8 | |
-| G24 | Negação complexa (*plus, rien, personne*), *ne... que* | A1+ → A2 | AUSENTE | `rien` 4 linhas, `ne... plus` 0 | vai para o A2 |
-| G25 | Pronomes tônicos | A1 | USO | "et toi ?", "Moi aussi" (2 linhas) | sem explicação |
-| G26 | *on* = *nous* | A1 | BEM | A1-7 (nota de realidade) | |
-| G27 | **Imperativo** | A1 | USO | "Tournez", "Excusez-moi" (A1-8), A1-14 | sem explicação (anomalia 20) |
-| G28 | **Futuro próximo** | A1 | USO | 8 frases em 5 unidades | nunca ensinado (anomalia 10) |
-| G29 | Passado recente (*venir de* + inf.) | A1+ | AUSENTE | 1 linha | vai para o A2 |
-| G30 | Passé composé com *avoir* | fim do A1 | BEM (ordem errada) | A1-20 (uso), A1-g9 | ensinado depois do uso maciço (anomalia 17) |
-| G31 | Passé composé com *être* e pronominais | fim do A1 | PARCIAL | A1-g9 (mesma unidade) | 0 input antes (validador) |
-| G32 | Pronome COD | A1 (D1, GP) / ponte (AE 7) | USO | "je la prends" (A1-10) | zona cinza: reconhecer no A1, sistematizar no A2 |
-| G33 | Pronome *y* (lugar) | A1 | AUSENTE | `j'y`/`on y va` 0 | AE 6.2, D1 7.1, GP 56 |
-| G34 | Pronome *en* | A1+ → A2 | AUSENTE | | A2 |
-| G35 | COI (*lui, leur*) | A1+ → A2 | AUSENTE | `lui`/`leur` pronome 0 | A2 |
-| G36 | Relativos *qui, que* | A1+ → A2 | AUSENTE | 1 a 2 linhas | A2 |
-| G37 | Comparativo | A1+ | BEM sem input | A1-g7 | validador: 0 ocorrências antes e depois |
-| G38 | Superlativo | A2 | AUSENTE | `meilleur` 3 linhas (só no A1-g7) | A2 |
-| G39 | Futuro simples | A1+ → A2 | AUSENTE | | só na Conjugação |
-| G40 | Imperfeito | A2 (ponte) | AUSENTE | | só na Conjugação e no Jogo |
-| G41 | Marcadores de tempo e duração (*il y a, depuis, pendant*) | fim do A1 → A2 | PARCIAL | A1-20 (*il y a deux jours*), *depuis* 3 linhas (A1-15) | |
-| G42 | Causa e finalidade simples (*pourquoi, parce que, pour* + inf.) | A1 | AUSENTE | `pourquoi` 0, `parce que` 0 | AE 2.1, D1 6.1 |
-| G43 | Condicional, *si*, discurso indireto, *-ment*, pronomes demonstrativos | A2 | AUSENTE | (só *je voudrais* como fórmula) | A2 |
-
-### 2.3 Fonética e ortografia
-
-| # | Ponto | Nível | Status | Onde no site | Observação |
-|---|---|---|---|---|---|
-| F1 | Alfabeto e acentos gráficos (nomes das letras e dos acentos) | A1 | AUSENTE | | Acentuação só como Desafio (46 publicados) |
-| F2 | Acento na última sílaba / grupo rítmico | A1 | AUSENTE | | todos os métodos |
-| F3 | Ligação (*liaison*) e encadeamento | A1 | AUSENTE | `liaison` 0 na camada (`01` 6.1) | todos os métodos; números (*deux‿ans*) |
-| F4 | Entonação da pergunta x afirmação | A1 | AUSENTE | | todos os métodos |
-| F5 | Elisão (*j', l', d', qu'*) | A1 | USO | o tempo todo | nunca explicada |
-| F6 | *e* caduco / mudo | A1 | AUSENTE | | AE, D1 |
-| F7 | [y] x [u] | A1 | AUSENTE | | AE 1.1, D1 P15 (*rue/roue*, *tu/tout*) |
-| F8 | Nasais | A1 → A2 | AUSENTE | | AE 4.2, 8.1-8.2 |
-| F9 | Letras mudas (*-ent*, *-es* dos verbos) | A1 | AUSENTE | | AE 1.3, 2.2 |
-| F10 | Forma falada reduzida (*t'es, y'a*, queda do *ne*) | A1 (reconhecer) | BEM | notas de realidade A1-2, A1-17, A1-19 | |
-
-### 2.4 Léxico (capítulos do VP A1 → site)
-
-| VP | Tema | Status | Onde no site |
-|---|---|---|---|
-| 1 | usos e cortesia | BEM | A1-1 |
-| 2 | família e fases da vida | PARCIAL | A1-4 (sem avós, filhos, fases da vida) |
-| 3 | amor e emoções | AUSENTE | |
-| 4 | caráter | AUSENTE | (*gentil* só) |
-| 5 | comunicação (telefone, carta, mail) | AUSENTE | |
-| 6 | corpo e movimentos | PARCIAL | A1-15 (4 partes do corpo) |
-| 7 | saúde | BEM | A1-15 |
-| 8 | descrição física | PARCIAL | A1-16 |
-| 9 | roupas e cores | PARCIAL | A1-10 (2 roupas), A1-16 (cores) |
-| 10 | casa e moradia | BEM | A1-17, A1-18 |
-| 11 | atividades diárias | BEM | A1-6 |
-| 12 | alimentos e lojas | BEM | A1-5, A1-11 (lojas: só *le magasin*) |
-| 13 | fazer compras | BEM | A1-10, A1-12 |
-| 14 | cozinha e refeições | PARCIAL | sem refeições do dia nem cardápio |
-| 15 | o tempo que passa | PARCIAL | A1-6, A1-7 (dias e meses incompletos) |
-| 16 | escola e ensino | AUSENTE | (A2) |
-| 17 | profissões | AUSENTE | |
-| 18 | tecnologia e mídia | AUSENTE | (`ordinateur`/`portable` 0) |
-| 19 | dinheiro e banco | PARCIAL | *euro* (24 linhas), preços |
-| 20 | correio, serviços, administração | AUSENTE | |
-| 21 | geografia e francofonia | PARCIAL | A1-2, A1-9, A1-g4 (só França, Brasil e Europa) |
-| 22 | clima | BEM | A1-13 |
-| 23 | cidade e campo | PARCIAL | A1-8 (cidade) |
-| 24 | direções | BEM | A1-8 |
-| 25 | transportes | BEM | A1-14 |
-| 26 | turismo, viagens, férias | AUSENTE | |
-| 27 | lazer, esportes, jogos | BEM | A1-19 |
-| 28 | artes e espetáculos | PARCIAL | A1-19 (cinema, música) |
-
-### 2.5 Cultura
-
-| # | Tema | Nível | Status | Onde no site |
-|---|---|---|---|---|
-| K1 | Cumprimentos, *la bise*, *tu/vous* | A1 | BEM | A1-1, A1-2 |
-| K2 | Refeições e hábitos à mesa | A1 | BEM | A1-4 (repas dominical), A1-5 (croissant), A1-6 (almoço) |
-| K3 | Paris (metrô, arrondissements, lugares) | A1 | PARCIAL | A1-14 (metrô); A1-8 sem nota |
-| K4 | **Francofonia** (Bélgica, Suíça, Quebec, África, ultramar) | A1 | AUSENTE como tema | só a nota regional de *vingt* (A1-3) cita que "não é igual em todo lugar" |
-| K5 | **Festas e datas** (categoria `festividade`) | A1 | AUSENTE | 0 notas `festividade` no francês (conferido agora) |
-| K6 | Correspondência e endereço (como se escreve um endereço, CEP) | A1 | AUSENTE | |
-| K7 | Ritmo de vida, trabalho, escola | A1 → A2 | PARCIAL | A1-6 (almoço longo) |
-| K8 | Símbolos e história | A1 | BEM | A1-7 (dias), A1-16 (bandeira), A1-19 (cinema) |
-| K9 | Mercado, lojas, comércio | A1 | BEM | A1-11 (marché) |
-| K10 | Moradia | A1 | BEM | A1-17 (rez-de-chaussée) |
-
-### 2.6 Conjugação (verbos e tempos do A1 x trilha x banco)
-
-| Verbo / tempo | Nível | Ensinado na trilha | No banco da Conjugação (`fr/conjugation-data.js`) |
-|---|---|---|---|
-| être, avoir | A1 | A1-g1 | sim (#1, #2) |
-| verbos em -er (parler, aimer, habiter, travailler, manger...) | A1 | A1-g3 | sim |
-| se lever, se réveiller, se coucher, s'habiller, se promener, s'amuser, se reposer | A1 | se lever/se réveiller em A1-g3 | **não** (nenhum pronominal; só s'asseoir; conferido agora: lever, réveiller, coucher, habiller, promener, amuser, reposer ausentes) |
-| détester, adorer, visiter, neiger | A1 | vocabulário/frases de A1-5, A1-19, A1-20, A1-13 | **não** |
-| épeler, monter, rencontrer, louer, déménager, se marier | A1 (épeler, monter, rencontrer) / A2 | não | **não** (conferido agora) |
-| aller, venir | A1 | não (só uso / nota) | sim (#3, #166) |
-| faire, prendre | A1 | A1-g5 | sim (#4, #186) |
-| vouloir, pouvoir, devoir, savoir, falloir | A1 | A1-g6 | sim (#228 a #231, #237) |
-| sortir, dormir, partir, lire, boire, dire, écrire, mettre, connaître | A1 | não | sim |
-| finir, choisir (-ir) | A1 | não | sim |
-| payer, envoyer (-yer) | A1 (AE 5.1) | não | sim |
-| éteindre | A2 | não | sim, mas no grupo errado (`g1`; é -re do 3º grupo, anomalia 34) |
-| Présent | A1 | sim | sim |
-| Passé composé | fim do A1 | A1-g9 | sim |
-| Impératif | A1 | **não** | sim |
-| Futur proche | A1 | **não** | saiu da prática (decisão da dona, 2026-10-13) |
-| Imparfait, futur simple, conditionnel | A2 | não | sim (sem etiqueta de nível) |
-| Plus-que-parfait, subjonctif | B1 | não | sim (sem etiqueta de nível) |
-
----
-
-## 3. FALTAS no A1 (priorizadas)
-
-**P0** = quebra a coerência da trilha (estrutura usada sem ensino em várias unidades, objetivo que não bate) ou impede uma tarefa do DELF A1.
-**P1** = núcleo A1 de todas as fontes que o site não tem. **P2** = melhora, zona cinza útil ou ajuste fino.
-
-| # | Prio. | Falta | Onde (unidade / arquivo) | Proposta concreta | Fontes |
-|---|---|---|---|---|---|
-| 1 | P0 | **Números 4 a 9** nunca são vocabulário, mas aparecem (huit, sept, six, cinq...) | A1-3 (`fr/content.js:384`) | Acrescentar no FIM do vocabulário do A1-3: *quatre, cinq, six, sept, huit, neuf* (índices 10 a 15) e reagrupar as lições: L1 zéro, un/une, deux, trois; L2 quatre, cinq, six; L3 sept, huit, neuf, dix; L4 vingt, l'âge, avoir, ans, combien + diálogo | AE 0; D1 1.1; GP 28; DELF A1 (preços, idade) |
-| 2 | P0 | **Números 11 a 29** nunca são vocabulário (quinze no A1-4, dix-neuf no A1-10, vingt-cinq no ditado d1) | nova **A1-21** | Unidade nova "Números de 11 a 29": *onze, douze, treize, quatorze, quinze, seize, dix-sept, dix-huit, dix-neuf, vingt et un*; nota de explicação "17 a 19 = 10 + 7..." e "22 a 29 sem *et*"; nota de fonética: ligação *dix-huit‿ans*, *vingt‿et un* | mesmas do item 1 |
-| 3 | P0 | **Objetivo do A1-3** promete "do zero a cem" (anomalia 23) | `courses/fr-pt-BR/layer.js:195` e `fr/content.en.js` | Novo objetivo: "Contar de zero a vinte e dizer e perguntar a idade." (o até cem fica com A1-10/A1-g10) | `01` 5.4 |
-| 4 | P0 | **Gênero, artigos, plural** nunca explicados (anomalia 13) | nova **A1-g11** | "Artigos, gênero e plural": *le/la/l'/les*, *un/une/des*; gênero não segue o português (*le lait*, *la mer*... com exemplos só de vocabulário visto: *le fromage, la pomme, l'eau* feminino); *-s* do plural mudo; *des → de* na negação (gancho para A1-g14) | AE 0, 1.2; D1 1.1, 2.2; GP 10-12; GEF 2-4 |
-| 5 | P0 | **Negação e perguntas** usadas desde A1-1 sem explicação (anomalias 12, 14) | nova **A1-g12** | "Frase negativa e perguntas": *ne... pas* (*n'* antes de vogal); 3 jeitos de perguntar: entonação (*Tu es français ?*), *est-ce que*, inversão (só reconhecer: *Comment allez-vous ?*, *Quel âge as-tu ?*); interrogativos *comment, où, quand, combien, pourquoi, qui, qu'est-ce que*; *quel/quelle/quels/quelles*; tela de fonética: entonação ascendente | AE 1.1, 1.2, 2.2, 5.1; D1 2.1-2.2; GP 5, 51-52; GEF 39-42; DELF A1 PO parte 2 (fazer perguntas) |
-| 6 | P0 | **aller + futuro próximo** usados desde A1-1/A1-5 sem ensino (anomalias 10, 11) | nova **A1-g13** | "O verbo aller, o futuro próximo e os contraídos": tabela de *aller*; *aller à la / au / à l' / aux* + lugar (input do A1-8); *je vais* + infinitivo; negação *je ne vais pas* + inf.; *venir de la / du* (prévia do A1-9) | AE 2.2, 4.2; D1 6.1, 7.1; GP 13, 42-43; GEF 7, 26 |
-| 7 | P0 | **Dados pessoais e soletrar** (DELF A1 PE parte 1: formulário) | nova **A1-23** | "Dados pessoais e formulário": *le prénom, le nom de famille, épeler, l'adresse, le code postal, le numéro de téléphone, le portable, le mail, la date de naissance, né / née*; nota de explicação "Como se soletra" (alfabeto, *accent aigu/grave*, *double v*); exercício novo de formulário (seção 7) | AE 0, 1.2; D1 1.1; VP 20; DELF A1 PE; CEFR A1 PE |
-| 8 | P0 | **Produção escrita** inexistente (DELF A1 PE parte 2: cartão-postal ~40 palavras) | nova **A1-26** + tipo de exercício novo | Cartão-postal guiado na unidade de viagem (seção 7, tipo E1) | AE 2.3, 6.3; DELF A1 PE; CEFR A1 PE |
-| 9 | P0 | **Passé composé antes da hora**: 9 de 10 frases do A1-20 e o diálogo já no passado; nota diz "que você já viu"; A1-g9 vem depois e diz "Você concluiu o nível A1" (anomalias 17, 26, 27) | A1-20, A1-g9 (`layer.js:2088`, `:2126`) | Ver seção 4.2: manter A1-20 como primeiro contato (input), reescrever objetivo e nota, acrescentar uma nota de explicação "j'ai + particípio" no A1-20; A1-g9 só com *avoir*; *être* e pronominais numa unidade nova **A1-g16**; mover a frase "Você concluiu o nível A1!" para o Teste de Nível | AE 4.3, 5.3; D1 8.2; GP 44-46 (todos fecham o A1 com o passé composé) |
-| 10 | P0 | **Dias da semana e meses incompletos**; Desafio de Acentuação do A1-7 cobra *février* e *août*, que não estão na unidade (anomalia 25) | A1-7 e nova **A1-24** | A1-7: acrescentar no fim *mercredi, jeudi, vendredi, samedi, dimanche* e reagrupar em 4 lições. A1-24 "Meses e datas": *février, mars, avril, mai, juin, juillet, août, septembre, octobre, novembre* + diálogo "C'est quand ton anniversaire ? / Le premier mars." | AE 1.1-1.2; D1 5.2; GP 29; VP 15; DELF A1 (data de nascimento) |
-| 11 | P0 | **Profissões** ausentes (DELF A1 PO parte 1: falar de si) | nova **A1-22** | "Profissões": *le travail, le professeur / la professeure, l'étudiant / l'étudiante, le vendeur / la vendeuse, le serveur / la serveuse, l'infirmier / l'infirmière, l'ingénieur / l'ingénieure, l'avocat / l'avocate, le bureau, l'entreprise*; nota de explicação "Je suis professeur (sem artigo)" x "C'est un professeur" | AE 3.1; D1 1.2; VP 17; GP 1; DELF A1 PO parte 1 |
-| 12 | P1 | **Imperativo** usado sem ensino (anomalia 20) | A1-g6 (acrescentar telas no fim) | Novas telas: "Dar instruções: o imperativo" (*Tournez, Prenez, Allez*; *tu* sem *-s* nos verbos em -er: *Mange !*; *nous*; *Excusez-moi* como fórmula; negativo só reconhecido) + 4 exercícios; título passa a "Verbos modais, il faut e o imperativo" | AE 4.2, 5.2; D1 7.2; GEF 32 |
-| 13 | P1 | **Partitivos e quantidade** só em notas | nova **A1-g14** | Sistematiza as notas de A1-5, A1-11, A1-12, A1-17 (sem repetir o texto delas): tabela *du / de la / de l' / des*, *pas de*, *beaucoup de / un kilo de*, *aimer le* x *manger du*; 6 exercícios | AE 7.1, 8.1; D1 8.1; GP 31-32; GEF 5-6, 10 |
-| 14 | P1 | **Adjetivos (gênero e número), demonstrativos, c'est x il est** sem regra | nova **A1-g15** | "Adjetivos e demonstrativos": feminino (*-e, -ne, -lle*, *beau/belle* só reconhecido), plural; lugar (*petit, grand, joli* antes; cores depois); *ce / cet / cette / ces*; *c'est* + adjetivo x *il est* + adjetivo/profissão | AE 2.3, 3.2, 5.3; D1 3.2, 4.1, 7.2; GP 2-3, 15, 25-27; GEF 8, 11-12 |
-| 15 | P1 | **Pronomes tônicos** sem explicação | A1-g1 (1 tela no fim) | Tela "Moi, toi, lui, elle..." com *Et toi ? Moi aussi. Moi non plus. C'est moi.* + 2 exercícios | AE 3.2, 5.1; GP 59; GEF 14 |
-| 16 | P1 | **Propor, aceitar, recusar** sem as fórmulas básicas (`d'accord` 0) | nova **A1-27** | "Convites e festas": *la fête, l'anniversaire, inviter, le cadeau, libre, d'accord, avec plaisir, volontiers, désolé / désolée, dommage*; nota de explicação *pourquoi ? / parce que* | AE 4.2, 5.1; D1 6.2; CEFR A1/A2 "Conversa" |
-| 17 | P1 | **Viagem e hospedagem** ausentes | nova **A1-26** | "Férias e hotel": *les vacances, l'hôtel, la nuit, réserver, la valise, le passeport, la mer, la montagne, la plage, la carte postale*; *y* de lugar só como fórmula (*On y va !*) | AE 2.2-2.3, 6.2-6.3; D1 6.2; VP 26 |
-| 18 | P1 | **Refeições e restaurante** incompletos | nova **A1-25** | "Refeições e restaurante": *le petit-déjeuner, le déjeuner, le dîner, la carte, le menu, l'entrée, le plat, la boisson, commander, le verre* (sem repetir *le dessert*, *l'addition*, *la table*, *le serveur*) | AE 7.1; D1 8.1; VP 14 |
-| 19 | P1 | **Fonética** sem nenhum ponto explícito | notas de explicação em unidades existentes e novas (lista na seção 8.3) | 7 notas curtas: ligação nos números (A1-21), letras mudas do -er (A1-g3), entonação da pergunta (A1-g12), [y]/[u] com *la rue* (A1-8), nasais com *le pain / le poisson* (A1-5), *e* caduco com *samedi / la fenêtre* (A1-7 / A1-17), acentos gráficos (A1-23) | AE e D1 (todos os pontos da tabela 9.3 do `02`); CEFR CV "controle fonológico" |
-| 20 | P1 | **Francofonia** ausente das notas | notas culturais/regionais (seção 8) | Bélgica e Suíça (números, refeições), Quebec (*bienvenue* = de nada), África | AE carnets; D1 2.1, 6.1, 7.1 |
-| 21 | P1 | **Gostos**: *adorer* sem vocabulário, "moi non plus" ausente | A1-19 (acrescentar *adorer* no fim do vocabulário) + nota "aimer + infinitivo" | *J'adore danser. Moi aussi. Je n'aime pas lire. Moi non plus.* | AE 1.3, 3.1; D1 2.2; GP 12 |
-| 22 | P1 | **Causa e finalidade** (*pourquoi, parce que, pour* + inf.) ausentes | A1-27 (nota) + frases | *Pourquoi tu ne viens pas ? Parce que je travaille.* | AE 2.1; D1 6.1; GEF 44 |
-| 23 | P1 | **Contraídos** sem regra geral | A1-g13 | ver item 6 | AE 2.1, 3.1; D1 6.1; GP 13 |
-| 24 | P2 | Descrição física pobre | A1-16 (acrescentar frases) | Frases novas com *Il a les cheveux bruns / les yeux bleus. Elle est grande et mince.* (palavras novas entram como vocabulário só se a dona quiser uma 11ª a 13ª palavra) | AE 3.2, 5.3; VP 8 |
-| 25 | P2 | Roupas: só 2 | A1-10 (frases) ou A2-6 | *la chemise, la jupe, le pull, les chaussures* como vocabulário de uma lição extra do A1-10 OU no A2 (A1-10 já tem 14 palavras) | VP 9; AE 7.2 (ponte) |
-| 26 | P2 | Pagamento | A1-25 ou A1-10 (frases) | *Je peux payer par carte ? En espèces.* | AE 8.1 |
-| 27 | P2 | *y* de lugar | A1-14 / A1-26 (nota) | *J'y vais en métro.* como fórmula, com nota | AE 6.2; D1 7.1; GP 56 |
-| 28 | P2 | COD sem explicação (*je la prends*) | A1-10 (nota de explicação após o diálogo) | "Je la prends = eu levo (ela)": reconhecer; sistematizar no A2-g7 | D1 7.1; GP 57 (zona cinza, regra 1.1) |
-| 29 | P2 | Família sem avós/filhos/estado civil | A1-4 (frases) | *mes grands-parents, j'ai deux enfants, je suis marié(e)* em frases novas | AE 3.3; D1 3.1-3.2; VP 2 |
-| 30 | P2 | Horários (*et quart, et demie, moins le quart*), abertura/fechamento | A1-6 (frases e nota) | *Il est huit heures et demie. Le musée ouvre à neuf heures.* | AE 4.1; GP 29 |
-| 31 | P2 | Telefonar (*Allô ?*) | A1-23 (1 frase e nota) ou A2-14 | *Allô ? C'est Léa.* | AE 5.2; CPI |
-| 32 | P2 | Verdadeiro ou falso só em 8 de 20 unidades (anomalia 5) | as 12 restantes | 1 V/F por unidade (A1-3, 4, 6, 7, 10, 11, 12, 14, 16, 17, 18, 20) | padrão do próprio site |
-| 33 | P2 | Poucas frases em A1-9 e A1-18 (5) (anomalia 6) | A1-9, A1-18 | acrescentar 2 frases com cenário em cada | padrão do próprio site |
-
-### 3.1 Anomalias do `01` que não são "falta de conteúdo" (correções de texto/gancho)
-
-| Anomalia (`01`) | Correção proposta | Arquivo |
+| Dependência | Onde | Efeito de reordenar hoje |
 |---|---|---|
-| 18 e 31: nota `ou-est-vs-il-y-a` (A1-8) usa *pharmacie* | Trocar o exemplo por palavras do A1-8: *Il y a un musée près de la gare.* | `courses/fr-pt-BR/layer.js` + `fr/content.en.js` (+ `fr/content.js` se o exemplo em francês mora na base) |
-| 29: `nous-sommes-on-est` dispara depois de *aujourd'hui* | Mudar o gatilho para `after:'dialogue'` ou para depois de *lundi* | `fr/content.js` (`trigger`) |
-| 30: `andar-terreo-premier-etage` dispara depois de *la chambre* | Gatilho `after:'dialogue'` (onde *étage* aparece na frase p6) | `fr/content.js` |
-| 22: A1-g6 promete *connaître* "mais adiante" | Cumprir no A2 (A2-g? com *savoir* x *connaître*, ver 5) ou tirar a promessa | `layer.js:1550` |
-| 27: "Você concluiu o nível A1!" no A1-g9 | Trocar por "Você concluiu o passé composé com avoir!" e levar a frase de fim de nível para a tela do Teste de Nível | `layer.js:2126` |
-| 28: lição "nome-e-ser" ensina *la France* | Reagrupar lições do A1-2: L1 *je, tu, s'appeler*; L2 *le nom, être, le pays*; L3 *la France, le Brésil, français/e, brésilien/ne* + diálogo (só `vocabIdx`, sem mudar id de cartão) | `fr/content.js` |
-| 38: Acentuação cobra *très* no A1-12 e no A1-16 | O vocabulário das duas unidades não tem palavra com acento-alvo. A1-12: tirar o desafio (`n/a`, motivo "sem acento real na unidade"). A1-16: trocar por uma palavra acentuada que já esteja numa frase da unidade (ex.: *préféré*, se a dona confirmar que está lá) ou tirar | tabela `challenges` (produção, com autorização) + lote do repo |
-| 36: 4 "Ouça e traduza" do A1-m3 estão só na produção | Exportar as 4 linhas para `lote-a1-m3.json` (repo = fonte) | `fr/scripts/challenges_import/` |
+| Id do cartão e FSRS | acima | histórico vai para a palavra errada ou some |
+| Lições (`lessons[].vocabIdx`) | `fr/content.js` | lição ensina outra palavra |
+| Gatilho de nota `trigger.afterVocabIdx` | 32 notas em `fr/content.js` | nota aparece depois da palavra errada |
+| Camadas de texto (`vocab: [...]`, `phrases: [...]` por posição) | `courses/fr-pt-BR/layer.js`, `fr/content.en.js` | tradução trocada |
+| Portão "cartão só entra na revisão depois da lição" | `isCardLessonCompleted`, `shared/core/revisao-decks.js:569` | cartão some da revisão ou entra antes da hora |
+| Portão no servidor | `LESSON_VOCAB_MAP` (cron, regerado à mão) | contagem de notificação errada |
+| Tags `licao-N` | `studyTrailTags` (derivada, não salva) | só exibição |
+| "Na frase": qual frase é exemplo de qual palavra | `findStudyExamplePhrase` busca a **1ª frase que contém a palavra**, na ordem do conteúdo | reordenar ou reescrever frases pode trocar a frase-exemplo: o cartão da frase antiga deixa de existir |
+| Gaveta de palavras que trocam por idioma (`STATE.cardVariants`) | `shared/card-variants.js`, `fr/app.js:533` | chaveada por id do cartão |
+| `reviewRecords.hardSeenIds` | `shared/review-extras.js` | ids de cartão |
+| `unitProgress[unitId].lessonIdx` | posição da lição | aluno no meio da unidade cai em outra lição |
+| Métricas por palavra | `studyWordKey` (`unitId:vocabIdx`, derivado a cada carga) | nada salvo |
+
+**O que NÃO depende da posição:** áudio pré-gerado (`AUDIO_MANIFEST` é por **texto**, `fr/app.js:110`), Desafios (por `unitId`/`moduleId`),
+ditados (por módulo, validados por texto), Course Decks (por `course_unit_id` = id da unidade, `shared/deck-engine.js:460`), conquistas e
+XP (contadores do bloco), `unitProgress`/`checkpointProgress`/`levelTestProgress` (por id de unidade/módulo/teste).
+
+**Gancho que já existe:** "o progresso segue a palavra, não a posição" (`shared/card-variants.js`, `docs/i18n/roadmap-i18n-l1.md` item 3):
+quando o idioma do site troca a palavra de um slot (país do aluno), o progresso vai para uma gaveta e volta quando a palavra volta.
+É o mesmo princípio (progresso pertence ao item) e o mesmo formato de whitelist de campos. E a arquitetura de cursos já previa
+"camada por id estável de item" (Q-08 / Dv-2 em `docs/i18n/arquitetura-multi-idioma-cursos.md`; `keyBy: 'index'|'id'` no contrato
+`docs/i18n/contratos-registro-e-camada-do-curso.md`), ainda não implementada (`grep keyBy` em `shared/` não acha nada).
+O teste de ida e volta do progresso (`tests/e4/test_progresso_ida_e_volta.js`) salva e carrega pelo caminho real com um cliente falso do
+Supabase: é a base dos testes da Etapa 0.
+
+### 2.2 Opções avaliadas
+
+| Opção | Como funciona | Reordenar | Mover | Fundir | Excluir | Reescrever | Problema |
+|---|---|---|---|---|---|---|---|
+| (a) **Chave estável por item** | cada palavra/frase/fala ganha `k` congelado; id do cartão = derivado de `k` | sim, sem migração | sim, sem migração | **não** (duas chaves viram uma) | só some (precisa de arquivo) | sim (mesmo sentido mantém `k`) | sozinha não resolve fusão nem guarda o excluído |
+| (b) **Tabela de aliases** id antigo → id novo, ids continuam por posição | a cada versão, um mapa traduz ids do save | só com alias para todo item deslocado | idem | sim | descartar ou arquivar | sim | cada reordenação gera dezenas de aliases encadeados por versão (v1→v2→v3), o servidor também precisa deles; fácil errar |
+| (c) **Combinação (recomendada)** | (a) para a identidade + (b) **só para fusões** + arquivo para exclusões | sim | sim | sim | sim, com volta | sim | pequena: um formato a mais de dado e um passo no carregamento |
+
+### 2.3 Desenho recomendado (c)
+
+1. **Chave congelada `k` em cada item da base** (`fr/content.js`): `vocab[i].k`, `phrases[i].k`, `dialogue.lines[i].k`.
+   O valor inicial é **exatamente o id de hoje sem o `u`**: `"A1-3-v5"`, `"A1-3-p2"`, `"A1-3-d4"`. Resultado: na Etapa 0 **nenhum id muda**
+   (zero migração de dado para quem já estuda). Um script (`fr/scripts/congelar_chaves.js`) escreve as chaves a partir das posições atuais
+   uma única vez e um teste garante unicidade e formato.
+2. **O id do cartão passa a vir da chave:** palavra = `u{k}` e `u{k}-b`; frase = `u{k}`. Função única `studyItemCardId(item)` usada por todos
+   os pontos da tabela 2.1 (fim do `` `u${unit.id}-v${idx}` `` espalhado). Item sem `k` (zh hoje) cai na regra antiga: o zh continua igual.
+3. **Item novo ganha chave nova**, nunca reaproveitada: `"{unidade onde nasceu}-v{próximo número livre}"`. Um registro
+   (`fr/scripts/item_keys_registry.json`) guarda o maior número já usado por unidade, inclusive de chaves aposentadas. O formato continua
+   casando com a regex do cron (`^(u.+-v(\d+))(-b)?$`).
+4. **Mover** um item (mudar de lugar na mesma unidade, ir para outra unidade, ir para o A2): a chave vai junto. O id fica igual; só
+   `unitId`, `vocabIdx` (posição atual), lição, tags e Course Deck mudam, e todos já são derivados a cada carregamento.
+   A chave guarda a unidade de **origem** (`uA1-10-v6` pode morar no A1-28): isso é só um rótulo opaco, nunca lido como lógica.
+5. **Reescrever:** correção de texto com o mesmo sentido (*Ça coûte combien ?* → *Ça coûte combien, ce pantalon ?*) mantém `k`.
+   Mudança de sentido (trocar *Je vais détester ce plat* por *Je vais prendre un café*) = item novo com `k` novo; o antigo é aposentado.
+   A regra fica escrita no cabeçalho do `content.js` e na skill de conteúdo.
+6. **Fundir** (o mesmo item em dois lugares, ex.: *français/française* no A1-2 e no A1-9): fica a chave sobrevivente; a outra entra num
+   arquivo novo de dados `fr/curriculum-changes.js` como `STUDY_KEY_MERGES = { "A1-9-v0": "A1-2-v7", ... }`. No carregamento, se o save tem
+   os dois, aplica-se a **regra de fusão FSRS**: fica o estado do cartão com a revisão mais recente (`lastReview` maior); empate → maior
+   `stability`; `firstLearnedDate` = a mais antiga das duas; o perdedor vai para o arquivo (item 7). A e B se fundem separadamente
+   (A com A, B com B). Se o save só tem o antigo, ele é renomeado para o sobrevivente.
+7. **Excluir:** a chave vai para `STUDY_RETIRED_KEYS` em `fr/curriculum-changes.js`. No carregamento, o progresso de cartão aposentado (e de
+   qualquer cartão salvo que não exista mais, por qualquer motivo) vai para `STATE.retiredStudyCards[id] = {...progresso, retiredAt}` e é
+   salvo no bloco (whitelist de progresso, poucos bytes por item). Se a chave voltar a existir, o progresso volta. Cartão aposentado não
+   conta em métrica, fila, notificação nem painel. Isso também fecha o achado da 2.1 (perda silenciosa).
+8. **Portão de lição sem armadilha:** mover uma palavra já estudada de uma unidade concluída para uma unidade nova (não concluída) a
+   tiraria da revisão até o aluno fazer a lição nova. Correção: guardar `released: true` no progresso do cartão (campo novo na whitelist)
+   na primeira vez que `isCardLessonCompleted` deixar o cartão passar; cartão com `released` passa sempre. A Etapa 0 publica isso **antes**
+   de qualquer movimento, então no primeiro carregamento todos os cartões já liberados ganham a marca.
+9. **Lições:** salvar também `unitProgress[u].lessonId` (as lições já têm id: `ola-e-tchau`, `checkpoint`...). Ao carregar, se o id da
+   lição salva estiver noutra posição, `lessonIdx` é recalculado; se a lição sumiu, volta para a 1ª lição que tem palavra ainda não
+   liberada.
+10. **Unidades e módulos fundidos ou excluídos:** `UNIT_MERGES` / `MODULE_MERGES` no mesmo arquivo (progresso de unidade: concluída se
+    qualquer uma das duas estava; Ponto de verificação: mantém aprovado). Nenhuma fusão de unidade está proposta hoje; o mecanismo fica pronto.
+11. **"Na frase" estável:** a frase-exemplo de cada palavra deixa de depender da ordem: o conteúdo pode fixar `exampleK` na palavra; sem
+    isso, continua a busca de hoje. Se uma frase deixar de ser exemplo, o progresso dela vai para o arquivo (item 7) e volta se ela voltar.
+12. **Camadas (texto em português e em inglês):** continuam por posição na Etapa 0, mas toda mudança de ordem passa por um **script de
+    operações** (item 13) que reordena base, `layer.js` e `content.en.js` juntos, mais `lessons` e `afterVocabIdx`. A camada por chave
+    (Q-08) fica para quando o app de português precisar (o pt já nasce com chave desde o 1º item).
+13. **Script de operações** `fr/scripts/curriculo_ops.js` (lê um arquivo `ops.json` revisável pela dona): operações `reorder`, `move`,
+    `merge`, `retire`, `insert`, `retext`. Aplica tudo de uma vez, atualiza `curriculum-changes.js`, regera o mapa do cron e roda os
+    validadores (`check_grammar_input.js`, `check_dictation_vocab.py`, camadas). Nenhuma mudança de currículo é feita à mão no arquivo.
+
+### 2.4 Arquivos e funções a mudar
+
+| Arquivo | Mudança |
+|---|---|
+| `fr/content.js` | campo `k` em 473 itens (script); cabeçalho com a regra de chave |
+| `fr/curriculum-changes.js` (novo, dado) | `STUDY_KEY_MERGES`, `STUDY_RETIRED_KEYS`, `UNIT_MERGES`, `MODULE_MERGES`, `CURRICULUM_VERSION` |
+| `shared/study-trail-model.js` | `studyItemCardId`; `studyNoteRowForWord`, `buildStudyWordCards`, `buildStudyPhraseCards` usando a chave; `released` em `STUDY_PROGRESS_FIELDS`; `mergeSavedCards` chama antes `applyStudyKeyChanges(saved)` (função pura nova: fusões, aposentados, arquivo) e devolve o que não casou para o arquivo |
+| `shared/srs.js:25`, `shared/core/exercicios-licao.js:144`, `fr/app.js:1850` (e equivalentes do zh) | trocar o id montado na mão por `studyItemCardId` |
+| `shared/core/revisao-decks.js:569` | `isCardLessonCompleted`: liberar se `card.released`; marcar `released` quando passar |
+| `fr/app.js` `serializeState` / `applySerializedState` (linhas 642 e 679) | salvar e ler `retiredStudyCards`; mover gavetas de `cardVariants` e `hardSeenIds` na fusão; recalcular `lessonIdx` por `lessonId`; regra de desbloqueio da 2.10 |
+| `shared/deck-browser.js` | esconder Course Deck cuja unidade não existe mais (fica vazio no banco; sem apagar) |
+| `supabase/functions/notification-cron/index.ts` | trocar `LESSON_VOCAB_MAP` por um mapa gerado `STUDY_ITEM_GATE` {id base → [unidade atual, lição]}, ignorar aposentados, respeitar `released`. **Exige novo deploy** (registrar) |
+| `fr/scripts/congelar_chaves.js`, `fr/scripts/curriculo_ops.js`, `fr/scripts/item_keys_registry.json` (novos) | scripts da 2.3 |
+| `tests/fase-e/test_course_decks_unit.js:125` | hoje exige `id === u{unitId}-v{vocabIdx}`; passa a exigir `id === u{k}` |
+| `.claude/rules/decks-review.md`, skill de conteúdo | registrar a regra de chave (1 linha cada) |
+
+### 2.5 Migração dos dados dos alunos
+
+- **Etapa 0 em si não migra nada:** as chaves iniciais reproduzem os ids de hoje byte a byte. O que muda no save é só o acréscimo de
+  `released`, `lessonId` e `retiredStudyCards`.
+- Cada mudança de currículo depois disso é migrada **no cliente, no carregamento, por bloco de curso** (`frances`, `frances@en`...),
+  de forma idempotente (aplicar duas vezes dá o mesmo resultado) e registrada com `_curriculumVersion` no bloco.
+- **Não exige migration SQL.** O servidor só lê os cartões (cron e painel), e o cron passa a usar o mapa gerado. Enquanto um aluno não abre o
+  app, o bloco dele fica com os ids antigos: como os ids não mudam (só fusões e aposentados), as contagens ficam certas, exceto o cartão
+  fundido que conta 2 vezes até ele entrar. Aceitável.
+- **Opcional, não recomendado agora:** um backfill no servidor (SQL Editor) aplicando as fusões em todos os blocos. Mexe em dado de produção:
+  só com autorização explícita da dona e depois do Staging.
+- Course Decks: unidade nova ganha deck sozinha (`ensure_course_decks`); deck de unidade que deixar de existir fica vazio e escondido.
+
+### 2.6 Plano de testes
+
+Pasta nova `tests/curriculo-ids/`:
+1. **Congelamento sem efeito:** constrói `STATE.cards` antes e depois das chaves e compara o conjunto de ids (tem de ser idêntico) e o texto.
+2. **Contas simuladas reais:** 5 saves sintéticos com o formato real (aluno no começo, no meio de uma unidade, A1 quase completo, curso
+   `frances` + `frances@en`, conta com cartões da professora e próprios), gerados a partir do conteúdo atual com FSRS variado.
+   Opcional e melhor: 3 saves de produção anonimizados (só com autorização da dona; ler sem gravar).
+3. **Conteúdo v2 de teste** com as operações da seção 5 (reordenar A1-3, mover números do A1-10, fundir *français*, *manger*, *hier*,
+   aposentar *récemment*, inserir A1-21) e verificação, item a item: mesmo `stability`, `difficulty`, `due`, `reps`, `lapses`, `state`,
+   `lastReview` para todo item mantido ou movido; regra de fusão aplicada; aposentado no arquivo; nada some.
+4. **Ida e volta** (molde de `tests/e4/test_progresso_ida_e_volta.js`): carregar → salvar → zerar → carregar duas vezes = estado igual.
+5. **Volta de item aposentado:** aposentar e "desaposentar" devolve o progresso.
+6. **Portão:** palavra estudada movida para unidade não iniciada continua na revisão; palavra nova na mesma unidade não entra antes da lição.
+7. **Cron:** contagem de "palavras prontas para revisar" antes x depois igual para os saves simulados (Deno test sobre a função pura).
+8. Regressão das áreas tocadas: `tests/trilha`, `tests/trilha-tags`, `tests/fase-e`, `tests/k2*`, `tests/curso-progresso`, `tests/e4`,
+   `tests/camada-curso`, `tests/i18n`; navegador nos 4 cenários (skill `teste-navegador`).
+
+### 2.7 Riscos
+
+| Risco | Mitigação |
+|---|---|
+| Chave congelada errada muda um id | teste 1 bloqueia o merge; script determinístico; revisão do diff só de `"k"` |
+| Aba antiga (código antigo em cache) salva por cima do bloco e apaga `retiredStudyCards` | subir a versão dos arquivos para forçar recarga; o código antigo não conhece fusões, mas também não apaga cartões existentes; o arquivo perdido só afeta itens já excluídos |
+| Fusão escolhe o estado "errado" | regra simples e documentada (revisão mais recente vence); o perdedor fica no arquivo e pode ser restaurado |
+| Cron sem novo deploy conta errado | o deploy faz parte da etapa; até lá, nada se move (Etapa 0 não muda ids) |
+| zh quebra | item sem `k` usa a regra antiga; testes do zh rodam na regressão |
+| Esquecer o script e editar à mão | teste novo compara posições x chaves x camadas; o PR de conteúdo sem `ops.json` falha |
+
+### 2.8 Esforço
+
+Médio. Código ~300 a 400 linhas (modelo, carregamento, portão, cron), 2 scripts, ~10 testes novos. Estimativa: **2 PRs** (0a: chaves +
+id derivado + arquivo + `released` + testes; 0b: script de operações + mapa do cron + deploy), 2 a 4 sessões de trabalho.
+Grátis x Premium: infraestrutura, **nada muda para o aluno** (tudo grátis, invisível).
+
+### 2.9 O que a Etapa 0 libera
+
+Com ela publicada, as propostas deste documento deixam de se limitar a "só acrescentar": **reordenar** palavras dentro da unidade, **mover**
+itens entre unidades (e para o A2), **fundir** repetições, **excluir** o que não serve e **reescrever** frases. As seções 4, 5 e 11 já usam isso.
+Nenhuma mudança de conteúdo entra antes da Etapa 0.
+
+### 2.10 Unidade nova antes de unidade já concluída (decisão da dona)
+
+Regra simples: **a unidade nova nasce aberta, mas não concluída.** No carregamento, para cada nível, uma unidade fica aberta se ela é a 1ª do
+nível, se a anterior está concluída **ou se alguma unidade depois dela no mesmo nível já está aberta**. Não é bloqueio nem tarefa obrigatória:
+o aluno vê a unidade no mapa, pode fazer quando quiser, e ela não exige nada para ele seguir. Ponto de verificação e Teste de Nível já
+aprovados continuam aprovados. Efeito visível: a porcentagem do módulo cai um pouco (há uma unidade a mais por fazer). São poucas linhas em
+`applySerializedState` (a mesma ideia de `markUnitCompleted`, `fr/app.js:4485-4501`), sem campo novo no save.
 
 ---
 
-## 4. REMOÇÕES e DESLOCAMENTOS
+## 3. FALTAS no A1 (priorizadas, v2)
 
-### 4.1 O que sai do A1 (ou ganha etiqueta de outro nível)
+P0c = P0 **confirmado pela dona**; P0 = proposto; P1 = núcleo A1 que falta; P2 = ajuste. Coluna "Operação" usa o vocabulário da Etapa 0.
 
-| # | Item | Hoje | Proposta | Motivo / fonte |
-|---|---|---|---|---|
-| R1 | Jogo "Passé composé ou Imparfait?" | aberto a qualquer aluno, sem nível (`fr/conj-games.js`) | Etiqueta **A2** e sugestão só depois do A2-g3; no A1, jogos novos (seção 6.1) | imperfeito e alternância = A2 em todas as fontes (`02` 9.2) |
-| R2 | Tempos imparfait, futur simple, conditionnel (A2), plus-que-parfait, subjonctif (B1) na Conjugação | sem etiqueta | Etiqueta de nível no seletor de tempo (não trancar) | `02` 9.2 e 10.5 |
-| R3 | A1-g7 Comparativos | A1-m5 | **Fica no A1** (decisão 2), no fim do módulo de descrição, com input novo: 3 frases acrescentadas em A1-16 e A1-17 (*Ma chambre est plus petite que le salon.*) | zona cinza (AE 8.3 ponte; GP 33-34 A1; D1 não tem); validador acusa 0 input |
-| R4 | Frase "Je vais détester ce plat" (A1-5) | 1ª aparição do futuro próximo, sentido estranho | Reescrever no mesmo índice: *Je vais prendre un café.* (troca de texto mantém o id; regenerar áudio) | coerência pedagógica (frase que o aluno vê precisa responder a uma situação real) |
-| R5 | 5 notas de realidade iguais sobre pergunta *in situ* (A1-2, A1-3, A1-9, A1-10, A1-20) | 5 das 15 notas de realidade tratam do mesmo fenômeno (conferido agora) | Manter A1-2 (primeira) e A1-20 (passado); nas outras 3, encurtar para 1 linha "como no A1-2" ou tirar (decisão 12). Depois do A1-g12 a regra fica numa tela própria | regra da skill `notas-de-realidade`: nunca duplicar o que a gramática ensina |
-| R6 | "On est allés au cinéma" no diálogo do A1-20 | passé composé com *être* antes de qualquer ensino | Manter (é input para o A1-g16), mas a nota nova do A1-20 avisa "com alguns verbos é *je suis* + particípio; você vai ver isso daqui a pouco" | input antes da gramática |
+| # | Prio. | Falta | Proposta concreta | Operação | Fontes |
+|---|---|---|---|---|---|
+| 1 | P0c | Números 4 a 9 nunca são vocabulário | A1-3 vira "Números de 0 a 10": *zéro, un/une, deux, trois, **quatre, cinq, six, sept, huit, neuf**, dix, combien* **na ordem natural**; 3 lições de 4 | inserir 6 no meio; reordenar; mover *vingt, l'âge, avoir, ans* para A1-21 | AE 0; D1 1.1; GP 28 |
+| 2 | P0c | Números 11 a 19 | nova **A1-21 "Números de 11 a 20 e a idade"**: *onze... dix-neuf, vingt, l'âge, avoir, ans* (13); frases e diálogo de idade **movidos** do A1-3; 21 a 29 numa nota ("*vingt et un*, depois sem *et*") | nova + mover | AE 0; D1 1.1 |
+| 3 | P0c | Gênero, artigos, plural | nova **A1-g11** "Artigos, gênero e plural" (v1 item 4, igual) | nova | AE 0, 1.2; D1 1.1, 2.2; GP 10-12; GeDD 2 |
+| 4 | P0c | Negação e perguntas | nova **A1-g12** "Frase negativa e perguntas": *ne... pas*; 3 jeitos de perguntar (entonação, *est-ce que*, inversão só para reconhecer); interrogativos; *quel*; **tela "o jeito da rua"** que absorve as notas *in situ* (Dúvida b) | nova | AE 1.1-2.2; D1 2.1-2.2; GP 5, 51-52; GPI 3 |
+| 5 | P0c | *aller* + futuro próximo + contraídos | nova **A1-g13** (v1 item 6, igual) | nova | AE 2.2, 4.2; D1 6.1, 7.1; GeDD 5, 13 |
+| 6 | P0 | Dados pessoais, soletrar | nova **A1-23** (v1 item 7) + atividade final do módulo 2 (formulário e soletrar, seção 7) | nova | DELF A1 PE1 |
+| 7 | P0 | Produção escrita | cartão-postal e outras tarefas viram **atividade final Premium dos módulos** (seção 7) | | DELF A1 PE2 |
+| 8 | P0 | Passé composé antes da hora | A1-20 vira "primeiro contato" (objetivo e nota novos), A1-g9 só com *avoir*, nova **A1-g16** com *être* e pronominais, frase "Você concluiu o A1" vai para o Teste de Nível (v1 item 9) | texto + nova | AE 4.3, 5.3; D1 8.2; GeDD 16-20 |
+| 9 | P0 | Dias e meses incompletos | A1-7 vira "Dias da semana": *lundi... dimanche* **na ordem**, *aujourd'hui, demain, hier, la semaine* (11); nova **A1-24 "Meses e datas"**: *le mois, la date* (movidos do A1-7), *janvier* e *décembre* (movidos) + os 10 meses que faltam, **na ordem** (14) | inserir, reordenar, mover | AE 1.1-1.2; D1 5.2; VP 15 |
+| 10 | P0 | Profissões | nova **A1-22** (v1 item 11) | nova | AE 3.1; D1 1.2; VP 17 |
+| 11 | P1 | Números 30 a 100 misturados com roupas no A1-10 (14 palavras) | nova **A1-28 "Números de 30 a 100 e preços"**: *trente... cent* (8, **movidos** do A1-10) + *mille, le prix*; o A1-10 vira "Roupas e compras" com *la chemise, le pull, les chaussures, essayer* (10) | mover + inserir | AE 0, 1.2; VP 9, 13; CPD 6 |
+| 12 | P1 | Imperativo | telas novas no A1-g6 (v1 item 12) | | AE 4.2, 5.2; D1 7.2 |
+| 13 | P1 | Partitivos e quantidade | nova **A1-g14** (v1 item 13) | | AE 7.1, 8.1; D1 8.1 |
+| 14 | P1 | Adjetivos, demonstrativos, *c'est* x *il est* | nova **A1-g15** (v1 item 14) | | AE 2.3, 3.2, 5.3; GPI 5 |
+| 15 | P1 | Pronomes tônicos | tela no A1-g1 (v1 item 15) | | AE 3.2; GPI 29 |
+| 16 | P1 | Convidar, aceitar, recusar **e desculpar-se** | nova **A1-27** "Convites, festas e desculpas": *la fête, l'anniversaire, inviter, le cadeau, libre, d'accord, avec plaisir, volontiers, désolé / désolée, dommage* + frases *Excusez-moi, je suis en retard. Pardon, je ne peux pas.* (o `02` 12.3 põe desculpar-se e negar no fim do A1) | nova | AE 4.2, 5.1; CPD 22, 25, 26 |
+| 17 | P1 | Viagem e hospedagem | nova **A1-26** (v1 item 17) | | AE 2.2-6.3; CPD 5 |
+| 18 | P1 | Refeições e restaurante | nova **A1-25** (v1 item 18) | | AE 7.1; D1 8.1; CPD 4 |
+| 19 | P1 | Fonética | 7 notas de explicação (v1 item 19 e 8.3) | | AE, D1 |
+| 20 | P1 | Francofonia | notas (v1 seção 8) | | AE, D1 |
+| 21 | P1 | Gostos | *adorer* no A1-19 (depois de *chanter*, na lição dos verbos de lazer) + nota *aimer* + infinitivo e *moi non plus* | inserir | AE 1.3; CPD 30 |
+| 22 | P1 | Causa (*pourquoi / parce que*) | A1-27 (nota) | | AE 2.1; D1 6.1 |
+| 23 | P1 | Rotina sem *se coucher* | A1-6: *se coucher* entra no lugar de *manger* (fundido com o do A1-5, item R7) | fundir + inserir | AE 3.3; VP 11 |
+| 24 | P1 | Onde se mora | A1-9 ganha *habiter* e *la ville* no lugar de *français* e *brésilien* (fundidos com o A1-2) | fundir + inserir | AE 1.2; D1 1.2 |
+| 25 a 33 | P2 | iguais à v1 (descrição física, pagamento, *y*, COD, família, horários, telefone, V/F nas 12 unidades, frases em A1-9 e A1-18) | v1 itens 24 a 33, sem a restrição "no fim" | | |
 
-**Nada do núcleo A1 sai.** O passé composé **fica no A1** (todas as fontes fecham o A1 com ele, `02` 10.2), só muda de forma (4.2).
+Correções de texto e gancho (v1, 3.1) continuam iguais, com uma mudança: a reordenação das lições do A1-2 (anomalia 28) agora pode
+reordenar também as **palavras** (L1 *je, tu, s'appeler, le nom*; L2 *être, le pays, la France, le Brésil*; L3 *français, brésilien* + diálogo).
 
-### 4.2 Deslocamentos e mudanças de ordem
+---
+
+## 4. Remoções, fusões, deslocamentos e reordenações (liberados pela Etapa 0)
+
+### 4.1 Fusões de repetições
+
+| Repetição (`01` 5.2) | Fica | Sai (vira fusão) | O que entra no lugar |
+|---|---|---|---|
+| *français / française* | A1-2 (`A1-2-v7`) | A1-9 (`A1-9-v0`) | A1-9: *habiter* |
+| *brésilien / brésilienne* | A1-2 (`A1-2-v8`) | A1-9 (`A1-9-v1`) | A1-9: *la ville* |
+| *manger* | A1-5 (`A1-5-v7`) | A1-6 (`A1-6-v6`) | A1-6: *se coucher* |
+| *hier* | A1-7 (`A1-7-v4`) | A1-20 (`A1-20-v0`) | A1-20: *tôt* e *tard* (usadas no A1-g9: *Je me suis levé tôt.*) |
+| 70, 80, 90 em A1-10 e A1-g10 | sem fusão: o A1-g10 é gramática (não gera cartão) | | |
+| Frases repetidas ("Combien ça coûte ?", "Je suis {nacionalidade}.") | 1ª ocorrência | 2ª: reescrita com variação, **mesma chave** (mesmo sentido) | |
+
+Regra de fusão do FSRS: seção 2.3, item 6. O diálogo do A1-9 deixa de repetir "Je suis brésilien" e passa a falar de origem e moradia de terceiros.
+
+### 4.2 Exclusões
+
+| Item | Por quê | Para onde vai o progresso |
+|---|---|---|
+| *récemment* (A1-20) | baixa frequência na fala de A1, difícil de pronunciar, nenhuma frase depende dela | **movida para o A2** (A2-6, relato), progresso intacto. Se a dona preferir excluir de vez: arquivo (volta se a palavra voltar) |
+| Frase "Je vais détester ce plat" (A1-5) | sentido estranho para a 1ª aparição do futuro próximo | aposentada; entra *Je vais prendre un café.* com chave nova; regenerar áudio |
+| 3 notas *in situ* (A1-3, A1-9, A1-10) | repetidas (Dúvida b) | notas não têm FSRS: encurtar para 1 linha agora; tirar as do A1-9 e A1-10 quando o A1-g12 existir (decisão 13) |
+
+### 4.3 Deslocamentos (unidades e itens)
 
 | # | O quê | De | Para | Por quê |
 |---|---|---|---|---|
-| D1 | Passé composé com *être* e pronominais | dentro do A1-g9 | nova **A1-g16**, logo depois do A1-g9 | A1-g9 hoje ensina dois auxiliares de uma vez sem input de *être* (validador: 0 antes); AE separa em 4.3 e 5.3; GP em 44-45 e 46 |
-| D2 | Ordem A1-20 → A1-g9 | igual | **igual** (input antes da gramática), com o A1-20 reescrito como "primeiro contato" | regra da casa (`grammar_input_map.json`); a anomalia é de texto (objetivo e nota), não de ordem |
-| D3 | A1-4 Família e A1-g2 Possessivos | A1-m1 | novo módulo **"Quem é você"** (id `A1-m7`, exibido como Módulo 2) | equilibrar: o m1 ganha A1-21 e perde 2; fica identidade/números, e família vai com profissões e dados pessoais |
-| D4 | A1-11 Mercado e A1-12 Quantidades | A1-m3 (7 unidades) | novo módulo **"Comer e comprar"** (id `A1-m8`, exibido como Módulo 5) | o m3 tem 7 unidades e 54 palavras (anomalia 3); juntam-se a A1-g14 e A1-25 |
-| D5 | Ordem relativa das 30 unidades existentes | | **inalterada** (só inserções entre elas) | não reabrir desbloqueio de quem está no meio |
-| D6 | Mensagem de fim do A1 | A1-g9 | tela do Teste de Nível `A1-final` | anomalia 27 |
-| D7 | Nota `vingt-to-quatrevingts` (base 20) | A1-3 | fica, mas o exemplo de 80 vira "você vai ver no A1-10" | é prévia; a regra fica no A1-g10 |
+| D1 | *vingt, l'âge, avoir, ans* + frases e diálogo de idade | A1-3 | A1-21 | A1-3 só com 0 a 10 (o aluno aprende a contar antes de dizer a idade); A1-21 fecha "números até 20 + idade" e já vem colada no A1-g1 (*avoir*) |
+| D2 | *le mois, la date, janvier, décembre* | A1-7 | A1-24 | meses juntos e em ordem |
+| D3 | *trente... cent* (8) | A1-10 | A1-28 | o A1-10 tinha 14 palavras e misturava roupa com número |
+| D4 | A1-14 Transporte e A1-g5 (*faire, prendre*) | A1-m4 | A1-m3 (cidade) | transporte é cidade; *prendre le métro* fecha o módulo da cidade |
+| D5 | A1-9 e A1-g4 | ordem A1-g4 → A1-9 | **A1-9 → A1-g4** | input antes da gramática (o validador acusava 0 input para o A1-g4) |
+| D6 | A1-10, A1-11, A1-12, A1-g10 | A1-m3 | novo módulo **A1-m8 "Compras"** | o m3 tinha 7 unidades |
+| D7 | A1-4 e A1-g2 | A1-m1 | novo módulo **A1-m7 "Quem é você"** | igual à v1 |
+| D8 | A1-13 Clima | A1-m4 | continua no A1-m4, que vira "Viagem, tempo e saúde" (clima entra no cartão-postal) | |
+| D9 | Mensagem de fim do A1 | A1-g9 | Teste de Nível | anomalia 27 |
+| D10 | Passé composé com *être* | dentro do A1-g9 | nova A1-g16 | v1 D1 |
 
-### 4.3 Repetições (o que fazer sem quebrar FSRS)
+### 4.4 O que sai do A1 ou ganha selo de outro nível
 
-| Repetição (`01` 5.2) | Proposta |
-|---|---|
-| *français/e*, *brésilien/ne* no A1-2 e no A1-9 | Manter os dois cartões (apagar quebraria FSRS). Recentrar o A1-9 em **origem e moradia de terceiros** (*Il vient d'Italie, il habite à Lyon*) com frases novas no fim; o diálogo do A1-9 deixa de repetir "Je suis brésilien" |
-| *manger* em A1-5 e A1-6; *hier* em A1-7 e A1-20 | Aceitar (são verbos/advérbios centrais). Opcional futuro: marcar o 2º como "revisão" na tela de introdução (precisa de código) |
-| Frases repetidas ("Combien ça coûte ?", "Je suis {nacionalidade}.") | Trocar o texto da 2ª ocorrência no mesmo índice por uma variação (*Ça coûte combien, ce pantalon ?*) |
-| 70, 80, 90 no A1-10 e no A1-g10 | Manter (vocabulário + sistematização é o padrão da casa) |
+- Jogo "Passé composé ou Imparfait?" e tempos A2/B1 da Conjugação: selo de nível (Dúvida a, decisão 15), tratado em `05-...`.
+- Nada do núcleo A1 sai. O passé composé fica no A1 (todas as fontes fecham o A1 com ele; GeDD 16-20 confirma).
+- O comparativo (A1-g7) fica no A1 se a dona aprovar a decisão 9.
 
-### 4.4 Desequilíbrios de unidades e módulos
+### 4.5 Tamanho das unidades
 
-| Medida | Hoje | Proposta |
+Padrão 10 palavras. Exceções aceitas por serem **conjuntos fechados** que se aprendem juntos: A1-3 (12), A1-21 (13), A1-7 (11),
+A1-24 (14), A1-19 (11). Decisão 11.
+
+---
+
+## 5. Lista de operações da reorganização do A1 (para o `ops.json`)
+
+Ordem de aplicação, todas depois da Etapa 0. Itens novos ganham chave nova; nada aqui muda id de item que já existe.
+
+1. `insert` A1-3: *quatre, cinq, six, sept, huit, neuf* entre *trois* e *dix*; `move` *vingt, l'âge, avoir, ans* → A1-21 (*combien* fica no A1-3).
+2. `insert` unidade A1-21 depois do A1-3; `move` frases/falas de idade do A1-3 → A1-21; frases novas de 0 a 10 no A1-3 (só com vocabulário visto).
+3. `reorder` A1-2 (lições e palavras, anomalia 28).
+4. `merge` A1-9-v0 → A1-2-v7; A1-9-v1 → A1-2-v8; `insert` A1-9 *habiter, la ville*.
+5. `merge` A1-6-v6 → A1-5-v7; `insert` A1-6 *se coucher*.
+6. `insert` A1-7 *mercredi, jeudi, vendredi, samedi, dimanche* (na ordem, depois de *mardi*); `move` *le mois, la date, janvier, décembre* → A1-24.
+7. `insert` unidade A1-24 depois do A1-7 com os 10 meses restantes, em ordem.
+8. `insert` unidade A1-28; `move` A1-10-v6 a v13 → A1-28; `insert` *mille, le prix*; `insert` A1-10 *la chemise, le pull, les chaussures, essayer*.
+9. `merge` A1-20-v0 → A1-7-v4; `move` *récemment* → A2-6; `insert` A1-20 *tôt, tard*.
+10. `insert` *adorer* no A1-19.
+11. `retext` (mesma chave): frases repetidas; `retire` + `insert`: frase R4 do A1-5.
+12. `insert` unidades A1-22, A1-23, A1-25, A1-26, A1-27 e gramáticas A1-g11 a A1-g16.
+13. Módulos: recompor conforme a seção 11 (ids de módulo antigos mantidos; 2 novos).
+
+Cada operação gera, no relatório do script, a lista de alunos afetados (simulada no teste) e o que muda no áudio (texto novo = mp3 novo,
+skill `audio-tts`) e nos Desafios/ditados (módulo de cada linha).
+
+---
+
+## 6. PROPOSTA DE A2 (redimensionada)
+
+### 6.1 Cálculo do tamanho
+
+| Evidência | Valor | Confiança |
 |---|---|---|
-| Unidades por módulo | 4 a 7 | 4 a 6 (seção 9) |
-| Palavras por unidade | 10, exceto A1-10 (14) | A1-3 (16) e A1-7 (15) passam do padrão por causa do "só acrescentar"; aceitável e documentado |
-| Notas de realidade/cultura | A1-8, A1-12, A1-13, A1-18 com 0 | propostas na seção 8 (sem forçar no A1-18) |
-| Gramática por módulo | 1 a 2 | 1 a 2 (as novas entram distribuídas) |
+| Horas guiadas CEFR (estimativas de editoras e da Alliance Française) | A1: ~60 a 100 h; A2: ~180 a 200 h **acumuladas** → o A2 sozinho = ~80 a 140 h | média (números de mercado, não do Conselho da Europa) |
+| Razão A2 / A1 em horas (pontos médios) | (190 − 80) / 80 ≈ **1,4** (faixa possível 0,8 a 2,3) | média |
+| Vocabulário (regra prática citada por editoras) | A1 ~500 a 700 palavras; A2 ~1.000 a 1.500 acumuladas → o A2 acrescenta **pelo menos tanto quanto o A1** | baixa a média (estimativas variam muito) |
+| Tópicos novos de gramática no A2 (`02` 9.2, 10.4, 12.3; D2 1-8; GPI 17-47; rappels do D3) | ~26 pontos (lista na 6.3) contra 16 do A1 revisado | alta |
+| Temas de comunicação novos (D2 1-8, CPI 6 blocos, VPI, CPD IV-VI, DELF A2) | ~34 situações (lista na 6.3) contra 28 do A1 revisado | média-alta |
+| Competências exigidas a mais no DELF A2 | relato no passado, carta com função, monólogo de 2 min, interação com negociação (`03` seção 3) | alta |
 
----
+A1 revisado (seção 11): 44 unidades (28 de vocabulário + 16 de gramática), ~291 palavras-cartão, 8 módulos.
 
-## 5. PROPOSTA DE A2
+**Parâmetro F (tamanho do A2 em relação ao A1):**
 
-**Tamanho:** 8 módulos, **34 unidades** (19 de vocabulário/situação + 15 de gramática), ~190 palavras novas, mesmo molde do A1 (10 palavras, 3 lições + consolidação, diálogo com 3 checagens, 1 nota de explicação por unidade). Cada módulo fecha com uma **tarefa DELF A2** (seção 7) e o nível fecha com um **Teste de Nível A2 em formato DELF**.
-Base: D2 (unidades 1 a 8), AE 8-9 (ponte), CPI, VPI, GEF; tarefas do DELF A2 (`03` seção 3). Léxico = inferência minha a partir dos temas (confiança média).
-Grátis x Premium: igual ao A1 (trilha aberta; Desafios Premium com paywall desligado; 1 ditado grátis por módulo). Decisão 9.
-
-### A2-m1 · Lembranças (DELF A2: monólogo "fale da sua infância"; PE: contar uma lembrança)
-
-| Unidade | Objetivo comunicativo | Gramática | Léxico (10) | Notas | Desafios | Conjugação |
-|---|---|---|---|---|---|---|
-| A2-1 Minha infância | Descrever como era a vida de criança, hábitos do passado | uso do imperfeito (input) | *l'enfance, l'enfant, le souvenir, se souvenir de, le jouet, le copain / la copine, l'école primaire, la récréation, autrefois, d'habitude* | cultura/costume: quarta-feira sem aula na escola primária francesa (alta); realidade/informal: *la récré* (alta) | OT 2; Acentuação (*récréation, école*); Expressões: *Quand j'étais petit(e)...*, *Ça me rappelle...* | imparfait de *être, avoir, aller, jouer, habiter* |
-| A2-g1 O imperfeito | | formação (radical do *nous* + *-ais*), *être → j'étais*; usos: descrição e hábito | | | Complete a frase 5 | imparfait (todos os grupos) |
-| A2-2 Antes e agora | Comparar a vida antes e hoje; cidade x campo | imperfeito x presente; comparativo (revisão do A1-g7) | *la ville, la campagne, le village, le bruit, calme, bruyant, la vie, changer, maintenant, avant* | cultura: os "néo-ruraux" (média); expressão *métro, boulot, dodo* (registro familiar, alta) | OT 2; Expressões 2 | *changer, vivre, devenir* |
-| A2-g2 Momentos da ação | | *venir de* (passado recente), *être en train de*, *être sur le point de*, *commencer à*, *arrêter de* | | | Complete a frase 5 | présent de *venir, être* |
-
-### A2-m2 · Contar uma experiência (DELF A2 PE 1: relato de 60 palavras; CO: anúncios de estação/aeroporto)
-
-| Unidade | Objetivo | Gramática | Léxico (10) | Notas | Desafios | Conjugação |
-|---|---|---|---|---|---|---|
-| A2-3 Uma viagem inesquecível | Contar uma viagem (o que aconteceu + como era) | input PC + imperfeito | *le voyage, le séjour, l'avion, l'aéroport, le vol, le paysage, la visite, découvrir, inoubliable, rater* | francofonia: destino fora da França (Quebec ou Senegal) (alta); *faire escale* | OT 2; Acentuação (*séjour, aéroport*); Ditado de relato | PC com *être* (*partir, arriver, rester, rentrer*) + imparfait |
-| A2-g3 Passé composé x imperfeito | | ação pontual x cenário/descrição; marcadores (*soudain, tout à coup* x *d'habitude*) | | | Complete a frase 6 | PC e imparfait |
-| A2-4 Um imprevisto | Contar um problema e como se resolveu | conectores do relato (*d'abord, ensuite, puis, enfin*) | *perdre, oublier, tomber en panne, en retard, la grève, le problème, heureusement, malheureusement, soudain, tout à coup* | cultura: *la grève* nos transportes (alta) | OT 2; Expressões: *Quelle galère !* (familiar), *Pas de chance !* | *perdre, oublier, tomber* |
-| A2-g4 Tempo, duração e concordância | | *il y a, depuis, pendant, en, ça fait... que*; concordância do particípio com *être* (revisão do A1-g16) | | | Complete a frase 5 | |
-
-### A2-m3 · Objetos e compras (DELF A2 PO 3: devolver/trocar um produto; CE: anúncio)
-
-| Unidade | Objetivo | Gramática | Léxico (10) | Notas | Desafios | Conjugação |
-|---|---|---|---|---|---|---|
-| A2-5 Descrever um objeto | Dizer forma, matéria, função | *ça sert à*, *c'est en* + matéria | *l'objet, la forme, rond, carré, en bois, en métal, en plastique, léger, lourd, pratique* | | OT 2; Acentuação (*léger, carré*) | *servir, utiliser* |
-| A2-g5 Relativos *qui, que, où* | | *l'objet qui..., le livre que..., la ville où...* | | | Complete a frase 6 | |
-| A2-6 Comprar on-line e reclamar | Encomendar, reclamar, trocar, pedir reembolso | condicional de cortesia como fórmula (*je voudrais échanger*) | *la commande, la livraison, livrer, le colis, rembourser, échanger, le ticket de caisse, abîmé, marcher (funcionar), la réclamation* | realidade/informal: *Ça marche pas* (alta) | OT 2; Expressões: *C'est pas normal !*, *Je ne suis pas satisfait(e)* | *rembourser, échanger, livrer* |
-| A2-g6 Comparativo e superlativo | | revisão de *plus/moins/aussi... que*; *le plus, le moins, le meilleur, le mieux* | | | Complete a frase 5 | |
-
-### A2-m4 · Saúde e bem-estar (DELF A2 PO 3: consulta; CO: recado de consultório)
-
-| Unidade | Objetivo | Gramática | Léxico (10) | Notas | Desafios | Conjugação |
-|---|---|---|---|---|---|---|
-| A2-7 Na consulta | Marcar consulta, descrever sintomas, entender a receita | *depuis* + tempo (revisão) | *le rendez-vous, l'ordonnance, le médicament, le comprimé, tousser, le rhume, la grippe, se faire mal, allergique, la carte Vitale* | cultura: *carte Vitale* e *médecin traitant* (alta) | OT 2; Acentuação (*le médicament*, *l'ordonnance* não tem: só a primeira) | *tousser, se faire mal* |
-| A2-g7 Pronomes COD e COI | | *le, la, les, lui, leur*; lugar no presente, no PC, no futuro próximo e no imperativo | | | Complete a frase 6 | |
-| A2-8 Esporte e hábitos saudáveis | Falar dos hábitos e dar conselhos | | *la forme, en forme, courir, nager, la salle de sport, l'entraînement, le match, gagner, l'équipe, se reposer* | cultura/história: Tour de France (alta); realidade `familiar-giria`: *être crevé* (alta) | OT 2; Expressões: *Je suis crevé(e)*, *Allez, courage !* | *courir, nager* |
-| A2-g8 Condicional para aconselhar | | *tu devrais, vous pourriez, il faudrait, je voudrais*; imperativo negativo | | | Complete a frase 5 | conditionnel présent |
-
-### A2-m5 · À mesa (DELF A2 PO 3: reservar e pedir; CE: cardápio)
-
-| Unidade | Objetivo | Gramática | Léxico (10) | Notas | Desafios | Conjugação |
-|---|---|---|---|---|---|---|
-| A2-9 No restaurante | Reservar, pedir, apreciar e reclamar do prato | *en* com quantidade (input) | *la réservation, saignant, à point, bien cuit, le pourboire, délicieux, fade, salé, sucré, épicé* | cultura: *service compris* e gorjeta (alta) | OT 2; Acentuação (*épicé, salé*); Expressões: *C'est délicieux !*, *L'addition, s'il vous plaît* (já A1: não repetir) | |
-| A2-g9 Pronomes *en* e *y* | | *en* (quantidade, *de* + coisa), *y* (lugar, *à* + coisa: *penser à*) | | | Complete a frase 6 | |
-| A2-10 Receitas | Explicar uma receita (passos, quantidades) | imperativo e infinitivo de instrução | *la recette, couper, mélanger, cuire, ajouter, faire bouillir, la poêle, le four, la cuillère, l'ingrédient* | festividade: Chandeleur e crêpes (2 de fevereiro, alta) | OT 2; Ditado de receita | *cuire, mettre* |
-
-### A2-m6 · Estudos, trabalho e moradia (DELF A2 PO 2: monólogo sobre estudos/trabalho; CE: classificado)
-
-| Unidade | Objetivo | Gramática | Léxico (10) | Notas | Desafios | Conjugação |
-|---|---|---|---|---|---|---|
-| A2-11 Estudos e formação | Contar a formação e planos | futuro simples (input) | *les études, la fac, le diplôme, l'examen, réussir, rater (prova), le stage, le CV, la formation, s'inscrire* | cultura: *le bac* (alta); realidade/informal: *la fac* (alta) | OT 2; Acentuação (*diplôme, études*) | *réussir, s'inscrire* |
-| A2-g10 Futuro simples | | formação regular; irregulares *serai, aurai, irai, ferai, pourrai, viendrai, verrai*; *quand* + futuro | | | Complete a frase 6 | futur simple |
-| A2-12 Trabalho e regras | Falar do trabalho; obrigação, proibição, permissão | *il est interdit de, avoir le droit de, il faut / il ne faut pas* | *l'entreprise, le / la collègue, le / la chef, le salaire, l'emploi, le contrat, les congés, interdit, autorisé, le boulot* | cultura/história: as 35 horas e os *congés payés* de 1936 (alta); `familiar-giria`: *le boulot* (alta) | OT 2; Expressões 2 | |
-| A2-g11 Condição com *si* | | *si* + presente → presente/futuro/imperativo | | | Complete a frase 5 | |
-| A2-13 Procurar moradia e dividir apartamento | Ler classificado, perguntar, combinar regras | relativos (revisão) | *louer, le loyer, la colocation, le / la colocataire, l'annonce, meublé, les charges, déménager, le / la propriétaire, le quartier* | cultura: abreviações de classificado (T2, cc) (alta); realidade/informal: *la coloc* (alta) | OT 2; Acentuação (*meublé, propriétaire*) | *louer, déménager* (faltam no banco) |
-
-### A2-m7 · Comunicar e se relacionar (DELF A2 PE 2: carta para convidar, recusar, desculpar-se, agradecer; CO: mensagens de voz)
-
-| Unidade | Objetivo | Gramática | Léxico (10) | Notas | Desafios | Conjugação |
-|---|---|---|---|---|---|---|
-| A2-14 Telefonar e deixar recado | Ligar, atender, deixar e entender recado | pergunta formal por inversão (*Puis-je parler à... ?*) | *allô, rappeler, laisser un message, la messagerie, ne quittez pas, de la part de qui, raccrocher, occupé, le répondeur, le numéro* | realidade: *Allô* só ao telefone (alta) | OT 2; Ditado de recado | *rappeler* |
-| A2-15 Escrever para convidar, recusar, agradecer | Escrever mensagem/carta com função | fórmulas de abertura e fecho | *cher / chère, l'invitation, remercier, s'excuser, accepter, refuser, malheureusement, amitiés, bisous, cordialement* | realidade/informal: *Bisous* x *Cordialement* (alta) | OT 2; Expressões: *Je te remercie de tout cœur*, *Je suis vraiment désolé(e)* | *remercier, s'excuser* |
-| A2-g12 Discurso indireto e perguntas formais | | *il dit que, il demande si / ce que / où*; inversão produzida | | | Complete a frase 5 | |
-| A2-16 Sentimentos | Expressar sentimentos, felicitar, consolar | *je suis content(e) de* + inf. | *content, triste, fâché, inquiet, surpris, déçu, féliciter, consoler, félicitations, la nouvelle* | `familiar-giria`: *Ça me saoule* (média: registro forte, conferir) | OT 2; Expressões: *Félicitations !*, *Ne t'inquiète pas* | |
-| A2-g13 Negação complexa e restrição | | *ne... plus, ne... rien, ne... personne, ne... jamais* (revisão), *ne... aucun*, *ne... que* | | | Complete a frase 6 | |
-
-### A2-m8 · Opinião e cultura (DELF A2 PO 2: monólogo "um filme/livro"; CE: artigo curto)
-
-| Unidade | Objetivo | Gramática | Léxico (10) | Notas | Desafios | Conjugação |
-|---|---|---|---|---|---|---|
-| A2-17 Livro, filme, exposição | Apresentar e opinar sobre uma obra | *je pense que, à mon avis, j'ai trouvé ça...* | *le roman, l'auteur / l'autrice, le personnage, l'histoire, l'exposition, le tableau, le / la peintre, raconter, émouvant, ennuyeux* | cultura: *Le Petit Prince*; Orsay (estação virou museu, AE carnet D8) (alta) | OT 2; Acentuação (*émouvant*) | *lire, écrire, voir* (PC) |
-| A2-g14 Opinar e ligar ideias | | *parce que, comme, donc, alors, pourtant, grâce à, à cause de*; advérbios em *-ment* | | | Complete a frase 6 | |
-| A2-18 Meio ambiente e consumo responsável | Dizer o que faz pelo meio ambiente, concordar/discordar | | *l'environnement, la planète, trier, recycler, les déchets, gaspiller, la pollution, économiser, l'énergie, protéger* | costume: *tri sélectif* (média: as cores variam por cidade) | OT 2; Expressões: *Je suis d'accord / pas d'accord* | *protéger, recycler* |
-| A2-19 Viajar pela francofonia | Descrever uma paisagem e situar um lugar | lugar do adjetivo (revisão) | *le nord, le sud, l'est, l'ouest, la côte, l'île, le fleuve, la forêt, le désert, la région* | francofonia (Bélgica, Suíça, Quebec, Senegal, Reunião) (alta) | OT 2; Ditado | |
-| A2-g15 Pronomes demonstrativos e interrogativos | | *celui / celle / ceux / celles (-ci, -là)*; *lequel / laquelle* | | | Complete a frase 5 | |
-
-**Fora do A2 (teto, não entram):** mais-que-perfeito, futuro anterior, pronomes duplos, relativos compostos, gerúndio (só um livro A2 traz, D2 8), subjuntivo (só GEF 34, confiança baixa) → B1. *savoir* x *connaître* (promessa do A1-g6) entra como 2 telas no A2-g7 ou como nota de explicação no A2-11 (decisão 15).
-
----
-
-## 6. Conjugação, Desafios e Ditados
-
-### 6.1 Conjugação (`fr/app.js:5112-5150`, `fr/conjugation-data.js`, `fr/conj-games.js`)
-
-| # | Problema (`01`) | Proposta | Esforço |
-|---|---|---|---|
-| J1 | "Top N" não é frequência (anomalia 32): `CONJ_VERB_RANK` usa a ordem do arquivo, que é por grupo; com Top 10/25/50/100 o `g3oir` e quase todo `g3re/g3ir` somem | Trocar por uma lista explícita de frequência (`CONJ_FREQ_ORDER`) e manter a ordem do arquivo só como desempate. Lista inicial (memória de listas de frequência; **conferir com Lexique 3**, confiança média): *être, avoir, faire, aller, dire, pouvoir, vouloir, savoir, voir, venir, devoir, prendre, mettre, falloir, parler, passer, trouver, donner, comprendre, connaître, partir, croire, demander, penser, aimer, rester, sortir, attendre, entendre, vivre, arriver, entrer, écrire, lire, chercher, appeler, boire, jouer, finir, travailler, manger, ouvrir, écouter, regarder, habiter, acheter, payer, choisir, dormir, essayer* (50) | baixo |
-| J2 | Verbos da trilha ausentes (anomalia 33 + conferido agora) | Acrescentar: **A1**: *lever, réveiller, coucher, habiller, promener, amuser, reposer* (com suporte a pronominal: exibir *je me lève*, auxiliar *être* no PC), *détester, adorer, visiter, neiger, épeler, monter, rencontrer*; **A2**: *louer, déménager, marier* (*se marier*). Gerar as formas pelo mesmo pipeline Verbiste do cabeçalho do arquivo | médio (pronominal muda a exibição e o PC) |
-| J3 | *éteindre* no grupo `g1` (anomalia 34) | Mudar para `g3re` | baixo |
-| J4 | Sem ligação unidade → verbo/tempo | Botão "Praticar os verbos desta unidade" no fim de cada unidade, que abre a Conjugação com o filtro pronto (verbos da tabela 2.6 por unidade; tempo = présent, e passé composé a partir do A1-g9). Prática continua livre | médio |
-| J5 | Tempos sem nível (anomalia 35) | Etiqueta no seletor: Présent, Passé composé, Impératif = A1; Imparfait, Futur simple, Conditionnel = A2; Plus-que-parfait, Subjonctif = B1 | baixo |
-| J6 | Só 1 jogo, de nível A2 | Jogos A1 novos (Premium, como o atual): **"Être ou avoir?"** (auxiliar do PC, 20 frases com verbos do A1-g9/g16), **"Qual é o particípio?"** (*fait, pris, bu, vu, lu, eu, été, mis, dit, écrit*), **"Agora ou depois?"** (présent x futur proche, reconhecer *je vais* + inf.) | médio |
-| J7 | Imperativo existe no banco mas não na trilha | Resolvido pelo item 12 da seção 3 (A1-g6) | |
-
-Grátis x Premium: prática da Conjugação **grátis**; Jogos **Premium** (com cadeado, paywall desligado), como hoje (`CONJ_GAMES_PAYWALL_ENABLED=false`).
-
-### 6.2 Desafios por categoria (regra da skill `criar-desafios`)
-
-Regra a seguir em cada unidade/módulo novo: rodar `challengeChecklist(idioma, escopo)` e decidir **cada** categoria como `trail`, `premium` ou `n/a` com motivo; Ditado = trail (1 grátis + 2 Premium por módulo); Ouça e traduza, Acentuação, Expressões, Complete a frase = Premium; densidade: OT ~2 por unidade, Expressões ~5 por módulo, Acentuação só com acento real (´ ` ^ ¨, "ç" não conta); só vocabulário já visto no módulo; toda expressão com `register`; tudo entra `needs_review` com `.md` de revisão.
-
-| Lacuna (`01` 2.4, 5.7) | Proposta |
-|---|---|
-| **Complete a frase** só no A1-m6 (6, todos do A1-g9) | 3 a 6 `cloze_grammar` por unidade de gramática: A1-g1 a A1-g8, A1-g10 e as novas A1-g11 a A1-g16 (~70 novos no A1). É a categoria que mais falta, porque é a única que treina gramática fora da trilha |
-| Expressões ausentes em A1-3, A1-4, A1-9, A1-11, A1-18 | A1-3: `n/a` (motivo: números e idade não têm expressão fixa natural de nível A1; *Ça fait combien ?* já está no A1-10). A1-4: *Tel père, tel fils* (register `neutre`, confiança alta). A1-9: *Bienvenue en France !* (`neutre`, alta). A1-11: *J'ai un petit creux* (`familier`, alta). A1-18: `n/a` (motivo: unidade de posição de objetos, sem expressão natural de nível A1) |
-| Acentuação fora do alvo (*très* no A1-12/A1-16; *février/août* no A1-7) | Ver 3.1; *février/août* passam a ser alvo legítimo com a A1-24 |
-| Unidades novas A1-21 a A1-27 | OT 2 cada (14). Acentuação só onde há acento real no vocabulário proposto: A1-21 `n/a` (nenhum), A1-22 *l'infirmière* (è), A1-23 *le prénom, né / née, le numéro de téléphone*, A1-24 *février, août*, A1-25 *le petit-déjeuner, le dîner, l'entrée*, A1-26 *l'hôtel*, A1-27 *désolé, la fête*. Expressões ~5 por módulo novo: `A1-m7` (*Qu'est-ce que vous faites dans la vie ?*, *Ça s'écrit comment ?*, *Tel père, tel fils*, *Enchanté de faire votre connaissance*, *Je vous en prie*); `A1-m8` (*Et avec ceci ?*, *Ce sera tout ?*, *J'ai un petit creux*, *C'est délicieux !*, *Santé !*). Registro de cada uma a definir na geração |
-| Repo x produção (A1-m3 com 4 OT só na produção) | Exportar para o lote do repo antes de qualquer mudança de módulo |
-| Mudança de módulo de A1-4, A1-11, A1-12 (seção 4.2) | Atualizar o módulo dessas linhas na tabela `challenges` (13 linhas: A1-4 OT 2 + Acent. 3; A1-11 OT 2 + Acent. 2; A1-12 OT 2 + Acent. 1 + Expr. 1). **Dado em produção: só com autorização explícita da dona** e Staging antes |
-| A2 | 8 módulos × (OT ~8, Acentuação ~6, Expressões ~5, Complete a frase ~15) ≈ 270 desafios; gerar módulo a módulo |
-
-### 6.3 Ditados (`fr/dictations.js`, validador `python3 fr/scripts/check_dictation_vocab.py`)
-
-| Lacuna | Proposta |
-|---|---|
-| Módulos novos `A1-m7` e `A1-m8` não têm ditado | 3 por módulo (1 grátis + 2 Premium), 18 a 33 palavras como os atuais |
-| d1 e d3 podem usar palavras de A1-4 e A1-11/12, que mudam de módulo | Rodar o validador depois da mudança; se acusar, trocar a palavra no mesmo id de ditado |
-| Ditado só de frases corridas | 2 formatos novos, compatíveis com o motor de ditado: **"Ditado de números"** (telefone em pares, preços, idades: DELF A1 CO cobra números) no A1-m1 e m4, e **"Ditado de soletrar"** (nome e e-mail letra por letra) no A1-m7 |
-| Revisão do A1 (r1 a r3) | Refazer depois do A1 revisado, cobrindo profissões, datas e passado |
-| A2 | 8 × 3 + 3 de revisão = 27; tipos: relato (m2), recado (m7), receita (m5) |
-
----
-
-## 7. Exercícios e tipos de lição
-
-O motor hoje gera tudo a partir de campos da unidade (`01` seção 0): vocabulário (múltipla escolha, escuta, digitação), frases com blocos (ordenar, traduzir montando, cloze), cenário (o que você diz?), V/F, diálogo (lacuna, escuta, compreensão), telas de gramática + lacunas, consolidação, Ponto de verificação (12 itens, 70%) e Teste de Nível (5 por módulo, 75%). **Não há** produção livre, compreensão sem texto, documento autêntico nem prova por competência.
-
-| # | Tipo novo | O que é | Compatível com o motor? | Nível / onde | Grátis x Premium (proposta) | Fontes |
-|---|---|---|---|---|---|---|
-| E1 | **Produção escrita guiada** | Tela com tarefa (destinatário, objetivo, mínimo de palavras), 3 a 5 "peças obrigatórias" em lista de checagem (ex.: cumprimentar, dizer onde está, dizer o tempo, despedir-se), modelo de resposta revelado depois; o aluno se autoavalia nos itens. Correção automática só de formas obrigatórias (`mustInclude`, já existe para Ouça e traduza) | Sim, com campo novo `writingTask` por unidade e um renderer novo simples (texto livre + checklist). Correção pela professora (aluno vinculado) num 2º momento | A1: formulário (A1-23), cartão-postal (A1-26), convite (A1-27). A2: um por módulo (60 palavras) | Grátis com autoavaliação; correção da professora para alunos vinculados | DELF A1/A2 PE; AE projetos; D1 *défis* |
-| E2 | **Formulário** | Campos (nome, sobrenome, nacionalidade, data de nascimento, endereço, e-mail) com resposta aceita por campo; pode usar os marcadores de perfil (`{nome}`, `{nacionalidade}`) | Sim: vários `type_answer` numa tela | A1-23 | Grátis | DELF A1 PE parte 1 |
-| E3 | **Tarefa final do módulo** (estilo *défi* / projeto) | Fecho de cada módulo com uma produção que junta o módulo: "apresente sua família", "conte seu fim de semana". Formato E1 + gravação oral opcional (E6) | Sim (reusa E1) | 1 por módulo (A1 e A2) | Grátis | D1 (défi por dossiê), AE (projeto por dossiê) |
-| E4 | **Compreensão oral graduada** | Ouvir o diálogo **sem texto** 2 vezes, responder 3 perguntas de múltipla escolha, só então ver o texto. Depois, "documentos sonoros" curtos (anúncio de estação, recado de secretária eletrônica) | Sim: o diálogo já tem áudio e `check.listen`; precisa de um passo novo `listenFirst` antes do `dialogue` e de um campo `audioDocs` com perguntas | A1 a partir do m2; A2 todos | Grátis (trilha) | DELF A1/A2 CO (2 escutas); CEFR "ouvir anúncios" |
-| E5 | **Compreensão escrita com documento** | Card que imita placa, cardápio, horário, mensagem, classificado, com 3 perguntas | Sim: campo `readingDocs` (texto formatado/HTML ou imagem) + múltipla escolha existente | A1: placa de loja (A1-10), cardápio (A1-25), horário de trem (A1-14); A2: classificado (A2-13), e-mail (A2-15) | Grátis | DELF A1/A2 CE; CEFR "ler para se orientar" |
-| E6 | **Produção oral com gravação** | O aluno ouve a pergunta da "entrevista dirigida" (*Comment vous appelez-vous ? Qu'est-ce que vous faites ?*), grava a resposta, ouve o modelo e se autoavalia | Parcial: precisa de gravação (o editor de cartões já tem `audio.type='recording'`; reaproveitar o componente) | A1: entrevista (m1, m7); A2: monólogo de 2 min (m1, m6, m8) | Grátis autoavaliado; feedback da professora para vinculados | DELF A1/A2 PO |
-| E7 | **Diálogo em turnos (interação simulada)** | O "cenário" atual em sequência: 4 a 6 escolhas que constroem a conversa de compra/reserva | Sim: lista de `scenario` encadeados com o diálogo como roteiro | A1-10, A1-25, A1-26; A2-6, A2-9 | Grátis | DELF A1 PO 3 / A2 PO 3 |
-| E8 | **Pares mínimos (fonética)** | Ouvir e escolher: *rue/roue*, *tu/tout*, *le/les*, *deux/douze*, *ils sont/ils ont* | Sim: escuta + múltipla escolha. Risco: a voz TTS precisa diferenciar bem os pares (testar no laboratório de áudio) | nas unidades da seção 8.3 | Grátis | AE, D1 (fonética por lição) |
-| E9 | **Mini-prova estilo DELF por módulo** | Opcional, depois do Ponto de verificação: CO (2 documentos), CE (2 documentos), PE (E1), PO (E6), 25 pontos cada; CO e CE corrigidos, PE e PO autoavaliados por grade simples; aprovação 50/100 e 5/25 por parte, como o DELF | Sim, reusando E1, E4, E5, E6; não substitui o Ponto de verificação (que segue destravando) | fim de cada módulo; Teste de Nível A1 e A2 viram simulado completo | Decisão 8 (recomendo grátis) | DELF (`03` seção 1); D1 e D2 (avaliação a cada 2 unidades) |
-| E10 | **Mediação** | "Repasse a informação": ler um aviso em francês e responder em português a quem pergunta (*A que horas abre?*) | Sim: o comparador de tradução para pt-BR já existe (`shared/translation-compare.js`) | A1-6, A1-14, A1-25 | Grátis | CEFR CV, mediação |
-
-**Ordem recomendada:** E4 e E7 (só dados novos no padrão atual) → E1/E2/E3 (renderer simples) → E5 → E8 → E6 → E9.
-
----
-
-## 8. Notas de realidade e culturais: lacunas por tema
-
-Hoje (conferido agora): 15 de realidade (informal 5, gramática coloquial 9, regional 1) e 10 culturais (costume 6, história 4, **festividade 0**). 5 das 9 de gramática coloquial são sobre pergunta *in situ* (R5). Unidades sem nenhuma: A1-8, A1-12, A1-13, A1-18 e todas as de gramática (por regra). Regras da skill: só entra se responder à palavra ensinada naquele momento; nada de média/baixa confiança publicado sem a dona pedir; `familiar-giria` só a partir do A2.
-
-### 8.1 Propostas por tema (A1)
-
-| Unidade | Gatilho (palavra) | Tipo / categoria | Conteúdo proposto | Confiança |
+| F | Módulos | Unidades | Palavras-cartão | Quando escolher |
 |---|---|---|---|---|
-| A1-1 | *de rien* | realidade / regional | No Quebec, "de nada" é *Bienvenue !* (calco do inglês); na França, *de rien* ou *je vous en prie* | alta |
-| A1-8 | *la place* ou diálogo | cultura / costume | Paris dividida em 20 *arrondissements* em espiral; o número aparece no CEP (750**08**) | alta |
-| A1-8 | *pardon* / *Excusez-moi* (frase) | realidade / informal | *Pardon* para abrir caminho e chamar atenção na rua; *Excusez-moi* mais formal | média (conferir com a dona) |
-| A1-12 | *un demi-kilo* | realidade / informal | Na feira se ouve *une livre de tomates* (meio quilo) | alta |
-| A1-13 | *il fait froid* | realidade / regional | No Quebec, *il fait frette* (muito frio) | alta |
-| A1-13 | *le soleil* / diálogo | cultura / costume | Temperatura em graus Celsius; previsão *la météo* | alta (mas fraca como nota; opcional) |
-| A1-14 | *le métro* / *le vélo* | cultura / costume | Bicicletas compartilhadas nas grandes cidades | alta (sem citar marca) |
-| A1-15 | *la pharmacie* | cultura / costume | Cruz verde luminosa; farmacêutico orienta antes do médico; 15 (SAMU) e 112 | alta |
-| A1-18 | | nenhuma | Sem gatilho natural: não forçar | |
-| A1-21 | *dix-sept* | realidade / regional | Bélgica e Suíça: *septante, nonante* (Suíça romanda: *huitante* em alguns cantões). Cuidado: a nota do A1-3 já cita o tema; **mover** o conteúdo regional para cá e deixar no A1-3 só a base 20 | alta |
-| A1-21 | *vingt et un* | explicação (fonética) | Ligação: *vingt‿et un* [t], *dix-huit‿ans* [z]; *six* e *dix* mudam de som (*six ans* [z], *six livres* mudo) | alta |
-| A1-22 | *la professeure* | realidade / informal? (variação normativa) | Feminização das profissões: *professeure, ingénieure, autrice* hoje correntes; antes era *le professeur* para todos | média-alta (categoria a decidir: é variação de norma, não de registro) |
-| A1-23 | *l'adresse* | cultura / costume | Ordem do endereço francês: número + rua, CEP de 5 dígitos (2 primeiros = departamento) + cidade | alta |
-| A1-23 | *le mail* | realidade / regional | No Quebec, *le courriel*; na França *le mail / l'e-mail*; *arobase* = @ | alta |
-| A1-24 | *juillet* | cultura / festividade | 14 de julho, festa nacional (tomada da Bastilha, 1789) | alta |
-| A1-24 | *mai* | cultura / festividade | 1º de maio: costume de dar *muguet* (lírio-do-vale) | alta |
-| A1-24 | *le premier* (frase) | explicação | Só o dia 1 usa ordinal: *le premier mai*, mas *le deux mai* | alta |
-| A1-25 | *le déjeuner* | realidade / regional | Bélgica, Suíça e Quebec: *déjeuner* = café da manhã, *dîner* = almoço, *souper* = jantar | alta |
-| A1-25 | *la carte* | cultura / costume | Água da torneira (*une carafe d'eau*) e pão vêm de graça no restaurante | alta |
-| A1-25 | *le menu* | explicação (falso amigo) | *le menu* = prato feito/combinação de preço fixo; o cardápio é *la carte* | alta |
-| A1-26 | *les vacances* | cultura / história | *Congés payés* (1936) e as "grandes férias" de julho e agosto | alta |
-| A1-26 | *la carte postale* | realidade / informal | Fecho de cartão a amigo: *Bisous*, *Grosses bises*; a desconhecido não | alta |
-| A1-27 | *la fête* | cultura / festividade | *Fête de la musique* (21 de junho) | alta |
-| A1-27 | *l'anniversaire* | cultura / festividade | *Galette des rois* em janeiro (quem acha a fava é rei) | alta |
-| A1-27 | *d'accord* | realidade / informal | Na fala: *OK*, *Ça marche*, *Carrément* (este último já perto de `familiar-giria`: deixar para o A2) | alta (só *OK/Ça marche* no A1) |
+| 1,2 | 9 | ~52 (30 + 22) | ~360 (30 × 12) | se a dona quiser publicar o A2 mais cedo |
+| **1,4 (recomendado)** | **10** | **60 (34 + 26)** | **~408 (34 × 12)** | bate com a razão de horas e cobre os 26 pontos de gramática sem fundir temas |
+| 1,6 | 11 | ~70 (40 + 30) | ~480 | se a dona quiser A2 forte (A2+) e mais revisão |
 
-### 8.2 A2 (categorias que abrem no A2)
+Mais denso em competências que o A1 (proposta, vale para todo o A2): **12 palavras por unidade** (A1: 10); 12 frases (A1: 8 a 12);
+diálogo com 4 checagens (A1: 3); **compreensão oral sem texto antes do diálogo** em toda unidade (E4); 1 documento para ler por unidade
+(E5); atividade final Premium por módulo no formato DELF A2 (seção 7); Teste de Nível A2 = simulado DELF A2 completo.
 
-`familiar-giria` passa a valer: *le boulot*, *bosser*, *la bouffe*, *crevé*, *un truc*, *c'est nul*, *trop bien*, *ouf* (verlan, média: frequência alta entre jovens, registro a confirmar). Culturais: escola sem aula na quarta à tarde (A2-1), *carte Vitale* (A2-7), Tour de France (A2-8), Chandeleur (A2-10), *le bac* (A2-11), 35 horas (A2-12), classificados (A2-13), *Le Petit Prince* e Orsay (A2-17), *tri sélectif* (A2-18, média), francofonia africana e ultramar (A2-19). Confiança alta salvo indicado; tudo na tabela da seção 5.
+### 6.2 Fora do A2 (teto)
 
-### 8.3 Notas de explicação de fonética (não são "realidade"; são `concepts` de explicação)
+B1: mais-que-perfeito, futuro anterior, pronomes duplos, relativos compostos e *dont*, *si* + imperfeito/condicional, **passiva** (só a GeDD
+e a GPI trazem; nenhum método A1/A2), discurso indireto no passado, condicional passado, subjuntivo como sistema, pronomes possessivos
+(*le mien*: D3 U1). **No fim do A2 entra só** *il faut que / je veux que* + subjuntivo dos verbos mais frequentes, como fórmula (`02` 12.3, GEF 34).
 
-| Unidade | Gatilho | Ponto |
+### 6.3 Mapa do A2 (10 módulos, 60 unidades)
+
+Léxico = proposta minha a partir dos temas das fontes (confiança média; para a dona revisar). Nenhuma palavra repete o A1 revisado.
+Cada módulo termina com a atividade final Premium (seção 7.4). Notas: as da v1 (seção 5) continuam valendo para as unidades equivalentes.
+
+**A2-m1 · Lembranças e fases da vida** (DELF A2 PO2: "fale da sua infância")
+
+| Unidade | Objetivo | Léxico (12) ou conteúdo |
 |---|---|---|
-| A1-5 | *le pain* / *le poisson* | as vogais nasais: *pain* [ɛ̃], *poisson* [ɔ̃], *viande* [ɑ̃] (esta no A1-11, se preferir) |
-| A1-7 | *samedi* | *e* caduco: *sam'di* |
-| A1-8 | *la rue* | [y] x [u]: *rue* x *roue*; *tu* x *tout* |
-| A1-g3 | tela nova | as terminações *-e, -es, -ent* não se pronunciam: *je parle, tu parles, ils parlent* soam igual |
-| A1-g12 | tela nova | entonação: sobe na pergunta, desce na afirmação |
-| A1-21 | *vingt et un* | ligação (ver 8.1) |
-| A1-23 | *épeler* | alfabeto e nomes dos acentos (*accent aigu, grave, circonflexe, cédille, tréma*) |
+| A2-1 Minha infância | descrever como era e o que fazia | *l'enfance, l'enfant, le souvenir, se souvenir de, le jouet, le copain / la copine, l'école primaire, la récréation, la maîtresse / le maître, grandir, autrefois, d'habitude* |
+| A2-g1 O imperfeito | formação e usos (descrição, hábito) | |
+| A2-2 Antes e agora | comparar a vida de antes e de hoje | *la campagne, le village, le bruit, calme, bruyant / bruyante, la vie, changer, avant, maintenant, moderne, ancien / ancienne, à l'époque* |
+| A2-g2 Momentos da ação | *venir de, être en train de, être sur le point de, commencer à, arrêter de* | |
+| A2-3 Fases da vida | nascimento, casamento, mudança | *naître, la naissance, le bébé, l'adolescent / l'adolescente, jeune, vieux / vieille, se marier, le mariage, divorcer, déménager, la retraite, mourir* |
 
-Taxonomia: o código não tem categoria "pronúncia" (`REALITY_NOTE_*`); por isso elas entram como nota de **explicação**, sem mexer na taxonomia.
+**A2-m2 · Contar uma experiência** (DELF A2 PE1: relato de 60 palavras; CO: anúncios)
+
+| Unidade | Objetivo | Léxico (12) ou conteúdo |
+|---|---|---|
+| A2-4 Uma viagem inesquecível | contar uma viagem | *le voyage, le séjour, l'avion, l'aéroport, le vol, le paysage, la visite, découvrir, inoubliable, rater, faire escale, le décalage horaire* |
+| A2-g3 Passé composé x imperfeito | ação pontual x cenário | |
+| A2-5 Um imprevisto | contar um problema e a solução | *perdre, oublier, tomber en panne, être en retard, la grève, le problème, heureusement, malheureusement, soudain, tout à coup, réparer, se tromper* |
+| A2-g4 Passé composé a fundo | concordância do particípio, negação, pronominais | |
+| A2-6 Acontecimentos | contar um fato do bairro (acidente, roubo) | *l'accident, le vol (roubo), voler, le voleur / la voleuse, le témoin, la police, porter plainte, blessé / blessée, l'incendie, les pompiers, se passer, arriver (acontecer)* + *récemment* (movida do A1-20) |
+| A2-g5 Tempo, duração e conectores | *il y a, depuis, pendant, en, ça fait... que*; *d'abord, ensuite, puis, enfin* | |
+
+**A2-m3 · Objetos e consumo** (DELF A2 PO3: trocar um produto; CE: anúncio)
+
+| Unidade | Objetivo | Léxico (12) ou conteúdo |
+|---|---|---|
+| A2-7 Descrever um objeto | forma, matéria, função | *l'objet, la forme, rond / ronde, carré / carrée, en bois, en métal, en plastique, en verre, léger / légère, lourd / lourde, pratique, servir à* |
+| A2-g6 Relativos *qui, que, où* | | |
+| A2-8 Comprar on-line e reclamar | encomendar, reclamar, trocar, reembolso | *la livraison, livrer, le colis, rembourser, le remboursement, échanger, le ticket de caisse, abîmé / abîmée, marcher (funcionar), la réclamation, le service client, en ligne* |
+| A2-g7 Comparativo e superlativo | | |
+| A2-9 Consumo responsável | segunda mão, desperdício | *d'occasion, le vide-grenier, vendre, jeter, garder, utile, inutile, gaspiller, le gaspillage, la marque, la qualité, la mode* |
+| A2-g8 Pronomes demonstrativos | *celui, celle, ceux, celles (-ci, -là)* | |
+
+**A2-m4 · Saúde e bem-estar** (DELF A2 PO3: consulta; CO: recado de consultório)
+
+| Unidade | Objetivo | Léxico (12) ou conteúdo |
+|---|---|---|
+| A2-10 Na consulta | marcar, descrever sintomas, entender a receita | *le rendez-vous, l'ordonnance, le médicament, le comprimé, la douleur, tousser, le rhume, la grippe, se faire mal, allergique, guérir, la carte Vitale* |
+| A2-g9 Pronomes COD | *le, la, les* no presente, PC, futuro próximo | |
+| A2-11 Corpo e emergências | partes do corpo, acidente, pronto-socorro | *le bras, la jambe, le dos, la gorge, la dent, l'œil / les yeux, le cœur, se casser, les urgences, l'ambulance, le dentiste, le pansement* |
+| A2-g10 Pronomes COI | *lui, leur* + *me, te, nous, vous* | |
+| A2-12 Esporte e hábitos saudáveis | hábitos, conselhos | *la forme, être en forme, courir, nager, la salle de sport, l'entraînement, le match, gagner, l'équipe, le sommeil, le stress, équilibré / équilibrée* |
+| A2-g11 Condicional presente | cortesia e conselho (*tu devrais*) | |
+
+**A2-m5 · À mesa** (DELF A2 PO3: reservar e pedir; CE: cardápio)
+
+| Unidade | Objetivo | Léxico (12) ou conteúdo |
+|---|---|---|
+| A2-13 No restaurante | reservar, pedir, apreciar, reclamar do prato | *la réservation, le plat du jour, la spécialité, saignant, à point, bien cuit, le pourboire, délicieux / délicieuse, fade, salé / salée, sucré / sucrée, épicé / épicée* |
+| A2-g12 Pronome *en* | quantidade e *de* + coisa | |
+| A2-14 Receitas | explicar uma receita | *la recette, couper, mélanger, cuire, ajouter, faire bouillir, la poêle, le four, la casserole, la cuillère, l'ingrédient, la farine* |
+| A2-g13 Imperativo com pronomes e negativo | *Prends-le ! Ne le prends pas !* | |
+| A2-15 Os sentidos e o gosto | descrever sabores e cheiros | *le goût, goûter, l'odeur, sentir (cheirar), toucher, doux / douce, amer / amère, acide, croustillant / croustillante, moelleux / moelleuse, avoir l'air, le parfum* |
+| A2-g14 Advérbios | intensidade (*assez, plutôt, trop*), *-ment*, *de plus en plus* | |
+
+**A2-m6 · Estudos e projetos** (DELF A2 PO2: monólogo sobre estudos e planos)
+
+| Unidade | Objetivo | Léxico (12) ou conteúdo |
+|---|---|---|
+| A2-16 Estudos e formação | contar a formação | *les études, la fac, le lycée, le diplôme, l'examen, réussir, échouer, le stage, la formation, s'inscrire, la matière, la note* |
+| A2-g15 Futuro simples | regulares e irregulares | |
+| A2-17 Aprender línguas | falar do próprio aprendizado | *apprendre, la langue étrangère, le cours, le niveau, le vocabulaire, la prononciation, l'accent, la faute, bilingue, l'échange, progresser, réviser* |
+| A2-g16 *quand* + futuro e *si* + presente/futuro | | |
+| A2-18 Projetos e sonhos | planos, desejos | *le projet, le rêve, rêver de, l'avenir, espérer, avoir envie de, un jour, plus tard, prochain / prochaine, décider de, réaliser, le but* |
+| A2-g17 *savoir* x *connaître* e verbos com *à / de* | cumpre a promessa do A1-g6 (anomalia 22) | |
+
+**A2-m7 · Trabalho e dinheiro** (DELF A2 PO2/PO3; CE: oferta de emprego)
+
+| Unidade | Objetivo | Léxico (12) ou conteúdo |
+|---|---|---|
+| A2-19 O mundo do trabalho | falar do trabalho | *le / la collègue, le / la chef, le salaire, l'emploi, le poste, le contrat, la réunion, les congés, à temps plein, à temps partiel, le boulot, embaucher* |
+| A2-20 Procurar emprego | CV, candidatura, entrevista | *le CV, la lettre de motivation, l'offre d'emploi, postuler, l'entretien, le candidat / la candidate, l'expérience, la compétence, motivé / motivée, sérieux / sérieuse, le chômage, démissionner* |
+| A2-g18 Obrigação, proibição, permissão | *il est interdit de, avoir le droit de, il ne faut pas* | |
+| A2-21 Regras e avisos | ler placas e regulamentos | *interdit / interdite, autorisé / autorisée, avoir le droit de, le règlement, respecter, obligatoire, permettre, défendre (proibir), le panneau, l'amende, fumer, stationner* |
+| A2-22 Banco e dinheiro | conta, cartão, economizar | *la banque, le compte, la carte bancaire, le distributeur, retirer, le code, le virement, dépenser, économiser, les économies, prêter, emprunter* |
+| A2-g19 Discurso indireto no presente | *il dit que, il demande si / ce que / où* | |
+
+**A2-m8 · Moradia e cidade** (DELF A2 CE: classificado; PO3: combinar com um vizinho)
+
+| Unidade | Objetivo | Léxico (12) ou conteúdo |
+|---|---|---|
+| A2-23 Procurar moradia | ler anúncio, perguntar, visitar | *louer, le loyer, l'annonce, l'agence immobilière, meublé / meublée, les charges, la caution, le / la propriétaire, le / la locataire, le quartier, lumineux / lumineuse, l'ascenseur* |
+| A2-24 Dividir apartamento e vizinhos | regras da casa, reclamar do barulho | *la colocation, le / la colocataire, le voisin / la voisine, partager, faire le ménage, faire la vaisselle, sortir les poubelles, ranger, sale, propre, déranger, se plaindre* |
+| A2-g20 Pronome *y* | lugar e *à* + coisa (*j'y pense*) | |
+| A2-25 Serviços e papelada | correio, prefeitura, formulários | *la poste, la lettre, le timbre, envoyer, la mairie, le formulaire, remplir, signer, le dossier, la carte d'identité, le permis de conduire, la file d'attente* |
+| A2-26 Trânsito e carro | dirigir, estacionar | *la route, l'autoroute, la circulation, le bouchon, conduire, le feu, le carrefour, le parking, se garer, l'essence, le péage, le covoiturage* |
+| A2-g21 Indefinidos | *quelqu'un, quelque chose, tout / tous / toute(s), chaque, plusieurs* | |
+
+**A2-m9 · Comunicar e se relacionar** (DELF A2 PE2: carta com função; CO: mensagens de voz)
+
+| Unidade | Objetivo | Léxico (12) ou conteúdo |
+|---|---|---|
+| A2-27 Telefonar e deixar recado | ligar, atender, recado | *allô, rappeler, laisser un message, la messagerie, ne quittez pas, de la part de qui, décrocher, raccrocher, occupé / occupée, le répondeur, joindre, la ligne* |
+| A2-28 Escrever para convidar, recusar, agradecer | carta e mensagem com função | *cher / chère, l'invitation, remercier, s'excuser, accepter, refuser, regretter, la réponse, amitiés, bisous, cordialement, à très vite* |
+| A2-g22 Pergunta formal e interrogativos | inversão produzida, *lequel / laquelle* | |
+| A2-29 Sentimentos e reações | felicitar, consolar, surpresa | *content / contente, triste, fâché / fâchée, inquiet / inquiète, surpris / surprise, déçu / déçue, fier / fière, jaloux / jalouse, féliciter, consoler, félicitations, la nouvelle* |
+| A2-30 Internet e redes | publicar, comentar (CEFR CV: interação on-line A2) | *le réseau social, publier, la publication, le commentaire, commenter, s'abonner, le lien, télécharger, le mot de passe, l'appli, l'écran, l'ordinateur* |
+| A2-g23 Negação complexa e *ne... que* | *plus, rien, personne, aucun, jamais* (revisão) | |
+
+**A2-m10 · Opinião, cultura e mundo** (DELF A2 PO2: "um filme/livro"; CE: artigo curto)
+
+| Unidade | Objetivo | Léxico (12) ou conteúdo |
+|---|---|---|
+| A2-31 Livro, filme, exposição | apresentar e opinar | *le roman, l'auteur / l'autrice, le personnage, l'histoire, la bande dessinée, l'exposition, le tableau, le / la peintre, le spectacle, raconter, émouvant / émouvante, ennuyeux / ennuyeuse* |
+| A2-g24 Opinar e ligar ideias | *je pense que, à mon avis*; causa, consequência, finalidade (*comme, donc, pour* + inf., *grâce à, à cause de*) | |
+| A2-32 Patrimônio e festas | monumentos, 14 de julho, tradições | *le monument, le château, l'église, le patrimoine, la tradition, la fête nationale, le feu d'artifice, le défilé, célébrer, historique, le siècle, le roi / la reine* |
+| A2-33 Meio ambiente | o que faço, concordar e discordar | *l'environnement, la planète, la nature, le climat, le réchauffement climatique, trier, recycler, les déchets, la pollution, polluer, l'énergie, protéger* |
+| A2-g25 Gerúndio | *en + -ant* (simultaneidade, modo) | |
+| A2-34 Viajar pela francofonia | paisagens e pontos cardeais | *le nord, le sud, l'est, l'ouest, la côte, l'île, le fleuve, la forêt, le désert, la région, la frontière, francophone* |
+| A2-g26 *Il faut que / je veux que* | subjuntivo só em fórmula, verbos frequentes (`02` 12.3) | |
+
+**Totais:** 10 módulos, 60 unidades (34 de vocabulário + 26 de gramática), 408 palavras-cartão + *récemment* movida do A1.
+Ordem de construção recomendada: m1 → m2 (passado = coração do DELF A2) → m9 (carta) → os demais.
+Grátis x Premium: trilha do A2 **grátis** (como o A1); atividade final de cada módulo e Desafios **Premium** (paywall desligado hoje:
+todos usam); 1 ditado grátis por módulo.
 
 ---
 
-## 9. Proposta de A1 revisado (mapa final)
+## 7. Atividade final Premium de cada módulo (ideia da dona)
 
-Princípios: as 30 unidades existentes **continuam com o mesmo id e na mesma ordem relativa**; só há inserções (13 unidades novas), 2 módulos novos e acréscimos no fim de vocabulário/frases. Status: **M** = mantida igual; **A** = alterada (acréscimo ou texto); **N** = nova; **→** = mudou de módulo.
+### 7.1 O que é
 
-| Módulo (posição · id · título) | Unidades na ordem | Status | O que entra / sai |
-|---|---|---|---|
-| **1 · A1-m1 · Primeiros contatos** | A1-1 | A | nota Quebec *bienvenue* (8.1); 1 V/F já existe |
-| | A1-2 | A | reagrupar lições (3.1, anomalia 28); nota curta "soletrar o nome" opcional |
-| | A1-3 | A | + *quatre, cinq, six, sept, huit, neuf* no fim; 4 lições; objetivo novo; nota regional encurtada (o regional vai para A1-21) |
-| | **A1-21 Números de 11 a 29** | N | *onze, douze, treize, quatorze, quinze, seize, dix-sept, dix-huit, dix-neuf, vingt et un*; diálogo sobre idade e turma; notas: regional *septante* + ligação |
-| | A1-g1 | A | + tela de pronomes tônicos (*moi, toi, lui, elle, nous, vous, eux, elles*) |
-| **2 · A1-m7 (novo) · Quem é você** | A1-4 → | A/→ | vem do m1; + frases com *grands-parents, enfants, marié(e)*; + 1 V/F |
-| | **A1-g11 Artigos, gênero e plural** | N | ver item 4 da seção 3 |
-| | A1-g2 → | M/→ | vem do m1 |
-| | **A1-22 Profissões** | N | ver item 11 |
-| | **A1-23 Dados pessoais e formulário** | N | ver item 7; tipos E2 (formulário) e E1; telefone em pares só até 29 (os números maiores voltam em exemplos do A1-g10) |
-| | **A1-g12 Frase negativa e perguntas** | N | ver item 5 |
-| **3 · A1-m2 · Rotina e tempo** | A1-5 | A | frase R4 reescrita; nota de nasais |
-| | A1-6 | A | + frases *et quart / et demie*, horário de abertura; + 1 V/F |
-| | A1-g3 | A | + tela "letras mudas" |
-| | A1-7 | A | + *mercredi, jeudi, vendredi, samedi, dimanche* no fim; 4 lições; gatilho da nota `nous-sommes-on-est` corrigido; nota *e* caduco |
-| | **A1-24 Meses e datas** | N | 10 meses; diálogo de aniversário; notas 14 juillet, 1er mai, *le premier* |
-| **4 · A1-m3 · Cidade e origem** | A1-8 | A | nota *il y a* com exemplo da própria unidade; notas *arrondissements* e [y]/[u] |
-| | **A1-g13 aller, futuro próximo e contraídos** | N | ver item 6 |
-| | A1-g4 | A | + 3 frases com *en/au* + país no A1-8 ou A1-9 para dar input (validador) |
-| | A1-9 | A | + 2 frases (origem/moradia de terceiros); diálogo sem repetir A1-2 |
-| | A1-10 | A | + nota COD *je la prends*; frase repetida variada; + 1 V/F; documento E5 (etiqueta de preço) |
-| | A1-g10 | A | + exemplos com telefone em pares |
-| **5 · A1-m8 (novo) · Comer e comprar** | A1-11 → | A/→ | vem do m3; + 1 V/F |
-| | A1-12 → | A/→ | vem do m3; nota *une livre*; Acentuação corrigida |
-| | **A1-g14 Partitivos e quantidade** | N | ver item 13 |
-| | **A1-25 Refeições e restaurante** | N | ver item 18; E7 (pedido em turnos), E5 (cardápio) |
-| **6 · A1-m4 · Deslocar-se e cuidar de si** | A1-13 | A | nota *frette*; + 1 V/F |
-| | A1-14 | A | nota de bicicletas; E5 (horário de trem); + 1 V/F |
-| | A1-g5 | M | |
-| | **A1-26 Férias e hotel** | N | ver item 17; E1 cartão-postal; *y* como fórmula |
-| | A1-15 | A | nota farmácia; *depuis* como fórmula com nota |
-| | A1-g6 | A | + telas e exercícios do imperativo; novo título |
-| **7 · A1-m5 · Casa e descrição** | A1-16 | A | + frases de descrição física; + 2 frases com comparativo; + 1 V/F |
-| | **A1-g15 Adjetivos e demonstrativos** | N | ver item 14 |
-| | A1-17 | A | gatilho da nota do térreo corrigido; + 1 frase com comparativo; + 1 V/F |
-| | A1-18 | A | + 2 frases; + 1 V/F |
-| | A1-g7 | A | fica no fim do módulo (decisão 2) |
-| **8 · A1-m6 · Lazer, convites e passado** | A1-19 | A | + *adorer* no fim do vocabulário; nota *aimer* + infinitivo / *moi non plus* |
-| | A1-g8 | M | |
-| | **A1-27 Convites e festas** | N | ver item 16; notas festividade; E1 (convite curto) |
-| | A1-20 | A | objetivo novo ("Contar o que você fez: primeiro contato com o passé composé"); nota "j'ai + particípio"; nota antiga corrigida; + 1 V/F |
-| | A1-g9 | A | só *avoir* + particípios irregulares + negação no PC; frase final corrigida |
-| | **A1-g16 Passé composé com être** | N | verbos de movimento, concordância, pronominais (*je me suis levé(e)*) |
-| **Teste de Nível A1** | A1-final | A | 5 itens × 8 módulos = 40; mensagem "Você concluiu o A1"; opcional simulado DELF A1 (E9) |
+Cada módulo termina com uma **tarefa de verdade**, no formato do DELF, que junta o que o módulo ensinou: preencher uma ficha, soletrar
+nome e e-mail, escrever um cartão-postal, mandar um convite, contar o fim de semana, gravar uma apresentação. Ela mora nos **Desafios**,
+aparece na trilha **depois do Ponto de verificação**, como o último nó do módulo, e **não bloqueia** o módulo seguinte (o Ponto de
+verificação continua sendo o que destrava). Os módulos passam a ser desenhados **de trás para a frente**: primeiro a tarefa final, depois
+as unidades que dão o vocabulário e a gramática que ela exige.
 
-**Totais:** 8 módulos, **43 unidades** (27 de vocabulário + 16 de gramática), ~282 palavras únicas (200 + 70 das 7 unidades novas + 12 acrescentadas em A1-3, A1-7, A1-19), 8 ditados de módulo × 3.
-**Versão enxuta (só P0):** A1-21, A1-22, A1-23, A1-24, A1-g11, A1-g12, A1-g13, A1-g16 + correções de texto = 38 unidades em 7 módulos (sem o `A1-m8`: A1-11 e A1-12 ficam no m3).
+Privacidade: tarefas de dados pessoais usam um **personagem fictício** ("Preencha a ficha de hotel da Sophie Martin"), nunca os dados reais
+do aluno (LGPD; o DELF faz o mesmo). Decisão 22.
 
----
+### 7.2 Como corrigir: comparação
 
-## 10. O molde para o português
-
-### 10.1 Reaproveitável (função comunicativa) x específico do francês, por módulo do A1 revisado
-
-| Módulo | Funções independentes do idioma (vão para o pt) | Específico do francês (não vai como está) | Equivalente a pensar no português (curso `portugues@en`) |
-|---|---|---|---|
-| 1 Primeiros contatos | cumprimentar, despedir-se, agradecer, apresentar-se, contar 0-29, dizer a idade | *tu/vous*, *la bise*, base 20 e *septante*, ligação nos números, *avoir* + idade | *você/tu/o senhor*; beijo no rosto (número varia por região); *ter* + idade (igual ao francês); *dezesseis/dezessete*; **"meia" = seis** ao ditar telefone |
-| 2 Quem é você | família, profissão, dados pessoais, soletrar, perguntar e negar | gênero com *le/la*, elisão *l'*, inversão, *ne... pas* em duas partes, *est-ce que* | artigos e **contrações** (*do, da, no, na, pelo*); negação com *não* antes do verbo e a dupla (*não sei não*, regional); pergunta só por entonação; **ser x estar** (não existe em francês: ponto novo, provavelmente já no módulo 1 ou 2) |
-| 3 Rotina e tempo | hora, rotina, dias, meses, datas | pronominais com *se* obrigatórios, letras mudas, *e* caduco | dias da semana numerados (*segunda-feira*), "o dia 1º"; reflexivos menos frequentes na fala (*eu levanto*); **estar + gerúndio** (A1 no Brasil) |
-| 4 Cidade e origem | pedir caminho, dizer origem, comprar roupa, preço | *à/en/au/aux*, *aller à la/au*, contraídos | *em/no/na* + lugar, *de/do/da* + país (já previsto no piloto pt: nota `eu-sou-de-do-da`); **ir + infinitivo** igual ao *futur proche* |
-| 5 Comer e comprar | pedir, quantidade, cardápio, restaurante | partitivo (*du, de la*), *pas de*, *une livre* | português não tem partitivo (**ponto mais fácil**); quilo/meio quilo; *a conta, por favor*; gorjeta 10% na conta |
-| 6 Deslocar-se e cuidar de si | transporte, clima, viagem, hotel, saúde, instruções | *il fait*, *avoir mal à*, imperativo de *vous* | *está frio / faz frio*; *estar com dor de*; imperativo na fala = forma do indicativo (*fala*, *vem*) x norma (*fale*): nota de realidade |
-| 7 Casa e descrição | descrever casa, objetos, pessoas, comparar | concordância e posição do adjetivo, *c'est/il est*, *ce/cet/cette* | concordância (parecida), adjetivo quase sempre depois; *este/esse/aquele* (3 graus, na fala 2) |
-| 8 Lazer, convites e passado | gostos, convidar/aceitar/recusar, contar o fim de semana | passé composé com 2 auxiliares, concordância do particípio | **pretérito perfeito simples** (sem auxiliar: muito mais fácil, pode vir antes); imperfeito pode entrar mais cedo que no francês |
-| Avaliação | Ponto de verificação, Teste de Nível, tarefas por competência | formato DELF | o **Celpe-Bras** não certifica A1/A2 (níveis a partir de Intermediário, confiança alta; conferir se houve mudança recente) e é por **tarefas integradas** (ler/ouvir e escrever com gênero, interlocutor e propósito): inspira E1/E3/E9 no pt, mas não dá escala A1/A2 |
-
-Também reaproveitável (pedagogia, `01` 6.2): molde da unidade, 1 nota contrastiva por unidade, gramática depois do input, notas de realidade com gatilho, avaliação em camadas, Desafios por módulo, tipos de exercício novos da seção 7 (todos independem do idioma, exceto E8, que precisa de pares mínimos próprios do português: *avó/avô*, *pão/pau*, *mais/mas*).
-
-### 10.2 Perguntas para responder quando chegarem os livros de PLE e o material do Celpe-Bras
-
-1. Em que ponto os livros de PLE para iniciantes põem **ser x estar**? (no francês não existe; é o maior "ponto novo" do molde)
-2. O **pretérito perfeito** vem no meio do A1 (é um tempo simples) ou no fim, como o passé composé?
-3. O **pretérito imperfeito** fica no A2, como no francês, ou entra no fim do A1?
-4. **Estar + gerúndio** é A1? (no francês *être en train de* é A1+/A2)
-5. Imperativo: ensinar a forma da norma (*fale*), a da fala (*fala*) ou as duas (com nota de realidade)?
-6. Pronomes oblíquos e colocação (*me chamo* x *chamo-me*; *te amo*; *vou te ligar*): o que é A1? (decisão 4 do catálogo de erros, ainda aberta)
-7. *A gente* no lugar de *nós*: desde a 1ª unidade (como *on* no francês)?
-8. Futuro: só *ir* + infinitivo no A1/A2 e o futuro simples (*falarei*) só reconhecido?
-9. Contrações (*no, na, do, pelo*) e crase: em que unidade e com que carga?
-10. Variedade: a decisão já tomada (vozes próximas da paulista, notas comparando Rio x SP) vale para todo o curso?
-11. Notas culturais do Brasil: quais temas os livros de PLE trazem (festas juninas, Carnaval, comida regional, "jeitinho")?
-12. Avaliação: usar a escala CEFR (A1/A2) mesmo sem exame oficial correspondente, ou outra (ex.: níveis do próprio livro)?
-13. Tarefas estilo Celpe-Bras (gênero + interlocutor + propósito) no fim de cada módulo: adotar já no A1?
-14. Conjugação do português: que verbos e tempos no A1 (decisão da dona: Conjugação está entre os módulos do começo)?
-15. Números: incluir o "meia" (seis) no ditado de telefone desde o A1?
-
----
-
-## 11. Decisões que dependem da dona e plano de execução
-
-### 11.1 Decisões (com a minha recomendação)
-
-1. **Fronteira A1/A2.** Adotar a regra 1.1 (A1 = núcleo dos dois métodos + DELF A1; zona cinza só como fórmula quando já usada). *Recomendo: sim.*
-2. **A1-g7 Comparativos** fica no A1 ou vai para o A2-g6? *Recomendo: fica no A1 (custo zero, útil em compras), com input novo; o superlativo vai para o A2.*
-3. **Tamanho do A1 revisado:** completo (43 unidades, 8 módulos) ou enxuto (38, só P0)? *Recomendo: aprovar o mapa completo e executar em ondas, P0 primeiro (seção 11.2).*
-4. **Módulos novos** `A1-m7` e `A1-m8` inseridos nas posições 2 e 5 (o número exibido dos módulos seguintes muda: "Módulo 2" passa a ser outro). *Recomendo: sim; avisar os alunos por aviso no Mural.*
-5. **Política "só acrescentar"** em unidades existentes (nunca reordenar/apagar/mover palavra ou frase): aceita que A1-3 e A1-7 fiquem com 16 e 15 palavras? *Recomendo: sim; é o que protege o FSRS.*
-6. **Unidades inseridas para quem já passou daquele ponto:** destravar automaticamente (sem obrigar a fazer) e mostrar "Novo" no mapa. *Recomendo: destravar e marcar "Novo"; não exigir para o Teste de Nível de quem já fez.*
-7. **Correção da produção escrita/oral (E1, E6):** só autoavaliação, professora (alunos vinculados) ou IA? *Recomendo: autoavaliação + modelo agora; envio para a professora depois; IA não (custo e infraestrutura).*
-8. **Mini-prova DELF por módulo (E9):** por módulo ou a cada 2 módulos (como o Défi)? Grátis ou Premium? *Recomendo: por módulo, opcional, grátis; o Teste de Nível vira simulado completo.*
-9. **Grátis x Premium** de tudo o que é novo: trilha (unidades novas, E1 a E8) grátis; Desafios Premium (paywall desligado); 1 ditado grátis por módulo; Jogos da Conjugação Premium. *Recomendo: assim.*
-10. **Conjugação:** ranking por frequência (J1) com a lista conferida no Lexique 3, etiquetas de nível (J5), verbos novos (J2), jogos A1 (J6). *Recomendo: J1, J3 e J5 já; J2 e J6 com o A1 revisado.*
-11. **Jogo "Passé composé ou Imparfait?"** com etiqueta A2. *Recomendo: sim.*
-12. **Notas repetidas de pergunta *in situ*** (R5): manter as 5, encurtar 3 ou tirar 3? *Recomendo: manter A1-2 e A1-20, encurtar as outras 3 para 1 linha.*
-13. **Classificação da nota de feminização das profissões** (A1-22): é "realidade" (que categoria?) ou explicação? *Recomendo: explicação.*
-14. **A2:** aprovar o mapa (8 módulos, 34 unidades) e construir na ordem m1 → m2 (passado = coração do DELF A2) → m7 (carta) → os demais. *Recomendo: sim.*
-15. ***savoir* x *connaître*** (promessa do A1-g6): tela no A2-g7 ou nota no A2-11? *Recomendo: nota de explicação no A2-11 (estudos: "Je connais cette école" x "Je sais parler anglais").*
-16. **Fonte de nível do Grammaire Essentielle e do Beacco:** vale conferir no livro físico quais capítulos são A1/A2 (subjuntivo) e comprar os referenciais Beacco A1/A2? *Recomendo: conferir o GEF (rápido); o Beacco é opcional.*
-17. **Atualizar o módulo de 13 desafios na produção** (seção 6.2): autoriza? *Recomendo: sim, primeiro no Staging, junto com a publicação do A1 revisado.*
-
-### 11.2 Plano de execução em etapas
-
-Riscos de progresso (lidos em `.claude/rules/conteudo-trilha.md` e `flashcards-motor.md`, conferidos no código):
-- **Ids de cartão da trilha são por índice** (`u{unidade}-v{i}`, frases por índice e local): nunca reordenar, apagar ou mover palavra/frase. Trocar só o **texto** mantém o id e o histórico (usar só para corrigir/variar, não para mudar o sentido).
-- Acrescentar palavras numa unidade **já concluída** cria cartões novos para quem já terminou (aparecem como novos na Revisão): avisar no Mural.
-- Reagrupar lições muda o `lessonIdx` de quem está no meio da unidade: zerar `lessonIdx` só das unidades reagrupadas e não concluídas.
-- Unidade nova antes de outra já concluída nasce trancada (`fr/app.js:4497-4501`): precisa de reparo no carregamento (decisão 6).
-- `unitProgress`, `checkpointProgress` e `levelTestProgress` são por id: ids existentes não mudam, então nada se perde; quem já passou no Ponto de verificação do `A1-m1` antigo continua aprovado.
-- Todo texto novo vai para **duas camadas** (`courses/fr-pt-BR/layer.js` e `fr/content.en.js`): o site em inglês não pode ter nada em português; tradução nova entra `needs_review` com confiança. Mudança de texto em português existente passa pela lista `DELIBERATE_PT_CHANGES` (`tests/i18n`).
-- Áudio: texto novo ou alterado = mp3 novo (skill `audio-tts`); texto com marcador de perfil cai no Web Speech.
-- Desafios e ditados ligados a módulo: mudar unidade de módulo exige atualizar dados na produção (autorização).
-- Decks e tags da trilha (Course Decks por idioma estudado, decisão Q-12): conferir que unidades e módulos novos geram deck/tag sem ajuste manual (`studyTrailTags`).
-
-| Etapa | O que muda | Arquivos | Esforço | Risco | Testes |
+| Forma | Como funciona | Custo | Qualidade | Esforço de implementação | Encaixe grátis x Premium |
 |---|---|---|---|---|---|
-| **A. Correções de texto e gancho** | anomalias 3, 18, 22, 27, 28-31; frase R4; frases repetidas (4.3); Acentuação fora do alvo (dados); éteindre (J3); etiquetas de nível na Conjugação (J5, R1, R2) | `layer.js`, `fr/content.en.js`, `fr/content.js` (gatilhos, `lessons`), `fr/conjugation-data.js`, `fr/app.js` | baixo | baixo (sem id novo) | `tests/camada-curso`, `tests/i18n`, `tests/conjugacao`, `check_grammar_input.js` |
-| **B. Acréscimos em unidades existentes** | A1-3 (+6), A1-7 (+5), A1-19 (+1) no fim; frases novas (input de A1-g4, A1-g7, descrição, família); V/F nas 12 unidades; notas da seção 8 (alta confiança) | `fr/content.js`, camadas, `AUDIO_MANIFEST` | médio | médio (cartões novos para quem já concluiu; `lessonIdx`) | regressão da trilha, `tests/curso-progresso`, `check_dictation_vocab.py`, teste no navegador (skill `teste-navegador`) |
-| **C. Gramática nova e ampliada** | A1-g11, g12, g13, g16 (P0); g14, g15 (P1); telas novas em A1-g1, g3, g6, g9 | `fr/content.js`, camadas, `grammar_input_map.json` | médio | baixo (unidades de gramática não geram cartão FSRS de palavra; conferir) | `check_grammar_input.js` (0 avisos novos), Ponto de verificação |
-| **D. Unidades e módulos novos** | A1-21 a A1-27; módulos `A1-m7`, `A1-m8`; reparo de desbloqueio; Teste de Nível com 40 itens; ditados dos módulos novos; módulo de 13 desafios atualizado (produção, com autorização) | `fr/content.js` (`UNITS`, `MODULES`), camadas, `fr/app.js` (reparo), `fr/dictations.js`, lotes de desafios, banco | alto | alto (desbloqueio, módulo exibido muda de número, dados em produção) | regressão completa, `tests/desafios-*`, `tests/ditado`, `tests/checkpoint-*`, navegador nos 4 cenários (fr × claro/escuro, celular) |
-| **E. Tipos de exercício** | E4, E7 → E1/E2/E3 → E5 → E8 → E6 → E9 | `fr/app.js` + `shared/core/` (núcleo comum, já pensando no pt) | alto | médio (UI nova) | testes novos em `tests/<tema>/`, navegador |
-| **F. Conjugação** | J1, J2, J4, J6 | `fr/conjugation-data.js`, `fr/app.js`, `fr/conj-games.js` | médio | baixo | `tests/conjugacao` |
-| **G. Desafios do A1** | Complete a frase das 16 gramáticas, Expressões das unidades sem nenhuma, OT/Acentuação/Expressões das unidades novas | `fr/scripts/challenges_import/`, skill `criar-desafios` | médio | baixo (`needs_review`) | `fr/scripts/test_answer_validation.js`, `tests/desafios-*` |
-| **H. A2** | módulo a módulo (m1, m2, m7, depois o resto), cada um com Desafios, ditados e tarefa DELF | tudo acima | muito alto | baixo para o A1 (nível novo) | idem D |
+| **Automática** | campos com gabarito (data no formato certo, *né / née* concordando, e-mail com @), soletrar letra a letra com comparação exata, frases curtas com o comparador tolerante (`shared/translation-compare.js` e o comparador da família latina para acentos) | zero | alta em tarefa fechada (formulário, soletrar, ditado de números); inútil em texto livre | baixo: reusa `type_answer`, ditado e comparadores | parte de toda atividade |
+| **Semiautomática** | o sistema confere **peças obrigatórias** (cumprimento, fecho, mínimo de palavras, 1 verbo no passé composé...) por regras simples (`mustInclude`, que já existe no Ouça e traduza, `fr/app.js`), mostra uma **resposta-modelo** e uma **rubrica de 4 itens** em que o aluno se autoavalia | zero | média: pega o que falta, não pega erro de gramática | baixo a médio: renderer de texto livre + checklist | parte de toda atividade |
+| **Por IA** | Edge Function nova (ex.: `writing-feedback`) manda o texto + a rubrica DELF A1/A2 para o modelo e devolve nota por critério e 3 correções comentadas | **Claude Haiku 5.5** (US$ 0,10 / 1M tokens de entrada, US$ 0,50 / 1M de saída): ~US$ 0,0004 por correção de ~1.500 + 500 tokens, ~US$ 0,40 por 1.000; **Claude Sonnet 5.5** (US$ 2 / US$ 10): ~US$ 0,008 por correção, ~US$ 8 por 1.000 (preços da tabela de 2026-10-06) | boa para A1/A2 se calibrada; risco de corrigir demais ou aceitar erro | médio: função, chave secreta no servidor, cota por conta, registro de uso, texto de privacidade (o texto do aluno vai para a API) | só Premium com cota (ex.: 10 por mês), **depois** que existir paywall; sem paywall o custo não tem teto |
+| **Pela professora** | o envio cai numa **fila de correção** na aba Professora (só alunos vinculados em `teacher_students`), ela marca a rubrica, escreve um comentário ou grava um áudio; o aluno recebe no sino | tempo da professora | a melhor | alto: tabela nova de envios + RLS + migration (Staging antes) + tela + aviso no sino no idioma de quem recebe (`_ui_lang`) + bucket de áudio para tarefa oral | grátis para aluno vinculado (é parte da aula), independente de Premium |
+| **Combinação (recomendada)** | automática + semiautomática em toda atividade; professora para vinculados; IA depois como Premium | ver acima | | em fases | ver 7.3 |
 
-Ordem: A → C → B → D → G → F → E → H (A e C não mexem em progresso e já resolvem as maiores incoerências; D é a etapa que exige mais cuidado e a autorização de dados).
+### 7.3 Recomendação
+
+1. **Fase 1 (junto com a 1ª atividade final):** só automática + semiautomática + resposta-modelo. Custo zero, funciona sem login de
+   professora, cobre bem formulário, soletrar, ditado de números e diálogo em turnos; para texto livre, o aluno se autoavalia com a rubrica.
+2. **Fase 2:** fila de correção da professora para alunos vinculados (13 dos 24 alunos atuais estudam português; a fila serve aos dois
+   idiomas). Precisa de migration e de autorização para criar a tabela em produção.
+3. **Fase 3 (só depois do paywall):** feedback por IA como benefício Premium, com cota, Haiku 5.5 primeiro; antes de ligar, piloto com
+   30 a 50 textos reais corrigidos pela professora para medir concordância. Sem nome nem e-mail no texto enviado.
+
+**Grátis x Premium:** a atividade final é **Premium** (nos Desafios); com o paywall desligado (`CHALLENGE_PAYWALL_ENABLED=false`), todos
+usam e ela aparece com o selo Premium, como os Jogos da Conjugação. Correção automática e semiautomática vêm junto (Premium). Correção da
+professora: aluno vinculado. IA: Premium com cota, só com paywall. A trilha continua inteira grátis.
+
+### 7.4 Atividades finais por módulo
+
+| Módulo | Atividade final (Premium) | Correção (fase 1) | Competência DELF |
+|---|---|---|---|
+| A1 · 1 Primeiros contatos | **Mensagem de apresentação** no grupo da turma (20 a 30 palavras: cumprimentar, nome, nacionalidade, idade, despedir-se) + entrevista gravada de 3 perguntas | checklist de 5 peças + modelo; gravação autoavaliada | PE / PO1 |
+| A1 · 2 Quem é você | **Ficha de inscrição** de um personagem (8 campos) + **soletrar** nome e e-mail ouvidos | automática por campo; soletrar exato | PE1 / CO |
+| A1 · 3 Rotina e calendário | **Marcar um encontro**: mensagem com dia, hora e lugar respondendo a um convite | checklist (dia da semana, hora, *à* + hora) + modelo | PE |
+| A1 · 4 Na cidade | **Explicar o caminho** a um amigo (mensagem com 3 instruções) + mediação: repassar em português o horário de um aviso | checklist + automática na mediação (comparador) | PE / mediação |
+| A1 · 5 Compras | **Diálogo em turnos na loja** (pedir, perguntar preço e tamanho, pagar) + ditado de preços | automática (escolhas e números) | PO3 / CO |
+| A1 · 6 Viagem, tempo e saúde | **Cartão-postal** de 40 palavras (onde está, o tempo, o que faz, despedida) | checklist de 5 peças + contagem + modelo | PE2 |
+| A1 · 7 Casa e descrição | **Anúncio do seu apartamento** ou **descrição de uma pessoa** (30 a 40 palavras) | checklist + modelo | PE |
+| A1 · 8 Lazer, convites e passado | **Convite e resposta** (aceitar ou recusar com motivo) + **"Conte seu fim de semana"** em 5 frases no passé composé | checklist (*parce que*, 3 verbos no PC) + modelo | PE / PO |
+| A2 · 1 a 10 | uma tarefa DELF A2 por módulo: monólogo da infância (m1), relato de 60 palavras (m2), reclamação de produto (m3), consulta por telefone (m4), reserva e pedido (m5), monólogo sobre estudos (m6), candidatura curta (m7), mensagem ao proprietário (m8), carta com função (m9), opinião sobre um filme (m10) | semiautomática; professora para vinculados | PE / PO / CE / CO |
+
+O mini-simulado DELF por módulo da v1 (E9) sai: a atividade final ocupa esse lugar. O simulado completo fica só no Teste de Nível (decisão 17).
+
+---
+
+## 8. Desafios e ditados (Conjugação fora deste plano)
+
+**Conjugação:** fora do escopo; achados e plano em `05-mensagem-sessao-conjugacao.md`.
+
+Desafios (regra da skill `criar-desafios`, igual à v1 6.2): `challengeChecklist` por unidade/módulo novo; Ditado = trilha (1 grátis + 2
+Premium por módulo); Ouça e traduza, Acentuação, Expressões, Complete a frase = Premium; tudo entra `needs_review` com `.md`.
+Mudanças da v2:
+- **Atividade final** (seção 7) vira uma categoria nova de Desafio (`module_task`), 1 por módulo, Premium.
+- Complete a frase para todas as gramáticas (A1-g1 a A1-g16): ~70 novos (v1).
+- Recomposição dos módulos (seção 11) muda o `moduleId` de mais linhas que na v1: unidades A1-10, A1-11, A1-12 (→ A1-m8) e A1-14 (→ A1-m3).
+  O número exato sai do checklist depois da Etapa 0. **Dado em produção: só com autorização explícita** e Staging antes (decisão 21).
+- A1-24 (meses) torna *février* e *août* alvos legítimos de Acentuação (anomalia 25 resolvida).
+- Ditados: 3 por módulo novo (A1-m7, A1-m8); formatos novos "ditado de números" (A1-m1, A1-m8) e "ditado de soletrar" (A1-m7, também
+  usado na atividade final); rodar `check_dictation_vocab.py` depois das operações (palavras mudam de módulo); revisão do A1 (r1 a r3) refeita.
+- A2: ~10 módulos × (OT ~8, Acentuação ~6, Expressões ~5, Complete a frase ~18) ≈ 370 desafios + 33 ditados (3 por módulo + 3 de revisão).
+
+---
+
+## 9. Exercícios novos (para a dona ler um por um)
+
+O motor hoje gera tudo a partir dos campos da unidade (vocabulário, frases com blocos, cenário, V/F, diálogo com `check`, telas de gramática,
+consolidação, Ponto de verificação, Teste de Nível). Regra de grátis x Premium dos exercícios: **dentro da trilha = grátis**; quando o mesmo
+formato é a atividade final do módulo = Premium (seção 7).
+
+### E1 · Produção escrita guiada
+
+- **O que é:** o aluno escreve um texto curto com destinatário e objetivo claros. Antes de escrever, vê as "peças obrigatórias"; depois de
+  enviar, o sistema marca as peças encontradas, mostra a resposta-modelo e pede a autoavaliação em 4 itens (cumpri a tarefa? usei o
+  vocabulário? frases compreensíveis? ortografia?).
+- **Exemplo (A1-26, Férias e hotel; versão curta na trilha, 25 palavras):**
+  1. Tela: "Você está de férias em Nice. Escreva uma mensagem curta para a sua amiga Léa." Peças: cumprimentar · dizer onde está ·
+     dizer como está o tempo · dizer uma coisa que faz · despedir-se.
+  2. O aluno escreve: *Salut Léa ! Je suis à Nice. Il fait beau. Je vais à la plage. Bisous !*
+  3. Correção: as peças são procuradas por listas de formas (cumprimento: *salut, bonjour, coucou*; tempo: *il fait, il pleut*; despedida:
+     *bisous, à bientôt, au revoir*...) → 5 de 5 ✓; contagem de palavras 15 (mínimo 12) ✓; aparece o modelo
+     *Coucou Léa ! Je suis en vacances à Nice. Il fait chaud et je vais à la plage tous les jours. À bientôt !*; o aluno marca a rubrica.
+- **Onde:** 1 por módulo dentro de uma unidade (versão curta, grátis) + a atividade final (versão DELF, Premium).
+- **Motor:** campo novo `writingTask` na unidade e um renderer simples (área de texto + lista de peças); a busca de peças reaproveita a lógica de
+  `mustInclude` do Ouça e traduza. Sem FSRS.
+
+### E2 · Formulário
+
+- **O que é:** uma ficha (hotel, inscrição, cadastro) com campos que o aluno preenche a partir de uma pequena ficha de personagem ou de
+  um áudio.
+- **Exemplo (A1-23, Dados pessoais):**
+  1. Tela: ficha de personagem em imagem/texto: "Sophie Martin, née le 3 mars 1998 à Lyon, française, 12 rue des Lilas, 69003 Lyon,
+     sophie.martin@mail.fr".
+  2. Formulário *Fiche d'inscription*: *Nom* · *Prénom* · *Date de naissance* · *Nationalité* · *Adresse* · *Code postal* · *Ville* · *E-mail*.
+  3. Respostas esperadas: MARTIN · Sophie · 03/03/1998 (aceita *3 mars 1998*) · *française* (com *e*: a ficha é de mulher) · 12 rue des
+     Lilas · 69003 · Lyon · sophie.martin@mail.fr.
+  4. Correção automática por campo: caixa e acento tolerados no nome; *français* em vez de *française* = "quase: a Sophie é mulher".
+- **Onde:** A1-23 (trilha, grátis) e atividade final do A1-m7 (Premium).
+- **Motor:** vários `type_answer` numa tela; normalização de data e e-mail; nada de dado real do aluno.
+
+### E3 · Tarefa final do módulo
+
+- **O que é:** o fecho do módulo (seção 7), montado com E1, E2, E6, E7 ou ditado, conforme o módulo.
+- **Exemplo (A1-m6, Viagem, tempo e saúde, cartão-postal DELF A1 PE2):**
+  1. Tela: foto de um cartão-postal; "Você está de férias. Escreva um cartão-postal para um amigo francês (40 palavras): onde você está,
+     o tempo, o que você faz, o que você comeu, despedida."
+  2. Resposta esperada (modelo): *Cher Paul, je suis à Marseille avec ma famille. Il fait très chaud ! Le matin, je vais à la plage et
+     l'après-midi, je visite la ville. Hier, j'ai mangé une bouillabaisse. C'est délicieux ! À bientôt, Ana.*
+  3. Correção: checklist de 5 peças + mínimo de 35 palavras + 1 verbo no passé composé → modelo → rubrica DELF simplificada (cumprir a
+     tarefa, léxico, gramática, ortografia, 0 a 2 pontos cada).
+- **Onde:** depois do Ponto de verificação de cada módulo. **Premium.**
+- **Motor:** um tipo de Desafio novo (`module_task`) com os blocos acima; registro em `completedChallenges` (já existe).
+
+### E4 · Compreensão oral antes do texto
+
+- **O que é:** o aluno ouve o diálogo **sem ver o texto**, duas vezes (como no DELF), responde 3 perguntas e só então vê o diálogo com as
+  checagens de hoje.
+- **Exemplo (A1-14, Transporte):**
+  1. Tela "Ouça a conversa (2 vezes)". Áudio do diálogo da unidade (já existe mp3).
+  2. Perguntas: *Où va la femme ?* (a) *à la gare* (b) *au musée* (c) *à l'hôpital*; *Elle prend quel transport ?* (a) *le bus* (b) *le
+     métro* (c) *le train*; *Le billet coûte...* (a) 2 € (b) 12 € (c) 20 €.
+  3. Correção automática (múltipla escolha); depois, o texto aparece com a resposta destacada.
+- **Onde:** A1 a partir do módulo 2; todo o A2. **Grátis.**
+- **Motor:** passo novo `listenFirst` antes do passo `dialogue`, perguntas num campo `listenQuestions` do diálogo; reusa áudio e múltipla escolha.
+
+### E5 · Compreensão escrita com documento
+
+- **O que é:** um "documento" do dia a dia (placa, cardápio, horário, anúncio) desenhado em HTML, com 3 perguntas.
+- **Exemplo (A1-25, Refeições e restaurante):**
+  1. Card estilo lousa: *Menu du jour · 15 € · Entrée + plat ou plat + dessert · Entrée : salade de tomates · Plat : poulet rôti, frites ·
+     Dessert : tarte aux pommes · Boisson non comprise*.
+  2. Perguntas: *Le menu coûte combien ?* (15 €) · *La boisson est comprise ?* (não) · *Quel est le dessert ?* (a torta de maçã).
+  3. Correção automática (múltipla escolha e verdadeiro/falso).
+- **Onde:** A1-10 (etiqueta de preço), A1-14 (horário de trem), A1-25 (cardápio); A2: 1 por unidade. **Grátis.**
+- **Motor:** campo `readingDocs` (HTML simples, estilos do próprio arquivo com tokens de cor validados nos 4 cenários) + múltipla escolha.
+
+### E6 · Produção oral com gravação
+
+- **O que é:** o aluno ouve uma pergunta da entrevista DELF, grava a resposta, ouve o modelo e se autoavalia.
+- **Exemplo (A1-22, Profissões):**
+  1. Áudio: *Qu'est-ce que vous faites dans la vie ?*
+  2. O aluno grava (até 30 s). Resposta esperada: *Je suis infirmière. Je travaille dans un hôpital.*
+  3. Ouve a própria gravação e o modelo; marca: "respondi à pergunta", "usei *je suis* + profissão sem artigo", "dá para entender".
+  4. Sem correção automática da pronúncia (reconhecimento de fala no navegador é instável; fica para depois).
+- **Onde:** A1-m1 e A1-m7 (entrevista), A2 (monólogo de 2 min). Grátis na trilha; Premium na atividade final.
+- **Motor:** reusa o gravador do editor de cartões (`shared/flashcard-field-audio-recorder.js`, `audio.type='recording'`); a gravação fica só
+  no aparelho na fase 1 (sem envio, sem custo de armazenamento); envio para a professora na fase 2.
+
+### E7 · Diálogo em turnos
+
+- **O que é:** o cenário de hoje ("o que você diz?") em sequência, construindo a conversa inteira.
+- **Exemplo (A1-10, Roupas e compras):**
+  1. Vendedora: *Bonjour, je peux vous aider ?* → escolha: (a) *Oui, je cherche un pull.* ✓ (b) *Non, il fait froid.* (c) *Je suis vendeuse.*
+  2. *Quelle taille ?* → (a) *Rouge.* (b) *Du 38.* ✓ (c) *Trente euros.*
+  3. *Il coûte 30 euros.* → (a) *C'est cher ! Vous avez moins cher ?* ✓ (b) *Je m'appelle Ana.* (c) *À droite.*
+  4. *Celui-ci coûte 20 euros.* → (a) *Je le prends.* ✓ (b) *Je prends le bus.* (c) *J'ai vingt ans.*
+  5. Correção automática; errar mostra por quê e repete o turno.
+- **Onde:** A1-10, A1-25, A1-26; A2-8, A2-13, A2-23. **Grátis.**
+- **Motor:** lista de `scenario` encadeados (formato atual) com o diálogo como roteiro; sem renderer novo.
+
+### E8 · Pares mínimos (fonética)
+
+- **O que é:** ouvir uma palavra e escolher entre duas que soam parecido.
+- **Exemplo (A1-8, nota [y] x [u]):** áudio *la rue* → (a) *la rue* ✓ (b) *la roue*; áudio *tout* → (a) *tu* (b) *tout* ✓; áudio *ils ont* →
+  (a) *ils sont* (b) *ils ont* ✓. 6 itens; correção automática; o erro toca as duas palavras em seguida.
+- **Onde:** nas unidades das notas de fonética (v1, 8.3). **Grátis.**
+- **Motor:** escuta + múltipla escolha. **Risco:** a voz do TTS precisa diferenciar bem cada par; testar no laboratório de áudio antes (skill
+  `audio-tts`); par que a voz não diferencia não entra.
+
+### E9 · Simulado DELF no Teste de Nível
+
+- **O que é:** o Teste de Nível A1 (e depois o A2) ganha um modo "simulado DELF": CO (2 documentos), CE (2), PE (E1), PO (E6), 25 pontos
+  cada; aprovação com 50/100 e mínimo 5/25 por parte, como o DELF.
+- **Exemplo (fim do A1):** CO: anúncio de estação (*Le train pour Lyon partira du quai 3 à 10 h 15*) → "De que plataforma sai o trem?";
+  CE: convite de aniversário → "Que dia é a festa?"; PE: cartão-postal; PO: 3 perguntas gravadas. CO e CE automáticas; PE e PO pela rubrica.
+- **Onde:** só no Teste de Nível (o mini-simulado por módulo sai, seção 7.4). Grátis (decisão 17).
+- **Motor:** reusa E1, E4, E5, E6; o Teste de Nível atual continua sendo o que vale para "concluir o nível".
+
+### E10 · Mediação ("repasse a informação")
+
+- **O que é:** ler ou ouvir um aviso em francês e responder em português a alguém que pergunta.
+- **Exemplo (A1-6, Horas e rotina):** placa *Pharmacie · Ouvert du lundi au samedi de 9 h à 19 h 30 · Fermé le dimanche*. Pergunta da mãe
+  do aluno (em português): "Que horas a farmácia fecha no sábado?" Resposta esperada: "Às sete e meia da noite" (aceita "19h30", "às 19:30").
+  Correção pelo comparador de tradução (`shared/translation-compare.js`) com lista de respostas aceitas.
+- **Onde:** A1-6, A1-14, A1-25; A2 com textos maiores. **Grátis.**
+- **Motor:** compatível (comparador já existe). No site em inglês a pergunta e a resposta são em inglês (regra do site em inglês).
+
+**Ordem de implementação:** E7 e E4 (só dados) → E1/E2/E3 (renderer simples; dão a atividade final) → E5 → E10 → E8 → E6 → E9.
+
+---
+
+## 10. Notas de realidade e culturais
+
+Continuam as propostas da v1 (seções 8.1 a 8.3), com três mudanças:
+- **Notas *in situ*:** encurtar as do A1-3, A1-9 e A1-10 já; tirar as do A1-9 e A1-10 quando o A1-g12 existir (Dúvida b, decisão 13).
+- **Regional de números:** a parte *septante / nonante / huitante* sai do A1-3 e vai para o A1-21 (gatilho *dix-sept* ou *vingt*); a do
+  A1-3 fica só "a contagem muda depois do 69, você vai ver no A1-28".
+- **Desculpar-se:** nota de realidade no A1-27: *Désolé(e) !* x *Pardon !* x *Excusez-moi* (alta).
+
+Toda nota nova ou editada sai com nível de confiança no chat (regra do projeto) e segue a skill `notas-de-realidade`.
+
+---
+
+## 11. Mapa do A1 revisado (v2)
+
+Status: **M** mantida; **A** alterada; **N** nova; **→** mudou de módulo. Todas as mudanças de item passam pelas operações da seção 5.
+
+| Módulo (posição · id · título) | Unidades na ordem | Status | Palavras | O que muda |
+|---|---|---|---|---|
+| **1 · A1-m1 · Primeiros contatos** | A1-1 | A | 10 | nota Quebec *bienvenue* |
+| | A1-2 | A | 10 | palavras e lições reordenadas |
+| | A1-3 Números de 0 a 10 | A | 12 | +6 números na ordem; idade sai |
+| | **A1-21 Números de 11 a 20 e a idade** | N | 13 | recebe idade e frases do A1-3 |
+| | A1-g1 | A | | + pronomes tônicos |
+| | *Atividade final: mensagem de apresentação + entrevista* | N | | Premium |
+| **2 · A1-m7 (novo) · Quem é você** | A1-4 → | A/→ | 10 | + frases de família |
+| | **A1-g11 Artigos, gênero e plural** | N | | P0c |
+| | A1-g2 → | M/→ | | |
+| | **A1-22 Profissões** | N | 10 | |
+| | **A1-23 Dados pessoais** | N | 10 | E2 |
+| | **A1-g12 Negação e perguntas** | N | | P0c |
+| | *Atividade final: ficha + soletrar* | N | | Premium |
+| **3 · A1-m2 · Rotina e calendário** | A1-5 | A | 10 | frase R4 trocada |
+| | A1-6 | A | 10 | *manger* fundido, + *se coucher* |
+| | A1-g3 | A | | + letras mudas |
+| | A1-7 Dias da semana | A | 11 | dias completos na ordem; meses saem |
+| | **A1-24 Meses e datas** | N | 14 | |
+| | *Atividade final: marcar um encontro* | N | | Premium |
+| **4 · A1-m3 · Na cidade** | A1-8 | A | 10 | |
+| | **A1-g13 aller, futuro próximo, contraídos** | N | | P0c |
+| | A1-9 | A | 10 | fusões; + *habiter, la ville* |
+| | A1-g4 | M | | agora depois do A1-9 |
+| | A1-14 → | A/→ | 10 | vem do m4 |
+| | A1-g5 → | M/→ | | vem do m4 |
+| | *Atividade final: explicar o caminho + mediação* | N | | Premium |
+| **5 · A1-m8 (novo) · Compras** | **A1-28 Números de 30 a 100 e preços** | N | 10 | 8 movidos do A1-10 |
+| | A1-g10 → | M/→ | | |
+| | A1-10 Roupas e compras → | A/→ | 10 | + 4 roupas; números saem |
+| | A1-11 → | A/→ | 10 | |
+| | A1-12 → | A/→ | 10 | |
+| | **A1-g14 Partitivos e quantidade** | N | | |
+| | *Atividade final: diálogo na loja + ditado de preços* | N | | Premium |
+| **6 · A1-m4 · Viagem, tempo e saúde** | **A1-25 Refeições e restaurante** | N | 10 | |
+| | A1-13 | A | 10 | |
+| | **A1-26 Férias e hotel** | N | 10 | |
+| | A1-15 | A | 10 | |
+| | A1-g6 | A | | + imperativo |
+| | *Atividade final: cartão-postal* | N | | Premium |
+| **7 · A1-m5 · Casa e descrição** | A1-16 | A | 10 | + descrição física |
+| | **A1-g15 Adjetivos e demonstrativos** | N | | |
+| | A1-17 | A | 10 | |
+| | A1-18 | A | 10 | |
+| | A1-g7 | A | | decisão 9 |
+| | *Atividade final: anúncio do apartamento* | N | | Premium |
+| **8 · A1-m6 · Lazer, convites e passado** | A1-19 | A | 11 | + *adorer* |
+| | A1-g8 | M | | |
+| | **A1-27 Convites, festas e desculpas** | N | 10 | |
+| | A1-20 | A | 10 | *hier* fundido, *récemment* → A2, + *tôt, tard* |
+| | A1-g9 | A | | só *avoir* |
+| | **A1-g16 Passé composé com être** | N | | |
+| | *Atividade final: convite + fim de semana* | N | | Premium |
+| **Teste de Nível A1** | A1-final | A | | 40 itens + modo simulado DELF (E9) |
+
+**Totais:** 8 módulos, **44 unidades** (28 de vocabulário + 16 de gramática), **~291 palavras-cartão** (204 de hoje − 4 fundidas − 1 movida
+para o A2 + 92 novas), 8 atividades finais. **Versão só com P0 confirmado:** A1-3, A1-21, A1-g11, A1-g12, A1-g13 + correções de texto
+(34 unidades, sem mudar módulos).
+
+---
+
+## 12. O molde para o português
+
+Igual à v1 (seção 10 de `04-v1-...`), com dois acréscimos: (1) o curso de português **nasce com chave estável em cada item** (formato da
+Etapa 0) e camada por chave, sem passar pela fase "por posição"; (2) a atividade final por módulo vale também para o pt, no espírito das
+tarefas integradas do Celpe-Bras (gênero, interlocutor e propósito).
+
+---
+
+## 13. Decisões consolidadas (numeração nova)
+
+Situação: **RESOLVIDA** (pela dona), **MUDOU** (a pergunta mudou com o retorno), **NOVA**, **CONTINUA**. "antiga nº X" = número da v1.
+
+| Nº | Decisão | Situação | Recomendação |
+|---|---|---|---|
+| 1 | Fronteira A1/A2: zona cinza (futuro simples, imperfeito, COI, *en*, relativos) | RESOLVIDA (antiga nº 1): tudo no A2, como no Défi 1 | aplicada no mapa |
+| 2 | Política "só acrescentar" | RESOLVIDA (antiga nº 5): inaceitável; substituída pela 3 | |
+| 3 | **Estratégia de ids estáveis**: chave congelada + fusões + arquivo (opção c) | NOVA | aprovar a opção (c) e fazer a Etapa 0 antes de qualquer conteúdo |
+| 4 | Regra de fusão do FSRS (revisão mais recente vence; perdedor no arquivo) | NOVA | aprovar |
+| 5 | Item excluído: arquivar (volta se o item voltar) ou descartar | NOVA | arquivar |
+| 6 | Unidade inserida antes de unidade concluída | RESOLVIDA (antiga nº 6): nasce aberta, não concluída | aplicada (2.10) |
+| 7 | Prioridades P0 | RESOLVIDA em parte: números 4-19, artigos/gênero, negação, perguntas, *aller* + futuro próximo | aplicada |
+| 8 | Tamanho e forma do A1 revisado (44 unidades, 8 módulos recompostos) | MUDOU (antigas nº 3 e 4) | aprovar o mapa completo; executar em ondas, P0 confirmado primeiro |
+| 9 | Comparativo (A1-g7) no A1 | CONTINUA (antiga nº 2) | fica no A1, com input; superlativo no A2 |
+| 10 | Módulos recompostos e 2 novos (o "Módulo N" exibido muda para quem já estuda) | MUDOU (antiga nº 4) | sim, com aviso no Mural |
+| 11 | Conjuntos fechados com mais de 10 palavras (A1-3 12, A1-21 13, A1-7 11, A1-24 14) | NOVA | aceitar |
+| 12 | Os outros itens que a v1 chamava P0 (dados pessoais, produção escrita, ordem do passé composé, dias/meses, profissões) | NOVA | manter P0 (são tarefas do DELF A1) |
+| 13 | Notas *in situ* repetidas | CONTINUA (antiga nº 12), explicada na Dúvida b | encurtar 3 já; tirar 2 quando houver o A1-g12 |
+| 14 | Nota de feminização das profissões: categoria | CONTINUA (antiga nº 13) | explicação |
+| 15 | Selo de nível no jogo PC x Imparfait e nos tempos da Conjugação | MUDOU (antigas nº 10 e 11): sai deste plano, vai para a sessão da Conjugação | mostrar o selo (sem trancar); alternativa: não mostrar |
+| 16 | Tamanho do A2 (fator F) | NOVA (substitui a antiga nº 14) | F = 1,4: 10 módulos, 60 unidades, ~408 palavras |
+| 17 | Mini-prova DELF | MUDOU (antiga nº 8) | só no Teste de Nível; por módulo vale a atividade final |
+| 18 | Atividade final Premium por módulo e a ordem dos módulos desenhada a partir dela | NOVA | sim |
+| 19 | **Correção da atividade final** | NOVA (substitui a antiga nº 7) | fase 1 automática + semiautomática; fase 2 professora (vinculados); fase 3 IA Premium com cota, só com paywall |
+| 20 | Grátis x Premium do que é novo | MUDOU (antiga nº 9) | trilha e exercícios da trilha grátis; atividade final e Desafios Premium (paywall desligado); professora para vinculados; IA Premium |
+| 21 | Atualizar `moduleId` de Desafios e ditados na produção | CONTINUA (antiga nº 17), com mais linhas | sim, no Staging antes, junto com a publicação |
+| 22 | Formulário com personagem fictício (sem dado real do aluno) | NOVA | sim |
+| 23 | *savoir* x *connaître* | MUDOU (antiga nº 15) | unidade A2-g17 |
+| 24 | GEF e Beacco como fonte de nível | RESOLVIDA (antiga nº 16): GEF sem divisão A1/A2; Beacco opcional | não comprar agora |
+| 25 | *récemment*: mover para o A2 ou excluir | NOVA | mover para A2-6 |
+| 26 | Saves reais anonimizados para o teste da Etapa 0 (só leitura) | NOVA | autorizar 3 contas |
+
+Saíram do plano: antiga nº 10 (Conjugação) → `05-mensagem-sessao-conjugacao.md`; antiga nº 14 (aprovar o A2 de 34 unidades) → nº 16.
+
+---
+
+## 14. Plano de execução em etapas
+
+Regras que valem para todas: Staging antes da produção; dado de produção só com autorização; texto novo nas duas camadas (o site em
+inglês não tem nada em português); português existente que muda passa por `DELIBERATE_PT_CHANGES`; texto novo com áudio = mp3 novo;
+regressão da área tocada com números reais; teste no navegador nos 4 cenários; nada de PR/merge sem pedido.
+
+| Etapa | O que | Esforço | Risco | Testes | Grátis x Premium |
+|---|---|---|---|---|---|
+| **0. Ids estáveis** | seção 2: chaves, id derivado, fusões, arquivo, `released`, `lessonId`, regra de desbloqueio, script de operações, mapa do cron + **deploy do `notification-cron`** | médio (2 PRs) | médio, mas **sem mudança visível** (ids iguais) | `tests/curriculo-ids` (8 grupos da 2.6) + regressão de trilha, decks, progresso, i18n | invisível |
+| **1. Texto e gramática P0** | correções de texto e gancho (v1 3.1), notas *in situ* encurtadas, A1-g11, A1-g12, A1-g13, A1-g16, telas novas em A1-g1/g3/g6/g9, frase R4 | médio | baixo (gramática não gera cartão) | `check_grammar_input.js`, `tests/camada-curso`, `tests/i18n`, Ponto de verificação | grátis |
+| **2. Reorganização do A1 (P0)** | operações 1 a 11 da seção 5 (números, dias/meses, fusões, A1-21, A1-24, A1-28), recomposição dos módulos, desbloqueio | médio-alto | médio (primeira vez que o progresso real é migrado) | testes da Etapa 0 com o `ops.json` real, `check_dictation_vocab.py`, navegador | grátis |
+| **3. Unidades novas P0/P1** | A1-22, A1-23, A1-25, A1-26, A1-27, A1-g14, A1-g15, notas da seção 10 | alto (conteúdo + áudio + 2 camadas) | baixo para o progresso | idem + `tests/desafios-*` | grátis |
+| **4. Atividades finais (Desafios)** | 4a: tipo `module_task` + E1/E2/E3 com correção automática e semiautomática para os 8 módulos do A1; 4b: fila da professora (migration nova, RLS, tela, sino bilíngue); 4c: IA, só depois do paywall | 4a médio; 4b alto; 4c médio | 4b mexe em banco (migration, Staging antes) | testes novos em `tests/atividade-final/`, `tests/desafios-*`, `tests/painel-professora` | atividade **Premium** (paywall desligado); professora para vinculados; IA Premium com cota |
+| **5. Exercícios na trilha** | E7, E4, E5, E10, E8, E6, E9 (nesta ordem) | alto | médio (UI nova) | testes novos por tipo + navegador | grátis |
+| **6. Desafios e ditados do A1** | Complete a frase das 16 gramáticas; Expressões que faltam; OT/Acentuação/Expressões das unidades novas; ditados dos módulos novos; `moduleId` na produção (autorização) | médio | baixo (`needs_review`) | `fr/scripts/test_answer_validation.js`, `tests/desafios-*`, `tests/ditado` | ditado 1 grátis + 2 Premium; o resto Premium |
+| **7. A2** | módulo a módulo (m1, m2, m9, depois os outros), cada um com unidades, notas, Desafios, ditados e atividade final | muito alto | baixo para o A1 (nível novo, chaves desde o 1º item) | idem às etapas 2 a 6 | trilha grátis; Desafios e atividade final Premium |
+
+Ordem: **0 → 1 → 2 → 3 → 4a → 6 → 5 → 4b → 7** (4c só com paywall). Nenhuma etapa avança sem a autorização da dona.
+
+Passos manuais da dona quando chegar a hora: deploy do `notification-cron` (Etapa 0, se for pelo painel); autorizar a leitura de 3 saves
+anonimizados (decisão 26); autorizar a atualização de `moduleId` dos Desafios na produção (Etapa 6); aplicar a migration da fila da
+professora no SQL Editor (Etapa 4b). Pendências acumuladas que continuam valendo (CLAUDE.md, "Estado atual"): 072 de país não aplicada;
+008 dos Desafios só com paywall; e-mails bilíngues do Supabase Auth; 107 (Mural) opcional; `report-reply-send`.
 
 ---
 
 ## Resumo
 
-- **Principais lacunas do A1:** números 4 a 19, artigos/gênero, negação e perguntas, *aller* + futuro próximo, imperativo (todos usados sem ensino); dados pessoais/formulário, soletrar, profissões, cartão-postal, viagem/hotel, convites (aceitar/recusar), refeições; dias e meses incompletos; fonética inexistente; francofonia e festividades ausentes das notas; nenhuma produção escrita/oral nem compreensão sem texto.
-- **Passé composé:** fica no A1 (todas as fontes), mas o A1-20 vira "primeiro contato" com objetivo e nota corrigidos, o A1-g9 fica só com *avoir* e o *être* ganha unidade própria (A1-g16).
-- **Remoções/etiquetas:** Jogo PC x Imparfait e tempos A2/B1 da Conjugação ganham etiqueta de nível; frase "Je vais détester ce plat" reescrita; 3 notas repetidas de pergunta *in situ* encurtadas. Nada do núcleo sai; o comparativo fica (decisão 2).
-- **Deslocamentos:** A1-4/A1-g2 e A1-11/A1-12 vão para 2 módulos novos; ordem relativa das 30 unidades preservada.
-- **A1 revisado:** 8 módulos, 43 unidades (13 novas), ~282 palavras; versão enxuta: 38 unidades.
-- **A2 proposto:** 8 módulos, 34 unidades (19 + 15 gramática), ~190 palavras, cada módulo com tarefa DELF A2 e Teste de Nível em formato DELF.
-- **Conjugação/Desafios/Ditados:** ranking real de frequência, 17 verbos faltando, *éteindre*, jogos A1; Complete a frase para todas as gramáticas; ditados de números e soletrar; 13 desafios mudam de módulo (dado em produção).
-- **Risco principal:** ids de cartão por índice: tudo é "só acrescentar" e unidades novas; desbloqueio de unidades inseridas precisa de código.
-- **Decisões abertas:** 17 (seção 11.1), com destaque para 3 (tamanho), 4 e 6 (módulos novos e desbloqueio), 7 e 8 (correção de produção e mini-prova DELF), 9 (grátis x Premium) e 17 (dados em produção).
+- **O que mudou da v1:** a regra "só acrescentar" caiu; entra a **Etapa 0 (ids estáveis)** antes de qualquer conteúdo; unidade nova nasce
+  aberta; zona cinza resolvida a favor do Défi 1; A1 revisado com fusões e movimentos (44 unidades, ~291 palavras, 8 módulos recompostos);
+  A2 redimensionado; atividade final Premium por módulo com análise de correção; 10 exercícios com exemplo; Conjugação foi para o `05`;
+  `02` novo incorporado (subjuntivo só em fórmula no fim do A2, gerúndio no A2, passiva no B1, desculpar-se no fim do A1).
+- **Ids em 3 linhas:** cada palavra/frase ganha uma chave congelada igual ao id de hoje (zero migração inicial) e o id do cartão passa a vir
+  da chave, não da posição; mover, reordenar e reescrever não mudam mais o id; fusões vão numa tabela aplicada no carregamento (revisão mais
+  recente vence) e itens excluídos vão para um arquivo de progresso que volta se o item voltar. Sem migration SQL; o `notification-cron` muda e precisa de deploy.
+- **A2 novo:** F = 1,4 → **10 módulos, 60 unidades (34 + 26), ~408 palavras**, 12 palavras por unidade, E4/E5 em toda unidade (parâmetro: F 1,2 a 1,6).
+- **Correção da atividade final:** automática + semiautomática já; professora para vinculados depois; IA (Haiku 5.5, ~US$ 0,40 por 1.000
+  correções) só como Premium com cota, depois do paywall.
+- **Decisões abertas:** 3, 4, 5 (ids), 8, 9, 10, 11, 12 (A1), 13, 14 (notas), 15 (selo), 16 (tamanho do A2), 17 a 20 e 22 (atividade final,
+  correção, grátis x Premium, privacidade), 21 e 26 (dados de produção), 23, 25.
