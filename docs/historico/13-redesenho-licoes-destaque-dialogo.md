@@ -183,3 +183,13 @@ A autora pensou em aposentar a ideia ("estamos criando coisas demais"). Nada foi
   (2026-10-14) que, se voltar, começa enxuta: só "Adicionar estas N formas à Revisão" na tela final da Conjugação e do
   Jogo, com o que a pessoa errou, sem mexer nos Desafios.
 - Os dois botões de áudio num mesmo Field (🔊 + 🎧) foram considerados "realmente muito confusos" pela autora.
+
+## Ajustes pedidos pela autora (2026-10-16)
+
+- Conjugação: teclas de acento do mesmo tamanho das da lição (o contêiner `.conj-accents` em flex encolhia a grade até a
+  largura da letra; `.fr-accent-picker` ganhou `width:100%; max-width:360px` dentro dele).
+- Busca de verbos: a tradução vem logo depois do verbo, entre parênteses ("morar (habiter)"), em vez de encostada à direita.
+- Check: o ✓ voltou a ser texto (branco nos círculos verdes); ver `docs/icones-fluent.md`.
+- Testes: Conjugação Playwright 64/66 (2 novas: teclas com largura de toque; busca "comer (manger)" atualizada). As 2 falhas
+  ("resposta: forma certa na lacuna..." e "site em inglês: tradução...") já falhavam antes. "corrigir: erro mostra a forma
+  certa" falha às vezes, conforme o verbo sorteado (ex.: "pouvoir" tem "peux/puis"). Ícones 43/43 (o ✓ deixou de virar ícone).

@@ -113,6 +113,7 @@ async function fill(page, wrongIdx){
 
     await page.click('#conj-start-btn');
     await page.waitForSelector('.conj-tense-box .conj-field input');
+    if (process.env.SHOTS) await page.locator('.conj-accents').screenshot({ path: process.env.SHOTS + `/conj-acentos-${theme}.png` });
     const lay = await page.evaluate(() => {
       const box = document.querySelector('.conj-tense-box').getBoundingClientRect();
       const grid = document.querySelector('.conj-tense-grid').getBoundingClientRect();
@@ -126,6 +127,8 @@ async function fill(page, wrongIdx){
     L('prática: um tempo só ocupa a largura toda', lay.single && lay.full, lay);
     L('prática: as 6 pessoas na vertical (je ... ils)', lay.oneCol && lay.down, lay);
     L('prática: pronome à esquerda do campo, na mesma linha', lay.labelLeft, lay);
+    const keyW = await page.evaluate(() => document.querySelector('.conj-accents .fr-accent-key').getBoundingClientRect().width);
+    L('teclas de acento com largura de toque (como na lição), não apertadas', keyW >= 40, keyW);
 
     await fill(page, 3);
     await page.click('#conj-verify-btn');
@@ -263,11 +266,12 @@ async function fill(page, wrongIdx){
     check('site em inglês: frase sem a tradução em português', enTr === 0, enTr);
     await page.click('#conj-search-input');
     await page.keyboard.type('comer');
+    if (process.env.SHOTS){ const bb = await page.locator('.conj-search').boundingBox(); await page.screenshot({ path: process.env.SHOTS + '/conj-busca-comer.png', clip: { x: bb.x, y: bb.y, width: bb.width, height: bb.height + 130 } }); }
     const s1 = await page.evaluate(() => { const o = document.querySelector('#conj-search-list .conj-search-opt');
       return { open: !document.getElementById('conj-search-list').hidden, exp: document.getElementById('conj-search-input').getAttribute('aria-expanded'),
         verb: o && o.dataset.verb, word: o && o.querySelector('.conj-opt-word').textContent, flag: o && o.querySelector('.conj-flag').getAttribute('aria-label'),
         green: !!(o && o.querySelector('.conj-flag rect[fill="#009739"]')) }; });
-    check('"comer" acha manger, com a bandeira do Brasil', s1.open && s1.exp === 'true' && s1.verb === 'manger' && s1.word === 'comer' && s1.flag === 'português' && s1.green, s1);
+    check('"comer" acha manger, com a bandeira do Brasil', s1.open && s1.exp === 'true' && s1.verb === 'manger' && s1.word === 'comer (manger)' /* 2026-10-16: tradução logo depois do verbo */ && s1.flag === 'português' && s1.green, s1);
     await page.keyboard.press('Enter');
     await page.keyboard.type('etre');
     const s2 = await page.evaluate(() => { const o = document.querySelector('#conj-search-list .conj-search-opt');

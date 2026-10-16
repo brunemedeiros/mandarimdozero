@@ -5318,8 +5318,7 @@ function renderConjSearchList(){
   list.innerHTML = hits.length ? hits.map((h, i) => {
     const other = h.lang === 'fr' ? (VERB_TRANSLATIONS[h.verb] || '') : h.verb;
     return `<li role="option" id="conj-opt-${i}" class="conj-search-opt" data-verb="${escapeHTML(h.verb)}" aria-selected="${i === 0}">
-      ${conjFlagHTML(h.lang)}<span class="conj-opt-word" ${h.lang === 'fr' ? 'lang="fr"' : ''}>${escapeHTML(h.word)}</span>
-      <span class="conj-opt-other" ${h.lang === 'pt' ? 'lang="fr"' : ''}>${escapeHTML(other)}</span></li>`;
+      ${conjFlagHTML(h.lang)}<span class="conj-opt-word" ${h.lang === 'fr' ? 'lang="fr"' : ''}>${escapeHTML(h.word)}${other ? ` <span class="conj-opt-other" ${h.lang === 'pt' ? 'lang="fr"' : ''}>(${escapeHTML(other)})</span>` : ''}</span></li>`;
   }).join('') : `<li class="conj-search-empty" role="presentation">${t('fr.conj.sel.noMatch')}</li>`;
   list.hidden = false;
   input.setAttribute('aria-expanded', 'true');
