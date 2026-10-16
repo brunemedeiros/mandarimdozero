@@ -17,5 +17,8 @@ site novo parte do molde da família (ver `docs/i18n/e4-plano-de-extracao.md`) e
   "Não sei" tira 1 (mínimo 1); refazer lição concluída 0; fechar lição `LESSON_CLOSE_XP` 4. Ponto de verificação 25 e bônus das Missões 30 ficam como estavam
   (decisão de 2026-10-15). Meta "Ganhe 50 XP hoje" mantida de propósito: uma lição sozinha não fecha, incentiva lição + revisão.
   Nunca escrever número solto em `addXP(...)` de exercício ou de fechar lição: usar as constantes.
+- **Hanzi e histórias** (hoje só no zh; valem para qualquer site que ganhe essas atividades; constantes em `shared/srs.js`): escrever hanzi `HANZI_WRITE_XP` 2, acerto no teste
+  de hanzi `HANZI_TEST_XP` 1, concluir lição de hanzi `LESSON_CLOSE_XP` 4, pergunta de história certa `STORY_QUESTION_XP` 1, concluir história `STORY_DONE_XP` 20.
+  Lição de hanzi ou história JÁ concluída não paga XP de novo (mesma regra de "refazer lição" da trilha).
 - O toast "+N XP" aparece para todo ganho maior que 0. A notificação do sino usa `notification_rules.min_xp_amount` (categoria `gamificacao`, 15 na produção).
 - Demais fontes e valores atuais, e o que está em revisão: `docs/historico/21-auditoria-xp.md`. Ao mexer em qualquer XP, atualizar esse arquivo e o teste `tests/xp/`.

@@ -75,6 +75,14 @@ const EXERCISE_XP_RECOGNIZE = 1;
 const EXERCISE_XP_PRODUCE = 2;
 const EXERCISE_XP_ALMOST = 1;
 const LESSON_CLOSE_XP = 4;
+// Hanzi e histórias (existem só no zh hoje; valem para qualquer site que ganhe essas atividades; decisão de 2026-10-15):
+// escrever um hanzi (produzir) 2, acerto no teste de hanzi (reconhecer) 1, concluir lição de hanzi = LESSON_CLOSE_XP,
+// pergunta de história certa (reconhecer) 1, concluir história 20 (marco, como o Ponto de verificação).
+// Lição de hanzi ou história JÁ concluída não paga XP de novo (mesma regra de refazer lição da trilha).
+const HANZI_WRITE_XP = 2;
+const HANZI_TEST_XP = 1;
+const STORY_QUESTION_XP = 1;
+const STORY_DONE_XP = 20;
 
 function todayStr(){
   const d = new Date();

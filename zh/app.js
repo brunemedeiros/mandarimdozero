@@ -1523,7 +1523,8 @@ function renderNextStoryBeat(){
           if (i === q.correctIndex) b.classList.add('correct');
           else if (i === chosenIdx) b.classList.add('incorrect');
         });
-        if (isCorrect) addXP(5);
+        // História já concluída não paga XP de novo (decisão de 2026-10-15).
+        if (isCorrect && !STATE.storyProgress[STORY_STATE.storyId]?.completed) addXP(STORY_QUESTION_XP);
 
         const continueBtn = document.createElement('button');
         continueBtn.className = 'story-continue-btn';
@@ -1554,7 +1555,7 @@ function finishStory(){
   const storyId = STORY_STATE.storyId;
   if (!STATE.storyProgress[storyId]?.completed){
     STATE.storyProgress[storyId] = { completed: true };
-    addXP(20);
+    addXP(STORY_DONE_XP);
     showToast(t('zh.toast.storyDone'));
   }
   saveState();
@@ -5351,7 +5352,7 @@ function renderHanziWriteCard(char, contentEl, nextBtn){
       onComplete: () => {
         feedbackEl.textContent = t('zh.hanzi.writeDone');
         feedbackEl.className = 'hanzi-write-feedback ok';
-        addXP(3);
+        if (!hanziLessonAlreadyCompleted()) addXP(HANZI_WRITE_XP); // lição já concluída não paga de novo
         setTimeout(() => advanceHanziAfterWrite(), 900);
       }
     });
@@ -5448,7 +5449,7 @@ function renderHanziTestStep(contentEl, nextBtn){
       });
       if (isCorrect){
         HANZI_STUDY_STATE.testScore += 1;
-        addXP(3);
+        if (!hanziLessonAlreadyCompleted()) addXP(HANZI_TEST_XP); // lição já concluída não paga de novo
       }
       // Streak conta só ao terminar a LIÇÃO de Hanzi inteira (ver
       // markHanziLessonCompleted), não a cada pergunta isolada do teste.
@@ -5460,6 +5461,11 @@ function renderHanziTestStep(contentEl, nextBtn){
   });
 }
 
+// Refazer uma lição de hanzi já concluída é permitido, mas não paga XP (escrita e teste).
+function hanziLessonAlreadyCompleted(){
+  return !!STATE.hanziLessonProgress[HANZI_STUDY_STATE.lessonIndex]?.completed;
+}
+
 function markHanziLessonCompleted(lessonIndex){
   if (STATE.hanziLessonProgress[lessonIndex].completed) return;
   STATE.hanziLessonProgress[lessonIndex].completed = true;
@@ -5467,7 +5473,7 @@ function markHanziLessonCompleted(lessonIndex){
   if (lessonIndex + 1 < HANZI_LESSONS.length){
     STATE.hanziLessonProgress[lessonIndex + 1].unlocked = true;
   }
-  addXP(20);
+  addXP(LESSON_CLOSE_XP);
   registerStudyToday();
   registerDailyHanziLesson();
   showToast(t('zh.toast.hanziLessonDone'));

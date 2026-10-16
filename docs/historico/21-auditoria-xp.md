@@ -13,6 +13,12 @@
 - Ponto de verificação (25), Missões do dia (30) e a meta "Ganhe 50 XP hoje" ficam como estavam, por decisão da autora (uma lição sozinha não fecha a meta: incentiva lição + revisão).
 - Constantes em `shared/srs.js` (`EXERCISE_XP_*`, `LESSON_CLOSE_XP`); fr, zh e `shared/core/quase-iguais-pinyin.js` usam as constantes. Testes: `tests/xp/test_trilha_xp.js` (18/18), `tests/xp/test_xp_navegador.js` (fr e zh, 10/10).
 
+## zh: hanzi e histórias (decidido e feito, 2026-10-16)
+- Escrever hanzi 3 -> **2**; acerto no teste de hanzi 3 -> **1**; concluir lição de hanzi 20 -> **4** (= fechar lição); pergunta de história certa 5 -> **1**; concluir história **20** (mantido).
+- Trava nova: lição de hanzi ou história já concluída não paga XP de novo (antes dava para repetir sem limite). Uma lição de hanzi (5 caracteres) vai de 50 para ~19 XP; uma história na 1ª vez de 35 para 23.
+- Constantes `HANZI_WRITE_XP`, `HANZI_TEST_XP`, `STORY_QUESTION_XP`, `STORY_DONE_XP` em `shared/srs.js`. Teste: `tests/xp/test_xp_zh_hanzi_historias.js` (9/9, app zh real; a escrita de traços é conferida no código porque a biblioteca vem de CDN).
+- Speed Review, Combinar e Conjugação não foram alterados (a autora pediu para não mexer).
+
 ## Fontes de XP (tabela abaixo = valores ANTES desta rodada; a rodada da trilha está acima)
 | Fonte | XP | Onde |
 |---|---|---|
