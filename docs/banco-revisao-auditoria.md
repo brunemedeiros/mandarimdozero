@@ -1,5 +1,7 @@
 # Banco de Revisão: auditoria do funcionamento (2026-10-16)
 
+> **Versão 2 (respostas, decisões da autora e propostas): `docs/banco-revisao-proposta-v2.md`.** Este arquivo descreve o funcionamento **antes** das mudanças propostas; as seções 6 e 7 foram superadas por lá.
+
 Feita lendo o código (`shared/review-bank*.js`, `shared/review-answer-extras.js`, renderizadores de Revisão em `fr/app.js`), a função da rotina
 (`supabase/functions/review-bank-agent/`), o artifact do Banco (a área do aluno com código) e **contagens reais da produção**. Não testei com conta de aluno de verdade.
 O que não verifiquei está marcado como "não conferi".
