@@ -138,10 +138,11 @@ São os **Reference Level Descriptions (RLD)** do francês: descrevem, para cada
 |---|---|
 | A1: formulário, dados pessoais, cartão-postal | Alter Ego+ D0-D2 (cartão-postal em D2 L3); Défi U1 |
 | A1: troca de informações com perguntas | Pergunta (entonação, *est-ce que*, *quel*) em todos os livros A1 |
-| A1: diálogo de compra com preços | Alter Ego+ D7-D8; Défi U7 D2 e U8 D1; números em todos |
+| A1: diálogo de compra com preços | Alter Ego+ D7-D8; Défi U7 D2 e U8 D1; Communication Progressive Débutant parte I (atos 1 a 7); números em todos |
 | A2: narrar experiência no passado (PE e monólogo) | Passé composé (fim do A1 em todos) + imperfeito e alternância (Alter Ego+ D8-D9, Défi 2 U7-U8, GEF 29-30) |
-| A2: carta para convidar, aceitar, recusar, desculpar-se, agradecer | Alter Ego+ D4 L2 (convidar); Communication Progressive Intermédiaire (Sociabilité, Conversation); Défi 2 (dar opinião e conselho) |
-| A2: interação com pequena negociação | Communication Progressive Intermédiaire (Achats, Contacts quotidiens); Défi 2 U3 (restaurante) |
+| A2: carta para convidar, aceitar, recusar, desculpar-se, agradecer | Alter Ego+ D4 L2 (convidar); Communication Progressive Débutant (atos 22, 26, 28) e Intermédiaire (Sociabilité, Conversation); Défi 2 (dar opinião e conselho) |
+| A2: interação com pequena negociação | Communication Progressive Débutant (atos 5, 13, 14) e Intermédiaire (Achats, Contacts quotidiens); Défi 2 U3 (restaurante) |
+| Teto do A2 (o que já é B1) | Défi 3 (B1) trata futuro simples, COD/COI, *en/y* e condicional presente como revisão e introduz subjuntivo, *si* + imperfeito, mais-que-perfeito, passiva e discurso relatado no passado (02, seção 8.7; atualização de 2026-10-16) |
 | CV: mediação simples (repassar informação) | Não aparece como objetivo explícito em nenhum livro lido (os livros são anteriores a 2020) |
 | CV: interação on-line | Alter Ego+ (perfil de rede social, fórum, e-mail) e Défi 2 (blog) já usam esses gêneros, sem chamá-los de escala própria |
 

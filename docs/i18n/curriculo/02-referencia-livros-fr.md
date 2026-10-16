@@ -1,6 +1,6 @@
 # Referência dos livros didáticos de francês (A1 e A2)
 
-Data: 2026-10-15. Levantamento de referência: aqui NÃO há comparação com o site (isso fica para depois, com base no `01-auditoria-fr-atual.md`).
+Data: 2026-10-15, **atualizado em 2026-10-16** com os sumários que a profa. pôs no Drive (o que mudou está na seção 12). Levantamento de referência: aqui NÃO há comparação com o site (isso fica para depois, com base no `01-auditoria-fr-atual.md`).
 Fonte: Google Drive da profa. Brune, pastas "Livros" (`1jrRDOuKTOoC8HNktmTkObIK4XFiC3RBl`) e "Gramáticas" (`1xUjQ_ccKShMyKYZaS_7l1yC-KF3iVxHJ`), percorridas até o fim (todas as subpastas, com paginação).
 Direitos autorais: só a ESTRUTURA (sumário, progressão, funções, tópicos). Os títulos de unidade e de capítulo aparecem como estão no livro (são rótulos, não trechos).
 
@@ -22,7 +22,7 @@ Direitos autorais: só a ESTRUTURA (sumário, progressão, funções, tópicos).
 
 ## 1. Inventário dos arquivos
 
-Legenda da coluna "Lido?": **sim** (sumário ou objetivos lidos), **indireto** (estrutura tirada de outra peça do mesmo livro), **não** (motivo ao lado), **fora** (nível acima de A2, só registrado).
+Legenda da coluna "Lido?": **sim** (sumário ou objetivos lidos), **lido (sumário)** (lido em 2026-10-16 num PDF curto só com o sumário, posto no Drive pela profa.), **indireto** (estrutura tirada de outra peça do mesmo livro), **não** (motivo ao lado), **fora** (nível acima de A2, só registrado).
 
 ### 1.1 Livros (pasta `1jrRDOuKTOoC8HNktmTkObIK4XFiC3RBl`)
 
@@ -41,12 +41,13 @@ Legenda da coluna "Lido?": **sim** (sumário ou objetivos lidos), **indireto** (
 | Défi A1 - Cahier d'exercices.pdf | A1 | `1i9tLPqR7WyyTBEA4PozUddklzJn-H4du` | não | 13 MB, acima do limite de download |
 | Défi A1 - Corrigés do caderno (Unités 1 a 8 + DELF) | A1 | pasta `1o4QeDoCLYtntVbTckWrkEQ42OVE8cGb2` | não | Não foi preciso: o guia já deu a estrutura |
 | Défi 1 - Espace Virtuel - Évaluations (4 Google Docs, 4 PDFs "Évaluation unités 1-2 / 3-4 / 5-6 / 7-8", transcrições, 6 áudios) | A1 | pasta `1ieFA9as3F0EKO6dKqlttfPW5_6ZouMOC` | não | Avaliação a cada 2 unidades (mesmo formato do Défi 2, ver abaixo) |
-| **Défi 2**: Défi 2.pdf (livro do aluno) | **A2** | `1EZsm5HzSGVGs15EeKK-wyEXI-FSVBrie` | indireto | 47 MB escaneado (o conector devolve só "Page 1...256"). Sem guia do professor no Drive. Estrutura tirada dos corrigés do caderno (títulos de seção por unidade) e da Avaliação 1 |
+| **Défi 2**: Défi 2.pdf (livro do aluno) | **A2** | `1EZsm5HzSGVGs15EeKK-wyEXI-FSVBrie` | indireto | 47 MB escaneado (o conector devolve só "Page 1...256"). Sem guia do professor no Drive. Estrutura tirada dos corrigés do caderno (títulos de seção por unidade) e da Avaliação 1. **Sem sumário novo em 2026-10-16**: os títulos dos dossiês continuam não lidos |
 | Défi 2 - Cahier d'exercices A2 - Corrigés (Unités 1 a 8 + DELF) | A2 | pasta `19TvCNvGR0aZtQcAEa3IPK_05HDfV5UsH` (U1 `1wQM3W_tcPPgmv66Jr2w-L5eLjN-euB4s` ... U8 `1wcDxJxukhLu8xpPojCXAwpfS1mmJ9yzR`) | **sim** (U1 a U8) | Títulos das unidades e seções de gramática/léxico/fonética de cada unidade |
-| Défi 2 - Évaluation 1 a 4 (Pour l'enseignant, PDFs e Google Docs, áudios) | A2 | pasta `12ZTywkHF-iZdlDD69RvhmI9wmQSgYPGE` | Avaliação 1 **sim** (`1WlWE-T372DMlGmTL81WCffr53ro1px7e`); 2 a 4 não | A Avaliação 1 lista os "recursos a mobilizar" das unidades 1 e 2 |
+| Défi 2 - Évaluation 1 a 4 (Pour l'enseignant, PDFs e Google Docs, áudios) | A2 | pasta `12ZTywkHF-iZdlDD69RvhmI9wmQSgYPGE` | Avaliação 1 **sim** (`1WlWE-T372DMlGmTL81WCffr53ro1px7e`); 2 a 4 não | A Avaliação 1 lista os "recursos a mobilizar" das unidades 1 e 2. As avaliações 2 a 4 ficaram fora por decisão da profa. (2026-10-16) |
 | Défi 2 - pastas de áudio | A2 | `1s4LwXEiyMIGd9R-FU2JgMdeC-DgUxkim`, `1UjrbqWu5RFTd25y_XCB1h-nkLDvWsgQm` | não | |
 | **Défi 3**: Livre, Cahier, guide pédagogique, corrigés, áudios | B1 | Livre `1pswlrUhaGTHE3GT_5utjXSaq5a5Z3rSG`, Cahier `1fEfLC_Tg3b-w4-D40uQ0N6GNh8BHlfDw`, guia `1fV6-mEaYM0PuU4cqhq_L351dX_FEHC9y` | fora | Nível B1: só inventário |
-| Conjugaison Progressive du Français - Niveau Débutant.pdf (raiz) | A1/A2 ("Débutant") | `1Fds4a1M-SoEkoj_i8f53x7cOC_N6a1dZ` | não | 84 MB sem texto; mesmo arquivo que está em Gramáticas (mesmo tamanho) |
+| Défi 3 - Livre (Sommaire).pdf | B1 | `1Kp5E_3V3-kpyWojljEEf0I8NWJHDD377` | **lido (sumário)**, alta (média para os títulos das unidades, que o OCR perdeu) | Tableau des contenus completo (9 unidades × 2 dossiês). Usado só como **teto** do A2: ver 8.7 |
+| Conjugaison Progressive du Français - Niveau Débutant.pdf (raiz) | A1/A2 ("Débutant") | `1Fds4a1M-SoEkoj_i8f53x7cOC_N6a1dZ` | não | 84 MB sem texto; mesmo arquivo que está em Gramáticas (mesmo tamanho). Fora por decisão da profa. (2026-10-16) |
 
 ### 1.2 Gramáticas (pasta `1xUjQ_ccKShMyKYZaS_7l1yC-KF3iVxHJ`)
 
@@ -54,21 +55,22 @@ Legenda da coluna "Lido?": **sim** (sumário ou objetivos lidos), **indireto** (
 |---|---|---|---|---|
 | **Grammaire Progressive du Français - Débutant (A1)**, 3e éd., CLE | A1 ("60 chapitres ... niveau A1") | `1wugHPG-coRudZ-Lu0SF3rNAkyblhVxz_` | indireto | 72 MB sem texto. Os 60 capítulos foram reconstruídos pelo caderno de respostas (que não traz os títulos) |
 | Grammaire Progressive A1 - Corrigés | A1 | `1ob5m0Ropo4OUf1o06q5IWlEjqieiqBee` | **sim** | Lido inteiro; o tema de cada capítulo foi deduzido das respostas (confiança média) |
-| **Grammaire en Dialogues - Débutant** + Corrigés | Débutant | `1rYhJ-pWWR0gK7BNJcrUMrGsXBYja0IAz`, `1IhBevb9GpnHRAzkjV22gNFqiFBW9Uwa7` | **não** | Livro escaneado (conector devolve só "Page 1...130"); corrigés lidos por OCR mas sem títulos de capítulo. Só dá para ver que começa por être/avoir, c'est/il y a, adjetivos, verbos em -er, faire/prendre (baixa) |
+| Grammaire Progressive A1: capítulos avulsos (3e éd.) | A1 | cap. 1 `1HMOzXAtIPp3sLrULlt0Quqj1GSZLxC_2`/`1cGRQVcLBkBGtL2Mt6u2WDhfdhoNTXFok`, 22 `1Hlf7T7AX2jhPCgkgoLeURH2NAGg7dJlk`, 28 `1PxMP2nFSRBzsbETVpSb1PlhvAkQrS8Zx`, 40 `1tj4IhuueJD6dT5URVG67koAgmEM2tHGy`, interrogação `1owBw3NwkKIk_s56_NCl76HZ-wb-yY5XF` | **título** (2026-10-16) | **Não há sumário novo deste livro.** Mas os PDFs avulsos que a profa. já usava em aula trazem o título no nome (e o de interrogação, no texto): confirmam 5 deduções (cap. 1, 22, 28, 40, 51-52). Os PDFs avulsos de 2021 ("Niveau débutant", sem "A1") podem ser de outra edição e não foram usados |
+| **Grammaire en Dialogues - Débutant** + Corrigés | Débutant | `1rYhJ-pWWR0gK7BNJcrUMrGsXBYja0IAz`, `1IhBevb9GpnHRAzkjV22gNFqiFBW9Uwa7` | **lido (sumário)**, alta | Sumário em `1WqIvKaVv9R74rGwZu12U6bx2s5DKAf6N` (texto legível pelo conector): 32 capítulos + 7 bilans (ver 8.4). Confirma a dedução anterior sobre o começo do livro |
 | **Vocabulaire Progressif du Français - Débutant (A1)**, 3e éd. | A1 | `1v-EQ0xCIXEmu5QDgeZCpfBjqiyfcIcfc` | **sim** | Sumário de 28 capítulos lido |
-| **Communication Progressive du Français - Débutant** + Corrigés | Débutant | `1upLyYlNfQG9rg8BnWHkWCoA9LFLeSlVc`, `1qmkoFfEJa5db63odDMCz5a2zRYL9WZjM` | **não** | 96 MB (conector devolve vazio) e 27 MB (só "Page n"); ambos acima de 10 MB |
-| **Conjugaison Progressive du Français - Débutant** | Débutant | `1cr4CFefXv-cwrwuMtS8JrLRXPd4asDSB` | **não** | 84 MB sem texto |
-| **Grammaire Essentielle du Français - A1-A2** (Didier) + Corrigés | A1-A2 | `13tMhEO88RTNchmbErFbh2wWYJ8NoEHn3`, corrigés `1DAAuErFrAHTZLCMlZTD5a6PLJ07tweZ3` | indireto, **alta** | Livro de 73 MB sem texto; os 45 títulos de capítulo saíram do OCR dos corrigés (que repetem o título de cada capítulo) |
-| **Grammaire Progressive - Intermédiaire A2 B1** + Corrigés + áudios | A2-B1 | `1n0hUmtZ2BP2tA41BFSmvWYTxYN82IilD`, `1tpSSXH0JuzMulanRn6KNUjmMRJnbpt6k` | **não** | 47 MB escaneado; corrigés 68 MB sem texto |
+| **Communication Progressive du Français - Débutant** + Corrigés | Débutant (o sumário não traz nível CEFR) | `1upLyYlNfQG9rg8BnWHkWCoA9LFLeSlVc`, `1qmkoFfEJa5db63odDMCz5a2zRYL9WZjM` | **lido (sumário)**: alta nos títulos, média na ligação gramática ↔ ato de fala | Sumário em `1G46I0XAz0R7hFqSC3Qy2IHDsktoyjsmU`: 40 atos de fala em 6 partes (ver 8.5). A tabela tem colunas (situação, gramática, vocabulário) que o texto extraído embaralha em alguns trechos |
+| **Conjugaison Progressive du Français - Débutant** | Débutant | `1cr4CFefXv-cwrwuMtS8JrLRXPd4asDSB` | **não** | 84 MB sem texto. Fora por decisão da profa. (2026-10-16) |
+| **Grammaire Essentielle du Français - A1-A2** (Didier) + Corrigés | A1-A2 | `13tMhEO88RTNchmbErFbh2wWYJ8NoEHn3`, corrigés `1DAAuErFrAHTZLCMlZTD5a6PLJ07tweZ3` | indireto, **alta** | Livro de 73 MB sem texto; os 45 títulos de capítulo saíram do OCR dos corrigés (que repetem o título de cada capítulo). **Segundo a profa. (2026-10-16), o livro não tem divisão definida entre A1 e A2**: nenhum capítulo é marcado como de um ou de outro (o PDF avulso do cap. 34, `11Vk67Z0RzRqvzGJemFXDbKwBpR4ygM_o`, também não traz marca) |
+| **Grammaire Progressive - Intermédiaire A2 B1** + Corrigés + áudios | A2-B1 (4e éd.) | `1n0hUmtZ2BP2tA41BFSmvWYTxYN82IilD`, `1tpSSXH0JuzMulanRn6KNUjmMRJnbpt6k` | **lido (sumário)**, alta | Sumário em `1tD_Knjytm9MdQFIEHzgreLdeFqEHJRmk`: 52 capítulos + 8 bilans (ver 8.6). O sumário não separa A2 de B1 |
 | **Communication Progressive - Intermédiaire** (2e éd.) + Corrigés + "Chapitre 16 (Parler de la santé)" | A2-B1 ("42 chapitres ... A2 et B1") | `1VGg0bXt8xkJvE2EDqIrvmsOCj5mJniN7`, `1rmxEfWqnU8OuHaKMvq3fzNfSbt0bqwlB`, `1AcQaNncDDRVT5KLAhlOHQxvb0I9kyFVh` | **sim** (sumário) | Sumário lido nos corrigés |
-| **Vocabulaire Progressif - Intermédiaire (A2 B1)**, 3e éd. + Corrigés + áudios | A2-B1 | `1RP-Qrk2en4sri5z9z2p4WMHAadVCsgeY`, `13uYyOWTDpEreENB0mmgsWhuLoPu2l_kI` | **sim** (sumário, média) | Livro escaneado; sumário por OCR dos corrigés (2 das ~20 linhas ilegíveis) |
+| **Vocabulaire Progressif - Intermédiaire (A2 B1)**, 3e éd. + Corrigés + áudios | A2-B1 | `1RP-Qrk2en4sri5z9z2p4WMHAadVCsgeY`, `13uYyOWTDpEreENB0mmgsWhuLoPu2l_kI` | **sim** (sumário, média) | Livro escaneado; sumário por OCR dos corrigés (2 das ~20 linhas ilegíveis). **Sem sumário novo em 2026-10-16.** Pelos PDFs avulsos (cap. 2 "La famille" `1592jlhMt_Mvbi00N5flMvgR6XwjVujW0`, cap. 11 "La maison, le logement" `18jYnctlWTaLK2fKqkphKmd8TzU9NcOv1`), as 2 linhas perdidas estão entre os capítulos 1 e 10 |
 | **Conjugaison Progressive - Intermédiaire** | Intermédiaire | `1dy-YeRuO9tWNM2MPiyOfoZIKH5dVqa3u` | **não** | 71 MB sem texto |
 | **Grammaire en Dialogues - Intermédiaire** | **B1** (declarado na capa e no prefácio) | `1V9lyxh4Y4quj2cgfyOZHgBYoIEsOws2g` | sim (sumário) | Apesar de estar na pasta "Intermédiaire", é B1: começa no presente e passa por mais-que-perfeito, futuro anterior, pronomes duplos, gerúndio. Útil só como teto do A2 |
 | Grammaire Essentielle - B1, B2 (+ corrigés) | B1, B2 | `1S1o5di83DWqocTJKf4peYDT2-PPqw5ha`, `1K6-SXH22hxztAUQ0c7XPxCWZU62KsRof`, `1G2rKGFZKZHPZ4mr7RzSb_RI3kiVMFksD` | fora | |
 | 3. Avancé: Grammaire Progressive B1 B2 (+ corrigés), Vocabulaire Progressif B2 C1.1 (corrigés) | B1-C1 | `1xaZCroM4S4wkkEakTvXQ5h5MxEYJq85J`, `1w-gJOq4Q30efqMlcNovRJWFlyk7GgAui`, `12HK55gbV1ks_hH1ZloNLX0MGsjq5jMmE` | fora | |
 | 4. Perfectionnement: Grammaire Progressive B2 C2 (+ corrigés), Communication Progressive C1 C2, Vocabulaire Progressif Perfectionnement (+ corrigés) | B2-C2 | `1NhP1an__4PR1IqTfl1B3CtcgacXHCbvM`, `1K3wcuWDPEK0A9KZ3vvWQ85SXurWIJo-Q`, `1OYBCZE0ctACDuoclV-zltK72whdB1eAH`, `1lURTe41CBfTc1EFmXytUoVUKMjf3CAaI`, `15Bua5utFiXM3lxRPQaNfvQgP2eX37CxG` | fora | |
 
-**Resumo do que deu para usar:** 2 métodos A1 completos (Alter Ego+ 1 e Défi 1), 1 método A2 (Défi 2, por via indireta), 2 gramáticas que cobrem A1 (Grammaire Progressive A1, média; Grammaire Essentielle A1-A2, alta), 1 vocabulário A1 (alta), e os sumários de Communication Progressive Intermédiaire e Vocabulaire Progressif Intermédiaire (A2-B1). **Ficaram de fora por limite técnico:** Grammaire Progressive Intermédiaire, Grammaire en Dialogues Débutant, Communication Progressive Débutant e as duas Conjugaison Progressive. Se a profa. quiser incluí-los, o caminho é exportar só as páginas de sumário (uma foto ou um PDF pequeno) para o Drive.
+**Resumo do que deu para usar (atualizado em 2026-10-16):** 2 métodos A1 completos (Alter Ego+ 1 e Défi 1), 1 método A2 (Défi 2, por via indireta), o sumário do Défi 3 (B1, como teto), 3 gramáticas que cobrem A1 (Grammaire Progressive A1, média, com 5 capítulos confirmados; Grammaire Essentielle A1-A2, alta; **Grammaire en Dialogues Débutant, alta, novo**), 1 gramática A2-B1 (**Grammaire Progressive Intermédiaire, alta, novo**), 2 livros de comunicação (**Communication Progressive Débutant, novo**, e Intermédiaire), 1 vocabulário A1 (alta) e o sumário do Vocabulaire Progressif Intermédiaire (média). **Continuam de fora:** as duas Conjugaison Progressive e as avaliações 2 a 4 do Défi 2 (por decisão da profa.); o sumário completo da Grammaire Progressive A1, os títulos dos dossiês do Défi 2 e as 2 linhas ilegíveis do Vocabulaire Progressif Intermédiaire (não vieram sumários novos deles).
 
 ---
 
@@ -157,7 +159,7 @@ Legenda da coluna "Lido?": **sim** (sumário ou objetivos lidos), **indireto** (
 
 ## 4. Grammaire Progressive du Français, Débutant A1 (CLE, 3e éd.): 60 capítulos
 
-**Confiança: média.** O livro (72 MB) não tem texto; o caderno de respostas (`1ob5m0Ropo4OUf1o06q5IWlEjqieiqBee`) foi lido inteiro, mas não traz os títulos. O tema de cada capítulo abaixo foi **deduzido das respostas**. A capa dos corrigés confirma: "60 chapitres ... niveau A1", "suit la progression naturelle des méthodes".
+**Confiança: média.** O livro (72 MB) não tem texto; o caderno de respostas (`1ob5m0Ropo4OUf1o06q5IWlEjqieiqBee`) foi lido inteiro, mas não traz os títulos. O tema de cada capítulo abaixo foi **deduzido das respostas**. **Em 2026-10-16** não veio sumário deste livro, mas os PDFs avulsos de capítulos que a profa. já tinha no Drive **confirmam 5 deduções** (confiança alta para elas): cap. 1 "La présentation", cap. 22 "à, en, au + ville ou pays", cap. 28 "Les nombres", cap. 40 "vouloir, pouvoir et devoir", cap. 51-52 "L'interrogation (2)" (onde, quando, como, quanto, por quê) e "(3)" (*qui*, *que/quoi/qu'est-ce que*, *quel*). Nenhuma dedução foi desmentida. A capa dos corrigés confirma: "60 chapitres ... niveau A1", "suit la progression naturelle des méthodes".
 
 | Cap. | Tema (deduzido) | Cap. | Tema (deduzido) |
 |---|---|---|---|
@@ -190,11 +192,11 @@ Legenda da coluna "Lido?": **sim** (sumário ou objetivos lidos), **indireto** (
 
 ## 5. Grammaire Essentielle du Français, A1-A2 (Didier): 45 capítulos
 
-**Confiança: alta** nos títulos (OCR dos corrigés `1DAAuErFrAHTZLCMlZTD5a6PLJ07tweZ3`, que repetem o título de cada capítulo). **O OCR não mostra se cada capítulo é marcado A1 ou A2** (o livro original costuma marcar; conferir no livro físico).
+**Confiança: alta** nos títulos (OCR dos corrigés `1DAAuErFrAHTZLCMlZTD5a6PLJ07tweZ3`, que repetem o título de cada capítulo). **Divisão A1/A2: não existe.** A profa. informou (2026-10-16) que o livro não tem divisão definida entre A1 e A2; ou seja, nenhum capítulo diz se é A1 ou A2, e a ordem dos capítulos é por categoria gramatical, não por nível. Para saber se um tópico é A1 ou A2 é preciso olhar os métodos (Alter Ego+, Défi) e as outras gramáticas, não esta.
 
 1 presentativos · 2 masculino/feminino dos nomes · 3 singular/plural dos nomes · 4 artigos definidos/indefinidos · 5 partitivos · 6 artigos e negação · 7 contraídos · 8 demonstrativos · 9 possessivos · 10 quantidade indeterminada · 11 concordância do adjetivo · 12 lugar do adjetivo · 13 pronomes sujeito · 14 tônicos · 15 relativos · 16 pronomes demonstrativos · 17 COD · 18 COI · 19 verbos e pronomes · 20 lugar do pronome · 21 a 25 presente (5 capítulos) · 26 futuro próximo / passado recente · 27 passé composé com *avoir* · 28 passé composé com *être* · 29 imperfeito · 30 imperfeito e passé composé · 31 futuro simples · 32 imperativo · 33 condicional presente · 34 **subjuntivo presente** · 35 preposições de lugar · 36 verbos e preposições · 37 sentido e lugar dos advérbios · 38 comparativos · 39 negação · 40 a 42 pergunta (3 capítulos) · 43 discurso indireto · 44 causa, consequência, finalidade e oposição · 45 condição. Mais 9 "bilans".
 
-**O que ela mostra sobre a fronteira A1/A2:** tudo o que o Défi 2 traz como A2 (imperfeito x passé composé, condicional, discurso indireto, causa/consequência, condição com *si*, pronomes demonstrativos, relativo *où*) está aqui; o **subjuntivo presente** aparece num livro A1-A2, mas em nenhum dos métodos A2 lidos (provavelmente marcado A2+ ou só reconhecimento; **baixa**, conferir).
+**O que ela mostra sobre a fronteira A1/A2:** tudo o que o Défi 2 traz como A2 (imperfeito x passé composé, condicional, discurso indireto, causa/consequência, condição com *si*, pronomes demonstrativos, relativo *où*) está aqui; o **subjuntivo presente** aparece num livro A1-A2, mas em nenhum dos métodos A2 lidos. Atualização de 2026-10-16: o capítulo 34 (PDF avulso) trata só do subjuntivo depois de verbos de vontade, desejo e obrigação (*je veux que, je voudrais que, il faut que*), e o Défi 3 (B1) começa o subjuntivo na unidade 2. Leitura atual: **no A2, só *il faut que / je veux que* com verbos frequentes; o subjuntivo como sistema é B1** (média; ver 9.2).
 
 ---
 
@@ -227,7 +229,9 @@ O próprio capítulo 1 mostra o recorte cultural típico do A1: *tu* x *vous*, *
 
 ---
 
-## 8. Livros intermediários (A2-B1) só com sumário
+## 8. Livros lidos só pelo sumário (débutant, intermédiaire e B1)
+
+As seções 8.1 a 8.3 são de 2026-10-15; 8.4 a 8.7 vêm dos sumários postos no Drive em 2026-10-16.
 
 ### 8.1 Communication Progressive du Français, Intermédiaire (CLE, 2e éd.): 42 capítulos A2-B1
 
@@ -248,13 +252,71 @@ Comparado ao A1: os mesmos campos voltam com mais profundidade, e entram **meio 
 
 ### 8.3 Grammaire en Dialogues, Intermédiaire: na verdade B1
 
-**Confiança: alta.** Começa pelo presente, artigos, passado recente/passé composé, imperfeito x passé composé, **mais-que-perfeito**, tônicos, **pronomes duplos**, possessivos/demonstrativos, **gerúndio e particípio presente**, **relativos compostos**, futuro, **futuro anterior**, infinitivo passado, verbos + preposição, passiva, condicional... Serve de **teto**: o que aparece aqui e em nenhum livro A2 (mais-que-perfeito, futuro anterior, pronomes duplos, relativos compostos) é B1.
+**Confiança: alta.** Começa pelo presente, artigos, passado recente/passé composé, imperfeito x passé composé, **mais-que-perfeito**, tônicos, **pronomes duplos**, possessivos/demonstrativos, **gerúndio e particípio presente**, **relativos compostos**, futuro, **futuro anterior**, infinitivo passado, verbos + preposição, passiva, condicional... Serve de **teto**: o que aparece aqui e em nenhum **método** A2 (mais-que-perfeito, futuro anterior, pronomes duplos, relativos compostos) é B1. Correção de 2026-10-16: esses pontos **aparecem** em duas obras de nível mais baixo da CLE (Communication Progressive Débutant e Grammaire Progressive Intermédiaire A2-B1), mas não nos métodos; o Défi 3 (B1) confirma que eles são B1 (ver 8.5 a 8.7).
+
+### 8.4 Grammaire en Dialogues, Débutant (CLE, Claire Miquel): 32 capítulos
+
+**Confiança: alta** (sumário `1WqIvKaVv9R74rGwZu12U6bx2s5DKAf6N`). Cada capítulo é um ou dois diálogos curtos com um tema do dia a dia (cidade universitária, ponto de ônibus, academia, café da manhã, viagem, táxi...) + exercícios. 7 bilans (a cada 4 ou 5 capítulos). O sumário não traz nível CEFR.
+
+| Bloco (até o bilan) | Capítulos |
+|---|---|
+| 1 | 1 *être* e *avoir* · 2 *il y a* e *c'est* (+ adjetivos) · 3 verbos do 1º grupo (+ perguntas) · 4 *faire* e *prendre* (+ perguntas) · 5 *aller, venir, partir* |
+| 2 | 6 *pouvoir, vouloir, devoir* · 7 *savoir* e *connaître* (+ perguntas) · 8 possessivos e demonstrativos · 9 expressão da quantidade · 10 comparação |
+| 3 | 11 pronominais · 12 negação (*ne... jamais* e outras) · 13 futuro próximo · 14 indefinidos · 15 advérbios |
+| 4 | 16 a 20 **passé composé em 5 capítulos** (1º grupo com *avoir*; alguns verbos do 2º/3º grupo; outros do 3º; com *être*; pronominais) |
+| 5 | 21 preposições de lugar · 22 futuro simples · 23 futuro simples (uso) · 24 **voz passiva** |
+| 6 | 25 imperfeito ("Tu te souviens ?", "Avant, c'était différent ?") · 26 imperfeito e passé composé · 27 pronomes relativos · 28 expressões de tempo |
+| 7 | 29 pronomes complemento *me, te, nous, vous* · 30 *lui, leur, le, la, les* · 31 *en, y* · 32 imperativo |
+
+**O que chama a atenção:** (1) o livro "débutant" vai até a alternância imperfeito x passé composé, ou seja, cobre o A1 e o A2 dos métodos; (2) os **pronomes complemento ficam no fim**, depois do passado (nos métodos eles vêm antes ou junto: COD no Défi 1 U7, antes do passé composé da U8); (3) a **voz passiva** aparece num livro débutant, coisa que nenhum método A1/A2 traz.
+
+### 8.5 Communication Progressive du Français, Débutant (CLE, Claire Miquel): 40 atos de fala
+
+**Confiança: alta** nos títulos das partes, dos atos de fala e das situações (sumário `1G46I0XAz0R7hFqSC3Qy2IHDsktoyjsmU`); **média** na ligação de cada ponto de gramática a um ato (o texto extraído da tabela embaralha as colunas; por isso a gramática vai listada por parte, não por ato). O sumário não traz nível CEFR. Cada ato tem 1 a 3 situações (diálogos) com um ponto de gramática e um campo de vocabulário.
+
+| Parte | Atos de fala (situações) | Gramática da parte | Vocabulário |
+|---|---|---|---|
+| **I Faire les courses** | 1 pedir artigos (padaria, correio) · 2 falar de quantidades (feira, mercearia) · 3 perguntar o preço (papelaria) · 4 fazer um pedido (peixaria, café) · 5 fazer uma reserva (hotel, estação) · 6 fazer compras (roupa, sapatos) · 7 hesitar (floricultura) | gênero e plural dos nomes; pergunta simples; quantidade; infinitivo; *pour*; *avoir, prendre, aller* no presente; adjetivo; *quel(s)/quelle(s)*; *trop/assez*; *dans/sur*; *savoir, croire, vouloir* | lojas e produtos, frutas e legumes, café, hotel, trem, roupas, sapatos, flores |
+| **II Renseigner, se renseigner** | 8 marcar hora (dentista, consultório) · 9 pedir informações (metrô, associação esportiva, posto de turismo) · 10 expressar obrigação (repartição) · 11 autorizar e proibir (estação de esqui, praia) · 12 verificar · 13 protestar · 14 expressar intenções e projetos (as situações dos atos 12 a 14 são camping, alugar bicicletas e banco; a extração não deixa ver qual vai com qual) | *devoir, pouvoir*; superlativo; imperfeito de *avoir* e *être*; expressões de tempo; pergunta complexa; verbos + *à*; *c'est / il est* + adjetivo; complemento do nome; futuro simples; futuro próximo; pronomes complemento | dentista, transporte, inscrições, 14 de julho, administração, esqui, piscina, camping, aluguel, banco |
+| **III Parler des lieux et des objets** | 15 localizar (loja de departamento, campo, objeto perdido) · 16 informar-se por telefone (casa para alugar) · 17 comparar (férias) · 18 caracterizar (antes de uma festa de aniversário) · 19 expressar hipótese real e condição (o tempo que faz) · 20 falar de uma necessidade (escritório novo) | preposições e advérbios de lugar; relativo *qui*; pronomes diretos no passé composé; *en*; comparativo; pronomes demonstrativos; condição; **verbos em *-er* no subjuntivo** | loja, aldeia, boletim de ocorrência, casa, turismo, louça, clima, celular e internet |
+| **IV Parler aux autres** | 21 cumprimentar e apresentar · 22 desculpar e desculpar-se · 23 telefonar (amigo, empresa) · 24 dar instruções (academia, parque) · 25 negar · 26 convidar, aceitar, recusar (vizinhos, trabalho) · 27 pedir a alguém que faça algo (escritório) · 28 propor (piquenique, babá) | pronominais no presente; **mais-que-perfeito**; pronomes indiretos; imperativo (*vous* e *tu*); passé composé negativo; possessivos; *on* = *nous*; **pronomes duplos**; discurso indireto; condicional presente | vizinhos e colegas, telefone, ginástica, tarefas, tempo que passa, escritório, piquenique |
+| **V Parler de soi** | 29 falar da saúde (farmácia, perna quebrada, médico) · 30 falar dos gostos (entre amigos) · 31 falar do currículo · 32 pedir e dar opinião (entre colegas) · 33 expressar surpresa (festa de aniversário) | pronomes indefinidos; passé composé com *être*; gerúndio; verbos com *de* + infinitivo; *savoir/connaître*; passado recente; nominalização | remédios, acidente, receita, passatempos, finanças, festa e presente |
+| **VI Parler des autres** | 34 expressar certeza ou incerteza (entre mães, investigação policial) · 35 descrever (delegacia: descrição física) · 36 elogiar · 37 felicitar · 38 consolar e encorajar (depois de um jogo) · 39 criticar (jantar entre amigas) · 40 expressar admiração (saída de um espetáculo) | *ce qui / ce que*; construções impessoais; passé composé x imperfeito; advérbios; *tout/toute(s)/tous*; voz passiva; causa; oposição | escola, debate, descrição física, acessórios, vida e morte, esporte, futebol, espetáculo |
+
+**O que chama a atenção:** os atos de fala das partes I a III são o núcleo A1 dos métodos (compras, reserva, informação, localizar, comparar, clima). As partes IV a VI trazem funções que os métodos deixam para o fim do A1 ou para o A2 (desculpar-se, negar, protestar, criticar, consolar, certeza/incerteza). A coluna de gramática serve de apoio ao diálogo e mistura A1, A2 e pontos que os métodos só dão no B1 (mais-que-perfeito, pronomes duplos, subjuntivo de verbos em *-er*, passiva).
+
+### 8.6 Grammaire Progressive du Français, Intermédiaire A2-B1 (CLE, 4e éd.): 52 capítulos
+
+**Confiança: alta** (sumário `1tD_Knjytm9MdQFIEHzgreLdeFqEHJRmk`, texto legível; um ou dois subtítulos saíram fora de lugar na extração, sem mudar os títulos de capítulo). 8 bilans, quadro de conjugações, atividades comunicativas, teste de avaliação e índice. **O sumário não separa A2 de B1.**
+
+1 *être* (e pronomes sujeito) · 2 adjetivo (1): gênero, número · 3 negação e interrogação (1) · 4 nome e artigo (inclui contraídos) · 5 *c'est* x *il est* · 6 possessivos (adjetivo e **pronome**) · 7 nomes de parentesco e de grupo · 8 demonstrativos (adjetivo e **pronome**) · 9 *il y a* e *c'est* · 10 situação no espaço (1): cidades, países, continentes · 11 *avoir* (idade, *avoir faim*...) · 12 adjetivo (2): lugar · 13 números · 14 tempo (1): dia, data, estações, hora, clima · 15 indefinidos · 16 verbos em *-er* no presente · 17 tempo (2): duração (*depuis, pour, pendant, en*) · 18 advérbio (inclui *-ment*) · 19 quantidade · 20 pronome *en* · 21 situação no espaço (2): regiões, origem · 22 **comparativo e superlativo** (*mieux / meilleur*) · 23 *aller* · 24 pronome *y* · 25 espaço e tempo (3): *à, de, jusqu'à* · 26 verbos em *-ir, -oir, -re* no presente (*mettre, prendre, faire, pouvoir, devoir, falloir, savoir, connaître, vouloir*) · 27 pronominais · 28 pronomes complemento (diretos, indiretos, **ordem dos pronomes**) · 29 tônicos · 30 imperativo (lugar dos pronomes) · 31 **condicional (1)**: polidez, conselho · 32 relativos (simples, ênfase, **compostos**) · 33 interrogação (2) e exclamação · 34 negação (2): *jamais, plus, ni... ni, sans, ne... que* · 35 **discurso indireto no presente** · 36 **gerúndio** e particípio presente · 37 preposições e verbos · 38 verbos de deslocamento · 39 futuro próximo · 40 passé composé (com *avoir*, particípio, com *être*, pronominais, concordância) · 41 tempo (3): origem, duração, cronologia · 42 **passiva** · 43 imperfeito (hábito; com o passé composé) · 44 **mais-que-perfeito** · 45 **discurso indireto no passado** · 46 *venir de, être en train de, être sur le point de* · 47 futuro simples (x futuro próximo) · 48 **futuro anterior** · 49 condicional (2): imaginário · 50 **hipóteses** (sobre o futuro, o presente e o passado) · 51 **subjuntivo** (presente e passado) · 52 relações lógicas (causa, consequência, finalidade, oposição e concessão).
+
+**Leitura:** é uma gramática em espiral, que recomeça do zero (*être*, adjetivo) e vai até o B1. Como não marca o nível de cada capítulo, ela **não decide a fronteira A2/B1** sozinha; vale como lista do que a CLE considera "intermediário". A ordem confirma a das outras fontes: passé composé → imperfeito → mais-que-perfeito; futuro simples → futuro anterior; condicional de polidez muito antes do condicional de hipótese.
+
+### 8.7 Défi 3 (Maison des Langues, B1): o teto do A2
+
+**Confiança: alta** nos dossiês, desafios, comunicação e gramática (sumário `1Kp5E_3V3-kpyWojljEEf0I8NWJHDD377`); **média** nas unidades 8 e 9 (texto da tabela embaralhado) e nos títulos de unidade (o OCR do PDF perdeu quase todos). 9 unidades × 2 dossiês, cada dossiê com um *défi* final e cada unidade com um *défi* digital, como no Défi 1. O prefácio declara o nível **B1**.
+
+| Unid. | Dossiês | Gramática (o que é "rappel" = revisão está marcado) |
+|---|---|---|
+| 1 | Avant / Après (lembranças, origens, migração) | alternância imperfeito x passé composé; concordância do particípio com *avoir*; falar de projetos; futuro simples (**rappel**); pronomes possessivos; oposição (*alors que, tandis que*) |
+| 2 | Les traditions / Les contes | *il faut que*; **subjuntivo presente**; ênfase *c'est / ce sont*; COD e COI (**rappel**); *en* e *y* (**rappel**); tônicos |
+| 3 | Les mots venus d'ailleurs / Langues multiples et langue unique | **relativos compostos** (*lequel, duquel...*); verbos de opinião com indicativo e subjuntivo; indefinidos (*certains, plusieurs*); **hipótese com *si* + imperfeito e condicional** |
+| 4 | Le spectacle vivant / De la scène à l'écran | **pronome *dont***; particípio presente; anterioridade e posterioridade (*après, avant de*); **mais-que-perfeito**; simultaneidade |
+| 5 | L'indispensable 2.0 / Vivre connectés | concessão; pronomes indefinidos; finalidade; estruturas de opinião (2); **subjuntivo passado** |
+| 6 | La jungle de l'information / La publicité | **passiva**; certeza e dúvida; verbos introdutores; **discurso relatado no passado** |
+| 7 | Les déchets / Le changement climatique | condição (*à condition de / que*); exclusão e inclusão; causa e consequência; nominalização |
+| 8 | Les inégalités / Les incivilités | ênfase com *ce qui, ce que*; particípio presente composto; condicional presente (**rappel**) |
+| 9 | Sexisme et parité / Droits humains | **condicional passado**; hipótese imaginária no passado; necessidade (*il est important que*); anterioridade e posterioridade (2); *n'importe qui/quoi*; subjuntivo (**rappel**) |
+
+**O que isso diz do A2:** o que o Défi 3 marca como **rappel** (futuro simples, COD/COI, *en/y*, condicional presente) e o que ele revisa logo na unidade 1 (imperfeito x passé composé, concordância do particípio) é **o que a série dá como sabido ao fim do A2**. O que ele introduz como novo (subjuntivo, relativos compostos e *dont*, *si* + imperfeito, mais-que-perfeito, passiva, discurso relatado no passado, condicional passado) é **B1** na série Défi.
 
 ---
 
 ## 9. SÍNTESE: tópico → onde aparece → convergência
 
-Siglas: **AE** = Alter Ego+ 1 (dossiê.lição); **D1** = Défi 1 (unidade.dossiê); **GP** = Grammaire Progressive A1 (capítulo, deduzido); **GEF** = Grammaire Essentielle A1-A2 (capítulo); **VP** = Vocabulaire Progressif A1 (capítulo); **D2** = Défi 2 (unidade); **CPI** = Communication Progressive Intermédiaire; **VPI** = Vocabulaire Progressif Intermédiaire.
+Siglas: **AE** = Alter Ego+ 1 (dossiê.lição); **D1** = Défi 1 (unidade.dossiê); **GP** = Grammaire Progressive A1 (capítulo, deduzido); **GEF** = Grammaire Essentielle A1-A2 (capítulo); **VP** = Vocabulaire Progressif A1 (capítulo); **D2** = Défi 2 (unidade); **CPI** = Communication Progressive Intermédiaire; **VPI** = Vocabulaire Progressif Intermédiaire. Novas em 2026-10-16 (sumário): **GeDD** = Grammaire en Dialogues Débutant (capítulo); **CPD** = Communication Progressive Débutant (ato de fala, ou parte I a VI quando é gramática); **GPI** = Grammaire Progressive Intermédiaire A2-B1 (capítulo); **D3** = Défi 3, B1 (unidade; só como teto).
+**Marca ⟳** = linha mudada ou complementada em 2026-10-16.
 **Convergência**: "todos" = todas as fontes que cobrem aquele nível e aquele tipo de conteúdo; "maioria"; "só um". **Nível** = onde os livros colocam o tópico.
 **Confiança da linha**: alta quando as fontes principais da linha foram lidas em sumário ou quadro de objetivos; média quando depende do GP (deduzido) ou do D2 (indireto).
 
@@ -262,96 +324,102 @@ Siglas: **AE** = Alter Ego+ 1 (dossiê.lição); **D1** = Défi 1 (unidade.dossi
 
 | Tópico | Onde aparece | Nível | Convergência | Conf. |
 |---|---|---|---|---|
-| Cumprimentar, despedir-se, *tu* x *vous* | AE 1.1; D1 1.1; VP 1; CPI "Tutoyer ou vouvoyer" | A1 (aprofundado em A2) | todos | alta |
+| Cumprimentar, despedir-se, *tu* x *vous* ⟳ | AE 1.1; D1 1.1; VP 1; CPD 21; CPI "Tutoyer ou vouvoyer" | A1 (aprofundado em A2) | todos | alta |
 | Apresentar-se (nome, nacionalidade, idade, profissão), soletrar | AE 0, 1.1-1.3; D1 1.1-1.2; GP 1; VP 1 | A1 | todos | alta |
 | Dados pessoais, formulário, e-mail e telefone | AE 1.2; D1 1.1; (DELF A1 PE) | A1 | maioria | alta |
 | Números | AE 0 (0-69), 1.2 (70-99); D1 1.1-1.2; GP 28 | A1 | todos | alta |
-| Gostos (*aimer, adorer, détester*) | AE 1.3, 3.1, 3.2; D1 2.2; GP 12 | A1 | todos | alta |
+| Gostos (*aimer, adorer, détester*) ⟳ | AE 1.3, 3.1, 3.2; D1 2.2; GP 12; CPD 30 | A1 | todos | alta |
 | Família e parentesco | AE 3.3; D1 3.1-3.2; VP 2; VPI | A1 | todos | alta |
-| Descrição física e caráter | AE 3.2, 5.3; D1 6.2; VP 4, 8; GP 2-3, 16-20 | A1 | todos | alta |
+| Descrição física e caráter ⟳ | AE 3.2, 5.3; D1 6.2; VP 4, 8; GP 2-3, 16-20; CPD 35 | A1 | todos | alta |
 | Profissões | AE 3.1; D1 1.2; VP 17 | A1 | todos | alta |
-| Cidade, lugares, localizar, caminho, transportes | AE 2.1-2.2; D1 7.1; VP 23-25; CPI "Localiser" | A1 | todos | alta |
+| Cidade, lugares, localizar, caminho, transportes ⟳ | AE 2.1-2.2; D1 7.1; VP 23-25; CPD 9, 15; CPI "Localiser" | A1 | todos | alta |
 | Hora, horários, dias, meses, datas | AE 1.1-1.2, 4.1, 6.1; D1 5.1-5.2; GP 29; VP 15 | A1 | todos | alta |
 | Rotina e hábitos diários | AE 4.1, 4.3; D1 5.1; GP 9; VP 11 | A1 | todos | alta |
 | Lazer e esportes | AE 3.1; D1 6.1; VP 27; D2 4 | A1 (esporte e saúde voltam em A2) | todos | alta |
-| Propor, aceitar, recusar, marcar encontro, convidar | AE 4.2; D1 6.2; CPI "Proposer, Inviter" | A1 (A2 em CPI) | todos | alta |
-| Moradia (cômodos, móveis, descrever a casa) | AE 9.1-9.2; D1 4.1-4.2; VP 10; VPI | A1 (AE a põe na ponte A2) | todos | alta |
+| Propor, aceitar, recusar, marcar encontro, convidar ⟳ | AE 4.2; D1 6.2; CPD 8 (marcar hora), 26, 28; CPI "Proposer, Inviter" | A1 (A2 em CPI) | todos | alta |
+| Moradia (cômodos, móveis, descrever a casa) ⟳ | AE 9.1-9.2; D1 4.1-4.2; VP 10; CPD 16 (casa para alugar); VPI 11 | A1 (AE a põe na ponte A2) | todos | alta |
 | Alimentação, refeições, cardápio | AE 7.1; D1 8.1; VP 12, 14; D2 3 | A1 (restaurante e gastronomia em A2) | todos | alta |
-| Compras (loja, feira, preço, quantidade, pagamento) | AE 7.3, 8.1; D1 7.2; VP 12-13; CPI "Les achats" | A1 (negociar, trocar, reembolso em A2) | todos | alta |
-| Roupas e cores | AE 7.2 (cores 6.1); D1 4.2, 7.2; VP 9 | A1 | todos | alta |
-| Corpo, saúde, *avoir mal à* | AE 3.3; GP 18; VP 6-7; D2 2; CPI "Parler de sa santé" | A1 básico; A2 (consulta, sintomas, conselhos) | todos | alta |
-| Tempo (clima) e estações | AE 2.3, 6.1; GP 30; VP 22; VPI | A1 | todos | alta |
+| Compras (loja, feira, preço, quantidade, pagamento) ⟳ | AE 7.3, 8.1; D1 7.2; VP 12-13; CPD 1-4, 6-7 (parte inteira); CPI "Les achats" | A1 (negociar, trocar, reembolso em A2) | todos | alta |
+| Roupas e cores ⟳ | AE 7.2 (cores 6.1); D1 4.2, 7.2; VP 9; CPD 6 | A1 | todos | alta |
+| Corpo, saúde, *avoir mal à* ⟳ | AE 3.3; GP 18; VP 6-7; CPD 8 (dentista), 29 (farmácia, médico); D2 2; CPI "Parler de sa santé" | A1 básico; consulta e farmácia já no CPD (débutant); A2 (sintomas, conselhos) no D2 | todos | alta |
+| Tempo (clima) e estações ⟳ | AE 2.3, 6.1; GP 30; VP 22; CPD 19; GPI 14; VPI | A1 | todos | alta |
 | Cartão-postal, correspondência, mensagens curtas | AE 2.3, 6.3; AE "Écrire une carte postale" (DELF) | A1 | maioria (o D1 não tem; o DELF cobra) | alta |
-| Viagem, férias, hospedagem, turismo | AE 2.2, 5.2, 6.2-6.3; D1 6.2; VP 26; D2 8 | A1 (relato de viagem no passado em A2) | todos | alta |
-| Festas e rituais | AE 5.1; D1 (défi nº 03 da U5) | A1 | maioria | média |
-| Telefonar | AE 5.2; CPI "Téléphoner" | A1-A2 | maioria | alta |
+| Viagem, férias, hospedagem, turismo ⟳ | AE 2.2, 5.2, 6.2-6.3; D1 6.2; VP 26; CPD 5 (reserva de hotel e trem), 9, 17; D2 8 | A1 (relato de viagem no passado em A2) | todos | alta |
+| Festas e rituais ⟳ | AE 5.1; D1 (défi nº 03 da U5); CPD 18, 33 (aniversário) | A1 | maioria | alta |
+| Telefonar ⟳ | AE 5.2; CPD 16, 23; CPI "Téléphoner" | A1-A2 | maioria | alta |
 | Contar o passado (biografia, um dia, uma experiência) | AE 4.3, 5.3; D1 8.2; D2 1, 8 | fim do A1 → A2 | todos | alta |
 | Lembranças, infância, "antes x agora" | AE 8.3, 9.1; D2 7, 8 | **A2** (o AE já põe na ponte A2) | todos os que vão até A2 | alta |
-| Descrever um objeto (forma, matéria, função) | AE 7.3; D2 1 | A1-A2 | maioria | alta |
-| Dar conselhos | AE 5.2, 7.2; D2 2, 4; CPI | A1 (imperativo) → A2 (condicional *tu devrais*) | todos | alta |
-| Dar opinião, concordar e discordar, apreciar e criticar | AE 7.2, 8.2; D2 3; CPI "Les opinions"; VPI | A1 simples → **A2** | todos | alta |
-| Emoções e sentimentos | AE 6.1; VP 3; D2 6; VPI | A1 simples → A2 | todos | alta |
-| Regras: obrigação, proibição, permissão | AE 4.1, 9.3; D2 6 | A1 (*il faut*) → A2 | todos | alta |
-| Estudos, formação, CV, projetos futuros | D1 5.2 (escola); VP 16; D2 5 | **A2** | maioria | média |
+| Descrever um objeto (forma, matéria, função) ⟳ | AE 7.3; CPD 15 (objeto perdido), 18; D2 1 | A1-A2 | maioria | alta |
+| Comparar ⟳ (linha nova) | AE 8.3; CPD 17; D2 1 | fim do A1 → A2 | maioria | alta |
+| Pedir informações, verificar, falar de projetos ⟳ (linha nova) | AE 1.2, 4.2; CPD 9, 12, 14; D2 5 | A1 (informação) → A2 (projetos) | maioria | alta |
+| Dar conselhos e instruções ⟳ | AE 5.2, 7.2; CPD 24, 27; D2 2, 4; CPI | A1 (imperativo) → A2 (condicional *tu devrais*) | todos | alta |
+| Dar opinião, concordar e discordar, apreciar e criticar ⟳ | AE 7.2, 8.2; CPD 32, 36, 39, 40; D2 3; CPI "Les opinions"; VPI | A1 simples → **A2** | todos | alta |
+| Emoções e sentimentos ⟳ | AE 6.1; VP 3; CPD 33 (surpresa), 37-38 (felicitar, consolar); D2 6; VPI | A1 simples → A2 | todos | alta |
+| Regras: obrigação, proibição, permissão ⟳ | AE 4.1, 9.3; CPD 10-11; D2 6 | A1 (*il faut*) → A2 | todos | alta |
+| Estudos, formação, CV, projetos futuros ⟳ | D1 5.2 (escola); VP 16; CPD 14, 31 (currículo); D2 5 | **A2** | maioria | alta |
 | Trabalho (condições, emoções no trabalho) | D1 5.2; VP 17; D2 6 | A1 básico → A2 | maioria | média |
 | Cultura: livro, filme, museu, monumento | AE carnets; VP 28; D2 7; VPI | A2 | maioria | média |
 | Meio ambiente, consumo responsável, sociedade | D1 8.1 (antidesperdício); D2 1; VPI | A2 (e B1) | maioria | média |
-| Reclamar, contestar, desculpar-se | AE 9.3 (protestar); CPI "Contester, Les plaintes, Excuser" | A2 | só CPI com profundidade | alta |
+| Reclamar, contestar, desculpar-se, negar ⟳ | AE 9.3 (protestar); CPD 13 (protestar), 22 (desculpar-se), 25 (negar); CPI "Contester, Les plaintes, Excuser" | fim do A1 → A2 | **maioria** (antes: "só CPI"; o CPD débutant já trabalha) | alta |
+| Expressar certeza e incerteza ⟳ (linha nova) | CPD 34; D3 6 (certeza e dúvida, B1) | A2 simples → B1 | só os livros de comunicação | média |
 
 ### 9.2 Gramática
 
 | Tópico | Onde aparece | Nível | Convergência | Conf. |
 |---|---|---|---|---|
-| *être*, *avoir*, *s'appeler* | AE 0-1; D1 1.2; GP 1-4, 16-20; GEF 21 | A1 | todos | alta |
-| Presente dos verbos em *-er* | AE 1.3; D1 2.2; GP 6-8; GEF 21-25 | A1 | todos | alta |
-| Irregulares frequentes (*aller, venir, prendre, faire, pouvoir, vouloir, devoir, sortir, dormir*) | AE 2.2-2.3, 3.1, 4.1-4.2; D1 4.2, 5.1, 7.1; GP 35-42 | A1 | todos | alta |
-| Verbos pronominais | AE 4.1, 5.1; D1 5.1; GP 9 | A1 | todos | alta |
+| *être*, *avoir*, *s'appeler* ⟳ | AE 0-1; D1 1.2; GP 1-4, 16-20; GEF 21; GeDD 1; GPI 1, 11 | A1 | todos | alta |
+| Presente dos verbos em *-er* ⟳ | AE 1.3; D1 2.2; GP 6-8; GEF 21-25; GeDD 3; GPI 16 | A1 | todos | alta |
+| Irregulares frequentes (*aller, venir, prendre, faire, pouvoir, vouloir, devoir, sortir, dormir*; *savoir* x *connaître*) ⟳ | AE 2.2-2.3, 3.1, 4.1-4.2; D1 4.2, 5.1, 7.1; GP 35-42; GeDD 4-7; CPD I-II, V; GPI 23, 26 | A1 | todos | alta |
+| Verbos pronominais ⟳ | AE 4.1, 5.1; D1 5.1; GP 9; GeDD 11; CPD IV; GPI 27 | A1 | todos | alta |
 | Gênero e número de nomes e adjetivos (profissões, nacionalidades) | AE 0, 3.1-3.2; D1 1.2, 3.2; GP 2-3, 10-11; GEF 2-3, 11 | A1 | todos | alta |
 | Artigos definidos e indefinidos | AE 0, 1.2, 2.1; D1 1.1, 2.2; GP 10-12; GEF 4 | A1 | todos | alta |
 | Artigos contraídos | AE 2.1, 3.1; D1 6.1; GP 13; GEF 7 | A1 | todos | alta |
-| Partitivos e quantidade (*pas de*, *beaucoup de*, quantidades precisas) | AE 7.1, 8.1; D1 8.1; GP 31-32; GEF 5-6, 10 | A1 | todos | alta |
-| Possessivos | AE 1.1, 3.3; D1 3.1; GP 14; GEF 9 | A1 | todos | alta |
-| Demonstrativos (determinantes) | AE 2.3; D1 7.2; GP 15; GEF 8 | A1 | todos | alta |
-| *c'est* x *il est*; *il y a* | AE 5.3, 9.1; D1 3.2, 4.1; GP 24-27; GEF 1 | A1 | todos | alta |
-| Preposições + países e cidades; preposições de lugar | AE 1.3, 2.1, 2.3; D1 2.1, 4.1; GP 21-23, 42; GEF 35 | A1 | todos | alta |
-| Pergunta (entonação, *est-ce que*, *quel*, palavras interrogativas) | AE 1.2, 2.2, 5.1; D1 2.1; GP 5, 51-52; GEF 40-42 | A1 | todos | alta |
-| Pergunta por inversão (registro formal) | GP 51-52; GEF 40-42; D2 2 | A1 (reconhecer) → **A2** (produzir) | maioria | média |
-| Negação *ne... pas* | AE 1.1; D1 2.2; GP 5; GEF 39 | A1 | todos | alta |
-| Negação complexa (*plus, jamais, rien, personne, aucun*) e restrição *ne... que* | AE 8.2; GP 53-54; GEF 39; D2 4, 7 | fim do A1 (AE, GP) → **A2** (D2) | todos | alta |
-| Pronomes tônicos | AE 3.2, 5.1; GP 59; GEF 14 | A1 | todos (D1 não destaca) | alta |
-| *on* (= *nous* e geral) | AE 4.2, 5.1, 6.3; D1 6.1-6.2 | A1 | todos os métodos | alta |
-| Imperativo | AE 4.2, 5.2; D1 7.2; GEF 32; D2 3 | A1 (revisto em A2) | todos | alta |
-| Futuro próximo | AE 4.2, 5.2; D1 7.1; GP 43; GEF 26 | A1 | todos | alta |
-| Passado recente (*venir de*) | AE 5.2; GEF 26; D2 5 | A1 (AE) / A2 (D2) | maioria | alta |
-| Passé composé com *avoir* | AE 4.3; D1 8.2; GP 44-45; GEF 27; D2 1 | **fim do A1** (todos), revisto em A2 | todos | alta |
-| Passé composé com *être* e pronominais; concordância do particípio | AE 5.3; D1 8.2; GP 46; GEF 28; D2 1 | fim do A1; concordância trabalhada no A2 | todos | alta |
-| Pronome COD | AE 7.2, 9.3; D1 7.1; GP 57; GEF 17; D2 2 | A1 (AE, D1, GP) → consolidado no A2 | todos | alta |
-| Pronome COI | AE 7.3, 9.3; GP 58; GEF 18; D2 1-2 | A1 alto (AE, GP) / **A2** (D2) | maioria (D1 não tem) | alta |
-| Pronome *y* | AE 6.2; D1 7.1; GP 56; GEF 19; D2 8 | A1 (lugar) → A2 (verbo + *à*) | todos | alta |
-| Pronome *en* | AE 8.1; GP 55; GEF 19; D2 3, 8 | A1 alto (AE, GP) / **A2** (D2) | maioria (D1 não tem) | alta |
-| Relativos *qui, que* | AE 7.3; GP 60; GEF 15; D2 1 | A1 alto / A2 | maioria (D1 não tem) | alta |
+| Partitivos e quantidade (*pas de*, *beaucoup de*, quantidades precisas) ⟳ | AE 7.1, 8.1; D1 8.1; GP 31-32; GEF 5-6, 10; GeDD 9; CPD 2 (I); GPI 19 | A1 | todos | alta |
+| Possessivos ⟳ | AE 1.1, 3.3; D1 3.1; GP 14; GEF 9; GeDD 8; CPD IV; GPI 6 | A1 | todos | alta |
+| Demonstrativos (determinantes) ⟳ | AE 2.3; D1 7.2; GP 15; GEF 8; GeDD 8; GPI 8 | A1 | todos | alta |
+| *c'est* x *il est*; *il y a* ⟳ | AE 5.3, 9.1; D1 3.2, 4.1; GP 24-27; GEF 1; GeDD 2; CPD II; GPI 5, 9 | A1 | todos | alta |
+| Preposições + países e cidades; preposições de lugar ⟳ | AE 1.3, 2.1, 2.3; D1 2.1, 4.1; GP 21-23, 42; GEF 35; GeDD 21; CPD III; GPI 10, 21, 25 | A1 | todos | alta |
+| Pergunta (entonação, *est-ce que*, *quel*, palavras interrogativas) ⟳ | AE 1.2, 2.2, 5.1; D1 2.1; GP 5, 51-52 (títulos confirmados); GEF 40-42; GeDD 3, 4, 7; CPD I; GPI 3 | A1 | todos | alta |
+| Pergunta por inversão (registro formal) ⟳ | GP 51-52 (confirmado: o cap. 51 já ensina a inversão com *où, quand...*); GEF 40-42; CPD II ("interrogation complexe"); GPI 33; D2 2 | A1 (reconhecer) → **A2** (produzir) | maioria | alta |
+| Negação *ne... pas* ⟳ | AE 1.1; D1 2.2; GP 5; GEF 39; GPI 3 | A1 | todos | alta |
+| Negação complexa (*plus, jamais, rien, personne, aucun*) e restrição *ne... que* ⟳ | AE 8.2; GP 53-54; GEF 39; GeDD 12; CPD 25 (IV: passé composé negativo); GPI 34 (inclui *ni... ni, sans*); D2 4, 7 | fim do A1 (AE, GP) → **A2** (D2) | todos | alta |
+| Pronomes tônicos ⟳ | AE 3.2, 5.1; GP 59; GEF 14; GPI 29; D3 2 | A1 | todos (D1 não destaca) | alta |
+| *on* (= *nous* e geral) ⟳ | AE 4.2, 5.1, 6.3; D1 6.1-6.2; CPD IV | A1 | todos os métodos | alta |
+| Imperativo ⟳ | AE 4.2, 5.2; D1 7.2; GEF 32; GeDD 32; CPD IV; GPI 30; D2 3 | A1 (revisto em A2) | todos | alta |
+| Futuro próximo ⟳ | AE 4.2, 5.2; D1 7.1; GP 43; GEF 26; GeDD 13; CPD II; GPI 39 | A1 | todos | alta |
+| Passado recente (*venir de*) ⟳ | AE 5.2; GEF 26; CPD V; GPI 46; D2 5 | A1 (AE) / A2 (D2) | maioria | alta |
+| Passé composé com *avoir* ⟳ | AE 4.3; D1 8.2; GP 44-45; GEF 27; GeDD 16-18; GPI 40; D2 1 | **fim do A1** (todos), revisto em A2 | todos | alta |
+| Passé composé com *être* e pronominais; concordância do particípio ⟳ | AE 5.3; D1 8.2; GP 46; GEF 28; GeDD 19-20; CPD V; GPI 40; D2 1; D3 1 (concordância com *avoir*, revista no B1) | fim do A1; concordância trabalhada no A2 e revista no B1 | todos | alta |
+| Pronome COD ⟳ | AE 7.2, 9.3; D1 7.1; GP 57; GEF 17; GeDD 29-30; CPD III (no passé composé); GPI 28; D2 2; D3 2 (**rappel**) | A1 (AE, D1, GP) → consolidado no A2 (o D3 trata como revisão) | todos | alta |
+| Pronome COI ⟳ | AE 7.3, 9.3; GP 58; GEF 18; GeDD 29-30; CPD IV; GPI 28; D2 1-2; D3 2 (**rappel**) | A1 alto (AE, GP) / **A2** (D2) | maioria (D1 não tem) | alta |
+| Pronome *y* ⟳ | AE 6.2; D1 7.1; GP 56; GEF 19; GeDD 31; GPI 24; D2 8; D3 2 (**rappel**) | A1 (lugar) → A2 (verbo + *à*) | todos | alta |
+| Pronome *en* ⟳ | AE 8.1; GP 55; GEF 19; GeDD 31; CPD III; GPI 20; D2 3, 8; D3 2 (**rappel**) | A1 alto (AE, GP) / **A2** (D2) | maioria (D1 não tem) | alta |
+| Relativos *qui, que* ⟳ | AE 7.3; GP 60; GEF 15; GeDD 27; CPD III (*qui*); GPI 32; D2 1 | A1 alto / A2 | maioria (D1 não tem) | alta |
 | Relativo *où* | GEF 15; D2 1 | **A2** | maioria das fontes A2 | média |
-| Comparativo | AE 8.3; GP 33-34; GEF 38; D2 1 | fim do A1 → A2 | todos (D1 não tem) | alta |
-| Superlativo (*le plus, le meilleur*) | D2 2; GEF 38 | **A2** | maioria das fontes A2 | média |
-| Futuro simples | AE 6.3; GP 48; GEF 31; D2 4-5 | A1 alto (AE, GP) / **A2** (D2) | maioria (D1 não tem) | alta |
-| Imperfeito (descrição, lembrança, hábito no passado) | AE 8.3, 9.1; GP 47?, 49; GEF 29; D2 7 | **ponte A1→A2** (AE D8 marcado "vers le DELF A2") / A2 | todos que vão até A2 | alta |
-| Alternância passé composé x imperfeito (relato) | AE 9.1; GEF 30; D2 8 | **A2** | todos que cobrem A2 | alta |
-| Marcadores de tempo e duração (*il y a, depuis, pendant, en, jusqu'à*) | AE 9.1; GP 50; D2 5, 7 | fim do A1 → A2 | todos | alta |
+| Comparativo ⟳ | AE 8.3; GP 33-34; GEF 38; GeDD 10; CPD 17 (III); GPI 22; D2 1 | fim do A1 → A2 | todos (D1 não tem) | alta |
+| Superlativo (*le plus, le meilleur*) ⟳ | D2 2; GEF 38; CPD II; GPI 22 (*mieux / meilleur*) | **A2** | maioria das fontes A2 | alta |
+| Futuro simples ⟳ | AE 6.3; GP 48; GEF 31; GeDD 22-23; CPD II; GPI 47; D2 4-5; D3 1 (**rappel**) | A1 alto (AE, GP) / **A2** (D2) | maioria (D1 não tem) | alta |
+| Imperfeito (descrição, lembrança, hábito no passado) ⟳ | AE 8.3, 9.1; GP 47?, 49; GEF 29; GeDD 25; CPD II (*avoir, être*); GPI 43; D2 7 | **ponte A1→A2** (AE D8 marcado "vers le DELF A2") / A2 | todos que vão até A2 | alta |
+| Alternância passé composé x imperfeito (relato) ⟳ | AE 9.1; GEF 30; GeDD 26; CPD VI; GPI 43; D2 8; D3 1 (revista logo no início do B1) | **A2** | todos que cobrem A2 | alta |
+| Marcadores de tempo e duração (*il y a, depuis, pendant, en, jusqu'à*) ⟳ | AE 9.1; GP 50; GeDD 28; CPD II; GPI 17, 25, 41; D2 5, 7 | fim do A1 → A2 | todos | alta |
 | Causa e finalidade (*parce que, pour* + inf.) | AE 2.1; D1 6.1; GEF 44 | A1 | todos | alta |
-| Causa, consequência e finalidade (*donc, alors, c'est pour cela que, afin de, grâce à*) | GEF 44; D2 4 | **A2** | maioria das fontes A2 | média |
-| Lugar do adjetivo | AE 6.2-6.3, 8.2; GEF 12; D2 8 | A1 → A2 | todos (D1 não destaca) | alta |
+| Causa, consequência e finalidade (*donc, alors, c'est pour cela que, afin de, grâce à*) ⟳ | GEF 44; CPD VI (causa, oposição); GPI 52; D2 4; D3 7 (revisto); concessão: D3 5 | **A2** (concessão é B1) | maioria das fontes A2 | alta |
+| Lugar do adjetivo ⟳ | AE 6.2-6.3, 8.2; GEF 12; GPI 12; D2 8 | A1 → A2 | todos (D1 não destaca) | alta |
 | *de plus en plus / de moins en moins* | AE 9.2; D2 3 | ponte A2 | maioria | alta |
-| Condicional presente (cortesia, conselho, desejo) | GEF 33; D2 4-5; CPI (formas de cortesia nas compras) | **A2** | todos que cobrem A2 | média |
-| Condição com *si* (+ presente/futuro) | GEF 45; D2 5 | **A2** | todos que cobrem A2 | média |
+| Condicional presente (cortesia, conselho, desejo) ⟳ | GEF 33; CPD IV; GPI 31 (polidez, conselho; o imaginário fica no 49); D2 4-5; D3 8 (**rappel**); CPI (formas de cortesia nas compras) | **A2** | todos que cobrem A2 | alta |
+| Condição com *si* (+ presente/futuro) ⟳ | GEF 45; CPD 19 ("hipótese real"); GPI 50; D2 5 | **A2**; *si* + imperfeito + condicional é **B1** (D3 3) | todos que cobrem A2 | alta |
 | *quand* + futuro; desejo (*j'espère que, je voudrais*) | D2 5 | A2 | só um | média |
-| Discurso indireto (afirmativo e interrogativo) | GEF 43; D2 6 | **A2** | maioria | média |
-| Pronomes demonstrativos (*celui-ci*) | GEF 16; D2 1 | A2 | maioria das fontes A2 | média |
+| Discurso indireto (afirmativo e interrogativo) ⟳ | GEF 43; CPD IV; GPI 35 (no presente); D2 6 | **A2** no presente; **no passado é B1** (GPI 45; D3 6) | maioria | alta |
+| Pronomes demonstrativos (*celui-ci*) ⟳ | GEF 16; CPD III; GPI 8; D2 1 | A2 | maioria das fontes A2 | alta |
+| Pronomes possessivos (*le mien*) ⟳ (linha nova) | GPI 6; D3 1 | A2-B1 (nenhum método A1/A2 lido destaca) | poucos | média |
+| Indefinidos (*quelqu'un, quelque chose, chaque, tout, certains, plusieurs*) ⟳ (linha nova) | GeDD 14; CPD V, VI (*tout*); GPI 15; D3 3, 5 | A1-A2 (os simples) → B1 (*certains, plusieurs*, pronomes) | maioria das gramáticas | média |
 | Pronomes interrogativos *lequel* | D2 3 | A2 | só um | média |
-| Advérbios em *-ment* | GEF 37; D2 8 | A2 | maioria das fontes A2 | média |
-| Gerúndio | D2 8 | A2 (só um livro); B1 na GeD Intermédiaire | só um | média |
-| Momentos da ação (*être en train de, être sur le point de, commencer à*) | AE 6.3 (*en train de*); D2 5 | A1 alto / A2 | maioria | média |
-| Subjuntivo presente | GEF 34 | A2? (só um livro, e não nos métodos) | só um | baixa |
-| Mais-que-perfeito, futuro anterior, pronomes duplos, relativos compostos | GeD Intermédiaire | **B1** (nenhum livro A2 lido traz) | n/a | alta |
+| Advérbios em *-ment* ⟳ | GEF 37; GeDD 15; CPD VI; GPI 18; D2 8 | A2 | maioria | alta |
+| Gerúndio ⟳ | CPD V; GPI 36 (com o particípio presente); D2 8; D3 4 (particípio presente, B1) | fim do A2 (gerúndio) / B1 (particípio presente) | maioria das fontes A2-B1 (antes: "só um") | média |
+| Momentos da ação (*être en train de, être sur le point de, commencer à*) ⟳ | AE 6.3 (*en train de*); GPI 46; D2 5 | A1 alto / A2 | maioria | alta |
+| Subjuntivo presente ⟳ | GEF 34 (só depois de *vouloir, souhaiter, il faut que*); CPD 20 (verbos em *-er*, "falar de uma necessidade"); GPI 51 (presente e passado, penúltimo capítulo); D3 2 (B1, primeira vez na série Défi) | **fim do A2 só com *il faut que / je veux que* + verbos frequentes; o sistema é B1** | nenhum método A1/A2 traz; 2 gramáticas e 1 livro de comunicação começam antes | média (antes: baixa) |
+| Mais-que-perfeito, futuro anterior, pronomes duplos, relativos compostos, *dont*, condicional passado ⟳ | GeD Intermédiaire; GPI 28 (ordem dos pronomes), 32, 44, 48, 50; D3 3, 4, 9; aparecem também no CPD IV (mais-que-perfeito, pronomes duplos) | **B1** em todos os métodos (o D3 os introduz como novos); as obras CLE "débutant"/"intermédiaire" os mostram antes, sem marcar nível | n/a | alta |
+| Voz passiva ⟳ (linha nova) | GeDD 24; CPD VI; GPI 42; D3 6 | **B1** nos métodos (D3 6); só reconhecimento antes disso | as gramáticas CLE trazem antes | média |
 
 ### 9.3 Fonética (onde os métodos convergem)
 
@@ -376,13 +444,62 @@ Siglas: **AE** = Alter Ego+ 1 (dossiê.lição); **D1** = Défi 1 (unidade.dossi
 2. **O passé composé fecha o A1 em todos os livros** (AE D4-D5; Défi 1 só na última unidade; GP 44-46). O A2 revisa e aprofunda (concordância do particípio, alternância com o imperfeito).
 3. **A fronteira A1/A2 não é a mesma nos dois métodos A1:** o Alter Ego+ 1 (e a Grammaire Progressive A1) já trazem futuro simples, imperfeito, COI, *en*, relativos *qui/que*, comparação e negação complexa; o Défi 1 deixa tudo isso para o Défi 2. O próprio Alter Ego+ marca os dossiês 7 a 9 como "vers le DELF A2". **Consenso prático:** esses tópicos são "A1 alto / começo do A2".
 4. **Exclusivo do A2 (convergência nas fontes A2):** imperfeito x passé composé no relato, condicional (cortesia, conselho), condição com *si*, discurso indireto, superlativo, *où* relativo, causa/consequência, advérbios em *-ment*, pronomes demonstrativos, negação complexa ampla. Em comunicação: contar experiências e lembranças, dar e pedir opinião, aconselhar, reclamar, saúde (consulta), estudos e trabalho, cultura (livro, filme, museu), meio ambiente e consumo.
-5. **Teto do A2:** mais-que-perfeito, futuro anterior, pronomes duplos, relativos compostos e (provavelmente) subjuntivo são B1 nas fontes lidas.
+5. **Teto do A2 (revisto em 2026-10-16):** mais-que-perfeito, futuro anterior, pronomes duplos, relativos compostos e *dont*, *si* + imperfeito, passiva, discurso indireto no passado, condicional passado e o subjuntivo como sistema são **B1 nos métodos**: o Défi 3 os introduz como novos, e o que ele marca como "rappel" (futuro simples, COD/COI, *en/y*, condicional presente, imperfeito x passé composé) é o que a série dá por sabido no fim do A2. Ressalva: as obras CLE "débutant" (Communication Progressive, Grammaire en Dialogues) já mostram alguns desses pontos (passiva, mais-que-perfeito, pronomes duplos, subjuntivo de *il faut que*), sem marcar nível; para o currículo, vale a régua dos métodos.
 6. **Cultura:** os dois métodos A1 têm um bloco cultural fixo por unidade (Carnet de voyage no AE; "objectif culturel et sociétal" no Défi), com francofonia (Bélgica, Quebec, Marrocos, Costa do Marfim, ultramar) desde o A1.
-7. **Tarefa final:** os dois métodos A1 fecham cada dossiê ou unidade com uma tarefa de produção (projeto no AE; *défi* no Défi) e treinam o formato DELF desde o A1.
+7. **Tarefa final:** os dois métodos A1 fecham cada dossiê ou unidade com uma tarefa de produção (projeto no AE; *défi* no Défi) e treinam o formato DELF desde o A1. O Défi 3 mantém o formato (2 *défis* por unidade + 1 digital).
+8. **Ordem dos pronomes complemento (novo, 2026-10-16):** nos métodos, o COD vem no fim do A1 (AE D7, Défi 1 U7) e o COI entre o A1 alto e o A2; nas gramáticas CLE (Grammaire en Dialogues Débutant, Grammaire Progressive Intermédiaire) eles vêm **depois** do passé composé e do futuro. Não há consenso de ordem, só de nível: COD no A1, COI/*en*/*y* com verbos de regência no A2.
+9. **Funções "sociais" mais cedo do que se pensava (novo):** desculpar-se, negar, protestar, felicitar, consolar, criticar e expressar certeza/incerteza estão no Communication Progressive **Débutant** (partes IV a VI), não só no Intermédiaire. Junto com o AE 9.3 (protestar), isso põe essas funções no **fim do A1 / A2**, não só no A2 alto.
+10. **A Grammaire Essentielle A1-A2 não define a fronteira A1/A2** (a profa. confirmou que não há divisão no livro); a fronteira sai dos métodos e das outras gramáticas.
 
 ## 11. Pendências deste levantamento
 
-- Ler os sumários que ficaram de fora (Grammaire Progressive Intermédiaire, Communication Progressive Débutant, Grammaire en Dialogues Débutant, Conjugaison Progressive Débutant e Intermédiaire): basta a profa. colocar no Drive uma foto ou um PDF curto só das páginas de sumário.
-- Confirmar no livro físico da Grammaire Essentielle A1-A2 quais capítulos são marcados A1 e quais A2 (em especial o subjuntivo, cap. 34).
-- Confirmar no livro do Défi 2 os títulos dos 2 dossiês de cada unidade e as tarefas finais (*défis*).
-- Confirmar os títulos reais dos capítulos da Grammaire Progressive A1 (aqui foram deduzidos das respostas).
+Situação em 2026-10-16 (detalhe na seção 12):
+
+- ~~Ler os sumários de Grammaire Progressive Intermédiaire, Communication Progressive Débutant e Grammaire en Dialogues Débutant~~: **feito** (8.4 a 8.6).
+- ~~Confirmar quais capítulos da Grammaire Essentielle A1-A2 são A1 e quais A2~~: **resolvido**, o livro não tem essa divisão (informação da profa.).
+- Conjugaison Progressive Débutant e Intermédiaire: **fora por decisão da profa.** (não é pendência).
+- Défi 2: títulos dos 2 dossiês de cada unidade e os *défis* finais continuam não lidos (não veio sumário). Opcional: um PDF curto com as páginas "Tableau des contenus" do livro (como o do Défi 3) resolveria.
+- Grammaire Progressive A1: títulos de 5 capítulos confirmados pelos PDFs avulsos; os outros continuam deduzidos (não veio sumário). Opcional: PDF curto do sumário.
+- Vocabulaire Progressif Intermédiaire: 2 títulos de capítulo ainda ilegíveis (entre os capítulos 1 e 10). Opcional, impacto baixo.
+
+---
+
+## 12. Atualização de 2026-10-16
+
+**Como foi feita:** busca no Drive por arquivos criados ou modificados desde 2026-10-14 (todas as pastas, com paginação) e por "Sommaire" no nome. Vieram **4 PDFs curtos de sumário**, todos com texto legível pelo conector (não foi preciso OCR). Também conferi os PDFs avulsos de capítulos que já estavam no Drive, porque alguns trazem o título no nome do arquivo.
+
+### 12.1 O que foi lido agora
+
+| Livro | Arquivo | Confiança | Onde está |
+|---|---|---|---|
+| Grammaire Progressive du Français, Intermédiaire A2-B1 (4e éd.) | `1tD_Knjytm9MdQFIEHzgreLdeFqEHJRmk` | alta | 8.6 |
+| Grammaire en Dialogues, Débutant | `1WqIvKaVv9R74rGwZu12U6bx2s5DKAf6N` | alta | 8.4 |
+| Communication Progressive du Français, Débutant | `1G46I0XAz0R7hFqSC3Qy2IHDsktoyjsmU` | alta (títulos) / média (gramática por ato) | 8.5 |
+| Défi 3 (B1), livro do aluno | `1Kp5E_3V3-kpyWojljEEf0I8NWJHDD377` | alta / média (unidades 8-9 e títulos de unidade) | 8.7 |
+| Grammaire Progressive A1: 5 títulos de capítulo (PDFs avulsos antigos) | ver inventário 1.2 | alta para os 5 | seção 4 |
+| Grammaire Essentielle A1-A2: cap. 34, subjuntivo (PDF avulso antigo) | `11Vk67Z0RzRqvzGJemFXDbKwBpR4ygM_o` | alta (conteúdo do capítulo) | seção 5 e 9.2 |
+
+**Observação da profa. registrada:** a Grammaire Essentielle A1-A2 **não tem divisão definida entre A1 e A2**. A pendência "conferir no livro físico" foi encerrada.
+
+### 12.2 O que continua não lido (e por quê)
+
+| Livro | Motivo |
+|---|---|
+| Conjugaison Progressive Débutant e Intermédiaire | Fora por decisão da profa. |
+| Défi 2: avaliações 2 a 4 | Fora por decisão da profa. |
+| Défi 2: títulos dos dossiês e *défis* finais | Não veio sumário; o livro (47 MB, escaneado) passa do limite de download. A estrutura por unidade (seção 7) continua de via indireta, confiança média |
+| Grammaire Progressive A1: títulos dos outros 55 capítulos | Não veio sumário; continuam deduzidos (média). Nenhuma dedução foi desmentida pelos 5 títulos confirmados |
+| Vocabulaire Progressif Intermédiaire: 2 títulos | Não veio sumário novo; sabe-se agora só que estão entre os capítulos 1 e 10 |
+
+### 12.3 O que mudou nas convergências
+
+1. **Subjuntivo:** de "A2?, só um livro, baixa" para "**fim do A2 só com *il faut que / je veux que*; sistema no B1**", média. Base: GEF 34 (só vontade e obrigação), CPD 20 (verbos em *-er*), GPI 51 (penúltimo capítulo), Défi 3 U2 (primeira vez na série).
+2. **Teto do A2 confirmado pelo Défi 3:** os "rappels" do Défi 3 (futuro simples, COD/COI, *en/y*, condicional presente) e a revisão de imperfeito x passé composé na U1 mostram o que a série espera no fim do A2. Novos no B1: subjuntivo, relativos compostos e *dont*, *si* + imperfeito, mais-que-perfeito, passiva, discurso relatado no passado, condicional passado.
+3. **Correção:** a linha "Mais-que-perfeito, futuro anterior, pronomes duplos, relativos compostos" dizia "nenhum livro A2 lido traz". Não é bem assim: o CPD (débutant) e a GPI (A2-B1) trazem; o que vale é que **nenhum método** A1/A2 traz. Nível continua B1.
+4. **Discurso indireto:** separado em presente (A2) e passado (B1: GPI 45, Défi 3 U6). **Condição com *si*:** presente/futuro no A2; *si* + imperfeito no B1.
+5. **Linhas que subiram de confiança** (média → alta) porque ganharam fontes lidas em sumário: pergunta por inversão, superlativo, condicional presente, condição com *si*, discurso indireto, pronomes demonstrativos, advérbios em *-ment*, momentos da ação, causa/consequência, estudos/CV, festas.
+6. **Gerúndio:** de "só um livro" para "maioria das fontes A2-B1" (CPD, GPI, D2), fim do A2.
+7. **Linhas novas:** voz passiva (B1 nos métodos), pronomes possessivos (A2-B1), indefinidos, comparar, pedir informações/projetos, certeza e incerteza.
+8. **Comunicação:** reclamar, protestar, desculpar-se e negar passam de "só o CPI" para "maioria" (o CPD débutant já trabalha) e de A2 para **fim do A1 → A2**; saúde com consulta e farmácia aparece já no CPD débutant.
+9. **Ordem dos pronomes complemento:** sem consenso de ordem entre métodos e gramáticas (convergência 8 da seção 10); o nível continua o mesmo.
+10. **Nada do núcleo A1 mudou:** a Grammaire en Dialogues Débutant e as partes I a III do CPD confirmam ponto por ponto o núcleo da convergência 1 (seção 10).
