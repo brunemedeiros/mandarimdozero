@@ -111,6 +111,8 @@ window.I18N_CATALOG['en'] = {
   'menu.supportMaterials': '📚 Study materials', // MÉDIA
   'menu.settings': '⚙️ Settings', // ALTA
   'menu.admin': '🛠️ Admin panel', // ALTA
+  'sidebar.collapse': 'Collapse menu', // ALTA
+  'sidebar.expand': 'Expand menu', // ALTA
   'menu.logout': 'Sign out', // ALTA
   'menu.conjugation': '✍️ Conjugation', // ALTA
   'menu.challenges': '🎯 Challenges', // ALTA
@@ -141,6 +143,13 @@ window.I18N_CATALOG['en'] = {
   'notif.time.hour': '{n}h', // ALTA
   'notif.time.day': '{n}d', // ALTA
   'notif.empty': 'No notifications yet. Keep studying! 📚', // ALTA
+  'notif.group.today': 'Today', // ALTA
+  'notif.group.yesterday': 'Yesterday', // ALTA
+  'notif.group.earlier': 'Earlier', // ALTA
+  'notif.unread': 'Unread', // ALTA
+  'notif.markAll': 'Mark all as read', // ALTA
+  'notif.markOne': 'Mark as read', // ALTA
+  'notif.new': 'New', // ALTA
   'notif.cat.estudo': '📘 Study', // ALTA
   'notif.cat.revisao': '🔄 Review', // ALTA
   'notif.cat.streak': '🔥 Streak', // ALTA
@@ -2081,7 +2090,6 @@ window.I18N_CATALOG['en'] = {
   'nav.study': 'Study', // ALTA
   'nav.challenges': 'Challenges', // ALTA
   'nav.profile': 'Profile', // ALTA
-  'side.streakDays': 'day streak', // ALTA
 
   // Fase 11: nomes/descrições de conquistas.
   'badge.first_step.name': 'First Step', // ALTA

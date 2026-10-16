@@ -235,7 +235,7 @@ async function fetchRecentNotifications(){
   const run = () => notificationsOwnBell(supabaseClient
     .from('notifications')
     .select('*')
-    .eq('user_id', CURRENT_USER.id))
+    .eq('user_id', CURRENT_USER.id).eq('language_app_key', APP_KEY)) // cada site mostra os avisos dele (Amigos são gravados 1 vez por site)
     .order('created_at', { ascending: false })
     .limit(NOTIFICATIONS_FETCH_LIMIT);
   let { data, error } = await run();
@@ -253,7 +253,7 @@ async function refreshNotificationUnreadCount(){
   const run = () => notificationsOwnBell(supabaseClient
     .from('notifications')
     .select('id', { count: 'exact', head: true })
-    .eq('user_id', CURRENT_USER.id))
+    .eq('user_id', CURRENT_USER.id).eq('language_app_key', APP_KEY)) // cada site mostra os avisos dele (Amigos são gravados 1 vez por site)
     .is('read_at', null);
   let { count, error } = await run();
   if (notificationAudienceMissing(error)) ({ count, error } = await run());
@@ -285,6 +285,20 @@ function notificationTimeAgoLabel(iso){
   return t('notif.time.day', { n: Math.floor(hr / 24) });
 }
 
+// "Hoje" / "Ontem" / "Antes", pelo dia local de quem vê.
+function notificationDayGroup(iso){
+  const d = new Date(iso), today = new Date();
+  const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((day(today) - day(d)) / 86400000);
+  return diff <= 0 ? 'today' : diff === 1 ? 'yesterday' : 'earlier';
+}
+
+// O ícone já fica à esquerda: o emoji no começo do texto ("📌 Fulana postou...") sai para não repetir.
+const NOTIFICATION_LEADING_EMOJI = /^(?:\p{Extended_Pictographic}️?(?:‍\p{Extended_Pictographic}️?)*\s*)+/u;
+function notificationBodyText(body){
+  return String(body || '').replace(NOTIFICATION_LEADING_EMOJI, '');
+}
+
 async function renderNotificationDropdown(){
   const list = document.getElementById('notifications-list');
   if (!list) return;
@@ -294,21 +308,48 @@ async function renderNotificationDropdown(){
     list.innerHTML = `<p class="notifications-empty">${t('notif.empty')}</p>`;
     return;
   }
-  list.innerHTML = items.map(n => `
-    <button class="notification-item ${n.read_at ? '' : 'unread'}" data-notification-id="${n.id}" data-action-tab="${n.action_tab || ''}">
-      <span class="notification-item-icon">${n.icon || NOTIFICATION_CATEGORY_ICON[n.category] || '🔔'}</span>
-      <span class="notification-item-body">
-        ${n.title ? `<span class="notification-item-title">${escapeHTML(n.title)}</span>` : ''}
-        <span class="notification-item-text">${escapeHTML(n.body)}</span>
-        <span class="notification-item-time">${notificationTimeAgoLabel(n.created_at)}</span>
-      </span>
-    </button>
-  `).join('');
+  // Peças do Design System do painel (Pico, `.painel` no #notifications-dropdown): p-itens / p-item / p-selo.
+  let lastGroup = null, open = false;
+  list.innerHTML = items.map(n => {
+    const group = notificationDayGroup(n.created_at);
+    let head = '';
+    if (group !== lastGroup){
+      head = `${open ? '</ul>' : ''}<p class="p-subtitulo notification-group">${t('notif.group.' + group)}</p><ul class="p-itens notification-items">`;
+      open = true;
+    }
+    lastGroup = group;
+    const unread = !n.read_at;
+    const twin = n.category === 'amigos' ? `data-twin-at="${escapeHTML(n.created_at)}" data-twin-body="${escapeHTML(n.body || '')}"` : '';
+    return `${head}
+    <li class="notification-row">
+      <a href="#" class="p-item notification-item ${unread ? 'p-item--suave unread' : ''}" data-notification-id="${n.id}" data-action-tab="${escapeHTML(n.action_tab || '')}" ${twin}>
+        <span class="p-item-media notification-item-icon" aria-hidden="true">${n.icon || NOTIFICATION_CATEGORY_ICON[n.category] || '🔔'}</span>
+        <span class="p-item-conteudo notification-item-body">
+          ${n.title ? `<span class="p-item-titulo notification-item-title">${escapeHTML(n.title)}</span>` : ''}
+          <span class="${n.title ? 'p-item-descricao' : 'p-item-titulo'} notification-item-text">${escapeHTML(notificationBodyText(n.body))}</span>
+          <small class="p-item-descricao notification-item-time">${notificationTimeAgoLabel(n.created_at)}</small>
+        </span>
+      </a>
+      ${unread ? `<button type="button" class="p-selo p-selo--info notification-unread-dot" data-mark-read="${n.id}" ${twin} title="${escapeHTML(t('notif.markOne'))}" aria-label="${escapeHTML(t('notif.new') + ': ' + t('notif.markOne'))}">${escapeHTML(t('notif.new'))}</button>` : ''}
+    </li>`;
+  }).join('') + (open ? '</ul>' : '');
+
+  // A bolinha marca só aquele aviso como lido, sem abrir nada.
+  list.querySelectorAll('[data-mark-read]').forEach(dot => {
+    dot.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await markNotificationRead(dot.dataset.markRead, dot.dataset.twinAt ? { createdAt: dot.dataset.twinAt, body: dot.dataset.twinBody } : null);
+      dot.parentElement.querySelector('.notification-item')?.classList.remove('unread', 'p-item--suave');
+      dot.remove();
+    });
+  });
 
   list.querySelectorAll('[data-notification-id]').forEach(el => {
-    el.addEventListener('click', async () => {
-      await markNotificationRead(el.dataset.notificationId);
-      el.classList.remove('unread');
+    el.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      await markNotificationRead(el.dataset.notificationId, el.dataset.twinAt ? { createdAt: el.dataset.twinAt, body: el.dataset.twinBody } : null);
+      el.classList.remove('unread', 'p-item--suave');
+      el.parentElement.querySelector('.notification-unread-dot')?.remove();
       const tab = el.dataset.actionTab;
       document.getElementById('notifications-dropdown')?.classList.remove('open');
       if (tab === 'profile-edit'){
@@ -329,15 +370,21 @@ async function renderNotificationDropdown(){
   });
 }
 
-async function markNotificationRead(id){
-  const { error } = await supabaseClient.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id).is('read_at', null);
+async function markNotificationRead(id, twin){
+  const now = new Date().toISOString();
+  const { error } = await supabaseClient.from('notifications').update({ read_at: now }).eq('id', id).is('read_at', null);
+  // Aviso de Amigos é da conta, gravado uma vez em cada site: lido aqui, lido lá também.
+  if (twin && typeof CURRENT_USER !== 'undefined' && CURRENT_USER){
+    await supabaseClient.from('notifications').update({ read_at: now })
+      .eq('user_id', CURRENT_USER.id).eq('category', 'amigos').eq('created_at', twin.createdAt).eq('body', twin.body).is('read_at', null);
+  }
   if (!error) refreshNotificationUnreadCount();
 }
 
 async function markAllNotificationsRead(){
   if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
   const run = () => notificationsOwnBell(supabaseClient.from('notifications').update({ read_at: new Date().toISOString() })
-    .eq('user_id', CURRENT_USER.id)).is('read_at', null);
+    .eq('user_id', CURRENT_USER.id).eq('language_app_key', APP_KEY)).is('read_at', null);
   const { error } = await run();
   if (notificationAudienceMissing(error)) await run();
   refreshNotificationUnreadCount();

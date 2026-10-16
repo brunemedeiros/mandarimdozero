@@ -25,7 +25,7 @@ function paintLanguageSwitcher(){
   // Chrome em vários SOs/navegadores, só como texto "FR"/"CN").
   const current = AVAILABLE_LANGUAGES.find(l => l.id === LANG_ID);
   btn.innerHTML = current ? current.flagSvg : '🌐';
-  btn.setAttribute('aria-label', current ? t('langSwitcher.ariaCurrent', { name: current.name }) : t('langSwitcher.ariaSwitch'));
+  btn.setAttribute('aria-label', current ? t('langSwitcher.ariaCurrent', { name: languageDisplayName(current) }) : t('langSwitcher.ariaSwitch'));
 
   // Cursos por idioma do site ligados: o menu vira "Meus cursos" (estilo Duolingo) + "Adicionar curso".
   if (CourseStorage.isPerSiteLanguage() && typeof paintCourseMenu === 'function'){ paintCourseMenu(btn, dropdown); return; }
@@ -33,11 +33,11 @@ function paintLanguageSwitcher(){
   const others = AVAILABLE_LANGUAGES.filter(l => l.enabled && l.id !== LANG_ID);
   dropdown.innerHTML = `
     <div class="lang-switcher-label">${t('langSwitcher.studying')}</div>
-    <div class="lang-switcher-current">${current ? current.flagSvg : ''} ${current ? current.name : ''}</div>
+    <div class="lang-switcher-current">${current ? current.flagSvg : ''} ${current ? languageDisplayName(current) : ''}</div>
     ${others.length ? `
       <div class="lang-switcher-sep"></div>
       <div class="lang-switcher-label">${t('langSwitcher.learnOther')}</div>
-      ${others.map(l => `<button type="button" class="lang-switcher-item" data-lang="${l.id}" aria-label="${t('langSwitcher.ariaSwitchTo', { name: l.name })}">${l.flagSvg} ${l.name}</button>`).join('')}
+      ${others.map(l => `<button type="button" class="lang-switcher-item" data-lang="${l.id}" aria-label="${t('langSwitcher.ariaSwitchTo', { name: languageDisplayName(l) })}">${l.flagSvg} ${languageDisplayName(l)}</button>`).join('')}
     ` : ''}
   `;
 

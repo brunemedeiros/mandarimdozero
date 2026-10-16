@@ -452,11 +452,15 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   /* .tabs já fica escondida sempre agora (ver regra global acima) --
      e o pill de Conta na topbar volta aqui (só mobile ele some, ver
      regra global também). */
-  #user-menu-btn{ display:flex; }
-  /* XP some do topbar aqui -- fica só no card de Status à direita, sem
-     repetição (decisão #1). No mobile (fora desta media query) continua
-     no topbar, como já decidido pra lá (decisão #4). */
-  .stats-pills .pill.xp{ display:none; }
+  /* Conta/Sair: o pill com o nome saiu no desktop; "Sair da conta" fica no fim da
+     sidebar (#sidebar-logout-btn) e Reportar já tem o ⚑ da topbar. */
+  /* Topbar "flutuando" (estilo Duolingo): no desktop os itens ficam sem caixinha,
+     só ícone + número. O XP volta à topbar (o card Status saiu). O pill de
+     Admin Mode ligado em OFF (.active, roxo) mantém o fundo: é um aviso. */
+  :root:root .stats-pills .pill:not(.admin-mode-toggle-btn.active),
+  :root:root .stats-pills .lang-switcher-btn{ background:none; border-color:transparent; box-shadow:none; }
+  :root:root .stats-pills .pill:not(.admin-mode-toggle-btn.active):hover,
+  :root:root .stats-pills .lang-switcher-btn:hover{ background:var(--paper-warm); }
   /* A faixa de Missões do dia na Trilha vira redundante aqui -- o mesmo
      conteúdo já mora no card fixo da sidebar direita (renderDailyChallengesStrip
      renderiza nos dois; CSS decide qual aparece). Some só a partir daqui;
@@ -474,12 +478,16 @@ a.pill:hover{ border-color: var(--imperial-gold); }
     /* Linha de separação da sidebar, estilo Duolingo. */
     border-right:1px solid var(--paper-line); padding-right:20px;
   }
+  /* Recolher menu: ícone « solto no topo (sem caixinha, como a topbar); vira » ao recolher. */
   .sidebar-toggle-btn{
-    align-self:flex-end; width:32px; height:32px; border-radius:8px; flex-shrink:0;
-    border:1px solid var(--paper-line); background:var(--paper); color:var(--ink-soft);
-    cursor:pointer; display:flex; align-items:center; justify-content:center; margin-bottom:10px;
+    align-self:flex-end; width:32px; height:32px; border-radius:8px; flex-shrink:0; border:none; background:none;
+    color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; justify-content:center; margin-bottom:10px;
   }
-  .sidebar-toggle-btn:hover{ color:var(--ink); border-color:var(--imperial-gold); }
+  .sidebar-toggle-btn:hover{ color:var(--ink); background:var(--paper-warm); }
+  #app.sidebar-collapsed .sidebar-toggle-btn{ align-self:center; }
+  .sidebar-toggle-icon{ transition:transform .2s ease; }
+  #app.sidebar-collapsed .sidebar-toggle-icon{ transform:rotate(180deg); }
+  @media (prefers-reduced-motion: reduce){ .sidebar-toggle-icon{ transition:none; } }
   .sidebar-nav{ display:flex; flex-direction:column; gap:2px; }
   .sidebar .tab-btn{ flex:none; width:100%; justify-content:flex-start; padding:10px 12px; }
   /* Ícones da sidebar são coloridos (flat, 2-3 tons), não monocromáticos
@@ -495,13 +503,12 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   .right-cards{ grid-area:cards; display:flex; flex-direction:column; gap:16px; position:sticky; top:97px; }
   .side-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-card); }
   .side-card-title{ font-size:15px; font-weight:900; letter-spacing:0; color:var(--ink); margin:0 0 12px; display:flex; align-items:center; gap:6px; }
-  .side-status-row{ display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:700; padding:4px 0; }
-  .side-status-row + .side-status-row{ border-top:1px solid var(--paper-line); }
   /* Card de Missões do dia usa o mesmo .dcs-card/.dcs-caption-btn da faixa
      da Trilha (renderDailyChallengesStrip renderiza nos dois lugares) --
      sem padding extra do .side-card aqui em cima, o botão de recolher já
      tem o próprio respiro. */
-  #side-card-missions{ padding-top:10px; }
+  /* Ranking e Missões do dia sem moldura: lista solta na coluna (as missões já são cartões). */
+  #side-card-missions, #side-card-ranking{ background:none; border:none; box-shadow:none; padding:0; }
   #side-missions-body .dcs-caption-btn{ padding-top:0; }
   /* Mesmo peso dos outros títulos da coluna (.side-card-title). */
   #side-missions-body .dcs-caption{ font-size:15px; font-weight:900; letter-spacing:0; text-transform:none; color:var(--ink); }
@@ -515,7 +522,6 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   #app.sidebar-collapsed{ grid-template-columns:64px minmax(0,1fr) 280px; }
   #app.sidebar-collapsed .sidebar-label{ display:none; }
   #app.sidebar-collapsed .sidebar .tab-btn{ justify-content:center; padding:10px; }
-  #app.sidebar-collapsed .sidebar-toggle-btn{ align-self:center; }
 
   /* Painéis da professora e do Admin ocupam a largura toda: sem Ranking, Status e Missões do dia ao lado (são do aluno). */
   #app:is([data-active-tab="teacher-panel"], [data-active-tab="admin-badges"]){ grid-template-columns:220px minmax(0,1fr); grid-template-areas:"topbar topbar" "sidebar content"; padding-right:32px; }
@@ -3951,6 +3957,34 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .tbell-new{ font-weight:800; color:var(--seal-red-dark); }
 .tbell-item-note{ font-size:12px; color:var(--ink-soft); font-style:italic; }
 .tbell-empty{ padding:20px 8px; text-align:center; color:var(--ink-soft); font-size:14px; margin:0; }
+/* Itens no Design System do painel (Pico): p-item + selo "Novo" que marca só aquele aviso (2026-10-15). */
+.tbell-panel.painel{ padding:0; background:var(--p-bg); border-color:var(--p-linha); overflow:hidden; }
+.tbell-panel.painel .tbell-head{ padding:.85rem 1rem .7rem; margin:0; border-bottom:1px solid var(--p-linha); }
+.tbell-panel.painel .tbell-mark-all{ margin:0; }
+.tbell-panel.painel .tbell-list{ padding:0 .6rem .6rem; }
+.tbell-panel.painel .tbell-group{ margin:.85rem .4rem .4rem; font-weight:800; font-size:.8rem; }
+.tbell-panel.painel .tbell-items{ gap:.4rem; }
+.tbell-panel.painel .tbell-items > li + li{ border-top:none; }
+.tbell-panel.painel .tbell-row{ position:relative; }
+.tbell-panel.painel button.tbell-item{ width:100%; margin:0; align-items:flex-start; text-align:left; padding:.7rem 2.2rem .7rem .8rem; border:1px solid var(--p-linha);
+  border-radius:12px; background:transparent; color:var(--p-tinta); font-weight:400; font-size:inherit; box-shadow:none; cursor:pointer; }
+.tbell-panel.painel button.tbell-item.p-item--suave{ background:var(--p-superficie); border-color:transparent; padding-right:4.8rem; }
+.tbell-panel.painel button.tbell-item:hover{ background:var(--p-superficie); color:var(--p-tinta); }
+.tbell-panel.painel button.tbell-item:not(.is-unread)::after{ content:"\203A"; position:absolute; right:.9rem; top:.75rem; font-size:1.4em; line-height:1; color:var(--p-tinta-suave); }
+.tbell-panel.painel button.tbell-item:focus-visible{ outline:2px solid var(--p-marca); outline-offset:2px; }
+.tbell-panel.painel .tbell-item-icon{ font-size:1.2rem; }
+.tbell-panel.painel .tbell-item-text{ overflow-wrap:anywhere; }
+.tbell-panel.painel .tbell-item:not(.is-unread) .tbell-item-text{ font-weight:600; }
+.tbell-panel.painel .tbell-item-meta{ display:flex; flex-wrap:wrap; align-items:center; gap:.3rem .6rem; margin-top:.15rem; }
+.tbell-panel.painel .tbell-lang{ font-size:.72rem; text-transform:capitalize; }
+.tbell-panel.painel .tbell-item-note{ font-style:italic; }
+.tbell-panel.painel button.tbell-new{ position:absolute; right:.75rem; top:.8rem; margin:0; width:auto; min-height:0; padding:.1rem .6rem; border:none; border-radius:999px;
+  font-size:.72rem; font-weight:800; line-height:1.5; cursor:pointer; box-shadow:none; background:var(--p-info); color:var(--p-sobre-vivo); }
+.tbell-panel.painel button.tbell-new:hover{ background:color-mix(in srgb, var(--p-info) 85%, black); color:var(--p-sobre-vivo); }
+.tbell-panel.painel button.tbell-new:focus-visible{ outline:2px solid var(--p-marca); outline-offset:2px; }
+/* Área de toque de 44px no selo, sem aumentar o desenho. */
+.tbell-panel.painel button.tbell-new::before, .notifications-dropdown.painel button.notification-unread-dot::before{ content:''; position:absolute; inset:-8px -8px; }
+@media (max-width:620px){ .tbell-panel.painel button.tbell-new{ min-height:32px; padding:.3rem .8rem; } .tbell-panel.painel .tbell-mark-all{ min-height:44px; } }
 .tbell-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--seal-red); margin-left:8px; vertical-align:middle; }
 .tab-btn > .tbell-dot{ position:absolute; top:6px; left:6px; margin:0; border:2px solid var(--paper); box-sizing:content-box; }
 @media (max-width: 899px){
@@ -4310,6 +4344,33 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   .friends-duo-field{ flex:0 0 auto; }
   .friends-duo-field select, .friends-duo-start, .friend-nudge{ min-height:44px; }
 }
+/* Painel de Notificações (2026-10-15): Design System do painel (Pico, classe .painel no #notifications-dropdown).
+   Itens p-item agrupados por dia; não lido = p-item--suave + selo "Nova" (que marca só aquele aviso como lido). */
+.notifications-dropdown.painel{ width:min(400px, calc(100vw - 24px)); min-width:0; max-width:none; max-height:min(74vh, 580px); padding:0; background:var(--p-bg); }
+.notifications-dropdown.painel .notifications-dropdown-header{ position:sticky; top:0; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+  margin:0; padding:.85rem 1rem .7rem; background:var(--p-bg); border-bottom:1px solid var(--p-linha); font-size:1.05rem; font-weight:800; color:var(--p-tinta); }
+.notifications-dropdown.painel .notifications-mark-all-btn{ margin:0; }
+.notifications-dropdown.painel .notification-group{ margin:.85rem 1rem .4rem; font-weight:800; font-size:.8rem; }
+.notifications-dropdown.painel .notification-items{ padding:0 .6rem; gap:.4rem; }
+.notifications-dropdown.painel #notifications-list{ padding-bottom:.6rem; }
+.notifications-dropdown.painel .notification-row{ position:relative; }
+.notifications-dropdown.painel .notification-item{ align-items:flex-start; padding:.7rem .8rem; }
+.notifications-dropdown.painel .notification-item.unread{ padding-right:4.6rem; }
+.notifications-dropdown.painel .notification-item.unread::after{ content:none; }
+.notifications-dropdown.painel .notification-item:focus-visible{ outline:2px solid var(--p-marca); outline-offset:2px; }
+.notifications-dropdown.painel .notification-item-icon{ font-size:1.2rem; }
+.notifications-dropdown.painel .notification-item:not(.unread) .notification-item-text.p-item-titulo{ font-weight:600; }
+.notifications-dropdown.painel .notification-item-time{ margin-top:.15rem; }
+.notifications-dropdown.painel button.notification-unread-dot{ position:absolute; right:.75rem; top:.8rem; margin:0; width:auto; min-height:0;
+  padding:.1rem .6rem; border:none; border-radius:999px; font-size:.72rem; font-weight:800; line-height:1.5; cursor:pointer; box-shadow:none;
+  background:var(--p-info); color:var(--p-sobre-vivo); }
+.notifications-dropdown.painel button.notification-unread-dot:hover{ background:color-mix(in srgb, var(--p-info) 85%, black); color:var(--p-sobre-vivo); }
+.notifications-dropdown.painel button.notification-unread-dot:focus-visible{ outline:2px solid var(--p-marca); outline-offset:2px; }
+.notifications-dropdown.painel .notifications-empty{ padding:1.5rem 1rem; color:var(--p-tinta-suave); }
+@media (max-width:620px){
+  .notifications-dropdown.painel .notifications-mark-all-btn{ min-height:44px; }
+  .notifications-dropdown.painel button.notification-unread-dot{ min-height:32px; padding:.3rem .8rem; }
+}
 </style>
 </head>
 <body>
@@ -4384,7 +4445,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
           <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
           <div class="lang-switcher-dropdown" id="lang-switcher-dropdown"></div>
         </div>
-        <button class="pill user-pill" id="user-menu-btn" aria-label="Conta" title="Conta">👤 <span id="user-label">Convidado</span></button>
+        <button class="pill user-pill" id="user-menu-btn" aria-label="Conta" title="Conta" data-i18n-attr="aria-label:settings.section.account;title:settings.section.account">👤 <span id="user-label">Convidado</span></button>
       </div>
       <div class="stats-pills-fade" aria-hidden="true"></div>
     </div>
@@ -4438,8 +4499,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
        existente (shared/tabs.js) sincroniza clique e estado ativo dos dois
        conjuntos de botões sem nenhum JS novo. -->
   <div class="sidebar" id="app-sidebar">
-    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" aria-label="Mostrar/ocultar barra lateral" title="Mostrar/ocultar barra lateral">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
+    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" type="button" aria-label="Recolher menu" title="Recolher menu">
+      <svg class="sidebar-toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
     </button>
     <nav class="sidebar-nav">
       <button class="tab-btn" data-tab="path">
@@ -4480,6 +4541,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="tab-btn admin-only-nav" data-tab="admin-badges" style="display:none;">
         <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6e0.svg" alt="" aria-hidden="true">
         <span class="sidebar-label">Admin</span>
+      </button>
+      <button class="tab-btn sidebar-logout-btn" id="sidebar-logout-btn" type="button">
+        <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6aa.svg" alt="" aria-hidden="true">
+        <span class="sidebar-label" data-i18n="menu.logout">Sair da conta</span>
       </button>
     </nav>
   </div>
@@ -4874,11 +4939,6 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <div class="side-card-title">🏆 Ranking</div>
       <div id="side-ranking-body"></div>
     </div>
-    <div class="side-card" id="side-card-status">
-      <div class="side-card-title">Status</div>
-      <div class="side-status-row"><span>⭐</span><span id="side-xp-count" class="stat-count">0</span><span>XP</span></div>
-      <div class="side-status-row"><span>🔥</span><span id="side-streak-count" class="stat-count">0</span><span data-i18n="side.streakDays">dias seguidos</span></div>
-    </div>
     <div class="side-card" id="side-card-missions">
       <div id="side-missions-body"></div>
     </div>
@@ -4887,10 +4947,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 
 <div id="mais-backdrop" class="mais-backdrop"></div>
 
-<div id="notifications-dropdown" class="user-dropdown notifications-dropdown">
+<div id="notifications-dropdown" class="user-dropdown notifications-dropdown painel">
   <div class="notifications-dropdown-header">
     <span data-i18n="notif.pref.sectionTitle">Notificações</span>
-    <button class="notifications-mark-all-btn" id="notifications-mark-all-btn">Ler todas</button>
+    <button type="button" class="outline p-pequeno notifications-mark-all-btn" id="notifications-mark-all-btn" data-i18n="notif.markAll">Ler todas</button>
   </div>
   <div id="notifications-list"></div>
 </div>

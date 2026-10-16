@@ -51,7 +51,7 @@ const MISSION = { id: 7, week_start: '2026-10-12', goal_xp: 300, started_by_me: 
 // Missão de dias (109): montada na página a partir de hoje (segunda da semana; você 3 dias antes de hoje, Bia 2).
 const DAYS = 'days';
 
-async function boot(browser, lang, port, theme, viewport){
+async function boot(browser, lang, port, theme, viewport, ui){
   const ctx = await browser.newContext({ serviceWorkers: 'block', viewport: viewport || { width: 1280, height: 900 }, colorScheme: theme || 'light' });
   const page = await ctx.newPage();
   const errors = [];
@@ -59,7 +59,7 @@ async function boot(browser, lang, port, theme, viewport){
   page.on('dialog', d => d.accept());
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
-  await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
+  await page.addInitScript((ui) => { try { sessionStorage.setItem('guest_mode', '1'); if (ui) localStorage.setItem('ui-language', ui); } catch (e) {} }, ui || null);
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
   return { page, errors, ctx };
@@ -221,14 +221,68 @@ async function run(browser, port, lang){
   await ctx.close();
 }
 
+// Site em inglês não tem NADA em português (CLAUDE.md): nome do idioma (filtros da disputa da semana, bandeira do
+// amigo, Ranking, troca de idioma, Perfil, perfil público) e o rótulo "Convidado" do topo. Claro e escuro.
+const PT_WORDS = /Francês|Chinês|Português|Mandarim|Convidado|\bConta\b/; // com acento: "Chinese" contém "Chines"
+async function english(browser, port){
+  for (const lang of ['fr', 'zh']) for (const theme of ['light', 'dark']){
+    const { page, errors, ctx } = await boot(browser, lang, port, theme, null, 'en');
+    const tag = `${lang} en ${theme}`;
+    await page.waitForFunction(() => getUiLang() === 'en' && t('auth.guestLabel') === 'Guest', null, { timeout: 8000 });
+    check(`${tag}: topo do convidado em inglês`, (await text(page, '#user-label')) === 'Guest', await text(page, '#user-label'));
+    check(`${tag}: aria-label da conta em inglês`, !PT_WORDS.test(await page.$eval('#user-menu-btn', e => e.getAttribute('aria-label') + ' ' + e.title)));
+    await setup(page, { mission: null });
+    await page.evaluate(() => { window.__RPC.friends_extras = () => [{ user_id: 'bia', streak: 2, studied_today: true, languages: ['frances', 'mandarim'] }]; });
+    await openFriends(page);
+    await page.waitForSelector('#friends-mini-rank .friends-rank-scopes', { timeout: 5000 });
+    await page.waitForSelector('#friends-content .friend-flag', { timeout: 5000 });
+    const chips = await text(page, '#friends-mini-rank .friends-rank-scopes');
+    check(`${tag}: filtros da disputa da semana em inglês`, /French/.test(chips) && /Chinese/.test(chips) && !PT_WORDS.test(chips), chips);
+    const flags = await page.$$eval('#friends-content .friend-flag', els => els.map(e => e.title).join(' '));
+    check(`${tag}: bandeira do amigo em inglês`, /French/.test(flags) && !PT_WORDS.test(flags), flags);
+    const out = await page.evaluate(async () => {
+      const r = {};
+      document.getElementById('leaderboard-content').innerHTML = '';
+      await renderLeaderboardView();
+      r.rank = document.querySelector('#leaderboard-content')?.innerText || '';
+      const per = CourseStorage.isPerSiteLanguage;
+      CourseStorage.isPerSiteLanguage = () => false;
+      try { paintLanguageSwitcher(); r.switcher = document.getElementById('lang-switcher-dropdown').innerHTML; } finally { CourseStorage.isPerSiteLanguage = per; }
+      r.profile = (await buildLanguagesSummary()).map(l => l.name).join(' ');
+      r.publicCard = publicProfileLangCardHTML({ languageAppKey: 'mandarim', streak: 1, lastStudyDay: todayStr() });
+      r.name = languageDisplayName('frances') + ' ' + languageDisplayName('mandarim');
+      return r;
+    });
+    check(`${tag}: abas do Ranking em inglês`, /French/.test(out.rank) && !PT_WORDS.test(out.rank), out.rank.slice(0, 200));
+    check(`${tag}: menu de troca de idioma em inglês`, /French|Chinese/.test(out.switcher) && !PT_WORDS.test(out.switcher));
+    check(`${tag}: idiomas do Perfil em inglês`, /French|Chinese/.test(out.profile) && !PT_WORDS.test(out.profile), out.profile);
+    check(`${tag}: perfil público em inglês`, /Chinese/.test(out.publicCard) && !PT_WORDS.test(out.publicCard));
+    check(`${tag}: helper com maiúscula`, out.name === 'French Chinese', out.name);
+    if (SHOTS){ await page.evaluate(() => switchTab('profile')); await page.click('#profile-content .profile-subnav [data-tab="friends"]'); await page.waitForTimeout(400);
+      await page.$eval('#friends-mini-rank', e => e.scrollIntoView({ block: 'start' })); await page.screenshot({ path: path.join(SHOTS, `en-amigos-${lang}-${theme}.png`) }); }
+    check(`${tag}: sem erros`, errors.length === 0, errors);
+    await ctx.close();
+  }
+  // Em português continua "Francês"/"Chinês" (o helper só troca o idioma, não o conteúdo pt).
+  const { page, ctx } = await boot(browser, 'fr', port);
+  check('pt-BR: helper segue em português', (await page.evaluate(() => languageDisplayName('frances') + ' ' + languageDisplayName('mandarim'))) === 'Francês Chinês');
+  await ctx.close();
+}
+
 async function visual(browser, port){
-  for (const lang of ['fr', 'zh']) for (const theme of ['light', 'dark']) for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]){
+  for (const ui of ['pt-BR', 'en']) for (const lang of ['fr', 'zh']) for (const theme of ['light', 'dark']) for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]){
     for (const mission of [null, DAYS]){
-      const { page, errors, ctx } = await boot(browser, lang, port, theme, vp);
+      const { page, errors, ctx } = await boot(browser, lang, port, theme, vp, ui);
+      const sfx = ui === 'en' ? '-en' : '';
       await setup(page, { mission });
       await openFriends(page);
       await page.waitForSelector('#friends-duo:not([hidden])', { timeout: 5000 });
-      const tag = `${lang} ${theme} ${vp.width} ${mission ? 'missão' : 'convite'}`;
+      const tag = `${ui} ${lang} ${theme} ${vp.width} ${mission ? 'missão' : 'convite'}`;
+      if (ui === 'en'){
+        // site em inglês: nada em português no cartão da dupla, nos cartões dos amigos e na linha das Missões do dia
+        const pt = await page.evaluate(() => [...document.querySelectorAll('#friends-duo, #friends-list, .dcs-duo')].map(e => e.innerText).join(' ').match(/\b(Você|dupla|dias|semana|Cutucar|Chamar|missão|juntos|Termina|até domingo)\b/gi));
+        check(`${tag}: sem português`, !pt, pt);
+      }
       const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
       check(`${tag}: sem rolagem lateral da página`, over <= 0, over);
       // contraste mínimo: texto do cartão não pode ter a mesma cor do fundo
@@ -238,20 +292,20 @@ async function visual(browser, port){
         const small = await page.$$eval('#friends-duo button, .friend-nudge, .friend-duo-invite', els => els.filter(e => e.offsetParent && e.getBoundingClientRect().height < 44).length);
         check(`${tag}: alvos de toque >= 44px`, small === 0, small);
       }
-      if (SHOTS){ await page.$eval('#friends-duo', e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-${lang}-${theme}-${vp.width}-${mission ? 'missao' : 'convite'}.png`) }); }
-      if (SHOTS && !mission){ await page.$eval('#friends-list', e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-cards-${lang}-${theme}-${vp.width}.png`) }); }
+      if (SHOTS){ await page.$eval('#friends-duo', e => { e.scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-${lang}-${theme}-${vp.width}-${mission ? 'missao' : 'convite'}${sfx}.png`) }); }
+      if (SHOTS && !mission){ await page.$eval('#friends-list', e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(150); await page.screenshot({ path: path.join(SHOTS, `dupla-cards-${lang}-${theme}-${vp.width}${sfx}.png`) }); }
       if (mission === DAYS && vp.width === 1280){
         // faixa do fim da lição + linha do quadro, desenhadas num canto da página para o print
         await page.evaluate(() => {
           FRIENDS_STATE.mission = JSON.parse(JSON.stringify(window.__daysMission));
           const box = document.createElement('div');
           box.id = 'tst-duo'; box.style.cssText = 'position:fixed;left:240px;top:110px;z-index:9999;width:460px;background:var(--paper);padding:16px;border-radius:16px';
-          box.innerHTML = `<div class="lesson-complete">${duoLessonStripHTML()}</div><div class="dcs-cards" style="margin-top:12px">${(FRIENDS_STATE.mission = window.__daysMission, duoDailyStripRowHTML())}</div>`;
+          box.innerHTML = `<div class="lesson-complete">${duoLessonStripHTML()}</div><div class="dcs-cards" style="margin-top:12px">${duoDailyStripRowHTML()}</div>`;
           document.body.appendChild(box);
         });
         const c2 = await page.$eval('#tst-duo .duo-lesson-strip', el => [getComputedStyle(el).backgroundColor, getComputedStyle(el).color]);
         check(`${tag}: faixa do fim da lição legível`, c2[0] !== c2[1], c2);
-        if (SHOTS) await page.$eval('#tst-duo', e => e).then(() => page.locator('#tst-duo').screenshot({ path: path.join(SHOTS, `dupla-faixa-${lang}-${theme}.png`) }));
+        if (SHOTS) await page.$eval('#tst-duo', e => e).then(() => page.locator('#tst-duo').screenshot({ path: path.join(SHOTS, `dupla-faixa-${lang}-${theme}${sfx}.png`) }));
       }
       check(`${tag}: sem erros`, errors.length === 0, errors);
       await ctx.close();
@@ -263,7 +317,7 @@ async function visual(browser, port){
   await new Promise(r => server.listen(0, '127.0.0.1', r));
   const port = server.address().port;
   const browser = await chromium.launch();
-  try { await run(browser, port, 'fr'); await run(browser, port, 'zh'); await visual(browser, port); }
+  try { await run(browser, port, 'fr'); await run(browser, port, 'zh'); await english(browser, port); await visual(browser, port); }
   catch (e) { failed++; console.log('  ERRO:', e.message); }
   await browser.close(); server.close();
   console.log(`Amigos em dupla (navegador): ${passed} ok, ${failed} falhas`);
