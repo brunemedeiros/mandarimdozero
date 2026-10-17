@@ -503,3 +503,177 @@ Situação em 2026-10-16 (detalhe na seção 12):
 8. **Comunicação:** reclamar, protestar, desculpar-se e negar passam de "só o CPI" para "maioria" (o CPD débutant já trabalha) e de A2 para **fim do A1 → A2**; saúde com consulta e farmácia aparece já no CPD débutant.
 9. **Ordem dos pronomes complemento:** sem consenso de ordem entre métodos e gramáticas (convergência 8 da seção 10); o nível continua o mesmo.
 10. **Nada do núcleo A1 mudou:** a Grammaire en Dialogues Débutant e as partes I a III do CPD confirmam ponto por ponto o núcleo da convergência 1 (seção 10).
+
+---
+
+## 13. Atualização de 2026-10-17
+
+**Marca ⟳** = linha mudada em 2026-10-17. Duas fontes novas da dona: (1) o sumário da Grammaire Progressive A1 (lido); (2) o "Défi Actuel 2 - scope and sequence and sample unit" (Klett World Languages, Issuu), que **não foi possível ler**.
+
+### 13.1 Grammaire Progressive du Français, Débutant A1 (CLE, 3e éd.): sumário lido
+
+**Fonte:** `1I9vFCJ7QTNOYf6twaTCYHP_xVDRHaBES` ("Sommaire", PDF com texto; o conector leu sem OCR). **Confiança: alta** nos títulos e na ordem. **Média** só no número exato dos capítulos 32 a 34, porque o texto extraído embaralhou a ordem dessas linhas (os números de página ajudam a reconstruir). A numeração bate com os 5 capítulos que os PDFs avulsos já tinham confirmado (1, 22, 28, 40, 51-52), o que reforça a contagem.
+
+**Estrutura:** 8 unidades de 5 a 12 capítulos, cada uma fechada por "Exercices récapitulatifs" e um "Bilan" (8 bilans). Depois: anexos, conjugações, atividades comunicativas (diálogos e "La grammaire en chantant", canções), teste de avaliação e índice. Cada capítulo ocupa 2 páginas e tem um título de frase-modelo (ex.: "Je parle, tu parles, il parle") mais o ponto de gramática.
+
+| Unidade | Cap. | Título gramatical (resumo) |
+|---|---|---|
+| **U1 Vous êtes japonais ?** (bilan 1) | 1 | A apresentação; a nacionalidade e a profissão |
+| | 2 | Descrição (1): masculino e feminino dos adjetivos |
+| | 3 | Descrição (2): singular e plural dos adjetivos |
+| | 4 | *être* no presente; *vous* e *tu*, *nous* e *on* |
+| | 5 | Pergunta simples (entonação, *est-ce que*); negação *ne... pas* |
+| | 6 | Verbos em *-er* (1); o verbo *aimer* |
+| | 7 | Verbos em *-er* (2): conjugação; pergunta e negação (revisão) |
+| | 8 | Verbos em *-er* (3): particularidades (*acheter*, *préférer*) |
+| | 9 | Verbos pronominais em *-er* |
+| **U2** (bilan 2) | 10 | O nome e o artigo; masculino e feminino dos nomes |
+| | 11 | Singular e plural dos nomes |
+| | 12 | *un/une/des* x *le/la/les*: artigo indefinido e definido |
+| | 13 | *à la / au / aux*; *de la / du / des* |
+| | 14 | Possessivos (*mon, ton, son*) |
+| | 15 | Demonstrativos (*ce, cette, ces*) |
+| | 16 | A posse: *avoir* + nome; lugar do adjetivo |
+| | 17 | Características físicas; a idade |
+| | 18 | Sensações de dor (*avoir mal à*) e de falta (*avoir faim, froid*) |
+| | 19 | *avoir* no presente; pergunta e negação (revisão) |
+| | 20 | *pas le/la/les* e *pas de*: artigos e negação |
+| **U3** (bilan 3) | 21 | *à, de, chez, près de, loin de*: localização |
+| | 22 | *à, au, en* + cidade ou país |
+| | 23 | *dans, sur, sous, devant, derrière* |
+| | 24 | *il y a* + nome; *qu'est-ce qu'il y a ?*; *il n'y a pas de* |
+| | 25 | *qui est-ce ?* e *qu'est-ce que c'est ?*; *ce n'est pas...* |
+| | 26 | *c'est* x *il est*: identificação e descrição |
+| | 27 | *c'est* + adjetivo: o comentário geral |
+| **U4** (bilan 4) | 28 | Os números (1) para contar; (2) para ordenar; a data e o dia |
+| | 29 | A hora (*il est* + horas) |
+| | 30 | O tempo (clima); os meses e as estações |
+| | 31 | Partitivos (*du, de la, des*) |
+| | 32 | Quantidade: *un kilo de, beaucoup de, pas de* |
+| | 33 | A comparação (*plus, aussi, moins... que*) |
+| | 34 | Comparação de quantidades (*plus de, moins de, autant de*); o superlativo |
+| **U5** (bilan 5) | 35 | *-ir* de duas formas, plural em *-iss-* (*grandir*) |
+| | 36 | *-ir* de duas formas, tipo *partir* |
+| | 37 | *-re* de duas formas, tipo *écrire* |
+| | 38 | *savoir*, *connaître*, *croire*, *voir* |
+| | 39 | *boire* e verbos de três formas (*-ir, -re, -oir*) |
+| | 40 | *vouloir, pouvoir, devoir* + infinitivo |
+| | 41 | *faire* (atividades); *faire* e *dire* |
+| | 42 | *aller* no presente |
+| **U6** (bilan 6) | 43 | Futuro próximo |
+| | 44 | Passé composé com *avoir*: verbos em *-er* |
+| | 45 | Passé composé com *avoir*: verbos em *-ir, -re, -oir* |
+| | 46 | Passé composé com *être* |
+| | 47 | Imperfeito |
+| | 48 | Futuro simples |
+| | 49 | Presente, passado e futuro (resumo) |
+| **U7** (bilan 7) | 50 | *il y a, pendant, depuis, dans*: preposições de tempo |
+| | 51 | Pergunta (2): lugar, tempo, modo (*où, quand, comment, combien, pourquoi*) |
+| | 52 | Pergunta (3): sobre pessoa ou coisa (*qui, que, quel*) |
+| | 53 | Negação (2): *ne... rien, jamais, plus, personne* |
+| | 54 | Negação e pergunta no passé composé |
+| **U8** (bilan 8) | 55 | Pronome *en* |
+| | 56 | Pronome *y* |
+| | 57 | *le, la, les*: pronomes COD |
+| | 58 | *lui* e *leur*: pronomes COI |
+| | 59 | Pronomes tônicos (*moi, toi, lui*) |
+| | 60 | Relativos simples *qui* e *que* |
+
+**O que isso desmente ou corrige nas deduções da seção 4** (o resto da tabela 4 foi confirmado: 1 a 11, 13 a 15, 19, 22 a 24, 28 a 31, 35, 36 a 41, 43 a 46, 48, 51 a 56, 57 a 60):
+
+1. **Cap. 47 era "provável imperfeito, baixa": confirmado, é o imperfeito.** Cap. 49 não era "contraste antes x depois": é o **resumo presente, passado e futuro** (o contraste imperfeito x futuro foi interpretação das respostas).
+2. **Cap. 12 não é só "artigos definidos (generalização, gostos)":** é o par *un/une/des* x *le/la/les*. Os **gostos** (*aimer*) estão no **cap. 6**, não no 12.
+3. **Cap. 16 a 20 reorganizados:** 16 = *avoir* + nome **e lugar do adjetivo** (o lugar do adjetivo não estava mapeado); 17 = físico e idade; 18 = *avoir mal à* e *avoir faim/froid*; 19 = conjugação de *avoir*; 20 = *pas le/la/les* e *pas de* (a negação com artigos está no 20, não misturada com *avoir*).
+4. **Cap. 21 é localização** (*à, de, chez, près de, loin de*), não "nacionalidade e origem". A origem (*il est de Rome*) é só um exemplo dentro dele.
+5. **Cap. 25 a 27:** 25 = identificação (*qui est-ce, qu'est-ce que c'est*); 26 = *c'est* x *il est*; 27 = *c'est* + adjetivo. O *il y a* é o 24 (certo).
+6. **Cap. 34 inclui o SUPERLATIVO** (com a comparação de quantidades). Antes a seção 9.2 dava o superlativo só ao D2 (A2). **O GP coloca no A1.**
+7. **Cap. 33-34 sem "plus/moins que com verbos" no título:** a ideia de comparar verbos continua sem confirmação (não aparece nos títulos).
+8. **Cap. 38 traz também *croire* e *voir*** (além de *savoir* x *connaître*); **cap. 41** traz *dire* junto com *faire*; **cap. 42** é a conjugação de *aller* (a preposição de lugar já tinha vindo no 22 e 23, não no 42).
+9. **Cap. 50:** os marcadores são *il y a, pendant, depuis, **dans*** (a dedução dizia *pour*, que não consta).
+10. **Cap. 4 inclui *tu/vous* e *nous/on*** (usos de *on* aparecem aqui, não só em métodos).
+11. **Cap. 30 inclui meses e estações;** o dia e a data estão no cap. 28.
+12. **Cap. 5 junta pergunta simples e *ne... pas*:** a negação **não** está no cap. 7 nem no 19 como tópico novo (aí é só revisão).
+13. **O GP A1 não tem imperativo,** nem passado recente, nem *il faut* como título, nem condicional, nem *où* relativo. O imperativo (e os outros) vêm dos métodos, não desta gramática.
+14. **Estrutura em 8 unidades com bilans;** a seção 4 não registrava isso.
+
+### 13.2 Défi Actuel 2 (Klett): NÃO LIDO
+
+**Não consegui ler o documento.** O Issuu e o site da Klett Sprachen foram bloqueados pelo proxy do ambiente (`issuu.com` e `www.klett-sprachen.de` recusados). A busca na web não achou versão em texto do "scope and sequence" nem da unidade-amostra. **Nada do Défi Actuel 2 foi incorporado às tabelas.** Para ler, preciso do PDF no Drive (baixar do Issuu ou da Klett e colocar na pasta dos livros) ou das páginas "Tableau des contenus" coladas.
+
+O pouco que a busca devolveu (**confiança baixa**, trechos de resultados de busca, não confirmados no documento):
+
+- A Klett Sprachen (editora alemã) lista a série "Défi actuel" com volumes por nível (1 = A1, 2 = A2, 3 = B1, 4 = B2), caderno de exercícios, edição híbrida com acesso digital, e o volume A2 com cerca de 190 páginas e uma **lição introdutória "00"** de revisão.
+- Um artigo da editora diz que cada unidade tem **dois dossiês sobre o mesmo tema**, o que bate com a estrutura "2 dossiês por unidade" do Défi 2 descrita na seção 7.
+- O "scope and sequence" em Issuu que a busca achou é de **outra série** (*Défi Francophone* 1 e 2, da mesma divisão Klett World Languages), com títulos de dossiê que não devem ser usados aqui.
+- **Não consegui confirmar** que o Défi Actuel 2 segue a mesma progressão do Défi 2 (Maison des Langues/Difusión) da seção 7; a ligação entre as séries (adaptação da Klett para outro mercado) é o que a dona informou, mas **não verifiquei**. Portanto: **nenhuma diferença registrada, porque nada foi comparado.** A seção 7 segue como estava (confiança média).
+
+### 13.3 Tabela-síntese: linhas alteradas (⟳ 2026-10-17)
+
+Só as linhas que mudam; as demais das seções 9.1 e 9.2 ficam como estavam. A coluna "Onde aparece" mostra a referência GP corrigida.
+
+**9.1 Comunicação e temas**
+
+| Tópico | Onde aparece (GP novo) | Nível | Convergência | Conf. |
+|---|---|---|---|---|
+| Gostos (*aimer, adorer, détester*) ⟳ | AE 1.3, 3.1, 3.2; D1 2.2; **GP 6** (era 12); CPD 30 | A1 | todos | alta |
+| Descrição física e caráter ⟳ | AE 3.2, 5.3; D1 6.2; VP 4, 8; GP 2-3, **16-17**; CPD 35 | A1 | todos | alta |
+| Corpo, saúde, *avoir mal à* ⟳ | GP **18 (título confirmado)**; demais fontes como antes | A1 básico; A2 | todos | alta |
+| Tempo (clima), meses e estações ⟳ | GP 30 (confirmado, com meses e estações); demais como antes | A1 | todos | alta |
+| Números, data e dia ⟳ | GP 28 (confirmado; inclui "a data e o dia") | A1 | todos | alta |
+
+**9.2 Gramática**
+
+| Tópico | Onde aparece (GP novo) | Nível | Convergência | Conf. |
+|---|---|---|---|---|
+| *être*, *avoir*, *s'appeler* ⟳ | GP 1, 4, **5, 19** (era 1-4, 16-20) | A1 | todos | alta |
+| Artigos definidos e indefinidos ⟳ | GP 10, **12** (confirmado como *un/une/des* x *le/la/les*) | A1 | todos | alta |
+| Partitivos e quantidade ⟳ | GP 31-32 (confirmado) e **20** (*pas de*, *pas le/la/les*) | A1 | todos | alta |
+| Preposições + países e cidades; de lugar ⟳ | GP **21-23** (era 21-23, 42; o 42 é só *aller*) | A1 | todos | alta |
+| *on* (= *nous* e geral) ⟳ | acrescenta **GP 4** (*nous* e *on*) | A1 | todos os métodos e a GP | alta |
+| Imperativo ⟳ | **GP não tem** (confirmado pelo sumário); AE 4.2, 5.2; D1 7.2; GEF 32; GeDD 32; CPD IV; GPI 30; D2 3 | A1 (métodos) | todos os **métodos**; a GP A1 não traz | alta |
+| Comparativo ⟳ | GP **33-34** (confirmado: *plus/aussi/moins... que*; *plus de/moins de/autant de*) | fim do A1 → A2 | todos (D1 não tem) | alta |
+| Superlativo (*le plus, le meilleur*) ⟳ | **GP 34 (novo)**; D2 2; GEF 38; CPD II; GPI 22 | **A1 alto (GP) / A2 (D2)**; antes só A2 | **maioria, com a GP A1 incluindo** | alta |
+| Imperfeito ⟳ | GP **47 (confirmado, sem "?")**, 49; AE 8.3, 9.1; GEF 29; GeDD 25; CPD II; GPI 43; D2 7 | ponte A1→A2 / A2 | todos que vão até A2 | alta |
+| Marcadores de tempo e duração ⟳ | GP **50** (*il y a, pendant, depuis, dans*; sem *pour*) | fim do A1 → A2 | todos | alta |
+| Lugar do adjetivo ⟳ | acrescenta **GP 16**; AE 6.2-6.3, 8.2; GEF 12; GPI 12; D2 8 | **A1** → A2 (a GP já ensina no cap. 16) | todos (D1 não destaca) | alta |
+| Futuro simples ⟳ | GP **48 (confirmado)** | A1 alto (AE, GP) / A2 | maioria (D1 não tem) | alta |
+| Pergunta e negação em geral ⟳ | GP **5, 7, 19** (simples e revisão), 51-52 e 53-54 (confirmados) | A1 / A2 | todos | alta |
+| Verbos irregulares frequentes ⟳ | GP **35-42** (confirmado); inclui *croire, voir* (38), *dire* (41) | A1 | todos | alta |
+| Passé composé (avoir e être) ⟳ | GP **44-46 (confirmado)**; negação e pergunta no passé composé: **GP 54** | fim do A1 | todos | alta |
+| Pronomes *en, y, COD, COI, tônicos* e relativos *qui/que* ⟳ | GP **55-60 (confirmado)**, todos no fim da GP, em ordem *en, y, COD, COI, tônicos, relativos* | A1 alto / A2 | como antes | alta |
+
+### 13.4 Convergências principais: o que muda
+
+- **Convergência 3 (fronteira A1/A2) reforçada:** a GP A1, com **60 capítulos confirmados**, inclui imperfeito (47), futuro simples (48), *en/y*, COI, relativos, negação complexa (53), comparação **e superlativo** (33-34). Ela é "A1 alto" mesmo; o Défi 1 é o A1 "puro". O consenso prático da seção 10 vale, com o **superlativo** a mais na lista "A1 alto / começo do A2".
+- **Convergência 4 (exclusivo do A2) corrigida:** o **superlativo sai da lista de exclusivos do A2** (a GP o põe no A1); continua sendo trabalhado a fundo no D2 (unidade 2).
+- **Convergência 2 (passé composé fecha o A1) confirmada:** GP 44-46 na penúltima unidade; o resto da GP (U7-U8) só acrescenta negação, pergunta, pronomes e relativos.
+- **Nova observação:** a GP A1 **não traz imperativo, passado recente nem *il faut***. Quem precisa dessas funções no A1 as encontra nos métodos (AE, D1, CPD), não na gramática.
+
+### 13.5 Pendências do levantamento (novo estado)
+
+- ~~Grammaire Progressive A1: 55 títulos ainda deduzidos~~: **resolvido**, 60 de 60 (alta; só a numeração de 32 a 34 em média).
+- **Défi Actuel 2 (Klett): não lido** (bloqueio de rede). Entrega opcional da dona: o PDF no Drive.
+- Défi 2 (Maison des Langues): dossiês e *défis* finais continuam não lidos (seção 12.2); o Défi Actuel 2, se lido, poderia cobrir isso se a progressão for a mesma, mas isso só se sabe depois de comparar.
+
+### 13.6 Impacto no 04 (`04-lacunas-e-propostas-fr.md`; não editado)
+
+**A1 revisado**
+
+1. **Item 12 (imperativo, P1, "telas novas no A1-g6", seção 3 e mapa 11):** a fonte "GP" não sustenta; ele continua sustentado por AE 4.2, 5.2 e D1 7.2. A coluna "Fontes" não precisa mudar, mas **não se pode citar a GP** como apoio. Prioridade pode continuar P1.
+2. **Item 3 (A1-g11 Artigos, gênero e plural, fontes "GP 10-12"):** corrigir para **GP 10-13** (13 = contraídos *au/du*). O capítulo 12 é *un/une/des* x *le/la/les*; os **gostos** não pertencem a esta unidade.
+3. **Item 4 (A1-g12 Negação e perguntas, fontes "GP 5, 51-52"):** a GP separa em **5** (simples + *ne... pas*), **51** (lugar, tempo, modo) e **52** (pessoa ou coisa); manter, e **acrescentar GP 19 e 20** (pergunta/negação com *avoir*; *pas de*), que sustentam a negação com artigos (*Je n'ai pas de chat*) na g11/g12.
+4. **Item 1 e 11 (números):** GP 28 junta números para contar, para ordenar **e data/dia**. Sem mudança de proposta; a GP apoia o A1-24 (meses e datas) e o A1-28 (preços).
+5. **Item 14 (A1-g15 Adjetivos, demonstrativos, *c'est* x *il est*):** a GP separa em 2-3 (adjetivo), 15 (demonstrativo), 16 (**lugar do adjetivo**), 25-27 (identificação, *c'est/il est*, *c'est* + adjetivo). **Acrescentar o lugar do adjetivo** como tela da g15 (a GP o põe no A1; o 04 mandava "A1 → A2").
+6. **Item 8 (passé composé antes da hora; A1-g9 só *avoir*, nova g16 *être* e pronominais):** a GP confirma a divisão em 3 capítulos (44 *-er*, 45 irregulares, 46 *être*) e põe a **negação e a pergunta no passé composé (54)** logo adiante. Mantido; a g16 pode citar GP 46 e 54.
+7. **Item 13 (A1-g14 Partitivos e quantidade):** GP 31-32 + **20** (*pas de*). Acrescentar o 20 às fontes.
+8. **Item 21 (Gostos, *adorer*):** a nota *aimer* + infinitivo cita a GP errada se alguém usou "GP 12"; o certo é **GP 6** (*aimer*). Só corrigir a referência.
+9. **Decisão 9 (comparativo A1-g7 fica no A1; "superlativo no A2"):** **muda.** A GP A1 traz o superlativo no capítulo 34. Opções: (a) manter o superlativo no A2 (como o 04 faz hoje) e registrar a divergência; (b) pôr um **superlativo simples** (*le plus grand, le meilleur*) no A1-g7. Recomendação: **(a)**, porque os dois métodos A1 (AE, D1) não trazem o superlativo e o D2 o ensina a fundo; mas decidir com a dona, pois o critério do 04 aceita "GP/VP + um método" para A1 (o D2, método A2, serve de segundo apoio, o que favorece o A2).
+10. **Item 22 (causa, *pourquoi/parce que*) e 16 (desculpas):** sem mudança (a GP não os destaca).
+
+**A2 novo**
+
+11. **A2-g7 Comparativo e superlativo (m3):** o título e o conteúdo continuam; ajustar a fonte para "GP 33-34 (A1) + D2 2". Se a decisão 9(b) for escolhida, a unidade fica só com o **superlativo completo** e a comparação de quantidades.
+12. **Unidades A2 de pronomes (COI, *en*, *y*), futuro simples, imperfeito e relativos:** sem mudança de nível. A GP confirma que são tópicos "A1 alto / começo do A2"; o A2 pode **revisar com input novo** (já é o desenho do 04: ver "rappel" do Défi 3). Citar GP 47, 48, 55-60 nas fontes.
+13. **A2-g5 (tempo, duração e conectores):** a GP 50 só traz *il y a, pendant, depuis, dans*. Manter *en, ça fait... que* e os conectores como conteúdo A2 (nenhuma mudança).
+14. **Negação complexa e *ne... que* (A2):** a GP 53 já ensina *rien, jamais, plus, personne*. No A2 ficam só *aucun*, *ne... que*, *ni... ni* (o 04 deve conferir se o A1 não repete *personne/rien*).
+15. **Défi Actuel 2:** **nenhuma mudança possível**, porque não foi lido. Se a dona colocar o PDF no Drive, reavaliar o mapa do A2 (seção 6.3), principalmente os temas de módulo e o léxico, que hoje são "proposta minha a partir dos temas das fontes".
