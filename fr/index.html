@@ -4644,6 +4644,23 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .public-copies-line span{ font-size:12.5px; color:var(--ink-soft); }
 .public-copies-line.is-locked{ color:var(--ink-soft); font-size:13px; }
 .public-copies-meta{ display:block; font-size:12px; font-weight:400; color:var(--ink-soft); }
+/* Escolher o @ uma vez (111) */
+.uchoice-card{ max-width:440px; }
+.uchoice-body{ padding:22px 22px 20px; }
+.uchoice-title{ margin:0 0 4px; font-size:19px; color:var(--ink); }
+.uchoice-sub{ margin:0 0 16px; font-size:14px; color:var(--ink-soft); }
+.uchoice-label{ display:block; margin:12px 0 6px; font-size:13.5px; font-weight:800; color:var(--ink); }
+.uchoice-input{ width:100%; box-sizing:border-box; }
+.uchoice-user-wrap{ position:relative; }
+.uchoice-at{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-weight:700; pointer-events:none; }
+.uchoice-user{ padding-left:30px; }
+.uchoice-status{ min-height:18px; margin:6px 0 0; font-size:13px; color:var(--ink-soft); }
+.uchoice-status.is-ok{ color:var(--jade); font-weight:700; }
+.uchoice-status.is-bad{ color:var(--error-red); font-weight:700; }
+.uchoice-rules{ margin:4px 0 0; font-size:12.5px; color:var(--ink-soft); }
+.uchoice-warn{ margin:14px 0 12px; padding:10px 12px; border-radius:12px; background:var(--paper-warm); color:var(--ink); font-size:13.5px; line-height:1.45; }
+.uchoice-error:empty{ display:none; }
+@media (max-width:600px){ .uchoice-input{ min-height:44px; font-size:16px; } }
 /* Convite de aluno (077): seção da professora, faixa na Trilha e cartão do convite */
 .tinv-lang{ display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 14px; }
 .tinv-grid{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; align-items:start; }
@@ -6334,6 +6351,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/teacher-panel.js"></script>
 <script src="../shared/painel/painel-ui.js"></script>
 <script src="../shared/teacher-invites.js"></script>
+<script src="../shared/username-choice.js"></script>
 <script src="../shared/mural.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
