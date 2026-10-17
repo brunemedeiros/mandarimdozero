@@ -567,14 +567,14 @@ const LANG_ID = 'fr';
 const CLOZE_MODE_KEY = 'frances_cloze_mode';
 
 
-document.getElementById('cloze-mode-switch').addEventListener('click', () => {
+document.getElementById('cloze-mode-switch').addEventListener('change', () => {
   const next = getClozeMode() === 'type' ? 'choice' : 'type';
   localStorageSafeSet(CLOZE_MODE_KEY, next);
   updateClozeModeSwitch();
 });
 updateClozeModeSwitch();
 
-document.getElementById('feedback-sound-switch').addEventListener('click', () => {
+document.getElementById('feedback-sound-switch').addEventListener('change', () => {
   localStorageSafeSet(FEEDBACK_SOUND_KEY, isFeedbackSoundEnabled() ? '0' : '1');
   updateFeedbackSoundSwitch();
 });
@@ -4945,7 +4945,11 @@ function renderSettingsView(){
 let SETTINGS_SECTION = 'geral';
 function switchSettingsSection(section){
   SETTINGS_SECTION = section;
-  document.querySelectorAll('[data-settings-section]').forEach(btn => btn.classList.toggle('active', btn.dataset.settingsSection === section));
+  document.querySelectorAll('[data-settings-section]').forEach(btn => {
+    const on = btn.dataset.settingsSection === section;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-pressed', String(on));
+  });
   document.getElementById('settings-geral-content').style.display = section === 'geral' ? '' : 'none';
   document.getElementById('settings-notifications-content').style.display = section === 'notifications' ? '' : 'none';
   document.getElementById('settings-export-content').style.display = section === 'export' ? '' : 'none';

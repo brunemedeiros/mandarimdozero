@@ -26,7 +26,7 @@ function isDarkThemeActive(){
 // customizado aqui: o próprio título "Modo escuro" já diz o que é.
 function updateThemePrefSwitch(){
   const btn = document.getElementById('theme-pref-switch');
-  if (btn) btn.setAttribute('aria-checked', isDarkThemeActive() ? 'true' : 'false');
+  if (btn) btn.checked = isDarkThemeActive();
 }
 
 function toggleTheme(){
@@ -36,5 +36,5 @@ function toggleTheme(){
   updateThemePrefSwitch();
 }
 
-document.getElementById('theme-pref-switch')?.addEventListener('click', toggleTheme);
+document.getElementById('theme-pref-switch')?.addEventListener('change', toggleTheme);
 updateThemePrefSwitch();

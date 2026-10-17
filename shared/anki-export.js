@@ -8,16 +8,17 @@
 // pras funções abaixo. Ver languages/{fr,zh}/app.js (`ANKI_EXPORT_CONFIG`).
 let exportSelectedUnit = 'all';
 
+// Configurações > Exportar (Design System do painel): um campo de escolha com
+// "Todas as unidades" + as unidades do curso. Antes era uma grade de botões.
 function renderExportDeckSelect(config){
   const wrap = document.getElementById('export-deck-select');
-  const options = [{id:'all', label:'Todas as unidades'}].concat(config.unitOptions());
-  wrap.innerHTML = options.map(o => `<button class="deck-chip ${exportSelectedUnit===o.id?'active':''}" data-id="${o.id}">${o.label}</button>`).join('');
-  wrap.querySelectorAll('.deck-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      exportSelectedUnit = chip.dataset.id;
-      renderExportDeckSelect(config);
-    });
-  });
+  if (!wrap) return;
+  const options = [{id:'all', label:t('settings.export.allUnits')}].concat(config.unitOptions());
+  if (!options.some(o => o.id === exportSelectedUnit)) exportSelectedUnit = 'all';
+  wrap.innerHTML = `<label class="cfg-campo">${escapeHTML(t('settings.export.unit'))}
+    <select id="export-unit-select">${options.map(o => `<option value="${escapeHTML(o.id)}" ${exportSelectedUnit === o.id ? 'selected' : ''}>${escapeHTML(o.label)}</option>`).join('')}</select>
+  </label>`;
+  wrap.querySelector('select').addEventListener('change', (e) => { exportSelectedUnit = e.target.value; });
 }
 
 function ankiRandId(){
