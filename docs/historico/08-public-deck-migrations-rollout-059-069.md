@@ -399,4 +399,5 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Testes: `tests/escolher-usuario/run.sh` (SQL 22/22) e `tests/escolher-usuario/test_playwright.js` (76/76: fr/zh, claro/escuro,
   celular, site em inglês sem português).
 - Staging: aplicada em 2026-10-17 (simulação com rollback: escolheu, não pede de novo, 2ª escolha e UPDATE direto recusados).
-  Produção: pendente (aguardando a autora).
+  Produção: aplicada em 2026-10-17 a pedido da autora (md5 das 6 funções igual ao Staging; simulação com rollback da
+  conta com @ aleatório: escolheu e deixou de ficar pendente).
