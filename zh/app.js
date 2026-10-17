@@ -3347,8 +3347,8 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     if (STEP_STATE.exerciseAnswered) return;
     // Vocabulário/pinyin com forma dupla (ex: "X / Y") -- qualquer uma das
     // duas conta como resposta completa, não só a string inteira com a barra.
-    const typed = strip(inputEl.value);
-    const forms = acceptedForms(ex.item.p);
+    const typed = strip(slashSpacing(inputEl.value));
+    const forms = acceptedFormsTyped(ex.item.p);
     const ok = forms.some(form => strip(form) === typed);
     finish(ok, !ok && isToneOnlyMiss(typed, forms, strip));
   });
@@ -3576,8 +3576,8 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
       const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
-      const typed = strip(inputEl.value);
-      const forms = acceptedForms(ex.correctBlock.p);
+      const typed = strip(slashSpacing(inputEl.value));
+      const forms = acceptedFormsTyped(ex.correctBlock.p);
       const ok = forms.some(form => strip(form) === typed);
       finish(ok, !ok && isToneOnlyMiss(typed, forms, strip));
     });
@@ -4203,12 +4203,12 @@ function renderClozeCard(mountEl, card, localState, callbacks){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
       mountEl.querySelector('#cloze-review-verify-btn').disabled = true;
-      const typed = strip(inputEl.value);
+      const typed = strip(slashSpacing(inputEl.value));
       // Interação intermediária (verificar) -- muta localState e o
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      const forms = acceptedForms(view.compareAnswerText);
+      const forms = acceptedFormsTyped(view.compareAnswerText);
       localState.wasCorrect = forms.some(form => strip(form) === typed);
       localState.toneOnly = localState.wasCorrect ? false : isToneOnlyMiss(typed, forms, strip);
       renderClozeCard(mountEl, card, localState, callbacks);
@@ -4292,12 +4292,12 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
       mountEl.querySelector('#cloze-review-verify-btn').disabled = true;
-      const typed = strip(inputEl.value);
+      const typed = strip(slashSpacing(inputEl.value));
       // Interação intermediária (verificar) -- muta localState e o
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      const forms = acceptedForms(view.compareAnswerText);
+      const forms = acceptedFormsTyped(view.compareAnswerText);
       localState.wasCorrect = forms.some(form => strip(form) === typed);
       localState.toneOnly = localState.wasCorrect ? false : isToneOnlyMiss(typed, forms, strip);
       renderTypeAnswerCard(mountEl, card, localState, callbacks);

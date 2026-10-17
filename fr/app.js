@@ -3271,7 +3271,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   }
 
   // isCorrect: true | false | 'quase' (só "oe" no lugar de "œ": meio ponto, mostra a forma certa).
-  function finish(isCorrect){
+  function finish(isCorrect, typed){
     const almost = isCorrect === 'quase';
     STEP_STATE.exerciseAnswered = true;
     playFeedbackSound(!!isCorrect);
@@ -3289,7 +3289,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       // A resposta certa já aparece dentro do próprio painel de resultado
       // (answerExplanationHTML mostra ex.item.f) -- sem repetir aqui como um
       // texto solto antes do painel, num estilo diferente.
-      showWrongAnswerPanel(contentEl, ex);
+      showWrongAnswerPanel(contentEl, ex, { attemptHTML: typedAttemptHTML(typed, ex.item.f) });
     }
   }
 
@@ -3301,7 +3301,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     // Vocabulário com forma dupla (ex: "un / une") -- qualquer uma das duas
     // conta como resposta completa, não só a string inteira com a barra.
     const result = lessonTypedAnswerResult(inputEl.value, ex.item.f);
-    finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false);
+    finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false, inputEl.value);
   });
 
   wireDontKnowButton(contentEl, ex, () => {
@@ -3431,7 +3431,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
   }
 
   // isCorrect: true | false | 'quase' (lacuna digitada com "oe" no lugar de "œ": meio ponto, mostra a forma certa).
-  function finish(isCorrect){
+  function finish(isCorrect, typed){
     const almost = isCorrect === 'quase';
     STEP_STATE.exerciseAnswered = true;
     playFeedbackSound(!!isCorrect);
@@ -3445,7 +3445,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
         ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>${clozeFeedbackDetailHTML(ex, true)}`
         : clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex, { attemptHTML: typedAttemptHTML(typed, ex.correctBlock.f) }), 500);
     }
   }
 
@@ -3464,7 +3464,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
       const result = lessonTypedAnswerResult(inputEl.value, ex.correctBlock.f);
-      finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false);
+      finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false, inputEl.value);
     });
   } else {
     contentEl.querySelectorAll('.cloze-option').forEach(btn => {
@@ -5231,6 +5231,23 @@ function conjAnswerViewHTML(given, target, status){
     : o.t === 'missing' ? '<span class="conj-gap"></span>'
     : `<span class="conj-x">${escapeHTML(o.a)}</span>`).join('');
   return `<div class="${cls}" role="img" aria-label="${escapeHTML(t('feedback.label.yourAnswer') + ': ' + given)}"><span class="conj-answer-text">${html}</span>${icon}</div>`;
+}
+
+// "Sua resposta" dos exercícios de digitar da trilha: o que a pessoa digitou, com as letras erradas em
+// vermelho e um traço onde faltou letra (mesmo alinhamento da Conjugação). Cartão com duas formas
+// ("allemand / allemande"): compara com a forma mais parecida, ou com o texto inteiro se ela digitou a barra.
+function typedAttemptHTML(typed, expected){
+  const given = String(typed == null ? '' : typed).replace(/\s*\/\s*/g, ' / ').trim();
+  if (!given) return '';
+  const forms = acceptedForms(expected);
+  const alvos = (given.includes('/') && forms.length > 1) ? [forms.join(' / ')] : (forms.length ? forms : [String(expected || '')]);
+  let best = null;
+  alvos.forEach(a => { const r = conjAlign(given, a); if (!best || r.cost < best.cost) best = r; });
+  const html = best.ops.map(o =>
+    o.t === 'same' ? escapeHTML(o.a)
+    : o.t === 'missing' ? '<span class="conj-gap"></span>'
+    : `<span class="conj-x">${escapeHTML(o.a)}</span>`).join('');
+  return `<div class="typed-attempt">${html}</div>`;
 }
 
 // Texto falado de uma forma: pronome + forma (sem pronome no impératif).
