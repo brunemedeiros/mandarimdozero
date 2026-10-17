@@ -728,3 +728,47 @@ Conferido por busca no 04: **todos os pontos gramaticais do Défi Actuel 2 já a
 Escala: o Défi Actuel 2 tem 8 unidades de 2 dossiês + o dossiê de revisão (16 dossiês + 8 défis, 148 páginas) para o A2 inteiro; o mapa do 04 tem
 10 módulos e 60 unidades, ou seja, ~3,75 unidades do site por dossiê, uma divisão mais fina e coerente com o modelo da trilha (unidades pequenas de 10 a 12
 palavras). **Nenhuma mudança de tamanho é necessária por causa do Défi Actuel 2**; só os 5 acréscimos acima. As **tarefas finais (défis)** dão ideias reais para as atividades finais Premium (04, seção 7): "criar a donnerie da turma", "recueil de remédios de avó", "guia culinário da sua cidade", "inventar uma prova esportiva", "CV de personagem fictício", "entrevista de emprego", "guia de viagem original", "programa de um festival de cinema".
+
+## 15. Atualização de 2026-10-17 (3): Défi Actuel 1, "Tableau des contenus" (prints enviados pela dona)
+
+Fonte: 2 prints do "Tableau des contenus" do **Défi Actuel 1** (versão atualizada do Défi 1, Klett), páginas 6 a 9. Transcrição a olho; confiança **alta** nos
+títulos e nos tópicos; **média** em pontos pequenos. Estrutura: unidade 0 (descoberta) + 8 unidades de 2 dossiês + défi (tarefa final) + fonética + vídeo.
+Rodapé: **Préparation au DELF A1** (pp. 83-84 e 149-150) e **DELF A1** (pp. 156-163): a série declara o livro inteiro como A1.
+
+| Un. | Título | Défi (tarefa final) | Comunicação | Gramática | Léxico | Fonética |
+|---|---|---|---|---|---|---|
+| 0 | Dossier de découverte | | saudar; dizer o nome, se apresentar, apresentar alguém; usar *tu* ou *vous*; pedir ajuda em aula; dizer as instruções; pronunciar os sons do francês | (nenhuma) | saudações; pronomes tônicos; dias da semana; meses; frases úteis de aula; comandos do livro | |
+| 1 | Portrait-robot | fazer o retrato de um país | dizer a identidade; soletrar; apresentar um país; dar uma informação com números; dizer a idade; dizer a profissão | artigos definidos; adjetivos ordinais; *avoir* e *être*; concordância dos nomes de profissão; pronomes tônicos | alfabeto; lugares da cidade; números de 0 a 20; endereço de e-mail; números a partir de 20; profissões | parler en mot phonétique |
+| 2 | D'ici et d'ailleurs | fazer um quiz sobre um país | falar de festas e tradições; fazer perguntas; indicar procedência e destino; se posicionar em relação aos outros; falar de atividades turísticas; exprimir gostos | palavras interrogativas; *quel(le)(s)*; gênero dos nomes de país; *aller* e *venir*; preposições com países e cidades; pronome *on*; verbos em *-er*; *aimer, adorer, détester* + nome / verbo; negação *ne... pas*; artigos indefinidos; *moi aussi, moi non plus* | festas; adjetivos para qualificar um evento; nomes de países; atividades turísticas; lembranças de viagem | entonação da pergunta |
+| 3 | Un air de famille | jogo de adivinhação sobre famílias famosas | falar da família; precisar um laço familiar; dizer o estado civil; indicar a nacionalidade | possessivos; concordância dos adjetivos (1); *c'est* ≠ *il est / elle est*; feminino das nacionalidades | tipos de família; laços; adjetivos de caráter (1); uniões; conectores *et, ou, mais*; estado civil; nacionalidades; *depuis* | liaison obrigatória com [n] (mon ami) |
+| 4 | Du matin ou du soir ? | criar o calendário dos dias preferidos da turma | falar dos ritmos de vida; dos hábitos; dar a hora; indicar a frequência; dar a data; situar no tempo; exprimir a duração | verbos pronominais (*se réveiller, s'habiller*); *faire* e *prendre*; advérbios e locuções de frequência | ações cotidianas; refeições; a hora; *tôt / tard*; momentos do dia; tempo de trabalho; dias, meses e estações; férias e feriados | enchaînement consonantique (tu habites où ?) |
+| 5 | Entre quatre murs | carta de moradias estudantis do seu país | descrever e qualificar uma moradia; falar de um interior; exprimir a possibilidade; dar recomendações | *il y a / il n'y a pas de*; *c'est* + adjetivo; *trop (de)* ≠ *pas assez (de)*; *pouvoir* + inf.; adjetivos de cor; *il faut* + inf.; *devoir* + inf.; *vouloir* + inf. | tipos de moradia; cômodos; adjetivos para descrever; *très, super, hyper*; preposições de localização; móveis; cores | o *e* final mudo |
+| 6 | Entre amis | propor atividades adaptadas a um traço de caráter | falar de lazer; de internet e redes sociais; de férias; descrever o caráter e o físico; fazer, aceitar ou recusar uma proposta | artigos contraídos; pronome *on*; *parce que* e *pour*; concordância dos adjetivos (2); imperativo (1) | lazer; internet e redes sociais; lazer e amizade; adjetivos de caráter (2); o físico | liaison em [z] |
+| 7 | Miam miam ! | apresentar as ações de uma pessoa importante em sua área | gostos e preferências alimentares; apresentar uma receita; contar uma sucessão de fatos no passado; contar um percurso de vida; exprimir a quantidade; fazer uma proposta | artigos partitivos; advérbios de quantidade; *manger* e *boire*; **passé composé**; concordância do particípio; frase negativa no passé composé | refeições; alimentos e famílias; pesos e medidas; continentes; agricultura; marcadores temporais; percurso de vida | o som [y] (du sucre) |
+| 8 | En ville | criar itinerários "afetivos" na cidade | nomear lugares da cidade; indicar um itinerário; estruturar um relato cronológico; qualificar meios de transporte; falar de hábitos de compra; interagir nas lojas; descrever uma roupa | imperativo (2); **pronomes COD**; **pronome *y***; futuro próximo; demonstrativos | lugares da cidade; se orienter; meios de transporte; *prendre, se déplacer, aller*; comércio e serviços; roupas | distinguir [œ] e [e] (le = les) |
+
+### 15.1 Confronto com o mapa de A1 revisado do 04 (seção 11) e com o que já está no site
+
+Conferido por busca no 04 e no 01. O A1 revisado cobre **a maior parte** do Défi Actuel 1; os pontos de atenção:
+
+| Ponto do Défi Actuel 1 | Situação no 04 / site | Recomendação |
+|---|---|---|
+| **Pronomes COD** (un. 8, A1) | o 04 põe como A2-g9 (só uma nota no A1-10) | **mover para o A1** (nova unidade de gramática no fim do módulo "Compras" ou "Lazer"): Défi Actuel 1 e Alter Ego+ 1 o trazem no A1. Decisão da dona. |
+| **Pronome *y*** (un. 8, A1) | A2-g20 | avaliar mover para o A1, junto do COD (só *y* de lugar: *j'y vais*); *y* com *à* + coisa fica no A2 |
+| **Pronome *on*** (un. 2 e 6) | não aparece como ponto de gramática no 04 (só nota de realidade do site) | **acrescentar** (A1-g12 ou A1-g1): *on = nous* é essencial no A1 |
+| **Adjetivos ordinais** (un. 1) | ausente | acrescentar à unidade de números ou de endereço (A1-21/A1-28), poucos itens (*premier, deuxième...*) |
+| ***c'est* ≠ *il est*** (un. 3) | citado no 04 uma vez | confirmar que está no A1-g15 (adjetivos e demonstrativos) |
+| ***moi aussi / moi non plus*** (un. 2) | ausente | pequena: entra em uma unidade de gostos (A1-5 ou A1-19) |
+| ***parce que* / *pour*** (un. 6) | aparece (2 menções) | ok |
+| ***très, super, hyper*** (un. 5) | ausente | pequena: vocabulário de moradia (A1-16/A1-17) |
+| **Preposições com países e cidades** (un. 2) | só como estrutura usada sem ensino | entra na unidade de origem e nacionalidade (A1-g2) |
+| **Fonética:** *liaison* [n] e [z], *enchaînement*, *e* final mudo, [y], [œ]/[e], entonação | só A1-g3 (letras mudas) e as notas | **trilha de fonética**: pares mínimos (E8 do 04) e uma nota de som por unidade, seguindo a ordem do livro |
+| **Adjetivos de caráter e físico** (un. 3, 6) | A1-16 tem descrição física | ok; adjetivos de caráter só no A2 por enquanto: avaliar adiantar uma lista curta (*sympa, timide*) |
+| **Unidade 0 do Défi**: instruções de aula, dias, meses, pronomes tônicos | A1-1, A1-g1 | **instruções de aula** (*écoutez, répétez, lisez*) não aparecem: poderiam ir em uma nota inicial |
+| **Passé composé só na unidade 7 (de 8)** | A1-20 / A1-g9 / A1-g16 | coerente com a recomendação do 04 de deslocar o passé composé para o fim do A1 |
+| **Défis** (tarefas finais): retrato de um país, quiz, jogo de adivinhação, calendário, carta de moradias, atividades por caráter, ações de pessoa importante, itinerários afetivos | atividades finais Premium do 04 (seção 7) | boas inspirações: *quiz sobre um país*, *carta de moradias*, *itinerário afetivo* |
+
+**Resumo do impacto:** (1) COD (e talvez *y*) passam do A2 para o A1; (2) *on*, ordinais, *moi aussi*, *très/super/hyper* e instruções de aula entram como acréscimos pequenos;
+(3) a fonética ganha trilha própria; (4) nenhuma unidade sai do mapa do A1 por causa do Défi Actuel 1; (5) o passé composé no fim do A1 fica reforçado.
+Fontes divergentes (COD no A1 em Défi Actuel 1 e Alter Ego+ 1; COI, *en*, imperfeito e futuro simples no A2 em Défi Actuel): confirmam a zona cinza já decidida pela dona
+("deixar para depois"). Nada disso foi aplicado ao 04; vira ajuste quando a dona responder à lista de decisões.
