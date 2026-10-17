@@ -677,3 +677,54 @@ Só as linhas que mudam; as demais das seções 9.1 e 9.2 ficam como estavam. A 
 13. **A2-g5 (tempo, duração e conectores):** a GP 50 só traz *il y a, pendant, depuis, dans*. Manter *en, ça fait... que* e os conectores como conteúdo A2 (nenhuma mudança).
 14. **Negação complexa e *ne... que* (A2):** a GP 53 já ensina *rien, jamais, plus, personne*. No A2 ficam só *aucun*, *ne... que*, *ni... ni* (o 04 deve conferir se o A1 não repete *personne/rien*).
 15. **Défi Actuel 2:** **nenhuma mudança possível**, porque não foi lido. Se a dona colocar o PDF no Drive, reavaliar o mapa do A2 (seção 6.3), principalmente os temas de módulo e o léxico, que hoje são "proposta minha a partir dos temas das fontes".
+
+## 14. Atualização de 2026-10-17 (2): Défi Actuel 2, "Tableau des contenus" (prints enviados pela dona)
+
+Fonte: 2 prints do "Tableau des contenus" do **Défi Actuel 2** (Klett; edição do mercado anglófono da série Défi), páginas 6 a 9 do livro. Os sites issuu.com e
+klett-sprachen.de estão bloqueados no ambiente, então esta seção é **transcrição dos prints**, feita a olho (confiança **alta** nos títulos e nos tópicos grandes;
+**média** onde o texto estava miúdo, marcado com "?"). Estrutura de cada unidade: 2 dossiês + 1 défi (tarefa final) + cultura e sociedade + comunicação + gramática +
+léxico + cápsula de fonética + vídeo.
+
+| Un. | Título | Défi (tarefa final) | Comunicação (resumo) | Gramática | Léxico |
+|---|---|---|---|---|---|
+| 0 | Dossier de révision | (revisão) | fazer conhecimento e perguntar; falar do cotidiano; situar no tempo e no espaço; trocar em um comércio; contar um percurso de vida; propor, aceitar, recusar | palavras interrogativas; verbos no presente; preposições de lugar; concordância do adjetivo; passé composé | interrogativos; rotina; momentos do dia; frequência e hora; países e continentes; lazer; nacionalidades |
+| 1 | À quoi ça sert ? | criar a "donnerie" da turma | descrever um objeto e sua função; contar um percurso de consumo; descrever hábitos de consumo; comparar elementos | *servir à, permettre de*; passé composé (rappel); pronome relativo *où*; comparação; pronomes demonstrativos; verbo *jeter* | objetos conectados; descrição de objeto (função, forma, cor, matéria); reciclagem; consumo solidário; compras online |
+| 2 | Un comprimé matin, midi et soir | fazer um "recueil" de remédios de avó | falar de saúde e de médicos; explicar uma doença; falar de remédios; falar da medicina antes e hoje; dar conselhos | superlativo; imperfeito; *ne... plus*; pronomes COI | médicos e especialistas; partes do corpo; doenças; estudos de medicina; expressões para aconselhar (*conseiller de, proposer de, recommander de* + infinitivo) |
+| 3 | Je me suis régalé ! | criar um guia culinário da sua cidade | falar de um prato (origem, ingredientes); de uma moda culinária; de hábitos alimentares; recusar e aceitar um prato; expressar uma opinião | pronome *en*; exprimir progressão (*de moins en moins, de plus en plus*); pronomes interrogativos *lequel...*; lugar dos pronomes no imperativo | especialidades locais; modos de cozimento; expressões para recusar um prato; os cinco sentidos; gostos e texturas; expressar opinião; advérbios de intensidade (*un peu, assez, très, trop*) |
+| 4 | En pleine forme | inventar uma prova esportiva | falar do esporte; de projetos futuros; aconselhar ou desaconselhar um esporte; falar de valores do esporte; fazer sugestões; imaginar uma situação | futuro simples; negação *ne... jamais*; condicional presente; exprimir causa (*comme, grâce à*) e consequência (*donc, c'est pour ça, alors*) | esportes; saúde e esporte; os esportes e seus valores; adjetivos de caráter; jogos olímpicos e paralímpicos |
+| 5 | Mention très bien | fazer o CV de um personagem fictício | apresentar seus estudos e formação; falar de projeto futuro; de experiências de estudo; novas formas de aprender; falar do percurso escolar e profissional | exprimir um desejo (*aimer, vouloir, espérer, avoir envie de*); exprimir uma condição com *si*; momentos da ação (*venir de, être en train de*); exprimir a duração (*depuis, pendant, il y a...*) | estudos e tipos de formação; escolarização; situar no futuro (*dans, quand*); projetos futuros; sala de aula; cursos online; CV |
+| 6 | Gagner sa vie | preparar uma entrevista de emprego | trocar sobre iniciativas originais; falar de emoções; de direitos e deveres; preparar uma entrevista de emprego; relatar propostas, conselhos e perguntas | exprimir emoções (*être, se sentir* + adjetivo); exprimir obrigação (*devoir, être obligé / obligatoire*); proibição e permissão (*il est interdit de, permis de*); discurso indireto; imperativo; discurso indireto interrogativo | mundo do trabalho; emoções e sentimentos; interjeições; espaços de trabalho; indústria de jogos; entrevista de emprego |
+| 7 | Ça vaut le détour ! | fazer um guia de viagem original | compartilhar razões de viajar; falar das férias; fazer perguntas; contar uma viagem; falar da preparação; descrever um lugar; exprimir uma restrição | registros de língua na interrogação; alternância passé composé / imparfait; restrição *ne... que*; gerúndio | viagens; tipos de viagem; preparação de viagem; paisagens |
+| 8 | Un chef-d'œuvre | fazer o programa de um festival de cinema | falar de gostos artísticos; propor, aceitar, recusar; apresentar uma série, um filme; falar de gêneros; apresentar um livro; dar opinião | adjetivo *tout / tous / toute(s)*; negações *ne... rien, personne, aucun* + nome | festivais, arte, cultura; expressar apreciação; fazer proposta; falar de filme, série; gêneros literários; dar opinião |
+
+Rodapé do índice: **Préparation au DELF A2** (pp. 83-84 e 149-150) e **DELF A2** (pp. 158-165): a série declara o Défi 2 como o nível A2, com simulado de DELF ao final.
+Cápsulas de fonética (títulos): [s] (consommation); [d] e [t] (dentiste); [ɡ] e a letra g; [b] x [v] (volley-ball?); [ɛ̃] (cinq lycéens); [ʒ] (travail); [ɑ̃] (monument); [œ] (œuvre?).
+
+### 14.1 Confronto com o mapa de A2 do 04 (seção 6.3, gramática A2-g1 a A2-g26)
+
+Conferido por busca no 04: **todos os pontos gramaticais do Défi Actuel 2 já aparecem no mapa do A2**, com estas ressalvas:
+
+| Ponto do Défi Actuel 2 | Onde está no 04 | Observação |
+|---|---|---|
+| imperfeito, passé composé x imperfeito | A2-g1, A2-g3 | ok |
+| superlativo (un. 2), comparação (un. 1) | A2-g7 | no Défi Actuel o superlativo é **A2**, a favor da decisão 9 do 04 (a Grammaire Progressive A1 o traz no A1: fontes divergem, ver 13) |
+| COI (un. 2), *en* (un. 3), relativo *où* (un. 1) | A2-g10, A2-g12, A2-g6 | ok |
+| lugar dos pronomes no imperativo | A2-g13 | ok |
+| futuro simples, condicional presente, *si* + condição, causa e consequência | A2-g15, A2-g11, A2-g16, A2-g24 | ok |
+| *venir de / être en train de*; duração (*depuis, pendant, il y a*) | A2-g2, A2-g5 | ok |
+| obrigação, proibição, permissão | A2-g18 | ok |
+| discurso indireto (declarativo e interrogativo) | A2-g19 | o 04 fica no presente; o Défi vai ao interrogativo: conferir se a g19 cobre *il demande si / ce que* (cobre) |
+| registros de língua na interrogação, *lequel* | A2-g22 | ok |
+| restrição *ne... que*, *rien / personne / aucun / jamais / plus* | A2-g23 | ok |
+| gerúndio | A2-g25 | ok |
+| adjetivo *tout / tous / toute(s)* | A2-g21 | ok |
+| **exprimer un souhait** (*aimer, vouloir, espérer, avoir envie de*) | **não aparece como unidade** | **lacuna a avaliar**: incluir em A2-g24 ou em uma unidade de comunicação ("exprimer un souhait") |
+| **servir à / permettre de** (função de objeto) | não aparece | lacuna pequena: entra na unidade de vocabulário de objetos do A2 |
+| **expressões para aconselhar** (*conseiller de, proposer de, recommander de* + inf.) | só o condicional de conselho (A2-g11) | acrescentar à A2-g11 ou à unidade de saúde |
+| **emoções** (*être / se sentir* + adjetivo) | não aparece como gramática | acrescentar às unidades de emoções e trabalho |
+| **progressão** (*de plus en plus, de moins en moins*) | A2-g14 (*de plus en plus*) | acrescentar *de moins en moins* |
+| verbo *jeter* | Conjugação (fora deste plano) | repassar à sessão de Conjugação |
+
+Escala: o Défi Actuel 2 tem 8 unidades de 2 dossiês + o dossiê de revisão (16 dossiês + 8 défis, 148 páginas) para o A2 inteiro; o mapa do 04 tem
+10 módulos e 60 unidades, ou seja, ~3,75 unidades do site por dossiê, uma divisão mais fina e coerente com o modelo da trilha (unidades pequenas de 10 a 12
+palavras). **Nenhuma mudança de tamanho é necessária por causa do Défi Actuel 2**; só os 5 acréscimos acima. As **tarefas finais (défis)** dão ideias reais para as atividades finais Premium (04, seção 7): "criar a donnerie da turma", "recueil de remédios de avó", "guia culinário da sua cidade", "inventar uma prova esportiva", "CV de personagem fictício", "entrevista de emprego", "guia de viagem original", "programa de um festival de cinema".
