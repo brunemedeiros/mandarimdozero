@@ -50,7 +50,7 @@ async function run(browser, port, lang){
       color: getComputedStyle(document.querySelector('#t1 .emo')).color }), 50));
   });
   check(`${L}: texto continua com o emoji (textContent)`, r.t1 === 'Muito bem 🔥 e ✓', r);
-  check(`${L}: dois ícones no parágrafo (🔥 e ✓)`, r.t1n === 2, r);
+  check(`${L}: só o 🔥 vira ícone; o ✓ fica como texto, na cor do lugar (2026-10-16: o ✓ do Fluent era roxo)`, r.t1n === 1, r);
   check(`${L}: campo de texto e <code> intactos`, r.t2 === '🔥' && r.t3 === 0 && r.t4 === 0, r);
   check(`${L}: emoji fora do mapa fica como está`, r.t5 === 0, r);
   check(`${L}: data-no-emoji-icons respeitado`, r.t6 === 0, r);

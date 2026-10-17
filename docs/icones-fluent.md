@@ -50,3 +50,9 @@ fr/, zh/, shared/ (inclui i18n pt-BR/en), páginas iniciais e modelos de notific
   restantes são iguais na `main` (desafios-progresso, card_variants, content_en, k2c, k2i, fase-j, registro e
   arquivos que dependem do ambiente).
 - Falta: em Admin › Conquistas, trocar o campo livre de emoji por um seletor só com os ícones do mapa.
+
+## Exceção: o ✓ fica como texto (2026-10-16, pedido da autora)
+
+O "heavy check mark" do Fluent (`2714.svg`) é todo roxo e aparecia roxo dentro dos círculos verdes de "feito" (lição
+concluída, dias da sequência, Conjugação). O `✓` (U+2713) saiu do `MAP` e da expressão de `shared/emoji-icons.js`: volta a ser
+texto e herda a cor do lugar (branco nos círculos verdes). O ✅ continua com o ícone do Fluent (quadrado verde, check claro).

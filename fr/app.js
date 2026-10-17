@@ -5325,8 +5325,7 @@ function renderConjSearchList(){
   list.innerHTML = hits.length ? hits.map((h, i) => {
     const other = h.lang === 'fr' ? (VERB_TRANSLATIONS[h.verb] || '') : h.verb;
     return `<li role="option" id="conj-opt-${i}" class="conj-search-opt" data-verb="${escapeHTML(h.verb)}" aria-selected="${i === 0}">
-      ${conjFlagHTML(h.lang)}<span class="conj-opt-word" ${h.lang === 'fr' ? 'lang="fr"' : ''}>${escapeHTML(h.word)}</span>
-      <span class="conj-opt-other" ${h.lang === 'pt' ? 'lang="fr"' : ''}>${escapeHTML(other)}</span></li>`;
+      ${conjFlagHTML(h.lang)}<span class="conj-opt-word" ${h.lang === 'fr' ? 'lang="fr"' : ''}>${escapeHTML(h.word)}${other ? ` <span class="conj-opt-other" ${h.lang === 'pt' ? 'lang="fr"' : ''}>(${escapeHTML(other)})</span>` : ''}</span></li>`;
   }).join('') : `<li class="conj-search-empty" role="presentation">${t('fr.conj.sel.noMatch')}</li>`;
   list.hidden = false;
   input.setAttribute('aria-expanded', 'true');
@@ -5603,6 +5602,24 @@ function normalizeLoose(str){
 
 // Uma instância do módulo por página, criada no primeiro uso (o lang-hooks.js e o módulo já carregaram).
 let _latinaFr = null;
+// Teclado de acentos da Conjugação: só as letras que aparecem nas formas dos verbos da lista (decisão da autora, 2026-10-16),
+// na ordem do teclado das lições e numa fileira só. Calculado da própria lista: verbo novo com outra letra (ex.: "haïr")
+// já entra sozinho. As lições continuam com o teclado completo (frAccentPickerHTML).
+let _conjAccentLetters = null;
+function conjAccentLetters(){
+  if (_conjAccentLetters) return _conjAccentLetters;
+  const used = new Set();
+  Object.values(CONJUGATION_VERBS).forEach(v => Object.values(v.f || {}).forEach(forms => (forms || []).forEach(x => {
+    for (const ch of String(x || '')) used.add(ch);
+  })));
+  const all = [].concat(...LANG_HOOKS.familiaLatina.gruposDeAcentos);
+  _conjAccentLetters = all.filter(ch => used.has(ch));
+  return _conjAccentLetters;
+}
+function conjAccentPickerHTML(){
+  return FamiliaLatina.htmlTecladoDeAcentos([conjAccentLetters()]);
+}
+
 function latinaFr(){
   return _latinaFr || (_latinaFr = FamiliaLatina.criar(LANG_HOOKS.familiaLatina));
 }
@@ -5702,7 +5719,7 @@ function renderConjPracticeStep(){
         </div>`).join('')}
     </div>
     ${alreadyChecked ? '' : `
-      <div class="conj-accents">${frAccentPickerHTML()}</div>
+      <div class="conj-accents">${conjAccentPickerHTML()}</div>
       <div class="conj-actions">
         <button class="btn btn-primary btn-block" id="conj-verify-btn">${t('fr.conj.checkAnswers')}</button>
         <button class="btn btn-secondary" id="conj-hint-btn" title="${t('fr.conj.hintTitle')}">${t('fr.conj.hintShow')}</button>

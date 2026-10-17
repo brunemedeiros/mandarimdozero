@@ -207,3 +207,17 @@ A autora pensou em aposentar a ideia ("estamos criando coisas demais"). Nada foi
 - Grátis x Premium: tudo grátis.
 - Testes: `tests/notificacoes/test_playwright.js` 36/36, `tests/sino-professora` 272/272, painel-alunos 256/256, painel-cartoes 264/264 (novo; fr/zh, claro/escuro, celular), i18n 2032/2032 e 209/209,
   celular 108/108, ícones 43/43, amigos 210/210, modo foco 19/19. `registro` 88/89 igual na `main` (pré-existente).
+
+## Ajustes pedidos pela autora (2026-10-16)
+
+- Conjugação: teclas de acento do mesmo tamanho das da lição (o contêiner `.conj-accents` em flex encolhia a grade até a
+  largura da letra; `.fr-accent-picker` ganhou `width:100%; max-width:360px` dentro dele).
+- Busca de verbos: a tradução vem logo depois do verbo, entre parênteses ("morar (habiter)"), em vez de encostada à direita.
+- Check: o ✓ voltou a ser texto (branco nos círculos verdes); ver `docs/icones-fluent.md`.
+- Testes: Conjugação Playwright 64/66 (2 novas: teclas com largura de toque; busca "comer (manger)" atualizada). As 2 falhas
+  ("resposta: forma certa na lacuna..." e "site em inglês: tradução...") já falhavam antes. "corrigir: erro mostra a forma
+  certa" falha às vezes, conforme o verbo sorteado (ex.: "pouvoir" tem "peux/puis"). Ícones 43/43 (o ✓ deixou de virar ícone).
+- Teclado da Conjugação (decisão da autora, 2026-10-16): só as letras que aparecem nas formas dos verbos da lista, calculadas
+  da própria `CONJUGATION_VERBS` (`conjAccentLetters`), na ordem do teclado das lições e numa fileira só. Hoje são 7
+  (â ç é è ê î û); verbo novo com outra letra entra sozinho. As lições seguem com as 14 (nenhuma faltando no francês do dia a
+  dia; ÿ e æ ficaram de fora por serem raríssimas). Conjugação Playwright 66/68 (as 2 de sempre).
