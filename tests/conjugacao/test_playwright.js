@@ -129,6 +129,9 @@ async function fill(page, wrongIdx){
     L('prática: pronome à esquerda do campo, na mesma linha', lay.labelLeft, lay);
     const keyW = await page.evaluate(() => document.querySelector('.conj-accents .fr-accent-key').getBoundingClientRect().width);
     L('teclas de acento com largura de toque (como na lição), não apertadas', keyW >= 40, keyW);
+    const keys = await page.evaluate(() => { const ks = [...document.querySelectorAll('.conj-accents .fr-accent-key')];
+      return { letters: ks.map(k => k.textContent).join(''), rows: new Set(ks.map(k => Math.round(k.getBoundingClientRect().top))).size }; });
+    L('teclado da Conjugação: só as letras que os verbos usam (2026-10-16), numa fileira só', keys.letters === 'âçéèêîû' && keys.rows === 1, keys);
 
     await fill(page, 3);
     await page.click('#conj-verify-btn');
@@ -161,7 +164,7 @@ async function fill(page, wrongIdx){
     await page.waitForSelector('.conj-tense-box');
     const s1 = await page.evaluate(() => ({ n: CONJ_STATE.verbQueue.length, next: !!document.querySelector('.conj-verb-header.next'),
       bar: document.querySelector('.conj-progress-bar > i').style.width, acc: document.querySelectorAll('.conj-accents .fr-accent-key').length }));
-    check('sessão com 3 verbos, sem "Próximo verbo", barra em 0%, teclas de acento', s1.n === 3 && !s1.next && s1.bar === '0%' && s1.acc >= 10, s1);
+    check('sessão com 3 verbos, sem "Próximo verbo", barra em 0%, teclas de acento', s1.n === 3 && !s1.next && s1.bar === '0%' && s1.acc === 7 /* 2026-10-16: só as letras dos verbos */, s1);
 
     // Acento entra no campo com o cursor; Enter passa para o próximo campo.
     await page.click('.conj-field[data-idx="1"] input');

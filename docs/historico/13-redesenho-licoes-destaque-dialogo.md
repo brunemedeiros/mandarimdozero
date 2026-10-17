@@ -217,3 +217,7 @@ A autora pensou em aposentar a ideia ("estamos criando coisas demais"). Nada foi
 - Testes: Conjugação Playwright 64/66 (2 novas: teclas com largura de toque; busca "comer (manger)" atualizada). As 2 falhas
   ("resposta: forma certa na lacuna..." e "site em inglês: tradução...") já falhavam antes. "corrigir: erro mostra a forma
   certa" falha às vezes, conforme o verbo sorteado (ex.: "pouvoir" tem "peux/puis"). Ícones 43/43 (o ✓ deixou de virar ícone).
+- Teclado da Conjugação (decisão da autora, 2026-10-16): só as letras que aparecem nas formas dos verbos da lista, calculadas
+  da própria `CONJUGATION_VERBS` (`conjAccentLetters`), na ordem do teclado das lições e numa fileira só. Hoje são 7
+  (â ç é è ê î û); verbo novo com outra letra entra sozinho. As lições seguem com as 14 (nenhuma faltando no francês do dia a
+  dia; ÿ e æ ficaram de fora por serem raríssimas). Conjugação Playwright 66/68 (as 2 de sempre).

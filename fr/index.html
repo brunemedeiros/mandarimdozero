@@ -4802,7 +4802,8 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 #view-conjugaison .conj-other-form{ flex-basis:100%; font-weight:600; color:var(--ink-soft); font-size:12.5px; }
 #view-conjugaison .conj-accents{ display:flex; justify-content:center; margin:-6px 0 14px; }
 /* Teclas do mesmo tamanho das da lição (o flex encolhia a grade até a largura da letra). */
-#view-conjugaison .conj-accents .fr-accent-picker{ width:100%; max-width:360px; }
+#view-conjugaison .conj-accents .fr-accent-picker{ width:100%; max-width:360px; grid-template-columns:repeat(auto-fit, minmax(40px, 1fr)); }
+/* Conjugação: só as letras que os verbos usam (hoje 7: é è ê î û â ç), numa fileira só. */
 #view-conjugaison .conj-size-hint{ margin:2px 0 0; font-size:12px; color:var(--ink-soft); }
 #view-conjugaison .conj-size-hint:empty{ display:none; }
 #view-conjugaison .conj-session-result:has(.conj-review){ max-width:560px; }
