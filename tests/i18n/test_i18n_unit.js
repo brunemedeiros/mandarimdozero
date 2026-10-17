@@ -317,6 +317,19 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
       .replace(/<div id="(admin-manage-badge-modal|admin-edit-badge-modal|admin-edit-template-modal|admin-report-detail-modal)" class="app-modal-overlay"[\s\S]*?\n<\/div>\n\n?/g, '') // modais antigos do Admin viraram janelas montadas pela tela
       .replace(/^[ ]*#app(\.sidebar-collapsed)?:is\(\[data-active-tab="teacher-panel"\][^\n]*\n/gm, '')
       .replace(/^[ ]*\/\* Painéis da professora e do Admin ocupam a largura toda[^\n]*\*\/\n/gm, '')
+      // Menu lateral e topbar (commit ab22a6e, 2026-10-15): "Sair da conta" no fim da sidebar, card Status removido, topbar sem caixinhas,
+      // botão de recolher só com ícone. Só estrutura/CSS (os textos novos já estão nas listas acima): sai dos dois lados.
+      .replace(/  #user-menu-btn\{ display:flex; \}\n  \/\* XP some do topbar aqui[\s\S]*?\.stats-pills \.pill\.xp\{ display:none; \}\n/, '')
+      .replace(/  \/\* Conta\/Sair: o pill com o nome saiu[\s\S]*?\.stats-pills \.lang-switcher-btn:hover\{[^}]*\}\n/, '')
+      .replace(/(  \/\* Recolher menu[^\n]*\n)?  \.sidebar-toggle-btn\{[^}]*\}\n  \.sidebar-toggle-btn:hover\{[^}]*\}\n/, '')
+      .replace(/^[ ]*(#app\.sidebar-collapsed \.sidebar-toggle-btn\{|\.sidebar-toggle-icon\{|#app\.sidebar-collapsed \.sidebar-toggle-icon\{|@media \(prefers-reduced-motion: reduce\)\{ \.sidebar-toggle-icon)[^\n]*\n/gm, '')
+      .replace(/\n\n\n(  \/\* Modo foco de lição)/, '\n\n$1')
+      .replace(/^[ ]*\.side-status-row(?: \+ \.side-status-row)?\{[^\n]*\n/gm, '')
+      .replace(/^[ ]*#side-card-missions\{ padding-top:10px; \}\n/m, '')
+      .replace(/^[ ]*\/\* Ranking e Missões do dia sem moldura[^\n]*\n[ ]*#side-card-missions, #side-card-ranking\{[^\n]*\n/m, '')
+      .replace(/    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn"[^>]*>[\s\S]*?<\/button>\n/, '')
+      .replace(/      <button class="tab-btn sidebar-logout-btn"[\s\S]*?<\/button>\n/, '')
+      .replace(/    <div class="side-card" id="side-card-status">\n(      <div[^\n]*<\/div>\n)+    <\/div>\n/, '')
       .replace(' notifications-dropdown painel"', ' notifications-dropdown"')
       .replace('<button type="button" class="outline p-pequeno notifications-mark-all-btn"', '<button class="notifications-mark-all-btn"');
     curClean = gameLook(curClean);
