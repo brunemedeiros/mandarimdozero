@@ -184,6 +184,30 @@ A autora pensou em aposentar a ideia ("estamos criando coisas demais"). Nada foi
   Jogo, com o que a pessoa errou, sem mexer nos Desafios.
 - Os dois botões de áudio num mesmo Field (🔊 + 🎧) foram considerados "realmente muito confusos" pela autora.
 
+## Painel de Notificações (fr e zh, 2026-10-15)
+
+- Bug: avisos de Amigos são gravados uma vez por site (`_friends_notify`, 102: `frances` e `mandarim`) e o painel não
+  filtrava pelo idioma, então cada pedido de amizade aparecia duas vezes (produção, 7 dias: 4 + 4). Lembretes de
+  sequência/revisão do chinês também apareciam no site de francês. Agora a lista, o contador do sino e "Ler todas"
+  filtram por `language_app_key = APP_KEY`; abrir um aviso de Amigos marca a cópia do outro site como lida.
+- Visual: grupos Hoje/Ontem/Antes; ícone num círculo; não lido = fundo leve na cor da marca + ponto (antes tudo ficava
+  rosa com `rgba` fixo); lido = texto mais apagado; cabeçalho fixo ao rolar; o emoji do começo do texto ("📌 Fulana
+  postou...") sai porque o ícone já está à esquerda. "Ler todas" passou a ter i18n (`notif.markAll`).
+- Ícones: todos os emojis dos avisos estão no mapa do Fluent (`shared/emoji-icons.js`); conferido no teste.
+- A bolinha de não lido é um botão (`notification-unread-dot`, "Marcar como lida"): marca só aquele aviso, sem abrir nem fechar
+  o painel (área de toque de 44px no celular). O menu Professora não tem lista própria: o sino é o mesmo em todo o site.
+- Decisão da autora (2026-10-15): versão B, Design System do painel (Pico, já na `main` pelo PR #319). O sino do topo
+  (`#notifications-dropdown.painel`) e o "Avisos dos alunos" do menu Professora (`.tbell-panel.painel`,
+  `shared/teacher-panel.js`, de outra sessão: 105/108) usam `p-itens`/`p-item` (não lido = `p-item--suave`), grupos
+  Hoje/Ontem/Antes e o selo "Nova"/"Novo" (`p-selo--info`) que marca só aquele aviso como lido (área de toque ampliada
+  por `::before`). O sino da professora continua mostrando todos os idiomas (com o selo do idioma); o do topo só o site aberto.
+- `tests/sino-professora`: as 16 verificações "sem a 108" esperavam o sino do topo com avisos de todos os idiomas;
+  atualizadas para o filtro por site (fr: 3 avisos, 2 não lidos; zh: 3 e 3).
+- A autora pediu para descobrir o que mais pode ganhar o Pico: levantamento entregue no chat em 2026-10-15.
+- Grátis x Premium: tudo grátis.
+- Testes: `tests/notificacoes/test_playwright.js` 36/36, `tests/sino-professora` 272/272, painel-alunos 256/256, painel-cartoes 264/264 (novo; fr/zh, claro/escuro, celular), i18n 2032/2032 e 209/209,
+  celular 108/108, ícones 43/43, amigos 210/210, modo foco 19/19. `registro` 88/89 igual na `main` (pré-existente).
+
 ## Ajustes pedidos pela autora (2026-10-16)
 
 - Conjugação: teclas de acento do mesmo tamanho das da lição (o contêiner `.conj-accents` em flex encolhia a grade até a

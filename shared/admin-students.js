@@ -1,20 +1,20 @@
-// ---------- Alunos (admin) -- Fase 1 do sistema de alunos particulares ----------
-// Tela só visível/alcançável pra conta da autora (isAdminUser). Vincula uma
-// conta já existente (por @username) como aluna, num idioma específico,
-// via a tabela teacher_students (shared/roles.js). Sem UI de flashcard
-// ainda -- isso é fase futura, fora do escopo desta entrega (ver CLAUDE.md).
+// ---------- Alunos (painel da professora) ----------
+// Tela da aba "Alunos" no Design System do painel (shared/painel/, classes p-*): quadro geral da turma
+// (indicadores, alerta, busca, tabela com situação) e ficha de cada aluno em página própria.
+// As peças de HTML ficam em shared/teacher-students-ui.js (dado -> string, testadas em Node); este arquivo
+// busca os dados, liga os eventos e abre os diálogos. Vincular aluno (criar vínculo direto) é só da admin;
+// remover vínculo nunca apaga progresso. Desenho aprovado: docs/fase-2-professora/desenho.html.
 //
-// Depende de (mesma posição de shared/admin-badges.js -- antes de app.js):
+// Depende de (antes de app.js, depois de shared/teacher-students-ui.js):
 //   - shared/roles.js            (fetchMyStudents, assignStudentToTeacher, removeStudentLink)
-//   - shared/admin-badges.js     (fetchAllProfiles, resolveProfileByUsername -- reaproveitados)
-//   - shared/student-metrics.js  (fetchTeacherStudentMetrics -- Fase 6)
-//   - shared/toast.js            (showToast)
+//   - shared/admin-badges.js     (fetchAllProfiles -- reaproveitado)
+//   - shared/student-metrics.js  (fetchTeacherStudentOverview, fetchTeacherStudentMetrics)
+//   - shared/teacher-class-logs.js (fetchClassLogs), shared/teacher-panel.js (switchTeacherPanelSection)
+//   - shared/painel/painel-ui.js (PainelUI.confirmar), shared/toast.js (showToast)
 //   - languages/<lang>/app.js    (isAdminUser)
 
-// Fase 6 (ver CLAUDE.md) -- quais vínculos já tiveram o painel de métricas
-// aberto nesta sessão, pra não refazer a chamada RPC a cada re-render (ex:
-// depois de vincular/remover outra aluna). Reseta ao recarregar a página --
-// não precisa persistir, é só cache de sessão.
+// Cache de sessão por vínculo: { overview, metrics }. Evita refazer as RPCs ao voltar para o quadro geral ou
+// ao reabrir uma ficha. "Atualizar dados" e remover vínculo limpam. Só guarda respostas que deram certo.
 const STUDENT_METRICS_CACHE = {};
 
 // 'portugues' de propósito NÃO está em AVAILABLE_LANGUAGES (languages/
@@ -58,165 +58,215 @@ const FLASHCARD_DIRECTION_LANGUAGE_LABELS = {
   portugues: { target: 'português', native: 'inglês' },
 };
 
+const STUDENT_VIEW = {
+  links: [],                       // vínculos ativos da professora (fetchMyStudents)
+  rows: [],                        // linhas do quadro geral
+  filtros: { busca: '', curso: '', soAtencao: false },
+  linkId: null, fichaLang: null,   // ficha aberta
+  token: 0,                        // descarta resposta atrasada de uma tela que já saiu de cena
+  ligado: false,                   // eventos delegados ligados uma vez só
+};
+
+function studentViewWrap(){ return document.getElementById('admin-students-content'); }
+
+// 'portugues' de propósito NÃO está em AVAILABLE_LANGUAGES (languages/index.js) -- só o schema aceita o valor; esta tela
+// pode listá-lo como opção de vínculo porque é a "possibilidade" que a autora pediu, sem site de português ainda.
+function studentLinkAccountsHTML(profiles, links){
+  const linkedByLang = {};
+  links.forEach(s => { if (s.username){ (linkedByLang[s.language_app_key] = linkedByLang[s.language_app_key] || new Set()).add(s.username); } });
+  const optionsFor = (lang) => {
+    const linked = linkedByLang[lang] || new Set();
+    return profiles.filter(p => !linked.has(p.username))
+      .map(p => `<option value="${escapeHTML(p.username)}">@${escapeHTML(p.username)}${p.display_name ? ` — ${escapeHTML(p.display_name)}` : ''}</option>`).join('');
+  };
+  const languages = Object.entries(STUDENT_LANGUAGE_LABELS).map(([key, label]) => `<option value="${key}">${escapeHTML(label)}</option>`).join('');
+  return { optionsFor, options: optionsFor(Object.keys(STUDENT_LANGUAGE_LABELS)[0]), languages };
+}
+
+// Consultas em andamento por vínculo: duas renderizações seguidas (abrir a aba + trocar de seção) não repetem a RPC.
+const STUDENT_OVERVIEW_INFLIGHT = {};
+function studentFetchOverview(l){
+  const c = STUDENT_METRICS_CACHE[l.id];
+  if (c && c.overview) return Promise.resolve(c.overview);
+  if (!STUDENT_OVERVIEW_INFLIGHT[l.id]){
+    STUDENT_OVERVIEW_INFLIGHT[l.id] = fetchTeacherStudentOverview(l.student_id, l.language_app_key).then(ov => {
+      delete STUDENT_OVERVIEW_INFLIGHT[l.id];
+      if (ov && Array.isArray(ov.languages)){ STUDENT_METRICS_CACHE[l.id] = Object.assign(STUDENT_METRICS_CACHE[l.id] || {}, { overview: ov }); return ov; }
+      return null;
+    });
+  }
+  return STUDENT_OVERVIEW_INFLIGHT[l.id];
+}
+
+// Busca o overview de cada aluno com no máximo 5 consultas ao mesmo tempo; usa o cache da sessão.
+async function studentLoadRows(links, onProgress){
+  const out = new Array(links.length); let done = 0; const fila = links.map((_, i) => i);
+  const worker = async () => {
+    while (fila.length){
+      const i = fila.shift(), l = links[i];
+      out[i] = tsuRowData(l, await studentFetchOverview(l));
+      done++; if (onProgress) onProgress(done);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(5, links.length) }, worker));
+  return out;
+}
+
 async function renderAdminStudentsView(){
-  const wrap = document.getElementById('admin-students-content');
+  const wrap = studentViewWrap();
   if (!wrap) return;
   if (!isTeacherUser()){
     wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
-  wrap.innerHTML = loadingHTML();
-
-  // Vínculo direto (sem convite) é só da admin (policy da 076). Toda
-  // professora convida (busca ou link) e o aluno aceita (077, shared/teacher-invites.js).
+  studentViewBind(wrap);
+  const token = ++STUDENT_VIEW.token;
+  STUDENT_VIEW.linkId = null;
   const canLink = typeof isAdminUser === 'function' && isAdminUser();
-  const [students, invites, profiles] = await Promise.all([
-    fetchMyStudents(), fetchMyPendingInvites(), canLink ? fetchAllProfiles() : Promise.resolve([]),
-  ]);
-
-  // Aluno já vinculado some da lista "Conta do aluno" -- mas só pro MESMO
-  // idioma que já tem vínculo: a mesma conta pode ser vinculada de novo para
-  // um idioma DIFERENTE (1 professora por idioma, não por conta).
-  const linkedUsernamesByLang = {};
-  students.forEach(s => {
-    if (!s.username) return;
-    if (!linkedUsernamesByLang[s.language_app_key]) linkedUsernamesByLang[s.language_app_key] = new Set();
-    linkedUsernamesByLang[s.language_app_key].add(s.username);
-  });
-  const usernameOptionsHTMLForLang = (lang) => {
-    const linked = linkedUsernamesByLang[lang] || new Set();
-    return profiles.filter(p => !linked.has(p.username))
-      .map(p => `<option value="${escapeHTML(p.username)}">@${escapeHTML(p.username)}${p.display_name ? ` — ${escapeHTML(p.display_name)}` : ''}</option>`).join('');
-  };
-  const languageOptionsHTML = Object.entries(STUDENT_LANGUAGE_LABELS)
-    .map(([key, label]) => `<option value="${key}">${label}</option>`).join('');
-  const defaultLang = Object.keys(STUDENT_LANGUAGE_LABELS)[0];
-
-  const studentsHTML = students.length ? students.map(s => `
-    <div class="admin-badge-row">
-      <div class="admin-badge-info">
-        <div class="admin-badge-name">@${escapeHTML(s.username || t('admin.common.removedUser'))}${s.display_name ? ` <span class="admin-grant-badge-name">— ${escapeHTML(s.display_name)}</span>` : ''}</div>
-        <div class="admin-badge-desc">${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key} · ${t('admin.students.linkedOn', { date: fmtDate(s.responded_at || s.created_at) })}</div>
-      </div>
-      <button class="admin-badge-delete-btn" data-toggle-metrics="${s.id}" data-metrics-student="${s.student_id}" data-metrics-lang="${s.language_app_key}" title="${t('admin.students.metricsTitle')}">📊</button>
-      <button class="admin-badge-delete-btn" data-remove-link="${s.id}" title="${t('admin.students.removeLinkTitle')}">✕</button>
-    </div>
-    <div class="admin-badge-desc" id="metrics-link-${s.id}" style="display:none; padding:10px 0 14px;"></div>
-  `).join('') : `<p class="profile-empty-note">${t('admin.students.none')}</p>`;
-
-  wrap.innerHTML = `
-    ${teacherInviteSectionHTML()}
-    ${teacherPendingInvitesHTML(invites)}
-    <section class="panel-section">
-      <h3 class="panel-h">${t('admin.students.yourStudents', { n: students.length })}</h3>
-      ${studentsHTML}
-    </section>
-    ${canLink ? `
-    <details class="panel-section tinv-direct">
-      <summary class="panel-h">${t('tinvite.direct.title')}</summary>
-      <p class="panel-hint">${t('tinvite.direct.hint')}</p>
-      <form id="admin-assign-student-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-student-username">${t('admin.students.accountLabel')}</label>
-        <select id="admin-student-username" class="profile-edit-input">
-          <option value="" disabled selected>${t('admin.students.selectAccount')}</option>
-          ${usernameOptionsHTMLForLang(defaultLang)}
-        </select>
-        <label class="profile-edit-label" for="admin-student-language">${t('fieldEditor.field.language')}</label>
-        <select id="admin-student-language" class="profile-edit-input">${languageOptionsHTML}</select>
-        <p class="profile-edit-error" id="admin-assign-student-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-assign-student-btn">${t('admin.students.link')}</button>
-      </form>
-    </details>` : ''}
-  `;
-
+  wrap.innerHTML = tsuLoadingHTML(0, 0);
+  const [links, profiles, invites] = await Promise.all([fetchMyStudents(), canLink ? fetchAllProfiles() : Promise.resolve([]), fetchMyPendingInvites()]);
+  if (token !== STUDENT_VIEW.token) return;
+  STUDENT_VIEW.links = links;
+  if (links.length){
+    wrap.innerHTML = tsuLoadingHTML(0, links.length);
+    STUDENT_VIEW.rows = await studentLoadRows(links, (n) => {
+      const el = wrap.querySelector('[data-tsu-progresso]');
+      if (el && token === STUDENT_VIEW.token) el.textContent = t('students.loading.count', { done: n, total: links.length });
+    });
+    if (token !== STUDENT_VIEW.token) return;
+  } else {
+    STUDENT_VIEW.rows = [];
+  }
+  const accounts = canLink ? studentLinkAccountsHTML(profiles, links) : null;
+  STUDENT_VIEW.accounts = accounts;
+  wrap.innerHTML = tsuGeralHTML(STUDENT_VIEW.rows, STUDENT_VIEW.filtros, canLink, accounts, teacherInviteSectionHTML() + teacherPendingInvitesHTML(invites));
   wireTeacherInviteSection();
+}
 
-  if (canLink){
-    // Reconstrói a lista de contas disponíveis a cada troca de idioma.
-    document.getElementById('admin-student-language').addEventListener('change', (e) => {
-      const usernameSelect = document.getElementById('admin-student-username');
-      const opts = usernameOptionsHTMLForLang(e.target.value);
-      usernameSelect.innerHTML = `<option value="" disabled selected>${t('admin.students.selectAccount')}</option>${opts}`;
-    });
-    document.getElementById('admin-assign-student-form').addEventListener('submit', async (e) => {
+function studentRefreshTable(){
+  const wrap = studentViewWrap(), box = wrap && wrap.querySelector('[data-tabela-alunos]');
+  if (!box) return;
+  box.innerHTML = tsuTableHTML(tsuFilterRows(STUDENT_VIEW.rows, STUDENT_VIEW.filtros), STUDENT_VIEW.filtros);
+}
+
+async function openStudentFicha(linkId){
+  const wrap = studentViewWrap();
+  const link = STUDENT_VIEW.links.find(l => String(l.id) === String(linkId));
+  if (!wrap || !link) return;
+  const token = ++STUDENT_VIEW.token;
+  STUDENT_VIEW.linkId = link.id; STUDENT_VIEW.fichaLang = null;
+  const c = STUDENT_METRICS_CACHE[link.id] = STUDENT_METRICS_CACHE[link.id] || {};
+  if (!c.overview){
+    wrap.innerHTML = tsuLoadingHTML(0, 1);
+    await studentFetchOverview(link);
+    if (token !== STUDENT_VIEW.token) return;
+  }
+  studentRenderFicha();
+  const h = wrap.querySelector('[data-tsu="ficha"] h2'); if (h){ h.tabIndex = -1; h.focus({ preventScroll: true }); }
+  const top = wrap.getBoundingClientRect().top + window.scrollY - 90; window.scrollTo({ top: Math.max(0, top) });
+  // Cartões criados e aulas chegam depois, sem refazer a página inteira.
+  const fill = (sel, html) => { const w = studentViewWrap(), el = w && w.querySelector(sel); if (el && token === STUDENT_VIEW.token) el.innerHTML = html; };
+  const name = tsuName(link);
+  if (c.metrics === undefined){
+    const m = await fetchTeacherStudentMetrics(link.student_id, link.language_app_key);
+    c.metrics = m || null;
+    fill('[data-bloco-criados]', `<header><h3>${escapeHTML(t('students.block.created'))}</h3></header>${tsuCreatedHTML(c.metrics, name)}`);
+  }
+  if (c.logs === undefined){
+    const logs = await fetchClassLogs(link.student_id, link.language_app_key);
+    c.logs = logs || [];
+    fill('[data-bloco-aulas]', `<header><h3>${escapeHTML(t('students.block.classes'))}</h3></header>${tsuClassesHTML(c.logs, link.student_id)}`);
+  }
+  if (c.decks === undefined){
+    // K.10 (078): Decks do aluno, em árvore, só nome e números.
+    c.decks = typeof fetchTeacherStudentDeckCounts === 'function' ? await fetchTeacherStudentDeckCounts(link.student_id, link.language_app_key) : null;
+    fill('[data-bloco-decks]', `<header><h3>${escapeHTML(t('studentDecks.title'))}</h3></header>${tsuDecksHTML(c.decks)}`);
+  }
+}
+
+function studentRenderFicha(){
+  const wrap = studentViewWrap();
+  const link = STUDENT_VIEW.links.find(l => String(l.id) === String(STUDENT_VIEW.linkId));
+  if (!wrap || !link) return;
+  const c = STUDENT_METRICS_CACHE[link.id] || {};
+  wrap.innerHTML = tsuFichaHTML({ link, overview: c.overview || null, metrics: c.metrics, logs: c.logs, decks: c.decks, langKey: STUDENT_VIEW.fichaLang }, true);
+}
+
+async function removeStudentFromFicha(linkId){
+  const link = STUDENT_VIEW.links.find(l => String(l.id) === String(linkId));
+  if (!link) return;
+  const opts = { titulo: t('students.remove.title', { name: tsuName(link) }), descricao: t('students.remove.text'), confirmar: t('students.remove.confirm'), cancelar: t('students.dialog.cancel'), perigo: true };
+  const ok = (window.PainelUI && PainelUI.confirmar) ? await PainelUI.confirmar(opts) : confirm(opts.descricao);
+  if (!ok) return;
+  await removeStudentLink(link.id);
+  delete STUDENT_METRICS_CACHE[link.id];
+  showToast(t('students.removed'));
+  renderAdminStudentsView();
+}
+
+// Eventos delegados no contêiner da aba: ligados uma única vez, valem para toda renderização.
+function studentViewBind(wrap){
+  if (STUDENT_VIEW.ligado) return;
+  STUDENT_VIEW.ligado = true;
+  wrap.addEventListener('click', (e) => {
+    const q = (sel) => e.target.closest(sel);
+    let el;
+    if ((el = q('[data-abrir-aluno]'))) return openStudentFicha(el.dataset.abrirAluno);
+    if (q('[data-voltar-alunos]')){ e.preventDefault(); return renderAdminStudentsView(); }
+    if ((el = q('[data-ir-secao]'))){
       e.preventDefault();
-      const btn = document.getElementById('admin-assign-student-btn');
-      const errorEl = document.getElementById('admin-assign-student-error');
-      errorEl.textContent = '';
-      btn.disabled = true;
-      const result = await assignStudentToTeacher(
-        document.getElementById('admin-student-username').value,
-        document.getElementById('admin-student-language').value
-      );
-      btn.disabled = false;
-      if (!result.ok){ errorEl.textContent = result.error; return; }
-      showToast(t('admin.students.linkedToast', { username: result.target.username }));
-      renderAdminStudentsView();
-    });
-  }
-
-  wrap.querySelectorAll('[data-remove-link]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      if (!confirm(t('admin.students.removeConfirm'))) return;
-      await removeStudentLink(btn.dataset.removeLink);
-      renderAdminStudentsView();
-    });
+      if (el.dataset.irSecao === 'classlogs' && el.dataset.aluno && typeof ADMIN_CLASS_LOGS_STATE !== 'undefined') ADMIN_CLASS_LOGS_STATE.studentIds = new Set([el.dataset.aluno]);   // abre Aulas já filtrada e com o aluno escolhido
+      return switchTeacherPanelSection(el.dataset.irSecao);
+    }
+    if ((el = q('[data-remover-vinculo]'))) return removeStudentFromFicha(el.dataset.removerVinculo);
+    if ((el = q('[data-ficha-idioma]'))){ STUDENT_VIEW.fichaLang = el.dataset.fichaIdioma; return studentRenderFicha(); }
+    if (q('[data-atualizar-alunos]')){ Object.keys(STUDENT_METRICS_CACHE).forEach(k => delete STUDENT_METRICS_CACHE[k]); return renderAdminStudentsView(); }
+    if (q('[data-ver-parados]')){
+      STUDENT_VIEW.filtros.soAtencao = true;
+      const sw = wrap.querySelector('[data-so-atencao]'); if (sw) sw.checked = true;
+      studentRefreshTable(); const tb = wrap.querySelector('[data-tabela-alunos]'); if (tb) tb.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   });
-
-  wrap.querySelectorAll('[data-toggle-metrics]').forEach(btn => {
-    btn.addEventListener('click', () => toggleStudentMetrics(btn));
+  // Filtros mexem só na tabela (nunca refazem o campo em que a pessoa está digitando).
+  wrap.addEventListener('input', (e) => {
+    if (e.target.matches('[data-busca-aluno]')){ STUDENT_VIEW.filtros.busca = e.target.value; studentRefreshTable(); }
+  });
+  wrap.addEventListener('change', (e) => {
+    if (e.target.matches('[data-filtro-curso]')){ STUDENT_VIEW.filtros.curso = e.target.value; studentRefreshTable(); }
+    else if (e.target.matches('[data-so-atencao]')){ STUDENT_VIEW.filtros.soAtencao = e.target.checked; studentRefreshTable(); }
+    else if (e.target.id === 'admin-student-language' && STUDENT_VIEW.accounts){
+      // A mesma conta pode ser vinculada de novo para outro idioma: a lista de contas depende do idioma escolhido.
+      document.getElementById('admin-student-username').innerHTML = `<option value="" disabled selected>${t('admin.students.selectAccount')}</option>${STUDENT_VIEW.accounts.optionsFor(e.target.value)}`;
+    }
+  });
+  wrap.addEventListener('submit', async (e) => {
+    if (e.target.id !== 'admin-assign-student-form') return;
+    e.preventDefault();
+    const btn = document.getElementById('admin-assign-student-btn'), errorEl = document.getElementById('admin-assign-student-error');
+    errorEl.textContent = ''; btn.disabled = true;
+    const result = await assignStudentToTeacher(document.getElementById('admin-student-username').value, document.getElementById('admin-student-language').value);
+    btn.disabled = false;
+    if (!result.ok){ errorEl.textContent = result.error; return; }
+    showToast(t('admin.students.linkedToast', { username: result.target.username }));
+    const dlg = document.getElementById('dlg-vincular-aluno'); if (dlg && dlg.open) dlg.close();
+    renderAdminStudentsView();
   });
 }
 
-
-// Fase 6 + Painel do aluno ampliado (070) -- abre/fecha o painel de um
-// vínculo específico. Busca as DUAS RPCs em paralelo (visão geral 070 +
-// métricas dos cartões da professora 059) só na PRIMEIRA vez que o vínculo
-// é aberto nesta sessão -- STUDENT_METRICS_CACHE evita refazer as chamadas.
-async function toggleStudentMetrics(btn){
-  const linkId = btn.dataset.toggleMetrics;
-  const panel = document.getElementById(`metrics-link-${linkId}`);
-  if (!panel) return;
-
-  if (panel.style.display !== 'none'){
-    panel.style.display = 'none';
-    return;
-  }
-
-  if (!STUDENT_METRICS_CACHE[linkId]){
-    panel.style.display = 'block';
-    panel.innerHTML = 'Carregando painel do aluno...';
-    STUDENT_METRICS_CACHE[linkId] = await fetchStudentPanelData(btn.dataset.metricsStudent, btn.dataset.metricsLang);
-  }
-
-  const cached = STUDENT_METRICS_CACHE[linkId];
-  panel.style.display = 'block';
-  panel.innerHTML = renderStudentPanelHTML(cached.overview, cached.metrics, cached.decks);
-}
-
-// ---------- Painel do aluno ampliado (070) -- helpers puros de render ----------
-// Tudo aqui é string -> string (sem DOM, sem rede), testado em
-// tests/painel-alunos/test_student_panel_unit.js. Todo texto vindo do banco
-// passa por escapeHTML (shared/profile.js).
+// ---------- Helpers puros da ficha (070): rótulos de eventos, títulos de unidade e módulo ----------
+// Tudo aqui é string -> string (sem DOM, sem rede), usado por shared/teacher-students-ui.js e testado em
+// tests/painel-alunos/test_students_ui_unit.js. Todo texto vindo do banco passa por escapeHTML (shared/profile.js).
 
 // Rótulo do histórico de acertos antes de existir dado: o evento
 // 'review_answer' só começa a ser gravado quando esta versão for publicada.
 // Data ESTIMADA de publicação -- ajustar se o deploy acontecer em outro dia.
 const ANSWER_HISTORY_START_LABEL = '05/10/2026';
 
-const STUDENT_PANEL_TAB_LABELS = {
-  path: 'Trilha', review: 'Revisão', profile: 'Perfil', challenges: 'Desafios',
-  conjugaison: 'Conjugação', leaderboard: 'Ranking', progress: 'Progresso',
-  dictation: 'Ditados', 'my-flashcards': 'Meus cartões', settings: 'Configurações',
-  goals: 'Metas', 'support-materials': 'Material de apoio', 'admin-badges': 'Painel de Admin',
-  hanzi: 'Hanzi',
-};
-const STUDENT_PANEL_ACTIVITY_LABELS = {
-  vocab_lesson: 'lição da trilha', unit_checkpoint: 'ponto de verificação',
-  flashcard_review: 'revisão de flashcards', match_game: 'jogo Combinar',
-  speed_review: 'revisão rápida', dictation: 'ditado', conjugation_session: 'conjugação',
-  challenge: 'desafio', hanzi_lesson: 'lição de hanzi', hanzi_review: 'revisão de hanzi',
-};
+// Rótulos da linha do tempo: nomes das abas do app e das atividades (chaves students.ev.*).
+const STUDENT_PANEL_TAB_NAMES = ['path', 'review', 'profile', 'challenges', 'conjugaison', 'leaderboard', 'progress', 'dictation', 'my-flashcards', 'settings', 'goals', 'support-materials', 'admin-badges', 'hanzi'];
+const STUDENT_PANEL_ACTIVITY_NAMES = ['vocab_lesson', 'unit_checkpoint', 'flashcard_review', 'match_game', 'speed_review', 'dictation', 'conjugation_session', 'challenge', 'hanzi_lesson', 'hanzi_review'];
+function studentPanelTabLabel(name){ return STUDENT_PANEL_TAB_NAMES.includes(name) ? t('students.ev.tab.' + name) : name; }
+function studentPanelActivityLabel(name){ return STUDENT_PANEL_ACTIVITY_NAMES.includes(name) ? t('students.ev.act.' + name) : name; }
 
 function studentPanelEsc(v){
   return escapeHTML(v == null ? '' : String(v));
@@ -226,25 +276,11 @@ function studentPanelNum(v){
   return Number.isFinite(n) ? n : 0;
 }
 
-// "hoje"/"ontem"/"N dias atrás"/"sem registro" a partir de 'YYYY-MM-DD'.
-function studentPanelDaysAgoLabel(dateStr){
-  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return 'sem registro';
-  const days = Math.round((Date.parse(todayStr()) - Date.parse(dateStr)) / 86400000);
-  if (days <= 0) return 'hoje';
-  if (days === 1) return 'ontem';
-  return `${days} dias atrás`;
-}
-
 // Lista das últimas N datas locais ('YYYY-MM-DD'), da mais antiga pra hoje.
 function studentPanelLastDays(n){
   const out = [];
   for (let i = n - 1; i >= 0; i--) out.push(dateStrDaysAgo(i));
   return out;
-}
-
-function studentPanelActiveDaysCount(activityDays, n){
-  const log = activityDays && typeof activityDays === 'object' ? activityDays : {};
-  return studentPanelLastDays(n).filter(d => studentPanelNum(log[d]) > 0).length;
 }
 
 // Título de unidade/módulo do SITE ATUAL (UNITS/MODULES de content.js), só
@@ -270,22 +306,22 @@ function studentPanelLangLabel(key){
   return STUDENT_LANGUAGE_LABELS[key] ? STUDENT_LANGUAGE_LABELS[key].replace(' (em breve)', '') : studentPanelEsc(key);
 }
 
-// Texto humano de um evento da linha do tempo.
+// Texto humano de um evento da linha do tempo (HTML seguro: tudo que vem do banco passa por escapeHTML).
 function studentPanelEventLabel(ev){
   const meta = ev && ev.meta && typeof ev.meta === 'object' ? ev.meta : {};
   const name = ev ? ev.name : '';
-  if (ev && ev.type === 'tab_switch') return `Abriu a aba ${studentPanelEsc(STUDENT_PANEL_TAB_LABELS[name] || name)}`;
-  if (ev && ev.type === 'report_submitted') return 'Enviou um relato de problema/sugestão';
-  const what = STUDENT_PANEL_ACTIVITY_LABELS[name] || name;
+  if (ev && ev.type === 'tab_switch') return t('students.ev.openedTab', { tab: studentPanelEsc(studentPanelTabLabel(name)) });
+  if (ev && ev.type === 'report_submitted') return t('students.ev.report');
+  const what = studentPanelEsc(studentPanelActivityLabel(name));
   const unit = meta.unitId != null ? ` (${studentPanelUnitTitle(ev.lang, meta.unitId)})` : '';
-  if (ev && ev.type === 'lesson_start') return `Começou ${studentPanelEsc(what)}${unit}`;
+  if (ev && ev.type === 'lesson_start') return t('students.ev.started', { what, unit });
   if (ev && ev.type === 'lesson_complete'){
     let score = '';
-    if (meta.scorePct != null) score = ` -- ${studentPanelNum(meta.scorePct)}%`;
-    else if (meta.pct != null) score = ` -- ${studentPanelNum(meta.pct)}%`;
-    else if (meta.score != null && name === 'dictation') score = ` -- nota ${studentPanelNum(meta.score)}`;
-    else if (meta.count != null) score = ` -- ${studentPanelNum(meta.count)} cartões`;
-    return `Concluiu ${studentPanelEsc(what)}${unit}${score}`;
+    if (meta.scorePct != null) score = t('students.ev.score.pct', { n: studentPanelNum(meta.scorePct) });
+    else if (meta.pct != null) score = t('students.ev.score.pct', { n: studentPanelNum(meta.pct) });
+    else if (meta.score != null && name === 'dictation') score = t('students.ev.score.dictation', { n: studentPanelNum(meta.score) });
+    else if (meta.count != null) score = t('students.ev.score.cards', { n: studentPanelNum(meta.count) });
+    return t('students.ev.completed', { what, unit, score });
   }
   return `${studentPanelEsc(ev && ev.type)} · ${studentPanelEsc(name)}`;
 }
@@ -301,106 +337,8 @@ function studentPanelPct(correct, total){
   return t > 0 ? Math.round(studentPanelNum(correct) * 100 / t) : null;
 }
 
-// Faixa de 30 quadradinhos (1 por dia) -- reaproveita só tokens já
-// calibrados nos dois temas (--jade / --paper-line).
-function studentPanelActivityStripHTML(activityDays){
-  const log = activityDays && typeof activityDays === 'object' ? activityDays : {};
-  const cells = studentPanelLastDays(30).map(d => {
-    const n = studentPanelNum(log[d]);
-    const bg = n > 0 ? 'var(--jade)' : 'var(--paper-line)';
-    return `<span title="${studentPanelEsc(d)}: ${n} atividade(s)" style="display:inline-block;width:9px;height:9px;margin:1px;border-radius:2px;background:${bg};"></span>`;
-  }).join('');
-  return `<div aria-label="Atividade dos últimos 30 dias" style="line-height:0;margin:4px 0;">${cells}</div>`;
-}
-
-function studentPanelDetailsHTML(title, body){
-  return `<details style="margin-top:6px;"><summary style="cursor:pointer;">${title}</summary><div style="padding:4px 0 4px 12px;">${body}</div></details>`;
-}
-
-// Resumo + detalhes de UM idioma do aluno.
-function studentPanelLanguageHTML(lang, isLinked, showLangHeader){
-  const key = lang && lang.key;
-  const streak = (typeof effectiveStreakFor === 'function')
-    ? effectiveStreakFor(studentPanelNum(lang.streak), lang.lastStudyDay)
-    : studentPanelNum(lang.streak);
-  const ps = lang.progressSummary && typeof lang.progressSummary === 'object' ? lang.progressSummary : null;
-  const levelLine = ps && ps.levelLabel ? `${studentPanelEsc(ps.levelLabel)} · ${studentPanelNum(ps.pct)}%` : 'sem registro';
-  const units = Array.isArray(lang.unitsCompleted) ? lang.unitsCompleted : [];
-  const q = lang.queue && typeof lang.queue === 'object' ? lang.queue : {};
-  const active7 = studentPanelActiveDaysCount(lang.activityDays, 7);
-  const active30 = studentPanelActiveDaysCount(lang.activityDays, 30);
-  const lessons30 = studentPanelLastDays(30).reduce((s, d) => s + studentPanelNum((lang.dailyLessons || {})[d]), 0);
-
-  const header = showLangHeader
-    ? `<div class="admin-badge-name" style="margin-top:8px;">${studentPanelLangLabel(key)}${isLinked ? ' (idioma do vínculo)' : ''}</div>`
-    : '';
-
-  const summary = `
-    <div>Último estudo: <strong>${studentPanelDaysAgoLabel(lang.lastStudyDay)}</strong> · Sequência: <strong>🔥 ${streak}</strong> · XP: <strong>${studentPanelNum(lang.xp)}</strong></div>
-    <div>Nível: <strong>${levelLine}</strong> · Unidades concluídas: <strong>${units.length}</strong> (${studentPanelNum(lang.unitsStarted)} iniciadas)</div>
-    <div>Dias ativos: <strong>${active7} nos últimos 7</strong> · ${active30} nos últimos 30</div>
-    <div>Fila de revisão: <strong>${studentPanelNum(q.due)} devidos</strong> · ${studentPanelNum(q.new)} novos · ${studentPanelNum(q.learning)} aprendendo · ${studentPanelNum(q.review)} em revisão · ${studentPanelNum(q.weak)} fracos (errados 2+ vezes)</div>
-    <div>Cartões próprios do aluno: <strong>${studentPanelNum(lang.ownCardsActive)}</strong> · Revisões feitas no total: ${studentPanelNum(lang.totalReviews)}</div>
-  `;
-
-  const unitsBody = units.length
-    ? `<ul style="margin:0;padding-left:16px;">${units.map(u => `<li>${studentPanelUnitTitle(key, u)}</li>`).join('')}</ul>`
-    : 'Nenhuma unidade concluída ainda.';
-
-  const cps = lang.checkpoints && typeof lang.checkpoints === 'object' ? Object.entries(lang.checkpoints) : [];
-  const cpBody = cps.length
-    ? `<ul style="margin:0;padding-left:16px;">${cps.map(([id, c]) => `<li>${studentPanelModuleTitle(key, id)}: melhor nota <strong>${studentPanelNum(c && c.bestScore)}%</strong>${c && c.completed ? ' ✓' : ''}</li>`).join('')}</ul>`
-    : 'Nenhum ponto de verificação feito ainda.';
-
-  const actBody = `${studentPanelActivityStripHTML(lang.activityDays)}<div>${active30} dias ativos · ${lessons30} lições concluídas nos últimos 30 dias</div>`;
-
-  const dicts = Array.isArray(lang.dictations) ? lang.dictations : [];
-  const dictBody = `
-    <div>Desafios concluídos: <strong>${studentPanelNum(lang.challengesCompleted)}</strong></div>
-    ${dicts.length
-      ? `<ul style="margin:0;padding-left:16px;">${dicts.map(d => `<li>${studentPanelEsc(d.id)}: melhor nota <strong>${studentPanelNum(d.bestScore)}</strong> · ${studentPanelNum(d.attempts)} tentativa(s)</li>`).join('')}</ul>`
-      : '<div>Nenhum ditado feito ainda.</div>'}
-  `;
-
-  return `
-    ${header}
-    ${summary}
-    ${studentPanelDetailsHTML('Unidades concluídas', unitsBody)}
-    ${studentPanelDetailsHTML('Notas dos pontos de verificação', cpBody)}
-    ${studentPanelDetailsHTML('Atividade dos últimos 30 dias', actBody)}
-    ${studentPanelDetailsHTML('Ditados e desafios', dictBody)}
-  `;
-}
-
-function studentPanelTimelineHTML(timeline){
-  const items = Array.isArray(timeline) ? timeline : [];
-  if (!items.length) return 'Nenhuma atividade registrada ainda.';
-  return `<ul style="margin:0;padding-left:16px;">${items.map(ev =>
-    `<li><span style="color:var(--ink-soft);">${studentPanelEsc(studentPanelEventTime(ev.at))}</span> -- ${studentPanelEventLabel(ev)}</li>`
-  ).join('')}</ul>`;
-}
-
-function studentPanelAnswersHTML(answers, lessonScores){
-  const a = answers && typeof answers === 'object' ? answers : {};
-  const l = lessonScores && typeof lessonScores === 'object' ? lessonScores : {};
-  const lessonsLine = studentPanelNum(l.last30Count) > 0
-    ? `<div>Lições e pontos de verificação (30 dias): média <strong>${studentPanelNum(l.last30AvgPct)}%</strong> em ${studentPanelNum(l.last30Count)}</div>`
-    : '';
-  if (!studentPanelNum(a.allTotal)){
-    return `<div>O histórico de acertos nas revisões começa a ser registrado a partir de ${ANSWER_HISTORY_START_LABEL}.</div>${lessonsLine}`;
-  }
-  const p7 = studentPanelPct(a.last7Correct, a.last7Total);
-  const p30 = studentPanelPct(a.last30Correct, a.last30Total);
-  return `
-    <div>Revisões (7 dias): <strong>${p7 === null ? '--' : p7 + '%'}</strong> de acerto em ${studentPanelNum(a.last7Total)} cartões</div>
-    <div>Revisões (30 dias): <strong>${p30 === null ? '--' : p30 + '%'}</strong> de acerto em ${studentPanelNum(a.last30Total)} cartões</div>
-    ${lessonsLine}
-  `;
-}
-
-// Painel completo: visão geral (070) + bloco dos cartões da professora (059).
-// As 3 RPCs do painel 📊 (070, 059 e 078), em paralelo. Também usado pelo
-// botão Analytics do perfil público (shared/public-profile.js).
+// As 3 RPCs do painel de um aluno (070, 059 e 078), em paralelo. Também usado pelo botão Analytics do perfil público
+// (shared/public-profile.js), que mostra o resultado numa janela.
 async function fetchStudentPanelData(studentId, lang){
   const [overview, metrics, decks] = await Promise.all([
     fetchTeacherStudentOverview(studentId, lang),
@@ -410,92 +348,7 @@ async function fetchStudentPanelData(studentId, lang){
   return { overview, metrics, decks };
 }
 
-// K.10: Decks do aluno (Meus Decks + os Decks desta professora) em árvore,
-// com as mesmas colunas da lista de Decks do próprio aluno. Só nome e números.
-function studentPanelDecksHTML(decks){
-  if (!Array.isArray(decks)) return `<p class="profile-empty-note">${t('studentDecks.error')}</p>`;
-  const byParent = new Map();
-  decks.forEach(d => { const k = d.parentId; if (!byParent.has(k)) byParent.set(k, []); byParent.get(k).push(d); });
-  const ids = new Set(decks.map(d => d.id));
-  const roots = decks.filter(d => !ids.has(d.parentId));
-  const ordered = [];
-  const walk = (d, lvl) => { ordered.push([d, lvl]); (byParent.get(d.id) || []).forEach(c => walk(c, lvl + 1)); };
-  roots.forEach(r => walk(r, 0));
-  const hasCards = decks.some(d => d.total > 0);
-  const name = (d) => d.kind === 'personal_root' ? t('deck.myDecks') : d.kind === 'teacher_root' ? t('deck.teacherRoot') : d.name;
-  const num = (n) => n ? `<td>${n}</td>` : '<td class="is-zero">0</td>';
-  return `
-    <div class="student-decks-scroll">
-      <table class="student-decks">
-        <thead><tr>
-          <th scope="col">${t('studentDecks.deck')}</th>
-          <th scope="col">${t('progress.statNew')}</th><th scope="col">${t('progress.statLearning')}</th>
-          <th scope="col">${t('progress.statReview')}</th><th scope="col">${t('progress.statDueNow')}</th>
-        </tr></thead>
-        <tbody>${ordered.map(([d, lvl]) => `
-          <tr class="${lvl === 0 ? 'is-root' : ''}">
-            <th scope="row" style="padding-left:${12 + lvl * 16}px">${escapeHTML(name(d))}</th>
-            ${num(d.new)}${num(d.learning)}${num(d.review)}${num(d.due)}
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>
-    ${hasCards ? '' : `<p class="panel-hint">${t('studentDecks.empty')}</p>`}
-    <p class="panel-hint">${t('studentDecks.hint')}</p>`;
-}
-
+// Corpo da ficha (indicadores, progresso, atividade, fila, cartões criados, respostas, Decks) sem cabeçalho nem Aulas.
 function renderStudentPanelHTML(overview, metrics, decks){
-  let html = '';
-  if (!overview || !Array.isArray(overview.languages)){
-    html += '<p class="profile-empty-note">Não foi possível carregar a visão geral do aluno agora.</p>';
-  } else {
-    const linked = overview.linkedLanguage;
-    const langs = overview.languages;
-    const lastAccess = Array.isArray(overview.timeline) && overview.timeline[0] ? studentPanelEventTime(overview.timeline[0].at) : '';
-    if (lastAccess) html += `<div>Último acesso ao app: <strong>${studentPanelEsc(lastAccess)}</strong></div>`;
-    if (!langs.length){
-      html += '<div>Ainda não há progresso salvo nesta conta.</div>';
-    } else {
-      if (!langs.some(l => l.key === linked)){
-        html += `<div class="profile-edit-hint">Sem progresso em ${studentPanelLangLabel(linked)} -- estudando no site de ${langs.map(l => studentPanelLangLabel(l.key)).join(' e ')}.</div>`;
-      }
-      html += langs.map(l => studentPanelLanguageHTML(l, l.key === linked, langs.length > 1 || l.key !== linked)).join('');
-    }
-    html += studentPanelDetailsHTML('Histórico de acertos', studentPanelAnswersHTML(overview.answers, overview.lessonScores));
-    html += studentPanelDetailsHTML('Linha do tempo (últimas atividades)', studentPanelTimelineHTML(overview.timeline));
-  }
-  html += `<div class="admin-badge-name" style="margin-top:10px;">Cartões que você criou</div>${renderStudentMetricsHTML(metrics)}`;
-  if (decks !== undefined) html += `<div class="admin-badge-name" style="margin-top:14px;">${t('studentDecks.title')}</div>${studentPanelDecksHTML(decks)}`;
-  return html;
-}
-
-// Renderiza só o que a function get_teacher_student_metrics devolve (migration
-// 059, K.6) -- tudo agregado, nada de resposta/cartão individual. Duas unidades,
-// nunca misturadas (docs/K-analytics-contrato.md):
-//   CONTEÚDOS = Notes (contentsX): 1 conteúdo pode gerar vários cartões
-//     (Reverso = 2, Cloze = N). Força é por conteúdo.
-//   CARTÕES = CardInstances (cardsX): Novos/Aprendendo/Para revisar (estado
-//     Review)/Devidos (vencidos, não-Novos).
-// Arquivados são informativos e nunca entram nos totais ativos.
-// Painel ampliado (070): sem cartões da professora NÃO esconde mais a última
-// atividade (antes o retorno antecipado fazia o aluno parecer vazio).
-function renderStudentMetricsHTML(m){
-  if (!m || typeof m.contentsTotal !== 'number'){
-    return '<p class="profile-empty-note">Não foi possível carregar as métricas agora.</p>';
-  }
-  const lastActivityLine = `<div>Última atividade geral da conta: <strong>${studentPanelDaysAgoLabel(m.lastStudyDay)}</strong></div>`;
-  if (!m.contentsTotal && !m.archivedNotes){
-    return `${lastActivityLine}<p class="profile-empty-note">Você ainda não criou nenhum cartão pra este aluno, na aba "📇 Flashcards".</p>`;
-  }
-  const archivedLine = m.archivedNotes
-    ? `<div>Arquivados (fora das contagens acima): <strong>${m.archivedNotes} conteúdos</strong> · ${m.archivedCards} cartões</div>`
-    : '';
-  return `
-    ${lastActivityLine}
-    <div>Conteúdos que você criou pra ele: <strong>${m.contentsTotal} ativos</strong></div>
-    <div>Conteúdos estudados: <strong>${m.contentsStudied} de ${m.contentsTotal}</strong> · ${m.contentsNotStarted} não iniciados</div>
-    <div>Força dos conteúdos: ${m.contentsStrengthNotStarted} não iniciados · <strong>${m.contentsStrengthWeak} fracos</strong> · ${m.contentsStrengthMedium} médios · ${m.contentsStrengthStrong} fortes</div>
-    <div>Cartões gerados desses conteúdos: <strong>${m.cardsTotal}</strong> · ${m.cardsNew} novos · ${m.cardsLearning} aprendendo · ${m.cardsReview} para revisar · ${m.cardsDue} devidos</div>
-    ${archivedLine}
-  `;
+  return tsuFichaHTML({ link: null, overview, metrics, logs: null, decks, langKey: null, bare: true }, false);
 }

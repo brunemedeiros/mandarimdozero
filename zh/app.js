@@ -2861,8 +2861,8 @@ function buildFullSentenceExercises(unit){
 
 // ---------- Tela final "Parabéns" (estilo Busuu) ----------
 function currentStudentName(){
-  if (!CURRENT_USER) return 'Convidado';
-  const full = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || 'Convidado';
+  if (!CURRENT_USER) return t('common.guest');
+  const full = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || t('common.guest');
   return full.split(' ')[0].split('@')[0];
 }
 
@@ -4683,9 +4683,16 @@ const SIDEBAR_COLLAPSE_KEY = 'sidebar_collapsed';
 if (localStorageSafeGet(SIDEBAR_COLLAPSE_KEY) === '1'){
   document.getElementById('app').classList.add('sidebar-collapsed');
 }
+function syncSidebarToggleLabel(){
+  const btn = document.getElementById('sidebar-toggle-btn');
+  const txt = t(document.getElementById('app').classList.contains('sidebar-collapsed') ? 'sidebar.expand' : 'sidebar.collapse');
+  btn.title = txt; btn.setAttribute('aria-label', txt);
+}
+syncSidebarToggleLabel();
 document.getElementById('sidebar-toggle-btn').addEventListener('click', () => {
   const collapsed = document.getElementById('app').classList.toggle('sidebar-collapsed');
   localStorageSafeSet(SIDEBAR_COLLAPSE_KEY, collapsed ? '1' : '0');
+  syncSidebarToggleLabel();
 });
 
 // Popula os campos de Configurações -- roda em QUALQUER entrada na aba
