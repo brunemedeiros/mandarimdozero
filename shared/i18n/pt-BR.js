@@ -118,6 +118,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'settings.pref.sound.title': 'Som de acerto/erro nos exercícios',
   'settings.pref.sound.sub': 'Toca um som curto ao responder cada exercício, além da cor de certo/errado.',
   'settings.export.title': 'Escolha o que exportar',
+  'settings.export.unit': 'Unidade',
+  'settings.export.allUnits': 'Todas as unidades',
   'settings.export.button': 'Gerar arquivo .apkg',
   'settings.pref.cloze.subFr': 'Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).',
   'settings.export.descFr': 'O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.',

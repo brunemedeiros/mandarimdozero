@@ -102,6 +102,8 @@ window.I18N_CATALOG['en'] = {
   'settings.pref.sound.title': 'Correct/incorrect sound in exercises', // ALTA
   'settings.pref.sound.sub': 'Plays a short sound after each answer, in addition to the correct/incorrect color.', // ALTA
   'settings.export.title': 'Choose what to export', // ALTA
+  'settings.export.unit': 'Unit', // ALTA
+  'settings.export.allUnits': 'All units', // ALTA
   'settings.export.button': 'Generate .apkg file', // ALTA
   'settings.pref.cloze.subFr': 'Instead of choosing from options, type the missing word (Clozemaster style).', // ALTA
   'settings.export.descFr': 'The exported deck includes the French word/phrase (with audio you can set up in Anki) and its translation, using the same question/answer pair as in the app.', // MÉDIA

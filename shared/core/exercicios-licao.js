@@ -23,7 +23,7 @@ function getClozeMode(){
 
 function updateClozeModeSwitch(){
   const btn = document.getElementById('cloze-mode-switch');
-  if (btn) btn.setAttribute('aria-checked', getClozeMode() === 'type' ? 'true' : 'false');
+  if (btn) btn.checked = getClozeMode() === 'type';
 }
 
 // Meta diária (plano de estudo) conta separado dos Desafios de hoje -- é uma

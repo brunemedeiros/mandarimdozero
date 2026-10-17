@@ -3702,35 +3702,56 @@ body.hide-pinyin .prompt-pinyin{
 /* Editar perfil: sem o buraco embaixo da foto quando não há erro. */
 #profile-edit-modal .profile-edit-avatar-row{ margin:4px 0 4px; }
 #profile-edit-modal .profile-edit-avatar-error:empty{ display:none; }
-/* ---------- Configurações: passada de design (Geral, Notificações, Exportar) ----------
-   Cada grupo é um painel só, com linhas separadas por traço fino (como "Conta"),
-   em vez de uma caixa solta por preferência. Títulos em tom de frase. */
-#view-settings .section-label{ text-transform:none; letter-spacing:0; font-size:15px; font-weight:800; color:var(--ink); margin:28px 0 10px; }
-#view-settings .settings-card{ box-shadow:var(--shadow-card); }
-#view-settings .settings-more-note{ display:none; }
-#view-settings .pref-row{ border-radius:0; border-bottom-width:0; padding:16px 18px; }
-#view-settings .section-label + .pref-row{ border-top-left-radius:var(--radius); border-top-right-radius:var(--radius); }
-#view-settings .pref-row:not(:has(+ .pref-row)){ border-bottom-width:1px; border-bottom-left-radius:var(--radius); border-bottom-right-radius:var(--radius); box-shadow:var(--shadow-card); }
-#view-settings .pref-row-sub{ max-width:60ch; }
-#view-settings .notif-pref-advanced{ margin-top:22px; }
-#view-settings .notif-pref-advanced summary{ font-size:15px; font-weight:800; color:var(--ink); cursor:pointer; min-height:44px; display:flex; align-items:center; gap:6px; }
-#view-settings .notif-pref-matrix-head{ text-transform:none; letter-spacing:0; font-size:12px; }
-@media (max-width:560px){
-  #view-settings .pref-row{ padding:14px; }
-  #view-settings .pref-row:has(.notif-pref-quiet-hours){ flex-wrap:wrap; }
-  #view-settings .pref-row:has(.notif-pref-quiet-hours) .pref-row-text{ flex-basis:100%; }
+/* ---------- Configurações no Design System do painel (Pico escopado em .painel, 2026-10-17) ----------
+   Abas Geral/Notificações/Exportar = .p-seg; cada grupo = <article> com título; linhas = .p-linha-opcao com
+   interruptor input[role=switch]. As classes antigas (.pref-row etc.) ficam no HTML para os testes e o JS,
+   mas aqui dentro quem desenha é o painel. */
+#view-settings .cfg-pagina{ padding:0; gap:1.1rem; }
+#view-settings .cfg-abas button{ gap:.4rem; }
+#view-settings .cfg-corpo{ display:grid; gap:1rem; }
+#view-settings .cfg-corpo > article{ margin:0; }
+#view-settings .painel .pref-row{ background:none; border:0; border-top:1px solid var(--p-linha); border-radius:0; box-shadow:none; padding:.75rem 0; }
+#view-settings .painel article > header + .pref-row, #view-settings .painel .friends-prefs-box > .friends-pref-row:first-child{ border-top:0; }
+#view-settings .pref-row-text{ flex:1; min-width:0; display:grid; gap:.15rem; }
+#view-settings .pref-row-title, #view-settings .pref-row-sub{ display:block; }
+#view-settings .pref-row-title{ margin:0; font-size:.95rem; font-weight:800; color:var(--p-tinta); }
+#view-settings .pref-row-sub{ max-width:60ch; font-size:.85rem; line-height:1.45; color:var(--p-tinta-suave); }
+#view-settings .cfg-infos{ display:grid; gap:.5rem; }
+#view-settings .p-linha-info strong{ word-break:break-all; }
+#view-settings .painel select{ margin:0; width:auto; }
+#view-settings .notif-pref-quiet-hours{ display:flex; align-items:center; gap:.5rem; flex-shrink:0; font-size:.9rem; color:var(--p-tinta-suave); }
+#view-settings .notif-pref-quiet-hours select{ border-radius:999px; padding:.45rem 2.2rem .45rem 1rem; font-size:.95rem; background-color:var(--p-elevado); color:var(--p-tinta); border:1px solid var(--p-borda-campo); }
+#view-settings .notif-pref-advanced{ margin:.6rem 0 0; border:0; padding:0; }
+#view-settings .notif-pref-advanced summary{ min-height:44px; display:flex; align-items:center; color:var(--p-tinta-suave); font-weight:600; }
+#view-settings .notif-pref-advanced summary::before{ content:none; }
+#view-settings .cfg-matriz{ overflow-x:auto; margin-top:.4rem; }
+#view-settings .cfg-matriz table{ margin:0; }
+#view-settings .cfg-matriz :is(th, td){ text-align:center; padding:.55rem .5rem; }
+#view-settings .cfg-matriz tbody th{ text-align:left; font-weight:600; }
+#view-settings .cfg-matriz input{ margin:0; }
+#view-settings label.pref-row{ width:100%; cursor:pointer; }
+#view-settings .friends-prefs-box{ background:none; border:0; border-radius:0; padding:0; }
+#view-settings .friends-pref-row{ width:100%; margin:0; padding:.75rem 0; font-size:.95rem; color:var(--p-tinta); cursor:pointer; }
+#view-settings .friends-pref-row > span{ flex:1; min-width:0; }
+#view-settings .friends-pref-row input{ width:2.25em; height:1.25em; accent-color:auto; }
+#view-settings .friends-prefs-box .p-descricao{ margin:.6rem 0 0; }
+#view-settings .cfg-exportar{ display:grid; gap:1rem; }
+#view-settings .cfg-campo{ display:grid; gap:.4rem; margin:0; font-weight:600; }
+#view-settings .cfg-campo select{ width:100%; }
+#view-settings .cfg-exportar .p-descricao{ max-width:62ch; }
+#view-settings #export-btn{ margin:0; width:auto; }
+#view-settings .export-status{ margin:0; }
+#view-settings .export-status:empty{ display:none; }
+@media (max-width:600px){
+  #view-settings .cfg-silencio{ flex-wrap:wrap; }
+  #view-settings .cfg-silencio .pref-row-text{ flex-basis:100%; }
+  #view-settings .cfg-silencio .notif-pref-quiet-hours{ width:100%; }
+  #view-settings .cfg-silencio .notif-pref-quiet-hours select{ flex:1; min-height:44px; }
+  #view-settings .cfg-abas button{ min-height:44px; }
+  #view-settings .painel input[role=switch]{ min-height:0; }
+  #view-settings .cfg-matriz :is(th, td){ padding:.5rem .3rem; }
+  #view-settings .cfg-matriz input{ width:1.4rem; height:1.4rem; }
 }
-
-/* Exportar: escolha da unidade como lista legível, alinhada à esquerda. */
-#settings-export-content .export-box{ background:var(--paper); text-align:left; padding:20px; box-shadow:var(--shadow-card); }
-#settings-export-content .export-box .icon{ display:none; }
-#settings-export-content .export-box h3{ font-size:15px; font-weight:800; margin:0 0 12px; }
-#settings-export-content .deck-select{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:6px; justify-content:stretch; }
-#settings-export-content .deck-select > .deck-chip{ text-align:left; border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.3; min-height:44px; }
-#settings-export-content .deck-select > .deck-chip:first-child{ grid-column:1 / -1; justify-self:start; padding-left:16px; padding-right:16px; }
-#settings-export-content .export-box p{ margin:4px 0 16px; max-width:62ch; }
-#settings-export-content #export-btn{ margin:0 !important; }
-#settings-export-content .export-status:empty{ min-height:0; margin:0; }
 /* ---------- Lições: opções de múltipla escolha com o mesmo dourado das outras ----------
    A regra antiga usava --imperial-gold (rosa no fr) e valia também no toque. */
 .exercise-option:not(.correct):not(.incorrect):hover{ border-color:var(--paper-line); transform:none; }
@@ -4752,72 +4773,78 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 
   <!-- ===== CONFIGURAÇÕES ===== -->
   <div class="view" id="view-settings">
-    <div class="path-header">
-      <h2 data-i18n="settings.title">Configurações</h2>
-      <p data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</p>
+    <!-- Configurações no Design System do painel (Pico escopado em .painel), aprovado pela autora em 2026-10-17.
+         Ids e data-settings-section continuam os mesmos: app.js, theme.js e os testes dependem deles. -->
+    <div class="painel">
+    <div class="p-pagina cfg-pagina">
+      <header class="p-cabecalho">
+        <div>
+          <h2 data-i18n="settings.title">Configurações</h2>
+          <span class="p-subtitulo" data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</span>
+        </div>
+      </header>
+      <div class="p-seg cfg-abas" role="toolbar" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
+        <button type="button" class="active" aria-pressed="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
+        <button type="button" aria-pressed="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
+        <button type="button" aria-pressed="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
+      </div>
+      <div id="settings-geral-content" class="cfg-corpo">
+        <article>
+          <header><h3 data-i18n="settings.section.account">Conta</h3></header>
+          <div class="cfg-infos">
+            <p class="p-linha-info"><span data-i18n="settings.account.email">E-mail</span><strong id="settings-email">—</strong></p>
+            <p class="p-linha-info"><span data-i18n="settings.account.provider">Conectado com</span><strong id="settings-provider">—</strong></p>
+          </div>
+        </article>
+        <article>
+          <header><h3 data-i18n="settings.section.preferences">Preferências</h3></header>
+          <label class="pref-row p-linha-opcao">
+            <span class="pref-row-text">
+              <span class="pref-row-title" data-i18n="settings.pref.dark.title">Modo escuro</span>
+              <span class="pref-row-sub" data-i18n="settings.pref.dark.sub">Usa o tema escuro em vez do claro, independente do sistema.</span>
+            </span>
+            <input type="checkbox" role="switch" id="theme-pref-switch" aria-label="Modo escuro" data-i18n-attr="aria-label:settings.pref.dark.title">
+          </label>
+          <label class="pref-row p-linha-opcao">
+            <span class="pref-row-text">
+              <span class="pref-row-title" data-i18n="settings.pref.cloze.title">Sempre digitar no exercício de completar frase</span>
+              <span class="pref-row-sub" data-i18n="settings.pref.cloze.subZh">Em vez de escolher entre opções, digite o pinyin que falta (estilo Clozemaster).</span>
+            </span>
+            <input type="checkbox" role="switch" id="cloze-mode-switch" aria-label="Sempre digitar no exercício de completar frase" data-i18n-attr="aria-label:settings.pref.cloze.title">
+          </label>
+          <label class="pref-row p-linha-opcao">
+            <span class="pref-row-text">
+              <span class="pref-row-title" data-i18n="settings.pref.sound.title">Som de acerto/erro nos exercícios</span>
+              <span class="pref-row-sub" data-i18n="settings.pref.sound.sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</span>
+            </span>
+            <input type="checkbox" role="switch" id="feedback-sound-switch" checked aria-label="Som de acerto/erro nos exercícios" data-i18n-attr="aria-label:settings.pref.sound.title">
+          </label>
+          <div class="pref-row p-linha-opcao">
+            <div class="pref-row-text">
+              <div class="pref-row-title" data-i18n="settings.uiLanguage.title">Idioma da interface</div>
+              <div class="pref-row-sub" data-i18n="settings.uiLanguage.sub">Muda só os textos do app (menus, botões e avisos). Não muda o idioma que você estuda.</div>
+            </div>
+            <select class="review-settings-select" id="ui-language-select" aria-label="Idioma da interface" data-i18n-attr="aria-label:settings.uiLanguage.title">
+              <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+              <option value="en" lang="en">English</option>
+            </select>
+          </div>
+          <div id="my-courses" class="pref-row" style="display:none; flex-direction:column; align-items:stretch; gap:8px;"></div>
+        </article>
+      </div>
+      <div id="settings-notifications-content" class="cfg-corpo" style="display:none;"></div>
+      <div id="settings-export-content" class="cfg-corpo" style="display:none;">
+        <article>
+          <header><h3 data-i18n="settings.export.title">Escolha o que exportar</h3></header>
+          <div class="cfg-exportar">
+            <div id="export-deck-select"></div>
+            <p class="p-descricao" data-i18n="settings.export.descZh">O baralho exportado inclui pinyin, caractere e tradução em cada cartão, com o mesmo par pergunta/resposta usado aqui no app.</p>
+            <div><button type="button" id="export-btn" data-i18n="settings.export.button">Gerar arquivo .apkg</button></div>
+            <div class="export-status" id="export-status"></div>
+          </div>
+        </article>
+      </div>
     </div>
-    <div class="leaderboard-tabs" role="tablist" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
-      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
-    </div>
-    <div id="settings-geral-content">
-      <div class="section-label" data-i18n="settings.section.account">Conta</div>
-      <div class="settings-card">
-        <div class="settings-row">
-          <div class="settings-row-label" data-i18n="settings.account.email">E-mail</div>
-          <div class="settings-row-value" id="settings-email">—</div>
-        </div>
-        <div class="settings-row">
-          <div class="settings-row-label" data-i18n="settings.account.provider">Conectado com</div>
-          <div class="settings-row-value" id="settings-provider">—</div>
-        </div>
-      </div>
-      <p class="settings-more-note" data-i18n="settings.account.moreSoon">Mais opções de conta em breve.</p>
-      <div class="section-label" data-i18n="settings.section.preferences">Preferências</div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.pref.dark.title">Modo escuro</div>
-          <div class="pref-row-sub" data-i18n="settings.pref.dark.sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
-        </div>
-        <button class="pref-switch" id="theme-pref-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
-      </div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.pref.cloze.title">Sempre digitar no exercício de completar frase</div>
-          <div class="pref-row-sub" data-i18n="settings.pref.cloze.subZh">Em vez de escolher entre opções, digite o pinyin que falta (estilo Clozemaster).</div>
-        </div>
-        <button class="pref-switch" id="cloze-mode-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
-      </div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.pref.sound.title">Som de acerto/erro nos exercícios</div>
-          <div class="pref-row-sub" data-i18n="settings.pref.sound.sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
-        </div>
-        <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
-      </div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.uiLanguage.title">Idioma da interface</div>
-          <div class="pref-row-sub" data-i18n="settings.uiLanguage.sub">Muda só os textos do app (menus, botões e avisos). Não muda o idioma que você estuda.</div>
-        </div>
-        <select class="review-settings-select" id="ui-language-select" aria-label="Idioma da interface" data-i18n-attr="aria-label:settings.uiLanguage.title" style="width:auto; flex-shrink:0;">
-          <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
-          <option value="en" lang="en">English</option>
-        </select>
-      </div>
-      <div id="my-courses" class="pref-row" style="display:none; flex-direction:column; align-items:stretch; gap:8px;"></div>
-    </div>
-    <div id="settings-notifications-content" style="display:none;"></div>
-    <div id="settings-export-content" style="display:none;">
-      <div class="export-box">
-        <div class="icon">📦</div>
-        <h3 data-i18n="settings.export.title">Escolha o que exportar</h3>
-        <div class="deck-select" id="export-deck-select"></div>
-        <p data-i18n="settings.export.descZh">O baralho exportado inclui pinyin, caractere e tradução em cada cartão, com o mesmo par pergunta/resposta usado aqui no app.</p>
-        <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;" data-i18n="settings.export.button">Gerar arquivo .apkg</button>
-        <div class="export-status" id="export-status"></div>
-      </div>
     </div>
   </div>
 

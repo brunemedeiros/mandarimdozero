@@ -1170,11 +1170,12 @@ async function loadFriendsPrefs(){
   if (!box) return;
   if (error){ console.error('Erro ao carregar preferências de amigos:', error); box.innerHTML = `<p class="profile-edit-error">${t('friends.prefs.error')}</p>`; return; }
   const cur = data || {};
+  // Interruptores no Design System do painel (Configurações > Notificações, bloco Amigos).
   box.innerHTML = FRIENDS_PREF_FIELDS.map(f => `
-    <label class="friends-pref-row">
-      <input type="checkbox" data-friends-pref="${f.key}" ${cur[f.key] === false ? '' : 'checked'}>
+    <label class="friends-pref-row p-linha-opcao">
       <span>${escapeHTML(f.label())}</span>
-    </label>`).join('') + `<p class="profile-edit-hint">${t('friends.prefs.hint')}</p>`;
+      <input type="checkbox" role="switch" data-friends-pref="${f.key}" ${cur[f.key] === false ? '' : 'checked'}>
+    </label>`).join('') + `<p class="profile-edit-hint p-descricao">${t('friends.prefs.hint')}</p>`;
   if (box.dataset.friendsPrefsWired !== '1'){
     box.dataset.friendsPrefsWired = '1';
     box.addEventListener('change', (e) => {
