@@ -279,6 +279,32 @@ aprovados continuam aprovados. Efeito visível: a porcentagem do módulo cai um 
 
 ---
 
+### 2.11 Garantias permanentes (pedido da dona, 2026-10-17: "uma estrutura, não um remendo")
+
+A dona não quer só consertar o problema de hoje: quer poder **alterar, adicionar e remover unidades quando quiser, sem afetar os alunos**.
+O desenho 2.3 dá a base (identidade do item separada da posição). Para virar estrutura permanente, a Etapa 0 passa a incluir mais três peças:
+
+1. **Princípio:** *o cartão é identificado pelo item, nunca pelo lugar.* Unidade, módulo, nível e lição são só "prateleiras" onde os itens são
+   expostos; mexer nas prateleiras (criar, apagar, reordenar, trocar de nível) não toca em nenhum id. Regra escrita no cabeçalho do
+   `content.js`, em `.claude/rules/conteudo-trilha.md` e na skill de conteúdo.
+2. **Livro-razão de ids publicados (`fr/published_ids.json`) + teste que bloqueia o merge.** Toda vez que um conteúdo vai ao ar, o script grava
+   todos os ids existentes. O teste `tests/curriculo-ids/test_ids_publicados.js` falha se algum id que já foi publicado **sumiu** sem estar
+   (a) no conteúdo, (b) em `STUDY_KEY_MERGES` ou (c) em `STUDY_RETIRED_KEYS`. Isso é a garantia automática: ninguém, nem eu nem outra sessão,
+   consegue apagar ou renomear um item por engano e quebrar o histórico de um aluno. Vale também para unidades, módulos e lições
+   (`UNIT_IDS`, `MODULE_IDS`).
+3. **Camadas de tradução por chave desde a Etapa 0** (hoje: por posição, 2.3 item 12). O texto em português (`layer.js`) e em inglês
+   (`content.en.js`) passam a ser indexados pela chave `k`, não pela posição. Assim reordenar ou inserir um item no meio não desalinha
+   tradução nenhuma, e o app de português e qualquer idioma futuro já nascem assim. (Custo: um passo a mais na Etapa 0, mas evita um script de
+   sincronização para sempre.)
+4. **O que nenhum sistema resolve sozinho (e é bom que assim seja):** se a **mudança é de sentido** (trocar a palavra ensinada por outra),
+   o histórico do aluno **não deve** passar para o item novo; por isso é um item novo com chave nova. Só correção do mesmo sentido mantém
+   o histórico. A decisão "é o mesmo item ou outro?" fica registrada no `ops.json`, revisável pela dona.
+5. **Versão do currículo** (`CURRICULUM_VERSION`) gravada em cada bloco de progresso: se um dia uma mudança precisar de migração, sabemos
+   exatamente quais alunos já a receberam.
+
+Resultado para a dona: criar uma unidade, apagar uma unidade, mover palavras entre unidades, trocar a ordem das lições e reescrever frases
+são operações comuns de conteúdo, com teste automático que impede perda de progresso.
+
 ## 3. FALTAS no A1 (priorizadas, v2)
 
 P0c = P0 **confirmado pela dona**; P0 = proposto; P1 = núcleo A1 que falta; P2 = ajuste. Coluna "Operação" usa o vocabulário da Etapa 0.
