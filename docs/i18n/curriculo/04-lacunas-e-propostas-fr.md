@@ -63,6 +63,14 @@ deixam de ser "A1+" e passam a **A2**; C40 (reclamar, desculpar-se) passa a **fi
 "discurso indireto no presente = A2, no passado = B1" e "*si* + presente/futuro = A2, *si* + imperfeito = B1" (`02`, 12.3); a linha da
 Conjugação (v1, 2.6) sai deste documento.
 
+### 0.1 Decisões da dona de 2026-10-17 (depois da leitura do Défi Actuel 1 e 2; ainda não aplicadas ao corpo do documento)
+
+1. **Pronomes: COD, COI, *y* e *en* ficam TODOS no A2** (COD no A2-g9, COI no A2-g10, *en* no A2-g12, *y* no A2-g20: o mapa já está assim; a sugestão de mover o COD para o A1 (`02`, 15.1) está **recusada**). O A1 só fala deles em nota de realidade, sem ensino (ex.: *je la prends*).
+2. **A1 = só *futur proche* como futuro; *passé composé* fecha o A1** e basta. Todo o resto (futuro simples, imperfeito, condicional, COI, *en*, relativos) é A2. Isso confirma as decisões 1, 2 e 24 já resolvidas.
+3. **Fonética:** uma nota de som por unidade pode ser coisa demais, mas o tema é importante: **explorar** formatos (trilha própria, módulo, pares mínimos, integração aos Desafios) em `06-fonetica-trilha.md` antes de decidir.
+4. **Atividades finais estilo *défi*:** explorar com sugestões, propostas, melhorias e adaptação ao ambiente virtual do site em `07-atividades-finais-defi.md`.
+5. **Acréscimos pequenos ao A1** vindos do Défi Actuel 1 (`02`, 15.1: *on*, ordinais, *moi aussi / moi non plus*, *très/super/hyper*, instruções de aula) e **5 acréscimos ao A2** do Défi Actuel 2 (`02`, 14.1: desejo, *servir à / permettre de*, expressões para aconselhar, emoções, *de moins en moins*) continuam **propostas**, a aprovar na lista de decisões.
+
 ---
 
 ## 1. Critérios (atualizados)
