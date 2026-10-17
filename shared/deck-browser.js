@@ -315,7 +315,7 @@ function openReviewSettingsModal(){
   overlay.className = 'app-modal-overlay';
   overlay.style.zIndex = 'calc(var(--z-modal-backdrop) - 1)';
   overlay.innerHTML = `
-    <div class="app-modal deck-window deck-window-sm review-settings-modal" role="dialog" aria-modal="true" aria-labelledby="review-settings-modal-title">
+    <div class="app-modal deck-window painel deck-window-sm review-settings-modal" role="dialog" aria-modal="true" aria-labelledby="review-settings-modal-title">
       <div class="app-modal-header">
         <h3 id="review-settings-modal-title">${escapeHTML(t('review.deck.settings'))}</h3>
         <button type="button" class="app-modal-close" data-review-settings-close aria-label="${escapeHTML(t('common.close'))}">✕</button>
@@ -731,12 +731,12 @@ async function openAddCardModal(opts){
   // podem abrir por cima desta; acima do Painel.
   overlay.style.zIndex = 'calc(var(--z-modal-backdrop) - 1)';
   overlay.innerHTML = `
-    <div class="app-modal deck-window add-card-modal" role="dialog" aria-modal="true" aria-labelledby="add-card-modal-title">
+    <div class="app-modal deck-window painel add-card-modal" role="dialog" aria-modal="true" aria-labelledby="add-card-modal-title">
       <div class="app-modal-header">
         <h3 id="add-card-modal-title">${escapeHTML(t('review.deck.addCard'))}</h3>
         <button type="button" class="app-modal-close" data-add-card-close aria-label="${escapeHTML(t('common.close'))}">✕</button>
       </div>
-      <div class="app-modal-body" id="add-card-modal-body"><p class="profile-edit-hint">${escapeHTML(t('review.deck.loading'))}</p></div>
+      <div class="app-modal-body p-editor" id="add-card-modal-body"><p class="profile-edit-hint">${escapeHTML(t('review.deck.loading'))}</p></div>
     </div>`;
   document.body.appendChild(overlay);
   overlay.querySelector('[data-add-card-close]').addEventListener('click', closeAddCardModal);
@@ -955,7 +955,7 @@ function deckPanelMount(){
   overlay.className = 'app-modal-overlay deck-panel-overlay';
   overlay.style.zIndex = 'calc(var(--z-modal-backdrop) - 2)';
   overlay.innerHTML = `
-    <div class="app-modal deck-window deck-panel-modal" role="dialog" aria-modal="true" aria-labelledby="deck-panel-title">
+    <div class="app-modal deck-window painel deck-panel-modal" role="dialog" aria-modal="true" aria-labelledby="deck-panel-title">
       <div class="deck-panel-head">
         <h3 id="deck-panel-title">${escapeHTML(t('review.deck.browse'))}</h3>
         <input type="search" class="profile-edit-input deck-panel-search" data-panel-search placeholder="${escapeHTML(t('review.panel.searchPlaceholder'))}" aria-label="${escapeHTML(t('review.panel.searchAria'))}">
@@ -972,7 +972,7 @@ function deckPanelMount(){
           <div class="deck-panel-list" data-panel-list role="listbox" aria-label="${escapeHTML(t('review.panel.listAria'))}"></div>
           <p class="profile-edit-hint deck-panel-count" data-panel-count></p>
         </section>
-        <section class="deck-panel-editor" data-panel-editor aria-label="${escapeHTML(t('review.panel.editorAria'))}"></section>
+        <section class="deck-panel-editor p-editor" data-panel-editor aria-label="${escapeHTML(t('review.panel.editorAria'))}"></section>
       </div>
     </div>`;
   document.body.appendChild(overlay);

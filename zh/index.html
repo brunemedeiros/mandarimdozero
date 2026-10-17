@@ -3645,6 +3645,75 @@ body.hide-pinyin .prompt-pinyin{
 .deck-delete-confirm{ background:var(--error-red, var(--seal-red)); color:var(--on-vivid); border:1px solid var(--error-red, var(--seal-red)); }
 .deck-delete-confirm:hover{ filter:brightness(1.06); }
 .deck-overview-danger{ color:var(--error-red, var(--seal-red)); }
+/* ---------- Janelas da Revisão no Design System do painel (Pico escopado em .painel, 2026-10-17) ----------
+   Configurar, Adicionar cartão, Painel e Exportar. Prévia aprovada pela autora: visual B, campo do cartão sem a
+   "ficha pautada" (igual ao editor de Criar cartão da Professora, .p-editor). As regras .deck-window acima continuam
+   valendo para o que não é redesenhado aqui. */
+/* Janela */
+.app-modal.deck-window.painel{ background:var(--p-elevado); color:var(--p-tinta); border:1px solid var(--p-linha); border-radius:var(--p-raio); box-shadow:var(--p-sombra), 0 16px 48px color-mix(in srgb, var(--p-tinta) 18%, transparent); font-family:var(--font-body); }
+.deck-window.painel :is(.app-modal-header, .deck-panel-head){ background:transparent; border-bottom:1px solid var(--p-linha); padding:1rem 1.25rem; gap:.75rem; }
+.deck-window.painel :is(.app-modal-header, .deck-panel-head) h3{ margin:0; font-size:1.1rem; font-weight:800; color:var(--p-tinta); }
+.deck-window.painel .app-modal-body{ padding:1.1rem 1.25rem 1.25rem; }
+/* Fechar: X discreto, como o rel=prev do Pico */
+.deck-window.painel button.app-modal-close{ width:2.25rem; height:2.25rem; min-height:0; margin:0; padding:0; flex:none; display:inline-grid; place-items:center; border:0; border-radius:8px; background:transparent; color:var(--p-tinta-suave); box-shadow:none; font-size:1rem; line-height:1; }
+.deck-window.painel button.app-modal-close:hover{ background:var(--p-superficie); color:var(--p-tinta); }
+/* Rótulos e textos de apoio */
+.deck-window.painel :is(label, .profile-edit-label){ font-size:.85rem; font-weight:700; color:var(--p-tinta); }
+.deck-window.painel .profile-edit-hint{ color:var(--p-tinta-suave); font-size:.85rem; }
+.deck-window.painel .section-label{ text-transform:none; letter-spacing:0; font-size:.95rem; font-weight:800; color:var(--p-tinta); }
+.deck-window.painel :is(select, input:not([type=checkbox]):not([type=radio]), textarea){ margin-bottom:0; }
+/* Configurar: linha rótulo x seleção */
+.deck-window.painel.review-settings-modal .app-modal-body > *{ border-color:var(--p-linha); }
+/* Editor de cartão: botão principal continua primário */
+.deck-window.painel .p-editor button.btn.btn-primary{ width:100%; min-height:2.75rem; margin:.5rem 0 0; padding:.6rem 1.2rem; border:0; border-radius:999px; background:var(--p-marca); color:var(--p-texto-botao); font-weight:800; box-shadow:none; }
+.deck-window.painel .p-editor button.btn.btn-primary:hover{ background:var(--p-botao-hover); }
+.deck-window.painel .p-editor .field-editor-row{ border:1px solid var(--p-linha); }
+.deck-window.painel .p-editor .field-editor-row [data-field-content]{ background:var(--p-elevado); border:1px solid var(--p-borda-campo); border-radius:var(--p-raio-controle); background-image:none; }
+.deck-window.painel .p-editor .field-editor-head{ border-bottom:0; }
+.deck-window.painel .p-editor .field-editor-title{ font-size:.95rem; font-weight:800; }
+.deck-window.painel .pill, .deck-window.painel .premium-pill{ border-radius:999px; }
+/* Painel: busca, filtros, lista */
+.deck-window.painel .deck-panel-head .deck-panel-search{ margin:0; min-height:2.5rem; border-radius:999px; }
+.deck-window.painel .deck-panel-side{ background:var(--p-superficie); border-right:1px solid var(--p-linha); }
+.deck-window.painel .deck-panel-side-label{ text-transform:none; letter-spacing:0; font-size:.8rem; font-weight:800; color:var(--p-tinta-suave); }
+.deck-window.painel button.deck-panel-side-item{ width:100%; min-height:0; margin:0 0 2px; padding:.4rem .75rem; border:0; border-radius:8px; background:transparent; color:var(--p-tinta); font-weight:600; font-size:.92rem; text-align:left; box-shadow:none; justify-content:flex-start; }
+.deck-window.painel button.deck-panel-side-item:hover{ background:var(--p-linha); }
+.deck-window.painel button.deck-panel-side-item.is-active{ background:var(--p-elevado); color:var(--p-tinta); font-weight:800; box-shadow:inset 3px 0 0 var(--p-marca); }
+.deck-window.painel .deck-panel-listhead{ font-size:.8rem; font-weight:800; color:var(--p-tinta-suave); text-transform:none; letter-spacing:0; border-bottom:1px solid var(--p-linha); }
+.deck-window.painel .deck-panel-item{ border-bottom:1px solid var(--p-linha); }
+.deck-window.painel .deck-panel-item.is-active{ background:color-mix(in srgb, var(--p-marca) 12%, transparent); box-shadow:inset 3px 0 0 var(--p-marca); }
+.deck-window.painel .deck-panel-item input[type=checkbox]{ margin:0; }
+.deck-window.painel .deck-panel-editor{ background:transparent; }
+.deck-window.painel .deck-panel-meta{ color:var(--p-tinta-suave); font-size:.85rem; }
+/* Exportar: duas ações */
+.deck-window.painel .export-choices{ display:flex; gap:.6rem; flex-wrap:wrap; }
+.deck-window.painel .export-choices button.btn{ width:auto; flex:1 1 12rem; min-height:2.6rem; margin:0; padding:.5rem 1rem; border-radius:999px; box-shadow:none; font-weight:800; }
+.deck-window.painel .export-choices button.btn:first-child{ background:var(--p-marca); border:0; color:var(--p-texto-botao); }
+.deck-window.painel .export-choices button.btn:not(:first-child){ background:transparent; border:1px solid var(--p-borda-campo); color:var(--p-tinta); }
+.deck-window.painel .add-card-submit-bar{ background:var(--p-elevado); border-top:1px solid var(--p-linha); }
+.deck-window.painel .deck-panel-item input[type=checkbox]{ border-radius:.3em; }
+.deck-window.painel .p-editor button.back-link.deck-panel-backbtn{ width:auto; min-height:2.5rem; margin:0; padding:0 .25rem; border:0; border-radius:8px; background:transparent; color:var(--p-tinta-suave); font-weight:700; box-shadow:none; }
+.deck-window.painel .p-editor button.back-link.deck-panel-backbtn:hover{ color:var(--p-tinta); background:transparent; }
+.deck-window.painel .p-editor button.btn.deck-overview-danger{ color:var(--p-erro); border-color:color-mix(in srgb, var(--p-erro) 45%, transparent); }
+.deck-window.painel .p-editor button.btn.deck-overview-danger:hover{ background:color-mix(in srgb, var(--p-erro) 10%, transparent); }
+/* Divisórias da lista do Painel: tom mais forte (no zh escuro a linha padrão some no fundo elevado) */
+.deck-window.painel .deck-panel-item{ border-bottom:1px solid color-mix(in srgb, var(--p-borda-campo) 70%, transparent); }
+.deck-window.painel .deck-panel-listhead{ border-bottom:1px solid var(--p-borda-campo); }
+/* Barra de seleção do Painel: compacta, Mover em contorno, Excluir em vermelho, Limpar como link */
+.deck-window.painel .deck-panel-bulk{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; padding:.6rem .75rem; background:var(--p-superficie); border-bottom:1px solid var(--p-borda-campo); }
+.deck-window.painel .deck-panel-bulk > span{ font-size:.85rem; font-weight:700; color:var(--p-tinta-suave); }
+.deck-window.painel .deck-panel-bulk select{ width:auto; min-height:2.2rem; margin:0; padding:.25rem 2rem .25rem .8rem; font-size:.9rem; }
+.deck-window.painel .deck-panel-bulk button{ width:auto; min-height:2.2rem; margin:0; padding:.25rem .9rem; border-radius:999px; font-size:.88rem; font-weight:700; box-shadow:none; }
+.deck-window.painel .deck-panel-bulk button.btn{ background:transparent; border:1px solid var(--p-borda-campo); color:var(--p-tinta); }
+.deck-window.painel .deck-panel-bulk button.btn:hover{ background:var(--p-linha); }
+.deck-window.painel .deck-panel-bulk button[data-panel-delete]{ color:var(--p-erro); border-color:color-mix(in srgb, var(--p-erro) 45%, transparent); }
+.deck-window.painel .deck-panel-bulk button.deck-panel-linkbtn{ background:transparent; border:0; color:var(--p-tinta-suave); text-decoration:underline; padding:.25rem .4rem; }
+.deck-window.painel .deck-panel-bulk .profile-edit-error:empty{ display:none; }
+@media (max-width:600px){
+  .deck-window.painel button.app-modal-close{ width:44px; height:44px; }
+  .deck-window.painel .deck-panel-bulk :is(button, select){ min-height:44px; }
+}
+
 /* ---------- Perfil: passada de design (Visão geral, Metas, Progresso, Amigos) ----------
    Identidade como carteirinha de estudante (faixa na cor do idioma no topo);
    o resto fica quieto: títulos em tom de frase, números do Progresso num painel só. */
