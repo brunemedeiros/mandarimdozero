@@ -174,7 +174,11 @@ function refreshProfilePlaceholders(){
 async function fetchMyProfileRow(){
   const rpc = await supabaseClient.rpc('get_my_profile');
   if (!rpc.error && rpc.data && typeof rpc.data === 'object' && rpc.data.user_id) return { data: rpc.data, error: null };
-  return supabaseClient.from('profiles').select('*').eq('user_id', CURRENT_USER.id).maybeSingle();
+  // RPC respondeu sem linha: a conta ainda não tem perfil. Não cair na leitura da tabela (a 080 a fechou: 403 e
+  // o perfil nunca era criado, 2026-10-16); devolver vazio para ensureProfileLoaded criar (ensure_my_profile).
+  if (!rpc.error) return { data: null, error: null };
+  const direct = await supabaseClient.from('profiles').select('*').eq('user_id', CURRENT_USER.id).maybeSingle();
+  return direct.error ? { data: null, error: null } : direct;
 }
 
 // UPDATE da própria linha SEM devolver a linha (devolver pediria ler colunas que a
