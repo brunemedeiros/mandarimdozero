@@ -106,10 +106,11 @@ for (const alvo of amostra.slice(0, 2500)) {
 // ---------------------------------------------------------------- 2. desafio Acentuação (acento exigido)
 for (const alvo of amostra) {
   for (const typed of variacoes(alvo).concat(['', '   ', null])) {
-    compara('acentuacao-certa', alvo + ' | ' + typed, A.isAccentAnswerCorrect(typed, alvo), N.isAccentAnswerCorrect(typed, alvo));
+    compara('acentuacao-certa', alvo + ' | ' + typed, A.isAccentAnswerCorrect(typed, alvo), N.isAccentAnswerCorrect(typed, alvo),
+      () => alvo.includes('/') && A.isAccentAnswerCorrect(typed, alvo) === false && N.isAccentAnswerCorrect(typed, alvo) === true && 'f');
     const o = A.accentAnswerOutcome(typed, alvo), n = N.accentAnswerOutcome(typed, alvo);
     compara('acentuacao-resultado', alvo + ' | ' + typed, o, n,
-      () => o === 'fail' && n === 'partial' && A.accentAnswerOutcome(semLigadura(typed), semLigadura(alvo)) !== 'fail' && 'a');
+      () => (alvo.includes('/') && o === 'fail' && n !== 'fail' && 'f') || (o === 'fail' && n === 'partial' && A.accentAnswerOutcome(semLigadura(typed), semLigadura(alvo)) !== 'fail' && 'a'));
   }
 }
 
