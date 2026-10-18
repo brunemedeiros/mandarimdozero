@@ -69,6 +69,10 @@ function confirmSwitchCourse(appKey, siteLang){
   if (!modal || !body || !yes || !no){ switchCourse(appKey, siteLang); return; }
   const oldTitle = title ? title.textContent : null;
   if (title) title.textContent = t('courses.confirm.title');
+  // Botões compartilhados com a troca de idioma do site: na troca de curso dizem a ação; o texto antigo volta ao fechar.
+  const oldYes = yes.textContent, oldNo = no.textContent;
+  yes.textContent = t('courses.confirm.go', { course: courseDisplayName(appKey, siteLang) });
+  no.textContent = t('courses.confirm.stay');
   body.innerHTML = `<div class="course-confirm">
     <p class="course-confirm-intro">${escapeHTML(t('courses.confirm.intro'))}</p>
     <p class="course-confirm-head">${courseFlag(appKey)}<span>${escapeHTML(courseDisplayName(appKey, siteLang))}</span></p>
@@ -80,6 +84,7 @@ function confirmSwitchCourse(appKey, siteLang){
     modal.style.display = 'none';
     yes.onclick = null; no.onclick = null;
     if (title && oldTitle !== null) title.textContent = oldTitle;
+    yes.textContent = oldYes; no.textContent = oldNo;
     if (ok) switchCourse(appKey, siteLang);
   };
   const closeBtn = document.getElementById('ui-language-confirm-close');
