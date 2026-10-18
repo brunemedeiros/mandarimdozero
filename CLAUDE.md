@@ -44,6 +44,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - **Notas de realidade/culturais**: toda nota nova ou editada é reportada no chat com nível de confiança
   (alta/média/baixa). Procedimento na skill `notas-de-realidade`.
 - **Conteúdo novo (nível/módulo/unidade)**: decidir os Desafios por categoria (skill `criar-desafios`).
+- **Código sem remendos** (decisão da autora, 2026-10-18): um lugar por decisão, regra em função pura testável, conteúdo por script, teste junto com a
+  mudança; ver `.claude/rules/qualidade-de-codigo.md` e o guia vivo `docs/guia-do-desenvolvedor.md` (atualizar a cada decisão técnica nova).
 - **E-mails**: todo e-mail do site (Supabase Auth, Edge Functions, Resend) segue o padrão Prof Brune
   (`docs/email/PADRAO-EMAIL.md`, modelo `docs/email/supabase/confirmar-conta.html`; detalhes em `.claude/rules/email.md`).
 
@@ -78,7 +80,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 ## Índice
 
 - Regras por área (carregam sozinhas): `.claude/rules/` -- frontend-fr-zh, flashcards-motor, decks-review,
-  supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora, painel-design-system, email.
+  supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora, painel-design-system, email, qualidade-de-codigo.
 - Skills do projeto: `migration-supabase`, `notas-de-realidade`, `criar-desafios`, `audio-tts`,
   `teste-navegador`, `registrar-entrega`.
 - Agentes (`.claude/agents/`, `model:` pela dificuldade): `regressao` (haiku, roda testes),
