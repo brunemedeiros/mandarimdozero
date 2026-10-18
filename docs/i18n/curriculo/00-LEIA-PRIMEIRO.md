@@ -18,3 +18,8 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 - Os mapas e as unidades usam **posição** (M1.3), não o id interno (A1-21). O id é só a chave fixa do progresso e não indica ordem.
 - Depois da sua leitura, as respostas das perguntas do 08, do 07, do 06 e das decisões do 04 viram a **versão 3 do 04** (um documento só, sem sobreposição).
 - Nada disso foi aplicado ao site. Toda mudança de conteúdo vem depois da Etapa 0 (ids estáveis) e com a sua autorização.
+
+## Atualização 2026-10-18
+
+- Novos: `09` preview do M1 (texto) e `maquete-m1/` (maquete no navegador), `10` revisão das unidades de gramática, `11` inventário das notas, `12` decisões depois da maquete (inclui o défi ARQUIVADO e as pendências).
+- `07` (défis) está **arquivado**: preservado, mas fora do plano atual.

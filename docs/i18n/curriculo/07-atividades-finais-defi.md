@@ -1,3 +1,6 @@
+> **STATUS (2026-10-18): ARQUIVADO por decisão da dona.** Tudo o que está aqui fica preservado para retomar depois, de forma mais clara e ligada ao DELF,
+> sem coincidir com as funções do Ponto de verificação e dos Desafios. Ver `12-decisoes-apos-maquete-m1.md`.
+
 # Atividades finais estilo *défi* no site (francês A1 e A2)
 
 Data: 2026-10-17. Documento de **exploração e proposta** (decisão 0.1.4 do `04-lacunas-e-propostas-fr.md`). **Nenhum arquivo do site foi alterado.**
