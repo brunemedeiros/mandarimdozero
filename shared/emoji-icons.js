@@ -227,7 +227,6 @@
     "✈": "fluent/2708.svg",
     "✍": "fluent/270d.svg",
     "✏": "fluent/270f.svg",
-    "✓": "fluent/2714.svg",
     "✕": "fluent/2716.svg",
     "✨": "fluent/2728.svg",
     "✱": "fluent/2733.svg",
@@ -244,8 +243,10 @@
 
   var script = document.currentScript;
   var BASE = script && script.src ? new URL('icons/', script.src).href : '../shared/icons/';
-  // Bandeira (par de letras regionais) | sequência com ZWJ e tom de pele | símbolos de texto que viram ícone (✓ ✕ ✗ ✱ ⚑).
-  var RE = /\p{Regional_Indicator}\p{Regional_Indicator}|\p{Extended_Pictographic}\uFE0F?\p{Emoji_Modifier}?(?:\u200D\p{Extended_Pictographic}\uFE0F?\p{Emoji_Modifier}?)*|[\u2713\u2715\u2717\u2731\u2691]\uFE0F?/gu;
+  // Bandeira (par de letras regionais) | sequência com ZWJ e tom de pele | símbolos de texto que viram ícone (✕ ✗ ✱ ⚑).
+  // O ✓ fica como texto (decisão da autora, 2026-10-16): o 2714 do Fluent é roxo e ficava roxo sobre o círculo verde; como
+  // texto ele herda a cor do lugar (branco nos círculos verdes de "feito").
+  var RE = /\p{Regional_Indicator}\p{Regional_Indicator}|\p{Extended_Pictographic}\uFE0F?\p{Emoji_Modifier}?(?:\u200D\p{Extended_Pictographic}\uFE0F?\p{Emoji_Modifier}?)*|[\u2715\u2717\u2731\u2691]\uFE0F?/gu;
   var QUICK = /[\u2600-\u27BF\u2B00-\u2BFF\u2691\u23E9-\u23FA\u231A-\u2328\u25B6\uD83C-\uD83E]/;
   var SKIP = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, INPUT: 1, SELECT: 1, OPTION: 1, CODE: 1, PRE: 1, TITLE: 1, NOSCRIPT: 1, svg: 1, SVG: 1, TEMPLATE: 1 };
 
