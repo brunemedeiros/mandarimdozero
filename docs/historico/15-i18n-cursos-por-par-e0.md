@@ -267,3 +267,12 @@ Só front-end estático; **nenhuma migration**; **flag desligada para todos**: s
 
 ## Q-12 respondida (2026-10-14)
 A dona aprovou a recomendação: os decks de curso (Course Decks) têm a estrutura pelo idioma estudado (as unidades são as mesmas para qualquer língua de origem) e os títulos são resolvidos pela camada do curso na hora de mostrar, sem gravar o nome em português no banco. Com isso, todas as perguntas Q-10 a Q-14 e P1 a P8 estão fechadas.
+
+## Entrada bilíngue e menu "Meus cursos" (2026-10-18)
+- **Entrada (`index.html` da raiz)**: "Idioma do site" no topo (menu Português/English com bandeiras `shared/icons/flags/br.svg` e `us.svg`, `menuitemradio`, setas e Esc). Só muda a língua da página e do cadastro; o curso é escolhido depois. Primeira visita: navegador em português abre em português; qualquer outro idioma abre em inglês. Todos os textos da entrada (login, código, links dos e-mails, senha nova, escolha do curso, experiência) estão em `gate.*` nos catálogos; a raiz passou a carregar `shared/i18n/i18n.js` e `pt-BR.js`.
+- Textos em português mudados com aprovação da dona: "Cadastre-se" -> "Crie sua conta grátis"; frase de cima com "crie sua conta grátis" e sem travessão; frase da experiência sem travessão.
+- **Escolha do curso**: "Eu falo..." igual ao de Adicionar curso, começando no idioma da entrada; mostra só os cursos do par (rascunho não aparece, beta com etiqueta). Ao escolher, o idioma vira o do site e fica em `localStorage['ui-language-gate']`; `shared/auth.js` (`askUiLanguageOnFirstAccess`) grava esse idioma na conta nova e não pergunta "Eu falo..." de novo.
+- Contraste no escuro: link de cadastro com `--accent` e `--danger` mais claro.
+- **Menu "Meus cursos"** (bug relatado pela dona): o menu era pintado antes do login resolver e só repintava ao trocar o idioma do site, então mostrava só o curso atual. Agora repinta ao abrir (`shared/language-switcher.js`) e guarda o último progresso lido (`shared/my-courses.js`).
+- Grátis x Premium: tudo grátis.
+- Testes: `tests/login-obrigatorio/test_entrada_idioma.js` 98/98 (novo), login 112/112 (contexto em pt-BR), portão 25/25 (+4 da marca da entrada), `tests/curso-progresso/test_menu_cursos_login_tardio.js` 20/20 (novo; falha sem a correção), menu 26/26, i18n 209/209, i18n unit 2050/2052 (as 2 falhas também na main).
