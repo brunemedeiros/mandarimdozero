@@ -1190,3 +1190,13 @@ function updateStudySetting(patch){
 function acceptedForms(expected){
   return (expected || '').split('/').map(s => s.trim()).filter(Boolean);
 }
+
+// Exercícios de digitar: além de cada forma, vale digitar o texto inteiro ("allemand / allemande"),
+// com ou sem espaço em volta da barra. Use junto com slashSpacing() no que foi digitado.
+function acceptedFormsTyped(expected){
+  const forms = acceptedForms(expected);
+  return forms.length > 1 ? forms.concat(forms.join(' / ')) : forms;
+}
+function slashSpacing(typed){
+  return String(typed == null ? '' : typed).replace(/\s*\/\s*/g, ' / ');
+}

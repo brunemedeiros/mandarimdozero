@@ -73,6 +73,12 @@ r = FR.avaliarDitado('Il fait 30 degrés.', 'il fait 30 degrés.');
 check('ditado (d): texto com "30" e aluna digita "30" = 100, sem nota de "por extenso" (antes: perdia ponto)', [r.score, r.digitNotes.length], [100, 0]);
 check('ditado (d): texto com "trente" e aluna digita "30" continua 100 com a nota', ((x) => [x.score, x.digitNotes.length])(FR.avaliarDitado('Il fait trente degrés.', 'il fait 30 degrés.')), [100, 1]);
 check('ditado (d): texto com "30" e aluna digita "trente" continua troca (sem inventar)', FR.avaliarDitado('Il fait 30 degrés.', 'il fait trente degrés.').score < 100, true);
+// (f) 2026-10-16: alvo com duas formas ("allemand / allemande"): o texto inteiro digitado também vale
+check('fr (f): "allemand / allemande" por "allemand / allemande" = ok (antes: errou)', FR.avaliarRespostaDigitada('allemand / allemande', 'allemand / allemande'), 'ok');
+check('fr (f): sem espaços em volta da barra e sem acento = ok', FR.avaliarRespostaDigitada('Francais/francaise', 'français / française'), 'ok');
+check('fr (f): só uma das formas continua ok', FR.avaliarRespostaDigitada('allemande', 'allemand / allemande'), 'ok');
+check('fr (f): as duas formas com uma errada = errou', FR.avaliarRespostaDigitada('allemand / allemand', 'allemand / allemande'), 'errou');
+check('fr (f): respostaDigitadaCerta aceita o texto inteiro', FL.respostaDigitadaCerta('un / une', 'un / une'), true);
 check('teclado fr: 14 teclas, com œ', CFG.gruposDeAcentos.flat().length === 14 && CFG.gruposDeAcentos.flat().includes('œ'), true);
 console.log(`família latina, francês: ${ok}/${ok + ruim} passaram`);
 process.exit(ruim ? 1 : 0);

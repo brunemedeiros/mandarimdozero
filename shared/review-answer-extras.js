@@ -40,6 +40,13 @@ function typedAnswerVerdict(typed, forms){
   return 'errou';
 }
 
+// Cartão com duas formas ("allemand / allemande"): vale digitar uma só OU o texto inteiro (barra com ou sem espaço).
+function typedAnswerVerdictForExpected(typed, expected){
+  const forms = acceptedForms(expected);
+  const whole = forms.length > 1 ? forms.concat(forms.join(' / ')) : forms;
+  return typedAnswerVerdict(String(typed == null ? '' : typed).replace(/\s*\/\s*/g, ' / '), whole);
+}
+
 // Nota FSRS de uma resposta digitada: Errei 0, Difícil 1 (quase lá), Bom 2.
 function typedAnswerGrade(verdict){
   return verdict === 'ok' ? 2 : verdict === 'quase' ? 1 : 0;

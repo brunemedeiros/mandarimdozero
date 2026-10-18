@@ -43,6 +43,16 @@
     return (expected || '').split('/').map(function (s) { return s.trim(); }).filter(Boolean);
   }
 
+  // Nos exercícios de digitar, quem ouve "allemand / allemande" pode digitar as DUAS formas (o texto inteiro,
+  // com ou sem espaço em volta da barra) ou só uma: a lista aceita ganha o texto inteiro além de cada forma.
+  function formasDigitaveis(expected) {
+    var forms = formasAceitas(expected);
+    return forms.length > 1 ? forms.concat(forms.join(' / ')) : forms;
+  }
+  function juntarBarra(s) {
+    return String(s).replace(/\s*\/\s*/g, ' / ');
+  }
+
   // Pontuação ignorada nos exercícios de digitar. O fr usa DUAS listas hoje (achado: o "Digite o que
   // ouviu" de vocabulário ignora o apóstrofo curvo ’, a lacuna digitada não). Mantidas iguais para a paridade.
   var PONTUACAO_VOCAB_RE = /[.,!?;:'"’]/g;
@@ -53,8 +63,8 @@
   function respostaDigitadaCerta(typed, expected, pontuacaoRe) {
     var re = pontuacaoRe || PONTUACAO_VOCAB_RE;
     var strip = function (s) { return normalizarFrouxo(s).replace(re, '').trim(); };
-    var t = strip(typed);
-    return formasAceitas(expected).some(function (form) { return strip(form) === t; });
+    var t = strip(juntarBarra(typed));
+    return formasDigitaveis(expected).some(function (form) { return strip(form) === t; });
   }
 
   // Versão em 3 níveis dos exercícios de digitar: 'ok' | 'quase' | 'errou'.
@@ -68,7 +78,8 @@
     var re = o.pontuacaoRe || PONTUACAO_VOCAB_RE;
     var estrito = function (s) { return String(s).normalize('NFC').toLowerCase().replace(re, '').trim(); };
     var frouxo = function (s) { return normalizarFrouxo(s).replace(re, '').trim(); };
-    var forms = formasAceitas(expected);
+    var forms = formasDigitaveis(expected);
+    typed = juntarBarra(typed);
     if (o.acento === 'tolerante') {
       var tf = frouxo(typed);
       if (forms.some(function (f) { return frouxo(f) === tf; })) return 'ok';
