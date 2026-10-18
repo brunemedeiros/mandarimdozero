@@ -67,8 +67,11 @@ for (const lang of ['fr', 'zh']){
   // 4. ARQUIVOS REAIS em disco: <lang>/content.js (base) + courses/<lang>-pt-BR/layer.js == original
   const disk = CourseContent.load(lang);
   const diskContent = { units: disk.UNITS, levels: disk.LEVELS, modules: disk.MODULES, levelTests: disk.LEVEL_TESTS, stories: disk.STORIES, hanzi: disk.HANZI_LESSONS, dictations: disk.DICTATIONS, conjugation: disk.CONJUGATION_GROUPS ? { groups: disk.CONJUGATION_GROUPS, verbTranslations: disk.VERB_TRANSLATIONS } : undefined };
-  ok(hash(orig) === hash(JSON.parse(JSON.stringify(diskContent))), lang + ': arquivos em disco (base + camada) == original');
-  const diskBaseOnly = (() => { const ctx = vm.createContext({}); vm.runInContext(fs.readFileSync(path.join(ROOT, lang, 'content.js'), 'utf8') + ';this.U=UNITS;', ctx); return JSON.parse(JSON.stringify(ctx.U)); })();
+  // Etapa 0 do currículo (2026-10-18): a base do fr ganhou a chave estável `k` em vocab/phrases/dialogue.lines (só
+  // estrutura, não existe no original). Sai dos dois lados da comparação; tests/curriculo-ids confere as chaves.
+  const noItemKeys = (c) => { (c.units || c).forEach(u => { (u.vocab || []).forEach(v => { delete v.k; }); (u.phrases || []).forEach(p => { delete p.k; }); if (u.dialogue) (u.dialogue.lines || []).forEach(l => { delete l.k; }); }); return c; };
+  ok(hash(orig) === hash(noItemKeys(JSON.parse(JSON.stringify(diskContent)))), lang + ': arquivos em disco (base + camada) == original');
+  const diskBaseOnly = (() => { const ctx = vm.createContext({}); vm.runInContext(fs.readFileSync(path.join(ROOT, lang, 'content.js'), 'utf8') + ';this.U=UNITS;', ctx); return noItemKeys(JSON.parse(JSON.stringify(ctx.U))); })();
   ok(JSON.stringify(diskBaseOnly).indexOf('"title"') === -1 && JSON.stringify(diskBaseOnly).indexOf('"goal"') === -1, lang + ': content.js em disco não tem title/goal (sem texto de língua de origem)');
   ok(hash(diskBaseOnly) === hash(base.units), lang + ': content.js em disco == strip(original)');
 

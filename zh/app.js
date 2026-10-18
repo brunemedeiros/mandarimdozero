@@ -1927,7 +1927,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   const posInBlock = acq.introIdx;
   const idx = block[posInBlock];
   const v = u.vocab[idx];
-  const cardId = `u${u.id}-v${idx}`;
+  const cardId = studyWordCardId(u, idx); // chave estável do item (shared/study-trail-model.js)
   const card = STATE.cards.find(c => c.id === cardId);
   const alreadyKnown = studyWordHasEvidence(studyWordCardsFor(STATE.cards, u.id, idx)); // K2-E: nível de palavra
   const matchingPhrase = findMatchingPhrase(v, u);

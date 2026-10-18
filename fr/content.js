@@ -2,6 +2,13 @@
 // O texto em língua de origem mora na CAMADA DO CURSO: courses/fr-pt-BR/layer.js (português) e fr/content.en.js (inglês).
 // Ids, frases em francês (f), respostas, tipos e ordem. Sozinho NÃO é exibível: a camada carrega logo depois e se aplica sobre ele.
 // Os comentários de autoria do arquivo anterior estão em docs/historico/conteudo-original/fr-<arquivo>.js.txt.
+//
+// CHAVE ESTÁVEL `k` (Etapa 0 de docs/i18n/curriculo/04-lacunas-e-propostas-fr.md): cada palavra (vocab), frase (phrases) e
+// fala (dialogue.lines) tem uma chave congelada; o id do cartão e o progresso do aluno seguem a CHAVE, nunca a posição.
+// - Nunca mudar nem reaproveitar um `k`. Item novo: rode `node fr/scripts/congelar_chaves.js` (dá a próxima chave livre).
+// - Mover, reordenar ou corrigir o texto com o MESMO sentido: o item leva o `k` junto.
+// - Mudou o sentido (outra palavra/frase): item novo com `k` novo; o antigo vai para STUDY_RETIRED_KEYS.
+// - Fundir ou excluir: fr/curriculum-changes.js. O teste tests/curriculo-ids/test_ids_publicados.js bloqueia id perdido.
 
 const LEVELS = [
   { "id": "A1" },
@@ -95,19 +102,20 @@ const UNITS = [
       { "subject": "Merci beaucoup !", "emoji": "🙏", "answer": true }
     ],
     "vocab": [
-      { "f": "bonjour" },
-      { "f": "bonsoir" },
-      { "f": "au revoir" },
-      { "f": "salut" },
-      { "f": "merci" },
-      { "f": "de rien" },
-      { "f": "s'il vous plaît" },
-      { "f": "pardon" },
-      { "f": "ça va" },
-      { "f": "à bientôt" }
+      { "k": "A1-1-v0", "f": "bonjour" },
+      { "k": "A1-1-v1", "f": "bonsoir" },
+      { "k": "A1-1-v2", "f": "au revoir" },
+      { "k": "A1-1-v3", "f": "salut" },
+      { "k": "A1-1-v4", "f": "merci" },
+      { "k": "A1-1-v5", "f": "de rien" },
+      { "k": "A1-1-v6", "f": "s'il vous plaît" },
+      { "k": "A1-1-v7", "f": "pardon" },
+      { "k": "A1-1-v8", "f": "ça va" },
+      { "k": "A1-1-v9", "f": "à bientôt" }
     ],
     "phrases": [
       {
+        "k": "A1-1-p0",
         "f": "Bonjour ! Je m'appelle {nome}.",
         "blocks": [
           { "f": "Bonjour !" },
@@ -117,6 +125,7 @@ const UNITS = [
         "scenarioEmoji": "🎉"
       },
       {
+        "k": "A1-1-p1",
         "f": "Merci beaucoup !",
         "blocks": [
           { "f": "Merci" },
@@ -125,6 +134,7 @@ const UNITS = [
         "scenarioEmoji": "🛍️"
       },
       {
+        "k": "A1-1-p2",
         "f": "Pardon, je ne comprends pas.",
         "blocks": [
           { "f": "Pardon," },
@@ -134,6 +144,7 @@ const UNITS = [
         "scenarioEmoji": "😕"
       },
       {
+        "k": "A1-1-p3",
         "f": "Ça va bien, et toi ?",
         "blocks": [
           { "f": "Ça va" },
@@ -143,6 +154,7 @@ const UNITS = [
         "scenarioEmoji": "☕"
       },
       {
+        "k": "A1-1-p4",
         "f": "Bonsoir ! Comment allez-vous ?",
         "blocks": [
           { "f": "Bonsoir !" },
@@ -150,6 +162,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-1-p5",
         "f": "Au revoir, à demain !",
         "blocks": [
           { "f": "Au revoir," },
@@ -157,6 +170,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-1-p6",
         "f": "Salut ! Ça va bien ?",
         "blocks": [
           { "f": "Salut !" },
@@ -164,6 +178,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-1-p7",
         "f": "De rien, c'est normal.",
         "blocks": [
           { "f": "De rien," },
@@ -171,6 +186,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-1-p8",
         "f": "Un café, s'il vous plaît.",
         "blocks": [
           { "f": "Un café," },
@@ -197,10 +213,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "f": "Bonjour !" },
-        { "f": "Bonjour ! Ça va ?" },
-        { "f": "Ça va bien, merci ! Et toi ?" },
-        { "f": "Ça va. À bientôt !" }
+        { "k": "A1-1-d0", "f": "Bonjour !" },
+        { "k": "A1-1-d1", "f": "Bonjour ! Ça va ?" },
+        { "k": "A1-1-d2", "f": "Ça va bien, merci ! Et toi ?" },
+        { "k": "A1-1-d3", "f": "Ça va. À bientôt !" }
       ]
     }
   },
@@ -274,19 +290,20 @@ const UNITS = [
       { "subject": "Comment tu t'appelles ?", "emoji": "🙋", "answer": false }
     ],
     "vocab": [
-      { "f": "je" },
-      { "f": "tu" },
-      { "f": "s'appeler" },
-      { "f": "le nom" },
-      { "f": "être" },
-      { "f": "la France" },
-      { "f": "le Brésil" },
-      { "f": "français / française" },
-      { "f": "brésilien / brésilienne" },
-      { "f": "le pays" }
+      { "k": "A1-2-v0", "f": "je" },
+      { "k": "A1-2-v1", "f": "tu" },
+      { "k": "A1-2-v2", "f": "s'appeler" },
+      { "k": "A1-2-v3", "f": "le nom" },
+      { "k": "A1-2-v4", "f": "être" },
+      { "k": "A1-2-v5", "f": "la France" },
+      { "k": "A1-2-v6", "f": "le Brésil" },
+      { "k": "A1-2-v7", "f": "français / française" },
+      { "k": "A1-2-v8", "f": "brésilien / brésilienne" },
+      { "k": "A1-2-v9", "f": "le pays" }
     ],
     "phrases": [
       {
+        "k": "A1-2-p0",
         "f": "Comment tu t'appelles ?",
         "blocks": [
           { "f": "Comment" },
@@ -296,6 +313,7 @@ const UNITS = [
         "scenarioEmoji": "🤝"
       },
       {
+        "k": "A1-2-p1",
         "f": "Je suis {nacionalidade}.",
         "blocks": [
           { "f": "Je" },
@@ -305,6 +323,7 @@ const UNITS = [
         "scenarioEmoji": "🇧🇷"
       },
       {
+        "k": "A1-2-p2",
         "f": "Tu es de quel pays ?",
         "blocks": [
           { "f": "Tu" },
@@ -314,6 +333,7 @@ const UNITS = [
         "scenarioEmoji": "🌍"
       },
       {
+        "k": "A1-2-p3",
         "f": "Moi aussi, je suis française !",
         "blocks": [
           { "f": "Moi aussi," },
@@ -323,6 +343,7 @@ const UNITS = [
         "scenarioEmoji": "🇫🇷"
       },
       {
+        "k": "A1-2-p4",
         "f": "Quel est le nom de la ville ?",
         "blocks": [
           { "f": "Quel est" },
@@ -331,6 +352,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-2-p5",
         "f": "J'aime la France.",
         "blocks": [
           { "f": "J'aime" },
@@ -338,6 +360,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-2-p6",
         "f": "Le Brésil est très grand.",
         "blocks": [
           { "f": "Le Brésil" },
@@ -346,6 +369,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-2-p7",
         "f": "Le pays est magnifique.",
         "blocks": [
           { "f": "Le pays" },
@@ -372,11 +396,11 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "Bonjour, comment tu t'appelles ?" },
-        { "f": "Je m'appelle Léo. Et toi ?" },
-        { "f": "Moi, c'est Ana. Tu es français ?" },
-        { "f": "Oui, je suis français. Et toi, tu es brésilienne ?" },
-        { "f": "Oui, je suis brésilienne !" }
+        { "k": "A1-2-d0", "f": "Bonjour, comment tu t'appelles ?" },
+        { "k": "A1-2-d1", "f": "Je m'appelle Léo. Et toi ?" },
+        { "k": "A1-2-d2", "f": "Moi, c'est Ana. Tu es français ?" },
+        { "k": "A1-2-d3", "f": "Oui, je suis français. Et toi, tu es brésilienne ?" },
+        { "k": "A1-2-d4", "f": "Oui, je suis brésilienne !" }
       ]
     }
   },
@@ -449,19 +473,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "f": "zéro" },
-      { "f": "un / une" },
-      { "f": "deux" },
-      { "f": "trois" },
-      { "f": "dix" },
-      { "f": "vingt" },
-      { "f": "l'âge" },
-      { "f": "avoir" },
-      { "f": "ans" },
-      { "f": "combien" }
+      { "k": "A1-3-v0", "f": "zéro" },
+      { "k": "A1-3-v1", "f": "un / une" },
+      { "k": "A1-3-v2", "f": "deux" },
+      { "k": "A1-3-v3", "f": "trois" },
+      { "k": "A1-3-v4", "f": "dix" },
+      { "k": "A1-3-v5", "f": "vingt" },
+      { "k": "A1-3-v6", "f": "l'âge" },
+      { "k": "A1-3-v7", "f": "avoir" },
+      { "k": "A1-3-v8", "f": "ans" },
+      { "k": "A1-3-v9", "f": "combien" }
     ],
     "phrases": [
       {
+        "k": "A1-3-p0",
         "f": "Quel âge as-tu ?",
         "blocks": [
           { "f": "Quel âge" },
@@ -470,6 +495,7 @@ const UNITS = [
         "scenarioEmoji": "🎂"
       },
       {
+        "k": "A1-3-p1",
         "f": "J'ai vingt ans.",
         "blocks": [
           { "f": "J'ai" },
@@ -479,6 +505,7 @@ const UNITS = [
         "scenarioEmoji": "🎈"
       },
       {
+        "k": "A1-3-p2",
         "f": "Il a dix ans.",
         "blocks": [
           { "f": "Il a" },
@@ -488,6 +515,7 @@ const UNITS = [
         "scenarioEmoji": "👦"
       },
       {
+        "k": "A1-3-p3",
         "f": "Nous sommes dix.",
         "blocks": [
           { "f": "Nous sommes" },
@@ -496,6 +524,7 @@ const UNITS = [
         "scenarioEmoji": "🍽️"
       },
       {
+        "k": "A1-3-p4",
         "f": "Combien ça coûte ?",
         "blocks": [
           { "f": "Combien" },
@@ -503,6 +532,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-3-p5",
         "f": "Il fait zéro degré dehors.",
         "blocks": [
           { "f": "Il fait" },
@@ -511,6 +541,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-3-p6",
         "f": "J'ai deux frères et trois sœurs.",
         "blocks": [
           { "f": "J'ai" },
@@ -519,6 +550,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-3-p7",
         "f": "Quel est l'âge de ton père ?",
         "blocks": [
           { "f": "Quel est" },
@@ -546,10 +578,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "f": "Quel âge a ta fille ?" },
-        { "f": "Elle a huit ans. Et ton fils ?" },
-        { "f": "Il a dix ans." },
-        { "f": "Ils sont grands !" }
+        { "k": "A1-3-d0", "f": "Quel âge a ta fille ?" },
+        { "k": "A1-3-d1", "f": "Elle a huit ans. Et ton fils ?" },
+        { "k": "A1-3-d2", "f": "Il a dix ans." },
+        { "k": "A1-3-d3", "f": "Ils sont grands !" }
       ]
     }
   },
@@ -678,19 +710,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "f": "la famille" },
-      { "f": "le père" },
-      { "f": "la mère" },
-      { "f": "le frère" },
-      { "f": "la sœur" },
-      { "f": "les parents" },
-      { "f": "le fils" },
-      { "f": "la fille" },
-      { "f": "le mari" },
-      { "f": "la femme" }
+      { "k": "A1-4-v0", "f": "la famille" },
+      { "k": "A1-4-v1", "f": "le père" },
+      { "k": "A1-4-v2", "f": "la mère" },
+      { "k": "A1-4-v3", "f": "le frère" },
+      { "k": "A1-4-v4", "f": "la sœur" },
+      { "k": "A1-4-v5", "f": "les parents" },
+      { "k": "A1-4-v6", "f": "le fils" },
+      { "k": "A1-4-v7", "f": "la fille" },
+      { "k": "A1-4-v8", "f": "le mari" },
+      { "k": "A1-4-v9", "f": "la femme" }
     ],
     "phrases": [
       {
+        "k": "A1-4-p0",
         "f": "Voici ma famille.",
         "blocks": [
           { "f": "Voici" },
@@ -699,6 +732,7 @@ const UNITS = [
         "scenarioEmoji": "👨‍👩‍👧‍👦"
       },
       {
+        "k": "A1-4-p1",
         "f": "J'ai deux frères.",
         "blocks": [
           { "f": "J'ai" },
@@ -708,6 +742,7 @@ const UNITS = [
         "scenarioEmoji": "👬"
       },
       {
+        "k": "A1-4-p2",
         "f": "Mon père s'appelle Marc.",
         "blocks": [
           { "f": "Mon père" },
@@ -717,6 +752,7 @@ const UNITS = [
         "scenarioEmoji": "👨"
       },
       {
+        "k": "A1-4-p3",
         "f": "Elle est ma sœur.",
         "blocks": [
           { "f": "Elle est" },
@@ -725,6 +761,7 @@ const UNITS = [
         "scenarioEmoji": "👧"
       },
       {
+        "k": "A1-4-p4",
         "f": "La famille est très importante.",
         "blocks": [
           { "f": "La famille" },
@@ -733,6 +770,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-4-p5",
         "f": "Le père travaille en ville.",
         "blocks": [
           { "f": "Le père" },
@@ -741,6 +779,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-4-p6",
         "f": "La mère prépare le dîner.",
         "blocks": [
           { "f": "La mère" },
@@ -749,6 +788,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-4-p7",
         "f": "Le frère et la sœur jouent ensemble.",
         "blocks": [
           { "f": "Le frère" },
@@ -757,6 +797,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-4-p8",
         "f": "Les parents adorent leurs enfants.",
         "blocks": [
           { "f": "Les parents" },
@@ -765,6 +806,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-4-p9",
         "f": "Le fils et la fille aiment l'école.",
         "blocks": [
           { "f": "Le fils" },
@@ -773,6 +815,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-4-p10",
         "f": "Le mari et la femme habitent à Paris.",
         "blocks": [
           { "f": "Le mari" },
@@ -800,11 +843,11 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "f": "Tu as des frères et sœurs ?" },
-        { "f": "Oui, j'ai une sœur. Et toi ?" },
-        { "f": "Moi, j'ai un frère. Il s'appelle Paul." },
-        { "f": "Il a quel âge ?" },
-        { "f": "Il a quinze ans." }
+        { "k": "A1-4-d0", "f": "Tu as des frères et sœurs ?" },
+        { "k": "A1-4-d1", "f": "Oui, j'ai une sœur. Et toi ?" },
+        { "k": "A1-4-d2", "f": "Moi, j'ai un frère. Il s'appelle Paul." },
+        { "k": "A1-4-d3", "f": "Il a quel âge ?" },
+        { "k": "A1-4-d4", "f": "Il a quinze ans." }
       ]
     }
   },
@@ -929,19 +972,20 @@ const UNITS = [
       { "subject": "L'addition, s'il vous plaît.", "emoji": "🧾", "answer": true }
     ],
     "vocab": [
-      { "f": "le pain" },
-      { "f": "l'eau" },
-      { "f": "le café" },
-      { "f": "le lait" },
-      { "f": "le fromage" },
-      { "f": "la pomme" },
-      { "f": "le poisson" },
-      { "f": "manger" },
-      { "f": "boire" },
-      { "f": "détester" }
+      { "k": "A1-5-v0", "f": "le pain" },
+      { "k": "A1-5-v1", "f": "l'eau" },
+      { "k": "A1-5-v2", "f": "le café" },
+      { "k": "A1-5-v3", "f": "le lait" },
+      { "k": "A1-5-v4", "f": "le fromage" },
+      { "k": "A1-5-v5", "f": "la pomme" },
+      { "k": "A1-5-v6", "f": "le poisson" },
+      { "k": "A1-5-v7", "f": "manger" },
+      { "k": "A1-5-v8", "f": "boire" },
+      { "k": "A1-5-v9", "f": "détester" }
     ],
     "phrases": [
       {
+        "k": "A1-5-p0",
         "f": "Je mange du pain le matin.",
         "blocks": [
           { "f": "Je mange" },
@@ -951,6 +995,7 @@ const UNITS = [
         "scenarioEmoji": "🥖"
       },
       {
+        "k": "A1-5-p1",
         "f": "J'aime le fromage, mais je déteste le poisson.",
         "blocks": [
           { "f": "J'aime" },
@@ -961,6 +1006,7 @@ const UNITS = [
         "scenarioEmoji": "🧀"
       },
       {
+        "k": "A1-5-p2",
         "f": "Tu bois du café ou du lait ?",
         "blocks": [
           { "f": "Tu bois" },
@@ -970,6 +1016,7 @@ const UNITS = [
         "scenarioEmoji": "☕"
       },
       {
+        "k": "A1-5-p3",
         "f": "L'addition, s'il vous plaît.",
         "blocks": [
           { "f": "L'addition," },
@@ -978,6 +1025,7 @@ const UNITS = [
         "scenarioEmoji": "🧾"
       },
       {
+        "k": "A1-5-p4",
         "f": "Le pain est délicieux.",
         "blocks": [
           { "f": "Le pain" },
@@ -985,6 +1033,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-5-p5",
         "f": "Je voudrais de l'eau, s'il vous plaît.",
         "blocks": [
           { "f": "Je voudrais" },
@@ -993,6 +1042,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-5-p6",
         "f": "Le café est très chaud.",
         "blocks": [
           { "f": "Le café" },
@@ -1001,6 +1051,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-5-p7",
         "f": "Le lait est dans le frigo.",
         "blocks": [
           { "f": "Le lait" },
@@ -1009,6 +1060,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-5-p8",
         "f": "La pomme est rouge et sucrée.",
         "blocks": [
           { "f": "La pomme" },
@@ -1017,6 +1069,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-5-p9",
         "f": "J'aime manger le matin.",
         "blocks": [
           { "f": "J'aime" },
@@ -1025,6 +1078,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-5-p10",
         "f": "Tu veux boire quelque chose ?",
         "blocks": [
           { "f": "Tu veux" },
@@ -1033,6 +1087,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-5-p11",
         "f": "Je vais détester ce plat, je pense.",
         "blocks": [
           { "f": "Je vais" },
@@ -1060,11 +1115,11 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "Bonjour, vous désirez ?" },
-        { "f": "Un café et un croissant, s'il vous plaît." },
-        { "f": "Autre chose ?" },
-        { "f": "Non merci, c'est tout." },
-        { "f": "Voilà, ça fait cinq euros." }
+        { "k": "A1-5-d0", "f": "Bonjour, vous désirez ?" },
+        { "k": "A1-5-d1", "f": "Un café et un croissant, s'il vous plaît." },
+        { "k": "A1-5-d2", "f": "Autre chose ?" },
+        { "k": "A1-5-d3", "f": "Non merci, c'est tout." },
+        { "k": "A1-5-d4", "f": "Voilà, ça fait cinq euros." }
       ]
     }
   },
@@ -1120,19 +1175,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "f": "l'heure" },
-      { "f": "le matin" },
-      { "f": "le midi" },
-      { "f": "le soir" },
-      { "f": "se réveiller" },
-      { "f": "se lever" },
-      { "f": "manger" },
-      { "f": "travailler" },
-      { "f": "dormir" },
-      { "f": "minuit" }
+      { "k": "A1-6-v0", "f": "l'heure" },
+      { "k": "A1-6-v1", "f": "le matin" },
+      { "k": "A1-6-v2", "f": "le midi" },
+      { "k": "A1-6-v3", "f": "le soir" },
+      { "k": "A1-6-v4", "f": "se réveiller" },
+      { "k": "A1-6-v5", "f": "se lever" },
+      { "k": "A1-6-v6", "f": "manger" },
+      { "k": "A1-6-v7", "f": "travailler" },
+      { "k": "A1-6-v8", "f": "dormir" },
+      { "k": "A1-6-v9", "f": "minuit" }
     ],
     "phrases": [
       {
+        "k": "A1-6-p0",
         "f": "Quelle heure est-il ?",
         "blocks": [
           { "f": "Quelle heure" },
@@ -1141,6 +1197,7 @@ const UNITS = [
         "scenarioEmoji": "⏰"
       },
       {
+        "k": "A1-6-p1",
         "f": "Il est huit heures.",
         "blocks": [
           { "f": "Il est" },
@@ -1149,6 +1206,7 @@ const UNITS = [
         "scenarioEmoji": "🕗"
       },
       {
+        "k": "A1-6-p2",
         "f": "Je me réveille à sept heures.",
         "blocks": [
           { "f": "Je me réveille" },
@@ -1158,6 +1216,7 @@ const UNITS = [
         "scenarioEmoji": "⏰"
       },
       {
+        "k": "A1-6-p3",
         "f": "Le soir, je regarde la télé.",
         "blocks": [
           { "f": "Le soir," },
@@ -1167,6 +1226,7 @@ const UNITS = [
         "scenarioEmoji": "📺"
       },
       {
+        "k": "A1-6-p4",
         "f": "Il regarde l'heure sur son téléphone.",
         "blocks": [
           { "f": "Il regarde" },
@@ -1175,6 +1235,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-6-p5",
         "f": "Le midi, je mange à la maison.",
         "blocks": [
           { "f": "Le midi," },
@@ -1183,6 +1244,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-6-p6",
         "f": "Il va se réveiller tôt demain.",
         "blocks": [
           { "f": "Il va" },
@@ -1191,6 +1253,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-6-p7",
         "f": "Elle va se lever à sept heures.",
         "blocks": [
           { "f": "Elle va" },
@@ -1199,6 +1262,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-6-p8",
         "f": "Il doit travailler jusqu'à minuit.",
         "blocks": [
           { "f": "Il doit" },
@@ -1207,6 +1271,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-6-p9",
         "f": "Je vais dormir maintenant.",
         "blocks": [
           { "f": "Je vais" },
@@ -1234,10 +1299,10 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "Tu te lèves à quelle heure ?" },
-        { "f": "Je me lève à six heures et demie." },
-        { "f": "Et tu travailles quand ?" },
-        { "f": "Je travaille le matin et l'après-midi." }
+        { "k": "A1-6-d0", "f": "Tu te lèves à quelle heure ?" },
+        { "k": "A1-6-d1", "f": "Je me lève à six heures et demie." },
+        { "k": "A1-6-d2", "f": "Et tu travailles quand ?" },
+        { "k": "A1-6-d3", "f": "Je travaille le matin et l'après-midi." }
       ]
     }
   },
@@ -1366,19 +1431,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "f": "lundi" },
-      { "f": "mardi" },
-      { "f": "aujourd'hui" },
-      { "f": "demain" },
-      { "f": "hier" },
-      { "f": "la semaine" },
-      { "f": "le mois" },
-      { "f": "janvier" },
-      { "f": "décembre" },
-      { "f": "la date" }
+      { "k": "A1-7-v0", "f": "lundi" },
+      { "k": "A1-7-v1", "f": "mardi" },
+      { "k": "A1-7-v2", "f": "aujourd'hui" },
+      { "k": "A1-7-v3", "f": "demain" },
+      { "k": "A1-7-v4", "f": "hier" },
+      { "k": "A1-7-v5", "f": "la semaine" },
+      { "k": "A1-7-v6", "f": "le mois" },
+      { "k": "A1-7-v7", "f": "janvier" },
+      { "k": "A1-7-v8", "f": "décembre" },
+      { "k": "A1-7-v9", "f": "la date" }
     ],
     "phrases": [
       {
+        "k": "A1-7-p0",
         "f": "Quel jour sommes-nous ?",
         "blocks": [
           { "f": "Quel jour" },
@@ -1387,6 +1453,7 @@ const UNITS = [
         "scenarioEmoji": "📅"
       },
       {
+        "k": "A1-7-p1",
         "f": "Nous sommes lundi.",
         "blocks": [
           { "f": "Nous sommes" },
@@ -1395,6 +1462,7 @@ const UNITS = [
         "scenarioEmoji": "🗓️"
       },
       {
+        "k": "A1-7-p2",
         "f": "Mon anniversaire est en mars.",
         "blocks": [
           { "f": "Mon anniversaire" },
@@ -1404,6 +1472,7 @@ const UNITS = [
         "scenarioEmoji": "🎂"
       },
       {
+        "k": "A1-7-p3",
         "f": "À demain !",
         "blocks": [
           { "f": "À" },
@@ -1412,6 +1481,7 @@ const UNITS = [
         "scenarioEmoji": "👋"
       },
       {
+        "k": "A1-7-p4",
         "f": "Aujourd'hui, il fait beau.",
         "blocks": [
           { "f": "Aujourd'hui," },
@@ -1419,6 +1489,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-7-p5",
         "f": "La semaine prochaine, je pars en voyage.",
         "blocks": [
           { "f": "La semaine" },
@@ -1427,6 +1498,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-7-p6",
         "f": "Le mois de janvier est très froid.",
         "blocks": [
           { "f": "Le mois" },
@@ -1435,6 +1507,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-7-p7",
         "f": "Mon anniversaire est en décembre.",
         "blocks": [
           { "f": "Mon anniversaire" },
@@ -1443,6 +1516,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-7-p8",
         "f": "Quelle est la date aujourd'hui ?",
         "blocks": [
           { "f": "Quelle est" },
@@ -1470,10 +1544,10 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "On se voit quel jour ?" },
-        { "f": "Mardi, ça te va ?" },
-        { "f": "Non, je travaille mardi. Et mercredi ?" },
-        { "f": "Parfait, à mercredi alors !" }
+        { "k": "A1-7-d0", "f": "On se voit quel jour ?" },
+        { "k": "A1-7-d1", "f": "Mardi, ça te va ?" },
+        { "k": "A1-7-d2", "f": "Non, je travaille mardi. Et mercredi ?" },
+        { "k": "A1-7-d3", "f": "Parfait, à mercredi alors !" }
       ]
     }
   },
@@ -1513,19 +1587,20 @@ const UNITS = [
       { "subject": "C'est loin d'ici ?", "emoji": "🗺️", "answer": false }
     ],
     "vocab": [
-      { "f": "la rue" },
-      { "f": "la place" },
-      { "f": "le musée" },
-      { "f": "l'hôpital" },
-      { "f": "la gare" },
-      { "f": "tout droit" },
-      { "f": "à gauche" },
-      { "f": "à droite" },
-      { "f": "près" },
-      { "f": "loin" }
+      { "k": "A1-8-v0", "f": "la rue" },
+      { "k": "A1-8-v1", "f": "la place" },
+      { "k": "A1-8-v2", "f": "le musée" },
+      { "k": "A1-8-v3", "f": "l'hôpital" },
+      { "k": "A1-8-v4", "f": "la gare" },
+      { "k": "A1-8-v5", "f": "tout droit" },
+      { "k": "A1-8-v6", "f": "à gauche" },
+      { "k": "A1-8-v7", "f": "à droite" },
+      { "k": "A1-8-v8", "f": "près" },
+      { "k": "A1-8-v9", "f": "loin" }
     ],
     "phrases": [
       {
+        "k": "A1-8-p0",
         "f": "Où est la gare ?",
         "blocks": [
           { "f": "Où est" },
@@ -1534,6 +1609,7 @@ const UNITS = [
         "scenarioEmoji": "🚉"
       },
       {
+        "k": "A1-8-p1",
         "f": "Tournez à gauche.",
         "blocks": [
           { "f": "Tournez" },
@@ -1542,6 +1618,7 @@ const UNITS = [
         "scenarioEmoji": "⬅️"
       },
       {
+        "k": "A1-8-p2",
         "f": "C'est tout droit.",
         "blocks": [
           { "f": "C'est" },
@@ -1550,6 +1627,7 @@ const UNITS = [
         "scenarioEmoji": "⬆️"
       },
       {
+        "k": "A1-8-p3",
         "f": "C'est loin d'ici ?",
         "blocks": [
           { "f": "C'est loin" },
@@ -1558,6 +1636,7 @@ const UNITS = [
         "scenarioEmoji": "🗺️"
       },
       {
+        "k": "A1-8-p4",
         "f": "La rue est très calme le soir.",
         "blocks": [
           { "f": "La rue" },
@@ -1566,6 +1645,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-8-p5",
         "f": "La place est au centre-ville.",
         "blocks": [
           { "f": "La place" },
@@ -1574,6 +1654,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-8-p6",
         "f": "L'hôpital est loin d'ici.",
         "blocks": [
           { "f": "L'hôpital" },
@@ -1601,11 +1682,11 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "f": "Excusez-moi, où est le musée ?" },
-        { "f": "C'est tout droit, puis à droite." },
-        { "f": "C'est loin ?" },
-        { "f": "Non, c'est à cinq minutes." },
-        { "f": "Merci beaucoup !" }
+        { "k": "A1-8-d0", "f": "Excusez-moi, où est le musée ?" },
+        { "k": "A1-8-d1", "f": "C'est tout droit, puis à droite." },
+        { "k": "A1-8-d2", "f": "C'est loin ?" },
+        { "k": "A1-8-d3", "f": "Non, c'est à cinq minutes." },
+        { "k": "A1-8-d4", "f": "Merci beaucoup !" }
       ]
     }
   },
@@ -1718,19 +1799,20 @@ const UNITS = [
       { "subject": "D'où viens-tu ?", "emoji": "🌍", "answer": false }
     ],
     "vocab": [
-      { "f": "français / française" },
-      { "f": "brésilien / brésilienne" },
-      { "f": "américain / américaine" },
-      { "f": "anglais / anglaise" },
-      { "f": "espagnol / espagnole" },
-      { "f": "italien / italienne" },
-      { "f": "allemand / allemande" },
-      { "f": "portugais / portugaise" },
-      { "f": "la nationalité" },
-      { "f": "venir de" }
+      { "k": "A1-9-v0", "f": "français / française" },
+      { "k": "A1-9-v1", "f": "brésilien / brésilienne" },
+      { "k": "A1-9-v2", "f": "américain / américaine" },
+      { "k": "A1-9-v3", "f": "anglais / anglaise" },
+      { "k": "A1-9-v4", "f": "espagnol / espagnole" },
+      { "k": "A1-9-v5", "f": "italien / italienne" },
+      { "k": "A1-9-v6", "f": "allemand / allemande" },
+      { "k": "A1-9-v7", "f": "portugais / portugaise" },
+      { "k": "A1-9-v8", "f": "la nationalité" },
+      { "k": "A1-9-v9", "f": "venir de" }
     ],
     "phrases": [
       {
+        "k": "A1-9-p0",
         "f": "Je suis {nacionalidade}.",
         "blocks": [
           { "f": "Je suis" },
@@ -1739,6 +1821,7 @@ const UNITS = [
         "scenarioEmoji": "🇧🇷"
       },
       {
+        "k": "A1-9-p1",
         "f": "Il est français, elle est espagnole.",
         "blocks": [
           { "f": "Il est français," },
@@ -1748,6 +1831,7 @@ const UNITS = [
         "scenarioEmoji": "🌍"
       },
       {
+        "k": "A1-9-p2",
         "f": "D'où viens-tu ?",
         "blocks": [
           { "f": "D'où" },
@@ -1756,6 +1840,7 @@ const UNITS = [
         "scenarioEmoji": "✈️"
       },
       {
+        "k": "A1-9-p3",
         "f": "Je viens du Portugal.",
         "blocks": [
           { "f": "Je viens" },
@@ -1764,6 +1849,7 @@ const UNITS = [
         "scenarioEmoji": "🇵🇹"
       },
       {
+        "k": "A1-9-p4",
         "f": "La nationalité est écrite sur le passeport.",
         "blocks": [
           { "f": "La nationalité" },
@@ -1791,11 +1877,11 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "Tu es d'où ?" },
-        { "f": "Je suis italienne, et toi ?" },
-        { "f": "Moi, je suis allemand." },
-        { "f": "Tu habites en Allemagne ?" },
-        { "f": "Non, j'habite au Portugal maintenant." }
+        { "k": "A1-9-d0", "f": "Tu es d'où ?" },
+        { "k": "A1-9-d1", "f": "Je suis italienne, et toi ?" },
+        { "k": "A1-9-d2", "f": "Moi, je suis allemand." },
+        { "k": "A1-9-d3", "f": "Tu habites en Allemagne ?" },
+        { "k": "A1-9-d4", "f": "Non, j'habite au Portugal maintenant." }
       ]
     }
   },
@@ -1854,23 +1940,24 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "f": "le pantalon" },
-      { "f": "la robe" },
-      { "f": "cher" },
-      { "f": "pas cher" },
-      { "f": "la taille" },
-      { "f": "le magasin" },
-      { "f": "trente" },
-      { "f": "quarante" },
-      { "f": "cinquante" },
-      { "f": "soixante" },
-      { "f": "soixante-dix" },
-      { "f": "quatre-vingts" },
-      { "f": "quatre-vingt-dix" },
-      { "f": "cent" }
+      { "k": "A1-10-v0", "f": "le pantalon" },
+      { "k": "A1-10-v1", "f": "la robe" },
+      { "k": "A1-10-v2", "f": "cher" },
+      { "k": "A1-10-v3", "f": "pas cher" },
+      { "k": "A1-10-v4", "f": "la taille" },
+      { "k": "A1-10-v5", "f": "le magasin" },
+      { "k": "A1-10-v6", "f": "trente" },
+      { "k": "A1-10-v7", "f": "quarante" },
+      { "k": "A1-10-v8", "f": "cinquante" },
+      { "k": "A1-10-v9", "f": "soixante" },
+      { "k": "A1-10-v10", "f": "soixante-dix" },
+      { "k": "A1-10-v11", "f": "quatre-vingts" },
+      { "k": "A1-10-v12", "f": "quatre-vingt-dix" },
+      { "k": "A1-10-v13", "f": "cent" }
     ],
     "phrases": [
       {
+        "k": "A1-10-p0",
         "f": "Combien ça coûte ?",
         "blocks": [
           { "f": "Combien" },
@@ -1879,6 +1966,7 @@ const UNITS = [
         "scenarioEmoji": "🏷️"
       },
       {
+        "k": "A1-10-p1",
         "f": "Ça coûte quarante euros.",
         "blocks": [
           { "f": "Ça coûte" },
@@ -1888,6 +1976,7 @@ const UNITS = [
         "scenarioEmoji": "💶"
       },
       {
+        "k": "A1-10-p2",
         "f": "Je peux essayer ce pantalon ?",
         "blocks": [
           { "f": "Je peux essayer" },
@@ -1896,6 +1985,7 @@ const UNITS = [
         "scenarioEmoji": "👖"
       },
       {
+        "k": "A1-10-p3",
         "f": "Ça fait cent euros, s'il vous plaît.",
         "blocks": [
           { "f": "Ça fait" },
@@ -1905,6 +1995,7 @@ const UNITS = [
         "scenarioEmoji": "💳"
       },
       {
+        "k": "A1-10-p4",
         "f": "Le pantalon est trop grand.",
         "blocks": [
           { "f": "Le pantalon" },
@@ -1913,6 +2004,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-10-p5",
         "f": "La robe est très jolie.",
         "blocks": [
           { "f": "La robe" },
@@ -1921,6 +2013,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-10-p6",
         "f": "Ce n'est pas cher du tout.",
         "blocks": [
           { "f": "Ce n'est" },
@@ -1929,6 +2022,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-10-p7",
         "f": "La taille est trop petite.",
         "blocks": [
           { "f": "La taille" },
@@ -1937,6 +2031,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-10-p8",
         "f": "Le magasin ferme à dix-neuf heures.",
         "blocks": [
           { "f": "Le magasin" },
@@ -1945,6 +2040,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-10-p9",
         "f": "Cette veste coûte trente euros.",
         "blocks": [
           { "f": "Cette veste" },
@@ -1953,6 +2049,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-10-p10",
         "f": "Ces chaussures coûtent cinquante euros.",
         "blocks": [
           { "f": "Ces chaussures" },
@@ -1961,6 +2058,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-10-p11",
         "f": "Le manteau coûte soixante-dix euros.",
         "blocks": [
           { "f": "Le manteau" },
@@ -1969,6 +2067,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-10-p12",
         "f": "Cette robe coûte quatre-vingts euros.",
         "blocks": [
           { "f": "Cette robe" },
@@ -1977,6 +2076,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-10-p13",
         "f": "Ce sac coûte quatre-vingt-dix euros.",
         "blocks": [
           { "f": "Ce sac" },
@@ -2004,11 +2104,11 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "Bonjour, je cherche une robe." },
-        { "f": "Quelle taille faites-vous ?" },
-        { "f": "Je fais du 38. Ça coûte combien ?" },
-        { "f": "Elle coûte soixante euros." },
-        { "f": "Parfait, je la prends !" }
+        { "k": "A1-10-d0", "f": "Bonjour, je cherche une robe." },
+        { "k": "A1-10-d1", "f": "Quelle taille faites-vous ?" },
+        { "k": "A1-10-d2", "f": "Je fais du 38. Ça coûte combien ?" },
+        { "k": "A1-10-d3", "f": "Elle coûte soixante euros." },
+        { "k": "A1-10-d4", "f": "Parfait, je la prends !" }
       ]
     }
   },
@@ -2138,19 +2238,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "f": "la viande" },
-      { "f": "le poulet" },
-      { "f": "les légumes" },
-      { "f": "la salade" },
-      { "f": "le riz" },
-      { "f": "les pâtes" },
-      { "f": "le sucre" },
-      { "f": "le sel" },
-      { "f": "l'œuf" },
-      { "f": "le dessert" }
+      { "k": "A1-11-v0", "f": "la viande" },
+      { "k": "A1-11-v1", "f": "le poulet" },
+      { "k": "A1-11-v2", "f": "les légumes" },
+      { "k": "A1-11-v3", "f": "la salade" },
+      { "k": "A1-11-v4", "f": "le riz" },
+      { "k": "A1-11-v5", "f": "les pâtes" },
+      { "k": "A1-11-v6", "f": "le sucre" },
+      { "k": "A1-11-v7", "f": "le sel" },
+      { "k": "A1-11-v8", "f": "l'œuf" },
+      { "k": "A1-11-v9", "f": "le dessert" }
     ],
     "phrases": [
       {
+        "k": "A1-11-p0",
         "f": "J'aime la viande.",
         "blocks": [
           { "f": "J'aime" },
@@ -2159,6 +2260,7 @@ const UNITS = [
         "scenarioEmoji": "🥩"
       },
       {
+        "k": "A1-11-p1",
         "f": "Je mange des légumes tous les jours.",
         "blocks": [
           { "f": "Je mange" },
@@ -2168,6 +2270,7 @@ const UNITS = [
         "scenarioEmoji": "🥦"
       },
       {
+        "k": "A1-11-p2",
         "f": "Je ne mange pas de viande.",
         "blocks": [
           { "f": "Je ne mange pas" },
@@ -2176,6 +2279,7 @@ const UNITS = [
         "scenarioEmoji": "🚫"
       },
       {
+        "k": "A1-11-p3",
         "f": "Je prends du riz et des pâtes.",
         "blocks": [
           { "f": "Je prends" },
@@ -2185,6 +2289,7 @@ const UNITS = [
         "scenarioEmoji": "🍚"
       },
       {
+        "k": "A1-11-p4",
         "f": "Le poulet est délicieux ce soir.",
         "blocks": [
           { "f": "Le poulet" },
@@ -2193,6 +2298,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-11-p5",
         "f": "Les légumes sont bons pour la santé.",
         "blocks": [
           { "f": "Les légumes" },
@@ -2201,6 +2307,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-11-p6",
         "f": "La salade est fraîche.",
         "blocks": [
           { "f": "La salade" },
@@ -2208,6 +2315,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-11-p7",
         "f": "Le riz et les pâtes sont mes plats préférés.",
         "blocks": [
           { "f": "Le riz" },
@@ -2216,6 +2324,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-11-p8",
         "f": "Le sucre et le sel sont sur la table.",
         "blocks": [
           { "f": "Le sucre" },
@@ -2224,6 +2333,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-11-p9",
         "f": "L'œuf est cuit.",
         "blocks": [
           { "f": "L'œuf" },
@@ -2231,6 +2341,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-11-p10",
         "f": "Le dessert est prêt.",
         "blocks": [
           { "f": "Le dessert" },
@@ -2257,10 +2368,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "f": "Qu'est-ce qu'on achète ?" },
-        { "f": "Du riz, des légumes et du poulet." },
-        { "f": "Tu veux un dessert ?" },
-        { "f": "Oui, avec du sucre, s'il te plaît !" }
+        { "k": "A1-11-d0", "f": "Qu'est-ce qu'on achète ?" },
+        { "k": "A1-11-d1", "f": "Du riz, des légumes et du poulet." },
+        { "k": "A1-11-d2", "f": "Tu veux un dessert ?" },
+        { "k": "A1-11-d3", "f": "Oui, avec du sucre, s'il te plaît !" }
       ]
     }
   },
@@ -2302,19 +2413,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "f": "un kilo (de)" },
-      { "f": "un demi-kilo" },
-      { "f": "un litre" },
-      { "f": "un gramme" },
-      { "f": "un peu de" },
-      { "f": "beaucoup de" },
-      { "f": "assez de" },
-      { "f": "trop de" },
-      { "f": "une tranche (de)" },
-      { "f": "une bouteille (de)" }
+      { "k": "A1-12-v0", "f": "un kilo (de)" },
+      { "k": "A1-12-v1", "f": "un demi-kilo" },
+      { "k": "A1-12-v2", "f": "un litre" },
+      { "k": "A1-12-v3", "f": "un gramme" },
+      { "k": "A1-12-v4", "f": "un peu de" },
+      { "k": "A1-12-v5", "f": "beaucoup de" },
+      { "k": "A1-12-v6", "f": "assez de" },
+      { "k": "A1-12-v7", "f": "trop de" },
+      { "k": "A1-12-v8", "f": "une tranche (de)" },
+      { "k": "A1-12-v9", "f": "une bouteille (de)" }
     ],
     "phrases": [
       {
+        "k": "A1-12-p0",
         "f": "Je prends un kilo de pommes.",
         "blocks": [
           { "f": "Je prends" },
@@ -2324,6 +2436,7 @@ const UNITS = [
         "scenarioEmoji": "🍎"
       },
       {
+        "k": "A1-12-p1",
         "f": "Un litre de lait, s'il vous plaît.",
         "blocks": [
           { "f": "Un litre" },
@@ -2333,6 +2446,7 @@ const UNITS = [
         "scenarioEmoji": "🥛"
       },
       {
+        "k": "A1-12-p2",
         "f": "C'est trop de sucre pour moi.",
         "blocks": [
           { "f": "C'est trop" },
@@ -2342,6 +2456,7 @@ const UNITS = [
         "scenarioEmoji": "🍬"
       },
       {
+        "k": "A1-12-p3",
         "f": "Une tranche de pain, s'il te plaît.",
         "blocks": [
           { "f": "Une tranche" },
@@ -2351,6 +2466,7 @@ const UNITS = [
         "scenarioEmoji": "🍞"
       },
       {
+        "k": "A1-12-p4",
         "f": "Un gramme, c'est très peu.",
         "blocks": [
           { "f": "Un gramme," },
@@ -2359,6 +2475,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-12-p5",
         "f": "Il y a beaucoup de monde ici.",
         "blocks": [
           { "f": "Il y a" },
@@ -2367,6 +2484,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-12-p6",
         "f": "Je n'ai pas assez de temps.",
         "blocks": [
           { "f": "Je n'ai pas" },
@@ -2394,10 +2512,10 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "Vous voulez combien de pommes ?" },
-        { "f": "Un demi-kilo, s'il vous plaît." },
-        { "f": "Et avec ça ?" },
-        { "f": "Une bouteille d'eau et un peu de fromage." }
+        { "k": "A1-12-d0", "f": "Vous voulez combien de pommes ?" },
+        { "k": "A1-12-d1", "f": "Un demi-kilo, s'il vous plaît." },
+        { "k": "A1-12-d2", "f": "Et avec ça ?" },
+        { "k": "A1-12-d3", "f": "Une bouteille d'eau et un peu de fromage." }
       ]
     }
   },
@@ -2442,19 +2560,20 @@ const UNITS = [
       { "subject": "Il fait très chaud aujourd'hui.", "emoji": "☀️", "answer": false }
     ],
     "vocab": [
-      { "f": "il fait beau" },
-      { "f": "il fait froid" },
-      { "f": "il fait chaud" },
-      { "f": "il pleut" },
-      { "f": "il neige" },
-      { "f": "le soleil" },
-      { "f": "le printemps" },
-      { "f": "l'été" },
-      { "f": "l'automne" },
-      { "f": "l'hiver" }
+      { "k": "A1-13-v0", "f": "il fait beau" },
+      { "k": "A1-13-v1", "f": "il fait froid" },
+      { "k": "A1-13-v2", "f": "il fait chaud" },
+      { "k": "A1-13-v3", "f": "il pleut" },
+      { "k": "A1-13-v4", "f": "il neige" },
+      { "k": "A1-13-v5", "f": "le soleil" },
+      { "k": "A1-13-v6", "f": "le printemps" },
+      { "k": "A1-13-v7", "f": "l'été" },
+      { "k": "A1-13-v8", "f": "l'automne" },
+      { "k": "A1-13-v9", "f": "l'hiver" }
     ],
     "phrases": [
       {
+        "k": "A1-13-p0",
         "f": "Quel temps fait-il ?",
         "blocks": [
           { "f": "Quel temps" },
@@ -2463,6 +2582,7 @@ const UNITS = [
         "scenarioEmoji": "🌦️"
       },
       {
+        "k": "A1-13-p1",
         "f": "Il fait très chaud aujourd'hui.",
         "blocks": [
           { "f": "Il fait" },
@@ -2472,6 +2592,7 @@ const UNITS = [
         "scenarioEmoji": "☀️"
       },
       {
+        "k": "A1-13-p2",
         "f": "J'aime l'hiver.",
         "blocks": [
           { "f": "J'aime" },
@@ -2480,6 +2601,7 @@ const UNITS = [
         "scenarioEmoji": "❄️"
       },
       {
+        "k": "A1-13-p3",
         "f": "Il pleut souvent en automne.",
         "blocks": [
           { "f": "Il pleut" },
@@ -2489,6 +2611,7 @@ const UNITS = [
         "scenarioEmoji": "🍂"
       },
       {
+        "k": "A1-13-p4",
         "f": "Il neige beaucoup en hiver.",
         "blocks": [
           { "f": "Il neige" },
@@ -2497,6 +2620,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-13-p5",
         "f": "Le soleil brille aujourd'hui.",
         "blocks": [
           { "f": "Le soleil" },
@@ -2505,6 +2629,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-13-p6",
         "f": "Le printemps est ma saison préférée.",
         "blocks": [
           { "f": "Le printemps" },
@@ -2513,6 +2638,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-13-p7",
         "f": "L'automne est très coloré.",
         "blocks": [
           { "f": "L'automne" },
@@ -2540,10 +2666,10 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "Quel temps fait-il aujourd'hui ?" },
-        { "f": "Il fait beau, mais il fait froid." },
-        { "f": "Tu préfères quelle saison ?" },
-        { "f": "Je préfère l'été, il fait chaud." }
+        { "k": "A1-13-d0", "f": "Quel temps fait-il aujourd'hui ?" },
+        { "k": "A1-13-d1", "f": "Il fait beau, mais il fait froid." },
+        { "k": "A1-13-d2", "f": "Tu préfères quelle saison ?" },
+        { "k": "A1-13-d3", "f": "Je préfère l'été, il fait chaud." }
       ]
     }
   },
@@ -2600,19 +2726,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "f": "le bus" },
-      { "f": "le train" },
-      { "f": "le métro" },
-      { "f": "la voiture" },
-      { "f": "le vélo" },
-      { "f": "à pied" },
-      { "f": "prendre" },
-      { "f": "l'arrêt" },
-      { "f": "le billet" },
-      { "f": "la station" }
+      { "k": "A1-14-v0", "f": "le bus" },
+      { "k": "A1-14-v1", "f": "le train" },
+      { "k": "A1-14-v2", "f": "le métro" },
+      { "k": "A1-14-v3", "f": "la voiture" },
+      { "k": "A1-14-v4", "f": "le vélo" },
+      { "k": "A1-14-v5", "f": "à pied" },
+      { "k": "A1-14-v6", "f": "prendre" },
+      { "k": "A1-14-v7", "f": "l'arrêt" },
+      { "k": "A1-14-v8", "f": "le billet" },
+      { "k": "A1-14-v9", "f": "la station" }
     ],
     "phrases": [
       {
+        "k": "A1-14-p0",
         "f": "Je prends le métro tous les jours.",
         "blocks": [
           { "f": "Je prends" },
@@ -2622,6 +2749,7 @@ const UNITS = [
         "scenarioEmoji": "🚇"
       },
       {
+        "k": "A1-14-p1",
         "f": "Où est l'arrêt de bus ?",
         "blocks": [
           { "f": "Où est" },
@@ -2631,6 +2759,7 @@ const UNITS = [
         "scenarioEmoji": "🚌"
       },
       {
+        "k": "A1-14-p2",
         "f": "Un billet, s'il vous plaît.",
         "blocks": [
           { "f": "Un billet," },
@@ -2639,6 +2768,7 @@ const UNITS = [
         "scenarioEmoji": "🎫"
       },
       {
+        "k": "A1-14-p3",
         "f": "Je vais au travail à pied.",
         "blocks": [
           { "f": "Je vais" },
@@ -2648,6 +2778,7 @@ const UNITS = [
         "scenarioEmoji": "🚶"
       },
       {
+        "k": "A1-14-p4",
         "f": "Je vais prendre le bus ce matin.",
         "blocks": [
           { "f": "Je vais prendre" },
@@ -2656,6 +2787,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-14-p5",
         "f": "Le train part à huit heures.",
         "blocks": [
           { "f": "Le train" },
@@ -2664,6 +2796,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-14-p6",
         "f": "La voiture est garée devant la maison.",
         "blocks": [
           { "f": "La voiture" },
@@ -2672,6 +2805,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-14-p7",
         "f": "Le vélo est plus rapide en ville.",
         "blocks": [
           { "f": "Le vélo" },
@@ -2680,6 +2814,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-14-p8",
         "f": "La station est fermée aujourd'hui.",
         "blocks": [
           { "f": "La station" },
@@ -2707,10 +2842,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "f": "Excusez-moi, ce train va au centre-ville ?" },
-        { "f": "Oui, c'est la bonne direction." },
-        { "f": "Combien coûte le billet ?" },
-        { "f": "Ça coûte deux euros." }
+        { "k": "A1-14-d0", "f": "Excusez-moi, ce train va au centre-ville ?" },
+        { "k": "A1-14-d1", "f": "Oui, c'est la bonne direction." },
+        { "k": "A1-14-d2", "f": "Combien coûte le billet ?" },
+        { "k": "A1-14-d3", "f": "Ça coûte deux euros." }
       ]
     }
   },
@@ -2827,19 +2962,20 @@ const UNITS = [
       { "subject": "J'ai mal à la tête.", "emoji": "🤕", "answer": true }
     ],
     "vocab": [
-      { "f": "la tête" },
-      { "f": "le ventre" },
-      { "f": "la main" },
-      { "f": "le pied" },
-      { "f": "malade" },
-      { "f": "le médecin" },
-      { "f": "la pharmacie" },
-      { "f": "avoir mal" },
-      { "f": "la fièvre" },
-      { "f": "se sentir" }
+      { "k": "A1-15-v0", "f": "la tête" },
+      { "k": "A1-15-v1", "f": "le ventre" },
+      { "k": "A1-15-v2", "f": "la main" },
+      { "k": "A1-15-v3", "f": "le pied" },
+      { "k": "A1-15-v4", "f": "malade" },
+      { "k": "A1-15-v5", "f": "le médecin" },
+      { "k": "A1-15-v6", "f": "la pharmacie" },
+      { "k": "A1-15-v7", "f": "avoir mal" },
+      { "k": "A1-15-v8", "f": "la fièvre" },
+      { "k": "A1-15-v9", "f": "se sentir" }
     ],
     "phrases": [
       {
+        "k": "A1-15-p0",
         "f": "J'ai mal à la tête.",
         "blocks": [
           { "f": "J'ai mal" },
@@ -2848,6 +2984,7 @@ const UNITS = [
         "scenarioEmoji": "🤕"
       },
       {
+        "k": "A1-15-p1",
         "f": "Je me sens malade.",
         "blocks": [
           { "f": "Je me sens" },
@@ -2856,6 +2993,7 @@ const UNITS = [
         "scenarioEmoji": "🤒"
       },
       {
+        "k": "A1-15-p2",
         "f": "Où est la pharmacie ?",
         "blocks": [
           { "f": "Où est" },
@@ -2864,6 +3002,7 @@ const UNITS = [
         "scenarioEmoji": "💊"
       },
       {
+        "k": "A1-15-p3",
         "f": "Il a de la fièvre.",
         "blocks": [
           { "f": "Il a" },
@@ -2872,6 +3011,7 @@ const UNITS = [
         "scenarioEmoji": "🌡️"
       },
       {
+        "k": "A1-15-p4",
         "f": "Le ventre me fait mal.",
         "blocks": [
           { "f": "Le ventre" },
@@ -2880,6 +3020,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-15-p5",
         "f": "La main est blessée.",
         "blocks": [
           { "f": "La main" },
@@ -2887,6 +3028,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-15-p6",
         "f": "Le pied me fait mal aussi.",
         "blocks": [
           { "f": "Le pied" },
@@ -2895,6 +3037,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-15-p7",
         "f": "Le médecin arrive dans dix minutes.",
         "blocks": [
           { "f": "Le médecin" },
@@ -2903,6 +3046,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-15-p8",
         "f": "Je vais avoir mal à la tête si ça continue.",
         "blocks": [
           { "f": "Je vais" },
@@ -2911,6 +3055,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-15-p9",
         "f": "Il ne va pas se sentir bien demain.",
         "blocks": [
           { "f": "Il ne va pas" },
@@ -2938,11 +3083,11 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "Qu'est-ce qui ne va pas ?" },
-        { "f": "J'ai mal au ventre et j'ai de la fièvre." },
-        { "f": "Depuis quand ?" },
-        { "f": "Depuis hier soir." },
-        { "f": "Vous devez vous reposer." }
+        { "k": "A1-15-d0", "f": "Qu'est-ce qui ne va pas ?" },
+        { "k": "A1-15-d1", "f": "J'ai mal au ventre et j'ai de la fièvre." },
+        { "k": "A1-15-d2", "f": "Depuis quand ?" },
+        { "k": "A1-15-d3", "f": "Depuis hier soir." },
+        { "k": "A1-15-d4", "f": "Vous devez vous reposer." }
       ]
     }
   },
@@ -3088,19 +3233,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "f": "rouge" },
-      { "f": "bleu" },
-      { "f": "vert" },
-      { "f": "jaune" },
-      { "f": "noir" },
-      { "f": "blanc" },
-      { "f": "grand" },
-      { "f": "petit" },
-      { "f": "joli" },
-      { "f": "gentil" }
+      { "k": "A1-16-v0", "f": "rouge" },
+      { "k": "A1-16-v1", "f": "bleu" },
+      { "k": "A1-16-v2", "f": "vert" },
+      { "k": "A1-16-v3", "f": "jaune" },
+      { "k": "A1-16-v4", "f": "noir" },
+      { "k": "A1-16-v5", "f": "blanc" },
+      { "k": "A1-16-v6", "f": "grand" },
+      { "k": "A1-16-v7", "f": "petit" },
+      { "k": "A1-16-v8", "f": "joli" },
+      { "k": "A1-16-v9", "f": "gentil" }
     ],
     "phrases": [
       {
+        "k": "A1-16-p0",
         "f": "J'aime la couleur bleue.",
         "blocks": [
           { "f": "J'aime" },
@@ -3110,6 +3256,7 @@ const UNITS = [
         "scenarioEmoji": "🔵"
       },
       {
+        "k": "A1-16-p1",
         "f": "Elle est très gentille.",
         "blocks": [
           { "f": "Elle est" },
@@ -3119,6 +3266,7 @@ const UNITS = [
         "scenarioEmoji": "😊"
       },
       {
+        "k": "A1-16-p2",
         "f": "Mon chat est noir et blanc.",
         "blocks": [
           { "f": "Mon chat" },
@@ -3128,6 +3276,7 @@ const UNITS = [
         "scenarioEmoji": "🐱"
       },
       {
+        "k": "A1-16-p3",
         "f": "C'est une jolie robe rouge.",
         "blocks": [
           { "f": "C'est" },
@@ -3137,6 +3286,7 @@ const UNITS = [
         "scenarioEmoji": "👗"
       },
       {
+        "k": "A1-16-p4",
         "f": "Le pull est vert et jaune.",
         "blocks": [
           { "f": "Le pull" },
@@ -3145,6 +3295,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-16-p5",
         "f": "Le chien est petit.",
         "blocks": [
           { "f": "Le chien" },
@@ -3171,10 +3322,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "f": "Comment est ton frère ?" },
-        { "f": "Il est grand et il a les cheveux noirs." },
-        { "f": "Il est sympa ?" },
-        { "f": "Oui, il est très gentil !" }
+        { "k": "A1-16-d0", "f": "Comment est ton frère ?" },
+        { "k": "A1-16-d1", "f": "Il est grand et il a les cheveux noirs." },
+        { "k": "A1-16-d2", "f": "Il est sympa ?" },
+        { "k": "A1-16-d3", "f": "Oui, il est très gentil !" }
       ]
     }
   },
@@ -3294,19 +3445,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "f": "la maison" },
-      { "f": "l'appartement" },
-      { "f": "la chambre" },
-      { "f": "la cuisine" },
-      { "f": "la salle de bain" },
-      { "f": "le salon" },
-      { "f": "la porte" },
-      { "f": "la fenêtre" },
-      { "f": "il y a" },
-      { "f": "il n'y a pas de" }
+      { "k": "A1-17-v0", "f": "la maison" },
+      { "k": "A1-17-v1", "f": "l'appartement" },
+      { "k": "A1-17-v2", "f": "la chambre" },
+      { "k": "A1-17-v3", "f": "la cuisine" },
+      { "k": "A1-17-v4", "f": "la salle de bain" },
+      { "k": "A1-17-v5", "f": "le salon" },
+      { "k": "A1-17-v6", "f": "la porte" },
+      { "k": "A1-17-v7", "f": "la fenêtre" },
+      { "k": "A1-17-v8", "f": "il y a" },
+      { "k": "A1-17-v9", "f": "il n'y a pas de" }
     ],
     "phrases": [
       {
+        "k": "A1-17-p0",
         "f": "Il y a une chambre.",
         "blocks": [
           { "f": "Il y a" },
@@ -3315,6 +3467,7 @@ const UNITS = [
         "scenarioEmoji": "🛏️"
       },
       {
+        "k": "A1-17-p1",
         "f": "Il y a deux salles de bain.",
         "blocks": [
           { "f": "Il y a" },
@@ -3324,6 +3477,7 @@ const UNITS = [
         "scenarioEmoji": "🚿"
       },
       {
+        "k": "A1-17-p2",
         "f": "Il n'y a pas de jardin.",
         "blocks": [
           { "f": "Il n'y a pas" },
@@ -3332,6 +3486,7 @@ const UNITS = [
         "scenarioEmoji": "🚫"
       },
       {
+        "k": "A1-17-p3",
         "f": "C'est une grande maison.",
         "blocks": [
           { "f": "C'est" },
@@ -3341,6 +3496,7 @@ const UNITS = [
         "scenarioEmoji": "🏠"
       },
       {
+        "k": "A1-17-p4",
         "f": "La maison est très grande.",
         "blocks": [
           { "f": "La maison" },
@@ -3349,6 +3505,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-17-p5",
         "f": "L'appartement a deux chambres.",
         "blocks": [
           { "f": "L'appartement" },
@@ -3357,6 +3514,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-17-p6",
         "f": "La chambre est au premier étage.",
         "blocks": [
           { "f": "La chambre" },
@@ -3365,6 +3523,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-17-p7",
         "f": "La cuisine est très propre.",
         "blocks": [
           { "f": "La cuisine" },
@@ -3373,6 +3532,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-17-p8",
         "f": "La salle de bain est à côté de la chambre.",
         "blocks": [
           { "f": "La salle de bain" },
@@ -3381,6 +3541,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-17-p9",
         "f": "Le salon est confortable.",
         "blocks": [
           { "f": "Le salon" },
@@ -3388,6 +3549,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-17-p10",
         "f": "La porte est fermée à clé.",
         "blocks": [
           { "f": "La porte" },
@@ -3396,6 +3558,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-17-p11",
         "f": "La fenêtre donne sur le jardin.",
         "blocks": [
           { "f": "La fenêtre" },
@@ -3423,10 +3586,10 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "Il y a combien de chambres ?" },
-        { "f": "Il y a deux chambres et une cuisine." },
-        { "f": "Il y a un balcon ?" },
-        { "f": "Non, il n'y a pas de balcon, mais il y a un beau salon." }
+        { "k": "A1-17-d0", "f": "Il y a combien de chambres ?" },
+        { "k": "A1-17-d1", "f": "Il y a deux chambres et une cuisine." },
+        { "k": "A1-17-d2", "f": "Il y a un balcon ?" },
+        { "k": "A1-17-d3", "f": "Non, il n'y a pas de balcon, mais il y a un beau salon." }
       ]
     }
   },
@@ -3468,19 +3631,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "f": "le lit" },
-      { "f": "la table" },
-      { "f": "la chaise" },
-      { "f": "le canapé" },
-      { "f": "la lampe" },
-      { "f": "sur" },
-      { "f": "sous" },
-      { "f": "devant" },
-      { "f": "derrière" },
-      { "f": "à côté de" }
+      { "k": "A1-18-v0", "f": "le lit" },
+      { "k": "A1-18-v1", "f": "la table" },
+      { "k": "A1-18-v2", "f": "la chaise" },
+      { "k": "A1-18-v3", "f": "le canapé" },
+      { "k": "A1-18-v4", "f": "la lampe" },
+      { "k": "A1-18-v5", "f": "sur" },
+      { "k": "A1-18-v6", "f": "sous" },
+      { "k": "A1-18-v7", "f": "devant" },
+      { "k": "A1-18-v8", "f": "derrière" },
+      { "k": "A1-18-v9", "f": "à côté de" }
     ],
     "phrases": [
       {
+        "k": "A1-18-p0",
         "f": "Le lit est à côté de la fenêtre.",
         "blocks": [
           { "f": "Le lit" },
@@ -3490,6 +3654,7 @@ const UNITS = [
         "scenarioEmoji": "🛏️"
       },
       {
+        "k": "A1-18-p1",
         "f": "Il y a une lampe sur la table.",
         "blocks": [
           { "f": "Il y a" },
@@ -3499,6 +3664,7 @@ const UNITS = [
         "scenarioEmoji": "💡"
       },
       {
+        "k": "A1-18-p2",
         "f": "Le chat est sous le canapé.",
         "blocks": [
           { "f": "Le chat" },
@@ -3508,6 +3674,7 @@ const UNITS = [
         "scenarioEmoji": "🐈"
       },
       {
+        "k": "A1-18-p3",
         "f": "La chaise bleue est devant la table.",
         "blocks": [
           { "f": "La chaise bleue" },
@@ -3517,6 +3684,7 @@ const UNITS = [
         "scenarioEmoji": "🪑"
       },
       {
+        "k": "A1-18-p4",
         "f": "Le chat est derrière la chaise.",
         "blocks": [
           { "f": "Le chat" },
@@ -3544,10 +3712,10 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "Où est mon sac ?" },
-        { "f": "Il est sous le lit." },
-        { "f": "Et mes clés ?" },
-        { "f": "Elles sont sur la table, à côté de la lampe." }
+        { "k": "A1-18-d0", "f": "Où est mon sac ?" },
+        { "k": "A1-18-d1", "f": "Il est sous le lit." },
+        { "k": "A1-18-d2", "f": "Et mes clés ?" },
+        { "k": "A1-18-d3", "f": "Elles sont sur la table, à côté de la lampe." }
       ]
     }
   },
@@ -3620,19 +3788,20 @@ const UNITS = [
       { "subject": "On va au cinéma ce soir ?", "emoji": "🎬", "answer": true }
     ],
     "vocab": [
-      { "f": "le cinéma" },
-      { "f": "la musique" },
-      { "f": "le sport" },
-      { "f": "lire" },
-      { "f": "jouer" },
-      { "f": "danser" },
-      { "f": "chanter" },
-      { "f": "le week-end" },
-      { "f": "sortir" },
-      { "f": "le film" }
+      { "k": "A1-19-v0", "f": "le cinéma" },
+      { "k": "A1-19-v1", "f": "la musique" },
+      { "k": "A1-19-v2", "f": "le sport" },
+      { "k": "A1-19-v3", "f": "lire" },
+      { "k": "A1-19-v4", "f": "jouer" },
+      { "k": "A1-19-v5", "f": "danser" },
+      { "k": "A1-19-v6", "f": "chanter" },
+      { "k": "A1-19-v7", "f": "le week-end" },
+      { "k": "A1-19-v8", "f": "sortir" },
+      { "k": "A1-19-v9", "f": "le film" }
     ],
     "phrases": [
       {
+        "k": "A1-19-p0",
         "f": "Qu'est-ce que tu fais le week-end ?",
         "blocks": [
           { "f": "Qu'est-ce que" },
@@ -3642,6 +3811,7 @@ const UNITS = [
         "scenarioEmoji": "🎨"
       },
       {
+        "k": "A1-19-p1",
         "f": "J'aime lire des livres.",
         "blocks": [
           { "f": "J'aime" },
@@ -3651,6 +3821,7 @@ const UNITS = [
         "scenarioEmoji": "📚"
       },
       {
+        "k": "A1-19-p2",
         "f": "On va au cinéma ce soir ?",
         "blocks": [
           { "f": "On va" },
@@ -3660,6 +3831,7 @@ const UNITS = [
         "scenarioEmoji": "🎬"
       },
       {
+        "k": "A1-19-p3",
         "f": "Il joue de la guitare.",
         "blocks": [
           { "f": "Il joue" },
@@ -3668,6 +3840,7 @@ const UNITS = [
         "scenarioEmoji": "🎸"
       },
       {
+        "k": "A1-19-p4",
         "f": "Le cinéma est fermé ce soir.",
         "blocks": [
           { "f": "Le cinéma" },
@@ -3676,6 +3849,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-19-p5",
         "f": "J'adore écouter de la musique.",
         "blocks": [
           { "f": "J'adore" },
@@ -3684,6 +3858,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-19-p6",
         "f": "Le sport est bon pour la santé.",
         "blocks": [
           { "f": "Le sport" },
@@ -3692,6 +3867,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-19-p7",
         "f": "Les enfants aiment jouer dehors.",
         "blocks": [
           { "f": "Les enfants" },
@@ -3700,6 +3876,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-19-p8",
         "f": "Elle adore danser et chanter.",
         "blocks": [
           { "f": "Elle adore" },
@@ -3708,6 +3885,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-19-p9",
         "f": "On va sortir samedi soir.",
         "blocks": [
           { "f": "On va" },
@@ -3716,6 +3894,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-19-p10",
         "f": "Le film commence à vingt heures.",
         "blocks": [
           { "f": "Le film" },
@@ -3743,10 +3922,10 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "Tu as des projets pour le week-end ?" },
-        { "f": "Oui, je vais au cinéma avec des amis." },
-        { "f": "Quel film vous allez voir ?" },
-        { "f": "On ne sait pas encore !" }
+        { "k": "A1-19-d0", "f": "Tu as des projets pour le week-end ?" },
+        { "k": "A1-19-d1", "f": "Oui, je vais au cinéma avec des amis." },
+        { "k": "A1-19-d2", "f": "Quel film vous allez voir ?" },
+        { "k": "A1-19-d3", "f": "On ne sait pas encore !" }
       ]
     }
   },
@@ -3851,19 +4030,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "f": "hier" },
-      { "f": "avant-hier" },
-      { "f": "la semaine dernière" },
-      { "f": "le week-end dernier" },
-      { "f": "le mois dernier" },
-      { "f": "l'année dernière" },
-      { "f": "il y a deux jours" },
-      { "f": "ce matin" },
-      { "f": "déjà" },
-      { "f": "récemment" }
+      { "k": "A1-20-v0", "f": "hier" },
+      { "k": "A1-20-v1", "f": "avant-hier" },
+      { "k": "A1-20-v2", "f": "la semaine dernière" },
+      { "k": "A1-20-v3", "f": "le week-end dernier" },
+      { "k": "A1-20-v4", "f": "le mois dernier" },
+      { "k": "A1-20-v5", "f": "l'année dernière" },
+      { "k": "A1-20-v6", "f": "il y a deux jours" },
+      { "k": "A1-20-v7", "f": "ce matin" },
+      { "k": "A1-20-v8", "f": "déjà" },
+      { "k": "A1-20-v9", "f": "récemment" }
     ],
     "phrases": [
       {
+        "k": "A1-20-p0",
         "f": "Hier, j'ai visité un musée.",
         "blocks": [
           { "f": "Hier," },
@@ -3873,6 +4053,7 @@ const UNITS = [
         "scenarioEmoji": "🖼️"
       },
       {
+        "k": "A1-20-p1",
         "f": "La semaine dernière, j'ai mangé au restaurant.",
         "blocks": [
           { "f": "La semaine dernière," },
@@ -3882,6 +4063,7 @@ const UNITS = [
         "scenarioEmoji": "🍽️"
       },
       {
+        "k": "A1-20-p2",
         "f": "Le week-end dernier, il a plu.",
         "blocks": [
           { "f": "Le week-end dernier," },
@@ -3890,6 +4072,7 @@ const UNITS = [
         "scenarioEmoji": "🌧️"
       },
       {
+        "k": "A1-20-p3",
         "f": "Tu as déjà visité Paris ?",
         "blocks": [
           { "f": "Tu as déjà" },
@@ -3898,6 +4081,7 @@ const UNITS = [
         "scenarioEmoji": "🗼"
       },
       {
+        "k": "A1-20-p4",
         "f": "Avant-hier, j'ai visité Paris.",
         "blocks": [
           { "f": "Avant-hier," },
@@ -3906,6 +4090,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-20-p5",
         "f": "Le mois dernier, j'ai voyagé en France.",
         "blocks": [
           { "f": "Le mois dernier," },
@@ -3914,6 +4099,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-20-p6",
         "f": "L'année dernière, j'ai appris le français.",
         "blocks": [
           { "f": "L'année dernière," },
@@ -3922,6 +4108,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-20-p7",
         "f": "Il y a deux jours, il a plu.",
         "blocks": [
           { "f": "Il y a deux jours," },
@@ -3929,6 +4116,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-20-p8",
         "f": "Ce matin, j'ai bu un café.",
         "blocks": [
           { "f": "Ce matin," },
@@ -3937,6 +4125,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "A1-20-p9",
         "f": "Récemment, j'ai changé de travail.",
         "blocks": [
           { "f": "Récemment," },
@@ -3964,10 +4153,10 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "f": "Qu'est-ce que tu as fait hier ?" },
-        { "f": "J'ai travaillé le matin, et l'après-midi j'ai fait du sport." },
-        { "f": "Et le week-end dernier ?" },
-        { "f": "On est allés au cinéma avec des amis." }
+        { "k": "A1-20-d0", "f": "Qu'est-ce que tu as fait hier ?" },
+        { "k": "A1-20-d1", "f": "J'ai travaillé le matin, et l'après-midi j'ai fait du sport." },
+        { "k": "A1-20-d2", "f": "Et le week-end dernier ?" },
+        { "k": "A1-20-d3", "f": "On est allés au cinéma avec des amis." }
       ]
     }
   },

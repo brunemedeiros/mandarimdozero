@@ -96,7 +96,8 @@ for (const lang of ['fr', 'zh']){
   // ---- serialização ----
   const ser = ctx.serializeCardsForSave(ctx.STATE.cards);
   const sA = ser.find(c => c.id === idA);
-  const WL = ['ef','interval','reps','due','lapses','stability','difficulty','state','lastReview','fsrsReps','fsrsLapses','fsrsMigrated','firstLearnedDate'];
+  // `released` entrou na Etapa 0 do currículo (2026-10-18): marca do portão de lição, ver tests/curriculo-ids.
+  const WL = ['ef','interval','reps','due','lapses','stability','difficulty','state','lastReview','fsrsReps','fsrsLapses','fsrsMigrated','firstLearnedDate','released'];
   check(lang + ' whitelist exatamente a especificada', JSON.stringify(run('STUDY_PROGRESS_FIELDS')) === JSON.stringify(WL));
   const allowed = new Set(['id', ...WL]);
   check(lang + ' serialização: só id + whitelist', ser.every(c => Object.keys(c).every(k => allowed.has(k))), Object.keys(sA));

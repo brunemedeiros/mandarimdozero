@@ -57,6 +57,8 @@ function loadLang(lang, overrides){
   run(read('shared/deck-engine.js'), 'shared/deck-engine.js');
   run(read('shared/deck-data.js'), 'shared/deck-data.js');
   run(require('../../scripts/lib/course-content.js').composedSource(lang) + '\n;this.UNITS = UNITS;', lang + '/content.js');
+  // Etapa 0 do currículo: mudanças de currículo do fr (fusões/aposentados), carregadas na página logo depois do content.js.
+  if (fs.existsSync(path.join(ROOT, lang, 'curriculum-changes.js'))) run(read(lang + '/curriculum-changes.js'), lang + '/curriculum-changes.js');
   run(read(lang + '/lang-hooks.js'), lang + '/lang-hooks.js'); // E4: ganchos por idioma que o shared/core usa
   const appSrc = require('../e4/app-source').withCore(read(lang + '/app.js'));
   APP_FUNCTIONS.forEach(fn => {

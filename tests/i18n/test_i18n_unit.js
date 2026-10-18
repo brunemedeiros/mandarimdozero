@@ -305,6 +305,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
       // troca geral de ícones (2026-10-14, docs/icones-fluent.md): ícone do menu (desenho antigo ou Fluent) e o script novo saem dos dois lados
       .replace(/<svg class="tab-icon[^"]*"[^>]*>[\s\S]*?<\/svg>|<img class="tab-icon[^"]*" src="..\/shared\/icons\/fluent\/[^"]+" alt="" aria-hidden="true">/g, '')
       .replace(/<script src="..\/shared\/emoji-icons\.js"><\/script>\n/g, '')
+      .replace(/<script src="curriculum-changes\.js"><\/script>\n/g, '') // Etapa 0 do currículo (2026-10-18): só um <script> de dados novo
       .replace(/[ ]*\/\* (Título de seção: antes|Botões com volume|Profundidade dos botões|Mesmo peso dos outros títulos|Medalhas do pódio)[\s\S]*?\*\/\n/g, '')
       .replace(/^[ ]*--(btn-depth|btn-depth-sm|medal-gold|medal-silver|medal-bronze|on-medal|error-red):[^\n]*\n/gm, '')
       .replace(/^[ ]*(\.btn[^{\n]*|\.section-label|\.side-card-title|#side-missions-body \.dcs-caption|\.module-label \.ml-text)\{[^}]*\}\n/gm, '');
