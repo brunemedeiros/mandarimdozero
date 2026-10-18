@@ -115,6 +115,7 @@ window.I18N_CATALOG['en'] = {
   'menu.admin': '🛠️ Admin panel', // ALTA
   'sidebar.collapse': 'Collapse menu', // ALTA
   'sidebar.expand': 'Expand menu', // ALTA
+  'sidebar.more': 'More', // ALTA
   'menu.logout': 'Sign out', // ALTA
   'menu.conjugation': '✍️ Conjugation', // ALTA
   'menu.challenges': '🎯 Challenges', // ALTA
