@@ -228,19 +228,19 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
   <div class="gate-card">
     <div class="er-head">
       <span class="er-logo"><img src="shared/brand/logo-mark.svg" alt="" width="44" height="50"></span>
-      <h1 id="gate-login-title" data-i18n="gate.brand">Idiomas com Prof. Brune</h1>
-      <p class="sub" data-i18n="gate.login.sub">Entre para continuar de onde parou ou crie sua conta grátis e escolha o que quer aprender.</p>
+      <h1 id="gate-login-title">Idiomas com Prof. Brune</h1>
+      <p class="sub" id="gate-login-sub">Entre para continuar de onde parou ou crie sua conta grátis e escolha o que quer aprender.</p>
     </div>
     <button class="gate-oauth-btn" id="gate-google-btn">
       <svg width="18" height="18" viewBox="0 0 18 18" style="flex-shrink:0;"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.91c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.27c-.81.54-1.84.86-3.05.86-2.35 0-4.34-1.58-5.05-3.71H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.95 10.7c-.18-.54-.28-1.11-.28-1.7s.1-1.16.28-1.7V4.96H.96C.35 6.17 0 7.55 0 9s.35 2.83.96 4.04l2.99-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.99 2.34C4.66 5.16 6.65 3.58 9 3.58z"/></svg>
       <span data-i18n="gate.login.google">Continuar com Google</span>
     </button>
-    <div class="gate-divider"><span data-i18n="gate.login.divider">ou entre com e-mail</span></div>
+    <div class="gate-divider"><span id="gate-login-divider">ou entre com e-mail</span></div>
     <form id="gate-email-form">
       <label class="sr-only" for="gate-email" style="position:absolute;left:-9999px;" data-i18n="gate.login.email">Seu e-mail</label>
       <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">📧</span><input type="email" id="gate-email" class="gate-input" placeholder="Seu e-mail" data-i18n-attr="placeholder:gate.login.email" autocomplete="email" required></div>
       <label class="sr-only" for="gate-password" style="position:absolute;left:-9999px;" data-i18n="gate.login.password">Sua senha</label>
-      <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="gate-password" class="gate-input" placeholder="Sua senha" data-i18n-attr="placeholder:gate.login.password" autocomplete="current-password" required minlength="6"></div>
+      <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="gate-password" class="gate-input" placeholder="Sua senha" autocomplete="current-password" required minlength="6"></div>
       <div class="gate-forgot-row">
         <button type="button" class="gate-link-btn" id="gate-forgot-btn" data-i18n="gate.login.forgot">Esqueceu sua senha?</button>
       </div>
@@ -248,7 +248,7 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
     </form>
     <p class="gate-note" id="gate-login-note" role="status"></p>
     <button type="button" class="jp-bloco jp-tom-verde" id="gate-toggle-mode-btn">
-      <span class="jp-icone" aria-hidden="true">🎁</span>
+      <span class="jp-icone" id="gate-toggle-mode-icon" aria-hidden="true">🎁</span>
       <span><b id="gate-toggle-mode-title">Crie sua conta grátis</b><small id="gate-signup-question">Lições, revisão e prática todo dia, no seu ritmo.</small></span>
       <span class="er-seta" aria-hidden="true">›</span>
     </button>
@@ -309,7 +309,6 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
 <div class="wrap" id="gate-choose-language" style="display:none;">
   <div class="gate-card">
     <div class="er-head">
-      <span class="jp-icone jp-icone--grande" aria-hidden="true">🧭</span>
       <h1 data-i18n="gate.choose.title">Qual idioma você quer aprender?</h1>
     </div>
     <div class="gate-speak" id="gate-speak" role="group" aria-label="Idioma que você fala" data-i18n-attr="aria-label:courseMenu.speakLabel">
@@ -324,7 +323,6 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
 <div class="wrap" id="gate-choose-experience" style="display:none;">
   <div class="gate-card">
     <div class="er-head">
-      <span class="jp-icone jp-icone--grande" aria-hidden="true">🎯</span>
       <h1 id="gate-exp-title"></h1>
       <p class="sub" data-i18n="gate.exp.sub">Isso só ajusta como você começa. Dá para mudar depois, a qualquer momento.</p>
     </div>
@@ -598,14 +596,34 @@ document.getElementById('gate-google-btn').addEventListener('click', async () =>
 // Auth em docs/email/supabase/bilingue/). É o idioma do site escolhido no topo da entrada (que começa pelo do navegador).
 function gateUiLanguage(){ return gateSiteLang(); }
 let gateSignupMode = false;
+// Entrar x Criar conta: o cadastro tem título, frase, divisor, senha e botão próprios, e o bloco de baixo leva de volta
+// ao login com outra cor e outro ícone (antes só o texto do bloco mudava e a tela parecia a mesma).
 function paintLoginMode(){
+  const card = document.querySelector('#gate-login .gate-card');
+  if (card) card.classList.toggle('is-signup', gateSignupMode);
+  document.getElementById('gate-login-title').textContent = t(gateSignupMode ? 'gate.signup.title' : 'gate.brand');
+  document.getElementById('gate-login-sub').textContent = t(gateSignupMode ? 'gate.signup.sub' : 'gate.login.sub');
+  document.getElementById('gate-login-divider').textContent = t(gateSignupMode ? 'gate.signup.divider' : 'gate.login.divider');
+  const pass = document.getElementById('gate-password');
+  pass.placeholder = t(gateSignupMode ? 'gate.signup.passwordPh' : 'gate.login.password');
+  pass.setAttribute('autocomplete', gateSignupMode ? 'new-password' : 'current-password');
+  const passLabel = document.querySelector('label[for="gate-password"]');
+  if (passLabel) passLabel.textContent = t(gateSignupMode ? 'gate.signup.passwordPh' : 'gate.login.password');
+  document.getElementById('gate-forgot-btn').parentElement.style.display = gateSignupMode ? 'none' : '';
+  const toggle = document.getElementById('gate-toggle-mode-btn');
+  toggle.classList.toggle('jp-tom-verde', !gateSignupMode);
+  const icon = document.getElementById('gate-toggle-mode-icon');
+  const wantIcon = gateSignupMode ? '👋' : '🎁';
+  if (icon.textContent.trim() !== wantIcon){ icon.textContent = wantIcon; if (window.EmojiIcons) window.EmojiIcons.scan(icon); }
   document.getElementById('gate-submit-btn').textContent = t(gateSignupMode ? 'gate.login.signupSubmit' : 'gate.login.submit');
   document.getElementById('gate-toggle-mode-title').textContent = t(gateSignupMode ? 'gate.login.loginLink' : 'gate.login.signupLink');
   document.getElementById('gate-signup-question').textContent = t(gateSignupMode ? 'gate.login.loginDesc' : 'gate.login.signupDesc');
 }
 document.getElementById('gate-toggle-mode-btn').addEventListener('click', () => {
   gateSignupMode = !gateSignupMode;
+  const note = document.getElementById('gate-login-note'); note.textContent = ''; note.className = 'gate-note';
   paintLoginMode();
+  document.getElementById('gate-email').focus();
 });
 
 document.getElementById('gate-email-form').addEventListener('submit', async (e) => {
