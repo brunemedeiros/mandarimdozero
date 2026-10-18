@@ -158,6 +158,8 @@ function startedCourses(raw){
 
 function courseFlag(appKey){ const l = LanguageRegistry.byAppKey(appKey); return l ? `<span class="course-flag" aria-hidden="true">${l.flagSvg}</span>` : ''; }
 
+// Último progresso lido da conta: reabrir o menu já mostra os cursos sem piscar só o atual.
+let courseMenuRaw = null;
 async function paintCourseMenu(btn, dropdown){
   ensureCourseMenuStyles();
   const render = (raw) => {
@@ -170,9 +172,9 @@ async function paintCourseMenu(btn, dropdown){
     const add = dropdown.querySelector('.course-menu-add');
     if (add) add.addEventListener('click', () => { dropdown.classList.remove('open'); openAddCourse(); });
   };
-  render(null);
+  render(courseMenuRaw);
   try {
-    if (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && typeof fetchOtherLanguagesRaw === 'function') render(await fetchOtherLanguagesRaw());
+    if (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && typeof fetchOtherLanguagesRaw === 'function'){ courseMenuRaw = await fetchOtherLanguagesRaw(); render(courseMenuRaw); }
   } catch (e) {}
 }
 
