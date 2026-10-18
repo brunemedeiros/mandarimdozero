@@ -735,6 +735,11 @@ function gradeCurrentCard(grade){
   // de ser calculado por regras SM-2 fixas.
   applyMemoryGrade(card, grade);
   trackReviewAnswer('flashcard', card, grade);
+  // Cartão da professora (Banco): o estudo em casa entra nas estatísticas e no agendamento do Banco (112).
+  if (typeof logBankHomeStudy === 'function'){
+    const kind = STATE.reviewCardState && STATE.reviewCardState.kind;
+    logBankHomeStudy(card, grade, kind === 'type_answer' || kind === 'cloze');
+  }
   STATE.totalReviews += 1;
   // Streak só conta quando a SESSÃO inteira termina (ver renderReviewView),
   // não a cada cartão avaliado -- senão avaliar 1 carta isolada já bastava

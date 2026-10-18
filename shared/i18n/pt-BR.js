@@ -3135,6 +3135,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'rb.restored': 'Item voltou para pendentes.',
   'rb.sByClass': 'Acerto por aula',
   'rb.sByType': 'Erros por tipo de item',
+  'rb.sInClass': 'Na aula',
+  'rb.sAtHome': 'Em casa',
   'rb.sDays': 'aulas revisadas',
   'rb.sHelp': 'com ajuda',
   'rb.sHint': 'desde que o registro começou',

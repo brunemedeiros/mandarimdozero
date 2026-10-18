@@ -137,10 +137,10 @@ const BANK_STUB = (who, appKey) => {
       let n = 0; D.teacher_flashcards.forEach(c => { if (c.bank_item_id === args.p_item_id){ Object.assign(c, { front: args.p_front, back_trans: args.p_back_trans, fields: args.p_fields, card_generation_mode: args.p_mode, tags: args.p_tags || [], note: args.p_note }); if (args.p_bump_revision) c.revision = (c.revision || 0) + 1; n++; } });
       return { data: n, error: null };
     }
-    if (name === 'get_my_pending_bank_reviews'){
+    if (name === 'get_my_pending_bank_reviews' || name === 'get_my_pending_bank_grades'){
       const out = D.review_bank_reviews.filter(r => !r.applied_at).map(r => ({ r, s: roster(r.bank_student_id), i: item(r.item_id) }))
         .filter(x => x.s && x.s.linked_student_id === who && x.s.language_app_key === args.p_language_app_key && x.i && x.i.teacher_flashcard_id)
-        .map(x => ({ id: x.r.id, teacher_flashcard_id: x.i.teacher_flashcard_id, outcome: x.r.outcome, created_at: x.r.created_at }));
+        .map(x => ({ id: x.r.id, teacher_flashcard_id: x.i.teacher_flashcard_id, outcome: x.r.outcome, grade: x.r.grade === undefined ? null : x.r.grade, created_at: x.r.created_at }));
       return { data: out, error: null };
     }
     if (name === 'ack_my_bank_reviews'){

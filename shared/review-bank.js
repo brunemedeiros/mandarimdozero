@@ -322,7 +322,7 @@ function rbStatsHTML(s){
     const perItem = {}; wrongs.forEach(r => { perItem[r.item_id] = (perItem[r.item_id] || 0) + 1; });
     const top = Object.entries(perItem).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id, n]) => [items.find(x => x.id === id), n]).filter(x => x[0]);
     body = `<div class="rb-tiles">
-      <div class="rb-tile"><b>${st.total}</b><span>${rbH(rbt('sTotal'))}</span></div><div class="rb-tile"><b>${st.days}</b><span>${rbH(rbt('sDays'))}</span></div>
+      <div class="rb-tile"><b>${st.total}</b><span>${rbH(rbt('sTotal'))}</span></div><div class="rb-tile"><b>${st.days}</b><span>${rbH(rbt('sDays'))}</span></div><div class="rb-tile"><b>${st.inClass}</b><span>${rbH(rbt('sInClass'))}</span></div><div class="rb-tile"><b>${st.atHome}</b><span>${rbH(rbt('sAtHome'))}</span></div>
       <div class="rb-tile is-ok"><b>${st.okPct}%</b><span>${rbH(rbt('sOk'))}</span></div><div class="rb-tile"><b>${st.helpPct}%</b><span>${rbH(rbt('sHelp'))}</span></div><div class="rb-tile is-bad"><b>${st.wrongPct}%</b><span>${rbH(rbt('sWrong'))}</span></div></div>
       <div class="rb-grid">
         <div><h5>${rbH(rbt('sByClass'))}</h5><div class="rb-cols">${st.byDay.map(d => `<div class="c" title="${rbH(rbt('sTip', { d: rbDateFmt(d.date), a: d.ok, h: d.help, e: d.wrong }))}"><em>${d.pct}%</em><i style="height:${Math.max(2, d.pct)}%"></i></div>`).join('')}</div><div class="rb-cols-x">${st.byDay.map(d => `<span>${rbDateFmt(d.date)}</span>`).join('')}</div></div>

@@ -3119,6 +3119,8 @@ window.I18N_CATALOG['en'] = {
   'rb.restored': 'Item went back to pending.', // ALTA
   'rb.sByClass': 'Accuracy per class', // ALTA
   'rb.sByType': 'Mistakes by item type', // ALTA
+  'rb.sInClass': 'In class', // ALTA
+  'rb.sAtHome': 'At home', // ALTA
   'rb.sDays': 'classes reviewed', // ALTA
   'rb.sHelp': 'with help', // ALTA
   'rb.sHint': 'since tracking started', // ALTA

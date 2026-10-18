@@ -96,6 +96,9 @@ const pvs = J(R('rbGradePreviews(__i, __n)', { i: { ...novo, fsrs: gb.fsrs }, n:
 check('prévia dos 4 botões cresce de Errei a Fácil', pvs.length === 4 && pvs[0] < pvs[1] && pvs[1] <= pvs[2] && pvs[2] <= pvs[3], JSON.stringify(pvs));
 check('só campos conhecidos vão para o fsrs do item', Object.keys(gb.fsrs).every(k => ['stability', 'difficulty', 'state', 'lastReview', 'due', 'reps', 'lapses', 'interval', 'fsrsReps', 'fsrsLapses'].includes(k)), Object.keys(gb.fsrs).join());
 
+const poolC = [it('x1', { last_review_date: '2026-10-13', due_date: '2026-10-10' }), it('x2', { last_review_date: '2026-10-13', due_date: '2026-10-10', last_result: 'errou' }), it('x3', { last_review_date: '2026-10-10', due_date: '2026-10-10' })];
+check('récap: quem foi revisto nos últimos 3 dias descansa, exceto o que errou', JSON.stringify(J(R('rbSelectRecap(__p, "2026-10-14", 8).map(i => i.id)', { p: poolC }))) === JSON.stringify(['x2', 'x3']));
+check('estatísticas separam respostas da aula e de casa', (() => { const st = J(R('rbStatsFromReviews(__r)', { r: [{ review_date: '2026-10-10', outcome: 'acertou' }, { review_date: '2026-10-11', outcome: 'errou', via: 'casa' }, { review_date: '2026-10-11', outcome: 'acertou', via: 'casa' }] })); return st.total === 3 && st.inClass === 1 && st.atHome === 2; })());
 // --- estatísticas
 const rev = [
   { review_date: '2026-10-10', outcome: 'acertou', reason: null, mode: 'recap' }, { review_date: '2026-10-10', outcome: 'errou', reason: 'ordem', mode: 'recap' },

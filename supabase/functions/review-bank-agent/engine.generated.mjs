@@ -5351,9 +5351,15 @@ function rbGradePreviews(item, nowMs, engine){
 
 // Récap: até `size` itens aprovados vencidos até `lessonDate` (ou nunca revistos). Errados por último resultado primeiro,
 // depois os mais atrasados, depois os de nível mais baixo e os mais recentes.
+const RB_RECAP_COOLDOWN_DAYS = 3;
 function rbSelectRecap(items, lessonDate, size){
   const n = size || RB_RECAP_SIZE;
-  const due = (items || []).filter(i => i.status === 'aprovado' && (!i.due_date || i.due_date <= lessonDate));
+  // Agendamento único (112): due_date vem do FSRS, seja da aula ou do estudo em casa. Quem foi revisto nos últimos
+  // RB_RECAP_COOLDOWN_DAYS dias (em casa ou na aula) descansa, a não ser que tenha errado: o que o aluno acabou de
+  // estudar sozinho não volta na aula seguinte.
+  const cool = rbAddDays(lessonDate, -RB_RECAP_COOLDOWN_DAYS);
+  const due = (items || []).filter(i => i.status === 'aprovado' && (!i.due_date || i.due_date <= lessonDate)
+    && !(i.last_review_date && i.last_review_date > cool && i.last_result !== 'errou'));
   due.sort((a, b) =>
     ((b.last_result === 'errou') - (a.last_result === 'errou')) ||
     String(a.due_date || '0000').localeCompare(String(b.due_date || '0000')) ||
@@ -5382,7 +5388,8 @@ function rbStatsFromReviews(reviews){
     const rs = list.filter(r => r.review_date === d), a = rs.filter(r => r.outcome === 'acertou').length, h = rs.filter(r => r.outcome === 'ajuda').length;
     return { date: d, pct: rbPercent(a, rs.length) || 0, ok: a, help: h, wrong: rs.length - a - h };
   });
-  return { total, days: days.length, okPct: rbPercent(ok, total), helpPct: rbPercent(help, total), wrongPct: rbPercent(wrong.length, total), byDay, byReason: count(wrong, r => r.reason) };
+  const home = list.filter(r => r.via === 'casa').length;
+  return { total, inClass: total - home, atHome: home, days: days.length, okPct: rbPercent(ok, total), helpPct: rbPercent(help, total), wrongPct: rbPercent(wrong.length, total), byDay, byReason: count(wrong, r => r.reason) };
 }
 
 // Uma linha da Visão geral por aluno do Banco.
@@ -5401,7 +5408,7 @@ function rbOverviewRow(student, items, reviews, recap, today){
     nextLesson: lessons[0] || '', hasAgenda: (student.lesson_dates || []).length > 0,
     pending: (items || []).filter(i => i.status === 'pendente').length, approved: (items || []).filter(i => i.status === 'aprovado').length,
     lastEntry: last, daysSinceEntry: days, recapGenerated: recap ? recap.class_date : '', recapUsed: lastRecapUsed,
-    n30: r30.length, accuracy: rbPercent(ok, r30.length), errors30: wrong.length, topReason: topReason ? topReason[0] : '',
+    n30: r30.length, home30: r30.filter(r => r.via === 'casa').length, accuracy: rbPercent(ok, r30.length), errors30: wrong.length, topReason: topReason ? topReason[0] : '',
   };
 }
 
