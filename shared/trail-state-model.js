@@ -54,6 +54,27 @@ function recalcUnlocked(groups, progress){
   return progress;
 }
 
+// Etapa 0b do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.10, decisão da dona): "a unidade nova
+// nasce aberta, mas não concluída". Junto com recalcUnlocked, a regra completa é: dentro de um grupo (nível), a unidade
+// fica aberta se é a 1ª, se a anterior está concluída OU se alguma unidade DEPOIS dela no mesmo grupo já está aberta
+// (unidade inserida antes do ponto onde o aluno já está). Esta função faz a 3ª parte: só ABRE (`unlocked`); nunca
+// conclui, nunca começa, não mexe em lição e nunca tranca. Não é bloqueio nem tarefa obrigatória: a unidade só aparece
+// liberada. Quem ainda não chegou lá não muda nada (nenhuma unidade depois dela está aberta). Idempotente.
+// Muta `progress` e devolve os ids que abriu agora (vazio = nada mudou).
+function openUnitsBeforeOpenOnes(groups, progress){
+  const opened = [];
+  (groups || []).forEach(units => {
+    let laterOpen = false;
+    for (let i = (units || []).length - 1; i >= 0; i--){
+      const prog = progress[units[i].id];
+      if (!prog) continue;
+      if (laterOpen && !prog.unlocked){ prog.unlocked = true; opened.push(units[i].id); }
+      if (prog.unlocked || prog.completed) laterOpen = true;
+    }
+  });
+  return opened;
+}
+
 // Primeira unidade, em ordem da trilha, que não está concluída E está
 // liberada. null = trilha inteira concluída (ou nenhuma liberada).
 function currentTrailUnit(groups, progress){
