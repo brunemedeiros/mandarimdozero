@@ -82,6 +82,11 @@ check('fr (f): ordem trocada = errou', FR.avaliarRespostaDigitada('allemande / a
 check('fr (f): vírgula de uma forma só continua pontuação ("Bonjour, Sophie" por "bonjour sophie")', FR.avaliarRespostaDigitada('Bonjour, Sophie', 'bonjour sophie'), 'ok');
 check('fr (f): as duas formas com uma errada = errou', FR.avaliarRespostaDigitada('allemand / allemand', 'allemand / allemande'), 'errou');
 check('fr (f): respostaDigitadaCerta aceita o texto inteiro', FL.respostaDigitadaCerta('un / une', 'un / une'), true);
+check('acentuação (f): uma das duas formas, com acento = ok', FR.resultadoAcentuacao('française', 'français / française'), 'ok');
+check('acentuação (f): texto inteiro com barra ou vírgula = ok', [FR.resultadoAcentuacao('français / française', 'français / française'), FR.resultadoAcentuacao('français, française', 'français / française')], ['ok', 'ok']);
+check('acentuação (f): sem acento numa forma = partial', FR.resultadoAcentuacao('francaise', 'français / française'), 'partial');
+check('acentuação (f): palavra de outro cartão = fail e ordem trocada = fail', [FR.resultadoAcentuacao('italien', 'français / française'), FR.resultadoAcentuacao('française / français', 'français / française')], ['fail', 'fail']);
+check('acentuação: alvo de uma forma só não mudou', [FR.resultadoAcentuacao('etudiant', 'étudiant'), FR.resultadoAcentuacao('étudiant', 'étudiant')], ['partial', 'ok']);
 check('teclado fr: 14 teclas, com œ', CFG.gruposDeAcentos.flat().length === 14 && CFG.gruposDeAcentos.flat().includes('œ'), true);
 console.log(`família latina, francês: ${ok}/${ok + ruim} passaram`);
 process.exit(ruim ? 1 : 0);

@@ -55,14 +55,14 @@ function _answerLigatureFold(s){
 function typedAnswerVerdictForExpected(typed, expected){
   const forms = acceptedForms(expected);
   const raw = String(typed == null ? '' : typed);
-  const variants = [raw.replace(/\s*\/\s*/g, ' / ')];
+  const variants = [raw, raw.replace(/\s*\/\s*/g, ' / ')];
   if (forms.length > 1 && raw.indexOf(',') !== -1) variants.push(raw.replace(/,/g, ' / ').replace(/\s*\/\s*/g, ' / '));
   const rank = { ok: 2, quase: 1, errou: 0 };
   let best = 'errou';
   variants.forEach(v => {
     let r = typedAnswerVerdict(v, forms);
     if (forms.length > 1){
-      const w = typedAnswerVerdict(v, [forms.join(' / ')], { semAproximar: true });
+      const w = typedAnswerVerdict(v, [forms.join(' / '), String(expected).trim()], { semAproximar: true });
       if (rank[w] > rank[r]) r = w;
     }
     if (rank[r] > rank[best]) best = r;

@@ -47,7 +47,9 @@
   // com ou sem espaço em volta da barra) ou só uma: a lista aceita ganha o texto inteiro além de cada forma.
   function formasDigitaveis(expected) {
     var forms = formasAceitas(expected);
-    return forms.length > 1 ? forms.concat(forms.join(' / ')) : forms;
+    if (forms.length < 2) return forms;
+    var inteiro = String(expected).trim();
+    return forms.concat(forms.join(' / ')).concat(inteiro && inteiro !== forms.join(' / ') ? [inteiro] : []);
   }
   function juntarBarra(s) {
     return String(s).replace(/\s*\/\s*/g, ' / ');
@@ -55,9 +57,9 @@
   // O que a pessoa digitou, como a comparação deve tentar: a barra com espaço padronizado e, quando o cartão tem
   // duas formas, também a vírgula lida como barra ("allemand, allemande"). A ordem trocada NÃO vale.
   function variantesDigitadas(typed, expected) {
-    var v = [juntarBarra(typed)];
+    var v = [String(typed), juntarBarra(typed)];
     if (formasAceitas(expected).length > 1 && String(typed).indexOf(',') !== -1) v.push(juntarBarra(String(typed).replace(/,/g, ' / ')));
-    return v;
+    return v.filter(function (x, i) { return v.indexOf(x) === i; });
   }
 
   // Pontuação ignorada nos exercícios de digitar. O fr usa DUAS listas hoje (achado: o "Digite o que
@@ -129,8 +131,14 @@
   function normalizarParaAcentuacao(s) {
     return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
   }
+  // Alvo com duas formas ("un / une"): vale uma forma só ou o texto inteiro (barra com ou sem espaço, vírgula),
+  // sempre com o acento exigido. Alvo de uma forma só: igual a antes.
   function acentuacaoCerta(studentAnswer, targetText) {
-    return normalizarParaAcentuacao(studentAnswer) === normalizarParaAcentuacao(targetText);
+    var alvos = formasDigitaveis(targetText);
+    if (alvos.length < 2) return normalizarParaAcentuacao(studentAnswer) === normalizarParaAcentuacao(targetText);
+    return variantesDigitadas(studentAnswer, targetText).some(function (v) {
+      return alvos.some(function (a) { return normalizarParaAcentuacao(v) === normalizarParaAcentuacao(a); });
+    });
   }
   function semAcentoParaAcentuacao(s, ligaduras) {
     var out = normalizarParaAcentuacao(s).normalize('NFD').replace(MARCAS_RE, '');
@@ -141,8 +149,15 @@
   // contar como 'partial'; o fr de hoje NÃO passa ligaduras (achado: "soeur" por "sœur" dá 'fail').
   function resultadoAcentuacao(studentAnswer, targetText, ligaduras) {
     if (acentuacaoCerta(studentAnswer, targetText)) return 'ok';
-    var typed = semAcentoParaAcentuacao(studentAnswer, ligaduras);
-    if (typed && typed === semAcentoParaAcentuacao(targetText, ligaduras)) return 'partial';
+    var alvos = formasDigitaveis(targetText);
+    if (alvos.length < 2) alvos = [targetText];
+    var vars = alvos.length > 1 ? variantesDigitadas(studentAnswer, targetText) : [studentAnswer];
+    for (var i = 0; i < vars.length; i++) {
+      var typed = semAcentoParaAcentuacao(vars[i], ligaduras);
+      for (var j = 0; j < alvos.length; j++) {
+        if (typed && typed === semAcentoParaAcentuacao(alvos[j], ligaduras)) return 'partial';
+      }
+    }
     return 'fail';
   }
 
