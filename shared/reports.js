@@ -49,6 +49,9 @@ const REPORT_CATEGORIES = [
 // só a admin define no Painel de Admin, depois de analisar). Opcional: exigir
 // isso quebraria o fluxo rápido pedido na auditoria ("clicar → escolher
 // categoria → descrever → enviar").
+// Ícone e tom de cada categoria/gravidade: só aparência (estética "janela rica", 2026-10-18).
+const REPORT_CATEGORY_ICONS = { bug_tecnico: ['🐞', 'rosa'], erro_conteudo: ['📄', 'marca'], traducao: ['🌐', 'marca'], audio: ['🔊', 'verde'], visual: ['🎨', 'ouro'], comportamento_inesperado: ['🔁', 'marca'], sugestao_melhoria: ['💡', 'ouro'], outro: ['💬', 'marca'] };
+const REPORT_SEVERITY_ICONS = { impede: '🚫', dificulta: '🐢', pequeno: '🔍', sugestao: '💡' };
 const REPORT_SEVERITIES = [
   { id: 'impede', label: 'Impede continuar', labelKey: 'report.severity.impede' },
   { id: 'dificulta', label: 'Dificulta a atividade', labelKey: 'report.severity.dificulta' },
@@ -382,15 +385,17 @@ let REPORT_SELECTED_SEVERITY = null;
 function populateReportOptionButtons(){
   const catWrap = document.getElementById('report-category-options');
   if (catWrap && !catWrap.dataset.built){
-    catWrap.innerHTML = REPORT_CATEGORIES.map((c, i) =>
-      `<button type="button" class="report-option-btn" data-category="${c.id}">${i + 1}. ${reportT(c.labelKey, c.label)}</button>`
-    ).join('');
+    catWrap.innerHTML = REPORT_CATEGORIES.map((c, i) => {
+      const [ico, tom] = REPORT_CATEGORY_ICONS[c.id] || ['💬', 'marca'];
+      return `<button type="button" class="report-option-btn jp-opcao" data-category="${c.id}" aria-pressed="false"><span class="jp-icone jp-tom-${tom}" aria-hidden="true">${ico}</span><span><b class="report-option-title">${i + 1}. ${reportT(c.labelKey, c.label)}</b><small class="report-option-desc">${reportT(c.labelKey + '.desc', '')}</small></span></button>`;
+    }).join('');
+    if (window.EmojiIcons) window.EmojiIcons.scan(catWrap);
     catWrap.dataset.built = '1';
     catWrap.addEventListener('click', (e) => {
       const btn = e.target.closest('.report-option-btn');
       if (!btn) return;
       REPORT_SELECTED_CATEGORY = btn.dataset.category;
-      catWrap.querySelectorAll('.report-option-btn').forEach(b => b.classList.toggle('selected', b === btn));
+      catWrap.querySelectorAll('.report-option-btn').forEach(b => { b.classList.toggle('selected', b === btn); b.setAttribute('aria-pressed', String(b === btn)); });
       const errEl = document.getElementById('report-error');
       if (errEl) errEl.textContent = '';
     });
@@ -398,16 +403,17 @@ function populateReportOptionButtons(){
   const sevWrap = document.getElementById('report-severity-options');
   if (sevWrap && !sevWrap.dataset.built){
     sevWrap.innerHTML = REPORT_SEVERITIES.map(s =>
-      `<button type="button" class="report-severity-btn" data-severity="${s.id}">${reportT(s.labelKey, s.label)}</button>`
+      `<button type="button" class="report-severity-btn jp-chip" data-severity="${s.id}" aria-pressed="false"><span aria-hidden="true">${REPORT_SEVERITY_ICONS[s.id] || ''}</span><span class="report-severity-label">${reportT(s.labelKey, s.label)}</span></button>`
     ).join('');
+    if (window.EmojiIcons) window.EmojiIcons.scan(sevWrap);
     sevWrap.dataset.built = '1';
     sevWrap.addEventListener('click', (e) => {
       const btn = e.target.closest('.report-severity-btn');
       if (!btn) return;
       const wasSelected = btn.classList.contains('selected');
-      sevWrap.querySelectorAll('.report-severity-btn').forEach(b => b.classList.remove('selected'));
+      sevWrap.querySelectorAll('.report-severity-btn').forEach(b => { b.classList.remove('selected'); b.setAttribute('aria-pressed', 'false'); });
       REPORT_SELECTED_SEVERITY = wasSelected ? null : btn.dataset.severity;
-      if (!wasSelected) btn.classList.add('selected');
+      if (!wasSelected){ btn.classList.add('selected'); btn.setAttribute('aria-pressed', 'true'); }
     });
   }
 }
@@ -418,12 +424,26 @@ function populateReportOptionButtons(){
 function refreshReportOptionLabels(){
   document.querySelectorAll('#report-category-options .report-option-btn').forEach((btn, i) => {
     const c = REPORT_CATEGORIES.find(x => x.id === btn.dataset.category);
-    if (c) btn.textContent = `${i + 1}. ${reportT(c.labelKey, c.label)}`;
+    if (!c) return;
+    const tEl = btn.querySelector('.report-option-title'), dEl = btn.querySelector('.report-option-desc');
+    if (tEl) tEl.textContent = `${i + 1}. ${reportT(c.labelKey, c.label)}`; else btn.textContent = `${i + 1}. ${reportT(c.labelKey, c.label)}`;
+    if (dEl) dEl.textContent = reportT(c.labelKey + '.desc', '');
   });
   document.querySelectorAll('#report-severity-options .report-severity-btn').forEach(btn => {
     const sv = REPORT_SEVERITIES.find(x => x.id === btn.dataset.severity);
-    if (sv) btn.textContent = reportT(sv.labelKey, sv.label);
+    if (!sv) return;
+    const lEl = btn.querySelector('.report-severity-label');
+    if (lEl) lEl.textContent = reportT(sv.labelKey, sv.label); else btn.textContent = reportT(sv.labelKey, sv.label);
   });
+}
+
+// Contador da descrição (o limite é o maxlength do campo, 600).
+function updateReportDescriptionCount(){
+  const desc = document.getElementById('report-description');
+  const out = document.getElementById('report-description-count');
+  if (!desc || !out) return;
+  out.textContent = `${desc.value.length}/${desc.maxLength > 0 ? desc.maxLength : 600}`;
+  if (!desc.dataset.countWired){ desc.dataset.countWired = '1'; desc.addEventListener('input', updateReportDescriptionCount); }
 }
 
 function resetReportForm(){
@@ -431,11 +451,12 @@ function resetReportForm(){
   REPORT_SELECTED_SEVERITY = null;
   REPORT_MODAL_SCREENSHOT_FILE = null;
   document.getElementById('report-category-options')?.querySelectorAll('.report-option-btn')
-    .forEach(b => b.classList.remove('selected'));
+    .forEach(b => { b.classList.remove('selected'); b.setAttribute('aria-pressed', 'false'); });
   document.getElementById('report-severity-options')?.querySelectorAll('.report-severity-btn')
-    .forEach(b => b.classList.remove('selected'));
+    .forEach(b => { b.classList.remove('selected'); b.setAttribute('aria-pressed', 'false'); });
   const desc = document.getElementById('report-description');
   if (desc) desc.value = '';
+  updateReportDescriptionCount();
   const exp = document.getElementById('report-expected');
   if (exp) exp.value = '';
   // Só convidado vê/preenche este campo -- conta logada já tem e-mail
@@ -450,7 +471,7 @@ function resetReportForm(){
   const errEl = document.getElementById('report-error');
   if (errEl) errEl.textContent = '';
   const submitBtn = document.getElementById('report-submit-btn');
-  if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = reportT('report.modal.submit', 'Enviar'); }
+  if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = reportT('report.modal.sendReport', 'Enviar relato'); }
   const formView = document.getElementById('report-form-view');
   const successView = document.getElementById('report-success-view');
   if (formView) formView.style.display = '';
@@ -538,7 +559,7 @@ async function submitReport(){
   const rateCheck = await reportCheckRateLimit();
   if (!rateCheck.ok){
     if (errEl) errEl.textContent = rateCheck.error;
-    if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = reportT('report.modal.submit', 'Enviar'); }
+    if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = reportT('report.modal.sendReport', 'Enviar relato'); }
     return;
   }
 
@@ -547,7 +568,7 @@ async function submitReport(){
     const upload = await uploadReportScreenshot(REPORT_MODAL_SCREENSHOT_FILE);
     if (!upload.ok){
       if (errEl) errEl.textContent = upload.error;
-      if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = reportT('report.modal.submit', 'Enviar'); }
+      if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = reportT('report.modal.sendReport', 'Enviar relato'); }
       return;
     }
     screenshotUrl = upload.url;
@@ -585,7 +606,7 @@ async function submitReport(){
     if (error) throw error;
   } catch (e) {
     if (errEl) errEl.textContent = reportT('report.error.sendFailed', 'Não foi possível enviar. Verifique sua conexão e tente de novo.');
-    if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = reportT('report.modal.submit', 'Enviar'); }
+    if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = reportT('report.modal.sendReport', 'Enviar relato'); }
     return;
   }
 

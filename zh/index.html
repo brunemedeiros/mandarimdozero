@@ -3715,7 +3715,7 @@ body.hide-pinyin .prompt-pinyin{
 .janela-painel.painel button.app-modal-close:hover{ background:var(--p-superficie); }
 /* Botões: rodapé à direita, tamanho do conteúdo; principal na cor da marca, secundário em contorno */
 .janela-painel.painel .app-modal-body div:has(> .btn-primary + .btn), .janela-painel.painel .app-modal-body div:has(> .btn-secondary + .btn-primary){ display:flex !important; justify-content:flex-end; gap:.6rem !important; flex-wrap:wrap; margin-top:1rem !important; }
-.janela-painel.painel button.btn{ flex:0 0 auto !important; width:auto; min-height:2.6rem; margin:0; padding:.5rem 1.3rem; border-radius:999px; font-weight:800; box-shadow:none; }
+.janela-painel.painel button.btn{ flex:1 1 0 !important; width:auto; min-height:2.9rem; margin:0; padding:.5rem 1.3rem; border-radius:999px; font-weight:800; box-shadow:none; }
 .janela-painel.painel button.btn.btn-primary{ background:var(--p-marca); border:0; color:var(--p-texto-botao); }
 .janela-painel.painel button.btn.btn-primary:hover{ background:var(--p-botao-hover); }
 .janela-painel.painel button.btn.btn-secondary{ background:transparent; border:1px solid var(--p-borda-campo); color:var(--p-tinta); }
@@ -3765,8 +3765,52 @@ body.hide-pinyin .prompt-pinyin{
 .janela-painel.painel #profile-edit-form .profile-edit-hint{ margin:.35rem 0 0; }
 .janela-painel.painel .pref-row-sub + .pref-row-sub{ margin-top:.35rem; }
 .janela-painel.painel .profile-share-helper{ font-weight:700; color:var(--p-tinta); }
+/* ---------- Estética "janela rica" (padrão aprovado pela autora em 2026-10-18) ----------
+   Mesmos elementos dos avisos Premium/Limite: título forte com subtítulo, ícone em quadrado tingido, blocos de
+   informação tingidos, opções com título e descrição. Cores só dos tokens de cada curso (--tom). */
+.janela-painel.painel .jp-tom-marca{ --tom:var(--p-marca); } .janela-painel.painel .jp-tom-ouro{ --tom:var(--hover-gold); }
+.janela-painel.painel .jp-tom-verde{ --tom:var(--jade); } .janela-painel.painel .jp-tom-rosa{ --tom:var(--error-red); }
+.janela-painel.painel .app-modal-header h3, .janela-painel.painel .janela-titulo h3{ font-size:1.35rem; font-weight:900; letter-spacing:-.01em; line-height:1.2; }
+.janela-painel.painel .jp-icone{ flex:none; width:46px; height:46px; border-radius:14px; display:grid; place-items:center; font-size:23px; line-height:1; background:color-mix(in srgb, var(--tom, var(--p-marca)) 18%, var(--p-elevado)); }
+.janela-painel.painel .jp-icone--grande{ width:72px; height:72px; border-radius:22px; font-size:38px; }
+.janela-painel.painel .jp-bloco{ display:grid; grid-template-columns:auto minmax(0, 1fr); gap:14px; align-items:center; margin:0; padding:14px 16px; border-radius:16px; background:color-mix(in srgb, var(--tom, var(--p-marca)) 10%, var(--p-elevado)); border:1px solid color-mix(in srgb, var(--tom, var(--p-marca)) 22%, var(--p-linha)); }
+.janela-painel.painel .jp-bloco b{ display:block; font-size:.98rem; font-weight:800; color:var(--p-tinta); }
+.janela-painel.painel .jp-bloco > span:not(.jp-icone) > span{ display:block; font-size:.9rem; line-height:1.45; color:var(--p-tinta-suave); }
+.janela-painel.painel .jp-blocos{ display:grid; gap:10px; }
+.janela-painel.painel .jp-destaque{ margin:0; font-size:1.15rem; line-height:1.35; font-weight:900; color:var(--p-tinta); text-wrap:balance; }
+.janela-painel.painel .jp-centro{ display:grid; justify-items:center; text-align:center; gap:10px; }
+.janela-painel.painel .jp-tagline{ margin:0; font-size:1.05rem; font-weight:800; color:var(--p-marca-escura); }
+/* Opções com ícone, título e descrição (Reportar) */
+.janela-painel.painel button.jp-opcao{ display:grid; grid-template-columns:auto minmax(0, 1fr); gap:12px; align-items:center; width:100%; min-height:0; margin:0; padding:10px 14px; border:1px solid var(--p-borda-campo); border-radius:14px; background:var(--p-elevado); color:var(--p-tinta); text-align:left; font-weight:400; box-shadow:none; }
+.janela-painel.painel button.jp-opcao:hover{ background:var(--p-superficie); }
+.janela-painel.painel button.jp-opcao.selected, .janela-painel.painel button.jp-opcao[aria-pressed="true"]{ border-color:var(--p-marca-escura); background:color-mix(in srgb, var(--p-marca) 10%, var(--p-elevado)); box-shadow:0 0 0 2px color-mix(in srgb, var(--p-marca-escura) 30%, transparent); }
+.janela-painel.painel .jp-opcao .jp-icone{ width:38px; height:38px; border-radius:12px; font-size:20px; }
+.janela-painel.painel .jp-opcao b{ display:block; font-size:.95rem; font-weight:800; line-height:1.3; }
+.janela-painel.painel .jp-opcao small{ display:block; font-size:.82rem; line-height:1.35; color:var(--p-tinta-suave); }
+.janela-painel.painel .report-option-grid{ display:grid; gap:8px; }
+.janela-painel.painel button.jp-chip{ display:inline-flex; align-items:center; gap:6px; }
+.janela-painel.painel button.jp-chip .emo{ font-size:1.05em; }
+/* Campo com ícone dentro (Editar perfil) */
+.janela-painel.painel .jp-campo{ position:relative; }
+.janela-painel.painel .jp-campo > .jp-campo-ico{ position:absolute; left:14px; top:.85rem; font-size:1.05rem; line-height:1; pointer-events:none; opacity:.85; }
+.janela-painel.painel .jp-campo > :is(input, textarea){ padding-left:2.6rem; }
+.janela-painel.painel .jp-contador{ text-align:right; font-size:.82rem; color:var(--p-tinta-suave); margin-top:.25rem; }
+/* Editar perfil: identidade ao lado da foto e bloco de privacidade */
+.janela-painel.painel .profile-edit-avatar-row{ display:flex; align-items:center; gap:18px; }
+.janela-painel.painel .profile-edit-avatar-actions{ display:grid; gap:4px; justify-items:start; }
+.janela-painel.painel .profile-edit-avatar-actions b{ font-size:1.02rem; font-weight:800; color:var(--p-tinta); }
+.janela-painel.painel .profile-edit-avatar-actions > span{ font-size:.88rem; color:var(--p-tinta-suave); }
+.janela-painel.painel .profile-edit-avatar-actions .jp-acoes-foto{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+.janela-painel.painel .pref-row.jp-privacidade{ display:grid; grid-template-columns:auto minmax(0, 1fr) auto; gap:14px; align-items:start; padding:16px; border-radius:16px; background:color-mix(in srgb, var(--p-marca) 9%, var(--p-elevado)); border:1px solid color-mix(in srgb, var(--p-marca) 22%, var(--p-linha)); }
+.janela-painel.painel .jp-ajuda{ display:flex; align-items:center; gap:8px; margin-top:.6rem; padding:8px 12px; border-radius:12px; background:color-mix(in srgb, var(--p-marca) 12%, var(--p-elevado)); font-size:.88rem; font-weight:800; color:var(--p-tinta); }
+/* Trocar de curso */
+.janela-painel.painel .course-confirm{ display:grid; gap:12px; }
+.janela-painel.painel .course-confirm-p{ color:var(--p-tinta); line-height:1.55; }
 @media (max-width:600px){
   .janela-painel.painel button.app-modal-close{ width:44px; height:44px; }
+  .janela-painel.painel .pref-row.jp-privacidade{ grid-template-columns:minmax(0, 1fr) auto; }
+  .janela-painel.painel .pref-row.jp-privacidade > .jp-icone{ display:none; }
+  .janela-painel.painel button.jp-opcao{ min-height:44px; }
   .janela-painel.painel button.btn, .janela-painel.painel :is(button.report-severity-btn, button.profile-edit-avatar-btn, button.report-screenshot-btn){ min-height:44px; }
 }
 
@@ -5194,15 +5238,19 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <div class="profile-edit-avatar-row">
           <div class="profile-edit-avatar-preview" id="profile-edit-avatar-preview"></div>
           <div class="profile-edit-avatar-actions">
+            <b data-i18n="ui.profileEdit.identityTitle">Sua identidade</b>
+            <span data-i18n="ui.profileEdit.identityText">Escolha como as pessoas vão conhecer você.</span>
+            <div class="jp-acoes-foto">
             <button type="button" class="profile-edit-avatar-btn" id="profile-edit-avatar-change-btn" data-i18n="ui.profileEdit.changePhoto" aria-label="Alterar foto do perfil" data-i18n-attr="aria-label:ui.profileEdit.changePhotoAria">Alterar foto</button>
             <button type="button" class="profile-edit-avatar-btn remove" id="profile-edit-avatar-remove-btn" style="display:none;" data-i18n="ui.profileEdit.removePhoto">Remover foto</button>
+            </div>
           </div>
           <input type="file" id="profile-edit-avatar-input" accept="image/*" style="display:none;">
         </div>
         <p class="profile-edit-avatar-error" id="profile-edit-avatar-error"></p>
 
         <label class="profile-edit-label" for="profile-edit-display-name" data-i18n="ui.profileEdit.name">Nome exibido</label>
-        <input type="text" id="profile-edit-display-name" class="profile-edit-input" maxlength="60" placeholder="Como você quer ser chamada(o)" data-i18n-attr="placeholder:ui.profileEdit.namePh" aria-describedby="profile-edit-name-hint">
+        <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">👤</span><input type="text" id="profile-edit-display-name" class="profile-edit-input" maxlength="60" placeholder="Como você quer ser chamada(o)" data-i18n-attr="placeholder:ui.profileEdit.namePh" aria-describedby="profile-edit-name-hint"></div>
         <p class="profile-edit-hint" id="profile-edit-name-hint" data-i18n="ui.profileEdit.nameHint">O nome que aparece no seu perfil.</p>
 
         <label data-i18n="ui.profileEdit.country" class="profile-edit-label" for="profile-edit-country">País de origem</label>
@@ -5221,7 +5269,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <p class="profile-edit-hint" id="profile-edit-username-hint" data-i18n="ui.profileEdit.usernameHint">Seu identificador é permanente e não pode ser alterado.</p>
 
         <label class="profile-edit-label" for="profile-edit-bio" data-i18n="ui.profileEdit.bio">Sobre você</label>
-        <textarea id="profile-edit-bio" class="profile-edit-textarea" maxlength="160" placeholder="Conte um pouco sobre você, seus interesses e o que está aprendendo." data-i18n-attr="placeholder:ui.profileEdit.bioPh"></textarea>
+        <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">📝</span><textarea id="profile-edit-bio" class="profile-edit-textarea" maxlength="160" placeholder="Conte um pouco sobre você, seus interesses e o que está aprendendo." data-i18n-attr="placeholder:ui.profileEdit.bioPh"></textarea></div>
         <div class="profile-edit-bio-count" id="profile-edit-bio-count">0/160</div>
 
         <!-- Fase 1 do perfil público (ver CLAUDE.md, grilling Q1) --
@@ -5233,12 +5281,13 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
              ver shared/my-flashcards.js). Privado por padrão -- só
              SALVA quando o formulário inteiro é salvo, mesmo padrão
              dos outros campos deste modal (nome/username/bio). -->
-        <div class="pref-row">
+        <div class="pref-row jp-privacidade">
+          <span class="jp-icone" aria-hidden="true">👥</span>
           <div class="pref-row-text">
             <div data-i18n="ui.profileEdit.shareTitle" class="pref-row-title">Compartilhe sua jornada</div>
             <div data-i18n="ui.profileEdit.sharePublic" class="pref-row-sub">Ligado: quem tem conta no site vê sua foto, seu progresso e seus Decks públicos, e pode encontrar você na busca.</div>
             <div data-i18n="ui.profileEdit.sharePrivate" class="pref-row-sub">Desligado: só seus amigos e sua professora, se você tiver uma, veem isso. As outras pessoas veem só seu nome, seu @ e sua conquista em destaque, e só encontram você pelo @ exato.</div>
-            <div data-i18n="ui.profileEdit.shareHelper" class="pref-row-sub profile-share-helper">Você decide o que compartilhar e pode mudar quando quiser.</div>
+            <div class="jp-ajuda"><span aria-hidden="true">✅</span><span data-i18n="ui.profileEdit.shareHelper" class="profile-share-helper">Você decide o que compartilhar e pode mudar quando quiser.</span></div>
           </div>
           <button type="button" class="pref-switch" id="profile-edit-public-switch" role="switch" aria-checked="false" aria-label="Perfil público" data-i18n-attr="aria-label:ui.profileEdit.publicProfile"><span class="pref-switch-knob"></span></button>
         </div>
@@ -5351,10 +5400,15 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="app-modal-close" id="flashcard-reset-confirm-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p data-i18n="flashcardReset.modal.body">Esta edição irá reiniciar o progresso de revisão deste cartão. Deseja continuar?</p>
+      <div class="jp-centro">
+        <span class="jp-icone jp-icone--grande jp-tom-marca" aria-hidden="true">🔄</span>
+        <p class="jp-destaque" data-i18n="flashcardReset.modal.headline">Esta edição vai reiniciar o progresso de revisão deste cartão.</p>
+        <p class="janela-sub" data-i18n="flashcardReset.modal.explain">Ele volta a aparecer como um cartão novo na Revisão. Você continua estudando normalmente depois de salvar.</p>
+      </div>
+      <p class="jp-bloco jp-tom-marca" style="margin-top:14px;"><span class="jp-icone" aria-hidden="true">💡</span><span><span data-i18n="flashcardReset.modal.keepTip">Se preferir manter o progresso atual, descarte as edições: o cartão continua como está.</span></span></p>
       <div style="display:flex; gap:10px; margin-top:14px;">
         <button class="btn btn-secondary" id="flashcard-reset-confirm-discard" style="flex:1;" data-i18n="flashcardReset.modal.discard">Descartar edições</button>
-        <button class="btn btn-primary" id="flashcard-reset-confirm-yes" style="flex:1;" data-i18n="flashcardReset.modal.confirm">Sim</button>
+        <button class="btn btn-primary" id="flashcard-reset-confirm-yes" style="flex:1;" data-i18n="flashcardReset.modal.yes">Sim, continuar</button>
       </div>
     </div>
   </div>
@@ -5418,7 +5472,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <div id="report-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal painel janela-painel">
     <div class="app-modal-header">
-      <h3 data-i18n="report.modal.title">⚑ Reportar problema ou sugestão</h3>
+      <div class="janela-titulo">
+        <h3 data-i18n="report.modal.title">⚑ Reportar problema ou sugestão</h3>
+        <p class="janela-sub" data-i18n="report.modal.intro">Conte o que aconteceu. Isso nos ajuda a melhorar a sua experiência.</p>
+      </div>
       <button class="app-modal-close" id="report-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
@@ -5430,7 +5487,9 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <div class="report-severity-row" id="report-severity-options"></div>
 
         <label class="profile-edit-label" for="report-description" data-i18n="report.modal.describeLabel">Descreva o que você viu</label>
-        <textarea id="report-description" class="profile-edit-textarea" maxlength="600" rows="3" placeholder="O que aconteceu, exatamente?" data-i18n-attr="placeholder:report.modal.describePlaceholder"></textarea>
+        <textarea id="report-description" class="profile-edit-textarea" maxlength="600" rows="3" placeholder="O que aconteceu, exatamente?" data-i18n-attr="placeholder:report.modal.describePlaceholder" aria-describedby="report-description-hint"></textarea>
+        <div class="jp-contador" id="report-description-count" aria-hidden="true">0/600</div>
+        <p class="profile-edit-hint" id="report-description-hint" data-i18n="report.modal.describeHint">Conte o que aconteceu e, se puder, os passos que você estava seguindo.</p>
 
         <label class="profile-edit-label" for="report-expected" data-i18n="report.modal.expectedLabel">O que você esperava que acontecesse? <span class="report-modal-optional" data-i18n="report.modal.optional">(opcional)</span></label>
         <textarea id="report-expected" class="profile-edit-textarea" maxlength="300" rows="2"></textarea>
@@ -5447,8 +5506,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         </div>
         <p class="report-modal-privacy-note" data-i18n="report.modal.privacyNote">A captura, se anexada, fica visível só para a equipe. Nada é enviado automaticamente.</p>
 
-        <p class="profile-edit-error" id="report-error"></p>
-        <button type="button" class="btn btn-primary btn-block" id="report-submit-btn" data-i18n="report.modal.submit">Enviar</button>
+        <p class="profile-edit-error" id="report-error" role="alert"></p>
+        <button type="button" class="btn btn-primary btn-block" id="report-submit-btn" data-i18n="report.modal.sendReport">Enviar relato</button>
       </div>
       <div id="report-success-view" style="display:none;">
         <div class="report-success-check">✓</div>

@@ -27,3 +27,12 @@ Histórico e decisão: `docs/historico/15-*`, `docs/levantamento-design-system-p
 Toda tela ou mudança visual nova passa por uma prévia (imagens com dados de exemplo, fr claro e zh escuro) que a autora
 aprova ANTES do código. Banco de Revisão: fica com a aparência atual dentro do Cartões; a parte do aluno
 (`review-bank-student.js`) fica para depois.
+
+## Estética "janela rica" (padrão da autora, 2026-10-18)
+Janelas de comunicação do aluno (confirmações, avisos, formulários curtos, conversão) seguem as imagens de referência da
+autora, sempre com as cores de cada curso (nunca o roxo das imagens): título forte com subtítulo, ícone Fluent em
+quadrado tingido (`.jp-icone`, tom por `.jp-tom-marca/ouro/verde/rosa`), blocos de informação tingidos (`.jp-bloco`),
+opções com título e descrição (`.jp-opcao`), chips com ícone (`.jp-chip`), campos com ícone (`.jp-campo`) e botões
+largos do mesmo tamanho. Peças no bloco "janela rica" dos dois index (classe `.janela-painel` no `.app-modal`).
+Sem ilustrações grandes sem função; texto e ícones só com o que o produto faz de verdade. Avisos Premium/Limite seguem a
+mesma linha (`docs/historico/13-*`). Prévia antes do código continua valendo para tela nova.

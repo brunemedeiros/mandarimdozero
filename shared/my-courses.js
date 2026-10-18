@@ -59,7 +59,10 @@ async function switchCourse(appKey, siteLang){
   else window.location.reload();
 }
 
-function confirmSwitchCourse(appKey, siteLang){
+// opts.started: true = curso já começado (menu da bandeira, ✓ em Adicionar curso); false = curso novo;
+// sem valor (troca pelo seletor de idioma do site) = texto neutro. Os botões e o título são da janela de troca
+// de idioma do site e voltam ao texto antigo ao fechar.
+function confirmSwitchCourse(appKey, siteLang, opts){
   ensureCourseMenuStyles();
   const modal = document.getElementById('ui-language-confirm-modal');
   const body = document.getElementById('ui-language-confirm-body');
@@ -67,19 +70,26 @@ function confirmSwitchCourse(appKey, siteLang){
   const no = document.getElementById('ui-language-confirm-no');
   const title = modal && modal.querySelector('h3');
   if (!modal || !body || !yes || !no){ switchCourse(appKey, siteLang); return; }
+  const started = opts && typeof opts.started === 'boolean' ? opts.started : null;
+  const course = courseDisplayName(appKey, siteLang);
   const oldTitle = title ? title.textContent : null;
-  if (title) title.textContent = t('courses.confirm.title');
-  // Botões compartilhados com a troca de idioma do site: na troca de curso dizem a ação; o texto antigo volta ao fechar.
+  if (title) title.textContent = started === true ? t('courses.confirm.backTitle', { course }) : started === false ? t('courses.confirm.newTitle') : t('courses.confirm.title');
   const oldYes = yes.textContent, oldNo = no.textContent;
-  yes.textContent = t('courses.confirm.go', { course: courseDisplayName(appKey, siteLang) });
+  yes.textContent = started === false ? t('courses.confirm.start', { course }) : t('courses.confirm.go', { course });
   no.textContent = t('courses.confirm.stay');
+  const intro = started === true ? t('courses.confirm.backIntro') : started === false ? t('courses.confirm.newIntro') : t('courses.confirm.intro');
+  const lead = started === true ? t('courses.confirm.backP', { course }) : started === false ? t('courses.confirm.newP', { course }) : t('courses.confirm.p1');
   body.innerHTML = `<div class="course-confirm">
-    <p class="course-confirm-intro">${escapeHTML(t('courses.confirm.intro'))}</p>
-    <p class="course-confirm-head">${courseFlag(appKey)}<span>${escapeHTML(courseDisplayName(appKey, siteLang))}</span></p>
-    <p class="course-confirm-p">${escapeHTML(t('courses.confirm.p1'))}</p>
-    <p class="course-confirm-p">${escapeHTML(t('courses.confirm.p2'))}</p>
-    <p class="course-confirm-keep"><span aria-hidden="true">🔥</span> ${escapeHTML(t('courses.confirm.p3'))}</p>
+    <p class="course-confirm-intro">${escapeHTML(intro)}</p>
+    <p class="course-confirm-head">${courseFlag(appKey)}<span>${escapeHTML(course)}</span></p>
+    ${started === false ? `<p class="jp-tagline">${escapeHTML(t('courses.confirm.tagline'))}</p>` : ''}
+    <p class="course-confirm-p">${escapeHTML(lead)}</p>
+    <div class="jp-blocos">
+      <p class="jp-bloco jp-tom-verde"><span class="jp-icone" aria-hidden="true">✅</span><span><b>${escapeHTML(t('courses.confirm.safeTitle'))}</b><span>${escapeHTML(t('courses.confirm.safeText'))}</span></span></p>
+      <p class="jp-bloco jp-tom-ouro course-confirm-keep"><span class="jp-icone" aria-hidden="true">🔥</span><span><b>${escapeHTML(t('courses.confirm.keepTitle'))}</b><span>${escapeHTML(t('courses.confirm.p3'))}</span></span></p>
+    </div>
   </div>`;
+  if (typeof window.EmojiIcons !== 'undefined') window.EmojiIcons.scan(body);
   const done = (ok) => {
     modal.style.display = 'none';
     yes.onclick = null; no.onclick = null;
@@ -156,7 +166,7 @@ async function paintCourseMenu(btn, dropdown){
       ${items.map(c => `<button type="button" class="lang-switcher-item course-menu-item${c.current ? ' is-current' : ''}" data-app="${escapeHTML(c.appKey)}" data-site="${escapeHTML(c.siteLang)}"${c.current ? ' aria-current="true"' : ''}>${courseFlag(c.appKey)}<span class="course-name">${escapeHTML(courseDisplayName(c.appKey, c.siteLang))}</span>${c.current ? '<span class="course-menu-check" aria-hidden="true">✓</span>' : ''}</button>`).join('')}
       <div class="lang-switcher-sep"></div>
       <button type="button" class="lang-switcher-item course-menu-add"><span class="course-menu-plus" aria-hidden="true">+</span><span class="course-name">${escapeHTML(t('courseMenu.add'))}</span></button>`;
-    dropdown.querySelectorAll('.course-menu-item:not(.is-current)').forEach(b => b.addEventListener('click', () => confirmSwitchCourse(b.dataset.app, b.dataset.site)));
+    dropdown.querySelectorAll('.course-menu-item:not(.is-current)').forEach(b => b.addEventListener('click', () => confirmSwitchCourse(b.dataset.app, b.dataset.site, { started: true })));
     const add = dropdown.querySelector('.course-menu-add');
     if (add) add.addEventListener('click', () => { dropdown.classList.remove('open'); openAddCourse(); });
   };
@@ -229,13 +239,13 @@ function openAddCourse(){
       <div class="app-modal-body">
         <div class="add-course-head">${speakControlHTML(site)}</div>
         <h4 class="add-course-group">${escapeHTML(t('courses.group.' + site))}</h4>
-        <div class="add-course-grid">${items.map(c => { const done = raw && CourseStorage.blockFor(raw, c.appKey, c.siteLang); return `<button type="button" class="add-course-card" data-app="${escapeHTML(c.appKey)}" data-site="${escapeHTML(c.siteLang)}"${c.current ? ' aria-current="true"' : ''}>
+        <div class="add-course-grid">${items.map(c => { const done = raw && CourseStorage.blockFor(raw, c.appKey, c.siteLang); return `<button type="button" class="add-course-card" data-app="${escapeHTML(c.appKey)}" data-site="${escapeHTML(c.siteLang)}"${done || c.current ? ' data-started="1"' : ''}${c.current ? ' aria-current="true"' : ''}>
           ${done || c.current ? '<span class="add-course-done" aria-hidden="true">✓</span>' : ''}${courseFlag(c.appKey)}<span>${escapeHTML(courseDisplayName(c.appKey, c.siteLang))}</span>${c.status === 'beta' ? `<span class="add-course-tag">${escapeHTML(t('courses.beta'))}</span>` : ''}</button>`; }).join('')}</div>
       </div></div>`;
     ov.querySelector('#add-course-close').addEventListener('click', () => { ov.style.display = 'none'; });
     ov.querySelectorAll('.add-course-speak button').forEach(b => b.addEventListener('click', () => { site = b.dataset.site; paint(); }));
     const speakSel = ov.querySelector('select.add-course-speak'); if (speakSel) speakSel.addEventListener('change', () => { site = speakSel.value; paint(); });
-    ov.querySelectorAll('.add-course-card:not([aria-current])').forEach(b => b.addEventListener('click', () => { ov.style.display = 'none'; confirmSwitchCourse(b.dataset.app, b.dataset.site); }));
+    ov.querySelectorAll('.add-course-card:not([aria-current])').forEach(b => b.addEventListener('click', () => { ov.style.display = 'none'; confirmSwitchCourse(b.dataset.app, b.dataset.site, { started: b.dataset.started === '1' }); }));
     ov.querySelector('.add-course-card[aria-current]') && ov.querySelector('.add-course-card[aria-current]').addEventListener('click', () => { ov.style.display = 'none'; });
   };
   ov.style.display = 'flex';

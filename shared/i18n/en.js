@@ -9,6 +9,17 @@ window.I18N_CATALOG['en'] = {
   'report.entry.menuItem': '⚑ Report a problem', // ALTA
 
   'report.modal.title': '⚑ Report a problem or suggestion', // ALTA
+  'report.modal.intro': 'Tell us what happened. It helps us improve your experience.', // ALTA
+  'report.category.bug_tecnico.desc': 'Something froze, showed an error or didn\'t load.', // ALTA
+  'report.category.erro_conteudo.desc': 'Some information in the lesson is wrong or out of date.', // ALTA
+  'report.category.traducao.desc': 'The translation of a word or sentence is wrong.', // ALTA
+  'report.category.audio.desc': 'The audio is wrong, cut off or badly pronounced.', // ALTA
+  'report.category.visual.desc': 'Something looks cut off, misaligned or hard to read.', // ALTA
+  'report.category.comportamento_inesperado.desc': 'A button or feature did something unexpected.', // ALTA
+  'report.category.sugestao_melhoria.desc': 'An idea to make the site even better.', // ALTA
+  'report.category.outro.desc': 'Something other than the options above.', // ALTA
+  'report.modal.describeHint': 'Tell us what happened and, if you can, the steps you were following.', // ALTA
+  'report.modal.sendReport': 'Send report', // ALTA
   'report.modal.whatHappened': 'What happened?', // ALTA
   'report.modal.howMuch': 'How much did it get in your way?', // MÉDIA -- "atrapalhou" sem equivalente direto; alternativa: "How much did this affect you?"
   'report.modal.optional': '(optional)', // ALTA
@@ -58,6 +69,10 @@ window.I18N_CATALOG['en'] = {
   'flashcardLimit.wouldGenerate': { one: 'This card would create {n} study card, but you only have {remaining} left on the free plan.', other: 'This card would create {n} study cards, but you only have {remaining} left on the free plan.' }, // MÉDIA -- política Free; plural real em EN (o PT usa "cartão(ões)")
 
   'flashcardReset.modal.title': '⚠️ Confirm edit', // ALTA
+  'flashcardReset.modal.headline': 'This edit will reset this card\'s review progress.', // ALTA
+  'flashcardReset.modal.explain': 'It shows up as a new card in Review again. You\'ll keep studying normally after saving.', // ALTA
+  'flashcardReset.modal.keepTip': 'If you want to keep your current progress, discard the edits: the card stays as it is.', // ALTA
+  'flashcardReset.modal.yes': 'Yes, continue', // ALTA
   'flashcardReset.modal.body': 'This edit will reset the review progress for this card. Do you want to continue?', // MÉDIA -- aviso de reinício de progresso
   'flashcardReset.modal.discard': 'Discard changes', // ALTA
   'flashcardReset.modal.confirm': 'Yes', // ALTA
@@ -84,6 +99,17 @@ window.I18N_CATALOG['en'] = {
   'courses.confirm.p3': 'Your day streak and achievements stay the same.', // ALTA
   'courses.confirm.stay': 'Keep studying', // ALTA
   'courses.confirm.go': 'Go to {course}', // ALTA
+  'courses.confirm.newTitle': 'Ready for a new journey?', // ALTA
+  'courses.confirm.backTitle': 'Back to {course}?', // ALTA
+  'courses.confirm.newIntro': 'You\'re about to start the course:', // ALTA
+  'courses.confirm.backIntro': 'You\'re going back to the course:', // ALTA
+  'courses.confirm.tagline': 'A new language, new possibilities.', // ALTA
+  'courses.confirm.newP': 'Each course has its own journey. In {course}, progress is separate and you build it at your own pace.', // ALTA
+  'courses.confirm.backP': 'Your progress in {course} picks up right where you left off.', // ALTA
+  'courses.confirm.safeTitle': 'Your progress is safe.', // ALTA
+  'courses.confirm.safeText': 'Your progress in the current course stays saved and comes back when you return to it.', // ALTA
+  'courses.confirm.keepTitle': 'Your journey continues.', // ALTA
+  'courses.confirm.start': 'Start {course}', // ALTA
   'courses.first.title': 'Which course do you want to start?', // ALTA
   'courses.first.sub': 'You can switch or add courses later from the flag at the top of the screen. Each course keeps its own progress.', // ALTA
 
@@ -1995,6 +2021,8 @@ window.I18N_CATALOG['en'] = {
   'ui.profileEdit.username': 'Your public username', // ALTA
   // Editar perfil (2026-10-18): textos novos aprovados pela autora; perfil é o mesmo em todos os cursos.
   'ui.profileEdit.title': 'Your profile, your way', // ALTA
+  'ui.profileEdit.identityTitle': 'Your identity', // ALTA
+  'ui.profileEdit.identityText': 'Choose how people get to know you.', // ALTA
   'ui.profileEdit.subtitle': 'Choose how you show up in the community.', // ALTA
   'ui.profileEdit.changePhoto': 'Change photo', // ALTA
   'ui.profileEdit.changePhotoAria': 'Change profile photo', // ALTA

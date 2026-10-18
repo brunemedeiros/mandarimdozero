@@ -314,3 +314,23 @@ as divisórias passaram para um tom mais forte (`--p-borda-campo`).
 - Testes: menu de cursos 26/26, identidade 1 falha que já existe na `main` (username vazio no stub), Fase J 62/62,
   i18n navegador 209/209, confirmação de idioma 16/16, placeholders 45/45, plano-admin 26/26, i18n unit com as
   mesmas falhas antigas da `main` (chaves novas registradas). Capturas em pt e en, fr/zh, claro/escuro e celular.
+
+## Estética "janela rica" nas janelas do aluno (fr e zh, 2026-10-18)
+
+A autora preferiu a estética das imagens de referência dela (ícones por opção, blocos tingidos, título forte com
+subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do site. Peças novas `.jp-*` no bloco da
+`.janela-painel` (regra em `.claude/rules/painel-design-system.md`).
+- Trocar de curso: título e texto mudam conforme o curso: novo ("Pronto para uma nova jornada?", "Começar {curso}",
+  frase "Um novo idioma, novas possibilidades.") ou já começado ("Voltar para {curso}?", "Ir para {curso}"); o menu da
+  bandeira passa `started: true` e "Adicionar curso" marca `data-started` nos cursos com ✓. Pela troca de idioma do site
+  sai o texto neutro. Blocos "Seu progresso está seguro." e "Sua jornada continua.".
+- Editar perfil: "Sua identidade" ao lado da foto, campos com ícone, bloco de privacidade tingido com ícone e a ajuda
+  "Você decide o que compartilhar". Sem selo de câmera (não há ícone Fluent de câmera no site).
+- Confirmar edição: ícone 🔄, mensagem principal, explicação real (o cartão volta como novo na Revisão; nada é apagado),
+  dica para manter o progresso e "Sim, continuar". "Descartar edições" só fecha sem salvar (comportamento mantido).
+- Reportar: subtítulo, 8 categorias com ícone e descrição curta (ids e valores enviados iguais), chips de impacto com
+  ícone, `aria-pressed` nas seleções, contador da descrição (limite real 600; a descrição continua obrigatória),
+  texto de apoio e "Enviar relato". Espanhol (congelado) ganhou só as chaves novas do Reportar.
+- Testes: i18n navegador 209/209, i18n unit com as mesmas falhas da `main`, menu de cursos 26/26, deck-browser 208/208,
+  Fase G 68/68, Fase H 68/68, Fase I 48/48, plano-admin 26/26, placeholders 45/45, confirmação de idioma 16/16,
+  identidade com a mesma falha que já existe na `main`.
