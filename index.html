@@ -809,6 +809,21 @@ function paintGateTexts(){
 window.addEventListener('i18n:change', paintGateTexts);
 paintGateTexts();
 
+// Botão de tema do topo: troca claro/escuro (toggleTheme, shared/theme.js). Antes não tinha clique nenhum.
+// O ícone mostra o tema para onde vai: lua no claro, sol no escuro.
+(function setupThemeButton(){
+  const b = document.getElementById('theme-toggle-btn');
+  if (!b || typeof toggleTheme !== 'function') return;
+  const paint = () => {
+    const dark = isDarkThemeActive();
+    b.textContent = dark ? '☀' : '🌙';
+    b.setAttribute('aria-pressed', String(dark));
+    if (window.EmojiIcons) window.EmojiIcons.scan(b);
+  };
+  b.addEventListener('click', () => { toggleTheme(); paint(); });
+  paint();
+})();
+
 // ---------- Resolução inicial ----------
 (async () => {
   const { data: { session } } = await supabaseClient.auth.getSession();

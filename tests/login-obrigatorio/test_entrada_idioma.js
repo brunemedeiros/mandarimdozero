@@ -118,6 +118,13 @@ const PT_WORDS = /\b(Entrar|senha|conta|Continuar|Esqueceu|Crie|grátis|Idioma|C
     await waitLang(page, 'pt-BR');
     const pt = await loginText(page);
     check(`${tag}: voltar para Português devolve o texto original`, /Entre para continuar de onde parou/.test(pt) && /Continuar com Google/.test(pt) && /Seu e-mail/.test(pt) && /Crie sua conta grátis/.test(pt), pt);
+    // botão de tema do topo troca claro/escuro (antes não fazia nada)
+    const th0 = await page.evaluate(() => ({ dark: isDarkThemeActive(), bg: getComputedStyle(document.body).backgroundColor }));
+    await page.click('#theme-toggle-btn');
+    const th1 = await page.evaluate(() => ({ dark: isDarkThemeActive(), attr: document.documentElement.getAttribute('data-theme'), bg: getComputedStyle(document.body).backgroundColor, saved: localStorage.getItem('app_theme'), pressed: document.getElementById('theme-toggle-btn').getAttribute('aria-pressed') }));
+    check(`${tag}: botão de tema troca o tema e guarda a escolha`, th1.dark === !th0.dark && th1.attr === (th1.dark ? 'dark' : 'light') && th1.bg !== th0.bg && th1.saved === th1.attr && th1.pressed === String(th1.dark), { th0, th1 });
+    await page.click('#theme-toggle-btn');
+    check(`${tag}: segundo clique volta ao tema anterior`, await page.evaluate((d) => isDarkThemeActive() === d, th0.dark));
     check(`${tag}: sem rolagem horizontal`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
     check(`${tag}: botão do idioma com 38px ou mais`, await page.evaluate(() => document.getElementById('site-lang-btn').getBoundingClientRect().height >= 38));
     if (width === 390) check(`${tag}: no celular o rótulo "Idioma do site" some, mas continua para leitor de tela`, await page.evaluate(() => document.querySelector('.site-lang-lbl').getBoundingClientRect().width <= 1 && /Idioma do site/.test(document.getElementById('site-lang-btn').textContent)));
