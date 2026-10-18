@@ -94,6 +94,9 @@ for (const lang of ['fr', 'zh']){
   check(lang + ' unidade concluída: elegíveis = vocab da unidade', sumAfter.eligibleCards === unitCards, sumAfter);
   check(lang + ' contagem por CardInstance (K2-C: A+B por palavra): new = 2 x vocab', sumAfter.new === unitCards);
   // lição parcial: só as palavras das lições já concluídas
+  // (o progresso real nunca anda para trás; aqui o teste volta a unidade de "concluída" para "lição 1", então
+  // apaga a marca `released` que a conclusão acabou de gravar -- Etapa 0 do currículo, 2.3 item 8)
+  ctx.STATE.cards.forEach(c => { delete c.released; });
   ctx.STATE.unitProgress[unit0.id] = { started: true, completed: false, lessonIdx: 1, lessonMisses: {} };
   const lesson0 = (unit0.lessons || [])[0];
   if (lesson0 && lesson0.vocabIdx){
@@ -122,7 +125,15 @@ for (const lang of ['fr', 'zh']){
   ctx.applySerializedState({ cards: saved });
   check(lang + ' save defasado não sobrescreve deckId', target.deckId === freshDeckId);
   check(lang + ' progresso FSRS restaurado normalmente', target.reps === 7 && target.due === 12345 && target.stability === 3.5, [target.reps, target.due, target.stability]);
-  check(lang + ' ids estáveis (u<unit>-v<idx>)', ctx.STATE.cards.every(c => ctx.isStudyTrailPhraseCard(c) ? /^u.+-[pd]\d+$/.test(c.id) : (c.id === `u${c.unitId}-v${c.vocabIdx}` || c.id === `u${c.unitId}-v${c.vocabIdx}-b`)));
+  // Etapa 0 do currículo: o id vem da chave estável do item (fr: `k` em content.js, id === u{k}); sem chave (zh),
+  // continua a regra antiga u<unit>-v<idx>.
+  const wordKey = c => { const u = ctx.UNITS.find(x => x.id === c.unitId); const v = u && u.vocab[c.vocabIdx]; return v && v.k; };
+  if (lang === 'fr') check(lang + ' todo cartão de palavra tem chave estável', ctx.STATE.cards.every(c => ctx.isStudyTrailPhraseCard(c) || !!wordKey(c)));
+  check(lang + ' ids estáveis (u{k}, ou u<unit>-v<idx> sem chave)', ctx.STATE.cards.every(c => {
+    if (ctx.isStudyTrailPhraseCard(c)) return /^u.+-[pd]\d+$/.test(c.id);
+    const base = wordKey(c) ? `u${wordKey(c)}` : `u${c.unitId}-v${c.vocabIdx}`;
+    return c.id === base || c.id === base + '-b';
+  }));
   // compat: save antigo sem nenhum deckId
   const old = JSON.parse(JSON.stringify(ctx.STATE.cards)).map(c => { delete c.deckId; return c; });
   ctx.STATE.cards = ctx.buildCardsFromUnits(ctx.UNITS);

@@ -18,17 +18,40 @@
 // card da trilha. Nada de conteúdo, Note, CardInstance, Deck, origin,
 // unitId/vocabIdx/unitTitle, tags ou direção (lastDirection, se vier em
 // save antigo, é ignorado por não estar aqui).
+// `released` (Etapa 0 do currículo, docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.3 item 8): o cartão já
+// passou pelo portão de lição uma vez; passa sempre daí em diante (mover a palavra para uma unidade nova não a
+// tira da Revisão). Só os itens com chave estável (`k`, fr) ganham a marca.
 const STUDY_PROGRESS_FIELDS = [
   'ef', 'interval', 'reps', 'due', 'lapses',
   'stability', 'difficulty', 'state', 'lastReview',
-  'fsrsReps', 'fsrsLapses', 'fsrsMigrated', 'firstLearnedDate',
+  'fsrsReps', 'fsrsLapses', 'fsrsMigrated', 'firstLearnedDate', 'released',
 ];
+
+// ============================================================
+// Etapa 0 do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md, seção 2): o cartão é identificado
+// pelo ITEM, nunca pelo lugar. Cada palavra/frase/fala do fr/content.js tem uma chave congelada `k`
+// (valor inicial = id de hoje sem o "u", então nenhum id mudou). Item SEM `k` (zh hoje) usa a regra antiga
+// por posição: `u{unidade}-{v|p|d}{posição}`.
+// ============================================================
+function studyItemKey(item){
+  return item && typeof item.k === 'string' && item.k !== '' ? item.k : null;
+}
+// Id (base, cartão A) de um item da trilha. kind: 'v' palavra, 'p' frase, 'd' fala do diálogo.
+// unitId/idx só servem para o item sem chave. O cartão B da palavra é este id + '-b'.
+function studyItemCardId(unitId, kind, idx, item){
+  const k = studyItemKey(item);
+  return k ? 'u' + k : `u${unitId}-${kind}${idx}`;
+}
+// Atalho para a palavra `idx` da unidade (o que os exercícios e a introdução da palavra usam).
+function studyWordCardId(unit, idx){
+  return studyItemCardId(unit.id, 'v', idx, unit.vocab ? unit.vocab[idx] : null);
+}
 
 // Linha sintética (mesmo shape que o motor interpreta pra uma Note nativa)
 // de UMA palavra. Ids de Field determinísticos. Texto exatamente como está
 // em content.js (AUDIO_MANIFEST procura o texto literal).
 function studyNoteRowForWord(unit, vocab, idx, appKey){
-  const base = `u${unit.id}-v${idx}`;
+  const base = studyItemCardId(unit.id, 'v', idx, vocab);
   const f = (n, lang, value) => ({
     id: `${base}-f${n}`, lang, role: null,
     content: { value }, audio: null, image: null, pinyinFieldId: null,
@@ -121,8 +144,14 @@ function reviewFilterVisibleTags(cards){
 // Devolve [A, B] já com os metadados da trilha.
 function buildStudyWordCards(unit, vocab, idx, appKey){
   const row = studyNoteRowForWord(unit, vocab, idx, appKey);
-  const cards = buildEngineCardsFromRow(row, { origin: 'study', appKey, idPrefix: `u${unit.id}-v` });
+  // O id vem da chave do item (studyItemCardId); `rowId`/legacyRowId continuam sendo a posição, como antes.
+  const cardId = studyItemCardId(unit.id, 'v', idx, vocab);
+  const cards = buildEngineCardsFromRow(Object.assign({}, row, { id: cardId }), { origin: 'study', appKey, idPrefix: '' });
+  const key = studyItemKey(vocab);
   cards.forEach(c => {
+    c.rowId = idx;
+    if (c.note) c.note.legacyRowId = idx;
+    if (key) c.studyKey = key;
     c.origin = 'study';
     c.unitId = unit.id;
     c.vocabIdx = idx;
@@ -208,14 +237,18 @@ function buildStudyPhraseCards(units, appKey){
     (unit.vocab || []).forEach((word, vIdx) => {
       const m = findStudyExamplePhrase(units, word, unit, appKey);
       if (!m) return;
-      const loc = `u${m.unitId}-${m.kind}`;
-      if (seen.has(loc + m.idx)) return;
-      seen.add(loc + m.idx);
+      const cardId = studyItemCardId(m.unitId, m.kind, m.idx, m.phrase);
+      if (seen.has(cardId)) return;
+      seen.add(cardId);
       const ph = m.phrase;
       const hasText = LanguageRegistry.isCjk(appKey) ? (ph.c && ph.t) : (ph.f && ph.t);
       if (!hasText) return;
       const row = studyNoteRowForPhrase(unit, ph, m.idx, appKey, vIdx);
-      buildEngineCardsFromRow(row, { origin: 'study', appKey, idPrefix: loc }).forEach(c => {
+      const key = studyItemKey(ph);
+      buildEngineCardsFromRow(Object.assign({}, row, { id: cardId }), { origin: 'study', appKey, idPrefix: '' }).forEach(c => {
+        c.rowId = m.idx;
+        if (c.note) c.note.legacyRowId = m.idx;
+        if (key) c.studyKey = key;
         c.origin = 'study';
         c.unitId = unit.id;
         c.vocabIdx = null;
@@ -275,6 +308,240 @@ function mergeSavedCards(cards, savedCards){
     Object.assign(c, saved);
     NOTE_LEVEL_FRESH_FIELDS.forEach(k => { c[k] = fresh[k]; });
     if (c.deckId === undefined) c.deckId = null;
+  });
+}
+
+// ============================================================
+// Etapa 0 do currículo: fusões, aposentados e arquivo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.3 itens 6, 7).
+// Tudo aqui é PURO (sem STATE/DOM): recebe o save e devolve o save ajustado. Idempotente: aplicar duas vezes dá o
+// mesmo resultado. Só mexe em entradas da TRILHA (id `u...`, origem 'study' ou sem origem, que é o formato salvo);
+// cartões da professora/próprios passam intactos.
+// ============================================================
+const STUDY_ARCHIVE_EXTRA_FIELDS = ['retiredAt', 'mergedInto'];
+
+// Mudanças de currículo do idioma da página (fr/curriculum-changes.js); sem o arquivo (zh, testes) = nenhuma.
+function studyCurriculumChanges(){
+  return {
+    merges: typeof STUDY_KEY_MERGES !== 'undefined' ? STUDY_KEY_MERGES : {},
+    retiredKeys: typeof STUDY_RETIRED_KEYS !== 'undefined' ? STUDY_RETIRED_KEYS : [],
+    unitMerges: typeof UNIT_MERGES !== 'undefined' ? UNIT_MERGES : {},
+    moduleMerges: typeof MODULE_MERGES !== 'undefined' ? MODULE_MERGES : {},
+    retiredLessonIds: typeof RETIRED_LESSON_IDS !== 'undefined' ? RETIRED_LESSON_IDS : [],
+    version: typeof CURRICULUM_VERSION !== 'undefined' ? CURRICULUM_VERSION : null,
+  };
+}
+
+function isStudySavedEntry(s){
+  return !!s && s.id != null && /^u./.test(String(s.id)) && (s.origin == null || s.origin === 'study');
+}
+// `uA1-3-v5-b` -> { key: 'A1-3-v5', suffix: '-b' }; `uA1-3-p2` -> { key: 'A1-3-p2', suffix: '' }.
+function studyCardIdParts(id){
+  const s = String(id);
+  const b = /-b$/.test(s);
+  return { key: s.slice(1, b ? -2 : undefined), suffix: b ? '-b' : '' };
+}
+function studyProgressOnly(entry, extra){
+  const out = { id: entry.id };
+  STUDY_PROGRESS_FIELDS.concat(extra ? STUDY_ARCHIVE_EXTRA_FIELDS : []).forEach(k => {
+    if (Object.prototype.hasOwnProperty.call(entry, k) && entry[k] !== undefined) out[k] = entry[k];
+  });
+  return out;
+}
+function studyReviewTime(entry){
+  const v = entry && entry.lastReview;
+  if (v == null || v === '') return -Infinity;
+  const n = typeof v === 'number' ? v : Date.parse(v);
+  return Number.isFinite(n) ? n : -Infinity;
+}
+// Regra de fusão FSRS: vence a revisão mais recente; empate -> maior stability; empate total -> `a` (o sobrevivente).
+// firstLearnedDate = a mais antiga das duas; `released` se qualquer uma já tinha passado pelo portão.
+// Devolve { winner, loser, aWon } (cópias; nada é mutado).
+function mergeStudyProgress(a, b){
+  let winner = a, loser = b;
+  const ta = studyReviewTime(a), tb = studyReviewTime(b);
+  if (tb > ta) { winner = b; loser = a; }
+  else if (tb === ta && (Number(b.stability) || 0) > (Number(a.stability) || 0)) { winner = b; loser = a; }
+  const w = Object.assign({}, winner);
+  const dates = [a.firstLearnedDate, b.firstLearnedDate].filter(Boolean).sort();
+  if (dates.length) w.firstLearnedDate = dates[0];
+  if (a.released || b.released) w.released = true;
+  return { winner: w, loser: Object.assign({}, loser), aWon: winner === a };
+}
+function resolveStudyKey(merges, key){
+  const seen = new Set();
+  let k = key;
+  while (merges && Object.prototype.hasOwnProperty.call(merges, k) && merges[k] && !seen.has(k)){ seen.add(k); k = merges[k]; }
+  return k;
+}
+
+// savedCards: data.cards do bloco. opts:
+//   merges        { chaveAntiga: chaveSobrevivente } (STUDY_KEY_MERGES)
+//   retiredKeys   [chave] (STUDY_RETIRED_KEYS)
+//   currentIds    ids de cartão da trilha que existem AGORA (null = não arquiva órfão nem restaura)
+//   archive       arquivo salvo (data.retiredStudyCards) { id: {...progresso, retiredAt, mergedInto?} }
+//   today         'AAAA-MM-DD' gravado em retiredAt
+// Devolve { cards, archive, renames: {idAntigo: idNovo}, archived: [ids], restored: [ids] }.
+function applyStudyKeyChanges(savedCards, opts){
+  const o = opts || {};
+  const merges = o.merges || {};
+  const retired = new Set(o.retiredKeys || []);
+  const current = o.currentIds ? new Set(o.currentIds) : null;
+  const today = o.today || null;
+  const archive = {};
+  const renames = {}, archived = [], restored = [];
+  if (o.archive && typeof o.archive === 'object'){
+    Object.keys(o.archive).forEach(id => {
+      const e = o.archive[id];
+      if (!e || typeof e !== 'object' || id === '__proto__' || id === 'constructor' || id === 'prototype') return;
+      archive[id] = studyProgressOnly(Object.assign({}, e, { id }), true);
+    });
+  }
+  const putArchive = (id, entry, extra) => {
+    const src = Object.assign({}, entry, extra || {}, { id });
+    if (src.retiredAt == null) src.retiredAt = today;
+    const e = studyProgressOnly(src, true); // ordem de campos fixa: aplicar de novo grava os mesmos bytes
+    if (archive[id]){
+      // já havia uma cópia arquivada deste id: fica a de revisão mais recente (mesma regra da fusão)
+      const m = mergeStudyProgress(archive[id], e);
+      archive[id] = m.winner;
+    } else archive[id] = e;
+    archived.push(id);
+  };
+
+  // 1. renomeia pelas fusões e aplica a regra de fusão quando o save tem os dois (A com A, B com B: o sufixo vai junto)
+  const slots = []; // entradas que não são da trilha (objeto) ou marcador { studyId } (posição da entrada da trilha)
+  const marks = new WeakSet();
+  const mark = studyId => { const m = { studyId }; marks.add(m); return m; };
+  const groups = new Map(); // idNovo -> [{ origId, entry }]
+  (savedCards || []).forEach(s => {
+    if (!isStudySavedEntry(s)){ slots.push(s); return; }
+    const origId = String(s.id);
+    const parts = studyCardIdParts(origId);
+    const newId = 'u' + resolveStudyKey(merges, parts.key) + parts.suffix;
+    if (newId !== origId) renames[origId] = newId;
+    if (!groups.has(newId)){ groups.set(newId, []); slots.push(mark(newId)); }
+    const list = groups.get(newId);
+    // o mesmo id repetido no save (sem fusão): vale o último, como sempre valeu em mergeSavedCards
+    const dup = list.findIndex(x => x.origId === origId);
+    if (dup >= 0) list.splice(dup, 1);
+    list.push({ origId, entry: Object.assign({}, s, { id: newId }) });
+  });
+  const study = new Map();
+  groups.forEach((list, newId) => {
+    // o sobrevivente (id que já era o novo) começa como `a`, para vencer o empate total
+    const ordered = list.filter(x => x.origId === newId).concat(list.filter(x => x.origId !== newId));
+    let cur = ordered[0];
+    for (let i = 1; i < ordered.length; i++){
+      const other = ordered[i];
+      const m = mergeStudyProgress(cur.entry, other.entry);
+      const aWon = m.aWon;
+      const loserOrig = aWon ? other.origId : cur.origId;
+      putArchive(loserOrig, Object.assign(m.loser, { id: loserOrig }), { mergedInto: newId });
+      cur = { origId: aWon ? cur.origId : other.origId, entry: Object.assign(m.winner, { id: newId }) };
+    }
+    study.set(newId, cur.entry);
+  });
+
+  // 2. aposentados e órfãos (id que não existe mais no conteúdo, por qualquer motivo) vão para o arquivo
+  study.forEach((entry, id) => {
+    const key = studyCardIdParts(id).key;
+    if (retired.has(key) || (current && !current.has(id))){
+      putArchive(id, entry);
+      study.delete(id);
+    }
+  });
+
+  // 3. arquivados cuja chave voltou (e que não estão ativos no save) voltam com o progresso
+  if (current){
+    Object.keys(archive).forEach(id => {
+      const parts = studyCardIdParts(id);
+      const key = resolveStudyKey(merges, parts.key);
+      const targetId = 'u' + key + parts.suffix;
+      if (retired.has(key) || !current.has(targetId) || study.has(targetId)) return;
+      const back = studyProgressOnly(archive[id], false);
+      back.id = targetId;
+      study.set(targetId, back);
+      slots.push(mark(targetId));
+      delete archive[id];
+      restored.push(targetId);
+    });
+  }
+
+  const cards = [];
+  slots.forEach(s => {
+    if (marks.has(s)){
+      const e = study.get(s.studyId);
+      if (e){ cards.push(e); study.delete(s.studyId); }
+    } else cards.push(s);
+  });
+  return { cards, archive, renames, archived, restored };
+}
+
+// Leva as gavetas de palavra (STATE.cardVariants) e os ids de "difíceis" (reviewRecords.hardSeenIds) junto com as
+// fusões. Puro: devolve cópias. Na colisão de gaveta, a do sobrevivente vence.
+function renameStudyIdsInRecords(renames, cardVariants, hardSeenIds){
+  const r = renames || {};
+  const cv = {};
+  if (cardVariants && typeof cardVariants === 'object'){
+    Object.keys(cardVariants).forEach(id => { if (!Object.prototype.hasOwnProperty.call(r, id)) cv[id] = cardVariants[id]; });
+    Object.keys(cardVariants).forEach(id => {
+      if (!Object.prototype.hasOwnProperty.call(r, id)) return;
+      const to = r[id];
+      cv[to] = Object.assign({}, cardVariants[id], cv[to] || {});
+    });
+  }
+  let hs = Array.isArray(hardSeenIds) ? hardSeenIds.map(id => Object.prototype.hasOwnProperty.call(r, id) ? r[id] : id) : hardSeenIds;
+  if (Array.isArray(hs)) hs = Array.from(new Set(hs));
+  return { cardVariants: cardVariants && typeof cardVariants === 'object' ? cv : cardVariants, hardSeenIds: hs };
+}
+
+// UNIT_MERGES / MODULE_MERGES (2.3 item 10): unidade/módulo fundido leva o progresso para o novo (concluída se
+// qualquer um dos dois estava; Ponto de verificação mantém aprovado e a melhor nota). Puro: devolve cópias.
+// O registro antigo fica (o carregamento ignora unidade que não existe mais).
+function applyUnitModuleMerges(unitProgress, checkpointProgress, unitMerges, moduleMerges){
+  const up = unitProgress && typeof unitProgress === 'object' ? Object.assign({}, unitProgress) : unitProgress;
+  const cp = checkpointProgress && typeof checkpointProgress === 'object' ? Object.assign({}, checkpointProgress) : checkpointProgress;
+  const fold = (map, from, to, combine) => {
+    if (!map || !map[from] || !to) return;
+    map[to] = combine(map[from], map[to]);
+  };
+  Object.keys(unitMerges || {}).forEach(from => fold(up, from, unitMerges[from], (a, b) => {
+    const out = Object.assign({}, a, b || {});
+    ['started', 'completed', 'unlocked'].forEach(k => { out[k] = !!(a[k] || (b && b[k])); });
+    return out;
+  }));
+  Object.keys(moduleMerges || {}).forEach(from => fold(cp, from, moduleMerges[from], (a, b) => ({
+    completed: !!(a.completed || (b && b.completed)),
+    bestScore: Math.max(Number(a.bestScore) || 0, Number(b && b.bestScore) || 0),
+  })));
+  return { unitProgress: up, checkpointProgress: cp };
+}
+
+// Lições (2.3 item 9): o save guarda também o id da lição atual (`lessonId`). Só para unidade começada e não
+// concluída (concluída volta para lessonIdx 0). Muta `unitProgress` (é o próprio STATE.unitProgress no save).
+function stampUnitLessonIds(unitProgress, units){
+  (units || []).forEach(u => {
+    const p = unitProgress && unitProgress[u.id];
+    if (!p || !Array.isArray(u.lessons) || !u.lessons.length) return;
+    if (!p.started || p.completed) return;
+    const l = u.lessons[p.lessonIdx];
+    if (l && l.id) p.lessonId = l.id;
+  });
+}
+// No carregamento: se a lição salva mudou de posição, `lessonIdx` segue o id; se sumiu, volta para a 1ª lição que
+// ainda tem palavra não liberada (isWordReleased(unit, vocabIdx)). Muta `unitProgress`.
+function reconcileUnitLessonIdx(unitProgress, units, isWordReleased){
+  (units || []).forEach(u => {
+    const p = unitProgress && unitProgress[u.id];
+    if (!p || typeof p.lessonId !== 'string' || !Array.isArray(u.lessons) || !u.lessons.length) return;
+    if (!p.started || p.completed) return;
+    const at = u.lessons.findIndex(l => l && l.id === p.lessonId);
+    if (at >= 0){ if (at !== p.lessonIdx) p.lessonIdx = at; return; }
+    let idx = u.lessons.findIndex(l => (l.vocabIdx || []).some(vi => !(isWordReleased && isWordReleased(u, vi))));
+    if (idx < 0) idx = u.lessons.length - 1;
+    p.lessonIdx = idx;
+    const l = u.lessons[idx];
+    if (l && l.id) p.lessonId = l.id;
   });
 }
 

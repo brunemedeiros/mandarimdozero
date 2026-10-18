@@ -2502,7 +2502,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 /* ---------- Modal: reportar problema/sugestão (bandeira ⚑) ---------- */
 .report-modal-label{ font-size:12px; font-weight:700; color:var(--ink-soft); margin:14px 0 6px; }
 .report-modal-label:first-child{ margin-top:0; }
-.report-modal-optional{ font-weight:500; color:var(--ink-faint); }
+.report-modal-optional{ font-weight:500; color:var(--ink-soft); }
 .report-option-grid{ display:flex; flex-direction:column; gap:6px; }
 .report-option-btn{
   text-align:left; background:var(--paper); border:1px solid var(--paper-line); border-radius:10px;
@@ -2524,7 +2524,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 }
 .report-screenshot-btn:hover{ border-color:var(--imperial-gold); color:var(--ink); }
 .report-screenshot-name{ font-size:12px; color:var(--ink-soft); word-break:break-all; }
-.report-modal-privacy-note{ font-size:11.5px; color:var(--ink-faint); margin:8px 0 0; line-height:1.4; }
+.report-modal-privacy-note{ font-size:11.5px; color:var(--ink-soft); margin:8px 0 0; line-height:1.4; }
 .report-success-check{
   width:56px; height:56px; border-radius:50%; background:var(--seal-red); color:#fff;
   display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; margin:6px auto 14px;
@@ -2583,18 +2583,6 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   cursor:pointer; font-weight:800; font-size:13.5px; color: var(--ink); padding:10px 2px; list-style:none;
 }
 .notif-pref-advanced summary::-webkit-details-marker{ display:none; }
-.notif-pref-advanced summary::before{ content:"▸ "; color: var(--ink-faint); }
-.notif-pref-advanced[open] summary::before{ content:"▾ "; }
-.notif-pref-matrix{
-  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); overflow:hidden; margin-top:6px;
-}
-.notif-pref-matrix-row{ display:flex; align-items:center; gap:8px; padding:10px 14px; }
-.notif-pref-matrix-row + .notif-pref-matrix-row{ border-top:1px solid var(--paper-line-soft, var(--paper-line)); }
-.notif-pref-matrix-head{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; color: var(--ink-soft); }
-.notif-pref-matrix-label{ flex:1; font-size:13.5px; font-weight:700; color: var(--ink); }
-.notif-pref-matrix-cell{ width:52px; flex-shrink:0; text-align:center; font-size:12px; color: var(--ink-soft); display:flex; align-items:center; justify-content:center; gap:4px; }
-.notif-pref-matrix-cell.disabled{ color: var(--ink-faint); cursor:not-allowed; }
-.notif-pref-matrix-cell input[type="checkbox"]{ width:16px; height:16px; accent-color: var(--seal-red); cursor:pointer; }
 .notif-pref-quiet-hours{ display:flex; align-items:center; gap:8px; flex-shrink:0; font-size:13px; color: var(--ink-soft); }
 .notif-pref-quiet-hours select{
   border:1px solid var(--paper-line); border-radius:8px; padding:6px 8px; font-size:13px; font-family: var(--font-body);
@@ -3954,6 +3942,10 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .conj-session-result .score-num{ font-size:34px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
 
 .reorder-attempt{ font-size:18px; line-height:1.8; }
+.typed-attempt{ font-size:18px; line-height:1.8; overflow-wrap:anywhere; }
+/* Letra errada (vermelho) e letra que faltou (traço): usados na Conjugação e em "Sua resposta" dos exercícios de digitar. */
+.conj-x{ color:var(--error-red); background:color-mix(in srgb, var(--error-red) 16%, transparent); border-radius:3px; font-weight:800; text-decoration:underline wavy; text-decoration-thickness:1.5px; text-underline-offset:3px; }
+.conj-gap{ display:inline-block; width:.55em; height:1em; border-bottom:3px solid var(--error-red); vertical-align:-.15em; margin:0 1px; }
 .reorder-attempt-w.ok{ color:var(--jade); }
 .reorder-attempt-w.bad{ color:var(--error-red); font-weight:700; text-decoration:line-through; text-decoration-thickness:2px; }
 .reorder-attempt-w.near{ text-decoration:underline; text-decoration-color:#E0A526; text-decoration-thickness:3px; text-underline-offset:4px; }
@@ -4427,7 +4419,6 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 #view-settings .notif-pref-quiet-hours select{ border-radius:999px; padding:.45rem 2.2rem .45rem 1rem; font-size:.95rem; background-color:var(--p-elevado); color:var(--p-tinta); border:1px solid var(--p-borda-campo); }
 #view-settings .notif-pref-advanced{ margin:.6rem 0 0; border:0; padding:0; }
 #view-settings .notif-pref-advanced summary{ min-height:44px; display:flex; align-items:center; color:var(--p-tinta-suave); font-weight:600; }
-#view-settings .notif-pref-advanced summary::before{ content:none; }
 #view-settings .cfg-matriz{ overflow-x:auto; margin-top:.4rem; }
 #view-settings .cfg-matriz table{ margin:0; }
 #view-settings .cfg-matriz :is(th, td){ text-align:center; padding:.55rem .5rem; }
@@ -4905,7 +4896,7 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 #view-conjugaison .conj-review-form{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size:15px; }
 #view-conjugaison .conj-review-form i{ color:var(--ink-soft); }
 #view-conjugaison .conj-review-form .conj-answer-view{ min-height:0; display:inline-flex; padding:2px 8px; border-width:1px; border-radius:6px; }
-#view-conjugaison .conj-review-arrow{ color:var(--ink-soft); }
+#view-conjugaison .conj-review-arrow, #view-conjugaison .conj-review-empty{ color:var(--ink-soft); }
 #view-conjugaison .conj-result-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
 /* Conjugação, fase 2: escolha com verbos em cima (busca com bandeira + filtros) e tempos em cartões com frase de exemplo. */
 #view-conjugaison #conj-select-wrap{ max-width:780px; margin:0 auto; }
@@ -6319,7 +6310,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
           <input type="file" id="report-screenshot-input" accept="image/*" style="display:none;">
           <span class="report-screenshot-name" id="report-screenshot-name"></span>
         </div>
-        <p class="report-modal-privacy-note" data-i18n="report.modal.privacyNote">A captura, se anexada, fica visível só para a equipe -- nada é enviado automaticamente.</p>
+        <p class="report-modal-privacy-note" data-i18n="report.modal.privacyNote">A captura, se anexada, fica visível só para a equipe. Nada é enviado automaticamente.</p>
 
         <p class="profile-edit-error" id="report-error"></p>
         <button type="button" class="btn btn-primary btn-block" id="report-submit-btn" data-i18n="report.modal.submit">Enviar</button>
@@ -6375,6 +6366,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/card-variants.js"></script>
 <script src="../shared/translation-compare.js"></script>
 <script src="content.js"></script>
+<script src="curriculum-changes.js"></script>
 <script src="conjugation-data.js"></script>
 <script src="conj-games.js"></script>
 <script src="dictations.js"></script>

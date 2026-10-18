@@ -201,111 +201,93 @@ function daysSince(dateStr: string | undefined | null): number | null {
   return Math.floor((Date.now() - then) / 86400000);
 }
 
-// Portado de UNITS[].lessons[].vocabIdx em fr/content.js e zh/content.js --
-// unitId -> lista de vocabIdx por lição, na mesma ordem do conteúdo. Só o
-// suficiente pra replicar isCardLessonCompleted() (fr/app.js, zh/app.js)
-// aqui (mesmo espírito de duplicação do MISSION_FIELD_BY_ID acima --
-// content.js não é importável neste runtime, ver comentário no topo do
-// arquivo).
+// Portão de lição no servidor: espelha isCardLessonCompleted() do cliente (shared/core/revisao-decks.js) -- content.js
+// não é importável neste runtime (ver comentário no topo do arquivo).
 //
-// Bug real que isto corrige (relatado pela autora, 2026-09-15): um cartão
-// ganha reps>0 e due<=now assim que é praticado dentro da PRÓPRIA lição que
-// ensina a palavra -- antes de "lição concluída" avançar. computeReviewOverdueCount
-// contava esse cartão como atrasado (due há >48h) mesmo que a tela Revisão
-// (getStudyQueue/eligibleReviewPool, que JÁ respeita esse gate) mostrasse 0
-// -- notificação "N palavras prontas pra revisar" batendo numa tela vazia.
-// Unidade sem lições de vocabulário (só gramática, ex: "A1-g1" em fr) mapeia
-// pra [] de propósito -- lessonIdx nunca é encontrado, cai no mesmo
-// fallback do cliente (!!prog.completed).
+// Bug real que isto corrige (relatado pela autora, 2026-09-15): um cartão ganha reps>0 e due<=now assim que é
+// praticado dentro da PRÓPRIA lição que ensina a palavra -- antes de "lição concluída" avançar. Sem o portão, a
+// notificação "N palavras prontas pra revisar" batia numa tela Revisão vazia.
 //
-// Precisa ser regerado manualmente se a estrutura de lições de alguma
-// unidade mudar (mesmo cuidado de sincronia do MISSION_FIELD_BY_ID acima).
-const LESSON_VOCAB_MAP: Record<string, Record<string, number[][]>> = {
+// Etapa 0b do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.3 e 2.4): o id do cartão vem da chave
+// estável do item (`u{k}`, fr) e não diz mais onde a palavra mora; por isso unidade e lição saem do mapa GERADO abaixo
+// (antes: regex no id + LESSON_VOCAB_MAP regerado à mão). Item aposentado não está no mapa (não conta); chave fundida
+// conta como o sobrevivente. Mudou o conteúdo: `node scripts/gerar_mapa_cron.js` e novo deploy desta função.
+// >>> GERADO: STUDY_ITEM_GATE (scripts/gerar_mapa_cron.js, a partir de fr/content.js, fr/curriculum-changes.js e zh/content.js; NÃO editar à mão)
+// [unidade atual, índice da lição que ensina a palavra (-1 = nenhuma)] ou, chave fundida, [unidade, lição, id do sobrevivente].
+const STUDY_ITEM_GATE: Record<string, Record<string, [string, number, string?]>> = {
   frances: {
-    "A1-1": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-2": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-3": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-g1": [],
-    "A1-4": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-g2": [],
-    "A1-5": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-6": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-g3": [],
-    "A1-7": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-8": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-g4": [],
-    "A1-9": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-10": [[0,1,2], [3,4,5], [6,7,8], [9,10,11], [12,13], []],
-    "A1-g10": [],
-    "A1-11": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-12": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-13": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-14": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-g5": [],
-    "A1-15": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-g6": [],
-    "A1-16": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-g7": [],
-    "A1-17": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-18": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-19": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-g8": [],
-    "A1-20": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "A1-g9": []
+    "uA1-1-v0": ["A1-1", 0], "uA1-1-v1": ["A1-1", 0], "uA1-1-v2": ["A1-1", 0], "uA1-1-v3": ["A1-1", 1], "uA1-1-v4": ["A1-1", 1], "uA1-1-v5": ["A1-1", 1], "uA1-1-v6": ["A1-1", 2], "uA1-1-v7": ["A1-1", 2], "uA1-1-v8": ["A1-1", 2], "uA1-1-v9": ["A1-1", 2],
+    "uA1-2-v0": ["A1-2", 0], "uA1-2-v1": ["A1-2", 0], "uA1-2-v2": ["A1-2", 0], "uA1-2-v3": ["A1-2", 1], "uA1-2-v4": ["A1-2", 1], "uA1-2-v5": ["A1-2", 1], "uA1-2-v6": ["A1-2", 2], "uA1-2-v7": ["A1-2", 2], "uA1-2-v8": ["A1-2", 2], "uA1-2-v9": ["A1-2", 2],
+    "uA1-3-v0": ["A1-3", 0], "uA1-3-v1": ["A1-3", 0], "uA1-3-v2": ["A1-3", 0], "uA1-3-v3": ["A1-3", 1], "uA1-3-v4": ["A1-3", 1], "uA1-3-v5": ["A1-3", 1], "uA1-3-v6": ["A1-3", 2], "uA1-3-v7": ["A1-3", 2], "uA1-3-v8": ["A1-3", 2], "uA1-3-v9": ["A1-3", 2],
+    "uA1-4-v0": ["A1-4", 0], "uA1-4-v1": ["A1-4", 0], "uA1-4-v2": ["A1-4", 0], "uA1-4-v3": ["A1-4", 1], "uA1-4-v4": ["A1-4", 1], "uA1-4-v5": ["A1-4", 1], "uA1-4-v6": ["A1-4", 2], "uA1-4-v7": ["A1-4", 2], "uA1-4-v8": ["A1-4", 2], "uA1-4-v9": ["A1-4", 2],
+    "uA1-5-v0": ["A1-5", 0], "uA1-5-v1": ["A1-5", 0], "uA1-5-v2": ["A1-5", 0], "uA1-5-v3": ["A1-5", 1], "uA1-5-v4": ["A1-5", 1], "uA1-5-v5": ["A1-5", 1], "uA1-5-v6": ["A1-5", 2], "uA1-5-v7": ["A1-5", 2], "uA1-5-v8": ["A1-5", 2], "uA1-5-v9": ["A1-5", 2],
+    "uA1-6-v0": ["A1-6", 0], "uA1-6-v1": ["A1-6", 0], "uA1-6-v2": ["A1-6", 0], "uA1-6-v3": ["A1-6", 1], "uA1-6-v4": ["A1-6", 1], "uA1-6-v5": ["A1-6", 1], "uA1-6-v6": ["A1-6", 2], "uA1-6-v7": ["A1-6", 2], "uA1-6-v8": ["A1-6", 2], "uA1-6-v9": ["A1-6", 2],
+    "uA1-7-v0": ["A1-7", 0], "uA1-7-v1": ["A1-7", 0], "uA1-7-v2": ["A1-7", 0], "uA1-7-v3": ["A1-7", 1], "uA1-7-v4": ["A1-7", 1], "uA1-7-v5": ["A1-7", 1], "uA1-7-v6": ["A1-7", 2], "uA1-7-v7": ["A1-7", 2], "uA1-7-v8": ["A1-7", 2], "uA1-7-v9": ["A1-7", 2],
+    "uA1-8-v0": ["A1-8", 0], "uA1-8-v1": ["A1-8", 0], "uA1-8-v2": ["A1-8", 0], "uA1-8-v3": ["A1-8", 1], "uA1-8-v4": ["A1-8", 1], "uA1-8-v5": ["A1-8", 1], "uA1-8-v6": ["A1-8", 2], "uA1-8-v7": ["A1-8", 2], "uA1-8-v8": ["A1-8", 2], "uA1-8-v9": ["A1-8", 2],
+    "uA1-9-v0": ["A1-9", 0], "uA1-9-v1": ["A1-9", 0], "uA1-9-v2": ["A1-9", 0], "uA1-9-v3": ["A1-9", 1], "uA1-9-v4": ["A1-9", 1], "uA1-9-v5": ["A1-9", 1], "uA1-9-v6": ["A1-9", 2], "uA1-9-v7": ["A1-9", 2], "uA1-9-v8": ["A1-9", 2], "uA1-9-v9": ["A1-9", 2],
+    "uA1-10-v0": ["A1-10", 0], "uA1-10-v1": ["A1-10", 0], "uA1-10-v2": ["A1-10", 0], "uA1-10-v3": ["A1-10", 1], "uA1-10-v4": ["A1-10", 1], "uA1-10-v5": ["A1-10", 1], "uA1-10-v6": ["A1-10", 2], "uA1-10-v7": ["A1-10", 2], "uA1-10-v8": ["A1-10", 2], "uA1-10-v9": ["A1-10", 3], "uA1-10-v10": ["A1-10", 3], "uA1-10-v11": ["A1-10", 3], "uA1-10-v12": ["A1-10", 4], "uA1-10-v13": ["A1-10", 4],
+    "uA1-11-v0": ["A1-11", 0], "uA1-11-v1": ["A1-11", 0], "uA1-11-v2": ["A1-11", 0], "uA1-11-v3": ["A1-11", 1], "uA1-11-v4": ["A1-11", 1], "uA1-11-v5": ["A1-11", 1], "uA1-11-v6": ["A1-11", 2], "uA1-11-v7": ["A1-11", 2], "uA1-11-v8": ["A1-11", 2], "uA1-11-v9": ["A1-11", 2],
+    "uA1-12-v0": ["A1-12", 0], "uA1-12-v1": ["A1-12", 0], "uA1-12-v2": ["A1-12", 0], "uA1-12-v3": ["A1-12", 1], "uA1-12-v4": ["A1-12", 1], "uA1-12-v5": ["A1-12", 1], "uA1-12-v6": ["A1-12", 2], "uA1-12-v7": ["A1-12", 2], "uA1-12-v8": ["A1-12", 2], "uA1-12-v9": ["A1-12", 2],
+    "uA1-13-v0": ["A1-13", 0], "uA1-13-v1": ["A1-13", 0], "uA1-13-v2": ["A1-13", 0], "uA1-13-v3": ["A1-13", 1], "uA1-13-v4": ["A1-13", 1], "uA1-13-v5": ["A1-13", 1], "uA1-13-v6": ["A1-13", 2], "uA1-13-v7": ["A1-13", 2], "uA1-13-v8": ["A1-13", 2], "uA1-13-v9": ["A1-13", 2],
+    "uA1-14-v0": ["A1-14", 0], "uA1-14-v1": ["A1-14", 0], "uA1-14-v2": ["A1-14", 0], "uA1-14-v3": ["A1-14", 1], "uA1-14-v4": ["A1-14", 1], "uA1-14-v5": ["A1-14", 1], "uA1-14-v6": ["A1-14", 2], "uA1-14-v7": ["A1-14", 2], "uA1-14-v8": ["A1-14", 2], "uA1-14-v9": ["A1-14", 2],
+    "uA1-15-v0": ["A1-15", 0], "uA1-15-v1": ["A1-15", 0], "uA1-15-v2": ["A1-15", 0], "uA1-15-v3": ["A1-15", 1], "uA1-15-v4": ["A1-15", 1], "uA1-15-v5": ["A1-15", 1], "uA1-15-v6": ["A1-15", 2], "uA1-15-v7": ["A1-15", 2], "uA1-15-v8": ["A1-15", 2], "uA1-15-v9": ["A1-15", 2],
+    "uA1-16-v0": ["A1-16", 0], "uA1-16-v1": ["A1-16", 0], "uA1-16-v2": ["A1-16", 0], "uA1-16-v3": ["A1-16", 1], "uA1-16-v4": ["A1-16", 1], "uA1-16-v5": ["A1-16", 1], "uA1-16-v6": ["A1-16", 2], "uA1-16-v7": ["A1-16", 2], "uA1-16-v8": ["A1-16", 2], "uA1-16-v9": ["A1-16", 2],
+    "uA1-17-v0": ["A1-17", 0], "uA1-17-v1": ["A1-17", 0], "uA1-17-v2": ["A1-17", 0], "uA1-17-v3": ["A1-17", 1], "uA1-17-v4": ["A1-17", 1], "uA1-17-v5": ["A1-17", 1], "uA1-17-v6": ["A1-17", 2], "uA1-17-v7": ["A1-17", 2], "uA1-17-v8": ["A1-17", 2], "uA1-17-v9": ["A1-17", 2],
+    "uA1-18-v0": ["A1-18", 0], "uA1-18-v1": ["A1-18", 0], "uA1-18-v2": ["A1-18", 0], "uA1-18-v3": ["A1-18", 1], "uA1-18-v4": ["A1-18", 1], "uA1-18-v5": ["A1-18", 1], "uA1-18-v6": ["A1-18", 2], "uA1-18-v7": ["A1-18", 2], "uA1-18-v8": ["A1-18", 2], "uA1-18-v9": ["A1-18", 2],
+    "uA1-19-v0": ["A1-19", 0], "uA1-19-v1": ["A1-19", 0], "uA1-19-v2": ["A1-19", 0], "uA1-19-v3": ["A1-19", 1], "uA1-19-v4": ["A1-19", 1], "uA1-19-v5": ["A1-19", 1], "uA1-19-v6": ["A1-19", 2], "uA1-19-v7": ["A1-19", 2], "uA1-19-v8": ["A1-19", 2], "uA1-19-v9": ["A1-19", 2],
+    "uA1-20-v0": ["A1-20", 0], "uA1-20-v1": ["A1-20", 0], "uA1-20-v2": ["A1-20", 0], "uA1-20-v3": ["A1-20", 1], "uA1-20-v4": ["A1-20", 1], "uA1-20-v5": ["A1-20", 1], "uA1-20-v6": ["A1-20", 2], "uA1-20-v7": ["A1-20", 2], "uA1-20-v8": ["A1-20", 2], "uA1-20-v9": ["A1-20", 2],
   },
   mandarim: {
-    "1": [[0,1,2], [3,4,5], [6,7], []],
-    "2": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "3": [[0,1,2], [3,4,5], [6,7,8], [9,10,11], [12,13], []],
-    "4": [[0,1,2], [3,4,5], [6,7,8], [9,10,11], []],
-    "5": [[0,1,2], [3,4,5], [6,7,8], [9,10], []],
-    "6": [[0,1,2], [3,4,5], [6,7,8], []],
-    "7": [[0,1,2], [3,4,5], [6,7,8], []],
-    "8": [[0,1,2], [3,4,5], [6,7,8], [9,10], []],
-    "9": [[0,1,2], [3,4,5,6], []],
-    "10": [[0,1,2], [3,4,5], [6,7], []],
-    "11": [[0,1,2], [3,4,5], [6,7], []],
-    "12": [[0,1,2], [3,4,5], [6,7], []],
-    "13": [[0,1,2], [3,4,5,6], []],
-    "14": [[0,1,2], [3,4,5], []],
-    "15": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "16": [[0,1,2], [3,4,5], [6,7,8,9], []],
-    "17": [[0,1,2], [3,4,5], [6,7], []],
-    "18": [[0,1,2], [3,4,5], [6,7,8,9], []]
+    "u1-v0": ["1", 0], "u1-v1": ["1", 0], "u1-v2": ["1", 0], "u1-v3": ["1", 1], "u1-v4": ["1", 1], "u1-v5": ["1", 1], "u1-v6": ["1", 2], "u1-v7": ["1", 2],
+    "u2-v0": ["2", 0], "u2-v1": ["2", 0], "u2-v2": ["2", 0], "u2-v3": ["2", 1], "u2-v4": ["2", 1], "u2-v5": ["2", 1], "u2-v6": ["2", 2], "u2-v7": ["2", 2], "u2-v8": ["2", 2], "u2-v9": ["2", 2],
+    "u3-v0": ["3", 0], "u3-v1": ["3", 0], "u3-v2": ["3", 0], "u3-v3": ["3", 1], "u3-v4": ["3", 1], "u3-v5": ["3", 1], "u3-v6": ["3", 2], "u3-v7": ["3", 2], "u3-v8": ["3", 2], "u3-v9": ["3", 3], "u3-v10": ["3", 3], "u3-v11": ["3", 3], "u3-v12": ["3", 4], "u3-v13": ["3", 4],
+    "u4-v0": ["4", 0], "u4-v1": ["4", 0], "u4-v2": ["4", 0], "u4-v3": ["4", 1], "u4-v4": ["4", 1], "u4-v5": ["4", 1], "u4-v6": ["4", 2], "u4-v7": ["4", 2], "u4-v8": ["4", 2], "u4-v9": ["4", 3], "u4-v10": ["4", 3], "u4-v11": ["4", 3],
+    "u5-v0": ["5", 0], "u5-v1": ["5", 0], "u5-v2": ["5", 0], "u5-v3": ["5", 1], "u5-v4": ["5", 1], "u5-v5": ["5", 1], "u5-v6": ["5", 2], "u5-v7": ["5", 2], "u5-v8": ["5", 2], "u5-v9": ["5", 3], "u5-v10": ["5", 3],
+    "u6-v0": ["6", 0], "u6-v1": ["6", 0], "u6-v2": ["6", 0], "u6-v3": ["6", 1], "u6-v4": ["6", 1], "u6-v5": ["6", 1], "u6-v6": ["6", 2], "u6-v7": ["6", 2], "u6-v8": ["6", 2],
+    "u7-v0": ["7", 0], "u7-v1": ["7", 0], "u7-v2": ["7", 0], "u7-v3": ["7", 1], "u7-v4": ["7", 1], "u7-v5": ["7", 1], "u7-v6": ["7", 2], "u7-v7": ["7", 2], "u7-v8": ["7", 2],
+    "u8-v0": ["8", 0], "u8-v1": ["8", 0], "u8-v2": ["8", 0], "u8-v3": ["8", 1], "u8-v4": ["8", 1], "u8-v5": ["8", 1], "u8-v6": ["8", 2], "u8-v7": ["8", 2], "u8-v8": ["8", 2], "u8-v9": ["8", 3], "u8-v10": ["8", 3],
+    "u9-v0": ["9", 0], "u9-v1": ["9", 0], "u9-v2": ["9", 0], "u9-v3": ["9", 1], "u9-v4": ["9", 1], "u9-v5": ["9", 1], "u9-v6": ["9", 1],
+    "u10-v0": ["10", 0], "u10-v1": ["10", 0], "u10-v2": ["10", 0], "u10-v3": ["10", 1], "u10-v4": ["10", 1], "u10-v5": ["10", 1], "u10-v6": ["10", 2], "u10-v7": ["10", 2],
+    "u11-v0": ["11", 0], "u11-v1": ["11", 0], "u11-v2": ["11", 0], "u11-v3": ["11", 1], "u11-v4": ["11", 1], "u11-v5": ["11", 1], "u11-v6": ["11", 2], "u11-v7": ["11", 2],
+    "u12-v0": ["12", 0], "u12-v1": ["12", 0], "u12-v2": ["12", 0], "u12-v3": ["12", 1], "u12-v4": ["12", 1], "u12-v5": ["12", 1], "u12-v6": ["12", 2], "u12-v7": ["12", 2],
+    "u13-v0": ["13", 0], "u13-v1": ["13", 0], "u13-v2": ["13", 0], "u13-v3": ["13", 1], "u13-v4": ["13", 1], "u13-v5": ["13", 1], "u13-v6": ["13", 1],
+    "u14-v0": ["14", 0], "u14-v1": ["14", 0], "u14-v2": ["14", 0], "u14-v3": ["14", 1], "u14-v4": ["14", 1], "u14-v5": ["14", 1],
+    "u15-v0": ["15", 0], "u15-v1": ["15", 0], "u15-v2": ["15", 0], "u15-v3": ["15", 1], "u15-v4": ["15", 1], "u15-v5": ["15", 1], "u15-v6": ["15", 2], "u15-v7": ["15", 2], "u15-v8": ["15", 2], "u15-v9": ["15", 2],
+    "u16-v0": ["16", 0], "u16-v1": ["16", 0], "u16-v2": ["16", 0], "u16-v3": ["16", 1], "u16-v4": ["16", 1], "u16-v5": ["16", 1], "u16-v6": ["16", 2], "u16-v7": ["16", 2], "u16-v8": ["16", 2], "u16-v9": ["16", 2],
+    "u17-v0": ["17", 0], "u17-v1": ["17", 0], "u17-v2": ["17", 0], "u17-v3": ["17", 1], "u17-v4": ["17", 1], "u17-v5": ["17", 1], "u17-v6": ["17", 2], "u17-v7": ["17", 2],
+    "u18-v0": ["18", 0], "u18-v1": ["18", 0], "u18-v2": ["18", 0], "u18-v3": ["18", 1], "u18-v4": ["18", 1], "u18-v5": ["18", 1], "u18-v6": ["18", 2], "u18-v7": ["18", 2], "u18-v8": ["18", 2], "u18-v9": ["18", 2],
   },
 };
+// <<< GERADO: STUDY_ITEM_GATE
 
-// Espelha isCardLessonCompleted() (fr/app.js, zh/app.js) usando
-// LESSON_VOCAB_MAP em vez de UNITS (indisponível aqui).
-function isCardLessonCompletedServer(card: any, unitProgress: any, languageAppKey: string): boolean {
-  const prog = unitProgress?.[card?.unitId];
-  // A0 (06/10/2026): espelho do cliente -- unidade concluída libera tudo.
-  if (prog?.completed) return true;
-  if (!prog?.started) return false;
-  const lessons = LESSON_VOCAB_MAP[languageAppKey]?.[String(card.unitId)];
-  const lessonIdx = lessons ? lessons.findIndex((vocabIdxList) => vocabIdxList.includes(card.vocabIdx)) : -1;
-  if (lessonIdx === -1) return !!prog.completed;
-  return lessonIdx < prog.lessonIdx;
+// Entrada do mapa para um cartão da trilha (A `u{k}` ou B `u{k}-b`); null = não é palavra da trilha deste idioma
+// (cartão "Na frase", professora/aluna, aposentado, idioma sem mapa). `base` identifica a PALAVRA: A e B (e a chave
+// fundida e a sobrevivente) contam uma vez só em "palavras prontas pra revisar".
+function studyWordGate(card: any, languageAppKey: string): { base: string; unitId: string; lessonIdx: number } | null {
+  if (!card || typeof card.id !== 'string') return null;
+  // origin explícito diferente de 'study' nunca é trilha. Saves da trilha não gravam `origin` (só id + progresso).
+  if (card.origin != null && card.origin !== 'study') return null;
+  const gate = STUDY_ITEM_GATE[languageAppKey];
+  if (!gate) return null;
+  let base = card.id;
+  let e = Object.prototype.hasOwnProperty.call(gate, base) ? gate[base] : undefined;
+  if (!e && base.endsWith('-b')) {
+    base = base.slice(0, -2);
+    e = Object.prototype.hasOwnProperty.call(gate, base) ? gate[base] : undefined;
+  }
+  if (!e) return null;
+  return { base: e[2] || base, unitId: e[0], lessonIdx: e[1] };
 }
 
-// K2-B: identidade da PALAVRA de um card da Study Trail. Hoje cada palavra é
-// um card `u{unitId}-v{idx}`; a migração da trilha (K2-C) passa a gerar dois
-// CardInstances por palavra: A (`u{unitId}-v{idx}`) e B (`u{unitId}-v{idx}-b`).
-// A/B representam a MESMA palavra e devem contar uma vez só em "palavras
-// prontas pra revisar". A identidade sai do id ancorado (não de "qualquer
-// sufixo -b": ids de professora/aluna são `t{n}`/`s{n}` e nunca casam aqui).
-// Devolve null pra qualquer card que não seja da trilha -- esses mantêm a
-// contagem por card, como sempre.
-const STUDY_CARD_ID_RE = /^(u.+-v(\d+))(-b)?$/;
-
-function studyWordIdentity(card: any): { baseId: string; vocabIdx: number } | null {
-  if (!card) return null;
-  // origin explícito diferente de 'study' nunca é trilha. Saves antigos não
-  // têm `origin`: aí só o formato do id decide (t{n}/s{n} nunca casam).
-  if (card.origin != null && card.origin !== 'study') return null;
-  const m = typeof card.id === 'string' ? STUDY_CARD_ID_RE.exec(card.id) : null;
-  if (!m) return null;
-  return { baseId: m[1], vocabIdx: Number(m[2]) };
+// isCardLessonCompleted() do cliente para a palavra da trilha: `released` (o cartão já passou pelo portão uma vez)
+// passa sempre; unidade concluída libera tudo (A0, 06/10/2026); senão só as lições já feitas.
+function isStudyWordReleasedServer(card: any, gate: { unitId: string; lessonIdx: number }, unitProgress: any): boolean {
+  if (card?.released) return true;
+  const prog = unitProgress?.[gate.unitId];
+  if (prog?.completed) return true;
+  if (!prog?.started) return false;
+  if (gate.lessonIdx === -1) return !!prog.completed;
+  return gate.lessonIdx < prog.lessonIdx;
 }
 
 function computeReviewOverdueCount(cards: any[] | undefined, unitProgress: any, languageAppKey: string): number {
@@ -314,29 +296,17 @@ function computeReviewOverdueCount(cards: any[] | undefined, unitProgress: any, 
   const seenStudyWords = new Set<string>();
   for (const c of (cards || [])) {
     if (!(c && c.reps > 0 && c.due && (now - c.due) > REVIEW_OVERDUE_STALE_MS)) continue;
-    // K.0-C: Teacher/Self não pertencem a nenhuma unidade (unitId null), então
-    // não passam pelo gate de lição da trilha. Espelha isCardLessonCompleted()
-    // do cliente (fr/zh app.js): só flashcardStatus==='active' os libera --
-    // arquivado fica de fora. Cada CardInstance conta individualmente (sem
-    // dedup por Note: o cron trabalha com CardInstances). New já foi excluído
-    // acima (reps>0).
+    // K.0-C: Teacher/Self não pertencem a nenhuma unidade: só flashcardStatus==='active' os libera (arquivado fica de
+    // fora). Cada CardInstance conta individualmente (sem dedup por Note). New já foi excluído acima (reps>0).
     if (c.origin === 'teacher' || c.origin === 'self') {
       if (c.flashcardStatus === 'active') count++;
       continue;
     }
-    const word = studyWordIdentity(c);
-    // Save da trilha que serialize só id+progresso (K2-C) pode não trazer
-    // unitId/vocabIdx: completa a partir do id só quando faltarem, pra o
-    // gate de lição continuar o mesmo. Com unitId presente nada muda.
-    let gateCard = c;
-    if (word && (c.unitId == null || c.vocabIdx == null)) {
-      gateCard = { ...c, unitId: c.unitId ?? word.baseId.slice(1, word.baseId.lastIndexOf('-v')), vocabIdx: c.vocabIdx ?? word.vocabIdx };
-    }
-    if (!isCardLessonCompletedServer(gateCard, unitProgress, languageAppKey)) continue;
-    if (word) {
-      if (seenStudyWords.has(word.baseId)) continue;
-      seenStudyWords.add(word.baseId);
-    }
+    const word = studyWordGate(c, languageAppKey);
+    if (!word) continue;
+    if (!isStudyWordReleasedServer(c, word, unitProgress)) continue;
+    if (seenStudyWords.has(word.base)) continue;
+    seenStudyWords.add(word.base);
     count++;
   }
   return count;
