@@ -52,6 +52,13 @@
   function juntarBarra(s) {
     return String(s).replace(/\s*\/\s*/g, ' / ');
   }
+  // O que a pessoa digitou, como a comparação deve tentar: a barra com espaço padronizado e, quando o cartão tem
+  // duas formas, também a vírgula lida como barra ("allemand, allemande"). A ordem trocada NÃO vale.
+  function variantesDigitadas(typed, expected) {
+    var v = [juntarBarra(typed)];
+    if (formasAceitas(expected).length > 1 && String(typed).indexOf(',') !== -1) v.push(juntarBarra(String(typed).replace(/,/g, ' / ')));
+    return v;
+  }
 
   // Pontuação ignorada nos exercícios de digitar. O fr usa DUAS listas hoje (achado: o "Digite o que
   // ouviu" de vocabulário ignora o apóstrofo curvo ’, a lacuna digitada não). Mantidas iguais para a paridade.
@@ -63,8 +70,8 @@
   function respostaDigitadaCerta(typed, expected, pontuacaoRe) {
     var re = pontuacaoRe || PONTUACAO_VOCAB_RE;
     var strip = function (s) { return normalizarFrouxo(s).replace(re, '').trim(); };
-    var t = strip(juntarBarra(typed));
-    return formasDigitaveis(expected).some(function (form) { return strip(form) === t; });
+    var ts = variantesDigitadas(typed, expected).map(strip);
+    return formasDigitaveis(expected).some(function (form) { return ts.indexOf(strip(form)) !== -1; });
   }
 
   // Versão em 3 níveis dos exercícios de digitar: 'ok' | 'quase' | 'errou'.
@@ -73,13 +80,12 @@
   //  - acento 'quase' (pt, decisão da dona de 2026-10-15: avó/avô, pais/país são palavras diferentes):
   //    'ok' = igual (só maiúscula/pontuação diferem); 'quase' = só acento/cedilha/til; 'errou'.
   //  - ligaduras (opcional, fr: [['œ','oe'],['æ','ae']]): "soeur" por "sœur" = 'quase' (decisão de 2026-10-15).
-  function avaliarRespostaDigitada(typed, expected, opcoes) {
+  function avaliarUmaDigitada(typed, expected, opcoes) {
     var o = opcoes || {};
     var re = o.pontuacaoRe || PONTUACAO_VOCAB_RE;
     var estrito = function (s) { return String(s).normalize('NFC').toLowerCase().replace(re, '').trim(); };
     var frouxo = function (s) { return normalizarFrouxo(s).replace(re, '').trim(); };
     var forms = formasDigitaveis(expected);
-    typed = juntarBarra(typed);
     if (o.acento === 'tolerante') {
       var tf = frouxo(typed);
       if (forms.some(function (f) { return frouxo(f) === tf; })) return 'ok';
@@ -95,6 +101,16 @@
       if (tl && forms.some(function (f) { return lig(f) === tl; })) return 'quase';
     }
     return 'errou';
+  }
+
+  // 'ok' > 'quase' > 'errou' entre as leituras possíveis do que foi digitado (barra, vírgula).
+  function avaliarRespostaDigitada(typed, expected, opcoes) {
+    var rank = { ok: 2, quase: 1, errou: 0 }, melhor = 'errou';
+    variantesDigitadas(typed, expected).forEach(function (v) {
+      var r = avaliarUmaDigitada(v, expected, opcoes);
+      if (rank[r] > rank[melhor]) melhor = r;
+    });
+    return melhor;
   }
 
   // Exercício de gramática com resposta digitada (números por extenso etc.): hífen, espaço e apóstrofo

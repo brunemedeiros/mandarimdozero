@@ -35,5 +35,17 @@ check('duas formas: barra sem espaço = ok', E('allemand/allemande', 'allemand /
 check('duas formas: só uma forma = ok', E('allemande', 'allemand / allemande') === 'ok' && E('allemand', 'allemand / allemande') === 'ok');
 check('duas formas: sem acento no texto inteiro = quase', E('francais / francaise', 'français / française') === 'quase');
 check('duas formas: errada = errou', E('allemand / italien', 'allemand / allemande') === 'errou');
+check('duas formas: segunda forma incompleta = errou (não vira "quase")', E('allemand / allemand', 'allemand / allemande') === 'errou' && E('allemand / allemandes', 'allemand / allemande') === 'errou');
+check('duas formas: vírgula no lugar da barra = ok', E('allemand, allemande', 'allemand / allemande') === 'ok' && E('allemand , allemande', 'allemand / allemande') === 'ok');
+check('duas formas: ordem trocada = errou', E('allemande / allemand', 'allemand / allemande') === 'errou' && E('allemande, allemand', 'allemand / allemande') === 'errou');
+check('duas formas: só espaço entre elas = errou', E('allemand allemande', 'allemand / allemande') === 'errou');
+check('duas formas: uma letra errada numa forma sozinha continua quase', E('allemend', 'allemand / allemande') === 'quase');
+check('vírgula dentro de uma forma só não é separador', E('bonjour, madame', 'bonjour, madame / salut') === 'ok');
 check('uma forma só continua igual', E('bonjour', 'bonjour') === 'ok' && E('', 'bonjour') === 'errou');
+// "oe" no lugar de "œ" = quase (mesma regra da trilha, 2026-10-18)
+check('oe por œ = quase', V('soeur', ['sœur']) === 'quase' && V('Coeur', ['cœur']) === 'quase');
+check('ae por æ = quase', V('curriculum vitae', ['curriculum vitæ']) === 'quase');
+check('œ digitado certo = ok', V('sœur', ['sœur']) === 'ok');
+check('oe por œ numa das duas formas = quase', E('soeur / frere', 'sœur / frère') === 'quase');
+check('oe por œ com outra letra errada = errou', V('soeor', ['sœur']) === 'errou');
 summary();

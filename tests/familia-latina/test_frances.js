@@ -77,6 +77,9 @@ check('ditado (d): texto com "30" e aluna digita "trente" continua troca (sem in
 check('fr (f): "allemand / allemande" por "allemand / allemande" = ok (antes: errou)', FR.avaliarRespostaDigitada('allemand / allemande', 'allemand / allemande'), 'ok');
 check('fr (f): sem espaços em volta da barra e sem acento = ok', FR.avaliarRespostaDigitada('Francais/francaise', 'français / française'), 'ok');
 check('fr (f): só uma das formas continua ok', FR.avaliarRespostaDigitada('allemande', 'allemand / allemande'), 'ok');
+check('fr (f): vírgula no lugar da barra = ok', FR.avaliarRespostaDigitada('allemand, allemande', 'allemand / allemande'), 'ok');
+check('fr (f): ordem trocada = errou', FR.avaliarRespostaDigitada('allemande / allemand', 'allemand / allemande'), 'errou');
+check('fr (f): vírgula de uma forma só continua pontuação ("Bonjour, Sophie" por "bonjour sophie")', FR.avaliarRespostaDigitada('Bonjour, Sophie', 'bonjour sophie'), 'ok');
 check('fr (f): as duas formas com uma errada = errou', FR.avaliarRespostaDigitada('allemand / allemand', 'allemand / allemande'), 'errou');
 check('fr (f): respostaDigitadaCerta aceita o texto inteiro', FL.respostaDigitadaCerta('un / une', 'un / une'), true);
 check('teclado fr: 14 teclas, com œ', CFG.gruposDeAcentos.flat().length === 14 && CFG.gruposDeAcentos.flat().includes('œ'), true);

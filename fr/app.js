@@ -3248,8 +3248,13 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 // Família latina, fase 2: as letras do teclado estão em LANG_HOOKS.familiaLatina.gruposDeAcentos
 // (fr/lang-hooks.js) e a marcação/inserção, em shared/core/familias/latina.js. As classes
 // continuam fr-accent-* (o CSS e as capturas de tela não mudam).
-function frAccentPickerHTML(){
-  return latinaFr().htmlTecladoDeAcentos();
+// `expected` (opcional): a resposta que o exercício pede. Se ela tem uma letra que o teclado não tem (æ, ñ, ß...),
+// entra uma fileira a mais só com essa letra, sem legenda; sem isso, o teclado é o de sempre.
+function frAccentPickerHTML(expected){
+  const base = LANG_HOOKS.familiaLatina.gruposDeAcentos;
+  const tem = new Set([].concat(...base));
+  const extras = [...new Set(Array.from(String(expected || '').toLowerCase()).filter(ch => /\p{L}/u.test(ch) && !/[a-z]/.test(ch) && !tem.has(ch)))];
+  return extras.length ? FamiliaLatina.htmlTecladoDeAcentos(base.concat([extras])) : latinaFr().htmlTecladoDeAcentos();
 }
 
 // Escreve a tecla no campo: insere no CURSOR (não sempre no final) -- dá pra
@@ -3282,7 +3287,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       </div>
       <div class="cloze-type-wrap">
         <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('fr.exercise.typeInFrench')}">
-        ${frAccentPickerHTML()}
+        ${frAccentPickerHTML(ex.item.f)}
         <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">${t('common.verify')}</button>
       </div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
@@ -3432,7 +3437,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       ${mode === 'type' ? `
         <div class="cloze-type-wrap">
           <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.cloze.placeholder')}">
-          ${frAccentPickerHTML()}
+          ${frAccentPickerHTML(ex.correctBlock.f)}
           <button class="btn btn-primary btn-block" id="cloze-verify-btn">${t('common.verify')}</button>
         </div>
       ` : `
@@ -4083,7 +4088,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     ${!answered ? `
       <div class="cloze-type-wrap">
         <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.cloze.placeholder')}">
-        ${frAccentPickerHTML()}
+        ${frAccentPickerHTML(view.compareAnswerText)}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
     ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
@@ -4163,7 +4168,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     ${!answered ? `
       <div class="cloze-type-wrap">
         <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.typeAnswer.placeholder')}">
-        ${frAccentPickerHTML()}
+        ${frAccentPickerHTML(view.compareAnswerText)}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
     ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
