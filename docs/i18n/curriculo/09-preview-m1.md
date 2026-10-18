@@ -30,8 +30,13 @@ e o código real da trilha, conferido nesta sessão: `fr/app.js`, `fr/content.js
   são cobrados pelo *défi* do M1. Os livros e as gramáticas **nunca** juntam tudo num lugar. Recomendo a **opção C (híbrida)**:
   M1.7 (g) enxuta "Masculino e feminino: nacionalidades e profissões" (`A1-g11`), notas curtas de contato em M1.2 e M1.3, e
   "Artigos e plural" como unidade nova no M2 (`A1-g17`, logo depois da família); *des → de* vai para a negação (M2).
-- Outras gramáticas suspeitas de excesso: M2.6, M3.2, M5.4, M6.2, M6.6 (alta); M2.5 (média); M2.2 (baixa a média).
-- 24 perguntas de verificação no fim, cada uma com a minha recomendação.
+- **M1.5 (g)** (pedido da dona, 2026-10-18): os pronomes tônicos **saem** da gramática de *être / avoir* (a tela dos tônicos era só proposta
+  do v2, nunca publicada: separar não custa nada). Recomendo a **combinação**: nota de gramática *Moi, toi* na M1.2 (nome), nota
+  *Et lui ? Et elle ?* na M1.4 (idade dos outros) e a sistematização com preposições (*pour moi, avec moi, chez moi*) mais adiante, onde a
+  função pede (B.10). A M1.5 fica "*être* e *avoir*: as seis pessoas", na mesma posição. Revisão de todas as (g) do M1 e desenho final em B.11 e B.12.
+- **Nada no desenho exige refazer lição** (pedido da dona): conferido item por item em B.13, com 2 cuidados (palavras novas em unidade já concluída; notas novas).
+- Outras gramáticas suspeitas de excesso (fora do M1; outro agente cobre M2 a M8 e o A2): M2.6, M3.2, M5.4, M6.2, M6.6 (alta); M2.5 (média); M2.2 (baixa a média).
+- 31 perguntas de verificação no fim, cada uma com a minha recomendação.
 
 ---
 
@@ -48,7 +53,7 @@ e o código real da trilha, conferido nesta sessão: `fr/app.js`, `fr/content.js
  │ M1.2  Dizer o nome e a nacionalidade        4 lições         │ [existe hoje] (lições reordenadas)
  │ M1.3  Dizer a idade: de 1 a 29              5 lições         │ [existe hoje] (palavras novas e reordenadas)
  │ M1.4  Perguntar a idade dos outros: até 69  4 lições         │ [existe hoje] (unidade nova, só conteúdo)
- │ M1.5  être e avoir, pronomes tônicos   (gramática)           │ [existe hoje]
+ │ M1.5  être e avoir: as seis pessoas    (gramática)           │ [existe hoje] (sem os tônicos, B.10)
  │ M1.6  Dizer a profissão                     4 lições         │ [existe hoje] (unidade nova, só conteúdo)
  │ M1.7  Masculino e feminino...          (gramática)           │ [existe hoje] (ver Parte B)
  │ ── Som do módulo: ritmo e entonação     opcional, ~4 min     │ [código novo]
@@ -214,7 +219,7 @@ Lições reordenadas (anomalia 28 do `01`: hoje *la France* cai na lição do no
 
 | Lição | Palavras | Notas |
 |---|---|---|
-| 1 Eu, você e o seu nome | *je, tu, s'appeler, le nom* | "Tu" ou "vous"? (existe) · *Tu t'appelles comment ?* (existe) |
+| 1 Eu, você e o seu nome | *je, tu, s'appeler, le nom* | "Tu" ou "vous"? (existe) · *Tu t'appelles comment ?* (existe) · **nova (B.10): *Moi, toi* para reforçar e devolver a pergunta** (depois de *s'appeler*) |
 | 2 Dizer a nacionalidade | *être, français / française, brésilien / brésilienne* | **nova (opção C da Parte B): o feminino que se ouve** |
 | 3 Falar do país | *la France, le Brésil, le pays* | *t'es* (depois do diálogo, existe) · diálogo "Primeiro encontro" (Léo e Ana) |
 | 4 Ponto de verificação | | frase com cenário *Je suis {nacionalidade}.* (resolve o gênero pelo perfil, `shared/profile-placeholders.js`) |
@@ -242,6 +247,23 @@ Lições reordenadas (anomalia 28 do `01`: hoje *la France* cai na lição do no
  EN: Français, française: the feminine you can hear
 ```
 Os nomes Léo e Ana são os do diálogo da própria unidade (o aluno ainda não viu *il / elle*, que vem na M1.5).
+
+**Nota nova de gramática · pronomes tônicos (combinação recomendada em B.10)** [existe hoje]. Confiança **alta**.
+Gatilho: depois de *s'appeler* (lição 1). O aluno já usou *Et toi ?* na M1.1 e vai ouvir *Moi, c'est Ana* no diálogo desta unidade.
+```
+ [banner] Vale entender isso
+ Moi, toi: para reforçar e devolver a pergunta
+ Moi e toi são "eu" e "você" com força. Servem para destacar quem fala
+ (Moi, je m'appelle Ana.) e para devolver a pergunta sem repetir tudo: Et toi ?
+ Com quem você trata por vous: Et vous ? Eles podem vir sozinhos: Moi aussi !
+   Moi, je m'appelle Ana. Et toi ? (alto-falante)      Eu me chamo Ana. E você?
+   Toi, tu t'appelles comment ? (alto-falante)         E você, como se chama?
+   Et vous ? (alto-falante)                            E o(a) senhor(a)?
+   Moi aussi ! (alto-falante)                          Eu também!
+ EN: Moi, toi: for emphasis and to bounce the question back
+```
+O exemplo da dona *Lui, il s'appelle comment ?* fica de fora aqui: pede *il* + *s'appelle*, que o aluno ainda não viu. *lui / elle* entram
+na M1.4, que é a unidade de "perguntar dos outros" (A.4). *Moi non plus* fica na M4.1, como no `08` (precisa da negação).
 
 ## A.3 M1.3 · Dizer a idade: de 1 a 29 (`A1-3`, 14 cartões, ~35 min)
 
@@ -323,8 +345,8 @@ conferir no laboratório (`fr/scripts/audio_lab.py`) antes de publicar [ajuste p
 ```
  Léa:  Hugo, Paul a quel âge ?                    Hugo, quantos anos o Paul tem?
  Hugo: Il a trente et un ans.                     Ele tem trinta e um anos.
- Léa:  Et Sophie ?                                E a Sophie?
- Hugo: Sophie a quarante-six ans. Et toi, tu as quel âge ?
+ Léa:  Et Sophie, elle a quel âge ?               E a Sophie, quantos anos ela tem?
+ Hugo: Elle a quarante-six ans. Et toi ?
  Léa:  Moi, j'ai vingt-neuf ans.
  Você entendeu? Quantos anos tem a Sophie?  [Quarenta e seis] [Cinquenta e seis] [Trinta e seis]
 ```
@@ -340,24 +362,40 @@ conferir no laboratório (`fr/scripts/audio_lab.py`) antes de publicar [ajuste p
 ```
 *dix-sept, dix-huit, dix-neuf* não viram cartão (decisão do `08`); aparecem nas frases e no ditado de números.
 
-## A.5 M1.5 (g) · *être* e *avoir*, pronomes tônicos (`A1-g1`, ~18 min)
+**Nota nova de gramática · *Et lui ? Et elle ?*** (2ª etapa dos tônicos, B.10) [existe hoje]. Confiança **alta**. Gatilho: depois do diálogo
+(*Et Sophie, elle a quel âge ? ... Et toi ?*). *il a / elle a* o aluno já viu nas frases e no diálogo da M1.3 (*Il a dix ans.*, *Elle a huit ans.*).
+```
+ [banner] Vale entender isso
+ Et lui ? Et elle ?
+ Para perguntar dos outros sem repetir o nome: lui (ele) e elle (ela).
+   Paul a trente et un ans. Et lui ? · Et elle ? (alto-falante)
+   Lui, il a quarante ans. Elle, elle a seize ans. (alto-falante)
+ Resumo até aqui: moi, toi, lui, elle, vous.
+ EN: Et lui ? Et elle ? (asking about others)
+```
 
-Hoje: 4 telas ("Avoir e être", "Nenhum padrão pra deduzir", "Uma pegadinha comum", "Très bien!" com as tabelas) e 6 exercícios [existe hoje].
-Muda: **+1 tela** (antes da tabela) e **+2 exercícios** (fica com 5 telas e 8 exercícios, o tamanho de `A1-g6`).
+## A.5 M1.5 (g) · *être* e *avoir*: as seis pessoas (`A1-g1`, publicada, ~15 min)
+
+**Mudou com o pedido da dona (2026-10-18):** a tela de pronomes tônicos que o `08` acrescentava aqui **não entra** (análise em B.10). Os
+tônicos chegam por notas na M1.2 e na M1.4 e são sistematizados depois, com preposições. A unidade fica com o que já está publicado
+(4 telas, 6 exercícios) e dois ajustes de exemplo [existe hoje: só conteúdo e camada; a mudança de texto em português entra no `DELIBERATE_PT_CHANGES`].
+
+Telas (títulos reais de hoje, `courses/fr-pt-BR/layer.js:269`):
 ```
- Passo 4 de 5
- Moi, toi: para reforçar e para reagir
- Os pronomes tônicos reforçam quem fala (Moi, je suis brésilienne.) e aparecem
- sozinhos nas reações curtas: Et toi ? Moi aussi. Moi non plus.
- moi, toi, lui, elle, nous, vous, eux, elles.
-   Moi, je m'appelle Carla. Et toi ? (alto-falante)
-   Je suis brésilienne. · Moi aussi ! (alto-falante)
-   Je ne suis pas française. · Moi non plus. (alto-falante)
- EN: Moi, toi: for emphasis and for reacting
+ Passo 1 de 4 · Avoir e être
+   Je suis brésilienne. (être) · J'ai vingt ans. (avoir)
+ Passo 2 de 4 · Nenhum padrão pra deduzir        (título publicado; tem "pra": trocar por "para", pergunta 30)
+   Il a dix ans. (avoir) · Elle est ma sœur. (être)   → proposta: Elle est française. (être)  (ma sœur só vem na M2.1)
+ Passo 3 de 4 · Uma pegadinha comum  (avoir faim, avoir raison)   → ver pergunta 26
+ Passo 4 de 4 · Très bien! + tabelas être | avoir
+                                                   [ Ir para os exercícios → ]
+ Frase 1 de 6
+   Je ___ étudiante.   (être)   → proposta: Je ___ brésilienne.   (étudiante só vem na M1.6)
+   [ Digite a forma correta ]                              [ Verificar ]
 ```
-Exercícios novos: *___, je m'appelle Carla.* (dica: eu, com força) → *Moi* · *Je suis brésilienne. Moi ___ !* (dica: também) → *aussi*.
-**Achado:** o exercício atual *Je ___ étudiante.* usa *étudiante*, que no v3 só chega na M1.6 (depois desta unidade). Trocar por
-*Je ___ brésilienne.* (pergunta 10).
+Os outros 5 exercícios ficam (*Tu ___ vingt ans.*, *Nous ___ français.*, *Ils ___ deux enfants.*, *Vous ___ de Paris ?*, *Elle ___ faim.*).
+Proposta opcional: trocar *Ils ___ deux enfants.* (*enfants* só na M2.1) por *Vous ___ quel âge ?* → *avez* (o *vous* de cortesia que o *défi* usa).
+Nenhum ajuste muda id nem exige que quem já fez a unidade a refaça (B.13).
 
 ## A.6 M1.6 · Dizer a profissão (`A1-22`, nova, 10 cartões, ~30 min)
 
@@ -441,7 +479,10 @@ logo antes do *défi*. É a base da Parte B.
 
 ---
 
-## A.8 Som do módulo · A1-S1 ritmo e entonação (~4 min, grátis, não bloqueia)
+## A.8 (e) Som do módulo · A1-S1 ritmo e entonação (~4 min, grátis, não bloqueia)
+
+É exatamente o item **(e)** do M1 no `08` (2.1): *A1-S1 ritmo e entonação; notas de letras mudas e liaison na idade (deux‿ans, trois‿ans,
+vingt‿et un, six‿ans)*. A lição do som está em A.8.1 e A.8.2; as notas, em A.8.3 (e nas unidades M1.1 e M1.3).
 
 ### A.8.1 Onde aparece
 Linha própria na Trilha, depois da última unidade e antes do Ponto de verificação ("Som do módulo · opcional"), como recomenda o `06` (5.1).
@@ -534,7 +575,11 @@ exercícios da gramática. Se a M1.7 virar só notas (opção B da Parte B), o M
 
 ---
 
-## A.10 *Défi* "Bienvenue au club !" (Premium, ~15 a 20 min)
+## A.10 (d) *Défi* "Bienvenue au club !" (Premium, ~15 a 20 min)
+
+É exatamente o item **(d)** do M1 no `08` (2.1): `07` 4.1 mantido com ajuste; peças cumprimento, nome, nacionalidade com concordância,
+idade até 69, profissão sem artigo, *et toi ?*, despedida; turnos fechados automáticos; mensagem por peças; alertas *je suis un professeur*
+e *je suis brésilien* com persona mulher; recicla só o M1. O que vem abaixo é esse item desenhado tela por tela.
 
 **Onde:** na linha "Desafios do Módulo 1", depois do Ponto de verificação; não bloqueia o M2 (`07` 4.1 e `04` 7.1). A linha já existe
 [existe hoje]; o *défi* dentro dela é [código novo] (`07` pergunta 2: arquivo `fr/module-tasks.js` + camada, sem migration).
@@ -661,7 +706,7 @@ com teto) · [Enviar para a professora] (só com vínculo ativo; fase 0 = post n
 |---|---|---|
 | M1.1, M1.2, M1.4, M1.6 | ~30 min cada | grátis |
 | M1.3 (5 lições) | ~35 min | grátis |
-| M1.5 (g) | ~18 min | grátis |
+| M1.5 (g) | ~15 min | grátis |
 | M1.7 (g) | ~30 min como no `08`; ~15 min na opção C | grátis |
 | Som do módulo | ~4 min | grátis (gravar e comparar também) |
 | Ponto de verificação | ~10 min | grátis |
@@ -695,7 +740,7 @@ Nada aqui pede migration nem Edge Function (a fila da professora e o Carnet com 
 
 ---
 
-# PARTE B · Análise da M1.7 (g) "Masculino e feminino, artigos e plural" (`A1-g11`)
+# PARTE B · As unidades de gramática do M1: M1.7 (B.1 a B.9), M1.5 e os tônicos (B.10), revisão e desenho final (B.11 a B.13)
 
 ## B.1 O que a unidade junta, e para que serve cada parte
 
@@ -770,6 +815,8 @@ sem uso, como o `A2-g4` (`08` 7.7). Em qualquer opção: entrada no `grammar_inp
 
 ## B.7 Opções
 
+As três opções tratam da M1.7. A M1.5 segue a análise de B.10 em todas (sem a tela dos tônicos); o desenho final consolidado está em B.12.
+
 ### Opção A · Dividir em duas gramáticas, as duas no M1
 
 | Pos. | Unidade (id) | Notas novas |
@@ -809,10 +856,10 @@ ficam picados em 3 notas e nunca têm um lugar para revisar (a GP e a GEF dão c
 | Pos. | Unidade (id) | O que tem | Notas |
 |---|---|---|---|
 | M1.1 | Cumprimentar e se despedir (`A1-1`) | como no `08` | letras caladas no fim (som); *bienvenue* no Quebec |
-| M1.2 | Dizer o nome e a nacionalidade (`A1-2`) | lições reordenadas | **"Français, française: o feminino que se ouve"** (contato, sem regra) |
+| M1.2 | Dizer o nome e a nacionalidade (`A1-2`) | lições reordenadas | **"Français, française: o feminino que se ouve"** (contato, sem regra); **"Moi, toi"** (B.10) |
 | M1.3 | Dizer a idade: de 1 a 29 (`A1-3`) | 14 cartões, 5 lições | ligação *deux‿ans* (inclui o *-s* mudo de *ans*); 21 a 29 + *vingt‿et un* |
-| M1.4 | Perguntar a idade dos outros: até 69 (`A1-21`) | como no `08` | 17 a 19 e dezenas |
-| M1.5 (g) | *être* e *avoir*, tônicos (`A1-g1`) | 5 telas, 8 exercícios | |
+| M1.4 | Perguntar a idade dos outros: até 69 (`A1-21`) | como no `08` | 17 a 19 e dezenas; **"Et lui ? Et elle ?"** (B.10) |
+| M1.5 (g) | *être* e *avoir*: as seis pessoas (`A1-g1`) | 4 telas, 6 exercícios (sem tônicos, B.10) | |
 | M1.6 | Dizer a profissão (`A1-22`) | como no `08` | sem artigo; *Qu'est-ce que vous faites dans la vie ?* |
 | M1.7 (g) | **Masculino e feminino: nacionalidades e profissões** (`A1-g11`, escopo menor) | 5 telas, 8 exercícios, ~15 min | |
 | | Som do módulo, Ponto de verificação, *défi* | | |
@@ -886,6 +933,8 @@ mais cobrada pelo *défi* sem nenhum exercício.
 
 ## B.9 Outras gramáticas do A1 com o mesmo risco (só suspeitas, sem redesenho)
 
+Fora do M1. A revisão completa das (g) dos módulos 2 a 8 e do A2 é de outro agente; esta lista é só o que saltou aos olhos aqui.
+
 | Unidade (08) | Assuntos juntos | Sinal nas fontes | Suspeita |
 |---|---|---|---|
 | M2.6 (g) Frase negativa e perguntas (`A1-g12`) | *ne... pas*, entonação, *est-ce que*, inversão?, palavras interrogativas, "o jeito da rua"; + *pas de* na opção C | GP separa em cap. 5, 20, 51, 52; AE espalha D1 a D5 | **alta** |
@@ -898,6 +947,96 @@ mais cobrada pelo *défi* sem nenhum exercício.
 | M1.5 (g) *être*, *avoir*, tônicos | 2 verbos + tônicos | DA1 U1 junta | baixa |
 
 Ficam fora da suspeita (um assunto só): M3.5, M4.5, M5.2, M7.3, M8.4, M8.5. Conferir cada suspeita do mesmo jeito (telas x exercícios x o que o *défi* cobra) antes de escrever as unidades.
+
+## B.10 M1.5 (g) e os pronomes tônicos (pedido da dona, 2026-10-18)
+
+### B.10.1 O que a M1.5 do `08` junta, e por que não combina
+| Parte | Publicada hoje? | Entrada no M1 antes da M1.5 | Para que serve |
+|---|---|---|---|
+| *être* (6 pessoas) | sim (`A1-g1`) | M1.2: *je suis, tu es* (cartão *être*, diálogo) | nome, nacionalidade, profissão (M1.2, M1.6) |
+| *avoir* (6 pessoas) | sim | M1.3 e M1.4: *j'ai, tu as, il a, elle a, avez-vous* | idade |
+| "Uma pegadinha comum" (*avoir faim, avoir raison*) | sim | **nenhuma** (fome e sede são do M4) | contraste com o português "estar com" |
+| Pronomes tônicos (*moi, toi... eux, elles*) | **não** (proposta do v2) | só *Et toi ?* (M1.1) e *Moi, c'est Ana*, *Moi aussi* (M1.2), como fórmula | reforçar e reagir; depois de preposição |
+
+A dona tem razão: *être* e *avoir* são **conjugação**; os tônicos são **pronomes de uso** (reagir, destacar, depois de preposição). Juntá-los
+só porque a tabela começa com *je / moi* põe na mesma tela formas que o aluno nunca viu (*lui, nous, eux, elles*), contra a regra da casa
+"entrada antes da gramática". E como a tela dos tônicos **nunca foi publicada**, separar não custa nada: basta não acrescentá-la.
+
+### B.10.2 Como os livros fazem (`02`)
+| Fonte | Tônicos |
+|---|---|
+| Défi Actuel 1 | unidade 0 como **palavras** (léxico do "Dossier de découverte"); unidade 1 como gramática |
+| Alter Ego+ 1 | D3 L2 (falar de si, com os adjetivos); D5 L1 *chez* + tônico |
+| Grammaire Progressive A1 | cap. 59, **um dos últimos** do livro |
+| Grammaire Essentielle | cap. 14 (bloco dos pronomes) |
+
+Ou seja: os métodos põem *moi, toi* na boca do aluno desde a primeira aula e deixam a regra (lista completa, depois de preposição) para depois.
+Confiança alta (sumários e quadros lidos).
+
+### B.10.3 As duas ideias da dona e a combinação
+| | (a) Nota na M1.2 (nome) | (b) Só mais adiante, com preposições | (c) Combinação (recomendada) |
+|---|---|---|---|
+| Desenho | nota de gramática *Moi, je m'appelle... Et toi ? Toi, tu t'appelles comment ? Lui, il s'appelle comment ?* | tela de gramática com *Et toi ?, avec moi, sans lui, pour elle* | M1.2: *moi, toi, vous* (+ *Moi aussi*); M1.4: *Et lui ? Et elle ?*; sistematização com preposições (*pour moi, avec toi, chez lui*) quando a função pedir |
+| Colado ao uso? | sim | não: *moi / toi* ficariam meses sem explicação, embora usados desde a M1.1 e no *défi* | sim, nas duas pontas |
+| Entrada antes da regra | quase: *Lui, il s'appelle* pede *il* + *s'appelle*, ainda não vistos na M1.2 | sim | sim: *lui / elle* entram na M1.4, quando o aluno já viu *il a, elle a* e o tema é "os outros" |
+| Fecha o sistema (8 formas + preposições) | não | sim | sim |
+| Exercício com correção | não (nota) | sim, se for tela de uma (g) | notas sem exercício no M1 (o *défi* só cobra *Et toi ? / Et vous ?*, fórmula); exercício na sistematização |
+| Código novo | nenhum | nenhum | nenhum |
+
+**Recomendação: (c).** Onde a sistematização mora é decisão que depende da revisão das (g) do M2 ao M8 (outro agente). Os ganchos que já existem
+ou estão no `08`: *C'est trop de sucre pour moi.* (frase publicada em `A1-12`, M4.3) e o pedido no café (*Pour moi, un café*, M4.1, onde o `08`
+já põe a nota *moi aussi / moi non plus*); *Tu viens avec moi ? On va chez moi ?* nos convites (M8.2). Sugiro a tela de gramática perto do M8.2
+(convidar pede *avec / chez* + tônico) e uma nota curta no M4.1 (pergunta 27). *sans lui* não aparece em nenhuma unidade do A1 e *sans* é pouco
+usado nesse nível: fica fora (pergunta 28).
+
+## B.11 Revisão de posição e conteúdo de todas as (g) do M1
+
+O M1 tem duas unidades de gramática (M1.5 e M1.7) e, depois do pedido da dona, um conteúdo de gramática sem unidade (os tônicos).
+
+| Unidade | Posição | Conteúdo | Veredito | O que muda |
+|---|---|---|---|---|
+| M1.5 (g) *être* e *avoir* (`A1-g1`) | **ok**: depois de M1.2 (entrada de *être*) e de M1.3/M1.4 (entrada de *avoir*); antes da M1.6, que usa *il est / elle est* | *être* + *avoir* + "pegadinha" | **separar** (os tônicos saem) e **ajustar exemplos** | título "*être* e *avoir*: as seis pessoas"; troca de 3 exemplos com palavras de depois (*ma sœur, étudiante, enfants*); "pegadinha" (*avoir faim*) para uma nota no M4.1 (pergunta 26) |
+| Pronomes tônicos | (não é unidade) | | **virar nota** no M1 + sistematizar depois | nota na M1.2 (*moi, toi, vous*) e na M1.4 (*lui, elle*); tela com preposições fora do M1 (B.10) |
+| M1.7 (g) Masculino e feminino (`A1-g11`) | **ok**: depois da M1.6 (entrada das profissões) e antes do *défi* | 7 assuntos | **reorganizar** (fica só gênero de pessoas) | artigos e plural para `A1-g17` no M2; *pas de* para a negação; "gênero ≠ português" para M5.3 (opção C, B.7) |
+| Juntar M1.5 e M1.7? | | | **não** | assuntos diferentes (conjugação x gênero); somadas dariam 9 telas |
+| Gramática nova no M1? | | | **não** | |
+
+## B.12 Desenho final do M1 (recomendado)
+
+| Pos. | Unidade (id) | Cartões | Lições | Notas de explicação (novas em negrito) | Tempo |
+|---|---|---|---|---|---|
+| M1.1 | Cumprimentar e se despedir (`A1-1`) | 10 | 3 + PV | *bonjour / bonsoir*; *s'il vous plaît*; *à plus*; *la bise*; **letras caladas no fim** (som); ***bienvenue* no Quebec** | ~30 min |
+| M1.2 | Dizer o nome e a nacionalidade (`A1-2`) | 10 | 3 + PV (reordenadas) | *tu / vous*; *tu t'appelles comment ?*; *t'es*; **Moi, toi (tônicos 1)**; **français, française: o feminino que se ouve** | ~30 min |
+| M1.3 | Dizer a idade: de 1 a 29 (`A1-3`) | 14 | 4 + PV | *avoir* na idade; *t'as quel âge ?*; **a letra muda acorda (*deux‿ans*)**; **21 a 29 + *vingt‿et un*** | ~35 min |
+| M1.4 | Perguntar a idade dos outros: até 69 (`A1-21`) | 10 | 3 + PV | **17 a 19 e as dezenas**; **Et lui ? Et elle ? (tônicos 2)** | ~30 min |
+| M1.5 (g) | *être* e *avoir*: as seis pessoas (`A1-g1`) | | 4 telas, 6 exercícios | | ~15 min |
+| M1.6 | Dizer a profissão (`A1-22`) | 10 | 3 + PV | **sem artigo**; ***Qu'est-ce que vous faites dans la vie ?*** | ~30 min |
+| M1.7 (g) | Masculino e feminino: nacionalidades e profissões (`A1-g11`) | | 5 telas, 8 exercícios | | ~15 min |
+| | (e) Som do módulo: ritmo e entonação (`A1-s1`, opcional) | | 3 telas, 6 a 8 itens | | ~4 min |
+| | Ponto de verificação | | 12 itens | | ~10 min |
+| | (d) *Défi* Bienvenue au club ! (Premium, opcional) | | 8 telas | | 15 a 20 min |
+| **Total** | 7 unidades (5 + 2) | **54** | | | **~3h20** sem o *défi* |
+
+Efeitos fora do M1 (para o agente que revisa M2 a M8 conferir): `A1-g17` "Artigos e plural" no M2; *pas de* na negação do M2; nota "gênero ≠
+português" na M5.3; "pegadinha" do *avoir* numa nota da M4.1; sistematização dos tônicos com preposições (sugestão: perto da M8.2, com nota na M4.1).
+
+## B.13 Nada exige refazer lição (pedido da dona)
+
+| Mudança | Quem já passou por ali | Precisa voltar? | Como fica |
+|---|---|---|---|
+| Unidades novas M1.4, M1.6, M1.7 antes de onde o aluno está | aluno que já está no M2 ou adiante | **não** | regra 2.10 do `04`: nasce aberta, não concluída, **não bloqueia** nada; o aluno faz se quiser. Efeito: a porcentagem do módulo cai (aviso no Mural, decisão 10) |
+| Palavras novas numa unidade já concluída (*quatre... neuf* na M1.3) | quem concluiu o `A1-3` | **não** | o código libera todos os cartões de unidade concluída (`isCardLessonCompleted`, `shared/core/revisao-decks.js:590`): as 6 palavras entram **direto na Revisão** como cartões novos, **sem** o cartão de apresentação. Opção: uma tela única "Novidades desta unidade" ao abrir a Trilha (pergunta 29) |
+| Palavras que mudam de unidade (*trente... soixante*, *le médecin*) | quem já estudou | **não** | marca `released` (Etapa 0a, já no código): continuam na Revisão onde estiverem |
+| Lições reordenadas (M1.2, M1.3) para quem está no meio da unidade | aluno no meio | **não** | a lição salva é achada pelo id (`lessonId`, item 9 da 2.3 do `04`); se sumiu, o aluno segue na 1ª lição que tem palavra que ele ainda não viu (conteúdo novo, não repetição) |
+| Notas novas em unidades concluídas (M1.1, M1.2, M1.3) | quem concluiu | **não** | não vê a nota (nota só aparece dentro da lição). O conteúdo volta adiante por outro caminho: tônicos (M1.4 e sistematização), feminino (M1.7), ligação (Som do módulo). Opcional: entrar na tela "Novidades" |
+| Exemplos trocados na M1.5 | quem já fez | **não** | só texto; nada no progresso muda |
+| Som do módulo | quem já passou do M1 | **não** | linha opcional, não bloqueia |
+| Ponto de verificação aprovado | quem aprovou o antigo `A1-m1` | **não** | aprovado continua aprovado (`08` seção 8) |
+| Alertas do *défi* e selo de som | todos | **não** | o alerta explica a regra **na própria tela** ("A sua personagem é mulher: brésilienne."); o "(M1.7)" é só a origem, sem botão "voltar à lição" (pergunta 31). A folha do selo pode ter "ver a lição do som", que é opcional |
+| Reprovar no Ponto de verificação | | **não** | refaz a **prova**, não as lições ("Quase lá!", como hoje) |
+
+Conclusão: nenhum ponto do desenho manda o aluno refazer lição. O único custo real é o das 6 palavras novas da M1.3 para quem já concluiu a
+unidade: elas chegam pela Revisão sem apresentação, o que a tela "Novidades" resolve sem fazer ninguém voltar.
 
 ---
 
@@ -927,16 +1066,25 @@ Ficam fora da suspeita (um assunto só): M3.5, M4.5, M5.2, M7.3, M8.4, M8.5. Con
 22. "Ponto de verificação" é o nome da última lição de cada unidade **e** da prova do módulo. Renomear a lição (ex.: "Revisão da unidade")? Muda texto em português (`DELIBERATE_PT_CHANGES`). *Recomendo avaliar à parte.*
 23. Diálogos da M1.6 e da M1.4 com Léa e Hugo (as personagens do M1.1), para o aluno reencontrar as mesmas pessoas no *défi*? *Recomendo sim.*
 24. Na M1.7, aceitar *professeur* e *professeure* (e *ingénieur / ingénieure*) para mulher? *Recomendo aceitar as duas e explicar na tela 3.*
+25. Tônicos pela **combinação**: nota *Moi, toi* (com *Et vous ?* e *Moi aussi*) na M1.2, nota *Et lui ? Et elle ?* na M1.4, sistematização com preposições depois; e a M1.5 sem a tela dos tônicos? *Recomendo sim.*
+26. A tela "Uma pegadinha comum" (*avoir faim, avoir raison*) da M1.5 publicada não responde a nada do M1: mover para uma nota na M4.1 (café) e pôr no lugar "*être* e *avoir* na apresentação" (*je suis* + nome, nacionalidade, profissão; *j'ai* + idade)? *Recomendo sim.*
+27. Sistematização dos tônicos com preposições: tela de gramática perto da M8.2 (convites: *avec moi, chez moi*) e nota curta na M4.1 (*Pour moi, un café*)? A decisão final depende da revisão das (g) do M2 ao M8. *Recomendo sim.*
+28. *sans lui* fica fora do A1 (nenhuma unidade usa *sans*), e os exemplos ficam em *pour, avec, chez*? *Recomendo sim.*
+29. Palavras novas numa unidade já concluída (*quatre... neuf*): entram direto na Revisão, como o código faz hoje, ou com uma tela única "Novidades desta unidade" (código novo pequeno), sem refazer lição? *Recomendo a tela "Novidades", opcional.*
+30. Trocar "pra" por "para" no título publicado "Nenhum padrão pra deduzir" (regra do projeto, `DELIBERATE_PT_CHANGES`)? *Recomendo sim.*
+31. Alertas do *défi* sempre explicam a regra na própria tela, sem botão nem convite para "voltar à lição"? *Recomendo sim.*
 
 ---
 
 ## Resumo
 
-- Preview completo do M1 do mapa v3: 7 unidades, Som do módulo, Ponto de verificação e *défi*, com telas, texto real em francês, instruções
-  em pt-BR (e EN nas telas novas) e a marca [existe hoje] / [ajuste pequeno] / [código novo] em cada tela.
+- Preview completo do M1 do mapa v3: 7 unidades, (e) Som do módulo, Ponto de verificação e (d) *défi*, exatamente os itens do `08`, com telas,
+  texto real em francês, instruções em pt-BR (e EN nas telas novas) e a marca [existe hoje] / [ajuste pequeno] / [código novo] em cada tela.
 - As lições cabem no motor de hoje; o novo é o som (exercício "ouça e escolha", linha que não bloqueia, gravação, selo) e o *défi* (persona,
   turnos encadeados, texto guiado com peças e erros previsíveis). Nada pede migration. Antes de tudo: a Etapa 0b (script de operações).
-- Achados de código: item em par sem "Na frase" e fora do Ponto de verificação; nota sem exercício; gramática hoje com 4 a 5 telas e 6 a 8 exercícios.
-- A M1.7 do `08` junta 7 assuntos (~9 telas, ~12 exercícios), e só 2 são cobrados pelo *défi*. Recomendo a opção C: M1.7 enxuta só com o
-  feminino de nacionalidades e profissões (`A1-g11`), "Artigos e plural" no M2 (`A1-g17`), *pas de* na negação, notas de contato na M1.2 e M1.3.
-- Outras gramáticas suspeitas de excesso: M2.6, M3.2, M5.4, M6.2, M6.6 (alta), M2.5 (média).
+- Achados de código: item em par sem "Na frase" e fora do Ponto de verificação; nota sem exercício; gramática hoje com 4 a 5 telas e 6 a 8
+  exercícios; unidade concluída libera direto na Revisão as palavras novas inseridas nela.
+- M1.7: de 7 assuntos para só o feminino de nacionalidades e profissões (`A1-g11`); artigos e plural no M2 (`A1-g17`); *pas de* na negação.
+- M1.5: *être* e *avoir* sem os tônicos (a tela dos tônicos nunca foi publicada); tônicos por nota na M1.2 e na M1.4 e sistematizados depois com
+  *pour, avec, chez*; a "pegadinha" do *avoir* vai para o M4.1. Desenho final do M1 em B.12: 7 unidades, 54 cartões, ~3h20.
+- Nenhuma mudança exige refazer lição (B.13). 31 perguntas para a dona.
