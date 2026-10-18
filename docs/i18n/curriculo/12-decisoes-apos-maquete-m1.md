@@ -92,3 +92,18 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
 26. **N02 fica COMO ESTÁ** (decisão da dona): o aluno precisa conhecer *s'il vous plaît* e também *s'il te plaît*, então a menção ao *tu* no parêntese faz sentido na M1.1.
     Observação de conteúdo: hoje o vocabulário da A1-1 só tem *s'il vous plaît*; *s'il te plaît* aparece só na nota. Pergunta aberta para a dona: pôr *s'il vous plaît / s'il te plaît*
     como cartão em par (formal / informal) no vocabulário da M1.1?
+
+---
+
+# Terceira rodada (2026-10-18, depois da maquete v3)
+
+27. **Nota "Et lui ? Et elle ?" (M1.4):** fica como está (a dona achou ótima), mas **precisa nomear o conceito**: *lui* e *elle* são **pronomes tônicos** e contrastam com os
+    pronomes sujeito *il* / *elle*. Uma linha curta. [a fazer]
+28. **Regra do currículo: nunca ensinar só o formal ou só o informal.** *S'il vous plaît* e *s'il te plaît* entram juntos na M1.1: no mesmo cartão (par) ou em dois cartões
+    seguidos, um após o outro. Vale para qualquer par de registro (*tu / vous*, *salut / bonjour*, etc.). Ver `15-regras-do-curriculo.md`. [padrão]
+29. **Visual das notas: a "caixa roxinha"** (a variação `wrapup` do bloco de gramática do site) é o gosto da dona. Interpretação a confirmar: **todas** as notas usam essa caixa;
+    o tipo (explicação, realidade, cultural) aparece no rótulo/ícone, não na cor da faixa lateral.
+30. **M1.7 (g) é só masculino e feminino.** A lição de **ritmo e entonação** (pergunta que sobe, afirmação que desce, onde cai a força) **não entra na M1.7**: continua separada
+    (a proposta de juntar foi retirada).
+31. **Nome:** a dona pediu trocar "Som" por "Pronúncia" (a faixa/etiqueta). "Pronúncia **do módulo**" foi um acréscimo da maquete e não foi pedido; a lição passa a se chamar só
+    **"Pronúncia"** (com subtítulo do assunto, ex.: "Pronúncia: pergunta e afirmação").

@@ -32,3 +32,4 @@ Skills: `notas-de-realidade` (notas de realidade/culturais) e `criar-desafios`. 
 - Frases só com vocabulário já visto (ditados: `python3 fr/scripts/check_dictation_vocab.py`).
 - Desafios entram como `needs_review` com um `.md` de revisão para a autora; só publicados aparecem na trilha.
 - Mudou texto com áudio pré-gerado → regenerar mp3 (skill `audio-tts`).
+- **Formal e informal juntos** (decisão da dona, 2026-10-18): nunca ensinar só a forma formal ou só a informal (ex.: *s'il vous plaît* e *s'il te plaît*); no mesmo cartão (par) ou em dois cartões seguidos. Regras do currículo: `docs/i18n/curriculo/15-regras-do-curriculo.md`.
