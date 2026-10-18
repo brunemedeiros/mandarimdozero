@@ -57,11 +57,16 @@ function renderLanguageSwitcher(){
     btn.setAttribute('aria-expanded', 'false');
   }
 
+  // O menu "Meus cursos" é pintado ao carregar o script, antes do login resolver (só o curso atual aparece). Ao abrir,
+  // pinta de novo: aí a conta já está carregada e os outros cursos aparecem.
+  const refreshCourses = () => { if (CourseStorage.isPerSiteLanguage() && typeof paintCourseMenu === 'function') paintCourseMenu(btn, dropdown); };
+
   btn.setAttribute('aria-haspopup', 'true');
   btn.setAttribute('aria-expanded', 'false');
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     const willOpen = !dropdown.classList.contains('open');
+    if (willOpen) refreshCourses();
     dropdown.classList.toggle('open', willOpen);
     btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
   });
@@ -69,7 +74,7 @@ function renderLanguageSwitcher(){
   if (CourseStorage.isPerSiteLanguage() && window.matchMedia && window.matchMedia('(hover: hover)').matches){
     const box = btn.closest('.lang-switcher') || btn;
     let timer = null;
-    const open = () => { clearTimeout(timer); dropdown.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); };
+    const open = () => { clearTimeout(timer); if (!dropdown.classList.contains('open')) refreshCourses(); dropdown.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); };
     const later = () => { clearTimeout(timer); timer = setTimeout(closeDropdown, 280); };
     box.addEventListener('mouseenter', open);
     box.addEventListener('mouseleave', later);

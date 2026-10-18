@@ -3564,4 +3564,83 @@ window.I18N_CATALOG['en'] = {
   'fr.dict.hom.peu': '“peu” means “little, not much”; “peux”/“peut” are forms of pouvoir (je peux, il peut).', // ALTA
   'fr.dict.hom.leur': '“leurs” goes before a plural noun; “leur” before a singular noun or as a pronoun (je leur parle).', // ALTA
   'fr.dict.hom.quel': 'Same pronunciation: “quel” changes with the gender and number of the noun.', // ALTA
+
+  // ---- tela de entrada (index.html da raiz), 2026-10-18 ----
+  'gate.brand': 'Languages with Prof. Brune', // ALTA
+  'gate.loading': 'Loading...', // ALTA
+  'gate.theme': 'Switch between light and dark theme', // ALTA
+  'gate.siteLang.label': 'Site language', // ALTA
+  'gate.login.sub': 'Log in to pick up where you left off, or create a free account and choose what to learn.', // ALTA
+  'gate.login.google': 'Continue with Google', // ALTA
+  'gate.login.divider': 'or log in with email', // ALTA
+  'gate.login.email': 'Your email', // ALTA
+  'gate.login.password': 'Your password', // ALTA
+  'gate.login.forgot': 'Forgot your password?', // ALTA
+  'gate.login.submit': 'Log in', // ALTA
+  'gate.login.signupSubmit': 'Create account', // ALTA
+  'gate.login.signupLink': 'Create a free account', // ALTA
+  'gate.login.loginLink': 'I already have an account', // ALTA
+  'gate.login.googleRedirect': 'Taking you to Google...', // ALTA
+  'gate.login.googleError': 'Couldn\'t connect to Google. Try again.', // ALTA
+  'gate.login.alreadyRegistered': 'This email already has an account. Try logging in.', // ALTA
+  'gate.login.signupFailed': 'Couldn\'t create your account right now.', // ALTA
+  'gate.login.notConfirmed': 'Your account isn\'t confirmed yet. We sent a new code to your email.', // ALTA
+  'gate.login.wrong': 'Wrong email or password.', // ALTA
+  'gate.forgot.needEmail': 'Type your email in the field above first.', // ALTA
+  'gate.forgot.failed': 'Couldn\'t send the email right now.', // ALTA
+  'gate.forgot.sent': 'We sent you a link to reset your password.', // ALTA
+  'gate.verify.title': 'Confirm your email', // ALTA
+  'gate.verify.subBefore': 'We sent a code to ', // ALTA
+  'gate.verify.subAfter': '. Enter it here to activate your account.', // ALTA
+  'gate.verify.codeLabel': 'Confirmation code', // ALTA
+  'gate.verify.submit': 'Confirm', // ALTA
+  'gate.verify.resend': 'Resend code', // ALTA
+  'gate.verify.resendIn': 'Resend code ({s}s)', // ALTA
+  'gate.verify.back': 'Use another email', // ALTA
+  'gate.verify.note': 'Didn\'t get it? Check your spam folder. You can also tap the "Activate my account" button in the email.', // ALTA
+  'gate.verify.incomplete': 'Enter the full code.', // ALTA
+  'gate.verify.invalid': 'That code doesn\'t work. Check the numbers or tap "Resend code".', // ALTA
+  'gate.verify.activated': 'Account activated! Logging you in...', // ALTA
+  'gate.verify.activatedElsewhere': 'Your account was activated! Logging you in...', // ALTA
+  'gate.verify.resendFailed': 'Couldn\'t resend right now. Wait a bit and try again.', // ALTA
+  'gate.verify.resent': 'We sent a new code.', // ALTA
+  'gate.newPass.title': 'Create a new password', // ALTA
+  'gate.newPass.sub': 'Choose the password you\'ll use from now on.', // ALTA
+  'gate.newPass.label': 'New password', // ALTA
+  'gate.newPass.ph': 'New password (at least 6 characters)', // ALTA
+  'gate.newPass.repeat': 'Repeat the new password', // ALTA
+  'gate.newPass.submit': 'Save new password', // ALTA
+  'gate.newPass.mismatch': 'The two passwords don\'t match.', // ALTA
+  'gate.newPass.same': 'The new password has to be different from the old one.', // ALTA
+  'gate.newPass.failed': 'Couldn\'t save right now. Ask for a new link in "Forgot your password?".', // ALTA
+  'gate.newPass.saved': 'New password saved!', // ALTA
+  'gate.link.confirmar.title': 'Activate your account', // ALTA
+  'gate.link.confirmar.sub': 'Tap the button to confirm your email and log in.', // ALTA
+  'gate.link.confirmar.btn': 'Activate my account', // ALTA
+  'gate.link.confirmar.fail': 'This link was already used or has expired. If you already activated your account, just log in with your email and password.', // ALTA
+  'gate.link.entrar.title': 'Log in to the app', // ALTA
+  'gate.link.entrar.sub': 'Tap the button to log in to your account.', // ALTA
+  'gate.link.entrar.ok': 'Done! Logging you in...', // ALTA
+  'gate.link.entrar.fail': 'This link was already used or has expired. Log in with your email and password or ask for a new link.', // ALTA
+  'gate.link.novaSenha.sub': 'Tap the button to choose your new password.', // ALTA
+  'gate.link.novaSenha.btn': 'Create new password', // ALTA
+  'gate.link.novaSenha.fail': 'This link was already used or has expired. Ask for another one in "Forgot your password?".', // ALTA
+  'gate.link.trocarEmail.title': 'Confirm your new email', // ALTA
+  'gate.link.trocarEmail.sub': 'Tap the button to confirm the email change.', // ALTA
+  'gate.link.trocarEmail.btn': 'Confirm email', // ALTA
+  'gate.link.trocarEmail.ok': 'Email confirmed! Logging you in...', // ALTA
+  'gate.link.trocarEmail.fail': 'This link was already used or has expired. Ask for the email change again.', // ALTA
+  'gate.link.toLogin': 'Go to login', // ALTA
+  'gate.link.otherAddress': 'Confirmed! Now also tap the button in the email sent to your other address.', // ALTA
+  'gate.choose.title': 'Which language do you want to learn?', // ALTA
+  'gate.choose.foot': 'You can add more courses later from the flag menu.', // ALTA
+  'gate.exp.title': 'Do you already know some {lang}?', // ALTA
+  'gate.exp.sub': 'This only adjusts how you start. You can change it later, anytime.', // ALTA
+  'gate.exp.beginner': 'I\'m a beginner', // ALTA
+  'gate.exp.knows': 'I know the basics', // ALTA
+  'gate.login.signupDesc': 'Lessons, review and daily practice, at your own pace.', // ALTA
+  'gate.login.loginDesc': 'Go back and log in with your email and password.', // ALTA
+  'gate.choose.footTitle': 'You can change this later', // ALTA
+  'gate.exp.beginnerDesc': 'You start from the first lesson.', // ALTA
+  'gate.exp.knowsDesc': 'You get an invite to the Level Test and skip what you already know.', // ALTA
 };
