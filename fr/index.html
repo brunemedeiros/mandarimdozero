@@ -4344,6 +4344,66 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
   .deck-window.painel .deck-panel-bulk :is(button, select){ min-height:44px; }
 }
 
+/* ---------- Janelas pequenas no Design System do painel (Pico escopado em .painel, 2026-10-18) ----------
+   Editar perfil, Reportar problema, Confirmar edição e Trocar de curso (classe .janela-painel no .app-modal).
+   Prévia aprovada pela autora. Botões no rodapé à direita; principal na cor da marca, secundário em contorno. */
+/* Janela */
+.app-modal.painel.janela-painel{ background:var(--p-elevado); color:var(--p-tinta); border:1px solid var(--p-linha); border-radius:var(--p-raio); box-shadow:var(--p-sombra), 0 16px 48px color-mix(in srgb, var(--p-tinta) 18%, transparent); font-family:var(--font-body); }
+.janela-painel.painel .app-modal-header{ background:transparent; border-bottom:1px solid var(--p-linha); padding:1rem 1.25rem; }
+.janela-painel.painel .app-modal-header h3{ margin:0; font-size:1.1rem; font-weight:800; color:var(--p-tinta); }
+.janela-painel.painel .app-modal-body{ padding:1.1rem 1.25rem 1.25rem; font-size:.95rem; line-height:1.55; color:var(--p-tinta); }
+.janela-painel.painel .app-modal-body p{ margin:0 0 .75rem; }
+.janela-painel.painel button.app-modal-close{ width:2.25rem; height:2.25rem; min-height:0; margin:0; padding:0; flex:none; display:inline-grid; place-items:center; border:0; border-radius:8px; background:transparent; color:var(--p-tinta-suave); box-shadow:none; font-size:1rem; line-height:1; }
+.janela-painel.painel button.app-modal-close:hover{ background:var(--p-superficie); }
+/* Botões: rodapé à direita, tamanho do conteúdo; principal na cor da marca, secundário em contorno */
+.janela-painel.painel .app-modal-body div:has(> .btn-primary + .btn), .janela-painel.painel .app-modal-body div:has(> .btn-secondary + .btn-primary){ display:flex !important; justify-content:flex-end; gap:.6rem !important; flex-wrap:wrap; margin-top:1rem !important; }
+.janela-painel.painel button.btn{ flex:0 0 auto !important; width:auto; min-height:2.6rem; margin:0; padding:.5rem 1.3rem; border-radius:999px; font-weight:800; box-shadow:none; }
+.janela-painel.painel button.btn.btn-primary{ background:var(--p-marca); border:0; color:var(--p-texto-botao); }
+.janela-painel.painel button.btn.btn-primary:hover{ background:var(--p-botao-hover); }
+.janela-painel.painel button.btn.btn-secondary{ background:transparent; border:1px solid var(--p-borda-campo); color:var(--p-tinta); }
+.janela-painel.painel button.btn.btn-secondary:hover{ background:var(--p-linha); }
+.janela-painel.painel button.btn.btn-block{ width:100%; }
+/* Formulário (Editar perfil, Reportar) */
+.janela-painel.painel :is(.profile-edit-label, .report-modal-label){ display:block; margin:.9rem 0 .3rem; font-size:.85rem; font-weight:800; color:var(--p-tinta); }
+.janela-painel.painel :is(input:not([type=checkbox]):not([type=radio]), textarea, select){ margin-bottom:0; }
+.janela-painel.painel .profile-edit-hint, .janela-painel.painel .profile-edit-bio-count{ color:var(--p-tinta-suave); font-size:.82rem; }
+.janela-painel.painel button.profile-edit-avatar-btn{ width:auto; min-height:2.2rem; margin:0; padding:.3rem .9rem; border:1px solid var(--p-borda-campo); border-radius:999px; background:transparent; color:var(--p-tinta); font-weight:700; font-size:.88rem; box-shadow:none; }
+/* Interruptor do Perfil público no desenho do Pico */
+.janela-painel.painel .pref-row{ background:var(--p-superficie); border:1px solid var(--p-linha); border-radius:var(--p-raio-controle); box-shadow:none; }
+.janela-painel.painel .pref-row-title{ color:var(--p-tinta); }
+.janela-painel.painel .pref-row-sub{ color:var(--p-tinta-suave); }
+.janela-painel.painel button.pref-switch{ position:relative; width:2.4rem; height:1.35rem; min-height:0; margin:0; padding:0; flex:none; border:0; border-radius:999px; background:var(--p-borda-campo); box-shadow:none; }
+.janela-painel.painel button.pref-switch[aria-checked="true"]{ background:var(--p-marca-escura); }
+.janela-painel.painel button.pref-switch .pref-switch-knob{ position:absolute; top:.15rem; left:.15rem; width:1.05rem; height:1.05rem; border-radius:50%; background:var(--p-elevado); box-shadow:none; transition:left .15s ease; }
+.janela-painel.painel button.pref-switch[aria-checked="true"] .pref-switch-knob{ left:1.2rem; }
+/* Reportar: lista de categorias e níveis */
+.janela-painel.painel button.report-option-btn, .janela-painel.painel .report-option-grid button{ width:100%; min-height:2.6rem; margin:0 0 .4rem; padding:.5rem .9rem; border:1px solid var(--p-linha); border-radius:var(--p-raio-controle); background:var(--p-elevado); color:var(--p-tinta); font-weight:600; text-align:left; justify-content:flex-start; box-shadow:none; }
+.janela-painel.painel :is(.report-option-grid button, button.report-option-btn):hover{ background:var(--p-superficie); }
+.janela-painel.painel :is(.report-option-grid button, button.report-option-btn)[aria-pressed="true"], .janela-painel.painel :is(.report-option-grid button, button.report-option-btn).active, .janela-painel.painel :is(.report-option-grid button, button.report-option-btn).selected{ border-color:var(--p-marca-escura); box-shadow:0 0 0 2px color-mix(in srgb, var(--p-marca-escura) 35%, transparent); }
+.janela-painel.painel .report-severity-row button, .janela-painel.painel button.report-severity-btn{ width:auto; min-height:2.2rem; margin:0; padding:.3rem .9rem; border:1px solid var(--p-borda-campo); border-radius:999px; background:transparent; color:var(--p-tinta); font-weight:700; font-size:.88rem; box-shadow:none; }
+.janela-painel.painel .report-modal-optional, .janela-painel.painel .report-modal-privacy-note{ color:var(--p-tinta-suave); }
+/* Avisos (limite, Premium) */
+.janela-painel.painel .app-modal-body strong, .janela-painel.painel .app-modal-body b{ color:var(--p-tinta); }
+.janela-painel.painel button.report-severity-btn.selected{ background:var(--p-marca); border-color:var(--p-marca); color:var(--p-texto-botao); }
+.janela-painel.painel button.report-screenshot-btn{ width:auto; min-height:2.2rem; margin:0; padding:.3rem .9rem; border:1px solid var(--p-borda-campo); border-radius:999px; background:transparent; color:var(--p-tinta); font-weight:700; font-size:.88rem; box-shadow:none; }
+.janela-painel.painel .report-option-grid{ gap:.4rem; }
+.janela-painel.painel button.app-modal-close:focus:not(:focus-visible){ background:transparent; box-shadow:none; }
+/* Trocar de curso: o Pico dá peso normal a todo <p>; o nome do curso continua grande e forte */
+.janela-painel.painel .course-confirm p{ margin:0; }
+.janela-painel.painel .course-confirm-head{ font-weight:900; font-size:26px; color:var(--p-tinta); }
+.janela-painel.painel .course-confirm-intro{ font-weight:700; color:var(--p-tinta-suave); font-size:.9rem; }
+.janela-painel.painel .course-confirm-keep{ background:var(--p-superficie); border-color:var(--p-linha); font-weight:700; }
+/* Bordas de opções e campos no tom mais forte (no escuro a linha padrão some no fundo elevado) */
+.janela-painel.painel :is(.report-option-grid button, button.report-option-btn){ border-color:var(--p-borda-campo); }
+/* Campo do @: o prefixo e o campo somente leitura formam uma peça só */
+.janela-painel.painel .profile-edit-username-wrap{ display:flex; align-items:center; border:1px solid var(--p-borda-campo); border-radius:var(--p-raio-controle); background:var(--p-superficie); overflow:hidden; }
+.janela-painel.painel .profile-edit-username-wrap > span{ padding:0 0 0 1rem; color:var(--p-tinta-suave); font-weight:700; }
+.janela-painel.painel .profile-edit-username-wrap input{ flex:1; width:auto; min-width:0; margin:0; border:0; border-radius:0; background:transparent; box-shadow:none; color:var(--p-tinta-suave); }
+@media (max-width:600px){
+  .janela-painel.painel button.app-modal-close{ width:44px; height:44px; }
+  .janela-painel.painel button.btn, .janela-painel.painel :is(button.report-severity-btn, button.profile-edit-avatar-btn, button.report-screenshot-btn){ min-height:44px; }
+}
+
 /* ---------- Perfil: passada de design (Visão geral, Metas, Progresso, Amigos) ----------
    Identidade como carteirinha de estudante (faixa na cor do idioma no topo);
    o resto fica quieto: títulos em tom de frase, números do Progresso num painel só. */
@@ -6037,7 +6097,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 </div>
 
 <div id="profile-edit-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
+  <div class="app-modal painel janela-painel">
     <div class="app-modal-header">
       <h3>Editar perfil</h3>
       <button class="app-modal-close" id="profile-edit-modal-close" aria-label="Fechar">✕</button>
@@ -6178,7 +6238,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
      id-com-revisão de shared/teacher-flashcards.js/shared/own-flashcards.js).
      Compartilhado entre shared/admin-flashcards.js e shared/my-flashcards.js. -->
 <div id="ui-language-confirm-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
+  <div class="app-modal painel janela-painel">
     <div class="app-modal-header">
       <h3 data-i18n="settings.uiLanguage.confirm.title">Trocar o idioma do site?</h3>
       <button class="app-modal-close" id="ui-language-confirm-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
@@ -6210,7 +6270,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 </div>
 
 <div id="flashcard-reset-confirm-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
+  <div class="app-modal painel janela-painel">
     <div class="app-modal-header">
       <h3 data-i18n="flashcardReset.modal.title">⚠️ Confirmar edição</h3>
       <button class="app-modal-close" id="flashcard-reset-confirm-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
@@ -6281,7 +6341,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 
 <!-- ===== MODAL: REPORTAR PROBLEMA/SUGESTÃO (bandeira ⚑) ===== -->
 <div id="report-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
+  <div class="app-modal painel janela-painel">
     <div class="app-modal-header">
       <h3 data-i18n="report.modal.title">⚑ Reportar problema ou sugestão</h3>
       <button class="app-modal-close" id="report-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
