@@ -69,6 +69,24 @@ const PT_WORDS = /\b(Entrar|senha|conta|Continuar|Esqueceu|Crie|grátis|Idioma|C
     const tag = `${theme}-${width}`;
     const { ctx, page, errors } = await open('pt-BR', theme, width);
     const btn = '#site-lang-btn';
+    // Entrar x Criar conta: o cadastro é visivelmente outra tela (título, frase, divisor, senha, botão e bloco de baixo)
+    const modo = () => page.evaluate(() => ({ h: document.getElementById('gate-login-title').textContent, sub: document.getElementById('gate-login-sub').textContent,
+      div: document.getElementById('gate-login-divider').textContent, ph: document.getElementById('gate-password').placeholder, ac: document.getElementById('gate-password').getAttribute('autocomplete'),
+      forgot: getComputedStyle(document.getElementById('gate-forgot-btn')).display !== 'none' && document.getElementById('gate-forgot-btn').offsetParent !== null,
+      submit: document.getElementById('gate-submit-btn').textContent, bloco: document.getElementById('gate-toggle-mode-title').textContent,
+      verde: document.getElementById('gate-toggle-mode-btn').classList.contains('jp-tom-verde'), icon: document.getElementById('gate-toggle-mode-icon').textContent.trim(),
+      focus: document.activeElement && document.activeElement.id }));
+    const m0 = await modo();
+    check(`${tag}: login: marca, frase de entrar, senha atual, "Esqueceu" e bloco verde de cadastro`, m0.h === 'Idiomas com Prof. Brune' && m0.div === 'ou entre com e-mail' && m0.ph === 'Sua senha' && m0.ac === 'current-password' && m0.forgot && m0.submit === 'Entrar' && m0.bloco === 'Crie sua conta grátis' && m0.verde && m0.icon === '🎁', m0);
+    await page.click('#gate-toggle-mode-btn');
+    const m1 = await modo();
+    check(`${tag}: cadastro: título, frase, divisor, senha nova e botão próprios`, m1.h === 'Crie sua conta grátis' && /Depois você escolhe o que quer aprender/.test(m1.sub) && m1.div === 'ou crie com e-mail' && m1.ph === 'Crie uma senha (mínimo 6 caracteres)' && m1.ac === 'new-password' && m1.submit === 'Criar conta grátis', m1);
+    check(`${tag}: cadastro: sem "Esqueceu sua senha?" e bloco de volta ao login com outra cor e ícone`, !m1.forgot && m1.bloco === 'Já tenho conta' && !m1.verde && m1.icon === '👋', m1);
+    check(`${tag}: cadastro: o foco vai para o e-mail`, m1.focus === 'gate-email', m1.focus);
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/entrada-cadastro-${tag}.png` });
+    await page.click('#gate-toggle-mode-btn');
+    const m2 = await modo();
+    check(`${tag}: voltar ao login devolve tudo`, JSON.stringify({ ...m2, focus: 0 }) === JSON.stringify({ ...m0, focus: 0 }), m2);
     check(`${tag}: menu começa fechado`, await page.evaluate(() => document.getElementById('site-lang-menu').hidden && document.getElementById('site-lang-btn').getAttribute('aria-expanded') === 'false'));
     await page.click(btn);
     const m = await page.evaluate(() => ({ open: !document.getElementById('site-lang-menu').hidden, exp: document.getElementById('site-lang-btn').getAttribute('aria-expanded'),
@@ -89,7 +107,7 @@ const PT_WORDS = /\b(Entrar|senha|conta|Continuar|Esqueceu|Crie|grátis|Idioma|C
     check(`${tag}: escolher English troca a página inteira`, /Log in to pick up/.test(en) && /Continue with Google/.test(en) && /Your email/.test(en) && /Forgot your password\?/.test(en) && /Create a free account/.test(en) && !PT_WORDS.test(en), en);
     check(`${tag}: escolha fica guardada`, await page.evaluate(() => localStorage.getItem('ui-language') === 'en'));
     await page.click('#gate-toggle-mode-btn');
-    check(`${tag}: modo cadastro em inglês`, await page.evaluate(() => document.getElementById('gate-submit-btn').textContent === 'Create account' && document.getElementById('gate-toggle-mode-title').textContent === 'I already have an account' && document.getElementById('gate-signup-question').textContent === 'Go back and log in with your email and password.'));
+    check(`${tag}: modo cadastro em inglês`, await page.evaluate(() => document.getElementById('gate-submit-btn').textContent === 'Create free account' && document.getElementById('gate-login-title').textContent === 'Create your free account' && document.getElementById('gate-toggle-mode-title').textContent === 'I already have an account' && document.getElementById('gate-signup-question').textContent === 'Log in with your email and password.' && document.getElementById('gate-password').placeholder === 'Create a password (at least 6 characters)'));
     await page.click('#gate-toggle-mode-btn');
     await page.click('#gate-submit-btn'); // campos vazios: o navegador barra, nada quebra
     await page.fill('#gate-email', 'x@x.com'); await page.fill('#gate-password', 'errada1'); await page.click('#gate-submit-btn');
@@ -100,6 +118,13 @@ const PT_WORDS = /\b(Entrar|senha|conta|Continuar|Esqueceu|Crie|grátis|Idioma|C
     await waitLang(page, 'pt-BR');
     const pt = await loginText(page);
     check(`${tag}: voltar para Português devolve o texto original`, /Entre para continuar de onde parou/.test(pt) && /Continuar com Google/.test(pt) && /Seu e-mail/.test(pt) && /Crie sua conta grátis/.test(pt), pt);
+    // botão de tema do topo troca claro/escuro (antes não fazia nada)
+    const th0 = await page.evaluate(() => ({ dark: isDarkThemeActive(), bg: getComputedStyle(document.body).backgroundColor }));
+    await page.click('#theme-toggle-btn');
+    const th1 = await page.evaluate(() => ({ dark: isDarkThemeActive(), attr: document.documentElement.getAttribute('data-theme'), bg: getComputedStyle(document.body).backgroundColor, saved: localStorage.getItem('app_theme'), pressed: document.getElementById('theme-toggle-btn').getAttribute('aria-pressed') }));
+    check(`${tag}: botão de tema troca o tema e guarda a escolha`, th1.dark === !th0.dark && th1.attr === (th1.dark ? 'dark' : 'light') && th1.bg !== th0.bg && th1.saved === th1.attr && th1.pressed === String(th1.dark), { th0, th1 });
+    await page.click('#theme-toggle-btn');
+    check(`${tag}: segundo clique volta ao tema anterior`, await page.evaluate((d) => isDarkThemeActive() === d, th0.dark));
     check(`${tag}: sem rolagem horizontal`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
     check(`${tag}: botão do idioma com 38px ou mais`, await page.evaluate(() => document.getElementById('site-lang-btn').getBoundingClientRect().height >= 38));
     if (width === 390) check(`${tag}: no celular o rótulo "Idioma do site" some, mas continua para leitor de tela`, await page.evaluate(() => document.querySelector('.site-lang-lbl').getBoundingClientRect().width <= 1 && /Idioma do site/.test(document.getElementById('site-lang-btn').textContent)));

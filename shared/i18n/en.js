@@ -3577,7 +3577,7 @@ window.I18N_CATALOG['en'] = {
   'gate.login.password': 'Your password', // ALTA
   'gate.login.forgot': 'Forgot your password?', // ALTA
   'gate.login.submit': 'Log in', // ALTA
-  'gate.login.signupSubmit': 'Create account', // ALTA
+  'gate.login.signupSubmit': 'Create free account', // ALTA
   'gate.login.signupLink': 'Create a free account', // ALTA
   'gate.login.loginLink': 'I already have an account', // ALTA
   'gate.login.googleRedirect': 'Taking you to Google...', // ALTA
@@ -3639,8 +3639,12 @@ window.I18N_CATALOG['en'] = {
   'gate.exp.beginner': 'I\'m a beginner', // ALTA
   'gate.exp.knows': 'I know the basics', // ALTA
   'gate.login.signupDesc': 'Lessons, review and daily practice, at your own pace.', // ALTA
-  'gate.login.loginDesc': 'Go back and log in with your email and password.', // ALTA
+  'gate.login.loginDesc': 'Log in with your email and password.', // ALTA
   'gate.choose.footTitle': 'You can change this later', // ALTA
   'gate.exp.beginnerDesc': 'You start from the first lesson.', // ALTA
   'gate.exp.knowsDesc': 'You get an invite to the Level Test and skip what you already know.', // ALTA
+  'gate.signup.title': 'Create your free account', // ALTA
+  'gate.signup.sub': 'Use Google or an email and a password. Then you choose what to learn.', // ALTA
+  'gate.signup.divider': 'or sign up with email', // ALTA
+  'gate.signup.passwordPh': 'Create a password (at least 6 characters)', // ALTA
 };
