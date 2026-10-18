@@ -54,18 +54,25 @@ try{
   --success: #1E7A3C;
   --shadow-card: 0 2px 10px rgba(32,26,44,0.07), 0 1px 3px rgba(32,26,44,0.06);
   --shadow-lift: 0 14px 34px rgba(32,26,44,0.14);
+  /* padrão "janela rica" (o mesmo das janelas do aluno): fundo elevado, borda de campo com 3:1 e o dourado das dicas */
+  --elevado: color-mix(in srgb, var(--paper-warm), white 45%);
+  --borda-campo: color-mix(in srgb, var(--paper-line), var(--ink-soft) 60%);
+  --ouro: #D99A1E;
+  --marca-texto: var(--accent-dark);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --ink: #EEE9F5; --ink-soft: #ADA5BE; --paper: #17141F; --paper-warm: #201C2B;
     --paper-line: #362F44; --shadow-card: 0 2px 10px rgba(0,0,0,0.35); --shadow-lift: 0 14px 34px rgba(0,0,0,0.45);
     --success: #6FD495; --danger: #FF8A80;
+    --elevado: color-mix(in srgb, var(--paper-warm), white 8%); --marca-texto: var(--accent);
   }
 }
 :root[data-theme="dark"]{
   --ink: #EEE9F5; --ink-soft: #ADA5BE; --paper: #17141F; --paper-warm: #201C2B;
   --paper-line: #362F44; --shadow-card: 0 2px 10px rgba(0,0,0,0.35); --shadow-lift: 0 14px 34px rgba(0,0,0,0.45);
   --success: #6FD495; --danger: #FF8A80;
+  --elevado: color-mix(in srgb, var(--paper-warm), white 8%); --marca-texto: var(--accent);
 }
 *{ box-sizing:border-box; }
 html,body{ margin:0; padding:0; }
@@ -84,84 +91,88 @@ body{
   color:var(--ink-soft); cursor:pointer;
 }
 .theme-toggle-btn:hover{ color:var(--ink); }
-.wrap{ max-width:420px; width:100%; padding:88px 24px 48px; text-align:center; }
+.wrap{ max-width:460px; width:100%; padding:88px 20px 48px; text-align:center; }
 h1{
   font-family:'Nunito', sans-serif; font-weight:800; font-size:clamp(24px,5vw,30px); margin:0 0 10px;
   letter-spacing:-0.01em;
 }
 .sub{ color:var(--ink-soft); font-size:15px; margin:0 0 32px; line-height:1.5; }
 
-/* ---------- Tela de login ---------- */
+/* ---------- Telas da entrada no padrão "janela rica" (2026-10-18) ----------
+   Uma janela por tela: logo ou ícone em quadrado tingido, título forte, campos com ícone, botão principal em pílula
+   (azul do Ranking), blocos tingidos e opções com título e descrição. Cores só dos tokens desta página. */
 .gate-card{
-  max-width:380px; width:100%; background:var(--paper); border:1px solid var(--paper-line);
-  border-radius:20px; padding:32px 26px; box-shadow:var(--shadow-lift); text-align:center;
+  width:100%; background:var(--paper); border:1px solid var(--paper-line); border-radius:24px;
+  padding:28px 26px 24px; box-shadow:var(--shadow-lift); text-align:left; display:grid; gap:14px;
 }
-.gate-note{ min-height:16px; font-size:12.5px; color:var(--ink-soft); margin:14px 0 0; }
+.er-head{ display:grid; justify-items:center; text-align:center; gap:8px; margin-bottom:4px; }
+.er-head h1{ font-size:clamp(1.4rem, 5vw, 1.6rem); font-weight:900; letter-spacing:-.01em; line-height:1.2; margin:4px 0 0; text-wrap:balance; }
+.er-head .sub{ margin:0; text-wrap:balance; }
+.er-logo{ width:76px; height:76px; border-radius:22px; display:grid; place-items:center; background:var(--elevado); border:1px solid var(--paper-line); box-shadow:var(--shadow-card); }
+.er-logo img{ width:44px; height:auto; display:block; }
+.jp-icone{ flex:none; width:46px; height:46px; border-radius:14px; display:grid; place-items:center; font-size:23px; line-height:1; background:color-mix(in srgb, var(--tom, var(--accent)) 18%, var(--elevado)); }
+.jp-icone--grande{ width:72px; height:72px; border-radius:22px; font-size:38px; }
+:is(.jp-icone, .jp-bloco).jp-tom-verde{ --tom:var(--success); } :is(.jp-icone, .jp-bloco).jp-tom-ouro{ --tom:var(--ouro); }
+.gate-note{ min-height:0; font-size:13px; color:var(--ink-soft); margin:0; text-align:center; }
+.gate-note:empty{ display:none; }
 .gate-note.err{ color:var(--danger); font-weight:700; }
 .gate-note.ok{ color:var(--success); font-weight:800; font-size:14px; }
 .btn{
-  border:none; border-radius:11px; padding:13px 20px; font-family:'Nunito', sans-serif; font-weight:800;
-  font-size:14px; cursor:pointer; transition:transform .1s ease, filter .15s ease, background .15s ease;
+  border:none; border-radius:999px; min-height:50px; padding:0 20px; font-family:'Nunito', sans-serif; font-weight:800;
+  font-size:16px; cursor:pointer; transition:transform .1s ease, filter .15s ease, background .15s ease;
 }
-.btn:active{ transform:scale(.97); }
+.btn:active{ transform:scale(.98); }
+.btn:disabled{ opacity:.6; cursor:default; }
 .btn-block{ width:100%; }
 .btn-primary{ background:var(--accent); color:#fff; }
 .btn-primary:hover{ filter:brightness(1.06); }
-.btn-secondary{ background:var(--paper-warm); color:var(--ink); border:1px solid var(--paper-line); }
-.btn-secondary:hover{ background:var(--paper-line); }
 .gate-oauth-btn{
-  width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
-  background:var(--paper); border:1.5px solid var(--paper-line); border-radius:11px;
-  padding:13px 20px; font-family:'Nunito', sans-serif; font-weight:800; font-size:14px; color:var(--ink);
-  cursor:pointer; transition:background .15s ease, transform .1s ease;
+  width:100%; min-height:50px; display:flex; align-items:center; justify-content:center; gap:10px;
+  background:var(--elevado); border:1px solid var(--borda-campo); border-radius:14px;
+  padding:0 20px; font-family:'Nunito', sans-serif; font-weight:800; font-size:15px; color:var(--ink);
+  cursor:pointer; transition:background .15s ease;
 }
 .gate-oauth-btn:hover{ background:var(--paper-warm); }
-.gate-block{ background:var(--paper-warm); border-radius:14px; padding:18px 18px 20px; margin:18px 0 16px; }
-.gate-divider{
-  display:flex; align-items:center; gap:12px; margin:0 0 16px; color:var(--ink-soft);
-  font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.06em;
-}
+.gate-divider{ display:flex; align-items:center; gap:12px; color:var(--ink-soft); font-size:13px; font-weight:700; }
 .gate-divider::before, .gate-divider::after{ content:''; flex:1; height:1px; background:var(--paper-line); }
+#gate-email-form, #gate-verify-form, #gate-new-password-form{ display:grid; gap:12px; }
 .gate-input{
-  width:100%; padding:12px 14px; border-radius:10px; border:2px solid var(--paper-line);
-  background:var(--paper); font-family:'Nunito', sans-serif; font-size:14.5px; color:var(--ink);
-  margin-bottom:10px; box-sizing:border-box;
+  width:100%; min-height:50px; padding:0 14px; border-radius:14px; border:1px solid var(--borda-campo);
+  background:var(--elevado); font-family:'Nunito', sans-serif; font-size:15px; color:var(--ink); box-sizing:border-box;
 }
-.gate-input:focus{ outline:none; border-color:var(--accent); }
+.gate-input:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+.jp-campo{ position:relative; }
+.jp-campo-ico{ position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:1.1rem; line-height:1; pointer-events:none; }
+.jp-campo .gate-input{ padding-left:2.8rem; }
 .gate-link-btn{
-  background:none; border:none; padding:0; font-family:'Nunito', sans-serif; font-size:12px;
-  font-weight:700; color:var(--ink-soft); cursor:pointer; text-decoration:underline;
-}
-.gate-link-btn:hover{ color:var(--danger); }
-.gate-forgot-row{ display:flex; justify-content:flex-end; margin:-2px 0 14px; }
-.gate-signup-row{ font-size:13px; color:var(--ink-soft); margin:16px 0 0; }
-.gate-signup-link{
   background:none; border:none; padding:0; font-family:'Nunito', sans-serif; font-size:13px;
-  font-weight:800; color:var(--accent-dark); cursor:pointer; margin-left:4px;
+  font-weight:800; color:var(--marca-texto); cursor:pointer; text-decoration:underline;
 }
-.gate-signup-link:hover{ text-decoration:underline; }
+.gate-link-btn:disabled{ color:var(--ink-soft); text-decoration:none; cursor:default; }
+.gate-forgot-row{ display:flex; justify-content:flex-end; margin:-4px 0 2px; }
 .gate-code-input{ font-size:24px; font-weight:800; letter-spacing:.35em; text-align:center; font-variant-numeric:tabular-nums; }
 .gate-verify-email{ font-weight:800; color:var(--ink); word-break:break-all; }
-.gate-verify-actions{ display:flex; justify-content:space-between; gap:12px; margin-top:12px; flex-wrap:wrap; }
-
-/* ---------- Escolha de idioma (primeiro login) ---------- */
-.lang-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-@media (max-width:420px){ .lang-grid{ grid-template-columns:1fr; } }
-.lang-card{
-  display:flex; flex-direction:column; align-items:center; gap:10px; padding:26px 18px;
-  border-radius:20px; background:var(--paper-warm); border:2px solid var(--paper-line);
-  cursor:pointer; color:var(--ink); box-shadow:var(--shadow-card); font-family:'Nunito', sans-serif;
-  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-}
-.lang-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-lift); border-color:var(--accent); }
-.lang-card .flag{ display:block; line-height:1; }
-.lang-card .flag svg{ width:56px; height:auto; display:block; border-radius:4px; box-shadow:0 0 0 1px rgba(0,0,0,0.08); }
-.lang-card .lang-name{ font-weight:800; font-size:18px; }
-.lang-card .native{ font-size:13.5px; color:var(--ink-soft); }
-.gate-loading-spinner{ color:var(--ink-soft); font-size:14px; padding-top:40px; }
-/* Link de cadastro no escuro: o azul-escuro some no fundo escuro (contraste baixo). */
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .gate-signup-link{ color:var(--accent); } }
-:root[data-theme="dark"] .gate-signup-link{ color:var(--accent); }
+.gate-verify-actions{ display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+/* Blocos tingidos e opções com título e descrição */
+.jp-bloco{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:14px; align-items:center; width:100%; margin:0;
+  padding:14px 16px; border-radius:16px; background:color-mix(in srgb, var(--tom, var(--accent)) 10%, var(--elevado)); border:1px solid color-mix(in srgb, var(--tom, var(--accent)) 22%, var(--paper-line));
+  color:var(--ink); text-align:left; font-family:'Nunito', sans-serif; }
+button.jp-bloco{ cursor:pointer; }
+button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 16%, var(--elevado)); }
+.jp-bloco--info{ grid-template-columns:auto minmax(0,1fr); }
+.jp-bloco b, .jp-opcao b{ display:block; font-size:1rem; font-weight:800; color:var(--ink); }
+.jp-bloco small, .jp-opcao small{ display:block; font-size:.9rem; line-height:1.45; color:var(--ink-soft); }
+.er-seta{ font-size:22px; font-weight:800; color:var(--ink-soft); line-height:1; }
+.er-lista{ display:grid; gap:10px; }
+.jp-opcao{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:14px; align-items:center; width:100%; min-height:64px; padding:12px 16px;
+  border:1px solid var(--borda-campo); border-radius:16px; background:var(--elevado); color:var(--ink); text-align:left; font-family:'Nunito', sans-serif; cursor:pointer;
+  transition:border-color .15s ease, background .15s ease; }
+.jp-opcao:hover{ border-color:var(--accent); background:var(--paper-warm); }
+.jp-opcao .flag-tile{ width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:color-mix(in srgb, var(--accent) 12%, var(--elevado)); }
+.jp-opcao .flag-tile svg{ width:34px; height:auto; display:block; border-radius:4px; box-shadow:0 0 0 1px rgba(0,0,0,0.08); }
+.jp-opcao .lang-beta{ font-size:12px; font-weight:800; padding:3px 10px; border-radius:999px; background:var(--paper); border:1px solid var(--paper-line); color:var(--ink-soft); }
+.gate-loading-spinner{ color:var(--ink-soft); font-size:14px; padding-top:40px; text-align:center; }
+:is(.btn, .gate-oauth-btn, .gate-link-btn, .jp-bloco, .jp-opcao, .site-lang-btn, .site-lang-menu button, .theme-toggle-btn, .gate-speak button):focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
 
 /* ---------- Idioma do site (só a página de entrada; o curso é escolhido depois) ---------- */
 .site-lang{ position:absolute; top:20px; right:70px; z-index:5; }
@@ -189,12 +200,10 @@ h1{
 @media (max-width:480px){ .site-lang{ right:66px; } .site-lang-lbl{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; } }
 
 /* ---------- "Eu falo..." na escolha do curso (igual ao de Adicionar curso) ---------- */
-.gate-speak{ display:inline-flex; gap:4px; padding:4px; background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px; margin:0 0 22px; max-width:100%; }
-.gate-speak button{ font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; min-height:44px; padding:0 16px; border:0; border-radius:999px; background:transparent; color:var(--ink-soft); cursor:pointer; }
+.gate-speak{ justify-self:center; display:inline-flex; gap:4px; padding:4px; background:var(--elevado); border:1px solid var(--paper-line); border-radius:999px; max-width:100%; }
+.gate-speak button{ font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; min-height:44px; padding:0 16px; border:0; border-radius:999px; background:transparent; color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
 .gate-speak button[aria-pressed="true"]{ background:var(--accent); color:#fff; }
-.lang-card{ position:relative; }
-.lang-card .lang-beta{ position:absolute; top:10px; right:10px; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; background:var(--paper); border:1px solid var(--paper-line); color:var(--ink-soft); }
-.gate-choose-foot{ font-size:13px; color:var(--ink-soft); margin:22px 0 0; }
+@media (max-width:420px){ .gate-card{ padding:24px 18px 20px; } .gate-speak button{ font-size:13px; padding:0 12px; } }
 </style>
 </head>
 <body>
@@ -216,38 +225,43 @@ h1{
 </div>
 
 <div class="wrap" id="gate-login" style="display:none;">
-  <h1 id="gate-login-title" data-i18n="gate.brand">Idiomas com Prof. Brune</h1>
-  <p class="sub" data-i18n="gate.login.sub">Entre para continuar de onde parou ou crie sua conta grátis e escolha o que quer aprender.</p>
   <div class="gate-card">
+    <div class="er-head">
+      <span class="er-logo"><img src="shared/brand/logo-mark.svg" alt="" width="44" height="50"></span>
+      <h1 id="gate-login-title" data-i18n="gate.brand">Idiomas com Prof. Brune</h1>
+      <p class="sub" data-i18n="gate.login.sub">Entre para continuar de onde parou ou crie sua conta grátis e escolha o que quer aprender.</p>
+    </div>
     <button class="gate-oauth-btn" id="gate-google-btn">
       <svg width="18" height="18" viewBox="0 0 18 18" style="flex-shrink:0;"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.91c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.27c-.81.54-1.84.86-3.05.86-2.35 0-4.34-1.58-5.05-3.71H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.95 10.7c-.18-.54-.28-1.11-.28-1.7s.1-1.16.28-1.7V4.96H.96C.35 6.17 0 7.55 0 9s.35 2.83.96 4.04l2.99-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.99 2.34C4.66 5.16 6.65 3.58 9 3.58z"/></svg>
       <span data-i18n="gate.login.google">Continuar com Google</span>
     </button>
-    <div class="gate-block">
-      <div class="gate-divider"><span data-i18n="gate.login.divider">ou entrar com</span></div>
-      <form id="gate-email-form">
-        <label class="sr-only" for="gate-email" style="position:absolute;left:-9999px;" data-i18n="gate.login.email">Seu e-mail</label>
-        <input type="email" id="gate-email" class="gate-input" placeholder="Seu e-mail" data-i18n-attr="placeholder:gate.login.email" autocomplete="email" required>
-        <label class="sr-only" for="gate-password" style="position:absolute;left:-9999px;" data-i18n="gate.login.password">Sua senha</label>
-        <input type="password" id="gate-password" class="gate-input" placeholder="Sua senha" data-i18n-attr="placeholder:gate.login.password" autocomplete="current-password" required minlength="6">
-        <div class="gate-forgot-row">
-          <button type="button" class="gate-link-btn" id="gate-forgot-btn" data-i18n="gate.login.forgot">Esqueceu sua senha?</button>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block" id="gate-submit-btn">Entrar</button>
-      </form>
-    </div>
-    <p class="gate-signup-row">
-      <span id="gate-signup-question">Não tem conta?</span>
-      <button type="button" class="gate-signup-link" id="gate-toggle-mode-btn">Crie sua conta grátis</button>
-    </p>
-    <p class="gate-note" id="gate-login-note"></p>
+    <div class="gate-divider"><span data-i18n="gate.login.divider">ou entre com e-mail</span></div>
+    <form id="gate-email-form">
+      <label class="sr-only" for="gate-email" style="position:absolute;left:-9999px;" data-i18n="gate.login.email">Seu e-mail</label>
+      <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">📧</span><input type="email" id="gate-email" class="gate-input" placeholder="Seu e-mail" data-i18n-attr="placeholder:gate.login.email" autocomplete="email" required></div>
+      <label class="sr-only" for="gate-password" style="position:absolute;left:-9999px;" data-i18n="gate.login.password">Sua senha</label>
+      <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="gate-password" class="gate-input" placeholder="Sua senha" data-i18n-attr="placeholder:gate.login.password" autocomplete="current-password" required minlength="6"></div>
+      <div class="gate-forgot-row">
+        <button type="button" class="gate-link-btn" id="gate-forgot-btn" data-i18n="gate.login.forgot">Esqueceu sua senha?</button>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="gate-submit-btn">Entrar</button>
+    </form>
+    <p class="gate-note" id="gate-login-note" role="status"></p>
+    <button type="button" class="jp-bloco jp-tom-verde" id="gate-toggle-mode-btn">
+      <span class="jp-icone" aria-hidden="true">🎁</span>
+      <span><b id="gate-toggle-mode-title">Crie sua conta grátis</b><small id="gate-signup-question">Lições, revisão e prática todo dia, no seu ritmo.</small></span>
+      <span class="er-seta" aria-hidden="true">›</span>
+    </button>
   </div>
 </div>
 
 <div class="wrap" id="gate-verify" style="display:none;">
-  <h1 data-i18n="gate.verify.title">Confirme seu e-mail</h1>
-  <p class="sub"><span data-i18n="gate.verify.subBefore">Enviamos um código para </span><span class="gate-verify-email" id="gate-verify-email"></span><span data-i18n="gate.verify.subAfter">. Digite o código aqui para ativar sua conta.</span></p>
   <div class="gate-card">
+    <div class="er-head">
+      <span class="jp-icone jp-icone--grande" aria-hidden="true">📧</span>
+      <h1 data-i18n="gate.verify.title">Confirme seu e-mail</h1>
+      <p class="sub"><span data-i18n="gate.verify.subBefore">Enviamos um código para </span><span class="gate-verify-email" id="gate-verify-email"></span><span data-i18n="gate.verify.subAfter">. Digite o código aqui para ativar sua conta.</span></p>
+    </div>
     <form id="gate-verify-form">
       <label class="sr-only" for="gate-code" style="position:absolute;left:-9999px;" data-i18n="gate.verify.codeLabel">Código de confirmação</label>
       <input type="text" id="gate-code" class="gate-input gate-code-input" inputmode="numeric" autocomplete="one-time-code"
@@ -258,50 +272,66 @@ h1{
       <button type="button" class="gate-link-btn" id="gate-resend-btn">Reenviar código</button>
       <button type="button" class="gate-link-btn" id="gate-verify-back-btn" data-i18n="gate.verify.back">Usar outro e-mail</button>
     </div>
-    <p class="gate-note" id="gate-verify-note">Não chegou? Olhe a caixa de spam. Também dá para tocar no botão "Ativar minha conta" do e-mail.</p>
+    <p class="gate-note" id="gate-verify-note" role="status">Não chegou? Olhe a caixa de spam. Também dá para tocar no botão "Ativar minha conta" do e-mail.</p>
   </div>
 </div>
 
 <div class="wrap" id="gate-confirm-link" style="display:none;">
-  <h1 id="gate-confirm-link-title">Ativar sua conta</h1>
-  <p class="sub" id="gate-confirm-link-sub">Toque no botão para confirmar seu e-mail e entrar.</p>
   <div class="gate-card">
+    <div class="er-head">
+      <span class="er-logo"><img src="shared/brand/logo-mark.svg" alt="" width="44" height="50"></span>
+      <h1 id="gate-confirm-link-title">Ativar sua conta</h1>
+      <p class="sub" id="gate-confirm-link-sub">Toque no botão para confirmar seu e-mail e entrar.</p>
+    </div>
     <button type="button" class="btn btn-primary btn-block" id="gate-confirm-link-btn">Ativar minha conta</button>
-    <p class="gate-note" id="gate-confirm-link-note"></p>
+    <p class="gate-note" id="gate-confirm-link-note" role="status"></p>
   </div>
 </div>
 
 <div class="wrap" id="gate-new-password" style="display:none;">
-  <h1 data-i18n="gate.newPass.title">Crie uma senha nova</h1>
-  <p class="sub" data-i18n="gate.newPass.sub">Escolha a senha que você vai usar daqui para frente.</p>
   <div class="gate-card">
+    <div class="er-head">
+      <span class="jp-icone jp-icone--grande" aria-hidden="true">🔒</span>
+      <h1 data-i18n="gate.newPass.title">Crie uma senha nova</h1>
+      <p class="sub" data-i18n="gate.newPass.sub">Escolha a senha que você vai usar daqui para frente.</p>
+    </div>
     <form id="gate-new-password-form">
       <label class="sr-only" for="gate-new-password-input" style="position:absolute;left:-9999px;" data-i18n="gate.newPass.label">Senha nova</label>
-      <input type="password" id="gate-new-password-input" class="gate-input" placeholder="Senha nova (mínimo 6 caracteres)" data-i18n-attr="placeholder:gate.newPass.ph" autocomplete="new-password" required minlength="6">
+      <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="gate-new-password-input" class="gate-input" placeholder="Senha nova (mínimo 6 caracteres)" data-i18n-attr="placeholder:gate.newPass.ph" autocomplete="new-password" required minlength="6"></div>
       <label class="sr-only" for="gate-new-password-confirm" style="position:absolute;left:-9999px;" data-i18n="gate.newPass.repeat">Repita a senha nova</label>
-      <input type="password" id="gate-new-password-confirm" class="gate-input" placeholder="Repita a senha nova" data-i18n-attr="placeholder:gate.newPass.repeat" autocomplete="new-password" required minlength="6">
+      <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="gate-new-password-confirm" class="gate-input" placeholder="Repita a senha nova" data-i18n-attr="placeholder:gate.newPass.repeat" autocomplete="new-password" required minlength="6"></div>
       <button type="submit" class="btn btn-primary btn-block" id="gate-new-password-btn" data-i18n="gate.newPass.submit">Salvar senha nova</button>
     </form>
-    <p class="gate-note" id="gate-new-password-note"></p>
+    <p class="gate-note" id="gate-new-password-note" role="status"></p>
   </div>
 </div>
 
 <div class="wrap" id="gate-choose-language" style="display:none;">
-  <h1 data-i18n="gate.choose.title">Qual idioma você quer aprender?</h1>
-  <div class="gate-speak" id="gate-speak" role="group" aria-label="Idioma que você fala" data-i18n-attr="aria-label:courseMenu.speakLabel">
-    <button type="button" data-site="pt-BR" aria-pressed="true" data-i18n="courseMenu.speak.pt-BR">Eu falo português</button>
-    <button type="button" data-site="en" aria-pressed="false" data-i18n="courseMenu.speak.en">Eu falo inglês</button>
+  <div class="gate-card">
+    <div class="er-head">
+      <span class="jp-icone jp-icone--grande" aria-hidden="true">🧭</span>
+      <h1 data-i18n="gate.choose.title">Qual idioma você quer aprender?</h1>
+    </div>
+    <div class="gate-speak" id="gate-speak" role="group" aria-label="Idioma que você fala" data-i18n-attr="aria-label:courseMenu.speakLabel">
+      <button type="button" data-site="pt-BR" aria-pressed="true" data-i18n="courseMenu.speak.pt-BR">Eu falo português</button>
+      <button type="button" data-site="en" aria-pressed="false" data-i18n="courseMenu.speak.en">Eu falo inglês</button>
+    </div>
+    <div class="er-lista" id="lang-grid"></div>
+    <p class="jp-bloco jp-tom-ouro jp-bloco--info"><span class="jp-icone" aria-hidden="true">💡</span><span><b data-i18n="gate.choose.footTitle">Pode mudar depois</b><small data-i18n="gate.choose.foot">Dá para adicionar outros cursos depois, no menu da bandeira.</small></span></p>
   </div>
-  <div class="lang-grid" id="lang-grid"></div>
-  <p class="gate-choose-foot" data-i18n="gate.choose.foot">Dá para adicionar outros cursos depois, no menu da bandeira.</p>
 </div>
 
 <div class="wrap" id="gate-choose-experience" style="display:none;">
-  <h1 id="gate-exp-title"></h1>
-  <p class="sub" data-i18n="gate.exp.sub">Isso só ajusta como você começa. Dá para mudar depois, a qualquer momento.</p>
-  <div class="gate-card" style="display:flex; flex-direction:column; gap:12px;">
-    <button type="button" class="btn btn-secondary btn-block" id="gate-exp-beginner-btn" data-i18n="gate.exp.beginner">Sou iniciante</button>
-    <button type="button" class="btn btn-primary btn-block" id="gate-exp-knows-btn" data-i18n="gate.exp.knows">Já sei o básico</button>
+  <div class="gate-card">
+    <div class="er-head">
+      <span class="jp-icone jp-icone--grande" aria-hidden="true">🎯</span>
+      <h1 id="gate-exp-title"></h1>
+      <p class="sub" data-i18n="gate.exp.sub">Isso só ajusta como você começa. Dá para mudar depois, a qualquer momento.</p>
+    </div>
+    <div class="er-lista">
+      <button type="button" class="jp-opcao" id="gate-exp-beginner-btn"><span class="jp-icone jp-tom-verde" aria-hidden="true">🌱</span><span><b data-i18n="gate.exp.beginner">Sou iniciante</b><small data-i18n="gate.exp.beginnerDesc">Você começa pela primeira lição.</small></span><span class="er-seta" aria-hidden="true">›</span></button>
+      <button type="button" class="jp-opcao" id="gate-exp-knows-btn"><span class="jp-icone jp-tom-ouro" aria-hidden="true">🚀</span><span><b data-i18n="gate.exp.knows">Já sei o básico</b><small data-i18n="gate.exp.knowsDesc">Você ganha o convite para o Teste de Nível e pula o que já sabe.</small></span><span class="er-seta" aria-hidden="true">›</span></button>
+    </div>
   </div>
 </div>
 
@@ -360,11 +390,12 @@ function renderLanguageChoices(onPick){
   if (!gateSpeak) gateSpeak = gateSiteLang();
   document.querySelectorAll('#gate-speak button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.site === gateSpeak)));
   const grid = document.getElementById('lang-grid');
+  // Cada curso: bandeira em quadrado tingido, nome do curso e o nome do idioma nele mesmo (Français, 中文).
   grid.innerHTML = gateCoursesFor(gateSpeak).map(({ l, status }) => `
-    <button type="button" class="lang-card" data-lang="${gateEsc(l.id)}">
-      ${status === 'beta' ? `<span class="lang-beta">${gateEsc(t('courses.beta'))}</span>` : ''}
-      <span class="flag">${l.flagSvg}</span>
-      <span class="lang-name">${gateEsc(LanguageRegistry.shortName(l.appKey, gateSpeak))}</span>
+    <button type="button" class="jp-opcao lang-card" data-lang="${gateEsc(l.id)}">
+      <span class="flag-tile" aria-hidden="true">${l.flagSvg}</span>
+      <span><b class="lang-name">${gateEsc(LanguageRegistry.shortName(l.appKey, gateSpeak))}</b><small lang="${gateEsc(l.fieldLang || l.id)}">${gateEsc(l.nativeName || '')}</small></span>
+      ${status === 'beta' ? `<span class="lang-beta">${gateEsc(t('courses.beta'))}</span>` : '<span class="er-seta" aria-hidden="true">›</span>'}
     </button>
   `).join('');
   grid.querySelectorAll('.lang-card').forEach(card => {
@@ -382,7 +413,9 @@ document.querySelectorAll('#gate-speak button').forEach(b => b.addEventListener(
 function askExperienceThenProceed(langId, finalCallback){
   const target = AVAILABLE_LANGUAGES.find(l => l.id === langId);
   if (!target){ finalCallback(langId, false); return; }
-  gateExpLang = LanguageRegistry.shortName(target.appKey, gateSiteLang()) || target.name;
+  // No meio da frase em português o nome do idioma vai com minúscula ("algo de francês"); em inglês, com maiúscula.
+  const expName = LanguageRegistry.shortName(target.appKey, gateSiteLang()) || target.name;
+  gateExpLang = gateSiteLang() === 'pt-BR' ? expName.toLowerCase() : expName;
   paintGateExperienceTitle();
   const knowsBtn = document.getElementById('gate-exp-knows-btn');
   knowsBtn.style.display = target.hasLevelTest ? '' : 'none';
@@ -567,8 +600,8 @@ function gateUiLanguage(){ return gateSiteLang(); }
 let gateSignupMode = false;
 function paintLoginMode(){
   document.getElementById('gate-submit-btn').textContent = t(gateSignupMode ? 'gate.login.signupSubmit' : 'gate.login.submit');
-  document.getElementById('gate-toggle-mode-btn').textContent = t(gateSignupMode ? 'gate.login.loginLink' : 'gate.login.signupLink');
-  document.getElementById('gate-signup-question').textContent = t(gateSignupMode ? 'gate.login.haveAccount' : 'gate.login.noAccount');
+  document.getElementById('gate-toggle-mode-title').textContent = t(gateSignupMode ? 'gate.login.loginLink' : 'gate.login.signupLink');
+  document.getElementById('gate-signup-question').textContent = t(gateSignupMode ? 'gate.login.loginDesc' : 'gate.login.signupDesc');
 }
 document.getElementById('gate-toggle-mode-btn').addEventListener('click', () => {
   gateSignupMode = !gateSignupMode;
@@ -718,6 +751,8 @@ function paintSiteLang(){
   document.title = t('gate.brand');
 }
 function paintGateTexts(){
+  // aviso de erro/sucesso já mostrado ficaria no idioma anterior: some ao trocar o idioma
+  ['gate-login-note', 'gate-new-password-note'].forEach(id => { const n = document.getElementById(id); if (n){ n.textContent = ''; n.className = 'gate-note'; } });
   paintSiteLang();
   paintLoginMode();
   paintResendBtn();

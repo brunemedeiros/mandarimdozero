@@ -3572,15 +3572,13 @@ window.I18N_CATALOG['en'] = {
   'gate.siteLang.label': 'Site language', // ALTA
   'gate.login.sub': 'Log in to pick up where you left off, or create a free account and choose what to learn.', // ALTA
   'gate.login.google': 'Continue with Google', // ALTA
-  'gate.login.divider': 'or log in with', // ALTA
+  'gate.login.divider': 'or log in with email', // ALTA
   'gate.login.email': 'Your email', // ALTA
   'gate.login.password': 'Your password', // ALTA
   'gate.login.forgot': 'Forgot your password?', // ALTA
   'gate.login.submit': 'Log in', // ALTA
   'gate.login.signupSubmit': 'Create account', // ALTA
-  'gate.login.noAccount': 'Don\'t have an account?', // ALTA
   'gate.login.signupLink': 'Create a free account', // ALTA
-  'gate.login.haveAccount': 'Already have an account?', // ALTA
   'gate.login.loginLink': 'I already have an account', // ALTA
   'gate.login.googleRedirect': 'Taking you to Google...', // ALTA
   'gate.login.googleError': 'Couldn\'t connect to Google. Try again.', // ALTA
@@ -3640,4 +3638,9 @@ window.I18N_CATALOG['en'] = {
   'gate.exp.sub': 'This only adjusts how you start. You can change it later, anytime.', // ALTA
   'gate.exp.beginner': 'I\'m a beginner', // ALTA
   'gate.exp.knows': 'I know the basics', // ALTA
+  'gate.login.signupDesc': 'Lessons, review and daily practice, at your own pace.', // ALTA
+  'gate.login.loginDesc': 'Go back and log in with your email and password.', // ALTA
+  'gate.choose.footTitle': 'You can change this later', // ALTA
+  'gate.exp.beginnerDesc': 'You start from the first lesson.', // ALTA
+  'gate.exp.knowsDesc': 'You get an invite to the Level Test and skip what you already know.', // ALTA
 };

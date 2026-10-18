@@ -47,10 +47,10 @@ const PT_WORDS = /\b(Entrar|senha|conta|Continuar|Esqueceu|Crie|grátis|Idioma|C
     const txt = await loginText(page);
     const cur = await page.evaluate(() => document.getElementById('site-lang-current').textContent);
     if (want === 'en'){
-      check(`${locale}: entrada abre em inglês`, /Languages with Prof\. Brune/.test(txt) && /Create a free account/.test(txt) && cur === 'English', txt);
+      check(`${locale}: entrada abre em inglês`, /Languages with Prof\. Brune/.test(txt) && /Create a free account/.test(txt) && /Lessons, review and daily practice/.test(txt) && /or log in with email/i.test(txt) && cur === 'English', txt);
       check(`${locale}: nada em português na entrada em inglês`, !PT_WORDS.test(txt), (txt.match(PT_WORDS) || [])[0]);
     } else {
-      check(`${locale}: entrada abre em português`, /Idiomas com Prof\. Brune/.test(txt) && /Crie sua conta grátis/.test(txt) && /conta grátis e escolha/.test(txt) && cur === 'Português', txt);
+      check(`${locale}: entrada abre em português`, /Idiomas com Prof\. Brune/.test(txt) && /Crie sua conta grátis/.test(txt) && /conta grátis e escolha/.test(txt) && /Lições, revisão e prática todo dia, no seu ritmo\./.test(txt) && /ou entre com e-mail/i.test(txt) && cur === 'Português', txt);
       check(`${locale}: sem travessão no texto de cima`, !/—|--/.test(txt));
     }
     check(`${locale}: sem erros de página`, errors.length === 0, errors);
@@ -89,7 +89,7 @@ const PT_WORDS = /\b(Entrar|senha|conta|Continuar|Esqueceu|Crie|grátis|Idioma|C
     check(`${tag}: escolher English troca a página inteira`, /Log in to pick up/.test(en) && /Continue with Google/.test(en) && /Your email/.test(en) && /Forgot your password\?/.test(en) && /Create a free account/.test(en) && !PT_WORDS.test(en), en);
     check(`${tag}: escolha fica guardada`, await page.evaluate(() => localStorage.getItem('ui-language') === 'en'));
     await page.click('#gate-toggle-mode-btn');
-    check(`${tag}: modo cadastro em inglês`, await page.evaluate(() => document.getElementById('gate-submit-btn').textContent === 'Create account' && document.getElementById('gate-toggle-mode-btn').textContent === 'I already have an account'));
+    check(`${tag}: modo cadastro em inglês`, await page.evaluate(() => document.getElementById('gate-submit-btn').textContent === 'Create account' && document.getElementById('gate-toggle-mode-title').textContent === 'I already have an account' && document.getElementById('gate-signup-question').textContent === 'Go back and log in with your email and password.'));
     await page.click('#gate-toggle-mode-btn');
     await page.click('#gate-submit-btn'); // campos vazios: o navegador barra, nada quebra
     await page.fill('#gate-email', 'x@x.com'); await page.fill('#gate-password', 'errada1'); await page.click('#gate-submit-btn');
@@ -103,6 +103,11 @@ const PT_WORDS = /\b(Entrar|senha|conta|Continuar|Esqueceu|Crie|grátis|Idioma|C
     check(`${tag}: sem rolagem horizontal`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
     check(`${tag}: botão do idioma com 38px ou mais`, await page.evaluate(() => document.getElementById('site-lang-btn').getBoundingClientRect().height >= 38));
     if (width === 390) check(`${tag}: no celular o rótulo "Idioma do site" some, mas continua para leitor de tela`, await page.evaluate(() => document.querySelector('.site-lang-lbl').getBoundingClientRect().width <= 1 && /Idioma do site/.test(document.getElementById('site-lang-btn').textContent)));
+    const vis = await page.evaluate(() => ({ logo: (() => { const i = document.querySelector('#gate-login .er-logo img'); return !!i && i.naturalWidth > 0 && /logo-mark\.svg$/.test(i.src); })(),
+      icons: [...document.querySelectorAll('#gate-login .jp-campo-ico')].map(e => !!e.querySelector('.emo') || e.textContent.trim()).length,
+      bloco: getComputedStyle(document.getElementById('gate-toggle-mode-btn')).display, h: document.getElementById('gate-toggle-mode-btn').getBoundingClientRect().height,
+      pill: getComputedStyle(document.getElementById('gate-submit-btn')).borderRadius }));
+    check(`${tag}: logo da Prof. Brune no topo, campos com ícone, cadastro em bloco e Entrar em pílula`, vis.logo && vis.icons === 2 && vis.bloco === 'grid' && vis.h >= 44 && parseFloat(vis.pill) >= 25, vis);
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/entrada-pt-${tag}.png` });
     check(`${tag}: sem erros de página`, errors.length === 0, errors);
     await ctx.close();
@@ -139,7 +144,7 @@ const PT_WORDS = /\b(Entrar|senha|conta|Continuar|Esqueceu|Crie|grátis|Idioma|C
       check(`${tag}: escolha do curso em inglês`, /Which language do you want to learn\?/.test(c.t) && /I speak Portuguese/.test(c.t) && /I speak English/.test(c.t) && /flag menu/.test(c.t) && !PT_WORDS.test(c.t), c.t);
       check(`${tag}: quem fala inglês vê French e Chinese (beta), sem o curso em rascunho`, c.cards.map(x => x.name).join('|') === 'French|Chinese' && c.cards.every(x => x.beta === 'beta') && !c.cards.some(x => x.id === 'pt'), c.cards);
     } else {
-      check(`${tag}: escolha do curso em português`, /Qual idioma você quer aprender\?/.test(c.t) && /Eu falo português/.test(c.t) && /Dá para adicionar outros cursos depois/.test(c.t), c.t);
+      check(`${tag}: escolha do curso em português`, /Qual idioma você quer aprender\?/.test(c.t) && /Eu falo português/.test(c.t) && /Pode mudar depois/.test(c.t) && /Dá para adicionar outros cursos depois/.test(c.t) && /Français/.test(c.t) && /中文/.test(c.t), c.t);
       check(`${tag}: quem fala português vê Francês e Chinês, sem etiqueta`, c.cards.map(x => x.name).join('|') === 'Francês|Chinês' && c.cards.every(x => !x.beta), c.cards);
     }
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/entrada-curso-${locale}-${theme}.png` });
@@ -155,7 +160,7 @@ const PT_WORDS = /\b(Entrar|senha|conta|Continuar|Esqueceu|Crie|grátis|Idioma|C
     await page.waitForSelector('#gate-choose-experience', { state: 'visible' });
     const ex = await page.evaluate(() => ({ h: document.getElementById('gate-exp-title').textContent, t: document.getElementById('gate-choose-experience').innerText, gate: localStorage.getItem('ui-language-gate'), ui: localStorage.getItem('ui-language') }));
     check(`${tag}: resposta do "Eu falo..." segue para o app`, ex.gate === want && ex.ui === want, ex);
-    check(`${tag}: pergunta da experiência no idioma certo`, want === 'en' ? (ex.h === 'Do you already know some French?' && /I'm a beginner/.test(ex.t) && !PT_WORDS.test(ex.t)) : (ex.h === 'Você já sabe algo de Francês?' && /Sou iniciante/.test(ex.t) && !/—/.test(ex.t)), ex);
+    check(`${tag}: pergunta da experiência no idioma certo`, want === 'en' ? (ex.h === 'Do you already know some French?' && /I'm a beginner/.test(ex.t) && /Level Test/.test(ex.t) && !PT_WORDS.test(ex.t)) : (ex.h === 'Você já sabe algo de francês?' && /Sou iniciante/.test(ex.t) && /Você começa pela primeira lição/.test(ex.t) && /Teste de Nível/.test(ex.t) && !/—/.test(ex.t)), ex);
     check(`${tag}: sem erros de página`, errors.length === 0, errors);
     await ctx.close();
   }
