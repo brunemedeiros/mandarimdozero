@@ -246,3 +246,23 @@ Prévia A (como estava) x B (Pico) aprovada pela autora: "aprovo o B, pode usar 
   255/255, curso-progresso 12/12, i18n confirmação 16/16, i18n navegador 209/209, i18n persistência 39/39,
   notificações 36/36, k2f 34/34 e 32/32 (export Anki), deck-browser 208/208; i18n unit 2232/2459, as mesmas falhas
   antigas da `main` (o teste agora acha o bloco do seletor de idioma com qualquer recuo).
+
+## Janelas da Revisão no Design System do painel (fr e zh, 2026-10-17)
+
+Prévia A x B aprovada pela autora ("Aprovado, prefiro como no B sem a pauta"), com a correção pedida por ela: no zh
+escuro a lista do Painel ficava sem as linhas entre os cartões (a linha padrão sumia no fundo elevado do painel);
+as divisórias passaram para um tom mais forte (`--p-borda-campo`).
+
+- Configurar, Adicionar cartão, Painel (`shared/deck-browser.js`) e Exportar (`shared/my-flashcards.js`) ganharam a
+  classe `painel` na `.app-modal.deck-window`. O corpo do Adicionar e o editor do Painel ganharam `.p-editor`: o editor
+  de campos fica igual ao Criar cartão da Professora. A "ficha pautada" (linha vermelha e pauta no texto) saiu.
+- CSS no bloco "Janelas da Revisão no Design System do painel" de `fr/index.html` e `zh/index.html`: X discreto (44px
+  no celular), busca em pílula, lateral com barrinha da marca no item escolhido, cartão aberto levemente colorido,
+  Excluir em vermelho de contorno, barra de seleção compacta (Mover em contorno, Excluir vermelho, Limpar como link),
+  Exportar com "Baixar .json" como botão principal e "Copiar link" em contorno.
+- Só visual: nenhum comportamento mudou. Grátis x Premium: igual (selo Premium e limite de cartões grátis intactos).
+- Testes: `tests/janelas-revisao/test_playwright.js` novo (40/40: classes, sem pauta, contraste das divisórias, X de
+  44px no celular, sem rolagem em 390px); deck-browser 208/208, revisao-ajustes 48/48, i18n navegador 209/209,
+  k2f 34/34 e 32/32, anki-destino 38/38, fase-f 50/50, fase-g 68/68, fase-h 68/68, fase-i 48/48, painel-cartoes
+  264/264, plano-admin 26/26, painel-ds (contraste 131/131, navegador 194/194, alinhamento 4/4, ui 288/288),
+  configurações 25/25, css-equilibrio 2/2.
