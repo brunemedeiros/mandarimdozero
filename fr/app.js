@@ -1852,23 +1852,8 @@ function buildExerciseHint(ex, unit){
 // frase nova nenhuma, só reaproveitando conteúdo que já existe no curso, e
 // nunca usa vocabulário que o aluno ainda não viu.
 function findMatchingPhrase(word, unit){
-  const sourcesOf = u2 => [...(u2.phrases || []), ...((u2.dialogue && u2.dialogue.lines) || [])];
-  // Case-insensitive: uma frase que começa com a palavra ("Bonjour !") tem
-  // maiúscula inicial e não batia com o vocabulário ("bonjour") sem isso.
-  // Parêntese de partícula ("un kilo (de)") é anotação do vocabulário, não
-  // faz parte da forma falada -- sem tirar, "un kilo (de)" nunca casava com
-  // "Je prends un kilo de pommes." e o cartão ficava sem "Na frase".
-  const needle = word.f.replace(/\s*\([^()]*\)/g, '').trim().toLowerCase();
-
-  const inUnit = sourcesOf(unit).find(p => p.f.toLowerCase().includes(needle));
-  if (inUnit) return inUnit;
-
-  const unitIdx = UNITS.findIndex(u2 => u2.id === unit.id);
-  for (let i = 0; i < unitIdx; i++){
-    const match = sourcesOf(UNITS[i]).find(p => p.f.toLowerCase().includes(needle));
-    if (match) return match;
-  }
-  return null;
+  const m = findStudyExamplePhrase(UNITS, word, unit, APP_KEY);
+  return m ? m.phrase : null;
 }
 
 // Cartão de introdução de UMA palavra do bloco atual (ETAPA 1). Mesmo

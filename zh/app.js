@@ -1902,17 +1902,8 @@ function buildExerciseHint(ex, unit){
 // frase nova nenhuma, só reaproveitando conteúdo que já existe no curso, e
 // nunca usa vocabulário que o aluno ainda não viu.
 function findMatchingPhrase(word, unit){
-  const sourcesOf = u2 => [...(u2.phrases || []), ...((u2.dialogue && u2.dialogue.lines) || [])];
-
-  const inUnit = sourcesOf(unit).find(p => p.c.includes(word.c));
-  if (inUnit) return inUnit;
-
-  const unitIdx = UNITS.findIndex(u2 => u2.id === unit.id);
-  for (let i = 0; i < unitIdx; i++){
-    const match = sourcesOf(UNITS[i]).find(p => p.c.includes(word.c));
-    if (match) return match;
-  }
-  return null;
+  const m = findStudyExamplePhrase(UNITS, word, unit, APP_KEY);
+  return m ? m.phrase : null;
 }
 
 // Cartão de introdução de UMA palavra do bloco atual (ETAPA 1). Mesmo

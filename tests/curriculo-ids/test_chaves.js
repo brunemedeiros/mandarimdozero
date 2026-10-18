@@ -42,9 +42,11 @@ const strip = cards => JSON.stringify(cards.map(c => { const o = Object.assign({
 check(`mesmos ${withKeys.length} cartões, idênticos campo a campo (id, texto, tags, Note, CardInstance)`, withKeys.length === withoutKeys.length && strip(withKeys) === strip(withoutKeys));
 check('item sem chave não ganha studyKey (regra antiga)', withoutKeys.every(c => c.studyKey === undefined));
 check('id do cartão = u{k} (A), u{k}-b (B), u{k} (frase/fala)', withKeys.every(c => c.studyKey && (c.id === 'u' + c.studyKey || c.id === 'u' + c.studyKey + '-b')));
-// livro-razão gravado ANTES da Etapa 0 (com o código antigo): mesmo conjunto de ids
+// livro-razão gravado ANTES da Etapa 0 (com o código antigo): nenhum id publicado pode ter sumido.
+// (Cartão novo é permitido: o conteúdo pode crescer; quem garante que nada some é este teste e test_ids_publicados.js.)
 const ledger = JSON.parse(fs.readFileSync(path.join(ROOT, 'fr/published_ids.json'), 'utf8'));
-check('ids de hoje == ids do livro-razão (gravado com o código de antes das chaves)', JSON.stringify(withKeys.map(c => c.id).sort()) === JSON.stringify(ledger.cards.slice().sort()));
+const hojeIds = new Set(withKeys.map(c => c.id));
+check('todo id do livro-razão (código de antes das chaves) continua existindo hoje', ledger.cards.every(id => hojeIds.has(id)), ledger.cards.filter(id => !hojeIds.has(id)).slice(0, 5));
 
 // --- script: conferência e idempotência ---
 const run = (args) => { try { return { code: 0, out: execFileSync('node', [path.join(ROOT, 'fr/scripts/congelar_chaves.js'), ...args], { encoding: 'utf8' }) }; } catch (e) { return { code: e.status, out: String(e.stdout) + String(e.stderr) }; } };

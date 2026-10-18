@@ -164,7 +164,7 @@ function buildStudyWordCards(unit, vocab, idx, appKey){
 // ============================================================
 // Cartões "Na frase" (doc §11.1; decisão da autora, 06/10/2026).
 // "Na frase" = a frase de exemplo mostrada no cartão de cada palavra nova
-// (mesma busca de findMatchingPhrase em fr/zh app.js: frases + falas do
+// (mesma busca de findMatchingPhrase em fr/zh app.js, que usa findStudyExamplePhrase: frases + falas do
 // diálogo da unidade, depois das unidades anteriores). Toda frase de
 // exemplo vira UM cartão (1 por frase, nunca 1 por palavra: a palavra já
 // tem os cartões A/B próprios; o objetivo aqui é lembrar o exemplo real).
@@ -181,21 +181,44 @@ function buildStudyWordCards(unit, vocab, idx, appKey){
 function studyExamplePhraseKey(appKey){
   return LanguageRegistry.isCjk(appKey) ? 'c' : 'f';
 }
-// Espelho exato de findMatchingPhrase (fr/app.js e zh/app.js), mas sobre a
-// lista `units` recebida e devolvendo também a posição da frase.
+// Única busca de frase de exemplo da trilha: `findMatchingPhrase` (fr/app.js e zh/app.js) apenas chama esta função.
+// Devolve a frase com a posição dela (unidade, tipo p/d e índice).
 // fr: compara sem caixa e ignora "(de)" do vocabulário; zh: hanzi contido.
+// Item em par ("le vendeur / la vendeuse"): vale QUALQUER uma das duas formas, com ou sem artigo, como palavra inteira (para "un" de "un / une"
+// não casar dentro de "lundi"); vence a primeira frase, na ordem do conteúdo, que contenha uma das formas.
+function studyExampleNeedles(rawForm){
+  const clean = t => String(t || '').replace(/\s*\([^()]*\)/g, '').trim().toLowerCase();
+  const raw = String(rawForm || '');
+  if (!raw.includes(' / ')){
+    const text = clean(raw);
+    return text ? [{ text, whole: false }] : [];
+  }
+  // Cada forma vale com e sem o artigo da frente: profissão não leva artigo na frase ("Elle est vendeuse" casa "la vendeuse").
+  const noArticle = t => t.replace(/^(?:l['\u2019]|(?:le|la|les|un|une|des)\s+)/u, '');
+  const texts = [];
+  raw.split(' / ').map(clean).filter(Boolean).forEach(t => { [t, noArticle(t)].forEach(x => { if (x && !texts.includes(x)) texts.push(x); }); });
+  return texts.map(text => ({ text, whole: true }));
+}
+function studyExampleHasNeedle(text, needles){
+  const hay = String(text || '').toLowerCase();
+  return needles.some(n => {
+    if (!n.whole) return hay.includes(n.text);
+    const esc = n.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp('(?<![\\p{L}\\p{N}])' + esc + '(?![\\p{L}\\p{N}])', 'u').test(hay);
+  });
+}
 function findStudyExamplePhrase(units, word, unit, appKey){
   const key = studyExamplePhraseKey(appKey);
-  const needle = String((word && word[key]) || '').replace(/\s*\([^()]*\)/g, '').trim().toLowerCase();
-  if (!needle) return null;
+  const needles = studyExampleNeedles(word && word[key]);
+  if (!needles.length) return null;
   const search = u2 => {
     const phrases = u2.phrases || [];
     for (let i = 0; i < phrases.length; i++){
-      if (String(phrases[i][key] || '').toLowerCase().includes(needle)) return { phrase: phrases[i], unitId: u2.id, kind: 'p', idx: i };
+      if (studyExampleHasNeedle(phrases[i][key], needles)) return { phrase: phrases[i], unitId: u2.id, kind: 'p', idx: i };
     }
     const lines = (u2.dialogue && u2.dialogue.lines) || [];
     for (let i = 0; i < lines.length; i++){
-      if (String(lines[i][key] || '').toLowerCase().includes(needle)) return { phrase: lines[i], unitId: u2.id, kind: 'd', idx: i };
+      if (studyExampleHasNeedle(lines[i][key], needles)) return { phrase: lines[i], unitId: u2.id, kind: 'd', idx: i };
     }
     return null;
   };
