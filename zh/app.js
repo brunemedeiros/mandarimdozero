@@ -4182,7 +4182,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
         ${answered ? `<div class="cloze-pinyin pinyin">${escapeHTML(view.compareAnswerText)}</div>` : ''}
       </div>
       ${view.audioUrl ? customAudioBtnHTML(view.audioUrl) : ''}
-      ${answered ? `<div class="cloze-trans">${escapeHTML(view.translation.text)}</div>` : ''}
+      ${(answered || card.origin === 'teacher') && view.translation.text ? `<div class="cloze-trans">${escapeHTML(view.translation.text)}</div>` : ''}
     </div>
     ${!answered ? `
       <div class="cloze-type-wrap">
@@ -4190,7 +4190,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
         ${pinyinTonePickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `${toneHintHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${toneHintHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
   `;
 
   wireCustomAudioButtons(mountEl);
@@ -4217,11 +4217,8 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
     mountEl.querySelector('#cloze-review-verify-btn').addEventListener('click', verify);
   } else {
-    mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
-      // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
-      // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
-    });
+    // Errou = Errei automático; acerto escolhe Bom ou Fácil (typedResultActionsHTML).
+    wireTypedResultActions(mountEl, callbacks, localState, 0);
   }
 }
 
@@ -4273,7 +4270,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
         ${pinyinTonePickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `${toneHintHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${toneHintHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -4306,11 +4303,8 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
     mountEl.querySelector('#cloze-review-verify-btn').addEventListener('click', verify);
   } else {
-    mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
-      // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
-      // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
-    });
+    // Errou = Errei automático; acerto escolhe Bom ou Fácil (typedResultActionsHTML).
+    wireTypedResultActions(mountEl, callbacks, localState, 0);
   }
 }
 

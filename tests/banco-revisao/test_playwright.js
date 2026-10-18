@@ -514,20 +514,23 @@ const BANK_STUB = (who, appKey) => {
             { id: 'q', lang: 'fr', role: 'answer', content: { value: 'Je suis allée au marché hier.' }, audio: null, image: null, pinyinFieldId: null }] };
           const card = buildEngineCardsFromRow(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' })[0];
           const res = {};
-          const run = async (typed) => {
+          const run = async (typed, pick) => {
             let got = null; const ls = { kind: 'type_answer', typedAnswer: '', answered: false, wasCorrect: null };
             renderTypeAnswerCard(mount, card, ls, { onAnswered: (c, g) => { got = [c, g]; } });
             res.obsBefore = mount.querySelector('.review-observation') ? 1 : 0;
             const input = mount.querySelector('#cloze-review-input'); input.value = typed;
             mount.querySelector('#cloze-review-verify-btn').click();
             res.almostLabel = !!mount.querySelector('.review-almost'); res.obsAfter = !!mount.querySelector('.review-observation');
-            mount.querySelector('#cloze-continue-btn').click();
-            return { grade: got && got[1], almost: res.almostLabel };
+            const msg = (mount.querySelector('.review-almost') || {}).textContent || '';
+            const btns = mount.querySelectorAll('.typed-grade .grade-btn').length;
+            if (btns) mount.querySelector('.typed-grade [data-grade="' + (pick || 2) + '"]').click(); else mount.querySelector('#cloze-continue-btn').click();
+            return { grade: got && got[1], almost: res.almostLabel, msg, btns };
           };
-          const out = { exact: await run('Je suis allée au marché hier.'), accent: await run('Je suis allee au marché hier'), wrong: await run('Tu es parti.'), obsBefore: res.obsBefore, obsAfter: res.obsAfter };
+          const out = { exact: await run('Je suis allée au marché hier.'), easy: await run('Je suis allée au marché hier.', 3), accent: await run('Je suis allee au marché hier'), letter: await run('Je suis allée au marche hier'.replace('marche', 'marchee')), wrong: await run('Tu es parti.'), obsBefore: res.obsBefore, obsAfter: res.obsAfter };
           mount.remove(); return out;
         });
-        L('digitar certo = Bom (2), sem "quase lá"', ta.exact.grade === 2 && ta.exact.almost === false, ta);
+        L('digitar certo = escolhe Bom ou Fácil (2 botões com intervalo), sem "quase lá"', ta.exact.grade === 2 && ta.exact.almost === false && ta.exact.btns === 2 && ta.easy.grade === 3, ta);
+        L('"quase" explica o motivo: acento x letra', ta.accent.msg.includes('acentos') && ta.letter.msg.includes('letras') && ta.accent.btns === 0, ta);
         L('digitar sem acento = quase lá = Difícil (1)', ta.accent.grade === 1 && ta.accent.almost === true, ta);
         L('digitar errado = Errei (0)', ta.wrong.grade === 0, ta);
         L('digitar: Observação só depois de responder', ta.obsBefore === 0 && ta.obsAfter === true, ta);

@@ -759,6 +759,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'review.deck.myDecks': 'Meus Decks',
   'review.observation': 'Observação',
   'review.almost': 'Quase lá',
+  'review.almost.accent': 'Quase lá: confira os acentos',
+  'review.almost.letter': 'Quase lá: confira as letras',
   'review.deck.teacherCards': 'Cartões da professora',
   'review.deck.studyPath': 'Trilha de Estudo',
   'review.deck.allDecks': 'Todos os Decks',

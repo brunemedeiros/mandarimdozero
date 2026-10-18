@@ -175,11 +175,11 @@
 .rb-ctrl{ display:flex; gap:10px; flex-wrap:wrap; }
 .rb-big{ font:inherit; font-weight:800; font-size:16px; border-radius:999px; padding:12px 22px; cursor:pointer; border:1px solid var(--paper-line); background:var(--paper-warm); color:var(--ink); min-height:44px; }
 .rb-big.is-blue{ background:var(--rb-box); border-color:var(--rb-box); color:var(--rb-on-box); }
-.rb-big.is-ok{ background:var(--jade); border-color:var(--jade); color:var(--on-vivid); }
+.rb-big.is-ok{ background:var(--grade-easy-bg,var(--jade)); border-color:var(--grade-easy-bg,var(--jade)); color:var(--on-vivid); }
 .rb-big.is-help{ background:var(--grade-hard-bg); border-color:var(--grade-hard-bg); color:var(--on-vivid); }
 .rb-big.is-good{ background:var(--grade-good-bg); border-color:var(--grade-good-bg); color:var(--on-vivid); }
 .rb-big small{ display:block; font-weight:600; font-size:11px; opacity:.85; }
-.rb-big.is-bad{ background:var(--rb-bad); border-color:var(--rb-bad); color:var(--on-vivid); }
+.rb-big.is-bad{ background:var(--grade-again-bg,var(--error-red,var(--rb-bad))); border-color:var(--grade-again-bg,var(--error-red,var(--rb-bad))); color:var(--on-vivid); }
 .rb-keys{ font-size:12.5px; color:var(--ink-soft); }
 .rb-reasons{ display:flex; flex-direction:column; gap:10px; }
 .rb-reasons .chips{ display:flex; flex-wrap:wrap; gap:8px; }

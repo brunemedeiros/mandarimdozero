@@ -1,7 +1,7 @@
 # Banco de Revisão: respostas e proposta (v2, 2026-10-16)
 
 Continua `docs/banco-revisao-auditoria.md` (v1, como o Banco funciona hoje). Esta versão responde às perguntas da autora, registra as decisões
-e propõe as mudanças. **Nada daqui foi implementado no site ainda**: cada proposta espera aprovação (seção 8).
+e propõe as mudanças. **Estado em 2026-10-18:** propostas A e C aprovadas e implementadas na branch `claude/trusting-edison-83xo14` (seção 9); B aprovada em tese, falta o preview e a decisão final dos campos; D ainda não.
 
 ## 1. Decisões já tomadas (autora, 2026-10-16)
 1. **Um único conjunto de regras** nos três lugares onde o aluno estuda ou a professora revisa (Modo aula, Aluno > Revisão no site, área do aluno do artifact). A única diferença aceita: **só a Revisão do site gera XP**.
@@ -142,3 +142,19 @@ Proposta: estudar fora do vencimento (Última aula, Erros) conta como revisão n
 4. Visões do aluno (proposta D).
 5. Tipos novos e migração dos itens (proposta B), junto com a rotina da madrugada e o Manual.
 6. Fontes novas (Notion, PDF) e o artifact, quando você decidir.
+
+## 9. Registro da implementação (2026-10-18, branch `claude/trusting-edison-83xo14`)
+
+Decisões da autora nesta rodada: **Modo aula também usa o FSRS e alimenta o mesmo banco** (os dois modos diferem depois); proposta A **aprovada**; proposta B **aprovada em tese, quer ver um preview**; Notion e PDF ficam para depois.
+
+**Feito (Staging e código; produção NÃO):**
+- Migration `112_review_bank_shared_schedule.sql`: `review_bank_items.fsrs` e `last_source`; `review_bank_reviews.grade` (0 a 3), `typed`, `via` ('aula' ou 'casa'); funções `log_my_bank_review` (estudo em casa), `get_my_pending_bank_grades` (nota exata da aula) e `get_my_pending_bank_reviews` com filtro `via = 'aula'`. Teste local `tests/banco-revisao-compartilhado/run.sh` (26/26); aplicada no Staging. Produção só com autorização.
+- **Modo aula com 4 botões** (Errei, Difícil, Bom, Fácil) e intervalo de cada um, mesmo FSRS do site (`rbApplyGrade`, `rbGradePreviews` em `shared/review-bank-model.js`). Item antigo (só nível) é convertido uma vez ao primeiro uso (`rbItemFsrsCard`). `level` continua sendo atualizado como reserva. Se a 112 não estiver aplicada, a aula grava no formato antigo (nunca trava).
+- **Estudo em casa alimenta o Banco** (`logBankHomeStudy` em `shared/review-bank-student.js`, chamado por `gradeCurrentCard`): fila local, envio por `log_my_bank_review`. Conta individual espelha o FSRS no item; aluno de Turma só gera a linha de estatística. A nota exata da aula chega ao aluno (Fácil deixa de virar Bom).
+- **Récap**: descanso de 3 dias para quem foi revisto (em casa ou em aula), exceto o que errou. Motor da rotina regerado (`engine.generated.mjs`); **a Edge Function `review-bank-agent` NÃO foi republicada** (precisa de autorização).
+- **Estatísticas** mostram respostas "Na aula" e "Em casa".
+- **Digitar (Completar e Digite a resposta, fr e zh):** erro = Errei e "quase" = Difícil automáticos; acerto = botões Bom e Fácil com intervalo, nas cores da Revisão. "Quase" agora diz o motivo (acentos ou letras). Cartão Completar da professora mostra o **sentido antes de responder**.
+
+**Testes:** `tests/banco-revisao/*` (todas as suítes, Playwright 534/534), `tests/banco-revisao-turmas` (096 49/49, Mural 80/80), `tests/banco-revisao-compartilhado` (112 26/26), xp, ida e volta do progresso.
+
+**Falta:** preview e fechamento da proposta B; proposta D; teclado de acentos do português; artifact (depois do site).

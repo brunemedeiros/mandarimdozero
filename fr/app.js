@@ -4044,7 +4044,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
       ${clozeImageUrl ? `<img src="${clozeImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="cloze-sentence">${sentenceHTML}</div>
       ${view.audioUrl ? customAudioBtnHTML(view.audioUrl) : ''}
-      ${answered ? `<div class="cloze-trans">${view.translation.text}</div>` : ''}
+      ${(answered || card.origin === 'teacher') && view.translation.text ? `<div class="cloze-trans">${view.translation.text}</div>` : ''}
     </div>
     ${!answered ? `
       <div class="cloze-type-wrap">
@@ -4052,7 +4052,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
         ${frAccentPickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
   `;
 
   wireCustomAudioButtons(mountEl);
@@ -4072,16 +4072,14 @@ function renderClozeCard(mountEl, card, localState, callbacks){
       const verdict = typedAnswerVerdict(inputEl.value, acceptedForms(view.compareAnswerText));
       localState.wasCorrect = verdict !== 'errou';
       localState.almost = verdict === 'quase';
+      localState.almostKind = localState.almost ? typedAlmostKind(inputEl.value, acceptedForms(view.compareAnswerText)) : null;
       renderClozeCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
     mountEl.querySelector('#cloze-review-verify-btn').addEventListener('click', verify);
   } else {
-    mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
-      // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
-      // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, typedAnswerGrade(localState.almost ? 'quase' : localState.wasCorrect ? 'ok' : 'errou'));
-    });
+    // Errei e Difícil (quase) são automáticos; acerto em cheio escolhe Bom ou Fácil (typedResultActionsHTML).
+    wireTypedResultActions(mountEl, callbacks, localState, typedAnswerGrade(localState.almost ? 'quase' : 'errou'));
   }
 }
 
@@ -4132,7 +4130,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
         ${frAccentPickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -4158,16 +4156,14 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
       const verdict = typedAnswerVerdict(inputEl.value, acceptedForms(view.compareAnswerText));
       localState.wasCorrect = verdict !== 'errou';
       localState.almost = verdict === 'quase';
+      localState.almostKind = localState.almost ? typedAlmostKind(inputEl.value, acceptedForms(view.compareAnswerText)) : null;
       renderTypeAnswerCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
     mountEl.querySelector('#cloze-review-verify-btn').addEventListener('click', verify);
   } else {
-    mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
-      // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
-      // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, typedAnswerGrade(localState.almost ? 'quase' : localState.wasCorrect ? 'ok' : 'errou'));
-    });
+    // Errei e Difícil (quase) são automáticos; acerto em cheio escolhe Bom ou Fácil (typedResultActionsHTML).
+    wireTypedResultActions(mountEl, callbacks, localState, typedAnswerGrade(localState.almost ? 'quase' : 'errou'));
   }
 }
 
