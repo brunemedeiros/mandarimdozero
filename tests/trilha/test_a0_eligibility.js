@@ -31,11 +31,14 @@ for (const lang of ['fr', 'zh']){
 
 // Espelho do servidor (notification-cron): mesma regra.
 const src = read('supabase/functions/notification-cron/index.ts');
-const m = /function isCardLessonCompletedServer[\s\S]*?\n}\n/.exec(src)[0]
-  .replace(/: any/g, '').replace(/: string/g, '').replace(/: boolean/g, '');
-const fn = new Function('LESSON_VOCAB_MAP', m + '; return isCardLessonCompletedServer;')({ frances: { '1': [[0, 1], [2, 3]] } });
-check('servidor: concluída com lessonIdx=0 libera cartão de lição', fn({ unitId: 1, vocabIdx: 3 }, { 1: { started: true, completed: true, lessonIdx: 0 } }, 'frances') === true);
-check('servidor: em andamento só libera lições feitas', fn({ unitId: 1, vocabIdx: 3 }, { 1: { started: true, completed: false, lessonIdx: 1 } }, 'frances') === false
-  && fn({ unitId: 1, vocabIdx: 0 }, { 1: { started: true, completed: false, lessonIdx: 1 } }, 'frances') === true);
-check('servidor: não iniciada não libera', fn({ unitId: 1, vocabIdx: 0 }, { 1: { started: false, completed: false, lessonIdx: 0 } }, 'frances') === false);
-summary();
+// Etapa 0b: unidade e lição vêm do mapa gerado (STUDY_ITEM_GATE); a função recebe a entrada do mapa ({unitId, lessonIdx}).
+const m = require('module').stripTypeScriptTypes(/function isStudyWordReleasedServer[\s\S]*?\n}\n/.exec(src)[0]);
+const srv = new Function(m + '; return isStudyWordReleasedServer;')();
+// palavra na lição 1 (índice) e na lição 0 da unidade '1'
+const fn = (lessonIdx, prog, card) => srv(card || {}, { unitId: '1', lessonIdx }, { 1: prog });
+check('servidor: concluída com lessonIdx=0 libera cartão de lição', fn(1, { started: true, completed: true, lessonIdx: 0 }) === true);
+check('servidor: em andamento só libera lições feitas', fn(1, { started: true, completed: false, lessonIdx: 1 }) === false
+  && fn(0, { started: true, completed: false, lessonIdx: 1 }) === true);
+check('servidor: não iniciada não libera', fn(0, { started: false, completed: false, lessonIdx: 0 }) === false);
+check('servidor: released passa sempre (Etapa 0)', fn(1, { started: false, completed: false, lessonIdx: 0 }, { released: true }) === true);
+summary('trilha a0');

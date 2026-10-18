@@ -78,7 +78,7 @@ const check = (n, c, x) => { if (c) { pass++; console.log('ok  ', n); } else { f
     if (await clickIf('#step-next-btn:visible:enabled')) continue;
     if (await clickIf('#unit-detail-wrap .exercise-option:visible:enabled')) continue;
     if (await clickIf('#exercise-dontknow-btn:visible:enabled')) continue;
-    const input = page.locator('#unit-detail-wrap input[type="text"]:visible');
+    const input = page.locator('#unit-detail-wrap input[type="text"]:visible:enabled');
     if (await input.count()) { await input.first().fill('bonjour'); await input.first().press('Enter'); await page.waitForTimeout(200); continue; }
     await clickIf('#unit-detail-wrap button.btn-primary:visible:enabled');
   }

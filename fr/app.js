@@ -721,6 +721,8 @@ function applySerializedState(data){
       const c = STATE.cards.find(x => x.id === studyWordCardId(u, vi));
       return !!(c && c.released);
     });
+    // Etapa 0b (04, 2.10): unidade nova inserida antes de onde o aluno já está nasce aberta, mas não concluída.
+    openUnitsBeforeOpenOnes(trailGroups(), STATE.unitProgress);
   }
   // Marca `released` em todo cartão já liberado pelo portão de lição (2.3 item 8): no 1º carregamento depois da
   // Etapa 0, todos os cartões que já estavam na Revisão ganham a marca e continuam lá mesmo se a palavra mudar de unidade.

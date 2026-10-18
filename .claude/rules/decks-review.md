@@ -27,6 +27,7 @@ Fonte de verdade: `docs/arquitetura-total-decks-tags-painel.md` (30 invariantes,
 - Id do cartão da trilha = chave estável do item (`studyItemCardId`: fr `u{k}`; sem `k`, zh, regra antiga por posição); nunca
   montar `u${unit.id}-v${idx}` na mão. Fusão/exclusão: `fr/curriculum-changes.js`; arquivo `STATE.retiredStudyCards`; marca
   `released` no portão. Testes: `tests/curriculo-ids` (livro-razão `fr/published_ids.json` bloqueia id perdido).
+  Course Deck de unidade que saiu do conteúdo: fica no banco (vazio) e escondido na tabela (`deckBrowserUnitVisible`).
 - Cartões da professora (origin 'teacher') ficam FORA da Revisão geral (pool, tabela de Decks, Painel, opção de origem):
   só na aba Aluno > Revisão (`startClassReviewSession`, `STATE.reviewSessionClassReview`, rota `#/review/class`). 2026-10-14.
 - Tela da Revisão: tabela estilo Anki (`shared/deck-browser.js`), Painel em janela, rotas `#/review/decks/...`.
