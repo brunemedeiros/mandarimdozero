@@ -266,3 +266,27 @@ as divisórias passaram para um tom mais forte (`--p-borda-campo`).
   k2f 34/34 e 32/32, anki-destino 38/38, fase-f 50/50, fase-g 68/68, fase-h 68/68, fase-i 48/48, painel-cartoes
   264/264, plano-admin 26/26, painel-ds (contraste 131/131, navegador 194/194, alinhamento 4/4, ui 288/288),
   configurações 25/25, css-equilibrio 2/2.
+
+## Achados da varredura de CSS da sessão do PR #351 (avaliados em 2026-10-18)
+
+- **A) `--ink-faint` nunca existiu.** No Reportar problema, o "(opcional)" já saía cinza (herda do rótulo), mas a nota de
+  privacidade saía na cor do texto normal. Decisão: usar `--ink-soft` (o cinza de texto secundário que já existe nos 3
+  blocos de tema, com contraste nos dois), em vez de criar um token novo. As regras da matriz antiga de Notificações
+  (`.notif-pref-matrix*` e a setinha `summary::before`) saíram: a tela virou tabela no painel em 2026-10-17 e essas
+  classes não são mais geradas. Teste novo `tests/css-equilibrio/test_variaveis.js`: falha se o index usar `var(--x)`
+  sem reserva e sem definição em lugar nenhum (pegava o `--ink-faint` na `main`).
+- **B) Classes sem regra:** só `conj-review-empty` ganhou estilo (o "—" de forma em branco na revisão de erros da
+  Conjugação fica no mesmo cinza da seta e do pronome). As outras não precisam: `fb-title` herda do cabeçalho;
+  `feedback-header` é falso positivo (a classe real é `challenge-`/`listen-translate-`/`accent-feedback-header`, todas
+  com estilo); `story-checkpoint-text`, `story-beat`, `mem-legend-item` e `profile-track-showcase` só embrulham peças
+  que já têm estilo (o pai já é flex com espaçamento); `tone-hint` usa `wrong-feedback-header`; `mc-mark` herda a cor
+  da alternativa certa/errada.
+- **C)** `.conj-x`/`.conj-gap`/`.typed-attempt` ficam com o PR #351 (aberto), sem duplicar aqui.
+- Achados extras, corrigidos com a autorização da autora (2026-10-18):
+  - O passo Diálogo e o "Você entendeu?" das lições (`renderDialogueStep`, `renderDialogueCheckStep`,
+    `renderDialogueCheck` em `fr/app.js` e `zh/app.js`) tinham uns 25 textos fixos em português ("✅ Isso mesmo!",
+    "Ouvir tudo", "Áudio automático", "Próxima pergunta"...), que apareciam no site em inglês. Viraram as chaves `dlg.*` e
+    `dlgCheck.*` (o português ficou igual). O conteúdo do curso (título, cena, falas, perguntas) é da camada do curso e
+    não entrou. Teste novo `tests/dialogo-idioma/test_playwright.js` (20/20; com o código antigo dá 6 falhas no inglês).
+  - Nota de privacidade do Reportar problema sem "--": "A captura, se anexada, fica visível só para a equipe. Nada é
+    enviado automaticamente." (inglês igual, com ponto). Registrada como mudança aprovada nos testes de i18n.
