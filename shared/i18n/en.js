@@ -3062,8 +3062,7 @@ window.I18N_CATALOG['en'] = {
   'rb.generateReady': 'Create cards', // ALTA
   'rb.generated': '{n} cards created.', // ALTA
   'rb.generatedPartial': '{ok} created, {fail} failed.', // ALTA
-  'rb.gotIt': 'Got it', // ALTA
-  'rb.keys': 'Space shows · right arrow got it · H with help · left arrow missed', // ALTA
+  'rb.keys': 'Space shows · 1 Again · 2 Hard · 3 Good (right arrow) · 4 Easy', // ALTA
   'rb.classEmpty': 'No students in the class yet', // ALTA
   'rb.classMembers': '{n} in the class: {names}', // ALTA
   'rb.classPick': 'Class', // ALTA
@@ -3083,7 +3082,6 @@ window.I18N_CATALOG['en'] = {
   'rb.manualEdit': 'Edit manual', // ALTA
   'rb.manualEmpty': 'There is no manual yet. Click "Edit manual" to write your note-taking rules.', // ALTA
   'rb.manualHint': 'Write in simple markdown: headings with #, lists with -, **bold** and tables with |.', // ALTA
-  'rb.missed': 'Missed it', // ALTA
   'rb.missing': 'Missing: {f}.', // ALTA
   'rb.modesAria': 'What to review', // ALTA
   'rb.more': 'Show more', // ALTA
@@ -3164,7 +3162,6 @@ window.I18N_CATALOG['en'] = {
   'rb.unlinkedDone': 'Student unlinked. Cards already delivered stay with them.', // ALTA
   'rb.updatedAt': 'Updated {d}', // ALTA
   'rb.whyMissed': 'Why was it missed?', // ALTA
-  'rb.withHelp': 'With help', // ALTA
   'rb.imp.title': 'Import data from the old Review Bank', // ALTA
   'rb.imp.hint': 'Choose the .json file exported from the old Review Bank. Nothing is delivered to anyone: items come in as they were, and cards are only created after you link the student and click Create cards.', // ALTA
   'rb.imp.note': 'Importing again is safe: what already exists here is not overwritten or duplicated.', // ALTA

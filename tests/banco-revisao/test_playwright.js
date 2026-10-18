@@ -321,8 +321,8 @@ const BANK_STUB = (who, appKey) => {
       await shot('modo-aula');
       await page.keyboard.press('Space');
       await page.waitForSelector('#rb-class .rb-sa');
-      L('espaço mostra a resposta com os 3 botões', await ev(() => document.querySelectorAll('#rb-class .rb-ctrl .rb-big').length === 3));
-      await page.click('#rb-class [data-o="errou"]');
+      L('espaço mostra a resposta com os 4 botões (Errei, Difícil, Bom, Fácil) e o intervalo de cada um', await ev(() => { const b = [...document.querySelectorAll('#rb-class .rb-ctrl .rb-big')]; return b.length === 4 && b.every(x => x.querySelector('small') && x.querySelector('small').textContent.trim()) && b.map(x => x.dataset.g).join() === '0,1,2,3'; }));
+      await page.click('#rb-class [data-g="0"]');
       await page.waitForSelector('#rb-class .rb-reasons');
       L('errou pede o motivo (os motivos do tipo do item + sem motivo)', await ev(() => (() => { const n = document.querySelectorAll('#rb-class .rb-reasons .chips button').length; const erro = !!document.querySelector('#rb-class .rb-sq.is-wrong'); return erro ? n === 3 : n === 5; })() && !!document.querySelector('#rb-class .chips .is-none')));
       await shot('modo-aula-motivo');
@@ -331,7 +331,9 @@ const BANK_STUB = (who, appKey) => {
       await page.waitForFunction((rs) => window.__DB.review_bank_reviews.some(r => r.reason === rs && r.mode === 'recap' && r.id.startsWith('u')), chosenReason);
       const rv = await ev(() => window.__DB.review_bank_reviews.filter(r => r.id.startsWith('u')));
       L('resposta gravada com motivo, modo e data; aluno vinculado recebe o aluno_id', rv.length === 1 && rv[0].outcome === 'errou' && rv[0].student_id === 'S1' && rv[0].mode === 'recap' && /^\d{4}-\d\d-\d\d$/.test(rv[0].review_date), rv);
+      L('Errei grava a nota 0 e a origem "aula"', rv[0].grade === 0 && rv[0].via === 'aula', rv[0]);
       const firstId = rv[0].item_id;
+      L('item guarda o estado FSRS e a origem da última resposta', await ev((id) => { const i = window.__DB.review_bank_items.find(x => x.id === id); return !!i.fsrs && i.fsrs.state === 'learning' && i.last_source === 'aula'; }, firstId));
       L('item errado volta ao nível 0 e amanhã', await ev((id) => { const i = window.__DB.review_bank_items.find(x => x.id === id); return i.level === 0 && i.last_result === 'errou' && i.due_date > i.last_review_date; }, firstId));
       // se sobrou slide, responde como acertou; senão já terminou
       if (await ev(() => !!document.querySelector('#rb-class .rb-end'))) L('fim da rodada com placar', true);

@@ -148,6 +148,52 @@ function rbNextSchedule(level, outcome, today){
   return { level: 0, due_date: rbAddDays(today, RB_INTERVALS[0]) };
 }
 
+// ---------- Agendamento único (FSRS): o Modo aula e o estudo em casa usam o MESMO estado de memória ----------
+// Nota 0..3 (Errei, Difícil, Bom, Fácil) = escala da Revisão do site (applyMemoryGrade em shared/fsrs.js).
+function rbGradeOutcome(grade){ return grade === 0 ? 'errou' : (grade === 1 ? 'ajuda' : 'acertou'); }
+function rbOutcomeGrade(outcome){ return outcome === 'errou' ? 0 : (outcome === 'ajuda' ? 1 : 2); }
+
+function rbLocalDateStr(ms){
+  const d = new Date(ms);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// Estado FSRS do item como "cartão" do motor. Item antigo (só nível da escada, sem fsrs) é convertido uma vez:
+// nunca revisado = novo; revisado = em revisão, com estabilidade do degrau anterior da escada.
+function rbItemFsrsCard(item){
+  const f = item && item.fsrs;
+  if (f && typeof f === 'object' && f.state && f.state !== 'new') return Object.assign({}, f);
+  const lv = Math.max(0, Math.min(9, Number(item && item.level) || 0));
+  if (item && item.last_review_date && (lv > 0 || item.last_result)){
+    const last = Date.parse(item.last_review_date + 'T12:00:00');
+    if (item.last_result === 'errou' || lv === 0) return { state: 'relearning', stability: 1, difficulty: 7, lastReview: last, due: last + 86400000, reps: 1, lapses: 1, fsrsReps: 1, fsrsLapses: 1, interval: 1 };
+    const st = RB_INTERVALS[Math.max(0, lv - 1)];
+    return { state: 'review', stability: st, difficulty: 5, lastReview: last, due: last + RB_INTERVALS[lv - 1] * 86400000, reps: lv, lapses: 0, fsrsReps: lv, fsrsLapses: 0, interval: st };
+  }
+  return { state: 'new', stability: 0, difficulty: 0, reps: 0, lapses: 0 };
+}
+
+// Aplica a nota e devolve o que gravar no item: { fsrs, due_date, level, outcome }. Usa applyMemoryGrade/previewNext
+// do shared/fsrs.js (carregado antes na página; nos testes, passe `engine`).
+function rbApplyGrade(item, grade, nowMs, engine){
+  const E = engine || { applyMemoryGrade: (typeof applyMemoryGrade === 'function' ? applyMemoryGrade : null) };
+  const now = nowMs || Date.now(), outcome = rbGradeOutcome(grade);
+  const card = rbItemFsrsCard(item);
+  E.applyMemoryGrade(card, grade, now);
+  const lv = Math.max(0, Math.min(9, Number(item && item.level) || 0));
+  const level = outcome === 'acertou' ? Math.min(9, lv + 1) : (outcome === 'ajuda' ? lv : 0);
+  const fsrs = {};
+  ['stability', 'difficulty', 'state', 'lastReview', 'due', 'reps', 'lapses', 'interval', 'fsrsReps', 'fsrsLapses'].forEach(k => { if (card[k] !== undefined) fsrs[k] = card[k]; });
+  return { fsrs, due_date: rbLocalDateStr(card.due), level, outcome };
+}
+
+// Intervalo (em dias) que cada botão daria, para o rótulo "Bom · 4 dias".
+function rbGradePreviews(item, nowMs, engine){
+  const E = engine || { previewNextIntervalDays: (typeof previewNextIntervalDays === 'function' ? previewNextIntervalDays : null) };
+  const card = rbItemFsrsCard(item), now = nowMs || Date.now();
+  return [0, 1, 2, 3].map(g => E.previewNextIntervalDays(card, g, now));
+}
+
 // Récap: até `size` itens aprovados vencidos até `lessonDate` (ou nunca revistos). Errados por último resultado primeiro,
 // depois os mais atrasados, depois os de nível mais baixo e os mais recentes.
 function rbSelectRecap(items, lessonDate, size){
