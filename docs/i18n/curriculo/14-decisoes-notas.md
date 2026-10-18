@@ -40,7 +40,7 @@ Cada item vale como regra de conteúdo/interface, até a dona mudar.
 - **N33 (*à vélo*):** a forma correta é **à vélo**; *en vélo* é comum na fala, mas considerado incorreto, porque *en* se reserva a veículos fechados ou nos
   quais a pessoa se instala no interior. Nota de realidade; fonte: a dona (confiança **alta**).
 - **Nota da M1.3 (liaison):** corrigir para o **x** de *deux* (o x faz o som [z] na ligação: *deux‿ans*), não "s".
-- N02: meia frase sobre *tu* antes da M1.2 (a confirmar na rodada 3).
+- **N02 fica como está** (decisão da dona, 2026-10-18): o aluno precisa ver *s'il vous plaît* e *s'il te plaît* já na M1.1, então a menção ao *tu* no parêntese é adequada.
 
 ## Pendente (rodada 3)
 - Notas do A2 (quantidade, tipos; gíria familiar só do A2 em diante), quem escreve e revisa os V/F de cada nota nova, e como as notas entram no mapa final.

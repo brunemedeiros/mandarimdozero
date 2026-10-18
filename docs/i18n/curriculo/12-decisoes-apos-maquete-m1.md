@@ -89,4 +89,6 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
     para o aluno poder conferir. Hoje a tela não mostra o masculino para comparar. [padrão]
 
 ## Nota N02
-26. Pendente da dona: escolha entre (a) explicar o *tu* na própria nota e (c) tirar o parêntese. Detalhe em 14-decisoes-notas.md.
+26. **N02 fica COMO ESTÁ** (decisão da dona): o aluno precisa conhecer *s'il vous plaît* e também *s'il te plaît*, então a menção ao *tu* no parêntese faz sentido na M1.1.
+    Observação de conteúdo: hoje o vocabulário da A1-1 só tem *s'il vous plaît*; *s'il te plaît* aparece só na nota. Pergunta aberta para a dona: pôr *s'il vous plaît / s'il te plaît*
+    como cartão em par (formal / informal) no vocabulário da M1.1?
