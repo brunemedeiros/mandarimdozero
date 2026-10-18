@@ -107,3 +107,17 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
     (a proposta de juntar foi retirada).
 31. **Nome:** a dona pediu trocar "Som" por "Pronúncia" (a faixa/etiqueta). "Pronúncia **do módulo**" foi um acréscimo da maquete e não foi pedido; a lição passa a se chamar só
     **"Pronúncia"** (com subtítulo do assunto, ex.: "Pronúncia: pergunta e afirmação").
+
+---
+
+# Quarta rodada (2026-10-18)
+
+32. **Entonação de pergunta e afirmação NÃO é uma lição de pronúncia** (uma frase só é cedo demais): vira uma **nota de pronúncia** na M1.1, ao ensinar *Ça va ?* (pergunta, sobe) e
+    *Ça va.* (resposta, desce), com os dois áudios. Some a lição avulsa "ritmo e entonação" do módulo. Regra geral: **pronúncia vira lição só quando há conteúdo suficiente**;
+    com uma ou duas frases, é nota. A pronúncia do M1 fica: nota em M1.1 (*Ça va ?* / *Ça va.*), nota em M1.3 (ligação *deux‿ans*) e a prática da M1.7 (masculino e feminino).
+33. **Nova categoria de nota: "pronúncia"** (além de explicação, realidade e cultural), com rótulo/ícone próprio, na mesma caixa roxinha.
+34. **Caixa roxinha para TODAS as notas** (confirmado); o tipo aparece no rótulo/ícone, não na cor. [a fazer na maquete v4]
+35. **Nota M1.2 "Moi, je m'appelle Ana. Et toi ?" passa a incluir "Et vous ?"** (regra do projeto: formal e informal sempre juntos) e a introduzir os **pronomes tônicos**:
+    *moi, toi, vous* são pronomes tônicos (como *mim* e *ti* em "para mim, para ti"); usamos o tônico **no começo da frase, para dar ênfase, ou depois de preposição ou conjunção**
+    (aqui, depois de "Et"). Assim a nota "Et lui ? Et elle ?" da M1.4 só amplia a lista (*lui, elle*) e contrasta com os pronomes sujeito *il / elle*. [a fazer]
+36. **Lição "Pronúncia do módulo: ritmo e entonação" sai** (ver 32); fica só a prática "Pronúncia: masculino ou feminino?" na M1.7. [a fazer]

@@ -13,3 +13,5 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
 6. **Pronúncia**: a prática vem logo depois da lição que introduz o fenômeno, nunca como atalho que tire o aluno da lição; sempre que o texto disser que dois sons são iguais ou
    diferentes, mostrar os dois lados com áudio (`12`).
 7. **Sem IPA** para o aluno (pt); respelling por idioma do site quando preciso.
+8. **Pronúncia: lição só com conteúdo suficiente; com uma ou duas frases é nota de pronúncia** (ex.: *Ça va ?* x *Ça va.*), na mesma caixa das demais notas. Tipos de nota: explicação, realidade, cultural e pronúncia. (2026-10-18)
+9. **Pronomes tônicos** entram cedo, junto do formal e do informal (*moi, toi, vous* na M1.2) e são ampliados depois (*lui, elle*, M1.4; com preposições mais adiante). (2026-10-18)
