@@ -33,3 +33,5 @@ paths:
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
 - Ícones: emoji escrito no texto vira desenho do Fluent por `shared/emoji-icons.js`. Emoji novo precisa entrar no MAP de lá
   e ter o SVG em `shared/icons/fluent/` (senão aparece o emoji do aparelho). Ícone de menu = `<img class="tab-icon" ...>`.
+- Painel fixo no pé da tela (resposta do exercício, barras): **nunca cobre nem esconde outro elemento**; a área rolável reserva espaço igual à altura do painel e, com zoom alto
+  ou tela baixa, o painel entra no fluxo normal (decisão da autora, 2026-10-18; `docs/i18n/curriculo/12-*`).

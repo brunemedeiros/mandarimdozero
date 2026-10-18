@@ -58,3 +58,35 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
 - Explorar gravação de apresentação/diálogo/habilidade como recurso geral de fim de módulo.
 - Testar a entonação de pergunta x afirmação no TTS do francês antes de publicar a lição de som.
 - Corretor de pronúncia (API) no "Grave e compare": avaliar custo e Premium no futuro.
+
+---
+
+# Segunda rodada de ajustes da maquete (2026-10-18, depois da maquete v2)
+
+## Áudio e botões
+18. **"Ouvir tudo" (diálogo) e "Ouvir a conjugação toda" (M1.5 g) precisam de botão de PAUSAR**, para o caso de o aluno clicar por acidente. [padrão]
+
+## Diálogo
+19. Manter o **nome dos personagens**: o nome fica **abaixo do avatar**, como já existia. Se o diálogo é para o aluno agir como ele mesmo, o lado direito mostra o avatar, ícone ou
+    iniciais dele com **"Você"** (en: **"You"**) embaixo do avatar. [a fazer]
+
+## Pronúncia (antes "Som")
+20. A faixa e a lição **"Som" passam a se chamar "Pronúncia"** (en: **Pronunciation**), inclusive "Pronúncia do módulo". [a fazer]
+21. A prática de pronúncia fica **só na M1.7 (g)**, com masculino e feminino das nacionalidades. Sai a linha curta de som que a maquete v2 pôs na M1.3. [a fazer]
+
+## Painel de resposta
+22. **[padrão] Regra geral: o painel de resposta fica preso ao pé da tela, mas nunca se sobrepõe a outro elemento nem os esconde.** Implementação: a área da lição reserva
+    espaço embaixo igual à altura do painel (a rolagem chega até o último elemento, como o botão "← Voltar", sempre acima do painel). Com zoom alto ou tela baixa, o painel passa a
+    fazer parte do fluxo (deixa de ser fixo). [a fazer na maquete; entra na especificação do componente do `13`]
+
+## Notas
+23. **Visual único para as notas curtas** ("Vale entender isso"): "Moi, je m'appelle Ana. Et toi ?" e "Et lui ? Et elle ?" estavam com visuais diferentes. Uma nota é um só
+    componente visual, com variações só de tipo (explicação, realidade, cultural). [a fazer / padrão]
+
+## M1.7 (g) masculino e feminino
+24. A caixa "iguais, ou diferentes só na escrita" não faz sentido. Trocar por **"Escritas diferentes, mas sons iguais"**. [a fazer]
+25. **Sempre que o texto disser que dois sons são iguais ou diferentes, mostrar os dois lados com áudio** (a versão masculina e a feminina lado a lado, cada uma com 🔊),
+    para o aluno poder conferir. Hoje a tela não mostra o masculino para comparar. [padrão]
+
+## Nota N02
+26. Pendente da dona: escolha entre (a) explicar o *tu* na própria nota e (c) tirar o parêntese. Detalhe em 14-decisoes-notas.md.
