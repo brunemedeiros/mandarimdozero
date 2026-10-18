@@ -157,4 +157,4 @@ Decisões da autora nesta rodada: **Modo aula também usa o FSRS e alimenta o me
 
 **Testes:** `tests/banco-revisao/*` (todas as suítes, Playwright 534/534), `tests/banco-revisao-turmas` (096 49/49, Mural 80/80), `tests/banco-revisao-compartilhado` (112 26/26), xp, ida e volta do progresso.
 
-**Falta:** preview e fechamento da proposta B; proposta D; teclado de acentos do português; artifact (depois do site).
+**Falta:** fechamento da proposta B (preview em `docs/banco-revisao-preview-tipos.png`); proposta D; teclado de acentos do português; artifact (depois do site).
