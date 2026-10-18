@@ -11,7 +11,9 @@ for (const lang of ['fr', 'zh']){
   const u = ctx.UNITS.find(x => x.type !== 'grammar' && x.vocab && x.vocab.length && (x.lessons || []).length);
   ctx.STATE.cards = ctx.buildCardsFromUnits(ctx.UNITS);
   const cards = ctx.STATE.cards.filter(c => c.unitId === u.id);
-  const elig = () => cards.filter(c => ctx.isCardLessonCompleted(c)).length;
+  // Cada cenário é um estado de unidade independente (o progresso real nunca volta de "concluída" para "não iniciada"):
+  // apaga a marca `released` do cenário anterior (Etapa 0 do currículo, 2.3 item 8; testada em tests/curriculo-ids).
+  const elig = () => { cards.forEach(c => { delete c.released; }); return cards.filter(c => ctx.isCardLessonCompleted(c)).length; };
 
   ctx.STATE.unitProgress = { [u.id]: { started: true, completed: false, lessonIdx: 0 } };
   check(lang + ': unidade nova (lessonIdx 0, não concluída): 0 elegíveis', elig() === 0);
