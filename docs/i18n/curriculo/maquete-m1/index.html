@@ -311,7 +311,7 @@ body.tags-off .mq-tag{ display:none; }
 .mq-bulb[aria-disabled="true"]{ opacity:.35; cursor:default; filter:grayscale(1); }
 .mq-bulb[aria-disabled="false"]{ border-color: var(--imperial-gold); background: color-mix(in srgb, var(--imperial-gold) 12%, var(--paper)); }
 .mq-bulb[data-n]:not([data-n=""])::after{ content:attr(data-n); position:absolute; top:-4px; right:-4px; min-width:18px; height:18px; border-radius:9px; background: var(--seal-red); color: var(--on-seal-red); font-size:11px; font-weight:900; display:flex; align-items:center; justify-content:center; padding:0 4px; }
-.mq-pop{ position:absolute; z-index:20; left:12px; right:12px; top:64px; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); box-shadow: var(--shadow-lift); padding:12px 14px; max-height:60vh; overflow:auto; animation: fadeUp .15s ease; }
+.mq-pop{ position:absolute; z-index:20; left:12px; right:12px; top:64px; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); box-shadow: var(--shadow-lift); padding:12px 14px; max-height:60vh; overflow:auto; overscroll-behavior:contain; animation: fadeUp .15s ease; }
 .mq-pop-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-weight:900; font-size:14px; margin-bottom:6px; }
 .mq-pop-note{ border-top:1px solid var(--paper-line); padding:10px 0 4px; }
 .mq-pop-title{ font-weight:900; color: var(--brand-purple); font-size:15px; margin-bottom:4px; }
@@ -686,7 +686,9 @@ function flow(root, steps, opts){
   const back = $('[data-back]', app), next = $('[data-next]', app), dock = $('.fbp-dock', app);
   // Lâmpada (decisão 5 do doc 12): o contador mostra só as notas ainda não abertas pela lâmpada; some no 1º clique
   // e volta a acender quando aparece uma nota nova. A lâmpada continua abrindo todas as notas já vistas na lição.
-  const seen = [], bulb = $('[data-bulb]', app), pop = $('.mq-pop', app);
+  // Escopo (decisão da dona, 2026-10-18): só as notas da lição atual; no Ponto de verificação da unidade, as notas da unidade
+  // (opts.preNotes). Notas de outras lições ou unidades nunca entram. Sem limite de quantidade: o popover rola.
+  const seen = (opts.preNotes || []).map(n => ({ key: n.title, title: n.title, body: n.body })), bulb = $('[data-bulb]', app), pop = $('.mq-pop', app);
   const paintBulb = () => { if (!bulb) return; const fresh = seen.filter(n => !n.opened).length; bulb.setAttribute('aria-disabled', String(!seen.length)); bulb.title = seen.length ? L('Notas desta lição', 'Notes from this lesson') + (fresh ? ` (${fresh} ${L(fresh > 1 ? 'novas' : 'nova', 'new')})` : '') : L('Nenhuma nota nesta lição ainda', 'No notes in this lesson yet'); bulb.dataset.n = fresh || ''; };
   if (bulb) bulb.addEventListener('click', () => {
     if (!seen.length) return; // ainda não apareceu nota nesta lição: o botão não faz nada
@@ -1080,7 +1082,9 @@ add({ id: 'inicio', g: 'inicio', title: 'Como usar esta maquete', tags: [], rend
     <div class="mq-box"><h3>Versão 2 (2026-10-18): o que mudou depois do seu retorno</h3><ul>
       <li><b>Diálogo</b>: a proposta aprovada é o padrão. Léa (A) sempre à esquerda, Hugo (B) sempre à direita, <b>sem seletor de lado</b>. 🔊 e 🌐 de 44 px embaixo de cada balão, e "Ouvir tudo" e "Mostrar traduções" no alto.</li>
       <li><b>Palavra nova no diálogo</b>: passar o mouse abre um balão com o significado, que fica aberto até você clicar em outro lugar; no celular, o toque abre o mesmo balão.</li>
-      <li><b>💡</b>: o número some depois do 1º clique; uma nota nova faz o número voltar (teste na M1.3 "De 21 a 29").</li>
+      <li><b>💡</b>: o número some depois do 1º clique; uma nota nova faz o número voltar (teste na M1.3 "De 21 a 29"). Mostra só as notas da lição atual (no Ponto de verificação da unidade, as da unidade); o quadro rola, sem limite de notas.</li>
+      <li><b>Notas curtas</b>: na 1ª aparição de um conceito, só uma nota breve sobre a frase que acabou de aparecer (M1.2 "Moi... Et toi ?", M1.2 "française", M1.6 "Elle est infirmière"); a explicação completa fica na unidade de gramática.</li>
+      <li>Nota da M1.1 com nome novo: "Letras que ficam <b>mudas</b> no fim".</li>
       <li><b>Painel de resposta em todos os exercícios</b> (referência Busuu): certo ou errado, mostra o estado, a frase certa em francês com 🔊 e a tradução embaixo; no digitar, as letras erradas ficam riscadas em vermelho e as que faltaram, sublinhadas em vermelho.</li>
       <li><b>Selo de som tirado</b>: depois de <i>ans</i> vem uma nota curta da ligação, e a prática de som entra na trilha, depois da lição.</li>
       <li><b>Som do módulo</b>: botão de áudio em cada frase e "Ouvir as duas"; "Grave e compare" básico, sem correção; caixa "a verificar" sobre a entonação do áudio real.</li>
@@ -1088,7 +1092,7 @@ add({ id: 'inicio', g: 'inicio', title: 'Como usar esta maquete', tags: [], rend
       <li><b>M1.6</b>: nota cultural nova sobre o feminino das profissões (confiança média, para você revisar); a M1.7 ficou só com a regra.</li>
       <li><b>Défi arquivado</b>: saiu do menu principal; as telas estão no fim do índice, em "Arquivado".</li></ul></div>
     <div class="mq-box"><h3>Decisões da 1ª rodada (2026-10-18), mantidas</h3><ul>
-      <li>Nota de explicação pode ter <b>um V/F rápido e fácil</b> logo depois; certo e errado repetem a explicação resumida (telas M1.1 "S'il vous plaît", M1.1 "Letras caladas", M1.2 "o feminino que se ouve" e M1.6 "sem artigo").</li>
+      <li>Nota de explicação pode ter <b>um V/F rápido e fácil</b> logo depois; certo e errado repetem a explicação resumida (telas M1.1 "S'il vous plaît", M1.1 "Letras mudas", M1.2 "o feminino que se ouve" e M1.6 "sem artigo").</li>
       <li>O <b>Ponto de verificação não puxa nada das notas</b>: só palavra, frase, escuta e gramática.</li>
       <li>Item em par (<i>le vendeur / la vendeuse</i>): "Na frase" vem de <b>uma</b> das formas, e isso <b>já está pronto no código</b> (telas M1.2 e M1.6).</li>
       <li><b>Botão 💡 ao lado da ⚑ de report</b>, no topo da lição: abre as notas que já apareceram naquela lição; sem nota ainda, fica apagado e não faz nada ${tag('novo')} (veja na tela M1.1 "Cartão da palavra").</li>
@@ -1097,10 +1101,21 @@ add({ id: 'inicio', g: 'inicio', title: 'Como usar esta maquete', tags: [], rend
   $$('[data-goto]', root).forEach(b => b.addEventListener('click', () => goId(b.dataset.goto)));
 } });
 
+// Notas usadas em mais de um lugar (na lição e na 💡 do Ponto de verificação da unidade). Funções: o texto depende do idioma (L).
+const N_SVP = () => ({ title: '"S\'il vous plaît" no dia a dia', wrapup: true, body: "Na fala informal ou em mensagens de texto, <strong>s'il vous plaît</strong> quase sempre encolhe: com amigos vira <strong>s'il te plaît</strong> (a forma \"tu\", não \"vous\"), e por escrito é comum ver só <strong>STP</strong>. A forma completa com \"vous\" continua sendo a mais segura com desconhecidos.",
+        examples: [{ f: "s'il te plaît", t: 'por favor (informal, entre amigos)' }, { f: 'STP', say: "s'il te plaît", t: 'abreviação de texto para "s\'il te plaît"' }] });
+const N_MUDAS = () => ({ title: L('Letras que ficam mudas no fim', 'Letters that stay silent at the end'), body: 'Muitas consoantes do fim não soam: o <strong>t</strong> de <strong>salut</strong>, o <strong>s</strong> de <strong>vous</strong>, o <strong>p</strong> de <strong>beaucoup</strong>. Escreva, mas não pronuncie.',
+      examples: [{ f: 'salut', t: 'oi / tchau (informal)' }, { f: "s'il vous plaît", t: 'por favor (formal)' }, { f: 'Merci beaucoup !', t: 'Muito obrigada!' }] });
+const N_QUEBEC = () => ({ title: L('Bienvenue: no Quebec, também é "de nada"', 'Bienvenue: in Quebec, it also means "you\'re welcome"'), wrapup: true, body: 'Na França, a resposta a <strong>merci</strong> é <strong>de rien</strong>. No Quebec é muito comum responder <strong>bienvenue</strong>, que no resto do mundo francófono quer dizer "bem-vindo(a)".', examples: [{ f: 'Merci ! · Bienvenue !', say: 'Merci ! Bienvenue !', t: 'Obrigada! · De nada! (Quebec)' }] });
+const N_LIGACAO = () => ({ title: L('Deux‿ans, trois‿ans: a letra muda acorda', 'Deux‿ans, trois‿ans: the silent letter wakes up'), wrapup: true,
+        body: L('O <strong>x</strong> de <strong>deux</strong> e o <strong>s</strong> de <strong>trois</strong> são mudos, mas antes de <strong>ans</strong> eles soam como <strong>z</strong> e grudam: <strong>deux‿ans, trois‿ans</strong>. O s de <i>ans</i> continua mudo.', 'The <strong>x</strong> in <strong>deux</strong> and the <strong>s</strong> in <strong>trois</strong> are silent, but before <strong>ans</strong> they sound like <strong>z</strong> and link: <strong>deux‿ans, trois‿ans</strong>. The s in <i>ans</i> stays silent.'),
+        examples: [{ f: 'deux ans', t: L('dois anos', 'two years') }, { f: 'trois ans', t: L('três anos', 'three years') }] });
+const N_21A = () => ({ counter: '1 de 2', title: L('De 21 a 29', 'From 21 to 29'), body: '21 é <strong>vingt et un</strong> (com <i>et</i>). De 22 em diante, hífen e sem <i>et</i>: <strong>vingt-deux, vingt-trois... vingt-neuf</strong>.', examples: [{ f: 'vingt et un ans', t: 'vinte e um anos' }, { f: 'vingt-quatre ans', t: 'vinte e quatro anos' }] });
+const N_21B = () => ({ counter: '2 de 2', wrapup: true, title: L('Vingt‿et un: o t de vingt aparece', 'Vingt‿et un: the t of vingt shows up'), body: 'Sozinho, o t de <strong>vingt</strong> é mudo; de 21 a 29 ele soa: <strong>vingt‿et un, vingt-deux</strong>. Antes de <strong>ans</strong>: <strong>six‿ans, dix‿ans</strong> (som de z), <strong>vingt‿ans</strong>, e <strong>neuf ans</strong> soa "neuv ans".', examples: [{ f: 'six ans' }, { f: 'dix ans' }, { f: 'vingt ans' }, { f: 'neuf ans' }] });
 /* ---- M1.1 ---- */
 add({ id: 'm11-cartao', g: 'm11', title: 'Cartão da palavra com "Na frase"', tags: ['existe', 'ajuste'], render(root){
   root.innerHTML = `<div class="mq-why">Lição 3 "Pedir por favor e perguntar como vai", na ordem real: cartão, nota, V/F rápido, próximos cartões. O áudio da palavra toca sozinho no site. <b>"Na frase" fica na mesma tela, logo abaixo do cartão</b> ${tag('existe')}.
-    <br><b>Botão 💡</b> no topo, ao lado da ⚑ de report ${tag('novo')}: no 1º cartão ainda está apagado (nenhuma nota nesta lição); depois da nota de <i>s'il vous plaît</i> ele acende e abre essa nota por cima da tela.
+    <br><b>Botão 💡</b> no topo, ao lado da ⚑ de report ${tag('novo')}: no 1º cartão ainda está apagado (nenhuma nota nesta lição); depois da nota de <i>s'il vous plaît</i> ele acende com o número 1 e abre essa nota por cima da tela; depois do 1º clique o número some (a 💡 continua abrindo as notas). A 💡 mostra <b>só as notas desta lição</b> (no Ponto de verificação da unidade, as da unidade), sem limite de quantidade: o quadro rola.
     Toque no cartão para virar: frente = palavra, verso = tradução ${tag('ajuste')} (hoje a tradução já aparece junto da palavra, sem virar).</div><div data-f></div>`;
   flow($('[data-f]', root), [
     (box, api) => {
@@ -1119,8 +1134,7 @@ add({ id: 'm11-cartao', g: 'm11', title: 'Cartão da palavra com "Na frase"', ta
       api.next('Próxima palavra →');
     },
     (box, api) => { api.banner('🗣️ Na vida real');
-      box.innerHTML = noteBlock({ title: '"S\'il vous plaît" no dia a dia', wrapup: true, body: "Na fala informal ou em mensagens de texto, <strong>s'il vous plaît</strong> quase sempre encolhe: com amigos vira <strong>s'il te plaît</strong> (a forma \"tu\", não \"vous\"), e por escrito é comum ver só <strong>STP</strong>. A forma completa com \"vous\" continua sendo a mais segura com desconhecidos.",
-        examples: [{ f: "s'il te plaît", t: 'por favor (informal, entre amigos)' }, { f: 'STP', say: "s'il te plaît", t: 'abreviação de texto para "s\'il te plaît"' }] }); },
+      box.innerHTML = noteBlock(N_SVP()); },
     ...tfSteps(TF_SVP),
     (box, api) => { box.innerHTML = vocabCard({ dots: [2, 4], word: 'pardon', trans: 'desculpe / com licença', phrase: { f: 'Pardon, je ne comprends pas.', t: 'Desculpe, eu não entendo.' } }) + `<p class="mq-small" style="margin-top:10px">Hoje o cartão de <i>pardon</i> mostra a 1ª frase que contém a palavra. Fixar outra frase (<i>Pardon ? Vous pouvez répéter ?</i>) seria ${tag('ajuste')} (pergunta 6).</p>`; api.next('Próxima palavra →'); },
     (box, api) => { box.innerHTML = vocabCard({ dots: [3, 4], word: 'ça va', trans: 'tudo bem', phrase: { f: 'Bonjour ! Ça va ?', t: 'Olá! Tudo bem?' } }); api.next('Próxima palavra →'); },
@@ -1140,8 +1154,7 @@ add({ id: 'm11-nota-svp', g: 'm11', title: 'Nota "S\'il vous plaît no dia a dia
   root.innerHTML = `<div class="mq-why">A nota já existe e aparece depois do cartão de <i>s'il vous plaît</i>. A novidade (decisão de hoje) é o <b>V/F rápido</b> logo depois, como mais um passo curto da lição (sem botão de pular): fácil, sem XP e sem efeito na memória; certo e errado mostram a mesma explicação resumida. Os dois itens são os seus exemplos. Confiança da explicação: <b>alta</b> (SVP e STP são abreviações correntes).</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => {
     api.banner('🗣️ Na vida real');
-    box.innerHTML = noteBlock({ title: '"S\'il vous plaît" no dia a dia', wrapup: true, body: "Na fala informal ou em mensagens de texto, <strong>s'il vous plaît</strong> quase sempre encolhe: com amigos vira <strong>s'il te plaît</strong> (a forma \"tu\", não \"vous\"), e por escrito é comum ver só <strong>STP</strong>. A forma completa com \"vous\" continua sendo a mais segura com desconhecidos.",
-      examples: [{ f: "s'il te plaît", t: 'por favor (informal, entre amigos)' }, { f: 'STP', say: "s'il te plaît", t: 'abreviação de texto para "s\'il te plaît"' }] });
+    box.innerHTML = noteBlock(N_SVP());
   }, ...tfSteps(TF_SVP)]);
 } });
 
@@ -1150,19 +1163,18 @@ const TF_MUDAS = [
     why: 'Em <i>salut</i> o <b>t</b> é mudo, como o <i>s</i> de <i>vous</i> e o <i>p</i> de <i>beaucoup</i>: escreva, mas não pronuncie.', whyEn: 'In <i>salut</i> the <b>t</b> is silent, like the <i>s</i> in <i>vous</i> and the <i>p</i> in <i>beaucoup</i>: write it, don\'t say it.',
     fr: 'Salut !', tr: 'Oi! / Tchau!', trEn: 'Hi! / Bye!' },
 ];
-add({ id: 'm11-nota-mudas', g: 'm11', title: 'Nota nova "Letras que ficam caladas no fim" (som)', en: true, tags: ['existe', 'ajuste', 'novo'], render(root){
+add({ id: 'm11-nota-mudas', g: 'm11', title: 'Nota nova "Letras que ficam mudas no fim" (som)', en: true, tags: ['existe', 'ajuste', 'novo'], render(root){
   root.innerHTML = `<div class="mq-why">Nota nova (depois de <i>salut</i>, lição 2). Hoje sairia com a faixa "Vale entender isso" ${tag('existe')}; com uma faixa própria de <b>Som</b> é ${tag('ajuste')}. Confiança <b>alta</b>. Também com um V/F rápido ${tag('novo')}.</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => {
     api.banner(L('🔊 Som', '🔊 Sound'));
-    box.innerHTML = noteBlock({ title: L('Letras que ficam caladas no fim', 'Letters that stay silent at the end'), body: 'Muitas consoantes do fim não soam: o <strong>t</strong> de <strong>salut</strong>, o <strong>s</strong> de <strong>vous</strong>, o <strong>p</strong> de <strong>beaucoup</strong>. Escreva, mas não pronuncie.',
-      examples: [{ f: 'salut', t: 'oi / tchau (informal)' }, { f: "s'il vous plaît", t: 'por favor (formal)' }, { f: 'Merci beaucoup !', t: 'Muito obrigada!' }] });
+    box.innerHTML = noteBlock(N_MUDAS());
   }, ...tfSteps(TF_MUDAS)]);
 } });
 
 add({ id: 'm11-nota-quebec', g: 'm11', title: 'Nota nova "Bienvenue: no Quebec, também é de nada"', en: true, tags: ['existe'], render(root){
   root.innerHTML = `<div class="mq-why">Nota de variação regional (depois de <i>de rien</i>). (Ela preparava o título do défi "Bienvenue au club !", hoje arquivado; a nota vale sozinha.) Confiança <b>alta</b>. Esta nota fica sem V/F: nem toda nota precisa.</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => { api.banner('📍 Variação regional');
-    box.innerHTML = noteBlock({ title: L('Bienvenue: no Quebec, também é "de nada"', 'Bienvenue: in Quebec, it also means "you\'re welcome"'), wrapup: true, body: 'Na França, a resposta a <strong>merci</strong> é <strong>de rien</strong>. No Quebec é muito comum responder <strong>bienvenue</strong>, que no resto do mundo francófono quer dizer "bem-vindo(a)".', examples: [{ f: 'Merci ! · Bienvenue !', say: 'Merci ! Bienvenue !', t: 'Obrigada! · De nada! (Quebec)' }] }); }]);
+    box.innerHTML = noteBlock(N_QUEBEC()); }]);
 } });
 
 add({ id: 'm11-checagem', g: 'm11', title: 'Checagem rápida "O que significa?"', tags: ['existe'], render(root){
@@ -1218,22 +1230,22 @@ add({ id: 'm11-entendeu', g: 'm11', title: '"Você entendeu?": as 3 checagens', 
   flow($('[data-f]', root), [(box, api) => dlgCheck(box, api, DLG_M11)]);
 } });
 add({ id: 'm11-pv', g: 'm11', title: 'Ponto de verificação da unidade: a frase nova', en: true, tags: ['existe'], render(root){
-  root.innerHTML = `<div class="mq-why">Última lição da M1.1. Frase nova com cenário (consigo 5 do 08). <i>vous pouvez</i> entra como fórmula.</div><div data-f></div>`;
+  root.innerHTML = `<div class="mq-why">Última lição da M1.1. Frase nova com cenário (consigo 5 do 08). <i>vous pouvez</i> entra como fórmula. <b>💡 aqui mostra as notas da unidade inteira</b> (as 3 da M1.1), porque é o Ponto de verificação da unidade; notas de outras unidades nunca aparecem.</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => {
     api.banner('🏁 Ponto de verificação');
     const o = { counter: 'Exercício 4 de 18', q: 'A Léa disse o nome da cidade dela rápido demais. Você quer que ela repita. O que você diz?', qEn: 'Léa said the name of her city too fast. You want her to repeat it. What do you say?', emoji: '💬',
       opts: [{ f: 'Pardon ? Vous pouvez répéter ?', ok: true }, { f: "De rien, c'est normal." }, { f: 'Au revoir, à demain !' }] };
     box.innerHTML = scenario(o); api.next('Continuar →', false);
     wireChoice(box, '.scenario-option', o.opts, (ok, x) => api.answer({ state: ok ? 'ok' : 'wrong', fr: 'Pardon ? Vous pouvez répéter ?', tr: 'Desculpe? Você pode repetir?', chosen: ok ? null : esc(x.f) }));
-  }]);
+  }], { preNotes: [N_SVP(), N_MUDAS(), N_QUEBEC()] });
 } });
 
 /* ---- M1.2 ---- */
-add({ id: 'm12-moi', g: 'm12', title: 'Nota nova "Moi, toi: para reforçar e devolver a pergunta"', en: true, tags: ['existe'], render(root){
-  root.innerHTML = `<div class="mq-why">Depois de <i>s'appeler</i> (lição 1). 1ª etapa dos pronomes tônicos (B.10). Confiança <b>alta</b>.</div><div data-f></div>`;
+add({ id: 'm12-moi', g: 'm12', title: 'Nota curta "Moi, je m\'appelle Ana. Et toi ?"', en: true, tags: ['existe'], render(root){
+  root.innerHTML = `<div class="mq-why">Depois de <i>s'appeler</i> (lição 1). <b>Nota curta</b> (regra da dona: 1ª aparição de um conceito = só uma nota breve sobre a frase que acabou de aparecer); a explicação completa dos pronomes tônicos fica para a gramática (B.10). Confiança <b>alta</b>.</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => { api.banner('💡 Vale entender isso');
-    box.innerHTML = noteBlock({ title: L('Moi, toi: para reforçar e devolver a pergunta', 'Moi, toi: for emphasis and to bounce the question back'), body: '<strong>Moi</strong> e <strong>toi</strong> são "eu" e "você" com força. Servem para destacar quem fala (<strong>Moi, je m\'appelle Ana.</strong>) e para devolver a pergunta sem repetir tudo: <strong>Et toi ?</strong> Com quem você trata por <i>vous</i>: <strong>Et vous ?</strong> Eles podem vir sozinhos: <strong>Moi aussi !</strong>',
-      examples: [{ f: "Moi, je m'appelle Ana. Et toi ?", t: 'Eu me chamo Ana. E você?' }, { f: "Toi, tu t'appelles comment ?", t: 'E você, como se chama?' }, { f: 'Et vous ?', t: 'E o(a) senhor(a)?' }, { f: 'Moi aussi !', t: 'Eu também!' }] }); }]);
+    box.innerHTML = noteBlock({ title: L('Moi, je m\'appelle Ana. Et toi ?', 'Moi, je m\'appelle Ana. Et toi ?'), body: L('<strong>Moi</strong> dá destaque a quem fala ("eu"). <strong>Et toi ?</strong> devolve a pergunta: "e você?".', '<strong>Moi</strong> stresses the "I". <strong>Et toi ?</strong> bounces the question back: "and you?".'),
+      examples: [{ f: "Moi, je m'appelle Ana. Et toi ?", t: 'Eu me chamo Ana. E você?' }] }); }]);
 } });
 function pairScreen(root, cards, why){
   root.innerHTML = `<div class="mq-why">${why}</div><div data-f></div>`;
@@ -1253,10 +1265,10 @@ const TF_FEM = [{ q: 'Em <i>française</i>, o <i>s</i> do fim soa (como um <i>z<
   why: 'No feminino o <b>s soa</b> (<i>française</i>); no masculino é mudo (<i>français</i>). O feminino se ouve.', whyEn: 'In the feminine the <b>s is pronounced</b> (<i>française</i>); in the masculine it is silent (<i>français</i>).',
   fr: 'Ana est française.', tr: 'A Ana é francesa.', trEn: 'Ana is French.' }];
 add({ id: 'm12-nota-fem', g: 'm12', title: 'Nota nova "Français, française: o feminino que se ouve"', en: true, tags: ['existe', 'novo'], render(root){
-  root.innerHTML = `<div class="mq-why">Primeiro contato com o gênero, sem a regra (que vem na M1.7). Léo e Ana são os nomes do diálogo da unidade. Confiança <b>alta</b>. Com V/F rápido ${tag('novo')}.</div><div data-f></div>`;
+  root.innerHTML = `<div class="mq-why">Primeiro contato com o gênero: <b>nota curta</b> só sobre a frase que acabou de aparecer; a regra completa fica na M1.7. Léo e Ana são os nomes do diálogo da unidade. Confiança <b>alta</b>. Com V/F rápido ${tag('novo')}.</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => { api.banner('💡 Vale entender isso');
-    box.innerHTML = noteBlock({ title: L('Français, française: o feminino que se ouve', 'Français, française: the feminine you can hear'), body: 'Léo é <strong>français</strong> (o s é mudo); Ana é <strong>française</strong> (o s soa, como z). <strong>brésilien</strong> termina nasal; em <strong>brésilienne</strong> o n soa. A regra vem na M1.7.',
-      examples: [{ f: 'Léo est français.' }, { f: 'Ana est française.' }, { f: 'Léo est brésilien.' }, { f: 'Ana est brésilienne.' }] }); }, ...tfSteps(TF_FEM)]);
+    box.innerHTML = noteBlock({ title: L('Français, française: o feminino que se ouve', 'Français, française: the feminine you can hear'), body: L('Em <strong>Ana est française</strong>, o s do fim soa (como z); em <i>Léo est français</i>, não. A regra vem na M1.7.', 'In <strong>Ana est française</strong>, the final s is pronounced (like z); in <i>Léo est français</i>, it isn\'t. The rule comes in M1.7.'),
+      examples: [{ f: 'Ana est française.', t: 'A Ana é francesa.' }, { f: 'Léo est français.', t: 'O Léo é francês.' }] }); }, ...tfSteps(TF_FEM)]);
 } });
 
 /* ---- M1.3 ---- */
@@ -1273,26 +1285,24 @@ add({ id: 'm13-ans', g: 'm13', title: 'Palavra "ans" e a nota da ligação logo 
   flow($('[data-f]', root), [
     (box, api) => { box.innerHTML = vocabCard({ dots: [3, 4], word: 'ans', trans: 'anos', phrase: { f: "J'ai vingt ans.", t: 'Eu tenho vinte anos.' } }); api.next('Continuar →'); },
     (box, api) => { api.banner(L('🔊 Som', '🔊 Sound'));
-      box.innerHTML = noteBlock({ title: L('Deux‿ans, trois‿ans: a letra muda acorda', 'Deux‿ans, trois‿ans: the silent letter wakes up'), wrapup: true,
-        body: L('O <strong>x</strong> de <strong>deux</strong> e o <strong>s</strong> de <strong>trois</strong> são mudos, mas antes de <strong>ans</strong> eles soam como <strong>z</strong> e grudam: <strong>deux‿ans, trois‿ans</strong>. O s de <i>ans</i> continua mudo.', 'The <strong>x</strong> in <strong>deux</strong> and the <strong>s</strong> in <strong>trois</strong> are silent, but before <strong>ans</strong> they sound like <strong>z</strong> and link: <strong>deux‿ans, trois‿ans</strong>. The s in <i>ans</i> stays silent.'),
-        examples: [{ f: 'deux ans', t: L('dois anos', 'two years') }, { f: 'trois ans', t: L('três anos', 'three years') }] }); },
+      box.innerHTML = noteBlock(N_LIGACAO()); },
   ]);
 } });
 add({ id: 'm13-nota-21', g: 'm13', title: 'Nota em 2 blocos "De 21 a 29" e "Vingt‿et un"', en: true, tags: ['existe'], render(root){
   root.innerHTML = `<div class="mq-why">Nota com 2 blocos ("1 de 2", "2 de 2"): o motor já aceita. O sinal ‿ fica só no texto; o áudio é o da forma normal. Confiança <b>alta</b>; <i>neuf ans</i> com som de v é proposta (pergunta 11).</div><div data-f></div>`;
   flow($('[data-f]', root), [
-    (box, api) => { api.banner('💡 Vale entender isso'); box.innerHTML = noteBlock({ counter: '1 de 2', title: L('De 21 a 29', 'From 21 to 29'), body: '21 é <strong>vingt et un</strong> (com <i>et</i>). De 22 em diante, hífen e sem <i>et</i>: <strong>vingt-deux, vingt-trois... vingt-neuf</strong>.', examples: [{ f: 'vingt et un ans', t: 'vinte e um anos' }, { f: 'vingt-quatre ans', t: 'vinte e quatro anos' }] }); api.next('Entendi →'); },
-    (box, api) => { api.banner('💡 Vale entender isso'); box.innerHTML = noteBlock({ counter: '2 de 2', wrapup: true, title: L('Vingt‿et un: o t de vingt aparece', 'Vingt‿et un: the t of vingt shows up'), body: 'Sozinho, o t de <strong>vingt</strong> é mudo; de 21 a 29 ele soa: <strong>vingt‿et un, vingt-deux</strong>. Antes de <strong>ans</strong>: <strong>six‿ans, dix‿ans</strong> (som de z), <strong>vingt‿ans</strong>, e <strong>neuf ans</strong> soa "neuv ans".', examples: [{ f: 'six ans' }, { f: 'dix ans' }, { f: 'vingt ans' }, { f: 'neuf ans' }] }); },
+    (box, api) => { api.banner('💡 Vale entender isso'); box.innerHTML = noteBlock(N_21A()); api.next('Entendi →'); },
+    (box, api) => { api.banner('💡 Vale entender isso'); box.innerHTML = noteBlock(N_21B()); },
   ]);
 } });
 add({ id: 'm13-cenario', g: 'm13', title: 'Frase com cenário "J\'ai vingt-quatre ans."', en: true, tags: ['existe'], render(root){
-  root.innerHTML = `<div class="mq-why">Frase nova no Ponto de verificação da unidade. A opção 2 é o erro clássico do brasileiro (<i>être</i> para idade).</div><div data-f></div>`;
+  root.innerHTML = `<div class="mq-why">Frase nova no Ponto de verificação da unidade. A opção 2 é o erro clássico do brasileiro (<i>être</i> para idade). A 💡 mostra as notas da M1.3 (unidade), e só elas.</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => {
     api.banner('🏁 Ponto de verificação');
     const o = { counter: 'Exercício 9 de 20', q: 'No clube de conversa, perguntam a sua idade. Você tem 24 anos. O que você diz?', qEn: 'At the conversation club, someone asks your age. You are 24. What do you say?', emoji: '🎂', opts: [{ f: "J'ai vingt-quatre ans.", ok: true }, { f: 'Je suis vingt-quatre ans.' }, { f: "J'ai vingt-quatre." }] };
     box.innerHTML = scenario(o); api.next('Continuar →', false);
     wireChoice(box, '.scenario-option', o.opts, (ok, x) => api.answer({ state: ok ? 'ok' : 'wrong', fr: "J'ai vingt-quatre ans.", tr: 'Eu tenho vinte e quatro anos.', chosen: ok ? null : esc(x.f), why: ok ? null : 'Para a idade o francês usa <b>avoir</b> e sempre diz <b>ans</b>.' }));
-  }]);
+  }], { preNotes: [N_LIGACAO(), N_21A(), N_21B()] });
 } });
 
 /* ---- M1.4 ---- */
@@ -1374,10 +1384,10 @@ const TF_ART = [
   { q: 'Para dizer a profissão, falamos <i>Je suis un professeur.</i>', qEn: 'To say your job, we say <i>Je suis un professeur.</i>', a: false, why: 'Depois de <i>je suis, il est, elle est</i>, a profissão vai <b>sem artigo</b>: <b>Je suis professeur.</b>', whyEn: 'After <i>je suis, il est, elle est</i>, the job takes <b>no article</b>: <b>Je suis professeur.</b>', fr: 'Je suis professeur.', tr: 'Eu sou professor.', trEn: 'I am a teacher.' },
   { q: '<i>Elle est médecin.</i> está certo.', qEn: '<i>Elle est médecin.</i> is correct.', a: true, why: 'Certo: profissão sem artigo depois de <i>elle est</i>. <b>Elle est médecin.</b>', whyEn: 'Right: no article after <i>elle est</i>. <b>Elle est médecin.</b>', fr: 'Elle est médecin.', tr: 'Ela é médica.', trEn: 'She is a doctor.' },
 ];
-add({ id: 'm16-nota-artigo', g: 'm16', title: 'Nota nova "Je suis professeur: sem artigo" + V/F rápido', en: true, tags: ['existe', 'novo'], render(root){
-  root.innerHTML = `<div class="mq-why">Depois do 1º cartão da M1.6. Erro clássico do brasileiro, então o V/F rápido ajuda aqui. Confiança <b>alta</b>.</div><div data-f></div>`;
+add({ id: 'm16-nota-artigo', g: 'm16', title: 'Nota curta "Elle est infirmière: sem artigo" + V/F rápido', en: true, tags: ['existe', 'novo'], render(root){
+  root.innerHTML = `<div class="mq-why">Depois do 1º cartão da M1.6 (<i>Elle est infirmière.</i>). <b>Nota curta</b> sobre essa frase; a regra completa está na M1.7 (passo "Profissão: sem artigo"). Erro clássico do brasileiro, então o V/F rápido ajuda aqui. Confiança <b>alta</b>.</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => { api.banner('💡 Vale entender isso');
-    box.innerHTML = noteBlock({ title: L('Je suis professeur: sem artigo', 'Je suis professeur: no article'), body: 'Para dizer a profissão depois de <strong>je suis, il est, elle est</strong>, o francês não usa artigo: <strong>Je suis professeur. Elle est médecin.</strong> Nunca "je suis un professeur". (Com <i>c\'est</i> é diferente: isso vem no módulo 2.)', examples: [{ f: 'Je suis professeure.', t: 'Eu sou professora.' }, { f: 'Il est étudiant.', t: 'Ele é estudante.' }] }); }, ...tfSteps(TF_ART)]);
+    box.innerHTML = noteBlock({ title: L('Elle est infirmière: sem artigo', 'Elle est infirmière: no article'), body: L('Repare: <strong>Elle est infirmière</strong>, sem <i>une</i>. Profissão depois de <i>je suis, il est, elle est</i> vai sem artigo.', 'Notice: <strong>Elle est infirmière</strong>, without <i>une</i>. A job after <i>je suis, il est, elle est</i> takes no article.'), examples: [{ f: 'Elle est infirmière.', t: 'Ela é enfermeira.' }] }); }, ...tfSteps(TF_ART)]);
 } });
 // Nota cultural da M1.6 (decisão 15 do doc 12): curta, estilo síntese, confiança MÉDIA, revisão da dona antes de publicar.
 add({ id: 'm16-nota-feminino', g: 'm16', title: 'Nota cultural nova "Professeure, autrice: o feminino das profissões"', en: true, tags: ['existe'], render(root){
