@@ -105,8 +105,8 @@ async function snapshot(page){
     const formText = document.getElementById('report-form-view').textContent.replace(/\s+/g, ' ').trim();
     const title = m.querySelector('.app-modal-header h3').textContent;
     const succ = document.getElementById('report-success-view').textContent.replace(/\s+/g, ' ').trim();
-    const cats = [...m.querySelectorAll('.report-option-btn')].map(b => b.textContent);
-    const sevs = [...m.querySelectorAll('.report-severity-btn')].map(b => b.textContent);
+    const cats = [...m.querySelectorAll('.report-option-btn')].map(b => (b.querySelector('.report-option-title') || b).textContent) /* 2026-10-18: título sem o ícone e a descrição */;
+    const sevs = [...m.querySelectorAll('.report-severity-btn')].map(b => (b.querySelector('.report-severity-label') || b).textContent);
     return { attrs, entry, menu, formText, title, succ, cats, sevs, displayGuest: document.getElementById('report-guest-email-wrap').style.display };
   });
 }
@@ -186,16 +186,19 @@ async function modalSnapshot(page, lang){
     if (!m) return [id, null];
     const prev = m.style.display; m.style.display = 'flex';
     const r = { title: m.querySelector('h3').textContent, closeAria: m.querySelector('.app-modal-close').getAttribute('aria-label'),
-      ps: [...m.querySelectorAll('.app-modal-body p')].map(p => p.innerHTML), btns: [...m.querySelectorAll('.app-modal-body button')].map(b => b.textContent) };
+      ps: [...m.querySelectorAll('.app-modal-body p')].map(p => p.classList.contains('jp-bloco') ? (p.querySelector('[data-i18n]') || p).innerHTML : p.innerHTML) /* bloco com ícone (2026-10-18): só o texto */, btns: [...m.querySelectorAll('.app-modal-body button')].map(b => b.textContent) };
     m.style.display = prev;
     return [id, r];
   }), MODALS.filter(x => !(x.frOnly && lang !== 'fr')).map(x => x.id));
 }
+// Confirmar edição ganhou textos novos aprovados pela autora (2026-10-18): fora da comparação com o commit anterior;
+// o conteúdo dele continua conferido contra o catálogo (expectedModals).
+const semReset = (snap) => snap.filter(([id]) => id !== 'flashcard-reset-confirm-modal');
 function expectedModals(C, lang){
   const out = [];
   if (lang === 'fr') out.push(['premium-challenges-modal', { title: C['premium.challenges.title'], closeAria: C['common.close'], ps: [C['premium.challenges.bodyHtml'], C['premium.challenges.howToActivate']], btns: [] }]);
   out.push(['flashcard-limit-modal', { title: C['flashcardLimit.modal.title'], closeAria: C['common.close'], ps: [C['flashcardLimit.modal.bodyHtml']], btns: [] }]);
-  out.push(['flashcard-reset-confirm-modal', { title: C['flashcardReset.modal.title'], closeAria: C['common.close'], ps: [C['flashcardReset.modal.body']], btns: [C['flashcardReset.modal.discard'], C['flashcardReset.modal.confirm']] }]);
+  out.push(['flashcard-reset-confirm-modal', { title: C['flashcardReset.modal.title'], closeAria: C['common.close'], ps: [C['flashcardReset.modal.headline'], C['flashcardReset.modal.explain'], C['flashcardReset.modal.keepTip']], btns: [C['flashcardReset.modal.discard'], C['flashcardReset.modal.yes']] }]); // textos aprovados pela autora em 2026-10-18
   return out;
 }
 // Layout a ~390px: nenhum elemento do modal estoura a largura da tela.
@@ -269,7 +272,11 @@ async function triggerWouldGenerate(page){
     // Mudanças de texto em português aprovadas pela autora depois do baseline (regra: sem "--" em texto visível).
     const DELIBERATE_PT = [['A captura, se anexada, fica visível só para a equipe -- nada é enviado automaticamente.', 'A captura, se anexada, fica visível só para a equipe. Nada é enviado automaticamente.'] /* 2026-10-18 */];
     const baseFixed = DELIBERATE_PT.reduce((acc, [a, c]) => acc.split(a).join(c), JSON.stringify(baseSnap));
-    L('pt-BR: snapshot idêntico ao baseline original', JSON.stringify(ptSnap) === baseFixed, { ptSnap, baseSnap });
+    // Reportar (2026-10-18, aprovado pela autora): descrições das categorias, texto de apoio, contador, ícones e
+    // "Enviar relato" são acréscimos; saem da comparação com o baseline (o texto deles é conferido nos testes de idioma).
+    const NOVOS_REPORT = ['bug_tecnico', 'erro_conteudo', 'traducao', 'audio', 'visual', 'comportamento_inesperado', 'sugestao_melhoria', 'outro'].map(id => CAT['pt-BR']['report.category.' + id + '.desc']).concat([CAT['pt-BR']['report.modal.describeHint']]);
+    const semNovos = (snap) => { const c = JSON.parse(JSON.stringify(snap)); let f = c.formText; NOVOS_REPORT.forEach(v => { f = f.split(v).join(''); }); c.formText = f.replace('0/600', '').replace(CAT['pt-BR']['report.modal.sendReport'], CAT['pt-BR']['report.modal.submit']).replace(/\p{Extended_Pictographic}\uFE0F?/gu, '').replace(/\s+/g, ' ').trim(); c.sevs = (c.sevs || []).map(x => x.replace(/\p{Extended_Pictographic}\uFE0F?/gu, '').trim()); return c; };
+    L('pt-BR: snapshot idêntico ao baseline original', JSON.stringify(semNovos(ptSnap)) === JSON.stringify(semNovos(JSON.parse(baseFixed))), { ptSnap, baseSnap });
     L('pt-BR: getUiLang = pt-BR, html lang = pt-BR', await p.page.evaluate(() => getUiLang() === 'pt-BR' && document.documentElement.lang === 'pt-BR'));
     L('pt-BR: en/es não carregados', await p.page.evaluate(() => !I18N_CATALOG.en && !I18N_CATALOG.es && !document.querySelector('script[src*="i18n/en.js"],script[src*="i18n/es.js"]')));
     L('pt-BR: nenhum elemento marcado como traduzido', await p.page.evaluate(() => document.querySelectorAll('[data-i18n-applied]').length === 0));
@@ -330,7 +337,7 @@ async function triggerWouldGenerate(page){
       U('erro de duplicata traduzido', (await page.textContent('#report-error')) === C['report.error.duplicate']);
       // voltar pra pt-BR em tempo de execução restaura o português
       await page.evaluate(() => setUiLang('pt-BR'));
-      const back = await page.evaluate(() => ({ title: document.querySelector('#report-modal h3').textContent, ph: document.getElementById('report-description').placeholder, cat: document.querySelector('.report-option-btn').textContent, lang: document.documentElement.lang }));
+      const back = await page.evaluate(() => ({ title: document.querySelector('#report-modal h3').textContent, ph: document.getElementById('report-description').placeholder, cat: (document.querySelector('.report-option-btn .report-option-title') || document.querySelector('.report-option-btn')).textContent, lang: document.documentElement.lang }));
       U('setUiLang(pt-BR) restaura português', back.title === CAT['pt-BR']['report.modal.title'] && back.ph === CAT['pt-BR']['report.modal.describePlaceholder'] && back.cat === '1. ' + CAT['pt-BR']['report.category.bug_tecnico'] && back.lang === 'pt-BR', back);
       U('zero pageerror novo vs baseline', s.errors.filter(e => !baseErrors.includes(e)).length === 0, s.errors);
       await s.ctx.close();
@@ -367,7 +374,7 @@ async function triggerWouldGenerate(page){
     const ctxA = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 1200, height: 1000 } });
     const a = await boot2(ctxA, portCur, lang, '');
     const ptSnap = await modalSnapshot(a.page, lang);
-    L('pt-BR: 3 modais idênticos ao commit anterior', JSON.stringify(ptSnap) === JSON.stringify(prevSnap), { ptSnap, prevSnap });
+    L('pt-BR: 3 modais idênticos ao commit anterior', JSON.stringify(semReset(ptSnap)) === JSON.stringify(semReset(prevSnap)), { ptSnap, prevSnap });
     L('pt-BR: modais == catálogo pt-BR', JSON.stringify(ptSnap) === JSON.stringify(expectedModals(CAT['pt-BR'], lang)), ptSnap);
     const ptWould = await triggerWouldGenerate(a.page);
     L('pt-BR: texto do preflight (JS) idêntico ao commit anterior', ptWould.err === prevWould.err && ptWould.err === 'Este cartão geraria 2 cartão(ões) de estudo, mas restam só 1 no plano grátis.', [ptWould.err, prevWould.err]);
@@ -416,7 +423,7 @@ async function triggerWouldGenerate(page){
     await b2.page.click('#ui-language-confirm-yes');
     await b2.page.waitForFunction(() => getUiLang() === 'pt-BR' && document.documentElement.lang === 'pt-BR');
     const backSnap = await modalSnapshot(b2.page, lang);
-    L('voltar para Português: modais idênticos ao commit anterior', JSON.stringify(backSnap) === JSON.stringify(prevSnap), backSnap);
+    L('voltar para Português: modais idênticos ao commit anterior', JSON.stringify(semReset(backSnap)) === JSON.stringify(semReset(prevSnap)), backSnap);
     L('voltar para Português: rótulo do seletor original', await b2.page.evaluate(t => document.getElementById('ui-language-select').closest('.pref-row').querySelector('.pref-row-title').textContent === t && localStorage.getItem('ui-language') === 'pt-BR', CAT['pt-BR']['settings.uiLanguage.title']));
     const backWould = await triggerWouldGenerate(b2.page);
     L('voltar para Português: preflight (JS) volta ao texto original', backWould.err === prevWould.err, backWould.err);

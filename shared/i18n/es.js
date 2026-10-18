@@ -12,6 +12,17 @@ window.I18N_CATALOG['es'] = {
   'report.entry.menuItem': '⚑ Reportar un problema', // ALTA
 
   'report.modal.title': '⚑ Reportar un problema o sugerencia', // ALTA
+  'report.modal.intro': 'Cuéntanos qué pasó. Así podemos mejorar tu experiencia.', // MÉDIA
+  'report.category.bug_tecnico.desc': 'Algo se trabó, mostró un error o no cargó.', // MÉDIA
+  'report.category.erro_conteudo.desc': 'Alguna información de la lección está mal o desactualizada.', // MÉDIA
+  'report.category.traducao.desc': 'La traducción de una palabra o frase está mal.', // MÉDIA
+  'report.category.audio.desc': 'El audio está mal, se interrumpe o tiene mala pronunciación.', // MÉDIA
+  'report.category.visual.desc': 'Algo se ve mal, desalineado o difícil de leer.', // MÉDIA
+  'report.category.comportamento_inesperado.desc': 'Un botón o función hizo algo distinto de lo esperado.', // MÉDIA
+  'report.category.sugestao_melhoria.desc': 'Una idea para mejorar el sitio.', // MÉDIA
+  'report.category.outro.desc': 'Algo distinto de las opciones de arriba.', // MÉDIA
+  'report.modal.describeHint': 'Cuéntanos qué pasó y, si puedes, los pasos que estabas siguiendo.', // MÉDIA
+  'report.modal.sendReport': 'Enviar reporte', // MÉDIA
   'report.modal.whatHappened': '¿Qué pasó?', // ALTA -- España: "¿Qué ha pasado?"
   'report.modal.howMuch': '¿Cuánto te afectó?', // MÉDIA -- "atrapalhou" ≈ "estorbó/molestó"; "afectó" é o mais neutro
   'report.modal.optional': '(opcional)', // ALTA

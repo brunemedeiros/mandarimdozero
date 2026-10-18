@@ -290,3 +290,47 @@ as divisórias passaram para um tom mais forte (`--p-borda-campo`).
     não entrou. Teste novo `tests/dialogo-idioma/test_playwright.js` (20/20; com o código antigo dá 6 falhas no inglês).
   - Nota de privacidade do Reportar problema sem "--": "A captura, se anexada, fica visível só para a equipe. Nada é
     enviado automaticamente." (inglês igual, com ponto). Registrada como mudança aprovada nos testes de i18n.
+
+## Janelas pequenas no painel, Editar perfil e Trocar de curso (fr e zh, 2026-10-18)
+
+- Visual B (Pico) aprovado nas janelas Editar perfil, Reportar problema, Confirmar edição e Trocar de curso: classe
+  `.janela-painel` no `.app-modal`, CSS no bloco "Janelas pequenas no Design System do painel" dos dois index.
+- Editar perfil com os textos do JSON da autora (`edit_profile_modal`): título "Seu perfil, seu jeito" e subtítulo,
+  textos de apoio do nome e do @, "Sobre você" com placeholder sem idioma fixo, bloco "Compartilhe sua jornada" e
+  "Salvar perfil". Os 5 textos que eram fixos em português (título, Alterar/Remover foto, Nome exibido, Sobre mim,
+  Salvar) entraram no i18n (`ui.profileEdit.*`).
+  - Privacidade conferida na migration 080: no perfil privado só a própria conta, amigos aceitos, professora/aluno com
+    vínculo ativo e a admin veem foto, bio, progresso e Decks públicos; os outros veem nome, @ e conquista em destaque
+    e só acham pelo @ exato. O texto mostra as duas situações com essas consequências reais (o JSON sugeria uma
+    frase genérica para o privado; ficou a regra real, como o próprio JSON pede).
+  - Conflito documentado: o JSON sugeria "Escolha com cuidado" para o @, mas o @ já foi escolhido no primeiro acesso
+    (111) e o campo é só leitura. Ficou "Seu identificador é permanente e não pode ser alterado."
+  - Sem mudança de regra, banco, permissão ou validação. Ícones dentro dos campos e o selo de câmera do mockup
+    ficaram de fora (a instrução pede para não acrescentar ícones decorativos).
+- Trocar de curso: mantém o visual compacto; os botões dizem a ação ("Continuar estudando" / "Ir para {curso}").
+  Os botões são os mesmos da troca de idioma do site, então o texto antigo volta ao fechar. O "Começar Francês" e o
+  "Pronto para uma nova jornada?" do mockup não entraram porque a mesma janela serve para voltar a um curso já
+  começado.
+- Testes: menu de cursos 26/26, identidade 1 falha que já existe na `main` (username vazio no stub), Fase J 62/62,
+  i18n navegador 209/209, confirmação de idioma 16/16, placeholders 45/45, plano-admin 26/26, i18n unit com as
+  mesmas falhas antigas da `main` (chaves novas registradas). Capturas em pt e en, fr/zh, claro/escuro e celular.
+
+## Estética "janela rica" nas janelas do aluno (fr e zh, 2026-10-18)
+
+A autora preferiu a estética das imagens de referência dela (ícones por opção, blocos tingidos, título forte com
+subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do site. Peças novas `.jp-*` no bloco da
+`.janela-painel` (regra em `.claude/rules/painel-design-system.md`).
+- Trocar de curso: título e texto mudam conforme o curso: novo ("Pronto para uma nova jornada?", "Começar {curso}",
+  frase "Um novo idioma, novas possibilidades.") ou já começado ("Voltar para {curso}?", "Ir para {curso}"); o menu da
+  bandeira passa `started: true` e "Adicionar curso" marca `data-started` nos cursos com ✓. Pela troca de idioma do site
+  sai o texto neutro. Blocos "Seu progresso está seguro." e "Sua jornada continua.".
+- Editar perfil: "Sua identidade" ao lado da foto, campos com ícone, bloco de privacidade tingido com ícone e a ajuda
+  "Você decide o que compartilhar". Sem selo de câmera (não há ícone Fluent de câmera no site).
+- Confirmar edição: ícone 🔄, mensagem principal, explicação real (o cartão volta como novo na Revisão; nada é apagado),
+  dica para manter o progresso e "Sim, continuar". "Descartar edições" só fecha sem salvar (comportamento mantido).
+- Reportar: subtítulo, 8 categorias com ícone e descrição curta (ids e valores enviados iguais), chips de impacto com
+  ícone, `aria-pressed` nas seleções, contador da descrição (limite real 600; a descrição continua obrigatória),
+  texto de apoio e "Enviar relato". Espanhol (congelado) ganhou só as chaves novas do Reportar.
+- Testes: i18n navegador 209/209, i18n unit com as mesmas falhas da `main`, menu de cursos 26/26, deck-browser 208/208,
+  Fase G 68/68, Fase H 68/68, Fase I 48/48, plano-admin 26/26, placeholders 45/45, confirmação de idioma 16/16,
+  identidade com a mesma falha que já existe na `main`.

@@ -9,6 +9,17 @@ window.I18N_CATALOG['en'] = {
   'report.entry.menuItem': '⚑ Report a problem', // ALTA
 
   'report.modal.title': '⚑ Report a problem or suggestion', // ALTA
+  'report.modal.intro': 'Tell us what happened. It helps us improve your experience.', // ALTA
+  'report.category.bug_tecnico.desc': 'Something froze, showed an error or didn\'t load.', // ALTA
+  'report.category.erro_conteudo.desc': 'Some information in the lesson is wrong or out of date.', // ALTA
+  'report.category.traducao.desc': 'The translation of a word or sentence is wrong.', // ALTA
+  'report.category.audio.desc': 'The audio is wrong, cut off or badly pronounced.', // ALTA
+  'report.category.visual.desc': 'Something looks cut off, misaligned or hard to read.', // ALTA
+  'report.category.comportamento_inesperado.desc': 'A button or feature did something unexpected.', // ALTA
+  'report.category.sugestao_melhoria.desc': 'An idea to make the site even better.', // ALTA
+  'report.category.outro.desc': 'Something other than the options above.', // ALTA
+  'report.modal.describeHint': 'Tell us what happened and, if you can, the steps you were following.', // ALTA
+  'report.modal.sendReport': 'Send report', // ALTA
   'report.modal.whatHappened': 'What happened?', // ALTA
   'report.modal.howMuch': 'How much did it get in your way?', // MÉDIA -- "atrapalhou" sem equivalente direto; alternativa: "How much did this affect you?"
   'report.modal.optional': '(optional)', // ALTA
@@ -58,6 +69,10 @@ window.I18N_CATALOG['en'] = {
   'flashcardLimit.wouldGenerate': { one: 'This card would create {n} study card, but you only have {remaining} left on the free plan.', other: 'This card would create {n} study cards, but you only have {remaining} left on the free plan.' }, // MÉDIA -- política Free; plural real em EN (o PT usa "cartão(ões)")
 
   'flashcardReset.modal.title': '⚠️ Confirm edit', // ALTA
+  'flashcardReset.modal.headline': 'This edit will reset this card\'s review progress.', // ALTA
+  'flashcardReset.modal.explain': 'It shows up as a new card in Review again. You\'ll keep studying normally after saving.', // ALTA
+  'flashcardReset.modal.keepTip': 'If you want to keep your current progress, discard the edits: the card stays as it is.', // ALTA
+  'flashcardReset.modal.yes': 'Yes, continue', // ALTA
   'flashcardReset.modal.body': 'This edit will reset the review progress for this card. Do you want to continue?', // MÉDIA -- aviso de reinício de progresso
   'flashcardReset.modal.discard': 'Discard changes', // ALTA
   'flashcardReset.modal.confirm': 'Yes', // ALTA
@@ -82,6 +97,19 @@ window.I18N_CATALOG['en'] = {
   'courses.confirm.p1': 'It is a separate course with its own progress: if you have never studied in it, you start from zero.', // ALTA
   'courses.confirm.p2': 'Your progress in the current course stays saved and comes back when you return to it.', // ALTA
   'courses.confirm.p3': 'Your day streak and achievements stay the same.', // ALTA
+  'courses.confirm.stay': 'Keep studying', // ALTA
+  'courses.confirm.go': 'Go to {course}', // ALTA
+  'courses.confirm.newTitle': 'Ready for a new journey?', // ALTA
+  'courses.confirm.backTitle': 'Back to {course}?', // ALTA
+  'courses.confirm.newIntro': 'You\'re about to start the course:', // ALTA
+  'courses.confirm.backIntro': 'You\'re going back to the course:', // ALTA
+  'courses.confirm.tagline': 'A new language, new possibilities.', // ALTA
+  'courses.confirm.newP': 'Each course has its own journey. In {course}, progress is separate and you build it at your own pace.', // ALTA
+  'courses.confirm.backP': 'Your progress in {course} picks up right where you left off.', // ALTA
+  'courses.confirm.safeTitle': 'Your progress is safe.', // ALTA
+  'courses.confirm.safeText': 'Your progress in the current course stays saved and comes back when you return to it.', // ALTA
+  'courses.confirm.keepTitle': 'Your journey continues.', // ALTA
+  'courses.confirm.start': 'Start {course}', // ALTA
   'courses.first.title': 'Which course do you want to start?', // ALTA
   'courses.first.sub': 'You can switch or add courses later from the flag at the top of the screen. Each course keeps its own progress.', // ALTA
 
@@ -1020,7 +1048,7 @@ window.I18N_CATALOG['en'] = {
   'leaderboard.emptyText': 'Nobody has scored in this category yet this week.', // ALTA
   'leaderboard.scopeAria': 'Leaderboard scope', // ALTA
   'leaderboard.footnote': 'The leaderboard resets every Monday. Only people who have earned XP this week appear.', // ALTA
-  'profile.err.saveFailed': "We couldn't save right now. Check your connection and try again.", // ALTA
+  'profile.err.saveFailed': 'Couldn\'t save your profile. Check your connection and try again.', // ALTA
   'profile.err.imageRead': "We couldn't read that image.", // ALTA
   'profile.err.imageTooBig': 'Image too large (max 8MB).', // ALTA
   'profile.err.imageProcess': "We couldn't process that image. Try another one.", // ALTA
@@ -1990,7 +2018,26 @@ window.I18N_CATALOG['en'] = {
   'ui.dictation.step3': 'Click "Verificar" to compare your answer with the original text.', // MÉDIA
   'ui.dictation.step4': 'See what you got right and what needs review, word by word.', // ALTA
   'ui.challenges.backToCategories': '← Back to categories', // ALTA
-  'ui.profileEdit.username': 'Your public identifier (permanent)', // ALTA
+  'ui.profileEdit.username': 'Your public username', // ALTA
+  // Editar perfil (2026-10-18): textos novos aprovados pela autora; perfil é o mesmo em todos os cursos.
+  'ui.profileEdit.title': 'Your profile, your way', // ALTA
+  'ui.profileEdit.identityTitle': 'Your identity', // ALTA
+  'ui.profileEdit.identityText': 'Choose how people get to know you.', // ALTA
+  'ui.profileEdit.subtitle': 'Choose how you show up in the community.', // ALTA
+  'ui.profileEdit.changePhoto': 'Change photo', // ALTA
+  'ui.profileEdit.changePhotoAria': 'Change profile photo', // ALTA
+  'ui.profileEdit.removePhoto': 'Remove photo', // ALTA
+  'ui.profileEdit.name': 'Display name', // ALTA
+  'ui.profileEdit.nameHint': 'The name shown on your profile.', // ALTA
+  'ui.profileEdit.usernamePh': 'yourusername', // ALTA
+  'ui.profileEdit.usernameHint': 'Your username is permanent and can\'t be changed.', // ALTA
+  'ui.profileEdit.bio': 'About you', // ALTA
+  'ui.profileEdit.bioPh': 'Tell people a bit about you, your interests and what you\'re learning.', // ALTA
+  'ui.profileEdit.shareTitle': 'Share your journey', // ALTA
+  'ui.profileEdit.sharePublic': 'On: anyone with an account on the site can see your photo, your progress and your public Decks, and can find you in search.', // ALTA
+  'ui.profileEdit.sharePrivate': 'Off: only your friends and your teacher, if you have one, can see that. Everyone else sees just your name, your @ and your featured achievement, and can only find you by your exact @.', // ALTA
+  'ui.profileEdit.shareHelper': 'You decide what to share, and you can change it anytime.', // ALTA
+  'ui.profileEdit.save': 'Save profile', // ALTA
   'ui.profileEdit.publicProfile': 'Public profile', // ALTA
   'ui.profileEdit.publicProfileSub': 'On: anyone with an account sees your photo, progress and public decks. Off: only friends and your teacher do; others see just your name, @ and badges, and can only find you by your exact @.', // ALTA
   'ui.profileEdit.featuredBadge': 'Featured badge (shown in the Leaderboard)', // ALTA
