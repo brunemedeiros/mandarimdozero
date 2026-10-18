@@ -266,7 +266,10 @@ async function triggerWouldGenerate(page){
     // ---- pt-BR (padrão, sem query) ----
     const p = await boot(browser, portCur, lang, '');
     const ptSnap = await snapshot(p.page);
-    L('pt-BR: snapshot idêntico ao baseline original', JSON.stringify(ptSnap) === JSON.stringify(baseSnap), { ptSnap, baseSnap });
+    // Mudanças de texto em português aprovadas pela autora depois do baseline (regra: sem "--" em texto visível).
+    const DELIBERATE_PT = [['A captura, se anexada, fica visível só para a equipe -- nada é enviado automaticamente.', 'A captura, se anexada, fica visível só para a equipe. Nada é enviado automaticamente.'] /* 2026-10-18 */];
+    const baseFixed = DELIBERATE_PT.reduce((acc, [a, c]) => acc.split(a).join(c), JSON.stringify(baseSnap));
+    L('pt-BR: snapshot idêntico ao baseline original', JSON.stringify(ptSnap) === baseFixed, { ptSnap, baseSnap });
     L('pt-BR: getUiLang = pt-BR, html lang = pt-BR', await p.page.evaluate(() => getUiLang() === 'pt-BR' && document.documentElement.lang === 'pt-BR'));
     L('pt-BR: en/es não carregados', await p.page.evaluate(() => !I18N_CATALOG.en && !I18N_CATALOG.es && !document.querySelector('script[src*="i18n/en.js"],script[src*="i18n/es.js"]')));
     L('pt-BR: nenhum elemento marcado como traduzido', await p.page.evaluate(() => document.querySelectorAll('[data-i18n-applied]').length === 0));

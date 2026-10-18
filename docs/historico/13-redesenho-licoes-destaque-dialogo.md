@@ -282,6 +282,11 @@ as divisórias passaram para um tom mais forte (`--p-borda-campo`).
   que já têm estilo (o pai já é flex com espaçamento); `tone-hint` usa `wrong-feedback-header`; `mc-mark` herda a cor
   da alternativa certa/errada.
 - **C)** `.conj-x`/`.conj-gap`/`.typed-attempt` ficam com o PR #351 (aberto), sem duplicar aqui.
-- Achados extras, não corrigidos (decisão da autora): texto em português fixo no retorno do diálogo das lições
-  (`fr/app.js` e `zh/app.js`, "✅ Isso mesmo!" / "Quase! A resposta certa era:"), que aparece no site em inglês; e "--"
-  visível na nota de privacidade do Reportar problema (`report.modal.privacyNote`).
+- Achados extras, corrigidos com a autorização da autora (2026-10-18):
+  - O passo Diálogo e o "Você entendeu?" das lições (`renderDialogueStep`, `renderDialogueCheckStep`,
+    `renderDialogueCheck` em `fr/app.js` e `zh/app.js`) tinham uns 25 textos fixos em português ("✅ Isso mesmo!",
+    "Ouvir tudo", "Áudio automático", "Próxima pergunta"...), que apareciam no site em inglês. Viraram as chaves `dlg.*` e
+    `dlgCheck.*` (o português ficou igual). O conteúdo do curso (título, cena, falas, perguntas) é da camada do curso e
+    não entrou. Teste novo `tests/dialogo-idioma/test_playwright.js` (20/20; com o código antigo dá 6 falhas no inglês).
+  - Nota de privacidade do Reportar problema sem "--": "A captura, se anexada, fica visível só para a equipe. Nada é
+    enviado automaticamente." (inglês igual, com ponto). Registrada como mudança aprovada nos testes de i18n.

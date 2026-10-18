@@ -2356,27 +2356,27 @@ function renderDialogueStep(u, contentEl, nextBtn){
     const side = l.spk === 'B' ? 'b' : 'a';
     const who = sp[l.spk] || { n: l.spk, e: '' };
     return `
-      <div class="dlg-row ${side}" data-i="${i}" role="button" tabindex="0" aria-label="${escapeHTML(who.n)}: ouvir a partir desta fala">
+      <div class="dlg-row ${side}" data-i="${i}" role="button" tabindex="0" aria-label="${escapeHTML(t('dlg.playFromAria', { name: who.n }))}">
         <div class="dlg-avatar"><span class="dlg-emoji" aria-hidden="true">${who.e || escapeHTML(l.spk)}</span><span class="dlg-name">${escapeHTML(who.n)}</span></div>
         <div class="dlg-bubble">
           <div class="dlg-fr">${dlgHighlight(l.f, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>
           <div class="dlg-tr">${escapeHTML(l.t)}</div>
-          <button type="button" class="dlg-trbtn" aria-label="Mostrar a tradução desta fala" aria-pressed="false">🌐</button>
+          <button type="button" class="dlg-trbtn" aria-label="${escapeHTML(t('dlg.lineTrAria'))}" aria-pressed="false">🌐</button>
         </div>
       </div>`;
   }).join('');
 
   contentEl.innerHTML = `
-    <div class="section-label">Diálogo</div>
+    <div class="section-label">${t('dlg.label')}</div>
     <div class="dlg-title">${escapeHTML(dlg.title)}</div>
     ${dlg.scene ? `<div class="dlg-scene">📍 ${escapeHTML(dlg.scene)}</div>` : ''}
     <div class="dlg-tools">
-      <button class="btn btn-secondary dlg-play-btn" id="dlg-play-btn">▶ Ouvir tudo</button>
-      <button class="dlg-chip" id="dlg-auto-btn" aria-pressed="${dlgAutoplayOn()}">Áudio automático: ${dlgAutoplayOn() ? 'ligado' : 'desligado'}</button>
+      <button class="btn btn-secondary dlg-play-btn" id="dlg-play-btn">${t('dlg.playAll')}</button>
+      <button class="dlg-chip" id="dlg-auto-btn" aria-pressed="${dlgAutoplayOn()}">${dlgAutoplayOn() ? t('dlg.autoOn') : t('dlg.autoOff')}</button>
     </div>
     <div class="dlg-chat" id="ud-dialogue">${rowsHTML}</div>
-    <div class="dlg-float"><button class="dlg-chip dlg-chip-float" id="dlg-trans-btn" aria-pressed="false">🌐 Mostrar traduções</button></div>
-    ${terms.length ? `<div class="dlg-legend">As palavras coloridas são do vocabulário desta unidade. Toque numa delas para ver o significado.</div>` : ''}
+    <div class="dlg-float"><button class="dlg-chip dlg-chip-float" id="dlg-trans-btn" aria-pressed="false">${t('dlg.showTr')}</button></div>
+    ${terms.length ? `<div class="dlg-legend">${t('dlg.legend')}</div>` : ''}
   `;
 
   const chat = document.getElementById('ud-dialogue');
@@ -2387,13 +2387,13 @@ function renderDialogueStep(u, contentEl, nextBtn){
 
   function setPlaying(on){
     chat.classList.toggle('playing', on);
-    playBtn.textContent = on ? '⏸ Parar' : '▶ Ouvir tudo';
+    playBtn.textContent = on ? t('dlg.stop') : t('dlg.playAll');
     if (!on) rows.forEach(r => r.classList.remove('speaking'));
   }
   function setTranslations(on){
     chat.classList.toggle('show-trans', on);
     transBtn.setAttribute('aria-pressed', String(on));
-    transBtn.textContent = on ? '🌐 Ocultar traduções' : '🌐 Mostrar traduções';
+    transBtn.textContent = on ? t('dlg.hideTr') : t('dlg.showTr');
     // o botão geral manda em todas as falas; os 🌐 individuais acompanham
     rows.forEach(r => { r.classList.remove('show-tr'); r.querySelector('.dlg-trbtn')?.setAttribute('aria-pressed', 'false'); });
   }
@@ -2411,7 +2411,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
       if (!alive()) return;
       if (res === 'blocked'){
         setPlaying(false);
-        if (viaAutoplay) showToast('🔇 Toque em "Ouvir tudo" para ouvir a conversa');
+        if (viaAutoplay) showToast(t('dlg.tapToPlayToast'));
         return;
       }
       if (!res){ setPlaying(false); return; }
@@ -2431,7 +2431,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
     const on = !dlgAutoplayOn();
     dlgSetAutoplay(on);
     autoBtn.setAttribute('aria-pressed', String(on));
-    autoBtn.textContent = 'Áudio automático: ' + (on ? 'ligado' : 'desligado');
+    autoBtn.textContent = on ? t('dlg.autoOn') : t('dlg.autoOff');
   });
   rows.forEach(r => {
     const tb = r.querySelector('.dlg-trbtn');
@@ -2452,7 +2452,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
 
   // A micro-checagem é um passo à parte (dialogueCheck), depois deste:
   // na mesma tela daria para rolar e copiar a resposta do próprio diálogo.
-  nextBtn.textContent = 'Continuar →';
+  nextBtn.textContent = t('common.continueArrow');
   nextBtn.style.display = 'flex';
 
   const canHear = dlg.lines.some(l => canSpeakFrench(l.f));
@@ -2469,9 +2469,9 @@ function renderDialogueCheckStep(u, contentEl, nextBtn){
   const checks = Array.isArray(dlg.check) ? dlg.check : [];
   DLG.check = { qi: 0, correct: 0 };
   contentEl.innerHTML = `
-    <div class="section-label">Diálogo</div>
+    <div class="section-label">${t('dlg.label')}</div>
     <div class="dlg-title">${escapeHTML(dlg.title)}</div>
-    <div class="dlg-scene">Sem olhar o diálogo: o que você entendeu da conversa?</div>
+    <div class="dlg-scene">${t('dlg.checkScene')}</div>
     <div class="dlg-check" id="dlg-check"></div>
   `;
   nextBtn.style.display = 'none';
@@ -2498,24 +2498,24 @@ function renderDialogueCheck(u, dlg, sp, checks, nextBtn, rows){
     const q = checks[st.qi];
     let label = '', ctx = '', opts = [], flashIdx = -1;
     if (q.k === 'fill'){
-      label = 'Complete a resposta';
+      label = t('dlgCheck.fill');
       ctx = `<div class="dlg-q-ctx">${bubble(q.line - 1, L[q.line - 1].f, false)}${bubble(q.line, '', true)}</div>`;
       opts = dlgShuffle([{ t: L[q.line].f, ok: true }, ...q.bad.map(t => ({ t, ok: false }))]);
       flashIdx = q.line;
     } else if (q.k === 'listen'){
-      label = 'Ouça e escolha a resposta';
-      ctx = `<div class="dlg-q-listen"><button class="audio-btn audio-btn-lg" id="dlg-q-audio" aria-label="Ouvir a fala">🔊</button><div class="prompt-audio-hint">toque para ouvir de novo</div></div>`;
+      label = t('dlgCheck.listen');
+      ctx = `<div class="dlg-q-listen"><button class="audio-btn audio-btn-lg" id="dlg-q-audio" aria-label="${escapeHTML(t('dlgCheck.listenAria'))}">🔊</button><div class="prompt-audio-hint">${t('dlgCheck.tapAgain')}</div></div>`;
       opts = dlgShuffle([{ t: L[q.line + 1].f, ok: true }, ...q.bad.map(t => ({ t, ok: false }))]);
       flashIdx = q.line + 1;
     } else {
-      label = 'Compreensão';
+      label = t('dlgCheck.comprehension');
       ctx = `<div class="dlg-q-text">${escapeHTML(q.q)}</div>`;
       opts = q.opts.map((t, i) => ({ t, ok: i === q.ok }));
       flashIdx = -1;
     }
     const dots = checks.map((_, i) => `<span class="dlg-dot${i < st.qi ? ' done' : (i === st.qi ? ' on' : '')}"></span>`).join('');
     box.innerHTML = `
-      <div class="dlg-check-head"><span>Você entendeu?</span><span class="dlg-dots" role="img" aria-label="Pergunta ${st.qi + 1} de ${checks.length}">${dots}</span></div>
+      <div class="dlg-check-head"><span>${t('lesson.step.dialogueCheck')}</span><span class="dlg-dots" role="img" aria-label="${escapeHTML(t('dlgCheck.progressAria', { n: st.qi + 1, total: checks.length }))}">${dots}</span></div>
       <div class="exercise-prompt-label">${label}</div>
       ${ctx}
       <div class="dlg-opts">${opts.map((o, i) => `<button class="dlg-opt" data-i="${i}">${escapeHTML(o.t)}</button>`).join('')}</div>
@@ -2544,9 +2544,9 @@ function renderDialogueCheck(u, dlg, sp, checks, nextBtn, rows){
       const last = st.qi === checks.length - 1;
       box.querySelector('.dlg-fb-slot').innerHTML = `
         <div class="dlg-fb ${o.ok ? 'ok' : 'no'}">
-          <div class="dlg-fb-title">${o.ok ? '✅ Isso mesmo!' : 'Quase! A resposta certa era:'}</div>
+          <div class="dlg-fb-title">${o.ok ? t('dlgCheck.right') : t('dlgCheck.almost')}</div>
           ${o.ok ? '' : `<div class="dlg-fb-right">${escapeHTML(right)}</div>`}
-          <button class="btn btn-primary btn-block" id="dlg-q-next">${last ? 'Concluir' : 'Próxima pergunta →'}</button>
+          <button class="btn btn-primary btn-block" id="dlg-q-next">${last ? t('dlgCheck.finish') : t('dlgCheck.next')}</button>
         </div>`;
       document.getElementById('dlg-q-next').addEventListener('click', () => {
         if (last) finish(); else { st.qi += 1; showQuestion(); }
@@ -2558,11 +2558,11 @@ function renderDialogueCheck(u, dlg, sp, checks, nextBtn, rows){
   function finish(){
     stopExerciseAudio();
     box.innerHTML = `
-      <div class="dlg-check-head"><span>Você entendeu?</span></div>
-      <div class="dlg-sum">${st.correct} de ${checks.length} certas. ${st.correct === checks.length ? 'Conversa entendida!' : 'Ouça de novo e tente outra vez quando quiser.'}</div>
-      <button class="dlg-chip" id="dlg-redo">Refazer as perguntas</button>`;
+      <div class="dlg-check-head"><span>${t('lesson.step.dialogueCheck')}</span></div>
+      <div class="dlg-sum">${t('dlgCheck.summary', { n: st.correct, total: checks.length })} ${st.correct === checks.length ? t('dlgCheck.allRight') : t('dlgCheck.tryAgain')}</div>
+      <button class="dlg-chip" id="dlg-redo">${t('dlgCheck.redo')}</button>`;
     document.getElementById('dlg-redo').addEventListener('click', () => { st.qi = 0; st.correct = 0; showQuestion(); nextBtn.style.display = 'none'; });
-    nextBtn.textContent = 'Continuar →';
+    nextBtn.textContent = t('common.continueArrow');
     nextBtn.style.display = 'flex';
     nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }

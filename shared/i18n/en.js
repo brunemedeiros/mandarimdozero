@@ -19,7 +19,7 @@ window.I18N_CATALOG['en'] = {
   'report.modal.guestEmailOptional': '(optional, only if you want a reply)', // ALTA
   'report.modal.guestEmailPlaceholder': 'youremail@example.com', // ALTA
   'report.modal.attachButton': '📎 Attach a screenshot (optional)', // ALTA
-  'report.modal.privacyNote': 'If attached, the screenshot is visible only to the team -- nothing is sent automatically.', // ALTA
+  'report.modal.privacyNote': 'If attached, the screenshot is visible only to the team. Nothing is sent automatically.', // ALTA
   'report.modal.submit': 'Send', // ALTA
   'report.modal.sending': 'Sending...', // ALTA
   'report.modal.successText': 'Report sent. Thanks for helping improve the app!', // ALTA
@@ -2033,6 +2033,34 @@ window.I18N_CATALOG['en'] = {
   'feedback.correctAnswerColon': 'Correct answer:', // ALTA
   'feedback.label.yourAnswer': 'Your answer', // ALTA
   'lesson.step.dialogueCheck': 'Did you understand?', // ALTA
+  // Passo Diálogo das lições, fr e zh (antes era texto fixo em português).
+  'dlg.label': 'Dialogue', // ALTA
+  'dlg.playFromAria': '{name}: play from this line', // ALTA
+  'dlg.lineTrAria': 'Show the translation of this line', // ALTA
+  'dlg.playAll': '▶ Play all', // ALTA
+  'dlg.stop': '⏸ Stop', // ALTA
+  'dlg.autoOn': 'Autoplay audio: on', // ALTA
+  'dlg.autoOff': 'Autoplay audio: off', // ALTA
+  'dlg.showTr': '🌐 Show translations', // ALTA
+  'dlg.hideTr': '🌐 Hide translations', // ALTA
+  'dlg.legend': 'The colored words are from this unit\'s vocabulary. Tap one to see what it means.', // ALTA
+  'dlg.tapToPlayToast': '🔇 Tap "Play all" to hear the conversation', // ALTA
+  'dlg.checkScene': 'Without looking at the dialogue: what did you understand from the conversation?', // ALTA
+  // Perguntas do diálogo das lições ("Você entendeu?"), fr e zh (antes eram texto fixo em português).
+  'dlgCheck.fill': 'Complete the reply', // ALTA
+  'dlgCheck.listen': 'Listen and choose the reply', // ALTA
+  'dlgCheck.listenAria': 'Play the line', // ALTA
+  'dlgCheck.tapAgain': 'tap to hear it again', // ALTA
+  'dlgCheck.comprehension': 'Comprehension', // ALTA
+  'dlgCheck.progressAria': 'Question {n} of {total}', // ALTA
+  'dlgCheck.right': '✅ That\'s right!', // ALTA
+  'dlgCheck.almost': 'Almost! The right answer was:', // ALTA
+  'dlgCheck.finish': 'Finish', // ALTA
+  'dlgCheck.next': 'Next question →', // ALTA
+  'dlgCheck.summary': '{n} of {total} correct.', // ALTA
+  'dlgCheck.allRight': 'You understood the conversation!', // ALTA
+  'dlgCheck.tryAgain': 'Listen again and try once more whenever you like.', // ALTA
+  'dlgCheck.redo': 'Redo the questions', // ALTA
   'lesson.vocabDots.aria': 'Word {pos} of {total}', // ALTA
   'zh.exercise.translateToChinese': 'Translate into Chinese', // ALTA
   'zh.reorder.tapHint': 'Tap the blocks in the right order. Tap a placed one to send it back.', // ALTA
