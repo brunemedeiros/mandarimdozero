@@ -22,4 +22,11 @@ check('zh: barra sem espaço = certo', certo('Nǐ jǐ suì?/Nǐ duō dà?', 'Nǐ
 check('zh: só a primeira frase = certo', certo('Nǐ jǐ suì?', 'Nǐ jǐ suì? / Nǐ duō dà?'));
 check('zh: segunda frase incompleta = errado', !certo('Nǐ jǐ suì? / Nǐ duō', 'Nǐ jǐ suì? / Nǐ duō dà?'));
 check('zh: frase de outro cartão = errado', !certo('Nǐ hǎo', 'Nǐ jǐ suì? / Nǐ duō dà?'));
+check('typedVariants: vírgula vira barra só em cartão de duas formas', J(R("typedVariants('a, b', 'a / b')")) === J(['a, b', 'a / b']) && J(R("typedVariants('bonjour, madame', 'bonjour, madame')")) === J(['bonjour, madame']));
+check('typedVariants: vírgula chinesa também', J(R("typedVariants('a，b', 'a / b')")) === J(['a，b', 'a / b']));
+check('typedVariants: sem vírgula só padroniza a barra (e mantém o original)', J(R("typedVariants('a/b', 'a / b')")) === J(['a/b', 'a / b']));
+check('acceptedFormsTyped: o texto original do cartão também vale (ex.: sem espaço em volta da barra)', R("acceptedFormsTyped('e/ou')").includes('e/ou'));
+const certoV = (typed, expected) => { const all = R(`typedVariants(${J(typed)}, ${J(expected)})`).map(strip); return R(`acceptedFormsTyped(${J(expected)})`).some(f => all.includes(strip(f))); };
+check('zh: vírgula entre as duas frases = certo', certoV('Nǐ jǐ suì?, Nǐ duō dà?', 'Nǐ jǐ suì? / Nǐ duō dà?'));
+check('zh: ordem trocada = errado', !certoV('Nǐ duō dà? / Nǐ jǐ suì?', 'Nǐ jǐ suì? / Nǐ duō dà?'));
 summary();
