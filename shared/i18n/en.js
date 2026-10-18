@@ -102,6 +102,8 @@ window.I18N_CATALOG['en'] = {
   'settings.pref.sound.title': 'Correct/incorrect sound in exercises', // ALTA
   'settings.pref.sound.sub': 'Plays a short sound after each answer, in addition to the correct/incorrect color.', // ALTA
   'settings.export.title': 'Choose what to export', // ALTA
+  'settings.export.unit': 'Unit', // ALTA
+  'settings.export.allUnits': 'All units', // ALTA
   'settings.export.button': 'Generate .apkg file', // ALTA
   'settings.pref.cloze.subFr': 'Instead of choosing from options, type the missing word (Clozemaster style).', // ALTA
   'settings.export.descFr': 'The exported deck includes the French word/phrase (with audio you can set up in Anki) and its translation, using the same question/answer pair as in the app.', // MÉDIA
@@ -3416,6 +3418,22 @@ window.I18N_CATALOG['en'] = {
   'tinvite.banner.title': '{name} invited you to {lang} classes', // ALTA
   'tinvite.banner.see': 'See invite', // ALTA
   'tinvite.card.kicker': 'Class invite', // ALTA
+  'uchoice.title': 'Choose your name and your @', // ALTA
+  'uchoice.sub': 'This is how your friends and your teacher will find you on the site.', // ALTA
+  'uchoice.nameLabel': 'Your name', // ALTA
+  'uchoice.namePlaceholder': 'E.g. Raissa Lima', // ALTA
+  'uchoice.userLabel': 'Your @', // ALTA
+  'uchoice.rules': 'Lowercase letters, numbers and dots (e.g. raissa.lima), 3 to 24 characters.', // ALTA
+  'uchoice.warn': 'Heads up: you can only choose your @ now. It can\'t be changed later. You can change your name anytime in your profile.', // ALTA
+  'uchoice.save': 'Save', // ALTA
+  'uchoice.status.ok': 'This @ is available ✓', // ALTA
+  'uchoice.status.taken': 'This @ is already taken. Try another one.', // ALTA
+  'uchoice.status.reserved': 'This @ can\'t be used. Try another one.', // ALTA
+  'uchoice.status.invalid': 'Use only lowercase letters, numbers and dots between them, 3 to 24 characters.', // ALTA
+  'uchoice.status.checking': 'Checking…', // ALTA
+  'uchoice.status.error': 'Something went wrong. Please try again in a moment.', // ALTA
+  'uchoice.err.name': 'Please enter your name.', // ALTA
+  'uchoice.done': 'Done! Your @ is @{user}', // ALTA
   'tinvite.card.title': '{name} invited you to be their {lang} student', // ALTA
   'tinvite.card.perkProgress': 'Follow-up on your {lang} progress', // ALTA
   'tinvite.card.perkCards': 'Cards and class notes made for you', // ALTA

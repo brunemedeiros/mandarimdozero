@@ -255,6 +255,8 @@ async function onUserLoggedIn(user){
   // ida extra à rede) e grava qualquer escolha pendente feita antes disso.
   await applyAccountUiLanguage();
   askUiLanguageOnFirstAccess();
+  // Escolher o @ uma vez (111): só para quem tem o @ aleatório e ainda não escolheu; espera outras janelas.
+  if (typeof maybeAskUsernameChoice === 'function') maybeAskUsernameChoice().catch(() => {});
   // Depois do render padrão (ver comentário equivalente em enterGuestMode)
   // -- só assim a navegação forçada por uma notificação clicada vence a
   // aba default do carregamento normal.

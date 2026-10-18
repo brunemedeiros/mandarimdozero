@@ -1052,7 +1052,7 @@ function openMyFlashcardsExportModal(cardsToExport){
   }
   modal.style.display = 'flex';
   modal.innerHTML = `
-    <div class="app-modal deck-window deck-window-sm">
+    <div class="app-modal deck-window painel deck-window-sm">
       <div class="app-modal-header">
         <h3>${t('myFlashcards.export.modalTitle', { n: payload.cards.length })}</h3>
         <button class="app-modal-close" id="my-flashcards-export-close" aria-label="${t('common.close')}">✕</button>

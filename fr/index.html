@@ -4283,6 +4283,75 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .deck-delete-confirm{ background:var(--error-red, var(--seal-red)); color:var(--on-vivid); border:1px solid var(--error-red, var(--seal-red)); }
 .deck-delete-confirm:hover{ filter:brightness(1.06); }
 .deck-overview-danger{ color:var(--error-red, var(--seal-red)); }
+/* ---------- Janelas da Revisão no Design System do painel (Pico escopado em .painel, 2026-10-17) ----------
+   Configurar, Adicionar cartão, Painel e Exportar. Prévia aprovada pela autora: visual B, campo do cartão sem a
+   "ficha pautada" (igual ao editor de Criar cartão da Professora, .p-editor). As regras .deck-window acima continuam
+   valendo para o que não é redesenhado aqui. */
+/* Janela */
+.app-modal.deck-window.painel{ background:var(--p-elevado); color:var(--p-tinta); border:1px solid var(--p-linha); border-radius:var(--p-raio); box-shadow:var(--p-sombra), 0 16px 48px color-mix(in srgb, var(--p-tinta) 18%, transparent); font-family:var(--font-body); }
+.deck-window.painel :is(.app-modal-header, .deck-panel-head){ background:transparent; border-bottom:1px solid var(--p-linha); padding:1rem 1.25rem; gap:.75rem; }
+.deck-window.painel :is(.app-modal-header, .deck-panel-head) h3{ margin:0; font-size:1.1rem; font-weight:800; color:var(--p-tinta); }
+.deck-window.painel .app-modal-body{ padding:1.1rem 1.25rem 1.25rem; }
+/* Fechar: X discreto, como o rel=prev do Pico */
+.deck-window.painel button.app-modal-close{ width:2.25rem; height:2.25rem; min-height:0; margin:0; padding:0; flex:none; display:inline-grid; place-items:center; border:0; border-radius:8px; background:transparent; color:var(--p-tinta-suave); box-shadow:none; font-size:1rem; line-height:1; }
+.deck-window.painel button.app-modal-close:hover{ background:var(--p-superficie); color:var(--p-tinta); }
+/* Rótulos e textos de apoio */
+.deck-window.painel :is(label, .profile-edit-label){ font-size:.85rem; font-weight:700; color:var(--p-tinta); }
+.deck-window.painel .profile-edit-hint{ color:var(--p-tinta-suave); font-size:.85rem; }
+.deck-window.painel .section-label{ text-transform:none; letter-spacing:0; font-size:.95rem; font-weight:800; color:var(--p-tinta); }
+.deck-window.painel :is(select, input:not([type=checkbox]):not([type=radio]), textarea){ margin-bottom:0; }
+/* Configurar: linha rótulo x seleção */
+.deck-window.painel.review-settings-modal .app-modal-body > *{ border-color:var(--p-linha); }
+/* Editor de cartão: botão principal continua primário */
+.deck-window.painel .p-editor button.btn.btn-primary{ width:100%; min-height:2.75rem; margin:.5rem 0 0; padding:.6rem 1.2rem; border:0; border-radius:999px; background:var(--p-marca); color:var(--p-texto-botao); font-weight:800; box-shadow:none; }
+.deck-window.painel .p-editor button.btn.btn-primary:hover{ background:var(--p-botao-hover); }
+.deck-window.painel .p-editor .field-editor-row{ border:1px solid var(--p-linha); }
+.deck-window.painel .p-editor .field-editor-row [data-field-content]{ background:var(--p-elevado); border:1px solid var(--p-borda-campo); border-radius:var(--p-raio-controle); background-image:none; }
+.deck-window.painel .p-editor .field-editor-head{ border-bottom:0; }
+.deck-window.painel .p-editor .field-editor-title{ font-size:.95rem; font-weight:800; }
+.deck-window.painel .pill, .deck-window.painel .premium-pill{ border-radius:999px; }
+/* Painel: busca, filtros, lista */
+.deck-window.painel .deck-panel-head .deck-panel-search{ margin:0; min-height:2.5rem; border-radius:999px; }
+.deck-window.painel .deck-panel-side{ background:var(--p-superficie); border-right:1px solid var(--p-linha); }
+.deck-window.painel .deck-panel-side-label{ text-transform:none; letter-spacing:0; font-size:.8rem; font-weight:800; color:var(--p-tinta-suave); }
+.deck-window.painel button.deck-panel-side-item{ width:100%; min-height:0; margin:0 0 2px; padding:.4rem .75rem; border:0; border-radius:8px; background:transparent; color:var(--p-tinta); font-weight:600; font-size:.92rem; text-align:left; box-shadow:none; justify-content:flex-start; }
+.deck-window.painel button.deck-panel-side-item:hover{ background:var(--p-linha); }
+.deck-window.painel button.deck-panel-side-item.is-active{ background:var(--p-elevado); color:var(--p-tinta); font-weight:800; box-shadow:inset 3px 0 0 var(--p-marca); }
+.deck-window.painel .deck-panel-listhead{ font-size:.8rem; font-weight:800; color:var(--p-tinta-suave); text-transform:none; letter-spacing:0; border-bottom:1px solid var(--p-linha); }
+.deck-window.painel .deck-panel-item{ border-bottom:1px solid var(--p-linha); }
+.deck-window.painel .deck-panel-item.is-active{ background:color-mix(in srgb, var(--p-marca) 12%, transparent); box-shadow:inset 3px 0 0 var(--p-marca); }
+.deck-window.painel .deck-panel-item input[type=checkbox]{ margin:0; }
+.deck-window.painel .deck-panel-editor{ background:transparent; }
+.deck-window.painel .deck-panel-meta{ color:var(--p-tinta-suave); font-size:.85rem; }
+/* Exportar: duas ações */
+.deck-window.painel .export-choices{ display:flex; gap:.6rem; flex-wrap:wrap; }
+.deck-window.painel .export-choices button.btn{ width:auto; flex:1 1 12rem; min-height:2.6rem; margin:0; padding:.5rem 1rem; border-radius:999px; box-shadow:none; font-weight:800; }
+.deck-window.painel .export-choices button.btn:first-child{ background:var(--p-marca); border:0; color:var(--p-texto-botao); }
+.deck-window.painel .export-choices button.btn:not(:first-child){ background:transparent; border:1px solid var(--p-borda-campo); color:var(--p-tinta); }
+.deck-window.painel .add-card-submit-bar{ background:var(--p-elevado); border-top:1px solid var(--p-linha); }
+.deck-window.painel .deck-panel-item input[type=checkbox]{ border-radius:.3em; }
+.deck-window.painel .p-editor button.back-link.deck-panel-backbtn{ width:auto; min-height:2.5rem; margin:0; padding:0 .25rem; border:0; border-radius:8px; background:transparent; color:var(--p-tinta-suave); font-weight:700; box-shadow:none; }
+.deck-window.painel .p-editor button.back-link.deck-panel-backbtn:hover{ color:var(--p-tinta); background:transparent; }
+.deck-window.painel .p-editor button.btn.deck-overview-danger{ color:var(--p-erro); border-color:color-mix(in srgb, var(--p-erro) 45%, transparent); }
+.deck-window.painel .p-editor button.btn.deck-overview-danger:hover{ background:color-mix(in srgb, var(--p-erro) 10%, transparent); }
+/* Divisórias da lista do Painel: tom mais forte (no zh escuro a linha padrão some no fundo elevado) */
+.deck-window.painel .deck-panel-item{ border-bottom:1px solid color-mix(in srgb, var(--p-borda-campo) 70%, transparent); }
+.deck-window.painel .deck-panel-listhead{ border-bottom:1px solid var(--p-borda-campo); }
+/* Barra de seleção do Painel: compacta, Mover em contorno, Excluir em vermelho, Limpar como link */
+.deck-window.painel .deck-panel-bulk{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; padding:.6rem .75rem; background:var(--p-superficie); border-bottom:1px solid var(--p-borda-campo); }
+.deck-window.painel .deck-panel-bulk > span{ font-size:.85rem; font-weight:700; color:var(--p-tinta-suave); }
+.deck-window.painel .deck-panel-bulk select{ width:auto; min-height:2.2rem; margin:0; padding:.25rem 2rem .25rem .8rem; font-size:.9rem; }
+.deck-window.painel .deck-panel-bulk button{ width:auto; min-height:2.2rem; margin:0; padding:.25rem .9rem; border-radius:999px; font-size:.88rem; font-weight:700; box-shadow:none; }
+.deck-window.painel .deck-panel-bulk button.btn{ background:transparent; border:1px solid var(--p-borda-campo); color:var(--p-tinta); }
+.deck-window.painel .deck-panel-bulk button.btn:hover{ background:var(--p-linha); }
+.deck-window.painel .deck-panel-bulk button[data-panel-delete]{ color:var(--p-erro); border-color:color-mix(in srgb, var(--p-erro) 45%, transparent); }
+.deck-window.painel .deck-panel-bulk button.deck-panel-linkbtn{ background:transparent; border:0; color:var(--p-tinta-suave); text-decoration:underline; padding:.25rem .4rem; }
+.deck-window.painel .deck-panel-bulk .profile-edit-error:empty{ display:none; }
+@media (max-width:600px){
+  .deck-window.painel button.app-modal-close{ width:44px; height:44px; }
+  .deck-window.painel .deck-panel-bulk :is(button, select){ min-height:44px; }
+}
+
 /* ---------- Perfil: passada de design (Visão geral, Metas, Progresso, Amigos) ----------
    Identidade como carteirinha de estudante (faixa na cor do idioma no topo);
    o resto fica quieto: títulos em tom de frase, números do Progresso num painel só. */
@@ -4337,35 +4406,56 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 /* Editar perfil: sem o buraco embaixo da foto quando não há erro. */
 #profile-edit-modal .profile-edit-avatar-row{ margin:4px 0 4px; }
 #profile-edit-modal .profile-edit-avatar-error:empty{ display:none; }
-/* ---------- Configurações: passada de design (Geral, Notificações, Exportar) ----------
-   Cada grupo é um painel só, com linhas separadas por traço fino (como "Conta"),
-   em vez de uma caixa solta por preferência. Títulos em tom de frase. */
-#view-settings .section-label{ text-transform:none; letter-spacing:0; font-size:15px; font-weight:800; color:var(--ink); margin:28px 0 10px; }
-#view-settings .settings-card{ box-shadow:var(--shadow-card); }
-#view-settings .settings-more-note{ display:none; }
-#view-settings .pref-row{ border-radius:0; border-bottom-width:0; padding:16px 18px; }
-#view-settings .section-label + .pref-row{ border-top-left-radius:var(--radius); border-top-right-radius:var(--radius); }
-#view-settings .pref-row:not(:has(+ .pref-row)){ border-bottom-width:1px; border-bottom-left-radius:var(--radius); border-bottom-right-radius:var(--radius); box-shadow:var(--shadow-card); }
-#view-settings .pref-row-sub{ max-width:60ch; }
-#view-settings .notif-pref-advanced{ margin-top:22px; }
-#view-settings .notif-pref-advanced summary{ font-size:15px; font-weight:800; color:var(--ink); cursor:pointer; min-height:44px; display:flex; align-items:center; gap:6px; }
-#view-settings .notif-pref-matrix-head{ text-transform:none; letter-spacing:0; font-size:12px; }
-@media (max-width:560px){
-  #view-settings .pref-row{ padding:14px; }
-  #view-settings .pref-row:has(.notif-pref-quiet-hours){ flex-wrap:wrap; }
-  #view-settings .pref-row:has(.notif-pref-quiet-hours) .pref-row-text{ flex-basis:100%; }
+/* ---------- Configurações no Design System do painel (Pico escopado em .painel, 2026-10-17) ----------
+   Abas Geral/Notificações/Exportar = .p-seg; cada grupo = <article> com título; linhas = .p-linha-opcao com
+   interruptor input[role=switch]. As classes antigas (.pref-row etc.) ficam no HTML para os testes e o JS,
+   mas aqui dentro quem desenha é o painel. */
+#view-settings .cfg-pagina{ padding:0; gap:1.1rem; }
+#view-settings .cfg-abas button{ gap:.4rem; }
+#view-settings .cfg-corpo{ display:grid; gap:1rem; }
+#view-settings .cfg-corpo > article{ margin:0; }
+#view-settings .painel .pref-row{ background:none; border:0; border-top:1px solid var(--p-linha); border-radius:0; box-shadow:none; padding:.75rem 0; }
+#view-settings .painel article > header + .pref-row, #view-settings .painel .friends-prefs-box > .friends-pref-row:first-child{ border-top:0; }
+#view-settings .pref-row-text{ flex:1; min-width:0; display:grid; gap:.15rem; }
+#view-settings .pref-row-title, #view-settings .pref-row-sub{ display:block; }
+#view-settings .pref-row-title{ margin:0; font-size:.95rem; font-weight:800; color:var(--p-tinta); }
+#view-settings .pref-row-sub{ max-width:60ch; font-size:.85rem; line-height:1.45; color:var(--p-tinta-suave); }
+#view-settings .cfg-infos{ display:grid; gap:.5rem; }
+#view-settings .p-linha-info strong{ word-break:break-all; }
+#view-settings .painel select{ margin:0; width:auto; }
+#view-settings .notif-pref-quiet-hours{ display:flex; align-items:center; gap:.5rem; flex-shrink:0; font-size:.9rem; color:var(--p-tinta-suave); }
+#view-settings .notif-pref-quiet-hours select{ border-radius:999px; padding:.45rem 2.2rem .45rem 1rem; font-size:.95rem; background-color:var(--p-elevado); color:var(--p-tinta); border:1px solid var(--p-borda-campo); }
+#view-settings .notif-pref-advanced{ margin:.6rem 0 0; border:0; padding:0; }
+#view-settings .notif-pref-advanced summary{ min-height:44px; display:flex; align-items:center; color:var(--p-tinta-suave); font-weight:600; }
+#view-settings .notif-pref-advanced summary::before{ content:none; }
+#view-settings .cfg-matriz{ overflow-x:auto; margin-top:.4rem; }
+#view-settings .cfg-matriz table{ margin:0; }
+#view-settings .cfg-matriz :is(th, td){ text-align:center; padding:.55rem .5rem; }
+#view-settings .cfg-matriz tbody th{ text-align:left; font-weight:600; }
+#view-settings .cfg-matriz input{ margin:0; }
+#view-settings label.pref-row{ width:100%; cursor:pointer; }
+#view-settings .friends-prefs-box{ background:none; border:0; border-radius:0; padding:0; }
+#view-settings .friends-pref-row{ width:100%; margin:0; padding:.75rem 0; font-size:.95rem; color:var(--p-tinta); cursor:pointer; }
+#view-settings .friends-pref-row > span{ flex:1; min-width:0; }
+#view-settings .friends-pref-row input{ width:2.25em; height:1.25em; accent-color:auto; }
+#view-settings .friends-prefs-box .p-descricao{ margin:.6rem 0 0; }
+#view-settings .cfg-exportar{ display:grid; gap:1rem; }
+#view-settings .cfg-campo{ display:grid; gap:.4rem; margin:0; font-weight:600; }
+#view-settings .cfg-campo select{ width:100%; }
+#view-settings .cfg-exportar .p-descricao{ max-width:62ch; }
+#view-settings #export-btn{ margin:0; width:auto; }
+#view-settings .export-status{ margin:0; }
+#view-settings .export-status:empty{ display:none; }
+@media (max-width:600px){
+  #view-settings .cfg-silencio{ flex-wrap:wrap; }
+  #view-settings .cfg-silencio .pref-row-text{ flex-basis:100%; }
+  #view-settings .cfg-silencio .notif-pref-quiet-hours{ width:100%; }
+  #view-settings .cfg-silencio .notif-pref-quiet-hours select{ flex:1; min-height:44px; }
+  #view-settings .cfg-abas button{ min-height:44px; }
+  #view-settings .painel input[role=switch]{ min-height:0; }
+  #view-settings .cfg-matriz :is(th, td){ padding:.5rem .3rem; }
+  #view-settings .cfg-matriz input{ width:1.4rem; height:1.4rem; }
 }
-
-/* Exportar: escolha da unidade como lista legível, alinhada à esquerda. */
-#settings-export-content .export-box{ background:var(--paper); text-align:left; padding:20px; box-shadow:var(--shadow-card); }
-#settings-export-content .export-box .icon{ display:none; }
-#settings-export-content .export-box h3{ font-size:15px; font-weight:800; margin:0 0 12px; }
-#settings-export-content .deck-select{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:6px; justify-content:stretch; }
-#settings-export-content .deck-select > .deck-chip{ text-align:left; border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.3; min-height:44px; }
-#settings-export-content .deck-select > .deck-chip:first-child{ grid-column:1 / -1; justify-self:start; padding-left:16px; padding-right:16px; }
-#settings-export-content .export-box p{ margin:4px 0 16px; max-width:62ch; }
-#settings-export-content #export-btn{ margin:0 !important; }
-#settings-export-content .export-status:empty{ min-height:0; margin:0; }
 /* ---------- Lições: opções de múltipla escolha com o mesmo dourado das outras ----------
    A regra antiga usava --imperial-gold (rosa no fr) e valia também no toque. */
 .exercise-option:not(.correct):not(.incorrect):hover{ border-color:var(--paper-line); transform:none; }
@@ -4644,6 +4734,23 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .public-copies-line span{ font-size:12.5px; color:var(--ink-soft); }
 .public-copies-line.is-locked{ color:var(--ink-soft); font-size:13px; }
 .public-copies-meta{ display:block; font-size:12px; font-weight:400; color:var(--ink-soft); }
+/* Escolher o @ uma vez (111) */
+.uchoice-card{ max-width:440px; }
+.uchoice-body{ padding:22px 22px 20px; }
+.uchoice-title{ margin:0 0 4px; font-size:19px; color:var(--ink); }
+.uchoice-sub{ margin:0 0 16px; font-size:14px; color:var(--ink-soft); }
+.uchoice-label{ display:block; margin:12px 0 6px; font-size:13.5px; font-weight:800; color:var(--ink); }
+.uchoice-input{ width:100%; box-sizing:border-box; }
+.uchoice-user-wrap{ position:relative; }
+.uchoice-at{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-weight:700; pointer-events:none; }
+.uchoice-user{ padding-left:30px; }
+.uchoice-status{ min-height:18px; margin:6px 0 0; font-size:13px; color:var(--ink-soft); }
+.uchoice-status.is-ok{ color:var(--jade); font-weight:700; }
+.uchoice-status.is-bad{ color:var(--error-red); font-weight:700; }
+.uchoice-rules{ margin:4px 0 0; font-size:12.5px; color:var(--ink-soft); }
+.uchoice-warn{ margin:14px 0 12px; padding:10px 12px; border-radius:12px; background:var(--paper-warm); color:var(--ink); font-size:13.5px; line-height:1.45; }
+.uchoice-error:empty{ display:none; }
+@media (max-width:600px){ .uchoice-input{ min-height:44px; font-size:16px; } }
 /* Convite de aluno (077): seção da professora, faixa na Trilha e cartão do convite */
 .tinv-lang{ display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 14px; }
 .tinv-grid{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; align-items:start; }
@@ -4784,6 +4891,9 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 #view-conjugaison .is-almost .conj-x{ color:var(--conj-quase); background:color-mix(in srgb, var(--conj-quase) 20%, transparent); }
 #view-conjugaison .conj-other-form{ flex-basis:100%; font-weight:600; color:var(--ink-soft); font-size:12.5px; }
 #view-conjugaison .conj-accents{ display:flex; justify-content:center; margin:-6px 0 14px; }
+/* Teclas do mesmo tamanho das da lição (o flex encolhia a grade até a largura da letra). */
+#view-conjugaison .conj-accents .fr-accent-picker{ width:100%; max-width:360px; grid-template-columns:repeat(auto-fit, minmax(40px, 1fr)); }
+/* Conjugação: só as letras que os verbos usam (hoje 7: é è ê î û â ç), numa fileira só. */
 #view-conjugaison .conj-size-hint{ margin:2px 0 0; font-size:12px; color:var(--ink-soft); }
 #view-conjugaison .conj-size-hint:empty{ display:none; }
 #view-conjugaison .conj-session-result:has(.conj-review){ max-width:560px; }
@@ -4815,11 +4925,11 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   position:absolute; z-index:30; left:0; right:0; top:calc(100% + 6px); margin:0; padding:6px; list-style:none; max-height:320px; overflow-y:auto;
   background:var(--paper); border:1px solid var(--paper-line); border-radius:14px; box-shadow:var(--shadow-lift);
 }
-#view-conjugaison .conj-search-opt{ display:grid; grid-template-columns:24px auto minmax(0, 1fr); align-items:center; gap:10px; min-height:44px; padding:6px 10px; border-radius:10px; cursor:pointer; }
+#view-conjugaison .conj-search-opt{ display:grid; grid-template-columns:24px minmax(0, 1fr); align-items:center; gap:10px; min-height:44px; padding:6px 10px; border-radius:10px; cursor:pointer; }
 #view-conjugaison .conj-search-opt[aria-selected="true"]{ background:color-mix(in srgb, var(--seal-red) 12%, var(--paper)); }
 @media (hover:hover){ #view-conjugaison .conj-search-opt:hover{ background:color-mix(in srgb, var(--seal-red) 8%, var(--paper)); } }
-#view-conjugaison .conj-opt-word{ font-weight:800; font-size:15.5px; color:var(--ink); }
-#view-conjugaison .conj-opt-other{ font-size:13.5px; color:var(--ink-soft); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#view-conjugaison .conj-opt-word{ font-weight:800; font-size:15.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#view-conjugaison .conj-opt-other{ font-weight:600; font-size:14px; color:var(--ink-soft); } /* tradução logo depois do verbo: "morar (habiter)" */
 #view-conjugaison .conj-search-empty{ padding:12px 10px; color:var(--ink-soft); font-size:14px; }
 #view-conjugaison .conj-flag{ display:inline-flex; width:24px; height:16px; border-radius:3px; overflow:hidden; box-shadow:0 0 0 1px rgba(0,0,0,.14); }
 #view-conjugaison .conj-flag svg{ width:100%; height:100%; display:block; }
@@ -5637,72 +5747,78 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 
   <!-- ===== CONFIGURAÇÕES ===== -->
   <div class="view" id="view-settings">
-    <div class="path-header">
-      <h2 data-i18n="settings.title">Configurações</h2>
-      <p data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</p>
+    <!-- Configurações no Design System do painel (Pico escopado em .painel), aprovado pela autora em 2026-10-17.
+         Ids e data-settings-section continuam os mesmos: app.js, theme.js e os testes dependem deles. -->
+    <div class="painel">
+    <div class="p-pagina cfg-pagina">
+      <header class="p-cabecalho">
+        <div>
+          <h2 data-i18n="settings.title">Configurações</h2>
+          <span class="p-subtitulo" data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</span>
+        </div>
+      </header>
+      <div class="p-seg cfg-abas" role="toolbar" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
+        <button type="button" class="active" aria-pressed="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
+        <button type="button" aria-pressed="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
+        <button type="button" aria-pressed="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
+      </div>
+      <div id="settings-geral-content" class="cfg-corpo">
+        <article>
+          <header><h3 data-i18n="settings.section.account">Conta</h3></header>
+          <div class="cfg-infos">
+            <p class="p-linha-info"><span data-i18n="settings.account.email">E-mail</span><strong id="settings-email">—</strong></p>
+            <p class="p-linha-info"><span data-i18n="settings.account.provider">Conectado com</span><strong id="settings-provider">—</strong></p>
+          </div>
+        </article>
+        <article>
+          <header><h3 data-i18n="settings.section.preferences">Preferências</h3></header>
+          <label class="pref-row p-linha-opcao">
+            <span class="pref-row-text">
+              <span class="pref-row-title" data-i18n="settings.pref.dark.title">Modo escuro</span>
+              <span class="pref-row-sub" data-i18n="settings.pref.dark.sub">Usa o tema escuro em vez do claro, independente do sistema.</span>
+            </span>
+            <input type="checkbox" role="switch" id="theme-pref-switch" aria-label="Modo escuro" data-i18n-attr="aria-label:settings.pref.dark.title">
+          </label>
+          <label class="pref-row p-linha-opcao">
+            <span class="pref-row-text">
+              <span class="pref-row-title" data-i18n="settings.pref.cloze.title">Sempre digitar no exercício de completar frase</span>
+              <span class="pref-row-sub" data-i18n="settings.pref.cloze.subFr">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</span>
+            </span>
+            <input type="checkbox" role="switch" id="cloze-mode-switch" aria-label="Sempre digitar no exercício de completar frase" data-i18n-attr="aria-label:settings.pref.cloze.title">
+          </label>
+          <label class="pref-row p-linha-opcao">
+            <span class="pref-row-text">
+              <span class="pref-row-title" data-i18n="settings.pref.sound.title">Som de acerto/erro nos exercícios</span>
+              <span class="pref-row-sub" data-i18n="settings.pref.sound.sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</span>
+            </span>
+            <input type="checkbox" role="switch" id="feedback-sound-switch" checked aria-label="Som de acerto/erro nos exercícios" data-i18n-attr="aria-label:settings.pref.sound.title">
+          </label>
+          <div class="pref-row p-linha-opcao">
+            <div class="pref-row-text">
+              <div class="pref-row-title" data-i18n="settings.uiLanguage.title">Idioma da interface</div>
+              <div class="pref-row-sub" data-i18n="settings.uiLanguage.sub">Muda só os textos do app (menus, botões e avisos). Não muda o idioma que você estuda.</div>
+            </div>
+            <select class="review-settings-select" id="ui-language-select" aria-label="Idioma da interface" data-i18n-attr="aria-label:settings.uiLanguage.title">
+              <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+              <option value="en" lang="en">English</option>
+            </select>
+          </div>
+          <div id="my-courses" class="pref-row" style="display:none; flex-direction:column; align-items:stretch; gap:8px;"></div>
+        </article>
+      </div>
+      <div id="settings-notifications-content" class="cfg-corpo" style="display:none;"></div>
+      <div id="settings-export-content" class="cfg-corpo" style="display:none;">
+        <article>
+          <header><h3 data-i18n="settings.export.title">Escolha o que exportar</h3></header>
+          <div class="cfg-exportar">
+            <div id="export-deck-select"></div>
+            <p class="p-descricao" data-i18n="settings.export.descFr">O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.</p>
+            <div><button type="button" id="export-btn" data-i18n="settings.export.button">Gerar arquivo .apkg</button></div>
+            <div class="export-status" id="export-status"></div>
+          </div>
+        </article>
+      </div>
     </div>
-    <div class="leaderboard-tabs" role="tablist" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
-      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
-    </div>
-    <div id="settings-geral-content">
-      <div class="section-label" data-i18n="settings.section.account">Conta</div>
-      <div class="settings-card">
-        <div class="settings-row">
-          <div class="settings-row-label" data-i18n="settings.account.email">E-mail</div>
-          <div class="settings-row-value" id="settings-email">—</div>
-        </div>
-        <div class="settings-row">
-          <div class="settings-row-label" data-i18n="settings.account.provider">Conectado com</div>
-          <div class="settings-row-value" id="settings-provider">—</div>
-        </div>
-      </div>
-      <p class="settings-more-note" data-i18n="settings.account.moreSoon">Mais opções de conta em breve.</p>
-      <div class="section-label" data-i18n="settings.section.preferences">Preferências</div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.pref.dark.title">Modo escuro</div>
-          <div class="pref-row-sub" data-i18n="settings.pref.dark.sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
-        </div>
-        <button class="pref-switch" id="theme-pref-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
-      </div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.pref.cloze.title">Sempre digitar no exercício de completar frase</div>
-          <div class="pref-row-sub" data-i18n="settings.pref.cloze.subFr">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</div>
-        </div>
-        <button class="pref-switch" id="cloze-mode-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
-      </div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.pref.sound.title">Som de acerto/erro nos exercícios</div>
-          <div class="pref-row-sub" data-i18n="settings.pref.sound.sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
-        </div>
-        <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
-      </div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.uiLanguage.title">Idioma da interface</div>
-          <div class="pref-row-sub" data-i18n="settings.uiLanguage.sub">Muda só os textos do app (menus, botões e avisos). Não muda o idioma que você estuda.</div>
-        </div>
-        <select class="review-settings-select" id="ui-language-select" aria-label="Idioma da interface" data-i18n-attr="aria-label:settings.uiLanguage.title" style="width:auto; flex-shrink:0;">
-          <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
-          <option value="en" lang="en">English</option>
-        </select>
-      </div>
-      <div id="my-courses" class="pref-row" style="display:none; flex-direction:column; align-items:stretch; gap:8px;"></div>
-    </div>
-    <div id="settings-notifications-content" style="display:none;"></div>
-    <div id="settings-export-content" style="display:none;">
-      <div class="export-box">
-        <div class="icon">📦</div>
-        <h3 data-i18n="settings.export.title">Escolha o que exportar</h3>
-        <div class="deck-select" id="export-deck-select"></div>
-        <p data-i18n="settings.export.descFr">O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.</p>
-        <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;" data-i18n="settings.export.button">Gerar arquivo .apkg</button>
-        <div class="export-status" id="export-status"></div>
-      </div>
     </div>
   </div>
 
@@ -6334,6 +6450,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/teacher-panel.js"></script>
 <script src="../shared/painel/painel-ui.js"></script>
 <script src="../shared/teacher-invites.js"></script>
+<script src="../shared/username-choice.js"></script>
 <script src="../shared/mural.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>

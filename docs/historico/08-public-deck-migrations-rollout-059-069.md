@@ -386,3 +386,18 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   merge de 2026-10-12 (`7cb42f6`). Todo o CSS depois dele só valia em aparelho com mouse: no celular os painéis, o cartão do
   convite ("Recusar" ilegível) e as regras do fim do `<style>` ficavam sem estilo. Chave fechada; guarda nova
   `tests/css-equilibrio/test_unit.js` (falha no código antigo). Os testes de navegador não pegavam (Chromium de teste tem hover).
+
+## 111 -- Escolher o @ uma vez, no primeiro acesso (2026-10-17)
+
+- `shared/supabase_migrations/111_choose_username_once.sql`. Sem DROP. Decisões da autora (2026-10-17): nome + @ na primeira
+  entrada, @ sugerido a partir do nome e editável, só pode escolher nesse momento (sem pular); vale para quem tem o @ aleatório
+  da 060 (`u` + 10 hex) e ainda não escolheu; contas antigas (@ do e-mail) ficam como estão; @ com letras minúsculas, números e
+  ponto entre eles (3 a 24). Para a tag de autoria (`criado-por-*`, ponto vira hífen) continuar única, um @ novo é recusado se
+  outro @ gera a mesma tag (ex.: raissa.lima x raissa_lima). `profiles_protect_identity` só deixa trocar o @ pela
+  `claim_my_username`, uma vez, de aleatório para escolhido. Coluna nova `profiles.username_chosen_at`.
+- Site: `shared/username-choice.js` (janela que não fecha, espera outras janelas fecharem), chamada em `onUserLoggedIn`.
+- Testes: `tests/escolher-usuario/run.sh` (SQL 22/22) e `tests/escolher-usuario/test_playwright.js` (76/76: fr/zh, claro/escuro,
+  celular, site em inglês sem português).
+- Staging: aplicada em 2026-10-17 (simulação com rollback: escolheu, não pede de novo, 2ª escolha e UPDATE direto recusados).
+  Produção: aplicada em 2026-10-17 a pedido da autora (md5 das 6 funções igual ao Staging; simulação com rollback da
+  conta com @ aleatório: escolheu e deixou de ficar pendente).

@@ -83,5 +83,5 @@ function wireCustomAudioButtons(container){
 
 function updateFeedbackSoundSwitch(){
   const btn = document.getElementById('feedback-sound-switch');
-  if (btn) btn.setAttribute('aria-checked', isFeedbackSoundEnabled() ? 'true' : 'false');
+  if (btn) btn.checked = isFeedbackSoundEnabled();
 }
