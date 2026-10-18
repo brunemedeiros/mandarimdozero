@@ -1200,3 +1200,12 @@ function acceptedFormsTyped(expected){
 function slashSpacing(typed){
   return String(typed == null ? '' : typed).replace(/\s*\/\s*/g, ' / ');
 }
+// As leituras do que foi digitado num cartão com duas formas: barra padronizada e, se o cartão tem mais de uma
+// forma, também a vírgula (, ou ，) lida como barra. Ordem trocada não vale.
+function typedVariants(typed, expected){
+  const v = [slashSpacing(typed)];
+  if (acceptedForms(expected).length > 1 && /[,，]/.test(String(typed == null ? '' : typed))){
+    v.push(slashSpacing(String(typed).replace(/[,，]/g, ' / ')));
+  }
+  return v;
+}
