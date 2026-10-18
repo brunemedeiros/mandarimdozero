@@ -23,7 +23,8 @@ const falhas = [];
 const J = JSON.stringify;
 const porRegra = {};
 const curto = (x) => x.length > 90 ? x.slice(0, 87) + '...' : x;
-// autorizada() devolve o NOME da regra que explica a diferença ('a', 'c', 'd', 'e') ou false.
+// autorizada() devolve o NOME da regra que explica a diferença ('a', 'c', 'd', 'e', 'f') ou false.
+// 'f' (2026-10-16): alvo com duas formas ("allemand / allemande") passa a aceitar o texto inteiro digitado.
 function compara(grupo, rotulo, a, b, autorizada) {
   const g = grupos[grupo] || (grupos[grupo] = { ok: 0, autorizadas: 0, falhou: 0, exemplos: [] });
   const ja = J(a), jb = J(b);
@@ -90,10 +91,10 @@ for (const alvo of amostra) {
   for (const typed of variacoes(alvo).concat([''])) {
     const vOld = A.vocab(typed, alvo), vNew = N.vocab(typed, alvo);
     compara('vocab-type', alvo + ' | ' + typed, vOld, vNew,
-      () => vOld === 'errou' && vNew === 'quase' && A.vocab(semLigadura(typed), semLigadura(alvo)) === 'ok' && 'a');
+      () => (alvo.includes('/') && vOld === 'errou' && vNew !== 'errou' && 'f') || (vOld === 'errou' && vNew === 'quase' && A.vocab(semLigadura(typed), semLigadura(alvo)) === 'ok' && 'a'));
     const lOld = A.lacuna(typed, alvo), lNew = N.lacuna(typed, alvo);
     compara('lacuna-type', alvo + ' | ' + typed, lOld, lNew,
-      () => lOld === 'errou' && ((lNew === 'ok' && vOld === 'ok' && 'c') || (lNew === 'quase' && A.vocab(semLigadura(typed), semLigadura(alvo)) === 'ok' && 'a')));
+      () => (alvo.includes('/') && lOld === 'errou' && lNew !== 'errou' && 'f') || (lOld === 'errou' && ((lNew === 'ok' && vOld === 'ok' && 'c') || (lNew === 'quase' && A.vocab(semLigadura(typed), semLigadura(alvo)) === 'ok' && 'a'))));
   }
 }
 
