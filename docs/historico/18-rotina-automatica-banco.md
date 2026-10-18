@@ -100,3 +100,7 @@ Correção: migration `100_review_bank_agent_other_students` (o estado devolve `
 - Escrever o texto da tarefa nova (passos: `state` -> agenda -> caderno -> `ingest`); só ligar depois de testada.
 - Produção: migrations e função feitas; falta a autora digitar os segredos lá e o merge da branch (caixa "Atualizar automaticamente" no formulário do aluno).
 - Interface: mostrar "última rodada" (lê `review_bank_agent_runs`).
+
+- 2026-10-15: função v8 na produção (autorizada pela autora), motor regerado no PR #337 (Banco ligado a Turma: `rbReadyToDeliver`
+  aceita turma; `teacherId` no cartão). Atalhos fixados no commit c57286f; `index.ts` igual ao da v7. A rotina segue só para
+  alunos ligados a uma conta (`core.mjs` exige `linked_student_id`).

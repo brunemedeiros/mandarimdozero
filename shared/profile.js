@@ -174,7 +174,11 @@ function refreshProfilePlaceholders(){
 async function fetchMyProfileRow(){
   const rpc = await supabaseClient.rpc('get_my_profile');
   if (!rpc.error && rpc.data && typeof rpc.data === 'object' && rpc.data.user_id) return { data: rpc.data, error: null };
-  return supabaseClient.from('profiles').select('*').eq('user_id', CURRENT_USER.id).maybeSingle();
+  // RPC respondeu sem linha: a conta ainda não tem perfil. Não cair na leitura da tabela (a 080 a fechou: 403 e
+  // o perfil nunca era criado, 2026-10-16); devolver vazio para ensureProfileLoaded criar (ensure_my_profile).
+  if (!rpc.error) return { data: null, error: null };
+  const direct = await supabaseClient.from('profiles').select('*').eq('user_id', CURRENT_USER.id).maybeSingle();
+  return direct.error ? { data: null, error: null } : direct;
 }
 
 // UPDATE da própria linha SEM devolver a linha (devolver pediria ler colunas que a
@@ -442,13 +446,13 @@ async function buildLanguagesSummary(){
   return AVAILABLE_LANGUAGES.filter(l => l.enabled).map(l => {
     if (l.id === LANG_ID){
       const s = computeProgressSummary();
-      return { id: l.id, name: l.name, flagSvg: l.flagSvg, levelLabel: s.levelLabel, pct: s.pct, isCurrent: true };
+      return { id: l.id, name: languageDisplayName(l), flagSvg: l.flagSvg, levelLabel: s.levelLabel, pct: s.pct, isCurrent: true };
     }
     const other = CourseStorage.isPerSiteLanguage() ? CourseStorage.blockFor(raw, l.appKey, getUiLang()) : raw[l.appKey];
     if (!other) return null;
     if (other.progressSummary){
       const s = other.progressSummary;
-      return { id: l.id, name: l.name, flagSvg: l.flagSvg, levelLabel: s.levelLabel, pct: s.pct, isCurrent: false };
+      return { id: l.id, name: languageDisplayName(l), flagSvg: l.flagSvg, levelLabel: s.levelLabel, pct: s.pct, isCurrent: false };
     }
     // Progresso salvo ANTES de progressSummary existir (contas com
     // histórico anterior a este recurso) -- sem isto, o card do outro
@@ -460,7 +464,7 @@ async function buildLanguagesSummary(){
     // content.js do outro site.
     const fallback = fallbackSummaryFromUnitProgress(other.unitProgress);
     if (!fallback) return null;
-    return { id: l.id, name: l.name, flagSvg: l.flagSvg, levelLabel: null, pct: fallback.pct, isCurrent: false };
+    return { id: l.id, name: languageDisplayName(l), flagSvg: l.flagSvg, levelLabel: null, pct: fallback.pct, isCurrent: false };
   }).filter(Boolean);
 }
 

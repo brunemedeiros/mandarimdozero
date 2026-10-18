@@ -39,6 +39,7 @@ const APP_FUNCTIONS = [
   'ensureCourseDecksLoaded', 'ensureDecksLoadedForReview',
   'deckReviewSummary', 'deckCountsForReview', 'reviewFilterQueue',
   'sessionIntensityToLimit',
+  'trailGroups', 'unitsOfLevel', // Etapa 0b: applySerializedState (fr) abre a unidade nova (04, 2.10)
 ];
 
 function loadLang(lang, overrides){
@@ -53,6 +54,7 @@ function loadLang(lang, overrides){
   run(read('languages/registry.js'), 'languages/registry.js');
   run(read('shared/flashcard-model.js'), 'shared/flashcard-model.js');
   run(read('shared/study-trail-model.js'), 'shared/study-trail-model.js');
+  run(read('shared/trail-state-model.js'), 'shared/trail-state-model.js');
   run(read('shared/analytics-metrics.js'), 'shared/analytics-metrics.js');
   run(read('shared/deck-engine.js'), 'shared/deck-engine.js');
   run(read('shared/deck-data.js'), 'shared/deck-data.js');

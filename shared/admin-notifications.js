@@ -1,6 +1,7 @@
 // ---------- Notificações (admin) -- editor de variantes de texto ----------
-// Terceira seção do Painel de Admin (Badges / Analytics / Notificações --
-// troca gerida por shared/admin-analytics.js:switchAdminPanelSection).
+// Terceira seção do Painel de Admin (troca gerida por shared/admin-panel.js:switchAdminPanelSection).
+// Visual no Design System do painel (shared/admin-notifications-ui.js): lista agrupada por evento com filtros, formulário
+// "Nova variante" e regra do XP ao lado, janela de edição e confirmação do painel ao apagar.
 // CRUD sobre notification_templates (ver shared/supabase_migrations/
 // 010_create_notification_tables.sql e 011_seed_client_event_templates.sql):
 // cada linha é UMA variante de texto pra um evento × canal × idioma do app.
@@ -27,6 +28,7 @@
 //   - shared/auth.js            (CURRENT_USER)
 //   - shared/toast.js           (showToast)
 //   - shared/profile.js         (escapeHTML)
+//   - shared/admin-notifications-ui.js, shared/painel/painel-ui.js (PainelUI.confirmar)
 //   - languages/<lang>/app.js   (isAdminUser)
 
 const NOTIFICATION_TEMPLATE_EVENT_LABELS = {
@@ -149,196 +151,134 @@ async function updateGamificacaoRule({ cooldownMinutes, dailyCap, minXpAmount })
   return { ok: true };
 }
 
+const NOTIF_VIEW = { templates: [], rule: null, filtros: { evento: '', idioma: '', canal: '', busca: '' }, token: 0, ligado: false };
+
+function notificationsWrap(){ return document.getElementById('admin-notifications-content'); }
+
+function notificationsRefreshList(){
+  const box = document.querySelector('[data-notif-lista]');
+  if (!box) return;
+  const V = NOTIF_VIEW;
+  box.innerHTML = tntListHTML(tntGroupTemplates(V.templates, V.filtros, notificationTemplateEventLabel), V.templates.length, notificationTemplateEventLabel, (e) => NOTIFICATION_TEMPLATE_PLACEHOLDER_HINTS[e] || '');
+}
+
+// Busca as variantes de novo e atualiza só a lista (e as opções do filtro de evento), sem refazer os formulários.
+async function notificationsReload(){
+  NOTIF_VIEW.templates = await fetchAllNotificationTemplates();
+  const sel = document.querySelector('[data-notif-evento]');
+  if (sel){
+    const events = [...new Set(NOTIF_VIEW.templates.map(x => x.event_type))].sort(tntCompareEvents);
+    if (NOTIF_VIEW.filtros.evento && !events.includes(NOTIF_VIEW.filtros.evento)) NOTIF_VIEW.filtros.evento = '';
+    sel.innerHTML = `<option value="">${escapeHTML(t('notifications.filter.event.all'))}</option>` + events.map(e => `<option value="${escapeHTML(e)}"${NOTIF_VIEW.filtros.evento === e ? ' selected' : ''}>${escapeHTML(notificationTemplateEventLabel(e))}</option>`).join('');
+  }
+  notificationsRefreshList();
+}
+
 async function renderAdminNotificationsView(){
-  const wrap = document.getElementById('admin-notifications-content');
+  const wrap = notificationsWrap();
   if (!wrap) return;
   if (!isAdminUser()){
     wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
-  wrap.innerHTML = loadingHTML();
-
-  const [templates, gamificacaoRule] = await Promise.all([fetchAllNotificationTemplates(), fetchGamificacaoRule()]);
-
-  const eventOptionsHTML = Object.keys(NOTIFICATION_TEMPLATE_EVENT_LABELS).map(ev => `<option value="${ev}">${notificationTemplateEventLabel(ev)}</option>`).join('');
-
-  // Agrupa por evento -- é assim que a autora pensa nisso ("as variantes do
-  // XP", "as do badge"), não uma tabela crua linha a linha.
-  const byEvent = new Map();
-  templates.forEach(tpl => {
-    if (!byEvent.has(tpl.event_type)) byEvent.set(tpl.event_type, []);
-    byEvent.get(tpl.event_type).push(tpl);
-  });
-
-  const groupsHTML = byEvent.size ? [...byEvent.entries()].map(([eventType, variants]) => {
-    const hint = NOTIFICATION_TEMPLATE_PLACEHOLDER_HINTS[eventType];
-    const rowsHTML = variants.map(tpl => `
-      <div class="admin-badge-row" data-template-id="${tpl.id}">
-        <span class="admin-badge-icon">${tpl.icon || '🔔'}</span>
-        <div class="admin-badge-info">
-          <div class="admin-badge-name">${tpl.channel === 'email' ? '📧' : '📱'} ${LanguageRegistry.flagEmoji(tpl.language_app_key)} ${tpl.title ? escapeHTML(tpl.title) + ' -- ' : ''}${escapeHTML(tpl.body)}</div>
-          <div class="admin-badge-desc">${tpl.channel === 'email' ? t('admin.notifications.channel.emailLower') : t('admin.notifications.channel.inAppLower')} · ${tpl.active ? t('admin.notifications.status.active') : t('admin.notifications.status.inactive')}</div>
-        </div>
-        <button class="admin-badge-edit-btn" data-template-toggle="${tpl.id}" data-template-active="${tpl.active}" title="${tpl.active ? t('admin.notifications.btn.deactivate') : t('admin.notifications.btn.activate')}">${tpl.active ? '👁️' : '🚫'}</button>
-        <button class="admin-badge-edit-btn" data-template-edit="${tpl.id}" title="${t('admin.notifications.btn.edit')}">✏️</button>
-        <button class="admin-badge-delete-btn" data-template-delete="${tpl.id}" title="${t('admin.notifications.btn.delete')}">🗑️</button>
-      </div>
-    `).join('');
-    return `
-      <div class="profile-section">
-        <div class="section-label">${notificationTemplateEventLabel(eventType)}</div>
-        ${hint ? `<p class="profile-edit-hint">${hint}</p>` : ''}
-        ${rowsHTML}
-      </div>
-    `;
-  }).join('') : `<p class="profile-empty-note">${t('admin.notifications.empty')}</p>`;
-
-  wrap.innerHTML = `
-    <div class="profile-section">
-      <div class="section-label">${t('admin.notifications.rule.title')}</div>
-      <p class="profile-edit-hint">${t('admin.notifications.rule.hint')}</p>
-      <form id="admin-gamificacao-rule-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-rule-min-xp">${t('admin.notifications.rule.minXp')}</label>
-        <input type="number" id="admin-rule-min-xp" class="profile-edit-input" min="0" max="999" value="${gamificacaoRule?.min_xp_amount ?? ''}" placeholder="${t('admin.notifications.rule.minXpPh')}">
-        <label class="profile-edit-label" for="admin-rule-cooldown">${t('admin.notifications.rule.cooldown')}</label>
-        <input type="number" id="admin-rule-cooldown" class="profile-edit-input" min="0" max="1440" value="${gamificacaoRule?.cooldown_minutes ?? 15}">
-        <label class="profile-edit-label" for="admin-rule-daily-cap">${t('admin.notifications.rule.dailyCap')}</label>
-        <input type="number" id="admin-rule-daily-cap" class="profile-edit-input" min="0" max="99" value="${gamificacaoRule?.daily_cap ?? 5}">
-        <p class="profile-edit-error" id="admin-gamificacao-rule-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-gamificacao-rule-save-btn">${t('admin.notifications.rule.save')}</button>
-      </form>
-    </div>
-    <div class="profile-section">
-      <div class="section-label">${t('admin.notifications.new.title')}</div>
-      <form id="admin-create-template-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-template-event">${t('admin.notifications.new.event')}</label>
-        <input type="text" id="admin-template-event" class="profile-edit-input" list="admin-template-event-datalist" placeholder="${t('admin.notifications.new.eventPh')}">
-        <datalist id="admin-template-event-datalist">${eventOptionsHTML}</datalist>
-        <label class="profile-edit-label" for="admin-template-lang">${t('admin.notifications.new.lang')}</label>
-        <select id="admin-template-lang" class="profile-edit-input">
-          <option value="frances">${t('admin.notifications.new.langFr')}</option>
-          <option value="mandarim">${t('admin.notifications.new.langZh')}</option>
-        </select>
-        <label class="profile-edit-label" for="admin-template-channel">${t('admin.notifications.new.channel')}</label>
-        <select id="admin-template-channel" class="profile-edit-input">
-          <option value="in_app">${t('admin.notifications.new.channelInApp')}</option>
-          <option value="email">${t('admin.notifications.new.channelEmail')}</option>
-        </select>
-        <p class="profile-edit-hint">${t('admin.notifications.new.hint')}</p>
-        <label class="profile-edit-label" for="admin-template-title">${t('admin.notifications.new.titleLabel')}</label>
-        <input type="text" id="admin-template-title" class="profile-edit-input" maxlength="60" placeholder="${t('admin.notifications.new.titlePh')}">
-        <label class="profile-edit-label" for="admin-template-icon">${t('admin.notifications.new.icon')}</label>
-        <input type="text" id="admin-template-icon" class="profile-edit-input" maxlength="8" placeholder="🔔">
-        <label class="profile-edit-label" for="admin-template-body">${t('admin.notifications.new.body')}</label>
-        <textarea id="admin-template-body" class="profile-edit-textarea" maxlength="300" rows="2" placeholder="${t('admin.notifications.new.bodyPh')}"></textarea>
-        <p class="profile-edit-error" id="admin-create-template-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-template-btn">${t('admin.notifications.new.create')}</button>
-      </form>
-    </div>
-    ${groupsHTML}
-  `;
-
-  document.getElementById('admin-gamificacao-rule-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('admin-gamificacao-rule-save-btn');
-    const errorEl = document.getElementById('admin-gamificacao-rule-error');
-    errorEl.textContent = '';
-    const minXpRaw = document.getElementById('admin-rule-min-xp').value;
-    btn.disabled = true;
-    const result = await updateGamificacaoRule({
-      minXpAmount: minXpRaw === '' ? null : parseInt(minXpRaw, 10),
-      cooldownMinutes: parseInt(document.getElementById('admin-rule-cooldown').value, 10) || 0,
-      dailyCap: parseInt(document.getElementById('admin-rule-daily-cap').value, 10) || 0,
-    });
-    btn.disabled = false;
-    if (!result.ok){ errorEl.textContent = t('teacherMaterials.err.saveFailed'); return; }
-    showToast(t('admin.notifications.toast.ruleSaved'));
-  });
-
-  document.getElementById('admin-create-template-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('admin-create-template-btn');
-    const errorEl = document.getElementById('admin-create-template-error');
-    errorEl.textContent = '';
-    btn.disabled = true;
-    const result = await createNotificationTemplate({
-      eventType: document.getElementById('admin-template-event').value,
-      languageAppKey: document.getElementById('admin-template-lang').value,
-      channel: document.getElementById('admin-template-channel').value,
-      title: document.getElementById('admin-template-title').value,
-      body: document.getElementById('admin-template-body').value,
-      icon: document.getElementById('admin-template-icon').value,
-    });
-    btn.disabled = false;
-    if (!result.ok){ errorEl.textContent = result.error; return; }
-    showToast(t('admin.notifications.toast.created'));
-    renderAdminNotificationsView();
-  });
-
-  wrap.querySelectorAll('[data-template-toggle]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      await toggleNotificationTemplateActive(btn.dataset.templateToggle, btn.dataset.templateActive !== 'true');
-      renderAdminNotificationsView();
-    });
-  });
-
-  wrap.querySelectorAll('[data-template-delete]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      if (!confirm(t('admin.notifications.confirm.delete'))) return;
-      await deleteNotificationTemplate(btn.dataset.templateDelete);
-      renderAdminNotificationsView();
-    });
-  });
-
-  wrap.querySelectorAll('[data-template-edit]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const t = templates.find(x => String(x.id) === btn.dataset.templateEdit);
-      if (t) openEditNotificationTemplateModal(t);
-    });
-  });
+  notificationsBind(wrap);
+  const token = ++NOTIF_VIEW.token;
+  wrap.innerHTML = tntLoadingHTML();
+  const [templates, rule] = await Promise.all([fetchAllNotificationTemplates(), fetchGamificacaoRule()]);
+  if (token !== NOTIF_VIEW.token) return;
+  NOTIF_VIEW.templates = templates; NOTIF_VIEW.rule = rule;
+  wrap.innerHTML = tntPageHTML({ templates, filtros: NOTIF_VIEW.filtros, rule, labelOf: notificationTemplateEventLabel, hintOf: (e) => NOTIFICATION_TEMPLATE_PLACEHOLDER_HINTS[e] || '', knownEvents: NOTIFICATION_TEMPLATE_EVENT_LABELS });
 }
 
-// Modal simples de edição -- só título/emoji/texto (evento/canal/idioma não
-// mudam depois de criado: trocar o evento de uma variante já existente
-// mudaria o sentido dela; é mais claro criar uma nova e apagar a antiga).
-function openEditNotificationTemplateModal(template){
-  const modal = document.getElementById('admin-edit-template-modal');
-  modal.dataset.templateId = template.id;
-  document.getElementById('admin-edit-template-title').value = template.title || '';
-  document.getElementById('admin-edit-template-icon').value = template.icon || '';
-  document.getElementById('admin-edit-template-body').value = template.body || '';
-  document.getElementById('admin-edit-template-error').textContent = '';
-  modal.style.display = 'flex';
+async function notificationsCreate(form){
+  const btn = document.getElementById('variante-criar'), errorEl = document.getElementById('variante-erro');
+  errorEl.textContent = '';
+  btn.disabled = true;
+  const result = await createNotificationTemplate({
+    eventType: document.getElementById('variante-evento').value, languageAppKey: document.getElementById('variante-idioma').value,
+    channel: document.getElementById('variante-canal').value, title: document.getElementById('variante-titulo').value,
+    body: document.getElementById('variante-texto').value, icon: document.getElementById('variante-icone').value,
+  });
+  btn.disabled = false;
+  if (!result.ok){ errorEl.textContent = result.error; return; }
+  showToast(t('admin.notifications.toast.created'));
+  form.reset();
+  await notificationsReload();
 }
 
-function closeEditNotificationTemplateModal(){
-  document.getElementById('admin-edit-template-modal').style.display = 'none';
+async function notificationsSaveRule(){
+  const btn = document.getElementById('regra-salvar'), errorEl = document.getElementById('regra-erro');
+  errorEl.textContent = '';
+  const minXpRaw = document.getElementById('regra-minxp').value;
+  btn.disabled = true;
+  const result = await updateGamificacaoRule({
+    minXpAmount: minXpRaw === '' ? null : parseInt(minXpRaw, 10),
+    cooldownMinutes: parseInt(document.getElementById('regra-intervalo').value, 10) || 0,
+    dailyCap: parseInt(document.getElementById('regra-maximo').value, 10) || 0,
+  });
+  btn.disabled = false;
+  if (!result.ok){ errorEl.textContent = t('teacherMaterials.err.saveFailed'); return; }
+  showToast(t('admin.notifications.toast.ruleSaved'));
 }
 
-function wireEditNotificationTemplateModal(){
-  const modal = document.getElementById('admin-edit-template-modal');
-  if (!modal) return;
+function notificationsOpenEdit(id){
+  const tpl = NOTIF_VIEW.templates.find(x => String(x.id) === String(id));
+  const wrap = notificationsWrap(); if (!tpl || !wrap) return;
+  const old = document.getElementById('dlg-editar-variante'); if (old) old.remove();
+  (wrap.querySelector('.painel') || wrap).insertAdjacentHTML('beforeend', tntEditDialogHTML(tpl, notificationTemplateEventLabel));
+  const d = document.getElementById('dlg-editar-variante');
+  d.addEventListener('close', () => d.remove());
+  d.showModal();
+}
 
-  document.getElementById('admin-edit-template-modal-close').addEventListener('click', closeEditNotificationTemplateModal);
-  modal.addEventListener('click', (e) => { if (e.target === modal) closeEditNotificationTemplateModal(); });
+async function notificationsSaveEdit(form){
+  const errorEl = document.getElementById('editar-verro'); errorEl.textContent = '';
+  const result = await updateNotificationTemplate(form.dataset.id, {
+    title: document.getElementById('editar-vtitulo').value, icon: document.getElementById('editar-vicone').value, body: document.getElementById('editar-vtexto').value,
+  });
+  if (!result.ok){ errorEl.textContent = result.error; return; }
+  document.getElementById('dlg-editar-variante').close();
+  showToast(t('admin.notifications.toast.updated'));
+  await notificationsReload();
+}
 
-  document.getElementById('admin-edit-template-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('admin-edit-template-save-btn');
-    const errorEl = document.getElementById('admin-edit-template-error');
-    errorEl.textContent = '';
-    btn.disabled = true;
-    const result = await updateNotificationTemplate(modal.dataset.templateId, {
-      title: document.getElementById('admin-edit-template-title').value,
-      icon: document.getElementById('admin-edit-template-icon').value,
-      body: document.getElementById('admin-edit-template-body').value,
-    });
-    btn.disabled = false;
-    if (!result.ok){ errorEl.textContent = result.error; return; }
-    closeEditNotificationTemplateModal();
-    showToast(t('admin.notifications.toast.updated'));
-    renderAdminNotificationsView();
+async function notificationsToggle(id){
+  const tpl = NOTIF_VIEW.templates.find(x => String(x.id) === String(id)); if (!tpl) return;
+  const r = await toggleNotificationTemplateActive(id, !tpl.active);
+  if (!r.ok){ showToast(t('plans.failed')); return; }
+  await notificationsReload();
+}
+
+async function notificationsDelete(id){
+  const tpl = NOTIF_VIEW.templates.find(x => String(x.id) === String(id)); if (!tpl) return;
+  const opts = { titulo: t('notifications.delete.title'), descricao: t('notifications.delete.text', { text: (tpl.title || tpl.body || '').slice(0, 60) }), confirmar: t('notifications.delete.confirm'), cancelar: t('notifications.edit.cancel'), perigo: true };
+  const ok = (window.PainelUI && PainelUI.confirmar) ? await PainelUI.confirmar(opts) : confirm(t('admin.notifications.confirm.delete'));
+  if (!ok) return;
+  const r = await deleteNotificationTemplate(id);
+  if (!r.ok){ showToast(t('plans.failed')); return; }
+  await notificationsReload();
+}
+
+// Eventos delegados no contêiner da aba: ligados uma vez só.
+function notificationsBind(wrap){
+  if (NOTIF_VIEW.ligado) return;
+  NOTIF_VIEW.ligado = true;
+  const V = NOTIF_VIEW;
+  wrap.addEventListener('click', (e) => {
+    let el;
+    if ((el = e.target.closest('[data-editar-variante]'))){ el.closest('details')?.removeAttribute('open'); return notificationsOpenEdit(el.dataset.editarVariante); }
+    if ((el = e.target.closest('[data-alternar-variante]'))){ el.closest('details')?.removeAttribute('open'); return notificationsToggle(el.dataset.alternarVariante); }
+    if ((el = e.target.closest('[data-apagar-variante]'))){ el.closest('details')?.removeAttribute('open'); return notificationsDelete(el.dataset.apagarVariante); }
+  });
+  wrap.addEventListener('input', (e) => { if (e.target.matches('[data-notif-busca]')){ V.filtros.busca = e.target.value; notificationsRefreshList(); } });
+  wrap.addEventListener('change', (e) => {
+    if (e.target.matches('[data-notif-evento]')){ V.filtros.evento = e.target.value; notificationsRefreshList(); }
+    else if (e.target.matches('[data-notif-idioma]')){ V.filtros.idioma = e.target.value; notificationsRefreshList(); }
+    else if (e.target.matches('[data-notif-canal]')){ V.filtros.canal = e.target.value; notificationsRefreshList(); }
+  });
+  wrap.addEventListener('submit', (e) => {
+    if (e.target.id === 'form-variante'){ e.preventDefault(); notificationsCreate(e.target); }
+    else if (e.target.id === 'form-regra-xp'){ e.preventDefault(); notificationsSaveRule(); }
+    else if (e.target.id === 'form-editar-variante'){ e.preventDefault(); notificationsSaveEdit(e.target); }
   });
 }
-
-wireEditNotificationTemplateModal();

@@ -139,8 +139,12 @@ function deckBrowserLangLabel(){
 // Unidades da Trilha de Estudo que o aluno ainda não começou (bloqueadas ou
 // nunca abertas) não aparecem na lista de Decks; só as em andamento e as
 // concluídas. Decks que não são unidade da Trilha passam sempre.
+// Etapa 0b do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.5): o Course Deck de uma unidade que não
+// existe mais no conteúdo (excluída ou fundida) fica no banco, vazio (os cartões seguem a unidade atual do item), e
+// some da tela, mesmo que o save ainda tenha progresso dela. Nada é apagado.
 function deckBrowserUnitVisible(deck){
   if (!deck || deck.kind !== 'course' || deck.course_unit_id == null) return true;
+  if (typeof UNITS !== 'undefined' && Array.isArray(UNITS) && !UNITS.some(u => u && String(u.id) === String(deck.course_unit_id))) return false;
   const prog = (typeof STATE !== 'undefined' && STATE.unitProgress) ? STATE.unitProgress[deck.course_unit_id] : null;
   return !!(prog && (prog.started || prog.completed));
 }

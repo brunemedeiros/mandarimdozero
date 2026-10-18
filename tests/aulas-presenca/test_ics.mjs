@@ -7,7 +7,7 @@ const src = fs.readFileSync(new URL('../../supabase/functions/class-calendar-fee
   .replace(/^Deno\.serve\(/m, '((..._a: any[]) => null)(');
 const tmp = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'ics-')), 'feed.mts');
 fs.writeFileSync(tmp, src);
-const { buildIcs } = await import(pathToFileURL(tmp).href);
+const { buildIcs, feedToken } = await import(pathToFileURL(tmp).href);
 let ok = 0, n = 0; const L = (name, c, extra) => { n++; if (c) ok++; else console.log('FALHOU', name, extra ?? ''); };
 const rows = [
   { id: 1, role: 'student', language_app_key: 'frances', class_date: '2026-11-03', start_at: '2026-11-03T22:30:00+00:00', duration_minutes: 90,
@@ -38,5 +38,11 @@ L('DTSTAMP do updated_at ou de agora', ics.includes('DTSTAMP:20261015T100000Z') 
 const en = buildIcs(rows.slice(0, 1), 'en');
 L('inglês', en.includes('SUMMARY:Lesson: French · Prof Brune') && en.includes('X-WR-CALNAME:Lessons · Prof. Brune') && en.replace(/\r\n /g, '').includes('Topic: '));
 L('calendário vazio válido', buildIcs([], 'pt').split('\r\n').filter(Boolean).at(-1) === 'END:VCALENDAR' && !buildIcs([], 'pt').includes('VEVENT'));
+const F = (x) => feedToken(new URL(x));
+L('senha curta no caminho (Netlify)', F('https://x.supabase.co/functions/v1/class-calendar-feed/k7qx9mp2vn4nr8st') === 'k7qx9mp2vn4nr8st');
+L('senha curta com .ics', F('https://x.supabase.co/functions/v1/class-calendar-feed/k7qx9mp2vn4nr8st.ics') === 'k7qx9mp2vn4nr8st');
+L('forma antiga ?t= com 64 hex', F('https://x.supabase.co/functions/v1/class-calendar-feed?t=' + 'a'.repeat(64)) === 'a'.repeat(64));
+L('sem senha = nada', F('https://x.supabase.co/functions/v1/class-calendar-feed') === null);
+L('senha inválida = nada', F('https://x.supabase.co/functions/v1/class-calendar-feed/abc') === null && F('https://x.supabase.co/functions/v1/class-calendar-feed/k7qx9mp2vn4nr8s1') === null);
 console.log(`${ok}/${n} ok`);
 process.exit(ok === n ? 0 : 1);

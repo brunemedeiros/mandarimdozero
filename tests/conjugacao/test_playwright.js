@@ -113,6 +113,7 @@ async function fill(page, wrongIdx){
 
     await page.click('#conj-start-btn');
     await page.waitForSelector('.conj-tense-box .conj-field input');
+    if (process.env.SHOTS) await page.locator('.conj-accents').screenshot({ path: process.env.SHOTS + `/conj-acentos-${theme}.png` });
     const lay = await page.evaluate(() => {
       const box = document.querySelector('.conj-tense-box').getBoundingClientRect();
       const grid = document.querySelector('.conj-tense-grid').getBoundingClientRect();
@@ -126,6 +127,11 @@ async function fill(page, wrongIdx){
     L('prática: um tempo só ocupa a largura toda', lay.single && lay.full, lay);
     L('prática: as 6 pessoas na vertical (je ... ils)', lay.oneCol && lay.down, lay);
     L('prática: pronome à esquerda do campo, na mesma linha', lay.labelLeft, lay);
+    const keyW = await page.evaluate(() => document.querySelector('.conj-accents .fr-accent-key').getBoundingClientRect().width);
+    L('teclas de acento com largura de toque (como na lição), não apertadas', keyW >= 40, keyW);
+    const keys = await page.evaluate(() => { const ks = [...document.querySelectorAll('.conj-accents .fr-accent-key')];
+      return { letters: ks.map(k => k.textContent).join(''), rows: new Set(ks.map(k => Math.round(k.getBoundingClientRect().top))).size }; });
+    L('teclado da Conjugação: só as letras que os verbos usam (2026-10-16), numa fileira só', keys.letters === 'âçéèêîû' && keys.rows === 1, keys);
 
     await fill(page, 3);
     await page.click('#conj-verify-btn');
@@ -158,7 +164,7 @@ async function fill(page, wrongIdx){
     await page.waitForSelector('.conj-tense-box');
     const s1 = await page.evaluate(() => ({ n: CONJ_STATE.verbQueue.length, next: !!document.querySelector('.conj-verb-header.next'),
       bar: document.querySelector('.conj-progress-bar > i').style.width, acc: document.querySelectorAll('.conj-accents .fr-accent-key').length }));
-    check('sessão com 3 verbos, sem "Próximo verbo", barra em 0%, teclas de acento', s1.n === 3 && !s1.next && s1.bar === '0%' && s1.acc >= 10, s1);
+    check('sessão com 3 verbos, sem "Próximo verbo", barra em 0%, teclas de acento', s1.n === 3 && !s1.next && s1.bar === '0%' && s1.acc === 7 /* 2026-10-16: só as letras dos verbos */, s1);
 
     // Acento entra no campo com o cursor; Enter passa para o próximo campo.
     await page.click('.conj-field[data-idx="1"] input');
@@ -263,11 +269,12 @@ async function fill(page, wrongIdx){
     check('site em inglês: frase sem a tradução em português', enTr === 0, enTr);
     await page.click('#conj-search-input');
     await page.keyboard.type('comer');
+    if (process.env.SHOTS){ const bb = await page.locator('.conj-search').boundingBox(); await page.screenshot({ path: process.env.SHOTS + '/conj-busca-comer.png', clip: { x: bb.x, y: bb.y, width: bb.width, height: bb.height + 130 } }); }
     const s1 = await page.evaluate(() => { const o = document.querySelector('#conj-search-list .conj-search-opt');
       return { open: !document.getElementById('conj-search-list').hidden, exp: document.getElementById('conj-search-input').getAttribute('aria-expanded'),
         verb: o && o.dataset.verb, word: o && o.querySelector('.conj-opt-word').textContent, flag: o && o.querySelector('.conj-flag').getAttribute('aria-label'),
         green: !!(o && o.querySelector('.conj-flag rect[fill="#009739"]')) }; });
-    check('"comer" acha manger, com a bandeira do Brasil', s1.open && s1.exp === 'true' && s1.verb === 'manger' && s1.word === 'comer' && s1.flag === 'português' && s1.green, s1);
+    check('"comer" acha manger, com a bandeira do Brasil', s1.open && s1.exp === 'true' && s1.verb === 'manger' && s1.word === 'comer (manger)' /* 2026-10-16: tradução logo depois do verbo */ && s1.flag === 'português' && s1.green, s1);
     await page.keyboard.press('Enter');
     await page.keyboard.type('etre');
     const s2 = await page.evaluate(() => { const o = document.querySelector('#conj-search-list .conj-search-opt');

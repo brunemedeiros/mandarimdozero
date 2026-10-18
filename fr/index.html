@@ -48,6 +48,12 @@ try{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="preload" href="../shared/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../shared/fonts/nunito.css">
+<!-- Design System do painel (tudo escopado em .painel: não muda nada fora dele). Ver .claude/rules/painel-design-system.md -->
+<link rel="stylesheet" href="../shared/painel/vendor/pico.painel.css">
+<link rel="stylesheet" href="../shared/painel/painel-tokens.css">
+<link rel="stylesheet" href="../shared/painel/painel-componentes.css">
 <link rel="stylesheet" href="../shared/review-bank.css">
 <style>
 :root{
@@ -197,11 +203,6 @@ try{
   --shadow-lift: 0 8px 24px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05);
 }
 
-/* Nunito de verdade (antes só local('Nunito'), que na prática nunca carregava). Subconjunto latin, 4 pesos. */
-@font-face{ font-family:'Nunito'; font-weight:400; font-style:normal; font-display:swap; src:url(../shared/fonts/nunito-latin-400-normal.woff2) format('woff2'); }
-@font-face{ font-family:'Nunito'; font-weight:700; font-style:normal; font-display:swap; src:url(../shared/fonts/nunito-latin-700-normal.woff2) format('woff2'); }
-@font-face{ font-family:'Nunito'; font-weight:800; font-style:normal; font-display:swap; src:url(../shared/fonts/nunito-latin-800-normal.woff2) format('woff2'); }
-@font-face{ font-family:'Nunito'; font-weight:900; font-style:normal; font-display:swap; src:url(../shared/fonts/nunito-latin-900-normal.woff2) format('woff2'); }
 
 *{ box-sizing: border-box; }
 /* Foco de teclado: sem isto, cada navegador desenha um anel default
@@ -505,11 +506,15 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   /* .tabs já fica escondida sempre agora (ver regra global acima) --
      e os pills de Ranking/Conta na topbar voltam aqui (só mobile os
      esconde, ver regra global também). */
-  #user-menu-btn{ display:flex; }
-  /* XP some do topbar aqui -- fica só no card de Status à direita, sem
-     repetição (decisão #1). No mobile (fora desta media query) continua
-     no topbar, como já decidido pra lá (decisão #4). */
-  .stats-pills .pill.xp{ display:none; }
+  /* Conta/Sair: o pill com o nome saiu no desktop; "Sair da conta" fica no fim da
+     sidebar (#sidebar-logout-btn) e Reportar já tem o ⚑ da topbar. */
+  /* Topbar "flutuando" (estilo Duolingo): no desktop os itens ficam sem caixinha,
+     só ícone + número. O XP volta à topbar (o card Status saiu). O pill de
+     Admin Mode ligado em OFF (.active, roxo) mantém o fundo: é um aviso. */
+  :root:root .stats-pills .pill:not(.admin-mode-toggle-btn.active),
+  :root:root .stats-pills .lang-switcher-btn{ background:none; border-color:transparent; box-shadow:none; }
+  :root:root .stats-pills .pill:not(.admin-mode-toggle-btn.active):hover,
+  :root:root .stats-pills .lang-switcher-btn:hover{ background:var(--paper-warm); }
   /* A faixa de Missões do dia na Trilha vira redundante aqui -- o mesmo
      conteúdo já mora no card fixo da sidebar direita (renderDailyChallengesStrip
      renderiza nos dois; CSS decide qual aparece). Some só a partir daqui;
@@ -527,12 +532,16 @@ a.pill:hover{ border-color: var(--imperial-gold); }
     /* Linha de separação da sidebar, estilo Duolingo. */
     border-right:1px solid var(--paper-line); padding-right:20px;
   }
+  /* Recolher menu: ícone « solto no topo (sem caixinha, como a topbar); vira » ao recolher. */
   .sidebar-toggle-btn{
-    align-self:flex-end; width:32px; height:32px; border-radius:8px; flex-shrink:0;
-    border:1px solid var(--paper-line); background:var(--paper); color:var(--ink-soft);
-    cursor:pointer; display:flex; align-items:center; justify-content:center; margin-bottom:10px;
+    align-self:flex-end; width:32px; height:32px; border-radius:8px; flex-shrink:0; border:none; background:none;
+    color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; justify-content:center; margin-bottom:10px;
   }
-  .sidebar-toggle-btn:hover{ color:var(--ink); border-color:var(--imperial-gold); }
+  .sidebar-toggle-btn:hover{ color:var(--ink); background:var(--paper-warm); }
+  #app.sidebar-collapsed .sidebar-toggle-btn{ align-self:center; }
+  .sidebar-toggle-icon{ transition:transform .2s ease; }
+  #app.sidebar-collapsed .sidebar-toggle-icon{ transform:rotate(180deg); }
+  @media (prefers-reduced-motion: reduce){ .sidebar-toggle-icon{ transition:none; } }
   .sidebar-nav{ display:flex; flex-direction:column; gap:2px; }
   .sidebar .tab-btn{ flex:none; width:100%; justify-content:flex-start; padding:10px 12px; }
   /* Ícones da sidebar são coloridos (flat, 2-3 tons), não monocromáticos
@@ -548,13 +557,12 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   .right-cards{ grid-area:cards; display:flex; flex-direction:column; gap:16px; position:sticky; top:97px; }
   .side-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-card); }
   .side-card-title{ font-size:15px; font-weight:900; letter-spacing:0; color:var(--ink); margin:0 0 12px; display:flex; align-items:center; gap:6px; }
-  .side-status-row{ display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:700; padding:4px 0; }
-  .side-status-row + .side-status-row{ border-top:1px solid var(--paper-line); }
   /* Card de Missões do dia usa o mesmo .dcs-card/.dcs-caption-btn da faixa
      da Trilha (renderDailyChallengesStrip renderiza nos dois lugares) --
      sem padding extra do .side-card aqui em cima, o botão de recolher já
      tem o próprio respiro. */
-  #side-card-missions{ padding-top:10px; }
+  /* Ranking e Missões do dia sem moldura: lista solta na coluna (as missões já são cartões). */
+  #side-card-missions, #side-card-ranking{ background:none; border:none; box-shadow:none; padding:0; }
   #side-missions-body .dcs-caption-btn{ padding-top:0; }
   /* Mesmo peso dos outros títulos da coluna (.side-card-title). */
   #side-missions-body .dcs-caption{ font-size:15px; font-weight:900; letter-spacing:0; text-transform:none; color:var(--ink); }
@@ -568,7 +576,11 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   #app.sidebar-collapsed{ grid-template-columns:64px minmax(0,1fr) 280px; }
   #app.sidebar-collapsed .sidebar-label{ display:none; }
   #app.sidebar-collapsed .sidebar .tab-btn{ justify-content:center; padding:10px; }
-  #app.sidebar-collapsed .sidebar-toggle-btn{ align-self:center; }
+
+  /* Painéis da professora e do Admin ocupam a largura toda: sem Ranking, Status e Missões do dia ao lado (são do aluno). */
+  #app:is([data-active-tab="teacher-panel"], [data-active-tab="admin-badges"]){ grid-template-columns:220px minmax(0,1fr); grid-template-areas:"topbar topbar" "sidebar content"; padding-right:32px; }
+  #app:is([data-active-tab="teacher-panel"], [data-active-tab="admin-badges"]) .right-cards{ display:none; }
+  #app.sidebar-collapsed:is([data-active-tab="teacher-panel"], [data-active-tab="admin-badges"]){ grid-template-columns:64px minmax(0,1fr); }
 
   /* Modo foco de lição estendido pro desktop: sidebar e cards somem, o
      conteúdo (o exercício em si) ocupa a largura toda -- reaproveita a
@@ -4325,40 +4337,62 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 /* Editar perfil: sem o buraco embaixo da foto quando não há erro. */
 #profile-edit-modal .profile-edit-avatar-row{ margin:4px 0 4px; }
 #profile-edit-modal .profile-edit-avatar-error:empty{ display:none; }
-/* ---------- Configurações: passada de design (Geral, Notificações, Exportar) ----------
-   Cada grupo é um painel só, com linhas separadas por traço fino (como "Conta"),
-   em vez de uma caixa solta por preferência. Títulos em tom de frase. */
-#view-settings .section-label{ text-transform:none; letter-spacing:0; font-size:15px; font-weight:800; color:var(--ink); margin:28px 0 10px; }
-#view-settings .settings-card{ box-shadow:var(--shadow-card); }
-#view-settings .settings-more-note{ display:none; }
-#view-settings .pref-row{ border-radius:0; border-bottom-width:0; padding:16px 18px; }
-#view-settings .section-label + .pref-row{ border-top-left-radius:var(--radius); border-top-right-radius:var(--radius); }
-#view-settings .pref-row:not(:has(+ .pref-row)){ border-bottom-width:1px; border-bottom-left-radius:var(--radius); border-bottom-right-radius:var(--radius); box-shadow:var(--shadow-card); }
-#view-settings .pref-row-sub{ max-width:60ch; }
-#view-settings .notif-pref-advanced{ margin-top:22px; }
-#view-settings .notif-pref-advanced summary{ font-size:15px; font-weight:800; color:var(--ink); cursor:pointer; min-height:44px; display:flex; align-items:center; gap:6px; }
-#view-settings .notif-pref-matrix-head{ text-transform:none; letter-spacing:0; font-size:12px; }
-@media (max-width:560px){
-  #view-settings .pref-row{ padding:14px; }
-  #view-settings .pref-row:has(.notif-pref-quiet-hours){ flex-wrap:wrap; }
-  #view-settings .pref-row:has(.notif-pref-quiet-hours) .pref-row-text{ flex-basis:100%; }
+/* ---------- Configurações no Design System do painel (Pico escopado em .painel, 2026-10-17) ----------
+   Abas Geral/Notificações/Exportar = .p-seg; cada grupo = <article> com título; linhas = .p-linha-opcao com
+   interruptor input[role=switch]. As classes antigas (.pref-row etc.) ficam no HTML para os testes e o JS,
+   mas aqui dentro quem desenha é o painel. */
+#view-settings .cfg-pagina{ padding:0; gap:1.1rem; }
+#view-settings .cfg-abas button{ gap:.4rem; }
+#view-settings .cfg-corpo{ display:grid; gap:1rem; }
+#view-settings .cfg-corpo > article{ margin:0; }
+#view-settings .painel .pref-row{ background:none; border:0; border-top:1px solid var(--p-linha); border-radius:0; box-shadow:none; padding:.75rem 0; }
+#view-settings .painel article > header + .pref-row, #view-settings .painel .friends-prefs-box > .friends-pref-row:first-child{ border-top:0; }
+#view-settings .pref-row-text{ flex:1; min-width:0; display:grid; gap:.15rem; }
+#view-settings .pref-row-title, #view-settings .pref-row-sub{ display:block; }
+#view-settings .pref-row-title{ margin:0; font-size:.95rem; font-weight:800; color:var(--p-tinta); }
+#view-settings .pref-row-sub{ max-width:60ch; font-size:.85rem; line-height:1.45; color:var(--p-tinta-suave); }
+#view-settings .cfg-infos{ display:grid; gap:.5rem; }
+#view-settings .p-linha-info strong{ word-break:break-all; }
+#view-settings .painel select{ margin:0; width:auto; }
+#view-settings .notif-pref-quiet-hours{ display:flex; align-items:center; gap:.5rem; flex-shrink:0; font-size:.9rem; color:var(--p-tinta-suave); }
+#view-settings .notif-pref-quiet-hours select{ border-radius:999px; padding:.45rem 2.2rem .45rem 1rem; font-size:.95rem; background-color:var(--p-elevado); color:var(--p-tinta); border:1px solid var(--p-borda-campo); }
+#view-settings .notif-pref-advanced{ margin:.6rem 0 0; border:0; padding:0; }
+#view-settings .notif-pref-advanced summary{ min-height:44px; display:flex; align-items:center; color:var(--p-tinta-suave); font-weight:600; }
+#view-settings .notif-pref-advanced summary::before{ content:none; }
+#view-settings .cfg-matriz{ overflow-x:auto; margin-top:.4rem; }
+#view-settings .cfg-matriz table{ margin:0; }
+#view-settings .cfg-matriz :is(th, td){ text-align:center; padding:.55rem .5rem; }
+#view-settings .cfg-matriz tbody th{ text-align:left; font-weight:600; }
+#view-settings .cfg-matriz input{ margin:0; }
+#view-settings label.pref-row{ width:100%; cursor:pointer; }
+#view-settings .friends-prefs-box{ background:none; border:0; border-radius:0; padding:0; }
+#view-settings .friends-pref-row{ width:100%; margin:0; padding:.75rem 0; font-size:.95rem; color:var(--p-tinta); cursor:pointer; }
+#view-settings .friends-pref-row > span{ flex:1; min-width:0; }
+#view-settings .friends-pref-row input{ width:2.25em; height:1.25em; accent-color:auto; }
+#view-settings .friends-prefs-box .p-descricao{ margin:.6rem 0 0; }
+#view-settings .cfg-exportar{ display:grid; gap:1rem; }
+#view-settings .cfg-campo{ display:grid; gap:.4rem; margin:0; font-weight:600; }
+#view-settings .cfg-campo select{ width:100%; }
+#view-settings .cfg-exportar .p-descricao{ max-width:62ch; }
+#view-settings #export-btn{ margin:0; width:auto; }
+#view-settings .export-status{ margin:0; }
+#view-settings .export-status:empty{ display:none; }
+@media (max-width:600px){
+  #view-settings .cfg-silencio{ flex-wrap:wrap; }
+  #view-settings .cfg-silencio .pref-row-text{ flex-basis:100%; }
+  #view-settings .cfg-silencio .notif-pref-quiet-hours{ width:100%; }
+  #view-settings .cfg-silencio .notif-pref-quiet-hours select{ flex:1; min-height:44px; }
+  #view-settings .cfg-abas button{ min-height:44px; }
+  #view-settings .painel input[role=switch]{ min-height:0; }
+  #view-settings .cfg-matriz :is(th, td){ padding:.5rem .3rem; }
+  #view-settings .cfg-matriz input{ width:1.4rem; height:1.4rem; }
 }
-
-/* Exportar: escolha da unidade como lista legível, alinhada à esquerda. */
-#settings-export-content .export-box{ background:var(--paper); text-align:left; padding:20px; box-shadow:var(--shadow-card); }
-#settings-export-content .export-box .icon{ display:none; }
-#settings-export-content .export-box h3{ font-size:15px; font-weight:800; margin:0 0 12px; }
-#settings-export-content .deck-select{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:6px; justify-content:stretch; }
-#settings-export-content .deck-select > .deck-chip{ text-align:left; border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.3; min-height:44px; }
-#settings-export-content .deck-select > .deck-chip:first-child{ grid-column:1 / -1; justify-self:start; padding-left:16px; padding-right:16px; }
-#settings-export-content .export-box p{ margin:4px 0 16px; max-width:62ch; }
-#settings-export-content #export-btn{ margin:0 !important; }
-#settings-export-content .export-status:empty{ min-height:0; margin:0; }
 /* ---------- Lições: opções de múltipla escolha com o mesmo dourado das outras ----------
    A regra antiga usava --imperial-gold (rosa no fr) e valia também no toque. */
 .exercise-option:not(.correct):not(.incorrect):hover{ border-color:var(--paper-line); transform:none; }
 @media (hover:hover){
   .exercise-option:not(.disabled):not(.correct):not(.incorrect):hover{ border-color:var(--hover-gold); background:color-mix(in srgb, var(--hover-gold) 14%, var(--paper)); transform:translateY(-1px); }
+}
 
 /* ---------- Painéis (Admin, Professora, Minhas aulas): passada de design 2026-10-12 ----------
    Mesma linguagem da Revisão: seletor segmentado (.deck-topbar) numa linha, títulos de seção sem
@@ -4373,6 +4407,9 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .panel-view .profile-edit-form{ max-width:560px; }
 .panel-section + .panel-section{ margin-top:30px; padding-top:20px; border-top:1px solid var(--paper-line); }
 .panel-view .profile-section{ margin-top:0; }
+/* Design System do painel dentro do app: sem fundo próprio (usa o do app) e sem recuo lateral extra. */
+.panel-view .painel{ background:transparent; }
+.panel-view .painel .p-pagina{ padding-left:0; padding-right:0; }
 .panel-view .profile-section + .profile-section{ margin-top:26px; }
 @media (min-width:640px){
   .panel-view .btn-block{ width:auto; min-width:200px; padding-left:22px; padding-right:22px; align-self:flex-start; }
@@ -4387,49 +4424,6 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
   .panel-view .leaderboard-tabs{ flex-wrap:nowrap; overflow-x:auto; }
   .panel-view .leaderboard-tab{ white-space:nowrap; min-height:44px; }
 }
-
-/* Planos: busca por nome/@ com sugestões */
-.plans-search{ position:relative; max-width:460px; }
-.plans-search-input{ width:100%; }
-.plans-search-list{
-  position:absolute; z-index:20; left:0; right:0; top:calc(100% + 4px); margin:0; padding:4px; list-style:none;
-  background:var(--paper); border:1px solid var(--paper-line); border-radius:12px; box-shadow:var(--shadow-card);
-  max-height:320px; overflow-y:auto;
-}
-.plans-option{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:9px; cursor:pointer; }
-.plans-option[aria-selected="true"], .plans-option:hover{ background:var(--paper-warm); }
-.plans-avatar{
-  flex-shrink:0; width:30px; height:30px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
-  background:var(--paper-line); color:var(--ink); font-weight:800; font-size:13px;
-}
-.plans-avatar-lg{ width:40px; height:40px; font-size:16px; }
-.plans-option-text{ display:flex; flex-direction:column; min-width:0; flex:1; }
-.plans-option-name{ font-weight:700; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.plans-option-user{ font-size:12.5px; color:var(--ink-soft); }
-.plans-chip{ flex-shrink:0; font-size:11.5px; font-weight:700; color:var(--ink-soft); border:1px solid var(--paper-line); border-radius:999px; padding:2px 8px; }
-.plans-search-status{ font-size:12.5px; color:var(--ink-soft); margin:6px 0 0; min-height:1em; }
-.plans-account-card{ max-width:460px; margin-top:12px; }
-.plans-account-head{ justify-content:flex-start; gap:12px; }
-
-/* Planos: tabela de permissões (mesmo desenho da tabela de Decks) */
-.plans-matrix-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); }
-.plans-matrix{ width:100%; border-collapse:separate; border-spacing:0; }
-.plans-matrix tbody th{ min-width:150px; }
-.plans-matrix tbody th, .plans-matrix thead th:first-child{ position:sticky; left:0; z-index:1; background:var(--paper); }
-.plans-matrix th, .plans-matrix td{ padding:8px 6px; border-bottom:1px solid var(--paper-line); text-align:center; vertical-align:middle; }
-.plans-matrix th:first-child{ padding-left:12px; }
-.plans-matrix thead th{ font-size:12px; font-weight:600; color:var(--ink-soft); line-height:1.25; }
-.plans-matrix tbody th{ text-align:left; font-weight:600; font-size:13.5px; color:var(--ink); line-height:1.35; }
-.plans-matrix thead th:first-child{ text-align:left; }
-.plans-matrix tr:last-child th, .plans-matrix tr:last-child td{ border-bottom:none; }
-.plans-cell{ display:inline-flex; flex-direction:column; align-items:center; gap:6px; }
-.plans-cell input[type="checkbox"]{ width:18px; height:18px; accent-color:var(--seal-red); cursor:pointer; }
-.plans-limit{
-  width:64px; text-align:center; font:inherit; font-size:13px; padding:4px 6px; border:1px solid var(--paper-line); border-radius:8px;
-  background:var(--paper-warm); color:var(--ink);
-}
-.plans-limit:disabled{ opacity:.45; }
-.plans-cell.is-saved .plans-limit, .plans-cell.is-saved input[type="checkbox"]{ outline:2px solid color-mix(in srgb, var(--seal-red) 45%, transparent); outline-offset:2px; border-radius:4px; }
 
 /* Minhas aulas (aluno): uma linha por aula, data à esquerda */
 .class-log-list{ list-style:none; margin:0; padding:0; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); }
@@ -4620,6 +4614,34 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .tbell-new{ font-weight:800; color:var(--seal-red-dark); }
 .tbell-item-note{ font-size:12px; color:var(--ink-soft); font-style:italic; }
 .tbell-empty{ padding:20px 8px; text-align:center; color:var(--ink-soft); font-size:14px; margin:0; }
+/* Itens no Design System do painel (Pico): p-item + selo "Novo" que marca só aquele aviso (2026-10-15). */
+.tbell-panel.painel{ padding:0; background:var(--p-bg); border-color:var(--p-linha); overflow:hidden; }
+.tbell-panel.painel .tbell-head{ padding:.85rem 1rem .7rem; margin:0; border-bottom:1px solid var(--p-linha); }
+.tbell-panel.painel .tbell-mark-all{ margin:0; }
+.tbell-panel.painel .tbell-list{ padding:0 .6rem .6rem; }
+.tbell-panel.painel .tbell-group{ margin:.85rem .4rem .4rem; font-weight:800; font-size:.8rem; }
+.tbell-panel.painel .tbell-items{ gap:.4rem; }
+.tbell-panel.painel .tbell-items > li + li{ border-top:none; }
+.tbell-panel.painel .tbell-row{ position:relative; }
+.tbell-panel.painel button.tbell-item{ width:100%; margin:0; align-items:flex-start; text-align:left; padding:.7rem 2.2rem .7rem .8rem; border:1px solid var(--p-linha);
+  border-radius:12px; background:transparent; color:var(--p-tinta); font-weight:400; font-size:inherit; box-shadow:none; cursor:pointer; }
+.tbell-panel.painel button.tbell-item.p-item--suave{ background:var(--p-superficie); border-color:transparent; padding-right:4.8rem; }
+.tbell-panel.painel button.tbell-item:hover{ background:var(--p-superficie); color:var(--p-tinta); }
+.tbell-panel.painel button.tbell-item:not(.is-unread)::after{ content:"\203A"; position:absolute; right:.9rem; top:.75rem; font-size:1.4em; line-height:1; color:var(--p-tinta-suave); }
+.tbell-panel.painel button.tbell-item:focus-visible{ outline:2px solid var(--p-marca); outline-offset:2px; }
+.tbell-panel.painel .tbell-item-icon{ font-size:1.2rem; }
+.tbell-panel.painel .tbell-item-text{ overflow-wrap:anywhere; }
+.tbell-panel.painel .tbell-item:not(.is-unread) .tbell-item-text{ font-weight:600; }
+.tbell-panel.painel .tbell-item-meta{ display:flex; flex-wrap:wrap; align-items:center; gap:.3rem .6rem; margin-top:.15rem; }
+.tbell-panel.painel .tbell-lang{ font-size:.72rem; text-transform:capitalize; }
+.tbell-panel.painel .tbell-item-note{ font-style:italic; }
+.tbell-panel.painel button.tbell-new{ position:absolute; right:.75rem; top:.8rem; margin:0; width:auto; min-height:0; padding:.1rem .6rem; border:none; border-radius:999px;
+  font-size:.72rem; font-weight:800; line-height:1.5; cursor:pointer; box-shadow:none; background:var(--p-info); color:var(--p-sobre-vivo); }
+.tbell-panel.painel button.tbell-new:hover{ background:color-mix(in srgb, var(--p-info) 85%, black); color:var(--p-sobre-vivo); }
+.tbell-panel.painel button.tbell-new:focus-visible{ outline:2px solid var(--p-marca); outline-offset:2px; }
+/* Área de toque de 44px no selo, sem aumentar o desenho. */
+.tbell-panel.painel button.tbell-new::before, .notifications-dropdown.painel button.notification-unread-dot::before{ content:''; position:absolute; inset:-8px -8px; }
+@media (max-width:620px){ .tbell-panel.painel button.tbell-new{ min-height:32px; padding:.3rem .8rem; } .tbell-panel.painel .tbell-mark-all{ min-height:44px; } }
 .tbell-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--seal-red); margin-left:8px; vertical-align:middle; }
 .tab-btn > .tbell-dot{ position:absolute; top:6px; left:6px; margin:0; border:2px solid var(--paper); box-sizing:content-box; }
 @media (max-width: 899px){
@@ -4643,6 +4665,23 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .public-copies-line span{ font-size:12.5px; color:var(--ink-soft); }
 .public-copies-line.is-locked{ color:var(--ink-soft); font-size:13px; }
 .public-copies-meta{ display:block; font-size:12px; font-weight:400; color:var(--ink-soft); }
+/* Escolher o @ uma vez (111) */
+.uchoice-card{ max-width:440px; }
+.uchoice-body{ padding:22px 22px 20px; }
+.uchoice-title{ margin:0 0 4px; font-size:19px; color:var(--ink); }
+.uchoice-sub{ margin:0 0 16px; font-size:14px; color:var(--ink-soft); }
+.uchoice-label{ display:block; margin:12px 0 6px; font-size:13.5px; font-weight:800; color:var(--ink); }
+.uchoice-input{ width:100%; box-sizing:border-box; }
+.uchoice-user-wrap{ position:relative; }
+.uchoice-at{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-weight:700; pointer-events:none; }
+.uchoice-user{ padding-left:30px; }
+.uchoice-status{ min-height:18px; margin:6px 0 0; font-size:13px; color:var(--ink-soft); }
+.uchoice-status.is-ok{ color:var(--jade); font-weight:700; }
+.uchoice-status.is-bad{ color:var(--error-red); font-weight:700; }
+.uchoice-rules{ margin:4px 0 0; font-size:12.5px; color:var(--ink-soft); }
+.uchoice-warn{ margin:14px 0 12px; padding:10px 12px; border-radius:12px; background:var(--paper-warm); color:var(--ink); font-size:13.5px; line-height:1.45; }
+.uchoice-error:empty{ display:none; }
+@media (max-width:600px){ .uchoice-input{ min-height:44px; font-size:16px; } }
 /* Convite de aluno (077): seção da professora, faixa na Trilha e cartão do convite */
 .tinv-lang{ display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 14px; }
 .tinv-grid{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; align-items:start; }
@@ -4707,8 +4746,6 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   .tinv-banner-actions{ width:100%; }
   .tinv-banner-actions .btn, .tinv-small-btn{ min-height:44px; }
   .tinv-pending-row{ flex-wrap:wrap; }
-  .plans-matrix{ min-width:520px; }
-  .plans-option, .plans-cell input[type="checkbox"]{ min-height:44px; }
   .panel-view .panel-nav{ flex-wrap:nowrap; overflow-x:auto; max-width:100%; justify-content:flex-start; }
   .panel-view .panel-nav .deck-topbar-btn{ white-space:nowrap; }
 }
@@ -4785,6 +4822,9 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 #view-conjugaison .is-almost .conj-x{ color:var(--conj-quase); background:color-mix(in srgb, var(--conj-quase) 20%, transparent); }
 #view-conjugaison .conj-other-form{ flex-basis:100%; font-weight:600; color:var(--ink-soft); font-size:12.5px; }
 #view-conjugaison .conj-accents{ display:flex; justify-content:center; margin:-6px 0 14px; }
+/* Teclas do mesmo tamanho das da lição (o flex encolhia a grade até a largura da letra). */
+#view-conjugaison .conj-accents .fr-accent-picker{ width:100%; max-width:360px; grid-template-columns:repeat(auto-fit, minmax(40px, 1fr)); }
+/* Conjugação: só as letras que os verbos usam (hoje 7: é è ê î û â ç), numa fileira só. */
 #view-conjugaison .conj-size-hint{ margin:2px 0 0; font-size:12px; color:var(--ink-soft); }
 #view-conjugaison .conj-size-hint:empty{ display:none; }
 #view-conjugaison .conj-session-result:has(.conj-review){ max-width:560px; }
@@ -4816,11 +4856,11 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   position:absolute; z-index:30; left:0; right:0; top:calc(100% + 6px); margin:0; padding:6px; list-style:none; max-height:320px; overflow-y:auto;
   background:var(--paper); border:1px solid var(--paper-line); border-radius:14px; box-shadow:var(--shadow-lift);
 }
-#view-conjugaison .conj-search-opt{ display:grid; grid-template-columns:24px auto minmax(0, 1fr); align-items:center; gap:10px; min-height:44px; padding:6px 10px; border-radius:10px; cursor:pointer; }
+#view-conjugaison .conj-search-opt{ display:grid; grid-template-columns:24px minmax(0, 1fr); align-items:center; gap:10px; min-height:44px; padding:6px 10px; border-radius:10px; cursor:pointer; }
 #view-conjugaison .conj-search-opt[aria-selected="true"]{ background:color-mix(in srgb, var(--seal-red) 12%, var(--paper)); }
 @media (hover:hover){ #view-conjugaison .conj-search-opt:hover{ background:color-mix(in srgb, var(--seal-red) 8%, var(--paper)); } }
-#view-conjugaison .conj-opt-word{ font-weight:800; font-size:15.5px; color:var(--ink); }
-#view-conjugaison .conj-opt-other{ font-size:13.5px; color:var(--ink-soft); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#view-conjugaison .conj-opt-word{ font-weight:800; font-size:15.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#view-conjugaison .conj-opt-other{ font-weight:600; font-size:14px; color:var(--ink-soft); } /* tradução logo depois do verbo: "morar (habiter)" */
 #view-conjugaison .conj-search-empty{ padding:12px 10px; color:var(--ink-soft); font-size:14px; }
 #view-conjugaison .conj-flag{ display:inline-flex; width:24px; height:16px; border-radius:3px; overflow:hidden; box-shadow:0 0 0 1px rgba(0,0,0,.14); }
 #view-conjugaison .conj-flag svg{ width:100%; height:100%; display:block; }
@@ -5198,6 +5238,33 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   .friends-duo-field{ flex:0 0 auto; }
   .friends-duo-field select, .friends-duo-start, .friend-nudge{ min-height:44px; }
 }
+/* Painel de Notificações (2026-10-15): Design System do painel (Pico, classe .painel no #notifications-dropdown).
+   Itens p-item agrupados por dia; não lido = p-item--suave + selo "Nova" (que marca só aquele aviso como lido). */
+.notifications-dropdown.painel{ width:min(400px, calc(100vw - 24px)); min-width:0; max-width:none; max-height:min(74vh, 580px); padding:0; background:var(--p-bg); }
+.notifications-dropdown.painel .notifications-dropdown-header{ position:sticky; top:0; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+  margin:0; padding:.85rem 1rem .7rem; background:var(--p-bg); border-bottom:1px solid var(--p-linha); font-size:1.05rem; font-weight:800; color:var(--p-tinta); }
+.notifications-dropdown.painel .notifications-mark-all-btn{ margin:0; }
+.notifications-dropdown.painel .notification-group{ margin:.85rem 1rem .4rem; font-weight:800; font-size:.8rem; }
+.notifications-dropdown.painel .notification-items{ padding:0 .6rem; gap:.4rem; }
+.notifications-dropdown.painel #notifications-list{ padding-bottom:.6rem; }
+.notifications-dropdown.painel .notification-row{ position:relative; }
+.notifications-dropdown.painel .notification-item{ align-items:flex-start; padding:.7rem .8rem; }
+.notifications-dropdown.painel .notification-item.unread{ padding-right:4.6rem; }
+.notifications-dropdown.painel .notification-item.unread::after{ content:none; }
+.notifications-dropdown.painel .notification-item:focus-visible{ outline:2px solid var(--p-marca); outline-offset:2px; }
+.notifications-dropdown.painel .notification-item-icon{ font-size:1.2rem; }
+.notifications-dropdown.painel .notification-item:not(.unread) .notification-item-text.p-item-titulo{ font-weight:600; }
+.notifications-dropdown.painel .notification-item-time{ margin-top:.15rem; }
+.notifications-dropdown.painel button.notification-unread-dot{ position:absolute; right:.75rem; top:.8rem; margin:0; width:auto; min-height:0;
+  padding:.1rem .6rem; border:none; border-radius:999px; font-size:.72rem; font-weight:800; line-height:1.5; cursor:pointer; box-shadow:none;
+  background:var(--p-info); color:var(--p-sobre-vivo); }
+.notifications-dropdown.painel button.notification-unread-dot:hover{ background:color-mix(in srgb, var(--p-info) 85%, black); color:var(--p-sobre-vivo); }
+.notifications-dropdown.painel button.notification-unread-dot:focus-visible{ outline:2px solid var(--p-marca); outline-offset:2px; }
+.notifications-dropdown.painel .notifications-empty{ padding:1.5rem 1rem; color:var(--p-tinta-suave); }
+@media (max-width:620px){
+  .notifications-dropdown.painel .notifications-mark-all-btn{ min-height:44px; }
+  .notifications-dropdown.painel button.notification-unread-dot{ min-height:32px; padding:.3rem .8rem; }
+}
 </style>
 </head>
 <body>
@@ -5260,7 +5327,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
         <div class="lang-switcher-dropdown" id="lang-switcher-dropdown"></div>
       </div>
-      <button class="pill user-pill" id="user-menu-btn" aria-label="Conta" title="Conta">👤 <span id="user-label">Convidado</span></button>
+      <button class="pill user-pill" id="user-menu-btn" aria-label="Conta" title="Conta" data-i18n-attr="aria-label:settings.section.account;title:settings.section.account">👤 <span id="user-label">Convidado</span></button>
     </div>
   </div>
 
@@ -5318,8 +5385,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
        existente (shared/tabs.js) sincroniza clique e estado ativo dos dois
        conjuntos de botões sem nenhum JS novo. -->
   <div class="sidebar" id="app-sidebar">
-    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" aria-label="Mostrar/ocultar barra lateral" title="Mostrar/ocultar barra lateral">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
+    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" type="button" aria-label="Recolher menu" title="Recolher menu">
+      <svg class="sidebar-toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
     </button>
     <nav class="sidebar-nav">
       <button class="tab-btn" data-tab="path">
@@ -5364,6 +5431,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="tab-btn admin-only-nav" data-tab="admin-badges" style="display:none;">
         <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6e0.svg" alt="" aria-hidden="true">
         <span class="sidebar-label">Admin</span>
+      </button>
+      <button class="tab-btn sidebar-logout-btn" id="sidebar-logout-btn" type="button">
+        <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6aa.svg" alt="" aria-hidden="true">
+        <span class="sidebar-label" data-i18n="menu.logout">Sair da conta</span>
       </button>
     </nav>
   </div>
@@ -5607,72 +5678,78 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 
   <!-- ===== CONFIGURAÇÕES ===== -->
   <div class="view" id="view-settings">
-    <div class="path-header">
-      <h2 data-i18n="settings.title">Configurações</h2>
-      <p data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</p>
+    <!-- Configurações no Design System do painel (Pico escopado em .painel), aprovado pela autora em 2026-10-17.
+         Ids e data-settings-section continuam os mesmos: app.js, theme.js e os testes dependem deles. -->
+    <div class="painel">
+    <div class="p-pagina cfg-pagina">
+      <header class="p-cabecalho">
+        <div>
+          <h2 data-i18n="settings.title">Configurações</h2>
+          <span class="p-subtitulo" data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</span>
+        </div>
+      </header>
+      <div class="p-seg cfg-abas" role="toolbar" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
+        <button type="button" class="active" aria-pressed="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
+        <button type="button" aria-pressed="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
+        <button type="button" aria-pressed="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
+      </div>
+      <div id="settings-geral-content" class="cfg-corpo">
+        <article>
+          <header><h3 data-i18n="settings.section.account">Conta</h3></header>
+          <div class="cfg-infos">
+            <p class="p-linha-info"><span data-i18n="settings.account.email">E-mail</span><strong id="settings-email">—</strong></p>
+            <p class="p-linha-info"><span data-i18n="settings.account.provider">Conectado com</span><strong id="settings-provider">—</strong></p>
+          </div>
+        </article>
+        <article>
+          <header><h3 data-i18n="settings.section.preferences">Preferências</h3></header>
+          <label class="pref-row p-linha-opcao">
+            <span class="pref-row-text">
+              <span class="pref-row-title" data-i18n="settings.pref.dark.title">Modo escuro</span>
+              <span class="pref-row-sub" data-i18n="settings.pref.dark.sub">Usa o tema escuro em vez do claro, independente do sistema.</span>
+            </span>
+            <input type="checkbox" role="switch" id="theme-pref-switch" aria-label="Modo escuro" data-i18n-attr="aria-label:settings.pref.dark.title">
+          </label>
+          <label class="pref-row p-linha-opcao">
+            <span class="pref-row-text">
+              <span class="pref-row-title" data-i18n="settings.pref.cloze.title">Sempre digitar no exercício de completar frase</span>
+              <span class="pref-row-sub" data-i18n="settings.pref.cloze.subFr">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</span>
+            </span>
+            <input type="checkbox" role="switch" id="cloze-mode-switch" aria-label="Sempre digitar no exercício de completar frase" data-i18n-attr="aria-label:settings.pref.cloze.title">
+          </label>
+          <label class="pref-row p-linha-opcao">
+            <span class="pref-row-text">
+              <span class="pref-row-title" data-i18n="settings.pref.sound.title">Som de acerto/erro nos exercícios</span>
+              <span class="pref-row-sub" data-i18n="settings.pref.sound.sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</span>
+            </span>
+            <input type="checkbox" role="switch" id="feedback-sound-switch" checked aria-label="Som de acerto/erro nos exercícios" data-i18n-attr="aria-label:settings.pref.sound.title">
+          </label>
+          <div class="pref-row p-linha-opcao">
+            <div class="pref-row-text">
+              <div class="pref-row-title" data-i18n="settings.uiLanguage.title">Idioma da interface</div>
+              <div class="pref-row-sub" data-i18n="settings.uiLanguage.sub">Muda só os textos do app (menus, botões e avisos). Não muda o idioma que você estuda.</div>
+            </div>
+            <select class="review-settings-select" id="ui-language-select" aria-label="Idioma da interface" data-i18n-attr="aria-label:settings.uiLanguage.title">
+              <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+              <option value="en" lang="en">English</option>
+            </select>
+          </div>
+          <div id="my-courses" class="pref-row" style="display:none; flex-direction:column; align-items:stretch; gap:8px;"></div>
+        </article>
+      </div>
+      <div id="settings-notifications-content" class="cfg-corpo" style="display:none;"></div>
+      <div id="settings-export-content" class="cfg-corpo" style="display:none;">
+        <article>
+          <header><h3 data-i18n="settings.export.title">Escolha o que exportar</h3></header>
+          <div class="cfg-exportar">
+            <div id="export-deck-select"></div>
+            <p class="p-descricao" data-i18n="settings.export.descFr">O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.</p>
+            <div><button type="button" id="export-btn" data-i18n="settings.export.button">Gerar arquivo .apkg</button></div>
+            <div class="export-status" id="export-status"></div>
+          </div>
+        </article>
+      </div>
     </div>
-    <div class="leaderboard-tabs" role="tablist" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
-      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
-    </div>
-    <div id="settings-geral-content">
-      <div class="section-label" data-i18n="settings.section.account">Conta</div>
-      <div class="settings-card">
-        <div class="settings-row">
-          <div class="settings-row-label" data-i18n="settings.account.email">E-mail</div>
-          <div class="settings-row-value" id="settings-email">—</div>
-        </div>
-        <div class="settings-row">
-          <div class="settings-row-label" data-i18n="settings.account.provider">Conectado com</div>
-          <div class="settings-row-value" id="settings-provider">—</div>
-        </div>
-      </div>
-      <p class="settings-more-note" data-i18n="settings.account.moreSoon">Mais opções de conta em breve.</p>
-      <div class="section-label" data-i18n="settings.section.preferences">Preferências</div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.pref.dark.title">Modo escuro</div>
-          <div class="pref-row-sub" data-i18n="settings.pref.dark.sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
-        </div>
-        <button class="pref-switch" id="theme-pref-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
-      </div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.pref.cloze.title">Sempre digitar no exercício de completar frase</div>
-          <div class="pref-row-sub" data-i18n="settings.pref.cloze.subFr">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</div>
-        </div>
-        <button class="pref-switch" id="cloze-mode-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
-      </div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.pref.sound.title">Som de acerto/erro nos exercícios</div>
-          <div class="pref-row-sub" data-i18n="settings.pref.sound.sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
-        </div>
-        <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
-      </div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.uiLanguage.title">Idioma da interface</div>
-          <div class="pref-row-sub" data-i18n="settings.uiLanguage.sub">Muda só os textos do app (menus, botões e avisos). Não muda o idioma que você estuda.</div>
-        </div>
-        <select class="review-settings-select" id="ui-language-select" aria-label="Idioma da interface" data-i18n-attr="aria-label:settings.uiLanguage.title" style="width:auto; flex-shrink:0;">
-          <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
-          <option value="en" lang="en">English</option>
-        </select>
-      </div>
-      <div id="my-courses" class="pref-row" style="display:none; flex-direction:column; align-items:stretch; gap:8px;"></div>
-    </div>
-    <div id="settings-notifications-content" style="display:none;"></div>
-    <div id="settings-export-content" style="display:none;">
-      <div class="export-box">
-        <div class="icon">📦</div>
-        <h3 data-i18n="settings.export.title">Escolha o que exportar</h3>
-        <div class="deck-select" id="export-deck-select"></div>
-        <p data-i18n="settings.export.descFr">O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.</p>
-        <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;" data-i18n="settings.export.button">Gerar arquivo .apkg</button>
-        <div class="export-status" id="export-status"></div>
-      </div>
     </div>
   </div>
 
@@ -5830,11 +5907,6 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <div class="side-card-title">🏆 Ranking</div>
       <div id="side-ranking-body"></div>
     </div>
-    <div class="side-card" id="side-card-status">
-      <div class="side-card-title">Status</div>
-      <div class="side-status-row"><span>⭐</span><span id="side-xp-count" class="stat-count">0</span><span>XP</span></div>
-      <div class="side-status-row"><span>🔥</span><span id="side-streak-count" class="stat-count">0</span><span data-i18n="side.streakDays">dias seguidos</span></div>
-    </div>
     <div class="side-card" id="side-card-missions">
       <div id="side-missions-body"></div>
     </div>
@@ -5843,10 +5915,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 
 <div id="mais-backdrop" class="mais-backdrop"></div>
 
-<div id="notifications-dropdown" class="user-dropdown notifications-dropdown">
+<div id="notifications-dropdown" class="user-dropdown notifications-dropdown painel">
   <div class="notifications-dropdown-header">
     <span data-i18n="notif.pref.sectionTitle">Notificações</span>
-    <button class="notifications-mark-all-btn" id="notifications-mark-all-btn">Ler todas</button>
+    <button type="button" class="outline p-pequeno notifications-mark-all-btn" id="notifications-mark-all-btn" data-i18n="notif.markAll">Ler todas</button>
   </div>
   <div id="notifications-list"></div>
 </div>
@@ -5900,137 +5972,6 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
     </div>
     <div class="app-modal-body">
       <div class="level-list" id="level-modal-list"></div>
-    </div>
-  </div>
-</div>
-
-<div id="admin-manage-badge-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
-    <div class="app-modal-header">
-      <h3 id="admin-manage-badge-title" data-i18n="admin.modal.manageBadge.title">Gerenciar badge</h3>
-      <button class="app-modal-close" id="admin-manage-badge-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
-    </div>
-    <div class="app-modal-body">
-      <p class="admin-manage-badge-hint" data-i18n="admin.modal.manageBadge.hint">Marque quem deve ter este badge. Desmarcar remove.</p>
-      <div id="admin-manage-badge-list" class="admin-member-list"></div>
-      <button class="btn btn-primary btn-block" id="admin-manage-badge-save-btn" style="margin-top:14px;" data-i18n="profile.save">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<div id="admin-edit-badge-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
-    <div class="app-modal-header">
-      <h3 data-i18n="admin.badges.catalog.editTitle">Editar badge</h3>
-      <button class="app-modal-close" id="admin-edit-badge-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
-    </div>
-    <div class="app-modal-body">
-      <form id="admin-edit-badge-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-edit-badge-id" data-i18n="admin.badges.create.id">ID (só letras minúsculas/números/_)</label>
-        <input type="text" id="admin-edit-badge-id" class="profile-edit-input" maxlength="32">
-        <label class="profile-edit-label" for="admin-edit-badge-name" data-i18n="admin.badges.create.name">Nome</label>
-        <input type="text" id="admin-edit-badge-name" class="profile-edit-input" maxlength="40">
-        <label class="profile-edit-label" for="admin-edit-badge-icon" data-i18n="admin.badges.create.icon">Emoji</label>
-        <input type="text" id="admin-edit-badge-icon" class="profile-edit-input" maxlength="8">
-        <label class="profile-edit-label" for="admin-edit-badge-desc" data-i18n="admin.materials.descOpt">Descrição (opcional)</label>
-        <input type="text" id="admin-edit-badge-desc" class="profile-edit-input" maxlength="120">
-        <p class="profile-edit-error" id="admin-edit-badge-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-edit-badge-save-btn" data-i18n="admin.modal.saveChanges">Salvar alterações</button>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div id="admin-edit-template-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
-    <div class="app-modal-header">
-      <h3 data-i18n="admin.modal.editTemplate.title">Editar variante</h3>
-      <button class="app-modal-close" id="admin-edit-template-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
-    </div>
-    <div class="app-modal-body">
-      <form id="admin-edit-template-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-edit-template-title" data-i18n="admin.notifications.new.titleLabel">Título (opcional)</label>
-        <input type="text" id="admin-edit-template-title" class="profile-edit-input" maxlength="60">
-        <label class="profile-edit-label" for="admin-edit-template-icon" data-i18n="admin.notifications.new.icon">Emoji (opcional)</label>
-        <input type="text" id="admin-edit-template-icon" class="profile-edit-input" maxlength="8">
-        <label class="profile-edit-label" for="admin-edit-template-body" data-i18n="admin.notifications.new.body">Texto</label>
-        <textarea id="admin-edit-template-body" class="profile-edit-textarea" maxlength="300" rows="2"></textarea>
-        <p class="profile-edit-error" id="admin-edit-template-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-edit-template-save-btn" data-i18n="admin.modal.saveChanges">Salvar alterações</button>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div id="admin-report-detail-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
-    <div class="app-modal-header">
-      <h3 id="admin-report-detail-category" data-i18n="admin.modal.report.title">Report</h3>
-      <button class="app-modal-close" id="admin-report-detail-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
-    </div>
-    <div class="app-modal-body">
-      <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label" data-i18n="admin.modal.report.sentBy">Enviado por</div>
-        <div id="admin-report-detail-reporter" class="admin-report-detail-text"></div>
-      </div>
-      <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label" data-i18n="admin.modal.report.description">Descrição</div>
-        <div id="admin-report-detail-description" class="admin-report-detail-text"></div>
-      </div>
-      <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label" data-i18n="admin.modal.report.expected">O que a pessoa esperava</div>
-        <div id="admin-report-detail-expected" class="admin-report-detail-text"></div>
-      </div>
-      <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label" data-i18n="admin.modal.report.severity">Gravidade percebida</div>
-        <div id="admin-report-detail-severity" class="admin-report-detail-text"></div>
-      </div>
-      <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label" data-i18n="admin.modal.report.context">Contexto capturado automaticamente</div>
-        <div id="admin-report-detail-context" class="admin-report-detail-context"></div>
-      </div>
-      <div class="admin-report-detail-block admin-report-detail-text" id="admin-report-detail-screenshot"></div>
-
-      <label class="profile-edit-label" for="admin-report-detail-status" data-i18n="admin.modal.report.status">Status</label>
-      <select id="admin-report-detail-status" class="profile-edit-input">
-        <option value="novo" data-i18n="admin.reports.status.novo">Novo</option>
-        <option value="em_analise" data-i18n="admin.reports.status.em_analise">Em análise</option>
-        <option value="confirmado" data-i18n="admin.reports.status.confirmado">Confirmado</option>
-        <option value="em_desenvolvimento" data-i18n="admin.reports.status.em_desenvolvimento">Em desenvolvimento</option>
-        <option value="resolvido" data-i18n="admin.reports.status.resolvido">Resolvido</option>
-        <option value="nao_reproduzido" data-i18n="admin.reports.status.nao_reproduzido">Não reproduzido</option>
-        <option value="recusado" data-i18n="admin.reports.status.recusado">Recusado</option>
-        <option value="duplicado" data-i18n="admin.reports.status.duplicado">Duplicado</option>
-      </select>
-
-      <label class="profile-edit-label" for="admin-report-detail-priority" data-i18n="admin.modal.report.priority">Prioridade técnica</label>
-      <select id="admin-report-detail-priority" class="profile-edit-input">
-        <option value="" data-i18n="admin.modal.report.priorityNone">(não definida)</option>
-        <option value="baixa" data-i18n="admin.reports.priority.baixa">Baixa</option>
-        <option value="media" data-i18n="admin.reports.priority.media">Média</option>
-        <option value="alta" data-i18n="admin.reports.priority.alta">Alta</option>
-        <option value="critica" data-i18n="admin.reports.priority.critica">Crítica</option>
-      </select>
-
-      <label class="profile-edit-label" for="admin-report-detail-note" data-i18n="admin.modal.report.note">Nota interna</label>
-      <textarea id="admin-report-detail-note" class="profile-edit-textarea" rows="3" placeholder="Só a equipe vê isso" data-i18n-attr="placeholder:admin.modal.report.notePh"></textarea>
-
-      <p class="profile-edit-error" id="admin-report-detail-error"></p>
-      <button type="button" class="btn btn-primary btn-block" id="admin-report-detail-save-btn" data-i18n="profile.save">Salvar</button>
-
-      <div class="admin-report-detail-block admin-report-reply-block">
-        <div class="admin-report-detail-label" data-i18n="admin.modal.report.replyByEmail">Responder por e-mail</div>
-        <div id="admin-report-reply-history" class="admin-report-detail-text"></div>
-        <div id="admin-report-reply-composer">
-          <label class="profile-edit-label" for="admin-report-reply-subject" data-i18n="admin.modal.report.subject">Assunto</label>
-          <input type="text" id="admin-report-reply-subject" class="profile-edit-input" maxlength="150">
-          <label class="profile-edit-label" for="admin-report-reply-body" data-i18n="admin.modal.report.message">Mensagem</label>
-          <textarea id="admin-report-reply-body" class="profile-edit-textarea" rows="5" placeholder="Obrigada por avisar! ..." data-i18n-attr="placeholder:admin.modal.report.replyPh"></textarea>
-          <p class="profile-edit-error" id="admin-report-reply-error"></p>
-          <button type="button" class="btn btn-primary btn-block" id="admin-report-reply-send-btn" data-i18n="admin.reports.reply.send">Enviar resposta</button>
-        </div>
-        <p id="admin-report-reply-noemail" class="profile-edit-hint" style="display:none;" data-i18n="admin.modal.report.noEmail">Sem e-mail associado a este report (convidado que não informou e-mail) -- não é possível responder.</p>
-      </div>
     </div>
   </div>
 </div>
@@ -6394,11 +6335,14 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/notifications.js"></script>
 <script src="../shared/push.js"></script>
 <script src="../shared/notification-preferences.js"></script>
+<script src="../shared/admin-badges-ui.js"></script>
 <script src="../shared/admin-badges.js"></script>
 <script src="../shared/roles.js"></script>
 <script src="../shared/permissions.js"></script>
 <script src="../shared/student-metrics.js"></script>
+<script src="../shared/teacher-students-ui.js"></script>
 <script src="../shared/admin-students.js"></script>
+<script src="../shared/admin-plans-ui.js"></script>
 <script src="../shared/admin-premium.js"></script>
 <script src="../shared/flashcard-model.js"></script>
 <script src="../shared/study-trail-model.js"></script>
@@ -6423,10 +6367,12 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/review-bank-student.js"></script>
 <script src="../shared/flashcard-preview.js"></script>
 <script src="../shared/teacher-flashcards.js"></script>
+<script src="../shared/teacher-cards-ui.js"></script>
 <script src="../shared/admin-flashcards.js"></script>
 <script src="../shared/teacher-class-logs.js"></script>
 <script src="../shared/admin-class-logs.js"></script>
 <script src="../shared/teacher-support-materials.js"></script>
+<script src="../shared/teacher-materials-ui.js"></script>
 <script src="../shared/admin-support-materials.js"></script>
 <script src="../shared/support-materials-view.js"></script>
 <script src="../shared/review-bank-model.js"></script>
@@ -6434,7 +6380,9 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/review-bank-class.js"></script>
 <script src="../shared/review-bank-import.js"></script>
 <script src="../shared/teacher-panel.js"></script>
+<script src="../shared/painel/painel-ui.js"></script>
 <script src="../shared/teacher-invites.js"></script>
+<script src="../shared/username-choice.js"></script>
 <script src="../shared/mural.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
@@ -6442,8 +6390,13 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/review-extras.js"></script>
 <script src="../shared/deck-browser.js"></script>
 <script src="../shared/anki-import-ui.js"></script>
+<script src="../shared/admin-analytics-calc.js"></script>
+<script src="../shared/admin-analytics-ui.js"></script>
 <script src="../shared/admin-analytics.js"></script>
+<script src="../shared/admin-panel.js"></script>
+<script src="../shared/admin-notifications-ui.js"></script>
 <script src="../shared/admin-notifications.js"></script>
+<script src="../shared/admin-reports-ui.js"></script>
 <script src="../shared/admin-reports.js"></script>
 <script src="../shared/friends.js"></script>
 <script src="../shared/leaderboard.js"></script>

@@ -1,0 +1,233 @@
+<title>Design System do Painel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Noto+Serif+SC:wght@600;700&display=swap">
+<style>
+/* Layout: cabeçalho, leitura do estilo, palco de preview com abas, comparação, recomendação. Paleta emprestada do próprio site (fr e zh). */
+:root{
+  --bg:#FAF5EA; --surface:#F0E8D8; --raised:#FFFCF5; --line:#E1D6C0;
+  --ink:#201335; --soft:#5C4E73; --brand:#3498D6; --brand-dark:#1D5A82; --on-brand:#201335;
+  --accent:#E36BCA; --ok:#3A7359; --warn:#8C5F0E;
+  --shadow:0 2px 8px rgba(33,23,20,.08),0 1px 2px rgba(33,23,20,.06);
+  --font:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --display:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17121F; --surface:#201A2C; --raised:#2A2238; --line:#362C42; --ink:#EDE6F5; --soft:#C5B8D9;
+  --brand:#4DA9E8; --brand-dark:#7FC4F5; --on-brand:#201335; --accent:#F08FE0; --ok:#52B487; --warn:#C9973A;
+  --shadow:0 8px 24px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.05); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17121F; --surface:#201A2C; --raised:#2A2238; --line:#362C42; --ink:#EDE6F5; --soft:#C5B8D9;
+  --brand:#4DA9E8; --brand-dark:#7FC4F5; --on-brand:#201335; --accent:#F08FE0; --ok:#52B487; --warn:#C9973A;
+  --shadow:0 8px 24px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.05); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55;padding-inline:20px;padding-block:32px 64px}
+.wrap{max-width:1180px;margin-inline:auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:clamp(1.9rem,4.5vw,2.8rem);font-weight:800}
+h2{font-size:1.5rem;font-weight:800}
+h3{font-size:1.05rem;font-weight:800}
+p{margin:0}
+.eyebrow{font-size:.75rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--soft)}
+.lead{color:var(--soft);max-width:68ch;margin-top:10px}
+.sec{display:flex;flex-direction:column;gap:18px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+.prefs{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.pref{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow)}
+.pref p{color:var(--soft);font-size:.92rem}
+.swatches{display:flex;gap:6px;margin-top:4px}
+.swatches i{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:block}
+
+.bar{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;justify-content:space-between}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.seg button{border:0;background:transparent;padding:8px 14px;border-radius:9px;font-weight:700;color:var(--soft);min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--brand);color:var(--on-brand)}
+.seg button:hover:not([aria-pressed="true"]){background:var(--line);color:var(--ink)}
+.ctrls{display:flex;flex-wrap:wrap;gap:12px}
+
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.stage-head{display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:space-between;align-items:baseline;padding:14px 18px;border-bottom:1px solid var(--line)}
+.stage-head p{color:var(--soft);font-size:.92rem;max-width:70ch}
+.meta{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:.78rem;font-weight:800;padding:2px 10px;border-radius:999px;background:var(--raised);border:1px solid var(--line);color:var(--soft)}
+.frame{display:block;width:100%;height:780px;border:0;background:var(--bg)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.cell{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
+.cell h3{padding:10px 14px;border-bottom:1px solid var(--line);font-size:.95rem}
+.vp{position:relative;overflow:hidden;height:var(--h,420px)}
+.vp iframe{position:absolute;left:0;top:0;width:1200px;height:900px;border:0;transform-origin:0 0;background:var(--bg)}
+
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:1100px;font-size:.92rem}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+thead th{font-weight:800;background:var(--raised);position:sticky;top:0}
+tbody th{font-weight:800;color:var(--soft);width:170px}
+.pick{background:color-mix(in srgb,var(--brand) 14%,transparent)}
+.good{color:var(--ok);font-weight:800}.mid{color:var(--warn);font-weight:800}
+
+.rec{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--brand);border-radius:14px;padding:22px 24px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+.rec ol,.rec ul{margin:0;padding-left:1.2rem;display:flex;flex-direction:column;gap:6px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+.note{color:var(--soft);font-size:.88rem}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}.frame{height:640px}body{padding-block:22px 48px}}
+@media (prefers-reduced-motion:no-preference){.seg button{transition:background .15s ease}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Painel interno · Idiomas com Prof. Brune</div>
+    <h1>Qual Design System combina com o seu painel</h1>
+    <p class="lead">Li os tokens e o CSS do site em francês e em mandarim, e montei a mesma tela de Alunos com seis bibliotecas open source reais, já vestidas com as suas cores. Troque idioma e tema abaixo para ver como cada uma se comporta.</p>
+  </header>
+
+  <section class="sec" aria-labelledby="h-prefs">
+    <h2 id="h-prefs">O que entendi do seu estilo</h2>
+    <div class="prefs">
+      <div class="pref"><h3>Papel e tinta, não branco e cinza</h3><p>Fundo bege quente, cartões um tom abaixo, linhas suaves e texto em tinta roxa ou marrom. Nada de cinza frio de painel padrão.</p>
+        <div class="swatches" aria-hidden="true"><i style="background:#FAF5EA"></i><i style="background:#F0E8D8"></i><i style="background:#E1D6C0"></i><i style="background:#201335"></i></div></div>
+      <div class="pref"><h3>Uma cor de marca por idioma</h3><p>Azul no francês, vermelho laca com dourado no mandarim. O sistema precisa trocar a cor primária sem mexer nos componentes.</p>
+        <div class="swatches" aria-hidden="true"><i style="background:#3498D6"></i><i style="background:#E36BCA"></i><i style="background:#C0231F"></i><i style="background:#D4A017"></i></div></div>
+      <div class="pref"><h3>Nunito, redondo e legível</h3><p>A mesma fonte arredondada em todos os idiomas e cursos. Só a paleta de cores muda entre francês e mandarim. Números grandes e pesados nos indicadores.</p></div>
+      <div class="pref"><h3>Cantos de 14px, sombra leve, pílulas</h3><p>Cartões generosos, selos arredondados para situação e streak, botões de 10px. Sem bordas duras nem sombras pesadas.</p></div>
+      <div class="pref"><h3>Claro e escuro com contraste cuidado</h3><p>Todo token tem par escuro, e texto sobre cor vívida troca de branco para tinta para passar o contraste. A biblioteca precisa respeitar isso.</p></div>
+      <div class="pref"><h3>Site estático, sem etapa de build</h3><p>HTML e JS puros no GitHub Pages, com Supabase. Biblioteca que exige Node, Tailwind ou framework entra com custo extra.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="h-prev">
+    <h2 id="h-prev">A mesma tela, seis caminhos</h2>
+    <p class="lead" style="margin-top:0">Tela de Alunos do painel da professora, com dados de exemplo. Os componentes vêm de cada biblioteca; as cores, o raio e a fonte vêm dos seus tokens.</p>
+    <div class="bar">
+      <div class="seg" id="tabs" role="group" aria-label="Alternativa">
+        <button type="button" data-k="pico" aria-pressed="true">Pico CSS</button>
+        <button type="button" data-k="daisyui" aria-pressed="false">daisyUI</button>
+        <button type="button" data-k="tabler" aria-pressed="false">Tabler</button>
+        <button type="button" data-k="open-props" aria-pressed="false">Open Props</button>
+        <button type="button" data-k="shadcn" aria-pressed="false">shadcn/ui</button>
+        <button type="button" data-k="mui" aria-pressed="false">Material UI</button>
+        <button type="button" data-k="all" aria-pressed="false">Lado a lado</button>
+      </div>
+      <div class="ctrls">
+        <div class="seg" id="screen" role="group" aria-label="Tela">
+          <button type="button" data-v="" aria-pressed="true">Alunos</button>
+          <button type="button" data-v="-aluno" aria-pressed="false">Detalhe do aluno</button>
+          <button type="button" data-v="-componentes" aria-pressed="false">Componentes</button>
+        </div>
+        <div class="seg" id="lang" role="group" aria-label="Idioma do painel">
+          <button type="button" data-v="fr" aria-pressed="true">Francês</button>
+          <button type="button" data-v="zh" aria-pressed="false">Mandarim</button>
+        </div>
+        <div class="seg" id="theme" role="group" aria-label="Tema">
+          <button type="button" data-v="light" aria-pressed="true">Claro</button>
+          <button type="button" data-v="dark" aria-pressed="false">Escuro</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" id="single">
+      <div class="stage-head"><div><h3 id="s-name"></h3><p id="s-desc"></p></div><div class="meta" id="s-meta"></div></div>
+      <iframe class="frame" id="s-frame" title="Prévia da tela de Alunos" src="pico.html"></iframe>
+    </div>
+    <div class="grid2" id="multi" hidden>
+      <div class="cell"><h3>Pico CSS</h3><div class="vp"><iframe data-src="pico.html" title="Pico CSS"></iframe></div></div>
+      <div class="cell"><h3>daisyUI</h3><div class="vp"><iframe data-src="daisyui.html" title="daisyUI"></iframe></div></div>
+      <div class="cell"><h3>Tabler</h3><div class="vp"><iframe data-src="tabler.html" title="Tabler"></iframe></div></div>
+      <div class="cell"><h3>Open Props com CSS próprio</h3><div class="vp"><iframe data-src="open-props.html" title="Open Props"></iframe></div></div>
+      <div class="cell"><h3>shadcn/ui</h3><div class="vp"><iframe data-src="shadcn.html" title="shadcn/ui"></iframe></div></div>
+      <div class="cell"><h3>Material UI</h3><div class="vp"><iframe data-src="mui.html" title="Material UI"></iframe></div></div>
+    </div>
+    <p class="note">Versões usadas: Pico 2.1.1, daisyUI 5.7.47, Tabler 1.6.1, Open Props 1.7.23, shadcn/ui (código oficial new-york-v4, com Radix e Tailwind 4.3), Material UI 9.5 com React 19. Todas com licença MIT. Os pacotes são os oficiais do npm, sem edição; o que mudei está na camada de tema, por cima. A fonte é a mesma nos dois idiomas; só as cores mudam.</p>
+  </section>
+
+  <section class="sec" aria-labelledby="h-cat">
+    <h2 id="h-cat">Catálogo de componentes e gamificação</h2>
+    <div class="tblwrap"><table style="min-width:900px">
+      <thead><tr><th></th><th class="pick">Pico CSS</th><th>daisyUI</th><th>Tabler</th><th>Open Props</th><th>shadcn/ui</th><th>Material UI</th></tr></thead>
+      <tbody>
+        <tr><th>Catálogo visual dos componentes</th><td class="pick">Sim, enxuto: cada página da documentação tem exemplo ao vivo e código</td><td>Sim, com muitos exemplos por componente</td><td>Sim, com páginas de exemplo prontas</td><td>Não: é só uma lista de variáveis</td><td>Sim, o que você gostou</td><td>Sim, com exemplos interativos</td></tr>
+        <tr><th>Quantidade de componentes</th><td class="pick"><span class="mid">Poucos</span>: 9 componentes, mais formulários, botões e tabela</td><td><span class="good">61</span> componentes</td><td><span class="good">Cerca de 70</span> módulos de interface</td><td><span class="mid">Nenhum</span></td><td><span class="good">Cerca de 60</span> no catálogo</td><td><span class="good">Mais de 130</span>, o maior conjunto</td></tr>
+        <tr><th>Pensado para gamificação</th><td class="pick"><span class="mid">Não</span></td><td><span class="mid">Parcial</span>: anel de progresso, estatística, avaliação por estrelas, linha do tempo</td><td><span class="mid">Parcial</span>: progresso, estrelas, passos, linha do tempo, faixas de destaque</td><td><span class="mid">Não</span></td><td><span class="mid">Não</span></td><td><span class="mid">Parcial</span>: progresso circular, avaliação por estrelas, passos</td></tr>
+        <tr><th>Sequência, XP, conquistas</th><td class="pick">Feito à mão</td><td>Feito à mão</td><td>Feito à mão</td><td>Feito à mão</td><td>Feito à mão</td><td>Feito à mão</td></tr>
+      </tbody></table></div>
+    <p class="note">Nenhuma das seis foi feita para um site de idiomas com gamificação. Na prévia, as peças de sequência, nível, conquistas, meta do dia e ranking são o mesmo CSS nosso nas seis; só o anel da meta usa componente nativo no daisyUI e no Material UI. Os números e a lista de peças de gamificação foram conferidos no catálogo do shadcn e nos pacotes oficiais de cada biblioteca. Os sites de documentação do Pico, daisyUI, Tabler, Open Props e Material UI continuam inacessíveis daqui, então a linha sobre catálogo visual com exemplos ao vivo ainda vem do meu conhecimento e não foi conferida.</p>
+  </section>
+
+  <section class="sec" aria-labelledby="h-cmp">
+    <h2 id="h-cmp">Comparação para o seu caso</h2>
+    <div class="tblwrap"><table>
+      <thead><tr><th></th><th class="pick">Pico CSS</th><th>daisyUI</th><th>Tabler</th><th>Open Props + próprio</th><th>shadcn/ui</th><th>Material UI</th></tr></thead>
+      <tbody>
+        <tr><th>O que é</th><td class="pick">CSS semântico: a tag certa já sai estilizada</td><td>Classes de componente sobre Tailwind</td><td>Kit de painel administrativo sobre Bootstrap</td><td>Só variáveis de design (espaço, raio, sombra); componentes são seus</td><td>Componentes React (Radix + Tailwind) que você copia para o projeto</td><td>Biblioteca React completa, com tema em JavaScript</td></tr>
+        <tr><th>Tamanho do CSS</th><td class="pick"><span class="good">84 KB</span></td><td><span class="mid">1,1 MB inteiro</span>; enxuga só com build Tailwind</td><td><span class="mid">624 KB</span></td><td><span class="good">44 KB</span> com o normalize</td><td><span class="mid">284 KB JS + 45 KB CSS</span></td><td><span class="mid">492 KB JS</span>, sem CSS à parte</td></tr>
+        <tr><th>Precisa de build</th><td class="pick"><span class="good">Não</span>, um link no HTML</td><td><span class="mid">Sim</span> para ficar leve e ter utilitários de layout</td><td><span class="good">Não</span>, mas dropdown e modal pedem o JS do Bootstrap</td><td><span class="good">Não</span></td><td><span class="mid">Sim</span>, e React</td><td><span class="mid">Sim</span>, e React</td></tr>
+        <tr><th>Trocar para as suas cores</th><td class="pick"><span class="good">Fácil</span>: variáveis <code>--pico-*</code> e dá para trocar no escuro e entre idiomas</td><td>Fácil: variáveis de cor e de raio, mas o escuro e o fr/zh exigem sobrescrever o tema</td><td><span class="mid">Médio</span>: precisei trocar variáveis e também os botões</td><td><span class="good">Total</span>: já nasce dos seus tokens</td><td><span class="good">Fácil</span>: duas dezenas de variáveis apontando para os seus tokens, claro e escuro seguem sozinhos</td><td><span class="mid">Médio</span>: o tema é JS e não lê CSS variables; precisei duplicar as cores por idioma e tema</td></tr>
+        <tr><th>Componentes de painel</th><td class="pick"><span class="mid">Básicos</span>: tabela, formulário, cartão, switch, barra. Selo de situação, avatar e indicador eu escrevi</td><td><span class="good">Muitos</span>: badge, stat, avatar, menu, alerta, tabs</td><td><span class="good">Mais completo</span>: gráficos, listas, kanban, páginas de login</td><td><span class="mid">Nenhum</span>: tudo é escrito à mão</td><td><span class="good">Muitos</span>: tabela, cartão, badge, avatar, alerta, switch, progresso e dezenas de outros</td><td><span class="good">O mais completo</span>: tabela, chip, alerta, progresso, e também gráficos e seletor de data nos pacotes extras</td></tr>
+        <tr><th>CSS próprio que precisei</th><td class="pick">28 blocos (a maioria é o mapeamento de cores)</td><td>21 blocos, e ainda faltou layout</td><td>20 blocos</td><td>43 blocos</td><td>2 blocos de CSS e ajustes nas classes de alguns componentes</td><td>Um tema de cerca de 20 linhas em JS</td></tr>
+        <tr><th>Parece o seu site</th><td class="pick"><span class="good">Muito</span>: sóbrio, arredondado, quase sem rastro de biblioteca</td><td><span class="good">Bastante</span>, com o tema ajustado</td><td><span class="mid">Médio</span>: tem cara de painel Bootstrap, mesmo vestido</td><td><span class="good">Idêntico</span>, porque é o que o site já faz</td><td><span class="good">Muito</span>: a estética padrão já é sóbria e arredondada</td><td><span class="good">Bastante</span>, depois do tema; sem ele, tem cara própria do Google</td></tr>
+        <tr><th>Risco</th><td class="pick">Poucos componentes prontos; cresce o CSS próprio</td><td>Dependência do Tailwind a médio prazo</td><td>Peso e arrastar o Bootstrap</td><td>Você mantém tudo; consistência depende de disciplina</td><td>Reescrever o painel em React e manter Tailwind e Radix</td><td>Peso e reescrita em React; mudança de versão costuma quebrar o tema</td></tr>
+      </tbody></table></div>
+  </section>
+
+  <section class="sec" aria-labelledby="h-rec">
+    <h2 id="h-rec">Minha sugestão</h2>
+    <div class="rec">
+      <div><div class="eyebrow">Recomendado</div><h3 style="font-size:1.3rem;margin-top:4px">Pico CSS como base, com os tokens do site por cima</h3></div>
+      <p>Das seis, é a única que une três coisas que você já pratica: nenhuma etapa de build, tema por variáveis CSS e visual sóbrio, redondo e quente. Com poucas linhas de mapeamento, o painel assume a cor de cada idioma e o modo escuro sem trocar nenhum componente. O que falta nele (selo de situação, avatar, indicador numérico) é pouco e já está escrito na prévia.</p>
+      <div class="cols">
+        <div><h3>Como entrar sem quebrar nada</h3>
+          <ol><li>Um único arquivo de tokens compartilhado (as variáveis <code>--b-*</code> da prévia), lido por fr, zh e painel.</li>
+          <li>Pico só nas telas do painel de Admin, uma por vez, começando por Alunos.</li>
+          <li>Selo, avatar e indicador viram três componentes próprios, documentados no próprio repositório.</li></ol></div>
+        <div><h3>Quando eu escolheria outra</h3>
+          <ul><li><b>Open Props</b>, se você prefere controle total e não se importa em escrever os componentes. É o mais próximo do que o site já faz.</li>
+          <li><b>Tabler</b>, se o painel crescer para gráficos, kanban e muitas telas densas, aceitando o peso e o JS do Bootstrap.</li>
+          <li><b>shadcn/ui</b>, se você decidir reescrever o painel em React. É a melhor opção nesse caminho: o tema é só variáveis CSS e os seus tokens entram quase direto.</li>
+          <li><b>Material UI</b>, se precisar de componentes muito complexos já prontos. Fica fiel, mas é o mais pesado.</li>
+          <li><b>daisyUI</b>, só se um dia você adotar Tailwind com build.</li></ul></div>
+      </div>
+      <p class="note">O site hoje é HTML e JS puros. shadcn e Material UI são React: usá-los significa adotar uma etapa de build e reescrever as telas do painel, não só trocar o CSS. Limites desta prévia: é uma tela estática, sem os menus suspensos, janelas e gráficos do painel real; as fontes carregam do Google Fonts. Dados fictícios.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var INFO={
+    "pico":{n:"Pico CSS 2.1.1",d:"Estiliza as tags HTML direto, sem classes. É a que menos aparece na tela: some atrás do seu visual.",m:["84 KB","sem JS","sem build"],f:"pico.html"},
+    "daisyui":{n:"daisyUI 5.7.47",d:"Classes prontas para badge, estatística, avatar, menu e alerta. Vem de um ecossistema Tailwind, que aqui eu não usei.",m:["1,1 MB sem enxugar","sem JS","build recomendado"],f:"daisyui.html"},
+    "tabler":{n:"Tabler 1.6.1",d:"Kit de painel administrativo completo, sobre Bootstrap. O mais rico em telas prontas, e o mais pesado.",m:["624 KB","JS opcional (Bootstrap)","sem build"],f:"tabler.html"},
+    "shadcn":{n:"shadcn/ui (new-york)",d:"Componentes Radix copiados para o seu código e estilizados com Tailwind. O tema é um punhado de variáveis CSS (--primary, --card...), então os seus tokens entram quase 1 para 1. Exige React, Tailwind e build.",m:["284 KB JS + 45 KB CSS","React","build obrigatório"],f:"shadcn.html"},
+    "mui":{n:"Material UI 9.5",d:"Biblioteca React completa, com tema em JavaScript. Fica fiel ao seu visual depois do tema, mas é a mais pesada e o tema precisa ser recriado em JS.",m:["492 KB JS","React","build obrigatório"],f:"mui.html"},
+    "open-props":{n:"Open Props 1.7.23 e CSS próprio",d:"Só entrega variáveis de design. Os componentes são escritos por você, o que dá o resultado mais fiel ao site e mais trabalho.",m:["44 KB","sem JS","sem build"],f:"open-props.html"}
+  };
+  var S={k:"pico",lang:"fr",theme:"light",sc:""};
+  var root=document.documentElement;
+  try{var sv=JSON.parse(localStorage.getItem("ds-prev")||"{}");if(sv.k)S.k=sv.k;if(sv.lang)S.lang=sv.lang;if(sv.theme)S.theme=sv.theme;if(typeof sv.sc==="string")S.sc=sv.sc;}catch(e){}
+  function frames(){return Array.prototype.slice.call(document.querySelectorAll("iframe"));}
+  function send(f){try{f.contentWindow.postMessage({brune:{lang:S.lang,theme:S.theme}},"*");}catch(e){}}
+  function setPressed(id,key,val){document.querySelectorAll("#"+id+" button").forEach(function(b){b.setAttribute("aria-pressed",String(b.getAttribute(key)===val));});}
+  function scaleAll(){document.querySelectorAll(".vp").forEach(function(vp){var f=vp.querySelector("iframe");var s=vp.clientWidth/1200;var H=S.sc===""?900:S.sc==="-aluno"?1350:2350;f.style.height=H+"px";f.style.transform="scale("+s+")";vp.style.setProperty("--h",Math.round(H*s)+"px");});}
+  function render(){
+    var all=S.k==="all";
+    document.getElementById("single").hidden=all;document.getElementById("multi").hidden=!all;
+    if(!all){var i=INFO[S.k];document.getElementById("s-name").textContent=i.n;document.getElementById("s-desc").textContent=i.d;
+      document.getElementById("s-meta").innerHTML=i.m.map(function(x){return '<span class="tag">'+x+'</span>';}).join("");
+      var f=i.f.replace(".html",S.sc+".html");var fr=document.getElementById("s-frame");fr.style.height=S.sc===""?"780px":S.sc==="-aluno"?"1350px":"2350px";if(fr.getAttribute("src")!==f)fr.setAttribute("src",f);}
+    else{document.querySelectorAll("#multi iframe").forEach(function(f){var u=f.getAttribute("data-src").replace(".html",S.sc+".html");if(f.getAttribute("src")!==u)f.setAttribute("src",u);});scaleAll();}
+    setPressed("tabs","data-k",S.k);setPressed("screen","data-v",S.sc);setPressed("lang","data-v",S.lang);setPressed("theme","data-v",S.theme);
+    root.setAttribute("data-theme",S.theme);
+    frames().forEach(send);
+    try{localStorage.setItem("ds-prev",JSON.stringify(S));}catch(e){}
+  }
+  document.getElementById("tabs").addEventListener("click",function(e){var b=e.target.closest("button");if(b){S.k=b.getAttribute("data-k");render();}});
+  document.getElementById("screen").addEventListener("click",function(e){var b=e.target.closest("button");if(b){S.sc=b.getAttribute("data-v");render();}});
+  document.getElementById("lang").addEventListener("click",function(e){var b=e.target.closest("button");if(b){S.lang=b.getAttribute("data-v");render();}});
+  document.getElementById("theme").addEventListener("click",function(e){var b=e.target.closest("button");if(b){S.theme=b.getAttribute("data-v");render();}});
+  window.addEventListener("message",function(e){if(e.data&&e.data.bridgeReady){frames().forEach(function(f){if(f.contentWindow===e.source)send(f);});}});
+  frames().forEach(function(f){f.addEventListener("load",function(){send(f);});});
+  window.addEventListener("resize",scaleAll);
+  render();
+})();
+</script>

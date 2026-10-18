@@ -354,3 +354,50 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   (md5 igual), review_bank_students 5 (md5 igual sem a coluna nova), reviews 0.
 - Produção: colada pela autora no SQL Editor em 2026-10-15 (autorizada). Conferido: as 8 funções, índice novo, gatilho, acks com RLS e sem grant
   para anon/authenticated, approve/pendentes na versão nova; 703 cartões (697 do Banco) e 2.134 itens intactos, nenhuma duplicata.
+
+## 107 -- Link de agenda com senha curta (2026-10-15)
+
+- `shared/supabase_migrations/107_calendar_feed_short_token.sql`: senha de 16 caracteres (alfabeto sem i/l/o/0/1,
+  `_calendar_feed_new_token()`), restrição aceita 64 hex (antiga) ou 16; `my_calendar_feed_token` troca a antiga
+  sozinha; `class_calendar_feed_lang(text)` (idioma do site do dono, `_ui_lang`). Única parte com DROP: troca da restrição.
+- Edge Function `class-calendar-feed` v2: senha no caminho (`/class-calendar-feed/<senha>`, para o Netlify) ou `?t=`.
+- Teste local: `tests/aulas-presenca/run.sh` (107 14/14); `.ics` 22/22. Staging: 107 aplicada (nome `105_calendar_feed_short_token`; renumerada para 107 porque outra conversa reservou 105, 106 e 108) e função v2 (2026-10-15),
+  testado ponta a ponta (200 text/calendar, `.ics` opcional, senha inválida 404, `?lang=en`).
+- Produção: aplicada em 2026-10-15 a pedido da autora (`107_calendar_feed_short_token`) e função v2. Conferido: anon e
+  authenticated sem acesso às funções internas, gerador dá 16 caracteres, senha inexistente = agenda vazia (200),
+  inválida = 404, 393 aulas intactas; a senha antiga da autora (64 hex) troca sozinha ao abrir o bloco.
+  Domínio `agenda.profbrune.com.br` (Netlify, pendente):
+  `docs/agenda-netlify-passo-a-passo.md`.
+
+
+## 110 -- get_my_profile cria o perfil que faltar (2026-10-16)
+
+- `shared/supabase_migrations/110_get_my_profile_creates_missing.sql`. Sem DROP. Causa: conta nova sem linha em `profiles`
+  (site caía na leitura da tabela fechada pela 080, 403, e nunca chamava `ensure_my_profile`): sem @/nome, "Aluno(a)" no
+  Ranking, Perfil sem edição e "Aceitar convite" com erro (aviso com body null). 21 contas assim na produção.
+- Staging: aplicada em 2026-10-16 (teste com rollback: conta sem perfil ganhou @, 2ª chamada devolve a mesma linha).
+  Produção: aplicada em 2026-10-16 a pedido da autora (simulação com rollback da conta afetada: perfil criado e
+  `accept_invite_code` ok). Site: `shared/profile.js` não depende mais da leitura da tabela;
+  teste `tests/perfil-faltando/test_unit.js` (7/7; 5 falhas no código antigo).
+
+### CSS do celular (achado junto, 2026-10-16)
+
+- `fr/index.html` e `zh/index.html`: um `@media (hover:hover){` (regra dourada das opções de exercício) ficou sem `}` desde o
+  merge de 2026-10-12 (`7cb42f6`). Todo o CSS depois dele só valia em aparelho com mouse: no celular os painéis, o cartão do
+  convite ("Recusar" ilegível) e as regras do fim do `<style>` ficavam sem estilo. Chave fechada; guarda nova
+  `tests/css-equilibrio/test_unit.js` (falha no código antigo). Os testes de navegador não pegavam (Chromium de teste tem hover).
+
+## 111 -- Escolher o @ uma vez, no primeiro acesso (2026-10-17)
+
+- `shared/supabase_migrations/111_choose_username_once.sql`. Sem DROP. Decisões da autora (2026-10-17): nome + @ na primeira
+  entrada, @ sugerido a partir do nome e editável, só pode escolher nesse momento (sem pular); vale para quem tem o @ aleatório
+  da 060 (`u` + 10 hex) e ainda não escolheu; contas antigas (@ do e-mail) ficam como estão; @ com letras minúsculas, números e
+  ponto entre eles (3 a 24). Para a tag de autoria (`criado-por-*`, ponto vira hífen) continuar única, um @ novo é recusado se
+  outro @ gera a mesma tag (ex.: raissa.lima x raissa_lima). `profiles_protect_identity` só deixa trocar o @ pela
+  `claim_my_username`, uma vez, de aleatório para escolhido. Coluna nova `profiles.username_chosen_at`.
+- Site: `shared/username-choice.js` (janela que não fecha, espera outras janelas fecharem), chamada em `onUserLoggedIn`.
+- Testes: `tests/escolher-usuario/run.sh` (SQL 22/22) e `tests/escolher-usuario/test_playwright.js` (76/76: fr/zh, claro/escuro,
+  celular, site em inglês sem português).
+- Staging: aplicada em 2026-10-17 (simulação com rollback: escolheu, não pede de novo, 2ª escolha e UPDATE direto recusados).
+  Produção: aplicada em 2026-10-17 a pedido da autora (md5 das 6 funções igual ao Staging; simulação com rollback da
+  conta com @ aleatório: escolheu e deixou de ficar pendente).

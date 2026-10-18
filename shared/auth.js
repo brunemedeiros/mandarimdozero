@@ -255,6 +255,8 @@ async function onUserLoggedIn(user){
   // ida extra à rede) e grava qualquer escolha pendente feita antes disso.
   await applyAccountUiLanguage();
   askUiLanguageOnFirstAccess();
+  // Escolher o @ uma vez (111): só para quem tem o @ aleatório e ainda não escolheu; espera outras janelas.
+  if (typeof maybeAskUsernameChoice === 'function') maybeAskUsernameChoice().catch(() => {});
   // Depois do render padrão (ver comentário equivalente em enterGuestMode)
   // -- só assim a navegação forçada por uma notificação clicada vence a
   // aba default do carregamento normal.
@@ -333,6 +335,14 @@ function toggleUserMenuDropdown(e){
   document.getElementById('mais-backdrop')?.classList.toggle('open', isOpen);
 }
 document.getElementById('user-menu-btn').addEventListener('click', toggleUserMenuDropdown);
+// O rótulo "Convidado"/"Minha conta" é gravado por t() na entrada; se o catálogo do
+// idioma do site chegar depois (site em inglês), repinta para não ficar em português.
+if (typeof window.addEventListener === 'function') window.addEventListener('i18n:change', () => {
+  const el = document.getElementById('user-label');
+  if (!el) return;
+  if (CURRENT_USER === false) el.textContent = t('auth.guestLabel');
+  else if (CURRENT_USER && !CURRENT_USER.user_metadata?.full_name && !CURRENT_USER.email) el.textContent = t('auth.myAccount');
+});
 document.getElementById('mais-btn')?.addEventListener('click', toggleUserMenuDropdown);
 document.addEventListener('click', () => {
   document.getElementById('user-menu-dropdown').classList.remove('open');
@@ -357,6 +367,9 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
     goToNeutralGate();
   }
 });
+
+// Sair da conta também na sidebar do desktop (o pill com o nome não existe lá).
+document.getElementById('sidebar-logout-btn')?.addEventListener('click', () => document.getElementById('logout-btn').click());
 
 // ---------- Persistência: Supabase (usuário logado) ou memória local (convidado) ----------
 let saveInFlight = false;

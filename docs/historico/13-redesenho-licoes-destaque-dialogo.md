@@ -183,3 +183,66 @@ A autora pensou em aposentar a ideia ("estamos criando coisas demais"). Nada foi
   (2026-10-14) que, se voltar, começa enxuta: só "Adicionar estas N formas à Revisão" na tela final da Conjugação e do
   Jogo, com o que a pessoa errou, sem mexer nos Desafios.
 - Os dois botões de áudio num mesmo Field (🔊 + 🎧) foram considerados "realmente muito confusos" pela autora.
+
+## Painel de Notificações (fr e zh, 2026-10-15)
+
+- Bug: avisos de Amigos são gravados uma vez por site (`_friends_notify`, 102: `frances` e `mandarim`) e o painel não
+  filtrava pelo idioma, então cada pedido de amizade aparecia duas vezes (produção, 7 dias: 4 + 4). Lembretes de
+  sequência/revisão do chinês também apareciam no site de francês. Agora a lista, o contador do sino e "Ler todas"
+  filtram por `language_app_key = APP_KEY`; abrir um aviso de Amigos marca a cópia do outro site como lida.
+- Visual: grupos Hoje/Ontem/Antes; ícone num círculo; não lido = fundo leve na cor da marca + ponto (antes tudo ficava
+  rosa com `rgba` fixo); lido = texto mais apagado; cabeçalho fixo ao rolar; o emoji do começo do texto ("📌 Fulana
+  postou...") sai porque o ícone já está à esquerda. "Ler todas" passou a ter i18n (`notif.markAll`).
+- Ícones: todos os emojis dos avisos estão no mapa do Fluent (`shared/emoji-icons.js`); conferido no teste.
+- A bolinha de não lido é um botão (`notification-unread-dot`, "Marcar como lida"): marca só aquele aviso, sem abrir nem fechar
+  o painel (área de toque de 44px no celular). O menu Professora não tem lista própria: o sino é o mesmo em todo o site.
+- Decisão da autora (2026-10-15): versão B, Design System do painel (Pico, já na `main` pelo PR #319). O sino do topo
+  (`#notifications-dropdown.painel`) e o "Avisos dos alunos" do menu Professora (`.tbell-panel.painel`,
+  `shared/teacher-panel.js`, de outra sessão: 105/108) usam `p-itens`/`p-item` (não lido = `p-item--suave`), grupos
+  Hoje/Ontem/Antes e o selo "Nova"/"Novo" (`p-selo--info`) que marca só aquele aviso como lido (área de toque ampliada
+  por `::before`). O sino da professora continua mostrando todos os idiomas (com o selo do idioma); o do topo só o site aberto.
+- `tests/sino-professora`: as 16 verificações "sem a 108" esperavam o sino do topo com avisos de todos os idiomas;
+  atualizadas para o filtro por site (fr: 3 avisos, 2 não lidos; zh: 3 e 3).
+- A autora pediu para descobrir o que mais pode ganhar o Pico: levantamento entregue no chat em 2026-10-15.
+- Grátis x Premium: tudo grátis.
+- Testes: `tests/notificacoes/test_playwright.js` 36/36, `tests/sino-professora` 272/272, painel-alunos 256/256, painel-cartoes 264/264 (novo; fr/zh, claro/escuro, celular), i18n 2032/2032 e 209/209,
+  celular 108/108, ícones 43/43, amigos 210/210, modo foco 19/19. `registro` 88/89 igual na `main` (pré-existente).
+
+## Ajustes pedidos pela autora (2026-10-16)
+
+- Conjugação: teclas de acento do mesmo tamanho das da lição (o contêiner `.conj-accents` em flex encolhia a grade até a
+  largura da letra; `.fr-accent-picker` ganhou `width:100%; max-width:360px` dentro dele).
+- Busca de verbos: a tradução vem logo depois do verbo, entre parênteses ("morar (habiter)"), em vez de encostada à direita.
+- Check: o ✓ voltou a ser texto (branco nos círculos verdes); ver `docs/icones-fluent.md`.
+- Testes: Conjugação Playwright 64/66 (2 novas: teclas com largura de toque; busca "comer (manger)" atualizada). As 2 falhas
+  ("resposta: forma certa na lacuna..." e "site em inglês: tradução...") já falhavam antes. "corrigir: erro mostra a forma
+  certa" falha às vezes, conforme o verbo sorteado (ex.: "pouvoir" tem "peux/puis"). Ícones 43/43 (o ✓ deixou de virar ícone).
+- Teclado da Conjugação (decisão da autora, 2026-10-16): só as letras que aparecem nas formas dos verbos da lista, calculadas
+  da própria `CONJUGATION_VERBS` (`conjAccentLetters`), na ordem do teclado das lições e numa fileira só. Hoje são 7
+  (â ç é è ê î û); verbo novo com outra letra entra sozinho. As lições seguem com as 14 (nenhuma faltando no francês do dia a
+  dia; ÿ e æ ficaram de fora por serem raríssimas). Conjugação Playwright 66/68 (as 2 de sempre).
+
+## Configurações no Design System do painel (fr e zh, 2026-10-17)
+
+Prévia A (como estava) x B (Pico) aprovada pela autora: "aprovo o B, pode usar o campo de escolha".
+
+- Tela inteira dentro de `.painel` (`#view-settings > .painel > .p-pagina.cfg-pagina`): cabeçalho `p-cabecalho`, abas
+  Geral/Notificações/Exportar em `.p-seg` (`aria-pressed`, `switchSettingsSection` marca também a classe `active`),
+  cada grupo num `<article>` com título.
+- Interruptores viraram `input[type=checkbox][role=switch]` (tema, cloze, som, os 3 de Notificações e os 9 de Amigos).
+  A linha inteira é um `<label>` (clicar no texto liga/desliga; alvo de toque grande no celular). Eventos passaram de
+  `click` para `change`; `updateThemePrefSwitch`/`updateClozeModeSwitch`/`updateFeedbackSoundSwitch` usam `.checked`.
+  Push que falha desmarca o interruptor de volta.
+- Notificações: "Personalizar por categoria" virou tabela (`.cfg-matriz`, rola para o lado se precisar; caixinhas
+  com nome acessível "Categoria: Canal"). Horário silencioso desce para baixo do texto no celular.
+- Exportar: a grade de unidades virou um campo de escolha (`#export-unit-select`, `shared/anki-export.js`).
+  "Todas as unidades" estava escrito direto no código e aparecia em português no site em inglês: agora é
+  `settings.export.allUnits` ("All units"), e o rótulo é `settings.export.unit`.
+- Classes antigas (`pref-row`, `pref-row-title`, `friends-pref-row`) ficaram no HTML porque o JS e os testes as usam;
+  o CSS da tela (`#view-settings ...`, bloco "Configurações no Design System do painel") desenha por cima.
+  A nota "Mais opções de conta em breve" (já escondida) saiu do HTML.
+- Grátis x Premium: só visual, tudo continua grátis.
+- Testes: `tests/configuracoes/test_playwright.js` novo (25/25); amigos 210/210, amigos-sugestoes 58/58, amigos-dupla
+  255/255, curso-progresso 12/12, i18n confirmação 16/16, i18n navegador 209/209, i18n persistência 39/39,
+  notificações 36/36, k2f 34/34 e 32/32 (export Anki), deck-browser 208/208; i18n unit 2232/2459, as mesmas falhas
+  antigas da `main` (o teste agora acha o bloco do seletor de idioma com qualquer recuo).

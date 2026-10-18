@@ -138,3 +138,13 @@ cria o vínculo). Os cartões do Eduardo ficam como estão, com o progresso.
   aluno com professora ativa 18/18, i18n unit 2032/2032.
 - Staging conferido (só leitura): todas as dependências existem, 096 ainda não aplicada; foto antes:
   teacher_flashcards 8 linhas (md5 a90d5f4c...), review_bank_items 18, review_bank_students 5, review_bank_reviews 0.
+
+## Publicado (2026-10-15)
+
+- 096 na produção (SQL Editor da autora), conferida: 8 funções, índice novo, gatilho, acks fechada, 703 cartões e 2.134 itens
+  intactos, nenhuma duplicata.
+- Textos aprovados: "Ainda sem conta no site" e "Vincular ao aluno" (en: "No account on the site yet", "Link to student").
+- PR #337 mesclado (merge c57286f); Pages publicado.
+- Edge Function `review-bank-agent` v8 (autorizada): mesmo `index.ts` da v7, atalhos para `engine.generated.mjs` e `core.mjs`
+  fixados no commit c57286f (só o motor gerado mudou).
+- Falta: converter "Sandra e Eduardo" em turma quando a Sandra tiver conta (dado em produção, só com autorização).

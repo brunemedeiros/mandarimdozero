@@ -571,14 +571,14 @@ const LANG_ID = 'fr';
 const CLOZE_MODE_KEY = 'frances_cloze_mode';
 
 
-document.getElementById('cloze-mode-switch').addEventListener('click', () => {
+document.getElementById('cloze-mode-switch').addEventListener('change', () => {
   const next = getClozeMode() === 'type' ? 'choice' : 'type';
   localStorageSafeSet(CLOZE_MODE_KEY, next);
   updateClozeModeSwitch();
 });
 updateClozeModeSwitch();
 
-document.getElementById('feedback-sound-switch').addEventListener('click', () => {
+document.getElementById('feedback-sound-switch').addEventListener('change', () => {
   localStorageSafeSet(FEEDBACK_SOUND_KEY, isFeedbackSoundEnabled() ? '0' : '1');
   updateFeedbackSoundSwitch();
 });
@@ -721,6 +721,8 @@ function applySerializedState(data){
       const c = STATE.cards.find(x => x.id === studyWordCardId(u, vi));
       return !!(c && c.released);
     });
+    // Etapa 0b (04, 2.10): unidade nova inserida antes de onde o aluno já está nasce aberta, mas não concluída.
+    openUnitsBeforeOpenOnes(trailGroups(), STATE.unitProgress);
   }
   // Marca `released` em todo cartão já liberado pelo portão de lição (2.3 item 8): no 1º carregamento depois da
   // Etapa 0, todos os cartões que já estavam na Revisão ganham a marca e continuam lá mesmo se a palavra mudar de unidade.
@@ -4949,9 +4951,16 @@ const SIDEBAR_COLLAPSE_KEY = 'sidebar_collapsed';
 if (localStorageSafeGet(SIDEBAR_COLLAPSE_KEY) === '1'){
   document.getElementById('app').classList.add('sidebar-collapsed');
 }
+function syncSidebarToggleLabel(){
+  const btn = document.getElementById('sidebar-toggle-btn');
+  const txt = t(document.getElementById('app').classList.contains('sidebar-collapsed') ? 'sidebar.expand' : 'sidebar.collapse');
+  btn.title = txt; btn.setAttribute('aria-label', txt);
+}
+syncSidebarToggleLabel();
 document.getElementById('sidebar-toggle-btn').addEventListener('click', () => {
   const collapsed = document.getElementById('app').classList.toggle('sidebar-collapsed');
   localStorageSafeSet(SIDEBAR_COLLAPSE_KEY, collapsed ? '1' : '0');
+  syncSidebarToggleLabel();
 });
 
 // Popula os campos de Configurações -- roda em QUALQUER entrada na aba
@@ -4970,7 +4979,11 @@ function renderSettingsView(){
 let SETTINGS_SECTION = 'geral';
 function switchSettingsSection(section){
   SETTINGS_SECTION = section;
-  document.querySelectorAll('[data-settings-section]').forEach(btn => btn.classList.toggle('active', btn.dataset.settingsSection === section));
+  document.querySelectorAll('[data-settings-section]').forEach(btn => {
+    const on = btn.dataset.settingsSection === section;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-pressed', String(on));
+  });
   document.getElementById('settings-geral-content').style.display = section === 'geral' ? '' : 'none';
   document.getElementById('settings-notifications-content').style.display = section === 'notifications' ? '' : 'none';
   document.getElementById('settings-export-content').style.display = section === 'export' ? '' : 'none';
@@ -5350,8 +5363,7 @@ function renderConjSearchList(){
   list.innerHTML = hits.length ? hits.map((h, i) => {
     const other = h.lang === 'fr' ? (VERB_TRANSLATIONS[h.verb] || '') : h.verb;
     return `<li role="option" id="conj-opt-${i}" class="conj-search-opt" data-verb="${escapeHTML(h.verb)}" aria-selected="${i === 0}">
-      ${conjFlagHTML(h.lang)}<span class="conj-opt-word" ${h.lang === 'fr' ? 'lang="fr"' : ''}>${escapeHTML(h.word)}</span>
-      <span class="conj-opt-other" ${h.lang === 'pt' ? 'lang="fr"' : ''}>${escapeHTML(other)}</span></li>`;
+      ${conjFlagHTML(h.lang)}<span class="conj-opt-word" ${h.lang === 'fr' ? 'lang="fr"' : ''}>${escapeHTML(h.word)}${other ? ` <span class="conj-opt-other" ${h.lang === 'pt' ? 'lang="fr"' : ''}>(${escapeHTML(other)})</span>` : ''}</span></li>`;
   }).join('') : `<li class="conj-search-empty" role="presentation">${t('fr.conj.sel.noMatch')}</li>`;
   list.hidden = false;
   input.setAttribute('aria-expanded', 'true');
@@ -5628,6 +5640,24 @@ function normalizeLoose(str){
 
 // Uma instância do módulo por página, criada no primeiro uso (o lang-hooks.js e o módulo já carregaram).
 let _latinaFr = null;
+// Teclado de acentos da Conjugação: só as letras que aparecem nas formas dos verbos da lista (decisão da autora, 2026-10-16),
+// na ordem do teclado das lições e numa fileira só. Calculado da própria lista: verbo novo com outra letra (ex.: "haïr")
+// já entra sozinho. As lições continuam com o teclado completo (frAccentPickerHTML).
+let _conjAccentLetters = null;
+function conjAccentLetters(){
+  if (_conjAccentLetters) return _conjAccentLetters;
+  const used = new Set();
+  Object.values(CONJUGATION_VERBS).forEach(v => Object.values(v.f || {}).forEach(forms => (forms || []).forEach(x => {
+    for (const ch of String(x || '')) used.add(ch);
+  })));
+  const all = [].concat(...LANG_HOOKS.familiaLatina.gruposDeAcentos);
+  _conjAccentLetters = all.filter(ch => used.has(ch));
+  return _conjAccentLetters;
+}
+function conjAccentPickerHTML(){
+  return FamiliaLatina.htmlTecladoDeAcentos([conjAccentLetters()]);
+}
+
 function latinaFr(){
   return _latinaFr || (_latinaFr = FamiliaLatina.criar(LANG_HOOKS.familiaLatina));
 }
@@ -5727,7 +5757,7 @@ function renderConjPracticeStep(){
         </div>`).join('')}
     </div>
     ${alreadyChecked ? '' : `
-      <div class="conj-accents">${frAccentPickerHTML()}</div>
+      <div class="conj-accents">${conjAccentPickerHTML()}</div>
       <div class="conj-actions">
         <button class="btn btn-primary btn-block" id="conj-verify-btn">${t('fr.conj.checkAnswers')}</button>
         <button class="btn btn-secondary" id="conj-hint-btn" title="${t('fr.conj.hintTitle')}">${t('fr.conj.hintShow')}</button>
