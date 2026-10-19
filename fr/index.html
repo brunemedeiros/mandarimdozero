@@ -5137,6 +5137,8 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 #view-conjugaison .cg-timeline{ margin:0; display:flex; flex-direction:column; gap:6px; color:var(--ink); }
 #view-conjugaison .cg-timeline svg{ width:134px; height:44px; display:block; }
 #view-conjugaison .cg-timeline figcaption{ font-size:12px; font-weight:800; color:var(--ink-soft); line-height:1.35; }
+/* Jogo sem desenho (être x avoir, tu x vous): a legenda vira a regra, num quadro. */
+#view-conjugaison .cg-timeline.cg-rule figcaption{ padding:10px 12px; border-radius:12px; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink); font-size:13px; }
 #view-conjugaison .cg-tr{ display:flex; align-items:center; gap:10px; margin:14px 0 18px; font-size:14.5px; color:var(--ink-soft); }
 #view-conjugaison .cg-next{ width:100%; }
 #view-conjugaison .cg-result{ text-align:center; background:var(--paper); border:1px solid var(--paper-line); border-radius:20px; padding:28px 24px; box-shadow:var(--shadow-card); }
@@ -5157,6 +5159,8 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
   #view-conjugaison .cg-choices{ gap:8px; }
 }
 #view-conjugaison .conj-mode-lock{ font-size:12px; }
+#view-conjugaison .cg-level{ display:inline-block; margin-right:8px; padding:1px 8px; border-radius:8px; font-size:13px; font-weight:900; vertical-align:2px;
+  color:var(--ink); background:color-mix(in srgb, var(--seal-red) 16%, var(--paper)); border:1px solid color-mix(in srgb, var(--seal-red) 40%, transparent); }
 #view-conjugaison .cg-premium{ display:inline-block; margin-right:10px; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:800;
   color:var(--ink); background:color-mix(in srgb, var(--imperial-gold) 22%, var(--paper)); border:1px solid color-mix(in srgb, var(--imperial-gold) 45%, transparent); }
 /* ---------- Cara de jogo: telas (passo 4, docs/historico/15) ----------

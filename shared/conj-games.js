@@ -2,6 +2,8 @@
 // Jogo de escolha entre duas formas (ex.: passé composé x imparfait), no formato do
 // "Jogo de Conjugações" da autora: frase com lacuna, duas opções, e depois da resposta
 // a explicação com o desenho da linha do tempo, a pista destacada, a tradução e o áudio.
+// Jogo que não é de tempo verbal (être x avoir, tu x vous) não tem desenho: sem opts.sketch, a
+// legenda (opts.tl) aparece sozinha como a regra. game.level ('A1', 'A2') vira etiqueta no cartão.
 // Os dados ficam por idioma (fr/conj-games.js -> CONJ_GAMES); o texto de cada item vem
 // por idioma do site (text['pt-BR'], text.en). Sem XP: é prática livre, como a Conjugação.
 function createConjGames({ games, speak, ids, isLocked, onLocked }){
@@ -28,7 +30,7 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
     if (!el) return;
     el.innerHTML = games.map(g => `
       <article class="cg-card">
-        <h3 class="cg-card-title">${esc(L(g.title))}</h3>
+        <h3 class="cg-card-title">${g.level ? `<span class="cg-level">${esc(g.level)}</span>` : ''}${esc(L(g.title))}</h3>
         <p class="cg-card-lede">${esc(L(g.lede))}</p>
         <div class="cg-card-foot">
           <span class="cg-card-meta"><span class="cg-premium" title="${esc(tt('games.premium'))}">🔒 ${esc(tt('games.premium'))}</span>${esc(tt('games.perRound', { n: Math.min(g.perRound, g.items.length) }))}</span>
@@ -66,7 +68,8 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
       return i < 0 ? esc(s) : esc(s.slice(0, i)) + `<mark class="cg-clue">${esc(it.clue)}</mark>` + esc(s.slice(i + it.clue.length));
     };
     const gap = filled ? `<span class="cg-fill">${esc(it[it.ans])}</span>` : '<span class="cg-blank" aria-label="___">&nbsp;</span>';
-    return `<p class="cg-sentence" lang="fr">${mark(it.before)}${gap}${mark(it.after)}</p>`;
+    // Espaço antes de ? ! : ; (tipografia francesa) vira inseparável: o sinal não cai sozinho na linha de baixo.
+    return `<p class="cg-sentence" lang="fr">${mark(it.before)}${gap}${mark(it.after)}</p>`.replace(/ ([?!:;])/g, '\u00a0$1');
   }
 
   function progressHTML(){
@@ -82,7 +85,7 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
       <h2 class="cg-title">${esc(L(g.title))}</h2>
       ${progressHTML()}
       <div class="cg-stage">
-        <span class="cg-verb" lang="fr">(${esc(it.verb)})</span>
+        ${it.verb ? `<span class="cg-verb" lang="fr">(${esc(it.verb)})</span>` : ''}
         ${sentenceHTML(it, false)}
         <div class="cg-choices">
           ${['a', 'b'].map((k, i) => `<button type="button" class="cg-choice" data-k="${k}" aria-keyshortcuts="${i + 1}">
@@ -111,7 +114,7 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
     fb.innerHTML = `
       <p class="cg-verdict ${ok ? 'ok' : 'no'}">${esc(tt(ok ? 'games.right' : 'games.wrong'))}${ok ? '' : ` <span>${esc(tt('games.answerWas', { form: it[it.ans] }))}</span>`}</p>
       <div class="cg-why">
-        <figure class="cg-timeline"><svg viewBox="0 0 134 44" role="img" aria-label="${esc(L(opt.tl))}">${SKETCH[opt.sketch] || ''}</svg><figcaption>${esc(L(opt.tl))}</figcaption></figure>
+        <figure class="cg-timeline${SKETCH[opt.sketch] ? '' : ' cg-rule'}">${SKETCH[opt.sketch] ? `<svg viewBox="0 0 134 44" role="img" aria-label="${esc(L(opt.tl))}">${SKETCH[opt.sketch]}</svg>` : ''}<figcaption>${esc(L(opt.tl))}</figcaption></figure>
         <div><h3>${esc(tt('games.whyTense', { tense: opt.label }))}</h3><p>${esc(txt.why || '')}</p></div>
       </div>
       <p class="cg-tr"><button type="button" class="audio-btn cg-listen" aria-label="${esc(tt('games.listen'))}" title="${esc(tt('games.listen'))}">🔊</button><span>${esc(txt.tr || '')}</span></p>

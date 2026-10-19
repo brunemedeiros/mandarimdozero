@@ -354,3 +354,17 @@ subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do si
 - Teste: `tests/acessibilidade/test_playwright.js` 60/60 (fr e zh, claro e escuro).
 - Pendente com a dona: textos dos avisos no banco (dia 1 "esqueceu de mim?", dia 7 "streak dormindo", "Quase lá" com zero
   lições) e o texto da janela da sequência; deploy da `notification-cron`.
+
+## Jogos da Conjugação A1 (fr, 2026-10-19)
+
+- Pedido da autora: jogos A1 1 (être x avoir), 2 (auxiliar do passé composé, SÓ o auxiliar; concordância fica para um jogo A2)
+  e 4 (tu x vous), com as frases que mais derrubam quem fala português e inglês. O 3 (presente x futur proche) ficou de fora.
+- Dados em `fr/conj-games.js`: `etre-avoir` (19 frases), `pc-auxiliaire` (24; com être, sujeito masculino e singular para a
+  concordância não aparecer), `tu-vous` (17); 10 por partida. Explicação em pt-BR voltada ao erro do brasileiro, em en ao erro
+  de quem fala inglês. Revisão do agente revisor-conteudo aplicada (ex.: "il est été" NÃO é erro típico de lusófono; "verbo com
+  objeto direto vai com avoir" removido por generalizar demais). Lista para a autora: `docs/jogos-conjugacao-a1-revisao.md`.
+- Motor (`shared/conj-games.js`): `level` vira etiqueta no cartão (A1 primeiro; o jogo do imparfait ficou A2); jogo sem
+  `opts.sketch` mostra a regra num quadro em vez da linha do tempo; `verb` opcional; espaço antes de ? ! : ; inseparável.
+- Grátis x Premium: igual ao jogo existente (Premium com cadeado; paywall desligado, então hoje todos jogam).
+- Testes: `tests/conjugacao/test_playwright.js` 77/77 (bloco novo dos jogos A1; os 2 que falhavam na main eram o seletor
+  `.cg-tr span` pegando o ícone 🔊, corrigido para `.cg-tr > span:last-child`). i18n unit 2050/2052, as mesmas 2 da main.
