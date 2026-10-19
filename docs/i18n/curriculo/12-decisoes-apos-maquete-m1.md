@@ -190,3 +190,12 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
 78. **Tônicos com preposição**: nota breve na M4.1 (*Pour moi, un café*) e nota na M8.4 (*avec moi, chez toi*); sem tela de gramática no A1 e sem *sans*.
 79. **M4.1 com 6 notas fica** (sem teto; a lâmpada rola). A nota de negação com partitivo é a N26 do M4.2 (*Je ne mange pas de ...*), com o contraste *le poisson* do M4.1 (decisão 69).
 80. **Regra "conteúdo nasce traduzido"** (dona, 2026-10-19, outra sessão; na `main`): todo conteúdo novo ou alterado do mapa sai com pt-BR e en no mesmo lote (camada `courses/fr-pt-BR/layer.js`, inglês em `docs/i18n/content-en/`, Desafios em `challenges-en.json` e `dictations-en.json`; validadores `build-content-overlay`, `validate-content-overlay`, `validate-challenges-en`, `tests/i18n/test_sem_portugues_en.js`). Vale para toda entrega de conteúdo deste currículo.
+
+---
+
+# Décima rodada (2026-10-19): M5
+
+81. **"Conteúdo nasce traduzido" vale a partir da aprovação**: nenhuma tradução (pt-BR ou en) é produzida para conteúdo ainda não aprovado pela dona. Depois de aprovado, o lote sai com as duas.
+82. **Demonstrativos *ce / cette / ces*: ficam como nota** (M5.3), sem gramática própria (o M5 já tem duas gramáticas).
+83. **`A1-g15`: só masculino, feminino e plural do adjetivo**, título visível **"Gramática: adjetivos"** (escolha da dona).
+84. **A nota de *combien* na M5.1 fica.** A dona não decidiu uma regra geral contra notas de pergunta: nota de pergunta é permitida quando há propósito (corrige a leitura literal da decisão 66).

@@ -78,7 +78,7 @@ perderia o ponto de consolidação cedo, perto das apresentações pessoais.
 - **M2.1** ganha 1 diálogo/frase com *qui* (*Qui est-ce ? C'est ma sœur.*): conteúdo novo, chave nova.
 - **M6.1**: mantém *où est* (já existe); os diálogos com *quand* de M3 viram a base da gramática do M6.
 - **M8.4**: *pourquoi / parce que* em diálogo de convite (já há *parce que* como vocabulário).
-- Notas de pergunta soltas **deixam de ser necessárias** (as frases com a pergunta e a resposta já estão nos diálogos atuais); cai a ideia de ~10 notas de pergunta da versão 1.
+- Notas de pergunta soltas **não são obrigatórias** (as frases com a pergunta e a resposta já estão nos diálogos atuais); onde houver um propósito (ex.: a nota de *combien* na M5.1), a nota pode existir. Não é regra geral (a dona, 2026-10-19).
 
 ## Respostas da dona (2026-10-19)
 

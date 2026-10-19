@@ -79,7 +79,8 @@ Desafios continuam Premium com o paywall desligado (todos usam). O *défi* de fi
 (unidades, vocabulário, frases, diálogos novos com cena e pergunta de compreensão, notas, telas de gramática, Desafios e ditados) sai no mesmo lote com a versão de
 **cada idioma de site do curso** (hoje pt-BR e en); lote sem todas as traduções não é importado nem publicado. A explicação em inglês explica o francês para quem fala inglês
 (nada de "em português dizemos..."). Cada lote tem um `.md` de revisão com pt e en lado a lado e confiança por tradução.
-Consequência para este mapa: todo diálogo e frase novos citados (negação por diálogo, *C'est qui ?*, *dix-sept a dix-neuf*, "Novidades desta unidade", notas novas) já nascem com pt-BR e en.
+**As traduções só são produzidas depois que o conteúdo é aprovado pela dona** (decisão 81): na fase de mapa não se gera tradução de nada.
+Consequência, quando o conteúdo estiver aprovado: todo diálogo e frase novos citados (negação por diálogo, *C'est qui ?*, *dix-sept a dix-neuf*, "Novidades desta unidade", notas novas) já nascem com pt-BR e en.
 
 ### 2.2 Decisões vigentes da dona (`12`, `14`, `04`)
 
@@ -182,7 +183,7 @@ Consigo: entender e dizer preços até 1000 € e pagar; dar um número de telef
 | M5.1 (`A1-28`) | Perguntar o preço e pagar | preço, pagamento, telefone | números 70 a 1000 | *soixante-dix, quatre-vingts, quatre-vingt-dix, cent, zéro, combien, mille, le prix, payer, en espèces* (10) | N09 vira *septante, huitante, nonante* (Real regional, alta; só a parte regional; gatilho *soixante-dix*) · telefone em pares (Exp, n/r, *nova*; gatilho *zéro*) · *combien*, também *Ça coûte combien ?* (Exp, n/r, *nova*; absorve N30) | nova (números das roupas e *zéro, combien* do `A1-3`); recebe a frase *Combien ça coûte ?* |
 | M5.2 (g) (`A1-g10`) | Números de 70 a 99 | montar 70 a 99 | base 20 (5 telas, 7 exercícios) | (gramática) | (sem nota: as notas vão para M5.1) | movida; +1 exercício de telefone |
 | M5.3 (`A1-10`) | Comprar roupas | pedir e experimentar roupa | *je peux essayer*, *je la prends* (fórmulas) | *le pantalon, la robe, cher, pas cher, la taille, le magasin, **la chemise, le pull, les chaussures, essayer*** (10) | N29 *Je voudrais* ou *je peux*? (Exp, n/r) · N30 **cortada** · *ce, cette, ces* (Exp, alta, *nova*) · o gênero nem sempre bate com o português (*le pantalon, la robe*) (Exp, n/r, *nova*) · *Je la prends*: reconhecer o COD (Exp, n/r, *nova*) | renomeada ("Compras"); 8 números saem (4 para M1.4, 4 para M5.1); passa de 14 para 10 palavras |
-| M5.4 (g) (`A1-g15`) | Adjetivos: masculino, feminino e plural | concordar o adjetivo | feminino em *-e* e os que mudam mais; feminino que se ouve; plural mudo (4 telas, 8 exercícios) | (gramática) | (sem nota) | nova; demonstrativos e lugar do adjetivo viram notas |
+| M5.4 (g) (`A1-g15`) | Gramática: adjetivos | concordar o adjetivo | feminino em *-e* e os que mudam mais; feminino que se ouve; plural mudo (4 telas, 8 exercícios) | (gramática) | (sem nota) | nova; demonstrativos e lugar do adjetivo viram notas |
 
 #### A1 M6 · Na cidade (`A1-m4`; hoje "Deslocando-se e cuidando de si")
 Consigo: perguntar e explicar o caminho; dizer aonde vou; usar o transporte; dizer onde dói e entender um conselho; repassar um aviso em
@@ -459,8 +460,8 @@ Origem entre colchetes, para conferência.
 26. [RESPONDIDA: sim] ***tôt, tard* na M3.1; *pas encore, après* na M8.2**; *hier* fundido; *récemment* movida para o A2 M2.5? *Recomendo sim.* Impacto: uma fusão (regra FSRS) e uma palavra que sai do A1 com o progresso intacto. [`08` 8, `04` 25]
 27. [RESPONDIDA: sim] **Módulo "Comer e beber"** (M4), *adorer* na M4.1, partitivos antes do restaurante e *faire / prendre* no M4.6? *Recomendo sim.* Impacto: `A1-g5` muda de módulo. [`08` 5, 9; `10` 8, 9]
 28. [RESPONDIDA: sim] **Tônicos com preposição**: nota breve na M4.1 (*Pour moi, un café*) e nota na M8.4 (*avec moi, chez toi*), sem tela de gramática no A1 e sem *sans*? *Recomendo sim.* Impacto: fecha a regra 9. [`09` 27, 28; `11` 17]
-29. **Demonstrativos como nota na M5.3** (sem exercício) ou gramática pequena `A1-g21`? *Recomendo nota.* Impacto: *ce* x *cette* sem prática com correção no A1. [`10` 10]
-30. **`A1-g15` só com masculino, feminino e plural** do adjetivo? *Recomendo sim.* [`10` 11]
+29. [RESPONDIDA: ver decisões 82 e 83] **Demonstrativos como nota na M5.3** (sem exercício) ou gramática pequena `A1-g21`? *Recomendo nota.* Impacto: *ce* x *cette* sem prática com correção no A1. [`10` 10]
+30. [RESPONDIDA: ver decisões 82 e 83] **`A1-g15` só com masculino, feminino e plural** do adjetivo? *Recomendo sim.* [`10` 11]
 31. **Imperativo em gramática própria** (`A1-g19`, M6.4), `A1-g6` só com modais e *il faut*, e *savoir* fora do A1? *Recomendo sim.* Impacto: `A1-g6` publicada perde 2 exercícios. [`10` 14, 15]
 32. ***le médecin* para a M1.6** e *se reposer* em "Dizer onde dói"? *Recomendo sim.* Impacto: palavra vai para mais cedo (`released` protege). [`08` 7]
 33. **Futuro próximo (`A1-g20`) no M7**, depois de "Férias e hotel", ou no M8, antes do passé composé? *Recomendo M7.* Impacto: M7 fica o mais longo (~3h45). [`10` 13]
