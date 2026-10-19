@@ -2046,7 +2046,7 @@ window.I18N_CATALOG['en'] = {
   'ui.kbd.confirm': 'Confirm a typed answer and move on to the next one', // ALTA
   'ui.kbd.replay': 'Play audio again', // ALTA
   'ui.kbd.note': 'The numbers only appear when an exercise has options to choose from -- never during typing or the sentence-ordering exercise. "r" repeats the last audio that played on screen.', // ALTA
-  'ui.streak.sub': 'Keep it up: your streak will reset if you don\'t study tomorrow.', // ALTA
+  'ui.streak.sub': 'Come back tomorrow to keep your streak going.', // ALTA
   'ui.reviewReminder.title': 'Shall we do a quick review?', // ALTA
   'ui.notNow': 'Not now', // ALTA
   'ui.update.title': 'New version available', // ALTA

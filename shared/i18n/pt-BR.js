@@ -2062,7 +2062,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'ui.kbd.confirm': 'Confirmar uma resposta digitada e avançar pra próxima',
   'ui.kbd.replay': 'Tocar áudio novamente',
   'ui.kbd.note': 'Os números só aparecem quando um exercício tem alternativas pra escolher -- nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela.',
-  'ui.streak.sub': 'Continue assim: sua série será zerada se você não estudar amanhã.',
+  'ui.streak.sub': 'Volte amanhã para manter sua sequência.',
   'ui.reviewReminder.title': 'Vamos fazer uma pequena revisão?',
   'ui.notNow': 'Agora não',
   'ui.update.title': 'Nova versão disponível',
