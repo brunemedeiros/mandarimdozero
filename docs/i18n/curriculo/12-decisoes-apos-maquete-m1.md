@@ -199,3 +199,6 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
 82. **Demonstrativos *ce / cette / ces*: ficam como nota** (M5.3), sem gramática própria (o M5 já tem duas gramáticas).
 83. **`A1-g15`: só masculino, feminino e plural do adjetivo**, título visível **"Gramática: adjetivos"** (escolha da dona).
 84. **A nota de *combien* na M5.1 fica.** A dona não decidiu uma regra geral contra notas de pergunta: nota de pergunta é permitida quando há propósito (corrige a leitura literal da decisão 66).
+85. **Nova unidade M5.4 "Cores e materiais"** (`A1-29`, id novo), depois de "Comprar roupas" e antes da "Gramática: adjetivos" (agora M5.5). ~10 cartões: *gris, rose, orange, marron, clair, foncé, le bois, le verre, le coton, le cuir*; demais materiais numa **nota de vocabulário "Outros materiais"** (*la laine, le plastique, le métal, le papier, la soie, la pierre*) em vez de um cartão para cada. M5 passa a 5 unidades (3 + 2), ~2h55.
+86. **Notas da M5.4**: *orange, marron* e *bleu clair* não mudam (na lição das cores, Exp, alta); *en* + material (depois dos materiais, Exp, alta); "Outros materiais" (vocabulário, Exp, alta).
+87. **M2.3 passa a ser sobre aparência física, não roupas** (dona): altura, bonito/feio, loiro/moreno, tipos de cabelo, olhos etc. Como ficam as cores básicas e quais palavras entram: pergunta aberta (ver `08 v2`).

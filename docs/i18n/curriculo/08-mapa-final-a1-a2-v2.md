@@ -176,14 +176,15 @@ cardápio. 6 unidades (4 + 2), 41 cartões, ~3h15.
 
 #### A1 M5 · Compras (`A1-m8`; módulo novo)
 Consigo: entender e dizer preços até 1000 € e pagar; dar um número de telefone; pedir uma roupa, dizer tamanho e cor; escolher um objeto com
-*ce / cette*. 4 unidades (2 + 2), 20 cartões, ~2h10.
+*ce / cette*; dizer a cor e o material de um objeto. 5 unidades (3 + 2), 30 cartões, ~2h55.
 
 | Posição (id) | Título visível | Função | Gramática | Vocabulário-chave | Notas | Muda |
 |---|---|---|---|---|---|---|
 | M5.1 (`A1-28`) | Perguntar o preço e pagar | preço, pagamento, telefone | números 70 a 1000 | *soixante-dix, quatre-vingts, quatre-vingt-dix, cent, zéro, combien, mille, le prix, payer, en espèces* (10) | N09 vira *septante, huitante, nonante* (Real regional, alta; só a parte regional; gatilho *soixante-dix*) · telefone em pares (Exp, n/r, *nova*; gatilho *zéro*) · *combien*, também *Ça coûte combien ?* (Exp, n/r, *nova*; absorve N30) | nova (números das roupas e *zéro, combien* do `A1-3`); recebe a frase *Combien ça coûte ?* |
 | M5.2 (g) (`A1-g10`) | Números de 70 a 99 | montar 70 a 99 | base 20 (5 telas, 7 exercícios) | (gramática) | (sem nota: as notas vão para M5.1) | movida; +1 exercício de telefone |
 | M5.3 (`A1-10`) | Comprar roupas | pedir e experimentar roupa | *je peux essayer*, *je la prends* (fórmulas) | *le pantalon, la robe, cher, pas cher, la taille, le magasin, **la chemise, le pull, les chaussures, essayer*** (10) | N29 *Je voudrais* ou *je peux*? (Exp, n/r) · N30 **cortada** · *ce, cette, ces* (Exp, alta, *nova*) · o gênero nem sempre bate com o português (*le pantalon, la robe*) (Exp, n/r, *nova*) · *Je la prends*: reconhecer o COD (Exp, n/r, *nova*) | renomeada ("Compras"); 8 números saem (4 para M1.4, 4 para M5.1); passa de 14 para 10 palavras |
-| M5.4 (g) (`A1-g15`) | Gramática: adjetivos | concordar o adjetivo | feminino em *-e* e os que mudam mais; feminino que se ouve; plural mudo (4 telas, 8 exercícios) | (gramática) | (sem nota) | nova; demonstrativos e lugar do adjetivo viram notas |
+| M5.4 (`A1-29`, id novo) | Cores e materiais | dizer a cor e o material de uma peça ou objeto | *en* + material; cor depois do nome (fórmula) | *gris, rose, orange, marron, clair, foncé, le bois, le verre, le coton, le cuir* (10; mais as cores e os materiais da nota "Outros materiais") | *orange, marron, bleu clair* não mudam (Exp, alta, *nova*, na lição das cores) · *en* + material (Exp, alta, *nova*, depois dos materiais) · "Outros materiais": *la laine, le plastique, le métal, le papier, la soie, la pierre* (nota de vocabulário, Exp, alta, *nova*) | nova (decisão 85); as cores básicas continuam na M2.3 (ver pergunta aberta sobre a M2.3) |
+| M5.5 (g) (`A1-g15`) | Gramática: adjetivos | concordar o adjetivo | feminino em *-e* e os que mudam mais; feminino que se ouve; plural mudo (4 telas, 8 exercícios) | (gramática) | (sem nota) | nova; demonstrativos e lugar do adjetivo viram notas |
 
 #### A1 M6 · Na cidade (`A1-m4`; hoje "Deslocando-se e cuidando de si")
 Consigo: perguntar e explicar o caminho; dizer aonde vou; usar o transporte; dizer onde dói e entender um conselho; repassar um aviso em
