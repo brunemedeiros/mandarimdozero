@@ -342,7 +342,7 @@ subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do si
   (badges chegam mais). Avisos antigos já gravados ficam. Teste: `tests/notificacoes/test_sino_so_na_hora.js` 8/8.
 - **"Não deixa apagar!" / "Sequência em risco"** (`notification-cron`, passo 2): só sai quando o último estudo foi ONTEM
   (`daysSince(lastStudyDay) === 1`). Antes saía todo dia para quem já tinha parado (212 avisos para 20 pessoas em 14 dias,
-  produção 2026-10-19). Só no código: precisa de deploy da `notification-cron` (produção estava na v29).
+  produção 2026-10-19). Publicado na produção como `notification-cron` v30 (2026-10-19, `verify_jwt` true; código publicado conferido igual ao do repositório).
 - **Avisos rápidos** (`shared/toast.js`): 4 a 10 s pelo tamanho do texto (antes 2 s), passar o mouse segura, `#toast-layer`
   com `role="status"` e `aria-live="polite"` (fr e zh), saída animada respeitando `prefers-reduced-motion`.
 - **Janelas antigas** (`shared/modal-a11y.js`, carregado em fr e zh): toda janela do HTML (`.app-modal-overlay`,
