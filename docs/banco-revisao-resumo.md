@@ -15,6 +15,13 @@ Botão "Estudar N": os cartões que vencem hoje. Hoje ela **não** tem Récap, �
 - Modo aula com 4 botões (Errei, Difícil, Bom, Fácil) e intervalo. Digitar: acerto escolhe Bom ou Fácil. Cores iguais no fr e no zh.
 - Telas novas estão na branch do PR #347; chegam ao site quando o PR for mesclado.
 
+## Decidido na entrevista (2026-10-19)
+- **Récap** fica como aquecimento de até 8 itens (só da professora).
+- **Erros** e **Última aula** são importantes para a professora **e** para a aluna: a aluna passa a ter os dois.
+- Última aula da aluna: todos os itens da aula mais recente, em partes, com "continuar depois".
+- Um erro só sai de Erros depois de **2 acertos seguidos**.
+- Estudar por Erros e Última aula **vale como revisão normal** (agendamento e XP).
+
 ## Em decisão (entrevista com a professora, 2026-10-19)
 O que fica, o que muda, o que sai e o que entra de novo: Récap, Última aula, Erros (também para a aluna), tipos de item.
 
