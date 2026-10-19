@@ -6,7 +6,9 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| 1 | `08-revisao-por-funcao-comunicativa.md` | **Mapa v3 do A1 e do A2** por função (posição "M1.3" + nome), "ao fim do módulo o aluno consegue...", mudanças e 18 perguntas | **inteiro** (é o mais recente e vale mais que o 04 nos mapas) |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (48 unidades) e do A2 (57), com notas por unidade, gramáticas corrigidas, riscos de progresso, 57 perguntas abertas (sem as já respondidas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
+| fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
 | 3 | `07-atividades-finais-defi.md` | Défis (atividades finais Premium) adaptados ao virtual, 18 défis, 3 exemplos, Portfólio, 17 perguntas | seções 3 (formatos), 5 (exemplos completos), 8 (perguntas) |
 | 4 | `06-fonetica-trilha.md` | Sons por módulo, formatos, gravação, IPA, perguntas Q-1 a Q-12 | seções 3 (formatos), 5 (recomendação), 6 (perguntas) |
