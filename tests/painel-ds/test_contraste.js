@@ -15,9 +15,9 @@ const BRANCO = [255, 255, 255];
 const css = require('fs').readFileSync(path.join(ROOT, 'shared/painel/painel-tokens.css'), 'utf8');
 check('CSS: --p-elevado claro = paper-warm + 45% branco', /--p-elevado: color-mix\(in srgb, var\(--paper-warm\), white 45%\)/.test(css));
 check('CSS: --p-elevado escuro = paper-warm + 8% branco (2 blocos)', (css.match(/--p-elevado: color-mix\(in srgb, var\(--paper-warm\), white 8%\)/g) || []).length === 2);
-check('CSS: hover do botão claro = marca 85% + preto', /--p-botao-hover: color-mix\(in srgb, var\(--p-marca\) 85%, black\)/.test(css));
-check('CSS: hover do botão escuro = marca 88% + branco (2 blocos)', (css.match(/--p-botao-hover: color-mix\(in srgb, var\(--p-marca\) 88%, white\)/g) || []).length === 2);
-check('CSS: texto do botão claro é branco, escuro é --on-seal-red (2 blocos)', /--p-texto-botao: white;/.test(css) && (css.match(/--p-texto-botao: var\(--on-seal-red\)/g) || []).length === 2);
+check('CSS: hover do botão = --brand-fill-hover (claro e escuro)', /--p-botao-hover: var\(--brand-fill-hover\)/.test(css));
+check('CSS: dark não redefine mais o hover do botão', !/--p-botao-hover: color-mix/.test(css));
+check('CSS: texto do botão é --on-brand-fill (branco) nos dois temas', /--p-texto-botao: var\(--on-brand-fill\)/.test(css) && !/--p-texto-botao: var\(--on-seal-red\)/.test(css));
 check('CSS: borda de campo = linha + 60% tinta suave', /--p-borda-campo: color-mix\(in srgb, var\(--p-linha\), var\(--p-tinta-suave\) 60%\)/.test(css));
 check('CSS: alerta usa 14% da cor sobre o fundo', /color-mix\(in srgb, var\(--c\) 14%, var\(--p-bg\)\)/.test(require('fs').readFileSync(path.join(ROOT, 'shared/painel/painel-componentes.css'), 'utf8')));
 for (const curso of ['fr', 'zh']){
@@ -25,18 +25,18 @@ for (const curso of ['fr', 'zh']){
   for (const [tema, rot] of [['luz', 'claro'], ['esc', 'escuro']]){
     const s = P[tema], c = k => rgb(s[k]);
     const bg = c('--paper'), sup = c('--paper-warm'), linha = c('--paper-line'), tinta = c('--ink'), suave = c('--ink-soft');
-    const marca = c('--seal-red'), marcaEsc = c('--seal-red-dark'), sobreMarca = c('--on-seal-red');
+    const marca = c('--brand-fill'), marcaEsc = c('--seal-red-dark'), sobreMarca = c('--on-brand-fill');
     const ok_ = c('--jade'), aviso = c('--grade-hard-bg'), erro = rgb(viaVar(s, s['--error-red'] || s['--grade-again-bg'])), info = c('--count-new'), vivo = c('--on-vivid');
     const elev = tema === 'luz' ? mix(sup, BRANCO, .55) : mix(sup, BRANCO, .92);   // = --p-elevado
-    const textoBotao = tema === 'luz' ? BRANCO : sobreMarca;                          // = --p-texto-botao (claro: branco, como o Ranking)
-    const marcaHover = tema === 'luz' ? mix(marca, [0, 0, 0], .85) : mix(marca, BRANCO, .88); // = --p-botao-hover
+    const textoBotao = sobreMarca;                                                    // = --p-texto-botao (branco nos dois temas, 2026-10-19)
+    const marcaHover = c('--brand-fill-hover');                                       // = --p-botao-hover
     const T = (nome, fg, bgc, min = 4.5) => { const r = razao(fg, bgc); check(`${curso} ${rot}: ${nome} ${r.toFixed(2)}:1 (mín ${min})`, r >= min, r.toFixed(2)); };
     T('texto principal em fundo', tinta, bg); T('texto principal em bloco', tinta, sup); T('texto principal em campo', tinta, elev);
     T('texto secundário em fundo', suave, bg); T('texto secundário em bloco', suave, sup); T('placeholder em campo', suave, elev);
     T('link (marca escura) em fundo', marcaEsc, bg); T('link (marca escura) em bloco', marcaEsc, sup);
     // Decisão da autora: botão primário igual ao do Ranking (branco sobre o azul). No francês claro dá 3,2:1, abaixo do AA (4,5),
     // então ali o piso é 3 (vale para texto grande/negrito) e o número real aparece no nome do check.
-    const minBotao = (curso === 'fr' && tema === 'luz') ? 3 : 4.5;
+    const minBotao = 4.5;   // 2026-10-19: --brand-fill (azul #2879B3 / vermelho #C0231F) com branco passa o AA nos dois temas, sem exceção
     T('botão primário' + (minBotao === 3 ? ' (exceção da autora, igual ao Ranking)' : ''), textoBotao, marca, minBotao);
     T('botão primário em hover' + (minBotao === 3 ? ' (exceção da autora)' : ''), textoBotao, marcaHover, minBotao);
     // balão enviado: texto sempre branco; no escuro o fundo é a cor do curso a 55% sobre preto (--p-balao-enviada)
