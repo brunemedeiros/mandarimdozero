@@ -458,6 +458,10 @@ const STATE = {
   // professora. switchTab() zera ao trocar de aba. Nunca serializado.
   reviewSessionClassReview: false,
   cardVariants: {}, // progresso das palavras que trocam por idioma do site (shared/card-variants.js)
+  // Etapa 0 do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.3 item 7): arquivo do progresso de
+  // cartão da trilha que não existe mais (excluído, fundido ou órfão). { id: {...progresso, retiredAt, mergedInto?} }.
+  // Salvo no bloco; volta para o cartão se a chave voltar. Não conta em métrica, fila, notificação nem painel.
+  retiredStudyCards: {},
   // Fase D -- cache em memória da árvore de Decks do idioma atual, carregada
   // sob demanda por ensureDecksLoadedForReview() (só quando uma sessão
   // Deck-scoped é de fato solicitada -- nenhum boot automático, nenhum
@@ -567,14 +571,14 @@ const LANG_ID = 'fr';
 const CLOZE_MODE_KEY = 'frances_cloze_mode';
 
 
-document.getElementById('cloze-mode-switch').addEventListener('click', () => {
+document.getElementById('cloze-mode-switch').addEventListener('change', () => {
   const next = getClozeMode() === 'type' ? 'choice' : 'type';
   localStorageSafeSet(CLOZE_MODE_KEY, next);
   updateClozeModeSwitch();
 });
 updateClozeModeSwitch();
 
-document.getElementById('feedback-sound-switch').addEventListener('click', () => {
+document.getElementById('feedback-sound-switch').addEventListener('change', () => {
   localStorageSafeSet(FEEDBACK_SOUND_KEY, isFeedbackSoundEnabled() ? '0' : '1');
   updateFeedbackSoundSwitch();
 });
@@ -640,9 +644,13 @@ document.getElementById('report-menu-btn').addEventListener('click', () => {
 // abaixo, específicas do formato de STATE deste idioma.
 
 function serializeState(){
+  // Etapa 0 do currículo: guarda também o id da lição atual (lessonIdx segue o id se a lição mudar de posição).
+  stampUnitLessonIds(STATE.unitProgress, UNITS);
   return {
     cards: serializeCardsForSave(STATE.cards),
     cardVariants: STATE.cardVariants,
+    retiredStudyCards: STATE.retiredStudyCards,
+    _curriculumVersion: studyCurriculumChanges().version,
     unitProgress: STATE.unitProgress,
     xp: STATE.xp,
     streak: STATE.streak,
@@ -678,24 +686,47 @@ function serializeState(){
 
 function applySerializedState(data){
   if (!data) return;
-  if (data.cards) {
+  // Etapa 0 do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.3): antes de aplicar o progresso,
+  // leva o save através das mudanças de currículo (fr/curriculum-changes.js): fusões de chave, aposentados e
+  // órfãos para o arquivo, volta de item arquivado. Idempotente; sem mudança nenhuma não altera nada.
+  const changes = studyCurriculumChanges();
+  const keyChanges = applyStudyKeyChanges(data.cards || [], {
+    merges: changes.merges, retiredKeys: changes.retiredKeys, archive: data.retiredStudyCards,
+    currentIds: STATE.cards.filter(c => c.origin === 'study').map(c => c.id), today: todayStr(),
+  });
+  STATE.retiredStudyCards = keyChanges.archive;
+  const renamed = renameStudyIdsInRecords(keyChanges.renames, data.cardVariants,
+    data.reviewRecords && data.reviewRecords.hardSeenIds);
+  if (data.cards || keyChanges.restored.length) {
     // K2-C: cards da trilha só recebem a whitelist de progresso; ver
     // mergeSavedCards (shared/study-trail-model.js).
-    mergeSavedCards(STATE.cards, data.cards);
+    mergeSavedCards(STATE.cards, keyChanges.cards);
   }
-  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(data.cardVariants);
+  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(renamed.cardVariants);
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
   // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
   STATE.cards.forEach(migrateCardToFSRS);
   if (typeof refreshStudyCardTexts === 'function') refreshStudyCardTexts();
+  // Unidades/módulos fundidos (UNIT_MERGES/MODULE_MERGES): o progresso vai para o novo. Sem fusão, nada muda.
+  const unitMerged = applyUnitModuleMerges(data.unitProgress, data.checkpointProgress, changes.unitMerges, changes.moduleMerges);
   if (data.unitProgress) {
-    Object.assign(STATE.unitProgress, data.unitProgress);
+    Object.assign(STATE.unitProgress, unitMerged.unitProgress);
     // Saves de antes das lições (Modelo B) não têm lessonIdx/lessonMisses.
     Object.values(STATE.unitProgress).forEach(p => {
       if (typeof p.lessonIdx !== 'number') p.lessonIdx = 0;
       if (!p.lessonMisses) p.lessonMisses = {};
     });
+    // A lição salva mudou de posição: lessonIdx segue o id; se sumiu, volta para a 1ª com palavra não liberada.
+    reconcileUnitLessonIdx(STATE.unitProgress, UNITS, (u, vi) => {
+      const c = STATE.cards.find(x => x.id === studyWordCardId(u, vi));
+      return !!(c && c.released);
+    });
+    // Etapa 0b (04, 2.10): unidade nova inserida antes de onde o aluno já está nasce aberta, mas não concluída.
+    openUnitsBeforeOpenOnes(trailGroups(), STATE.unitProgress);
   }
+  // Marca `released` em todo cartão já liberado pelo portão de lição (2.3 item 8): no 1º carregamento depois da
+  // Etapa 0, todos os cartões que já estavam na Revisão ganham a marca e continuam lá mesmo se a palavra mudar de unidade.
+  STATE.cards.forEach(c => { if (c.origin === 'study' && c.studyKey && !c.released) isCardLessonCompleted(c); });
   if (typeof data.xp === 'number') STATE.xp = data.xp;
   if (typeof data.streak === 'number') STATE.streak = data.streak;
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
@@ -705,7 +736,10 @@ function applySerializedState(data){
   if (data.dailyMinutesLog) Object.assign(STATE.dailyMinutesLog, data.dailyMinutesLog);
   if (data.dailyLessonsLog) Object.assign(STATE.dailyLessonsLog, data.dailyLessonsLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
-  if (data.reviewRecords && typeof data.reviewRecords === 'object') STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
+  if (data.reviewRecords && typeof data.reviewRecords === 'object'){
+    STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
+    if (Object.keys(keyChanges.renames).length && Array.isArray(renamed.hardSeenIds)) STATE.reviewRecords.hardSeenIds = renamed.hardSeenIds;
+  }
   if (data.reviewTimeStats && typeof data.reviewTimeStats === 'object') STATE.reviewTimeStats = { cards: Number(data.reviewTimeStats.cards) || 0, ms: Number(data.reviewTimeStats.ms) || 0 };
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
   if (data.hadStreakComeback) STATE.hadStreakComeback = true;
@@ -716,7 +750,7 @@ function applySerializedState(data){
   if (typeof data.dictationsAced === 'number') STATE.dictationsAced = Math.max(STATE.dictationsAced || 0, data.dictationsAced);
   if (data.periodXp) Object.assign(STATE.periodXp, data.periodXp);
   if (data.daily) Object.assign(STATE.daily, data.daily);
-  if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, data.checkpointProgress);
+  if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, unitMerged.checkpointProgress);
   if (data.reviewMilestones) Object.assign(STATE.reviewMilestones, data.reviewMilestones);
   if (data.levelTestProgress) Object.assign(STATE.levelTestProgress, data.levelTestProgress);
   if (data.completedChallenges) Object.assign(STATE.completedChallenges, data.completedChallenges);
@@ -1847,7 +1881,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   const posInBlock = acq.introIdx;
   const idx = block[posInBlock];
   const v = u.vocab[idx];
-  const cardId = `u${u.id}-v${idx}`;
+  const cardId = studyWordCardId(u, idx); // chave estável do item (shared/study-trail-model.js)
   const card = STATE.cards.find(c => c.id === cardId);
   const alreadyKnown = studyWordHasEvidence(studyWordCardsFor(STATE.cards, u.id, idx)); // K2-E: nível de palavra
   const matchingPhrase = findMatchingPhrase(v, u);
@@ -2356,27 +2390,27 @@ function renderDialogueStep(u, contentEl, nextBtn){
     const side = l.spk === 'B' ? 'b' : 'a';
     const who = sp[l.spk] || { n: l.spk, e: '' };
     return `
-      <div class="dlg-row ${side}" data-i="${i}" role="button" tabindex="0" aria-label="${escapeHTML(who.n)}: ouvir a partir desta fala">
+      <div class="dlg-row ${side}" data-i="${i}" role="button" tabindex="0" aria-label="${escapeHTML(t('dlg.playFromAria', { name: who.n }))}">
         <div class="dlg-avatar"><span class="dlg-emoji" aria-hidden="true">${who.e || escapeHTML(l.spk)}</span><span class="dlg-name">${escapeHTML(who.n)}</span></div>
         <div class="dlg-bubble">
           <div class="dlg-fr">${dlgHighlight(l.f, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>
           <div class="dlg-tr">${escapeHTML(l.t)}</div>
-          <button type="button" class="dlg-trbtn" aria-label="Mostrar a tradução desta fala" aria-pressed="false">🌐</button>
+          <button type="button" class="dlg-trbtn" aria-label="${escapeHTML(t('dlg.lineTrAria'))}" aria-pressed="false">🌐</button>
         </div>
       </div>`;
   }).join('');
 
   contentEl.innerHTML = `
-    <div class="section-label">Diálogo</div>
+    <div class="section-label">${t('dlg.label')}</div>
     <div class="dlg-title">${escapeHTML(dlg.title)}</div>
     ${dlg.scene ? `<div class="dlg-scene">📍 ${escapeHTML(dlg.scene)}</div>` : ''}
     <div class="dlg-tools">
-      <button class="btn btn-secondary dlg-play-btn" id="dlg-play-btn">▶ Ouvir tudo</button>
-      <button class="dlg-chip" id="dlg-auto-btn" aria-pressed="${dlgAutoplayOn()}">Áudio automático: ${dlgAutoplayOn() ? 'ligado' : 'desligado'}</button>
+      <button class="btn btn-secondary dlg-play-btn" id="dlg-play-btn">${t('dlg.playAll')}</button>
+      <button class="dlg-chip" id="dlg-auto-btn" aria-pressed="${dlgAutoplayOn()}">${dlgAutoplayOn() ? t('dlg.autoOn') : t('dlg.autoOff')}</button>
     </div>
     <div class="dlg-chat" id="ud-dialogue">${rowsHTML}</div>
-    <div class="dlg-float"><button class="dlg-chip dlg-chip-float" id="dlg-trans-btn" aria-pressed="false">🌐 Mostrar traduções</button></div>
-    ${terms.length ? `<div class="dlg-legend">As palavras coloridas são do vocabulário desta unidade. Toque numa delas para ver o significado.</div>` : ''}
+    <div class="dlg-float"><button class="dlg-chip dlg-chip-float" id="dlg-trans-btn" aria-pressed="false">${t('dlg.showTr')}</button></div>
+    ${terms.length ? `<div class="dlg-legend">${t('dlg.legend')}</div>` : ''}
   `;
 
   const chat = document.getElementById('ud-dialogue');
@@ -2387,13 +2421,13 @@ function renderDialogueStep(u, contentEl, nextBtn){
 
   function setPlaying(on){
     chat.classList.toggle('playing', on);
-    playBtn.textContent = on ? '⏸ Parar' : '▶ Ouvir tudo';
+    playBtn.textContent = on ? t('dlg.stop') : t('dlg.playAll');
     if (!on) rows.forEach(r => r.classList.remove('speaking'));
   }
   function setTranslations(on){
     chat.classList.toggle('show-trans', on);
     transBtn.setAttribute('aria-pressed', String(on));
-    transBtn.textContent = on ? '🌐 Ocultar traduções' : '🌐 Mostrar traduções';
+    transBtn.textContent = on ? t('dlg.hideTr') : t('dlg.showTr');
     // o botão geral manda em todas as falas; os 🌐 individuais acompanham
     rows.forEach(r => { r.classList.remove('show-tr'); r.querySelector('.dlg-trbtn')?.setAttribute('aria-pressed', 'false'); });
   }
@@ -2411,7 +2445,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
       if (!alive()) return;
       if (res === 'blocked'){
         setPlaying(false);
-        if (viaAutoplay) showToast('🔇 Toque em "Ouvir tudo" para ouvir a conversa');
+        if (viaAutoplay) showToast(t('dlg.tapToPlayToast'));
         return;
       }
       if (!res){ setPlaying(false); return; }
@@ -2431,7 +2465,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
     const on = !dlgAutoplayOn();
     dlgSetAutoplay(on);
     autoBtn.setAttribute('aria-pressed', String(on));
-    autoBtn.textContent = 'Áudio automático: ' + (on ? 'ligado' : 'desligado');
+    autoBtn.textContent = on ? t('dlg.autoOn') : t('dlg.autoOff');
   });
   rows.forEach(r => {
     const tb = r.querySelector('.dlg-trbtn');
@@ -2452,7 +2486,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
 
   // A micro-checagem é um passo à parte (dialogueCheck), depois deste:
   // na mesma tela daria para rolar e copiar a resposta do próprio diálogo.
-  nextBtn.textContent = 'Continuar →';
+  nextBtn.textContent = t('common.continueArrow');
   nextBtn.style.display = 'flex';
 
   const canHear = dlg.lines.some(l => canSpeakFrench(l.f));
@@ -2469,9 +2503,9 @@ function renderDialogueCheckStep(u, contentEl, nextBtn){
   const checks = Array.isArray(dlg.check) ? dlg.check : [];
   DLG.check = { qi: 0, correct: 0 };
   contentEl.innerHTML = `
-    <div class="section-label">Diálogo</div>
+    <div class="section-label">${t('dlg.label')}</div>
     <div class="dlg-title">${escapeHTML(dlg.title)}</div>
-    <div class="dlg-scene">Sem olhar o diálogo: o que você entendeu da conversa?</div>
+    <div class="dlg-scene">${t('dlg.checkScene')}</div>
     <div class="dlg-check" id="dlg-check"></div>
   `;
   nextBtn.style.display = 'none';
@@ -2498,24 +2532,24 @@ function renderDialogueCheck(u, dlg, sp, checks, nextBtn, rows){
     const q = checks[st.qi];
     let label = '', ctx = '', opts = [], flashIdx = -1;
     if (q.k === 'fill'){
-      label = 'Complete a resposta';
+      label = t('dlgCheck.fill');
       ctx = `<div class="dlg-q-ctx">${bubble(q.line - 1, L[q.line - 1].f, false)}${bubble(q.line, '', true)}</div>`;
       opts = dlgShuffle([{ t: L[q.line].f, ok: true }, ...q.bad.map(t => ({ t, ok: false }))]);
       flashIdx = q.line;
     } else if (q.k === 'listen'){
-      label = 'Ouça e escolha a resposta';
-      ctx = `<div class="dlg-q-listen"><button class="audio-btn audio-btn-lg" id="dlg-q-audio" aria-label="Ouvir a fala">🔊</button><div class="prompt-audio-hint">toque para ouvir de novo</div></div>`;
+      label = t('dlgCheck.listen');
+      ctx = `<div class="dlg-q-listen"><button class="audio-btn audio-btn-lg" id="dlg-q-audio" aria-label="${escapeHTML(t('dlgCheck.listenAria'))}">🔊</button><div class="prompt-audio-hint">${t('dlgCheck.tapAgain')}</div></div>`;
       opts = dlgShuffle([{ t: L[q.line + 1].f, ok: true }, ...q.bad.map(t => ({ t, ok: false }))]);
       flashIdx = q.line + 1;
     } else {
-      label = 'Compreensão';
+      label = t('dlgCheck.comprehension');
       ctx = `<div class="dlg-q-text">${escapeHTML(q.q)}</div>`;
       opts = q.opts.map((t, i) => ({ t, ok: i === q.ok }));
       flashIdx = -1;
     }
     const dots = checks.map((_, i) => `<span class="dlg-dot${i < st.qi ? ' done' : (i === st.qi ? ' on' : '')}"></span>`).join('');
     box.innerHTML = `
-      <div class="dlg-check-head"><span>Você entendeu?</span><span class="dlg-dots" role="img" aria-label="Pergunta ${st.qi + 1} de ${checks.length}">${dots}</span></div>
+      <div class="dlg-check-head"><span>${t('lesson.step.dialogueCheck')}</span><span class="dlg-dots" role="img" aria-label="${escapeHTML(t('dlgCheck.progressAria', { n: st.qi + 1, total: checks.length }))}">${dots}</span></div>
       <div class="exercise-prompt-label">${label}</div>
       ${ctx}
       <div class="dlg-opts">${opts.map((o, i) => `<button class="dlg-opt" data-i="${i}">${escapeHTML(o.t)}</button>`).join('')}</div>
@@ -2544,9 +2578,9 @@ function renderDialogueCheck(u, dlg, sp, checks, nextBtn, rows){
       const last = st.qi === checks.length - 1;
       box.querySelector('.dlg-fb-slot').innerHTML = `
         <div class="dlg-fb ${o.ok ? 'ok' : 'no'}">
-          <div class="dlg-fb-title">${o.ok ? '✅ Isso mesmo!' : 'Quase! A resposta certa era:'}</div>
+          <div class="dlg-fb-title">${o.ok ? t('dlgCheck.right') : t('dlgCheck.almost')}</div>
           ${o.ok ? '' : `<div class="dlg-fb-right">${escapeHTML(right)}</div>`}
-          <button class="btn btn-primary btn-block" id="dlg-q-next">${last ? 'Concluir' : 'Próxima pergunta →'}</button>
+          <button class="btn btn-primary btn-block" id="dlg-q-next">${last ? t('dlgCheck.finish') : t('dlgCheck.next')}</button>
         </div>`;
       document.getElementById('dlg-q-next').addEventListener('click', () => {
         if (last) finish(); else { st.qi += 1; showQuestion(); }
@@ -2558,11 +2592,11 @@ function renderDialogueCheck(u, dlg, sp, checks, nextBtn, rows){
   function finish(){
     stopExerciseAudio();
     box.innerHTML = `
-      <div class="dlg-check-head"><span>Você entendeu?</span></div>
-      <div class="dlg-sum">${st.correct} de ${checks.length} certas. ${st.correct === checks.length ? 'Conversa entendida!' : 'Ouça de novo e tente outra vez quando quiser.'}</div>
-      <button class="dlg-chip" id="dlg-redo">Refazer as perguntas</button>`;
+      <div class="dlg-check-head"><span>${t('lesson.step.dialogueCheck')}</span></div>
+      <div class="dlg-sum">${t('dlgCheck.summary', { n: st.correct, total: checks.length })} ${st.correct === checks.length ? t('dlgCheck.allRight') : t('dlgCheck.tryAgain')}</div>
+      <button class="dlg-chip" id="dlg-redo">${t('dlgCheck.redo')}</button>`;
     document.getElementById('dlg-redo').addEventListener('click', () => { st.qi = 0; st.correct = 0; showQuestion(); nextBtn.style.display = 'none'; });
-    nextBtn.textContent = 'Continuar →';
+    nextBtn.textContent = t('common.continueArrow');
     nextBtn.style.display = 'flex';
     nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
@@ -3214,8 +3248,13 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 // Família latina, fase 2: as letras do teclado estão em LANG_HOOKS.familiaLatina.gruposDeAcentos
 // (fr/lang-hooks.js) e a marcação/inserção, em shared/core/familias/latina.js. As classes
 // continuam fr-accent-* (o CSS e as capturas de tela não mudam).
-function frAccentPickerHTML(){
-  return latinaFr().htmlTecladoDeAcentos();
+// `expected` (opcional): a resposta que o exercício pede. Se ela tem uma letra que o teclado não tem (æ, ñ, ß...),
+// entra uma fileira a mais só com essa letra, sem legenda; sem isso, o teclado é o de sempre.
+function frAccentPickerHTML(expected){
+  const base = LANG_HOOKS.familiaLatina.gruposDeAcentos;
+  const tem = new Set([].concat(...base));
+  const extras = [...new Set(Array.from(String(expected || '').toLowerCase()).filter(ch => /\p{L}/u.test(ch) && !/[a-z]/.test(ch) && !tem.has(ch)))];
+  return extras.length ? FamiliaLatina.htmlTecladoDeAcentos(base.concat([extras])) : latinaFr().htmlTecladoDeAcentos();
 }
 
 // Escreve a tecla no campo: insere no CURSOR (não sempre no final) -- dá pra
@@ -3248,7 +3287,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       </div>
       <div class="cloze-type-wrap">
         <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('fr.exercise.typeInFrench')}">
-        ${frAccentPickerHTML()}
+        ${frAccentPickerHTML(ex.item.f)}
         <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">${t('common.verify')}</button>
       </div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
@@ -3271,7 +3310,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   }
 
   // isCorrect: true | false | 'quase' (só "oe" no lugar de "œ": meio ponto, mostra a forma certa).
-  function finish(isCorrect){
+  function finish(isCorrect, typed){
     const almost = isCorrect === 'quase';
     STEP_STATE.exerciseAnswered = true;
     playFeedbackSound(!!isCorrect);
@@ -3289,7 +3328,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       // A resposta certa já aparece dentro do próprio painel de resultado
       // (answerExplanationHTML mostra ex.item.f) -- sem repetir aqui como um
       // texto solto antes do painel, num estilo diferente.
-      showWrongAnswerPanel(contentEl, ex);
+      showWrongAnswerPanel(contentEl, ex, { attemptHTML: typedAttemptHTML(typed, ex.item.f) });
     }
   }
 
@@ -3301,7 +3340,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     // Vocabulário com forma dupla (ex: "un / une") -- qualquer uma das duas
     // conta como resposta completa, não só a string inteira com a barra.
     const result = lessonTypedAnswerResult(inputEl.value, ex.item.f);
-    finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false);
+    finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false, inputEl.value);
   });
 
   wireDontKnowButton(contentEl, ex, () => {
@@ -3398,7 +3437,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       ${mode === 'type' ? `
         <div class="cloze-type-wrap">
           <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.cloze.placeholder')}">
-          ${frAccentPickerHTML()}
+          ${frAccentPickerHTML(ex.correctBlock.f)}
           <button class="btn btn-primary btn-block" id="cloze-verify-btn">${t('common.verify')}</button>
         </div>
       ` : `
@@ -3431,7 +3470,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
   }
 
   // isCorrect: true | false | 'quase' (lacuna digitada com "oe" no lugar de "œ": meio ponto, mostra a forma certa).
-  function finish(isCorrect){
+  function finish(isCorrect, typed){
     const almost = isCorrect === 'quase';
     STEP_STATE.exerciseAnswered = true;
     playFeedbackSound(!!isCorrect);
@@ -3445,7 +3484,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
         ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>${clozeFeedbackDetailHTML(ex, true)}`
         : clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex, { attemptHTML: typedAttemptHTML(typed, ex.correctBlock.f) }), 500);
     }
   }
 
@@ -3464,7 +3503,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
       const result = lessonTypedAnswerResult(inputEl.value, ex.correctBlock.f);
-      finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false);
+      finish(result === 'ok' ? true : result === 'quase' ? 'quase' : false, inputEl.value);
     });
   } else {
     contentEl.querySelectorAll('.cloze-option').forEach(btn => {
@@ -4049,7 +4088,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     ${!answered ? `
       <div class="cloze-type-wrap">
         <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.cloze.placeholder')}">
-        ${frAccentPickerHTML()}
+        ${frAccentPickerHTML(view.compareAnswerText)}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
     ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
@@ -4069,7 +4108,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      const verdict = typedAnswerVerdict(inputEl.value, acceptedForms(view.compareAnswerText));
+      const verdict = typedAnswerVerdictForExpected(inputEl.value, view.compareAnswerText);
       localState.wasCorrect = verdict !== 'errou';
       localState.almost = verdict === 'quase';
       renderClozeCard(mountEl, card, localState, callbacks);
@@ -4129,7 +4168,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     ${!answered ? `
       <div class="cloze-type-wrap">
         <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.typeAnswer.placeholder')}">
-        ${frAccentPickerHTML()}
+        ${frAccentPickerHTML(view.compareAnswerText)}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
     ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
@@ -4155,7 +4194,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      const verdict = typedAnswerVerdict(inputEl.value, acceptedForms(view.compareAnswerText));
+      const verdict = typedAnswerVerdictForExpected(inputEl.value, view.compareAnswerText);
       localState.wasCorrect = verdict !== 'errou';
       localState.almost = verdict === 'quase';
       renderTypeAnswerCard(mountEl, card, localState, callbacks);
@@ -4945,7 +4984,11 @@ function renderSettingsView(){
 let SETTINGS_SECTION = 'geral';
 function switchSettingsSection(section){
   SETTINGS_SECTION = section;
-  document.querySelectorAll('[data-settings-section]').forEach(btn => btn.classList.toggle('active', btn.dataset.settingsSection === section));
+  document.querySelectorAll('[data-settings-section]').forEach(btn => {
+    const on = btn.dataset.settingsSection === section;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-pressed', String(on));
+  });
   document.getElementById('settings-geral-content').style.display = section === 'geral' ? '' : 'none';
   document.getElementById('settings-notifications-content').style.display = section === 'notifications' ? '' : 'none';
   document.getElementById('settings-export-content').style.display = section === 'export' ? '' : 'none';
@@ -5233,6 +5276,23 @@ function conjAnswerViewHTML(given, target, status){
   return `<div class="${cls}" role="img" aria-label="${escapeHTML(t('feedback.label.yourAnswer') + ': ' + given)}"><span class="conj-answer-text">${html}</span>${icon}</div>`;
 }
 
+// "Sua resposta" dos exercícios de digitar da trilha: o que a pessoa digitou, com as letras erradas em
+// vermelho e um traço onde faltou letra (mesmo alinhamento da Conjugação). Cartão com duas formas
+// ("allemand / allemande"): compara com a forma mais parecida, ou com o texto inteiro se ela digitou a barra.
+function typedAttemptHTML(typed, expected){
+  const given = String(typed == null ? '' : typed).replace(/\s*\/\s*/g, ' / ').trim();
+  if (!given) return '';
+  const forms = acceptedForms(expected);
+  const alvos = (given.includes('/') && forms.length > 1) ? [forms.join(' / ')] : (forms.length ? forms : [String(expected || '')]);
+  let best = null;
+  alvos.forEach(a => { const r = conjAlign(given, a); if (!best || r.cost < best.cost) best = r; });
+  const html = best.ops.map(o =>
+    o.t === 'same' ? escapeHTML(o.a)
+    : o.t === 'missing' ? '<span class="conj-gap"></span>'
+    : `<span class="conj-x">${escapeHTML(o.a)}</span>`).join('');
+  return `<div class="typed-attempt">${html}</div>`;
+}
+
 // Texto falado de uma forma: pronome + forma (sem pronome no impératif).
 function conjSpeakText(idx, tenseKey, form){
   if (tenseKey === 'imperatif') return form;
@@ -5325,8 +5385,7 @@ function renderConjSearchList(){
   list.innerHTML = hits.length ? hits.map((h, i) => {
     const other = h.lang === 'fr' ? (VERB_TRANSLATIONS[h.verb] || '') : h.verb;
     return `<li role="option" id="conj-opt-${i}" class="conj-search-opt" data-verb="${escapeHTML(h.verb)}" aria-selected="${i === 0}">
-      ${conjFlagHTML(h.lang)}<span class="conj-opt-word" ${h.lang === 'fr' ? 'lang="fr"' : ''}>${escapeHTML(h.word)}</span>
-      <span class="conj-opt-other" ${h.lang === 'pt' ? 'lang="fr"' : ''}>${escapeHTML(other)}</span></li>`;
+      ${conjFlagHTML(h.lang)}<span class="conj-opt-word" ${h.lang === 'fr' ? 'lang="fr"' : ''}>${escapeHTML(h.word)}${other ? ` <span class="conj-opt-other" ${h.lang === 'pt' ? 'lang="fr"' : ''}>(${escapeHTML(other)})</span>` : ''}</span></li>`;
   }).join('') : `<li class="conj-search-empty" role="presentation">${t('fr.conj.sel.noMatch')}</li>`;
   list.hidden = false;
   input.setAttribute('aria-expanded', 'true');
@@ -5603,6 +5662,24 @@ function normalizeLoose(str){
 
 // Uma instância do módulo por página, criada no primeiro uso (o lang-hooks.js e o módulo já carregaram).
 let _latinaFr = null;
+// Teclado de acentos da Conjugação: só as letras que aparecem nas formas dos verbos da lista (decisão da autora, 2026-10-16),
+// na ordem do teclado das lições e numa fileira só. Calculado da própria lista: verbo novo com outra letra (ex.: "haïr")
+// já entra sozinho. As lições continuam com o teclado completo (frAccentPickerHTML).
+let _conjAccentLetters = null;
+function conjAccentLetters(){
+  if (_conjAccentLetters) return _conjAccentLetters;
+  const used = new Set();
+  Object.values(CONJUGATION_VERBS).forEach(v => Object.values(v.f || {}).forEach(forms => (forms || []).forEach(x => {
+    for (const ch of String(x || '')) used.add(ch);
+  })));
+  const all = [].concat(...LANG_HOOKS.familiaLatina.gruposDeAcentos);
+  _conjAccentLetters = all.filter(ch => used.has(ch));
+  return _conjAccentLetters;
+}
+function conjAccentPickerHTML(){
+  return FamiliaLatina.htmlTecladoDeAcentos([conjAccentLetters()]);
+}
+
 function latinaFr(){
   return _latinaFr || (_latinaFr = FamiliaLatina.criar(LANG_HOOKS.familiaLatina));
 }
@@ -5702,7 +5779,7 @@ function renderConjPracticeStep(){
         </div>`).join('')}
     </div>
     ${alreadyChecked ? '' : `
-      <div class="conj-accents">${frAccentPickerHTML()}</div>
+      <div class="conj-accents">${conjAccentPickerHTML()}</div>
       <div class="conj-actions">
         <button class="btn btn-primary btn-block" id="conj-verify-btn">${t('fr.conj.checkAnswers')}</button>
         <button class="btn btn-secondary" id="conj-hint-btn" title="${t('fr.conj.hintTitle')}">${t('fr.conj.hintShow')}</button>

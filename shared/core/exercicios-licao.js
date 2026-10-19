@@ -23,7 +23,7 @@ function getClozeMode(){
 
 function updateClozeModeSwitch(){
   const btn = document.getElementById('cloze-mode-switch');
-  if (btn) btn.setAttribute('aria-checked', getClozeMode() === 'type' ? 'true' : 'false');
+  if (btn) btn.checked = getClozeMode() === 'type';
 }
 
 // Meta diária (plano de estudo) conta separado dos Desafios de hoje -- é uma
@@ -141,7 +141,7 @@ function exerciseXP(ex, fullXP){
 // Sem `intent` (chamada avulsa), mantém o comportamento mais conservador de
 // reconhecimento, igual ao de 'practice'.
 function pickVocabFormat(unit, idx, intent){
-  const cardId = `u${unit.id}-v${idx}`;
+  const cardId = studyWordCardId(unit, idx); // chave estável do item (shared/study-trail-model.js)
   const card = STATE.cards.find(c => c.id === cardId);
   const exposed = studyWordHasEvidence(studyWordCardsFor(STATE.cards, unit.id, idx)); // K2-E: nível de palavra
   const misses = (STEP_STATE.acq && STEP_STATE.acq.wordMisses[idx]) || 0;

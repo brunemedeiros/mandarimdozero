@@ -2260,7 +2260,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   color:var(--ink-soft);
 }
 .admin-badge-edit-btn:hover{ background:var(--paper-warm); color:var(--ink); }
-.admin-badge-delete-btn:hover{ background:var(--paper-warm); color:var(--seal-red-dark); }
+.admin-badge-delete-btn:hover{ background:var(--paper-warm); color:var(--error-red-text); }
 .admin-badge-row.clickable{ cursor:pointer; }
 .admin-badge-row.clickable:hover{ border-color:var(--seal-red); }
 .admin-manage-badge-hint{ font-size:12.5px; color:var(--ink-soft); margin:0 0 10px; }
@@ -2455,8 +2455,8 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   border-radius:99px; padding:6px 14px; cursor:pointer; font-family:var(--font-body); text-align:center;
 }
 .profile-edit-avatar-btn:hover{ border-color:var(--seal-red); color:var(--ink); }
-.profile-edit-avatar-btn.remove{ color:var(--seal-red-dark); }
-.profile-edit-avatar-error{ color:var(--seal-red-dark); font-size:12.5px; min-height:14px; margin:0 0 8px; }
+.profile-edit-avatar-btn.remove{ color:var(--error-red-text); }
+.profile-edit-avatar-error{ color:var(--error-red-text); font-size:12.5px; min-height:14px; margin:0 0 8px; }
 .profile-edit-form{ display:flex; flex-direction:column; gap:4px; }
 .profile-edit-label{ font-size:12px; font-weight:700; color:var(--ink-soft); margin:12px 0 2px; }
 .profile-edit-label:first-child{ margin-top:0; }
@@ -2469,14 +2469,15 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .profile-edit-at{ padding-left:12px; color:var(--ink-soft); font-weight:700; }
 .profile-edit-textarea{ resize:vertical; min-height:64px; }
 .profile-edit-bio-count{ font-size:11px; color:var(--ink-soft); text-align:right; margin-top:2px; }
-.profile-edit-error{ color:var(--seal-red-dark); font-size:12.5px; min-height:16px; margin:8px 0 4px; }
+/* Erros em vermelho de verdade: no fr o --seal-red é azul (etapa 2, 2026-10-19). */
+.profile-edit-error{ color:var(--error-red-text); font-size:12.5px; min-height:16px; margin:8px 0 4px; }
 .profile-edit-hint{ font-size:12px; color:var(--ink-soft); margin:4px 0 2px; line-height:1.5; }
 /* Fase 2 da reestruturação do formulário de flashcards (ver CLAUDE.md) --
    mesmo par border-color/background já usado em .gram-exercise.wrong
    input/.conj-field.wrong input (validação de campo errado), reaproveitado
    aqui pra sinalizar um campo obrigatório vazio/inválido antes do submit. */
 .profile-edit-input.field-invalid{ border-color: var(--error-red); background: rgba(214,38,25,0.08); }
-.profile-edit-field-error{ color:var(--seal-red-dark); font-size:12px; margin:2px 0 6px; min-height:14px; }
+.profile-edit-field-error{ color:var(--error-red-text); font-size:12px; margin:2px 0 6px; min-height:14px; }
 /* Fase 3 da reestruturação do formulário de flashcards (ver CLAUDE.md) --
    redesenho do bloco "Alunos"/Destinatários: contador vira um .pill (já
    existente, reaproveitado do streak/XP da topbar) posicionado no TOPO do
@@ -2502,7 +2503,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 /* ---------- Modal: reportar problema/sugestão (bandeira ⚑) ---------- */
 .report-modal-label{ font-size:12px; font-weight:700; color:var(--ink-soft); margin:14px 0 6px; }
 .report-modal-label:first-child{ margin-top:0; }
-.report-modal-optional{ font-weight:500; color:var(--ink-faint); }
+.report-modal-optional{ font-weight:500; color:var(--ink-soft); }
 .report-option-grid{ display:flex; flex-direction:column; gap:6px; }
 .report-option-btn{
   text-align:left; background:var(--paper); border:1px solid var(--paper-line); border-radius:10px;
@@ -2524,7 +2525,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 }
 .report-screenshot-btn:hover{ border-color:var(--imperial-gold); color:var(--ink); }
 .report-screenshot-name{ font-size:12px; color:var(--ink-soft); word-break:break-all; }
-.report-modal-privacy-note{ font-size:11.5px; color:var(--ink-faint); margin:8px 0 0; line-height:1.4; }
+.report-modal-privacy-note{ font-size:11.5px; color:var(--ink-soft); margin:8px 0 0; line-height:1.4; }
 .report-success-check{
   width:56px; height:56px; border-radius:50%; background:var(--seal-red); color:#fff;
   display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; margin:6px auto 14px;
@@ -2583,18 +2584,6 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   cursor:pointer; font-weight:800; font-size:13.5px; color: var(--ink); padding:10px 2px; list-style:none;
 }
 .notif-pref-advanced summary::-webkit-details-marker{ display:none; }
-.notif-pref-advanced summary::before{ content:"▸ "; color: var(--ink-faint); }
-.notif-pref-advanced[open] summary::before{ content:"▾ "; }
-.notif-pref-matrix{
-  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); overflow:hidden; margin-top:6px;
-}
-.notif-pref-matrix-row{ display:flex; align-items:center; gap:8px; padding:10px 14px; }
-.notif-pref-matrix-row + .notif-pref-matrix-row{ border-top:1px solid var(--paper-line-soft, var(--paper-line)); }
-.notif-pref-matrix-head{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; color: var(--ink-soft); }
-.notif-pref-matrix-label{ flex:1; font-size:13.5px; font-weight:700; color: var(--ink); }
-.notif-pref-matrix-cell{ width:52px; flex-shrink:0; text-align:center; font-size:12px; color: var(--ink-soft); display:flex; align-items:center; justify-content:center; gap:4px; }
-.notif-pref-matrix-cell.disabled{ color: var(--ink-faint); cursor:not-allowed; }
-.notif-pref-matrix-cell input[type="checkbox"]{ width:16px; height:16px; accent-color: var(--seal-red); cursor:pointer; }
 .notif-pref-quiet-hours{ display:flex; align-items:center; gap:8px; flex-shrink:0; font-size:13px; color: var(--ink-soft); }
 .notif-pref-quiet-hours select{
   border:1px solid var(--paper-line); border-radius:8px; padding:6px 8px; font-size:13px; font-family: var(--font-body);
@@ -2736,7 +2725,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   .dictation-sentence{ align-items:flex-start; flex-direction:column; gap:6px; }
 }
 .dictation-result:focus{ outline:none; }
-.dictation-word-wrong{ color: var(--seal-red-dark); text-decoration: line-through; text-decoration-color: var(--seal-red); }
+.dictation-word-wrong{ color: var(--error-red-text); text-decoration: line-through; text-decoration-color: var(--error-red); }
 .dictation-result-summary{ display:flex; align-items:center; gap:14px; padding-top:16px; border-top:1px dashed var(--paper-line); }
 .dictation-score-badge{
   flex-shrink:0; width:56px; height:56px; border-radius:14px; color:white;
@@ -3298,7 +3287,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 .export-box p{ margin:0 0 18px; color:var(--ink-soft); font-size:13.5px; max-width:420px; margin-left:auto; margin-right:auto; }
 .export-status{ margin-top:14px; font-size:13px; font-weight:700; min-height:18px; }
 .export-status.ok{ color: var(--jade); }
-.export-status.err{ color: var(--seal-red-dark); }
+.export-status.err{ color: var(--error-red-text); }
 
 .deck-select{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:18px; }
 
@@ -3309,7 +3298,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 }
 .challenges-import-status{ margin-top:14px; font-size:13px; font-weight:700; white-space:pre-wrap; }
 .challenges-import-status.ok{ color: var(--jade); }
-.challenges-import-status.err{ color: var(--seal-red-dark); }
+.challenges-import-status.err{ color: var(--error-red-text); }
 .deck-chip{ padding:7px 13px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper); font-size:12.5px; font-weight:700; cursor:pointer; color:var(--ink-soft); }
 .deck-chip.active{ background: var(--seal-red); border-color: var(--seal-red); color: var(--on-seal-red); }
 
@@ -3574,7 +3563,10 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
    por JS antes de cada toast; o valor abaixo só vale antes do primeiro
    toast (auditoria de UX/UI, 2026-09, P3). */
 #toast-layer{ position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:var(--z-toast); display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
-.toast{ background: var(--ink); color: var(--gold-bright); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease, toastOut .3s ease 1.7s forwards; }
+.toast{ background: var(--ink); color: var(--gold-bright); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease; pointer-events:auto; max-width:min(560px, calc(100vw - 32px)); text-align:center; }
+/* Some com animação só depois do tempo de leitura (shared/toast.js); passar o mouse ou focar segura o aviso. */
+.toast.saindo{ animation: toastOut .3s ease forwards; }
+@media (prefers-reduced-motion: reduce){ .toast, .toast.saindo{ animation:none; } }
 /* Modo escuro: --ink fica claro e --gold-bright também (ilegível); troca para fundo escuro com texto claro. */
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .toast{ background: var(--paper-warm); color: var(--ink); box-shadow: var(--shadow-lift), inset 0 0 0 1px var(--paper-line); } }
 :root[data-theme="dark"] .toast{ background: var(--paper-warm); color: var(--ink); box-shadow: var(--shadow-lift), inset 0 0 0 1px var(--paper-line); }
@@ -3683,7 +3675,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .login-lockup{ height:44px; width:auto; margin:0 auto 22px; display:block; }
 .login-desc{ margin:0 0 22px; color: var(--ink-soft); font-size:13.5px; line-height:1.5; }
 .login-note{ min-height:16px; font-size:12.5px; color: var(--ink-soft); margin: 14px 0 0; }
-.login-note.err{ color: var(--seal-red-dark); font-weight:700; }
+.login-note.err{ color: var(--error-red-text); font-weight:700; }
 
 /* Botão de login social (Google) — estilo "outline", separado do vermelho
    de ação principal, igual referência enviada pela professora. */
@@ -3742,7 +3734,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
   font-family:var(--font-body); font-weight:700; font-size:13.5px; color: var(--ink);
 }
 .user-dropdown-item:hover{ background: var(--paper-warm); }
-.user-dropdown-item.danger{ color: var(--seal-red-dark); }
+.user-dropdown-item.danger{ color: var(--error-red-text); }
 .user-dropdown-sep{ height:1px; background:var(--paper-line); margin:6px 4px; }
 
 /* ---------- Sino de notificações (Fase 1) ----------
@@ -3954,6 +3946,10 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .conj-session-result .score-num{ font-size:34px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
 
 .reorder-attempt{ font-size:18px; line-height:1.8; }
+.typed-attempt{ font-size:18px; line-height:1.8; overflow-wrap:anywhere; }
+/* Letra errada (vermelho) e letra que faltou (traço): usados na Conjugação e em "Sua resposta" dos exercícios de digitar. */
+.conj-x{ color:var(--error-red); background:color-mix(in srgb, var(--error-red) 16%, transparent); border-radius:3px; font-weight:800; text-decoration:underline wavy; text-decoration-thickness:1.5px; text-underline-offset:3px; }
+.conj-gap{ display:inline-block; width:.55em; height:1em; border-bottom:3px solid var(--error-red); vertical-align:-.15em; margin:0 1px; }
 .reorder-attempt-w.ok{ color:var(--jade); }
 .reorder-attempt-w.bad{ color:var(--error-red); font-weight:700; text-decoration:line-through; text-decoration-thickness:2px; }
 .reorder-attempt-w.near{ text-decoration:underline; text-decoration-color:#E0A526; text-decoration-thickness:3px; text-underline-offset:4px; }
@@ -4283,6 +4279,187 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .deck-delete-confirm{ background:var(--error-red, var(--seal-red)); color:var(--on-vivid); border:1px solid var(--error-red, var(--seal-red)); }
 .deck-delete-confirm:hover{ filter:brightness(1.06); }
 .deck-overview-danger{ color:var(--error-red, var(--seal-red)); }
+/* ---------- Janelas da Revisão no Design System do painel (Pico escopado em .painel, 2026-10-17) ----------
+   Configurar, Adicionar cartão, Painel e Exportar. Prévia aprovada pela autora: visual B, campo do cartão sem a
+   "ficha pautada" (igual ao editor de Criar cartão da Professora, .p-editor). As regras .deck-window acima continuam
+   valendo para o que não é redesenhado aqui. */
+/* Janela */
+.app-modal.deck-window.painel{ background:var(--p-elevado); color:var(--p-tinta); border:1px solid var(--p-linha); border-radius:var(--p-raio); box-shadow:var(--p-sombra), 0 16px 48px color-mix(in srgb, var(--p-tinta) 18%, transparent); font-family:var(--font-body); }
+.deck-window.painel :is(.app-modal-header, .deck-panel-head){ background:transparent; border-bottom:1px solid var(--p-linha); padding:1rem 1.25rem; gap:.75rem; }
+.deck-window.painel :is(.app-modal-header, .deck-panel-head) h3{ margin:0; font-size:1.1rem; font-weight:800; color:var(--p-tinta); }
+.deck-window.painel .app-modal-body{ padding:1.1rem 1.25rem 1.25rem; }
+/* Fechar: X discreto, como o rel=prev do Pico */
+.deck-window.painel button.app-modal-close{ width:2.25rem; height:2.25rem; min-height:0; margin:0; padding:0; flex:none; display:inline-grid; place-items:center; border:0; border-radius:8px; background:transparent; color:var(--p-tinta-suave); box-shadow:none; font-size:1rem; line-height:1; }
+.deck-window.painel button.app-modal-close:hover{ background:var(--p-superficie); color:var(--p-tinta); }
+/* Rótulos e textos de apoio */
+.deck-window.painel :is(label, .profile-edit-label){ font-size:.85rem; font-weight:700; color:var(--p-tinta); }
+.deck-window.painel .profile-edit-hint{ color:var(--p-tinta-suave); font-size:.85rem; }
+.deck-window.painel .section-label{ text-transform:none; letter-spacing:0; font-size:.95rem; font-weight:800; color:var(--p-tinta); }
+.deck-window.painel :is(select, input:not([type=checkbox]):not([type=radio]), textarea){ margin-bottom:0; }
+/* Configurar: linha rótulo x seleção */
+.deck-window.painel.review-settings-modal .app-modal-body > *{ border-color:var(--p-linha); }
+/* Editor de cartão: botão principal continua primário */
+.deck-window.painel .p-editor button.btn.btn-primary{ width:100%; min-height:2.75rem; margin:.5rem 0 0; padding:.6rem 1.2rem; border:0; border-radius:999px; background:var(--p-marca); color:var(--p-texto-botao); font-weight:800; box-shadow:none; }
+.deck-window.painel .p-editor button.btn.btn-primary:hover{ background:var(--p-botao-hover); }
+.deck-window.painel .p-editor .field-editor-row{ border:1px solid var(--p-linha); }
+.deck-window.painel .p-editor .field-editor-row [data-field-content]{ background:var(--p-elevado); border:1px solid var(--p-borda-campo); border-radius:var(--p-raio-controle); background-image:none; }
+.deck-window.painel .p-editor .field-editor-head{ border-bottom:0; }
+.deck-window.painel .p-editor .field-editor-title{ font-size:.95rem; font-weight:800; }
+.deck-window.painel .pill, .deck-window.painel .premium-pill{ border-radius:999px; }
+/* Painel: busca, filtros, lista */
+.deck-window.painel .deck-panel-head .deck-panel-search{ margin:0; min-height:2.5rem; border-radius:999px; }
+.deck-window.painel .deck-panel-side{ background:var(--p-superficie); border-right:1px solid var(--p-linha); }
+.deck-window.painel .deck-panel-side-label{ text-transform:none; letter-spacing:0; font-size:.8rem; font-weight:800; color:var(--p-tinta-suave); }
+.deck-window.painel button.deck-panel-side-item{ width:100%; min-height:0; margin:0 0 2px; padding:.4rem .75rem; border:0; border-radius:8px; background:transparent; color:var(--p-tinta); font-weight:600; font-size:.92rem; text-align:left; box-shadow:none; justify-content:flex-start; }
+.deck-window.painel button.deck-panel-side-item:hover{ background:var(--p-linha); }
+.deck-window.painel button.deck-panel-side-item.is-active{ background:var(--p-elevado); color:var(--p-tinta); font-weight:800; box-shadow:inset 3px 0 0 var(--p-marca); }
+.deck-window.painel .deck-panel-listhead{ font-size:.8rem; font-weight:800; color:var(--p-tinta-suave); text-transform:none; letter-spacing:0; border-bottom:1px solid var(--p-linha); }
+.deck-window.painel .deck-panel-item{ border-bottom:1px solid var(--p-linha); }
+.deck-window.painel .deck-panel-item.is-active{ background:color-mix(in srgb, var(--p-marca) 12%, transparent); box-shadow:inset 3px 0 0 var(--p-marca); }
+.deck-window.painel .deck-panel-item input[type=checkbox]{ margin:0; }
+.deck-window.painel .deck-panel-editor{ background:transparent; }
+.deck-window.painel .deck-panel-meta{ color:var(--p-tinta-suave); font-size:.85rem; }
+/* Exportar: duas ações */
+.deck-window.painel .export-choices{ display:flex; gap:.6rem; flex-wrap:wrap; }
+.deck-window.painel .export-choices button.btn{ width:auto; flex:1 1 12rem; min-height:2.6rem; margin:0; padding:.5rem 1rem; border-radius:999px; box-shadow:none; font-weight:800; }
+.deck-window.painel .export-choices button.btn:first-child{ background:var(--p-marca); border:0; color:var(--p-texto-botao); }
+.deck-window.painel .export-choices button.btn:not(:first-child){ background:transparent; border:1px solid var(--p-borda-campo); color:var(--p-tinta); }
+.deck-window.painel .add-card-submit-bar{ background:var(--p-elevado); border-top:1px solid var(--p-linha); }
+.deck-window.painel .deck-panel-item input[type=checkbox]{ border-radius:.3em; }
+.deck-window.painel .p-editor button.back-link.deck-panel-backbtn{ width:auto; min-height:2.5rem; margin:0; padding:0 .25rem; border:0; border-radius:8px; background:transparent; color:var(--p-tinta-suave); font-weight:700; box-shadow:none; }
+.deck-window.painel .p-editor button.back-link.deck-panel-backbtn:hover{ color:var(--p-tinta); background:transparent; }
+.deck-window.painel .p-editor button.btn.deck-overview-danger{ color:var(--p-erro); border-color:color-mix(in srgb, var(--p-erro) 45%, transparent); }
+.deck-window.painel .p-editor button.btn.deck-overview-danger:hover{ background:color-mix(in srgb, var(--p-erro) 10%, transparent); }
+/* Divisórias da lista do Painel: tom mais forte (no zh escuro a linha padrão some no fundo elevado) */
+.deck-window.painel .deck-panel-item{ border-bottom:1px solid color-mix(in srgb, var(--p-borda-campo) 70%, transparent); }
+.deck-window.painel .deck-panel-listhead{ border-bottom:1px solid var(--p-borda-campo); }
+/* Barra de seleção do Painel: compacta, Mover em contorno, Excluir em vermelho, Limpar como link */
+.deck-window.painel .deck-panel-bulk{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; padding:.6rem .75rem; background:var(--p-superficie); border-bottom:1px solid var(--p-borda-campo); }
+.deck-window.painel .deck-panel-bulk > span{ font-size:.85rem; font-weight:700; color:var(--p-tinta-suave); }
+.deck-window.painel .deck-panel-bulk select{ width:auto; min-height:2.2rem; margin:0; padding:.25rem 2rem .25rem .8rem; font-size:.9rem; }
+.deck-window.painel .deck-panel-bulk button{ width:auto; min-height:2.2rem; margin:0; padding:.25rem .9rem; border-radius:999px; font-size:.88rem; font-weight:700; box-shadow:none; }
+.deck-window.painel .deck-panel-bulk button.btn{ background:transparent; border:1px solid var(--p-borda-campo); color:var(--p-tinta); }
+.deck-window.painel .deck-panel-bulk button.btn:hover{ background:var(--p-linha); }
+.deck-window.painel .deck-panel-bulk button[data-panel-delete]{ color:var(--p-erro); border-color:color-mix(in srgb, var(--p-erro) 45%, transparent); }
+.deck-window.painel .deck-panel-bulk button.deck-panel-linkbtn{ background:transparent; border:0; color:var(--p-tinta-suave); text-decoration:underline; padding:.25rem .4rem; }
+.deck-window.painel .deck-panel-bulk .profile-edit-error:empty{ display:none; }
+@media (max-width:600px){
+  .deck-window.painel button.app-modal-close{ width:44px; height:44px; }
+  .deck-window.painel .deck-panel-bulk :is(button, select){ min-height:44px; }
+}
+
+/* ---------- Janelas pequenas no Design System do painel (Pico escopado em .painel, 2026-10-18) ----------
+   Editar perfil, Reportar problema, Confirmar edição e Trocar de curso (classe .janela-painel no .app-modal).
+   Prévia aprovada pela autora. Botões no rodapé à direita; principal na cor da marca, secundário em contorno. */
+/* Janela */
+.app-modal.painel.janela-painel{ background:var(--p-elevado); color:var(--p-tinta); border:1px solid var(--p-linha); border-radius:var(--p-raio); box-shadow:var(--p-sombra), 0 16px 48px color-mix(in srgb, var(--p-tinta) 18%, transparent); font-family:var(--font-body); }
+.janela-painel.painel .app-modal-header{ background:transparent; border-bottom:1px solid var(--p-linha); padding:1rem 1.25rem; }
+.janela-painel.painel .app-modal-header h3{ margin:0; font-size:1.1rem; font-weight:800; color:var(--p-tinta); }
+.janela-painel.painel .app-modal-body{ padding:1.1rem 1.25rem 1.25rem; font-size:.95rem; line-height:1.55; color:var(--p-tinta); }
+.janela-painel.painel .app-modal-body p{ margin:0 0 .75rem; }
+.janela-painel.painel button.app-modal-close{ width:2.25rem; height:2.25rem; min-height:0; margin:0; padding:0; flex:none; display:inline-grid; place-items:center; border:0; border-radius:8px; background:transparent; color:var(--p-tinta-suave); box-shadow:none; font-size:1rem; line-height:1; }
+.janela-painel.painel button.app-modal-close:hover{ background:var(--p-superficie); }
+/* Botões: rodapé à direita, tamanho do conteúdo; principal na cor da marca, secundário em contorno */
+.janela-painel.painel .app-modal-body div:has(> .btn-primary + .btn), .janela-painel.painel .app-modal-body div:has(> .btn-secondary + .btn-primary){ display:flex !important; justify-content:flex-end; gap:.6rem !important; flex-wrap:wrap; margin-top:1rem !important; }
+.janela-painel.painel button.btn{ flex:1 1 0 !important; width:auto; min-height:2.9rem; margin:0; padding:.5rem 1.3rem; border-radius:999px; font-weight:800; box-shadow:none; }
+.janela-painel.painel button.btn.btn-primary{ background:var(--p-marca); border:0; color:var(--p-texto-botao); }
+.janela-painel.painel button.btn.btn-primary:hover{ background:var(--p-botao-hover); }
+.janela-painel.painel button.btn.btn-secondary{ background:transparent; border:1px solid var(--p-borda-campo); color:var(--p-tinta); }
+.janela-painel.painel button.btn.btn-secondary:hover{ background:var(--p-linha); }
+.janela-painel.painel button.btn.btn-block{ width:100%; }
+/* Formulário (Editar perfil, Reportar) */
+.janela-painel.painel :is(.profile-edit-label, .report-modal-label){ display:block; margin:.9rem 0 .3rem; font-size:.85rem; font-weight:800; color:var(--p-tinta); }
+.janela-painel.painel :is(input:not([type=checkbox]):not([type=radio]), textarea, select){ margin-bottom:0; }
+.janela-painel.painel .profile-edit-hint, .janela-painel.painel .profile-edit-bio-count{ color:var(--p-tinta-suave); font-size:.82rem; }
+.janela-painel.painel button.profile-edit-avatar-btn{ width:auto; min-height:2.2rem; margin:0; padding:.3rem .9rem; border:1px solid var(--p-borda-campo); border-radius:999px; background:transparent; color:var(--p-tinta); font-weight:700; font-size:.88rem; box-shadow:none; }
+/* Interruptor do Perfil público no desenho do Pico */
+.janela-painel.painel .pref-row{ background:var(--p-superficie); border:1px solid var(--p-linha); border-radius:var(--p-raio-controle); box-shadow:none; }
+.janela-painel.painel .pref-row-title{ color:var(--p-tinta); }
+.janela-painel.painel .pref-row-sub{ color:var(--p-tinta-suave); }
+.janela-painel.painel button.pref-switch{ position:relative; width:2.4rem; height:1.35rem; min-height:0; margin:0; padding:0; flex:none; border:0; border-radius:999px; background:var(--p-borda-campo); box-shadow:none; }
+.janela-painel.painel button.pref-switch[aria-checked="true"]{ background:var(--p-marca-escura); }
+.janela-painel.painel button.pref-switch .pref-switch-knob{ position:absolute; top:.15rem; left:.15rem; width:1.05rem; height:1.05rem; border-radius:50%; background:var(--p-elevado); box-shadow:none; transition:left .15s ease; }
+.janela-painel.painel button.pref-switch[aria-checked="true"] .pref-switch-knob{ left:1.2rem; }
+/* Reportar: lista de categorias e níveis */
+.janela-painel.painel button.report-option-btn, .janela-painel.painel .report-option-grid button{ width:100%; min-height:2.6rem; margin:0 0 .4rem; padding:.5rem .9rem; border:1px solid var(--p-linha); border-radius:var(--p-raio-controle); background:var(--p-elevado); color:var(--p-tinta); font-weight:600; text-align:left; justify-content:flex-start; box-shadow:none; }
+.janela-painel.painel :is(.report-option-grid button, button.report-option-btn):hover{ background:var(--p-superficie); }
+.janela-painel.painel :is(.report-option-grid button, button.report-option-btn)[aria-pressed="true"], .janela-painel.painel :is(.report-option-grid button, button.report-option-btn).active, .janela-painel.painel :is(.report-option-grid button, button.report-option-btn).selected{ border-color:var(--p-marca-escura); box-shadow:0 0 0 2px color-mix(in srgb, var(--p-marca-escura) 35%, transparent); }
+.janela-painel.painel .report-severity-row button, .janela-painel.painel button.report-severity-btn{ width:auto; min-height:2.2rem; margin:0; padding:.3rem .9rem; border:1px solid var(--p-borda-campo); border-radius:999px; background:transparent; color:var(--p-tinta); font-weight:700; font-size:.88rem; box-shadow:none; }
+.janela-painel.painel .report-modal-optional, .janela-painel.painel .report-modal-privacy-note{ color:var(--p-tinta-suave); }
+/* Avisos (limite, Premium) */
+.janela-painel.painel .app-modal-body strong, .janela-painel.painel .app-modal-body b{ color:var(--p-tinta); }
+.janela-painel.painel button.report-severity-btn.selected{ background:var(--p-marca); border-color:var(--p-marca); color:var(--p-texto-botao); }
+.janela-painel.painel button.report-screenshot-btn{ width:auto; min-height:2.2rem; margin:0; padding:.3rem .9rem; border:1px solid var(--p-borda-campo); border-radius:999px; background:transparent; color:var(--p-tinta); font-weight:700; font-size:.88rem; box-shadow:none; }
+.janela-painel.painel .report-option-grid{ gap:.4rem; }
+.janela-painel.painel button.app-modal-close:focus:not(:focus-visible){ background:transparent; box-shadow:none; }
+/* Trocar de curso: o Pico dá peso normal a todo <p>; o nome do curso continua grande e forte */
+.janela-painel.painel .course-confirm p{ margin:0; }
+.janela-painel.painel .course-confirm-head{ font-weight:900; font-size:26px; color:var(--p-tinta); }
+.janela-painel.painel .course-confirm-intro{ font-weight:700; color:var(--p-tinta-suave); font-size:.9rem; }
+.janela-painel.painel .course-confirm-keep{ background:var(--p-superficie); border-color:var(--p-linha); font-weight:700; }
+/* Bordas de opções e campos no tom mais forte (no escuro a linha padrão some no fundo elevado) */
+.janela-painel.painel :is(.report-option-grid button, button.report-option-btn){ border-color:var(--p-borda-campo); }
+/* Campo do @: o prefixo e o campo somente leitura formam uma peça só */
+.janela-painel.painel .profile-edit-username-wrap{ display:flex; align-items:center; border:1px solid var(--p-borda-campo); border-radius:var(--p-raio-controle); background:var(--p-superficie); overflow:hidden; }
+.janela-painel.painel .profile-edit-username-wrap > span{ padding:0 0 0 1rem; color:var(--p-tinta-suave); font-weight:700; }
+.janela-painel.painel .profile-edit-username-wrap input{ flex:1; width:auto; min-width:0; margin:0; border:0; border-radius:0; background:transparent; box-shadow:none; color:var(--p-tinta-suave); }
+/* Título com subtítulo (Editar perfil) e textos de apoio dos campos */
+.janela-painel.painel .janela-titulo{ display:grid; gap:.15rem; min-width:0; }
+.janela-painel.painel .janela-titulo h3{ font-size:1.25rem; }
+.janela-painel.painel .janela-sub{ margin:0; font-size:.9rem; line-height:1.4; color:var(--p-tinta-suave); }
+.janela-painel.painel .app-modal-header:has(.janela-titulo){ align-items:flex-start; }
+.janela-painel.painel #profile-edit-form .profile-edit-hint{ margin:.35rem 0 0; }
+.janela-painel.painel .pref-row-sub + .pref-row-sub{ margin-top:.35rem; }
+.janela-painel.painel .profile-share-helper{ font-weight:700; color:var(--p-tinta); }
+/* ---------- Estética "janela rica" (padrão aprovado pela autora em 2026-10-18) ----------
+   Mesmos elementos dos avisos Premium/Limite: título forte com subtítulo, ícone em quadrado tingido, blocos de
+   informação tingidos, opções com título e descrição. Cores só dos tokens de cada curso (--tom). */
+.janela-painel.painel .jp-tom-marca{ --tom:var(--p-marca); } .janela-painel.painel .jp-tom-ouro{ --tom:var(--hover-gold); }
+.janela-painel.painel .jp-tom-verde{ --tom:var(--jade); } .janela-painel.painel .jp-tom-rosa{ --tom:var(--error-red); }
+.janela-painel.painel .app-modal-header h3, .janela-painel.painel .janela-titulo h3{ font-size:1.35rem; font-weight:900; letter-spacing:-.01em; line-height:1.2; }
+.janela-painel.painel .jp-icone{ flex:none; width:46px; height:46px; border-radius:14px; display:grid; place-items:center; font-size:23px; line-height:1; background:color-mix(in srgb, var(--tom, var(--p-marca)) 18%, var(--p-elevado)); }
+.janela-painel.painel .jp-icone--grande{ width:72px; height:72px; border-radius:22px; font-size:38px; }
+.janela-painel.painel .jp-bloco{ display:grid; grid-template-columns:auto minmax(0, 1fr); gap:14px; align-items:center; margin:0; padding:14px 16px; border-radius:16px; background:color-mix(in srgb, var(--tom, var(--p-marca)) 10%, var(--p-elevado)); border:1px solid color-mix(in srgb, var(--tom, var(--p-marca)) 22%, var(--p-linha)); }
+.janela-painel.painel .jp-bloco b{ display:block; font-size:.98rem; font-weight:800; color:var(--p-tinta); }
+.janela-painel.painel .jp-bloco > span:not(.jp-icone) > span{ display:block; font-size:.9rem; line-height:1.45; color:var(--p-tinta-suave); }
+.janela-painel.painel .jp-blocos{ display:grid; gap:10px; }
+.janela-painel.painel .jp-destaque{ margin:0; font-size:1.15rem; line-height:1.35; font-weight:900; color:var(--p-tinta); text-wrap:balance; }
+.janela-painel.painel .jp-centro{ display:grid; justify-items:center; text-align:center; gap:10px; }
+.janela-painel.painel .jp-tagline{ margin:0; font-size:1.05rem; font-weight:800; color:var(--p-marca-escura); }
+/* Opções com ícone, título e descrição (Reportar) */
+.janela-painel.painel button.jp-opcao{ display:grid; grid-template-columns:auto minmax(0, 1fr); gap:12px; align-items:center; width:100%; min-height:0; margin:0; padding:10px 14px; border:1px solid var(--p-borda-campo); border-radius:14px; background:var(--p-elevado); color:var(--p-tinta); text-align:left; font-weight:400; box-shadow:none; }
+.janela-painel.painel button.jp-opcao:hover{ background:var(--p-superficie); }
+.janela-painel.painel button.jp-opcao.selected, .janela-painel.painel button.jp-opcao[aria-pressed="true"]{ border-color:var(--p-marca-escura); background:color-mix(in srgb, var(--p-marca) 10%, var(--p-elevado)); box-shadow:0 0 0 2px color-mix(in srgb, var(--p-marca-escura) 30%, transparent); }
+.janela-painel.painel .jp-opcao .jp-icone{ width:38px; height:38px; border-radius:12px; font-size:20px; }
+.janela-painel.painel .jp-opcao b{ display:block; font-size:.95rem; font-weight:800; line-height:1.3; }
+.janela-painel.painel .jp-opcao small{ display:block; font-size:.82rem; line-height:1.35; color:var(--p-tinta-suave); }
+.janela-painel.painel .report-option-grid{ display:grid; gap:8px; }
+.janela-painel.painel button.jp-chip{ display:inline-flex; align-items:center; gap:6px; }
+.janela-painel.painel button.jp-chip .emo{ font-size:1.05em; }
+/* Campo com ícone dentro (Editar perfil) */
+.janela-painel.painel .jp-campo{ position:relative; }
+.janela-painel.painel .jp-campo > .jp-campo-ico{ position:absolute; left:14px; top:.85rem; font-size:1.05rem; line-height:1; pointer-events:none; opacity:.85; }
+.janela-painel.painel .jp-campo > :is(input, textarea){ padding-left:2.6rem; }
+.janela-painel.painel .jp-contador{ text-align:right; font-size:.82rem; color:var(--p-tinta-suave); margin-top:.25rem; }
+/* Editar perfil: identidade ao lado da foto e bloco de privacidade */
+.janela-painel.painel .profile-edit-avatar-row{ display:flex; align-items:center; gap:18px; }
+.janela-painel.painel .profile-edit-avatar-actions{ display:grid; gap:4px; justify-items:start; }
+.janela-painel.painel .profile-edit-avatar-actions b{ font-size:1.02rem; font-weight:800; color:var(--p-tinta); }
+.janela-painel.painel .profile-edit-avatar-actions > span{ font-size:.88rem; color:var(--p-tinta-suave); }
+.janela-painel.painel .profile-edit-avatar-actions .jp-acoes-foto{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+.janela-painel.painel .pref-row.jp-privacidade{ display:grid; grid-template-columns:auto minmax(0, 1fr) auto; gap:14px; align-items:start; padding:16px; border-radius:16px; background:color-mix(in srgb, var(--p-marca) 9%, var(--p-elevado)); border:1px solid color-mix(in srgb, var(--p-marca) 22%, var(--p-linha)); }
+.janela-painel.painel .jp-ajuda{ display:flex; align-items:center; gap:8px; margin-top:.6rem; padding:8px 12px; border-radius:12px; background:color-mix(in srgb, var(--p-marca) 12%, var(--p-elevado)); font-size:.88rem; font-weight:800; color:var(--p-tinta); }
+/* Trocar de curso */
+.janela-painel.painel .course-confirm{ display:grid; gap:12px; }
+.janela-painel.painel .course-confirm-p{ color:var(--p-tinta); line-height:1.55; }
+@media (max-width:600px){
+  .janela-painel.painel button.app-modal-close{ width:44px; height:44px; }
+  .janela-painel.painel .pref-row.jp-privacidade{ grid-template-columns:minmax(0, 1fr) auto; }
+  .janela-painel.painel .pref-row.jp-privacidade > .jp-icone{ display:none; }
+  .janela-painel.painel button.jp-opcao{ min-height:44px; }
+  .janela-painel.painel button.btn, .janela-painel.painel :is(button.report-severity-btn, button.profile-edit-avatar-btn, button.report-screenshot-btn){ min-height:44px; }
+}
+
 /* ---------- Perfil: passada de design (Visão geral, Metas, Progresso, Amigos) ----------
    Identidade como carteirinha de estudante (faixa na cor do idioma no topo);
    o resto fica quieto: títulos em tom de frase, números do Progresso num painel só. */
@@ -4337,40 +4514,61 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 /* Editar perfil: sem o buraco embaixo da foto quando não há erro. */
 #profile-edit-modal .profile-edit-avatar-row{ margin:4px 0 4px; }
 #profile-edit-modal .profile-edit-avatar-error:empty{ display:none; }
-/* ---------- Configurações: passada de design (Geral, Notificações, Exportar) ----------
-   Cada grupo é um painel só, com linhas separadas por traço fino (como "Conta"),
-   em vez de uma caixa solta por preferência. Títulos em tom de frase. */
-#view-settings .section-label{ text-transform:none; letter-spacing:0; font-size:15px; font-weight:800; color:var(--ink); margin:28px 0 10px; }
-#view-settings .settings-card{ box-shadow:var(--shadow-card); }
-#view-settings .settings-more-note{ display:none; }
-#view-settings .pref-row{ border-radius:0; border-bottom-width:0; padding:16px 18px; }
-#view-settings .section-label + .pref-row{ border-top-left-radius:var(--radius); border-top-right-radius:var(--radius); }
-#view-settings .pref-row:not(:has(+ .pref-row)){ border-bottom-width:1px; border-bottom-left-radius:var(--radius); border-bottom-right-radius:var(--radius); box-shadow:var(--shadow-card); }
-#view-settings .pref-row-sub{ max-width:60ch; }
-#view-settings .notif-pref-advanced{ margin-top:22px; }
-#view-settings .notif-pref-advanced summary{ font-size:15px; font-weight:800; color:var(--ink); cursor:pointer; min-height:44px; display:flex; align-items:center; gap:6px; }
-#view-settings .notif-pref-matrix-head{ text-transform:none; letter-spacing:0; font-size:12px; }
-@media (max-width:560px){
-  #view-settings .pref-row{ padding:14px; }
-  #view-settings .pref-row:has(.notif-pref-quiet-hours){ flex-wrap:wrap; }
-  #view-settings .pref-row:has(.notif-pref-quiet-hours) .pref-row-text{ flex-basis:100%; }
+/* ---------- Configurações no Design System do painel (Pico escopado em .painel, 2026-10-17) ----------
+   Abas Geral/Notificações/Exportar = .p-seg; cada grupo = <article> com título; linhas = .p-linha-opcao com
+   interruptor input[role=switch]. As classes antigas (.pref-row etc.) ficam no HTML para os testes e o JS,
+   mas aqui dentro quem desenha é o painel. */
+#view-settings .cfg-pagina{ padding:0; gap:1.1rem; }
+#view-settings .cfg-abas button{ gap:.4rem; }
+#view-settings .cfg-corpo{ display:grid; gap:1rem; }
+#view-settings .cfg-corpo > article{ margin:0; }
+#view-settings .painel .pref-row{ background:none; border:0; border-top:1px solid var(--p-linha); border-radius:0; box-shadow:none; padding:.75rem 0; }
+#view-settings .painel article > header + .pref-row, #view-settings .painel .friends-prefs-box > .friends-pref-row:first-child{ border-top:0; }
+#view-settings .pref-row-text{ flex:1; min-width:0; display:grid; gap:.15rem; }
+#view-settings .pref-row-title, #view-settings .pref-row-sub{ display:block; }
+#view-settings .pref-row-title{ margin:0; font-size:.95rem; font-weight:800; color:var(--p-tinta); }
+#view-settings .pref-row-sub{ max-width:60ch; font-size:.85rem; line-height:1.45; color:var(--p-tinta-suave); }
+#view-settings .cfg-infos{ display:grid; gap:.5rem; }
+#view-settings .p-linha-info strong{ word-break:break-all; }
+#view-settings .painel select{ margin:0; width:auto; }
+#view-settings .notif-pref-quiet-hours{ display:flex; align-items:center; gap:.5rem; flex-shrink:0; font-size:.9rem; color:var(--p-tinta-suave); }
+#view-settings .notif-pref-quiet-hours select{ border-radius:999px; padding:.45rem 2.2rem .45rem 1rem; font-size:.95rem; background-color:var(--p-elevado); color:var(--p-tinta); border:1px solid var(--p-borda-campo); }
+#view-settings .notif-pref-advanced{ margin:.6rem 0 0; border:0; padding:0; }
+#view-settings .notif-pref-advanced summary{ min-height:44px; display:flex; align-items:center; color:var(--p-tinta-suave); font-weight:600; }
+#view-settings .cfg-matriz{ overflow-x:auto; margin-top:.4rem; }
+#view-settings .cfg-matriz table{ margin:0; }
+#view-settings .cfg-matriz :is(th, td){ text-align:center; padding:.55rem .5rem; }
+#view-settings .cfg-matriz tbody th{ text-align:left; font-weight:600; }
+#view-settings .cfg-matriz input{ margin:0; }
+#view-settings label.pref-row{ width:100%; cursor:pointer; }
+#view-settings .friends-prefs-box{ background:none; border:0; border-radius:0; padding:0; }
+#view-settings .friends-pref-row{ width:100%; margin:0; padding:.75rem 0; font-size:.95rem; color:var(--p-tinta); cursor:pointer; }
+#view-settings .friends-pref-row > span{ flex:1; min-width:0; }
+#view-settings .friends-pref-row input{ width:2.25em; height:1.25em; accent-color:auto; }
+#view-settings .friends-prefs-box .p-descricao{ margin:.6rem 0 0; }
+#view-settings .cfg-exportar{ display:grid; gap:1rem; }
+#view-settings .cfg-campo{ display:grid; gap:.4rem; margin:0; font-weight:600; }
+#view-settings .cfg-campo select{ width:100%; }
+#view-settings .cfg-exportar .p-descricao{ max-width:62ch; }
+#view-settings #export-btn{ margin:0; width:auto; }
+#view-settings .export-status{ margin:0; }
+#view-settings .export-status:empty{ display:none; }
+@media (max-width:600px){
+  #view-settings .cfg-silencio{ flex-wrap:wrap; }
+  #view-settings .cfg-silencio .pref-row-text{ flex-basis:100%; }
+  #view-settings .cfg-silencio .notif-pref-quiet-hours{ width:100%; }
+  #view-settings .cfg-silencio .notif-pref-quiet-hours select{ flex:1; min-height:44px; }
+  #view-settings .cfg-abas button{ min-height:44px; }
+  #view-settings .painel input[role=switch]{ min-height:0; }
+  #view-settings .cfg-matriz :is(th, td){ padding:.5rem .3rem; }
+  #view-settings .cfg-matriz input{ width:1.4rem; height:1.4rem; }
 }
-
-/* Exportar: escolha da unidade como lista legível, alinhada à esquerda. */
-#settings-export-content .export-box{ background:var(--paper); text-align:left; padding:20px; box-shadow:var(--shadow-card); }
-#settings-export-content .export-box .icon{ display:none; }
-#settings-export-content .export-box h3{ font-size:15px; font-weight:800; margin:0 0 12px; }
-#settings-export-content .deck-select{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:6px; justify-content:stretch; }
-#settings-export-content .deck-select > .deck-chip{ text-align:left; border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.3; min-height:44px; }
-#settings-export-content .deck-select > .deck-chip:first-child{ grid-column:1 / -1; justify-self:start; padding-left:16px; padding-right:16px; }
-#settings-export-content .export-box p{ margin:4px 0 16px; max-width:62ch; }
-#settings-export-content #export-btn{ margin:0 !important; }
-#settings-export-content .export-status:empty{ min-height:0; margin:0; }
 /* ---------- Lições: opções de múltipla escolha com o mesmo dourado das outras ----------
    A regra antiga usava --imperial-gold (rosa no fr) e valia também no toque. */
 .exercise-option:not(.correct):not(.incorrect):hover{ border-color:var(--paper-line); transform:none; }
 @media (hover:hover){
   .exercise-option:not(.disabled):not(.correct):not(.incorrect):hover{ border-color:var(--hover-gold); background:color-mix(in srgb, var(--hover-gold) 14%, var(--paper)); transform:translateY(-1px); }
+}
 
 /* ---------- Painéis (Admin, Professora, Minhas aulas): passada de design 2026-10-12 ----------
    Mesma linguagem da Revisão: seletor segmentado (.deck-topbar) numa linha, títulos de seção sem
@@ -4643,6 +4841,23 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .public-copies-line span{ font-size:12.5px; color:var(--ink-soft); }
 .public-copies-line.is-locked{ color:var(--ink-soft); font-size:13px; }
 .public-copies-meta{ display:block; font-size:12px; font-weight:400; color:var(--ink-soft); }
+/* Escolher o @ uma vez (111) */
+.uchoice-card{ max-width:440px; }
+.uchoice-body{ padding:22px 22px 20px; }
+.uchoice-title{ margin:0 0 4px; font-size:19px; color:var(--ink); }
+.uchoice-sub{ margin:0 0 16px; font-size:14px; color:var(--ink-soft); }
+.uchoice-label{ display:block; margin:12px 0 6px; font-size:13.5px; font-weight:800; color:var(--ink); }
+.uchoice-input{ width:100%; box-sizing:border-box; }
+.uchoice-user-wrap{ position:relative; }
+.uchoice-at{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-weight:700; pointer-events:none; }
+.uchoice-user{ padding-left:30px; }
+.uchoice-status{ min-height:18px; margin:6px 0 0; font-size:13px; color:var(--ink-soft); }
+.uchoice-status.is-ok{ color:var(--jade); font-weight:700; }
+.uchoice-status.is-bad{ color:var(--error-red); font-weight:700; }
+.uchoice-rules{ margin:4px 0 0; font-size:12.5px; color:var(--ink-soft); }
+.uchoice-warn{ margin:14px 0 12px; padding:10px 12px; border-radius:12px; background:var(--paper-warm); color:var(--ink); font-size:13.5px; line-height:1.45; }
+.uchoice-error:empty{ display:none; }
+@media (max-width:600px){ .uchoice-input{ min-height:44px; font-size:16px; } }
 /* Convite de aluno (077): seção da professora, faixa na Trilha e cartão do convite */
 .tinv-lang{ display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 14px; }
 .tinv-grid{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; align-items:start; }
@@ -4783,6 +4998,9 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 #view-conjugaison .is-almost .conj-x{ color:var(--conj-quase); background:color-mix(in srgb, var(--conj-quase) 20%, transparent); }
 #view-conjugaison .conj-other-form{ flex-basis:100%; font-weight:600; color:var(--ink-soft); font-size:12.5px; }
 #view-conjugaison .conj-accents{ display:flex; justify-content:center; margin:-6px 0 14px; }
+/* Teclas do mesmo tamanho das da lição (o flex encolhia a grade até a largura da letra). */
+#view-conjugaison .conj-accents .fr-accent-picker{ width:100%; max-width:360px; grid-template-columns:repeat(auto-fit, minmax(40px, 1fr)); }
+/* Conjugação: só as letras que os verbos usam (hoje 7: é è ê î û â ç), numa fileira só. */
 #view-conjugaison .conj-size-hint{ margin:2px 0 0; font-size:12px; color:var(--ink-soft); }
 #view-conjugaison .conj-size-hint:empty{ display:none; }
 #view-conjugaison .conj-session-result:has(.conj-review){ max-width:560px; }
@@ -4794,7 +5012,7 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 #view-conjugaison .conj-review-form{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size:15px; }
 #view-conjugaison .conj-review-form i{ color:var(--ink-soft); }
 #view-conjugaison .conj-review-form .conj-answer-view{ min-height:0; display:inline-flex; padding:2px 8px; border-width:1px; border-radius:6px; }
-#view-conjugaison .conj-review-arrow{ color:var(--ink-soft); }
+#view-conjugaison .conj-review-arrow, #view-conjugaison .conj-review-empty{ color:var(--ink-soft); }
 #view-conjugaison .conj-result-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
 /* Conjugação, fase 2: escolha com verbos em cima (busca com bandeira + filtros) e tempos em cartões com frase de exemplo. */
 #view-conjugaison #conj-select-wrap{ max-width:780px; margin:0 auto; }
@@ -4814,11 +5032,11 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   position:absolute; z-index:30; left:0; right:0; top:calc(100% + 6px); margin:0; padding:6px; list-style:none; max-height:320px; overflow-y:auto;
   background:var(--paper); border:1px solid var(--paper-line); border-radius:14px; box-shadow:var(--shadow-lift);
 }
-#view-conjugaison .conj-search-opt{ display:grid; grid-template-columns:24px auto minmax(0, 1fr); align-items:center; gap:10px; min-height:44px; padding:6px 10px; border-radius:10px; cursor:pointer; }
+#view-conjugaison .conj-search-opt{ display:grid; grid-template-columns:24px minmax(0, 1fr); align-items:center; gap:10px; min-height:44px; padding:6px 10px; border-radius:10px; cursor:pointer; }
 #view-conjugaison .conj-search-opt[aria-selected="true"]{ background:color-mix(in srgb, var(--seal-red) 12%, var(--paper)); }
 @media (hover:hover){ #view-conjugaison .conj-search-opt:hover{ background:color-mix(in srgb, var(--seal-red) 8%, var(--paper)); } }
-#view-conjugaison .conj-opt-word{ font-weight:800; font-size:15.5px; color:var(--ink); }
-#view-conjugaison .conj-opt-other{ font-size:13.5px; color:var(--ink-soft); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#view-conjugaison .conj-opt-word{ font-weight:800; font-size:15.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#view-conjugaison .conj-opt-other{ font-weight:600; font-size:14px; color:var(--ink-soft); } /* tradução logo depois do verbo: "morar (habiter)" */
 #view-conjugaison .conj-search-empty{ padding:12px 10px; color:var(--ink-soft); font-size:14px; }
 #view-conjugaison .conj-flag{ display:inline-flex; width:24px; height:16px; border-radius:3px; overflow:hidden; box-shadow:0 0 0 1px rgba(0,0,0,.14); }
 #view-conjugaison .conj-flag svg{ width:100%; height:100%; display:block; }
@@ -5229,7 +5447,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 
 <a data-i18n="ui.skipLink" class="skip-link" href="#main-content">Pular para o conteúdo</a>
 
-<div id="toast-layer"></div>
+<div id="toast-layer" role="status" aria-live="polite"></div>
 <div id="badge-unlock-layer" aria-live="polite"></div>
 <div id="confetti-layer"></div>
 
@@ -5636,72 +5854,78 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 
   <!-- ===== CONFIGURAÇÕES ===== -->
   <div class="view" id="view-settings">
-    <div class="path-header">
-      <h2 data-i18n="settings.title">Configurações</h2>
-      <p data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</p>
+    <!-- Configurações no Design System do painel (Pico escopado em .painel), aprovado pela autora em 2026-10-17.
+         Ids e data-settings-section continuam os mesmos: app.js, theme.js e os testes dependem deles. -->
+    <div class="painel">
+    <div class="p-pagina cfg-pagina">
+      <header class="p-cabecalho">
+        <div>
+          <h2 data-i18n="settings.title">Configurações</h2>
+          <span class="p-subtitulo" data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</span>
+        </div>
+      </header>
+      <div class="p-seg cfg-abas" role="toolbar" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
+        <button type="button" class="active" aria-pressed="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
+        <button type="button" aria-pressed="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
+        <button type="button" aria-pressed="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
+      </div>
+      <div id="settings-geral-content" class="cfg-corpo">
+        <article>
+          <header><h3 data-i18n="settings.section.account">Conta</h3></header>
+          <div class="cfg-infos">
+            <p class="p-linha-info"><span data-i18n="settings.account.email">E-mail</span><strong id="settings-email">—</strong></p>
+            <p class="p-linha-info"><span data-i18n="settings.account.provider">Conectado com</span><strong id="settings-provider">—</strong></p>
+          </div>
+        </article>
+        <article>
+          <header><h3 data-i18n="settings.section.preferences">Preferências</h3></header>
+          <label class="pref-row p-linha-opcao">
+            <span class="pref-row-text">
+              <span class="pref-row-title" data-i18n="settings.pref.dark.title">Modo escuro</span>
+              <span class="pref-row-sub" data-i18n="settings.pref.dark.sub">Usa o tema escuro em vez do claro, independente do sistema.</span>
+            </span>
+            <input type="checkbox" role="switch" id="theme-pref-switch" aria-label="Modo escuro" data-i18n-attr="aria-label:settings.pref.dark.title">
+          </label>
+          <label class="pref-row p-linha-opcao">
+            <span class="pref-row-text">
+              <span class="pref-row-title" data-i18n="settings.pref.cloze.title">Sempre digitar no exercício de completar frase</span>
+              <span class="pref-row-sub" data-i18n="settings.pref.cloze.subFr">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</span>
+            </span>
+            <input type="checkbox" role="switch" id="cloze-mode-switch" aria-label="Sempre digitar no exercício de completar frase" data-i18n-attr="aria-label:settings.pref.cloze.title">
+          </label>
+          <label class="pref-row p-linha-opcao">
+            <span class="pref-row-text">
+              <span class="pref-row-title" data-i18n="settings.pref.sound.title">Som de acerto/erro nos exercícios</span>
+              <span class="pref-row-sub" data-i18n="settings.pref.sound.sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</span>
+            </span>
+            <input type="checkbox" role="switch" id="feedback-sound-switch" checked aria-label="Som de acerto/erro nos exercícios" data-i18n-attr="aria-label:settings.pref.sound.title">
+          </label>
+          <div class="pref-row p-linha-opcao">
+            <div class="pref-row-text">
+              <div class="pref-row-title" data-i18n="settings.uiLanguage.title">Idioma da interface</div>
+              <div class="pref-row-sub" data-i18n="settings.uiLanguage.sub">Muda só os textos do app (menus, botões e avisos). Não muda o idioma que você estuda.</div>
+            </div>
+            <select class="review-settings-select" id="ui-language-select" aria-label="Idioma da interface" data-i18n-attr="aria-label:settings.uiLanguage.title">
+              <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+              <option value="en" lang="en">English</option>
+            </select>
+          </div>
+          <div id="my-courses" class="pref-row" style="display:none; flex-direction:column; align-items:stretch; gap:8px;"></div>
+        </article>
+      </div>
+      <div id="settings-notifications-content" class="cfg-corpo" style="display:none;"></div>
+      <div id="settings-export-content" class="cfg-corpo" style="display:none;">
+        <article>
+          <header><h3 data-i18n="settings.export.title">Escolha o que exportar</h3></header>
+          <div class="cfg-exportar">
+            <div id="export-deck-select"></div>
+            <p class="p-descricao" data-i18n="settings.export.descFr">O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.</p>
+            <div><button type="button" id="export-btn" data-i18n="settings.export.button">Gerar arquivo .apkg</button></div>
+            <div class="export-status" id="export-status"></div>
+          </div>
+        </article>
+      </div>
     </div>
-    <div class="leaderboard-tabs" role="tablist" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
-      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
-    </div>
-    <div id="settings-geral-content">
-      <div class="section-label" data-i18n="settings.section.account">Conta</div>
-      <div class="settings-card">
-        <div class="settings-row">
-          <div class="settings-row-label" data-i18n="settings.account.email">E-mail</div>
-          <div class="settings-row-value" id="settings-email">—</div>
-        </div>
-        <div class="settings-row">
-          <div class="settings-row-label" data-i18n="settings.account.provider">Conectado com</div>
-          <div class="settings-row-value" id="settings-provider">—</div>
-        </div>
-      </div>
-      <p class="settings-more-note" data-i18n="settings.account.moreSoon">Mais opções de conta em breve.</p>
-      <div class="section-label" data-i18n="settings.section.preferences">Preferências</div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.pref.dark.title">Modo escuro</div>
-          <div class="pref-row-sub" data-i18n="settings.pref.dark.sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
-        </div>
-        <button class="pref-switch" id="theme-pref-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
-      </div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.pref.cloze.title">Sempre digitar no exercício de completar frase</div>
-          <div class="pref-row-sub" data-i18n="settings.pref.cloze.subFr">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</div>
-        </div>
-        <button class="pref-switch" id="cloze-mode-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
-      </div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.pref.sound.title">Som de acerto/erro nos exercícios</div>
-          <div class="pref-row-sub" data-i18n="settings.pref.sound.sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
-        </div>
-        <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
-      </div>
-      <div class="pref-row">
-        <div class="pref-row-text">
-          <div class="pref-row-title" data-i18n="settings.uiLanguage.title">Idioma da interface</div>
-          <div class="pref-row-sub" data-i18n="settings.uiLanguage.sub">Muda só os textos do app (menus, botões e avisos). Não muda o idioma que você estuda.</div>
-        </div>
-        <select class="review-settings-select" id="ui-language-select" aria-label="Idioma da interface" data-i18n-attr="aria-label:settings.uiLanguage.title" style="width:auto; flex-shrink:0;">
-          <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
-          <option value="en" lang="en">English</option>
-        </select>
-      </div>
-      <div id="my-courses" class="pref-row" style="display:none; flex-direction:column; align-items:stretch; gap:8px;"></div>
-    </div>
-    <div id="settings-notifications-content" style="display:none;"></div>
-    <div id="settings-export-content" style="display:none;">
-      <div class="export-box">
-        <div class="icon">📦</div>
-        <h3 data-i18n="settings.export.title">Escolha o que exportar</h3>
-        <div class="deck-select" id="export-deck-select"></div>
-        <p data-i18n="settings.export.descFr">O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.</p>
-        <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;" data-i18n="settings.export.button">Gerar arquivo .apkg</button>
-        <div class="export-status" id="export-status"></div>
-      </div>
     </div>
   </div>
 
@@ -5929,25 +6153,33 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 </div>
 
 <div id="profile-edit-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
+  <div class="app-modal painel janela-painel">
     <div class="app-modal-header">
-      <h3>Editar perfil</h3>
-      <button class="app-modal-close" id="profile-edit-modal-close" aria-label="Fechar">✕</button>
+      <div class="janela-titulo">
+        <h3 data-i18n="ui.profileEdit.title">Seu perfil, seu jeito</h3>
+        <p class="janela-sub" data-i18n="ui.profileEdit.subtitle">Personalize como você aparece na comunidade.</p>
+      </div>
+      <button class="app-modal-close" id="profile-edit-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
       <form id="profile-edit-form" class="profile-edit-form">
         <div class="profile-edit-avatar-row">
           <div class="profile-edit-avatar-preview" id="profile-edit-avatar-preview"></div>
           <div class="profile-edit-avatar-actions">
-            <button type="button" class="profile-edit-avatar-btn" id="profile-edit-avatar-change-btn">Alterar foto</button>
-            <button type="button" class="profile-edit-avatar-btn remove" id="profile-edit-avatar-remove-btn" style="display:none;">Remover foto</button>
+            <b data-i18n="ui.profileEdit.identityTitle">Sua identidade</b>
+            <span data-i18n="ui.profileEdit.identityText">Escolha como as pessoas vão conhecer você.</span>
+            <div class="jp-acoes-foto">
+            <button type="button" class="profile-edit-avatar-btn" id="profile-edit-avatar-change-btn" data-i18n="ui.profileEdit.changePhoto" aria-label="Alterar foto do perfil" data-i18n-attr="aria-label:ui.profileEdit.changePhotoAria">Alterar foto</button>
+            <button type="button" class="profile-edit-avatar-btn remove" id="profile-edit-avatar-remove-btn" style="display:none;" data-i18n="ui.profileEdit.removePhoto">Remover foto</button>
+            </div>
           </div>
           <input type="file" id="profile-edit-avatar-input" accept="image/*" style="display:none;">
         </div>
         <p class="profile-edit-avatar-error" id="profile-edit-avatar-error"></p>
 
-        <label class="profile-edit-label" for="profile-edit-display-name">Nome exibido</label>
-        <input type="text" id="profile-edit-display-name" class="profile-edit-input" maxlength="60" placeholder="Como você quer ser chamada(o)" data-i18n-attr="placeholder:ui.profileEdit.namePh">
+        <label class="profile-edit-label" for="profile-edit-display-name" data-i18n="ui.profileEdit.name">Nome exibido</label>
+        <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">👤</span><input type="text" id="profile-edit-display-name" class="profile-edit-input" maxlength="60" placeholder="Como você quer ser chamada(o)" data-i18n-attr="placeholder:ui.profileEdit.namePh" aria-describedby="profile-edit-name-hint"></div>
+        <p class="profile-edit-hint" id="profile-edit-name-hint" data-i18n="ui.profileEdit.nameHint">O nome que aparece no seu perfil.</p>
 
         <label data-i18n="ui.profileEdit.country" class="profile-edit-label" for="profile-edit-country">País de origem</label>
         <select id="profile-edit-country" class="profile-edit-input"></select>
@@ -5957,14 +6189,15 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <select id="profile-edit-gender" class="profile-edit-input"></select>
         <p data-i18n="ui.profileEdit.genderHint" class="profile-edit-hint">Privado: só você vê. Usado para escolher a forma certa das palavras nos exemplos da trilha (ex.: brasileiro ou brasileira). Sem escolher, mostramos as duas formas (brasileiro·a).</p>
 
-        <label data-i18n="ui.profileEdit.username" class="profile-edit-label" for="profile-edit-username">Seu identificador público (permanente)</label>
+        <label data-i18n="ui.profileEdit.username" class="profile-edit-label" for="profile-edit-username">Seu identificador público</label>
         <div class="profile-edit-username-wrap">
           <span class="profile-edit-at">@</span>
-          <input type="text" id="profile-edit-username" class="profile-edit-input" maxlength="24" readonly aria-readonly="true" title="Gerado pelo sistema; não pode ser alterado">
+          <input type="text" id="profile-edit-username" class="profile-edit-input" maxlength="24" readonly aria-readonly="true" placeholder="seuusuario" data-i18n-attr="placeholder:ui.profileEdit.usernamePh" aria-describedby="profile-edit-username-hint">
         </div>
+        <p class="profile-edit-hint" id="profile-edit-username-hint" data-i18n="ui.profileEdit.usernameHint">Seu identificador é permanente e não pode ser alterado.</p>
 
-        <label class="profile-edit-label" for="profile-edit-bio">Sobre mim</label>
-        <textarea id="profile-edit-bio" class="profile-edit-textarea" maxlength="160" placeholder="Conte um pouco sobre você e por que está aprendendo francês" data-i18n-attr="placeholder:ui.profileEdit.bioPh.fr"></textarea>
+        <label class="profile-edit-label" for="profile-edit-bio" data-i18n="ui.profileEdit.bio">Sobre você</label>
+        <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">📝</span><textarea id="profile-edit-bio" class="profile-edit-textarea" maxlength="160" placeholder="Conte um pouco sobre você, seus interesses e o que está aprendendo." data-i18n-attr="placeholder:ui.profileEdit.bioPh"></textarea></div>
         <div class="profile-edit-bio-count" id="profile-edit-bio-count">0/160</div>
 
         <!-- Fase 1 do perfil público (ver CLAUDE.md, grilling Q1) --
@@ -5976,12 +6209,15 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
              ver shared/my-flashcards.js). Privado por padrão -- só
              SALVA quando o formulário inteiro é salvo, mesmo padrão
              dos outros campos deste modal (nome/username/bio). -->
-        <div class="pref-row">
+        <div class="pref-row jp-privacidade">
+          <span class="jp-icone" aria-hidden="true">👥</span>
           <div class="pref-row-text">
-            <div data-i18n="ui.profileEdit.publicProfile" class="pref-row-title">Perfil público</div>
-            <div data-i18n="ui.profileEdit.publicProfileSub" class="pref-row-sub">Ligado: quem tem conta vê sua foto, seu progresso e seus Decks públicos. Desligado: só amigos e sua professora veem; os outros veem só nome, @ e badges, e só te acham pelo @ exato.</div>
+            <div data-i18n="ui.profileEdit.shareTitle" class="pref-row-title">Compartilhe sua jornada</div>
+            <div data-i18n="ui.profileEdit.sharePublic" class="pref-row-sub">Ligado: quem tem conta no site vê sua foto, seu progresso e seus Decks públicos, e pode encontrar você na busca.</div>
+            <div data-i18n="ui.profileEdit.sharePrivate" class="pref-row-sub">Desligado: só seus amigos e sua professora, se você tiver uma, veem isso. As outras pessoas veem só seu nome, seu @ e sua conquista em destaque, e só encontram você pelo @ exato.</div>
+            <div class="jp-ajuda"><span aria-hidden="true">✅</span><span data-i18n="ui.profileEdit.shareHelper" class="profile-share-helper">Você decide o que compartilhar e pode mudar quando quiser.</span></div>
           </div>
-          <button type="button" class="pref-switch" id="profile-edit-public-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
+          <button type="button" class="pref-switch" id="profile-edit-public-switch" role="switch" aria-checked="false" aria-label="Perfil público" data-i18n-attr="aria-label:ui.profileEdit.publicProfile"><span class="pref-switch-knob"></span></button>
         </div>
 
         <div id="profile-edit-featured-badge-row" style="display:none;">
@@ -5990,7 +6226,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         </div>
 
         <p class="profile-edit-error" id="profile-edit-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="profile-edit-save-btn">Salvar</button>
+        <button type="submit" class="btn btn-primary btn-block" id="profile-edit-save-btn" data-i18n="ui.profileEdit.save">Salvar perfil</button>
       </form>
     </div>
   </div>
@@ -6070,7 +6306,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
      id-com-revisão de shared/teacher-flashcards.js/shared/own-flashcards.js).
      Compartilhado entre shared/admin-flashcards.js e shared/my-flashcards.js. -->
 <div id="ui-language-confirm-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
+  <div class="app-modal painel janela-painel">
     <div class="app-modal-header">
       <h3 data-i18n="settings.uiLanguage.confirm.title">Trocar o idioma do site?</h3>
       <button class="app-modal-close" id="ui-language-confirm-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
@@ -6102,16 +6338,21 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 </div>
 
 <div id="flashcard-reset-confirm-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
+  <div class="app-modal painel janela-painel">
     <div class="app-modal-header">
       <h3 data-i18n="flashcardReset.modal.title">⚠️ Confirmar edição</h3>
       <button class="app-modal-close" id="flashcard-reset-confirm-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p data-i18n="flashcardReset.modal.body">Esta edição irá reiniciar o progresso de revisão deste cartão. Deseja continuar?</p>
+      <div class="jp-centro">
+        <span class="jp-icone jp-icone--grande jp-tom-marca" aria-hidden="true">🔄</span>
+        <p class="jp-destaque" data-i18n="flashcardReset.modal.headline">Esta edição vai reiniciar o progresso de revisão deste cartão.</p>
+        <p class="janela-sub" data-i18n="flashcardReset.modal.explain">Ele volta a aparecer como um cartão novo na Revisão. Você continua estudando normalmente depois de salvar.</p>
+      </div>
+      <p class="jp-bloco jp-tom-marca" style="margin-top:14px;"><span class="jp-icone" aria-hidden="true">💡</span><span><span data-i18n="flashcardReset.modal.keepTip">Se preferir manter o progresso atual, descarte as edições: o cartão continua como está.</span></span></p>
       <div style="display:flex; gap:10px; margin-top:14px;">
         <button class="btn btn-secondary" id="flashcard-reset-confirm-discard" style="flex:1;" data-i18n="flashcardReset.modal.discard">Descartar edições</button>
-        <button class="btn btn-primary" id="flashcard-reset-confirm-yes" style="flex:1;" data-i18n="flashcardReset.modal.confirm">Sim</button>
+        <button class="btn btn-primary" id="flashcard-reset-confirm-yes" style="flex:1;" data-i18n="flashcardReset.modal.yes">Sim, continuar</button>
       </div>
     </div>
   </div>
@@ -6173,9 +6414,12 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 
 <!-- ===== MODAL: REPORTAR PROBLEMA/SUGESTÃO (bandeira ⚑) ===== -->
 <div id="report-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
+  <div class="app-modal painel janela-painel">
     <div class="app-modal-header">
-      <h3 data-i18n="report.modal.title">⚑ Reportar problema ou sugestão</h3>
+      <div class="janela-titulo">
+        <h3 data-i18n="report.modal.title">⚑ Reportar problema ou sugestão</h3>
+        <p class="janela-sub" data-i18n="report.modal.intro">Conte o que aconteceu. Isso nos ajuda a melhorar a sua experiência.</p>
+      </div>
       <button class="app-modal-close" id="report-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
@@ -6187,7 +6431,9 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <div class="report-severity-row" id="report-severity-options"></div>
 
         <label class="profile-edit-label" for="report-description" data-i18n="report.modal.describeLabel">Descreva o que você viu</label>
-        <textarea id="report-description" class="profile-edit-textarea" maxlength="600" rows="3" placeholder="O que aconteceu, exatamente?" data-i18n-attr="placeholder:report.modal.describePlaceholder"></textarea>
+        <textarea id="report-description" class="profile-edit-textarea" maxlength="600" rows="3" placeholder="O que aconteceu, exatamente?" data-i18n-attr="placeholder:report.modal.describePlaceholder" aria-describedby="report-description-hint"></textarea>
+        <div class="jp-contador" id="report-description-count" aria-hidden="true">0/600</div>
+        <p class="profile-edit-hint" id="report-description-hint" data-i18n="report.modal.describeHint">Conte o que aconteceu e, se puder, os passos que você estava seguindo.</p>
 
         <label class="profile-edit-label" for="report-expected" data-i18n="report.modal.expectedLabel">O que você esperava que acontecesse? <span class="report-modal-optional" data-i18n="report.modal.optional">(opcional)</span></label>
         <textarea id="report-expected" class="profile-edit-textarea" maxlength="300" rows="2"></textarea>
@@ -6202,10 +6448,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
           <input type="file" id="report-screenshot-input" accept="image/*" style="display:none;">
           <span class="report-screenshot-name" id="report-screenshot-name"></span>
         </div>
-        <p class="report-modal-privacy-note" data-i18n="report.modal.privacyNote">A captura, se anexada, fica visível só para a equipe -- nada é enviado automaticamente.</p>
+        <p class="report-modal-privacy-note" data-i18n="report.modal.privacyNote">A captura, se anexada, fica visível só para a equipe. Nada é enviado automaticamente.</p>
 
-        <p class="profile-edit-error" id="report-error"></p>
-        <button type="button" class="btn btn-primary btn-block" id="report-submit-btn" data-i18n="report.modal.submit">Enviar</button>
+        <p class="profile-edit-error" id="report-error" role="alert"></p>
+        <button type="button" class="btn btn-primary btn-block" id="report-submit-btn" data-i18n="report.modal.sendReport">Enviar relato</button>
       </div>
       <div id="report-success-view" style="display:none;">
         <div class="report-success-check">✓</div>
@@ -6221,7 +6467,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
     <div class="streak-flame">🔥</div>
     <div class="streak-week-row" id="streak-week-row"></div>
     <h2 class="streak-headline">Você está em uma sequência de <span id="streak-days-num">0</span> <span id="streak-days-unit">dias</span>!</h2>
-    <p data-i18n="ui.streak.sub" class="streak-subtext">Continue assim: sua série será zerada se você não estudar amanhã.</p>
+    <p data-i18n="ui.streak.sub" class="streak-subtext">Volte amanhã para manter sua sequência.</p>
   </div>
   <div class="streak-modal-footer">
     <button class="btn btn-primary" id="streak-modal-continue-btn">Continuar</button>
@@ -6258,6 +6504,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/card-variants.js"></script>
 <script src="../shared/translation-compare.js"></script>
 <script src="content.js"></script>
+<script src="curriculum-changes.js"></script>
 <script src="conjugation-data.js"></script>
 <script src="conj-games.js"></script>
 <script src="dictations.js"></script>
@@ -6333,6 +6580,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/teacher-panel.js"></script>
 <script src="../shared/painel/painel-ui.js"></script>
 <script src="../shared/teacher-invites.js"></script>
+<script src="../shared/username-choice.js"></script>
 <script src="../shared/mural.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
@@ -6361,6 +6609,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/anki-export.js"></script>
 <script src="../shared/pwa.js"></script>
 <script src="../shared/toast.js"></script>
+<script src="../shared/modal-a11y.js"></script>
 <script src="../shared/supabase-client.js"></script>
 <script src="../shared/language-pref.js"></script>
 <script src="../shared/auth.js"></script>

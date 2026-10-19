@@ -68,6 +68,28 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       await ctx.close();
     }
   }
+  // A entrada (index.html da raiz) já perguntou "Eu falo..." ao escolher o curso (2026-10-18): conta nova grava a
+  // resposta ('ui-language-gate') na conta e não vê o portão de novo; conta antiga só descarta a marca.
+  for (const isNew of [true, false]) {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 800 }, serviceWorkers: 'block' });
+    await ctx.addInitScript(() => { try { if (!sessionStorage.getItem('once')) { sessionStorage.setItem('once', '1'); sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'en'); localStorage.setItem('ui-language-gate', 'en'); } } catch (e) {} });
+    const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(String(e)));
+    await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.goto(`${base}/fr/index.html`);
+    await page.waitForFunction(() => typeof askUiLanguageOnFirstAccess === 'function' && CURRENT_USER === false, null, { timeout: 20000 });
+    const r = await page.evaluate((isNew) => {
+      window.__persisted = [];
+      persistUiLanguageToAccount = (l) => { window.__persisted.push(l); return Promise.resolve(true); };
+      CURRENT_USER = { id: 'u-gate' }; progressLoadedOk = true; progressAccountIsNew = isNew; progressAccountUiLanguage = null; pendingAccountUiLanguage = null;
+      askUiLanguageOnFirstAccess();
+      return { modal: document.getElementById('ui-language-first-modal').style.display, persisted: window.__persisted, marker: localStorage.getItem('ui-language-gate') };
+    }, isNew);
+    if (isNew) check('entrada já perguntou: conta nova grava o idioma e não vê "Eu falo..." de novo', r.modal !== 'flex' && r.persisted.join() === 'en' && r.marker === null, r);
+    else check('entrada já perguntou: conta antiga só descarta a marca', r.modal !== 'flex' && r.persisted.length === 0 && r.marker === null, r);
+    check(`marca da entrada (nova=${isNew}): sem erro de script`, errs.length === 0, errs);
+    await ctx.close();
+  }
   // flag ligada por padrão; chave de emergência '0' desliga só naquele navegador
   {
     const ctx = await browser.newContext({ serviceWorkers: 'block' });

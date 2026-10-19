@@ -255,6 +255,8 @@ async function onUserLoggedIn(user){
   // ida extra à rede) e grava qualquer escolha pendente feita antes disso.
   await applyAccountUiLanguage();
   askUiLanguageOnFirstAccess();
+  // Escolher o @ uma vez (111): só para quem tem o @ aleatório e ainda não escolheu; espera outras janelas.
+  if (typeof maybeAskUsernameChoice === 'function') maybeAskUsernameChoice().catch(() => {});
   // Depois do render padrão (ver comentário equivalente em enterGuestMode)
   // -- só assim a navegação forçada por uma notificação clicada vence a
   // aba default do carregamento normal.
@@ -445,9 +447,22 @@ function uiLanguageSuggestionFromBrowser(){
   } catch (e) { return 'pt-BR'; }
 }
 
+// A entrada (index.html da raiz) já perguntou "Eu falo..." ao escolher o curso: guarda a resposta em 'ui-language-gate'.
+// Conta nova sem idioma salvo grava essa resposta e não pergunta de novo.
+function takeGateUiLanguage(){
+  try {
+    const v = window.localStorage.getItem('ui-language-gate');
+    if (v) window.localStorage.removeItem('ui-language-gate');
+    return v === 'en' || v === 'pt-BR' ? v : null;
+  } catch (e) { return null; }
+}
+
 function askUiLanguageOnFirstAccess(){
-  if (!CURRENT_USER || !progressLoadedOk || !progressAccountIsNew) return;
+  if (!CURRENT_USER || !progressLoadedOk) return;
+  const fromGate = takeGateUiLanguage();
+  if (!progressAccountIsNew) return;
   if (progressAccountUiLanguage || pendingAccountUiLanguage || accountUiLangFromQuery()) return;
+  if (fromGate){ persistUiLanguageToAccount(fromGate); return; }
   try { if (window.localStorage.getItem('ui-language')) return; } catch (e) {}
   const modal = document.getElementById('ui-language-first-modal');
   if (!modal || typeof setUiLang !== 'function') return;

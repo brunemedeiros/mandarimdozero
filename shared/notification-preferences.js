@@ -88,97 +88,92 @@ async function renderNotificationPreferencesView(){
   const anyInAppOn = NOTIFICATION_PREF_CATEGORIES.some(c => notifPrefEffectiveChannels(prefs, c).includes('in_app'));
   const anyEmailOn = NOTIFICATION_PREF_CATEGORIES.filter(c => !c.inAppOnly && !c.noEmail).some(c => (prefs.channels?.[c.id] || []).includes('email'));
 
+  // Design System do painel (Pico escopado em .painel, 2026-10-17): blocos <article>, interruptores
+  // input[role=switch] e a matriz por categoria numa tabela. Ids e data-pref-* continuam os mesmos.
   const matrixRowsHTML = NOTIFICATION_PREF_CATEGORIES.map(c => {
     const eff = notifPrefEffectiveChannels(prefs, c);
-    const inAppChecked = eff.includes('in_app') ? 'checked' : '';
-    const pushChecked = eff.includes('push') ? 'checked' : '';
-    const emailChecked = eff.includes('email') ? 'checked' : '';
+    const label = t(c.labelKey);
+    const cell = (channel, titleKey, offAttr) => `<td><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="${channel}" ${eff.includes(channel) ? 'checked' : ''} ${offAttr} aria-label="${escapeHTML(label + ': ' + t(titleKey))}"></td>`;
     const offAttr = c.inAppOnly ? `disabled title="${t('notif.pref.inAppOnly')}"` : '';
     const emailOffAttr = c.noEmail ? `disabled title="${t('notif.pref.noEmail')}"` : offAttr;
     return `
-      <div class="notif-pref-matrix-row">
-        <span class="notif-pref-matrix-label">${t(c.labelKey)}</span>
-        <label class="notif-pref-matrix-cell" title="${t('notif.pref.titleMatrixInApp')}"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="in_app" ${inAppChecked}></label>
-        <label class="notif-pref-matrix-cell" title="${t('notif.pref.titleMatrixPush')}"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="push" ${pushChecked} ${offAttr}></label>
-        <label class="notif-pref-matrix-cell" title="${t('notif.pref.titleMatrixEmail')}"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="email" ${emailChecked} ${emailOffAttr}></label>
-      </div>
+      <tr>
+        <th scope="row">${label}</th>
+        ${cell('in_app', 'notif.pref.matrix.app', '')}
+        ${cell('push', 'notif.pref.matrix.push', offAttr)}
+        ${cell('email', 'notif.pref.matrix.email', emailOffAttr)}
+      </tr>
     `;
   }).join('');
 
+  const switchRow = (id, titleKey, subKey, on) => `
+      <label class="pref-row p-linha-opcao">
+        <span class="pref-row-text">
+          <span class="pref-row-title">${t(titleKey)}</span>
+          <span class="pref-row-sub">${t(subKey)}</span>
+        </span>
+        <input type="checkbox" role="switch" id="${id}" ${on ? 'checked' : ''} aria-label="${escapeHTML(t(titleKey))}">
+      </label>`;
+
   wrap.innerHTML = `
-    <div class="section-label">${t('notif.pref.sectionTitle')}</div>
-    <div class="pref-row">
-      <div class="pref-row-text">
-        <div class="pref-row-title">${t('notif.pref.inApp.title')}</div>
-        <div class="pref-row-sub">${t('notif.pref.inApp.sub')}</div>
-      </div>
-      <button class="pref-switch" id="notif-pref-inapp-switch" role="switch" aria-checked="${anyInAppOn}"><span class="pref-switch-knob"></span></button>
-    </div>
-    <div class="pref-row">
-      <div class="pref-row-text">
-        <div class="pref-row-title">${t('notif.pref.push.title')}</div>
-        <div class="pref-row-sub">${t('notif.pref.push.sub')}</div>
-      </div>
-      <button class="pref-switch" id="notif-pref-push-switch" role="switch" aria-checked="${pushSubscribedHere}"><span class="pref-switch-knob"></span></button>
-    </div>
-    <div class="pref-row">
-      <div class="pref-row-text">
-        <div class="pref-row-title">${t('notif.pref.email.title')}</div>
-        <div class="pref-row-sub">${t('notif.pref.email.sub')}</div>
-      </div>
-      <button class="pref-switch" id="notif-pref-email-switch" role="switch" aria-checked="${anyEmailOn}"><span class="pref-switch-knob"></span></button>
-    </div>
+    <article>
+      <header><h3>${t('notif.pref.sectionTitle')}</h3></header>
+      ${switchRow('notif-pref-inapp-switch', 'notif.pref.inApp.title', 'notif.pref.inApp.sub', anyInAppOn)}
+      ${switchRow('notif-pref-push-switch', 'notif.pref.push.title', 'notif.pref.push.sub', pushSubscribedHere)}
+      ${switchRow('notif-pref-email-switch', 'notif.pref.email.title', 'notif.pref.email.sub', anyEmailOn)}
+    </article>
 
-    <div class="section-label">${t('notif.pref.quiet.section')}</div>
-    <div class="pref-row">
-      <div class="pref-row-text">
-        <div class="pref-row-title">${t('notif.pref.quiet.title')}</div>
-        <div class="pref-row-sub">${t('notif.pref.quiet.sub')}</div>
-      </div>
-      <div class="notif-pref-quiet-hours">
-        <select id="notif-pref-quiet-start" aria-label="${t('notif.pref.quiet.startAria')}">${notifPrefHourOptionsHTML(prefs.quiet_hours_start)}</select>
-        <span>${t('notif.pref.quiet.until')}</span>
-        <select id="notif-pref-quiet-end" aria-label="${t('notif.pref.quiet.endAria')}">${notifPrefHourOptionsHTML(prefs.quiet_hours_end)}</select>
-      </div>
-    </div>
-
-    <details class="notif-pref-advanced">
-      <summary>${t('notif.pref.advanced.summary')}</summary>
-      <div class="notif-pref-matrix">
-        <div class="notif-pref-matrix-row notif-pref-matrix-head">
-          <span class="notif-pref-matrix-label"></span>
-          <span class="notif-pref-matrix-cell">${t('notif.pref.matrix.app')}</span>
-          <span class="notif-pref-matrix-cell">${t('notif.pref.matrix.push')}</span>
-          <span class="notif-pref-matrix-cell">${t('notif.pref.matrix.email')}</span>
+    <article>
+      <header><h3>${t('notif.pref.quiet.section')}</h3></header>
+      <div class="pref-row p-linha-opcao cfg-silencio">
+        <div class="pref-row-text">
+          <div class="pref-row-title">${t('notif.pref.quiet.title')}</div>
+          <div class="pref-row-sub">${t('notif.pref.quiet.sub')}</div>
         </div>
-        ${matrixRowsHTML}
+        <div class="notif-pref-quiet-hours">
+          <select id="notif-pref-quiet-start" aria-label="${t('notif.pref.quiet.startAria')}">${notifPrefHourOptionsHTML(prefs.quiet_hours_start)}</select>
+          <span>${t('notif.pref.quiet.until')}</span>
+          <select id="notif-pref-quiet-end" aria-label="${t('notif.pref.quiet.endAria')}">${notifPrefHourOptionsHTML(prefs.quiet_hours_end)}</select>
+        </div>
       </div>
-    </details>
 
-    <div class="section-label">${t('friends.prefs.sectionTitle')}</div>
-    <div class="friends-prefs-box" id="friends-prefs-body"></div>
+      <details class="notif-pref-advanced">
+        <summary>${t('notif.pref.advanced.summary')}</summary>
+        <div class="cfg-matriz">
+          <table>
+            <thead><tr><td></td><th scope="col">${t('notif.pref.matrix.app')}</th><th scope="col">${t('notif.pref.matrix.push')}</th><th scope="col">${t('notif.pref.matrix.email')}</th></tr></thead>
+            <tbody>${matrixRowsHTML}</tbody>
+          </table>
+        </div>
+      </details>
+    </article>
+
+    <article>
+      <header><h3>${t('friends.prefs.sectionTitle')}</h3></header>
+      <div class="friends-prefs-box" id="friends-prefs-body"></div>
+    </article>
   `;
   // Preferências de Amigos (tabela friend_settings), antes uma seção solta na
   // aba Perfil > Amigos. Desenhadas por shared/friends.js.
   if (typeof loadFriendsPrefs === 'function') loadFriendsPrefs();
 
-  document.getElementById('notif-pref-inapp-switch').addEventListener('click', async (e) => {
-    const btn = e.currentTarget;
-    const turningOn = btn.getAttribute('aria-checked') !== 'true';
-    btn.setAttribute('aria-checked', String(turningOn));
-    await setAllCategoriesChannel('in_app', turningOn);
+  document.getElementById('notif-pref-inapp-switch').addEventListener('change', async (e) => {
+    const input = e.currentTarget;
+    input.disabled = true;
+    await setAllCategoriesChannel('in_app', input.checked);
     renderNotificationPreferencesView();
   });
 
-  document.getElementById('notif-pref-push-switch').addEventListener('click', async (e) => {
-    const btn = e.currentTarget;
-    const turningOn = btn.getAttribute('aria-checked') !== 'true';
-    btn.disabled = true;
+  document.getElementById('notif-pref-push-switch').addEventListener('change', async (e) => {
+    const input = e.currentTarget;
+    const turningOn = input.checked;
+    input.disabled = true;
     if (turningOn){
       const result = await subscribeToPush();
       if (!result.ok){
         showToast(notificationPushErrorMessage(result.reason));
-        btn.disabled = false;
+        input.checked = false;
+        input.disabled = false;
         return;
       }
       await setAllCategoriesChannel('push', true);
@@ -191,11 +186,10 @@ async function renderNotificationPreferencesView(){
     renderNotificationPreferencesView();
   });
 
-  document.getElementById('notif-pref-email-switch').addEventListener('click', async (e) => {
-    const btn = e.currentTarget;
-    const turningOn = btn.getAttribute('aria-checked') !== 'true';
-    btn.setAttribute('aria-checked', String(turningOn));
-    await setAllCategoriesChannel('email', turningOn);
+  document.getElementById('notif-pref-email-switch').addEventListener('change', async (e) => {
+    const input = e.currentTarget;
+    input.disabled = true;
+    await setAllCategoriesChannel('email', input.checked);
     renderNotificationPreferencesView();
   });
 

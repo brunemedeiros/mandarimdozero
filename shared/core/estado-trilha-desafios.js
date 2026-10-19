@@ -1190,3 +1190,24 @@ function updateStudySetting(patch){
 function acceptedForms(expected){
   return (expected || '').split('/').map(s => s.trim()).filter(Boolean);
 }
+
+// Exercícios de digitar: além de cada forma, vale digitar o texto inteiro ("allemand / allemande"),
+// com ou sem espaço em volta da barra. Use junto com slashSpacing() no que foi digitado.
+function acceptedFormsTyped(expected){
+  const forms = acceptedForms(expected);
+  if (forms.length < 2) return forms;
+  const inteiro = String(expected).trim();
+  return forms.concat(forms.join(' / ')).concat(inteiro !== forms.join(' / ') ? [inteiro] : []);
+}
+function slashSpacing(typed){
+  return String(typed == null ? '' : typed).replace(/\s*\/\s*/g, ' / ');
+}
+// As leituras do que foi digitado num cartão com duas formas: barra padronizada e, se o cartão tem mais de uma
+// forma, também a vírgula (, ou ，) lida como barra. Ordem trocada não vale.
+function typedVariants(typed, expected){
+  const v = [String(typed == null ? '' : typed), slashSpacing(typed)];
+  if (acceptedForms(expected).length > 1 && /[,，]/.test(String(typed == null ? '' : typed))){
+    v.push(slashSpacing(String(typed).replace(/[,，]/g, ' / ')));
+  }
+  return v.filter((x, i) => v.indexOf(x) === i);
+}

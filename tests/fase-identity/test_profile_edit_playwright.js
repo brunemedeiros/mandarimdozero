@@ -48,10 +48,10 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     await page.evaluate(async () => { PROFILE_CACHE = await ensureProfileLoaded(); openEditProfileModal([]); });
     await page.waitForSelector('#profile-edit-modal', { state: 'visible' });
 
-    const f = await page.evaluate(() => { const u = document.getElementById('profile-edit-username'); return { v: u.value, ro: u.readOnly, label: document.querySelector('label[for="profile-edit-username"]').textContent }; });
+    const f = await page.evaluate(() => { const u = document.getElementById('profile-edit-username'); return { v: u.value, ro: u.readOnly, label: document.querySelector('label[for="profile-edit-username"]').textContent, hint: (document.getElementById('profile-edit-username-hint') || {}).textContent }; });
     L('modal abre com o username atual', f.v === 'ana.silva', f);
     L('campo username é somente leitura', f.ro === true);
-    L('rótulo comunica identificador permanente (não "Nome de usuário")', /permanente/i.test(f.label), f.label);
+    L('rótulo e texto de apoio comunicam identificador permanente (não "Nome de usuário")', /identificador/i.test(f.label) && /permanente/i.test(f.hint || ''), f); // 2026-10-18: "permanente" saiu do rótulo e foi para o texto de apoio (pedido da autora)
 
     // tentativa de digitar: readonly impede; força via DOM + evento e confirma que o save ignora
     await page.evaluate(() => { const u = document.getElementById('profile-edit-username'); u.removeAttribute('readonly'); u.value = 'hacker'; u.dispatchEvent(new Event('input')); });
