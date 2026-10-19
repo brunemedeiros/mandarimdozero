@@ -102,8 +102,12 @@ function studyTrailModuleTag(unit){
   const sameLevel = mods.filter(m => m.level === mod.level);
   return 'modulo-' + (sameLevel.indexOf(mod) + 1);
 }
+// O slug sai SEMPRE do título original em português (`_originalTitle`, guardado por
+// shared/content-i18n.js antes do overlay): no site em inglês o overlay troca
+// `unit.title`, e o slug não pode mudar (filtros de tag salvos deixariam de casar).
 function studyTrailUnitTag(unit){
-  const byTitle = 'unidade-' + normalizeTagSlug(unit.title);
+  const sourceTitle = (unit && typeof unit._originalTitle === 'string') ? unit._originalTitle : unit.title;
+  const byTitle = 'unidade-' + normalizeTagSlug(sourceTitle);
   if (byTitle !== 'unidade-' && byTitle.length <= TAG_MAX_LENGTH) return byTitle;
   return 'unidade-' + normalizeTagSlug(unit.id);
 }

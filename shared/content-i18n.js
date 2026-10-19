@@ -188,7 +188,16 @@
   function create(cfg){
     var units = cfg.units || [];
     var snaps = {};
-    units.forEach(function(u){ snaps[u.id] = snapUnit(u); });
+    units.forEach(function(u){
+      snaps[u.id] = snapUnit(u);
+      // Título ORIGINAL (português do content.js), guardado no próprio objeto antes de
+      // qualquer overlay: é lógica (slug da tag `unidade-<slug>`, ver studyTrailUnitTag em
+      // shared/study-trail-model.js) e não pode seguir o idioma do site. Não enumerável:
+      // não entra em JSON/cópias. Só é definido uma vez (o primeiro valor é o original).
+      if (u && !Object.prototype.hasOwnProperty.call(u, '_originalTitle')){
+        try { Object.defineProperty(u, '_originalTitle', { value: u.title, enumerable: false, configurable: true, writable: false }); } catch (e) {}
+      }
+    });
     var modSnap = {}; (cfg.modules || []).forEach(function(m){ modSnap[m.id] = m.title; });
     var lvlSnap = {}; (cfg.levels || []).forEach(function(l){ lvlSnap[l.id] = l.label; });
     var ltSnap = {}; (cfg.levelTests || []).forEach(function(x){ ltSnap[x.id] = x.title; });

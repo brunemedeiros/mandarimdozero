@@ -3473,6 +3473,30 @@ function validateNoteEditorStateForSave(editorState){
   return { ok: false, error: `Card Type desconhecido: "${mode}".` };
 }
 
+// Textos de preenchimento gravados em back_trans quando o Field correspondente
+// está vazio. O DADO continua em português (é o que já está no banco); só a
+// EXIBIÇÃO troca pelo texto da chave no idioma do site (Etapa 3, c4).
+const LEGACY_MIRROR_PLACEHOLDERS = {
+  multipleChoice: '(múltipla escolha)',
+  cloze: '(completar a frase)',
+  noTranslation: '(sem tradução)',
+};
+
+// Etapa 3 (c4, decisão da dona, 2026-10-19): texto "frente → verso" de uma
+// linha crua (own_flashcards/teacher_flashcards) para as listas Meus cartões e
+// "Cartões criados". Só exibição: a frente e o verso continuam vindo da linha
+// (em pt-BR o resultado é exatamente o de antes); quando o verso é um dos
+// textos de preenchimento acima, mostra a tradução da chave
+// `flashcards.mirror.<tipo>` (em pt-BR a chave devolve o mesmo texto).
+function flashcardRowDisplayTexts(row){
+  const front = (row && row.front) || '';
+  const back = (row && row.back_trans) || '';
+  const kind = Object.keys(LEGACY_MIRROR_PLACEHOLDERS).find(k => LEGACY_MIRROR_PLACEHOLDERS[k] === back.trim());
+  if (!kind || typeof t !== 'function') return { front, back };
+  const shown = t('flashcards.mirror.' + kind);
+  return { front, back: (shown && shown !== 'flashcards.mirror.' + kind) ? shown : back };
+}
+
 // ---------- Mirror legado (write-only, nunca lido de volta) ----------
 //
 // `back_trans` continua `not null` em teacher_flashcards/own_flashcards
@@ -3498,7 +3522,7 @@ function deriveLegacyMirrorFromNoteEditorState(editorState){
   if (mode === 'multiple_choice'){
     const prompt = fields.find(f => f.role === 'prompt');
     const answer = fields.find(f => f.role === 'answer');
-    return { front: textOf(prompt) || null, back_trans: textOf(answer) || '(múltipla escolha)' };
+    return { front: textOf(prompt) || null, back_trans: textOf(answer) || LEGACY_MIRROR_PLACEHOLDERS.multipleChoice };
   }
   const slots = contentFieldIndices(fields);
   if (mode === 'cloze'){
@@ -3506,12 +3530,12 @@ function deriveLegacyMirrorFromNoteEditorState(editorState){
     // convênio do cloze legado, que nunca exibe front em nenhuma tela de
     // revisão); back_trans mostra a tradução (slots[1]), mesmo papel que
     // já tinha no cloze legado (texto revelado depois de responder).
-    return { front: null, back_trans: textOf(fields[slots[1]]) || '(completar a frase)' };
+    return { front: null, back_trans: textOf(fields[slots[1]]) || LEGACY_MIRROR_PLACEHOLDERS.cloze };
   }
   // normal/normal_reversed/type_answer -- par posicional direto.
   return {
     front: textOf(fields[slots[0]]) || null,
-    back_trans: textOf(fields[slots[1]]) || '(sem tradução)',
+    back_trans: textOf(fields[slots[1]]) || LEGACY_MIRROR_PLACEHOLDERS.noTranslation,
   };
 }
 

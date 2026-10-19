@@ -526,7 +526,7 @@ window.I18N_CATALOG['en'] = {
   'fr.moduleDone.stars': 'Stars', // ALTA
   'fr.moduleDone.retryNote': 'You need at least {pct}% to pass. Keep studying the units in this section and try again whenever you like — no rush.', // ALTA
   'fr.moduleDone.nowYouKnow': 'Now you can do this in real life:', // MÉDIA
-  'trail.backToTrail': 'Back to the trail', // ALTA
+  'trail.backToTrail': 'Back to the Study Path', // ALTA -- "Study Path", escolha da dona (2026-10-19)
   'common.guest': 'Guest', // ALTA
   'fr.grammar.stepCounter': 'Step {i} of {n}', // ALTA
   'fr.grammar.goToExercises': 'Go to the exercises →', // ALTA
@@ -1155,6 +1155,23 @@ window.I18N_CATALOG['en'] = {
   'ankiExport.mediaNote': { one: ' ({n} media file could not be included -- the cards were exported anyway, just without that specific audio/image.)', other: ' ({n} media files could not be included -- the cards were exported anyway, just without those specific audio/image files.)' }, // ALTA
   'ankiExport.done': { one: 'Exported! {n} card in the .apkg file — import it straight into Anki.{mediaNote}', other: 'Exported! {n} cards in the .apkg file — import them straight into Anki.{mediaNote}' }, // ALTA
   'ankiExport.failed': "We couldn't generate the file right now. Try again.", // ALTA
+  // Etapa 3 (decisão da dona, 2026-10-19): nomes dentro do .apkg (Anki) no idioma do site.
+  // Etapa 3 (c4): verso de preenchimento gravado no cartão (só exibição; o dado não muda).
+  'flashcards.mirror.multipleChoice': '(multiple choice)', // ALTA
+  'flashcards.mirror.cloze': '(fill in the blank)', // ALTA
+  'flashcards.mirror.noTranslation': '(no translation)', // ALTA
+  'ankiExport.appName.fr': 'French with Prof. Brune', // ALTA
+  'ankiExport.appName.zh': 'Chinese with Prof. Brune', // ALTA
+  'ankiExport.deckDesc': 'Exported from the {app} app', // ALTA
+  'ankiExport.field.french': 'French', // ALTA
+  'ankiExport.field.translation': 'Translation', // ALTA
+  'ankiExport.field.character': 'Character', // ALTA
+  'ankiExport.template.card1': 'Card 1', // ALTA
+  'ankiExport.model.reverse': '{model} - Reverse', // ALTA
+  'ankiExport.filename.fr.all': 'french-with-prof-brune-complete.apkg', // ALTA
+  'ankiExport.filename.fr.unit': 'french-with-prof-brune-unit-{n}.apkg', // ALTA
+  'ankiExport.filename.zh.all': 'chinese-with-prof-brune-complete.apkg', // ALTA
+  'ankiExport.filename.zh.unit': 'chinese-with-prof-brune-unit-{n}.apkg', // ALTA
   'fieldEditor.lang.fr': 'French', // ALTA
   'fieldEditor.lang.zh': 'Mandarin (Chinese)', // ALTA
   'fieldEditor.lang.zhPinyin': 'Pinyin', // ALTA
@@ -1318,7 +1335,7 @@ window.I18N_CATALOG['en'] = {
   'clozeEditor.sel.outOfRange': 'Invalid selection.', // ALTA
   'clozeEditor.sel.failed': "We couldn't mark that selection.", // ALTA
   'clozeEditor.panel.emptyAnswer': 'The blank text cannot be empty.', // ALTA
-  'fr.dictation.backToTrail': '← Back to the trail', // ALTA
+  'fr.dictation.backToTrail': '← Back to the Study Path', // ALTA -- "Study Path", escolha da dona (2026-10-19)
   'fr.dictation.backToChallenges': '← Back to challenges', // ALTA
   'fr.dictation.listen': '▶️ Listen to the dictation', // ALTA
   'fr.dictation.pause': '⏸ Pause', // ALTA
@@ -1669,7 +1686,7 @@ window.I18N_CATALOG['en'] = {
   'admin.badges.manage.notePh': 'note', // ALTA
   'admin.badges.toast.members': '✓ Badge members updated.', // ALTA
   'admin.badges.toast.updated': '✓ Badge "{name}" updated.', // ALTA
-  'admin.analytics.tab.path': '🗺️ Trail', // ALTA
+  'admin.analytics.tab.path': '🗺️ Path', // ALTA -- "Path", escolha da dona (2026-10-19)
   'admin.analytics.tab.review': '🔁 Review', // ALTA
   'admin.analytics.tab.conjugaison': '📝 Conjugation', // ALTA
   'admin.analytics.tab.dictation': '🎧 Dictations', // ALTA
@@ -2706,7 +2723,7 @@ window.I18N_CATALOG['en'] = {
   'perm.public_deck_import': 'Import public Decks', // ALTA
   'perm.public_deck_copy_count': 'See how many people copied my Deck', // ALTA
   'perm.challenges_premium': 'Premium challenges', // ALTA
-  'perm.trail_skip_locked': 'Skip trail lessons', // ALTA
+  'perm.trail_skip_locked': 'Skip Study Path lessons', // ALTA -- "Study Path", escolha da dona (2026-10-19)
   'perm.class_logs_view': 'See My classes', // ALTA
   'perm.support_materials_view': 'See study materials', // ALTA
   'perm.teacher_panel': 'Teacher panel', // ALTA
@@ -3676,8 +3693,8 @@ window.I18N_CATALOG['en'] = {
   // apareciam em português também no site em inglês.
   'common.start': 'Start', // ALTA
   'trail.lessonsCompleted': '{done} of {total} lessons completed', // ALTA
-  'trail.continue.eyebrowDone': 'Your trail', // MÉDIA -- "trilha" segue trail.backToTrail ("trail"); alternativa: "Your path"
-  'trail.continue.allDone': 'You\'ve completed the whole trail 🎉', // MÉDIA -- mesmo critério de "trail"
+  'trail.continue.eyebrowDone': 'Your path', // ALTA -- "Path", escolha da dona (2026-10-19)
+  'trail.continue.allDone': 'You\'ve completed the whole Study Path 🎉', // ALTA -- "Study Path", escolha da dona (2026-10-19)
   'trail.continue.lessonOf': 'lesson {i} of {n}', // ALTA
   'trail.continue.eyebrowResume': 'Pick up where you left off', // ALTA
   'trail.continue.eyebrowStart': 'Start here', // ALTA
@@ -3698,8 +3715,8 @@ window.I18N_CATALOG['en'] = {
   'trail.checkpoint.skipLockedToast': 'Skipping units is a Premium plan feature (or for the teacher\'s students). On the free plan, follow the units in order. 🔒', // ALTA
   'trail.known.siblingStudied': 'You already studied this word with the reverse card.', // ALTA
   'zh.path.levelTitle': 'Level 1 · Beginner', // ALTA
-  'trail.view.aria': 'Trail view mode', // ALTA
-  'trail.view.trail': 'Trail', // MÉDIA -- mesmo critério de "trail"; alternativa: "Path"
+  'trail.view.aria': 'Path view mode', // ALTA -- "Path", escolha da dona (2026-10-19)
+  'trail.view.trail': 'Path', // ALTA -- "Path", escolha da dona (2026-10-19)
   'trail.view.map': 'Map', // ALTA
   'trail.map.closePanel': 'Close panel', // ALTA
   'trail.map.note.done': '✓ Completed', // ALTA

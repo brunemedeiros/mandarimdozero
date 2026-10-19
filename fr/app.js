@@ -5051,20 +5051,32 @@ document.querySelectorAll('[data-settings-section]').forEach(btn => {
 // guidPrefix NÃO muda: é o identificador de GUID que o Anki usa pra casar notas num
 // reimport -- trocar agora faria o Anki tratar decks já exportados por usuários
 // existentes como notas novas/duplicadas em vez de atualizar as existentes.
+// Etapa 3 (decisão da dona, 2026-10-19): com o site em inglês, nomes de campo,
+// do modelo e do arquivo saem em inglês; em pt-BR as chaves devolvem o texto de
+// antes. Por isso são getters (lidos na hora de exportar, no idioma atual).
+// O id do modelo é aleatório por exportação (ankiRandId) e o GUID da nota vem
+// de guidPrefix + id do cartão: nada disso depende do nome.
 const ANKI_EXPORT_CONFIG = {
-  modelName: APP_IDENTITY.apps.fr.name,
-  fields: [
-    { name:"Francês", ord:0, font:"Arial", size:22 },
-    { name:"Tradução", ord:1, font:"Arial", size:18 }
-  ],
-  qfmt: "<div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{Francês}}</div>",
-  afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:18px;color:#5C4E73;'>{{Tradução}}</div>",
+  // nomes dos campos no idioma do site (em pt-BR, os de sempre)
+  fieldNames(){
+    return { fr: ankiExportText('ankiExport.field.french', 'Francês'), tr: ankiExportText('ankiExport.field.translation', 'Tradução') };
+  },
+  get modelName(){ return ankiExportText('ankiExport.appName.fr', APP_IDENTITY.apps.fr.name, { app: APP_IDENTITY.apps.fr.name }); },
+  get fields(){
+    const n = this.fieldNames();
+    return [
+      { name:n.fr, ord:0, font:"Arial", size:22 },
+      { name:n.tr, ord:1, font:"Arial", size:18 }
+    ];
+  },
+  get qfmt(){ return `<div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{${this.fieldNames().fr}}}</div>`; },
+  get afmt(){ return `{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:18px;color:#5C4E73;'>{{${this.fieldNames().tr}}}</div>`; },
   css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FAF5EA; color:#201335; }",
-  deckDesc: `Exportado do app ${APP_IDENTITY.apps.fr.name}`,
+  get deckDesc(){ return ankiExportText('ankiExport.deckDesc', `Exportado do app ${APP_IDENTITY.apps.fr.name}`, { app: this.modelName }); },
   // K2-F: template do modelo "Reverso" (B da trilha): frente = Tradução,
   // verso = Francês. Mesmos campos semânticos do Básico.
-  reverseQfmt: "<div style='text-align:center;font-size:22px;color:#5C4E73;font-weight:bold;'>{{Tradução}}</div>",
-  reverseAfmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{Francês}}</div>",
+  get reverseQfmt(){ return `<div style='text-align:center;font-size:22px;color:#5C4E73;font-weight:bold;'>{{${this.fieldNames().tr}}}</div>`; },
+  get reverseAfmt(){ return `{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{${this.fieldNames().fr}}}</div>`; },
   guidPrefix: "fzc_",
   unitOptions(){
     return UNITS.filter(u => u.type !== 'grammar').map(u => {
@@ -5074,8 +5086,8 @@ const ANKI_EXPORT_CONFIG = {
   },
   deckName(sel){
     return sel === 'all'
-      ? `${APP_IDENTITY.apps.fr.name} - A1`
-      : `${APP_IDENTITY.apps.fr.name} - ${UNITS.find(u=>String(u.id)===sel).title}`;
+      ? `${this.modelName} - A1`
+      : `${this.modelName} - ${UNITS.find(u=>String(u.id)===sel).title}`;
   },
   cards(sel){
     // Fase 7i (ver CLAUDE.md) -- `.filter(hasPlainFrontBack)` removido.
@@ -5146,7 +5158,9 @@ const ANKI_EXPORT_CONFIG = {
     return cardPromptText(card);
   },
   filename(sel){
-    return `frances-com-prof-brune-${sel === 'all' ? 'completo' : 'unidade-'+sel}.apkg`;
+    return sel === 'all'
+      ? ankiExportText('ankiExport.filename.fr.all', 'frances-com-prof-brune-completo.apkg')
+      : ankiExportText('ankiExport.filename.fr.unit', `frances-com-prof-brune-unidade-${sel}.apkg`, { n: sel });
   },
 };
 
@@ -6952,7 +6966,7 @@ const CHALLENGE_I18N = {
   'en': {
     'tier.premium': "Premium",
     'tier.free': "Free",
-    'dict.back.trail': "← Back to the trail",
+    'dict.back.trail': "← Back to the Study Path",
     'dict.back.challenges': "← Back to challenges",
     'dict.bestAttempts': "Best score: {best} · {n} {unit}",
     'dict.attempt.one': "attempt",
@@ -7076,7 +7090,7 @@ const CHALLENGE_I18N = {
     'ch.search.none': "No expressions found.", // ALTA
     'ch.filter.label': "Filter expressions", // ALTA
     'ch.filter.all': "All", // ALTA
-    'ch.filter.pending': "To do", // MÉDIA -- "Pendentes"; alternativa: "Pending"
+    'ch.filter.pending': "Pending", // ALTA -- "Pendentes" (escolha da dona, 2026-10-19)
     'ch.filter.done': "Completed", // ALTA
     'ch.ring.aria': "{done} of {total} completed", // ALTA
     'ch.lt.legend.bad': "wrong word", // ALTA
@@ -7118,7 +7132,7 @@ const CHALLENGE_I18N = {
     'ch.accent.wrong': "❌ Incorrect.",
     'ch.static.back': "← Back to categories",
     'ch.static.backChallenges': "← Back to challenges",
-    'ch.static.backTrail': "← Back to the trail",
+    'ch.static.backTrail': "← Back to the Study Path",
     'dict.static.title': "Dictations",
     'dict.static.sub': "Train your listening and spelling with dictations based on real tasks from each module.",
     'dict.static.how': "🎧 How does the dictation work?",
@@ -8034,6 +8048,19 @@ function answerChallenge(c, chosenIdx){
   renderExpressionFeedbackScreen(c, chosenIdx, isCorrect);
 }
 
+// Etapa 3 (decisão da dona, 2026-10-19): o modelo da frase termina em ponto
+// ("significa <strong>{fr}</strong>."). Quando o texto já termina em ! ? … ou
+// "...", não acrescentar o ponto (antes saía "Bom fim de semana!."). Texto que
+// termina em ponto simples continua como antes (o ponto do texto sai e fica o
+// do modelo).
+function expressionMeaningLineHTML(key, param, raw){
+  const trimmed = String(raw == null ? '' : raw).replace(/\s+$/, '');
+  const keepsOwnEnd = /(?:[!?\u2026]|\.\.\.)$/.test(trimmed);
+  const value = keepsOwnEnd ? trimmed : trimmed.replace(/[.\s]+$/, '');
+  const html = chT(key, { [param]: escapeHtmlChallenge(value) });
+  return keepsOwnEnd ? html.replace(/\.\s*$/, '') : html;
+}
+
 function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
   const content = document.getElementById('challenge-player-content');
   // Etapa 3 (c1): com o site em outro idioma, o sentido vem da tradução do desafio (fr/challenges.en.js,
@@ -8043,8 +8070,8 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
   const bodyHTML = `
       ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.expr.yourAnswer', { chosen: escapeHtmlChallenge(c.options[chosenIdx]), correct: escapeHtmlChallenge(c.correctAnswer) })}</p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
-      ${chT('ch.expr.signifies', { fr: escapeHtmlChallenge(String(c.meaning.fr).replace(/[.\s]+$/, '')) })}<br>
-      ${chT('ch.expr.inPt', { pt: escapeHtmlChallenge(String(meaningShown).replace(/[.\s]+$/, '')) })}</p>
+      ${expressionMeaningLineHTML('ch.expr.signifies', 'fr', c.meaning.fr)}<br>
+      ${expressionMeaningLineHTML('ch.expr.inPt', 'pt', meaningShown)}</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
 
       <div class="challenge-second-example">

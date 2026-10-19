@@ -235,6 +235,17 @@ async function collectExportMediaAssets(exportCards){
 
 const ANKI_CLOZE_TRANSLATION_FIELD_DEFAULT = "Tradução";
 
+// Etapa 3 (decisão da dona, 2026-10-19): nomes que aparecem DENTRO do Anki
+// (template "Cartão 1", sufixo "Reverso", campo de tradução do Cloze) saem no
+// idioma do site. Em pt-BR as chaves devolvem exatamente o texto de antes.
+// Os ids de modelo/baralho continuam aleatórios (ankiRandId) e o GUID da nota
+// continua `guidPrefix + card.id`: trocar o nome não cria nota duplicada.
+function ankiExportText(key, ptValue, params){
+  if (typeof t !== 'function') return ptValue;
+  const v = t(key, params);
+  return (v && v !== key) ? v : ptValue;
+}
+
 async function generateApkg(config){
   const statusEl = document.getElementById('export-status');
   statusEl.textContent = t('ankiExport.generating');
@@ -319,7 +330,7 @@ async function generateApkg(config){
         flds: config.fields,
         tmpls: [
           {
-            name: "Cartão 1", ord:0,
+            name: ankiExportText('ankiExport.template.card1', "Cartão 1"), ord:0,
             qfmt: config.qfmt,
             afmt: config.afmt,
             bqfmt:"", bafmt:"", did: null
@@ -331,11 +342,11 @@ async function generateApkg(config){
     };
     if (hasReverseCards){
       model[reverseModelId] = {
-        id: reverseModelId, name: `${config.modelName} - Reverso`, type: 0, mod: now, usn: -1,
+        id: reverseModelId, name: ankiExportText('ankiExport.model.reverse', `${config.modelName} - Reverso`, { model: config.modelName }), type: 0, mod: now, usn: -1,
         sortf: 0, did: deckId,
         flds: config.fields,
         tmpls: [
-          { name: "Cartão 1", ord:0, qfmt: config.reverseQfmt, afmt: config.reverseAfmt, bqfmt:"", bafmt:"", did: null }
+          { name: ankiExportText('ankiExport.template.card1', "Cartão 1"), ord:0, qfmt: config.reverseQfmt, afmt: config.reverseAfmt, bqfmt:"", bafmt:"", did: null }
         ],
         css: config.css,
         latexPre: "", latexPost: "", latexsvg:false, req: [[0,"any",[0]]]
@@ -346,7 +357,7 @@ async function generateApkg(config){
       // config do idioma quando definido; default "Tradução" (export idêntico).
       // O import nunca depende deste nome (Cloze é reconhecido por
       // model.type===1 e a tradução pela posição -- ver anki-import.js).
-      const clozeTranslationFieldName = config.clozeTranslationFieldName || ANKI_CLOZE_TRANSLATION_FIELD_DEFAULT;
+      const clozeTranslationFieldName = config.clozeTranslationFieldName || ankiExportText('ankiExport.field.translation', ANKI_CLOZE_TRANSLATION_FIELD_DEFAULT);
       model[clozeModelId] = {
         id: clozeModelId, name: `${config.modelName} - Cloze`, type: 1, mod: now, usn: -1,
         sortf: 0, did: deckId,

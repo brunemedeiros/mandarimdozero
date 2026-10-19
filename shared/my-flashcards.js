@@ -493,7 +493,7 @@ function myFlashcardRowHTML(c, premium){
   return `
     <div class="admin-badge-row">
       <div class="admin-badge-info">
-        <div class="admin-badge-name">${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
+        <div class="admin-badge-name">${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(flashcardRowDisplayTexts(c).back)}</div>
         <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}${t('myFlashcards.row.createdOn', { date: fmtDate(c.created_at) })}</div>
         ${(c.tags && c.tags.length) ? `<div data-row-tags style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${noteTagChipsHTML(c.tags)}</div>` : ''}
       </div>

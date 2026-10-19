@@ -53,7 +53,7 @@ const sideText = () => (document.querySelector('.right-cards').textContent || ''
       check(`${app}: boot en: cartão Continuar em inglês`, /Start here|Pick up where you left off/i.test(r.trail) && /lessons completed/.test(r.trail) && !/lições|Comece por aqui/.test(r.trail), r.trail.slice(0, 300));
       check(`${app}: boot en: unidades da trilha em inglês`, /Greeting and saying goodbye/.test(r.trail) && !/Cumprimentar e se despedir/.test(r.trail), r.trail.slice(0, 300));
       check(`${app}: boot en: cartões laterais em inglês`, /Daily missions/.test(r.side) && !/Missões do dia/.test(r.side), r.side);
-      check(`${app}: boot en: alternador Trilha/Mapa em inglês`, r.toggle === 'Trail view mode', r.toggle);
+      check(`${app}: boot en: alternador Trilha/Mapa em inglês ("Path", escolha da dona 2026-10-19)`, r.toggle === 'Path view mode', r.toggle);
       check(`${app}: boot en: sem erro de página`, errors.length === 0, errors);
       await ctx.close();
     }

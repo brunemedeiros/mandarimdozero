@@ -4794,29 +4794,38 @@ function zhTypeAnswerExportColumns(view){
   return { pinyin, hanzi: view.displayAnswerText, translation: view.prompt.text, hanziSide: 'back', translationSide: 'front' };
 }
 
+// Etapa 3 (decisão da dona, 2026-10-19): mesmo esquema de fr/app.js -- nomes
+// de campo, do modelo e do arquivo no idioma do site (pt-BR igual a antes).
 const ANKI_EXPORT_CONFIG = {
-  modelName: APP_IDENTITY.apps.zh.name,
-  fields: [
-    { name:"Pinyin", ord:0, font:"Arial", size:20 },
-    { name:"Caractere", ord:1, font:"Arial", size:20 },
-    { name:"Tradução", ord:2, font:"Arial", size:18 }
-  ],
-  qfmt: "<div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{Pinyin}}</div>",
-  afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:36px;'>{{Caractere}}</div><div style='text-align:center;font-size:18px;color:#5C4A3F;'>{{Tradução}}</div>",
+  // nomes dos campos no idioma do site (em pt-BR, os de sempre)
+  fieldNames(){
+    return { py: 'Pinyin', ch: ankiExportText('ankiExport.field.character', 'Caractere'), tr: ankiExportText('ankiExport.field.translation', 'Tradução') };
+  },
+  get modelName(){ return ankiExportText('ankiExport.appName.zh', APP_IDENTITY.apps.zh.name, { app: APP_IDENTITY.apps.zh.name }); },
+  get fields(){
+    const n = this.fieldNames();
+    return [
+      { name:n.py, ord:0, font:"Arial", size:20 },
+      { name:n.ch, ord:1, font:"Arial", size:20 },
+      { name:n.tr, ord:2, font:"Arial", size:18 }
+    ];
+  },
+  get qfmt(){ return `<div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{${this.fieldNames().py}}}</div>`; },
+  get afmt(){ const n = this.fieldNames(); return `{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:36px;'>{{${n.ch}}}</div><div style='text-align:center;font-size:18px;color:#5C4A3F;'>{{${n.tr}}}</div>`; },
   css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FBF4E8; color:#211714; }",
-  deckDesc: `Exportado do app ${APP_IDENTITY.apps.zh.name}`,
+  get deckDesc(){ return ankiExportText('ankiExport.deckDesc', `Exportado do app ${APP_IDENTITY.apps.zh.name}`, { app: this.modelName }); },
   // K2-F: template do modelo "Reverso" (B da trilha): frente = Tradução,
   // verso = Pinyin + Caractere. Mesmos campos semânticos do Básico.
-  reverseQfmt: "<div style='text-align:center;font-size:22px;color:#5C4A3F;font-weight:bold;'>{{Tradução}}</div>",
-  reverseAfmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{Pinyin}}</div><div style='text-align:center;font-size:36px;'>{{Caractere}}</div>",
+  get reverseQfmt(){ return `<div style='text-align:center;font-size:22px;color:#5C4A3F;font-weight:bold;'>{{${this.fieldNames().tr}}}</div>`; },
+  get reverseAfmt(){ const n = this.fieldNames(); return `{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{${n.py}}}</div><div style='text-align:center;font-size:36px;'>{{${n.ch}}}</div>`; },
   guidPrefix: "mzc_",
   unitOptions(){
     return UNITS.map(u => ({ id: String(u.id), label: `${u.id}. ${u.title}` }));
   },
   deckName(sel){
     return sel === 'all'
-      ? `${APP_IDENTITY.apps.zh.name} - HSK 1`
-      : `${APP_IDENTITY.apps.zh.name} - ${UNITS.find(u=>String(u.id)===sel).title}`;
+      ? `${this.modelName} - HSK 1`
+      : `${this.modelName} - ${UNITS.find(u=>String(u.id)===sel).title}`;
   },
   cards(sel){
     // Fase 7i (ver CLAUDE.md) -- `.filter(hasPlainFrontBack)` removido,
@@ -4885,7 +4894,9 @@ const ANKI_EXPORT_CONFIG = {
     return cardPromptPinyinText(card);
   },
   filename(sel){
-    return `chines-com-prof-brune-${sel === 'all' ? 'completo' : 'unidade-'+sel}.apkg`;
+    return sel === 'all'
+      ? ankiExportText('ankiExport.filename.zh.all', 'chines-com-prof-brune-completo.apkg')
+      : ankiExportText('ankiExport.filename.zh.unit', `chines-com-prof-brune-unidade-${sel}.apkg`, { n: sel });
   },
 };
 
