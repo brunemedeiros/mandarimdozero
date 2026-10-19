@@ -596,7 +596,7 @@ const CONTENT_I18N = ContentI18n.create({
   units: UNITS, levels: LEVELS, stories: STORIES, hanzi: HANZI_LESSONS,
   overlayUrl: (lang) => `content.${lang}.js`,
   getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
-  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); }
+  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); if (typeof repaintTrailForUiLanguage === 'function') repaintTrailForUiLanguage(); }
 });
 // Cartões guardam cópia do texto exibido; só o texto muda (id/FSRS intactos).
 // Também roda depois de carregar o progresso salvo (traz o texto do idioma em
@@ -1316,22 +1316,22 @@ function mapUnitDescribe(u, moduleId){
   const lines = [];
   if (hasLessons){
     const done = (st === 'done' || st === 'skipped') ? u.lessons.length : currentLessonIdx(u.id);
-    lines.push(`${done} de ${u.lessons.length} lições concluídas`);
+    lines.push(t('trail.lessonsCompleted', { done, total: u.lessons.length }));
   }
   const { dueForReview } = unitCardCounts(u.id);
-  if (dueForReview > 0) lines.push(`🔁 ${dueForReview} para revisar`);
+  if (dueForReview > 0) lines.push(t('trail.map.unit.toReview', { n: dueForReview }));
   const actions = [];
   if (st === 'locked'){
-    lines.push('Complete a unidade anterior para liberar esta.');
-    if (moduleId && trailSkipAllowed()) actions.push({ label: 'Fazer Ponto de verificação para pular', primary: false, onClick: () => openCheckpoint(moduleId) });
-    else if (moduleId) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
+    lines.push(t('trail.map.unit.lockedHint'));
+    if (moduleId && trailSkipAllowed()) actions.push({ label: t('trail.map.unit.skipCta'), primary: false, onClick: () => openCheckpoint(moduleId) });
+    else if (moduleId) lines.push(t('trail.checkpoint.skipLocked'));
   } else if (st === 'done' || st === 'skipped'){
-    actions.push({ label: 'Abrir de novo', primary: false, onClick: () => openUnitDetail(u.id) });
+    actions.push({ label: t('trail.map.unit.openAgain'), primary: false, onClick: () => openUnitDetail(u.id) });
   } else {
     const started = !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
-    actions.push({ label: started ? 'Continuar' : 'Começar', primary: true, onClick: () => openUnitDetail(u.id) });
+    actions.push({ label: started ? t('common.continue') : t('common.start'), primary: true, onClick: () => openUnitDetail(u.id) });
   }
-  return { eyebrow: unitTypeOf(u) === 'grammar' ? 'Gramática' : 'Unidade', title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
+  return { eyebrow: unitTypeOf(u) === 'grammar' ? t('trail.eyebrow.grammar') : t('trail.map.unit.eyebrow'), title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
 }
 
 function renderTrailMapView(container){
@@ -1347,7 +1347,7 @@ function renderTrailMapView(container){
       const done = !!STATE.storyProgress?.[story.id]?.completed;
       const sst = done ? 'done' : (unlocked ? 'available' : 'locked');
       nodes.push({ key: 's:' + story.id, kind: 'story', icon: story.icon, label: story.title, state: sst,
-        aria: `História: ${story.title}, ${TRAIL_MAP_STATE_LABEL[sst]}` });
+        aria: t('trail.map.aria.story', { title: story.title, state: TRAIL_MAP_STATE_LABEL[sst] }) });
     }
   });
   const describe = (key) => {
@@ -1355,13 +1355,13 @@ function renderTrailMapView(container){
       const story = STORIES.find(s => String(s.id) === key.slice(2));
       const unlocked = !!STATE.unitProgress[story.afterUnit]?.completed;
       const done = !!STATE.storyProgress?.[story.id]?.completed;
-      return { eyebrow: 'História', title: story.title, status: done ? 'Concluída' : (unlocked ? 'Disponível' : 'Bloqueada'), goal: story.subtitle || '',
-        lines: unlocked ? [] : ['Complete a unidade anterior para liberar esta história.'],
-        actions: unlocked ? [{ label: done ? 'Ler de novo' : 'Ler a história', primary: !done, onClick: () => openStory(story.id) }] : [] };
+      return { eyebrow: t('trail.map.story.eyebrow'), title: story.title, status: TRAIL_MAP_STATE_LABEL[done ? 'done' : (unlocked ? 'available' : 'locked')], goal: story.subtitle || '',
+        lines: unlocked ? [] : [t('trail.map.story.lockedHint')],
+        actions: unlocked ? [{ label: done ? t('trail.map.story.readAgain') : t('trail.map.story.read'), primary: !done, onClick: () => openStory(story.id) }] : [] };
     }
     return mapUnitDescribe(UNITS.find(u => String(u.id) === key.slice(2)), null);
   };
-  renderTrailMap(container, { sections: [{ title: 'Unidades', nodes }] }, describe);
+  renderTrailMap(container, { sections: [{ title: t('trail.map.unitsSection'), nodes }] }, describe);
 }
 
 

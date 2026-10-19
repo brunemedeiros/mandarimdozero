@@ -653,7 +653,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .module-label:first-child{ margin-top:0; padding-top:0; border-top:none; }
 .module-label .ml-text{
   font-family: var(--font-display); font-weight:900; font-size:15px; text-transform:none; letter-spacing:0;
-  color:var(--ink); white-space:nowrap;
+  color:var(--ink); white-space:normal; min-width:0; /* rótulo longo (ex.: inglês) quebra em vez de estourar a tela de 390px */
 }
 .module-label .ml-track{ flex:1; height:4px; border-radius:2px; background:var(--paper-warm); overflow:hidden; }
 .module-label .ml-fill{ height:100%; border-radius:2px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }

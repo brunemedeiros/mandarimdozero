@@ -3671,4 +3671,71 @@ window.I18N_CATALOG['en'] = {
   'gate.signup.retrySub': 'Someone took @{u} while you were creating your account. Pick another one to continue.', // ALTA
   'gate.signup.retrySave': 'Save and continue', // ALTA
   'gate.signup.passwordPh': 'Create a password (at least 6 characters)', // ALTA
+  // Etapa 3, lote A (2026-10-19): trilha, cartão Continuar, Revisão do módulo e mapa da trilha. needs_review:
+  // tradução nova, ainda não revisada pela dona; confiança no comentário de cada linha. Antes estes textos
+  // apareciam em português também no site em inglês.
+  'common.start': 'Start', // ALTA
+  'trail.lessonsCompleted': '{done} of {total} lessons completed', // ALTA
+  'trail.continue.eyebrowDone': 'Your trail', // MÉDIA -- "trilha" segue trail.backToTrail ("trail"); alternativa: "Your path"
+  'trail.continue.allDone': 'You\'ve completed the whole trail 🎉', // MÉDIA -- mesmo critério de "trail"
+  'trail.continue.lessonOf': 'lesson {i} of {n}', // ALTA
+  'trail.continue.eyebrowResume': 'Pick up where you left off', // ALTA
+  'trail.continue.eyebrowStart': 'Start here', // ALTA
+  'trail.moduleReview.title': 'Module review', // ALTA
+  'trail.moduleReview.chip': 'Review', // ALTA
+  'trail.moduleReview.locked': 'Locked: unlock the module (complete the previous unit) to review.', // ALTA
+  'trail.moduleReview.empty': 'Nothing to review yet: study this module\'s units and come back here.', // ALTA
+  'trail.moduleReview.doneOn': 'Reviewed on {date} (optional)', // ALTA
+  'trail.moduleReview.doneOnAgain': 'Reviewed on {date} · to review again now: {why} (optional)', // MÉDIA -- "de novo agora" sem equivalente curto; alternativa: "· again now: {why}"
+  'trail.moduleReview.recommended': 'Recommended before moving on (optional)', // ALTA
+  'trail.moduleReview.reason.itemWord.one': 'item', // ALTA
+  'trail.moduleReview.reason.itemWord.other': 'items', // ALTA
+  'trail.moduleReview.reason.learning': '{n} with recent mistakes', // ALTA
+  'trail.moduleReview.reason.due': '{n} due today', // ALTA
+  'trail.moduleReview.reason.weak': '{n} with weaker memory', // MÉDIA -- termo do FSRS em linguagem simples; alternativa: "{n} you remember less well"
+  'trail.moduleReview.reason.fresh.one': '{n} new', // ALTA
+  'trail.moduleReview.reason.fresh.other': '{n} new', // ALTA
+  'trail.checkpoint.skipLockedToast': 'Skipping units is a Premium plan feature (or for the teacher\'s students). On the free plan, follow the units in order. 🔒', // ALTA
+  'trail.known.siblingStudied': 'You already studied this word with the reverse card.', // ALTA
+  'zh.path.levelTitle': 'Level 1 · Beginner', // ALTA
+  'trail.view.aria': 'Trail view mode', // ALTA
+  'trail.view.trail': 'Trail', // MÉDIA -- mesmo critério de "trail"; alternativa: "Path"
+  'trail.view.map': 'Map', // ALTA
+  'trail.map.closePanel': 'Close panel', // ALTA
+  'trail.map.note.done': '✓ Completed', // ALTA
+  'trail.map.note.skipped': '↷ Skipped', // ALTA
+  'trail.map.note.current': 'You are here', // ALTA
+  'trail.map.note.locked': '🔒 Locked', // ALTA
+  'trail.map.note.empty': 'Nothing yet', // ALTA
+  'trail.map.state.done': 'Completed', // ALTA
+  'trail.map.state.current': 'Current', // ALTA
+  'trail.map.state.available': 'Available', // ALTA
+  'trail.map.state.empty': 'No items', // ALTA
+  'trail.map.aria.grammarSuffix': ', grammar', // ALTA
+  'trail.map.aria.review': 'Module {n} review, optional', // ALTA
+  'trail.map.aria.reviewEmptySuffix': ', nothing to review yet', // ALTA
+  'trail.map.aria.checkpoint': 'Module {n} checkpoint', // ALTA
+  'trail.map.aria.story': 'Story: {title}, {state}', // ALTA
+  'trail.map.checkpointShort': 'Checkpoint', // MÉDIA -- rótulo curto do nó; "Ponto" sozinho não tem tradução curta melhor
+  'trail.map.unitsSection': 'Units', // ALTA
+  'trail.map.unit.eyebrow': 'Unit', // ALTA
+  'trail.map.unit.toReview': '🔁 {n} to review', // ALTA
+  'trail.map.unit.lockedHint': 'Complete the previous unit to unlock this one.', // ALTA
+  'trail.map.unit.skipCta': 'Take the Checkpoint to skip', // ALTA
+  'trail.map.unit.openAgain': 'Open again', // ALTA
+  'trail.map.review.statusDone': 'Reviewed', // ALTA
+  'trail.map.review.statusReady': 'Recommended', // ALTA
+  'trail.map.review.goal': 'Optional: a short session with what most needs review in this module. It never blocks your progress.', // ALTA
+  'trail.map.review.lastSession': 'Last session: {date}', // ALTA
+  'trail.map.review.cta': 'Review now', // ALTA
+  'trail.map.checkpoint.lockedHint': 'Unlock the module (complete the previous unit) to take the Checkpoint.', // ALTA
+  'trail.map.checkpoint.redo': 'Retake the checkpoint', // ALTA
+  'trail.map.checkpoint.take': 'Take the Checkpoint', // ALTA
+  'trail.map.checkpoint.passed': 'Passed (best score {score}%)', // ALTA
+  'trail.map.checkpoint.locked': 'Locked', // ALTA
+  'trail.map.checkpoint.goal': 'Test the whole module at once. If you do well (70% or more), its units are marked as skipped.', // ALTA
+  'trail.map.story.eyebrow': 'Story', // ALTA
+  'trail.map.story.lockedHint': 'Complete the previous unit to unlock this story.', // ALTA
+  'trail.map.story.readAgain': 'Read again', // ALTA
+  'trail.map.story.read': 'Read the story', // ALTA
 };
