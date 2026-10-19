@@ -22,12 +22,18 @@
 // ---------- helpers PUROS (testáveis) ----------
 
 // Etapa 3 (lote C): texto no idioma do site quando t() existe; sem ele (testes Node), o português de sempre.
+// Plural (Etapa 4): `pt` pode ser { one, other }; com params.n numérico a forma sai por n === 1 (tp no catálogo).
 function tagManagerT(key, pt, params){
-  if (typeof t === 'function'){
+  const plural = params && typeof params.n === 'number';
+  if (plural && typeof tp === 'function'){
+    const v = tp(key, params.n === 1 ? 1 : 2, params);
+    if (v && v !== key) return v;
+  } else if (typeof t === 'function'){
     const v = t(key, params);
     if (v && v !== key) return v;
   }
-  return String(pt).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
+  const s = (pt && typeof pt === 'object') ? (plural && params.n === 1 ? pt.one : pt.other) : pt;
+  return String(s).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
 }
 function tagManagerNoteWord(n){
   return n === 1 ? tagManagerT('tagManager.note.one', 'nota') : tagManagerT('tagManager.note.other', 'notas');
@@ -251,7 +257,7 @@ async function renderTagManagerInto(mountEl, opts){
       const res = await renameNoteTag(scope, old, plan.newSlug);
       if (!res.ok){ ui.busy = false; ui.msg = res.error; ui.msgKind = 'error'; paint(); return; }
       applyTagChangeToLocalState(scope, 'rename', old, plan.newSlug);
-      await finish(`✓ #${old} → #${plan.newSlug} (${res.affected} ${tagManagerNoteWord(res.affected)}${res.merged ? tagManagerT('tagManager.done.merged', ', {n} unificada(s)', { n: res.merged }) : ''}).`);
+      await finish(`✓ #${old} → #${plan.newSlug} (${res.affected} ${tagManagerNoteWord(res.affected)}${res.merged ? tagManagerT('tagManager.done.merged', { one: ', {n} unificada', other: ', {n} unificadas' }, { n: res.merged }) : ''}).`);
     });
     const dc = mountEl.querySelector('[data-tag-delete-confirm]');
     if (dc) dc.addEventListener('click', async () => {

@@ -452,7 +452,7 @@ function publicDeckImportPlanHTML(d, plan){
   const counts = plan.counts || {};
   const by = (c) => notes.filter(n => n.cls === c);
   const exactN = (counts.exact || 0) + (counts.exact_archived || 0);
-  const label = (n) => `${escapeHTML(n.preview || '…')} <span class="profile-edit-hint">${escapeHTML(publicDeckModeLabel(n.mode))}${n.instances > 1 ? ` · ${t('publicDeck.plan.instances', { n: n.instances })}` : ''}</span>`;
+  const label = (n) => `${escapeHTML(n.preview || '…')} <span class="profile-edit-hint">${escapeHTML(publicDeckModeLabel(n.mode))}${n.instances > 1 ? ` · ${tp('publicDeck.plan.instances', n.instances === 1 ? 1 : 2, { n: n.instances })}` : ''}</span>`;
   const checkRow = (n, checked) => `<label class="admin-badge-row" style="display:flex; gap:8px; align-items:center;">
       <input type="checkbox" data-plan-sig="${escapeHTML(n.sig)}" ${checked ? 'checked' : ''}><span style="flex:1;">${label(n)}</span></label>`;
   const novas = by('none'), variantes = by('variant'), related = by('cross_family');
@@ -467,11 +467,11 @@ function publicDeckImportPlanHTML(d, plan){
       <p class="profile-edit-hint">${t('publicDeck.plan.variantsHint')}</p>
       ${variantes.map(n => checkRow(n, false)).join('')}` : ''}
     ${related.length ? `<div class="section-label" data-plan-related>${t('publicDeck.plan.related')}</div>
-      <p class="profile-edit-hint">${t('publicDeck.plan.relatedHint', { n: related.length })}</p>` : ''}
+      <p class="profile-edit-hint">${tp('publicDeck.plan.relatedHint', related.length === 1 ? 1 : 2, { n: related.length })}</p>` : ''}
     ${exactN ? `<details data-plan-existing><summary class="profile-edit-hint">${t('publicDeck.plan.existingSummary', { n: exactN })}</summary>
       ${[...by('exact'), ...by('exact_archived')].map(n => `<div class="admin-badge-row"><span style="flex:1;">${label(n)}</span><span class="profile-edit-hint">${n.local_archived ? t('publicDeck.plan.archivedOne') : t('publicDeck.plan.alreadyExists')}</span></div>`).join('')}</details>` : ''}
-    ${counts.source_duplicate ? `<p class="profile-edit-hint">${t('publicDeck.plan.sourceDup', { n: counts.source_duplicate })}</p>` : ''}
-    ${plan.incompatible ? `<p class="profile-edit-hint">${t('publicDeck.plan.incompatible', { n: plan.incompatible })}</p>` : ''}
+    ${counts.source_duplicate ? `<p class="profile-edit-hint">${tp('publicDeck.plan.sourceDup', counts.source_duplicate === 1 ? 1 : 2, { n: counts.source_duplicate })}</p>` : ''}
+    ${plan.incompatible ? `<p class="profile-edit-hint">${tp('publicDeck.plan.incompatible', plan.incompatible === 1 ? 1 : 2, { n: plan.incompatible })}</p>` : ''}
     <p class="profile-edit-hint" data-plan-decks></p>
     <div style="display:flex; gap:8px; margin-top:10px;">
       <button type="button" class="btn btn-primary" id="public-deck-import-confirm">${t('publicDeck.plan.import')}</button>
@@ -492,7 +492,7 @@ async function openPublicDeckImportPlan(d, panel){
     const st = publicDeckPlanStats(plan, checked());
     panel.querySelector('[data-plan-create-count]').textContent = String(st.create);
     panel.querySelector('[data-plan-decks]').textContent = st.create
-      ? `${t('publicDeck.plan.toStudy', { n: st.instances })} ${t('publicDeck.plan.decksCreated', { list: st.decksCreated.join(', ') })}${st.decksOmitted ? ` ${t('publicDeck.plan.omitted', { n: st.decksOmitted })}` : ''}.`
+      ? `${tp('publicDeck.plan.toStudy', st.instances === 1 ? 1 : 2, { n: st.instances })} ${t('publicDeck.plan.decksCreated', { list: st.decksCreated.join(', ') })}${st.decksOmitted ? ` ${t('publicDeck.plan.omitted', { n: st.decksOmitted })}` : ''}.`
       : t('publicDeck.plan.nothingNew');
     confirmBtn.disabled = st.create === 0;
     // Plural como antes: "Note" só com 1 (create > 1 = "Notes").

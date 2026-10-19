@@ -110,7 +110,9 @@ function buildPreviewCardsFromRow(row, opts){
       idPrefix: 'preview-',
     });
   } catch (e){
-    return { ok: false, error: t('preview.err.buildFailedBase') + (e && e.message ? t('preview.err.detail', { detail: e.message }) : '') + '.' };
+    // Etapa 4: a mensagem crua do código (nomes de campo internos) vai só para o console; a tela mostra a frase amigável.
+    try { console.warn('[preview] não foi possível montar a pré-visualização:', e && e.message); } catch (_){}
+    return { ok: false, error: t('preview.err.buildFailed') };
   }
   if (!cards || !cards.length){
     return { ok: false, error: t('preview.err.noCards') };

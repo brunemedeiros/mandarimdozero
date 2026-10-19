@@ -35,14 +35,14 @@
 
 const ANKI_PARSER_ERROR_MESSAGES = {
   invalid_zip: 'Arquivo não é um .apkg/.zip válido.',
-  missing_collection: 'Este .apkg não contém um banco de coleção reconhecível (collection.anki2/anki21).',
-  unreadable_collection: 'Não foi possível ler o banco de dados da coleção dentro do .apkg.',
-  invalid_sqlite: 'O banco de dados da coleção está corrompido ou num formato SQLite não reconhecido.',
+  missing_collection: 'Este .apkg não contém uma coleção de cartões reconhecível.',
+  unreadable_collection: 'Não foi possível ler a coleção de cartões dentro do .apkg.',
+  invalid_sqlite: 'A coleção de cartões deste .apkg está corrompida ou num formato não reconhecido.',
   empty_collection: 'A tabela "col" desta coleção está vazia.',
   malformed_col_table: 'Não foi possível ler a tabela "col" desta coleção.',
   malformed_notes_cards: 'Não foi possível ler as tabelas de notas/cartões desta coleção.',
-  unsupported_format_zstd: 'Este .apkg usa o formato mais novo do Anki (compactação zstd, collection.anki21b), ainda não suportado por este importador. No Anki, ao exportar, marque a opção "Suporte a versões legadas do Anki" (ou "Support older Anki versions") pra gerar um pacote compatível, e tente de novo.',
-  unsupported_format_protobuf: 'Este .apkg foi exportado num formato mais novo do Anki, cujos modelos de cartão ficam guardados em protobuf binário (não suportado por este importador -- decodificar isso à mão arriscaria corromper o conteúdo). No Anki, ao exportar, marque a opção "Suporte a versões legadas do Anki" (ou "Support older Anki versions") pra gerar um pacote compatível, e tente de novo.',
+  unsupported_format_zstd: 'Este .apkg usa o formato mais novo do Anki, ainda não suportado por este importador. No Anki, ao exportar, marque a opção "Suporte a versões legadas do Anki" (ou "Support older Anki versions") para gerar um pacote compatível, e tente de novo.',
+  unsupported_format_protobuf: 'Este .apkg foi exportado num formato mais novo do Anki, ainda não suportado por este importador. No Anki, ao exportar, marque a opção "Suporte a versões legadas do Anki" (ou "Support older Anki versions") para gerar um pacote compatível, e tente de novo.',
 };
 
 // Etapa 3 (lote C): mensagem no idioma do site (chaves ankiImport.parse.<code>) quando t() existe; sem ele

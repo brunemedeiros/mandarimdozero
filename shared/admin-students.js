@@ -320,7 +320,7 @@ function studentPanelEventLabel(ev){
     if (meta.scorePct != null) score = t('students.ev.score.pct', { n: studentPanelNum(meta.scorePct) });
     else if (meta.pct != null) score = t('students.ev.score.pct', { n: studentPanelNum(meta.pct) });
     else if (meta.score != null && name === 'dictation') score = t('students.ev.score.dictation', { n: studentPanelNum(meta.score) });
-    else if (meta.count != null) score = t('students.ev.score.cards', { n: studentPanelNum(meta.count) });
+    else if (meta.count != null) score = tp('students.ev.score.cards', Number(meta.count) === 1 ? 1 : 2, { n: studentPanelNum(meta.count) });
     return t('students.ev.completed', { what, unit, score });
   }
   return `${studentPanelEsc(ev && ev.type)} · ${studentPanelEsc(name)}`;

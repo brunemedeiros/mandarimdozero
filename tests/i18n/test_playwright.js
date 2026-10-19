@@ -355,6 +355,14 @@ async function triggerWouldGenerate(page){
   }
 
   // ================= modais pequenos + seletor de idioma =================
+  // Etapa 4 (mecânico, aprovado pela dona em 2026-10-19): sem "--", sem "pra" e plural de verdade no modal de limite e
+  // no texto do preflight (antes "cartão(ões)"). Aplicado à referência (commit anterior) antes de comparar.
+  const ETAPA4_PT = [
+    ['Pra criar mais, apague algum cartão, ou peça pra sua professora te vincular -- alunos vinculados', 'Para criar mais, apague algum cartão, ou peça para sua professora te vincular. Alunos vinculados'], // flashcardLimit.modal.bodyHtml: Etapa 4: -- / pra
+    ['cartão(ões) de estudo', 'cartões de estudo'], // flashcardLimit.wouldGenerate (n = 2): Etapa 4: plural
+  ];
+  const etapa4 = (x) => ETAPA4_PT.reduce((acc, [a, c]) => acc.split(a).join(c), x);
+  const etapa4Snap = (snap) => JSON.parse(etapa4(JSON.stringify(snap)));
   for (const lang of ['fr', 'zh']){
     console.log('== ' + lang + ' (modais pequenos + seletor)');
     const L = (n, c, x) => check(lang + ' ' + n, c, x);
@@ -364,8 +372,9 @@ async function triggerWouldGenerate(page){
     // ---- referência: commit anterior (PREV), pt-BR ----
     const ctxP = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 1200, height: 1000 } });
     const pv = await boot2(ctxP, portPrev, lang, '');
-    const prevSnap = await modalSnapshot(pv.page, lang);
+    const prevSnap = etapa4Snap(await modalSnapshot(pv.page, lang));
     const prevWould = await triggerWouldGenerate(pv.page);
+    prevWould.err = etapa4(prevWould.err || '');
     const prevErrors = pv.errors.slice();
     await ctxP.close();
     L('referência: premium só no fr', lang === 'fr' ? prevSnap.length === 3 : prevSnap.length === 2);
@@ -377,7 +386,7 @@ async function triggerWouldGenerate(page){
     L('pt-BR: 3 modais idênticos ao commit anterior', JSON.stringify(semReset(ptSnap)) === JSON.stringify(semReset(prevSnap)), { ptSnap, prevSnap });
     L('pt-BR: modais == catálogo pt-BR', JSON.stringify(ptSnap) === JSON.stringify(expectedModals(CAT['pt-BR'], lang)), ptSnap);
     const ptWould = await triggerWouldGenerate(a.page);
-    L('pt-BR: texto do preflight (JS) idêntico ao commit anterior', ptWould.err === prevWould.err && ptWould.err === 'Este cartão geraria 2 cartão(ões) de estudo, mas restam só 1 no plano grátis.', [ptWould.err, prevWould.err]);
+    L('pt-BR: texto do preflight (JS) idêntico ao commit anterior', ptWould.err === prevWould.err && ptWould.err === 'Este cartão geraria 2 cartões de estudo, mas restam só 1 no plano grátis.', [ptWould.err, prevWould.err]);
     L('pt-BR: preflight não gravou nada', ptWould.n === ptWould.n0);
     L('pt-BR: zero pageerror novo vs commit anterior', a.errors.filter(e => !prevErrors.includes(e)).length === 0, a.errors);
 

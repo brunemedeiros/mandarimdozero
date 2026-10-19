@@ -504,7 +504,7 @@ async function renderPublicProfileCardsBox(bodyEl, username){
 function updatePublicProfileCardsCounter(box){
   const n = PUBLIC_PROFILE_IMPORT_STATE.selectedIds.size;
   const counter = box.querySelector('#public-profile-cards-counter');
-  if (counter) counter.textContent = n === 0 ? t('publicProfile.counterNone') : tp('publicProfile.counter', n);
+  if (counter) counter.textContent = n === 0 ? t('publicProfile.counterNone') : tp('publicProfile.counter', n === 1 ? 1 : 2, { n });
   const importBtn = box.querySelector('#public-profile-cards-import-btn');
   if (importBtn) importBtn.disabled = n === 0;
 }
@@ -647,7 +647,7 @@ async function importSelectedPublicFlashcards(box){
   }
 
   if (importedCount > 0 && typeof showToast === 'function'){
-    showToast(`${tp('publicProfile.imported', importedCount)} ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount), { ignoreSystem: true })}`.trim());
+    showToast(`${tp('publicProfile.imported', importedCount === 1 ? 1 : 2, { n: importedCount })} ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount), { ignoreSystem: true })}`.trim());
   }
   if (importedCount < idsToCreate.length && errorEl){
     errorEl.textContent = t('publicProfile.importPartial');
