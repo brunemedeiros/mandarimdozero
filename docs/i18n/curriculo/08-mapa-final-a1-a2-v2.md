@@ -439,11 +439,11 @@ Origem entre colchetes, para conferência.
 **A1 M2**
 17. **Artigos e plural (`A1-g17`, id novo) como M2.2**, intercalada (família → artigos → descrever → possessivos)? *Recomendo sim.* Impacto: M2 com 7 unidades e 4 gramáticas. [`09` 1 a 3]
 18. **"Perguntar e negar" numa gramática só** (sim ou não + *ne... pas* + *pas de*), palavras de pergunta em notas e sistema no A2 M9.4? *Recomendo sim.* Impacto: separar levaria o M2 a 8 unidades. [`10` 3, 4; `09` 4]
-19. ***sympa* e *timide* como cartões na M2.3** (fica com 12)? *Recomendo sim.* Impacto: +2 cartões (A1 com 294); o resto do caráter fica no A2 M4.5. [`08` 6]
-20. **Frases do `A1-3` com família** (*J'ai deux frères et trois sœurs.*, *Quel est l'âge de ton père ?*) vão para a M2.1 com a chave? *Recomendo sim.* Impacto: frase muda de unidade sem perder progresso. [`09` 7]
-21. ***c'est / il est* como nota na M2.1** e não tela da `A1-g2`? *Recomendo sim.* Impacto: `A1-g2` fica como está publicada. [`10` 5]
-22. **"O gênero não segue o português"**: tela na `A1-g17` (*l'âge*) e nota na M5.3 (*le pantalon, la robe*)? *Recomendo sim.* [`09` 5]
-23. **Dados pessoais e soletrar (`A1-23`) no M7** (ficha de hotel), não no M2? *Recomendo sim*: é o 1º ponto com meses, números até 1000 e telefone. [`08` 4]
+19. [RESPONDIDA: sim] ***sympa* e *timide* como cartões na M2.3** (fica com 12)? *Recomendo sim.* Impacto: +2 cartões (A1 com 294); o resto do caráter fica no A2 M4.5. [`08` 6]
+20. [RESPONDIDA: sim] **Frases do `A1-3` com família** (*J'ai deux frères et trois sœurs.*, *Quel est l'âge de ton père ?*) vão para a M2.1 com a chave? *Recomendo sim.* Impacto: frase muda de unidade sem perder progresso. [`09` 7]
+21. [RESPONDIDA: sim] ***c'est / il est* como nota na M2.1** e não tela da `A1-g2`? *Recomendo sim.* Impacto: `A1-g2` fica como está publicada. [`10` 5]
+22. [RESPONDIDA: sim] **"O gênero não segue o português"**: tela na `A1-g17` (*l'âge*) e nota na M5.3 (*le pantalon, la robe*)? *Recomendo sim.* [`09` 5]
+23. [RESPONDIDA: sim] **Dados pessoais e soletrar (`A1-23`) no M7** (ficha de hotel), não no M2? *Recomendo sim*: é o 1º ponto com meses, números até 1000 e telefone. [`08` 4]
 
 **A1 M3 a M8**
 24. **Dividir a `A1-g3`**: *-er* na M3.2 (com *on* só na tabela) e pronominais na nova `A1-g18` (M3.4)? *Recomendo sim.* Impacto: quem concluiu a `A1-g3` vê a `A1-g18` aberta, não concluída. [`10` 6, 7]

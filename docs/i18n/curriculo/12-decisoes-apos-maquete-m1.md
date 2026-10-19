@@ -146,3 +146,15 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
 49. **Detalhes do M1** como na maquete (*neuf ans* na nota de ligação; Léa e Hugo; exemplos da M1.5 trocados); **tela "Uma pegadinha comum" (*avoir faim*) sai da M1.5** e vira nota na M4.1; **nota de instruções de aula (*écoutez, répétez*) sai da trilha**; **aceitar *professeur* e *professeure*** (e *ingénieur / ingénieure*) para mulher.
 50. **Palavras novas em unidade já concluída** (*quatre... neuf*): **tela única opcional "Novidades desta unidade"**, não direto para a Revisão (código novo pequeno).
 51. **M1.5, tela "Être e avoir na apresentação":** não usar *Je suis Ana* (pouco usual para dizer o nome; o nome se diz com *je m'appelle* ou *moi, c'est...*). *Être* aparece com nacionalidade: *Je suis brésilienne. Je suis français.*; *avoir* com a idade.
+
+---
+
+# Sétima rodada (2026-10-19): perguntas do M2
+
+52. ***sympa* e *timide* como cartões na M2.3** (12 palavras); o resto do caráter fica no A2 M4.5.
+53. **Frases do `A1-3` sobre família** (*J'ai deux frères et trois sœurs.*, *Quel est l'âge de ton père ?*) vão para a M2.1 mantendo a chave.
+54. ***c'est / il est* como nota na M2.1**, não tela da `A1-g2`.
+55. **"O gênero não segue o português"**: tela na `A1-g17` (*l'âge*) e nota na M5.3 (*le pantalon, la robe*).
+56. **Dados pessoais e soletrar (`A1-23`) no M7** (ficha de hotel), não no M2.
+57. **Perguntas (sistema completo) são conteúdo do A1, não do A2** (a dona, 2026-10-19): palavras interrogativas e estrutura interrogativa (entonação, *est-ce que*, inversão) se espaçam em vários módulos e unidades do A1. Isso REVOGA "sistema completo no A2 M9.4" e "palavras de pergunta só viram notas". Desenho em discussão (ver `08 v2` pergunta 18).
+58. **Negação**: a dona quer tratar a negação simples e a complexa com mais peso (nota para cada uma ou uma gramática maior "Negação"). Em discussão (ver `08 v2` pergunta 18).
