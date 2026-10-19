@@ -235,71 +235,71 @@ Gramáticas com 4 telas e 8 exercícios, salvo indicação. Lições: não desen
 |---|---|---|---|---|---|---|
 | **M1 · Lembranças e fases da vida** (`A2-m1`) | | contar a infância, comparar antes e agora, marcos da vida | | | | 4 unidades (3 + 1) |
 | M1.1 (`A2-1`) | Contar como era a infância | lembranças | imperfeito (entrada) | *l'enfance, le souvenir, se souvenir de, le jouet, autrefois...* | | igual |
-| M1.2 (g) (`A2-g1`) | Imperfeito | descrever e dizer hábitos do passado | formação pela forma *nous*; *j'étais* | | | igual |
+| M1.2 (g) (`A2-g1`) | Gramática: imperfeito | descrever e dizer hábitos do passado | formação pela forma *nous*; *j'étais* | | | igual |
 | M1.3 (`A2-2`) | Comparar antes e agora | antes x agora | comparativo do A1 | *la campagne, le village, avant, maintenant, à l'époque...* | *ne... plus* = não... mais (Exp, alta, *nova*) | + nota |
 | M1.4 (`A2-3`) | Contar as fases da vida | marcos com datas | *il y a* + tempo | *naître, se marier, déménager, la retraite...* | | posição (sai a gramática do meio) |
 | **M2 · Contar uma experiência** (`A2-m2`) | | relato de 60 a 80 palavras, imprevisto, notícia | | | | 6 (3 + 3) |
 | M2.1 (`A2-4`) | Contar uma viagem | relato de viagem | | *le voyage, le séjour, l'avion, le vol, rater...* | *d'abord, ensuite, puis, enfin* (Exp, alta, *nova*) | + nota |
-| M2.2 (g) (`A2-g3`) | Passé composé x imperfeito | cenário x ação | revisão do PC + imperfeito x PC (5 telas) | | | + tela de revisão (absorve parte da `A2-g4`) |
+| M2.2 (g) (`A2-g3`) | Gramática: passé composé x imperfeito | cenário x ação | revisão do PC + imperfeito x PC (5 telas) | | | + tela de revisão (absorve parte da `A2-g4`) |
 | M2.3 (`A2-5`) | Contar um imprevisto | problema e solução | | *perdre, oublier, tomber en panne, heureusement, soudain...* | *donc, alors* (Exp, alta, *nova*) · *-ment* = *-mente* (Exp, alta, *nova*) | + notas |
-| M2.4 (g) (`A2-g9`) | Pronomes COD e a concordância do particípio | retomar sem repetir | *le, la, l', les*; no PC e com futuro próximo; concordância (5 telas, no teto) | | | movida (do M4); absorve a concordância da `A2-g4` |
+| M2.4 (g) (`A2-g9`) | Gramática: pronomes COD e a concordância do particípio | retomar sem repetir | *le, la, l', les*; no PC e com futuro próximo; concordância (5 telas, no teto) | | | movida (do M4); absorve a concordância da `A2-g4` |
 | M2.5 (`A2-6`) | Contar um acontecimento | fato do bairro | | *l'accident, **le portefeuille**, le témoin, la police, **récemment** (do A1)...* | | *le vol (roubo)* → *le portefeuille* |
-| M2.6 (g) (`A2-g5`) | Marcar o tempo: *il y a, depuis, pendant, en, ça fait... que* | situar e medir o tempo | duração | | | conectores viram notas |
+| M2.6 (g) (`A2-g5`) | Gramática: marcar o tempo (*il y a, depuis, pendant, en, ça fait... que*) | situar e medir o tempo | duração | | | conectores viram notas |
 | **M3 · Objetos e consumo** (`A2-m3`) | | descrever objeto, comprar on-line e reclamar, comparar | | | | 6 (3 + 3) |
 | M3.1 (`A2-7`) | Descrever um objeto | forma, matéria, função | *ça sert à, ça permet de* | *l'objet, la forme, en bois, léger, servir à...* | | + frase *permettre de* |
-| M3.2 (g) (`A2-g6`) | Relativos *qui, que, où* | | | | | igual |
+| M3.2 (g) (`A2-g6`) | Gramática: relativos *qui, que, où* | | | | | igual |
 | M3.3 (`A2-8`) | Comprar on-line e reclamar | reclamação educada | | *la livraison, le colis, rembourser, **cordialement**...* | | *en ligne* vira frase; *cordialement* vem do M9 |
-| M3.4 (g) (`A2-g7`) | Superlativo | o melhor, o mais | *le plus, le moins, le meilleur, le mieux* + 1 tela de revisão do comparativo | | | foco ajustado |
+| M3.4 (g) (`A2-g7`) | Gramática: superlativo | o melhor, o mais | *le plus, le moins, le meilleur, le mieux* + 1 tela de revisão do comparativo | | | foco ajustado |
 | M3.5 (`A2-9`) | Opinar sobre o consumo | opinião simples | opinião em fórmula | *d'occasion, gaspiller, la marque, la qualité...* | *je trouve que, à mon avis* (Exp, n/r, *nova*) · *plus de, moins de, autant de* (Exp, n/r, *nova*) | + notas |
-| M3.6 (g) (`A2-g8`) | Pronomes demonstrativos e *lequel* | escolher entre objetos | *celui-ci, celle-là*; *Lequel ? Laquelle ?* | | | + tela *lequel* (da `A2-g22`) |
+| M3.6 (g) (`A2-g8`) | Gramática: pronomes demonstrativos e *lequel* | escolher entre objetos | *celui-ci, celle-là*; *Lequel ? Laquelle ?* | | | + tela *lequel* (da `A2-g22`) |
 | **M4 · Saúde e bem-estar** (`A2-m4`) | | consulta, emergência, conselhos, caráter | | | | 6 (4 + 2) |
 | M4.1 (`A2-10`) | Na consulta | marcar e descrever sintomas | | *le rendez-vous, l'ordonnance, le médicament, tousser...* | | igual |
 | M4.2 (`A2-11`) | Corpo e emergências | emergência | | *le bras, la jambe, le dos, les urgences...* | | igual |
-| M4.3 (g) (`A2-g10`) | Pronomes COI | | *lui, leur, me, te, nous, vous* | | | sobe para depois das 2 unidades |
+| M4.3 (g) (`A2-g10`) | Gramática: pronomes COI | | *lui, leur, me, te, nous, vous* | | | sobe para depois das 2 unidades |
 | M4.4 (`A2-12`) | Esporte e hábitos saudáveis | hábitos | | *être en forme, courir, nager, le sommeil...* | | igual |
 | M4.5 (`A2-35`) | Descrever o caráter | descrever um amigo (DELF A2 PO2) | | *le caractère, gentil (vindo da M2.3), sympa, timide, courageux, patient, drôle, curieux, têtu...* (12 a 14, confiança média) | | nova |
-| M4.6 (g) (`A2-g11`) | Condicional dos conselhos | aconselhar e pedir com cortesia | só *devoir, vouloir, pouvoir, aimer* (*tu devrais, je voudrais*) | | | ajustada (o futuro só chega no M6) |
+| M4.6 (g) (`A2-g11`) | Gramática: condicional dos conselhos | aconselhar e pedir com cortesia | só *devoir, vouloir, pouvoir, aimer* (*tu devrais, je voudrais*) | | | ajustada (o futuro só chega no M6) |
 | **M5 · À mesa** (`A2-m5`) | | reservar, receita, sabores | | | | 5 (3 + 2) |
 | M5.1 (`A2-13`) | Reservar e pedir no restaurante | pedir e reclamar do prato | | *la réservation, le plat du jour, saignant, le pourboire...* | *ne... que* = só (Exp, média no gatilho, *nova*) · opinião em fórmula (Exp, n/r, *nova*) | + notas |
-| M5.2 (g) (`A2-g12`) | Pronome *en* | | | | | igual |
+| M5.2 (g) (`A2-g12`) | Gramática: pronome *en* | | | | | igual |
 | M5.3 (`A2-14`) | Explicar uma receita | receita | | *la recette, couper, mélanger, cuire...* | | igual |
-| M5.4 (g) (`A2-g13`) | Imperativo com pronomes | | *Prends-le ! Ne le prends pas !* | | | igual |
+| M5.4 (g) (`A2-g13`) | Gramática: imperativo com pronomes | | *Prends-le ! Ne le prends pas !* | | | igual |
 | M5.5 (`A2-15`) | Descrever sabores | sabores e opinião | | *le goût, goûter, amer, croustillant...* | intensidade (*assez, plutôt, trop*) (Exp, n/r, *nova*) · *de plus en plus de* + nome (Exp, n/r, *nova*) | `A2-g14` vira estas 2 notas |
 | **M6 · Estudos e projetos** (`A2-m6`) | | formação, aprender línguas, projetos | | | | 6 (3 + 3) |
 | M6.1 (`A2-16`) | Contar a formação | | | *les études, la fac, le diplôme, réussir...* | | igual |
-| M6.2 (g) (`A2-g15`) | Futuro simples | | + linha de reconhecimento do condicional | | | igual |
+| M6.2 (g) (`A2-g15`) | Gramática: futuro simples | | + linha de reconhecimento do condicional | | | igual |
 | M6.3 (`A2-17`) | Falar do aprendizado de línguas | dizer o que sei fazer | | *apprendre, le niveau, l'accent, bilingue...* | | igual |
-| M6.4 (g) (`A2-g17`) | *savoir* x *connaître* | saber x conhecer | (3 telas, 6 exercícios) | | | movida (era M6.6); recebe o *savoir* do A1; verbos com *à / de* saem |
+| M6.4 (g) (`A2-g17`) | Gramática: *savoir* x *connaître* | saber x conhecer | (3 telas, 6 exercícios) | | | movida (era M6.6); recebe o *savoir* do A1; verbos com *à / de* saem |
 | M6.5 (`A2-18`) | Projetos e sonhos | planos e desejos | | *le projet, rêver de, espérer, avoir envie de...* | desejo (*j'aimerais, j'espère que*) (Exp, n/r, *nova*) · verbo + *de* + infinitivo (Exp, n/r, *nova*) | + notas |
-| M6.6 (g) (`A2-g16`) | *quand* e *si*: falar do futuro com condição | | *quand* + futuro, *si* + presente | | | movida (era M6.4); desejo vira nota |
+| M6.6 (g) (`A2-g16`) | Gramática: *quand* e *si* (falar do futuro com condição) | | *quand* + futuro, *si* + presente | | | movida (era M6.4); desejo vira nota |
 | **M7 · Trabalho e dinheiro** (`A2-m7`) | | trabalho, entrevista, regras, banco, relatar | | | | 5 (4 + 1) |
 | M7.1 (`A2-19`) | Falar do trabalho | | | *le / la collègue, le salaire, la réunion...* | | igual |
 | M7.2 (`A2-20`) | Procurar emprego | entrevista | | *le CV, postuler, l'entretien...* | | igual |
-| M7.3 (g) (`A2-g19`) | Discurso indireto no presente | relatar o que alguém disse | *il dit que, il demande si / ce que / où* | | | movida (era M7.6) |
+| M7.3 (g) (`A2-g19`) | Gramática: discurso indireto no presente | relatar o que alguém disse | *il dit que, il demande si / ce que / où* | | | movida (era M7.6) |
 | M7.4 (`A2-21`) | Entender regras e avisos | ler placas | | *interdit, autorisé, obligatoire, le panneau...* | *il est interdit de* + infinitivo (Exp, alta, *nova*) · *il ne faut pas* = não pode (Exp, alta, *nova*) | `A2-g18` vira estas 2 notas; revisar junto com o `A2-26` (*stationner* x *se garer*) |
 | M7.5 (`A2-22`) | Resolver no banco | | | *la banque, le compte, retirer...* | | igual |
 | **M8 · Moradia e cidade** (`A2-m8`) | | classificado, convivência, papelada, trânsito | | | | 6 (4 + 2) |
 | M8.1 (`A2-23`) | Procurar moradia | | | *louer, le loyer, l'annonce...* | | igual |
 | M8.2 (`A2-24`) | Dividir apartamento e vizinhos | regras da casa | | *la colocation, le voisin, faire le ménage...* | *tout, chaque, plusieurs, chacun* (Exp, n/r, *nova*) | + nota |
-| M8.3 (g) (`A2-g20`) | Pronome *y* | | | | | igual |
+| M8.3 (g) (`A2-g20`) | Gramática: pronome *y* | | | | | igual |
 | M8.4 (`A2-25`) | Serviços e papelada | | | *la poste, la mairie, le formulaire...* | | igual |
 | M8.5 (`A2-26`) | Trânsito e carro | | | *conduire, le bouchon, se garer...* | | igual |
-| M8.6 (g) (`A2-g21`) | Alguém e ninguém | *quelqu'un / personne, quelque chose / rien, aucun* | (5 telas) | | | reorganizada (recebe da `A2-g23`) |
+| M8.6 (g) (`A2-g21`) | Gramática: alguém e ninguém | *quelqu'un / personne, quelque chose / rien, aucun* | (5 telas) | | | reorganizada (recebe da `A2-g23`) |
 | **M9 · Comunicar e se relacionar** (`A2-m9`) | | telefonar, escrever com função, sentimentos, redes | | | | 6 (4 + 2) |
 | M9.1 (`A2-27`) | Telefonar e deixar recado | | | *rappeler, laisser un message, raccrocher...* | | igual |
-| M9.2 (g) (`A2-g2`) | Momentos da ação | dizer em que ponto está a ação | *venir de, être en train de, être sur le point de* | | | movida (era A2 M1) |
+| M9.2 (g) (`A2-g2`) | Gramática: momentos da ação | dizer em que ponto está a ação | *venir de, être en train de, être sur le point de* | | | movida (era A2 M1) |
 | M9.3 (`A2-28`) | Escrever para convidar, recusar e agradecer | | | *l'invitation, remercier, refuser, **je t'embrasse**...* | | *cordialement* → M3.3 |
-| M9.4 (g) (`A2-g22`) | Perguntar em três registros | | entonação, *est-ce que*, inversão com *-t-*; quadro das palavras de pergunta | | | ajustada; *lequel* → `A2-g8` |
+| M9.4 (g) (`A2-g22`) | Gramática: perguntar em três registros | | entonação, *est-ce que*, inversão com *-t-*; quadro das palavras de pergunta | | | ajustada; *lequel* → `A2-g8` |
 | M9.5 (`A2-29`) | Sentimentos e reações | | | *content, triste, déçu, féliciter...* + *se sentir* | | + *se sentir* + adjetivo |
 | M9.6 (`A2-30`) | Internet e redes | | | *le réseau social, publier, le lien...* | | igual |
 | **M10 · Opinião, cultura e mundo** (`A2-m10`) | | opinar, festas, meio ambiente, francofonia | | | | 7 (4 + 3) |
 | M10.1 (`A2-31`) | Apresentar um livro, filme ou exposição | | | *le roman, l'auteur / l'autrice, le personnage...* | opinião (*je pense que, à mon avis*) (Exp, n/r, *nova*) | + nota |
-| M10.2 (g) (`A2-g24`) | Causa, consequência e finalidade | ligar ideias | *parce que, comme, grâce à, à cause de, donc, pour* + infinitivo | | | opinião sai para nota |
+| M10.2 (g) (`A2-g24`) | Gramática: causa, consequência e finalidade | ligar ideias | *parce que, comme, grâce à, à cause de, donc, pour* + infinitivo | | | opinião sai para nota |
 | M10.3 (`A2-32`) | Patrimônio e festas | | | *le monument, la tradition, la fête nationale...* | | igual |
 | M10.4 (`A2-33`) | Meio ambiente | | | *l'environnement, recycler, les déchets...* | | igual |
-| M10.5 (g) (`A2-g26`) | *Il faut que / je veux que* (fórmula) | | (3 telas, 6 exercícios) | | | sobe (era a última) |
+| M10.5 (g) (`A2-g26`) | Gramática: *Il faut que / je veux que* (fórmula) | | (3 telas, 6 exercícios) | | | sobe (era a última) |
 | M10.6 (`A2-34`) | Viajar pela francofonia | | | *le nord, la côte, l'île, francophone...* | | igual |
-| M10.7 (g) (`A2-g25`) | Gerúndio | | (3 telas, 6 exercícios) | | | desce (vem depois da francofonia) |
+| M10.7 (g) (`A2-g25`) | Gramática: gerúndio | | (3 telas, 6 exercícios) | | | desce (vem depois da francofonia) |
 
 Ids do A2 aposentados sem uso (nunca reaproveitar): `A2-g4`, `A2-g14`, `A2-g18`, `A2-g23`.
 

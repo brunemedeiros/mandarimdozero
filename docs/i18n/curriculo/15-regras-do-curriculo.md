@@ -15,3 +15,5 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
 7. **Sem IPA** para o aluno (pt); respelling por idioma do site quando preciso.
 8. **Pronúncia: lição só com conteúdo suficiente; com uma ou duas frases é nota de pronúncia** (ex.: *Ça va ?* x *Ça va.*), na mesma caixa das demais notas. Tipos de nota: explicação, realidade, cultural e pronúncia. (2026-10-18)
 9. **Pronomes tônicos** entram cedo, junto do formal e do informal (*moi, toi, vous* na M1.2) e são ampliados depois (*lui, elle*, M1.4; com preposições mais adiante). (2026-10-18)
+
+10. **Título das unidades de gramática** (dona, 2026-10-19): sempre "Gramática: <assunto curto>", em todos os níveis e em todos os cursos (fr, zh, pt), sem subtítulo explicativo. O assunto fica no título; o que a unidade ensina fica no "Consigo...".

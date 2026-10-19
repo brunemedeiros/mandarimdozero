@@ -206,3 +206,13 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
 89. **M2.3 só aparência física, sem roupas e sem caráter** (dona): "Descrever a aparência", 12 palavras (*grand, petit, joli, laid, les cheveux, les yeux, blond, brun, noir, bleu, vert, marron*) e uma nota de vocabulário "Outros traços" (*long, court, roux, bouclé, raide, la barbe, les lunettes*). *gentil* (cartão publicado) e a N16 vão para o A2 M4.5 "Descrever o caráter"; *sympa* e *timide* entram lá. Revisa a decisão 52.
 90. **Padrão de título "Gramática: …"** para todas as unidades de gramática do A1 (dona); o assunto vem curto, sem subtítulo explicativo. Muda título publicado em 9 gramáticas já publicadas (camada pt-BR e en; `DELIBERATE_PT_CHANGES`). A2: a decidir.
 91. **M5.4**: `le verre` já é cartão do M4.5 (copo); na M5.4 aparece só o sentido de material. Notas de vocabulário "Outros materiais" e "Outras cores" (*violet, beige, doré, argenté*).
+
+---
+
+# Décima primeira rodada (2026-10-19): padrão de título e M6
+
+92. **Padrão "Gramática: …" vale para o A2 e para todos os cursos** (fr, zh, pt): regra 10 no `15`. Aplicado nos títulos das gramáticas do A2 no `08 v2`.
+93. **Imperativo logo depois de "Perguntar e indicar o caminho"** (é onde aparece: *Tournez à gauche*). Revisa a posição da `A1-g19` no M6.
+94. **Palavras interrogativas (lugar, hora e coisas) depois de "Pegar transporte"** no M6, se o tema comportar (dona).
+95. ***le médecin* vai para a M1.6** e continua aparecendo em frases de exemplo na unidade de "Dizer onde dói"; *se reposer* vem para a unidade de saúde. **Modais perdem 2 exercícios** e *savoir* vai para o A2 (aprovado).
+96. **A unidade de saúde (`A1-15`) está deslocada no M6 "Na cidade"** (dona). A junção vinha do módulo publicado "Deslocando-se e cuidando de si", não de um motivo pedagógico. Solução em discussão (ver `08 v2`).
