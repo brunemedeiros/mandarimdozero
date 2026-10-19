@@ -477,6 +477,13 @@ details.mq-det > div{ padding:0 14px 14px; }
 .pdlg-mark{ font-size:12px; font-weight:800; margin-top:4px; }
 .pdlg-mark.warn{ color: var(--grade-hard-bg); }
 
+.mq-news-list{ list-style:none; margin:0 0 12px; padding:0; display:flex; flex-direction:column; gap:8px; }
+.mq-news-row{ display:flex; align-items:center; gap:10px; background: var(--paper); border:1px solid var(--paper-line); border-radius:12px; padding:6px 12px; min-height:52px; }
+.mq-news-fr{ font-weight:900; font-size:17px; color: var(--ink); }
+.mq-news-tr{ margin-left:auto; font-size:14px; color: var(--ink-soft); text-align:right; }
+.mq-news-title{ margin:0 0 4px; font-size:18px; color: var(--ink); }
+.mq-news-actions{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+
 @media (max-width: 600px){
   .mq-h{ font-size:20px; }
   .mq-app{ padding:14px 10px 16px; border-radius:18px; }
@@ -715,7 +722,7 @@ function flow(root, steps, opts){
   const back = $('[data-back]', app), next = $('[data-next]', app), dock = $('.fbp-dock', app);
   // Lâmpada (decisão 5 do doc 12): o contador mostra só as notas ainda não abertas pela lâmpada; some no 1º clique
   // e volta a acender quando aparece uma nota nova. A lâmpada continua abrindo todas as notas já vistas na lição.
-  // Escopo (decisão da dona, 2026-10-18): só as notas da lição atual; no Ponto de verificação da unidade, as notas da unidade
+  // Escopo (decisão da dona, 2026-10-18): só as notas da lição atual; na Revisão da unidade, as notas da unidade
   // (opts.preNotes). Notas de outras lições ou unidades nunca entram. Sem limite de quantidade: o popover rola.
   const seen = (opts.preNotes || []).map(n => ({ key: n.title, kind: n.kind, title: n.title, body: n.body })), bulb = $('[data-bulb]', app), pop = $('.mq-pop', app);
   const paintBulb = () => { if (!bulb) return; const fresh = seen.filter(n => !n.opened).length; bulb.setAttribute('aria-disabled', String(!seen.length)); bulb.title = seen.length ? L('Notas desta lição', 'Notes from this lesson') + (fresh ? ` (${fresh} ${L(fresh > 1 ? 'novas' : 'nova', 'new')})` : '') : L('Nenhuma nota nesta lição ainda', 'No notes in this lesson yet'); bulb.dataset.n = fresh || ''; };
@@ -1092,7 +1099,7 @@ const V_M11 = [['bonjour', 'olá / bom dia'], ['bonsoir', 'boa noite (saudação
 const DLG_M11 = { title: 'Encontro na rua', scene: 'De manhã, na rua do bairro: Léa encontra o vizinho Hugo.', speakers: SPK, vocab: V_M11,
   lines: [{ spk: 'A', f: 'Bonjour !', t: 'Olá!' }, { spk: 'B', f: 'Bonjour ! Ça va ?', t: 'Olá! Tudo bem?' }, { spk: 'A', f: 'Ça va bien, merci ! Et toi ?', t: 'Vou bem, obrigada! E você?' }, { spk: 'B', f: 'Ça va. À bientôt !', t: 'Tudo bem. Até breve!' }],
   check: [{ k: 'fill', line: 3, bad: ['Bonsoir !', "S'il vous plaît !"] }, { k: 'listen', line: 0, bad: ['À bientôt !', 'Au revoir !'] }, { k: 'understand', line: 3, q: 'Como Léa e Hugo se despedem no final?', opts: ['Dizem "até breve"', 'Dizem "de nada"', 'Pedem "por favor"'], ok: 0 }] };
-const V_M14 = [['onze', 'onze'], ['douze', 'doze'], ['treize', 'treze'], ['quatorze', 'catorze'], ['quinze', 'quinze'], ['seize', 'dezesseis'], ['trente', 'trinta'], ['quarante', 'quarenta'], ['cinquante', 'cinquenta'], ['soixante', 'sessenta']].map(([f, t]) => ({ f, t }));
+const V_M14 = [['onze', 'onze'], ['douze', 'doze'], ['treize', 'treze'], ['quatorze', 'catorze'], ['quinze', 'quinze'], ['seize', 'dezesseis'], ['dix-sept', 'dezessete'], ['dix-huit', 'dezoito'], ['dix-neuf', 'dezenove'], ['trente', 'trinta'], ['quarante', 'quarenta'], ['cinquante', 'cinquenta'], ['soixante', 'sessenta']].map(([f, t]) => ({ f, t }));
 const DLG_M14 = { title: 'No clube de conversa', scene: 'Léa e Hugo conversam sobre os outros participantes do clube.', speakers: SPK, vocab: V_M14,
   lines: [{ spk: 'A', f: 'Hugo, Paul a quel âge ?', t: 'Hugo, quantos anos o Paul tem?' }, { spk: 'B', f: 'Il a trente et un ans.', t: 'Ele tem trinta e um anos.' }, { spk: 'A', f: 'Et Sophie, elle a quel âge ?', t: 'E a Sophie, quantos anos ela tem?' }, { spk: 'B', f: 'Elle a quarante-six ans. Et toi ?', t: 'Ela tem quarenta e seis anos. E você?' }, { spk: 'A', f: "Moi, j'ai vingt-neuf ans.", t: 'Eu tenho vinte e nove anos.' }],
   check: [{ k: 'fill', line: 1, bad: ['Il est trente et un ans.', 'Elle a seize ans.'] }, { k: 'listen', line: 3, bad: ['Il a onze ans.', 'Merci, à bientôt !'] }, { k: 'understand', line: 3, q: 'Quantos anos tem a Sophie?', opts: ['Quarenta e seis', 'Cinquenta e seis', 'Trinta e seis'], ok: 0 }] };
@@ -1113,14 +1120,14 @@ const G = { inicio: 'Começo', m11: 'M1.1 · Cumprimentar e se despedir', m12: '
 /* ---- Começo ---- */
 add({ id: 'inicio', g: 'inicio', title: 'Como usar esta maquete', tags: [], render(root){
   const trail = [
-    ['M1.1', 'Cumprimentar e se despedir', '3 lições + Ponto de verificação', 'existe', 'm11-cartao'],
-    ['M1.2', 'Dizer o nome e a nacionalidade', 'lições reordenadas', 'existe', 'm12-par'],
-    ['M1.3', 'Dizer a idade: de 1 a 29', '4 lições + Ponto de verificação', 'existe', 'm13-ans'],
-    ['M1.4', 'Perguntar a idade dos outros: até 69', 'unidade nova, só conteúdo', 'existe', 'm14-dialogo'],
+    ['M1.1', 'Cumprimentar e se despedir', '10 cartões · 3 lições + Revisão da unidade', 'existe', 'm11-cartao'],
+    ['M1.2', 'Dizer o nome e a nacionalidade', '10 cartões · lições reordenadas', 'existe', 'm12-par'],
+    ['M1.3', 'Dizer a idade: de 1 a 29', '14 cartões · 4 lições + Revisão da unidade · tela "Novidades"', 'existe', 'm13-ans'],
+    ['M1.4', 'Perguntar a idade dos outros: até 69', 'unidade nova · 13 cartões · 4 lições + Revisão da unidade', 'existe', 'm14-dialogo'],
     ['M1.5 (g)', 'être e avoir: as seis pessoas', 'gramática', 'existe', 'm15-explica'],
-    ['M1.6', 'Dizer a profissão', 'unidade nova, só conteúdo', 'existe', 'm16-par'],
+    ['M1.6', 'Dizer a profissão', 'unidade nova · 10 cartões', 'existe', 'm16-par'],
     ['M1.7 (g)', 'Masculino e feminino: nacionalidades e profissões', 'gramática', 'existe', 'm17-explica'],
-    ['PV', 'Ponto de verificação', '12 itens, 70%', 'existe', 'pv-prova'],
+    ['PV', 'Ponto de verificação do módulo', 'a prova: 12 itens, 70%', 'existe', 'pv-prova'],
   ];
   root.innerHTML = `<div class="mq-why"><b>Para que serve:</b> esta página imita o site (mesmas cores, fonte, botões e o diálogo copiado do código de hoje) para você ver como o Módulo 1 ficaria, tela por tela. Nada aqui grava progresso nem manda dados.
     <ul><li><b>Etiquetas</b> em cada tela: ${tag('existe')} o site já faz; ${tag('ajuste')} poucas linhas de código; ${tag('novo')} tela ou motor que não existe. O botão <b>Mostrar o que é novo</b> liga e desliga as etiquetas.</li>
@@ -1129,7 +1136,12 @@ add({ id: 'inicio', g: 'inicio', title: 'Como usar esta maquete', tags: [], rend
     <li><b>Áudio</b>: o 🔊 usa a voz do seu navegador, se houver; senão o botão só anima (no site são os mp3 gravados).</li></ul></div>
     <div class="mq-app"><div class="section-label" style="margin-top:0">MÓDULO 1 · Apresentar-se</div>
     <div class="mq-trail">${trail.map(r => `<button class="mq-trail-row${r[3] === 'novo' ? ' soft' : ''}" data-goto="${r[4]}"><span class="mq-trail-num">${r[0]}</span><span class="mq-trail-txt"><b>${r[1]}</b><span>${r[2]}</span></span>${tag(r[3])}</button>`).join('')}</div>
-    <p class="mq-small" style="margin:12px 2px 0">A ordem "unidades → Ponto de verificação" é a de hoje. Tempo da trilha: cerca de 3h20. O défi de fim de módulo está <b>arquivado</b> (fim do índice).</p></div>
+    <p class="mq-small" style="margin:12px 2px 0">A ordem "unidades → Ponto de verificação do módulo" é a de hoje. A última lição de cada unidade agora se chama <b>Revisão da unidade</b>; "Ponto de verificação" fica só para a prova do módulo. <b>57 cartões</b> no M1 (eram 54: <i>dix-sept, dix-huit, dix-neuf</i> ganharam cartão). Tempo da trilha: cerca de 3h20. O défi de fim de módulo está <b>arquivado</b> (fim do índice).</p></div>
+    <div class="mq-box"><h3>Versão 5 (2026-10-19, 6ª rodada): o que mudou</h3><ul>
+      <li><b>"Revisão da unidade"</b> (en: <i>Unit review</i>) é o nome novo da última lição de cada unidade (telas M1.1 e M1.3). <b>Ponto de verificação</b> fica só para a prova do módulo.</li>
+      <li><b>M1.4 com 13 cartões</b>: <i>dix-sept, dix-huit, dix-neuf</i> agora têm cartão. Conjunto fechado: 4 lições + Revisão da unidade (veja a divisão na tela do diálogo da M1.4). Total do M1: 57 cartões.</li>
+      <li><b>M1.3: tela opcional "Novidades desta unidade"</b> ${tag('novo')}: quem já concluiu a unidade vê as 6 palavras novas (<i>quatre... neuf</i>), com "Ver agora" e "Depois". Elas vão para a Revisão de qualquer jeito.</li>
+      <li><b>M1.5</b>: saiu a tela "Uma pegadinha comum" (<i>avoir faim</i>, vira nota na M4.1); no lugar, "<i>être</i> e <i>avoir</i> na apresentação". O exercício <i>Elle ___ faim.</i> virou <i>Elle ___ seize ans.</i></li></ul></div>
     <div class="mq-box"><h3>Versão 4 (2026-10-18, 3ª e 4ª rodadas): o que mudou</h3><ul>
       <li><b>Caixa roxinha em todas as notas</b>: o visual real do site (<code>gram-block wrapup</code>). O tipo aparece só no rótulo com ícone (faixa de cima e, na 💡, em cima de cada nota): 💡 explicação, 🗣 realidade, 📜 cultura e 🔊 <b>pronúncia</b> (tipo novo).</li>
       <li><b>M1.1</b>: cartão em par <i>s'il vous plaît / s'il te plaît</i> (formal e informal juntos); a nota "S'il vous plaît no dia a dia" ficou como estava.</li>
@@ -1148,7 +1160,7 @@ add({ id: 'inicio', g: 'inicio', title: 'Como usar esta maquete', tags: [], rend
     <div class="mq-box"><h3>Versão 2 (2026-10-18): o que mudou depois do seu retorno</h3><ul>
       <li><b>Diálogo</b>: a proposta aprovada é o padrão. Léa (A) sempre à esquerda, Hugo (B) sempre à direita, <b>sem seletor de lado</b>. 🔊 e 🌐 de 44 px embaixo de cada balão, e "Ouvir tudo" e "Mostrar traduções" no alto.</li>
       <li><b>Palavra nova no diálogo</b>: passar o mouse abre um balão com o significado, que fica aberto até você clicar em outro lugar; no celular, o toque abre o mesmo balão.</li>
-      <li><b>💡</b>: o número some depois do 1º clique; uma nota nova faz o número voltar (teste na M1.3 "De 21 a 29"). Mostra só as notas da lição atual (no Ponto de verificação da unidade, as da unidade); o quadro rola, sem limite de notas.</li>
+      <li><b>💡</b>: o número some depois do 1º clique; uma nota nova faz o número voltar (teste na M1.3 "De 21 a 29"). Mostra só as notas da lição atual (na Revisão da unidade, as da unidade); o quadro rola, sem limite de notas.</li>
       <li><b>Notas curtas</b>: na 1ª aparição de um conceito, só uma nota breve sobre a frase que acabou de aparecer (M1.2 "Moi... Et toi ?", M1.2 "française", M1.6 "Elle est infirmière"); a explicação completa fica na unidade de gramática.</li>
       <li>Nota da M1.1 com nome novo: "Letras que ficam <b>mudas</b> no fim".</li>
       <li><b>Painel de resposta em todos os exercícios</b> (referência Busuu): certo ou errado, mostra o estado, a frase certa em francês com 🔊 e a tradução embaixo; no digitar, as letras erradas ficam riscadas em vermelho e as que faltaram, sublinhadas em vermelho.</li>
@@ -1159,7 +1171,7 @@ add({ id: 'inicio', g: 'inicio', title: 'Como usar esta maquete', tags: [], rend
       <li><b>Défi arquivado</b>: saiu do menu principal; as telas estão no fim do índice, em "Arquivado".</li></ul></div>
     <div class="mq-box"><h3>Decisões da 1ª rodada (2026-10-18), mantidas</h3><ul>
       <li>Nota de explicação pode ter <b>um V/F rápido e fácil</b> logo depois; certo e errado repetem a explicação resumida (telas M1.1 "S'il vous plaît", M1.1 "Letras mudas", M1.2 "o feminino que se ouve" e M1.6 "sem artigo").</li>
-      <li>O <b>Ponto de verificação não puxa nada das notas</b>: só palavra, frase, escuta e gramática.</li>
+      <li>O <b>Ponto de verificação do módulo não puxa nada das notas</b>: só palavra, frase, escuta e gramática.</li>
       <li>Item em par (<i>le vendeur / la vendeuse</i>): "Na frase" vem de <b>uma</b> das formas, e isso <b>já está pronto no código</b> (telas M1.2 e M1.6).</li>
       <li><b>Botão 💡 ao lado da ⚑ de report</b>, no topo da lição: abre as notas que já apareceram naquela lição; sem nota ainda, fica apagado e não faz nada ${tag('novo')} (veja na tela M1.1 "Cartão da palavra").</li>
       <li>O V/F depois da nota <b>não tem botão de pular</b>: é um mini-passo curto, sem XP e sem efeito na memória; certo e errado mostram a mesma explicação (agora no painel de resposta padrão, um item por passo).</li>
@@ -1167,7 +1179,7 @@ add({ id: 'inicio', g: 'inicio', title: 'Como usar esta maquete', tags: [], rend
   $$('[data-goto]', root).forEach(b => b.addEventListener('click', () => goId(b.dataset.goto)));
 } });
 
-// Notas usadas em mais de um lugar (na lição e na 💡 do Ponto de verificação da unidade). Funções: o texto depende do idioma (L).
+// Notas usadas em mais de um lugar (na lição e na 💡 da Revisão da unidade). Funções: o texto depende do idioma (L).
 const N_SVP = () => ({ kind: 'realidade', title: '"S\'il vous plaît" no dia a dia', wrapup: true, body: "Na fala informal ou em mensagens de texto, <strong>s'il vous plaît</strong> quase sempre encolhe: com amigos vira <strong>s'il te plaît</strong> (a forma \"tu\", não \"vous\"), e por escrito é comum ver só <strong>STP</strong>. A forma completa com \"vous\" continua sendo a mais segura com desconhecidos.",
         examples: [{ f: "s'il te plaît", t: 'por favor (informal, entre amigos)' }, { f: 'STP', say: "s'il te plaît", t: 'abreviação de texto para "s\'il te plaît"' }] });
 const N_MUDAS = () => ({ kind: 'pronuncia', title: L('Letras que ficam mudas no fim', 'Letters that stay silent at the end'), body: 'Muitas consoantes do fim não soam: o <strong>t</strong> de <strong>salut</strong>, o <strong>s</strong> de <strong>vous</strong>, o <strong>p</strong> de <strong>beaucoup</strong>. Escreva, mas não pronuncie.',
@@ -1186,7 +1198,7 @@ const N_21B = () => ({ kind: 'explica', counter: '2 de 2', wrapup: true, title: 
 /* ---- M1.1 ---- */
 add({ id: 'm11-cartao', g: 'm11', title: 'Cartão da palavra com "Na frase"', tags: ['existe', 'ajuste'], render(root){
   root.innerHTML = `<div class="mq-why">Lição 3 "Pedir por favor e perguntar como vai", na ordem real: cartão, nota, V/F rápido, próximos cartões, nota de pronúncia de <i>ça va</i>. <b>Cartão em par</b> <i>s'il vous plaît / s'il te plaît</i> (regra do currículo: formal e informal sempre juntos); "Na frase" achada por uma das formas (<i>s'il vous plaît</i>) ${tag('existe')}. O áudio da palavra toca sozinho no site. <b>"Na frase" fica na mesma tela, logo abaixo do cartão</b> ${tag('existe')}.
-    <br><b>Botão 💡</b> no topo, ao lado da ⚑ de report ${tag('novo')}: no 1º cartão ainda está apagado (nenhuma nota nesta lição); depois da nota de <i>s'il vous plaît</i> ele acende com o número 1 e abre essa nota por cima da tela; depois do 1º clique o número some (a 💡 continua abrindo as notas). A 💡 mostra <b>só as notas desta lição</b> (no Ponto de verificação da unidade, as da unidade), sem limite de quantidade: o quadro rola.
+    <br><b>Botão 💡</b> no topo, ao lado da ⚑ de report ${tag('novo')}: no 1º cartão ainda está apagado (nenhuma nota nesta lição); depois da nota de <i>s'il vous plaît</i> ele acende com o número 1 e abre essa nota por cima da tela; depois do 1º clique o número some (a 💡 continua abrindo as notas). A 💡 mostra <b>só as notas desta lição</b> (na Revisão da unidade, as da unidade), sem limite de quantidade: o quadro rola.
     Toque no cartão para virar: frente = palavra, verso = tradução ${tag('ajuste')} (hoje a tradução já aparece junto da palavra, sem virar).</div><div data-f></div>`;
   flow($('[data-f]', root), [
     (box, api) => {
@@ -1254,7 +1266,7 @@ add({ id: 'm11-nota-quebec', g: 'm11', title: 'Nota nova "Bienvenue: no Quebec, 
 } });
 
 add({ id: 'm11-checagem', g: 'm11', title: 'Checagem rápida "O que significa?"', tags: ['existe'], render(root){
-  root.innerHTML = `<div class="mq-why">Uma pergunta por palavra nova, 4 opções e "Não sei". Errar guarda a palavra para a revisão do fim da unidade.</div><div data-f></div>`;
+  root.innerHTML = `<div class="mq-why">Uma pergunta por palavra nova, 4 opções e "Não sei". Errar guarda a palavra para a Revisão da unidade.</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => {
     api.banner('🧠 Checagem rápida');
     const opts = [{ t: 'tudo bem' }, { t: 'por favor (formal)', ok: true }, { t: 'desculpe / com licença' }, { t: 'até breve' }];
@@ -1305,10 +1317,10 @@ add({ id: 'm11-entendeu', g: 'm11', title: '"Você entendeu?": as 3 checagens', 
   root.innerHTML = `<div class="mq-why">Passo à parte, <b>sem o diálogo na tela</b> (para não copiar a resposta). 1) completar a fala que falta, 2) ouvir uma fala e escolher a resposta, 3) pergunta de compreensão. Errar não reprova: mostra a resposta certa. O "Continuar" só aparece no fim.</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => dlgCheck(box, api, DLG_M11)]);
 } });
-add({ id: 'm11-pv', g: 'm11', title: 'Ponto de verificação da unidade: a frase nova', en: true, tags: ['existe'], render(root){
-  root.innerHTML = `<div class="mq-why">Última lição da M1.1. Frase nova com cenário (consigo 5 do 08). <i>vous pouvez</i> entra como fórmula. <b>💡 aqui mostra as notas da unidade inteira</b> (as 3 da M1.1), porque é o Ponto de verificação da unidade; notas de outras unidades nunca aparecem.</div><div data-f></div>`;
+add({ id: 'm11-revisao', g: 'm11', title: 'Revisão da unidade: a frase nova', en: true, tags: ['existe'], render(root){
+  root.innerHTML = `<div class="mq-why">Última lição da M1.1. Frase nova com cenário (consigo 5 do 08). <i>vous pouvez</i> entra como fórmula. <b>💡 aqui mostra as notas da unidade inteira</b> (as 3 da M1.1), porque é a Revisão da unidade; notas de outras unidades nunca aparecem. O nome mudou (decisão 47) para não confundir com a prova do módulo.</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => {
-    api.banner('🏁 Ponto de verificação');
+    api.banner(L('🏁 Revisão da unidade', '🏁 Unit review'));
     const o = { counter: 'Exercício 4 de 18', q: 'A Léa disse o nome da cidade dela rápido demais. Você quer que ela repita. O que você diz?', qEn: 'Léa said the name of her city too fast. You want her to repeat it. What do you say?', emoji: '💬',
       opts: [{ f: 'Pardon ? Vous pouvez répéter ?', ok: true }, { f: "De rien, c'est normal." }, { f: 'Au revoir, à demain !' }] };
     box.innerHTML = scenario(o); api.next('Continuar →', false);
@@ -1368,18 +1380,54 @@ add({ id: 'm13-nota-21', g: 'm13', title: 'Nota em 2 blocos "De 21 a 29" e "Ving
   ]);
 } });
 add({ id: 'm13-cenario', g: 'm13', title: 'Frase com cenário "J\'ai vingt-quatre ans."', en: true, tags: ['existe'], render(root){
-  root.innerHTML = `<div class="mq-why">Frase nova no Ponto de verificação da unidade. A opção 2 é o erro clássico do brasileiro (<i>être</i> para idade). A 💡 mostra as notas da M1.3 (unidade), e só elas.</div><div data-f></div>`;
+  root.innerHTML = `<div class="mq-why">Frase nova na Revisão da unidade. A opção 2 é o erro clássico do brasileiro (<i>être</i> para idade). A 💡 mostra as notas da M1.3 (unidade), e só elas.</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => {
-    api.banner('🏁 Ponto de verificação');
+    api.banner(L('🏁 Revisão da unidade', '🏁 Unit review'));
     const o = { counter: 'Exercício 9 de 20', q: 'No clube de conversa, perguntam a sua idade. Você tem 24 anos. O que você diz?', qEn: 'At the conversation club, someone asks your age. You are 24. What do you say?', emoji: '🎂', opts: [{ f: "J'ai vingt-quatre ans.", ok: true }, { f: 'Je suis vingt-quatre ans.' }, { f: "J'ai vingt-quatre." }] };
     box.innerHTML = scenario(o); api.next('Continuar →', false);
     wireChoice(box, '.scenario-option', o.opts, (ok, x) => api.answer({ state: ok ? 'ok' : 'wrong', fr: "J'ai vingt-quatre ans.", tr: 'Eu tenho vinte e quatro anos.', chosen: ok ? null : esc(x.f), why: ok ? null : 'Para a idade o francês usa <b>avoir</b> e sempre diz <b>ans</b>.' }));
   }], { preNotes: [N_LIGACAO(), N_21A(), N_21B()] });
 } });
 
+// Decisão 50 do doc 12: palavras novas numa unidade que o aluno já concluiu (quatre... neuf na M1.3) aparecem numa tela única e
+// opcional "Novidades desta unidade". Ver agora ou Depois: as palavras vão para a Revisão de qualquer jeito.
+const NOVAS_M13 = [['quatre', 'quatro', 'four'], ['cinq', 'cinco', 'five'], ['six', 'seis', 'six'], ['sept', 'sete', 'seven'], ['huit', 'oito', 'eight'], ['neuf', 'nove', 'nine']];
+add({ id: 'm13-novidades', g: 'm13', title: 'Tela opcional "Novidades desta unidade" (quem já concluiu a M1.3)', en: true, tags: ['novo'], render(root){
+  root.innerHTML = `<div class="mq-why">Para quem <b>já concluiu</b> a M1.3 antes de ela ganhar <i>quatre, cinq, six, sept, huit, neuf</i> (decisão 50) ${tag('novo')}. Aparece uma vez, ao abrir a unidade na trilha, no lugar de mandar as palavras direto para a Revisão sem aviso. É <b>opcional</b>: "Ver agora" mostra os 6 cartões de apresentação; "Depois" pula. Nos dois casos as palavras entram na Revisão como cartões novos. Não refaz lição nem muda o progresso da unidade.</div><div data-n></div>`;
+  const host = $('[data-n]', root);
+  const n = NOVAS_M13.length;
+  const endBox = (title, body) => {
+    host.innerHTML = `<div class="mq-app" data-news-end><h3 class="mq-news-title">${title}</h3><p class="gram-block-body" style="margin:0 0 12px">${body}</p>
+      <div class="mq-news-actions"><button class="btn btn-primary btn-block" data-unit>${L('Ir para a unidade', 'Go to the unit')}</button><button class="btn btn-secondary btn-block" data-again>${L('↺ Ver a tela de novo (só na maquete)', '↺ See this screen again (mockup only)')}</button></div></div>`;
+    $('[data-unit]', host).addEventListener('click', () => toast(L('Abriria a M1.3 na trilha', 'Would open M1.3 on the path')));
+    $('[data-again]', host).addEventListener('click', intro);
+    scanEmoji(host);
+  };
+  const cards = () => flow(host, NOVAS_M13.map(([f, pt, en], k) => (box, api) => {
+    api.banner(L('Novidades desta unidade', 'New in this unit'));
+    box.innerHTML = vocabCard({ dots: [k + 1, n], word: f, trans: L(pt, en), phrase: { f: `J'ai ${f} ans.`, t: L(`Eu tenho ${pt} anos.`, `I am ${en} years old.`) } });
+    api.next(k < n - 1 ? L('Próxima palavra →', 'Next word →') : L('Concluir →', 'Finish →'));
+  }), { bulb: false, onEnd: () => endBox(L('🎉 Pronto!', '🎉 All set!'), L(`Você viu as ${n} palavras novas. Elas já estão na sua Revisão.`, `You have seen the ${n} new words. They are already in your Review.`)) });
+  const intro = () => {
+    host.innerHTML = `<div class="mq-app" data-news>
+      <div class="section-label" style="margin-top:0">${L('Novidades desta unidade', 'New in this unit')}</div>
+      <h3 class="mq-news-title">${L('Esta unidade ganhou palavras novas', 'This unit has new words')}</h3>
+      <p class="mq-small" style="margin:0 0 12px">M1.3 · ${L('Dizer a idade: de 1 a 29', 'Saying your age: 1 to 29')}</p>
+      <ul class="mq-news-list">${NOVAS_M13.map(([f, pt, en]) => `<li class="mq-news-row"><span class="mq-news-fr">${esc(f)}</span>${ab(f)}<span class="mq-news-tr">${L(pt, en)}</span></li>`).join('')}</ul>
+      <p class="mq-small" style="margin:0">${L('Elas já entram na sua Revisão. Quer ver os cartões agora?', 'They are already in your Review. Want to see the cards now?')}</p>
+      <div class="mq-news-actions"><button class="btn btn-primary btn-block" data-now>${L('Ver agora', 'See them now')}</button><button class="btn btn-secondary btn-block" data-later>${L('Depois', 'Later')}</button></div></div>`;
+    $('[data-now]', host).addEventListener('click', cards);
+    $('[data-later]', host).addEventListener('click', () => endBox(L('Tudo bem!', 'No problem!'), L(`As ${n} palavras já estão na sua Revisão. Esta tela não aparece de novo.`, `The ${n} words are already in your Review. This screen won't show up again.`)));
+    scanEmoji(host);
+  };
+  intro();
+} });
+
 /* ---- M1.4 ---- */
 add({ id: 'm14-dialogo', g: 'm14', title: 'Diálogo novo "No clube de conversa"', en: true, tags: ['existe', 'ajuste'], render(root){
-  root.innerHTML = `<div class="mq-why">Diálogo novo só com conteúdo ${tag('existe')}. Repare: hoje o destaque não pega <i>quarante</i> em <i>quarante-six</i> (a busca para no hífen); vale ajustar junto ${tag('ajuste')}.</div><div data-d></div><div class="section-label">Você entendeu?</div><div data-c></div>`;
+  root.innerHTML = `<div class="mq-why">Diálogo novo só com conteúdo ${tag('existe')}. Repare: hoje o destaque não pega <i>quarante</i> em <i>quarante-six</i> (a busca para no hífen); vale ajustar junto ${tag('ajuste')}.</div>
+    <div class="mq-box"><h3>M1.4: ${V_M14.length} palavras, 4 lições + Revisão da unidade</h3>Conjunto fechado (decisão 41: <i>dix-sept, dix-huit, dix-neuf</i> agora têm cartão).
+    <ul><li>Lição 1: <i>onze, douze, treize</i></li><li>Lição 2: <i>quatorze, quinze, seize</i></li><li>Lição 3: <i>dix-sept, dix-huit, dix-neuf</i></li><li>Lição 4: <i>trente, quarante, cinquante, soixante</i></li><li>Revisão da unidade (frase nova com cenário)</li></ul></div><div data-d></div><div class="section-label">Você entendeu?</div><div data-c></div>`;
   dlgCompare($('[data-d]', root), DLG_M14);
   flow($('[data-c]', root), [(box, api) => dlgCheck(box, api, DLG_M14)]);
 } });
@@ -1438,17 +1486,17 @@ document.addEventListener('click', async e => {
 const TBL = (rows, heads) => `<div class="gram-tables">${heads.map((h, c) => `<div class="gram-table"><div class="gram-table-title">${h}</div>${rows.map(r => `<div class="gram-table-row"><span class="gram-table-pronoun">${r[0]}</span><span class="gram-table-form">${r[c + 1]}</span></div>`).join('')}</div>`).join('')}</div>`;
 add({ id: 'm15-explica', g: 'm15', title: 'Explicação: 4 passos', tags: ['existe'], render(root){
   root.innerHTML = `<div class="mq-why"><b>Passo 4:</b> 🔊 ao lado de <b>cada</b> conjugação, fora da caixa, tocando pronome + verbo ${tag('ajuste')} (hoje só <i>je suis, j'ai, il a, elle est</i> têm áudio, por estarem em frases: as outras precisam de mp3 novo). <b>"Ouvir a conjugação toda"</b> toca as seis em sequência e destaca cada linha ${tag('sug')}.
-    <br>A unidade publicada, <b>sem a tela dos tônicos</b> (decisão de hoje) e com os ajustes de exemplo do 09: <i>Elle est française</i> no lugar de <i>Elle est ma sœur</i>, título sem "pra" (pergunta 30). O passo 3 ("pegadinha") é o publicado; a recomendação é movê-lo para a M4.1 (pergunta 26).</div><div data-f></div>`;
+    <br>A unidade publicada, <b>sem a tela dos tônicos</b> (decisão de hoje) e com os ajustes de exemplo do 09: <i>Elle est française</i> no lugar de <i>Elle est ma sœur</i>, título sem "pra" (pergunta 30). O passo 3 agora é "<i>être</i> e <i>avoir</i> na apresentação" ${tag('ajuste')} (decisão 49): a tela publicada "Uma pegadinha comum" (<i>avoir faim</i>) saiu e vira nota na M4.1.</div><div data-f></div>`;
   gramExplain($('[data-f]', root), [
     { title: 'Avoir e être', body: '<strong>Avoir</strong> (ter) e <strong>être</strong> (ser/estar) são os dois verbos mais usados do francês, e os únicos totalmente irregulares no presente. Você já viu várias formas deles nas últimas unidades (<i>je suis, j\'ai, il a</i>...) sem parar para pensar na conjugação completa.', examples: [{ f: 'Je suis brésilienne.', t: 'Eu sou brasileira. (être)' }, { f: "J'ai vingt ans.", t: 'Eu tenho vinte anos. (avoir)' }] },
     { title: 'Nenhum padrão para deduzir', body: 'Nenhuma das duas conjugações segue um padrão regular: não dá para "deduzir" a forma a partir do infinitivo. Vale a pena memorizar a tabela inteira, não só as formas que você já viu.', examples: [{ f: 'Il a dix ans.', t: 'Ele tem dez anos. (avoir)' }, { f: 'Elle est française.', t: 'Ela é francesa. (être)' }] },
-    { title: 'Uma pegadinha comum', body: 'O francês usa <strong>avoir</strong> (ter) em várias expressões em que o português usa "estar": <i>avoir faim</i> (estar com fome), <i>avoir soif</i> (estar com sede), <i>avoir raison</i> (estar certo).', examples: [{ f: "J'ai faim.", t: 'Estou com fome.' }, { f: 'Elle a raison.', t: 'Ela está certa.' }] },
+    { title: 'Être e avoir na apresentação', body: 'Para se apresentar, você já usa os dois: <strong>être</strong> para dizer quem você é e de onde é (<i>je suis</i> + nome ou nacionalidade) e <strong>avoir</strong> para a idade (<i>j\'ai</i> + número + <i>ans</i>). Na idade, o francês <strong>tem</strong> anos: nunca <i>je suis vingt ans</i>.', examples: [{ f: 'Je suis Ana. Je suis brésilienne.', t: 'Eu sou a Ana. Sou brasileira. (être)' }, { f: "J'ai vingt-neuf ans.", t: 'Tenho vinte e nove anos. (avoir)' }] },
     { title: 'Très bien! 🎉', wrapup: true, body: 'Aqui está a conjugação completa dos dois verbos antes de praticar. Toque no 🔊 ao lado de cada forma, ou ouça a conjugação toda:', after: conjHTML() },
   ], 'm15-exercicios');
 } });
 add({ id: 'm15-exercicios', g: 'm15', title: 'Exercícios de digitar (6 frases)', tags: ['existe', 'ajuste'], render(root){
-  root.innerHTML = `<div class="mq-why">Só de digitar, com o <b>painel de resposta padrão</b> ${tag('ajuste')}: certo ou errado, a frase inteira em francês com 🔊 e a tradução. Certo = 1 ponto; acento errado = "Quase" e meio ponto (ex.: <b>etes</b> em vez de <b>êtes</b>, com o <b>e</b> marcado). Erro de conjugação: as letras erradas ficam riscadas em vermelho e as que faltaram, sublinhadas (ex.: <b>somes</b> em vez de <b>sommes</b>). Já com as trocas propostas: <i>Je ___ brésilienne.</i> e <i>Vous ___ quel âge ?</i>.</div><div data-f></div>`;
-  gramExercises($('[data-f]', root), [{ p: 'Je ___ brésilienne.', h: 'être', a: 'suis', t: 'Eu sou brasileira.' }, { p: 'Tu ___ vingt ans.', h: 'avoir', a: 'as', t: 'Você tem vinte anos.' }, { p: 'Nous ___ français.', h: 'être', a: 'sommes', t: 'Nós somos franceses.' }, { p: 'Vous ___ quel âge ?', h: 'avoir', a: 'avez', t: 'Quantos anos o senhor tem? (a senhora / vocês)' }, { p: 'Vous ___ de Paris ?', h: 'être', a: 'êtes', t: 'O senhor é de Paris? (a senhora / vocês)' }, { p: 'Elle ___ faim.', h: 'avoir', a: 'a', t: 'Ela está com fome.' }]);
+  root.innerHTML = `<div class="mq-why">Só de digitar, com o <b>painel de resposta padrão</b> ${tag('ajuste')}: certo ou errado, a frase inteira em francês com 🔊 e a tradução. Certo = 1 ponto; acento errado = "Quase" e meio ponto (ex.: <b>etes</b> em vez de <b>êtes</b>, com o <b>e</b> marcado). Erro de conjugação: as letras erradas ficam riscadas em vermelho e as que faltaram, sublinhadas (ex.: <b>somes</b> em vez de <b>sommes</b>). Já com as trocas propostas: <i>Je ___ brésilienne.</i>, <i>Vous ___ quel âge ?</i> e <i>Elle ___ seize ans.</i> (no lugar de <i>Elle ___ faim.</i>, que saiu com a pegadinha).</div><div data-f></div>`;
+  gramExercises($('[data-f]', root), [{ p: 'Je ___ brésilienne.', h: 'être', a: 'suis', t: 'Eu sou brasileira.' }, { p: 'Tu ___ vingt ans.', h: 'avoir', a: 'as', t: 'Você tem vinte anos.' }, { p: 'Nous ___ français.', h: 'être', a: 'sommes', t: 'Nós somos franceses.' }, { p: 'Vous ___ quel âge ?', h: 'avoir', a: 'avez', t: 'Quantos anos o senhor tem? (a senhora / vocês)' }, { p: 'Vous ___ de Paris ?', h: 'être', a: 'êtes', t: 'O senhor é de Paris? (a senhora / vocês)' }, { p: 'Elle ___ seize ans.', h: 'avoir', a: 'a', t: 'Ela tem dezesseis anos.' }]);
 } });
 
 /* ---- M1.6 ---- */
@@ -1554,7 +1602,7 @@ function recorder(box, model){
 }
 /* ---- Ponto de verificação do módulo ---- */
 add({ id: 'pv-prova', g: 'pv', title: 'A prova: só palavra, frase, escuta e gramática', tags: ['existe'], render(root){
-  root.innerHTML = `<div class="mq-why"><b>Decisão de hoje:</b> o Ponto de verificação <b>não puxa nada das notas de explicação</b> (são acessórias). No código já é assim: a prova sorteia 12 itens digitados das palavras, das frases, do áudio e dos exercícios das gramáticas. Aqui, 6 de exemplo (um de cada tipo):
+  root.innerHTML = `<div class="mq-why"><b>Decisão de hoje:</b> o Ponto de verificação do módulo <b>não puxa nada das notas de explicação</b> (são acessórias). No código já é assim: a prova sorteia 12 itens digitados das palavras, das frases, do áudio e dos exercícios das gramáticas. Aqui, 6 de exemplo (um de cada tipo):
     <ul><li>3 "Ouça e escreva" · 3 "Escreva em francês" · 2 de gramática (M1.5 e M1.7) · o resto "Como se diz...?"</li><li>Item em par (<i>le vendeur / la vendeuse</i>) não vira "Como se diz": o gênero entra por frase ou pela gramática.</li><li>Pontuação e maiúscula não descontam; acento faltando = meio ponto; aprovação com 70%.</li></ul></div><div data-f></div>`;
   const items = [
     { kind: 'Frase', label: 'Escreva em francês: "Eu tenho vinte e quatro anos."', a: "J'ai vingt-quatre ans.", t: 'Eu tenho vinte e quatro anos.' },
@@ -1807,7 +1855,7 @@ function buildNav(){
     html += link(s, k);
   });
   const arch = SCREENS.map((s, k) => [s, k]).filter(([s]) => s.arch);
-  if (arch.length) html += `<details class="mq-nav-arch" ${isArch(APP.i) ? 'open' : ''}><summary>Arquivado (para retomar depois)</summary><div class="mq-small" style="margin:0 10px 6px">Défi de fim de módulo, como estava na v1. Retomar ligado ao DELF, sem repetir o Ponto de verificação e os Desafios.</div>${arch.map(([s, k]) => link(s, k)).join('')}</details>`;
+  if (arch.length) html += `<details class="mq-nav-arch" ${isArch(APP.i) ? 'open' : ''}><summary>Arquivado (para retomar depois)</summary><div class="mq-small" style="margin:0 10px 6px">Défi de fim de módulo, como estava na v1. Retomar ligado ao DELF, sem repetir o Ponto de verificação do módulo e os Desafios.</div>${arch.map(([s, k]) => link(s, k)).join('')}</details>`;
   html += `<p class="mq-small" style="margin:14px 4px 0">Bolinha: <span class="mq-dot existe" style="display:inline-block"></span> só o que existe · <span class="mq-dot ajuste" style="display:inline-block"></span> tem ajuste pequeno · <span class="mq-dot novo" style="display:inline-block"></span> tem código novo.</p>`;
   $('#mq-nav-panel').innerHTML = html;
   $('#mq-nav-close').addEventListener('click', closeNav);
@@ -1821,7 +1869,7 @@ function render(){
   APP.enOk = !!s.en;
   $('#mq-en').disabled = false;
   const main = $('#mq-main'); main.classList.remove('wide');
-  const archNote = s.arch ? `<div class="mq-box mq-arch" style="margin-top:0"><b>Arquivado em 2026-10-18 (para retomar depois).</b> O défi não pode repetir as funções do Ponto de verificação nem dos Desafios; deve ficar mais claramente voltado ao DELF. Tela preservada como estava na v1; nada foi apagado (texto em <code>07-atividades-finais-defi.md</code>).</div>` : '';
+  const archNote = s.arch ? `<div class="mq-box mq-arch" style="margin-top:0"><b>Arquivado em 2026-10-18 (para retomar depois).</b> O défi não pode repetir as funções do Ponto de verificação do módulo nem dos Desafios; deve ficar mais claramente voltado ao DELF. Tela preservada como estava na v1; nada foi apagado (texto em <code>07-atividades-finais-defi.md</code>).</div>` : '';
   const enNote = (APP.lang === 'en' && !s.en) ? `<div class="mq-box" style="margin-top:0">EN: esta tela já existe no site; a versão em inglês sai da camada en do curso (<code>fr/content.en.js</code>). Aqui ela fica em português.</div>` : '';
   main.innerHTML = `<div class="mq-crumb">${G[s.g]}</div><h2 class="mq-h">${esc(s.title)}${s.arch ? ' <span class="mq-small">(arquivado)</span>' : ''}</h2>${s.tags.length ? `<div class="mq-tags">${s.tags.map(t => tag(t)).join('')}</div>` : ''}${archNote}${enNote}<div data-screen></div>`;
   s.render($('[data-screen]', main));
