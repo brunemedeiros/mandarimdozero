@@ -27,6 +27,12 @@ Botão "Estudar N": os cartões que vencem hoje. Hoje ela **não** tem Récap, �
 - **Privacidade:** a janela de aviso da aluna só tem o botão "Entendi" (a política completa virá no menu Mais > Ajuda). Rascunho da política em aba temporária "Privacidade" do Painel de Admin (`shared/privacy-draft.js`), para o advogado revisar.
 - **Ideias aceitas para depois:** mapa de erros, ranking dos itens mais errados, revisão por período e meta semanal.
 
+- **Mapa de erros:** completo para a professora; versão leve e positiva para a aluna dentro de Meus erros.
+- **Meta semanal:** padrão fixo de 40 cartões foi recusado (aluna com 1 aula por semana não gera tantos). Pensar uma meta que acompanhe o ritmo de cada aluna.
+- **Revisão por período:** só a professora escolhe o período (no Modo aula); a aluna não.
+- **Cadernos:** relatório por aula (linhas lidas, itens criados, ignoradas); preview em `docs/banco-revisao-preview-relatorio.png`, ainda sem decisão de implementar.
+- **Privacidade:** política cobre o site inteiro (conta sem vínculo, com vínculo, professora, pessoas sem conta), mapa do fluxo dos dados e pontos para o advogado, tudo na aba temporária do Admin.
+
 ## Em decisão (entrevista com a professora, 2026-10-19)
 O que fica, o que muda, o que sai e o que entra de novo: Récap, Última aula, Erros (também para a aluna), tipos de item.
 
