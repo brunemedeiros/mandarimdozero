@@ -368,7 +368,7 @@ Gatilhos corrigidos na conversão para `afterKey`: N21 → *demain*; N23 → *lu
 chave, `fr/curriculum-changes.js` com fusões e aposentados, arquivo `retiredStudyCards`, marca `released`, `lessonId`, livro-razão
 `fr/published_ids.json` com teste que bloqueia o merge). 0b parte 1 feita (mapa `STUDY_ITEM_GATE` do cron gerado, regra 2.10 "nasce aberta",
 Course Deck de unidade que saiu escondido). **Falta:** script de operações `fr/scripts/curriculo_ops.js`, camadas de tradução por chave e o
-**deploy do `notification-cron`** (pendente no `CLAUDE.md`). Nenhuma mudança de conteúdo deste mapa entra antes disso.
+**deploy do `notification-cron`** (feito: v29 em produção, publicado pela dona pelo painel). O portão já está ativo para quando o conteúdo mover palavra.
 
 **Seguro por construção:**
 - O id do cartão vem da chave do item, não da posição nem da unidade: mover unidade de módulo, reordenar lições, mover palavra de unidade ou
@@ -392,7 +392,7 @@ Course Deck de unidade que saiu escondido). **Falta:** script de operações `fr
 | Notas novas em unidade concluída | M1.1, M1.2, M1.3... | lâmpada mostra "nova" sem refazer lição (decidido, `14`) |
 | Desafios com `moduleId` antigo | ~36 linhas (`A1-4, 5, 8, 9, 10, 13, 16`) + "Complete a frase" da `A1-g9` que usam *être* | Staging antes; produção só com autorização (pergunta 55) |
 | Ditados por módulo | d1 a d6 escritos com os módulos antigos | re-hospedar cada um no módulo de que mais usa palavras, rodar `check_dictation_vocab.py`, escrever os que faltam |
-| Notificação conta errado | cron só conhece o mapa novo depois do deploy | deploy do `notification-cron` antes de qualquer conteúdo mover palavra (passo manual) |
+| Notificação conta errado | cron só conhece o mapa novo depois do deploy | deploy do `notification-cron` v29 já feito em produção; falta só repetir se o mapa do cron mudar |
 | "Módulo N" e porcentagem mudam | todos os alunos | aviso no Mural (pergunta 5) |
 | Texto em português que muda | títulos e telas de unidades publicadas | `DELIBERATE_PT_CHANGES` + camada en (site em inglês sem português) |
 | Par *s'il vous plaît / s'il te plaît* | cartão `A1-1-v6` | correção do mesmo sentido mantém a chave; se virar dois cartões, o informal é item novo (pergunta 10) |
@@ -494,7 +494,7 @@ Origem entre colchetes, para conferência.
 | **Teste de entonação no TTS do francês** | pendência técnica (`12` 11): a maquete usou a voz do navegador | antes de publicar a nota *Ça va ?* / *Ça va.* da M1.1, testar no laboratório de áudio do fr (`fr/scripts/audio_lab.py`) se o Chirp 3 HD sobe na pergunta e desce na afirmação; se não variar, usar frases-modelo gravadas ou ajustadas |
 | **Corretor de pronúncia (API)** | futuro (`12` 13) | avaliar quando chegar a hora: custo e se é Premium. Opção encontrada: Azure (fr-FR) com nota por som; equivalente do Google não confirmado (confiança média) |
 | **PLE e CELPE-Bras** | depois (app de português) | o mapa fr é o molde do pt (`04` 12): pt nasce com chave estável e camada por chave. Quando chegarem os livros de PLE e o material do Celpe-Bras, responder as 13 perguntas do `04-v1` 10.2 (ser x estar, pretérito perfeito cedo, *a gente*, imperativo da fala x norma...). O Celpe-Bras não certifica A1/A2 e é por tarefas integradas: inspira tarefas, não a escala |
-| Deploy do `notification-cron` com `STUDY_ITEM_GATE` | passo manual pendente (`CLAUDE.md`) | antes de qualquer conteúdo mover palavra (`docs/deploy/`) |
+| Deploy do `notification-cron` com `STUDY_ITEM_GATE` | feito (v29 em produção) | repetir só se o mapa do cron mudar (`scripts/gerar_mapa_cron.js`) |
 
 ---
 
