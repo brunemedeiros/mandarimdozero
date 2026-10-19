@@ -1,7 +1,7 @@
 # Negação e perguntas no A1: nota leve a cada estrutura nova, gramática só para sistematizar
 
 Data: 2026-10-19. Decisão da dona (resposta às perguntas 17 e 18 do `08-mapa-final-a1-a2-v2.md`; decisões 59 a 63 no `12`).
-**Estado: versão 2 (2026-10-19), depois das respostas da dona: negação por diálogo, não por nota; "Palavras interrogativas" em duas gramáticas. Aguarda confirmação.** Nada foi aplicado ao site.
+**Estado: versão 2 APROVADA pela dona em 2026-10-19** (decisões 67 a 71 no `12`): negação por diálogo, não por nota; "Palavras interrogativas" em duas gramáticas. Nada foi aplicado ao site.
 
 ## Princípio (versão 2)
 
@@ -80,7 +80,12 @@ perderia o ponto de consolidação cedo, perto das apresentações pessoais.
 - **M8.4**: *pourquoi / parce que* em diálogo de convite (já há *parce que* como vocabulário).
 - Notas de pergunta soltas **deixam de ser necessárias** (as frases com a pergunta e a resposta já estão nos diálogos atuais); cai a ideia de ~10 notas de pergunta da versão 1.
 
-## Perguntas abertas (para a dona)
+## Respostas da dona (2026-10-19)
+
+1 a 4: sim às recomendações (nota breve no M1.2; notas do M4.2 e do M5.3 ficam; duas gramáticas, M2 e M6; *pourquoi / parce que* no M8.4). 5: **sim, mas com *C'est qui ? C'est ma sœur.*** (e não *Qui est-ce ?*).
+Posições finais no M2: M2.5 origem, M2.6 preposições com cidades, **M2.7 Palavras interrogativas: sobre pessoas** (nova), **M2.8 Perguntar: sim ou não**.
+
+## (histórico) Perguntas abertas feitas à dona
 
 1. **Primeira aparição da negação (M1.2)**: uma nota breve de 2 linhas junto do diálogo novo (recomendo, pela regra 4), ou só o diálogo com o destaque de *ne... pas*?
 2. **Notas de negação do M4.2 e do M5.3**: manter as duas (recomendo, têm propósito: regra do *de* e o *ne* que cai na fala)?

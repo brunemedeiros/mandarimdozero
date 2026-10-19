@@ -166,3 +166,8 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
 64. **Negação por diálogo, não por nota** (a dona, 2026-10-19): a forma negativa NÃO ganha uma nota por verbo novo; aparece num diálogo natural depois da afirmativa (ex.: M1.2 *Tu es française ? Non, je ne suis pas française. Je suis brésilienne.*). Nota só na 1ª aparição (a confirmar) e onde há regra que não se deduz (*pas de*, o *ne* que cai). Revisa a decisão 60.
 65. **Nome "Palavras interrogativas"** (não "Palavras de pergunta").
 66. **Perguntas: análise global** em `16`: as perguntas pessoais (*comment, quel, d'où, qui, combien de*) nascem em M1/M2 e as de hora, lugar e coisa em M3, M4, M6, M8. Proposta de duas gramáticas curtas (M2 e M6), a confirmar. Revisa a decisão 63.
+67. ***C'est qui ? C'est ma sœur.*** (e não *Qui est-ce ?*) como frase nova na M2.1; escolha da dona. Grafia correta: *sœur*, com ligadura.
+68. **Primeira aparição da negação (M1.2): nota breve de 2 linhas** junto do diálogo novo (*Tu es française ? Non, je ne suis pas française. Je suis brésilienne.*).
+69. **Notas de negação do M4.2 (*pas de* / partitivo) e do M5.3 (o *ne* que cai na fala) ficam.**
+70. **"Palavras interrogativas" em duas gramáticas**: (1) sobre pessoas, M2.7 (`A1-g22`, id novo); (2) lugar, hora e coisas, no M6 depois do M6.1 (id novo, a numerar). A M2 passa a 8 unidades (M2.8 = "Perguntar: sim ou não") e a M6 a 7. O A1 passa de 20 para 22 gramáticas.
+71. ***Pourquoi / parce que*** só no M8.4 (diálogo de convite, recusar e justificar).
