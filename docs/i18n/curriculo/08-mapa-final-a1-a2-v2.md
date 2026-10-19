@@ -1,6 +1,7 @@
 # Mapa final do A1 e do A2 de francês (versão 2 do 08)
 
-Data: 2026-10-19. **Documento único de revisão para a dona.** Junta e reconcilia `08` (mapa v3), `09` (preview do M1), `10` (gramáticas
+Data: 2026-10-19. **Mapa final do A1 APROVADO pela dona (2026-10-19); M1 fechado (decisões 40 a 49 no `12`).** Falta o A2 e o resto das perguntas (seção 6).
+**Documento único de revisão para a dona.** Junta e reconcilia `08` (mapa v3), `09` (preview do M1), `10` (gramáticas
 corrigidas), `11` (inventário das notas), `14` (decisões sobre as notas), `12` (decisões 1 a 39), `13` (padrão de feedback), `15` (regras 1 a 9)
 e o `04` (Etapa 0 e as 26 decisões). Nada aqui foi aplicado ao site; nenhum outro documento foi alterado.
 
@@ -21,7 +22,8 @@ Cada divergência resolvida está na seção 8 ("Conflitos resolvidos"). Número
 **O que muda em relação ao currículo atual (publicado hoje):**
 - Os módulos passam a ser organizados por **função comunicativa** ("ao fim do módulo o aluno consegue..."), não por tema nem por ordem de
   criação. Números, gramática e pronúncia entram quando a função pede (a idade do adulto já no M1, os preços no M5).
-- O A1 sai de **6 para 8 módulos** e ganha módulos de **Família** (M2), **Comer e beber** (M4) e **Compras** (M5); o módulo "Cidade e identidade"
+- O A1 sai de **6 para 8 módulos**, cada um com um tema só (o M1 continua só com os primeiros contatos). Os assuntos que hoje estão misturados
+  ganham módulo próprio: **Família** (M2), **Comer e beber** (M4) e **Compras** (M5); o módulo "Cidade e identidade"
   se desfaz (identidade vai para o M1 e o M2; cidade vai para o M6).
 - Cada gramática passa a ensinar **um conceito** (ou um par que os livros sempre ensinam juntos). Gramáticas grandes se dividem (verbos em *-er* x
   pronominais; imperativo; futuro próximo); o que é pequeno e preso a uma palavra vira **nota** na lição que a usa.
@@ -37,7 +39,7 @@ Cada divergência resolvida está na seção 8 ("Conflitos resolvidos"). Número
 | A1: módulos | 6 | **8** |
 | A1: unidades | 30 (20 de vocabulário + 10 de gramática) | **48** (28 + 20) |
 | A1: palavras (cartões A/B) | 204 (408) | **292** (584); 294 se *sympa* e *timide* entrarem (pergunta 19) |
-| A1: lições das unidades de vocabulário | 82 (com o Ponto de verificação de cada unidade) | **~114** (estimativa: 3 lições + Ponto de verificação por unidade; 4 + PV nas de 14 palavras, M1.3 e M3.5) |
+| A1: lições das unidades de vocabulário | 82 (com o Ponto de verificação de cada unidade) | **~115** (estimativa: 3 lições + Revisão da unidade por unidade; 4 + Revisão nas de mais de 10 palavras: M1.3, M1.4, M3.1, M3.3, M3.5, M4.1) |
 | A1: notas | 45 (20 Exp, 15 Real, 10 Cult; nenhuma em gramática) | **~105** (45 − 2 cortadas + ~62 novas) |
 | A1: tempo de trilha | não medido | ~24h20 (confiança baixa, estimativa do `08`/`10`) |
 | A2: módulos / unidades | 0 / 0 (nada publicado) | **10 / 57** (35 de vocabulário + 22 de gramática) |
@@ -57,20 +59,20 @@ Desafios continuam Premium com o paywall desligado (todos usam). O *défi* de fi
 
 ### 2.1 Regras do currículo (cópia curta do `15`; valem para fr, zh e pt)
 
-1. **Formal e informal juntos**: nunca ensinar só um registro (*s'il vous plaît* e *s'il te plaît*; *tu* e *vous*; *salut* e *bonjour*), no
+1. [RESPONDIDA: sim] **Formal e informal juntos**: nunca ensinar só um registro (*s'il vous plaît* e *s'il te plaît*; *tu* e *vous*; *salut* e *bonjour*), no
    mesmo cartão (par) ou em dois cartões seguidos.
 2. **Unidades por função comunicativa**, não por tema nem por ordem de criação.
 3. **Gramática**: uma unidade = um conceito (ou conceitos muito ligados); o pequeno e ligado ao vocabulário vira nota; um tópico pode aparecer
    informal cedo e ser sistematizado depois (espiral); o aluno nunca volta a uma lição anterior.
-4. **Notas**: uma ideia por nota, curtas, sem teto de tamanho nem de quantidade; na primeira aparição, só nota breve da frase que acabou de
+4. [RESPONDIDA: sim] **Notas**: uma ideia por nota, curtas, sem teto de tamanho nem de quantidade; na primeira aparição, só nota breve da frase que acabou de
    aparecer; a explicação completa vive na unidade de gramática; mesmo conceito com outro conteúdo ou estrutura mais difícil = nota nova mais
    breve; V/F depois da nota (sem pular, sem XP); o Ponto de verificação não usa notas.
-5. **Feedback**: padrão único com frase correta + tradução + áudio; erro de digitação marca as letras.
-6. **Pronúncia**: a prática vem logo depois da lição que introduz o fenômeno, nunca como atalho que tire o aluno da lição; se o texto diz que dois
+5. [RESPONDIDA: sim] **Feedback**: padrão único com frase correta + tradução + áudio; erro de digitação marca as letras.
+6. [RESPONDIDA: sim] **Pronúncia**: a prática vem logo depois da lição que introduz o fenômeno, nunca como atalho que tire o aluno da lição; se o texto diz que dois
    sons são iguais ou diferentes, mostrar os dois lados com áudio.
-7. **Sem IPA** para o aluno; respelling por idioma do site quando preciso.
-8. **Lição de pronúncia só com conteúdo suficiente**; com uma ou duas frases é **nota de pronúncia**, na mesma caixa das outras notas.
-9. **Pronomes tônicos** entram cedo, junto do formal e do informal (*moi, toi, vous* na M1.2), e são ampliados depois (*lui, elle* na M1.4; com
+7. [RESPONDIDA: sim] **Sem IPA** para o aluno; respelling por idioma do site quando preciso.
+8. [RESPONDIDA: sim] **Lição de pronúncia só com conteúdo suficiente**; com uma ou duas frases é **nota de pronúncia**, na mesma caixa das outras notas.
+9. [RESPONDIDA: sim] **Pronomes tônicos** entram cedo, junto do formal e do informal (*moi, toi, vous* na M1.2), e são ampliados depois (*lui, elle* na M1.4; com
    preposições mais adiante).
 
 ### 2.2 Decisões vigentes da dona (`12`, `14`, `04`)
@@ -105,7 +107,8 @@ Desafios continuam Premium com o paywall desligado (todos usam). O *défi* de fi
 
 Coluna **Muda**: *nova* (unidade que não existe), *movida* (muda de módulo ou de posição), *renomeada* (título visível novo: hoje → novo),
 *fundida* (palavra fundida com outra unidade), *alterada* (conteúdo muda), *igual*. Título "hoje" = título publicado em `fr/content.js`.
-Lições: unidade de vocabulário = 3 lições + Ponto de verificação (PV), salvo indicação.
+Lições: unidade de vocabulário = 3 lições + **Revisão da unidade** (antes "Ponto de verificação"; decisão 47, a dona não quer dois "Ponto de verificação"), salvo indicação.
+**"Ponto de verificação" passa a ser só a prova do módulo.**
 
 ### 3.1 A1
 
@@ -118,7 +121,7 @@ perguntar a do outro; dizer a profissão sem artigo; reagir (*Et toi ? Moi aussi
 | M1.1 (`A1-1`) | Cumprimentar e se despedir | cumprimentar, agradecer, pedir para repetir | fórmulas (*je ne comprends pas*, *vous pouvez*) | *bonjour, bonsoir, au revoir, salut, merci, de rien, **s'il vous plaît / s'il te plaît** (par), pardon, ça va, à bientôt* (10) | N01 "Bonjour" ou "Bonsoir"? (Exp, n/r) · N02 "S'il vous plaît" no dia a dia (Real, alta; fica como está) · N03 *à plus* (Real, alta) · N04 *la bise* (Cult, alta) · Letras que ficam mudas no fim (Pron, alta, *nova*) · *Bienvenue* no Quebec, também "bem-vindo(a)" (Real regional, alta, *nova*) · *Ça va ?* sobe, *Ça va.* desce, com os dois áudios (Pron, alta no conteúdo; áudio depende do teste de entonação, *nova*) | alterada: par formal/informal (regra 1); frase nova *Pardon ? Vous pouvez répéter ?* |
 | M1.2 (`A1-2`) | Dizer o nome e a nacionalidade | dizer e perguntar nome e nacionalidade | *être* (fórmula); tônicos 1 | *je, tu, s'appeler, le nom, être, la France, le Brésil, français / française, brésilien / brésilienne, le pays* (10) | N05 "Tu" ou "vous"? (Exp, n/r) · N06 *Tu t'appelles comment ?* (Real, alta; breve sobre a frase, a regra fica na M2.7) · N07 *t'es* (Real, alta) · *Moi, je m'appelle Ana. Et toi ? Et vous ?*: *moi, toi, vous* são tônicos, para ênfase ou depois de *Et* (Exp, alta, *nova*) · *Français, française*: o feminino que se ouve (Exp, alta, *nova*) | renomeada ("Se apresentar"); lições e palavras reordenadas |
 | M1.3 (`A1-3`) | Dizer a idade: de 1 a 29 | dizer a própria idade | *avoir* (fórmula) | *un / une, deux, trois, **quatre, cinq, six, sept, huit, neuf**, dix, vingt, l'âge, avoir, ans* (14; 4 lições + PV) | N08 *J'ai vingt ans*: por que *ai* (Exp, n/r; sobe para a L1) · N10 *T'as quel âge ?* (Real, alta, *breve*; sobe para a L1) · *Deux‿ans, trois‿ans*: a letra muda acorda, o **x** de *deux* soa [z] (Pron, alta, *nova*) · De 21 a 29 + *vingt‿et un* (Exp, alta, *nova*, 2 blocos) | renomeada ("Números e idade"); +6 palavras; *zéro, combien* saem para M5.1; N09 sai para M5.1 |
-| M1.4 (`A1-21`) | Perguntar a idade dos outros: até 69 | perguntar e dizer a idade de terceiros | *il a / elle a*; tônicos 2 | *onze, douze, treize, quatorze, quinze, seize, trente, quarante, cinquante, soixante* (10; 4 movidas das roupas) | 17, 18, 19 e as dezenas (Exp, alta, *nova*) · *Et lui ? Et elle ?*: tônicos; *lui* é diferente do sujeito *il*, *elle* é igual nos dois usos (Exp, alta, *nova*) | nova; diálogo novo com Léa e Hugo; *dix-sept... dix-neuf* sem cartão (frases e ditado) |
+| M1.4 (`A1-21`) | Perguntar a idade dos outros: até 69 | perguntar e dizer a idade de terceiros | *il a / elle a*; tônicos 2 | *onze, douze, treize, quatorze, quinze, seize, **dix-sept, dix-huit, dix-neuf**, trente, quarante, cinquante, soixante* (13; 4 movidas das roupas; conjunto fechado: 4 lições + Revisão da unidade) | 17, 18, 19 e as dezenas (Exp, alta, *nova*) · *Et lui ? Et elle ?*: tônicos; *lui* é diferente do sujeito *il*, *elle* é igual nos dois usos (Exp, alta, *nova*) | nova; diálogo novo com Léa e Hugo; *dix-sept, dix-huit, dix-neuf* **com cartão** (decisão 41) |
 | M1.5 (g) (`A1-g1`) | *être* e *avoir*: as seis pessoas | conjugar os dois verbos da apresentação | *être, avoir* (4 telas, 6 exercícios) | (gramática) | (gramática não tem nota) | renomeada ("Verbos avoir e être"); sem tela de tônicos; 🔊 por forma + "Ouvir a conjugação toda" com pausa; exemplos trocados (*Je ___ brésilienne.*, *Elle est française.*) |
 | M1.6 (`A1-22`) | Dizer a profissão | dizer e perguntar a profissão | profissão sem artigo | *le professeur / la professeure, l'étudiant / l'étudiante, le médecin, l'infirmier / l'infirmière, le vendeur / la vendeuse, le serveur / la serveuse, l'ingénieur / l'ingénieure, l'avocat / l'avocate, le travail, le bureau* (10) | *Elle est infirmière*: sem artigo (Exp, alta, *nova*) · *Qu'est-ce que vous faites dans la vie ?* e *Tu fais quoi dans la vie ?* (Real, alta, *nova*, breve) · *Professeure, autrice*: o feminino das profissões (Cult, **média**, *nova*, revisão da dona antes de publicar) | nova; *le médecin* vem de "Corpo e saúde"; sem *l'entreprise* |
 | M1.7 (g) (`A1-g11`) | Masculino e feminino: nacionalidades e profissões | concordar nacionalidade e profissão com a pessoa | gênero de pessoas: *-e*, *-ien/-ienne*, *-ier/-ière*, *-eur/-euse*; iguais na fala (5 telas, 8 exercícios) + prática "Pronúncia: masculino ou feminino?" | (gramática) | (sem nota) | nova; só gênero de pessoas (artigos e plural vão para M2.2; *pas de* para M2.7) |
@@ -410,6 +413,9 @@ Palavras que mudam de unidade: *zéro, combien* (`A1-3` → `A1-28`, mais tarde)
 Só o que ainda não tem resposta nos `12`, `14`, `15`, nos históricos `21`/`22` nem nas decisões resolvidas do `04`. Cada uma: recomendação e impacto.
 Origem entre colchetes, para conferência.
 
+> **Respondidas em 2026-10-19 (viram decisões 40 a 49 no `12`)**: 1 (mapa do A1), 4 a 16 (com duas mudanças: *dix-sept* a *dix-neuf* TÊM cartão; e a lição final
+> da unidade vira "Revisão da unidade"). Elas continuam listadas abaixo, marcadas **[RESPONDIDA]**, para o histórico.
+
 **Mapa e critérios gerais**
 1. **Aprovar o mapa final do A1** (8 módulos, 48 unidades, seção 3.1)? *Recomendo sim.* Impacto: libera a Etapa 2 (reorganização) depois da 0b. [`08` 1, `04` 8]
 2. **Aprovar o mapa final do A2** (10 módulos, 57 unidades, seção 3.2)? *Recomendo sim.* Impacto: nenhum para o progresso (tudo inédito); define a ordem de construção m1 → m2 → m9. [`04` 16, `08` 13 a 16, `10` 18 a 26 em bloco; detalhes nas perguntas 35 a 43]
@@ -422,13 +428,13 @@ Origem entre colchetes, para conferência.
 9. **Teto de 5 telas e 8 exercícios por gramática**? *Recomendo sim.* Impacto: nenhuma gramática do mapa passa disso. [`10` 2]
 
 **A1 M1**
-10. ***s'il vous plaît / s'il te plaît* como um cartão em par** (como na maquete), mantendo a chave do cartão atual? *Recomendo sim.* Impacto: o progresso de quem já estudou segue; com dois cartões, o informal seria item novo. [`12` 26 e 28]
-11. **Detalhes do M1 ainda sem resposta explícita**: *dix-sept* a *dix-neuf* sem cartão; M1.3 com 4 lições + PV; *neuf ans* (som de v) na nota de ligação; Léa e Hugo nos diálogos novos; exemplos da M1.5 trocados (*Je ___ brésilienne.*)? *Recomendo sim a todos* (é o que a maquete v5 mostra). Impacto: só conteúdo. [`08` 2, 3; `09` 9, 10, 11, 23]
-12. **Tela "Uma pegadinha comum" (*avoir faim*) sai da M1.5** e vira nota na M4.1; no lugar, "*être* e *avoir* na apresentação"? *Recomendo sim.* Impacto: muda tela publicada (`DELIBERATE_PT_CHANGES`). [`09` 26]
-13. **Nota de instruções de aula (*écoutez, répétez*) na M1.1**: tirar da trilha (vira material de aula)? *Recomendo tirar.* Impacto: nenhum. [`09` 6]
-14. **Palavras novas em unidade já concluída** (*quatre... neuf*): direto na Revisão (hoje) ou tela única opcional "Novidades desta unidade"? *Recomendo a tela opcional.* Impacto: código novo pequeno. [`09` 29]
-15. **Aceitar *professeur* e *professeure*** (e *ingénieur / ingénieure*) para mulher na M1.7? *Recomendo aceitar as duas* e explicar na tela "Escritas diferentes, mas sons iguais". Impacto: campo `alt` nos exercícios. [`09` 24]
-16. **Renomear a lição final de cada unidade** ("Ponto de verificação" → "Revisão da unidade"), para não confundir com a prova do módulo? *Recomendo avaliar à parte.* Impacto: texto em português publicado. [`09` 22]
+10. [RESPONDIDA: sim] ***s'il vous plaît / s'il te plaît* como um cartão em par** (como na maquete), mantendo a chave do cartão atual? *Recomendo sim.* Impacto: o progresso de quem já estudou segue; com dois cartões, o informal seria item novo. [`12` 26 e 28]
+11. [RESPONDIDA: sim, exceto *dix-sept* a *dix-neuf*, que TÊM cartão] **Detalhes do M1 ainda sem resposta explícita**: *dix-sept* a *dix-neuf* sem cartão; M1.3 com 4 lições + PV; *neuf ans* (som de v) na nota de ligação; Léa e Hugo nos diálogos novos; exemplos da M1.5 trocados (*Je ___ brésilienne.*)? *Recomendo sim a todos* (é o que a maquete v5 mostra). Impacto: só conteúdo. [`08` 2, 3; `09` 9, 10, 11, 23]
+12. [RESPONDIDA: sim] **Tela "Uma pegadinha comum" (*avoir faim*) sai da M1.5** e vira nota na M4.1; no lugar, "*être* e *avoir* na apresentação"? *Recomendo sim.* Impacto: muda tela publicada (`DELIBERATE_PT_CHANGES`). [`09` 26]
+13. [RESPONDIDA: sim] **Nota de instruções de aula (*écoutez, répétez*) na M1.1**: tirar da trilha (vira material de aula)? *Recomendo tirar.* Impacto: nenhum. [`09` 6]
+14. [RESPONDIDA: tela opcional "Novidades desta unidade"] **Palavras novas em unidade já concluída** (*quatre... neuf*): direto na Revisão (hoje) ou tela única opcional "Novidades desta unidade"? *Recomendo a tela opcional.* Impacto: código novo pequeno. [`09` 29]
+15. [RESPONDIDA: sim] **Aceitar *professeur* e *professeure*** (e *ingénieur / ingénieure*) para mulher na M1.7? *Recomendo aceitar as duas* e explicar na tela "Escritas diferentes, mas sons iguais". Impacto: campo `alt` nos exercícios. [`09` 24]
+16. [RESPONDIDA: sim, renomear já: "Revisão da unidade"] **Renomear a lição final de cada unidade** ("Ponto de verificação" → "Revisão da unidade"), para não confundir com a prova do módulo? *Recomendo avaliar à parte.* Impacto: texto em português publicado. [`09` 22]
 
 **A1 M2**
 17. **Artigos e plural (`A1-g17`, id novo) como M2.2**, intercalada (família → artigos → descrever → possessivos)? *Recomendo sim.* Impacto: M2 com 7 unidades e 4 gramáticas. [`09` 1 a 3]

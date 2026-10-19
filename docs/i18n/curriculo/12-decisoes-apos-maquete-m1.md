@@ -129,3 +129,19 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
 37. **Nota "onde cai a força" (merCI, bonJOUR): sai.** Já não está na maquete v4/v5.
 38. **Rótulos de realidade ficam:** "Na vida real", "Assim também se fala", "Variação regional".
 39. **Nota "Et lui ? Et elle ?" (M1.4)** ganha a frase: *lui* é diferente do sujeito *il*; *elle* é igual nos dois usos.
+
+---
+
+# Sexta rodada (2026-10-19): perguntas que travavam o M1 e aprovação do mapa do A1
+
+40. **Mapa final do A1 APROVADO** (8 módulos, 48 unidades; `08-mapa-final-a1-a2-v2.md` seção 3.1). O M1 está fechado. Falta aprovar o A2.
+41. **Palavras *dix-sept, dix-huit, dix-neuf* TÊM cartão** (a recomendação era deixá-las sem). A M1.4 passa a ter 13 palavras (conjunto fechado): 4 lições + Revisão da unidade.
+42. **Títulos funcionais** em unidades e módulos (regra 2): "Primeiros contatos" vira "Apresentar-se" etc. Muda texto publicado (`DELIBERATE_PT_CHANGES` e camada en).
+43. **Ids de módulo por sobreposição de unidades** e **aviso no Mural** sobre a nova numeração.
+44. **"Continuar" segue onde o aluno estava**, não aponta para a unidade nova aberta atrás dele (mudança pequena em `currentTrailUnit`).
+45. **Conjuntos fechados com mais de 10 palavras** ficam numa unidade só (M1.3 com 14, M1.4 com 13, M3.1, M3.3, M3.5, M4.1): 4 lições + Revisão da unidade.
+46. **Critério nota x gramática** (vira nota só o que a prova do módulo e os Desafios não cobram com correção) e **teto de 5 telas e 8 exercícios por gramática**.
+47. **A lição final de cada unidade passa a se chamar "Revisão da unidade"** (en: "Unit review"). "Ponto de verificação" fica só para a prova do módulo. Motivo: a dona não quer dois "Ponto de verificação". Muda texto publicado em `fr/content.js` (lições), `fr/app.js`, `shared/i18n` e camada en; `DELIBERATE_PT_CHANGES`. Aplicar na Etapa de textos, com teste.
+48. ***s'il vous plaît / s'il te plaît* num cartão em par**, mantendo a chave do cartão atual (progresso de quem já estudou segue).
+49. **Detalhes do M1** como na maquete (*neuf ans* na nota de ligação; Léa e Hugo; exemplos da M1.5 trocados); **tela "Uma pegadinha comum" (*avoir faim*) sai da M1.5** e vira nota na M4.1; **nota de instruções de aula (*écoutez, répétez*) sai da trilha**; **aceitar *professeur* e *professeure*** (e *ingénieur / ingénieure*) para mulher.
+50. **Palavras novas em unidade já concluída** (*quatre... neuf*): **tela única opcional "Novidades desta unidade"**, não direto para a Revisão (código novo pequeno).
