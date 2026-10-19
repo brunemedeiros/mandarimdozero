@@ -1135,7 +1135,7 @@ add({ id: 'inicio', g: 'inicio', title: 'Como usar esta maquete', tags: [], rend
       <li><b>M1.1</b>: cartão em par <i>s'il vous plaît / s'il te plaît</i> (formal e informal juntos); a nota "S'il vous plaît no dia a dia" ficou como estava.</li>
       <li><b>M1.1</b>: nota de pronúncia "Ça va ? sobe, Ça va. desce", com os dois áudios e a caixa "a verificar" da entonação do TTS.</li>
       <li><b>Saiu a lição avulsa de ritmo e entonação.</b> A pronúncia do M1 fica: nota na M1.1 (<i>Ça va ?</i> / <i>Ça va.</i>), nota na M1.3 (<i>deux‿ans</i>) e a prática da M1.7 (masculino e feminino).</li>
-      <li><b>M1.2</b>: a nota "Moi... Et toi ? Et vous ?" apresenta os pronomes tônicos. <b>M1.4</b>: "Et lui ? Et elle ?" ganhou uma linha com o nome do conceito e o contraste com <i>il / elle</i>.</li></ul></div>
+      <li><b>M1.2</b>: a nota "Moi... Et toi ? Et vous ?" apresenta os pronomes tônicos. <b>M1.4</b>: "Et lui ? Et elle ?" ganhou uma linha com o nome do conceito: <i>lui</i> é diferente do sujeito <i>il</i>; <i>elle</i> é igual nos dois usos.</li></ul></div>
     <div class="mq-box"><h3>Versão 3 (2026-10-18, 2ª rodada): o que mudou</h3><ul>
       <li><b>Pausar</b>: "Ouvir tudo" do diálogo e "Ouvir a conjugação toda" (M1.5) viram "⏸ Pausar" enquanto tocam e "▶ Continuar" depois.</li>
       <li><b>Diálogo</b>: avatar dos dois lados com o <b>nome embaixo</b>; saiu a linha "Léa à esquerda · Hugo à direita". Quando o aluno fala como ele mesmo, avatar ou iniciais com "Você" (no défi arquivado).</li>
@@ -1384,9 +1384,9 @@ add({ id: 'm14-dialogo', g: 'm14', title: 'Diálogo novo "No clube de conversa"'
   flow($('[data-c]', root), [(box, api) => dlgCheck(box, api, DLG_M14)]);
 } });
 add({ id: 'm14-nota-lui', g: 'm14', title: 'Nota nova "Et lui ? Et elle ?"', en: true, tags: ['existe'], render(root){
-  root.innerHTML = `<div class="mq-why">Depois do diálogo. Fica como estava (a dona aprovou) e ganha <b>uma linha</b> que nomeia o conceito: <i>lui</i> e <i>elle</i> são pronomes tônicos e contrastam com o sujeito <i>il / elle</i> (decisão 27). Confiança <b>alta</b>.</div><div data-f></div>`;
+  root.innerHTML = `<div class="mq-why">Depois do diálogo. Fica como estava (a dona aprovou) e ganha <b>uma linha</b> que nomeia o conceito: <i>lui</i> e <i>elle</i> são pronomes tônicos e <i>lui</i> difere do sujeito <i>il</i> e <i>elle</i> é igual nos dois usos (decisão 27). Confiança <b>alta</b>.</div><div data-f></div>`;
   flow($('[data-f]', root), [(box, api) => { api.banner('💡 Vale entender isso');
-    box.innerHTML = noteCard('explica', { title: 'Et lui ? Et elle ?', wrapup: true, body: 'Para perguntar dos outros sem repetir o nome: <strong>lui</strong> (ele) e <strong>elle</strong> (ela). Resumo até aqui: <strong>moi, toi, lui, elle, vous</strong>.<br><strong>Lui</strong> e <strong>elle</strong> também são pronomes tônicos, como <i>moi, toi, vous</i>: contrastam com os pronomes sujeito <strong>il / elle</strong> (<i>Lui, il a quarante ans.</i>).', examples: [{ f: 'Paul a trente et un ans. Et lui ?', t: 'O Paul tem trinta e um anos. E ele?' }, { f: 'Et elle ?', t: 'E ela?' }, { f: 'Lui, il a quarante ans. Elle, elle a seize ans.', t: 'Ele tem quarenta anos. Ela tem dezesseis.' }] }); }]);
+    box.innerHTML = noteCard('explica', { title: 'Et lui ? Et elle ?', wrapup: true, body: 'Para perguntar dos outros sem repetir o nome: <strong>lui</strong> (ele) e <strong>elle</strong> (ela). Resumo até aqui: <strong>moi, toi, lui, elle, vous</strong>.<br><strong>Lui</strong> e <strong>elle</strong> também são pronomes tônicos, como <i>moi, toi, vous</i>. Atenção: <strong>lui</strong> é diferente do sujeito <strong>il</strong>; já <strong>elle</strong> é igual nos dois usos (<i>Lui, il a quarante ans. Elle, elle a seize ans.</i>).', examples: [{ f: 'Paul a trente et un ans. Et lui ?', t: 'O Paul tem trinta e um anos. E ele?' }, { f: 'Et elle ?', t: 'E ela?' }, { f: 'Lui, il a quarante ans. Elle, elle a seize ans.', t: 'Ele tem quarenta anos. Ela tem dezesseis.' }] }); }]);
 } });
 
 /* ---- M1.5 (g) ---- */
