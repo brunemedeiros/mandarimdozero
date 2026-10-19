@@ -32,11 +32,11 @@
 //   - fr/zh app.js           (APP_KEY, addSelfFlashcardToState)
 //   - shared/toast.js        (showToast)
 
-const ANKI_IMPORT_CARD_TYPE_LABELS = {
-  normal: 'Normal',
-  normal_reversed: 'Normal com reverso',
-  cloze: 'Completar a frase (Cloze)',
-  type_answer: 'Digite a resposta',
+// Etapa 3 (lote C): rótulo no idioma do site (mesmas chaves do editor de cartões; antes era o mapa
+// ANKI_IMPORT_CARD_TYPE_LABELS em português, com o mesmo texto do pt-BR dessas chaves).
+const ANKI_IMPORT_CARD_TYPE_KEYS = {
+  normal: 'admin.flashcards.cardType.normal', normal_reversed: 'admin.flashcards.cardType.normalReversed',
+  cloze: 'admin.flashcards.cardType.cloze', type_answer: 'admin.flashcards.cardType.typeAnswer',
 };
 
 // Limite de linhas efetivamente desenhadas na lista (performance/DOM --
@@ -166,7 +166,7 @@ function ankiImportNoteRowHTML(note){
         </div>
       </label>`;
   }
-  const typeLabel = ANKI_IMPORT_CARD_TYPE_LABELS[note.cardTypeLabel] || note.cardTypeLabel;
+  const typeLabel = ANKI_IMPORT_CARD_TYPE_KEYS[note.cardTypeLabel] ? t(ANKI_IMPORT_CARD_TYPE_KEYS[note.cardTypeLabel]) : note.cardTypeLabel;
   const tagPills = (note.normalizedTags || []).map(tag => `<span class="pill" style="font-size:10px;">#${escapeHTML(tag)}</span>`).join(' ');
   const badges = [
     `<span class="pill" style="font-size:11px;">${escapeHTML(typeLabel)}</span>`,
@@ -230,11 +230,11 @@ function refreshAnkiImportConflicts(body){
   const names = plan.conflicts.slice(0, 8).map(c => `<li>${escapeHTML(c.path.join(' › '))}</li>`).join('');
   box.innerHTML = `
     <div style="margin-top:8px; padding:8px 10px; border:1px solid var(--paper-line); border-radius:8px;">
-      <strong>Um deck com este nome já existe. O que você deseja fazer?</strong>
-      <ul style="padding-left:18px; margin:4px 0;">${names}${plan.conflicts.length > 8 ? `<li>+ ${plan.conflicts.length - 8} outro(s)</li>` : ''}</ul>
-      <label style="display:flex; gap:6px; align-items:center;"><input type="radio" name="anki-import-conflict" value="suffix" ${st.conflictMode === 'suffix' ? 'checked' : ''}> Criar com sufixo (2)</label>
-      <label style="display:flex; gap:6px; align-items:center;"><input type="radio" name="anki-import-conflict" value="merge" ${st.conflictMode === 'merge' ? 'checked' : ''}> Inserir no Deck existente</label>
-      <span class="profile-edit-hint">A escolha vale para todos os decks repetidos desta importação. Ao inserir no Deck existente, cartões que parecem já existir continuam desmarcados.</span>
+      <strong>${t('ankiImport.conflict.title')}</strong>
+      <ul style="padding-left:18px; margin:4px 0;">${names}${plan.conflicts.length > 8 ? `<li>${tp('ankiImport.conflict.more', plan.conflicts.length - 8 === 1 ? 1 : 2, { n: plan.conflicts.length - 8 })}</li>` : ''}</ul>
+      <label style="display:flex; gap:6px; align-items:center;"><input type="radio" name="anki-import-conflict" value="suffix" ${st.conflictMode === 'suffix' ? 'checked' : ''}> ${t('ankiImport.conflict.suffix')}</label>
+      <label style="display:flex; gap:6px; align-items:center;"><input type="radio" name="anki-import-conflict" value="merge" ${st.conflictMode === 'merge' ? 'checked' : ''}> ${t('ankiImport.conflict.merge')}</label>
+      <span class="profile-edit-hint">${t('ankiImport.conflict.hint')}</span>
     </div>`;
   box.querySelectorAll('input[name="anki-import-conflict"]').forEach(r => r.addEventListener('change', () => {
     st.conflictMode = r.value;
@@ -262,7 +262,7 @@ function renderAnkiImportSummary(body){
 
   body.innerHTML = `
     <p class="profile-edit-hint">
-      ${tp('ankiImport.summary.found', plan.totalNotes)}
+      ${tp('ankiImport.summary.found', plan.totalNotes === 1 ? 1 : 2, { n: plan.totalNotes })}
       ${t('ankiImport.summary.ok', { n: plan.okCount })}
       ${t('ankiImport.summary.skipped', { n: plan.skippedCount })}
       ${plan.duplicateCount ? `<br>${t('ankiImport.summary.duplicates', { n: plan.duplicateCount })}` : ''}
@@ -279,7 +279,7 @@ function renderAnkiImportSummary(body){
     </div>
     <div id="anki-import-list" style="max-height:320px; overflow-y:auto;">
       ${visibleNotes.map(ankiImportNoteRowHTML).join('')}
-      ${truncatedCount > 0 ? `<p class="profile-edit-hint">${tp('ankiImport.truncated', truncatedCount)}</p>` : ''}
+      ${truncatedCount > 0 ? `<p class="profile-edit-hint">${tp('ankiImport.truncated', truncatedCount === 1 ? 1 : 2, { n: truncatedCount })}</p>` : ''}
     </div>
     <button type="button" class="btn btn-primary btn-block" id="anki-import-confirm-btn" style="margin-top:10px;">${t('ankiImport.confirm')}</button>
     <p class="profile-edit-error" id="anki-import-confirm-error"></p>
@@ -291,7 +291,7 @@ function renderAnkiImportSummary(body){
 function updateAnkiImportCounter(body){
   const n = ANKI_IMPORT_STATE.selectedIds.size;
   const counter = body.querySelector('#anki-import-counter');
-  if (counter) counter.textContent = n === 0 ? t('ankiImport.counterNone') : tp('ankiImport.counter', n);
+  if (counter) counter.textContent = n === 0 ? t('ankiImport.counterNone') : tp('ankiImport.counter', n === 1 ? 1 : 2, { n });
   const btn = body.querySelector('#anki-import-confirm-btn');
   // Com conflito de nome pendente (pastas mantidas), a pessoa precisa
   // escolher sufixo ou inserir no existente antes de confirmar.
@@ -394,7 +394,7 @@ async function confirmAnkiImport(body){
       st.destDeckId = dest.deckId;
       resetBtn();
       refreshAnkiImportConflicts(body); // mostra a pergunta e trava o botão até a escolha
-      if (errorEl) errorEl.textContent = 'Já existem Decks com estes nomes. Escolha acima o que fazer antes de importar.';
+      if (errorEl) errorEl.textContent = t('ankiImport.conflict.chooseFirst');
       return;
     }
   }
@@ -436,7 +436,7 @@ async function confirmAnkiImport(body){
     ? await persistAnkiImportBatches(entries.map(e => ({ editorState: e.note.editorState, deckId: e.deckId })), {
         identity,
         onBatchDone: (info) => {
-          if (btn) btn.textContent = info.ok ? t('ankiImport.savingBatches', { n: info.batchIndex + 1 }) : t('ankiImport.saveError');
+          if (btn) btn.textContent = info.ok ? tp('ankiImport.savingBatches', info.batchIndex + 1 === 1 ? 1 : 2, { n: info.batchIndex + 1 }) : t('ankiImport.saveError');
         },
       })
     : { ok: true, createdRows: [] };
@@ -466,12 +466,12 @@ function renderAnkiImportResult(body, result){
   body.innerHTML = `
     <p class="profile-edit-hint">
       ${result.ok
-        ? `${tp('ankiImport.result.ok', result.requested, { imported: result.imported })}${result.createdDeckCount ? ' ' + t('ankiImport.result.decksCreated', { n: result.createdDeckCount }) : ''}`
+        ? `${tp('ankiImport.result.ok', result.requested === 1 ? 1 : 2, { n: result.requested, imported: result.imported })}${result.createdDeckCount ? ' ' + tp('ankiImport.result.decksCreated', result.createdDeckCount === 1 ? 1 : 2, { n: result.createdDeckCount }) : ''}`
         : t('ankiImport.result.partial', { imported: result.imported, requested: result.requested })}
     </p>
-    ${result.cutMessage ? `<p class="profile-edit-hint">🔒 ${escapeHTML(result.cutMessage)} ${t('ankiImport.result.cutTail', { n: result.cutCount })}</p>` : ''}
-    ${result.deckErrors && result.deckErrors.length ? `<p class="profile-edit-error" style="display:block;">⚠️ ${result.deckErrors.slice(0, 5).map(escapeHTML).join(' ')} ${t('ankiImport.result.deckFailed', { n: result.deckFailedCount })}</p>` : ''}
-    ${result.mediaWarnings.length ? `<p class="profile-edit-hint">${tp('ankiImport.result.mediaWarn', result.mediaWarnings.length, { list: result.mediaWarnings.slice(0, 5).map(escapeHTML).join('; '), more: result.mediaWarnings.length > 5 ? '...' : '' })}</p>` : ''}
+    ${result.cutMessage ? `<p class="profile-edit-hint">🔒 ${escapeHTML(result.cutMessage)} ${tp('ankiImport.result.cutTail', result.cutCount === 1 ? 1 : 2, { n: result.cutCount })}</p>` : ''}
+    ${result.deckErrors && result.deckErrors.length ? `<p class="profile-edit-error" style="display:block;">⚠️ ${result.deckErrors.slice(0, 5).map(escapeHTML).join(' ')} ${tp('ankiImport.result.deckFailed', result.deckFailedCount === 1 ? 1 : 2, { n: result.deckFailedCount })}</p>` : ''}
+    ${result.mediaWarnings.length ? `<p class="profile-edit-hint">${tp('ankiImport.result.mediaWarn', result.mediaWarnings.length === 1 ? 1 : 2, { n: result.mediaWarnings.length, list: result.mediaWarnings.slice(0, 5).map(escapeHTML).join('; '), more: result.mediaWarnings.length > 5 ? '...' : '' })}</p>` : ''}
     ${skippedList ? `<div class="section-label" style="margin-top:10px;">${t('ankiImport.result.skippedTitle', { n: result.skippedNotes.length })}</div><ul class="profile-edit-hint" style="padding-left:18px;">${skippedList}</ul>` : ''}
     <button type="button" class="btn btn-secondary btn-block" id="anki-import-done-btn" style="margin-top:10px;">${t('common.close')}</button>
   `;

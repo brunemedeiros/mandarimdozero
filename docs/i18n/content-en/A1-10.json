@@ -83,6 +83,19 @@
     "I'm a 38. How much is it?",
     "It costs sixty euros.",
     "Perfect, I'll take it!"
+   ],
+   "scene": "In a clothing store, a customer is looking for a dress.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "How much is the dress?",
+     "opts": [
+      "Forty euros",
+      "Sixty euros",
+      "A hundred euros"
+     ]
+    }
    ]
   },
   "concepts": {

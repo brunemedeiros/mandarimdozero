@@ -64,10 +64,36 @@ const SPECIAL_BADGES = [
 // Badges do catálogo da admin (tabela badge_catalog, texto em português):
 // se existir tradução 'badge.catalog.<id>.<campo>' no idioma do site usa ela;
 // senão (badge criado depois, sem tradução) mostra o texto do banco.
-function catalogBadgeText(id, field, fallback){
+// Nome com gênero (Embaixadora/Embaixador, Pioneira/Pioneiro; Etapa 4, aprovado pela dona): como nas trilhas de
+// conquista (BadgeTracks.levelName), 'badge.catalog.<id>.name.f'/'.m' pelo gênero da pessoa; sem gênero conhecido
+// (ou o badge de outra pessoa, cujo gênero é privado) fica a forma neutra ('Embaixador(a)').
+function catalogBadgeText(id, field, fallback, gender){
   const key = 'badge.catalog.' + id + '.' + field;
+  const suffix = field === 'name' ? (gender === 'feminine' ? '.f' : gender === 'masculine' ? '.m' : null) : null;
+  if (suffix){
+    const g = t(key + suffix);
+    if (g && g !== key + suffix) return g;
+  }
   const v = t(key);
-  return v === key ? fallback : v;
+  if (v !== key) return v;
+  const teacher = teacherClassBadgeText(id, field, fallback);
+  return teacher != null ? teacher : fallback;
+}
+
+// Badge de cada professora (id 'student_<...>', criado por _teacher_badge_id, só em português no banco): nome "Turma de
+// {nome}" (115) ou o antigo "Aluno/a do/a Prof. {nome}" (077, badges ainda não atualizados). O nome sai do próprio texto;
+// se não der para ler, fica o texto do banco. Descrição é fixa ("Estuda com esta professora.").
+function teacherClassBadgeText(id, field, fallback){
+  if (!/^student_/.test(String(id || ''))) return null;
+  if (field === 'desc') return t('badge.catalog.teacherClass.desc');
+  if (field !== 'name') return null;
+  const m = /^(?:Turma de|Aluno\/a do\/a Prof\.)\s+(.+)$/.exec(String(fallback || '').trim());
+  return m ? t('badge.catalog.teacherClass.name', { name: m[1] }) : null;
+}
+
+// Gênero da própria conta (privado, PROFILE_PRIVATE_CACHE); null quando não foi escolhido ou ainda não carregou.
+function ownProfileGender(){
+  return (typeof PROFILE_PRIVATE_CACHE !== 'undefined' && PROFILE_PRIVATE_CACHE && PROFILE_PRIVATE_CACHE.gender) || null;
 }
 
 function isFounder(){
@@ -118,7 +144,7 @@ async function computeEarnedSpecialBadges(){
     const catalog = await fetchBadgeCatalog();
     catalog.forEach(cb => {
       if (granted.has(cb.id) && !earned.some(e => e.id === cb.id)){
-        earned.push({ id: cb.id, name: catalogBadgeText(cb.id, 'name', cb.name), icon: cb.icon, desc: catalogBadgeText(cb.id, 'desc', cb.description) });
+        earned.push({ id: cb.id, name: catalogBadgeText(cb.id, 'name', cb.name, ownProfileGender()), icon: cb.icon, desc: catalogBadgeText(cb.id, 'desc', cb.description) });
       }
     });
   }
@@ -364,8 +390,8 @@ function avatarStoragePath(){
 }
 
 async function uploadAvatar(file){
-  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta pra salvar uma foto.' };
-  if (!file.type.startsWith('image/')) return { ok: false, error: 'Escolha um arquivo de imagem (JPG, PNG...).' };
+  if (!CURRENT_USER) return { ok: false, error: t('profile.err.photoLoginRequired') };
+  if (!file.type.startsWith('image/')) return { ok: false, error: t('profile.err.photoNotImage') };
   if (file.size > AVATAR_MAX_UPLOAD_BYTES) return { ok: false, error: t('profile.err.imageTooBig') };
 
   let blob;
@@ -400,7 +426,7 @@ async function uploadAvatar(file){
 }
 
 async function removeAvatar(){
-  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  if (!CURRENT_USER) return { ok: false, error: t('deck.err.loginRequired') };
   // Best-effort: mesmo se o arquivo já não existir no Storage (ou a
   // remoção falhar por algum motivo), ainda limpamos avatar_url no
   // perfil -- o dado que a UI realmente lê é a coluna, não o arquivo.

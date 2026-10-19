@@ -1025,7 +1025,7 @@ async function adminCreateCards(){
   }
   clearFreshMediaUploads(nativeState);
   const okCount = results.length - failed.length;
-  if (failed.length) showToast(t('admin.flashcards.createdPartial', { ok: okCount, failed: failed.map(f => '@' + (f.student.username || '?')).join(', ') }));
+  if (failed.length) showToast(tp('admin.flashcards.createdPartial', okCount === 1 ? 1 : 2, { ok: okCount, failed: failed.map(f => '@' + (f.student.username || '?')).join(', ') }));
   else showToast(results.length > 1 ? t('admin.flashcards.createdN', { n: okCount }) : t('admin.flashcards.created'));
   // Só aqui o formulário é limpo (um envio bem-sucedido deve limpar); as pessoas e os Decks escolhidos continuam.
   const cjkKey = S.nativeCardState.languageAppKey;

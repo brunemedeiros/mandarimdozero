@@ -52,6 +52,19 @@
     "He's tall and has black hair.",
     "Is he nice?",
     "Yes, he's very kind!"
+   ],
+   "scene": "Two friends are chatting, and Adrien describes his brother to Pauline.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What is Adrien's brother like?",
+     "opts": [
+      "Tall, with black hair, and kind",
+      "Short, with light hair, and shy",
+      "Tall and unfriendly"
+     ]
+    }
    ]
   },
   "concepts": {

@@ -40,7 +40,8 @@ function tccSummary(c){
   const front = c.front
     ? `${c.front}${c.front_pinyin ? ` (${c.front_pinyin})` : ''}`
     : (c.cloze_sentence ? c.cloze_sentence.replace('___', `[${c.cloze_answer || '...'}]`) : '');
-  return { front, back: c.back_trans || '' };
+  // Etapa 3 (c4): texto de preenchimento do verso ("(sem tradução)"...) no idioma do site.
+  return { front, back: (typeof flashcardRowDisplayTexts === 'function' ? flashcardRowDisplayTexts(c).back : (c.back_trans || '')) };
 }
 
 /* ---------------- Quadro da tela ---------------- */
@@ -109,7 +110,7 @@ function tccDestRowHTML(s, opts){
 }
 // rows = [{ deck, depth, label, own, kids, deletable }]
 function tccTreeHTML(rows){
-  return `<ul class="p-lista">${rows.map(r => `<li data-tree-row="${tccEsc(r.deck.id)}" style="padding-left:${r.depth * 1.1}rem"><span>${tccEsc(r.label)} <small>${tccEsc(t('admin.flashcards.dest.countCards', { n: r.own }))}${r.kids ? tccEsc(t('admin.flashcards.dest.countSubdecks', { n: r.kids })) : ''})</small></span>${r.deck.kind === 'teacher' ? `<button type="button" class="outline p-pequeno" data-tree-delete="${tccEsc(r.deck.id)}"${r.deletable ? '' : ' disabled'} title="${tccEsc(r.deletable ? t('admin.flashcards.dest.deleteTitle') : t('admin.flashcards.dest.deleteDisabledTitle'))}">${tccEsc(t('cards.act.delete'))}</button>` : ''}</li>`).join('')}</ul>`;
+  return `<ul class="p-lista">${rows.map(r => `<li data-tree-row="${tccEsc(r.deck.id)}" style="padding-left:${r.depth * 1.1}rem"><span>${tccEsc(r.label)} <small>${tccEsc(tp('admin.flashcards.dest.countCards', r.own === 1 ? 1 : 2, { n: r.own }))}${r.kids ? tccEsc(tp('admin.flashcards.dest.countSubdecks', r.kids === 1 ? 1 : 2, { n: r.kids })) : ''})</small></span>${r.deck.kind === 'teacher' ? `<button type="button" class="outline p-pequeno" data-tree-delete="${tccEsc(r.deck.id)}"${r.deletable ? '' : ' disabled'} title="${tccEsc(r.deletable ? t('admin.flashcards.dest.deleteTitle') : t('admin.flashcards.dest.deleteDisabledTitle'))}">${tccEsc(t('cards.act.delete'))}</button>` : ''}</li>`).join('')}</ul>`;
 }
 
 function tccSubmitLabel(n){ return `${t('myFlashcards.create')}${n > 1 ? t('admin.common.forNStudents', { n }) : ''}`; }

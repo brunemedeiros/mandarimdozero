@@ -24,7 +24,7 @@
   ],
   "phrases": [
    {
-    "t": "Hello! My name is Brune.",
+    "t": "Hello! My name is {nome}.",
     "scenario": "You meet someone new at a party and want to introduce yourself. What do you say?"
    },
    {
@@ -62,6 +62,19 @@
     "Hello! How are you?",
     "I'm doing well, thanks! And you?",
     "I'm fine. See you soon!"
+   ],
+   "scene": "In the morning, on a neighborhood street: Léa runs into her neighbor Hugo.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "How do Léa and Hugo say goodbye at the end?",
+     "opts": [
+      "They say \"see you soon\"",
+      "They say \"you're welcome\"",
+      "They say \"please\""
+     ]
+    }
    ]
   },
   "concepts": {

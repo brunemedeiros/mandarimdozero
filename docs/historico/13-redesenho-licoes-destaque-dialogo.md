@@ -342,7 +342,7 @@ subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do si
   (badges chegam mais). Avisos antigos já gravados ficam. Teste: `tests/notificacoes/test_sino_so_na_hora.js` 8/8.
 - **"Não deixa apagar!" / "Sequência em risco"** (`notification-cron`, passo 2): só sai quando o último estudo foi ONTEM
   (`daysSince(lastStudyDay) === 1`). Antes saía todo dia para quem já tinha parado (212 avisos para 20 pessoas em 14 dias,
-  produção 2026-10-19). Só no código: precisa de deploy da `notification-cron` (produção estava na v29).
+  produção 2026-10-19). Publicado na produção como `notification-cron` v30 (2026-10-19, `verify_jwt` true; código publicado conferido igual ao do repositório).
 - **Avisos rápidos** (`shared/toast.js`): 4 a 10 s pelo tamanho do texto (antes 2 s), passar o mouse segura, `#toast-layer`
   com `role="status"` e `aria-live="polite"` (fr e zh), saída animada respeitando `prefers-reduced-motion`.
 - **Janelas antigas** (`shared/modal-a11y.js`, carregado em fr e zh): toda janela do HTML (`.app-modal-overlay`,
@@ -352,8 +352,45 @@ subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do si
 - **Erros do francês em vermelho**: regras que usavam `--seal-red-dark` (azul no fr) passaram para `--error-red-text` /
   `--error-red` (erros de formulário, nota de login, ditado, exportar/importar, item "perigo" do menu, apagar foto/badge).
 - Teste: `tests/acessibilidade/test_playwright.js` 60/60 (fr e zh, claro e escuro).
-- Pendente com a dona: textos dos avisos no banco (dia 1 "esqueceu de mim?", dia 7 "streak dormindo", "Quase lá" com zero
-  lições) e o texto da janela da sequência; deploy da `notification-cron`.
+- Aprovado pela dona (2026-10-19) e publicado pelo PR #363. Banco da produção, `notification_templates`:
+  `user_inactive_1` (ids 1, 3, 79, 81, 161) com texto novo ("Que tal praticar um pouquinho de francês/chinês hoje? Cinco
+  minutinhos já valem o estudo do dia." e o equivalente em inglês para francês, chinês e português); `user_inactive_7`
+  (ids 14, 16, 94, 93, 168) e `study_goal_remaining` (ids 48, 50, 130, 129, 160) desativados (`active=false`), cada
+  combinação ainda com pelo menos uma variante ativa. Janela da sequência: "Volte amanhã para manter sua sequência."
+  (en: "Come back tomorrow to keep your streak going.").
+
+## Etapa 3 do plano "Voz da Prof. Brune": nada em português no site em inglês (2026-10-19, na branch)
+- Auditoria: `docs/i18n/etapa3-auditoria-pt-no-en.md` (50 achados de interface, 2 de conteúdo, 4 do banco, 8 de admin só
+  listados). Guarda: `tests/i18n/test_sem_portugues_en.js` percorre fr e zh em inglês e falha se sobrar português
+  (antes: fr 183 / zh 101 trechos; depois: 0 / 0, conteúdo do curso sem inglês 0 / 0). Varredura estática:
+  `tests/i18n/scan_pt_literais.js`.
+- Lote A: trilha repinta quando o catálogo en e o `content.en.js` chegam (causa raiz da primeira tela em português);
+  Continuar, Revisão do módulo e mapa com `t()`. Lote B: lição, janela da sequência, cartões esperando, Perfil, Hanzi,
+  frases de carregamento, Desafios. Lote C: Tags, excluir Deck, importação cortada, `.apkg`, Decks públicos. Lote D: cena e
+  pergunta de compreensão do diálogo no overlay (`dialogue.scene`/`dialogue.check`), Complete a frase e explicações dos
+  Desafios em inglês (lista com confiança: `docs/i18n/etapa3-traducoes-conteudo.md`).
+- Decisões da dona: "Path"/"Study Path" no lugar de "Trail"; "Pending" no filtro dos Desafios; sem o "!." da Expressão
+  (mudança de português aprovada); exportação `.apkg` no idioma do site (GUIDs iguais, reimportar não duplica).
+- Correções achadas no caminho: slug da tag de unidade sempre do título original (filtro salvo não quebra ao trocar o idioma);
+  versos de preenchimento "(sem tradução)" traduzidos só na tela (o dado no banco não muda).
+- Desafios do Módulo 3: a produção tem os 10 Ouça e traduza antigos (o lote do repositório caiu para 6 no commit 2fb4ca1 sem
+  reimportar). O overlay en segue a produção; retrato em `docs/i18n/challenges-producao-a1m3-lt.json`. Decisão pendente da dona.
+- `review-bank-agent`: `engine.generated.mjs` regerado (comportamento igual lá, tudo em português). Deploy NÃO feito de propósito: a v9 da
+  produção usa o motor do commit `0c851e3` (PR #347, outra sessão, FSRS único da 112), que não está na `main`; publicar a `main`
+  desfaria isso. Quando o #347 for mesclado, a regeração do motor junta as duas coisas e aí sim publica.
+
+## Etapa 4 do plano "Voz da Prof. Brune": novo padrão de escrita (2026-10-19)
+- Auditoria: `docs/i18n/etapa4-auditoria-escrita.md`. Achado principal: avisos com número na frente de palavra no plural
+  ("1 dias de sequência" 167 vezes em 30 dias, "sequência de 1 dias" 156, "faltam 1 missões" 44).
+- Mecânico (site): 188 chaves sem "--", sem "pra", com plural de verdade (`tp(chave, n === 1 ? 1 : 2, …)`) e sem jargão
+  técnico cru ("SQLite", "pinyinFieldId", erro cru da prévia). "O que você aprendeu" do zh saiu do português fixo.
+- Aprovado pela dona: avisos sem culpa (sequência, sumiço, revisão, badge, ranking com texto novo, "mandarim"); convites
+  "te convidou para as aulas de…"/"agora estuda … com você"; badge "Turma da Prof. Brune" e "Turma de X" (professoras novas,
+  en "{name}'s class"); Embaixador/Pioneiro pelo gênero, neutro "Embaixador(a)"/"Pioneiro(a)"; "Note" vira "item" na tela;
+  "report" continua "report"; "Aluno(a)" de reserva continua (nenhum perfil fica sem nome e sem @).
+- Banco (Staging e produção): 114 (100 modelos trocados na produção; texto antigo em `docs/i18n/etapa4-modelos-antes.json`),
+  115 (5 funções sem "aluno/a" + `_notif_text_en`/`_teacher_notice_params` aceitando frase antiga e nova). Badge `student`
+  da produção atualizado. Pendência pequena: `_teacher_notice_params` não lê "(1 dia)" no singular quando o aviso não tem params.
 
 ## Jogos da Conjugação A1 (fr, 2026-10-19)
 

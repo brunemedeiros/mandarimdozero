@@ -48,6 +48,19 @@
     "Today is Friday, August 15th.",
     "Then let's meet on Sunday, okay?",
     "Great! After 3 p.m. I'm free all the time."
+   ],
+   "scene": "Two friends arrange to meet over the weekend.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What day are they going to meet?",
+     "opts": [
+      "Sunday",
+      "Friday",
+      "Saturday"
+     ]
+    }
    ]
   },
   "concepts": {

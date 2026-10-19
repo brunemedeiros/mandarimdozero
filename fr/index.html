@@ -506,8 +506,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   /* .tabs já fica escondida sempre agora (ver regra global acima) --
      e os pills de Ranking/Conta na topbar voltam aqui (só mobile os
      esconde, ver regra global também). */
-  /* Conta/Sair: o pill com o nome saiu no desktop; "Sair da conta" fica no fim da
-     sidebar (#sidebar-logout-btn) e Reportar já tem o ⚑ da topbar. */
+  /* Conta/Sair: o pill com o nome saiu no desktop; "Sair da conta" fica no menu
+     "Mais" da sidebar (#sidebar-logout-btn) e Reportar já tem o ⚑ da topbar. */
   /* Topbar "flutuando" (estilo Duolingo): no desktop os itens ficam sem caixinha,
      só ícone + número. O XP volta à topbar (o card Status saiu). O pill de
      Admin Mode ligado em OFF (.active, roxo) mantém o fundo: é um aviso. */
@@ -550,6 +550,19 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   .sidebar-icon{ width:21px; height:21px; }
   .sidebar-divider{ height:1px; background:var(--paper-line); margin:12px 6px; }
   .sidebar-nav-secondary{ margin-top:auto; padding-top:12px; }
+  /* Menu "Mais" (Configurações e Sair da conta): abre ao lado do botão, por hover ou clique (shared/tabs.js).
+     Futuramente recebe Ajuda (termos e privacidade). */
+  .sidebar-mais{ position:relative; }
+  .sidebar-mais-menu{
+    display:none; flex-direction:column; gap:2px; position:absolute; left:calc(100% + 4px); bottom:0; z-index:30; min-width:220px;
+    background:var(--paper); border:1px solid var(--paper-line); border-radius:14px; box-shadow:var(--shadow-card); padding:6px;
+  }
+  .sidebar-mais-menu::before{ content:""; position:absolute; left:-12px; top:0; bottom:0; width:12px; } /* ponte para o mouse atravessar */
+  .sidebar-mais.open .sidebar-mais-menu{ display:flex; }
+  .sidebar .sidebar-mais-menu .tab-btn, #app.sidebar-collapsed .sidebar .sidebar-mais-menu .tab-btn{ justify-content:flex-start; padding:10px 12px; font-size:14px; }
+  .sidebar-mais-menu .tab-btn:hover, .sidebar-mais-menu .tab-btn.active{ background:var(--paper-warm); color:var(--ink); box-shadow:none; }
+  .sidebar-mais-menu .sidebar-mais-danger, .sidebar-mais-menu .sidebar-mais-danger:hover{ color:var(--seal-red-dark); }
+  .sidebar-mais:has(.sidebar-mais-menu .tab-btn.active) > #sidebar-mais-btn{ background:var(--paper); color:var(--seal-red-dark); box-shadow:var(--shadow-card); }
 
   .app-content{ grid-area:content; max-width:none; margin:0; padding:0 0 80px; }
 
@@ -653,7 +666,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .module-label:first-child{ margin-top:0; padding-top:0; border-top:none; }
 .module-label .ml-text{
   font-family: var(--font-display); font-weight:900; font-size:15px; text-transform:none; letter-spacing:0;
-  color:var(--ink); white-space:nowrap;
+  color:var(--ink); white-space:normal; min-width:0; /* rótulo longo (ex.: inglês) quebra em vez de estourar a tela de 390px */
 }
 .module-label .ml-track{ flex:1; height:4px; border-radius:2px; background:var(--paper-warm); overflow:hidden; }
 .module-label .ml-fill{ height:100%; border-radius:2px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
@@ -5476,8 +5489,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   <div class="public-profile-page">
     <div class="public-profile-page-inner">
       <div id="public-profile-page-body"></div>
-      <div class="public-profile-page-footer">
-        Quer estudar francês também? <a href="../">Criar minha conta →</a>
+      <div class="public-profile-page-footer" data-i18n="publicProfile.footer.askFr">
+        Quer estudar francês também? <a href="../" data-i18n="publicProfile.footer.cta">Criar minha conta →</a>
       </div>
     </div>
   </div>
@@ -5596,10 +5609,6 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f3c6.svg" alt="" aria-hidden="true">
         <span class="sidebar-label">Ranking</span>
       </button>
-      <button class="tab-btn" data-tab="settings">
-        <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/2699.svg" alt="" aria-hidden="true">
-        <span data-i18n="settings.title" class="sidebar-label">Configurações</span>
-      </button>
       <button class="tab-btn student-only-nav" data-tab="student-panel" style="display:none;">
         <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f392.svg" alt="" aria-hidden="true">
         <span class="sidebar-label" data-i18n="studentPanel.nav">Aluno</span>
@@ -5612,10 +5621,22 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6e0.svg" alt="" aria-hidden="true">
         <span class="sidebar-label">Admin</span>
       </button>
-      <button class="tab-btn sidebar-logout-btn" id="sidebar-logout-btn" type="button">
-        <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6aa.svg" alt="" aria-hidden="true">
-        <span class="sidebar-label" data-i18n="menu.logout">Sair da conta</span>
-      </button>
+      <div class="sidebar-mais" id="sidebar-mais">
+        <button class="tab-btn" id="sidebar-mais-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="sidebar-mais-menu">
+          <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.3" fill="#94A3B8"/><circle cx="12" cy="12" r="2.3" fill="#64748B"/><circle cx="19" cy="12" r="2.3" fill="#475569"/></svg>
+          <span class="sidebar-label" data-i18n="sidebar.more">Mais</span>
+        </button>
+        <div class="sidebar-mais-menu" id="sidebar-mais-menu" role="menu">
+          <button class="tab-btn" data-tab="settings" role="menuitem" type="button">
+            <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/2699.svg" alt="" aria-hidden="true">
+            <span data-i18n="settings.title">Configurações</span>
+          </button>
+          <button class="tab-btn sidebar-mais-danger" id="sidebar-logout-btn" role="menuitem" type="button">
+            <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6aa.svg" alt="" aria-hidden="true">
+            <span data-i18n="menu.logout">Sair da conta</span>
+          </button>
+        </div>
+      </div>
     </nav>
   </div>
 
@@ -5657,7 +5678,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <div id="step-content"></div>
 
       <div class="unit-actions">
-        <button class="btn btn-secondary" id="step-back-btn" style="display:none;">← Voltar</button>
+        <button data-i18n="common.backArrow" class="btn btn-secondary" id="step-back-btn" style="display:none;">← Voltar</button>
         <button class="btn btn-primary btn-block" id="step-next-btn">Continuar →</button>
       </div>
     </div>
@@ -5814,15 +5835,15 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   <div class="view" id="view-progress">
     <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil" data-i18n-attr="aria-label:profile.subnavAria">
       <button data-i18n="profile.tabOverview" class="leaderboard-tab" data-tab="profile">Visão geral</button>
-      <button class="leaderboard-tab" data-tab="goals">Metas</button>
-      <button class="leaderboard-tab active" data-tab="progress">Progresso</button>
+      <button data-i18n="profile.tabGoals" class="leaderboard-tab" data-tab="goals">Metas</button>
+      <button data-i18n="profile.tabProgress" class="leaderboard-tab active" data-tab="progress">Progresso</button>
       <button data-i18n="profile.tabFriends" class="leaderboard-tab" data-tab="friends">Amigos</button>
     </div>
     <div class="path-header">
       <h2 data-i18n="ui.stats.title">Seu progresso</h2>
       <p data-i18n="ui.stats.sub">Acompanhe sua consistência e conquistas.</p>
     </div>
-    <div class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
+    <div data-i18n="profile.sectionBadges" class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
     <div class="badge-grid conquests-grid" id="badge-grid"></div>
     <div class="stat-cards" id="stat-cards"></div>
     <div id="vocab-strength-widget"></div>
@@ -5836,12 +5857,12 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   <div class="view" id="view-goals">
     <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil" data-i18n-attr="aria-label:profile.subnavAria">
       <button data-i18n="profile.tabOverview" class="leaderboard-tab" data-tab="profile">Visão geral</button>
-      <button class="leaderboard-tab active" data-tab="goals">Metas</button>
-      <button class="leaderboard-tab" data-tab="progress">Progresso</button>
+      <button data-i18n="profile.tabGoals" class="leaderboard-tab active" data-tab="goals">Metas</button>
+      <button data-i18n="profile.tabProgress" class="leaderboard-tab" data-tab="progress">Progresso</button>
       <button data-i18n="profile.tabFriends" class="leaderboard-tab" data-tab="friends">Amigos</button>
     </div>
     <div class="path-header">
-      <h2>Minhas metas</h2>
+      <h2 data-i18n="profile.goals.title">Minhas metas</h2>
       <p data-i18n="ui.goal.sub">Defina quantas lições por dia você quer estudar.</p>
     </div>
     <div class="study-plan-card" id="study-plan-card">
@@ -5850,7 +5871,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
           <div data-i18n="ui.goal.title" class="study-plan-title">Minha meta de estudo</div>
           <div class="study-plan-sub" id="study-plan-sub"></div>
         </div>
-        <button class="study-plan-edit-btn" id="study-plan-edit-btn" aria-label="Editar meta" title="Editar meta">✏️</button>
+        <button class="study-plan-edit-btn" id="study-plan-edit-btn" aria-label="Editar meta" title="Editar meta" data-i18n-attr="aria-label:profile.goals.edit;title:profile.goals.edit">✏️</button>
       </div>
       <div class="study-plan-body" id="study-plan-body"></div>
     </div>
@@ -6002,7 +6023,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   <div class="view" id="view-my-flashcards">
     <div class="path-header">
       <h2 data-i18n="ui.myCards.title">📇 Meus cartões</h2>
-      <p data-i18n="ui.myCards.sub">Crie seus próprios flashcards -- palavras e frases que você quer memorizar, mesmo que não estejam na trilha.</p>
+      <p data-i18n="ui.myCards.sub">Crie seus próprios flashcards: palavras e frases que você quer memorizar, mesmo que não estejam na trilha.</p>
     </div>
     <div id="my-flashcards-content"></div>
   </div>
@@ -6135,7 +6156,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="app-modal-close" id="challenges-import-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p>Cole aqui a saída do pipeline de geração (<code>challenges_pipeline_output.json</code>, ou só o array de <code>accepted</code>) -- vai direto pro banco, sem precisar rodar SQL manualmente no Supabase.</p>
+      <p>Cole aqui a saída do pipeline de geração (<code>challenges_pipeline_output.json</code>, ou só o array de <code>accepted</code>). Vai direto para o banco, sem precisar rodar SQL manualmente no Supabase.</p>
       <textarea id="challenges-import-textarea" class="challenges-import-textarea" placeholder='[{"id": "expr-auto-001", "type": "expression", "level": "B1", ...}, ...]' rows="12"></textarea>
       <button class="btn btn-primary btn-block" id="challenges-import-submit-btn" style="max-width:320px; margin:12px auto 0;" data-i18n="adminChallenges.import.btn">Importar</button>
       <div class="challenges-import-status" id="challenges-import-status"></div>
@@ -6261,13 +6282,13 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">Enter</span></div>
-        <div data-i18n="ui.kbd.confirm" class="kbd-shortcuts-desc">Confirmar uma resposta digitada e avançar pra próxima</div>
+        <div data-i18n="ui.kbd.confirm" class="kbd-shortcuts-desc">Confirmar uma resposta digitada e avançar para a próxima</div>
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">r</span></div>
         <div data-i18n="ui.kbd.replay" class="kbd-shortcuts-desc">Tocar áudio novamente</div>
       </div>
-      <p data-i18n="ui.kbd.note" class="kbd-shortcuts-note">Os números só aparecem quando um exercício tem alternativas pra escolher -- nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela.</p>
+      <p data-i18n="ui.kbd.note" class="kbd-shortcuts-note">Os números só aparecem quando um exercício tem alternativas para escolher, nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela.</p>
     </div>
   </div>
 </div>
@@ -6299,7 +6320,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="app-modal-close" id="flashcard-limit-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p data-i18n-html="flashcardLimit.modal.bodyHtml">Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Pra criar mais, apague algum cartão, ou peça pra sua professora te vincular -- alunos vinculados a uma professora têm cartões próprios ilimitados.</p>
+      <p data-i18n-html="flashcardLimit.modal.bodyHtml">Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Para criar mais, apague algum cartão, ou peça para sua professora te vincular. Alunos vinculados a uma professora têm cartões próprios ilimitados.</p>
     </div>
   </div>
 </div>
@@ -6375,7 +6396,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="app-modal-close" id="flashcard-preview-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p class="profile-edit-hint" style="margin-top:0;" data-i18n="flashcardPreview.modal.hint">Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão -- nada é salvo ou avaliado aqui.</p>
+      <p class="profile-edit-hint" style="margin-top:0;" data-i18n="flashcardPreview.modal.hint">Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão. Nada é salvo ou avaliado aqui.</p>
       <div id="flashcard-preview-modal-body"></div>
       <div id="flashcard-preview-modal-nav" style="display:flex; align-items:center; justify-content:center; margin-top:12px;"></div>
     </div>
@@ -6385,8 +6406,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <div id="public-deck-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>Deck público</h3>
-      <button class="app-modal-close" id="public-deck-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="publicDeck.modal.title">Deck público</h3>
+      <button class="app-modal-close" id="public-deck-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body" id="public-deck-modal-body"></div>
   </div>
@@ -6474,7 +6495,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
     <p data-i18n="ui.streak.sub" class="streak-subtext">Volte amanhã para manter sua sequência.</p>
   </div>
   <div class="streak-modal-footer">
-    <button class="btn btn-primary" id="streak-modal-continue-btn">Continuar</button>
+    <button data-i18n="common.continue" class="btn btn-primary" id="streak-modal-continue-btn">Continuar</button>
   </div>
 </div>
 
@@ -6482,11 +6503,11 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   <div class="review-reminder-icon">🗂️</div>
   <div class="review-reminder-text">
     <div data-i18n="ui.reviewReminder.title" class="review-reminder-title">Vamos fazer uma pequena revisão?</div>
-    <div class="review-reminder-sub"><span id="review-reminder-count">0</span> cartões estão esperando por você — afie sua memória revisando o que já viu.</div>
+    <div data-i18n="ui.reviewReminder.subRest" class="review-reminder-sub"><span id="review-reminder-count">0</span> cartões estão esperando por você — afie sua memória revisando o que já viu.</div>
   </div>
   <div class="review-reminder-actions">
     <button data-i18n="ui.notNow" class="review-reminder-dismiss" id="review-reminder-dismiss-btn">Agora não</button>
-    <button class="btn btn-primary review-reminder-cta" id="review-reminder-cta-btn">Revisar agora</button>
+    <button data-i18n="ui.reviewReminder.cta" class="btn btn-primary review-reminder-cta" id="review-reminder-cta-btn">Revisar agora</button>
   </div>
 </div>
 

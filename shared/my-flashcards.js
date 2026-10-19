@@ -133,7 +133,7 @@ function personalDecksListHTML(decks){
     const pad = Math.max(0, personalDeckDepth(decks, d) - 1) * 16;
     const c = getDeckCounts(decks, d.id, pool);
     return `<div class="admin-badge-row" style="padding-left:${pad}px;" data-personal-deck-row="${d.id}">
-      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? t('deck.myDecks') : d.name)} <span class="profile-edit-hint">(${t('deck.countsFull', { total: c.total, new: c.new, learning: c.learning, review: c.review, due: c.due })})</span></span>
+      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? t('deck.myDecks') : d.name)} <span class="profile-edit-hint">(${tp('deck.countsFull', c.total === 1 ? 1 : 2, { total: c.total, new: c.new, learning: c.learning, review: c.review, due: c.due })})</span></span>
       <button type="button" class="btn btn-secondary" data-study-deck="${d.id}">${t('deck.studyThis')}</button>
       ${d.kind === 'personal' && typeof publishBoxHTML === 'function' ? `<button type="button" class="btn btn-secondary" data-publish-deck="${d.id}">${d.is_public ? t('deck.publicBadge') : t('deck.publish')}</button>` : ''}
     </div>
@@ -161,7 +161,7 @@ function teacherReceivedDecks(decks){
 function teacherTagsReadOnlyHTML(cards){
   const tags = collectTagsFromCards((cards || []).filter(c => c.origin === 'teacher'));
   if (!tags.length) return '';
-  return `<div data-teacher-tags style="margin:6px 0;"><span class="profile-edit-hint">Tags dos cartões da professora:</span> ${noteTagChipsHTML(tags)}</div>`;
+  return `<div data-teacher-tags style="margin:6px 0;"><span class="profile-edit-hint">${t('myFlashcards.tags.teacher')}</span> ${noteTagChipsHTML(tags)}</div>`;
 }
 
 // Fase I (Tags): o filtro de tag do Review vale também para "Estudar este
@@ -171,7 +171,7 @@ function tagFilterNoticeHTML(){
   // A sessão não aplica mais filtro de tag (só o Painel filtra), ver activeReviewTagFilter().
   const f = (typeof activeReviewTagFilter === 'function') ? activeReviewTagFilter() : [];
   if (!f.length) return '';
-  return `<p class="profile-edit-hint" data-tag-filter-notice>Filtro de tags ativo na Revisão: ${noteTagChipsHTML(f)} — vale também para "Estudar este Deck". <button type="button" class="admin-select-link" data-clear-review-tag-filter style="background:none;border:none;cursor:pointer;padding:0;">Limpar</button></p>`;
+  return `<p class="profile-edit-hint" data-tag-filter-notice>${t('myFlashcards.tags.filterNotice', { chips: noteTagChipsHTML(f) })} <button type="button" class="admin-select-link" data-clear-review-tag-filter style="background:none;border:none;cursor:pointer;padding:0;">${t('myFlashcards.tags.clear')}</button></p>`;
 }
 
 function teacherDecksReadOnlyHTML(decks){
@@ -192,7 +192,7 @@ function teacherDecksReadOnlyHTML(decks){
     const n = c.total;
     const label = deck.kind === 'teacher_root' ? t('deck.teacherRoot') : deck.name;
     return `<div class="admin-badge-row" style="padding-left:${depth * 16}px;" data-teacher-deck-row="${deck.id}">
-      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${t('deck.countsFull', { total: n, new: c.new, learning: c.learning, review: c.review, due: c.due })})</span></span>
+      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${tp('deck.countsFull', n === 1 ? 1 : 2, { total: n, new: c.new, learning: c.learning, review: c.review, due: c.due })})</span></span>
       <button type="button" class="btn btn-secondary" data-study-deck="${deck.id}" ${n ? '' : 'disabled'}>${t('deck.studyThis')}</button>
     </div>`;
   }).join('');
@@ -392,7 +392,7 @@ async function renderMyFlashcardsView(opts){
     <!-- Fase J: gerenciamento global das PRÓPRIAS tags (own_flashcards). Tags de
          Teacher Cards nunca entram aqui (outra propriedade; somente leitura). -->
     <div class="profile-section" id="my-tags-section">
-      <div class="section-label">🏷️ Gerenciar tags</div>
+      <div class="section-label">🏷️ ${t('review.panel.manageTags')}</div>
       <div id="my-tag-manager"></div>
     </div>
 
@@ -493,7 +493,7 @@ function myFlashcardRowHTML(c, premium){
   return `
     <div class="admin-badge-row">
       <div class="admin-badge-info">
-        <div class="admin-badge-name">${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
+        <div class="admin-badge-name">${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(flashcardRowDisplayTexts(c).back)}</div>
         <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}${t('myFlashcards.row.createdOn', { date: fmtDate(c.created_at) })}</div>
         ${(c.tags && c.tags.length) ? `<div data-row-tags style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${noteTagChipsHTML(c.tags)}</div>` : ''}
       </div>
@@ -858,8 +858,8 @@ function wireMyFlashcardsForm(wrap, atLimit, premium, onCreated){
     });
     if (!pre.ok){
       errorEl.textContent = (typeof window.tp === 'function')
-        ? window.tp('flashcardLimit.wouldGenerate', pre.requested, { n: pre.requested, remaining: pre.remaining })
-        : `Este cartão geraria ${pre.requested} cartão(ões) de estudo, mas restam só ${pre.remaining} no plano grátis.`;
+        ? window.tp('flashcardLimit.wouldGenerate', pre.requested === 1 ? 1 : 2, { n: pre.requested, remaining: pre.remaining })
+        : `Este cartão geraria ${pre.requested} ${pre.requested === 1 ? 'cartão' : 'cartões'} de estudo, mas restam só ${pre.remaining} no plano grátis.`;
       openFlashcardLimitModal();
       return;
     }
@@ -1038,7 +1038,7 @@ function myFlashcardsExportPayload(cardsToExport){
 function openMyFlashcardsExportModal(cardsToExport){
   if (!cardsToExport.length){ showToast(t('myFlashcards.export.noneActive')); return; }
   const payload = myFlashcardsExportPayload(cardsToExport);
-  if (!payload.cards.length){ showToast('Nenhum dos cartões selecionados cabe neste formato (só frente e verso).'); return; }
+  if (!payload.cards.length){ showToast(t('myFlashcards.export.noneFits')); return; }
   const json = JSON.stringify(payload, null, 2);
   const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   const shareUrl = `${location.origin}${location.pathname}#import=${base64}`;
@@ -1058,7 +1058,7 @@ function openMyFlashcardsExportModal(cardsToExport){
         <button class="app-modal-close" id="my-flashcards-export-close" aria-label="${t('common.close')}">✕</button>
       </div>
       <div class="app-modal-body">
-        ${payload.cards.length < cardsToExport.length ? `<p class="profile-edit-hint">${t('myFlashcards.export.leftOut', { n: cardsToExport.length - payload.cards.length })}</p>` : ''}
+        ${payload.cards.length < cardsToExport.length ? `<p class="profile-edit-hint">${tp('myFlashcards.export.leftOut', cardsToExport.length - payload.cards.length === 1 ? 1 : 2, { n: cardsToExport.length - payload.cards.length })}</p>` : ''}
         <p class="profile-edit-hint">${t('myFlashcards.export.hint')}</p>
         <div class="export-choices">
           <button type="button" class="btn btn-secondary" id="my-flashcards-export-download" style="flex:1;">${t('myFlashcards.export.download')}</button>
@@ -1158,8 +1158,8 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
   const dest = await resolveOwnCreationDeck({ languageAppKey: APP_KEY });
   if (!dest.ok){ if (errorEl) errorEl.textContent = dest.error; return; }
   const confirmText = cutPlan.cut
-    ? t('myFlashcards.import.confirmCut', { total: payload.cards.length, kept: cardsToCreate.length })
-    : tp('myFlashcards.import.confirm', payload.cards.length);
+    ? tp('myFlashcards.import.confirmCut', payload.cards.length === 1 ? 1 : 2, { total: payload.cards.length, kept: cardsToCreate.length })
+    : tp('myFlashcards.import.confirm', payload.cards.length === 1 ? 1 : 2, { n: payload.cards.length });
   if (!confirm(confirmText)) return;
   let importedCount = 0;
   for (const card of cardsToCreate){
@@ -1176,7 +1176,7 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
       if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
     }
   }
-  showToast(`${tp('myFlashcards.import.done', importedCount)} ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount))}`.trim());
+  showToast(`${tp('myFlashcards.import.done', importedCount === 1 ? 1 : 2, { n: importedCount })} ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount))}`.trim());
   await myFlashcardsAfterChange();
   if (cutMessage) openFlashcardLimitModal({ cutMessage });
 }
@@ -1209,12 +1209,12 @@ function openFlashcardLimitModal(opts){
     body.innerHTML = cutMessage
       ? `<p data-limit-cut-message>${escapeHTML(cutMessage)}</p>
          <div data-limit-premium-cta style="margin-top:10px; padding:10px 12px; border:2px solid var(--seal-red); border-radius:var(--radius, 10px); background:var(--paper-warm);">
-           <strong>⭐ Com o Premium, seus cartões próprios são ilimitados.</strong><br>
-           Para ativar, fale com a administração (profbrune). Você também pode excluir cartões que já não usa para liberar espaço.
+           <strong>${hasT ? t('flashcardLimit.cut.ctaStrong') : '⭐ Com o Premium, seus cartões próprios são ilimitados.'}</strong><br>
+           ${hasT ? t('flashcardLimit.cut.ctaBody') : 'Para ativar, fale com a administração (profbrune). Você também pode excluir cartões que já não usa para liberar espaço.'}
          </div>`
       : defaultBodyHTML;
   }
-  if (title) title.textContent = cutMessage ? '🔒 Importação limitada pelo plano grátis' : defaultTitle;
+  if (title) title.textContent = cutMessage ? (hasT ? t('flashcardLimit.cut.title') : '🔒 Importação limitada pelo plano grátis') : defaultTitle;
   modal.style.display = 'flex';
   return true;
 }

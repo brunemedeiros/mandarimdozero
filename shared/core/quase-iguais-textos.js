@@ -148,7 +148,7 @@ function onMatchTileClick(btn){
             <div class="match-complete">
               <div class="big-emoji">🎉</div>
               <h3>${t('review.match.allMatched')}</h3>
-              <div class="score-num">${tp('review.match.attempts', MATCH_STATE.attempts)}</div>
+              <div class="score-num">${tp('review.match.attempts', MATCH_STATE.attempts === 1 ? 1 : 2, { n: MATCH_STATE.attempts })}</div>
               ${matchMs ? `<p class="review-record-line">${t('review.records.time', { time: formatRecordSeconds(matchMs) })} · ${matchIsRecord ? t('review.records.newRecord') : t('review.records.yourRecord', { record: formatRecordSeconds(reviewRecords().matchBestMs) })}</p>` : ''}
               <button class="btn btn-primary" id="match-restart-btn">${t('review.match.playAgain')}</button>
             </div>
@@ -317,7 +317,7 @@ function renderUnitCompleteScreen(u, xpEarned){
       ` : ''}
       ${unitWords.length ? `
         <div class="lesson-recap">
-          <div class="lesson-recap-label">O que você aprendeu: ${unitWords.length} ${unitWords.length > 1 ? 'palavras novas' : 'palavra nova'}</div>
+          <div class="lesson-recap-label">${tp('zh.path.unitDone.learnedWords', unitWords.length === 1 ? 1 : 2, { n: unitWords.length })}</div>
           ${unitWords.map(item => `
             <div class="lesson-recap-item">
               <div class="lesson-recap-french">${audioBtnHTML(LANG_HOOKS.recapText(item))}<span>${LANG_HOOKS.recapText(item)}</span>${LANG_HOOKS.recapExtra(item)}</div>

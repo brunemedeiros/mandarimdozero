@@ -35,15 +35,30 @@
 
 const ANKI_PARSER_ERROR_MESSAGES = {
   invalid_zip: 'Arquivo não é um .apkg/.zip válido.',
-  missing_collection: 'Este .apkg não contém um banco de coleção reconhecível (collection.anki2/anki21).',
-  unreadable_collection: 'Não foi possível ler o banco de dados da coleção dentro do .apkg.',
-  invalid_sqlite: 'O banco de dados da coleção está corrompido ou num formato SQLite não reconhecido.',
+  missing_collection: 'Este .apkg não contém uma coleção de cartões reconhecível.',
+  unreadable_collection: 'Não foi possível ler a coleção de cartões dentro do .apkg.',
+  invalid_sqlite: 'A coleção de cartões deste .apkg está corrompida ou num formato não reconhecido.',
   empty_collection: 'A tabela "col" desta coleção está vazia.',
   malformed_col_table: 'Não foi possível ler a tabela "col" desta coleção.',
-  malformed_notes_cards: 'Não foi possível ler as tabelas de notas/cartões desta coleção.',
-  unsupported_format_zstd: 'Este .apkg usa o formato mais novo do Anki (compactação zstd, collection.anki21b), ainda não suportado por este importador. No Anki, ao exportar, marque a opção "Suporte a versões legadas do Anki" (ou "Support older Anki versions") pra gerar um pacote compatível, e tente de novo.',
-  unsupported_format_protobuf: 'Este .apkg foi exportado num formato mais novo do Anki, cujos modelos de cartão ficam guardados em protobuf binário (não suportado por este importador -- decodificar isso à mão arriscaria corromper o conteúdo). No Anki, ao exportar, marque a opção "Suporte a versões legadas do Anki" (ou "Support older Anki versions") pra gerar um pacote compatível, e tente de novo.',
+  malformed_notes_cards: 'Não foi possível ler os itens e cartões desta coleção.',
+  unsupported_format_zstd: 'Este .apkg usa o formato mais novo do Anki, ainda não suportado por este importador. No Anki, ao exportar, marque a opção "Suporte a versões legadas do Anki" (ou "Support older Anki versions") para gerar um pacote compatível, e tente de novo.',
+  unsupported_format_protobuf: 'Este .apkg foi exportado num formato mais novo do Anki, ainda não suportado por este importador. No Anki, ao exportar, marque a opção "Suporte a versões legadas do Anki" (ou "Support older Anki versions") para gerar um pacote compatível, e tente de novo.',
 };
+
+// Etapa 3 (lote C): mensagem no idioma do site (chaves ankiImport.parse.<code>) quando t() existe; sem ele
+// (testes Node), o português acima.
+const ANKI_PARSER_EXTRA_MESSAGES = {
+  missing_dependencies: 'Bibliotecas de leitura de .apkg não carregadas.',
+  no_notetypes: 'Esta coleção não tem nenhum modelo de cartão (notetype) reconhecível.',
+};
+function ankiParserErrorText(code){
+  const pt = ANKI_PARSER_ERROR_MESSAGES[code] || ANKI_PARSER_EXTRA_MESSAGES[code];
+  if (typeof t === 'function'){
+    const v = t('ankiImport.parse.' + code);
+    if (v && v !== 'ankiImport.parse.' + code) return v;
+  }
+  return pt;
+}
 
 function safeParseJsonObject(raw){
   if (!raw) return {};
@@ -63,14 +78,14 @@ async function parseApkgFile(arrayBuffer, deps){
   const SQL = deps && deps.SQL;
   const JSZipCtor = deps && deps.JSZipCtor;
   if (!SQL || !JSZipCtor){
-    return { ok: false, fatal: true, code: 'missing_dependencies', error: 'Bibliotecas de leitura de .apkg não carregadas.' };
+    return { ok: false, fatal: true, code: 'missing_dependencies', error: ankiParserErrorText('missing_dependencies') };
   }
 
   let zip;
   try {
     zip = await JSZipCtor.loadAsync(arrayBuffer);
   } catch (e) {
-    return { ok: false, fatal: true, code: 'invalid_zip', error: ANKI_PARSER_ERROR_MESSAGES.invalid_zip };
+    return { ok: false, fatal: true, code: 'invalid_zip', error: ankiParserErrorText('invalid_zip') };
   }
 
   const anki21bEntry = zip.file('collection.anki21b');
@@ -80,23 +95,23 @@ async function parseApkgFile(arrayBuffer, deps){
 
   if (!dbEntry){
     if (anki21bEntry){
-      return { ok: false, fatal: true, code: 'unsupported_format_zstd', error: ANKI_PARSER_ERROR_MESSAGES.unsupported_format_zstd };
+      return { ok: false, fatal: true, code: 'unsupported_format_zstd', error: ankiParserErrorText('unsupported_format_zstd') };
     }
-    return { ok: false, fatal: true, code: 'missing_collection', error: ANKI_PARSER_ERROR_MESSAGES.missing_collection };
+    return { ok: false, fatal: true, code: 'missing_collection', error: ankiParserErrorText('missing_collection') };
   }
 
   let dbBytes;
   try {
     dbBytes = await dbEntry.async('uint8array');
   } catch (e) {
-    return { ok: false, fatal: true, code: 'unreadable_collection', error: ANKI_PARSER_ERROR_MESSAGES.unreadable_collection };
+    return { ok: false, fatal: true, code: 'unreadable_collection', error: ankiParserErrorText('unreadable_collection') };
   }
 
   let db;
   try {
     db = new SQL.Database(dbBytes);
   } catch (e) {
-    return { ok: false, fatal: true, code: 'invalid_sqlite', error: ANKI_PARSER_ERROR_MESSAGES.invalid_sqlite };
+    return { ok: false, fatal: true, code: 'invalid_sqlite', error: ankiParserErrorText('invalid_sqlite') };
   }
 
   let colRow;
@@ -104,13 +119,13 @@ async function parseApkgFile(arrayBuffer, deps){
     const colRes = db.exec('SELECT crt, models, decks FROM col LIMIT 1');
     if (!colRes.length || !colRes[0].values.length){
       db.close && db.close();
-      return { ok: false, fatal: true, code: 'empty_collection', error: ANKI_PARSER_ERROR_MESSAGES.empty_collection };
+      return { ok: false, fatal: true, code: 'empty_collection', error: ankiParserErrorText('empty_collection') };
     }
     const row = colRes[0].values[0];
     colRow = { crt: row[0], modelsJson: row[1], decksJson: row[2] };
   } catch (e) {
     db.close && db.close();
-    return { ok: false, fatal: true, code: 'malformed_col_table', error: ANKI_PARSER_ERROR_MESSAGES.malformed_col_table };
+    return { ok: false, fatal: true, code: 'malformed_col_table', error: ankiParserErrorText('malformed_col_table') };
   }
 
   const models = safeParseJsonObject(colRow.modelsJson);
@@ -129,9 +144,9 @@ async function parseApkgFile(arrayBuffer, deps){
     } catch (e) { /* tabela nem existe -- não é o caso relacional, segue pro erro genérico abaixo */ }
     db.close && db.close();
     if (hasRelationalNotetypes){
-      return { ok: false, fatal: true, code: 'unsupported_format_protobuf', error: ANKI_PARSER_ERROR_MESSAGES.unsupported_format_protobuf };
+      return { ok: false, fatal: true, code: 'unsupported_format_protobuf', error: ankiParserErrorText('unsupported_format_protobuf') };
     }
-    return { ok: false, fatal: true, code: 'empty_collection', error: 'Esta coleção não tem nenhum modelo de cartão (notetype) reconhecível.' };
+    return { ok: false, fatal: true, code: 'empty_collection', error: ankiParserErrorText('no_notetypes') };
   }
 
   let notesRaw, cardsRaw;
@@ -140,7 +155,7 @@ async function parseApkgFile(arrayBuffer, deps){
     cardsRaw = db.exec('SELECT id, nid, did, ord FROM cards');
   } catch (e) {
     db.close && db.close();
-    return { ok: false, fatal: true, code: 'malformed_notes_cards', error: ANKI_PARSER_ERROR_MESSAGES.malformed_notes_cards };
+    return { ok: false, fatal: true, code: 'malformed_notes_cards', error: ankiParserErrorText('malformed_notes_cards') };
   }
 
   const notes = (notesRaw[0] ? notesRaw[0].values : []).map(row => ({

@@ -25,12 +25,14 @@ function sessionStorageSafeSet(key, val){
 // `label`, quando informado, fixa uma frase específica pro contexto (ex:
 // "Carregando perfil..."); sem ele, sorteia da pool genérica -- dá um
 // pouco de variedade sem inventar informação que o contexto não tem.
+// Etapa 3: a pool é de CHAVES do catálogo (shared/i18n), uma por frase, na mesma ordem e com o mesmo único
+// Math.random por sorteio de antes (testes com semente continuam com a mesma sequência).
 const LOADING_PHRASES = [
-  'Carregando...', 'Só um instante...', 'Quase lá...', 'Buscando os dados...',
-  'Preparando tudo...', 'Um momento...'
+  'loading.phrase.loading', 'loading.phrase.oneSec', 'loading.phrase.almost', 'loading.phrase.fetching',
+  'loading.phrase.preparing', 'loading.phrase.moment'
 ];
 function loadingHTML(label){
-  const text = label || LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
+  const text = label || t(LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)]);
   return `<div class="profile-loading"><span class="loading-spinner"></span><p>${text}</p></div>`;
 }
 

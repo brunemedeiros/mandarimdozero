@@ -264,7 +264,7 @@ function validateFieldAudioUploadFile(file){
   if (!file) return { ok: false, error: mediaErrorText('media.noFile', 'Nenhum arquivo selecionado.') };
   if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: mediaErrorText('media.emptyFile', 'Arquivo vazio.') };
   if (typeof file.size === 'number' && file.size > FIELD_AUDIO_UPLOAD_MAX_BYTES){
-    return { ok: false, error: mediaErrorText('media.audioTooBig', 'Arquivo maior que 5 MB -- escolha um arquivo de áudio menor.') };
+    return { ok: false, error: mediaErrorText('media.audioTooBig', 'Arquivo maior que 5 MB. Escolha um arquivo de áudio menor.') };
   }
   const type = file.type || '';
   if (!FIELD_AUDIO_UPLOAD_MIME_TYPES.includes(type)){
@@ -592,16 +592,24 @@ const TAG_MAX_LENGTH = 50;
 // mensagem que a UI mostra. (O que normalizeNoteTags já fazia --
 // deduplicar e descartar o que normaliza pra vazio -- continua sendo
 // normalização, não "descarte por limite".)
+// Etapa 3 (lote C): mensagem no idioma do site quando t() existe; sem ele (testes Node), o português de sempre.
+function noteTagsErrorText(key, pt, params){
+  if (typeof t === 'function'){
+    const v = t(key, params);
+    if (v && v !== key) return v;
+  }
+  return String(pt).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
+}
 function validateNoteTags(rawTags){
   const tags = normalizeNoteTags(rawTags);
   const tooLong = tags.filter(t => t.length > TAG_MAX_LENGTH);
   if (tooLong.length){
     return { ok: false, tags, errorCode: 'tag_too_long',
-      error: `Tag muito longa (máximo ${TAG_MAX_LENGTH} caracteres): "${tooLong[0].slice(0, 20)}…".` };
+      error: noteTagsErrorText('tags.err.tooLong', 'Tag muito longa (máximo {max} caracteres): "{tag}…".', { max: TAG_MAX_LENGTH, tag: tooLong[0].slice(0, 20) }) };
   }
   if (tags.length > TAG_MAX_PER_NOTE){
     return { ok: false, tags, errorCode: 'too_many_tags',
-      error: `Máximo de ${TAG_MAX_PER_NOTE} tags por cartão (foram informadas ${tags.length}).` };
+      error: noteTagsErrorText('tags.err.tooMany', 'Máximo de {max} tags por cartão (foram informadas {n}).', { max: TAG_MAX_PER_NOTE, n: tags.length }) };
   }
   return { ok: true, tags };
 }

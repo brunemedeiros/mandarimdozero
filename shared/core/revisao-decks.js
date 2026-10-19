@@ -172,22 +172,22 @@ function buildTrailContinueCard(){
   const { done, total } = trailLessonCounts(groups, STATE.unitProgress);
   const card = document.createElement('div');
   card.className = 'trail-continue';
-  const metric = `${done} de ${total} lições concluídas`;
+  const metric = tp('trail.lessonsCompleted', total === 1 ? 1 : 2, { done, total });
   if (!next){
     card.classList.add('complete');
-    card.innerHTML = `<div class="tc-info"><div class="tc-eyebrow">Sua trilha</div><div class="tc-title">Você concluiu toda a trilha 🎉</div><div class="tc-sub">${metric}</div></div>`;
+    card.innerHTML = `<div class="tc-info"><div class="tc-eyebrow">${t('trail.continue.eyebrowDone')}</div><div class="tc-title">${t('trail.continue.allDone')}</div><div class="tc-sub">${metric}</div></div>`;
     return card;
   }
   const u = UNITS.find(x => x.id === next.unitId);
-  const lessonLabel = next.lessonCount ? ` · lição ${next.lessonIdx + 1} de ${next.lessonCount}` : '';
+  const lessonLabel = next.lessonCount ? ` · ${t('trail.continue.lessonOf', { i: next.lessonIdx + 1, n: next.lessonCount })}` : '';
   const started = done > 0 || !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
   card.innerHTML = `
     <div class="tc-info">
-      <div class="tc-eyebrow">${started ? 'Continue de onde parou' : 'Comece por aqui'}</div>
+      <div class="tc-eyebrow">${started ? t('trail.continue.eyebrowResume') : t('trail.continue.eyebrowStart')}</div>
       <div class="tc-title">${u.title}${lessonLabel}</div>
       <div class="tc-sub">${metric}</div>
     </div>
-    <button type="button" class="btn btn-primary tc-cta">${started ? 'Continuar' : 'Começar'}</button>
+    <button type="button" class="btn btn-primary tc-cta">${started ? t('common.continue') : t('common.start')}</button>
   `;
   card.querySelector('.tc-cta').addEventListener('click', () => openUnitDetail(u.id));
   setTimeout(() => watchTrailContinueCard(card), 0);

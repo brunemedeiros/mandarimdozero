@@ -58,6 +58,19 @@
     "It's nice, but it's cold.",
     "Which season do you prefer?",
     "I prefer summer, it's hot."
+   ],
+   "scene": "At the bus stop, on a cold morning, two coworkers talk about the weather.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "Which season does Baptiste prefer?",
+     "opts": [
+      "Winter",
+      "Summer",
+      "Fall"
+     ]
+    }
    ]
   },
   "concepts": {

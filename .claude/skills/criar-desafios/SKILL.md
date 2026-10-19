@@ -20,6 +20,11 @@ Histórico e decisões: `docs/historico/09-desafios-ditados.md`. Política em c�
    `register` do desafio (`formal` / `neutral` / `familiar` / `slang` / `vulgar`). Sem ele o build falha.
    Na lista vira etiqueta (Formal, Dia a dia, Entre amigos, Gíria, Pode ofender). Reportar o registro de cada
    expressão nova no chat com nível de confiança. Expressão criada à mão (admin/SQL) também precisa do campo.
+4c. **Tradução no mesmo lote** (regra de 19/10/2026): cada desafio nasce com a versão em inglês em
+   `docs/i18n/challenges-en.json` (expression `meaning`; listen_translate `referenceTranslations` + `explanation`;
+   accent `explanation`; cloze_grammar `translation` + `explanation`; ditado em `dictations-en.json`), revisada no mesmo `.md`
+   com nível de confiança. `node scripts/build-challenges-overlay.js en` e `node scripts/validate-challenges-en.js` sem erro
+   antes de importar. Lote sem inglês não é importado.
 5. Áudio: Actions > "Áudio TTS" com o modo do lote (ex.: `desafios-a1-m1`, `ditados`).
 6. Conclusão: acerto ou erro leve conclui; erro total mostra "Tentar de novo"/"Tentar mais tarde".
 7. Textos de interface via `chT()`/`CHALLENGE_I18N`. chinês ainda não tem aba Desafios.

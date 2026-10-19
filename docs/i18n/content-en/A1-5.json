@@ -71,6 +71,19 @@
     "Anything else?",
     "No thanks, that's all.",
     "Here you go, that's five euros."
+   ],
+   "scene": "At a café in Paris, in the morning: a customer orders from the waiter.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "How much does Manon's order cost?",
+     "opts": [
+      "Two euros",
+      "Five euros",
+      "Ten euros"
+     ]
+    }
    ]
   },
   "concepts": {

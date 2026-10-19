@@ -39,6 +39,19 @@
     "My name is Brune. And you?",
     "My name is Xiao Li. What country are you from?",
     "I'm American."
+   ],
+   "scene": "Brune meets Xiao Li at a language exchange event.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What country is Brune from?",
+     "opts": [
+      "The United States",
+      "China",
+      "The conversation doesn't say"
+     ]
+    }
    ]
   },
   "concepts": {
@@ -264,6 +277,13 @@
    "en": "我是美国人 / 我美国人",
    "conf": "media",
    "why": "mesmas frases localizadas; áudios novos necessários (voz do navegador enquanto isso)"
+  },
+  {
+   "path": "dialogue.check[2].opts[0]",
+   "pt": "Brasil",
+   "en": "The United States",
+   "conf": "media",
+   "why": "adaptado: no site em inglês a fala foi localizada (我是美国人), então a resposta certa acompanha; ordem das opções igual"
   }
  ]
 }

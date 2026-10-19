@@ -124,7 +124,7 @@ async function fetchPublicProfileByUsername(username){
   const allBadgeIds = new Set(grantedIds);
   if (profile.featured_badge_id) allBadgeIds.add(profile.featured_badge_id);
   const badges = [...allBadgeIds]
-    .map(id => ({ id, ...resolveFeaturedBadge(id, catalog) }))
+    .map(id => ({ id, ...resolveFeaturedBadge(id, catalog, (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && profile.user_id === CURRENT_USER.id) ? ownProfileGender() : null) }))
     .filter(b => b.icon);
 
   const stats = (statsRes && !statsRes.error) ? statsRes.data : null;
@@ -271,8 +271,8 @@ async function renderPublicProfileInto(bodyEl, username){
   // transição compatível, a remover na fase de cleanup.
   const decksHTML = isPublic ? `
     <div class="public-profile-decks-section">
-      <div class="section-label">Decks públicos</div>
-      <div id="public-profile-decks-box"><p class="profile-empty-note">Carregando...</p></div>
+      <div class="section-label">${t('publicDeckCopies.tab')}</div>
+      <div id="public-profile-decks-box"><p class="profile-empty-note">${t('loading.phrase.loading')}</p></div>
     </div>
   ` : '';
   const cardsHTML = (isPublic && PUBLIC_FLAT_FLASHCARDS_ENABLED) ? `
@@ -504,7 +504,7 @@ async function renderPublicProfileCardsBox(bodyEl, username){
 function updatePublicProfileCardsCounter(box){
   const n = PUBLIC_PROFILE_IMPORT_STATE.selectedIds.size;
   const counter = box.querySelector('#public-profile-cards-counter');
-  if (counter) counter.textContent = n === 0 ? t('publicProfile.counterNone') : tp('publicProfile.counter', n);
+  if (counter) counter.textContent = n === 0 ? t('publicProfile.counterNone') : tp('publicProfile.counter', n === 1 ? 1 : 2, { n });
   const importBtn = box.querySelector('#public-profile-cards-import-btn');
   if (importBtn) importBtn.disabled = n === 0;
 }
@@ -647,7 +647,7 @@ async function importSelectedPublicFlashcards(box){
   }
 
   if (importedCount > 0 && typeof showToast === 'function'){
-    showToast(`${tp('publicProfile.imported', importedCount)} ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount), { ignoreSystem: true })}`.trim());
+    showToast(`${tp('publicProfile.imported', importedCount === 1 ? 1 : 2, { n: importedCount })} ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount), { ignoreSystem: true })}`.trim());
   }
   if (importedCount < idsToCreate.length && errorEl){
     errorEl.textContent = t('publicProfile.importPartial');

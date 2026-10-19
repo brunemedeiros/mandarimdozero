@@ -21,16 +21,34 @@
 
 // ---------- helpers PUROS (testáveis) ----------
 
+// Etapa 3 (lote C): texto no idioma do site quando t() existe; sem ele (testes Node), o português de sempre.
+// Plural (Etapa 4): `pt` pode ser { one, other }; com params.n numérico a forma sai por n === 1 (tp no catálogo).
+function tagManagerT(key, pt, params){
+  const plural = params && typeof params.n === 'number';
+  if (plural && typeof tp === 'function'){
+    const v = tp(key, params.n === 1 ? 1 : 2, params);
+    if (v && v !== key) return v;
+  } else if (typeof t === 'function'){
+    const v = t(key, params);
+    if (v && v !== key) return v;
+  }
+  const s = (pt && typeof pt === 'object') ? (plural && params.n === 1 ? pt.one : pt.other) : pt;
+  return String(s).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
+}
+function tagManagerNoteWord(n){
+  return n === 1 ? tagManagerT('tagManager.note.one', 'item') : tagManagerT('tagManager.note.other', 'itens');
+}
+
 // Planeja um rename a partir do texto digitado. `counts` = { slug: notas }.
 // Nunca chama o banco. Normaliza pela função canônica (não há 2ª normalização).
 function planTagRename(oldSlug, rawNew, counts){
   const c = counts || {};
   // Tag de SISTEMA (criado-por-*): nem origem nem destino de rename (o
   // servidor também recusa -- migration 060).
-  if (isAttributionTag(oldSlug)) return { ok: false, error: 'Tags de atribuição (criado-por-…) são de sistema e não podem ser renomeadas.' };
+  if (isAttributionTag(oldSlug)) return { ok: false, error: tagManagerT('tagManager.err.systemRename', 'Tags de atribuição (criado-por-…) são de sistema e não podem ser renomeadas.') };
   const norm = normalizeNoteTags([rawNew]);
-  if (norm.length && isAttributionTag(norm[0])) return { ok: false, error: 'Nomes que começam com "criado-por" são reservados ao sistema.', newSlug: norm[0] };
-  if (!norm.length) return { ok: false, error: 'Digite um nome de tag válido (letras, números e hífen).' };
+  if (norm.length && isAttributionTag(norm[0])) return { ok: false, error: tagManagerT('tagManager.err.systemReserved', 'Nomes que começam com "criado-por" são reservados ao sistema.'), newSlug: norm[0] };
+  if (!norm.length) return { ok: false, error: tagManagerT('tagManager.err.invalidName', 'Digite um nome de tag válido (letras, números e hífen).') };
   const newSlug = norm[0];
   const v = validateNoteTags([newSlug]);
   if (!v.ok) return { ok: false, error: v.error, newSlug };
@@ -74,15 +92,17 @@ function reviewTagFilterAfterDelete(filter, tag){
 
 // ---------- dados (RPCs) ----------
 
+// Mapeamento do erro da RPC -> chave do catálogo (o texto do servidor nunca vai para a tela).
 const TAG_MANAGER_ERROR_LABELS = {
   invalid_tag: 'Nome de tag inválido.',
   invalid_scope: 'Escopo inválido.',
   system_tag_protected: 'Tags de atribuição (criado-por-…) são de sistema e não podem ser criadas, renomeadas ou excluídas.',
 };
+const TAG_MANAGER_ERROR_KEYS = { invalid_tag: 'tagManager.err.invalidTag', invalid_scope: 'tagManager.err.invalidScope', system_tag_protected: 'tagManager.err.systemProtected' };
 function tagManagerErrorMessage(err){
   const msg = (err && (err.message || err.code)) || '';
-  for (const k of Object.keys(TAG_MANAGER_ERROR_LABELS)) if (msg.includes(k)) return TAG_MANAGER_ERROR_LABELS[k];
-  return 'Não foi possível concluir agora. Tente novamente.';
+  for (const k of Object.keys(TAG_MANAGER_ERROR_LABELS)) if (msg.includes(k)) return tagManagerT(TAG_MANAGER_ERROR_KEYS[k], TAG_MANAGER_ERROR_LABELS[k]);
+  return tagManagerT('tagManager.err.generic', 'Não foi possível concluir agora. Tente novamente.');
 }
 
 async function fetchNoteTags(scope){
@@ -122,42 +142,44 @@ function applyTagChangeToLocalState(scope, kind, oldTag, newTag){
 
 function renameInfoHTML(plan){
   if (!plan.ok) return `<span class="profile-edit-field-error">${escapeHTML(plan.error)}</span>`;
-  if (plan.unchanged) return `<span class="profile-edit-hint">Nenhuma alteração.</span>`;
-  return `<span class="profile-edit-hint">Novo nome: <strong>#${escapeHTML(plan.newSlug)}</strong> · ${plan.affected} ${plan.affected === 1 ? 'nota será alterada' : 'notas serão alteradas'}.</span>`
-    + (plan.collision ? `<br><span class="profile-edit-hint" data-tag-collision>⚠️ ${plan.collision} ${plan.collision === 1 ? 'nota já usa' : 'notas já usam'} <strong>#${escapeHTML(plan.newSlug)}</strong>: as duas tags serão unificadas (sem duplicar).</span>` : '');
+  if (plan.unchanged) return `<span class="profile-edit-hint">${tagManagerT('tagManager.unchanged', 'Nenhuma alteração.')}</span>`;
+  const affectedWord = plan.affected === 1 ? tagManagerT('tagManager.rename.affected.one', 'item será alterado') : tagManagerT('tagManager.rename.affected.other', 'itens serão alterados');
+  const collisionWord = plan.collision === 1 ? tagManagerT('tagManager.rename.collision.one', 'item já usa') : tagManagerT('tagManager.rename.collision.other', 'itens já usam');
+  return `<span class="profile-edit-hint">${tagManagerT('tagManager.rename.newName', 'Novo nome:')} <strong>#${escapeHTML(plan.newSlug)}</strong> · ${plan.affected} ${affectedWord}.</span>`
+    + (plan.collision ? `<br><span class="profile-edit-hint" data-tag-collision>⚠️ ${plan.collision} ${collisionWord} <strong>#${escapeHTML(plan.newSlug)}</strong>${tagManagerT('tagManager.rename.collisionMerge', ': as duas tags serão unificadas (sem duplicar).')}</span>` : '');
 }
 
 function tagManagerRowsHTML(list, ui){
   return list.map(({ tag, notes }) => {
     const e = escapeHTML(tag);
-    const noteLabel = `${notes} ${notes === 1 ? 'nota' : 'notas'}`;
+    const noteLabel = `${notes} ${tagManagerNoteWord(notes)}`;
     let extra = '';
     if (ui.renaming === tag){
       const plan = planTagRename(tag, ui.renameValue, ui.counts);
       const info = renameInfoHTML(plan);
       const can = plan.ok && !plan.unchanged && !ui.busy;
       extra = `<div class="tag-manager-panel" data-tag-rename-panel="${e}" style="width:100%; margin-top:6px;">
-        <input type="text" class="profile-edit-input" data-tag-rename-input="${e}" value="${escapeHTML(ui.renameValue)}" maxlength="80" aria-label="Novo nome da tag ${e}">
+        <input type="text" class="profile-edit-input" data-tag-rename-input="${e}" value="${escapeHTML(ui.renameValue)}" maxlength="80" aria-label="${tagManagerT('tagManager.rename.inputAria', 'Novo nome da tag {tag}', { tag: e })}">
         <div style="margin:4px 0;" data-tag-rename-info>${info}</div>
-        <button type="button" class="btn btn-primary" data-tag-rename-confirm="${e}" ${can ? '' : 'disabled'}>Confirmar renomeação</button>
-        <button type="button" class="btn btn-secondary" data-tag-rename-cancel ${ui.busy ? 'disabled' : ''}>Cancelar</button>
+        <button type="button" class="btn btn-primary" data-tag-rename-confirm="${e}" ${can ? '' : 'disabled'}>${tagManagerT('tagManager.rename.confirm', 'Confirmar renomeação')}</button>
+        <button type="button" class="btn btn-secondary" data-tag-rename-cancel ${ui.busy ? 'disabled' : ''}>${tagManagerT('tagManager.cancel', 'Cancelar')}</button>
       </div>`;
     } else if (ui.deleting === tag){
       extra = `<div class="tag-manager-panel" data-tag-delete-panel="${e}" style="width:100%; margin-top:6px;">
-        <p class="profile-edit-hint" style="margin:0 0 6px;">Excluir <strong>#${e}</strong>? Essa Tag será removida de ${noteLabel}. A remoção é global no seu escopo e não pode ser desfeita.</p>
-        <button type="button" class="btn btn-primary" data-tag-delete-confirm="${e}" ${ui.busy ? 'disabled' : ''}>Excluir Tag</button>
-        <button type="button" class="btn btn-secondary" data-tag-delete-cancel ${ui.busy ? 'disabled' : ''}>Cancelar</button>
+        <p class="profile-edit-hint" style="margin:0 0 6px;">${tagManagerT('tagManager.delete.askHtml', 'Excluir <strong>#{tag}</strong>? Essa Tag será removida de {notes}. A remoção é global no seu escopo e não pode ser desfeita.', { tag: e, notes: noteLabel })}</p>
+        <button type="button" class="btn btn-primary" data-tag-delete-confirm="${e}" ${ui.busy ? 'disabled' : ''}>${tagManagerT('tagManager.delete.confirm', 'Excluir Tag')}</button>
+        <button type="button" class="btn btn-secondary" data-tag-delete-cancel ${ui.busy ? 'disabled' : ''}>${tagManagerT('tagManager.cancel', 'Cancelar')}</button>
       </div>`;
     }
     if (isAttributionTag(tag)){
       return `<div class="admin-badge-row" data-tag-row="${e}" data-system-tag="1" style="flex-wrap:wrap;">
-      <span style="flex:1; min-width:120px;"><span class="pill note-tag-chip">🔒 #${e}</span> <span class="profile-edit-hint">${noteLabel} · atribuição permanente (sistema)</span></span>
+      <span style="flex:1; min-width:120px;"><span class="pill note-tag-chip">🔒 #${e}</span> <span class="profile-edit-hint">${noteLabel} · ${tagManagerT('tagManager.systemTag', 'atribuição permanente (sistema)')}</span></span>
     </div>`;
     }
     return `<div class="admin-badge-row" data-tag-row="${e}" style="flex-wrap:wrap;">
       <span style="flex:1; min-width:120px;"><span class="pill note-tag-chip">#${e}</span> <span class="profile-edit-hint">${noteLabel}</span></span>
-      <button type="button" class="btn btn-secondary" data-tag-rename="${e}" ${ui.busy ? 'disabled' : ''}>Renomear</button>
-      <button type="button" class="admin-badge-delete-btn" data-tag-delete="${e}" title="Excluir tag" aria-label="Excluir tag ${e}" ${ui.busy ? 'disabled' : ''}>🗑</button>
+      <button type="button" class="btn btn-secondary" data-tag-rename="${e}" ${ui.busy ? 'disabled' : ''}>${tagManagerT('tagManager.rename', 'Renomear')}</button>
+      <button type="button" class="admin-badge-delete-btn" data-tag-delete="${e}" title="${tagManagerT('tagManager.delete.title', 'Excluir tag')}" aria-label="${tagManagerT('tagManager.delete.aria', 'Excluir tag {tag}', { tag: e })}" ${ui.busy ? 'disabled' : ''}>🗑</button>
       ${extra}
     </div>`;
   }).join('');
@@ -168,11 +190,11 @@ async function renderTagManagerInto(mountEl, opts){
   if (!mountEl) return;
   const scope = opts.scope;
   const ui = { list: [], counts: {}, renaming: null, renameValue: '', deleting: null, busy: false, msg: '', msgKind: '' };
-  mountEl.innerHTML = `<p class="profile-empty-note">Carregando tags…</p>`;
+  mountEl.innerHTML = `<p class="profile-empty-note">${tagManagerT('tagManager.loading', 'Carregando tags…')}</p>`;
 
   const hint = scope === 'teacher'
-    ? 'Tags dos seus cartões de aluno (todos os alunos e idiomas). Renomear ou excluir vale para todos eles.'
-    : 'Tags dos seus próprios cartões. As tags dos cartões da professora não aparecem aqui e não podem ser alteradas por você.';
+    ? tagManagerT('tagManager.hint.teacher', 'Tags dos seus cartões de aluno (todos os alunos e idiomas). Renomear ou excluir vale para todos eles.')
+    : tagManagerT('tagManager.hint.own', 'Tags dos seus próprios cartões. As tags dos cartões da professora não aparecem aqui e não podem ser alteradas por você.');
 
   async function load(){
     const res = await fetchNoteTags(scope);
@@ -184,13 +206,13 @@ async function renderTagManagerInto(mountEl, opts){
 
   function paint(){
     if (ui.list === null){
-      mountEl.innerHTML = `<p class="profile-edit-error" data-tag-manager-error>${escapeHTML(ui.msg)}</p><button type="button" class="btn btn-secondary" data-tag-manager-retry>Tentar de novo</button>`;
+      mountEl.innerHTML = `<p class="profile-edit-error" data-tag-manager-error>${escapeHTML(ui.msg)}</p><button type="button" class="btn btn-secondary" data-tag-manager-retry>${tagManagerT('tagManager.retry', 'Tentar de novo')}</button>`;
       mountEl.querySelector('[data-tag-manager-retry]').addEventListener('click', async () => { ui.msg = ''; await load(); paint(); });
       return;
     }
     const body = ui.list.length
       ? tagManagerRowsHTML(ui.list, ui)
-      : `<p class="profile-empty-note" data-tag-manager-empty>Você ainda não usa nenhuma tag.</p>`;
+      : `<p class="profile-empty-note" data-tag-manager-empty>${tagManagerT('tagManager.empty', 'Você ainda não usa nenhuma tag.')}</p>`;
     mountEl.innerHTML = `<p class="profile-edit-hint">${escapeHTML(hint)}</p>
       <div data-tag-manager-list>${body}</div>
       <p class="${ui.msgKind === 'error' ? 'profile-edit-error' : 'profile-edit-hint'}" data-tag-manager-msg>${escapeHTML(ui.msg)}</p>`;
@@ -231,21 +253,21 @@ async function renderTagManagerInto(mountEl, opts){
       const old = rc.dataset.tagRenameConfirm;
       const plan = planTagRename(old, ui.renameValue, ui.counts);
       if (!plan.ok || plan.unchanged) return;
-      ui.busy = true; rc.disabled = true; rc.textContent = 'Renomeando…';
+      ui.busy = true; rc.disabled = true; rc.textContent = tagManagerT('tagManager.renaming', 'Renomeando…');
       const res = await renameNoteTag(scope, old, plan.newSlug);
       if (!res.ok){ ui.busy = false; ui.msg = res.error; ui.msgKind = 'error'; paint(); return; }
       applyTagChangeToLocalState(scope, 'rename', old, plan.newSlug);
-      await finish(`✓ #${old} → #${plan.newSlug} (${res.affected} ${res.affected === 1 ? 'nota' : 'notas'}${res.merged ? `, ${res.merged} unificada(s)` : ''}).`);
+      await finish(`✓ #${old} → #${plan.newSlug} (${res.affected} ${tagManagerNoteWord(res.affected)}${res.merged ? tagManagerT('tagManager.done.merged', { one: ', {n} unificado', other: ', {n} unificados' }, { n: res.merged }) : ''}).`);
     });
     const dc = mountEl.querySelector('[data-tag-delete-confirm]');
     if (dc) dc.addEventListener('click', async () => {
       if (ui.busy) return;
       const tag = dc.dataset.tagDeleteConfirm;
-      ui.busy = true; dc.disabled = true; dc.textContent = 'Excluindo…';
+      ui.busy = true; dc.disabled = true; dc.textContent = tagManagerT('tagManager.deleting', 'Excluindo…');
       const res = await deleteNoteTag(scope, tag);
       if (!res.ok){ ui.busy = false; ui.msg = res.error; ui.msgKind = 'error'; paint(); return; }
       applyTagChangeToLocalState(scope, 'delete', tag, null);
-      await finish(`✓ #${tag} removida de ${res.affected} ${res.affected === 1 ? 'nota' : 'notas'}.`);
+      await finish(tagManagerT('tagManager.done.removedFrom', '✓ #{tag} removida de {n} {notes}.', { tag, n: res.affected, notes: tagManagerNoteWord(res.affected) }));
     });
   }
 

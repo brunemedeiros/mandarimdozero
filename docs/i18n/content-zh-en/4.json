@@ -39,6 +39,19 @@
     "There are 4 people in my family: dad, mom, my older brother and me.",
     "Do you have a younger sister?",
     "No, I don't have a younger sister."
+   ],
+   "scene": "Two friends look at family photos.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "How many people are in the family of the person answering?",
+     "opts": [
+      "3",
+      "4",
+      "5"
+     ]
+    }
    ]
   },
   "concepts": {

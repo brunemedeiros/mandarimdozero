@@ -40,6 +40,19 @@
     "You can take the subway or a taxi.",
     "Where is the subway station?",
     "Up ahead, very close."
+   ],
+   "scene": "At a hotel front desk, a guest asks how to get to the airport.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "How does the receptionist suggest getting there?",
+     "opts": [
+      "By subway or taxi",
+      "By bus or on foot",
+      "Only by plane"
+     ]
+    }
    ]
   },
   "concepts": {

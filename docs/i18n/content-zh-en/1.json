@@ -21,7 +21,7 @@
   ],
   "phrases": [
    {
-    "t": "Hello! My name is Brune."
+    "t": "Hello! My name is {nome}."
    },
    {
     "t": "Thank you!"
@@ -40,6 +40,19 @@
     "Hello! Good morning.",
     "Thank you, see you later!",
     "See you later!"
+   ],
+   "scene": "Two people run into each other on the street in the morning.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What time of day does this conversation happen?",
+     "opts": [
+      "In the morning",
+      "At night",
+      "You can't tell"
+     ]
+    }
    ]
   },
   "concepts": {

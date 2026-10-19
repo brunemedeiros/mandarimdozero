@@ -36,7 +36,7 @@ function tsuDaysLabel(days){
   if (days === null || days === undefined) return t('admin.students.metrics.noRecord');
   if (days === 0) return t('admin.students.metrics.today');
   if (days === 1) return t('admin.students.metrics.yesterday');
-  return t('admin.students.metrics.daysAgo', { n: days });
+  return tp('admin.students.metrics.daysAgo', days === 1 ? 1 : 2, { n: days });
 }
 
 function tsuInitials(name){

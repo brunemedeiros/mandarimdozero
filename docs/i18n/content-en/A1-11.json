@@ -67,6 +67,19 @@
     "Rice, vegetables and chicken.",
     "Do you want a dessert?",
     "Yes, with sugar, please!"
+   ],
+   "scene": "Two friends who live together make their shopping list for the week.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What's on the shopping list?",
+     "opts": [
+      "Rice, vegetables and chicken",
+      "Fish and salad",
+      "Bread and cheese"
+     ]
+    }
    ]
   },
   "concepts": {
