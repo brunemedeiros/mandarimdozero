@@ -133,12 +133,12 @@ onde alguém é, onde mora e que línguas fala; perguntar e negar. 7 unidades (3
 | Posição (id) | Título visível | Função | Gramática | Vocabulário-chave | Notas | Muda |
 |---|---|---|---|---|---|---|
 | M2.1 (`A1-4`) | Apresentar a família | apresentar a família | possessivo (fórmula) | *la famille, le père, la mère, le frère, la sœur, les parents, le fils, la fille, le mari, la femme* (10) | N11 *papa, maman* (Real, alta) · N12 *mon / ma* (Exp, n/r, *breve*) · N13 almoço de domingo (Cult, alta) · *C'est mon père, il est ingénieur*: *c'est* x *il / elle est* (Exp, alta, *nova*) | movida (do M1); renomeada ("Família"); frases *mes grands-parents, j'ai deux enfants, je suis marié(e)*; recebe 2 frases do `A1-3` (pergunta 20) |
-| M2.2 (g) (`A1-g17`) | Artigos e plural | escolher *le / la / les*, *un / une / des* | artigos, plural que se ouve no artigo, gênero vem com a palavra (*l'âge*) | (gramática) | (sem nota) | nova (parte da antiga M1.7) |
+| M2.2 (g) (`A1-g17`) | Artigos e plural | escolher *le / la / les*, *un / une / des* | artigos, plural que se ouve no artigo, gênero vem com a palavra (*l'âge*); *un / une / des* viram *de* depois de *pas* (*Je n'ai pas de voiture.*) | (gramática) | (sem nota) | nova (parte da antiga M1.7) |
 | M2.3 (`A1-16`) | Descrever pessoas: cores e aparência | descrever alguém | adjetivo (fórmula); *plus... que* (entrada) | *rouge, bleu, vert, jaune, noir, blanc, grand, petit, joli, gentil* (10; +*sympa, timide*, pergunta 19) | N14 bandeira (Cult, alta) · N15 lugar do adjetivo (Exp, n/r; +1 linha "o mesmo *-e* de *grand, grande*"; troca *robe*) · N16 *gentil* vira *sympa* (Real, alta) | movida (do módulo da casa); renomeada ("Cores e descrições") |
 | M2.4 (g) (`A1-g2`) | Possessivos | dizer de quem é | *mon, ma, mes...* (4 telas, 6 exercícios, como hoje) | (gramática) | (sem nota) | movida (do M1); renomeada ("Adjetivos possessivos"); sem *c'est / il est* |
 | M2.5 (`A1-9`) | Dizer de onde é e onde mora | origem, moradia, línguas | *venir de* (fórmula) | *habiter, la ville, américain, anglais, espagnol, italien, allemand, portugais* (pares), *la nationalité, venir de* (10) | N17 *Je suis brésilienne* ou *je viens du Brésil* (Exp, n/r, enxugada) · N18 vira "*où* vai para o fim" (Real, alta, *breve*) · feminino das outras 6 nacionalidades (Exp, n/r, *nova*) | movida (do módulo da cidade); renomeada ("Nacionalidades"); fundida (*français, brésilien* → M1.2); frases de línguas faladas; diálogo sobre terceiros |
 | M2.6 (g) (`A1-g4`) | Preposições com cidades e países | ir e vir de um país | *à, en, au, aux* + procedência *de, d', du, des* (5 telas, 8 exercícios) | (gramática) | (sem nota) | movida (do módulo da cidade); +1 tela de procedência |
-| M2.7 (g) (`A1-g12`) | Perguntar e negar | fazer perguntas de sim ou não e negar | entonação, *est-ce que*, inversão só reconhecer; *ne... pas*; *pas de*; "Na rua" (4 telas + quadro, 8 exercícios) | (gramática) | (sem nota) | nova; palavras interrogativas viram notas onde aparecem; sistema completo no A2 M9.4 |
+| M2.7 (g) (`A1-g12`) | Perguntar: sim ou não | fazer perguntas de sim ou não | entonação, *est-ce que*, inversão só reconhecer; "Na rua" (4 telas + quadro, 8 exercícios); **sem negação** (a negação vira notas leves ao longo do A1, `16`) | (gramática) | (sem nota) | nova; palavras de pergunta: notas leves + gramática "Palavras de pergunta" (`16`); registros no A2 M9.4 |
 
 #### A1 M3 · Rotina e calendário (`A1-m2`; hoje "Rotina do dia a dia")
 Consigo: dizer as horas e a que horas faço algo; descrever a rotina e com que frequência; dizer o dia, a data e o aniversário; combinar dia e hora.
@@ -413,6 +413,7 @@ Palavras que mudam de unidade: *zéro, combien* (`A1-3` → `A1-28`, mais tarde)
 Só o que ainda não tem resposta nos `12`, `14`, `15`, nos históricos `21`/`22` nem nas decisões resolvidas do `04`. Cada uma: recomendação e impacto.
 Origem entre colchetes, para conferência.
 
+> **Perguntas 17 e 18 respondidas em 2026-10-19 (decisões 59 a 63; plano em `16-negacao-e-perguntas-no-a1.md`).**
 > **Respondidas em 2026-10-19 (viram decisões 40 a 49 no `12`)**: 1 (mapa do A1), 4 a 16 (com duas mudanças: *dix-sept* a *dix-neuf* TÊM cartão; e a lição final
 > da unidade vira "Revisão da unidade"). Elas continuam listadas abaixo, marcadas **[RESPONDIDA]**, para o histórico.
 
@@ -437,8 +438,8 @@ Origem entre colchetes, para conferência.
 16. [RESPONDIDA: sim, renomear já: "Revisão da unidade"] **Renomear a lição final de cada unidade** ("Ponto de verificação" → "Revisão da unidade"), para não confundir com a prova do módulo? *Recomendo avaliar à parte.* Impacto: texto em português publicado. [`09` 22]
 
 **A1 M2**
-17. **Artigos e plural (`A1-g17`, id novo) como M2.2**, intercalada (família → artigos → descrever → possessivos)? *Recomendo sim.* Impacto: M2 com 7 unidades e 4 gramáticas. [`09` 1 a 3]
-18. **"Perguntar e negar" numa gramática só** (sim ou não + *ne... pas* + *pas de*), palavras de pergunta em notas e sistema no A2 M9.4? *Recomendo sim.* Impacto: separar levaria o M2 a 8 unidades. [`10` 3, 4; `09` 4]
+17. [RESPONDIDA: sim] **Artigos e plural (`A1-g17`, id novo) como M2.2**, intercalada (família → artigos → descrever → possessivos)? *Recomendo sim.* Impacto: M2 com 7 unidades e 4 gramáticas. [`09` 1 a 3]
+18. [RESPONDIDA: não numa gramática só; ver `16`] **"Perguntar e negar" numa gramática só** (sim ou não + *ne... pas* + *pas de*), palavras de pergunta em notas e sistema no A2 M9.4? *Recomendo sim.* Impacto: separar levaria o M2 a 8 unidades. [`10` 3, 4; `09` 4]
 19. [RESPONDIDA: sim] ***sympa* e *timide* como cartões na M2.3** (fica com 12)? *Recomendo sim.* Impacto: +2 cartões (A1 com 294); o resto do caráter fica no A2 M4.5. [`08` 6]
 20. [RESPONDIDA: sim] **Frases do `A1-3` com família** (*J'ai deux frères et trois sœurs.*, *Quel est l'âge de ton père ?*) vão para a M2.1 com a chave? *Recomendo sim.* Impacto: frase muda de unidade sem perder progresso. [`09` 7]
 21. [RESPONDIDA: sim] ***c'est / il est* como nota na M2.1** e não tela da `A1-g2`? *Recomendo sim.* Impacto: `A1-g2` fica como está publicada. [`10` 5]

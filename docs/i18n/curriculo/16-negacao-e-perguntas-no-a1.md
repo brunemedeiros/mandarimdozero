@@ -40,8 +40,8 @@ A frase-gancho é uma frase que o aluno **acabou de aprender**; a nota mostra o 
 | M8.2 | *pas encore* (cartão) | **sim**, breve | *Je n'ai pas encore mangé*: *pas* depois do auxiliar (prepara o M8.3) |
 | M8.4 | recusar um convite | nenhuma | reaproveita *Je ne peux pas, désolé* do M6.6 em diálogo |
 
-Contagem: **9 notas novas de negação** (M1.2, M1.4, M2.3, M2.5, M3.3, M4.1, M4.2, M5.3, M6.5, M8.2 são 10; M1.6 opcional) e **4 telas novas** dentro de gramáticas
-(M2.2, M6.6; as de M3.4, M3.6, M6.4, M7.5, M8.3 já existiam). A negação some da M2.7.
+Contagem: **10 notas novas de negação** (M1.2, M1.4, M2.3, M2.5, M3.3, M4.1, M4.2, M5.3, M6.5, M8.2; a da M1.6 é opcional) e **2 telas novas** dentro de
+gramáticas (M2.2 e M6.6). As telas de negação de M3.4, M3.6, M6.4, M7.5 e M8.3 já existiam. A negação sai da M2.7.
 
 ## Negação complexa (A2)
 
