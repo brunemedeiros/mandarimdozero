@@ -9,6 +9,8 @@
 //   a / b: as duas opções, já como entram na lacuna. Com "je", o pronome vai na opção,
 //          porque a elisão muda com a forma (j'ai croisé / je croisais).
 //   ans: 'a' | 'b'; verb: infinitivo (opcional, aparece entre parênteses); clue: trecho da frase que decide (destacado na explicação)
+//   Francês dentro do texto em português/inglês (title, lede, tl, why) vai entre {chaves}: sai em azul (.cg-fr).
+//   Vale para toda frase nova; o teste da Conjugação barra explicação sem nenhum trecho marcado.
 //   text: tradução (tr) e explicação (why) por idioma do site. O curso em inglês não mostra
 //         português: sem a chave do idioma, cai no pt-BR só como último recurso.
 const CONJ_GAMES = [

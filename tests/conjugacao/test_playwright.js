@@ -376,11 +376,13 @@ async function fill(page, wrongIdx){
           || !['pt-BR', 'en'].every(l => i.text[l] && i.text[l].tr && i.text[l].why && i.text[l].why.length > 20)).map(i => i.id),
         // site em inglês sem português; pt-BR sem "pra" nem "--"
         enPt: g.items.filter(i => /[ãõ]|\b(você|não)\b/i.test(i.text.en.tr + ' ' + i.text.en.why)).map(i => i.id),
+        // francês em azul (2026-10-19): toda explicação tem trecho entre {chaves}, balanceadas e sem aninhar
+        unmarked: g.items.filter(i => ['pt-BR', 'en'].some(l => !/\{[^{}]+\}/.test(i.text[l].why) || /\{[^}]*\{|\}[^{]*\}/.test(i.text[l].why.replace(/\{[^{}]*\}/g, '')))).map(i => i.id),
         ptBad: g.items.filter(i => /\bpra\b|--/.test(i.text['pt-BR'].tr + ' ' + i.text['pt-BR'].why)).map(i => i.id),
         // só o auxiliar: com être, sujeito masculino e singular (concordância do particípio é A2)
         agree: id === 'pc-auxiliaire' ? g.items.filter(i => i.ans === 'b' && (/(ée|ées|és)$/.test(i.after.trim().split(' ')[0]) || /^(Elle|Elles|Ils|Nous|Vous) /.test(i.before))).map(i => i.id) : [] }; }));
     for (const g of d) check(`jogo ${g.id}: A1, 10 por partida, sem desenho, pt e en completos, pista na frase`,
-      g.level === 'A1' && g.per === 10 && g.n >= 16 && g.a >= 6 && g.n - g.a >= 6 && g.noSketch && !g.dupIds && !g.bad.length && !g.enPt.length && !g.ptBad.length && !g.agree.length, g);
+      g.level === 'A1' && g.per === 10 && g.n >= 16 && g.a >= 6 && g.n - g.a >= 6 && g.noSketch && !g.dupIds && !g.bad.length && !g.unmarked.length && !g.enPt.length && !g.ptBad.length && !g.agree.length, g);
     await page.click('#conj-mode-games');
     const cards = await page.evaluate(() => [...document.querySelectorAll('#conj-games-list .cg-card')].map(c => ({ level: (c.querySelector('.cg-level') || {}).textContent, game: c.querySelector('.cg-play').dataset.game })));
     check('lista: 3 jogos A1 primeiro, depois o A2, com etiqueta de nível', cards.map(c => c.level).join() === 'A1,A1,A1,A2' && cards[3].game === 'pc-imparfait', cards);
