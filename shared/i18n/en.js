@@ -120,6 +120,18 @@ window.I18N_CATALOG['en'] = {
   'settings.tab.notifications': '🔔 Notifications', // ALTA
   'settings.tab.export': '📦 Export', // ALTA
   'settings.section.account': 'Account', // ALTA
+  'accountDelete.title': 'Delete my account', // ALTA
+  'accountDelete.hint': 'Deletes your account and everything linked to it: progress, flashcards, achievements, friendships, photos and files. This cannot be undone.', // ALTA
+  'accountDelete.btn': 'Delete my account', // ALTA
+  'accountDelete.modal.title': 'Delete your account?', // ALTA
+  'accountDelete.modal.explain': 'This deletes your progress, your flashcards, the records your teacher keeps about you (lessons and flashcards), and your files. This cannot be undone. Help requests you sent will lose your email and any screenshots.', // ALTA
+  'accountDelete.modal.label': 'Type your email to confirm', // ALTA
+  'accountDelete.modal.cancel': 'Cancel', // ALTA
+  'accountDelete.modal.yes': 'Delete forever', // ALTA
+  'accountDelete.err.mismatch': 'The email does not match.', // ALTA
+  'accountDelete.err.teacher': 'Teacher and administrator accounts cannot be deleted here. Please contact the administrator.', // ALTA
+  'accountDelete.err.generic': 'We could not delete it right now. Please try again in a moment.', // ALTA
+  'accountDelete.done': 'Account deleted. See you!', // ALTA
   'settings.account.email': 'Email', // ALTA
   'settings.account.provider': 'Signed in with', // ALTA
   'settings.account.moreSoon': 'More account options coming soon.', // ALTA

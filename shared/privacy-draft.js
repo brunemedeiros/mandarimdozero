@@ -175,7 +175,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "p",
-  "Hoje o site não apaga dados automaticamente e não tem um botão para excluir a conta: os dados ficam enquanto a conta existir e a exclusão é feita sob pedido. Se você pedir, apagamos ou anonimizamos os seus dados, salvo o que a lei exigir guardar. [CONFIRMAR: prazos por tipo de dado e se vamos criar o botão de excluir conta]"
+  "Os dados ficam enquanto a conta existir. Quem é aluna ou usuária pode excluir a própria conta em Configurações, na aba Geral (função em teste): isso apaga o progresso, os cartões, os registros que a professora tem sobre ela (aulas, cartões e itens do Banco de Revisão), as fotos e os arquivos. Pedidos de ajuda enviados antes ficam sem o e-mail e sem a captura de tela. Contas de professora e de administradora ainda não podem ser excluídas por conta própria. Fora isso, o site não apaga dados automaticamente. [CONFIRMAR: prazos por tipo de dado, exclusão de contas de professora e o que a lei exige guardar]"
  ],
  [
   "h",
@@ -225,7 +225,7 @@ const PRIVACY_DRAFT = {
      "Cadastro",
      "Serviço de login do Supabase",
      "Você; a administradora vê o e-mail",
-     "Enquanto a conta existir; sem botão de excluir"
+     "Enquanto a conta existir; a aluna pode excluir em Configurações (em teste)"
     ],
     [
      "Perfil (nome, @, foto, país, gênero, apresentação)",
@@ -370,7 +370,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "li",
-  "Não existe botão de excluir conta nem limpeza automática de dados: definir prazos de guarda por tipo de dado e o procedimento para pedidos de exclusão."
+  "Exclusão de conta (em teste, só para alunas): apaga em cascata o progresso, os cartões e os registros da professora sobre a aluna, os arquivos e a pessoa dela no Banco de Revisão; os pedidos de ajuda ficam sem e-mail e sem captura. Confirmar se isso atende a LGPD, se o texto dos pedidos de ajuda pode ser mantido, e como excluir contas de professora. Não existe limpeza automática de dados: definir prazos de guarda por tipo de dado."
  ],
  [
   "li",

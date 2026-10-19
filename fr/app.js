@@ -4971,6 +4971,7 @@ function renderSettingsView(){
   document.getElementById('settings-email').textContent = CURRENT_USER?.email || t('settings.account.guest');
   document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? t('settings.account.emailPassword') : '—');
   switchSettingsSection(SETTINGS_SECTION);
+  if (typeof refreshDeleteAccountBox === 'function') refreshDeleteAccountBox();
 }
 
 // Alterna entre as duas seções internas de Configurações (Geral/Exportar) --
