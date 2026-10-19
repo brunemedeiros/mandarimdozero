@@ -181,3 +181,12 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
 74. ***tôt, tard* na M3.1; *pas encore, après* na M8.2**; *hier* fundido; *récemment* sai para o A2 M2.5 (progresso intacto).
 75. **M3.3**: a nota de pronúncia *samedi* = "sam'di" fica no M3.3, junto da palavra. **M3.5** (14 palavras): conjunto fechado, 4 lições + Revisão da unidade.
 76. **M3 fechado** (6 unidades, 37 cartões, ~2h50), com o diálogo de negação do M3.3 (decisão 64) e as perguntas de hora e dia em diálogo (decisão 66).
+
+---
+
+# Nona rodada (2026-10-19): M4 e regra "conteúdo nasce traduzido"
+
+77. **M4 "Comer e beber" aprovado**: *adorer* na M4.1; partitivos antes do restaurante; `A1-g5` (*faire / prendre*) vira M4.6 (muda de módulo).
+78. **Tônicos com preposição**: nota breve na M4.1 (*Pour moi, un café*) e nota na M8.4 (*avec moi, chez toi*); sem tela de gramática no A1 e sem *sans*.
+79. **M4.1 com 6 notas fica** (sem teto; a lâmpada rola). A nota de negação com partitivo é a N26 do M4.2 (*Je ne mange pas de ...*), com o contraste *le poisson* do M4.1 (decisão 69).
+80. **Regra "conteúdo nasce traduzido"** (dona, 2026-10-19, outra sessão; na `main`): todo conteúdo novo ou alterado do mapa sai com pt-BR e en no mesmo lote (camada `courses/fr-pt-BR/layer.js`, inglês em `docs/i18n/content-en/`, Desafios em `challenges-en.json` e `dictations-en.json`; validadores `build-content-overlay`, `validate-content-overlay`, `validate-challenges-en`, `tests/i18n/test_sem_portugues_en.js`). Vale para toda entrega de conteúdo deste currículo.

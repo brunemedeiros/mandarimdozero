@@ -75,6 +75,12 @@ Desafios continuam Premium com o paywall desligado (todos usam). O *défi* de fi
 9. [RESPONDIDA: sim] **Pronomes tônicos** entram cedo, junto do formal e do informal (*moi, toi, vous* na M1.2), e são ampliados depois (*lui, elle* na M1.4; com
    preposições mais adiante).
 
+**Regra nova de 2026-10-19 (`CLAUDE.md` e `.claude/rules/conteudo-trilha.md` da `main`, seção "Conteúdo nasce traduzido")**: todo conteúdo novo ou alterado deste mapa
+(unidades, vocabulário, frases, diálogos novos com cena e pergunta de compreensão, notas, telas de gramática, Desafios e ditados) sai no mesmo lote com a versão de
+**cada idioma de site do curso** (hoje pt-BR e en); lote sem todas as traduções não é importado nem publicado. A explicação em inglês explica o francês para quem fala inglês
+(nada de "em português dizemos..."). Cada lote tem um `.md` de revisão com pt e en lado a lado e confiança por tradução.
+Consequência para este mapa: todo diálogo e frase novos citados (negação por diálogo, *C'est qui ?*, *dix-sept a dix-neuf*, "Novidades desta unidade", notas novas) já nascem com pt-BR e en.
+
 ### 2.2 Decisões vigentes da dona (`12`, `14`, `04`)
 
 | Tema | Decisão (número da origem) |
@@ -451,8 +457,8 @@ Origem entre colchetes, para conferência.
 24. [RESPONDIDA: sim] **Dividir a `A1-g3`**: *-er* na M3.2 (com *on* só na tabela) e pronominais na nova `A1-g18` (M3.4)? *Recomendo sim.* Impacto: quem concluiu a `A1-g3` vê a `A1-g18` aberta, não concluída. [`10` 6, 7]
 25. [RESPONDIDA: sim] **Reescrever os exercícios** das gramáticas publicadas que mudam de lugar (`A1-g8`, `g5`, `g3`, `g7`, `g6`) e criar o teste "exercício só com palavras vistas"? *Recomendo sim.* Impacto: texto publicado muda. [`10` 17]
 26. [RESPONDIDA: sim] ***tôt, tard* na M3.1; *pas encore, après* na M8.2**; *hier* fundido; *récemment* movida para o A2 M2.5? *Recomendo sim.* Impacto: uma fusão (regra FSRS) e uma palavra que sai do A1 com o progresso intacto. [`08` 8, `04` 25]
-27. **Módulo "Comer e beber"** (M4), *adorer* na M4.1, partitivos antes do restaurante e *faire / prendre* no M4.6? *Recomendo sim.* Impacto: `A1-g5` muda de módulo. [`08` 5, 9; `10` 8, 9]
-28. **Tônicos com preposição**: nota breve na M4.1 (*Pour moi, un café*) e nota na M8.4 (*avec moi, chez toi*), sem tela de gramática no A1 e sem *sans*? *Recomendo sim.* Impacto: fecha a regra 9. [`09` 27, 28; `11` 17]
+27. [RESPONDIDA: sim] **Módulo "Comer e beber"** (M4), *adorer* na M4.1, partitivos antes do restaurante e *faire / prendre* no M4.6? *Recomendo sim.* Impacto: `A1-g5` muda de módulo. [`08` 5, 9; `10` 8, 9]
+28. [RESPONDIDA: sim] **Tônicos com preposição**: nota breve na M4.1 (*Pour moi, un café*) e nota na M8.4 (*avec moi, chez toi*), sem tela de gramática no A1 e sem *sans*? *Recomendo sim.* Impacto: fecha a regra 9. [`09` 27, 28; `11` 17]
 29. **Demonstrativos como nota na M5.3** (sem exercício) ou gramática pequena `A1-g21`? *Recomendo nota.* Impacto: *ce* x *cette* sem prática com correção no A1. [`10` 10]
 30. **`A1-g15` só com masculino, feminino e plural** do adjetivo? *Recomendo sim.* [`10` 11]
 31. **Imperativo em gramática própria** (`A1-g19`, M6.4), `A1-g6` só com modais e *il faut*, e *savoir* fora do A1? *Recomendo sim.* Impacto: `A1-g6` publicada perde 2 exercícios. [`10` 14, 15]
