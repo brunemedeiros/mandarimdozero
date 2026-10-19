@@ -80,3 +80,14 @@ Testes: desafios-modulo 75/75, desafios-conclusao 19/19, test_answer_validation 
 - **Regra nova**: toda expressão nova precisa de registro. `build_lote_expressoes.py` falha sem ele; a importação do painel (`importChallengesFromJSON`) pula expressão sem registro válido; skill `criar-desafios` e `shared/challenge-policy.js` atualizados. Resumos `lote-a1-m*.md` ganharam a coluna Registro.
 - **App (fr)**: `expressionCardHTML` (cartão álbum: pendente tracejada com "O que será que significa?", concluída com o sentido e selo "no álbum", etiqueta de registro, Free/Premium, botão ▶ fora do botão do cartão), `expressionTodayHTML`/`expressionOfTheDay` (pendente não trancada do nível mais baixo, sorteada pelo dia; "Pode ofender" só se não houver outra; concluir a do dia mostra a próxima), etiqueta de registro também na tela da pergunta. CSS no bloco "Expressões: álbum de figurinhas" de `fr/index.html` (só tokens existentes). Textos em `CHALLENGE_I18N` pt-BR e en.
 - Testes: `tests/desafios-album/test_playwright.js` 62/62 (claro/escuro × 1200/390, en, importação); regressão desafios-modulo 75/75, desafios-conclusao 19/19, ditado 58/58, test_answer_validation 154/154, i18n unit 2104/2104 (chave nova liberada em NEW_KEYS). Prints conferidos nos 4 cenários; zh não tem Desafios.
+
+## Repetições nos Desafios (produção, 2026-10-19)
+- Varredura de todos os desafios da produção (expressão por `canonicalExpression` e sentido; Ouça e traduza e Acentuação pelo
+  texto). Repetição exata de Expressão: só "Il pleut des cordes" (A1 `expr-a1m4-001` e B2 `expr-lote4-016`).
+- Pedido da autora: deixar só no B2. `expr-a1m4-001` tirado do ar como o painel faz (`status='approved'`, `unpublished_at`,
+  `unpublished_by`); nada apagado, progresso de quem já fez fica guardado; reimportar o lote não o traz de volta (a importação
+  pula ids existentes). Para voltar: publicar de novo pelo painel de Desafios.
+- Também repetidos (A1, Acentuação, aguardam decisão da autora): "très" (`accent-a1m3-008` e `accent-a1m5-001`) e "été"
+  (`accent-a1m4-001` e `accent-a1m6-006`). Sinônimos em níveis diferentes, para a autora avaliar: casser les pieds x casser
+  les bonbons (B1), tu te fous de moi (B1) x se foutre de la gueule de quelqu'un (B2), coûter les yeux de la tête (B1) x
+  coûter la peau des fesses (B2), avoir du bol x pas de bol (B1).
