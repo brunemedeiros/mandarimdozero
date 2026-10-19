@@ -31,13 +31,17 @@ function loadPinyinAnswerLogic(){
     );
   }
   const block = src.slice(start, end + END_MARKER.length);
+  // E4: acceptedForms e os ajudantes de cartão com duas formas moram em shared/core (fora do bloco marcado).
+  const core = require('../../tests/e4/app-source').coreText();
+  const fn = (name) => { const a = core.indexOf('function ' + name + '('); return core.slice(a, core.indexOf('\n}\n', a) + 3); };
+  const coreFns = ['acceptedForms', 'acceptedFormsTyped', 'slashSpacing', 'typedVariants'].map(fn).join('\n');
   const sandbox = {};
   vm.createContext(sandbox);
-  vm.runInContext(block + '\n;this.__exports = { normalizePinyinAnswer, convertNumberedPinyin, convertNumberedPinyinSyllable, pinyinToneVowelIndex, acceptedForms };', sandbox);
+  vm.runInContext(block + '\n' + coreFns + '\n;this.__exports = { normalizePinyinAnswer, convertNumberedPinyin, convertNumberedPinyinSyllable, pinyinToneVowelIndex, acceptedForms, acceptedFormsTyped, typedVariants };', sandbox);
   return sandbox.__exports;
 }
 
-const { normalizePinyinAnswer, convertNumberedPinyinSyllable, acceptedForms } = loadPinyinAnswerLogic();
+const { normalizePinyinAnswer, convertNumberedPinyinSyllable, acceptedForms, acceptedFormsTyped, typedVariants } = loadPinyinAnswerLogic();
 
 // Mesma lógica de strip() usada nos dois call sites reais (renderVocabTypeExercise/
 // renderClozeExercise em zh/app.js) -- replicada aqui só porque é uma linha
@@ -46,8 +50,10 @@ function strip(s){
   return normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
 }
 
+// Mesma conta dos call sites do zh/app.js: uma forma só, o texto inteiro (barra ou vírgula) -- acceptedFormsTyped + typedVariants.
 function pinyinAnswerCorrect(typed, expected){
-  return acceptedForms(expected).some(form => strip(form) === strip(typed));
+  const all = typedVariants(typed, expected).map(strip);
+  return acceptedFormsTyped(expected).some(form => all.includes(strip(form)));
 }
 
 let passed = 0;
@@ -116,6 +122,17 @@ console.log('\n=== Requisito 3: caracteres (hanzi) -- confirmação de que não 
 // função que não existe. Se algum dia isso mudar, este teste deve virar um
 // teste real de comparação de hanzi.
 check('placeholder documentando que hanzi não passa por normalização de texto', true, true);
+
+// Cartão com duas formas ("Nǐ jǐ suì? / Nǐ duō dà?"): uma frase só, o texto inteiro (barra ou vírgula); ordem trocada não.
+const DUAS = 'Nǐ jǐ suì? / Nǐ duō dà?';
+check('duas formas: a primeira sozinha = correto', pinyinAnswerCorrect('Nǐ jǐ suì?', DUAS), true);
+check('duas formas: a segunda sozinha = correto', pinyinAnswerCorrect('Nǐ duō dà?', DUAS), true);
+check('duas formas: texto inteiro com barra = correto', pinyinAnswerCorrect('Nǐ jǐ suì? / Nǐ duō dà?', DUAS), true);
+check('duas formas: barra sem espaço = correto', pinyinAnswerCorrect('Nǐ jǐ suì?/Nǐ duō dà?', DUAS), true);
+check('duas formas: vírgula no lugar da barra = correto', pinyinAnswerCorrect('Nǐ jǐ suì?, Nǐ duō dà?', DUAS), true);
+check('duas formas: ordem trocada = incorreto', pinyinAnswerCorrect('Nǐ duō dà? / Nǐ jǐ suì?', DUAS), false);
+check('duas formas: segunda incompleta = incorreto', pinyinAnswerCorrect('Nǐ jǐ suì? / Nǐ duō', DUAS), false);
+check('duas formas: tom errado continua errado', pinyinAnswerCorrect('Ní jǐ suì? / Nǐ duō dà?', DUAS), false);
 
 console.log(`\n${passed} passaram, ${failed} falharam.`);
 if (failed > 0){

@@ -402,7 +402,22 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
       return go(0, 0);
     };
     const okMerged = matchesResolution(merged, strip(curClean));
-    check(`${lang}: HTML inteiro sem data-i18n* e sem o seletor == commit anterior (${PREV2}) ou merge ${MAIN3}+${PREV3}`, strip(curClean) === strip(p) || okMerged);
+    // Decisão de 2026-10-18 (autora): o teste de HTML inteiro travava QUALQUER mudança visual (cada PR de CSS/estrutura
+    // exigia uma exceção aqui). Por padrão, a checagem agora é só de TEXTO: cada elemento com data-i18n mostra, no HTML,
+    // exatamente o texto pt-BR do catálogo. Para voltar à comparação do HTML inteiro: I18N_HTML_EXATO=1 node tests/i18n/test_i18n_unit.js
+    // (o visual travado por captura de tela é outro teste, ver docs/historico/15-design-system-painel-fase-1.md).
+    if (process.env.I18N_HTML_EXATO){
+      check(`${lang}: HTML inteiro sem data-i18n* e sem o seletor == commit anterior (${PREV2}) ou merge ${MAIN3}+${PREV3}`, strip(curClean) === strip(p) || okMerged);
+    } else {
+      const decode = (x) => x.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, '\u00a0');
+      const bad = [];
+      for (const m of cur.matchAll(/<(\w+)\b[^>]*\sdata-i18n="([^"]+)"[^>]*>([\s\S]*?)<\/\1>/g)){
+        const k = m[2]; if (!(k in pt) || typeof pt[k] !== 'string' || /<|&/.test(pt[k]) || /\($/.test(pt[k])) continue; // valor com HTML, ou prefixo montado em tempo de execução ("... (" + número + ")")
+        const txt = decode(m[3].replace(/<(\w+)\b[^>]*>[\s\S]*?<\/\1>/g, '').replace(/<[^>]*>/g, '')).replace(/\s+/g, ' ').trim();
+        if (txt !== pt[k].replace(/\s+/g, ' ').trim()) bad.push([k, txt.slice(0, 50), pt[k].slice(0, 50)]);
+      }
+      check(`${lang}: texto de cada elemento com data-i18n == pt-BR do catálogo (visual livre)`, bad.length === 0, bad.slice(0, 5));
+    }
     check(`${lang}: seletor só oferece pt-BR e English`, /<option value="pt-BR" lang="pt-BR">Português \(Brasil\)<\/option>\s*<option value="en" lang="en">English<\/option>\s*<\/select>/.test(cur.slice(selStart, selEnd)));
     const usedHtml = [...cur.matchAll(/data-i18n-html="([^"]+)"/g)].map(m => m[1]);
     check(`${lang}: todo data-i18n-html existe em pt-BR`, usedHtml.every(k => k in pt));
