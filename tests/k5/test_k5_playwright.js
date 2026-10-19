@@ -107,10 +107,10 @@ async function bootPage(browser, lang, port){
     });
     // Pai agrega o Filho: s1,s1-b (2) + s2-c1..c3 (3) = 5 elegíveis (arquivado fora)
     check(lang + ' lista: Pai = 5 cartões (agrega Filho, arquivado fora)', /\(5 cartões ·/.test(r.pai), r.pai);
-    check(lang + ' lista: Pai 2 novos · 1 aprendendo · 2 para revisar · 2 devidos', /2 novos · 1 aprendendo · 2 para revisar · 2 devidos/.test(r.pai), r.pai);
-    check(lang + ' lista: Filho = 3 cartões, 1 devido (Review futuro e New não são devidos)', /\(3 cartões · 1 novos · 1 aprendendo · 1 para revisar · 1 devidos/.test(r.filho), r.filho);
+    check(lang + ' lista: Pai 2 novos · 1 aprendendo · 2 para revisar · 2 devidos', /Novos: 2 · Aprendendo: 1 · Para revisar: 2 · Devidos: 2/.test(r.pai) /* Etapa 4: contagens viraram rótulos (antes "2 novos · 1 aprendendo...") */, r.pai);
+    check(lang + ' lista: Filho = 3 cartões, 1 devido (Review futuro e New não são devidos)', /\(3 cartões · Novos: 1 · Aprendendo: 1 · Para revisar: 1 · Devidos: 1/.test(r.filho), r.filho);
     check(lang + ' lista: raiz pessoal = 5 (sem Teacher)', /\(5 cartões/.test(r.raiz), r.raiz);
-    check(lang + ' Teacher Deck: só Teacher (2 cartões, 1 novo, 1 para revisar, 1 devido)', /\(2 cartões · 1 novos · 0 aprendendo · 1 para revisar · 1 devidos/.test(r.prof), r.prof);
+    check(lang + ' Teacher Deck: só Teacher (2 cartões, 1 novo, 1 para revisar, 1 devido)', /\(2 cartões · Novos: 1 · Aprendendo: 0 · Para revisar: 1 · Devidos: 1/.test(r.prof), r.prof);
     check(lang + ' botão "Estudar este Deck" habilitado', r.btnFilho === true);
     check(lang + ' deckReviewSummary: total inclui arquivado, elegíveis não; due presente', r.sum.totalCards === 6 && r.sum.eligibleCards === 5 && r.sum.archivedCards === 1 && r.sum.due === 2, r.sum);
     // Estudar este Deck: sessão usa o mesmo universo da contagem do Deck (elegível, subárvore)

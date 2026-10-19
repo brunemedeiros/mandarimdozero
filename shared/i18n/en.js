@@ -56,7 +56,7 @@ window.I18N_CATALOG['en'] = {
   'report.error.attachUploadFailed': "Couldn't upload the image.", // ALTA
   'report.error.chooseCategory': 'Choose a category.', // ALTA
   'report.error.describe': 'Describe what happened.', // ALTA
-  'report.error.duplicate': 'You just sent this a moment ago -- thank you!', // ALTA
+  'report.error.duplicate': 'You just sent this a moment ago. Thank you!', // ALTA
   'report.error.sendFailed': "Couldn't send. Check your connection and try again.", // ALTA
   'report.toast.success': '✓ Report sent. Thanks for helping!', // ALTA
 
@@ -65,8 +65,8 @@ window.I18N_CATALOG['en'] = {
   'premium.challenges.howToActivate': 'They\'re part of the Premium plan. To activate it, contact the administrator (profbrune).', // MÉDIA -- política de plano/ativação manual
 
   'flashcardLimit.modal.title': '🔒 Free plan limit', // ALTA
-  'flashcardLimit.modal.bodyHtml': 'You\'ve reached the free plan\'s limit of <strong>20 active cards of your own</strong>. To create more, delete a card, or ask your teacher to link your account -- students linked to a teacher get unlimited cards of their own.', // MÉDIA -- política Free; PT e EN falam em apagar, a ação que a interface oferece (🗑); arquivar saiu na CONSOLIDAÇÃO-3
-  'flashcardLimit.wouldGenerate': { one: 'This card would create {n} study card, but you only have {remaining} left on the free plan.', other: 'This card would create {n} study cards, but you only have {remaining} left on the free plan.' }, // MÉDIA -- política Free; plural real em EN (o PT usa "cartão(ões)")
+  'flashcardLimit.modal.bodyHtml': 'You\'ve reached the free plan\'s limit of <strong>20 active cards of your own</strong>. To create more, delete a card, or ask your teacher to link your account. Students linked to a teacher get unlimited cards of their own.', // MÉDIA -- política Free; PT e EN falam em apagar, a ação que a interface oferece (🗑); arquivar saiu na CONSOLIDAÇÃO-3
+  'flashcardLimit.wouldGenerate': { one: 'This card would create {n} study card, but you only have {remaining} left on the free plan.', other: 'This card would create {n} study cards, but you only have {remaining} left on the free plan.' }, // MÉDIA -- política Free; plural real em EN e PT
 
   'flashcardReset.modal.title': '⚠️ Confirm edit', // ALTA
   'flashcardReset.modal.headline': 'This edit will reset this card\'s review progress.', // ALTA
@@ -167,8 +167,8 @@ window.I18N_CATALOG['en'] = {
   'preview.prev': '← Previous', // ALTA
   'preview.next': 'Next →', // ALTA
   'preview.cardOf': 'Card {n} of {total}', // ALTA
-  'preview.toast.noEffect': '👁️ Preview -- nothing was saved or graded.', // ALTA
-  'preview.toast.reviewMore': '👁️ Preview -- "Review more" has no effect here.', // MÉDIA
+  'preview.toast.noEffect': '👁️ Preview: nothing was saved or graded.', // ALTA
+  'preview.toast.reviewMore': '👁️ Preview: "Review more" has no effect here.', // MÉDIA
   'notif.time.now': 'now', // ALTA
   'notif.time.min': '{n}min', // ALTA
   'notif.time.hour': '{n}h', // ALTA
@@ -188,12 +188,12 @@ window.I18N_CATALOG['en'] = {
   'notif.cat.ranking': '🏆 Leaderboard', // MÉDIA
   'notif.cat.desafios': '🎯 Challenges', // ALTA
   'notif.cat.conteudo': '📚 What\'s new', // ALTA
-  'notif.cat.reengajamento': '👋 Re-engagement', // MÉDIA
+  'notif.cat.reengajamento': '👋 Come-back reminders', // MÉDIA -- Etapa 4: aprovado pela dona
   'notif.cat.sistema': '⚙️ System', // ALTA
   'notif.cat.amigos': '👥 Friends', // ALTA
   'notif.pref.inAppOnly': 'Friends only has in-app notifications', // ALTA
   'notif.pref.noEmail': 'Friends has no email notifications', // ALTA
-  'notif.pref.guest': 'Create an account to set up notifications -- guest mode does not save preferences.', // ALTA
+  'notif.pref.guest': 'Create an account to set up notifications. Guest mode does not save preferences.', // ALTA
   'notif.pref.loadFailed': 'Could not load your preferences right now.', // ALTA
   'notif.pref.sectionTitle': 'Notifications', // ALTA
   'notif.pref.inApp.title': 'In-app notifications', // ALTA
@@ -216,7 +216,7 @@ window.I18N_CATALOG['en'] = {
   'notif.pref.toast.pushOff': 'Browser alerts turned off.', // ALTA
   'notif.pref.toast.saved': '✓ Preferences saved.', // ALTA
   'notif.pref.push.unsupported': 'Your browser does not support push notifications.', // ALTA
-  'notif.pref.push.blocked': 'Notifications are blocked in your browser settings -- allow them there and try again.', // ALTA
+  'notif.pref.push.blocked': 'Notifications are blocked in your browser settings. Allow them there and try again.', // ALTA
   'notif.pref.push.denied': 'You did not allow notifications. You can try again whenever you like.', // ALTA
   'notif.pref.push.error': 'Could not turn on right now. Please try again.', // ALTA
   'notif.pref.titleMatrixInApp': 'In the app', // ALTA
@@ -252,7 +252,7 @@ window.I18N_CATALOG['en'] = {
   'review.strength.notStarted': 'Not started', // ALTA
   'review.strength.medium': 'Medium', // ALTA
   'review.strength.strong': 'Strong', // ALTA
-  'review.strength.hint': 'Not started = no study yet; Weak = not solid yet; Strong = known well for a while; Medium = somewhere in between. This is ALL your vocabulary, not today\'s reviews (above) -- so you can have medium words here even with no reviews due right now.', // MÉDIA -- texto longo; "firmou" sem equivalente direto
+  'review.strength.hint': 'Not started = no study yet; Weak = not solid yet; Strong = known well for a while; Medium = somewhere in between. This is ALL your vocabulary, not today\'s reviews (above). So you can have medium words here even with no reviews due right now.', // MÉDIA -- texto longo; "firmou" sem equivalente direto
   'review.mode.reviewLabel': 'Review', // ALTA
   'review.empty.noneYetTitle': 'No reviews yet', // ALTA
   'review.empty.upToDateTitle': 'You\'re all caught up!', // ALTA
@@ -270,24 +270,24 @@ window.I18N_CATALOG['en'] = {
   'review.match.pairsLabel': 'pairs<br>({cards} cards)', // ALTA -- contém <br>
   'review.match.start': 'Start →', // ALTA
   'review.match.allMatched': 'All pairs matched!', // ALTA
-  'review.match.attempts': '{n} attempt(s)', // ALTA
+  'review.match.attempts': { one: '{n} attempt', other: '{n} attempts' }, // ALTA
   'review.match.playAgain': 'Play again', // ALTA
   'review.speed.insufficientBody': 'Speed Review needs words you have already studied successfully at least once. Keep studying units in Study.', // ALTA
   'review.speed.upToDateBody': 'No reviews due right now. Practice is still available whenever you like.', // ALTA
   'review.practice': 'Practice', // ALTA
   'review.speed.gameOver': 'Game over!', // ALTA
   'review.speed.points': '{n} pts', // ALTA
-  'review.speed.answered': 'You answered {n} word(s) this round.', // ALTA
+  'review.speed.answered': { one: 'You answered {n} word this round.', other: 'You answered {n} words this round.' }, // ALTA
   'review.back': 'Back', // ALTA
   'review.practiceMore': 'Practice more', // ALTA
   'review.complete.title': 'Review complete!', // ALTA
-  'review.complete.reviewed': 'You reviewed {n} card(s) this session.', // ALTA
+  'review.complete.reviewed': { one: 'You reviewed {n} card this session.', other: 'You reviewed {n} cards this session.' }, // ALTA
   'review.session.deckEmptyTitle': 'No cards in this Deck yet', // ALTA
   'review.session.classEmptyTitle': 'No lesson cards to review right now', // ALTA
   'review.session.tagsEmptyTitle': 'No cards with the selected tags', // ALTA
   'review.session.unitEmptyTitle': 'No cards in this unit yet', // ALTA
   'review.session.allDoneTitle': 'All caught up!', // ALTA
-  'review.session.pendingOverall': 'You still have {n} card(s) due overall.', // ALTA
+  'review.session.pendingOverall': { one: 'You still have {n} card due overall.', other: 'You still have {n} cards due overall.' }, // ALTA
   'review.session.comeBackLater': 'Come back later for your next review, or start a new unit on the course path.', // ALTA
   'review.session.reviewAllAvailable': 'Review everything available', // ALTA
   'review.previewLabel': '👁️ Preview', // ALTA
@@ -317,7 +317,7 @@ window.I18N_CATALOG['en'] = {
   'trail.checkpoint.skipLocked': 'Skipping units is a Premium plan feature (or for the teacher\'s students).', // ALTA
   'review.listen.placeholder': 'Write what you heard', // ALTA
   'trail.unit.done': 'Completed', // ALTA
-  'trail.unit.lessonsProgress': '{done} of {total} lessons', // ALTA
+  'trail.unit.lessonsProgress': { one: '{done} of {total} lesson', other: '{done} of {total} lessons' }, // ALTA
   'trail.checkpoint.title': 'Checkpoint', // ALTA
   'trail.checkpoint.goal': 'Test the whole module at once and skip the units you already know.', // ALTA
   'trail.moduleChallenges.title': 'Module {n} Challenges', // ALTA
@@ -336,7 +336,7 @@ window.I18N_CATALOG['en'] = {
   'deck.myDecks': 'My Decks', // ALTA
   'deck.teacherRoot': 'Teacher\'s cards', // MÉDIA
   'deck.studyThis': 'Study this Deck', // ALTA
-  'deck.countsFull': '{total} cards · {new} new · {learning} learning · {review} to review · {due} due', // ALTA
+  'deck.countsFull': { one: '{total} card · New: {new} · Learning: {learning} · To review: {review} · Due: {due}', other: '{total} cards · New: {new} · Learning: {learning} · To review: {review} · Due: {due}' }, // ALTA
   'deck.publicBadge': '🌐 Public', // ALTA
   'deck.publish': '🔒 Private', // ALTA
   'deck.cardsCount': { one: '{n} card', other: '{n} cards' }, // ALTA
@@ -376,17 +376,17 @@ window.I18N_CATALOG['en'] = {
   'myFlashcards.active.empty': 'You haven\'t created any cards yet. Use the form above to add words/phrases you want to memorize, even if they aren\'t in the study path.', // ALTA
   'myFlashcards.archived.title': 'Archived (history) ({n})', // MÉDIA
   'myFlashcards.import.title': 'Import cards', // ALTA
-  'myFlashcards.import.hint': 'Did you get a .json file from another student, or a share link? Import it here -- only cards in the SAME language you are studying ({lang}) can be imported.', // ALTA
+  'myFlashcards.import.hint': 'Did you get a .json file from another student, or a share link? Import it here. Only cards in the SAME language you are studying ({lang}) can be imported.', // ALTA
   'myFlashcards.anki.title': '📥 Import from Anki (.apkg)', // ALTA
-  'myFlashcards.anki.hint': 'Have an Anki deck? Choose the .apkg file exported from there -- you\'ll see a summary (how many cards, types, warnings) before confirming; nothing is imported without your confirmation.', // ALTA
+  'myFlashcards.anki.hint': 'Have an Anki deck? Choose the .apkg file exported from there. You\'ll see a summary (how many cards, types, warnings) before confirming; nothing is imported without your confirmation.', // ALTA
   'myFlashcards.row.createdOn': 'created on {date}', // ALTA
   'myFlashcards.row.previewTitle': 'Preview how it will appear in Review', // ALTA
   'myFlashcards.row.editTitle': 'Edit', // ALTA
   'myFlashcards.row.reactivateTitle': 'Reactivate (remove from the archive)', // MÉDIA
-  'myFlashcards.row.hiddenTitle': 'Hidden from your profile -- click to make it visible', // ALTA
-  'myFlashcards.row.visibleTitle': 'Visible on your profile (if your account is public) -- click to hide', // ALTA
+  'myFlashcards.row.hiddenTitle': 'Hidden from your profile. Click to make it visible', // ALTA
+  'myFlashcards.row.visibleTitle': 'Visible on your profile (if your account is public). Click to hide', // ALTA
   'myFlashcards.row.deleteTitle': 'Delete permanently', // ALTA
-  'myFlashcards.edit.useNative': '🧪 Use the new field editor (native) -- keeps the content you already typed', // MÉDIA
+  'myFlashcards.edit.useNative': '🧪 Use the new field editor (native): keeps the content you already typed', // MÉDIA
   'myFlashcards.edit.sideLanguage': 'Language of each side', // ALTA
   'myFlashcards.edit.front': 'Front', // ALTA
   'myFlashcards.edit.pinyin': 'Pinyin', // ALTA
@@ -396,7 +396,7 @@ window.I18N_CATALOG['en'] = {
   'myFlashcards.toast.editedReset': '✓ Card edited. Its review progress was reset.', // ALTA
   'myFlashcards.toast.edited': '✓ Card edited.', // ALTA
   'myFlashcards.native.title': 'Edit card', // MÉDIA
-  'myFlashcards.native.hint': 'This card uses the new field model -- editing here, the content is saved to fields/card_generation_mode, never to the old columns.', // MÉDIA
+  'myFlashcards.native.hint': 'This card uses the new field model. When you edit here, the content is saved only in that model, never in the old format.', // MÉDIA
   'myFlashcards.native.cardType': 'Card type', // MÉDIA
   'myFlashcards.toast.created': '✓ Card created. It\'s already in your review queue.', // ALTA
   'myFlashcards.err.previewLoad': 'Could not load this card to preview.', // ALTA
@@ -405,15 +405,15 @@ window.I18N_CATALOG['en'] = {
   'myFlashcards.toast.deleted': '✓ Card deleted.', // ALTA
   'myFlashcards.export.noneActive': 'You don\'t have any active cards to export.', // ALTA
   'myFlashcards.export.modalTitle': '⬇️ Export cards ({n})', // ALTA
-  'myFlashcards.export.hint': 'Download a .json file to give to another student to import, or copy the share link -- both have the same content.', // ALTA
+  'myFlashcards.export.hint': 'Download a .json file to give to another student to import, or copy the share link. Both have the same content.', // ALTA
   'myFlashcards.export.download': '⬇️ Download .json', // ALTA
   'myFlashcards.export.copyLink': '🔗 Copy link', // ALTA
   'myFlashcards.export.linkCopied': '✓ Link copied!', // ALTA
-  'myFlashcards.export.leftOut': '{n} Fill-in-the-blank card(s) were left out: this format only carries front and back.', // ALTA
-  'myFlashcards.import.confirmCut': 'The file has {total} card(s), but only the first {kept} fit in the free plan. Import those {kept}?', // ALTA
+  'myFlashcards.export.leftOut': { one: '{n} Fill-in-the-blank card was left out: this format only carries front and back.', other: '{n} Fill-in-the-blank cards were left out: this format only carries front and back.' }, // ALTA
+  'myFlashcards.import.confirmCut': { one: 'The file has {total} card, but only the first {kept} fit in the free plan. Import those {kept}?', other: 'The file has {total} cards, but only the first {kept} fit in the free plan. Import those {kept}?' }, // ALTA
   'myFlashcards.import.errRead': 'Could not read this file. Make sure it is a .json exported from this screen.', // ALTA
   'myFlashcards.import.errEmpty': 'The file/link has no cards to import.', // ALTA
-  'myFlashcards.import.errLang': 'These cards are in another language ({lang}) -- they can\'t be imported here.', // ALTA
+  'myFlashcards.import.errLang': 'These cards are in another language ({lang}). They can\'t be imported here.', // ALTA
   'myFlashcards.import.confirm': { one: 'Import {n} card into your account?', other: 'Import {n} cards into your account?' }, // ALTA
   'myFlashcards.import.done': { one: '✓ {n} card imported.', other: '✓ {n} cards imported.' }, // ALTA
 
@@ -445,7 +445,7 @@ window.I18N_CATALOG['en'] = {
   'zh.path.knownAsk': 'Already know it?', // ALTA
   'zh.path.knownDone': '✓ I know it', // ALTA
   'zh.path.lessonDone.recapVocab': 'Vocabulary from this lesson', // ALTA
-  'zh.path.lessonDone.recapMissed': 'Words you missed in the Checkpoint', // MÉDIA -- "Ponto de verificação" = checkpoint da unidade
+  'zh.path.lessonDone.recapMissed': 'Words to review from the Checkpoint', // MÉDIA -- Etapa 4: aprovado pela dona
   'zh.path.lessonDone.checkpointTitle': 'Checkpoint completed!', // MÉDIA -- "Ponto de verificação" = checkpoint
   'zh.path.lessonDone.lessonTitle': 'Lesson completed!', // ALTA
   'zh.path.lessonDone.xpEarned': 'XP earned', // ALTA
@@ -456,6 +456,7 @@ window.I18N_CATALOG['en'] = {
   'zh.path.unitDone.congrats': 'Congratulations, {name}!', // ALTA
   'zh.path.unitDone.skills': 'Skills developed', // ALTA
   'zh.path.unitDone.goalReached': 'Communication goal achieved', // ALTA
+  'zh.path.unitDone.learnedWords': { one: 'What you learned: {n} new word', other: 'What you learned: {n} new words' }, // ALTA
   'zh.path.banner.quickCheck': '🧠 Quick check', // ALTA
   'zh.path.banner.practice': '✏️ Practicing what you just saw', // ALTA
   'zh.path.banner.mixed': '🔀 Mixing in what you\'ve already seen', // ALTA
@@ -577,9 +578,9 @@ window.I18N_CATALOG['en'] = {
   'zh.search.loadMore': 'Load more ({shown} of {total})', // ALTA
   'zh.manual.title': 'Manual — Unit {id}: {title}', // ALTA
   'zh.hint.thinkWhenUse': 'Think about when you would use this expression. It appears in this sentence you already studied: "{masked}"', // ALTA
-  'zh.hint.listenAgain': 'Listen again, paying attention to the sounds -- it is an expression from this unit\'s topic.', // MÉDIA
+  'zh.hint.listenAgain': 'Listen again, paying attention to the sounds. It is an expression from this unit\'s topic.', // MÉDIA
   'zh.hint.thinkContext': 'Think about the context of this unit\'s topic ("{title}"): in what situation would you use this word?', // ALTA
-  'zh.hint.reorder': 'First identify who performs the action, then the action itself -- build the sentence following that line of thought, ignoring the blocks that do not belong to it.', // ALTA
+  'zh.hint.reorder': 'First identify who performs the action, then the action itself. Build the sentence following that line of thought, ignoring the blocks that do not belong to it.', // ALTA
   'zh.hint.fullsentence': 'Reread the sentence and think about how each part of it is normally said in Chinese, before comparing the options.', // MÉDIA
   'zh.hint.cloze': 'Reread the whole sentence, together with the translation, and think about which word gives the blank its grammatical and communicative meaning.', // ALTA
   'zh.hint.trueFalseUsage': 'Think about the explanation: "{title}"', // ALTA
@@ -612,24 +613,24 @@ window.I18N_CATALOG['en'] = {
   'progress.statToday': 'To study today', // ALTA
   'progress.statTodayTitle': "One session's queue: due + new cards limited by 'new per day'. Follows the Review origin/tag filters, so it can differ from New/Due.", // MÉDIA
   'zh.progress.chartEmpty': 'Start studying to see your progress over time here.', // ALTA
-  'zh.progress.chartPoint': '{date}: {n} words', // ALTA
+  'zh.progress.chartPoint': { one: '{date}: {n} word', other: '{date}: {n} words' }, // ALTA
   'zh.progress.chartTotal': 'Total so far:', // ALTA
   'zh.progress.chartTotalSuffix': 'words and characters learned', // ALTA
   'zh.progress.heatCell': { one: '{n} activity on {date}', other: '{n} activities on {date}' }, // ALTA
   'zh.progress.heatLess': 'Less', // ALTA
   'zh.progress.heatMore': 'More', // ALTA
   'zh.hanzi.allCaughtUp': 'All caught up!', // ALTA
-  'zh.hanzi.pendingChars': 'You still have {n} character(s) due.', // ALTA
+  'zh.hanzi.pendingChars': { one: 'You still have {n} character due.', other: 'You still have {n} characters due.' }, // ALTA
   'zh.hanzi.comeBackLater': 'Come back later for your next review, or move on to a new lesson.', // ALTA
   'zh.hanzi.sessionDone': 'Session complete!', // ALTA
-  'zh.hanzi.sessionReviewed': 'You reviewed {n} character(s) in this session.', // ALTA
+  'zh.hanzi.sessionReviewed': { one: 'You reviewed {n} character in this session.', other: 'You reviewed {n} characters in this session.' }, // ALTA
   'zh.hanzi.lessonTag': 'Lesson {n}', // ALTA
   'zh.hanzi.tapToReveal': 'tap to see the pinyin and meaning', // ALTA
   'zh.hanzi.backToRadicals': '← Back to radicals', // ALTA
-  'zh.hanzi.appearsInCount': 'Appears in {n} character(s) you have already studied', // ALTA
+  'zh.hanzi.appearsInCount': { one: 'Appears in {n} character you have already studied', other: 'Appears in {n} characters you have already studied' }, // ALTA
   'zh.hanzi.countLabel': '{chars} characters in {lessons} lessons. See them, write them and test your memory.', // ALTA
   'zh.hanzi.lessonCompleted': 'Completed', // ALTA
-  'zh.hanzi.charCount': '{n} characters', // ALTA
+  'zh.hanzi.charCount': { one: '{n} character', other: '{n} characters' }, // ALTA
   'zh.hanzi.charOf': 'Character {i} of {n}', // ALTA
   'zh.hanzi.finalTest': 'Final test: {i} of {n}', // ALTA
   'zh.hanzi.appearsIn': 'Appears in', // ALTA
@@ -658,10 +659,10 @@ window.I18N_CATALOG['en'] = {
   'fr.hint.retry': 'Try again', // ALTA
   'fr.hint.reveal': 'Show answer', // ALTA
   'fr.hint.thinkWhen': 'Think about when you would use this expression. It appears in this sentence you have already studied: "{masked}"', // ALTA
-  'fr.hint.listenAgain': 'Listen again, paying close attention to the sounds -- it is an expression from this unit\'s topic.', // ALTA
+  'fr.hint.listenAgain': 'Listen again, paying close attention to the sounds. It is an expression from this unit\'s topic.', // ALTA
   'fr.hint.thinkContext': 'Think about the context of this unit\'s topic ("{title}"): in what situation would you use this word?', // ALTA
-  'fr.hint.reorderTranslate': 'First discard the blocks that don\'t belong to this sentence -- only then think about the order of the remaining words.', // ALTA
-  'fr.hint.reorderOrder': 'First identify who performs the action and then the action itself -- build the sentence following that line of reasoning, ignoring the blocks that don\'t belong to it.', // ALTA
+  'fr.hint.reorderTranslate': 'First discard the blocks that don\'t belong to this sentence. Only then think about the order of the remaining words.', // ALTA
+  'fr.hint.reorderOrder': 'First identify who performs the action and then the action itself. Build the sentence following that line of reasoning, ignoring the blocks that don\'t belong to it.', // ALTA
   'fr.hint.scenario': 'Reread the situation carefully: think about what you would say at that moment, not just the meaning of each sentence.', // ALTA
   'fr.hint.cloze': 'Reread the whole sentence, together with the translation, and think about which word gives the blank its grammatical and communicative sense.', // ALTA
   'fr.hint.trueFalseExplanation': 'Think about the explanation: "{title}"', // ALTA
@@ -849,7 +850,7 @@ window.I18N_CATALOG['en'] = {
   'review.panel.origin.self': 'My cards', // ALTA -- Revisão nova
   'review.panel.origin.teacher': 'Teacher', // ALTA -- Revisão nova
   'review.panel.all': 'All', // ALTA -- Revisão nova
-  'review.panel.searchPlaceholder': 'Search cards and notes', // ALTA -- Revisão nova
+  'review.panel.searchPlaceholder': 'Search cards', // ALTA -- Etapa 4: aprovado pela dona
   'review.panel.searchAria': 'Search cards', // ALTA -- Revisão nova
   'review.panel.filters': 'Filters', // ALTA -- Revisão nova
   'review.panel.cardsAria': 'Cards', // ALTA -- Revisão nova
@@ -904,13 +905,13 @@ window.I18N_CATALOG['en'] = {
   'review.week.day.sun': 'Sun', // ALTA -- Revisão nova
   'review.week.today': 'Today', // ALTA -- Revisão nova
   'review.week.studied': 'studied', // ALTA -- Revisão nova
-  'review.week.notStudied': 'didn\'t study', // ALTA -- Revisão nova
+  'review.week.notStudied': 'no study', // ALTA -- Etapa 4: aprovado pela dona
   'review.week.ariaFuture': '{day}: {due} to review, {new} new', // ALTA -- Revisão nova
   'review.week.alreadyStudied': ', already studied', // ALTA -- Revisão nova
   'review.week.title': 'Your review week', // ALTA -- Revisão nova
   'review.week.goalDone': 'Weekly goal reached', // ALTA -- Revisão nova
   'review.week.goal': 'Weekly goal', // ALTA -- Revisão nova
-  'review.week.goalCount': ': <b>{n} of {goal}</b> study days', // ALTA -- Revisão nova
+  'review.week.goalCount': { one: ': <b>{n} of {goal}</b> study day', other: ': <b>{n} of {goal}</b> study days' }, // ALTA -- Revisão nova
   'review.week.legendPast': 'Past days: ✓ when you studied. Coming days: ', // ALTA -- Revisão nova
   'review.week.legendDue': 'cards coming due and ', // ALTA -- Revisão nova
   'review.week.legendNew': 'new words.', // ALTA -- Revisão nova
@@ -929,7 +930,7 @@ window.I18N_CATALOG['en'] = {
   'review.today.filter': 'Session filter: {filter}', // ALTA -- Revisão nova
   'review.today.clearFilter': 'Clear filter', // ALTA -- Revisão nova
   'review.today.aria': 'For today: {new} new, {learning} learning, {review} to review', // ALTA -- Revisão nova
-  'review.today.shortTitle': 'Short session: the cards you miss most and the most overdue come first', // ALTA -- Revisão nova
+  'review.today.shortTitle': 'Short session: the cards you miss most and the ones waiting longest come first', // ALTA -- Etapa 4: aprovado pela dona
   'review.today.short': '⏱ 5 minutes', // ALTA -- Revisão nova
   'review.today.studyAll': 'Study all ({n})', // ALTA -- Revisão nova
   'review.today.upToDate': 'You\'re all caught up for today.', // ALTA -- Revisão nova
@@ -1009,7 +1010,7 @@ window.I18N_CATALOG['en'] = {
   'wizard.q.time': 'What time of day do you want to study?', // ALTA
   'wizard.q.lessons': 'How many lessons per day do you want to do?', // ALTA
   'wizard.notif.title': 'Notifications', // ALTA
-  'wizard.notif.sub': "Get reminders for when you should study — only works with the browser open (we don't have a push notification server).", // ALTA
+  'wizard.notif.sub': 'Get a reminder at the time you choose. This reminder only shows up while the site is open.', // ALTA -- Etapa 4: aprovado pela dona
   'wizard.summary.noDays': 'set at least 1 day of the week', // ALTA
   'wizard.summary.title': 'You will reach your goal by <strong>{date}</strong>', // ALTA
   'wizard.summary.goalLabel': 'Your goal', // ALTA
@@ -1033,7 +1034,7 @@ window.I18N_CATALOG['en'] = {
   'auth.myAccount': 'My account', // ALTA
   'auth.saveFailed': "⚠ We couldn't save your progress right now. Check your connection.", // ALTA
   'auth.notLoadedYet': '⏳ Still confirming your saved progress. Wait a moment before continuing.', // ALTA
-  'auth.staleLocal': '⚠ Your progress here looks out of date compared to what was already saved -- reload the page if this persists.', // ALTA
+  'auth.staleLocal': '⚠ Your progress here looks out of date compared to what was already saved. Reload the page if this persists.', // ALTA
   'leaderboard.daysLeft': { one: '{n} day left', other: '{n} days left' }, // ALTA
   'leaderboard.sideEmpty': 'Nobody has scored this week yet.', // ALTA
   'leaderboard.anonymous': 'Student', // ALTA
@@ -1118,19 +1119,19 @@ window.I18N_CATALOG['en'] = {
   'ankiImport.title': '📥 Import from Anki', // ALTA
   'ankiImport.loadingFile': 'Reading the .apkg file...', // ALTA
   'ankiImport.err.readFile': "We couldn't read the chosen file.", // ALTA
-  'ankiImport.err.loadDb': "We couldn't load the database reader right now. Try again in a moment.", // ALTA
+  'ankiImport.err.loadDb': 'We couldn\'t load the Anki file reader right now. Try again in a moment.', // ALTA
   'ankiImport.err.loadZip': "We couldn't load the .zip reader right now. Try again in a moment.", // ALTA
   'ankiImport.loadingPlan': 'Analyzing the cards...', // ALTA
   'ankiImport.noDeck': 'No deck', // ALTA
   'ankiImport.pillMedia': '🎧🖼️ media', // ALTA
   'ankiImport.pillDuplicate': '⚠️ possible duplicate', // ALTA
   'ankiImport.tags.title': '🏷️ Tags found ({n}):', // ALTA
-  'ankiImport.tags.note': 'Tags will be saved on each card (Note) exactly as in Anki (normalized -- lowercase, no accents, spaces become "-") and will be available for filtering once the Dashboard exists.', // MÉDIA
-  'ankiImport.summary.found': { one: '<strong>{n}</strong> card found in the file --', other: '<strong>{n}</strong> cards found in the file --' }, // ALTA
+  'ankiImport.tags.note': 'Tags will be saved on each item exactly as in Anki (normalized: lowercase, no accents, spaces become "-") and will be available for filtering once the Dashboard exists.', // MÉDIA -- Etapa 4: aprovado pela dona
+  'ankiImport.summary.found': { one: '<strong>{n}</strong> card found in the file:', other: '<strong>{n}</strong> cards found in the file:' }, // ALTA
   'ankiImport.summary.ok': '<strong>{n}</strong> can be imported natively,', // ALTA
   'ankiImport.summary.skipped': "<strong>{n}</strong> couldn't be recognized safely (see the warnings below; they're left out).", // ALTA
   'ankiImport.summary.duplicates': '⚠️ {n} seem to already exist in your account (unchecked by default, but you can check them anyway).', // ALTA
-  'ankiImport.summary.media': '🎧🖼️ {n} have audio/image -- it is only downloaded/uploaded for the cards you actually confirm.', // ALTA
+  'ankiImport.summary.media': '🎧🖼️ {n} have audio/image. It is only downloaded/uploaded for the cards you actually confirm.', // ALTA
   'ankiImport.counterNone': 'No cards selected', // ALTA
   'ankiImport.counter': { one: '{n} card selected', other: '{n} cards selected' }, // ALTA
   'ankiImport.selectAll': 'Select all', // ALTA
@@ -1139,21 +1140,21 @@ window.I18N_CATALOG['en'] = {
   'ankiImport.confirm': 'Confirm import', // ALTA
   'ankiImport.importing': 'Importing...', // ALTA
   'ankiImport.importingProgress': 'Importing {done}/{total}...', // ALTA
-  'ankiImport.savingBatches': 'Saving... ({n} batch(es) ok)', // ALTA
+  'ankiImport.savingBatches': { one: 'Saving... ({n} batch ok)', other: 'Saving... ({n} batches ok)' }, // ALTA
   'ankiImport.saveError': 'Error saving.', // ALTA
   'ankiImport.skippedFallback': 'Card skipped.', // ALTA
   'ankiImport.result.ok': { one: '✓ <strong>{imported}</strong> of {n} selected card was imported successfully.', other: '✓ <strong>{imported}</strong> of {n} selected cards were imported successfully.' }, // ALTA
-  'ankiImport.result.partial': '⚠️ The import stopped halfway -- <strong>{imported}</strong> of {requested} cards were already saved successfully before the failure. Those already imported will NOT be duplicated if you try again (that attempt will detect the ones that already exist).', // ALTA
+  'ankiImport.result.partial': '⚠️ The import stopped halfway. <strong>{imported}</strong> of {requested} cards were already saved successfully before the failure. Those already imported will NOT be duplicated if you try again (that attempt will detect the ones that already exist).', // ALTA
   'ankiImport.result.mediaWarn': { one: '⚠️ {n} media file could not be included (the card text was imported normally): {list}{more}', other: '⚠️ {n} media files could not be included (the card text was imported normally): {list}{more}' }, // ALTA
   'ankiImport.destDeck': '📚 Import into Deck:', // ALTA
   'ankiImport.keepFolders': 'Keep the Anki folders (recreate them as Decks inside the chosen Deck)', // ALTA
-  'ankiImport.result.decksCreated': '{n} Deck(s) created from the Anki folders.', // ALTA
-  'ankiImport.result.cutTail': '({n} Anki card(s) were left out.)', // ALTA
-  'ankiImport.result.deckFailed': '({n} card(s) were not imported.)', // ALTA
+  'ankiImport.result.decksCreated': { one: '{n} Deck created from the Anki folders.', other: '{n} Decks created from the Anki folders.' }, // ALTA
+  'ankiImport.result.cutTail': { one: '({n} Anki card was left out.)', other: '({n} Anki cards were left out.)' }, // ALTA
+  'ankiImport.result.deckFailed': { one: '({n} card was not imported.)', other: '({n} cards were not imported.)' }, // ALTA
   'ankiImport.result.skippedTitle': 'Skipped cards ({n})', // ALTA
   'ankiExport.generating': 'Generating file...', // ALTA
   'ankiExport.empty': 'No cards to export in this selection.', // ALTA
-  'ankiExport.mediaNote': { one: ' ({n} media file could not be included -- the cards were exported anyway, just without that specific audio/image.)', other: ' ({n} media files could not be included -- the cards were exported anyway, just without those specific audio/image files.)' }, // ALTA
+  'ankiExport.mediaNote': { one: ' ({n} media file could not be included. The cards were exported anyway, just without that specific audio/image.)', other: ' ({n} media files could not be included. The cards were exported anyway, just without those specific audio/image files.)' }, // ALTA
   'ankiExport.done': { one: 'Exported! {n} card in the .apkg file — import it straight into Anki.{mediaNote}', other: 'Exported! {n} cards in the .apkg file — import them straight into Anki.{mediaNote}' }, // ALTA
   'ankiExport.failed': "We couldn't generate the file right now. Try again.", // ALTA
   // Etapa 3 (decisão da dona, 2026-10-19): nomes dentro do .apkg (Anki) no idioma do site.
@@ -1195,7 +1196,7 @@ window.I18N_CATALOG['en'] = {
   'fieldEditor.audio.method.url': '🔗 Use a link', // ALTA
   'fieldEditor.audio.method.tts': '🔊 Text to speech', // ALTA
   'fieldEditor.audio.method.recording': '🎙️ Record audio', // ALTA
-  'fieldEditor.audio.ttsLang.choose': '-- choose the language --', // ALTA
+  'fieldEditor.audio.ttsLang.choose': 'Choose the language', // ALTA
   'fieldEditor.audio.ttsLang.fr': 'French (fr-FR)', // ALTA
   'fieldEditor.audio.ttsLang.zh': 'Mandarin (zh-CN)', // ALTA
   'fieldEditor.audio.ttsLang.pt': 'Portuguese (pt-BR)', // ALTA
@@ -1252,9 +1253,9 @@ window.I18N_CATALOG['en'] = {
   'fieldEditor.field.defaultLabel': 'Field {n}', // ALTA
   'fieldEditor.list.empty': 'No fields yet. Use "Add field" below.', // ALTA
   'fieldEditor.list.add': '+ Add field', // ALTA
-  'mcEditor.err.notNative': 'This Note is not native.', // ALTA
-  'mcEditor.err.notMcMode': 'This Note is not in Multiple choice mode.', // ALTA
-  'mcEditor.err.unrecognized': { one: 'Multiple choice does not accept a Field with no role ({n} field without prompt/answer/distractor) -- assign a role or remove it.', other: 'Multiple choice does not accept Fields with no role ({n} fields without prompt/answer/distractor) -- assign a role or remove them.' }, // ALTA
+  'mcEditor.err.notNative': 'This item was created in the old format and can\'t be edited here.', // ALTA -- Etapa 4: aprovado pela dona
+  'mcEditor.err.notMcMode': 'This item isn\'t a Multiple choice item.', // ALTA -- Etapa 4: aprovado pela dona
+  'mcEditor.err.unrecognized': { one: 'Multiple choice does not accept a Field with no role ({n} field without prompt/answer/distractor). Assign a role or remove it.', other: 'Multiple choice does not accept Fields with no role ({n} fields without prompt/answer/distractor). Assign a role or remove them.' }, // ALTA
   'mcEditor.err.emptyField': 'Every multiple choice field (question, correct answer, distractors) must have content.', // ALTA
   'mcEditor.promptLabel': 'Question/Prompt', // ALTA
   'mcEditor.answerLabel': 'Correct answer', // ALTA
@@ -1265,18 +1266,18 @@ window.I18N_CATALOG['en'] = {
   'mcEditor.distractorLabel': 'Distractor {n}', // ALTA
   'mcEditor.promote': '✓ Mark as correct answer', // ALTA
   'mcEditor.removeDistractor': '🗑 Remove distractor', // ALTA
-  'mcEditor.noDistractors': 'No distractors yet -- add at least 1.', // ALTA
+  'mcEditor.noDistractors': 'No distractors yet. Add at least 1.', // ALTA
   'mcEditor.addDistractor': '+ Add distractor', // ALTA
   'mcEditor.maxDistractors': 'Maximum of {n} distractors reached.', // ALTA
   'mcEditor.othersTitle': 'Other fields (no role defined in this multiple choice)', // ALTA
-  'mcEditor.othersHint': "These fields came from another mode and don't have a role here yet -- remove them or assign a role so the structure becomes valid.", // ALTA
+  'mcEditor.othersHint': 'These fields came from another mode and don\'t have a role here yet. Remove them or assign a role so the structure becomes valid.', // ALTA
   'mcEditor.noRoleField': 'Field with no role {n}', // ALTA
   'mcEditor.valid': '✓ Multiple choice structure complete.', // ALTA
   'mcEditor.distractorsTitle': 'Distractors ({n}/{max})', // ALTA
-  'taEditor.err.notNative': 'This Note is not native.', // ALTA
-  'taEditor.err.notTaMode': 'This Note is not in Type the answer mode.', // ALTA
+  'taEditor.err.notNative': 'This item was created in the old format and can\'t be edited here.', // ALTA -- Etapa 4: aprovado pela dona
+  'taEditor.err.notTaMode': 'This item isn\'t a Type the answer item.', // ALTA -- Etapa 4: aprovado pela dona
   'taEditor.err.selfPinyin': "A field can't point to itself as pinyin.", // ALTA
-  'taEditor.err.unrecognized': { one: 'Type the answer does not accept a Field with no role ({n} field without prompt/answer) -- assign a role or remove it.', other: 'Type the answer does not accept Fields with no role ({n} fields without prompt/answer) -- assign a role or remove them.' }, // ALTA
+  'taEditor.err.unrecognized': { one: 'Type the answer does not accept a Field with no role ({n} field without prompt/answer). Assign a role or remove it.', other: 'Type the answer does not accept Fields with no role ({n} fields without prompt/answer). Assign a role or remove them.' }, // ALTA
   'taEditor.err.missingPrompt': 'The question field is missing.', // ALTA
   'taEditor.err.multiPrompt': 'There can be only 1 question field.', // ALTA
   'taEditor.err.missingAnswer': 'The answer field is missing.', // ALTA
@@ -1289,28 +1290,28 @@ window.I18N_CATALOG['en'] = {
   'taEditor.noAnswer': 'No answer field yet.', // ALTA
   'taEditor.addAnswer': '+ Create answer field', // ALTA
   'taEditor.pinyinTitle': 'Pinyin (satellite of another field)', // ALTA
-  'taEditor.pinyinHint': 'Linked to another field via pinyinFieldId -- editable as usual, never counts as a 3rd question/answer field.', // MÉDIA
+  'taEditor.pinyinHint': 'Linked to another field as its pinyin. Editable as usual, never counts as a 3rd question/answer field.', // MÉDIA
   'taEditor.pinyinLabel': 'Pinyin {n}', // ALTA
   'taEditor.othersTitle': 'Other fields (no role defined in Type the answer)', // ALTA
-  'taEditor.othersHint': "These fields came from another mode and don't have a role here yet -- remove them or assign a role so the structure becomes valid.", // ALTA
+  'taEditor.othersHint': 'These fields came from another mode and don\'t have a role here yet. Remove them or assign a role so the structure becomes valid.', // ALTA
   'taEditor.noRoleField': 'Field with no role {n}', // ALTA
   'taEditor.valid': '✓ Type the answer structure complete.', // ALTA
-  'recorder.err.permissionDenied': "Microphone permission denied -- we couldn't record. You can allow microphone access in your browser settings and try again.", // ALTA
+  'recorder.err.permissionDenied': 'Microphone permission denied. We couldn\'t record. You can allow microphone access in your browser settings and try again.', // ALTA
   'recorder.err.noDevice': 'No microphone available in this browser/device.', // ALTA
-  'recorder.err.recordingError': 'An error occurred during recording -- try again.', // ALTA
-  'recorder.err.uploadError': "Recording finished, but we couldn't save it -- try again.", // ALTA
+  'recorder.err.recordingError': 'An error occurred during recording. Try again.', // ALTA
+  'recorder.err.uploadError': 'Recording finished, but we couldn\'t save it. Try again.', // ALTA
   'recorder.err.finishFailed': "We couldn't finish the recording.", // ALTA
   'recorder.err.uploadUnavailable': 'Recording upload is not available on this screen.', // ALTA
   'recorder.err.saveFailed': "We couldn't save the recording right now.", // ALTA
-  'clozeEditor.err.notNative': 'This Note is not native.', // ALTA
-  'clozeEditor.err.notClozeMode': 'This Note is not in Fill in the blank mode.', // ALTA
+  'clozeEditor.err.notNative': 'This item was created in the old format and can\'t be edited here.', // ALTA -- Etapa 4: aprovado pela dona
+  'clozeEditor.err.notClozeMode': 'This item isn\'t a Fill in the blank item.', // ALTA -- Etapa 4: aprovado pela dona
   'clozeEditor.err.emptySentence': 'The sentence with blanks cannot be empty.', // ALTA
   'clozeEditor.err.emptyTranslation': 'The translation cannot be empty.', // ALTA
-  'clozeEditor.err.malformed': 'The sentence has a malformed blank marker -- remove it and mark again.', // ALTA
+  'clozeEditor.err.malformed': 'The sentence has a malformed blank marker. Remove it and mark again.', // ALTA
   'clozeEditor.err.noMarks': 'Select at least one part of the sentence and mark it as a blank.', // ALTA
-  'clozeEditor.err.duplicateIds': 'Duplicate blank IDs -- inconsistent state.', // ALTA
+  'clozeEditor.err.duplicateIds': 'Two blanks ended up with the same marker. Remove one of them and mark it again.', // ALTA
   'clozeEditor.err.emptyMark': 'One of the blanks has no text.', // ALTA
-  'clozeEditor.err.missingPinyin': 'Missing pinyin for the blank "{answer}" (required for Mandarin) -- click it to complete.', // ALTA
+  'clozeEditor.err.missingPinyin': 'Missing pinyin for the blank "{answer}" (required for Mandarin). Click it to complete.', // ALTA
   'clozeEditor.panel.answerLabel': 'Blank text', // ALTA
   'clozeEditor.panel.compareLabel': 'Expected answer (pinyin)', // ALTA
   'clozeEditor.panel.save': 'Save', // ALTA
@@ -1323,16 +1324,16 @@ window.I18N_CATALOG['en'] = {
   'clozeEditor.noTranslation': 'No translation yet.', // ALTA
   'clozeEditor.addTranslation': '+ Create translation', // ALTA
   'clozeEditor.othersTitle': 'Other fields (no role defined in Fill in the blank)', // ALTA
-  'clozeEditor.othersHint': "These fields came from another mode and don't have a role here yet -- remove them.", // ALTA
+  'clozeEditor.othersHint': 'These fields came from another mode and don\'t have a role here yet. Remove them.', // ALTA
   'clozeEditor.noRoleField': 'Field with no role {n}', // ALTA
   'clozeEditor.valid': '✓ Fill in the blank structure complete.', // ALTA
   'clozeEditor.sentenceTitle': 'Sentence with blanks', // ALTA
-  'clozeEditor.sentenceHint': 'Select a word or part of the sentence and click "Mark selection as blank" -- you can mark more than one part.', // ALTA
+  'clozeEditor.sentenceHint': 'Select a word or part of the sentence and click "Mark selection as blank". You can mark more than one part.', // ALTA
   'clozeEditor.translationTitle': 'Translation', // ALTA
   'clozeEditor.sel.selectFirst': 'Select a part of the sentence first.', // ALTA
   'clozeEditor.sel.outside': 'Select a part INSIDE the sentence.', // ALTA
   'clozeEditor.sel.whitespace': 'The selection must contain some text, not just spaces.', // ALTA
-  'clozeEditor.sel.overlaps': 'That selection already includes (fully or partially) an existing blank -- mark a part outside the blanks already created.', // ALTA
+  'clozeEditor.sel.overlaps': 'That selection already includes (fully or partially) an existing blank. Mark a part outside the blanks already created.', // ALTA
   'clozeEditor.sel.outOfRange': 'Invalid selection.', // ALTA
   'clozeEditor.sel.failed': "We couldn't mark that selection.", // ALTA
   'clozeEditor.panel.emptyAnswer': 'The blank text cannot be empty.', // ALTA
@@ -1356,7 +1357,7 @@ window.I18N_CATALOG['en'] = {
   'admin.common.forNStudents': ' for {n} students', // ALTA
   'admin.common.forTheseStudents': ' for these students', // ALTA
   'admin.common.forThisStudent': ' for this student', // ALTA
-  'admin.common.forNoStudent': ' -- select a student first', // ALTA
+  'admin.common.forNoStudent': ' (select a student first)', // ALTA
   'admin.common.selectAtLeastOne': 'Select at least one student.', // ALTA
   'admin.common.students': 'Students', // ALTA
   'admin.common.date': 'Date', // ALTA
@@ -1379,10 +1380,10 @@ window.I18N_CATALOG['en'] = {
   'admin.students.metrics.noRecord': 'no record', // ALTA
   'admin.students.metrics.today': 'today', // ALTA
   'admin.students.metrics.yesterday': 'yesterday', // ALTA
-  'admin.students.metrics.daysAgo': '{n} days ago', // ALTA
+  'admin.students.metrics.daysAgo': { one: '{n} day ago', other: '{n} days ago' }, // ALTA
   'admin.premium.adminOnly': 'Only the administration can access this section.', // ALTA
   'admin.premium.title': '⭐ Activate/remove Premium', // ALTA
-  'admin.premium.hint': 'Search for an account by @username and activate the Premium plan for it -- it works for ANY registered account, whether linked to you as a student or not. No real billing yet (no checkout set up) -- it is a manual grant, reversible at any time.', // ALTA
+  'admin.premium.hint': 'Search for an account by @username and activate the Premium plan for it. It works for ANY registered account, whether linked to you as a student or not. No real billing yet (no checkout set up): it is a manual grant, reversible at any time.', // ALTA
   'admin.premium.usernamePlaceholder': 'e.g. johnsmith', // ALTA
   'admin.premium.search': 'Find account', // ALTA
   'admin.premium.notFound': 'I couldn\'t find anyone with that @username. Check the spelling.', // ALTA
@@ -1446,19 +1447,19 @@ window.I18N_CATALOG['en'] = {
   'teacherFlashcards.err.clozePinyinRequired': 'Enter the pinyin of the answer (it is what the student will type).', // ALTA
   'flashcardModel.tts.providerNotConfigured': 'Text-to-speech audio generation is not turned on on the server yet.', // ALTA
   'flashcardModel.tts.providerNotImplemented': 'Text-to-speech audio generation is not available yet.', // ALTA
-  'flashcardModel.tts.providerError': 'The voice service couldn\'t generate the audio right now -- try again in a moment.', // ALTA
-  'flashcardModel.tts.providerRateLimited': 'The voice service is overloaded -- try again in a few minutes.', // ALTA
+  'flashcardModel.tts.providerError': 'The voice service couldn\'t generate the audio right now. Try again in a moment.', // ALTA
+  'flashcardModel.tts.providerRateLimited': 'The voice service is overloaded. Try again in a few minutes.', // ALTA
   'flashcardModel.tts.monthlyQuotaExceeded': 'You\'ve reached the monthly limit of generated audio. Try again next month.', // ALTA
-  'flashcardModel.tts.quotaCheckFailed': 'We couldn\'t check your audio limit right now -- try again in a moment.', // ALTA
+  'flashcardModel.tts.quotaCheckFailed': 'We couldn\'t check your audio limit right now. Try again in a moment.', // ALTA
   'flashcardModel.tts.unsupportedLanguage': 'This language doesn\'t have a voice for audio generation yet.', // ALTA
-  'flashcardModel.tts.invalidVoice': 'Invalid voice for this language -- leave the "Voice" field blank to use the default voice.', // ALTA
-  'flashcardModel.tts.rateLimited': 'Too many audio generations in a short time -- wait a few minutes and try again.', // ALTA
+  'flashcardModel.tts.invalidVoice': 'Invalid voice for this language. Leave the "Voice" field blank to use the default voice.', // ALTA
+  'flashcardModel.tts.rateLimited': 'Too many audio generations in a short time. Wait a few minutes and try again.', // ALTA
   'flashcardModel.tts.notAuthorized': 'You don\'t have permission to generate audio for this card.', // ALTA
-  'flashcardModel.tts.invalidSession': 'Session expired -- log in again.', // ALTA
+  'flashcardModel.tts.invalidSession': 'Session expired. Log in again.', // ALTA
   'flashcardModel.tts.textTooLong': 'Text too long (maximum {max} characters).', // ALTA
   'flashcardModel.tts.missingText': 'Enter the text to synthesize.', // ALTA
   'flashcardModel.tts.missingLanguage': 'Choose the synthesis language.', // ALTA
-  'flashcardModel.tts.uploadFailed': 'Audio generated, but it could not be saved -- try again.', // ALTA
+  'flashcardModel.tts.uploadFailed': 'Audio generated, but it could not be saved. Try again.', // ALTA
   'admin.flashcards.hint.flip': 'Image and audio appear next to the front of the card. Notes show up for the student after they answer.', // ALTA
   'admin.flashcards.hint.mc': 'Image and audio appear next to the question, above the multiple-choice options. Notes show up for the student after they answer.', // ALTA
   'admin.flashcards.hint.cloze': 'Image and audio appear next to the sentence with the blank. Notes show up for the student after they answer.', // ALTA
@@ -1476,16 +1477,16 @@ window.I18N_CATALOG['en'] = {
   'admin.flashcards.edit.modeMc': ' Multiple choice', // ALTA
   'admin.flashcards.edit.modeCloze': ' Fill in the blank', // ALTA
   'admin.flashcards.edit.question': 'Question/term', // ALTA
-  'admin.flashcards.edit.mc1': 'Other options -- wrong option 1', // ALTA
+  'admin.flashcards.edit.mc1': 'Other options: wrong option 1', // ALTA
   'admin.flashcards.edit.mc2': 'Wrong option 2 (optional)', // ALTA
   'admin.flashcards.edit.mc3': 'Wrong option 3 (optional)', // ALTA
   'admin.flashcards.edit.clozeSentence': 'Sentence with a blank (use ___ to mark the space)', // ALTA
   'admin.flashcards.edit.clozeAnswer': 'Correct answer', // ALTA
   'admin.flashcards.edit.clozePinyin': 'Answer pinyin', // ALTA
   'admin.flashcards.edit.image': 'Image', // ALTA
-  'admin.flashcards.edit.hasOne': ' (it already has one -- choose a file only to replace it)', // ALTA
+  'admin.flashcards.edit.hasOne': ' (it already has one: choose a file only to replace it)', // ALTA
   'admin.flashcards.edit.ownAudio': 'Own audio', // ALTA
-  'admin.flashcards.edit.hasOneAudio': ' (it already has one -- choose a file only to replace it)', // ALTA
+  'admin.flashcards.edit.hasOneAudio': ' (it already has one: choose a file only to replace it)', // ALTA
   'admin.flashcards.edit.err.front': 'Enter the front.', // ALTA
   'admin.flashcards.edit.err.back': 'Enter the back.', // ALTA
   'admin.flashcards.edit.err.oneWrongOption': 'Enter at least 1 wrong option.', // ALTA
@@ -1501,8 +1502,8 @@ window.I18N_CATALOG['en'] = {
   'admin.flashcards.dest.moveTo': 'Move to…', // ALTA
   'admin.flashcards.dest.deleteTitle': 'Delete this Deck (empty)', // ALTA
   'admin.flashcards.dest.deleteDisabledTitle': 'You can only delete a Deck with no subdecks and no cards', // ALTA
-  'admin.flashcards.dest.countCards': '({n} card(s)', // ALTA
-  'admin.flashcards.dest.countSubdecks': ', {n} subdeck(s)', // ALTA
+  'admin.flashcards.dest.countCards': { one: '({n} card', other: '({n} cards' }, // ALTA
+  'admin.flashcards.dest.countSubdecks': { one: ', {n} subdeck', other: ', {n} subdecks' }, // ALTA
   'admin.flashcards.dest.treeTitle': 'Deck tree', // ALTA
   'admin.flashcards.dest.deleteConfirm': 'Delete the Deck "{name}"? It is empty.', // ALTA
   'admin.flashcards.dest.deleteFailed': 'We couldn\'t delete the Deck.', // ALTA
@@ -1527,7 +1528,7 @@ window.I18N_CATALOG['en'] = {
   'admin.flashcards.destHint': 'Each student has their own Deck tree. By default the card goes to the student\'s "Teacher cards"; choose a subdeck if you want to organize it.', // ALTA
   'admin.flashcards.cardTitle': 'Card', // ALTA
   'admin.flashcards.needStudent': 'Select at least one student above to be able to create the card.', // ALTA
-  'admin.flashcards.createdPartial': '✓ {ok} card(s) created; failed for: {failed}.', // ALTA
+  'admin.flashcards.createdPartial': { one: '✓ {ok} card created; failed for: {failed}.', other: '✓ {ok} cards created; failed for: {failed}.' }, // ALTA
   'admin.flashcards.createdN': '✓ {n} cards created.', // ALTA
   'admin.flashcards.created': '✓ Card created.', // ALTA
   'admin.reports.status.novo': 'New', // ALTA
@@ -1566,7 +1567,7 @@ window.I18N_CATALOG['en'] = {
   'admin.reports.row.details': 'View details', // ALTA
   'admin.reports.empty': 'No reports found with this filter.', // ALTA
   'admin.reports.title': '⚑ Bug reports and suggestions', // ALTA
-  'admin.reports.hint': 'Sent through the ⚑ flag (top bar, user menu or inside exercises). Guests can report too -- reports with no account and no email appear as "guest".', // ALTA
+  'admin.reports.hint': 'Sent through the ⚑ flag (top bar, user menu or inside exercises). Guests can report too. Reports with no account and no email appear as "guest".', // ALTA
   'admin.reports.detail.suggestion': '💡 Suggestion', // ALTA
   'admin.reports.detail.problem': '⚑ Problem', // ALTA
   'admin.reports.detail.notInformed': '(not provided)', // ALTA
@@ -1574,7 +1575,7 @@ window.I18N_CATALOG['en'] = {
   'admin.reports.detail.screenshotNone': '(no screenshot attached)', // ALTA
   'admin.reports.reply.lastSentTo': 'Last reply sent on {date} to {email}:', // ALTA
   'admin.reports.reply.lastSent': 'Last reply sent on {date}:', // ALTA
-  'admin.reports.reply.err.forbidden': 'Session without admin permission -- sign in again.', // ALTA
+  'admin.reports.reply.err.forbidden': 'Session without admin permission. Sign in again.', // ALTA
   'admin.reports.reply.err.report_not_found': 'This report was not found.', // ALTA
   'admin.reports.reply.err.no_email': 'No email associated with this report.', // ALTA
   'admin.reports.reply.err.email_not_configured': 'Email sending is not yet configured on the server (RESEND_API_KEY/RESEND_FROM_EMAIL).', // ALTA
@@ -1589,14 +1590,14 @@ window.I18N_CATALOG['en'] = {
   'admin.notifications.event.mission_completed': '🎯 Mission completed', // ALTA
   'admin.notifications.event.streak_completed': '🔥 Streak kept', // ALTA
   'admin.notifications.event.featured_badge_reminder': '🏅 Featured badge reminder', // ALTA
-  'admin.notifications.event.user_inactive_1': '👋 Re-engagement -- 1 day inactive', // MÉDIA
-  'admin.notifications.event.user_inactive_3': '👋 Re-engagement -- 3 days inactive', // MÉDIA
-  'admin.notifications.event.user_inactive_5': '👋 Re-engagement -- 5 days inactive', // MÉDIA
-  'admin.notifications.event.user_inactive_7': '👋 Re-engagement -- 7 days inactive', // MÉDIA
-  'admin.notifications.event.user_inactive_9': '👋 Re-engagement -- 9 days inactive', // MÉDIA
-  'admin.notifications.event.user_inactive_15': '👋 Re-engagement -- 15 days inactive', // MÉDIA
-  'admin.notifications.event.user_inactive_20': '👋 Re-engagement -- 20 days inactive', // MÉDIA
-  'admin.notifications.event.user_inactive_30': '👋 Re-engagement -- 30 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_1': '👋 Re-engagement: 1 day inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_3': '👋 Re-engagement: 3 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_5': '👋 Re-engagement: 5 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_7': '👋 Re-engagement: 7 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_9': '👋 Re-engagement: 9 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_15': '👋 Re-engagement: 15 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_20': '👋 Re-engagement: 20 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_30': '👋 Re-engagement: 30 days inactive', // MÉDIA
   'admin.notifications.hint.xp_earned': 'amount of XP earned', // ALTA
   'admin.notifications.hint.achievement_unlocked': 'badge name and emoji', // ALTA
   'admin.notifications.hint.mission_completed': 'text and icon of the completed Daily Mission', // ALTA
@@ -1615,7 +1616,7 @@ window.I18N_CATALOG['en'] = {
   'admin.notifications.btn.edit': 'Edit', // ALTA
   'admin.notifications.btn.delete': 'Delete', // ALTA
   'admin.notifications.rule.title': '⭐ "XP earned" rule', // ALTA
-  'admin.notifications.rule.hint': 'Controls when the XP notification fires -- not its text (that is in the variants below). Reviews of well-known words give very low XP on purpose; below the minimum, the notification is not even created.', // ALTA
+  'admin.notifications.rule.hint': 'Controls when the XP notification fires, not its text (that is in the variants below). Reviews of well-known words give very low XP on purpose; below the minimum, the notification is not even created.', // ALTA
   'admin.notifications.rule.minXp': 'Minimum XP to notify', // ALTA
   'admin.notifications.rule.minXpPh': 'e.g. 5 (0 or empty = no minimum)', // ALTA
   'admin.notifications.rule.cooldown': 'Minimum interval between notifications (minutes)', // ALTA
@@ -1630,12 +1631,12 @@ window.I18N_CATALOG['en'] = {
   'admin.notifications.new.channel': 'Channel', // ALTA
   'admin.notifications.new.channelInApp': '📱 In the app', // ALTA
   'admin.notifications.new.channelEmail': '📧 Email', // ALTA
-  'admin.notifications.new.hint': 'Push does not appear here -- it reuses the text of the "In the app" variant of the same event, with no pool of its own. In email, the title becomes the subject. Placeholders like {{amount}}/{{days}} are replaced with the real event data -- see the hint for each event above.', // ALTA
+  'admin.notifications.new.hint': 'Push does not appear here: it reuses the text of the "In the app" variant of the same event, with no pool of its own. In email, the title becomes the subject. Placeholders like {{amount}}/{{days}} are replaced with the real event data. See the hint for each event above.', // ALTA
   'admin.notifications.new.titleLabel': 'Title (optional)', // ALTA
   'admin.notifications.new.titlePh': 'e.g. New achievement!', // ALTA
   'admin.notifications.new.icon': 'Emoji (optional)', // ALTA
   'admin.notifications.new.body': 'Text', // ALTA
-  'admin.notifications.new.bodyPh': 'Hey, did you forget about me? 🥺', // ALTA
+  'admin.notifications.new.bodyPh': 'How about 5 minutes of study today? 🙂', // ALTA -- Etapa 4: aprovado pela dona
   'admin.notifications.new.create': 'Create variant', // ALTA
   'admin.notifications.empty': 'No variants created yet.', // ALTA
   'admin.notifications.toast.ruleSaved': '✓ Rule saved.', // ALTA
@@ -1743,7 +1744,7 @@ window.I18N_CATALOG['en'] = {
   'admin.analytics.exclude.title': 'Exclude my activity from Analytics', // ALTA
   'admin.analytics.exclude.sub': 'Your browsing and lessons as admin are not counted in student metrics. Turn it off only if you want to generate test data on purpose, using your own account.', // ALTA
   'admin.mode.title': 'Admin Mode', // ALTA
-  'admin.mode.sub': 'When off, your account browses and completes lessons exactly like a regular student (while still recognized as admin) -- useful to test the real experience without admin shortcuts. Same control as the 🔒 Admin pill on the main screen.', // ALTA
+  'admin.mode.sub': 'When off, your account browses and completes lessons exactly like a regular student (while still recognized as admin). Useful to test the real experience without admin shortcuts. Same control as the 🔒 Admin pill on the main screen.', // ALTA
   'admin.analytics.noEvents': 'No student events recorded in the selected period.', // ALTA
   'admin.analytics.subtab.resumo': 'Summary', // ALTA
   'admin.analytics.subtab.atividade': 'Activity', // ALTA
@@ -1757,7 +1758,7 @@ window.I18N_CATALOG['en'] = {
   'admin.analytics.subtab.tecnologia': 'Technology', // ALTA
   'admin.analytics.subnav.aria': 'Analytics section', // ALTA
   'admin.analytics.resumo.rateNA': 'Completion rate unavailable: nobody started an exercise of the types counted here (flashcards, speed review, memory game, hanzi, dictation, conjugation) in this period.', // ALTA
-  'admin.analytics.resumo.rateNote': 'The completion rate only uses exercises that have a recorded "start" (flashcards, speed review, memory game, hanzi, dictation, conjugation). Vocabulary lessons and unit checkpoints are not part of this calculation because we only know when they end, not when they start -- that is why "Exercises completed" (above) is larger than "Exercises started": it adds up ALL types, those with a start and those without. To see each type separately, check the Exercises tab.', // ALTA
+  'admin.analytics.resumo.rateNote': 'The completion rate only uses exercises that have a recorded "start" (flashcards, speed review, memory game, hanzi, dictation, conjugation). Vocabulary lessons and unit checkpoints are not part of this calculation because we only know when they end, not when they start. That is why "Exercises completed" (above) is larger than "Exercises started": it adds up ALL types, those with a start and those without. To see each type separately, check the Exercises tab.', // ALTA
   'admin.analytics.kpi.activeStudents': 'Active students', // ALTA
   'admin.analytics.kpi.activeStudentsNote': 'different students who used the app in the period', // ALTA
   'admin.analytics.kpi.newStudents': 'New students', // ALTA
@@ -1771,8 +1772,8 @@ window.I18N_CATALOG['en'] = {
   'admin.analytics.kpi.rate': 'Completion rate', // ALTA
   'admin.analytics.kpi.rateNote': 'of those who started an exercise, what % finished', // ALTA
   'admin.analytics.kpi.time': 'Study time (estimated)', // ALTA
-  'admin.analytics.kpi.timeNote': 'rough estimate, not the actual time spent -- see note below', // ALTA
-  'admin.analytics.resumo.timeNote': '"Study time" is an approximation: for each session, we measure from the first to the last recorded event and add everything up. If a student stays idle in the middle (e.g. leaves to do something else and comes back), that idle time is also counted -- it is not an active-use stopwatch.', // ALTA
+  'admin.analytics.kpi.timeNote': 'rough estimate, not the actual time spent; see note below', // ALTA
+  'admin.analytics.resumo.timeNote': '"Study time" is an approximation: for each session, we measure from the first to the last recorded event and add everything up. If a student stays idle in the middle (e.g. leaves to do something else and comes back), that idle time is also counted. It is not an active-use stopwatch.', // ALTA
   'admin.analytics.resumo.xpNote': 'Want to see total XP and streak? That is in the Engagement tab, not here in the Summary.', // ALTA
   'admin.analytics.ativ.newActive': 'New (active in the period)', // ALTA
   'admin.analytics.ativ.returning': 'Returning', // ALTA
@@ -1789,32 +1790,32 @@ window.I18N_CATALOG['en'] = {
   'admin.analytics.ex.col.rate': 'Rate', // ALTA
   'admin.analytics.ex.col.score': 'Score', // ALTA
   'admin.analytics.ex.byType': 'Exercises by type', // ALTA
-  'admin.analytics.ex.note': '"—" = no start event (vocab_lesson/unit_checkpoint/challenge) or no score concept for that type. Popularity (completed) and performance (average score) are separate columns on purpose -- a heavily done exercise is not necessarily an exercise with a high score.', // ALTA
+  'admin.analytics.ex.note': '"—" = no start event (vocab_lesson/unit_checkpoint/challenge) or no score concept for that type. Popularity (completed) and performance (average score) are separate columns on purpose: a heavily done exercise is not necessarily an exercise with a high score.', // ALTA
   'admin.analytics.funnel.started': 'Started', // ALTA
   'admin.analytics.funnel.completed': 'Completed', // ALTA
   'admin.analytics.funnel.goodScore': 'Scored well ✓', // ALTA
   'admin.analytics.funnel.avgScore': 'Average score', // ALTA
   'admin.analytics.funnel.title': 'Funnel: started → completed → scored well', // ALTA
-  'admin.analytics.funnel.note': 'Only types with a start event enter the funnel (same limitation as the overall completion rate). "Answered" (per individual question) does not exist as an event -- the funnel goes straight from "started" to "completed". "Scored well" = average score ≥ 80%, same cutoff as the "Score over 80%" challenge.', // ALTA
+  'admin.analytics.funnel.note': 'Only types with a start event enter the funnel (same limitation as the overall completion rate). "Answered" (per individual question) does not exist as an event: the funnel goes straight from "started" to "completed". "Scored well" = average score ≥ 80%, same cutoff as the "Score over 80%" challenge.', // ALTA
   'admin.analytics.funnel.empty': 'No type with a start event had activity in the period.', // ALTA
   'admin.analytics.lang.events': 'Events by language', // ALTA
-  'admin.analytics.lang.filterActive': 'Language filter active ({lang}) -- to compare languages side by side, select "All languages" in the filter above.', // ALTA
-  'admin.analytics.lang.note': 'Segmentation by level/feature/exercise/cohort/user type already exists in the Progression, Exercises and Retention tabs and in the "Exclude my activity" toggle -- not repeated here as global filters to avoid meaningless combinations (e.g. level does not apply to a "tab_switch").', // ALTA
+  'admin.analytics.lang.filterActive': 'Language filter active ({lang}). To compare languages side by side, select "All languages" in the filter above.', // ALTA
+  'admin.analytics.lang.note': 'Segmentation by level/feature/exercise/cohort/user type already exists in the Progression, Exercises and Retention tabs and in the "Exclude my activity" toggle, so it is not repeated here as global filters to avoid meaningless combinations (e.g. level does not apply to a "tab_switch").', // ALTA
   'admin.analytics.prog.byLevel': 'Students by level', // ALTA
-  'admin.analytics.prog.levelNote': 'Only covers units of the app language in which this Panel is open now -- events from the other language fall under "Unknown level" (each site only loads its own language content).', // ALTA
+  'admin.analytics.prog.levelNote': 'Only covers units of the app language in which this Panel is open now. Events from the other language fall under "Unknown level" (each site only loads its own language content).', // ALTA
   'admin.analytics.prog.units': 'Units completed per student (checkpoints)', // ALTA
-  'admin.analytics.prog.unitsNote': 'Not every unit has internal lessons (e.g. grammar units in French) -- those count as a single block of exercises, and completing them generates a checkpoint with no matching "lesson completed". Units with lessons only generate the checkpoint after going through all of them. That is why a student can appear here with more completed units than completed lessons.', // ALTA
+  'admin.analytics.prog.unitsNote': 'Not every unit has internal lessons (e.g. grammar units in French): those count as a single block of exercises, and completing them generates a checkpoint with no matching "lesson completed". Units with lessons only generate the checkpoint after going through all of them. That is why a student can appear here with more completed units than completed lessons.', // ALTA
   'admin.analytics.prog.lessons': 'Lessons completed per student', // ALTA
-  'admin.analytics.prog.lessonsNote': '"Level advancement" (speed of progression between levels over time) is left for a future stage -- it would require tracking the same account across several periods, not just one slice.', // ALTA
-  'admin.analytics.dev.noData': 'All events in the period are from before device collection existed (migration 009) -- that is why they fall under "unknown". New data is already classified.', // ALTA
+  'admin.analytics.prog.lessonsNote': '"Level advancement" (speed of progression between levels over time) is left for a future stage: it would require tracking the same account across several periods, not just one slice.', // ALTA
+  'admin.analytics.dev.noData': 'All events in the period are from before device collection existed (migration 009), which is why they fall under "unknown". New data is already classified.', // ALTA
   'admin.analytics.dev.type': 'Device type', // ALTA
   'admin.analytics.dev.browser': 'Browser', // ALTA
   'admin.analytics.dev.os': 'Operating system', // ALTA
-  'admin.analytics.dev.osNote': 'Classification by navigator.userAgent (simple heuristic, no library) -- not 100% accurate, but it is the acceptable standard without third-party telemetry.', // ALTA
+  'admin.analytics.dev.osNote': 'Classification by navigator.userAgent (simple heuristic, no library). It is not 100% accurate, but it is the acceptable standard without third-party telemetry.', // ALTA
   'admin.analytics.eng.perSession': 'Exercises/session', // ALTA
   'admin.analytics.eng.reviewsDone': 'Reviews completed', // ALTA
   'admin.analytics.eng.challengesDone': 'Challenges completed', // ALTA
-  'admin.analytics.eng.freqNote': 'Study frequency (active days per student) is already in the Activity tab -- not repeated here.', // ALTA
+  'admin.analytics.eng.freqNote': 'Study frequency (active days per student) is already in the Activity tab, so it is not repeated here.', // ALTA
   'admin.analytics.eng.gamification': 'Gamification', // ALTA
   'admin.analytics.eng.xpTotal': 'Total XP (current week)', // ALTA
   'admin.analytics.eng.xpAvg': 'Average XP/student (current week)', // ALTA
@@ -1826,18 +1827,18 @@ window.I18N_CATALOG['en'] = {
   'admin.analytics.eng.badgedStudents': { one: '{n} student received', other: '{n} students received' }, // ALTA
   'admin.analytics.eng.xpNote2': 'Streak is an approximation calculated from the days with recorded activity, not the app\'s "official" streak (which has its own rules such as rest days and lives outside the reach of this panel).', // ALTA
   'admin.analytics.eng.badgedSuffix': 'at least one achievement in the period.', // ALTA
-  'admin.analytics.eng.xpNote1': 'XP uses the same week (Monday to Sunday) already shown in the Leaderboard -- it is not "XP earned in the period selected above", it is always the current week. "Average XP/student" divides by the total of active students in the period (not just those who already earned XP this specific week) -- an active student with no XP this week still counts, with 0.', // ALTA
+  'admin.analytics.eng.xpNote1': 'XP uses the same week (Monday to Sunday) already shown in the Leaderboard. It is not "XP earned in the period selected above", it is always the current week. "Average XP/student" divides by the total of active students in the period (not just those who already earned XP this specific week). An active student with no XP this week still counts, with 0.', // ALTA
   'admin.analytics.tech.errors': 'Errors and failures', // ALTA
   'admin.analytics.tech.total': 'Recorded errors', // ALTA
   'admin.analytics.tech.affected': 'Affected students', // ALTA
   'admin.analytics.tech.noErrors': 'No technical errors recorded in the period.', // ALTA
-  'admin.analytics.tech.note': 'Covers JavaScript errors, rejected promises, audio load/play failures and progress save failures -- all deduplicated per session (a repeating error does not inflate the count). There is no video category: the app has no video content.', // ALTA
+  'admin.analytics.tech.note': 'Covers JavaScript errors, rejected promises, audio load/play failures and progress save failures, all deduplicated per session (a repeating error does not inflate the count). There is no video category: the app has no video content.', // ALTA
   'admin.analytics.tech.perf': 'Performance', // ALTA
   'admin.analytics.tech.loadAvg': 'Average load time', // ALTA
   'admin.analytics.tech.loadMedian': 'Median load time', // ALTA
   'admin.analytics.tech.samples': { one: '{n} session measured (Navigation Timing API, one record per page load).', other: '{n} sessions measured (Navigation Timing API, one record per page load).' }, // ALTA
   'admin.analytics.tech.noPerf': 'No performance measurements in the period.', // ALTA
-  'admin.analytics.tech.separateNote': 'This tab is conceptually separate from Learning/Product -- it never adds technical errors together with completion rate, average score, etc. A low TECHNICAL score here does not mean the content is hard, and the opposite also holds.', // ALTA
+  'admin.analytics.tech.separateNote': 'This tab is conceptually separate from Learning/Product: it never adds technical errors together with completion rate, average score, etc. A low TECHNICAL score here does not mean the content is hard, and the opposite also holds.', // ALTA
   'admin.analytics.ret.empty': 'No accounts found to build cohorts.', // ALTA
   'admin.analytics.ret.title': 'Retention by cohort (signup week)', // ALTA
   'admin.analytics.ret.col.cohort': 'Cohort', // ALTA
@@ -1845,7 +1846,7 @@ window.I18N_CATALOG['en'] = {
   'admin.analytics.ret.col.d7': 'Day 7', // ALTA
   'admin.analytics.ret.col.d14': 'Day 14', // ALTA
   'admin.analytics.ret.col.d30': 'Day 30', // ALTA
-  'admin.analytics.ret.note': 'Cohort = students whose account was created in the same week (Monday to Sunday). "Day N" = had at least one recorded activity on the calendar day that falls exactly N days after account creation -- "—" when the cohort has not yet completed that number of days (never shown as 0%). Uses the full available history (up to the 5000 most recent events), not the period filter in the controls above -- retention is a question about all time, not a window.', // ALTA
+  'admin.analytics.ret.note': 'Cohort = students whose account was created in the same week (Monday to Sunday). "Day N" = had at least one recorded activity on the calendar day that falls exactly N days after account creation; "—" when the cohort has not yet completed that number of days (never shown as 0%). Uses the full available history (up to the 5000 most recent events), not the period filter in the controls above: retention is a question about all time, not a window.', // ALTA
   'adminChallenges.import.invalidJson': 'Invalid JSON: ', // ALTA
   'adminChallenges.import.expectedArray': 'Expected an array of challenges, or an object with "accepted" (direct pipeline output).', // ALTA
   'adminChallenges.import.itemN': 'item #{n}', // ALTA
@@ -1858,7 +1859,7 @@ window.I18N_CATALOG['en'] = {
   'adminChallenges.import.importing': 'Importing…', // ALTA
   'adminChallenges.import.btn': 'Import', // ALTA
   'adminChallenges.import.dbFail': '❌ Failed to write to the database: {error}', // ALTA
-  'adminChallenges.import.ok': '✅ {n} challenge(s) imported as pending review.', // ALTA
+  'adminChallenges.import.ok': { one: '✅ {n} challenge imported as pending review.', other: '✅ {n} challenges imported as pending review.' }, // ALTA
   'adminChallenges.import.skipped': '⚠ {n} skipped:', // ALTA
   'adminChallenges.audio.target': 'Target expression audio', // ALTA
   'adminChallenges.audio.ex1': 'Audio of Exemple 1', // ALTA
@@ -1940,7 +1941,7 @@ window.I18N_CATALOG['en'] = {
   'adminChallenges.section.loadMore': 'Load {n} more ({remaining} remaining)', // ALTA
   'adminChallenges.bulk.selectAll': 'Select all ({n})', // ALTA
   'adminChallenges.bulk.approveSelected': '✅ Approve selected ({n})', // ALTA
-  'adminChallenges.loadFailed': '⚠ We could not load the challenges right now. Check your connection and try again -- this does NOT mean the queue is empty.', // ALTA
+  'adminChallenges.loadFailed': '⚠ We could not load the challenges right now. Check your connection and try again. This does NOT mean the queue is empty.', // ALTA
   'adminChallenges.section.noResults': 'No results in this section with the current filter.', // ALTA
   'adminChallenges.section.pending': 'Pending review', // ALTA
   'adminChallenges.section.pendingEmpty': 'No challenges pending review.', // ALTA
@@ -1948,10 +1949,10 @@ window.I18N_CATALOG['en'] = {
   'adminChallenges.section.publishedEmpty': 'No challenges published yet.', // ALTA
   'adminChallenges.section.unpublished': 'Unpublished', // ALTA
   'adminChallenges.section.unpublishedEmpty': 'No unpublished challenges.', // ALTA
-  'adminChallenges.bulk.confirm': 'Approve and publish {n} selected challenge(s)? Only those with no problem in the quality checklist are published automatically -- the rest stay pending for individual review.', // ALTA
+  'adminChallenges.bulk.confirm': { one: 'Approve and publish {n} selected challenge? Only those with no problem in the quality checklist are published automatically. The rest stay pending for individual review.', other: 'Approve and publish {n} selected challenges? Only those with no problem in the quality checklist are published automatically. The rest stay pending for individual review.' }, // ALTA
   'adminChallenges.bulk.approving': 'Approving…', // ALTA
-  'adminChallenges.bulk.published': '{published} challenge(s) published.', // ALTA
-  'adminChallenges.bulk.publishedSkipped': '{published} published. {skipped} skipped because of a problem in the checklist -- review one by one: {list}', // ALTA
+  'adminChallenges.bulk.published': { one: '{published} challenge published.', other: '{published} challenges published.' }, // ALTA
+  'adminChallenges.bulk.publishedSkipped': 'Published: {published}. Skipped because of a problem in the checklist: {skipped}. Review one by one: {list}', // ALTA
   'adminChallenges.confirm.unpublish': 'Unpublish this challenge? It stops being shown to students immediately.', // ALTA
   'adminChallenges.toast.rejected': 'Challenge rejected.', // ALTA
   'adminChallenges.toast.savedBackToReview': 'Edit saved — challenge went back to review (it was published/approved and needs to be approved again).', // ALTA
@@ -1983,7 +1984,7 @@ window.I18N_CATALOG['en'] = {
   'admin.modal.report.notePh': 'Only the team sees this', // ALTA
   'admin.modal.report.replyByEmail': 'Reply by email', // ALTA
   'admin.modal.report.replyPh': 'Thank you for letting us know! ...', // ALTA
-  'admin.modal.report.noEmail': 'No email associated with this report (guest who did not provide an email) -- it is not possible to reply.', // ALTA
+  'admin.modal.report.noEmail': 'No email associated with this report (guest who did not provide an email). It is not possible to reply.', // ALTA
   'adminChallenges.bar.import': '📥 Import JSON', // ALTA
   'adminChallenges.bar.review': '🛠️ Review pending (', // ALTA
   'adminChallenges.modal.title': 'Import challenges via JSON', // ALTA
@@ -1995,7 +1996,7 @@ window.I18N_CATALOG['en'] = {
   'admin.panel.tab.materials': '📚 Study materials', // ALTA
   'admin.panel.tab.premium': '⭐ Premium', // ALTA
   'admin.panel.tab.tags': '🏷️ Tags', // ALTA
-  'flashcardPreview.modal.hint': 'This is only a preview of how the card will look in Review -- nothing is saved or graded here.', // ALTA
+  'flashcardPreview.modal.hint': 'This is only a preview of how the card will look in Review. Nothing is saved or graded here.', // ALTA
   'publicFlashcard.modal.title': '👁 Card', // ALTA
   'content.untranslatedNotice': 'This lesson isn\'t available in English yet. Showing Portuguese.', // ALTA
   'ui.skipLink': 'Skip to content', // ALTA
@@ -2028,10 +2029,10 @@ window.I18N_CATALOG['en'] = {
   'ui.goal.sub': 'Set how many lessons a day you want to study.', // ALTA
   'ui.goal.title': 'My study goal', // ALTA
   'ui.myCards.title': '📇 My cards', // ALTA
-  'ui.myCards.sub': 'Create your own flashcards -- words and phrases you want to memorize, even if they\'re not in the path.', // ALTA
+  'ui.myCards.sub': 'Create your own flashcards: words and phrases you want to memorize, even if they\'re not in the path.', // ALTA
   'ui.materials.sub': 'Summaries, links and files your teacher shared with you.', // ALTA
   'ui.dictation.sub': 'Train your listening and spelling with dictations based on real tasks from each module.', // ALTA
-  'ui.dictation.step1': 'Listen to the audio -- at normal speed or slowly, as many times as you like.', // ALTA
+  'ui.dictation.step1': 'Listen to the audio, at normal speed or slowly, as many times as you like.', // ALTA
   'ui.dictation.step2': 'Type exactly what you heard, with accents and punctuation.', // ALTA
   'ui.dictation.step3': 'Click "Verificar" to compare your answer with the original text.', // MÉDIA
   'ui.dictation.step4': 'See what you got right and what needs review, word by word.', // ALTA
@@ -2063,7 +2064,7 @@ window.I18N_CATALOG['en'] = {
   'ui.kbd.choose': 'Pick an option by its position on screen', // ALTA
   'ui.kbd.confirm': 'Confirm a typed answer and move on to the next one', // ALTA
   'ui.kbd.replay': 'Play audio again', // ALTA
-  'ui.kbd.note': 'The numbers only appear when an exercise has options to choose from -- never during typing or the sentence-ordering exercise. "r" repeats the last audio that played on screen.', // ALTA
+  'ui.kbd.note': 'The numbers only appear when an exercise has options to choose from, never during typing or the sentence-ordering exercise. "r" repeats the last audio that played on screen.', // ALTA
   'ui.streak.sub': 'Come back tomorrow to keep your streak going.', // ALTA
   'ui.reviewReminder.title': 'Shall we do a quick review?', // ALTA
   'ui.notNow': 'Not now', // ALTA
@@ -2224,11 +2225,17 @@ window.I18N_CATALOG['en'] = {
   'badge.beta_tester.name': 'Beta Tester', // ALTA
   'badge.beta_tester.desc': 'Helped test the app before the official launch', // ALTA
   'badge.catalog.ambassador.name': 'Ambassador', // MÉDIA
+  'badge.catalog.ambassador.name.f': 'Ambassador', // ALTA -- Etapa 4: nome pelo gênero
+  'badge.catalog.ambassador.name.m': 'Ambassador', // ALTA -- Etapa 4: nome pelo gênero
   'badge.catalog.ambassador.desc': 'Spread the word about the app to other people', // MÉDIA
   'badge.catalog.pioneer.name': 'Pioneer', // MÉDIA
+  'badge.catalog.pioneer.name.f': 'Pioneer', // ALTA -- Etapa 4: nome pelo gênero
+  'badge.catalog.pioneer.name.m': 'Pioneer', // ALTA -- Etapa 4: nome pelo gênero
   'badge.catalog.pioneer.desc': 'Among the first people to use the app in its early phase', // MÉDIA
   'badge.catalog.student.name': 'Prof. Brune\'s student', // MÉDIA
-  'badge.catalog.student.desc': 'Prof. Brune\'s student', // MÉDIA
+  'badge.catalog.student.desc': 'Studies with Prof. Brune', // MÉDIA -- Etapa 4: aprovado pela dona
+  'badge.catalog.teacherClass.name': '{name}\'s class', // ALTA -- Etapa 4: badge de cada professora (student_<...>, 115)
+  'badge.catalog.teacherClass.desc': 'Studies with this teacher.', // ALTA -- Etapa 4
   'badge.track.days.title': 'First Step', // ALTA
   'badge.track.days.1': 'First Step', // ALTA
   'badge.track.days.2': 'Getting the Hang of It', // ALTA
@@ -2528,7 +2535,7 @@ window.I18N_CATALOG['en'] = {
   'friends.nudge.btn': 'Nudge', // ALTA
   'friends.nudge.aria': 'Nudge {name} to study today', // ALTA
   'friends.nudge.done': 'Nudged', // ALTA
-  'friends.nudge.atRisk': 'Your streak together ends if {name} doesn\'t study today', // ALTA
+  'friends.nudge.atRisk': 'One lesson from {name} today keeps your streak together going', // ALTA -- Etapa 4: aprovado pela dona
   'friends.toast.nudged': 'Nudge sent 👋', // ALTA
   'friends.error.nudges_off': 'This person chose not to get nudges.', // ALTA
   'friends.error.already_studied': 'This person already studied today 🎉', // ALTA
@@ -2573,16 +2580,16 @@ window.I18N_CATALOG['en'] = {
   'panel.tbell.lang.frances': 'French', // ALTA
   'panel.tbell.lang.mandarim': 'Chinese', // ALTA
   'panel.tbell.lang.portugues': 'Portuguese', // ALTA
-  'panel.tbell.ev.inactive': 'Haven\'t shown up in a few days: {list}. Maybe it\'s time to say hi 👋', // ALTA (mesma frase da 056)
+  'panel.tbell.ev.inactive': 'A few days without practice over there: {list}. A note from you can help them get back into the rhythm.', // ALTA -- Etapa 4: aprovado pela dona (mesmo tom da 114)
   'panel.tbell.days': { one: '{n} day', other: '{n} days' }, // ALTA
-  'panel.tbell.ev.accepted': '{name} accepted your invitation and is now your {lang} student 🎉', // ALTA (mesma frase da 104)
-  'panel.tbell.ev.joinedLink': '{name} joined through your link and is now your {lang} student 🎉', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.accepted': '{name} accepted your invitation and now studies {lang} with you 🎉', // ALTA -- Etapa 4: aprovado pela dona
+  'panel.tbell.ev.joinedLink': '{name} joined through your link and now studies {lang} with you 🎉', // ALTA -- Etapa 4: aprovado pela dona
   'panel.tbell.ev.declined': '{name} declined the invitation to {lang} classes.', // ALTA (mesma frase da 104)
   'panel.tbell.ev.post': '{name} posted on the board: {snippet}', // ALTA (mesma frase da 104)
   'panel.tbell.ev.postClass': '{name} posted on the board (class {classroom}): {snippet}', // ALTA (mesma frase da 104)
   'panel.tbell.ev.comment': '{name} commented on the board: {snippet}', // ALTA (mesma frase da 104)
   'panel.tbell.ev.joinClass': '{name} joined the class {classroom} through your link', // ALTA (mesma frase da 104)
-  'panel.tbell.ev.joinClassNew': '{name} joined the class {classroom} through your link and is now your {lang} student 🎉', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.joinClassNew': '{name} joined the class {classroom} through your link and now studies {lang} with you 🎉', // ALTA -- Etapa 4: aprovado pela dona
   'panel.tab.students': 'Students', // ALTA
   'panel.tab.cards': 'Cards', // ALTA
   'panel.tab.classlogs': 'Classes', // ALTA
@@ -2655,7 +2662,7 @@ window.I18N_CATALOG['en'] = {
   'badges.members.noteAria': 'Note for @{username}', // ALTA
   'badges.members.partial': 'Some changes were not saved ({n}). Check the list and try again.', // ALTA
   'badges.delete.title': 'Delete the badge "{name}"?', // ALTA
-  'badges.delete.textWith': 'The badge disappears from the profile of {n} person(s) who got it. This cannot be undone.', // ALTA
+  'badges.delete.textWith': { one: 'The badge disappears from the profile of {n} person who got it. This cannot be undone.', other: 'The badge disappears from the profile of {n} people who got it. This cannot be undone.' }, // ALTA
   'badges.delete.textNone': 'Nobody has this badge yet. This cannot be undone.', // ALTA
   'badges.delete.confirm': 'Delete badge', // ALTA
   'badges.toast.revoked': '✓ Badge revoked.', // ALTA
@@ -2869,7 +2876,7 @@ window.I18N_CATALOG['en'] = {
   'students.ev.completed': 'Completed {what}{unit}{score}', // ALTA
   'students.ev.score.pct': ' · {n}% correct', // ALTA
   'students.ev.score.dictation': ' · score {n}', // ALTA
-  'students.ev.score.cards': ' · {n} cards', // ALTA
+  'students.ev.score.cards': { one: ' · {n} card', other: ' · {n} cards' }, // ALTA
   'students.n.activeDays': { one: '{n} active day', other: '{n} active days' }, // ALTA
   'students.n.lessonsDone': { one: '{n} lesson completed', other: '{n} lessons completed' }, // ALTA
   'students.n.items': { one: '{n} item', other: '{n} items' }, // ALTA
@@ -3527,7 +3534,7 @@ window.I18N_CATALOG['en'] = {
   'uchoice.status.error': 'Something went wrong. Please try again in a moment.', // ALTA
   'uchoice.err.name': 'Please enter your name.', // ALTA
   'uchoice.done': 'Done! Your @ is @{user}', // ALTA
-  'tinvite.card.title': '{name} invited you to be their {lang} student', // ALTA
+  'tinvite.card.title': '{name} invited you to their {lang} classes', // ALTA -- Etapa 4: aprovado pela dona
   'tinvite.card.perkProgress': 'Follow-up on your {lang} progress', // ALTA
   'tinvite.card.perkCards': 'Cards and class notes made for you', // ALTA
   'tinvite.card.perkBadge': 'A student badge on your profile', // ALTA
@@ -3536,14 +3543,14 @@ window.I18N_CATALOG['en'] = {
   'tinvite.card.decline': 'Decline', // ALTA
   'tinvite.card.later': 'Not now', // ALTA
   'tinvite.card.foot': 'To end the link later, just talk to whoever invited you.', // ALTA
-  'tinvite.acceptedToast': 'Done! You are now {name}\'s {lang} student 🎓', // ALTA
+  'tinvite.acceptedToast': 'Done! You now study {lang} with {name} 🎓', // ALTA -- Etapa 4: aprovado pela dona
   'tinvite.declinedToast': 'Invite declined.', // ALTA
   'tinvite.err.not_authorized': 'Only accounts with the Teacher plan can invite students.', // ALTA
   'tinvite.err.invalid_language': 'Invalid language.', // ALTA
   'tinvite.err.invalid_target': 'This invite is yours: you can\'t be your own student.', // ALTA
   'tinvite.err.not_found': 'I couldn\'t find that account.', // ALTA
   'tinvite.err.student_has_teacher': 'This account already has a teacher for this language. Only one per language.', // ALTA
-  'tinvite.err.already_student': 'This account is already your student for this language.', // ALTA
+  'tinvite.err.already_student': 'This account already studies this language with you.', // ALTA -- Etapa 4: aprovado pela dona
   'tinvite.err.already_invited': 'You already invited this account. The invite is still valid.', // ALTA
   'tinvite.err.daily_invite_limit': 'You reached the limit of 30 invites per day. Try again tomorrow or send the link.', // ALTA
   'tinvite.err.no_pending_invite': 'This invite is no longer valid.', // ALTA
@@ -3693,7 +3700,7 @@ window.I18N_CATALOG['en'] = {
   // tradução nova, ainda não revisada pela dona; confiança no comentário de cada linha. Antes estes textos
   // apareciam em português também no site em inglês.
   'common.start': 'Start', // ALTA
-  'trail.lessonsCompleted': '{done} of {total} lessons completed', // ALTA
+  'trail.lessonsCompleted': { one: '{done} of {total} lesson completed', other: '{done} of {total} lessons completed' }, // ALTA
   'trail.continue.eyebrowDone': 'Your path', // ALTA -- "Path", escolha da dona (2026-10-19)
   'trail.continue.allDone': 'You\'ve completed the whole Study Path 🎉', // ALTA -- "Study Path", escolha da dona (2026-10-19)
   'trail.continue.lessonOf': 'lesson {i} of {n}', // ALTA
@@ -3788,13 +3795,13 @@ window.I18N_CATALOG['en'] = {
   'tagManager.err.generic': 'We couldn\'t finish this right now. Try again.', // ALTA
   'tagManager.unchanged': 'No changes.', // ALTA
   'tagManager.rename.newName': 'New name:', // ALTA
-  'tagManager.rename.affected.one': 'note will be changed', // ALTA
-  'tagManager.rename.affected.other': 'notes will be changed', // ALTA
-  'tagManager.rename.collision.one': 'note already uses', // ALTA
-  'tagManager.rename.collision.other': 'notes already use', // ALTA
+  'tagManager.rename.affected.one': 'item will be changed', // ALTA -- Etapa 4: aprovado pela dona
+  'tagManager.rename.affected.other': 'items will be changed', // ALTA -- Etapa 4: aprovado pela dona
+  'tagManager.rename.collision.one': 'item already uses', // ALTA -- Etapa 4: aprovado pela dona
+  'tagManager.rename.collision.other': 'items already use', // ALTA -- Etapa 4: aprovado pela dona
   'tagManager.rename.collisionMerge': ': the two tags will be merged (no duplicates).', // ALTA
-  'tagManager.note.one': 'note', // ALTA
-  'tagManager.note.other': 'notes', // ALTA
+  'tagManager.note.one': 'item', // ALTA -- Etapa 4: aprovado pela dona
+  'tagManager.note.other': 'items', // ALTA -- Etapa 4: aprovado pela dona
   'tagManager.rename.inputAria': 'New name for tag {tag}', // ALTA
   'tagManager.rename.confirm': 'Confirm rename', // ALTA
   'tagManager.cancel': 'Cancel', // ALTA
@@ -3835,39 +3842,39 @@ window.I18N_CATALOG['en'] = {
   'noteConvert.err.manyBlanks': 'This fill-in sentence has more than one "___". The old form only supports 1 blank per card, so we can\'t tell automatically which one becomes the new blank. Fix the sentence in the usual form before using the new editor.', // ALTA
   'noteConvert.err.mcNoAnswer': 'This multiple choice card has no correct answer set (the back is empty), so we can\'t tell which answer is right. Fill in the back in the usual form before using the new editor.', // ALTA
   'noteEditor.err.emptySides': 'Both content fields (front/back) need text.', // ALTA
-  'import.tagsDropped.limit': '{n} tag(s) were skipped for going over the limit ({max} tags per card, {len} characters per tag).', // ALTA
-  'import.tagsDropped.system': '{n} system tag(s) (author credit) aren\'t imported from a file or link: only a copy made in the app creates them.', // MÉDIA -- alternativa: "authorship attribution"
+  'import.tagsDropped.limit': { one: '{n} tag was skipped for going over the limit ({max} tags per card, {len} characters per tag).', other: '{n} tags were skipped for going over the limit ({max} tags per card, {len} characters per tag).' }, // ALTA
+  'import.tagsDropped.system': { one: '{n} system tag (author credit) isn\'t imported from a file or link: only a copy made in the app creates it.', other: '{n} system tags (author credit) aren\'t imported from a file or link: only a copy made in the app creates them.' }, // MÉDIA -- alternativa: "authorship attribution"
   'ownFlashcards.err.copyFailed': 'We couldn\'t copy the card right now.', // ALTA
   'review.tagLabel.unitPrefix': '#unit-', // MÉDIA -- só o prefixo do rótulo; o resto é o slug do título da unidade
   'ankiImport.parse.invalid_zip': 'This file is not a valid .apkg/.zip.', // ALTA
-  'ankiImport.parse.missing_collection': 'This .apkg doesn\'t contain a collection database we recognize (collection.anki2/anki21).', // ALTA
-  'ankiImport.parse.unreadable_collection': 'We couldn\'t read the collection database inside the .apkg.', // ALTA
-  'ankiImport.parse.invalid_sqlite': 'The collection database is corrupted or in a SQLite format we don\'t recognize.', // ALTA
+  'ankiImport.parse.missing_collection': 'This .apkg doesn\'t contain a card collection we recognize.', // ALTA
+  'ankiImport.parse.unreadable_collection': 'We couldn\'t read the card collection inside the .apkg.', // ALTA
+  'ankiImport.parse.invalid_sqlite': 'The card collection in this .apkg is corrupted or in a format we don\'t recognize.', // ALTA
   'ankiImport.parse.empty_collection': 'The "col" table in this collection is empty.', // ALTA
   'ankiImport.parse.malformed_col_table': 'We couldn\'t read the "col" table in this collection.', // ALTA
-  'ankiImport.parse.malformed_notes_cards': 'We couldn\'t read the notes/cards tables in this collection.', // ALTA
-  'ankiImport.parse.unsupported_format_zstd': 'This .apkg uses the newer Anki format (zstd compression, collection.anki21b), which this importer doesn\'t support yet. In Anki, when you export, check "Support older Anki versions" to create a compatible package, and try again.', // ALTA
-  'ankiImport.parse.unsupported_format_protobuf': 'This .apkg was exported in a newer Anki format that stores card models as binary protobuf (this importer doesn\'t support it: decoding it by hand could corrupt the content). In Anki, when you export, check "Support older Anki versions" to create a compatible package, and try again.', // ALTA
+  'ankiImport.parse.malformed_notes_cards': 'We couldn\'t read the items and cards in this collection.', // ALTA -- Etapa 4: aprovado pela dona
+  'ankiImport.parse.unsupported_format_zstd': 'This .apkg uses the newer Anki format, which this importer doesn\'t support yet. In Anki, when you export, check "Support older Anki versions" to create a compatible package, and try again.', // ALTA
+  'ankiImport.parse.unsupported_format_protobuf': 'This .apkg was exported in a newer Anki format, which this importer doesn\'t support yet. In Anki, when you export, check "Support older Anki versions" to create a compatible package, and try again.', // ALTA
   'ankiImport.parse.missing_dependencies': 'The .apkg reading libraries didn\'t load.', // ALTA
   'ankiImport.parse.no_notetypes': 'This collection doesn\'t have any card model (notetype) we recognize.', // ALTA
-  'ankiImport.warn.emptyFrontBack': 'The front or back was empty after removing HTML/media. Note skipped.', // ALTA
-  'ankiImport.warn.emptyZh': 'Pinyin, character or translation was empty after removing HTML/media. Note skipped.', // ALTA
-  'ankiImport.warn.emptyQA': 'The question or answer was empty after removing HTML/media. Note skipped.', // ALTA
-  'ankiImport.warn.clozeNoTranslation': 'This Cloze card doesn\'t have a filled-in 2nd translation field in Anki. The app needs a translation for this format, so the Note was skipped. You can create it by hand later.', // ALTA
-  'ankiImport.warn.noClozeMarks': 'No valid Cloze blank found in the text. Note skipped.', // ALTA
-  'ankiImport.warn.hintsDropped': '{n} Anki blank hint(s) weren\'t kept (there\'s no safe match in this app). The answer itself was kept.', // ALTA
-  'ankiImport.warn.unrecognized': 'Card format not recognized (it isn\'t a recognizable Basic/Basic reversed/Cloze/Type the answer). Note skipped.', // ALTA
+  'ankiImport.warn.emptyFrontBack': 'The front or back was empty after removing formatting and media. Item skipped.', // ALTA -- Etapa 4: aprovado pela dona
+  'ankiImport.warn.emptyZh': 'Pinyin, character or translation was empty after removing formatting and media. Item skipped.', // ALTA -- Etapa 4: aprovado pela dona
+  'ankiImport.warn.emptyQA': 'The question or answer was empty after removing formatting and media. Item skipped.', // ALTA -- Etapa 4: aprovado pela dona
+  'ankiImport.warn.clozeNoTranslation': 'This Cloze card doesn\'t have a filled-in 2nd translation field in Anki. The app needs a translation for this format, so the item was skipped. You can create it by hand later.', // ALTA -- Etapa 4: aprovado pela dona
+  'ankiImport.warn.noClozeMarks': 'No valid Cloze blank found in the text. Item skipped.', // ALTA -- Etapa 4: aprovado pela dona
+  'ankiImport.warn.hintsDropped': { one: '{n} Anki blank hint wasn\'t kept (there\'s no safe match in this app). The answer itself was kept.', other: '{n} Anki blank hints weren\'t kept (there\'s no safe match in this app). The answer itself was kept.' }, // ALTA
+  'ankiImport.warn.unrecognized': 'Card format not recognized (it isn\'t a recognizable Basic/Basic reversed/Cloze/Type the answer). Item skipped.', // ALTA -- Etapa 4: aprovado pela dona
   'ankiImport.media.notFound': 'Media "{file}" is referenced but wasn\'t found in the .apkg package.', // ALTA
   'ankiImport.media.notInPackage': 'Media "{file}" is listed in the manifest but missing from the package.', // ALTA
   'ankiImport.media.unreadable': 'We couldn\'t read the media file "{file}" from the package.', // ALTA
   'ankiImport.media.uploadFailed': 'Failed to upload "{file}".', // ALTA
-  'ankiImport.warn.missingModel': 'The card model this Note uses doesn\'t exist in the collection. Note skipped.', // ALTA
-  'ankiImport.warn.unrecognizedType': 'Anki card type not safely recognized (it isn\'t a clear Basic/Basic reversed/Cloze/Type the answer). Note skipped.', // ALTA
-  'ankiImport.warn.systemTags': '{n} system tag(s) ({tags}) can\'t be imported: author credit is only created by the app itself.', // MÉDIA -- alternativa: "authorship attribution"
-  'ankiImport.warn.tagsTooLong': '{n} tag(s) over {max} characters weren\'t imported: {tags}.', // ALTA
-  'ankiImport.warn.tagsOverLimit': 'Limit of {max} tags per card: {n} tag(s) weren\'t imported: {tags}.', // ALTA
+  'ankiImport.warn.missingModel': 'The card model this item uses doesn\'t exist in the collection. Item skipped.', // ALTA -- Etapa 4: aprovado pela dona
+  'ankiImport.warn.unrecognizedType': 'Anki card type not safely recognized (it isn\'t a clear Basic/Basic reversed/Cloze/Type the answer). Item skipped.', // ALTA -- Etapa 4: aprovado pela dona
+  'ankiImport.warn.systemTags': { one: '{n} system tag ({tags}) can\'t be imported: author credit is only created by the app itself.', other: '{n} system tags ({tags}) can\'t be imported: author credit is only created by the app itself.' }, // MÉDIA -- alternativa: "authorship attribution"
+  'ankiImport.warn.tagsTooLong': { one: '{n} tag over {max} characters wasn\'t imported: {tags}.', other: '{n} tags over {max} characters weren\'t imported: {tags}.' }, // ALTA
+  'ankiImport.warn.tagsOverLimit': { one: 'Limit of {max} tags per card: {n} tag wasn\'t imported: {tags}.', other: 'Limit of {max} tags per card: {n} tags weren\'t imported: {tags}.' }, // ALTA
   'ankiImport.warn.invalidAfterMap': 'Invalid card after mapping: {error}', // ALTA
-  'ankiImport.warn.extraTemplates': '{n} extra template(s) of this card type weren\'t kept (only the 1st was imported).', // ALTA
+  'ankiImport.warn.extraTemplates': { one: '{n} extra template of this card type wasn\'t kept (only the 1st was imported).', other: '{n} extra templates of this card type weren\'t kept (only the 1st was imported).' }, // ALTA
   'ankiImport.err.deckCreateNamed': 'We couldn\'t create the Deck "{name}"{detail}. The cards in that folder weren\'t imported.', // ALTA
   'ankiImport.conflict.title': 'A deck with this name already exists. What do you want to do?', // ALTA
   'ankiImport.conflict.more': '+ {n} more', // ALTA
@@ -3899,7 +3906,7 @@ window.I18N_CATALOG['en'] = {
   'publicDeck.gate.premium': '🔒 Opening and importing public Decks is a Premium feature. You can see the Deck details above.', // ALTA
   'publicDeck.loading': 'Loading Deck...', // ALTA
   'publicDeck.subdecks': 'Public subdecks', // ALTA
-  'publicDeck.notesCount': '{n} Notes', // ALTA -- igual ao pt de propósito: "Note" é o termo do app nos dois idiomas
+  'publicDeck.notesCount': { one: '{n} item', other: '{n} items' }, // ALTA -- Etapa 4: aprovado pela dona
   'publicDeck.wrongSite': 'This Deck is in {lang}.', // MÉDIA -- alternativa: "This is a {lang} Deck."
   'publicDeck.openOtherSite': 'Open it on the matching site', // ALTA
   'publicDeck.viewCards': '📇 See cards ({n})', // ALTA
@@ -3915,35 +3922,35 @@ window.I18N_CATALOG['en'] = {
   'publicDeck.notes.empty': 'This Deck doesn\'t have any public cards yet.', // ALTA
   'publicDeck.notes.view': 'View', // ALTA
   'publicDeck.notes.reportTitle': 'Report this card', // ALTA
-  'publicDeck.plan.instances': '{n} cards', // ALTA
+  'publicDeck.plan.instances': { one: '{n} card', other: '{n} cards' }, // ALTA
   'publicDeck.plan.title': 'Import “{name}”', // ALTA
-  'publicDeck.plan.contains': 'This Deck has {n} Notes.', // ALTA
+  'publicDeck.plan.contains': { one: 'This Deck has {n} item.', other: 'This Deck has {n} items.' }, // ALTA -- Etapa 4: aprovado pela dona
   'publicDeck.plan.existing': '{n} already exist in your collection', // ALTA
   'publicDeck.plan.archived': '({n} archived)', // ALTA
   'publicDeck.plan.willAdd': 'will be added.', // ALTA
   'publicDeck.plan.renamed': 'A Deck with this name already exists: it will be created as “{name}”.', // ALTA
   'publicDeck.plan.new': 'New', // ALTA
   'publicDeck.plan.variants': 'Similar to something of yours (unchecked)', // ALTA
-  'publicDeck.plan.variantsHint': 'They start like one of your Notes but have different content. Check only the ones you want as new, independent Notes; yours aren\'t changed.', // ALTA
+  'publicDeck.plan.variantsHint': 'They start like one of your items but have different content. Check only the ones you want as new, independent items; yours aren\'t changed.', // ALTA -- Etapa 4: aprovado pela dona
   'publicDeck.plan.related': 'Related content found', // ALTA
-  'publicDeck.plan.relatedHint': '{n} item(s) have the same pair in another card type in your collection. They aren\'t imported.', // ALTA
+  'publicDeck.plan.relatedHint': { one: '{n} item has the same pair in another card type in your collection. It isn\'t imported.', other: '{n} items have the same pair in another card type in your collection. They aren\'t imported.' }, // ALTA
   'publicDeck.plan.existingSummary': '{n} already exist in your collection — they won\'t be imported', // ALTA
   'publicDeck.plan.archivedOne': 'archived', // ALTA
   'publicDeck.plan.alreadyExists': 'already exists', // ALTA
   'publicDeck.plan.sourceDup': '{n} repeated inside the Deck itself: imported only once.', // ALTA
-  'publicDeck.plan.incompatible': '{n} Note(s) couldn\'t be imported (incompatible format).', // ALTA
+  'publicDeck.plan.incompatible': { one: '{n} item couldn\'t be imported (incompatible format).', other: '{n} items couldn\'t be imported (incompatible format).' }, // ALTA -- Etapa 4: aprovado pela dona
   'publicDeck.plan.import': 'Import', // ALTA
   'publicDeck.plan.cancel': 'Cancel', // ALTA
   'publicDeck.plan.analyzing': 'Analyzing your collection...', // ALTA
-  'publicDeck.plan.toStudy': '{n} card(s) to study.', // ALTA
+  'publicDeck.plan.toStudy': { one: '{n} card to study.', other: '{n} cards to study.' }, // ALTA
   'publicDeck.plan.decksCreated': 'Decks created: {list}', // ALTA
-  'publicDeck.plan.omitted': '({n} with no new Notes, left out)', // ALTA
+  'publicDeck.plan.omitted': '({n} with no new items, left out)', // ALTA -- Etapa 4: aprovado pela dona
   'publicDeck.plan.nothingNew': 'Nothing new to import.', // ALTA
   'publicDeck.plan.nothingNewBtn': 'Nothing new to import', // ALTA
-  'publicDeck.plan.importN.one': 'Import {n} Note', // ALTA
-  'publicDeck.plan.importN.other': 'Import {n} Notes', // ALTA
+  'publicDeck.plan.importN.one': 'Import {n} item', // ALTA -- Etapa 4: aprovado pela dona
+  'publicDeck.plan.importN.other': 'Import {n} items', // ALTA -- Etapa 4: aprovado pela dona
   'publicDeck.copyingMedia': 'Copying media {done}/{total}...', // ALTA
-  'publicDeck.done.imported': '✅ {n} Notes imported', // ALTA
+  'publicDeck.done.imported': { one: '✅ {n} item imported', other: '✅ {n} items imported' }, // ALTA -- Etapa 4: aprovado pela dona
   'publicDeck.done.into': 'into “{name}”', // ALTA
   'publicDeck.done.existed': '{n} already existed.', // ALTA
   'publicDeck.done.incompatible': '({n} couldn\'t be imported)', // ALTA
@@ -3952,7 +3959,7 @@ window.I18N_CATALOG['en'] = {
   'publicDeck.publish.public': '🌐 This Deck is public: it shows on your profile and opens from the link.', // ALTA
   'publicDeck.publish.private': '🔒 This Deck is private: only you can see it.', // ALTA
   'publicDeck.publish.ownKeyHtml': 'Each Deck has its own switch: <strong>subdecks don\'t change with it</strong>. The cards\' "private note" field is never public.', // MÉDIA -- "chave" = interruptor público/privado
-  'publicDeck.publish.notesWillBePublic': '{n} Notes will become public.', // ALTA
+  'publicDeck.publish.notesWillBePublic': { one: '{n} item will become public.', other: '{n} items will become public.' }, // ALTA -- Etapa 4: aprovado pela dona
   'publicDeck.publish.incompatHtml': '{n} can\'t be shown in the new format and <strong>won\'t be published</strong> (they stay as they are in your Deck).', // ALTA
   'publicDeck.publish.copyLink': 'Copy link', // ALTA
   'publicDeck.publish.makePrivate': 'Make private', // ALTA

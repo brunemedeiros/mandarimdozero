@@ -90,17 +90,17 @@ async function bootPage(browser, lang, port){
 
     // ===== aluna: lista =====
     let rows = await rowsOf();
-    L('lista: só Tags de own_flashcards, com contagem de Notes', JSON.stringify(rows) === '["a1:1 nota","cumprimentos:1 nota","saudacao:2 notas","verbos:1 nota"]', rows);
+    L('lista: só Tags de own_flashcards, com contagem de Notes', JSON.stringify(rows) === '["a1:1 item","cumprimentos:1 item","saudacao:2 itens","verbos:1 item"]' /* Etapa 4: "Note" vira "item" na tela */, rows);
     L('lista: Tag exclusiva de Teacher Card (prof) NÃO aparece', !rows.some(r => r.startsWith('prof')));
-    L('lista: contagem de saudacao não inclui o Teacher Card (2, não 3)', rows.includes('saudacao:2 notas'));
+    L('lista: contagem de saudacao não inclui o Teacher Card (2, não 3)', rows.includes('saudacao:2 itens'));
     L('hint explica o escopo (Teacher Cards não editáveis)', (await mgrText()).includes('professora'));
 
     // ===== aluna: cancelar rename não altera =====
     await page.click('[data-tag-rename="saudacao"]');
     await page.fill('[data-tag-rename-input]', 'Cumprimentos');
     L('rename: mostra resultado normalizado e aviso de colisão', (await mgrText()).includes('#cumprimentos') && (await ev(() => !!document.querySelector('[data-tag-collision]'))));
-    L('rename: aviso informa 1 nota já usa e unificação', (await ev(() => document.querySelector('[data-tag-collision]').textContent)).includes('1 nota já usa'));
-    L('rename: mostra quantas notas serão alteradas (2)', (await mgrText()).includes('2 notas serão alteradas'));
+    L('rename: aviso informa 1 item já usa e unificação', (await ev(() => document.querySelector('[data-tag-collision]').textContent)).includes('1 item já usa'));
+    L('rename: mostra quantos itens serão alterados (2)', (await mgrText()).includes('2 itens serão alterados'));
     await page.click('[data-tag-rename-cancel]');
     const dbTags0 = await ev(() => JSON.stringify(window.__DB.own_flashcards.map(r => r.tags)));
     L('rename cancelado: nada muda no banco', dbTags0 === '[["a1","saudacao"],["saudacao","verbos"],["cumprimentos"]]', dbTags0);
@@ -127,12 +127,12 @@ async function bootPage(browser, lang, port){
     L('rename: STATE.cards (origem self) atualizado em memória', after.cardTags.includes('a1,cumprimentos'), after);
     await page.waitForFunction(() => document.querySelector('#my-tag-manager [data-tag-row="cumprimentos"]'));
     rows = await rowsOf();
-    L('rename: lista refeita (cumprimentos:3, saudacao some)', rows.includes('cumprimentos:3 notas') && !rows.some(r => r.startsWith('saudacao')), rows);
+    L('rename: lista refeita (cumprimentos:3, saudacao some)', rows.includes('cumprimentos:3 itens') && !rows.some(r => r.startsWith('saudacao')), rows);
     L('rename: filtro persistido no estado salvo', await ev(() => JSON.stringify(serializeState()).includes('"reviewTagFilter":["cumprimentos"]')));
 
     // ===== delete: cancelar e confirmar =====
     await page.click('[data-tag-delete="verbos"]');
-    L('delete: confirmação mostra nome, quantidade e aviso de irreversibilidade', await ev(() => { const t = document.querySelector('[data-tag-delete-panel]').textContent; return t.includes('#verbos') && t.includes('1 nota') && t.includes('não pode ser desfeita'); }));
+    L('delete: confirmação mostra nome, quantidade e aviso de irreversibilidade', await ev(() => { const t = document.querySelector('[data-tag-delete-panel]').textContent; return t.includes('#verbos') && t.includes('1 item') && t.includes('não pode ser desfeita'); }));
     await page.click('[data-tag-delete-cancel]');
     L('delete cancelado: nada muda', (await ev(() => JSON.stringify(window.__DB.own_flashcards[1].tags))) === '["cumprimentos","verbos"]');
     await page.click('[data-tag-delete="verbos"]');

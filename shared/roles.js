@@ -97,7 +97,7 @@ async function assignStudentToTeacher(studentUsername, languageAppKey){
       return { ok: false, error: 'Não foi possível vincular agora.' };
     }
   }
-  // O badge da professora (o da autora é "Aluno/a da Prof. Brune") entra e sai
+  // O badge da professora (o da autora é "Turma da Prof. Brune") entra e sai
   // sozinho com o vínculo ativo: trigger da migration 077 em teacher_students.
   return { ok: true, target };
 }

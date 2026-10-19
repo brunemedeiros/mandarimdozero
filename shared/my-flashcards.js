@@ -133,7 +133,7 @@ function personalDecksListHTML(decks){
     const pad = Math.max(0, personalDeckDepth(decks, d) - 1) * 16;
     const c = getDeckCounts(decks, d.id, pool);
     return `<div class="admin-badge-row" style="padding-left:${pad}px;" data-personal-deck-row="${d.id}">
-      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? t('deck.myDecks') : d.name)} <span class="profile-edit-hint">(${t('deck.countsFull', { total: c.total, new: c.new, learning: c.learning, review: c.review, due: c.due })})</span></span>
+      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? t('deck.myDecks') : d.name)} <span class="profile-edit-hint">(${tp('deck.countsFull', c.total === 1 ? 1 : 2, { total: c.total, new: c.new, learning: c.learning, review: c.review, due: c.due })})</span></span>
       <button type="button" class="btn btn-secondary" data-study-deck="${d.id}">${t('deck.studyThis')}</button>
       ${d.kind === 'personal' && typeof publishBoxHTML === 'function' ? `<button type="button" class="btn btn-secondary" data-publish-deck="${d.id}">${d.is_public ? t('deck.publicBadge') : t('deck.publish')}</button>` : ''}
     </div>
@@ -192,7 +192,7 @@ function teacherDecksReadOnlyHTML(decks){
     const n = c.total;
     const label = deck.kind === 'teacher_root' ? t('deck.teacherRoot') : deck.name;
     return `<div class="admin-badge-row" style="padding-left:${depth * 16}px;" data-teacher-deck-row="${deck.id}">
-      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${t('deck.countsFull', { total: n, new: c.new, learning: c.learning, review: c.review, due: c.due })})</span></span>
+      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${tp('deck.countsFull', n === 1 ? 1 : 2, { total: n, new: c.new, learning: c.learning, review: c.review, due: c.due })})</span></span>
       <button type="button" class="btn btn-secondary" data-study-deck="${deck.id}" ${n ? '' : 'disabled'}>${t('deck.studyThis')}</button>
     </div>`;
   }).join('');
@@ -858,8 +858,8 @@ function wireMyFlashcardsForm(wrap, atLimit, premium, onCreated){
     });
     if (!pre.ok){
       errorEl.textContent = (typeof window.tp === 'function')
-        ? window.tp('flashcardLimit.wouldGenerate', pre.requested, { n: pre.requested, remaining: pre.remaining })
-        : `Este cartão geraria ${pre.requested} cartão(ões) de estudo, mas restam só ${pre.remaining} no plano grátis.`;
+        ? window.tp('flashcardLimit.wouldGenerate', pre.requested === 1 ? 1 : 2, { n: pre.requested, remaining: pre.remaining })
+        : `Este cartão geraria ${pre.requested} ${pre.requested === 1 ? 'cartão' : 'cartões'} de estudo, mas restam só ${pre.remaining} no plano grátis.`;
       openFlashcardLimitModal();
       return;
     }
@@ -1058,7 +1058,7 @@ function openMyFlashcardsExportModal(cardsToExport){
         <button class="app-modal-close" id="my-flashcards-export-close" aria-label="${t('common.close')}">✕</button>
       </div>
       <div class="app-modal-body">
-        ${payload.cards.length < cardsToExport.length ? `<p class="profile-edit-hint">${t('myFlashcards.export.leftOut', { n: cardsToExport.length - payload.cards.length })}</p>` : ''}
+        ${payload.cards.length < cardsToExport.length ? `<p class="profile-edit-hint">${tp('myFlashcards.export.leftOut', cardsToExport.length - payload.cards.length === 1 ? 1 : 2, { n: cardsToExport.length - payload.cards.length })}</p>` : ''}
         <p class="profile-edit-hint">${t('myFlashcards.export.hint')}</p>
         <div class="export-choices">
           <button type="button" class="btn btn-secondary" id="my-flashcards-export-download" style="flex:1;">${t('myFlashcards.export.download')}</button>
@@ -1158,8 +1158,8 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
   const dest = await resolveOwnCreationDeck({ languageAppKey: APP_KEY });
   if (!dest.ok){ if (errorEl) errorEl.textContent = dest.error; return; }
   const confirmText = cutPlan.cut
-    ? t('myFlashcards.import.confirmCut', { total: payload.cards.length, kept: cardsToCreate.length })
-    : tp('myFlashcards.import.confirm', payload.cards.length);
+    ? tp('myFlashcards.import.confirmCut', payload.cards.length === 1 ? 1 : 2, { total: payload.cards.length, kept: cardsToCreate.length })
+    : tp('myFlashcards.import.confirm', payload.cards.length === 1 ? 1 : 2, { n: payload.cards.length });
   if (!confirm(confirmText)) return;
   let importedCount = 0;
   for (const card of cardsToCreate){
@@ -1176,7 +1176,7 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
       if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
     }
   }
-  showToast(`${tp('myFlashcards.import.done', importedCount)} ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount))}`.trim());
+  showToast(`${tp('myFlashcards.import.done', importedCount === 1 ? 1 : 2, { n: importedCount })} ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount))}`.trim());
   await myFlashcardsAfterChange();
   if (cutMessage) openFlashcardLimitModal({ cutMessage });
 }

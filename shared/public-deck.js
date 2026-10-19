@@ -356,7 +356,7 @@ async function renderPublicDeckInto(bodyEl, publicId){
     <div class="public-deck-subs"><div class="section-label">${t('publicDeck.subdecks')}</div>
       ${d.subdecks.map(s => `<a class="admin-badge-row public-deck-sub" href="${publicDeckLinkFor(s.public_id, d.language)}" data-public-deck-sub="${s.public_id}">
         ${publicDeckBadgeHTML(s.icon, s.color)}<span style="flex:1;">${escapeHTML(s.name)}</span>
-        <span class="profile-edit-hint">${t('publicDeck.notesCount', { n: s.notes_count })}</span></a>`).join('')}
+        <span class="profile-edit-hint">${tp('publicDeck.notesCount', s.notes_count === 1 ? 1 : 2, { n: s.notes_count })}</span></a>`).join('')}
     </div>` : '';
   const parent = d.parent ? `<a class="profile-stats-link" href="${publicDeckLinkFor(d.parent.public_id, d.language)}">← ${escapeHTML(d.parent.name)}</a>` : '';
 
@@ -385,7 +385,7 @@ async function renderPublicDeckInto(bodyEl, publicId){
         <div class="public-profile-username">${t('publicDeck.by')} <a href="#/user/${encodeURIComponent(d.owner.username)}">${escapeHTML(authorName)}</a> (@${escapeHTML(d.owner.username)})</div></div></div>
       ${d.description ? `<p class="public-profile-bio">${escapeHTML(d.description)}</p>` : ''}
       <div class="public-deck-meta">
-        <span class="pill">${t('publicDeck.notesCount', { n: d.notes_count })}</span>
+        <span class="pill">${tp('publicDeck.notesCount', d.notes_count === 1 ? 1 : 2, { n: d.notes_count })}</span>
         <span class="pill">${escapeHTML(publicDeckLangLabel(d.language))}</span>
         <span class="pill">${t('publicDeck.updatedOn', { date: publicDeckFormatDate(d.updated_at) })}</span>
       </div>
@@ -452,13 +452,13 @@ function publicDeckImportPlanHTML(d, plan){
   const counts = plan.counts || {};
   const by = (c) => notes.filter(n => n.cls === c);
   const exactN = (counts.exact || 0) + (counts.exact_archived || 0);
-  const label = (n) => `${escapeHTML(n.preview || '…')} <span class="profile-edit-hint">${escapeHTML(publicDeckModeLabel(n.mode))}${n.instances > 1 ? ` · ${t('publicDeck.plan.instances', { n: n.instances })}` : ''}</span>`;
+  const label = (n) => `${escapeHTML(n.preview || '…')} <span class="profile-edit-hint">${escapeHTML(publicDeckModeLabel(n.mode))}${n.instances > 1 ? ` · ${tp('publicDeck.plan.instances', n.instances === 1 ? 1 : 2, { n: n.instances })}` : ''}</span>`;
   const checkRow = (n, checked) => `<label class="admin-badge-row" style="display:flex; gap:8px; align-items:center;">
       <input type="checkbox" data-plan-sig="${escapeHTML(n.sig)}" ${checked ? 'checked' : ''}><span style="flex:1;">${label(n)}</span></label>`;
   const novas = by('none'), variantes = by('variant'), related = by('cross_family');
   return `
     <div class="section-label">${t('publicDeck.plan.title', { name: escapeHTML(d.name) })}</div>
-    <p class="profile-edit-hint" data-plan-summary>${t('publicDeck.plan.contains', { n: plan.source_total })}
+    <p class="profile-edit-hint" data-plan-summary>${tp('publicDeck.plan.contains', plan.source_total === 1 ? 1 : 2, { n: plan.source_total })}
       ${exactN ? `${t('publicDeck.plan.existing', { n: exactN })}${counts.exact_archived ? ` ${t('publicDeck.plan.archived', { n: counts.exact_archived })}` : ''}. ` : ''}
       <strong data-plan-create-count>${plan.create_default}</strong> ${t('publicDeck.plan.willAdd')}</p>
     ${plan.root_final_name && plan.root_final_name !== d.name ? `<p class="profile-edit-hint" data-plan-rename>${t('publicDeck.plan.renamed', { name: escapeHTML(plan.root_final_name) })}</p>` : ''}
@@ -467,11 +467,11 @@ function publicDeckImportPlanHTML(d, plan){
       <p class="profile-edit-hint">${t('publicDeck.plan.variantsHint')}</p>
       ${variantes.map(n => checkRow(n, false)).join('')}` : ''}
     ${related.length ? `<div class="section-label" data-plan-related>${t('publicDeck.plan.related')}</div>
-      <p class="profile-edit-hint">${t('publicDeck.plan.relatedHint', { n: related.length })}</p>` : ''}
+      <p class="profile-edit-hint">${tp('publicDeck.plan.relatedHint', related.length === 1 ? 1 : 2, { n: related.length })}</p>` : ''}
     ${exactN ? `<details data-plan-existing><summary class="profile-edit-hint">${t('publicDeck.plan.existingSummary', { n: exactN })}</summary>
       ${[...by('exact'), ...by('exact_archived')].map(n => `<div class="admin-badge-row"><span style="flex:1;">${label(n)}</span><span class="profile-edit-hint">${n.local_archived ? t('publicDeck.plan.archivedOne') : t('publicDeck.plan.alreadyExists')}</span></div>`).join('')}</details>` : ''}
-    ${counts.source_duplicate ? `<p class="profile-edit-hint">${t('publicDeck.plan.sourceDup', { n: counts.source_duplicate })}</p>` : ''}
-    ${plan.incompatible ? `<p class="profile-edit-hint">${t('publicDeck.plan.incompatible', { n: plan.incompatible })}</p>` : ''}
+    ${counts.source_duplicate ? `<p class="profile-edit-hint">${tp('publicDeck.plan.sourceDup', counts.source_duplicate === 1 ? 1 : 2, { n: counts.source_duplicate })}</p>` : ''}
+    ${plan.incompatible ? `<p class="profile-edit-hint">${tp('publicDeck.plan.incompatible', plan.incompatible === 1 ? 1 : 2, { n: plan.incompatible })}</p>` : ''}
     <p class="profile-edit-hint" data-plan-decks></p>
     <div style="display:flex; gap:8px; margin-top:10px;">
       <button type="button" class="btn btn-primary" id="public-deck-import-confirm">${t('publicDeck.plan.import')}</button>
@@ -492,11 +492,11 @@ async function openPublicDeckImportPlan(d, panel){
     const st = publicDeckPlanStats(plan, checked());
     panel.querySelector('[data-plan-create-count]').textContent = String(st.create);
     panel.querySelector('[data-plan-decks]').textContent = st.create
-      ? `${t('publicDeck.plan.toStudy', { n: st.instances })} ${t('publicDeck.plan.decksCreated', { list: st.decksCreated.join(', ') })}${st.decksOmitted ? ` ${t('publicDeck.plan.omitted', { n: st.decksOmitted })}` : ''}.`
+      ? `${tp('publicDeck.plan.toStudy', st.instances === 1 ? 1 : 2, { n: st.instances })} ${t('publicDeck.plan.decksCreated', { list: st.decksCreated.join(', ') })}${st.decksOmitted ? ` ${t('publicDeck.plan.omitted', { n: st.decksOmitted })}` : ''}.`
       : t('publicDeck.plan.nothingNew');
     confirmBtn.disabled = st.create === 0;
     // Plural como antes: "Note" só com 1 (create > 1 = "Notes").
-    confirmBtn.textContent = st.create ? t(st.create > 1 ? 'publicDeck.plan.importN.other' : 'publicDeck.plan.importN.one', { n: st.create }) : t('publicDeck.plan.nothingNewBtn');
+    confirmBtn.textContent = st.create ? t(st.create === 1 ? 'publicDeck.plan.importN.one' : 'publicDeck.plan.importN.other', { n: st.create }) : t('publicDeck.plan.nothingNewBtn');
   };
   panel.querySelectorAll('[data-plan-sig]').forEach(i => i.addEventListener('change', refresh));
   refresh();
@@ -524,7 +524,7 @@ async function openPublicDeckImportPlan(d, panel){
     const out = r.result || {};
     panel.style.display = 'none'; panel.innerHTML = '';
     showToast(out.notes_copied
-      ? `${t('publicDeck.done.imported', { n: out.notes_copied })}${out.root_name ? ` ${t('publicDeck.done.into', { name: out.root_name })}` : ''}.${out.skipped_exact || out.skipped_exact_archived ? ` ${t('publicDeck.done.existed', { n: (out.skipped_exact || 0) + (out.skipped_exact_archived || 0) })}` : ''}${out.skipped_incompatible ? ` ${t('publicDeck.done.incompatible', { n: out.skipped_incompatible })}` : ''}`
+      ? `${tp('publicDeck.done.imported', out.notes_copied === 1 ? 1 : 2, { n: out.notes_copied })}${out.root_name ? ` ${t('publicDeck.done.into', { name: out.root_name })}` : ''}.${out.skipped_exact || out.skipped_exact_archived ? ` ${t('publicDeck.done.existed', { n: (out.skipped_exact || 0) + (out.skipped_exact_archived || 0) })}` : ''}${out.skipped_incompatible ? ` ${t('publicDeck.done.incompatible', { n: out.skipped_incompatible })}` : ''}`
       : t('publicDeck.done.nothing'));
   });
 }
@@ -593,7 +593,7 @@ function publicDeckProfileRowHTML(d){
   return `<a class="admin-badge-row public-deck-sub" href="${publicDeckLinkFor(d.public_id, d.language)}" data-public-deck-link="${d.public_id}">
     ${publicDeckBadgeHTML(d.icon, d.color)}
     <span style="flex:1;">${escapeHTML(d.name)}
-      <span class="profile-edit-hint">${escapeHTML(publicDeckLangLabel(d.language))} · ${t('publicDeck.notesCount', { n: d.notes_count })} · ${publicDeckFormatDate(d.updated_at)}</span></span></a>`;
+      <span class="profile-edit-hint">${escapeHTML(publicDeckLangLabel(d.language))} · ${tp('publicDeck.notesCount', d.notes_count === 1 ? 1 : 2, { n: d.notes_count })} · ${publicDeckFormatDate(d.updated_at)}</span></span></a>`;
 }
 
 async function renderPublicDecksSection(boxEl, username){
@@ -647,7 +647,7 @@ function publishBoxHTML(deck, status){
       ? (profilePrivate ? t('publicDeck.publish.publicPrivateProfile') : t('publicDeck.publish.public'))
       : t('publicDeck.publish.private')}
       ${t('publicDeck.publish.ownKeyHtml')}</p>
-    ${status && !isPublic ? `<p class="profile-edit-hint">${t('publicDeck.publish.notesWillBePublic', { n: status.notes_count })}${incompat ? ` ${t('publicDeck.publish.incompatHtml', { n: incompat })}` : ''}</p>` : ''}
+    ${status && !isPublic ? `<p class="profile-edit-hint">${tp('publicDeck.publish.notesWillBePublic', status.notes_count === 1 ? 1 : 2, { n: status.notes_count })}${incompat ? ` ${t('publicDeck.publish.incompatHtml', { n: incompat })}` : ''}</p>` : ''}
     ${isPublic ? '<div class="public-copies-box" data-publish-copies></div>' : ''}
     ${isPublic && publicId ? `<input type="text" class="profile-edit-input" readonly data-publish-link value="${escapeHTML(publicDeckShareUrl(publicId, deck.language_app_key))}">` : ''}
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin:8px 0;">

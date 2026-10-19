@@ -1216,7 +1216,7 @@ function buildUnitBlock(u){
   let fracLabel;
   if (hasLessons){
     const doneLessons = isFinished ? u.lessons.length : currentLessonIdx(u.id);
-    fracLabel = t('trail.unit.lessonsProgress', { done: doneLessons, total: u.lessons.length });
+    fracLabel = tp('trail.unit.lessonsProgress', u.lessons.length === 1 ? 1 : 2, { done: doneLessons, total: u.lessons.length });
   } else fracLabel = `${pct}%`;
   if (dueForReview > 0) fracLabel += ` · 🔁 ${dueForReview}`;
 
@@ -1316,7 +1316,7 @@ function mapUnitDescribe(u, moduleId){
   const lines = [];
   if (hasLessons){
     const done = (st === 'done' || st === 'skipped') ? u.lessons.length : currentLessonIdx(u.id);
-    lines.push(t('trail.lessonsCompleted', { done, total: u.lessons.length }));
+    lines.push(tp('trail.lessonsCompleted', u.lessons.length === 1 ? 1 : 2, { done, total: u.lessons.length }));
   }
   const { dueForReview } = unitCardCounts(u.id);
   if (dueForReview > 0) lines.push(t('trail.map.unit.toReview', { n: dueForReview }));
@@ -4007,7 +4007,7 @@ function renderSpeedReview(){
         <div class="big-emoji">💔</div>
         <h3>${t('review.speed.gameOver')}</h3>
         <div class="score-num">${SPEED_STATE.score} pts</div>
-        <p>${tp('review.speed.answered', SPEED_STATE.index)}</p>
+        <p>${tp('review.speed.answered', SPEED_STATE.index === 1 ? 1 : 2, { n: SPEED_STATE.index })}</p>
         <p class="review-record-line">${speedIsRecord ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
@@ -4330,7 +4330,7 @@ function renderReviewView(){
       <div class="review-empty">
         <div class="big-emoji">🍵</div>
         <h3>${STATE.reviewSessionClassReview ? t('review.session.classEmptyTitle') : activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
-        <p>${allDue > 0 ? tp('review.session.pendingOverall', allDue) : t('review.session.comeBackLater')}</p>
+        <p>${allDue > 0 ? tp('review.session.pendingOverall', allDue === 1 ? 1 : 2, { n: allDue }) : t('review.session.comeBackLater')}</p>
         ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">${t('review.session.reviewAllAvailable')}</button>` : ''}
         ${STATE.reviewSessionClassReview ? `<button class="btn btn-secondary" id="review-class-back">${t('review.backToStudent')}</button>` : ''}
       </div>
@@ -4367,7 +4367,7 @@ function renderReviewView(){
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
         <h3>${t('review.complete.title')}</h3>
-        <p>${tp('review.complete.reviewed', STATE.reviewQueue.length)}</p>
+        <p>${tp('review.complete.reviewed', STATE.reviewQueue.length === 1 ? 1 : 2, { n: STATE.reviewQueue.length })}</p>
         <div class="review-complete-actions">
           ${STATE.reviewSessionClassReview
             ? `<button class="btn btn-primary" id="review-class-back">${t('review.backToStudent')}</button>`
@@ -4950,7 +4950,7 @@ function renderHanziReviewView(){
       <div class="review-empty">
         <div class="big-emoji">🀄</div>
         <h3>${t('zh.hanzi.allCaughtUp')}</h3>
-        <p>${allDue > 0 ? t('zh.hanzi.pendingChars', { n: allDue }) : t('zh.hanzi.comeBackLater')}</p>
+        <p>${allDue > 0 ? tp('zh.hanzi.pendingChars', allDue === 1 ? 1 : 2, { n: allDue }) : t('zh.hanzi.comeBackLater')}</p>
       </div>
     `;
     return;
@@ -4964,7 +4964,7 @@ function renderHanziReviewView(){
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
         <h3>${t('zh.hanzi.sessionDone')}</h3>
-        <p>${t('zh.hanzi.sessionReviewed', { n: STATE.hanziReviewQueue.length })}</p>
+        <p>${tp('zh.hanzi.sessionReviewed', STATE.hanziReviewQueue.length === 1 ? 1 : 2, { n: STATE.hanziReviewQueue.length })}</p>
         <button class="btn btn-primary" id="hanzi-review-again">${t('zh.hanzi.backToLessons')}</button>
       </div>
     `;
@@ -5119,7 +5119,7 @@ function openRadicalDetail(radicalData){
       <div class="r">${radicalData.radical}</div>
       <div class="m">${radicalData.meaning}</div>
     </div>
-    <div class="section-label">${t('zh.hanzi.appearsInCount', { n: radicalData.chars.length })}</div>
+    <div class="section-label">${tp('zh.hanzi.appearsInCount', radicalData.chars.length === 1 ? 1 : 2, { n: radicalData.chars.length })}</div>
     <div class="radical-chars-grid">
       ${radicalData.chars.map(h => `
         <div class="radical-char-item">
@@ -5167,7 +5167,7 @@ function renderHanziLessonsGrid(){
     card.innerHTML = `
       <div class="hanzi-lesson-num">${prog.completed ? '✓' : i+1}</div>
       <div class="hanzi-lesson-preview">${preview}</div>
-      <div class="hanzi-lesson-status">${prog.completed ? t('zh.hanzi.lessonCompleted') : (prog.unlocked ? t('zh.hanzi.charCount', { n: lesson.length }) : '🔒')}</div>
+      <div class="hanzi-lesson-status">${prog.completed ? t('zh.hanzi.lessonCompleted') : (prog.unlocked ? tp('zh.hanzi.charCount', lesson.length === 1 ? 1 : 2, { n: lesson.length }) : '🔒')}</div>
     `;
     if (prog.unlocked){
       card.addEventListener('click', () => openHanziLesson(i));
