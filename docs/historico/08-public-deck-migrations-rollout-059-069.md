@@ -401,3 +401,15 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Staging: aplicada em 2026-10-17 (simulação com rollback: escolheu, não pede de novo, 2ª escolha e UPDATE direto recusados).
   Produção: aplicada em 2026-10-17 a pedido da autora (md5 das 6 funções igual ao Staging; simulação com rollback da
   conta com @ aleatório: escolheu e deixou de ficar pendente).
+
+## 113 -- Conferir o @ no cadastro, sem login (2026-10-18)
+
+- `shared/supabase_migrations/113_check_username_signup.sql`. Sem DROP, só uma função nova. O número 112 já estava em uso por
+  outra conversa (`112_review_bank_shared_schedule`), por isso 113. Decisão da autora (2026-10-18): no cadastro por e-mail, nome e @
+  na mesma tela, sabendo na hora se o @ está livre. `check_username_signup(p_username)` (security definer, `search_path=public`,
+  `execute` para anon e authenticated) devolve `{status: ok|invalid|reserved|taken, suggestions: [até 3 livres]}` com as regras
+  da 111 (`_username_problem`, que continua fechada); não devolve nome nem id. A gravação continua sendo `claim_my_username`,
+  depois do login.
+- Testes: `tests/escolher-usuario/run.sh` (111 22/22, 113 15/15), Postgres local.
+- Staging: `20261018214052`. Produção: `20261018214122`, autorizada pela autora em 2026-10-18; 28 perfis com o mesmo md5 antes e
+  depois; `check_username_signup('admin')` = reserved com 3 sugestões; anon não chama `_username_problem`.

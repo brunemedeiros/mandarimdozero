@@ -156,6 +156,8 @@ async function passesAntiSpam(category, eventType, payload){
   return true;
 }
 
+const NOTIFICATION_EVENTS_ONLY_IN_THE_MOMENT = ['xp_earned', 'streak_completed'];
+
 // Ponto de entrada único pros 4 eventos "Cliente" da Fase 1. actionTab é
 // opcional -- pra onde o clique na notificação deve levar (switchTab, não
 // existe URL por tela neste app).
@@ -172,6 +174,10 @@ async function fireNotificationEvent(eventType, category, payload, actionTab){
     payload: payload || null,
     source: 'client',
   }).then(({ error }) => { if (error) console.error('Erro ao registrar evento de notificação:', error); });
+
+  // "+XP" e "Sequência mantida" já aparecem na hora (aviso rápido e janela da sequência): não ficam guardados no sino
+  // (decisão da dona, 2026-10-18; etapa 2 do plano "Voz da Prof. Brune"). O evento bruto acima continua registrado.
+  if (NOTIFICATION_EVENTS_ONLY_IN_THE_MOMENT.indexOf(eventType) >= 0) return;
 
   await ensureNotificationPreferencesLoaded();
   // Fase 3: push "pendura" no in-app -- as duas checagens abaixo (anti-spam

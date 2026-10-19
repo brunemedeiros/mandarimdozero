@@ -1,12 +1,12 @@
 // K2-B -- dedup de "palavras prontas pra revisar" (notification-cron).
 // Carrega o código REAL de supabase/functions/notification-cron/index.ts
-// (recorte de LESSON_VOCAB_MAP até computeReviewOverdueCount), transpilado
+// (recorte do mapa gerado STUDY_ITEM_GATE até computeReviewOverdueCount; Etapa 0b), transpilado
 // por type-stripping do Node 22. Uso: node tests/k2b/test_cron_dedup.js
 const fs = require('fs'), vm = require('vm'), path = require('path'), ts = require('module');
 const src = fs.readFileSync(path.join(__dirname, '../../supabase/functions/notification-cron/index.ts'), 'utf8');
 const cut = (a, b) => src.slice(src.indexOf(a), src.indexOf(b));
 const consts = src.match(/const REVIEW_OVERDUE_STALE_MS[^\n]*\nconst REVIEW_OVERDUE_MIN_COUNT[^\n]*/)[0];
-const body = cut('const LESSON_VOCAB_MAP', 'function fillPlaceholders(');
+const body = cut('// >>> GERADO: STUDY_ITEM_GATE', 'function fillPlaceholders(');
 const js = ts.stripTypeScriptTypes ? ts.stripTypeScriptTypes(consts + '\n' + body) : null;
 if (!js) throw new Error('Node sem stripTypeScriptTypes');
 const ctx = {}; vm.createContext(ctx);

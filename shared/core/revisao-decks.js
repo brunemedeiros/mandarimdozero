@@ -577,20 +577,30 @@ function isCardLessonCompleted(card){
   // pertence a unidade nenhuma, também usa `flashcardStatus` (espelha
   // `own_flashcards.status`) como único critério de elegibilidade.
   if (card.origin === 'teacher' || card.origin === 'self') return card.flashcardStatus === 'active';
-  const prog = STATE.unitProgress[card.unitId];
-  // A0 (Fase 0 da trilha, 06/10/2026): unidade CONCLUÍDA libera todos os
-  // cartões dela. Antes só `lessonIdx < prog.lessonIdx` decidia, mas
-  // `lessonIdx` volta a 0 ao concluir a unidade -- o cartão saía da Revisão.
-  if (prog?.completed) return true;
-  if (!prog?.started) return false;
-  const unit = UNITS.find(u => u.id === card.unitId);
-  // Cartão "Na frase": entra com a lição da palavra que o apresenta (gateVocabIdx).
-  const gateIdx = card.vocabIdx != null ? card.vocabIdx : card.gateVocabIdx;
-  const lessonIdx = unit ? lessonIndexForVocabIdx(unit, gateIdx) : -1;
-  // Sem lição conhecida pra esse vocabIdx: só libera se a unidade inteira
-  // já foi concluída (mais seguro que arriscar mostrar algo nunca ensinado).
-  if (lessonIdx === -1) return !!prog.completed;
-  return lessonIdx < prog.lessonIdx;
+  // Etapa 0 do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.3 item 8): cartão que já passou pelo
+  // portão uma vez passa sempre (mover a palavra para uma unidade ainda não feita não a tira da Revisão).
+  // A marca só é gravada em item com chave estável (`studyKey`, fr); o zh continua só com a regra abaixo.
+  if (card.released) return true;
+  // O portão de lição de sempre (função interna: os testes extraem isCardLessonCompleted inteira do texto).
+  const passesGate = () => {
+    const prog = STATE.unitProgress[card.unitId];
+    // A0 (Fase 0 da trilha, 06/10/2026): unidade CONCLUÍDA libera todos os
+    // cartões dela. Antes só `lessonIdx < prog.lessonIdx` decidia, mas
+    // `lessonIdx` volta a 0 ao concluir a unidade -- o cartão saía da Revisão.
+    if (prog?.completed) return true;
+    if (!prog?.started) return false;
+    const unit = UNITS.find(u => u.id === card.unitId);
+    // Cartão "Na frase": entra com a lição da palavra que o apresenta (gateVocabIdx).
+    const gateIdx = card.vocabIdx != null ? card.vocabIdx : card.gateVocabIdx;
+    const lessonIdx = unit ? lessonIndexForVocabIdx(unit, gateIdx) : -1;
+    // Sem lição conhecida pra esse vocabIdx: só libera se a unidade inteira
+    // já foi concluída (mais seguro que arriscar mostrar algo nunca ensinado).
+    if (lessonIdx === -1) return !!prog.completed;
+    return lessonIdx < prog.lessonIdx;
+  };
+  const passed = passesGate();
+  if (passed && card.studyKey) card.released = true;
+  return passed;
 }
 
 function startReviewSession(opts){

@@ -9,6 +9,17 @@ window.I18N_CATALOG['en'] = {
   'report.entry.menuItem': '⚑ Report a problem', // ALTA
 
   'report.modal.title': '⚑ Report a problem or suggestion', // ALTA
+  'report.modal.intro': 'Tell us what happened. It helps us improve your experience.', // ALTA
+  'report.category.bug_tecnico.desc': 'Something froze, showed an error or didn\'t load.', // ALTA
+  'report.category.erro_conteudo.desc': 'Some information in the lesson is wrong or out of date.', // ALTA
+  'report.category.traducao.desc': 'The translation of a word or sentence is wrong.', // ALTA
+  'report.category.audio.desc': 'The audio is wrong, cut off or badly pronounced.', // ALTA
+  'report.category.visual.desc': 'Something looks cut off, misaligned or hard to read.', // ALTA
+  'report.category.comportamento_inesperado.desc': 'A button or feature did something unexpected.', // ALTA
+  'report.category.sugestao_melhoria.desc': 'An idea to make the site even better.', // ALTA
+  'report.category.outro.desc': 'Something other than the options above.', // ALTA
+  'report.modal.describeHint': 'Tell us what happened and, if you can, the steps you were following.', // ALTA
+  'report.modal.sendReport': 'Send report', // ALTA
   'report.modal.whatHappened': 'What happened?', // ALTA
   'report.modal.howMuch': 'How much did it get in your way?', // MÉDIA -- "atrapalhou" sem equivalente direto; alternativa: "How much did this affect you?"
   'report.modal.optional': '(optional)', // ALTA
@@ -19,7 +30,7 @@ window.I18N_CATALOG['en'] = {
   'report.modal.guestEmailOptional': '(optional, only if you want a reply)', // ALTA
   'report.modal.guestEmailPlaceholder': 'youremail@example.com', // ALTA
   'report.modal.attachButton': '📎 Attach a screenshot (optional)', // ALTA
-  'report.modal.privacyNote': 'If attached, the screenshot is visible only to the team -- nothing is sent automatically.', // ALTA
+  'report.modal.privacyNote': 'If attached, the screenshot is visible only to the team. Nothing is sent automatically.', // ALTA
   'report.modal.submit': 'Send', // ALTA
   'report.modal.sending': 'Sending...', // ALTA
   'report.modal.successText': 'Report sent. Thanks for helping improve the app!', // ALTA
@@ -58,6 +69,10 @@ window.I18N_CATALOG['en'] = {
   'flashcardLimit.wouldGenerate': { one: 'This card would create {n} study card, but you only have {remaining} left on the free plan.', other: 'This card would create {n} study cards, but you only have {remaining} left on the free plan.' }, // MÉDIA -- política Free; plural real em EN (o PT usa "cartão(ões)")
 
   'flashcardReset.modal.title': '⚠️ Confirm edit', // ALTA
+  'flashcardReset.modal.headline': 'This edit will reset this card\'s review progress.', // ALTA
+  'flashcardReset.modal.explain': 'It shows up as a new card in Review again. You\'ll keep studying normally after saving.', // ALTA
+  'flashcardReset.modal.keepTip': 'If you want to keep your current progress, discard the edits: the card stays as it is.', // ALTA
+  'flashcardReset.modal.yes': 'Yes, continue', // ALTA
   'flashcardReset.modal.body': 'This edit will reset the review progress for this card. Do you want to continue?', // MÉDIA -- aviso de reinício de progresso
   'flashcardReset.modal.discard': 'Discard changes', // ALTA
   'flashcardReset.modal.confirm': 'Yes', // ALTA
@@ -82,6 +97,19 @@ window.I18N_CATALOG['en'] = {
   'courses.confirm.p1': 'It is a separate course with its own progress: if you have never studied in it, you start from zero.', // ALTA
   'courses.confirm.p2': 'Your progress in the current course stays saved and comes back when you return to it.', // ALTA
   'courses.confirm.p3': 'Your day streak and achievements stay the same.', // ALTA
+  'courses.confirm.stay': 'Keep studying', // ALTA
+  'courses.confirm.go': 'Go to {course}', // ALTA
+  'courses.confirm.newTitle': 'Ready for a new journey?', // ALTA
+  'courses.confirm.backTitle': 'Back to {course}?', // ALTA
+  'courses.confirm.newIntro': 'You\'re about to start the course:', // ALTA
+  'courses.confirm.backIntro': 'You\'re going back to the course:', // ALTA
+  'courses.confirm.tagline': 'A new language, new possibilities.', // ALTA
+  'courses.confirm.newP': 'Each course has its own journey. In {course}, progress is separate and you build it at your own pace.', // ALTA
+  'courses.confirm.backP': 'Your progress in {course} picks up right where you left off.', // ALTA
+  'courses.confirm.safeTitle': 'Your progress is safe.', // ALTA
+  'courses.confirm.safeText': 'Your progress in the current course stays saved and comes back when you return to it.', // ALTA
+  'courses.confirm.keepTitle': 'Your journey continues.', // ALTA
+  'courses.confirm.start': 'Start {course}', // ALTA
   'courses.first.title': 'Which course do you want to start?', // ALTA
   'courses.first.sub': 'You can switch or add courses later from the flag at the top of the screen. Each course keeps its own progress.', // ALTA
 
@@ -1021,7 +1049,7 @@ window.I18N_CATALOG['en'] = {
   'leaderboard.emptyText': 'Nobody has scored in this category yet this week.', // ALTA
   'leaderboard.scopeAria': 'Leaderboard scope', // ALTA
   'leaderboard.footnote': 'The leaderboard resets every Monday. Only people who have earned XP this week appear.', // ALTA
-  'profile.err.saveFailed': "We couldn't save right now. Check your connection and try again.", // ALTA
+  'profile.err.saveFailed': 'Couldn\'t save your profile. Check your connection and try again.', // ALTA
   'profile.err.imageRead': "We couldn't read that image.", // ALTA
   'profile.err.imageTooBig': 'Image too large (max 8MB).', // ALTA
   'profile.err.imageProcess': "We couldn't process that image. Try another one.", // ALTA
@@ -1991,7 +2019,26 @@ window.I18N_CATALOG['en'] = {
   'ui.dictation.step3': 'Click "Verificar" to compare your answer with the original text.', // MÉDIA
   'ui.dictation.step4': 'See what you got right and what needs review, word by word.', // ALTA
   'ui.challenges.backToCategories': '← Back to categories', // ALTA
-  'ui.profileEdit.username': 'Your public identifier (permanent)', // ALTA
+  'ui.profileEdit.username': 'Your public username', // ALTA
+  // Editar perfil (2026-10-18): textos novos aprovados pela autora; perfil é o mesmo em todos os cursos.
+  'ui.profileEdit.title': 'Your profile, your way', // ALTA
+  'ui.profileEdit.identityTitle': 'Your identity', // ALTA
+  'ui.profileEdit.identityText': 'Choose how people get to know you.', // ALTA
+  'ui.profileEdit.subtitle': 'Choose how you show up in the community.', // ALTA
+  'ui.profileEdit.changePhoto': 'Change photo', // ALTA
+  'ui.profileEdit.changePhotoAria': 'Change profile photo', // ALTA
+  'ui.profileEdit.removePhoto': 'Remove photo', // ALTA
+  'ui.profileEdit.name': 'Display name', // ALTA
+  'ui.profileEdit.nameHint': 'The name shown on your profile.', // ALTA
+  'ui.profileEdit.usernamePh': 'yourusername', // ALTA
+  'ui.profileEdit.usernameHint': 'Your username is permanent and can\'t be changed.', // ALTA
+  'ui.profileEdit.bio': 'About you', // ALTA
+  'ui.profileEdit.bioPh': 'Tell people a bit about you, your interests and what you\'re learning.', // ALTA
+  'ui.profileEdit.shareTitle': 'Share your journey', // ALTA
+  'ui.profileEdit.sharePublic': 'On: anyone with an account on the site can see your photo, your progress and your public Decks, and can find you in search.', // ALTA
+  'ui.profileEdit.sharePrivate': 'Off: only your friends and your teacher, if you have one, can see that. Everyone else sees just your name, your @ and your featured achievement, and can only find you by your exact @.', // ALTA
+  'ui.profileEdit.shareHelper': 'You decide what to share, and you can change it anytime.', // ALTA
+  'ui.profileEdit.save': 'Save profile', // ALTA
   'ui.profileEdit.publicProfile': 'Public profile', // ALTA
   'ui.profileEdit.publicProfileSub': 'On: anyone with an account sees your photo, progress and public decks. Off: only friends and your teacher do; others see just your name, @ and badges, and can only find you by your exact @.', // ALTA
   'ui.profileEdit.featuredBadge': 'Featured badge (shown in the Leaderboard)', // ALTA
@@ -2000,7 +2047,7 @@ window.I18N_CATALOG['en'] = {
   'ui.kbd.confirm': 'Confirm a typed answer and move on to the next one', // ALTA
   'ui.kbd.replay': 'Play audio again', // ALTA
   'ui.kbd.note': 'The numbers only appear when an exercise has options to choose from -- never during typing or the sentence-ordering exercise. "r" repeats the last audio that played on screen.', // ALTA
-  'ui.streak.sub': 'Keep it up: your streak will reset if you don\'t study tomorrow.', // ALTA
+  'ui.streak.sub': 'Come back tomorrow to keep your streak going.', // ALTA
   'ui.reviewReminder.title': 'Shall we do a quick review?', // ALTA
   'ui.notNow': 'Not now', // ALTA
   'ui.update.title': 'New version available', // ALTA
@@ -2034,6 +2081,34 @@ window.I18N_CATALOG['en'] = {
   'feedback.correctAnswerColon': 'Correct answer:', // ALTA
   'feedback.label.yourAnswer': 'Your answer', // ALTA
   'lesson.step.dialogueCheck': 'Did you understand?', // ALTA
+  // Passo Diálogo das lições, fr e zh (antes era texto fixo em português).
+  'dlg.label': 'Dialogue', // ALTA
+  'dlg.playFromAria': '{name}: play from this line', // ALTA
+  'dlg.lineTrAria': 'Show the translation of this line', // ALTA
+  'dlg.playAll': '▶ Play all', // ALTA
+  'dlg.stop': '⏸ Stop', // ALTA
+  'dlg.autoOn': 'Autoplay audio: on', // ALTA
+  'dlg.autoOff': 'Autoplay audio: off', // ALTA
+  'dlg.showTr': '🌐 Show translations', // ALTA
+  'dlg.hideTr': '🌐 Hide translations', // ALTA
+  'dlg.legend': 'The colored words are from this unit\'s vocabulary. Tap one to see what it means.', // ALTA
+  'dlg.tapToPlayToast': '🔇 Tap "Play all" to hear the conversation', // ALTA
+  'dlg.checkScene': 'Without looking at the dialogue: what did you understand from the conversation?', // ALTA
+  // Perguntas do diálogo das lições ("Você entendeu?"), fr e zh (antes eram texto fixo em português).
+  'dlgCheck.fill': 'Complete the reply', // ALTA
+  'dlgCheck.listen': 'Listen and choose the reply', // ALTA
+  'dlgCheck.listenAria': 'Play the line', // ALTA
+  'dlgCheck.tapAgain': 'tap to hear it again', // ALTA
+  'dlgCheck.comprehension': 'Comprehension', // ALTA
+  'dlgCheck.progressAria': 'Question {n} of {total}', // ALTA
+  'dlgCheck.right': '✅ That\'s right!', // ALTA
+  'dlgCheck.almost': 'Almost! The right answer was:', // ALTA
+  'dlgCheck.finish': 'Finish', // ALTA
+  'dlgCheck.next': 'Next question →', // ALTA
+  'dlgCheck.summary': '{n} of {total} correct.', // ALTA
+  'dlgCheck.allRight': 'You understood the conversation!', // ALTA
+  'dlgCheck.tryAgain': 'Listen again and try once more whenever you like.', // ALTA
+  'dlgCheck.redo': 'Redo the questions', // ALTA
   'lesson.vocabDots.aria': 'Word {pos} of {total}', // ALTA
   'zh.exercise.translateToChinese': 'Translate into Chinese', // ALTA
   'zh.reorder.tapHint': 'Tap the blocks in the right order. Tap a placed one to send it back.', // ALTA
@@ -3490,4 +3565,111 @@ window.I18N_CATALOG['en'] = {
   'fr.dict.hom.peu': '“peu” means “little, not much”; “peux”/“peut” are forms of pouvoir (je peux, il peut).', // ALTA
   'fr.dict.hom.leur': '“leurs” goes before a plural noun; “leur” before a singular noun or as a pronoun (je leur parle).', // ALTA
   'fr.dict.hom.quel': 'Same pronunciation: “quel” changes with the gender and number of the noun.', // ALTA
+
+  // ---- tela de entrada (index.html da raiz), 2026-10-18 ----
+  'gate.brand': 'Languages with Prof.\u00a0Brune', // ALTA
+  'gate.loading': 'Loading...', // ALTA
+  'gate.theme': 'Switch between light and dark theme', // ALTA
+  'gate.siteLang.label': 'Site language', // ALTA
+  'gate.login.google': 'Continue with Google', // ALTA
+  'gate.login.divider': 'or', // ALTA
+  'gate.login.password': 'Your password', // ALTA
+  'gate.login.forgot': 'Forgot your password?', // ALTA
+  'gate.login.submit': 'Log in', // ALTA
+  'gate.login.signupSubmit': 'Create free account', // ALTA
+  'gate.login.signupLink': 'Create a free account', // ALTA
+  'gate.login.googleRedirect': 'Taking you to Google...', // ALTA
+  'gate.login.googleError': 'Couldn\'t connect to Google. Try again.', // ALTA
+  'gate.login.alreadyRegistered': 'This email already has an account. Try logging in.', // ALTA
+  'gate.login.signupFailed': 'Couldn\'t create your account right now.', // ALTA
+  'gate.login.notConfirmed': 'Your account isn\'t confirmed yet. We sent a new code to your email.', // ALTA
+  'gate.login.wrong': 'Wrong email or password.', // ALTA
+  'gate.forgot.needEmail': 'Type your email in the field above first.', // ALTA
+  'gate.forgot.failed': 'Couldn\'t send the email right now.', // ALTA
+  'gate.forgot.sent': 'We sent you a link to reset your password.', // ALTA
+  'gate.verify.title': 'Confirm your email', // ALTA
+  'gate.verify.subBefore': 'We sent a code to ', // ALTA
+  'gate.verify.subAfter': '. Enter it here to activate your account.', // ALTA
+  'gate.verify.codeLabel': 'Confirmation code', // ALTA
+  'gate.verify.submit': 'Confirm', // ALTA
+  'gate.verify.resend': 'Resend code', // ALTA
+  'gate.verify.resendIn': 'Resend code ({s}s)', // ALTA
+  'gate.verify.back': 'Use another email', // ALTA
+  'gate.verify.note': 'Didn\'t get it? Check your spam folder. You can also tap the "Activate my account" button in the email.', // ALTA
+  'gate.verify.incomplete': 'Enter the full code.', // ALTA
+  'gate.verify.invalid': 'That code doesn\'t work. Check the numbers or tap "Resend code".', // ALTA
+  'gate.verify.activated': 'Account activated! Logging you in...', // ALTA
+  'gate.verify.activatedElsewhere': 'Your account was activated! Logging you in...', // ALTA
+  'gate.verify.resendFailed': 'Couldn\'t resend right now. Wait a bit and try again.', // ALTA
+  'gate.verify.resent': 'We sent a new code.', // ALTA
+  'gate.newPass.title': 'Create a new password', // ALTA
+  'gate.newPass.sub': 'Choose the password you\'ll use from now on.', // ALTA
+  'gate.newPass.label': 'New password', // ALTA
+  'gate.newPass.ph': 'New password (at least 6 characters)', // ALTA
+  'gate.newPass.repeat': 'Repeat the new password', // ALTA
+  'gate.newPass.submit': 'Save new password', // ALTA
+  'gate.newPass.mismatch': 'The two passwords don\'t match.', // ALTA
+  'gate.newPass.same': 'The new password has to be different from the old one.', // ALTA
+  'gate.newPass.failed': 'Couldn\'t save right now. Ask for a new link in "Forgot your password?".', // ALTA
+  'gate.newPass.saved': 'New password saved!', // ALTA
+  'gate.link.confirmar.title': 'Activate your account', // ALTA
+  'gate.link.confirmar.sub': 'Tap the button to confirm your email and log in.', // ALTA
+  'gate.link.confirmar.btn': 'Activate my account', // ALTA
+  'gate.link.confirmar.fail': 'This link was already used or has expired. If you already activated your account, just log in with your email and password.', // ALTA
+  'gate.link.entrar.title': 'Log in to the app', // ALTA
+  'gate.link.entrar.sub': 'Tap the button to log in to your account.', // ALTA
+  'gate.link.entrar.ok': 'Done! Logging you in...', // ALTA
+  'gate.link.entrar.fail': 'This link was already used or has expired. Log in with your email and password or ask for a new link.', // ALTA
+  'gate.link.novaSenha.sub': 'Tap the button to choose your new password.', // ALTA
+  'gate.link.novaSenha.btn': 'Create new password', // ALTA
+  'gate.link.novaSenha.fail': 'This link was already used or has expired. Ask for another one in "Forgot your password?".', // ALTA
+  'gate.link.trocarEmail.title': 'Confirm your new email', // ALTA
+  'gate.link.trocarEmail.sub': 'Tap the button to confirm the email change.', // ALTA
+  'gate.link.trocarEmail.btn': 'Confirm email', // ALTA
+  'gate.link.trocarEmail.ok': 'Email confirmed! Logging you in...', // ALTA
+  'gate.link.trocarEmail.fail': 'This link was already used or has expired. Ask for the email change again.', // ALTA
+  'gate.link.toLogin': 'Go to login', // ALTA
+  'gate.link.otherAddress': 'Confirmed! Now also tap the button in the email sent to your other address.', // ALTA
+  'gate.choose.title': 'Which language do you want to learn?', // ALTA
+  'gate.choose.foot': 'You can add more courses later from the flag menu.', // ALTA
+  'gate.exp.title': 'Do you already know some {lang}?', // ALTA
+  'gate.exp.sub': 'This only adjusts how you start. You can change it later, anytime.', // ALTA
+  'gate.exp.beginner': 'I\'m a beginner', // ALTA
+  'gate.exp.knows': 'I know the basics', // ALTA
+  'gate.choose.footTitle': 'You can change this later', // ALTA
+  'gate.exp.beginnerDesc': 'You start from the first lesson.', // ALTA
+  'gate.exp.knowsDesc': 'You get an invite to the Level Test and skip what you already know.', // ALTA
+  'gate.login.emailLabel': 'Email', // ALTA
+  'gate.login.emailPh': 'you@email.com', // ALTA
+  'gate.login.passwordLabel': 'Password', // ALTA
+  'gate.login.noAccount': 'Don\'t have an account?', // ALTA
+  'gate.signup.back': 'Back', // ALTA
+  'gate.signup.step': 'Step {n} of 3', // ALTA
+  'gate.signup.haveAccount': 'Already have an account?', // ALTA
+  'gate.signup.loginLink': 'Log in', // ALTA
+  'gate.signup.methodTitle': 'Create your account and start learning {lang}', // ALTA
+  'gate.signup.methodSub': 'It\'s free. Choose how you\'d like to sign up.', // ALTA
+  'gate.signup.withEmail': 'Continue with email', // ALTA
+  'gate.signup.dataTitle': 'Your details', // ALTA
+  'gate.signup.dataSub': 'Your name and your @ appear on your profile.', // ALTA
+  'gate.signup.name': 'Name', // ALTA
+  'gate.signup.namePh': 'Your name', // ALTA
+  'gate.signup.username': 'Your @', // ALTA
+  'gate.signup.userFree': '@{u} is available.', // ALTA
+  'gate.signup.userTaken': '@{u} is already taken. How about one of these?', // ALTA
+  'gate.signup.userTakenNoSugg': '@{u} is already taken.', // ALTA
+  'gate.signup.userReserved': '@{u} can\'t be used. How about one of these?', // ALTA
+  'gate.signup.userReservedNoSugg': '@{u} can\'t be used.', // ALTA
+  'gate.signup.userInvalid': 'Use 3 to 24 letters or numbers, with dots only between them.', // ALTA
+  'gate.signup.userChecking': 'Checking...', // ALTA
+  'gate.signup.userCheckFailed': 'Couldn\'t check right now. If the @ is taken, you\'ll pick another one after the code.', // ALTA
+  'gate.signup.userHelp': 'We build your @ from your name; you can change it now. Use letters, numbers and dots. Once your account is created, it can\'t be changed.', // ALTA
+  'gate.signup.userPickFree': 'Pick an available @.', // ALTA
+  'gate.signup.needName': 'Enter your name.', // ALTA
+  'gate.signup.badEmail': 'Check the email address.', // ALTA
+  'gate.signup.shortPassword': 'The password needs at least 6 characters.', // ALTA
+  'gate.signup.retryTitle': 'Choose another @', // ALTA
+  'gate.signup.retrySub': 'Someone took @{u} while you were creating your account. Pick another one to continue.', // ALTA
+  'gate.signup.retrySave': 'Save and continue', // ALTA
+  'gate.signup.passwordPh': 'Create a password (at least 6 characters)', // ALTA
 };

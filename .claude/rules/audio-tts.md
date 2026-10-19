@@ -17,4 +17,7 @@ Procedimento: skill `audio-tts`. Histórico: `docs/historico/05-*`, `07-*` (cama
   (`SPOKEN_RULES_VERSION` e `TTS_SPOKEN_RULES_VERSION_BY_LANG`) e rodar os 2 testes.
 - Voz Chirp 3 HD Achernar (fr-FR, cmn-CN, pt-BR). Chave só em Secrets (`GCP_TTS_KEY` no GitHub, `TTS_PROVIDER_API_KEY`
   no Supabase); nunca em arquivo/commit/chat.
+- Diálogos (decisão da dona, 2026-10-15; vale para todo idioma que tiver diálogo): duas vozes alternando por fala,
+  feminina Achernar (padrão) e masculina Charon (ex.: `pt-BR-Chirp3-HD-Charon`); falas soltas usam só a Achernar.
+  Sotaque do pt: brasileiro genérico, base paulista. Ainda não implementado no pipeline; implementar com a E7/E9.
 - TTS por Field: só ação explícita, idempotente por `generationKey`; cota mensal por conta; nunca gerar em Review/Preview.

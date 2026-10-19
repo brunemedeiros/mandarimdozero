@@ -808,7 +808,7 @@ function wireProfileEditModal(){
     });
 
     saveBtn.disabled = false;
-    saveBtn.textContent = t('profile.save');
+    saveBtn.textContent = t('ui.profileEdit.save');
 
     if (!result.ok){
       errorEl.textContent = result.error;

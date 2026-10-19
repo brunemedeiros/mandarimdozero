@@ -63,7 +63,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
         if (process.env.SHOTS) { await page.screenshot({ path: `${process.env.SHOTS}/${app}-adicionar-curso-en.png` }); }
         await page.evaluate(() => document.querySelector('.add-course-card').click());
         const modal = await page.evaluate(() => ({ disp: document.getElementById('ui-language-confirm-modal').style.display, body: document.getElementById('ui-language-confirm-body').textContent, add: document.getElementById('add-course-overlay').style.display }));
-        check(`${tag}: escolher um curso abre o aviso de curso novo e fecha a tela`, modal.disp === 'flex' && /curso novo, com progresso próprio/.test(modal.body) && modal.add === 'none', modal);
+        check(`${tag}: escolher um curso abre o aviso de curso novo e fecha a tela`, modal.disp === 'flex' && /progresso (próprio|é separado)/.test(modal.body) /* texto novo do aviso de curso (2026-10-18) */ && modal.add === 'none', modal);
         await page.evaluate(() => document.getElementById('ui-language-confirm-no').click());
       }
       check(`${tag}: sem erro de script`, errs.length === 0, errs);

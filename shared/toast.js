@@ -36,12 +36,25 @@ function toastTopOffset(){
   return Math.max(FALLBACK, Math.round(maxBottom + 12));
 }
 
+// Tempo na tela pelo tamanho do texto (antes eram 2 s fixos, curto demais para ler; etapa 2 do plano "Voz da
+// Prof. Brune", 2026-10-19): 4 s no mínimo, uns 60 ms por letra, até 10 s. Passar o mouse segura o aviso.
+// #toast-layer tem role="status" (aria-live) no HTML: leitor de tela anuncia cada aviso.
+function toastDurationMs(msg){
+  return Math.min(10000, Math.max(4000, String(msg || '').length * 60));
+}
+
 function showToast(msg){
   const layer = document.getElementById('toast-layer');
+  if (!layer.hasAttribute('role')){ layer.setAttribute('role', 'status'); layer.setAttribute('aria-live', 'polite'); }
   layer.style.top = toastTopOffset() + 'px';
   const el = document.createElement('div');
   el.className = 'toast';
   el.textContent = msg;
   layer.appendChild(el);
-  setTimeout(() => el.remove(), 2000);
+  let timer = null, removal = null;
+  const leave = () => { el.classList.add('saindo'); removal = setTimeout(() => el.remove(), 300); };
+  const start = (ms) => { clearTimeout(timer); timer = setTimeout(leave, ms); };
+  el.addEventListener('mouseenter', () => { clearTimeout(timer); clearTimeout(removal); el.classList.remove('saindo'); });
+  el.addEventListener('mouseleave', () => start(1500));
+  start(toastDurationMs(msg));
 }

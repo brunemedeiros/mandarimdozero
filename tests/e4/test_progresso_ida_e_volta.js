@@ -79,6 +79,9 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       applySerializedState(fresh2); progressLoadedOk = false; await loadState();
       out.after2 = JSON.parse(JSON.stringify(serializeState()));
       out.mutatedIds = study.slice(0, 5).map(c => c.id);
+      // `released` só em cartão que a Revisão libera (unidade concluída) -- nunca em cartão ainda bloqueado
+      out.releasedNotEligible = STATE.cards.filter(c => c.released && STATE.unitProgress[c.unitId] && !STATE.unitProgress[c.unitId].completed).map(c => c.id);
+      out.nReleased = STATE.cards.filter(c => c.released).length;
       return out;
     });
     check(`${lang}: salvou na tabela`, r.saved && r.blockKeys.length >= 1, r.blockKeys);
@@ -92,8 +95,11 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     const FSRS = ['reps', 'interval', 'stability', 'difficulty', 'state', 'lastReview', 'due', 'lapses'];
     const badMut = r.mutatedIds.filter(id => FSRS.some(f => JSON.stringify(sb.get(id)[f]) !== JSON.stringify((sa.get(id) || {})[f])));
     check(`${lang}: os 5 cartões estudados voltam com o FSRS idêntico`, badMut.length === 0, badMut);
-    // cartões não estudados: o carregamento só pode acrescentar a marca de migração (fsrsMigrated)
-    let strange = null; sb.forEach((c, k) => { if (strange) return; const o = sa.get(k) || {}; const ks = [...new Set([...Object.keys(c), ...Object.keys(o)])].filter(x => x !== 'fsrsMigrated' && JSON.stringify(c[x]) !== JSON.stringify(o[x])); if (ks.length) strange = { id: k, campos: ks }; });
+    // cartões não estudados: o carregamento só pode acrescentar a marca de migração (fsrsMigrated) e, no fr, a marca
+    // `released` (Etapa 0 do currículo, 2026-10-18: cartão de unidade concluída ganha a marca do portão de lição no
+    // carregamento). A marca só pode ser true e só em cartão que a Revisão já liberava.
+    const okRelease = (x, c, o) => x === 'released' && lang === 'fr' && c.released === undefined && o.released === true;
+    let strange = null; sb.forEach((c, k) => { if (strange) return; const o = sa.get(k) || {}; const ks = [...new Set([...Object.keys(c), ...Object.keys(o)])].filter(x => x !== 'fsrsMigrated' && !okRelease(x, c, o) && JSON.stringify(c[x]) !== JSON.stringify(o[x])); if (ks.length) strange = { id: k, campos: ks }; });
     check(`${lang}: nenhum outro campo de cartão muda no carregamento`, !strange, strange);
     check(`${lang}: progresso das unidades volta igual`, JSON.stringify(r.before.unitProgress) === JSON.stringify(r.after.unitProgress));
     // estabilidade: um segundo ciclo salvar/carregar não muda mais nada (o estado é ponto fixo)
@@ -103,6 +109,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     const IGN = new Set(['cards', 'hanziCards', 'periodXp']);
     const diffKeys = Object.keys(r.before).filter(k => !IGN.has(k) && JSON.stringify(r.before[k]) !== JSON.stringify(r.after[k]));
     check(`${lang}: demais campos do estado voltam iguais`, diffKeys.length === 0, diffKeys);
+    check(`${lang}: \`released\` só em cartão de unidade concluída (fr) / nunca (zh)`, r.releasedNotEligible.length === 0 && (lang === 'fr' ? r.nReleased > 0 : r.nReleased === 0), [r.nReleased, r.releasedNotEligible.slice(0, 3)]);
     check(`${lang}: sem erro de página`, errs.length === 0, errs);
     await ctx.close();
   }
