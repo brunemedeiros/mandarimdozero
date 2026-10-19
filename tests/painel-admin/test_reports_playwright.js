@@ -43,7 +43,7 @@ const ANTES = () => {
 
     // ---- quadro ----
     L('tela cheia: sem Ranking ao lado', await p.evaluate(() => getComputedStyle(document.querySelector('.right-cards')).display === 'none'));
-    L('título, as 5 abas do Admin e Reports ativa', (await p.innerText('[data-trp="pagina"] header')).includes('Reports') && JSON.stringify(await p.$$eval('#view-admin-badges [data-admin-section]', l => l.map(b => b.dataset.adminSection))) === '["badges","analytics","notifications","reports","premium"]' && await p.$eval('[data-admin-section="reports"]', b => b.classList.contains('is-active')));
+    L('título, as 6 abas do Admin (a de Privacidade é temporária) e Reports ativa', (await p.innerText('[data-trp="pagina"] header')).includes('Reports') && JSON.stringify(await p.$$eval('#view-admin-badges [data-admin-section]', l => l.map(b => b.dataset.adminSection))) === '["badges","analytics","notifications","reports","premium","privacy"]' && await p.$eval('[data-admin-section="reports"]', b => b.classList.contains('is-active')));
     L('5 reports, o mais recente primeiro', (await rows()).length === 5 && (await ids()) === '1,2,3,4,5', await ids());
     const r1 = (await rows())[0];
     L('linha: categoria, trecho, nome da conta, Francês, tela, status Novo', r1.includes('Áudio') && r1.includes('O áudio da lição 3') && r1.includes('Ana Souza') && r1.includes('Francês') && r1.includes('Estudo') && r1.includes('Novo'), r1);

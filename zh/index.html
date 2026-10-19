@@ -2048,6 +2048,11 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 /* Observação da professora (depois de responder) e "Quase lá" (digitar) -- Banco de Revisão */
 .review-observation{ display:flex; flex-direction:column; gap:2px; margin:12px 0; padding:10px 14px; background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:var(--radius); color:var(--ink); font-size:14px; line-height:1.45; text-align:left; white-space:pre-line; }
 .review-observation strong{ font-size:12px; font-weight:800; color:var(--ink-soft); }
+.privacy-draft{ max-width:760px; margin:0 auto; padding:4px 0 24px; line-height:1.55; }
+.privacy-draft-h{ margin:22px 0 6px; font-size:17px; }
+.privacy-draft-p{ margin:0 0 10px; }
+.privacy-draft-list{ margin:0 0 10px; padding-left:20px; }
+.privacy-draft-list li{ margin-bottom:6px; }
 .review-almost{ margin:10px 0 0; text-align:center; font-weight:800; font-size:14px; color:var(--ink); }
 .grade-buttons{ display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:18px; }
 .grade-btn{
@@ -5053,12 +5058,14 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="notifications" data-i18n="panel.tab.notifications">Notificações</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="reports" data-i18n="panel.tab.reports">Reports</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="premium" data-i18n="panel.tab.plans">Planos</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="privacy" data-i18n="panel.tab.privacy">Privacidade</button>
     </div>
     <div id="admin-badges-content"></div>
     <div id="admin-analytics-content" style="display:none;"></div>
     <div id="admin-notifications-content" style="display:none;"></div>
     <div id="admin-reports-content" style="display:none;"></div>
     <div id="admin-premium-content" style="display:none;"></div>
+    <div id="admin-privacy-content" style="display:none;"></div>
   </div>
 
   <!-- ===== PAINEL DA PROFESSORA (papel Professora, migration 075/076; não depende do Admin Mode) ===== -->
@@ -5615,6 +5622,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/admin-students.js"></script>
 <script src="../shared/admin-plans-ui.js"></script>
 <script src="../shared/admin-premium.js"></script>
+<script src="../shared/privacy-draft.js"></script>
 <script src="../shared/flashcard-model.js"></script>
 <script src="../shared/study-trail-model.js"></script>
 <script src="../shared/trail-state-model.js"></script>

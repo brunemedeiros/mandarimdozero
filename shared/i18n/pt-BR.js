@@ -2575,6 +2575,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'panel.tab.notifications': 'Notificações',
   'panel.tab.reports': 'Reports',
   'panel.tab.plans': 'Planos',
+  'panel.tab.privacy': 'Privacidade',
   'panel.teacher.title': 'Painel da professora',
   'panel.teacher.sub': 'Seus alunos, os cartões e as aulas de cada um e os materiais que você compartilha.',
   'panel.teacher.aria': 'Seção do painel da professora',

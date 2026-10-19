@@ -2559,6 +2559,7 @@ window.I18N_CATALOG['en'] = {
   'panel.tab.notifications': 'Notifications', // ALTA
   'panel.tab.reports': 'Reports', // ALTA
   'panel.tab.plans': 'Plans', // ALTA
+  'panel.tab.privacy': 'Privacy', // ALTA
   'panel.teacher.title': 'Teacher panel', // ALTA
   'panel.teacher.sub': 'Your students, their cards and classes, and the materials you share.', // ALTA
   'panel.teacher.aria': 'Teacher panel section', // ALTA
