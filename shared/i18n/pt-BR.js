@@ -159,6 +159,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'menu.admin': '🛠️ Painel de Admin',
   'sidebar.collapse': 'Recolher menu',
   'sidebar.expand': 'Expandir menu',
+  'sidebar.more': 'Mais',
   'menu.logout': 'Sair da conta',
   'menu.conjugation': '✍️ Conjugação',
   'menu.challenges': '🎯 Desafios',
