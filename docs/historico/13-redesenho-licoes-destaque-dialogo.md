@@ -352,5 +352,9 @@ subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do si
 - **Erros do francês em vermelho**: regras que usavam `--seal-red-dark` (azul no fr) passaram para `--error-red-text` /
   `--error-red` (erros de formulário, nota de login, ditado, exportar/importar, item "perigo" do menu, apagar foto/badge).
 - Teste: `tests/acessibilidade/test_playwright.js` 60/60 (fr e zh, claro e escuro).
-- Pendente com a dona: textos dos avisos no banco (dia 1 "esqueceu de mim?", dia 7 "streak dormindo", "Quase lá" com zero
-  lições) e o texto da janela da sequência; deploy da `notification-cron`.
+- Aprovado pela dona (2026-10-19) e publicado pelo PR #363. Banco da produção, `notification_templates`:
+  `user_inactive_1` (ids 1, 3, 79, 81, 161) com texto novo ("Que tal praticar um pouquinho de francês/chinês hoje? Cinco
+  minutinhos já valem o estudo do dia." e o equivalente em inglês para francês, chinês e português); `user_inactive_7`
+  (ids 14, 16, 94, 93, 168) e `study_goal_remaining` (ids 48, 50, 130, 129, 160) desativados (`active=false`), cada
+  combinação ainda com pelo menos uma variante ativa. Janela da sequência: "Volte amanhã para manter sua sequência."
+  (en: "Come back tomorrow to keep your streak going.").
