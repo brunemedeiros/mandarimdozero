@@ -40,7 +40,7 @@ const ANKI_PARSER_ERROR_MESSAGES = {
   invalid_sqlite: 'A coleção de cartões deste .apkg está corrompida ou num formato não reconhecido.',
   empty_collection: 'A tabela "col" desta coleção está vazia.',
   malformed_col_table: 'Não foi possível ler a tabela "col" desta coleção.',
-  malformed_notes_cards: 'Não foi possível ler as tabelas de notas/cartões desta coleção.',
+  malformed_notes_cards: 'Não foi possível ler os itens e cartões desta coleção.',
   unsupported_format_zstd: 'Este .apkg usa o formato mais novo do Anki, ainda não suportado por este importador. No Anki, ao exportar, marque a opção "Suporte a versões legadas do Anki" (ou "Support older Anki versions") para gerar um pacote compatível, e tente de novo.',
   unsupported_format_protobuf: 'Este .apkg foi exportado num formato mais novo do Anki, ainda não suportado por este importador. No Anki, ao exportar, marque a opção "Suporte a versões legadas do Anki" (ou "Support older Anki versions") para gerar um pacote compatível, e tente de novo.',
 };

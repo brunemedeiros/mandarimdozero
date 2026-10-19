@@ -383,7 +383,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
     const frontRaw = extractAnkiMediaRefs(rawFieldByName(classification.frontFieldName));
     const backRaw = extractAnkiMediaRefs(rawFieldByName(classification.backFieldName));
     if (!frontRaw.text || !backRaw.text){
-      return { ok: false, reason: 'empty_content', warning: ankiImportText('ankiImport.warn.emptyFrontBack', 'Frente ou verso ficou vazio depois de tirar a formatação e a mídia. Note pulada.') };
+      return { ok: false, reason: 'empty_content', warning: ankiImportText('ankiImport.warn.emptyFrontBack', 'Frente ou verso ficou vazio depois de tirar a formatação e a mídia. Item pulado.') };
     }
     const frontField = createFieldState({ lang: null, content: { value: frontRaw.text } });
     const backField = createFieldState({ lang: null, content: { value: backRaw.text } });
@@ -416,7 +416,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
     const hanziRaw = extractAnkiMediaRefs(rawFieldByName(classification.hanziFieldName));
     const translationRaw = extractAnkiMediaRefs(rawFieldByName(classification.translationFieldName));
     if (!pinyinRaw.text || !hanziRaw.text || !translationRaw.text){
-      return { ok: false, reason: 'empty_content', warning: ankiImportText('ankiImport.warn.emptyZh', 'Pinyin, caractere ou tradução ficou vazio depois de tirar a formatação e a mídia. Note pulada.') };
+      return { ok: false, reason: 'empty_content', warning: ankiImportText('ankiImport.warn.emptyZh', 'Pinyin, caractere ou tradução ficou vazio depois de tirar a formatação e a mídia. Item pulado.') };
     }
     const hanziField = createFieldState({ lang: 'zh', content: { value: hanziRaw.text } });
     const pinyinField = createFieldState({ lang: 'zh-pinyin', content: { value: pinyinRaw.text } });
@@ -444,7 +444,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
     const promptRaw = extractAnkiMediaRefs(rawFieldByName(classification.promptFieldName));
     const answerRaw = extractAnkiMediaRefs(rawFieldByName(classification.answerFieldName));
     if (!promptRaw.text || !answerRaw.text){
-      return { ok: false, reason: 'empty_content', warning: ankiImportText('ankiImport.warn.emptyQA', 'Pergunta ou resposta ficou vazia depois de tirar a formatação e a mídia. Note pulada.') };
+      return { ok: false, reason: 'empty_content', warning: ankiImportText('ankiImport.warn.emptyQA', 'Pergunta ou resposta ficou vazia depois de tirar a formatação e a mídia. Item pulado.') };
     }
     const promptField = createFieldState({ lang: null, role: 'prompt', content: { value: promptRaw.text } });
     const answerField = createFieldState({ lang: null, role: 'answer', content: { value: answerRaw.text } });
@@ -473,12 +473,12 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
       // rejeitaria esta Note de qualquer jeito (validateNativeClozeStructure
       // exige tradução não-vazia); nunca inventamos uma. Erro recuperável,
       // não fatal.
-      return { ok: false, reason: 'cloze_missing_translation', warning: ankiImportText('ankiImport.warn.clozeNoTranslation', 'Este cartão Cloze não tem um 2º campo de tradução preenchido no Anki. O app exige uma tradução para este formato, então a Note foi pulada. Pode ser criada manualmente depois.') };
+      return { ok: false, reason: 'cloze_missing_translation', warning: ankiImportText('ankiImport.warn.clozeNoTranslation', 'Este cartão Cloze não tem um 2º campo de tradução preenchido no Anki. O app exige uma tradução para este formato, então o item foi pulado. Pode ser criado manualmente depois.') };
     }
     const { text: nativeSyntax, hintsDropped } = convertAnkiClozeToNativeSyntax(textClean.text);
     const marks = parseClozeMarks(nativeSyntax);
     if (!marks.length){
-      return { ok: false, reason: 'no_cloze_marks', warning: ankiImportText('ankiImport.warn.noClozeMarks', 'Nenhuma lacuna Cloze válida encontrada no texto. Note pulada.') };
+      return { ok: false, reason: 'no_cloze_marks', warning: ankiImportText('ankiImport.warn.noClozeMarks', 'Nenhuma lacuna Cloze válida encontrada no texto. Item pulado.') };
     }
     const textField = createFieldState({ lang: null, content: { value: nativeSyntax } });
     const translationField = createFieldState({ lang: null, content: { value: translationClean.text } });
@@ -498,7 +498,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
     };
   }
 
-  return { ok: false, reason: 'unrecognized_note_type', warning: ankiImportText('ankiImport.warn.unrecognized', 'Formato de cartão não reconhecido (não é um Básico/Básico invertido/Cloze/Digite a resposta reconhecível). Note pulada.') };
+  return { ok: false, reason: 'unrecognized_note_type', warning: ankiImportText('ankiImport.warn.unrecognized', 'Formato de cartão não reconhecido (não é um Básico/Básico invertido/Cloze/Digite a resposta reconhecível). Item pulado.') };
 }
 
 // ============================================================
@@ -666,13 +666,13 @@ function buildAnkiImportPlan(parseResult, { languageAppKey, existingRows }){
     const deckName = deckNames[0] || null;
     const deckPath = ankiDeckPathFromName(deckName);
     if (!model){
-      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: 'missing_model', warning: ankiImportText('ankiImport.warn.missingModel', 'Modelo de cartão referenciado por esta Note não existe na coleção. Note pulada.'), deckName, deckPath, tags: note.tags, normalizedTags };
+      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: 'missing_model', warning: ankiImportText('ankiImport.warn.missingModel', 'Modelo de cartão referenciado por este item não existe na coleção. Item pulado.'), deckName, deckPath, tags: note.tags, normalizedTags };
     }
     if (!modelCache.has(note.mid)) modelCache.set(note.mid, classifyAnkiNoteType(model));
     const classification = modelCache.get(note.mid);
 
     if (classification.kind === 'unrecognized'){
-      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: classification.reason || 'unrecognized_note_type', warning: ankiImportText('ankiImport.warn.unrecognizedType', 'Tipo de cartão do Anki não reconhecido de forma segura (não é Básico/Básico invertido/Cloze/Digite a resposta claro). Note pulada.'), deckName, deckPath, tags: note.tags, normalizedTags };
+      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: classification.reason || 'unrecognized_note_type', warning: ankiImportText('ankiImport.warn.unrecognizedType', 'Tipo de cartão do Anki não reconhecido de forma segura (não é Básico/Básico invertido/Cloze/Digite a resposta claro). Item pulado.'), deckName, deckPath, tags: note.tags, normalizedTags };
     }
 
     const mapped = mapAnkiNoteToNativeEditorState(note, model, classification, languageAppKey);

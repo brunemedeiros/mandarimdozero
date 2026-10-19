@@ -28,7 +28,14 @@ const STUB = `window.supabase={createClient(){return{auth:{getSession:async()=>(
     // Conquistas com níveis: BADGES é preenchido ao semear (depois de carregar o progresso).
     await page.waitForFunction(() => BADGES.length > 0, null, { timeout: 15000 }).catch(() => {});
     const r = await page.evaluate(() => ({ b: BADGES.map(b => [b.id, b.name, b.desc]), s: SPECIAL_BADGES.map(b => [b.id, b.name, b.desc]),
-      cat: typeof catalogBadgeText === 'function' ? [catalogBadgeText('student', 'name', 'X'), catalogBadgeText('novo-sem-traducao', 'name', 'Texto do banco')] : null }));
+      cat: typeof catalogBadgeText === 'function' ? [catalogBadgeText('student', 'name', 'X'), catalogBadgeText('novo-sem-traducao', 'name', 'Texto do banco'),
+        // Etapa 4: Embaixador/Pioneiro pelo gênero (como as trilhas), neutro sem gênero; descrição não tem gênero.
+        catalogBadgeText('ambassador', 'name', 'X'), catalogBadgeText('ambassador', 'name', 'X', 'feminine'), catalogBadgeText('ambassador', 'name', 'X', 'masculine'),
+        catalogBadgeText('pioneer', 'name', 'X', 'other'), catalogBadgeText('pioneer', 'name', 'X', 'feminine'), catalogBadgeText('pioneer', 'name', 'X', 'masculine'),
+        catalogBadgeText('student', 'desc', 'X', 'feminine'),
+        // Etapa 4: badge de cada professora (student_<...>): nome novo (115) e antigo (077) lidos do texto do banco
+        catalogBadgeText('student_abc123', 'name', 'Turma de Ana'), catalogBadgeText('student_abc123', 'name', 'Aluno/a do/a Prof. Ana'),
+        catalogBadgeText('student_abc123', 'desc', 'Estuda com esta professora.'), catalogBadgeText('student_abc123', 'name', 'Outro texto')] : null }));
     await ctx.close(); return r; };
   for (const site of ['fr', 'zh']) {
     const before = await grab(prev.address().port, site, ''); const pt = await grab(cur.address().port, site, '');
@@ -41,7 +48,12 @@ const STUB = `window.supabase={createClient(){return{auth:{getSession:async()=>(
     check(`${site}: em inglês, nomes mudam e nenhum vira chave`, en.b.length === pt.b.length && en.b.every((x, i) => x[1] !== pt.b[i][1]) && en.b.every(x => !x[1].startsWith('badge.') && !x[2].startsWith('badge.')));
     check(`${site}: Fundadora/Beta em inglês`, en.s[0][1] === 'Founder' && en.s[1][2].startsWith('Helped test'));
     check(`${site}: catálogo traduzido e fallback pro banco`, en.cat && en.cat[0] === "Prof. Brune's student" && en.cat[1] === 'Texto do banco');
-    check(`${site}: pt-BR do catálogo igual ao banco`, pt.cat && pt.cat[0] === 'Aluno/a da Prof. Brune');
+    // Etapa 4 (aprovado pela dona, 2026-10-19): o badge de aluno virou "Turma da Prof. Brune" (antes "Aluno/a da Prof. Brune", igual ao banco).
+    check(`${site}: pt-BR do catálogo com o nome aprovado na Etapa 4`, pt.cat && pt.cat[0] === 'Turma da Prof. Brune', pt.cat && pt.cat[0]);
+    check(`${site}: pt-BR Embaixador/Pioneiro pelo gênero (neutro, f, m)`, pt.cat && JSON.stringify(pt.cat.slice(2, 9)) === JSON.stringify(['Embaixador(a)', 'Embaixadora', 'Embaixador', 'Pioneiro(a)', 'Pioneira', 'Pioneiro', 'Estuda com a Prof. Brune']), pt.cat && pt.cat.slice(2, 9));
+    check(`${site}: pt-BR badge da professora (Turma de ..., antigo vira o novo, sem padrão fica o banco)`, pt.cat && JSON.stringify(pt.cat.slice(9)) === JSON.stringify(['Turma de Ana', 'Turma de Ana', 'Estuda com esta professora.', 'Outro texto']), pt.cat && pt.cat.slice(9));
+    check(`${site}: en badge da professora traduzido`, en.cat && JSON.stringify(en.cat.slice(9)) === JSON.stringify(["Ana's class", "Ana's class", 'Studies with this teacher.', 'Outro texto']), en.cat && en.cat.slice(9));
+    check(`${site}: en Ambassador/Pioneer iguais em qualquer gênero`, en.cat && JSON.stringify(en.cat.slice(2, 9)) === JSON.stringify(['Ambassador', 'Ambassador', 'Ambassador', 'Pioneer', 'Pioneer', 'Pioneer', 'Studies with Prof. Brune']), en.cat && en.cat.slice(2, 9));
   }
   await browser.close(); cur.close(); prev.close(); console.log(`${ok} ok, ${bad} falhas`); process.exit(bad ? 1 : 0);
 })();

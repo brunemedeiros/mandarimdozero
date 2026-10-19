@@ -124,7 +124,7 @@ async function fetchPublicProfileByUsername(username){
   const allBadgeIds = new Set(grantedIds);
   if (profile.featured_badge_id) allBadgeIds.add(profile.featured_badge_id);
   const badges = [...allBadgeIds]
-    .map(id => ({ id, ...resolveFeaturedBadge(id, catalog) }))
+    .map(id => ({ id, ...resolveFeaturedBadge(id, catalog, (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && profile.user_id === CURRENT_USER.id) ? ownProfileGender() : null) }))
     .filter(b => b.icon);
 
   const stats = (statsRes && !statsRes.error) ? statsRes.data : null;

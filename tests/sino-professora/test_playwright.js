@@ -23,6 +23,7 @@ const BELL_STUB = ([who, noAudience]) => {
   const ago = (min) => new Date(Date.now() - min * 60000).toISOString();
   window.__NOTIF = [
     { id: 1, user_id: 'P', audience: 'teacher', category: 'supervisao', event_type: 'teacher_invite_accepted', language_app_key: 'portugues', action_tab: 'teacher-panel', read_at: null, created_at: ago(5),
+      // aviso ANTIGO (frase de antes da Etapa 4 no body) com params: o sino monta a frase nova pelo t()
       body: 'Ana aceitou seu convite e agora é seu aluno/a de português 🎉', params: { name: 'Ana', via: 'invite' } },
     { id: 2, user_id: 'P', audience: 'teacher', category: 'mural', event_type: 'mural_post', language_app_key: window.__appKey, action_tab: 'teacher-mural', read_at: null, created_at: ago(30),
       body: '📌 Bia postou no mural (turma Sábado): Oi, prof!', params: { name: 'Bia', classroom: 'Sábado', snippet: 'Oi, prof!' } },
@@ -137,10 +138,16 @@ const BELL_STUB = ([who, noAudience]) => {
       await page.waitForSelector('.tbell-item');
       L('lista: 6 avisos da professora, nenhum do sino normal', await ev(() => document.querySelectorAll('.tbell-item').length === 6 && !document.querySelector('#tbell-panel').textContent.includes('XP')));
       const texts = await ev(() => [...document.querySelectorAll('.tbell-item-text')].map(e => e.textContent));
-      L('frase pelo t(): aceitou (aluno de português)', texts[0] === 'Ana aceitou seu convite e agora é seu aluno/a de português 🎉', texts[0]);
+      // Etapa 4 (aprovado pela dona, 2026-10-19): "agora estuda {idioma} com você" no lugar de "agora é seu aluno/a", também nos avisos antigos
+      L('frase pelo t(): aceitou (estuda português), aviso antigo com a frase nova', texts[0] === 'Ana aceitou seu convite e agora estuda português com você 🎉', texts[0]);
       L('frase pelo t(): post na turma', texts[1] === 'Bia postou no mural (turma Sábado): Oi, prof!', texts[1]);
-      L('aluno sumido pelo t(): lista com plural de dias', texts[3] === 'Sem aparecer há alguns dias: Caio (3 dias), Duda (1 dia). Talvez seja hora de mandar um alô 👋', texts[3]);
+      L('aluno sumido pelo t(): lista com plural de dias', texts[3] === 'Uns dias sem prática por aí: Caio (3 dias), Duda (1 dia). Um recado seu pode ajudar a retomar o ritmo.', texts[3]); // Etapa 4: tom da 114
       L('sem params: mostra o body gravado', texts[5] === 'Frase antiga gravada sem params', texts[5]);
+      // Etapa 4: entrou pelo link / entrou na turma pelo link, com o body antigo ("agora é seu aluno/a") e params: frase nova
+      const viaLink = await ev(() => [
+        teacherBellText({ event_type: 'teacher_invite_accepted', language_app_key: 'frances', body: 'Ana entrou pelo seu link e agora é seu aluno/a de francês 🎉', params: { name: 'Ana', via: 'link' } }),
+        teacherBellText({ event_type: 'mural_classroom_join', language_app_key: 'mandarim', body: '🏫 Ana entrou pelo link na turma Sábado e agora é seu aluno/a de chinês 🎉', params: { name: 'Ana', classroom: 'Sábado', new_link: true } })]);
+      L('frase pelo t(): entrou pelo link / na turma (estuda ... com você)', viaLink[0] === 'Ana entrou pelo seu link e agora estuda francês com você 🎉' && viaLink[1] === 'Ana entrou pelo link na turma Sábado e agora estuda chinês com você 🎉', viaLink);
       L('nome com HTML escapado (sem XSS)', await ev(() => !document.querySelector('#tbell-panel img[src="x"]') && !window.__xss && document.querySelector('#tbell-panel').textContent.includes('<img src=x')));
       L('idioma do aluno em cada aviso (português, chinês...)', await ev(() => [...document.querySelectorAll('.tbell-lang')].map(e => e.textContent).join(',')) === `português,${lang === 'fr' ? 'francês' : 'chinês'},${lang === 'fr' ? 'chinês' : 'francês'},chinês,francês,português`);
       L('aviso de mural de outro idioma diz onde responder', await ev(() => document.querySelectorAll('.tbell-item-note').length === 2));
@@ -175,9 +182,9 @@ const BELL_STUB = ([who, noAudience]) => {
       await ev(() => setUiLang('en'));
       await page.waitForFunction(() => document.querySelector('#tbell-btn')?.textContent.includes('Student notifications'));
       const en = await ev(() => [...document.querySelectorAll('.tbell-item-text')].map(e => e.textContent));
-      L('inglês: frase montada no idioma de quem lê (aviso gravado em português)', en[0] === 'Ana accepted your invitation and is now your Portuguese student 🎉', en[0]);
+      L('inglês: frase montada no idioma de quem lê (aviso gravado em português)', en[0] === 'Ana accepted your invitation and now studies Portuguese with you 🎉', en[0]);
       L('inglês: nenhuma palavra em português nos avisos com params', !/aceitou|postou|comentou|recusou|aluno\/a|turma/.test([en[0], en[1], en[2], en[3], en[4]].join(' ')), en);
-      L('inglês: aluno sumido com a frase e o plural em inglês', en[3] === "Haven't shown up in a few days: Caio (3 days), Duda (1 day). Maybe it's time to say hi 👋", en[3]);
+      L('inglês: aluno sumido com a frase e o plural em inglês', en[3] === 'A few days without practice over there: Caio (3 days), Duda (1 day). A note from you can help them get back into the rhythm.', en[3]); // Etapa 4
       L('inglês: idioma do aluno em inglês', await ev(() => document.querySelector('.tbell-lang').textContent === 'Portuguese'));
       await shot('en');
       await ev(() => setUiLang('pt-BR'));
