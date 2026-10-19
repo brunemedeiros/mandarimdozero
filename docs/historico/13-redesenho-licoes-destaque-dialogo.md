@@ -378,3 +378,16 @@ subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do si
 - `review-bank-agent`: `engine.generated.mjs` regerado (comportamento igual lá, tudo em português). Deploy NÃO feito de propósito: a v9 da
   produção usa o motor do commit `0c851e3` (PR #347, outra sessão, FSRS único da 112), que não está na `main`; publicar a `main`
   desfaria isso. Quando o #347 for mesclado, a regeração do motor junta as duas coisas e aí sim publica.
+
+## Etapa 4 do plano "Voz da Prof. Brune": novo padrão de escrita (2026-10-19)
+- Auditoria: `docs/i18n/etapa4-auditoria-escrita.md`. Achado principal: avisos com número na frente de palavra no plural
+  ("1 dias de sequência" 167 vezes em 30 dias, "sequência de 1 dias" 156, "faltam 1 missões" 44).
+- Mecânico (site): 188 chaves sem "--", sem "pra", com plural de verdade (`tp(chave, n === 1 ? 1 : 2, …)`) e sem jargão
+  técnico cru ("SQLite", "pinyinFieldId", erro cru da prévia). "O que você aprendeu" do zh saiu do português fixo.
+- Aprovado pela dona: avisos sem culpa (sequência, sumiço, revisão, badge, ranking com texto novo, "mandarim"); convites
+  "te convidou para as aulas de…"/"agora estuda … com você"; badge "Turma da Prof. Brune" e "Turma de X" (professoras novas,
+  en "{name}'s class"); Embaixador/Pioneiro pelo gênero, neutro "Embaixador(a)"/"Pioneiro(a)"; "Note" vira "item" na tela;
+  "report" continua "report"; "Aluno(a)" de reserva continua (nenhum perfil fica sem nome e sem @).
+- Banco (Staging e produção): 114 (100 modelos trocados na produção; texto antigo em `docs/i18n/etapa4-modelos-antes.json`),
+  115 (5 funções sem "aluno/a" + `_notif_text_en`/`_teacher_notice_params` aceitando frase antiga e nova). Badge `student`
+  da produção atualizado. Pendência pequena: `_teacher_notice_params` não lê "(1 dia)" no singular quando o aviso não tem params.
