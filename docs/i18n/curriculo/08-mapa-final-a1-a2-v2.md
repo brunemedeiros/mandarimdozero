@@ -114,7 +114,7 @@ Lições: unidade de vocabulário = 3 lições + **Revisão da unidade** (antes 
 
 #### A1 M1 · Apresentar-se (`A1-m1`; hoje "Primeiros contatos")
 Consigo: cumprimentar e despedir-se escolhendo *tu* ou *vous*; dizer nome e nacionalidade no masculino e no feminino; dizer a idade (1 a 69) e
-perguntar a do outro; dizer a profissão sem artigo; reagir (*Et toi ? Moi aussi.*) e pedir para repetir. 7 unidades (5 + 2), 54 cartões, ~3h20.
+perguntar a do outro; dizer a profissão sem artigo; reagir (*Et toi ? Moi aussi.*) e pedir para repetir. 7 unidades (5 + 2), 57 cartões, ~3h20.
 
 | Posição (id) | Título visível | Função | Gramática | Vocabulário-chave | Notas | Muda |
 |---|---|---|---|---|---|---|
