@@ -44,10 +44,10 @@ const nb = (x) => String(x).replace(/\u00a0/g, ' ');
   const waitLang = (page, v) => page.waitForFunction((v) => getUiLang() === v && document.documentElement.lang === v &&
     document.title.replace(/\u00a0/g, ' ') === (v === 'en' ? 'Languages with Prof. Brune' : 'Idiomas com Prof. Brune'), v, { timeout: 5000 });
   const visible = (page, id) => page.waitForSelector('#' + id, { state: 'visible', timeout: 5000 });
-  const userState = (page, p) => page.evaluate((p) => ({ v: document.getElementById(p + '-username').value, msg: document.getElementById(p + '-username-msg').textContent,
-    cls: document.getElementById(p + '-username-box').className, inv: document.getElementById(p + '-username').getAttribute('aria-invalid'),
-    sugg: [...document.querySelectorAll('#' + p + '-username-sugg button')].map(b => b.textContent) }), p);
-  const waitMsg = (page, p, re) => page.waitForFunction(([p, src]) => new RegExp(src).test(document.getElementById(p + '-username-msg').textContent), [p, re.source], { timeout: 5000 });
+  const userState = (page, p) => page.evaluate((p) => ({ v: document.getElementById(p + '-arroba').value, msg: document.getElementById(p + '-arroba-msg').textContent,
+    cls: document.getElementById(p + '-arroba-box').className, inv: document.getElementById(p + '-arroba').getAttribute('aria-invalid'),
+    sugg: [...document.querySelectorAll('#' + p + '-arroba-sugg button')].map(b => b.textContent) }), p);
+  const waitMsg = (page, p, re) => page.waitForFunction(([p, src]) => new RegExp(src).test(document.getElementById(p + '-arroba-msg').textContent), [p, re.source], { timeout: 5000 });
 
   // 1) idioma inicial pelo navegador
   for (const [locale, want] of [['pt-BR', 'pt-BR'], ['pt-PT', 'pt-BR'], ['en-US', 'en'], ['es-ES', 'en'], ['fr-FR', 'en']]){
@@ -186,17 +186,17 @@ const nb = (x) => String(x).replace(/\u00a0/g, ' ');
     await page.waitForFunction(() => document.getElementById('signup-note').textContent.length > 0);
     check(`${tag}: com @ ocupado não cria a conta`, await page.evaluate((E) => document.getElementById('signup-note').textContent === (E ? 'Pick an available @.' : 'Escolha um @ livre.') && !window.__calls.some(c => c[0] === 'signUp'), E));
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/cadastro-3-ocupado-${tag}.png`, fullPage: true });
-    await page.click('#signup-username-sugg button:nth-child(2)');
+    await page.click('#signup-arroba-sugg button:nth-child(2)');
     u = await userState(page, 'signup');
     check(`${tag}: tocar na sugestão escolhe o @ livre`, u.v === 'raissa.lima2' && /ok/.test(u.cls) && u.inv === 'false' && (E ? /is available/ : /está livre/).test(u.msg) && u.sugg.length === 0, u);
-    await page.fill('#signup-username', 'ab');
+    await page.fill('#signup-arroba', 'ab');
     await waitMsg(page, 'signup', E ? /3 to 24/ : /3 a 24/);
     check(`${tag}: @ curto avisa as regras`, /ruim/.test((await userState(page, 'signup')).cls));
-    await page.fill('#signup-username', 'Admin!');
+    await page.fill('#signup-arroba', 'Admin!');
     await waitMsg(page, 'signup', E ? /can't be used/ : /não pode ser usado/);
     u = await userState(page, 'signup');
     check(`${tag}: maiúscula e símbolo somem; @ reservado sugere outros`, u.v === 'admin' && u.sugg.length === 3, u);
-    await page.fill('#signup-username', 'raissa.oficial');
+    await page.fill('#signup-arroba', 'raissa.oficial');
     await waitMsg(page, 'signup', E ? /is available/ : /está livre/);
     await page.fill('#signup-name', 'Raíssa Lima Souza');
     await page.waitForTimeout(500);
@@ -215,7 +215,7 @@ const nb = (x) => String(x).replace(/\u00a0/g, ' ');
     txt = await screenText(page, 'gate-signup-data');
     if (E) check(`${tag}: passo 3 sem português`, !PT_WORDS.test(txt), (txt.match(PT_WORDS) || [])[0]);
     check(`${tag}: passo 3 sem rolagem horizontal`, await noScroll());
-    check(`${tag}: campos do passo 3 com nome ligado (label for)`, await page.evaluate(() => ['signup-name', 'signup-username', 'signup-email', 'signup-password'].every(id => !!document.querySelector(`label[for="${id}"]`))));
+    check(`${tag}: campos do passo 3 com nome ligado (label for)`, await page.evaluate(() => ['signup-name', 'signup-arroba', 'signup-email', 'signup-password'].every(id => !!document.querySelector(`label[for="${id}"]`))));
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/cadastro-3-livre-${tag}.png`, fullPage: true });
     await page.click('#signup-submit');
     await visible(page, 'gate-verify');
@@ -224,7 +224,7 @@ const nb = (x) => String(x).replace(/\u00a0/g, ' ');
     check(`${tag}: guarda curso, idioma e @ até o código`, intent && intent.lang === 'fr' && intent.speak === want && intent.username === 'raissa.oficial' && intent.name === 'Raíssa Lima', intent);
     await page.click('#gate-verify-back-btn');
     await visible(page, 'gate-signup-data');
-    check(`${tag}: "Usar outro e-mail" volta para os dados, sem perder o que foi digitado`, await page.evaluate(() => document.getElementById('signup-name').value === 'Raíssa Lima' && document.getElementById('signup-username').value === 'raissa.oficial'));
+    check(`${tag}: "Usar outro e-mail" volta para os dados, sem perder o que foi digitado`, await page.evaluate(() => document.getElementById('signup-name').value === 'Raíssa Lima' && document.getElementById('signup-arroba').value === 'raissa.oficial'));
     await page.click('#signup-submit');
     await visible(page, 'gate-verify');
     await page.fill('#gate-code', '123456'); await page.click('#gate-verify-btn');
@@ -270,11 +270,11 @@ const nb = (x) => String(x).replace(/\u00a0/g, ' ');
     await page.fill('#gate-code', '123456'); await page.click('#gate-verify-btn');
     await visible(page, 'gate-signup-retry');
     await waitMsg(page, 'retry', /já é de outra pessoa/);
-    const r = await page.evaluate(() => ({ sub: document.getElementById('signup-retry-sub').textContent, v: document.getElementById('retry-username').value,
-      sugg: [...document.querySelectorAll('#retry-username-sugg button')].map(b => b.textContent) }));
+    const r = await page.evaluate(() => ({ sub: document.getElementById('signup-retry-sub').textContent, v: document.getElementById('retry-arroba').value,
+      sugg: [...document.querySelectorAll('#retry-arroba-sugg button')].map(b => b.textContent) }));
     check('retry: explica que alguém pegou o @ e sugere outros', /@nova\.pessoa/.test(r.sub) && r.v === 'nova.pessoa' && r.sugg.join('|') === '@nova.pessoa2|@nova.pessoa3', r);
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/cadastro-retry-dark-390.png`, fullPage: true });
-    await page.click('#retry-username-sugg button');
+    await page.click('#retry-arroba-sugg button');
     await page.click('#retry-submit');
     await visible(page, 'gate-choose-experience');
     check('retry: grava o @ novo e segue', await page.evaluate(() => window.__calls.filter(c => c[0] === 'rpc' && c[1][0] === 'claim_my_username').map(c => c[1][1].p_username).join('|') === 'nova.pessoa|nova.pessoa2'));
@@ -313,6 +313,32 @@ const nb = (x) => String(x).replace(/\u00a0/g, ' ');
     await page.evaluate(() => afterAuthResolved({ id: 'g2' }));
     await visible(page, 'gate-choose-language');
     check('Google pela tela Entrar (conta nova): escolha do curso', true);
+    await ctx.close();
+  }
+
+  // 8b) preenchimento automático do navegador (relato da dona, 2026-10-19): o e-mail não pode cair no campo do @
+  {
+    const { ctx, page, errors } = await open('pt-BR', 'dark', 390);
+    await page.click('#gate-signup-link'); await visible(page, 'gate-signup-course');
+    await page.click('#signup-grid .lang-card[data-lang="fr"]'); await visible(page, 'gate-signup-method');
+    await page.click('#signup-email-btn'); await visible(page, 'gate-signup-data');
+    const attrs = await page.evaluate(() => { const i = document.getElementById('signup-arroba'); return { ac: i.getAttribute('autocomplete'), name: i.name, id: i.id }; });
+    check('campo do @ não se apresenta como "usuário" para o navegador', attrs.ac === 'off' && !/user/i.test(attrs.name + attrs.id), attrs);
+    // o navegador preenche nome, e-mail e (por engano) o @ de uma vez, sem a pessoa digitar
+    await page.evaluate(() => {
+      const fill = (id, v) => { const el = document.getElementById(id); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); };
+      fill('signup-name', 'Brune Medeiros'); fill('signup-email', 'brunemed1310@gmail.com'); fill('signup-arroba', 'brunemed1310@gmail.com');
+    });
+    await waitMsg(page, 'signup', /está livre/);
+    let u = await userState(page, 'signup');
+    check('e-mail jogado no @ é desfeito e o @ volta a acompanhar o nome', u.v === 'brune.medeiros' && /@brune\.medeiros está livre/.test(u.msg), u);
+    // depois de a pessoa escolher o @, um e-mail jogado ali não apaga a escolha
+    await page.fill('#signup-arroba', 'brune.prof'); await waitMsg(page, 'signup', /brune\.prof está livre/);
+    await page.evaluate(() => { const el = document.getElementById('signup-arroba'); el.value = 'brunemed1310@gmail.com'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+    await page.waitForTimeout(400);
+    u = await userState(page, 'signup');
+    check('com o @ já escolhido, o e-mail jogado ali volta para a escolha', u.v === 'brune.prof', u);
+    check('preenchimento automático: sem erros de página', errors.length === 0, errors);
     await ctx.close();
   }
 

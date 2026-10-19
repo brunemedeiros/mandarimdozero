@@ -350,11 +350,11 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
         <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">👤</span><input type="text" id="signup-name" class="gate-input" autocomplete="name" maxlength="60" placeholder="Seu nome" data-i18n-attr="placeholder:gate.signup.namePh"></div>
       </div>
       <div class="cad-campo">
-        <label for="signup-username" data-i18n="gate.signup.username">Seu @</label>
-        <div class="cad-arroba" id="signup-username-box"><span class="pre" aria-hidden="true">@</span><input type="text" id="signup-username" class="gate-input" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="24" aria-describedby="signup-username-msg signup-username-help"><span class="st" id="signup-username-icon" aria-hidden="true"></span></div>
-        <p class="cad-msg" id="signup-username-msg" aria-live="polite"></p>
-        <div class="cad-sugestoes" id="signup-username-sugg"></div>
-        <p class="cad-ajuda" id="signup-username-help" data-i18n="gate.signup.userHelp">Montamos o @ a partir do seu nome; pode mudar agora. Use letras, números e ponto. Depois de criar a conta, ele não muda mais.</p>
+        <label for="signup-arroba" data-i18n="gate.signup.username">Seu @</label>
+        <div class="cad-arroba" id="signup-arroba-box"><span class="pre" aria-hidden="true">@</span><input type="text" id="signup-arroba" name="arroba" class="gate-input" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other" autocapitalize="none" spellcheck="false" maxlength="24" aria-describedby="signup-arroba-msg signup-arroba-help"><span class="st" id="signup-arroba-icon" aria-hidden="true"></span></div>
+        <p class="cad-msg" id="signup-arroba-msg" aria-live="polite"></p>
+        <div class="cad-sugestoes" id="signup-arroba-sugg"></div>
+        <p class="cad-ajuda" id="signup-arroba-help" data-i18n="gate.signup.userHelp">Montamos o @ a partir do seu nome; pode mudar agora. Use letras, números e ponto. Depois de criar a conta, ele não muda mais.</p>
       </div>
       <div class="cad-campo">
         <label for="signup-email" data-i18n="gate.login.emailLabel">E-mail</label>
@@ -380,11 +380,11 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
     </div>
     <form id="retry-form" novalidate>
       <div class="cad-campo">
-        <label for="retry-username" data-i18n="gate.signup.username">Seu @</label>
-        <div class="cad-arroba" id="retry-username-box"><span class="pre" aria-hidden="true">@</span><input type="text" id="retry-username" class="gate-input" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="24" aria-describedby="retry-username-msg retry-username-help"><span class="st" id="retry-username-icon" aria-hidden="true"></span></div>
-        <p class="cad-msg" id="retry-username-msg" aria-live="polite"></p>
-        <div class="cad-sugestoes" id="retry-username-sugg"></div>
-        <p class="cad-ajuda" id="retry-username-help" data-i18n="gate.signup.userHelp">Montamos o @ a partir do seu nome; pode mudar agora. Use letras, números e ponto. Depois de criar a conta, ele não muda mais.</p>
+        <label for="retry-arroba" data-i18n="gate.signup.username">Seu @</label>
+        <div class="cad-arroba" id="retry-arroba-box"><span class="pre" aria-hidden="true">@</span><input type="text" id="retry-arroba" name="arroba" class="gate-input" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other" autocapitalize="none" spellcheck="false" maxlength="24" aria-describedby="retry-arroba-msg retry-arroba-help"><span class="st" id="retry-arroba-icon" aria-hidden="true"></span></div>
+        <p class="cad-msg" id="retry-arroba-msg" aria-live="polite"></p>
+        <div class="cad-sugestoes" id="retry-arroba-sugg"></div>
+        <p class="cad-ajuda" id="retry-arroba-help" data-i18n="gate.signup.userHelp">Montamos o @ a partir do seu nome; pode mudar agora. Use letras, números e ponto. Depois de criar a conta, ele não muda mais.</p>
       </div>
       <button type="submit" class="btn btn-primary btn-block" id="retry-submit" data-i18n="gate.signup.retrySave">Salvar e continuar</button>
     </form>
@@ -955,12 +955,12 @@ function gateUsernameLocalProblem(u){
   return null;
 }
 // Campo do @ com checagem na hora. status: empty | checking | ok | taken | reserved | invalid | unknown (não deu para conferir).
-function makeUsernameField(p){
-  const input = document.getElementById(p + '-username');
-  const box = document.getElementById(p + '-username-box');
-  const msg = document.getElementById(p + '-username-msg');
-  const sugg = document.getElementById(p + '-username-sugg');
-  const icon = document.getElementById(p + '-username-icon');
+function makeUsernameField(p, onAutofillEmail){
+  const input = document.getElementById(p + '-arroba');
+  const box = document.getElementById(p + '-arroba-box');
+  const msg = document.getElementById(p + '-arroba-msg');
+  const sugg = document.getElementById(p + '-arroba-sugg');
+  const icon = document.getElementById(p + '-arroba-icon');
   const st = { status: 'empty', value: '', suggestions: [], touched: false };
   let seq = 0, timer = null, pending = null;
   const BAD = ['taken', 'reserved', 'invalid'];
@@ -1015,6 +1015,12 @@ function makeUsernameField(p){
     else schedule(u, 0);
   }
   input.addEventListener('input', () => {
+    // Preenchimento automático do navegador às vezes joga o e-mail aqui (2026-10-19): e-mail não é @, volta ao que estava.
+    if (/\S+@\S+\.\S+/.test(input.value)){
+      input.value = st.value || '';
+      if (!st.touched && typeof onAutofillEmail === 'function') onAutofillEmail();
+      return;
+    }
     const c = gateUsernameClean(input.value);
     if (c !== input.value) input.value = c;
     st.touched = true;
@@ -1029,7 +1035,8 @@ function makeUsernameField(p){
   }
   return { st, set, settle, repaint: paint, input, isBad: () => BAD.indexOf(st.status) >= 0 };
 }
-const signupUser = makeUsernameField('signup');
+// Se o navegador jogar o e-mail no @ antes de a pessoa mexer nele, o @ volta a acompanhar o nome.
+const signupUser = makeUsernameField('signup', () => signupUser.set(gateUsernameSlug(document.getElementById('signup-name').value)));
 const retryUser = makeUsernameField('retry');
 // Enquanto a pessoa não mexe no @, ele acompanha o nome.
 document.getElementById('signup-name').addEventListener('input', (e) => {
