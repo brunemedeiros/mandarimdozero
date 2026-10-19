@@ -91,3 +91,11 @@ Testes: desafios-modulo 75/75, desafios-conclusao 19/19, test_answer_validation 
   (`accent-a1m4-001` e `accent-a1m6-006`). Sinônimos em níveis diferentes, para a autora avaliar: casser les pieds x casser
   les bonbons (B1), tu te fous de moi (B1) x se foutre de la gueule de quelqu'un (B2), coûter les yeux de la tête (B1) x
   coûter la peau des fesses (B2), avoir du bol x pas de bol (B1).
+- Decisão da autora (2026-10-19): "été" fica na A1-19 (passé composé) e "très" na A1-12 (com peu/beaucoup/assez/trop; a
+  autora pediu "a que tem advérbios junto"); tirados do ar `accent-a1m4-001` (A1-13) e `accent-a1m5-001` (A1-16), do
+  mesmo jeito do painel. Sinônimos em níveis diferentes: mantidos.
+- Lista de Expressões (2026-10-19): os níveis encostavam (o gap estava no contêiner de fora, não em
+  `#challenges-level-sections-inner`) e o anel do nível invadia o último cartão de cima; corrigido. Cartão compacto: sem
+  "O que será que significa?" e sem etiqueta de nível, 2 por linha no celular e 3 ou mais no computador, som no canto de
+  baixo. Lista inteira de 6891px para 4256px de altura (1200px) e de 12897px para 5898px (390px).
+  `tests/desafios-album` 66/66, desafios-modulo 75/75, desafios-conclusao 19/19.

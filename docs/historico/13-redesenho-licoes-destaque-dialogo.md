@@ -405,3 +405,6 @@ subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do si
 - Grátis x Premium: igual ao jogo existente (Premium com cadeado; paywall desligado, então hoje todos jogam).
 - Testes: `tests/conjugacao/test_playwright.js` 77/77 (bloco novo dos jogos A1; os 2 que falhavam na main eram o seletor
   `.cg-tr span` pegando o ícone 🔊, corrigido para `.cg-tr > span:last-child`). i18n unit 2050/2052, as mesmas 2 da main.
+- Ajuste pedido pela autora (2026-10-19): o francês dentro do texto em português/inglês sai em azul (`--seal-red-dark`,
+  `.cg-fr`, `lang="fr"`). Nos dados, o trecho em francês vai entre {chaves} (título, apresentação, regra e explicação dos 4
+  jogos; 190 de 196 textos). Marcação feita por subagente e conferida por script: tirando as chaves, o texto é idêntico.
