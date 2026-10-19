@@ -183,6 +183,16 @@ function classifyAnkiTemplate(model, tmpl){
 // literais (auto-descritivos: "Pinyin"/"Caractere"/"Tradução") é tratado
 // do mesmo jeito, de propósito -- os NOMES já dizem o que cada campo é,
 // não é uma adivinhação, é reconhecimento por rótulo explícito.
+// Etapa 3 (lote C): avisos e erros no idioma do site quando t() existe; sem ele (testes Node), o português de sempre.
+// Os nomes de campo do Anki abaixo ('Tradução', 'Caractere'...) são lógica de reconhecimento e não passam por aqui.
+function ankiImportText(key, pt, params){
+  if (typeof t === 'function'){
+    const v = t(key, params);
+    if (v && v !== key) return v;
+  }
+  return String(pt).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
+}
+
 const ZH_PINYIN_CHAR_TRANSLATION_FIELD_NAMES = ['Pinyin', 'Caractere', 'Tradução'];
 
 // i18n Fase 7 -- o reconhecimento não pode depender SÓ dos nomes em
@@ -367,7 +377,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
     const frontRaw = extractAnkiMediaRefs(rawFieldByName(classification.frontFieldName));
     const backRaw = extractAnkiMediaRefs(rawFieldByName(classification.backFieldName));
     if (!frontRaw.text || !backRaw.text){
-      return { ok: false, reason: 'empty_content', warning: 'Frente ou verso ficou vazio depois de limpar HTML/mídia -- Note pulada.' };
+      return { ok: false, reason: 'empty_content', warning: ankiImportText('ankiImport.warn.emptyFrontBack', 'Frente ou verso ficou vazio depois de limpar HTML/mídia -- Note pulada.') };
     }
     const frontField = createFieldState({ lang: null, content: { value: frontRaw.text } });
     const backField = createFieldState({ lang: null, content: { value: backRaw.text } });
@@ -400,7 +410,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
     const hanziRaw = extractAnkiMediaRefs(rawFieldByName(classification.hanziFieldName));
     const translationRaw = extractAnkiMediaRefs(rawFieldByName(classification.translationFieldName));
     if (!pinyinRaw.text || !hanziRaw.text || !translationRaw.text){
-      return { ok: false, reason: 'empty_content', warning: 'Pinyin, caractere ou tradução ficou vazio depois de limpar HTML/mídia -- Note pulada.' };
+      return { ok: false, reason: 'empty_content', warning: ankiImportText('ankiImport.warn.emptyZh', 'Pinyin, caractere ou tradução ficou vazio depois de limpar HTML/mídia -- Note pulada.') };
     }
     const hanziField = createFieldState({ lang: 'zh', content: { value: hanziRaw.text } });
     const pinyinField = createFieldState({ lang: 'zh-pinyin', content: { value: pinyinRaw.text } });
@@ -428,7 +438,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
     const promptRaw = extractAnkiMediaRefs(rawFieldByName(classification.promptFieldName));
     const answerRaw = extractAnkiMediaRefs(rawFieldByName(classification.answerFieldName));
     if (!promptRaw.text || !answerRaw.text){
-      return { ok: false, reason: 'empty_content', warning: 'Pergunta ou resposta ficou vazia depois de limpar HTML/mídia -- Note pulada.' };
+      return { ok: false, reason: 'empty_content', warning: ankiImportText('ankiImport.warn.emptyQA', 'Pergunta ou resposta ficou vazia depois de limpar HTML/mídia -- Note pulada.') };
     }
     const promptField = createFieldState({ lang: null, role: 'prompt', content: { value: promptRaw.text } });
     const answerField = createFieldState({ lang: null, role: 'answer', content: { value: answerRaw.text } });
@@ -457,17 +467,17 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
       // rejeitaria esta Note de qualquer jeito (validateNativeClozeStructure
       // exige tradução não-vazia); nunca inventamos uma. Erro recuperável,
       // não fatal.
-      return { ok: false, reason: 'cloze_missing_translation', warning: 'Este cartão Cloze não tem um 2º campo de tradução preenchido no Anki -- o app exige uma tradução pra este formato, então a Note foi pulada. Pode ser criada manualmente depois.' };
+      return { ok: false, reason: 'cloze_missing_translation', warning: ankiImportText('ankiImport.warn.clozeNoTranslation', 'Este cartão Cloze não tem um 2º campo de tradução preenchido no Anki -- o app exige uma tradução pra este formato, então a Note foi pulada. Pode ser criada manualmente depois.') };
     }
     const { text: nativeSyntax, hintsDropped } = convertAnkiClozeToNativeSyntax(textClean.text);
     const marks = parseClozeMarks(nativeSyntax);
     if (!marks.length){
-      return { ok: false, reason: 'no_cloze_marks', warning: 'Nenhuma lacuna Cloze válida encontrada no texto -- Note pulada.' };
+      return { ok: false, reason: 'no_cloze_marks', warning: ankiImportText('ankiImport.warn.noClozeMarks', 'Nenhuma lacuna Cloze válida encontrada no texto -- Note pulada.') };
     }
     const textField = createFieldState({ lang: null, content: { value: nativeSyntax } });
     const translationField = createFieldState({ lang: null, content: { value: translationClean.text } });
     const warnings = [];
-    if (hintsDropped > 0) warnings.push(`${hintsDropped} dica(s) de lacuna do Anki não foram preservadas (sem equivalente seguro neste app) -- a resposta em si foi mantida.`);
+    if (hintsDropped > 0) warnings.push(ankiImportText('ankiImport.warn.hintsDropped', '{n} dica(s) de lacuna do Anki não foram preservadas (sem equivalente seguro neste app) -- a resposta em si foi mantida.', { n: hintsDropped }));
     return {
       ok: true,
       warnings,
@@ -482,7 +492,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
     };
   }
 
-  return { ok: false, reason: 'unrecognized_note_type', warning: 'Formato de cartão não reconhecido (não é um Básico/Básico invertido/Cloze/Digite a resposta reconhecível) -- Note pulada.' };
+  return { ok: false, reason: 'unrecognized_note_type', warning: ankiImportText('ankiImport.warn.unrecognized', 'Formato de cartão não reconhecido (não é um Básico/Básico invertido/Cloze/Digite a resposta reconhecível) -- Note pulada.') };
 }
 
 // ============================================================
@@ -523,13 +533,13 @@ async function resolveAndAttachAnkiMedia(mediaRefs, { parseResult, uploadFn, med
     if (mediaCache.has(filename)) return mediaCache.get(filename);
     const zipIndex = filenameToIndex.get(filename);
     if (zipIndex === undefined){
-      const result = { ok: false, error: `Mídia "${filename}" referenciada mas não encontrada no pacote .apkg.` };
+      const result = { ok: false, error: ankiImportText('ankiImport.media.notFound', 'Mídia "{file}" referenciada mas não encontrada no pacote .apkg.', { file: filename }) };
       mediaCache.set(filename, result);
       return result;
     }
     const entry = parseResult.zip.file(String(zipIndex));
     if (!entry){
-      const result = { ok: false, error: `Mídia "${filename}" listada no manifesto mas ausente do pacote.` };
+      const result = { ok: false, error: ankiImportText('ankiImport.media.notInPackage', 'Mídia "{file}" listada no manifesto mas ausente do pacote.', { file: filename }) };
       mediaCache.set(filename, result);
       return result;
     }
@@ -537,13 +547,13 @@ async function resolveAndAttachAnkiMedia(mediaRefs, { parseResult, uploadFn, med
     try {
       blob = await entry.async('blob');
     } catch (e) {
-      const result = { ok: false, error: `Não foi possível ler o arquivo de mídia "${filename}" do pacote.` };
+      const result = { ok: false, error: ankiImportText('ankiImport.media.unreadable', 'Não foi possível ler o arquivo de mídia "{file}" do pacote.', { file: filename }) };
       mediaCache.set(filename, result);
       return result;
     }
     const file = (typeof File !== 'undefined') ? new File([blob], filename, { type: blob.type }) : blob;
     const uploadRes = await uploadFn(file, kind, fieldId);
-    const result = uploadRes.ok ? { ok: true, url: uploadRes.url } : { ok: false, error: uploadRes.error || `Falha ao enviar "${filename}".` };
+    const result = uploadRes.ok ? { ok: true, url: uploadRes.url } : { ok: false, error: uploadRes.error || ankiImportText('ankiImport.media.uploadFailed', 'Falha ao enviar "{file}".', { file: filename }) };
     mediaCache.set(filename, result);
     return result;
   }
@@ -650,13 +660,13 @@ function buildAnkiImportPlan(parseResult, { languageAppKey, existingRows }){
     const deckName = deckNames[0] || null;
     const deckPath = ankiDeckPathFromName(deckName);
     if (!model){
-      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: 'missing_model', warning: 'Modelo de cartão referenciado por esta Note não existe na coleção -- Note pulada.', deckName, deckPath, tags: note.tags, normalizedTags };
+      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: 'missing_model', warning: ankiImportText('ankiImport.warn.missingModel', 'Modelo de cartão referenciado por esta Note não existe na coleção -- Note pulada.'), deckName, deckPath, tags: note.tags, normalizedTags };
     }
     if (!modelCache.has(note.mid)) modelCache.set(note.mid, classifyAnkiNoteType(model));
     const classification = modelCache.get(note.mid);
 
     if (classification.kind === 'unrecognized'){
-      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: classification.reason || 'unrecognized_note_type', warning: 'Tipo de cartão do Anki não reconhecido de forma segura (não é Básico/Básico invertido/Cloze/Digite a resposta claro) -- Note pulada.', deckName, deckPath, tags: note.tags, normalizedTags };
+      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: classification.reason || 'unrecognized_note_type', warning: ankiImportText('ankiImport.warn.unrecognizedType', 'Tipo de cartão do Anki não reconhecido de forma segura (não é Básico/Básico invertido/Cloze/Digite a resposta claro) -- Note pulada.'), deckName, deckPath, tags: note.tags, normalizedTags };
     }
 
     const mapped = mapAnkiNoteToNativeEditorState(note, model, classification, languageAppKey);
@@ -674,17 +684,17 @@ function buildAnkiImportPlan(parseResult, { languageAppKey, existingRows }){
       if (part.dropped.length){
         mapped.editorState.tags = part.tags;
         const sysTags = part.dropped.filter(d => d.reason === 'system_tag').map(d => d.tag);
-        if (sysTags.length) tagLimitWarnings.push(`${sysTags.length} tag(s) de sistema (${sysTags.join(', ')}) não podem ser importadas: a atribuição de autoria só é criada pelo próprio app.`);
+        if (sysTags.length) tagLimitWarnings.push(ankiImportText('ankiImport.warn.systemTags', '{n} tag(s) de sistema ({tags}) não podem ser importadas: a atribuição de autoria só é criada pelo próprio app.', { n: sysTags.length, tags: sysTags.join(', ') }));
         const tooLong = part.dropped.filter(d => d.reason === 'too_long').map(d => d.tag);
         const overLimit = part.dropped.filter(d => d.reason === 'over_limit').map(d => d.tag);
-        if (tooLong.length) tagLimitWarnings.push(`${tooLong.length} tag(s) acima de ${TAG_MAX_LENGTH} caracteres não foram importadas: ${tooLong.map(t => t.slice(0, 20) + '…').join(', ')}.`);
-        if (overLimit.length) tagLimitWarnings.push(`Limite de ${TAG_MAX_PER_NOTE} tags por cartão: ${overLimit.length} tag(s) não foram importadas: ${overLimit.join(', ')}.`);
+        if (tooLong.length) tagLimitWarnings.push(ankiImportText('ankiImport.warn.tagsTooLong', '{n} tag(s) acima de {max} caracteres não foram importadas: {tags}.', { n: tooLong.length, max: TAG_MAX_LENGTH, tags: tooLong.map(x => x.slice(0, 20) + '…').join(', ') }));
+        if (overLimit.length) tagLimitWarnings.push(ankiImportText('ankiImport.warn.tagsOverLimit', 'Limite de {max} tags por cartão: {n} tag(s) não foram importadas: {tags}.', { max: TAG_MAX_PER_NOTE, n: overLimit.length, tags: overLimit.join(', ') }));
       }
     }
 
     const validation = validateNoteEditorStateForSave(mapped.editorState);
     if (!validation.ok){
-      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: 'validation_failed', warning: `Cartão inválido depois de mapeado: ${validation.error}`, deckName, deckPath, tags: note.tags, normalizedTags };
+      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: 'validation_failed', warning: ankiImportText('ankiImport.warn.invalidAfterMap', 'Cartão inválido depois de mapeado: {error}', { error: validation.error }), deckName, deckPath, tags: note.tags, normalizedTags };
     }
 
     const isDuplicateOfExisting = dedupSignatures.has(mapped.dedupKey);
@@ -700,7 +710,7 @@ function buildAnkiImportPlan(parseResult, { languageAppKey, existingRows }){
         : classification.kind,
       editorState: mapped.editorState,
       mediaRefs: mapped.mediaRefs,
-      warnings: mapped.warnings.concat(tagLimitWarnings).concat(classification.extraTemplatesDropped ? [`${classification.extraTemplatesDropped} template(s) extra deste tipo de cartão não foram preservados (só o 1º foi importado).`] : []),
+      warnings: mapped.warnings.concat(tagLimitWarnings).concat(classification.extraTemplatesDropped ? [ankiImportText('ankiImport.warn.extraTemplates', '{n} template(s) extra deste tipo de cartão não foram preservados (só o 1º foi importado).', { n: classification.extraTemplatesDropped })] : []),
       hasMedia: mapped.mediaRefs.some(r => r.audioFilename || r.imageFilename),
       isDuplicate: isDuplicateOfExisting || isDuplicateWithinBatch,
       deckName,
@@ -886,7 +896,7 @@ async function executeAnkiDeckCreations(destPlan, { createFn, decks, languageApp
     try {
       res = await createFn({ name: c.name, parentDeckId, languageAppKey, decks: list });
     } catch (e){
-      res = { ok: false, error: 'Não foi possível criar o Deck agora.' };
+      res = { ok: false, error: ankiImportText('deck.err.createFailed', 'Não foi possível criar o Deck agora.') };
     }
     if (res && res.ok && res.deck){
       idByKey.set(c.key, res.deck.id);
@@ -894,7 +904,7 @@ async function executeAnkiDeckCreations(destPlan, { createFn, decks, languageApp
       createdDecks.push(res.deck);
     } else {
       failedKeys.add(c.key);
-      errors.push(`Não foi possível criar o Deck "${c.name}"${res && res.error ? ` (${res.error})` : ''}. Os cartões dessa pasta não foram importados.`);
+      errors.push(ankiImportText('ankiImport.err.deckCreateNamed', 'Não foi possível criar o Deck "{name}"{detail}. Os cartões dessa pasta não foram importados.', { name: c.name, detail: res && res.error ? ` (${res.error})` : '' }));
     }
   }
   return { idByKey, failedKeys, errors, createdDecks, decks: list };

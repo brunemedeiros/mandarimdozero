@@ -221,14 +221,14 @@ const PUBLIC_DECK_IMPORTS_IN_FLIGHT = new Set();
 async function copyPublicDeckWithMedia(publicId, destDeckId, onProgress, selection){
   // duplo clique / chamada repetida da MESMA importação enquanto ela roda: ignora (cópias
   // intencionais separadas continuam possíveis depois que esta termina).
-  if (PUBLIC_DECK_IMPORTS_IN_FLIGHT.has(publicId)) return { ok: false, error: 'Esta importação já está em andamento.' };
+  if (PUBLIC_DECK_IMPORTS_IN_FLIGHT.has(publicId)) return { ok: false, error: t('publicDeck.err.inFlight') };
   PUBLIC_DECK_IMPORTS_IN_FLIGHT.add(publicId);
   try { return await copyPublicDeckWithMediaInner(publicId, destDeckId, onProgress, selection); }
   finally { PUBLIC_DECK_IMPORTS_IN_FLIGHT.delete(publicId); }
 }
 async function copyPublicDeckWithMediaInner(publicId, destDeckId, onProgress, selection){
   const uid = (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && CURRENT_USER.id) || null;
-  if (!uid) return { ok: false, error: 'Entre na sua conta para importar.' };
+  if (!uid) return { ok: false, error: t('publicDeck.err.loginToImport') };
   for (let attempt = 0; attempt < 2; attempt++){
     const man = await fetchPublicDeckMediaManifest(publicId, selection);
     if (!man.ok) return man;
@@ -256,24 +256,25 @@ function publicDeckErrorCode(msg){
   return m ? m[1] : null;
 }
 
+// Código de erro da RPC -> texto no idioma do site (o texto do servidor nunca vai para a tela).
 function publicDeckErrorMessage(msg){
   const m = String(msg || '');
-  if (/premium_required/.test(m)) return 'Importar Decks públicos é um recurso Premium.';
-  if (/unavailable/.test(m)) return 'Este Deck não está mais disponível.';
-  if (/duplicates_changed/.test(m)) return 'Sua coleção ou o Deck mudou desde a análise. Nada foi importado; revise o novo plano.';
-  if (/invalid_selection/.test(m)) return 'A seleção não é válida. Nada foi importado; revise o plano.';
-  if (/deck_too_large/.test(m)) return 'Este Deck é grande demais para importar de uma vez.';
-  if (/deck_media_too_large/.test(m)) return 'Este Deck tem arquivos de mídia demais para importar de uma vez.';
-  if (/media_copy_failed/.test(m)) return 'Não foi possível copiar os arquivos de mídia. Nada foi importado; tente novamente.';
-  if (/rpc_ambiguous/.test(m)) return 'A conexão falhou durante a importação e ela pode ter sido concluída. Confira em Meus Decks antes de tentar de novo.';
-  if (/media_map_incomplete/.test(m)) return 'O Deck mudou durante a importação. Tente novamente.';
-  if (/invalid_media_map/.test(m)) return 'Não foi possível validar os arquivos de mídia. Nada foi importado.';
-  if (/cannot_copy_own_deck/.test(m)) return 'Este Deck já é seu.';
-  if (/invalid_destination/.test(m)) return 'Escolha um Deck pessoal válido como destino.';
-  if (/description_too_long/.test(m)) return 'A descrição pode ter no máximo 280 caracteres.';
-  if (/public_deck_kind_forbidden/.test(m)) return 'Só Decks pessoais (dentro de Meus Decks) podem ser públicos.';
-  if (/deck_not_found/.test(m)) return 'Deck não encontrado.';
-  return 'Não foi possível concluir agora. Tente novamente.';
+  if (/premium_required/.test(m)) return t('publicDeck.err.premium');
+  if (/unavailable/.test(m)) return t('publicDeck.err.unavailable');
+  if (/duplicates_changed/.test(m)) return t('publicDeck.err.duplicatesChanged');
+  if (/invalid_selection/.test(m)) return t('publicDeck.err.invalidSelection');
+  if (/deck_too_large/.test(m)) return t('publicDeck.err.tooLarge');
+  if (/deck_media_too_large/.test(m)) return t('publicDeck.err.mediaTooLarge');
+  if (/media_copy_failed/.test(m)) return t('publicDeck.err.mediaCopyFailed');
+  if (/rpc_ambiguous/.test(m)) return t('publicDeck.err.ambiguous');
+  if (/media_map_incomplete/.test(m)) return t('publicDeck.err.mediaMapIncomplete');
+  if (/invalid_media_map/.test(m)) return t('publicDeck.err.invalidMediaMap');
+  if (/cannot_copy_own_deck/.test(m)) return t('publicDeck.err.ownDeck');
+  if (/invalid_destination/.test(m)) return t('deck.err.chooseValidPersonal');
+  if (/description_too_long/.test(m)) return t('publicDeck.err.descriptionTooLong');
+  if (/public_deck_kind_forbidden/.test(m)) return t('publicDeck.err.kindForbidden');
+  if (/deck_not_found/.test(m)) return t('publicDeck.err.notFound');
+  return t('publicDeck.err.generic');
 }
 
 // ---------- Notes públicas → linhas no formato que o motor já entende ----------
@@ -290,18 +291,31 @@ function publicDeckNoteSummary(note){
   return raw.replace(/\{\{c\d+::([^}|]*?)(?:\|[^}]*)?\}\}/g, '$1');
 }
 
-const PUBLIC_DECK_MODE_LABELS = {
-  normal: 'Normal', normal_reversed: 'Normal com reverso', multiple_choice: 'Múltipla escolha',
-  type_answer: 'Digite a resposta', cloze: 'Completar',
+// Etapa 3 (lote C): rótulo do tipo no idioma do site (chaves do editor; "Completar" tem chave própria).
+// Antes era o mapa PUBLIC_DECK_MODE_LABELS em português; o texto pt-BR das chaves é o mesmo.
+const PUBLIC_DECK_MODE_KEYS = {
+  normal: 'admin.flashcards.cardType.normal', normal_reversed: 'admin.flashcards.cardType.normalReversed',
+  multiple_choice: 'admin.flashcards.cardType.multipleChoice', type_answer: 'admin.flashcards.cardType.typeAnswer',
+  cloze: 'publicDeck.mode.cloze',
 };
+function publicDeckModeLabel(mode){
+  return PUBLIC_DECK_MODE_KEYS[mode] ? t(PUBLIC_DECK_MODE_KEYS[mode]) : mode;
+}
+// Nome do idioma do Deck no idioma do site ("Francês"/"French"); sem chave, o rótulo pt-BR do registro.
+function publicDeckLangLabel(appKey){
+  const key = 'review.deck.lang.' + appKey;
+  const v = typeof t === 'function' ? t(key) : key;
+  return (v && v !== key) ? v : (PUBLIC_DECK_LANG_LABELS[appKey] || appKey);
+}
 
+// Data no formato do idioma do site (em pt-BR continua dd/mm/aaaa, igual ao toLocaleDateString('pt-BR') de antes).
 function publicDeckFormatDate(iso){
-  try { return new Date(iso).toLocaleDateString('pt-BR'); } catch (e) { return ''; }
+  try { return typeof fmtDate === 'function' ? fmtDate(new Date(iso)) : new Date(iso).toLocaleDateString('pt-BR'); } catch (e) { return ''; }
 }
 
 function publicDeckUnavailableHTML(){
-  return `<div class="review-empty"><div class="big-emoji">🔒</div><h3>Deck indisponível</h3>
-    <p>Este Deck não existe ou não está público no momento.</p></div>`;
+  return `<div class="review-empty"><div class="big-emoji">🔒</div><h3>${t('publicDeck.unavailable.title')}</h3>
+    <p>${t('publicDeck.unavailable.body')}</p></div>`;
 }
 
 function publicDeckBadgeHTML(icon, color){
@@ -311,11 +325,11 @@ function publicDeckBadgeHTML(icon, color){
 
 function publicDeckGateHTML(v){
   if (!v.authenticated){
-    return `<p class="profile-empty-note" data-public-deck-gate="login">🔒 Entre na sua conta para ver os cartões. Abrir e importar Decks públicos é um recurso Premium.</p>
-      <a class="btn btn-secondary btn-block" href="../" data-login-cta>Entrar ou criar conta</a>`;
+    return `<p class="profile-empty-note" data-public-deck-gate="login">${t('publicDeck.gate.login')}</p>
+      <a class="btn btn-secondary btn-block" href="../" data-login-cta>${t('publicProfile.loginCta')}</a>`;
   }
   if (!v.can_open){
-    return `<p class="profile-empty-note" data-public-deck-gate="premium">🔒 Abrir e importar Decks públicos é um recurso Premium. Você pode ver as informações do Deck acima.</p>`;
+    return `<p class="profile-empty-note" data-public-deck-gate="premium">${t('publicDeck.gate.premium')}</p>`;
   }
   return '';
 }
@@ -324,7 +338,7 @@ async function renderPublicDeckInto(bodyEl, publicId){
   if (!bodyEl) return;
   const token = (PUBLIC_DECK_RENDER_TOKENS.get(bodyEl) || 0) + 1;
   PUBLIC_DECK_RENDER_TOKENS.set(bodyEl, token);
-  bodyEl.innerHTML = loadingHTML('Carregando Deck...');
+  bodyEl.innerHTML = loadingHTML(t('publicDeck.loading'));
 
   const res = await fetchPublicDeck(publicId);
   if (PUBLIC_DECK_RENDER_TOKENS.get(bodyEl) !== token) return;
@@ -339,26 +353,26 @@ async function renderPublicDeckInto(bodyEl, publicId){
   const otherLink = publicDeckLinkFor(d.public_id, d.language);
 
   const subs = (d.subdecks || []).length ? `
-    <div class="public-deck-subs"><div class="section-label">Subdecks públicos</div>
+    <div class="public-deck-subs"><div class="section-label">${t('publicDeck.subdecks')}</div>
       ${d.subdecks.map(s => `<a class="admin-badge-row public-deck-sub" href="${publicDeckLinkFor(s.public_id, d.language)}" data-public-deck-sub="${s.public_id}">
         ${publicDeckBadgeHTML(s.icon, s.color)}<span style="flex:1;">${escapeHTML(s.name)}</span>
-        <span class="profile-edit-hint">${s.notes_count} Notes</span></a>`).join('')}
+        <span class="profile-edit-hint">${t('publicDeck.notesCount', { n: s.notes_count })}</span></a>`).join('')}
     </div>` : '';
   const parent = d.parent ? `<a class="profile-stats-link" href="${publicDeckLinkFor(d.parent.public_id, d.language)}">← ${escapeHTML(d.parent.name)}</a>` : '';
 
   let actions = '';
   if (wrongSite){
-    actions = `<p class="profile-empty-note" data-public-deck-gate="site">Este Deck é de ${escapeHTML(PUBLIC_DECK_LANG_LABELS[d.language] || d.language)}.
-      ${PUBLIC_DECK_LANG_FOLDERS[d.language] ? `<a href="${otherLink}">Abrir no site correspondente</a>` : ''}</p>`;
+    actions = `<p class="profile-empty-note" data-public-deck-gate="site">${t('publicDeck.wrongSite', { lang: escapeHTML(publicDeckLangLabel(d.language)) })}
+      ${PUBLIC_DECK_LANG_FOLDERS[d.language] ? `<a href="${otherLink}">${t('publicDeck.openOtherSite')}</a>` : ''}</p>`;
   } else {
     actions = publicDeckGateHTML(v);
     if (v.can_open){
-      actions += `<button type="button" class="btn btn-secondary btn-block" id="public-deck-open-btn">📇 Ver cartões (${d.notes_count})</button>
+      actions += `<button type="button" class="btn btn-secondary btn-block" id="public-deck-open-btn">${t('publicDeck.viewCards', { n: d.notes_count })}</button>
         <div id="public-deck-notes-box" style="display:none; margin-top:10px;"></div>`;
     }
     if (v.can_import){
-      actions += `<button type="button" class="btn btn-primary btn-block" id="public-deck-import-btn" style="margin-top:10px;">⬇️ Importar para Meus Decks</button>
-        <p class="profile-edit-hint">Cria uma cópia independente dentro de Meus Decks, com atribuição ao autor original. Seu progresso de estudo começa do zero.</p>`;
+      actions += `<button type="button" class="btn btn-primary btn-block" id="public-deck-import-btn" style="margin-top:10px;">${t('publicDeck.importBtn')}</button>
+        <p class="profile-edit-hint">${t('publicDeck.importHint')}</p>`;
     }
   }
   const canReport = typeof openReportModal === 'function' && document.getElementById('report-modal');
@@ -368,17 +382,17 @@ async function renderPublicDeckInto(bodyEl, publicId){
       ${parent}
       <div class="public-deck-title-row">${publicDeckBadgeHTML(d.icon, d.color)}
         <div><div class="public-profile-name">${escapeHTML(d.name)}</div>
-        <div class="public-profile-username">por <a href="#/user/${encodeURIComponent(d.owner.username)}">${escapeHTML(authorName)}</a> (@${escapeHTML(d.owner.username)})</div></div></div>
+        <div class="public-profile-username">${t('publicDeck.by')} <a href="#/user/${encodeURIComponent(d.owner.username)}">${escapeHTML(authorName)}</a> (@${escapeHTML(d.owner.username)})</div></div></div>
       ${d.description ? `<p class="public-profile-bio">${escapeHTML(d.description)}</p>` : ''}
       <div class="public-deck-meta">
-        <span class="pill">${d.notes_count} Notes</span>
-        <span class="pill">${escapeHTML(PUBLIC_DECK_LANG_LABELS[d.language] || d.language)}</span>
-        <span class="pill">Atualizado em ${publicDeckFormatDate(d.updated_at)}</span>
+        <span class="pill">${t('publicDeck.notesCount', { n: d.notes_count })}</span>
+        <span class="pill">${escapeHTML(publicDeckLangLabel(d.language))}</span>
+        <span class="pill">${t('publicDeck.updatedOn', { date: publicDeckFormatDate(d.updated_at) })}</span>
       </div>
     </div>
     ${subs}
     <div class="public-deck-actions">${actions}</div>
-    ${canReport ? `<button type="button" class="profile-stats-link" id="public-deck-report-btn" style="margin-top:12px;">⚑ Reportar este Deck</button>` : ''}
+    ${canReport ? `<button type="button" class="profile-stats-link" id="public-deck-report-btn" style="margin-top:12px;">${t('publicDeck.report')}</button>` : ''}
   `;
 
   const openBtn = bodyEl.querySelector('#public-deck-open-btn');
@@ -396,19 +410,19 @@ async function renderPublicDeckInto(bodyEl, publicId){
 }
 
 async function renderPublicDeckNotesBox(box, publicId){
-  box.innerHTML = loadingHTML('Carregando cartões...');
+  box.innerHTML = loadingHTML(t('publicDeck.loadingCards'));
   const r = await fetchPublicDeckNotes(publicId);
   if (!r.ok){
-    box.innerHTML = `<p class="profile-empty-note">${r.error === 'premium_required' ? 'Abrir Decks públicos é um recurso Premium.' : (r.error === 'login_required' ? 'Entre na sua conta para ver os cartões.' : 'Não foi possível carregar os cartões.')}</p>`;
+    box.innerHTML = `<p class="profile-empty-note">${r.error === 'premium_required' ? t('publicDeck.notes.premium') : (r.error === 'login_required' ? t('publicDeck.notes.login') : t('publicDeck.notes.failed'))}</p>`;
     return;
   }
   PUBLIC_DECK_STATE.notes = r;
-  if (!r.notes.length){ box.innerHTML = `<p class="profile-empty-note">Este Deck ainda não tem cartões públicos.</p>`; return; }
+  if (!r.notes.length){ box.innerHTML = `<p class="profile-empty-note">${t('publicDeck.notes.empty')}</p>`; return; }
   box.innerHTML = r.notes.map(n => `<div class="admin-badge-row" data-public-note="${n.idx}">
       <span style="flex:1;">${escapeHTML(publicDeckNoteSummary(n))}
-        <span class="profile-edit-hint">${escapeHTML(PUBLIC_DECK_MODE_LABELS[n.mode] || n.mode)}${(n.tags || []).length ? ' · ' + n.tags.map(t => '#' + escapeHTML(t)).join(' ') : ''}</span></span>
-      <button type="button" class="btn btn-secondary" data-public-note-view="${n.idx}">Ver</button>
-      <button type="button" class="profile-stats-link" data-public-note-report="${n.idx}" title="Reportar este cartão">⚑</button>
+        <span class="profile-edit-hint">${escapeHTML(publicDeckModeLabel(n.mode))}${(n.tags || []).length ? ' · ' + n.tags.map(tag => '#' + escapeHTML(tag)).join(' ') : ''}</span></span>
+      <button type="button" class="btn btn-secondary" data-public-note-view="${n.idx}">${t('publicDeck.notes.view')}</button>
+      <button type="button" class="profile-stats-link" data-public-note-report="${n.idx}" title="${t('publicDeck.notes.reportTitle')}">⚑</button>
     </div>`).join('');
   box.querySelectorAll('[data-public-note-view]').forEach(btn => btn.addEventListener('click', () => {
     const note = r.notes.find(x => String(x.idx) === btn.dataset.publicNoteView);
@@ -438,36 +452,36 @@ function publicDeckImportPlanHTML(d, plan){
   const counts = plan.counts || {};
   const by = (c) => notes.filter(n => n.cls === c);
   const exactN = (counts.exact || 0) + (counts.exact_archived || 0);
-  const label = (n) => `${escapeHTML(n.preview || '…')} <span class="profile-edit-hint">${escapeHTML(PUBLIC_DECK_MODE_LABELS[n.mode] || n.mode)}${n.instances > 1 ? ` · ${n.instances} cartões` : ''}</span>`;
+  const label = (n) => `${escapeHTML(n.preview || '…')} <span class="profile-edit-hint">${escapeHTML(publicDeckModeLabel(n.mode))}${n.instances > 1 ? ` · ${t('publicDeck.plan.instances', { n: n.instances })}` : ''}</span>`;
   const checkRow = (n, checked) => `<label class="admin-badge-row" style="display:flex; gap:8px; align-items:center;">
       <input type="checkbox" data-plan-sig="${escapeHTML(n.sig)}" ${checked ? 'checked' : ''}><span style="flex:1;">${label(n)}</span></label>`;
   const novas = by('none'), variantes = by('variant'), related = by('cross_family');
   return `
-    <div class="section-label">Importar “${escapeHTML(d.name)}”</div>
-    <p class="profile-edit-hint" data-plan-summary>Este Deck contém ${plan.source_total} Notes.
-      ${exactN ? `${exactN} já existem na sua coleção${counts.exact_archived ? ` (${counts.exact_archived} arquivadas)` : ''}. ` : ''}
-      <strong data-plan-create-count>${plan.create_default}</strong> serão adicionadas.</p>
-    ${plan.root_final_name && plan.root_final_name !== d.name ? `<p class="profile-edit-hint" data-plan-rename>Já existe um Deck com este nome: ele será criado como “${escapeHTML(plan.root_final_name)}”.</p>` : ''}
-    ${novas.length ? `<div class="section-label">Novas</div>${novas.map(n => checkRow(n, true)).join('')}` : ''}
-    ${variantes.length ? `<div class="section-label">Parecidas com algo seu (desmarcadas)</div>
-      <p class="profile-edit-hint">Têm o mesmo início de uma Note sua, mas conteúdo diferente. Marque só as que quiser como Notes novas e independentes; as suas não são alteradas.</p>
+    <div class="section-label">${t('publicDeck.plan.title', { name: escapeHTML(d.name) })}</div>
+    <p class="profile-edit-hint" data-plan-summary>${t('publicDeck.plan.contains', { n: plan.source_total })}
+      ${exactN ? `${t('publicDeck.plan.existing', { n: exactN })}${counts.exact_archived ? ` ${t('publicDeck.plan.archived', { n: counts.exact_archived })}` : ''}. ` : ''}
+      <strong data-plan-create-count>${plan.create_default}</strong> ${t('publicDeck.plan.willAdd')}</p>
+    ${plan.root_final_name && plan.root_final_name !== d.name ? `<p class="profile-edit-hint" data-plan-rename>${t('publicDeck.plan.renamed', { name: escapeHTML(plan.root_final_name) })}</p>` : ''}
+    ${novas.length ? `<div class="section-label">${t('publicDeck.plan.new')}</div>${novas.map(n => checkRow(n, true)).join('')}` : ''}
+    ${variantes.length ? `<div class="section-label">${t('publicDeck.plan.variants')}</div>
+      <p class="profile-edit-hint">${t('publicDeck.plan.variantsHint')}</p>
       ${variantes.map(n => checkRow(n, false)).join('')}` : ''}
-    ${related.length ? `<div class="section-label" data-plan-related>Conteúdos relacionados encontrados</div>
-      <p class="profile-edit-hint">${related.length} conteúdo(s) têm o mesmo par em outro tipo de cartão na sua coleção. Não são importados.</p>` : ''}
-    ${exactN ? `<details data-plan-existing><summary class="profile-edit-hint">${exactN} já existem na sua coleção — não serão importadas</summary>
-      ${[...by('exact'), ...by('exact_archived')].map(n => `<div class="admin-badge-row"><span style="flex:1;">${label(n)}</span><span class="profile-edit-hint">${n.local_archived ? 'arquivada' : 'já existe'}</span></div>`).join('')}</details>` : ''}
-    ${counts.source_duplicate ? `<p class="profile-edit-hint">${counts.source_duplicate} repetida(s) dentro do próprio Deck: importada(s) uma única vez.</p>` : ''}
-    ${plan.incompatible ? `<p class="profile-edit-hint">${plan.incompatible} Note(s) não puderam ser importadas (formato incompatível).</p>` : ''}
+    ${related.length ? `<div class="section-label" data-plan-related>${t('publicDeck.plan.related')}</div>
+      <p class="profile-edit-hint">${t('publicDeck.plan.relatedHint', { n: related.length })}</p>` : ''}
+    ${exactN ? `<details data-plan-existing><summary class="profile-edit-hint">${t('publicDeck.plan.existingSummary', { n: exactN })}</summary>
+      ${[...by('exact'), ...by('exact_archived')].map(n => `<div class="admin-badge-row"><span style="flex:1;">${label(n)}</span><span class="profile-edit-hint">${n.local_archived ? t('publicDeck.plan.archivedOne') : t('publicDeck.plan.alreadyExists')}</span></div>`).join('')}</details>` : ''}
+    ${counts.source_duplicate ? `<p class="profile-edit-hint">${t('publicDeck.plan.sourceDup', { n: counts.source_duplicate })}</p>` : ''}
+    ${plan.incompatible ? `<p class="profile-edit-hint">${t('publicDeck.plan.incompatible', { n: plan.incompatible })}</p>` : ''}
     <p class="profile-edit-hint" data-plan-decks></p>
     <div style="display:flex; gap:8px; margin-top:10px;">
-      <button type="button" class="btn btn-primary" id="public-deck-import-confirm">Importar</button>
-      <button type="button" class="btn btn-secondary" id="public-deck-import-cancel">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="public-deck-import-confirm">${t('publicDeck.plan.import')}</button>
+      <button type="button" class="btn btn-secondary" id="public-deck-import-cancel">${t('publicDeck.plan.cancel')}</button>
     </div>`;
 }
 
 async function openPublicDeckImportPlan(d, panel){
   panel.style.display = 'block';
-  panel.innerHTML = loadingHTML('Analisando sua coleção...');
+  panel.innerHTML = loadingHTML(t('publicDeck.plan.analyzing'));
   const res = await fetchPublicDeckImportPlan(d.public_id, null);
   if (!res.ok){ panel.innerHTML = `<p class="profile-empty-note">${escapeHTML(res.error)}</p>`; return; }
   const plan = res.plan;
@@ -478,10 +492,11 @@ async function openPublicDeckImportPlan(d, panel){
     const st = publicDeckPlanStats(plan, checked());
     panel.querySelector('[data-plan-create-count]').textContent = String(st.create);
     panel.querySelector('[data-plan-decks]').textContent = st.create
-      ? `${st.instances} cartão(ões) a estudar. Decks criados: ${st.decksCreated.join(', ')}${st.decksOmitted ? ` (${st.decksOmitted} sem Notes novas, omitidos)` : ''}.`
-      : 'Nada novo para importar.';
+      ? `${t('publicDeck.plan.toStudy', { n: st.instances })} ${t('publicDeck.plan.decksCreated', { list: st.decksCreated.join(', ') })}${st.decksOmitted ? ` ${t('publicDeck.plan.omitted', { n: st.decksOmitted })}` : ''}.`
+      : t('publicDeck.plan.nothingNew');
     confirmBtn.disabled = st.create === 0;
-    confirmBtn.textContent = st.create ? `Importar ${st.create} Note${st.create > 1 ? 's' : ''}` : 'Nada novo para importar';
+    // Plural como antes: "Note" só com 1 (create > 1 = "Notes").
+    confirmBtn.textContent = st.create ? t(st.create > 1 ? 'publicDeck.plan.importN.other' : 'publicDeck.plan.importN.one', { n: st.create }) : t('publicDeck.plan.nothingNewBtn');
   };
   panel.querySelectorAll('[data-plan-sig]').forEach(i => i.addEventListener('change', refresh));
   refresh();
@@ -493,7 +508,7 @@ async function openPublicDeckImportPlan(d, panel){
     const btn = document.getElementById('public-deck-import-btn');
     const label0 = btn ? btn.textContent : '';
     if (btn) btn.disabled = true;
-    const r = await copyPublicDeckWithMedia(d.public_id, null, (done, total) => { if (btn) btn.textContent = `Copiando mídia ${done}/${total}...`; }, selection);
+    const r = await copyPublicDeckWithMedia(d.public_id, null, (done, total) => { if (btn) btn.textContent = t('publicDeck.copyingMedia', { done, total }); }, selection);
     if (btn){ btn.disabled = false; btn.textContent = label0; }
     if (!r.ok){
       showToast(r.error);
@@ -509,8 +524,8 @@ async function openPublicDeckImportPlan(d, panel){
     const out = r.result || {};
     panel.style.display = 'none'; panel.innerHTML = '';
     showToast(out.notes_copied
-      ? `✅ ${out.notes_copied} Notes importadas${out.root_name ? ` para “${out.root_name}”` : ''}.${out.skipped_exact || out.skipped_exact_archived ? ` ${(out.skipped_exact || 0) + (out.skipped_exact_archived || 0)} já existiam.` : ''}${out.skipped_incompatible ? ` (${out.skipped_incompatible} não puderam ser importadas)` : ''}`
-      : 'Nada novo para importar: esse conteúdo já existe na sua coleção.');
+      ? `${t('publicDeck.done.imported', { n: out.notes_copied })}${out.root_name ? ` ${t('publicDeck.done.into', { name: out.root_name })}` : ''}.${out.skipped_exact || out.skipped_exact_archived ? ` ${t('publicDeck.done.existed', { n: (out.skipped_exact || 0) + (out.skipped_exact_archived || 0) })}` : ''}${out.skipped_incompatible ? ` ${t('publicDeck.done.incompatible', { n: out.skipped_incompatible })}` : ''}`
+      : t('publicDeck.done.nothing'));
   });
 }
 
@@ -578,13 +593,13 @@ function publicDeckProfileRowHTML(d){
   return `<a class="admin-badge-row public-deck-sub" href="${publicDeckLinkFor(d.public_id, d.language)}" data-public-deck-link="${d.public_id}">
     ${publicDeckBadgeHTML(d.icon, d.color)}
     <span style="flex:1;">${escapeHTML(d.name)}
-      <span class="profile-edit-hint">${escapeHTML(PUBLIC_DECK_LANG_LABELS[d.language] || d.language)} · ${d.notes_count} Notes · ${publicDeckFormatDate(d.updated_at)}</span></span></a>`;
+      <span class="profile-edit-hint">${escapeHTML(publicDeckLangLabel(d.language))} · ${t('publicDeck.notesCount', { n: d.notes_count })} · ${publicDeckFormatDate(d.updated_at)}</span></span></a>`;
 }
 
 async function renderPublicDecksSection(boxEl, username){
   if (!boxEl) return;
   const decks = await fetchPublicDecksForUser(username, null);
-  if (!decks.length){ boxEl.innerHTML = `<p class="profile-empty-note">Nenhum Deck público ainda.</p>`; return; }
+  if (!decks.length){ boxEl.innerHTML = `<p class="profile-empty-note">${t('publicDeckCopies.none')}</p>`; return; }
   boxEl.innerHTML = decks.map(publicDeckProfileRowHTML).join('');
   boxEl.querySelectorAll('a[data-public-deck-link]').forEach(a => a.addEventListener('click', (e) => {
     const href = a.getAttribute('href');
@@ -629,26 +644,26 @@ function publishBoxHTML(deck, status){
   // "Editar página do Deck". Os data-publish-* são os mesmos de antes (testes e fluxo).
   return `<div class="public-deck-publish-form" data-publish-form="${deck.id}">
     <p class="profile-edit-hint">${isPublic
-      ? (profilePrivate ? '🌐 Este Deck é público, mas seu perfil está privado: só seus amigos e sua professora veem.' : '🌐 Este Deck é público: aparece no seu perfil e abre pelo link.')
-      : '🔒 Este Deck é privado: só você vê.'}
-      Cada Deck tem a própria chave: <strong>subdecks não mudam junto</strong>. O campo "nota privada" dos cartões nunca é público.</p>
-    ${status && !isPublic ? `<p class="profile-edit-hint">${status.notes_count} Notes ficarão públicas.${incompat ? ` ${incompat} não podem ser representadas no formato novo e <strong>não serão publicadas</strong> (continuam intactas no seu Deck).` : ''}</p>` : ''}
+      ? (profilePrivate ? t('publicDeck.publish.publicPrivateProfile') : t('publicDeck.publish.public'))
+      : t('publicDeck.publish.private')}
+      ${t('publicDeck.publish.ownKeyHtml')}</p>
+    ${status && !isPublic ? `<p class="profile-edit-hint">${t('publicDeck.publish.notesWillBePublic', { n: status.notes_count })}${incompat ? ` ${t('publicDeck.publish.incompatHtml', { n: incompat })}` : ''}</p>` : ''}
     ${isPublic ? '<div class="public-copies-box" data-publish-copies></div>' : ''}
     ${isPublic && publicId ? `<input type="text" class="profile-edit-input" readonly data-publish-link value="${escapeHTML(publicDeckShareUrl(publicId, deck.language_app_key))}">` : ''}
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin:8px 0;">
-      ${isPublic ? `<button type="button" class="btn btn-secondary" data-publish-copy>Copiar link</button>
-      <button type="button" class="btn btn-secondary" data-publish-unpublish>Tornar privado</button>`
-      : `<button type="button" class="btn btn-primary" data-publish-save>Tornar público</button>`}
+      ${isPublic ? `<button type="button" class="btn btn-secondary" data-publish-copy>${t('publicDeck.publish.copyLink')}</button>
+      <button type="button" class="btn btn-secondary" data-publish-unpublish>${t('publicDeck.publish.makePrivate')}</button>`
+      : `<button type="button" class="btn btn-primary" data-publish-save>${t('publicDeck.publish.makePublic')}</button>`}
     </div>
     <details class="public-deck-page-edit"${isPublic ? '' : ''}>
-      <summary class="profile-edit-label" style="cursor:pointer;">Editar página do Deck</summary>
-      <label class="profile-edit-label">Descrição (opcional, até 280 caracteres)</label>
+      <summary class="profile-edit-label" style="cursor:pointer;">${t('publicDeck.publish.editPage')}</summary>
+      <label class="profile-edit-label">${t('publicDeck.publish.descLabel')}</label>
       <textarea class="profile-edit-input profile-edit-textarea" rows="2" maxlength="280" data-publish-desc>${escapeHTML(desc)}</textarea>
       <div style="display:flex; gap:8px;">
-        <select class="profile-edit-input" data-publish-icon aria-label="Ícone">${iconOpts}</select>
-        <select class="profile-edit-input" data-publish-color aria-label="Cor">${colorOpts}</select>
+        <select class="profile-edit-input" data-publish-icon aria-label="${t('publicDeck.publish.iconAria')}">${iconOpts}</select>
+        <select class="profile-edit-input" data-publish-color aria-label="${t('publicDeck.publish.colorAria')}">${colorOpts}</select>
       </div>
-      ${isPublic ? '<button type="button" class="btn btn-primary" data-publish-save>Salvar alterações</button>' : ''}
+      ${isPublic ? `<button type="button" class="btn btn-primary" data-publish-save>${t('publicDeck.publish.save')}</button>` : ''}
     </details>
     <p class="profile-edit-field-error" data-publish-error></p>
   </div>`;
@@ -670,23 +685,23 @@ async function openPublishBox(deck, boxEl, onChange){
     });
     if (!res.ok){ errEl.textContent = res.error; ev.currentTarget.disabled = false; return; }
     Object.assign(deck, { is_public: true, public_id: res.publicId, published_at: res.publishedAt });
-    if (!res.visibleOnProfile) showToast('Deck público. Como seu perfil está privado, só seus amigos e sua professora veem.');
-    else showToast('🌐 Deck público.');
+    if (!res.visibleOnProfile) showToast(t('publicDeck.publish.toastPrivateProfile'));
+    else showToast(t('publicDeck.publish.toastPublic'));
     if (onChange) onChange(deck);
     openPublishBox(deck, boxEl, onChange);
   });
   boxEl.querySelector('[data-publish-unpublish]')?.addEventListener('click', async (ev) => {
-    if (!window.confirm('Tornar este Deck privado? Ele sai do seu perfil e o link deixa de funcionar. Cópias que outras pessoas já fizeram continuam com elas.')) return;
+    if (!window.confirm(t('publicDeck.publish.confirmPrivate'))) return;
     ev.currentTarget.disabled = true;
     const res = await unpublishDeckRpc(deck.id);
     if (!res.ok){ errEl.textContent = res.error; ev.currentTarget.disabled = false; return; }
     deck.is_public = false;
-    showToast('🔒 Deck privado.');
+    showToast(t('publicDeck.publish.toastPrivate'));
     if (onChange) onChange(deck);
     openPublishBox(deck, boxEl, onChange);
   });
   boxEl.querySelector('[data-publish-copy]')?.addEventListener('click', async () => {
     const link = boxEl.querySelector('[data-publish-link]');
-    try { await navigator.clipboard.writeText(link.value); showToast('Link copiado.'); } catch (e) { link.select(); }
+    try { await navigator.clipboard.writeText(link.value); showToast(t('publicDeck.publish.linkCopied')); } catch (e) { link.select(); }
   });
 }

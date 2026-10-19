@@ -9,8 +9,11 @@
 //
 // Telas: trilha (primeira pintura e depois de re-render), cartão Continuar, mapa da trilha + painel de
 // unidade/revisão/ponto, detalhe da unidade e passos de uma lição, Revisão (tabela de Decks, sessão),
-// gerenciador de Tags, Desafios e Ditados (só fr), Conjugação (fr) / Hanzi (zh), Perfil (abas), Configurações,
+// gerenciador de Tags (vazio, com tags, renomear, excluir, erro), Desafios e Ditados (só fr), Conjugação (fr) / Hanzi (zh), Perfil (abas), Configurações,
 // Ranking, janela de sequência, aviso "cartões esperando", janela de importação cortada, toasts.
+// Lote C: importação .apkg (arquivo inválido e plano com Notes puladas), Deck público (página, cartões, plano de
+// importação, Deck de outro idioma, convite para entrar, indisponível), publicar Deck, seção do perfil público,
+// rodapé do perfil para visitante e mensagens de erro (excluir Deck, tags, novo editor, leitura do .apkg).
 // Login simulado (CURRENT_USER) depois do boot; Supabase stubado (listas vazias), SW bloqueado.
 //
 // Rodar: node tests/i18n/test_sem_portugues_en.js        (SHOTS=/pasta para salvar capturas)
@@ -54,6 +57,8 @@ const STUB = `
     auth: { getSession: async () => ({ data: { session: null } }), getUser: async () => ({ data: { user: null } }), onAuthStateChange: () => ({ data: { subscription: { unsubscribe(){} } } }), signOut: async () => ({}) },
     from: builder,
     rpc: async (name, args) => {
+      // lote C: telas que precisam de resposta de RPC (Tags, Decks públicos) instalam window.__rpcOverride
+      if (window.__rpcOverride){ const r = await window.__rpcOverride(name, args); if (r) return r; }
       if (name !== 'ensure_user_decks') return { data: null, error: null };
       const D = window.__DB.decks, uid = args.p_owner_id, lang = args.p_language_app_key;
       let root = D.find(d => d.kind === 'root' && d.owner_id === uid && d.language_app_key === lang);
@@ -81,7 +86,8 @@ const PT_WORDS = ['você', 'vocês', 'não', 'está', 'estão', 'são', 'também
   'recomendado', 'recomendada', 'opcional', 'frase', 'frases', 'palavra', 'palavras', 'tradução', 'explicação', 'expressões',
   'acentuação', 'ponto', 'verificação', 'perfil', 'buscar', 'nada', 'quase', 'instante', 'esperando', 'memória', 'sessão',
   'abrir', 'ler', 'novo', 'novos', 'nova', 'aprendendo', 'dominados', 'meus', 'minha', 'minhas', 'meu', 'faltam', 'falta',
-  'praticar', 'pratique', 'treine', 'ouvir', 'escreva', 'certo', 'certa', 'errado', 'errou', 'acertou', 'sair', 'sobre'];
+  'praticar', 'pratique', 'treine', 'ouvir', 'escreva', 'certo', 'certa', 'errado', 'errou', 'acertou', 'sair', 'sobre',
+  /* lote C */ 'público', 'pública', 'públicos', 'públicas', 'importar', 'importadas', 'importada', 'cópia', 'excluir', 'renomear', 'arquivadas', 'pulada', 'mídia', 'gerenciar'];
 const PT_RE = new RegExp('(?<![\\p{L}\\p{N}_.@/-])(' + PT_WORDS.join('|') + ')(?![\\p{L}\\p{N}_])', 'iu');
 const PT_SUFFIX = /\p{L}(ção|ções|ão|ões|ã|õe)(?!\p{L})/iu;   // "-ção", "-ões", "-ão": não existem em en/fr/pinyin
 const looksPt = (s) => PT_RE.test(s) || PT_SUFFIX.test(s);
@@ -273,13 +279,105 @@ async function run(browser, port, app){
     if (!host){ host = document.createElement('div'); host.id = '__tag-host'; host.style.cssText = 'position:fixed;left:0;top:0;width:600px;background:#fff;z-index:99999'; document.body.appendChild(host); }
     await renderTagManagerInto(host, { scope: 'own' });
   }, { wait: 700 });
-  await page.evaluate(() => { const h = document.getElementById('__tag-host'); if (h) h.remove(); const m = document.getElementById('deck-panel-modal'); if (m) m.remove(); });
+  // lote C: com tags (renomear com colisão, excluir) e com erro da RPC
+  const tagHost = () => { let host = document.getElementById('__tag-host'); if (!host){ host = document.createElement('div'); host.id = '__tag-host'; host.style.cssText = 'position:fixed;left:0;top:0;width:600px;background:#fff;z-index:99999'; document.body.appendChild(host); } return host; };
+  await page.evaluate(() => { window.__rpcOverride = async (name) => name === 'list_note_tags' ? { data: [{ tag: 'verbos', notes: 1 }, { tag: 'temas', notes: 3 }, { tag: 'criado-por-ana', notes: 2 }], error: null } : null; });
+  await S('Tags: gerenciador com tags', async (fn) => { await renderTagManagerInto(eval(fn)(), { scope: 'own' }); }, { wait: 500, arg: `(${tagHost})` });
+  await S('Tags: painel de renomear', () => {
+    const h = document.getElementById('__tag-host'); h.querySelector('[data-tag-rename="verbos"]').click();
+    const i = h.querySelector('[data-tag-rename-input]'); i.value = 'temas'; i.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await S('Tags: painel de excluir', () => { document.getElementById('__tag-host').querySelector('[data-tag-delete="temas"]').click(); });
+  await S('Tags: nome inválido', () => {
+    const h = document.getElementById('__tag-host'); h.querySelector('[data-tag-rename="verbos"]').click();
+    const i = h.querySelector('[data-tag-rename-input]'); i.value = '!!!'; i.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await page.evaluate(() => { window.__rpcOverride = async (name) => name === 'list_note_tags' ? { data: null, error: { message: 'invalid_scope' } } : null; });
+  await S('Tags: erro da RPC', async () => { await renderTagManagerInto(document.getElementById('__tag-host'), { scope: 'own' }); }, { wait: 500 });
+  await page.evaluate(() => { window.__rpcOverride = null; const h = document.getElementById('__tag-host'); if (h) h.remove(); const m = document.getElementById('deck-panel-modal'); if (m) m.remove(); });
+  // lote C: a aba Meus cartões de verdade (seção "Gerenciar tags" com tags, filtro de tag ativo na Revisão)
+  await page.evaluate(() => { window.__rpcOverride = async (name) => name === 'list_note_tags' ? { data: [{ tag: 'verbos', notes: 1 }], error: null } : null; });
+  await S('Meus cartões (aba, com tags e filtro de tag)', () => {
+    try { ensureProfileLoaded = async () => ({ plan_tier: 'free' }); } catch (e) {}
+    if (STATE.studySettings) STATE.studySettings.reviewTagFilter = ['verbos'];
+    switchTab('my-flashcards');
+  }, { wait: 1200 });
+  await page.evaluate(() => { window.__rpcOverride = null; if (STATE.studySettings) STATE.studySettings.reviewTagFilter = []; switchTab('path'); });
 
   // Importação cortada pelo limite do plano grátis (mesma chamada do import real)
   await S('janela: importação cortada', () => {
     openFlashcardLimitModal({ cutMessage: ownCardInstanceCutMessage({ requested: 30, keptInstances: 5, limit: 20, used: 15, what: 'import' }) });
   });
   await page.evaluate(() => { const m = document.getElementById('flashcard-limit-modal'); if (m) m.style.display = 'none'; });
+
+  // lote C: importação .apkg (arquivo inválido, depois um plano com Notes puladas)
+  await S('.apkg: arquivo inválido', async () => {
+    const modal = ensureAnkiImportModal(); modal.style.display = 'flex';
+    const r = await parseApkgFile(new ArrayBuffer(4), { SQL: {}, JSZipCtor: { loadAsync: async () => { throw new Error('zip'); } } });
+    document.getElementById('anki-import-body').innerHTML = ankiImportErrorHTML(r.error);
+  });
+  await S('.apkg: plano com Notes puladas', () => {
+    const pr = { notes: [{ id: 1, guid: 'g1', mid: 'm404', tags: [], flds: ['a', 'b'] }, { id: 2, guid: 'g2', mid: 'm1', tags: [], flds: ['a'] }],
+      models: { m1: { tmpls: [], flds: [] } }, decks: {}, cardsByNoteId: new Map(), mediaManifest: {} };
+    ANKI_IMPORT_STATE.plan = buildAnkiImportPlan(pr, { languageAppKey: APP_KEY, existingRows: [] });
+    ANKI_IMPORT_STATE.decks = STATE.decks || []; ANKI_IMPORT_STATE.selectedIds = new Set();
+    renderAnkiImportSummary(document.getElementById('anki-import-body'));
+  });
+  await page.evaluate(() => { const m = document.getElementById('anki-import-modal'); if (m) m.style.display = 'none'; });
+
+  // lote C: Deck público (modal dentro do app), cartões, plano de importação, publicar, perfil público
+  await page.evaluate(() => {
+    const other = APP_KEY === 'frances' ? 'mandarim' : 'frances';
+    const deck = (id, extra) => Object.assign({ public_id: id, name: 'Verbos', description: 'Os verbos mais úteis', icon: 'book', color: 'blue', language: APP_KEY, notes_count: 4,
+      updated_at: '2026-10-01T12:00:00Z', owner: { username: 'ana', display_name: 'Ana' }, subdecks: [{ public_id: 'pd2', name: 'Sub', notes_count: 2, icon: 'book', color: 'gray' }],
+      parent: null, viewer: { authenticated: true, can_open: true, can_import: true } }, extra || {});
+    const DECKS = { pd1: deck('pd1'), pdlogin: deck('pdlogin', { viewer: { authenticated: false } }), pdfree: deck('pdfree', { viewer: { authenticated: true, can_open: false } }), pdother: deck('pdother', { language: other }) };
+    window.__rpcOverride = async (name, args) => {
+      if (name === 'get_public_deck') return { data: DECKS[args.p_public_id] || { error: 'unavailable' }, error: null };
+      if (name === 'get_public_deck_notes') return { data: { language: APP_KEY, total: 2, notes: [
+        { idx: 0, mode: 'cloze', fields: [{ id: 'f1', lang: null, content: { value: '{{c1::Bonjour}} toi' } }, { id: 'f2', lang: null, content: { value: 'Oi você' } }], tags: ['verbos'] },
+        { idx: 1, mode: 'multiple_choice', fields: [{ id: 'f3', lang: null, role: 'prompt', content: { value: 'merci' } }], tags: [] }] }, error: null };
+      if (name === 'check_public_deck_duplicates') return { data: { source_total: 7, create_default: 2, root_final_name: 'Verbos (2)', incompatible: 1,
+        counts: { exact: 1, exact_archived: 1, source_duplicate: 2 }, notes: [{ cls: 'none', sig: 's1', mode: 'cloze', preview: 'p', instances: 2 }, { cls: 'variant', sig: 's2', mode: 'normal', preview: 'q', instances: 1 },
+          { cls: 'cross_family', sig: 's3', mode: 'normal' }, { cls: 'exact', mode: 'normal_reversed', preview: 'r', instances: 1 }, { cls: 'exact_archived', local_archived: true, mode: 'type_answer', preview: 's', instances: 3 }],
+        decks: [] }, error: null };
+      if (name === 'get_public_deck_owner_status') return { data: window.__ownerStatus, error: null };
+      if (name === 'get_public_deck_copy_count') return { data: { error: 'not_allowed' }, error: null };
+      if (name === 'list_public_decks_for_user') return { data: { decks: window.__noDecks ? [] : [DECKS.pd1] }, error: null };
+      return null;
+    };
+  });
+  await S('Deck público: página', async () => { await openPublicDeckModal('pd1'); }, { wait: 600 });
+  await S('Deck público: cartões', () => { document.getElementById('public-deck-open-btn').click(); }, { wait: 600 });
+  await S('Deck público: plano de importação', () => { document.getElementById('public-deck-import-btn').click(); }, { wait: 700 });
+  await S('Deck público: plano com Note marcada', () => { const c = document.querySelector('[data-plan-sig="s2"]'); if (c){ c.checked = true; c.dispatchEvent(new Event('change', { bubbles: true })); } });
+  await S('Deck público: sem conta', async () => { await openPublicDeckModal('pdlogin'); }, { wait: 600 });
+  await S('Deck público: plano grátis', async () => { await openPublicDeckModal('pdfree'); }, { wait: 600 });
+  await S('Deck público: de outro idioma', async () => { await openPublicDeckModal('pdother'); }, { wait: 600 });
+  await S('Deck público: indisponível', async () => { await openPublicDeckModal('nope'); }, { wait: 600 });
+  await page.evaluate(() => { if (typeof closePublicDeckModal === 'function') closePublicDeckModal(); });
+  const pubHost = () => { let h = document.getElementById('__pub-host'); if (!h){ h = document.createElement('div'); h.id = '__pub-host'; h.style.cssText = 'position:fixed;left:0;top:0;width:600px;background:#fff;z-index:99999'; document.body.appendChild(h); } return h; };
+  await S('publicar Deck: privado', async (fn) => { window.__ownerStatus = { is_public: false, notes_count: 4, incompatible: [1] }; await openPublishBox({ id: 7001, is_public: false, language_app_key: APP_KEY }, eval(fn)()); }, { wait: 500, arg: `(${pubHost})` });
+  await S('publicar Deck: público', async () => { window.__ownerStatus = { is_public: true, public_id: 'pd1' }; await openPublishBox({ id: 7001, is_public: true, public_id: 'pd1', language_app_key: APP_KEY }, document.getElementById('__pub-host')); }, { wait: 500 });
+  await S('perfil público: seção Decks públicos', async () => { await renderPublicDecksSection(document.getElementById('__pub-host'), 'ana'); }, { wait: 400 });
+  await S('perfil público: nenhum Deck público', async () => { window.__noDecks = true; await renderPublicDecksSection(document.getElementById('__pub-host'), 'ana'); }, { wait: 400 });
+  await S('perfil público: rodapé do visitante', () => { document.getElementById('__pub-host').remove(); const w = document.getElementById('public-profile-standalone'); if (w) w.style.display = 'block'; });
+  await page.evaluate(() => { window.__rpcOverride = null; const w = document.getElementById('public-profile-standalone'); if (w) w.style.display = 'none'; });
+
+  // lote C: mensagens montadas nas camadas de dados (aparecem em toast/erro de formulário)
+  await S('mensagens de erro (excluir Deck, tags, novo editor, .apkg)', async () => {
+    const out = window.__toasts = window.__toasts || [];
+    const me = CURRENT_USER.id, deck = { id: 1, kind: 'personal', owner_id: me, language_app_key: APP_KEY };
+    out.push((await deletePersonalDeckTree({ deck: { id: 1, kind: 'course' }, decks: [] })).error);
+    out.push((await deletePersonalDeckTree({ deck, decks: [deck], mode: 'move', destination: null })).error);
+    out.push((await deletePersonalDeckTree({ deck, decks: [deck], mode: 'x' })).error);
+    out.push(validateNoteTags(['x'.repeat(60)]).error, validateNoteTags(Array.from({ length: 23 }, (_, i) => 't' + i)).error);
+    out.push(legacyFlashcardConversionPreflight({ cloze_sentence: 'abc' }).error, legacyFlashcardConversionPreflight({ cloze_sentence: 'a ___ b ___' }).error, legacyFlashcardConversionPreflight({ choices: ['a'], back_trans: '' }).error);
+    out.push(summarizeDroppedImportTags([{ __droppedTags: [{ reason: 'over_limit' }, { reason: 'system_tag' }] }]));
+    Object.keys(ANKI_PARSER_ERROR_MESSAGES).concat(['missing_dependencies', 'no_notetypes']).forEach(c => out.push(ankiParserErrorText(c)));
+    ['premium_required', 'duplicates_changed', 'rpc_ambiguous', 'invalid_destination', 'zzz'].forEach(c => out.push(publicDeckErrorMessage(c)));
+    out.push(planTagRename('criado-por-x', 'a', {}).error, planTagRename('a', 'criado-por-y', {}).error, friendlyTagLabel('unidade-saudacoes'));
+  });
 
   // Desafios / Ditados (fr) ; Conjugação (fr) ; Hanzi (zh)
   if (app === 'fr'){

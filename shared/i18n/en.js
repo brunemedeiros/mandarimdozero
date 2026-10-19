@@ -3759,4 +3759,198 @@ window.I18N_CATALOG['en'] = {
   'loading.phrase.preparing': 'Getting everything ready...', // ALTA
   'loading.phrase.moment': 'One moment...', // ALTA
   'zh.hanzi.radicals': '🧬 Radicals', // ALTA (achado extra: botão e título da tela de Radicais)
+  // Etapa 3, lote C (2026-10-19): gerenciador de Tags, excluir Deck, importação cortada, Meus cartões, validação de
+  // tags, novo editor, importação .apkg e Decks públicos. Texto pt idêntico ao que estava escrito direto no JS/HTML.
+  'tagManager.err.systemRename': 'Attribution tags (criado-por-…) are system tags and can\'t be renamed.', // ALTA
+  'tagManager.err.systemReserved': 'Names that start with "criado-por" are reserved for the system.', // ALTA
+  'tagManager.err.invalidName': 'Enter a valid tag name (letters, numbers and hyphens).', // ALTA
+  'tagManager.err.invalidTag': 'Invalid tag name.', // ALTA
+  'tagManager.err.invalidScope': 'Invalid scope.', // ALTA
+  'tagManager.err.systemProtected': 'Attribution tags (criado-por-…) are system tags and can\'t be created, renamed or deleted.', // ALTA
+  'tagManager.err.generic': 'We couldn\'t finish this right now. Try again.', // ALTA
+  'tagManager.unchanged': 'No changes.', // ALTA
+  'tagManager.rename.newName': 'New name:', // ALTA
+  'tagManager.rename.affected.one': 'note will be changed', // ALTA
+  'tagManager.rename.affected.other': 'notes will be changed', // ALTA
+  'tagManager.rename.collision.one': 'note already uses', // ALTA
+  'tagManager.rename.collision.other': 'notes already use', // ALTA
+  'tagManager.rename.collisionMerge': ': the two tags will be merged (no duplicates).', // ALTA
+  'tagManager.note.one': 'note', // ALTA
+  'tagManager.note.other': 'notes', // ALTA
+  'tagManager.rename.inputAria': 'New name for tag {tag}', // ALTA
+  'tagManager.rename.confirm': 'Confirm rename', // ALTA
+  'tagManager.cancel': 'Cancel', // ALTA
+  'tagManager.delete.askHtml': 'Delete <strong>#{tag}</strong>? This tag will be removed from {notes}. The removal applies everywhere in your scope and can\'t be undone.', // ALTA
+  'tagManager.delete.confirm': 'Delete tag', // ALTA
+  'tagManager.systemTag': 'permanent attribution (system)', // MÉDIA -- alternativa: "permanent credit (system)"
+  'tagManager.rename': 'Rename', // ALTA
+  'tagManager.delete.title': 'Delete tag', // ALTA
+  'tagManager.delete.aria': 'Delete tag {tag}', // ALTA
+  'tagManager.loading': 'Loading tags…', // ALTA
+  'tagManager.hint.teacher': 'Tags on your student cards (all students and languages). Renaming or deleting applies to all of them.', // ALTA
+  'tagManager.hint.own': 'Tags on your own cards. Tags on your teacher\'s cards don\'t show up here and you can\'t change them.', // ALTA
+  'tagManager.retry': 'Try again', // ALTA
+  'tagManager.empty': 'You\'re not using any tags yet.', // ALTA
+  'tagManager.renaming': 'Renaming…', // ALTA
+  'tagManager.deleting': 'Deleting…', // ALTA
+  'tagManager.done.merged': ', {n} merged', // ALTA
+  'tagManager.done.removedFrom': '✓ #{tag} removed from {n} {notes}.', // ALTA
+  'deck.delete.err.notOwn': 'You can only delete a personal Deck of your own.', // ALTA
+  'deck.delete.err.checkFailed': 'We couldn\'t check this Deck\'s cards right now. Nothing was changed.', // ALTA
+  'deck.delete.err.mismatch': 'This Deck\'s cards don\'t match what\'s on the screen. Reload the page and try again. Nothing was changed.', // ALTA
+  'deck.delete.err.chooseDest': 'Choose a personal Deck outside this one to receive the cards.', // ALTA
+  'deck.delete.err.moveFailed': 'We couldn\'t move the cards right now. Nothing was deleted.', // ALTA
+  'deck.delete.err.deleteCardsFailed': 'We couldn\'t delete the cards right now. Nothing was deleted.', // ALTA
+  'deck.delete.err.invalidOp': 'Invalid operation.', // ALTA
+  'deck.delete.err.movedButDeck': 'The cards were moved, but we couldn\'t delete the Deck right now. Try again.', // ALTA
+  'deck.delete.err.deletedButDeck': 'The cards were deleted, but we couldn\'t delete the Deck right now. Try again.', // ALTA
+  'flashcardLimit.cut.title': '🔒 Import limited by the free plan', // ALTA
+  'flashcardLimit.cut.ctaStrong': '⭐ With Premium, your own cards are unlimited.', // ALTA
+  'flashcardLimit.cut.ctaBody': 'To turn it on, contact the admin (profbrune). You can also delete cards you no longer use to free up space.', // ALTA
+  'myFlashcards.tags.teacher': 'Tags on your teacher\'s cards:', // ALTA
+  'myFlashcards.tags.filterNotice': 'Tag filter on in Review: {chips} — it also applies to "Study this Deck".', // ALTA
+  'myFlashcards.tags.clear': 'Clear', // ALTA
+  'myFlashcards.export.noneFits': 'None of the selected cards fit this format (front and back only).', // ALTA
+  'tags.err.tooLong': 'Tag too long (up to {max} characters): "{tag}…".', // ALTA
+  'tags.err.tooMany': 'Up to {max} tags per card ({n} were given).', // ALTA
+  'noteConvert.err.noBlank': 'This fill-in sentence has no "___" marking the blank, so we can\'t tell where the answer goes. Fix the sentence in the usual form before using the new editor.', // ALTA
+  'noteConvert.err.manyBlanks': 'This fill-in sentence has more than one "___". The old form only supports 1 blank per card, so we can\'t tell automatically which one becomes the new blank. Fix the sentence in the usual form before using the new editor.', // ALTA
+  'noteConvert.err.mcNoAnswer': 'This multiple choice card has no correct answer set (the back is empty), so we can\'t tell which answer is right. Fill in the back in the usual form before using the new editor.', // ALTA
+  'noteEditor.err.emptySides': 'Both content fields (front/back) need text.', // ALTA
+  'import.tagsDropped.limit': '{n} tag(s) were skipped for going over the limit ({max} tags per card, {len} characters per tag).', // ALTA
+  'import.tagsDropped.system': '{n} system tag(s) (author credit) aren\'t imported from a file or link: only a copy made in the app creates them.', // MÉDIA -- alternativa: "authorship attribution"
+  'ownFlashcards.err.copyFailed': 'We couldn\'t copy the card right now.', // ALTA
+  'review.tagLabel.unitPrefix': '#unit-', // MÉDIA -- só o prefixo do rótulo; o resto é o slug do título da unidade
+  'ankiImport.parse.invalid_zip': 'This file is not a valid .apkg/.zip.', // ALTA
+  'ankiImport.parse.missing_collection': 'This .apkg doesn\'t contain a collection database we recognize (collection.anki2/anki21).', // ALTA
+  'ankiImport.parse.unreadable_collection': 'We couldn\'t read the collection database inside the .apkg.', // ALTA
+  'ankiImport.parse.invalid_sqlite': 'The collection database is corrupted or in a SQLite format we don\'t recognize.', // ALTA
+  'ankiImport.parse.empty_collection': 'The "col" table in this collection is empty.', // ALTA
+  'ankiImport.parse.malformed_col_table': 'We couldn\'t read the "col" table in this collection.', // ALTA
+  'ankiImport.parse.malformed_notes_cards': 'We couldn\'t read the notes/cards tables in this collection.', // ALTA
+  'ankiImport.parse.unsupported_format_zstd': 'This .apkg uses the newer Anki format (zstd compression, collection.anki21b), which this importer doesn\'t support yet. In Anki, when you export, check "Support older Anki versions" to create a compatible package, and try again.', // ALTA
+  'ankiImport.parse.unsupported_format_protobuf': 'This .apkg was exported in a newer Anki format that stores card models as binary protobuf (this importer doesn\'t support it: decoding it by hand could corrupt the content). In Anki, when you export, check "Support older Anki versions" to create a compatible package, and try again.', // ALTA
+  'ankiImport.parse.missing_dependencies': 'The .apkg reading libraries didn\'t load.', // ALTA
+  'ankiImport.parse.no_notetypes': 'This collection doesn\'t have any card model (notetype) we recognize.', // ALTA
+  'ankiImport.warn.emptyFrontBack': 'The front or back was empty after removing HTML/media. Note skipped.', // ALTA
+  'ankiImport.warn.emptyZh': 'Pinyin, character or translation was empty after removing HTML/media. Note skipped.', // ALTA
+  'ankiImport.warn.emptyQA': 'The question or answer was empty after removing HTML/media. Note skipped.', // ALTA
+  'ankiImport.warn.clozeNoTranslation': 'This Cloze card doesn\'t have a filled-in 2nd translation field in Anki. The app needs a translation for this format, so the Note was skipped. You can create it by hand later.', // ALTA
+  'ankiImport.warn.noClozeMarks': 'No valid Cloze blank found in the text. Note skipped.', // ALTA
+  'ankiImport.warn.hintsDropped': '{n} Anki blank hint(s) weren\'t kept (there\'s no safe match in this app). The answer itself was kept.', // ALTA
+  'ankiImport.warn.unrecognized': 'Card format not recognized (it isn\'t a recognizable Basic/Basic reversed/Cloze/Type the answer). Note skipped.', // ALTA
+  'ankiImport.media.notFound': 'Media "{file}" is referenced but wasn\'t found in the .apkg package.', // ALTA
+  'ankiImport.media.notInPackage': 'Media "{file}" is listed in the manifest but missing from the package.', // ALTA
+  'ankiImport.media.unreadable': 'We couldn\'t read the media file "{file}" from the package.', // ALTA
+  'ankiImport.media.uploadFailed': 'Failed to upload "{file}".', // ALTA
+  'ankiImport.warn.missingModel': 'The card model this Note uses doesn\'t exist in the collection. Note skipped.', // ALTA
+  'ankiImport.warn.unrecognizedType': 'Anki card type not safely recognized (it isn\'t a clear Basic/Basic reversed/Cloze/Type the answer). Note skipped.', // ALTA
+  'ankiImport.warn.systemTags': '{n} system tag(s) ({tags}) can\'t be imported: author credit is only created by the app itself.', // MÉDIA -- alternativa: "authorship attribution"
+  'ankiImport.warn.tagsTooLong': '{n} tag(s) over {max} characters weren\'t imported: {tags}.', // ALTA
+  'ankiImport.warn.tagsOverLimit': 'Limit of {max} tags per card: {n} tag(s) weren\'t imported: {tags}.', // ALTA
+  'ankiImport.warn.invalidAfterMap': 'Invalid card after mapping: {error}', // ALTA
+  'ankiImport.warn.extraTemplates': '{n} extra template(s) of this card type weren\'t kept (only the 1st was imported).', // ALTA
+  'ankiImport.err.deckCreateNamed': 'We couldn\'t create the Deck "{name}"{detail}. The cards in that folder weren\'t imported.', // ALTA
+  'ankiImport.conflict.title': 'A deck with this name already exists. What do you want to do?', // ALTA
+  'ankiImport.conflict.more': '+ {n} more', // ALTA
+  'ankiImport.conflict.suffix': 'Create with suffix (2)', // ALTA
+  'ankiImport.conflict.merge': 'Add to the existing Deck', // ALTA
+  'ankiImport.conflict.hint': 'This choice applies to all repeated decks in this import. When adding to the existing Deck, cards that seem to already exist stay unchecked.', // ALTA
+  'ankiImport.conflict.chooseFirst': 'Decks with these names already exist. Choose what to do above before importing.', // ALTA
+  'publicDeck.err.inFlight': 'This import is already in progress.', // ALTA
+  'publicDeck.err.loginToImport': 'Sign in to your account to import.', // ALTA
+  'publicDeck.err.premium': 'Importing public Decks is a Premium feature.', // ALTA
+  'publicDeck.err.unavailable': 'This Deck is no longer available.', // ALTA
+  'publicDeck.err.duplicatesChanged': 'Your collection or the Deck changed since the analysis. Nothing was imported; review the new plan.', // ALTA
+  'publicDeck.err.invalidSelection': 'The selection isn\'t valid. Nothing was imported; review the plan.', // ALTA
+  'publicDeck.err.tooLarge': 'This Deck is too big to import all at once.', // ALTA
+  'publicDeck.err.mediaTooLarge': 'This Deck has too many media files to import all at once.', // ALTA
+  'publicDeck.err.mediaCopyFailed': 'We couldn\'t copy the media files. Nothing was imported; try again.', // ALTA
+  'publicDeck.err.ambiguous': 'The connection failed during the import, and it may have finished anyway. Check My Decks before trying again.', // ALTA
+  'publicDeck.err.mediaMapIncomplete': 'The Deck changed during the import. Try again.', // ALTA
+  'publicDeck.err.invalidMediaMap': 'We couldn\'t validate the media files. Nothing was imported.', // ALTA
+  'publicDeck.err.ownDeck': 'This Deck is already yours.', // ALTA
+  'publicDeck.err.descriptionTooLong': 'The description can have up to 280 characters.', // ALTA
+  'publicDeck.err.kindForbidden': 'Only personal Decks (inside My Decks) can be public.', // ALTA
+  'publicDeck.err.notFound': 'Deck not found.', // ALTA
+  'publicDeck.err.generic': 'We couldn\'t finish this right now. Try again.', // ALTA
+  'publicDeck.mode.cloze': 'Fill in the blank', // ALTA
+  'publicDeck.unavailable.title': 'Deck unavailable', // ALTA
+  'publicDeck.unavailable.body': 'This Deck doesn\'t exist or isn\'t public right now.', // ALTA
+  'publicDeck.gate.login': '🔒 Sign in to your account to see the cards. Opening and importing public Decks is a Premium feature.', // ALTA
+  'publicDeck.gate.premium': '🔒 Opening and importing public Decks is a Premium feature. You can see the Deck details above.', // ALTA
+  'publicDeck.loading': 'Loading Deck...', // ALTA
+  'publicDeck.subdecks': 'Public subdecks', // ALTA
+  'publicDeck.notesCount': '{n} Notes', // ALTA -- igual ao pt de propósito: "Note" é o termo do app nos dois idiomas
+  'publicDeck.wrongSite': 'This Deck is in {lang}.', // MÉDIA -- alternativa: "This is a {lang} Deck."
+  'publicDeck.openOtherSite': 'Open it on the matching site', // ALTA
+  'publicDeck.viewCards': '📇 See cards ({n})', // ALTA
+  'publicDeck.importBtn': '⬇️ Import to My Decks', // ALTA
+  'publicDeck.importHint': 'Creates an independent copy inside My Decks, credited to the original author. Your study progress starts from zero.', // ALTA
+  'publicDeck.by': 'by', // ALTA
+  'publicDeck.updatedOn': 'Updated {date}', // ALTA
+  'publicDeck.report': '⚑ Report this Deck', // ALTA
+  'publicDeck.loadingCards': 'Loading cards...', // ALTA
+  'publicDeck.notes.premium': 'Opening public Decks is a Premium feature.', // ALTA
+  'publicDeck.notes.login': 'Sign in to your account to see the cards.', // ALTA
+  'publicDeck.notes.failed': 'We couldn\'t load the cards.', // ALTA
+  'publicDeck.notes.empty': 'This Deck doesn\'t have any public cards yet.', // ALTA
+  'publicDeck.notes.view': 'View', // ALTA
+  'publicDeck.notes.reportTitle': 'Report this card', // ALTA
+  'publicDeck.plan.instances': '{n} cards', // ALTA
+  'publicDeck.plan.title': 'Import “{name}”', // ALTA
+  'publicDeck.plan.contains': 'This Deck has {n} Notes.', // ALTA
+  'publicDeck.plan.existing': '{n} already exist in your collection', // ALTA
+  'publicDeck.plan.archived': '({n} archived)', // ALTA
+  'publicDeck.plan.willAdd': 'will be added.', // ALTA
+  'publicDeck.plan.renamed': 'A Deck with this name already exists: it will be created as “{name}”.', // ALTA
+  'publicDeck.plan.new': 'New', // ALTA
+  'publicDeck.plan.variants': 'Similar to something of yours (unchecked)', // ALTA
+  'publicDeck.plan.variantsHint': 'They start like one of your Notes but have different content. Check only the ones you want as new, independent Notes; yours aren\'t changed.', // ALTA
+  'publicDeck.plan.related': 'Related content found', // ALTA
+  'publicDeck.plan.relatedHint': '{n} item(s) have the same pair in another card type in your collection. They aren\'t imported.', // ALTA
+  'publicDeck.plan.existingSummary': '{n} already exist in your collection — they won\'t be imported', // ALTA
+  'publicDeck.plan.archivedOne': 'archived', // ALTA
+  'publicDeck.plan.alreadyExists': 'already exists', // ALTA
+  'publicDeck.plan.sourceDup': '{n} repeated inside the Deck itself: imported only once.', // ALTA
+  'publicDeck.plan.incompatible': '{n} Note(s) couldn\'t be imported (incompatible format).', // ALTA
+  'publicDeck.plan.import': 'Import', // ALTA
+  'publicDeck.plan.cancel': 'Cancel', // ALTA
+  'publicDeck.plan.analyzing': 'Analyzing your collection...', // ALTA
+  'publicDeck.plan.toStudy': '{n} card(s) to study.', // ALTA
+  'publicDeck.plan.decksCreated': 'Decks created: {list}', // ALTA
+  'publicDeck.plan.omitted': '({n} with no new Notes, left out)', // ALTA
+  'publicDeck.plan.nothingNew': 'Nothing new to import.', // ALTA
+  'publicDeck.plan.nothingNewBtn': 'Nothing new to import', // ALTA
+  'publicDeck.plan.importN.one': 'Import {n} Note', // ALTA
+  'publicDeck.plan.importN.other': 'Import {n} Notes', // ALTA
+  'publicDeck.copyingMedia': 'Copying media {done}/{total}...', // ALTA
+  'publicDeck.done.imported': '✅ {n} Notes imported', // ALTA
+  'publicDeck.done.into': 'into “{name}”', // ALTA
+  'publicDeck.done.existed': '{n} already existed.', // ALTA
+  'publicDeck.done.incompatible': '({n} couldn\'t be imported)', // ALTA
+  'publicDeck.done.nothing': 'Nothing new to import: this content is already in your collection.', // ALTA
+  'publicDeck.publish.publicPrivateProfile': '🌐 This Deck is public, but your profile is private: only your friends and your teacher can see it.', // ALTA
+  'publicDeck.publish.public': '🌐 This Deck is public: it shows on your profile and opens from the link.', // ALTA
+  'publicDeck.publish.private': '🔒 This Deck is private: only you can see it.', // ALTA
+  'publicDeck.publish.ownKeyHtml': 'Each Deck has its own switch: <strong>subdecks don\'t change with it</strong>. The cards\' "private note" field is never public.', // MÉDIA -- "chave" = interruptor público/privado
+  'publicDeck.publish.notesWillBePublic': '{n} Notes will become public.', // ALTA
+  'publicDeck.publish.incompatHtml': '{n} can\'t be shown in the new format and <strong>won\'t be published</strong> (they stay as they are in your Deck).', // ALTA
+  'publicDeck.publish.copyLink': 'Copy link', // ALTA
+  'publicDeck.publish.makePrivate': 'Make private', // ALTA
+  'publicDeck.publish.makePublic': 'Make public', // ALTA
+  'publicDeck.publish.editPage': 'Edit Deck page', // ALTA
+  'publicDeck.publish.descLabel': 'Description (optional, up to 280 characters)', // ALTA
+  'publicDeck.publish.iconAria': 'Icon', // ALTA
+  'publicDeck.publish.colorAria': 'Color', // ALTA
+  'publicDeck.publish.save': 'Save changes', // ALTA
+  'publicDeck.publish.toastPrivateProfile': 'Public Deck. Since your profile is private, only your friends and your teacher can see it.', // ALTA
+  'publicDeck.publish.toastPublic': '🌐 Public Deck.', // ALTA
+  'publicDeck.publish.confirmPrivate': 'Make this Deck private? It leaves your profile and the link stops working. Copies other people already made stay with them.', // ALTA
+  'publicDeck.publish.toastPrivate': '🔒 Private Deck.', // ALTA
+  'publicDeck.publish.linkCopied': 'Link copied.', // ALTA
+  'publicProfile.footer.askFr': 'Want to study French too?', // ALTA
+  'publicProfile.footer.askZh': 'Want to study Mandarin too?', // ALTA
+  'publicProfile.footer.cta': 'Create my account →', // ALTA
+  'publicDeck.modal.title': 'Public Deck', // ALTA
 };

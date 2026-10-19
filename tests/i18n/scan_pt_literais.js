@@ -58,7 +58,9 @@ function looksPtText(s){
   return weak >= 1 && /\s/.test(txt.trim());
 }
 
-const KEY_FNS = new Set(['t', 'tp', 'tpZero', 'chT', '_ckT', 'mediaErrorText', 'tagsEditorT', 'reportT', 'tsuTp', 'studyTrailTagText']);
+// Etapa 3, lote C: wrappers com fallback em português para os testes Node (tag-manager, flashcard-model,
+// flashcard-native-persistence, anki-import).
+const KEY_FNS = new Set(['t', 'tp', 'tpZero', 'chT', '_ckT', 'mediaErrorText', 'tagsEditorT', 'reportT', 'tsuTp', 'studyTrailTagText', 'tagManagerT', 'noteTagsErrorText', 'nativePersistenceText', 'ankiImportText']);
 function calleeName(call){
   const e = call.expression;
   if (ts.isIdentifier(e)) return e.text;

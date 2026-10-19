@@ -865,16 +865,24 @@ const TAG_MAX_LENGTH = 50;
 // mensagem que a UI mostra. (O que normalizeNoteTags já fazia --
 // deduplicar e descartar o que normaliza pra vazio -- continua sendo
 // normalização, não "descarte por limite".)
+// Etapa 3 (lote C): mensagem no idioma do site quando t() existe; sem ele (testes Node), o português de sempre.
+function noteTagsErrorText(key, pt, params){
+  if (typeof t === 'function'){
+    const v = t(key, params);
+    if (v && v !== key) return v;
+  }
+  return String(pt).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
+}
 function validateNoteTags(rawTags){
   const tags = normalizeNoteTags(rawTags);
   const tooLong = tags.filter(t => t.length > TAG_MAX_LENGTH);
   if (tooLong.length){
     return { ok: false, tags, errorCode: 'tag_too_long',
-      error: `Tag muito longa (máximo ${TAG_MAX_LENGTH} caracteres): "${tooLong[0].slice(0, 20)}…".` };
+      error: noteTagsErrorText('tags.err.tooLong', 'Tag muito longa (máximo {max} caracteres): "{tag}…".', { max: TAG_MAX_LENGTH, tag: tooLong[0].slice(0, 20) }) };
   }
   if (tags.length > TAG_MAX_PER_NOTE){
     return { ok: false, tags, errorCode: 'too_many_tags',
-      error: `Máximo de ${TAG_MAX_PER_NOTE} tags por cartão (foram informadas ${tags.length}).` };
+      error: noteTagsErrorText('tags.err.tooMany', 'Máximo de {max} tags por cartão (foram informadas {n}).', { max: TAG_MAX_PER_NOTE, n: tags.length }) };
   }
   return { ok: true, tags };
 }
@@ -3401,20 +3409,28 @@ function nextRevisionForNativeSave(c, editorState, conversionBaseline){
 //    há nenhuma resposta certa pra promover a `role:'answer'` -- bloquear
 //    em vez de criar um Field de resposta vazio que passaria despercebido
 //    até o clique em Salvar.
+// Etapa 3 (lote C): mensagem no idioma do site quando t() existe; sem ele (testes Node), o português de sempre.
+function nativePersistenceText(key, pt, params){
+  if (typeof t === 'function'){
+    const v = t(key, params);
+    if (v && v !== key) return v;
+  }
+  return String(pt).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
+}
 function legacyFlashcardConversionPreflight(row){
   const isCloze = !!row.cloze_sentence;
   if (isCloze){
     const blankMatches = (row.cloze_sentence.match(/___/g) || []).length;
     if (blankMatches !== 1){
       return { ok: false, error: blankMatches === 0
-        ? 'Esta frase de completar não tem nenhum "___" marcando a lacuna -- não dá pra saber onde a resposta entra. Corrija a frase pelo formulário de sempre antes de usar o editor novo.'
-        : 'Esta frase de completar tem mais de um "___" -- o formulário legado só suporta 1 lacuna por cartão, então não dá pra determinar automaticamente qual delas vira a marca nativa. Corrija a frase pelo formulário de sempre antes de usar o editor novo.' };
+        ? nativePersistenceText('noteConvert.err.noBlank', 'Esta frase de completar não tem nenhum "___" marcando a lacuna -- não dá pra saber onde a resposta entra. Corrija a frase pelo formulário de sempre antes de usar o editor novo.')
+        : nativePersistenceText('noteConvert.err.manyBlanks', 'Esta frase de completar tem mais de um "___" -- o formulário legado só suporta 1 lacuna por cartão, então não dá pra determinar automaticamente qual delas vira a marca nativa. Corrija a frase pelo formulário de sempre antes de usar o editor novo.') };
     }
     return { ok: true };
   }
   const isMC = !!(row.choices && row.choices.length);
   if (isMC && !(row.back_trans || '').trim()){
-    return { ok: false, error: 'Este cartão de múltipla escolha não tem uma resposta certa definida (verso vazio) -- não dá pra determinar qual é a resposta certa. Preencha o verso pelo formulário de sempre antes de usar o editor novo.' };
+    return { ok: false, error: nativePersistenceText('noteConvert.err.mcNoAnswer', 'Este cartão de múltipla escolha não tem uma resposta certa definida (verso vazio) -- não dá pra determinar qual é a resposta certa. Preencha o verso pelo formulário de sempre antes de usar o editor novo.') };
   }
   return { ok: true };
 }
@@ -3450,7 +3466,7 @@ function validateNoteEditorStateForSave(editorState){
     const slots = contentFieldIndices(editorState.fields || []);
     const isEmptyField = (f) => !f || !((f.content && f.content.value) || '').trim();
     if (isEmptyField(editorState.fields[slots[0]]) || isEmptyField(editorState.fields[slots[1]])){
-      return { ok: false, error: 'Os dois campos de conteúdo (frente/verso) precisam ter texto.' };
+      return { ok: false, error: nativePersistenceText('noteEditor.err.emptySides', 'Os dois campos de conteúdo (frente/verso) precisam ter texto.') };
     }
     return { ok: true };
   }
@@ -3756,8 +3772,8 @@ function summarizeDroppedImportTags(states, opts){
   const sys = all.filter(d => d.reason === 'system_tag').length;
   const lim = all.length - sys;
   const parts = [];
-  if (lim) parts.push(`${lim} tag(s) foram ignoradas por passar do limite (${TAG_MAX_PER_NOTE} tags por cartão, ${TAG_MAX_LENGTH} caracteres por tag).`);
-  if (sys) parts.push(`${sys} tag(s) de sistema (atribuição de autoria) não são importadas por arquivo/link: só uma cópia feita pelo app a cria.`);
+  if (lim) parts.push(nativePersistenceText('import.tagsDropped.limit', '{n} tag(s) foram ignoradas por passar do limite ({max} tags por cartão, {len} caracteres por tag).', { n: lim, max: TAG_MAX_PER_NOTE, len: TAG_MAX_LENGTH }));
+  if (sys) parts.push(nativePersistenceText('import.tagsDropped.system', '{n} tag(s) de sistema (atribuição de autoria) não são importadas por arquivo/link: só uma cópia feita pelo app a cria.', { n: sys }));
   return parts.join(' ');
 }
 
