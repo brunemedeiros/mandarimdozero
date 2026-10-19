@@ -1041,7 +1041,7 @@ function renderProgressView(){
   const ownContentCards = ['teacher', 'self'].map(o => {
     const m = ownContentProgress(STATE.cards, o);
     if (!m.total) return '';
-    const label = o === 'teacher' ? 'Conteúdos da professora estudados' : 'Meus conteúdos estudados';
+    const label = o === 'teacher' ? t('progress.stat.teacherContent') : t('progress.stat.ownContent');
     return `<div class="stat-card" data-stat="content-${o}"><div class="num">${m.studied}/${m.total}</div><div class="label">${label}</div></div>`;
   }).join('');
 

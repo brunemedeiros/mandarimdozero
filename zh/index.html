@@ -4798,7 +4798,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <div id="step-content"></div>
 
       <div class="unit-actions">
-        <button class="btn btn-secondary" id="step-back-btn" style="display:none;">← Voltar</button>
+        <button data-i18n="common.backArrow" class="btn btn-secondary" id="step-back-btn" style="display:none;">← Voltar</button>
         <button class="btn btn-primary btn-block" id="step-next-btn">Continuar →</button>
       </div>
     </div>
@@ -4900,15 +4900,15 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   <div class="view" id="view-progress">
     <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil" data-i18n-attr="aria-label:profile.subnavAria">
       <button data-i18n="profile.tabOverview" class="leaderboard-tab" data-tab="profile">Visão geral</button>
-      <button class="leaderboard-tab" data-tab="goals">Metas</button>
-      <button class="leaderboard-tab active" data-tab="progress">Progresso</button>
+      <button data-i18n="profile.tabGoals" class="leaderboard-tab" data-tab="goals">Metas</button>
+      <button data-i18n="profile.tabProgress" class="leaderboard-tab active" data-tab="progress">Progresso</button>
       <button data-i18n="profile.tabFriends" class="leaderboard-tab" data-tab="friends">Amigos</button>
     </div>
     <div class="path-header">
       <h2 data-i18n="ui.stats.title">Seu progresso</h2>
       <p data-i18n="ui.stats.sub">Acompanhe sua consistência e conquistas.</p>
     </div>
-    <div class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
+    <div data-i18n="profile.sectionBadges" class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
     <div class="badge-grid conquests-grid" id="badge-grid"></div>
     <div class="stat-cards" id="stat-cards"></div>
     <div id="vocab-strength-widget"></div>
@@ -4922,12 +4922,12 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   <div class="view" id="view-goals">
     <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil" data-i18n-attr="aria-label:profile.subnavAria">
       <button data-i18n="profile.tabOverview" class="leaderboard-tab" data-tab="profile">Visão geral</button>
-      <button class="leaderboard-tab active" data-tab="goals">Metas</button>
-      <button class="leaderboard-tab" data-tab="progress">Progresso</button>
+      <button data-i18n="profile.tabGoals" class="leaderboard-tab active" data-tab="goals">Metas</button>
+      <button data-i18n="profile.tabProgress" class="leaderboard-tab" data-tab="progress">Progresso</button>
       <button data-i18n="profile.tabFriends" class="leaderboard-tab" data-tab="friends">Amigos</button>
     </div>
     <div class="path-header">
-      <h2>Minhas metas</h2>
+      <h2 data-i18n="profile.goals.title">Minhas metas</h2>
       <p data-i18n="ui.goal.sub">Defina quantas lições por dia você quer estudar.</p>
     </div>
     <div class="study-plan-card" id="study-plan-card">
@@ -4936,7 +4936,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
           <div data-i18n="ui.goal.title" class="study-plan-title">Minha meta de estudo</div>
           <div class="study-plan-sub" id="study-plan-sub"></div>
         </div>
-        <button class="study-plan-edit-btn" id="study-plan-edit-btn" aria-label="Editar meta" title="Editar meta">✏️</button>
+        <button class="study-plan-edit-btn" id="study-plan-edit-btn" aria-label="Editar meta" title="Editar meta" data-i18n-attr="aria-label:profile.goals.edit;title:profile.goals.edit">✏️</button>
       </div>
       <div class="study-plan-body" id="study-plan-body"></div>
     </div>
@@ -5104,8 +5104,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
             <p id="hanzi-count-label">163 caracteres em 33 lições. Veja, escreva e teste sua memória.</p>
           </div>
           <div class="hanzi-header-btns">
-            <button class="btn btn-secondary hanzi-review-btn" id="hanzi-radicals-btn">🧬 Radicais</button>
-            <button class="btn btn-secondary hanzi-review-btn" id="hanzi-review-all-btn">🔁 Revisar caracteres</button>
+            <button data-i18n="zh.hanzi.radicals" class="btn btn-secondary hanzi-review-btn" id="hanzi-radicals-btn">🧬 Radicais</button>
+            <button data-i18n="zh.hanzi.reviewAll" class="btn btn-secondary hanzi-review-btn" id="hanzi-review-all-btn">🔁 Revisar caracteres</button>
           </div>
         </div>
       </div>
@@ -5135,7 +5135,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
     <div id="hanzi-radicals-wrap" style="display:none;">
       <button data-i18n="ui.zh.hanziBackToLessons" class="back-link" id="hanzi-radicals-back-btn">← Voltar às lições</button>
       <div class="path-header">
-        <h2>🧬 Radicais</h2>
+        <h2 data-i18n="zh.hanzi.radicals">🧬 Radicais</h2>
         <p data-i18n="ui.zh.radicalsSub">Os blocos de construção dos caracteres que você já estudou, organizados por frequência.</p>
       </div>
       <div id="hanzi-radicals-content"></div>
@@ -5529,7 +5529,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
     <p data-i18n="ui.streak.sub" class="streak-subtext">Volte amanhã para manter sua sequência.</p>
   </div>
   <div class="streak-modal-footer">
-    <button class="btn btn-primary" id="streak-modal-continue-btn">Continuar</button>
+    <button data-i18n="common.continue" class="btn btn-primary" id="streak-modal-continue-btn">Continuar</button>
   </div>
 </div>
 
@@ -5537,11 +5537,11 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   <div class="review-reminder-icon">🗂️</div>
   <div class="review-reminder-text">
     <div data-i18n="ui.reviewReminder.title" class="review-reminder-title">Vamos fazer uma pequena revisão?</div>
-    <div class="review-reminder-sub"><span id="review-reminder-count">0</span> cartões estão esperando por você — afie sua memória revisando o que já viu.</div>
+    <div data-i18n="ui.reviewReminder.subRest" class="review-reminder-sub"><span id="review-reminder-count">0</span> cartões estão esperando por você — afie sua memória revisando o que já viu.</div>
   </div>
   <div class="review-reminder-actions">
     <button data-i18n="ui.notNow" class="review-reminder-dismiss" id="review-reminder-dismiss-btn">Agora não</button>
-    <button class="btn btn-primary review-reminder-cta" id="review-reminder-cta-btn">Revisar agora</button>
+    <button data-i18n="ui.reviewReminder.cta" class="btn btn-primary review-reminder-cta" id="review-reminder-cta-btn">Revisar agora</button>
   </div>
 </div>
 

@@ -3738,4 +3738,25 @@ window.I18N_CATALOG['en'] = {
   'trail.map.story.lockedHint': 'Complete the previous unit to unlock this story.', // ALTA
   'trail.map.story.readAgain': 'Read again', // ALTA
   'trail.map.story.read': 'Read the story', // ALTA
+  // Etapa 3, lote B (2026-10-19): lição, janela de sequência, aviso de cartões, Perfil (Metas/Progresso), foto do
+  // perfil, Hanzi e frases de carregamento. needs_review: tradução nova, ainda não revisada pela dona.
+  'common.backArrow': '← Back', // ALTA
+  'streak.modal.headline.one': 'You\'re on a {n}-day streak!', // ALTA
+  'streak.modal.headline.other': 'You\'re on a {n}-day streak!', // ALTA
+  'ui.reviewReminder.subRest': 'cards are waiting for you. Sharpen your memory by reviewing what you\'ve already seen.', // ALTA -- o travessão virou ponto; o número fica antes, no <span>
+  'ui.reviewReminder.cta': 'Review now', // ALTA
+  'profile.goals.title': 'My goals', // ALTA
+  'profile.goals.edit': 'Edit goal', // ALTA
+  'progress.stat.teacherContent': 'Teacher\'s content studied', // MÉDIA -- alternativa: "Studied from your teacher"
+  'progress.stat.ownContent': 'My content studied', // MÉDIA -- alternativa: "Your own content studied"
+  'profile.err.photoLoginRequired': 'Sign in to your account to save a photo.', // ALTA
+  'profile.err.photoNotImage': 'Choose an image file (JPG, PNG...).', // ALTA
+  'zh.hanzi.reviewAll': '🔁 Review characters', // ALTA
+  'loading.phrase.loading': 'Loading...', // ALTA
+  'loading.phrase.oneSec': 'Just a second...', // ALTA
+  'loading.phrase.almost': 'Almost there...', // ALTA
+  'loading.phrase.fetching': 'Getting the data...', // ALTA
+  'loading.phrase.preparing': 'Getting everything ready...', // ALTA
+  'loading.phrase.moment': 'One moment...', // ALTA
+  'zh.hanzi.radicals': '🧬 Radicals', // ALTA (achado extra: botão e título da tela de Radicais)
 };

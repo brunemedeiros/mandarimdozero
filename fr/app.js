@@ -5988,9 +5988,9 @@ function playDictationSentence(d, n, sentence, btn){
     }
     btn.disabled = true;
     btn.classList.remove('speaking');
-    btn.textContent = '🔇 sem áudio';
-    btn.setAttribute('aria-label', `Áudio da frase ${n} indisponível neste dispositivo`);
-    btn.title = 'Áudio indisponível neste dispositivo';
+    btn.textContent = chT('dict.noAudio');
+    btn.setAttribute('aria-label', chT('dict.noAudioAria', { n }));
+    btn.title = chT('dict.noAudioTitle');
   };
   const path = dictationSentenceAudioPath(d, n);
   if (dictationSentenceMissing.has(path)) return fallback();
@@ -6789,6 +6789,9 @@ const CHALLENGE_I18N = {
     'dict.retry': 'Tentar novamente',
     'dict.audioFail': 'Não foi possível reproduzir o áudio',
     'dict.audioUnavailable': '⚠️ Áudio indisponível',
+    'dict.noAudio': '🔇 sem áudio',
+    'dict.noAudioAria': 'Áudio da frase {n} indisponível neste dispositivo',
+    'dict.noAudioTitle': 'Áudio indisponível neste dispositivo',
     'dict.writeFirst': 'Escreva o que você ouviu antes de verificar.',
     'dict.nearPrefix': 'Quase: ',
     'dict.note.digits': 'Por extenso: {digits} → <strong>{words}</strong>. Numa escrita de ditado, o número vai por extenso (sem desconto).',
@@ -7067,6 +7070,21 @@ const CHALLENGE_I18N = {
     'ch.lt.alert.mustInclude': "An important idea is missing: \"{word}\".",
     'ch.lt.alert.mustExclude': "The word \"{word}\" doesn't fit this sentence.",
     'ch.lt.missing': "Words that were missing",
+    // Etapa 3, lote B (2026-10-19): chaves que só existiam no pt-BR (o chT caía no português). needs_review.
+    'ch.search.placeholder': "Search expressions…", // ALTA
+    'ch.search.label': "Search the expressions", // ALTA
+    'ch.search.none': "No expressions found.", // ALTA
+    'ch.filter.label': "Filter expressions", // ALTA
+    'ch.filter.all': "All", // ALTA
+    'ch.filter.pending': "To do", // MÉDIA -- "Pendentes"; alternativa: "Pending"
+    'ch.filter.done': "Completed", // ALTA
+    'ch.ring.aria': "{done} of {total} completed", // ALTA
+    'ch.lt.legend.bad': "wrong word", // ALTA
+    'ch.lt.legend.near': "almost right", // ALTA
+    'ch.lt.legend.miss': "missing", // ALTA
+    'dict.noAudio': "🔇 no audio", // ALTA
+    'dict.noAudioAria': "Audio for sentence {n} isn't available on this device", // ALTA
+    'dict.noAudioTitle': "Audio isn't available on this device", // ALTA
     'ch.lt.agreement': "⚠ Mind the agreement: after \"{pronoun}\", \"{verb}\" is not the right conjugation.",
     'ch.lt.yours': "Your answer",
     'ch.lt.expected': "Expected answer",
@@ -8018,11 +8036,15 @@ function answerChallenge(c, chosenIdx){
 
 function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
   const content = document.getElementById('challenge-player-content');
+  // Etapa 3 (c1): com o site em outro idioma, o sentido vem da tradução do desafio (fr/challenges.en.js,
+  // campo `meaning`) quando existe; sem tradução, continua o português do banco.
+  const exprOv = challengeOverlay(c);
+  const meaningShown = (exprOv && exprOv.meaning) ? exprOv.meaning : c.meaning.pt;
   const bodyHTML = `
       ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.expr.yourAnswer', { chosen: escapeHtmlChallenge(c.options[chosenIdx]), correct: escapeHtmlChallenge(c.correctAnswer) })}</p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
       ${chT('ch.expr.signifies', { fr: escapeHtmlChallenge(String(c.meaning.fr).replace(/[.\s]+$/, '')) })}<br>
-      ${chT('ch.expr.inPt', { pt: escapeHtmlChallenge(String(c.meaning.pt).replace(/[.\s]+$/, '')) })}</p>
+      ${chT('ch.expr.inPt', { pt: escapeHtmlChallenge(String(meaningShown).replace(/[.\s]+$/, '')) })}</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
 
       <div class="challenge-second-example">

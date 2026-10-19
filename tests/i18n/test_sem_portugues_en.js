@@ -243,6 +243,14 @@ async function run(browser, port, app){
       const dontKnow = visBtns.find(b => /I don.t know/i.test(b.textContent));
       const cont = visBtns.find(b => b.id !== 'step-next-btn' && /^\s*Continue/i.test(b.textContent));
       if (cont) { cont.click(); return; }
+      // exercício de digitar (vocabulário de ouvido, Complete a frase, gramática): responde "test" e verifica
+      // (resposta errada de propósito: o painel de erro também é tela da lição e leva ao passo seguinte)
+      const typed = [...root.querySelectorAll('input[type="text"], textarea')].find(el => el.offsetParent && !el.disabled);
+      if (typed){
+        typed.value = 'test'; typed.dispatchEvent(new Event('input', { bubbles: true }));
+        const vb = visBtns.find(b => /verify-btn$/.test(b.id) || /^\s*(Check|Verify)\b/i.test(b.textContent));
+        if (vb){ vb.click(); return; }
+      }
       // escolhe a opção certa quando o motor expõe a resposta (data-correct), senão a primeira
       const right = visBtns.find(b => b.dataset && (b.dataset.correct === 'true' || b.dataset.correct === '1'));
       if (right) right.click(); else if (choice) choice.click(); else if (dontKnow) dontKnow.click();

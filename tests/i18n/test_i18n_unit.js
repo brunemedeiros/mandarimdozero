@@ -176,7 +176,9 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   // da trilha tinham o português escrito direto nestes arquivos (mapa e marco de Revisão nasceram depois das
   // referências acima). O texto pt-BR das chaves novas do lote A tem que existir byte a byte aqui.
   const PREV4 = process.env.I18N_PREV4 || '81810d3';
-  const prev4Js = ['shared/trail-map.js', 'shared/review-milestone.js', 'shared/core/revisao-decks.js', 'shared/core/estado-trilha-desafios.js', 'fr/app.js', 'zh/app.js', 'zh/index.html']
+  // Lote B (mesmo commit 81810d3): frases de carregamento (utils.js), foto do perfil (profile.js), janela de sequência
+  // (gamificacao.js + index.html) e o resto do HTML fixo do fr.
+  const prev4Js = ['shared/trail-map.js', 'shared/review-milestone.js', 'shared/core/revisao-decks.js', 'shared/core/estado-trilha-desafios.js', 'fr/app.js', 'zh/app.js', 'zh/index.html', 'fr/index.html', 'shared/utils.js', 'shared/profile.js', 'shared/core/gamificacao.js']
     .map(f => execSync(`git show ${PREV4}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 })).join('\n');
   const all = origFr + origZh + origRep + prevFr + prevZh + prevJs + prev2Fr + prev2Zh + prev2Js + prev3Js + prev4Js;
   // Textos NOVOS (não existiam antes): só o seletor de idioma.
@@ -198,6 +200,13 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     // Mustache literal ({{amount}}) é texto, não placeholder: byte a byte. Templates com
     // expressão aninhada no original (`${a}${b ? `...${c}` : ''}`) checam cada fragmento.
     if (/\{\{\w+\}\}/.test(v)){ check(`regressão: pt-BR '${k}' (mustache literal) existe byte a byte no original`, all.includes(v), v); continue; }
+    // Lote B: o título da janela de sequência era HTML com o número e a palavra "dia"/"dias" em <span>s
+    // (`Você está em uma sequência de <span…>0</span> <span…>dias</span>!` + `STATE.streak === 1 ? 'dia' : 'dias'`).
+    if (k === 'streak.modal.headline.one' || k === 'streak.modal.headline.other'){
+      const word = k.endsWith('.one') ? 'dia' : 'dias';
+      check(`regressão: pt-BR '${k}' (janela de sequência) igual ao texto montado no original`, v === `Você está em uma sequência de {n} ${word}!` && all.includes('Você está em uma sequência de <span id="streak-days-num">0</span> <span id="streak-days-unit">dias</span>!') && all.includes("STATE.streak === 1 ? 'dia' : 'dias'"), v);
+      continue;
+    }
     if (NESTED_TEMPLATE_KEYS.includes(k)){ check(`regressão: pt-BR '${k}' (template aninhado) fragmentos existem no original`, v.split(/\{\w+\}/).map(x => x.trim()).filter(Boolean).every(x => all.includes(x)), v); continue; }
     if (/\{\w+\}/.test(v)){
       // placeholder {x} <-> ${...} do template literal original
