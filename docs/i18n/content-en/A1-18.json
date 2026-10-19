@@ -49,6 +49,19 @@
     "It's under the bed.",
     "And my keys?",
     "They're on the table, next to the lamp."
+   ],
+   "scene": "At home, a boy looks for his things before leaving for school.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "Where are Enzo's keys?",
+     "opts": [
+      "Under the bed",
+      "On the table, next to the lamp",
+      "Behind the couch"
+     ]
+    }
    ]
   },
   "concepts": {

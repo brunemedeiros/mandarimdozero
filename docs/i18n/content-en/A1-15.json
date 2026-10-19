@@ -65,6 +65,19 @@
     "Since when?",
     "Since last night.",
     "You need to rest."
+   ],
+   "scene": "At the doctor's office, a patient explains how he's feeling.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What's wrong with Théo?",
+     "opts": [
+      "He has a headache",
+      "He has a stomachache and a fever",
+      "His foot hurts"
+     ]
+    }
    ]
   },
   "concepts": {

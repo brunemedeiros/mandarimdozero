@@ -55,6 +55,19 @@
     "Half a kilo, please.",
     "Anything else?",
     "A bottle of water and a little cheese."
+   ],
+   "scene": "At an open-air market, a customer buys apples, water and cheese.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "How many apples does Hélène want?",
+     "opts": [
+      "One kilo",
+      "Half a kilo",
+      "One bottle"
+     ]
+    }
    ]
   },
   "concepts": {

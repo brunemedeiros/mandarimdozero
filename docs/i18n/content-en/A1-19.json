@@ -67,6 +67,19 @@
     "Yes, I'm going to the movies with friends.",
     "Which movie are you going to see?",
     "We don't know yet!"
+   ],
+   "scene": "On Friday, two friends talk about their plans for the weekend.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "Have they already picked the movie?",
+     "opts": [
+      "Yes, they've already picked it",
+      "They don't know which one yet",
+      "They're not going to the movies"
+     ]
+    }
    ]
   },
   "concepts": {

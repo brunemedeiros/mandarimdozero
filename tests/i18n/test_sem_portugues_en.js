@@ -178,6 +178,31 @@ function contentDiff(ptJson, enJson){
   walk(JSON.parse(ptJson), JSON.parse(enJson), []);
   return out;
 }
+// Passada estrita da cena e da pergunta de compreensão do diálogo (lote D): não depende da lista de palavras.
+// Cena e pergunta iguais ao português = sem tradução. Opção igual ao português só passa se for nome próprio ou
+// número ("Paul", "4"): uma palavra só, com inicial maiúscula, fora da lista de palavras portuguesas que aparecem
+// sozinhas como opção ("Chá", "Terça"...); qualquer outra opção igual conta como sem tradução.
+function dialogueStrict(ptJson, enJson){
+  const out = [];
+  const P = JSON.parse(ptJson).units || [], E = JSON.parse(enJson).units || [];
+  P.forEach((u, ui) => {
+    const d = u && u.dialogue, e = E[ui] && E[ui].dialogue;
+    if (!d || !e) return;
+    const base = `units.${ui}.dialogue`;
+    if (typeof d.scene === 'string' && d.scene === e.scene) out.push({ path: base + '.scene', text: d.scene });
+    (d.check || []).forEach((c, ci) => {
+      const ec = (e.check || [])[ci] || {};
+      if (!c || c.k !== 'understand') return;
+      if (typeof c.q === 'string' && c.q === ec.q) out.push({ path: `${base}.check.${ci}.q`, text: c.q });
+      (c.opts || []).forEach((o, oi) => {
+        const same = typeof o === 'string' && ec.opts && ec.opts[oi] === o;
+        const nameOrNumber = /^\d+$/.test(o) || /^[A-ZÀ-Ý][^\s]*$/.test(o) && !/^(Chá|Café|Água|Sim|Não|Oito|Dez|Seis|Terça|Quarta|Segunda|Inverno|Verão|Outono|Domingo|Sábado|Brasil|França|Itália)$/.test(o);
+        if (same && !nameOrNumber) out.push({ path: `${base}.check.${ci}.opts.${oi}`, text: o });
+      });
+    });
+  });
+  return out;
+}
 const CONTENT_FOUND = {};
 const ptSnapCache = {};
 
@@ -218,7 +243,12 @@ async function run(browser, port, app){
   checks++;
   const lang = await page.evaluate(() => getUiLang());
   if (lang !== 'en'){ failed++; console.log(`  FALHOU: [${app}] site não ficou em inglês (${lang})`); }
-  CONTENT_FOUND[app] = contentDiff(ptSnap, await contentSnapshot(page));
+  {
+    const enSnap = await contentSnapshot(page);
+    const list = contentDiff(ptSnap, enSnap);
+    for (const x of dialogueStrict(ptSnap, enSnap)) if (!list.some(y => y.path === x.path)) list.push(x);
+    CONTENT_FOUND[app] = list;
+  }
   // toasts: registra toda mensagem (a função de verdade continua rodando)
   await page.evaluate(() => { const orig = window.showToast; window.showToast = function(m){ (window.__toasts = window.__toasts || []).push(m); return orig.apply(this, arguments); }; });
 
@@ -238,6 +268,31 @@ async function run(browser, port, app){
   await S('mapa: painel do Ponto de verificação', () => { const n = document.querySelector('.tm-node.tm-checkpoint'); if (n) n.click(); });
   await S('mapa: painel da história (zh)', () => { const n = document.querySelector('.tm-node.tm-story'); if (n) n.click(); });
   await page.evaluate(() => { const c = document.querySelector('.tm-close'); if (c) c.click(); const b = document.querySelector('.trail-view-toggle [data-view="trail"]'); if (b) b.click(); });
+
+  // diálogo: cena (passo Diálogo) e pergunta de compreensão respondida (passo "Você entendeu?"), numa unidade
+  // que tem as duas (lote D). Mesmo jeito de montar do tests/dialogo-idioma.
+  const dlgHost = () => {
+    const u = UNITS.find(x => x.dialogue && x.dialogue.scene && Array.isArray(x.dialogue.check) && x.dialogue.check.some(c => c.k === 'understand'));
+    if (!u) return null;
+    let host = document.getElementById('__dlg-host'), btn = document.getElementById('__dlg-next');
+    if (!host){ host = document.createElement('div'); host.id = '__dlg-host'; host.style.cssText = 'position:relative;background:var(--bg,#fff);padding:12px;max-width:760px'; document.body.prepend(host); }
+    if (!btn){ btn = document.createElement('button'); btn.id = '__dlg-next'; btn.textContent = 'Continue'; document.body.prepend(btn); }
+    window.__dlgU = u; return { u, host, btn };
+  };
+  await S('diálogo: cena e falas', (fn) => { const h = eval(fn)(); if (h) renderDialogueStep(h.u, h.host, h.btn); window.scrollTo(0, 0); }, { wait: 500, arg: `(${dlgHost})` });
+  await S('diálogo: pergunta de compreensão respondida', () => {
+    const host = document.getElementById('__dlg-host'), btn = document.getElementById('__dlg-next');
+    if (!host || !window.__dlgU) return;
+    renderDialogueCheckStep(window.__dlgU, host, btn);
+    // responde até chegar na pergunta de compreensão (k=understand)
+    const u = window.__dlgU, idx = u.dialogue.check.findIndex(c => c.k === 'understand');
+    for (let i = 0; i <= idx; i++){
+      const opt = host.querySelector('.dlg-opt:not(.locked)'); if (opt) opt.click();
+      if (i < idx){ const nx = document.getElementById('dlg-q-next'); if (nx) nx.click(); }
+    }
+    window.scrollTo(0, 0);
+  }, { wait: 500 });
+  await page.evaluate(() => { ['__dlg-host', '__dlg-next'].forEach(id => { const e = document.getElementById(id); if (e) e.remove(); }); });
 
   // lição: abre a 1ª unidade e avança alguns passos
   await S('lição: detalhe da unidade', () => { openUnitDetail(UNITS[0].id); }, { wait: 800 });

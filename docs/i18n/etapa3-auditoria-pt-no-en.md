@@ -140,6 +140,8 @@ Total do grupo (a): **50 achados** (a1 a a50; quando o mesmo texto está em fr e
 
 ## (b) Conteúdo pedagógico sem versão em inglês
 
+**Lote D (2026-10-19): b1 e b2 resolvidos** (overlay aceita `dialogue.scene`/`dialogue.check`; 38 cenas e 38 perguntas traduzidas). Lista: `docs/i18n/etapa3-traducoes-conteudo.md`.
+
 Medido pelo teste (seção "Conteúdo do curso"): compara o conteúdo carregado em pt-BR com o mesmo conteúdo depois do
 overlay `content.en.js`; conta o texto que continua igual e tem cara de português (campos do idioma estudado ficam de fora).
 Títulos, objetivos, vocabulário, frases, falas do diálogo, conceitos e gramática estão todos traduzidos.
@@ -157,6 +159,8 @@ Observação: a comparação usa a mesma lista de palavras do teste, então opç
 ---
 
 ## (c) Texto vindo do banco/servidor
+
+**Lote D (2026-10-19): c2 e c3 resolvidos** (overlay de Desafios com `cloze_grammar`; também as 33 explicações do Ouça e traduza que faltavam e o realinhamento do Módulo 3). Lista: `docs/i18n/etapa3-traducoes-conteudo.md`.
 
 | # | Arquivo:linha / origem | Texto em português | Visto | Chave/tradução en | Correção sugerida |
 |---|---|---|---|---|---|

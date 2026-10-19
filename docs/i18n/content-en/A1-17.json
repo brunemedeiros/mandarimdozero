@@ -70,6 +70,19 @@
     "There are two bedrooms and a kitchen.",
     "Is there a balcony?",
     "No, there isn't a balcony, but there's a nice living room."
+   ],
+   "scene": "At an apartment viewing, the future tenant asks the real estate agent some questions.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "Does the apartment have a balcony?",
+     "opts": [
+      "Yes, and two bedrooms",
+      "No, but it has a nice living room",
+      "No, and it doesn't have a kitchen"
+     ]
+    }
    ]
   },
   "concepts": {

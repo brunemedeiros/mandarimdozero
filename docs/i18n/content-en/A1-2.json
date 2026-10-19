@@ -59,6 +59,19 @@
     "I'm Ana. Are you French?",
     "Yes, I'm French. And you, are you American?",
     "Yes, I'm American!"
+   ],
+   "scene": "At a welcome party, two strangers introduce themselves.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What country is Ana from?",
+     "opts": [
+      "France",
+      "The United States",
+      "Italy"
+     ]
+    }
    ]
   },
   "concepts": {
@@ -214,6 +227,13 @@
    "en": "Oui, je suis français. Et toi, tu es américaine ? / Oui, je suis américaine !",
    "conf": "media",
    "why": "dialogue lines localized for the EN site; 2 new mp3 needed"
+  },
+  {
+   "path": "dialogue.check[2].opts[1]",
+   "pt": "Brasil",
+   "en": "The United States",
+   "conf": "media",
+   "why": "adaptado: no site em inglês a fala foi localizada (\"je suis américaine\"), então a resposta certa acompanha; ordem das opções igual"
   }
  ]
 }

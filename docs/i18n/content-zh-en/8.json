@@ -44,6 +44,19 @@
     "30 yuan.",
     "That's too expensive! Make it a bit cheaper.",
     "Okay, 25 yuan."
+   ],
+   "scene": "Brune haggles at a market stall.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "How much does Brune pay in the end?",
+     "opts": [
+      "30 yuan",
+      "25 yuan",
+      "20 yuan"
+     ]
+    }
    ]
   },
   "concepts": {

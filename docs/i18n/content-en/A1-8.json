@@ -56,6 +56,19 @@
     "Is it far?",
     "No, it's five minutes away.",
     "Thank you very much!"
+   ],
+   "scene": "On the street, a tourist asks a local for directions.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "Is the museum far?",
+     "opts": [
+      "No, it's five minutes away",
+      "Yes, it's an hour away",
+      "It's closed"
+     ]
+    }
    ]
   },
   "concepts": {

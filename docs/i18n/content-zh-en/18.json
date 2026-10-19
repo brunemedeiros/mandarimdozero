@@ -48,6 +48,19 @@
     "This is my girlfriend, she's a student.",
     "Where does she work or study?",
     "She studies at the school, and there are some of her books here."
+   ],
+   "scene": "Someone asks a friend who the young woman in the photo is.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What does the girlfriend do?",
+     "opts": [
+      "She studies at a school",
+      "She works at a hospital",
+      "She's a doctor"
+     ]
+    }
    ]
   },
   "concepts": {

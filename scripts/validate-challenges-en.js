@@ -17,13 +17,19 @@ const ch = JSON.parse(fs.readFileSync(path.join(root, 'docs/i18n/challenges-en.j
 const dc = JSON.parse(fs.readFileSync(path.join(root, 'docs/i18n/dictations-en.json'), 'utf8'));
 const errors = [];
 const ne = v => typeof v === 'string' && v.trim().length > 0;
-const ALLOWED = { expression: ['meaning'], listen_translate: ['referenceTranslations', 'explanation'], accent: ['explanation'] };
+// cloze_grammar (Complete a frase): translation = tradução da frase (fonte: translationPt), explanation = explicação.
+const ALLOWED = { expression: ['meaning'], listen_translate: ['referenceTranslations', 'explanation'], accent: ['explanation'], cloze_grammar: ['translation', 'explanation'] };
 for (const [id, e] of Object.entries(ch)) {
   const c = byId.get(id);
   if (!c) { errors.push(`${id}: id não existe nas fontes`); continue; }
   for (const k of Object.keys(e)) if (!ALLOWED[c.type].includes(k)) errors.push(`${id}: campo "${k}" não existe no tipo ${c.type}`);
   if (c.type === 'expression' && !ne(e.meaning)) errors.push(`${id}: meaning vazio`);
   if (c.type === 'accent' && !ne(e.explanation)) errors.push(`${id}: explanation vazio`);
+  if (c.type === 'cloze_grammar'){
+    if (!ne(e.explanation)) errors.push(`${id}: explanation vazio`);
+    if (c.translationPt && !ne(e.translation)) errors.push(`${id}: translation existe na fonte (translationPt) mas falta em EN`);
+    if (!c.translationPt && 'translation' in e) errors.push(`${id}: translation EN sem equivalente na fonte`);
+  }
   if (c.type === 'listen_translate') {
     const r = e.referenceTranslations;
     if (!Array.isArray(r) || r.filter(ne).length < 2 || r.some(x => !ne(x))) errors.push(`${id}: referenceTranslations precisa de >=2 itens não vazios`);

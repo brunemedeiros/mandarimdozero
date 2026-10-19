@@ -61,6 +61,19 @@
     "Yes, it's the right direction.",
     "How much is the ticket?",
     "It costs two euros."
+   ],
+   "scene": "At the metro station, a passenger asks about the train.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "How much is the ticket?",
+     "opts": [
+      "Two euros",
+      "Three euros",
+      "One euro"
+     ]
+    }
    ]
   },
   "concepts": {

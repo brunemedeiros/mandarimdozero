@@ -64,6 +64,19 @@
     "I worked in the morning, and in the afternoon I played sports.",
     "And last weekend?",
     "We went to the movies with friends."
+   ],
+   "scene": "On Monday, two coworkers talk about what they did yesterday and last weekend.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What did Kévin do yesterday afternoon?",
+     "opts": [
+      "He worked",
+      "He played sports",
+      "He went to the movies"
+     ]
+    }
    ]
   },
   "concepts": {

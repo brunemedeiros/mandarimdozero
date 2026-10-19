@@ -41,6 +41,19 @@
     "I'd like rice and tea.",
     "Okay. Would you like some coffee?",
     "No, thank you. I like drinking tea."
+   ],
+   "scene": "Brune orders lunch at a restaurant.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What does Brune order to drink?",
+     "opts": [
+      "Tea",
+      "Coffee",
+      "Water"
+     ]
+    }
    ]
   },
   "concepts": {

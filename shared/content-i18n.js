@@ -12,7 +12,11 @@
 //   { levels:{A1:"..."}, modules:{"A1-m1":"..."}, levelTests:{"A1-final":"..."},
 //     units:{ "A1-1": {
 //       title, goal, lessons:{lessonId:"título"},
-//       vocab:["t",...], phrases:[{t, scenario}], dialogue:{title, lines:["t",...]},
+//       vocab:["t",...], phrases:[{t, scenario}],
+//       dialogue:{title, lines:["t",...], scene, check:[null, null, {q, opts:["a","b","c"]}]},
+//         (scene = cena do diálogo; check = mesmo índice de dialogue.check do content.js, só as
+//          perguntas de compreensão k:"understand"; a resposta certa (`ok`) fica no content.js,
+//          então a ordem das opções TEM que ser a mesma do português)
 //       concepts:{conceptId:[{title, body, examples:["t",...], variants:["região",...]}]},
 //       grammar:{blocks:[{title, body, examples:["t"], table:[{label, pronouns:["..."]}]}], exercises:[{hint, prompt?}]} (só unidades type:"grammar"),
 //       trueFalse:[{claim, whyNote}],
@@ -59,7 +63,11 @@
     s.vocab = (u.vocab || []).map(function(v){ return v.t; });
     s.phrases = (u.phrases || []).map(function(p){ return { t: p.t, scenario: p.scenario }; });
     if (u.dialogue){
-      s.dialogue = { title: u.dialogue.title, lines: (u.dialogue.lines || []).map(function(l){ return l.t; }) };
+      s.dialogue = { title: u.dialogue.title, lines: (u.dialogue.lines || []).map(function(l){ return l.t; }),
+        scene: u.dialogue.scene,
+        check: (u.dialogue.check || []).map(function(c){
+          return (c && (c.q !== undefined || c.opts !== undefined)) ? { q: c.q, opts: Array.isArray(c.opts) ? c.opts.slice() : c.opts } : null;
+        }) };
     }
     s.concepts = {};
     (u.concepts || []).forEach(function(c){
@@ -114,6 +122,19 @@
       u.dialogue.title = pick(o.dialogue && o.dialogue.title, snap.dialogue.title);
       (u.dialogue.lines || []).forEach(function(l, i){
         l.t = pick(o.dialogue && o.dialogue.lines && o.dialogue.lines[i], snap.dialogue.lines[i]);
+      });
+      if (snap.dialogue.scene !== undefined) u.dialogue.scene = pick(o.dialogue && o.dialogue.scene, snap.dialogue.scene);
+      (u.dialogue.check || []).forEach(function(c, i){
+        var sc = snap.dialogue.check && snap.dialogue.check[i];
+        if (!c || !sc) return;
+        var oc = (o.dialogue && o.dialogue.check && o.dialogue.check[i]) || {};
+        if (sc.q !== undefined) c.q = pick(oc.q, sc.q);
+        // Opções: troca uma a uma (mesmo índice), e só se a tradução tiver o MESMO número de
+        // opções; senão fica o português inteiro (a resposta certa é um índice).
+        if (Array.isArray(sc.opts)){
+          var oo = Array.isArray(oc.opts) && oc.opts.length === sc.opts.length ? oc.opts : null;
+          c.opts = sc.opts.map(function(op, oi){ return pick(oo && oo[oi], op); });
+        }
       });
     }
     (u.concepts || []).forEach(function(c){

@@ -8732,11 +8732,16 @@ function renderClozeGrammarFeedback(c, chosen, res){
   });
   document.getElementById('cloze-grammar-verify-btn').style.display = 'none';
   const isCorrect = res.outcome === 'ok';
+  // Tradução e explicação no idioma do site (overlay fr/challenges.<lang>.js: translation/explanation);
+  // sem overlay, o original em português.
+  const clozeOv = challengeOverlay(c);
+  const clozeTranslation = (clozeOv && clozeOv.translation) ? clozeOv.translation : c.translationPt;
+  const clozeExplanation = (clozeOv && clozeOv.explanation) ? clozeOv.explanation : c.explanation;
   const bodyHTML = `
     ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.cloze.yourAnswer')}: ${escapeHtmlChallenge(clozeGrammarFilled(c, chosen))}<br>${chT('ch.cloze.correct')}: <strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>`}
     ${isCorrect ? `<p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>` : ''}
-    ${c.translationPt ? `<p class="challenge-feedback-meaning">${chT('ch.cloze.translation')}: ${escapeHtmlChallenge(c.translationPt)}</p>` : ''}
-    <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation || '')}</p>
+    ${clozeTranslation ? `<p class="challenge-feedback-meaning">${chT('ch.cloze.translation')}: ${escapeHtmlChallenge(clozeTranslation)}</p>` : ''}
+    <p class="challenge-explanation">${escapeHtmlChallenge(clozeExplanation || '')}</p>
   `;
   document.getElementById('cloze-grammar-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? chT('ch.cloze.right') : chT('ch.notQuite'), bodyHTML, res.outcome);
   recordChallengeReviewOutcome(c, res.outcome);

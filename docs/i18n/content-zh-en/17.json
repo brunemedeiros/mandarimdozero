@@ -46,6 +46,19 @@
     "Not yet, I'm still working.",
     "I've eaten, I ate two apples.",
     "I didn't have dinner yesterday, so I'm very hungry today."
+   ],
+   "scene": "Two coworkers chat at dinnertime.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What did the person who has already eaten say they ate?",
+     "opts": [
+      "Two apples",
+      "Rice",
+      "Nothing"
+     ]
+    }
    ]
   },
   "concepts": {
