@@ -358,3 +358,21 @@ subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do si
   (ids 14, 16, 94, 93, 168) e `study_goal_remaining` (ids 48, 50, 130, 129, 160) desativados (`active=false`), cada
   combinação ainda com pelo menos uma variante ativa. Janela da sequência: "Volte amanhã para manter sua sequência."
   (en: "Come back tomorrow to keep your streak going.").
+
+## Etapa 3 do plano "Voz da Prof. Brune": nada em português no site em inglês (2026-10-19, na branch)
+- Auditoria: `docs/i18n/etapa3-auditoria-pt-no-en.md` (50 achados de interface, 2 de conteúdo, 4 do banco, 8 de admin só
+  listados). Guarda: `tests/i18n/test_sem_portugues_en.js` percorre fr e zh em inglês e falha se sobrar português
+  (antes: fr 183 / zh 101 trechos; depois: 0 / 0, conteúdo do curso sem inglês 0 / 0). Varredura estática:
+  `tests/i18n/scan_pt_literais.js`.
+- Lote A: trilha repinta quando o catálogo en e o `content.en.js` chegam (causa raiz da primeira tela em português);
+  Continuar, Revisão do módulo e mapa com `t()`. Lote B: lição, janela da sequência, cartões esperando, Perfil, Hanzi,
+  frases de carregamento, Desafios. Lote C: Tags, excluir Deck, importação cortada, `.apkg`, Decks públicos. Lote D: cena e
+  pergunta de compreensão do diálogo no overlay (`dialogue.scene`/`dialogue.check`), Complete a frase e explicações dos
+  Desafios em inglês (lista com confiança: `docs/i18n/etapa3-traducoes-conteudo.md`).
+- Decisões da dona: "Path"/"Study Path" no lugar de "Trail"; "Pending" no filtro dos Desafios; sem o "!." da Expressão
+  (mudança de português aprovada); exportação `.apkg` no idioma do site (GUIDs iguais, reimportar não duplica).
+- Correções achadas no caminho: slug da tag de unidade sempre do título original (filtro salvo não quebra ao trocar o idioma);
+  versos de preenchimento "(sem tradução)" traduzidos só na tela (o dado no banco não muda).
+- Desafios do Módulo 3: a produção tem os 10 Ouça e traduza antigos (o lote do repositório caiu para 6 no commit 2fb4ca1 sem
+  reimportar). O overlay en segue a produção; retrato em `docs/i18n/challenges-producao-a1m3-lt.json`. Decisão pendente da dona.
+- `review-bank-agent`: `engine.generated.mjs` regerado (comportamento igual lá, tudo em português); deploy opcional, não feito.
