@@ -243,51 +243,71 @@
  },
  "lt-a1m3-001": {
   "referenceTranslations": [
+   "The museum is far from here.",
+   "The museum is far away from here.",
+   "The museum is a long way from here."
+  ]
+ },
+ "lt-a1m3-002": {
+  "referenceTranslations": [
    "Turn right, then go straight.",
    "Turn right and then go straight ahead.",
    "Turn right, then straight ahead."
-  ],
-  "explanation": "\"Tournez\" is the polite imperative (vous); \"tout droit\" = \"straight ahead\"."
+  ]
  },
- "lt-a1m3-002": {
+ "lt-a1m3-003": {
   "referenceTranslations": [
    "I come from Brazil, and you?",
    "I'm from Brazil, and you?",
    "I am from Brazil, and you?"
-  ],
-  "explanation": "\"Je viens de\" tells where you're from: \"du\" = de + le (du Brésil); \"et toi ?\" turns the question back around."
+  ]
  },
- "lt-a1m3-003": {
+ "lt-a1m3-004": {
+  "referenceTranslations": [
+   "She is American.",
+   "She's American."
+  ]
+ },
+ "lt-a1m3-005": {
   "referenceTranslations": [
    "The pants cost fifty euros.",
    "The pants are fifty euros.",
    "The trousers cost fifty euros."
-  ],
-  "explanation": "\"Coûte\" is the form of the verb \"coûter\" (to cost) for a single thing: in French, \"le pantalon\" is singular; \"cinquante\" = 50."
+  ]
  },
- "lt-a1m3-004": {
+ "lt-a1m3-006": {
   "referenceTranslations": [
    "I'm looking for a dress.",
    "I am looking for a dress.",
    "I look for a dress."
-  ],
-  "explanation": "\"Je cherche\" already means \"I'm looking for\": French uses the simple present for an action in progress."
+  ]
  },
- "lt-a1m3-005": {
+ "lt-a1m3-007": {
   "referenceTranslations": [
    "I buy vegetables and rice.",
    "I'm buying vegetables and rice.",
    "I am buying vegetables and rice."
-  ],
-  "explanation": "\"Des\" is the plural indefinite article (vegetables) and \"du\" is the partitive (rice, which you don't count)."
+  ]
  },
- "lt-a1m3-006": {
+ "lt-a1m3-008": {
+  "referenceTranslations": [
+   "Do you want sugar?",
+   "Do you want some sugar?",
+   "Would you like sugar?"
+  ]
+ },
+ "lt-a1m3-009": {
   "referenceTranslations": [
    "I'll take a kilo of apples.",
    "I take a kilo of apples.",
    "I'll take one kilo of apples."
-  ],
-  "explanation": "After a quantity, French uses \"de\" with no article: \"un kilo de pommes\"."
+  ]
+ },
+ "lt-a1m3-010": {
+  "referenceTranslations": [
+   "A bottle of water, please.",
+   "One bottle of water, please."
+  ]
  },
  "accent-a1m3-001": {
   "explanation": "\"e\" has a grave accent."

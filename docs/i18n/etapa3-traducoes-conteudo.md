@@ -240,20 +240,12 @@ Confiança média: 10. Baixa: nenhuma.
 | lt-a1m6-003 | explicação | "Hier" pede o passado composto: "j'ai mangé" (avoir + particípio). | "Hier" ("yesterday") calls for the passé composé: "j'ai mangé" (avoir + past participle). | alta |
 | lt-a1m6-004 | explicação | "Ce matin" é o dia de hoje; "j'ai pris" é o passado composto de "prendre". | "Ce matin" ("this morning") is part of today; "j'ai pris" is the passé composé of "prendre". | alta |
 
-### Ouça e traduza do Módulo 3: traduções em inglês trocadas de desafio (corrigido)
+### Ouça e traduza do Módulo 3: o overlay segue a PRODUÇÃO (conferido em 2026-10-19)
 
-O lote `lote-a1-m3.json` foi reduzido de 10 para 6 e renumerado (commit 2fb4ca1, 2026-10-06) **depois** da tradução para o
-inglês (f042da2, 2026-10-05). O overlay en continuava com os ids antigos: no site em inglês, "Tournez à droite, puis tout droit."
-era corrigido contra "The museum is far from here.", e assim por diante nos 6. Agora cada id usa a tradução da sua frase atual
-(mesmas frases em inglês, só trocadas de id). As entradas antigas `lt-a1m3-007` a `lt-a1m3-010` (ids que não existem mais no
-lote) saíram do overlay (o validador já acusava). **Não conferido na produção** (sem acesso ao banco nesta tarefa): se a tabela
-`challenges` da produção ainda tiver o conjunto antigo de 10, os ids de lá não batem com o lote do repositório.
-
-| Id | Frase em francês (lote atual) | Inglês de referência (agora) | Vinha de |
-|---|---|---|---|
-| lt-a1m3-001 | Tournez à droite, puis tout droit. | Turn right, then go straight. / Turn right and then go straight ahead. / Turn right, then straight ahead. | lt-a1m3-002 (id antigo) |
-| lt-a1m3-002 | Je viens du Brésil, et toi ? | I come from Brazil, and you? / I'm from Brazil, and you? / I am from Brazil, and you? | lt-a1m3-003 (id antigo) |
-| lt-a1m3-003 | Le pantalon coûte cinquante euros. | The pants cost fifty euros. / The pants are fifty euros. / The trousers cost fifty euros. | lt-a1m3-005 (id antigo) |
-| lt-a1m3-004 | Je cherche une robe. | I'm looking for a dress. / I am looking for a dress. / I look for a dress. | lt-a1m3-006 (id antigo) |
-| lt-a1m3-005 | J'achète des légumes et du riz. | I buy vegetables and rice. / I'm buying vegetables and rice. / I am buying vegetables and rice. | lt-a1m3-007 (id antigo) |
-| lt-a1m3-006 | Je prends un kilo de pommes. | I'll take a kilo of apples. / I take a kilo of apples. / I'll take one kilo of apples. | lt-a1m3-009 (id antigo) |
+O lote `lote-a1-m3.json` foi reduzido de 10 para 6 e renumerado (commit 2fb4ca1) depois da tradução (f042da2), mas a
+tabela `challenges` da produção continua com os **10 desafios antigos** (`lt-a1m3-001` "Le musée est loin d'ici." a `-010`
+"Une bouteille d'eau, s'il vous plaît.", todos sem explicação). O overlay en já estava alinhado com a produção; o
+realinhamento feito no lote D foi desfeito. Retrato da produção: `docs/i18n/challenges-producao-a1m3-lt.json` (o validador
+usa esse retrato para estes ids). As explicações em inglês desses 6 (tabela acima, linhas `lt-a1m3-*`) saíram do overlay,
+porque na produção esses desafios não têm explicação nem em português; voltam se o lote novo for importado.
+Decisão pendente da dona: importar o lote novo de 6 (apaga 4 desafios da produção) ou manter os 10.

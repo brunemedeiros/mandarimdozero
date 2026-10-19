@@ -11,6 +11,11 @@ const dir = path.join(root, 'fr/scripts/challenges_import');
 for (const f of fs.readdirSync(dir).filter(f => /^lote-.*\.json$/.test(f) && !/content/.test(f))) {
   for (const c of JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'))) sources.push({ ...c, _src: f });
 }
+// Ouça e traduza do Módulo 3: a produção ainda tem os 10 desafios antigos (o lote do repositório caiu para 6 sem
+// reimportar). O overlay en segue a produção, então estes ids são conferidos contra o retrato dela.
+for (const c of JSON.parse(fs.readFileSync(path.join(root, 'docs/i18n/challenges-producao-a1m3-lt.json'), 'utf8')).challenges) {
+  sources.push({ ...c, _src: 'docs/i18n/challenges-producao-a1m3-lt.json' });
+}
 const byId = new Map(sources.map(c => [c.id, c]));
 const dicts = load('fr/dictations.js', 'DICTATIONS');
 const ch = JSON.parse(fs.readFileSync(path.join(root, 'docs/i18n/challenges-en.json'), 'utf8'));
