@@ -452,8 +452,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   /* .tabs já fica escondida sempre agora (ver regra global acima) --
      e o pill de Conta na topbar volta aqui (só mobile ele some, ver
      regra global também). */
-  /* Conta/Sair: o pill com o nome saiu no desktop; "Sair da conta" fica no fim da
-     sidebar (#sidebar-logout-btn) e Reportar já tem o ⚑ da topbar. */
+  /* Conta/Sair: o pill com o nome saiu no desktop; "Sair da conta" fica no menu
+     "Mais" da sidebar (#sidebar-logout-btn) e Reportar já tem o ⚑ da topbar. */
   /* Topbar "flutuando" (estilo Duolingo): no desktop os itens ficam sem caixinha,
      só ícone + número. O XP volta à topbar (o card Status saiu). O pill de
      Admin Mode ligado em OFF (.active, roxo) mantém o fundo: é um aviso. */
@@ -496,6 +496,19 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   .sidebar-icon{ width:21px; height:21px; }
   .sidebar-divider{ height:1px; background:var(--paper-line); margin:12px 6px; }
   .sidebar-nav-secondary{ margin-top:auto; padding-top:12px; }
+  /* Menu "Mais" (Configurações e Sair da conta): abre ao lado do botão, por hover ou clique (shared/tabs.js).
+     Futuramente recebe Ajuda (termos e privacidade). */
+  .sidebar-mais{ position:relative; }
+  .sidebar-mais-menu{
+    display:none; flex-direction:column; gap:2px; position:absolute; left:calc(100% + 4px); bottom:0; z-index:30; min-width:220px;
+    background:var(--paper); border:1px solid var(--paper-line); border-radius:14px; box-shadow:var(--shadow-card); padding:6px;
+  }
+  .sidebar-mais-menu::before{ content:""; position:absolute; left:-12px; top:0; bottom:0; width:12px; } /* ponte para o mouse atravessar */
+  .sidebar-mais.open .sidebar-mais-menu{ display:flex; }
+  .sidebar .sidebar-mais-menu .tab-btn, #app.sidebar-collapsed .sidebar .sidebar-mais-menu .tab-btn{ justify-content:flex-start; padding:10px 12px; font-size:14px; }
+  .sidebar-mais-menu .tab-btn:hover, .sidebar-mais-menu .tab-btn.active{ background:var(--paper-warm); color:var(--ink); box-shadow:none; }
+  .sidebar-mais-menu .sidebar-mais-danger, .sidebar-mais-menu .sidebar-mais-danger:hover{ color:var(--seal-red-dark); }
+  .sidebar-mais:has(.sidebar-mais-menu .tab-btn.active) > #sidebar-mais-btn{ background:var(--paper); color:var(--seal-red-dark); box-shadow:var(--shadow-card); }
 
   .app-content{ grid-area:content; max-width:none; margin:0; padding:0 0 80px; }
 
@@ -4736,10 +4749,6 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f3c6.svg" alt="" aria-hidden="true">
         <span class="sidebar-label">Ranking</span>
       </button>
-      <button class="tab-btn" data-tab="settings">
-        <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/2699.svg" alt="" aria-hidden="true">
-        <span data-i18n="settings.title" class="sidebar-label">Configurações</span>
-      </button>
       <button class="tab-btn student-only-nav" data-tab="student-panel" style="display:none;">
         <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f392.svg" alt="" aria-hidden="true">
         <span class="sidebar-label" data-i18n="studentPanel.nav">Aluno</span>
@@ -4752,10 +4761,22 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6e0.svg" alt="" aria-hidden="true">
         <span class="sidebar-label">Admin</span>
       </button>
-      <button class="tab-btn sidebar-logout-btn" id="sidebar-logout-btn" type="button">
-        <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6aa.svg" alt="" aria-hidden="true">
-        <span class="sidebar-label" data-i18n="menu.logout">Sair da conta</span>
-      </button>
+      <div class="sidebar-mais" id="sidebar-mais">
+        <button class="tab-btn" id="sidebar-mais-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="sidebar-mais-menu">
+          <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.3" fill="#94A3B8"/><circle cx="12" cy="12" r="2.3" fill="#64748B"/><circle cx="19" cy="12" r="2.3" fill="#475569"/></svg>
+          <span class="sidebar-label" data-i18n="sidebar.more">Mais</span>
+        </button>
+        <div class="sidebar-mais-menu" id="sidebar-mais-menu" role="menu">
+          <button class="tab-btn" data-tab="settings" role="menuitem" type="button">
+            <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/2699.svg" alt="" aria-hidden="true">
+            <span data-i18n="settings.title">Configurações</span>
+          </button>
+          <button class="tab-btn sidebar-mais-danger" id="sidebar-logout-btn" role="menuitem" type="button">
+            <img class="tab-icon sidebar-icon" src="../shared/icons/fluent/1f6aa.svg" alt="" aria-hidden="true">
+            <span data-i18n="menu.logout">Sair da conta</span>
+          </button>
+        </div>
+      </div>
     </nav>
   </div>
 
