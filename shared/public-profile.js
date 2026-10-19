@@ -271,8 +271,8 @@ async function renderPublicProfileInto(bodyEl, username){
   // transição compatível, a remover na fase de cleanup.
   const decksHTML = isPublic ? `
     <div class="public-profile-decks-section">
-      <div class="section-label">Decks públicos</div>
-      <div id="public-profile-decks-box"><p class="profile-empty-note">Carregando...</p></div>
+      <div class="section-label">${t('publicDeckCopies.tab')}</div>
+      <div id="public-profile-decks-box"><p class="profile-empty-note">${t('loading.phrase.loading')}</p></div>
     </div>
   ` : '';
   const cardsHTML = (isPublic && PUBLIC_FLAT_FLASHCARDS_ENABLED) ? `

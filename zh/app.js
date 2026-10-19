@@ -596,7 +596,7 @@ const CONTENT_I18N = ContentI18n.create({
   units: UNITS, levels: LEVELS, stories: STORIES, hanzi: HANZI_LESSONS,
   overlayUrl: (lang) => `content.${lang}.js`,
   getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
-  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); }
+  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); if (typeof repaintTrailForUiLanguage === 'function') repaintTrailForUiLanguage(); }
 });
 // Cartões guardam cópia do texto exibido; só o texto muda (id/FSRS intactos).
 // Também roda depois de carregar o progresso salvo (traz o texto do idioma em
@@ -1316,22 +1316,22 @@ function mapUnitDescribe(u, moduleId){
   const lines = [];
   if (hasLessons){
     const done = (st === 'done' || st === 'skipped') ? u.lessons.length : currentLessonIdx(u.id);
-    lines.push(`${done} de ${u.lessons.length} lições concluídas`);
+    lines.push(t('trail.lessonsCompleted', { done, total: u.lessons.length }));
   }
   const { dueForReview } = unitCardCounts(u.id);
-  if (dueForReview > 0) lines.push(`🔁 ${dueForReview} para revisar`);
+  if (dueForReview > 0) lines.push(t('trail.map.unit.toReview', { n: dueForReview }));
   const actions = [];
   if (st === 'locked'){
-    lines.push('Complete a unidade anterior para liberar esta.');
-    if (moduleId && trailSkipAllowed()) actions.push({ label: 'Fazer Ponto de verificação para pular', primary: false, onClick: () => openCheckpoint(moduleId) });
-    else if (moduleId) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
+    lines.push(t('trail.map.unit.lockedHint'));
+    if (moduleId && trailSkipAllowed()) actions.push({ label: t('trail.map.unit.skipCta'), primary: false, onClick: () => openCheckpoint(moduleId) });
+    else if (moduleId) lines.push(t('trail.checkpoint.skipLocked'));
   } else if (st === 'done' || st === 'skipped'){
-    actions.push({ label: 'Abrir de novo', primary: false, onClick: () => openUnitDetail(u.id) });
+    actions.push({ label: t('trail.map.unit.openAgain'), primary: false, onClick: () => openUnitDetail(u.id) });
   } else {
     const started = !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
-    actions.push({ label: started ? 'Continuar' : 'Começar', primary: true, onClick: () => openUnitDetail(u.id) });
+    actions.push({ label: started ? t('common.continue') : t('common.start'), primary: true, onClick: () => openUnitDetail(u.id) });
   }
-  return { eyebrow: unitTypeOf(u) === 'grammar' ? 'Gramática' : 'Unidade', title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
+  return { eyebrow: unitTypeOf(u) === 'grammar' ? t('trail.eyebrow.grammar') : t('trail.map.unit.eyebrow'), title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
 }
 
 function renderTrailMapView(container){
@@ -1347,7 +1347,7 @@ function renderTrailMapView(container){
       const done = !!STATE.storyProgress?.[story.id]?.completed;
       const sst = done ? 'done' : (unlocked ? 'available' : 'locked');
       nodes.push({ key: 's:' + story.id, kind: 'story', icon: story.icon, label: story.title, state: sst,
-        aria: `História: ${story.title}, ${TRAIL_MAP_STATE_LABEL[sst]}` });
+        aria: t('trail.map.aria.story', { title: story.title, state: TRAIL_MAP_STATE_LABEL[sst] }) });
     }
   });
   const describe = (key) => {
@@ -1355,13 +1355,13 @@ function renderTrailMapView(container){
       const story = STORIES.find(s => String(s.id) === key.slice(2));
       const unlocked = !!STATE.unitProgress[story.afterUnit]?.completed;
       const done = !!STATE.storyProgress?.[story.id]?.completed;
-      return { eyebrow: 'História', title: story.title, status: done ? 'Concluída' : (unlocked ? 'Disponível' : 'Bloqueada'), goal: story.subtitle || '',
-        lines: unlocked ? [] : ['Complete a unidade anterior para liberar esta história.'],
-        actions: unlocked ? [{ label: done ? 'Ler de novo' : 'Ler a história', primary: !done, onClick: () => openStory(story.id) }] : [] };
+      return { eyebrow: t('trail.map.story.eyebrow'), title: story.title, status: TRAIL_MAP_STATE_LABEL[done ? 'done' : (unlocked ? 'available' : 'locked')], goal: story.subtitle || '',
+        lines: unlocked ? [] : [t('trail.map.story.lockedHint')],
+        actions: unlocked ? [{ label: done ? t('trail.map.story.readAgain') : t('trail.map.story.read'), primary: !done, onClick: () => openStory(story.id) }] : [] };
     }
     return mapUnitDescribe(UNITS.find(u => String(u.id) === key.slice(2)), null);
   };
-  renderTrailMap(container, { sections: [{ title: 'Unidades', nodes }] }, describe);
+  renderTrailMap(container, { sections: [{ title: t('trail.map.unitsSection'), nodes }] }, describe);
 }
 
 
@@ -1928,7 +1928,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   const posInBlock = acq.introIdx;
   const idx = block[posInBlock];
   const v = u.vocab[idx];
-  const cardId = `u${u.id}-v${idx}`;
+  const cardId = studyWordCardId(u, idx); // chave estável do item (shared/study-trail-model.js)
   const card = STATE.cards.find(c => c.id === cardId);
   const alreadyKnown = studyWordHasEvidence(studyWordCardsFor(STATE.cards, u.id, idx)); // K2-E: nível de palavra
   const matchingPhrase = findMatchingPhrase(v, u);
@@ -2270,28 +2270,28 @@ function renderDialogueStep(u, contentEl, nextBtn){
     const side = dlgSpeakerSide(dlg, l.spk);
     const w = who(l.spk);
     return `
-      <div class="dlg-row ${side}" data-i="${i}" role="button" tabindex="0" aria-label="${escapeHTML(w.n)}: ouvir a partir desta fala">
+      <div class="dlg-row ${side}" data-i="${i}" role="button" tabindex="0" aria-label="${escapeHTML(t('dlg.playFromAria', { name: w.n }))}">
         <div class="dlg-avatar"><span class="dlg-emoji" aria-hidden="true">${w.e || escapeHTML(l.spk.slice(0, 1))}</span><span class="dlg-name">${escapeHTML(w.n)}</span></div>
         <div class="dlg-bubble">
           <div class="dlg-py">${dlgHighlightPinyin(l.c, l.p, terms)}</div>
           <div class="dlg-hz">${dlgHighlight(l.c, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>
           <div class="dlg-tr">${escapeHTML(l.t)}</div>
-          <button type="button" class="dlg-trbtn" aria-label="Mostrar a tradução desta fala" aria-pressed="false">🌐</button>
+          <button type="button" class="dlg-trbtn" aria-label="${escapeHTML(t('dlg.lineTrAria'))}" aria-pressed="false">🌐</button>
         </div>
       </div>`;
   }).join('');
 
   contentEl.innerHTML = `
-    <div class="section-label">Diálogo</div>
+    <div class="section-label">${t('dlg.label')}</div>
     <div class="dlg-title">${escapeHTML(dlg.title)}</div>
     ${dlg.scene ? `<div class="dlg-scene">📍 ${escapeHTML(dlg.scene)}</div>` : ''}
     <div class="dlg-tools">
-      <button class="btn btn-secondary dlg-play-btn" id="dlg-play-btn">▶ Ouvir tudo</button>
-      <button class="dlg-chip" id="dlg-auto-btn" aria-pressed="${dlgAutoplayOn()}">Áudio automático: ${dlgAutoplayOn() ? 'ligado' : 'desligado'}</button>
+      <button class="btn btn-secondary dlg-play-btn" id="dlg-play-btn">${t('dlg.playAll')}</button>
+      <button class="dlg-chip" id="dlg-auto-btn" aria-pressed="${dlgAutoplayOn()}">${dlgAutoplayOn() ? t('dlg.autoOn') : t('dlg.autoOff')}</button>
     </div>
     <div class="dlg-chat" id="ud-dialogue">${rowsHTML}</div>
-    <div class="dlg-float"><button class="dlg-chip dlg-chip-float" id="dlg-trans-btn" aria-pressed="false">🌐 Mostrar traduções</button></div>
-    ${terms.length ? `<div class="dlg-legend">As palavras coloridas são do vocabulário desta unidade. Toque numa delas para ver o significado.</div>` : ''}
+    <div class="dlg-float"><button class="dlg-chip dlg-chip-float" id="dlg-trans-btn" aria-pressed="false">${t('dlg.showTr')}</button></div>
+    ${terms.length ? `<div class="dlg-legend">${t('dlg.legend')}</div>` : ''}
   `;
 
   const chat = document.getElementById('ud-dialogue');
@@ -2302,13 +2302,13 @@ function renderDialogueStep(u, contentEl, nextBtn){
 
   function setPlaying(on){
     chat.classList.toggle('playing', on);
-    playBtn.textContent = on ? '⏸ Parar' : '▶ Ouvir tudo';
+    playBtn.textContent = on ? t('dlg.stop') : t('dlg.playAll');
     if (!on) rows.forEach(r => r.classList.remove('speaking'));
   }
   function setTranslations(on){
     chat.classList.toggle('show-trans', on);
     transBtn.setAttribute('aria-pressed', String(on));
-    transBtn.textContent = on ? '🌐 Ocultar traduções' : '🌐 Mostrar traduções';
+    transBtn.textContent = on ? t('dlg.hideTr') : t('dlg.showTr');
     rows.forEach(r => { r.classList.remove('show-tr'); r.querySelector('.dlg-trbtn')?.setAttribute('aria-pressed', 'false'); });
   }
   function stillHere(){ return token === DLG.run && document.body.contains(chat); }
@@ -2325,7 +2325,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
       if (!alive()) return;
       if (res === 'blocked'){
         setPlaying(false);
-        if (viaAutoplay) showToast('🔇 Toque em "Ouvir tudo" para ouvir a conversa');
+        if (viaAutoplay) showToast(t('dlg.tapToPlayToast'));
         return;
       }
       if (!res){ setPlaying(false); return; }
@@ -2345,7 +2345,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
     const on = !dlgAutoplayOn();
     dlgSetAutoplay(on);
     autoBtn.setAttribute('aria-pressed', String(on));
-    autoBtn.textContent = 'Áudio automático: ' + (on ? 'ligado' : 'desligado');
+    autoBtn.textContent = on ? t('dlg.autoOn') : t('dlg.autoOff');
   });
   rows.forEach(r => {
     const tb = r.querySelector('.dlg-trbtn');
@@ -2366,7 +2366,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
 
   // A micro-checagem é um passo à parte (dialogueCheck), depois deste:
   // na mesma tela daria para rolar e copiar a resposta do próprio diálogo.
-  nextBtn.textContent = 'Continuar →';
+  nextBtn.textContent = t('common.continueArrow');
   nextBtn.style.display = 'flex';
 
   const canHear = dlg.lines.some(l => canSpeakChinese(l.c));
@@ -2384,9 +2384,9 @@ function renderDialogueCheckStep(u, contentEl, nextBtn){
   const checks = Array.isArray(dlg.check) ? dlg.check : [];
   DLG.check = { qi: 0, correct: 0 };
   contentEl.innerHTML = `
-    <div class="section-label">Diálogo</div>
+    <div class="section-label">${t('dlg.label')}</div>
     <div class="dlg-title">${escapeHTML(dlg.title)}</div>
-    <div class="dlg-scene">Sem olhar o diálogo: o que você entendeu da conversa?</div>
+    <div class="dlg-scene">${t('dlg.checkScene')}</div>
     <div class="dlg-check" id="dlg-check"></div>
   `;
   nextBtn.style.display = 'none';
@@ -2414,17 +2414,17 @@ function renderDialogueCheck(u, dlg, who, checks, nextBtn, rows){
     const q = checks[st.qi];
     let label = '', ctx = '', opts = [], flashIdx = -1;
     if (q.k === 'fill'){
-      label = 'Complete a resposta';
+      label = t('dlgCheck.fill');
       ctx = `<div class="dlg-q-ctx">${bubble(q.line - 1, false)}${bubble(q.line, true)}</div>`;
       opts = dlgShuffle([{ o: L[q.line], ok: true }, ...q.bad.map(o => ({ o, ok: false }))]);
       flashIdx = q.line;
     } else if (q.k === 'listen'){
-      label = 'Ouça e escolha a resposta';
-      ctx = `<div class="dlg-q-listen"><button class="audio-btn audio-btn-lg" id="dlg-q-audio" aria-label="Ouvir a fala">🔊</button><div class="prompt-audio-hint">toque para ouvir de novo</div></div>`;
+      label = t('dlgCheck.listen');
+      ctx = `<div class="dlg-q-listen"><button class="audio-btn audio-btn-lg" id="dlg-q-audio" aria-label="${escapeHTML(t('dlgCheck.listenAria'))}">🔊</button><div class="prompt-audio-hint">${t('dlgCheck.tapAgain')}</div></div>`;
       opts = dlgShuffle([{ o: L[q.line + 1], ok: true }, ...q.bad.map(o => ({ o, ok: false }))]);
       flashIdx = q.line + 1;
     } else {
-      label = 'Compreensão';
+      label = t('dlgCheck.comprehension');
       ctx = `<div class="dlg-q-text">${escapeHTML(q.q)}</div>`;
       opts = q.opts.map((t, i) => ({ t, ok: i === q.ok }));
       flashIdx = -1;
@@ -2432,7 +2432,7 @@ function renderDialogueCheck(u, dlg, who, checks, nextBtn, rows){
     const optHTML = o => o.o ? zhOpt(o.o) : escapeHTML(o.t);
     const dots = checks.map((_, i) => `<span class="dlg-dot${i < st.qi ? ' done' : (i === st.qi ? ' on' : '')}"></span>`).join('');
     box.innerHTML = `
-      <div class="dlg-check-head"><span>Você entendeu?</span><span class="dlg-dots" role="img" aria-label="Pergunta ${st.qi + 1} de ${checks.length}">${dots}</span></div>
+      <div class="dlg-check-head"><span>${t('lesson.step.dialogueCheck')}</span><span class="dlg-dots" role="img" aria-label="${escapeHTML(t('dlgCheck.progressAria', { n: st.qi + 1, total: checks.length }))}">${dots}</span></div>
       <div class="exercise-prompt-label">${label}</div>
       ${ctx}
       <div class="dlg-opts">${opts.map((o, i) => `<button class="dlg-opt" data-i="${i}">${optHTML(o)}</button>`).join('')}</div>
@@ -2461,9 +2461,9 @@ function renderDialogueCheck(u, dlg, who, checks, nextBtn, rows){
       const last = st.qi === checks.length - 1;
       box.querySelector('.dlg-fb-slot').innerHTML = `
         <div class="dlg-fb ${o.ok ? 'ok' : 'no'}">
-          <div class="dlg-fb-title">${o.ok ? '✅ Isso mesmo!' : 'Quase! A resposta certa era:'}</div>
+          <div class="dlg-fb-title">${o.ok ? t('dlgCheck.right') : t('dlgCheck.almost')}</div>
           ${o.ok ? '' : `<div class="dlg-fb-right">${right}</div>`}
-          <button class="btn btn-primary btn-block" id="dlg-q-next">${last ? 'Concluir' : 'Próxima pergunta →'}</button>
+          <button class="btn btn-primary btn-block" id="dlg-q-next">${last ? t('dlgCheck.finish') : t('dlgCheck.next')}</button>
         </div>`;
       document.getElementById('dlg-q-next').addEventListener('click', () => {
         if (last) finish(); else { st.qi += 1; showQuestion(); }
@@ -2475,11 +2475,11 @@ function renderDialogueCheck(u, dlg, who, checks, nextBtn, rows){
   function finish(){
     stopExerciseAudio();
     box.innerHTML = `
-      <div class="dlg-check-head"><span>Você entendeu?</span></div>
-      <div class="dlg-sum">${st.correct} de ${checks.length} certas. ${st.correct === checks.length ? 'Conversa entendida!' : 'Ouça de novo e tente outra vez quando quiser.'}</div>
-      <button class="dlg-chip" id="dlg-redo">Refazer as perguntas</button>`;
+      <div class="dlg-check-head"><span>${t('lesson.step.dialogueCheck')}</span></div>
+      <div class="dlg-sum">${t('dlgCheck.summary', { n: st.correct, total: checks.length })} ${st.correct === checks.length ? t('dlgCheck.allRight') : t('dlgCheck.tryAgain')}</div>
+      <button class="dlg-chip" id="dlg-redo">${t('dlgCheck.redo')}</button>`;
     document.getElementById('dlg-redo').addEventListener('click', () => { st.qi = 0; st.correct = 0; showQuestion(); nextBtn.style.display = 'none'; });
-    nextBtn.textContent = 'Continuar →';
+    nextBtn.textContent = t('common.continueArrow');
     nextBtn.style.display = 'flex';
     nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
@@ -3348,9 +3348,9 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     if (STEP_STATE.exerciseAnswered) return;
     // Vocabulário/pinyin com forma dupla (ex: "X / Y") -- qualquer uma das
     // duas conta como resposta completa, não só a string inteira com a barra.
-    const typed = strip(inputEl.value);
-    const forms = acceptedForms(ex.item.p);
-    const ok = forms.some(form => strip(form) === typed);
+    const typedAll = typedVariants(inputEl.value, ex.item.p).map(strip), typed = typedAll[0];
+    const forms = acceptedFormsTyped(ex.item.p);
+    const ok = forms.some(form => typedAll.includes(strip(form)));
     finish(ok, !ok && isToneOnlyMiss(typed, forms, strip));
   });
 
@@ -3577,9 +3577,9 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
       const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
-      const typed = strip(inputEl.value);
-      const forms = acceptedForms(ex.correctBlock.p);
-      const ok = forms.some(form => strip(form) === typed);
+      const typedAll = typedVariants(inputEl.value, ex.correctBlock.p).map(strip), typed = typedAll[0];
+      const forms = acceptedFormsTyped(ex.correctBlock.p);
+      const ok = forms.some(form => typedAll.includes(strip(form)));
       finish(ok, !ok && isToneOnlyMiss(typed, forms, strip));
     });
   } else {
@@ -4204,13 +4204,13 @@ function renderClozeCard(mountEl, card, localState, callbacks){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
       mountEl.querySelector('#cloze-review-verify-btn').disabled = true;
-      const typed = strip(inputEl.value);
+      const typedAll = typedVariants(inputEl.value, view.compareAnswerText).map(strip), typed = typedAll[0];
       // Interação intermediária (verificar) -- muta localState e o
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      const forms = acceptedForms(view.compareAnswerText);
-      localState.wasCorrect = forms.some(form => strip(form) === typed);
+      const forms = acceptedFormsTyped(view.compareAnswerText);
+      localState.wasCorrect = forms.some(form => typedAll.includes(strip(form)));
       localState.toneOnly = localState.wasCorrect ? false : isToneOnlyMiss(typed, forms, strip);
       renderClozeCard(mountEl, card, localState, callbacks);
     }
@@ -4290,13 +4290,13 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
       mountEl.querySelector('#cloze-review-verify-btn').disabled = true;
-      const typed = strip(inputEl.value);
+      const typedAll = typedVariants(inputEl.value, view.compareAnswerText).map(strip), typed = typedAll[0];
       // Interação intermediária (verificar) -- muta localState e o
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      const forms = acceptedForms(view.compareAnswerText);
-      localState.wasCorrect = forms.some(form => strip(form) === typed);
+      const forms = acceptedFormsTyped(view.compareAnswerText);
+      localState.wasCorrect = forms.some(form => typedAll.includes(strip(form)));
       localState.toneOnly = localState.wasCorrect ? false : isToneOnlyMiss(typed, forms, strip);
       renderTypeAnswerCard(mountEl, card, localState, callbacks);
     }
@@ -4789,29 +4789,38 @@ function zhTypeAnswerExportColumns(view){
   return { pinyin, hanzi: view.displayAnswerText, translation: view.prompt.text, hanziSide: 'back', translationSide: 'front' };
 }
 
+// Etapa 3 (decisão da dona, 2026-10-19): mesmo esquema de fr/app.js -- nomes
+// de campo, do modelo e do arquivo no idioma do site (pt-BR igual a antes).
 const ANKI_EXPORT_CONFIG = {
-  modelName: APP_IDENTITY.apps.zh.name,
-  fields: [
-    { name:"Pinyin", ord:0, font:"Arial", size:20 },
-    { name:"Caractere", ord:1, font:"Arial", size:20 },
-    { name:"Tradução", ord:2, font:"Arial", size:18 }
-  ],
-  qfmt: "<div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{Pinyin}}</div>",
-  afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:36px;'>{{Caractere}}</div><div style='text-align:center;font-size:18px;color:#5C4A3F;'>{{Tradução}}</div>",
+  // nomes dos campos no idioma do site (em pt-BR, os de sempre)
+  fieldNames(){
+    return { py: 'Pinyin', ch: ankiExportText('ankiExport.field.character', 'Caractere'), tr: ankiExportText('ankiExport.field.translation', 'Tradução') };
+  },
+  get modelName(){ return ankiExportText('ankiExport.appName.zh', APP_IDENTITY.apps.zh.name, { app: APP_IDENTITY.apps.zh.name }); },
+  get fields(){
+    const n = this.fieldNames();
+    return [
+      { name:n.py, ord:0, font:"Arial", size:20 },
+      { name:n.ch, ord:1, font:"Arial", size:20 },
+      { name:n.tr, ord:2, font:"Arial", size:18 }
+    ];
+  },
+  get qfmt(){ return `<div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{${this.fieldNames().py}}}</div>`; },
+  get afmt(){ const n = this.fieldNames(); return `{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:36px;'>{{${n.ch}}}</div><div style='text-align:center;font-size:18px;color:#5C4A3F;'>{{${n.tr}}}</div>`; },
   css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FBF4E8; color:#211714; }",
-  deckDesc: `Exportado do app ${APP_IDENTITY.apps.zh.name}`,
+  get deckDesc(){ return ankiExportText('ankiExport.deckDesc', `Exportado do app ${APP_IDENTITY.apps.zh.name}`, { app: this.modelName }); },
   // K2-F: template do modelo "Reverso" (B da trilha): frente = Tradução,
   // verso = Pinyin + Caractere. Mesmos campos semânticos do Básico.
-  reverseQfmt: "<div style='text-align:center;font-size:22px;color:#5C4A3F;font-weight:bold;'>{{Tradução}}</div>",
-  reverseAfmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{Pinyin}}</div><div style='text-align:center;font-size:36px;'>{{Caractere}}</div>",
+  get reverseQfmt(){ return `<div style='text-align:center;font-size:22px;color:#5C4A3F;font-weight:bold;'>{{${this.fieldNames().tr}}}</div>`; },
+  get reverseAfmt(){ const n = this.fieldNames(); return `{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{${n.py}}}</div><div style='text-align:center;font-size:36px;'>{{${n.ch}}}</div>`; },
   guidPrefix: "mzc_",
   unitOptions(){
     return UNITS.map(u => ({ id: String(u.id), label: `${u.id}. ${u.title}` }));
   },
   deckName(sel){
     return sel === 'all'
-      ? `${APP_IDENTITY.apps.zh.name} - HSK 1`
-      : `${APP_IDENTITY.apps.zh.name} - ${UNITS.find(u=>String(u.id)===sel).title}`;
+      ? `${this.modelName} - HSK 1`
+      : `${this.modelName} - ${UNITS.find(u=>String(u.id)===sel).title}`;
   },
   cards(sel){
     // Fase 7i (ver CLAUDE.md) -- `.filter(hasPlainFrontBack)` removido,
@@ -4880,7 +4889,9 @@ const ANKI_EXPORT_CONFIG = {
     return cardPromptPinyinText(card);
   },
   filename(sel){
-    return `chines-com-prof-brune-${sel === 'all' ? 'completo' : 'unidade-'+sel}.apkg`;
+    return sel === 'all'
+      ? ankiExportText('ankiExport.filename.zh.all', 'chines-com-prof-brune-completo.apkg')
+      : ankiExportText('ankiExport.filename.zh.unit', `chines-com-prof-brune-unidade-${sel}.apkg`, { n: sel });
   },
 };
 

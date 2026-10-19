@@ -64,6 +64,19 @@
     "I get up at six thirty.",
     "And when do you work?",
     "I work in the morning and in the afternoon."
+   ],
+   "scene": "At lunchtime, two coworkers talk about their daily routines.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What time does Julien get up?",
+     "opts": [
+      "At six o'clock",
+      "At six thirty",
+      "At noon"
+     ]
+    }
    ]
   },
   "concepts": {

@@ -34,6 +34,19 @@
     "Chinese is even harder than French, but it's really interesting.",
     "Which do you think is the hardest? Chinese or Italian?",
     "Chinese, of course!"
+   ],
+   "scene": "Two classmates talk about studying languages.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "Which language does the person answering think is the hardest?",
+     "opts": [
+      "Chinese",
+      "French",
+      "Italian"
+     ]
+    }
    ]
   },
   "concepts": {

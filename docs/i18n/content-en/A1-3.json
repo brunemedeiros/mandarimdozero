@@ -58,6 +58,19 @@
     "She's eight. And your son?",
     "He's ten.",
     "They're so big!"
+   ],
+   "scene": "At the park, two parents chat while their kids play.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "How old is Marc's daughter?",
+     "opts": [
+      "Eight",
+      "Ten",
+      "Six"
+     ]
+    }
    ]
   },
   "concepts": {

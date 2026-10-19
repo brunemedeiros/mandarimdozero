@@ -38,6 +38,19 @@
     "It's very hot today, and sunny.",
     "What about tomorrow?",
     "Tomorrow it will rain, and it'll be a bit cold."
+   ],
+   "scene": "Two friends check the weather forecast.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What will the weather be like tomorrow?",
+     "opts": [
+      "Rainy and a bit cold",
+      "Sunny and hot",
+      "Very windy"
+     ]
+    }
    ]
   },
   "concepts": {

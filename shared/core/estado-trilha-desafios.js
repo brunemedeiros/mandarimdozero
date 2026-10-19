@@ -36,7 +36,7 @@ function wireKnowButtons(container){
       // desmarcar em A -- avisa em vez de reescrever o histórico de B.
       const siblings = studyWordCardsFor(STATE.cards, card.unitId, card.vocabIdx);
       if (card.reps === 0 && studyWordHasEvidence(siblings)){
-        showToast('Esta palavra já foi estudada pelo cartão inverso.');
+        showToast(t('trail.known.siblingStudied'));
         return;
       }
 
@@ -69,7 +69,7 @@ function wireKnowButtons(container){
       // K2-E: o rótulo reflete a PALAVRA (A ou B com histórico).
       const wordKnown = studyWordHasEvidence(siblings);
       btn.classList.toggle('known', wordKnown);
-      btn.textContent = wordKnown ? '✓ Já sei' : 'Já sei?';
+      btn.textContent = wordKnown ? t('zh.path.knownDone') : t('zh.path.knownAsk');
 
       saveState();
       checkUnitCompletion(STATE.currentUnitId);
@@ -184,6 +184,27 @@ function removeSelfFlashcardFromState(rowId){
 function replaceSelfFlashcardInState(rowId, updatedRow){
   removeSelfFlashcardFromState(rowId);
   addSelfFlashcardToState(updatedRow);
+}
+
+// Etapa 3 (i18n): a trilha é pintada no boot, antes de o catálogo do idioma do site (shared/i18n/en.js) e o
+// overlay do conteúdo (content.en.js) chegarem. Chamado pelo onApplied do CONTENT_I18N (que roda também a cada
+// 'i18n:change'): repinta a trilha e os cartões laterais no idioma certo. Nunca no meio de uma lição: com a lição
+// aberta (ou outra aba na frente) a trilha fica como está e se repinta sozinha ao voltar (switchTab('path') e
+// exitToPath() chamam renderUnitsGrid); os cartões laterais (Ranking, Missões do dia) só são repintados fora da lição.
+function repaintTrailForUiLanguage(){
+  if (typeof document === 'undefined' || document.readyState === 'loading') return; // o boot ainda vai pintar
+  const grid = document.getElementById('units-grid');
+  if (!grid || !grid.childElementCount) return; // trilha ainda não pintada: a 1ª pintura já sai no idioma certo
+  const app = document.getElementById('app');
+  const detail = document.getElementById('unit-detail-wrap');
+  const inLesson = (app && app.classList.contains('lesson-focus')) || (detail && detail.style.display !== 'none' && detail.style.display !== '');
+  if (inLesson) return;
+  const pathView = document.getElementById('view-path');
+  const listWrap = document.getElementById('path-list-wrap');
+  const trailVisible = !!(pathView && pathView.classList.contains('active') && listWrap && listWrap.style.display !== 'none');
+  if (trailVisible){ renderUnitsGrid(); return; }
+  if (typeof renderDailyChallengesStrip === 'function') renderDailyChallengesStrip();
+  if (typeof renderSideRankingCard === 'function') renderSideRankingCard();
 }
 
 async function loadStateAndRender(){
@@ -1020,7 +1041,7 @@ function renderProgressView(){
   const ownContentCards = ['teacher', 'self'].map(o => {
     const m = ownContentProgress(STATE.cards, o);
     if (!m.total) return '';
-    const label = o === 'teacher' ? 'Conteúdos da professora estudados' : 'Meus conteúdos estudados';
+    const label = o === 'teacher' ? t('progress.stat.teacherContent') : t('progress.stat.ownContent');
     return `<div class="stat-card" data-stat="content-${o}"><div class="num">${m.studied}/${m.total}</div><div class="label">${label}</div></div>`;
   }).join('');
 
@@ -1189,4 +1210,25 @@ function updateStudySetting(patch){
 // nos exercícios de digitar de ouvido (vocab-type/cloze).
 function acceptedForms(expected){
   return (expected || '').split('/').map(s => s.trim()).filter(Boolean);
+}
+
+// Exercícios de digitar: além de cada forma, vale digitar o texto inteiro ("allemand / allemande"),
+// com ou sem espaço em volta da barra. Use junto com slashSpacing() no que foi digitado.
+function acceptedFormsTyped(expected){
+  const forms = acceptedForms(expected);
+  if (forms.length < 2) return forms;
+  const inteiro = String(expected).trim();
+  return forms.concat(forms.join(' / ')).concat(inteiro !== forms.join(' / ') ? [inteiro] : []);
+}
+function slashSpacing(typed){
+  return String(typed == null ? '' : typed).replace(/\s*\/\s*/g, ' / ');
+}
+// As leituras do que foi digitado num cartão com duas formas: barra padronizada e, se o cartão tem mais de uma
+// forma, também a vírgula (, ou ，) lida como barra. Ordem trocada não vale.
+function typedVariants(typed, expected){
+  const v = [String(typed == null ? '' : typed), slashSpacing(typed)];
+  if (acceptedForms(expected).length > 1 && /[,，]/.test(String(typed == null ? '' : typed))){
+    v.push(slashSpacing(String(typed).replace(/[,，]/g, ' / ')));
+  }
+  return v.filter((x, i) => v.indexOf(x) === i);
 }

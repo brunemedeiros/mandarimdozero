@@ -22,7 +22,7 @@
 function registerExerciseCorrect(unit, vocabItem){
   const idx = unit.vocab.indexOf(vocabItem);
   if (idx === -1) return;
-  const cardId = `u${unit.id}-v${idx}`;
+  const cardId = studyItemCardId(unit.id, 'v', idx, vocabItem); // chave estável do item (shared/study-trail-model.js)
   const card = STATE.cards.find(c => c.id === cardId);
   if (card && card.reps === 0){
     // Fase 5: exercícios de lição também alimentam o motor novo (via

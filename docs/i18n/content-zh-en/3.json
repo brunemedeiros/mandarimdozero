@@ -44,6 +44,19 @@
     "How old are you?",
     "I'm 28. And you?",
     "I'm 30."
+   ],
+   "scene": "Two classmates chat during a break in class.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "Who is 30 years old?",
+     "opts": [
+      "The person who asked the first question",
+      "The person who answered first",
+      "Neither of them"
+     ]
+    }
    ]
   },
   "concepts": {

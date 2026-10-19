@@ -61,6 +61,19 @@
     "Tuesday, does that work for you?",
     "No, I work on Tuesday. What about Wednesday?",
     "Perfect, see you Wednesday then!"
+   ],
+   "scene": "Two friends make plans to see each other next week.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What day do Chloé and Maxime agree to meet?",
+     "opts": [
+      "Tuesday",
+      "Wednesday",
+      "Monday"
+     ]
+    }
    ]
   },
   "concepts": {

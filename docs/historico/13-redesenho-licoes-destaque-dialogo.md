@@ -246,3 +246,133 @@ Prévia A (como estava) x B (Pico) aprovada pela autora: "aprovo o B, pode usar 
   255/255, curso-progresso 12/12, i18n confirmação 16/16, i18n navegador 209/209, i18n persistência 39/39,
   notificações 36/36, k2f 34/34 e 32/32 (export Anki), deck-browser 208/208; i18n unit 2232/2459, as mesmas falhas
   antigas da `main` (o teste agora acha o bloco do seletor de idioma com qualquer recuo).
+
+## Janelas da Revisão no Design System do painel (fr e zh, 2026-10-17)
+
+Prévia A x B aprovada pela autora ("Aprovado, prefiro como no B sem a pauta"), com a correção pedida por ela: no zh
+escuro a lista do Painel ficava sem as linhas entre os cartões (a linha padrão sumia no fundo elevado do painel);
+as divisórias passaram para um tom mais forte (`--p-borda-campo`).
+
+- Configurar, Adicionar cartão, Painel (`shared/deck-browser.js`) e Exportar (`shared/my-flashcards.js`) ganharam a
+  classe `painel` na `.app-modal.deck-window`. O corpo do Adicionar e o editor do Painel ganharam `.p-editor`: o editor
+  de campos fica igual ao Criar cartão da Professora. A "ficha pautada" (linha vermelha e pauta no texto) saiu.
+- CSS no bloco "Janelas da Revisão no Design System do painel" de `fr/index.html` e `zh/index.html`: X discreto (44px
+  no celular), busca em pílula, lateral com barrinha da marca no item escolhido, cartão aberto levemente colorido,
+  Excluir em vermelho de contorno, barra de seleção compacta (Mover em contorno, Excluir vermelho, Limpar como link),
+  Exportar com "Baixar .json" como botão principal e "Copiar link" em contorno.
+- Só visual: nenhum comportamento mudou. Grátis x Premium: igual (selo Premium e limite de cartões grátis intactos).
+- Testes: `tests/janelas-revisao/test_playwright.js` novo (40/40: classes, sem pauta, contraste das divisórias, X de
+  44px no celular, sem rolagem em 390px); deck-browser 208/208, revisao-ajustes 48/48, i18n navegador 209/209,
+  k2f 34/34 e 32/32, anki-destino 38/38, fase-f 50/50, fase-g 68/68, fase-h 68/68, fase-i 48/48, painel-cartoes
+  264/264, plano-admin 26/26, painel-ds (contraste 131/131, navegador 194/194, alinhamento 4/4, ui 288/288),
+  configurações 25/25, css-equilibrio 2/2.
+
+## Achados da varredura de CSS da sessão do PR #351 (avaliados em 2026-10-18)
+
+- **A) `--ink-faint` nunca existiu.** No Reportar problema, o "(opcional)" já saía cinza (herda do rótulo), mas a nota de
+  privacidade saía na cor do texto normal. Decisão: usar `--ink-soft` (o cinza de texto secundário que já existe nos 3
+  blocos de tema, com contraste nos dois), em vez de criar um token novo. As regras da matriz antiga de Notificações
+  (`.notif-pref-matrix*` e a setinha `summary::before`) saíram: a tela virou tabela no painel em 2026-10-17 e essas
+  classes não são mais geradas. Teste novo `tests/css-equilibrio/test_variaveis.js`: falha se o index usar `var(--x)`
+  sem reserva e sem definição em lugar nenhum (pegava o `--ink-faint` na `main`).
+- **B) Classes sem regra:** só `conj-review-empty` ganhou estilo (o "—" de forma em branco na revisão de erros da
+  Conjugação fica no mesmo cinza da seta e do pronome). As outras não precisam: `fb-title` herda do cabeçalho;
+  `feedback-header` é falso positivo (a classe real é `challenge-`/`listen-translate-`/`accent-feedback-header`, todas
+  com estilo); `story-checkpoint-text`, `story-beat`, `mem-legend-item` e `profile-track-showcase` só embrulham peças
+  que já têm estilo (o pai já é flex com espaçamento); `tone-hint` usa `wrong-feedback-header`; `mc-mark` herda a cor
+  da alternativa certa/errada.
+- **C)** `.conj-x`/`.conj-gap`/`.typed-attempt` ficam com o PR #351 (aberto), sem duplicar aqui.
+- Achados extras, corrigidos com a autorização da autora (2026-10-18):
+  - O passo Diálogo e o "Você entendeu?" das lições (`renderDialogueStep`, `renderDialogueCheckStep`,
+    `renderDialogueCheck` em `fr/app.js` e `zh/app.js`) tinham uns 25 textos fixos em português ("✅ Isso mesmo!",
+    "Ouvir tudo", "Áudio automático", "Próxima pergunta"...), que apareciam no site em inglês. Viraram as chaves `dlg.*` e
+    `dlgCheck.*` (o português ficou igual). O conteúdo do curso (título, cena, falas, perguntas) é da camada do curso e
+    não entrou. Teste novo `tests/dialogo-idioma/test_playwright.js` (20/20; com o código antigo dá 6 falhas no inglês).
+  - Nota de privacidade do Reportar problema sem "--": "A captura, se anexada, fica visível só para a equipe. Nada é
+    enviado automaticamente." (inglês igual, com ponto). Registrada como mudança aprovada nos testes de i18n.
+
+## Janelas pequenas no painel, Editar perfil e Trocar de curso (fr e zh, 2026-10-18)
+
+- Visual B (Pico) aprovado nas janelas Editar perfil, Reportar problema, Confirmar edição e Trocar de curso: classe
+  `.janela-painel` no `.app-modal`, CSS no bloco "Janelas pequenas no Design System do painel" dos dois index.
+- Editar perfil com os textos do JSON da autora (`edit_profile_modal`): título "Seu perfil, seu jeito" e subtítulo,
+  textos de apoio do nome e do @, "Sobre você" com placeholder sem idioma fixo, bloco "Compartilhe sua jornada" e
+  "Salvar perfil". Os 5 textos que eram fixos em português (título, Alterar/Remover foto, Nome exibido, Sobre mim,
+  Salvar) entraram no i18n (`ui.profileEdit.*`).
+  - Privacidade conferida na migration 080: no perfil privado só a própria conta, amigos aceitos, professora/aluno com
+    vínculo ativo e a admin veem foto, bio, progresso e Decks públicos; os outros veem nome, @ e conquista em destaque
+    e só acham pelo @ exato. O texto mostra as duas situações com essas consequências reais (o JSON sugeria uma
+    frase genérica para o privado; ficou a regra real, como o próprio JSON pede).
+  - Conflito documentado: o JSON sugeria "Escolha com cuidado" para o @, mas o @ já foi escolhido no primeiro acesso
+    (111) e o campo é só leitura. Ficou "Seu identificador é permanente e não pode ser alterado."
+  - Sem mudança de regra, banco, permissão ou validação. Ícones dentro dos campos e o selo de câmera do mockup
+    ficaram de fora (a instrução pede para não acrescentar ícones decorativos).
+- Trocar de curso: mantém o visual compacto; os botões dizem a ação ("Continuar estudando" / "Ir para {curso}").
+  Os botões são os mesmos da troca de idioma do site, então o texto antigo volta ao fechar. O "Começar Francês" e o
+  "Pronto para uma nova jornada?" do mockup não entraram porque a mesma janela serve para voltar a um curso já
+  começado.
+- Testes: menu de cursos 26/26, identidade 1 falha que já existe na `main` (username vazio no stub), Fase J 62/62,
+  i18n navegador 209/209, confirmação de idioma 16/16, placeholders 45/45, plano-admin 26/26, i18n unit com as
+  mesmas falhas antigas da `main` (chaves novas registradas). Capturas em pt e en, fr/zh, claro/escuro e celular.
+
+## Estética "janela rica" nas janelas do aluno (fr e zh, 2026-10-18)
+
+A autora preferiu a estética das imagens de referência dela (ícones por opção, blocos tingidos, título forte com
+subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do site. Peças novas `.jp-*` no bloco da
+`.janela-painel` (regra em `.claude/rules/painel-design-system.md`).
+- Trocar de curso: título e texto mudam conforme o curso: novo ("Pronto para uma nova jornada?", "Começar {curso}",
+  frase "Um novo idioma, novas possibilidades.") ou já começado ("Voltar para {curso}?", "Ir para {curso}"); o menu da
+  bandeira passa `started: true` e "Adicionar curso" marca `data-started` nos cursos com ✓. Pela troca de idioma do site
+  sai o texto neutro. Blocos "Seu progresso está seguro." e "Sua jornada continua.".
+- Editar perfil: "Sua identidade" ao lado da foto, campos com ícone, bloco de privacidade tingido com ícone e a ajuda
+  "Você decide o que compartilhar". Sem selo de câmera (não há ícone Fluent de câmera no site).
+- Confirmar edição: ícone 🔄, mensagem principal, explicação real (o cartão volta como novo na Revisão; nada é apagado),
+  dica para manter o progresso e "Sim, continuar". "Descartar edições" só fecha sem salvar (comportamento mantido).
+- Reportar: subtítulo, 8 categorias com ícone e descrição curta (ids e valores enviados iguais), chips de impacto com
+  ícone, `aria-pressed` nas seleções, contador da descrição (limite real 600; a descrição continua obrigatória),
+  texto de apoio e "Enviar relato". Espanhol (congelado) ganhou só as chaves novas do Reportar.
+- Testes: i18n navegador 209/209, i18n unit com as mesmas falhas da `main`, menu de cursos 26/26, deck-browser 208/208,
+  Fase G 68/68, Fase H 68/68, Fase I 48/48, plano-admin 26/26, placeholders 45/45, confirmação de idioma 16/16,
+  identidade com a mesma falha que já existe na `main`.
+
+## Etapa 2 do plano "Voz da Prof. Brune": mensagens erradas e acessibilidade crítica (2026-10-19)
+- **Sino**: `xp_earned` e `streak_completed` não são mais gravados no sino (`shared/notifications.js`, lista
+  `NOTIFICATION_EVENTS_ONLY_IN_THE_MOMENT`); o aviso na hora (toast de XP, janela da sequência) e o evento bruto em
+  `notification_events` continuam. Efeito colateral bom: o XP deixa de gastar o limite diário da categoria `gamificacao`
+  (badges chegam mais). Avisos antigos já gravados ficam. Teste: `tests/notificacoes/test_sino_so_na_hora.js` 8/8.
+- **"Não deixa apagar!" / "Sequência em risco"** (`notification-cron`, passo 2): só sai quando o último estudo foi ONTEM
+  (`daysSince(lastStudyDay) === 1`). Antes saía todo dia para quem já tinha parado (212 avisos para 20 pessoas em 14 dias,
+  produção 2026-10-19). Publicado na produção como `notification-cron` v30 (2026-10-19, `verify_jwt` true; código publicado conferido igual ao do repositório).
+- **Avisos rápidos** (`shared/toast.js`): 4 a 10 s pelo tamanho do texto (antes 2 s), passar o mouse segura, `#toast-layer`
+  com `role="status"` e `aria-live="polite"` (fr e zh), saída animada respeitando `prefers-reduced-motion`.
+- **Janelas antigas** (`shared/modal-a11y.js`, carregado em fr e zh): toda janela do HTML (`.app-modal-overlay`,
+  `.manual-modal-overlay`, `.streak-modal-overlay`) ganha `role="dialog"`, `aria-modal` e `aria-labelledby`; foco vai para
+  dentro ao abrir e volta para quem abriu; Tab preso; Esc toca no botão de fechar da janela de cima (sem botão = não fecha,
+  ex.: escolha obrigatória do idioma do site). Janelas criadas por JS seguem com o cuidado próprio.
+- **Erros do francês em vermelho**: regras que usavam `--seal-red-dark` (azul no fr) passaram para `--error-red-text` /
+  `--error-red` (erros de formulário, nota de login, ditado, exportar/importar, item "perigo" do menu, apagar foto/badge).
+- Teste: `tests/acessibilidade/test_playwright.js` 60/60 (fr e zh, claro e escuro).
+- Aprovado pela dona (2026-10-19) e publicado pelo PR #363. Banco da produção, `notification_templates`:
+  `user_inactive_1` (ids 1, 3, 79, 81, 161) com texto novo ("Que tal praticar um pouquinho de francês/chinês hoje? Cinco
+  minutinhos já valem o estudo do dia." e o equivalente em inglês para francês, chinês e português); `user_inactive_7`
+  (ids 14, 16, 94, 93, 168) e `study_goal_remaining` (ids 48, 50, 130, 129, 160) desativados (`active=false`), cada
+  combinação ainda com pelo menos uma variante ativa. Janela da sequência: "Volte amanhã para manter sua sequência."
+  (en: "Come back tomorrow to keep your streak going.").
+
+## Etapa 3 do plano "Voz da Prof. Brune": nada em português no site em inglês (2026-10-19, na branch)
+- Auditoria: `docs/i18n/etapa3-auditoria-pt-no-en.md` (50 achados de interface, 2 de conteúdo, 4 do banco, 8 de admin só
+  listados). Guarda: `tests/i18n/test_sem_portugues_en.js` percorre fr e zh em inglês e falha se sobrar português
+  (antes: fr 183 / zh 101 trechos; depois: 0 / 0, conteúdo do curso sem inglês 0 / 0). Varredura estática:
+  `tests/i18n/scan_pt_literais.js`.
+- Lote A: trilha repinta quando o catálogo en e o `content.en.js` chegam (causa raiz da primeira tela em português);
+  Continuar, Revisão do módulo e mapa com `t()`. Lote B: lição, janela da sequência, cartões esperando, Perfil, Hanzi,
+  frases de carregamento, Desafios. Lote C: Tags, excluir Deck, importação cortada, `.apkg`, Decks públicos. Lote D: cena e
+  pergunta de compreensão do diálogo no overlay (`dialogue.scene`/`dialogue.check`), Complete a frase e explicações dos
+  Desafios em inglês (lista com confiança: `docs/i18n/etapa3-traducoes-conteudo.md`).
+- Decisões da dona: "Path"/"Study Path" no lugar de "Trail"; "Pending" no filtro dos Desafios; sem o "!." da Expressão
+  (mudança de português aprovada); exportação `.apkg` no idioma do site (GUIDs iguais, reimportar não duplica).
+- Correções achadas no caminho: slug da tag de unidade sempre do título original (filtro salvo não quebra ao trocar o idioma);
+  versos de preenchimento "(sem tradução)" traduzidos só na tela (o dado no banco não muda).
+- Desafios do Módulo 3: a produção tem os 10 Ouça e traduza antigos (o lote do repositório caiu para 6 no commit 2fb4ca1 sem
+  reimportar). O overlay en segue a produção; retrato em `docs/i18n/challenges-producao-a1m3-lt.json`. Decisão pendente da dona.
+- `review-bank-agent`: `engine.generated.mjs` regerado (comportamento igual lá, tudo em português); deploy opcional, não feito.

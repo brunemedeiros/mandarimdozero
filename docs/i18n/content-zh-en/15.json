@@ -48,6 +48,19 @@
     "I can! What time?",
     "At 7 in the evening, at the movie theater.",
     "Sounds good, I want to see that movie too!"
+   ],
+   "scene": "One friend invites another to the movies.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What time is the movie?",
+     "opts": [
+      "7 p.m.",
+      "5 p.m.",
+      "9 p.m."
+     ]
+    }
    ]
   },
   "concepts": {

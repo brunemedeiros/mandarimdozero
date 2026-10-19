@@ -18,9 +18,25 @@ function trailEscape(s){
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+// Textos no idioma do site (shared/i18n): getters, para que cada leitura use o catálogo do momento
+// (o inglês pode chegar depois da primeira pintura). Sem t() (fora do navegador), devolve a chave.
+function trailMapT(key){ return typeof t === 'function' ? t(key) : key; }
 // Linha curta no rodapé do bloco (só o que ajuda a ler o estado de relance).
-const TRAIL_MAP_NOTE = { done: '✓ Concluída', skipped: '↷ Pulada', current: 'Você está aqui', locked: '🔒 Bloqueada', empty: 'Nada ainda' };
-const TRAIL_MAP_STATE_LABEL = { done: 'Concluída', skipped: 'Pulada', current: 'Atual', available: 'Disponível', locked: 'Bloqueada', empty: 'Sem itens' };
+const TRAIL_MAP_NOTE = {
+  get done(){ return trailMapT('trail.map.note.done'); },
+  get skipped(){ return trailMapT('trail.map.note.skipped'); },
+  get current(){ return trailMapT('trail.map.note.current'); },
+  get locked(){ return trailMapT('trail.map.note.locked'); },
+  get empty(){ return trailMapT('trail.map.note.empty'); },
+};
+const TRAIL_MAP_STATE_LABEL = {
+  get done(){ return trailMapT('trail.map.state.done'); },
+  get skipped(){ return trailMapT('trail.unit.skipped'); },
+  get current(){ return trailMapT('trail.map.state.current'); },
+  get available(){ return trailMapT('trail.map.state.available'); },
+  get locked(){ return trailMapT('badge.ui.locked'); },
+  get empty(){ return trailMapT('trail.map.state.empty'); },
+};
 
 // Constrói o mapa dentro de `root` (limpa o que havia). Devolve { select, close }.
 function renderTrailMap(root, model, describe, opts){
@@ -76,7 +92,7 @@ function renderTrailMap(root, model, describe, opts){
     if (btn){ btn.classList.add('selected'); btn.setAttribute('aria-expanded', 'true'); }
     const d = describe(key) || {};
     panel.innerHTML = `
-      <button type="button" class="tm-close" aria-label="Fechar painel">✕</button>
+      <button type="button" class="tm-close" aria-label="${trailEscape(trailMapT('trail.map.closePanel'))}">✕</button>
       ${d.eyebrow ? `<div class="tm-eyebrow">${trailEscape(d.eyebrow)}</div>` : ''}
       <h3 id="tm-panel-title" class="tm-title">${trailEscape(d.title)}</h3>
       ${d.status ? `<div class="tm-status">${trailEscape(d.status)}</div>` : ''}
@@ -115,8 +131,8 @@ function buildTrailViewToggle(storageKey, onChange){
   const bar = document.createElement('div');
   bar.className = 'trail-view-toggle';
   bar.setAttribute('role', 'group');
-  bar.setAttribute('aria-label', 'Modo de visualização da trilha');
-  [['trail', 'Trilha'], ['map', 'Mapa']].forEach(([v, label]) => {
+  bar.setAttribute('aria-label', trailMapT('trail.view.aria'));
+  [['trail', trailMapT('trail.view.trail')], ['map', trailMapT('trail.view.map')]].forEach(([v, label]) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'tvt-btn' + (cur === v ? ' active' : '');

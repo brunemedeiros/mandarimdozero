@@ -43,6 +43,25 @@
     return (expected || '').split('/').map(function (s) { return s.trim(); }).filter(Boolean);
   }
 
+  // Nos exercícios de digitar, quem ouve "allemand / allemande" pode digitar as DUAS formas (o texto inteiro,
+  // com ou sem espaço em volta da barra) ou só uma: a lista aceita ganha o texto inteiro além de cada forma.
+  function formasDigitaveis(expected) {
+    var forms = formasAceitas(expected);
+    if (forms.length < 2) return forms;
+    var inteiro = String(expected).trim();
+    return forms.concat(forms.join(' / ')).concat(inteiro && inteiro !== forms.join(' / ') ? [inteiro] : []);
+  }
+  function juntarBarra(s) {
+    return String(s).replace(/\s*\/\s*/g, ' / ');
+  }
+  // O que a pessoa digitou, como a comparação deve tentar: a barra com espaço padronizado e, quando o cartão tem
+  // duas formas, também a vírgula lida como barra ("allemand, allemande"). A ordem trocada NÃO vale.
+  function variantesDigitadas(typed, expected) {
+    var v = [String(typed), juntarBarra(typed)];
+    if (formasAceitas(expected).length > 1 && String(typed).indexOf(',') !== -1) v.push(juntarBarra(String(typed).replace(/,/g, ' / ')));
+    return v.filter(function (x, i) { return v.indexOf(x) === i; });
+  }
+
   // Pontuação ignorada nos exercícios de digitar. O fr usa DUAS listas hoje (achado: o "Digite o que
   // ouviu" de vocabulário ignora o apóstrofo curvo ’, a lacuna digitada não). Mantidas iguais para a paridade.
   var PONTUACAO_VOCAB_RE = /[.,!?;:'"’]/g;
@@ -53,8 +72,8 @@
   function respostaDigitadaCerta(typed, expected, pontuacaoRe) {
     var re = pontuacaoRe || PONTUACAO_VOCAB_RE;
     var strip = function (s) { return normalizarFrouxo(s).replace(re, '').trim(); };
-    var t = strip(typed);
-    return formasAceitas(expected).some(function (form) { return strip(form) === t; });
+    var ts = variantesDigitadas(typed, expected).map(strip);
+    return formasDigitaveis(expected).some(function (form) { return ts.indexOf(strip(form)) !== -1; });
   }
 
   // Versão em 3 níveis dos exercícios de digitar: 'ok' | 'quase' | 'errou'.
@@ -63,12 +82,12 @@
   //  - acento 'quase' (pt, decisão da dona de 2026-10-15: avó/avô, pais/país são palavras diferentes):
   //    'ok' = igual (só maiúscula/pontuação diferem); 'quase' = só acento/cedilha/til; 'errou'.
   //  - ligaduras (opcional, fr: [['œ','oe'],['æ','ae']]): "soeur" por "sœur" = 'quase' (decisão de 2026-10-15).
-  function avaliarRespostaDigitada(typed, expected, opcoes) {
+  function avaliarUmaDigitada(typed, expected, opcoes) {
     var o = opcoes || {};
     var re = o.pontuacaoRe || PONTUACAO_VOCAB_RE;
     var estrito = function (s) { return String(s).normalize('NFC').toLowerCase().replace(re, '').trim(); };
     var frouxo = function (s) { return normalizarFrouxo(s).replace(re, '').trim(); };
-    var forms = formasAceitas(expected);
+    var forms = formasDigitaveis(expected);
     if (o.acento === 'tolerante') {
       var tf = frouxo(typed);
       if (forms.some(function (f) { return frouxo(f) === tf; })) return 'ok';
@@ -84,6 +103,16 @@
       if (tl && forms.some(function (f) { return lig(f) === tl; })) return 'quase';
     }
     return 'errou';
+  }
+
+  // 'ok' > 'quase' > 'errou' entre as leituras possíveis do que foi digitado (barra, vírgula).
+  function avaliarRespostaDigitada(typed, expected, opcoes) {
+    var rank = { ok: 2, quase: 1, errou: 0 }, melhor = 'errou';
+    variantesDigitadas(typed, expected).forEach(function (v) {
+      var r = avaliarUmaDigitada(v, expected, opcoes);
+      if (rank[r] > rank[melhor]) melhor = r;
+    });
+    return melhor;
   }
 
   // Exercício de gramática com resposta digitada (números por extenso etc.): hífen, espaço e apóstrofo
@@ -102,8 +131,14 @@
   function normalizarParaAcentuacao(s) {
     return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
   }
+  // Alvo com duas formas ("un / une"): vale uma forma só ou o texto inteiro (barra com ou sem espaço, vírgula),
+  // sempre com o acento exigido. Alvo de uma forma só: igual a antes.
   function acentuacaoCerta(studentAnswer, targetText) {
-    return normalizarParaAcentuacao(studentAnswer) === normalizarParaAcentuacao(targetText);
+    var alvos = formasDigitaveis(targetText);
+    if (alvos.length < 2) return normalizarParaAcentuacao(studentAnswer) === normalizarParaAcentuacao(targetText);
+    return variantesDigitadas(studentAnswer, targetText).some(function (v) {
+      return alvos.some(function (a) { return normalizarParaAcentuacao(v) === normalizarParaAcentuacao(a); });
+    });
   }
   function semAcentoParaAcentuacao(s, ligaduras) {
     var out = normalizarParaAcentuacao(s).normalize('NFD').replace(MARCAS_RE, '');
@@ -114,8 +149,15 @@
   // contar como 'partial'; o fr de hoje NÃO passa ligaduras (achado: "soeur" por "sœur" dá 'fail').
   function resultadoAcentuacao(studentAnswer, targetText, ligaduras) {
     if (acentuacaoCerta(studentAnswer, targetText)) return 'ok';
-    var typed = semAcentoParaAcentuacao(studentAnswer, ligaduras);
-    if (typed && typed === semAcentoParaAcentuacao(targetText, ligaduras)) return 'partial';
+    var alvos = formasDigitaveis(targetText);
+    if (alvos.length < 2) alvos = [targetText];
+    var vars = alvos.length > 1 ? variantesDigitadas(studentAnswer, targetText) : [studentAnswer];
+    for (var i = 0; i < vars.length; i++) {
+      var typed = semAcentoParaAcentuacao(vars[i], ligaduras);
+      for (var j = 0; j < alvos.length; j++) {
+        if (typed && typed === semAcentoParaAcentuacao(alvos[j], ligaduras)) return 'partial';
+      }
+    }
     return 'fail';
   }
 

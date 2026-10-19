@@ -50,6 +50,19 @@
     "Me, I'm German.",
     "Do you live in Germany?",
     "No, I live in Portugal now."
+   ],
+   "scene": "At an international party, two people find out where each other is from.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "Where does Thomas live now?",
+     "opts": [
+      "In Germany",
+      "In Portugal",
+      "In Italy"
+     ]
+    }
    ]
   },
   "concepts": {

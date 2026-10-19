@@ -161,7 +161,7 @@ function teacherReceivedDecks(decks){
 function teacherTagsReadOnlyHTML(cards){
   const tags = collectTagsFromCards((cards || []).filter(c => c.origin === 'teacher'));
   if (!tags.length) return '';
-  return `<div data-teacher-tags style="margin:6px 0;"><span class="profile-edit-hint">Tags dos cartões da professora:</span> ${noteTagChipsHTML(tags)}</div>`;
+  return `<div data-teacher-tags style="margin:6px 0;"><span class="profile-edit-hint">${t('myFlashcards.tags.teacher')}</span> ${noteTagChipsHTML(tags)}</div>`;
 }
 
 // Fase I (Tags): o filtro de tag do Review vale também para "Estudar este
@@ -171,7 +171,7 @@ function tagFilterNoticeHTML(){
   // A sessão não aplica mais filtro de tag (só o Painel filtra), ver activeReviewTagFilter().
   const f = (typeof activeReviewTagFilter === 'function') ? activeReviewTagFilter() : [];
   if (!f.length) return '';
-  return `<p class="profile-edit-hint" data-tag-filter-notice>Filtro de tags ativo na Revisão: ${noteTagChipsHTML(f)} — vale também para "Estudar este Deck". <button type="button" class="admin-select-link" data-clear-review-tag-filter style="background:none;border:none;cursor:pointer;padding:0;">Limpar</button></p>`;
+  return `<p class="profile-edit-hint" data-tag-filter-notice>${t('myFlashcards.tags.filterNotice', { chips: noteTagChipsHTML(f) })} <button type="button" class="admin-select-link" data-clear-review-tag-filter style="background:none;border:none;cursor:pointer;padding:0;">${t('myFlashcards.tags.clear')}</button></p>`;
 }
 
 function teacherDecksReadOnlyHTML(decks){
@@ -392,7 +392,7 @@ async function renderMyFlashcardsView(opts){
     <!-- Fase J: gerenciamento global das PRÓPRIAS tags (own_flashcards). Tags de
          Teacher Cards nunca entram aqui (outra propriedade; somente leitura). -->
     <div class="profile-section" id="my-tags-section">
-      <div class="section-label">🏷️ Gerenciar tags</div>
+      <div class="section-label">🏷️ ${t('review.panel.manageTags')}</div>
       <div id="my-tag-manager"></div>
     </div>
 
@@ -493,7 +493,7 @@ function myFlashcardRowHTML(c, premium){
   return `
     <div class="admin-badge-row">
       <div class="admin-badge-info">
-        <div class="admin-badge-name">${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
+        <div class="admin-badge-name">${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(flashcardRowDisplayTexts(c).back)}</div>
         <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}${t('myFlashcards.row.createdOn', { date: fmtDate(c.created_at) })}</div>
         ${(c.tags && c.tags.length) ? `<div data-row-tags style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${noteTagChipsHTML(c.tags)}</div>` : ''}
       </div>
@@ -1038,7 +1038,7 @@ function myFlashcardsExportPayload(cardsToExport){
 function openMyFlashcardsExportModal(cardsToExport){
   if (!cardsToExport.length){ showToast(t('myFlashcards.export.noneActive')); return; }
   const payload = myFlashcardsExportPayload(cardsToExport);
-  if (!payload.cards.length){ showToast('Nenhum dos cartões selecionados cabe neste formato (só frente e verso).'); return; }
+  if (!payload.cards.length){ showToast(t('myFlashcards.export.noneFits')); return; }
   const json = JSON.stringify(payload, null, 2);
   const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   const shareUrl = `${location.origin}${location.pathname}#import=${base64}`;
@@ -1052,7 +1052,7 @@ function openMyFlashcardsExportModal(cardsToExport){
   }
   modal.style.display = 'flex';
   modal.innerHTML = `
-    <div class="app-modal deck-window deck-window-sm">
+    <div class="app-modal deck-window painel deck-window-sm">
       <div class="app-modal-header">
         <h3>${t('myFlashcards.export.modalTitle', { n: payload.cards.length })}</h3>
         <button class="app-modal-close" id="my-flashcards-export-close" aria-label="${t('common.close')}">✕</button>
@@ -1209,12 +1209,12 @@ function openFlashcardLimitModal(opts){
     body.innerHTML = cutMessage
       ? `<p data-limit-cut-message>${escapeHTML(cutMessage)}</p>
          <div data-limit-premium-cta style="margin-top:10px; padding:10px 12px; border:2px solid var(--seal-red); border-radius:var(--radius, 10px); background:var(--paper-warm);">
-           <strong>⭐ Com o Premium, seus cartões próprios são ilimitados.</strong><br>
-           Para ativar, fale com a administração (profbrune). Você também pode excluir cartões que já não usa para liberar espaço.
+           <strong>${hasT ? t('flashcardLimit.cut.ctaStrong') : '⭐ Com o Premium, seus cartões próprios são ilimitados.'}</strong><br>
+           ${hasT ? t('flashcardLimit.cut.ctaBody') : 'Para ativar, fale com a administração (profbrune). Você também pode excluir cartões que já não usa para liberar espaço.'}
          </div>`
       : defaultBodyHTML;
   }
-  if (title) title.textContent = cutMessage ? '🔒 Importação limitada pelo plano grátis' : defaultTitle;
+  if (title) title.textContent = cutMessage ? (hasT ? t('flashcardLimit.cut.title') : '🔒 Importação limitada pelo plano grátis') : defaultTitle;
   modal.style.display = 'flex';
   return true;
 }

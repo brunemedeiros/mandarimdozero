@@ -46,16 +46,44 @@ function selectMilestoneCards(pool, opts){
   return { cards, reasons, available: (pool || []).length };
 }
 
+// Texto do marco no idioma do site (shared/i18n, chaves trail.moduleReview.*). Fora do navegador (testes
+// em Node, sem t()) cai no português abaixo, idêntico ao catálogo pt-BR.
+const MILESTONE_TEXT_PT = {
+  'trail.moduleReview.reason.itemWord.one': 'item',
+  'trail.moduleReview.reason.itemWord.other': 'itens',
+  'trail.moduleReview.reason.learning': '{n} com erros recentes',
+  'trail.moduleReview.reason.due': '{n} vencendo hoje',
+  'trail.moduleReview.reason.weak': '{n} com memória mais fraca',
+  'trail.moduleReview.reason.fresh.one': '{n} novo',
+  'trail.moduleReview.reason.fresh.other': '{n} novos',
+};
+function milestoneT(key, params){
+  if (typeof t === 'function') return t(key, params);
+  return String(MILESTONE_TEXT_PT[key] || key).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
+}
+
 // "12 itens: 7 com erros recentes, 5 vencendo hoje"
 function milestoneReasonText(sel){
   const n = sel.cards.length;
   if (!n) return '';
   const parts = [];
-  if (sel.reasons.learning) parts.push(`${sel.reasons.learning} com erros recentes`);
-  if (sel.reasons.due) parts.push(`${sel.reasons.due} vencendo hoje`);
-  if (sel.reasons.weak) parts.push(`${sel.reasons.weak} com memória mais fraca`);
-  if (sel.reasons.fresh) parts.push(`${sel.reasons.fresh} ${sel.reasons.fresh === 1 ? 'novo' : 'novos'}`);
-  return `${n} ${n === 1 ? 'item' : 'itens'}: ${parts.join(', ')}`;
+  if (sel.reasons.learning) parts.push(milestoneT('trail.moduleReview.reason.learning', { n: sel.reasons.learning }));
+  if (sel.reasons.due) parts.push(milestoneT('trail.moduleReview.reason.due', { n: sel.reasons.due }));
+  if (sel.reasons.weak) parts.push(milestoneT('trail.moduleReview.reason.weak', { n: sel.reasons.weak }));
+  if (sel.reasons.fresh) parts.push(milestoneT(sel.reasons.fresh === 1 ? 'trail.moduleReview.reason.fresh.one' : 'trail.moduleReview.reason.fresh.other', { n: sel.reasons.fresh }));
+  return `${n} ${milestoneT(n === 1 ? 'trail.moduleReview.reason.itemWord.one' : 'trail.moduleReview.reason.itemWord.other')}: ${parts.join(', ')}`;
+}
+
+// Data da última sessão ('AAAA-MM-DD') no formato do idioma do site (pt-BR: dd/mm/aaaa).
+function milestoneDateLabel(iso){
+  if (!iso) return '';
+  const lang = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+  try {
+    const [y, m, d] = String(iso).split('-').map(Number);
+    const out = new Date(y, m - 1, d).toLocaleDateString(lang, { day: '2-digit', month: '2-digit', year: 'numeric' });
+    if (out && !/Invalid/.test(out)) return out;
+  } catch (e) { /* cai no formato antigo */ }
+  return String(iso).split('-').reverse().join('/');
 }
 
 // Estado do marco para a UI: 'empty' (nenhum cartão elegível), 'ready' (nunca

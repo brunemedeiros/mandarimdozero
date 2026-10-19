@@ -68,6 +68,19 @@
     "I have a brother. His name is Paul.",
     "How old is he?",
     "He's fifteen."
+   ],
+   "scene": "On a coffee break at work, two coworkers talk about their families.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What is Julie's brother's name?",
+     "opts": [
+      "Paul",
+      "Marc",
+      "Louis"
+     ]
+    }
    ]
   },
   "concepts": {

@@ -75,3 +75,32 @@ function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
     }
   };
 }
+
+// ---------- Menu "Mais" da sidebar (desktop): Configurações e Sair da conta ----------
+// Abre por hover (com folga de 200ms para o mouse atravessar) e por clique/teclado.
+// Aberto por clique, fica aberto até clicar fora ou apertar Esc.
+(function setupSidebarMais(){
+  const box = document.getElementById('sidebar-mais'), btn = document.getElementById('sidebar-mais-btn');
+  if (!box || !btn) return;
+  let timer = null, pinned = false;
+  const set = (v) => {
+    box.classList.toggle('open', v);
+    btn.setAttribute('aria-expanded', v ? 'true' : 'false');
+    if (!v) pinned = false;
+  };
+  const later = (v) => { clearTimeout(timer); timer = setTimeout(() => set(v), v ? 60 : 200); };
+  if (window.matchMedia && matchMedia('(hover: hover)').matches){
+    box.addEventListener('mouseenter', () => later(true));
+    box.addEventListener('mouseleave', () => { if (!pinned) later(false); });
+  }
+  btn.addEventListener('click', () => {
+    clearTimeout(timer);
+    if (box.classList.contains('open') && pinned) set(false);
+    else { pinned = true; set(true); }
+  });
+  box.querySelectorAll('[role="menuitem"]').forEach(i => i.addEventListener('click', () => set(false)));
+  document.addEventListener('click', (e) => { if (!box.contains(e.target)) set(false); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && box.classList.contains('open')){ set(false); btn.focus(); }
+  });
+})();

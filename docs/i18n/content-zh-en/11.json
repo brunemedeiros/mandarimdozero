@@ -37,6 +37,19 @@
     "I don't feel well, my head hurts a lot.",
     "Do you need to see a doctor?",
     "Yes, is the hospital far from here?"
+   ],
+   "scene": "A friend notices that the other one isn't feeling well.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What hurts for the person who isn't feeling well?",
+     "opts": [
+      "Their head",
+      "Their stomach",
+      "Their leg"
+     ]
+    }
    ]
   },
   "concepts": {
