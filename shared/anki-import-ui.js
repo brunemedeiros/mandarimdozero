@@ -32,11 +32,11 @@
 //   - fr/zh app.js           (APP_KEY, addSelfFlashcardToState)
 //   - shared/toast.js        (showToast)
 
-const ANKI_IMPORT_CARD_TYPE_LABELS = {
-  normal: 'Normal',
-  normal_reversed: 'Normal com reverso',
-  cloze: 'Completar a frase (Cloze)',
-  type_answer: 'Digite a resposta',
+// Etapa 3 (lote C): rótulo no idioma do site (mesmas chaves do editor de cartões; antes era o mapa
+// ANKI_IMPORT_CARD_TYPE_LABELS em português, com o mesmo texto do pt-BR dessas chaves).
+const ANKI_IMPORT_CARD_TYPE_KEYS = {
+  normal: 'admin.flashcards.cardType.normal', normal_reversed: 'admin.flashcards.cardType.normalReversed',
+  cloze: 'admin.flashcards.cardType.cloze', type_answer: 'admin.flashcards.cardType.typeAnswer',
 };
 
 // Limite de linhas efetivamente desenhadas na lista (performance/DOM --
@@ -166,7 +166,7 @@ function ankiImportNoteRowHTML(note){
         </div>
       </label>`;
   }
-  const typeLabel = ANKI_IMPORT_CARD_TYPE_LABELS[note.cardTypeLabel] || note.cardTypeLabel;
+  const typeLabel = ANKI_IMPORT_CARD_TYPE_KEYS[note.cardTypeLabel] ? t(ANKI_IMPORT_CARD_TYPE_KEYS[note.cardTypeLabel]) : note.cardTypeLabel;
   const tagPills = (note.normalizedTags || []).map(tag => `<span class="pill" style="font-size:10px;">#${escapeHTML(tag)}</span>`).join(' ');
   const badges = [
     `<span class="pill" style="font-size:11px;">${escapeHTML(typeLabel)}</span>`,
@@ -230,11 +230,11 @@ function refreshAnkiImportConflicts(body){
   const names = plan.conflicts.slice(0, 8).map(c => `<li>${escapeHTML(c.path.join(' › '))}</li>`).join('');
   box.innerHTML = `
     <div style="margin-top:8px; padding:8px 10px; border:1px solid var(--paper-line); border-radius:8px;">
-      <strong>Um deck com este nome já existe. O que você deseja fazer?</strong>
-      <ul style="padding-left:18px; margin:4px 0;">${names}${plan.conflicts.length > 8 ? `<li>+ ${plan.conflicts.length - 8} outro(s)</li>` : ''}</ul>
-      <label style="display:flex; gap:6px; align-items:center;"><input type="radio" name="anki-import-conflict" value="suffix" ${st.conflictMode === 'suffix' ? 'checked' : ''}> Criar com sufixo (2)</label>
-      <label style="display:flex; gap:6px; align-items:center;"><input type="radio" name="anki-import-conflict" value="merge" ${st.conflictMode === 'merge' ? 'checked' : ''}> Inserir no Deck existente</label>
-      <span class="profile-edit-hint">A escolha vale para todos os decks repetidos desta importação. Ao inserir no Deck existente, cartões que parecem já existir continuam desmarcados.</span>
+      <strong>${t('ankiImport.conflict.title')}</strong>
+      <ul style="padding-left:18px; margin:4px 0;">${names}${plan.conflicts.length > 8 ? `<li>${t('ankiImport.conflict.more', { n: plan.conflicts.length - 8 })}</li>` : ''}</ul>
+      <label style="display:flex; gap:6px; align-items:center;"><input type="radio" name="anki-import-conflict" value="suffix" ${st.conflictMode === 'suffix' ? 'checked' : ''}> ${t('ankiImport.conflict.suffix')}</label>
+      <label style="display:flex; gap:6px; align-items:center;"><input type="radio" name="anki-import-conflict" value="merge" ${st.conflictMode === 'merge' ? 'checked' : ''}> ${t('ankiImport.conflict.merge')}</label>
+      <span class="profile-edit-hint">${t('ankiImport.conflict.hint')}</span>
     </div>`;
   box.querySelectorAll('input[name="anki-import-conflict"]').forEach(r => r.addEventListener('change', () => {
     st.conflictMode = r.value;
@@ -394,7 +394,7 @@ async function confirmAnkiImport(body){
       st.destDeckId = dest.deckId;
       resetBtn();
       refreshAnkiImportConflicts(body); // mostra a pergunta e trava o botão até a escolha
-      if (errorEl) errorEl.textContent = 'Já existem Decks com estes nomes. Escolha acima o que fazer antes de importar.';
+      if (errorEl) errorEl.textContent = t('ankiImport.conflict.chooseFirst');
       return;
     }
   }

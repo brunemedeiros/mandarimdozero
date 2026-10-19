@@ -35,6 +35,19 @@
     "I plan to study Chinese.",
     "Do you want to go to China in the future?",
     "Yes! I want to travel to China."
+   ],
+   "scene": "Two friends talk about their plans for the future.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What does the person answering plan to do next week?",
+     "opts": [
+      "Study Chinese",
+      "Travel to China",
+      "Work"
+     ]
+    }
    ]
   },
   "concepts": {

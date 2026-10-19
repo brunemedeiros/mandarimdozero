@@ -596,7 +596,7 @@ const CONTENT_I18N = ContentI18n.create({
   units: UNITS, levels: LEVELS, stories: STORIES, hanzi: HANZI_LESSONS,
   overlayUrl: (lang) => `content.${lang}.js`,
   getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
-  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); }
+  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); if (typeof repaintTrailForUiLanguage === 'function') repaintTrailForUiLanguage(); }
 });
 // Cartões guardam cópia do texto exibido; só o texto muda (id/FSRS intactos).
 // Também roda depois de carregar o progresso salvo (traz o texto do idioma em
@@ -1316,22 +1316,22 @@ function mapUnitDescribe(u, moduleId){
   const lines = [];
   if (hasLessons){
     const done = (st === 'done' || st === 'skipped') ? u.lessons.length : currentLessonIdx(u.id);
-    lines.push(`${done} de ${u.lessons.length} lições concluídas`);
+    lines.push(t('trail.lessonsCompleted', { done, total: u.lessons.length }));
   }
   const { dueForReview } = unitCardCounts(u.id);
-  if (dueForReview > 0) lines.push(`🔁 ${dueForReview} para revisar`);
+  if (dueForReview > 0) lines.push(t('trail.map.unit.toReview', { n: dueForReview }));
   const actions = [];
   if (st === 'locked'){
-    lines.push('Complete a unidade anterior para liberar esta.');
-    if (moduleId && trailSkipAllowed()) actions.push({ label: 'Fazer Ponto de verificação para pular', primary: false, onClick: () => openCheckpoint(moduleId) });
-    else if (moduleId) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
+    lines.push(t('trail.map.unit.lockedHint'));
+    if (moduleId && trailSkipAllowed()) actions.push({ label: t('trail.map.unit.skipCta'), primary: false, onClick: () => openCheckpoint(moduleId) });
+    else if (moduleId) lines.push(t('trail.checkpoint.skipLocked'));
   } else if (st === 'done' || st === 'skipped'){
-    actions.push({ label: 'Abrir de novo', primary: false, onClick: () => openUnitDetail(u.id) });
+    actions.push({ label: t('trail.map.unit.openAgain'), primary: false, onClick: () => openUnitDetail(u.id) });
   } else {
     const started = !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
-    actions.push({ label: started ? 'Continuar' : 'Começar', primary: true, onClick: () => openUnitDetail(u.id) });
+    actions.push({ label: started ? t('common.continue') : t('common.start'), primary: true, onClick: () => openUnitDetail(u.id) });
   }
-  return { eyebrow: unitTypeOf(u) === 'grammar' ? 'Gramática' : 'Unidade', title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
+  return { eyebrow: unitTypeOf(u) === 'grammar' ? t('trail.eyebrow.grammar') : t('trail.map.unit.eyebrow'), title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
 }
 
 function renderTrailMapView(container){
@@ -1347,7 +1347,7 @@ function renderTrailMapView(container){
       const done = !!STATE.storyProgress?.[story.id]?.completed;
       const sst = done ? 'done' : (unlocked ? 'available' : 'locked');
       nodes.push({ key: 's:' + story.id, kind: 'story', icon: story.icon, label: story.title, state: sst,
-        aria: `História: ${story.title}, ${TRAIL_MAP_STATE_LABEL[sst]}` });
+        aria: t('trail.map.aria.story', { title: story.title, state: TRAIL_MAP_STATE_LABEL[sst] }) });
     }
   });
   const describe = (key) => {
@@ -1355,13 +1355,13 @@ function renderTrailMapView(container){
       const story = STORIES.find(s => String(s.id) === key.slice(2));
       const unlocked = !!STATE.unitProgress[story.afterUnit]?.completed;
       const done = !!STATE.storyProgress?.[story.id]?.completed;
-      return { eyebrow: 'História', title: story.title, status: done ? 'Concluída' : (unlocked ? 'Disponível' : 'Bloqueada'), goal: story.subtitle || '',
-        lines: unlocked ? [] : ['Complete a unidade anterior para liberar esta história.'],
-        actions: unlocked ? [{ label: done ? 'Ler de novo' : 'Ler a história', primary: !done, onClick: () => openStory(story.id) }] : [] };
+      return { eyebrow: t('trail.map.story.eyebrow'), title: story.title, status: TRAIL_MAP_STATE_LABEL[done ? 'done' : (unlocked ? 'available' : 'locked')], goal: story.subtitle || '',
+        lines: unlocked ? [] : [t('trail.map.story.lockedHint')],
+        actions: unlocked ? [{ label: done ? t('trail.map.story.readAgain') : t('trail.map.story.read'), primary: !done, onClick: () => openStory(story.id) }] : [] };
     }
     return mapUnitDescribe(UNITS.find(u => String(u.id) === key.slice(2)), null);
   };
-  renderTrailMap(container, { sections: [{ title: 'Unidades', nodes }] }, describe);
+  renderTrailMap(container, { sections: [{ title: t('trail.map.unitsSection'), nodes }] }, describe);
 }
 
 
@@ -4794,29 +4794,38 @@ function zhTypeAnswerExportColumns(view){
   return { pinyin, hanzi: view.displayAnswerText, translation: view.prompt.text, hanziSide: 'back', translationSide: 'front' };
 }
 
+// Etapa 3 (decisão da dona, 2026-10-19): mesmo esquema de fr/app.js -- nomes
+// de campo, do modelo e do arquivo no idioma do site (pt-BR igual a antes).
 const ANKI_EXPORT_CONFIG = {
-  modelName: APP_IDENTITY.apps.zh.name,
-  fields: [
-    { name:"Pinyin", ord:0, font:"Arial", size:20 },
-    { name:"Caractere", ord:1, font:"Arial", size:20 },
-    { name:"Tradução", ord:2, font:"Arial", size:18 }
-  ],
-  qfmt: "<div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{Pinyin}}</div>",
-  afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:36px;'>{{Caractere}}</div><div style='text-align:center;font-size:18px;color:#5C4A3F;'>{{Tradução}}</div>",
+  // nomes dos campos no idioma do site (em pt-BR, os de sempre)
+  fieldNames(){
+    return { py: 'Pinyin', ch: ankiExportText('ankiExport.field.character', 'Caractere'), tr: ankiExportText('ankiExport.field.translation', 'Tradução') };
+  },
+  get modelName(){ return ankiExportText('ankiExport.appName.zh', APP_IDENTITY.apps.zh.name, { app: APP_IDENTITY.apps.zh.name }); },
+  get fields(){
+    const n = this.fieldNames();
+    return [
+      { name:n.py, ord:0, font:"Arial", size:20 },
+      { name:n.ch, ord:1, font:"Arial", size:20 },
+      { name:n.tr, ord:2, font:"Arial", size:18 }
+    ];
+  },
+  get qfmt(){ return `<div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{${this.fieldNames().py}}}</div>`; },
+  get afmt(){ const n = this.fieldNames(); return `{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:36px;'>{{${n.ch}}}</div><div style='text-align:center;font-size:18px;color:#5C4A3F;'>{{${n.tr}}}</div>`; },
   css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FBF4E8; color:#211714; }",
-  deckDesc: `Exportado do app ${APP_IDENTITY.apps.zh.name}`,
+  get deckDesc(){ return ankiExportText('ankiExport.deckDesc', `Exportado do app ${APP_IDENTITY.apps.zh.name}`, { app: this.modelName }); },
   // K2-F: template do modelo "Reverso" (B da trilha): frente = Tradução,
   // verso = Pinyin + Caractere. Mesmos campos semânticos do Básico.
-  reverseQfmt: "<div style='text-align:center;font-size:22px;color:#5C4A3F;font-weight:bold;'>{{Tradução}}</div>",
-  reverseAfmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{Pinyin}}</div><div style='text-align:center;font-size:36px;'>{{Caractere}}</div>",
+  get reverseQfmt(){ return `<div style='text-align:center;font-size:22px;color:#5C4A3F;font-weight:bold;'>{{${this.fieldNames().tr}}}</div>`; },
+  get reverseAfmt(){ const n = this.fieldNames(); return `{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{${n.py}}}</div><div style='text-align:center;font-size:36px;'>{{${n.ch}}}</div>`; },
   guidPrefix: "mzc_",
   unitOptions(){
     return UNITS.map(u => ({ id: String(u.id), label: `${u.id}. ${u.title}` }));
   },
   deckName(sel){
     return sel === 'all'
-      ? `${APP_IDENTITY.apps.zh.name} - HSK 1`
-      : `${APP_IDENTITY.apps.zh.name} - ${UNITS.find(u=>String(u.id)===sel).title}`;
+      ? `${this.modelName} - HSK 1`
+      : `${this.modelName} - ${UNITS.find(u=>String(u.id)===sel).title}`;
   },
   cards(sel){
     // Fase 7i (ver CLAUDE.md) -- `.filter(hasPlainFrontBack)` removido,
@@ -4885,7 +4894,9 @@ const ANKI_EXPORT_CONFIG = {
     return cardPromptPinyinText(card);
   },
   filename(sel){
-    return `chines-com-prof-brune-${sel === 'all' ? 'completo' : 'unidade-'+sel}.apkg`;
+    return sel === 'all'
+      ? ankiExportText('ankiExport.filename.zh.all', 'chines-com-prof-brune-completo.apkg')
+      : ankiExportText('ankiExport.filename.zh.unit', `chines-com-prof-brune-unidade-${sel}.apkg`, { n: sel });
   },
 };
 

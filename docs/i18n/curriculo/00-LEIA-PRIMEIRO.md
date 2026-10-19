@@ -18,3 +18,6 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 - Os mapas e as unidades usam **posição** (M1.3), não o id interno (A1-21). O id é só a chave fixa do progresso e não indica ordem.
 - Depois da sua leitura, as respostas das perguntas do 08, do 07, do 06 e das decisões do 04 viram a **versão 3 do 04** (um documento só, sem sobreposição).
 - Nada disso foi aplicado ao site. Toda mudança de conteúdo vem depois da Etapa 0 (ids estáveis) e com a sua autorização.
+- **Conteúdo nasce traduzido** (regra da autora, 2026-10-19): toda unidade, nota, diálogo (com cena e pergunta de
+  compreensão), Desafio e ditado novo ou alterado já sai com o inglês no mesmo lote e na mesma revisão. Como fazer:
+  `.claude/rules/conteudo-trilha.md` e a skill `criar-desafios` (passo 4c).

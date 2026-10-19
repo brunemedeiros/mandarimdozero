@@ -35,6 +35,19 @@
     "It's up ahead, on the left.",
     "Is it far from here?",
     "Not far, it's very close."
+   ],
+   "scene": "At a mall, someone looking for the restroom asks an older woman.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "Where is the restroom?",
+     "opts": [
+      "Up ahead, on the left",
+      "Behind you, on the right",
+      "Far from here"
+     ]
+    }
    ]
   },
   "concepts": {

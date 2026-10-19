@@ -124,7 +124,7 @@ async function copyPublicFlashcard({ sourceId, languageAppKey, nativeState, deck
     p_columns: columns,
     p_deck_id: dest.deckId,
   });
-  if (error){ console.error('Erro ao copiar flashcard público:', error); return { ok: false, error: 'Não foi possível copiar o cartão agora.' }; }
+  if (error){ console.error('Erro ao copiar flashcard público:', error); return { ok: false, error: t('ownFlashcards.err.copyFailed') }; }
   return { ok: true, card: data };
 }
 

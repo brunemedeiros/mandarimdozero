@@ -37,6 +37,19 @@
     "I like watching movies and dancing. And you?",
     "I like to exercise. Are you free this weekend?",
     "I am! Let's go see a movie."
+   ],
+   "scene": "Two coworkers make plans for the weekend.",
+   "check": [
+    null,
+    null,
+    {
+     "q": "What does the person who answers first like to do?",
+     "opts": [
+      "Watch movies and dance",
+      "Exercise",
+      "Sing and read"
+     ]
+    }
    ]
   },
   "concepts": {
@@ -146,6 +159,13 @@
    "en": "This is a way of inviting someone to do something.",
    "conf": "media",
    "why": "idiomatic"
+  },
+  {
+   "path": "dialogue.scene",
+   "pt": "Dois colegas combinam um programa para o fim de semana.",
+   "en": "Two coworkers make plans for the weekend.",
+   "conf": "media",
+   "why": "\"colegas\" pode ser de trabalho ou de turma; o diálogo não diz"
   }
  ]
 }

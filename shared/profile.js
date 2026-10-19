@@ -364,8 +364,8 @@ function avatarStoragePath(){
 }
 
 async function uploadAvatar(file){
-  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta pra salvar uma foto.' };
-  if (!file.type.startsWith('image/')) return { ok: false, error: 'Escolha um arquivo de imagem (JPG, PNG...).' };
+  if (!CURRENT_USER) return { ok: false, error: t('profile.err.photoLoginRequired') };
+  if (!file.type.startsWith('image/')) return { ok: false, error: t('profile.err.photoNotImage') };
   if (file.size > AVATAR_MAX_UPLOAD_BYTES) return { ok: false, error: t('profile.err.imageTooBig') };
 
   let blob;
@@ -400,7 +400,7 @@ async function uploadAvatar(file){
 }
 
 async function removeAvatar(){
-  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  if (!CURRENT_USER) return { ok: false, error: t('deck.err.loginRequired') };
   // Best-effort: mesmo se o arquivo já não existir no Storage (ou a
   // remoção falhar por algum motivo), ainda limpamos avatar_url no
   // perfil -- o dado que a UI realmente lê é a coluna, não o arquivo.

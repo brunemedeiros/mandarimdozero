@@ -1,0 +1,113 @@
+{
+ "_sobre": "Retrato (2026-10-19, só leitura) do Ouça e traduza do Módulo 3 que está NA PRODUÇÃO (tabela challenges): 10 desafios, numeração anterior ao commit 2fb4ca1, que reduziu o lote do repositório para 6 sem reimportar. O overlay en segue a produção; o validador usa este retrato no lugar do lote para estes ids.",
+ "challenges": [
+  {
+   "id": "lt-a1m3-001",
+   "type": "listen_translate",
+   "sentenceFr": "Le musée est loin d'ici.",
+   "explanation": "",
+   "referenceTranslations": [
+    "O museu fica longe daqui.",
+    "O museu é longe daqui.",
+    "O museu está longe daqui."
+   ]
+  },
+  {
+   "id": "lt-a1m3-002",
+   "type": "listen_translate",
+   "sentenceFr": "Tournez à droite, puis tout droit.",
+   "explanation": "",
+   "referenceTranslations": [
+    "Vire à direita e depois siga em frente.",
+    "Vire à direita, depois siga reto.",
+    "Vire à direita, depois em frente."
+   ]
+  },
+  {
+   "id": "lt-a1m3-003",
+   "type": "listen_translate",
+   "sentenceFr": "Je viens du Brésil, et toi ?",
+   "explanation": "",
+   "referenceTranslations": [
+    "Eu venho do Brasil, e você?",
+    "Sou do Brasil, e você?",
+    "Eu venho do Brasil, e tu?"
+   ]
+  },
+  {
+   "id": "lt-a1m3-004",
+   "type": "listen_translate",
+   "sentenceFr": "Elle est américaine.",
+   "explanation": "",
+   "referenceTranslations": [
+    "Ela é americana.",
+    "Ela é norte-americana."
+   ]
+  },
+  {
+   "id": "lt-a1m3-005",
+   "type": "listen_translate",
+   "sentenceFr": "Le pantalon coûte cinquante euros.",
+   "explanation": "",
+   "referenceTranslations": [
+    "A calça custa cinquenta euros.",
+    "A calça é cinquenta euros.",
+    "A calça sai por cinquenta euros."
+   ]
+  },
+  {
+   "id": "lt-a1m3-006",
+   "type": "listen_translate",
+   "sentenceFr": "Je cherche une robe.",
+   "explanation": "",
+   "referenceTranslations": [
+    "Estou procurando um vestido.",
+    "Eu procuro um vestido.",
+    "Procuro um vestido."
+   ]
+  },
+  {
+   "id": "lt-a1m3-007",
+   "type": "listen_translate",
+   "sentenceFr": "J'achète des légumes et du riz.",
+   "explanation": "",
+   "referenceTranslations": [
+    "Eu compro legumes e arroz.",
+    "Compro legumes e arroz.",
+    "Estou comprando legumes e arroz."
+   ]
+  },
+  {
+   "id": "lt-a1m3-008",
+   "type": "listen_translate",
+   "sentenceFr": "Tu veux du sucre ?",
+   "explanation": "",
+   "referenceTranslations": [
+    "Você quer açúcar?",
+    "Tu queres açúcar?",
+    "Quer açúcar?"
+   ]
+  },
+  {
+   "id": "lt-a1m3-009",
+   "type": "listen_translate",
+   "sentenceFr": "Je prends un kilo de pommes.",
+   "explanation": "",
+   "referenceTranslations": [
+    "Eu levo um quilo de maçãs.",
+    "Eu pego um quilo de maçãs.",
+    "Levo um quilo de maçãs."
+   ]
+  },
+  {
+   "id": "lt-a1m3-010",
+   "type": "listen_translate",
+   "sentenceFr": "Une bouteille d'eau, s'il vous plaît.",
+   "explanation": "",
+   "referenceTranslations": [
+    "Uma garrafa de água, por favor.",
+    "Uma garrafa d'água, por favor."
+   ]
+  }
+ ]
+}

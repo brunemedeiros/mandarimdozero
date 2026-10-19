@@ -40,7 +40,8 @@ function tccSummary(c){
   const front = c.front
     ? `${c.front}${c.front_pinyin ? ` (${c.front_pinyin})` : ''}`
     : (c.cloze_sentence ? c.cloze_sentence.replace('___', `[${c.cloze_answer || '...'}]`) : '');
-  return { front, back: c.back_trans || '' };
+  // Etapa 3 (c4): texto de preenchimento do verso ("(sem tradução)"...) no idioma do site.
+  return { front, back: (typeof flashcardRowDisplayTexts === 'function' ? flashcardRowDisplayTexts(c).back : (c.back_trans || '')) };
 }
 
 /* ---------------- Quadro da tela ---------------- */

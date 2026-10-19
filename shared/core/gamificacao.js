@@ -45,8 +45,27 @@ function buildStreakWeekData(){
 function showStreakCelebration(){
   // Fase 1 do sistema de notificações.
   fireNotificationEvent('streak_completed', 'streak', { days: STATE.streak });
-  document.getElementById('streak-days-num').textContent = STATE.streak;
-  { const u = document.getElementById('streak-days-unit'); if (u) u.textContent = STATE.streak === 1 ? 'dia' : 'dias'; }
+  // Título "Você está em uma sequência de {n} dia(s)!" pelo catálogo (.one/.other por n === 1). O número continua
+  // num <span id="streak-days-num"> (tem cor própria no CSS); o resto é texto puro (sem innerHTML).
+  {
+    const n = STATE.streak;
+    const h = document.querySelector('#streak-modal-overlay .streak-headline');
+    const MARK = '\u0000';
+    const tpl = (typeof t === 'function') ? t('streak.modal.headline.' + (n === 1 ? 'one' : 'other'), { n: MARK }) : '';
+    if (h && tpl.indexOf(MARK) >= 0){
+      const parts = tpl.split(MARK);
+      const num = document.createElement('span');
+      num.id = 'streak-days-num';
+      num.textContent = n;
+      h.textContent = '';
+      h.appendChild(document.createTextNode(parts[0]));
+      h.appendChild(num);
+      h.appendChild(document.createTextNode(parts.slice(1).join(MARK)));
+    } else {
+      document.getElementById('streak-days-num').textContent = n;
+      { const u = document.getElementById('streak-days-unit'); if (u) u.textContent = n === 1 ? 'dia' : 'dias'; }
+    }
+  }
   document.getElementById('streak-week-row').innerHTML = buildStreakWeekData().map(d => `
     <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
       <div class="streak-day-circle">${d.done ? '✓' : ''}</div>

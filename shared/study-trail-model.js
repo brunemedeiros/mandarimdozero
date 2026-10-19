@@ -102,8 +102,12 @@ function studyTrailModuleTag(unit){
   const sameLevel = mods.filter(m => m.level === mod.level);
   return 'modulo-' + (sameLevel.indexOf(mod) + 1);
 }
+// O slug sai SEMPRE do título original em português (`_originalTitle`, guardado por
+// shared/content-i18n.js antes do overlay): no site em inglês o overlay troca
+// `unit.title`, e o slug não pode mudar (filtros de tag salvos deixariam de casar).
 function studyTrailUnitTag(unit){
-  const byTitle = 'unidade-' + normalizeTagSlug(unit.title);
+  const sourceTitle = (unit && typeof unit._originalTitle === 'string') ? unit._originalTitle : unit.title;
+  const byTitle = 'unidade-' + normalizeTagSlug(sourceTitle);
   if (byTitle !== 'unidade-' && byTitle.length <= TAG_MAX_LENGTH) return byTitle;
   return 'unidade-' + normalizeTagSlug(unit.id);
 }
@@ -655,6 +659,7 @@ const STUDY_TRAIL_TAG_LABEL_PT = {
   'review.deck.lang.frances': 'Francês', 'review.deck.lang.mandarim': 'Mandarim', 'review.deck.lang.portugues': 'Português',
   'review.tagLabel.studyPath': 'Trilha de Estudo', 'review.tagLabel.word': 'Palavra', 'review.tagLabel.inPhrase': 'Na frase',
   'review.tagLabel.general': ' (geral)', 'review.tagLabel.level': 'Nível', 'review.tagLabel.module': 'Módulo', 'review.tagLabel.lesson': 'Lição',
+  'review.tagLabel.unitPrefix': '#unidade-',
 };
 // Etiqueta do cartão "Na frase" na Revisão (segue o idioma do site).
 function studyPhraseCardTitle(unitTitle){ return `${studyTrailTagText('review.tagLabel.inPhrase')} · ${unitTitle}`; }
@@ -672,5 +677,9 @@ function friendlyTagLabel(tag){
   if (m) return studyTrailTagText('review.tagLabel.module') + ' ' + m[1];
   m = s.match(/^licao-(\d+)$/);
   if (m) return studyTrailTagText('review.tagLabel.lesson') + ' ' + m[1];
+  // Tag da unidade (`unidade-<slug>`, ver studyTrailUnitTag): só o prefixo da etiqueta segue o idioma do site
+  // (em pt-BR continua "#unidade-…"); o slug é lógica do filtro e não muda.
+  m = s.match(/^unidade-(.+)$/);
+  if (m) return studyTrailTagText('review.tagLabel.unitPrefix') + m[1];
   return '#' + s;
 }

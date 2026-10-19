@@ -30,5 +30,12 @@ Skills: `notas-de-realidade` (notas de realidade/culturais) e `criar-desafios`. 
 - Placeholders de perfil: `{nome}`, `{primeiro_nome}`, `{nacionalidade}`, `{nacionalidade_p}`, `{nacionalidade_t}`
   (quando o falante é o próprio aluno). Texto resolvido quase nunca bate `AUDIO_MANIFEST` (cai no Web Speech).
 - Frases só com vocabulário já visto (ditados: `python3 fr/scripts/check_dictation_vocab.py`).
+- **Conteúdo nasce traduzido** (regra da autora, 2026-10-19): o lote só está pronto quando tem a versão de cada idioma de site.
+  Trilha: texto pt na camada `courses/<fr|zh>-pt-BR/layer.js` + en em `docs/i18n/content-en/` ou `content-zh-en/` (inclui
+  `dialogue.scene` e `dialogue.check`) → `node scripts/build-content-overlay.js` e `node scripts/validate-content-overlay.js`.
+  Desafios/ditados: en em `docs/i18n/challenges-en.json`/`dictations-en.json` → `node scripts/build-challenges-overlay.js en`
+  e `node scripts/validate-challenges-en.js`. Explicação traduzida explica para quem fala aquele idioma (não "em português...").
+  Mudou o pt de um item já traduzido: mudar o en junto. Guarda final: `node tests/i18n/test_sem_portugues_en.js` (0/0).
+  Antes de traduzir Desafios, conferir que o lote do repositório bate com a tabela `challenges` da produção.
 - Desafios entram como `needs_review` com um `.md` de revisão para a autora; só publicados aparecem na trilha.
 - Mudou texto com áudio pré-gerado → regenerar mp3 (skill `audio-tts`).

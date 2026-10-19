@@ -520,7 +520,7 @@ const CONTENT_I18N = ContentI18n.create({
   overlayUrl: (lang) => `content.${lang}.js`,
   extraUrls: (lang) => [`challenges.${lang}.js`],
   getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
-  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); }
+  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); if (typeof repaintTrailForUiLanguage === 'function') repaintTrailForUiLanguage(); }
 });
 // Cartões da trilha guardam cópia do texto exibido; só o texto muda (id/FSRS
 // intactos). Também roda depois de carregar o progresso salvo, que traz o texto
@@ -1125,23 +1125,23 @@ function mapUnitDescribe(u, moduleId){
   const lines = [];
   if (hasLessons){
     const done = (st === 'done' || st === 'skipped') ? u.lessons.length : currentLessonIdx(u.id);
-    lines.push(`${done} de ${u.lessons.length} lições concluídas`);
+    lines.push(t('trail.lessonsCompleted', { done, total: u.lessons.length }));
   }
   const { dueForReview } = unitCardCounts(u.id);
-  if (dueForReview > 0) lines.push(`🔁 ${dueForReview} para revisar`);
+  if (dueForReview > 0) lines.push(t('trail.map.unit.toReview', { n: dueForReview }));
   const actions = [];
   if (st === 'locked'){
-    lines.push('Complete a unidade anterior para liberar esta.');
+    lines.push(t('trail.map.unit.lockedHint'));
     const modOpen = moduleId && moduleUnlocked(MODULES.find(m => m.id === moduleId));
-    if (modOpen && trailSkipAllowed()) actions.push({ label: 'Fazer Ponto de verificação para pular', primary: false, onClick: () => openCheckpoint(moduleId) });
-    else if (modOpen) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
+    if (modOpen && trailSkipAllowed()) actions.push({ label: t('trail.map.unit.skipCta'), primary: false, onClick: () => openCheckpoint(moduleId) });
+    else if (modOpen) lines.push(t('trail.checkpoint.skipLocked'));
   } else if (st === 'done' || st === 'skipped'){
-    actions.push({ label: 'Abrir de novo', primary: false, onClick: () => openUnitDetail(u.id) });
+    actions.push({ label: t('trail.map.unit.openAgain'), primary: false, onClick: () => openUnitDetail(u.id) });
   } else {
     const started = !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
-    actions.push({ label: started ? 'Continuar' : 'Começar', primary: true, onClick: () => openUnitDetail(u.id) });
+    actions.push({ label: started ? t('common.continue') : t('common.start'), primary: true, onClick: () => openUnitDetail(u.id) });
   }
-  return { eyebrow: unitTypeOf(u) === 'grammar' ? 'Gramática' : 'Unidade', title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
+  return { eyebrow: unitTypeOf(u) === 'grammar' ? t('trail.eyebrow.grammar') : t('trail.map.unit.eyebrow'), title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
 }
 
 function renderTrailMapView(container, levelModules){
@@ -1150,16 +1150,16 @@ function renderTrailMapView(container, levelModules){
       const u = UNITS.find(x => x.id === id);
       const st = unitBlockState(u);
       return { key: 'u:' + id, kind: 'unit', icon: UNIT_ICONS[id] || '📖', label: u.title, state: st, current: st === 'current',
-        aria: `${u.title}, ${TRAIL_MAP_STATE_LABEL[st]}${unitTypeOf(u) === 'grammar' ? ', gramática' : ''}` };
+        aria: `${u.title}, ${TRAIL_MAP_STATE_LABEL[st]}${unitTypeOf(u) === 'grammar' ? t('trail.map.aria.grammarSuffix') : ''}` };
     });
     const sel = moduleReviewSelection(module);
     const rst = milestoneState(sel.available, STATE.reviewMilestones[module.id]);
-    nodes.push({ key: 'r:' + module.id, kind: 'review', icon: '🔁', label: 'Revisão', state: !moduleUnlocked(module) ? 'locked' : (rst === 'empty' ? 'empty' : (rst === 'done' ? 'done' : 'available')),
-      aria: `Revisão do módulo ${mIdx + 1}, opcional${rst === 'empty' ? ', nada para revisar ainda' : ''}` });
+    nodes.push({ key: 'r:' + module.id, kind: 'review', icon: '🔁', label: t('trail.moduleReview.chip'), state: !moduleUnlocked(module) ? 'locked' : (rst === 'empty' ? 'empty' : (rst === 'done' ? 'done' : 'available')),
+      aria: t('trail.map.aria.review', { n: mIdx + 1 }) + (rst === 'empty' ? t('trail.map.aria.reviewEmptySuffix') : '') });
     const cp = STATE.checkpointProgress[module.id];
-    nodes.push({ key: 'c:' + module.id, kind: 'checkpoint', icon: '🏆', label: 'Ponto', state: cp.completed ? 'done' : (moduleUnlocked(module) ? 'available' : 'locked'),
-      aria: `Ponto de verificação do módulo ${mIdx + 1}` });
-    return { title: `Módulo ${mIdx + 1} · ${module.title}`, nodes };
+    nodes.push({ key: 'c:' + module.id, kind: 'checkpoint', icon: '🏆', label: t('trail.map.checkpointShort'), state: cp.completed ? 'done' : (moduleUnlocked(module) ? 'available' : 'locked'),
+      aria: t('trail.map.aria.checkpoint', { n: mIdx + 1 }) });
+    return { title: t('trail.module.label', { n: mIdx + 1, title: module.title }), nodes };
   });
   const find = key => { const [k, id] = [key.slice(0, 1), key.slice(2)]; return { k, id }; };
   const describe = (key) => {
@@ -1174,19 +1174,19 @@ function renderTrailMapView(container, levelModules){
       const rec = STATE.reviewMilestones[module.id];
       const st = milestoneState(sel.available, rec);
       const why = milestoneReasonText(sel);
-      return { eyebrow: 'Revisão', title: 'Revisão do módulo', status: st === 'done' ? 'Revisada' : (st === 'empty' ? 'Sem itens' : 'Recomendada'),
-        goal: 'Opcional: uma sessão curta com o que mais precisa ser revisto neste módulo. Nunca bloqueia o avanço.',
-        lines: st === 'empty' ? ['Nada para revisar ainda: estude as unidades deste módulo e volte aqui.'] : [why].concat(rec && rec.lastDate ? [`Última sessão: ${rec.lastDate.split('-').reverse().join('/')}`] : []),
-        actions: (st === 'empty' || !moduleUnlocked(module)) ? [] : [{ label: 'Revisar agora', primary: true, onClick: () => startModuleReviewSession(module.id) }] };
+      return { eyebrow: t('trail.moduleReview.chip'), title: t('trail.moduleReview.title'), status: st === 'done' ? t('trail.map.review.statusDone') : (st === 'empty' ? t('trail.map.state.empty') : t('trail.map.review.statusReady')),
+        goal: t('trail.map.review.goal'),
+        lines: st === 'empty' ? [t('trail.moduleReview.empty')] : [why].concat(rec && rec.lastDate ? [t('trail.map.review.lastSession', { date: milestoneDateLabel(rec.lastDate) })] : []),
+        actions: (st === 'empty' || !moduleUnlocked(module)) ? [] : [{ label: t('trail.map.review.cta'), primary: true, onClick: () => startModuleReviewSession(module.id) }] };
     }
     const cp = STATE.checkpointProgress[module.id];
     const lines = [];
     const actions = [];
-    if (!moduleUnlocked(module)) lines.push('Libere o módulo (complete a unidade anterior) para fazer o Ponto de verificação.');
-    else if (!trailSkipAllowed()) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
-    else actions.push({ label: cp.completed ? 'Refazer o ponto' : 'Fazer o Ponto de verificação', primary: !cp.completed, onClick: () => openCheckpoint(module.id) });
-    return { eyebrow: 'Ponto de verificação', title: module.title, status: cp.completed ? `Aprovado (melhor nota ${cp.bestScore || 0}%)` : (moduleUnlocked(module) ? 'Disponível' : 'Bloqueado'),
-      goal: 'Teste o módulo inteiro de uma vez. Se for bem (70% ou mais), as unidades dele são marcadas como puladas.', lines, actions };
+    if (!moduleUnlocked(module)) lines.push(t('trail.map.checkpoint.lockedHint'));
+    else if (!trailSkipAllowed()) lines.push(t('trail.checkpoint.skipLocked'));
+    else actions.push({ label: cp.completed ? t('trail.map.checkpoint.redo') : t('trail.map.checkpoint.take'), primary: !cp.completed, onClick: () => openCheckpoint(module.id) });
+    return { eyebrow: t('trail.checkpoint.title'), title: module.title, status: cp.completed ? t('trail.map.checkpoint.passed', { score: cp.bestScore || 0 }) : (moduleUnlocked(module) ? t('trail.map.state.available') : t('trail.map.checkpoint.locked')),
+      goal: t('trail.map.checkpoint.goal'), lines, actions };
   };
   renderTrailMap(container, { sections }, describe);
 }
@@ -3992,19 +3992,19 @@ function buildModuleReviewRow(module, unlocked){
   const rec = STATE.reviewMilestones[module.id];
   const st = milestoneState(sel.available, rec);
   const why = milestoneReasonText(sel);
-  const dateBR = rec && rec.lastDate ? rec.lastDate.split('-').reverse().join('/') : '';
+  const dateLabel = rec && rec.lastDate ? milestoneDateLabel(rec.lastDate) : '';
   let goal;
-  if (unlocked === false) goal = 'Bloqueada: libere o módulo (complete a unidade anterior) para revisar.';
-  else if (st === 'empty') goal = 'Nada para revisar ainda: estude as unidades deste módulo e volte aqui.';
-  else if (st === 'done') goal = `Revisada em ${dateBR}${why ? ' · de novo agora: ' + why : ''} (opcional)`;
-  else goal = `Recomendado antes de seguir (opcional)${why ? ' · ' + why : ''}`;
+  if (unlocked === false) goal = t('trail.moduleReview.locked');
+  else if (st === 'empty') goal = t('trail.moduleReview.empty');
+  else if (st === 'done') goal = why ? t('trail.moduleReview.doneOnAgain', { date: dateLabel, why }) : t('trail.moduleReview.doneOn', { date: dateLabel });
+  else goal = t('trail.moduleReview.recommended') + (why ? ' · ' + why : '');
   const block = document.createElement('div');
   block.className = 'unit-block review-milestone' + (unlocked === false ? ' locked' : '') + (st === 'empty' ? ' empty' : '') + (st === 'done' ? ' done' : '');
   block.innerHTML = `
     <div class="ub-header">
       <div class="ub-icon">🔁</div>
       <div class="ub-info">
-        <div class="ub-title-row"><span class="ub-title">Revisão do módulo</span><span class="ub-type-chip review">Revisão</span>${st === 'done' ? '<span class="ub-badge">✓</span>' : ''}</div>
+        <div class="ub-title-row"><span class="ub-title">${t('trail.moduleReview.title')}</span><span class="ub-type-chip review">${t('trail.moduleReview.chip')}</span>${st === 'done' ? '<span class="ub-badge">✓</span>' : ''}</div>
         <div class="ub-goal">${goal}</div>
       </div>
     </div>
@@ -4589,7 +4589,7 @@ function ensureTrailTeacherLink(){
   hasActiveTeacherLink().then(v => { TRAIL_TEACHER_LINK = !!v; if (v) renderUnitsGrid(); }).catch(() => {});
 }
 function showTrailSkipLocked(){
-  showToast('Pular unidades é do plano Premium (ou de alunos da professora). Pelo plano grátis, siga as unidades em ordem. 🔒');
+  showToast(t('trail.checkpoint.skipLockedToast'));
 }
 
 
@@ -5051,20 +5051,32 @@ document.querySelectorAll('[data-settings-section]').forEach(btn => {
 // guidPrefix NÃO muda: é o identificador de GUID que o Anki usa pra casar notas num
 // reimport -- trocar agora faria o Anki tratar decks já exportados por usuários
 // existentes como notas novas/duplicadas em vez de atualizar as existentes.
+// Etapa 3 (decisão da dona, 2026-10-19): com o site em inglês, nomes de campo,
+// do modelo e do arquivo saem em inglês; em pt-BR as chaves devolvem o texto de
+// antes. Por isso são getters (lidos na hora de exportar, no idioma atual).
+// O id do modelo é aleatório por exportação (ankiRandId) e o GUID da nota vem
+// de guidPrefix + id do cartão: nada disso depende do nome.
 const ANKI_EXPORT_CONFIG = {
-  modelName: APP_IDENTITY.apps.fr.name,
-  fields: [
-    { name:"Francês", ord:0, font:"Arial", size:22 },
-    { name:"Tradução", ord:1, font:"Arial", size:18 }
-  ],
-  qfmt: "<div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{Francês}}</div>",
-  afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:18px;color:#5C4E73;'>{{Tradução}}</div>",
+  // nomes dos campos no idioma do site (em pt-BR, os de sempre)
+  fieldNames(){
+    return { fr: ankiExportText('ankiExport.field.french', 'Francês'), tr: ankiExportText('ankiExport.field.translation', 'Tradução') };
+  },
+  get modelName(){ return ankiExportText('ankiExport.appName.fr', APP_IDENTITY.apps.fr.name, { app: APP_IDENTITY.apps.fr.name }); },
+  get fields(){
+    const n = this.fieldNames();
+    return [
+      { name:n.fr, ord:0, font:"Arial", size:22 },
+      { name:n.tr, ord:1, font:"Arial", size:18 }
+    ];
+  },
+  get qfmt(){ return `<div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{${this.fieldNames().fr}}}</div>`; },
+  get afmt(){ return `{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:18px;color:#5C4E73;'>{{${this.fieldNames().tr}}}</div>`; },
   css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FAF5EA; color:#201335; }",
-  deckDesc: `Exportado do app ${APP_IDENTITY.apps.fr.name}`,
+  get deckDesc(){ return ankiExportText('ankiExport.deckDesc', `Exportado do app ${APP_IDENTITY.apps.fr.name}`, { app: this.modelName }); },
   // K2-F: template do modelo "Reverso" (B da trilha): frente = Tradução,
   // verso = Francês. Mesmos campos semânticos do Básico.
-  reverseQfmt: "<div style='text-align:center;font-size:22px;color:#5C4E73;font-weight:bold;'>{{Tradução}}</div>",
-  reverseAfmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{Francês}}</div>",
+  get reverseQfmt(){ return `<div style='text-align:center;font-size:22px;color:#5C4E73;font-weight:bold;'>{{${this.fieldNames().tr}}}</div>`; },
+  get reverseAfmt(){ return `{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{${this.fieldNames().fr}}}</div>`; },
   guidPrefix: "fzc_",
   unitOptions(){
     return UNITS.filter(u => u.type !== 'grammar').map(u => {
@@ -5074,8 +5086,8 @@ const ANKI_EXPORT_CONFIG = {
   },
   deckName(sel){
     return sel === 'all'
-      ? `${APP_IDENTITY.apps.fr.name} - A1`
-      : `${APP_IDENTITY.apps.fr.name} - ${UNITS.find(u=>String(u.id)===sel).title}`;
+      ? `${this.modelName} - A1`
+      : `${this.modelName} - ${UNITS.find(u=>String(u.id)===sel).title}`;
   },
   cards(sel){
     // Fase 7i (ver CLAUDE.md) -- `.filter(hasPlainFrontBack)` removido.
@@ -5146,7 +5158,9 @@ const ANKI_EXPORT_CONFIG = {
     return cardPromptText(card);
   },
   filename(sel){
-    return `frances-com-prof-brune-${sel === 'all' ? 'completo' : 'unidade-'+sel}.apkg`;
+    return sel === 'all'
+      ? ankiExportText('ankiExport.filename.fr.all', 'frances-com-prof-brune-completo.apkg')
+      : ankiExportText('ankiExport.filename.fr.unit', `frances-com-prof-brune-unidade-${sel}.apkg`, { n: sel });
   },
 };
 
@@ -5988,9 +6002,9 @@ function playDictationSentence(d, n, sentence, btn){
     }
     btn.disabled = true;
     btn.classList.remove('speaking');
-    btn.textContent = '🔇 sem áudio';
-    btn.setAttribute('aria-label', `Áudio da frase ${n} indisponível neste dispositivo`);
-    btn.title = 'Áudio indisponível neste dispositivo';
+    btn.textContent = chT('dict.noAudio');
+    btn.setAttribute('aria-label', chT('dict.noAudioAria', { n }));
+    btn.title = chT('dict.noAudioTitle');
   };
   const path = dictationSentenceAudioPath(d, n);
   if (dictationSentenceMissing.has(path)) return fallback();
@@ -6789,6 +6803,9 @@ const CHALLENGE_I18N = {
     'dict.retry': 'Tentar novamente',
     'dict.audioFail': 'Não foi possível reproduzir o áudio',
     'dict.audioUnavailable': '⚠️ Áudio indisponível',
+    'dict.noAudio': '🔇 sem áudio',
+    'dict.noAudioAria': 'Áudio da frase {n} indisponível neste dispositivo',
+    'dict.noAudioTitle': 'Áudio indisponível neste dispositivo',
     'dict.writeFirst': 'Escreva o que você ouviu antes de verificar.',
     'dict.nearPrefix': 'Quase: ',
     'dict.note.digits': 'Por extenso: {digits} → <strong>{words}</strong>. Numa escrita de ditado, o número vai por extenso (sem desconto).',
@@ -6949,7 +6966,7 @@ const CHALLENGE_I18N = {
   'en': {
     'tier.premium': "Premium",
     'tier.free': "Free",
-    'dict.back.trail': "← Back to the trail",
+    'dict.back.trail': "← Back to the Study Path",
     'dict.back.challenges': "← Back to challenges",
     'dict.bestAttempts': "Best score: {best} · {n} {unit}",
     'dict.attempt.one': "attempt",
@@ -7067,6 +7084,21 @@ const CHALLENGE_I18N = {
     'ch.lt.alert.mustInclude': "An important idea is missing: \"{word}\".",
     'ch.lt.alert.mustExclude': "The word \"{word}\" doesn't fit this sentence.",
     'ch.lt.missing': "Words that were missing",
+    // Etapa 3, lote B (2026-10-19): chaves que só existiam no pt-BR (o chT caía no português). needs_review.
+    'ch.search.placeholder': "Search expressions…", // ALTA
+    'ch.search.label': "Search the expressions", // ALTA
+    'ch.search.none': "No expressions found.", // ALTA
+    'ch.filter.label': "Filter expressions", // ALTA
+    'ch.filter.all': "All", // ALTA
+    'ch.filter.pending': "Pending", // ALTA -- "Pendentes" (escolha da dona, 2026-10-19)
+    'ch.filter.done': "Completed", // ALTA
+    'ch.ring.aria': "{done} of {total} completed", // ALTA
+    'ch.lt.legend.bad': "wrong word", // ALTA
+    'ch.lt.legend.near': "almost right", // ALTA
+    'ch.lt.legend.miss': "missing", // ALTA
+    'dict.noAudio': "🔇 no audio", // ALTA
+    'dict.noAudioAria': "Audio for sentence {n} isn't available on this device", // ALTA
+    'dict.noAudioTitle': "Audio isn't available on this device", // ALTA
     'ch.lt.agreement': "⚠ Mind the agreement: after \"{pronoun}\", \"{verb}\" is not the right conjugation.",
     'ch.lt.yours': "Your answer",
     'ch.lt.expected': "Expected answer",
@@ -7100,7 +7132,7 @@ const CHALLENGE_I18N = {
     'ch.accent.wrong': "❌ Incorrect.",
     'ch.static.back': "← Back to categories",
     'ch.static.backChallenges': "← Back to challenges",
-    'ch.static.backTrail': "← Back to the trail",
+    'ch.static.backTrail': "← Back to the Study Path",
     'dict.static.title': "Dictations",
     'dict.static.sub': "Train your listening and spelling with dictations based on real tasks from each module.",
     'dict.static.how': "🎧 How does the dictation work?",
@@ -8016,13 +8048,30 @@ function answerChallenge(c, chosenIdx){
   renderExpressionFeedbackScreen(c, chosenIdx, isCorrect);
 }
 
+// Etapa 3 (decisão da dona, 2026-10-19): o modelo da frase termina em ponto
+// ("significa <strong>{fr}</strong>."). Quando o texto já termina em ! ? … ou
+// "...", não acrescentar o ponto (antes saía "Bom fim de semana!."). Texto que
+// termina em ponto simples continua como antes (o ponto do texto sai e fica o
+// do modelo).
+function expressionMeaningLineHTML(key, param, raw){
+  const trimmed = String(raw == null ? '' : raw).replace(/\s+$/, '');
+  const keepsOwnEnd = /(?:[!?\u2026]|\.\.\.)$/.test(trimmed);
+  const value = keepsOwnEnd ? trimmed : trimmed.replace(/[.\s]+$/, '');
+  const html = chT(key, { [param]: escapeHtmlChallenge(value) });
+  return keepsOwnEnd ? html.replace(/\.\s*$/, '') : html;
+}
+
 function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
   const content = document.getElementById('challenge-player-content');
+  // Etapa 3 (c1): com o site em outro idioma, o sentido vem da tradução do desafio (fr/challenges.en.js,
+  // campo `meaning`) quando existe; sem tradução, continua o português do banco.
+  const exprOv = challengeOverlay(c);
+  const meaningShown = (exprOv && exprOv.meaning) ? exprOv.meaning : c.meaning.pt;
   const bodyHTML = `
       ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.expr.yourAnswer', { chosen: escapeHtmlChallenge(c.options[chosenIdx]), correct: escapeHtmlChallenge(c.correctAnswer) })}</p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
-      ${chT('ch.expr.signifies', { fr: escapeHtmlChallenge(String(c.meaning.fr).replace(/[.\s]+$/, '')) })}<br>
-      ${chT('ch.expr.inPt', { pt: escapeHtmlChallenge(String(c.meaning.pt).replace(/[.\s]+$/, '')) })}</p>
+      ${expressionMeaningLineHTML('ch.expr.signifies', 'fr', c.meaning.fr)}<br>
+      ${expressionMeaningLineHTML('ch.expr.inPt', 'pt', meaningShown)}</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
 
       <div class="challenge-second-example">
@@ -8683,11 +8732,16 @@ function renderClozeGrammarFeedback(c, chosen, res){
   });
   document.getElementById('cloze-grammar-verify-btn').style.display = 'none';
   const isCorrect = res.outcome === 'ok';
+  // Tradução e explicação no idioma do site (overlay fr/challenges.<lang>.js: translation/explanation);
+  // sem overlay, o original em português.
+  const clozeOv = challengeOverlay(c);
+  const clozeTranslation = (clozeOv && clozeOv.translation) ? clozeOv.translation : c.translationPt;
+  const clozeExplanation = (clozeOv && clozeOv.explanation) ? clozeOv.explanation : c.explanation;
   const bodyHTML = `
     ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.cloze.yourAnswer')}: ${escapeHtmlChallenge(clozeGrammarFilled(c, chosen))}<br>${chT('ch.cloze.correct')}: <strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>`}
     ${isCorrect ? `<p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>` : ''}
-    ${c.translationPt ? `<p class="challenge-feedback-meaning">${chT('ch.cloze.translation')}: ${escapeHtmlChallenge(c.translationPt)}</p>` : ''}
-    <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation || '')}</p>
+    ${clozeTranslation ? `<p class="challenge-feedback-meaning">${chT('ch.cloze.translation')}: ${escapeHtmlChallenge(clozeTranslation)}</p>` : ''}
+    <p class="challenge-explanation">${escapeHtmlChallenge(clozeExplanation || '')}</p>
   `;
   document.getElementById('cloze-grammar-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? chT('ch.cloze.right') : chT('ch.notQuite'), bodyHTML, res.outcome);
   recordChallengeReviewOutcome(c, res.outcome);
