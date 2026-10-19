@@ -171,3 +171,13 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
 69. **Notas de negação do M4.2 (*pas de* / partitivo) e do M5.3 (o *ne* que cai na fala) ficam.**
 70. **"Palavras interrogativas" em duas gramáticas**: (1) sobre pessoas, M2.7 (`A1-g22`, id novo); (2) lugar, hora e coisas, no M6 depois do M6.1 (id novo, a numerar). A M2 passa a 8 unidades (M2.8 = "Perguntar: sim ou não") e a M6 a 7. O A1 passa de 20 para 22 gramáticas.
 71. ***Pourquoi / parce que*** só no M8.4 (diálogo de convite, recusar e justificar).
+
+---
+
+# Oitava rodada (2026-10-19): M3
+
+72. **Dividir a `A1-g3`**: verbos em *-er* na M3.2 (com *on* só na tabela) e pronominais na nova `A1-g18` (M3.4), que nasce aberta, não concluída, para quem já fez a `A1-g3`.
+73. **Reescrever os exercícios das gramáticas publicadas que mudam de lugar** (`A1-g8`, `g5`, `g3`, `g7`, `g6`) e criar o teste "exercício só com palavras vistas até ali".
+74. ***tôt, tard* na M3.1; *pas encore, après* na M8.2**; *hier* fundido; *récemment* sai para o A2 M2.5 (progresso intacto).
+75. **M3.3**: a nota de pronúncia *samedi* = "sam'di" fica no M3.3, junto da palavra. **M3.5** (14 palavras): conjunto fechado, 4 lições + Revisão da unidade.
+76. **M3 fechado** (6 unidades, 37 cartões, ~2h50), com o diálogo de negação do M3.3 (decisão 64) e as perguntas de hora e dia em diálogo (decisão 66).

@@ -448,9 +448,9 @@ Origem entre colchetes, para conferência.
 23. [RESPONDIDA: sim] **Dados pessoais e soletrar (`A1-23`) no M7** (ficha de hotel), não no M2? *Recomendo sim*: é o 1º ponto com meses, números até 1000 e telefone. [`08` 4]
 
 **A1 M3 a M8**
-24. **Dividir a `A1-g3`**: *-er* na M3.2 (com *on* só na tabela) e pronominais na nova `A1-g18` (M3.4)? *Recomendo sim.* Impacto: quem concluiu a `A1-g3` vê a `A1-g18` aberta, não concluída. [`10` 6, 7]
-25. **Reescrever os exercícios** das gramáticas publicadas que mudam de lugar (`A1-g8`, `g5`, `g3`, `g7`, `g6`) e criar o teste "exercício só com palavras vistas"? *Recomendo sim.* Impacto: texto publicado muda. [`10` 17]
-26. ***tôt, tard* na M3.1; *pas encore, après* na M8.2**; *hier* fundido; *récemment* movida para o A2 M2.5? *Recomendo sim.* Impacto: uma fusão (regra FSRS) e uma palavra que sai do A1 com o progresso intacto. [`08` 8, `04` 25]
+24. [RESPONDIDA: sim] **Dividir a `A1-g3`**: *-er* na M3.2 (com *on* só na tabela) e pronominais na nova `A1-g18` (M3.4)? *Recomendo sim.* Impacto: quem concluiu a `A1-g3` vê a `A1-g18` aberta, não concluída. [`10` 6, 7]
+25. [RESPONDIDA: sim] **Reescrever os exercícios** das gramáticas publicadas que mudam de lugar (`A1-g8`, `g5`, `g3`, `g7`, `g6`) e criar o teste "exercício só com palavras vistas"? *Recomendo sim.* Impacto: texto publicado muda. [`10` 17]
+26. [RESPONDIDA: sim] ***tôt, tard* na M3.1; *pas encore, après* na M8.2**; *hier* fundido; *récemment* movida para o A2 M2.5? *Recomendo sim.* Impacto: uma fusão (regra FSRS) e uma palavra que sai do A1 com o progresso intacto. [`08` 8, `04` 25]
 27. **Módulo "Comer e beber"** (M4), *adorer* na M4.1, partitivos antes do restaurante e *faire / prendre* no M4.6? *Recomendo sim.* Impacto: `A1-g5` muda de módulo. [`08` 5, 9; `10` 8, 9]
 28. **Tônicos com preposição**: nota breve na M4.1 (*Pour moi, un café*) e nota na M8.4 (*avec moi, chez toi*), sem tela de gramática no A1 e sem *sans*? *Recomendo sim.* Impacto: fecha a regra 9. [`09` 27, 28; `11` 17]
 29. **Demonstrativos como nota na M5.3** (sem exercício) ou gramática pequena `A1-g21`? *Recomendo nota.* Impacto: *ce* x *cette* sem prática com correção no A1. [`10` 10]
