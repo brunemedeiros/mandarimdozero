@@ -2260,7 +2260,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   color:var(--ink-soft);
 }
 .admin-badge-edit-btn:hover{ background:var(--paper-warm); color:var(--ink); }
-.admin-badge-delete-btn:hover{ background:var(--paper-warm); color:var(--seal-red-dark); }
+.admin-badge-delete-btn:hover{ background:var(--paper-warm); color:var(--error-red-text); }
 .admin-badge-row.clickable{ cursor:pointer; }
 .admin-badge-row.clickable:hover{ border-color:var(--seal-red); }
 .admin-manage-badge-hint{ font-size:12.5px; color:var(--ink-soft); margin:0 0 10px; }
@@ -2455,8 +2455,8 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   border-radius:99px; padding:6px 14px; cursor:pointer; font-family:var(--font-body); text-align:center;
 }
 .profile-edit-avatar-btn:hover{ border-color:var(--seal-red); color:var(--ink); }
-.profile-edit-avatar-btn.remove{ color:var(--seal-red-dark); }
-.profile-edit-avatar-error{ color:var(--seal-red-dark); font-size:12.5px; min-height:14px; margin:0 0 8px; }
+.profile-edit-avatar-btn.remove{ color:var(--error-red-text); }
+.profile-edit-avatar-error{ color:var(--error-red-text); font-size:12.5px; min-height:14px; margin:0 0 8px; }
 .profile-edit-form{ display:flex; flex-direction:column; gap:4px; }
 .profile-edit-label{ font-size:12px; font-weight:700; color:var(--ink-soft); margin:12px 0 2px; }
 .profile-edit-label:first-child{ margin-top:0; }
@@ -2469,14 +2469,15 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .profile-edit-at{ padding-left:12px; color:var(--ink-soft); font-weight:700; }
 .profile-edit-textarea{ resize:vertical; min-height:64px; }
 .profile-edit-bio-count{ font-size:11px; color:var(--ink-soft); text-align:right; margin-top:2px; }
-.profile-edit-error{ color:var(--seal-red-dark); font-size:12.5px; min-height:16px; margin:8px 0 4px; }
+/* Erros em vermelho de verdade: no fr o --seal-red é azul (etapa 2, 2026-10-19). */
+.profile-edit-error{ color:var(--error-red-text); font-size:12.5px; min-height:16px; margin:8px 0 4px; }
 .profile-edit-hint{ font-size:12px; color:var(--ink-soft); margin:4px 0 2px; line-height:1.5; }
 /* Fase 2 da reestruturação do formulário de flashcards (ver CLAUDE.md) --
    mesmo par border-color/background já usado em .gram-exercise.wrong
    input/.conj-field.wrong input (validação de campo errado), reaproveitado
    aqui pra sinalizar um campo obrigatório vazio/inválido antes do submit. */
 .profile-edit-input.field-invalid{ border-color: var(--error-red); background: rgba(214,38,25,0.08); }
-.profile-edit-field-error{ color:var(--seal-red-dark); font-size:12px; margin:2px 0 6px; min-height:14px; }
+.profile-edit-field-error{ color:var(--error-red-text); font-size:12px; margin:2px 0 6px; min-height:14px; }
 /* Fase 3 da reestruturação do formulário de flashcards (ver CLAUDE.md) --
    redesenho do bloco "Alunos"/Destinatários: contador vira um .pill (já
    existente, reaproveitado do streak/XP da topbar) posicionado no TOPO do
@@ -2724,7 +2725,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   .dictation-sentence{ align-items:flex-start; flex-direction:column; gap:6px; }
 }
 .dictation-result:focus{ outline:none; }
-.dictation-word-wrong{ color: var(--seal-red-dark); text-decoration: line-through; text-decoration-color: var(--seal-red); }
+.dictation-word-wrong{ color: var(--error-red-text); text-decoration: line-through; text-decoration-color: var(--error-red); }
 .dictation-result-summary{ display:flex; align-items:center; gap:14px; padding-top:16px; border-top:1px dashed var(--paper-line); }
 .dictation-score-badge{
   flex-shrink:0; width:56px; height:56px; border-radius:14px; color:white;
@@ -3286,7 +3287,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 .export-box p{ margin:0 0 18px; color:var(--ink-soft); font-size:13.5px; max-width:420px; margin-left:auto; margin-right:auto; }
 .export-status{ margin-top:14px; font-size:13px; font-weight:700; min-height:18px; }
 .export-status.ok{ color: var(--jade); }
-.export-status.err{ color: var(--seal-red-dark); }
+.export-status.err{ color: var(--error-red-text); }
 
 .deck-select{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:18px; }
 
@@ -3297,7 +3298,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 }
 .challenges-import-status{ margin-top:14px; font-size:13px; font-weight:700; white-space:pre-wrap; }
 .challenges-import-status.ok{ color: var(--jade); }
-.challenges-import-status.err{ color: var(--seal-red-dark); }
+.challenges-import-status.err{ color: var(--error-red-text); }
 .deck-chip{ padding:7px 13px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper); font-size:12.5px; font-weight:700; cursor:pointer; color:var(--ink-soft); }
 .deck-chip.active{ background: var(--seal-red); border-color: var(--seal-red); color: var(--on-seal-red); }
 
@@ -3562,7 +3563,10 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
    por JS antes de cada toast; o valor abaixo só vale antes do primeiro
    toast (auditoria de UX/UI, 2026-09, P3). */
 #toast-layer{ position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:var(--z-toast); display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
-.toast{ background: var(--ink); color: var(--gold-bright); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease, toastOut .3s ease 1.7s forwards; }
+.toast{ background: var(--ink); color: var(--gold-bright); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease; pointer-events:auto; max-width:min(560px, calc(100vw - 32px)); text-align:center; }
+/* Some com animação só depois do tempo de leitura (shared/toast.js); passar o mouse ou focar segura o aviso. */
+.toast.saindo{ animation: toastOut .3s ease forwards; }
+@media (prefers-reduced-motion: reduce){ .toast, .toast.saindo{ animation:none; } }
 /* Modo escuro: --ink fica claro e --gold-bright também (ilegível); troca para fundo escuro com texto claro. */
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .toast{ background: var(--paper-warm); color: var(--ink); box-shadow: var(--shadow-lift), inset 0 0 0 1px var(--paper-line); } }
 :root[data-theme="dark"] .toast{ background: var(--paper-warm); color: var(--ink); box-shadow: var(--shadow-lift), inset 0 0 0 1px var(--paper-line); }
@@ -3671,7 +3675,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .login-lockup{ height:44px; width:auto; margin:0 auto 22px; display:block; }
 .login-desc{ margin:0 0 22px; color: var(--ink-soft); font-size:13.5px; line-height:1.5; }
 .login-note{ min-height:16px; font-size:12.5px; color: var(--ink-soft); margin: 14px 0 0; }
-.login-note.err{ color: var(--seal-red-dark); font-weight:700; }
+.login-note.err{ color: var(--error-red-text); font-weight:700; }
 
 /* Botão de login social (Google) — estilo "outline", separado do vermelho
    de ação principal, igual referência enviada pela professora. */
@@ -3730,7 +3734,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
   font-family:var(--font-body); font-weight:700; font-size:13.5px; color: var(--ink);
 }
 .user-dropdown-item:hover{ background: var(--paper-warm); }
-.user-dropdown-item.danger{ color: var(--seal-red-dark); }
+.user-dropdown-item.danger{ color: var(--error-red-text); }
 .user-dropdown-sep{ height:1px; background:var(--paper-line); margin:6px 4px; }
 
 /* ---------- Sino de notificações (Fase 1) ----------
@@ -5443,7 +5447,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 
 <a data-i18n="ui.skipLink" class="skip-link" href="#main-content">Pular para o conteúdo</a>
 
-<div id="toast-layer"></div>
+<div id="toast-layer" role="status" aria-live="polite"></div>
 <div id="badge-unlock-layer" aria-live="polite"></div>
 <div id="confetti-layer"></div>
 
@@ -6463,7 +6467,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
     <div class="streak-flame">🔥</div>
     <div class="streak-week-row" id="streak-week-row"></div>
     <h2 class="streak-headline">Você está em uma sequência de <span id="streak-days-num">0</span> <span id="streak-days-unit">dias</span>!</h2>
-    <p data-i18n="ui.streak.sub" class="streak-subtext">Continue assim: sua série será zerada se você não estudar amanhã.</p>
+    <p data-i18n="ui.streak.sub" class="streak-subtext">Volte amanhã para manter sua sequência.</p>
   </div>
   <div class="streak-modal-footer">
     <button class="btn btn-primary" id="streak-modal-continue-btn">Continuar</button>
@@ -6605,6 +6609,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/anki-export.js"></script>
 <script src="../shared/pwa.js"></script>
 <script src="../shared/toast.js"></script>
+<script src="../shared/modal-a11y.js"></script>
 <script src="../shared/supabase-client.js"></script>
 <script src="../shared/language-pref.js"></script>
 <script src="../shared/auth.js"></script>

@@ -24,7 +24,7 @@ async function signupByEmail(page, email, password, opts){
   await page.click('#signup-email-btn');
   await page.waitForSelector('#gate-signup-data', { state: 'visible' });
   await page.fill('#signup-name', opts.name || 'Nova Pessoa');
-  await page.waitForFunction(() => /livre|available/.test(document.getElementById('signup-username-msg').textContent), null, { timeout: 5000 });
+  await page.waitForFunction(() => /livre|available/.test(document.getElementById('signup-arroba-msg').textContent), null, { timeout: 5000 });
   await page.fill('#signup-email', email); await page.fill('#signup-password', password);
   await page.click('#signup-submit');
 }
