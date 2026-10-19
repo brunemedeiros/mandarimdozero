@@ -88,7 +88,15 @@ async function boot(browser, port, theme, width){
     const slang = r.cards.find(c => c.id === 'expr-lote1-003');
     check(`${tag}: todas as expressões viram cartão de álbum`, r.cards.length === 18, r.cards.length);
     check(`${tag}: concluída mostra sentido e selo`, done1 && done1.done && done1.seal && /Prazer em conhecer/.test(done1.meaning) && !done1.hint, done1);
-    check(`${tag}: pendente esconde o sentido`, pend && !pend.done && !pend.meaning && /O que será que significa/.test(pend.hint), pend);
+    // 2026-10-19 (pedido da autora): sem "O que será que significa?" e sem a etiqueta de nível no cartão.
+    check(`${tag}: pendente esconde o sentido, sem a pergunta`, pend && !pend.done && !pend.meaning && !pend.hint, pend);
+    const lay = await ev(() => { const g = document.querySelector('.challenges-cards:has(> .expr-card-wrap)');
+      const cols = getComputedStyle(g).gridTemplateColumns.split(' ').length;
+      const secs = [...document.querySelectorAll('.challenges-level-section')].map(e => e.getBoundingClientRect());
+      return { cols, chip: document.querySelectorAll('.expr-card .challenge-card-level').length,
+        gaps: secs.slice(1).map((r, i) => Math.round(r.top - secs[i].bottom)) }; });
+    check(`${tag}: cartões compactos (${width >= 760 ? '3 ou mais' : '2'} por linha), sem etiqueta de nível, níveis sem encostar`,
+      (width >= 760 ? lay.cols >= 3 : lay.cols === 2) && lay.chip === 0 && lay.gaps.every(g => g >= 20), lay);
     check(`${tag}: sentido concluído sem o aviso "Registro:" do texto`, slang && slang.meaning && !/Registro/.test(slang.meaning) && /não estar nem aí/.test(slang.meaning), slang);
     check(`${tag}: etiqueta de registro em todo cartão`, r.cards.every(c => c.reg), r.cards.filter(c => !c.reg));
     check(`${tag}: gíria = Gíria; neutro = Dia a dia; familiar = Entre amigos`, /Gíria/.test(slang.reg) && /Dia a dia/.test(pend.reg) && /Entre amigos/.test(r.cards.find(c => c.id === 'expr-lote1-001').reg), [slang.reg, pend.reg]);

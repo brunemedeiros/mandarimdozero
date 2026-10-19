@@ -357,7 +357,7 @@ async function fill(page, wrongIdx){
       await page.click('.cg-play[data-game="pc-imparfait"]');
       await page.keyboard.press('1');
       const en = await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[0];
-        return { tr: document.querySelector('.cg-tr > span:last-child').textContent === it.text.en.tr, why: document.querySelector('.cg-why p').textContent === it.text.en.why,
+        return { tr: document.querySelector('.cg-tr > span:last-child').textContent === it.text.en.tr, why: document.querySelector('.cg-why p').textContent === it.text.en.why.replace(/[{}]/g, ''),
           tl: document.querySelector('.cg-timeline figcaption').textContent }; });
       check('site em inglês: tradução, explicação e legenda em inglês', en.tr && en.why && /^a (point|line)/.test(en.tl), en);
       check('jogos: zero pageerror', errors.length === 0, errors);
@@ -393,9 +393,10 @@ async function fill(page, wrongIdx){
       await page.keyboard.press(it.ans === 'a' ? '1' : '2');
       await page.waitForTimeout(60);
       const f = await page.evaluate(() => ({ verdict: document.querySelector('.cg-verdict').className, svg: !!document.querySelector('.cg-timeline svg'),
-        rule: (document.querySelector('.cg-timeline.cg-rule figcaption') || {}).textContent || '', clue: !!document.querySelector('.cg-sentence .cg-clue') }));
-      check(`${id}: acerto, sem desenho, regra em quadro, pista marcada, verbo ${it.verb ? 'mostrado' : 'escondido'}`,
-        /ok/.test(f.verdict) && !f.svg && f.rule.length > 10 && f.clue && (it.verb ? verb === '(' + it.verb + ')' : verb === ''), { f, verb, it: it.id });
+        rule: (document.querySelector('.cg-timeline.cg-rule figcaption') || {}).textContent || '', clue: !!document.querySelector('.cg-sentence .cg-clue'),
+        fr: document.querySelectorAll('.cg-why .cg-fr[lang="fr"]').length, braces: /[{}]/.test(document.getElementById('conj-game-content').textContent) }));
+      check(`${id}: acerto, sem desenho, regra em quadro, pista marcada, francês em azul na explicação, verbo ${it.verb ? 'mostrado' : 'escondido'}`,
+        /ok/.test(f.verdict) && !f.svg && f.rule.length > 10 && f.clue && f.fr >= 2 && !f.braces && (it.verb ? verb === '(' + it.verb + ')' : verb === ''), { f, verb, it: it.id });
       if (process.env.SHOTS) await page.screenshot({ path: process.env.SHOTS + `/jogo-${id}.png`, fullPage: true });
       await page.click('#conj-game-back');
     }
@@ -403,7 +404,7 @@ async function fill(page, wrongIdx){
     await page.click('.cg-play[data-game="tu-vous"]');
     await page.keyboard.press('1');
     const en = await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[0];
-      return { title: document.querySelector('.cg-title').textContent, why: document.querySelector('.cg-why p').textContent === it.text.en.why,
+      return { title: document.querySelector('.cg-title').textContent, why: document.querySelector('.cg-why p').textContent === it.text.en.why.replace(/[{}]/g, ''),
         rule: document.querySelector('.cg-rule figcaption').textContent }; });
     check('site em inglês: título, explicação e regra em inglês', en.title === 'Tu or vous?' && en.why && /^(tu|vous): /.test(en.rule) && !/[ãõ]|você/.test(en.rule), en);
     check('jogos A1: zero pageerror', errors.length === 0, errors);

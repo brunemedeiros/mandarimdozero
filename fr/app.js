@@ -7637,14 +7637,15 @@ function expressionTodayHTML(list){
 function expressionCardHTML(c){
   const done = isChallengeCompleted(c.id);
   const locked = isChallengeLocked(c);
+  // Cartão compacto (2026-10-19, pedido da autora): sem a etiqueta de nível (o cartão já está dentro do
+  // "Nível X") e sem o "O que será que significa?" na pendente; concluída mostra o sentido.
   const middle = done
     ? `<span class="expr-card-meaning">${escapeHtmlChallenge(expressionCardMeaning(c))}</span>`
-    : `<span class="expr-card-hint">${locked ? chT('ch.album.locked') : chT('ch.album.guess')}</span>`;
+    : (locked ? `<span class="expr-card-hint">${chT('ch.album.locked')}</span>` : '');
   return `
     <div class="expr-card-wrap">
       <button class="challenge-card expr-card ${done ? 'completed' : ''} ${locked ? 'locked' : ''}" data-challenge-id="${c.id}">
         ${done ? `<span class="expr-card-seal">${chT('ch.album.seal')}</span>` : ''}
-        <span class="challenge-card-level">${escapeHtmlChallenge(c.level || '')}</span>
         <span class="challenge-card-expr">${escapeHtmlChallenge(c.canonicalExpression)}</span>
         ${middle}
         <span class="expr-card-foot">${expressionRegisterChipHTML(c)}${tierBadgeHTML(challengeTier(c))}</span>

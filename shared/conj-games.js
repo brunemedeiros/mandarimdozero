@@ -15,6 +15,10 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
   const uiLang = () => (typeof getUiLang === 'function' && getUiLang()) || 'pt-BR';
   // Texto no idioma do site; português só como último recurso (o curso em inglês não deve mostrá-lo).
   const L = o => (o && typeof o === 'object') ? (o[uiLang()] || o.en || o['pt-BR'] || '') : (o || '');
+  // Trecho em francês marcado com {chaves} nos textos (título, apresentação, regra e explicação) sai em azul,
+  // para separar do português/inglês do site (pedido da autora, 2026-10-19). plain() tira as chaves (aria-label).
+  const rich = s => esc(s).replace(/\{([^{}]+)\}/g, '<span class="cg-fr" lang="fr">$1</span>');
+  const plain = s => String(s == null ? '' : s).replace(/[{}]/g, '');
   const shuffle = a => { const r = a.slice(); for (let i = r.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; };
 
   const AXIS = '<line x1="4" y1="26" x2="122" y2="26" stroke="currentColor" stroke-width="2" opacity=".45"/><path d="M122 21 L130 26 L122 31 Z" fill="currentColor" opacity=".45"/>';
@@ -30,8 +34,8 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
     if (!el) return;
     el.innerHTML = games.map(g => `
       <article class="cg-card">
-        <h3 class="cg-card-title">${g.level ? `<span class="cg-level">${esc(g.level)}</span>` : ''}${esc(L(g.title))}</h3>
-        <p class="cg-card-lede">${esc(L(g.lede))}</p>
+        <h3 class="cg-card-title">${g.level ? `<span class="cg-level">${esc(g.level)}</span>` : ''}${rich(L(g.title))}</h3>
+        <p class="cg-card-lede">${rich(L(g.lede))}</p>
         <div class="cg-card-foot">
           <span class="cg-card-meta"><span class="cg-premium" title="${esc(tt('games.premium'))}">🔒 ${esc(tt('games.premium'))}</span>${esc(tt('games.perRound', { n: Math.min(g.perRound, g.items.length) }))}</span>
           <button type="button" class="btn btn-primary cg-play" data-game="${esc(g.id)}">${esc(tt('games.play'))}</button>
@@ -82,7 +86,7 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
     const it = item(), g = S.game;
     S.answered = false;
     $(ids.content).innerHTML = `
-      <h2 class="cg-title">${esc(L(g.title))}</h2>
+      <h2 class="cg-title">${rich(L(g.title))}</h2>
       ${progressHTML()}
       <div class="cg-stage">
         ${it.verb ? `<span class="cg-verb" lang="fr">(${esc(it.verb)})</span>` : ''}
@@ -114,8 +118,8 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
     fb.innerHTML = `
       <p class="cg-verdict ${ok ? 'ok' : 'no'}">${esc(tt(ok ? 'games.right' : 'games.wrong'))}${ok ? '' : ` <span>${esc(tt('games.answerWas', { form: it[it.ans] }))}</span>`}</p>
       <div class="cg-why">
-        <figure class="cg-timeline${SKETCH[opt.sketch] ? '' : ' cg-rule'}">${SKETCH[opt.sketch] ? `<svg viewBox="0 0 134 44" role="img" aria-label="${esc(L(opt.tl))}">${SKETCH[opt.sketch]}</svg>` : ''}<figcaption>${esc(L(opt.tl))}</figcaption></figure>
-        <div><h3>${esc(tt('games.whyTense', { tense: opt.label }))}</h3><p>${esc(txt.why || '')}</p></div>
+        <figure class="cg-timeline${SKETCH[opt.sketch] ? '' : ' cg-rule'}">${SKETCH[opt.sketch] ? `<svg viewBox="0 0 134 44" role="img" aria-label="${esc(plain(L(opt.tl)))}">${SKETCH[opt.sketch]}</svg>` : ''}<figcaption>${rich(L(opt.tl))}</figcaption></figure>
+        <div><h3>${rich(tt('games.whyTense', { tense: '{' + opt.label + '}' }))}</h3><p>${rich(txt.why || '')}</p></div>
       </div>
       <p class="cg-tr"><button type="button" class="audio-btn cg-listen" aria-label="${esc(tt('games.listen'))}" title="${esc(tt('games.listen'))}">🔊</button><span>${esc(txt.tr || '')}</span></p>
       <button type="button" class="btn btn-primary cg-next" id="cg-next">${esc(tt(last ? 'games.seeResult' : 'games.next'))}</button>`;

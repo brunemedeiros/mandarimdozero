@@ -2809,6 +2809,9 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .challenge-level-tab.active{ background: var(--seal-red); border-color: var(--seal-red); color:#fff; }
 
 .challenges-level-sections{ display:flex; flex-direction:column; gap:22px; }
+/* Os níveis ficam dentro de #challenges-level-sections-inner: sem isto eles encostam e o anel do nível
+   seguinte invade o último cartão do nível de cima (achado da autora, 2026-10-19). */
+#challenges-level-sections-inner{ display:flex; flex-direction:column; gap:22px; }
 .challenges-level-section{ display:flex; flex-direction:column; gap:12px; }
 .challenges-level-heading{
   display:flex; align-items:center; gap:10px; width:100%; text-align:left;
@@ -3155,6 +3158,19 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .expr-play:hover{ background: var(--seal-red-dark); }
 .expr-play.speaking{ background: var(--imperial-gold); }
 .expr-play:focus-visible{ outline:3px solid color-mix(in srgb, var(--seal-red) 55%, transparent); outline-offset:2px; }
+/* Álbum compacto (2026-10-19): mais cartões por linha (2 no celular, 3 ou mais no computador) e o som
+   no canto de baixo, para a expressão usar a largura toda. */
+.challenges-cards:has(> .expr-card-wrap){ grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+@media (min-width:760px){ .challenges-cards:has(> .expr-card-wrap){ grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); } }
+.challenges-cards .challenge-card.expr-card{ min-height:0; padding:12px 12px 12px 14px; }
+.challenges-cards .expr-card .challenge-card-expr{ font-size:16.5px; line-height:1.2; }
+.challenges-cards .expr-card-meaning{ font-size:13px; }
+.challenges-cards .expr-card-foot{ flex-direction:column; align-items:flex-start; gap:4px; padding-right:42px; min-height:36px; }
+.expr-card-wrap .expr-play{ top:auto; bottom:10px; right:10px; width:36px; height:36px; font-size:12px; }
+@media (max-width:759px){
+  .expr-card-wrap .expr-play{ width:44px; height:44px; bottom:8px; right:8px; }
+  .challenges-cards .expr-card-foot{ padding-right:48px; min-height:44px; }
+}
 
 .expr-today{ display:flex; flex-direction:column; gap:10px; background: color-mix(in srgb, var(--seal-red) 9%, var(--paper-warm)); border:1.5px solid color-mix(in srgb, var(--seal-red) 30%, var(--paper-line)); border-radius:20px; padding:18px; margin-bottom:16px; }
 .expr-today-eyebrow{ font-size:12px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color: var(--seal-red-dark); }
@@ -5172,6 +5188,8 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
   #view-conjugaison .cg-choices{ gap:8px; }
 }
 #view-conjugaison .conj-mode-lock{ font-size:12px; }
+/* Francês dentro do texto em português/inglês (marcado com {chaves} nos dados). */
+#view-conjugaison .cg-fr{ color:var(--seal-red-dark); font-weight:800; }
 #view-conjugaison .cg-level{ display:inline-block; margin-right:8px; padding:1px 8px; border-radius:8px; font-size:13px; font-weight:900; vertical-align:2px;
   color:var(--ink); background:color-mix(in srgb, var(--seal-red) 16%, var(--paper)); border:1px solid color-mix(in srgb, var(--seal-red) 40%, transparent); }
 #view-conjugaison .cg-premium{ display:inline-block; margin-right:10px; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:800;
