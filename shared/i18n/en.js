@@ -2046,7 +2046,7 @@ window.I18N_CATALOG['en'] = {
   'ui.kbd.confirm': 'Confirm a typed answer and move on to the next one', // ALTA
   'ui.kbd.replay': 'Play audio again', // ALTA
   'ui.kbd.note': 'The numbers only appear when an exercise has options to choose from -- never during typing or the sentence-ordering exercise. "r" repeats the last audio that played on screen.', // ALTA
-  'ui.streak.sub': 'Keep it up: your streak will reset if you don\'t study tomorrow.', // ALTA
+  'ui.streak.sub': 'Come back tomorrow to keep your streak going.', // ALTA
   'ui.reviewReminder.title': 'Shall we do a quick review?', // ALTA
   'ui.notNow': 'Not now', // ALTA
   'ui.update.title': 'New version available', // ALTA
@@ -3566,20 +3566,17 @@ window.I18N_CATALOG['en'] = {
   'fr.dict.hom.quel': 'Same pronunciation: “quel” changes with the gender and number of the noun.', // ALTA
 
   // ---- tela de entrada (index.html da raiz), 2026-10-18 ----
-  'gate.brand': 'Languages with Prof. Brune', // ALTA
+  'gate.brand': 'Languages with Prof.\u00a0Brune', // ALTA
   'gate.loading': 'Loading...', // ALTA
   'gate.theme': 'Switch between light and dark theme', // ALTA
   'gate.siteLang.label': 'Site language', // ALTA
-  'gate.login.sub': 'Log in to pick up where you left off, or create a free account and choose what to learn.', // ALTA
   'gate.login.google': 'Continue with Google', // ALTA
-  'gate.login.divider': 'or log in with email', // ALTA
-  'gate.login.email': 'Your email', // ALTA
+  'gate.login.divider': 'or', // ALTA
   'gate.login.password': 'Your password', // ALTA
   'gate.login.forgot': 'Forgot your password?', // ALTA
   'gate.login.submit': 'Log in', // ALTA
-  'gate.login.signupSubmit': 'Create account', // ALTA
+  'gate.login.signupSubmit': 'Create free account', // ALTA
   'gate.login.signupLink': 'Create a free account', // ALTA
-  'gate.login.loginLink': 'I already have an account', // ALTA
   'gate.login.googleRedirect': 'Taking you to Google...', // ALTA
   'gate.login.googleError': 'Couldn\'t connect to Google. Try again.', // ALTA
   'gate.login.alreadyRegistered': 'This email already has an account. Try logging in.', // ALTA
@@ -3638,9 +3635,40 @@ window.I18N_CATALOG['en'] = {
   'gate.exp.sub': 'This only adjusts how you start. You can change it later, anytime.', // ALTA
   'gate.exp.beginner': 'I\'m a beginner', // ALTA
   'gate.exp.knows': 'I know the basics', // ALTA
-  'gate.login.signupDesc': 'Lessons, review and daily practice, at your own pace.', // ALTA
-  'gate.login.loginDesc': 'Go back and log in with your email and password.', // ALTA
   'gate.choose.footTitle': 'You can change this later', // ALTA
   'gate.exp.beginnerDesc': 'You start from the first lesson.', // ALTA
   'gate.exp.knowsDesc': 'You get an invite to the Level Test and skip what you already know.', // ALTA
+  'gate.login.emailLabel': 'Email', // ALTA
+  'gate.login.emailPh': 'you@email.com', // ALTA
+  'gate.login.passwordLabel': 'Password', // ALTA
+  'gate.login.noAccount': 'Don\'t have an account?', // ALTA
+  'gate.signup.back': 'Back', // ALTA
+  'gate.signup.step': 'Step {n} of 3', // ALTA
+  'gate.signup.haveAccount': 'Already have an account?', // ALTA
+  'gate.signup.loginLink': 'Log in', // ALTA
+  'gate.signup.methodTitle': 'Create your account and start learning {lang}', // ALTA
+  'gate.signup.methodSub': 'It\'s free. Choose how you\'d like to sign up.', // ALTA
+  'gate.signup.withEmail': 'Continue with email', // ALTA
+  'gate.signup.dataTitle': 'Your details', // ALTA
+  'gate.signup.dataSub': 'Your name and your @ appear on your profile.', // ALTA
+  'gate.signup.name': 'Name', // ALTA
+  'gate.signup.namePh': 'Your name', // ALTA
+  'gate.signup.username': 'Your @', // ALTA
+  'gate.signup.userFree': '@{u} is available.', // ALTA
+  'gate.signup.userTaken': '@{u} is already taken. How about one of these?', // ALTA
+  'gate.signup.userTakenNoSugg': '@{u} is already taken.', // ALTA
+  'gate.signup.userReserved': '@{u} can\'t be used. How about one of these?', // ALTA
+  'gate.signup.userReservedNoSugg': '@{u} can\'t be used.', // ALTA
+  'gate.signup.userInvalid': 'Use 3 to 24 letters or numbers, with dots only between them.', // ALTA
+  'gate.signup.userChecking': 'Checking...', // ALTA
+  'gate.signup.userCheckFailed': 'Couldn\'t check right now. If the @ is taken, you\'ll pick another one after the code.', // ALTA
+  'gate.signup.userHelp': 'We build your @ from your name; you can change it now. Use letters, numbers and dots. Once your account is created, it can\'t be changed.', // ALTA
+  'gate.signup.userPickFree': 'Pick an available @.', // ALTA
+  'gate.signup.needName': 'Enter your name.', // ALTA
+  'gate.signup.badEmail': 'Check the email address.', // ALTA
+  'gate.signup.shortPassword': 'The password needs at least 6 characters.', // ALTA
+  'gate.signup.retryTitle': 'Choose another @', // ALTA
+  'gate.signup.retrySub': 'Someone took @{u} while you were creating your account. Pick another one to continue.', // ALTA
+  'gate.signup.retrySave': 'Save and continue', // ALTA
+  'gate.signup.passwordPh': 'Create a password (at least 6 characters)', // ALTA
 };

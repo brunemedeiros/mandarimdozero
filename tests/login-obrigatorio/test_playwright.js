@@ -14,6 +14,20 @@ const server = http.createServer((req, res) => {
 });
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x) : ''); } };
+// Cadastro em 3 passos (2026-10-18): curso, "Continuar com e-mail", seus dados (nome, @ conferido, e-mail, senha).
+async function signupByEmail(page, email, password, opts){
+  opts = opts || {};
+  await page.click('#gate-signup-link');
+  await page.waitForSelector('#gate-signup-course', { state: 'visible' });
+  await page.click(`#signup-grid .lang-card[data-lang="${opts.lang || 'fr'}"]`);
+  await page.waitForSelector('#gate-signup-method', { state: 'visible' });
+  await page.click('#signup-email-btn');
+  await page.waitForSelector('#gate-signup-data', { state: 'visible' });
+  await page.fill('#signup-name', opts.name || 'Nova Pessoa');
+  await page.waitForFunction(() => /livre|available/.test(document.getElementById('signup-arroba-msg').textContent), null, { timeout: 5000 });
+  await page.fill('#signup-email', email); await page.fill('#signup-password', password);
+  await page.click('#signup-submit');
+}
 
 // Supabase mínimo do portão: sem sessão; signUp sem sessão (confirmação ligada); signIn de conta não confirmada.
 const GATE_STUB = `window.supabase = { createClient: () => {
@@ -21,7 +35,19 @@ const GATE_STUB = `window.supabase = { createClient: () => {
   const rec = (n, a) => { window.__calls.push([n, a]); };
   const q = () => { const b = new Proxy({}, { get(_, p){ if (p === 'then') return (ok) => ok({ data: null, error: null }); return () => b; } }); return b; };
   return {
-    from: q, rpc: async () => ({ data: null, error: null }),
+    from: q,
+    // 113: @ livre/ocupado no cadastro (raissa.lima ocupado, admin reservado); 111: gravar o @ depois do código
+    rpc: async (name, args) => { rec('rpc', [name, args]);
+      if (name === 'check_username_signup'){ const u = args.p_username;
+        if (u === 'raissa.lima') return { data: { status: 'taken', suggestions: ['raissalima', 'raissa.lima2', 'raissa.lima3'] }, error: null };
+        if (u === 'admin') return { data: { status: 'reserved', suggestions: ['admin2', 'admin3', 'admin4'] }, error: null };
+        if (window.__checkDown) return { data: null, error: { message: 'offline' } };
+        if ((window.__claimTaken || []).indexOf(u) >= 0) return { data: { status: 'taken', suggestions: [u + '2', u + '3'] }, error: null };
+        return { data: { status: 'ok', suggestions: [] }, error: null }; }
+      if (name === 'claim_my_username'){ const taken = window.__claimTaken || [];
+        if (taken.indexOf(args.p_username) >= 0) return { data: { error: 'taken' }, error: null };
+        return { data: { username: args.p_username }, error: null }; }
+      return { data: null, error: null }; },
     auth: {
       getSession: async () => ({ data: { session: /type=recovery/.test(location.hash) ? { user: { id: 'r1', email: 'esqueci@x.com' } } : null } }),
       updateUser: async (a) => { rec('updateUser', a); return { data: { user: { id: 'r1' } }, error: null }; },
@@ -36,7 +62,7 @@ const GATE_STUB = `window.supabase = { createClient: () => {
       resend: async (a) => { rec('resend', a); return { error: null }; },
       verifyOtp: async (a) => { rec('verifyOtp', a); if (a.token_hash === 'metade') return { data: { user: null, session: null }, error: null }; return (a.token === '123456' || a.token_hash === 'hashbom')
         ? { data: { user: { id: 'n1' }, session: {} }, error: null } : { data: {}, error: { message: 'Token has expired or is invalid' } }; },
-      resetPasswordForEmail: async () => ({ error: null }), signInWithOAuth: async () => ({ error: null }),
+      resetPasswordForEmail: async () => ({ error: null }), signInWithOAuth: async (a) => { rec('oauth', a); return { error: null }; },
     },
   };
 } };`;
@@ -62,9 +88,7 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     L('sem botão "Continuar sem conta"', !(await page.$('#gate-guest-btn')) && !(await page.evaluate(() => document.body.innerText.includes('Continuar sem conta'))));
     L('flag de convidado limpa', await page.evaluate(() => sessionStorage.getItem('guest_mode') === '0'));
     // cadastro
-    await page.click('#gate-toggle-mode-btn');
-    await page.fill('#gate-email', 'nova@x.com'); await page.fill('#gate-password', 'segredo1');
-    await page.click('#gate-submit-btn');
+    await signupByEmail(page, 'nova@x.com', 'segredo1');
     await page.waitForSelector('#gate-verify', { state: 'visible' });
     L('cadastro abre a tela do código', await page.evaluate(() => document.getElementById('gate-verify-email').textContent === 'nova@x.com'));
     // idioma do site vai no cadastro (user_metadata.ui_language) para o e-mail do Supabase Auth sair no idioma certo
@@ -75,7 +99,10 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     await page.waitForFunction(() => document.getElementById('gate-verify-note').classList.contains('err'));
     L('código errado avisa', await page.evaluate(() => /não vale/.test(document.getElementById('gate-verify-note').textContent)));
     await page.fill('#gate-code', '123456'); await page.click('#gate-verify-btn');
-    await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+    await page.waitForSelector('#gate-choose-experience', { state: 'visible' });
+    L('depois do código grava o @ escolhido e o nome', await page.evaluate(() => window.__calls.some(c => c[0] === 'rpc' && c[1][0] === 'claim_my_username' && c[1][1].p_username === 'nova.pessoa' && c[1][1].p_display_name === 'Nova Pessoa')));
+    L('cadastro manda o nome também (full_name)', await page.evaluate(() => window.__calls.some(c => c[0] === 'signUp' && c[1].options.data.full_name === 'Nova Pessoa')));
+    L('curso escolhido no passo 1 segue sem perguntar de novo', await page.evaluate(() => document.getElementById('gate-exp-title').textContent === 'Você já sabe algo de francês?'));
     L('código certo confirma e segue para a escolha de idioma', await page.evaluate(() => window.__calls.some(c => c[0] === 'verifyOtp' && c[1].email === 'nova@x.com' && c[1].token === '123456' && c[1].type === 'email')));
     // o cadastro grava o idioma do site escolhido no topo da entrada; valor guardado desconhecido (es) cai em pt-BR
     for (const [saved, esperado] of [['pt-BR', 'pt-BR'], ['en', 'en'], ['es', 'pt-BR']]){
@@ -88,9 +115,7 @@ const GATE_STUB = `window.supabase = { createClient: () => {
         await page.click('#site-lang-btn'); await page.click(`#site-lang-menu button[data-ui="${saved}"]`);
         await page.waitForFunction((v) => getUiLang() === v, saved);
       }
-      await page.click('#gate-toggle-mode-btn');
-      await page.fill('#gate-email', 'idioma@x.com'); await page.fill('#gate-password', 'segredo1');
-      await page.click('#gate-submit-btn');
+      await signupByEmail(page, 'idioma@x.com', 'segredo1');
       await page.waitForSelector('#gate-verify', { state: 'visible' });
       L(`cadastro com ui-language=${saved} grava ui_language=${esperado}`, await page.evaluate((e) => window.__calls.some(c => c[0] === 'signUp' && c[1].options.data.ui_language === e), esperado));
       await page.evaluate(() => localStorage.setItem('ui-language', 'pt-BR'));
@@ -99,15 +124,15 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     for (const via of ['codigo', 'reenviar']){
       await page.goto(`http://127.0.0.1:${port}/index.html`);
       await page.waitForSelector('#gate-login', { state: 'visible' });
-      await page.click('#gate-toggle-mode-btn');
-      await page.fill('#gate-email', 'jaativa@x.com'); await page.fill('#gate-password', 'segredo1');
-      await page.click('#gate-submit-btn');
+      await signupByEmail(page, 'jaativa@x.com', 'segredo1');
       await page.waitForSelector('#gate-verify', { state: 'visible' });
       if (via === 'codigo'){ await page.fill('#gate-code', '999999'); await page.click('#gate-verify-btn'); }
       else { await page.evaluate(() => { const b = document.getElementById('gate-resend-btn'); b.disabled = false; b.click(); }); }
-      await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+      await page.waitForSelector('#gate-choose-experience', { state: 'visible' });
       L(`conta já ativa entra direto (${via})`, await page.evaluate(() => window.__calls.some(c => c[0] === 'signIn' && c[1].email === 'jaativa@x.com' && c[1].password === 'segredo1')));
     }
+    // botão do e-mail aberto em outro navegador (sem o cadastro guardado): segue para a escolha do curso
+    await page.evaluate(() => localStorage.removeItem('signup-intent'));
     // botão do e-mail: ?confirmar=<hash> só confirma com um toque
     await page.goto(`http://127.0.0.1:${port}/index.html?confirmar=hashbom`);
     await page.waitForSelector('#gate-confirm-link', { state: 'visible' });
@@ -126,9 +151,7 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     // conta ativada fora desta aba (botão do e-mail em outra janela): a tela do código percebe ao voltar e avisa
     await page.goto(`http://127.0.0.1:${port}/index.html`);
     await page.waitForSelector('#gate-login', { state: 'visible' });
-    await page.click('#gate-toggle-mode-btn');
-    await page.fill('#gate-email', 'outraaba@x.com'); await page.fill('#gate-password', 'segredo1');
-    await page.click('#gate-submit-btn');
+    await signupByEmail(page, 'outraaba@x.com', 'segredo1');
     await page.waitForSelector('#gate-verify', { state: 'visible' });
     await page.evaluate(() => { window.dispatchEvent(new Event('focus')); });
     await page.waitForTimeout(300);
@@ -137,8 +160,9 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     await page.waitForFunction(() => document.getElementById('gate-verify-note').classList.contains('ok'));
     L('avisa "Sua conta foi ativada!"', await page.evaluate(() => /Sua conta foi ativada/.test(document.getElementById('gate-verify-note').textContent)));
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/gate-ativada-${theme}-${width}.png` });
-    await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+    await page.waitForSelector('#gate-choose-experience', { state: 'visible' });
     L('depois do aviso segue para o app', true);
+    await page.evaluate(() => localStorage.removeItem('signup-intent'));
     // os outros botões dos e-mails também só valem com um toque
     for (const [kind, type, title, next] of [['entrar', 'email', 'Entrar no app', '#gate-choose-language'],
       ['nova-senha', 'recovery', 'Crie uma senha nova', '#gate-new-password'], ['trocar-email', 'email_change', 'Confirmar o novo e-mail', '#gate-choose-language']]){

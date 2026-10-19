@@ -334,3 +334,23 @@ subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do si
 - Testes: i18n navegador 209/209, i18n unit com as mesmas falhas da `main`, menu de cursos 26/26, deck-browser 208/208,
   Fase G 68/68, Fase H 68/68, Fase I 48/48, plano-admin 26/26, placeholders 45/45, confirmação de idioma 16/16,
   identidade com a mesma falha que já existe na `main`.
+
+## Etapa 2 do plano "Voz da Prof. Brune": mensagens erradas e acessibilidade crítica (2026-10-19)
+- **Sino**: `xp_earned` e `streak_completed` não são mais gravados no sino (`shared/notifications.js`, lista
+  `NOTIFICATION_EVENTS_ONLY_IN_THE_MOMENT`); o aviso na hora (toast de XP, janela da sequência) e o evento bruto em
+  `notification_events` continuam. Efeito colateral bom: o XP deixa de gastar o limite diário da categoria `gamificacao`
+  (badges chegam mais). Avisos antigos já gravados ficam. Teste: `tests/notificacoes/test_sino_so_na_hora.js` 8/8.
+- **"Não deixa apagar!" / "Sequência em risco"** (`notification-cron`, passo 2): só sai quando o último estudo foi ONTEM
+  (`daysSince(lastStudyDay) === 1`). Antes saía todo dia para quem já tinha parado (212 avisos para 20 pessoas em 14 dias,
+  produção 2026-10-19). Só no código: precisa de deploy da `notification-cron` (produção estava na v29).
+- **Avisos rápidos** (`shared/toast.js`): 4 a 10 s pelo tamanho do texto (antes 2 s), passar o mouse segura, `#toast-layer`
+  com `role="status"` e `aria-live="polite"` (fr e zh), saída animada respeitando `prefers-reduced-motion`.
+- **Janelas antigas** (`shared/modal-a11y.js`, carregado em fr e zh): toda janela do HTML (`.app-modal-overlay`,
+  `.manual-modal-overlay`, `.streak-modal-overlay`) ganha `role="dialog"`, `aria-modal` e `aria-labelledby`; foco vai para
+  dentro ao abrir e volta para quem abriu; Tab preso; Esc toca no botão de fechar da janela de cima (sem botão = não fecha,
+  ex.: escolha obrigatória do idioma do site). Janelas criadas por JS seguem com o cuidado próprio.
+- **Erros do francês em vermelho**: regras que usavam `--seal-red-dark` (azul no fr) passaram para `--error-red-text` /
+  `--error-red` (erros de formulário, nota de login, ditado, exportar/importar, item "perigo" do menu, apagar foto/badge).
+- Teste: `tests/acessibilidade/test_playwright.js` 60/60 (fr e zh, claro e escuro).
+- Pendente com a dona: textos dos avisos no banco (dia 1 "esqueceu de mim?", dia 7 "streak dormindo", "Quase lá" com zero
+  lições) e o texto da janela da sequência; deploy da `notification-cron`.

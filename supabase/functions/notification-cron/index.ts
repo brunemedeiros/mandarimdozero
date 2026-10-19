@@ -611,9 +611,10 @@ async function processUserLanguage(
     if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'review_overdue', 'revisao', { dueCount }, 'review')) created++;
   }
 
-  // 2) Sequência em risco -- tem sequência (algo a perder) e ainda não
-  // estudou "hoje" (ver limitação de fuso no topo do arquivo).
-  if (accountEvents && (acct.streak || 0) > 0 && acct.lastStudyDay !== today) {
+  // 2) Sequência em risco -- tem sequência (algo a perder), estudou ONTEM e ainda não estudou "hoje" (ver limitação de
+  // fuso no topo do arquivo). Antes bastava não ter estudado hoje: quem parou recebia "Dá tempo!" todo dia com o número
+  // velho, mas a sequência já zera no 2º dia sem estudo (effectiveStreakFor, shared/srs.js). Etapa 2, 2026-10-19.
+  if (accountEvents && (acct.streak || 0) > 0 && daysSince(acct.lastStudyDay) === 1) {
     if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'streak_at_risk', 'streak', { days: acct.streak }, 'path')) created++;
   }
 

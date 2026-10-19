@@ -204,6 +204,45 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
 .gate-speak button{ font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; min-height:44px; padding:0 16px; border:0; border-radius:999px; background:transparent; color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
 .gate-speak button[aria-pressed="true"]{ background:var(--accent); color:#fff; }
 @media (max-width:420px){ .gate-card{ padding:24px 18px 20px; } .gate-speak button{ font-size:13px; padding:0 12px; } }
+
+/* ---------- Entrar e cadastro em 3 passos (2026-10-18, no estilo do Busuu) ---------- */
+.er-marca{ width:40px; height:auto; display:block; }
+.cad-campo{ display:grid; gap:6px; }
+.cad-campo > label{ font-size:14px; font-weight:800; color:var(--ink); }
+.gate-forgot-row{ justify-content:flex-start; }
+.gate-divider span{ text-transform:uppercase; letter-spacing:.04em; }
+.cad-alt{ margin:2px 0 0; text-align:center; font-size:14.5px; color:var(--ink-soft); }
+.cad-alt-link{ font-size:14.5px; }
+.cad-topo{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:-6px -6px 0; }
+.cad-voltar{ display:inline-flex; align-items:center; gap:4px; min-height:44px; padding:0 10px; border:0; border-radius:12px; background:transparent;
+  color:var(--ink-soft); font-family:'Nunito',sans-serif; font-size:14px; font-weight:800; cursor:pointer; }
+.cad-voltar:hover{ background:var(--paper-warm); color:var(--ink); }
+.cad-voltar span[aria-hidden]{ font-size:20px; line-height:1; }
+.cad-passo{ font-size:13px; font-weight:800; color:var(--ink-soft); padding-right:6px; }
+.cad-progress{ height:8px; border-radius:999px; background:var(--paper-line); overflow:hidden; }
+.cad-progress > span{ display:block; height:100%; border-radius:999px; background:var(--success); }
+.cad-ola{ display:flex; align-items:center; justify-content:center; gap:12px; margin:4px 0 0; font-size:1.5rem; font-weight:800; }
+.cad-ola .flag-tile{ width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:color-mix(in srgb, var(--accent) 12%, var(--elevado)); }
+.cad-ola .flag-tile svg{ width:34px; height:auto; display:block; border-radius:4px; box-shadow:0 0 0 1px rgba(0,0,0,.08); }
+.cad-email-btn{ display:flex; align-items:center; justify-content:center; gap:10px; }
+.cad-arroba{ position:relative; }
+.cad-arroba .pre{ position:absolute; left:14px; top:50%; transform:translateY(-50%); font-weight:800; font-size:15px; color:var(--ink-soft); pointer-events:none; }
+.cad-arroba .gate-input{ padding-left:2rem; padding-right:2.6rem; }
+.cad-arroba .st{ position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:1.1rem; line-height:1; }
+.cad-arroba.ok .gate-input{ border-color:var(--success); }
+.cad-arroba.ruim .gate-input{ border-color:var(--danger); }
+.cad-msg{ margin:0; font-size:13.5px; line-height:1.45; color:var(--ink-soft); }
+.cad-msg:empty{ display:none; }
+.cad-msg.ok{ color:var(--success); font-weight:800; }
+.cad-msg.ruim{ color:var(--danger); font-weight:700; }
+.cad-sugestoes{ display:flex; flex-wrap:wrap; gap:8px; }
+.cad-sugestoes:empty{ display:none; }
+.cad-sugestoes button{ font-family:'Nunito',sans-serif; font-weight:800; font-size:13.5px; min-height:40px; padding:0 14px; border-radius:999px; cursor:pointer;
+  border:1px solid color-mix(in srgb, var(--success) 45%, var(--paper-line)); background:color-mix(in srgb, var(--success) 10%, var(--elevado)); color:var(--ink); }
+.cad-sugestoes button:focus-visible, .cad-voltar:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.cad-ajuda{ margin:0; font-size:13px; line-height:1.45; color:var(--ink-soft); }
+#signup-form, #retry-form{ display:grid; gap:14px; }
+@media (max-width:420px){ .er-head h1{ font-size:1.45rem; } }
 </style>
 </head>
 <body>
@@ -227,31 +266,129 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
 <div class="wrap" id="gate-login" style="display:none;">
   <div class="gate-card">
     <div class="er-head">
-      <span class="er-logo"><img src="shared/brand/logo-mark.svg" alt="" width="44" height="50"></span>
-      <h1 id="gate-login-title" data-i18n="gate.brand">Idiomas com Prof. Brune</h1>
-      <p class="sub" data-i18n="gate.login.sub">Entre para continuar de onde parou ou crie sua conta grátis e escolha o que quer aprender.</p>
+      <img class="er-marca" src="shared/brand/logo-mark.svg" alt="" width="40" height="46">
+      <h1 id="gate-login-title" data-i18n="gate.brand">Idiomas com Prof. Brune</h1>
     </div>
     <button class="gate-oauth-btn" id="gate-google-btn">
       <svg width="18" height="18" viewBox="0 0 18 18" style="flex-shrink:0;"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.91c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.27c-.81.54-1.84.86-3.05.86-2.35 0-4.34-1.58-5.05-3.71H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.95 10.7c-.18-.54-.28-1.11-.28-1.7s.1-1.16.28-1.7V4.96H.96C.35 6.17 0 7.55 0 9s.35 2.83.96 4.04l2.99-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.99 2.34C4.66 5.16 6.65 3.58 9 3.58z"/></svg>
       <span data-i18n="gate.login.google">Continuar com Google</span>
     </button>
-    <div class="gate-divider"><span data-i18n="gate.login.divider">ou entre com e-mail</span></div>
+    <div class="gate-divider"><span data-i18n="gate.login.divider">ou</span></div>
     <form id="gate-email-form">
-      <label class="sr-only" for="gate-email" style="position:absolute;left:-9999px;" data-i18n="gate.login.email">Seu e-mail</label>
-      <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">📧</span><input type="email" id="gate-email" class="gate-input" placeholder="Seu e-mail" data-i18n-attr="placeholder:gate.login.email" autocomplete="email" required></div>
-      <label class="sr-only" for="gate-password" style="position:absolute;left:-9999px;" data-i18n="gate.login.password">Sua senha</label>
-      <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="gate-password" class="gate-input" placeholder="Sua senha" data-i18n-attr="placeholder:gate.login.password" autocomplete="current-password" required minlength="6"></div>
+      <div class="cad-campo">
+        <label for="gate-email" data-i18n="gate.login.emailLabel">E-mail</label>
+        <input type="email" id="gate-email" class="gate-input" placeholder="seu@email.com" data-i18n-attr="placeholder:gate.login.emailPh" autocomplete="email" required>
+      </div>
+      <div class="cad-campo">
+        <label for="gate-password" data-i18n="gate.login.passwordLabel">Senha</label>
+        <input type="password" id="gate-password" class="gate-input" placeholder="Sua senha" data-i18n-attr="placeholder:gate.login.password" autocomplete="current-password" required minlength="6">
+      </div>
       <div class="gate-forgot-row">
         <button type="button" class="gate-link-btn" id="gate-forgot-btn" data-i18n="gate.login.forgot">Esqueceu sua senha?</button>
       </div>
-      <button type="submit" class="btn btn-primary btn-block" id="gate-submit-btn">Entrar</button>
+      <button type="submit" class="btn btn-primary btn-block" id="gate-submit-btn" data-i18n="gate.login.submit">Entrar</button>
     </form>
     <p class="gate-note" id="gate-login-note" role="status"></p>
-    <button type="button" class="jp-bloco jp-tom-verde" id="gate-toggle-mode-btn">
-      <span class="jp-icone" aria-hidden="true">🎁</span>
-      <span><b id="gate-toggle-mode-title">Crie sua conta grátis</b><small id="gate-signup-question">Lições, revisão e prática todo dia, no seu ritmo.</small></span>
-      <span class="er-seta" aria-hidden="true">›</span>
+    <p class="cad-alt"><span data-i18n="gate.login.noAccount">Não tem conta?</span> <button type="button" class="gate-link-btn cad-alt-link" id="gate-signup-link" data-i18n="gate.login.signupLink">Crie sua conta grátis</button></p>
+  </div>
+</div>
+
+<!-- Cadastro em 3 passos (2026-10-18, no estilo do Busuu): curso, como entrar, seus dados. Quem já tem conta não passa aqui. -->
+<div class="wrap" id="gate-signup-course" style="display:none;">
+  <div class="gate-card">
+    <div class="cad-topo">
+      <button type="button" class="cad-voltar" data-back="gate-login"><span aria-hidden="true">‹</span> <span data-i18n="gate.signup.back">Voltar</span></button>
+      <span class="cad-passo" data-step="1">Passo 1 de 3</span>
+    </div>
+    <div class="cad-progress" aria-hidden="true"><span style="width:33.4%"></span></div>
+    <div class="er-head"><h1 data-i18n="gate.choose.title">Qual idioma você quer aprender?</h1></div>
+    <div class="gate-speak" role="group" aria-label="Idioma que você fala" data-i18n-attr="aria-label:courseMenu.speakLabel">
+      <button type="button" data-site="pt-BR" aria-pressed="true" data-i18n="courseMenu.speak.pt-BR">Eu falo português</button>
+      <button type="button" data-site="en" aria-pressed="false" data-i18n="courseMenu.speak.en">Eu falo inglês</button>
+    </div>
+    <div class="er-lista" id="signup-grid"></div>
+    <p class="cad-alt"><span data-i18n="gate.signup.haveAccount">Já tem conta?</span> <button type="button" class="gate-link-btn cad-alt-link" data-goto-login data-i18n="gate.signup.loginLink">Entrar</button></p>
+  </div>
+</div>
+
+<div class="wrap" id="gate-signup-method" style="display:none;">
+  <div class="gate-card">
+    <div class="cad-topo">
+      <button type="button" class="cad-voltar" data-back="gate-signup-course"><span aria-hidden="true">‹</span> <span data-i18n="gate.signup.back">Voltar</span></button>
+      <span class="cad-passo" data-step="2">Passo 2 de 3</span>
+    </div>
+    <div class="cad-progress" aria-hidden="true"><span style="width:66.7%"></span></div>
+    <div class="er-head">
+      <p class="cad-ola"><span class="flag-tile" id="signup-method-flag" aria-hidden="true"></span><span id="signup-method-hello"></span></p>
+      <h1 id="signup-method-title"></h1>
+      <p class="sub" data-i18n="gate.signup.methodSub">É grátis. Escolha como prefere entrar.</p>
+    </div>
+    <button class="gate-oauth-btn" id="signup-google-btn">
+      <svg width="18" height="18" viewBox="0 0 18 18" style="flex-shrink:0;"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.91c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.27c-.81.54-1.84.86-3.05.86-2.35 0-4.34-1.58-5.05-3.71H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.95 10.7c-.18-.54-.28-1.11-.28-1.7s.1-1.16.28-1.7V4.96H.96C.35 6.17 0 7.55 0 9s.35 2.83.96 4.04l2.99-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.99 2.34C4.66 5.16 6.65 3.58 9 3.58z"/></svg>
+      <span data-i18n="gate.login.google">Continuar com Google</span>
     </button>
+    <button type="button" class="btn btn-primary btn-block cad-email-btn" id="signup-email-btn"><span class="cad-email-ico" aria-hidden="true">📧</span><span data-i18n="gate.signup.withEmail">Continuar com e-mail</span></button>
+    <p class="gate-note" id="signup-method-note" role="status"></p>
+    <p class="cad-alt"><span data-i18n="gate.signup.haveAccount">Já tem conta?</span> <button type="button" class="gate-link-btn cad-alt-link" data-goto-login data-i18n="gate.signup.loginLink">Entrar</button></p>
+  </div>
+</div>
+
+<div class="wrap" id="gate-signup-data" style="display:none;">
+  <div class="gate-card">
+    <div class="cad-topo">
+      <button type="button" class="cad-voltar" data-back="gate-signup-method"><span aria-hidden="true">‹</span> <span data-i18n="gate.signup.back">Voltar</span></button>
+      <span class="cad-passo" data-step="3">Passo 3 de 3</span>
+    </div>
+    <div class="cad-progress" aria-hidden="true"><span style="width:100%"></span></div>
+    <div class="er-head">
+      <h1 data-i18n="gate.signup.dataTitle">Seus dados</h1>
+      <p class="sub" data-i18n="gate.signup.dataSub">Seu nome e seu @ aparecem no seu perfil.</p>
+    </div>
+    <form id="signup-form" novalidate>
+      <div class="cad-campo">
+        <label for="signup-name" data-i18n="gate.signup.name">Nome</label>
+        <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">👤</span><input type="text" id="signup-name" class="gate-input" autocomplete="name" maxlength="60" placeholder="Seu nome" data-i18n-attr="placeholder:gate.signup.namePh"></div>
+      </div>
+      <div class="cad-campo">
+        <label for="signup-arroba" data-i18n="gate.signup.username">Seu @</label>
+        <div class="cad-arroba" id="signup-arroba-box"><span class="pre" aria-hidden="true">@</span><input type="text" id="signup-arroba" name="arroba" class="gate-input" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other" autocapitalize="none" spellcheck="false" maxlength="24" aria-describedby="signup-arroba-msg signup-arroba-help"><span class="st" id="signup-arroba-icon" aria-hidden="true"></span></div>
+        <p class="cad-msg" id="signup-arroba-msg" aria-live="polite"></p>
+        <div class="cad-sugestoes" id="signup-arroba-sugg"></div>
+        <p class="cad-ajuda" id="signup-arroba-help" data-i18n="gate.signup.userHelp">Montamos o @ a partir do seu nome; pode mudar agora. Use letras, números e ponto. Depois de criar a conta, ele não muda mais.</p>
+      </div>
+      <div class="cad-campo">
+        <label for="signup-email" data-i18n="gate.login.emailLabel">E-mail</label>
+        <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">📧</span><input type="email" id="signup-email" class="gate-input" autocomplete="email" placeholder="seu@email.com" data-i18n-attr="placeholder:gate.login.emailPh"></div>
+      </div>
+      <div class="cad-campo">
+        <label for="signup-password" data-i18n="gate.login.passwordLabel">Senha</label>
+        <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="signup-password" class="gate-input" autocomplete="new-password" minlength="6" placeholder="Crie uma senha (mínimo 6 caracteres)" data-i18n-attr="placeholder:gate.signup.passwordPh"></div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="signup-submit" data-i18n="gate.login.signupSubmit">Criar conta grátis</button>
+    </form>
+    <p class="gate-note" id="signup-note" role="status"></p>
+    <p class="cad-alt"><span data-i18n="gate.signup.haveAccount">Já tem conta?</span> <button type="button" class="gate-link-btn cad-alt-link" data-goto-login data-i18n="gate.signup.loginLink">Entrar</button></p>
+  </div>
+</div>
+
+<!-- Depois do código: o @ escolhido foi pego por outra pessoa entre a checagem e a confirmação. -->
+<div class="wrap" id="gate-signup-retry" style="display:none;">
+  <div class="gate-card">
+    <div class="er-head">
+      <h1 data-i18n="gate.signup.retryTitle">Escolha outro @</h1>
+      <p class="sub" id="signup-retry-sub"></p>
+    </div>
+    <form id="retry-form" novalidate>
+      <div class="cad-campo">
+        <label for="retry-arroba" data-i18n="gate.signup.username">Seu @</label>
+        <div class="cad-arroba" id="retry-arroba-box"><span class="pre" aria-hidden="true">@</span><input type="text" id="retry-arroba" name="arroba" class="gate-input" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other" autocapitalize="none" spellcheck="false" maxlength="24" aria-describedby="retry-arroba-msg retry-arroba-help"><span class="st" id="retry-arroba-icon" aria-hidden="true"></span></div>
+        <p class="cad-msg" id="retry-arroba-msg" aria-live="polite"></p>
+        <div class="cad-sugestoes" id="retry-arroba-sugg"></div>
+        <p class="cad-ajuda" id="retry-arroba-help" data-i18n="gate.signup.userHelp">Montamos o @ a partir do seu nome; pode mudar agora. Use letras, números e ponto. Depois de criar a conta, ele não muda mais.</p>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="retry-submit" data-i18n="gate.signup.retrySave">Salvar e continuar</button>
+    </form>
+    <p class="gate-note" id="retry-note" role="status"></p>
   </div>
 </div>
 
@@ -309,7 +446,6 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
 <div class="wrap" id="gate-choose-language" style="display:none;">
   <div class="gate-card">
     <div class="er-head">
-      <span class="jp-icone jp-icone--grande" aria-hidden="true">🧭</span>
       <h1 data-i18n="gate.choose.title">Qual idioma você quer aprender?</h1>
     </div>
     <div class="gate-speak" id="gate-speak" role="group" aria-label="Idioma que você fala" data-i18n-attr="aria-label:courseMenu.speakLabel">
@@ -324,7 +460,6 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
 <div class="wrap" id="gate-choose-experience" style="display:none;">
   <div class="gate-card">
     <div class="er-head">
-      <span class="jp-icone jp-icone--grande" aria-hidden="true">🎯</span>
       <h1 id="gate-exp-title"></h1>
       <p class="sub" data-i18n="gate.exp.sub">Isso só ajusta como você começa. Dá para mudar depois, a qualquer momento.</p>
     </div>
@@ -370,7 +505,8 @@ function gateSiteLang(){ return getUiLang() === 'en' ? 'en' : 'pt-BR'; }
 const GUEST_MODE_FLAG = 'guest_mode'; // mesma chave usada por shared/auth.js dentro de cada idioma
 
 function showOnly(id){
-  ['gate-loading', 'gate-login', 'gate-verify', 'gate-confirm-link', 'gate-new-password', 'gate-choose-language', 'gate-choose-experience'].forEach(x => {
+  ['gate-loading', 'gate-login', 'gate-signup-course', 'gate-signup-method', 'gate-signup-data', 'gate-signup-retry', 'gate-verify',
+   'gate-confirm-link', 'gate-new-password', 'gate-choose-language', 'gate-choose-experience'].forEach(x => {
     document.getElementById(x).style.display = (x === id) ? '' : 'none';
   });
 }
@@ -378,18 +514,18 @@ function showOnly(id){
 // Escolha do curso: "Eu falo..." (igual ao de Adicionar curso) decide quais cursos aparecem. Começa no idioma do site
 // escolhido na entrada. Curso em rascunho não aparece; em teste ganha a etiqueta.
 let gateSpeak = null;
-let gateOnPick = null;
 function gateCoursesFor(site){
   return LanguageRegistry.enabled()
     .filter(l => (l.siteLanguages || []).indexOf(site) >= 0)
     .map(l => ({ l, status: ((LanguageRegistry.courseStatus(l.appKey, site) || {}).status) || 'publicado' }))
     .filter(c => c.status !== 'rascunho');
 }
-function renderLanguageChoices(onPick){
-  if (onPick) gateOnPick = onPick;
+// Duas telas usam a lista: a escolha do curso de quem já tem conta (#lang-grid) e o passo 1 do cadastro (#signup-grid).
+function renderLanguageChoices(onPick, gridId){
+  const grid = document.getElementById(gridId || 'lang-grid');
+  if (onPick) grid._onPick = onPick;
   if (!gateSpeak) gateSpeak = gateSiteLang();
-  document.querySelectorAll('#gate-speak button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.site === gateSpeak)));
-  const grid = document.getElementById('lang-grid');
+  document.querySelectorAll('.gate-speak button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.site === gateSpeak)));
   // Cada curso: bandeira em quadrado tingido, nome do curso e o nome do idioma nele mesmo (Français, 中文).
   grid.innerHTML = gateCoursesFor(gateSpeak).map(({ l, status }) => `
     <button type="button" class="jp-opcao lang-card" data-lang="${gateEsc(l.id)}">
@@ -399,10 +535,14 @@ function renderLanguageChoices(onPick){
     </button>
   `).join('');
   grid.querySelectorAll('.lang-card').forEach(card => {
-    card.addEventListener('click', () => gateOnPick && gateOnPick(card.dataset.lang));
+    card.addEventListener('click', () => grid._onPick && grid._onPick(card.dataset.lang));
   });
 }
-document.querySelectorAll('#gate-speak button').forEach(b => b.addEventListener('click', () => { gateSpeak = b.dataset.site; renderLanguageChoices(); }));
+function rerenderVisibleCourseLists(){
+  if (document.getElementById('gate-choose-language').style.display !== 'none') renderLanguageChoices(null, 'lang-grid');
+  if (document.getElementById('gate-signup-course').style.display !== 'none') renderLanguageChoices(null, 'signup-grid');
+}
+document.querySelectorAll('.gate-speak button').forEach(b => b.addEventListener('click', () => { gateSpeak = b.dataset.site; rerenderVisibleCourseLists(); }));
 
 // Pergunta rápida entre "escolher idioma" e "entrar no app" -- só existe pra
 // ajustar a primeira experiência (ver goToLanguageApp abaixo): quem já sabe
@@ -445,26 +585,39 @@ function goToLanguageApp(langId, alreadyKnows){
   window.location.replace(offerLevelTest ? `${target.path}?level_test_offer=1` : target.path);
 }
 
+// Conta que já tem curso vai direto para ele. Conta nova que passou pelo cadastro em 3 passos já escolheu o curso
+// (e, por e-mail, o nome e o @): grava o @ e segue. Sem isso (conta antiga sem curso, Google pela tela de Entrar),
+// mostra a escolha do curso.
 async function afterAuthResolved(user){
+  const intent = readSignupIntent();
   const lang = await getCurrentLearningLanguage(user.id);
   if (lang){
+    clearSignupIntent();
     goToLanguageApp(lang);
     return;
   }
+  if (intent && intent.lang && AVAILABLE_LANGUAGES.some(l => l.id === intent.lang)){
+    if (intent.username && !(await claimSignupUsername(user, intent))) return;
+    finishCoursePick(user, intent.lang, intent.speak || gateSiteLang());
+    return;
+  }
   showOnly('gate-choose-language');
-  renderLanguageChoices(async (langId) => {
-    // O curso sai no idioma de "Eu falo...": vira o idioma do site, e o app grava na conta nova (shared/auth.js lê
-    // 'ui-language-gate' e não pergunta "Eu falo..." de novo no primeiro acesso).
-    try { localStorage.setItem('ui-language-gate', gateSpeak); } catch (e) {}
-    if (getUiLang() !== gateSpeak){ try { await setUiLang(gateSpeak); } catch (e) {} }
-    askExperienceThenProceed(langId, async (langId, alreadyKnows) => {
-      try{
-        await setCurrentLearningLanguage(user.id, langId);
-      }catch(e){
-        console.error('Erro ao salvar idioma inicial:', e);
-      }
-      goToLanguageApp(langId, alreadyKnows);
-    });
+  renderLanguageChoices((langId) => finishCoursePick(user, langId, gateSpeak), 'lang-grid');
+}
+
+// O curso sai no idioma de "Eu falo...": vira o idioma do site, e o app grava na conta nova (shared/auth.js lê
+// 'ui-language-gate' e não pergunta "Eu falo..." de novo no primeiro acesso).
+async function finishCoursePick(user, langId, speak){
+  try { localStorage.setItem('ui-language-gate', speak); } catch (e) {}
+  if (getUiLang() !== speak){ try { await setUiLang(speak); } catch (e) {} }
+  askExperienceThenProceed(langId, async (langId, alreadyKnows) => {
+    try{
+      await setCurrentLearningLanguage(user.id, langId);
+    }catch(e){
+      console.error('Erro ao salvar idioma inicial:', e);
+    }
+    clearSignupIntent();
+    goToLanguageApp(langId, alreadyKnows);
   });
 }
 
@@ -520,6 +673,7 @@ function showNewPassword(user){
 // Conta ativada em outra aba/janela ou pelo botão do e-mail: a tela do código confere sozinha (a cada 15s e ao
 // voltar para a aba) e avisa "Sua conta foi ativada!" antes de seguir.
 let gateVerifyEmail = '';
+let gatePendingPassword = ''; // senha digitada no cadastro ou no login, para entrar sozinha se a conta já estiver ativa
 let gateCheckBusy = false;
 let gateCheckTimer = null;
 let gateActivated = false;
@@ -532,7 +686,7 @@ function gateShowActivated(noteId, text, user){
   setTimeout(() => { afterAuthResolved(user); }, 1200);
 }
 async function gateEnterIfAlreadyConfirmed(){
-  const password = document.getElementById('gate-password').value;
+  const password = gatePendingPassword;
   if (!gateVerifyEmail || !password || gateCheckBusy || gateActivated) return false;
   gateCheckBusy = true;
   try {
@@ -597,50 +751,25 @@ document.getElementById('gate-google-btn').addEventListener('click', async () =>
 // Idioma do site de quem está se cadastrando (vira user_metadata.ui_language, lido pelos modelos de e-mail do Supabase
 // Auth em docs/email/supabase/bilingue/). É o idioma do site escolhido no topo da entrada (que começa pelo do navegador).
 function gateUiLanguage(){ return gateSiteLang(); }
-let gateSignupMode = false;
-function paintLoginMode(){
-  document.getElementById('gate-submit-btn').textContent = t(gateSignupMode ? 'gate.login.signupSubmit' : 'gate.login.submit');
-  document.getElementById('gate-toggle-mode-title').textContent = t(gateSignupMode ? 'gate.login.loginLink' : 'gate.login.signupLink');
-  document.getElementById('gate-signup-question').textContent = t(gateSignupMode ? 'gate.login.loginDesc' : 'gate.login.signupDesc');
-}
-document.getElementById('gate-toggle-mode-btn').addEventListener('click', () => {
-  gateSignupMode = !gateSignupMode;
-  paintLoginMode();
-});
-
 document.getElementById('gate-email-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('gate-email').value.trim();
   const password = document.getElementById('gate-password').value;
   const note = document.getElementById('gate-login-note');
   note.textContent = ''; note.className = 'gate-note';
-
-  if (gateSignupMode){
-    const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { ui_language: gateUiLanguage() } } });
-    if (error){
-      note.textContent = error.message === 'User already registered' ? t('gate.login.alreadyRegistered') : t('gate.login.signupFailed');
-      note.className = 'gate-note err';
-      return;
-    }
-    if (data.user && !data.session){
-      showVerify(email);
-      return;
-    }
-    if (data.session){ await afterAuthResolved(data.user); }
-  } else {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error && (error.code === 'email_not_confirmed' || /not confirmed/i.test(error.message || ''))){
-      await supabaseClient.auth.resend({ type: 'signup', email });
-      showVerify(email, t('gate.login.notConfirmed'));
-      return;
-    }
-    if (error){
-      note.textContent = t('gate.login.wrong');
-      note.className = 'gate-note err';
-      return;
-    }
-    await afterAuthResolved(data.user);
+  gatePendingPassword = password;
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error && (error.code === 'email_not_confirmed' || /not confirmed/i.test(error.message || ''))){
+    await supabaseClient.auth.resend({ type: 'signup', email });
+    showVerify(email, t('gate.login.notConfirmed'));
+    return;
   }
+  if (error){
+    note.textContent = t('gate.login.wrong');
+    note.className = 'gate-note err';
+    return;
+  }
+  await afterAuthResolved(data.user);
 });
 
 document.getElementById('gate-forgot-btn').addEventListener('click', async () => {
@@ -728,7 +857,268 @@ document.getElementById('gate-confirm-link-btn').addEventListener('click', async
 document.getElementById('gate-verify-back-btn').addEventListener('click', () => {
   clearInterval(gateResendTimer);
   stopActivationCheck();
+  // veio do cadastro: volta para "Seus dados", com o que já foi digitado
+  const intent = readSignupIntent();
+  showOnly(intent && intent.username ? 'gate-signup-data' : 'gate-login');
+});
+
+// ---------- Cadastro em 3 passos (2026-10-18, no estilo do Busuu) ----------
+// 1) curso ("Eu falo..." + cursos do par), 2) como entrar (Google ou e-mail), 3) seus dados (nome, @ conferido na hora,
+// e-mail e senha). O que foi escolhido fica em localStorage['signup-intent'] até a conta entrar: depois do código do
+// e-mail (ou da volta do Google), afterAuthResolved grava o @ (claim_my_username, 111) e o curso. A checagem do @ sem
+// login é a check_username_signup (113). Grátis x Premium: tudo grátis.
+const SIGNUP_INTENT_KEY = 'signup-intent';
+const SIGNUP_INTENT_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+const SIGNUP_HELLO = { fr: { text: 'Bonjour !', lang: 'fr' }, zh: { text: '你好！', lang: 'zh' }, pt: { text: 'Olá!', lang: 'pt-BR' } };
+let gateSignupLang = null;
+function readSignupIntent(){
+  try {
+    const v = JSON.parse(localStorage.getItem(SIGNUP_INTENT_KEY) || 'null');
+    if (!v || !v.ts || Date.now() - v.ts > SIGNUP_INTENT_MAX_AGE_MS) return null;
+    return v;
+  } catch (e) { return null; }
+}
+function saveSignupIntent(v){ try { localStorage.setItem(SIGNUP_INTENT_KEY, JSON.stringify(Object.assign({}, v, { ts: Date.now() }))); } catch (e) {} }
+function clearSignupIntent(){ try { localStorage.removeItem(SIGNUP_INTENT_KEY); } catch (e) {} }
+
+function signupCourseName(langId){
+  const l = AVAILABLE_LANGUAGES.find(x => x.id === langId);
+  if (!l) return '';
+  const n = LanguageRegistry.shortName(l.appKey, gateSiteLang()) || l.name;
+  return gateSiteLang() === 'pt-BR' ? n.toLowerCase() : n;
+}
+function paintSignupTexts(){
+  document.querySelectorAll('.cad-passo').forEach(el => { el.textContent = t('gate.signup.step', { n: el.dataset.step }); });
+  if (gateSignupLang){
+    const hello = SIGNUP_HELLO[gateSignupLang] || { text: '', lang: '' };
+    const h = document.getElementById('signup-method-hello');
+    h.textContent = hello.text; h.setAttribute('lang', hello.lang);
+    document.getElementById('signup-method-title').textContent = t('gate.signup.methodTitle', { lang: signupCourseName(gateSignupLang) });
+  }
+  if (typeof signupUser !== 'undefined'){ signupUser.repaint(); retryUser.repaint(); }
+  paintRetrySub();
+}
+function gateFocusHeading(id){ const h = document.querySelector('#' + id + ' h1'); if (h){ h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } }
+function showSignupCourse(){
+  if (!gateSpeak) gateSpeak = gateSiteLang();
+  showOnly('gate-signup-course');
+  renderLanguageChoices((langId) => { gateSignupLang = langId; showSignupMethod(); }, 'signup-grid');
+  gateFocusHeading('gate-signup-course');
+}
+function showSignupMethod(){
+  const l = AVAILABLE_LANGUAGES.find(x => x.id === gateSignupLang);
+  document.getElementById('signup-method-flag').innerHTML = l ? l.flagSvg : '';
+  paintSignupTexts();
+  showOnly('gate-signup-method');
+  gateFocusHeading('gate-signup-method');
+}
+function showSignupData(){
+  showOnly('gate-signup-data');
+  document.getElementById('signup-name').focus();
+}
+function showLoginScreen(){
+  clearSignupIntent();
   showOnly('gate-login');
+  gateFocusHeading('gate-login');
+}
+document.getElementById('gate-signup-link').addEventListener('click', showSignupCourse);
+document.querySelectorAll('[data-goto-login]').forEach(b => b.addEventListener('click', showLoginScreen));
+document.querySelectorAll('.cad-voltar').forEach(b => b.addEventListener('click', () => {
+  const to = b.dataset.back;
+  if (to === 'gate-login') showLoginScreen();
+  else if (to === 'gate-signup-course') showSignupCourse();
+  else if (to === 'gate-signup-method') showSignupMethod();
+}));
+document.getElementById('signup-email-btn').addEventListener('click', showSignupData);
+document.getElementById('signup-google-btn').addEventListener('click', async () => {
+  const note = document.getElementById('signup-method-note');
+  saveSignupIntent({ lang: gateSignupLang, speak: gateSpeak || gateSiteLang() });
+  note.textContent = t('gate.login.googleRedirect'); note.className = 'gate-note';
+  const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: cleanRedirectURL() } });
+  if (error){ note.textContent = t('gate.login.googleError'); note.className = 'gate-note err'; }
+});
+
+// O @: mesmas regras da 111 (letras minúsculas, números e ponto entre eles, de 3 a 24) e mesmo jeito de montar a partir
+// do nome que a janela do app (shared/username-choice.js).
+const GATE_USERNAME_RE = /^[a-z0-9]+(\.[a-z0-9]+)*$/;
+function gateUsernameSlug(text){
+  return String(text || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+    .replace(/[^a-z0-9.\s]+/g, ' ').trim().replace(/[\s.]+/g, '.').replace(/^\.+|\.+$/g, '')
+    .slice(0, 24).replace(/\.+$/, '');
+}
+function gateUsernameClean(text){
+  return String(text || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/^@+/, '')
+    .replace(/[^a-z0-9.]/g, '').slice(0, 24);
+}
+function gateUsernameLocalProblem(u){
+  if (!u || u.length < 3 || u.length > 24 || !GATE_USERNAME_RE.test(u) || /^u[0-9a-f]{10}$/.test(u)) return 'invalid';
+  return null;
+}
+// Campo do @ com checagem na hora. status: empty | checking | ok | taken | reserved | invalid | unknown (não deu para conferir).
+function makeUsernameField(p, onAutofillEmail){
+  const input = document.getElementById(p + '-arroba');
+  const box = document.getElementById(p + '-arroba-box');
+  const msg = document.getElementById(p + '-arroba-msg');
+  const sugg = document.getElementById(p + '-arroba-sugg');
+  const icon = document.getElementById(p + '-arroba-icon');
+  const st = { status: 'empty', value: '', suggestions: [], touched: false };
+  let seq = 0, timer = null, pending = null;
+  const BAD = ['taken', 'reserved', 'invalid'];
+  function paint(){
+    const s = st.status, u = st.value;
+    box.classList.toggle('ok', s === 'ok');
+    box.classList.toggle('ruim', BAD.indexOf(s) >= 0);
+    input.setAttribute('aria-invalid', String(BAD.indexOf(s) >= 0));
+    const ic = s === 'ok' ? '✅' : (BAD.indexOf(s) >= 0 ? '❌' : '');
+    if (icon.textContent.trim() !== ic){ icon.textContent = ic; if (ic && window.EmojiIcons) window.EmojiIcons.scan(icon); }
+    const hasSugg = st.suggestions.length > 0;
+    const text = s === 'ok' ? t('gate.signup.userFree', { u })
+      : s === 'taken' ? t(hasSugg ? 'gate.signup.userTaken' : 'gate.signup.userTakenNoSugg', { u })
+      : s === 'reserved' ? t(hasSugg ? 'gate.signup.userReserved' : 'gate.signup.userReservedNoSugg', { u })
+      : s === 'invalid' ? t('gate.signup.userInvalid')
+      : s === 'checking' ? t('gate.signup.userChecking')
+      : s === 'unknown' ? t('gate.signup.userCheckFailed') : '';
+    msg.textContent = text;
+    msg.className = 'cad-msg' + (s === 'ok' ? ' ok' : (BAD.indexOf(s) >= 0 ? ' ruim' : ''));
+    sugg.innerHTML = st.suggestions.map(x => `<button type="button" data-u="${gateEsc(x)}">@${gateEsc(x)}</button>`).join('');
+    sugg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { set(b.dataset.u, 'ok'); input.focus(); }));
+  }
+  function check(u){
+    const my = ++seq;
+    if (!u){ st.status = 'empty'; st.value = ''; st.suggestions = []; paint(); return Promise.resolve(st.status); }
+    if (gateUsernameLocalProblem(u)){ st.status = 'invalid'; st.value = u; st.suggestions = []; paint(); return Promise.resolve(st.status); }
+    st.status = 'checking'; st.value = u; st.suggestions = []; paint();
+    pending = (async () => {
+      let res = null;
+      try {
+        const { data, error } = await supabaseClient.rpc('check_username_signup', { p_username: u });
+        res = error ? null : data;
+      } catch (e) { res = null; }
+      if (my !== seq) return st.status;
+      st.status = (res && res.status) || 'unknown';
+      st.suggestions = (res && Array.isArray(res.suggestions)) ? res.suggestions.slice(0, 3) : [];
+      paint();
+      return st.status;
+    })();
+    return pending;
+  }
+  function schedule(u, delay){
+    clearTimeout(timer);
+    if (!u || gateUsernameLocalProblem(u)){ check(u); return; }
+    st.status = 'checking'; st.value = u; st.suggestions = []; paint();
+    timer = setTimeout(() => check(u), delay == null ? 350 : delay);
+  }
+  function set(u, known){
+    clearTimeout(timer); seq++;
+    input.value = u;
+    if (known === 'ok'){ st.status = 'ok'; st.value = u; st.suggestions = []; paint(); }
+    else schedule(u, 0);
+  }
+  input.addEventListener('input', () => {
+    // Preenchimento automático do navegador às vezes joga o e-mail aqui (2026-10-19): e-mail não é @, volta ao que estava.
+    if (/\S+@\S+\.\S+/.test(input.value)){
+      input.value = st.value || '';
+      if (!st.touched && typeof onAutofillEmail === 'function') onAutofillEmail();
+      return;
+    }
+    const c = gateUsernameClean(input.value);
+    if (c !== input.value) input.value = c;
+    st.touched = true;
+    schedule(c);
+  });
+  // Antes de enviar: se ainda está conferindo (ou nunca conferiu), confere agora e espera.
+  async function settle(){
+    const u = gateUsernameClean(input.value);
+    if (st.value === u && st.status !== 'checking' && st.status !== 'empty') return st.status;
+    clearTimeout(timer);
+    return check(u);
+  }
+  return { st, set, settle, repaint: paint, input, isBad: () => BAD.indexOf(st.status) >= 0 };
+}
+// Se o navegador jogar o e-mail no @ antes de a pessoa mexer nele, o @ volta a acompanhar o nome.
+const signupUser = makeUsernameField('signup', () => signupUser.set(gateUsernameSlug(document.getElementById('signup-name').value)));
+const retryUser = makeUsernameField('retry');
+// Enquanto a pessoa não mexe no @, ele acompanha o nome.
+document.getElementById('signup-name').addEventListener('input', (e) => {
+  if (!signupUser.st.touched) signupUser.set(gateUsernameSlug(e.target.value));
+});
+
+function signupError(text, focusEl){
+  const note = document.getElementById('signup-note');
+  note.textContent = text; note.className = 'gate-note err';
+  if (focusEl) focusEl.focus();
+}
+document.getElementById('signup-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nameEl = document.getElementById('signup-name');
+  const emailEl = document.getElementById('signup-email');
+  const passEl = document.getElementById('signup-password');
+  const btn = document.getElementById('signup-submit');
+  const note = document.getElementById('signup-note');
+  note.textContent = ''; note.className = 'gate-note';
+  const name = nameEl.value.trim().replace(/\s+/g, ' ');
+  if (!name) return signupError(t('gate.signup.needName'), nameEl);
+  btn.disabled = true;
+  try {
+    const status = await signupUser.settle();
+    if (status === 'empty' || signupUser.isBad()) return signupError(status === 'empty' ? t('gate.signup.userInvalid') : signupUser.st.status === 'invalid' ? t('gate.signup.userInvalid') : t('gate.signup.userPickFree'), signupUser.input);
+    const email = emailEl.value.trim();
+    if (!email || !emailEl.checkValidity()) return signupError(t('gate.signup.badEmail'), emailEl);
+    const password = passEl.value;
+    if (password.length < 6) return signupError(t('gate.signup.shortPassword'), passEl);
+    const username = signupUser.st.value;
+    saveSignupIntent({ lang: gateSignupLang, speak: gateSpeak || gateSiteLang(), username, name });
+    gatePendingPassword = password;
+    const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { ui_language: gateUiLanguage(), full_name: name } } });
+    if (error){
+      return signupError(error.message === 'User already registered' ? t('gate.login.alreadyRegistered') : t('gate.login.signupFailed'));
+    }
+    if (data.user && !data.session){ showVerify(email); return; }
+    if (data.session){ await afterAuthResolved(data.user); }
+  } finally { btn.disabled = false; }
+});
+
+// Depois de confirmar o código: grava o @ escolhido. Se outra pessoa pegou o mesmo @ nesse meio tempo, a tela
+// "Escolha outro @" aparece com sugestões. Falha de rede: segue (a janela do app pede o @ no primeiro acesso).
+let gateRetryCtx = null;
+async function claimSignupUsername(user, intent){
+  let err = null;
+  try {
+    const { data, error } = await supabaseClient.rpc('claim_my_username', { p_username: intent.username, p_display_name: intent.name || '' });
+    err = error ? 'network' : (data && data.error) || null;
+  } catch (e) { err = 'network'; }
+  if (err === 'taken' || err === 'reserved' || err === 'invalid'){
+    gateRetryCtx = { user, intent };
+    paintRetrySub();
+    showOnly('gate-signup-retry');
+    retryUser.set(intent.username);
+    retryUser.input.focus();
+    return false;
+  }
+  return true;
+}
+function paintRetrySub(){
+  const el = document.getElementById('signup-retry-sub');
+  if (el && gateRetryCtx) el.textContent = t('gate.signup.retrySub', { u: gateRetryCtx.intent.username });
+}
+document.getElementById('retry-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!gateRetryCtx) return;
+  const btn = document.getElementById('retry-submit');
+  const note = document.getElementById('retry-note');
+  note.textContent = ''; note.className = 'gate-note';
+  btn.disabled = true;
+  try {
+    const status = await retryUser.settle();
+    if (status !== 'ok' && status !== 'unknown'){ note.textContent = t(status === 'invalid' || status === 'empty' ? 'gate.signup.userInvalid' : 'gate.signup.userPickFree'); note.className = 'gate-note err'; retryUser.input.focus(); return; }
+    const intent = Object.assign({}, gateRetryCtx.intent, { username: retryUser.st.value });
+    saveSignupIntent(intent);
+    if (await claimSignupUsername(gateRetryCtx.user, intent)){
+      const user = gateRetryCtx.user;
+      gateRetryCtx = null;
+      finishCoursePick(user, intent.lang, intent.speak || gateSiteLang());
+    }
+  } finally { btn.disabled = false; }
 });
 
 // ---------- Idioma do site no topo da entrada ----------
@@ -753,14 +1143,15 @@ function paintSiteLang(){
 function paintGateTexts(){
   // aviso de erro/sucesso já mostrado ficaria no idioma anterior: some ao trocar o idioma
   ['gate-login-note', 'gate-new-password-note'].forEach(id => { const n = document.getElementById(id); if (n){ n.textContent = ''; n.className = 'gate-note'; } });
+  ['signup-note', 'signup-method-note', 'retry-note'].forEach(id => { const n = document.getElementById(id); if (n){ n.textContent = ''; n.className = 'gate-note'; } });
   paintSiteLang();
-  paintLoginMode();
+  paintSignupTexts();
   paintResendBtn();
   const vn = document.getElementById('gate-verify-note');
   if (vn && !vn.classList.contains('err') && !vn.classList.contains('ok')) vn.textContent = t('gate.verify.note');
   paintGateLink();
   paintGateExperienceTitle();
-  if (document.getElementById('gate-choose-language').style.display !== 'none') renderLanguageChoices();
+  rerenderVisibleCourseLists();
 }
 (function setupSiteLangMenu(){
   const btn = document.getElementById('site-lang-btn');
@@ -790,6 +1181,21 @@ function paintGateTexts(){
 })();
 window.addEventListener('i18n:change', paintGateTexts);
 paintGateTexts();
+
+// Botão de tema do topo: troca claro/escuro (toggleTheme, shared/theme.js). Antes não tinha clique nenhum.
+// O ícone mostra o tema para onde vai: lua no claro, sol no escuro.
+(function setupThemeButton(){
+  const b = document.getElementById('theme-toggle-btn');
+  if (!b || typeof toggleTheme !== 'function') return;
+  const paint = () => {
+    const dark = isDarkThemeActive();
+    b.textContent = dark ? '☀' : '🌙';
+    b.setAttribute('aria-pressed', String(dark));
+    if (window.EmojiIcons) window.EmojiIcons.scan(b);
+  };
+  b.addEventListener('click', () => { toggleTheme(); paint(); });
+  paint();
+})();
 
 // ---------- Resolução inicial ----------
 (async () => {

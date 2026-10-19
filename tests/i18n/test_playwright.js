@@ -270,7 +270,7 @@ async function triggerWouldGenerate(page){
     const p = await boot(browser, portCur, lang, '');
     const ptSnap = await snapshot(p.page);
     // Mudanças de texto em português aprovadas pela autora depois do baseline (regra: sem "--" em texto visível).
-    const DELIBERATE_PT = [['A captura, se anexada, fica visível só para a equipe -- nada é enviado automaticamente.', 'A captura, se anexada, fica visível só para a equipe. Nada é enviado automaticamente.'] /* 2026-10-18 */];
+    const DELIBERATE_PT = [['A captura, se anexada, fica visível só para a equipe -- nada é enviado automaticamente.', 'A captura, se anexada, fica visível só para a equipe. Nada é enviado automaticamente.'] /* 2026-10-18 */, ['Continue assim: sua série será zerada se você não estudar amanhã.', 'Volte amanhã para manter sua sequência.'] /* 2026-10-19 */];
     const baseFixed = DELIBERATE_PT.reduce((acc, [a, c]) => acc.split(a).join(c), JSON.stringify(baseSnap));
     // Reportar (2026-10-18, aprovado pela autora): descrições das categorias, texto de apoio, contador, ícones e
     // "Enviar relato" são acréscimos; saem da comparação com o baseline (o texto deles é conferido nos testes de idioma).
