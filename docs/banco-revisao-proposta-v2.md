@@ -157,6 +157,6 @@ Decisões da autora nesta rodada: **Modo aula também usa o FSRS e alimenta o me
 
 **Testes:** `tests/banco-revisao/*` (todas as suítes, Playwright 534/534), `tests/banco-revisao-turmas` (096 49/49, Mural 80/80), `tests/banco-revisao-compartilhado` (112 26/26), xp, ida e volta do progresso.
 
-**Falta:** fechamento da proposta B (preview em `docs/banco-revisao-preview-tipos.png`); proposta D; teclado de acentos do português; artifact (depois do site).
+**Falta:** fechamento da proposta B (preview no visual do artifact em `docs/banco-revisao-preview-tipos-claro.png` e `-escuro.png`); proposta D; teclado de acentos do português; artifact (depois do site).
 
 **Atualização 2026-10-19:** migration 112 aplicada na produção e `review-bank-agent` v9 publicada (ambas autorizadas pela autora). Paleta dos botões de nota padronizada: o zh passou a usar as mesmas cores do fr (Errei vermelho de erro, Difícil âmbar, Bom azul, Fácil verde jade; antes o zh tinha Bom e Fácil em dois verdes).
