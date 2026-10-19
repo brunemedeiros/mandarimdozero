@@ -2968,7 +2968,10 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
    por JS antes de cada toast; o valor abaixo só vale antes do primeiro
    toast (auditoria de UX/UI, 2026-09, P3). */
 #toast-layer{ position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:var(--z-toast); display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
-.toast{ background: var(--ink); color: var(--gold-bright); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease, toastOut .3s ease 1.7s forwards; }
+.toast{ background: var(--ink); color: var(--gold-bright); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease; pointer-events:auto; max-width:min(560px, calc(100vw - 32px)); text-align:center; }
+/* Some com animação só depois do tempo de leitura (shared/toast.js); passar o mouse ou focar segura o aviso. */
+.toast.saindo{ animation: toastOut .3s ease forwards; }
+@media (prefers-reduced-motion: reduce){ .toast, .toast.saindo{ animation:none; } }
 /* Modo escuro: --ink fica claro e --gold-bright também (ilegível); troca para fundo escuro com texto claro. */
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .toast{ background: var(--paper-warm); color: var(--ink); box-shadow: var(--shadow-lift), inset 0 0 0 1px var(--paper-line); } }
 :root[data-theme="dark"] .toast{ background: var(--paper-warm); color: var(--ink); box-shadow: var(--shadow-lift), inset 0 0 0 1px var(--paper-line); }
@@ -4584,7 +4587,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 
 <a data-i18n="ui.skipLink" class="skip-link" href="#main-content">Pular para o conteúdo</a>
 
-<div id="toast-layer"></div>
+<div id="toast-layer" role="status" aria-live="polite"></div>
 <div id="badge-unlock-layer" aria-live="polite"></div>
 <div id="confetti-layer"></div>
 
@@ -5654,6 +5657,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/anki-export.js"></script>
 <script src="../shared/pwa.js"></script>
 <script src="../shared/toast.js"></script>
+<script src="../shared/modal-a11y.js"></script>
 <script src="../shared/supabase-client.js"></script>
 <script src="../shared/language-pref.js"></script>
 <script src="../shared/auth.js"></script>
