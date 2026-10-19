@@ -375,4 +375,6 @@ subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do si
   versos de preenchimento "(sem tradução)" traduzidos só na tela (o dado no banco não muda).
 - Desafios do Módulo 3: a produção tem os 10 Ouça e traduza antigos (o lote do repositório caiu para 6 no commit 2fb4ca1 sem
   reimportar). O overlay en segue a produção; retrato em `docs/i18n/challenges-producao-a1m3-lt.json`. Decisão pendente da dona.
-- `review-bank-agent`: `engine.generated.mjs` regerado (comportamento igual lá, tudo em português); deploy opcional, não feito.
+- `review-bank-agent`: `engine.generated.mjs` regerado (comportamento igual lá, tudo em português). Deploy NÃO feito de propósito: a v9 da
+  produção usa o motor do commit `0c851e3` (PR #347, outra sessão, FSRS único da 112), que não está na `main`; publicar a `main`
+  desfaria isso. Quando o #347 for mesclado, a regeração do motor junta as duas coisas e aí sim publica.
