@@ -9,7 +9,7 @@ const RB = {
   ready: false, loading: false,
   students: [], settings: { auto_generate: true, manual_markdown: '' }, links: [], classrooms: [],
   summary: null, itemsBy: {}, reviewsBy: {}, recapBy: {},
-  view: 'students', cur: null, filter: 'pendente', type: '', q: '', limit: 60,
+  view: 'students', tab: 'aulas', cur: null, filter: 'pendente', type: '', q: '', limit: 60,
   editingId: null, adding: false, studentForm: null, manualEditing: false, importPlan: null, importOpen: false,
   overview: { ord: { k: 'pending', dir: -1 }, f: { lg: 'todos', att: '0', aula: '0', q: '' }, data: null, loading: false, at: null },
 };
@@ -107,6 +107,7 @@ async function renderReviewBankView(){
     const active = RB.students.filter(s => s.status !== 'arquivado');
     RB.cur = (RB.students.find(s => s.id === saved) || active[0] || RB.students[0] || {}).id || null;
     RB.view = ['students', 'overview', 'manual'].includes(rbLs.get('view')) ? rbLs.get('view') : 'students';
+    RB.tab = ['desempenho', 'aulas', 'itens'].includes(rbLs.get('student-tab')) ? rbLs.get('student-tab') : 'aulas';
     try { const f = JSON.parse(rbLs.get('ov-filters') || 'null'); if (f) Object.assign(RB.overview.f, f, { q: '' }); } catch (e) {}
   }
   if (RB.cur && !RB.itemsBy[RB.cur]) { try { await rbLoadStudentData(RB.cur); } catch (e) { console.error(e); } }
@@ -224,9 +225,10 @@ function rbStudentPanelHTML(s){
     <div class="rb-linkline">${rbLinkLineHTML(s)}</div>
     ${ready.length && rbHasTarget(s) ? `<div class="rb-ready"><span>${rbH(rbt('readyBanner', { n: ready.length }))}</span><button class="rb-btn rb-btn-blue" data-rb="generate-ready" data-id="${rbH(s.id)}">${rbH(rbt('generateReady'))}</button></div>` : ''}
     <div class="rb-counts" aria-live="polite">${counts.map(([v, k]) => `<div class="rb-count"><b>${v}</b><span>${rbH(rbt(k))}</span></div>`).join('')}</div>
-    ${rbStatsHTML(s)}
-    ${rbRecapHTML(s)}
-    <section style="display:flex;flex-direction:column;gap:12px;">
+    <div class="rb-tabs" role="tablist" aria-label="${rbH(rbt('tabsAria'))}">${['desempenho', 'aulas', 'itens'].map(k => `<button class="rb-fchip" role="tab" data-rb="tab" data-t="${k}" aria-selected="${RB.tab === k}" aria-pressed="${RB.tab === k}">${rbH(rbt('tab.' + k))}</button>`).join('')}</div>
+    ${RB.tab === 'desempenho' ? rbStatsHTML(s) : ''}
+    ${RB.tab === 'aulas' ? rbRecapHTML(s) + rbLessonsHTML(s) : ''}
+    ${RB.tab !== 'itens' ? '' : `<section style="display:flex;flex-direction:column;gap:12px;">
       <div class="rb-toolbar" role="group" aria-label="${rbH(rbt('filterAria'))}">
         ${['pendente', 'aprovado', 'cortado', 'todos'].map(f => `<button class="rb-fchip" data-rb="filter" data-f="${f}" aria-pressed="${RB.filter === f}">${rbH(rbt('f.' + f))}</button>`).join('')}
         <button class="rb-btn rb-btn-blue rb-new" data-rb="item-new">${rbH(rbt('newItem'))}</button>
@@ -237,7 +239,23 @@ function rbStudentPanelHTML(s){
       </div>
       <div id="rb-newbox">${RB.adding ? rbItemFormHTML(null, s) : ''}</div>
       <div class="rb-list" id="rb-list">${rbListHTML(s)}</div>
-    </section></div>`;
+    </section>`}</div>`;
+}
+
+// Aba Aulas: os itens do aluno agrupados pela data da aula (a mais recente aberta), com os mesmos botões da lista.
+function rbLessonsHTML(s){
+  const items = RB.itemsBy[s.id] || [];
+  if (!items.length) return `<div class="rb-empty">${rbH(rbt('emptyStudent'))}</div>`;
+  const groups = {};
+  items.forEach(i => { const d = i.class_date || ''; (groups[d] = groups[d] || []).push(i); });
+  const dates = Object.keys(groups).sort((x, y) => (y || '').localeCompare(x || ''));
+  return `<div class="rb-lessons">${dates.map((d, k) => {
+    const g = groups[d], n = st => g.filter(i => i.status === st).length;
+    const pill = (v, key, cls) => v ? `<span class="rb-pill${cls ? ' ' + cls : ''}">${rbH(rbt(key))} ${v}</span>` : '';
+    return `<details class="rb-lesson"${k === 0 ? ' open' : ''}><summary><strong>${d ? rbH(rbt('lessonOf', { d: rbDateFmt(d) })) : rbH(rbt('lessonNoDate'))}</strong>
+      <span class="rb-lesson-pills">${pill(n('aprovado'), 'cApproved', 'is-ok')}${pill(n('pendente'), 'cToCheck', 'is-pend')}${pill(n('cortado'), 'cCut', '')}</span></summary>
+      <div class="rb-list">${g.map(i => rbItemHTML(i, s)).join('')}</div></details>`;
+  }).join('')}</div>`;
 }
 
 function rbFilteredItems(s){
@@ -603,6 +621,7 @@ function rbWire(wrap){
     try {
       if (a === 'view'){ RB.view = b.dataset.v; rbLs.set('view', RB.view); rbRender(); }
       else if (a === 'select'){ RB.cur = id; rbLs.set('cur', id); RB.editingId = null; RB.adding = false; RB.limit = 60; if (!RB.itemsBy[id]) await rbLoadStudentData(id); rbRender(); }
+      else if (a === 'tab'){ RB.tab = b.dataset.t; rbLs.set('student-tab', RB.tab); RB.editingId = null; RB.adding = false; rbRender(); }
       else if (a === 'filter'){ RB.filter = b.dataset.f; RB.limit = 60; rbRender(); }
       else if (a === 'more'){ RB.limit += 60; document.getElementById('rb-list').innerHTML = rbListHTML(rbStudentById(RB.cur)); }
       else if (a === 'item-new'){ RB.adding = true; RB.editingId = null; rbRender(); }

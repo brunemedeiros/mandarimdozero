@@ -3227,6 +3227,12 @@ window.I18N_CATALOG['en'] = {
   'rb.restored': 'Item went back to pending.', // ALTA
   'rb.sByClass': 'Accuracy per class', // ALTA
   'rb.sByType': 'Mistakes by item type', // ALTA
+  'rb.tabsAria': 'Student sections', // ALTA
+  'rb.tab.desempenho': 'Performance', // ALTA
+  'rb.tab.aulas': 'Lessons', // ALTA
+  'rb.tab.itens': 'All items', // ALTA
+  'rb.lessonOf': 'Lesson of {d}', // ALTA
+  'rb.lessonNoDate': 'No lesson date', // ALTA
   'rb.sInClass': 'In class', // ALTA
   'rb.sAtHome': 'At home', // ALTA
   'rb.sDays': 'classes reviewed', // ALTA

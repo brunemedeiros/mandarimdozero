@@ -209,3 +209,11 @@
 /* espaçamento da área principal e nome do aluno sem quebrar linha na Visão geral */
 #rb-main{ display:flex; flex-direction:column; gap:16px; }
 .rb-table td:first-child{ white-space:nowrap; }
+
+.rb-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:2px 0 4px; }
+.rb-lessons{ display:flex; flex-direction:column; gap:10px; }
+.rb-lesson{ border:1px solid var(--paper-line); border-radius:var(--radius); padding:8px 12px; background:var(--paper); }
+.rb-lesson > summary{ cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; list-style:none; padding:4px 0; }
+.rb-lesson > summary::-webkit-details-marker{ display:none; }
+.rb-lesson-pills{ display:flex; gap:6px; flex-wrap:wrap; }
+.rb-lesson .rb-list{ margin-top:8px; }

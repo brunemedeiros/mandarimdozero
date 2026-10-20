@@ -16,6 +16,7 @@ const dyn = [];
 ['nao_lembrou', 'em_parte', 'confundiu', 'genero', 'conjugacao', 'tempo', 'auxiliar', 'ordem', 'preposicao', 'concordancia', 'repetiu', 'corrigiu_parte', 'som', 'tonico'].forEach(k => dyn.push('reason.' + k));
 ['question', 'answer', 'wrong_form'].forEach(k => dyn.push('field.' + k));
 ['pt', 'en', 'fr'].forEach(k => dyn.push('ref.' + k));
+['desempenho', 'aulas', 'itens'].forEach(k => dyn.push('tab.' + k));
 ['recap', 'ultima', 'erros'].forEach(k => { dyn.push('mode.' + k); dyn.push('classEmpty.' + k); });
 [0, 1, 2, 3, 4].forEach(n => dyn.push('oAttOpt' + n)); [0, 1, 2].forEach(n => dyn.push('oLessonOpt' + n));
 ['tabStudents', 'tabOverview', 'tabManual', 'cItems', 'cApproved', 'cToCheck', 'cCut', 'oStudents', 'oPending', 'oStale', 'oAccuracy', 'colName', 'colNext', 'colPending', 'colApproved', 'colEntry', 'colRecap', 'colAccuracy', 'colErrors', 'colReason', 'sub.cards', 'sub.bank'].forEach(k => dyn.push(k));

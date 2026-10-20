@@ -230,11 +230,17 @@ const BANK_STUB = (who, appKey) => {
       const counts = await ev(() => [...document.querySelectorAll('.rb-count b')].map(e => e.textContent));
       L('contagens: 4 itens, 1 aprovado, 2 pendentes, 1 cortado', JSON.stringify(counts) === '["4","1","2","1"]', counts);
       L('Carol vinculada à conta @carol', await ev(() => document.querySelector('.rb-linkline').textContent.includes('@carol')));
+      L('abas do aluno: Desempenho, Aulas e Todos os itens (abre em Aulas)', await ev(() => [...document.querySelectorAll('.rb-tabs [data-rb=tab]')].map(b => b.textContent.trim() + ':' + b.getAttribute('aria-selected')).join() === 'Desempenho:false,Aulas:true,Todos os itens:false'));
+      await page.click('.rb-tabs [data-t=itens]');
       L('"+ Novo item" na mesma linha dos filtros, depois de "Todos"', await ev(() => { const tb = document.querySelector('.rb-toolbar'); const kids = [...tb.children].map(e => e.textContent.trim()); return kids.length === 5 && kids[3] === 'Todos' && kids[4] === '+ Novo item' && !!tb.querySelector('.rb-new'); }));
       L('filtro padrão: Pendentes (2 itens, um com "Para conferir")', await ev(() => document.querySelectorAll('.rb-item').length === 2 && document.querySelectorAll('.rb-doubt').length === 1));
       L('aluna vinculada com 2 itens prontos (1 pendente sem dúvida + 1 aprovado sem cartão): aviso para gerar', await ev(() => !!document.querySelector('.rb-ready') && document.querySelector('.rb-ready').textContent.includes('2')));
+      await page.click('.rb-tabs [data-t=desempenho]');
       L('estatísticas do modo aula aparecem com os números', await ev(() => document.querySelector('#rb-stats .rb-tile b').textContent === '2'));
+      await page.click('.rb-tabs [data-t=aulas]');
       L('Récap: botão para gerar com a data da próxima aula', await ev(() => /Gerar Récap da aula de/.test(document.querySelector('.rb-recap-actions .rb-btn-blue').textContent)));
+      L('aba Aulas agrupa os itens por data da aula, a mais recente aberta', await ev(() => { const l = document.querySelectorAll('.rb-lesson'); return l.length >= 1 && l[0].open && l[0].querySelectorAll('.rb-item').length >= 1 && /Aula de/.test(l[0].querySelector('summary').textContent); }));
+      await page.click('.rb-tabs [data-t=itens]');
       await shot('banco-carol');
 
       // caixas azuis: texto branco em negrito
@@ -309,6 +315,7 @@ const BANK_STUB = (who, appKey) => {
 
       // Récap + Modo aula
       await page.click('[data-rb="filter"][data-f="aprovado"]');
+      await page.click('.rb-tabs [data-t=aulas]');
       await page.click('[data-rb="recap-make"]');
       await page.waitForFunction(() => window.__DB.review_bank_recaps.length === 1);
       const rc = await ev(() => window.__DB.review_bank_recaps[0]);
@@ -340,7 +347,9 @@ const BANK_STUB = (who, appKey) => {
       else { await page.keyboard.press('Space'); await page.keyboard.press('ArrowRight'); await page.waitForSelector('#rb-class .rb-end'); L('fim da rodada com placar', await ev(() => document.querySelector('#rb-class .rb-score').textContent.includes('/'))); }
       await shot('modo-aula-fim');
       await page.click('#rb-class [data-c="close"]');
+      await page.click('.rb-tabs [data-t=aulas]');
       L('fechar o Modo aula volta ao painel', await ev(() => !document.getElementById('rb-class') && !!document.querySelector('.rb-recap')));
+      await page.click('.rb-tabs [data-t=itens]');
 
       // item sensível nunca entra sozinho: nem na geração automática, nem no "Gerar cartões"
       await ev(() => { window.__DB.review_bank_items.push({ id: 'i-sens', teacher_id: 'A', bank_student_id: 'rb-carol', language_app_key: 'frances', student_id: null, item_type: 'vocabulario', question: 'pessoal', answer: 'pessoal', wrong_form: null, gap_word: null, explanation: null, check_note: null, class_date: '2026-10-07', status: 'aprovado', teacher_flashcard_id: null, level: 0, due_date: null, last_result: null, last_review_date: null, proposal: null, sensitive: true, created_at: '2026-10-07', updated_at: '2026-10-07' }); });
