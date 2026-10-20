@@ -17,3 +17,5 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
 9. **Pronomes tônicos** entram cedo, junto do formal e do informal (*moi, toi, vous* na M1.2) e são ampliados depois (*lui, elle*, M1.4; com preposições mais adiante). (2026-10-18)
 
 10. **Título das unidades de gramática** (dona, 2026-10-19): sempre "Gramática: <assunto curto>", em todos os níveis e em todos os cursos (fr, zh, pt), sem subtítulo explicativo. O assunto fica no título; o que a unidade ensina fica no "Consigo...".
+
+11. **Mudou ordem, tema, módulo, nível ou conteúdo de um item? Revisar o que ele ensina e rodar o `auditor-curricular`** (dona, 2026-10-19): ao mover uma unidade, as palavras, frases, diálogos, notas e exercícios dela são reavaliados para a nova posição (nada de usar palavra ainda não ensinada, nada do tema antigo sobrando) e o agente `.claude/agents/auditor-curricular.md` confere em paralelo. Além disso, **uma auditoria pedagógica completa do A1 e do A2 antes da implementação real**.

@@ -84,7 +84,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - Skills do projeto: `migration-supabase`, `notas-de-realidade`, `criar-desafios`, `audio-tts`,
   `teste-navegador`, `registrar-entrega`.
 - Agentes (`.claude/agents/`, `model:` pela dificuldade): `regressao` (haiku, roda testes),
-  `revisor-conteudo` (opus, revisa notas/traduções), `code-architecture-reviewer`/`principal-engineer`/
+  `revisor-conteudo` (opus, revisa notas/traduções), `auditor-curricular` (opus, audita ordem/tema/conteúdo do currículo; rodar a cada mudança de unidade), `code-architecture-reviewer`/`principal-engineer`/
   `plan-reviewer`/`refactor-planner` (opus), `code-refactor-master`/`documentation-architect`/
   `web-research-specialist`/`auto-error-resolver` (sonnet).
 - Histórico completo (texto original, só leitura sob demanda): `docs/historico/01..15-*.md`.
