@@ -4,7 +4,7 @@
 // item virou cartão, o app dele aplica a nota no FSRS (shared/review-bank-student.js). Sem conta: só fica o registro.
 // Depende de shared/review-bank.js (RB, rbt, rbH, helpers) e shared/review-bank-model.js.
 
-const RBC = { open: false, sid: null, mode: 'recap', slides: [], idx: 0, shown: false, results: {}, reasonFor: null, drawer: false, done: false, busy: false };
+const RBC = { open: false, sid: null, mode: 'recap', slides: [], idx: 0, shown: false, results: {}, reasonFor: null, drawer: false, done: false, busy: false, editing: false };
 
 function rbcItemsFor(s, mode){
   const items = (RB.itemsBy[s.id] || []).filter(i => i.status === 'aprovado');
@@ -28,7 +28,7 @@ async function rbcEnsureRecap(s){
 }
 
 async function openReviewBankClass(studentId, mode){
-  RBC.open = true; RBC.drawer = false;
+  RBC.open = true; RBC.drawer = false; RBC.editing = false;
   await rbcLoadStudent(studentId, mode || 'recap');
   if (!document.getElementById('rb-class')){
     const el = document.createElement('div'); el.id = 'rb-class'; el.className = 'rb-class'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', rbt('openClass'));
@@ -67,7 +67,7 @@ function rbcRender(){
     <button class="rb-ico" data-c="fs" aria-label="${rbH(rbt('fullscreen'))}">⛶</button>
     <button class="rb-ico" data-c="close" aria-label="${rbH(rbt('backToPanel'))}">✕</button></div>`;
   const dots = RBC.slides.length ? `<div class="rb-dots">${RBC.slides.map((it, k) => `<span class="rb-dot ${k === RBC.idx && !RBC.done ? 'is-cur' : (RBC.results[it.id] ? 'is-' + ({ acertou: 'ok', ajuda: 'help', errou: 'bad' }[RBC.results[it.id].outcome]) : '')}"></span>`).join('')}</div>` : '';
-  el.innerHTML = bar + dots + `<main class="rb-stage" aria-live="polite">${rbcStageHTML(s)}</main>` + (RBC.drawer ? rbcDrawerHTML() : '');
+  el.innerHTML = bar + dots + `<main class="rb-stage" aria-live="polite">${rbcStageHTML(s)}</main>` + (RBC.drawer ? rbcDrawerHTML() : '') + (RBC.editing ? rbcEditHTML() : '');
 }
 
 function rbcStageHTML(s){
@@ -84,10 +84,46 @@ function rbcStageHTML(s){
   } else {
     ctrl = `<div class="rb-ctrl"><button class="rb-big is-blue" data-c="show">${rbH(rbt('showAnswer'))}</button><button class="rb-big" data-c="skip">${rbH(rbt('skip'))}</button></div>`;
   }
-  return `<div class="rb-kind"><span class="rb-tag">${rbH(rbt('type.' + it.item_type))}</span>${it.class_date ? `<span>${rbH(rbt('classOf', { d: rbDateFmt(it.class_date) }))}</span>` : ''}<span>${RBC.idx + 1} / ${RBC.slides.length}</span></div>
+  return `<div class="rb-kind"><span class="rb-tag">${rbH(rbt('type.' + it.item_type))}</span>${it.class_date ? `<span>${rbH(rbt('classOf', { d: rbDateFmt(it.class_date) }))}</span>` : ''}<span>${RBC.idx + 1} / ${RBC.slides.length}</span><button class="rb-btn rb-edit-open" data-c="edit">${rbH(rbt('edit'))}</button></div>
     <div class="rb-slide">${q}${RBC.shown ? `<div class="rb-sa">${rbH(it.answer)}</div>${it.explanation ? `<div class="rb-sn">${rbH(it.explanation)}</div>` : ''}` : `<div class="rb-hidden">${rbH(rbt('answerHidden'))}</div>`}</div>
     ${ctrl}<div class="rb-keys">${rbH(rbt('keys'))}</div>
     ${rbHasTarget(s) ? '' : `<div class="rb-keys">${rbH(rbt('classNoAccount'))}</div>`}`;
+}
+
+// Janela de edição durante a aula: corrige o item (vale para todos) ou corta, sem sair da aula.
+function rbcEditHTML(){
+  const it = RBC.slides[RBC.idx]; if (!it) return '';
+  const delivered = !!it.teacher_flashcard_id;
+  return `<div class="rb-cedit-veil" data-c="edit-veil"><div class="rb-cedit" role="dialog" aria-modal="true" aria-label="${rbH(rbt('editTitle'))}" data-id="${rbH(it.id)}">
+    <h3 class="rb-h">${rbH(rbt('editTitle'))}</h3>
+    <label>${rbH(rbt('fQuestion'))}<textarea rows="2" data-e="question">${rbH(it.question)}</textarea></label>
+    <label>${rbH(rbt('fAnswer'))}<textarea rows="2" data-e="answer">${rbH(it.answer)}</textarea></label>
+    <label>${rbH(rbt('fObservation'))}<textarea rows="2" data-e="explanation">${rbH(it.explanation || '')}</textarea></label>
+    ${delivered ? `<label class="rb-check" style="flex-direction:row;align-items:center;gap:6px;"><input type="checkbox" data-e="reset"> ${rbH(rbt('fReset'))}</label><p class="rb-hint">${rbH(rbt('fResetHint'))}</p>` : ''}
+    <div class="rb-cedit-actions"><button class="rb-btn rb-btn-blue" data-c="edit-save">${rbH(rbt('save'))}</button><button class="rb-btn" data-c="edit-cancel">${rbH(rbt('cancel'))}</button><span class="rb-meta" id="rb-cedit-msg" role="status" aria-live="polite"></span></div>
+    <div class="rb-cedit-cutbox"><span class="rb-meta">${rbH(rbt('cutWarnAll'))}</span><button class="rb-btn rb-btn-cut" data-c="edit-cut">${rbH(rbt('cutThis'))}</button></div></div></div>`;
+}
+async function rbcEditSave(){
+  const it = RBC.slides[RBC.idx], box = document.querySelector('.rb-cedit'), msg = document.getElementById('rb-cedit-msg');
+  if (!it || !box) return;
+  const g = k => { const e = box.querySelector('[data-e=' + k + ']'); return e ? (e.type === 'checkbox' ? e.checked : e.value.trim()) : ''; };
+  const cols = { question: g('question'), answer: g('answer'), explanation: g('explanation') || null, updated_at: new Date().toISOString() };
+  if (!cols.question || !cols.answer){ if (msg) msg.textContent = rbt('missing', { f: [!cols.question ? rbt('field.question') : '', !cols.answer ? rbt('field.answer') : ''].filter(Boolean).join(', ') }); return; }
+  const { data, error } = await supabaseClient.from('review_bank_items').update(cols).eq('id', it.id).select().maybeSingle();
+  if (error){ if (msg) msg.textContent = rbt('error') + ' ' + rbErrMsg(error); return; }
+  Object.assign(it, data || cols);
+  const s = rbStudentById(it.bank_student_id);
+  if (it.teacher_flashcard_id){ const sync = await rbSyncDeliveredCard(it, s, !!g('reset')); if (!sync.ok) showToast(rbt('error') + ' ' + sync.error); }
+  RBC.editing = false; rbcRender(); showToast(rbt('saved'));
+}
+async function rbcEditCut(){
+  const it = RBC.slides[RBC.idx]; if (!it) return;
+  const { error } = await supabaseClient.rpc('set_review_bank_item_status', { p_item_id: it.id, p_status: 'cortado' });
+  if (error){ showToast(rbt('error') + ' ' + rbErrMsg(error)); return; }
+  it.status = 'cortado';
+  RBC.slides.splice(RBC.idx, 1); RBC.editing = false; RBC.shown = false;
+  if (RBC.idx >= RBC.slides.length) RBC.done = true;
+  rbcRender(); showToast(rbt('cutDone'));
 }
 
 function rbcEndHTML(){
@@ -141,7 +177,12 @@ function rbcAdvance(){
 async function rbcClick(e){
   const b = e.target.closest('[data-c]'); if (!b) return;
   const c = b.dataset.c;
-  if (c === 'close') rbcClose();
+  if (c === 'edit-veil'){ if (e.target === b){ RBC.editing = false; rbcRender(); } return; }
+  if (c === 'edit'){ RBC.editing = true; rbcRender(); }
+  else if (c === 'edit-cancel'){ RBC.editing = false; rbcRender(); }
+  else if (c === 'edit-save'){ b.disabled = true; await rbcEditSave(); }
+  else if (c === 'edit-cut'){ b.disabled = true; await rbcEditCut(); }
+  else if (c === 'close') rbcClose();
   else if (c === 'drawer'){ RBC.drawer = !RBC.drawer; rbcRender(); }
   else if (c === 'fs'){ try { const el = document.getElementById('rb-class'); if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen(); } catch (err) {} }
   else if (c === 'mode'){ await rbcLoadStudent(RBC.sid, b.dataset.m); rbcRender(); }
@@ -158,6 +199,7 @@ async function rbcClick(e){
 
 function rbcKey(e){
   if (!RBC.open) return;
+  if (RBC.editing){ if (e.key === 'Escape'){ RBC.editing = false; rbcRender(); } return; }
   const tag = (e.target && e.target.tagName || '').toLowerCase();
   if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
   if (e.key === 'Escape'){ if (RBC.drawer){ RBC.drawer = false; rbcRender(); } else rbcClose(); return; }

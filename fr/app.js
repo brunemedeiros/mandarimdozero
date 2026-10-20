@@ -4207,6 +4207,10 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
 }
 
 function renderReviewView(){
+  renderReviewViewInner();
+  if (typeof mountBankRequestMenu === 'function') mountBankRequestMenu();
+}
+function renderReviewViewInner(){
   syncReviewBackLink();
   stopExerciseAudio();
   const el = document.getElementById('review-content');

@@ -3140,6 +3140,45 @@ window.I18N_CATALOG['en'] = {
   'rb.chooseStudent': 'Choose a student', // ALTA
   'rb.classNoAccount': 'This student has no linked account yet: answers are only kept in the class record.', // ALTA
   'rb.classOf': 'class of {d}', // ALTA
+  'reqChange.menuAria': 'More options for this card', // ALTA
+  'reqChange.opt.cortar': 'Ask to cut', // ALTA
+  'reqChange.opt.cortarSub': 'This card isn\'t useful for me', // ALTA
+  'reqChange.opt.corrigir': 'Suggest a fix', // ALTA
+  'reqChange.opt.corrigirSub': 'I know how it should be', // ALTA
+  'reqChange.opt.errado': 'Looks wrong', // ALTA
+  'reqChange.opt.erradoSub': 'I\'m not sure, my teacher will check', // ALTA
+  'reqChange.title.cortar': 'Ask to cut', // ALTA
+  'reqChange.title.corrigir': 'Suggest a fix', // ALTA
+  'reqChange.title.errado': 'Looks wrong', // ALTA
+  'reqChange.hint.cortar': 'Your teacher decides. Meanwhile, the card is paused only for you.', // ALTA
+  'reqChange.hint.corrigir': 'Your teacher checks it and, if you are right, updates the card.', // ALTA
+  'reqChange.hint.errado': 'Your teacher checks it. Meanwhile, the card is paused only for you.', // ALTA
+  'reqChange.fixLabel': 'How it should be', // ALTA
+  'reqChange.whyFix': 'What\'s wrong (optional)', // ALTA
+  'reqChange.whyOpt': 'Want to explain? (optional)', // ALTA
+  'reqChange.send': 'Send request', // ALTA
+  'reqChange.cancel': 'Back', // ALTA
+  'reqChange.needFix': 'Write how it should be.', // ALTA
+  'reqChange.sent': 'Request sent to your teacher.', // ALTA
+  'reqChange.sentPaused': 'Request sent. The card stays paused until your teacher answers.', // ALTA
+  'reqChange.notBank': 'This card can\'t take requests here. Talk to your teacher.', // ALTA
+  'reqChange.error': 'That didn\'t work. Try again.', // ALTA
+  'rb.reqTitle': 'Student request', // ALTA
+  'rb.reqKind.cortar': '{n} asked to cut this', // ALTA
+  'rb.reqKind.corrigir': '{n} suggested a fix', // ALTA
+  'rb.reqKind.errado': '{n} thinks this is wrong', // ALTA
+  'rb.reqReason': 'Reason:', // ALTA
+  'rb.reqSuggestion': 'Suggestion:', // ALTA
+  'rb.reqApproveCut': 'Approve the cut', // ALTA
+  'rb.reqDecline': 'Decline', // ALTA
+  'rb.reqKeep': 'It\'s right, keep it', // ALTA
+  'rb.reqApplySug': 'Approve the suggestion', // ALTA
+  'rb.reqEditApprove': 'Edit and approve', // ALTA
+  'rb.reqDeclined': 'Request declined. The card is back for them.', // ALTA
+  'rb.reqApplied': 'Suggestion applied.', // ALTA
+  'rb.editTitle': 'Edit this item', // ALTA
+  'rb.cutThis': '✂ Cut this item', // ALTA
+  'rb.cutWarnAll': 'Cutting applies to every student who has this item.', // ALTA
   'rb.cut': 'Cut', // ALTA
   'rb.cutDone': 'Item cut.', // ALTA
   'rb.daysAgo': '{n} days ago', // ALTA

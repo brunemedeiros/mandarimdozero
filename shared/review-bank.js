@@ -8,7 +8,7 @@
 const RB = {
   ready: false, loading: false,
   students: [], settings: { auto_generate: true, manual_markdown: '' }, links: [], classrooms: [],
-  summary: null, itemsBy: {}, reviewsBy: {}, recapBy: {},
+  summary: null, itemsBy: {}, reviewsBy: {}, recapBy: {}, reqBy: {},
   view: 'students', tab: 'aulas', cur: null, filter: 'pendente', type: '', q: '', limit: 60,
   editingId: null, adding: false, studentForm: null, manualEditing: false, importPlan: null, importOpen: false,
   overview: { ord: { k: 'pending', dir: -1 }, f: { lg: 'todos', att: '0', aula: '0', q: '' }, data: null, loading: false, at: null },
@@ -80,6 +80,11 @@ async function rbLoadStudentData(id){
     supabaseClient.from('review_bank_recaps').select('*').eq('bank_student_id', id).order('class_date', { ascending: false }).limit(1),
   ]);
   RB.itemsBy[id] = items;
+  // Pedidos abertos das alunas (114); falha (banco sem a migration) = sem pedidos.
+  try {
+    const rq = await supabaseClient.from('review_bank_requests').select('*').eq('bank_student_id', id).eq('status', 'pendente').order('created_at');
+    RB.reqBy[id] = rq && !rq.error && rq.data ? rq.data : [];
+  } catch (e) { RB.reqBy[id] = []; }
   RB.reviewsBy[id] = (reviews && reviews.data) || [];
   RB.recapBy[id] = (recaps && recaps.data && recaps.data[0]) || null;
   const s = RB.summary[id] = { total: items.length, pendente: 0, aprovado: 0, cortado: 0 };
@@ -287,6 +292,7 @@ function rbItemHTML(i, s){
       ${i.explanation ? `<div class="rb-obs">${rbH(i.explanation)}</div>` : ''}
       ${i.check_note ? `<div class="rb-doubt"><strong>${rbH(rbt('toCheckColon'))}</strong> ${rbH(i.check_note)}</div>` : ''}
       ${prop ? rbProposalHTML(i, prop) : ''}
+      ${rbRequestsHTML(i)}
     </div>
     <div class="rb-actions">
       ${i.status !== 'aprovado' ? `<button class="rb-btn rb-btn-ok" data-rb="approve" data-id="${rbH(i.id)}">${rbH(rbt('approve'))}</button>` : `<button class="rb-btn" data-rb="unapprove" data-id="${rbH(i.id)}">${rbH(rbt('backToPending'))}</button>`}
@@ -294,6 +300,42 @@ function rbItemHTML(i, s){
       <button class="rb-btn" data-rb="item-edit" data-id="${rbH(i.id)}">${rbH(rbt('edit'))}</button>
       <button class="rb-btn" data-rb="preview" data-id="${rbH(i.id)}">${rbH(rbt('preview'))}</button>
     </div></article>`;
+}
+
+// Pedidos das alunas (114): cada um com as ações certas para o tipo. Cortar vale para todos; recusar devolve o cartão dela.
+function rbRequestsOf(i){ return (RB.reqBy[i.bank_student_id] || []).filter(r => r.item_id === i.id); }
+function rbRequestsHTML(i){
+  return rbRequestsOf(i).map(r => {
+    const who = rbPersonLabel(r.requester_id, i.language_app_key);
+    const sug = r.kind === 'corrigir' && r.proposal ? `<div class="rb-req-sug"><strong>${rbH(rbt('reqSuggestion'))}</strong> ${r.proposal.question ? rbH(r.proposal.question) : ''}${r.proposal.question && r.proposal.answer ? ' → ' : ''}${r.proposal.answer ? rbH(r.proposal.answer) : ''}${r.proposal.note ? ` <span class="rb-obs">${rbH(r.proposal.note)}</span>` : ''}</div>` : '';
+    const btn = (a, cls, k) => `<button class="rb-btn ${cls}" data-rb="${a}" data-id="${rbH(r.id)}" data-item="${rbH(i.id)}">${rbH(rbt(k))}</button>`;
+    const acts = r.kind === 'cortar' ? btn('req-cut', 'rb-btn-cut', 'reqApproveCut') + btn('req-decline', '', 'reqDecline') + btn('req-edit', '', 'edit')
+      : r.kind === 'corrigir' ? btn('req-apply', 'rb-btn-ok', 'reqApplySug') + btn('req-edit', '', 'reqEditApprove') + btn('req-decline', '', 'reqDecline')
+      : btn('req-decline', 'rb-btn-ok', 'reqKeep') + btn('req-edit', '', 'edit') + btn('req-cut', 'rb-btn-cut', 'cut');
+    return `<div class="rb-req" data-req="${rbH(r.id)}"><strong>${rbH(rbt('reqTitle'))}</strong> <span>${rbH(rbt('reqKind.' + r.kind, { n: who }))}</span>
+      ${r.reason ? `<div class="rb-req-why"><strong>${rbH(rbt('reqReason'))}</strong> ${rbH(r.reason)}</div>` : ''}${sug}
+      <div class="rb-actions" style="flex-direction:row;flex-wrap:wrap;">${acts}</div></div>`;
+  }).join('');
+}
+async function rbDecideRequest(reqId, decision){
+  const { data, error } = await supabaseClient.rpc('decide_bank_request', { p_request_id: reqId, p_decision: decision });
+  if (error){ rbToastErr(error); return false; }
+  return data || true;
+}
+// Depois de salvar uma correção no item, os pedidos de correção e de "parece errado" dele ficam resolvidos.
+async function rbResolveRequestsFor(item){
+  for (const r of rbRequestsOf(item).filter(x => x.kind !== 'cortar')) await supabaseClient.rpc('decide_bank_request', { p_request_id: r.id, p_decision: 'resolver' });
+}
+async function rbRequestApply(reqId, itemId){
+  const item = rbFindItem(itemId), s = item && rbStudentById(item.bank_student_id);
+  const r = (RB.reqBy[item && item.bank_student_id] || []).find(x => x.id === reqId);
+  if (!item || !s || !r || !r.proposal) return;
+  const cols = { question: r.proposal.question || item.question, answer: r.proposal.answer || item.answer, explanation: r.proposal.note || item.explanation || null, updated_at: new Date().toISOString() };
+  const { data, error } = await supabaseClient.from('review_bank_items').update(cols).eq('id', item.id).select().maybeSingle();
+  if (error) return rbToastErr(error);
+  if (data && data.teacher_flashcard_id) await rbSyncDeliveredCard(data, s, false);
+  await rbDecideRequest(reqId, 'resolver');
+  await rbReloadCur(); rbRender(); showToast(rbt('reqApplied'));
 }
 
 function rbProposalHTML(i, p){
@@ -455,6 +497,7 @@ async function rbSaveItem(box, approve){
     const r = await rbApproveItem(saved);
     if (!r.ok) rbToastErr(r.error); else delivered = r.card;
   }
+  if (existing) await rbResolveRequestsFor(existing);
   RB.editingId = null; RB.adding = false;
   await rbReloadCur(); rbRender();
   showToast(note || (delivered ? rbt('savedDelivered') : rbt('saved')));
@@ -629,6 +672,11 @@ function rbWire(wrap){
       else if (a === 'item-cancel'){ RB.editingId = null; RB.adding = false; rbRender(); }
       else if (a === 'item-save'){ b.disabled = true; await rbSaveItem(b.closest('[data-form=item]'), !!b.dataset.approve); }
       else if (a === 'approve'){ b.disabled = true; const it = rbFindItem(id); const r = await rbApproveItem(it); if (!r.ok) { rbToastErr(r.error); b.disabled = false; return; } await rbReloadCur(); rbRender(); showToast(r.card ? rbt('savedDelivered') : rbt('approved')); }
+      else if (a === 'req-cut'){ b.disabled = true; if (await rbDecideRequest(id, 'cortar')){ await rbReloadCur(); rbRender(); showToast(rbt('cutDone')); } else b.disabled = false; }
+      else if (a === 'req-decline'){ b.disabled = true; if (await rbDecideRequest(id, 'recusar')){ await rbReloadCur(); rbRender(); showToast(rbt('reqDeclined')); } else b.disabled = false; }
+      else if (a === 'req-apply'){ b.disabled = true; await rbRequestApply(id, b.dataset.item); }
+      else if (a === 'req-edit'){ RB.editingId = b.dataset.item; RB.adding = false; rbRender(); }
+      else if (a === 'cut' && rbRequestsOf(rbFindItem(id) || {}).length){ b.disabled = true; if (await rbDecideRequest(rbRequestsOf(rbFindItem(id))[0].id, 'cortar')){ await rbReloadCur(); rbRender(); showToast(rbt('cutDone')); } else b.disabled = false; }
       else if (a === 'cut' || a === 'unapprove'){ b.disabled = true; const { error } = await supabaseClient.rpc('set_review_bank_item_status', { p_item_id: id, p_status: a === 'cut' ? 'cortado' : 'pendente' }); if (error) { rbToastErr(error); b.disabled = false; return; } await rbReloadCur(); rbRender(); showToast(a === 'cut' ? rbt('cutDone') : rbt('restored')); }
       else if (a === 'preview'){ rbPreview(id); }
       else if (a === 'proposal-apply'){ b.disabled = true; await rbProposalApply(id); }

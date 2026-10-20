@@ -22,18 +22,19 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
 const BANK_STUB = (who, appKey) => {
   const uuid = () => 'u' + Math.random().toString(16).slice(2, 10) + Math.random().toString(16).slice(2, 10);
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
-  const BANK = new Set(['review_bank_students', 'review_bank_items', 'review_bank_recaps', 'review_bank_reviews', 'review_bank_settings']);
+  const BANK = new Set(['review_bank_students', 'review_bank_items', 'review_bank_recaps', 'review_bank_reviews', 'review_bank_settings', 'review_bank_requests']);
   const DEF = {
     review_bank_items: () => ({ status: 'pendente', level: 0, due_date: null, last_result: null, last_review_date: null, proposal: null, student_id: null, teacher_flashcard_id: null }),
     review_bank_reviews: () => ({ applied_at: null, mode: null, review_date: today() }),
     review_bank_students: () => ({ status: 'ativo', linked_student_id: null, lesson_dates: [], reference_language: 'pt' }),
-    review_bank_recaps: () => ({ item_ids: [] }), review_bank_settings: () => ({}),
+    review_bank_recaps: () => ({ item_ids: [] }), review_bank_settings: () => ({}), review_bank_requests: () => ({ status: 'pendente', proposal: null, reason: null }),
   };
   window.__DB.review_bank_students = window.__DB.review_bank_students || [];
   window.__DB.review_bank_items = window.__DB.review_bank_items || [];
   window.__DB.review_bank_recaps = window.__DB.review_bank_recaps || [];
   window.__DB.review_bank_reviews = window.__DB.review_bank_reviews || [];
   window.__DB.review_bank_settings = window.__DB.review_bank_settings || [];
+  window.__DB.review_bank_requests = window.__DB.review_bank_requests || [];
   function bankBuilder(table){
     const st = { f: [], ord: [], lim: null, rng: null, op: null, pl: null, single: false, conf: null };
     const test = r => st.f.every(([op, k, v]) => op === 'eq' ? r[k] === v : op === 'neq' ? r[k] !== v : op === 'in' ? v.includes(r[k]) : op === 'gte' ? r[k] >= v : op === 'lte' ? r[k] <= v : true);
@@ -136,6 +137,30 @@ const BANK_STUB = (who, appKey) => {
     if (name === 'sync_review_bank_item_cards'){
       let n = 0; D.teacher_flashcards.forEach(c => { if (c.bank_item_id === args.p_item_id){ Object.assign(c, { front: args.p_front, back_trans: args.p_back_trans, fields: args.p_fields, card_generation_mode: args.p_mode, tags: args.p_tags || [], note: args.p_note }); if (args.p_bump_revision) c.revision = (c.revision || 0) + 1; n++; } });
       return { data: n, error: null };
+    }
+    // 114: pedidos da aluna (espelha request_bank_item_change e decide_bank_request)
+    if (name === 'request_bank_item_change'){
+      const card = D.teacher_flashcards.find(c => c.id === args.p_teacher_flashcard_id && c.bank_item_id);
+      if (!card) return { data: null, error: { message: 'not_authorized' } };
+      const it = item(card.bank_item_id);
+      let rq = D.review_bank_requests.find(r => r.item_id === it.id && r.requester_id === card.student_id && r.status === 'pendente');
+      if (!rq){ rq = { id: uuid(), item_id: it.id, teacher_id: 'A', requester_id: card.student_id, bank_student_id: it.bank_student_id, status: 'pendente', created_at: new Date().toISOString() }; D.review_bank_requests.push(rq); }
+      Object.assign(rq, { kind: args.p_kind, proposal: args.p_kind === 'corrigir' ? args.p_proposal : null, reason: args.p_reason });
+      card.status = ['cortar', 'errado'].includes(args.p_kind) ? 'archived' : 'active';
+      return { data: rq.id, error: null };
+    }
+    if (name === 'decide_bank_request'){
+      const rq = D.review_bank_requests.find(r => r.id === args.p_request_id); if (!rq) return { data: null, error: { message: 'not_authorized' } };
+      if (rq.status !== 'pendente') return { data: rq.status, error: null };
+      if (args.p_decision === 'cortar'){
+        D.teacher_flashcards.forEach(c => { if (c.bank_item_id === rq.item_id) c.status = 'archived'; });
+        item(rq.item_id).status = 'cortado';
+        D.review_bank_requests.forEach(r => { if (r.item_id === rq.item_id && r.status === 'pendente') r.status = 'aprovado'; });
+        return { data: 'aprovado', error: null };
+      }
+      rq.status = args.p_decision === 'resolver' ? 'aprovado' : rq.kind === 'errado' ? 'mantido' : 'recusado';
+      D.teacher_flashcards.forEach(c => { if (c.bank_item_id === rq.item_id && c.student_id === rq.requester_id && c.status === 'archived' && item(rq.item_id).status === 'aprovado') c.status = 'active'; });
+      return { data: rq.status, error: null };
     }
     if (name === 'get_my_pending_bank_reviews' || name === 'get_my_pending_bank_grades'){
       const out = D.review_bank_reviews.filter(r => !r.applied_at).map(r => ({ r, s: roster(r.bank_student_id), i: item(r.item_id) }))
@@ -349,6 +374,61 @@ const BANK_STUB = (who, appKey) => {
       await page.click('#rb-class [data-c="close"]');
       await page.click('.rb-tabs [data-t=aulas]');
       L('fechar o Modo aula volta ao painel', await ev(() => !document.getElementById('rb-class') && !!document.querySelector('.rb-recap')));
+      await page.click('.rb-tabs [data-t=itens]');
+
+      // 114: pedidos da aluna no Banco (cortar / sugerir correção / parece errado) e janela Editar no Modo aula
+      await ev(() => {
+        const D = window.__DB, now = new Date().toISOString();
+        D.teacher_flashcards.push({ id: 880, teacher_id: 'A', student_id: 'S1', language_app_key: APP_KEY, front: 'a', back_trans: 'b', status: 'active', fields: [], card_generation_mode: 'normal', tags: [], bank_item_id: 'i3', revision: 0 });
+        D.review_bank_items.find(i => i.id === 'i3').teacher_flashcard_id = 880;
+        D.review_bank_requests.push(
+          { id: 'q-cut', item_id: 'i3', teacher_id: 'A', requester_id: 'S1', bank_student_id: 'rb-carol', kind: 'cortar', proposal: null, reason: 'repetido', status: 'pendente', created_at: now },
+          { id: 'q-fix', item_id: 'i1', teacher_id: 'A', requester_id: 'S1', bank_student_id: 'rb-carol', kind: 'corrigir', proposal: { answer: 'choisir (verbe)' }, reason: 'faltou o tipo', status: 'pendente', created_at: now },
+          { id: 'q-wrong', item_id: 'i2', teacher_id: 'A', requester_id: 'S1', bank_student_id: 'rb-carol', kind: 'errado', proposal: null, reason: null, status: 'pendente', created_at: now });
+        RB.filter = 'todos';
+      });
+      await ev(async () => { await rbReloadCur(); rbRender(); });
+      L('pedidos abertos aparecem dentro de cada item, com o nome da aluna', await ev(() => document.querySelectorAll('.rb-req').length === 3 && [...document.querySelectorAll('.rb-req')].every(e => e.textContent.includes('Carol Rocha'))));
+      L('cada tipo de pedido tem as ações certas', await ev(() => { const q = id => [...document.querySelector('[data-req="' + id + '"]').querySelectorAll('button')].map(b => b.dataset.rb).join(); return q('q-cut') === 'req-cut,req-decline,req-edit' && q('q-fix') === 'req-apply,req-edit,req-decline' && q('q-wrong') === 'req-decline,req-edit,req-cut'; }));
+      L('o motivo e a sugestão da aluna aparecem', await ev(() => document.querySelector('[data-req="q-fix"]').textContent.includes('choisir (verbe)') && document.querySelector('[data-req="q-fix"]').textContent.includes('faltou o tipo')));
+      await shot('pedidos-banco');
+      await page.click('[data-req="q-fix"] [data-rb="req-apply"]');
+      await page.waitForFunction(() => window.__DB.review_bank_requests.find(r => r.id === 'q-fix').status === 'aprovado');
+      L('aprovar a sugestão atualiza o item e fecha o pedido', await ev(() => window.__DB.review_bank_items.find(i => i.id === 'i1').answer === 'choisir (verbe)' && !document.querySelector('[data-req="q-fix"]')));
+      const i2Before = await ev(() => window.__DB.review_bank_items.find(i => i.id === 'i2').status);
+      await page.click('[data-req="q-wrong"] [data-rb="req-decline"]');
+      await page.waitForFunction(() => window.__DB.review_bank_requests.find(r => r.id === 'q-wrong').status === 'mantido');
+      L('"parece errado" mantido: fecha o pedido e o item continua igual', await ev((b4) => !document.querySelector('[data-req="q-wrong"]') && window.__DB.review_bank_items.find(i => i.id === 'i2').status === b4, i2Before));
+      await page.click('[data-req="q-cut"] [data-rb="req-cut"]');
+      await page.waitForFunction(() => window.__DB.review_bank_items.find(i => i.id === 'i3').status === 'cortado');
+      L('aprovar o corte corta o item para todos e arquiva o cartão', await ev(() => window.__DB.teacher_flashcards.find(c => c.id === 880).status === 'archived' && window.__DB.review_bank_requests.find(r => r.id === 'q-cut').status === 'aprovado'));
+      // Modo aula: só o botão Editar; Cortar fica dentro da janela
+      await ev(() => { RB.filter = 'aprovado'; });
+      await page.click('.rb-tabs [data-t=aulas]');
+      await ev(() => { window.__DB.review_bank_items.find(i => i.id === 'i1').status = 'aprovado'; window.__DB.review_bank_items.find(i => i.id === 'i1').due_date = '2000-01-01'; });
+      await ev(async () => { await rbReloadCur(); rbRender(); });
+      await page.click('[data-rb="class"]');
+      await page.waitForSelector('#rb-class .rb-slide');
+      L('Modo aula: só há o botão Editar (sem Cortar solto na tela)', await ev(() => !!document.querySelector('#rb-class [data-c="edit"]') && !document.querySelector('#rb-class .rb-stage [data-c="edit-cut"]')));
+      const firstQ = await ev(() => RBC.slides[RBC.idx].id);
+      await page.click('#rb-class [data-c="edit"]');
+      await page.waitForSelector('.rb-cedit');
+      L('janela Editar: pergunta, resposta, observação, Salvar, Cancelar e "Cortar este item" com o aviso de todos', await ev(() => ['question', 'answer', 'explanation'].every(k => !!document.querySelector('.rb-cedit [data-e=' + k + ']')) && !!document.querySelector('[data-c="edit-save"]') && !!document.querySelector('[data-c="edit-cancel"]') && /todos/.test(document.querySelector('.rb-cedit-cutbox').textContent) && !!document.querySelector('[data-c="edit-cut"]')));
+      await shot('modo-aula-editar');
+      await page.fill('.rb-cedit [data-e=explanation]', 'Nota nova da aula.');
+      await page.click('[data-c="edit-save"]');
+      await page.waitForFunction((id) => window.__DB.review_bank_items.find(i => i.id === id).explanation === 'Nota nova da aula.', firstQ);
+      L('Salvar na janela corrige o item e fecha a janela', await ev(() => !document.querySelector('.rb-cedit')));
+      await page.click('#rb-class [data-c="edit"]');
+      await page.waitForSelector('.rb-cedit');
+      await page.keyboard.press('Escape');
+      L('Esc fecha a janela sem sair do Modo aula', await ev(() => !document.querySelector('.rb-cedit') && !!document.getElementById('rb-class')));
+      await page.click('#rb-class [data-c="edit"]');
+      await page.click('[data-c="edit-cut"]');
+      await page.waitForFunction((id) => window.__DB.review_bank_items.find(i => i.id === id).status === 'cortado', firstQ);
+      L('Cortar dentro da janela corta o item e tira da rodada', await ev((id) => !RBC.slides.some(i => i.id === id), firstQ));
+      await page.click('#rb-class [data-c="close"]');
+      await ev(() => { RB.filter = 'pendente'; });
       await page.click('.rb-tabs [data-t=itens]');
 
       // item sensível nunca entra sozinho: nem na geração automática, nem no "Gerar cartões"
@@ -605,6 +685,33 @@ const BANK_STUB = (who, appKey) => {
       L('sessão do Aluno: só cartões da professora, mesmo motor da Revisão', sess.allTeacher, sess);
       L('sessão do Aluno: link "Voltar ao Aluno" e rota #/review/class', /Aluno|Student/.test(sess.back) && sess.hash === '#/review/class', sess);
       await shot('aluno-revisao-sessao');
+      // 114: menu ⋯ do cartão da professora (três opções, cada uma um botão com borda e espaço entre eles)
+      await ev(() => {
+        window.__DB.teacher_flashcards.push({ id: 991, teacher_id: 'A', student_id: 'S1', language_app_key: APP_KEY, front: 'x', back_trans: 'y', status: 'active', fields: [], card_generation_mode: 'normal', tags: [], bank_item_id: 'i7', revision: 0 });
+        window.__DB.review_bank_items.find(i => i.id === 'i7').status = 'aprovado';
+        STATE.reviewIndex = STATE.reviewQueue.findIndex(c => String(c.rowId) === '991'); STATE.reviewCardState = null; renderReviewView();
+      });
+      L('cartão da professora tem o botão ⋯', await ev(() => !!document.getElementById('rq-open') && document.getElementById('rq-open').offsetWidth >= 44));
+      await page.click('#rq-open');
+      await page.waitForSelector('#rq-pop .rq-opt');
+      const opts = await ev(() => [...document.querySelectorAll('#rq-pop .rq-opt')].map(b => { const r = b.getBoundingClientRect(), cs = getComputedStyle(b); return { top: r.top, bottom: r.bottom, h: r.height, bw: parseFloat(cs.borderTopWidth), bs: cs.borderTopStyle, txt: b.textContent.replace(/\s+/g, ' ').trim() }; }));
+      L('menu ⋯: 3 opções, cada uma um botão distinto com borda visível e espaço entre elas', opts.length === 3 && opts.every(o => o.bw >= 2 && o.bs === 'solid' && o.h >= 44) && opts[1].top - opts[0].bottom >= 6 && opts[2].top - opts[1].bottom >= 6, opts);
+      L('menu ⋯: título e explicação em cada opção', opts.every(o => o.txt.length > 12), opts);
+      await shot('aluna-menu');
+      await page.click('#rq-pop [data-rq="corrigir"]');
+      await page.click('#rq-pop [data-rq="send"]');
+      L('sugerir correção sem texto pede para escrever', await ev(() => document.getElementById('rq-msg').textContent.length > 3));
+      await page.fill('#rq-fix', 'ça va bien');
+      await page.fill('#rq-why', 'faltou o acento');
+      await page.click('#rq-pop [data-rq="send"]');
+      await page.waitForFunction(() => window.__DB.review_bank_requests.some(r => r.requester_id === 'S1' && r.item_id === 'i7' && r.kind === 'corrigir'));
+      L('correção enviada com sugestão e motivo; o cartão NÃO pausa', await ev(() => { const r = window.__DB.review_bank_requests.find(x => x.item_id === 'i7'); return r.proposal.answer === 'ça va bien' && r.reason === 'faltou o acento' && window.__DB.teacher_flashcards.find(c => c.id === 991).status === 'active' && !document.getElementById('rq-pop'); }));
+      await page.click('#rq-open'); await page.click('#rq-pop [data-rq="errado"]'); await page.click('#rq-pop [data-rq="back"]');
+      L('Voltar traz as 3 opções de novo', await ev(() => document.querySelectorAll('#rq-pop .rq-opt').length === 3));
+      await page.click('#rq-pop [data-rq="errado"]'); await page.click('#rq-pop [data-rq="send"]');
+      await page.waitForFunction(() => window.__DB.teacher_flashcards.find(c => c.id === 991).status === 'archived');
+      L('"Parece errado" pausa o cartão só dela e ele sai da fila de hoje', await ev(() => window.__DB.review_bank_requests.find(x => x.item_id === 'i7').kind === 'errado' && !STATE.reviewQueue.some(c => String(c.rowId) === '991') && !STATE.cards.some(c => c.origin === 'teacher' && String(c.rowId) === '991' && c.flashcardStatus === 'active')));
+      L('menu ⋯ some quando o cartão atual não é da professora ou a fila acabou', await ev(() => { const el = document.getElementById('rq-open'); const c = STATE.reviewQueue[STATE.reviewIndex]; return el ? !!c && c.origin === 'teacher' : true; }));
       await page.click('#review-back-to-modes');
       await page.waitForFunction(() => document.getElementById('view-student-panel').classList.contains('active'));
       L('voltar leva ao Aluno > Revisão e encerra o escopo', await ev(() => document.getElementById('my-class-review-content').style.display !== 'none' && STATE.reviewSessionClassReview === false && !eligibleReviewPool().some(c => c.origin === 'teacher')));

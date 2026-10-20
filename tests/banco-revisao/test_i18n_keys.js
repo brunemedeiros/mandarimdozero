@@ -19,7 +19,7 @@ const dyn = [];
 ['desempenho', 'aulas', 'itens'].forEach(k => dyn.push('tab.' + k));
 ['recap', 'ultima', 'erros'].forEach(k => { dyn.push('mode.' + k); dyn.push('classEmpty.' + k); });
 [0, 1, 2, 3, 4].forEach(n => dyn.push('oAttOpt' + n)); [0, 1, 2].forEach(n => dyn.push('oLessonOpt' + n));
-['tabStudents', 'tabOverview', 'tabManual', 'cItems', 'cApproved', 'cToCheck', 'cCut', 'oStudents', 'oPending', 'oStale', 'oAccuracy', 'colName', 'colNext', 'colPending', 'colApproved', 'colEntry', 'colRecap', 'colAccuracy', 'colErrors', 'colReason', 'sub.cards', 'sub.bank'].forEach(k => dyn.push(k));
+['tabStudents', 'tabOverview', 'tabManual', 'cItems', 'cApproved', 'cToCheck', 'cCut', 'oStudents', 'oPending', 'oStale', 'oAccuracy', 'colName', 'colNext', 'colPending', 'colApproved', 'colEntry', 'colRecap', 'colAccuracy', 'colErrors', 'colReason', 'sub.cards', 'sub.bank', 'reqKind.cortar', 'reqKind.corrigir', 'reqKind.errado', 'reqApproveCut', 'reqDecline', 'reqKeep', 'reqApplySug', 'reqEditApprove'].forEach(k => dyn.push(k));
 ['json', 'format', 'empty'].forEach(k => dyn.push('imp.err.' + k));
 ['cStudents', 'cItems', 'cPending', 'cRecaps', 'cReviews'].forEach(k => dyn.push('imp.' + k));
 const all = [...new Set([...used, ...dyn])];
