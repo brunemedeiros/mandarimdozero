@@ -248,7 +248,7 @@ function reviewWeekHTML(pool){
   return `<div class="review-week">
     <div class="review-week-head">
       <div class="review-week-title">${escapeHTML(t('review.week.title'))}</div>
-      <div class="review-week-goal${done ? ' is-done' : ''}">${escapeHTML(t(done ? 'review.week.goalDone' : 'review.week.goal'))}${t('review.week.goalCount', { n: Math.min(w.studiedDays, 7), goal: w.goal })}</div>
+      <div class="review-week-goal${done ? ' is-done' : ''}">${escapeHTML(t(done ? 'review.week.goalDone' : 'review.week.goal'))}${tp('review.week.goalCount', w.goal === 1 ? 1 : 2, { n: Math.min(w.studiedDays, 7), goal: w.goal })}</div>
     </div>
     <ol class="review-week-days">${cols}</ol>
     <p class="review-week-legend">${escapeHTML(t('review.week.legendPast'))}<span class="week-key week-key-due"></span>${escapeHTML(t('review.week.legendDue'))}<span class="week-key week-key-new"></span>${escapeHTML(t('review.week.legendNew'))}</p>

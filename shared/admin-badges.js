@@ -334,7 +334,7 @@ async function badgesSaveMembers(form){
 async function badgesDelete(id){
   const b = BADGES_VIEW.catalog.find(x => x.id === id); if (!b) return;
   const n = BADGES_VIEW.grants.filter(g => g.badge_id === id).length;
-  const opts = { titulo: t('badges.delete.title', { name: b.name }), descricao: t(n ? 'badges.delete.textWith' : 'badges.delete.textNone', { n }), confirmar: t('badges.delete.confirm'), cancelar: t('badges.edit.cancel'), perigo: true };
+  const opts = { titulo: t('badges.delete.title', { name: b.name }), descricao: n ? tp('badges.delete.textWith', n === 1 ? 1 : 2, { n }) : t('badges.delete.textNone', { n }), confirmar: t('badges.delete.confirm'), cancelar: t('badges.edit.cancel'), perigo: true };
   const ok = (window.PainelUI && PainelUI.confirmar) ? await PainelUI.confirmar(opts) : confirm(t('admin.badges.confirm.delete'));
   if (!ok) return;
   const r = await deleteCatalogBadge(id);

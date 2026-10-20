@@ -1155,7 +1155,7 @@ function renderActivityHeatmap(){
     <div class="heatmap-col">
       ${week.map(day => day === null
         ? `<div class="heatmap-cell lvl-0 empty"></div>`
-        : `<div class="heatmap-cell ${intensityClass(day.count)}" title="${tp('zh.progress.heatCell', day.count, { date: fmtDate(day.date) })}"></div>`
+        : `<div class="heatmap-cell ${intensityClass(day.count)}" title="${tp('zh.progress.heatCell', day.count === 1 ? 1 : 2, { n: day.count, date: fmtDate(day.date) })}"></div>`
       ).join('')}
     </div>
   `).join('');

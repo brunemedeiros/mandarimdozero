@@ -413,3 +413,34 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Testes: `tests/escolher-usuario/run.sh` (111 22/22, 113 15/15), Postgres local.
 - Staging: `20261018214052`. Produção: `20261018214122`, autorizada pela autora em 2026-10-18; 28 perfis com o mesmo md5 antes e
   depois; `check_username_signup('admin')` = reserved com 3 sugestões; anon não chama `_username_problem`.
+
+## 114 -- Etapa 4 da "Voz da Prof. Brune": textos dos modelos de aviso (2026-10-19)
+
+- `shared/supabase_migrations/114_etapa4_notification_templates_text.sql`. Só dado (`UPDATE` em `notification_templates`), sem deploy.
+  Aprovado pela dona em 2026-10-19 ("Aprovado, troque o texto do ranking"): textos das seções 3.1 e 4.1 de
+  `docs/i18n/etapa4-auditoria-escrita.md`; `ranking_rank_down` trocou o texto (não foi desligado); chinês como "mandarim"/"Mandarin"
+  nas linhas trocadas; e-mails de 9 dias na opção "mecânica" (só sai o "--"). Os ids diferem entre Staging e produção (o Staging só
+  tem os modelos pt-BR, ids 1 a 80), então o UPDATE casa por (evento, canal, idioma estudado, idioma do site, título e corpo antigos).
+  Nenhum placeholder novo; saem `{{days}}`, `{{missing}}` e `{{lessonsRemaining}}` (opcionais no código: variável ausente vira vazio).
+  Texto antigo de cada linha, por projeto: `docs/i18n/etapa4-modelos-antes.json`.
+- Staging: `20261019201144` (53 linhas, só pt-BR). Produção: `20261019201322` (100 linhas: achievement_unlocked 2,
+  daily_missions_reminder 8, featured_badge_reminder 6, mission_completed 2, ranking_rank_down 4, review_overdue 6, streak_at_risk 10,
+  streak_completed 6, student_inactive_alert 3, study_goal_remaining 4, user_inactive_1 5, user_inactive_3 10, user_inactive_5 10,
+  user_inactive_9 8, user_inactive_15 8, user_inactive_20 4, user_inactive_30 4). Depois: nenhum modelo ativo com "--" ou "pra";
+  toda combinação evento x idioma estudado x idioma do site continua com pelo menos uma variante ativa (nos dois projetos).
+
+## 115 -- Etapa 4: avisos de vínculo sem "aluno/a" e badge "Turma de X" (2026-10-19)
+
+- `shared/supabase_migrations/115_etapa4_teacher_link_texts.sql`. Só `create or replace` (nada removido), aplicada pela ferramenta.
+  Base: definição atual na produção (`pg_get_functiondef`, md5 igual ao Staging). `teacher_invite_student` ("te convidou para as
+  aulas de X"), `respond_teacher_invite`, `accept_invite_code`, `join_classroom_code` ("agora estuda X com você"), `_teacher_badge_id`
+  (badge novo "Turma de {nome}" / "Estuda com esta professora."). `_notif_text_en` e `_teacher_notice_params` reconhecem a frase antiga
+  e a nova (o inglês sai sempre na forma nova: "invited you to their X classes", "now studies X with you"); `_teacher_notice_params`
+  também lê o modelo novo de aluno sumido da 114 ("Uns dias sem prática por aí ... Um recado seu").
+- Testes: `tests/sino-professora/run_115.sh` (108 45/45, 115 25/25), mural `test_087.sql` no mesmo banco 80/80. Postgres local.
+- Staging: `20261019202044`. Produção: `20261019202200` (md5 das 7 funções igual ao Staging; ACL igual ao de antes, com
+  service_role na produção; os 2 avisos antigos de vínculo na produção continuam com params lidos da frase).
+- Badges já criados (dado, autorizado pela dona): Staging `student_02bd4956c8f4470584f37b2b` "Aluno/a do/a Prof. uf19f9a6fc1" /
+  "Aluno/a com vínculo ativo com esta professora." -> "Turma de uf19f9a6fc1" / "Estuda com esta professora.". Produção: nenhum badge
+  gerado pela `_teacher_badge_id`; o badge `student` (da Prof. Brune) "Aluno/a da Prof. Brune" / "Aluno/a da Prof. Brune" ->
+  "Turma da Prof. Brune" / "Estuda com a Prof. Brune" (texto da seção 3.4; na tela vale a tradução `badge.catalog.student.*`).

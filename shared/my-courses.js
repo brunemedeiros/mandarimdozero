@@ -194,7 +194,7 @@ function ensureCourseMenuStyles(){
 .add-course-modal{ max-width:640px; width:calc(100% - 24px); max-height:90vh; overflow:auto; }
 .add-course-speak{ display:inline-flex; gap:4px; padding:4px; background: var(--paper); border:1px solid var(--paper-line); border-radius:999px; }
 .add-course-speak button{ font:inherit; font-weight:800; font-size:14px; min-height:44px; padding:0 16px; border:0; border-radius:999px; background:transparent; color: var(--ink-soft); cursor:pointer; }
-.add-course-speak button[aria-pressed="true"]{ background: var(--seal-red); color: var(--on-seal-red); }
+.add-course-speak button[aria-pressed="true"]{ background: var(--brand-fill); color: var(--on-brand-fill); }
 .add-course-speak button:focus-visible, .add-course-card:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }
 .add-course-group{ margin:18px 0 0; font-size:14px; font-weight:800; color: var(--ink-soft); }
 .add-course-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:12px; margin-top:12px; }

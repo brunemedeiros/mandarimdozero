@@ -451,9 +451,9 @@ async function generateApkg(config){
     setTimeout(() => URL.revokeObjectURL(url), 4000);
 
     const mediaNote = media.failedCount > 0
-      ? tp('ankiExport.mediaNote', media.failedCount)
+      ? tp('ankiExport.mediaNote', media.failedCount === 1 ? 1 : 2, { n: media.failedCount })
       : '';
-    statusEl.textContent = tp('ankiExport.done', exportCards.length, { mediaNote });
+    statusEl.textContent = tp('ankiExport.done', exportCards.length === 1 ? 1 : 2, { n: exportCards.length, mediaNote });
     statusEl.className = `export-status ${media.failedCount > 0 ? 'err' : 'ok'}`;
 
   }catch(err){

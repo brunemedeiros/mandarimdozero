@@ -64,6 +64,9 @@ try{
      renomear tudo que os referencia; só os valores mudaram de família. */
   --seal-red: #3498D6;       /* azul — cor primária */
   --seal-red-dark: #1D5A82;  /* azul profundo — hover/pressed, texto de destaque */
+  /* Caixas com texto (botões, abas e chips selecionados, contadores): azul + branco, 4,7:1 nos dois temas (decisão da autora, 2026-10-19).
+     Mesmo valor no claro e no escuro: o azul claro do escuro não aguenta texto branco. */
+  --brand-fill: #2879B3; --brand-fill-hover: #1D5A82; --on-brand-fill: #FFFFFF;
   --imperial-gold: #E36BCA;  /* rosa — accent secundário */
   --hover-gold: #C9973A;
   --gold-bright: #F2A8DE;    /* rosa claro — destaques sobre fundo escuro */
@@ -233,7 +236,7 @@ html,body{ margin:0; padding:0; }
    aba pra quem usa teclado/leitor de tela. */
 .skip-link{
   position:absolute; top:-48px; left:8px; z-index:var(--z-top);
-  background: var(--seal-red); color: var(--on-seal-red);
+  background: var(--brand-fill); color: var(--on-brand-fill);
   font-family: var(--font-body); font-weight:800; font-size:14px;
   padding:12px 18px; border-radius:0 0 10px 10px; text-decoration:none;
   transition: top .15s ease;
@@ -648,7 +651,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   flex-shrink:0; width:44px; height:44px; border-radius:12px; background: var(--paper-warm);
   display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color: var(--ink-soft);
 }
-.level-list-item.active .level-list-badge{ background: var(--seal-red); color: var(--on-seal-red); }
+.level-list-item.active .level-list-badge{ background: var(--brand-fill); color: var(--on-brand-fill); }
 .level-list-title{ font-weight:800; font-size:15px; }
 .level-list-sub{ font-size:12.5px; color: var(--ink-soft); margin-top:2px; }
 
@@ -863,7 +866,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 }
 .level-test-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift); }
 .level-test-card.done{ border-color: var(--jade); background: linear-gradient(135deg, rgba(58,115,89,0.06), rgba(58,115,89,0.1)); }
-.level-test-icon{ flex-shrink:0; width:52px; height:52px; border-radius:14px; background: var(--seal-red); display:flex; align-items:center; justify-content:center; font-size:26px; }
+.level-test-icon{ flex-shrink:0; width:52px; height:52px; border-radius:14px; background: var(--brand-fill); display:flex; align-items:center; justify-content:center; font-size:26px; }
 .level-test-card.done .level-test-icon{ background: var(--jade); }
 .level-test-body{ flex:1; min-width:0; }
 .level-test-title{ font-weight:800; font-size:16px; margin-bottom:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
@@ -1002,7 +1005,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .dlg-row.a{ align-self:flex-start; }
 .dlg-row.b{ align-self:flex-end; flex-direction:row-reverse; }
 .dlg-avatar{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px; width:46px; }
-.dlg-emoji{ width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; background: var(--seal-red); color: var(--on-seal-red); font-weight:800; }
+.dlg-emoji{ width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; background: var(--brand-fill); color: var(--on-brand-fill); font-weight:800; }
 .dlg-row.b .dlg-emoji{ background: var(--imperial-gold); color: var(--ink); }
 .dlg-name{ font-size:10.5px; font-weight:800; color: var(--ink-soft); max-width:60px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .dlg-bubble{
@@ -1171,7 +1174,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 }
 /* Vermelho mais escuro e menos saturado que --error-red puro; par background+color
    revisado junto (texto branco fixo, legível nos dois temas). */
-button.wrong-feedback-continue{ background: var(--error-red); color: var(--on-vivid); }
+button.wrong-feedback-continue{ background: var(--error-red); color: var(--on-brand-fill); }
 button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid); }
 
 /* ---------- Passos de unidade de gramática (blocos, estilo Busuu) ---------- */
@@ -1523,7 +1526,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 }
 
 .lesson-recap{ text-align:left; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); overflow:hidden; }
-.lesson-recap-label{ background: var(--seal-red); color: var(--on-seal-red); font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:10px 16px; }
+.lesson-recap-label{ background: var(--brand-fill); color: var(--on-brand-fill); font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:10px 16px; }
 .lesson-recap-item{ padding:12px 16px; }
 .lesson-recap-item + .lesson-recap-item{ border-top:1px solid var(--paper-line); }
 .lesson-recap-french{ font-size:15px; font-weight:700; display:flex; align-items:center; gap:8px; }
@@ -1695,10 +1698,10 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   position:relative;
 }
 .btn:active:not(:disabled){ transform: translateY(2px); }
-.btn-primary{ background: var(--seal-red); color: var(--on-seal-red);
+.btn-primary{ background: var(--brand-fill); color: var(--on-brand-fill);
   box-shadow: 0 var(--btn-depth) 0 rgba(0,0,0,0.22);
-  box-shadow: 0 var(--btn-depth) 0 color-mix(in srgb, var(--seal-red) 62%, #000); }
-.btn-primary:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--seal-red) 62%, #000); }
+  box-shadow: 0 var(--btn-depth) 0 color-mix(in srgb, var(--brand-fill) 62%, #000); }
+.btn-primary:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--brand-fill) 62%, #000); }
 .btn-primary:hover{ filter:brightness(1.06); }
 .btn-secondary{ background: var(--paper-warm); color: var(--ink); border:2px solid var(--paper-line); box-shadow: 0 var(--btn-depth-sm) 0 var(--paper-line); }
 .btn-secondary:active:not(:disabled){ box-shadow: 0 1px 0 var(--paper-line); }
@@ -2139,7 +2142,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .friends-crowd .friends-crowd-other{ opacity:.85; }
 .friends-crowd .friends-crowd-other:first-child{ margin-right:-12px; }
 .friends-crowd .friends-crowd-other:last-child{ margin-left:-12px; }
-.friends-crowd .friends-crowd-me{ width:64px; height:64px; font-size:22px; background:var(--seal-red); color:var(--on-seal-red); position:relative; z-index:1; }
+.friends-crowd .friends-crowd-me{ width:64px; height:64px; font-size:22px; background:var(--brand-fill); color:var(--on-brand-fill); position:relative; z-index:1; }
 .friends-empty-title{ font-family:var(--font-body); font-size:22px; font-weight:900; margin:0; color:var(--ink); text-wrap:balance; }
 .friends-empty-text{ color:var(--ink-soft); margin:6px auto 16px; max-width:32ch; font-size:15px; }
 .friends-empty .btn-block{ max-width:360px; }
@@ -2192,7 +2195,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 }
 .side-ranking-tabs{ display:flex; gap:6px; margin-bottom:8px; }
 .side-ranking-tab{ flex:1; background:var(--paper-warm); border:1px solid var(--paper-line); color:var(--ink-soft); border-radius:999px; padding:4px 8px; font-size:12px; font-weight:700; cursor:pointer; }
-.side-ranking-tab.active{ background:var(--seal-red); border-color:var(--seal-red); color:#fff; }
+.side-ranking-tab.active{ background:var(--brand-fill); border-color:var(--brand-fill); color:var(--on-brand-fill); }
 /* ---------- Ranking (Leaderboard) ---------- */
 .leaderboard-week-label{ font-size:12.5px; color:var(--ink-soft); font-weight:700; text-align:center; margin-bottom:10px; }
 .leaderboard-tabs{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; }
@@ -2200,7 +2203,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   font-size:12.5px; font-weight:700; color:var(--ink-soft); background:var(--paper); border:1px solid var(--paper-line);
   border-radius:99px; padding:6px 14px; cursor:pointer; font-family:var(--font-body);
 }
-.leaderboard-tab.active{ background:var(--seal-red); border-color:var(--seal-red); color:#fff; }
+.leaderboard-tab.active{ background:var(--brand-fill); border-color:var(--brand-fill); color:var(--on-brand-fill); }
 /* Lista contínua (não cards por linha) -- linha divisória fina em vez de
    borda+raio+gap por item, densidade mais parecida com um ranking de
    verdade do que com uma pilha de cartões administrativos. */
@@ -2552,7 +2555,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .report-screenshot-name{ font-size:12px; color:var(--ink-soft); word-break:break-all; }
 .report-modal-privacy-note{ font-size:11.5px; color:var(--ink-soft); margin:8px 0 0; line-height:1.4; }
 .report-success-check{
-  width:56px; height:56px; border-radius:50%; background:var(--seal-red); color:#fff;
+  width:56px; height:56px; border-radius:50%; background:var(--brand-fill); color:var(--on-brand-fill);
   display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; margin:6px auto 14px;
 }
 .report-success-text{ text-align:center; font-size:14px; color:var(--ink); margin:0 0 18px; line-height:1.5; }
@@ -2700,7 +2703,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   cursor:pointer; color: var(--ink-soft);
 }
 .dictation-speed-btn:hover{ border-color: var(--imperial-gold); }
-.dictation-speed-btn.active{ background: var(--seal-red); border-color: var(--seal-red); color: var(--on-seal-red); }
+.dictation-speed-btn.active{ background: var(--brand-fill); border-color: var(--brand-fill); color: var(--on-brand-fill); }
 @media (max-width: 480px){
   .dictation-secondary-controls{ gap:10px; }
   .dictation-speed-controls{ margin-left:0; }
@@ -2818,9 +2821,12 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   font-weight:700; font-size:13px; cursor:pointer; transition: all .15s ease;
 }
 .challenge-level-tab:hover{ border-color: var(--seal-red); }
-.challenge-level-tab.active{ background: var(--seal-red); border-color: var(--seal-red); color:#fff; }
+.challenge-level-tab.active{ background: var(--brand-fill); border-color: var(--brand-fill); color:var(--on-brand-fill); }
 
 .challenges-level-sections{ display:flex; flex-direction:column; gap:22px; }
+/* Os níveis ficam dentro de #challenges-level-sections-inner: sem isto eles encostam e o anel do nível
+   seguinte invade o último cartão do nível de cima (achado da autora, 2026-10-19). */
+#challenges-level-sections-inner{ display:flex; flex-direction:column; gap:22px; }
 .challenges-level-section{ display:flex; flex-direction:column; gap:12px; }
 .challenges-level-heading{
   display:flex; align-items:center; gap:10px; width:100%; text-align:left;
@@ -3163,10 +3169,23 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .expr-card-foot .tier-badge{ margin:0; }
 .challenge-card.expr-card.completed{ border-color: var(--jade); }
 .expr-card-seal{ position:absolute; top:-9px; right:12px; background: var(--jade); color: var(--on-vivid); font-size:11.5px; font-weight:900; border-radius:999px; padding:2px 9px; transform:rotate(4deg); box-shadow: var(--shadow-card); }
-.expr-play{ position:absolute; top:14px; right:12px; width:40px; height:40px; border-radius:50%; border:0; display:grid; place-items:center; background: var(--seal-red); color: var(--on-vivid); font-size:14px; cursor:pointer; box-shadow: var(--shadow-card); }
-.expr-play:hover{ background: var(--seal-red-dark); }
+.expr-play{ position:absolute; top:14px; right:12px; width:40px; height:40px; border-radius:50%; border:0; display:grid; place-items:center; background: var(--brand-fill); color: var(--on-brand-fill); font-size:14px; cursor:pointer; box-shadow: var(--shadow-card); }
+.expr-play:hover{ background: var(--brand-fill-hover); }
 .expr-play.speaking{ background: var(--imperial-gold); }
 .expr-play:focus-visible{ outline:3px solid color-mix(in srgb, var(--seal-red) 55%, transparent); outline-offset:2px; }
+/* Álbum compacto (2026-10-19): mais cartões por linha (2 no celular, 3 ou mais no computador) e o som
+   no canto de baixo, para a expressão usar a largura toda. */
+.challenges-cards:has(> .expr-card-wrap){ grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+@media (min-width:760px){ .challenges-cards:has(> .expr-card-wrap){ grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); } }
+.challenges-cards .challenge-card.expr-card{ min-height:0; padding:12px 12px 12px 14px; }
+.challenges-cards .expr-card .challenge-card-expr{ font-size:16.5px; line-height:1.2; }
+.challenges-cards .expr-card-meaning{ font-size:13px; }
+.challenges-cards .expr-card-foot{ flex-direction:column; align-items:flex-start; gap:4px; padding-right:42px; min-height:36px; }
+.expr-card-wrap .expr-play{ top:auto; bottom:10px; right:10px; width:36px; height:36px; font-size:12px; }
+@media (max-width:759px){
+  .expr-card-wrap .expr-play{ width:44px; height:44px; bottom:8px; right:8px; }
+  .challenges-cards .expr-card-foot{ padding-right:48px; min-height:44px; }
+}
 
 .expr-today{ display:flex; flex-direction:column; gap:10px; background: color-mix(in srgb, var(--seal-red) 9%, var(--paper-warm)); border:1.5px solid color-mix(in srgb, var(--seal-red) 30%, var(--paper-line)); border-radius:20px; padding:18px; margin-bottom:16px; }
 .expr-today-eyebrow{ font-size:12px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color: var(--seal-red-dark); }
@@ -3325,7 +3344,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 .challenges-import-status.ok{ color: var(--jade); }
 .challenges-import-status.err{ color: var(--error-red-text); }
 .deck-chip{ padding:7px 13px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper); font-size:12.5px; font-weight:700; cursor:pointer; color:var(--ink-soft); }
-.deck-chip.active{ background: var(--seal-red); border-color: var(--seal-red); color: var(--on-seal-red); }
+.deck-chip.active{ background: var(--brand-fill); border-color: var(--brand-fill); color: var(--on-brand-fill); }
 
 /* ---------- Modal genérico (perfil, meta de estudo, atalhos...) ---------- */
 .app-modal-overlay{
@@ -3443,7 +3462,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
   display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color: var(--ink-soft);
   z-index:1;
 }
-.wizard-level-row.active .wizard-level-circle{ background: var(--seal-red); border-color: var(--seal-red); color: var(--on-seal-red); }
+.wizard-level-row.active .wizard-level-circle{ background: var(--brand-fill); border-color: var(--brand-fill); color: var(--on-brand-fill); }
 .wizard-level-text{ display:flex; flex-direction:column; gap:2px; padding-top:6px; }
 .wizard-level-tier{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; }
 .wizard-level-desc{ font-size:14px; font-weight:700; color: var(--ink); line-height:1.35; }
@@ -3781,7 +3800,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .report-topbar-pill:hover{ color:var(--ink); border-color:var(--imperial-gold); }
 .notifications-badge{
   position:absolute; top:-3px; right:-3px; min-width:16px; height:16px; padding:0 4px;
-  border-radius:999px; background:var(--seal-red-dark); color:#fff; font-size:10px; font-weight:800;
+  border-radius:999px; background:var(--brand-fill); color:var(--on-brand-fill); font-size:10px; font-weight:800;
   align-items:center; justify-content:center; line-height:1; border:2px solid var(--paper);
 }
 .notifications-dropdown{ min-width:min(320px, calc(100vw - 24px)); max-width:min(360px, calc(100vw - 24px)); max-height:70vh; overflow-y:auto; }
@@ -4704,7 +4723,7 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   .calendar-feed-actions .btn, .calendar-feed-copy .btn { min-height: 44px; }
 }
 /* Mural da professora (087, shared/mural.js) */
-.mural-count{ display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 6px; margin-left:6px; border-radius:999px; background:var(--seal-red); color:var(--on-seal-red); font-size:11.5px; font-weight:800; line-height:1; vertical-align:middle; }
+.mural-count{ display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 6px; margin-left:6px; border-radius:999px; background:var(--brand-fill); color:var(--on-brand-fill); font-size:11.5px; font-weight:800; line-height:1; vertical-align:middle; }
 .tab-btn > .mural-count{ position:absolute; top:2px; right:4px; margin:0; min-width:18px; height:18px; font-size:10.5px; border:2px solid var(--paper); box-sizing:content-box; padding:0 4px; }
 .tab-btn > .friends-badge ~ .mural-count, .tab-btn > .mural-count ~ .friends-badge{ right:auto; left:4px; }
 .mural-wrap{ display:flex; flex-direction:column; gap:12px; }
@@ -4714,7 +4733,7 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .mural-picker{ display:flex; flex-wrap:wrap; gap:8px; }
 .mural-chip{ display:inline-flex; align-items:center; gap:6px; min-height:40px; padding:6px 14px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink); font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
 .mural-chip:hover{ border-color:var(--seal-red); }
-.mural-chip.is-active{ background:var(--seal-red); color:var(--on-seal-red); border-color:var(--seal-red); }
+.mural-chip.is-active{ background:var(--brand-fill); color:var(--on-brand-fill); border-color:var(--brand-fill); }
 .mural-chip.is-active .mural-count{ background:var(--paper); color:var(--ink); }
 .mural-chip-new{ border-style:dashed; color:var(--ink-soft); }
 .mural-chip .mural-count{ margin-left:2px; }
@@ -5162,6 +5181,8 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 #view-conjugaison .cg-timeline{ margin:0; display:flex; flex-direction:column; gap:6px; color:var(--ink); }
 #view-conjugaison .cg-timeline svg{ width:134px; height:44px; display:block; }
 #view-conjugaison .cg-timeline figcaption{ font-size:12px; font-weight:800; color:var(--ink-soft); line-height:1.35; }
+/* Jogo sem desenho (être x avoir, tu x vous): a legenda vira a regra, num quadro. */
+#view-conjugaison .cg-timeline.cg-rule figcaption{ padding:10px 12px; border-radius:12px; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink); font-size:13px; }
 #view-conjugaison .cg-tr{ display:flex; align-items:center; gap:10px; margin:14px 0 18px; font-size:14.5px; color:var(--ink-soft); }
 #view-conjugaison .cg-next{ width:100%; }
 #view-conjugaison .cg-result{ text-align:center; background:var(--paper); border:1px solid var(--paper-line); border-radius:20px; padding:28px 24px; box-shadow:var(--shadow-card); }
@@ -5182,6 +5203,10 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
   #view-conjugaison .cg-choices{ gap:8px; }
 }
 #view-conjugaison .conj-mode-lock{ font-size:12px; }
+/* Francês dentro do texto em português/inglês (marcado com {chaves} nos dados). */
+#view-conjugaison .cg-fr{ color:var(--seal-red-dark); font-weight:800; }
+#view-conjugaison .cg-level{ display:inline-block; margin-right:8px; padding:1px 8px; border-radius:8px; font-size:13px; font-weight:900; vertical-align:2px;
+  color:var(--ink); background:color-mix(in srgb, var(--seal-red) 16%, var(--paper)); border:1px solid color-mix(in srgb, var(--seal-red) 40%, transparent); }
 #view-conjugaison .cg-premium{ display:inline-block; margin-right:10px; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:800;
   color:var(--ink); background:color-mix(in srgb, var(--imperial-gold) 22%, var(--paper)); border:1px solid color-mix(in srgb, var(--imperial-gold) 45%, transparent); }
 /* ---------- Cara de jogo: telas (passo 4, docs/historico/15) ----------
@@ -6038,7 +6063,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   <div class="view" id="view-my-flashcards">
     <div class="path-header">
       <h2 data-i18n="ui.myCards.title">📇 Meus cartões</h2>
-      <p data-i18n="ui.myCards.sub">Crie seus próprios flashcards -- palavras e frases que você quer memorizar, mesmo que não estejam na trilha.</p>
+      <p data-i18n="ui.myCards.sub">Crie seus próprios flashcards: palavras e frases que você quer memorizar, mesmo que não estejam na trilha.</p>
     </div>
     <div id="my-flashcards-content"></div>
   </div>
@@ -6171,7 +6196,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="app-modal-close" id="challenges-import-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p>Cole aqui a saída do pipeline de geração (<code>challenges_pipeline_output.json</code>, ou só o array de <code>accepted</code>) -- vai direto pro banco, sem precisar rodar SQL manualmente no Supabase.</p>
+      <p>Cole aqui a saída do pipeline de geração (<code>challenges_pipeline_output.json</code>, ou só o array de <code>accepted</code>). Vai direto para o banco, sem precisar rodar SQL manualmente no Supabase.</p>
       <textarea id="challenges-import-textarea" class="challenges-import-textarea" placeholder='[{"id": "expr-auto-001", "type": "expression", "level": "B1", ...}, ...]' rows="12"></textarea>
       <button class="btn btn-primary btn-block" id="challenges-import-submit-btn" style="max-width:320px; margin:12px auto 0;" data-i18n="adminChallenges.import.btn">Importar</button>
       <div class="challenges-import-status" id="challenges-import-status"></div>
@@ -6297,13 +6322,13 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">Enter</span></div>
-        <div data-i18n="ui.kbd.confirm" class="kbd-shortcuts-desc">Confirmar uma resposta digitada e avançar pra próxima</div>
+        <div data-i18n="ui.kbd.confirm" class="kbd-shortcuts-desc">Confirmar uma resposta digitada e avançar para a próxima</div>
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">r</span></div>
         <div data-i18n="ui.kbd.replay" class="kbd-shortcuts-desc">Tocar áudio novamente</div>
       </div>
-      <p data-i18n="ui.kbd.note" class="kbd-shortcuts-note">Os números só aparecem quando um exercício tem alternativas pra escolher -- nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela.</p>
+      <p data-i18n="ui.kbd.note" class="kbd-shortcuts-note">Os números só aparecem quando um exercício tem alternativas para escolher, nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela.</p>
     </div>
   </div>
 </div>
@@ -6335,7 +6360,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="app-modal-close" id="flashcard-limit-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p data-i18n-html="flashcardLimit.modal.bodyHtml">Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Pra criar mais, apague algum cartão, ou peça pra sua professora te vincular -- alunos vinculados a uma professora têm cartões próprios ilimitados.</p>
+      <p data-i18n-html="flashcardLimit.modal.bodyHtml">Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Para criar mais, apague algum cartão, ou peça para sua professora te vincular. Alunos vinculados a uma professora têm cartões próprios ilimitados.</p>
     </div>
   </div>
 </div>
@@ -6429,7 +6454,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="app-modal-close" id="flashcard-preview-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p class="profile-edit-hint" style="margin-top:0;" data-i18n="flashcardPreview.modal.hint">Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão -- nada é salvo ou avaliado aqui.</p>
+      <p class="profile-edit-hint" style="margin-top:0;" data-i18n="flashcardPreview.modal.hint">Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão. Nada é salvo ou avaliado aqui.</p>
       <div id="flashcard-preview-modal-body"></div>
       <div id="flashcard-preview-modal-nav" style="display:flex; align-items:center; justify-content:center; margin-top:12px;"></div>
     </div>

@@ -99,7 +99,7 @@ const ANTES = () => {
     L('já respondido: mostra a última resposta com a data e o e-mail', (await det.innerText()).includes('Última resposta enviada') && (await det.innerText()).includes('visitante@exemplo.com') && (await det.innerText()).includes('Já está no ar.'));
     await p.click('#dlg-report [data-fechar-dialogo] >> nth=0'); await p.waitForSelector('#dlg-report', { state: 'detached' });
     await p.click('[data-ver-report="3"]');
-    L('convidado sem e-mail: sem campos de resposta e com o aviso', !(await p.$('#report-resp-enviar')) && (await det.innerText()).includes('não é possível responder'));
+    L('convidado sem e-mail: sem campos de resposta e com o aviso', !(await p.$('#report-resp-enviar')) && (await det.innerText()).includes('Não é possível responder')); // Etapa 4: "--" virou ponto (frase nova começa com maiúscula)
     await p.click('#dlg-report [data-fechar-dialogo] >> nth=0'); await p.waitForSelector('#dlg-report', { state: 'detached' });
     await p.click('[data-ver-report="4"]');
     await p.click('#report-resp-enviar'); L('resposta vazia: pede assunto e mensagem, sem confirmar nem enviar', (await p.textContent('#report-resp-erro')).includes('assunto') && !(await dlg.count()) && (await p.evaluate(() => window.__fnLog.length)) === 0);

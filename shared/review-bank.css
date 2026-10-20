@@ -1,8 +1,8 @@
 /* Banco de Revisão (Professora > Cartões). Só tokens do site (fr e zh têm os mesmos nomes, valores diferentes).
-   Caixas azuis: fundo azul profundo com texto branco em negrito (decisão da autora, 2026-10-12; contraste ~7:1 nos 2 temas). */
-:root{ --rb-box:#1D5A82; --rb-on-box:#FFFFFF; --rb-answer:#1D5A82; --rb-wrong:#B81F13; --rb-bad:#D62619; }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --rb-box:#1D5A82; --rb-on-box:#FFFFFF; --rb-answer:#7FC4F5; --rb-wrong:#FF6B5C; --rb-bad:#FF6B5C; } }
-:root[data-theme="dark"]{ --rb-box:#1D5A82; --rb-on-box:#FFFFFF; --rb-answer:#7FC4F5; --rb-wrong:#FF6B5C; --rb-bad:#FF6B5C; }
+   Caixas de cor da marca (azul no fr, vermelho no zh): --brand-fill com texto branco em negrito (decisão da autora, 2026-10-19; substitui o azul profundo de 2026-10-12). */
+:root{ --rb-box:var(--brand-fill); --rb-on-box:var(--on-brand-fill); --rb-answer:#1D5A82; --rb-wrong:#B81F13; --rb-bad:#D62619; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --rb-box:var(--brand-fill); --rb-on-box:var(--on-brand-fill); --rb-answer:#7FC4F5; --rb-wrong:#FF6B5C; --rb-bad:#FF6B5C; } }
+:root[data-theme="dark"]{ --rb-box:var(--brand-fill); --rb-on-box:var(--on-brand-fill); --rb-answer:#7FC4F5; --rb-wrong:#FF6B5C; --rb-bad:#FF6B5C; }
 /* Respostas certas em azul e erros em vermelho nos DOIS idiomas do site: no mandarim a cor da marca é vermelha e
    não pode ser usada para "certo" (nem faltar token de erro: o zh não tem --error-red). */
 

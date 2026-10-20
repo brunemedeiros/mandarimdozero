@@ -1125,7 +1125,7 @@ function mapUnitDescribe(u, moduleId){
   const lines = [];
   if (hasLessons){
     const done = (st === 'done' || st === 'skipped') ? u.lessons.length : currentLessonIdx(u.id);
-    lines.push(t('trail.lessonsCompleted', { done, total: u.lessons.length }));
+    lines.push(tp('trail.lessonsCompleted', u.lessons.length === 1 ? 1 : 2, { done, total: u.lessons.length }));
   }
   const { dueForReview } = unitCardCounts(u.id);
   if (dueForReview > 0) lines.push(t('trail.map.unit.toReview', { n: dueForReview }));
@@ -1255,7 +1255,7 @@ function buildUnitBlock(u){
   if (isGrammar) fracLabel = state === 'done' ? t('trail.unit.done') : (state === 'skipped' ? t('trail.unit.skipped') : '');
   else if (hasLessons){
     const doneLessons = isFinished ? u.lessons.length : currentLessonIdx(u.id);
-    fracLabel = t('trail.unit.lessonsProgress', { done: doneLessons, total: u.lessons.length });
+    fracLabel = tp('trail.unit.lessonsProgress', u.lessons.length === 1 ? 1 : 2, { done: doneLessons, total: u.lessons.length });
   }
   else fracLabel = `${pct}%`;
   if (dueForReview > 0) fracLabel += ` · 🔁 ${dueForReview}`;
@@ -3863,7 +3863,7 @@ function renderSpeedReview(){
         <div class="big-emoji">💔</div>
         <h3>${t('review.speed.gameOver')}</h3>
         <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
-        <p>${t('review.speed.answered', { n: SPEED_STATE.index })}</p>
+        <p>${tp('review.speed.answered', SPEED_STATE.index === 1 ? 1 : 2, { n: SPEED_STATE.index })}</p>
         <p class="review-record-line">${speedIsRecord ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
@@ -4227,7 +4227,7 @@ function renderReviewViewInner(){
       <div class="review-empty">
         <div class="big-emoji">☕</div>
         <h3>${STATE.reviewSessionClassReview ? t('review.session.classEmptyTitle') : activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
-        <p>${allDue > 0 ? t('review.session.pendingOverall', { n: allDue }) : t('review.session.comeBackLater')}</p>
+        <p>${allDue > 0 ? tp('review.session.pendingOverall', allDue === 1 ? 1 : 2, { n: allDue }) : t('review.session.comeBackLater')}</p>
         ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">${t('review.session.reviewAllAvailable')}</button>` : ''}
         ${STATE.reviewSessionClassReview ? `<button class="btn btn-secondary" id="review-class-back">${t('review.backToStudent')}</button>` : ''}
       </div>
@@ -4272,7 +4272,7 @@ function renderReviewViewInner(){
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
         <h3>${t('review.complete.title')}</h3>
-        <p>${t('review.complete.reviewed', { n: STATE.reviewQueue.length })}</p>
+        <p>${tp('review.complete.reviewed', STATE.reviewQueue.length === 1 ? 1 : 2, { n: STATE.reviewQueue.length })}</p>
         <div class="review-complete-actions">
           ${STATE.reviewSessionClassReview
             ? `<button class="btn btn-primary" id="review-class-back">${t('review.backToStudent')}</button>`
@@ -7137,7 +7137,7 @@ const CHALLENGE_I18N = {
     'dict.static.title': "Dictations",
     'dict.static.sub': "Train your listening and spelling with dictations based on real tasks from each module.",
     'dict.static.how': "🎧 How does the dictation work?",
-    'dict.static.s1': "Listen to the audio -- at normal speed or slowly, as many times as you like.",
+    'dict.static.s1': "Listen to the audio, at normal speed or slowly, as many times as you like.",
     'dict.static.s2': "Type exactly what you heard, with accents and punctuation.",
     'dict.static.s3': "Click \"Verificar\" to compare your answer with the original text.",
     'dict.static.s4': "See what you got right and what needs review, word by word.",
@@ -7638,14 +7638,15 @@ function expressionTodayHTML(list){
 function expressionCardHTML(c){
   const done = isChallengeCompleted(c.id);
   const locked = isChallengeLocked(c);
+  // Cartão compacto (2026-10-19, pedido da autora): sem a etiqueta de nível (o cartão já está dentro do
+  // "Nível X") e sem o "O que será que significa?" na pendente; concluída mostra o sentido.
   const middle = done
     ? `<span class="expr-card-meaning">${escapeHtmlChallenge(expressionCardMeaning(c))}</span>`
-    : `<span class="expr-card-hint">${locked ? chT('ch.album.locked') : chT('ch.album.guess')}</span>`;
+    : (locked ? `<span class="expr-card-hint">${chT('ch.album.locked')}</span>` : '');
   return `
     <div class="expr-card-wrap">
       <button class="challenge-card expr-card ${done ? 'completed' : ''} ${locked ? 'locked' : ''}" data-challenge-id="${c.id}">
         ${done ? `<span class="expr-card-seal">${chT('ch.album.seal')}</span>` : ''}
-        <span class="challenge-card-level">${escapeHtmlChallenge(c.level || '')}</span>
         <span class="challenge-card-expr">${escapeHtmlChallenge(c.canonicalExpression)}</span>
         ${middle}
         <span class="expr-card-foot">${expressionRegisterChipHTML(c)}${tierBadgeHTML(challengeTier(c))}</span>
@@ -7957,8 +7958,8 @@ document.getElementById('challenges-import-submit-btn').addEventListener('click'
     return;
   }
   const lines = [];
-  if (result.insertedCount > 0) lines.push(t('adminChallenges.import.ok', { n: result.insertedCount }));
-  if (result.skipped.length > 0) lines.push(t('adminChallenges.import.skipped', { n: result.skipped.length }) + '\n' + result.skipped.map(s => '  • ' + s).join('\n'));
+  if (result.insertedCount > 0) lines.push(tp('adminChallenges.import.ok', result.insertedCount === 1 ? 1 : 2, { n: result.insertedCount }));
+  if (result.skipped.length > 0) lines.push(tp('adminChallenges.import.skipped', result.skipped.length === 1 ? 1 : 2, { n: result.skipped.length }) + '\n' + result.skipped.map(s => '  • ' + s).join('\n'));
   statusEl.className = result.insertedCount > 0 ? 'challenges-import-status ok' : 'challenges-import-status err';
   statusEl.textContent = lines.join('\n\n');
   if (result.insertedCount > 0){
@@ -9499,7 +9500,7 @@ function renderChallengesAdminList(){
   if (bulkApproveBtn) bulkApproveBtn.addEventListener('click', async () => {
     const targets = pending.filter(c => challengesAdminSelectedIds.has(c.id));
     if (targets.length === 0) return;
-    if (!confirm(t('adminChallenges.bulk.confirm', { n: targets.length }))) return;
+    if (!confirm(tp('adminChallenges.bulk.confirm', targets.length === 1 ? 1 : 2, { n: targets.length }))) return;
     bulkApproveBtn.disabled = true;
     bulkApproveBtn.textContent = t('adminChallenges.bulk.approving');
     let published = 0;
@@ -9510,7 +9511,7 @@ function renderChallengesAdminList(){
       else if (result.skipped) skipped.push(challengeAdminCardTitle(c));
     }
     showToast(skipped.length === 0
-      ? t('adminChallenges.bulk.published', { published })
+      ? tp('adminChallenges.bulk.published', published === 1 ? 1 : 2, { published })
       : t('adminChallenges.bulk.publishedSkipped', { published, skipped: skipped.length, list: skipped.join(', ') }));
     renderChallengesAdmin();
   });

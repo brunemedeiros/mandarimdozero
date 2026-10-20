@@ -279,12 +279,13 @@ function leaderboardRankBadge(rank){
 // entram na vitrine "em destaque" do Ranking, Conquistas ficam só na seção
 // própria do Perfil (ver o comentário de saveProfileEdits em
 // shared/profile.js).
-function resolveFeaturedBadge(badgeId, catalog){
+// gender: só para o badge da própria pessoa (o gênero das outras é privado); sem ele, o nome sai na forma neutra.
+function resolveFeaturedBadge(badgeId, catalog, gender){
   if (!badgeId) return null;
   const special = SPECIAL_BADGES.find(b => b.id === badgeId);
   if (special) return { icon: special.icon, name: special.name, desc: special.desc };
   const custom = (catalog || []).find(b => b.id === badgeId);
-  if (custom) return { icon: custom.icon, name: catalogBadgeText(custom.id, 'name', custom.name), desc: catalogBadgeText(custom.id, 'desc', custom.description) };
+  if (custom) return { icon: custom.icon, name: catalogBadgeText(custom.id, 'name', custom.name, gender), desc: catalogBadgeText(custom.id, 'desc', custom.description) };
   return null;
 }
 
@@ -383,7 +384,7 @@ async function renderLeaderboardView(){
     const avatarHTML = r.profile?.avatar_url
       ? `<img class="leaderboard-avatar" src="${escapeAttr(r.profile.avatar_url)}" alt="${t('leaderboard.avatarAlt')}">`
       : `<div class="leaderboard-avatar" style="background:${color};">${initials}</div>`;
-    const featured = resolveFeaturedBadge(r.profile?.featured_badge_id, catalog);
+    const featured = resolveFeaturedBadge(r.profile?.featured_badge_id, catalog, (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && r.user_id === CURRENT_USER.id) ? ownProfileGender() : null);
     const badgeHTML = featured
       ? `<span class="leaderboard-featured-badge" aria-hidden="true" title="${escapeHTML(featured.name)}">${featured.icon}</span>`
       : '';

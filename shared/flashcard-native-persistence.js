@@ -131,12 +131,18 @@ function nextRevisionForNativeSave(c, editorState, conversionBaseline){
 //    em vez de criar um Field de resposta vazio que passaria despercebido
 //    até o clique em Salvar.
 // Etapa 3 (lote C): mensagem no idioma do site quando t() existe; sem ele (testes Node), o português de sempre.
+// Plural (Etapa 4): `pt` pode ser { one, other }; com params.n numérico a forma sai por n === 1 (tp no catálogo).
 function nativePersistenceText(key, pt, params){
-  if (typeof t === 'function'){
+  const plural = params && typeof params.n === 'number';
+  if (plural && typeof tp === 'function'){
+    const v = tp(key, params.n === 1 ? 1 : 2, params);
+    if (v && v !== key) return v;
+  } else if (typeof t === 'function'){
     const v = t(key, params);
     if (v && v !== key) return v;
   }
-  return String(pt).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
+  const s = (pt && typeof pt === 'object') ? (plural && params.n === 1 ? pt.one : pt.other) : pt;
+  return String(s).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
 }
 function legacyFlashcardConversionPreflight(row){
   const isCloze = !!row.cloze_sentence;
@@ -144,14 +150,14 @@ function legacyFlashcardConversionPreflight(row){
     const blankMatches = (row.cloze_sentence.match(/___/g) || []).length;
     if (blankMatches !== 1){
       return { ok: false, error: blankMatches === 0
-        ? nativePersistenceText('noteConvert.err.noBlank', 'Esta frase de completar não tem nenhum "___" marcando a lacuna -- não dá pra saber onde a resposta entra. Corrija a frase pelo formulário de sempre antes de usar o editor novo.')
-        : nativePersistenceText('noteConvert.err.manyBlanks', 'Esta frase de completar tem mais de um "___" -- o formulário legado só suporta 1 lacuna por cartão, então não dá pra determinar automaticamente qual delas vira a marca nativa. Corrija a frase pelo formulário de sempre antes de usar o editor novo.') };
+        ? nativePersistenceText('noteConvert.err.noBlank', 'Esta frase de completar não tem nenhum "___" marcando a lacuna, então não dá para saber onde a resposta entra. Corrija a frase pelo formulário de sempre antes de usar o editor novo.')
+        : nativePersistenceText('noteConvert.err.manyBlanks', 'Esta frase de completar tem mais de um "___". O formulário legado só suporta 1 lacuna por cartão, então não dá para determinar automaticamente qual delas vira a marca nativa. Corrija a frase pelo formulário de sempre antes de usar o editor novo.') };
     }
     return { ok: true };
   }
   const isMC = !!(row.choices && row.choices.length);
   if (isMC && !(row.back_trans || '').trim()){
-    return { ok: false, error: nativePersistenceText('noteConvert.err.mcNoAnswer', 'Este cartão de múltipla escolha não tem uma resposta certa definida (verso vazio) -- não dá pra determinar qual é a resposta certa. Preencha o verso pelo formulário de sempre antes de usar o editor novo.') };
+    return { ok: false, error: nativePersistenceText('noteConvert.err.mcNoAnswer', 'Este cartão de múltipla escolha não tem uma resposta certa definida (verso vazio), então não dá para determinar qual é a resposta certa. Preencha o verso pelo formulário de sempre antes de usar o editor novo.') };
   }
   return { ok: true };
 }
@@ -517,8 +523,8 @@ function summarizeDroppedImportTags(states, opts){
   const sys = all.filter(d => d.reason === 'system_tag').length;
   const lim = all.length - sys;
   const parts = [];
-  if (lim) parts.push(nativePersistenceText('import.tagsDropped.limit', '{n} tag(s) foram ignoradas por passar do limite ({max} tags por cartão, {len} caracteres por tag).', { n: lim, max: TAG_MAX_PER_NOTE, len: TAG_MAX_LENGTH }));
-  if (sys) parts.push(nativePersistenceText('import.tagsDropped.system', '{n} tag(s) de sistema (atribuição de autoria) não são importadas por arquivo/link: só uma cópia feita pelo app a cria.', { n: sys }));
+  if (lim) parts.push(nativePersistenceText('import.tagsDropped.limit', { one: '{n} tag foi ignorada por passar do limite ({max} tags por cartão, {len} caracteres por tag).', other: '{n} tags foram ignoradas por passar do limite ({max} tags por cartão, {len} caracteres por tag).' }, { n: lim, max: TAG_MAX_PER_NOTE, len: TAG_MAX_LENGTH }));
+  if (sys) parts.push(nativePersistenceText('import.tagsDropped.system', { one: '{n} tag de sistema (atribuição de autoria) não é importada por arquivo/link: só uma cópia feita pelo app a cria.', other: '{n} tags de sistema (atribuição de autoria) não são importadas por arquivo/link: só uma cópia feita pelo app a cria.' }, { n: sys }));
   return parts.join(' ');
 }
 

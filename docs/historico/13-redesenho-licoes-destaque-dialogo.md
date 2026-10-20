@@ -375,4 +375,36 @@ subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do si
   versos de preenchimento "(sem tradução)" traduzidos só na tela (o dado no banco não muda).
 - Desafios do Módulo 3: a produção tem os 10 Ouça e traduza antigos (o lote do repositório caiu para 6 no commit 2fb4ca1 sem
   reimportar). O overlay en segue a produção; retrato em `docs/i18n/challenges-producao-a1m3-lt.json`. Decisão pendente da dona.
-- `review-bank-agent`: `engine.generated.mjs` regerado (comportamento igual lá, tudo em português); deploy opcional, não feito.
+- `review-bank-agent`: `engine.generated.mjs` regerado (comportamento igual lá, tudo em português). Deploy NÃO feito de propósito: a v9 da
+  produção usa o motor do commit `0c851e3` (PR #347, outra sessão, FSRS único da 112), que não está na `main`; publicar a `main`
+  desfaria isso. Quando o #347 for mesclado, a regeração do motor junta as duas coisas e aí sim publica.
+
+## Etapa 4 do plano "Voz da Prof. Brune": novo padrão de escrita (2026-10-19)
+- Auditoria: `docs/i18n/etapa4-auditoria-escrita.md`. Achado principal: avisos com número na frente de palavra no plural
+  ("1 dias de sequência" 167 vezes em 30 dias, "sequência de 1 dias" 156, "faltam 1 missões" 44).
+- Mecânico (site): 188 chaves sem "--", sem "pra", com plural de verdade (`tp(chave, n === 1 ? 1 : 2, …)`) e sem jargão
+  técnico cru ("SQLite", "pinyinFieldId", erro cru da prévia). "O que você aprendeu" do zh saiu do português fixo.
+- Aprovado pela dona: avisos sem culpa (sequência, sumiço, revisão, badge, ranking com texto novo, "mandarim"); convites
+  "te convidou para as aulas de…"/"agora estuda … com você"; badge "Turma da Prof. Brune" e "Turma de X" (professoras novas,
+  en "{name}'s class"); Embaixador/Pioneiro pelo gênero, neutro "Embaixador(a)"/"Pioneiro(a)"; "Note" vira "item" na tela;
+  "report" continua "report"; "Aluno(a)" de reserva continua (nenhum perfil fica sem nome e sem @).
+- Banco (Staging e produção): 114 (100 modelos trocados na produção; texto antigo em `docs/i18n/etapa4-modelos-antes.json`),
+  115 (5 funções sem "aluno/a" + `_notif_text_en`/`_teacher_notice_params` aceitando frase antiga e nova). Badge `student`
+  da produção atualizado. Pendência pequena: `_teacher_notice_params` não lê "(1 dia)" no singular quando o aviso não tem params.
+
+## Jogos da Conjugação A1 (fr, 2026-10-19)
+
+- Pedido da autora: jogos A1 1 (être x avoir), 2 (auxiliar do passé composé, SÓ o auxiliar; concordância fica para um jogo A2)
+  e 4 (tu x vous), com as frases que mais derrubam quem fala português e inglês. O 3 (presente x futur proche) ficou de fora.
+- Dados em `fr/conj-games.js`: `etre-avoir` (19 frases), `pc-auxiliaire` (24; com être, sujeito masculino e singular para a
+  concordância não aparecer), `tu-vous` (17); 10 por partida. Explicação em pt-BR voltada ao erro do brasileiro, em en ao erro
+  de quem fala inglês. Revisão do agente revisor-conteudo aplicada (ex.: "il est été" NÃO é erro típico de lusófono; "verbo com
+  objeto direto vai com avoir" removido por generalizar demais). Lista para a autora: `docs/jogos-conjugacao-a1-revisao.md`.
+- Motor (`shared/conj-games.js`): `level` vira etiqueta no cartão (A1 primeiro; o jogo do imparfait ficou A2); jogo sem
+  `opts.sketch` mostra a regra num quadro em vez da linha do tempo; `verb` opcional; espaço antes de ? ! : ; inseparável.
+- Grátis x Premium: igual ao jogo existente (Premium com cadeado; paywall desligado, então hoje todos jogam).
+- Testes: `tests/conjugacao/test_playwright.js` 77/77 (bloco novo dos jogos A1; os 2 que falhavam na main eram o seletor
+  `.cg-tr span` pegando o ícone 🔊, corrigido para `.cg-tr > span:last-child`). i18n unit 2050/2052, as mesmas 2 da main.
+- Ajuste pedido pela autora (2026-10-19): o francês dentro do texto em português/inglês sai em azul (`--seal-red-dark`,
+  `.cg-fr`, `lang="fr"`). Nos dados, o trecho em francês vai entre {chaves} (título, apresentação, regra e explicação dos 4
+  jogos; 190 de 196 textos). Marcação feita por subagente e conferida por script: tirando as chaves, o texto é idêntico.

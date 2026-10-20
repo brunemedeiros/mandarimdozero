@@ -112,7 +112,7 @@ function validateNativeTypeAnswerStructure(editorState){
 
   const unrecognized = roledFields.filter(f => f.role !== 'prompt' && f.role !== 'answer');
   if (unrecognized.length){
-    return { ok: false, error: tp('taEditor.err.unrecognized', unrecognized.length) };
+    return { ok: false, error: tp('taEditor.err.unrecognized', unrecognized.length === 1 ? 1 : 2, { n: unrecognized.length }) };
   }
 
   const promptFields = roledFields.filter(f => f.role === 'prompt');

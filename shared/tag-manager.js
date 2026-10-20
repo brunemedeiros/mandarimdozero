@@ -22,15 +22,21 @@
 // ---------- helpers PUROS (testáveis) ----------
 
 // Etapa 3 (lote C): texto no idioma do site quando t() existe; sem ele (testes Node), o português de sempre.
+// Plural (Etapa 4): `pt` pode ser { one, other }; com params.n numérico a forma sai por n === 1 (tp no catálogo).
 function tagManagerT(key, pt, params){
-  if (typeof t === 'function'){
+  const plural = params && typeof params.n === 'number';
+  if (plural && typeof tp === 'function'){
+    const v = tp(key, params.n === 1 ? 1 : 2, params);
+    if (v && v !== key) return v;
+  } else if (typeof t === 'function'){
     const v = t(key, params);
     if (v && v !== key) return v;
   }
-  return String(pt).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
+  const s = (pt && typeof pt === 'object') ? (plural && params.n === 1 ? pt.one : pt.other) : pt;
+  return String(s).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
 }
 function tagManagerNoteWord(n){
-  return n === 1 ? tagManagerT('tagManager.note.one', 'nota') : tagManagerT('tagManager.note.other', 'notas');
+  return n === 1 ? tagManagerT('tagManager.note.one', 'item') : tagManagerT('tagManager.note.other', 'itens');
 }
 
 // Planeja um rename a partir do texto digitado. `counts` = { slug: notas }.
@@ -137,8 +143,8 @@ function applyTagChangeToLocalState(scope, kind, oldTag, newTag){
 function renameInfoHTML(plan){
   if (!plan.ok) return `<span class="profile-edit-field-error">${escapeHTML(plan.error)}</span>`;
   if (plan.unchanged) return `<span class="profile-edit-hint">${tagManagerT('tagManager.unchanged', 'Nenhuma alteração.')}</span>`;
-  const affectedWord = plan.affected === 1 ? tagManagerT('tagManager.rename.affected.one', 'nota será alterada') : tagManagerT('tagManager.rename.affected.other', 'notas serão alteradas');
-  const collisionWord = plan.collision === 1 ? tagManagerT('tagManager.rename.collision.one', 'nota já usa') : tagManagerT('tagManager.rename.collision.other', 'notas já usam');
+  const affectedWord = plan.affected === 1 ? tagManagerT('tagManager.rename.affected.one', 'item será alterado') : tagManagerT('tagManager.rename.affected.other', 'itens serão alterados');
+  const collisionWord = plan.collision === 1 ? tagManagerT('tagManager.rename.collision.one', 'item já usa') : tagManagerT('tagManager.rename.collision.other', 'itens já usam');
   return `<span class="profile-edit-hint">${tagManagerT('tagManager.rename.newName', 'Novo nome:')} <strong>#${escapeHTML(plan.newSlug)}</strong> · ${plan.affected} ${affectedWord}.</span>`
     + (plan.collision ? `<br><span class="profile-edit-hint" data-tag-collision>⚠️ ${plan.collision} ${collisionWord} <strong>#${escapeHTML(plan.newSlug)}</strong>${tagManagerT('tagManager.rename.collisionMerge', ': as duas tags serão unificadas (sem duplicar).')}</span>` : '');
 }
@@ -251,7 +257,7 @@ async function renderTagManagerInto(mountEl, opts){
       const res = await renameNoteTag(scope, old, plan.newSlug);
       if (!res.ok){ ui.busy = false; ui.msg = res.error; ui.msgKind = 'error'; paint(); return; }
       applyTagChangeToLocalState(scope, 'rename', old, plan.newSlug);
-      await finish(`✓ #${old} → #${plan.newSlug} (${res.affected} ${tagManagerNoteWord(res.affected)}${res.merged ? tagManagerT('tagManager.done.merged', ', {n} unificada(s)', { n: res.merged }) : ''}).`);
+      await finish(`✓ #${old} → #${plan.newSlug} (${res.affected} ${tagManagerNoteWord(res.affected)}${res.merged ? tagManagerT('tagManager.done.merged', { one: ', {n} unificado', other: ', {n} unificados' }, { n: res.merged }) : ''}).`);
     });
     const dc = mountEl.querySelector('[data-tag-delete-confirm]');
     if (dc) dc.addEventListener('click', async () => {

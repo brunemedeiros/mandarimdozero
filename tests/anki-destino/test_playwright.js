@@ -48,7 +48,7 @@ const NOTES = [
     L('pastas recriadas abaixo de Meus Decks (Vocab > Animais/Cores, Verbos), kind=personal', r1.ok && r1.kinds, r1);
     L('cada Note no Deck da sua pasta', r1.chat && r1.chien && r1.rouge && r1.aller, r1);
     L('nunca um Deck global "Importado"', !r1.importado);
-    L('resultado informa Decks criados', /4 Deck\(s\) criado\(s\)/.test(r1.text), r1.text);
+    L('resultado informa Decks criados', /4 Decks criados/.test(r1.text), r1.text); // Etapa 4: plural de verdade (antes "Deck(s) criado(s)")
     L('cartões entram em STATE.cards com o deckId certo', await ev(() => STATE.cards.filter(c => c.origin === 'self').length === 4 && STATE.cards.filter(c => c.origin === 'self').every(c => c.deckId != null)));
     await page.click('#anki-import-done-btn');
 

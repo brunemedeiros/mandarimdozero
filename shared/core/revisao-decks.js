@@ -172,7 +172,7 @@ function buildTrailContinueCard(){
   const { done, total } = trailLessonCounts(groups, STATE.unitProgress);
   const card = document.createElement('div');
   card.className = 'trail-continue';
-  const metric = t('trail.lessonsCompleted', { done, total });
+  const metric = tp('trail.lessonsCompleted', total === 1 ? 1 : 2, { done, total });
   if (!next){
     card.classList.add('complete');
     card.innerHTML = `<div class="tc-info"><div class="tc-eyebrow">${t('trail.continue.eyebrowDone')}</div><div class="tc-title">${t('trail.continue.allDone')}</div><div class="tc-sub">${metric}</div></div>`;

@@ -61,6 +61,9 @@ try{
   /* Design tokens — inspirado no vermelho laca (印泥红) e dourado imperial chinês */
   --seal-red: #C0231F;      /* vermelho selo/laca — cor primária */
   --seal-red-dark: #8E1915; /* vermelho profundo, hover/pressed */
+  /* Caixas com texto (botões, abas e chips selecionados, contadores): vermelho + branco, 6,0:1 nos dois temas (decisão da autora, 2026-10-19).
+     Mesmo valor no claro e no escuro: o vermelho claro do escuro não aguenta texto branco. */
+  --brand-fill: #C0231F; --brand-fill-hover: #8E1915; --on-brand-fill: #FFFFFF;
   --imperial-gold: #D4A017; /* dourado imperial — accent */
   --hover-gold: #D4A017;
   --gold-bright: #F0C444;   /* dourado claro — destaques, XP */
@@ -201,7 +204,7 @@ try{
    aba pra quem usa teclado/leitor de tela. */
 .skip-link{
   position:absolute; top:-48px; left:8px; z-index:var(--z-top);
-  background: var(--seal-red); color: var(--on-seal-red);
+  background: var(--brand-fill); color: var(--on-brand-fill);
   font-family: var(--font-body); font-weight:800; font-size:14px;
   padding:12px 18px; border-radius:0 0 10px 10px; text-decoration:none;
   transition: top .15s ease;
@@ -757,7 +760,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 
 .story-continue-btn{
   display:block; width:100%; margin-top:14px; padding:15px; border:none; border-radius:999px;
-  background: var(--seal-red); color:white; font-family: var(--font-body); font-weight:800;
+  background: var(--brand-fill); color:var(--on-brand-fill); font-family: var(--font-body); font-weight:800;
   font-size:15px; cursor:pointer;
 }
 
@@ -971,7 +974,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
    como um dos ícones redondos da barra de foco -- a topbar inteira fica
    escondida durante a lição (ver #app.lesson-focus .topbar), então sem isto
    não haveria como ligar/desligar o pinyin no meio de um exercício. */
-.pinyin-toggle-btn-lesson.active{ background: var(--seal-red); border-color: var(--seal-red); color: var(--gold-bright); }
+.pinyin-toggle-btn-lesson.active{ background: var(--brand-fill); border-color: var(--brand-fill); color: var(--on-brand-fill); }
 .lesson-progress-track{ flex:1; height:8px; background: var(--paper-warm); border-radius:4px; overflow:hidden; }
 .lesson-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
 
@@ -1100,7 +1103,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .dlg-row.a{ align-self:flex-start; }
 .dlg-row.b{ align-self:flex-end; flex-direction:row-reverse; }
 .dlg-avatar{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px; width:46px; }
-.dlg-emoji{ width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; background: var(--seal-red); color: var(--on-seal-red); font-weight:800; }
+.dlg-emoji{ width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; background: var(--brand-fill); color: var(--on-brand-fill); font-weight:800; }
 .dlg-row.b .dlg-emoji{ background: var(--imperial-gold); color: var(--ink); }
 .dlg-name{ font-size:10.5px; font-weight:800; color: var(--ink-soft); max-width:60px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .dlg-bubble{
@@ -1304,7 +1307,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
    .btn-primary padrão (par background+color revisado junto: texto branco
    fixo sobre fundo escuro, legível nos dois temas). */
 /* zh: --seal-red É o vermelho de erro; --on-seal-red (branco no claro, escuro no escuro) é o par certo. */
-button.wrong-feedback-continue{ background: var(--seal-red); color: var(--on-seal-red); box-shadow: 0 3px 10px rgba(192,35,31,0.28); }
+button.wrong-feedback-continue{ background: var(--brand-fill); color: var(--on-brand-fill); box-shadow: 0 3px 10px rgba(192,35,31,0.28); }
 /* Painel de erro: a palavra estudada não pode ficar "vermelha de erro" também; só o fundo/cabeçalho sinalizam o erro. */
 .wrong-feedback-why-label{ color: var(--ink-soft); }
 .wrong-feedback .feedback-inner-box .pinyin,
@@ -1642,7 +1645,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 }
 
 .lesson-recap{ text-align:left; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); overflow:hidden; }
-.lesson-recap-label{ background: var(--seal-red-dark); color: var(--paper); font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:10px 16px; }
+.lesson-recap-label{ background: var(--brand-fill); color: var(--on-brand-fill); font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:10px 16px; }
 .lesson-recap-item{ padding:12px 16px; }
 .lesson-recap-item + .lesson-recap-item{ border-top:1px solid var(--paper-line); }
 .lesson-recap-french{ font-size:15px; font-weight:700; display:flex; align-items:center; gap:8px; }
@@ -1703,10 +1706,10 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   position:relative;
 }
 .btn:active:not(:disabled){ transform: translateY(2px); }
-.btn-primary{ background: linear-gradient(135deg, var(--seal-red), var(--seal-red-dark)); color: var(--on-seal-red);
+.btn-primary{ background: var(--brand-fill); color: var(--on-brand-fill);
   box-shadow: 0 var(--btn-depth) 0 rgba(0,0,0,0.22);
-  box-shadow: 0 var(--btn-depth) 0 color-mix(in srgb, var(--seal-red) 62%, #000); }
-.btn-primary:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--seal-red) 62%, #000); }
+  box-shadow: 0 var(--btn-depth) 0 color-mix(in srgb, var(--brand-fill) 62%, #000); }
+.btn-primary:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--brand-fill) 62%, #000); }
 .btn-primary:hover{ filter:brightness(1.06); }
 .btn-secondary{ background: var(--paper-warm); color: var(--ink); border:2px solid var(--paper-line); box-shadow: 0 var(--btn-depth-sm) 0 var(--paper-line); }
 .btn-secondary:active:not(:disabled){ box-shadow: 0 1px 0 var(--paper-line); }
@@ -2222,7 +2225,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .friends-crowd .friends-crowd-other{ opacity:.85; }
 .friends-crowd .friends-crowd-other:first-child{ margin-right:-12px; }
 .friends-crowd .friends-crowd-other:last-child{ margin-left:-12px; }
-.friends-crowd .friends-crowd-me{ width:64px; height:64px; font-size:22px; background:var(--seal-red); color:var(--on-seal-red); position:relative; z-index:1; }
+.friends-crowd .friends-crowd-me{ width:64px; height:64px; font-size:22px; background:var(--brand-fill); color:var(--on-brand-fill); position:relative; z-index:1; }
 .friends-empty-title{ font-family:var(--font-body); font-size:22px; font-weight:900; margin:0; color:var(--ink); text-wrap:balance; }
 .friends-empty-text{ color:var(--ink-soft); margin:6px auto 16px; max-width:32ch; font-size:15px; }
 .friends-empty .btn-block{ max-width:360px; }
@@ -2275,7 +2278,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 }
 .side-ranking-tabs{ display:flex; gap:6px; margin-bottom:8px; }
 .side-ranking-tab{ flex:1; background:var(--paper-warm); border:1px solid var(--paper-line); color:var(--ink-soft); border-radius:999px; padding:4px 8px; font-size:12px; font-weight:700; cursor:pointer; }
-.side-ranking-tab.active{ background:var(--seal-red); border-color:var(--seal-red); color:#fff; }
+.side-ranking-tab.active{ background:var(--brand-fill); border-color:var(--brand-fill); color:var(--on-brand-fill); }
 /* ---------- Ranking (Leaderboard) ---------- */
 .leaderboard-week-label{ font-size:12.5px; color:var(--ink-soft); font-weight:700; text-align:center; margin-bottom:10px; }
 .leaderboard-tabs{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; }
@@ -2283,7 +2286,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   font-size:12.5px; font-weight:700; color:var(--ink-soft); background:var(--paper); border:1px solid var(--paper-line);
   border-radius:99px; padding:6px 14px; cursor:pointer; font-family:var(--font-body);
 }
-.leaderboard-tab.active{ background:var(--seal-red); border-color:var(--seal-red); color:#fff; }
+.leaderboard-tab.active{ background:var(--brand-fill); border-color:var(--brand-fill); color:var(--on-brand-fill); }
 /* Lista contínua (não cards por linha) -- linha divisória fina em vez de
    borda+raio+gap por item, densidade mais parecida com um ranking de
    verdade do que com uma pilha de cartões administrativos. */
@@ -2633,7 +2636,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .report-screenshot-name{ font-size:12px; color:var(--ink-soft); word-break:break-all; }
 .report-modal-privacy-note{ font-size:11.5px; color:var(--ink-soft); margin:8px 0 0; line-height:1.4; }
 .report-success-check{
-  width:56px; height:56px; border-radius:50%; background:var(--seal-red); color:#fff;
+  width:56px; height:56px; border-radius:50%; background:var(--brand-fill); color:var(--on-brand-fill);
   display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; margin:6px auto 14px;
 }
 .report-success-text{ text-align:center; font-size:14px; color:var(--ink); margin:0 0 18px; line-height:1.5; }
@@ -2750,7 +2753,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 
 .deck-select{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:18px; }
 .deck-chip{ padding:7px 13px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper); font-size:12.5px; font-weight:700; cursor:pointer; color:var(--ink-soft); }
-.deck-chip.active{ background: var(--seal-red); border-color: var(--seal-red); color:white; }
+.deck-chip.active{ background: var(--brand-fill); border-color: var(--brand-fill); color:var(--on-brand-fill); }
 
 /* ---------- Tela de sequência de streak (estilo Duolingo) ---------- */
 .streak-modal-overlay{
@@ -3159,7 +3162,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
   cursor:pointer; border:1px solid var(--paper-line); background: var(--paper-warm);
   font-weight:700; color: var(--ink-soft); font-size:13px;
 }
-.pinyin-toggle-btn.active{ background: var(--seal-red); border-color: var(--seal-red); color: var(--gold-bright); }
+.pinyin-toggle-btn.active{ background: var(--brand-fill); border-color: var(--brand-fill); color: var(--on-brand-fill); }
 
 /* Admin Mode ON/OFF (topbar, mesmo padrão visual do pill de Pinyin) --
    só renderizado quando isAdminUser()===true (ver applyAdminModeUI em
@@ -3216,7 +3219,7 @@ body.hide-pinyin .prompt-pinyin{
 .report-topbar-pill:hover{ color:var(--ink); border-color:var(--imperial-gold); }
 .notifications-badge{
   position:absolute; top:-3px; right:-3px; min-width:16px; height:16px; padding:0 4px;
-  border-radius:999px; background:var(--seal-red-dark); color:#fff; font-size:10px; font-weight:800;
+  border-radius:999px; background:var(--brand-fill); color:var(--on-brand-fill); font-size:10px; font-weight:800;
   align-items:center; justify-content:center; line-height:1; border:2px solid var(--paper);
 }
 .notifications-dropdown{ min-width:min(320px, calc(100vw - 24px)); max-width:min(360px, calc(100vw - 24px)); max-height:70vh; overflow-y:auto; }
@@ -4064,7 +4067,7 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   .calendar-feed-actions .btn, .calendar-feed-copy .btn { min-height: 44px; }
 }
 /* Mural da professora (087, shared/mural.js) */
-.mural-count{ display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 6px; margin-left:6px; border-radius:999px; background:var(--seal-red); color:var(--on-seal-red); font-size:11.5px; font-weight:800; line-height:1; vertical-align:middle; }
+.mural-count{ display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 6px; margin-left:6px; border-radius:999px; background:var(--brand-fill); color:var(--on-brand-fill); font-size:11.5px; font-weight:800; line-height:1; vertical-align:middle; }
 .tab-btn > .mural-count{ position:absolute; top:2px; right:4px; margin:0; min-width:18px; height:18px; font-size:10.5px; border:2px solid var(--paper); box-sizing:content-box; padding:0 4px; }
 .tab-btn > .friends-badge ~ .mural-count, .tab-btn > .mural-count ~ .friends-badge{ right:auto; left:4px; }
 .mural-wrap{ display:flex; flex-direction:column; gap:12px; }
@@ -4074,7 +4077,7 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .mural-picker{ display:flex; flex-wrap:wrap; gap:8px; }
 .mural-chip{ display:inline-flex; align-items:center; gap:6px; min-height:40px; padding:6px 14px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink); font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
 .mural-chip:hover{ border-color:var(--seal-red); }
-.mural-chip.is-active{ background:var(--seal-red); color:var(--on-seal-red); border-color:var(--seal-red); }
+.mural-chip.is-active{ background:var(--brand-fill); color:var(--on-brand-fill); border-color:var(--brand-fill); }
 .mural-chip.is-active .mural-count{ background:var(--paper); color:var(--ink); }
 .mural-chip-new{ border-style:dashed; color:var(--ink-soft); }
 .mural-chip .mural-count{ margin-left:2px; }
@@ -5128,7 +5131,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   <div class="view" id="view-my-flashcards">
     <div class="path-header">
       <h2 data-i18n="ui.myCards.title">📇 Meus cartões</h2>
-      <p data-i18n="ui.myCards.sub">Crie seus próprios flashcards -- palavras e frases que você quer memorizar, mesmo que não estejam na trilha.</p>
+      <p data-i18n="ui.myCards.sub">Crie seus próprios flashcards: palavras e frases que você quer memorizar, mesmo que não estejam na trilha.</p>
     </div>
     <div id="my-flashcards-content"></div>
   </div>
@@ -5372,13 +5375,13 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">Enter</span></div>
-        <div data-i18n="ui.kbd.confirm" class="kbd-shortcuts-desc">Confirmar uma resposta digitada e avançar pra próxima</div>
+        <div data-i18n="ui.kbd.confirm" class="kbd-shortcuts-desc">Confirmar uma resposta digitada e avançar para a próxima</div>
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">r</span></div>
         <div data-i18n="ui.kbd.replay" class="kbd-shortcuts-desc">Tocar áudio novamente</div>
       </div>
-      <p data-i18n="ui.kbd.note" class="kbd-shortcuts-note">Os números só aparecem quando um exercício tem alternativas pra escolher -- nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela.</p>
+      <p data-i18n="ui.kbd.note" class="kbd-shortcuts-note">Os números só aparecem quando um exercício tem alternativas para escolher, nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela.</p>
     </div>
   </div>
 </div>
@@ -5394,7 +5397,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="app-modal-close" id="flashcard-limit-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p data-i18n-html="flashcardLimit.modal.bodyHtml">Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Pra criar mais, apague algum cartão, ou peça pra sua professora te vincular -- alunos vinculados a uma professora têm cartões próprios ilimitados.</p>
+      <p data-i18n-html="flashcardLimit.modal.bodyHtml">Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Para criar mais, apague algum cartão, ou peça para sua professora te vincular. Alunos vinculados a uma professora têm cartões próprios ilimitados.</p>
     </div>
   </div>
 </div>
@@ -5488,7 +5491,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="app-modal-close" id="flashcard-preview-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p class="profile-edit-hint" style="margin-top:0;" data-i18n="flashcardPreview.modal.hint">Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão -- nada é salvo ou avaliado aqui.</p>
+      <p class="profile-edit-hint" style="margin-top:0;" data-i18n="flashcardPreview.modal.hint">Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão. Nada é salvo ou avaliado aqui.</p>
       <div id="flashcard-preview-modal-body"></div>
       <div id="flashcard-preview-modal-nav" style="display:flex; align-items:center; justify-content:center; margin-top:12px;"></div>
     </div>

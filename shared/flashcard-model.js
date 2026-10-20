@@ -264,7 +264,7 @@ function validateFieldAudioUploadFile(file){
   if (!file) return { ok: false, error: mediaErrorText('media.noFile', 'Nenhum arquivo selecionado.') };
   if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: mediaErrorText('media.emptyFile', 'Arquivo vazio.') };
   if (typeof file.size === 'number' && file.size > FIELD_AUDIO_UPLOAD_MAX_BYTES){
-    return { ok: false, error: mediaErrorText('media.audioTooBig', 'Arquivo maior que 5 MB -- escolha um arquivo de áudio menor.') };
+    return { ok: false, error: mediaErrorText('media.audioTooBig', 'Arquivo maior que 5 MB. Escolha um arquivo de áudio menor.') };
   }
   const type = file.type || '';
   if (!FIELD_AUDIO_UPLOAD_MIME_TYPES.includes(type)){

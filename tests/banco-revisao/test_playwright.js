@@ -270,7 +270,7 @@ const BANK_STUB = (who, appKey) => {
 
       // caixas azuis: texto branco em negrito
       const blue = await ev(() => { const cs = (s) => { const e = document.querySelector(s); const c = getComputedStyle(e); return { bg: c.backgroundColor, color: c.color, w: c.fontWeight }; }; return { chip: cs('.rb-stu[aria-pressed="true"]'), novo: cs('.rb-new'), aula: cs('[data-rb="class"]') }; });
-      L('caixas azuis: fundo azul escuro e texto branco em negrito', Object.values(blue).every(b => b.bg === 'rgb(29, 90, 130)' && b.color === 'rgb(255, 255, 255)' && Number(b.w) >= 700), blue);
+      L('caixas da marca: --brand-fill (azul no fr, vermelho no zh, 2026-10-19) e texto branco em negrito', Object.values(blue).every(b => b.bg === (lang === 'fr' ? 'rgb(40, 121, 179)' : 'rgb(192, 35, 31)') && b.color === 'rgb(255, 255, 255)' && Number(b.w) >= 700), blue);
 
       // Visualizar: o MESMO cartão que o aluno vai ver (renderers reais da Revisão), com a Observação só depois de revelar
       await page.locator('.rb-item', { hasText: 'escolher (verbo)' }).locator('[data-rb="preview"]').click();

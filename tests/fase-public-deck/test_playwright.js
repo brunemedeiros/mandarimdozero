@@ -98,7 +98,7 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       await page.waitForSelector('#public-profile-standalone .public-deck-header', { timeout: 15000 });
       const txt = await page.locator('#public-profile-page-body').innerText();
       L('anônimo: página pública abre sem login (standalone)', await page.locator('#public-profile-standalone').isVisible());
-      L('anônimo: mostra nome, autor, descrição, Notes, atualização', txt.includes('Verbos') && txt.includes('Dona do Deck') && txt.includes('Os verbos mais úteis') && txt.includes('4 Notes') && txt.includes('Atualizado em'));
+      L('anônimo: mostra nome, autor, descrição, Notes, atualização', txt.includes('Verbos') && txt.includes('Dona do Deck') && txt.includes('Os verbos mais úteis') && txt.includes('4 itens') && txt.includes('Atualizado em')); // Etapa 4: "Note" vira "item" na tela
       L('anônimo: HTML do nome escapado (sem <b> real)', await page.locator('#public-profile-page-body b').count() === 0);
       L('anônimo: gate de login, sem "Ver cartões" nem importar', await page.locator('[data-public-deck-gate="login"]').count() === 1 && await page.locator('#public-deck-open-btn, #public-deck-import-btn').count() === 0);
       L('anônimo: nunca chamou conteúdo nem cópia', !(await page.evaluate(() => window.__rpcLog.map(x => x[0]))).some(n => ['get_public_deck_notes', 'copy_public_deck'].includes(n)));
@@ -136,7 +136,7 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       await page.evaluate((id) => { window.location.hash = '#/deck/' + id; renderRoute(hashToRoute('#/deck/' + id)); }, PID);
       await page.waitForSelector('#public-deck-modal-body .public-deck-header', { timeout: 10000 });
       L('rota #/deck/<id> dentro do app abre o modal', await page.locator('#public-deck-modal').isVisible());
-      L('Free: vê metadado', (await page.locator('#public-deck-modal-body').innerText()).includes('4 Notes'));
+      L('Free: vê metadado', (await page.locator('#public-deck-modal-body').innerText()).includes('4 itens'));
       L('Free: gate Premium, sem abrir conteúdo, sem importar', await page.locator('[data-public-deck-gate="premium"]').count() === 1 && await page.locator('#public-deck-open-btn, #public-deck-import-btn').count() === 0);
       L('Free: não chamou conteúdo/cópia', !(await page.evaluate(() => window.__rpcLog.map(x => x[0]))).some(n => ['get_public_deck_notes', 'copy_public_deck'].includes(n)));
       L('Free: erros de página', errors.length === 0, errors);
@@ -330,7 +330,7 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       await r.page.waitForSelector('#public-deck-import-btn'); await r.page.click('#public-deck-import-btn');
       await r.page.waitForSelector('#public-deck-import-confirm');
       const txt = await r.page.locator('#public-deck-import-plan').innerText();
-      L('plano: resumo (origem, já existem, arquivadas, a adicionar)', /contém 7 Notes/.test(txt) && /2 já existem na sua coleção \(1 arquivadas\)/.test(txt) && (await r.page.locator('[data-plan-create-count]').innerText()) === '2', txt.slice(0, 200));
+      L('plano: resumo (origem, já existem, arquivadas, a adicionar)', /contém 7 itens/.test(txt) && /2 já existem na sua coleção \(1 arquivadas\)/.test(txt) && (await r.page.locator('[data-plan-create-count]').innerText()) === '2', txt.slice(0, 200));
       L('plano: Novas marcadas, VARIANT desmarcada por padrão', await r.page.locator('[data-plan-sig="sig1"]').isChecked() && await r.page.locator('[data-plan-sig="sig2"]').isChecked() && !(await r.page.locator('[data-plan-sig="sig3"]').isChecked()));
       L('plano: EXACT, EXACT arquivada, cross-family e duplicata da origem NÃO têm checkbox', await r.page.locator('[data-plan-sig="sig4"], [data-plan-sig="sig5"], [data-plan-sig="sig6"], [data-plan-sig="sig7"]').count() === 0);
       L('plano: cross-family só informativo ("Conteúdos relacionados encontrados")', await r.page.locator('[data-plan-related]').count() === 1 && /Conteúdos relacionados encontrados/i.test(txt));
@@ -338,7 +338,7 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       L('plano: HTML do conteúdo escapado (sem <img> real)', await r.page.locator('#public-deck-import-plan img').count() === 0);
       L('plano: Deck sem Notes novas omitido na descrição (Sub vazio só aparece se tiver Note)', /Decks criados: Verbos/.test(await r.page.locator('[data-plan-decks]').innerText()) && /Sub vazio/.test(await r.page.locator('[data-plan-decks]').innerText()) === true);
       await r.page.check('[data-plan-sig="sig3"]');
-      L('marcar VARIANT atualiza a contagem (3) e o texto do botão', (await r.page.locator('[data-plan-create-count]').innerText()) === '3' && /Importar 3 Notes/.test(await r.page.locator('#public-deck-import-confirm').innerText()));
+      L('marcar VARIANT atualiza a contagem (3) e o texto do botão', (await r.page.locator('[data-plan-create-count]').innerText()) === '3' && /Importar 3 itens/.test(await r.page.locator('#public-deck-import-confirm').innerText()));
       await r.page.uncheck('[data-plan-sig="sig1"]'); await r.page.uncheck('[data-plan-sig="sig2"]'); await r.page.uncheck('[data-plan-sig="sig3"]');
       L('nada marcado: botão desabilitado ("Nada novo para importar")', await r.page.locator('#public-deck-import-confirm').isDisabled());
       await r.page.check('[data-plan-sig="sig2"]'); await r.page.check('[data-plan-sig="sig3"]');
@@ -443,7 +443,7 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       await page.evaluate(() => openPublicProfileModalForUsername('u0123456789'));
       await page.waitForSelector('[data-public-deck-link]', { timeout: 10000 });
       const pt = await page.locator('#public-profile-modal-body').innerText();
-      L('perfil: seção "Decks públicos" com nome, Notes e idioma', /decks públicos/i.test(pt) && pt.includes('Verbos') && pt.includes('4 Notes'));
+      L('perfil: seção "Decks públicos" com nome, Notes e idioma', /decks públicos/i.test(pt) && pt.includes('Verbos') && pt.includes('4 itens'));
       L('perfil: lista solta de cartões aposentada (sem "Ver cartões criados por")', !pt.includes('Ver cartões criados por') && await page.locator('#public-profile-cards-toggle-btn').count() === 0);
       L('perfil: não chamou get_public_flashcards', !(await page.evaluate(() => window.__rpcLog.map(x => x[0]))).includes('get_public_flashcards'));
       await page.click('[data-public-deck-link]');
