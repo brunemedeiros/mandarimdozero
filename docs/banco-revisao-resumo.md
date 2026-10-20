@@ -33,6 +33,9 @@ Botão "Estudar N": os cartões que vencem hoje. Hoje ela **não** tem Récap, �
 - **Cadernos:** relatório por aula (linhas lidas, itens criados, ignoradas); preview em `docs/banco-revisao-preview-relatorio.png`, ainda sem decisão de implementar.
 - **Privacidade:** política cobre o site inteiro (conta sem vínculo, com vínculo, professora, pessoas sem conta), mapa do fluxo dos dados e pontos para o advogado, tudo na aba temporária do Admin.
 
+- **Cortar ou corrigir enquanto estuda (decisões de 2026-10-20):** Modo aula tem só o botão Editar; Cortar fica dentro da janela de edição (vale para todas as alunas; mudar o sentido reinicia o progresso). A aluna não corta nem edita sozinha: ela faz um **pedido** (cortar, sugerir correção ou "parece errado"), que chega como pendente para a professora aprovar, recusar ou editar e aprovar. O Banco é um só, sempre sincronizado: não existe corte só para uma aluna.
+- **Banco do aluno em abas:** feito no estilo atual; Pico só se a professora aprovar (preview em `docs/banco-revisao-preview-abas-atual-x-pico.png`).
+
 ## Em decisão (entrevista com a professora, 2026-10-19)
 O que fica, o que muda, o que sai e o que entra de novo: Récap, Última aula, Erros (também para a aluna), tipos de item.
 
