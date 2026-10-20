@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (48 unidades) e do A2 (57), com notas por unidade, gramáticas corrigidas, riscos de progresso, 57 perguntas abertas (sem as já respondidas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (10 módulos, 56 unidades) e do A2 (57), com notas por unidade, gramáticas corrigidas, riscos de progresso, 59 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |

@@ -227,3 +227,23 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
 105. **Casa e moradia aprovada** com 6 unidades: M7.1 Tipos de moradia e cômodos; M7.2 Descrever a moradia; M7.3 Gramática: *il y a* e *c'est* + adjetivo; M7.4 Móveis e objetos da casa; M7.5 Dizer onde as coisas estão; M7.6 Gramática: comparativos (~2h45).
 106. **Sai a unidade "Dar os dados pessoais"** (`A1-23`) (dona): as palavras se distribuem pelas unidades onde fazem sentido (proposta de lugares em discussão). O hotel só reusa em diálogo.
 107. **Dúvida da dona sobre a gramática de países (M2.6)**: com só *la France* e *le Brésil* como cartões a base de vocabulário é fina para ensinar *en / au / aux*. Confirmado: a gramática publicada (`A1-g4`) usa países nos exemplos sem cartão. Solução em discussão.
+
+---
+
+# Décima segunda rodada (2026-10-19): A1 em 10 módulos
+
+108. **Alfabeto como lição de pronúncia na M1.2**, "O alfabeto e soletrar o nome", **sem cartão por letra**: tabela com áudio de cada letra, exercícios de ouvir e escolher ou digitar
+     letras e de soletrar nomes; cartões só de *épeler* e da frase *Ça s'écrit comment ?*; confusões a treinar: G/J, E/I, H e os nomes dos acentos. Exceção à decisão 32
+     (lição de pronúncia só com conteúdo suficiente), aprovada pela dona. A M1.2 ganha também *le prénom* (11 palavras).
+109. **Opção A para a gramática de países** (resposta à dúvida da decisão 107): a `A1-g4` sai do M2 (base de vocabulário fina) e vira a **M8.2**, logo depois do vocabulário
+     "Países e cidades" (`A1-31`). O M2 fica com 7 unidades (M2.6 palavras interrogativas sobre pessoas, M2.7 perguntar sim ou não). A M2.5 ensina *venir de* e *habiter à*
+     como fórmulas, com nota breve só para os países que o aluno já tem (*Je viens de France / du Brésil. J'habite à Paris.*).
+110. **Palavras da unidade "Dar os dados pessoais" (`A1-23`, nunca publicada, removida pela decisão 106) distribuídas**: *le prénom* e o alfabeto na M1.2; *le numéro de
+     téléphone, le portable, le mail* na M5.1 (com as notas de telefone em pares e *courriel / arobase*); *la date de naissance* e *né / née* na M3.5; *l'adresse* na M7.1 (com
+     *le code postal* na nota da ordem do endereço). O check-in da M8.3 só reusa essas palavras em diálogo.
+111. **M3.5 com 15 palavras aceita** (conjunto fechado: 4 lições + Revisão da unidade), com *la date de naissance*.
+112. **A1 com 10 módulos** (consolida as decisões 102, 105, 106 e 109): M1 Apresentar-se (`A1-m1`), M2 Família e pessoas próximas (`A1-m7`), M3 Rotina e calendário (`A1-m2`),
+     M4 Comer e beber (`A1-m3`), M5 Compras (`A1-m8`), M6 Na cidade (`A1-m4`), M7 Casa e moradia (`A1-m5`), M8 Viagem e férias (`A1-m9`, novo), M9 Saúde e conselhos
+     (`A1-m10`, novo), M10 Lazer, convites e passado (`A1-m6`). Ids de módulo por sobreposição de unidades; `A1-m7` a `A1-m10` nunca foram aprovados por ninguém. Total: 56 unidades
+     (33 de vocabulário + 23 de gramática), 349 cartões, ~29h (estimativa). Mapa em `08-mapa-final-a1-a2-v2.md` seção 3.1. Ficam abertas as perguntas 58 (cartões publicados
+     *la porte, la fenêtre, il y a, il n'y a pas de* que saem da `A1-17`) e 59 (nota *Allô ?*).
