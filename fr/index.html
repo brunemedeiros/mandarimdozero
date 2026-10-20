@@ -1958,6 +1958,17 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 /* Observação da professora (depois de responder) e "Quase lá" (digitar) -- Banco de Revisão */
 .review-observation{ display:flex; flex-direction:column; gap:2px; margin:12px 0; padding:10px 14px; background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:var(--radius); color:var(--ink); font-size:14px; line-height:1.45; text-align:left; white-space:pre-line; }
 .review-observation strong{ font-size:12px; font-weight:800; color:var(--ink-soft); }
+#delete-account-yes{ background:var(--error-red, var(--grade-again-bg)); border-color:var(--error-red, var(--grade-again-bg)); color:var(--on-vivid); }
+#delete-account-yes:disabled{ opacity:.45; cursor:not-allowed; }
+.privacy-draft{ max-width:760px; margin:0 auto; padding:4px 0 24px; line-height:1.55; }
+.privacy-draft-h{ margin:22px 0 6px; font-size:17px; }
+.privacy-draft-p{ margin:0 0 10px; }
+.privacy-draft-list{ margin:0 0 10px; padding-left:20px; }
+.privacy-draft-list li{ margin-bottom:6px; }
+.privacy-draft-scroll{ overflow-x:auto; margin:8px 0 14px; }
+.privacy-draft-table{ border-collapse:collapse; font-size:13px; min-width:640px; }
+.privacy-draft-table th, .privacy-draft-table td{ border:1px solid var(--paper-line); padding:6px 8px; text-align:left; vertical-align:top; }
+.privacy-draft-table th{ background:var(--paper-warm); font-weight:800; }
 .review-almost{ margin:10px 0 0; text-align:center; font-weight:800; font-size:14px; color:var(--ink); }
 .grade-buttons{ display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:18px; }
 .grade-btn{
@@ -1965,6 +1976,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   font-weight:800; font-size:13px; display:flex; flex-direction:column; gap:3px; align-items:center;
   transition: transform .1s ease, filter .15s;
 }
+.typed-grade{ grid-template-columns: repeat(2,1fr); }
 .grade-btn:active{ transform: scale(.96); }
 .grade-btn small{ font-weight:600; font-size:10.5px; opacity:.85; }
 /* 4 botões unificados no MESMO par cor-de-fundo/on-vivid (antes hard/good
@@ -5923,6 +5935,11 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
             <p class="p-linha-info"><span data-i18n="settings.account.provider">Conectado com</span><strong id="settings-provider">—</strong></p>
           </div>
         </article>
+        <article id="settings-delete-box" hidden>
+          <header><h3 data-i18n="accountDelete.title">Excluir minha conta</h3></header>
+          <p class="pref-row-sub" data-i18n="accountDelete.hint">Apaga a sua conta e tudo o que está ligado a ela: progresso, cartões, conquistas, amizades, fotos e arquivos. Não dá para desfazer.</p>
+          <footer><button type="button" class="p-perigo" id="delete-account-open" data-i18n="accountDelete.btn">Excluir minha conta</button></footer>
+        </article>
         <article>
           <header><h3 data-i18n="settings.section.preferences">Preferências</h3></header>
           <label class="pref-row p-linha-opcao">
@@ -5987,12 +6004,14 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="notifications" data-i18n="panel.tab.notifications">Notificações</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="reports" data-i18n="panel.tab.reports">Reports</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="premium" data-i18n="panel.tab.plans">Planos</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="privacy" data-i18n="panel.tab.privacy">Privacidade</button>
     </div>
     <div id="admin-badges-content"></div>
     <div id="admin-analytics-content" style="display:none;"></div>
     <div id="admin-notifications-content" style="display:none;"></div>
     <div id="admin-reports-content" style="display:none;"></div>
     <div id="admin-premium-content" style="display:none;"></div>
+    <div id="admin-privacy-content" style="display:none;"></div>
   </div>
 
   <!-- ===== PAINEL DA PROFESSORA (papel Professora, migration 075/076; não depende do Admin Mode) ===== -->
@@ -6383,6 +6402,24 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   </div>
 </div>
 
+<div id="delete-account-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal painel janela-painel" role="alertdialog" aria-labelledby="delete-account-title">
+    <div class="app-modal-header">
+      <h3 id="delete-account-title" data-i18n="accountDelete.modal.title">Excluir sua conta?</h3>
+      <button class="app-modal-close" id="delete-account-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
+    </div>
+    <div class="app-modal-body">
+      <p class="janela-sub" data-i18n="accountDelete.modal.explain">Isso apaga o seu progresso, os seus cartões, os registros que a sua professora tem sobre você (aulas e cartões) e os seus arquivos. Não dá para desfazer. Pedidos de ajuda que você enviou ficam sem o seu e-mail e sem capturas de tela.</p>
+      <div class="p-campo"><label for="delete-account-input" data-i18n="accountDelete.modal.label">Digite o seu e-mail para confirmar</label><input id="delete-account-input" type="email" autocomplete="off"></div>
+      <p id="delete-account-error" role="alert" style="color:var(--error-red, var(--grade-again-bg));min-height:1.2em;margin:6px 0 0;"></p>
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <button class="btn btn-secondary" id="delete-account-cancel" style="flex:1;" data-i18n="accountDelete.modal.cancel">Cancelar</button>
+        <button class="btn btn-primary p-perigo" id="delete-account-yes" style="flex:1;" disabled data-i18n="accountDelete.modal.yes">Excluir para sempre</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="flashcard-reset-confirm-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal painel janela-painel">
     <div class="app-modal-header">
@@ -6588,6 +6625,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/admin-students.js"></script>
 <script src="../shared/admin-plans-ui.js"></script>
 <script src="../shared/admin-premium.js"></script>
+<script src="../shared/privacy-draft.js"></script>
+<script src="../shared/account-delete.js"></script>
 <script src="../shared/flashcard-model.js"></script>
 <script src="../shared/study-trail-model.js"></script>
 <script src="../shared/trail-state-model.js"></script>
@@ -6609,6 +6648,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/anki-import.js"></script>
 <script src="../shared/review-answer-extras.js"></script>
 <script src="../shared/review-bank-student.js"></script>
+<script src="../shared/review-request.js"></script>
 <script src="../shared/flashcard-preview.js"></script>
 <script src="../shared/teacher-flashcards.js"></script>
 <script src="../shared/teacher-cards-ui.js"></script>

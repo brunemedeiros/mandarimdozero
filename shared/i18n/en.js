@@ -120,6 +120,18 @@ window.I18N_CATALOG['en'] = {
   'settings.tab.notifications': '🔔 Notifications', // ALTA
   'settings.tab.export': '📦 Export', // ALTA
   'settings.section.account': 'Account', // ALTA
+  'accountDelete.title': 'Delete my account', // ALTA
+  'accountDelete.hint': 'Deletes your account and everything linked to it: progress, flashcards, achievements, friendships, photos and files. This cannot be undone.', // ALTA
+  'accountDelete.btn': 'Delete my account', // ALTA
+  'accountDelete.modal.title': 'Delete your account?', // ALTA
+  'accountDelete.modal.explain': 'This deletes your progress, your flashcards, the records your teacher keeps about you (lessons and flashcards), and your files. This cannot be undone. Help requests you sent will lose your email and any screenshots.', // ALTA
+  'accountDelete.modal.label': 'Type your email to confirm', // ALTA
+  'accountDelete.modal.cancel': 'Cancel', // ALTA
+  'accountDelete.modal.yes': 'Delete forever', // ALTA
+  'accountDelete.err.mismatch': 'The email does not match.', // ALTA
+  'accountDelete.err.teacher': 'Teacher and administrator accounts cannot be deleted here. Please contact the administrator.', // ALTA
+  'accountDelete.err.generic': 'We could not delete it right now. Please try again in a moment.', // ALTA
+  'accountDelete.done': 'Account deleted. See you!', // ALTA
   'settings.account.email': 'Email', // ALTA
   'settings.account.provider': 'Signed in with', // ALTA
   'settings.account.moreSoon': 'More account options coming soon.', // ALTA
@@ -773,6 +785,8 @@ window.I18N_CATALOG['en'] = {
   'review.deck.myDecks': 'My Decks', // ALTA -- Revisão nova
   'review.observation': 'Note from your teacher', // ALTA
   'review.almost': 'Almost there', // ALTA
+  'review.almost.accent': 'Almost there: check the accents', // ALTA
+  'review.almost.letter': 'Almost there: check the letters', // ALTA
   'review.deck.teacherCards': 'Teacher\'s cards', // MÉDIA -- Revisão nova
   'review.deck.studyPath': 'Study Path', // MÉDIA -- Revisão nova
   'review.deck.allDecks': 'All Decks', // ALTA -- Revisão nova
@@ -2564,6 +2578,7 @@ window.I18N_CATALOG['en'] = {
   'panel.tab.notifications': 'Notifications', // ALTA
   'panel.tab.reports': 'Reports', // ALTA
   'panel.tab.plans': 'Plans', // ALTA
+  'panel.tab.privacy': 'Privacy', // ALTA
   'panel.teacher.title': 'Teacher panel', // ALTA
   'panel.teacher.sub': 'Your students, their cards and classes, and the materials you share.', // ALTA
   'panel.teacher.aria': 'Teacher panel section', // ALTA
@@ -3132,6 +3147,45 @@ window.I18N_CATALOG['en'] = {
   'rb.chooseStudent': 'Choose a student', // ALTA
   'rb.classNoAccount': 'This student has no linked account yet: answers are only kept in the class record.', // ALTA
   'rb.classOf': 'class of {d}', // ALTA
+  'reqChange.menuAria': 'More options for this card', // ALTA
+  'reqChange.opt.cortar': 'Ask to cut', // ALTA
+  'reqChange.opt.cortarSub': 'This card isn\'t useful for me', // ALTA
+  'reqChange.opt.corrigir': 'Suggest a fix', // ALTA
+  'reqChange.opt.corrigirSub': 'I know how it should be', // ALTA
+  'reqChange.opt.errado': 'Looks wrong', // ALTA
+  'reqChange.opt.erradoSub': 'I\'m not sure, my teacher will check', // ALTA
+  'reqChange.title.cortar': 'Ask to cut', // ALTA
+  'reqChange.title.corrigir': 'Suggest a fix', // ALTA
+  'reqChange.title.errado': 'Looks wrong', // ALTA
+  'reqChange.hint.cortar': 'Your teacher decides. Meanwhile, the card is paused only for you.', // ALTA
+  'reqChange.hint.corrigir': 'Your teacher checks it and, if you are right, updates the card.', // ALTA
+  'reqChange.hint.errado': 'Your teacher checks it. Meanwhile, the card is paused only for you.', // ALTA
+  'reqChange.fixLabel': 'How it should be', // ALTA
+  'reqChange.whyFix': 'What\'s wrong (optional)', // ALTA
+  'reqChange.whyOpt': 'Want to explain? (optional)', // ALTA
+  'reqChange.send': 'Send request', // ALTA
+  'reqChange.cancel': 'Back', // ALTA
+  'reqChange.needFix': 'Write how it should be.', // ALTA
+  'reqChange.sent': 'Request sent to your teacher.', // ALTA
+  'reqChange.sentPaused': 'Request sent. The card stays paused until your teacher answers.', // ALTA
+  'reqChange.notBank': 'This card can\'t take requests here. Talk to your teacher.', // ALTA
+  'reqChange.error': 'That didn\'t work. Try again.', // ALTA
+  'rb.reqTitle': 'Student request', // ALTA
+  'rb.reqKind.cortar': '{n} asked to cut this', // ALTA
+  'rb.reqKind.corrigir': '{n} suggested a fix', // ALTA
+  'rb.reqKind.errado': '{n} thinks this is wrong', // ALTA
+  'rb.reqReason': 'Reason:', // ALTA
+  'rb.reqSuggestion': 'Suggestion:', // ALTA
+  'rb.reqApproveCut': 'Approve the cut', // ALTA
+  'rb.reqDecline': 'Decline', // ALTA
+  'rb.reqKeep': 'It\'s right, keep it', // ALTA
+  'rb.reqApplySug': 'Approve the suggestion', // ALTA
+  'rb.reqEditApprove': 'Edit and approve', // ALTA
+  'rb.reqDeclined': 'Request declined. The card is back for them.', // ALTA
+  'rb.reqApplied': 'Suggestion applied.', // ALTA
+  'rb.editTitle': 'Edit this item', // ALTA
+  'rb.cutThis': '✂ Cut this item', // ALTA
+  'rb.cutWarnAll': 'Cutting applies to every student who has this item.', // ALTA
   'rb.cut': 'Cut', // ALTA
   'rb.cutDone': 'Item cut.', // ALTA
   'rb.daysAgo': '{n} days ago', // ALTA
@@ -3162,8 +3216,7 @@ window.I18N_CATALOG['en'] = {
   'rb.generateReady': 'Create cards', // ALTA
   'rb.generated': '{n} cards created.', // ALTA
   'rb.generatedPartial': '{ok} created, {fail} failed.', // ALTA
-  'rb.gotIt': 'Got it', // ALTA
-  'rb.keys': 'Space shows · right arrow got it · H with help · left arrow missed', // ALTA
+  'rb.keys': 'Space shows · 1 Again · 2 Hard · 3 Good (right arrow) · 4 Easy', // ALTA
   'rb.classEmpty': 'No students in the class yet', // ALTA
   'rb.classMembers': '{n} in the class: {names}', // ALTA
   'rb.classPick': 'Class', // ALTA
@@ -3183,7 +3236,6 @@ window.I18N_CATALOG['en'] = {
   'rb.manualEdit': 'Edit manual', // ALTA
   'rb.manualEmpty': 'There is no manual yet. Click "Edit manual" to write your note-taking rules.', // ALTA
   'rb.manualHint': 'Write in simple markdown: headings with #, lists with -, **bold** and tables with |.', // ALTA
-  'rb.missed': 'Missed it', // ALTA
   'rb.missing': 'Missing: {f}.', // ALTA
   'rb.modesAria': 'What to review', // ALTA
   'rb.more': 'Show more', // ALTA
@@ -3221,6 +3273,14 @@ window.I18N_CATALOG['en'] = {
   'rb.restored': 'Item went back to pending.', // ALTA
   'rb.sByClass': 'Accuracy per class', // ALTA
   'rb.sByType': 'Mistakes by item type', // ALTA
+  'rb.tabsAria': 'Student sections', // ALTA
+  'rb.tab.desempenho': 'Performance', // ALTA
+  'rb.tab.aulas': 'Lessons', // ALTA
+  'rb.tab.itens': 'All items', // ALTA
+  'rb.lessonOf': 'Lesson of {d}', // ALTA
+  'rb.lessonNoDate': 'No lesson date', // ALTA
+  'rb.sInClass': 'In class', // ALTA
+  'rb.sAtHome': 'At home', // ALTA
   'rb.sDays': 'classes reviewed', // ALTA
   'rb.sHelp': 'with help', // ALTA
   'rb.sHint': 'since tracking started', // ALTA
@@ -3264,7 +3324,6 @@ window.I18N_CATALOG['en'] = {
   'rb.unlinkedDone': 'Student unlinked. Cards already delivered stay with them.', // ALTA
   'rb.updatedAt': 'Updated {d}', // ALTA
   'rb.whyMissed': 'Why was it missed?', // ALTA
-  'rb.withHelp': 'With help', // ALTA
   'rb.imp.title': 'Import data from the old Review Bank', // ALTA
   'rb.imp.hint': 'Choose the .json file exported from the old Review Bank. Nothing is delivered to anyone: items come in as they were, and cards are only created after you link the student and click Create cards.', // ALTA
   'rb.imp.note': 'Importing again is safe: what already exists here is not overwritten or duplicated.', // ALTA

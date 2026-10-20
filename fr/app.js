@@ -1956,7 +1956,7 @@ function finishCurrentLesson(u){
     const challengesBefore = todaysChallenges().map(c => Math.min(c.get(STATE.daily), c.target));
     const lessonKey = `${u.id}:${currentLessonIdx(u.id)}`;
     STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
-    addXP(8);
+    addXP(LESSON_CLOSE_XP);
     // Terminar esta lição intermediária já conta como "estudei hoje" pro
     // streak -- antes só o Ponto de verificação (fim da unidade inteira)
     // contava, deixando quem completa 1-2 lições de uma unidade grande sem
@@ -1982,7 +1982,7 @@ function finishCurrentLesson(u){
     renderTopbarStats();
     // XP real da lição (não hardcoded, não estrelas): delta entre o XP
     // atual e o snapshot tirado quando a lição começou (xpAtLessonStart),
-    // cobrindo tanto o XP dos exercícios respondidos quanto o +8 de
+    // cobrindo tanto o XP dos exercícios respondidos quanto o bônus de fechar a lição (LESSON_CLOSE_XP) de
     // conclusão logo acima -- STATE.xp só muda dentro de addXP() (ver
     // Fase 1), então esse delta é exatamente o que esta lição concedeu.
     const xpEarned = STATE.xp - STEP_STATE.acq.xpAtLessonStart;
@@ -3216,7 +3216,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
       revealCorrectVisual(chosenIdx);
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
-        addXP(exerciseXP(ex, 3));
+        addXP(exerciseXP(ex, EXERCISE_XP_RECOGNIZE));
         registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
         addStudyMinutes();
         setTimeout(() => showCorrectFeedbackPanel(contentEl, null), 500);
@@ -3318,7 +3318,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
 
     if (isCorrect){
       STEP_STATE.exerciseScore += almost ? 0.5 : 1;
-      addXP(exerciseXP(ex, almost ? 2 : 4)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
+      addXP(exerciseXP(ex, almost ? EXERCISE_XP_ALMOST : EXERCISE_XP_PRODUCE)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
       registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
       addStudyMinutes();
       // Detalhe extra vale a pena aqui -- o exercício testou só o som da
@@ -3405,7 +3405,7 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
 
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
-        addXP(exerciseXP(ex, 4));
+        addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE));
         addStudyMinutes();
         // Sem detalhe extra -- a opção certa já ficou marcada em verde na
         // tela (revealCorrectVisual), repetir o texto no painel seria redundante.
@@ -3478,7 +3478,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 
     if (isCorrect){
       STEP_STATE.exerciseScore += almost ? 0.5 : 1;
-      addXP(exerciseXP(ex, almost ? 2 : 4));
+      addXP(exerciseXP(ex, almost ? EXERCISE_XP_ALMOST : EXERCISE_XP_PRODUCE));
       addStudyMinutes();
       setTimeout(() => showCorrectFeedbackPanel(contentEl, almost
         ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>${clozeFeedbackDetailHTML(ex, true)}`
@@ -3651,7 +3651,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4));
+      addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE));
       addStudyMinutes();
       // No modo "traduzir", o português já apareceu como pergunta --
       // repeti-lo aqui seria redundante; mostra a frase francesa completa
@@ -4083,7 +4083,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
       ${clozeImageUrl ? `<img src="${clozeImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="cloze-sentence">${sentenceHTML}</div>
       ${view.audioUrl ? customAudioBtnHTML(view.audioUrl) : ''}
-      ${answered ? `<div class="cloze-trans">${view.translation.text}</div>` : ''}
+      ${(answered || card.origin === 'teacher') && view.translation.text ? `<div class="cloze-trans">${view.translation.text}</div>` : ''}
     </div>
     ${!answered ? `
       <div class="cloze-type-wrap">
@@ -4091,7 +4091,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
         ${frAccentPickerHTML(view.compareAnswerText)}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
   `;
 
   wireCustomAudioButtons(mountEl);
@@ -4111,16 +4111,14 @@ function renderClozeCard(mountEl, card, localState, callbacks){
       const verdict = typedAnswerVerdictForExpected(inputEl.value, view.compareAnswerText);
       localState.wasCorrect = verdict !== 'errou';
       localState.almost = verdict === 'quase';
+      localState.almostKind = localState.almost ? typedAlmostKind(inputEl.value, acceptedForms(view.compareAnswerText)) : null;
       renderClozeCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
     mountEl.querySelector('#cloze-review-verify-btn').addEventListener('click', verify);
   } else {
-    mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
-      // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
-      // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, typedAnswerGrade(localState.almost ? 'quase' : localState.wasCorrect ? 'ok' : 'errou'));
-    });
+    // Errei e Difícil (quase) são automáticos; acerto em cheio escolhe Bom ou Fácil (typedResultActionsHTML).
+    wireTypedResultActions(mountEl, callbacks, localState, typedAnswerGrade(localState.almost ? 'quase' : 'errou'));
   }
 }
 
@@ -4171,7 +4169,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
         ${frAccentPickerHTML(view.compareAnswerText)}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${reviewAlmostHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -4197,20 +4195,22 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
       const verdict = typedAnswerVerdictForExpected(inputEl.value, view.compareAnswerText);
       localState.wasCorrect = verdict !== 'errou';
       localState.almost = verdict === 'quase';
+      localState.almostKind = localState.almost ? typedAlmostKind(inputEl.value, acceptedForms(view.compareAnswerText)) : null;
       renderTypeAnswerCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
     mountEl.querySelector('#cloze-review-verify-btn').addEventListener('click', verify);
   } else {
-    mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
-      // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
-      // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, typedAnswerGrade(localState.almost ? 'quase' : localState.wasCorrect ? 'ok' : 'errou'));
-    });
+    // Errei e Difícil (quase) são automáticos; acerto em cheio escolhe Bom ou Fácil (typedResultActionsHTML).
+    wireTypedResultActions(mountEl, callbacks, localState, typedAnswerGrade(localState.almost ? 'quase' : 'errou'));
   }
 }
 
 function renderReviewView(){
+  renderReviewViewInner();
+  if (typeof mountBankRequestMenu === 'function') mountBankRequestMenu();
+}
+function renderReviewViewInner(){
   syncReviewBackLink();
   stopExerciseAudio();
   const el = document.getElementById('review-content');
@@ -4975,6 +4975,7 @@ function renderSettingsView(){
   document.getElementById('settings-email').textContent = CURRENT_USER?.email || t('settings.account.guest');
   document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? t('settings.account.emailPassword') : '—');
   switchSettingsSection(SETTINGS_SECTION);
+  if (typeof refreshDeleteAccountBox === 'function') refreshDeleteAccountBox();
 }
 
 // Alterna entre as duas seções internas de Configurações (Geral/Exportar) --

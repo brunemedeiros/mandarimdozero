@@ -50,7 +50,7 @@ const ANTES = () => {
 
     // ---- quadro ----
     L('tela cheia: sem Ranking ao lado', await p.evaluate(() => getComputedStyle(document.querySelector('.right-cards')).display === 'none'));
-    L('título, as 5 abas do Admin e Analytics ativa', (await p.innerText('[data-tan="pagina"] header')).includes('Analytics') && JSON.stringify(await p.$$eval('#view-admin-badges [data-admin-section]', l => l.map(b => b.dataset.adminSection))) === '["badges","analytics","notifications","reports","premium"]' && await p.$eval('[data-admin-section="analytics"]', b => b.classList.contains('is-active')));
+    L('título, as 6 abas do Admin (a de Privacidade é temporária) e Analytics ativa', (await p.innerText('[data-tan="pagina"] header')).includes('Analytics') && JSON.stringify(await p.$$eval('#view-admin-badges [data-admin-section]', l => l.map(b => b.dataset.adminSection))) === '["badges","analytics","notifications","reports","premium","privacy"]' && await p.$eval('[data-admin-section="analytics"]', b => b.classList.contains('is-active')));
     L('11 sub-abas, Resumo aberta e só o painel dela visível', (await p.$$eval('[data-analytics-tab]', l => l.length)) === 11 && (await visiblePanel()) === 'resumo' && await p.$eval('[data-analytics-tab="resumo"]', a => a.getAttribute('aria-current') === 'page'));
     L('filtros: Últimos 30 dias, todos os idiomas e dispositivos; comparação desligada', (await p.inputValue('#analytics-period-select')) === 'last30' && (await p.inputValue('#analytics-language-select')) === 'all' && (await p.inputValue('#analytics-device-select')) === 'all' && !(await p.isChecked('#analytics-compare-switch')));
     L('linha do período mostra de e até', (await p.textContent('[data-analytics-periodo]')).includes(' – '));

@@ -126,7 +126,7 @@ async function pickNotificationTemplate(eventType){
 // desde a última notificação DESSA categoria pra essa conta) + limite
 // diário + (Fase 1b) um piso de XP mínimo pro evento xp_earned -- cooldown/
 // limite diário controlam FREQUÊNCIA, não o TAMANHO do ganho, então uma
-// sequência de revisões maduras (XP bem baixo de propósito, ver reviewXP())
+// sequência de revisões (XP baixo de propósito, ver reviewXP())
 // ainda enchia o sino de notificações de "+1/+2/+3 XP" mesmo respeitando o
 // cooldown. min_xp_amount é editável no Painel de Admin > Notificações.
 async function passesAntiSpam(category, eventType, payload){

@@ -22,18 +22,19 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
 const BANK_STUB = (who, appKey) => {
   const uuid = () => 'u' + Math.random().toString(16).slice(2, 10) + Math.random().toString(16).slice(2, 10);
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
-  const BANK = new Set(['review_bank_students', 'review_bank_items', 'review_bank_recaps', 'review_bank_reviews', 'review_bank_settings']);
+  const BANK = new Set(['review_bank_students', 'review_bank_items', 'review_bank_recaps', 'review_bank_reviews', 'review_bank_settings', 'review_bank_requests']);
   const DEF = {
     review_bank_items: () => ({ status: 'pendente', level: 0, due_date: null, last_result: null, last_review_date: null, proposal: null, student_id: null, teacher_flashcard_id: null }),
     review_bank_reviews: () => ({ applied_at: null, mode: null, review_date: today() }),
     review_bank_students: () => ({ status: 'ativo', linked_student_id: null, lesson_dates: [], reference_language: 'pt' }),
-    review_bank_recaps: () => ({ item_ids: [] }), review_bank_settings: () => ({}),
+    review_bank_recaps: () => ({ item_ids: [] }), review_bank_settings: () => ({}), review_bank_requests: () => ({ status: 'pendente', proposal: null, reason: null }),
   };
   window.__DB.review_bank_students = window.__DB.review_bank_students || [];
   window.__DB.review_bank_items = window.__DB.review_bank_items || [];
   window.__DB.review_bank_recaps = window.__DB.review_bank_recaps || [];
   window.__DB.review_bank_reviews = window.__DB.review_bank_reviews || [];
   window.__DB.review_bank_settings = window.__DB.review_bank_settings || [];
+  window.__DB.review_bank_requests = window.__DB.review_bank_requests || [];
   function bankBuilder(table){
     const st = { f: [], ord: [], lim: null, rng: null, op: null, pl: null, single: false, conf: null };
     const test = r => st.f.every(([op, k, v]) => op === 'eq' ? r[k] === v : op === 'neq' ? r[k] !== v : op === 'in' ? v.includes(r[k]) : op === 'gte' ? r[k] >= v : op === 'lte' ? r[k] <= v : true);
@@ -137,10 +138,34 @@ const BANK_STUB = (who, appKey) => {
       let n = 0; D.teacher_flashcards.forEach(c => { if (c.bank_item_id === args.p_item_id){ Object.assign(c, { front: args.p_front, back_trans: args.p_back_trans, fields: args.p_fields, card_generation_mode: args.p_mode, tags: args.p_tags || [], note: args.p_note }); if (args.p_bump_revision) c.revision = (c.revision || 0) + 1; n++; } });
       return { data: n, error: null };
     }
-    if (name === 'get_my_pending_bank_reviews'){
+    // 114: pedidos da aluna (espelha request_bank_item_change e decide_bank_request)
+    if (name === 'request_bank_item_change'){
+      const card = D.teacher_flashcards.find(c => c.id === args.p_teacher_flashcard_id && c.bank_item_id);
+      if (!card) return { data: null, error: { message: 'not_authorized' } };
+      const it = item(card.bank_item_id);
+      let rq = D.review_bank_requests.find(r => r.item_id === it.id && r.requester_id === card.student_id && r.status === 'pendente');
+      if (!rq){ rq = { id: uuid(), item_id: it.id, teacher_id: 'A', requester_id: card.student_id, bank_student_id: it.bank_student_id, status: 'pendente', created_at: new Date().toISOString() }; D.review_bank_requests.push(rq); }
+      Object.assign(rq, { kind: args.p_kind, proposal: args.p_kind === 'corrigir' ? args.p_proposal : null, reason: args.p_reason });
+      card.status = ['cortar', 'errado'].includes(args.p_kind) ? 'archived' : 'active';
+      return { data: rq.id, error: null };
+    }
+    if (name === 'decide_bank_request'){
+      const rq = D.review_bank_requests.find(r => r.id === args.p_request_id); if (!rq) return { data: null, error: { message: 'not_authorized' } };
+      if (rq.status !== 'pendente') return { data: rq.status, error: null };
+      if (args.p_decision === 'cortar'){
+        D.teacher_flashcards.forEach(c => { if (c.bank_item_id === rq.item_id) c.status = 'archived'; });
+        item(rq.item_id).status = 'cortado';
+        D.review_bank_requests.forEach(r => { if (r.item_id === rq.item_id && r.status === 'pendente') r.status = 'aprovado'; });
+        return { data: 'aprovado', error: null };
+      }
+      rq.status = args.p_decision === 'resolver' ? 'aprovado' : rq.kind === 'errado' ? 'mantido' : 'recusado';
+      D.teacher_flashcards.forEach(c => { if (c.bank_item_id === rq.item_id && c.student_id === rq.requester_id && c.status === 'archived' && item(rq.item_id).status === 'aprovado') c.status = 'active'; });
+      return { data: rq.status, error: null };
+    }
+    if (name === 'get_my_pending_bank_reviews' || name === 'get_my_pending_bank_grades'){
       const out = D.review_bank_reviews.filter(r => !r.applied_at).map(r => ({ r, s: roster(r.bank_student_id), i: item(r.item_id) }))
         .filter(x => x.s && x.s.linked_student_id === who && x.s.language_app_key === args.p_language_app_key && x.i && x.i.teacher_flashcard_id)
-        .map(x => ({ id: x.r.id, teacher_flashcard_id: x.i.teacher_flashcard_id, outcome: x.r.outcome, created_at: x.r.created_at }));
+        .map(x => ({ id: x.r.id, teacher_flashcard_id: x.i.teacher_flashcard_id, outcome: x.r.outcome, grade: x.r.grade === undefined ? null : x.r.grade, created_at: x.r.created_at }));
       return { data: out, error: null };
     }
     if (name === 'ack_my_bank_reviews'){
@@ -230,11 +255,17 @@ const BANK_STUB = (who, appKey) => {
       const counts = await ev(() => [...document.querySelectorAll('.rb-count b')].map(e => e.textContent));
       L('contagens: 4 itens, 1 aprovado, 2 pendentes, 1 cortado', JSON.stringify(counts) === '["4","1","2","1"]', counts);
       L('Carol vinculada à conta @carol', await ev(() => document.querySelector('.rb-linkline').textContent.includes('@carol')));
+      L('abas do aluno: Desempenho, Aulas e Todos os itens (abre em Aulas)', await ev(() => [...document.querySelectorAll('.rb-tabs [data-rb=tab]')].map(b => b.textContent.trim() + ':' + b.getAttribute('aria-selected')).join() === 'Desempenho:false,Aulas:true,Todos os itens:false'));
+      await page.click('.rb-tabs [data-t=itens]');
       L('"+ Novo item" na mesma linha dos filtros, depois de "Todos"', await ev(() => { const tb = document.querySelector('.rb-toolbar'); const kids = [...tb.children].map(e => e.textContent.trim()); return kids.length === 5 && kids[3] === 'Todos' && kids[4] === '+ Novo item' && !!tb.querySelector('.rb-new'); }));
       L('filtro padrão: Pendentes (2 itens, um com "Para conferir")', await ev(() => document.querySelectorAll('.rb-item').length === 2 && document.querySelectorAll('.rb-doubt').length === 1));
       L('aluna vinculada com 2 itens prontos (1 pendente sem dúvida + 1 aprovado sem cartão): aviso para gerar', await ev(() => !!document.querySelector('.rb-ready') && document.querySelector('.rb-ready').textContent.includes('2')));
+      await page.click('.rb-tabs [data-t=desempenho]');
       L('estatísticas do modo aula aparecem com os números', await ev(() => document.querySelector('#rb-stats .rb-tile b').textContent === '2'));
+      await page.click('.rb-tabs [data-t=aulas]');
       L('Récap: botão para gerar com a data da próxima aula', await ev(() => /Gerar Récap da aula de/.test(document.querySelector('.rb-recap-actions .rb-btn-blue').textContent)));
+      L('aba Aulas agrupa os itens por data da aula, a mais recente aberta', await ev(() => { const l = document.querySelectorAll('.rb-lesson'); return l.length >= 1 && l[0].open && l[0].querySelectorAll('.rb-item').length >= 1 && /Aula de/.test(l[0].querySelector('summary').textContent); }));
+      await page.click('.rb-tabs [data-t=itens]');
       await shot('banco-carol');
 
       // caixas azuis: texto branco em negrito
@@ -309,6 +340,7 @@ const BANK_STUB = (who, appKey) => {
 
       // Récap + Modo aula
       await page.click('[data-rb="filter"][data-f="aprovado"]');
+      await page.click('.rb-tabs [data-t=aulas]');
       await page.click('[data-rb="recap-make"]');
       await page.waitForFunction(() => window.__DB.review_bank_recaps.length === 1);
       const rc = await ev(() => window.__DB.review_bank_recaps[0]);
@@ -321,8 +353,8 @@ const BANK_STUB = (who, appKey) => {
       await shot('modo-aula');
       await page.keyboard.press('Space');
       await page.waitForSelector('#rb-class .rb-sa');
-      L('espaço mostra a resposta com os 3 botões', await ev(() => document.querySelectorAll('#rb-class .rb-ctrl .rb-big').length === 3));
-      await page.click('#rb-class [data-o="errou"]');
+      L('espaço mostra a resposta com os 4 botões (Errei, Difícil, Bom, Fácil) e o intervalo de cada um', await ev(() => { const b = [...document.querySelectorAll('#rb-class .rb-ctrl .rb-big')]; return b.length === 4 && b.every(x => x.querySelector('small') && x.querySelector('small').textContent.trim()) && b.map(x => x.dataset.g).join() === '0,1,2,3'; }));
+      await page.click('#rb-class [data-g="0"]');
       await page.waitForSelector('#rb-class .rb-reasons');
       L('errou pede o motivo (os motivos do tipo do item + sem motivo)', await ev(() => (() => { const n = document.querySelectorAll('#rb-class .rb-reasons .chips button').length; const erro = !!document.querySelector('#rb-class .rb-sq.is-wrong'); return erro ? n === 3 : n === 5; })() && !!document.querySelector('#rb-class .chips .is-none')));
       await shot('modo-aula-motivo');
@@ -331,14 +363,73 @@ const BANK_STUB = (who, appKey) => {
       await page.waitForFunction((rs) => window.__DB.review_bank_reviews.some(r => r.reason === rs && r.mode === 'recap' && r.id.startsWith('u')), chosenReason);
       const rv = await ev(() => window.__DB.review_bank_reviews.filter(r => r.id.startsWith('u')));
       L('resposta gravada com motivo, modo e data; aluno vinculado recebe o aluno_id', rv.length === 1 && rv[0].outcome === 'errou' && rv[0].student_id === 'S1' && rv[0].mode === 'recap' && /^\d{4}-\d\d-\d\d$/.test(rv[0].review_date), rv);
+      L('Errei grava a nota 0 e a origem "aula"', rv[0].grade === 0 && rv[0].via === 'aula', rv[0]);
       const firstId = rv[0].item_id;
+      L('item guarda o estado FSRS e a origem da última resposta', await ev((id) => { const i = window.__DB.review_bank_items.find(x => x.id === id); return !!i.fsrs && i.fsrs.state === 'learning' && i.last_source === 'aula'; }, firstId));
       L('item errado volta ao nível 0 e amanhã', await ev((id) => { const i = window.__DB.review_bank_items.find(x => x.id === id); return i.level === 0 && i.last_result === 'errou' && i.due_date > i.last_review_date; }, firstId));
       // se sobrou slide, responde como acertou; senão já terminou
       if (await ev(() => !!document.querySelector('#rb-class .rb-end'))) L('fim da rodada com placar', true);
       else { await page.keyboard.press('Space'); await page.keyboard.press('ArrowRight'); await page.waitForSelector('#rb-class .rb-end'); L('fim da rodada com placar', await ev(() => document.querySelector('#rb-class .rb-score').textContent.includes('/'))); }
       await shot('modo-aula-fim');
       await page.click('#rb-class [data-c="close"]');
+      await page.click('.rb-tabs [data-t=aulas]');
       L('fechar o Modo aula volta ao painel', await ev(() => !document.getElementById('rb-class') && !!document.querySelector('.rb-recap')));
+      await page.click('.rb-tabs [data-t=itens]');
+
+      // 114: pedidos da aluna no Banco (cortar / sugerir correção / parece errado) e janela Editar no Modo aula
+      await ev(() => {
+        const D = window.__DB, now = new Date().toISOString();
+        D.teacher_flashcards.push({ id: 880, teacher_id: 'A', student_id: 'S1', language_app_key: APP_KEY, front: 'a', back_trans: 'b', status: 'active', fields: [], card_generation_mode: 'normal', tags: [], bank_item_id: 'i3', revision: 0 });
+        D.review_bank_items.find(i => i.id === 'i3').teacher_flashcard_id = 880;
+        D.review_bank_requests.push(
+          { id: 'q-cut', item_id: 'i3', teacher_id: 'A', requester_id: 'S1', bank_student_id: 'rb-carol', kind: 'cortar', proposal: null, reason: 'repetido', status: 'pendente', created_at: now },
+          { id: 'q-fix', item_id: 'i1', teacher_id: 'A', requester_id: 'S1', bank_student_id: 'rb-carol', kind: 'corrigir', proposal: { answer: 'choisir (verbe)' }, reason: 'faltou o tipo', status: 'pendente', created_at: now },
+          { id: 'q-wrong', item_id: 'i2', teacher_id: 'A', requester_id: 'S1', bank_student_id: 'rb-carol', kind: 'errado', proposal: null, reason: null, status: 'pendente', created_at: now });
+        RB.filter = 'todos';
+      });
+      await ev(async () => { await rbReloadCur(); rbRender(); });
+      L('pedidos abertos aparecem dentro de cada item, com o nome da aluna', await ev(() => document.querySelectorAll('.rb-req').length === 3 && [...document.querySelectorAll('.rb-req')].every(e => e.textContent.includes('Carol Rocha'))));
+      L('cada tipo de pedido tem as ações certas', await ev(() => { const q = id => [...document.querySelector('[data-req="' + id + '"]').querySelectorAll('button')].map(b => b.dataset.rb).join(); return q('q-cut') === 'req-cut,req-decline,req-edit' && q('q-fix') === 'req-apply,req-edit,req-decline' && q('q-wrong') === 'req-decline,req-edit,req-cut'; }));
+      L('o motivo e a sugestão da aluna aparecem', await ev(() => document.querySelector('[data-req="q-fix"]').textContent.includes('choisir (verbe)') && document.querySelector('[data-req="q-fix"]').textContent.includes('faltou o tipo')));
+      await shot('pedidos-banco');
+      await page.click('[data-req="q-fix"] [data-rb="req-apply"]');
+      await page.waitForFunction(() => window.__DB.review_bank_requests.find(r => r.id === 'q-fix').status === 'aprovado');
+      L('aprovar a sugestão atualiza o item e fecha o pedido', await ev(() => window.__DB.review_bank_items.find(i => i.id === 'i1').answer === 'choisir (verbe)' && !document.querySelector('[data-req="q-fix"]')));
+      const i2Before = await ev(() => window.__DB.review_bank_items.find(i => i.id === 'i2').status);
+      await page.click('[data-req="q-wrong"] [data-rb="req-decline"]');
+      await page.waitForFunction(() => window.__DB.review_bank_requests.find(r => r.id === 'q-wrong').status === 'mantido');
+      L('"parece errado" mantido: fecha o pedido e o item continua igual', await ev((b4) => !document.querySelector('[data-req="q-wrong"]') && window.__DB.review_bank_items.find(i => i.id === 'i2').status === b4, i2Before));
+      await page.click('[data-req="q-cut"] [data-rb="req-cut"]');
+      await page.waitForFunction(() => window.__DB.review_bank_items.find(i => i.id === 'i3').status === 'cortado');
+      L('aprovar o corte corta o item para todos e arquiva o cartão', await ev(() => window.__DB.teacher_flashcards.find(c => c.id === 880).status === 'archived' && window.__DB.review_bank_requests.find(r => r.id === 'q-cut').status === 'aprovado'));
+      // Modo aula: só o botão Editar; Cortar fica dentro da janela
+      await ev(() => { RB.filter = 'aprovado'; });
+      await page.click('.rb-tabs [data-t=aulas]');
+      await ev(() => { window.__DB.review_bank_items.find(i => i.id === 'i1').status = 'aprovado'; window.__DB.review_bank_items.find(i => i.id === 'i1').due_date = '2000-01-01'; });
+      await ev(async () => { await rbReloadCur(); rbRender(); });
+      await page.click('[data-rb="class"]');
+      await page.waitForSelector('#rb-class .rb-slide');
+      L('Modo aula: só há o botão Editar (sem Cortar solto na tela)', await ev(() => !!document.querySelector('#rb-class [data-c="edit"]') && !document.querySelector('#rb-class .rb-stage [data-c="edit-cut"]')));
+      const firstQ = await ev(() => RBC.slides[RBC.idx].id);
+      await page.click('#rb-class [data-c="edit"]');
+      await page.waitForSelector('.rb-cedit');
+      L('janela Editar: pergunta, resposta, observação, Salvar, Cancelar e "Cortar este item" com o aviso de todos', await ev(() => ['question', 'answer', 'explanation'].every(k => !!document.querySelector('.rb-cedit [data-e=' + k + ']')) && !!document.querySelector('[data-c="edit-save"]') && !!document.querySelector('[data-c="edit-cancel"]') && /todos/.test(document.querySelector('.rb-cedit-cutbox').textContent) && !!document.querySelector('[data-c="edit-cut"]')));
+      await shot('modo-aula-editar');
+      await page.fill('.rb-cedit [data-e=explanation]', 'Nota nova da aula.');
+      await page.click('[data-c="edit-save"]');
+      await page.waitForFunction((id) => window.__DB.review_bank_items.find(i => i.id === id).explanation === 'Nota nova da aula.', firstQ);
+      L('Salvar na janela corrige o item e fecha a janela', await ev(() => !document.querySelector('.rb-cedit')));
+      await page.click('#rb-class [data-c="edit"]');
+      await page.waitForSelector('.rb-cedit');
+      await page.keyboard.press('Escape');
+      L('Esc fecha a janela sem sair do Modo aula', await ev(() => !document.querySelector('.rb-cedit') && !!document.getElementById('rb-class')));
+      await page.click('#rb-class [data-c="edit"]');
+      await page.click('[data-c="edit-cut"]');
+      await page.waitForFunction((id) => window.__DB.review_bank_items.find(i => i.id === id).status === 'cortado', firstQ);
+      L('Cortar dentro da janela corta o item e tira da rodada', await ev((id) => !RBC.slides.some(i => i.id === id), firstQ));
+      await page.click('#rb-class [data-c="close"]');
+      await ev(() => { RB.filter = 'pendente'; });
+      await page.click('.rb-tabs [data-t=itens]');
 
       // item sensível nunca entra sozinho: nem na geração automática, nem no "Gerar cartões"
       await ev(() => { window.__DB.review_bank_items.push({ id: 'i-sens', teacher_id: 'A', bank_student_id: 'rb-carol', language_app_key: 'frances', student_id: null, item_type: 'vocabulario', question: 'pessoal', answer: 'pessoal', wrong_form: null, gap_word: null, explanation: null, check_note: null, class_date: '2026-10-07', status: 'aprovado', teacher_flashcard_id: null, level: 0, due_date: null, last_result: null, last_review_date: null, proposal: null, sensitive: true, created_at: '2026-10-07', updated_at: '2026-10-07' }); });
@@ -512,20 +603,23 @@ const BANK_STUB = (who, appKey) => {
             { id: 'q', lang: 'fr', role: 'answer', content: { value: 'Je suis allée au marché hier.' }, audio: null, image: null, pinyinFieldId: null }] };
           const card = buildEngineCardsFromRow(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' })[0];
           const res = {};
-          const run = async (typed) => {
+          const run = async (typed, pick) => {
             let got = null; const ls = { kind: 'type_answer', typedAnswer: '', answered: false, wasCorrect: null };
             renderTypeAnswerCard(mount, card, ls, { onAnswered: (c, g) => { got = [c, g]; } });
             res.obsBefore = mount.querySelector('.review-observation') ? 1 : 0;
             const input = mount.querySelector('#cloze-review-input'); input.value = typed;
             mount.querySelector('#cloze-review-verify-btn').click();
             res.almostLabel = !!mount.querySelector('.review-almost'); res.obsAfter = !!mount.querySelector('.review-observation');
-            mount.querySelector('#cloze-continue-btn').click();
-            return { grade: got && got[1], almost: res.almostLabel };
+            const msg = (mount.querySelector('.review-almost') || {}).textContent || '';
+            const btns = mount.querySelectorAll('.typed-grade .grade-btn').length;
+            if (btns) mount.querySelector('.typed-grade [data-grade="' + (pick || 2) + '"]').click(); else mount.querySelector('#cloze-continue-btn').click();
+            return { grade: got && got[1], almost: res.almostLabel, msg, btns };
           };
-          const out = { exact: await run('Je suis allée au marché hier.'), accent: await run('Je suis allee au marché hier'), wrong: await run('Tu es parti.'), obsBefore: res.obsBefore, obsAfter: res.obsAfter };
+          const out = { exact: await run('Je suis allée au marché hier.'), easy: await run('Je suis allée au marché hier.', 3), accent: await run('Je suis allee au marché hier'), letter: await run('Je suis allée au marche hier'.replace('marche', 'marchee')), wrong: await run('Tu es parti.'), obsBefore: res.obsBefore, obsAfter: res.obsAfter };
           mount.remove(); return out;
         });
-        L('digitar certo = Bom (2), sem "quase lá"', ta.exact.grade === 2 && ta.exact.almost === false, ta);
+        L('digitar certo = escolhe Bom ou Fácil (2 botões com intervalo), sem "quase lá"', ta.exact.grade === 2 && ta.exact.almost === false && ta.exact.btns === 2 && ta.easy.grade === 3, ta);
+        L('"quase" explica o motivo: acento x letra', ta.accent.msg.includes('acentos') && ta.letter.msg.includes('letras') && ta.accent.btns === 0, ta);
         L('digitar sem acento = quase lá = Difícil (1)', ta.accent.grade === 1 && ta.accent.almost === true, ta);
         L('digitar errado = Errei (0)', ta.wrong.grade === 0, ta);
         L('digitar: Observação só depois de responder', ta.obsBefore === 0 && ta.obsAfter === true, ta);
@@ -591,6 +685,33 @@ const BANK_STUB = (who, appKey) => {
       L('sessão do Aluno: só cartões da professora, mesmo motor da Revisão', sess.allTeacher, sess);
       L('sessão do Aluno: link "Voltar ao Aluno" e rota #/review/class', /Aluno|Student/.test(sess.back) && sess.hash === '#/review/class', sess);
       await shot('aluno-revisao-sessao');
+      // 114: menu ⋯ do cartão da professora (três opções, cada uma um botão com borda e espaço entre eles)
+      await ev(() => {
+        window.__DB.teacher_flashcards.push({ id: 991, teacher_id: 'A', student_id: 'S1', language_app_key: APP_KEY, front: 'x', back_trans: 'y', status: 'active', fields: [], card_generation_mode: 'normal', tags: [], bank_item_id: 'i7', revision: 0 });
+        window.__DB.review_bank_items.find(i => i.id === 'i7').status = 'aprovado';
+        STATE.reviewIndex = STATE.reviewQueue.findIndex(c => String(c.rowId) === '991'); STATE.reviewCardState = null; renderReviewView();
+      });
+      L('cartão da professora tem o botão ⋯', await ev(() => !!document.getElementById('rq-open') && document.getElementById('rq-open').offsetWidth >= 44));
+      await page.click('#rq-open');
+      await page.waitForSelector('#rq-pop .rq-opt');
+      const opts = await ev(() => [...document.querySelectorAll('#rq-pop .rq-opt')].map(b => { const r = b.getBoundingClientRect(), cs = getComputedStyle(b); return { top: r.top, bottom: r.bottom, h: r.height, bw: parseFloat(cs.borderTopWidth), bs: cs.borderTopStyle, txt: b.textContent.replace(/\s+/g, ' ').trim() }; }));
+      L('menu ⋯: 3 opções, cada uma um botão distinto com borda visível e espaço entre elas', opts.length === 3 && opts.every(o => o.bw >= 2 && o.bs === 'solid' && o.h >= 44) && opts[1].top - opts[0].bottom >= 6 && opts[2].top - opts[1].bottom >= 6, opts);
+      L('menu ⋯: título e explicação em cada opção', opts.every(o => o.txt.length > 12), opts);
+      await shot('aluna-menu');
+      await page.click('#rq-pop [data-rq="corrigir"]');
+      await page.click('#rq-pop [data-rq="send"]');
+      L('sugerir correção sem texto pede para escrever', await ev(() => document.getElementById('rq-msg').textContent.length > 3));
+      await page.fill('#rq-fix', 'ça va bien');
+      await page.fill('#rq-why', 'faltou o acento');
+      await page.click('#rq-pop [data-rq="send"]');
+      await page.waitForFunction(() => window.__DB.review_bank_requests.some(r => r.requester_id === 'S1' && r.item_id === 'i7' && r.kind === 'corrigir'));
+      L('correção enviada com sugestão e motivo; o cartão NÃO pausa', await ev(() => { const r = window.__DB.review_bank_requests.find(x => x.item_id === 'i7'); return r.proposal.answer === 'ça va bien' && r.reason === 'faltou o acento' && window.__DB.teacher_flashcards.find(c => c.id === 991).status === 'active' && !document.getElementById('rq-pop'); }));
+      await page.click('#rq-open'); await page.click('#rq-pop [data-rq="errado"]'); await page.click('#rq-pop [data-rq="back"]');
+      L('Voltar traz as 3 opções de novo', await ev(() => document.querySelectorAll('#rq-pop .rq-opt').length === 3));
+      await page.click('#rq-pop [data-rq="errado"]'); await page.click('#rq-pop [data-rq="send"]');
+      await page.waitForFunction(() => window.__DB.teacher_flashcards.find(c => c.id === 991).status === 'archived');
+      L('"Parece errado" pausa o cartão só dela e ele sai da fila de hoje', await ev(() => window.__DB.review_bank_requests.find(x => x.item_id === 'i7').kind === 'errado' && !STATE.reviewQueue.some(c => String(c.rowId) === '991') && !STATE.cards.some(c => c.origin === 'teacher' && String(c.rowId) === '991' && c.flashcardStatus === 'active')));
+      L('menu ⋯ some quando o cartão atual não é da professora ou a fila acabou', await ev(() => { const el = document.getElementById('rq-open'); const c = STATE.reviewQueue[STATE.reviewIndex]; return el ? !!c && c.origin === 'teacher' : true; }));
       await page.click('#review-back-to-modes');
       await page.waitForFunction(() => document.getElementById('view-student-panel').classList.contains('active'));
       L('voltar leva ao Aluno > Revisão e encerra o escopo', await ev(() => document.getElementById('my-class-review-content').style.display !== 'none' && STATE.reviewSessionClassReview === false && !eligibleReviewPool().some(c => c.origin === 'teacher')));

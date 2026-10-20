@@ -175,9 +175,11 @@
 .rb-ctrl{ display:flex; gap:10px; flex-wrap:wrap; }
 .rb-big{ font:inherit; font-weight:800; font-size:16px; border-radius:999px; padding:12px 22px; cursor:pointer; border:1px solid var(--paper-line); background:var(--paper-warm); color:var(--ink); min-height:44px; }
 .rb-big.is-blue{ background:var(--rb-box); border-color:var(--rb-box); color:var(--rb-on-box); }
-.rb-big.is-ok{ background:var(--jade); border-color:var(--jade); color:var(--on-vivid); }
+.rb-big.is-ok{ background:var(--grade-easy-bg,var(--jade)); border-color:var(--grade-easy-bg,var(--jade)); color:var(--on-vivid); }
 .rb-big.is-help{ background:var(--grade-hard-bg); border-color:var(--grade-hard-bg); color:var(--on-vivid); }
-.rb-big.is-bad{ background:var(--rb-bad); border-color:var(--rb-bad); color:var(--on-vivid); }
+.rb-big.is-good{ background:var(--grade-good-bg); border-color:var(--grade-good-bg); color:var(--on-vivid); }
+.rb-big small{ display:block; font-weight:600; font-size:11px; opacity:.85; }
+.rb-big.is-bad{ background:var(--grade-again-bg,var(--error-red,var(--rb-bad))); border-color:var(--grade-again-bg,var(--error-red,var(--rb-bad))); color:var(--on-vivid); }
 .rb-keys{ font-size:12.5px; color:var(--ink-soft); }
 .rb-reasons{ display:flex; flex-direction:column; gap:10px; }
 .rb-reasons .chips{ display:flex; flex-wrap:wrap; gap:8px; }
@@ -207,3 +209,40 @@
 /* espaçamento da área principal e nome do aluno sem quebrar linha na Visão geral */
 #rb-main{ display:flex; flex-direction:column; gap:16px; }
 .rb-table td:first-child{ white-space:nowrap; }
+
+.rb-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:2px 0 4px; }
+.rb-lessons{ display:flex; flex-direction:column; gap:10px; }
+.rb-lesson{ border:1px solid var(--paper-line); border-radius:var(--radius); padding:8px 12px; background:var(--paper); }
+.rb-lesson > summary{ cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; list-style:none; padding:4px 0; }
+.rb-lesson > summary::-webkit-details-marker{ display:none; }
+.rb-lesson-pills{ display:flex; gap:6px; flex-wrap:wrap; }
+.rb-lesson .rb-list{ margin-top:8px; }
+
+/* Pedidos da aluna (114) */
+.rb-req{ margin-top:6px; border:1px solid var(--rb-box); border-left:4px solid var(--rb-accent, #D98A00); border-radius:10px; padding:8px 10px; font-size:13px; display:flex; flex-direction:column; gap:6px; }
+.rb-req-why,.rb-req-sug{ color:var(--ink-soft); }
+/* Modo aula: botão Editar e janela de edição */
+.rb-edit-open{ margin-left:auto; }
+.rb-cedit-veil{ position:fixed; inset:0; z-index:calc(var(--z-fullscreen-screen, 500) + 5); background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; padding:16px; }
+.rb-cedit{ background:var(--paper); color:var(--ink); border-radius:14px; padding:16px; width:min(560px,100%); max-height:92vh; overflow:auto; display:flex; flex-direction:column; gap:10px; box-sizing:border-box; }
+.rb-cedit label{ display:flex; flex-direction:column; gap:4px; font-size:13px; font-weight:700; }
+.rb-cedit textarea,.rb-cedit input[type=text]{ font:inherit; padding:8px; border-radius:8px; border:1px solid var(--rb-box); background:var(--paper); color:var(--ink); }
+.rb-cedit-actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.rb-cedit-cutbox{ border-top:1px solid var(--rb-box); padding-top:10px; display:flex; flex-direction:column; gap:6px; }
+/* Menu ⋯ do cartão da professora na Revisão da aluna (114): três opções, cada uma um botão com borda */
+#review-content{ position:relative; }
+.rq-open{ position:absolute; top:6px; right:6px; z-index:5; width:44px; height:44px; border-radius:50%; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink); font:inherit; font-size:22px; font-weight:800; line-height:1; cursor:pointer; }
+.rq-veil{ position:fixed; inset:0; z-index:900; background:rgba(0,0,0,.4); }
+.rq-pop{ position:fixed; z-index:901; left:50%; top:50%; transform:translate(-50%,-50%); width:min(420px, calc(100vw - 32px)); max-height:88vh; overflow:auto; background:var(--paper); color:var(--ink); border-radius:16px; padding:14px; box-sizing:border-box; box-shadow:0 12px 40px rgba(0,0,0,.35); }
+.rq-opts{ display:flex; flex-direction:column; gap:10px; }
+.rq-opt{ display:flex; align-items:center; gap:12px; width:100%; min-height:56px; text-align:left; font:inherit; color:var(--ink); background:var(--paper); border:2px solid var(--paper-line); border-radius:12px; padding:10px 12px; cursor:pointer; }
+.rq-opt:hover,.rq-opt:focus-visible{ border-color:var(--rb-box); }
+.rq-ico{ flex:none; width:36px; height:36px; border-radius:50%; background:var(--rb-box); color:var(--rb-on-box); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; }
+.rq-txt{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.rq-txt small{ color:var(--ink-soft); font-size:12px; }
+.rq-h{ margin:0 0 4px; font-size:17px; }
+.rq-hint{ margin:0 0 10px; color:var(--ink-soft); font-size:13px; }
+.rq-f{ display:flex; flex-direction:column; gap:4px; font-size:13px; font-weight:700; margin-bottom:10px; }
+.rq-f textarea{ font:inherit; padding:8px; border-radius:8px; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink); }
+.rq-actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.rq-msg{ font-size:12px; color:var(--rb-wrong); }
