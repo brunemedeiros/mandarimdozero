@@ -284,3 +284,9 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
      hábitos saudáveis; M4.6 Gramática: condicional dos conselhos. Tabela "Saúde: o que é do A1 e o que é do A2" no `08 v2` (seção 3.2).
 
 Pendência registrada junto (regra 11 do `15`): **auditoria pedagógica completa do A1 e do A2 antes da implementação real**, a cargo do agente `auditor-curricular`.
+
+---
+
+# Décima segunda rodada (2026-10-19): grátis x Premium nas notas e gramáticas
+
+124. **Regra 12 (dona)**: notas (breves ou longas) ficam dentro das lições e são sempre grátis; unidades de gramática são Premium por natureza. Não tirar um conceito das notas para deixá-lo só numa gramática: o aluno gratuito precisa de uma versão gratuita (nota breve ou formulação numa lição de vocabulário) de cada conceito; a gramática Premium sistematiza e treina (reconhecimento, sistematização e produção). Nota breve não gera cartão nem entra nos Pontos de verificação. A dona reconhece que decisões anteriores desta fase podem ter ignorado isso; **auditoria pedida** (ver `auditoria/`).

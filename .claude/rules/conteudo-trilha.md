@@ -33,3 +33,4 @@ Skills: `notas-de-realidade` (notas de realidade/culturais) e `criar-desafios`. 
 - Desafios entram como `needs_review` com um `.md` de revisão para a autora; só publicados aparecem na trilha.
 - Mudou texto com áudio pré-gerado → regenerar mp3 (skill `audio-tts`).
 - **Formal e informal juntos** (decisão da dona, 2026-10-18): nunca ensinar só a forma formal ou só a informal (ex.: *s'il vous plaît* e *s'il te plaît*); no mesmo cartão (par) ou em dois cartões seguidos. Regras do currículo: `docs/i18n/curriculo/15-regras-do-curriculo.md`.
+- **Nota (grátis) x gramática (Premium)** (decisão da dona, 2026-10-19; `docs/i18n/curriculo/15-regras-do-curriculo.md` regra 12): notas ficam nas lições e são sempre grátis (não geram cartão nem entram em Ponto de verificação); unidade de gramática é Premium e sistematiza/treina. Nunca deixar um conceito só numa gramática: o aluno gratuito precisa da versão gratuita (nota breve ou formulação na lição de vocabulário).

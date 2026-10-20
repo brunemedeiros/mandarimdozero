@@ -20,7 +20,8 @@ Para cada mudança pedida (mover unidade, trocar módulo, criar, fundir, remover
 5. **Progresso dos alunos**: cartão publicado muda de unidade ou de nível? Chave estável preservada (`k`, `fr/curriculum-changes.js`, `fr/published_ids.json`)? Unidade que muda de nível, fusão ou
    aposentadoria afeta conclusão, Ponto de verificação, Teste de Nível, Desafios (`moduleId`), ditados, notificações (`STUDY_ITEM_GATE`)?
 6. **Referências quebradas**: posições antigas (M7.4 etc.) ainda citadas em qualquer documento de `docs/i18n/curriculo/`; contagens (módulos, unidades, cartões, tempo) batem com as tabelas.
-7. **Novas decisões que fazem sentido** depois do quadro geral: sugira, sem decidir.
+7. **Equidade grátis x Premium (regra 12 do `15`)**: para CADA unidade de gramática (Premium), existe a versão gratuita do conceito em nota ou em lição de vocabulário? Liste os conceitos que hoje só existem dentro de gramática (inclusive decisões que trocaram nota por tela de gramática, como negação, perguntas, *aller*, imperativo, modais, futuro próximo, *passé composé*, artigos e plural, adjetivos). O aluno gratuito consegue seguir a trilha sem elas?
+8. **Novas decisões que fazem sentido** depois do quadro geral: sugira, sem decidir.
 
 Entrega: um relatório curto em `docs/i18n/curriculo/auditoria/AAAA-MM-DD-<tema>.md` com seções **Bloqueia**, **Atenção**, **Ok** e **Sugestões**, cada achado com unidade (posição e id),
 evidência e recomendação em 1 linha; e um resumo de até 15 linhas para o chat. Seja crítico: não concorde por padrão. **Não edite o mapa nem o código**; só relate. Português do Brasil coloquial, sem "--" e sem "pra".
