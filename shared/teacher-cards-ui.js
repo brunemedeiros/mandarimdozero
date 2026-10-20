@@ -110,7 +110,7 @@ function tccDestRowHTML(s, opts){
 }
 // rows = [{ deck, depth, label, own, kids, deletable }]
 function tccTreeHTML(rows){
-  return `<ul class="p-lista">${rows.map(r => `<li data-tree-row="${tccEsc(r.deck.id)}" style="padding-left:${r.depth * 1.1}rem"><span>${tccEsc(r.label)} <small>${tccEsc(t('admin.flashcards.dest.countCards', { n: r.own }))}${r.kids ? tccEsc(t('admin.flashcards.dest.countSubdecks', { n: r.kids })) : ''})</small></span>${r.deck.kind === 'teacher' ? `<button type="button" class="outline p-pequeno" data-tree-delete="${tccEsc(r.deck.id)}"${r.deletable ? '' : ' disabled'} title="${tccEsc(r.deletable ? t('admin.flashcards.dest.deleteTitle') : t('admin.flashcards.dest.deleteDisabledTitle'))}">${tccEsc(t('cards.act.delete'))}</button>` : ''}</li>`).join('')}</ul>`;
+  return `<ul class="p-lista">${rows.map(r => `<li data-tree-row="${tccEsc(r.deck.id)}" style="padding-left:${r.depth * 1.1}rem"><span>${tccEsc(r.label)} <small>${tccEsc(tp('admin.flashcards.dest.countCards', r.own === 1 ? 1 : 2, { n: r.own }))}${r.kids ? tccEsc(tp('admin.flashcards.dest.countSubdecks', r.kids === 1 ? 1 : 2, { n: r.kids })) : ''})</small></span>${r.deck.kind === 'teacher' ? `<button type="button" class="outline p-pequeno" data-tree-delete="${tccEsc(r.deck.id)}"${r.deletable ? '' : ' disabled'} title="${tccEsc(r.deletable ? t('admin.flashcards.dest.deleteTitle') : t('admin.flashcards.dest.deleteDisabledTitle'))}">${tccEsc(t('cards.act.delete'))}</button>` : ''}</li>`).join('')}</ul>`;
 }
 
 function tccSubmitLabel(n){ return `${t('myFlashcards.create')}${n > 1 ? t('admin.common.forNStudents', { n }) : ''}`; }

@@ -84,7 +84,7 @@ function validateNativeMultipleChoiceStructure(editorState){
   // fieldIsPinyinSatellite já existe pras transições).
   const unrecognized = fields.filter(f => !MC_ROLES.includes(f.role) && !fieldIsPinyinSatellite(f, fields));
   if (unrecognized.length){
-    return { ok: false, error: tp('mcEditor.err.unrecognized', unrecognized.length) };
+    return { ok: false, error: tp('mcEditor.err.unrecognized', unrecognized.length === 1 ? 1 : 2, { n: unrecognized.length }) };
   }
 
   const isEmptyField = f => !(f.content && (f.content.value || '').trim());

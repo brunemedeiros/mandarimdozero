@@ -550,7 +550,7 @@ async function submitReport(){
   const categoryDef = REPORT_CATEGORIES.find(c => c.id === REPORT_SELECTED_CATEGORY);
   const hash = reportDedupHash(REPORT_SELECTED_CATEGORY, description, REPORT_MODAL_CONTEXT?.url);
   if (reportIsDuplicate(hash)){
-    if (errEl) errEl.textContent = reportT('report.error.duplicate', 'Você já enviou isso agora há pouco -- obrigada!');
+    if (errEl) errEl.textContent = reportT('report.error.duplicate', 'Você já enviou isso agora há pouco. Obrigada!');
     return;
   }
 

@@ -231,7 +231,7 @@ function refreshAnkiImportConflicts(body){
   box.innerHTML = `
     <div style="margin-top:8px; padding:8px 10px; border:1px solid var(--paper-line); border-radius:8px;">
       <strong>${t('ankiImport.conflict.title')}</strong>
-      <ul style="padding-left:18px; margin:4px 0;">${names}${plan.conflicts.length > 8 ? `<li>${t('ankiImport.conflict.more', { n: plan.conflicts.length - 8 })}</li>` : ''}</ul>
+      <ul style="padding-left:18px; margin:4px 0;">${names}${plan.conflicts.length > 8 ? `<li>${tp('ankiImport.conflict.more', plan.conflicts.length - 8 === 1 ? 1 : 2, { n: plan.conflicts.length - 8 })}</li>` : ''}</ul>
       <label style="display:flex; gap:6px; align-items:center;"><input type="radio" name="anki-import-conflict" value="suffix" ${st.conflictMode === 'suffix' ? 'checked' : ''}> ${t('ankiImport.conflict.suffix')}</label>
       <label style="display:flex; gap:6px; align-items:center;"><input type="radio" name="anki-import-conflict" value="merge" ${st.conflictMode === 'merge' ? 'checked' : ''}> ${t('ankiImport.conflict.merge')}</label>
       <span class="profile-edit-hint">${t('ankiImport.conflict.hint')}</span>
@@ -262,7 +262,7 @@ function renderAnkiImportSummary(body){
 
   body.innerHTML = `
     <p class="profile-edit-hint">
-      ${tp('ankiImport.summary.found', plan.totalNotes)}
+      ${tp('ankiImport.summary.found', plan.totalNotes === 1 ? 1 : 2, { n: plan.totalNotes })}
       ${t('ankiImport.summary.ok', { n: plan.okCount })}
       ${t('ankiImport.summary.skipped', { n: plan.skippedCount })}
       ${plan.duplicateCount ? `<br>${t('ankiImport.summary.duplicates', { n: plan.duplicateCount })}` : ''}
@@ -279,7 +279,7 @@ function renderAnkiImportSummary(body){
     </div>
     <div id="anki-import-list" style="max-height:320px; overflow-y:auto;">
       ${visibleNotes.map(ankiImportNoteRowHTML).join('')}
-      ${truncatedCount > 0 ? `<p class="profile-edit-hint">${tp('ankiImport.truncated', truncatedCount)}</p>` : ''}
+      ${truncatedCount > 0 ? `<p class="profile-edit-hint">${tp('ankiImport.truncated', truncatedCount === 1 ? 1 : 2, { n: truncatedCount })}</p>` : ''}
     </div>
     <button type="button" class="btn btn-primary btn-block" id="anki-import-confirm-btn" style="margin-top:10px;">${t('ankiImport.confirm')}</button>
     <p class="profile-edit-error" id="anki-import-confirm-error"></p>
@@ -291,7 +291,7 @@ function renderAnkiImportSummary(body){
 function updateAnkiImportCounter(body){
   const n = ANKI_IMPORT_STATE.selectedIds.size;
   const counter = body.querySelector('#anki-import-counter');
-  if (counter) counter.textContent = n === 0 ? t('ankiImport.counterNone') : tp('ankiImport.counter', n);
+  if (counter) counter.textContent = n === 0 ? t('ankiImport.counterNone') : tp('ankiImport.counter', n === 1 ? 1 : 2, { n });
   const btn = body.querySelector('#anki-import-confirm-btn');
   // Com conflito de nome pendente (pastas mantidas), a pessoa precisa
   // escolher sufixo ou inserir no existente antes de confirmar.
@@ -436,7 +436,7 @@ async function confirmAnkiImport(body){
     ? await persistAnkiImportBatches(entries.map(e => ({ editorState: e.note.editorState, deckId: e.deckId })), {
         identity,
         onBatchDone: (info) => {
-          if (btn) btn.textContent = info.ok ? t('ankiImport.savingBatches', { n: info.batchIndex + 1 }) : t('ankiImport.saveError');
+          if (btn) btn.textContent = info.ok ? tp('ankiImport.savingBatches', info.batchIndex + 1 === 1 ? 1 : 2, { n: info.batchIndex + 1 }) : t('ankiImport.saveError');
         },
       })
     : { ok: true, createdRows: [] };
@@ -466,12 +466,12 @@ function renderAnkiImportResult(body, result){
   body.innerHTML = `
     <p class="profile-edit-hint">
       ${result.ok
-        ? `${tp('ankiImport.result.ok', result.requested, { imported: result.imported })}${result.createdDeckCount ? ' ' + t('ankiImport.result.decksCreated', { n: result.createdDeckCount }) : ''}`
+        ? `${tp('ankiImport.result.ok', result.requested === 1 ? 1 : 2, { n: result.requested, imported: result.imported })}${result.createdDeckCount ? ' ' + tp('ankiImport.result.decksCreated', result.createdDeckCount === 1 ? 1 : 2, { n: result.createdDeckCount }) : ''}`
         : t('ankiImport.result.partial', { imported: result.imported, requested: result.requested })}
     </p>
-    ${result.cutMessage ? `<p class="profile-edit-hint">🔒 ${escapeHTML(result.cutMessage)} ${t('ankiImport.result.cutTail', { n: result.cutCount })}</p>` : ''}
-    ${result.deckErrors && result.deckErrors.length ? `<p class="profile-edit-error" style="display:block;">⚠️ ${result.deckErrors.slice(0, 5).map(escapeHTML).join(' ')} ${t('ankiImport.result.deckFailed', { n: result.deckFailedCount })}</p>` : ''}
-    ${result.mediaWarnings.length ? `<p class="profile-edit-hint">${tp('ankiImport.result.mediaWarn', result.mediaWarnings.length, { list: result.mediaWarnings.slice(0, 5).map(escapeHTML).join('; '), more: result.mediaWarnings.length > 5 ? '...' : '' })}</p>` : ''}
+    ${result.cutMessage ? `<p class="profile-edit-hint">🔒 ${escapeHTML(result.cutMessage)} ${tp('ankiImport.result.cutTail', result.cutCount === 1 ? 1 : 2, { n: result.cutCount })}</p>` : ''}
+    ${result.deckErrors && result.deckErrors.length ? `<p class="profile-edit-error" style="display:block;">⚠️ ${result.deckErrors.slice(0, 5).map(escapeHTML).join(' ')} ${tp('ankiImport.result.deckFailed', result.deckFailedCount === 1 ? 1 : 2, { n: result.deckFailedCount })}</p>` : ''}
+    ${result.mediaWarnings.length ? `<p class="profile-edit-hint">${tp('ankiImport.result.mediaWarn', result.mediaWarnings.length === 1 ? 1 : 2, { n: result.mediaWarnings.length, list: result.mediaWarnings.slice(0, 5).map(escapeHTML).join('; '), more: result.mediaWarnings.length > 5 ? '...' : '' })}</p>` : ''}
     ${skippedList ? `<div class="section-label" style="margin-top:10px;">${t('ankiImport.result.skippedTitle', { n: result.skippedNotes.length })}</div><ul class="profile-edit-hint" style="padding-left:18px;">${skippedList}</ul>` : ''}
     <button type="button" class="btn btn-secondary btn-block" id="anki-import-done-btn" style="margin-top:10px;">${t('common.close')}</button>
   `;

@@ -60,7 +60,7 @@ const closeModal = page => page.evaluate(() => { document.getElementById('flashc
     const ank = await ev(() => ({ rows: window.__DB.own_flashcards.filter(r => r.fields).map(r => r.fields[0].content.value), body: document.getElementById('anki-import-body').innerText }));
     L('C Anki: só as 3 primeiras Notes criadas', ank.rows.join(',') === 'k1,k2,k3', ank.rows);
     L('C Anki: aviso "Este Deck criaria 5 cartões..."', m.open && m.text.includes('Este Deck criaria 5 cartões, mas sua conta pode possuir apenas 20') && m.text.includes('você já tinha 17') && m.text.includes('apenas os primeiros 3 cartões foram criados') && m.cta, m.text);
-    L('C Anki: resultado também informa o corte', ank.body.includes('2 cartão(ões) do Anki ficaram de fora'), ank.body);
+    L('C Anki: resultado também informa o corte', ank.body.includes('2 cartões do Anki ficaram de fora') /* Etapa 4: plural de verdade (antes "cartão(ões)") */, ank.body);
     await closeModal(page);
     await page.click('#anki-import-done-btn');
 

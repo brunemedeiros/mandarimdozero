@@ -156,7 +156,7 @@ function renderProgressLineChart(){
       <line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" class="chart-axis"/>
       <path d="${areaD}" class="chart-area"/>
       <path d="${pathD}" class="chart-line"/>
-      ${points.map((p,i) => `<circle cx="${(PAD + i*xStep).toFixed(1)}" cy="${yScale(p.total).toFixed(1)}" r="3" class="chart-dot"><title>${t('zh.progress.chartPoint', { date: p.date, n: p.total })}</title></circle>`).join('')}
+      ${points.map((p,i) => `<circle cx="${(PAD + i*xStep).toFixed(1)}" cy="${yScale(p.total).toFixed(1)}" r="3" class="chart-dot"><title>${tp('zh.progress.chartPoint', p.total === 1 ? 1 : 2, { date: p.date, n: p.total })}</title></circle>`).join('')}
       ${dateLabels.map(l => `<text x="${l.x.toFixed(1)}" y="${H-10}" class="chart-label" text-anchor="middle">${l.text}</text>`).join('')}
     </svg>
     <div class="chart-total">${t('zh.progress.chartTotal')} <strong>${maxVal}</strong> ${t(LANG_HOOKS.uiKey('progress.chartTotalSuffix'))}</div>

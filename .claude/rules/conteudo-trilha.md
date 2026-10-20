@@ -6,6 +6,7 @@ paths:
   - "shared/course-layer.js"
   - "fr/dictations.js"
   - "fr/scripts/challenges_import/**"
+  - "fr/conj-games.js"
   - "shared/challenge-policy.js"
   - "shared/profile-placeholders.js"
 ---
@@ -39,3 +40,6 @@ Skills: `notas-de-realidade` (notas de realidade/culturais) e `criar-desafios`. 
   Antes de traduzir Desafios, conferir que o lote do repositório bate com a tabela `challenges` da produção.
 - Desafios entram como `needs_review` com um `.md` de revisão para a autora; só publicados aparecem na trilha.
 - Mudou texto com áudio pré-gerado → regenerar mp3 (skill `audio-tts`).
+- **Jogos da Conjugação** (`fr/conj-games.js`): todo trecho em francês dentro do texto em português/inglês (título,
+  apresentação, regra `tl` e explicação `why`) vai entre {chaves}, que o motor pinta de azul (decisão da autora,
+  2026-10-19). Toda explicação nova tem pelo menos um trecho marcado; `tests/conjugacao/test_playwright.js` barra a que não tiver.
