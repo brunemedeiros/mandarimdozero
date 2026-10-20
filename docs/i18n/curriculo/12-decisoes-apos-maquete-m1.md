@@ -247,3 +247,6 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
      (`A1-m10`, novo), M10 Lazer, convites e passado (`A1-m6`). Ids de módulo por sobreposição de unidades; `A1-m7` a `A1-m10` nunca foram aprovados por ninguém. Total: 56 unidades
      (33 de vocabulário + 23 de gramática), 349 cartões, ~29h (estimativa). Mapa em `08-mapa-final-a1-a2-v2.md` seção 3.1. Ficam abertas as perguntas 58 (cartões publicados
      *la porte, la fenêtre, il y a, il n'y a pas de* que saem da `A1-17`) e 59 (nota *Allô ?*).
+113. **Cartões que saem da `A1-17`**: *la porte, la fenêtre* vão para a M7.4 (móveis e objetos); *il y a, il n'y a pas de* ficam na M7.1; a M7.3 (gramática) sistematiza. As notas N37 (*y'a*) e "*la fenêtre*: o *e* que some" ficam na M7.1.
+114. **Nota *Allô ?*** fica na M5.1, junto do telefone.
+115. ***Il fait zéro degré dehors*** vai para a M8.5 (Falar do tempo e das estações).
