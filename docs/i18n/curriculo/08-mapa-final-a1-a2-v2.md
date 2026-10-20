@@ -1,8 +1,8 @@
 # Mapa final do A1 e do A2 de francês (versão 2 do 08)
 
-Data: 2026-10-19. **Mapa final do A1 APROVADO pela dona (2026-10-19); M1 fechado (decisões 40 a 49 no `12`); A1 reestruturado em 10 módulos (decisões 102 a 112).** Falta o A2 e o resto das perguntas (seção 6).
+Data: 2026-10-19. **Mapa final do A1 APROVADO pela dona (2026-10-19); M1 fechado (decisões 40 a 49 no `12`); A1 reestruturado em 10 módulos (decisões 102 a 112) e depois em 9 (decisões 116 a 123: a saúde vai para o A2).** Falta aprovar o A2 e o resto das perguntas (seção 6).
 **Documento único de revisão para a dona.** Junta e reconcilia `08` (mapa v3), `09` (preview do M1), `10` (gramáticas
-corrigidas), `11` (inventário das notas), `14` (decisões sobre as notas), `12` (decisões 1 a 112), `13` (padrão de feedback), `15` (regras 1 a 9)
+corrigidas), `11` (inventário das notas), `14` (decisões sobre as notas), `12` (decisões 1 a 123), `13` (padrão de feedback), `15` (regras 1 a 11)
 e o `04` (Etapa 0 e as 26 decisões). Nada aqui foi aplicado ao site; nenhum outro documento foi alterado.
 
 Regra de desempate usada quando os documentos divergem: vale o mais recente, nesta ordem: `12` > `14` > `10` > `11` > `09` > `08` > `04`.
@@ -22,36 +22,39 @@ Cada divergência resolvida está na seção 8 ("Conflitos resolvidos"). Número
 **O que muda em relação ao currículo atual (publicado hoje):**
 - Os módulos passam a ser organizados por **função comunicativa** ("ao fim do módulo o aluno consegue..."), não por tema nem por ordem de
   criação. Números, gramática e pronúncia entram quando a função pede (a idade do adulto já no M1, os preços no M5).
-- O A1 sai de **6 para 10 módulos** (decisões 102 e 112), cada um com um tema só (o M1 continua só com os primeiros contatos). Os assuntos que hoje estão misturados
-  ganham módulo próprio: **Família** (M2), **Comer e beber** (M4), **Compras** (M5), **Casa e moradia** (M7), **Viagem e férias** (M8) e
-  **Saúde e conselhos** (M9); o módulo "Cidade e identidade" se desfaz (identidade vai para o M1 e o M2; cidade vai para o M6), e o antigo
-  "Casa, hotel e férias" se divide em Casa (M7) e Viagem (M8). A unidade "Dar os dados pessoais" (`A1-23`, nunca publicada) sai e as palavras se
-  espalham por M1.2, M3.5, M5.1 e M7.1 (decisão 110).
+- O A1 sai de **6 para 9 módulos** (decisões 102, 112 e 116), cada um com um tema só (o M1 continua só com os primeiros contatos). Os assuntos que hoje estão misturados
+  ganham módulo próprio: **Família** (M2), **Comer e beber** (M4), **Compras** (M5), **Casa e moradia** (M7) e **Viagem e férias** (M8); o módulo "Cidade e identidade"
+  se desfaz (identidade vai para o M1 e o M2; cidade vai para o M6), e o antigo "Casa, hotel e férias" se divide em Casa (M7) e Viagem (M8). A unidade "Dar os dados
+  pessoais" (`A1-23`, nunca publicada) sai e as palavras se espalham por M1.2, M3.5, M5.1 e M7.1 (decisão 110).
+- **A saúde sai do A1** (decisão 116): a unidade publicada "Dizer onde dói" (`A1-15`) **muda de nível** e vira a A2 M4.1 "Corpo e dores" (mesmo id, mesmas chaves de
+  cartão); "Pedir ajuda" (`A1-32`) vira a última unidade de Viagem (M8.6), com ligação para a **polícia** (decisão 117); os modais (`A1-g6`) vão para o M9 "Lazer,
+  convites e passado", antes dos convites (decisão 118).
 - Cada gramática passa a ensinar **um conceito** (ou um par que os livros sempre ensinam juntos). Gramáticas grandes se dividem (verbos em *-er* x
   pronominais; imperativo; futuro próximo); o que é pequeno e preso a uma palavra vira **nota** na lição que a usa.
 - Notas: uma ideia por nota, curtas, sem teto; a primeira aparição é sempre **breve**; quatro tipos (explicação, realidade, cultural, **pronúncia**);
   todas na mesma caixa roxinha; V/F logo depois das notas de explicação e de realidade; lâmpada 💡 com as notas da lição.
-- O **A2 é todo novo** (nada publicado): 10 módulos por função.
+- O **A2 é novo** (nada publicado como A2): 10 módulos por função; só a unidade publicada `A1-15` ("Dizer onde dói") entra nele, como A2 M4.1, e o cartão *gentil* vai para o A2 M1.3.
 - Nenhum id de cartão muda e nenhum cartão é apagado: a Etapa 0 (chave `k`, fusões, arquivo de aposentados) protege o progresso (seção 5).
 
 **Números**
 
 | | Hoje (publicado, conferido) | Mapa final (este documento) |
 |---|---|---|
-| A1: módulos | 6 | **10** |
-| A1: unidades | 30 (20 de vocabulário + 10 de gramática) | **56** (33 + 23 gramáticas) |
-| A1: palavras (cartões A/B) | 204 (408) | **349** (698): 347 palavras das unidades + *épeler* e *Ça s'écrit comment ?* da lição do alfabeto (soma das tabelas da seção 3.1; listas de M7.2, M7.4, M8.1 e M9.2 ainda ajustáveis) |
-| A1: lições das unidades de vocabulário | 82 (com o Ponto de verificação de cada unidade) | **~145** (estimativa: 3 lições + Revisão da unidade por unidade; 4 + Revisão nas de mais de 10 palavras: M1.3, M1.4, M2.3, M3.1, M3.3, M3.5, M4.1, M5.1, M5.4, M7.1, M8.1, M9.1; + a lição de pronúncia do alfabeto na M1.2) |
-| A1: notas | 45 (20 Exp, 15 Real, 10 Cult; nenhuma em gramática) | **~110** (estimativa: 45 − 2 cortadas + ~67 novas; a M7.2, a M7.4 e a M9.2 ainda sem notas definidas) |
-| A1: tempo de trilha | não medido | **~29h** (confiança baixa; soma das estimativas por módulo: M1 3h35, M2 3h20, M3 2h55, M4 3h15, M5 3h05, M6 3h, M7 2h45, M8 2h40, M9 1h35, M10 2h50) |
-| A2: módulos / unidades | 0 / 0 (nada publicado) | **10 / 57** (35 de vocabulário + 22 de gramática) |
-| A2: palavras | 0 | **421** (12 por unidade + *Descrever o caráter*) |
-| A2: lições | 0 | **~140 a 175** (35 unidades × 4 a 5, com PV; confiança baixa: o A2 ainda não foi desenhado lição por lição) |
-| A2: notas | 0 | ~16 previstas pelas gramáticas desfeitas; política das notas do A2 em aberto (pergunta 46) |
+| A1: módulos | 6 | **9** |
+| A1: unidades | 30 (20 de vocabulário + 10 de gramática) | **55** (32 + 23 gramáticas) |
+| A1: palavras (cartões A/B) | 204 (408) | **339** (678): 337 palavras das unidades + *épeler* e *Ça s'écrit comment ?* da lição do alfabeto (soma das tabelas da seção 3.1; listas de M7.2, M7.4, M8.1 e M8.6 ainda ajustáveis). Saem as 11 da `A1-15` (vão para o A2) e a M8.6 passa de 8 para 9 |
+| A1: lições das unidades de vocabulário | 82 (com o Ponto de verificação de cada unidade) | **~140** (estimativa: 3 lições + Revisão da unidade por unidade; 4 + Revisão nas de mais de 10 palavras: M1.3, M1.4, M2.3, M3.1, M3.3, M3.5, M4.1, M5.1, M5.4, M7.1, M8.1; + a lição de pronúncia do alfabeto na M1.2) |
+| A1: notas | 45 (20 Exp, 15 Real, 10 Cult; nenhuma em gramática) | **~105** (estimativa: 45 − 2 cortadas − 2 que vão com a `A1-15` para o A2 (N34, N35) + ~64 novas; a M7.2, a M7.4 e a M8.6 ainda sem notas definidas) |
+| A1: tempo de trilha | não medido | **~28h15** (confiança baixa; soma das estimativas por módulo: M1 3h35, M2 3h20, M3 2h55, M4 3h15, M5 3h05, M6 3h, M7 2h45, M8 3h05, M9 3h15) |
+| A2: módulos / unidades | 0 / 0 (nada publicado) | **10 / 58** (36 de vocabulário + 22 de gramática; a `A1-15`, publicada, entra como A2 M4.1) |
+| A2: palavras | 0 | **432**: 421 novas (12 por unidade + 13 em *Descrever o caráter*) + as 11 da `A1-15`, já publicadas |
+| A2: lições | 0 | **~145 a 180** (36 unidades × 4 a 5, com Revisão da unidade; a `A1-15` já tem 4 + 1; confiança baixa: o A2 ainda não foi desenhado lição por lição) |
+| A2: notas | 0 | ~21: ~16 previstas pelas gramáticas desfeitas + as 5 da `A1-15` (N34 e N35 publicadas, 3 novas); política das notas do A2 em aberto (pergunta 46) |
 
 Comparado com o `08`: o A1 passou de 44 para 48 unidades (+4 gramáticas: `A1-g17`, `A1-g18`, `A1-g19`, `A1-g20`), e o A2 cai de 60 para 57
 (`A2-g14`, `A2-g18` e `A2-g23` viram notas; `A2-g4` já saía). Depois, com 10 módulos (decisões 97 a 112), o A1 vai de 48 para 56 unidades:
 +3 gramáticas (`A1-g22`, `A1-g23`, `A1-g24`) e +6 unidades de vocabulário (`A1-29` a `A1-34`), − a `A1-23` (dados pessoais, removida).
+Por fim, com 9 módulos (decisões 116 a 123), o A1 vai de 56 para 55 unidades e o A2 de 57 para 58: a `A1-15` ("Dizer onde dói") muda de nível.
 
 **Grátis x Premium:** trilha, notas, lâmpada, V/F das notas, prática de pronúncia, "Grave e compare" básico e o painel de feedback são **grátis**.
 Desafios continuam Premium com o paywall desligado (todos usam). O *défi* de fim de módulo está **arquivado** (seção 7).
@@ -77,6 +80,9 @@ Desafios continuam Premium com o paywall desligado (todos usam). O *défi* de fi
 8. [RESPONDIDA: sim] **Lição de pronúncia só com conteúdo suficiente**; com uma ou duas frases é **nota de pronúncia**, na mesma caixa das outras notas.
 9. [RESPONDIDA: sim] **Pronomes tônicos** entram cedo, junto do formal e do informal (*moi, toi, vous* na M1.2), e são ampliados depois (*lui, elle* na M1.4; com
    preposições mais adiante).
+10. **Título das gramáticas**: sempre "Gramática: <assunto curto>", em todos os níveis e cursos.
+11. **Mudou ordem, tema, módulo, nível ou conteúdo de um item? Revisar o que ele ensina** (palavras, frases, diálogos, notas e exercícios) para a nova posição e rodar o
+    agente `auditor-curricular`; a coluna "Muda" do mapa diz o que foi trocado (decisão 119). Antes da implementação real: auditoria pedagógica completa do A1 e do A2.
 
 **Regra nova de 2026-10-19 (`CLAUDE.md` e `.claude/rules/conteudo-trilha.md` da `main`, seção "Conteúdo nasce traduzido")**: todo conteúdo novo ou alterado deste mapa
 (unidades, vocabulário, frases, diálogos novos com cena e pergunta de compreensão, notas, telas de gramática, Desafios e ditados) sai no mesmo lote com a versão de
@@ -146,7 +152,7 @@ dizer de onde alguém é, onde mora e que línguas fala; perguntar sobre pessoas
 |---|---|---|---|---|---|---|
 | M2.1 (`A1-4`) | Apresentar a família | apresentar a família | possessivo (fórmula) | *la famille, le père, la mère, le frère, la sœur, les parents, le fils, la fille, le mari, la femme* (10) | N11 *papa, maman* (Real, alta) · N12 *mon / ma* (Exp, n/r, *breve*) · N13 almoço de domingo (Cult, alta) · *C'est mon père, il est ingénieur*: *c'est* x *il / elle est* (Exp, alta, *nova*) | movida (do M1); renomeada ("Família"); frases *mes grands-parents, j'ai deux enfants, je suis marié(e)*; recebe 2 frases do `A1-3` (pergunta 20); frase nova *C'est qui ? C'est ma sœur.* (decisão 67) |
 | M2.2 (g) (`A1-g17`) | Gramática: artigos e plural | escolher *le / la / les*, *un / une / des* | artigos, plural que se ouve no artigo, gênero vem com a palavra (*l'âge*); *un / une / des* viram *de* depois de *pas* (*Je n'ai pas de voiture.*) | (gramática) | (sem nota) | nova (parte da antiga M1.7) |
-| M2.3 (`A1-16`) | Descrever a aparência | descrever a aparência física de alguém | adjetivo (fórmula); *plus... que* (entrada) | *grand, petit, joli, laid, les cheveux, les yeux, blond, brun, noir, bleu, vert, marron* (12; só aparência, sem roupas e sem caráter) | N14 bandeira (Cult, alta; vai para a M5.4 ou fica, a rever ao escrever) · N15 lugar do adjetivo (Exp, n/r; +1 linha "o mesmo *-e* de *grand, grande*"; troca *robe*) · "Outros traços": *long, court, roux, bouclé, raide, la barbe, les lunettes* (nota de vocabulário, Exp, alta, *nova*) | movida (do módulo da casa); renomeada; sai o caráter: *gentil* (cartão já publicado) e a nota N16 vão para o A2 M4.5 "Descrever o caráter"; *sympa* e *timide* entram lá, não aqui (decisão 52 revista); *rouge, jaune, blanc* vão para a M5.4 (decisão 88) |
+| M2.3 (`A1-16`) | Descrever a aparência | descrever a aparência física de alguém | adjetivo (fórmula); *plus... que* (entrada) | *grand, petit, joli, laid, les cheveux, les yeux, blond, brun, noir, bleu, vert, marron* (12; só aparência, sem roupas e sem caráter) | N14 bandeira (Cult, alta; vai para a M5.4 ou fica, a rever ao escrever) · N15 lugar do adjetivo (Exp, n/r; +1 linha "o mesmo *-e* de *grand, grande*"; troca *robe*) · "Outros traços": *long, court, roux, bouclé, raide, la barbe, les lunettes* (nota de vocabulário, Exp, alta, *nova*) | movida (do módulo da casa); renomeada; sai o caráter: *gentil* (cartão já publicado) e a nota N16 vão para o A2 M1.3 "Descrever o caráter" (decisão 120); *sympa* e *timide* entram lá, não aqui (decisão 52 revista); *rouge, jaune, blanc* vão para a M5.4 (decisão 88) |
 | M2.4 (g) (`A1-g2`) | Gramática: possessivos | dizer de quem é | *mon, ma, mes...* (4 telas, 6 exercícios, como hoje) | (gramática) | (sem nota) | movida (do M1); renomeada ("Adjetivos possessivos"); sem *c'est / il est* |
 | M2.5 (`A1-9`) | Dizer de onde é e onde mora | origem, moradia, línguas | fórmulas *venir de*, *habiter à* | *habiter, la ville, américain, anglais, espagnol, italien, allemand, portugais* (pares), *la nationalité, venir de* (10) | N17 *Je suis brésilienne* ou *je viens du Brésil* (Exp, n/r, enxugada) · N18 vira "*où* vai para o fim" (Real, alta, *breve*) · feminino das outras 6 nacionalidades (Exp, n/r, *nova*) · *Je viens de France / du Brésil. J'habite à Paris.* (Exp, alta, *nova*, *breve*: só com os países que o aluno já tem, *la France* e *le Brésil*; a regra completa fica na M8.2) | movida (do módulo da cidade); renomeada ("Nacionalidades"); fundida (*français, brésilien* → M1.2); frases de línguas faladas; diálogo sobre terceiros; a gramática de países (`A1-g4`) que vinha logo depois sai para a M8.2 (decisão 109) |
 | M2.6 (g) (`A1-g22`, id novo) | Gramática: palavras interrogativas (pessoas) | perguntar sobre pessoas | *qui / c'est qui, comment, quel / quelle, d'où, combien de* (consolida o que M1 e M2 já mostraram) (4 telas, 6 a 8 exercícios) | (gramática) | (sem nota) | nova (decisão 67); a frase *C'est qui ? C'est ma sœur.* entra como frase nova na M2.1 |
@@ -191,7 +197,7 @@ Consigo: entender e dizer preços até 1000 € e pagar; dar meu número de tele
 | M5.5 (g) (`A1-g15`) | Gramática: adjetivos | concordar o adjetivo | feminino em *-e* e os que mudam mais; feminino que se ouve; plural mudo (4 telas, 8 exercícios) | (gramática) | (sem nota) | nova; demonstrativos e lugar do adjetivo viram notas |
 
 #### A1 M6 · Na cidade (`A1-m4`; hoje "Deslocando-se e cuidando de si")
-Consigo: perguntar e explicar o caminho; dizer aonde vou; usar o transporte; dizer onde ficam os lugares do dia a dia. 6 unidades (3 + 3), 30 cartões, ~3h. A saúde ("Dizer onde dói") e os modais saíram deste módulo e formam o M9 (decisões 96 e 99).
+Consigo: perguntar e explicar o caminho; dizer aonde vou; usar o transporte; dizer onde ficam os lugares do dia a dia. 6 unidades (3 + 3), 30 cartões, ~3h. A saúde ("Dizer onde dói") e os modais saíram deste módulo: a saúde vai para o A2 M4.1 e os modais para a M9.2 (decisões 96, 116 e 118).
 
 | Posição (id) | Título visível | Função | Gramática | Vocabulário-chave | Notas | Muda |
 |---|---|---|---|---|---|---|
@@ -200,7 +206,7 @@ Consigo: perguntar e explicar o caminho; dizer aonde vou; usar o transporte; diz
 | M6.3 (`A1-30`, id novo) | Lugares da cidade | dizer onde fica e aonde vou | *il y a* + lugar (já visto) | *la pharmacie, la banque, l'hôpital, la poste, la boulangerie, le supermarché, l'école, le parc, la mairie, l'église* (10; ajustável) | farmácia: cruz verde, 15 e 112 (Cult, alta, vinda da saúde) | nova (decisão 97); *la pharmacie* e *l'hôpital* vêm de "Corpo e saúde" e da M6.1 |
 | M6.4 (g) (`A1-g13`) | Gramática: o verbo *aller* | dizer aonde vou | *aller*; *aller à* + lugar (*à la, à l', au, aux*, com retomada curta das contrações, sem link para outra unidade); nota: *en* + país feminino (*Je vais en France*) x *à la* + lugar feminino (*Je vais à la pharmacie*) (4 telas, 8 exercícios) | (gramática) | nota *en* x *à la* (Exp, alta, *nova*, na lição de Lugares da cidade ou na gramática) | nova; sem futuro próximo (→ M8.4) e sem *du / des* |
 | M6.5 (`A1-14`) | Pegar transporte | transporte | *prendre* (já visto) | *le bus, le train, le métro, la voiture, le vélo, à pied, prendre, l'arrêt, le billet, la station* (10) | N32 metrô de Paris (Cult, alta) · N33 *en métro* x *à pied*; *à vélo* é o correto, *en vélo* é comum mas considerado incorreto (Exp, alta, fonte a dona) · bicicletas compartilhadas (Cult, alta, *nova*) · *J'y vais en métro* (Exp, n/r, *nova*, fórmula com *y*) | renomeada ("Transporte") |
-| M6.6 (g) (`A1-g23`, id novo) | Gramática: palavras interrogativas (lugar, hora e coisas) | perguntar onde, quando, quanto, o quê | *où, quand, à quelle heure, combien, qu'est-ce que / que / quoi* (4 telas, 6 a 8 exercícios; *pourquoi* fica na M10.4) | (gramática) | (sem nota) | nova (decisões 70 e 94) |
+| M6.6 (g) (`A1-g23`, id novo) | Gramática: palavras interrogativas (lugar, hora e coisas) | perguntar onde, quando, quanto, o quê | *où, quand, à quelle heure, combien, qu'est-ce que / que / quoi* (4 telas, 6 a 8 exercícios; *pourquoi* fica na M9.3) | (gramática) | (sem nota) | nova (decisões 70 e 94) |
 
 #### A1 M7 · Casa e moradia (`A1-m5`; hoje "Descrevendo o mundo ao redor")
 Consigo: dizer em que tipo de moradia vivo, quais são os cômodos e dar o meu endereço; descrever a moradia (*C'est un appartement clair et calme.*);
@@ -218,38 +224,32 @@ dizer o que tem e o que não tem na casa; dizer onde as coisas estão; comparar 
 
 #### A1 M8 · Viagem e férias (`A1-m9`; módulo novo)
 Consigo: dizer de que país alguém é e para onde vou viajar (*en, au, aux, à*); reservar um quarto e fazer o check-in dando os meus dados; falar das férias e
-de planos com o futuro próximo; falar do tempo e das estações; escrever um cartão-postal. 5 unidades (3 + 2), 31 cartões, ~2h40 (estimativa).
+de planos com o futuro próximo; falar do tempo e das estações; escrever um cartão-postal; pedir ajuda na viagem e ligar para a polícia (17 ou 112) se perder o
+passaporte ou for roubado(a). 6 unidades (4 + 2), 40 cartões, ~3h05 (estimativa; decisões 116 e 117).
 
 | Posição (id) | Título visível | Função | Gramática | Vocabulário-chave | Notas | Muda |
 |---|---|---|---|---|---|---|
 | M8.1 (`A1-31`, id novo) | Países e cidades | dizer de onde alguém é e para onde vai viajar | *aller en / au / aux / à* (fórmula, sem repetir a gramática) | *les États-Unis, l'Angleterre, l'Espagne, l'Italie, l'Allemagne, le Portugal, le Canada, la Suisse, la Belgique, le Japon, partir* (11) | *partir / aller en vacances en, au, aux, à* (Exp, alta, *nova*, *breve*: retomada, sem repetir a gramática) | nova (decisão 102): a base de países que faltava para a gramática (decisão 107) |
-| M8.2 (g) (`A1-g4`) | Gramática: preposições com cidades e países | ir e vir de um país ou cidade | *à, en, au, aux* + procedência *de, d', du, des* (5 telas, 8 exercícios) | (gramática) | (sem nota) | movida (era M2.6; decisão 109); +1 tela de procedência; vem logo depois do vocabulário de países |
-| M8.3 (`A1-26`) | Férias e hotel | reservar e falar das férias | *je vais* + infinitivo (entrada) | *les vacances, l'hôtel, la nuit, réserver, la valise, le passeport, la mer, la montagne, la plage, la carte postale* (10) | *congés payés* (1936) (Cult, alta, *nova*) · *Bisous, grosses bises* (Real informal, alta, *nova*) · *On y va* (Exp, n/r, *nova*) | nova; o diálogo de check-in **reusa** nome, *prénom*, endereço, telefone e data de nascimento já ensinados (M1.2, M3.5, M5.1, M7.1), sem ensinar de novo (decisão 106) |
+| M8.2 (g) (`A1-g4`) | Gramática: preposições com cidades e países | ir e vir de um país ou cidade | *à, en, au, aux* + procedência *de, d', du, des* (5 telas, 8 exercícios) | (gramática) | (sem nota) | movida (era M2.6; decisão 109); +1 tela de procedência; vem logo depois do vocabulário de países; nada muda nesta rodada |
+| M8.3 (`A1-26`) | Férias e hotel | reservar e falar das férias | *je vais* + infinitivo (entrada) | *les vacances, l'hôtel, la nuit, réserver, la valise, le passeport, la mer, la montagne, la plage, la carte postale* (10) | *congés payés* (1936) (Cult, alta, *nova*) · *Bisous, grosses bises* (Real informal, alta, *nova*) · *On y va* (Exp, n/r, *nova*) | nova; o diálogo de check-in **reusa** nome, *prénom*, endereço, telefone e data de nascimento já ensinados (M1.2, M3.5, M5.1, M7.1), sem ensinar de novo (decisão 106); nada muda nesta rodada (*le passeport* passa a ser reusado na M8.6) |
 | M8.4 (g) (`A1-g20`) | Gramática: futuro próximo | falar de planos | *aller* + infinitivo; negativo; *demain, ce soir, la semaine prochaine* (4 telas, 6 exercícios) | (gramática) | (sem nota) | nova (parte da `A1-g13`), veio do M6 |
-| M8.5 (`A1-13`) | Falar do tempo e das estações | clima e estações | *il fait* | *il fait beau, il fait froid, il fait chaud, il pleut, il neige, le soleil, le printemps, l'été, l'automne, l'hiver* (10) | N40 *Il fait chaud* ou *j'ai chaud*? (Exp, n/r) · *Il fait frette* no Quebec (Real regional, alta, *nova*) | movida (do módulo de viagem); renomeada ("Clima e estações"); frase *Demain, il va pleuvoir.* |
+| M8.5 (`A1-13`) | Falar do tempo e das estações | clima e estações | *il fait* | *il fait beau, il fait froid, il fait chaud, il pleut, il neige, le soleil, le printemps, l'été, l'automne, l'hiver* (10) | N40 *Il fait chaud* ou *j'ai chaud*? (Exp, n/r) · *Il fait frette* no Quebec (Real regional, alta, *nova*) | movida (do módulo de viagem); renomeada ("Clima e estações"); frases *Demain, il va pleuvoir.* e *Il fait zéro degré dehors.* (decisão 115) |
+| M8.6 (`A1-32`, id novo) | Pedir ajuda | pedir ajuda na viagem e chamar a polícia (perdi o passaporte, roubaram a bolsa) | fórmulas (*avoir besoin de*, *J'ai besoin d'aide*) | ***Lista a revisar pela dona:*** *au secours, appeler, avoir besoin de, urgent, vite, la police, perdu, le commissariat, l'aide* (9; reusa *le passeport* da M8.3) | (a definir junto com o texto; candidata: os números da polícia, 17 na França e 112 em toda a Europa, Cult, alta) | movida (era M9.2, no módulo de saúde que saiu; decisão 117); **revisada para o novo tema**: a ligação é para a **polícia** (17 e 112), não para a urgência médica; sai *l'ambulance* (vai para o A2 M4.3 "Emergências", com o 15 e o 18); entram *le commissariat* e *l'aide*. Atenção ao escrever: *J'ai perdu mon passeport* é *passé composé*, que só vem na M9.4/M9.5: entra como **fórmula** (como *je voudrais*) ou se troca por *Je ne trouve pas mon passeport* (a revisar pela dona). **Sem texto final**: a dona revisa antes de escrever |
 
-#### A1 M9 · Saúde e conselhos (`A1-m10`; módulo novo)
-Consigo: dizer onde dói e como me sinto; entender um conselho; pedir ajuda numa urgência e ligar para o 15, o 112 ou o 18; dizer o que posso, quero e
-devo fazer. 3 unidades (2 + 1), 19 cartões, ~1h35 (estimativa).
-
-| Posição (id) | Título visível | Função | Gramática | Vocabulário-chave | Notas | Muda |
-|---|---|---|---|---|---|---|
-| M9.1 (`A1-15`) | Dizer onde dói | dizer onde dói e como se sente | *avoir mal à* | *la tête, le ventre, la main, le pied, **la gorge, la dent**, malade, avoir mal, la fièvre, se sentir, **se reposer*** (11; *le médecin* é cartão da M1.6 e aparece em frases) | N34 *avoir mal* x *être malade* (Exp, n/r) · N35 *Ça va pas ?* (Real, alta) · retomada de *avoir mal au / à la / aux* (Exp, n/r, *nova*, *breve*) · *Reposez-vous !* (Exp, n/r, *nova*) · *depuis* como fórmula (Exp, n/r, *nova*) | alterada; renomeada ("Corpo e saúde"); *le médecin* sai para a M1.6; *la pharmacie* sai para "Lugares da cidade" (M6.3), com a nota da cruz verde; + *la gorge, la dent, se reposer*; negação por diálogo (*Vous avez de la fièvre ? Non, je n'ai pas de fièvre.*) |
-| M9.2 (`A1-32`, id novo) | Pedir ajuda | pedir ajuda numa urgência | fórmulas (*avoir besoin de*) | *au secours, appeler, avoir besoin de, urgent, vite, l'ambulance, la police, perdu* (8) | (a definir junto com o texto) | nova (decisão 99); diálogo simulando a ligação para a urgência (15, 112, 18); **sem texto final**: a dona revisa antes de escrever |
-| M9.3 (g) (`A1-g6`) | Gramática: modais e *il faut* | dizer o que posso, quero, devo | *vouloir, pouvoir, devoir* + infinitivo; *il faut*; negativo (*Je ne peux pas venir.*) (4 telas, 6 exercícios) | (gramática) | (sem nota) | movida (era M6.6); renomeada ("Verbos modais e il faut"); sem imperativo (→ `A1-g19`) e sem *savoir* (→ A2 M6.4); perde 2 exercícios (decisão 95) |
-
-#### A1 M10 · Lazer, convites e passado (`A1-m6`; hoje "Lazer e o passado")
-Consigo: falar de lazer; convidar, aceitar, recusar com motivo e se desculpar; contar o fim de semana; entender um convite escrito.
-5 unidades (3 + 2), 30 cartões, ~2h50. Ordem aprovada na decisão 35 (pergunta 35).
+#### A1 M9 · Lazer, convites e passado (`A1-m6`; hoje "Lazer e o passado")
+Consigo: falar de lazer; dizer o que posso, quero e devo fazer (*Tu veux aller au cinéma ? Je ne peux pas.*); convidar, aceitar, recusar com motivo e se desculpar;
+contar o fim de semana; entender um convite escrito. 6 unidades (3 + 3), 30 cartões, ~3h15 (estimativa). Ordem: decisão 118 (substitui a da decisão 35): os modais
+entram logo antes dos convites, que é onde são usados.
 
 | Posição (id) | Título visível | Função | Gramática | Vocabulário-chave | Notas | Muda |
 |---|---|---|---|---|---|---|
-| M10.1 (`A1-19`) | Falar de lazer | lazer e gostos | *jouer au / de la* | *le cinéma, la musique, le sport, lire, jouer, danser, chanter, le week-end, sortir, le film* (10) | N41 o cinema nasceu na França (Cult, alta) · N42 *jouer de* x *jouer à* (Exp, n/r) · N43 *On sait pas encore* (Real, alta, *breve*) | renomeada ("Lazer e atividades"); *adorer* não entra (está na M4.1) |
-| M10.2 (`A1-20`) | Contar o que você fez | contar o passado | *j'ai* + particípio (entrada) | *avant-hier, la semaine dernière, le week-end dernier, le mois dernier, l'année dernière, il y a deux jours, ce matin, déjà, **pas encore, après*** (10) | N44 *Hier* ou *la semaine dernière*? (Exp, n/r; sai "que você já viu") · N45 *T'as fait quoi hier ?* (Real, alta, *breve*) · *j'ai* + particípio, 1º contato (Exp, n/r, *nova*) · com alguns verbos é *je suis* + particípio (Exp, n/r, *nova*) | movida (posição); renomeada ("Expressões de tempo passado"); fundida (*hier* → M3.3); *récemment* → A2 M2.5 |
-| M10.3 (g) (`A1-g9`) | Gramática: *passé composé* com *avoir* | contar o que fiz | *j'ai* + particípio; irregulares; *je n'ai pas mangé* (4 telas, 8 exercícios) | (gramática) | (sem nota) | renomeada ("O passé composé"); a tela de *être* vira tela de negação; 3 exercícios com *être* vão para a `A1-g16`; mensagem "Você concluiu o A1" vai para o Teste de Nível |
-| M10.4 (`A1-27`) | Convidar, aceitar, recusar e se desculpar | convites | *parce que*; tônicos com preposição | *la fête, l'anniversaire, inviter, le cadeau, libre, d'accord, avec plaisir, volontiers, désolé / désolée, dommage* (10) | *Désolé(e)* x *Pardon* x *Excusez-moi* (Real, alta, *nova*) · *pourquoi ? / parce que* (Exp, n/r, *nova*) · *avec moi, chez toi*: tônicos depois de preposição (Exp, n/r, *nova*, pergunta 28) · *Fête de la musique* (Cult, alta, *nova*) · *Galette des rois* (Cult, alta, *nova*) · *OK, ça marche* (Real informal, alta, *nova*) | nova; frase *Désolée, je suis rentrée tard hier* (entrada do *être*) |
-| M10.5 (g) (`A1-g16`) | Gramática: *passé composé* com *être* | contar idas e vindas | verbos de movimento, concordância, pronominais (4 telas, 8 exercícios) | (gramática) | (sem nota) | nova |
-| | **Teste de Nível A1** (`A1-final`) | | | | | |
+| M9.1 (`A1-19`) | Falar de lazer | lazer e gostos | *jouer au / de la* | *le cinéma, la musique, le sport, lire, jouer, danser, chanter, le week-end, sortir, le film* (10) | N41 o cinema nasceu na França (Cult, alta) · N42 *jouer de* x *jouer à* (Exp, n/r) · N43 *On sait pas encore* (Real, alta, *breve*) | renomeada ("Lazer e atividades"); *adorer* não entra (está na M4.1); era M10.1, conteúdo igual |
+| M9.2 (g) (`A1-g6`) | Gramática: modais e *il faut* | dizer o que posso, quero, devo e o que é preciso fazer, para combinar um programa | *vouloir, pouvoir, devoir* + infinitivo; *il faut*; tela de negação (*Je ne peux pas venir.*, *Il ne faut pas...*) (até 5 telas, 6 exercícios) | (gramática) | (sem nota) | movida (publicada como última unidade do módulo `A1-m4`; M6.6 no `08`; M9.3 no módulo de saúde do mapa de 10 módulos; decisão 118); renomeada ("Verbos modais e il faut"); sem imperativo (→ `A1-g19`) e sem *savoir* (→ A2 M6.4). **Revisada para o novo contexto** (lazer e convites): exemplos e exercícios passam a falar de programas (*Tu veux aller au cinéma ce week-end ? Je ne peux pas, mais je peux samedi prochain.*, *Tu dois voir ce film !*, *Il faut réserver.*), sem frases de saúde. O que muda na gramática publicada: tela 1 (*Tu veux un dessert ?*, *Je peux essayer cette robe ?*) reescrita; tela 2 "Devoir e savoir" vira só *devoir* (saem *Vous devez vous reposer.* e *Je sais parler français.*); tela 3 *il faut* (saem *Il faut dormir huit heures.* e *Tu dois te reposer.*); tabela final sem a coluna *savoir*; texto do objetivo sem *savoir*; tela nova de negação. Exercícios: saem os 2 de *savoir* (*Elle ___ parler trois langues.*, *Je ___ nager.*); reescritos *Je ___ un café.*, *Tu ___ essayer cette robe ?*, *Nous ___ nous reposer.* (saúde), *Il ___ manger des légumes tous les jours.* (saúde) e *Vous ___ un dessert ?*; *Ils ___ prendre le bus.* pode ficar ou virar programa (a revisar) |
+| M9.3 (`A1-27`) | Convidar, aceitar, recusar e se desculpar | convites | *parce que*; tônicos com preposição; modais da M9.2 em uso | *la fête, l'anniversaire, inviter, le cadeau, libre, d'accord, avec plaisir, volontiers, désolé / désolée, dommage* (10) | *Désolé(e)* x *Pardon* x *Excusez-moi* (Real, alta, *nova*) · *pourquoi ? / parce que* (Exp, n/r, *nova*) · *avec moi, chez toi*: tônicos depois de preposição (Exp, n/r, *nova*, pergunta 28) · *Fête de la musique* (Cult, alta, *nova*) · *Galette des rois* (Cult, alta, *nova*) · *OK, ça marche* (Real informal, alta, *nova*) | nova; **movida** (era M10.4, depois do *passé composé*; decisão 118): agora vem **antes** do 1º contato com o *passé composé* (M9.4), então a frase *Désolée, je suis rentrée tard hier* (que era a entrada do *être*) não cabe mais aqui; proposta: ela passa a ser exemplo da nota "com alguns verbos é *je suis* + particípio" da M9.4, e a desculpa daqui fica no presente com modal (*Désolée, je ne peux pas, je dois travailler.*) (a revisar pela dona) |
+| M9.4 (`A1-20`) | Contar o que você fez | contar o passado | *j'ai* + particípio (entrada) | *avant-hier, la semaine dernière, le week-end dernier, le mois dernier, l'année dernière, il y a deux jours, ce matin, déjà, **pas encore, après*** (10) | N44 *Hier* ou *la semaine dernière*? (Exp, n/r; sai "que você já viu") · N45 *T'as fait quoi hier ?* (Real, alta, *breve*) · *j'ai* + particípio, 1º contato (Exp, n/r, *nova*) · com alguns verbos é *je suis* + particípio (Exp, n/r, *nova*) | movida (era M10.2, agora depois dos convites); renomeada ("Expressões de tempo passado"); fundida (*hier* → M3.3); *récemment* → A2 M2.5; pode retomar o convite da M9.3 (*Tu as fait quoi samedi ? Je suis allée à la fête de Léa.*) |
+| M9.5 (g) (`A1-g9`) | Gramática: *passé composé* com *avoir* | contar o que fiz | *j'ai* + particípio; irregulares; *je n'ai pas mangé* (4 telas, 8 exercícios) | (gramática) | (sem nota) | renomeada ("O passé composé"); a tela de *être* vira tela de negação; 3 exercícios com *être* vão para a `A1-g16`; mensagem "Você concluiu o A1" vai para o Teste de Nível; era M10.3 |
+| M9.6 (g) (`A1-g16`) | Gramática: *passé composé* com *être* | contar idas e vindas | verbos de movimento, concordância, pronominais (4 telas, 8 exercícios) | (gramática) | (sem nota) | nova; era M10.5 |
+| | **Teste de Nível A1** (`A1-final`) | | | | | deixa de cobrar a saúde (a `A1-15` agora é do A2) |
 
 ### 3.2 A2 (todo inédito)
 
@@ -258,11 +258,12 @@ Gramáticas com 4 telas e 8 exercícios, salvo indicação. Lições: não desen
 
 | Posição (id) | Título visível | Função | Gramática | Vocabulário-chave | Notas | Muda (em relação ao `04` v2) |
 |---|---|---|---|---|---|---|
-| **M1 · Lembranças e fases da vida** (`A2-m1`) | | contar a infância, comparar antes e agora, marcos da vida | | | | 4 unidades (3 + 1) |
+| **M1 · Lembranças e fases da vida** (`A2-m1`) | | contar a infância, descrever como a pessoa era e como é, comparar antes e agora, marcos da vida | | | | 5 unidades (4 + 1) (decisão 120) |
 | M1.1 (`A2-1`) | Contar como era a infância | lembranças | imperfeito (entrada) | *l'enfance, le souvenir, se souvenir de, le jouet, autrefois...* | | igual |
 | M1.2 (g) (`A2-g1`) | Gramática: imperfeito | descrever e dizer hábitos do passado | formação pela forma *nous*; *j'étais* | | | igual |
-| M1.3 (`A2-2`) | Comparar antes e agora | antes x agora | comparativo do A1 | *la campagne, le village, avant, maintenant, à l'époque...* | *ne... plus* = não... mais (Exp, alta, *nova*) | + nota |
-| M1.4 (`A2-3`) | Contar as fases da vida | marcos com datas | *il y a* + tempo | *naître, se marier, déménager, la retraite...* | | posição (sai a gramática do meio) |
+| M1.3 (`A2-35`) | Descrever o caráter (antes e hoje) | descrever como uma pessoa era e como é hoje (base para o DELF A2 PO2, "descreva um amigo") | imperfeito + traços de caráter; presente para hoje (*Petit, j'étais timide ; aujourd'hui, je suis plus sûr de moi.*) | ***Lista a revisar pela dona*** (12 a 14, confiança média): *le caractère, gentil* (cartão já publicado da `A1-16`, chave mantida), *sympa, timide, courageux, patient, drôle, curieux, têtu, sûr de soi, généreux, sérieux...* | N16 (*gentil* x *sympa*, publicada, Real, alta) vem com *gentil* | **movida** (era A2 M4.5, ao lado do esporte; decisão 120): a unidade passa a servir para **comparar como a pessoa era antes e como é hoje**, logo depois do imperfeito; *gentil*, *sympa* e *timide* entram aqui; frases e diálogo reescritos para "antes e hoje" (não "descrever um amigo" solto); não vai para o M9 |
+| M1.4 (`A2-2`) | Comparar antes e agora | antes x agora | comparativo do A1 | *la campagne, le village, avant, maintenant, à l'époque...* | *ne... plus* = não... mais (Exp, alta, *nova*; exemplo *Avant je fumais, maintenant je ne fume plus.*; 1ª aparição da negação complexa, sistematizada na M8.7) | + nota; era M1.3 (desce uma posição) |
+| M1.5 (`A2-3`) | Contar as fases da vida | marcos com datas | *il y a* + tempo | *naître, se marier, déménager, la retraite...* | | posição (sai a gramática do meio); era M1.4 |
 | **M2 · Contar uma experiência** (`A2-m2`) | | relato de 60 a 80 palavras, imprevisto, notícia | | | | 6 (3 + 3) |
 | M2.1 (`A2-4`) | Contar uma viagem | relato de viagem | | *le voyage, le séjour, l'avion, le vol, rater...* | *d'abord, ensuite, puis, enfin* (Exp, alta, *nova*) | + nota |
 | M2.2 (g) (`A2-g3`) | Gramática: passé composé x imperfeito | cenário x ação | revisão do PC + imperfeito x PC (5 telas) | | | + tela de revisão (absorve parte da `A2-g4`) |
@@ -277,13 +278,13 @@ Gramáticas com 4 telas e 8 exercícios, salvo indicação. Lições: não desen
 | M3.4 (g) (`A2-g7`) | Gramática: superlativo | o melhor, o mais | *le plus, le moins, le meilleur, le mieux* + 1 tela de revisão do comparativo | | | foco ajustado |
 | M3.5 (`A2-9`) | Opinar sobre o consumo | opinião simples | opinião em fórmula | *d'occasion, gaspiller, la marque, la qualité...* | *je trouve que, à mon avis* (Exp, n/r, *nova*) · *plus de, moins de, autant de* (Exp, n/r, *nova*) | + notas |
 | M3.6 (g) (`A2-g8`) | Gramática: pronomes demonstrativos e *lequel* | escolher entre objetos | *celui-ci, celle-là*; *Lequel ? Laquelle ?* | | | + tela *lequel* (da `A2-g22`) |
-| **M4 · Saúde e bem-estar** (`A2-m4`) | | consulta, emergência, conselhos, caráter | | | | 6 (4 + 2) |
-| M4.1 (`A2-10`) | Na consulta | marcar e descrever sintomas | | *le rendez-vous, l'ordonnance, le médicament, tousser...* | | igual |
-| M4.2 (`A2-11`) | Corpo e emergências | emergência | | *le bras, la jambe, le dos, les urgences...* | | igual |
-| M4.3 (g) (`A2-g10`) | Gramática: pronomes COI | | *lui, leur, me, te, nous, vous* | | | sobe para depois das 2 unidades |
-| M4.4 (`A2-12`) | Esporte e hábitos saudáveis | hábitos | | *être en forme, courir, nager, le sommeil...* | | igual |
-| M4.5 (`A2-35`) | Descrever o caráter | descrever um amigo (DELF A2 PO2) | | *le caractère, gentil (vindo da M2.3), sympa, timide, courageux, patient, drôle, curieux, têtu...* (12 a 14, confiança média) | | nova |
-| M4.6 (g) (`A2-g11`) | Gramática: condicional dos conselhos | aconselhar e pedir com cortesia | só *devoir, vouloir, pouvoir, aimer* (*tu devrais, je voudrais*) | | | ajustada (o futuro só chega no M6) |
+| **M4 · Saúde e bem-estar** (`A2-m4`) | | dizer onde dói, consulta, emergência médica, conselhos, hábitos | | | | 6 (4 + 2) (decisão 123) |
+| M4.1 (`A1-15`, **publicada, vinda do A1**) | Corpo e dores | dizer onde dói e como se sente | *avoir mal à* | *la tête, le ventre, la main, le pied, la gorge, la dent, malade, avoir mal, la fièvre, se sentir, se reposer* (11; mesmas chaves de cartão) | N34 *avoir mal* x *être malade* (Exp, n/r, publicada) · N35 *Ça va pas ?* (Real, alta, publicada) · retomada de *avoir mal au / à la / aux* (Exp, n/r, *nova*, *breve*) · *Reposez-vous !* (Exp, n/r, *nova*; o imperativo já veio no A1 M6.2) · *depuis* como fórmula (Exp, n/r, *nova*; **a revisar**: no A2 a `A2-g5` (M2.6) já ensina *depuis* antes desta unidade, então a nota vira retomada breve ou sai) | **muda de nível** (era A1 M6, depois A1 M9.1; decisão 116); renomeada ("Corpo e saúde" → "Corpo e dores"); mesmo id, mesmas chaves (progresso intacto, seção 5); *le médecin* (A1 M1.6) e *la pharmacie* (A1 M6.3) seguem em frases; negação por diálogo (*Vous avez de la fièvre ? Non, je n'ai pas de fièvre.*) fica aqui; revisar os exemplos para o nível A2 (pode usar *passé composé* e imperfeito: *Hier, j'ai eu de la fièvre.*) |
+| M4.2 (`A2-10`) | Na consulta | marcar e descrever sintomas | | *le rendez-vous, l'ordonnance, le médicament, tousser...* | | era M4.1; sem repetir a M4.1: *la douleur* e *se faire mal* entram como "o nome da dor" e "machucar-se", sem reensinar *avoir mal* |
+| M4.3 (`A2-11`) | Emergências | emergência médica (acidente, pronto-socorro, ligar para o 15) | | ***Lista a revisar pela dona***: *le bras, la jambe, le dos, le cœur, se casser, se blesser / blessé, grave, les urgences, l'ambulance, le SAMU, les pompiers, le pansement* (12, confiança média) | os números de urgência médica: 15 (SAMU), 18 (bombeiros), 112 (Cult, alta, *nova*; o 112 e o 17 da polícia já vieram no A1 M8.6, aqui é só a parte médica) | **renomeada** ("Corpo e emergências" → "Emergências"; decisão 123): só emergência médica; saem *la gorge, la dent* (já na M4.1) e *l'œil / les yeux* (*les yeux* é cartão do A1 M2.3); sai *le dentiste* (destino a revisar pela dona); entram *se blesser / blessé, grave, le SAMU, les pompiers*; *l'ambulance* vem da antiga "Pedir ajuda" do A1 |
+| M4.4 (g) (`A2-g10`) | Gramática: pronomes COI | | *lui, leur, me, te, nous, vous* | | | era M4.3 |
+| M4.5 (`A2-12`) | Esporte e hábitos saudáveis | hábitos | | *être en forme, courir, nager, le sommeil...* | | era M4.4 |
+| M4.6 (g) (`A2-g11`) | Gramática: condicional dos conselhos | aconselhar e pedir com cortesia | só *devoir, vouloir, pouvoir, aimer* (*tu devrais, je voudrais*); exemplo que fecha o módulo: *Tu devrais te reposer.* | | | ajustada (o futuro só chega no M6) |
 | **M5 · À mesa** (`A2-m5`) | | reservar, receita, sabores | | | | 5 (3 + 2) |
 | M5.1 (`A2-13`) | Reservar e pedir no restaurante | pedir e reclamar do prato | | *la réservation, le plat du jour, saignant, le pourboire...* | *ne... que* = só (Exp, média no gatilho, *nova*) · opinião em fórmula (Exp, n/r, *nova*) | + notas |
 | M5.2 (g) (`A2-g12`) | Gramática: pronome *en* | | | | | igual |
@@ -297,19 +298,19 @@ Gramáticas com 4 telas e 8 exercícios, salvo indicação. Lições: não desen
 | M6.4 (g) (`A2-g17`) | Gramática: *savoir* x *connaître* | saber x conhecer | (3 telas, 6 exercícios) | | | movida (era M6.6); recebe o *savoir* do A1; verbos com *à / de* saem |
 | M6.5 (`A2-18`) | Projetos e sonhos | planos e desejos | | *le projet, rêver de, espérer, avoir envie de...* | desejo (*j'aimerais, j'espère que*) (Exp, n/r, *nova*) · verbo + *de* + infinitivo (Exp, n/r, *nova*) | + notas |
 | M6.6 (g) (`A2-g16`) | Gramática: *quand* e *si* (falar do futuro com condição) | | *quand* + futuro, *si* + presente | | | movida (era M6.4); desejo vira nota |
-| **M7 · Trabalho e dinheiro** (`A2-m7`) | | trabalho, entrevista, regras, banco, relatar | | | | 5 (4 + 1) |
+| **M7 · Trabalho e dinheiro** (`A2-m7`) | | trabalho, entrevista, banco, relatar | | | | 4 (3 + 1) (decisão 121) |
 | M7.1 (`A2-19`) | Falar do trabalho | | | *le / la collègue, le salaire, la réunion...* | | igual |
 | M7.2 (`A2-20`) | Procurar emprego | entrevista | | *le CV, postuler, l'entretien...* | | igual |
 | M7.3 (g) (`A2-g19`) | Gramática: discurso indireto no presente | relatar o que alguém disse | *il dit que, il demande si / ce que / où* | | | movida (era M7.6) |
-| M7.4 (`A2-21`) | Entender regras e avisos | ler placas | | *interdit, autorisé, obligatoire, le panneau...* | *il est interdit de* + infinitivo (Exp, alta, *nova*) · *il ne faut pas* = não pode (Exp, alta, *nova*) | `A2-g18` vira estas 2 notas; revisar junto com o `A2-26` (*stationner* x *se garer*) |
-| M7.5 (`A2-22`) | Resolver no banco | | | *la banque, le compte, retirer...* | | igual |
-| **M8 · Moradia e cidade** (`A2-m8`) | | classificado, convivência, papelada, trânsito | | | | 6 (4 + 2) |
+| M7.4 (`A2-22`) | Resolver no banco | | | *la banque, le compte, retirer...* | | era M7.5 |
+| **M8 · Moradia e cidade** (`A2-m8`) | | classificado, convivência, papelada, trânsito, placas e avisos da cidade | | | | 7 (5 + 2) (decisões 121 e 122) |
 | M8.1 (`A2-23`) | Procurar moradia | | | *louer, le loyer, l'annonce...* | | igual |
 | M8.2 (`A2-24`) | Dividir apartamento e vizinhos | regras da casa | | *la colocation, le voisin, faire le ménage...* | *tout, chaque, plusieurs, chacun* (Exp, n/r, *nova*) | + nota |
 | M8.3 (g) (`A2-g20`) | Gramática: pronome *y* | | | | | igual |
 | M8.4 (`A2-25`) | Serviços e papelada | | | *la poste, la mairie, le formulaire...* | | igual |
 | M8.5 (`A2-26`) | Trânsito e carro | | | *conduire, le bouchon, se garer...* | | igual |
-| M8.6 (g) (`A2-g21`) | Gramática: alguém e ninguém | *quelqu'un / personne, quelque chose / rien, aucun* | (5 telas) | | | reorganizada (recebe da `A2-g23`) |
+| M8.6 (`A2-21`) | Entender regras e avisos | ler placas, interdições e avisos da cidade (prédio, parque, rua, transporte) | | ***Lista a revisar pela dona*** (12, confiança média): *le panneau, l'avis, interdit / interdite, autorisé / autorisée, obligatoire, avoir le droit de, respecter, l'amende, fumer, traverser, le passage piéton, la pelouse* | *il est interdit de* + infinitivo (Exp, alta, *nova*) · *il ne faut pas* = não pode (Exp, alta, *nova*, breve: a tela de negação dos modais do A1 M9.2 já mostrou a forma) | **movida** (era A2 M7.4, no trabalho; decisão 121); vem logo depois de "Trânsito e carro"; `A2-g18` vira estas 2 notas. **Palavras revistas para a cidade** (o que muda em relação à lista do `04`): saem *le règlement* (regra de trabalho; a do prédio já está na M8.2), *permettre* (já é frase da M3.1, *ça permet de*), *défendre* (vira placa *Défense de fumer*, sem cartão) e *stationner* (vira placa *Stationnement interdit*; o cartão do sentido é *se garer*, da M8.5, logo antes); entram *l'avis, traverser, le passage piéton, la pelouse* (*Pelouse interdite*); frases e diálogo passam de "regras do trabalho" para placas e avisos da cidade |
+| M8.7 (g) (`A2-g21`) | Gramática: negação complexa | negar com *ne... plus, rien, personne, aucun, que* e *ni... ni* | (5 telas) | | | **movida e renomeada** (era M8.6 "Alguém e ninguém"; `16` e decisão 122): última unidade do M8, depois de "Entender regras e avisos"; sistematiza as negações que já apareceram em notas e diálogos (onde cada uma aparece antes: tabela "Negação complexa: onde aparece antes" abaixo) |
 | **M9 · Comunicar e se relacionar** (`A2-m9`) | | telefonar, escrever com função, sentimentos, redes | | | | 6 (4 + 2) |
 | M9.1 (`A2-27`) | Telefonar e deixar recado | | | *rappeler, laisser un message, raccrocher...* | | igual |
 | M9.2 (g) (`A2-g2`) | Gramática: momentos da ação | dizer em que ponto está a ação | *venir de, être en train de, être sur le point de* | | | movida (era A2 M1) |
@@ -327,6 +328,34 @@ Gramáticas com 4 telas e 8 exercícios, salvo indicação. Lições: não desen
 | M10.7 (g) (`A2-g25`) | Gramática: gerúndio | | (3 telas, 6 exercícios) | | | desce (vem depois da francofonia) |
 
 Ids do A2 aposentados sem uso (nunca reaproveitar): `A2-g4`, `A2-g14`, `A2-g18`, `A2-g23`.
+
+#### Negação complexa: onde aparece antes da M8.7 (decisão 122)
+
+Princípio do `16`: a negação aparece em diálogo quando a palavra surge; nota breve só na 1ª aparição com propósito; a gramática sistematiza.
+Só *ne... plus* e *ne... que* já têm nota no mapa; as demais posições são **propostas** para quando o A2 for escrito (a revisar pela dona).
+
+| Negação | 1ª aparição (antes da M8.7) | Como | Situação |
+|---|---|---|---|
+| *ne... pas* / *ne... jamais* | A1 (M1.2 em diante; *jamais* na M3.6 (g)) | diálogos, telas | já no A1 |
+| *ne... plus* | **A2 M1.4** "Comparar antes e agora": *Avant je fumais, maintenant je ne fume plus.* | nota breve (Exp, alta) | no mapa |
+| *rien* | A2 M2.5 "Contar um acontecimento": a testemunha diz *Je n'ai rien vu.* (*de rien* é fórmula desde a A1 M1.1) | diálogo | proposta |
+| *ne... que* | **A2 M5.1** "Reservar e pedir no restaurante": *ne... que* = só (exemplo a escrever com a unidade) | nota breve (Exp, média no gatilho) | no mapa |
+| *personne* | A2 M8.2 "Dividir apartamento e vizinhos": *Il n'y a personne ?* / *Personne ne fait le ménage !* | diálogo | proposta |
+| *aucun / aucune* | A2 M8.4 "Serviços e papelada": *Je n'ai reçu aucun courrier.* | diálogo | proposta |
+| *ni... ni* | A2 M8.1 "Procurar moradia" (anúncio: *Ni animaux ni fumeurs.*) ou A2 M8.6 (placa) | anúncio ou placa | proposta |
+
+#### Saúde: o que é do A1 e o que é do A2 (decisões 116, 117 e 123)
+
+O A1 não tem mais módulo de saúde; o A2 M4 começa pelo que a `A1-15` já ensinava e não repete.
+
+| Tema | A1 | A2 | Para não repetir |
+|---|---|---|---|
+| Corpo | só aparência (M2.3: *les cheveux, les yeux*) | M4.1 *la tête, le ventre, la main, le pied, la gorge, la dent*; M4.3 *le bras, la jambe, le dos, le cœur* | a `A2-11` perde *la gorge, la dent, l'œil / les yeux* |
+| Dor e como me sinto | nenhum cartão (*Ça va ?* na M1.1) | M4.1 *avoir mal (à), malade, la fièvre, se sentir*; M4.2 *la douleur, se faire mal, tousser, le rhume, la grippe* | *la douleur* (nome) e *se faire mal* (machucar-se) sem reensinar *avoir mal* |
+| Descansar e conselho | nenhum (sai *Vous devez vous reposer* dos modais, M9.2) | M4.1 *se reposer*, nota *Reposez-vous !*; M4.6 (g) *Tu devrais te reposer.* | espiral: imperativo (A1 M6.2) → *Reposez-vous !* → condicional |
+| Médico e lugares | M1.6 *le médecin*; M6.3 *la pharmacie, l'hôpital* + nota da cruz verde, 15 e 112 | M4.2 *le rendez-vous, l'ordonnance, le médicament*; M4.3 *les urgences* | *le médecin* e *la pharmacie* só em frases no A2 |
+| Pedir ajuda e ligar | M8.6 *au secours, appeler, la police, le commissariat*: **polícia** (17, 112), na viagem | M4.3 *l'ambulance, le SAMU* (15), *les pompiers* (18), *grave, blessé*: **urgência médica** | o 112 aparece nos dois níveis com outro uso; a nota do A2 cita só a parte médica |
+| Esporte e hábitos | nenhum (*le sport* é lazer, M9.1) | M4.5 *être en forme, courir, nager, le sommeil* | sem sobreposição |
 
 ---
 
@@ -360,11 +389,11 @@ com correção** (nota não tem exercício, não entra no Ponto de verificação
 | `A1-g7` | M7.3 | M7.6 | exemplos trocados |
 | `A1-g4` | M2.5 | **M8.2** (Viagem e férias) | movida para depois do vocabulário de países (`A1-31`), decisão 109; + procedência |
 | `A1-g20` | (tela da `A1-g13`) | **M8.4 Futuro próximo** | nova |
-| `A1-g6` | M6.6 modais, *il faut*, imperativo | **M9.3** modais e *il faut* (Saúde e conselhos) | imperativo e *savoir* saem; perde 2 exercícios (decisões 95 e 99) |
-| `A1-g9` | M8.4 | M10.3 | + tela de negação no PC |
-| `A1-g16` | M8.5 | M10.5 | recebe 3 exercícios da `A1-g9` |
+| `A1-g6` | M6.6 modais, *il faut*, imperativo | **M9.2** modais e *il faut* (Lazer, convites e passado), antes dos convites | imperativo e *savoir* saem; perde 2 exercícios; exemplos e exercícios reescritos para lazer e convites, sem saúde; + tela de negação (decisões 95, 99 e 118; lista na M9.2 da seção 3.1) |
+| `A1-g9` | M8.4 | M9.5 | + tela de negação no PC |
+| `A1-g16` | M8.5 | M9.6 | recebe 3 exercícios da `A1-g9` |
 | A1 (total) | 16 gramáticas | **23** | 10 publicadas hoje; `A1-g22`, `A1-g23` e `A1-g24` vieram depois do `10` |
-| A2 | 25 gramáticas | 22 | ver tabela 3.2 (coluna "Muda") |
+| A2 | 25 gramáticas | 22 | ver tabela 3.2 (coluna "Muda"); `A2-g21` vira "Gramática: negação complexa" e passa para a M8.7 (decisão 122) |
 
 ### 4.2 Notas que mudam de unidade, de lição ou de forma
 
@@ -379,15 +408,16 @@ com correção** (nota não tem exercício, não entra no Ponto de verificação
 | *c'est* x *il est* | tela da `A1-g2` | nota M2.1 (e breves M4.1 e M7.1); *c'est* + adjetivo sistematizado na M7.3 (g) | `10`; `12` 103 |
 | Demonstrativos *ce, cette, ces* | tela da `A1-g15` | nota M5.3 | `10` |
 | "Pegadinha" *avoir faim* | tela da `A1-g1` (publicada) | nota M4.1 | `09` (pergunta 12) |
-| *Reposez-vous !* (imperativo pronominal) | (telas do imperativo) | nota M9.1 | `10` |
+| *Reposez-vous !* (imperativo pronominal) | (telas do imperativo) | nota da `A1-15`, agora **A2 M4.1** | `10`; `12` 116 |
 | Feminização das profissões | tela 3 da M1.7 (`09`) | nota **cultural** na M1.6 | `12` 15 |
-| Palavras de pergunta (*quel, quand, combien, pourquoi*) | telas da `A1-g12` | notas M3.1, M3.3, M5.1, M10.4 e as gramáticas M2.6 e M6.6 | `10`; `16` |
+| Palavras de pergunta (*quel, quand, combien, pourquoi*) | telas da `A1-g12` | notas M3.1, M3.3, M5.1, M9.3 e as gramáticas M2.6 e M6.6 | `10`; `16` |
+| N34, N35 e as 3 notas novas da `A1-15` (*avoir mal au / à la / aux*, *Reposez-vous !*, *depuis*) | A1 (publicada no módulo `A1-m4`, "Deslocando-se e cuidando de si"; M9.1 no mapa de 10 módulos) | **A2 M4.1**, com a unidade (a de *depuis* vira retomada breve ou sai, porque a `A2-g5` vem antes) | `12` 116 |
 | Farmácia: cruz verde, 15 e 112 | M6.5 "Dizer onde dói" (`A1-15`) | M6.3 "Lugares da cidade" (`A1-30`), junto com *la pharmacie* | `12` 97 |
 | Alfabeto e nomes dos acentos | nota de pronúncia da `A1-23` (removida) | **lição de pronúncia** "O alfabeto e soletrar o nome" na M1.2 | `12` 108 (exceção à decisão 32) |
 | Ordem do endereço e CEP | `A1-23` (removida) | M7.1, junto com *l'adresse* e *le code postal* | `12` 110 |
 | *courriel* no Quebec, *arobase* | `A1-23` (removida) | M5.1, junto com *le mail* | `12` 110 |
-| *Allô ?* | `A1-23` (removida) | **destino a decidir** (pergunta 59) | a decisão 110 não a cita |
-| A2: *ne... plus*, *ne... que*, conectores, *-ment*, intensidade, progressão, desejo, verbo + *de*, obrigação, *tout / chaque*, opinião | gramáticas `A2-g23`, `A2-g5`, `A2-g14`, `A2-g16`, `A2-g17`, `A2-g18`, `A2-g21`, `A2-g24` | notas nas unidades da tabela 3.2 | `10` |
+| *Allô ?* | `A1-23` (removida) | **M5.1**, junto do telefone | `12` 114 |
+| A2: *ne... plus*, *ne... que*, conectores, *-ment*, intensidade, progressão, desejo, verbo + *de*, obrigação, *tout / chaque*, opinião | gramáticas `A2-g23`, `A2-g5`, `A2-g14`, `A2-g16`, `A2-g17`, `A2-g18`, `A2-g21`, `A2-g24` | notas nas unidades da tabela 3.2 (*ne... plus* na M1.4; *ne... que* na M5.1; todas as negações sistematizadas depois na `A2-g21`, M8.7) | `10`; `16`; `12` 122 |
 | Nota "onde cai a força" (*merCI*) | lição "Som do módulo" (`09`) | **sai** | `12` 37 |
 | Nota de instruções de aula (*écoutez*) | M1.1 (`08`) | fora do mapa até a dona decidir | nenhuma palavra da M1.1 a motiva (pergunta 13) |
 
@@ -397,14 +427,16 @@ Gatilhos corrigidos na conversão para `afterKey`: N21 → *demain*; N23 → *lu
 
 | Tópico | 1º contato | Regra | Volta |
 |---|---|---|---|
-| Tônicos | M1.2 (*moi, toi, vous*) | (notas) | M1.4 *lui, elle*; M4.1 *Pour moi*; M10.4 *avec moi, chez toi* |
+| Tônicos | M1.2 (*moi, toi, vous*) | (notas) | M1.4 *lui, elle*; M4.1 *Pour moi*; M9.3 *avec moi, chez toi* |
 | *c'est* x *il est* | M1.6 (sem artigo) | nota M2.1; M7.3 (g) *c'est* + adjetivo | M4.1 *c'est bon*; M7.1 *c'est une grande maison*; M7.2 descrever a moradia |
-| Negação | M1.1 *je ne comprends pas* | por diálogo (`16`); telas em M2.2 (g) *pas de*, M7.3 (g) *il n'y a pas de*, M9.3 (g) modais | M3.6 *jamais*; M4.2 *pas de*; M10.2 *pas encore*; M10.3 no PC; A2 M1.3 *ne... plus*; A2 M8.6 *rien, personne* |
-| Perguntas | M1.2 *in situ* (breve) | M2.6 (g) pessoas; M2.7 (g) sim ou não; M6.6 (g) lugar, hora e coisas | notas M3.1, M3.3, M5.1, M10.4; A2 M7.3 indireta; A2 M9.4 (g) |
-| Feminino | M1.2 *française* | M1.7 (g) | nota M2.5; M3.5 *né / née*; M5.5 (g); M10.5 concordância do PC |
-| Contrações | M2.5 *du Brésil* (nota breve); M4 *au café* | M6.4 (g) *aller à* (retomada curta) | nota M7.5 *à côté du lit*; M8.2 (g) *au, aux* com países; M9.1 *avoir mal au / aux* |
+| Negação | M1.1 *je ne comprends pas* | por diálogo (`16`); telas em M2.2 (g) *pas de*, M7.3 (g) *il n'y a pas de*, M9.2 (g) modais | M3.6 *jamais*; M4.2 *pas de*; M9.4 *pas encore*; M9.5 no PC; A2 M1.4 *ne... plus*; A2 M4.1 *je n'ai pas de fièvre*; A2 M5.1 *ne... que*; A2 M8.7 (g) negação complexa |
+| Perguntas | M1.2 *in situ* (breve) | M2.6 (g) pessoas; M2.7 (g) sim ou não; M6.6 (g) lugar, hora e coisas | notas M3.1, M3.3, M5.1, M9.3; A2 M7.3 indireta; A2 M9.4 (g) |
+| Feminino | M1.2 *française* | M1.7 (g) | nota M2.5; M3.5 *né / née*; M5.5 (g); M9.6 concordância do PC |
+| Contrações | M2.5 *du Brésil* (nota breve); M4 *au café* | M6.4 (g) *aller à* (retomada curta) | nota M7.5 *à côté du lit*; M8.2 (g) *au, aux* com países; A2 M4.1 *avoir mal au / aux* |
 | Futuro | *je vais* + infinitivo desde M3.1 | M8.4 (g) | A2 M6.2 futuro simples |
-| Imperativo | M6.1 *Tournez à gauche* | M6.2 (g) | M9.1 *Reposez-vous !*; A2 M5.4 com pronomes |
+| Modais | *je voudrais, vous pouvez* (fórmulas desde M1.1 e M4.1) | M9.2 (g) | M9.3 convites (*Tu veux venir ? Je ne peux pas.*); A2 M4.6 condicional (*tu devrais*) |
+| Caráter | *gentil* (cartão publicado da `A1-16`) | (nota N16) | A2 M1.3 "antes e hoje" com o imperfeito |
+| Imperativo | M6.1 *Tournez à gauche* | M6.2 (g) | A2 M4.1 *Reposez-vous !*; A2 M5.4 com pronomes |
 
 ---
 
@@ -423,36 +455,48 @@ Course Deck de unidade que saiu escondido). **Falta:** script de operações `fr
   para o arquivo (`04` 2.3 item 6).
 - Aposentado ou órfão: progresso vai para `retiredStudyCards` e volta se o item voltar (item 7). *récemment* é **movida** para o A2, não apagada.
 - Palavra estudada que vai para uma unidade ainda não feita continua na Revisão (`released`, item 8).
-- Gramática e nota não geram cartão: criar, dividir, mover ou cortar gramática ou nota **não toca no FSRS**. O A2 é todo inédito.
+- Gramática e nota não geram cartão: criar, dividir, mover ou cortar gramática ou nota **não toca no FSRS**. O A2 é inédito, menos a `A1-15` (que muda de nível, risco abaixo) e o cartão *gentil* (`A1-16` → `A2-35`).
 - O livro-razão impede que alguém apague ou renomeie um id publicado por engano.
 
 **Riscos que sobram e mitigação** (`08` 8, `10` 7, `09` B.13, `22`):
 
 | Risco | Onde | Mitigação |
 |---|---|---|
-| Ponto de verificação herdado "errado" | aprovado é guardado por id de módulo | ids de módulo escolhidos por sobreposição de unidades (decisão 112): `A1-m1` → Apresentar-se (M1), `A1-m7` → Família (M2), `A1-m2` → Rotina e calendário (M3), `A1-m3` → Comer e beber (M4), `A1-m8` → Compras (M5), `A1-m4` → Na cidade (M6), `A1-m5` → Casa e moradia (M7; casa, móveis e comparativo, como o antigo), `A1-m9` → Viagem e férias (M8), `A1-m10` → Saúde e conselhos (M9), `A1-m6` → Lazer, convites e passado (M10); `A1-m7`, `A1-m8`, `A1-m9` e `A1-m10` são novos e nunca foram aprovados (quem aprovou o antigo `A1-m4` fez transporte, saúde e modais: herda a aprovação em Na cidade, e o M9 sem aprovação não bloqueia); módulo sem aprovação herdada não bloqueia (pergunta 5) |
+| Ponto de verificação herdado "errado" | aprovado é guardado por id de módulo | ids de módulo escolhidos por sobreposição de unidades (decisões 112 e 116): `A1-m1` → Apresentar-se (M1), `A1-m7` → Família (M2), `A1-m2` → Rotina e calendário (M3), `A1-m3` → Comer e beber (M4), `A1-m8` → Compras (M5), `A1-m4` → Na cidade (M6), `A1-m5` → Casa e moradia (M7; casa, móveis e comparativo, como o antigo), `A1-m9` → Viagem e férias (M8), `A1-m6` → Lazer, convites e passado (M9). **`A1-m10` não existe** (nunca foi publicado; o módulo de saúde saiu do A1): não entra no conteúdo, no `MODULE_MERGES` nem no cron. `A1-m7`, `A1-m8` e `A1-m9` são novos e nunca foram aprovados. Quem aprovou o antigo `A1-m4` (clima, transporte, *faire / prendre*, saúde e modais) herda a aprovação em Na cidade; os modais agora estão no `A1-m6` e a saúde no `A2-m4`, módulos que ele não aprovou (ver a linha "Unidade publicada que muda de nível"). Módulo sem aprovação herdada não bloqueia (pergunta 5) |
 | Unidade aparece atrás do aluno | movimentos para trás (`A1-16`, `A1-9`, `A1-g8`, `A1-5`) e unidades novas no M1 (incluindo a lição de pronúncia do alfabeto na M1.2) | regra 2.10 (feita): nasce aberta, não concluída, não bloqueia; o "Continuar" hoje aponta para ela (pergunta 6) |
 | Gramática publicada dividida | `A1-g3` → `A1-g18`; `A1-g6` → `A1-g19` | quem concluiu a antiga vê a nova aberta, não concluída |
 | Gramática publicada que vai para mais tarde | `A1-g4` (países) passa da M2.6 para a M8.2 | **sem risco**: só muda de posição para a frente; quem concluiu mantém a conclusão, quem não fez a encontra depois do vocabulário de países |
-| Unidade publicada perde palavra | `A1-15` (M9.1) perde *la pharmacie* para a `A1-30` (M6.3, mais cedo); `A1-18` (M7.5) perde os 5 móveis para a `A1-34` (M7.4); `A1-17` (M7.1) perde *la porte, la fenêtre, il y a, il n'y a pas de* | chave estável + `released`: o cartão segue na Revisão; o destino das 4 palavras da `A1-17` está na pergunta 58 (nenhuma pode ser apagada sem ir para o arquivo de aposentados) |
-| Exercícios com palavra ainda não ensinada na posição nova | `A1-g8` (6 de 6), `A1-g5` (4 de 6), `A1-g3` (1), `A1-g7` (2 + 3 exemplos), `A1-g6` (2 de *savoir*) | reescrever **antes** de mover; teste novo "exercício de gramática só com palavras vistas" (pergunta 25) |
+| Unidade publicada perde palavra | `A1-15` (agora A2 M4.1) perde *la pharmacie* para a `A1-30` (M6.3, mais cedo) e *le médecin* para a `A1-22`; `A1-16` (M2.3) perde *gentil* para a `A2-35` (A2 M1.3, outro nível); `A1-18` (M7.5) perde os 5 móveis para a `A1-34` (M7.4); `A1-17` (M7.1) perde *la porte, la fenêtre* para a `A1-34` (decisão 113; *il y a, il n'y a pas de* ficam na M7.1) | chave estável + `released`: o cartão segue na Revisão (nenhum pode ser apagado sem ir para o arquivo de aposentados) |
+| **Unidade publicada que muda de nível** (decisão 116) | `A1-15` "Dizer onde dói" (hoje no `A1-m4`) vira A2 M4.1 "Corpo e dores" (`A2-m4`), com o mesmo id e as mesmas chaves (`A1-15-v*`, `-p*`, `-d*`) | **Cartões e FSRS: seguros** (o id vem da chave; o prefixo "A1-" no id é só nome, na busca feita, nenhum código deduz o nível do id do cartão). **O que muda e precisa de cuidado:** (1) **conclusão**: `unitProgress['A1-15']` fica; o A1 passa a ser concluído sem ela (`levelCompleted` olha os módulos do nível), então quem só faltava a saúde passa a ter o A1 concluído; quem a concluiu (estudando ou pulando pelo Ponto de verificação do antigo `A1-m4` ou pelo Teste de Nível) a vê concluída no A2 M4; (2) **desbloqueio**: hoje `moduleUnlocked` olha só a 1ª unidade do módulo, e a 1ª do `A2-m4` passa a ser a `A1-15`, já desbloqueada para quem a fez: o A2 M4 pode aparecer aberto para um aluno do A1 (**conferir e corrigir no código antes de mover**); (3) **Teste de Nível A1** (`A1-final`): deixa de sortear perguntas de saúde; quem passa nele não marca mais a `A1-15`; (4) **tags e decks derivados**: a tag `nivel-A1` dos cartões vira `nivel-A2` e a de módulo muda (`shared/study-trail-model.js`); filtros "Nível A1" da Revisão e o Course Deck do nível deixam de incluir esses cartões; (5) **Desafios**: 7 linhas com `unitId: "A1-15"` em `fr/scripts/challenges_import/lote-a1-m4.json` (com `level: "A1"`, `moduleId: "A1-m4"`) e a expressão *Tu es malade ? Bon rétablissement !* do mesmo lote passam para `level: "A2"` e `moduleId: "A2-m4"` (dado de produção, pergunta 55); (6) **ditados do A1**: `d4` e o ditado guiado do `A1-m4` em `fr/dictations.js` usam *J'ai mal au ventre* / *Elle a mal au ventre*: reescrever sem saúde e rodar `check_dictation_vocab.py`; o lote de expressões (`lote-expressoes-80.json`: *avoir mal au ventre, avoir de la fièvre, se reposer*) precisa conferir em que nível está; (7) **cron**: `STUDY_ITEM_GATE` é por unidade e lição: regenerar (`scripts/gerar_mapa_cron.js`) e publicar o `notification-cron` de novo; (8) **texto**: título publicado "Corpo e saúde" muda (`DELIBERATE_PT_CHANGES` + camada en). Nenhuma outra unidade do A1 usa as palavras de saúde (conferido por script em `fr/content.js` com a camada pt-BR, 2026-10-19), além da `A1-g6` (que perde as frases de saúde na reescrita) |
+| Exercícios com palavra ainda não ensinada na posição nova | `A1-g8` (6 de 6), `A1-g5` (4 de 6), `A1-g3` (1), `A1-g7` (2 + 3 exemplos), `A1-g6` (2 de *savoir* saem; 5 reescritos para lazer e convites, 1 a revisar; 3 telas de exemplo reescritas; ver M9.2) | reescrever **antes** de mover; teste novo "exercício de gramática só com palavras vistas" (pergunta 25) |
 | Palavras novas em unidade já concluída | *quatre... neuf* na M1.3 | entram direto na Revisão sem cartão de apresentação (como o código faz hoje) ou tela "Novidades" (pergunta 14) |
 | Notas novas em unidade concluída | M1.1, M1.2, M1.3... | lâmpada mostra "nova" sem refazer lição (decidido, `14`) |
-| Desafios com `moduleId` antigo | ~36 linhas (`A1-4, 5, 8, 9, 10, 13, 16`) + "Complete a frase" da `A1-g9` que usam *être* | Staging antes; produção só com autorização (pergunta 55) |
-| Ditados por módulo | d1 a d6 escritos com os módulos antigos | re-hospedar cada um no módulo de que mais usa palavras, rodar `check_dictation_vocab.py`, escrever os que faltam |
+| Desafios com `moduleId` antigo | ~36 linhas (`A1-4, 5, 8, 9, 10, 13, 16`) + "Complete a frase" da `A1-g9` que usam *être* + as linhas da `A1-15`, que mudam também de nível (linha acima) | Staging antes; produção só com autorização (pergunta 55) |
+| Ditados por módulo | d1 a d6 escritos com os módulos antigos (o `d4` e o guiado do `A1-m4` usam saúde, que saiu do A1) | re-hospedar cada um no módulo de que mais usa palavras, rodar `check_dictation_vocab.py`, escrever os que faltam |
 | Notificação conta errado | cron só conhece o mapa novo depois do deploy | deploy do `notification-cron` v29 já feito em produção; falta só repetir se o mapa do cron mudar |
 | "Módulo N" e porcentagem mudam | todos os alunos | aviso no Mural (pergunta 5) |
 | Texto em português que muda | títulos e telas de unidades publicadas | `DELIBERATE_PT_CHANGES` + camada en (site em inglês sem português) |
 | Par *s'il vous plaît / s'il te plaît* | cartão `A1-1-v6` | correção do mesmo sentido mantém a chave; se virar dois cartões, o informal é item novo (pergunta 10) |
 
 Movimentos de unidades **existentes** (todos sem mudança de id e sem cartão excluído): `A1-4`, `A1-g2`, `A1-5`, `A1-8`, `A1-9`, `A1-g4`, `A1-10`,
-`A1-g10`, `A1-11`, `A1-12`, `A1-13`, `A1-14`, `A1-g5`, `A1-15`, `A1-g6`, `A1-16`, `A1-17`, `A1-18`, `A1-g7`, `A1-g8`, `A1-19`, `A1-20`, `A1-g9`.
+`A1-g10`, `A1-11`, `A1-12`, `A1-13`, `A1-14`, `A1-g5`, `A1-15` (**muda de nível: vai para o A2 M4.1**), `A1-g6`, `A1-16`, `A1-17`, `A1-18`, `A1-g7`, `A1-g8`, `A1-19`, `A1-20`, `A1-g9`.
 Unidades novas do A1 (ids novos): `A1-21`, `A1-22`, `A1-24` a `A1-34`, `A1-g17` a `A1-g24` (a `A1-g21`, proposta para os demonstrativos, não foi usada). A `A1-23` nunca foi publicada:
 sai sem risco e o id não se reaproveita.
 Palavras que mudam de unidade: *zéro, combien* (`A1-3` → `A1-28`, mais tarde); *trente... soixante* (`A1-10` → `A1-21`, mais cedo);
 *soixante-dix... cent* (`A1-10` → `A1-28`); *le médecin* (`A1-15` → `A1-22`, mais cedo); *la pharmacie* (`A1-15` → `A1-30`, mais cedo); *l'hôpital* (`A1-8` → `A1-30`);
-*le lit, la table, la chaise, le canapé, la lampe* (`A1-18` → `A1-34`); *rouge, jaune, blanc* (`A1-16` → `A1-29`). Ordem de execução: Etapa 0b completa → texto e gramática
+*le lit, la table, la chaise, le canapé, la lampe* (`A1-18` → `A1-34`); *la porte, la fenêtre* (`A1-17` → `A1-34`, decisão 113); *rouge, jaune, blanc* (`A1-16` → `A1-29`); *gentil* (`A1-16` → `A2-35`, outro nível, mais tarde). Ordem de execução: Etapa 0b completa → texto e gramática
 (Etapa 1) → reorganização do A1 (Etapa 2, com o `ops.json` revisável pela dona) → unidades novas (Etapa 3).
+
+**Mover unidade de nível: o que as ferramentas permitem hoje e o que falta** (conferido em 2026-10-19):
+- `fr/curriculum-changes.js` tem `STUDY_KEY_MERGES`, `STUDY_RETIRED_KEYS`, `UNIT_MERGES`, `MODULE_MERGES`, `RETIRED_LESSON_IDS` e `CURRICULUM_VERSION`. **Não há
+  operação de "mudar de nível"**, e ela não é necessária para o FSRS: o nível de uma unidade é o campo `level` dela em `fr/content.js` e a lista `unitIds` do módulo;
+  trocar os dois (e a camada pt-BR / en) já leva a `A1-15` para o A2 sem mudar id.
+- `scripts/lib/course-content.js` só monta o conteúdo com a camada (`load('fr')`); não faz operações.
+- **Falta implementar:** (1) a operação "mover unidade de nível" no `fr/scripts/curriculo_ops.js` (Etapa 0b parte 2, ainda não existe), que mude `level` e `unitIds`
+  juntos, atualize as camadas, regenere o mapa do cron e rode os validadores; (2) correção de `moduleUnlocked` para um módulo cuja 1ª unidade já estava desbloqueada
+  em outro nível (o A2 M4 não pode abrir para um aluno do A1); (3) teste em `tests/curriculo-ids/` "unidade que muda de nível" (conclusão mantida, A1 concluído sem ela,
+  A2 M4 fechado para quem não chegou ao A2, cartões e tags); (4) a mudança de `level` e `moduleId` dos Desafios e a reescrita dos ditados do A1 (dados de produção,
+  só com autorização, pergunta 55).
 
 ---
 
@@ -466,10 +510,12 @@ Origem entre colchetes, para conferência.
 > da unidade vira "Revisão da unidade"). Elas continuam listadas abaixo, marcadas **[RESPONDIDA]**, para o histórico.
 > **Respondidas depois (decisões 52 a 112, até a divisão do A1 em 10 módulos)**: 3, 5 a 9, 19 a 35 (menos a 34). As posições citadas nas perguntas foram
 > atualizadas para o mapa de 10 módulos. Perguntas novas: 58 e 59.
+> **Respondidas na rodada de 9 módulos (decisões 113 a 123)**: 34, 58 e 59 (decisões 113 a 115) e 41 (decisão 120); 37 e 43 em parte (decisões 121 e 122).
+> As posições citadas nas perguntas foram atualizadas para o A1 de 9 módulos.
 
 **Mapa e critérios gerais**
-1. [RESPONDIDA: sim (decisão 40); revista para 10 módulos e 56 unidades (decisões 102 e 112)] **Aprovar o mapa final do A1** (8 módulos, 48 unidades, seção 3.1)? *Recomendo sim.* Impacto: libera a Etapa 2 (reorganização) depois da 0b. [`08` 1, `04` 8]
-2. **Aprovar o mapa final do A2** (10 módulos, 57 unidades, seção 3.2)? *Recomendo sim.* Impacto: nenhum para o progresso (tudo inédito); define a ordem de construção m1 → m2 → m9. [`04` 16, `08` 13 a 16, `10` 18 a 26 em bloco; detalhes nas perguntas 35 a 43]
+1. [RESPONDIDA: sim (decisão 40); revista para 10 módulos e 56 unidades (decisões 102 e 112) e depois para 9 módulos e 55 unidades (decisão 116)] **Aprovar o mapa final do A1** (8 módulos, 48 unidades, seção 3.1)? *Recomendo sim.* Impacto: libera a Etapa 2 (reorganização) depois da 0b. [`08` 1, `04` 8]
+2. **Aprovar o mapa final do A2** (10 módulos, 58 unidades com a `A1-15` vinda do A1, seção 3.2; M1, M4, M7 e M8 já reordenados pelas decisões 120 a 123)? *Recomendo sim.* Impacto: quase nenhum para o progresso (inédito, menos a `A1-15` e *gentil*, seção 5); define a ordem de construção m1 → m2 → m9. [`04` 16, `08` 13 a 16, `10` 18 a 26 em bloco; detalhes nas perguntas 35 a 43]
 3. [RESPONDIDA: A1, na M7.6 (decisão 105)] **Comparativo no A1** (M7.6) e superlativo no A2 (M3.4)? *Recomendo A1.* Impacto: se for A2, a `A2-g7` sobe para o A2 M1, que usa a comparação. [`04` 9, `08` 17]
 4. **Títulos funcionais** em todas as unidades e módulos publicados (os 6 módulos, 18 unidades de vocabulário e 8 gramáticas com "hoje" na seção 3.1)? *Recomendo sim* (regra 2). Impacto: muda texto que o aluno já viu; `DELIBERATE_PT_CHANGES` e camada en. [`08` 11]
 5. [RESPONDIDA: sim (decisão 43); ids na seção 5 (decisão 112)] **Ids de módulo por sobreposição** (seção 5) e **aviso no Mural** sobre a nova numeração? *Recomendo sim.* Impacto: Ponto de verificação aprovado cai num módulo cujas unidades o aluno fez. [`08` 10, `04` 10]
@@ -490,41 +536,41 @@ Origem entre colchetes, para conferência.
 **A1 M2**
 17. [RESPONDIDA: sim] **Artigos e plural (`A1-g17`, id novo) como M2.2**, intercalada (família → artigos → descrever → possessivos)? *Recomendo sim.* Impacto: M2 com 7 unidades e 4 gramáticas. [`09` 1 a 3]
 18. [RESPONDIDA: não numa gramática só; ver `16`] **"Perguntar e negar" numa gramática só** (sim ou não + *ne... pas* + *pas de*), palavras de pergunta em notas e sistema no A2 M9.4? *Recomendo sim.* Impacto: separar levaria o M2 a 8 unidades. [`10` 3, 4; `09` 4]
-19. [RESPONDIDA: sim, depois revista pela decisão 89: vão para o A2 M4.5] ***sympa* e *timide* como cartões na M2.3** (fica com 12)? *Recomendo sim.* Impacto: +2 cartões (A1 com 294); o resto do caráter fica no A2 M4.5. [`08` 6]
+19. [RESPONDIDA: sim, depois revista pela decisão 89: vão para o A2 "Descrever o caráter", hoje A2 M1.3 (decisão 120)] ***sympa* e *timide* como cartões na M2.3** (fica com 12)? *Recomendo sim.* Impacto: +2 cartões (A1 com 294); o resto do caráter fica no A2 M1.3. [`08` 6]
 20. [RESPONDIDA: sim] **Frases do `A1-3` com família** (*J'ai deux frères et trois sœurs.*, *Quel est l'âge de ton père ?*) vão para a M2.1 com a chave? *Recomendo sim.* Impacto: frase muda de unidade sem perder progresso. [`09` 7]
 21. [RESPONDIDA: sim] ***c'est / il est* como nota na M2.1** e não tela da `A1-g2`? *Recomendo sim.* Impacto: `A1-g2` fica como está publicada. [`10` 5]
 22. [RESPONDIDA: sim] **"O gênero não segue o português"**: tela na `A1-g17` (*l'âge*) e nota na M5.3 (*le pantalon, la robe*)? *Recomendo sim.* [`09` 5]
 23. [RESPONDIDA: sim, depois revista: a unidade saiu e as palavras se espalharam (decisões 106 e 110)] **Dados pessoais e soletrar (`A1-23`) no M7** (ficha de hotel), não no M2? *Recomendo sim*: é o 1º ponto com meses, números até 1000 e telefone. [`08` 4]
 
-**A1 M3 a M10**
+**A1 M3 a M9**
 24. [RESPONDIDA: sim] **Dividir a `A1-g3`**: *-er* na M3.2 (com *on* só na tabela) e pronominais na nova `A1-g18` (M3.4)? *Recomendo sim.* Impacto: quem concluiu a `A1-g3` vê a `A1-g18` aberta, não concluída. [`10` 6, 7]
 25. [RESPONDIDA: sim] **Reescrever os exercícios** das gramáticas publicadas que mudam de lugar (`A1-g8`, `g5`, `g3`, `g7`, `g6`) e criar o teste "exercício só com palavras vistas"? *Recomendo sim.* Impacto: texto publicado muda. [`10` 17]
-26. [RESPONDIDA: sim] ***tôt, tard* na M3.1; *pas encore, après* na M10.2**; *hier* fundido; *récemment* movida para o A2 M2.5? *Recomendo sim.* Impacto: uma fusão (regra FSRS) e uma palavra que sai do A1 com o progresso intacto. [`08` 8, `04` 25]
+26. [RESPONDIDA: sim] ***tôt, tard* na M3.1; *pas encore, après* na M9.4**; *hier* fundido; *récemment* movida para o A2 M2.5? *Recomendo sim.* Impacto: uma fusão (regra FSRS) e uma palavra que sai do A1 com o progresso intacto. [`08` 8, `04` 25]
 27. [RESPONDIDA: sim] **Módulo "Comer e beber"** (M4), *adorer* na M4.1, partitivos antes do restaurante e *faire / prendre* no M4.6? *Recomendo sim.* Impacto: `A1-g5` muda de módulo. [`08` 5, 9; `10` 8, 9]
-28. [RESPONDIDA: sim] **Tônicos com preposição**: nota breve na M4.1 (*Pour moi, un café*) e nota na M10.4 (*avec moi, chez toi*), sem tela de gramática no A1 e sem *sans*? *Recomendo sim.* Impacto: fecha a regra 9. [`09` 27, 28; `11` 17]
+28. [RESPONDIDA: sim] **Tônicos com preposição**: nota breve na M4.1 (*Pour moi, un café*) e nota na M9.3 (*avec moi, chez toi*), sem tela de gramática no A1 e sem *sans*? *Recomendo sim.* Impacto: fecha a regra 9. [`09` 27, 28; `11` 17]
 29. [RESPONDIDA: ver decisões 82 e 83] **Demonstrativos como nota na M5.3** (sem exercício) ou gramática pequena `A1-g21`? *Recomendo nota.* Impacto: *ce* x *cette* sem prática com correção no A1. [`10` 10]
 30. [RESPONDIDA: ver decisões 82 e 83] **`A1-g15` só com masculino, feminino e plural** do adjetivo? *Recomendo sim.* [`10` 11]
 31. [RESPONDIDA: sim (decisões 93 e 95)] **Imperativo em gramática própria** (`A1-g19`, M6.2), `A1-g6` só com modais e *il faut*, e *savoir* fora do A1? *Recomendo sim.* Impacto: `A1-g6` publicada perde 2 exercícios. [`10` 14, 15]
-32. [RESPONDIDA: sim (decisão 95)] ***le médecin* para a M1.6** e *se reposer* em "Dizer onde dói"? *Recomendo sim.* Impacto: palavra vai para mais cedo (`released` protege). [`08` 7]
+32. [RESPONDIDA: sim (decisão 95); "Dizer onde dói" foi depois para o A2 M4.1 (decisão 116)] ***le médecin* para a M1.6** e *se reposer* em "Dizer onde dói"? *Recomendo sim.* Impacto: palavra vai para mais cedo (`released` protege). [`08` 7]
 33. [RESPONDIDA: fica no módulo Viagem e férias, M8.4, depois de "Férias e hotel" (decisões 102 e 112)] **Futuro próximo (`A1-g20`) no módulo da casa e das férias**, depois de "Férias e hotel", ou no de lazer, antes do passé composé? *Recomendo o das férias.* [`10` 13]
-34. ***Il fait zéro degré dehors.*** (sai do `A1-3`) vai para a M8.5 ("Falar do tempo e das estações") ou é aposentada? *Recomendo M8.5.* [`09` 8]
-35. [RESPONDIDA: sim; hoje é o M10 (decisão 112)] **Ordem do módulo de lazer**: Lazer → Contar → (g) PC *avoir* → Convites → (g) PC *être*? *Recomendo sim.* [`10` 16]
+34. [RESPONDIDA: M8.5 (decisão 115)] ***Il fait zéro degré dehors.*** (sai do `A1-3`) vai para a M8.5 ("Falar do tempo e das estações") ou é aposentada? *Recomendo M8.5.* [`09` 8]
+35. [RESPONDIDA: sim (decisão 35); depois revista: hoje é o M9, na ordem Lazer → (g) modais → Convites → Contar → (g) PC *avoir* → (g) PC *être* (decisão 118)] **Ordem do módulo de lazer**: Lazer → Contar → (g) PC *avoir* → Convites → (g) PC *être*? *Recomendo sim.* [`10` 16]
 
 **A2**
 36. **COD (`A2-g9`) no M2** com a concordância do particípio, e `A2-g4` aposentada? *Recomendo sim.* [`08` 13]
-37. **Momentos da ação no M9.2** e **negação complexa desfeita** (*ne... plus* nota M1.3; *rien, personne, aucun* na `A2-g21`; *ne... que* nota M5.1)? *Recomendo sim.* [`08` 14, `10` 18]
+37. [EM PARTE: a negação complexa ficou como gramática `A2-g21` "Gramática: negação complexa", última do A2 M8 (M8.7), com *ne... plus* em nota na M1.4 e *ne... que* na M5.1 (`16`; decisão 122). Falta só:] **Momentos da ação no M9.2**? *Recomendo sim.* [`08` 14, `10` 18]
 38. **Gramáticas que viram notas**: `A2-g5` só com marcadores de tempo; `A2-g14` → notas M5.5; `A2-g18` → 2 notas no `A2-21`; opinião → nota M10.1? *Recomendo sim.* [`10` 19, 22, 24]
 39. **Ajustes de foco**: `A2-g7` no superlativo (com *lequel* indo para a `A2-g8`); condicional só com *devoir, vouloir, pouvoir, aimer*; `A2-g22` "Perguntar em três registros"? *Recomendo sim.* [`10` 20, 21]
 40. **Ordem do A2 M6** (futuro → línguas → *savoir* x *connaître* → projetos → *quand* e *si*) e do M7 (discurso indireto logo depois de "Procurar emprego")? *Recomendo sim.* [`10` 23, 25]
-41. **Unidade nova "Descrever o caráter"** (`A2-35`, 12 cartões, confiança média na lista) em M4.5? *Recomendo sim.* [`08` 15]
+41. [RESPONDIDA: sim, mas no A2 M1.3, para comparar como a pessoa era e como é (decisão 120); a lista de palavras ainda é para a dona revisar] **Unidade nova "Descrever o caráter"** (`A2-35`, 12 cartões, confiança média na lista) em M4.5? *Recomendo sim.* [`08` 15]
 42. ***Il faut que* no fim** (M10.5) e gerúndio depois da francofonia? *Recomendo sim.* [`08` 16]
-43. **Palavras do A2**: *le vol (roubo)* → *le portefeuille*; *cordialement* para M3.3 e *je t'embrasse* na M9.3; revisar juntos `A2-21` e `A2-26`? *Recomendo sim.* [`08` 7.7]
+43. [EM PARTE: `A2-21` e `A2-26` revistos juntos, a `A2-21` vem logo depois da `A2-26` no M8 (decisão 121). Falta:] **Palavras do A2**: *le vol (roubo)* → *le portefeuille*; *cordialement* para M3.3 e *je t'embrasse* na M9.3? *Recomendo sim.* [`08` 7.7]
 44. **Ids `A2-g14`, `A2-g18`, `A2-g23` aposentados sem uso**, como o `A2-g4`? *Recomendo sim.* [`10` 26]
 
 **Notas e pronúncia (rodada 3 do `14`)**
 45. **Quem escreve e revisa os V/F de cada nota nova?** *Recomendo:* escrevo junto com a nota (`needs_review`, com confiança), o agente `revisor-conteudo` revisa, e a senhora aprova em lote com a lista antes e depois. Impacto: ritmo de publicação. [`14` pendente]
 46. **Notas do A2**: mesmo padrão do A1 (sem teto, uma ideia, breve na 1ª vez), **gíria familiar** (*le boulot, crevé, carrément*) só a partir do A2 e culturais do `04-v1` 8.2? *Recomendo sim.* Impacto: define a escrita das ~16 notas já previstas e das novas. [`14` pendente]
-47. **Pronúncia nos módulos 2 a 8**: com a regra 8, cada som do `06` (*tu* x *tout*, terminações mudas, *r*, nasais, *deux* x *heure*, feminino que se ouve, presente x PC) vira nota de pronúncia na unidade que o introduz, e só ganha lição "Pronúncia" quando houver pares para 6 a 8 exercícios (como na M1.7)? *Recomendo sim, decidindo unidade a unidade ao escrever.* Impacto: substitui o encaixe de sons por módulo do `08` (pergunta 18). [`08` 18, `06`]
+47. **Pronúncia nos módulos 2 a 9**: com a regra 8, cada som do `06` (*tu* x *tout*, terminações mudas, *r*, nasais, *deux* x *heure*, feminino que se ouve, presente x PC) vira nota de pronúncia na unidade que o introduz, e só ganha lição "Pronúncia" quando houver pares para 6 a 8 exercícios (como na M1.7)? *Recomendo sim, decidindo unidade a unidade ao escrever.* Impacto: substitui o encaixe de sons por módulo do `08` (pergunta 18). [`08` 18, `06`]
 
 **Padrão de feedback (`13`)**
 48. **Títulos do painel**: elogios sorteados no acerto; "Quase!" só para meio ponto em todo o site e "Não foi dessa vez" no erro? *Recomendo sim.* [`13` 1, 8]
@@ -536,14 +582,14 @@ Origem entre colchetes, para conferência.
 54. **Escopo do painel**: Conjugação mantém a grade e só troca a marcação; Desafios, Ditado e Revisão ficam para depois; exercício de clicar não repete "Você escolheu"; no zh, tom em âmbar e letra em vermelho? *Recomendo sim às quatro.* [`13` 10 a 13]
 
 **A1 com 10 módulos (2026-10-19)**
-58. **Destino dos 4 cartões publicados que saem da `A1-17`** (*la porte, la fenêtre, il y a, il n'y a pas de*), já que a M7.1 nova tem outra lista e a fórmula *il y a* vira a M7.3 (g)?
+58. [RESPONDIDA: decisão 113] **Destino dos 4 cartões publicados que saem da `A1-17`** (*la porte, la fenêtre, il y a, il n'y a pas de*), já que a M7.1 nova tem outra lista e a fórmula *il y a* vira a M7.3 (g)?
     *Recomendo:* *la porte, la fenêtre* na M7.4 "Móveis e objetos da casa" (fica com 10) e *il y a, il n'y a pas de* continuando como cartões na M7.1 (fica com 13; 4 lições + Revisão), que é
     onde o aluno os usa antes da gramática. Impacto: chave estável e `released` protegem o progresso; as notas N37 (*y'a*) e "*la fenêtre*: o *e* que some" vão junto com as palavras.
     Se nada for decidido, os 4 cartões não podem simplesmente sumir: iriam para o arquivo de aposentados. [decisões 105 e 110]
-59. **Nota *Allô ?*** (vinha da `A1-23`, que saiu): fica na M5.1, junto do telefone e do celular, ou sai? *Recomendo M5.1.* Impacto: só conteúdo (nota nova, ainda não escrita). [decisão 110]
+59. [RESPONDIDA: M5.1 (decisão 114)] **Nota *Allô ?*** (vinha da `A1-23`, que saiu): fica na M5.1, junto do telefone e do celular, ou sai? *Recomendo M5.1.* Impacto: só conteúdo (nota nova, ainda não escrita). [decisão 110]
 
 **Dados de produção (só com autorização)**
-55. **Atualizar o `moduleId` dos Desafios** (~36 linhas) e re-hospedar os ditados, Staging antes, junto com a publicação? *Recomendo sim.* Impacto: dado de produção. [`04` 21]
+55. **Atualizar o `moduleId` dos Desafios** (~36 linhas, + as da `A1-15`, que também mudam de `level` para A2) e re-hospedar os ditados (reescrevendo os que usam saúde), Staging antes, junto com a publicação? *Recomendo sim.* Impacto: dado de produção. [`04` 21]
 56. **Ler 3 saves reais anonimizados** (só leitura) para o teste da Etapa 0? *Recomendo autorizar.* Impacto: hoje os testes usam só saves simulados (`21`). [`04` 26]
 57. **Seguir com a Etapa 0b parte 2** (`curriculo_ops.js` + camadas por chave), que aguarda decisão? *Recomendo sim.* Impacto: pré-requisito de qualquer mudança de conteúdo deste mapa. [`22`, `04` 2.11]
 
@@ -558,7 +604,10 @@ Origem entre colchetes, para conferência.
 | **Teste de entonação no TTS do francês** | pendência técnica (`12` 11): a maquete usou a voz do navegador | antes de publicar a nota *Ça va ?* / *Ça va.* da M1.1, testar no laboratório de áudio do fr (`fr/scripts/audio_lab.py`) se o Chirp 3 HD sobe na pergunta e desce na afirmação; se não variar, usar frases-modelo gravadas ou ajustadas |
 | **Corretor de pronúncia (API)** | futuro (`12` 13) | avaliar quando chegar a hora: custo e se é Premium. Opção encontrada: Azure (fr-FR) com nota por som; equivalente do Google não confirmado (confiança média) |
 | **PLE e CELPE-Bras** | depois (app de português) | o mapa fr é o molde do pt (`04` 12): pt nasce com chave estável e camada por chave. Quando chegarem os livros de PLE e o material do Celpe-Bras, responder as 13 perguntas do `04-v1` 10.2 (ser x estar, pretérito perfeito cedo, *a gente*, imperativo da fala x norma...). O Celpe-Bras não certifica A1/A2 e é por tarefas integradas: inspira tarefas, não a escala |
-| Deploy do `notification-cron` com `STUDY_ITEM_GATE` | feito (v29 em produção) | repetir só se o mapa do cron mudar (`scripts/gerar_mapa_cron.js`) |
+| Deploy do `notification-cron` com `STUDY_ITEM_GATE` | feito (v29 em produção) | repetir só se o mapa do cron mudar (`scripts/gerar_mapa_cron.js`); a mudança de nível da `A1-15` muda o mapa |
+| **Auditoria pedagógica completa do A1 e do A2 antes da implementação real** | pendente (regra 11 do `15`; dona, 2026-10-19) | a cargo do agente `auditor-curricular` (`.claude/agents/auditor-curricular.md`): conferir unidade por unidade, na ordem final, que nada usa palavra ainda não ensinada e que nada do tema antigo sobrou nas unidades movidas (desta rodada: `A1-15`, `A1-32`, `A1-g6`, `A1-27`, `A1-20`, `A2-35`, `A2-21`, `A2-g21`, `A2-11`) |
+| **Mover unidade de nível** (`A1-15` → A2 M4.1) | decidido (`12` 116); falta implementar | operação no `curriculo_ops.js`, correção do desbloqueio do módulo, teste "unidade que muda de nível", Desafios e ditados (seção 5) |
+| Listas de palavras a revisar pela dona | abertas | M8.6 "Pedir ajuda" (`A1-32`), A2 M1.3 "Descrever o caráter" (`A2-35`), A2 M4.3 "Emergências" (`A2-11`), A2 M8.6 "Entender regras e avisos" (`A2-21`); e as propostas: frase *Désolée, je suis rentrée tard hier* da M9.3 para a M9.4; nota *depuis* da A2 M4.1; *J'ai perdu mon passeport* como fórmula na M8.6 |
 
 ---
 
@@ -581,22 +630,28 @@ Origem entre colchetes, para conferência.
 | 13 | N33: acrescentar "também se ouve *en vélo*" (`11`, confiança média) | ***à vélo* correto; *en vélo* comum mas incorreto** (alta, fonte a dona) | `14` |
 | 14 | Nota *Et lui ? Et elle ?* do `09` | **nomeia os tônicos e diz que *lui* ≠ *il*, *elle* igual** | `12` 27, 39 |
 | 15 | Painel preso embaixo só no celular (`13` recomendação 5) | **sempre preso ao pé, sem cobrir nada** | `12` 22 |
-| 16 | Posições das gramáticas e unidades do `08` (M2, M3, M4, M6, M7, M8 e A2) | **as do `10`** | `10` > `08`; ex.: *faire / prendre* M6.4 → M4.6, futuro próximo M6.2 → M7.5 (hoje M8.4, decisão 112) |
-| 17 | Totais: A1 44 / A2 60 (`08`) | **A1 48 / A2 57** (o A1 foi depois a 56 unidades, decisão 112) | `10` |
+| 16 | Posições das gramáticas e unidades do `08` (M2, M3, M4, M6, M7, M8 e A2) | **as do `10`**, depois as das decisões 112 e 116 a 123 | `10` > `08`; ex.: *faire / prendre* M6.4 → M4.6, futuro próximo M6.2 → M7.5 (hoje M8.4, decisão 112) |
+| 17 | Totais: A1 44 / A2 60 (`08`) | **A1 48 / A2 57** (depois A1 56, decisão 112; hoje **A1 55 / A2 58**, decisão 116) | `10` |
 | 18 | `A2-g23` negação complexa: movida para A2 M1.4 (`08`) | **desfeita** (notas + `A2-g21`) | `10` |
 | 19 | Títulos: `08` 7.5 renomeia só 4 unidades, mas o mapa 6.1 do `08` usa títulos funcionais em todas | **títulos funcionais em todas**, a confirmar na pergunta 4 | regra 2 do `15` |
 | 20 | Nota de instruções de aula na M1.1 (`08`) x tirar (`09`) | **fora do mapa**, a confirmar na pergunta 13 | `09` > `08` |
-| 21 | Tônicos com preposição: tela de gramática perto da M8.2 (`09`) x nota na M8.4 (`10`) | **nota na M8.4** (+ breve na M4.1; hoje M10.4), confirmada na pergunta 28 | `10` > `09`; regra 9 |
+| 21 | Tônicos com preposição: tela de gramática perto da M8.2 (`09`) x nota na M8.4 (`10`) | **nota na M8.4** (+ breve na M4.1; hoje M9.3), confirmada na pergunta 28 | `10` > `09`; regra 9 |
 | 22 | `04` v2 x `08` (ficha no M2, *adorer* no lazer, *tôt / tard* no passado, A1-3 "0 a 10", A1-28 "30 a 100", conjuntos A1-3 12 e A1-21 13) | **o `08`** (com as correções do `10`) | `08` > `04`; o `04` seções 3, 4.3, 5 e 11 já estavam superadas |
 | 23 | *Défis* ajustados por módulo (`08`, `09`, `10` 6) | **arquivados** | `12` 16; peças ficam como insumo (seção 7) |
+| 24 | Módulo "Saúde e conselhos" no A1 (M9, decisões 99, 102 e 112) | **sai do A1**: `A1-15` vai para o A2 M4.1; `A1-m10` apagado | `12` 116 |
+| 25 | "Pedir ajuda" como urgência médica (15, 112, 18) no módulo de saúde (decisão 99) | **ajuda na viagem com a polícia** (17, 112), A1 M8.6; *l'ambulance* vai para o A2 M4.3 | `12` 117 |
+| 26 | Modais no módulo de saúde (M9.3, decisão 99) e ordem Lazer → Contar → PC → Convites (decisão 35) | **M9.2, antes dos convites**; ordem Lazer → modais → Convites → Contar → PC *avoir* → PC *être* | `12` 118 |
+| 27 | "Descrever o caráter" no A2 M4.5, ao lado do esporte (`08`, decisão 89) | **A2 M1.3**, "antes e hoje" com o imperfeito | `12` 120 |
+| 28 | "Entender regras e avisos" no A2 M7 (trabalho) e "Alguém e ninguém" no A2 M8.6 | **A2 M8.6** (cidade) e **M8.7 "Gramática: negação complexa"** | `12` 121 e 122; `16` |
+| 29 | A2 M4.2 "Corpo e emergências" com *la gorge, la dent* | **A2 M4.3 "Emergências"**, só emergência médica, sem o que a `A1-15` ensina | `12` 123 |
 
 ---
 
 ## Resumo
 
-- Um mapa só: A1 com 10 módulos e 56 unidades (33 de vocabulário + 23 de gramática, 349 cartões, ~29h estimadas) e A2 com 10 módulos e 57 unidades (35 + 22,
-  421 palavras). Hoje o site tem 6 módulos e 30 unidades no A1 (204 palavras, 82 lições, 45 notas) e nenhum A2.
+- Um mapa só: A1 com 9 módulos e 55 unidades (32 de vocabulário + 23 de gramática, 339 cartões, ~28h15 estimadas) e A2 com 10 módulos e 58 unidades (36 + 22,
+  432 cartões: 421 novos + 11 da `A1-15`, que muda de nível). Hoje o site tem 6 módulos e 30 unidades no A1 (204 palavras, 82 lições, 45 notas) e nenhum A2.
 - Cada unidade com posição, função, gramática, vocabulário, notas (tipo e confiança) e o que muda; gramáticas corrigidas pelo `10` e notas
   movidas pelo `11`/`14`.
 - Progresso protegido pela Etapa 0 (0a e 0b parte 1 feitas; faltam `curriculo_ops.js`, camadas por chave e o deploy do cron).
-- 59 perguntas (as respondidas ficam marcadas, para o histórico); 23 conflitos resolvidos pela ordem `12` > `14` > `10` > `11` > `09` > `08` > `04`.
+- 59 perguntas (as respondidas ficam marcadas, para o histórico); 29 conflitos resolvidos pela ordem `12` > `14` > `10` > `11` > `09` > `08` > `04`.

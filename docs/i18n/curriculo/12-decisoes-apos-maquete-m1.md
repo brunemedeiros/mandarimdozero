@@ -250,3 +250,37 @@ maquete v2; **[padrão]** viram regra de interface; **[pendência]** ficam regis
 113. **Cartões que saem da `A1-17`**: *la porte, la fenêtre* vão para a M7.4 (móveis e objetos); *il y a, il n'y a pas de* ficam na M7.1; a M7.3 (gramática) sistematiza. As notas N37 (*y'a*) e "*la fenêtre*: o *e* que some" ficam na M7.1.
 114. **Nota *Allô ?*** fica na M5.1, junto do telefone.
 115. ***Il fait zéro degré dehors*** vai para a M8.5 (Falar do tempo e das estações).
+
+---
+
+# Décima terceira rodada (2026-10-19): A1 em 9 módulos, saúde no A2 e ajustes do A2
+
+116. **O módulo "Saúde e conselhos" sai do A1** (dona): o A1 passa a ter **9 módulos** (55 unidades: 32 de vocabulário + 23 de gramática, 339 cartões, ~28h15). O id
+     `A1-m10` nunca existiu em produção e é apagado do mapa. A unidade publicada **`A1-15` ("Dizer onde dói") muda de nível**: vira a **A2 M4.1 "Corpo e dores"**, com o
+     mesmo id e as mesmas chaves de cartão (*la tête, le ventre, la main, le pied, la gorge, la dent, malade, avoir mal, la fièvre, se sentir, se reposer*) e as notas N34,
+     N35, *Reposez-vous !*, *avoir mal au / à la / aux* e *depuis*. Riscos (conclusão, desbloqueio do módulo, Teste de Nível, tags, Desafios, ditados, cron) e o que falta
+     implementar: `08 v2` seção 5. Ids de módulo: `A1-m6` = Lazer, convites e passado (M9); `A1-m9` = Viagem e férias (M8).
+117. **"Pedir ajuda" (`A1-32`) vai para o A1 M8 "Viagem e férias", como a última unidade (M8.6)**, depois de "Clima e estações". A ligação é para a **polícia** (perdi o
+     passaporte, roubaram a bolsa; números 17 e 112), não para a urgência médica. Lista proposta, **a revisar pela dona**: *au secours, appeler, avoir besoin de, urgent,
+     vite, la police, perdu, le commissariat, l'aide* (sai *l'ambulance*, que vai para o A2 M4.3). M8 com 6 unidades (~3h05).
+118. **Modais e *il faut* (`A1-g6`) vão para o A1 M9 "Lazer, convites e passado"**, antes de "Convidar, aceitar, recusar e se desculpar". Ordem do M9: M9.1 Falar de lazer;
+     M9.2 Gramática: modais e *il faut*; M9.3 Convidar, aceitar, recusar e se desculpar; M9.4 Contar o que você fez; M9.5 Gramática: *passé composé* com *avoir*; M9.6 Gramática:
+     *passé composé* com *être* (~3h15; substitui a ordem da decisão 35). A gramática é **revisada para o novo contexto**: exemplos e exercícios sobre convites e lazer
+     (*Tu veux aller au cinéma ce week-end ? Je ne peux pas, mais je peux samedi prochain.*, *Tu dois voir ce film*, *Il faut réserver*), sem frases de saúde e sem *savoir*
+     (A2 M6.4); a tela de negação com modais (*Je ne peux pas venir*) fica nela. Telas e exercícios publicados que mudam: `08 v2` seção 3.1, M9.2.
+119. **Regra geral (dona): mover unidade = reavaliar as palavras e o conteúdo** para o novo módulo, ordem e tema, e dizer no mapa (coluna "Muda") o que foi trocado. Vale
+     para todas as unidades movidas desta rodada (é a regra 11 do `15`).
+120. **"Descrever o caráter" (`A2-35`) vai para o A2 M1 "Lembranças e fases da vida", como M1.3**, para comparar como a pessoa era antes (imperfeito + traços) e como é hoje
+     (*Petit, j'étais timide ; aujourd'hui, je suis plus sûr de moi.*). Ordem do M1: M1.1 Contar como era a infância; M1.2 Gramática: imperfeito; M1.3 Descrever o caráter
+     (antes e hoje); M1.4 Comparar antes e agora; M1.5 Contar as fases da vida. *gentil* (cartão publicado da `A1-16`), *sympa* e *timide* entram aqui; lista (*courageux,
+     patient, drôle, curieux, têtu...*, 12 a 14, confiança média) **a revisar pela dona**. Sai do M4 e não vai para o M9.
+121. **"Entender regras e avisos" (`A2-21`) vai do A2 M7 para o A2 M8**, depois de "Trânsito e carro", com as palavras revistas para a cidade (placas, interdições, avisos)
+     em vez de regras de trabalho. O A2 M7 fica com 4 unidades.
+122. **"Gramática: negação complexa" (`A2-g21`, antes "Alguém e ninguém") é a última unidade do A2 M8 (M8.7)**, depois de "Entender regras e avisos", porque ali
+     *ne... plus, rien, personne, aucun, que* e *ni... ni* já apareceram em notas e diálogos. M8: M8.1 Procurar moradia; M8.2 Dividir apartamento e vizinhos; M8.3 Gramática:
+     pronome *y*; M8.4 Serviços e papelada; M8.5 Trânsito e carro; M8.6 Entender regras e avisos; M8.7 Gramática: negação complexa.
+123. **A2 M4 reordenado**: M4.1 Corpo e dores (a `A1-15`, vinda do A1); M4.2 Na consulta (`A2-10`); M4.3 **Emergências** (`A2-11`, renomeada; só emergência médica:
+     *le bras, la jambe, le dos, les urgences, l'ambulance, le SAMU, grave, blessé...*, sem o que a `A1-15` já ensina); M4.4 Gramática: pronomes COI; M4.5 Esporte e
+     hábitos saudáveis; M4.6 Gramática: condicional dos conselhos. Tabela "Saúde: o que é do A1 e o que é do A2" no `08 v2` (seção 3.2).
+
+Pendência registrada junto (regra 11 do `15`): **auditoria pedagógica completa do A1 e do A2 antes da implementação real**, a cargo do agente `auditor-curricular`.
