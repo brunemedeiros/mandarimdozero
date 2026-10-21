@@ -324,7 +324,7 @@ Base: `auditoria/2026-10-19-a1-a2-rodada-saude-modais.md` (tabelas 1.1 e 1.2). A
      malade, le médecin, la pharmacie, avoir mal, la fièvre, se sentir*); *la gorge, la dent, se reposer* nunca foram publicados; *le médecin* e *la pharmacie* saem (ficam no A1,
      M1.6 e M6.3) → no A2 M4.1: **8 chaves antigas + 3 novas** (11). A unidade tem **3 lições + a lição final** (agora "Revisão da unidade"); `pe-doente-medico` e
      `farmacia-dor-febre` perdem palavras e são refeitas (`RETIRED_LESSON_IDS`). Corrige a decisão 116 ("mesmas chaves", "11 cartões") e a seção 5 do `08 v2`. A2: 9 cartões
-     já publicados (8 + *gentil*).
+     já publicados (8 + *gentil*) (corrigido pela 136: 10, com *récemment*).
 131. **M6.4 (`A1-g13`) ensina as contrações *au, aux* (à + le / les) pela primeira vez** (nenhuma gramática as ensina antes, porque a de países foi para a M8.2): "retomada"
      vira ensino completo (revisa a decisão 101). A versão grátis é a nota da M6.3 (*Je vais à la pharmacie, au parc*). A nota *en* x *à la* fica fixada na M6.3.
 132. **Conteúdo publicado que precisa de reescrita** (lista na seção 7 do `08 v2`): *gentil* e *sympa* no diálogo da M2.3 (`A1-16`), na `A1-g7` e no ditado `d5`; o diálogo da
@@ -332,8 +332,39 @@ Base: `auditoria/2026-10-19-a1-a2-rodada-saude-modais.md` (tabelas 1.1 e 1.2). A
      (hoje antes dos cartões); *Désolée, je suis rentrée tard hier* sai da M9.3 (PC) e vai para a M9.4.
 133. **Palavra repetida entre cartões = um cartão só**: *clair* tem cartão só na M5.4 (a M7.2 usa em frase e nota, "iluminado") e *le bureau* só na M1.6 (a M7.4 usa em frase e
      nota, "escrivaninha"); *la poste, la mairie, la banque, la police* e os números 112, 15 e 17 aparecem no A1 e no A2, e **o A2 não os reensina** como cartão novo (A2: 428
-     cartões, 419 novos). Regra 14 do `15`.
+     cartões, 419 novos; corrigido pela 136: 427, 417 novos + 10 publicados). Regra 14 do `15`.
 134. **A2: coluna "Versão grátis"** nas 22 gramáticas, com as posições propostas pela auditoria (tabela 1.2) para as 13 sem versão grátis e para as parciais. A **nota *depuis* da
      A2 M4.1 fica**: a `A2-g5` (M2.6) vem antes na ordem do mapa, mas é Premium; a versão grátis de *depuis / pendant* entra na M2.5, antes da gramática.
 135. **Auditoria**: o relatório de 2026-10-19 fica como **histórico**; depois desta rodada será rodada outra (`auditor-curricular`).
+
+---
+
+# Décima sexta rodada (2026-10-21): correções da auditoria da equidade
+
+Base: `auditoria/2026-10-21-a1-a2-rodada-equidade.md`. Aplicado em `08-mapa-final-a1-a2-v2.md`, `16`, `15`, `00` e no `CLAUDE.md` (estado do cron). Nada aplicado ao site.
+
+136. **Correções de rodada de auditoria sem decisão nova** (2026-10-21; só os achados que o relatório marca como "o editor corrige", aplicando regras e decisões já tomadas):
+     - **Versão grátis**: a A2 M4.1 não abriga mais a de *depuis* (a da M2.5 vem antes; a nota da M4.1 é retomada); *combien de* da M2.6 ganha a fala *Tu as combien de
+       frères ? J'ai deux frères.* no diálogo novo da M2.1; diálogos negativos posicionados na M3.1 (*Tu te lèves tôt ? Non, je ne me lève pas tôt.*, para a M3.4), M6.1
+       (*Ne tournez pas à gauche...*, para a M6.2) e M8.3 (*Tu vas réserver l'hôtel ? Non, je ne vais pas réserver l'hôtel.*, para a M8.4); procedência *Je viens des
+       États-Unis, d'Italie* na nota da M8.1 (para a M8.2); pronominal no PC *Ce matin, je me suis levée tôt.* na nota da M9.4 (para a M9.6); +1 linha *je l'ai perdue* na
+       A2 M2.3 e *-t-* na A2 M9.3. Os outros 44 ganchos foram conferidos: todos antes da gramática.
+     - **M1.2**: a nota breve da negação (*Tu es française ? Non, je ne suis pas française.*) e o diálogo, que estavam só no `16`, entram no `08 v2`.
+     - **Regra 14**: *en bois* sai da A2 M3.1 (pergunta 62 vira registro) e *se sentir* da lista da A2 M9.5 (só frase e nota); A2 com **427 cartões: 417 novos + 10 já
+       publicados** (*récemment*, `A1-20` → A2 M2.5, também muda de nível, como a `A1-15` e *gentil*; tags e decks derivados valem para ela).
+     - **Frases e notas fora do lugar**: *La main est blessée.* vai com a chave para a A2 M4.3; exemplo da nota *ne... plus* (A2 M1.4) sem *fumer*; 10 frases publicadas
+       que ficaram antes do cartão ganham destino (M6.1 → M6.3 e M7.2; M2.3 e M4.1 → M5.4; M3.1 → M7.1; M2.5 → M8.1 e M8.3; A1 M9.4 → A2 M2.5; M7.1 e M6.5 → M7.5) e
+       *Le vélo est plus rapide en ville.* é trocada (chave nova); exemplo da M3.7 *Je travaille toujours le matin.* (sem *lire*); M9.2 sem *prochain* nem *voir*; N43 e a
+       fala *On ne sait pas encore !* da M9.1 sem *savoir* nem *pas encore* (fala nova *On sort ce week-end ?*; N43 com *Je peux pas*; a A2 M6.4 perde esse gancho);
+       diálogo da A2 M4.1 só com dores e corpo (a consulta fica na M4.2); exemplos publicados da `A1-g3` e da `A1-g4` reescritos.
+     - **Notas repetidas no A2**: opinião completa só na M3.5; M5.1 sem nota de opinião; M10.1 nota breve só com *je pense que*; M8.2 sem *chaque* (cartão do A1 M3.6).
+     - **Progresso**: 19 lições publicadas perdem palavras (não 3), listadas na seção 5 do `08 v2` com o destino e o efeito no `STUDY_ITEM_GATE`; Desafios da `A1-16`
+       (*gentille*, *pull rouge*, *Ça te va bien !*, *Ça te plaît ?*) entram na lista de reescrita da 132; tabela de re-hospedagem dos ditados por módulo (proposta, pergunta 55).
+     - **Contagens e estado**: tempos dos cabeçalhos de M2 (3h25), M6 (3h05) e M9 (3h20) iguais à seção 1; linha das lições (M2.3 é aberto, M1.2 tem a lição de pronúncia);
+       M8.2 e M8.3 descrevem o que muda; "Consigo" do M5 diz "reconhecer" celular e e-mail; gatilho da nota *courriel* sem o cartão *le mail*; `notification-cron`
+       **v29 publicado em produção (2026-10-19, pela dona, painel)** em todo o `08 v2` e no `CLAUDE.md`.
+137. **Pendências de decisão da dona** (da mesma auditoria; o mapa fica como está nesses pontos; lista completa na seção 7 do `08 v2`):
+     (1) regra 13 no A2 e exceções do A1 (M1.2, M2.3; M3.1, M3.3, M4.1 como "fechadas"); (2) *trouver* como cartão na M8.6 (pergunta 61); (3) nota da M6.3 com 15 e 112;
+     (4) carga do A1 M1 e M3 (e M9) e do A2 M8 e M10 (pergunta 63); (5) conclusão com paywall: desbloqueio da unidade seguinte e Teste de Nível (pergunta 60). Também:
+     M7.3 com dois conceitos, regra "palavra de frase", A2 M1.3 x M1.4, cadeado da gramática na trilha.
 

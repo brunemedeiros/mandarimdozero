@@ -32,8 +32,10 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
     - Hoje não há bloqueio de gramática no código (auditoria de 2026-10-19): tratar isto como regra de produto até a implementação.
 
 13. **Conjunto aberto: no máximo 10 palavras por unidade** (dona, 2026-10-19/21, decisões 45 e 129). O excedente vira **nota de vocabulário** na mesma unidade (como "Outros
-    materiais"). Só conjunto fechado (números, dias, meses, horas) passa de 10, com 4 lições + Revisão da unidade.
+    materiais"). Só conjunto fechado (números, dias, meses, horas) passa de 10, com 4 lições + Revisão da unidade. Em aberto com a dona (decisão 137): se vale para o A2
+    e as exceções do A1 (M1.2 11, M2.3 12; M3.1, M3.3 e M4.1 chamadas de "fechadas").
 
 14. **Uma palavra, um cartão** (dona, decisão 133): palavra que já é cartão numa unidade aparece nas outras só em frase ou nota, também entre A1 e A2 (o A2 não reensina
     *la poste, la mairie, la banque, la police* nem os números 15, 17 e 112). Mesma forma com sentido novo (*le bureau*: escritório x escrivaninha; *clair*: cor x iluminado)
-    entra como frase e nota na 2ª unidade, sem cartão novo, salvo decisão da dona.
+    entra como frase e nota na 2ª unidade, sem cartão novo, salvo decisão da dona. Aplicações sem decisão nova (decisão 136): *en bois* no A2 M3.1 (*le bois* é do A1 M5.4) e
+    *se sentir* no A2 M9.5 (cartão da A2 M4.1) ficam só em frase e nota.
