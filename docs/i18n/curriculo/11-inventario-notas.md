@@ -277,7 +277,7 @@ Confiança do autor da proposta quando registrada. "Gatilho" com frase = ainda n
 | M6.3 (`A1-14`) | Bicicletas compartilhadas | C costume | *le vélo* | `04-v1` | alta |
 | M6.3 | *J'y vais en métro* (fórmula com *y*) | E | | `04-v1` 27 (ou M7.4) | |
 | M6.5 (`A1-15`) | *Reposez-vous !* | E | | `10` | |
-| M6.5 | Farmácia: cruz verde, 15 e 112 | C costume | *la pharmacie* | `04-v1` | alta |
+| M6.5 | Farmácia: cruz verde (os números de emergência foram redistribuídos: 17 e 112 na A1 M8.6; 15 e 18 na A2 M4.3; ver `08` v2, decisão 141) | C costume | *la pharmacie* | `04-v1` | alta |
 | M6.5 | *depuis* como fórmula | E | | `04-v1` | |
 | M7.1 (`A1-17`) | *très / super / hyper* | R informal | | `08` | |
 | M7.1 | *C'est une grande maison* x *La maison est grande* | E | frase | `10` | |

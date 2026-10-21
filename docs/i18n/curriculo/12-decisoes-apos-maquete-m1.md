@@ -408,3 +408,5 @@ Aplicado em `08-mapa-final-a1-a2-v2.md` (seções 1, 2.1, 3.1, 3.2, 4.2, 5, 6, 7
 146. **Próxima etapa.** O mapa A1 + A2 aguarda a **aprovação final da dona**. Depois: a implementação (Etapa 0b parte 2: `fr/scripts/curriculo_ops.js`, camadas por chave,
      operações de unidade que muda de nível, regra de conclusão e desbloqueio por plano) e a escrita do conteúdo **módulo a módulo** (notas grátis, diálogos, frases, telas),
      cada lote com pt-BR e en só depois de aprovado (decisão 81).
+147. **A1 M2.3 com 11 cartões** (dona, 2026-10-21): *brun* volta como cartão e nenhuma outra palavra sai (exceção à regra 13); *laid* fica na nota "Outros traços". M2 passa a 31 cartões e o A1 a 344.
+148. **Revisão do A2 módulo a módulo** (dona), com as listas de palavras trazidas no corpo da conversa, não por documento. Começa pelo M1.
