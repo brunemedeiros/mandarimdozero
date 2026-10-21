@@ -472,6 +472,11 @@ function reviewSessionFilterSummary(){
 // "Estudar tudo" (todos os Decks juntos) fica embaixo da tabela de Decks; as
 // contagens por Deck já estão na tabela, então aqui não há números. Aviso
 // quando um filtro de sessão (origem/tag, em "Configurar") está ativo.
+// Com a faixa dos cartões da professora na tela, "Estudar tudo" vira "Estudar a trilha": esse botão não inclui os cartões dela.
+function classBannerVisible(){
+  try { return classReviewTodayCount() > 0; } catch (e) { return false; }
+}
+
 function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
@@ -492,7 +497,7 @@ function renderReviewTodayWidget(){
       </div>
       <div class="review-today-go">
         ${trueCount ? `<button class="btn btn-secondary review-short-btn" id="review-short-btn" title="${escapeHTML(t('review.today.shortTitle'))}">${escapeHTML(t('review.today.short'))}</button>
-        <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">${escapeHTML(t('review.today.studyAll', { n: trueCount }))}</button>`
+        <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">${escapeHTML(t(classBannerVisible() ? 'review.today.studyPath' : 'review.today.studyAll', { n: trueCount }))}</button>`
         : `<span class="review-today-done">${escapeHTML(t('review.today.upToDate'))}</span>`}
       </div>
     </div>

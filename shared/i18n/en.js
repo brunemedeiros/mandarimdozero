@@ -947,6 +947,7 @@ window.I18N_CATALOG['en'] = {
   'review.today.shortTitle': 'Short session: the cards you miss most and the ones waiting longest come first', // ALTA -- Etapa 4: aprovado pela dona
   'review.today.short': '⏱ 5 minutes', // ALTA -- Revisão nova
   'review.today.studyAll': 'Study all ({n})', // ALTA -- Revisão nova
+  'review.today.studyPath': 'Study the path ({n})', // ALTA
   'review.today.upToDate': 'You\'re all caught up for today.', // ALTA -- Revisão nova
   'review.today.speedSplitAria': 'New {new}, Learning {learning}, Review {review}', // ALTA -- Revisão nova
   'review.backToDeck': '← Back to Deck', // ALTA -- Revisão nova

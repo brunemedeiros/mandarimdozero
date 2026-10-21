@@ -42,6 +42,8 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       words.forEach((w, i) => { const row = { id: 900 + i, teacher_id: 'A', student_id: 'S1', language_app_key: APP_KEY, status: 'active', revision: 0, note: '', tags: [], front: 'x', back_trans: 'y', card_generation_mode: 'normal', deck_id: null, fields: [
         { id: 'a', lang: 'pt', role: null, content: { value: 'palavra ' + (i + 1) }, audio: null, image: null, pinyinFieldId: null }, { id: 'b', lang: target, role: null, content: { value: w }, audio: null, image: null, pinyinFieldId: null }] };
         buildEngineCardsFromRow(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' }).forEach(c => STATE.cards.push(c)); });
+      const past = Date.now() - 86400000;
+      STATE.cards.filter(c => c.origin === 'study').slice(0, 12).forEach(c => Object.assign(c, { state: 'review', reps: 3, fsrsReps: 3, stability: 6, difficulty: 5, lastReview: past - 6 * 86400000, due: past, interval: 6 }));
       switchTab('review'); return classReviewTodayCount();
     }, [lang]);
     await page.waitForTimeout(300);
@@ -49,6 +51,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     const rv = await ev(() => { const b = document.getElementById('class-review-banner'), w = document.getElementById('review-today-widget'); return { has: !!b, txt: b ? b.textContent : '', before: !!b && !!(b.compareDocumentPosition(w) & Node.DOCUMENT_POSITION_FOLLOWING), btn: b ? b.querySelector('.crb-cta').offsetHeight : 0, ov: document.documentElement.scrollWidth <= window.innerWidth + 1 }; });
     L('Revisão: faixa com o número certo, acima do resumo, botão de 44px, sem rolagem lateral', rv.has && rv.txt.includes(String(n)) && rv.before && rv.btn >= 44 && rv.ov, rv);
     await shot('revisao');
+    L('Revisão: com a faixa, o botão geral vira "Estudar a trilha"', await ev(() => { const b = document.getElementById('review-study-all-btn'); return !!b && b.textContent.trim().startsWith(t('review.today.studyPath', { n: 0 }).replace(/\s*\(0\)$/, '')); }));
     await page.click('#class-review-banner .crb-cta');
     await page.waitForFunction(() => STATE.reviewSessionClassReview === true, null, { timeout: 5000 });
     L('Revisão: "Revisar agora" abre a sessão só com cartões da professora', await ev(() => STATE.reviewQueue.length > 0 && STATE.reviewQueue.every(c => c.origin === 'teacher')));
@@ -56,6 +59,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     await page.waitForTimeout(400);
     const tr = await ev(() => { const row = document.querySelector('.trail-continue-row'); if (!row) return null; const [a, b] = [...row.children].map(e => e.getBoundingClientRect()); return { kids: row.children.length, sameRow: Math.abs(a.top - b.top) < 4, stacked: b.top >= a.bottom - 1, txt: row.textContent, ov: document.documentElement.scrollWidth <= window.innerWidth + 1, btn: row.querySelector('.tc-teacher .tc-cta').offsetHeight }; });
     L('Estudo: "Continue de onde parou" e a faixa da professora na mesma linha (celular: uma abaixo da outra)', tr && tr.kids === 2 && (width >= 900 ? tr.sameRow : tr.stacked), tr);
+    L('celular: o botão de cada caixa fica embaixo do texto, nas duas', width >= 900 || await ev(() => [...document.querySelectorAll('.trail-continue-row .trail-continue')].every(c => c.querySelector('.tc-cta').getBoundingClientRect().top >= c.querySelector('.tc-info').getBoundingClientRect().bottom - 1)));
     L('Estudo: faixa com o número certo, botão de 44px, sem rolagem lateral', tr && tr.txt.includes(String(n)) && tr.btn >= 44 && tr.ov, tr);
     await shot('estudo');
     await page.click('.trail-continue-row .tc-teacher .tc-cta');

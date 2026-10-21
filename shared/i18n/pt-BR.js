@@ -963,6 +963,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'review.today.shortTitle': 'Sessão curta: primeiro os cartões que você mais erra e os que esperam há mais tempo',
   'review.today.short': '⏱ 5 minutos',
   'review.today.studyAll': 'Estudar tudo ({n})',
+  'review.today.studyPath': 'Estudar a trilha ({n})',
   'review.today.upToDate': 'Você está em dia por hoje.',
   'review.today.speedSplitAria': 'Novo {new}, Aprendendo {learning}, Revisar {review}',
   'review.backToDeck': '← Voltar ao Deck',

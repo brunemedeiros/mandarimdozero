@@ -258,3 +258,5 @@
 .trail-continue-row{ grid-column:1 / -1; display:flex; gap:12px; flex-wrap:wrap; align-items:stretch; margin-bottom:18px; }
 .trail-continue-row .trail-continue{ flex:1 1 300px; margin-bottom:0; grid-column:auto; }
 @media (min-width: 900px){ .trail-continue-row.tc-sticky{ position:sticky; top:8px; z-index:5; } }
+/* Celular/tablet: nas duas caixas da linha, o botão fica numa linha própria, embaixo do texto */
+@media (max-width: 899px){ .trail-continue-row .trail-continue .tc-info{ flex:1 1 100%; } }
