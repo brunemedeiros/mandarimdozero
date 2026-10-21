@@ -79,5 +79,7 @@ function mountBankRequestMenu(){
   b.type = 'button'; b.id = 'rq-open'; b.className = 'rq-open'; b.textContent = '⋯';
   b.setAttribute('aria-haspopup', 'dialog'); b.setAttribute('aria-expanded', 'false'); b.setAttribute('aria-label', t('reqChange.menuAria'));
   b.addEventListener('click', rqOpenMenu);
-  host.appendChild(b);
+  // Dentro da linha do progresso (à direita do "6 / 13"), para nunca cobrir o contador; sem a linha, fica no canto.
+  const row = host.querySelector('.review-progress');
+  if (row){ b.classList.add('in-row'); row.appendChild(b); } else host.appendChild(b);
 }
