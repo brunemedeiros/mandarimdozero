@@ -947,6 +947,7 @@ window.I18N_CATALOG['en'] = {
   'review.today.shortTitle': 'Short session: the cards you miss most and the ones waiting longest come first', // ALTA -- Etapa 4: aprovado pela dona
   'review.today.short': '⏱ 5 minutes', // ALTA -- Revisão nova
   'review.today.studyAll': 'Study all ({n})', // ALTA -- Revisão nova
+  'review.today.studyPath': 'Study the path ({n})', // ALTA
   'review.today.upToDate': 'You\'re all caught up for today.', // ALTA -- Revisão nova
   'review.today.speedSplitAria': 'New {new}, Learning {learning}, Review {review}', // ALTA -- Revisão nova
   'review.backToDeck': '← Back to Deck', // ALTA -- Revisão nova
@@ -3763,6 +3764,12 @@ window.I18N_CATALOG['en'] = {
   'trail.continue.eyebrowDone': 'Your path', // ALTA -- "Path", escolha da dona (2026-10-19)
   'trail.continue.allDone': 'You\'ve completed the whole Study Path 🎉', // ALTA -- "Study Path", escolha da dona (2026-10-19)
   'trail.continue.lessonOf': 'lesson {i} of {n}', // ALTA
+  'classBanner.title': { one: '{n} card from your teacher today', other: '{n} cards from your teacher today' }, // ALTA
+  'classBanner.titleShort': { one: '{n} card today', other: '{n} cards today' }, // ALTA
+  'classBanner.eyebrow': 'From your teacher', // ALTA
+  'classBanner.sub': 'From your latest classes', // ALTA
+  'classBanner.subReview': 'From your latest classes. A few minutes keeps everything fresh.', // ALTA
+  'classBanner.cta': 'Review now ({n})', // ALTA
   'trail.continue.eyebrowResume': 'Pick up where you left off', // ALTA
   'trail.continue.eyebrowStart': 'Start here', // ALTA
   'trail.moduleReview.title': 'Module review', // ALTA

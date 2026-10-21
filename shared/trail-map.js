@@ -150,14 +150,15 @@ function buildTrailViewToggle(storageKey, onChange){
 // No modo Mapa nunca fica fixo (o painel lateral usa o mesmo espaço).
 function watchTrailContinueCard(card){
   if (!card || !card.isConnected || typeof IntersectionObserver === 'undefined') return;
-  const grid = card.parentElement;
+  const stickyEl = card.closest('.trail-continue-row') || card; // linha com a faixa da professora, se houver
+  const grid = stickyEl.parentElement;
   if (!grid || grid.querySelector('.trail-map')) return;
   const target = grid.querySelector('.unit-block.current');
   if (!target) return;
   if (card._tcObserver) card._tcObserver.disconnect();
   const obs = new IntersectionObserver(entries => {
     if (!card.isConnected){ obs.disconnect(); return; }
-    card.classList.toggle('tc-sticky', !entries[0].isIntersecting);
+    stickyEl.classList.toggle('tc-sticky', !entries[0].isIntersecting);
   });
   card._tcObserver = obs;
   obs.observe(target);
