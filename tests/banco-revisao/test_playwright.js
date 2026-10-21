@@ -692,6 +692,8 @@ const BANK_STUB = (who, appKey) => {
         STATE.reviewIndex = STATE.reviewQueue.findIndex(c => String(c.rowId) === '991'); STATE.reviewCardState = null; renderReviewView();
       });
       L('cartão da professora tem o botão ⋯', await ev(() => !!document.getElementById('rq-open') && document.getElementById('rq-open').offsetWidth >= 44));
+      L('botão ⋯ não cobre o contador "N / total" nem a barra de progresso', await ev(() => { const b = document.getElementById('rq-open').getBoundingClientRect(); return ['.review-progress-count', '.review-progress-bar'].every(sel => { const r = document.querySelector(sel).getBoundingClientRect(); return b.right <= r.left + 0.5 || b.left >= r.right - 0.5 || b.bottom <= r.top + 0.5 || b.top >= r.bottom - 0.5; }); }));
+      await shot('aluna-botao');
       await page.click('#rq-open');
       await page.waitForSelector('#rq-pop .rq-opt');
       const opts = await ev(() => [...document.querySelectorAll('#rq-pop .rq-opt')].map(b => { const r = b.getBoundingClientRect(), cs = getComputedStyle(b); return { top: r.top, bottom: r.bottom, h: r.height, bw: parseFloat(cs.borderTopWidth), bs: cs.borderTopStyle, txt: b.textContent.replace(/\s+/g, ' ').trim() }; }));
