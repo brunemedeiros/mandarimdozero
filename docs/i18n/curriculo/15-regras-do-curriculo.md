@@ -37,10 +37,12 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
 13. **Limite de palavras por unidade** (dona, decisões 45, 129 e 139). O excedente vira **nota de vocabulário** na mesma unidade (como "Outros materiais").
     - **A1**: conjunto aberto com **no máximo 10** palavras. Exceções aceitas como conjuntos naturais (decisão 139): M1.2 (11, por causa de *le prénom*), M3.1 (12, rotina),
       M3.3 (11, dias) e M4.1 (11, comida). Conjunto fechado (números, dias, meses, horas) pode passar de 10, com 4 lições + Revisão da unidade. A M2.3 (aparência) foi
-      cortada para 10 (*laid, brun* em nota).
-    - **A2**: **no máximo 12** palavras por unidade (a M1.3 "Descrever o caráter" caiu de 13 para 12).
+      cortada para 10 (*laid, brun* em nota) e voltou a **11** com *brun* (decisão 147, exceção aceita pela dona; *laid* fica na nota).
+    - **A2**: **no máximo 12** palavras por unidade (a "Descrever o caráter", hoje M1.4 pela decisão 154, caiu de 13 para 12).
 
 14. **Uma palavra, um cartão** (dona, decisão 133): palavra que já é cartão numa unidade aparece nas outras só em frase ou nota, também entre A1 e A2 (o A2 não reensina
     *la poste, la mairie, la banque, la police* nem os números 17 e 112; o 15 e o 18 só entram no A2 M4.3, decisão 141). Mesma forma com sentido novo (*le bureau*: escritório x escrivaninha; *clair*: cor x iluminado)
     entra como frase e nota na 2ª unidade, sem cartão novo, salvo decisão da dona (confirmado pela dona, decisão 144). Aplicações sem decisão nova (decisão 136): *en bois* no A2 M3.1 (*le bois* é do A1 M5.4) e
-    *se sentir* no A2 M9.5 (cartão da A2 M4.1) ficam só em frase e nota.
+    *se sentir* no A2 M9.5 (cartão da A2 M4.1) ficam só em frase e nota. Decisões 152 a 156 (2026-10-21): *le verre* tem um cartão só (A1 M4.5, "copo"; "vidro" e
+    *en verre* em nota e frase na A1 M5.4); *d'habitude* (A1 M3.6) sai da A2 M1.1 (entra *le goûter*); *calme, bruyant, moderne, ancien* (A1 M7.2) não ganham cartão
+    na A2 M1.3, só frase e diálogo; *sérieux* tem cartão só na A2 M1.4 (a A2 M7.2 usa em frase). Achados ainda sem decisão: `08 v2` seção 7, "Palavras repetidas no A2".

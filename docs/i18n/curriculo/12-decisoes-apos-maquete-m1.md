@@ -410,3 +410,38 @@ Aplicado em `08-mapa-final-a1-a2-v2.md` (seções 1, 2.1, 3.1, 3.2, 4.2, 5, 6, 7
      cada lote com pt-BR e en só depois de aprovado (decisão 81).
 147. **A1 M2.3 com 11 cartões** (dona, 2026-10-21): *brun* volta como cartão e nenhuma outra palavra sai (exceção à regra 13); *laid* fica na nota "Outros traços". M2 passa a 31 cartões e o A1 a 344.
 148. **Revisão do A2 módulo a módulo** (dona), com as listas de palavras trazidas no corpo da conversa, não por documento. Começa pelo M1.
+
+---
+
+# Décima oitava rodada (2026-10-21): ajustes do A1 e revisão do A2 M1
+
+Base: respostas da dona no corpo da conversa (decisão 148). Aplicado em `08-mapa-final-a1-a2-v2.md` (seções 1, 3.1, 3.2, 4, 5, 6, 7 e 8), `15` (regras 13 e 14), `16` e `00`.
+Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovados pela dona.
+
+149. **A1 M2.3 "Descrever a aparência"**: na nota de vocabulário "Outros traços" sai *les lunettes* e entra ***beau / belle*** (formas *beau, bel, belle*); *joli* continua
+     cartão. A M2.3 continua com 11 cartões (decisão 147).
+150. **Erro de digitação "une fois par *semana*"**: o certo é "une fois par ***semaine***" (francês). Conferido por busca em `08`, `12`, `15`, `16` e `00`: nenhuma
+     ocorrência de "par semana"; todos os documentos já trazem *une fois par semaine* (o erro estava só na conversa).
+151. **Nota nova na A1 M3.6 "Frequência"** sobre *chaque* e os intervalos (Exp, alta; fonte: a dona; faz parte da versão grátis de frequência): *chaque* = "cada" +
+     substantivo no **singular** (*chaque jour* = *tous les jours*, *chaque semaine*); "a cada dois meses" = ***tous les deux mois*** (não *chaque deux mois*, que não é a
+     formulação natural); "uma vez a cada dois meses" = *une fois tous les deux mois*; "duas vezes por mês" = *deux fois par mois*; a frequência usa *par* (*une fois par
+     semaine*). O cartão *chaque* continua e a nota o acompanha. Texto só depois, aprovado pela dona.
+152. ***le verre*** continua **um cartão só** (A1 M4.5, "copo"). O sentido "vidro" entra só em nota e frase na A1 M5.4 (*le verre* = vidro; *en verre*, dentro da nota
+     *en* + material), sem cartão novo (regra 14).
+153. **A2 M1.1 "Contar como era a infância"**: nota nova (Real, alta, breve, gancho *le copain / la copine*): *copain / copine* = amigo(a), mas *mon copain / ma copine*
+     (e muitas vezes *un copain* falando de um casal) costuma indicar namorado(a), conforme o contexto; para ser claro, *mon petit ami / ma petite amie*; *mon ami(e)* é
+     mais neutro. Texto só depois, aprovado. Na lista, *d'habitude* (já é cartão da A1 M3.6) dá lugar a ***le goûter*** (o lanche da tarde das crianças francesas), que
+     fica registrado como candidato a nota cultural breve (Cult, alta).
+154. **Ordem do A2 M1 (aceita)**: M1.1 Contar como era a infância; M1.2 Gramática: imperfeito; **M1.3 Comparar antes e agora** (`A2-2`, com a nota do *ne... plus*);
+     **M1.4 Descrever o caráter (antes e hoje)** (`A2-35`, que já usa *avant, maintenant, à l'époque*, ensinados na M1.3); M1.5 Contar as fases da vida. Revisa a ordem
+     da decisão 120. A versão grátis do *ne... plus* (para a negação complexa, A2 M8.6) passa da M1.4 para a M1.3; o caráter passa a ser a M1.4 em todas as referências
+     (`08 v2`, `15`, `16`, `00`). Resolve o ponto "A2 M1.3 x M1.4" que ficara para a nova rodada da auditoria.
+155. **Palavras do A2 M1.3 "Comparar antes e agora" (`A2-2`)**: *calme, bruyant, moderne, ancien* **não ganham cartão novo** (já são cartões da A1 M7.2, mesmo sentido;
+     regra 14) e continuam nas frases e no diálogo (revisão natural). A unidade fica com 12: *la campagne, le village, le bruit, la vie, changer, avant, maintenant,
+     à l'époque* + ***le quartier, la circulation, la nature, les gens*** (proposta a revisar pela dona; sem *tranquille*, sinônimo redundante de *calme*). Na conferência
+     da regra 14 (seção 7 do `08 v2`), as três primeiras novas já estão nas listas do `04` de outras unidades do A2 (*le quartier* na M8.1, *la circulation* na M8.4,
+     *la nature* na M10.4): achado para a dona decidir.
+156. ***sérieux*** fica **só na A2 M1.4** (caráter); a A2 M7.2 "Procurar emprego" usa em frase, sem cartão (fica com 11). A2 M1.1 (com *le goûter*), M1.4 (caráter,
+     lista de 12) e M1.5 **aprovadas como estão**. Totais: A2 com **425 cartões** (415 novos + 10 publicados); A1 com **344** (decisão 147); tempos do A2 M1 sem mudança
+     (~3h05, 48 cartões). A conferência das demais listas do A2 contra o A1 e entre si (regra 14) ficou só como achados, sem decisão: `08 v2` seção 7, linha "Palavras
+     repetidas no A2".

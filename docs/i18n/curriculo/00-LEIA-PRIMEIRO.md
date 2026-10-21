@@ -28,7 +28,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 ## Atualização 2026-10-19
 
-- A1 com **9 módulos** (decisões 116 a 123 no `12`): a saúde sai do A1 (`A1-15` vira A2 M4.1), "Pedir ajuda" vai para Viagem (M8.6, polícia), os modais vão para Lazer (M9.2). A2: "Descrever o caráter" no M1.3, regras e avisos e negação complexa no fim do M8.
+- A1 com **9 módulos** (decisões 116 a 123 no `12`): a saúde sai do A1 (`A1-15` vira A2 M4.1), "Pedir ajuda" vai para Viagem (M8.6, polícia), os modais vão para Lazer (M9.2). A2: "Descrever o caráter" no M1.3 (hoje M1.4, decisão 154), regras e avisos e negação complexa no fim do M8.
 - Regras vivas do currículo: `15-regras-do-curriculo.md` (regra 11: mover unidade = revisar o conteúdo e rodar o `auditor-curricular`). Negação e perguntas no A1: `16`.
 
 ## Atualização 2026-10-21
@@ -52,3 +52,10 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   M8 3h30, M9 3h30, M10 3h55).
 - **Próxima etapa (decisão 146)**: o mapa A1 + A2 aguarda a aprovação final da dona; depois, a Etapa 0b parte 2 (`curriculo_ops.js`, camadas por chave, unidade que
   muda de nível, conclusão e desbloqueio por plano) e o conteúdo módulo a módulo, com pt-BR e en depois de aprovado.
+- **Decisões 147 a 156 no `12`** (2026-10-21): A1 M2.3 com 11 cartões (*brun* volta) e a nota "Outros traços" com *beau / belle* no lugar de *les lunettes*; nota nova de
+  *chaque* e dos intervalos (*tous les deux mois*, *deux fois par mois*) na A1 M3.6; *le verre* com um cartão só (A1 M4.5, "copo"; "vidro" em nota na M5.4);
+  revisão do A2 começou pelo M1: ordem nova (**M1.3 Comparar antes e agora, M1.4 Descrever o caráter**; a nota *ne... plus* fica na M1.3), *le goûter* no lugar de
+  *d'habitude* e nota *copain / copine* na M1.1, listas da M1.1, M1.4 e M1.5 aprovadas, M1.3 sem *calme, bruyant, moderne, ancien* (cartões do A1) e com 4 palavras novas
+  (proposta), *sérieux* só na M1.4. Na conferência, "une fois par semaine" já estava certo em todos os documentos (decisão 150).
+- **Totais depois das decisões 147 a 156**: A1 com **344 cartões** (M2 31); A2 com **425 cartões** (415 novos + 10 publicados; a A2 M7.2 fica com 11 sem *sérieux*);
+  tempos sem mudança (A2 M1 ~3h05). Palavras repetidas que ainda restam no A2 (achados, sem decisão): `08 v2` seção 7.
