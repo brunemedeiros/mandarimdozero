@@ -163,6 +163,32 @@ function unitCardCounts(unitId){
   return { total, learned, dueForReview, totalCards: pool.length };
 }
 
+// Faixa "cartões da sua professora para hoje" (decisão da autora, 2026-10-21): deixa a aba Aluno > Revisão
+// menos escondida. Só existe quando há cartões da professora para hoje (mesmo número do +N da aba Aluno).
+// variant 'review': faixa própria no topo da Revisão; 'trail': caixa menor ao lado do "Continue de onde parou".
+function buildClassReviewBanner(variant){
+  let n = 0;
+  try { n = classReviewTodayCount(); } catch (e) { n = 0; }
+  if (!n) return null;
+  const el = document.createElement('div');
+  const title = tp('classBanner.title', n === 1 ? 1 : 2, { n });
+  if (variant === 'trail'){
+    el.className = 'trail-continue tc-teacher';
+    const short = tp('classBanner.titleShort', n === 1 ? 1 : 2, { n });
+    el.innerHTML = `<div class="tc-info"><div class="tc-eyebrow">${escapeHTML(t('classBanner.eyebrow'))}</div><div class="tc-title">${escapeHTML(short)}</div><div class="tc-sub">${escapeHTML(t('classBanner.sub'))}</div></div>
+      <button type="button" class="btn btn-primary tc-cta">${escapeHTML(t('classBanner.cta', { n }))}</button>`;
+    el.querySelector('.tc-cta').addEventListener('click', () => startClassReviewSession());
+    return el;
+  }
+  el.className = 'class-review-banner';
+  el.setAttribute('role', 'region');
+  el.setAttribute('aria-label', title);
+  el.innerHTML = `<div class="crb-ico" aria-hidden="true">👩‍🏫</div><div class="crb-txt"><strong>${escapeHTML(title)}</strong><span>${escapeHTML(t('classBanner.subReview'))}</span></div>
+    <button type="button" class="btn btn-primary crb-cta">${escapeHTML(t('classBanner.cta', { n }))}</button>`;
+  el.querySelector('.crb-cta').addEventListener('click', () => startClassReviewSession());
+  return el;
+}
+
 // Fase 2 da trilha: cartão "Continuar" no topo. Fonte única = nextTrailItem
 // (shared/trail-state-model.js); aqui só desenha. A métrica mostrada é a
 // oficial: lições concluídas.
@@ -190,6 +216,15 @@ function buildTrailContinueCard(){
     <button type="button" class="btn btn-primary tc-cta">${started ? t('common.continue') : t('common.start')}</button>
   `;
   card.querySelector('.tc-cta').addEventListener('click', () => openUnitDetail(u.id));
+  const teacher = buildClassReviewBanner('trail');
+  if (teacher){
+    // Na mesma linha (quebra para baixo em tela estreita); o "fixo no topo" vale para a linha toda.
+    const row = document.createElement('div');
+    row.className = 'trail-continue-row';
+    row.append(card, teacher);
+    setTimeout(() => watchTrailContinueCard(card), 0);
+    return row;
+  }
   setTimeout(() => watchTrailContinueCard(card), 0);
   return card;
 }
@@ -502,6 +537,13 @@ function renderReviewModeSelect(){
   const rec = reviewRecords();
 
   renderReviewTodayWidget();
+  const widgetEl = document.getElementById('review-today-widget');
+  if (widgetEl){
+    const old = document.getElementById('class-review-banner');
+    if (old) old.remove();
+    const banner = buildClassReviewBanner('review');
+    if (banner){ banner.id = 'class-review-banner'; widgetEl.parentNode.insertBefore(banner, widgetEl); }
+  }
   // Navegador de Decks (shared/deck-browser.js): tabela Deck | Novo | Aprendendo | Revisar.
   if (typeof renderReviewDeckTable === 'function') renderReviewDeckTable();
 

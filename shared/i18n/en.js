@@ -3763,6 +3763,12 @@ window.I18N_CATALOG['en'] = {
   'trail.continue.eyebrowDone': 'Your path', // ALTA -- "Path", escolha da dona (2026-10-19)
   'trail.continue.allDone': 'You\'ve completed the whole Study Path 🎉', // ALTA -- "Study Path", escolha da dona (2026-10-19)
   'trail.continue.lessonOf': 'lesson {i} of {n}', // ALTA
+  'classBanner.title': { one: '{n} card from your teacher today', other: '{n} cards from your teacher today' }, // ALTA
+  'classBanner.titleShort': { one: '{n} card today', other: '{n} cards today' }, // ALTA
+  'classBanner.eyebrow': 'From your teacher', // ALTA
+  'classBanner.sub': 'From your latest classes', // ALTA
+  'classBanner.subReview': 'From your latest classes. A few minutes keeps everything fresh.', // ALTA
+  'classBanner.cta': 'Review now ({n})', // ALTA
   'trail.continue.eyebrowResume': 'Pick up where you left off', // ALTA
   'trail.continue.eyebrowStart': 'Start here', // ALTA
   'trail.moduleReview.title': 'Module review', // ALTA
