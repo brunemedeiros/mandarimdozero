@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 56 unidades, 344 cartões) e do A2 (10 módulos, 58 unidades, 427 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 56 unidades, 343 cartões) e do A2 (10 módulos, 58 unidades, 426 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
@@ -39,7 +39,16 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   máximo 10 palavras, correção da `A1-15` (8 chaves publicadas + 3 novas), contrações *au, aux* ensinadas pela 1ª vez na M6.4, lista do conteúdo publicado a reescrever e
   "uma palavra, um cartão" entre A1 e A2.
 - Regras novas no `15`: 13 (conjunto aberto: no máximo 10 palavras) e 14 (uma palavra, um cartão); a 12 ganhou a opção A e a coluna "Versão grátis".
-- Totais: A1 com 9 módulos, 56 unidades (33 + 23), 344 cartões, ~28h50; A2 com 10 módulos, 58 unidades (36 + 22), 427 cartões (417 novos + 10 publicados), ~33h10 (1ª estimativa).
+- Totais: A1 com 9 módulos, 56 unidades (33 + 23), 344 cartões, ~28h50; A2 com 10 módulos, 58 unidades (36 + 22), 427 cartões (417 novos + 10 publicados), ~33h10 (1ª estimativa). *Superados pelos totais das decisões 138 a 146, abaixo.*
 - Auditoria `auditoria/2026-10-21-a1-a2-rodada-equidade.md`: os achados do editor foram corrigidos no `08 v2`, `16`, `15` e `12` (decisão 136: versões grátis posicionadas,
   frases publicadas que vinham antes do cartão com destino, 19 lições que perdem palavras, ditados re-hospedados em proposta, *en bois* sem cartão, *récemment* no A2,
-  cron v29 publicado). O que é da dona está em "Pendências de decisão da dona" na seção 7 do `08 v2` (decisão 137).
+  cron v29 publicado). O que era da dona ficou listado na decisão 137 e foi respondido pelas decisões 138 a 146.
+- Decisões 138 a 146 no `12` (a dona aprovou todas as recomendações da auditoria da equidade; as pendências da 137 estão respondidas): a gramática Premium é pulada na
+  cadeia de desbloqueio do gratuito, com cadeado (a implementar); regra 13 por nível (A1: 10, com exceções M1.2, M3.1, M3.3, M4.1; M2.3 cortada para 10; A2: 12);
+  *trouver* com cartão na M8.6; números de emergência por função (M6.3 só a cruz verde; 17 e 112 na M8.6; 15 e 18 no A2 M4.3); "Serviços e papelada" no A2 M7,
+  que vira "Trabalho, dinheiro e papelada"; regras 12 e 14 confirmadas.
+- **Totais novos**: A1 com 9 módulos, 56 unidades (33 + 23), **343 cartões**, ~28h45 (M1 3h35, M2 3h15, M3 3h25, M4 3h15, M5 2h55, M6 3h05, M7 2h50, M8 3h05, M9 3h20);
+  A2 com 10 módulos, 58 unidades (36 + 22), **426 cartões** (416 novos + 10 publicados), ~33h10 (M1 3h05, M2 3h15, M3 3h15, M4 3h30, M5 2h50, M6 3h15, M7 3h05,
+  M8 3h30, M9 3h30, M10 3h55).
+- **Próxima etapa (decisão 146)**: o mapa A1 + A2 aguarda a aprovação final da dona; depois, a Etapa 0b parte 2 (`curriculo_ops.js`, camadas por chave, unidade que
+  muda de nível, conclusão e desbloqueio por plano) e o conteúdo módulo a módulo, com pt-BR e en depois de aprovado.

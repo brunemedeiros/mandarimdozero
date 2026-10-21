@@ -319,7 +319,7 @@ Base: `auditoria/2026-10-19-a1-a2-rodada-saude-modais.md` (tabelas 1.1 e 1.2). A
      il n'y a pas de* ficam na M7.1; a nota "*la fenêtre*: o *e* que some" vai **com o cartão para a M7.4** (revisa a 113 nesse ponto); as frases publicadas *La porte est fermée
      à clé.* e *La fenêtre donne sur le jardin.* vão para a M7.4 e *La cuisine est très propre.*, *Le salon est confortable.* para a M7.2. Cortes propostos (pergunta 64 do
      `08 v2`): M5.1 *en espèces, le portable, le mail* em nota; M5.4 *le cuir* em "Outros materiais"; M7.1 *le studio, l'immeuble, le jardin* em nota; M8.1 *le Japon* em
-     "Outros países". Contagens: M7 34, M8 39, A1 344.
+     "Outros países". Contagens: M7 34, M8 39, A1 344 (depois, pelas 139 e 140: M2 30, M8 40, A1 343; e M3.1, M3.3, M4.1 são exceções aceitas como conjuntos naturais, não "fechados").
 130. **Correção da `A1-15`** (a unidade publicada "Corpo e saúde"; "Dizer onde dói" no mapa de 10 módulos): são **10 cartões publicados** (*la tête, le ventre, la main, le pied,
      malade, le médecin, la pharmacie, avoir mal, la fièvre, se sentir*); *la gorge, la dent, se reposer* nunca foram publicados; *le médecin* e *la pharmacie* saem (ficam no A1,
      M1.6 e M6.3) → no A2 M4.1: **8 chaves antigas + 3 novas** (11). A unidade tem **3 lições + a lição final** (agora "Revisão da unidade"); `pe-doente-medico` e
@@ -332,7 +332,7 @@ Base: `auditoria/2026-10-19-a1-a2-rodada-saude-modais.md` (tabelas 1.1 e 1.2). A
      (hoje antes dos cartões); *Désolée, je suis rentrée tard hier* sai da M9.3 (PC) e vai para a M9.4.
 133. **Palavra repetida entre cartões = um cartão só**: *clair* tem cartão só na M5.4 (a M7.2 usa em frase e nota, "iluminado") e *le bureau* só na M1.6 (a M7.4 usa em frase e
      nota, "escrivaninha"); *la poste, la mairie, la banque, la police* e os números 112, 15 e 17 aparecem no A1 e no A2, e **o A2 não os reensina** como cartão novo (A2: 428
-     cartões, 419 novos; corrigido pela 136: 427, 417 novos + 10 publicados). Regra 14 do `15`.
+     cartões, 419 novos; corrigido pela 136: 427, 417 novos + 10 publicados; pela 139: 426, 416 + 10). Regra 14 do `15`. Números de emergência corrigidos pela 141: o A1 ensina 17 e 112 (M8.6), o A2 ensina 15 e 18 (M4.3).
 134. **A2: coluna "Versão grátis"** nas 22 gramáticas, com as posições propostas pela auditoria (tabela 1.2) para as 13 sem versão grátis e para as parciais. A **nota *depuis* da
      A2 M4.1 fica**: a `A2-g5` (M2.6) vem antes na ordem do mapa, mas é Premium; a versão grátis de *depuis / pendant* entra na M2.5, antes da gramática.
 135. **Auditoria**: o relatório de 2026-10-19 fica como **histórico**; depois desta rodada será rodada outra (`auditor-curricular`).
@@ -363,8 +363,48 @@ Base: `auditoria/2026-10-21-a1-a2-rodada-equidade.md`. Aplicado em `08-mapa-fina
      - **Contagens e estado**: tempos dos cabeçalhos de M2 (3h25), M6 (3h05) e M9 (3h20) iguais à seção 1; linha das lições (M2.3 é aberto, M1.2 tem a lição de pronúncia);
        M8.2 e M8.3 descrevem o que muda; "Consigo" do M5 diz "reconhecer" celular e e-mail; gatilho da nota *courriel* sem o cartão *le mail*; `notification-cron`
        **v29 publicado em produção (2026-10-19, pela dona, painel)** em todo o `08 v2` e no `CLAUDE.md`.
-137. **Pendências de decisão da dona** (da mesma auditoria; o mapa fica como está nesses pontos; lista completa na seção 7 do `08 v2`):
+137. **Pendências de decisão da dona** (da mesma auditoria; **todas respondidas em 2026-10-21 pelas decisões 138 a 146**, não são mais pendências; texto original abaixo, para o histórico):
      (1) regra 13 no A2 e exceções do A1 (M1.2, M2.3; M3.1, M3.3, M4.1 como "fechadas"); (2) *trouver* como cartão na M8.6 (pergunta 61); (3) nota da M6.3 com 15 e 112;
      (4) carga do A1 M1 e M3 (e M9) e do A2 M8 e M10 (pergunta 63); (5) conclusão com paywall: desbloqueio da unidade seguinte e Teste de Nível (pergunta 60). Também:
      M7.3 com dois conceitos, regra "palavra de frase", A2 M1.3 x M1.4, cadeado da gramática na trilha.
 
+---
+
+# Décima sétima rodada (2026-10-21): respostas da dona à auditoria da equidade
+
+Base: `auditoria/2026-10-21-a1-a2-rodada-equidade.md` e as pendências da decisão 137. A dona aprovou **todas** as recomendações do relatório e do editor anterior.
+Aplicado em `08-mapa-final-a1-a2-v2.md` (seções 1, 2.1, 3.1, 3.2, 4.2, 5, 6, 7 e 8), `15` (regras 12, 13 e 14), `16` e `00`. Nada aplicado ao site.
+
+138. **Cadeia de desbloqueio com paywall: opção A** (completa a 125; responde a pergunta 60). Para o aluno gratuito, a unidade de gramática (Premium) é **pulada**
+     automaticamente na cadeia de desbloqueio: ele passa dela para a unidade seguinte, a gramática aparece com **cadeado** e a trilha continua. Vai para a lista de
+     implementação (`08 v2` seções 5 e 7): `markUnitCompleted` e o desbloqueio da próxima unidade (hoje só abre a `idx+1`), `moduleCompleted` / `levelCompleted` em
+     função pura (`shared/core/`), `moduleProgressPct` sem a gramática para o gratuito, Ponto de verificação por plano (o Teste de Nível é montado com os Pontos de
+     verificação, então fica resolvido por plano junto) e teste. **Não implementar nesta fase.**
+139. **Regra 13 (limite de palavras), por nível.** **A1**: no máximo 10 por unidade aberta; exceções aceitas como conjuntos naturais: M1.2 (11, por causa de *le prénom*),
+     M3.1 (12), M3.3 (11) e M4.1 (11); conjuntos fechados (números, dias, meses) continuam podendo passar de 10. **A M2.3 é cortada para 10**: *laid* e *brun* vão para a
+     nota de vocabulário "Outros traços" (proposta a revisar pela dona; *brun* = cabelo escuro, junto de *châtain* e *roux*); a M2.3 passa a 3 lições + Revisão da unidade;
+     M2 com 30 cartões e ~3h15. **A2**: limite de **12** por unidade; a A2 M1.3 "Descrever o caráter" cai de 13 para 12 (o excedente vai para nota de vocabulário).
+     A2: **426 cartões** (416 novos + 10 publicados).
+140. ***trouver* vira cartão na M8.6** "Pedir ajuda" (M8.6 com 10; M8 com 40 cartões, ~3h05). Responde a pergunta 61. Com a 139, o A1 fica com **343 cartões**
+     (344 − 2 da M2.3 + 1).
+141. **Números de emergência separados por função.** A nota da M6.3 "Lugares da cidade" fica **só com a cruz verde** da farmácia. **17 (polícia) e 112 (emergência
+     europeia, geral)** vão para a A1 M8.6 "Pedir ajuda" (polícia); **15 (SAMU, urgência médica) e 18 (bombeiros)** vão para a A2 M4.3 "Emergências". Função de cada número:
+     15 = SAMU (medicina de urgência), 17 = polícia, 18 = bombeiros, 112 = número europeu de emergência (geral, toda a União Europeia). A M8.6 não cita o 15; a A2 M4.3
+     não cita o 17 e só cita o 112, sem reensinar. Corrige a 133 neste ponto (o 15 não vem mais do A1).
+142. **Carga.** "Serviços e papelada" (`A2-25`) vai do A2 M8 para o **A2 M7**, que passa a **"Trabalho, dinheiro e papelada"** (5 unidades, 4 + 1, ~3h05), na ordem: Falar do
+     trabalho; Procurar emprego; Gramática: discurso indireto no presente; Resolver no banco; Serviços e papelada. O A2 M8 fica com 6 unidades (4 + 2, ~3h30): Procurar
+     moradia; Dividir apartamento e vizinhos; Gramática: pronome *y*; Trânsito e carro; Entender regras e avisos; Gramática: negação complexa. As palavras de "Serviços e
+     papelada" são revistas para banco, trabalho e documentos (lista a revisar pela dona, confiança média: *le formulaire, remplir, signer, le dossier, envoyer, la file
+     d'attente, le guichet, la carte d'identité, le permis de conduire, le titre de séjour, le justificatif de domicile, la pièce jointe*; saem *la lettre, le timbre*).
+     O *aucun* por diálogo vem com ela (*Je n'ai aucun justificatif de domicile.*), ainda antes da negação complexa. Conferido: *y* (A1 M6.5 e M8.3) e negação complexa (A2 M1.4,
+     M2.5, M5.1, M7.5, M8.2 e o anúncio ou a placa no M8) continuam com versão grátis antes, e a ordem nova não usa palavra antes de ensinada (*se garer* da M8.4 continua
+     logo antes da M8.5). O A2 M10 fica como está (3h55, último módulo); o A1 M1 (3h35) e o M3 (3h25) ficam. Responde a pergunta 63.
+143. **Regra "nota grátis nunca diz que a gramática já mostrou"** confirmada (regra 12 do `15`).
+144. **Regra 14 (uma palavra, um cartão) vale também para a mesma forma com sentido novo** (*clair*, *le bureau*): confirmada.
+145. **Registro.** As pendências da 137 estão todas respondidas (138 a 144) e saem das listas de pendências (seção 7 do `08 v2` e aqui). Ficam só como registro:
+     (a) **M7.3 (g) com dois conceitos** (*il y a* e *c'est* + adjetivo), aceita pela regra 3 ("conceitos muito ligados") com uma tela de contraste (*Il y a un salon.
+     C'est un grand salon.*), atendendo o pedido original da dona (decisão 103: gramática sobre *il y a* e *c'est* + adjetivo); (b) **"palavra de frase"** resolvida pela
+     regra já existente "frases só com vocabulário visto": a frase com palavra que ainda não é cartão é trocada, sem regra nova.
+146. **Próxima etapa.** O mapa A1 + A2 aguarda a **aprovação final da dona**. Depois: a implementação (Etapa 0b parte 2: `fr/scripts/curriculo_ops.js`, camadas por chave,
+     operações de unidade que muda de nível, regra de conclusão e desbloqueio por plano) e a escrita do conteúdo **módulo a módulo** (notas grátis, diálogos, frases, telas),
+     cada lote com pt-BR e en só depois de aprovado (decisão 81).

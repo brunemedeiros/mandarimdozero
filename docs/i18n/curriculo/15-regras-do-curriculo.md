@@ -6,7 +6,8 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
    dois cartões seguidos. (2026-10-18)
 2. **Unidades por função comunicativa**, não por tema nem por ordem de criação (`08`).
 3. **Gramática**: uma unidade de gramática = um conceito (ou conceitos muito ligados); conteúdo pequeno ligado ao vocabulário vira nota; um tópico pode aparecer informal cedo e ser
-   sistematizado depois (espiral); o aluno nunca volta a lição anterior (`10`).
+   sistematizado depois (espiral); o aluno nunca volta a lição anterior (`10`). Exemplo de "conceitos muito ligados": a M7.3 (g) *il y a* e *c'est* + adjetivo, com uma tela
+   de contraste (*Il y a un salon. C'est un grand salon.*) (decisão 145).
 4. **Notas**: uma ideia por nota, curtas, sem teto de tamanho nem de quantidade; na primeira aparição só uma nota breve da frase que acabou de aparecer; a explicação completa vive na unidade
    de gramática; mesmo conceito com outro conteúdo ou estrutura mais difícil = nota nova mais breve; V/F depois da nota (sem pular, sem XP); o Ponto de verificação não usa notas (`14`).
 5. **Feedback dos exercícios**: padrão único com frase correta + tradução + áudio; erro de digitação marca letras (`13`).
@@ -18,7 +19,7 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
 
 10. **Título das unidades de gramática** (dona, 2026-10-19): sempre "Gramática: <assunto curto>", em todos os níveis e em todos os cursos (fr, zh, pt), sem subtítulo explicativo. O assunto fica no título; o que a unidade ensina fica no "Consigo...".
 
-11. **Mudou ordem, tema, módulo, nível ou conteúdo de um item? Revisar o que ele ensina e rodar o `auditor-curricular`** (dona, 2026-10-19): ao mover uma unidade, as palavras, frases, diálogos, notas e exercícios dela são reavaliados para a nova posição (nada de usar palavra ainda não ensinada, nada do tema antigo sobrando) e o agente `.claude/agents/auditor-curricular.md` confere em paralelo. Além disso, **uma auditoria pedagógica completa do A1 e do A2 antes da implementação real**.
+11. **Mudou ordem, tema, módulo, nível ou conteúdo de um item? Revisar o que ele ensina e rodar o `auditor-curricular`** (dona, 2026-10-19): ao mover uma unidade, as palavras, frases, diálogos, notas e exercícios dela são reavaliados para a nova posição (nada de usar palavra ainda não ensinada, nada do tema antigo sobrando) e o agente `.claude/agents/auditor-curricular.md` confere em paralelo. Frase com palavra que ainda não é cartão naquela posição é **trocada** (regra "frases só com vocabulário visto"; sem lista de "palavra de frase", decisão 145). Além disso, **uma auditoria pedagógica completa do A1 e do A2 antes da implementação real**.
 
 12. **Nota (grátis) x unidade de gramática (Premium): equidade para quem não paga** (dona, 2026-10-19). As **notas**, breves ou longas, ficam dentro das lições e são **sempre gratuitas**. As **unidades de gramática são Premium por natureza**.
     - Nota breve: ensina pontualmente uma regra ou pequena novidade sem pesar a lição; **não gera cartão de revisão nem entra nos Pontos de verificação** (não garante fixação).
@@ -27,15 +28,19 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
     - **Conclusão com paywall ligado: opção A** (dona, decisão 125, revisa a 46): o aluno gratuito conclui módulo e nível **sem** as unidades de gramática; o Ponto de
       verificação do módulo cobra dele só o que pôde estudar (palavras, frases, escuta) e, do Premium, também a gramática. Falta implementar (`moduleCompleted`,
       `levelCompleted`, Ponto de verificação e teste; `08 v2` seções 5 e 7).
+    - **Desbloqueio com paywall ligado** (dona, decisão 138): para o gratuito, a unidade de gramática é **pulada** na cadeia de desbloqueio (a seguinte abre), aparece com
+      cadeado e a trilha continua; o Teste de Nível segue os Pontos de verificação por plano. Falta implementar (`markUnitCompleted`, `moduleProgressPct`; `08 v2` seção 5).
     - **Coluna "Versão grátis"** no mapa (decisões 126 e 134): cada gramática do A1 e do A2 mostra onde está a sua versão gratuita (posição + gancho). Nota grátis nunca diz que
-      "a gramática já mostrou" (o gratuito não viu). O texto das notas novas só se escreve módulo a módulo, aprovado pela dona.
+      "a gramática já mostrou" (o gratuito não viu; confirmada pela dona, decisão 143). O texto das notas novas só se escreve módulo a módulo, aprovado pela dona.
     - Hoje não há bloqueio de gramática no código (auditoria de 2026-10-19): tratar isto como regra de produto até a implementação.
 
-13. **Conjunto aberto: no máximo 10 palavras por unidade** (dona, 2026-10-19/21, decisões 45 e 129). O excedente vira **nota de vocabulário** na mesma unidade (como "Outros
-    materiais"). Só conjunto fechado (números, dias, meses, horas) passa de 10, com 4 lições + Revisão da unidade. Em aberto com a dona (decisão 137): se vale para o A2
-    e as exceções do A1 (M1.2 11, M2.3 12; M3.1, M3.3 e M4.1 chamadas de "fechadas").
+13. **Limite de palavras por unidade** (dona, decisões 45, 129 e 139). O excedente vira **nota de vocabulário** na mesma unidade (como "Outros materiais").
+    - **A1**: conjunto aberto com **no máximo 10** palavras. Exceções aceitas como conjuntos naturais (decisão 139): M1.2 (11, por causa de *le prénom*), M3.1 (12, rotina),
+      M3.3 (11, dias) e M4.1 (11, comida). Conjunto fechado (números, dias, meses, horas) pode passar de 10, com 4 lições + Revisão da unidade. A M2.3 (aparência) foi
+      cortada para 10 (*laid, brun* em nota).
+    - **A2**: **no máximo 12** palavras por unidade (a M1.3 "Descrever o caráter" caiu de 13 para 12).
 
 14. **Uma palavra, um cartão** (dona, decisão 133): palavra que já é cartão numa unidade aparece nas outras só em frase ou nota, também entre A1 e A2 (o A2 não reensina
-    *la poste, la mairie, la banque, la police* nem os números 15, 17 e 112). Mesma forma com sentido novo (*le bureau*: escritório x escrivaninha; *clair*: cor x iluminado)
-    entra como frase e nota na 2ª unidade, sem cartão novo, salvo decisão da dona. Aplicações sem decisão nova (decisão 136): *en bois* no A2 M3.1 (*le bois* é do A1 M5.4) e
+    *la poste, la mairie, la banque, la police* nem os números 17 e 112; o 15 e o 18 só entram no A2 M4.3, decisão 141). Mesma forma com sentido novo (*le bureau*: escritório x escrivaninha; *clair*: cor x iluminado)
+    entra como frase e nota na 2ª unidade, sem cartão novo, salvo decisão da dona (confirmado pela dona, decisão 144). Aplicações sem decisão nova (decisão 136): *en bois* no A2 M3.1 (*le bois* é do A1 M5.4) e
     *se sentir* no A2 M9.5 (cartão da A2 M4.1) ficam só em frase e nota.

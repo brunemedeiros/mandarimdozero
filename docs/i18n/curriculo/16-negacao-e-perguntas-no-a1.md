@@ -18,8 +18,8 @@ M2.1; N43 sem *savoir* nem *pas encore*. O `08 v2` registra as mesmas posições
    (b) uma **regra que o aluno não deduz** vendo a frase (*pas de*, o *ne* que cai na fala). O resto fica no diálogo, na frase "Na frase" e no *hover* da tradução.
 3. Onde a estrutura é **uma unidade de gramática**, a negação é uma **tela dentro dela** (gramática não tem nota).
 4. **Negação complexa** (*ne... plus, rien, personne, aucun, que, ni... ni*): aparece em diálogo quando a palavra surge e **uma gramática dedicada no A2** a sistematiza
-   (`A2-g21`, ampliada e renomeada "Gramática: negação complexa", **última unidade do A2 M8, M8.7**, decisão 122). Revoga a decisão 18 do `10`. Onde cada uma aparece
-   antes (*ne... plus* na A2 M1.4, *ne... que* na A2 M5.1, as outras em diálogos do A2 M2 e M8): tabela "Negação complexa: onde aparece antes" no `08 v2`, seção 3.2.
+   (`A2-g21`, ampliada e renomeada "Gramática: negação complexa", **última unidade do A2 M8, hoje M8.6**, decisões 122 e 142). Revoga a decisão 18 do `10`. Onde cada uma aparece
+   antes (*ne... plus* na A2 M1.4, *ne... que* na A2 M5.1, *aucun* no A2 M7.5 "Serviços e papelada" (decisão 142), as outras em diálogos do A2 M2 e M8): tabela "Negação complexa: onde aparece antes" no `08 v2`, seção 3.2.
 5. **Perguntas** são conteúdo do **A1** (decisão da dona). Cada palavra interrogativa entra **onde a resposta também é ensinada** e é consolidada em **gramática**
    de nome **"Palavras interrogativas"** (nome escolhido pela dona).
 
@@ -46,7 +46,7 @@ M2.1; N43 sem *savoir* nem *pas encore*. O `08 v2` registra as mesmas posições
 | M7.3 (g) | *il y a* | **tela**: *il n'y a pas de* |
 | M8.3 | diálogo novo: *Tu vas réserver l'hôtel ? Non, je ne vais pas réserver l'hôtel.* (decisão 136) | não (versão grátis por diálogo do futuro próximo negativo da M8.4) |
 | M8.4 (g) | futuro próximo | **tela** já prevista (versão grátis: nota *Je vais réserver* na M8.3; a negativa, pelo diálogo da M8.3) |
-| M8.6 | *Je ne trouve pas mon passeport.* (no presente, decisão 128) | não |
+| M8.6 | *Je ne trouve pas mon passeport.* (no presente, decisão 128; *trouver* é cartão da própria M8.6, decisão 140) | não |
 | M9.1 | *Tu veux sortir ? Je ne peux pas, je dois travailler.* | **sim** (nota grátis dos modais e de *il faut*, decisão 126; a negação vem na própria frase). A N43 passa a ser a 2ª aparição da queda do *ne* (*Je peux pas*; a 1ª é a M5.3) e a fala publicada *On ne sait pas encore !* sai (usa *savoir* e *pas encore*), decisão 136 |
 | M9.2 (g) | modais | **tela**: *Je ne peux pas venir.*, *Il ne faut pas...* (no contexto de convites e lazer, decisão 118) |
 | M9.4 | *pas encore* (cartão): *Tu as mangé ? Non, pas encore.* | não |
@@ -60,7 +60,7 @@ Isso reduz as 10 notas da versão 1. Cada diálogo novo é **conteúdo novo**: f
 
 ## Versão grátis da negação e das perguntas (rodada de 2026-10-21)
 
-O aluno gratuito não vê as gramáticas (regra 12; com o paywall ligado, conclui módulo e nível sem elas, decisão 125). Onde fica a porta de entrada grátis:
+O aluno gratuito não vê as gramáticas (regra 12; com o paywall ligado, conclui módulo e nível sem elas, decisão 125, e passa da gramática, com cadeado, para a unidade seguinte, decisão 138). Onde fica a porta de entrada grátis:
 
 | Conceito (gramática) | Versão grátis | Tipo |
 |---|---|---|
