@@ -1,6 +1,7 @@
 # Auditoria do mapa A1 (9 módulos) e A2 (10 módulos): rodada da saúde e dos modais
 
 Data: 2026-10-19 (rodada das decisões 108 a 124 do `12`; regras 1 a 12 do `15`). Agente: `auditor-curricular`. **Só relata: nada foi editado no mapa nem no código.**
+**Histórico (decisão 135):** respondido pelas decisões 125 a 135 do `12` (2026-10-21) e aplicado no `08 v2`; as posições e contagens daqui são as de antes dessa rodada. Uma nova rodada vem depois.
 Fontes conferidas: `08-mapa-final-a1-a2-v2.md` (inteiro), `12`, `15`, `16`, `00`, `.claude/rules/conteudo-trilha.md`; conteúdo publicado por script
 (`scripts/lib/course-content.js`, `load('fr')`): vocabulário, frases, diálogos, notas e gramáticas de todas as 30 unidades; `fr/dictations.js`;
 `fr/scripts/challenges_import/*.json`; `fr/app.js` (`moduleUnlocked`, `moduleCompleted`, `levelCompleted`).

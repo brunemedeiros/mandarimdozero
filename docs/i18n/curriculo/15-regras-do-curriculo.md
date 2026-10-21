@@ -24,4 +24,16 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
     - Nota breve: ensina pontualmente uma regra ou pequena novidade sem pesar a lição; **não gera cartão de revisão nem entra nos Pontos de verificação** (não garante fixação).
     - Unidade de gramática: mais robusta, com **reconhecimento, sistematização e produção** das variantes e regras, e com efeito mais forte para o Premium.
     - **Consequência de projeto:** nunca tirar um conceito das notas e deixá-lo SÓ numa unidade de gramática. Todo conceito de uma gramática precisa ter antes a sua **versão gratuita** (nota breve ou formulação clara dentro de uma lição de vocabulário) para o aluno gratuito conseguir seguir a trilha; a gramática Premium **sistematiza e treina**, não é a única porta de entrada. Ao decidir "vira nota" ou "vira gramática", considerar sempre o usuário gratuito.
-    - O estado real do bloqueio de gramática no código não foi conferido nesta fase: tratar isto como regra de produto.
+    - **Conclusão com paywall ligado: opção A** (dona, decisão 125, revisa a 46): o aluno gratuito conclui módulo e nível **sem** as unidades de gramática; o Ponto de
+      verificação do módulo cobra dele só o que pôde estudar (palavras, frases, escuta) e, do Premium, também a gramática. Falta implementar (`moduleCompleted`,
+      `levelCompleted`, Ponto de verificação e teste; `08 v2` seções 5 e 7).
+    - **Coluna "Versão grátis"** no mapa (decisões 126 e 134): cada gramática do A1 e do A2 mostra onde está a sua versão gratuita (posição + gancho). Nota grátis nunca diz que
+      "a gramática já mostrou" (o gratuito não viu). O texto das notas novas só se escreve módulo a módulo, aprovado pela dona.
+    - Hoje não há bloqueio de gramática no código (auditoria de 2026-10-19): tratar isto como regra de produto até a implementação.
+
+13. **Conjunto aberto: no máximo 10 palavras por unidade** (dona, 2026-10-19/21, decisões 45 e 129). O excedente vira **nota de vocabulário** na mesma unidade (como "Outros
+    materiais"). Só conjunto fechado (números, dias, meses, horas) passa de 10, com 4 lições + Revisão da unidade.
+
+14. **Uma palavra, um cartão** (dona, decisão 133): palavra que já é cartão numa unidade aparece nas outras só em frase ou nota, também entre A1 e A2 (o A2 não reensina
+    *la poste, la mairie, la banque, la police* nem os números 15, 17 e 112). Mesma forma com sentido novo (*le bureau*: escritório x escrivaninha; *clair*: cor x iluminado)
+    entra como frase e nota na 2ª unidade, sem cartão novo, salvo decisão da dona.

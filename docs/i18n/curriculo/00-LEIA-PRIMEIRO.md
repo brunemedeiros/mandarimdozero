@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 55 unidades, 339 cartões) e do A2 (10 módulos, 58 unidades, com a `A1-15` "Dizer onde dói" vinda do A1), com notas por unidade, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível), 59 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 56 unidades, 344 cartões) e do A2 (10 módulos, 58 unidades, 428 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
@@ -30,3 +30,13 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 - A1 com **9 módulos** (decisões 116 a 123 no `12`): a saúde sai do A1 (`A1-15` vira A2 M4.1), "Pedir ajuda" vai para Viagem (M8.6, polícia), os modais vão para Lazer (M9.2). A2: "Descrever o caráter" no M1.3, regras e avisos e negação complexa no fim do M8.
 - Regras vivas do currículo: `15-regras-do-curriculo.md` (regra 11: mover unidade = revisar o conteúdo e rodar o `auditor-curricular`). Negação e perguntas no A1: `16`.
+
+## Atualização 2026-10-21
+
+- Decisões 125 a 135 no `12` (respostas à auditoria `auditoria/2026-10-19-a1-a2-rodada-saude-modais.md`, que fica como histórico; outra rodada vem depois desta):
+  conclusão com paywall ligado (opção A: o gratuito conclui módulo e nível sem as gramáticas; Ponto de verificação dele só com palavras, frases e escuta), coluna "Versão grátis"
+  em todas as tabelas do `08 v2` (texto das notas só depois, módulo a módulo), unidade nova M3.6 "Frequência" (`A1-35`), "Pedir ajuda" no presente, conjuntos abertos com no
+  máximo 10 palavras, correção da `A1-15` (8 chaves publicadas + 3 novas), contrações *au, aux* ensinadas pela 1ª vez na M6.4, lista do conteúdo publicado a reescrever e
+  "uma palavra, um cartão" entre A1 e A2.
+- Regras novas no `15`: 13 (conjunto aberto: no máximo 10 palavras) e 14 (uma palavra, um cartão); a 12 ganhou a opção A e a coluna "Versão grátis".
+- Totais: A1 com 9 módulos, 56 unidades (33 + 23), 344 cartões, ~28h50; A2 com 10 módulos, 58 unidades (36 + 22), 428 cartões, ~33h10 (1ª estimativa).

@@ -287,6 +287,53 @@ Pendência registrada junto (regra 11 do `15`): **auditoria pedagógica completa
 
 ---
 
-# Décima segunda rodada (2026-10-19): grátis x Premium nas notas e gramáticas
+# Décima quarta rodada (2026-10-19): grátis x Premium nas notas e gramáticas
 
 124. **Regra 12 (dona)**: notas (breves ou longas) ficam dentro das lições e são sempre grátis; unidades de gramática são Premium por natureza. Não tirar um conceito das notas para deixá-lo só numa gramática: o aluno gratuito precisa de uma versão gratuita (nota breve ou formulação numa lição de vocabulário) de cada conceito; a gramática Premium sistematiza e treina (reconhecimento, sistematização e produção). Nota breve não gera cartão nem entra nos Pontos de verificação. A dona reconhece que decisões anteriores desta fase podem ter ignorado isso; **auditoria pedida** (ver `auditoria/`).
+
+---
+
+# Décima quinta rodada (2026-10-19 a 2026-10-21): respostas à auditoria da saúde e dos modais
+
+Base: `auditoria/2026-10-19-a1-a2-rodada-saude-modais.md` (tabelas 1.1 e 1.2). Aplicado em `08-mapa-final-a1-a2-v2.md`, `15` (regras 12 a 14), `16` e `00`. Nada aplicado ao site.
+
+125. **Conclusão com paywall ligado: opção A** (dona). O aluno gratuito **conclui módulo e nível sem as unidades de gramática** (Premium). O Ponto de verificação do módulo
+     cobra dele só o que ele pôde estudar (palavras, frases, escuta); do Premium, cobra também a gramática. **Revisa a decisão 46**: o critério nota x gramática continua
+     ("vira gramática o que a prova do módulo e os Desafios cobram com correção"), mas essa cobrança vale para o Premium; para o gratuito, a prova do módulo não tem item de
+     gramática. Falta implementar (`08 v2` seções 5 e 7): `moduleCompleted` e `levelCompleted` sem as gramáticas para quem não é Premium, Ponto de verificação por plano e
+     teste. Nada implementado nesta fase; Teste de Nível e desbloqueio do módulo seguinte ficam na pergunta 60 do `08 v2`.
+126. **Coluna "Versão grátis"** em todas as tabelas do A1 e do A2 do `08 v2`: para cada gramática, onde está a nota ou formulação gratuita do conceito (posição + gancho),
+     com as notas novas marcadas *(nota nova)*. **O texto das notas só se escreve depois, módulo a módulo, aprovado pela dona.** Propostas aprovadas: artigos e plural na
+     M2.1 (gancho *les parents*: o plural se ouve no artigo) + diálogo *Tu as des frères ? Non, je n'ai pas de frère.* com nota breve (*un, une, des* viram *de* depois de
+     *pas*); adjetivos: +1 linha na N15 da M2.3 ("plural: *grands*, o *s* não se ouve") e a nota das cores (*orange, marron* não mudam); comparativos na M7.2 (gancho *grand*:
+     *plus grand que, moins cher que, aussi calme que*, *meilleur*); números de 70 a 99 na M5.1 (gancho *soixante-dix*: 75, 80, 92, *deux cents*). E as demais da tabela 1.1:
+     *son / sa* na M2.1; *est-ce que* na M2.5; terminações mudas do *-er* e pronominais na M3.1; imperativo *Tourne / Tournez* na M6.1; *aller à* + contrações na M6.3;
+     *en, au, aux, à* + país completo na M8.1; futuro próximo na M8.3; modais e *il faut* na M9.1; PC negativo por diálogo na M9.4; +1 linha na nota da M1.6 (*-ier / -ière*).
+127. **Nova unidade de vocabulário "Frequência"** (`A1-35`, id novo) no A1 M3, **antes da gramática**: M3.6 Frequência (10 palavras, lista a revisar pela dona: *toujours,
+     souvent, parfois, rarement, jamais, tous les jours, d'habitude, de temps en temps, une fois par semaine, chaque*) e M3.7 Gramática: advérbios de frequência (`A1-g8`:
+     posição do advérbio e *ne... jamais*). M3 passa a 7 unidades (4 + 3), 48 cartões, ~3h25. A1: 56 unidades (33 + 23).
+128. **"Pedir ajuda" (A1 M8.6) no presente, sem passé composé**. Lista a revisar pela dona; frases-modelo: *Je suis perdu(e)*, *Je ne trouve pas mon passeport*, *J'ai besoin
+     de la police*, *Au secours !*. As frases no passado (*J'ai perdu...*, *On m'a volé...*) só do M9 em diante.
+129. **Conjuntos abertos com mais de 10 palavras são cortados para 10** (M5.1, M5.4, M7.1, M8.1); o excedente vai para **nota de vocabulário** (método dos materiais). Conjuntos
+     fechados continuam permitidos (M1.3, M1.4, M3.5, M3.1, M3.3, M4.1, conforme o mapa). Junto, a decisão 113 nas tabelas: *la porte, la fenêtre* → M7.4 (10); *il y a,
+     il n'y a pas de* ficam na M7.1; a nota "*la fenêtre*: o *e* que some" vai **com o cartão para a M7.4** (revisa a 113 nesse ponto); as frases publicadas *La porte est fermée
+     à clé.* e *La fenêtre donne sur le jardin.* vão para a M7.4 e *La cuisine est très propre.*, *Le salon est confortable.* para a M7.2. Cortes propostos (pergunta 64 do
+     `08 v2`): M5.1 *en espèces, le portable, le mail* em nota; M5.4 *le cuir* em "Outros materiais"; M7.1 *le studio, l'immeuble, le jardin* em nota; M8.1 *le Japon* em
+     "Outros países". Contagens: M7 34, M8 39, A1 344.
+130. **Correção da `A1-15`** (a unidade publicada "Corpo e saúde"; "Dizer onde dói" no mapa de 10 módulos): são **10 cartões publicados** (*la tête, le ventre, la main, le pied,
+     malade, le médecin, la pharmacie, avoir mal, la fièvre, se sentir*); *la gorge, la dent, se reposer* nunca foram publicados; *le médecin* e *la pharmacie* saem (ficam no A1,
+     M1.6 e M6.3) → no A2 M4.1: **8 chaves antigas + 3 novas** (11). A unidade tem **3 lições + a lição final** (agora "Revisão da unidade"); `pe-doente-medico` e
+     `farmacia-dor-febre` perdem palavras e são refeitas (`RETIRED_LESSON_IDS`). Corrige a decisão 116 ("mesmas chaves", "11 cartões") e a seção 5 do `08 v2`. A2: 9 cartões
+     já publicados (8 + *gentil*).
+131. **M6.4 (`A1-g13`) ensina as contrações *au, aux* (à + le / les) pela primeira vez** (nenhuma gramática as ensina antes, porque a de países foi para a M8.2): "retomada"
+     vira ensino completo (revisa a decisão 101). A versão grátis é a nota da M6.3 (*Je vais à la pharmacie, au parc*). A nota *en* x *à la* fica fixada na M6.3.
+132. **Conteúdo publicado que precisa de reescrita** (lista na seção 7 do `08 v2`): *gentil* e *sympa* no diálogo da M2.3 (`A1-16`), na `A1-g7` e no ditado `d5`; o diálogo da
+     M2.5 (`A1-9`) com *en Allemagne* e *au Portugal*; *La porte est fermée à clé.*, *La fenêtre donne sur le jardin.*, *La cuisine est très propre.*, *Le salon est confortable.*
+     (hoje antes dos cartões); *Désolée, je suis rentrée tard hier* sai da M9.3 (PC) e vai para a M9.4.
+133. **Palavra repetida entre cartões = um cartão só**: *clair* tem cartão só na M5.4 (a M7.2 usa em frase e nota, "iluminado") e *le bureau* só na M1.6 (a M7.4 usa em frase e
+     nota, "escrivaninha"); *la poste, la mairie, la banque, la police* e os números 112, 15 e 17 aparecem no A1 e no A2, e **o A2 não os reensina** como cartão novo (A2: 428
+     cartões, 419 novos). Regra 14 do `15`.
+134. **A2: coluna "Versão grátis"** nas 22 gramáticas, com as posições propostas pela auditoria (tabela 1.2) para as 13 sem versão grátis e para as parciais. A **nota *depuis* da
+     A2 M4.1 fica**: a `A2-g5` (M2.6) vem antes na ordem do mapa, mas é Premium; a versão grátis de *depuis / pendant* entra na M2.5, antes da gramática.
+135. **Auditoria**: o relatório de 2026-10-19 fica como **histórico**; depois desta rodada será rodada outra (`auditor-curricular`).
+
