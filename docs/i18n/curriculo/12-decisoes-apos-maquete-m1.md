@@ -829,3 +829,62 @@ Base: respostas da dona no corpo da conversa, aprovadas em 2026-10-22. Aplicado 
      - Notas do A2: ~62 (+2 da decisão 191).
      - **Pendências limpas** (seção 7 do `08 v2`): sai o achado de *garée* (decidido pela 188); em "Listas de palavras a revisar pela dona", o A2 M9 entra como aprovado,
        com *confirmer* (M9.3) a revisar pela dona; a lista "só para conferir" perde *allô* e *bisous* (decididos pelas 189 e 190) e ganha os pares da decisão 190.
+
+---
+
+# Vigésima sétima rodada (2026-10-22): revisão do A2 M10 "Opinião, cultura e mundo" e mapa do A2 completo
+
+Base: respostas da dona no corpo da conversa, aprovadas em 2026-10-22. Aplicado em `08-mapa-final-a1-a2-v2.md` (cabeçalho, seções 1, 3.2, 6, 7, 8 e Resumo),
+`15` (regras 11 e 14) e `00`. O `16` não muda (o M10 não tem negação nova). Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovados pela dona.
+
+193. **A2 M10 "Opinião, cultura e mundo": listas aprovadas** (as quatro com 12, as listas do `04` 6.3 já com as trocas da decisão 157).
+     - M10.1 "Apresentar um livro, filme ou exposição" (`A2-31`, 12): *le roman, l'auteur / l'autrice, le personnage, l'histoire, la bande dessinée, l'exposition,
+       le tableau, le / la peintre, le spectacle, raconter, émouvant / émouvante, ennuyeux / ennuyeuse*.
+     - M10.3 "Patrimônio e festas" (`A2-32`, 12): *le monument, le château, le patrimoine, la tradition, la fête nationale, le feu d'artifice, le défilé, célébrer,
+       historique, le siècle, le roi / la reine, le jour férié* (*le jour férié* no lugar de *l'église*, decisões 157 e 162).
+     - M10.4 "Meio ambiente" (`A2-33`, 12): *l'environnement, la planète, le climat, le réchauffement climatique, trier, recycler, les déchets, la pollution, polluer,
+       l'énergie, protéger, durable* (*durable* no lugar de *la nature*, decisões 157 e 162).
+     - M10.6 "Viajar pela francofonia" (`A2-34`, 12): *le nord, le sud, l'est, l'ouest, la côte, l'île, le fleuve, la forêt, le désert, la région, la frontière,
+       francophone*.
+     - **Conferência da regra 14** (A1 e A2 inteiros, no `08 v2`, no `04`, no `08` e em `fr/content.js`): **nenhuma das 48 palavras é cartão em outra unidade** e
+       nenhuma aparece no conteúdo publicado (o único "roman" de `fr/content.js` é o id da nota N22, *dias-semana-deuses-romanos*). **Nenhuma troca, nenhuma substituta.**
+       *l'histoire* é cartão só aqui, com os dois sentidos (história e estória; em inglês *story* e *history*), como *voler* (decisão 158); *le nord, le sud* e
+       *la région* não são cartão em nenhuma outra unidade (o A1 M8 tem países e paisagens de férias, não pontos cardeais nem regiões). Ficam só em frase ou nota no
+       M10: *l'église* (A1 M6.3) na M10.3; *la nature* (A2 M1.3) na M10.4; *le Canada, la Suisse, la Belgique* (A1 M8.1) e *la mer, la montagne, la plage*
+       (A1 M8.3) na M10.6.
+       - Só para conferir (não é a mesma palavra-cartão; vão para a lista de conferência do `08 v2`, seção 3.2): *l'histoire* x *historique* (M10.1 x M10.3);
+         *le roi / la reine* (M10.3) x a nota *Galette des rois* (A1 M9.3, só nota); *l'autrice* (cartão da M10.1) x a nota "*Professeure, autrice*" (A1 M1.6, só
+         nota); *le réchauffement climatique* x *le climat* e *la pollution* x *polluer* (os dois pares na M10.4); *l'est* (ponto cardeal, o *s* e o *t* soam) x *est*
+         (de *être*, A1 M1.5), mesma escrita e pronúncia diferente; *la côte* (M10.6) x *à côté de* (A1 M7.5); *francophone* (M10.6) x *français / française*
+         (A1 M1.2); *la région* (M10.6) x *le pays* (A1 M1.2). *la fête nationale* (A1 *la fête*) e *le feu d'artifice* x *le feu* (A2 M8.4) já estavam na lista.
+194. **Notas culturais do A2 M10 (aprovadas; texto só depois, aprovado pela dona)**:
+     - M10.6 (Cult, alta): **onde o francês é língua oficial ou falada** (França, Bélgica, Suíça, Canadá e Quebec, países da África, Caribe), ligando com os cartões
+       *le Canada, la Suisse, la Belgique* do A1 M8.1. Junto do cartão *francophone*.
+     - M10.6 (Cult, alta): **as variantes da francofonia**, ligando com *septante, huitante, nonante* (nota do A1 M5.1) e *déjeuner / dîner / souper* (nota do
+       A1 M4.5) **sem repeti-las** (regra "nunca nota igual", `14`): só a ideia de que o francês muda de um país para outro, com uma ou duas formas novas.
+     - M10.3 (Cult, alta): ***la fête nationale* do 14 de julho**: a data, a tomada da Bastilha (1789), o desfile (*le défilé*) e os fogos (*le feu d'artifice*);
+       comparar com o 7 de setembro do Brasil. Junto do cartão *la fête nationale*.
+       - **Ponto para o texto (proposta a confirmar pela dona)**: o A1 M3.5 já tem a nota cultural "14 de julho" (Cult, alta, gatilho *juillet*). Pela regra "nunca nota
+         igual" (`14`), a proposta é a nota do A1 ficar **breve** (só "14 de julho é a festa nacional da França") e a história (Bastilha, desfile, fogos, 7 de setembro)
+         ficar **só na A2 M10.3**, sem "você já viu".
+     - M10.3 (Cult, alta), **se couber**: uma nota sobre ***le château*** (por exemplo, os castelos do Loire). Junto do cartão *le château*.
+     - Com elas, a M10.6 tem 3 notas (francofonia, variantes, versão grátis do gerúndio) e a M10.3 tem 1 ou 2 (*la fête nationale*; *le château* se couber).
+195. **A2 M10 mantido com 7 unidades (4 + 3) e ~3h55**: é o último módulo do A2 e fecha o nível (4 unidades de vocabulário × ~40 min + 3 gramáticas × ~25 min).
+     As duas gramáticas finais **ficam** (M10.5 *Il faut que / je veux que*, subjuntivo só em fórmula; M10.7 gerúndio), e a M10.2 (causa, consequência e finalidade)
+     também. **Versões grátis mantidas** (coluna "Versão grátis" do `08 v2`, sem mudança de posição): *à cause de / grâce à* na M10.1 (da M10.2); *Il faut qu'on recycle*
+     na M10.4 (da M10.5); *en voyageant* na M10.6 (da M10.7). Responde a pergunta 42 do `08 v2`.
+196. **Mapa do A2 completo** (M1 a M10 revistos módulo a módulo, decisões 148 a 195); **mapa do A1 também revisto**. **Próximo passo: auditoria final do A1 e do A2**
+     pelo agente `auditor-curricular` (`.claude/agents/auditor-curricular.md`) **antes da aprovação final do mapa** (decisão 146) e da implementação (Etapa 0b parte 2).
+     - **Contas do A2 refeitas pela soma das listas aprovadas**: M1 48, M2 36, M3 34, M4 47, M5 36, M6 36, M7 47, M8 48, M9 47, M10 48 = **427 cartões** (417 novos
+       + 10 publicados: 8 da `A1-15`, *gentil* e *récemment*). A conta histórica dava **424** porque três subtrações da rodada de 2026-10-21 nunca foram desfeitas quando
+       as unidades voltaram a 12: *la police* na A2 M2.5 (a lista aprovada, decisão 158, tem 12 com *le portefeuille* e *récemment*) e *la poste, la mairie* na A2 M7.5
+       (a lista revista e aprovada, decisões 142 e 181, tem 12 com *le guichet, le titre de séjour, le justificatif de domicile, la pièce jointe*). Nenhuma lista muda;
+       só a soma. **Vale 427** (`08 v2`, seção 8, conflito 62).
+     - **Tempo**: A2 ~33h10 sem mudança (M1 3h05, M2 3h15, M3 3h15, M4 3h30, M5 2h50, M6 3h15, M7 3h05, M8 3h30, M9 3h30, M10 3h55).
+       A1 sem mudança: 9 módulos, 56 unidades (33 + 23), 344 cartões, ~28h45.
+     - **Notas do A2**: ~65 (+3 da decisão 194; +1 se couber a de *le château*).
+     - **Pendências limpas** (seção 7 do `08 v2`): saem as linhas já decididas ("Pendências de decisão da 137", "*prochain*, *le projet* e *garée*", "Palavras repetidas
+       no A2"); a lista "só para conferir" sai da seção 7 e vira a **lista de conferência da regra 14** na seção 3.2 (insumo da auditoria, não pendência); em "Listas de
+       palavras a revisar pela dona" ficam só as que nunca tiveram aprovação explícita (A1 M3.6, A1 M8.6, os cortes da decisão 129 e *confirmer* na A2 M9.3); entram a
+       nota do 14 de julho (decisão 194) e, na linha da auditoria, a frase `A1-7-p5` (*partir* e *en voyage* antes dos cartões).
+     - **Status**: A2 M1 a M10 fechados; o mapa A1 + A2 **aguarda a auditoria final e a aprovação da dona**.

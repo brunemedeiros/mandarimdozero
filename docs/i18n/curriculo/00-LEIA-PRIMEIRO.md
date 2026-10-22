@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 56 unidades, 344 cartões) e do A2 (10 módulos, 58 unidades, 424 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar. Status (2026-10-22): A2 M1 a M10 fechados; aguarda auditoria final e aprovação do mapa.** Mapa final do A1 (9 módulos, 56 unidades, 344 cartões) e do A2 (10 módulos, 58 unidades, 427 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
@@ -50,7 +50,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 - **Totais novos**: A1 com 9 módulos, 56 unidades (33 + 23), **343 cartões**, ~28h45 (M1 3h35, M2 3h15, M3 3h25, M4 3h15, M5 2h55, M6 3h05, M7 2h50, M8 3h05, M9 3h20);
   A2 com 10 módulos, 58 unidades (36 + 22), **426 cartões** (416 novos + 10 publicados), ~33h10 (M1 3h05, M2 3h15, M3 3h15, M4 3h30, M5 2h50, M6 3h15, M7 3h05,
   M8 3h30, M9 3h30, M10 3h55).
-- **Próxima etapa (decisão 146)**: o mapa A1 + A2 aguarda a aprovação final da dona; depois, a Etapa 0b parte 2 (`curriculo_ops.js`, camadas por chave, unidade que
+- **Próxima etapa (decisão 146)** (*antes da aprovação vem a auditoria final, decisão 196*): o mapa A1 + A2 aguarda a aprovação final da dona; depois, a Etapa 0b parte 2 (`curriculo_ops.js`, camadas por chave, unidade que
   muda de nível, conclusão e desbloqueio por plano) e o conteúdo módulo a módulo, com pt-BR e en depois de aprovado.
 - **Decisões 147 a 156 no `12`** (2026-10-21): A1 M2.3 com 11 cartões (*brun* volta) e a nota "Outros traços" com *beau / belle* no lugar de *les lunettes*; nota nova de
   *chaque* e dos intervalos (*tous les deux mois*, *deux fois par mois*) na A1 M3.6; *le verre* com um cartão só (A1 M4.5, "copo"; "vidro" em nota na M5.4);
@@ -107,3 +107,11 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   *l'écran* sem conflito da regra 14); notas novas de abertura e fecho de cartas e e-mails (M9.3, Real, alta) e *Félicitations !* e *Bon courage !* (M9.5, Real, alta);
   **A2 M1 a M9 fechados, segue o M10** (Opinião, cultura e mundo). Totais: A1 344; **A2 424** (414 + 10), ~33h10 (M9 ~3h30, 47 cartões). Na seção 7 do `08 v2` sai o
   achado de *garée*.
+- **Decisões 193 a 196 no `12`**: listas do A2 M10 aprovadas (M10.1, M10.3, M10.4 e M10.6 com 12; conferência da regra 14 com o A1 e o A2 inteiros: nenhuma palavra é
+  cartão em outra unidade, sem troca; *l'histoire* com os dois sentidos num cartão só); notas culturais novas: onde se fala francês e as variantes da francofonia
+  (M10.6, ligando com *le Canada, la Suisse, la Belgique*, *septante* e *souper* do A1 sem repeti-los), *la fête nationale* do 14 de julho (M10.3) e *le château* se couber;
+  M10 mantido com 7 unidades e ~3h55, gramáticas finais e versões grátis mantidas. **Mapa do A2 completo e A1 revisto.** Contas refeitas pela soma das listas aprovadas:
+  **A2 com 427 cartões (417 + 10)**, não 424 (a conta histórica não desfez *la police* na M2.5 nem *la poste, la mairie* na M7.5 quando voltaram a 12); ~33h10; notas do A2
+  ~65. A1 sem mudança: 9 módulos, 56 unidades (33 + 23), 344 cartões, ~28h45. Seção 7 do `08 v2` limpa: ficam só as pendências abertas (inclusive a nota "14 de julho"
+  do A1 M3.5, proposta a confirmar); a lista "só para conferir" virou a lista de conferência da regra 14, na seção 3.2.
+- **Status: A2 M1 a M10 fechados; aguarda auditoria final (agente `auditor-curricular`) e aprovação do mapa** (decisões 146 e 196).
