@@ -486,3 +486,8 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   agenda; domínio próprio do Supabase custa US$ 10 + plano Pro e ainda mostraria `/functions/v1/`; Railway não tem plano
   grátis permanente). Um único Netlify para o site inteiro, configurado uma vez; outras professoras não fazem nada.
   Passo a passo: `docs/agenda-netlify-passo-a-passo.md`. Interruptor no site: `CALENDAR_FEED_HOST`.
+- 2026-10-22: Netlify `agenda-profbrune` (público, repasse testado pela autora com senha inventada = agenda vazia),
+  CNAME `agenda` + TXT de verificação no Registro.br, cadeado Let's Encrypt emitido (o 1º pedido travou com
+  "certificate parameter is required", erro conhecido do Netlify; resolveu sozinho). `CALENDAR_FEED_HOST` ligado:
+  link = `webcal://agenda.profbrune.com.br/<senha>`. Testes: painel-professora 565/571 (as 6 falhas são da aba
+  "Privacidade" do Admin, de outra conversa, e já falhavam sem esta mudança).
