@@ -72,3 +72,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   do A2 M3 (**M3.4 demonstrativos e *lequel***, versão grátis na M3.3; **M3.6 superlativo**, versão grátis na M3.5; ids iguais); notas culturais *les soldes* (M3.3) e
   *le vide-grenier* (M3.5); **A2 M1, M2 e M3 fechados, segue o M4**. Totais: A1 344 cartões; **A2 424** (414 + 10), ~33h10 (M3 ~3h15, sem mudança). Na seção 7 do
   `08 v2` fica só a lista "só para conferir" das palavras repetidas.
+- **Decisões 167 a 170 no `12`**: listas do A2 M4 aprovadas (M4.1 11, M4.2 12, M4.3 12; *blessé / blessée* e *les pompiers* só em frase); **M4.5 só hábitos saudáveis**
+  (saem *le match, l'équipe, gagner*; entram *se détendre, la santé* e a 12ª palavra proposta ***l'alimentation***, a revisar pela dona); nota cultural nova na M4.2
+  (*carte Vitale* e *médecin traitant*, Cult, alta); **A2 M1 a M4 fechados, segue o M5** (À mesa). Totais: A1 344; **A2 424** (414 + 10; 423 se a M4.5 ficar com 11),
+  ~33h10 (M4 ~3h30, 47 cartões). Achado na seção 7 do `08 v2`: *la santé* já aparece em 2 frases publicadas do A1 (`A1-11`, `A1-19`).

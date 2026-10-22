@@ -52,3 +52,5 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
     (nota). Lexemas diferentes com a mesma raiz ficam com os dois cartões (*goûter*, verbo, A2 M5.5; *le goûter*, lanche, A2 M1.1). Uma palavra com dois sentidos pode ser um
     cartão só com os dois (*voler*: roubar e voar; *arriver*: chegar e acontecer, A2 M2.5; decisão 158). *en bois* e *en verre* ficam só em frase na A2 M3.1 (*le bois* e *le verre* são cartões do A1); os cartões de material da M3.1 são *le métal* e *le plastique*, com
     *en métal, en plastique* em frase (decisão 163, fecha a pendência *en verre*).
+    A2 M4 (decisões 167 e 168): *la santé* e *se détendre* têm cartão só na A2 M4.5 (*la santé* já aparece em 2 frases publicadas do A1, achado a decidir);
+    *gagner* fica fora da M4.5 (repetiria o sentido de "ganhar dinheiro" do A2 M7); *la carte Vitale* (A2 M4.2) contém o cartão *la carte* do A1 sem ser a mesma palavra.

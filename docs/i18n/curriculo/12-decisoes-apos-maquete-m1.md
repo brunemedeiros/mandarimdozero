@@ -514,3 +514,41 @@ Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovad
      verão); *le vide-grenier* na M3.5, junto do cartão (Cult, alta): feira popular de troca e venda de usados. A nota de opinião completa do A2 (*je trouve que, à mon
      avis*) **fica** na M3.5.
 166. **Revisão do A2 módulo a módulo**: M1, M2 e M3 fechados; segue o **M4**.
+
+---
+
+# Vigésima primeira rodada (2026-10-22): revisão do A2 M4 "Saúde e bem-estar"
+
+Base: respostas da dona no corpo da conversa (decisão 148). Aplicado em `08-mapa-final-a1-a2-v2.md` (seções 1, 3.2, "Saúde", 7 e Resumo), `15` (regra 14) e `00`.
+Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovados pela dona.
+
+167. **A2 M4: listas aprovadas.**
+     - M4.1 (`A1-15`, vinda do A1, 11): *la tête, le ventre, la main, le pied, malade, avoir mal, la fièvre, se sentir* (8 chaves publicadas) + *la gorge, la dent,
+       se reposer* (3 chaves novas, decisão 130).
+     - M4.2 "Na consulta" (`A2-10`, 12): *le rendez-vous, l'ordonnance, le médicament, le comprimé, la douleur, tousser, le rhume, la grippe, se faire mal, allergique,
+       guérir, la carte Vitale*.
+     - M4.3 "Emergências" (`A2-11`, 12): *le bras, la jambe, le dos, le cœur, se casser, grave, les urgences, l'ambulance, le SAMU, le pansement, le malaise, saigner*.
+       *blessé / blessée* e *les pompiers* só em frase (cartões da A2 M2.5, decisão 157); *se blesser* só em frase (decisão 162); *le dentiste* fica fora das listas do M4
+       (sem cartão; fecha o "destino a revisar" que estava na A2 M4.3 do `08 v2`).
+     - Conferido (regra 14): nenhuma dessas palavras é cartão em outra unidade do A1 ou do A2. *la carte Vitale* continua na lista "só para conferir" da seção 7 do `08 v2`
+       (expressão que contém o cartão *la carte* do A1, sem ser a mesma palavra-cartão).
+168. **A2 M4.5 só hábitos saudáveis.** Saem *le match, l'équipe, gagner*: esporte de competição é lazer, e *gagner* repetiria o sentido de "ganhar dinheiro" do A2 M7.
+     Entram ***se détendre*** e ***la santé***. Lista da M4.5: *courir, nager, la salle de sport, l'entraînement, le sommeil, le stress, équilibré / équilibrée, faire de
+     l'exercice, grignoter, se détendre, la santé* (11) + **12ª palavra proposta: *l'alimentation*** (alimentação; *une alimentation équilibrée*, que junta com
+     *équilibré* da própria lista; **a revisar pela dona**; se ela preferir, a unidade fica com 11). *être en forme* continua em nota (decisão 157).
+     - Conferido (regra 14), no A1 e no A2 (`08 v2`, `04`, `08-revisao-por-funcao-comunicativa.md` e `fr/content.js`): *se détendre* e *l'alimentation* não aparecem em
+       nenhuma lista nem no conteúdo publicado; *la santé* não é cartão em nenhuma unidade (cartão **só aqui**). *se reposer* (A2 M4.1) é outro verbo, sem conflito.
+     - **Achado para a dona**: *la santé* já aparece em **2 frases publicadas do A1**, antes do cartão: *Les légumes sont bons pour la santé.* (`A1-11`, A1 M4.2) e
+       *Le sport est bon pour la santé.* (`A1-19`, A1 M9.1). Pela regra "frases só com vocabulário visto" (regra 11 do `15`, decisão 145) elas seriam trocadas na
+       reescrita do A1, ou aceitas como exceção (a frase vira revisão natural no A2). Fica na seção 7 do `08 v2` para decidir.
+169. **Nota cultural nova na A2 M4.2** (Cult, alta; texto só depois, aprovado pela dona): a *carte Vitale* e o *médecin traitant* (o médico de família que a pessoa
+     declara), como a consulta funciona na França (marcar *un rendez-vous*, pagar e ser reembolsado) e o reembolso pela *Sécurité sociale* com a *carte Vitale*.
+     Vai junto do cartão *la carte Vitale*.
+170. **A2 M4 fechado**; segue o **M5** (À mesa).
+     - **Contas**: M4.1 11, M4.2 12, M4.3 12, M4.5 12 (com *l'alimentation*, proposta) = **47 cartões**; na M4.5 saem 3 e entram 2 + a 12ª proposta (a M4.2 e a M4.3
+       já eram contadas com 12), então o A2 continua com **424 cartões** (414 novos + 10 publicados); se a dona ficar com 11 na M4.5, **423** (413 + 10). O tempo não muda:
+       M4 ~3h30 (4 unidades de vocabulário × ~40 min + 2 gramáticas × ~25 min); A2 ~33h10.
+     - **Versão grátis** (coluna do `08 v2`): M4.2 abriga a do COI (M4.4, gancho *Le médecin lui donne une ordonnance*); M4.5 abriga a do condicional (M4.6, gancho
+       *Tu devrais dormir plus*). Sem mudança de posição.
+     - Pendências limpas: a lista da A2 M4.3 sai de "Listas de palavras a revisar pela dona" (seção 7 do `08 v2`); entram lá só a 12ª palavra da M4.5 e o achado de
+       *la santé* nas frases publicadas do A1.
