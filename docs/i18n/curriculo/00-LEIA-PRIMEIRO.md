@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 56 unidades, 343 cartões) e do A2 (10 módulos, 58 unidades, 426 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 56 unidades, 344 cartões) e do A2 (10 módulos, 58 unidades, 425 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
@@ -58,4 +58,12 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   *d'habitude* e nota *copain / copine* na M1.1, listas da M1.1, M1.4 e M1.5 aprovadas, M1.3 sem *calme, bruyant, moderne, ancien* (cartões do A1) e com 4 palavras novas
   (proposta), *sérieux* só na M1.4. Na conferência, "une fois par semaine" já estava certo em todos os documentos (decisão 150).
 - **Totais depois das decisões 147 a 156**: A1 com **344 cartões** (M2 31); A2 com **425 cartões** (415 novos + 10 publicados; a A2 M7.2 fica com 11 sem *sérieux*);
-  tempos sem mudança (A2 M1 ~3h05). Palavras repetidas que ainda restam no A2 (achados, sem decisão): `08 v2` seção 7.
+  tempos sem mudança (A2 M1 ~3h05). Palavras repetidas no A2: resolvidas pela decisão 157 (abaixo).
+
+## Atualização 2026-10-22
+
+- **Decisões 157 a 161 no `12`**: palavras repetidas no A2 deduplicadas (regra 14: o primeiro cartão fica; quem perde um cartão ganha uma palavra nova, proposta a revisar
+  pela dona: A2 M4.3 *le malaise, saigner*; M4.5 *faire de l'exercice, grignoter*; M8.1 *disponible*; M8.2 *passer l'aspirateur*; M8.4 *la vitesse*; M9.3 *souhaiter*;
+  M10.3 *le jour férié*; M10.4 *durable*); *goûter* e *le goûter* ficam os dois; listas do A2 M2 aprovadas (*voler* e *arriver* com os dois sentidos na M2.5) e notas novas
+  do M2 (*le vol / voler*, *la grève*); **A2 M1 e M2 fechados, segue o M3**. Totais sem mudança: A1 344 cartões; A2 425 (415 + 10), ~33h10. Na seção 7 do `08 v2`
+  ficam só *en verre* e a lista "só para conferir".

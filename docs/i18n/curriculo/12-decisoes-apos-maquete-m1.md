@@ -445,3 +445,40 @@ Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovad
      lista de 12) e M1.5 **aprovadas como estão**. Totais: A2 com **425 cartões** (415 novos + 10 publicados); A1 com **344** (decisão 147); tempos do A2 M1 sem mudança
      (~3h05, 48 cartões). A conferência das demais listas do A2 contra o A1 e entre si (regra 14) ficou só como achados, sem decisão: `08 v2` seção 7, linha "Palavras
      repetidas no A2".
+
+---
+
+# Décima nona rodada (2026-10-22): palavras repetidas no A2 e revisão do A2 M2
+
+Base: respostas da dona no corpo da conversa (decisão 148). Aplicado em `08-mapa-final-a1-a2-v2.md` (seções 1, 3.2, "Saúde", 7 e 8), `15` (regra 14) e `00`.
+Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovados pela dona. As palavras que entram no lugar das que saíram são **proposta a revisar pela dona**.
+
+157. **Deduplicação de palavras (regra 14), aprovada.** O primeiro cartão fica; as demais unidades usam a palavra em frase (ou nota) e **cada unidade que perde um cartão
+     ganha uma palavra nova no lugar** (proposta, a revisar pela dona, sem repetir cartões de outras unidades), então nenhuma conta muda:
+     - *le quartier, la circulation, la nature* têm cartão na **A2 M1.3** (lista da M1.3 aprovada, decisão 160). Saem da A2 M8.1 "Procurar moradia" (entra *disponible*),
+       da A2 M8.4 "Trânsito e carro" (entra *la vitesse*) e da A2 M10.4 "Meio ambiente" (entra *durable*).
+     - *blessé / blessée* e *les pompiers* têm cartão na **A2 M2.5**; a A2 M4.3 "Emergências" só reusa em frase. O cartão da M4.3 era o par *se blesser / blessé*: sai inteiro
+       (*se blesser* fica em frase, *Il s'est blessé à la jambe.*, por ser a mesma família de *blessé*; a confirmar pela dona) e entram *le malaise* (*faire un malaise*, o "mal
+       súbito" do 15) e *saigner*. A nota dos números (15 e 18) continua na M4.3 e usa *les pompiers* já conhecido.
+     - *propre* fica na **A1 M7.2**; sai da A2 M8.2 "Dividir apartamento e vizinhos" (entra *passer l'aspirateur*; *sale* continua e *propre* volta em frase).
+     - *l'église* fica na **A1 M6.3**; sai da A2 M10.3 "Patrimônio e festas" (entra *le jour férié*).
+     - *cher / chère* ("querido", no começo da carta) vira **nota** na A2 M9.3, sem cartão (o cartão *cher* = caro é do A1 M5.3); a M9.3 ganha *souhaiter* no lugar.
+     - *la forme* ("forma", cartão da A2 M3.1) e *être en forme* ficam **sem cartão na A2 M4.5**: *être en forme* entra em nota ("estar em forma"; *la forme* da M3.1 com
+       sentido novo); a M4.5 ganha *faire de l'exercice* e *grignoter* no lugar das duas.
+     - *goûter* (verbo, provar, A2 M5.5) e *le goûter* (lanche, A2 M1.1) **ficam os dois cartões**: lexemas diferentes (verbo e substantivo).
+     - Consequência: a frase publicada *La main est blessée.* (A2 M4.1) continua indo com a chave para a M4.3 (decisão 136), agora como reuso em frase (o cartão *blessé* já
+       veio na M2.5); como a M2.5 vem antes da M4.1, ela também poderia ficar na M4.1 (a decidir ao escrever o A2 M4).
+     - Fica pendente na seção 7 do `08 v2`: *en verre* (A2 M3.1, caso igual ao de *en bois*) e a lista "só para conferir".
+158. **A2 M2 "Contar uma experiência": listas aprovadas.** M2.1 (`A2-4`): *le voyage, le séjour, l'avion, l'aéroport, le vol, le paysage, la visite, découvrir,
+     inoubliable, rater, faire escale, le décalage horaire*. M2.3 (`A2-5`): *perdre, oublier, tomber en panne, être en retard, la grève, le problème, heureusement,
+     malheureusement, soudain, tout à coup, réparer, se tromper*. M2.5 (`A2-6`): *l'accident, le portefeuille, voler, le voleur / la voleuse, le témoin, porter plainte,
+     blessé / blessée, l'incendie, les pompiers, se passer, arriver, récemment* (12, com *récemment* publicado). *arriver* é um cartão com os dois sentidos (chegar e
+     acontecer); *voler* é um cartão com os dois sentidos (roubar e voar); *le vol* na M2.1 continua só "voo". M2 com 36 cartões, tempo sem mudança (~3h15).
+159. **Notas novas do A2 M2 (aprovadas; texto só depois).** M2.5: "*le vol* = voo ou roubo; *voler* = voar ou roubar" (Exp, alta, armadilha lexical; e *arriver* = chegar
+     ou acontecer, se couber). M2.3: nota cultural breve sobre *la grève* (Cult, alta): greves de transporte fazem parte do cotidiano (*grève dans les transports*).
+     Versões grátis confirmadas: *d'abord, ensuite, puis, enfin* e imperfeito x PC na M2.1; *donc, alors*, *-ment* e *Je l'ai perdue* (com concordância) na M2.3;
+     *depuis / pendant* na M2.5.
+160. **Revisão do A2 módulo a módulo**: M1 e M2 fechados (com a M1.3 aprovada com *le quartier, la circulation, la nature, les gens*); segue o **M3**.
+161. **Contas e registro.** As trocas da 157 são uma por uma: A2 continua com **425 cartões** (415 novos + 10 publicados) e os tempos não mudam (~33h10). A seção 7 do
+     `08 v2` fica só com o que ainda é pendência (*en verre* e a lista "só para conferir"); as listas novas que receberam palavras de substituição entram em "Listas de
+     palavras a revisar pela dona".
