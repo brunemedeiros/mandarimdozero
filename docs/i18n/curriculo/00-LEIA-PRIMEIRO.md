@@ -81,3 +81,9 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   M5.5 com *tendre, juteux* no lugar de *toucher, le parfum*; *sentir* x *se sentir* com dois cartões e nota na M5.5); nota de intensidade (*assez, plutôt, trop*) vai para
   a M5.1; notas novas na M5.1: *le pourboire / service compris* (Cult, alta) e pontos da carne (Exp, alta); **A2 M1 a M5 fechados, segue o M6** (Estudos e projetos).
   Totais sem mudança: A1 344; **A2 424** (414 + 10), ~33h10 (M5 ~2h50, 36 cartões). Achado na seção 7 do `08 v2`: *délicieux, sucrée, cuit* em frases publicadas do A1.
+- **Decisões 176 a 179 no `12`**: *délicieux, cuit, sucré* nas frases publicadas do A1 (*Le pain est délicieux.*, *Le poulet est délicieux ce soir.*, *L'œuf est cuit.*,
+  *La pomme est rouge et sucrée.*) **ficam**, pela exceção formal da regra 11 do `15` (adjetivo ou expressão de uso comum; cartões no A2 M5); listas do A2 M6 aprovadas
+  (M6.1 com ***le bac*** no lugar de *la note*, que fica só em frase; M6.3 e M6.5 como no `04`; conferência da regra 14 sem nenhuma troca); notas novas do M6: sistema
+  escolar francês (Cult, alta) e *la fac* (Real, alta) na M6.1, níveis do Quadro Europeu e DELF (Cult, alta) na M6.3; **A2 M1 a M6 fechados, segue o M7** (Trabalho,
+  dinheiro e papelada). Totais sem mudança: A1 344; **A2 424** (414 + 10), ~33h10 (M6 ~3h15, 36 cartões). Achado na seção 7 do `08 v2`: *prochain* (*La semaine
+  prochaine, je pars en voyage.*, A1 M3.3, e a gramática A1 M8.4) e *le projet* (fala da A1 M9.1) em frases publicadas do A1.

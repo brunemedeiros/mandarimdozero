@@ -609,3 +609,59 @@ Base: respostas da dona no corpo da conversa (decisão 148). Aplicado em `08-map
      - Notas do A2: ~49 (+2 culturais da M5.1, decisão 174; +1 nota *sentir* x *se sentir* na M5.5, decisão 172; a intensidade só muda de unidade).
      - **Pendências limpas** (seção 7 do `08 v2`): sai a 12ª palavra da M4.5 de "Listas de palavras a revisar pela dona" (decisão 171); a linha "*la santé* em frases
        publicadas do A1" vira decidida (exceção da decisão 171, nada a trocar); entra o achado de *délicieux, sucrée, cuit* (decisão 172).
+
+---
+
+# Vigésima terceira rodada (2026-10-22): *délicieux, cuit, sucré* no A1 e revisão do A2 M6 "Estudos e projetos"
+
+Base: respostas da dona no corpo da conversa (decisão 148), aprovadas em 2026-10-22. Aplicado em `08-mapa-final-a1-a2-v2.md` (cabeçalho, seções 1, 2.1, 3.2, 7, 8 e
+Resumo), `15` (regras 11 e 14) e `00`. O `16` não cita nada desta rodada. Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovados pela dona.
+
+176. ***délicieux, cuit, sucré* nas frases publicadas do A1 ficam como estão** (fecha o achado da decisão 172): *Le pain est délicieux.* (`A1-5`, A1 M4.1), *Le poulet est
+     délicieux ce soir.* e *L'œuf est cuit.* (`A1-11`, A1 M4.2) e *La pomme est rouge et sucrée.* (`A1-5`, vai com a chave para a A1 M5.4, decisão 136) são aceitas pela
+     **exceção formal da regra 11** do `15` (decisão 171), estendida pela dona a **adjetivo ou expressão de uso comum** que o aluno entende pela tradução da frase. Os cartões
+     continuam no A2 (*délicieux, sucré* na A2 M5.1; *cuire* na A2 M5.3; *cuit* aparece no cartão *bien cuit*, A2 M5.1), onde a palavra é ensinada e a frase vira revisão
+     natural. A nota nova *c'est bon, c'est délicieux* da A1 M4.1 fica. Vale caso a caso, com decisão da dona; palavra solta sem decisão continua sendo trocada. A pendência
+     sai da seção 7 do `08 v2`.
+177. **A2 M6 "Estudos e projetos": listas aprovadas.**
+     - M6.1 "Contar a formação" (`A2-16`, 12): *les études, la fac, le lycée, le diplôme, l'examen, réussir, échouer, le stage, la formation, s'inscrire, la matière*
+       (disciplina) + ***le bac*** (no lugar de *la note* do `04` 6.3; a nota escolar aparece **só em frase**, ex.: *J'ai eu une bonne note à l'examen.*).
+     - M6.3 "Falar do aprendizado de línguas" (`A2-17`, 12): *apprendre, la langue étrangère, le cours, le niveau, le vocabulaire, la prononciation, l'accent, la faute,
+       bilingue, l'échange, progresser, réviser* (a lista do `04` 6.3, sem mudança).
+     - M6.5 "Projetos e sonhos" (`A2-18`, 12): *le projet, le rêve, rêver de, l'avenir, espérer, avoir envie de, un jour, plus tard, prochain / prochaine, décider de,
+       réaliser, le but* (a lista do `04` 6.3, sem mudança).
+     - **Conferência da regra 14** (A1 e A2, no `08 v2`, no `04`, no `08-revisao-por-funcao-comunicativa.md` e em `fr/content.js`): **nenhuma palavra sai**, então não há
+       substituta a propor.
+       - *prochain / prochaine*: **não é cartão do A1** em nenhuma unidade (decisão 136 já registrava "sem *prochain* nem *voir*, que não são cartão"); fica na M6.5.
+         **Achado para a dona** (mesmo caso das decisões 171 e 176): a palavra aparece antes do cartão na frase publicada *La semaine prochaine, je pars en voyage.*
+         (`A1-7-p5`, A1 M3.3; a frase também usa *partir*, cartão da A1 M8.1, e *en voyage*, com o cartão *le voyage* da A2 M2.1) e no quadro da gramática A1 M8.4
+         (`A1-g20`, *demain, ce soir, la semaine prochaine*). Opções: aceitar *la semaine prochaine* como expressão fixa (exceção da regra 11) ou trocar a frase e o exemplo
+         na reescrita do A1. Fica na seção 7 do `08 v2`, a decidir.
+       - *s'inscrire*: cartão **só na A2 M6.1**. A A2 M7.5 "Serviços e papelada" (lista ainda a revisar pela dona) não tem *s'inscrire*; se precisar do verbo
+         (inscrever-se num serviço), usa em frase.
+       - *le stage*: não aparece em nenhuma outra lista (a A2 M7.2 tem *le CV, l'expérience, la compétence...*, sem *le stage*) nem no publicado. Sem conflito.
+       - *la matière*: cartão só aqui, no sentido de **disciplina escolar**. A "matéria" da A2 M3.1 é só a função da unidade ("forma, matéria, função"), sem cartão
+         *la matière*; os cartões de material de lá são *le métal, le plastique* (decisão 163). Mesma forma com outro sentido ("material"): se a M3.1 usar, é só em
+         frase (regra 14). Sem conflito.
+       - *réviser*: não aparece em nenhuma outra lista nem no publicado. Sem conflito.
+       - Demais palavras do M6 (*le bac, l'examen, le lycée, la fac, le cours, le niveau, l'accent, la faute, le projet, le rêve, l'avenir, un jour, plus tard, le but*...):
+         nenhuma é cartão em outra unidade nem aparece no publicado (só *Tu as des projets pour le week-end ?*, fala `A1-19-d0` da A1 M9.1, com *le projet* antes do
+         cartão: frase de conversa comum, entra na mesma lista de achados da seção 7).
+       - Lexemas diferentes da mesma família, com os dois cartões (vão para a lista "só para conferir" da seção 7 do `08 v2`): *les études* (A2 M6.1) x *l'étudiant /
+         l'étudiante* (A1 M1.6); *l'échange* (intercâmbio, A2 M6.3) x *échanger* (trocar, A2 M3.3); *le rêve* x *rêver de* (os dois na A2 M6.5, como no `04`);
+         *la langue étrangère* (A2 M6.3) contém *la langue*, que não é cartão no A1.
+178. **Notas novas do A2 M6 (aprovadas; texto só depois, aprovado pela dona)**:
+     - M6.1, nota cultural (Cult, alta): **o sistema escolar francês** (*le lycée, le bac, la fac, les grandes écoles*): o *lycée* termina com o *bac*, que dá acesso à
+       *fac*; as *grandes écoles* são um caminho à parte, seletivo. Junto do cartão *le bac*.
+     - M6.1, nota de realidade (Real, alta): ***la fac*** = a universidade, no registro informal (*Je suis à la fac.*; a forma completa é *la faculté* / *l'université*).
+       Junto do cartão *la fac*.
+     - M6.3, nota cultural (Cult, alta): **os níveis do Quadro Europeu (A1 a C2) e o DELF**: o que o aluno estuda aqui corresponde ao DELF A2. Junto do cartão *le niveau*.
+     - Ficam as versões grátis do M6 (coluna "Versão grátis" do `08 v2`, sem mudança de posição): M6.1 abriga a da M6.2 (futuro simples, gancho *Je serai médecin*); M6.3
+       a da M6.4 (*savoir* x *connaître*, gancho *Je sais parler anglais / Je connais Paris*); M6.5 a da M6.6 (*quand* e *si*, gancho *Si j'ai le temps, je...*), com as
+       notas já previstas de desejo (*j'aimerais, j'espère que*) e verbo + *de* + infinitivo.
+179. **A2 M6 fechado**; segue o **M7** (Trabalho, dinheiro e papelada).
+     - **Contas**: M6.1 12, M6.3 12, M6.5 12 = **36 cartões** (a troca da M6.1 é uma por uma); A2 com **424 cartões** (414 novos + 10 publicados), sem mudança. O tempo
+       não muda: M6 ~3h15 (3 unidades de vocabulário × ~40 min + 3 gramáticas × ~25 min); A2 ~33h10.
+     - Notas do A2: ~52 (+3 da decisão 178: sistema escolar e *la fac* na M6.1, níveis e DELF na M6.3).
+     - **Pendências limpas** (seção 7 do `08 v2`): sai o achado de *délicieux, sucrée, cuit* (decidido pela 176); em "Listas de palavras a revisar pela dona", o A2 M6 entra
+       como aprovado; entra o achado de *prochain* e *le projet* em frases publicadas do A1 (decisão 177).
