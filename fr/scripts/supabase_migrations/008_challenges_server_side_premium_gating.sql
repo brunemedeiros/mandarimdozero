@@ -5,7 +5,8 @@
 -- Premium (data->>'moduleId' preenchido). A trava do app é só visual.
 --
 -- Solução (aditiva até o passo 3):
---  1) is_challenges_premium(): true para plan_tier='premium' ou a admin.
+--  1) is_challenges_premium(): true para quem tem a permissão "Desafios Premium" na tabela Admin > Planos
+--     (Premium, Professora, Aluno vinculado, admin). Depende da 075 (_has_permission).
 --  2) get_published_challenges(): devolve os publicados; para quem não é
 --     Premium, os desafios com moduleId saem como "esqueleto" (id, type,
 --     level, status e só moduleId/unitId/theme dentro de data), sem
@@ -19,6 +20,11 @@
 -- Ordem recomendada (SQL Editor, tem DROP): Staging primeiro, depois produção.
 -- Rollback: recriar a policy da 001 (using (status = 'published')).
 
+-- Corrigida na Etapa 5 (2026-10-22), ainda NÃO aplicada: a versão anterior usava `p.id` (profiles não tem
+-- coluna id; a chave é user_id) e plan_tier, deixando o aluno vinculado de fora. Agora usa a permissão
+-- efetiva da conta pela tabela Admin > Planos (075/116): célula "Desafios Premium" (challenges_premium),
+-- somando os papéis (Premium Basic/Pro, Professora, Aluno pelo vínculo ativo). Admin continua liberada
+-- (_has_permission já devolve true para ela). Sem login: false.
 create or replace function public.is_challenges_premium()
 returns boolean
 language sql
@@ -26,14 +32,7 @@ stable
 security definer
 set search_path = public
 as $$
-  select coalesce(
-    (auth.jwt() ->> 'email') = 'brunemed1310@gmail.com'
-    or exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() and p.plan_tier = 'premium'
-    ),
-    false
-  );
+  select coalesce(public._has_permission(auth.uid(), 'challenges_premium'), false);
 $$;
 
 revoke all on function public.is_challenges_premium() from public;

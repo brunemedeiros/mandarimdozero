@@ -269,8 +269,21 @@ export function isTtsAdminEmail(email) {
   return typeof email === 'string' && email.trim().toLowerCase() === TTS_ADMIN_EMAIL;
 }
 
+// Etapa 5 (decisões da dona, 2026-10-22): a cota mensal vem da tabela Admin > Planos (célula "Áudio por texto e
+// gravação", permission_limit('tts_monthly_quota') da conta). planLimit: número = teto; 0 = o plano não tem áudio
+// por texto; null = sem limite. Se o RPC falhar (rpcFailed) ou não responder, vale o teto antigo da env
+// (TTS_MONTHLY_LIMIT, padrão 300), como antes da Etapa 5.
+export function resolvePlanMonthlyLimit({ planLimit, rpcFailed, envLimit }) {
+  if (rpcFailed || planLimit === undefined) return envLimit;
+  if (planLimit === null) return Infinity;
+  const n = Number(planLimit);
+  return Number.isInteger(n) && n >= 0 ? n : envLimit;
+}
+
 // count = gerações bem-sucedidas da conta desde o início do mês.
 export function decideMonthlyQuota({ count, limit, isAdmin }) {
   if (isAdmin) return { allowed: true };
+  if (limit === 0) return { allowed: false, error: 'plan_required' };
+  if (limit === Infinity) return { allowed: true };
   return (count ?? 0) >= limit ? { allowed: false, error: 'monthly_quota_exceeded' } : { allowed: true };
 }

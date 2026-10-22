@@ -225,3 +225,119 @@ limite de 20 e TTS sem trava no servidor (`docs/historico/14-*` itens 6 e 7).
 8. **Benefícios citáveis nos avisos Premium** (por enquanto, a explorar depois): cartões ilimitados, todos os tipos de
    cartão, áudio por texto e gravação, Decks públicos, ver quem copiou seu Deck, Desafios do Módulo e Ditados extras,
    Jogos da Conjugação, pular unidades.
+
+Decisões finais da dona (2026-10-22, aprovadas para implementação): (1) o site obedece à tabela Admin > Planos para
+Grátis, Aluno, Premium Basic e Premium Pro; as linhas da Professora ficam pelo papel e só leitura na tela; (2) o Aluno
+tem a versão básica do Premium, lida da coluna Aluno (nada fixo no código); (3) pular unidades: Premium e Aluno;
+(4) limite de cartões próprios lido da tabela e contado por conta; (5) Premium Pro fica (igual ao Basic); (6) pedir o
+Premium = botão "Fale com a Prof. Brune" (e-mail preenchido); (7) selo sem cadeado com bloqueio desligado; selo + cadeado
+com bloqueio ligado; Jogos com janela própria; (8) benefícios citáveis: os da lista do item 8 acima.
+
+## 8. Implementação (2026-10-22, branch `claude/optimistic-ramanujan-tercxc`)
+
+### O que mudou
+
+- **Fonte única**: `my_permissions()` (075) já somava os papéis (account_roles com validade + Aluno pelo vínculo ativo)
+  e devolvia o valor mais permissivo; foi reaproveitada (não há função paralela). A 116 só acrescenta `free` (linha
+  Grátis pura, para a admin com o Admin Mode desligado ver o site como conta grátis).
+- **Site** (`shared/permissions.js`): `planCan(chave)` e `planLimit(chave)` respondem pela tabela; antes de carregar ou
+  com o RPC fora do ar ninguém ganha nada (limite de reserva = 20). `shared/roles.js`: `myPlanKind()` (só para o texto
+  do selo), `fetchMyOwnCardsQuota()` (limite da célula "Cartões próprios", contando os cartões ativos de TODOS os
+  cursos), `isPremium()` deixou de decidir acesso; `hasUnlimitedOwnCards()` lê a tabela.
+- Trocas de `plan_tier`/vínculo fixo pela permissão:
+  | Recurso | Antes | Agora |
+  |---|---|---|
+  | Tipos de cartão (Meus cartões e janela Adicionar) | `plan_tier` | `planCan('rich_card_formats')` |
+  | Áudio por texto e gravação | `plan_tier` | `planLimit('tts_monthly_quota')` > 0 ou sem limite |
+  | Limite de cartões (criar, importar arquivo/link, Anki, perfil público) | 20 fixo, por curso; isento = Premium ou vínculo | célula `own_cards_limit`, por conta |
+  | Abrir/importar Deck público (servidor, 5 RPCs) | `plan_tier = 'premium'` | `_has_permission(uid, 'public_deck_import')` (116) |
+  | Desafios do Módulo e Ditados extras | `isPremium()` | `planCan('challenges_premium')` |
+  | Jogos da Conjugação | `isPremium()` (via Desafios) | `planCan('conj_games')` (permissão nova, 116) |
+  | Pular unidades | `isPremium()` ou vínculo | `planCan('trail_skip_locked')` |
+  | Cota do `tts-generate` (Edge Function) | `TTS_MONTHLY_LIMIT` igual para todos | `permission_limit('tts_monthly_quota')`; 0 = `plan_required`; RPC fora = env |
+- Bloqueios continuam como estavam: `CHALLENGE_PAYWALL_ENABLED`, `CHALLENGES_SERVER_GATING`, `CONJ_GAMES_PAYWALL_ENABLED`
+  e `TRAIL_SKIP_PAYWALL_ENABLED` = false. Os dois últimos viraram `let` (os testes ligam).
+- **Selos (regra 7)**: Jogos mostram "⭐ Premium" sem cadeado (cartão e aba) com o bloqueio desligado; com o bloqueio
+  ligado, só quem não tem `conj_games` vê "⭐ Premium" + 🔒 e, ao tocar, a janela própria `#premium-games-modal`.
+- **"Fale com a Prof. Brune"** (`premiumContactMailto`/`premiumContactButtonHTML`): `mailto:brunemed1310@gmail.com` com
+  assunto e texto no idioma do site (@ da pessoa + curso). Está na janela de limite (padrão e corte), na janela dos
+  Desafios do Módulo, na janela dos Jogos, no aviso dos tipos de cartão e no aviso de Deck público. Nenhum texto cita
+  mais "administração (profbrune)".
+- **Admin > Planos**: linhas Painel da professora, Analytics do aluno, Mural e Banco de Revisão só leitura (decididas
+  pelo papel), com explicação; subtítulo "A mudança vale na hora para Grátis, Aluno e Premium"; rótulos novos
+  (Todos os tipos de cartão; Áudio por texto e gravação; Pular unidades; Cartões próprios somando todos os cursos;
+  Jogos da Conjugação; Banco de Revisão em inglês, que antes aparecia em português).
+- **Ninguém perde cartão**: quem já passou do limite mantém todos os cartões ativos; só o botão Criar trava e as
+  importações cortam e avisam (regra "limite corta e avisa"; teste `tests/limite-corte`, casos G e H).
+- **008** (`fr/scripts/supabase_migrations/008_...`): `is_challenges_premium()` corrigida (`_has_permission(auth.uid(),
+  'challenges_premium')`, sem `p.id` nem `plan_tier`, Aluno incluído). Continua **não aplicada** (espera o paywall);
+  testada localmente dentro de `begin ... rollback` (`tests/planos-permissoes/test_008.sql`).
+
+### Migrations
+
+| Nº | Arquivo | Staging | Produção |
+|---|---|---|---|
+| 116 | `shared/supabase_migrations/116_plan_permissions_effective.sql` | aplicada em 2026-10-22, versão `20261022013043` | **pendente** (só depois da prévia aprovada) |
+
+Conferido no Staging depois: as 5 RPCs de Deck público sem `plan_tier`, `security definer` + `search_path=public`,
+hash igual ao do teste local; `my_permissions`/`copy_public_deck` sem EXECUTE para `anon`; `account_roles` com o mesmo
+hash; `role_permissions` 65 → 70 linhas (5 de `conj_games`); `trail_skip_locked` ligado para Premium Basic/Pro e Aluno.
+A 116 não tem DROP nem DELETE (vai pelo `apply_migration`). As 5 RPCs da produção têm o mesmo hash das do Staging
+(conferido por SELECT), então o `replace` da 116 casa nas duas.
+
+Desfazer a 116 (SQL Editor, tem DELETE): rodar o mesmo bloco `do $mig$` trocando as duas linhas de lugar; recriar
+`my_permissions()` da 075; `update role_permissions set enabled = false where permission_key = 'trail_skip_locked' and
+role in ('premium_basic','premium_pro')`; `delete from role_permissions where permission_key = 'conj_games'; delete from
+permission_catalog where key = 'conj_games'` (e voltar a versão anterior do site, que não conhece `conj_games`).
+
+### O que cada conta passa a ter (tabela de 2026-10-22 + 116)
+
+| Recurso | Grátis | Aluno | Premium Basic | Premium Pro | Professora | Admin (Admin Mode ligado) |
+|---|---|---|---|---|---|---|
+| Cartões próprios | 20 na conta (todos os cursos) | sem limite | sem limite | sem limite | sem limite | sem limite |
+| Tipos de cartão | só Normal | todos | todos | todos | todos | todos |
+| Áudio por texto e gravação | não (upload e link sim) | 300/mês | 300/mês | 300/mês | 300/mês | sem cota |
+| Abrir e importar Deck público | não | **sim (novo)** | sim | sim | sim | sim |
+| Ver quem copiou meu Deck | não | sim | sim | sim | sim | sim |
+| Desafios do Módulo e Ditados extras (bloqueio desligado: todos abrem) | não, ao ligar | sim | sim | sim | sim | sim |
+| Jogos da Conjugação (bloqueio desligado: todos abrem) | não, ao ligar | sim | sim | sim | sim | sim |
+| Pular unidades (bloqueio desligado: todos pulam) | não, ao ligar | sim | **sim (novo)** | **sim (novo)** | não (célula desligada) | sim |
+| Minhas aulas / Material de apoio | não | sim | não | não | não | sim |
+
+Admin com o Admin Mode desligado vê a coluna Grátis (só na interface; o servidor continua a tratando como admin).
+
+### Testes (números reais em 2026-10-22)
+
+- `tests/planos-permissoes/run.sh` (Postgres local, migrations 001 a 115 + 116 duas vezes): 116 142/142 (8 contas:
+  grátis, aluno, ex-aluno, Premium Basic, Premium Pro, Premium vencido, professora, admin; 5 RPCs de Deck público; a
+  tabela manda na hora) e 008 corrigida 14/14.
+- `tests/planos-permissoes/test_playwright.js` (fr e zh; grátis, aluno, Premium Basic, professora; Planos fr/zh x
+  claro/escuro em 390px): 105/105.
+- `tests/tts-google/test_tts_core.mjs`: 114/114 (cota pela tabela).
+- Regressão (antes = commit `bdde8d21`, depois = esta branch): i18n unit 2344 → 2343/2343 (2 checagens a menos: o `<p>` da
+  janela de limite deixou de usar `data-i18n-html`, porque o texto tem `{limit}`; 1 a mais pela `plan_required`), i18n
+  navegador 209/209, sem português no site em inglês 6/6, limite-corte 26 → 38/38 e unit 30/30, painel-admin Planos
+  162/162 e peças 31 → 35/35, plano-admin 26/26, conjugação 80/80, trilha (skip/checkpoint 19/19 e demais iguais),
+  desafios-* iguais, fase-f/g/i/j iguais, Deck público navegador 152, k2* iguais, acessibilidade 60/60, anki-destino 38/38.
+  Falhas que já existiam antes e continuam iguais: `scan_pt_literais` (privacy-draft), `test_card_variants_browser`
+  14/16, `test_content_en` 29/30, desafios-progresso 22/23, fase-h 76/78 (unit) e navegador zh H5, k2c 12/14, k2i,
+  painel-cartoes 256/264, painel-professora 565/571, `test_legacy_parity` (precisa do banco `pubdeck` do `run.sh`).
+- Testes antigos mudados de propósito (comportamento novo): `tests/trilha/test_skip_checkpoint_ui.js`,
+  `tests/plano-admin/test_playwright.js`, `tests/conjugacao/test_playwright.js` (selo sem cadeado e janela própria),
+  `tests/limite-corte/test_playwright.js` (botão de e-mail; casos G e H novos), `tests/painel-admin/*` (rótulos),
+  `tests/i18n/*` (textos aprovados), e os harness `tests/anki-destino/pw_harness.js`, `tests/fase-f`, `tests/fase-g`
+  (Premium simulado por `my_permissions`, `tests/planos-permissoes/fixtures.js`).
+
+### O que falta para a produção (nesta ordem)
+
+1. Dona aprova a prévia (capturas do selo dos Jogos, do aviso de limite com o botão e de Admin > Planos).
+2. Aplicar a 116 na produção (`apply_migration`, sem DROP) e conferir: 5 RPCs sem `plan_tier`, grants, `role_permissions`
+   65 → 70, `account_roles` com o mesmo hash, `trail_skip_locked` ligado para Premium Basic/Pro.
+3. Publicar o site (PR desta branch). A ordem importa pouco: o site novo com o banco antigo funciona (sem `free`, a
+   admin com Admin Mode desligado vê limite de reserva 20; sem `conj_games`, os Jogos só mudam quando o bloqueio ligar);
+   o banco novo com o site antigo também (o aluno passa a abrir Deck público pelo servidor).
+4. `tts-generate`: o código novo (cota pela tabela) não foi publicado em lugar nenhum (a função não existe no Staging).
+   Depois do PR, novo deploy na produção; até lá vale `TTS_MONTHLY_LIMIT` (300) para quem chamar a função.
+5. 008: continua esperando o paywall (lista em `docs/historico/14-pendencias-pos-paywall-e-decks.md`).
+6. Pergunta aberta para a dona: a Professora (sem ser admin) pode pular unidades? Hoje a célula está desligada (a decisão
+   2 citou só Premium e Aluno); a dona liga em Admin > Planos se quiser, sem código.

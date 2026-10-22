@@ -14,7 +14,9 @@ const seed = (page, n) => page.evaluate(n => {
   const pr = window.__DB.decks.find(d => d.kind === 'personal_root');
   for (let i = 0; i < n; i++) window.__DB.own_flashcards.push({ id: 9000 + i, owner_id: 'u-f', language_app_key: APP_KEY, status: 'active', deck_id: pr ? pr.id : null, front: 'a' + i, back_trans: 'b', fields: null, card_generation_mode: null, revision: 0, tags: [], created_at: new Date().toISOString() });
 }, n);
-const modal = page => page.evaluate(() => { const m = document.getElementById('flashcard-limit-modal'); return { open: m.style.display === 'flex', text: m.innerText, cta: !!m.querySelector('[data-limit-premium-cta]') }; });
+const modal = page => page.evaluate(() => { const m = document.getElementById('flashcard-limit-modal'); const a = m.querySelector('a[data-premium-contact]'); return { open: m.style.display === 'flex', text: m.innerText, cta: !!m.querySelector('[data-limit-premium-cta]'), mail: a ? a.getAttribute('href') : null }; });
+// Etapa 5: botão "Fale com a Prof. Brune" = e-mail da professora com o @ e o curso no assunto/texto.
+const mailOk = (m, course) => !!m.mail && m.mail.startsWith('mailto:brunemed1310@gmail.com?subject=') && decodeURIComponent(m.mail).includes(course) && decodeURIComponent(m.mail).includes('@aluna.teste');
 const closeModal = page => page.evaluate(() => { document.getElementById('flashcard-limit-modal').style.display = 'none'; });
 
 (async () => {
@@ -39,14 +41,16 @@ const closeModal = page => page.evaluate(() => { document.getElementById('flashc
     let m = await modal(page);
     L('A arquivo: só as 2 primeiras Notes criadas', await ev(() => { const t = window.__DB.own_flashcards.filter(r => r.fields).map(r => r.fields[0].content.value); return t.length === 2 && t[0] === 'c1' && t[1] === 'c2'; }));
     L('A aviso com números reais', m.text.includes('Esta importação criaria 3 cartões, mas sua conta pode possuir apenas 20') && m.text.includes('apenas os primeiros 2 cartões foram criados'), m.text);
-    L('A convite ao Premium destacado', m.cta && /Premium/.test(m.text) && /administração/.test(m.text));
+    L('A convite ao Premium destacado', m.cta && /Premium/.test(m.text) && /Prof\. Brune/.test(m.text) && !/administração|profbrune/.test(m.text), m.text);
+    L('A botão Fale com a Prof. Brune abre o e-mail com @ e curso', mailOk(m, lang === 'fr' ? 'Francês' : 'Mandarim'), m.mail);
     await closeModal(page);
 
     // B) Criação manual no teto: bloqueia e mostra o texto PADRÃO (sem vazar o aviso de corte)
     await openMeusCartoes(page, false, false);
     await ev(() => openFlashcardLimitModal());
     m = await modal(page);
-    L('B modal padrão restaurado (sem texto de importação)', m.open && m.text.includes('20 cartões próprios ativos') && !m.cta && !m.text.includes('criaria'), m.text);
+    L('B modal padrão restaurado (sem texto de importação)', m.open && m.text.includes('20 cartões próprios ativos') && m.text.includes('somando todos os cursos') && !m.cta && !m.text.includes('criaria') && !m.text.includes('{limit}'), m.text);
+    L('B modal padrão também tem o botão de e-mail', mailOk(m, lang === 'fr' ? 'Francês' : 'Mandarim'), m.mail);
     await closeModal(page);
 
     // C) Anki: Free com 17 -> 5 Notes, 3 criadas, aviso "Este Deck criaria 5..."
@@ -110,6 +114,26 @@ const closeModal = page => page.evaluate(() => { document.getElementById('flashc
     L('F perfil público: só o 1º cartão copiado', pub.length === 1 && pub[0] === 501, pub);
     L('F perfil público: aviso de corte com convite', m.open && m.text.includes('Esta seleção criaria 2 cartões') && m.text.includes('apenas o primeiro cartão foi criado') && m.cta, m.text);
     await closeModal(page);
+
+    // G) Etapa 5: o limite é da CONTA. 18 cartões no OUTRO curso + 0 neste: importar 3 cria só 2.
+    await seed(page, 0);
+    await ev(() => { const other = APP_KEY === 'frances' ? 'mandarim' : 'frances';
+      for (let i = 0; i < 18; i++) window.__DB.own_flashcards.push({ id: 9500 + i, owner_id: 'u-f', language_app_key: other, status: 'active', deck_id: null, front: 'o' + i, back_trans: 'b', fields: null, card_generation_mode: null, revision: 0, tags: [], created_at: new Date().toISOString() }); });
+    await openMeusCartoes(page, false, false);
+    const badgeG = await ev(() => ([...document.querySelectorAll('.pill')].map(e => e.textContent).find(x => /\d+\/\d+/.test(x)) || '').replace(/^\S+\s*/, ''));
+    L('G selo conta a conta inteira (18/20)', badgeG === 'Plano grátis — 18/20 cartões', badgeG);
+    await page.setInputFiles('#my-flashcards-import-file', { name: 'y.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({ languageAppKey: key, cards: ['g1', 'g2', 'g3'].map(f => ({ front: f, backTrans: f + 'b', frontIsTargetLanguage: true })) })) });
+    await page.waitForFunction(() => document.getElementById('flashcard-limit-modal').style.display === 'flex', null, { timeout: 8000 });
+    m = await modal(page);
+    L('G cartões do outro curso contam no limite: só 2 criados', await ev(() => window.__DB.own_flashcards.filter(r => r.fields && r.language_app_key === APP_KEY).length === 2), m.text);
+    L('G nenhum cartão do outro curso foi apagado nem escondido', await ev(() => window.__DB.own_flashcards.filter(r => r.id >= 9500 && r.id < 9518 && r.status === 'active').length === 18));
+    await closeModal(page);
+
+    // H) Quem já passou do limite não perde nada: 25 ativos continuam ativos; só não cria novos.
+    await seed(page, 25);
+    await openMeusCartoes(page, false, false);
+    const h = await ev(() => ({ btn: document.getElementById('my-create-flashcard-btn')?.disabled, active: window.__DB.own_flashcards.filter(r => r.status === 'active').length }));
+    L('H acima do limite: 25 cartões seguem ativos e o botão Criar fica travado', h.btn === true && h.active === 25, h);
 
     L('sem erros de JS na página', errors.length === 0, errors);
     await ctx.close();

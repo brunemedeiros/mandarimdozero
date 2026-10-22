@@ -4573,20 +4573,22 @@ function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
 const CHECKPOINT_PASS_THRESHOLD = 70;
 
 // ---------- Fase 6: quem pode PULAR (Ponto de verificação / Teste de Nível) ----------
-// Decisão da professora: Free tem progressão linear; Premium e aluno vinculado
-// podem pular. Fica DESLIGADO por enquanto (mesmo padrão de CHALLENGE_PAYWALL_ENABLED):
+// Decisão da professora: Free tem progressão linear; quem pula é decidido pela tabela Admin > Planos
+// (célula "Pular unidades", trail_skip_locked: Premium e Aluno desde a 116, decisão da dona de 2026-10-22).
+// Fica DESLIGADO por enquanto (mesmo padrão de CHALLENGE_PAYWALL_ENABLED):
 // hoje todos continuam podendo pular; ao ligar a flag a regra vale sem mexer em mais nada.
 // Trava só no cliente (decisão 10): o servidor não valida plano.
 let TRAIL_SKIP_PAYWALL_ENABLED = false; // let: os testes ligam a flag
-let TRAIL_TEACHER_LINK = null; // cache de hasActiveTeacherLink() (null = ainda não sabemos)
+let TRAIL_PERMS_REQUESTED = false;
 function trailSkipAllowed(){
   if (!TRAIL_SKIP_PAYWALL_ENABLED) return true;
-  return (typeof isPremium === 'function' && isPremium()) || isChallengesAdmin() || TRAIL_TEACHER_LINK === true;
+  return (typeof planCan === 'function' && planCan('trail_skip_locked')) || isChallengesAdmin();
 }
+// Com a flag ligada, garante que a tabela de permissões chegou e redesenha a trilha quando chegar.
 function ensureTrailTeacherLink(){
-  if (!TRAIL_SKIP_PAYWALL_ENABLED || TRAIL_TEACHER_LINK !== null || !CURRENT_USER || typeof hasActiveTeacherLink !== 'function') return;
-  TRAIL_TEACHER_LINK = false; // evita chamadas repetidas enquanto a primeira não volta
-  hasActiveTeacherLink().then(v => { TRAIL_TEACHER_LINK = !!v; if (v) renderUnitsGrid(); }).catch(() => {});
+  if (!TRAIL_SKIP_PAYWALL_ENABLED || TRAIL_PERMS_REQUESTED || !CURRENT_USER || typeof loadMyPermissions !== 'function') return;
+  TRAIL_PERMS_REQUESTED = true;
+  loadMyPermissions().then(() => { if (trailSkipAllowed()) renderUnitsGrid(); }).catch(() => {});
 }
 function showTrailSkipLocked(){
   showToast(t('trail.checkpoint.skipLockedToast'));
@@ -5615,14 +5617,38 @@ function startConjSession(verbs, tenses){
 // Jogos da Conjugação são PREMIUM (decisão da autora, 2026-10-14); a Conjugação normal é grátis.
 // Paywall DESLIGADO como o dos Desafios (CHALLENGE_PAYWALL_ENABLED): hoje só o cadeado aparece e
 // todo mundo joga. Ao ligar o paywall, trocar para true (lista em docs/historico/14-pendencias-...md).
-const CONJ_GAMES_PAYWALL_ENABLED = false;
-function isConjGameLocked(){ return CONJ_GAMES_PAYWALL_ENABLED && !challengesPremiumUnlocked(); }
+// Quem joga com o bloqueio ligado: célula "Jogos da Conjugação" (conj_games, 116) da tabela Admin > Planos.
+// O selo segue a regra 7 da dona: desligado = "⭐ Premium" sem cadeado; ligado = "⭐ Premium" + cadeado para quem não tem.
+let CONJ_GAMES_PAYWALL_ENABLED = false; // let: os testes ligam a flag
+function conjGamesUnlocked(){ return (typeof planCan === 'function' && planCan('conj_games')) || isChallengesAdmin(); }
+function isConjGameLocked(){ return CONJ_GAMES_PAYWALL_ENABLED && !conjGamesUnlocked(); }
+// Janela Premium própria dos Jogos (não a dos Desafios do Módulo), com o botão "Fale com a Prof. Brune".
+function openPremiumGamesModal(){
+  const modal = document.getElementById('premium-games-modal');
+  if (!modal) return;
+  if (typeof applyDomI18n === 'function') applyDomI18n(modal);
+  const box = document.getElementById('premium-games-contact');
+  if (box) box.innerHTML = typeof premiumContactButtonHTML === 'function' ? premiumContactButtonHTML() : '';
+  modal.style.display = 'flex';
+}
+document.getElementById('premium-games-modal-close')?.addEventListener('click', () => {
+  document.getElementById('premium-games-modal').style.display = 'none';
+});
+document.getElementById('premium-games-modal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'premium-games-modal') e.target.style.display = 'none';
+});
 const CONJ_GAMES_UI = (typeof createConjGames === 'function' && typeof CONJ_GAMES !== 'undefined')
   ? createConjGames({ games: CONJ_GAMES, speak: (text, btn) => speakFrench(text, btn),
-      isLocked: g => isConjGameLocked(g), onLocked: () => openPremiumChallengesModal(),
+      isLocked: g => isConjGameLocked(g), onLocked: () => openPremiumGamesModal(),
       ids: { select: 'conj-select-wrap', wrap: 'conj-game-wrap', content: 'conj-game-content', list: 'conj-games-list', back: 'conj-game-back' } })
   : null;
+// Selo da aba Jogos (regra 7): "⭐" com o bloqueio desligado ou para quem tem a permissão; "⭐🔒" quando trava de verdade.
+function refreshConjGamesSeal(){
+  const seal = document.querySelector('[data-conj-games-seal]');
+  if (seal) seal.textContent = isConjGameLocked() ? '⭐🔒' : '⭐';
+}
 function setConjMode(mode){
+  refreshConjGamesSeal();
   const games = mode === 'games';
   document.getElementById('conj-practice-pane').hidden = games;
   document.getElementById('conj-games-pane').hidden = !games;
@@ -6962,7 +6988,7 @@ const CHALLENGE_I18N = {
     'dict.static.backList': '← Voltar aos ditados',
     'prem.modal.title': '🔒 Recurso Premium',
     'prem.modal.p1': 'Os <strong>Desafios do Módulo</strong> reforçam cada tema da trilha com Expressões, Ouça e traduza, Acentuação e Ditados extras.',
-    'prem.modal.p2': 'Eles fazem parte do plano Premium. Para ativar, fale com a administração (profbrune).'
+    'prem.modal.p2': 'Eles fazem parte do plano Premium. Para pedir o Premium, fale com a Prof. Brune pelo botão abaixo.'
   },
   'en': {
     'tier.premium': "Premium",
@@ -7144,7 +7170,7 @@ const CHALLENGE_I18N = {
     'dict.static.backList': "← Back to dictations",
     'prem.modal.title': "🔒 Premium feature",
     'prem.modal.p1': "<strong>Module Challenges</strong> reinforce each topic in the course with Expressions, Listen and Translate, Accents, and extra Dictations.",
-    'prem.modal.p2': "They're part of the Premium plan. To activate it, contact the administrator (profbrune)."
+    'prem.modal.p2': "They're part of the Premium plan. To ask for Premium, contact Prof. Brune using the button below."
   }
 };
 function chT(key, vars){
@@ -7177,8 +7203,9 @@ let dictationModuleFilter = null;
 let pendingDictationModuleFilter = null;
 
 function challengeModuleId(c){ return (c && c.moduleId) || null; }
+// Desafios do Módulo e Ditados extras: célula "Desafios Premium" (challenges_premium) da tabela Admin > Planos.
 function challengesPremiumUnlocked(){
-  return (typeof isPremium === 'function' && isPremium()) || isChallengesAdmin();
+  return (typeof planCan === 'function' && planCan('challenges_premium')) || isChallengesAdmin();
 }
 // Paywall DESLIGADO por enquanto (decisão da autora): interface de bloqueio,
 // paywall e Stripe entram depois. Hoje só ROTULAMOS cada item como Free ou
@@ -7218,6 +7245,8 @@ async function ensureChallengesPlanLoaded(){
 }
 function openPremiumChallengesModal(){
   applyChallengeI18n();
+  const box = document.getElementById('premium-challenges-contact');
+  if (box) box.innerHTML = typeof premiumContactButtonHTML === 'function' ? premiumContactButtonHTML() : '';
   document.getElementById('premium-challenges-modal').style.display = 'flex';
 }
 document.getElementById('premium-challenges-modal-close').addEventListener('click', () => {

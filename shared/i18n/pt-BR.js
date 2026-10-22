@@ -73,14 +73,19 @@ window.I18N_CATALOG['pt-BR'] = {
   // ---- modal "Recurso Premium" dos Desafios do Módulo (só fr) ----
   'premium.challenges.title': '🔒 Recurso Premium',
   'premium.challenges.bodyHtml': 'Os <strong>Desafios do Módulo</strong> reforçam cada tema da trilha com Expressões, Ouça e traduza, Acentuação e Ditados extras.',
-  'premium.challenges.howToActivate': 'Eles fazem parte do plano Premium. Para ativar, fale com a administração (profbrune).',
+  'premium.challenges.howToActivate': 'Eles fazem parte do plano Premium. Para pedir o Premium, fale com a Prof. Brune pelo botão abaixo.', // Etapa 1/5: aprovado pela dona
 
   // ---- modal de limite de cartões próprios (plano grátis) ----
   'flashcardLimit.modal.title': '🔒 Limite do plano grátis',
-  'flashcardLimit.modal.bodyHtml': 'Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Para criar mais, apague algum cartão, ou peça para sua professora te vincular. Alunos vinculados a uma professora têm cartões próprios ilimitados.',
+  'flashcardLimit.modal.bodyHtml': 'Você atingiu o limite de <strong>{limit} cartões próprios ativos</strong> da sua conta, somando todos os cursos. Para criar mais, apague algum cartão que já não usa ou peça o Premium: com ele, seus cartões próprios são ilimitados.', // Etapa 1/5: aprovado pela dona
+  // Etapa 5: botão dos avisos Premium/Limite (abre o e-mail da professora, já preenchido)
+  'premiumContact.button': 'Fale com a Prof. Brune',
+  'premiumContact.subject': 'Quero o Premium ({course})',
+  'premiumContact.body': 'Olá, Prof. Brune!\n\nQuero pedir o Premium na minha conta.\n\nMeu usuário: {username}\nCurso: {course}\n\nAté mais!',
+  'premiumContact.noUsername': '(ainda sem nome de usuário)',
   // Plural escolhido por n === 1 (Etapa 4: antes era "cartão(ões)");
   // {n} = cartões de estudo que seriam criados, {remaining} = vagas restantes.
-  'flashcardLimit.wouldGenerate': { one: 'Este cartão geraria {n} cartão de estudo, mas restam só {remaining} no plano grátis.', other: 'Este cartão geraria {n} cartões de estudo, mas restam só {remaining} no plano grátis.' },
+  'flashcardLimit.wouldGenerate': { one: 'Este cartão geraria {n} cartão de estudo, mas restam só {remaining} na sua conta.', other: 'Este cartão geraria {n} cartões de estudo, mas restam só {remaining} na sua conta.' }, // Etapa 1/5: aprovado pela dona
 
   // ---- modal de confirmação: editar reinicia o progresso ----
   'flashcardReset.modal.title': '⚠️ Confirmar edição',
@@ -382,6 +387,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'myFlashcards.guest': 'Entre na sua conta para criar seus próprios cartões.',
   'myFlashcards.badge.linked': '✨ Aluno vinculado — cartões ilimitados',
   'myFlashcards.badge.free': '🔒 Plano grátis — {used}/{limit} cartões',
+  'myFlashcards.badge.limited': '🔒 {used}/{limit} cartões na sua conta',
   'myFlashcards.badge.premium': '⭐ Premium',
   'myFlashcards.badge.premiumUnlimited': '⭐ Premium — cartões ilimitados',
   'myFlashcards.edit.legacyConversionError': 'Este cartão não pôde abrir no editor novo: {reason}',
@@ -743,6 +749,10 @@ window.I18N_CATALOG['pt-BR'] = {
   'games.tabPractice': 'Praticar',
   'games.tabGames': 'Jogos',
   'games.premium': 'Premium',
+  'games.locked': 'Bloqueado',
+  'games.premiumModal.title': '🔒 Recurso Premium',
+  'games.premiumModal.bodyHtml': 'Os <strong>Jogos da Conjugação</strong> treinam as escolhas que mais confundem, como passé composé ou imparfait e être ou avoir, com explicação e áudio em cada frase. A prática da Conjugação continua grátis.',
+  'games.premiumModal.howTo': 'Eles fazem parte do plano Premium. Para pedir o Premium, fale com a Prof. Brune pelo botão abaixo.',
   'games.perRound': '{n} frases por partida',
   'games.play': 'Jogar',
   'games.counter': 'Frase {i} de {n}',
@@ -1481,6 +1491,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'flashcardModel.tts.providerError': 'O serviço de voz não conseguiu gerar o áudio agora. Tente de novo em instantes.',
   'flashcardModel.tts.providerRateLimited': 'O serviço de voz está sobrecarregado. Tente de novo em alguns minutos.',
   'flashcardModel.tts.monthlyQuotaExceeded': 'Você atingiu o limite mensal de áudios gerados. Tente de novo no próximo mês.',
+  'flashcardModel.tts.planRequired': 'Gerar áudio por texto faz parte do plano Premium.',
   'flashcardModel.tts.quotaCheckFailed': 'Não foi possível conferir seu limite de áudios agora. Tente de novo em instantes.',
   'flashcardModel.tts.unsupportedLanguage': 'Este idioma ainda não tem voz para gerar áudio.',
   'flashcardModel.tts.invalidVoice': 'Voz inválida para este idioma. Deixe o campo "Voz" em branco para usar a voz padrão.',
@@ -2634,7 +2645,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'myClassLogs.observations': 'Observações',
   'myClassLogs.empty': 'Sua professora ainda não registrou nenhuma aula.',
   'plans.title': 'Planos',
-  'plans.sub': 'Quem tem qual plano e o que cada plano libera. A mudança vale na hora.',
+  'plans.sub': 'Quem tem qual plano e o que cada plano libera. A mudança vale na hora para Grátis, Aluno e Premium.',
   'plans.loading': 'Carregando…',
   'plans.confirm.cancel': 'Cancelar',
   'plans.confirm.revoke.title': 'Tirar {role} de @{username}?',
@@ -2753,22 +2764,26 @@ window.I18N_CATALOG['pt-BR'] = {
   'plans.loadFailed': 'Não deu para carregar os planos desta conta.',
   'plans.matrix.title': 'O que cada plano libera',
   'plans.matrix.hint': 'Quem tem mais de um plano fica com a soma. Nos números vale o maior, e campo vazio é sem limite.',
+  'plans.matrix.roleOnly': 'Vem do papel Professora',
+  'plans.matrix.roleOnlyHint': 'As linhas da Professora (painel, analytics, mural e Banco de Revisão) vêm do papel Professora e não mudam por aqui.',
   'plans.matrix.permission': 'Permissão',
   'plans.matrix.unlimited': 'sem limite',
   'plans.matrix.saved': 'Salvo',
   'plans.matrix.loadFailed': 'Não deu para carregar a tabela de permissões.',
-  'perm.own_cards_limit': 'Cartões próprios (quantidade)',
-  'perm.rich_card_formats': 'Formatos ricos (imagem, áudio, múltipla escolha, completar frase)',
-  'perm.tts_monthly_quota': 'Áudio automático por campo (por mês)',
+  'perm.own_cards_limit': 'Cartões próprios (quantidade, somando todos os cursos)',
+  'perm.rich_card_formats': 'Todos os tipos de cartão (com reverso, múltipla escolha, digite a resposta, completar a frase)',
+  'perm.tts_monthly_quota': 'Áudio por texto e gravação no microfone (áudios por texto por mês)',
   'perm.public_deck_import': 'Importar Deck público',
   'perm.public_deck_copy_count': 'Ver quantas pessoas copiaram meu Deck',
   'perm.challenges_premium': 'Desafios Premium',
-  'perm.trail_skip_locked': 'Pular lições da trilha',
+  'perm.conj_games': 'Jogos da Conjugação',
+  'perm.trail_skip_locked': 'Pular unidades (Ponto de verificação)',
   'perm.class_logs_view': 'Ver Minhas aulas',
   'perm.support_materials_view': 'Ver Material de apoio',
   'perm.teacher_panel': 'Painel da professora',
   'perm.teacher_student_analytics': 'Analytics do aluno',
   'perm.teacher_board': 'Mural para a turma',
+  'perm.review_bank': 'Banco de Revisão (cartões automáticos para o aluno)',
   'plans.chip.premium': 'Premium',
   'panel.students.inviteSoon': 'Por enquanto, quem vincula alunos é a administração. Em breve você vai poder convidar o aluno, e ele aceita pelo próprio perfil.',
   'students.title': 'Alunos',
@@ -3912,7 +3927,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'deck.delete.err.deletedButDeck': 'Os cartões foram excluídos, mas não foi possível excluir o Deck agora. Tente de novo.',
   'flashcardLimit.cut.title': '🔒 Importação limitada pelo plano grátis',
   'flashcardLimit.cut.ctaStrong': '⭐ Com o Premium, seus cartões próprios são ilimitados.',
-  'flashcardLimit.cut.ctaBody': 'Para ativar, fale com a administração (profbrune). Você também pode excluir cartões que já não usa para liberar espaço.',
+  'flashcardLimit.cut.ctaBody': 'Para pedir o Premium, fale com a Prof. Brune pelo botão abaixo. Você também pode apagar cartões que já não usa para liberar espaço.', // Etapa 1/5: aprovado pela dona
   'myFlashcards.tags.teacher': 'Tags dos cartões da professora:',
   'myFlashcards.tags.filterNotice': 'Filtro de tags ativo na Revisão: {chips} — vale também para "Estudar este Deck".',
   'myFlashcards.tags.clear': 'Limpar',

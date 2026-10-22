@@ -444,3 +444,10 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   "Aluno/a com vínculo ativo com esta professora." -> "Turma de uf19f9a6fc1" / "Estuda com esta professora.". Produção: nenhum badge
   gerado pela `_teacher_badge_id`; o badge `student` (da Prof. Brune) "Aluno/a da Prof. Brune" / "Aluno/a da Prof. Brune" ->
   "Turma da Prof. Brune" / "Estuda com a Prof. Brune" (texto da seção 3.4; na tela vale a tradução `badge.catalog.student.*`).
+
+## 116 (Etapa 5: o site obedece à tabela Admin > Planos)
+
+- `116_plan_permissions_effective`: Staging em 2026-10-22, versão `20261022013043`. Produção: pendente (depois da prévia).
+  `my_permissions()` + `free`; permissão nova `conj_games`; `trail_skip_locked` ligado para Premium Basic/Pro; rótulos;
+  5 RPCs de Deck público por `_has_permission(uid, 'public_deck_import')`. Detalhes e rollback:
+  `docs/i18n/etapa5-auditoria-premium.md`, seção 8.

@@ -62,11 +62,15 @@ window.I18N_CATALOG['en'] = {
 
   'premium.challenges.title': '🔒 Premium feature', // ALTA
   'premium.challenges.bodyHtml': '<strong>Module Challenges</strong> reinforce each topic in the course with Expressions, Listen and Translate, Accents, and extra Dictations.', // MÉDIA -- nomes das categorias de desafio ainda não traduzidos na aba Desafios; alinhar quando ela for migrada
-  'premium.challenges.howToActivate': 'They\'re part of the Premium plan. To activate it, contact the administrator (profbrune).', // MÉDIA -- política de plano/ativação manual
+  'premium.challenges.howToActivate': 'They\'re part of the Premium plan. To ask for Premium, contact Prof. Brune using the button below.', // ALTA -- Etapa 1/5: aprovado pela dona
 
   'flashcardLimit.modal.title': '🔒 Free plan limit', // ALTA
-  'flashcardLimit.modal.bodyHtml': 'You\'ve reached the free plan\'s limit of <strong>20 active cards of your own</strong>. To create more, delete a card, or ask your teacher to link your account. Students linked to a teacher get unlimited cards of their own.', // MÉDIA -- política Free; PT e EN falam em apagar, a ação que a interface oferece (🗑); arquivar saiu na CONSOLIDAÇÃO-3
-  'flashcardLimit.wouldGenerate': { one: 'This card would create {n} study card, but you only have {remaining} left on the free plan.', other: 'This card would create {n} study cards, but you only have {remaining} left on the free plan.' }, // MÉDIA -- política Free; plural real em EN e PT
+  'flashcardLimit.modal.bodyHtml': 'You\'ve reached the limit of <strong>{limit} active cards of your own</strong> on your account, counting all courses. To create more, delete a card you no longer use or ask for Premium: with it, your own cards are unlimited.', // MÉDIA -- política Free; PT e EN falam em apagar, a ação que a interface oferece (🗑); arquivar saiu na CONSOLIDAÇÃO-3
+  'premiumContact.button': 'Contact Prof. Brune', // ALTA -- Etapa 5
+  'premiumContact.subject': 'I\'d like Premium ({course})', // ALTA -- Etapa 5
+  'premiumContact.body': 'Hi, Prof. Brune!\n\nI\'d like to ask for Premium on my account.\n\nMy username: {username}\nCourse: {course}\n\nThank you!', // ALTA -- Etapa 5
+  'premiumContact.noUsername': '(no username yet)', // ALTA -- Etapa 5
+  'flashcardLimit.wouldGenerate': { one: 'This card would create {n} study card, but you only have {remaining} left on your account.', other: 'This card would create {n} study cards, but you only have {remaining} left on your account.' }, // MÉDIA -- política Free; plural real em EN e PT
 
   'flashcardReset.modal.title': '⚠️ Confirm edit', // ALTA
   'flashcardReset.modal.headline': 'This edit will reset this card\'s review progress.', // ALTA
@@ -366,6 +370,7 @@ window.I18N_CATALOG['en'] = {
   'myFlashcards.guest': 'Sign in to your account to create your own cards.', // ALTA
   'myFlashcards.badge.linked': '✨ Linked student — unlimited cards', // MÉDIA
   'myFlashcards.badge.free': '🔒 Free plan — {used}/{limit} cards', // ALTA
+  'myFlashcards.badge.limited': '🔒 {used}/{limit} cards on your account', // ALTA -- Etapa 5
   'myFlashcards.badge.premium': '⭐ Premium', // ALTA
   'myFlashcards.badge.premiumUnlimited': '⭐ Premium — unlimited cards', // ALTA
   'myFlashcards.edit.legacyConversionError': 'This card couldn\'t open in the new editor: {reason}', // ALTA
@@ -727,6 +732,10 @@ window.I18N_CATALOG['en'] = {
   'games.tabPractice': 'Practice', // ALTA
   'games.tabGames': 'Games', // ALTA
   'games.premium': 'Premium', // ALTA
+  'games.locked': 'Locked', // ALTA -- Etapa 5
+  'games.premiumModal.title': '🔒 Premium feature', // ALTA -- Etapa 5
+  'games.premiumModal.bodyHtml': 'The <strong>Conjugation Games</strong> train the choices that confuse people the most, like passé composé or imparfait and être or avoir, with an explanation and audio for every sentence. Conjugation practice stays free.', // MÉDIA -- Etapa 5
+  'games.premiumModal.howTo': 'They\'re part of the Premium plan. To ask for Premium, contact Prof. Brune using the button below.', // ALTA -- Etapa 5
   'games.perRound': '{n} sentences per round', // ALTA
   'games.play': 'Play', // ALTA
   'games.counter': 'Sentence {i} of {n}', // ALTA
@@ -1465,6 +1474,7 @@ window.I18N_CATALOG['en'] = {
   'flashcardModel.tts.providerError': 'The voice service couldn\'t generate the audio right now. Try again in a moment.', // ALTA
   'flashcardModel.tts.providerRateLimited': 'The voice service is overloaded. Try again in a few minutes.', // ALTA
   'flashcardModel.tts.monthlyQuotaExceeded': 'You\'ve reached the monthly limit of generated audio. Try again next month.', // ALTA
+  'flashcardModel.tts.planRequired': 'Generating audio from text is part of the Premium plan.', // ALTA -- Etapa 5
   'flashcardModel.tts.quotaCheckFailed': 'We couldn\'t check your audio limit right now. Try again in a moment.', // ALTA
   'flashcardModel.tts.unsupportedLanguage': 'This language doesn\'t have a voice for audio generation yet.', // ALTA
   'flashcardModel.tts.invalidVoice': 'Invalid voice for this language. Leave the "Voice" field blank to use the default voice.', // ALTA
@@ -2618,7 +2628,7 @@ window.I18N_CATALOG['en'] = {
   'myClassLogs.observations': 'Notes', // ALTA
   'myClassLogs.empty': 'Your teacher hasn\'t logged any classes yet.', // ALTA
   'plans.title': 'Plans', // ALTA
-  'plans.sub': 'Who has which plan and what each plan unlocks. Changes apply right away.', // ALTA
+  'plans.sub': 'Who has which plan and what each plan unlocks. Changes apply right away for Free, Student and Premium.', // ALTA
   'plans.loading': 'Loading…', // ALTA
   'plans.confirm.cancel': 'Cancel', // ALTA
   'plans.confirm.revoke.title': 'Remove {role} from @{username}?', // ALTA
@@ -2737,22 +2747,26 @@ window.I18N_CATALOG['en'] = {
   'plans.loadFailed': 'Couldn\'t load this account\'s plans.', // ALTA
   'plans.matrix.title': 'What each plan unlocks', // ALTA
   'plans.matrix.hint': 'Accounts with more than one plan get all of them combined. For numbers the highest wins, and an empty field means no limit.', // ALTA
+  'plans.matrix.roleOnly': 'Comes from the Teacher role', // ALTA -- Etapa 5
+  'plans.matrix.roleOnlyHint': 'The Teacher rows (panel, analytics, board and Review Bank) come from the Teacher role and can\'t be changed here.', // ALTA -- Etapa 5
   'plans.matrix.permission': 'Permission', // ALTA
   'plans.matrix.unlimited': 'no limit', // ALTA
   'plans.matrix.saved': 'Saved', // ALTA
   'plans.matrix.loadFailed': 'Couldn\'t load the permissions table.', // ALTA
-  'perm.own_cards_limit': 'Own cards (how many)', // ALTA
-  'perm.rich_card_formats': 'Rich formats (image, audio, multiple choice, fill in the blank)', // ALTA
-  'perm.tts_monthly_quota': 'Automatic audio per field (per month)', // ALTA
+  'perm.own_cards_limit': 'Own cards (how many, counting all courses)', // ALTA
+  'perm.rich_card_formats': 'All card types (with reverse, multiple choice, type the answer, fill in the blank)', // ALTA
+  'perm.tts_monthly_quota': 'Text-to-speech audio and microphone recording (text-to-speech audios per month)', // ALTA
   'perm.public_deck_import': 'Import public Decks', // ALTA
   'perm.public_deck_copy_count': 'See how many people copied my Deck', // ALTA
   'perm.challenges_premium': 'Premium challenges', // ALTA
-  'perm.trail_skip_locked': 'Skip Study Path lessons', // ALTA -- "Study Path", escolha da dona (2026-10-19)
+  'perm.conj_games': 'Conjugation Games', // ALTA -- Etapa 5
+  'perm.trail_skip_locked': 'Skip units (Checkpoint)', // ALTA -- "Study Path", escolha da dona (2026-10-19)
   'perm.class_logs_view': 'See My classes', // ALTA
   'perm.support_materials_view': 'See study materials', // ALTA
   'perm.teacher_panel': 'Teacher panel', // ALTA
   'perm.teacher_student_analytics': 'Student analytics', // ALTA
   'perm.teacher_board': 'Class board', // ALTA
+  'perm.review_bank': 'Review Bank (automatic cards for the student)', // ALTA -- Etapa 5 (antes aparecia em português)
   'plans.chip.premium': 'Premium', // ALTA
   'panel.students.inviteSoon': 'For now, students are linked by the admin. Soon you will be able to invite a student, who accepts from their own profile.', // ALTA
   'students.title': 'Students', // ALTA
@@ -3897,7 +3911,7 @@ window.I18N_CATALOG['en'] = {
   'deck.delete.err.deletedButDeck': 'The cards were deleted, but we couldn\'t delete the Deck right now. Try again.', // ALTA
   'flashcardLimit.cut.title': '🔒 Import limited by the free plan', // ALTA
   'flashcardLimit.cut.ctaStrong': '⭐ With Premium, your own cards are unlimited.', // ALTA
-  'flashcardLimit.cut.ctaBody': 'To turn it on, contact the admin (profbrune). You can also delete cards you no longer use to free up space.', // ALTA
+  'flashcardLimit.cut.ctaBody': 'To ask for Premium, contact Prof. Brune using the button below. You can also delete cards you no longer use to free up space.', // ALTA
   'myFlashcards.tags.teacher': 'Tags on your teacher\'s cards:', // ALTA
   'myFlashcards.tags.filterNotice': 'Tag filter on in Review: {chips} — it also applies to "Study this Deck".', // ALTA
   'myFlashcards.tags.clear': 'Clear', // ALTA
