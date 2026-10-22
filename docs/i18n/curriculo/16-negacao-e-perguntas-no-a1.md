@@ -19,7 +19,7 @@ M2.1; N43 sem *savoir* nem *pas encore*. O `08 v2` registra as mesmas posições
 3. Onde a estrutura é **uma unidade de gramática**, a negação é uma **tela dentro dela** (gramática não tem nota).
 4. **Negação complexa** (*ne... plus, rien, personne, aucun, que, ni... ni*): aparece em diálogo quando a palavra surge e **uma gramática dedicada no A2** a sistematiza
    (`A2-g21`, ampliada e renomeada "Gramática: negação complexa", **última unidade do A2 M8, hoje M8.6**, decisões 122 e 142). Revoga a decisão 18 do `10`. Onde cada uma aparece
-   antes (*ne... plus* na A2 M1.3 "Comparar antes e agora", decisão 154, *ne... que* na A2 M5.1, *aucun* no A2 M7.5 "Serviços e papelada" (decisão 142), as outras em diálogos do A2 M2 e M8): tabela "Negação complexa: onde aparece antes" no `08 v2`, seção 3.2.
+   antes (*ne... plus* na A2 M1.3 "Comparar antes e agora", decisão 154, *ne... que* na A2 M5.1, *aucun* no A2 M7.5 "Serviços e papelada" (decisão 142), *rien* e *personne* em diálogos do A2 M2.5 e M8.2, *ni... ni* em nota na A2 M8.5, decisão 185): tabela "Negação complexa: onde aparece antes" no `08 v2`, seção 3.2.
 5. **Perguntas** são conteúdo do **A1** (decisão da dona). Cada palavra interrogativa entra **onde a resposta também é ensinada** e é consolidada em **gramática**
    de nome **"Palavras interrogativas"** (nome escolhido pela dona).
 

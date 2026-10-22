@@ -94,3 +94,9 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   *emprunter* (Exp, alta, breve) na M7.4, *le justificatif de domicile* (Cult, alta) na M7.5; **A2 M1 a M7 fechados, segue o M8** (Moradia e cidade). Totais: A1 344;
   **A2 425** (415 + 10), ~33h10 (M7 ~3h05, 47 cartões). Na seção 7 do `08 v2` fica registrado, para a auditoria completa, que a frase *La semaine prochaine, je pars en
   voyage.* também usa *partir* e *en voyage* antes dos cartões.
+- **Decisões 184 a 187 no `12`**: listas do A2 M8 aprovadas (M8.1, M8.2, M8.4 e M8.5 com 12; **M8.5 revista como cidade**, sem o "a revisar"; *lumineux* com cartão só
+  na A2 M8.1; a A1 M7.2 fica como está, **sem *lumineux* nem *spacieux***); nota nova ***ni... ni*** na M8.5 (Exp, alta), a versão grátis que faltava da M8.6 (tabela
+  da negação complexa completa: *ne... plus* M1.3, *rien* M2.5, *ne... que* M5.1, *aucun* M7.5, *personne* M8.2, *ni... ni* M8.5); notas culturais *la caution* e as
+  *charges* (M8.1, alta) e ***la fête des voisins*** (M8.2, alta, fonte: a dona; sexta-feira no fim de maio, data variável); **A2 M1 a M8 fechados, segue o M9**
+  (Comunicar e se relacionar). Totais sem mudança: A1 344; **A2 425** (415 + 10), ~33h10 (M8 ~3h30, 48 cartões). Achado na seção 7 do `08 v2`: *garée* na frase
+  publicada *La voiture est garée devant la maison.* (A1 M7.5) antes do cartão *se garer* (A2 M8.4), a decidir.

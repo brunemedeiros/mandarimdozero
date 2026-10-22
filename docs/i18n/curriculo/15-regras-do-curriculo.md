@@ -64,3 +64,6 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
     então ninguém perde palavra); *la banque, la poste, la mairie* (A1 M6.3) e *s'inscrire* (A2 M6.1) só em frase no M7; *les congés* é cartão da A2 M7.1 e a nota cultural
     *congés payés* fica na A1 M8.3; *le poste* (cargo) x *la poste* (correio), *le boulot* x *le travail* (A1 M1.6), *le code* (senha) x *le code postal* (só nota da A1 M7.1),
     *prêter* x *emprunter* e *économiser* x *les économies* são palavras ou lexemas diferentes (dois cartões).
+    A2 M8 (decisão 184): nenhuma das 48 palavras é cartão em outra unidade (nenhuma troca); *lumineux* tem cartão só na A2 M8.1 e a A1 M7.2 fica sem *lumineux* e sem
+    *spacieux* (*clair* = "iluminado" segue só em frase e nota lá); *l'avis* (aviso, A2 M8.5) x *à mon avis* (só nota da A2 M3.5) e *sale* x *la salle de bain* são palavras
+    diferentes; *fumer* tem cartão só na A2 M8.5.

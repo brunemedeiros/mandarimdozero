@@ -727,3 +727,56 @@ das notas novas só se escrevem depois, aprovados pela dona.
      - **Pendências limpas** (seção 7 do `08 v2`): sai o achado de *prochain* e *le projet* (decidido pela 180); em "Listas de palavras a revisar pela dona", a A2 M7.5
        sai das abertas e o A2 M7 entra como aprovado; a lista "só para conferir" ganha *le code* x *le code postal*, *l'emploi* x *l'offre d'emploi*, *économiser* x
        *les économies*, *prêter* x *emprunter*, *le boulot* x *le travail*.
+
+---
+
+# Vigésima quinta rodada (2026-10-22): revisão do A2 M8 "Moradia e cidade"
+
+Base: respostas da dona no corpo da conversa (decisão 148), aprovadas em 2026-10-22. Aplicado em `08-mapa-final-a1-a2-v2.md` (cabeçalho, seções 1, 3.2, 7, 8 e
+Resumo), `15` (regra 14), `16` (item 4) e `00`. Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovados pela dona.
+
+184. **A2 M8 "Moradia e cidade": listas aprovadas.**
+     - M8.1 "Procurar moradia" (`A2-23`, 12): *louer, le loyer, l'annonce, l'agence immobilière, meublé / meublée, les charges, la caution, le / la propriétaire,
+       le / la locataire, lumineux / lumineuse, l'ascenseur, disponible* (com *disponible*, decisões 157 e 162; *le quartier* só em frase, cartão da A2 M1.3).
+     - M8.2 "Dividir apartamento e vizinhos" (`A2-24`, 12): *la colocation, le / la colocataire, le voisin / la voisine, partager, faire le ménage, faire la vaisselle,
+       sortir les poubelles, ranger, sale, déranger, se plaindre, passer l'aspirateur* (com *passer l'aspirateur*, decisões 157 e 162; *propre* só em frase, em contraste
+       com *sale*, cartão da A1 M7.2).
+     - M8.4 "Trânsito e carro" (`A2-26`, 12): *la route, l'autoroute, le bouchon, conduire, le feu, le carrefour, le parking, se garer, l'essence, le péage,
+       le covoiturage, la vitesse* (com *la vitesse*, decisões 157 e 162; *la circulation* só em frase, cartão da A2 M1.3; *le permis de conduire* só em frase, cartão
+       da A2 M7.5, decisão 181).
+     - M8.5 "Entender regras e avisos" (`A2-21`, 12), **revista como cidade e aprovada** (sai o "a revisar"): *le panneau, l'avis, interdit / interdite,
+       autorisé / autorisée, obligatoire, avoir le droit de, respecter, l'amende, fumer, traverser, le passage piéton, la pelouse*.
+     - ***lumineux / lumineuse*** tem cartão **só na A2 M8.1**. **A A1 M7.2 "Descrever a moradia" fica como está** (*moderne, ancien, calme, bruyant, confortable,
+       propre*, 6; *clair* = "iluminado" só em frase e nota, decisão 133): a dona aceitou a recomendação de **não acrescentar *lumineux*** lá, e ***spacieux* também não
+       entra** (conferido: *spacieux* não aparece em nenhum documento do currículo nem em `fr/content.js`; *lumineux* só na A2 M8.1, no `04` e como exemplo de som do
+       `06`, A2-S8 semivogais, no A2 m8).
+     - **Conferência da regra 14** (A1 e A2, no `08 v2`, no `04` e em `fr/content.js`): **nenhuma das 48 palavras é cartão em outra unidade**, então nenhuma sai e não
+       há substituta a propor. *fumer* tem cartão só aqui (o exemplo *Avant je fumais...* já tinha saído da A2 M1.3, decisão 136).
+       - **Achado para a dona** (mesmo caso das decisões 171, 176 e 180): a frase publicada ***La voiture est garée devant la maison.*** (`A1-14`, vai com a chave para
+         a A1 M7.5, decisão 136) usa *garée* antes do cartão *se garer* (A2 M8.4). Opções: aceitar como expressão de uso comum (exceção formal da regra 11 do `15`) ou
+         trocar a frase na reescrita do A1. Fica na seção 7 do `08 v2`, a decidir. Nenhuma outra palavra do M8 aparece no conteúdo publicado.
+       - Só para conferir (não é a mesma palavra-cartão; vão para a lista da seção 7 do `08 v2`): *l'avis* (aviso, A2 M8.5) x *à mon avis* (só nota da A2 M3.5, sem
+         cartão); *louer, le loyer, le / la locataire* (os três na A2 M8.1) e *la colocation* x *le / la colocataire* (os dois na A2 M8.2): lexemas diferentes da mesma
+         família; *faire le ménage, faire la vaisselle* (A1 *faire*), *avoir le droit de* (A1 *avoir*): expressões que contêm um cartão anterior; *sale* (sujo) x
+         *la salle de bain* (A1 M7.1): palavras diferentes. *le feu* x *le feu d'artifice* e *sortir les poubelles* (A1 *sortir*) já estavam na lista.
+185. **Nota nova de *ni... ni* na A2 M8.5** (Exp, alta, *nova*; texto só depois, aprovado pela dona; exemplos da dona: *Ni fumer ni manger ici*, *Ni cris ni musique après
+     22h*): é a **versão grátis que faltava** da gramática de negação complexa (M8.6) para *ni... ni*. A coluna "Versão grátis" passa a dizer que a M8.5 abriga a versão
+     grátis da M8.6 (*ni... ni*), e a tabela "Negação complexa: onde aparece antes" fica completa, na ordem da trilha: *ne... plus* M1.3; *rien* M2.5; *ne... que* M5.1;
+     *aucun* M7.5; *personne* M8.2; *ni... ni* M8.5 (sai a proposta "M8.1, anúncio *Ni animaux ni fumeurs.*, ou M8.5"). A M8.5 passa a ter 3 notas (*il est interdit de*,
+     *il ne faut pas*, *ni... ni*).
+     - Ao escrever o texto: *le cri* não é cartão em nenhuma unidade; pela regra 11 do `15`, o exemplo *Ni cris ni musique après 22h* troca a palavra ou a dona aceita
+       caso a caso (*fumer, manger, la musique* são cartões vistos antes).
+186. **Notas culturais novas do A2 M8 (aprovadas; texto só depois, aprovado pela dona)**:
+     - M8.1 (Cult, alta): ***la caution* e as *charges***: como funciona o aluguel na França: a caução, o aluguel com *charges comprises* ou não (condomínio, água,
+       aquecimento) e o contrato de locação (*le bail*, só na nota). Junto do cartão *la caution*. Ponto para o texto (confiança alta): no uso comum *la caution* é o
+       depósito; no contrato o nome oficial é *le dépôt de garantie*, e *la caution* também quer dizer o fiador (*se porter caution*).
+     - M8.2 (Cult, **alta, fonte: a dona**): ***la fête des voisins***: festa anual dos vizinhos de prédio e de rua, criada em Paris em 1999, numa **sexta-feira no fim
+       de maio; a data muda a cada ano** (2026: 29 de maio; 2027: 28 de maio, segundo a dona). **Não escrever "dia fixo".** Junto do cartão *le voisin / la voisine*.
+     - Com elas, a M8.1 tem 1 nota (*la caution* e *charges*) e a M8.2 tem 3 (*tout, plusieurs, chacun*; *personne*, versão grátis; *la fête des voisins*).
+187. **A2 M8 fechado**; segue o **M9** (Comunicar e se relacionar).
+     - **Contas**: M8.1 12, M8.2 12, M8.4 12, M8.5 12 = **48 cartões** (as 4 listas já eram contadas com 12); A2 com **425 cartões** (415 novos + 10 publicados), sem
+       mudança. O tempo não muda: M8 ~3h30 (4 unidades de vocabulário × ~40 min + 2 gramáticas × ~25 min); A2 ~33h10.
+     - Notas do A2: ~60 (+3: *ni... ni* na M8.5, decisão 185; *la caution* e *charges* na M8.1 e *la fête des voisins* na M8.2, decisão 186).
+     - **Pendências limpas** (seção 7 do `08 v2`): em "Listas de palavras a revisar pela dona", a A2 M8.5 sai das abertas e o A2 M8 entra como aprovado; entra o achado
+       de *garée* na frase publicada do A1 (decisão 184); a lista "só para conferir" ganha os pares da decisão 184. A posição "*ni... ni* na M8.1 ou na M8.5" sai da tabela
+       de negação complexa (decidida pela 185).
