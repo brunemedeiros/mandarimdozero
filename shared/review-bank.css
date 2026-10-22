@@ -22,8 +22,8 @@
 .rb-btn:disabled{ opacity:.5; cursor:default; }
 .rb-btn-blue{ background:var(--rb-box); border-color:var(--rb-box); color:var(--rb-on-box); font-weight:800; }
 .rb-btn-blue:hover{ background:var(--rb-box); filter:brightness(1.12); }
-.rb-btn-ok{ background:var(--jade); border-color:var(--jade); color:var(--on-vivid); }
-.rb-btn-ok:hover{ background:var(--jade); filter:brightness(1.08); }
+.rb-btn-ok{ background:var(--success-fill); border-color:var(--success-fill); color:var(--on-success-fill); }
+.rb-btn-ok:hover{ background:var(--success-fill); filter:brightness(1.08); }
 .rb-btn-cut{ color:var(--rb-wrong); }
 .rb-link{ font:inherit; font-size:13px; font-weight:700; border:0; background:none; padding:2px; color:var(--ink-soft); text-decoration:underline; cursor:pointer; }
 .rb button:focus-visible, .rb input:focus-visible, .rb select:focus-visible, .rb textarea:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }

@@ -62,7 +62,7 @@
 
 /* ---------- Selo de situação ---------- */
 .painel .p-selo{ display: inline-flex; align-items: center; padding: .1rem .65rem; border-radius: 999px; font-size: .8rem; font-weight: 800; white-space: nowrap; background: var(--p-linha); color: var(--p-tinta); }
-.painel .p-selo--ok{ background: var(--p-ok); color: var(--p-sobre-vivo); }
+.painel .p-selo--ok{ background: var(--success-fill); color: var(--on-success-fill); }
 .painel .p-selo--aviso{ background: var(--p-aviso); color: var(--p-sobre-vivo); }
 .painel .p-selo--erro{ background: var(--p-erro); color: var(--p-sobre-vivo); }
 .painel .p-selo--info{ background: var(--p-info); color: var(--p-sobre-vivo); }

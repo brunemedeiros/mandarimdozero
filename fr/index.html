@@ -78,6 +78,8 @@ try{
   --paper-warm: #F0E8D8;     /* fundo secundário, cards */
   --paper-line: #E1D6C0;     /* linhas/bordas sutis */
   --jade: #3A7359;           /* verde — sucesso/acerto (funcional, fora da paleta de marca) */
+  /* Caixas de sucesso com texto/check (Continuar do acerto, ✓ de concluído): verde + branco, 5,6:1 nos dois temas (decisão da autora, 2026-10-22). */
+  --success-fill: #3A7359; --on-success-fill: #FFFFFF;
   --ink-soft: #5C4E73;       /* texto secundário */
   /* Selo colorido atrás do ícone de cada desafio diário -- 3 cores fixas
      por posição no card (não por desafio específico), pra manter a mesma
@@ -838,7 +840,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   width:22px; height:22px; border-radius:50%; flex-shrink:0; font-size:11px; font-weight:800;
   display:flex; align-items:center; justify-content:center;
 }
-.ub-lesson-dot.done{ background:var(--jade); color:white; }
+.ub-lesson-dot.done{ background:var(--success-fill); color:var(--on-success-fill); }
 .ub-lesson-dot.current{ border:2px solid var(--seal-red); color:var(--seal-red-dark); background: color-mix(in srgb, var(--seal-red) 9%, var(--paper)); }
 .ub-lesson-dot.locked{ border:1.5px dashed var(--paper-line); color: var(--ink-soft); }
 .ub-lesson-title{ font-size:13px; font-weight:600; }
@@ -867,10 +869,10 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .level-test-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift); }
 .level-test-card.done{ border-color: var(--jade); background: linear-gradient(135deg, rgba(58,115,89,0.06), rgba(58,115,89,0.1)); }
 .level-test-icon{ flex-shrink:0; width:52px; height:52px; border-radius:14px; background: var(--brand-fill); display:flex; align-items:center; justify-content:center; font-size:26px; }
-.level-test-card.done .level-test-icon{ background: var(--jade); }
+.level-test-card.done .level-test-icon{ background: var(--success-fill); }
 .level-test-body{ flex:1; min-width:0; }
 .level-test-title{ font-weight:800; font-size:16px; margin-bottom:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.level-test-done-pill{ background: var(--jade); color:white; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
+.level-test-done-pill{ background: var(--success-fill); color:var(--on-success-fill); font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
 .level-test-sub{ font-size:13px; color: var(--ink-soft); line-height:1.4; }
 .level-test-cta{ flex-shrink:0; font-weight:800; font-size:14px; color: var(--seal-red-dark); white-space:nowrap; }
 .level-test-card.done .level-test-cta{ color: var(--jade); }
@@ -1175,7 +1177,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 /* Vermelho mais escuro e menos saturado que --error-red puro; par background+color
    revisado junto (texto branco fixo, legível nos dois temas). */
 button.wrong-feedback-continue{ background: var(--error-red); color: var(--on-brand-fill); }
-button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid); }
+button.correct-feedback-continue{ background: var(--success-fill); color: var(--on-success-fill); }
 
 /* ---------- Passos de unidade de gramática (blocos, estilo Busuu) ---------- */
 .gram-block-counter{ text-align:center; font-size:12.5px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
@@ -1521,7 +1523,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 }
 .unit-skill-item + .unit-skill-item{ border-top:1px solid var(--paper-line); }
 .unit-skill-check{
-  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--jade); color:white;
+  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--success-fill); color:var(--on-success-fill);
   font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px;
 }
 
@@ -1548,7 +1550,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 }
 .module-skill-item + .module-skill-item{ border-top:1px solid var(--paper-line); }
 .module-skill-check{
-  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--jade); color:white;
+  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--success-fill); color:var(--on-success-fill);
   font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px;
 }
 .module-retry-note{ color: var(--ink-soft); font-size:13.5px; line-height:1.5; max-width:340px; margin:0 auto; }
@@ -3020,8 +3022,8 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .challenge-card:has(.challenge-card-check)::after, .dictation-card:has(.challenge-card-check)::after{ content:none; }
 .challenge-card-check{ position:static; grid-column:2; grid-row:1 / span 4; justify-self:end; align-self:center; }
 .challenge-card.completed{ opacity:1; background: color-mix(in srgb, var(--jade) 7%, var(--paper)); border-color: color-mix(in srgb, var(--jade) 38%, var(--paper-line)); }
-.challenge-card:not(.locked) .challenge-card-check{ font-size:0; width:26px; height:26px; border-radius:50%; background: var(--jade); display:grid; place-items:center; }
-.challenge-card:not(.locked) .challenge-card-check::before{ content:'✓'; font-size:15px; font-weight:800; color: var(--on-vivid); }
+.challenge-card:not(.locked) .challenge-card-check{ font-size:0; width:26px; height:26px; border-radius:50%; background: var(--success-fill); display:grid; place-items:center; }
+.challenge-card:not(.locked) .challenge-card-check::before{ content:'✓'; font-size:15px; font-weight:800; color: var(--on-success-fill); }
 .challenge-card.locked .challenge-card-check{ font-size:18px; }
 .challenges-level-heading{ min-height:44px; }
 
@@ -3172,7 +3174,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .expr-card-foot{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:auto; padding-top:2px; }
 .expr-card-foot .tier-badge{ margin:0; }
 .challenge-card.expr-card.completed{ border-color: var(--jade); }
-.expr-card-seal{ position:absolute; top:-9px; right:12px; background: var(--jade); color: var(--on-vivid); font-size:11.5px; font-weight:900; border-radius:999px; padding:2px 9px; transform:rotate(4deg); box-shadow: var(--shadow-card); }
+.expr-card-seal{ position:absolute; top:-9px; right:12px; background: var(--success-fill); color: var(--on-success-fill); font-size:11.5px; font-weight:900; border-radius:999px; padding:2px 9px; transform:rotate(4deg); box-shadow: var(--shadow-card); }
 .expr-play{ position:absolute; top:14px; right:12px; width:40px; height:40px; border-radius:50%; border:0; display:grid; place-items:center; background: var(--brand-fill); color: var(--on-brand-fill); font-size:14px; cursor:pointer; box-shadow: var(--shadow-card); }
 .expr-play:hover{ background: var(--brand-fill-hover); }
 .expr-play.speaking{ background: var(--imperial-gold); }
@@ -3386,7 +3388,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
   width:32px; height:32px; border-radius:50%; border:2px solid var(--paper-line); background: var(--paper);
   display:flex; align-items:center; justify-content:center; font-size:14px; color:white; font-weight:800;
 }
-.streak-day-item.done .streak-day-circle{ background: var(--jade); border-color: var(--jade); }
+.streak-day-item.done .streak-day-circle{ background: var(--success-fill); border-color: var(--success-fill); color: var(--on-success-fill); }
 .streak-day-item.today .streak-day-label{ color: var(--seal-red-dark); font-weight:800; }
 .streak-day-label{ font-size:11.5px; color: var(--ink-soft); font-weight:700; }
 .streak-headline{ font-size:23px; font-weight:800; margin:0 0 12px; line-height:1.3; }
@@ -4031,7 +4033,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .week-day-label{ font-size:12px; font-weight:700; color:var(--ink-soft); padding-top:4px; border-top:1px solid var(--paper-line); }
 .week-day.is-today .week-day-label{ color:var(--ink); font-weight:800; border-top:2px solid var(--count-new); }
 .week-check{ width:30px; height:30px; border-radius:50%; border:1.5px dashed var(--paper-line); display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; }
-.week-check.is-done{ border:0; background:var(--count-review); color:var(--paper); }
+.week-check.is-done{ border:0; background:var(--success-fill); color:var(--on-success-fill); }
 .week-check-small{ width:20px; height:20px; font-size:11px; }
 .week-total{ font-size:12px; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums; }
 .week-total.is-zero{ color:var(--ink-soft); font-weight:600; }
@@ -5040,7 +5042,7 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 #view-conjugaison .conj-answer-view.is-ok{ border-color:var(--jade); background:color-mix(in srgb, var(--jade) 9%, var(--paper)); }
 #view-conjugaison .conj-answer-view.is-almost{ border-color:var(--conj-quase); background:color-mix(in srgb, var(--conj-quase) 12%, var(--paper)); }
 #view-conjugaison .conj-ic{ position:absolute; right:8px; top:50%; transform:translateY(-50%); width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; line-height:1; background:var(--error-red); color:var(--on-vivid); }
-#view-conjugaison .is-ok .conj-ic{ background:var(--jade); }
+#view-conjugaison .is-ok .conj-ic{ background:var(--success-fill); }
 #view-conjugaison .is-almost .conj-ic{ background:var(--conj-quase); }
 #view-conjugaison .conj-tag{ font-weight:800; color:var(--conj-quase); }
 #view-conjugaison .is-almost .conj-x{ color:var(--conj-quase); background:color-mix(in srgb, var(--conj-quase) 20%, transparent); }
