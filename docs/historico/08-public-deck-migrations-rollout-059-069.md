@@ -447,7 +447,7 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 
 ## 116 (Etapa 5: o site obedece à tabela Admin > Planos)
 
-- `116_plan_permissions_effective`: Staging em 2026-10-22, versão `20261022013043`. Produção: pendente (depois da prévia).
+- `116_plan_permissions_effective`: Staging em 2026-10-22, versão `20261022013043`. Produção em 2026-10-22, versão `20261022215604` (prévia aprovada pela dona; conferido: role_permissions 65→70, account_roles igual, 5 funções de Deck público sem plan_tier).
   `my_permissions()` + `free`; permissão nova `conj_games`; `trail_skip_locked` ligado para Premium Basic/Pro; rótulos;
   5 RPCs de Deck público por `_has_permission(uid, 'public_deck_import')`. Detalhes e rollback:
   `docs/i18n/etapa5-auditoria-premium.md`, seção 8.
