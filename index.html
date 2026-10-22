@@ -50,6 +50,8 @@ try{
   --paper-line: #E3DCCE;
   --accent: #3498D6;
   --accent-dark: #2678AC;
+  /* Caixas com texto (botão principal, opção marcada): azul + branco, 4,7:1 nos dois temas (decisão da autora, 2026-10-19; mesmo token do fr). */
+  --brand-fill: #2879B3; --on-brand-fill: #FFFFFF;
   --danger: #C0231F;
   --success: #1E7A3C;
   --shadow-card: 0 2px 10px rgba(32,26,44,0.07), 0 1px 3px rgba(32,26,44,0.06);
@@ -124,7 +126,7 @@ h1{
 .btn:active{ transform:scale(.98); }
 .btn:disabled{ opacity:.6; cursor:default; }
 .btn-block{ width:100%; }
-.btn-primary{ background:var(--accent); color:#fff; }
+.btn-primary{ background:var(--brand-fill); color:var(--on-brand-fill); }
 .btn-primary:hover{ filter:brightness(1.06); }
 .gate-oauth-btn{
   width:100%; min-height:50px; display:flex; align-items:center; justify-content:center; gap:10px;
@@ -202,7 +204,7 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
 /* ---------- "Eu falo..." na escolha do curso (igual ao de Adicionar curso) ---------- */
 .gate-speak{ justify-self:center; display:inline-flex; gap:4px; padding:4px; background:var(--elevado); border:1px solid var(--paper-line); border-radius:999px; max-width:100%; }
 .gate-speak button{ font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; min-height:44px; padding:0 16px; border:0; border-radius:999px; background:transparent; color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
-.gate-speak button[aria-pressed="true"]{ background:var(--accent); color:#fff; }
+.gate-speak button[aria-pressed="true"]{ background:var(--brand-fill); color:var(--on-brand-fill); }
 @media (max-width:420px){ .gate-card{ padding:24px 18px 20px; } .gate-speak button{ font-size:13px; padding:0 12px; } }
 
 /* ---------- Entrar e cadastro em 3 passos (2026-10-18, no estilo do Busuu) ---------- */
