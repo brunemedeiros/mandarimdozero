@@ -81,7 +81,7 @@
 .painel .p-abas a[aria-current]{ color: var(--p-tinta); border-bottom-color: var(--p-marca); }
 
 /* ---------- Avatar (iniciais) ---------- */
-.painel .p-avatar{ display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; flex: none; font-size: .85rem; font-weight: 800; background: var(--p-marca-escura); color: var(--p-bg); }
+.painel .p-avatar{ display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; flex: none; font-size: .85rem; font-weight: 800; background: var(--p-marca); color: var(--p-texto-botao); }
 .painel .p-avatar--grande{ width: 4rem; height: 4rem; font-size: 1.2rem; }
 /* No escuro, --p-marca-escura é claro: vira contorno sobre a superfície para manter contraste com as iniciais. */
 :root[data-theme="dark"] .painel .p-avatar{ background: var(--p-elevado); color: var(--p-tinta); outline: 1px solid var(--p-linha); }

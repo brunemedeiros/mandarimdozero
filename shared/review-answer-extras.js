@@ -75,6 +75,35 @@ function typedAnswerGrade(verdict){
   return verdict === 'ok' ? 2 : verdict === 'quase' ? 1 : 0;
 }
 
+// Por que foi "quase": 'accent' (só acento a mais ou a menos) ou 'letter' (uma letra a mais, a menos ou trocada).
+function typedAlmostKind(typed, forms){
+  const list = (forms || []).filter(Boolean);
+  const cands = list.concat(list.length > 1 ? [list.join(' / ')] : []).map(f => _answerLigatureFold(_answerLooseForm(f)));
+  const raw = String(typed == null ? '' : typed);
+  const variants = [raw, raw.replace(/\s*\/\s*/g, ' / '), raw.replace(/,/g, ' / ').replace(/\s*\/\s*/g, ' / ')];
+  const sameLoose = variants.some(v => cands.indexOf(_answerLigatureFold(_answerLooseForm(v))) !== -1);
+  return sameLoose ? 'accent' : 'letter';
+}
+
 function reviewAlmostHTML(localState){
-  return localState && localState.almost ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>` : '';
+  if (!localState || !localState.almost) return '';
+  const key = localState.almostKind === 'accent' ? 'review.almost.accent' : localState.almostKind === 'letter' ? 'review.almost.letter' : 'review.almost';
+  return `<div class="review-almost">${escapeHTML(t(key))}</div>`;
+}
+
+// Resultado de uma resposta digitada (Digite a resposta e Completar): errou = Errei e quase = Difícil são automáticos
+// (botão Continuar); acertou em cheio = a pessoa escolhe Bom ou Fácil, com o intervalo de cada um, nas cores da Revisão.
+function typedResultActionsHTML(card, localState){
+  if (localState && localState.wasCorrect && !localState.almost){
+    const now = Date.now();
+    return `<div class="grade-buttons typed-grade">${[[2, 'good'], [3, 'easy']].map(([g, k]) =>
+      `<button class="grade-btn grade-${k}" data-grade="${g}">${escapeHTML(t('review.grade.' + k))}<small>${escapeHTML(formatReviewInterval(previewNextIntervalDays(card, g, now)))}</small></button>`).join('')}</div>`;
+  }
+  return `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${escapeHTML(t('common.continue'))}</button>`;
+}
+// autoGrade = nota do Continuar (Errei ou Difícil). Bom/Fácil vêm do botão clicado.
+function wireTypedResultActions(mountEl, callbacks, localState, autoGrade){
+  mountEl.querySelectorAll('.typed-grade .grade-btn').forEach(b => b.addEventListener('click', () => callbacks.onAnswered(localState.wasCorrect, Number(b.dataset.grade))));
+  const cont = mountEl.querySelector('#cloze-continue-btn');
+  if (cont) cont.addEventListener('click', () => callbacks.onAnswered(localState.wasCorrect, autoGrade));
 }

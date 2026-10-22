@@ -109,7 +109,7 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
 
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
-        addXP(exerciseXP(ex, 4));
+        addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE));
         addStudyMinutes();
         // Sem detalhe extra -- a resposta certa já ficou marcada em verde na
         // tela (revealCorrectVisual), repetir o texto no painel seria redundante.

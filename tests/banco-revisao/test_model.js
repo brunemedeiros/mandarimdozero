@@ -74,6 +74,31 @@ const rc = J(R('rbSelectRecap(__p, "2026-10-14", 8).map(i => i.id)', { p: pool }
 check('récap: só aprovados vencidos até a aula, errados primeiro, depois nunca revistos e os mais atrasados', JSON.stringify(rc) === JSON.stringify(['c', 'd', 'g', 'b']), JSON.stringify(rc));
 check('récap respeita o tamanho', J(R('rbSelectRecap(__p, "2026-12-31", 2).length', { p: pool })) === 2);
 
+// --- agendamento único (FSRS, migration 112): Modo aula e estudo em casa usam o mesmo estado
+check('FSRS: o motor real está carregado no teste', R('typeof applyMemoryGrade === "function" && typeof previewNextIntervalDays === "function"') === true);
+const NOW = Date.parse('2026-10-18T15:00:00');
+const g = (item, grade) => J(R('rbApplyGrade(__i, __g, __n)', { i: item, g: grade, n: NOW }));
+check('nota 0..3 mapeia no resultado antigo (errou/ajuda/acertou/acertou)', J(R('[0,1,2,3].map(rbGradeOutcome)', {})).join() === 'errou,ajuda,acertou,acertou' && J(R('["errou","ajuda","acertou"].map(rbOutcomeGrade)', {})).join() === '0,1,2');
+const novo = { id: 'n', level: 0, due_date: null, last_result: null, last_review_date: null };
+const gb = g(novo, 2), gf = g(novo, 3), ge = g(novo, 0);
+check('item novo + Bom: estado review, estabilidade e due no futuro', gb.fsrs.state === 'review' && gb.fsrs.stability > 0 && gb.fsrs.due > NOW && gb.outcome === 'acertou' && gb.level === 1);
+check('Fácil agenda mais longe que Bom, e o nível sobe igual', gf.fsrs.stability > gb.fsrs.stability && gf.due_date >= gb.due_date && gf.level === 1);
+check('Errei: due amanhã (regra do site), nível 0, lapso contado', ge.due_date === '2026-10-19' && ge.level === 0 && ge.fsrs.lapses === 1 && ge.outcome === 'errou');
+check('Difícil mantém o nível', g({ ...novo, level: 4 }, 1).level === 4);
+const seg = J(R('rbApplyGrade(__i, 2, __n)', { i: { ...novo, fsrs: gb.fsrs }, n: NOW + 86400000 * 3 }));
+check('segunda resposta usa o estado salvo (reps 2, estabilidade cresce)', seg.fsrs.reps === 2 && seg.fsrs.stability > gb.fsrs.stability);
+const antigo = { id: 'o', level: 3, due_date: '2026-10-10', last_result: 'acertou', last_review_date: '2026-10-03' };
+const ca = J(R('rbItemFsrsCard(__i)', { i: antigo }));
+check('item antigo (só nível) vira cartão em revisão com estabilidade do degrau anterior', ca.state === 'review' && ca.stability === 7 && ca.reps === 3, JSON.stringify(ca));
+check('item antigo que errou última vez volta como reaprendizado', J(R('rbItemFsrsCard(__i)', { i: { ...antigo, last_result: 'errou' } })).state === 'relearning');
+check('item nunca revisado é novo', J(R('rbItemFsrsCard(__i)', { i: novo })).state === 'new');
+const pvs = J(R('rbGradePreviews(__i, __n)', { i: { ...novo, fsrs: gb.fsrs }, n: NOW + 86400000 * 3 }));
+check('prévia dos 4 botões cresce de Errei a Fácil', pvs.length === 4 && pvs[0] < pvs[1] && pvs[1] <= pvs[2] && pvs[2] <= pvs[3], JSON.stringify(pvs));
+check('só campos conhecidos vão para o fsrs do item', Object.keys(gb.fsrs).every(k => ['stability', 'difficulty', 'state', 'lastReview', 'due', 'reps', 'lapses', 'interval', 'fsrsReps', 'fsrsLapses'].includes(k)), Object.keys(gb.fsrs).join());
+
+const poolC = [it('x1', { last_review_date: '2026-10-13', due_date: '2026-10-10' }), it('x2', { last_review_date: '2026-10-13', due_date: '2026-10-10', last_result: 'errou' }), it('x3', { last_review_date: '2026-10-10', due_date: '2026-10-10' })];
+check('récap: quem foi revisto nos últimos 3 dias descansa, exceto o que errou', JSON.stringify(J(R('rbSelectRecap(__p, "2026-10-14", 8).map(i => i.id)', { p: poolC }))) === JSON.stringify(['x2', 'x3']));
+check('estatísticas separam respostas da aula e de casa', (() => { const st = J(R('rbStatsFromReviews(__r)', { r: [{ review_date: '2026-10-10', outcome: 'acertou' }, { review_date: '2026-10-11', outcome: 'errou', via: 'casa' }, { review_date: '2026-10-11', outcome: 'acertou', via: 'casa' }] })); return st.total === 3 && st.inClass === 1 && st.atHome === 2; })());
 // --- estatísticas
 const rev = [
   { review_date: '2026-10-10', outcome: 'acertou', reason: null, mode: 'recap' }, { review_date: '2026-10-10', outcome: 'errou', reason: 'ordem', mode: 'recap' },

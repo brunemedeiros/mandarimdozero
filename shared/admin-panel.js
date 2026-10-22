@@ -1,5 +1,5 @@
 // ---------- Painel de Admin: navegação entre as abas ----------
-// Alterna entre as seções do Painel de Admin (Badges, Analytics, Notificações, Reports, Planos). Antes morava dentro de
+// Alterna entre as seções do Painel de Admin (Badges, Analytics, Notificações, Reports, Planos, Privacidade). Antes morava dentro de
 // shared/admin-analytics.js. Cada seção renderiza no seu próprio contêiner (#admin-<seção>-content); só um fica visível.
 // O Admin Mode tem UM ponto de acesso só: o botão 🔒 Admin da barra de cima (applyAdminModeUI, shared/auth.js).
 // Alunos/Cartões/Aulas/Material de apoio ficam no Painel da professora (shared/teacher-panel.js), que depende do PAPEL
@@ -10,7 +10,7 @@
 
 const ADMIN_PANEL_STATE = { section: 'badges' };
 
-const ADMIN_PANEL_SECTIONS = ['badges', 'analytics', 'notifications', 'reports', 'premium'];
+const ADMIN_PANEL_SECTIONS = ['badges', 'analytics', 'notifications', 'reports', 'premium', 'privacy'];
 function switchAdminPanelSection(section){
   if (!ADMIN_PANEL_SECTIONS.includes(section)) section = 'badges';
   ADMIN_PANEL_STATE.section = section;
@@ -27,6 +27,7 @@ function switchAdminPanelSection(section){
   else if (section === 'notifications') renderAdminNotificationsView();
   else if (section === 'reports') renderAdminReportsView();
   else if (section === 'premium') renderAdminPremiumView();
+  else if (section === 'privacy') renderAdminPrivacyView();
   else renderAdminAnalyticsView();
 }
 
