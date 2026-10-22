@@ -39,7 +39,7 @@ const SEED = {
 
     // ---- quadro ----
     L('tela cheia: sem Ranking ao lado', await p.evaluate(() => getComputedStyle(document.querySelector('.right-cards')).display === 'none'));
-    L('título, as 5 abas do Admin e Badges ativa', (await p.innerText('[data-tbd="pagina"] header')).includes('Badges') && JSON.stringify(await p.$$eval('#view-admin-badges [data-admin-section]', l => l.map(b => b.dataset.adminSection))) === '["badges","analytics","notifications","reports","premium"]' && await p.$eval('[data-admin-section="badges"]', b => b.classList.contains('is-active')));
+    L('título, as 6 abas do Admin (a de Privacidade é temporária) e Badges ativa', (await p.innerText('[data-tbd="pagina"] header')).includes('Badges') && JSON.stringify(await p.$$eval('#view-admin-badges [data-admin-section]', l => l.map(b => b.dataset.adminSection))) === '["badges","analytics","notifications","reports","premium","privacy"]' && await p.$eval('[data-admin-section="badges"]', b => b.classList.contains('is-active')));
     L('catálogo: 2 cartões com a contagem de pessoas', (await cardsTxt()).length === 2 && (await cardsTxt())[0].includes('2 pessoas') && (await cardsTxt())[1].includes('1 pessoa'), await cardsTxt());
     L('nome com HTML aparece como texto', (await p.$$eval('[data-badges-catalogo] b', l => l.length)) === 0 && (await cardsTxt())[1].includes('Beta <b>'));
     L('o ícone SVG do badge automático fica pequeno, do tamanho do texto', await p.$$eval('[data-badges-concessoes] td svg, [data-badges-concessoes] td img', l => l.length > 0 && l.every(e => e.getBoundingClientRect().width <= 30)));

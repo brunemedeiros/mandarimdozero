@@ -36,3 +36,9 @@ opções com título e descrição (`.jp-opcao`), chips com ícone (`.jp-chip`),
 largos do mesmo tamanho. Peças no bloco "janela rica" dos dois index (classe `.janela-painel` no `.app-modal`).
 Sem ilustrações grandes sem função; texto e ícones só com o que o produto faz de verdade. Avisos Premium/Limite seguem a
 mesma linha (`docs/historico/13-*`). Prévia antes do código continua valendo para tela nova.
+
+## Cor das caixas com texto (2026-10-19)
+Botão primário, aba/chip/segmento selecionado, contador e avatar usam `--brand-fill` (azul `#2879B3` no fr, vermelho `#C0231F` no zh)
+com `--on-brand-fill` (branco), nos dois temas; hover `--brand-fill-hover`. No painel: `--p-marca` = `--brand-fill`, `--p-texto-botao` =
+`--on-brand-fill`. O Banco de Revisão segue a mesma cor (`--rb-box`). `--seal-red` fica só para elementos sem texto (barras, bolinhas,
+interruptores) e `--seal-red-dark` para links e destaques. Ao criar uma caixa nova, rodar `tests/cores-marca/test_playwright.js`.

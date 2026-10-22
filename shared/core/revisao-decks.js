@@ -163,6 +163,32 @@ function unitCardCounts(unitId){
   return { total, learned, dueForReview, totalCards: pool.length };
 }
 
+// Faixa "cartões da sua professora para hoje" (decisão da autora, 2026-10-21): deixa a aba Aluno > Revisão
+// menos escondida. Só existe quando há cartões da professora para hoje (mesmo número do +N da aba Aluno).
+// variant 'review': faixa própria no topo da Revisão; 'trail': caixa menor ao lado do "Continue de onde parou".
+function buildClassReviewBanner(variant){
+  let n = 0;
+  try { n = classReviewTodayCount(); } catch (e) { n = 0; }
+  if (!n) return null;
+  const el = document.createElement('div');
+  const title = tp('classBanner.title', n === 1 ? 1 : 2, { n });
+  if (variant === 'trail'){
+    el.className = 'trail-continue tc-teacher';
+    const short = tp('classBanner.titleShort', n === 1 ? 1 : 2, { n });
+    el.innerHTML = `<div class="tc-info"><div class="tc-eyebrow">${escapeHTML(t('classBanner.eyebrow'))}</div><div class="tc-title">${escapeHTML(short)}</div><div class="tc-sub">${escapeHTML(t('classBanner.sub'))}</div></div>
+      <button type="button" class="btn btn-primary tc-cta">${escapeHTML(t('classBanner.cta', { n }))}</button>`;
+    el.querySelector('.tc-cta').addEventListener('click', () => startClassReviewSession());
+    return el;
+  }
+  el.className = 'class-review-banner';
+  el.setAttribute('role', 'region');
+  el.setAttribute('aria-label', title);
+  el.innerHTML = `<div class="crb-ico" aria-hidden="true">👩‍🏫</div><div class="crb-txt"><strong>${escapeHTML(title)}</strong><span>${escapeHTML(t('classBanner.subReview'))}</span></div>
+    <button type="button" class="btn btn-primary crb-cta">${escapeHTML(t('classBanner.cta', { n }))}</button>`;
+  el.querySelector('.crb-cta').addEventListener('click', () => startClassReviewSession());
+  return el;
+}
+
 // Fase 2 da trilha: cartão "Continuar" no topo. Fonte única = nextTrailItem
 // (shared/trail-state-model.js); aqui só desenha. A métrica mostrada é a
 // oficial: lições concluídas.
@@ -190,6 +216,15 @@ function buildTrailContinueCard(){
     <button type="button" class="btn btn-primary tc-cta">${started ? t('common.continue') : t('common.start')}</button>
   `;
   card.querySelector('.tc-cta').addEventListener('click', () => openUnitDetail(u.id));
+  const teacher = buildClassReviewBanner('trail');
+  if (teacher){
+    // Na mesma linha (quebra para baixo em tela estreita); o "fixo no topo" vale para a linha toda.
+    const row = document.createElement('div');
+    row.className = 'trail-continue-row';
+    row.append(card, teacher);
+    setTimeout(() => watchTrailContinueCard(card), 0);
+    return row;
+  }
   setTimeout(() => watchTrailContinueCard(card), 0);
   return card;
 }
@@ -437,6 +472,11 @@ function reviewSessionFilterSummary(){
 // "Estudar tudo" (todos os Decks juntos) fica embaixo da tabela de Decks; as
 // contagens por Deck já estão na tabela, então aqui não há números. Aviso
 // quando um filtro de sessão (origem/tag, em "Configurar") está ativo.
+// Com a faixa dos cartões da professora na tela, "Estudar tudo" vira "Estudar a trilha": esse botão não inclui os cartões dela.
+function classBannerVisible(){
+  try { return classReviewTodayCount() > 0; } catch (e) { return false; }
+}
+
 function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
@@ -457,7 +497,7 @@ function renderReviewTodayWidget(){
       </div>
       <div class="review-today-go">
         ${trueCount ? `<button class="btn btn-secondary review-short-btn" id="review-short-btn" title="${escapeHTML(t('review.today.shortTitle'))}">${escapeHTML(t('review.today.short'))}</button>
-        <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">${escapeHTML(t('review.today.studyAll', { n: trueCount }))}</button>`
+        <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">${escapeHTML(t(classBannerVisible() ? 'review.today.studyPath' : 'review.today.studyAll', { n: trueCount }))}</button>`
         : `<span class="review-today-done">${escapeHTML(t('review.today.upToDate'))}</span>`}
       </div>
     </div>
@@ -502,6 +542,13 @@ function renderReviewModeSelect(){
   const rec = reviewRecords();
 
   renderReviewTodayWidget();
+  const widgetEl = document.getElementById('review-today-widget');
+  if (widgetEl){
+    const old = document.getElementById('class-review-banner');
+    if (old) old.remove();
+    const banner = buildClassReviewBanner('review');
+    if (banner){ banner.id = 'class-review-banner'; widgetEl.parentNode.insertBefore(banner, widgetEl); }
+  }
   // Navegador de Decks (shared/deck-browser.js): tabela Deck | Novo | Aprendendo | Revisar.
   if (typeof renderReviewDeckTable === 'function') renderReviewDeckTable();
 
@@ -725,16 +772,11 @@ function reviewProgressBarHTML(card){
   `;
 }
 
-// Rendimento decrescente de XP pra cartas maduras (artefato §5): uma carta
-// já dominada (intervalo alto) avaliada repetidamente não deve valer o
-// mesmo XP que uma carta ainda instável -- sem tirar XP de revisão nenhuma
-// (piso de 1), só reduzir o ganho marginal. `intervalBefore` é o intervalo
-// ANTES desta revisão (maturidade já acumulada), não o recalculado por ela.
+// XP da Revisão (decisão da autora, 2026-10-15): valor fixo por nota (XP_PER_GRADE em shared/srs.js), SEM redução
+// para cartão maduro, para não desestimular a revisão ao longo do tempo. Errei = 0 (addXP(0) não faz nada).
+// `intervalBefore` continua na assinatura só porque os chamadores (fr e zh) já o passam; não entra mais no cálculo.
 function reviewXP(intervalBefore, grade){
-  const base = XP_PER_GRADE[grade];
-  if (intervalBefore >= 60) return Math.max(1, Math.round(base * 0.4));
-  if (intervalBefore >= 21) return Math.max(1, Math.round(base * 0.7));
-  return base;
+  return XP_PER_GRADE[grade] || 0;
 }
 
 function gradeCurrentCard(grade){
@@ -750,6 +792,11 @@ function gradeCurrentCard(grade){
   // de ser calculado por regras SM-2 fixas.
   applyMemoryGrade(card, grade);
   trackReviewAnswer('flashcard', card, grade);
+  // Cartão da professora (Banco): o estudo em casa entra nas estatísticas e no agendamento do Banco (112).
+  if (typeof logBankHomeStudy === 'function'){
+    const kind = STATE.reviewCardState && STATE.reviewCardState.kind;
+    logBankHomeStudy(card, grade, kind === 'type_answer' || kind === 'cloze');
+  }
   STATE.totalReviews += 1;
   // Streak só conta quando a SESSÃO inteira termina (ver renderReviewView),
   // não a cada cartão avaliado -- senão avaliar 1 carta isolada já bastava

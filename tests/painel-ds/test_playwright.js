@@ -13,8 +13,8 @@ const server = http.createServer((req, res) => {
 });
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x).slice(0, 500) : ''); } };
-const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', ok: 'rgb(58, 115, 89)', erro: 'rgb(214, 38, 25)' }, dark: { marca: 'rgb(77, 169, 232)', ok: 'rgb(82, 180, 135)', erro: 'rgb(255, 107, 92)' } },
-              zh: { light: { marca: 'rgb(192, 35, 31)', ok: 'rgb(58, 115, 89)', erro: 'rgb(192, 35, 31)' }, dark: { marca: 'rgb(225, 82, 75)', ok: 'rgb(82, 180, 135)', erro: 'rgb(255, 107, 92)' } } };   // o zh passou a definir --error-red (claro = --seal-red, escuro = #FF6B5C)
+const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', botao: 'rgb(40, 121, 179)', ok: 'rgb(58, 115, 89)', erro: 'rgb(214, 38, 25)' }, dark: { marca: 'rgb(77, 169, 232)', botao: 'rgb(40, 121, 179)', ok: 'rgb(82, 180, 135)', erro: 'rgb(255, 107, 92)' } },
+              zh: { light: { marca: 'rgb(192, 35, 31)', botao: 'rgb(192, 35, 31)', ok: 'rgb(58, 115, 89)', erro: 'rgb(192, 35, 31)' }, dark: { marca: 'rgb(225, 82, 75)', botao: 'rgb(192, 35, 31)', ok: 'rgb(82, 180, 135)', erro: 'rgb(255, 107, 92)' } } };   // o zh passou a definir --error-red (claro = --seal-red, escuro = #FF6B5C)
 
 (async () => {
   await new Promise(r => server.listen(0, '127.0.0.1', r));
@@ -50,10 +50,10 @@ const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', ok: 'rgb(58, 115, 89)',
         });
         const esp = COR[curso][tema];
         check(`[${rot}] atributos aplicados`, info.curso === curso && info.tema === tema, info);
-        check(`[${rot}] botão primário usa a cor do curso (${esp.marca})`, info.botao === esp.marca, info.botao);
+        check(`[${rot}] botão primário usa a cor de caixa do curso (${esp.botao})`, info.botao === esp.botao, info.botao);
         check(`[${rot}] selo ok e selo erro com as cores do curso`, info.seloOk === esp.ok && info.seloErro === esp.erro, [info.seloOk, info.seloErro]);
         check(`[${rot}] fonte única Nunito, também no título`, /nunito/i.test(info.fonte) && /nunito/i.test(info.fonteH1) && !/serif sc/i.test(info.fonteH1), [info.fonte, info.fonteH1]);
-        check(`[${rot}] aba atual sublinhada com a cor do curso`, info.abaBorda === esp.marca, info.abaBorda);
+        check(`[${rot}] aba atual sublinhada com a cor do curso`, info.abaBorda === esp.botao, info.abaBorda);
         check(`[${rot}] abas agrupadas à esquerda (não espalhadas)`, info.abasEspalhadas !== null && info.abasEspalhadas < 40, info.abasEspalhadas);
         check(`[${rot}] 15 tokens de cor no guia`, info.tokens === 15, info.tokens);
         check(`[${rot}] tabela rola só nela`, info.tabelaOverflow === 'auto', info.tabelaOverflow);
@@ -85,9 +85,9 @@ const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', ok: 'rgb(58, 115, 89)',
         });
         check(`[${rot}] Nunito hospedada: arquivo carregado e fonte disponível`, ext.fontes >= 1 && ext.nunitoOk, [ext.fontes, ext.nunitoOk]);
         const textoBotao = tema === 'light' ? 'rgb(255, 255, 255)' : (curso === 'fr' ? 'rgb(32, 19, 83)' : 'rgb(26, 6, 5)');
-        check(`[${rot}] botão primário: pílula, negrito, texto ${tema === 'light' ? 'branco' : 'escuro'} (igual ao Ranking)`, ext.prim && /^(999|1000)px|^9999px/.test(ext.prim.raio) && +ext.prim.peso >= 800 && (tema === 'light' ? ext.prim.cor === textoBotao : ext.prim.cor !== 'rgb(255, 255, 255)'), ext.prim);
+        check(`[${rot}] botão primário: pílula, negrito, texto branco nos dois temas (igual ao Ranking)`, ext.prim && /^(999|1000)px|^9999px/.test(ext.prim.raio) && +ext.prim.peso >= 800 && ext.prim.cor === 'rgb(255, 255, 255)', ext.prim);
         check(`[${rot}] botão secundário e contorno: pílula bege em negrito`, ext.sec && ext.out && /999|1000/.test(ext.sec.raio) && /999|1000/.test(ext.out.raio) && +ext.sec.peso >= 800 && ext.sec.fundo === ext.out.fundo && ext.out.fundo !== 'rgba(0, 0, 0, 0)', [ext.sec, ext.out]);
-        check(`[${rot}] seletor em pílulas: ativa na cor do curso, pílulas inteiras (os 2 cantos), negrito e espaço de 6px entre elas`, ext.seg && ext.seg.ativoFundo === esp.marca && [...ext.seg.ativoRaio, ...ext.seg.inativoRaio].every(r => parseFloat(r) >= 100) && +ext.seg.inativoPeso >= 800 && ext.seg.espaco >= 4, ext.seg);
+        check(`[${rot}] seletor em pílulas: ativa na cor do curso, pílulas inteiras (os 2 cantos), negrito e espaço de 6px entre elas`, ext.seg && ext.seg.ativoFundo === esp.botao && [...ext.seg.ativoRaio, ...ext.seg.inativoRaio].every(r => parseFloat(r) >= 100) && +ext.seg.inativoPeso >= 800 && ext.seg.espaco >= 4, ext.seg);
         check(`[${rot}] tabela: primeira coluna à esquerda, demais dados e títulos centralizados`, ext.tabela.primeira === 'start' || ext.tabela.primeira === 'left' ? ext.tabela.demais.length >= 3 && ext.tabela.demais.every(a => a === 'center') && ext.tabela.titulosDemais.every(a => a === 'center') && (ext.tabela.tituloPrimeira === 'start' || ext.tabela.tituloPrimeira === 'left') : false, ext.tabela);
         check(`[${rot}] trilha de navegação: itens, separador › e página atual em destaque`, ext.trilha.itens === 4 && /›/.test(ext.trilha.chevron || '') && +ext.trilha.atual >= 700, ext.trilha);
         check(`[${rot}] spinner girando (animação p-giro, 0,8s) e redondo`, ext.spinner && ext.spinner.anim === 'p-giro' && ext.spinner.dur === '0.8s' && /50%|9\d\dpx|px/.test(ext.spinner.raio), ext.spinner);
@@ -114,7 +114,7 @@ const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', ok: 'rgb(58, 115, 89)',
     await page.goto(base + '/shared/painel/guia-de-estilo.html');
     await page.click('#curso button[data-v="zh"]'); await page.click('#tema button[data-v="dark"]');
     const cor = await page.evaluate(() => getComputedStyle(document.querySelector('.painel')).getPropertyValue('--p-marca').trim());
-    check('clicar Mandarim + Escuro troca --p-marca para o vermelho escuro do zh', cor.toUpperCase() === '#E1524B', cor);
+    check('clicar Mandarim + Escuro troca --p-marca para o vermelho de caixa do zh (igual no claro e no escuro)', cor.toUpperCase() === '#C0231F', cor);
     const erro = await page.evaluate(() => getComputedStyle(document.querySelector('.p-selo--erro')).backgroundColor);
     check('zh escuro usa o --error-red do site no selo de erro', erro === 'rgb(255, 107, 92)', erro);
     await ctx.close(); }
@@ -135,7 +135,7 @@ const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', ok: 'rgb(58, 115, 89)',
     <div id="fora-div" style="width:100px;padding:10px;border:1px solid red">caixa</div>
     <div class="painel" id="dentro"><h1 id="dentro-h1">Dentro</h1><button id="dentro-btn">Botão</button></div></body>`;
   // Stub dos tokens que o site já define no :root (valores reais do fr claro). Nas duas páginas, para a única diferença ser o CSS do painel.
-  const STUB = '<style>:root{--seal-red:#3498D6;--seal-red-dark:#1D5A82;--on-seal-red:#201335;--imperial-gold:#E36BCA;--paper:#FAF5EA;--paper-warm:#F0E8D8;--paper-line:#E1D6C0;--ink:#201335;--ink-soft:#5C4E73;--jade:#3A7359;--error-red:#D62619;--on-vivid:#FFF;--grade-hard-bg:#8C5F0E;--count-new:#1D5A82;--font-body:Nunito,sans-serif;--radius:14px}</style>';
+  const STUB = '<style>:root{--brand-fill:#2879B3;--brand-fill-hover:#1D5A82;--on-brand-fill:#FFFFFF;--seal-red:#3498D6;--seal-red-dark:#1D5A82;--on-seal-red:#201335;--imperial-gold:#E36BCA;--paper:#FAF5EA;--paper-warm:#F0E8D8;--paper-line:#E1D6C0;--ink:#201335;--ink-soft:#5C4E73;--jade:#3A7359;--error-red:#D62619;--on-vivid:#FFF;--grade-hard-bg:#8C5F0E;--count-new:#1D5A82;--font-body:Nunito,sans-serif;--radius:14px}</style>';
   const html = (comCss) => `<!doctype html><html data-theme="light"><head><meta charset="utf-8">${STUB}${comCss ? ['vendor/pico.painel.css', 'painel-tokens.css', 'painel-componentes.css'].map(f => `<link rel="stylesheet" href="${base}/shared/painel/${f}">`).join('') : ''}</head>${corpo}</html>`;
   const ctx = await browser.newContext({ viewport: { width: 900, height: 700 }, serviceWorkers: 'block' });
   const sem = await ctx.newPage(); await sem.route('**/controle-sem', r => r.fulfill({ contentType: 'text/html', body: html(false) })); await sem.goto(base + '/controle-sem');
@@ -143,7 +143,7 @@ const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', ok: 'rgb(58, 115, 89)',
   const a = await sem.evaluate(medir), b = await com.evaluate(medir);
   for (const k of Object.keys(a)) check(`FORA de .painel: ${k} idêntico com e sem o CSS do painel`, JSON.stringify(a[k]) === JSON.stringify(b[k]), { sem: a[k], com: b[k] });
   const dentro = await com.evaluate(() => { const c = getComputedStyle(document.getElementById('dentro-btn')); return c.backgroundColor; });
-  check('DENTRO de .painel o botão recebe o estilo do painel', dentro === 'rgb(52, 152, 214)', dentro);
+  check('DENTRO de .painel o botão recebe o estilo do painel', dentro === 'rgb(40, 121, 179)', dentro);
   const h1d = await com.evaluate(() => getComputedStyle(document.getElementById('dentro-h1')).color), h1f = await sem.evaluate(() => getComputedStyle(document.getElementById('fora-h1')).color);
   check('DENTRO de .painel o h1 recebe a cor de tinta do site (a base do Pico está ativa)', h1d === 'rgb(32, 19, 53)' && h1f !== h1d, [h1d, h1f]);
   await ctx.close();

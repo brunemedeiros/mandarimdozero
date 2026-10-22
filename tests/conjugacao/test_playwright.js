@@ -313,25 +313,26 @@ async function fill(page, wrongIdx){
       await page.click('#conj-mode-games');
       const l = await page.evaluate(() => ({ practiceHidden: document.getElementById('conj-practice-pane').hidden, cards: document.querySelectorAll('#conj-games-list .cg-card').length,
         sel: document.getElementById('conj-mode-games').getAttribute('aria-selected'), sub: document.querySelector('#conj-select-wrap .path-header p').hidden }));
-      check('aba Jogos: lista de jogos no lugar da escolha', l.practiceHidden && l.cards === 1 && l.sel === 'true' && l.sub, l);
+      check('aba Jogos: lista de jogos no lugar da escolha', l.practiceHidden && l.cards === 4 && l.sel === 'true' && l.sub, l);
       const lock = await page.evaluate(() => ({ badge: (document.querySelector('.cg-card .cg-premium') || {}).textContent, tab: !!document.querySelector('#conj-mode-games .conj-mode-lock') }));
       check('Jogos são Premium: cadeado no cartão e na aba', /🔒/.test(lock.badge || '') && /Premium/.test(lock.badge || '') && lock.tab, lock);
       // Paywall ligado (simulado): tocar em Jogar abre o aviso Premium e não começa a partida.
       await page.evaluate(() => { window.__origLock = isConjGameLocked; window.isConjGameLocked = () => true; });
-      await page.click('.cg-play');
+      await page.click('.cg-play[data-game="pc-imparfait"]');
       const pw = await page.evaluate(() => ({ modal: getComputedStyle(document.getElementById('premium-challenges-modal')).display, playing: document.getElementById('conj-game-wrap').style.display }));
       check('paywall ligado: abre o aviso Premium em vez do jogo', pw.modal === 'flex' && pw.playing !== 'block', pw);
       await page.evaluate(() => { window.isConjGameLocked = window.__origLock; document.getElementById('premium-challenges-modal').style.display = 'none'; });
-      await page.click('.cg-play');
+      await page.click('.cg-play[data-game="pc-imparfait"]');
       await page.waitForSelector('.cg-choice');
       const q = await page.evaluate(() => ({ n: CONJ_GAMES_UI.state.order.length, focus: document.body.dataset.activityFocus, blank: !!document.querySelector('.cg-blank'),
-        choices: document.querySelectorAll('.cg-choice').length }));
-      check('partida com 10 frases, em modo foco, lacuna e 2 opções', q.n === 10 && q.focus === 'conjugaison' && q.blank && q.choices === 2, q);
+        choices: document.querySelectorAll('.cg-choice').length,
+        noSpoil: !document.querySelector('.cg-listen') && document.querySelector('.cg-panel .cg-tr').hidden }));
+      check('partida com 10 frases, em modo foco, lacuna e 2 opções; sem 🔊 nem tradução antes de responder', q.n === 10 && q.focus === 'conjugaison' && q.blank && q.choices === 2 && q.noSpoil, q);
       const right = await page.evaluate(() => CONJ_GAMES_UI.state.order[0].ans);
       await page.keyboard.press(right === 'a' ? '2' : '1'); // tecla escolhe (errada, de propósito)
       await page.waitForTimeout(60);
       const f = await page.evaluate(() => ({ verdict: document.querySelector('.cg-verdict').className, fill: document.querySelector('.cg-sentence .cg-fill').textContent,
-        clue: !!document.querySelector('.cg-sentence .cg-clue'), why: document.querySelector('.cg-why p').textContent.length, tr: document.querySelector('.cg-tr span').textContent,
+        clue: !!document.querySelector('.cg-sentence .cg-clue'), why: document.querySelector('.cg-why p').textContent.length, tr: document.querySelector('.cg-panel .cg-tr').textContent,
         right: document.querySelector('.cg-choice.is-right').dataset.k, wrong: !!document.querySelector('.cg-choice.is-wrong'), svg: !!document.querySelector('.cg-timeline svg'),
         nextFocus: document.activeElement && document.activeElement.id }));
       const it0 = await page.evaluate(() => CONJ_GAMES_UI.state.order[0]);
@@ -354,14 +355,67 @@ async function fill(page, wrongIdx){
       check('voltar aos jogos sai do foco', await page.evaluate(() => !document.body.dataset.activityFocus && document.getElementById('conj-select-wrap').style.display === 'block'));
       // Site em inglês: nada em português no jogo.
       await page.evaluate(() => { window.getUiLang = () => 'en'; });
-      await page.click('.cg-play');
+      await page.click('.cg-play[data-game="pc-imparfait"]');
       await page.keyboard.press('1');
       const en = await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[0];
-        return { tr: document.querySelector('.cg-tr span').textContent === it.text.en.tr, why: document.querySelector('.cg-why p').textContent === it.text.en.why,
+        return { tr: document.querySelector('.cg-panel .cg-tr').textContent === it.text.en.tr, why: document.querySelector('.cg-why p').textContent === it.text.en.why.replace(/[{}]/g, ''),
           tl: document.querySelector('.cg-timeline figcaption').textContent }; });
       check('site em inglês: tradução, explicação e legenda em inglês', en.tr && en.why && /^a (point|line)/.test(en.tl), en);
       check('jogos: zero pageerror', errors.length === 0, errors);
       await ctx.close(); })();
+  }
+
+  // ---- Jogos A1 (2026-10-19): être x avoir, auxiliar do passé composé, tu x vous ----
+  {
+    const { page, errors, ctx } = await bootPage(browser, 'fr', port, 'light');
+    await page.evaluate(() => switchTab('conjugaison'));
+    const d = await page.evaluate(() => ['etre-avoir', 'pc-auxiliaire', 'tu-vous'].map(id => { const g = CONJ_GAMES.find(x => x.id === id);
+      const ids = g.items.map(i => i.id);
+      return { id, level: g.level, n: g.items.length, a: g.items.filter(i => i.ans === 'a').length, per: g.perRound, noSketch: !g.opts.a.sketch && !g.opts.b.sketch,
+        dupIds: ids.length !== new Set(ids).size,
+        bad: g.items.filter(i => !['a', 'b'].includes(i.ans) || i.a === i.b || !(i.before + i.after).includes(i.clue)
+          || !['pt-BR', 'en'].every(l => i.text[l] && i.text[l].tr && i.text[l].why && i.text[l].why.length > 20)).map(i => i.id),
+        // site em inglês sem português; pt-BR sem "pra" nem "--"
+        enPt: g.items.filter(i => /[ãõ]|\b(você|não)\b/i.test(i.text.en.tr + ' ' + i.text.en.why)).map(i => i.id),
+        // francês em azul (2026-10-19): toda explicação tem trecho entre {chaves}, balanceadas e sem aninhar
+        unmarked: g.items.filter(i => ['pt-BR', 'en'].some(l => !/\{[^{}]+\}/.test(i.text[l].why) || /\{[^}]*\{|\}[^{]*\}/.test(i.text[l].why.replace(/\{[^{}]*\}/g, '')))).map(i => i.id),
+        ptBad: g.items.filter(i => /\bpra\b|--/.test(i.text['pt-BR'].tr + ' ' + i.text['pt-BR'].why)).map(i => i.id),
+        // só o auxiliar: com être, sujeito masculino e singular (concordância do particípio é A2)
+        agree: id === 'pc-auxiliaire' ? g.items.filter(i => i.ans === 'b' && (/(ée|ées|és)$/.test(i.after.trim().split(' ')[0]) || /^(Elle|Elles|Ils|Nous|Vous) /.test(i.before))).map(i => i.id) : [] }; }));
+    for (const g of d) check(`jogo ${g.id}: A1, 10 por partida, sem desenho, pt e en completos, pista na frase`,
+      g.level === 'A1' && g.per === 10 && g.n >= 16 && g.a >= 6 && g.n - g.a >= 6 && g.noSketch && !g.dupIds && !g.bad.length && !g.unmarked.length && !g.enPt.length && !g.ptBad.length && !g.agree.length, g);
+    await page.click('#conj-mode-games');
+    const cards = await page.evaluate(() => [...document.querySelectorAll('#conj-games-list .cg-card')].map(c => ({ level: (c.querySelector('.cg-level') || {}).textContent, game: c.querySelector('.cg-play').dataset.game })));
+    check('lista: 3 jogos A1 primeiro, depois o A2, com etiqueta de nível', cards.map(c => c.level).join() === 'A1,A1,A1,A2' && cards[3].game === 'pc-imparfait', cards);
+    if (process.env.SHOTS) await page.screenshot({ path: process.env.SHOTS + '/jogos-lista.png', fullPage: true });
+    for (const id of ['etre-avoir', 'pc-auxiliaire', 'tu-vous']){
+      await page.click(`.cg-play[data-game="${id}"]`);
+      await page.waitForSelector('.cg-choice');
+      const it = await page.evaluate(() => CONJ_GAMES_UI.state.order[0]);
+      const verb = await page.evaluate(() => (document.querySelector('.cg-verb') || {}).textContent || '');
+      await page.keyboard.press(it.ans === 'a' ? '1' : '2');
+      await page.waitForTimeout(60);
+      const f = await page.evaluate(() => ({ verdict: document.querySelector('.cg-verdict').className, svg: !!document.querySelector('.cg-timeline svg'),
+        rule: (document.querySelector('.cg-timeline.cg-rule figcaption') || {}).textContent || '', clue: !!document.querySelector('.cg-sentence .cg-clue'),
+        // 🔊 colado na frase e tradução logo abaixo dela, dentro do painel (2026-10-20)
+        audioNear: !!document.querySelector('.cg-panel .cg-sentence-row .cg-listen') && !document.querySelector('.cg-feedback .cg-listen')
+          && !!(document.querySelector('.cg-panel .cg-tr') || {}).textContent && !document.querySelector('.cg-panel .cg-tr').hidden,
+        eyebrow: (document.querySelector('.cg-eyebrow') || {}).textContent || '',
+        fr: document.querySelectorAll('.cg-why .cg-fr[lang="fr"]').length, braces: /[{}]/.test(document.getElementById('conj-game-content').textContent) }));
+      check(`${id}: acerto, sem desenho, regra em quadro, pista marcada, francês em azul na explicação, verbo ${it.verb ? 'mostrado' : 'escondido'}`,
+        /ok/.test(f.verdict) && !f.svg && f.rule.length > 10 && f.clue && f.fr >= 2 && !f.braces && f.audioNear && /A1/.test(f.eyebrow) && (it.verb ? verb === '(' + it.verb + ')' : verb === ''), { f, verb, it: it.id });
+      if (process.env.SHOTS) await page.screenshot({ path: process.env.SHOTS + `/jogo-${id}.png`, fullPage: true });
+      await page.click('#conj-game-back');
+    }
+    await page.evaluate(() => { window.getUiLang = () => 'en'; });
+    await page.click('.cg-play[data-game="tu-vous"]');
+    await page.keyboard.press('1');
+    const en = await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[0];
+      return { title: document.querySelector('.cg-title').textContent, why: document.querySelector('.cg-why p').textContent === it.text.en.why.replace(/[{}]/g, ''),
+        rule: document.querySelector('.cg-rule figcaption').textContent }; });
+    check('site em inglês: título, explicação e regra em inglês', en.title === 'Tu or vous?' && en.why && /^(tu|vous): /.test(en.rule) && !/[ãõ]|você/.test(en.rule), en);
+    check('jogos A1: zero pageerror', errors.length === 0, errors);
+    await ctx.close();
   }
 
   // Celular (390px): sem rolagem horizontal; tabela numa coluna só.

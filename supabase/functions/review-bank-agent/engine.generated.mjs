@@ -537,7 +537,7 @@ function validateFieldAudioUploadFile(file){
   if (!file) return { ok: false, error: mediaErrorText('media.noFile', 'Nenhum arquivo selecionado.') };
   if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: mediaErrorText('media.emptyFile', 'Arquivo vazio.') };
   if (typeof file.size === 'number' && file.size > FIELD_AUDIO_UPLOAD_MAX_BYTES){
-    return { ok: false, error: mediaErrorText('media.audioTooBig', 'Arquivo maior que 5 MB -- escolha um arquivo de áudio menor.') };
+    return { ok: false, error: mediaErrorText('media.audioTooBig', 'Arquivo maior que 5 MB. Escolha um arquivo de áudio menor.') };
   }
   const type = file.type || '';
   if (!FIELD_AUDIO_UPLOAD_MIME_TYPES.includes(type)){
@@ -3410,12 +3410,18 @@ function nextRevisionForNativeSave(c, editorState, conversionBaseline){
 //    em vez de criar um Field de resposta vazio que passaria despercebido
 //    até o clique em Salvar.
 // Etapa 3 (lote C): mensagem no idioma do site quando t() existe; sem ele (testes Node), o português de sempre.
+// Plural (Etapa 4): `pt` pode ser { one, other }; com params.n numérico a forma sai por n === 1 (tp no catálogo).
 function nativePersistenceText(key, pt, params){
-  if (typeof t === 'function'){
+  const plural = params && typeof params.n === 'number';
+  if (plural && typeof tp === 'function'){
+    const v = tp(key, params.n === 1 ? 1 : 2, params);
+    if (v && v !== key) return v;
+  } else if (typeof t === 'function'){
     const v = t(key, params);
     if (v && v !== key) return v;
   }
-  return String(pt).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
+  const s = (pt && typeof pt === 'object') ? (plural && params.n === 1 ? pt.one : pt.other) : pt;
+  return String(s).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
 }
 function legacyFlashcardConversionPreflight(row){
   const isCloze = !!row.cloze_sentence;
@@ -3423,14 +3429,14 @@ function legacyFlashcardConversionPreflight(row){
     const blankMatches = (row.cloze_sentence.match(/___/g) || []).length;
     if (blankMatches !== 1){
       return { ok: false, error: blankMatches === 0
-        ? nativePersistenceText('noteConvert.err.noBlank', 'Esta frase de completar não tem nenhum "___" marcando a lacuna -- não dá pra saber onde a resposta entra. Corrija a frase pelo formulário de sempre antes de usar o editor novo.')
-        : nativePersistenceText('noteConvert.err.manyBlanks', 'Esta frase de completar tem mais de um "___" -- o formulário legado só suporta 1 lacuna por cartão, então não dá pra determinar automaticamente qual delas vira a marca nativa. Corrija a frase pelo formulário de sempre antes de usar o editor novo.') };
+        ? nativePersistenceText('noteConvert.err.noBlank', 'Esta frase de completar não tem nenhum "___" marcando a lacuna, então não dá para saber onde a resposta entra. Corrija a frase pelo formulário de sempre antes de usar o editor novo.')
+        : nativePersistenceText('noteConvert.err.manyBlanks', 'Esta frase de completar tem mais de um "___". O formulário legado só suporta 1 lacuna por cartão, então não dá para determinar automaticamente qual delas vira a marca nativa. Corrija a frase pelo formulário de sempre antes de usar o editor novo.') };
     }
     return { ok: true };
   }
   const isMC = !!(row.choices && row.choices.length);
   if (isMC && !(row.back_trans || '').trim()){
-    return { ok: false, error: nativePersistenceText('noteConvert.err.mcNoAnswer', 'Este cartão de múltipla escolha não tem uma resposta certa definida (verso vazio) -- não dá pra determinar qual é a resposta certa. Preencha o verso pelo formulário de sempre antes de usar o editor novo.') };
+    return { ok: false, error: nativePersistenceText('noteConvert.err.mcNoAnswer', 'Este cartão de múltipla escolha não tem uma resposta certa definida (verso vazio), então não dá para determinar qual é a resposta certa. Preencha o verso pelo formulário de sempre antes de usar o editor novo.') };
   }
   return { ok: true };
 }
@@ -3796,8 +3802,8 @@ function summarizeDroppedImportTags(states, opts){
   const sys = all.filter(d => d.reason === 'system_tag').length;
   const lim = all.length - sys;
   const parts = [];
-  if (lim) parts.push(nativePersistenceText('import.tagsDropped.limit', '{n} tag(s) foram ignoradas por passar do limite ({max} tags por cartão, {len} caracteres por tag).', { n: lim, max: TAG_MAX_PER_NOTE, len: TAG_MAX_LENGTH }));
-  if (sys) parts.push(nativePersistenceText('import.tagsDropped.system', '{n} tag(s) de sistema (atribuição de autoria) não são importadas por arquivo/link: só uma cópia feita pelo app a cria.', { n: sys }));
+  if (lim) parts.push(nativePersistenceText('import.tagsDropped.limit', { one: '{n} tag foi ignorada por passar do limite ({max} tags por cartão, {len} caracteres por tag).', other: '{n} tags foram ignoradas por passar do limite ({max} tags por cartão, {len} caracteres por tag).' }, { n: lim, max: TAG_MAX_PER_NOTE, len: TAG_MAX_LENGTH }));
+  if (sys) parts.push(nativePersistenceText('import.tagsDropped.system', { one: '{n} tag de sistema (atribuição de autoria) não é importada por arquivo/link: só uma cópia feita pelo app a cria.', other: '{n} tags de sistema (atribuição de autoria) não são importadas por arquivo/link: só uma cópia feita pelo app a cria.' }, { n: sys }));
   return parts.join(' ');
 }
 
@@ -4664,7 +4670,7 @@ function validateNativeMultipleChoiceStructure(editorState){
   // fieldIsPinyinSatellite já existe pras transições).
   const unrecognized = fields.filter(f => !MC_ROLES.includes(f.role) && !fieldIsPinyinSatellite(f, fields));
   if (unrecognized.length){
-    return { ok: false, error: tp('mcEditor.err.unrecognized', unrecognized.length) };
+    return { ok: false, error: tp('mcEditor.err.unrecognized', unrecognized.length === 1 ? 1 : 2, { n: unrecognized.length }) };
   }
 
   const isEmptyField = f => !(f.content && (f.content.value || '').trim());
@@ -5009,7 +5015,7 @@ function validateNativeTypeAnswerStructure(editorState){
 
   const unrecognized = roledFields.filter(f => f.role !== 'prompt' && f.role !== 'answer');
   if (unrecognized.length){
-    return { ok: false, error: tp('taEditor.err.unrecognized', unrecognized.length) };
+    return { ok: false, error: tp('taEditor.err.unrecognized', unrecognized.length === 1 ? 1 : 2, { n: unrecognized.length }) };
   }
 
   const promptFields = roledFields.filter(f => f.role === 'prompt');
@@ -5343,11 +5349,63 @@ function rbNextSchedule(level, outcome, today){
   return { level: 0, due_date: rbAddDays(today, RB_INTERVALS[0]) };
 }
 
+// ---------- Agendamento único (FSRS): o Modo aula e o estudo em casa usam o MESMO estado de memória ----------
+// Nota 0..3 (Errei, Difícil, Bom, Fácil) = escala da Revisão do site (applyMemoryGrade em shared/fsrs.js).
+function rbGradeOutcome(grade){ return grade === 0 ? 'errou' : (grade === 1 ? 'ajuda' : 'acertou'); }
+function rbOutcomeGrade(outcome){ return outcome === 'errou' ? 0 : (outcome === 'ajuda' ? 1 : 2); }
+
+function rbLocalDateStr(ms){
+  const d = new Date(ms);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// Estado FSRS do item como "cartão" do motor. Item antigo (só nível da escada, sem fsrs) é convertido uma vez:
+// nunca revisado = novo; revisado = em revisão, com estabilidade do degrau anterior da escada.
+function rbItemFsrsCard(item){
+  const f = item && item.fsrs;
+  if (f && typeof f === 'object' && f.state && f.state !== 'new') return Object.assign({}, f);
+  const lv = Math.max(0, Math.min(9, Number(item && item.level) || 0));
+  if (item && item.last_review_date && (lv > 0 || item.last_result)){
+    const last = Date.parse(item.last_review_date + 'T12:00:00');
+    if (item.last_result === 'errou' || lv === 0) return { state: 'relearning', stability: 1, difficulty: 7, lastReview: last, due: last + 86400000, reps: 1, lapses: 1, fsrsReps: 1, fsrsLapses: 1, interval: 1 };
+    const st = RB_INTERVALS[Math.max(0, lv - 1)];
+    return { state: 'review', stability: st, difficulty: 5, lastReview: last, due: last + RB_INTERVALS[lv - 1] * 86400000, reps: lv, lapses: 0, fsrsReps: lv, fsrsLapses: 0, interval: st };
+  }
+  return { state: 'new', stability: 0, difficulty: 0, reps: 0, lapses: 0 };
+}
+
+// Aplica a nota e devolve o que gravar no item: { fsrs, due_date, level, outcome }. Usa applyMemoryGrade/previewNext
+// do shared/fsrs.js (carregado antes na página; nos testes, passe `engine`).
+function rbApplyGrade(item, grade, nowMs, engine){
+  const E = engine || { applyMemoryGrade: (typeof applyMemoryGrade === 'function' ? applyMemoryGrade : null) };
+  const now = nowMs || Date.now(), outcome = rbGradeOutcome(grade);
+  const card = rbItemFsrsCard(item);
+  E.applyMemoryGrade(card, grade, now);
+  const lv = Math.max(0, Math.min(9, Number(item && item.level) || 0));
+  const level = outcome === 'acertou' ? Math.min(9, lv + 1) : (outcome === 'ajuda' ? lv : 0);
+  const fsrs = {};
+  ['stability', 'difficulty', 'state', 'lastReview', 'due', 'reps', 'lapses', 'interval', 'fsrsReps', 'fsrsLapses'].forEach(k => { if (card[k] !== undefined) fsrs[k] = card[k]; });
+  return { fsrs, due_date: rbLocalDateStr(card.due), level, outcome };
+}
+
+// Intervalo (em dias) que cada botão daria, para o rótulo "Bom · 4 dias".
+function rbGradePreviews(item, nowMs, engine){
+  const E = engine || { previewNextIntervalDays: (typeof previewNextIntervalDays === 'function' ? previewNextIntervalDays : null) };
+  const card = rbItemFsrsCard(item), now = nowMs || Date.now();
+  return [0, 1, 2, 3].map(g => E.previewNextIntervalDays(card, g, now));
+}
+
 // Récap: até `size` itens aprovados vencidos até `lessonDate` (ou nunca revistos). Errados por último resultado primeiro,
 // depois os mais atrasados, depois os de nível mais baixo e os mais recentes.
+const RB_RECAP_COOLDOWN_DAYS = 3;
 function rbSelectRecap(items, lessonDate, size){
   const n = size || RB_RECAP_SIZE;
-  const due = (items || []).filter(i => i.status === 'aprovado' && (!i.due_date || i.due_date <= lessonDate));
+  // Agendamento único (112): due_date vem do FSRS, seja da aula ou do estudo em casa. Quem foi revisto nos últimos
+  // RB_RECAP_COOLDOWN_DAYS dias (em casa ou na aula) descansa, a não ser que tenha errado: o que o aluno acabou de
+  // estudar sozinho não volta na aula seguinte.
+  const cool = rbAddDays(lessonDate, -RB_RECAP_COOLDOWN_DAYS);
+  const due = (items || []).filter(i => i.status === 'aprovado' && (!i.due_date || i.due_date <= lessonDate)
+    && !(i.last_review_date && i.last_review_date > cool && i.last_result !== 'errou'));
   due.sort((a, b) =>
     ((b.last_result === 'errou') - (a.last_result === 'errou')) ||
     String(a.due_date || '0000').localeCompare(String(b.due_date || '0000')) ||
@@ -5376,7 +5434,8 @@ function rbStatsFromReviews(reviews){
     const rs = list.filter(r => r.review_date === d), a = rs.filter(r => r.outcome === 'acertou').length, h = rs.filter(r => r.outcome === 'ajuda').length;
     return { date: d, pct: rbPercent(a, rs.length) || 0, ok: a, help: h, wrong: rs.length - a - h };
   });
-  return { total, days: days.length, okPct: rbPercent(ok, total), helpPct: rbPercent(help, total), wrongPct: rbPercent(wrong.length, total), byDay, byReason: count(wrong, r => r.reason) };
+  const home = list.filter(r => r.via === 'casa').length;
+  return { total, inClass: total - home, atHome: home, days: days.length, okPct: rbPercent(ok, total), helpPct: rbPercent(help, total), wrongPct: rbPercent(wrong.length, total), byDay, byReason: count(wrong, r => r.reason) };
 }
 
 // Uma linha da Visão geral por aluno do Banco.
@@ -5395,7 +5454,7 @@ function rbOverviewRow(student, items, reviews, recap, today){
     nextLesson: lessons[0] || '', hasAgenda: (student.lesson_dates || []).length > 0,
     pending: (items || []).filter(i => i.status === 'pendente').length, approved: (items || []).filter(i => i.status === 'aprovado').length,
     lastEntry: last, daysSinceEntry: days, recapGenerated: recap ? recap.class_date : '', recapUsed: lastRecapUsed,
-    n30: r30.length, accuracy: rbPercent(ok, r30.length), errors30: wrong.length, topReason: topReason ? topReason[0] : '',
+    n30: r30.length, home30: r30.filter(r => r.via === 'casa').length, accuracy: rbPercent(ok, r30.length), errors30: wrong.length, topReason: topReason ? topReason[0] : '',
   };
 }
 

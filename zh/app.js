@@ -1523,7 +1523,8 @@ function renderNextStoryBeat(){
           if (i === q.correctIndex) b.classList.add('correct');
           else if (i === chosenIdx) b.classList.add('incorrect');
         });
-        if (isCorrect) addXP(5);
+        // História já concluída não paga XP de novo (decisão de 2026-10-15).
+        if (isCorrect && !STATE.storyProgress[STORY_STATE.storyId]?.completed) addXP(STORY_QUESTION_XP);
 
         const continueBtn = document.createElement('button');
         continueBtn.className = 'story-continue-btn';
@@ -1554,7 +1555,7 @@ function finishStory(){
   const storyId = STORY_STATE.storyId;
   if (!STATE.storyProgress[storyId]?.completed){
     STATE.storyProgress[storyId] = { completed: true };
-    addXP(20);
+    addXP(STORY_DONE_XP);
     showToast(t('zh.toast.storyDone'));
   }
   saveState();
@@ -2010,7 +2011,7 @@ function finishCurrentLesson(u){
     const challengesBefore = todaysChallenges().map(c => Math.min(c.get(STATE.daily), c.target));
     const lessonKey = `${u.id}:${currentLessonIdx(u.id)}`;
     STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
-    addXP(8);
+    addXP(LESSON_CLOSE_XP);
     // Terminar esta lição intermediária já conta como "estudei hoje" pro
     // streak -- antes só o Ponto de verificação (fim da unidade inteira)
     // contava, deixando quem completa 1-2 lições de uma unidade grande sem
@@ -2036,7 +2037,7 @@ function finishCurrentLesson(u){
     renderTopbarStats();
     // XP real da lição (não hardcoded, não estrelas): delta entre o XP
     // atual e o snapshot tirado quando a lição começou (xpAtLessonStart),
-    // cobrindo tanto o XP dos exercícios respondidos quanto o +8 de
+    // cobrindo tanto o XP dos exercícios respondidos quanto o bônus de fechar a lição (LESSON_CLOSE_XP) de
     // conclusão logo acima -- STATE.xp só muda dentro de addXP() (ver
     // Fase 1), então esse delta é exatamente o que esta lição concedeu.
     const xpEarned = STATE.xp - STEP_STATE.acq.xpAtLessonStart;
@@ -3260,7 +3261,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
       revealCorrectVisual(chosenIdx);
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
-        addXP(exerciseXP(ex, 3));
+        addXP(exerciseXP(ex, EXERCISE_XP_RECOGNIZE));
         registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
         addStudyMinutes();
         setTimeout(() => showCorrectFeedbackPanel(contentEl, null), 500);
@@ -3325,7 +3326,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
+      addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
       registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
       addStudyMinutes();
       // Detalhe extra vale a pena aqui (diferente da múltipla escolha): o
@@ -3553,7 +3554,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4));
+      addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE));
       addStudyMinutes();
       setTimeout(() => showCorrectFeedbackPanel(contentEl, clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
@@ -3672,7 +3673,7 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
       addStudyMinutes();
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
-        addXP(exerciseXP(ex, 4)); // vale um pouco mais que múltipla escolha simples, mesmo critério do reorder
+        addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE)); // vale um pouco mais que múltipla escolha simples, mesmo critério do reorder
         setTimeout(() => showCorrectFeedbackPanel(contentEl, phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t)), 500);
       } else {
         setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
@@ -3799,7 +3800,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
-      addXP(exerciseXP(ex, 4)); // ordenar frase vale um pouco mais que múltipla escolha simples
+      addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE)); // ordenar frase vale um pouco mais que múltipla escolha simples
       addStudyMinutes();
       setTimeout(() => showCorrectFeedbackPanel(contentEl, phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t)), 500);
     } else {
@@ -4181,7 +4182,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
         ${answered ? `<div class="cloze-pinyin pinyin">${escapeHTML(view.compareAnswerText)}</div>` : ''}
       </div>
       ${view.audioUrl ? customAudioBtnHTML(view.audioUrl) : ''}
-      ${answered ? `<div class="cloze-trans">${escapeHTML(view.translation.text)}</div>` : ''}
+      ${(answered || card.origin === 'teacher') && view.translation.text ? `<div class="cloze-trans">${escapeHTML(view.translation.text)}</div>` : ''}
     </div>
     ${!answered ? `
       <div class="cloze-type-wrap">
@@ -4189,7 +4190,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
         ${pinyinTonePickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `${toneHintHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${toneHintHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
   `;
 
   wireCustomAudioButtons(mountEl);
@@ -4216,11 +4217,8 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
     mountEl.querySelector('#cloze-review-verify-btn').addEventListener('click', verify);
   } else {
-    mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
-      // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
-      // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
-    });
+    // Errou = Errei automático; acerto escolhe Bom ou Fácil (typedResultActionsHTML).
+    wireTypedResultActions(mountEl, callbacks, localState, 0);
   }
 }
 
@@ -4272,7 +4270,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
         ${pinyinTonePickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `${toneHintHTML(localState)}${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
+    ` : `${toneHintHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -4305,15 +4303,16 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
     mountEl.querySelector('#cloze-review-verify-btn').addEventListener('click', verify);
   } else {
-    mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
-      // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
-      // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
-      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
-    });
+    // Errou = Errei automático; acerto escolhe Bom ou Fácil (typedResultActionsHTML).
+    wireTypedResultActions(mountEl, callbacks, localState, 0);
   }
 }
 
 function renderReviewView(){
+  renderReviewViewInner();
+  if (typeof mountBankRequestMenu === 'function') mountBankRequestMenu();
+}
+function renderReviewViewInner(){
   syncReviewBackLink();
   stopExerciseAudio();
   const el = document.getElementById('review-content');
@@ -4702,6 +4701,7 @@ function renderSettingsView(){
   document.getElementById('settings-email').textContent = CURRENT_USER?.email || t('settings.account.guest');
   document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? t('settings.account.emailPassword') : '—');
   switchSettingsSection(SETTINGS_SECTION);
+  if (typeof refreshDeleteAccountBox === 'function') refreshDeleteAccountBox();
 }
 
 // Alterna entre as duas seções internas de Configurações (Geral/Exportar) --
@@ -5366,7 +5366,7 @@ function renderHanziWriteCard(char, contentEl, nextBtn){
       onComplete: () => {
         feedbackEl.textContent = t('zh.hanzi.writeDone');
         feedbackEl.className = 'hanzi-write-feedback ok';
-        addXP(3);
+        if (!hanziLessonAlreadyCompleted()) addXP(HANZI_WRITE_XP); // lição já concluída não paga de novo
         setTimeout(() => advanceHanziAfterWrite(), 900);
       }
     });
@@ -5463,7 +5463,7 @@ function renderHanziTestStep(contentEl, nextBtn){
       });
       if (isCorrect){
         HANZI_STUDY_STATE.testScore += 1;
-        addXP(3);
+        if (!hanziLessonAlreadyCompleted()) addXP(HANZI_TEST_XP); // lição já concluída não paga de novo
       }
       // Streak conta só ao terminar a LIÇÃO de Hanzi inteira (ver
       // markHanziLessonCompleted), não a cada pergunta isolada do teste.
@@ -5475,6 +5475,11 @@ function renderHanziTestStep(contentEl, nextBtn){
   });
 }
 
+// Refazer uma lição de hanzi já concluída é permitido, mas não paga XP (escrita e teste).
+function hanziLessonAlreadyCompleted(){
+  return !!STATE.hanziLessonProgress[HANZI_STUDY_STATE.lessonIndex]?.completed;
+}
+
 function markHanziLessonCompleted(lessonIndex){
   if (STATE.hanziLessonProgress[lessonIndex].completed) return;
   STATE.hanziLessonProgress[lessonIndex].completed = true;
@@ -5482,7 +5487,7 @@ function markHanziLessonCompleted(lessonIndex){
   if (lessonIndex + 1 < HANZI_LESSONS.length){
     STATE.hanziLessonProgress[lessonIndex + 1].unlocked = true;
   }
-  addXP(20);
+  addXP(LESSON_CLOSE_XP);
   registerStudyToday();
   registerDailyHanziLesson();
   showToast(t('zh.toast.hanziLessonDone'));
