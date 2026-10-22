@@ -408,3 +408,8 @@ subtítulo) à versão B do Pico, e pediu que vire o padrão, com as cores do si
 - Ajuste pedido pela autora (2026-10-19): o francês dentro do texto em português/inglês sai em azul (`--seal-red-dark`,
   `.cg-fr`, `lang="fr"`). Nos dados, o trecho em francês vai entre {chaves} (título, apresentação, regra e explicação dos 4
   jogos; 190 de 196 textos). Marcação feita por subagente e conferida por script: tirando as chaves, o texto é idêntico.
+- Tela do jogo no visual da lição (pedido da autora, 2026-10-20: "contrasta demais com o restante do site" e o 🔊 ficava
+  longe da frase): cabeçalho discreto ("Jogos · A1" + título, com a chave já existente `games.tabGames`), sem o cartão com
+  sombra em volta, frase centralizada num painel bege (igual a `.vocab-card`/"Na frase"), letra menor; depois da resposta o
+  🔊 fica colado na frase e a tradução logo abaixo dela (antes da resposta nenhum dos dois aparece, para não entregar a
+  resposta). Conjugação 77/77 (com checagem nova do 🔊/tradução), fr claro/escuro e 390px conferidos.

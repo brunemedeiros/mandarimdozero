@@ -85,12 +85,20 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
   function renderQuestion(){
     const it = item(), g = S.game;
     S.answered = false;
+    // Mesmo visual da lição (2026-10-20, pedido da autora): cabeçalho discreto, frase centralizada num painel
+    // bege; depois da resposta, o 🔊 fica colado na frase e a tradução logo abaixo (como o "Na frase" da lição).
     $(ids.content).innerHTML = `
-      <h2 class="cg-title">${rich(L(g.title))}</h2>
+      <div class="cg-head">
+        <span class="cg-eyebrow">${esc(tt('games.tabGames'))}${g.level ? ` · ${esc(g.level)}` : ''}</span>
+        <h2 class="cg-title">${rich(L(g.title))}</h2>
+      </div>
       ${progressHTML()}
       <div class="cg-stage">
-        ${it.verb ? `<span class="cg-verb" lang="fr">(${esc(it.verb)})</span>` : ''}
-        ${sentenceHTML(it, false)}
+        <div class="cg-panel">
+          ${it.verb ? `<span class="cg-verb" lang="fr">(${esc(it.verb)})</span>` : ''}
+          <div class="cg-sentence-row">${sentenceHTML(it, false)}</div>
+          <p class="cg-tr" hidden></p>
+        </div>
         <div class="cg-choices">
           ${['a', 'b'].map((k, i) => `<button type="button" class="cg-choice" data-k="${k}" aria-keyshortcuts="${i + 1}">
             <span class="cg-choice-form" lang="fr">${esc(it[k])}</span><span class="cg-choice-label">${esc(g.opts[k].label)}</span></button>`).join('')}
@@ -110,9 +118,15 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
       b.disabled = true;
       b.classList.add(b.dataset.k === it.ans ? 'is-right' : (b.dataset.k === k ? 'is-wrong' : 'is-dim'));
     });
-    $(ids.content).querySelector('.cg-sentence').outerHTML = sentenceHTML(it, true);
     const opt = g.opts[it.ans], txt = L(it.text) || {};
     const full = it.before + it[it.ans] + it.after;
+    const row = $(ids.content).querySelector('.cg-sentence-row');
+    row.innerHTML = sentenceHTML(it, true)
+      + `<button type="button" class="audio-btn cg-listen" aria-label="${esc(tt('games.listen'))}" title="${esc(tt('games.listen'))}">🔊</button>`;
+    row.querySelector('.cg-listen').addEventListener('click', e => { if (speak) speak(full, e.currentTarget); });
+    const tr = $(ids.content).querySelector('.cg-tr');
+    tr.textContent = txt.tr || '';
+    tr.hidden = !txt.tr;
     const last = S.idx + 1 >= S.order.length;
     const fb = $('cg-feedback');
     fb.innerHTML = `
@@ -121,9 +135,7 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
         <figure class="cg-timeline${SKETCH[opt.sketch] ? '' : ' cg-rule'}">${SKETCH[opt.sketch] ? `<svg viewBox="0 0 134 44" role="img" aria-label="${esc(plain(L(opt.tl)))}">${SKETCH[opt.sketch]}</svg>` : ''}<figcaption>${rich(L(opt.tl))}</figcaption></figure>
         <div><h3>${rich(tt('games.whyTense', { tense: '{' + opt.label + '}' }))}</h3><p>${rich(txt.why || '')}</p></div>
       </div>
-      <p class="cg-tr"><button type="button" class="audio-btn cg-listen" aria-label="${esc(tt('games.listen'))}" title="${esc(tt('games.listen'))}">🔊</button><span>${esc(txt.tr || '')}</span></p>
       <button type="button" class="btn btn-primary cg-next" id="cg-next">${esc(tt(last ? 'games.seeResult' : 'games.next'))}</button>`;
-    fb.querySelector('.cg-listen').addEventListener('click', e => { if (speak) speak(full, e.currentTarget); });
     S.shownAt = performance.now();
     $('cg-next').addEventListener('click', next);
     setTimeout(() => { const n = $('cg-next'); if (n) n.focus(); }, 0);

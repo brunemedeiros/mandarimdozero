@@ -5203,6 +5203,23 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
   #view-conjugaison .cg-choices{ gap:8px; }
 }
 #view-conjugaison .conj-mode-lock{ font-size:12px; }
+/* Jogo no visual da lição (2026-10-20): cabeçalho discreto, sem cartão com sombra em volta, frase centralizada
+   num painel bege (igual a .vocab-card / "Na frase"), 🔊 colado na frase e tradução logo abaixo. */
+#view-conjugaison .cg-head{ border-bottom:1px solid var(--paper-line); padding-bottom:10px; margin-bottom:14px; }
+#view-conjugaison .cg-eyebrow{ display:block; font-size:11.5px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; color:var(--seal-red-dark); }
+#view-conjugaison .cg-head .cg-title{ font-size:16px; margin:2px 0 0; }
+#view-conjugaison .cg-stage{ background:none; border:0; border-radius:0; padding:0; box-shadow:none; }
+#view-conjugaison .cg-panel{ background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:var(--radius); padding:26px 20px; text-align:center; margin-bottom:16px; }
+#view-conjugaison .cg-panel .cg-verb{ display:block; margin-bottom:8px; }
+#view-conjugaison .cg-sentence-row{ display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; }
+#view-conjugaison .cg-panel .cg-sentence{ font-size:clamp(19px, 2.4vw, 22px); font-weight:700; line-height:1.45; margin:0; }
+#view-conjugaison .cg-panel .cg-tr{ display:block; margin:6px 0 0; font-size:14px; color:var(--ink-soft); }
+#view-conjugaison .cg-choice{ border-radius:var(--radius); background:var(--paper); min-height:64px; }
+#view-conjugaison .cg-choice-form{ font-size:clamp(17px, 2.2vw, 20px); font-weight:800; }
+#view-conjugaison .cg-feedback{ margin-top:16px; padding-top:0; border-top:0; }
+#view-conjugaison .cg-why{ border:1px solid var(--paper-line); border-radius:var(--radius); margin-bottom:16px; }
+#view-conjugaison .cg-result{ background:var(--paper-warm); box-shadow:none; border-radius:var(--radius); }
+@media (max-width:620px){ #view-conjugaison .cg-stage{ padding:0; } #view-conjugaison .cg-panel{ padding:22px 14px; } }
 /* Francês dentro do texto em português/inglês (marcado com {chaves} nos dados). */
 #view-conjugaison .cg-fr{ color:var(--seal-red-dark); font-weight:800; }
 #view-conjugaison .cg-level{ display:inline-block; margin-right:8px; padding:1px 8px; border-radius:8px; font-size:13px; font-weight:900; vertical-align:2px;

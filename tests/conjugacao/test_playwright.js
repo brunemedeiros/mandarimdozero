@@ -325,13 +325,14 @@ async function fill(page, wrongIdx){
       await page.click('.cg-play[data-game="pc-imparfait"]');
       await page.waitForSelector('.cg-choice');
       const q = await page.evaluate(() => ({ n: CONJ_GAMES_UI.state.order.length, focus: document.body.dataset.activityFocus, blank: !!document.querySelector('.cg-blank'),
-        choices: document.querySelectorAll('.cg-choice').length }));
-      check('partida com 10 frases, em modo foco, lacuna e 2 opções', q.n === 10 && q.focus === 'conjugaison' && q.blank && q.choices === 2, q);
+        choices: document.querySelectorAll('.cg-choice').length,
+        noSpoil: !document.querySelector('.cg-listen') && document.querySelector('.cg-panel .cg-tr').hidden }));
+      check('partida com 10 frases, em modo foco, lacuna e 2 opções; sem 🔊 nem tradução antes de responder', q.n === 10 && q.focus === 'conjugaison' && q.blank && q.choices === 2 && q.noSpoil, q);
       const right = await page.evaluate(() => CONJ_GAMES_UI.state.order[0].ans);
       await page.keyboard.press(right === 'a' ? '2' : '1'); // tecla escolhe (errada, de propósito)
       await page.waitForTimeout(60);
       const f = await page.evaluate(() => ({ verdict: document.querySelector('.cg-verdict').className, fill: document.querySelector('.cg-sentence .cg-fill').textContent,
-        clue: !!document.querySelector('.cg-sentence .cg-clue'), why: document.querySelector('.cg-why p').textContent.length, tr: document.querySelector('.cg-tr > span:last-child').textContent,
+        clue: !!document.querySelector('.cg-sentence .cg-clue'), why: document.querySelector('.cg-why p').textContent.length, tr: document.querySelector('.cg-panel .cg-tr').textContent,
         right: document.querySelector('.cg-choice.is-right').dataset.k, wrong: !!document.querySelector('.cg-choice.is-wrong'), svg: !!document.querySelector('.cg-timeline svg'),
         nextFocus: document.activeElement && document.activeElement.id }));
       const it0 = await page.evaluate(() => CONJ_GAMES_UI.state.order[0]);
@@ -357,7 +358,7 @@ async function fill(page, wrongIdx){
       await page.click('.cg-play[data-game="pc-imparfait"]');
       await page.keyboard.press('1');
       const en = await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[0];
-        return { tr: document.querySelector('.cg-tr > span:last-child').textContent === it.text.en.tr, why: document.querySelector('.cg-why p').textContent === it.text.en.why.replace(/[{}]/g, ''),
+        return { tr: document.querySelector('.cg-panel .cg-tr').textContent === it.text.en.tr, why: document.querySelector('.cg-why p').textContent === it.text.en.why.replace(/[{}]/g, ''),
           tl: document.querySelector('.cg-timeline figcaption').textContent }; });
       check('site em inglês: tradução, explicação e legenda em inglês', en.tr && en.why && /^a (point|line)/.test(en.tl), en);
       check('jogos: zero pageerror', errors.length === 0, errors);
@@ -396,9 +397,13 @@ async function fill(page, wrongIdx){
       await page.waitForTimeout(60);
       const f = await page.evaluate(() => ({ verdict: document.querySelector('.cg-verdict').className, svg: !!document.querySelector('.cg-timeline svg'),
         rule: (document.querySelector('.cg-timeline.cg-rule figcaption') || {}).textContent || '', clue: !!document.querySelector('.cg-sentence .cg-clue'),
+        // 🔊 colado na frase e tradução logo abaixo dela, dentro do painel (2026-10-20)
+        audioNear: !!document.querySelector('.cg-panel .cg-sentence-row .cg-listen') && !document.querySelector('.cg-feedback .cg-listen')
+          && !!(document.querySelector('.cg-panel .cg-tr') || {}).textContent && !document.querySelector('.cg-panel .cg-tr').hidden,
+        eyebrow: (document.querySelector('.cg-eyebrow') || {}).textContent || '',
         fr: document.querySelectorAll('.cg-why .cg-fr[lang="fr"]').length, braces: /[{}]/.test(document.getElementById('conj-game-content').textContent) }));
       check(`${id}: acerto, sem desenho, regra em quadro, pista marcada, francês em azul na explicação, verbo ${it.verb ? 'mostrado' : 'escondido'}`,
-        /ok/.test(f.verdict) && !f.svg && f.rule.length > 10 && f.clue && f.fr >= 2 && !f.braces && (it.verb ? verb === '(' + it.verb + ')' : verb === ''), { f, verb, it: it.id });
+        /ok/.test(f.verdict) && !f.svg && f.rule.length > 10 && f.clue && f.fr >= 2 && !f.braces && f.audioNear && /A1/.test(f.eyebrow) && (it.verb ? verb === '(' + it.verb + ')' : verb === ''), { f, verb, it: it.id });
       if (process.env.SHOTS) await page.screenshot({ path: process.env.SHOTS + `/jogo-${id}.png`, fullPage: true });
       await page.click('#conj-game-back');
     }
