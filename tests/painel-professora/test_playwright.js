@@ -150,14 +150,14 @@ const PANEL_STUB = (who) => {
       L('aluna: link de agenda fechado até ela abrir', await ev(() => { const b = document.querySelector('#my-class-logs-content [data-calendar-feed]'); return !!b && !b.open && !(window.__rpcCalls || []).some(c => c[0] === 'my_calendar_feed_token'); }));
       await ev(() => { const b = document.querySelector('#my-class-logs-content [data-calendar-feed]'); b.open = true; });
       await page.waitForSelector('#my-class-logs-content [data-calendar-feed-url]');
-      L('aluna: link de agenda aponta para a Edge Function com o token', await ev(() => /\/functions\/v1\/class-calendar-feed\/a{16}$/.test(document.querySelector('[data-calendar-feed-url]').value)), await ev(() => document.querySelector('[data-calendar-feed-url]').value));
+      L('aluna: link de agenda no domínio agenda.profbrune.com.br com a senha', await ev(() => /^https:\/\/agenda\.profbrune\.com\.br\/a{16}$/.test(document.querySelector('[data-calendar-feed-url]').value)), await ev(() => document.querySelector('[data-calendar-feed-url]').value));
       L('aluna: botão do Google Agenda assina o link (webcal) em nova aba', await ev(() => { const a = document.querySelector('[data-calendar-feed-google]'); const u = new URL(a.href); return u.host === 'calendar.google.com' && decodeURIComponent(u.searchParams.get('cid')).startsWith('webcal://') && a.target === '_blank'; }));
-      L('aluna: Apple/Outlook abre o webcal', await ev(() => document.querySelector('[data-calendar-feed-webcal]').getAttribute('href').startsWith('webcal://')));
+      L('aluna: Apple/Outlook e Google assinam webcal://agenda.profbrune.com.br/<senha>', await ev(() => document.querySelector('[data-calendar-feed-webcal]').getAttribute('href') === 'webcal://agenda.profbrune.com.br/' + 'a'.repeat(16) && decodeURIComponent(new URL(document.querySelector('[data-calendar-feed-google]').href).searchParams.get('cid')) === 'webcal://agenda.profbrune.com.br/' + 'a'.repeat(16)));
       await ev(() => document.querySelector('[data-my-classlog-view="calendar"]').click());
       L('aluna: trocar Lista/Calendário não fecha o bloco da agenda', await ev(() => document.querySelector('#my-class-logs-content [data-calendar-feed]').open));
       await ev(() => document.querySelector('[data-my-classlog-view="list"]').click());
       await ev(() => document.querySelector('[data-calendar-feed-reset]').click());
-      await page.waitForFunction(() => /class-calendar-feed\/b{16}$/.test(document.querySelector('[data-calendar-feed-url]')?.value || ''));
+      await page.waitForFunction(() => /agenda\.profbrune\.com\.br\/b{16}$/.test(document.querySelector('[data-calendar-feed-url]')?.value || ''));
       L('aluna: "Gerar outro link" (com confirmação) troca o token', await ev(() => (window.__rpcCalls || []).some(c => c[0] === 'my_calendar_feed_token' && c[1] && c[1].p_regenerate === true)));
       if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#my-class-logs-content [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aluna-link-agenda');
@@ -349,7 +349,7 @@ const PANEL_STUB = (who) => {
       L('calendário: link de agenda da professora acima do mês', await ev(() => !!document.querySelector('#admin-classlogs-calendar-wrap > [data-calendar-feed]')));
       await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').open = true; });
       await page.waitForSelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]');
-      L('calendário: professora recebe o link dela', await ev(() => /class-calendar-feed\/[ab]{16}$/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
+      L('calendário: professora recebe o link dela', await ev(() => /^https:\/\/agenda\.profbrune\.com\.br\/[ab]{16}$/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
       if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aulas-link-agenda');
       // a aula agendada pode cair no mês seguinte: avança até achar
