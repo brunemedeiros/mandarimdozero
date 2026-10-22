@@ -211,3 +211,17 @@ que em inglês aparece de dois jeitos: "contact the administrator (profbrune)" e
 
 Fora do escopo, mas para não esquecer antes do paywall: corrigir a 008 (`p.id` → `p.user_id`, e aceitar aluno);
 limite de 20 e TTS sem trava no servidor (`docs/historico/14-*` itens 6 e 7).
+
+## 7. Decisões da dona (2026-10-22)
+
+1. **Aluno vinculado**: tem a versão mais básica do Premium, ainda a definir, e isso pode mudar (ex.: no futuro o aluno
+   pode ter só a seção Aluno com os cartões da professora). Por isso a regra do aluno precisa ser fácil de mudar.
+2. **Pular unidades**: Premium e aluno.
+3. **Como pedir o Premium**: só por e-mail ("Fale com a Prof. Brune").
+4. **Premium Pro**: fica para o futuro (lembrete: será implementado depois; hoje é igual ao Basic).
+5. **Limite de cartões próprios**: 20 **por conta** (hoje o código conta por curso: mudar).
+6. **Selo e cadeado**: perguntado se, com bloqueio ligado, é selo Premium + cadeado (resposta pendente; recomendação abaixo).
+7. **Tabela do Admin mandar no site**: a dona pediu explicação antes de decidir.
+8. **Benefícios citáveis nos avisos Premium** (por enquanto, a explorar depois): cartões ilimitados, todos os tipos de
+   cartão, áudio por texto e gravação, Decks públicos, ver quem copiou seu Deck, Desafios do Módulo e Ditados extras,
+   Jogos da Conjugação, pular unidades.
