@@ -290,7 +290,7 @@ async function bootPage(browser, lang, port){
     L('trilha intacta / sem cards pessoais na sessão', await ev(n => STATE.cards.filter(c => c.origin === 'study').length === n && !STATE.reviewQueue.some(c => c.origin === 'self'), trailBefore));
 
     // Premium: contas premium veem a mesma seção somente leitura (matriz de Card Types inalterada)
-    await ev(() => { ensureProfileLoaded = async () => ({ plan_tier: 'premium' }); switchTab('my-flashcards'); });
+    await ev(p => { ensureProfileLoaded = async () => ({ plan_tier: 'premium' }); MY_PERMISSIONS = p; switchTab('my-flashcards'); }, require('../planos-permissoes/fixtures').permsFor('premium')); // Etapa 5: plano pela tabela
     await page.waitForSelector('#teacher-decks-section', { timeout: 8000 });
     L('Premium: seção da professora continua somente leitura', await ev(() => document.querySelectorAll('#teacher-decks-section select,#teacher-decks-section input').length === 0));
     L('sem erros de JS na página', errors.length === 0, errors);

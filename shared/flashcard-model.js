@@ -424,6 +424,7 @@ const TTS_GENERATION_ERROR_LABELS = {
   get provider_rate_limited(){ return t('flashcardModel.tts.providerRateLimited'); },
   get rate_limited(){ return t('flashcardModel.tts.rateLimited'); },
   get monthly_quota_exceeded(){ return t('flashcardModel.tts.monthlyQuotaExceeded'); },
+  get plan_required(){ return t('flashcardModel.tts.planRequired'); }, // Etapa 5: célula da tabela desligada para o plano
   get quota_check_failed(){ return t('flashcardModel.tts.quotaCheckFailed'); },
   get unsupported_language(){ return t('flashcardModel.tts.unsupportedLanguage'); },
   get invalid_voice(){ return t('flashcardModel.tts.invalidVoice'); },

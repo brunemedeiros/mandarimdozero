@@ -123,13 +123,16 @@ async function handleAnkiImportFileSelected(file){
   ANKI_IMPORT_STATE.parseResult = parseResult;
 
   body.innerHTML = loadingHTML(t('ankiImport.loadingPlan'));
-  const [existingRows, hasLink, boot] = await Promise.all([
+  // Etapa 5: existingRows continua sendo o curso (duplicatas); o limite usa a tabela Admin > Planos e conta a conta inteira.
+  const [existingRows, quota, boot] = await Promise.all([
     fetchMyOwnFlashcards(APP_KEY),
-    hasUnlimitedOwnCards(),
+    fetchMyOwnCardsQuota(),
     ensureDecksForCurrentUser(APP_KEY),
   ]);
   ANKI_IMPORT_STATE.existingRows = existingRows;
-  ANKI_IMPORT_STATE.hasLink = hasLink;
+  ANKI_IMPORT_STATE.hasLink = quota.unlimited;
+  ANKI_IMPORT_STATE.quotaRows = quota.rows;
+  ANKI_IMPORT_STATE.limit = quota.limit;
   // Só LEITURA dos Decks aqui (o bootstrap root/personal_root é idempotente
   // e já é feito por Meus Cartões) -- nenhum Deck do .apkg é criado antes
   // da confirmação.
@@ -350,15 +353,15 @@ async function confirmAnkiImport(body){
   // uma Note pela metade); o resto fica de fora e a pessoa é avisada.
   // Regra única por CardInstance em shared/deck-engine.js.
   const cutPlan = planOwnCardInstanceCut({
-    activeRows: st.existingRows,
+    activeRows: st.quotaRows || st.existingRows,
     hasTeacherLink: st.hasLink,
     editorStates: selectedNotes.map(n => n.editorState),
     languageAppKey: APP_KEY,
-    limit: FREE_OWN_FLASHCARD_LIMIT,
+    limit: typeof st.limit === 'number' ? st.limit : FREE_OWN_FLASHCARD_LIMIT,
   });
   const cutMessage = cutPlan.cut ? ownCardInstanceCutMessage({
     requested: cutPlan.requested, keptInstances: cutPlan.keptInstances,
-    limit: FREE_OWN_FLASHCARD_LIMIT, used: cutPlan.used, what: 'deck',
+    limit: typeof st.limit === 'number' ? st.limit : FREE_OWN_FLASHCARD_LIMIT, used: cutPlan.used, what: 'deck',
   }) : null;
   if (cutPlan.keepCount === 0){
     if (typeof openFlashcardLimitModal !== 'function' || !openFlashcardLimitModal({ cutMessage })){

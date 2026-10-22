@@ -7,7 +7,8 @@
 // Os dados ficam por idioma (fr/conj-games.js -> CONJ_GAMES); o texto de cada item vem
 // por idioma do site (text['pt-BR'], text.en). Sem XP: é prática livre, como a Conjugação.
 function createConjGames({ games, speak, ids, isLocked, onLocked }){
-  // isLocked(game): paywall (Jogos são Premium); onLocked(game): o que fazer ao tocar num jogo trancado.
+  // isLocked(game): paywall (Jogos são Premium; true só com o bloqueio ligado E sem a permissão "Jogos da Conjugação");
+  // onLocked(game): o que fazer ao tocar num jogo trancado (a janela Premium própria dos Jogos).
   const $ = id => document.getElementById(id);
   const esc = s => (typeof escapeHTML === 'function' ? escapeHTML(String(s == null ? '' : s))
     : String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
@@ -29,6 +30,14 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
 
   const S = { game: null, order: [], idx: 0, hits: 0, log: [], answered: false, shownAt: 0 };
 
+  // Selo (regra 7 da dona, 2026-10-22): recurso Premium com o bloqueio DESLIGADO mostra só "⭐ Premium" e abre para
+  // todos; com o bloqueio LIGADO, quem não tem a permissão vê "⭐ Premium" + cadeado e, ao tocar, o aviso Premium.
+  function premiumSealHTML(g){
+    const locked = !!(isLocked && isLocked(g));
+    return `<span class="cg-premium" data-cg-seal="${locked ? 'locked' : 'open'}">⭐ ${esc(tt('games.premium'))}${locked
+      ? ` <span class="cg-lock" role="img" aria-label="${esc(tt('games.locked'))}">🔒</span>` : ''}</span>`;
+  }
+
   function renderList(){
     const el = $(ids.list);
     if (!el) return;
@@ -37,7 +46,7 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
         <h3 class="cg-card-title">${g.level ? `<span class="cg-level">${esc(g.level)}</span>` : ''}${rich(L(g.title))}</h3>
         <p class="cg-card-lede">${rich(L(g.lede))}</p>
         <div class="cg-card-foot">
-          <span class="cg-card-meta"><span class="cg-premium" title="${esc(tt('games.premium'))}">🔒 ${esc(tt('games.premium'))}</span>${esc(tt('games.perRound', { n: Math.min(g.perRound, g.items.length) }))}</span>
+          <span class="cg-card-meta">${premiumSealHTML(g)}${esc(tt('games.perRound', { n: Math.min(g.perRound, g.items.length) }))}</span>
           <button type="button" class="btn btn-primary cg-play" data-game="${esc(g.id)}">${esc(tt('games.play'))}</button>
         </div>
       </article>`).join('');

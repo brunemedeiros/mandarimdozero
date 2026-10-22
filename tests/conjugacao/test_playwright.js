@@ -314,14 +314,24 @@ async function fill(page, wrongIdx){
       const l = await page.evaluate(() => ({ practiceHidden: document.getElementById('conj-practice-pane').hidden, cards: document.querySelectorAll('#conj-games-list .cg-card').length,
         sel: document.getElementById('conj-mode-games').getAttribute('aria-selected'), sub: document.querySelector('#conj-select-wrap .path-header p').hidden }));
       check('aba Jogos: lista de jogos no lugar da escolha', l.practiceHidden && l.cards === 4 && l.sel === 'true' && l.sub, l);
-      const lock = await page.evaluate(() => ({ badge: (document.querySelector('.cg-card .cg-premium') || {}).textContent, tab: !!document.querySelector('#conj-mode-games .conj-mode-lock') }));
-      check('Jogos são Premium: cadeado no cartão e na aba', /🔒/.test(lock.badge || '') && /Premium/.test(lock.badge || '') && lock.tab, lock);
-      // Paywall ligado (simulado): tocar em Jogar abre o aviso Premium e não começa a partida.
-      await page.evaluate(() => { window.__origLock = isConjGameLocked; window.isConjGameLocked = () => true; });
+      // Etapa 5, regra 7 da dona: bloqueio DESLIGADO = só o selo "⭐ Premium" (sem cadeado) e o jogo abre para todos.
+      const lock = await page.evaluate(() => ({ badge: (document.querySelector('.cg-card .cg-premium') || {}).textContent, tab: (document.querySelector('#conj-mode-games [data-conj-games-seal]') || {}).textContent,
+        seal: (document.querySelector('.cg-card .cg-premium') || {}).dataset?.cgSeal, flag: CONJ_GAMES_PAYWALL_ENABLED }));
+      check('Jogos são Premium: selo ⭐ Premium sem cadeado no cartão e na aba (bloqueio desligado)', lock.flag === false && /⭐/.test(lock.badge || '') && /Premium/.test(lock.badge || '') && !/🔒/.test(lock.badge || '') && lock.seal === 'open' && lock.tab === '⭐', lock);
+      // Bloqueio LIGADO para uma conta grátis: selo + cadeado e a janela Premium PRÓPRIA dos Jogos (não a dos Desafios).
+      await page.evaluate(p => { MY_PERMISSIONS = p; CONJ_GAMES_PAYWALL_ENABLED = true; isChallengesAdmin = () => false; PROFILE_CACHE = Object.assign({}, PROFILE_CACHE || {}, { username: 'aluna.teste' }); setConjMode('games'); }, require('../planos-permissoes/fixtures').permsFor('free'));
+      const lk = await page.evaluate(() => ({ badge: (document.querySelector('.cg-card .cg-premium') || {}).textContent, tab: (document.querySelector('#conj-mode-games [data-conj-games-seal]') || {}).textContent }));
+      check('bloqueio ligado, conta grátis: ⭐ Premium + cadeado no cartão e na aba', /⭐/.test(lk.badge || '') && /🔒/.test(lk.badge || '') && lk.tab === '⭐🔒', lk);
       await page.click('.cg-play[data-game="pc-imparfait"]');
-      const pw = await page.evaluate(() => ({ modal: getComputedStyle(document.getElementById('premium-challenges-modal')).display, playing: document.getElementById('conj-game-wrap').style.display }));
-      check('paywall ligado: abre o aviso Premium em vez do jogo', pw.modal === 'flex' && pw.playing !== 'block', pw);
-      await page.evaluate(() => { window.isConjGameLocked = window.__origLock; document.getElementById('premium-challenges-modal').style.display = 'none'; });
+      const pw = await page.evaluate(() => ({ modal: getComputedStyle(document.getElementById('premium-games-modal')).display, ch: getComputedStyle(document.getElementById('premium-challenges-modal')).display,
+        text: document.getElementById('premium-games-modal').innerText, mail: (document.querySelector('#premium-games-modal a[data-premium-contact]') || {}).href || '', playing: document.getElementById('conj-game-wrap').style.display }));
+      check('bloqueio ligado: abre a janela Premium dos Jogos (não a dos Desafios) em vez do jogo', pw.modal === 'flex' && pw.ch === 'none' && pw.playing !== 'block' && /Jogos da Conjugação/.test(pw.text) && !/Desafios do Módulo/.test(pw.text), pw);
+      check('janela dos Jogos: botão Fale com a Prof. Brune com e-mail, @ e curso', pw.mail.startsWith('mailto:brunemed1310@gmail.com') && decodeURIComponent(pw.mail).includes('@aluna.teste') && decodeURIComponent(pw.mail).includes('Francês') && /Fale com a Prof\. Brune/.test(pw.text), pw.mail);
+      // Bloqueio ligado, aluno (tabela: Jogos ligados para Aluno): sem cadeado, joga.
+      await page.evaluate(p => { document.getElementById('premium-games-modal').style.display = 'none'; MY_PERMISSIONS = p; setConjMode('games'); }, require('../planos-permissoes/fixtures').permsFor('student'));
+      const st = await page.evaluate(() => ({ badge: (document.querySelector('.cg-card .cg-premium') || {}).textContent, tab: (document.querySelector('#conj-mode-games [data-conj-games-seal]') || {}).textContent }));
+      check('bloqueio ligado, aluno: ⭐ Premium sem cadeado (a tabela libera)', !/🔒/.test(st.badge || '') && st.tab === '⭐', st);
+      await page.evaluate(() => { CONJ_GAMES_PAYWALL_ENABLED = false; MY_PERMISSIONS = null; setConjMode('games'); });
       await page.click('.cg-play[data-game="pc-imparfait"]');
       await page.waitForSelector('.cg-choice');
       const q = await page.evaluate(() => ({ n: CONJ_GAMES_UI.state.order.length, focus: document.body.dataset.activityFocus, blank: !!document.querySelector('.cg-blank'),

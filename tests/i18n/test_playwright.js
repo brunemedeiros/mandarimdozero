@@ -197,7 +197,7 @@ const semReset = (snap) => snap.filter(([id]) => id !== 'flashcard-reset-confirm
 function expectedModals(C, lang){
   const out = [];
   if (lang === 'fr') out.push(['premium-challenges-modal', { title: C['premium.challenges.title'], closeAria: C['common.close'], ps: [C['premium.challenges.bodyHtml'], C['premium.challenges.howToActivate']], btns: [] }]);
-  out.push(['flashcard-limit-modal', { title: C['flashcardLimit.modal.title'], closeAria: C['common.close'], ps: [C['flashcardLimit.modal.bodyHtml']], btns: [] }]);
+  out.push(['flashcard-limit-modal', { title: C['flashcardLimit.modal.title'], closeAria: C['common.close'], ps: [C['flashcardLimit.modal.bodyHtml'].replace('{limit}', '20')], btns: [] }]); // Etapa 5: número da tabela (reserva 20)
   out.push(['flashcard-reset-confirm-modal', { title: C['flashcardReset.modal.title'], closeAria: C['common.close'], ps: [C['flashcardReset.modal.headline'], C['flashcardReset.modal.explain'], C['flashcardReset.modal.keepTip']], btns: [C['flashcardReset.modal.discard'], C['flashcardReset.modal.yes']] }]); // textos aprovados pela autora em 2026-10-18
   return out;
 }
@@ -218,20 +218,21 @@ async function otherStorage(page){
 async function triggerWouldGenerate(page){
   // Premium com 19 cartões ativos: "Normal com reverso" geraria 2 -> preflight
   // bloqueia, injeta o texto em #my-create-flashcard-error e abre o modal.
-  await page.evaluate(() => {
+  await page.evaluate((perms) => {
     CURRENT_USER = { id: 'u-i18n' };
     ensureProfileLoaded = async () => ({ plan_tier: 'premium' });
+    MY_PERMISSIONS = perms; // Etapa 5: plano pela tabela Admin > Planos (Premium Basic)
     window.__DB.own_flashcards = [];
     for (let i = 0; i < 19; i++) window.__DB.own_flashcards.push({ id: 9000 + i, owner_id: 'u-i18n', language_app_key: APP_KEY, status: 'active', deck_id: null, front: 'a' + i, back_trans: 'b', fields: null, card_generation_mode: null, revision: 0, tags: [], created_at: new Date().toISOString() });
     // "Meus Cartões" virou a janela Adicionar da Revisão (mesmo formulário);
     // o commit de referência antigo ainda tem a aba.
     if (typeof openAddCardModal === 'function') openAddCardModal({});
     else switchTab('my-flashcards');
-  });
+  }, require('../planos-permissoes/fixtures').permsFor('premium'));
   await page.waitForSelector('#my-flashcard-deck', { timeout: 8000 });
   // Hoje Premium não tem teto (regra atual); o teste só confere o TEXTO do aviso,
   // então força o caminho do teto na janela nova (o tipo "com reverso" pede Premium).
-  await page.evaluate(() => { if (document.getElementById('add-card-modal')) MY_FLASHCARDS_STATE._hasLink = false; });
+  await page.evaluate(() => { if (document.getElementById('add-card-modal')){ MY_FLASHCARDS_STATE._hasLink = false; MY_FLASHCARDS_STATE._limit = 20; } }); // Etapa 5: teto da tabela
   await page.selectOption('#my-flashcard-card-type-preview', 'normal_reversed');
   const before = await page.locator('#my-flashcard-native-fields [data-field-content]').count();
   for (let i = before; i < 2; i++) await page.click('#my-flashcard-native-fields [data-field-add]');
@@ -361,6 +362,11 @@ async function triggerWouldGenerate(page){
     ['Pra criar mais, apague algum cartão, ou peça pra sua professora te vincular -- alunos vinculados', 'Para criar mais, apague algum cartão, ou peça para sua professora te vincular. Alunos vinculados'], // flashcardLimit.modal.bodyHtml: Etapa 4: -- / pra
     ['cartão(ões) de estudo', 'cartões de estudo'], // flashcardLimit.wouldGenerate (n = 2): Etapa 4: plural
   ];
+  // Etapa 5 (Etapa 1/5: aprovado pela dona, 2026-10-22): limite da tabela contado por conta e "Fale com a Prof. Brune".
+  ETAPA4_PT.push(
+    ['do plano grátis. Para criar mais, apague algum cartão, ou peça para sua professora te vincular. Alunos vinculados a uma professora têm cartões próprios ilimitados.', 'da sua conta, somando todos os cursos. Para criar mais, apague algum cartão que já não usa ou peça o Premium: com ele, seus cartões próprios são ilimitados.'],
+    ['Para ativar, fale com a administração (profbrune).', 'Para pedir o Premium, fale com a Prof. Brune pelo botão abaixo.'],
+    ['restam só 1 no plano grátis.', 'restam só 1 na sua conta.']);
   const etapa4 = (x) => ETAPA4_PT.reduce((acc, [a, c]) => acc.split(a).join(c), x);
   const etapa4Snap = (snap) => JSON.parse(etapa4(JSON.stringify(snap)));
   for (const lang of ['fr', 'zh']){
@@ -386,7 +392,7 @@ async function triggerWouldGenerate(page){
     L('pt-BR: 3 modais idênticos ao commit anterior', JSON.stringify(semReset(ptSnap)) === JSON.stringify(semReset(prevSnap)), { ptSnap, prevSnap });
     L('pt-BR: modais == catálogo pt-BR', JSON.stringify(ptSnap) === JSON.stringify(expectedModals(CAT['pt-BR'], lang)), ptSnap);
     const ptWould = await triggerWouldGenerate(a.page);
-    L('pt-BR: texto do preflight (JS) idêntico ao commit anterior', ptWould.err === prevWould.err && ptWould.err === 'Este cartão geraria 2 cartões de estudo, mas restam só 1 no plano grátis.', [ptWould.err, prevWould.err]);
+    L('pt-BR: texto do preflight (JS) idêntico ao commit anterior', ptWould.err === prevWould.err && ptWould.err === 'Este cartão geraria 2 cartões de estudo, mas restam só 1 na sua conta.', [ptWould.err, prevWould.err]);
     L('pt-BR: preflight não gravou nada', ptWould.n === ptWould.n0);
     L('pt-BR: zero pageerror novo vs commit anterior', a.errors.filter(e => !prevErrors.includes(e)).length === 0, a.errors);
 
@@ -410,7 +416,7 @@ async function triggerWouldGenerate(page){
     L('seletor -> en: modais em inglês', JSON.stringify(enSnap) === JSON.stringify(expectedModals(C, lang)), enSnap);
     L('en: <strong> preservado e sem HTML extra', await ev(() => { const p = document.querySelector('#flashcard-limit-modal .app-modal-body p'); return p.querySelectorAll('*').length === 1 && p.querySelector('strong') && p.querySelector('strong').textContent === '20 active cards of your own'; }));
     const enWould = await triggerWouldGenerate(a.page);
-    L('en: texto do preflight (JS) em inglês, plural', enWould.err === 'This card would create 2 study cards, but you only have 1 left on the free plan.' && enWould.title === C['flashcardLimit.modal.title'], enWould);
+    L('en: texto do preflight (JS) em inglês, plural', enWould.err === 'This card would create 2 study cards, but you only have 1 left on your account.' && enWould.title === C['flashcardLimit.modal.title'], enWould);
     L('en: preflight não gravou nada', enWould.n === enWould.n0);
     // modal de reinício pelo caminho real (openFlashcardResetConfirm) e "Discard changes" fecha sem confirmar
     const reset = await ev(() => { let ok = 0; openFlashcardResetConfirm(() => { ok++; }); const m = document.getElementById('flashcard-reset-confirm-modal'); const shown = m.style.display; const txt = document.getElementById('flashcard-reset-confirm-discard').textContent; document.getElementById('flashcard-reset-confirm-discard').click(); return { shown, txt, closed: m.style.display, ok }; });
@@ -446,7 +452,8 @@ async function triggerWouldGenerate(page){
     await q.page.waitForFunction(() => document.querySelectorAll('[data-i18n-applied]').length > 0);
     L('?ui=en: modais em inglês', JSON.stringify(await modalSnapshot(q.page, lang)) === JSON.stringify(expectedModals(C, lang)));
     // tradução maliciosa: data-i18n-html só permite <strong>/<b>/<em>
-    const xss = await q.page.evaluate(() => { I18N_CATALOG.en['flashcardLimit.modal.bodyHtml'] = 'a <strong>b</strong> <img src=x onerror="window.__x=1"> <em>c</em>'; applyDomI18n(document); const p = document.querySelector('#flashcard-limit-modal .app-modal-body p'); return { tags: [...p.querySelectorAll('*')].map(e => e.tagName).join(','), x: window.__x }; });
+    // Etapa 5: o texto da janela de limite tem {limit} e é montado pelo JS; o teste cria um elemento com data-i18n-html só para conferir o escape.
+    const xss = await q.page.evaluate(() => { const p = document.createElement('p'); p.setAttribute('data-i18n-html', 'test.xss'); document.body.appendChild(p); I18N_CATALOG.en['test.xss'] = 'a <strong>b</strong> <img src=x onerror="window.__x=1"> <em>c</em>'; applyDomI18n(document); return { tags: [...p.querySelectorAll('*')].map(e => e.tagName).join(','), x: window.__x }; });
     L('data-i18n-html escapa tags fora da lista curta', xss.tags === 'STRONG,EM' && xss.x === undefined, xss);
     await ctxQ.close();
 

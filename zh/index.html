@@ -1708,6 +1708,10 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   position:relative;
 }
 .btn:active:not(:disabled){ transform: translateY(2px); }
+/* Etapa 5: botão "Fale com a Prof. Brune" (link mailto com cara de botão) nos avisos Premium/Limite. */
+.premium-contact-btn{ display:flex; align-items:center; justify-content:center; gap:8px; min-height:44px; text-decoration:none; }
+.premium-contact-btn:hover, .premium-contact-btn:focus{ text-decoration:none; }
+.premium-contact-wrap{ margin-top:12px; }
 .btn-primary{ background: var(--brand-fill); color: var(--on-brand-fill);
   box-shadow: 0 var(--btn-depth) 0 rgba(0,0,0,0.22);
   box-shadow: 0 var(--btn-depth) 0 color-mix(in srgb, var(--brand-fill) 62%, #000); }
@@ -5399,7 +5403,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="app-modal-close" id="flashcard-limit-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p data-i18n-html="flashcardLimit.modal.bodyHtml">Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Para criar mais, apague algum cartão, ou peça para sua professora te vincular. Alunos vinculados a uma professora têm cartões próprios ilimitados.</p>
+      <p data-limit-default>Você atingiu o limite de <strong>20 cartões próprios ativos</strong> da sua conta, somando todos os cursos. Para criar mais, apague algum cartão que já não usa ou peça o Premium: com ele, seus cartões próprios são ilimitados.</p>
     </div>
   </div>
 </div>

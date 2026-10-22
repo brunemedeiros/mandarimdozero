@@ -462,11 +462,14 @@ async function renderPublicProfileCardsBox(bodyEl, username){
 
   box.innerHTML = loadingHTML();
 
-  const [cardsRes, hasLink, myCards] = await Promise.all([
+  // Etapa 5: limite da tabela Admin > Planos, contado na conta inteira (todos os cursos).
+  const [cardsRes, quota] = await Promise.all([
     fetchPublicFlashcardsByUsername(username, APP_KEY),
-    (typeof hasUnlimitedOwnCards === 'function') ? hasUnlimitedOwnCards() : Promise.resolve(false),
-    (typeof fetchMyOwnFlashcards === 'function') ? fetchMyOwnFlashcards(APP_KEY) : Promise.resolve([]),
+    (typeof fetchMyOwnCardsQuota === 'function') ? fetchMyOwnCardsQuota() : Promise.resolve({ unlimited: false, limit: 20, rows: [] }),
   ]);
+  const hasLink = quota.unlimited;
+  const myCards = quota.rows;
+  PUBLIC_PROFILE_IMPORT_STATE.limit = quota.limit;
 
   PUBLIC_PROFILE_IMPORT_STATE.username = username;
   PUBLIC_PROFILE_IMPORT_STATE.cardsCache = cardsRes.cards;
@@ -594,7 +597,8 @@ async function importSelectedPublicFlashcards(box){
   const importStates = selectedCards.map(c => nativeNoteEditorStateFromImportPayload(c, APP_KEY));
   // "Corta e avisa" (arquitetura seção 17) -- mesma regra única dos outros
   // imports (shared/deck-engine.js): só as primeiras Notes que cabem.
-  const limit = typeof FREE_OWN_FLASHCARD_LIMIT === 'number' ? FREE_OWN_FLASHCARD_LIMIT : 20;
+  const limit = typeof PUBLIC_PROFILE_IMPORT_STATE.limit === 'number' ? PUBLIC_PROFILE_IMPORT_STATE.limit
+    : (typeof FREE_OWN_FLASHCARD_LIMIT === 'number' ? FREE_OWN_FLASHCARD_LIMIT : 20);
   const cutPlan = planOwnCardInstanceCut({
     activeRows: PUBLIC_PROFILE_IMPORT_STATE.myCards,
     hasTeacherLink: PUBLIC_PROFILE_IMPORT_STATE.hasLink,

@@ -132,6 +132,13 @@ ok(core.decideMonthlyQuota({ count: 299, limit: 300, isAdmin: false }).allowed, 
 ok(eq(core.decideMonthlyQuota({ count: 300, limit: 300, isAdmin: false }), { allowed: false, error: 'monthly_quota_exceeded' }), '300 bloqueia');
 ok(core.decideMonthlyQuota({ count: 9999, limit: 300, isAdmin: true }).allowed, 'admin isento');
 ok(!core.decideMonthlyQuota({ count: 0, limit: 0, isAdmin: false }).allowed, 'limite 0 bloqueia tudo');
+// Etapa 5: cota pela tabela Admin > Planos (permission_limit('tts_monthly_quota'))
+ok(core.resolvePlanMonthlyLimit({ planLimit: 300, envLimit: 50 }) === 300, 'plano: número da tabela vale (não a env)');
+ok(core.resolvePlanMonthlyLimit({ planLimit: 0, envLimit: 300 }) === 0, 'plano grátis: 0');
+ok(core.resolvePlanMonthlyLimit({ planLimit: null, envLimit: 300 }) === Infinity, 'plano sem limite: Infinity');
+ok(core.resolvePlanMonthlyLimit({ planLimit: 5, rpcFailed: true, envLimit: 300 }) === 300 && core.resolvePlanMonthlyLimit({ envLimit: 300 }) === 300, 'RPC falhou: teto da env');
+ok(eq(core.decideMonthlyQuota({ count: 0, limit: 0, isAdmin: false }), { allowed: false, error: 'plan_required' }), 'limite 0 = plan_required');
+ok(core.decideMonthlyQuota({ count: 99999, limit: Infinity, isAdmin: false }).allowed, 'sem limite passa');
 ok(core.isTtsAdminEmail('BruneMed1310@gmail.com ') && !core.isTtsAdminEmail('x@y.com') && !core.isTtsAdminEmail(undefined), 'admin por e-mail');
 
 // --- cliente e servidor concordam no generationKey ---
@@ -168,6 +175,7 @@ ok(ctx.__labels.monthly_quota_exceeded === 'Você atingiu o limite mensal de áu
 ok(!idx.includes('provider_not_implemented'), 'sem provider_not_implemented');
 ok(idx.includes('texttospeech.googleapis.com/v1/text:synthesize?key='), 'endpoint Google');
 ok(idx.indexOf('decideMonthlyQuota(') > 0 && idx.indexOf('decideMonthlyQuota(') < idx.indexOf('await generateTTS('), 'cota checada antes do provedor');
+ok(idx.indexOf("rpc('permission_limit', { p_key: 'tts_monthly_quota' })") > 0 && idx.indexOf("rpc('permission_limit'") < idx.indexOf('await generateTTS('), 'Etapa 5: cota lida da tabela antes do provedor');
 ok(idx.indexOf('>= TTS_RATE_LIMIT') > 0, 'limite curto mantido');
 ok(!/console\.(error|warn|log)\([^)]*apiKey/.test(idx), 'chave nunca logada');
 ok(idx.includes("TTS_MOCK_ENABLED') === 'true'"), 'mock mantido');

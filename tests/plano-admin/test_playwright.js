@@ -38,15 +38,18 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       CURRENT_USER = { id: 'U', email: 'x@y' };
       const out = {};
       isAdminUser = () => false;
-      PROFILE_CACHE = { plan_tier: 'free', admin_mode: true }; out.userFree = isPremium();
-      PROFILE_CACHE = { plan_tier: 'premium', admin_mode: true }; out.userPremium = isPremium();
+      // Etapa 5: o selo Premium vem dos papéis de my_permissions (tabela Admin > Planos), não de plan_tier.
+      PROFILE_CACHE = { plan_tier: 'premium', admin_mode: true }; MY_PERMISSIONS = { roles: ['user'], admin: false, permissions: {} }; out.userFree = isPremium();
+      PROFILE_CACHE = { plan_tier: 'free', admin_mode: true }; MY_PERMISSIONS = { roles: ['user', 'premium_basic'], admin: false, permissions: {} }; out.userPremium = isPremium();
+      MY_PERMISSIONS = { roles: ['user', 'student'], admin: false, permissions: {} }; out.student = myPlanKind();
+      MY_PERMISSIONS = null;
       isAdminUser = () => true;
       PROFILE_CACHE = { plan_tier: 'free', admin_mode: true }; out.adminOn = isPremium();
       PROFILE_CACHE = { plan_tier: 'premium', admin_mode: false }; out.adminOff = isPremium();
       PROFILE_CACHE = null; out.adminLoading = effectivePlanTier(null);
       return out;
     });
-    L('plano efetivo: aluno free/premium, admin ON=premium, OFF=free', tiers.userFree === false && tiers.userPremium === true && tiers.adminOn === true && tiers.adminOff === false && tiers.adminLoading === 'premium', tiers);
+    L('plano efetivo: aluno free/premium, admin ON=premium, OFF=free', tiers.userFree === false && tiers.userPremium === true && tiers.adminOn === true && tiers.adminOff === false && tiers.adminLoading === 'premium' && tiers.student === 'student', tiers);
 
     // ---- conta grátis: cartão legado abre no editor novo ----
     await ev((a) => {

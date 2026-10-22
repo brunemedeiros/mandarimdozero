@@ -92,20 +92,24 @@ async function runExam(page, correct){
   const off = await page.evaluate(() => TRAIL_SKIP_PAYWALL_ENABLED);
   check('flag de bloqueio nasce desligada', off === false);
   const g = await page.evaluate(() => {
-    TRAIL_SKIP_PAYWALL_ENABLED = true; TRAIL_TEACHER_LINK = null;
+    // Etapa 5: quem pula vem da tabela Admin > Planos (my_permissions -> trail_skip_locked), não de plan_tier.
+    const perms = (skip, roles) => ({ roles, admin: false, permissions: { trail_skip_locked: { enabled: skip, limit: null } }, free: {} });
+    TRAIL_SKIP_PAYWALL_ENABLED = true; TRAIL_PERMS_REQUESTED = true;
     const out = {};
-    // Free (PROFILE_CACHE sem plano) -> bloqueado
-    PROFILE_CACHE = { plan_tier: 'free' };
+    // Free (linha Grátis desligada) -> bloqueado
+    MY_PERMISSIONS = perms(false, ['user']);
     renderUnitsGrid();
     const row = document.querySelector('.unit-block.checkpoint');
     out.freeAllowed = trailSkipAllowed(); out.lockedClass = row.classList.contains('skip-locked'); out.lockText = row.textContent;
     STEP_STATE.onCheckpoint = null; openCheckpoint('A1-m2'); out.freeOpened = STEP_STATE.onCheckpoint === 'A1-m2';
     openLevelTest('A1-final'); out.freeLevelOpened = STEP_STATE.onLevelTest === 'A1-final';
-    // Premium -> liberado
-    PROFILE_CACHE = { plan_tier: 'premium' }; out.premiumAllowed = trailSkipAllowed();
+    // Premium -> liberado (célula ligada para Premium Basic desde a 116)
+    MY_PERMISSIONS = perms(true, ['user', 'premium_basic']); out.premiumAllowed = trailSkipAllowed();
     // aluno vinculado -> liberado
-    PROFILE_CACHE = { plan_tier: 'free' }; TRAIL_TEACHER_LINK = true; out.linkedAllowed = trailSkipAllowed();
-    TRAIL_TEACHER_LINK = false; out.freeAgain = trailSkipAllowed();
+    MY_PERMISSIONS = perms(true, ['user', 'student']); out.linkedAllowed = trailSkipAllowed();
+    // a tabela manda: Premium com a célula desligada não pula
+    MY_PERMISSIONS = perms(false, ['user', 'premium_basic']); out.freeAgain = trailSkipAllowed();
+    MY_PERMISSIONS = null;
     TRAIL_SKIP_PAYWALL_ENABLED = false;
     return out; });
   check('free: pular bloqueado e sinalizado', g.freeAllowed === false && g.lockedClass && /Premium/.test(g.lockText), g);

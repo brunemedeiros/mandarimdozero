@@ -161,18 +161,52 @@ async function fetchMyPlanTier(){
   return effectivePlanTier(profile);
 }
 
-function isPremium(){
-  return effectivePlanTier(PROFILE_CACHE) === 'premium';
+// Etapa 5 (decisões da dona, 2026-10-22): "é Premium?" deixou de ser plan_tier. Cada recurso pergunta pela
+// SUA permissão na tabela Admin > Planos (planCan/planLimit, shared/permissions.js). isPremium() fica só como
+// "a conta tem algum plano pago ou de professora" (selos), sem decidir acesso a nada.
+function isPremium(){ return myPlanKind() === 'premium'; }
+
+// Que selo mostrar: 'premium' (Premium Basic/Pro, Professora ou admin com Admin Mode ligado), 'student'
+// (vínculo ativo com uma professora) ou 'free'. Só para TEXTO; o que a conta pode fazer vem de planCan/planLimit.
+function myPlanKind(){
+  if (typeof isAdminUser === 'function' && isAdminUser()){
+    return (PROFILE_CACHE && PROFILE_CACHE.admin_mode === false) ? 'free' : 'premium';
+  }
+  const roles = (typeof MY_PERMISSIONS !== 'undefined' && MY_PERMISSIONS && Array.isArray(MY_PERMISSIONS.roles)) ? MY_PERMISSIONS.roles : [];
+  if (roles.some(r => r === 'premium_basic' || r === 'premium_pro' || r === 'teacher')) return 'premium';
+  if (roles.includes('student')) return 'student';
+  return 'free';
 }
 
-// Teto de cartões próprios (FREE_OWN_FLASHCARD_LIMIT): é o limite do PLANO
-// GRÁTIS (docs/arquitetura-total-decks-tags-painel.md, seção 17 -- "CTA de
-// upgrade Premium"). Isento: aluna vinculada a uma professora (Fase 5.1) OU
-// plano efetivo Premium. Único ponto que decide isso -- criação manual,
-// import de arquivo/link, Anki e perfil público usam esta função.
+// Cartões próprios ATIVOS da conta em TODOS os cursos (o limite é por conta, decisão 5 da dona).
+async function fetchMyActiveOwnFlashcardsAllCourses(){
+  if (!CURRENT_USER) return [];
+  const { data, error } = await supabaseClient
+    .from('own_flashcards')
+    .select('*')
+    .eq('owner_id', CURRENT_USER.id)
+    .eq('status', 'active');
+  if (error){ console.error('Erro ao contar seus cartões:', error); return []; }
+  return data || [];
+}
+
+// Limite de cartões próprios: a célula "Cartões próprios" da tabela (own_cards_limit), contada POR CONTA.
+// { unlimited, limit, rows } -- rows = cartões ativos de todos os cursos (o que conta no limite).
+// Passar `unlimited` como hasTeacherLink e `limit` como limit para as funções de shared/deck-engine.js.
+// Quem já passou do limite não perde nada: só não cria cartões novos (o "limite corta e avisa" continua igual).
+async function fetchMyOwnCardsQuota(){
+  if (typeof loadMyPermissions === 'function') await loadMyPermissions();
+  const lim = typeof planLimit === 'function' ? planLimit('own_cards_limit') : undefined;
+  const fallback = typeof FREE_OWN_FLASHCARD_LIMIT === 'number' ? FREE_OWN_FLASHCARD_LIMIT : 20;
+  const limit = lim === undefined ? fallback : lim;
+  const rows = await fetchMyActiveOwnFlashcardsAllCourses();
+  return { unlimited: limit === null, limit: limit === null ? Infinity : limit, rows };
+}
+
+// Compatibilidade: true quando a tabela não põe teto de cartões próprios para esta conta.
 async function hasUnlimitedOwnCards(){
-  const [hasLink, tier] = await Promise.all([hasActiveTeacherLink(), fetchMyPlanTier()]);
-  return hasLink || tier === 'premium';
+  const q = await fetchMyOwnCardsQuota();
+  return q.unlimited;
 }
 
 // Ativação/remoção manual do Premium -- sem checkout Stripe real nesta

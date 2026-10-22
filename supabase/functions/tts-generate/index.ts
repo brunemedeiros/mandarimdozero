@@ -45,9 +45,12 @@
 // Field -- provedor Google ativado"). Sem a secret, devolve
 // {ok:false, error:'provider_not_configured'}, nunca finge sucesso.
 //
-// Cota mensal -- além do limite curto, no máximo TTS_MONTHLY_LIMIT (padrão
-// 300, env TTS_MONTHLY_LIMIT) gerações bem-sucedidas por conta por mês
-// (UTC). A conta admin é isenta. Partes puras em ./tts_core.mjs.
+// Cota mensal -- além do limite curto, no máximo N gerações bem-sucedidas
+// por conta por mês (UTC). Etapa 5: N vem da tabela Admin > Planos
+// (permission_limit('tts_monthly_quota') da conta: 0 = plano sem áudio por
+// texto, erro plan_required; vazio = sem limite). Se o RPC falhar, vale
+// TTS_MONTHLY_LIMIT (padrão 300), como antes. A conta admin é isenta.
+// Partes puras em ./tts_core.mjs.
 // TTS_MOCK_ENABLED (secret separada, só pra teste -- nunca setada em
 // produção real) troca generateTTS() por um mock que gera um WAV
 // minúsculo/silencioso, permitindo validar o pipeline inteiro (auth,
@@ -61,6 +64,7 @@ import {
   isTtsAdminEmail,
   mapGoogleTtsError,
   parseMonthlyLimit,
+  resolvePlanMonthlyLimit,
   resolveSpeakingRate,
   resolveTtsVoice,
   startOfCurrentMonthUtcIso,
@@ -340,7 +344,19 @@ Deno.serve(async (req: Request) => {
   // sem saber o consumo do mês, não se gasta chamada paga.
   const isAdmin = isTtsAdminEmail(userData.user.email);
   if (!isAdmin) {
-    const monthlyLimit = parseMonthlyLimit(Deno.env.get('TTS_MONTHLY_LIMIT'));
+    const { data: planLimit, error: planError } = await supabase.rpc('permission_limit', { p_key: 'tts_monthly_quota' });
+    if (planError) console.error('tts-generate: falha ao ler a cota do plano (usando TTS_MONTHLY_LIMIT)', planError);
+    const monthlyLimit = resolvePlanMonthlyLimit({
+      planLimit: planError ? undefined : planLimit,
+      rpcFailed: !!planError,
+      envLimit: parseMonthlyLimit(Deno.env.get('TTS_MONTHLY_LIMIT')),
+    });
+    if (monthlyLimit === 0) {
+      return new Response(JSON.stringify({ ok: false, error: 'plan_required' }), {
+        status: 403,
+        headers: JSON_HEADERS,
+      });
+    }
     const { count: monthCount, error: monthError } = await supabase
       .from('tts_generation_log')
       .select('id', { count: 'exact', head: true })

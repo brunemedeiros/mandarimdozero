@@ -18,7 +18,7 @@ check('busca: tira caracteres do filtro', run('plnSearchTerm(" a%b,c(d)e*f\\\\g 
 check('busca: vazio e nulo', run('plnSearchTerm(null)') === '' && run('plnSearchTerm("")') === '');
 check('inicial: maiúscula do nome, ou do usuário, ou ?', run('plnInitial({display_name:"ana"})') === 'A' && run('plnInitial({username:"zé"})') === 'Z' && run('plnInitial({})') === '?');
 check('inicial: escapada', run('plnInitial({display_name:"<b>"})') === '&lt;');
-check('permissão: usa o texto do catálogo quando existe', run('plnPermLabel({key:"own_cards_limit",label_pt:"x"})') === 'Cartões próprios (quantidade)');
+check('permissão: usa o texto do catálogo quando existe', run('plnPermLabel({key:"own_cards_limit",label_pt:"x"})') === 'Cartões próprios (quantidade, somando todos os cursos)'); // Etapa 5: rótulo novo (limite por conta)
 check('permissão: sem texto no catálogo usa o do banco', run('plnPermLabel({key:"nova_coisa",label_pt:"Coisa nova"})') === 'Coisa nova');
 
 // ---- página ----
@@ -57,8 +57,14 @@ check('matriz: Grátis tem limite 20 ligado', /data-role="user" data-key="own_ca
 check('matriz: desligada traz o campo de número desabilitado', /data-role="teacher" data-key="own_cards_limit"[^>]*>\s*<input type="checkbox"[^>]*>\s*<input type="number"[^>]*value="7"[^>]* disabled/.test(mx));
 check('matriz: sem linha no banco = desligado', /data-role="student" data-key="rich_card_formats"[^>]*>\s*<input type="checkbox" aria-label="[^"]*">/.test(mx));
 check('matriz: nome da permissão com HTML escapado, também no atributo', !mx.includes('Perigo <b>') && mx.includes('Perigo &lt;b&gt;') && mx.includes('data-key="zz&quot;&lt;x&gt;"'));
-check('matriz: cada caixa tem nome acessível com permissão e tipo de conta', mx.includes('aria-label="Cartões próprios (quantidade): Premium Pro"'));
+check('matriz: cada caixa tem nome acessível com permissão e tipo de conta', mx.includes('aria-label="Cartões próprios (quantidade, somando todos os cursos): Premium Pro"')); // Etapa 5
 check('matriz: sob o contêiner de tabela do painel', mx.startsWith('<div class="p-tabela p-tabela--matriz">'));
+// Etapa 5: linhas da Professora (painel, analytics, mural, Banco de Revisão) só leitura, com explicação
+const mx2 = run('plnMatrixHTML(C, P)', { C: [{ key: 'teacher_panel', kind: 'bool', label_pt: 'p', sort: 1 }, { key: 'review_bank', kind: 'bool', label_pt: 'r', sort: 2 }, { key: 'public_deck_import', kind: 'bool', label_pt: 'd', sort: 3 }], P: [{ role: 'teacher', permission_key: 'teacher_panel', enabled: true, limit_value: null }] });
+check('matriz: linhas da Professora sem célula editável (10 só leitura)', (mx2.match(/data-plano-so-leitura /g) || []).length === 10 && (mx2.match(/data-plano-celula/g) || []).length === 5);
+check('matriz: caixas só leitura desabilitadas e marcadas pelo papel', (mx2.match(/ disabled>/g) || []).length === 10 && /data-role="teacher" data-key="teacher_panel"[^>]*>\s*<input type="checkbox"[^>]* checked disabled>/.test(mx2));
+check('matriz: explicação das linhas da Professora', mx2.includes('vêm do papel Professora'));
+check('subtítulo diz para quem a mudança vale na hora', run('t("plans.sub")').includes('Grátis, Aluno e Premium'));
 
 console.log(`painel-admin planos (peças de tela): ${pass}/${pass + fail} checks`);
 process.exit(fail ? 1 : 0);
