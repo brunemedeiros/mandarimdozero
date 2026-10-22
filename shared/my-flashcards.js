@@ -10,7 +10,8 @@
 //
 // Depende de (mesma posição de shared/admin-flashcards.js -- antes de app.js):
 //   - shared/own-flashcards.js (fetchMyOwnFlashcards, createOwnFlashcard, uploadOwnFlashcardMedia, setOwnFlashcardStatus, updateOwnFlashcardContent, deleteOwnFlashcardPermanently)
-//   - shared/roles.js              (hasActiveTeacherLink, fetchMyPlanTier)
+//   - shared/roles.js              (fetchMyOwnCardsQuota, myPlanKind)
+//   - shared/permissions.js        (planCan, planLimit: tabela Admin > Planos)
 //   - shared/toast.js              (showToast)
 //   - shared/admin-flashcards.js   (openFlashcardResetConfirm, CARD_TYPE_UI_META -- carregado ANTES deste arquivo, mesma página, reaproveitado sem duplicar; ver Fase 6D.2 no CLAUDE.md)
 //   - shared/flashcard-native-persistence.js (nativeNoteEditorStateFromLegacyRow,
@@ -32,6 +33,19 @@
 // ilimitados. Quando a plataforma tiver assinatura de verdade, este é o
 // ponto a substituir/estender, não reinventar do zero.
 const FREE_OWN_FLASHCARD_LIMIT = 20;
+// Etapa 5: o número que vale é a célula "Cartões próprios" da linha da conta na tabela Admin > Planos
+// (fetchMyOwnCardsQuota, shared/roles.js); FREE_OWN_FLASHCARD_LIMIT acima é só a reserva para quando a tabela não
+// carregou. myOwnCardsLimit() = o teto já carregado (Infinity = sem limite).
+function myOwnCardsLimit(){
+  const v = MY_FLASHCARDS_STATE && MY_FLASHCARDS_STATE._limit;
+  return typeof v === 'number' ? v : FREE_OWN_FLASHCARD_LIMIT;
+}
+// Origens de áudio por campo: upload e link são de todos; gerar por texto e gravar no microfone dependem da célula
+// "Áudio por texto e gravação" (tts_monthly_quota ligada e com cota > 0). `undefined` = todas as origens.
+function myAllowedAudioOrigins(){
+  const tts = typeof planLimit === 'function' ? planLimit('tts_monthly_quota') : 0;
+  return (tts === null || (typeof tts === 'number' && tts > 0)) ? undefined : ['none', 'upload', 'url'];
+}
 
 // Fase 6D.2 (ver CLAUDE.md) -- nativeCardState: mesmo papel de
 // ADMIN_FLASHCARDS_STATE.nativeCardState (shared/admin-flashcards.js),
@@ -246,37 +260,39 @@ async function loadMyFlashcardsContext(){
   // Fase F -- Decks pessoais carregados sob demanda (bootstrap idempotente
   // + leitura); STATE.decks é atualizado pra "Estudar este Deck"
   // (startDeckReviewSession) nunca enxergar uma lista velha.
-  const [cards, hasLink, planTier, decks] = await Promise.all([
+  // Etapa 5: tipos de cartão, áudio e limite vêm da tabela Admin > Planos (planCan/planLimit,
+  // shared/permissions.js); o limite de cartões próprios conta a CONTA inteira (todos os cursos).
+  const [cards, quota, decks] = await Promise.all([
     fetchMyOwnFlashcards(APP_KEY),
-    hasActiveTeacherLink(),
-    fetchMyPlanTier(),
+    fetchMyOwnCardsQuota(),
     ensureDecksForCurrentUser(APP_KEY).then(() => fetchDecksForLanguage(APP_KEY)),
   ]);
-  const premium = planTier === 'premium';
+  // `premium` aqui = pode usar todos os tipos de cartão (célula "Todos os tipos de cartão").
+  const premium = planCan('rich_card_formats');
+  const audioOrigins = myAllowedAudioOrigins();
+  const kind = myPlanKind();
+  const hasLink = kind === 'student';
   MY_FLASHCARDS_STATE._cardsCache = cards;
   MY_FLASHCARDS_STATE._decks = decks;
-  // Teto do plano grátis não vale pra aluna vinculada nem pra Premium
-  // (mesma regra de hasUnlimitedOwnCards, shared/roles.js).
-  const unlimited = hasLink || premium;
+  MY_FLASHCARDS_STATE._audioOrigins = audioOrigins;
+  const unlimited = quota.unlimited;
   MY_FLASHCARDS_STATE._hasLink = unlimited;
+  MY_FLASHCARDS_STATE._quotaRows = quota.rows;
+  MY_FLASHCARDS_STATE._limit = quota.limit;
   if (typeof STATE !== 'undefined') STATE.decks = decks;
   const activeCards = cards.filter(c => c.status === 'active');
   const archivedCards = cards.filter(c => c.status === 'archived');
   // Fase F -- o teto conta CardInstances (regra única em shared/deck-engine.js),
-  // nunca linhas.
-  const usedInstances = ownCardInstanceUsage(cards);
-  const atLimit = !unlimited && usedInstances >= FREE_OWN_FLASHCARD_LIMIT;
+  // nunca linhas. Etapa 5: de todos os cursos da conta.
+  const usedInstances = ownCardInstanceUsage(quota.rows);
+  const atLimit = !unlimited && usedInstances >= quota.limit;
 
-  // Selo de tier -- eixo de QUANTIDADE (vínculo com professora) continua
-  // separado do eixo de PREMIUM (formatos ricos) -- ver comentário em
-  // shared/roles.js. Uma conta pode mostrar os dois selos juntos.
-  const tierBadgeHTML = premium
-    ? `<span class="pill">${t('myFlashcards.badge.premiumUnlimited')}</span>`
-    : (hasLink
-      ? `<span class="pill">${t('myFlashcards.badge.linked')}</span>`
-      : `<span class="pill">${t('myFlashcards.badge.free', { used: usedInstances, limit: FREE_OWN_FLASHCARD_LIMIT })}</span>`);
+  // Selo do plano: texto só (o que a conta pode fazer vem da tabela).
+  const tierBadgeHTML = unlimited
+    ? `<span class="pill">${t(kind === 'student' ? 'myFlashcards.badge.linked' : 'myFlashcards.badge.premiumUnlimited')}</span>`
+    : `<span class="pill">${t(kind === 'free' ? 'myFlashcards.badge.free' : 'myFlashcards.badge.limited', { used: usedInstances, limit: quota.limit })}</span>`;
 
-  return { cards, hasLink, premium, decks, activeCards, archivedCards, usedInstances, unlimited, atLimit, tierBadgeHTML };
+  return { cards, hasLink, premium, audioOrigins, decks, activeCards, archivedCards, usedInstances, unlimited, atLimit, tierBadgeHTML };
 }
 
 // Formulário "Novo cartão" (mesmo HTML em Meus Cartões e na janela "Adicionar").
@@ -310,7 +326,7 @@ function myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML }){
         </select>
       </div>
     </div>
-    ${premium ? '' : `<p class="profile-edit-hint">${t('myFlashcards.free.hint')}</p>`}
+    ${premium ? '' : `<p class="profile-edit-hint">${t('myFlashcards.free.hint')}${typeof premiumContactMailto === 'function' ? ` <a class="admin-select-link" data-premium-contact href="${escapeHTML(premiumContactMailto())}">📧 ${t('premiumContact.button')}</a>` : ''}</p>`}
     <div class="section-label add-card-fields-title">${t('myFlashcards.fields.title')}</div>
     <p class="profile-edit-hint add-card-fields-hint">${t('myFlashcards.fields.hint')}</p>
     <div id="my-flashcard-native-fields"></div>
@@ -671,7 +687,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap, premium){
   // existe de verdade nesta tela de EDIÇÃO) habilitam "Gerar áudio".
   const nativeFieldOpts = { namePrefix: 'edit-my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia, ttsFn: requestOwnFieldAudioTTS, noteId: editorState.noteId,
     // Mesma matriz do formulário de criação: grátis = sem áudio/upload/link.
-    allowedAudioOrigins: premium ? undefined : ['none', 'upload', 'url'] };
+    allowedAudioOrigins: myAllowedAudioOrigins() };
   const boxEl = document.getElementById('edit-my-native-flashcard-fields');
   refreshNativeCardTypeBox(boxEl, editorState, nativeFieldOpts);
   mountNoteTagsEditor(document.getElementById('edit-my-native-flashcard-tags'), editorState);
@@ -775,7 +791,7 @@ function wireMyFlashcardsForm(wrap, atLimit, premium, onCreated){
     // quando o gate cobria o bloco inteiro -- agora que o bloco é sempre
     // visível, o filtro é quem faz esse trabalho). `undefined` (premium)
     // = sem restrição.
-    allowedAudioOrigins: premium ? undefined : ['none', 'upload', 'url'],
+    allowedAudioOrigins: myAllowedAudioOrigins(),
   };
 
   // Fase 6D.2 (ver CLAUDE.md) -- seletor de Card Type: muta só
@@ -850,16 +866,16 @@ function wireMyFlashcardsForm(wrap, atLimit, premium, onCreated){
     // gravado se estourar -- e como o uso vem só de linhas já persistidas,
     // uma criação que falha depois nunca consome limite.
     const pre = preflightOwnCardInstanceCreation({
-      activeRows: MY_FLASHCARDS_STATE._cardsCache,
+      activeRows: MY_FLASHCARDS_STATE._quotaRows || MY_FLASHCARDS_STATE._cardsCache,
       hasTeacherLink: !!MY_FLASHCARDS_STATE._hasLink,
       editorStates: [nativeState],
       languageAppKey: APP_KEY,
-      limit: FREE_OWN_FLASHCARD_LIMIT,
+      limit: myOwnCardsLimit(),
     });
     if (!pre.ok){
       errorEl.textContent = (typeof window.tp === 'function')
         ? window.tp('flashcardLimit.wouldGenerate', pre.requested === 1 ? 1 : 2, { n: pre.requested, remaining: pre.remaining })
-        : `Este cartão geraria ${pre.requested} ${pre.requested === 1 ? 'cartão' : 'cartões'} de estudo, mas restam só ${pre.remaining} no plano grátis.`;
+        : `Este cartão geraria ${pre.requested} ${pre.requested === 1 ? 'cartão' : 'cartões'} de estudo, mas restam só ${pre.remaining} na sua conta.`;
       openFlashcardLimitModal();
       return;
     }
@@ -1140,15 +1156,15 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
   // plano grátis, cria só as primeiras Notes que cabem (nunca uma pela
   // metade) e avisa no fim. Regra única em shared/deck-engine.js.
   const cutPlan = planOwnCardInstanceCut({
-    activeRows: MY_FLASHCARDS_STATE._cardsCache,
+    activeRows: MY_FLASHCARDS_STATE._quotaRows || MY_FLASHCARDS_STATE._cardsCache,
     hasTeacherLink: !!MY_FLASHCARDS_STATE._hasLink,
     editorStates: importStates,
     languageAppKey: APP_KEY,
-    limit: FREE_OWN_FLASHCARD_LIMIT,
+    limit: myOwnCardsLimit(),
   });
   const cutMessage = cutPlan.cut ? ownCardInstanceCutMessage({
     requested: cutPlan.requested, keptInstances: cutPlan.keptInstances,
-    limit: FREE_OWN_FLASHCARD_LIMIT, used: cutPlan.used, what: 'import',
+    limit: myOwnCardsLimit(), used: cutPlan.used, what: 'import',
   }) : null;
   if (cutPlan.keepCount === 0){
     openFlashcardLimitModal({ cutMessage });
@@ -1192,6 +1208,19 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
 // guardado na 1ª abertura e restaurado depois, então um aviso de corte
 // nunca "vaza" pra próxima abertura por criação manual. Usado também por
 // shared/anki-import-ui.js e shared/public-profile.js.
+// Texto padrão da janela de limite (o número vem da tabela Admin > Planos) + botão "Fale com a Prof. Brune".
+// O <p> não usa data-i18n-html porque o texto tem {limit}: quem troca o idioma é o ouvinte de i18n:change abaixo.
+function flashcardLimitDefaultBodyHTML(){
+  const contactHTML = typeof premiumContactButtonHTML === 'function' ? `<div class="premium-contact-wrap">${premiumContactButtonHTML()}</div>` : '';
+  return `<p data-limit-default>${t('flashcardLimit.modal.bodyHtml', { limit: myOwnCardsLimit() === Infinity ? FREE_OWN_FLASHCARD_LIMIT : myOwnCardsLimit() })}</p>${contactHTML}`;
+}
+// Troca de idioma do site: a janela de limite (fechada ou aberta no texto padrão) acompanha.
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') window.addEventListener('i18n:change', () => {
+  const modal = document.getElementById('flashcard-limit-modal');
+  if (!modal || typeof t !== 'function') return;
+  const body = modal.querySelector('.app-modal-body');
+  if (body && !body.querySelector('[data-limit-cut-message]')) body.innerHTML = flashcardLimitDefaultBodyHTML();
+});
 function openFlashcardLimitModal(opts){
   const modal = document.getElementById('flashcard-limit-modal');
   if (!modal) return false;
@@ -1202,7 +1231,9 @@ function openFlashcardLimitModal(opts){
   // Texto padrão no idioma ATUAL do site (o guardado acima é o do 1º uso e
   // ficaria em português depois de trocar para inglês).
   const hasT = typeof t === 'function';
-  const defaultBodyHTML = hasT ? `<p data-i18n-html="flashcardLimit.modal.bodyHtml">${t('flashcardLimit.modal.bodyHtml')}</p>` : body && body.dataset.defaultHtml;
+  // Etapa 5: o número vem da tabela Admin > Planos e conta a conta inteira; o botão abre o e-mail da Prof. Brune.
+  const contactHTML = typeof premiumContactButtonHTML === 'function' ? `<div class="premium-contact-wrap">${premiumContactButtonHTML()}</div>` : '';
+  const defaultBodyHTML = hasT ? flashcardLimitDefaultBodyHTML() : body && body.dataset.defaultHtml;
   const defaultTitle = hasT ? t('flashcardLimit.modal.title') : title && title.dataset.defaultText;
   const cutMessage = opts && opts.cutMessage;
   if (body){
@@ -1210,8 +1241,8 @@ function openFlashcardLimitModal(opts){
       ? `<p data-limit-cut-message>${escapeHTML(cutMessage)}</p>
          <div data-limit-premium-cta style="margin-top:10px; padding:10px 12px; border:2px solid var(--seal-red); border-radius:var(--radius, 10px); background:var(--paper-warm);">
            <strong>${hasT ? t('flashcardLimit.cut.ctaStrong') : '⭐ Com o Premium, seus cartões próprios são ilimitados.'}</strong><br>
-           ${hasT ? t('flashcardLimit.cut.ctaBody') : 'Para ativar, fale com a administração (profbrune). Você também pode excluir cartões que já não usa para liberar espaço.'}
-         </div>`
+           ${hasT ? t('flashcardLimit.cut.ctaBody') : 'Para pedir o Premium, fale com a Prof. Brune pelo botão abaixo. Você também pode apagar cartões que já não usa para liberar espaço.'}
+         </div>${contactHTML}`
       : defaultBodyHTML;
   }
   if (title) title.textContent = cutMessage ? (hasT ? t('flashcardLimit.cut.title') : '🔒 Importação limitada pelo plano grátis') : defaultTitle;

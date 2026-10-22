@@ -80,13 +80,18 @@ async function bootPage(browser, lang, port){
   return { page, errors, ctx };
 }
 
+// Etapa 5: o plano vem da tabela Admin > Planos (my_permissions), simulada por tests/planos-permissoes/fixtures.js.
+const { permsFor } = require('../planos-permissoes/fixtures');
 async function openMeusCartoes(page, premium, link){
-  await page.evaluate(([premium, link]) => {
+  const perms = permsFor(premium ? 'premium' : (link ? 'student' : 'free'));
+  await page.evaluate(([premium, link, perms]) => {
     CURRENT_USER = { id: 'u-f' };
     ensureProfileLoaded = async () => ({ plan_tier: premium ? 'premium' : 'free' });
+    MY_PERMISSIONS = perms;
+    PROFILE_CACHE = Object.assign({}, PROFILE_CACHE || {}, { user_id: 'u-f', username: 'aluna.teste' });
     window.__DB.teacher_students = link ? [{ id: 1, student_id: 'u-f', status: 'active' }] : [];
     switchTab('my-flashcards');
-  }, [premium, link]);
+  }, [premium, link, perms]);
   await page.waitForSelector('#my-flashcard-deck', { timeout: 8000 });
 }
 

@@ -329,7 +329,7 @@ function publicDeckGateHTML(v){
       <a class="btn btn-secondary btn-block" href="../" data-login-cta>${t('publicProfile.loginCta')}</a>`;
   }
   if (!v.can_open){
-    return `<p class="profile-empty-note" data-public-deck-gate="premium">${t('publicDeck.gate.premium')}</p>`;
+    return `<p class="profile-empty-note" data-public-deck-gate="premium">${t('publicDeck.gate.premium')}</p>${typeof premiumContactButtonHTML === 'function' ? premiumContactButtonHTML() : ''}`;
   }
   return '';
 }

@@ -104,7 +104,7 @@ const ANTES = () => {
     await p.check(`${celula('user', 'rich_card_formats')} input[type=checkbox]`); await p.waitForFunction(() => document.querySelector('[data-plano-celula][data-role="user"][data-key="rich_card_formats"]').classList.contains('is-saved'));
     L('ligar permissão: grava na hora, sem confirmação, e marca como salvo', (await p.evaluate(() => window.__T.role_permissions.find(r => r.role === 'user' && r.permission_key === 'rich_card_formats').enabled)) === true && !(await dlg.count()));
     await p.uncheck(`${celula('user', 'rich_card_formats')} input[type=checkbox]`);
-    L('desligar permissão: pergunta com a permissão e o tipo de conta', await dlg.isVisible() && (await dlg.innerText()).includes('Formatos ricos') && (await dlg.innerText()).includes('Grátis'));
+    L('desligar permissão: pergunta com a permissão e o tipo de conta', await dlg.isVisible() && (await dlg.innerText()).includes('Todos os tipos de cartão') && (await dlg.innerText()).includes('Grátis')); // Etapa 5: rótulo novo
     await dlg.locator('button:not(.p-perigo)').click(); await p.waitForFunction(() => document.querySelector('[data-plano-celula][data-role="user"][data-key="rich_card_formats"] input[type=checkbox]').checked);
     L('cancelar: a caixa volta ligada e o banco não mudou', await p.isChecked(`${celula('user', 'rich_card_formats')} input[type=checkbox]`) && (await p.evaluate(() => window.__T.role_permissions.find(r => r.role === 'user' && r.permission_key === 'rich_card_formats').enabled)) === true);
     await p.uncheck(`${celula('user', 'rich_card_formats')} input[type=checkbox]`); await dlg.locator('.p-perigo').click();

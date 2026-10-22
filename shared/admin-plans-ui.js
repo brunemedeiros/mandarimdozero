@@ -7,6 +7,9 @@
 
 const PLAN_GRANTABLE_ROLES = ['premium_basic', 'premium_pro', 'teacher'];
 const PLAN_MATRIX_ROLES = ['user', 'student', 'premium_basic', 'premium_pro', 'teacher'];
+// Etapa 5 (decisão 1 da dona, 2026-10-22): estas linhas são decididas pelo PAPEL Professora (is_teacher), não pela
+// tabela; na tela ficam só leitura, com a explicação. As outras linhas o site obedece na hora.
+const PLAN_ROLE_ONLY_KEYS = ['teacher_panel', 'teacher_student_analytics', 'teacher_board', 'review_bank'];
 
 function plnEsc(v){ return escapeHTML(v == null ? '' : String(v)); }
 function plnRoleLabel(role){ return t(`plans.role.${role}`); }
@@ -68,9 +71,11 @@ function plnMatrixHTML(cat, perms){
     <tbody>${cat.map(c => `<tr><th scope="row">${plnEsc(plnPermLabel(c))}</th>${PLAN_MATRIX_ROLES.map(r => {
       const v = cell[`${r}|${c.key}`] || { enabled: false, limit_value: null };
       const name = `${plnPermLabel(c)}: ${plnRoleLabel(r)}`;
-      return `<td><span class="p-celula" data-plano-celula data-role="${r}" data-key="${plnEsc(c.key)}" data-kind="${plnEsc(c.kind)}">
-        <input type="checkbox" aria-label="${plnEsc(name)}"${v.enabled ? ' checked' : ''}>
+      const roleOnly = PLAN_ROLE_ONLY_KEYS.includes(c.key);
+      return `<td><span class="p-celula"${roleOnly ? ` data-plano-so-leitura title="${plnEsc(t('plans.matrix.roleOnly'))}"` : ' data-plano-celula'} data-role="${r}" data-key="${plnEsc(c.key)}" data-kind="${plnEsc(c.kind)}">
+        <input type="checkbox" aria-label="${plnEsc(roleOnly ? `${name} (${t('plans.matrix.roleOnly')})` : name)}"${v.enabled ? ' checked' : ''}${roleOnly ? ' disabled' : ''}>
         ${c.kind === 'limit' ? `<input type="number" min="0" step="1" inputmode="numeric" data-plano-limite value="${v.limit_value == null ? '' : plnEsc(v.limit_value)}" placeholder="∞" title="${plnEsc(t('plans.matrix.unlimited'))}" aria-label="${plnEsc(name)}"${v.enabled ? '' : ' disabled'}>` : ''}
       </span></td>`;
-    }).join('')}</tr>`).join('')}</tbody></table></div>`;
+    }).join('')}</tr>`).join('')}</tbody></table></div>
+    <p class="p-subtitulo" data-plano-so-leitura-nota style="margin-top:8px">${plnEsc(t('plans.matrix.roleOnlyHint'))}</p>`;
 }
