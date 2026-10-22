@@ -665,3 +665,65 @@ Resumo), `15` (regras 11 e 14) e `00`. O `16` não cita nada desta rodada. Nada 
      - Notas do A2: ~52 (+3 da decisão 178: sistema escolar e *la fac* na M6.1, níveis e DELF na M6.3).
      - **Pendências limpas** (seção 7 do `08 v2`): sai o achado de *délicieux, sucrée, cuit* (decidido pela 176); em "Listas de palavras a revisar pela dona", o A2 M6 entra
        como aprovado; entra o achado de *prochain* e *le projet* em frases publicadas do A1 (decisão 177).
+
+---
+
+# Vigésima quarta rodada (2026-10-22): *prochain* e *le projet* no A1 e revisão do A2 M7 "Trabalho, dinheiro e papelada"
+
+Base: respostas da dona no corpo da conversa (decisão 148), aprovadas em 2026-10-22. Aplicado em `08-mapa-final-a1-a2-v2.md` (cabeçalho, seções 1, 2.1, 3.2, 6, 7, 8 e
+Resumo), `15` (regras 11 e 14) e `00`. O `16` não cita nada desta rodada (a tabela de negação complexa do `08 v2` mantém *aucun* na M7.5). Nada aplicado ao site. Os textos
+das notas novas só se escrevem depois, aprovados pela dona.
+
+180. ***prochain* e *le projet* nas frases publicadas do A1 ficam** (fecha o achado da decisão 177): *La semaine prochaine, je pars en voyage.* (`A1-7-p5`, A1 M3.3), o
+     quadro da gramática A1 M8.4 (`A1-g20`: *demain, ce soir, la semaine prochaine*) e a fala *Tu as des projets pour le week-end ?* (`A1-19-d0`, A1 M9.1) são aceitos
+     como **expressão de uso comum** pela exceção formal da regra 11 do `15` (decisões 171 e 176, como *délicieux*). Os cartões *prochain / prochaine* e *le projet*
+     continuam na A2 M6.5, onde as palavras são ensinadas e as frases viram revisão natural. A pendência sai da seção 7 do `08 v2`.
+     - Fica registrado, sem decisão nova: a frase `A1-7-p5` também usa *partir* (cartão da A1 M8.1, depois da M3.3) e *en voyage* (o cartão *le voyage* é da A2 M2.1).
+       A 180 trata só de *prochain*; esses dois pontos entram na auditoria pedagógica completa antes da implementação (regra 11), que decide trocar a frase ou levá-la.
+181. **A2 M7 "Trabalho, dinheiro e papelada": listas aprovadas.**
+     - M7.1 "Falar do trabalho" (`A2-19`, 12): *le / la collègue, le / la chef, le salaire, l'emploi, le poste, le contrat, la réunion, les congés, à temps plein,
+       à temps partiel, le boulot, embaucher* (a lista do `04` 6.3, sem mudança). *les congés* tem a nota cultural *congés payés* (1936) na A1 M8.3: aqui **só o cartão**,
+       sem nota nova.
+     - M7.2 "Procurar emprego" (`A2-20`, 11): *le CV, la lettre de motivation, l'offre d'emploi, postuler, l'entretien, le candidat / la candidate, l'expérience,
+       la compétence, motivé / motivée, le chômage, démissionner* (*sérieux* só em frase: o cartão é da A2 M1.4, decisão 156).
+     - M7.4 "Resolver no banco" (`A2-22`, 12): *le compte, la carte bancaire, le distributeur, retirer, le code, le virement, dépenser, économiser, les économies, prêter,
+       emprunter* + ***le RIB*** (12ª palavra nova; *la banque* só em frase, é cartão do A1 M6.3, decisão 133). *prêter* x *emprunter*: nota breve de contraste (decisão 182).
+     - M7.5 "Serviços e papelada" (`A2-25`, 12): *le formulaire, remplir, signer, le dossier, envoyer, la file d'attente, le guichet, la carte d'identité, le permis de
+       conduire, le titre de séjour, le justificatif de domicile, la pièce jointe* (a lista revista pela decisão 142, agora aprovada; *la poste, la mairie* só em frase,
+       cartões do A1 M6.3; *s'inscrire* só em frase, cartão da A2 M6.1, decisão 177).
+     - **Conferência da regra 14** (A1 e A2, no `08 v2`, no `04` e em `fr/content.js`; nenhuma das 47 palavras aparece no conteúdo publicado):
+       - *la pièce jointe*: a 1ª unidade com cartão é a **A2 M7.5**. A A2 M9 (M9.3 "Escrever para convidar, recusar e agradecer" e M9.6 "Internet e redes", lista do `04`
+         6.3: *le réseau social, publier, la publication, le commentaire, commenter, s'abonner, le lien, télécharger, le mot de passe, l'appli, l'écran, l'ordinateur*)
+         **não tem *la pièce jointe* como cartão**: lá ela só aparece em frase (e-mail com anexo). Nenhuma unidade perde cartão.
+       - *le permis de conduire*: a 1ª unidade com cartão é a **A2 M7.5**. A A2 M8.4 "Trânsito e carro" (lista aprovada pela decisão 162) **não tem *le permis de
+         conduire***: lá ele só aparece em frase. Nenhuma unidade perde cartão. *le permis de conduire* x *conduire* (A2 M8.4) são lexemas diferentes (já estava na lista
+         "só para conferir").
+       - Como nenhuma unidade perde cartão, **não há palavra substituta a propor**.
+       - *le poste* (cargo, A2 M7.1) x *la poste* (correio, cartão do A1 M6.3): gêneros e sentidos diferentes, dois cartões, com nota (decisão 182); já estava na lista
+         "só para conferir".
+       - *le code* (A2 M7.4, a senha do cartão) x *le code postal* (só em nota na A1 M7.1, sem cartão): sem conflito; vai para a lista "só para conferir".
+       - *la carte bancaire, la carte d'identité* contêm o cartão *la carte* do A1 (já na lista "só para conferir", como *la carte Vitale*).
+       - *le boulot* x *le travail* (cartão da A1 M1.6): palavras diferentes, dois cartões, com nota de registro (decisão 182).
+       - Lexemas diferentes da mesma família, com os dois cartões (vão para a lista "só para conferir"): *l'emploi* x *l'offre d'emploi* (as duas na A2 M7, *l'offre
+         d'emploi* contém *l'emploi*); *économiser* x *les économies* (os dois na A2 M7.4); *prêter* x *emprunter* (sentidos opostos, com nota).
+182. **Notas novas do A2 M7 (aprovadas; texto só depois, aprovado pela dona)**:
+     - M7.1, nota de realidade (Real, alta): ***le boulot*** = "trabalho", informal (*J'ai trouvé un boulot.*); o verbo informal é *bosser*; *le travail* é o neutro
+       (cartão da A1 M1.6). Junto do cartão *le boulot*. Responde em parte a pergunta 46 do `08 v2` (gíria familiar a partir do A2).
+     - M7.1, nota de explicação (Exp, alta): ***le poste* x *la poste***: *le poste* = cargo, vaga (*un poste de vendeur*); *la poste* = o correio (cartão do A1 M6.3);
+       a mesma escrita com gênero diferente muda o sentido. Junto do cartão *le poste*.
+     - M7.4, nota cultural (Cult, alta): ***le RIB* e a *carte bancaire***: como se paga e se recebe na França: o *RIB* (*relevé d'identité bancaire*, os dados da conta)
+       é pedido para receber salário, pagar aluguel e contas; paga-se quase tudo com cartão de débito, muitas vezes *sans contact*; o cheque está em desuso. Junto do
+       cartão *le RIB*.
+     - M7.4, nota de explicação (Exp, alta, *breve*): ***prêter* x *emprunter***: *prêter* = emprestar a alguém (*Je te prête mon livre.*); *emprunter* = pegar
+       emprestado (*J'emprunte de l'argent à la banque.*). Junto do 2º cartão do par.
+     - M7.5, nota cultural (Cult, alta): ***le justificatif de domicile***: o comprovante de endereço, pedido em quase todo trâmite na França (abrir conta, título de
+       residência, matrícula); normalmente uma conta de luz, água ou internet com menos de 3 meses; explica o que vai no *dossier*. Junto do cartão.
+     - **Versões grátis mantidas** (coluna "Versão grátis" do `08 v2`, sem mudança de posição): a M7.2 abriga a da M7.3 (discurso indireto, gancho *Il dit que...*);
+       a M7.5 abriga a de *aucun* da M8.6 (diálogo *Je n'ai aucun justificatif de domicile.*). A M7.1 e a M7.4 não abrigam nenhuma.
+183. **A2 M7 fechado**; segue o **M8** (Moradia e cidade).
+     - **Contas**: M7.1 12, M7.2 11, M7.4 12, M7.5 12 = **47 cartões** (+1 por *le RIB*: a M7.4 era contada com 11, sem *la banque*); A2 com **425 cartões** (415 novos
+       + 10 publicados). O tempo não muda: M7 ~3h05 (4 unidades de vocabulário × ~40 min + 1 gramática × ~25 min); A2 ~33h10.
+     - Notas do A2: ~57 (+5 da decisão 182).
+     - **Pendências limpas** (seção 7 do `08 v2`): sai o achado de *prochain* e *le projet* (decidido pela 180); em "Listas de palavras a revisar pela dona", a A2 M7.5
+       sai das abertas e o A2 M7 entra como aprovado; a lista "só para conferir" ganha *le code* x *le code postal*, *l'emploi* x *l'offre d'emploi*, *économiser* x
+       *les économies*, *prêter* x *emprunter*, *le boulot* x *le travail*.

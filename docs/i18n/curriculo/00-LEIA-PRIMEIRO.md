@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 56 unidades, 344 cartões) e do A2 (10 módulos, 58 unidades, 424 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 56 unidades, 344 cartões) e do A2 (10 módulos, 58 unidades, 425 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
@@ -87,3 +87,10 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   escolar francês (Cult, alta) e *la fac* (Real, alta) na M6.1, níveis do Quadro Europeu e DELF (Cult, alta) na M6.3; **A2 M1 a M6 fechados, segue o M7** (Trabalho,
   dinheiro e papelada). Totais sem mudança: A1 344; **A2 424** (414 + 10), ~33h10 (M6 ~3h15, 36 cartões). Achado na seção 7 do `08 v2`: *prochain* (*La semaine
   prochaine, je pars en voyage.*, A1 M3.3, e a gramática A1 M8.4) e *le projet* (fala da A1 M9.1) em frases publicadas do A1.
+- **Decisões 180 a 183 no `12`**: *prochain* e *le projet* nas frases publicadas do A1 (*La semaine prochaine, je pars en voyage.*, A1 M3.3, e o quadro da gramática
+  A1 M8.4; *Tu as des projets pour le week-end ?*, A1 M9.1) **ficam**, pela exceção formal da regra 11 do `15` (cartões na A2 M6.5); listas do A2 M7 aprovadas (M7.1 12,
+  M7.2 11, **M7.4 com *le RIB***, 12, M7.5 12; *la pièce jointe* e *le permis de conduire* com cartão só na M7.5, sem troca na A2 M9 nem na M8.4, então sem palavra
+  substituta); notas novas do M7: *le boulot* (Real, alta) e *le poste* x *la poste* (Exp, alta) na M7.1, *le RIB* e a *carte bancaire* (Cult, alta) e *prêter* x
+  *emprunter* (Exp, alta, breve) na M7.4, *le justificatif de domicile* (Cult, alta) na M7.5; **A2 M1 a M7 fechados, segue o M8** (Moradia e cidade). Totais: A1 344;
+  **A2 425** (415 + 10), ~33h10 (M7 ~3h05, 47 cartões). Na seção 7 do `08 v2` fica registrado, para a auditoria completa, que a frase *La semaine prochaine, je pars en
+  voyage.* também usa *partir* e *en voyage* antes dos cartões.
