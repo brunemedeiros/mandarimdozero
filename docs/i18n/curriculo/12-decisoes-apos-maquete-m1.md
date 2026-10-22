@@ -780,3 +780,52 @@ Resumo), `15` (regra 14), `16` (item 4) e `00`. Nada aplicado ao site. Os textos
      - **Pendências limpas** (seção 7 do `08 v2`): em "Listas de palavras a revisar pela dona", a A2 M8.5 sai das abertas e o A2 M8 entra como aprovado; entra o achado
        de *garée* na frase publicada do A1 (decisão 184); a lista "só para conferir" ganha os pares da decisão 184. A posição "*ni... ni* na M8.1 ou na M8.5" sai da tabela
        de negação complexa (decidida pela 185).
+
+---
+
+# Vigésima sexta rodada (2026-10-22): *garée*, *allô* e revisão do A2 M9 "Comunicar e se relacionar"
+
+Base: respostas da dona no corpo da conversa, aprovadas em 2026-10-22. Aplicado em `08-mapa-final-a1-a2-v2.md` (cabeçalho, seções 1, 3.2, 4.2, 6, 7, 8 e Resumo),
+`15` (regras 11 e 14), `16` (item 4) e `00`. Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovados pela dona.
+
+188. ***garée*, exemplo de *ni... ni* e a nota de *la caution*** (fecha o achado da decisão 184 e os pontos de texto das decisões 185 e 186):
+     - A frase publicada ***La voiture est garée devant la maison.*** (`A1-14`, vai com a chave para a A1 M7.5, decisão 136) **fica**: *garée* é **expressão de uso
+       comum** (exceção formal da regra 11 do `15`, como *prochain*, decisão 180); o cartão *se garer* continua na A2 M8.4. A pendência sai da seção 7 do `08 v2`.
+     - O exemplo da nota de ***ni... ni*** (A2 M8.5, decisão 185) passa a ***Ni bruit ni musique après 22h*** (no lugar de *Ni cris ni musique après 22h*: *le cri*
+       não é cartão; ***le bruit*** é cartão da A2 M1.3 e *la musique* do A1). O outro exemplo, *Ni fumer ni manger ici*, fica.
+     - A nota cultural de ***la caution*** e das *charges* (A2 M8.1, decisão 186) diz: no uso comum, *la caution* é o **depósito**; no contrato, o nome oficial é
+       ***le dépôt de garantie***; e *la caution* também quer dizer o **fiador** (*se porter caution*) (Cult, alta). Texto só depois, aprovado pela dona.
+189. ***Allô* sem cartão.** *Allô* fica **só em frase** (já tem a nota *Allô ?* no A1 M5.1, decisão 114) e sai da lista da A2 M9.1, que passa a ter **11 palavras**:
+     *rappeler, laisser un message, la messagerie, ne quittez pas, de la part de qui, décrocher, raccrocher, occupé / occupée, le répondeur, joindre, la ligne*
+     (a lista do `04` 6.3 sem *allô*). Não entra palavra substituta (11 está dentro do limite do A2, regra 13). Sai da lista "só para conferir" da seção 7 do `08 v2`.
+190. **A2 M9 "Comunicar e se relacionar": listas aprovadas.**
+     - M9.1 "Telefonar e deixar recado" (`A2-27`, 11): a lista da decisão 189.
+     - M9.3 "Escrever para convidar, recusar e agradecer" (`A2-28`, 12): *l'invitation, remercier, s'excuser, accepter, refuser, regretter, la réponse, amitiés,
+       à très vite, je t'embrasse, souhaiter* + ***confirmer*** (*Je confirme ma présence.*), **proposta de substituição** de *bisous*, **a revisar pela dona**.
+       *bisous* já tem nota no A1 M8.3 (*Bisous, grosses bises*) e fica **só em frase** aqui; *cordialement* é cartão da A2 M3.3 e *cher / chère* (querido) fica em nota
+       (decisão 157). Conferência da regra 14 de *confirmer*: não aparece em nenhuma lista do A1 nem do A2 (`08 v2`, `04`, `08`) nem em `fr/content.js`: sem conflito.
+     - M9.5 "Sentimentos e reações" (`A2-29`, 12): *content / contente, triste, fâché / fâchée, inquiet / inquiète, surpris / surprise, déçu / déçue, fier / fière,
+       jaloux / jalouse, féliciter, consoler, félicitations, la nouvelle* (a lista do `04` 6.3; *se sentir* só em frase e nota: é cartão da A2 M4.1, decisão 136).
+     - M9.6 "Internet e redes" (`A2-30`, 12): *le réseau social, publier, la publication, le commentaire, commenter, s'abonner, le lien, télécharger, le mot de passe,
+       l'appli, l'écran, l'ordinateur* (a lista do `04` 6.3; *la pièce jointe* só em frase, cartão da A2 M7.5, decisão 181).
+     - **Conferência da regra 14** (A1 e A2, no `08 v2`, no `04`, no `08` e em `fr/content.js`): ***l'ordinateur*** e ***l'écran*** **não são cartão em nenhuma outra
+       unidade** (nem do A1 nem do A2) e não aparecem no conteúdo publicado: ficam na M9.6, **sem substituta**. Nenhuma das 47 palavras do M9 é cartão em outra
+       unidade; nenhuma aparece em `fr/content.js`.
+       - Só para conferir (não é a mesma palavra-cartão; vão para a lista da seção 7 do `08 v2`): *rappeler* (A2 M9.1) x *appeler* (A1 M8.6); *joindre* (A2 M9.1) x
+         *la pièce jointe* (A2 M7.5); *la ligne* (A2 M9.1) x *en ligne* (só frase da A2 M3.3); *s'excuser* (A2 M9.3) x a nota *Excusez-moi* (A1 M9.3);
+         *félicitations* x *féliciter* (os dois na A2 M9.5); *la publication* x *publier* e *le commentaire* x *commenter* (os dois pares na A2 M9.6); *la nouvelle*
+         (notícia, A2 M9.5) x o adjetivo *nouveau / nouvelle* (sem cartão no mapa); *Bon courage !* (nota da A2 M9.5) x *courageux* (A2 M1.4).
+191. **Notas novas do A2 M9 (aprovadas; texto só depois, aprovado pela dona)**:
+     - M9.3, nota de realidade (Real, alta): **abertura e fecho de cartas e e-mails**: *Cher / Chère* abre carta ou e-mail, formal ou informal; *Salut* para amigo;
+       fechos *Cordialement* x *Bien cordialement* x *Amicalement* (*cordialement* é cartão da A2 M3.3; aqui só a escolha do fecho conforme a relação).
+     - M9.5, nota de realidade (Real, alta): ***Félicitations !* e *Bon courage !***: o que dizer numa boa notícia e numa fase difícil. Junto do cartão *félicitations*.
+     - **Mantidas**: *Cher Paul, Chère Marie* na M9.3 (*cher / chère* = querido(a), Exp, alta, *breve*; o cartão *cher* = caro é do A1 M5.3); *se sentir* + adjetivo
+       na M9.5 (Exp, n/r). **Versões grátis mantidas** (coluna "Versão grátis" do `08 v2`, sem mudança de posição): a M9.1 abriga a da M9.2 (gancho *Il vient de sortir*,
+       avisando que não é "vir de"); a M9.3 abriga a da M9.4 (registro escrito *Pourriez-vous...*, com +1 linha da inversão com *-t-*). A M9.5 e a M9.6 não abrigam nenhuma.
+     - Com elas, a M9.3 tem 3 notas (abertura e fecho; *Cher Paul, Chère Marie*; a versão grátis da M9.4) e a M9.5 tem 2 (*se sentir*; *Félicitations !* e *Bon courage !*).
+192. **A2 M9 fechado**; segue o **M10** (Opinião, cultura e mundo).
+     - **Contas**: M9.1 11, M9.3 12, M9.5 12, M9.6 12 = **47 cartões**; A2 com **424 cartões** (414 novos + 10 publicados; −1 por *allô*, decisão 189). O tempo não muda:
+       M9 ~3h30 (4 unidades de vocabulário × ~40 min + 2 gramáticas × ~25 min; a M9.1 com 11 conta como unidade de até 12 palavras, como a A2 M3.1 com 10); A2 ~33h10.
+     - Notas do A2: ~62 (+2 da decisão 191).
+     - **Pendências limpas** (seção 7 do `08 v2`): sai o achado de *garée* (decidido pela 188); em "Listas de palavras a revisar pela dona", o A2 M9 entra como aprovado,
+       com *confirmer* (M9.3) a revisar pela dona; a lista "só para conferir" perde *allô* e *bisous* (decididos pelas 189 e 190) e ganha os pares da decisão 190.

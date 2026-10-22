@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 56 unidades, 344 cartões) e do A2 (10 módulos, 58 unidades, 425 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 56 unidades, 344 cartões) e do A2 (10 módulos, 58 unidades, 424 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
@@ -100,3 +100,10 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   *charges* (M8.1, alta) e ***la fête des voisins*** (M8.2, alta, fonte: a dona; sexta-feira no fim de maio, data variável); **A2 M1 a M8 fechados, segue o M9**
   (Comunicar e se relacionar). Totais sem mudança: A1 344; **A2 425** (415 + 10), ~33h10 (M8 ~3h30, 48 cartões). Achado na seção 7 do `08 v2`: *garée* na frase
   publicada *La voiture est garée devant la maison.* (A1 M7.5) antes do cartão *se garer* (A2 M8.4), a decidir.
+- **Decisões 188 a 192 no `12`**: *garée* na frase publicada *La voiture est garée devant la maison.* (A1 M7.5) **fica**, pela exceção formal da regra 11 do `15`
+  (expressão de uso comum; cartão *se garer* na A2 M8.4); o exemplo da nota *ni... ni* (A2 M8.5) passa a ***Ni bruit ni musique après 22h*** (*le bruit* é cartão da A2 M1.3);
+  a nota *la caution* (A2 M8.1) diz que no contrato o nome oficial é *le dépôt de garantie* e que *la caution* também é o fiador; ***allô* sem cartão** (só em frase; nota no
+  A1 M5.1), **A2 M9.1 com 11**; listas do A2 M9 aprovadas (M9.3 com ***confirmer*** no lugar de *bisous*, **a revisar pela dona**; M9.5 e M9.6 como no `04`; *l'ordinateur* e
+  *l'écran* sem conflito da regra 14); notas novas de abertura e fecho de cartas e e-mails (M9.3, Real, alta) e *Félicitations !* e *Bon courage !* (M9.5, Real, alta);
+  **A2 M1 a M9 fechados, segue o M10** (Opinião, cultura e mundo). Totais: A1 344; **A2 424** (414 + 10), ~33h10 (M9 ~3h30, 47 cartões). Na seção 7 do `08 v2` sai o
+  achado de *garée*.
