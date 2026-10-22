@@ -76,3 +76,8 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   (saem *le match, l'équipe, gagner*; entram *se détendre, la santé* e a 12ª palavra proposta ***l'alimentation***, a revisar pela dona); nota cultural nova na M4.2
   (*carte Vitale* e *médecin traitant*, Cult, alta); **A2 M1 a M4 fechados, segue o M5** (À mesa). Totais: A1 344; **A2 424** (414 + 10; 423 se a M4.5 ficar com 11),
   ~33h10 (M4 ~3h30, 47 cartões). Achado na seção 7 do `08 v2`: *la santé* já aparece em 2 frases publicadas do A1 (`A1-11`, `A1-19`).
+- **Decisões 171 a 175 no `12`**: *l'alimentation* aceita como 12ª palavra da A2 M4.5, renomeada **"Hábitos saudáveis"**; *pour la santé* nas frases publicadas do A1
+  (`A1-11`, `A1-19`) fica como **expressão fixa** (exceção formal da regra 11 do `15`; o cartão *la santé* é da A2 M4.5); listas do A2 M5 aprovadas (M5.1 e M5.3 como no `04`;
+  M5.5 com *tendre, juteux* no lugar de *toucher, le parfum*; *sentir* x *se sentir* com dois cartões e nota na M5.5); nota de intensidade (*assez, plutôt, trop*) vai para
+  a M5.1; notas novas na M5.1: *le pourboire / service compris* (Cult, alta) e pontos da carne (Exp, alta); **A2 M1 a M5 fechados, segue o M6** (Estudos e projetos).
+  Totais sem mudança: A1 344; **A2 424** (414 + 10), ~33h10 (M5 ~2h50, 36 cartões). Achado na seção 7 do `08 v2`: *délicieux, sucrée, cuit* em frases publicadas do A1.

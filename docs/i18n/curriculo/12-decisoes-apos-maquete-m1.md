@@ -552,3 +552,60 @@ Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovad
        *Tu devrais dormir plus*). Sem mudança de posição.
      - Pendências limpas: a lista da A2 M4.3 sai de "Listas de palavras a revisar pela dona" (seção 7 do `08 v2`); entram lá só a 12ª palavra da M4.5 e o achado de
        *la santé* nas frases publicadas do A1.
+
+---
+
+# Vigésima segunda rodada (2026-10-22): *l'alimentation*, *pour la santé* e revisão do A2 M5 "À mesa"
+
+Base: respostas da dona no corpo da conversa (decisão 148). Aplicado em `08-mapa-final-a1-a2-v2.md` (cabeçalho, seções 1, 2.1, 3.2, "Saúde", 7, 8 e Resumo), `15`
+(regras 11 e 14) e `00`. Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovados pela dona.
+
+171. **A2 M4.5: *l'alimentation* aceita como 12ª palavra** (aprovada pela dona; fecha a proposta da decisão 168). A M4.5 fica com 12 e o A2 com **424 cartões** (414 novos
+     + 10 publicados), que já contava com ela; some o "423 se a M4.5 ficar com 11". A unidade é **renomeada "Hábitos saudáveis"** (era "Esporte e hábitos saudáveis"):
+     o título diz o que a unidade ensina depois da decisão 168 (sem esporte de competição).
+     - ***pour la santé* nas frases publicadas do A1** (achado da decisão 168): *Les légumes sont bons pour la santé.* (`A1-11`, A1 M4.2) e *Le sport est bon pour la
+       santé.* (`A1-19`, A1 M9.1) **ficam como estão**, com *pour la santé* tratado como **expressão fixa** (o aluno entende o bloco "faz bem à saúde" pela tradução da
+       frase, sem cartão). O cartão *la santé* continua **só na A2 M4.5**, onde a palavra é ensinada e a expressão vira revisão natural.
+     - É uma **exceção formal** à regra "frases só com vocabulário visto" (regra 11 do `15`, decisão 145): **expressão fixa aceita pela dona** pode aparecer em frase antes
+       do cartão da palavra que a contém. Registrada no `15` dentro da regra 11 (sem regra nova solta). Vale só para expressão fixa com decisão da dona, caso a caso;
+       palavra solta continua sendo trocada.
+172. **A2 M5 "À mesa": listas aprovadas.**
+     - M5.1 "Reservar e pedir no restaurante" (`A2-13`, 12): *la réservation, le plat du jour, la spécialité, saignant, à point, bien cuit, le pourboire, délicieux,
+       fade, salé, sucré, épicé* (a lista do `04` 6.3, sem mudança).
+     - M5.3 "Explicar uma receita" (`A2-14`, 12): *la recette, couper, mélanger, cuire, ajouter, faire bouillir, la poêle, le four, la casserole, la cuillère,
+       l'ingrédient, la farine* (a lista do `04` 6.3, sem mudança).
+     - M5.5 "Descrever sabores" (`A2-15`, 12): *le goût, goûter, l'odeur, sentir* (cheirar), *doux / douce, amer / amère, acide, croustillant / croustillante, moelleux /
+       moelleuse, avoir l'air* + ***tendre*** e ***juteux*** (entram no lugar de *toucher* e *le parfum* do `04`: a unidade fica no gosto, na textura e no cheiro da comida).
+     - **Conferência da regra 14** (A1 e A2, no `08 v2`, no `04`, no `08-revisao-por-funcao-comunicativa.md` e em `fr/content.js`):
+       - *tendre* e *juteux*: não são cartão nem aparecem em nenhuma lista nem no conteúdo publicado (*tendre* só aparece dentro de *se détendre*, A2 M4.5, outro verbo).
+         Sem conflito.
+       - *sentir* (cheirar, A2 M5.5) x *se sentir* (sentir-se, cartão da A2 M4.1, chave publicada `A1-15-v9`): **mesma forma, verbos diferentes**, então ficam os dois
+         cartões (como *goûter* e *le goûter*, decisão 157). Na M5.5 entra uma **nota** (Exp, alta, *nova*, *breve*): *Ça sent bon.* (cheira bem) x *Je me sens bien.*
+         (eu me sinto bem); com o *se*, é como a pessoa está; sem o *se*, é o cheiro. A A2 M9.5 continua usando *se sentir* só em frase e nota (decisão 136).
+       - Lexemas diferentes da mesma família, com os dois cartões (vão para a lista "só para conferir" da seção 7 do `08 v2`): *la réservation* (A2 M5.1) x *réserver*
+         (A1 M8.3); *salé* x *le sel* e *sucré* x *le sucre* (A1 M4.2); *bien cuit* (ponto da carne, A2 M5.1) x *cuire* (A2 M5.3); *avoir l'air* (A2 M5.5) contém o
+         cartão *avoir* do A1. *le plat du jour* já estava na lista (A1 *le plat*).
+       - *trop* e *assez* (nota de intensidade da M5.1, decisão 173) não são cartão novo: os cartões do A1 são *trop de, assez de* + nome (A1 M4.3, quantidade); a nota
+         mostra o uso com adjetivo (*trop salé*), que já aparece na frase publicada *Le pantalon est trop grand.* (`A1-10`, A1 M5.3).
+     - **Achado para a dona** (palavras do A2 M5.1 em frases publicadas do A1, antes do cartão; mesmo caso da *la santé*, decisão 171): *délicieux* em *Le pain est
+       délicieux.* (`A1-5`, A1 M4.1, onde também há a nota nova *c'est bon, c'est délicieux*) e *Le poulet est délicieux ce soir.* (`A1-11`, A1 M4.2); *sucrée* em
+       *La pomme est rouge et sucrée.* (`A1-5`, vai com a chave para a A1 M5.4, decisão 136); *cuit* em *L'œuf est cuit.* (`A1-11`, A1 M4.2; o cartão do verbo é *cuire*,
+       A2 M5.3). Opções: trocar as frases na reescrita do A1 (regra 11) ou aceitar como exceção da decisão 171 (só se a dona considerar *c'est délicieux* uma fórmula).
+       Fica na seção 7 do `08 v2`, a decidir.
+173. **Nota de intensidade (*assez, plutôt, trop*) vai da M5.5 para a M5.1** (Exp, n/r, *nova*): serve para reclamar do prato (*C'est trop salé.*, *C'est un peu fade.*),
+     com as palavras da própria M5.1. Na M5.5 fica só a nota *de plus en plus de* + nome. A nota de intensidade não é versão grátis de nenhuma gramática (vem da `A2-g14`,
+     que virou nota, decisão 136 e `10`); a coluna "Versão grátis" não muda: a M5.1 continua abrigando a versão grátis da M5.2 (*en*, gancho *J'en voudrais deux*) e da
+     M8.6 (*ne... que*), a M5.3 a da M5.4 (gancho *Mélangez-les*) e a M5.5 nenhuma. **Ordem de aparição proposta na M5.1** (segue a cena do restaurante; a confirmar
+     ao escrever as lições): reservar e pedir (*les points de cuisson*, decisão 174; *J'en voudrais deux*; *ne... que*), reclamar do prato (intensidade) e pagar (*le
+     pourboire / service compris*, decisão 174).
+174. **Notas culturais novas do A2 M5.1 (aprovadas; texto só depois, aprovado pela dona)**:
+     - *le pourboire / service compris* (Cult, alta): na França a gorjeta é opcional; o serviço já vem incluído na conta (*service compris*). Junto do cartão *le pourboire*.
+     - **os pontos da carne** *bleu, saignant, à point, bien cuit* (Exp, alta): como pedir a carne e o que cada ponto quer dizer (*bleu* = quase crua, só em nota: *bleu* já é
+       cartão do A1 M2.3 como cor e aqui ganha sentido novo, regra 14; os três outros são cartões). Junto dos cartões *saignant, à point, bien cuit*.
+     - Com elas, a M5.1 tem 4 notas: *ne... que*, intensidade, *pourboire* e pontos da carne.
+175. **A2 M5 fechado**; segue o **M6** (Estudos e projetos).
+     - **Contas**: M5.1 12, M5.3 12, M5.5 12 = **36 cartões** (as trocas da M5.5 são uma por uma); A2 com **424 cartões** (414 novos + 10 publicados), sem mudança. O tempo
+       não muda: M5 ~2h50 (3 unidades de vocabulário × ~40 min + 2 gramáticas × ~25 min); A2 ~33h10.
+     - Notas do A2: ~49 (+2 culturais da M5.1, decisão 174; +1 nota *sentir* x *se sentir* na M5.5, decisão 172; a intensidade só muda de unidade).
+     - **Pendências limpas** (seção 7 do `08 v2`): sai a 12ª palavra da M4.5 de "Listas de palavras a revisar pela dona" (decisão 171); a linha "*la santé* em frases
+       publicadas do A1" vira decidida (exceção da decisão 171, nada a trocar); entra o achado de *délicieux, sucrée, cuit* (decisão 172).
