@@ -261,7 +261,10 @@ const BANK_STUB = (who, appKey) => {
       L('filtro padrão: Pendentes (2 itens, um com "Para conferir")', await ev(() => document.querySelectorAll('.rb-item').length === 2 && document.querySelectorAll('.rb-doubt').length === 1));
       L('aluna vinculada com 2 itens prontos (1 pendente sem dúvida + 1 aprovado sem cartão): aviso para gerar', await ev(() => !!document.querySelector('.rb-ready') && document.querySelector('.rb-ready').textContent.includes('2')));
       await page.click('.rb-tabs [data-t=desempenho]');
+      L('Desempenho: título "aula e casa" e nota explicando Na aula x Em casa', await ev(() => { const t = document.querySelector('#rb-stats summary span').textContent; const n = document.querySelector('#rb-stats .rb-stats-note'); return !/modo aula$/i.test(t) && /casa|home/i.test(t) && !!n && /Em casa|At home/.test(n.textContent); }));
       L('estatísticas do modo aula aparecem com os números', await ev(() => document.querySelector('#rb-stats .rb-tile b').textContent === '2'));
+      await ev(() => { document.getElementById('rb-stats').open = true; });
+      await shot('desempenho');
       await page.click('.rb-tabs [data-t=aulas]');
       L('Récap: botão para gerar com a data da próxima aula', await ev(() => /Gerar Récap da aula de/.test(document.querySelector('.rb-recap-actions .rb-btn-blue').textContent)));
       L('aba Aulas agrupa os itens por data da aula, a mais recente aberta', await ev(() => { const l = document.querySelectorAll('.rb-lesson'); return l.length >= 1 && l[0].open && l[0].querySelectorAll('.rb-item').length >= 1 && /Aula de/.test(l[0].querySelector('summary').textContent); }));
