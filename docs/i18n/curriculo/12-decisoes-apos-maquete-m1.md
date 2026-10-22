@@ -482,3 +482,35 @@ Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovad
 161. **Contas e registro.** As trocas da 157 são uma por uma: A2 continua com **425 cartões** (415 novos + 10 publicados) e os tempos não mudam (~33h10). A seção 7 do
      `08 v2` fica só com o que ainda é pendência (*en verre* e a lista "só para conferir"); as listas novas que receberam palavras de substituição entram em "Listas de
      palavras a revisar pela dona".
+
+---
+
+# Vigésima rodada (2026-10-22): palavras da deduplicação aprovadas e revisão do A2 M3
+
+Base: respostas da dona no corpo da conversa (decisão 148). Aplicado em `08-mapa-final-a1-a2-v2.md` (seções 1, 3.2, 4, 6, 7, 8 e Resumo), `15` (regra 14) e `00`.
+Nada aplicado ao site. Os textos das notas novas só se escrevem depois, aprovados pela dona.
+
+162. **Palavras novas da deduplicação (decisão 157) aprovadas**: A2 M4.3 *le malaise, saigner* (*se blesser* fica **só em frase**, *Il s'est blessé à la jambe.*);
+     M4.5 *faire de l'exercice, grignoter*; M8.1 *disponible*; M8.2 *passer l'aspirateur*; M8.4 *la vitesse*; M9.3 *souhaiter* (*cher / chère* = querido em nota);
+     M10.3 *le jour férié*; M10.4 *durable*. A frase publicada *La main est blessée.* (com a chave, vinda da A2 M4.1) **fica na M4.3** (fecha o "a decidir ao escrever o M4"
+     da 157). O resto da lista da M4.3 se revisa com o A2 M4.
+163. **A2 M3 "Objetos e consumo": listas aprovadas.**
+     - M3.1 (`A2-7`, 10): *l'objet, la forme, rond / ronde, carré / carrée, le métal, le plastique, léger / légère, lourd / lourde, pratique, servir à*. *en métal* e
+       *en plastique* viram frases com *en* + material; os cartões são *le métal* e *le plastique* (no A1 só aparecem na nota "Outros materiais", sem cartão). *en bois* e
+       *en verre* só em frase (regra 14: *le bois* é cartão do A1 M5.4 e *le verre* do A1 M4.5; "vidro" e *en verre* em nota na A1 M5.4, decisão 152). **Fecha a pendência
+       *en verre*** (seção 7 do `08 v2`) e tira *en métal, en plastique* da lista "só para conferir".
+     - M3.3 (`A2-8`, 12): *la livraison, livrer, le colis, rembourser, le remboursement, échanger, le ticket de caisse, abîmé / abîmée, marcher* (funcionar),
+       *la réclamation, le service client, cordialement* (*en ligne* vira frase).
+     - M3.5 (`A2-9`, 12): *d'occasion, le vide-grenier, vendre, jeter, garder, utile, inutile, gaspiller, le gaspillage, la marque, la qualité, la mode*.
+     - Conferido contra o A1 e as outras listas do A2 (regra 14): nenhuma dessas palavras já é cartão em outra unidade.
+     - **Contas**: a M3.1 passa de 11 (12 do `04` menos *en bois*) para **10**; A2 com **424 cartões** (414 novos + 10 publicados); M3 com 34 cartões. O tempo não muda
+       (a estimativa conta ~40 min por unidade de vocabulário de até 12 palavras): M3 continua ~3h15 e o A2 ~33h10.
+164. **Ordem das gramáticas do A2 M3**: M3.1 Descrever um objeto; M3.2 Gramática: relativos *qui, que, où*; M3.3 Comprar on-line e reclamar; **M3.4 Gramática:
+     pronomes demonstrativos e *lequel*** (versão grátis na M3.3, gancho *Je prends celui-ci*; a nota *ce, cette, ces* do A1 M5.3 é a base); M3.5 Opinar sobre o consumo;
+     **M3.6 Gramática: superlativo** (versão grátis na M3.5, gancho *le meilleur rapport qualité-prix*; o comparativo do A1, nota grátis da M7.2 e gramática da M7.6, é a
+     base). Os ids internos não mudam (`A2-g7` superlativo, `A2-g8` demonstrativos); só trocam as posições. Antes: superlativo na M3.4 (gancho *le moins cher*, M3.3) e
+     demonstrativos na M3.6 (gancho *celui-ci ou celui-là ?*, M3.5).
+165. **Notas culturais novas no A2 M3 (aprovadas; texto só depois)**: *les soldes* na M3.3 (Cult, alta): liquidações regulamentadas na França, duas por ano (inverno e
+     verão); *le vide-grenier* na M3.5, junto do cartão (Cult, alta): feira popular de troca e venda de usados. A nota de opinião completa do A2 (*je trouve que, à mon
+     avis*) **fica** na M3.5.
+166. **Revisão do A2 módulo a módulo**: M1, M2 e M3 fechados; segue o **M4**.

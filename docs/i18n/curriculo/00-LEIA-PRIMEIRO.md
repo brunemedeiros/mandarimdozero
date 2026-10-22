@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 56 unidades, 344 cartões) e do A2 (10 módulos, 58 unidades, 425 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar.** Mapa final do A1 (9 módulos, 56 unidades, 344 cartões) e do A2 (10 módulos, 58 unidades, 424 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
@@ -67,3 +67,8 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   M10.3 *le jour férié*; M10.4 *durable*); *goûter* e *le goûter* ficam os dois; listas do A2 M2 aprovadas (*voler* e *arriver* com os dois sentidos na M2.5) e notas novas
   do M2 (*le vol / voler*, *la grève*); **A2 M1 e M2 fechados, segue o M3**. Totais sem mudança: A1 344 cartões; A2 425 (415 + 10), ~33h10. Na seção 7 do `08 v2`
   ficam só *en verre* e a lista "só para conferir".
+- **Decisões 162 a 166 no `12`**: palavras de substituição da 157 aprovadas (*se blesser* só em frase; *La main est blessée.* fica na A2 M4.3); listas do A2 M3 aprovadas
+  (M3.1 com 10: *le métal, le plastique* com cartão, *en métal, en plastique, en bois, en verre* só em frase, o que fecha a pendência *en verre*); ordem nova das gramáticas
+  do A2 M3 (**M3.4 demonstrativos e *lequel***, versão grátis na M3.3; **M3.6 superlativo**, versão grátis na M3.5; ids iguais); notas culturais *les soldes* (M3.3) e
+  *le vide-grenier* (M3.5); **A2 M1, M2 e M3 fechados, segue o M4**. Totais: A1 344 cartões; **A2 424** (414 + 10), ~33h10 (M3 ~3h15, sem mudança). Na seção 7 do
+  `08 v2` fica só a lista "só para conferir" das palavras repetidas.

@@ -47,7 +47,8 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
     *en verre* em nota e frase na A1 M5.4); *d'habitude* (A1 M3.6) sai da A2 M1.1 (entra *le goûter*); *calme, bruyant, moderne, ancien* (A1 M7.2) não ganham cartão
     na A2 M1.3, só frase e diálogo; *sérieux* tem cartão só na A2 M1.4 (a A2 M7.2 usa em frase).
     **Deduplicação do A2** (decisão 157, 2026-10-22): o **primeiro cartão fica**, as outras unidades usam em frase ou nota e **cada unidade que perde um cartão ganha uma
-    palavra nova no lugar** (proposta a revisar pela dona, sem repetir cartão de outra unidade): *le quartier, la circulation, la nature* (A2 M1.3), *blessé / blessée* e
+    palavra nova no lugar** (sem repetir cartão de outra unidade; as palavras novas foram aprovadas pela dona, decisão 162): *le quartier, la circulation, la nature* (A2 M1.3), *blessé / blessée* e
     *les pompiers* (A2 M2.5), *propre* (A1 M7.2), *l'église* (A1 M6.3); *cher / chère* (querido) só em nota na A2 M9.3; *la forme* e *être en forme* sem cartão na A2 M4.5
     (nota). Lexemas diferentes com a mesma raiz ficam com os dois cartões (*goûter*, verbo, A2 M5.5; *le goûter*, lanche, A2 M1.1). Uma palavra com dois sentidos pode ser um
-    cartão só com os dois (*voler*: roubar e voar; *arriver*: chegar e acontecer, A2 M2.5; decisão 158). Ainda pendente: *en verre* (A2 M3.1), `08 v2` seção 7.
+    cartão só com os dois (*voler*: roubar e voar; *arriver*: chegar e acontecer, A2 M2.5; decisão 158). *en bois* e *en verre* ficam só em frase na A2 M3.1 (*le bois* e *le verre* são cartões do A1); os cartões de material da M3.1 são *le métal* e *le plastique*, com
+    *en métal, en plastique* em frase (decisão 163, fecha a pendência *en verre*).
