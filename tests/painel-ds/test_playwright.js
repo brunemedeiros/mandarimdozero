@@ -13,8 +13,8 @@ const server = http.createServer((req, res) => {
 });
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x).slice(0, 500) : ''); } };
-const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', botao: 'rgb(40, 121, 179)', ok: 'rgb(58, 115, 89)', erro: 'rgb(214, 38, 25)' }, dark: { marca: 'rgb(77, 169, 232)', botao: 'rgb(40, 121, 179)', ok: 'rgb(82, 180, 135)', erro: 'rgb(255, 107, 92)' } },
-              zh: { light: { marca: 'rgb(192, 35, 31)', botao: 'rgb(192, 35, 31)', ok: 'rgb(58, 115, 89)', erro: 'rgb(192, 35, 31)' }, dark: { marca: 'rgb(225, 82, 75)', botao: 'rgb(192, 35, 31)', ok: 'rgb(82, 180, 135)', erro: 'rgb(255, 107, 92)' } } };   // o zh passou a definir --error-red (claro = --seal-red, escuro = #FF6B5C)
+const COR = { fr: { light: { marca: 'rgb(52, 152, 214)', botao: 'rgb(40, 121, 179)', ok: 'rgb(58, 115, 89)', erro: 'rgb(214, 38, 25)' }, dark: { marca: 'rgb(77, 169, 232)', botao: 'rgb(40, 121, 179)', ok: 'rgb(58, 115, 89)', erro: 'rgb(255, 107, 92)' } },
+              zh: { light: { marca: 'rgb(192, 35, 31)', botao: 'rgb(192, 35, 31)', ok: 'rgb(58, 115, 89)', erro: 'rgb(192, 35, 31)' }, dark: { marca: 'rgb(225, 82, 75)', botao: 'rgb(192, 35, 31)', ok: 'rgb(58, 115, 89)', erro: 'rgb(255, 107, 92)' } } };   // o zh passou a definir --error-red (claro = --seal-red, escuro = #FF6B5C)
 
 (async () => {
   await new Promise(r => server.listen(0, '127.0.0.1', r));
