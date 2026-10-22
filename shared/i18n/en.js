@@ -3290,7 +3290,8 @@ window.I18N_CATALOG['en'] = {
   'rb.sOk': 'got it', // ALTA
   'rb.sReasons': 'Reasons for mistakes', // ALTA
   'rb.sTip': '{d}: {a} correct, {h} with help, {e} mistakes', // ALTA
-  'rb.sTitle': 'Class-mode performance', // ALTA
+  'rb.sNote': 'In class: answers given in Class mode. At home: answers from when the student reviews the cards on the site (recorded since 10/19/2026; anything earlier is not shown here).', // ALTA
+  'rb.sTitle': 'Performance (class and home)', // ALTA
   'rb.sTop': 'Most missed', // ALTA
   'rb.sTotal': 'answers', // ALTA
   'rb.sWrong': 'missed', // ALTA
