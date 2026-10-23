@@ -1,0 +1,6 @@
+/* "Sua resposta" dos exercícios de digitar da lição (typedAttemptHTML, shared/core/licao-feedback.js) e Conjugação do fr.
+   Comum a todos os sites (paridade fr x zh, item C2, 2026-10-23). --error-red é definido no :root de cada site. */
+.typed-attempt{ font-size:18px; line-height:1.8; overflow-wrap:anywhere; }
+/* Letra errada (vermelho) e letra que faltou (traço): usados na Conjugação e em "Sua resposta" dos exercícios de digitar. */
+.conj-x{ color:var(--error-red); background:color-mix(in srgb, var(--error-red) 16%, transparent); border-radius:3px; font-weight:800; text-decoration:underline wavy; text-decoration-thickness:1.5px; text-underline-offset:3px; }
+.conj-gap{ display:inline-block; width:.55em; height:1em; border-bottom:3px solid var(--error-red); vertical-align:-.15em; margin:0 1px; }

@@ -95,14 +95,19 @@ function carregarNovo() {
   const { bloco, declaracao, tem, linhas } = ferramentas(SRC, 'fr/app.js');
   // Os exercícios de digitar e o de gramática chamam o módulo direto: confere que o fr/app.js usa mesmo estas chamadas.
   const usoDigitar = linhas(/lessonTypedAnswerResult\(inputEl\.value, /);
-  const usoGram = linhas(/latinaFr\(\)\.avaliarComSeparadores\(given, forms\)/);
-  if (usoDigitar.length !== 2 || usoGram.length !== 1) throw new Error('chamadas do módulo mudaram no fr/app.js: ' + usoDigitar.length + '/' + usoGram.length);
+  // O exercício da unidade de gramática foi para shared/core/gramatica-cenario.js (paridade C6, 2026-10-23): o core chama
+  // LANG_HOOKS.grammarAnswerVerdict, e o gancho do fr (fr/lang-hooks.js) chama o módulo.
+  const usoGram = linhas(/LANG_HOOKS\.grammarAnswerVerdict\(given, forms\)/)
+    .concat(ler('fr/lang-hooks.js').split('\n').filter(l => /grammarAnswerVerdict: \(given, forms\) => latinaFr\(\)\.avaliarComSeparadores\(given, forms\)/.test(l)));
+  if (usoDigitar.length !== 2 || usoGram.length !== 2) throw new Error('chamadas do módulo mudaram no fr/app.js: ' + usoDigitar.length + '/' + usoGram.length);
   const opcional = (nome) => tem(nome) ? declaracao(nome) : '';
   const codigo = [
     bloco('accent-answer-logic'),
     declaracao('acceptedForms'),
     bloco('dictation-answer-logic'),
     bloco('accent-challenge-logic'),
+    // alinharLetras saiu do módulo latino para shared/core/licao-feedback.js (paridade C2, 2026-10-23): vem do core.
+    opcional('alinharLetras'),
     declaracao('conjAlign'),
     declaracao('conjFold'),
     opcional('FR_ACCENT_GROUPS'),

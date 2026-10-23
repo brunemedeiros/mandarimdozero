@@ -13,7 +13,8 @@ check('zh/app.js não compara resposta digitada com acceptedForms() cru (use acc
 const fr = lines('fr/app.js').filter(x => /\btypedAnswerVerdict\(/.test(x.l) && !/^\s*\/\//.test(x.l));
 check('fr/app.js usa typedAnswerVerdictForExpected (não typedAnswerVerdict direto)', fr.length === 0, fr.map(x => x.n));
 // 3) fr: acceptedForms() cru só na Conjugação (conjEvaluate e a lista de formas, que tem regra própria)
-const frAF = lines('fr/app.js').filter(x => /\bacceptedForms\(/.test(x.l) && !/^\s*\/\//.test(x.l));
+// typedAlmostKind(typed, acceptedForms(...)) só explica o "quase" (acento ou letra) e já trata o texto inteiro por dentro.
+const frAF = lines('fr/app.js').filter(x => /\bacceptedForms\(/.test(x.l) && !/^\s*\/\//.test(x.l) && !/typedAlmostKind\(/.test(x.l));
 check('fr/app.js: acceptedForms() cru só nas 2 funções da Conjugação', frAF.length <= 2, frAF.map(x => x.n));
 // 4) as telas de digitar do fr passam pelo avaliador da família latina
 const src = fs.readFileSync(path.join(ROOT, 'fr/app.js'), 'utf8');

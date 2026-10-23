@@ -56,6 +56,8 @@ try{
 <link rel="stylesheet" href="../shared/painel/painel-tokens.css">
 <link rel="stylesheet" href="../shared/painel/painel-componentes.css">
 <link rel="stylesheet" href="../shared/review-bank.css">
+<link rel="stylesheet" href="../shared/licao-feedback.css">
+<link rel="stylesheet" href="../shared/gramatica-cenario.css">
 <style>
 :root{
   /* Design tokens — inspirado no vermelho laca (印泥红) e dourado imperial chinês */
@@ -73,6 +75,8 @@ try{
   --paper-warm: #F3E6CE;    /* fundo secundário, cards */
   --paper-line: #E2CFA6;    /* linhas/bordas sutis */
   --jade: #3A7359;          /* verde jade — sucesso/acerto, contraste intencional ao vermelho */
+  /* Caixas de sucesso com texto/check (Continuar do acerto, ✓ de concluído): verde + branco, 5,6:1 nos dois temas (decisão da autora, 2026-10-22). */
+  --success-fill: #3A7359; --on-success-fill: #FFFFFF;
   --ink-soft: #5C4A3F;      /* texto secundário */
   --on-seal-red: #FFFFFF;   /* texto legível sobre fundo --seal-red — 6.0:1 no claro */
   /* Botões de nota da revisão: fundo próprio + texto --on-vivid (mesmo padrão do fr). Branco no claro (>=5.0:1), escuro no escuro (>=6.8:1). */
@@ -639,7 +643,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   width:22px; height:22px; border-radius:6px; background:var(--paper-warm); font-size:11px; font-weight:800;
   color:var(--ink-soft); display:flex; align-items:center; justify-content:center;
 }
-.hanzi-lesson-card.done .hanzi-lesson-num{ background: var(--jade); color:white; }
+.hanzi-lesson-card.done .hanzi-lesson-num{ background: var(--success-fill); color:var(--on-success-fill); }
 .hanzi-lesson-preview{ font-family: var(--font-hanzi); font-size:16px; line-height:1.3; color: var(--ink); }
 .hanzi-lesson-status{ font-size:10.5px; font-weight:700; color: var(--ink-soft); }
 
@@ -922,7 +926,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   width:22px; height:22px; border-radius:50%; flex-shrink:0; font-size:11px; font-weight:800;
   display:flex; align-items:center; justify-content:center;
 }
-.ub-lesson-dot.done{ background:var(--jade); color:white; }
+.ub-lesson-dot.done{ background:var(--success-fill); color:var(--on-success-fill); }
 .ub-lesson-dot.current{ border:2px solid var(--seal-red); color:var(--seal-red-dark); background: color-mix(in srgb, var(--seal-red) 9%, var(--paper)); }
 .ub-lesson-dot.locked{ border:1.5px dashed var(--paper-line); color: var(--ink-soft); }
 .ub-lesson-title{ font-size:13px; font-weight:600; }
@@ -1302,7 +1306,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
   display:block; width:100%; margin-top:18px;
 }
 /* zh não define --on-vivid no :root (e este bloco não toca :root): fallback --paper = branco-papel no claro, escuro no escuro. */
-button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid, var(--paper)); box-shadow: 0 3px 10px rgba(58,115,89,0.28); }
+button.correct-feedback-continue{ background: var(--success-fill); color: var(--on-success-fill); box-shadow: 0 3px 10px rgba(58,115,89,0.28); }
 /* Continuar do painel de erro: vermelho mais escuro e menos saturado que o
    .btn-primary padrão (par background+color revisado junto: texto branco
    fixo sobre fundo escuro, legível nos dois temas). */
@@ -1496,6 +1500,8 @@ button.wrong-feedback-continue{ background: var(--brand-fill); color: var(--on-b
 .feedback-phrase-trans{ margin-top:8px; padding-top:8px; border-top:1px dashed var(--paper-line); font-size:13.5px; font-style:italic; color: var(--ink-soft); }
 .opt-pinyin-sentence{ font-size:13px; color: var(--seal-red-dark); font-weight:700; margin-bottom:4px; }
 .opt-hanzi-sentence{ font-family: var(--font-hanzi); font-size:19px; line-height:1.5; }
+/* Opção do exercício de cenário (shared/gramatica-cenario.css): pinyin em cima do hanzi, como no "Frase completa". */
+.scenario-option-text .opt-pinyin-sentence, .scenario-option-text .opt-hanzi-sentence{ display:block; }
 
 /* ---------- Exercício de verdadeiro ou falso (uso real) ---------- */
 .tf-scene{
@@ -1640,7 +1646,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 }
 .unit-skill-item + .unit-skill-item{ border-top:1px solid var(--paper-line); }
 .unit-skill-check{
-  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--jade); color:white;
+  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--success-fill); color:var(--on-success-fill);
   font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px;
 }
 
@@ -1724,6 +1730,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .btn-gold:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--imperial-gold) 65%, #000); }
 .btn:disabled{ opacity:.45; cursor:not-allowed; }
 .btn-block{ width:100%; }
+.btn-sm{ padding:8px 14px; font-size:13px; border-radius:11px; text-decoration:none; --btn-depth:3px; --btn-depth-sm:2px; } /* usado por shared/ (deck-browser, friends); faltava no zh (2026-10-23) */
 
 /* ---------- Review / SRS flashcard ---------- */
 .review-empty{ text-align:center; padding: 60px 20px; }
@@ -2774,7 +2781,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   width:32px; height:32px; border-radius:50%; border:2px solid var(--paper-line); background: var(--paper);
   display:flex; align-items:center; justify-content:center; font-size:14px; color:white; font-weight:800;
 }
-.streak-day-item.done .streak-day-circle{ background: var(--jade); border-color: var(--jade); }
+.streak-day-item.done .streak-day-circle{ background: var(--success-fill); border-color: var(--success-fill); color: var(--on-success-fill); }
 .streak-day-item.today .streak-day-label{ color: var(--seal-red-dark); font-weight:800; }
 .streak-day-label{ font-size:11.5px; color: var(--ink-soft); font-weight:700; }
 .streak-headline{ font-size:23px; font-weight:800; margin:0 0 12px; line-height:1.3; }
@@ -2838,6 +2845,28 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .wizard-option-row.active{ border-color: var(--seal-red); }
 .wizard-option-icon{ font-size:22px; flex-shrink:0; }
 .wizard-option-label{ font-size:14.5px; font-weight:700; color: var(--ink); }
+
+/* Linhas de escolha do assistente de meta (nível, lições por dia), usadas por shared/wizard.js. Faltavam no zh e os
+   botões apareciam com o estilo padrão do navegador (achado da autora, 2026-10-23). Mesmo bloco do fr. */
+.wizard-level-list{ display:flex; flex-direction:column; position:relative; }
+.wizard-level-row{
+  display:flex; align-items:flex-start; gap:16px; background:none; border:none; cursor:pointer;
+  font-family: var(--font-body); text-align:left; padding:12px 10px; border-radius:12px; position:relative;
+}
+.wizard-level-row:hover{ background: var(--paper-warm); }
+.wizard-level-row.active{ background: var(--paper-warm); }
+.wizard-level-row:not(:last-child)::before{
+  content:''; position:absolute; left:29px; top:44px; bottom:-12px; width:2px; background: var(--paper-line);
+}
+.wizard-level-circle{
+  flex-shrink:0; width:40px; height:40px; border-radius:50%; background: var(--paper); border:2px solid var(--paper-line);
+  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color: var(--ink-soft);
+  z-index:1;
+}
+.wizard-level-row.active .wizard-level-circle{ background: var(--brand-fill); border-color: var(--brand-fill); color: var(--on-brand-fill); }
+.wizard-level-text{ display:flex; flex-direction:column; gap:2px; padding-top:6px; }
+.wizard-level-tier{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; }
+.wizard-level-desc{ font-size:14px; font-weight:700; color: var(--ink); line-height:1.35; }
 
 .wizard-day-row{ display:flex; justify-content:space-between; gap:6px; flex-wrap:wrap; }
 .wizard-day-chip{
@@ -3372,7 +3401,7 @@ body.hide-pinyin .prompt-pinyin{
 .week-day-label{ font-size:12px; font-weight:700; color:var(--ink-soft); padding-top:4px; border-top:1px solid var(--paper-line); }
 .week-day.is-today .week-day-label{ color:var(--ink); font-weight:800; border-top:2px solid var(--count-new); }
 .week-check{ width:30px; height:30px; border-radius:50%; border:1.5px dashed var(--paper-line); display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; }
-.week-check.is-done{ border:0; background:var(--count-review); color:var(--paper); }
+.week-check.is-done{ border:0; background:var(--success-fill); color:var(--on-success-fill); }
 .week-check-small{ width:20px; height:20px; font-size:11px; }
 .week-total{ font-size:12px; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums; }
 .week-total.is-zero{ color:var(--ink-soft); font-weight:600; }
@@ -4059,6 +4088,24 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   .cal{ padding:6px; } .cal-grid{ gap:2px; } .cal-cell{ min-height:52px; padding:2px; }
   .cal-chip{ font-size:0; padding:0; height:6px; border-radius:3px; } .cal-chip b{ display:none; }
   .cal-nav, .cal-today-btn{ min-height:44px; min-width:44px; }
+}
+/* Google Agenda -> site (117, shared/google-calendar.js) */
+.gcal-box > summary { cursor: pointer; list-style: revert; }
+.gcal-body { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.gcal-badge { display: inline-block; min-width: 1.4em; padding: 0 6px; border-radius: 999px; background: var(--brand-fill); color: var(--on-brand-fill); font-size: 0.75rem; text-align: center; }
+.gcal-oneway { font-weight: 700; }
+.gcal-error { color: var(--error-red); font-weight: 700; margin: 0; }
+.gcal-sources, .gcal-review { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.gcal-sources li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.gcal-sources select { max-width: 260px; }
+.gcal-actions, .gcal-review-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.gcal-review-item { border: 1px solid var(--border, rgba(0,0,0,.12)); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.gcal-review-head { display: flex; flex-direction: column; gap: 2px; }
+.gcal-review-actions select { flex: 1; min-width: 180px; }
+.gcal-remember { font-size: 0.85rem; display: flex; gap: 6px; align-items: center; }
+.gcal-counts, .gcal-account { margin: 0; }
+@media (max-width: 600px) {
+  .gcal-actions .btn, .gcal-review-actions .btn { min-height: 44px; }
 }
 /* Link de agenda (103): assinatura ICS em Aulas (professora e aluno) */
 .calendar-feed-box > summary { cursor: pointer; list-style: revert; }
@@ -4991,13 +5038,12 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <header class="p-cabecalho">
         <div>
           <h2 data-i18n="settings.title">Configurações</h2>
-          <span class="p-subtitulo" data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</span>
+          <span class="p-subtitulo" data-i18n="settings.subtitle">Suas informações e preferências de conta</span>
         </div>
       </header>
       <div class="p-seg cfg-abas" role="toolbar" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
         <button type="button" class="active" aria-pressed="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
         <button type="button" aria-pressed="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
-        <button type="button" aria-pressed="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
       </div>
       <div id="settings-geral-content" class="cfg-corpo">
         <article>
@@ -5049,6 +5095,9 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         </article>
       </div>
       <div id="settings-notifications-content" class="cfg-corpo" style="display:none;"></div>
+      <!-- ARQUIVADO (2026-10-23, decisão da autora): a aba "📦 Exportar" saiu de Configurações porque exportar para o Anki
+           esvaziaria a Revisão (que já tem Importar/Exportar no menu ⋯). Este painel fica escondido, sem aba que o abra, só para
+           o código de shared/anki-export.js seguir testável. Para trazer de volta: ver docs/historico/23-configuracoes-exportar-arquivado.md. -->
       <div id="settings-export-content" class="cfg-corpo" style="display:none;">
         <article>
           <header><h3 data-i18n="settings.export.title">Escolha o que exportar</h3></header>
@@ -5627,6 +5676,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/content-i18n.js"></script>
 <script src="../shared/card-variants.js"></script>
 <script src="content.js"></script>
+<script src="curriculum-changes.js"></script>
 <script src="stories.js"></script>
 <script src="hanzi-data.js"></script><script src="audio-manifest.js"></script>
 <script src="../shared/course-layer.js"></script>
@@ -5686,6 +5736,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/admin-flashcards.js"></script>
 <script src="../shared/teacher-class-logs.js"></script>
 <script src="../shared/admin-class-logs.js"></script>
+<script src="../shared/google-calendar.js"></script>
 <script src="../shared/teacher-support-materials.js"></script>
 <script src="../shared/teacher-materials-ui.js"></script>
 <script src="../shared/admin-support-materials.js"></script>
@@ -5737,6 +5788,9 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/core/revisao-decks.js"></script>
 <script src="../shared/core/exercicios-licao.js"></script>
 <script src="../shared/core/estado-trilha-desafios.js"></script>
+<script src="../shared/core/curriculo-progresso.js"></script>
+<script src="../shared/core/licao-feedback.js"></script>
+<script src="../shared/core/gramatica-cenario.js"></script>
 <script src="lang-hooks.js"></script>
 <script src="../shared/core/quase-iguais-simples.js"></script>
 <script src="../shared/core/quase-iguais-textos.js"></script>

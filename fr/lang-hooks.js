@@ -27,6 +27,16 @@ const LANG_HOOKS = {
   revisaoPool: () => REVISAO_CONJ_CHALLENGES,
   revisaoFallbackId: 'conj1',
   dailyExtra: () => ({ stars: 0, grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0, conjugationTenses: [] }),
+  // Dica do Verdadeiro ou Falso (trueFalseHint, shared/core/licao-feedback.js): chaves de texto deste site.
+  trueFalseHintKeys: { seen: 'fr.hint.trueFalseExplanation', generic: 'fr.hint.trueFalseGeneric' },
+  // "Sua resposta" (typedAttemptHTML): o fr compara o texto como foi digitado (o alinhamento já ignora maiúscula).
+  typedAttemptForm: (s) => s,
+  // Unidade de gramática e exercício de cenário (shared/core/gramatica-cenario.js, paridade C6):
+  // exercício de digitar da gramática: acento errado = 'almost'; hífen, espaço e apóstrofo contam como iguais
+  // ("soixante dix" = "soixante-dix"), só a grafia do separador nunca deve custar o ponto de quem sabe a palavra.
+  grammarAnswerVerdict: (given, forms) => latinaFr().avaliarComSeparadores(given, forms),
+  scenarioOptionHTML: (p) => p.f,
+  phraseAnswerHTML: (p) => `<strong>${p.f}</strong> ${audioBtnHTML(p.f)}`,
 // --- /E4 hooks ---
   // Família latina (shared/core/familias/latina.js): configuração do FRANCÊS. O português, quando o /pt existir,
   // terá a dele no pt/lang-hooks.js (rascunho em shared/core/familias/latina-idiomas.js). Ver docs/i18n/familia-latina-modulo.md.

@@ -1,0 +1,56 @@
+/* Unidade de gramática (tabela e exercício de digitar) e exercício de cenário: shared/core/gramatica-cenario.js.
+   Comum a todos os sites (paridade fr x zh, item C6, 2026-10-23). As cores vêm dos tokens do :root de cada site.
+   Cabeçalho da tabela = caixa com texto: --gram-table-head/--on-gram-table-head se o site definir (o fr mantém o roxo
+   de sempre); senão a cor da marca com o texto dela (--brand-fill/--on-brand-fill, regra "Caixas da marca com texto").
+   Os blocos da explicação (.gram-block*) ficam no index.html de cada site: são os mesmos dos cartões de conceito. */
+.gram-tables{ display:flex; gap:14px; flex-wrap:wrap; margin-top:18px; }
+.gram-table{ flex:1; min-width:160px; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); overflow:hidden; }
+.gram-table-title{ background: var(--gram-table-head, var(--brand-fill)); color: var(--on-gram-table-head, var(--on-brand-fill)); font-weight:800; text-align:center; padding:8px; font-size:14px; }
+.gram-table-row{ display:flex; justify-content:space-between; padding:8px 12px; border-top:1px solid var(--paper-line); font-size:13.5px; }
+.gram-table-pronoun{ color: var(--ink-soft); font-weight:700; }
+.gram-table-form{ font-weight:800; color: var(--seal-red-dark); }
+
+.gram-exercise{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:20px; text-align:center; margin-bottom:14px; }
+.gram-exercise-prompt{ font-size:19px; font-weight:700; margin-bottom:6px; }
+.gram-exercise-hint{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:14px; }
+.gram-exercise input{
+  width:100%; max-width:260px; text-align:center; font-size:16px; font-weight:700;
+  padding:10px 12px; border-radius:10px; border:2px solid var(--paper-line); background: var(--paper);
+  font-family: var(--font-body); color: var(--ink);
+}
+.gram-exercise input:focus{ outline:none; border-color: var(--imperial-gold); }
+.gram-exercise input:disabled{ opacity:.7; }
+.gram-exercise.ok input{ border-color: var(--jade); background: rgba(58,115,89,0.08); }
+.gram-exercise.almost input{ border-color: var(--imperial-gold); background: var(--gram-almost-bg, color-mix(in srgb, var(--imperial-gold) 10%, transparent)); }
+.gram-exercise.wrong input{ border-color: var(--error-red); background: rgba(214,38,25,0.08); }
+.gram-exercise .expected{ font-size:12.5px; color:var(--seal-red-dark); font-weight:700; min-height:16px; margin-top:8px; }
+
+/* ---------- Exercício de cenário ("o que você diria...") ---------- */
+.scenario-question{ font-size:16px; font-weight:800; margin-bottom:16px; line-height:1.4; }
+.scenario-scene{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:26px 20px; margin-bottom:20px; font-size:48px; line-height:1;
+}
+.scenario-flag{ display:inline-block; width:64px; height:43px; border-radius:5px; overflow:hidden; box-shadow:0 0 0 1px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.15); vertical-align:middle; }
+.scenario-flag svg{ display:block; width:100%; height:100%; }
+.scenario-options{ display:flex; flex-direction:column; gap:10px; }
+@media (min-width:600px){ .scenario-options{ display:grid; grid-template-columns:1fr 1fr; } }
+.scenario-option{
+  display:flex; align-items:center; gap:12px; background: var(--paper); border:2px solid var(--paper-line);
+  border-radius:12px; padding:14px 16px; cursor:pointer; font-family: var(--font-body);
+  text-align:left; transition: all .12s ease;
+}
+@media (hover:hover){ .scenario-option:hover:not(.disabled){ border-color: var(--hover-gold); background: color-mix(in srgb, var(--hover-gold) 14%, transparent); transform: translateY(-1px); } }
+.scenario-option-num{
+  flex-shrink:0; width:24px; height:24px; border-radius:50%; background: var(--paper-warm);
+  border:1px solid var(--paper-line); display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:800; color: var(--ink-soft);
+}
+.scenario-option-text{ font-size:14.5px; font-weight:700; color: var(--ink); }
+.scenario-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
+.scenario-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
+.scenario-option.disabled{ pointer-events:none; opacity:.6; }
+.scenario-option.disabled.correct, .scenario-option.disabled.incorrect{ opacity:1; }
+
+/* Contador "Frase X de Y" do exercício de gramática (o fr também usa na Conjugação). */
+.conj-progress{ font-size:12px; font-weight:800; color:var(--ink-soft); text-align:center; margin-bottom:12px; }

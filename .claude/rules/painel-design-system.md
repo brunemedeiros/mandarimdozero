@@ -41,4 +41,4 @@ mesma linha (`docs/historico/13-*`). Prévia antes do código continua valendo p
 Botão primário, aba/chip/segmento selecionado, contador e avatar usam `--brand-fill` (azul `#2879B3` no fr, vermelho `#C0231F` no zh)
 com `--on-brand-fill` (branco), nos dois temas; hover `--brand-fill-hover`. No painel: `--p-marca` = `--brand-fill`, `--p-texto-botao` =
 `--on-brand-fill`. O Banco de Revisão segue a mesma cor (`--rb-box`). `--seal-red` fica só para elementos sem texto (barras, bolinhas,
-interruptores) e `--seal-red-dark` para links e destaques. Ao criar uma caixa nova, rodar `tests/cores-marca/test_playwright.js`.
+interruptores) e `--seal-red-dark` para links e destaques. Verde de sucesso: `--success-fill` (`#3A7359`) com `--on-success-fill` (branco), igual nos dois temas (selo ok, checks); botões de nota da Revisão (Fácil) têm conjunto próprio e ficam de fora. Ao criar uma caixa nova, rodar `tests/cores-marca/test_playwright.js`.

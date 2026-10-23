@@ -95,7 +95,7 @@ let feedbackAudioCtx = null;
 function speakChineseAudioOnly(text, btnEl, isAutoplay){
   const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
   if (pregenFile){
-    playPregeneratedAudio(pregenFile, btnEl, isAutoplay);
+    playPregeneratedAudio(pregenFile, btnEl, isAutoplay, LANG_HOOKS.pregenRate());
     return;
   }
 
@@ -554,6 +554,10 @@ const STATE = {
   // professora. switchTab() zera ao trocar de aba. Nunca serializado.
   reviewSessionClassReview: false,
   cardVariants: {}, // progresso das palavras que trocam por idioma do site (shared/card-variants.js)
+  // Mudanças de currículo (shared/core/curriculo-progresso.js): arquivo do progresso de cartão da trilha que não existe
+  // mais (excluído, fundido ou órfão). { id: {...progresso, retiredAt, mergedInto?} }. Salvo no bloco; volta para o
+  // cartão se a chave voltar. Não conta em métrica, fila, notificação nem painel.
+  retiredStudyCards: {},
   // Fase D -- cache em memória da árvore de Decks do idioma atual, carregada
   // sob demanda por ensureDecksLoadedForReview() (só quando uma sessão
   // Deck-scoped é de fato solicitada). Nunca serializado, nunca uma
@@ -779,6 +783,8 @@ function serializeState(){
     cards: serializeCardsForSave(STATE.cards),
     hanziCards: STATE.hanziCards,
     cardVariants: STATE.cardVariants,
+    // Mudanças de currículo (shared/core/curriculo-progresso.js): arquivo de aposentados, versão e id da lição atual.
+    ...curriculumSaveFields(),
     unitProgress: STATE.unitProgress,
     xp: STATE.xp,
     streak: STATE.streak,
@@ -809,14 +815,18 @@ function serializeState(){
 
 function applySerializedState(data){
   if (!data) return;
-  if (data.cards) {
+  // Mudanças de currículo (shared/core/curriculo-progresso.js, igual em todos os sites): antes de aplicar o progresso,
+  // leva o save através de zh/curriculum-changes.js (fusões, aposentados e órfãos para o arquivo, volta de arquivado,
+  // unidades fundidas). Idempotente; sem mudança nenhuma não altera nada.
+  const cur = curriculumLoadPrepare(data);
+  if (cur.hasCards) {
     // K2-C: cards da trilha só recebem a whitelist de progresso; ver
     // mergeSavedCards (shared/study-trail-model.js).
-    mergeSavedCards(STATE.cards, data.cards);
+    mergeSavedCards(STATE.cards, cur.cards);
   }
   // Hanzi: só o progresso volta (o texto vem da camada do curso); ver mergeSavedHanziCards.
   if (Array.isArray(data.hanziCards)) mergeSavedHanziCards(STATE.hanziCards, data.hanziCards);
-  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(data.cardVariants);
+  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(cur.cardVariants);
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
   // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
   // Roda pra TODO cartão, vindo de save antigo ou recém-criado, garantindo
@@ -825,7 +835,7 @@ function applySerializedState(data){
   STATE.hanziCards.forEach(migrateCardToFSRS);
   if (typeof refreshStudyCardTexts === 'function') refreshStudyCardTexts();
   if (data.unitProgress) {
-    Object.assign(STATE.unitProgress, data.unitProgress);
+    Object.assign(STATE.unitProgress, cur.unitProgress);
     // Saves de antes das lições (Modelo B) não têm lessonIdx/lessonMisses --
     // sem isso, um progresso salvo antigo sobrescreveria os defaults com
     // `undefined`, quebrando freshAcquisitionState pra quem já tinha conta.
@@ -833,7 +843,9 @@ function applySerializedState(data){
       if (typeof p.lessonIdx !== 'number') p.lessonIdx = 0;
       if (!p.lessonMisses) p.lessonMisses = {};
     });
+    curriculumLoadReconcileUnits();
   }
+  curriculumLoadStampReleased();
   if (typeof data.xp === 'number') STATE.xp = data.xp;
   if (typeof data.streak === 'number') STATE.streak = data.streak;
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
@@ -843,7 +855,10 @@ function applySerializedState(data){
   if (data.dailyMinutesLog) Object.assign(STATE.dailyMinutesLog, data.dailyMinutesLog);
   if (data.dailyLessonsLog) Object.assign(STATE.dailyLessonsLog, data.dailyLessonsLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
-  if (data.reviewRecords && typeof data.reviewRecords === 'object') STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
+  if (data.reviewRecords && typeof data.reviewRecords === 'object'){
+    STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
+    if (cur.hardSeenIds) STATE.reviewRecords.hardSeenIds = cur.hardSeenIds;
+  }
   if (data.reviewTimeStats && typeof data.reviewTimeStats === 'object') STATE.reviewTimeStats = { cards: Number(data.reviewTimeStats.cards) || 0, ms: Number(data.reviewTimeStats.ms) || 0 };
   if (data.hanziLessonProgress) Object.assign(STATE.hanziLessonProgress, data.hanziLessonProgress);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
@@ -894,10 +909,12 @@ const REVIEW_REMINDER_THRESHOLD = 15;
 
 document.getElementById('review-reminder-dismiss-btn').addEventListener('click', () => {
   document.getElementById('review-reminder-banner').style.display = 'none';
+  markReviewReminderSeen(); // fechou = viu: grava o dia agora
 });
 
 document.getElementById('review-reminder-cta-btn').addEventListener('click', () => {
   document.getElementById('review-reminder-banner').style.display = 'none';
+  markReviewReminderSeen(); // clicou = viu: grava o dia antes de sair da tela
   switchTab('review');
   openReviewSession('flashcard');
 });
@@ -1040,7 +1057,7 @@ function buildSearchIndex(){
   recalculateUnlockedUnits();
   const index = [];
   UNITS.forEach(u => {
-    u.vocab.forEach(v => {
+    (u.vocab || []).forEach(v => {
       index.push({
         pinyin: v.p, hanzi: v.c, trans: v.t,
         unitId: u.id, unitTitle: u.title, source: 'vocab',
@@ -1050,7 +1067,7 @@ function buildSearchIndex(){
     // Frases-modelo e diálogo também entram no índice -- algumas palavras
     // (principalmente gramaticais, como 很/吗/了) só aparecem em frases,
     // nunca como entrada isolada de vocabulário.
-    u.phrases.forEach(p => {
+    (u.phrases || []).forEach(p => {
       index.push({
         pinyin: p.p, hanzi: p.c, trans: p.t,
         unitId: u.id, unitTitle: u.title, source: 'phrase',
@@ -1231,7 +1248,7 @@ function buildUnitBlock(u){
   if (state === 'current') block.setAttribute('aria-current', 'step');
 
   const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>`
-    : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="${t('trail.unit.skippedTitle')}">⏭ 跳过</span>` : '';
+    : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="${t('trail.unit.skippedTitle')}">${t('trail.unit.skippedBadge')}</span>` : '';
   const chevronHTML = hasLessons ? `<button class="ub-chevron" type="button" aria-label="${t('zh.path.unit.expandLessons')}">▾</button>` : '';
   // Só lições JÁ concluídas (e que não são o Ponto de verificação, cujo
   // reteste tem efeitos colaterais bem mais pesados -- desbloqueio de
@@ -1591,6 +1608,7 @@ const STEP_DEFS = [
 // um passo "Dica de uso" vazio. Unidades ainda não migradas continuam com o
 // passo normalmente (mesmo comportamento de antes).
 function currentStepDefs(u){
+  if (isGrammarUnit(u)) return getStepDefsGrammar(); // unidade de gramática: shared/core/gramatica-cenario.js
   if (isLessonUnit(u)){
     const lesson = currentLesson(u);
     if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: t('trail.checkpoint.title') }];
@@ -1653,6 +1671,12 @@ const STEP_STATE = {
   // acerto (ver showCorrectFeedbackPanel).
   comboCount: 0,
   exerciseAnswered: false,
+  // Unidade de gramática (shared/core/gramatica-cenario.js): bloco da explicação e exercício atuais.
+  explanationIndex: 0,
+  explanationUnitId: null,
+  gramExerciseUnitId: null,
+  gramExerciseIndex: 0,
+  gramExerciseScore: 0,
   onChallengesScreen: false,
   // Fila de cartões de conceito (explicação contextual) tocando AGORA, por
   // cima do passo normal (vocab/diálogo) -- ver runConceptQueueThen. Vazia
@@ -1715,9 +1739,12 @@ function openUnitDetail(unitId){
   document.getElementById('unit-detail-wrap').style.display = 'block';
 
   const u = UNITS.find(x => x.id === unitId);
-  document.getElementById('ud-eyebrow').textContent = t('zh.path.unit.eyebrow', { id: u.id, total: UNITS.length });
+  // Unidade de gramática não mostra numeração (como no fr): só "Gramática".
+  document.getElementById('ud-eyebrow').textContent = isGrammarUnit(u) ? t('trail.eyebrow.grammar') : t('zh.path.unit.eyebrow', { id: u.id, total: UNITS.length });
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
+  // Unidade de gramática não tem vocabulário/frases/diálogo para o "Manual da unidade": o botão some nela.
+  { const manualBtn = document.getElementById('unit-manual-btn'); if (manualBtn) manualBtn.style.display = isGrammarUnit(u) ? 'none' : ''; }
   const langNotice = document.getElementById('ud-lang-notice');
   if (langNotice){
     const untranslated = !CONTENT_I18N.isUnitTranslated(u.id);
@@ -1757,6 +1784,8 @@ document.getElementById('kbd-shortcuts-modal').addEventListener('click', (e) => 
 // sem exercícios) — usado no modal "Manual da unidade" (📖 dentro do painel
 // de dicas de cada lição).
 function renderUnitSummaryHTML(u){
+  // Unidade de gramática (shared/core/gramatica-cenario.js) não tem vocabulário, frases nem diálogo: o manual dela é a própria explicação.
+  if (isGrammarUnit(u)) return '';
   const vocabHTML = u.vocab.map(v => `
     <div class="vocab-row vocab-row-readonly">
       <div class="pinyin">${v.p}</div>
@@ -1834,7 +1863,7 @@ function renderStepProgress(){
     // da lição atual (cada lição já é sua própria mini-sessão, com sua
     // própria tela de conclusão) -- não da unidade inteira, que é como o
     // motor antigo de blocos calculava.
-    const totalWords = (isLessonUnit(u) ? (acq.blocks[0] || []).length : u.vocab.length) || 1;
+    const totalWords = (isLessonUnit(u) ? (acq.blocks[0] || []).length : (u.vocab || []).length) || 1;
     const wordsBeforeBlock = acq.blocks.slice(0, acq.blockIdx).flat().length;
     const curBlockSize = (acq.blocks[acq.blockIdx] || []).length;
 
@@ -1849,6 +1878,9 @@ function renderStepProgress(){
     intraStepFraction = Math.min(1, (wordsBeforeBlock + curBlockSize * withinBlock) / totalWords);
   } else if (stepKey === 'exercises' || stepKey === 'checkpointExercises'){
     intraStepFraction = STEP_STATE.exerciseList.length ? STEP_STATE.exerciseIndex / STEP_STATE.exerciseList.length : 0;
+  } else {
+    const gramFraction = grammarStepFraction(u, stepKey); // shared/core/gramatica-cenario.js
+    if (gramFraction != null) intraStepFraction = gramFraction;
   }
 
   const pct = ((STEP_STATE.currentStep + intraStepFraction) / stepCount) * 100;
@@ -1881,13 +1913,14 @@ function buildExerciseHint(ex, unit){
   if (ex.format === 'fullsentence'){
     return t('zh.hint.fullsentence');
   }
+  if (ex.format === 'scenario'){
+    return scenarioHint(); // shared/core/gramatica-cenario.js
+  }
   if (ex.format === 'cloze'){
     return t('zh.hint.cloze');
   }
   if (ex.format === 'trueFalse'){
-    return unit.usageNote
-      ? t('zh.hint.trueFalseUsage', { title: unit.usageNote.title })
-      : t('zh.hint.trueFalseDefault');
+    return trueFalseHint(unit); // shared/core/licao-feedback.js (cita o conceito já visto, como no fr)
   }
   return null;
 }
@@ -2045,8 +2078,9 @@ function finishCurrentLesson(u){
     return;
   }
 
-  const total = STEP_STATE.exerciseList.length;
-  const scorePct = total ? Math.round((STEP_STATE.exerciseScore / total) * 100) : 100;
+  // Unidade de gramática pontua pelos exercícios dela (shared/core/gramatica-cenario.js).
+  const { total, correct } = unitFinalScore(u);
+  const scorePct = total ? Math.round((correct / total) * 100) : 100;
   // XP real da UNIDADE (Fase 4): snapshot ANTES de markUnitCompleted (que
   // concede os +25 de bônus) -- skipToast:true porque quem chega aqui vai
   // ver a tela própria de "Unidade concluída!" logo abaixo, não o toast
@@ -2090,8 +2124,12 @@ function renderStep(){
   // Na micro-checagem do diálogo não há "Voltar": voltar ao diálogo
   // deixaria copiar as respostas.
   const showBack = stepKey !== 'dialogueCheck' && (STEP_STATE.currentStep > 0
-    || (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro' && (STEP_STATE.acq.blockIdx > 0 || STEP_STATE.acq.introIdx > 0)));
+    || (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro' && (STEP_STATE.acq.blockIdx > 0 || STEP_STATE.acq.introIdx > 0))
+    || grammarShowBack(stepKey));
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
+
+  // Unidade de gramática: passos próprios (shared/core/gramatica-cenario.js).
+  if (renderGrammarUnitStep(u, stepKey, contentEl, nextBtn)) return;
 
   if (stepKey === 'vocab'){
     if (STEP_STATE.acq.unitId !== u.id || (isLessonUnit(u) && STEP_STATE.acq.lessonIdx !== currentLessonIdx(u.id))){
@@ -2511,6 +2549,8 @@ document.getElementById('step-back-btn').addEventListener('click', () => {
     }
   }
 
+  if (grammarStepBack(stepKey)) return; // explicação da unidade de gramática: volta um bloco
+
   if (STEP_STATE.currentStep > 0){
     STEP_STATE.currentStep -= 1;
     renderStep();
@@ -2585,6 +2625,9 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
     }
     return;
   }
+
+  // Explicação da unidade de gramática: avança um bloco (shared/core/gramatica-cenario.js).
+  if (grammarStepNext(u, stepKey)) return;
 
   // Saindo do diálogo: mostra os conceitos cujo gatilho só existe em
   // contexto (a palavra em si não é vocabulário novo, só aparece na fala)
@@ -2665,7 +2708,15 @@ function buildExerciseSet(unit){
   // Só frases com blocks definidos entram como exercício de ordenar — proteção
   // defensiva caso alguma frase futura seja adicionada sem essa segmentação.
   const phrasesWithBlocks = (unit.phrases || []).filter(p => p.blocks && p.blocks.length >= 2);
-  const reorderExercises = phrasesWithBlocks.map(p => {
+  // Cenário ("o que você diria?", shared/core/gramatica-cenario.js): mesma regra do fr (frase ímpar com `scenario`,
+  // pelo menos 3 frases com cenário na unidade). Hoje nenhuma frase do zh tem `scenario`: nada muda nem é sorteado.
+  const phrasesWithScenario = (unit.phrases || []).filter(p => p.scenario);
+  const scenarioExercises = [];
+  const reorderExercises = phrasesWithBlocks.filter((p, i) => {
+    const scenarioEx = buildScenarioExercise(p, i, phrasesWithScenario);
+    if (scenarioEx) scenarioExercises.push(scenarioEx);
+    return !scenarioEx;
+  }).map(p => {
     const distractorCount = reorderDistractorCount(unit, p.blocks);
     const distractorBlocks = buildReorderDistractors(unit, p.blocks, distractorCount);
     return { format: 'reorder', phrase: p, shuffledBlocks: shuffle([...p.blocks, ...distractorBlocks]) };
@@ -2706,7 +2757,7 @@ function buildExerciseSet(unit){
 
   const fullSentenceExercises = buildFullSentenceExercises(unit);
 
-  return shuffle([...vocabExercises, ...cappedReorderExercises, ...trueFalseExercises, ...clozeExercises, ...fullSentenceExercises]);
+  return shuffle([...vocabExercises, ...cappedReorderExercises, ...scenarioExercises, ...trueFalseExercises, ...clozeExercises, ...fullSentenceExercises]);
 }
 
 // ---------- Exercício "Frase completa" — PT → escolher entre 4 frases em hanzi ----------
@@ -2719,7 +2770,7 @@ function buildCumulativeVocabPool(unit){
   const idx = UNITS.findIndex(u => u.id === unit.id);
   const priorUnits = UNITS.slice(0, idx + 1); // unidade atual + todas anteriores
   const pool = [];
-  priorUnits.forEach(u => u.vocab.forEach(v => pool.push(v)));
+  priorUnits.forEach(u => (u.vocab || []).forEach(v => pool.push(v))); // unidade de gramática não tem vocab
   return pool;
 }
 
@@ -2996,6 +3047,8 @@ function renderExerciseStep(){
     renderReorderExercise(ex, contentEl, nextBtn, total);
   } else if (ex.format === 'fullsentence'){
     renderFullSentenceExercise(ex, contentEl, nextBtn, total);
+  } else if (ex.format === 'scenario'){
+    renderScenarioExercise(ex, contentEl, nextBtn, total); // shared/core/gramatica-cenario.js
   } else if (ex.format === 'trueFalse'){
     renderTrueFalseExercise(ex, contentEl, nextBtn, total);
   } else if (ex.format === 'cloze'){
@@ -3058,6 +3111,7 @@ function clozeFeedbackDetailHTML(ex, withCorrect){
 function answerExplanationHTML(ex){
   if (ex && ex.format === 'cloze') return clozeFeedbackDetailHTML(ex, true);
   if (ex && ex.format === 'fullsentence') return phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t);
+  if (ex && ex.format === 'scenario' && ex.phrase) return scenarioExplanationHTML(ex); // shared/core/gramatica-cenario.js
   if (ex && ex.phrase){
     const phraseHTML = phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t);
     return phraseHTML + (noteOrConceptReviewHTML() || '');
@@ -3310,7 +3364,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   const inputEl = document.getElementById('vocab-type-input');
   inputEl.focus();
   wirePinyinTonePicker(contentEl.querySelector('.pinyin-tone-picker'), inputEl);
-  const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+  const strip = pinyinAnswerCompareForm;
 
   function lockInputs(){
     inputEl.disabled = true;
@@ -3319,7 +3373,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
-  function finish(isCorrect, toneOnly){
+  function finish(isCorrect, toneOnly, typedRaw){
     STEP_STATE.exerciseAnswered = true;
     playFeedbackSound(isCorrect);
     lockInputs();
@@ -3337,7 +3391,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       // A resposta certa já aparece dentro do próprio painel de resultado
       // (answerExplanationHTML mostra ex.item.p) -- sem repetir aqui como um
       // texto solto antes do painel, num estilo diferente.
-      showWrongAnswerPanel(contentEl, ex, { toneOnly });
+      showWrongAnswerPanel(contentEl, ex, { toneOnly, attemptHTML: typedAttemptHTML(typedRaw, ex.item.p) });
     }
   }
 
@@ -3351,7 +3405,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     const typedAll = typedVariants(inputEl.value, ex.item.p).map(strip), typed = typedAll[0];
     const forms = acceptedFormsTyped(ex.item.p);
     const ok = forms.some(form => typedAll.includes(strip(form)));
-    finish(ok, !ok && isToneOnlyMiss(typed, forms, strip));
+    finish(ok, !ok && isToneOnlyMiss(typed, forms, strip), inputEl.value);
   });
 
   wireDontKnowButton(contentEl, ex, () => {
@@ -3361,6 +3415,19 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   });
 }
 
+
+// Forma em que os exercícios de digitar do zh comparam o pinyin: numerado vira marca de tom, minúsculas, sem
+// pontuação. A marcação de "Sua resposta" (typedAttemptHTML, via LANG_HOOKS.typedAttemptForm) usa a mesma forma,
+// para as letras em vermelho concordarem com o veredito.
+function pinyinAnswerCompareForm(s){
+  return normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+}
+// O que "Sua resposta" mostra: a mesma forma, mas mantendo maiúsculas como a aluna digitou (o alinhamento das letras
+// já ignora maiúscula, como o veredito). Pinyin numerado aparece convertido ("ni3" -> "nǐ") e a pontuação sai,
+// porque o veredito também a ignora: assim nada fica vermelho sem ter contado como erro.
+function pinyinAttemptDisplayForm(s){
+  return convertNumberedPinyin(String(s || '')).normalize('NFC').replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+}
 
 // BEGIN pinyin-answer-logic (extraído literalmente por zh/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
 // ---------- Comparação de pinyin digitado (preserva tom) ----------
@@ -3547,7 +3614,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
-  function finish(isCorrect, toneOnly){
+  function finish(isCorrect, toneOnly, typedRaw){
     STEP_STATE.exerciseAnswered = true;
     playFeedbackSound(isCorrect);
     revealBlank(isCorrect ? 'ok' : 'wrong');
@@ -3558,7 +3625,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       addStudyMinutes();
       setTimeout(() => showCorrectFeedbackPanel(contentEl, clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl, ex, { toneOnly }), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex, { toneOnly, attemptHTML: typedAttemptHTML(typedRaw, ex.correctBlock.p) }), 500);
     }
   }
 
@@ -3576,11 +3643,11 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     document.getElementById('cloze-verify-btn').addEventListener('click', () => {
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
-      const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+      const strip = pinyinAnswerCompareForm;
       const typedAll = typedVariants(inputEl.value, ex.correctBlock.p).map(strip), typed = typedAll[0];
       const forms = acceptedFormsTyped(ex.correctBlock.p);
       const ok = forms.some(form => typedAll.includes(strip(form)));
-      finish(ok, !ok && isToneOnlyMiss(typed, forms, strip));
+      finish(ok, !ok && isToneOnlyMiss(typed, forms, strip), inputEl.value);
     });
   } else {
     contentEl.querySelectorAll('.cloze-option').forEach(btn => {
@@ -3785,9 +3852,9 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     );
     playFeedbackSound(isCorrect);
 
-    slotsEl.querySelectorAll('.reorder-slot').forEach(slot => {
-      slot.classList.add(isCorrect ? 'correct' : 'incorrect');
-    });
+    // Acerto: tudo verde. Erro: só os blocos fora do lugar ficam vermelhos, os que já estavam na posição certa
+    // ficam verdes (dica de onde errou), como no fr. shared/core/licao-feedback.js
+    markReorderSlots(slotsEl, chosenSequence, ex.shuffledBlocks, correctOrder, isCorrect);
     // Com a frase completa, todo bloco já foi usado (visibility:hidden --
     // preserva a posição pra "desfazer" clicando num slot, ver renderSlots
     // acima) -- mas essa desfeita não existe mais depois de respondido, então
@@ -3808,8 +3875,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       // frase (isca); amarelo sublinhado = bloco certo no lugar errado.
       const attemptHTML = `<div class="reorder-attempt">${chosenSequence.map((blockIdx, pos) => {
         const block = ex.shuffledBlocks[blockIdx];
-        const cls = block === correctOrder[pos] ? 'ok' : (correctOrder.includes(block) ? 'near' : 'bad');
-        return `<span class="reorder-attempt-w ${cls}"><div class="pinyin">${block.p}</div><div class="hanzi">${block.c}</div></span>`;
+        return `<span class="reorder-attempt-w ${reorderBlockStatus(block, pos, correctOrder)}"><div class="pinyin">${block.p}</div><div class="hanzi">${block.c}</div></span>`;
       }).join('')}</div>`;
       setTimeout(() => showWrongAnswerPanel(contentEl, ex, { attemptHTML }), 500);
     }
@@ -4007,7 +4073,7 @@ function renderSpeedReview(){
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
         <h3>${t('review.speed.gameOver')}</h3>
-        <div class="score-num">${SPEED_STATE.score} pts</div>
+        <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
         <p>${tp('review.speed.answered', SPEED_STATE.index === 1 ? 1 : 2, { n: SPEED_STATE.index })}</p>
         <p class="review-record-line">${speedIsRecord ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
         <div class="review-complete-actions">
@@ -4053,7 +4119,7 @@ function renderSpeedReview(){
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
         <h3>${t('review.complete.title')}</h3>
-        <div class="score-num">${SPEED_STATE.score} pts</div>
+        <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
         <p class="review-record-line">${speedIsRecord2 || speedStreakRecord2 ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
@@ -4075,7 +4141,7 @@ function renderSpeedReview(){
   el.innerHTML = `
     <div class="speed-header">
       <div class="speed-hearts">${heartsHTML}</div>
-      <div class="speed-score">${SPEED_STATE.score} pts</div>
+      <div class="speed-score">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
     </div>
     <div class="speed-timer-track"><div class="speed-timer-fill" id="speed-timer-fill" style="width:100%"></div></div>
     <div class="speed-prompt">
@@ -4199,7 +4265,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     const inputEl = mountEl.querySelector('#cloze-review-input');
     inputEl.focus();
     wirePinyinTonePicker(mountEl.querySelector('.pinyin-tone-picker'), inputEl);
-    const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+    const strip = pinyinAnswerCompareForm;
     function verify(){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
@@ -4285,7 +4351,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     const inputEl = mountEl.querySelector('#cloze-review-input');
     inputEl.focus();
     wirePinyinTonePicker(mountEl.querySelector('.pinyin-tone-picker'), inputEl);
-    const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+    const strip = pinyinAnswerCompareForm;
     function verify(){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
@@ -4357,7 +4423,9 @@ function renderReviewViewInner(){
       saveState();
     }
     maybeShowStreakCelebration();
-    trackEvent('lesson_complete', 'flashcard_review', { count: STATE.reviewQueue.length });
+    // unitId da sessão de uma unidade, igual ao fr (o painel da professora deriva daí; auditoria de paridade C7).
+    trackEvent('lesson_complete', 'flashcard_review', Object.assign({ count: STATE.reviewQueue.length },
+      STATE.reviewSessionUnitFilter ? { unitId: STATE.reviewSessionUnitFilter } : {}));
     // Fase 6 do projeto de reorganização: terminar a revisão nunca deve
     // convidar a repetir a mesma bateria -- "Voltar" leva pra trilha,
     // "Praticar mais" leva pra PRATICAR (Combinar/Palavras difíceis), não
@@ -5207,12 +5275,12 @@ function currentHanziLesson(){
 function findHanziAppearances(char, limit){
   const results = [];
   UNITS.forEach(u => {
-    u.vocab.forEach(v => {
+    (u.vocab || []).forEach(v => {
       if (v.c.includes(char) && !results.some(r => r.c === v.c)){
         results.push({ p: v.p, c: v.c, t: v.t });
       }
     });
-    u.phrases.forEach(p => {
+    (u.phrases || []).forEach(p => {
       if (p.c.includes(char) && !results.some(r => r.c === p.c)){
         results.push({ p: p.p, c: p.c, t: p.t });
       }

@@ -43,7 +43,7 @@ Os arquivos ficam numa subpasta de `shared/core/` de propósito: `tests/e4/test_
 
 ## 3. O que o módulo tem
 
-- Genéricas: `semAcento`, `normalizarFrouxo`, `dobrarBusca`, `formasAceitas`, `respostaDigitadaCerta` (com a lista de pontuação como parâmetro), `avaliarRespostaDigitada` (nova, 3 níveis, modo `tolerante` ou `quase`), `avaliarComSeparadores`, Acentuação (`acentuacaoCerta`, `resultadoAcentuacao`), `tiposDeErroDeAcento` (novo: faltou, sobrou ou trocado, e qual marca: agudo, grave, circunflexo, til, cedilha, trema), `nomeDaMarca`, `alinharLetras`, `htmlTecladoDeAcentos` (classes como parâmetro), `inserirNoCursor`.
+- Genéricas: `semAcento`, `normalizarFrouxo`, `dobrarBusca`, `formasAceitas`, `respostaDigitadaCerta` (com a lista de pontuação como parâmetro), `avaliarRespostaDigitada` (nova, 3 níveis, modo `tolerante` ou `quase`), `avaliarComSeparadores`, Acentuação (`acentuacaoCerta`, `resultadoAcentuacao`), `tiposDeErroDeAcento` (novo: faltou, sobrou ou trocado, e qual marca: agudo, grave, circunflexo, til, cedilha, trema), `nomeDaMarca`, `htmlTecladoDeAcentos` (classes como parâmetro), `inserirNoCursor`.
 - Por idioma, `FamiliaLatina.criar(config)`: todo o ditado (normalização estrita e frouxa, motivo do erro leve, preparo do texto, alinhamento, nota, classificação da troca, texto da explicação), mais contrações e acentos abolidos para quem declarar.
 - Configuração: ligaduras, hífen, apóstrofo, elisão, grupos do teclado, pontuação falada, números por extenso, homófonos, regra de concordância, contrações, acentos abolidos, textos das explicações.
 

@@ -119,7 +119,7 @@ window.I18N_CATALOG['en'] = {
 
   // Fase 6 lote 1
   'settings.title': 'Settings', // ALTA
-  'settings.subtitle': 'Your account, preferences, and data export.', // ALTA
+  'settings.subtitle': 'Your account information and preferences', // ALTA
   'settings.tab.general': 'General', // ALTA
   'settings.tab.notifications': '🔔 Notifications', // ALTA
   'settings.tab.export': '📦 Export', // ALTA
@@ -2155,6 +2155,7 @@ window.I18N_CATALOG['en'] = {
   'lesson.vocabDots.aria': 'Word {pos} of {total}', // ALTA
   'zh.exercise.translateToChinese': 'Translate into Chinese', // ALTA
   'zh.reorder.tapHint': 'Tap the blocks in the right order. Tap a placed one to send it back.', // ALTA
+  'fr.reorder.tapHint': 'Tap the words in the right order. Tap a placed one to send it back.', // ALTA
   'feedback.whereSeen': 'Where you saw this before', // ALTA
   'feedback.header.revealed': '👀 Answer revealed', // ALTA
   'feedback.header.notThisTime': '❌ Not this time', // ALTA
@@ -3439,6 +3440,50 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.cal.empty': 'No lessons on this day.', // ALTA
   'panel.classLog.cal.schedule': 'Schedule a lesson on this day', // ALTA
   'myClassLogs.upcoming': 'Upcoming lessons', // ALTA
+  'panel.gcal.title': 'Google Calendar', // ALTA
+  'panel.gcal.oneWay': 'One-way sync: Google Calendar → site. The site only reads your calendar; nothing is written to your Google account.', // ALTA
+  'panel.gcal.howItWorks': 'Connect your Google account and choose the calendars with your lessons. Every 15 minutes the site reads the events and creates or updates each lesson on the right day and time, recognizing the student by the name in the title or the guest\'s email. If you move a lesson in Google, the site follows.', // ALTA
+  'panel.gcal.connect': 'Connect Google Calendar', // ALTA
+  'panel.gcal.connectedAs': 'Connected as {email}', // ALTA
+  'panel.gcal.lastRead': 'last read: {when}', // ALTA
+  'panel.gcal.never': 'not read yet', // ALTA
+  'panel.gcal.justNow': 'just now', // ALTA
+  'panel.gcal.minAgo': '{n} min ago', // ALTA
+  'panel.gcal.calendars': 'Calendars', // ALTA
+  'panel.gcal.calendarsHint': 'Check the calendars that have lessons. "Every event is a lesson": anything the site doesn\'t recognize goes to review. "Only recognized events": personal events (lunch, birthdays) are ignored.', // ALTA
+  'panel.gcal.primary': 'main', // ALTA
+  'panel.gcal.modeAll': 'Every event is a lesson', // ALTA
+  'panel.gcal.modeMatched': 'Only recognized events', // ALTA
+  'panel.gcal.noCalendars': 'No calendars found. Click "Refresh calendar list".', // ALTA
+  'panel.gcal.syncNow': 'Read now', // ALTA
+  'panel.gcal.refreshList': 'Refresh calendar list', // ALTA
+  'panel.gcal.disconnect': 'Disconnect', // ALTA
+  'panel.gcal.disconnectConfirm': 'Disconnect Google Calendar? Your lessons stay on the site; it just stops reading your calendar.', // ALTA
+  'panel.gcal.disconnected': 'Google Calendar disconnected.', // ALTA
+  'panel.gcal.counts': '{linked} lessons linked to Google · {review} to review · {waiting} waiting for a site account', // ALTA
+  'panel.gcal.waitingTitle': 'Students without a site account', // ALTA
+  'panel.gcal.waitingHint': 'These events were already recognized and are kept. They become lessons on their own once the student creates an account and is linked to you.', // ALTA
+  'panel.gcal.reviewTitle': 'Events to review ({n})', // ALTA
+  'panel.gcal.reviewHint': 'The site didn\'t recognize these events. Choose whose lesson it is or mark it as not a lesson. With "remember" checked, future events with the same title (or the same guest) come in on their own.', // ALTA
+  'panel.gcal.pick': 'Whose lesson is this?', // ALTA
+  'panel.gcal.pickFirst': 'Choose the student or class first.', // ALTA
+  'panel.gcal.assign': 'Save', // ALTA
+  'panel.gcal.ignore': 'Not a lesson', // ALTA
+  'panel.gcal.remember': 'Remember for future events with this title', // ALTA
+  'panel.gcal.noTitle': '(no title)', // ALTA
+  'panel.gcal.noAccountGroup': 'Students without a site account', // ALTA
+  'panel.gcal.cancelledHint': 'This event was deleted or canceled in Google. The lesson stays on the site with everything you recorded.', // ALTA
+  'panel.gcal.keep': 'Keep the lesson', // ALTA
+  'panel.gcal.unlink': 'Unlink from Google', // ALTA
+  'panel.gcal.saved': 'Done.', // ALTA
+  'panel.gcal.reading': 'Reading your calendar…', // ALTA
+  'panel.gcal.synced': 'Calendar read.', // ALTA
+  'panel.gcal.loadError': 'Couldn\'t load the Google connection right now.', // ALTA
+  'panel.gcal.errReconnect': 'Google asked you to connect again. Click Disconnect, then Connect Google Calendar.', // ALTA
+  'panel.gcal.errGeneric': 'Something went wrong with Google Calendar. Please try again in a moment.', // ALTA
+  'panel.gcal.connectedToast': 'Google Calendar connected. Now choose the calendars with your lessons.', // ALTA
+  'panel.gcal.cancelledToast': 'Google connection canceled.', // ALTA
+  'panel.gcal.timeFromGoogle': 'Time comes from Google Calendar: to change it, change it there.', // ALTA
   'myClassLogs.feed.title': 'See your lessons in your calendar (Google, Apple, Outlook)', // ALTA
   'myClassLogs.feed.intro': 'Subscribe to this link once and your lessons show up in your calendar on their own, in your time zone. When a lesson changes here, your calendar follows.', // ALTA
   'myClassLogs.feed.google': 'Open in Google Calendar', // ALTA

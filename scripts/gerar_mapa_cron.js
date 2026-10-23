@@ -10,7 +10,8 @@
 //                                                      ou [unidade, lição, id do sobrevivente]  (chave fundida)
 //
 // - fr: fr/content.js + fr/curriculum-changes.js (aposentados ficam de fora; chave fundida aponta para o sobrevivente,
-//   para o cron contar a palavra uma vez só enquanto o aluno não abre o app). zh: zh/content.js (regra antiga de id).
+//   para o cron contar a palavra uma vez só enquanto o aluno não abre o app). zh: zh/content.js + zh/curriculum-changes.js
+//   (desde o C1 da paridade o zh também tem a chave `k`, com o mesmo valor do id antigo: o mapa do zh não mudou).
 // - "Na frase" não entra: o cron conta palavras (o cartão de frase nunca contou).
 // - O trecho entre os marcadores ">>> GERADO: STUDY_ITEM_GATE" e "<<< GERADO: STUDY_ITEM_GATE" é reescrito nos dois arquivos:
 //   supabase/functions/notification-cron/index.ts e docs/deploy/notification-cron-para-colar-no-painel.ts.
@@ -24,7 +25,12 @@ const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.resolve(__dirname, '..');
 const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 const TARGETS = ['supabase/functions/notification-cron/index.ts', 'docs/deploy/notification-cron-para-colar-no-painel.ts'];
-const LANGS = [{ lang: 'fr', appKey: 'frances', changes: 'fr/curriculum-changes.js' }, { lang: 'zh', appKey: 'mandarim', changes: null }];
+// Sites descobertos sozinhos (scripts/lib/sites.js); cada um com o seu <site>/curriculum-changes.js (C1 da paridade: o zh
+// também tem). Ordem alfabética (fr, zh), a mesma de antes: o trecho gerado não muda.
+const LANGS = require('./lib/sites.js').discoverSites(ROOT).map(s => ({
+  lang: s.site, appKey: s.appKey,
+  changes: fs.existsSync(path.join(ROOT, s.site, 'curriculum-changes.js')) ? s.site + '/curriculum-changes.js' : null,
+}));
 const BEGIN = '// >>> GERADO: STUDY_ITEM_GATE';
 const END = '// <<< GERADO: STUDY_ITEM_GATE';
 

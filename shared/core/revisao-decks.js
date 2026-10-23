@@ -98,21 +98,63 @@ function isRealityNoteCategoryAllowedAtLevel(category, level){
   return !!guidance && guidance.categoriesAllowed.includes(category);
 }
 
-function maybeShowReviewReminder(){
+// Lembrete de revisão acumulada (pop-up de rodapé). Regras (2026-10-23, depois de o banner quase nunca aparecer):
+//  - o DIA só é gravado quando o banner foi visto de verdade (visível por REVIEW_REMINDER_SEEN_MS, com a aba à
+//    frente e fora de uma lição) ou quando a pessoa clica nele; antes, o dia queimava na hora de decidir mostrar,
+//    mesmo com o banner escondido (lição aberta, aba em segundo plano);
+//  - dentro de uma lição ele nem é mostrado nem queima o dia;
+//  - é reavaliado ao voltar para a aba e ao sair de uma lição, não só no carregamento da página (aba aberta de
+//    um dia para o outro). O limite de uma vez por dia continua valendo para a conta toda.
+const REVIEW_REMINDER_SEEN_MS = 4000;
+let REVIEW_REMINDER_TIMER = null;
+
+function reviewReminderCanBeSeen(){
+  const banner = document.getElementById('review-reminder-banner');
+  if (!banner || getComputedStyle(banner).display === 'none') return false;
+  if (document.body.classList.contains('lesson-focus')) return false;
+  return document.visibilityState !== 'hidden';
+}
+
+// Grava "hoje" como o dia do lembrete (visto ou clicado) e para o relógio da checagem.
+function markReviewReminderSeen(){
+  if (REVIEW_REMINDER_TIMER){ clearTimeout(REVIEW_REMINDER_TIMER); REVIEW_REMINDER_TIMER = null; }
   const today = todayStr();
   if (STATE.lastReviewReminderDay === today) return;
+  STATE.lastReviewReminderDay = today;
+  saveState();
+}
+
+function scheduleReviewReminderSeen(){
+  if (REVIEW_REMINDER_TIMER) return;
+  REVIEW_REMINDER_TIMER = setTimeout(() => {
+    REVIEW_REMINDER_TIMER = null;
+    if (reviewReminderCanBeSeen()) markReviewReminderSeen();
+    // Senão o banner segue marcado como não visto: o próximo "voltar para a aba" ou "sair da lição" tenta de novo.
+  }, REVIEW_REMINDER_SEEN_MS);
+}
+
+function maybeShowReviewReminder(){
+  if (typeof STATE === 'undefined' || !STATE || !STATE.cards || !STATE.cards.length) return;
+  const today = todayStr();
+  if (STATE.lastReviewReminderDay === today) return;
+  // Dentro de uma lição o banner fica escondido: não mostra e, principalmente, não gasta o dia.
+  if (document.body.classList.contains('lesson-focus')) return;
 
   // K.7: Devido = não-New com due<=agora (structuralCounts). O antigo
   // cardsDueNow() contava New (due=0) como pendente.
   const dueCount = structuralCounts(eligibleReviewPool()).due;
   if (dueCount < REVIEW_REMINDER_THRESHOLD) return;
 
-  STATE.lastReviewReminderDay = today;
-  saveState();
-
   document.getElementById('review-reminder-count').textContent = dueCount;
   document.getElementById('review-reminder-banner').style.display = 'flex';
+  scheduleReviewReminderSeen();
 }
+
+// Voltar para a aba (ou para a janela) reavalia: cobre quem deixa o site aberto de um dia para o outro.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') maybeShowReviewReminder();
+});
+window.addEventListener('focus', () => { maybeShowReviewReminder(); });
 
 function registerDailyReviewCard(){
   ensureDailyBucket();
@@ -626,7 +668,7 @@ function isCardLessonCompleted(card){
   if (card.origin === 'teacher' || card.origin === 'self') return card.flashcardStatus === 'active';
   // Etapa 0 do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.3 item 8): cartão que já passou pelo
   // portão uma vez passa sempre (mover a palavra para uma unidade ainda não feita não a tira da Revisão).
-  // A marca só é gravada em item com chave estável (`studyKey`, fr); o zh continua só com a regra abaixo.
+  // A marca só é gravada em item com chave estável (`studyKey`; fr e zh desde o C1 da paridade).
   if (card.released) return true;
   // O portão de lição de sempre (função interna: os testes extraem isCardLessonCompleted inteira do texto).
   const passesGate = () => {

@@ -204,7 +204,7 @@ function ensureCourseMenuStyles(){
 .add-course-card .course-flag{ width:72px; height:72px; }
 .add-course-card .course-flag svg{ width:104px; height:72px; }
 .add-course-tag{ font-size:12px; font-weight:700; padding:1px 10px; border-radius:999px; border:1px solid var(--paper-line); background: var(--paper); color: var(--ink-soft); }
-.add-course-done{ position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:50%; background: var(--jade); color: var(--on-vivid); font-size:13px; display:flex; align-items:center; justify-content:center; }
+.add-course-done{ position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:50%; background: var(--success-fill); color: var(--on-success-fill); font-size:13px; display:flex; align-items:center; justify-content:center; }
 .course-confirm{ display:flex; flex-direction:column; gap:12px; }
 .course-confirm p{ margin:0; }
 .course-confirm-intro{ font-size:14px; font-weight:700; color: var(--ink-soft); }

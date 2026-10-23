@@ -55,6 +55,8 @@ try{
 <link rel="stylesheet" href="../shared/painel/painel-tokens.css">
 <link rel="stylesheet" href="../shared/painel/painel-componentes.css">
 <link rel="stylesheet" href="../shared/review-bank.css">
+<link rel="stylesheet" href="../shared/licao-feedback.css">
+<link rel="stylesheet" href="../shared/gramatica-cenario.css">
 <style>
 :root{
   /* Design tokens — paleta própria do Francês do Zero (azul como cor
@@ -63,6 +65,11 @@ try{
      Nomes de variável mantidos (--seal-red etc.) para não precisar
      renomear tudo que os referencia; só os valores mudaram de família. */
   --seal-red: #3498D6;       /* azul — cor primária */
+  /* Tabela da unidade de gramática (shared/gramatica-cenario.css): o fr mantém o cabeçalho roxo com texto na cor do papel
+     e o "quase" rosado de sempre; sem estes tokens, a peça comum usa --brand-fill/--on-brand-fill e o dourado do site. */
+  --gram-table-head: var(--brand-purple);
+  --on-gram-table-head: var(--paper);
+  --gram-almost-bg: rgba(227,107,202,0.1);
   --seal-red-dark: #1D5A82;  /* azul profundo — hover/pressed, texto de destaque */
   /* Caixas com texto (botões, abas e chips selecionados, contadores): azul + branco, 4,7:1 nos dois temas (decisão da autora, 2026-10-19).
      Mesmo valor no claro e no escuro: o azul claro do escuro não aguenta texto branco. */
@@ -78,6 +85,8 @@ try{
   --paper-warm: #F0E8D8;     /* fundo secundário, cards */
   --paper-line: #E1D6C0;     /* linhas/bordas sutis */
   --jade: #3A7359;           /* verde — sucesso/acerto (funcional, fora da paleta de marca) */
+  /* Caixas de sucesso com texto/check (Continuar do acerto, ✓ de concluído): verde + branco, 5,6:1 nos dois temas (decisão da autora, 2026-10-22). */
+  --success-fill: #3A7359; --on-success-fill: #FFFFFF;
   --ink-soft: #5C4E73;       /* texto secundário */
   /* Selo colorido atrás do ícone de cada desafio diário -- 3 cores fixas
      por posição no card (não por desafio específico), pra manter a mesma
@@ -838,7 +847,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   width:22px; height:22px; border-radius:50%; flex-shrink:0; font-size:11px; font-weight:800;
   display:flex; align-items:center; justify-content:center;
 }
-.ub-lesson-dot.done{ background:var(--jade); color:white; }
+.ub-lesson-dot.done{ background:var(--success-fill); color:var(--on-success-fill); }
 .ub-lesson-dot.current{ border:2px solid var(--seal-red); color:var(--seal-red-dark); background: color-mix(in srgb, var(--seal-red) 9%, var(--paper)); }
 .ub-lesson-dot.locked{ border:1.5px dashed var(--paper-line); color: var(--ink-soft); }
 .ub-lesson-title{ font-size:13px; font-weight:600; }
@@ -867,10 +876,10 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .level-test-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift); }
 .level-test-card.done{ border-color: var(--jade); background: linear-gradient(135deg, rgba(58,115,89,0.06), rgba(58,115,89,0.1)); }
 .level-test-icon{ flex-shrink:0; width:52px; height:52px; border-radius:14px; background: var(--brand-fill); display:flex; align-items:center; justify-content:center; font-size:26px; }
-.level-test-card.done .level-test-icon{ background: var(--jade); }
+.level-test-card.done .level-test-icon{ background: var(--success-fill); }
 .level-test-body{ flex:1; min-width:0; }
 .level-test-title{ font-weight:800; font-size:16px; margin-bottom:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.level-test-done-pill{ background: var(--jade); color:white; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
+.level-test-done-pill{ background: var(--success-fill); color:var(--on-success-fill); font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
 .level-test-sub{ font-size:13px; color: var(--ink-soft); line-height:1.4; }
 .level-test-cta{ flex-shrink:0; font-weight:800; font-size:14px; color: var(--seal-red-dark); white-space:nowrap; }
 .level-test-card.done .level-test-cta{ color: var(--jade); }
@@ -1175,7 +1184,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 /* Vermelho mais escuro e menos saturado que --error-red puro; par background+color
    revisado junto (texto branco fixo, legível nos dois temas). */
 button.wrong-feedback-continue{ background: var(--error-red); color: var(--on-brand-fill); }
-button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid); }
+button.correct-feedback-continue{ background: var(--success-fill); color: var(--on-success-fill); }
 
 /* ---------- Passos de unidade de gramática (blocos, estilo Busuu) ---------- */
 .gram-block-counter{ text-align:center; font-size:12.5px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
@@ -1202,28 +1211,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
    forma/tradução de .gram-block-example. */
 .gram-block-variants{ margin:18px 0 0; padding-left:20px; text-align:left; font-size:14px; line-height:1.7; color: var(--ink); }
 .gram-block-variants li + li{ margin-top:6px; }
-
-.gram-tables{ display:flex; gap:14px; flex-wrap:wrap; margin-top:18px; }
-.gram-table{ flex:1; min-width:160px; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); overflow:hidden; }
-.gram-table-title{ background: var(--brand-purple); color: var(--paper); font-weight:800; text-align:center; padding:8px; font-size:14px; }
-.gram-table-row{ display:flex; justify-content:space-between; padding:8px 12px; border-top:1px solid var(--paper-line); font-size:13.5px; }
-.gram-table-pronoun{ color: var(--ink-soft); font-weight:700; }
-.gram-table-form{ font-weight:800; color: var(--seal-red-dark); }
-
-.gram-exercise{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:20px; text-align:center; margin-bottom:14px; }
-.gram-exercise-prompt{ font-size:19px; font-weight:700; margin-bottom:6px; }
-.gram-exercise-hint{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:14px; }
-.gram-exercise input{
-  width:100%; max-width:260px; text-align:center; font-size:16px; font-weight:700;
-  padding:10px 12px; border-radius:10px; border:2px solid var(--paper-line); background: var(--paper);
-  font-family: var(--font-body); color: var(--ink);
-}
-.gram-exercise input:focus{ outline:none; border-color: var(--imperial-gold); }
-.gram-exercise input:disabled{ opacity:.7; }
-.gram-exercise.ok input{ border-color: var(--jade); background: rgba(58,115,89,0.08); }
-.gram-exercise.almost input{ border-color: var(--imperial-gold); background: rgba(227,107,202,0.1); }
-.gram-exercise.wrong input{ border-color: var(--error-red); background: rgba(214,38,25,0.08); }
-.gram-exercise .expected{ font-size:12.5px; color:var(--seal-red-dark); font-weight:700; min-height:16px; margin-top:8px; }
+/* Tabela (.gram-table-*), exercício (.gram-exercise*) e cenário (.scenario-*): shared/gramatica-cenario.css, comum aos sites. */
 
 /* ---------- Audio button (TTS) ---------- */
 .audio-btn, .custom-audio-btn{
@@ -1364,33 +1352,6 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .exercise-option.disabled{ pointer-events:none; opacity:.6; }
 .exercise-option.disabled.correct, .exercise-option.disabled.incorrect{ opacity:1; }
 
-/* ---------- Exercício de cenário ("o que você diria...") ---------- */
-.scenario-question{ font-size:16px; font-weight:800; margin-bottom:16px; line-height:1.4; }
-.scenario-scene{
-  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
-  padding:26px 20px; margin-bottom:20px; font-size:48px; line-height:1;
-}
-.scenario-flag{ display:inline-block; width:64px; height:43px; border-radius:5px; overflow:hidden; box-shadow:0 0 0 1px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.15); vertical-align:middle; }
-.scenario-flag svg{ display:block; width:100%; height:100%; }
-.scenario-options{ display:flex; flex-direction:column; gap:10px; }
-@media (min-width:600px){ .scenario-options{ display:grid; grid-template-columns:1fr 1fr; } }
-.scenario-option{
-  display:flex; align-items:center; gap:12px; background: var(--paper); border:2px solid var(--paper-line);
-  border-radius:12px; padding:14px 16px; cursor:pointer; font-family: var(--font-body);
-  text-align:left; transition: all .12s ease;
-}
-@media (hover:hover){ .scenario-option:hover:not(.disabled){ border-color: var(--hover-gold); background: color-mix(in srgb, var(--hover-gold) 14%, transparent); transform: translateY(-1px); } }
-.scenario-option-num{
-  flex-shrink:0; width:24px; height:24px; border-radius:50%; background: var(--paper-warm);
-  border:1px solid var(--paper-line); display:flex; align-items:center; justify-content:center;
-  font-size:12px; font-weight:800; color: var(--ink-soft);
-}
-.scenario-option-text{ font-size:14.5px; font-weight:700; color: var(--ink); }
-.scenario-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.scenario-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
-.scenario-option.disabled{ pointer-events:none; opacity:.6; }
-.scenario-option.disabled.correct, .scenario-option.disabled.incorrect{ opacity:1; }
-
 /* ---------- Exercício de verdadeiro ou falso (uso real) ---------- */
 .tf-scene{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
@@ -1521,7 +1482,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 }
 .unit-skill-item + .unit-skill-item{ border-top:1px solid var(--paper-line); }
 .unit-skill-check{
-  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--jade); color:white;
+  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--success-fill); color:var(--on-success-fill);
   font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px;
 }
 
@@ -1548,7 +1509,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 }
 .module-skill-item + .module-skill-item{ border-top:1px solid var(--paper-line); }
 .module-skill-check{
-  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--jade); color:white;
+  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--success-fill); color:var(--on-success-fill);
   font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px;
 }
 .module-retry-note{ color: var(--ink-soft); font-size:13.5px; line-height:1.5; max-width:340px; margin:0 auto; }
@@ -3020,8 +2981,8 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .challenge-card:has(.challenge-card-check)::after, .dictation-card:has(.challenge-card-check)::after{ content:none; }
 .challenge-card-check{ position:static; grid-column:2; grid-row:1 / span 4; justify-self:end; align-self:center; }
 .challenge-card.completed{ opacity:1; background: color-mix(in srgb, var(--jade) 7%, var(--paper)); border-color: color-mix(in srgb, var(--jade) 38%, var(--paper-line)); }
-.challenge-card:not(.locked) .challenge-card-check{ font-size:0; width:26px; height:26px; border-radius:50%; background: var(--jade); display:grid; place-items:center; }
-.challenge-card:not(.locked) .challenge-card-check::before{ content:'✓'; font-size:15px; font-weight:800; color: var(--on-vivid); }
+.challenge-card:not(.locked) .challenge-card-check{ font-size:0; width:26px; height:26px; border-radius:50%; background: var(--success-fill); display:grid; place-items:center; }
+.challenge-card:not(.locked) .challenge-card-check::before{ content:'✓'; font-size:15px; font-weight:800; color: var(--on-success-fill); }
 .challenge-card.locked .challenge-card-check{ font-size:18px; }
 .challenges-level-heading{ min-height:44px; }
 
@@ -3172,7 +3133,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .expr-card-foot{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:auto; padding-top:2px; }
 .expr-card-foot .tier-badge{ margin:0; }
 .challenge-card.expr-card.completed{ border-color: var(--jade); }
-.expr-card-seal{ position:absolute; top:-9px; right:12px; background: var(--jade); color: var(--on-vivid); font-size:11.5px; font-weight:900; border-radius:999px; padding:2px 9px; transform:rotate(4deg); box-shadow: var(--shadow-card); }
+.expr-card-seal{ position:absolute; top:-9px; right:12px; background: var(--success-fill); color: var(--on-success-fill); font-size:11.5px; font-weight:900; border-radius:999px; padding:2px 9px; transform:rotate(4deg); box-shadow: var(--shadow-card); }
 .expr-play{ position:absolute; top:14px; right:12px; width:40px; height:40px; border-radius:50%; border:0; display:grid; place-items:center; background: var(--brand-fill); color: var(--on-brand-fill); font-size:14px; cursor:pointer; box-shadow: var(--shadow-card); }
 .expr-play:hover{ background: var(--brand-fill-hover); }
 .expr-play.speaking{ background: var(--imperial-gold); }
@@ -3386,7 +3347,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
   width:32px; height:32px; border-radius:50%; border:2px solid var(--paper-line); background: var(--paper);
   display:flex; align-items:center; justify-content:center; font-size:14px; color:white; font-weight:800;
 }
-.streak-day-item.done .streak-day-circle{ background: var(--jade); border-color: var(--jade); }
+.streak-day-item.done .streak-day-circle{ background: var(--success-fill); border-color: var(--success-fill); color: var(--on-success-fill); }
 .streak-day-item.today .streak-day-label{ color: var(--seal-red-dark); font-weight:800; }
 .streak-day-label{ font-size:11.5px; color: var(--ink-soft); font-weight:700; }
 .streak-headline{ font-size:23px; font-weight:800; margin:0 0 12px; line-height:1.3; }
@@ -3980,7 +3941,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .conj-field.wrong input{ border-color: var(--error-red); background: rgba(214,38,25,0.08); }
 .conj-field .expected{ font-size:11px; color:var(--seal-red-dark); font-weight:700; min-height:14px; }
 
-.conj-progress{ font-size:12px; font-weight:800; color:var(--ink-soft); text-align:center; margin-bottom:12px; }
+/* .conj-progress (contador "Frase X de Y"): shared/gramatica-cenario.css. */
 
 .conj-actions{ display:flex; gap:10px; align-items:stretch; margin-bottom:14px; }
 .conj-actions .btn-block{ flex:1; }
@@ -3994,10 +3955,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .conj-session-result .score-num{ font-size:34px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
 
 .reorder-attempt{ font-size:18px; line-height:1.8; }
-.typed-attempt{ font-size:18px; line-height:1.8; overflow-wrap:anywhere; }
-/* Letra errada (vermelho) e letra que faltou (traço): usados na Conjugação e em "Sua resposta" dos exercícios de digitar. */
-.conj-x{ color:var(--error-red); background:color-mix(in srgb, var(--error-red) 16%, transparent); border-radius:3px; font-weight:800; text-decoration:underline wavy; text-decoration-thickness:1.5px; text-underline-offset:3px; }
-.conj-gap{ display:inline-block; width:.55em; height:1em; border-bottom:3px solid var(--error-red); vertical-align:-.15em; margin:0 1px; }
+/* .typed-attempt, .conj-x e .conj-gap ("Sua resposta" com letras erradas): shared/licao-feedback.css, comum aos sites. */
 .reorder-attempt-w.ok{ color:var(--jade); }
 .reorder-attempt-w.bad{ color:var(--error-red); font-weight:700; text-decoration:line-through; text-decoration-thickness:2px; }
 .reorder-attempt-w.near{ text-decoration:underline; text-decoration-color:#E0A526; text-decoration-thickness:3px; text-underline-offset:4px; }
@@ -4031,7 +3989,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .week-day-label{ font-size:12px; font-weight:700; color:var(--ink-soft); padding-top:4px; border-top:1px solid var(--paper-line); }
 .week-day.is-today .week-day-label{ color:var(--ink); font-weight:800; border-top:2px solid var(--count-new); }
 .week-check{ width:30px; height:30px; border-radius:50%; border:1.5px dashed var(--paper-line); display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; }
-.week-check.is-done{ border:0; background:var(--count-review); color:var(--paper); }
+.week-check.is-done{ border:0; background:var(--success-fill); color:var(--on-success-fill); }
 .week-check-small{ width:20px; height:20px; font-size:11px; }
 .week-total{ font-size:12px; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums; }
 .week-total.is-zero{ color:var(--ink-soft); font-weight:600; }
@@ -4716,6 +4674,24 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   .cal-chip{ font-size:0; padding:0; height:6px; border-radius:3px; } .cal-chip b{ display:none; }
   .cal-nav, .cal-today-btn{ min-height:44px; min-width:44px; }
 }
+/* Google Agenda -> site (117, shared/google-calendar.js) */
+.gcal-box > summary { cursor: pointer; list-style: revert; }
+.gcal-body { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.gcal-badge { display: inline-block; min-width: 1.4em; padding: 0 6px; border-radius: 999px; background: var(--brand-fill); color: var(--on-brand-fill); font-size: 0.75rem; text-align: center; }
+.gcal-oneway { font-weight: 700; }
+.gcal-error { color: var(--error-red); font-weight: 700; margin: 0; }
+.gcal-sources, .gcal-review { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.gcal-sources li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.gcal-sources select { max-width: 260px; }
+.gcal-actions, .gcal-review-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.gcal-review-item { border: 1px solid var(--border, rgba(0,0,0,.12)); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.gcal-review-head { display: flex; flex-direction: column; gap: 2px; }
+.gcal-review-actions select { flex: 1; min-width: 180px; }
+.gcal-remember { font-size: 0.85rem; display: flex; gap: 6px; align-items: center; }
+.gcal-counts, .gcal-account { margin: 0; }
+@media (max-width: 600px) {
+  .gcal-actions .btn, .gcal-review-actions .btn { min-height: 44px; }
+}
 /* Link de agenda (103): assinatura ICS em Aulas (professora e aluno) */
 .calendar-feed-box > summary { cursor: pointer; list-style: revert; }
 .calendar-feed-body { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
@@ -5040,7 +5016,7 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 #view-conjugaison .conj-answer-view.is-ok{ border-color:var(--jade); background:color-mix(in srgb, var(--jade) 9%, var(--paper)); }
 #view-conjugaison .conj-answer-view.is-almost{ border-color:var(--conj-quase); background:color-mix(in srgb, var(--conj-quase) 12%, var(--paper)); }
 #view-conjugaison .conj-ic{ position:absolute; right:8px; top:50%; transform:translateY(-50%); width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; line-height:1; background:var(--error-red); color:var(--on-vivid); }
-#view-conjugaison .is-ok .conj-ic{ background:var(--jade); }
+#view-conjugaison .is-ok .conj-ic{ background:var(--success-fill); }
 #view-conjugaison .is-almost .conj-ic{ background:var(--conj-quase); }
 #view-conjugaison .conj-tag{ font-weight:800; color:var(--conj-quase); }
 #view-conjugaison .is-almost .conj-x{ color:var(--conj-quase); background:color-mix(in srgb, var(--conj-quase) 20%, transparent); }
@@ -5940,13 +5916,12 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <header class="p-cabecalho">
         <div>
           <h2 data-i18n="settings.title">Configurações</h2>
-          <span class="p-subtitulo" data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</span>
+          <span class="p-subtitulo" data-i18n="settings.subtitle">Suas informações e preferências de conta</span>
         </div>
       </header>
       <div class="p-seg cfg-abas" role="toolbar" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
         <button type="button" class="active" aria-pressed="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
         <button type="button" aria-pressed="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
-        <button type="button" aria-pressed="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
       </div>
       <div id="settings-geral-content" class="cfg-corpo">
         <article>
@@ -5998,6 +5973,9 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         </article>
       </div>
       <div id="settings-notifications-content" class="cfg-corpo" style="display:none;"></div>
+      <!-- ARQUIVADO (2026-10-23, decisão da autora): a aba "📦 Exportar" saiu de Configurações porque exportar para o Anki
+           esvaziaria a Revisão (que já tem Importar/Exportar no menu ⋯). Este painel fica escondido, sem aba que o abra, só para
+           o código de shared/anki-export.js seguir testável. Para trazer de volta: ver docs/historico/23-configuracoes-exportar-arquivado.md. -->
       <div id="settings-export-content" class="cfg-corpo" style="display:none;">
         <article>
           <header><h3 data-i18n="settings.export.title">Escolha o que exportar</h3></header>
@@ -6693,6 +6671,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/admin-flashcards.js"></script>
 <script src="../shared/teacher-class-logs.js"></script>
 <script src="../shared/admin-class-logs.js"></script>
+<script src="../shared/google-calendar.js"></script>
 <script src="../shared/teacher-support-materials.js"></script>
 <script src="../shared/teacher-materials-ui.js"></script>
 <script src="../shared/admin-support-materials.js"></script>
@@ -6745,6 +6724,9 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/core/revisao-decks.js"></script>
 <script src="../shared/core/exercicios-licao.js"></script>
 <script src="../shared/core/estado-trilha-desafios.js"></script>
+<script src="../shared/core/curriculo-progresso.js"></script>
+<script src="../shared/core/licao-feedback.js"></script>
+<script src="../shared/core/gramatica-cenario.js"></script>
 <script src="../shared/core/familias/latina.js"></script>
 <script src="lang-hooks.js"></script>
 <script src="../shared/core/quase-iguais-simples.js"></script>

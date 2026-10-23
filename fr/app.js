@@ -109,7 +109,7 @@ const PREGEN_AUDIO_RATE = 0.9;
 function speakFrenchAudioOnly(text, btnEl, isAutoplay){
   const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
   if (pregenFile){
-    playPregeneratedAudio(pregenFile, btnEl, isAutoplay, PREGEN_AUDIO_RATE);
+    playPregeneratedAudio(pregenFile, btnEl, isAutoplay, LANG_HOOKS.pregenRate());
     return;
   }
 
@@ -211,21 +211,6 @@ function slowAudioIconBtnHTML(id){
   return `<button class="audio-btn audio-btn-slow" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
 }
 
-// Emoji de bandeira (🇧🇷 🇫🇷 🇵🇹 etc.) não renderiza em todo sistema — no
-// Windows, por exemplo, vira as duas letras do código do país ("BR") em
-// vez do desenho da bandeira. Pros cenários que usam bandeira como ícone,
-// desenhamos um SVG simples em vez de confiar no emoji (mesma razão do
-// flag-badge usado no link cruzado entre os sites).
-const SCENARIO_FLAG_SVG = {
-  '🇫🇷': '<svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="2" x="0" fill="#0055A4"/><rect width="1" height="2" x="1" fill="#FFFFFF"/><rect width="1" height="2" x="2" fill="#EF4135"/></svg>',
-  '🇧🇷': '<svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg"><rect width="3" height="2" fill="#009739"/><polygon points="1.5,0.15 2.85,1 1.5,1.85 0.15,1" fill="#FEDD00"/><circle cx="1.5" cy="1" r="0.55" fill="#002776"/></svg>',
-  '🇵🇹': '<svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg"><rect width="1.2" height="2" x="0" fill="#046A38"/><rect width="1.8" height="2" x="1.2" fill="#DA291C"/><circle cx="1.2" cy="1" r="0.4" fill="#FFCC00"/><circle cx="1.2" cy="1" r="0.24" fill="#FFFFFF"/></svg>'
-};
-
-function scenarioSceneHTML(emoji){
-  const svg = SCENARIO_FLAG_SVG[emoji];
-  return svg ? `<span class="scenario-flag">${svg}</span>` : emoji;
-}
 
 
 // ---------- Taxonomia de "notas de realidade" (sociolinguística) ----------
@@ -644,13 +629,11 @@ document.getElementById('report-menu-btn').addEventListener('click', () => {
 // abaixo, específicas do formato de STATE deste idioma.
 
 function serializeState(){
-  // Etapa 0 do currículo: guarda também o id da lição atual (lessonIdx segue o id se a lição mudar de posição).
-  stampUnitLessonIds(STATE.unitProgress, UNITS);
   return {
     cards: serializeCardsForSave(STATE.cards),
     cardVariants: STATE.cardVariants,
-    retiredStudyCards: STATE.retiredStudyCards,
-    _curriculumVersion: studyCurriculumChanges().version,
+    // Mudanças de currículo (shared/core/curriculo-progresso.js): arquivo de aposentados, versão e id da lição atual.
+    ...curriculumSaveFields(),
     unitProgress: STATE.unitProgress,
     xp: STATE.xp,
     streak: STATE.streak,
@@ -686,47 +669,30 @@ function serializeState(){
 
 function applySerializedState(data){
   if (!data) return;
-  // Etapa 0 do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.3): antes de aplicar o progresso,
-  // leva o save através das mudanças de currículo (fr/curriculum-changes.js): fusões de chave, aposentados e
-  // órfãos para o arquivo, volta de item arquivado. Idempotente; sem mudança nenhuma não altera nada.
-  const changes = studyCurriculumChanges();
-  const keyChanges = applyStudyKeyChanges(data.cards || [], {
-    merges: changes.merges, retiredKeys: changes.retiredKeys, archive: data.retiredStudyCards,
-    currentIds: STATE.cards.filter(c => c.origin === 'study').map(c => c.id), today: todayStr(),
-  });
-  STATE.retiredStudyCards = keyChanges.archive;
-  const renamed = renameStudyIdsInRecords(keyChanges.renames, data.cardVariants,
-    data.reviewRecords && data.reviewRecords.hardSeenIds);
-  if (data.cards || keyChanges.restored.length) {
+  // Mudanças de currículo (shared/core/curriculo-progresso.js, igual em todos os sites): antes de aplicar o progresso,
+  // leva o save através de fr/curriculum-changes.js (fusões, aposentados e órfãos para o arquivo, volta de arquivado,
+  // unidades/módulos fundidos). Idempotente; sem mudança nenhuma não altera nada.
+  const cur = curriculumLoadPrepare(data);
+  if (cur.hasCards) {
     // K2-C: cards da trilha só recebem a whitelist de progresso; ver
     // mergeSavedCards (shared/study-trail-model.js).
-    mergeSavedCards(STATE.cards, keyChanges.cards);
+    mergeSavedCards(STATE.cards, cur.cards);
   }
-  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(renamed.cardVariants);
+  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(cur.cardVariants);
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
   // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
   STATE.cards.forEach(migrateCardToFSRS);
   if (typeof refreshStudyCardTexts === 'function') refreshStudyCardTexts();
-  // Unidades/módulos fundidos (UNIT_MERGES/MODULE_MERGES): o progresso vai para o novo. Sem fusão, nada muda.
-  const unitMerged = applyUnitModuleMerges(data.unitProgress, data.checkpointProgress, changes.unitMerges, changes.moduleMerges);
   if (data.unitProgress) {
-    Object.assign(STATE.unitProgress, unitMerged.unitProgress);
+    Object.assign(STATE.unitProgress, cur.unitProgress);
     // Saves de antes das lições (Modelo B) não têm lessonIdx/lessonMisses.
     Object.values(STATE.unitProgress).forEach(p => {
       if (typeof p.lessonIdx !== 'number') p.lessonIdx = 0;
       if (!p.lessonMisses) p.lessonMisses = {};
     });
-    // A lição salva mudou de posição: lessonIdx segue o id; se sumiu, volta para a 1ª com palavra não liberada.
-    reconcileUnitLessonIdx(STATE.unitProgress, UNITS, (u, vi) => {
-      const c = STATE.cards.find(x => x.id === studyWordCardId(u, vi));
-      return !!(c && c.released);
-    });
-    // Etapa 0b (04, 2.10): unidade nova inserida antes de onde o aluno já está nasce aberta, mas não concluída.
-    openUnitsBeforeOpenOnes(trailGroups(), STATE.unitProgress);
+    curriculumLoadReconcileUnits();
   }
-  // Marca `released` em todo cartão já liberado pelo portão de lição (2.3 item 8): no 1º carregamento depois da
-  // Etapa 0, todos os cartões que já estavam na Revisão ganham a marca e continuam lá mesmo se a palavra mudar de unidade.
-  STATE.cards.forEach(c => { if (c.origin === 'study' && c.studyKey && !c.released) isCardLessonCompleted(c); });
+  curriculumLoadStampReleased();
   if (typeof data.xp === 'number') STATE.xp = data.xp;
   if (typeof data.streak === 'number') STATE.streak = data.streak;
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
@@ -738,7 +704,7 @@ function applySerializedState(data){
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
   if (data.reviewRecords && typeof data.reviewRecords === 'object'){
     STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
-    if (Object.keys(keyChanges.renames).length && Array.isArray(renamed.hardSeenIds)) STATE.reviewRecords.hardSeenIds = renamed.hardSeenIds;
+    if (cur.hardSeenIds) STATE.reviewRecords.hardSeenIds = cur.hardSeenIds;
   }
   if (data.reviewTimeStats && typeof data.reviewTimeStats === 'object') STATE.reviewTimeStats = { cards: Number(data.reviewTimeStats.cards) || 0, ms: Number(data.reviewTimeStats.ms) || 0 };
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
@@ -750,7 +716,7 @@ function applySerializedState(data){
   if (typeof data.dictationsAced === 'number') STATE.dictationsAced = Math.max(STATE.dictationsAced || 0, data.dictationsAced);
   if (data.periodXp) Object.assign(STATE.periodXp, data.periodXp);
   if (data.daily) Object.assign(STATE.daily, data.daily);
-  if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, unitMerged.checkpointProgress);
+  if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, cur.checkpointProgress);
   if (data.reviewMilestones) Object.assign(STATE.reviewMilestones, data.reviewMilestones);
   if (data.levelTestProgress) Object.assign(STATE.levelTestProgress, data.levelTestProgress);
   if (data.completedChallenges) Object.assign(STATE.completedChallenges, data.completedChallenges);
@@ -812,10 +778,12 @@ const REVIEW_REMINDER_THRESHOLD = 15;
 
 document.getElementById('review-reminder-dismiss-btn').addEventListener('click', () => {
   document.getElementById('review-reminder-banner').style.display = 'none';
+  markReviewReminderSeen(); // fechou = viu: grava o dia agora
 });
 
 document.getElementById('review-reminder-cta-btn').addEventListener('click', () => {
   document.getElementById('review-reminder-banner').style.display = 'none';
+  markReviewReminderSeen(); // clicou = viu: grava o dia antes de sair da tela
   switchTab('review');
   openReviewSession('flashcard');
 });
@@ -1565,16 +1533,6 @@ function getStepDefs(){
   ];
 }
 
-// Unidades de gramática (type: "grammar") seguem um fluxo próprio, no estilo
-// Busuu: uma sequência de telas de explicação (paginadas bloco por bloco,
-// como o vocabulário palavra-por-palavra) e depois os exercícios de uso.
-function getStepDefsGrammar(){
-  return [
-    { key: 'explanation', label: t('fr.step.explanation') },
-    { key: 'gramExercises', label: t('fr.step.exercises') }
-  ];
-}
-
 // Unidades migradas pra explicação contextual (`unit.concepts`, ver
 // content.js) não têm mais `usageNote` -- a teoria dele já foi incorporada
 // como cartões de conceito dentro do próprio ciclo de aquisição/diálogo, não
@@ -1791,10 +1749,9 @@ function renderStepProgress(){
     intraStepFraction = Math.min(1, (wordsBeforeBlock + curBlockSize * withinBlock) / totalWords);
   } else if (stepKey === 'exercises' || stepKey === 'checkpointExercises'){
     intraStepFraction = STEP_STATE.exerciseList.length ? STEP_STATE.exerciseIndex / STEP_STATE.exerciseList.length : 0;
-  } else if (stepKey === 'explanation' && u && u.grammar){
-    intraStepFraction = u.grammar.blocks.length ? STEP_STATE.explanationIndex / u.grammar.blocks.length : 0;
-  } else if (stepKey === 'gramExercises' && u && u.grammar){
-    intraStepFraction = u.grammar.exercises.length ? STEP_STATE.gramExerciseIndex / u.grammar.exercises.length : 0;
+  } else {
+    const gramFraction = grammarStepFraction(u, stepKey); // shared/core/gramatica-cenario.js
+    if (gramFraction != null) intraStepFraction = gramFraction;
   }
 
   const pct = ((STEP_STATE.currentStep + intraStepFraction) / stepCount) * 100;
@@ -1830,16 +1787,13 @@ function buildExerciseHint(ex, unit){
       : t('fr.hint.reorderOrder');
   }
   if (ex.format === 'scenario'){
-    return t('fr.hint.scenario');
+    return scenarioHint(); // shared/core/gramatica-cenario.js
   }
   if (ex.format === 'cloze'){
     return t('fr.hint.cloze');
   }
   if (ex.format === 'trueFalse'){
-    const shown = unit.concepts && unit.concepts.find(c => STEP_STATE.conceptsShown.has(c.id));
-    return shown
-      ? t('fr.hint.trueFalseExplanation', { title: shown.blocks[0].title })
-      : t('fr.hint.trueFalseGeneric');
+    return trueFalseHint(unit); // shared/core/licao-feedback.js
   }
   return null;
 }
@@ -1993,8 +1947,7 @@ function finishCurrentLesson(u){
   // Unidades de gramática pontuam por u.grammar.exercises/gramExerciseScore
   // (lista fixa, não gerada por buildExerciseSet) -- mesma distinção que já
   // existia no fluxo antigo, só centralizada aqui agora.
-  const total = u.type === 'grammar' ? u.grammar.exercises.length : STEP_STATE.exerciseList.length;
-  const correct = u.type === 'grammar' ? STEP_STATE.gramExerciseScore : STEP_STATE.exerciseScore;
+  const { total, correct } = unitFinalScore(u); // shared/core/gramatica-cenario.js
   const scorePct = total ? Math.round((correct / total) * 100) : 100;
   // XP real da UNIDADE (Fase 4): snapshot ANTES de markUnitCompleted (que
   // concede os +25 de bônus) -- skipToast:true porque quem chega aqui vai
@@ -2021,53 +1974,6 @@ function finishCurrentLesson(u){
 
 const CONFETTI_COLORS = ['#d64545', '#e3b341', '#2f8f6e', '#3498d6', '#a15fc9'];
 
-
-// ---------- Unidades de gramática (Explicação em blocos, estilo Busuu → Exercícios) ----------
-function renderGramTableHTML(table){
-  return `<div class="gram-tables">${Object.entries(table || {}).map(([verb, rows]) => `
-    <div class="gram-table">
-      <div class="gram-table-title">${verb}</div>
-      ${rows.map(r => `
-        <div class="gram-table-row">
-          <span class="gram-table-pronoun">${r.pronoun}</span>
-          <span class="gram-table-form">${r.form}</span>
-        </div>
-      `).join('')}
-    </div>
-  `).join('')}</div>`;
-}
-
-// Cada bloco é sua própria tela (como uma palavra do vocabulário): título,
-// explicação curta e uma caixa de exemplos com divisória entre eles.
-function renderGrammarExplanationStep(u, contentEl, nextBtn){
-  const blocks = u.grammar.blocks;
-  const idx = STEP_STATE.explanationIndex;
-  const block = blocks[idx];
-  const isLast = idx === blocks.length - 1;
-
-  const examplesHTML = (block.examples && block.examples.length) ? `
-    <div class="gram-block-examples">
-      ${block.examples.map(ex => `
-        <div class="gram-block-example">
-          <div class="french">${ex.f} ${audioBtnHTML(ex.f)}</div>
-          <div class="trans">${ex.t}</div>
-        </div>
-      `).join('')}
-    </div>` : '';
-
-  contentEl.innerHTML = `
-    <div class="gram-block-counter">${t('fr.grammar.stepCounter', { i: idx + 1, n: blocks.length })}</div>
-    <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
-      <h3 class="gram-block-title">${block.title}</h3>
-      <p class="gram-block-body">${block.body}</p>
-      ${examplesHTML}
-      ${block.table ? renderGramTableHTML(block.table) : ''}
-    </div>
-  `;
-  wireAudioButtons(contentEl);
-  nextBtn.style.display = 'flex';
-  nextBtn.textContent = isLast ? t('fr.grammar.goToExercises') : t('common.continueArrow');
-}
 
 // ---------- Tela final "Parabéns" (estilo Busuu): estrelas, pontuação e
 // recapitulação do vocabulário/frases vistos pela primeira vez na lição ----------
@@ -2141,84 +2047,6 @@ function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitl
   nextBtn.style.display = 'flex';
 }
 
-function renderGrammarExerciseStep(u, contentEl, nextBtn){
-  const list = u.grammar.exercises;
-  const total = list.length;
-  renderStepProgress();
-
-  if (STEP_STATE.gramExerciseIndex >= total){
-    const scorePct = total ? Math.round((STEP_STATE.gramExerciseScore / total) * 100) : 0;
-    // Unidades de gramática nunca tiraram um snapshot de XP (não passam por
-    // 'exercises'/'checkpointExercises', ver STEP_DEFS_GRAMMAR) -- caminho
-    // morto hoje (nenhuma unidade fr é type:'grammar'), então 0 é o valor
-    // seguro em vez de expor STATE.xp inteiro por engano caso isto volte a
-    // ser usado.
-    const xpEarned = STEP_STATE.checkpointXpAtStart == null ? 0 : STATE.xp - STEP_STATE.checkpointXpAtStart;
-    renderLessonCompleteScreen(u, null, { challengesBefore: null, xpEarned, scorePct, trackHistory: false });
-    return;
-  }
-
-  const ex = list[STEP_STATE.gramExerciseIndex];
-  nextBtn.style.display = 'none';
-
-  contentEl.innerHTML = `
-    <div class="conj-progress">${t('fr.grammar.sentenceCounter', { i: STEP_STATE.gramExerciseIndex + 1, n: total })}</div>
-    <div class="gram-exercise">
-      <div class="gram-exercise-prompt">${ex.prompt}</div>
-      ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
-      <input type="text" id="gram-exercise-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('fr.grammar.typeCorrectForm')}">
-      <div class="expected" id="gram-exercise-expected"></div>
-    </div>
-    <button class="btn btn-primary btn-block" id="gram-exercise-verify-btn">${t('common.verify')}</button>
-  `;
-
-  const inputEl = document.getElementById('gram-exercise-input');
-  inputEl.focus();
-  inputEl.addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('gram-exercise-verify-btn').click();
-  });
-
-  document.getElementById('gram-exercise-verify-btn').addEventListener('click', () => {
-    const given = inputEl.value;
-    const expected = ex.answer;
-    const wrapEl = contentEl.querySelector('.gram-exercise');
-    const expectedEl = document.getElementById('gram-exercise-expected');
-    inputEl.disabled = true;
-
-    // Formas aceitas: a resposta principal + `alt` opcional (variantes reais,
-    // ex.: septante/nonante na Bélgica e Suíça). Hífen, espaço e apóstrofo
-    // contam como iguais ("soixante dix" = "soixante-dix" = "soixante et
-    // onze" = "soixante-et-onze") -- só a grafia do separador, nunca deve
-    // custar o ponto de quem sabe a palavra. Acento errado continua "Quase!".
-    const forms = [expected, ...(ex.alt || [])];
-    const sepResult = latinaFr().avaliarComSeparadores(given, forms);
-    if (sepResult === 'ok'){
-      wrapEl.classList.add('ok');
-      STEP_STATE.gramExerciseScore += 1;
-    } else if (sepResult === 'almost'){
-      wrapEl.classList.add('almost');
-      expectedEl.textContent = t('feedback.almostArrow', { expected });
-      STEP_STATE.gramExerciseScore += 0.5;
-    } else {
-      wrapEl.classList.add('wrong');
-      expectedEl.textContent = `→ ${expected}`;
-    }
-    // "almost" (grafia quase certa, sem acento etc.) já dá 0.5 ponto -- toca
-    // o mesmo som de acerto do "ok", só "wrong" de verdade toca o de erro.
-    playFeedbackSound(!wrapEl.classList.contains('wrong'));
-
-    document.getElementById('gram-exercise-verify-btn').style.display = 'none';
-    const goNextBtn = document.createElement('button');
-    goNextBtn.className = 'btn btn-secondary btn-block';
-    goNextBtn.textContent = STEP_STATE.gramExerciseIndex < total - 1 ? t('fr.grammar.nextSentenceArrow') : t('common.seeResultArrow');
-    goNextBtn.addEventListener('click', () => {
-      STEP_STATE.gramExerciseIndex += 1;
-      renderGrammarExerciseStep(u, contentEl, nextBtn);
-    });
-    contentEl.appendChild(goNextBtn);
-  });
-}
-
 function renderStep(){
   stopExerciseAudio();
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
@@ -2236,26 +2064,11 @@ function renderStep(){
   // deixaria copiar as respostas.
   const showBack = stepKey !== 'dialogueCheck' && (STEP_STATE.currentStep > 0
     || (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro' && (STEP_STATE.acq.blockIdx > 0 || STEP_STATE.acq.introIdx > 0))
-    || (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0));
+    || grammarShowBack(stepKey));
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
 
-  if (u.type === 'grammar'){
-    if (stepKey === 'explanation'){
-      if (STEP_STATE.explanationUnitId !== u.id){
-        STEP_STATE.explanationIndex = 0;
-        STEP_STATE.explanationUnitId = u.id;
-      }
-      renderGrammarExplanationStep(u, contentEl, nextBtn);
-    } else if (stepKey === 'gramExercises'){
-      if (STEP_STATE.gramExerciseUnitId !== u.id){
-        STEP_STATE.gramExerciseUnitId = u.id;
-        STEP_STATE.gramExerciseIndex = 0;
-        STEP_STATE.gramExerciseScore = 0;
-      }
-      renderGrammarExerciseStep(u, contentEl, nextBtn);
-    }
-    return;
-  }
+  // Unidade de gramática: passos próprios (shared/core/gramatica-cenario.js).
+  if (renderGrammarUnitStep(u, stepKey, contentEl, nextBtn)) return;
 
   if (stepKey === 'vocab'){
     if (STEP_STATE.acq.unitId !== u.id || (isLessonUnit(u) && STEP_STATE.acq.lessonIdx !== currentLessonIdx(u.id))){
@@ -2626,11 +2439,7 @@ document.getElementById('step-back-btn').addEventListener('click', () => {
     }
   }
 
-  if (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0){
-    STEP_STATE.explanationIndex -= 1;
-    renderStep();
-    return;
-  }
+  if (grammarStepBack(stepKey)) return; // explicação da unidade de gramática: volta um bloco
 
   if (STEP_STATE.currentStep > 0){
     STEP_STATE.currentStep -= 1;
@@ -2728,14 +2537,8 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
     return;
   }
 
-  if (stepKey === 'explanation'){
-    const u = UNITS.find(x => x.id === STATE.currentUnitId);
-    if (STEP_STATE.explanationIndex < u.grammar.blocks.length - 1){
-      STEP_STATE.explanationIndex += 1;
-      renderStep();
-      return;
-    }
-  }
+  // Explicação da unidade de gramática: avança um bloco (shared/core/gramatica-cenario.js).
+  if (grammarStepNext(UNITS.find(x => x.id === STATE.currentUnitId), stepKey)) return;
 
   // Saindo do diálogo: mostra os conceitos cujo gatilho só existe em
   // contexto (o padrão em si não é vocabulário novo, só aparece na fala)
@@ -2820,9 +2623,9 @@ function buildExerciseSet(unit){
   const reorderExercises = [];
   const scenarioExercises = [];
   phrasesWithBlocks.forEach((p, i) => {
-    if (p.scenario && i % 2 === 1 && phrasesWithScenario.length >= 3){
-      const distractors = shuffle(phrasesWithScenario.filter(x => x !== p)).slice(0, 2);
-      scenarioExercises.push({ format: 'scenario', phrase: p, options: shuffle([p, ...distractors]) });
+    const scenarioEx = buildScenarioExercise(p, i, phrasesWithScenario); // shared/core/gramatica-cenario.js
+    if (scenarioEx){
+      scenarioExercises.push(scenarioEx);
     } else {
       const mode = reorderExercises.length % 2 === 0 ? 'translate' : 'order';
       const distractorCount = reorderDistractorCount(unit, p.blocks);
@@ -3037,11 +2840,7 @@ function answerExplanationHTML(ex){
     // tradução completa já aparece no prompt e na frase preenchida — repeti-la aqui é redundante
     return '';
   }
-  if (ex && ex.format === 'scenario' && ex.phrase){
-    // Mesmo padrão do "Complete a frase": resposta certa (com áudio) + tradução.
-    // A frase vem da própria unidade, então ela mesma já é o "onde você viu".
-    return `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${ex.phrase.f}</strong> ${audioBtnHTML(ex.phrase.f)}</div><div class="feedback-phrase-trans">${ex.phrase.t}</div>`;
-  }
+  if (ex && ex.format === 'scenario' && ex.phrase) return scenarioExplanationHTML(ex); // shared/core/gramatica-cenario.js
   if (ex && ex.phrase){
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
     return `<div class="feedback-phrase-zh"><strong>${ex.phrase.f}</strong> ${audioBtnHTML(ex.phrase.f)}</div><div class="feedback-phrase-trans">${ex.phrase.t}</div>${noteOrConceptReviewHTML(u) || ''}`;
@@ -3350,73 +3149,6 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   });
 }
 
-// ---------- Exercício de cenário ("O que você diria...?") ----------
-// Testa uso pragmático de uma frase já ensinada: dado um contexto em
-// português, escolher entre 3 frases em francês (já vistas na unidade)
-// qual é a resposta certa pra situação — não só reconhecer o significado.
-function renderScenarioExercise(ex, contentEl, nextBtn, total){
-  const optionsHTML = ex.options.map((opt, i) => `
-    <button class="scenario-option" data-idx="${i}">
-      <span class="scenario-option-num">${i + 1}</span>
-      <span class="scenario-option-text">${opt.f}</span>
-    </button>
-  `).join('');
-
-  contentEl.innerHTML = `
-    <div class="exercise-wrap">
-      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
-      <div class="scenario-question">${ex.phrase.scenario}</div>
-      <div class="scenario-scene">${scenarioSceneHTML(ex.phrase.scenarioEmoji)}</div>
-      <div class="scenario-options">${optionsHTML}</div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
-    </div>
-  `;
-
-  nextBtn.style.display = 'none';
-  // A numeração já aparece na tela (.scenario-option-num) -- só liga o
-  // atalho a ela, sem duplicar indicador.
-  wireKeyboardOptions(contentEl.querySelectorAll('.scenario-option'), { badgeSelector: '.scenario-option-num' });
-
-  function revealCorrectVisual(chosenIdx){
-    contentEl.querySelectorAll('.scenario-option').forEach((b, i) => {
-      b.classList.add('disabled');
-      if (ex.options[i] === ex.phrase) b.classList.add('correct');
-      else if (i === chosenIdx) b.classList.add('incorrect');
-    });
-    document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
-    contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
-  }
-
-  wireDontKnowButton(contentEl, ex, () => {
-    STEP_STATE.exerciseAnswered = true;
-    revealCorrectVisual(-1);
-    setTimeout(() => showAnswerPanel(contentEl, ex, { revealed: true }), 300);
-  });
-
-  contentEl.querySelectorAll('.scenario-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (STEP_STATE.exerciseAnswered) return;
-      STEP_STATE.exerciseAnswered = true;
-      const chosenIdx = parseInt(btn.dataset.idx);
-      const isCorrect = ex.options[chosenIdx] === ex.phrase;
-      playFeedbackSound(isCorrect);
-
-      revealCorrectVisual(chosenIdx);
-
-      if (isCorrect){
-        STEP_STATE.exerciseScore += 1;
-        addXP(exerciseXP(ex, EXERCISE_XP_PRODUCE));
-        addStudyMinutes();
-        // Sem detalhe extra -- a opção certa já ficou marcada em verde na
-        // tela (revealCorrectVisual), repetir o texto no painel seria redundante.
-        setTimeout(() => showCorrectFeedbackPanel(contentEl, null), 500);
-      } else {
-        setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
-      }
-    });
-  });
-}
-
 
 // ---------- Exercício de completar frase (cloze, estilo Clozemaster) ----------
 // Esconde uma palavra de uma frase já ensinada e pede pra completar — múltipla
@@ -3561,7 +3293,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
           <div class="prompt-translation">${ex.phrase.t}</div>
           ${audioBtnHTML(ex.phrase.f, 'audio-btn-lg')}
         </div>
-        <div class="reorder-wrap-hint">Toque nas palavras na ordem certa. Toque numa já colocada para devolvê-la.</div>
+        <div class="reorder-wrap-hint">${t('fr.reorder.tapHint')}</div>
       `}
       <div class="reorder-answer-slots" id="reorder-answer-slots"></div>
       <div class="reorder-blocks" id="reorder-blocks"></div>
@@ -3636,10 +3368,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 
     // Acerto: tudo verde. Erro: só os blocos fora do lugar ficam vermelhos,
     // os que já estavam na posição certa ficam verdes (dica de onde errou).
-    slotsEl.querySelectorAll('.reorder-slot').forEach((slot, pos) => {
-      const here = ex.shuffledBlocks[chosenSequence[pos]] === correctOrder[pos];
-      slot.classList.add(isCorrect || here ? 'correct' : 'incorrect');
-    });
+    markReorderSlots(slotsEl, chosenSequence, ex.shuffledBlocks, correctOrder, isCorrect); // shared/core/licao-feedback.js
     // Com a frase completa, todo bloco já foi usado (visibility:hidden --
     // preserva a posição pra "desfazer" clicando num slot) -- mas essa
     // desfeita não existe mais depois de respondido, então a fileira de
@@ -3666,8 +3395,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       // frase (isca) ; amarelo sublinhado = palavra certa no lugar errado.
       const attemptHTML = `<div class="reorder-attempt">${chosenSequence.map((blockIdx, pos) => {
         const block = ex.shuffledBlocks[blockIdx];
-        const cls = block === correctOrder[pos] ? 'ok' : (correctOrder.includes(block) ? 'near' : 'bad');
-        return `<span class="reorder-attempt-w ${cls}">${block.f}</span>`;
+        return `<span class="reorder-attempt-w ${reorderBlockStatus(block, pos, correctOrder)}">${block.f}</span>`;
       }).join(' ')}</div>`;
       setTimeout(() => showWrongAnswerPanel(contentEl, ex, { attemptHTML }), 500);
     }
@@ -3930,7 +3658,7 @@ function renderSpeedReview(){
   el.innerHTML = `
     <div class="speed-header">
       <div class="speed-hearts">${heartsHTML}</div>
-      <div class="speed-score">${SPEED_STATE.score} pts</div>
+      <div class="speed-score">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
     </div>
     <div class="speed-timer-track"><div class="speed-timer-fill" id="speed-timer-fill" style="width:100%"></div></div>
     <div class="speed-prompt">
@@ -5275,9 +5003,9 @@ function conjOtherFormOf(verb, tenseKey, given, accepted){
 }
 
 // Alinhamento letra a letra (distância de edição), como no Jogo de Conjugações.
-// Família latina, fase 2: a conta mora em shared/core/familias/latina.js (alinharLetras).
+// A conta é comum a todos os sites: alinharLetras em shared/core/licao-feedback.js.
 function conjAlign(a, b){
-  return FamiliaLatina.alinharLetras(a, b);
+  return alinharLetras(a, b);
 }
 
 // O que a pessoa digitou, com só as letras erradas em vermelho; o traço
@@ -5293,22 +5021,7 @@ function conjAnswerViewHTML(given, target, status){
   return `<div class="${cls}" role="img" aria-label="${escapeHTML(t('feedback.label.yourAnswer') + ': ' + given)}"><span class="conj-answer-text">${html}</span>${icon}</div>`;
 }
 
-// "Sua resposta" dos exercícios de digitar da trilha: o que a pessoa digitou, com as letras erradas em
-// vermelho e um traço onde faltou letra (mesmo alinhamento da Conjugação). Cartão com duas formas
-// ("allemand / allemande"): compara com a forma mais parecida, ou com o texto inteiro se ela digitou a barra.
-function typedAttemptHTML(typed, expected){
-  const given = String(typed == null ? '' : typed).replace(/\s*\/\s*/g, ' / ').trim();
-  if (!given) return '';
-  const forms = acceptedForms(expected);
-  const alvos = (given.includes('/') && forms.length > 1) ? [forms.join(' / ')] : (forms.length ? forms : [String(expected || '')]);
-  let best = null;
-  alvos.forEach(a => { const r = conjAlign(given, a); if (!best || r.cost < best.cost) best = r; });
-  const html = best.ops.map(o =>
-    o.t === 'same' ? escapeHTML(o.a)
-    : o.t === 'missing' ? '<span class="conj-gap"></span>'
-    : `<span class="conj-x">${escapeHTML(o.a)}</span>`).join('');
-  return `<div class="typed-attempt">${html}</div>`;
-}
+// "Sua resposta" dos exercícios de digitar da trilha: typedAttemptHTML, comum a todos os sites (shared/core/licao-feedback.js).
 
 // Texto falado de uma forma: pronome + forma (sem pronome no impératif).
 function conjSpeakText(idx, tenseKey, form){
