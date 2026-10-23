@@ -22,6 +22,18 @@ function frContext(){
   return ctx;
 }
 
+// Contexto do zh (C1 da paridade): mesmo caminho real de applySerializedState, sem módulos.
+function zhContext(){
+  const ctx = loadLang('zh');
+  const run = (code) => vm.runInContext(code, ctx);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'shared/card-variants.js'), 'utf8'), ctx, { filename: 'shared/card-variants.js' });
+  ctx.__run = run;
+  run('STATE.retiredStudyCards = {}; STATE.cardVariants = {}; STATE.reviewRecords = { speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] };');
+  run('UNITS.forEach(u => { STATE.unitProgress[u.id] = { started:false, completed:false, unlocked:false, lessonIdx:0, lessonMisses:{} }; }); STATE.unitProgress[UNITS[0].id].unlocked = true;');
+  ctx.STATE.cards = ctx.buildCardsFromUnits(ctx.UNITS);
+  return ctx;
+}
+
 // Carrega um bloco salvo pelo caminho real (applySerializedState) num contexto novo e devolve o contexto.
 function loadBlock(ctx, block){
   ctx.applySerializedState(JSON.parse(JSON.stringify(block)));
@@ -205,4 +217,4 @@ function applyV2(ctx, opts){
   return { merges, retired, retiredLessons };
 }
 
-module.exports = { ROOT, FIELDS, rng, frContext, loadBlock, saveBlock, simulatedSaves, realSaves, applyV2 };
+module.exports = { ROOT, FIELDS, rng, frContext, zhContext, loadBlock, saveBlock, simulatedSaves, realSaves, applyV2 };

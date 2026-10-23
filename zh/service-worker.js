@@ -16,6 +16,7 @@ const PRECACHE_URLS = [
   './index.html',
   './app.js',
   './content.js',
+  './curriculum-changes.js',
   './stories.js',
   './hanzi-data.js',
   './audio-manifest.js',

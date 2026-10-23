@@ -205,18 +205,61 @@ console.log('== portão de lição e lessonId');
   check('conteúdo igual: lessonIdx não muda', c1again.STATE.unitProgress['A1-2'].lessonIdx === 2 && c1again.STATE.unitProgress['A1-10'].lessonIdx === 4);
 }
 
-// ============ zh não muda ============
+// ============ zh (C1 da paridade, 2026-10-23): mesma regra do fr, nenhum id mudou ============
+const fs = require('fs'), path = require('path');
 console.log('== zh');
 {
-  const { loadLang } = require('../fase-e/harness');
-  const zh = loadLang('zh');
-  const cards = zh.buildCardsFromUnits(zh.UNITS);
-  check('zh: nenhum cartão tem studyKey (sem chave no conteúdo)', cards.every(c => !c.studyKey));
-  check('zh: ids pela regra antiga (posição)', cards.every(c => c.phraseIdx != null ? /^u.+-[pd]\d+$/.test(c.id) : (c.id === `u${c.unitId}-v${c.vocabIdx}` || c.id === `u${c.unitId}-v${c.vocabIdx}-b`)));
-  zh.STATE.cards = cards;
-  zh.STATE.unitProgress = { [zh.UNITS[0].id]: { started: true, completed: true, lessonIdx: 0 } };
-  check('zh: portão não grava released', cards.filter(c => zh.isCardLessonCompleted(c)).length > 0 && cards.every(c => c.released === undefined));
-  const src = require('fs').readFileSync(require('path').join(L.ROOT, 'zh/app.js'), 'utf8');
-  check('zh: applySerializedState sem as mudanças de currículo (comportamento de antes)', !/applyStudyKeyChanges|retiredStudyCards/.test(src));
+  const zh = L.zhContext();
+  const cards = zh.STATE.cards;
+  const ledger = JSON.parse(fs.readFileSync(path.join(L.ROOT, 'zh/published_ids.json'), 'utf8'));
+  check('zh: todo cartão da trilha tem studyKey (chave no conteúdo)', cards.length > 0 && cards.every(c => typeof c.studyKey === 'string'));
+  check('zh: id = u{k} = o id de antes pela posição (nenhum id mudou)', cards.every(c => c.phraseIdx != null ? c.id === 'u' + c.studyKey && /^u.+-[pd]\d+$/.test(c.id) : (c.id === `u${c.unitId}-v${c.vocabIdx}` || c.id === `u${c.unitId}-v${c.vocabIdx}-b`)));
+  check('zh: ids == livro-razão zh/published_ids.json (conferido contra a origin/main)', JSON.stringify(cards.map(c => c.id).sort()) === JSON.stringify(ledger.cards.slice().sort()));
+  const src = fs.readFileSync(path.join(L.ROOT, 'zh/app.js'), 'utf8');
+  const fn = (name) => { const a = src.indexOf('function ' + name + '('); return src.slice(a, src.indexOf('\n}\n', a)); };
+  check('zh: applySerializedState chama as funções comuns (shared/core/curriculo-progresso.js)', ['curriculumLoadPrepare(data)', 'curriculumLoadReconcileUnits()', 'curriculumLoadStampReleased()'].every(x => fn('applySerializedState').includes(x)));
+  check('zh: serializeState grava os campos de currículo', fn('serializeState').includes('...curriculumSaveFields()'));
+
+  // save antigo do zh (sem _curriculumVersion nem retiredStudyCards): unidade 1 concluída, unidade 2 começada, 1 órfão
+  const r = L.rng(20261023);
+  const entries = zh.serializeCardsForSave(zh.buildCardsFromUnits(zh.UNITS));
+  const u1 = entries.filter(e => /^u1-/.test(e.id)), u2 = entries.filter(e => /^u2-v[0-2](-b)?$/.test(e.id));
+  u1.concat(u2).forEach((e, i) => Object.assign(e, { reps: 1 + (i % 4), lapses: i % 2, state: 'review', stability: 3 + i * 0.5, difficulty: 4.5,
+    lastReview: 1790000000000 + i * 1000, due: 1790400000000 + i * 1000, interval: 3 + i, fsrsReps: 1 + (i % 4), fsrsLapses: i % 2, fsrsMigrated: true, firstLearnedDate: '2026-09-1' + (i % 10) }));
+  const orphan = { id: 'u1-v99', reps: 4, stability: 12, state: 'review', lastReview: 1790000000000, due: 1791000000000 };
+  const teacher = { id: 't7', origin: 'teacher', rowId: 7, reps: 2, stability: 5, state: 'review', flashcardStatus: 'active' };
+  const block = { cards: entries.concat([orphan, teacher]), xp: 50,
+    unitProgress: { 1: { started: true, completed: true, unlocked: true, lessonIdx: 0, lessonMisses: {} }, 2: { started: true, completed: false, unlocked: true, lessonIdx: 1, lessonMisses: {} } } };
+  const before = JSON.parse(JSON.stringify(block));
+  const z1 = L.loadBlock(L.zhContext(), block);
+  check('zh: carregar não muta o save recebido', JSON.stringify(block) === JSON.stringify(before));
+  const byId = new Map(z1.STATE.cards.map(c => [c.id, c]));
+  const studiedIds = u1.concat(u2).map(e => e.id);
+  const badFsrs = studiedIds.filter(id => L.FIELDS.some(f => JSON.stringify(byId.get(id)[f]) !== JSON.stringify(before.cards.find(e => e.id === id)[f])));
+  check(`zh: save antigo carrega com o FSRS intacto (${studiedIds.length} cartões estudados)`, badFsrs.length === 0, badFsrs.slice(0, 3));
+  check('zh: nenhum cartão da trilha sumiu (mesma quantidade)', z1.STATE.cards.filter(c => c.origin === 'study').length === cards.length);
+  check('zh: órfão antigo vai para o arquivo com o progresso (antes era descartado em silêncio)', z1.STATE.retiredStudyCards['u1-v99'] && z1.STATE.retiredStudyCards['u1-v99'].stability === 12);
+  check('zh: unidade 1 concluída: cartões ganham released', u1.every(e => byId.get(e.id).released === true));
+  check('zh: unidade 2 começada (lição 1): só as palavras da lição 0 ganham released', z1.STATE.cards.filter(c => c.released && c.unitId === 2).every(c => z1.lessonIndexForVocabIdx(z1.UNITS[1], c.vocabIdx != null ? c.vocabIdx : c.gateVocabIdx) < 1));
+  check('zh: nenhum released em unidade não começada', z1.STATE.cards.every(c => !c.released || c.unitId === 1 || c.unitId === 2));
+  const s1 = L.saveBlock(z1);
+  check('zh: save grava _curriculumVersion = 1 e o arquivo', s1._curriculumVersion === 1 && s1.retiredStudyCards['u1-v99']);
+  check('zh: save grava lessonId da unidade começada', s1.unitProgress[2].lessonId === z1.UNITS[1].lessons[1].id);
+  const z2 = L.loadBlock(L.zhContext(), s1);
+  const s2 = L.saveBlock(z2);
+  check('zh: ida e volta: salvar, recarregar e salvar dá o mesmo bloco', JSON.stringify(s1) === JSON.stringify(s2), Object.keys(s1).filter(k => JSON.stringify(s1[k]) !== JSON.stringify(s2[k])));
+
+  // fusão e aposentado no zh (conteúdo sem módulos): o caminho comum funciona sem MODULES
+  const z3 = L.zhContext();
+  z3.__run(`Object.assign(STUDY_KEY_MERGES, { '2-v0': '1-v0' }); STUDY_RETIRED_KEYS.push('2-v1');`);
+  const merged = JSON.parse(JSON.stringify(before));
+  L.loadBlock(z3, merged);
+  check('zh: typeof MODULES === undefined no contexto (sem módulos)', z3.__run('typeof MODULES') === 'undefined');
+  check('zh: fusão 2-v0 -> 1-v0 com aposentado 2-v1: o perdedor e o aposentado vão para o arquivo',
+    ['u1-v0', 'u2-v0'].some(id => z3.STATE.retiredStudyCards[id] && z3.STATE.retiredStudyCards[id].mergedInto === 'u1-v0') && z3.STATE.retiredStudyCards['u2-v1'] && z3.STATE.retiredStudyCards['u2-v1-b'], Object.keys(z3.STATE.retiredStudyCards));
+  const fresh = new Map(z3.STATE.cards.map(c => [c.id, c]));
+  const a = before.cards.find(e => e.id === 'u1-v0'), b = before.cards.find(e => e.id === 'u2-v0');
+  const win = (b.lastReview > a.lastReview) ? b : a;
+  check('zh: sobrevivente fica com a revisão mais recente (regra FSRS da fusão)', fresh.get('u1-v0').lastReview === win.lastReview && fresh.get('u1-v0').stability === win.stability);
 }
 summary('curriculo-ids carregamento');

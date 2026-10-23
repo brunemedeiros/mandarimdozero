@@ -554,6 +554,10 @@ const STATE = {
   // professora. switchTab() zera ao trocar de aba. Nunca serializado.
   reviewSessionClassReview: false,
   cardVariants: {}, // progresso das palavras que trocam por idioma do site (shared/card-variants.js)
+  // Mudanças de currículo (shared/core/curriculo-progresso.js): arquivo do progresso de cartão da trilha que não existe
+  // mais (excluído, fundido ou órfão). { id: {...progresso, retiredAt, mergedInto?} }. Salvo no bloco; volta para o
+  // cartão se a chave voltar. Não conta em métrica, fila, notificação nem painel.
+  retiredStudyCards: {},
   // Fase D -- cache em memória da árvore de Decks do idioma atual, carregada
   // sob demanda por ensureDecksLoadedForReview() (só quando uma sessão
   // Deck-scoped é de fato solicitada). Nunca serializado, nunca uma
@@ -779,6 +783,8 @@ function serializeState(){
     cards: serializeCardsForSave(STATE.cards),
     hanziCards: STATE.hanziCards,
     cardVariants: STATE.cardVariants,
+    // Mudanças de currículo (shared/core/curriculo-progresso.js): arquivo de aposentados, versão e id da lição atual.
+    ...curriculumSaveFields(),
     unitProgress: STATE.unitProgress,
     xp: STATE.xp,
     streak: STATE.streak,
@@ -809,14 +815,18 @@ function serializeState(){
 
 function applySerializedState(data){
   if (!data) return;
-  if (data.cards) {
+  // Mudanças de currículo (shared/core/curriculo-progresso.js, igual em todos os sites): antes de aplicar o progresso,
+  // leva o save através de zh/curriculum-changes.js (fusões, aposentados e órfãos para o arquivo, volta de arquivado,
+  // unidades fundidas). Idempotente; sem mudança nenhuma não altera nada.
+  const cur = curriculumLoadPrepare(data);
+  if (cur.hasCards) {
     // K2-C: cards da trilha só recebem a whitelist de progresso; ver
     // mergeSavedCards (shared/study-trail-model.js).
-    mergeSavedCards(STATE.cards, data.cards);
+    mergeSavedCards(STATE.cards, cur.cards);
   }
   // Hanzi: só o progresso volta (o texto vem da camada do curso); ver mergeSavedHanziCards.
   if (Array.isArray(data.hanziCards)) mergeSavedHanziCards(STATE.hanziCards, data.hanziCards);
-  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(data.cardVariants);
+  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(cur.cardVariants);
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
   // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
   // Roda pra TODO cartão, vindo de save antigo ou recém-criado, garantindo
@@ -825,7 +835,7 @@ function applySerializedState(data){
   STATE.hanziCards.forEach(migrateCardToFSRS);
   if (typeof refreshStudyCardTexts === 'function') refreshStudyCardTexts();
   if (data.unitProgress) {
-    Object.assign(STATE.unitProgress, data.unitProgress);
+    Object.assign(STATE.unitProgress, cur.unitProgress);
     // Saves de antes das lições (Modelo B) não têm lessonIdx/lessonMisses --
     // sem isso, um progresso salvo antigo sobrescreveria os defaults com
     // `undefined`, quebrando freshAcquisitionState pra quem já tinha conta.
@@ -833,7 +843,9 @@ function applySerializedState(data){
       if (typeof p.lessonIdx !== 'number') p.lessonIdx = 0;
       if (!p.lessonMisses) p.lessonMisses = {};
     });
+    curriculumLoadReconcileUnits();
   }
+  curriculumLoadStampReleased();
   if (typeof data.xp === 'number') STATE.xp = data.xp;
   if (typeof data.streak === 'number') STATE.streak = data.streak;
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
@@ -843,7 +855,10 @@ function applySerializedState(data){
   if (data.dailyMinutesLog) Object.assign(STATE.dailyMinutesLog, data.dailyMinutesLog);
   if (data.dailyLessonsLog) Object.assign(STATE.dailyLessonsLog, data.dailyLessonsLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
-  if (data.reviewRecords && typeof data.reviewRecords === 'object') STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
+  if (data.reviewRecords && typeof data.reviewRecords === 'object'){
+    STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
+    if (cur.hardSeenIds) STATE.reviewRecords.hardSeenIds = cur.hardSeenIds;
+  }
   if (data.reviewTimeStats && typeof data.reviewTimeStats === 'object') STATE.reviewTimeStats = { cards: Number(data.reviewTimeStats.cards) || 0, ms: Number(data.reviewTimeStats.ms) || 0 };
   if (data.hanziLessonProgress) Object.assign(STATE.hanziLessonProgress, data.hanziLessonProgress);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;

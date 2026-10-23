@@ -20,7 +20,7 @@
 // save antigo, é ignorado por não estar aqui).
 // `released` (Etapa 0 do currículo, docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.3 item 8): o cartão já
 // passou pelo portão de lição uma vez; passa sempre daí em diante (mover a palavra para uma unidade nova não a
-// tira da Revisão). Só os itens com chave estável (`k`, fr) ganham a marca.
+// tira da Revisão). Só os itens com chave estável (`k`; fr e zh desde o C1 da paridade) ganham a marca.
 const STUDY_PROGRESS_FIELDS = [
   'ef', 'interval', 'reps', 'due', 'lapses',
   'stability', 'difficulty', 'state', 'lastReview',
@@ -29,8 +29,8 @@ const STUDY_PROGRESS_FIELDS = [
 
 // ============================================================
 // Etapa 0 do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md, seção 2): o cartão é identificado
-// pelo ITEM, nunca pelo lugar. Cada palavra/frase/fala do fr/content.js tem uma chave congelada `k`
-// (valor inicial = id de hoje sem o "u", então nenhum id mudou). Item SEM `k` (zh hoje) usa a regra antiga
+// pelo ITEM, nunca pelo lugar. Cada palavra/frase/fala do <site>/content.js (fr; zh desde o C1 da paridade) tem uma
+// chave congelada `k` (valor inicial = id de hoje sem o "u", então nenhum id mudou). Item SEM `k` usa a regra antiga
 // por posição: `u{unidade}-{v|p|d}{posição}`.
 // ============================================================
 function studyItemKey(item){
@@ -323,7 +323,7 @@ function mergeSavedCards(cards, savedCards){
 // ============================================================
 const STUDY_ARCHIVE_EXTRA_FIELDS = ['retiredAt', 'mergedInto'];
 
-// Mudanças de currículo do idioma da página (fr/curriculum-changes.js); sem o arquivo (zh, testes) = nenhuma.
+// Mudanças de currículo do idioma da página (<site>/curriculum-changes.js); sem o arquivo (testes) = nenhuma.
 function studyCurriculumChanges(){
   return {
     merges: typeof STUDY_KEY_MERGES !== 'undefined' ? STUDY_KEY_MERGES : {},

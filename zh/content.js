@@ -2,6 +2,14 @@
 // O texto em língua de origem mora na CAMADA DO CURSO: courses/zh-pt-BR/layer.js (português) e zh/content.en.js (inglês).
 // Ids, hanzi (c), pinyin (p), tipos e ordem. Sozinho NÃO é exibível: a camada carrega logo depois e se aplica sobre ele.
 // Os comentários de autoria do arquivo anterior estão em docs/historico/conteudo-original/zh-<arquivo>.js.txt.
+//
+// CHAVE ESTÁVEL `k` (C1 de docs/auditoria-paridade-fr-zh.md; mesma regra do fr): cada palavra (vocab), frase (phrases) e
+// fala (dialogue.lines) tem uma chave congelada; o id do cartão e o progresso do aluno seguem a CHAVE, nunca a posição.
+// (O `k` de dialogue.check, como "fill"/"listen", é outra coisa: o tipo da pergunta do diálogo.)
+// - Nunca mudar nem reaproveitar um `k`. Item novo: rode `node scripts/congelar_chaves.js zh` (dá a próxima chave livre).
+// - Mover, reordenar ou corrigir o texto com o MESMO sentido: o item leva o `k` junto.
+// - Mudou o sentido (outra palavra/frase): item novo com `k` novo; o antigo vai para STUDY_RETIRED_KEYS.
+// - Fundir ou excluir: zh/curriculum-changes.js. O teste tests/curriculo-ids/test_ids_publicados.js bloqueia id perdido.
 
 const LEVELS = [
   { "id": "HSK1" }
@@ -105,17 +113,18 @@ const UNITS = [
       { "subject": "谢谢", "pinyin": "xièxiè", "emoji": "🎁", "answer": true }
     ],
     "vocab": [
-      { "p": "nǐ hǎo", "c": "你好" },
-      { "p": "zài jiàn", "c": "再见" },
-      { "p": "xiè xiè", "c": "谢谢" },
-      { "p": "bú kè qi", "c": "不客气" },
-      { "p": "duì bu qǐ", "c": "对不起" },
-      { "p": "méi guān xi", "c": "没关系" },
-      { "p": "zǎo shang hǎo", "c": "早上好" },
-      { "p": "wǎn shang hǎo", "c": "晚上好" }
+      { "k": "1-v0", "p": "nǐ hǎo", "c": "你好" },
+      { "k": "1-v1", "p": "zài jiàn", "c": "再见" },
+      { "k": "1-v2", "p": "xiè xiè", "c": "谢谢" },
+      { "k": "1-v3", "p": "bú kè qi", "c": "不客气" },
+      { "k": "1-v4", "p": "duì bu qǐ", "c": "对不起" },
+      { "k": "1-v5", "p": "méi guān xi", "c": "没关系" },
+      { "k": "1-v6", "p": "zǎo shang hǎo", "c": "早上好" },
+      { "k": "1-v7", "p": "wǎn shang hǎo", "c": "晚上好" }
     ],
     "phrases": [
       {
+        "k": "1-p0",
         "p": "Nǐ hǎo! Wǒ jiào {nome}.",
         "c": "你好！我叫{nome}。",
         "blocks": [
@@ -125,6 +134,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "1-p1",
         "p": "Xiè xiè nǐ!",
         "c": "谢谢你！",
         "blocks": [
@@ -133,6 +143,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "1-p2",
         "p": "Duì bu qǐ, wǒ bù dǒng.",
         "c": "对不起，我不懂。",
         "blocks": [
@@ -142,6 +153,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "1-p3",
         "p": "Shì a! Wǒ yě shì.",
         "c": "是啊！我也是。",
         "blocks": [
@@ -176,10 +188,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Nǐ hǎo!", "c": "你好！" },
-        { "p": "Nǐ hǎo! Zǎo shang hǎo.", "c": "你好！早上好。" },
-        { "p": "Xiè xiè, zài jiàn!", "c": "谢谢，再见！" },
-        { "p": "Zài jiàn!", "c": "再见！" }
+        { "k": "1-d0", "p": "Nǐ hǎo!", "c": "你好！" },
+        { "k": "1-d1", "p": "Nǐ hǎo! Zǎo shang hǎo.", "c": "你好！早上好。" },
+        { "k": "1-d2", "p": "Xiè xiè, zài jiàn!", "c": "谢谢，再见！" },
+        { "k": "1-d3", "p": "Zài jiàn!", "c": "再见！" }
       ]
     }
   },
@@ -270,19 +282,20 @@ const UNITS = [
       { "subject": "你叫什么名字？", "pinyin": "nǐ jiào shénme míngzi?", "emoji": "🙋", "answer": false }
     ],
     "vocab": [
-      { "p": "wǒ", "c": "我" },
-      { "p": "nǐ", "c": "你" },
-      { "p": "jiào", "c": "叫" },
-      { "p": "míngzi", "c": "名字" },
-      { "p": "shì", "c": "是" },
-      { "p": "rén", "c": "人" },
-      { "p": "Bāxī", "c": "巴西" },
-      { "p": "Zhōngguó", "c": "中国" },
-      { "p": "nǎ", "c": "哪" },
-      { "p": "guó", "c": "国" }
+      { "k": "2-v0", "p": "wǒ", "c": "我" },
+      { "k": "2-v1", "p": "nǐ", "c": "你" },
+      { "k": "2-v2", "p": "jiào", "c": "叫" },
+      { "k": "2-v3", "p": "míngzi", "c": "名字" },
+      { "k": "2-v4", "p": "shì", "c": "是" },
+      { "k": "2-v5", "p": "rén", "c": "人" },
+      { "k": "2-v6", "p": "Bāxī", "c": "巴西" },
+      { "k": "2-v7", "p": "Zhōngguó", "c": "中国" },
+      { "k": "2-v8", "p": "nǎ", "c": "哪" },
+      { "k": "2-v9", "p": "guó", "c": "国" }
     ],
     "phrases": [
       {
+        "k": "2-p0",
         "p": "Nǐ jiào shénme míngzi?",
         "c": "你叫什么名字？",
         "blocks": [
@@ -292,6 +305,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "2-p1",
         "p": "Wǒ shì {nacionalidade_p}.",
         "c": "我是{nacionalidade}。",
         "blocks": [
@@ -301,6 +315,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "2-p2",
         "p": "Nǐ shì nǎ guó rén?",
         "c": "你是哪国人？",
         "blocks": [
@@ -335,10 +350,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Nǐ hǎo, nǐ jiào shénme míngzi?", "c": "你好，你叫什么名字？" },
-        { "p": "Wǒ jiào Brune. Nǐ ne?", "c": "我叫Brune。你呢？" },
-        { "p": "Wǒ jiào Xiǎo Lǐ. Nǐ shì nǎ guó rén?", "c": "我叫小李。你是哪国人？" },
-        { "p": "Wǒ shì Bāxī rén.", "c": "我是巴西人。" }
+        { "k": "2-d0", "p": "Nǐ hǎo, nǐ jiào shénme míngzi?", "c": "你好，你叫什么名字？" },
+        { "k": "2-d1", "p": "Wǒ jiào Brune. Nǐ ne?", "c": "我叫Brune。你呢？" },
+        { "k": "2-d2", "p": "Wǒ jiào Xiǎo Lǐ. Nǐ shì nǎ guó rén?", "c": "我叫小李。你是哪国人？" },
+        { "k": "2-d3", "p": "Wǒ shì Bāxī rén.", "c": "我是巴西人。" }
       ]
     }
   },
@@ -441,23 +456,24 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "p": "líng", "c": "零" },
-      { "p": "yī", "c": "一" },
-      { "p": "èr", "c": "二" },
-      { "p": "sān", "c": "三" },
-      { "p": "sì", "c": "四" },
-      { "p": "wǔ", "c": "五" },
-      { "p": "liù", "c": "六" },
-      { "p": "qī", "c": "七" },
-      { "p": "bā", "c": "八" },
-      { "p": "jiǔ", "c": "九" },
-      { "p": "shí", "c": "十" },
-      { "p": "suì", "c": "岁" },
-      { "p": "duō dà", "c": "多大" },
-      { "p": "gāo", "c": "高" }
+      { "k": "3-v0", "p": "líng", "c": "零" },
+      { "k": "3-v1", "p": "yī", "c": "一" },
+      { "k": "3-v2", "p": "èr", "c": "二" },
+      { "k": "3-v3", "p": "sān", "c": "三" },
+      { "k": "3-v4", "p": "sì", "c": "四" },
+      { "k": "3-v5", "p": "wǔ", "c": "五" },
+      { "k": "3-v6", "p": "liù", "c": "六" },
+      { "k": "3-v7", "p": "qī", "c": "七" },
+      { "k": "3-v8", "p": "bā", "c": "八" },
+      { "k": "3-v9", "p": "jiǔ", "c": "九" },
+      { "k": "3-v10", "p": "shí", "c": "十" },
+      { "k": "3-v11", "p": "suì", "c": "岁" },
+      { "k": "3-v12", "p": "duō dà", "c": "多大" },
+      { "k": "3-v13", "p": "gāo", "c": "高" }
     ],
     "phrases": [
       {
+        "k": "3-p0",
         "p": "Nǐ jǐ suì? / Nǐ duō dà?",
         "c": "你几岁？/ 你多大？",
         "blocks": [
@@ -466,6 +482,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "3-p1",
         "p": "Wǒ èr shí bā suì.",
         "c": "我二十八岁。",
         "blocks": [
@@ -475,6 +492,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "3-p2",
         "p": "Tā duō gāo?",
         "c": "他多高？",
         "blocks": [
@@ -508,9 +526,9 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Nǐ duō dà?", "c": "你多大？" },
-        { "p": "Wǒ èr shí bā suì. Nǐ ne?", "c": "我二十八岁。你呢？" },
-        { "p": "Wǒ sān shí suì.", "c": "我三十岁。" }
+        { "k": "3-d0", "p": "Nǐ duō dà?", "c": "你多大？" },
+        { "k": "3-d1", "p": "Wǒ èr shí bā suì. Nǐ ne?", "c": "我二十八岁。你呢？" },
+        { "k": "3-d2", "p": "Wǒ sān shí suì.", "c": "我三十岁。" }
       ]
     }
   },
@@ -612,21 +630,22 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "p": "jiā", "c": "家" },
-      { "p": "bàba", "c": "爸爸" },
-      { "p": "māma", "c": "妈妈" },
-      { "p": "gēge", "c": "哥哥" },
-      { "p": "dìdi", "c": "弟弟" },
-      { "p": "jiějie", "c": "姐姐" },
-      { "p": "mèimei", "c": "妹妹" },
-      { "p": "háizi", "c": "孩子" },
-      { "p": "yǒu", "c": "有" },
-      { "p": "jǐ", "c": "几" },
-      { "p": "yí gè jiějie", "c": "一个姐姐" },
-      { "p": "jǐ kǒu rén", "c": "几口人" }
+      { "k": "4-v0", "p": "jiā", "c": "家" },
+      { "k": "4-v1", "p": "bàba", "c": "爸爸" },
+      { "k": "4-v2", "p": "māma", "c": "妈妈" },
+      { "k": "4-v3", "p": "gēge", "c": "哥哥" },
+      { "k": "4-v4", "p": "dìdi", "c": "弟弟" },
+      { "k": "4-v5", "p": "jiějie", "c": "姐姐" },
+      { "k": "4-v6", "p": "mèimei", "c": "妹妹" },
+      { "k": "4-v7", "p": "háizi", "c": "孩子" },
+      { "k": "4-v8", "p": "yǒu", "c": "有" },
+      { "k": "4-v9", "p": "jǐ", "c": "几" },
+      { "k": "4-v10", "p": "yí gè jiějie", "c": "一个姐姐" },
+      { "k": "4-v11", "p": "jǐ kǒu rén", "c": "几口人" }
     ],
     "phrases": [
       {
+        "k": "4-p0",
         "p": "Nǐ jiā yǒu jǐ kǒu rén?",
         "c": "你家有几口人？",
         "blocks": [
@@ -636,6 +655,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "4-p1",
         "p": "Wǒ yǒu yí gè jiějie.",
         "c": "我有一个姐姐。",
         "blocks": [
@@ -670,10 +690,10 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "p": "Nǐ jiā yǒu jǐ kǒu rén?", "c": "你家有几口人？" },
-        { "p": "Wǒ jiā yǒu sì kǒu rén: bàba, māma, gēge hé wǒ.", "c": "我家有四口人：爸爸，妈妈，哥哥和我。" },
-        { "p": "Nǐ yǒu mèimei ma?", "c": "你有妹妹吗？" },
-        { "p": "Méiyǒu, wǒ méiyǒu mèimei.", "c": "没有，我没有妹妹。" }
+        { "k": "4-d0", "p": "Nǐ jiā yǒu jǐ kǒu rén?", "c": "你家有几口人？" },
+        { "k": "4-d1", "p": "Wǒ jiā yǒu sì kǒu rén: bàba, māma, gēge hé wǒ.", "c": "我家有四口人：爸爸，妈妈，哥哥和我。" },
+        { "k": "4-d2", "p": "Nǐ yǒu mèimei ma?", "c": "你有妹妹吗？" },
+        { "k": "4-d3", "p": "Méiyǒu, wǒ méiyǒu mèimei.", "c": "没有，我没有妹妹。" }
       ]
     }
   },
@@ -754,20 +774,21 @@ const UNITS = [
       { "subject": "我要一杯茶。", "pinyin": "wǒ yào yì bēi chá.", "emoji": "☕", "answer": true }
     ],
     "vocab": [
-      { "p": "chī", "c": "吃" },
-      { "p": "hē", "c": "喝" },
-      { "p": "mǐfàn", "c": "米饭" },
-      { "p": "miàn", "c": "面" },
-      { "p": "shuǐ", "c": "水" },
-      { "p": "chá", "c": "茶" },
-      { "p": "kāfēi", "c": "咖啡" },
-      { "p": "hǎo chī", "c": "好吃" },
-      { "p": "xǐhuan", "c": "喜欢" },
-      { "p": "yào", "c": "要" },
-      { "p": "yì bēi chá", "c": "一杯茶" }
+      { "k": "5-v0", "p": "chī", "c": "吃" },
+      { "k": "5-v1", "p": "hē", "c": "喝" },
+      { "k": "5-v2", "p": "mǐfàn", "c": "米饭" },
+      { "k": "5-v3", "p": "miàn", "c": "面" },
+      { "k": "5-v4", "p": "shuǐ", "c": "水" },
+      { "k": "5-v5", "p": "chá", "c": "茶" },
+      { "k": "5-v6", "p": "kāfēi", "c": "咖啡" },
+      { "k": "5-v7", "p": "hǎo chī", "c": "好吃" },
+      { "k": "5-v8", "p": "xǐhuan", "c": "喜欢" },
+      { "k": "5-v9", "p": "yào", "c": "要" },
+      { "k": "5-v10", "p": "yì bēi chá", "c": "一杯茶" }
     ],
     "phrases": [
       {
+        "k": "5-p0",
         "p": "Wǒ yào yì bēi chá.",
         "c": "我要一杯茶。",
         "blocks": [
@@ -777,6 +798,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "5-p1",
         "p": "Zhège hěn hǎo chī!",
         "c": "这个很好吃！",
         "blocks": [
@@ -786,6 +808,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "5-p2",
         "p": "Wǒ xǐhuan hē kāfēi.",
         "c": "我喜欢喝咖啡。",
         "blocks": [
@@ -820,10 +843,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Nǐ hǎo, nǐ yào chī shénme?", "c": "你好，你要吃什么？" },
-        { "p": "Wǒ yào mǐfàn hé chá.", "c": "我要米饭和茶。" },
-        { "p": "Hǎo de. Nǐ yào hē kāfēi ma?", "c": "好的。你要喝咖啡吗？" },
-        { "p": "Bú yào, xièxiè. Wǒ xǐhuan hē chá.", "c": "不要，谢谢。我喜欢喝茶。" }
+        { "k": "5-d0", "p": "Nǐ hǎo, nǐ yào chī shénme?", "c": "你好，你要吃什么？" },
+        { "k": "5-d1", "p": "Wǒ yào mǐfàn hé chá.", "c": "我要米饭和茶。" },
+        { "k": "5-d2", "p": "Hǎo de. Nǐ yào hē kāfēi ma?", "c": "好的。你要喝咖啡吗？" },
+        { "k": "5-d3", "p": "Bú yào, xièxiè. Wǒ xǐhuan hē chá.", "c": "不要，谢谢。我喜欢喝茶。" }
       ]
     }
   },
@@ -910,18 +933,19 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "p": "diǎn", "c": "点" },
-      { "p": "qǐchuáng", "c": "起床" },
-      { "p": "shàngbān", "c": "上班" },
-      { "p": "xiàbān", "c": "下班" },
-      { "p": "shuìjiào", "c": "睡觉" },
-      { "p": "měitiān", "c": "每天" },
-      { "p": "xiànzài", "c": "现在" },
-      { "p": "jīntiān", "c": "今天" },
-      { "p": "méiyǒu", "c": "没有" }
+      { "k": "6-v0", "p": "diǎn", "c": "点" },
+      { "k": "6-v1", "p": "qǐchuáng", "c": "起床" },
+      { "k": "6-v2", "p": "shàngbān", "c": "上班" },
+      { "k": "6-v3", "p": "xiàbān", "c": "下班" },
+      { "k": "6-v4", "p": "shuìjiào", "c": "睡觉" },
+      { "k": "6-v5", "p": "měitiān", "c": "每天" },
+      { "k": "6-v6", "p": "xiànzài", "c": "现在" },
+      { "k": "6-v7", "p": "jīntiān", "c": "今天" },
+      { "k": "6-v8", "p": "méiyǒu", "c": "没有" }
     ],
     "phrases": [
       {
+        "k": "6-p0",
         "p": "Wǒ měitiān qī diǎn qǐchuáng.",
         "c": "我每天七点起床。",
         "blocks": [
@@ -931,6 +955,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "6-p1",
         "p": "Xiànzài jǐ diǎn?",
         "c": "现在几点？",
         "blocks": [
@@ -939,6 +964,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "6-p2",
         "p": "Wǒ zhèngzài chī fàn.",
         "c": "我正在吃饭。",
         "blocks": [
@@ -972,10 +998,10 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "p": "Nǐ měitiān jǐ diǎn qǐchuáng?", "c": "你每天几点起床？" },
-        { "p": "Wǒ měitiān qī diǎn qǐchuáng, bā diǎn shàngbān.", "c": "我每天七点起床，八点上班。" },
-        { "p": "Jīntiān nǐ jǐ diǎn xiàbān?", "c": "今天你几点下班？" },
-        { "p": "Jīntiān wǔ diǎn xiàbān.", "c": "今天五点下班。" }
+        { "k": "6-d0", "p": "Nǐ měitiān jǐ diǎn qǐchuáng?", "c": "你每天几点起床？" },
+        { "k": "6-d1", "p": "Wǒ měitiān qī diǎn qǐchuáng, bā diǎn shàngbān.", "c": "我每天七点起床，八点上班。" },
+        { "k": "6-d2", "p": "Jīntiān nǐ jǐ diǎn xiàbān?", "c": "今天你几点下班？" },
+        { "k": "6-d3", "p": "Jīntiān wǔ diǎn xiàbān.", "c": "今天五点下班。" }
       ]
     }
   },
@@ -1033,18 +1059,19 @@ const UNITS = [
       { "subject": "厕所在哪里？", "pinyin": "cèsuǒ zài nǎlǐ?", "emoji": "🚻", "answer": false }
     ],
     "vocab": [
-      { "p": "zài", "c": "在" },
-      { "p": "nǎlǐ", "c": "哪里" },
-      { "p": "zuǒ", "c": "左" },
-      { "p": "yòu", "c": "右" },
-      { "p": "qiánmiàn", "c": "前面" },
-      { "p": "hòumiàn", "c": "后面" },
-      { "p": "lí", "c": "离" },
-      { "p": "jìn", "c": "近" },
-      { "p": "yuǎn", "c": "远" }
+      { "k": "7-v0", "p": "zài", "c": "在" },
+      { "k": "7-v1", "p": "nǎlǐ", "c": "哪里" },
+      { "k": "7-v2", "p": "zuǒ", "c": "左" },
+      { "k": "7-v3", "p": "yòu", "c": "右" },
+      { "k": "7-v4", "p": "qiánmiàn", "c": "前面" },
+      { "k": "7-v5", "p": "hòumiàn", "c": "后面" },
+      { "k": "7-v6", "p": "lí", "c": "离" },
+      { "k": "7-v7", "p": "jìn", "c": "近" },
+      { "k": "7-v8", "p": "yuǎn", "c": "远" }
     ],
     "phrases": [
       {
+        "k": "7-p0",
         "p": "Cèsuǒ zài nǎlǐ?",
         "c": "厕所在哪里？",
         "blocks": [
@@ -1054,6 +1081,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "7-p1",
         "p": "Yī yuàn lí zhèlǐ hěn jìn.",
         "c": "医院离这里很近。",
         "blocks": [
@@ -1088,10 +1116,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Duì bu qǐ, cèsuǒ zài nǎlǐ?", "c": "对不起，厕所在哪里？" },
-        { "p": "Zài qiánmiàn, zuǒ biān.", "c": "在前面，左边。" },
-        { "p": "Lí zhèlǐ yuǎn ma?", "c": "离这里远吗？" },
-        { "p": "Bù yuǎn, hěn jìn.", "c": "不远，很近。" }
+        { "k": "7-d0", "p": "Duì bu qǐ, cèsuǒ zài nǎlǐ?", "c": "对不起，厕所在哪里？" },
+        { "k": "7-d1", "p": "Zài qiánmiàn, zuǒ biān.", "c": "在前面，左边。" },
+        { "k": "7-d2", "p": "Lí zhèlǐ yuǎn ma?", "c": "离这里远吗？" },
+        { "k": "7-d3", "p": "Bù yuǎn, hěn jìn.", "c": "不远，很近。" }
       ]
     }
   },
@@ -1190,20 +1218,21 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "p": "mǎi", "c": "买" },
-      { "p": "mài", "c": "卖" },
-      { "p": "duōshao qián", "c": "多少钱" },
-      { "p": "kuài", "c": "块" },
-      { "p": "máo", "c": "毛" },
-      { "p": "piányi", "c": "便宜" },
-      { "p": "guì", "c": "贵" },
-      { "p": "zhège", "c": "这个" },
-      { "p": "nàge", "c": "那个" },
-      { "p": "yīfu", "c": "衣服" },
-      { "p": "xié", "c": "鞋" }
+      { "k": "8-v0", "p": "mǎi", "c": "买" },
+      { "k": "8-v1", "p": "mài", "c": "卖" },
+      { "k": "8-v2", "p": "duōshao qián", "c": "多少钱" },
+      { "k": "8-v3", "p": "kuài", "c": "块" },
+      { "k": "8-v4", "p": "máo", "c": "毛" },
+      { "k": "8-v5", "p": "piányi", "c": "便宜" },
+      { "k": "8-v6", "p": "guì", "c": "贵" },
+      { "k": "8-v7", "p": "zhège", "c": "这个" },
+      { "k": "8-v8", "p": "nàge", "c": "那个" },
+      { "k": "8-v9", "p": "yīfu", "c": "衣服" },
+      { "k": "8-v10", "p": "xié", "c": "鞋" }
     ],
     "phrases": [
       {
+        "k": "8-p0",
         "p": "Zhège duōshao qián?",
         "c": "这个多少钱？",
         "blocks": [
@@ -1213,6 +1242,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "8-p1",
         "p": "Tài guì le! Piányi yìdiǎn ba.",
         "c": "太贵了！便宜一点吧。",
         "blocks": [
@@ -1222,6 +1252,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "8-p2",
         "p": "Wǒ yào mǎi zhè jiàn yīfu.",
         "c": "我要买这件衣服。",
         "blocks": [
@@ -1231,6 +1262,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "8-p3",
         "p": "Wǔ kuài sān máo.",
         "c": "五块三毛。",
         "blocks": [
@@ -1264,10 +1296,10 @@ const UNITS = [
         { "k": "understand", "ok": 1 }
       ],
       "lines": [
-        { "p": "Zhège duōshao qián?", "c": "这个多少钱？" },
-        { "p": "Sān shí kuài.", "c": "三十块。" },
-        { "p": "Tài guì le! Piányi yìdiǎn ba.", "c": "太贵了！便宜一点吧。" },
-        { "p": "Hǎo ba, èr shí wǔ kuài.", "c": "好吧，二十五块。" }
+        { "k": "8-d0", "p": "Zhège duōshao qián?", "c": "这个多少钱？" },
+        { "k": "8-d1", "p": "Sān shí kuài.", "c": "三十块。" },
+        { "k": "8-d2", "p": "Tài guì le! Piányi yìdiǎn ba.", "c": "太贵了！便宜一点吧。" },
+        { "k": "8-d3", "p": "Hǎo ba, èr shí wǔ kuài.", "c": "好吧，二十五块。" }
       ]
     }
   },
@@ -1332,16 +1364,17 @@ const UNITS = [
       { "subject": "今天很热。", "pinyin": "jīntiān hěn rè.", "emoji": "☀️", "answer": false }
     ],
     "vocab": [
-      { "p": "tiānqì", "c": "天气" },
-      { "p": "rè", "c": "热" },
-      { "p": "lěng", "c": "冷" },
-      { "p": "xià yǔ", "c": "下雨" },
-      { "p": "qíngtiān", "c": "晴天" },
-      { "p": "yīntiān", "c": "阴天" },
-      { "p": "fēng", "c": "风" }
+      { "k": "9-v0", "p": "tiānqì", "c": "天气" },
+      { "k": "9-v1", "p": "rè", "c": "热" },
+      { "k": "9-v2", "p": "lěng", "c": "冷" },
+      { "k": "9-v3", "p": "xià yǔ", "c": "下雨" },
+      { "k": "9-v4", "p": "qíngtiān", "c": "晴天" },
+      { "k": "9-v5", "p": "yīntiān", "c": "阴天" },
+      { "k": "9-v6", "p": "fēng", "c": "风" }
     ],
     "phrases": [
       {
+        "k": "9-p0",
         "p": "Jīntiān tiānqì zěnmeyàng?",
         "c": "今天天气怎么样？",
         "blocks": [
@@ -1351,6 +1384,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "9-p1",
         "p": "Jīntiān hěn rè.",
         "c": "今天很热。",
         "blocks": [
@@ -1360,6 +1394,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "9-p2",
         "p": "Míngtiān huì xià yǔ.",
         "c": "明天会下雨。",
         "blocks": [
@@ -1369,6 +1404,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "9-p3",
         "p": "Jīntiān bú tài lěng.",
         "c": "今天不太冷。",
         "blocks": [
@@ -1403,10 +1439,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Jīntiān tiānqì zěnmeyàng?", "c": "今天天气怎么样？" },
-        { "p": "Jīntiān hěn rè, qíngtiān.", "c": "今天很热，晴天。" },
-        { "p": "Míngtiān ne?", "c": "明天呢？" },
-        { "p": "Míngtiān huì xià yǔ, yǒu diǎn lěng.", "c": "明天会下雨，有点冷。" }
+        { "k": "9-d0", "p": "Jīntiān tiānqì zěnmeyàng?", "c": "今天天气怎么样？" },
+        { "k": "9-d1", "p": "Jīntiān hěn rè, qíngtiān.", "c": "今天很热，晴天。" },
+        { "k": "9-d2", "p": "Míngtiān ne?", "c": "明天呢？" },
+        { "k": "9-d3", "p": "Míngtiān huì xià yǔ, yǒu diǎn lěng.", "c": "明天会下雨，有点冷。" }
       ]
     }
   },
@@ -1486,17 +1522,18 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "p": "gōngjiāochē", "c": "公共汽车" },
-      { "p": "dìtiě", "c": "地铁" },
-      { "p": "chūzūchē", "c": "出租车" },
-      { "p": "zǒu lù", "c": "走路" },
-      { "p": "zěnme qù", "c": "怎么去" },
-      { "p": "zhàn", "c": "站" },
-      { "p": "piào", "c": "票" },
-      { "p": "yì zhāng piào", "c": "一张票" }
+      { "k": "10-v0", "p": "gōngjiāochē", "c": "公共汽车" },
+      { "k": "10-v1", "p": "dìtiě", "c": "地铁" },
+      { "k": "10-v2", "p": "chūzūchē", "c": "出租车" },
+      { "k": "10-v3", "p": "zǒu lù", "c": "走路" },
+      { "k": "10-v4", "p": "zěnme qù", "c": "怎么去" },
+      { "k": "10-v5", "p": "zhàn", "c": "站" },
+      { "k": "10-v6", "p": "piào", "c": "票" },
+      { "k": "10-v7", "p": "yì zhāng piào", "c": "一张票" }
     ],
     "phrases": [
       {
+        "k": "10-p0",
         "p": "Qù jīchǎng zěnme qù?",
         "c": "去机场怎么去？",
         "blocks": [
@@ -1506,6 +1543,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "10-p1",
         "p": "Wǒ zuò dìtiě qù.",
         "c": "我坐地铁去。",
         "blocks": [
@@ -1515,6 +1553,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "10-p2",
         "p": "Wǒ yào mǎi yì zhāng piào.",
         "c": "我要买一张票。",
         "blocks": [
@@ -1524,6 +1563,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "10-p3",
         "p": "Nǐ shì zěnme lái de?",
         "c": "你是怎么来的？",
         "blocks": [
@@ -1558,10 +1598,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Qù jīchǎng zěnme qù?", "c": "去机场怎么去？" },
-        { "p": "Nǐ kěyǐ zuò dìtiě huò chūzūchē.", "c": "你可以坐地铁或出租车。" },
-        { "p": "Dìtiě zhàn zài nǎlǐ?", "c": "地铁站在哪里？" },
-        { "p": "Zài qiánmiàn, hěn jìn.", "c": "在前面，很近。" }
+        { "k": "10-d0", "p": "Qù jīchǎng zěnme qù?", "c": "去机场怎么去？" },
+        { "k": "10-d1", "p": "Nǐ kěyǐ zuò dìtiě huò chūzūchē.", "c": "你可以坐地铁或出租车。" },
+        { "k": "10-d2", "p": "Dìtiě zhàn zài nǎlǐ?", "c": "地铁站在哪里？" },
+        { "k": "10-d3", "p": "Zài qiánmiàn, hěn jìn.", "c": "在前面，很近。" }
       ]
     }
   },
@@ -1631,17 +1671,18 @@ const UNITS = [
       { "subject": "我头疼。", "pinyin": "wǒ tóu téng.", "emoji": "🤕", "answer": true }
     ],
     "vocab": [
-      { "p": "shēntǐ", "c": "身体" },
-      { "p": "tóu", "c": "头" },
-      { "p": "dùzi", "c": "肚子" },
-      { "p": "téng", "c": "疼" },
-      { "p": "shēngbìng", "c": "生病" },
-      { "p": "yīshēng", "c": "医生" },
-      { "p": "yīyuàn", "c": "医院" },
-      { "p": "bù shūfu", "c": "不舒服" }
+      { "k": "11-v0", "p": "shēntǐ", "c": "身体" },
+      { "k": "11-v1", "p": "tóu", "c": "头" },
+      { "k": "11-v2", "p": "dùzi", "c": "肚子" },
+      { "k": "11-v3", "p": "téng", "c": "疼" },
+      { "k": "11-v4", "p": "shēngbìng", "c": "生病" },
+      { "k": "11-v5", "p": "yīshēng", "c": "医生" },
+      { "k": "11-v6", "p": "yīyuàn", "c": "医院" },
+      { "k": "11-v7", "p": "bù shūfu", "c": "不舒服" }
     ],
     "phrases": [
       {
+        "k": "11-p0",
         "p": "Wǒ tóu téng.",
         "c": "我头疼。",
         "blocks": [
@@ -1651,6 +1692,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "11-p1",
         "p": "Wǒ bù shūfu.",
         "c": "我不舒服。",
         "blocks": [
@@ -1660,6 +1702,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "11-p2",
         "p": "Wǒ xūyào kàn yīshēng.",
         "c": "我需要看医生。",
         "blocks": [
@@ -1694,10 +1737,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Nǐ zěnme le?", "c": "你怎么了？" },
-        { "p": "Wǒ bù shūfu, tóu hěn téng.", "c": "我不舒服，头很疼。" },
-        { "p": "Nǐ xūyào kàn yīshēng ma?", "c": "你需要看医生吗？" },
-        { "p": "Shì de, yīyuàn lí zhèlǐ yuǎn ma?", "c": "是的，医院离这里远吗？" }
+        { "k": "11-d0", "p": "Nǐ zěnme le?", "c": "你怎么了？" },
+        { "k": "11-d1", "p": "Wǒ bù shūfu, tóu hěn téng.", "c": "我不舒服，头很疼。" },
+        { "k": "11-d2", "p": "Nǐ xūyào kàn yīshēng ma?", "c": "你需要看医生吗？" },
+        { "k": "11-d3", "p": "Shì de, yīyuàn lí zhèlǐ yuǎn ma?", "c": "是的，医院离这里远吗？" }
       ]
     }
   },
@@ -1769,17 +1812,18 @@ const UNITS = [
       { "subject": "周末你有空吗？", "pinyin": "zhōumò nǐ yǒu kòng ma?", "emoji": "🎬", "answer": true }
     ],
     "vocab": [
-      { "p": "àihào", "c": "爱好" },
-      { "p": "kàn shū", "c": "看书" },
-      { "p": "tīng yīnyuè", "c": "听音乐" },
-      { "p": "kàn diànyǐng", "c": "看电影" },
-      { "p": "yùndòng", "c": "运动" },
-      { "p": "chàng gē", "c": "唱歌" },
-      { "p": "tiàowǔ", "c": "跳舞" },
-      { "p": "yǒu kòng", "c": "有空" }
+      { "k": "12-v0", "p": "àihào", "c": "爱好" },
+      { "k": "12-v1", "p": "kàn shū", "c": "看书" },
+      { "k": "12-v2", "p": "tīng yīnyuè", "c": "听音乐" },
+      { "k": "12-v3", "p": "kàn diànyǐng", "c": "看电影" },
+      { "k": "12-v4", "p": "yùndòng", "c": "运动" },
+      { "k": "12-v5", "p": "chàng gē", "c": "唱歌" },
+      { "k": "12-v6", "p": "tiàowǔ", "c": "跳舞" },
+      { "k": "12-v7", "p": "yǒu kòng", "c": "有空" }
     ],
     "phrases": [
       {
+        "k": "12-p0",
         "p": "Nǐ de àihào shì shénme?",
         "c": "你的爱好是什么？",
         "blocks": [
@@ -1789,6 +1833,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "12-p1",
         "p": "Wǒ xǐhuan kàn shū hé tīng yīnyuè.",
         "c": "我喜欢看书和听音乐。",
         "blocks": [
@@ -1798,6 +1843,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "12-p2",
         "p": "Zhōumò nǐ yǒu kòng ma?",
         "c": "周末你有空吗？",
         "blocks": [
@@ -1832,10 +1878,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Nǐ de àihào shì shénme?", "c": "你的爱好是什么？" },
-        { "p": "Wǒ xǐhuan kàn diànyǐng hé tiàowǔ. Nǐ ne?", "c": "我喜欢看电影和跳舞。你呢？" },
-        { "p": "Wǒ xǐhuan yùndòng. Zhōumò nǐ yǒu kòng ma?", "c": "我喜欢运动。周末你有空吗？" },
-        { "p": "Yǒu kòng! Wǒmen qù kàn diànyǐng ba.", "c": "有空！我们去看电影吧。" }
+        { "k": "12-d0", "p": "Nǐ de àihào shì shénme?", "c": "你的爱好是什么？" },
+        { "k": "12-d1", "p": "Wǒ xǐhuan kàn diànyǐng hé tiàowǔ. Nǐ ne?", "c": "我喜欢看电影和跳舞。你呢？" },
+        { "k": "12-d2", "p": "Wǒ xǐhuan yùndòng. Zhōumò nǐ yǒu kòng ma?", "c": "我喜欢运动。周末你有空吗？" },
+        { "k": "12-d3", "p": "Yǒu kòng! Wǒmen qù kàn diànyǐng ba.", "c": "有空！我们去看电影吧。" }
       ]
     }
   },
@@ -1891,16 +1937,17 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "p": "dǎsuàn", "c": "打算" },
-      { "p": "míngtiān", "c": "明天" },
-      { "p": "xià ge xīngqī", "c": "下个星期" },
-      { "p": "lǚyóu", "c": "旅游" },
-      { "p": "xuéxí", "c": "学习" },
-      { "p": "jìhuà", "c": "计划" },
-      { "p": "yǐhòu", "c": "以后" }
+      { "k": "13-v0", "p": "dǎsuàn", "c": "打算" },
+      { "k": "13-v1", "p": "míngtiān", "c": "明天" },
+      { "k": "13-v2", "p": "xià ge xīngqī", "c": "下个星期" },
+      { "k": "13-v3", "p": "lǚyóu", "c": "旅游" },
+      { "k": "13-v4", "p": "xuéxí", "c": "学习" },
+      { "k": "13-v5", "p": "jìhuà", "c": "计划" },
+      { "k": "13-v6", "p": "yǐhòu", "c": "以后" }
     ],
     "phrases": [
       {
+        "k": "13-p0",
         "p": "Nǐ míngtiān yǒu shénme jìhuà?",
         "c": "你明天有什么计划？",
         "blocks": [
@@ -1910,6 +1957,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "13-p1",
         "p": "Wǒ dǎsuàn xué Zhōngwén.",
         "c": "我打算学中文。",
         "blocks": [
@@ -1919,6 +1967,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "13-p2",
         "p": "Wǒ yǐhòu yào qù Zhōngguó lǚyóu.",
         "c": "我以后要去中国旅游。",
         "blocks": [
@@ -1953,10 +2002,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Nǐ xià ge xīngqī yǒu shénme jìhuà?", "c": "你下个星期有什么计划？" },
-        { "p": "Wǒ dǎsuàn xuéxí Zhōngwén.", "c": "我打算学习中文。" },
-        { "p": "Nǐ yǐhòu yào qù Zhōngguó ma?", "c": "你以后要去中国吗？" },
-        { "p": "Yào! Wǒ yào qù Zhōngguó lǚyóu.", "c": "要！我要去中国旅游。" }
+        { "k": "13-d0", "p": "Nǐ xià ge xīngqī yǒu shénme jìhuà?", "c": "你下个星期有什么计划？" },
+        { "k": "13-d1", "p": "Wǒ dǎsuàn xuéxí Zhōngwén.", "c": "我打算学习中文。" },
+        { "k": "13-d2", "p": "Nǐ yǐhòu yào qù Zhōngguó ma?", "c": "你以后要去中国吗？" },
+        { "k": "13-d3", "p": "Yào! Wǒ yào qù Zhōngguó lǚyóu.", "c": "要！我要去中国旅游。" }
       ]
     }
   },
@@ -2011,15 +2060,16 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "p": "bǐ", "c": "比" },
-      { "p": "gèng", "c": "更" },
-      { "p": "yíyàng", "c": "一样" },
-      { "p": "bù yíyàng", "c": "不一样" },
-      { "p": "zuì", "c": "最" },
-      { "p": "háishi", "c": "还是" }
+      { "k": "14-v0", "p": "bǐ", "c": "比" },
+      { "k": "14-v1", "p": "gèng", "c": "更" },
+      { "k": "14-v2", "p": "yíyàng", "c": "一样" },
+      { "k": "14-v3", "p": "bù yíyàng", "c": "不一样" },
+      { "k": "14-v4", "p": "zuì", "c": "最" },
+      { "k": "14-v5", "p": "háishi", "c": "还是" }
     ],
     "phrases": [
       {
+        "k": "14-p0",
         "p": "Zhōngwén bǐ Fǎwén nán.",
         "c": "中文比法文难。",
         "blocks": [
@@ -2029,6 +2079,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "14-p1",
         "p": "Zhège hé nàge yíyàng.",
         "c": "这个和那个一样。",
         "blocks": [
@@ -2037,6 +2088,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "14-p2",
         "p": "Nǐ juéde nǎge zuì hǎo?",
         "c": "你觉得哪个最好？",
         "blocks": [
@@ -2071,10 +2123,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Nǐ juéde Zhōngwén nán ma?", "c": "你觉得中文难吗？" },
-        { "p": "Zhōngwén bǐ Fǎwén gèng nán, dànshì hěn yǒu yìsi.", "c": "中文比法文更难，但是很有意思。" },
-        { "p": "Nǐ juéde nǎge zuì nán? Zhōngwén háishi Yìdàlìwén?", "c": "你觉得哪个最难？中文还是意大利文？" },
-        { "p": "Dāngrán shì Zhōngwén!", "c": "当然是中文！" }
+        { "k": "14-d0", "p": "Nǐ juéde Zhōngwén nán ma?", "c": "你觉得中文难吗？" },
+        { "k": "14-d1", "p": "Zhōngwén bǐ Fǎwén gèng nán, dànshì hěn yǒu yìsi.", "c": "中文比法文更难，但是很有意思。" },
+        { "k": "14-d2", "p": "Nǐ juéde nǎge zuì nán? Zhōngwén háishi Yìdàlìwén?", "c": "你觉得哪个最难？中文还是意大利文？" },
+        { "k": "14-d3", "p": "Dāngrán shì Zhōngwén!", "c": "当然是中文！" }
       ]
     }
   },
@@ -2166,19 +2218,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "p": "xiǎng", "c": "想" },
-      { "p": "huì", "c": "会" },
-      { "p": "néng", "c": "能" },
-      { "p": "qǐng", "c": "请" },
-      { "p": "zuò", "c": "坐" },
-      { "p": "dōu", "c": "都" },
-      { "p": "yě", "c": "也" },
-      { "p": "shuō", "c": "说" },
-      { "p": "lái", "c": "来" },
-      { "p": "diànyǐngyuàn", "c": "电影院" }
+      { "k": "15-v0", "p": "xiǎng", "c": "想" },
+      { "k": "15-v1", "p": "huì", "c": "会" },
+      { "k": "15-v2", "p": "néng", "c": "能" },
+      { "k": "15-v3", "p": "qǐng", "c": "请" },
+      { "k": "15-v4", "p": "zuò", "c": "坐" },
+      { "k": "15-v5", "p": "dōu", "c": "都" },
+      { "k": "15-v6", "p": "yě", "c": "也" },
+      { "k": "15-v7", "p": "shuō", "c": "说" },
+      { "k": "15-v8", "p": "lái", "c": "来" },
+      { "k": "15-v9", "p": "diànyǐngyuàn", "c": "电影院" }
     ],
     "phrases": [
       {
+        "k": "15-p0",
         "p": "Wǒ xiǎng qù kàn diànyǐng.",
         "c": "我想去看电影。",
         "blocks": [
@@ -2188,6 +2241,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "15-p1",
         "p": "Nǐ huì shuō Zhōngwén ma?",
         "c": "你会说中文吗？",
         "blocks": [
@@ -2197,6 +2251,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "15-p2",
         "p": "Nǐ míngtiān néng lái ma?",
         "c": "你明天能来吗？",
         "blocks": [
@@ -2206,6 +2261,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "15-p3",
         "p": "Qǐng zuò.",
         "c": "请坐。",
         "blocks": [
@@ -2214,6 +2270,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "15-p4",
         "p": "Wǒmen dōu xiǎng qù.",
         "c": "我们都想去。",
         "blocks": [
@@ -2222,6 +2279,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "15-p5",
         "p": "Wǒ yě xiǎng qù.",
         "c": "我也想去。",
         "blocks": [
@@ -2255,10 +2313,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Wǒ xiǎng qù kàn diànyǐng, nǐ néng lái ma?", "c": "我想去看电影，你能来吗？" },
-        { "p": "Néng! Jǐ diǎn?", "c": "能！几点？" },
-        { "p": "Wǎnshang qī diǎn, zài diànyǐngyuàn.", "c": "晚上七点，在电影院。" },
-        { "p": "Hǎo de, wǒ yě xiǎng kàn nà bù diànyǐng!", "c": "好的，我也想看那部电影！" }
+        { "k": "15-d0", "p": "Wǒ xiǎng qù kàn diànyǐng, nǐ néng lái ma?", "c": "我想去看电影，你能来吗？" },
+        { "k": "15-d1", "p": "Néng! Jǐ diǎn?", "c": "能！几点？" },
+        { "k": "15-d2", "p": "Wǎnshang qī diǎn, zài diànyǐngyuàn.", "c": "晚上七点，在电影院。" },
+        { "k": "15-d3", "p": "Hǎo de, wǒ yě xiǎng kàn nà bù diànyǐng!", "c": "好的，我也想看那部电影！" }
       ]
     }
   },
@@ -2352,19 +2410,20 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "p": "xīngqī", "c": "星期" },
-      { "p": "xīngqīyī", "c": "星期一" },
-      { "p": "xīngqītiān", "c": "星期天" },
-      { "p": "hào", "c": "号" },
-      { "p": "yuè", "c": "月" },
-      { "p": "nián", "c": "年" },
-      { "p": "fēn", "c": "分" },
-      { "p": "yǐhòu", "c": "以后" },
-      { "p": "yǐqián", "c": "以前" },
-      { "p": "bǎi", "c": "百" }
+      { "k": "16-v0", "p": "xīngqī", "c": "星期" },
+      { "k": "16-v1", "p": "xīngqīyī", "c": "星期一" },
+      { "k": "16-v2", "p": "xīngqītiān", "c": "星期天" },
+      { "k": "16-v3", "p": "hào", "c": "号" },
+      { "k": "16-v4", "p": "yuè", "c": "月" },
+      { "k": "16-v5", "p": "nián", "c": "年" },
+      { "k": "16-v6", "p": "fēn", "c": "分" },
+      { "k": "16-v7", "p": "yǐhòu", "c": "以后" },
+      { "k": "16-v8", "p": "yǐqián", "c": "以前" },
+      { "k": "16-v9", "p": "bǎi", "c": "百" }
     ],
     "phrases": [
       {
+        "k": "16-p0",
         "p": "Jīntiān xīngqī jǐ?",
         "c": "今天星期几？",
         "blocks": [
@@ -2373,6 +2432,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "16-p1",
         "p": "Jīntiān xīngqīsān.",
         "c": "今天星期三。",
         "blocks": [
@@ -2381,6 +2441,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "16-p2",
         "p": "Jīntiān bā yuè èrshí hào.",
         "c": "今天八月二十号。",
         "blocks": [
@@ -2390,6 +2451,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "16-p3",
         "p": "Xiànzài shí yī diǎn shí bā fēn.",
         "c": "现在十一点十八分。",
         "blocks": [
@@ -2399,6 +2461,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "16-p4",
         "p": "Shí diǎn yǐqián wǒ zài jiā.",
         "c": "十点以前我在家。",
         "blocks": [
@@ -2408,6 +2471,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "16-p5",
         "p": "Shí diǎn yǐhòu wǒ bú zài jiā.",
         "c": "十点以后我不在家。",
         "blocks": [
@@ -2442,10 +2506,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Jīntiān xīngqī jǐ?", "c": "今天星期几？" },
-        { "p": "Jīntiān xīngqīwǔ, bā yuè shíwǔ hào.", "c": "今天星期五，八月十五号。" },
-        { "p": "Nà wǒmen xīngqītiān jiàn, hǎo ma?", "c": "那我们星期天见，好吗？" },
-        { "p": "Hǎo! Xiàwǔ sān diǎn yǐhòu wǒ dōu yǒu kòng.", "c": "好！下午三点以后我都有空。" }
+        { "k": "16-d0", "p": "Jīntiān xīngqī jǐ?", "c": "今天星期几？" },
+        { "k": "16-d1", "p": "Jīntiān xīngqīwǔ, bā yuè shíwǔ hào.", "c": "今天星期五，八月十五号。" },
+        { "k": "16-d2", "p": "Nà wǒmen xīngqītiān jiàn, hǎo ma?", "c": "那我们星期天见，好吗？" },
+        { "k": "16-d3", "p": "Hǎo! Xiàwǔ sān diǎn yǐhòu wǒ dōu yǒu kòng.", "c": "好！下午三点以后我都有空。" }
       ]
     }
   },
@@ -2588,17 +2652,18 @@ const UNITS = [
       }
     ],
     "vocab": [
-      { "p": "le", "c": "了" },
-      { "p": "chī fàn", "c": "吃饭" },
-      { "p": "píngguǒ", "c": "苹果" },
-      { "p": "hái méi", "c": "还没" },
-      { "p": "zuótiān", "c": "昨天" },
-      { "p": "wán", "c": "完" },
-      { "p": "gōngzuò", "c": "工作" },
-      { "p": "jiǔbā", "c": "酒吧" }
+      { "k": "17-v0", "p": "le", "c": "了" },
+      { "k": "17-v1", "p": "chī fàn", "c": "吃饭" },
+      { "k": "17-v2", "p": "píngguǒ", "c": "苹果" },
+      { "k": "17-v3", "p": "hái méi", "c": "还没" },
+      { "k": "17-v4", "p": "zuótiān", "c": "昨天" },
+      { "k": "17-v5", "p": "wán", "c": "完" },
+      { "k": "17-v6", "p": "gōngzuò", "c": "工作" },
+      { "k": "17-v7", "p": "jiǔbā", "c": "酒吧" }
     ],
     "phrases": [
       {
+        "k": "17-p0",
         "p": "Wǒ chī le liǎng gè píngguǒ.",
         "c": "我吃了两个苹果。",
         "blocks": [
@@ -2608,6 +2673,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "17-p1",
         "p": "Wǒ bù xiǎng chī le.",
         "c": "我不想吃了。",
         "blocks": [
@@ -2616,6 +2682,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "17-p2",
         "p": "Wǒ zuótiān méiyǒu qù gōngzuò.",
         "c": "我昨天没有去工作。",
         "blocks": [
@@ -2625,6 +2692,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "17-p3",
         "p": "Nǐ chī fàn le ma?",
         "c": "你吃饭了吗？",
         "blocks": [
@@ -2633,6 +2701,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "17-p4",
         "p": "Wǒ hái méi chī.",
         "c": "我还没吃。",
         "blocks": [
@@ -2642,6 +2711,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "17-p5",
         "p": "Jīntiān wǎnshang wǒ bù hē jiǔ.",
         "c": "今天晚上我不喝酒。",
         "blocks": [
@@ -2676,10 +2746,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Nǐ chī fàn le ma?", "c": "你吃饭了吗？" },
-        { "p": "Hái méi, wǒ hái zài gōngzuò.", "c": "还没，我还在工作。" },
-        { "p": "Wǒ chī le, wǒ chī le liǎng gè píngguǒ.", "c": "我吃了，我吃了两个苹果。" },
-        { "p": "Zuótiān wǒ méiyǒu chī wǎnfàn, jīntiān hěn è.", "c": "昨天我没有吃晚饭，今天很饿。" }
+        { "k": "17-d0", "p": "Nǐ chī fàn le ma?", "c": "你吃饭了吗？" },
+        { "k": "17-d1", "p": "Hái méi, wǒ hái zài gōngzuò.", "c": "还没，我还在工作。" },
+        { "k": "17-d2", "p": "Wǒ chī le, wǒ chī le liǎng gè píngguǒ.", "c": "我吃了，我吃了两个苹果。" },
+        { "k": "17-d3", "p": "Zuótiān wǒ méiyǒu chī wǎnfàn, jīntiān hěn è.", "c": "昨天我没有吃晚饭，今天很饿。" }
       ]
     }
   },
@@ -2778,19 +2848,20 @@ const UNITS = [
       { "subject": "你为什么不去？", "pinyin": "nǐ wèishénme bú qù?", "emoji": "🤔", "answer": false }
     ],
     "vocab": [
-      { "p": "shéi", "c": "谁" },
-      { "p": "wèishénme", "c": "为什么" },
-      { "p": "yīnwèi", "c": "因为" },
-      { "p": "zhèlǐ", "c": "这里" },
-      { "p": "xuéxiào", "c": "学校" },
-      { "p": "xuésheng", "c": "学生" },
-      { "p": "nǚpéngyou", "c": "女朋友" },
-      { "p": "nánpéngyou", "c": "男朋友" },
-      { "p": "yìxiē", "c": "一些" },
-      { "p": "gōngzuò", "c": "工作" }
+      { "k": "18-v0", "p": "shéi", "c": "谁" },
+      { "k": "18-v1", "p": "wèishénme", "c": "为什么" },
+      { "k": "18-v2", "p": "yīnwèi", "c": "因为" },
+      { "k": "18-v3", "p": "zhèlǐ", "c": "这里" },
+      { "k": "18-v4", "p": "xuéxiào", "c": "学校" },
+      { "k": "18-v5", "p": "xuésheng", "c": "学生" },
+      { "k": "18-v6", "p": "nǚpéngyou", "c": "女朋友" },
+      { "k": "18-v7", "p": "nánpéngyou", "c": "男朋友" },
+      { "k": "18-v8", "p": "yìxiē", "c": "一些" },
+      { "k": "18-v9", "p": "gōngzuò", "c": "工作" }
     ],
     "phrases": [
       {
+        "k": "18-p0",
         "p": "Nǐ shì shéi?",
         "c": "你是谁？",
         "blocks": [
@@ -2799,6 +2870,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "18-p1",
         "p": "Nǐ wèishénme bù qù?",
         "c": "你为什么不去？",
         "blocks": [
@@ -2807,6 +2879,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "18-p2",
         "p": "Yīnwèi wǒ hěn máng.",
         "c": "因为我很忙。",
         "blocks": [
@@ -2816,6 +2889,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "18-p3",
         "p": "Wǒ zài Shànghǎi gōngzuò.",
         "c": "我在上海工作。",
         "blocks": [
@@ -2825,6 +2899,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "18-p4",
         "p": "Zhèlǐ yǒu yìxiē kāfēi.",
         "c": "这里有一些咖啡。",
         "blocks": [
@@ -2834,6 +2909,7 @@ const UNITS = [
         ]
       },
       {
+        "k": "18-p5",
         "p": "Zhè shì wǒ nǚpéngyou.",
         "c": "这是我女朋友。",
         "blocks": [
@@ -2868,10 +2944,10 @@ const UNITS = [
         { "k": "understand", "ok": 0 }
       ],
       "lines": [
-        { "p": "Zhè shì shéi?", "c": "这是谁？" },
-        { "p": "Zhè shì wǒ nǚpéngyou, tā shì xuésheng.", "c": "这是我女朋友，她是学生。" },
-        { "p": "Tā zài nǎlǐ gōngzuò huò xuéxí?", "c": "她在哪里工作或学习？" },
-        { "p": "Tā zài xuéxiào xuéxí, zhèlǐ yǒu yìxiē tā de shū.", "c": "她在学校学习，这里有一些她的书。" }
+        { "k": "18-d0", "p": "Zhè shì shéi?", "c": "这是谁？" },
+        { "k": "18-d1", "p": "Zhè shì wǒ nǚpéngyou, tā shì xuésheng.", "c": "这是我女朋友，她是学生。" },
+        { "k": "18-d2", "p": "Tā zài nǎlǐ gōngzuò huò xuéxí?", "c": "她在哪里工作或学习？" },
+        { "k": "18-d3", "p": "Tā zài xuéxiào xuéxí, zhèlǐ yǒu yìxiē tā de shū.", "c": "她在学校学习，这里有一些她的书。" }
       ]
     }
   }

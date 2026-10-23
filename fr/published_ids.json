@@ -1,5 +1,5 @@
 {
- "_doc": "Livro-razão de ids publicados do francês. Só cresce. Um id daqui só pode sumir do conteúdo se estiver em fr/curriculum-changes.js (STUDY_KEY_MERGES, STUDY_RETIRED_KEYS, UNIT_MERGES, MODULE_MERGES, RETIRED_LESSON_IDS). Atualizar com: node fr/scripts/ids_publicados.js",
+ "_doc": "Livro-razão de ids publicados do site fr/. Só cresce. Um id daqui só pode sumir do conteúdo se estiver em fr/curriculum-changes.js (STUDY_KEY_MERGES, STUDY_RETIRED_KEYS, UNIT_MERGES, MODULE_MERGES, RETIRED_LESSON_IDS). Atualizar com: node scripts/ids_publicados.js fr",
  "cards": [
   "uA1-1-d3",
   "uA1-1-p0",
