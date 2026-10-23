@@ -2841,6 +2841,28 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .wizard-option-icon{ font-size:22px; flex-shrink:0; }
 .wizard-option-label{ font-size:14.5px; font-weight:700; color: var(--ink); }
 
+/* Linhas de escolha do assistente de meta (nível, lições por dia), usadas por shared/wizard.js. Faltavam no zh e os
+   botões apareciam com o estilo padrão do navegador (achado da autora, 2026-10-23). Mesmo bloco do fr. */
+.wizard-level-list{ display:flex; flex-direction:column; position:relative; }
+.wizard-level-row{
+  display:flex; align-items:flex-start; gap:16px; background:none; border:none; cursor:pointer;
+  font-family: var(--font-body); text-align:left; padding:12px 10px; border-radius:12px; position:relative;
+}
+.wizard-level-row:hover{ background: var(--paper-warm); }
+.wizard-level-row.active{ background: var(--paper-warm); }
+.wizard-level-row:not(:last-child)::before{
+  content:''; position:absolute; left:29px; top:44px; bottom:-12px; width:2px; background: var(--paper-line);
+}
+.wizard-level-circle{
+  flex-shrink:0; width:40px; height:40px; border-radius:50%; background: var(--paper); border:2px solid var(--paper-line);
+  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color: var(--ink-soft);
+  z-index:1;
+}
+.wizard-level-row.active .wizard-level-circle{ background: var(--brand-fill); border-color: var(--brand-fill); color: var(--on-brand-fill); }
+.wizard-level-text{ display:flex; flex-direction:column; gap:2px; padding-top:6px; }
+.wizard-level-tier{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; }
+.wizard-level-desc{ font-size:14px; font-weight:700; color: var(--ink); line-height:1.35; }
+
 .wizard-day-row{ display:flex; justify-content:space-between; gap:6px; flex-wrap:wrap; }
 .wizard-day-chip{
   display:flex; flex-direction:column; align-items:center; gap:6px; background:none; border:none; cursor:pointer;

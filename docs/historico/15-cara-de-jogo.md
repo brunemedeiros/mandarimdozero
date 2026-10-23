@@ -136,3 +136,10 @@ parabéns até a autora definir o critério das conquistas (análise em `docs/co
   intacto); Playwright amigos 210/210 (eram 182); i18n unit 2033/2033; k2e 28/28; revisao-ajustes 48/48;
   checkpoint-zh 25/25; ditado 58/58; placeholders 45/45; desafios-conclusao 19/19; trilha mobile_shell 108,
   review_milestone_ui 34. O Postgres local de teste foi recriado neste container (initdb em /tmp/pgdata, porta 54329).
+
+## Janela "Minha meta de estudo" sem estilo no zh (2026-10-23)
+- Achado da autora: no chinês, os passos "Que nível você quer alcançar?" e "Quantas lições por dia" mostravam botões cinza
+  do navegador. Causa: `shared/wizard.js` usa `.wizard-level-*`, que só existia no `fr/index.html` (o zh nunca teve o bloco).
+  Correção: o mesmo bloco copiado para o `zh/index.html` (só tokens que o zh já tem; círculo ativo com `--brand-fill`).
+- Teste novo `tests/metas-wizard/test_playwright.js` 18/18 (fr e zh, claro/escuro, 390px); sem a correção dá 12/18.
+  `tests/cores-marca` 20/20, 6/6, 26/26.
