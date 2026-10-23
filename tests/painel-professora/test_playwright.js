@@ -392,7 +392,9 @@ const PANEL_STUB = (who) => {
       await ev(() => { switchTab('admin-badges'); switchAdminPanelSection('premium'); });
       await page.waitForSelector('#plans-search-input');
       const adminTabs = await ev(() => [...document.querySelectorAll('#view-admin-badges [data-admin-section]')].map(b => b.dataset.adminSection));
-      L('admin: 5 abas, sem as da professora e sem Tags', JSON.stringify(adminTabs) === '["badges","analytics","notifications","reports","premium"]', adminTabs);
+      // TEMPORÁRIO: "privacy" é a aba provisória de Privacidade (shared/privacy-draft.js, só admin). Quando ela sair do Painel de Admin
+      // (menu Mais > Ajuda), tirar "privacy" daqui e voltar o texto para "5 abas".
+      L('admin: 6 abas (5 + a temporária Privacidade), sem as da professora e sem Tags', JSON.stringify(adminTabs) === '["badges","analytics","notifications","reports","premium","privacy"]', adminTabs);
       await page.waitForSelector('[data-plano-matriz] tbody tr');
       L('matriz: 12 permissões x 5 tipos', await ev(() => document.querySelectorAll('[data-plano-matriz] tbody tr').length === 12 && document.querySelectorAll('[data-plano-matriz] thead th').length === 6));
       await page.fill('#plans-search-input', 'a');
