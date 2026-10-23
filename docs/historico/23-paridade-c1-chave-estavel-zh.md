@@ -38,9 +38,26 @@ Grátis x Premium: infraestrutura invisível, tudo grátis; nada muda para o alu
 
 ## Testes
 
-Ver a seção "Números" abaixo. Testes antigos ajustados de propósito: `curriculo-ids/test_chaves.js` e `test_ids_publicados.js`
+Testes antigos ajustados de propósito: `curriculo-ids/test_chaves.js` e `test_ids_publicados.js`
 (todos os sites; simulação de item novo também no zh), `curriculo-ids/test_carregamento.js` (a seção "zh não muda" virou
 "zh com a mesma regra": save antigo, órfão, released, ida e volta, fusão sem módulos), `curriculo-ids/test_unidade_nova.js`
 (fr e zh chamam a função comum), `e4/test_progresso_ida_e_volta.js` (o zh também ganha `released`; +2 checagens da versão),
 `fase-e/harness.js` (extrai as 4 funções novas). Novo: `curriculo-ids/test_save_antigo_browser.js` (navegador, fr e zh: save
 antigo sem `_curriculumVersion` carrega em página nova, nada some, FSRS intacto, órfão no arquivo, salvar e recarregar igual).
+
+### Números (2026-10-23)
+
+- Ids: com o código da `origin/main` (worktree) e com o novo, zh 420 cartões e fr 570, **mesmos ids na mesma ordem e cartões
+  idênticos campo a campo** (sem `studyKey`). `zh/published_ids.json` == ids da `origin/main`.
+- `tests/curriculo-ids`: chaves 38/38, livro-razão 24/24, carregamento 125/125, unidade nova 39/39, cron 29/29, deck de unidade
+  excluída 9/9, navegador fr 10/10, navegador 0b 23/23, save antigo no navegador 29/29. `e4/test_progresso_ida_e_volta.js` 26/26.
+- Bateria completa (todo `tests/*/test_*.js` e `*_unit.js`): 184 de 206 suítes passam; as 22 que falham falham igual (mesma
+  contagem) no código de antes (`88e12a2`): banco-revisao/test_agent_core, desafios-progresso, e4/lote5b, fase-h (2),
+  fase-identity (2), fase-public-deck/legacy_parity, i18n/card_variants_browser, i18n/content_en, k2c/playwright, k2f (3),
+  k2i/reachability, painel-admin/reports_ui, painel-cartoes, painel-professora, pt-servidor/cron_pt, registro,
+  respostas-digitadas/guarda, trilha-tags/unit. **0 falhas novas.**
+- `node scripts/gerar_mapa_cron.js --conferir`: ok (mapa igual, sem deploy). `validate-content-overlay`: ok.
+
+## Passos manuais
+
+Nenhum (nada de banco, secret ou deploy). Publicar só quando a dona pedir o PR.
