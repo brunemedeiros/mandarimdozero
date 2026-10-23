@@ -74,5 +74,11 @@ const LANG_HOOKS = {
   levelTestKeys: { sub: 'zh.levelTest.sub', intro: 'zh.levelTest.intro' },
   // O "Manual da unidade" é da lição de uma unidade; na prova do módulo/nível ele some (openUnitDetail o mostra de novo).
   examScreenOpened: () => { const b = document.getElementById('unit-manual-btn'); if (b) b.style.display = 'none'; },
+  reviewEmptyEmoji: '🍵',
+  speedPromptHTML: (card) => `<div class="hanzi">${cardPromptText(card)}</div>
+      <div class="pinyin">${cardPromptPinyinText(card)}</div>`,
+  clozeCorrectHTML: (b) => `${t('feedback.correctAnswerColon')} <strong>${b.c}</strong> <span class="pinyin">(${b.p})</span>`,
+  phraseFeedbackHTML: (p, trans, correct) => phraseFeedbackDetailHTML(p, trans, correct),
+  phraseHasWord: (word) => (p) => p.c.includes(word.c),
 // --- /E4 hooks ---
 };

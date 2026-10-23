@@ -37,6 +37,11 @@ const LANG_HOOKS = {
   grammarAnswerVerdict: (given, forms) => latinaFr().avaliarComSeparadores(given, forms),
   scenarioOptionHTML: (p) => p.f,
   phraseAnswerHTML: (p) => `<strong>${p.f}</strong> ${audioBtnHTML(p.f)}`,
+  reviewEmptyEmoji: '☕',
+  speedPromptHTML: (card) => `<div class="french">${cardPromptText(card)}</div>`,
+  clozeCorrectHTML: (b) => `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${b.f}</strong></div>`,
+  phraseFeedbackHTML: (p, trans, correct) => `${correct}<div class="feedback-phrase-zh"><strong>${p.f}</strong> ${audioBtnHTML(p.f)}</div><div class="feedback-phrase-trans">${trans}</div>`,
+  phraseHasWord: (word) => { const needle = word.f.replace(/\s*\([^()]*\)/g, '').trim().toLowerCase(); return (p) => p.f.toLowerCase().includes(needle); },
 // --- /E4 hooks ---
   // Família latina (shared/core/familias/latina.js): configuração do FRANCÊS. O português, quando o /pt existir,
   // terá a dele no pt/lang-hooks.js (rascunho em shared/core/familias/latina-idiomas.js). Ver docs/i18n/familia-latina-modulo.md.

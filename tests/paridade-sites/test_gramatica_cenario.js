@@ -275,9 +275,11 @@ check('fr/app.js sem SCENARIO_FLAG_SVG próprio', !/^const SCENARIO_FLAG_SVG/m.t
    ['renderStep desvia para gramática', /if \(renderGrammarUnitStep\(u, stepKey, contentEl, nextBtn\)\) return;/],
    ['Voltar e Continuar da explicação', /grammarStepBack\(stepKey\)[\s\S]*grammarStepNext\(u, stepKey\)/],
    ['nota final da unidade de gramática', /const \{ total, correct \} = unitFinalScore\(u\);/],
-   ['exercício de cenário montado e desenhado', /buildScenarioExercise\(p, i, phrasesWithScenario\)[\s\S]*renderScenarioExercise\(ex, contentEl, nextBtn, total\)/],
+   ['exercício de cenário montado', /buildScenarioExercise\(p, i, phrasesWithScenario\)/],
+   ['exercício de cenário desenhado', /renderScenarioExercise\(ex, contentEl, nextBtn, total\)/],
    ['dica e explicação do cenário', /scenarioHint\(\)[\s\S]*scenarioExplanationHTML\(ex\)/]]
-    .forEach(([n, re]) => check('zh/app.js: ' + n, re.test(zhApp)));
+    // paridade 5d: currentStepDefs, finishCurrentLesson e renderExerciseStep do zh estão em shared/core/ (comuns aos sites)
+    .forEach(([n, re]) => check('zh/app.js: ' + n, re.test(zhApp) || re.test(require('../e4/app-source.js').coreText())));
 }
 
 // zh: sem frase com cenário (o conteúdo de hoje), buildExerciseSet do zh sorteia EXATAMENTE o mesmo de antes

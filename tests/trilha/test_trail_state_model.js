@@ -36,7 +36,7 @@ function load(lang){
   run(read('shared/trail-state-model.js'), 'trail-state-model.js');
   run(require('../../scripts/lib/course-content.js').composedSource(lang) + '\n;this.UNITS=UNITS;this.LEVELS=LEVELS;' + (lang === 'fr' ? 'this.MODULES=MODULES;' : ''), 'content.js');
   const src = require('../e4/app-source').withCore(read(lang + '/app.js'));
-  const fns = ['trailGroups', 'recalculateUnlockedUnits', 'markUnitCompleted'].concat(lang === 'fr' ? ['unitsOfLevel', 'completeModuleUnits'] : []);
+  const fns = ['trailGroups', 'recalculateUnlockedUnits', 'markUnitCompleted'].concat(lang === 'fr' ? ['unitsOfLevel', 'completeModuleUnits'] : ['unitsOfLevel']); // paridade 5d: trailGroups comum usa unitsOfLevel
   fns.forEach(f => run(extractFunction(src, f), lang + '/app.js#' + f));
   // dependências com efeitos colaterais: stubs que só contam chamadas
   run(`this.calls = { xp: 0, fsrs: 0 };

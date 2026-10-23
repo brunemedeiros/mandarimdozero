@@ -185,7 +185,8 @@ for (const [site, fn] of [['fr', 'speakFrenchAudioOnly'], ['zh', 'speakChineseAu
   check('D6 zh: sem "⏭ 跳过" fixo', !zhSrc.includes('跳过'));
   check('D6 zh: selo de pulada usa trail.unit.skippedBadge', zhSrc.includes("${t('trail.unit.skippedBadge')}</span>"));
   for (const site of ['fr', 'zh']){
-    const src = read(site + '/app.js');
+    // paridade 5d: renderSpeedReview é comum (shared/core/licao-base.js); o texto conferido é o app.js + o core
+    const src = read(site + '/app.js') + '\n' + read('shared/core/licao-base.js');
     check(`D6 ${site}: Revisão rápida sem "pts" fixo`, !/\$\{SPEED_STATE\.score\} pts/.test(src));
     check(`D6 ${site}: Revisão rápida usa review.speed.points (3 lugares)`, (src.match(/t\('review\.speed\.points', \{ n: SPEED_STATE\.score \}\)/g) || []).length === 3);
   }
