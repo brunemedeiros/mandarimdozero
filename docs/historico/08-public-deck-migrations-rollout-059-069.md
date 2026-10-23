@@ -476,3 +476,12 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Staging: aplicada (2026-10-23, `118_gcal_retry_review`). Produção: pendente de autorização.
 - Teste local: `tests/aulas-presenca/run.sh` 117+118 35/35.
 
+## 119 -- Google Agenda: Pular por agora e Fora do site (2026-10-23, pedido da autora)
+
+- `shared/supabase_migrations/119_gcal_review_skip_outside.sql`: `google_calendar_events.skipped_at`,
+  `google_calendar_rules.ignore_kind` ('not_lesson' | 'outside'); `_gcal_apply`, `gcal_ingest`, `google_calendar_status`
+  (conta `skipped`) e `google_calendar_resolve` (ações `skip`, `unskip`, `outside`) refeitos; `google_calendar_review_items()`
+  (caixa inteira, sem o limite de 300). Só `add column if not exists` e `create or replace`.
+- Staging: aplicada (2026-10-23, `119_gcal_review_skip_outside`). Produção: pendente de autorização (junto com a 118).
+- Teste local: `tests/aulas-presenca/run.sh` 117+118+119 42/42; painel-professora 673/673.
+

@@ -4104,8 +4104,15 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .gcal-review-actions select { flex: 1; min-width: 180px; }
 .gcal-remember { font-size: 0.85rem; display: flex; gap: 6px; align-items: center; }
 .gcal-counts, .gcal-account { margin: 0; }
+.gcal-review-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.gcal-review-bar select { max-width: 240px; }
+.gcal-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.gcal-tab { border: 1px solid var(--border, rgba(0,0,0,.12)); background: transparent; color: inherit; border-radius: 999px; padding: 6px 14px; font: inherit; font-weight: 700; cursor: pointer; }
+.gcal-tab.is-active { background: var(--brand-fill); color: var(--on-brand-fill); border-color: var(--brand-fill); }
+.gcal-skip { background: none; border: none; padding: 0; font: inherit; cursor: pointer; }
+.gcal-more { align-self: flex-start; }
 @media (max-width: 600px) {
-  .gcal-actions .btn, .gcal-review-actions .btn { min-height: 44px; }
+  .gcal-actions .btn, .gcal-review-actions .btn, .gcal-tab, .gcal-skip, .gcal-more { min-height: 44px; }
 }
 /* Link de agenda (103): assinatura ICS em Aulas (professora e aluno) */
 .calendar-feed-box > summary { cursor: pointer; list-style: revert; }
