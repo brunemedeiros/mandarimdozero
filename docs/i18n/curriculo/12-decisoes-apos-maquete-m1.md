@@ -1136,3 +1136,16 @@ Nada aplicado ao site. Continuam pendentes (seção 7 do `08 v2`, com contexto):
 220. ***le restaurant*** vira cartão na unidade "Pedir no restaurante" (módulo "Comer e beber").
 221. **Como falar com a dona**: sempre o nome do módulo e da unidade, nunca só a posição ou o id; explicar termos internos; contexto completo (também no `auditor-curricular`).
 222. **Revisão do cartão "Na frase" pedida**: antes de seguir com a decisão 211, repensar o que é o cartão "Na frase", onde as frases de exemplo são usadas (exemplo na ficha da palavra, cartão de Revisão e exercícios da lição) e o que cada uso pode conter.
+223. **Nota de *excusez-moi* / *excuse-moi***: fica na unidade "Cumprimentar e se despedir" (módulo "Apresentar-se"), junto de *pardon* (e a menção a *désolé(e)*, que tem
+     cartão em "Convidar, aceitar, recusar e se desculpar"); não se repete em "Perguntar e indicar o caminho". Confiança alta.
+224. ***prendre*** continua com cartão em "Pegar transporte" (módulo "Na cidade"). Entram na lista fechada de expressões fixas ***je vais prendre*** e ***je voudrais*** (café e
+     restaurante), que aparecem antes do cartão. "Verbos muito usados" fica com os seis verbos.
+225. **"Vistas"**: as palavras de uma nota de vocabulário contam como vistas nos **diálogos** (com tradução); **não** contam em ditados nem em Desafios. A nota fica dentro da lição
+     e não dá para pular no sistema; se o aluno escolhe não ler, o prejuízo é dele.
+226. **"Na frase" com palavra nova (refina a 211 e a 222)**: a frase com palavra nova pode aparecer na ficha, na Revisão e nos exercícios da lição que **não pedem digitar**
+     (reordenar, traduzir por blocos, cenário, completar tocando). Fica **fora do Ponto de verificação do módulo e do Teste de Nível** (onde o aluno digita a frase inteira ou
+     escreve o que ouviu), **exceto** quando a frase é **essencial para a função comunicativa** da unidade (ex.: *L'addition, s'il vous plaît* em "Pedir no restaurante"):
+     essa o aluno precisa saber usar, e pode ser cobrada. Cada frase "Na frase" tem então uma marca: **essencial** (cobrável em qualquer lugar) ou **só exemplo** (nunca no
+     exame do módulo nem no Teste de Nível). A marca é decidida por frase, na revisão de texto abaixo, e a regra de exclusão é aplicada por função pura testável (não por `if` solto).
+227. **Revisão de texto das frases "Na frase"**: passar por cada cartão do mapa, marcar cada frase como essencial ou só exemplo com esse critério, e reportar à dona por módulo
+     e unidade. Faz parte da implementação do conteúdo (módulo a módulo), junto com a marca no código.
