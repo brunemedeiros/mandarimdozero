@@ -9,6 +9,7 @@ numa gramática ganha a sua **versão grátis** numa unidade de vocabulário ant
 passou a M3.7 (a M3.6 é a unidade nova de vocabulário "Frequência", `A1-35`).
 **Correções da auditoria de 2026-10-21** (decisão 136; `auditoria/2026-10-21-a1-a2-rodada-equidade.md`): diálogos negativos posicionados na M3.1, M6.1 e M8.3; fala com *combien de* na
 M2.1; N43 sem *savoir* nem *pas encore*. O `08 v2` registra as mesmas posições (nota da M1.2 incluída).
+**Auditoria final** (decisões 197 e 202 do `12`, 2026-10-23; `auditoria/2026-10-22-a1-a2-auditoria-final.md`): *aimer* (M4.1) e *parler* (M2.5) viram cartão, então os diálogos negativos da M4.1 e da M2.5 usam só cartões; *pourquoi / parce que* sai da lista da M6.6 e fica na M9.3, como no `08 v2`.
 
 ## Princípio (versão 2)
 
@@ -33,12 +34,12 @@ M2.1; N43 sem *savoir* nem *pas encore*. O `08 v2` registra as mesmas posições
 | M2.1 | diálogo novo: *Tu as des frères ? Non, je n'ai pas de frère.* | **sim, breve**: *un, une, des* viram *de* depois de *pas* (regra que não se deduz; versão grátis da tela da M2.2, decisão 126) |
 | M2.2 (g) | *J'ai une voiture* → *Je n'ai pas de voiture* | **tela** na gramática de artigos (regra que não se deduz; sistematiza a nota da M2.1) |
 | M2.3 | *Il est grand ? Non, il n'est pas très grand.* | não |
-| M2.5 | *Tu parles anglais ? Non, je ne parle pas anglais.* | não |
+| M2.5 | *Tu parles anglais ? Non, je ne parle pas anglais.* (*parler* é cartão da M2.5, decisão 197) | não |
 | M3.1 | diálogo novo: *Tu te lèves tôt ? Non, je ne me lève pas tôt. Je me lève tard.* (decisão 136) | não (versão grátis por diálogo do *ne* antes do pronome da M3.4) |
 | M3.3 | *Tu travailles le samedi ? Non, je ne travaille pas le samedi.* | não |
 | M3.6 | *jamais* vira cartão (unidade "Frequência", decisão 127): *Tu travailles le dimanche ? Non, je ne travaille jamais le dimanche.* (proposta de exemplo, a escrever com a unidade) | **sim, breve**: *ne... jamais*, o *jamais* fica no lugar do *pas* (versão grátis da M3.7) |
 | M3.4 (g), M3.7 (g) | *ne* antes do pronome; *ne... jamais* | **telas** já previstas (o *ne* antes do pronome: versão grátis pelo diálogo novo da M3.1, decisão 136) |
-| M4.1 | *Tu aimes le poisson ? Non, je n'aime pas le poisson.* | não (o artigo não muda; vira contraste na nota do M4.2) |
+| M4.1 | *Tu aimes le poisson ? Non, je n'aime pas le poisson.* (*aimer* é cartão da M4.1, decisão 197) | não (o artigo não muda; vira contraste na nota do M4.2) |
 | M4.2 | *Je mange de la salade.* → *Je ne mange pas de salade.* | **sim** (a regra *de*; ideia da dona); cita o contraste com *le poisson* do M4.1 |
 | M5.3 | *pas cher* (cartão) | **sim, Realidade**: *Ce n'est pas cher* → *C'est pas cher* (o *ne* cai na fala) |
 | M6.1 | diálogo novo: *Ne tournez pas à gauche, tournez à droite !* (decisão 136) | não (versão grátis por diálogo do imperativo negativo da M6.2) |
@@ -105,8 +106,8 @@ As perguntas **pessoais** (*comment, quel, d'où, qui, combien de*) já nascem n
 
 1. **"Palavras interrogativas: sobre pessoas" no M2** (M2.6, depois de M2.5 e antes de M2.7): *qui, comment, quel / quelle, d'où, combien de*. Todas já vistas em M1 e M2.
    4 telas, 6 a 8 exercícios. Serve de ponte para a M2.7 "Perguntar: sim ou não".
-2. **"Palavras interrogativas: lugar, hora e coisas" no M6** (posição final M6.6, depois de "Pegar transporte"; decisões 94 e 98): *où, quand, à quelle heure, qu'est-ce que / que / quoi, pourquoi / parce que*.
-   *Où* e *quand* já tiveram 2 ou 3 contatos; *pourquoi / parce que* ainda é novo e entra por diálogo na M9.3 (decisões 71 e 118).
+2. **"Palavras interrogativas: lugar, hora e coisas" no M6** (posição final M6.6, depois de "Pegar transporte"; decisões 94 e 98): *où, quand, à quelle heure, combien, qu'est-ce que / que / quoi*.
+   *Où* e *quand* já tiveram 2 ou 3 contatos. ***pourquoi / parce que* não entra na M6.6**: é novo e entra por diálogo e nota na **A1 M9.3** (convites; decisões 71 e 118), como no `08 v2` (alinhado pela decisão 202 do `12`).
 3. **A2 M9.4**: só os três registros lado a lado e a inversão completa.
 
 Efeito: A1 passa de 20 para **22 gramáticas** (+2, ~+25 min); M2 fica com **8 unidades** e M6 com **7**. (Depois, com 10 módulos: A1 com **23** gramáticas, M2 com **7** unidades, porque a gramática de países foi para a M8.2, e M6 com **6**; decisões 98, 109 e 112.) *Alternativa mais leve*: uma gramática só, no M6, que retoma tudo;

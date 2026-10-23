@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar. Status (2026-10-22): A2 M1 a M10 fechados; aguarda auditoria final e aprovação do mapa.** Mapa final do A1 (9 módulos, 56 unidades, 344 cartões) e do A2 (10 módulos, 58 unidades, 427 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar. Status (2026-10-23): auditoria final feita e respondida (decisões 197 a 203); aguarda as pendências da decisão 203 e a aprovação do mapa.** Mapa final do A1 (9 módulos, 56 unidades, 349 cartões) e do A2 (10 módulos, 58 unidades, 426 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
@@ -114,4 +114,22 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   **A2 com 427 cartões (417 + 10)**, não 424 (a conta histórica não desfez *la police* na M2.5 nem *la poste, la mairie* na M7.5 quando voltaram a 12); ~33h10; notas do A2
   ~65. A1 sem mudança: 9 módulos, 56 unidades (33 + 23), 344 cartões, ~28h45. Seção 7 do `08 v2` limpa: ficam só as pendências abertas (inclusive a nota "14 de julho"
   do A1 M3.5, proposta a confirmar); a lista "só para conferir" virou a lista de conferência da regra 14, na seção 3.2.
-- **Status: A2 M1 a M10 fechados; aguarda auditoria final (agente `auditor-curricular`) e aprovação do mapa** (decisões 146 e 196).
+- Status em 2026-10-22: A2 M1 a M10 fechados; aguarda auditoria final e aprovação do mapa (decisões 146 e 196). *Superado pela atualização de 2026-10-23, abaixo.*
+
+## Atualização 2026-10-23
+
+- Auditoria final do A1 e do A2: `auditoria/2026-10-22-a1-a2-auditoria-final.md` (agente `auditor-curricular`), respondida pelas **decisões 197 a 203 no `12`**.
+- **197**: cartões para palavras muito comuns, cada uma na unidade da função: *aimer* (A1 M4.1), *parler* (M2.5), *l'enfant* (M2.1, sai da A2 M1.1), *le jour* (M3.3),
+  *l'anniversaire* (M3.5, sai da M9.3), *l'addition* (M4.5), *acheter* (M5.3), *voir* (M9.1; a mensagem dizia "A2 M9.1", aplicado na A1 M9.1, a confirmar), *la saison* (M8.5),
+  *l'après-midi* (M3.1) e *l'ami / l'amie* (M9.3, porque não cabia na M2.1). Para nota de vocabulário por passar do limite (a revisar pela dona): *adorer* (M4.1),
+  *la ville* (M2.5), *se coucher* (M3.1), *la boisson* (M4.5), *la chemise* (M5.3). Acima do limite sem palavra que possa sair (a revisar): M2.1 (11), M3.3 (12), M8.5 (11),
+  M9.1 (11). A exceção dos verbos irregulares **não foi aprovada**.
+- **198 a 201**: diálogo "No parque" da M1.3 como exceção da regra 11; nota "Mais família" (*les grands-parents, marié(e)*) na M2.1; *Ne quitte pas !* junto de
+  *ne quittez pas* (A2 M9.1); **todos os Pontos de verificação revisados** depois das mudanças (regra 15 nova no `15`; herdar a aprovação é pergunta aberta).
+- **202**: correções do editor no `08 v2` (destino das ~60 frases publicadas, exercícios de `A1-g1`, `g2`, `g7`, `g9`, ganchos, pares da regra 14, contagens, diálogos das
+  lições aposentadas, notas N28 e N09, regra 1, `16` alinhado, `UNITS` reordenado pelo `curriculo_ops.js` com teste).
+- **203 (pendentes, com contexto na seção 7 do `08 v2`)**: cartão dos verbos irregulares pelo primeiro uso; frase `A1-7-p5`; nota do 14 de julho; listas A1 M3.6 e M8.6,
+  *laid* e cortes da decisão 129, com *le portable* (A2 M9.1) e *le mail* (A2 M9.6).
+- **Totais novos**: A1 com 9 módulos, 56 unidades (33 + 23), **349 cartões**, **~29h35** (M1 3h35, M2 3h35, M3 3h35, M4 3h15, M5 2h55, M6 3h05, M7 2h50, M8 3h15, M9 3h30),
+  ~143 lições, notas ~133; A2 com 10 módulos, 58 unidades (36 + 22), **426 cartões (416 novos + 10 publicados)**, ~33h10 (sem mudança), notas ~74.
+- **Status: aguarda as pendências da decisão 203 e a aprovação final do mapa.**

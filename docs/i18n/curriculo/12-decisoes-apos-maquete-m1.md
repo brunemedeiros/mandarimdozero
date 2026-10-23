@@ -888,3 +888,80 @@ Base: respostas da dona no corpo da conversa, aprovadas em 2026-10-22. Aplicado 
        palavras a revisar pela dona" ficam só as que nunca tiveram aprovação explícita (A1 M3.6, A1 M8.6, os cortes da decisão 129 e *confirmer* na A2 M9.3); entram a
        nota do 14 de julho (decisão 194) e, na linha da auditoria, a frase `A1-7-p5` (*partir* e *en voyage* antes dos cartões).
      - **Status**: A2 M1 a M10 fechados; o mapa A1 + A2 **aguarda a auditoria final e a aprovação da dona**.
+
+---
+
+# Vigésima oitava rodada (2026-10-23): respostas à auditoria final do A1 e do A2
+
+Base: auditoria `auditoria/2026-10-22-a1-a2-auditoria-final.md` (agente `auditor-curricular`) e respostas da dona, aprovadas em 2026-10-23. Aplicado em
+`08-mapa-final-a1-a2-v2.md` (cabeçalho, seções 1, 2.1, 3.1, 3.2, 4.1, 4.2, 5, 6, 7, 8 e Resumo), `15` (regras 11, 13, 14 e 15 nova), `16` e `00`. Nada aplicado ao site.
+
+197. **Cartões para palavras muito comuns (aprovado, SEM os verbos irregulares; Bloqueia 1 da auditoria).** Entram como cartão, cada uma na unidade da função:
+     *aimer* (A1 M4.1), *parler* (A1 M2.5), *l'enfant* (A1 M2.1; sai da A2 M1.1), *le jour* (A1 M3.3), *l'anniversaire* (A1 M3.5; **sai da A1 M9.3**, onde era cartão),
+     *l'addition* (A1 M4.5), *acheter* (A1 M5.3), *voir* (A1 M9.1), *la saison* (A1 M8.5), *l'après-midi* (A1 M3.1) e ***l'ami / l'amie*** (A1 M9.3).
+     - ***voir***: a mensagem da dona diz "A2 M9.1", mas a proposta da auditoria (aprovada) é a **A1 M9.1** "Falar de lazer" (*Quel film vous allez voir ?*, publicado; *voir* também
+       é usado na A1 M3.3 e na A2 M2.5 *Je n'ai rien vu*); a A2 M9.1 é "Telefonar e deixar recado". **Aplicado na A1 M9.1; a confirmar pela dona.**
+     - ***l'ami / l'amie*** (decisão do editor, pedida pela dona): **não cabe na A1 M2.1** (com *l'enfant* ela já passa do limite, ver abaixo). Vai para a **A1 M9.3** "Convidar",
+       que fica com 10 porque *l'anniversaire* sai de lá para a M3.5 (convidar amigos: *Tu viens avec tes amis ?*). Fica no A1, onde é usada (`A1-g2`, `A1-19`, `A1-20`).
+       *le copain / la copine* continua cartão da A2 M1.1 (lexema diferente: dois cartões, regra 14); a nota *copain / copine* fica com o cartão na A2 M1.1 e passa a citar
+       *mon ami(e)* só em frase (é cartão do A1), sem "você já viu". A A2 M1.1 perde *l'enfant* e fica com **11**, sem palavra substituta (dentro do limite do A2, como a
+       A2 M9.1, decisão 189).
+     - **Limite da regra 13** (A1: 10, com as exceções aceitas M1.2 11, M3.1 12, M3.3 11, M4.1 11; conjunto fechado pode passar). Onde a unidade passou do limite, a palavra
+       **menos importante que ainda não é cartão publicado** vai para uma **nota de vocabulário** na mesma unidade, **a revisar pela dona**:
+       - A1 M4.1 (11 → 12): ***adorer*** vai para a nota "Mais gostos" (*adorer*, *aimer bien*); *aimer* e *détester* (publicado) ficam como cartões. Custo: as frases
+         publicadas com *adorer* trocam (decisão 202).
+       - A1 M2.5 (10 → 11): ***la ville*** vai para a nota de vocabulário "Onde moro" (os outros 8 são cartões publicados; *habiter* é a função e a base da reescrita da `A1-g3`).
+         Custo: *Quel est le nom de la ville ?* (M1.2), *Le père travaille en ville.* (M2.1) e *En ville, je prends le vélo.* (M6.5, chave nova da decisão 136) e
+         *centre-ville* (M6.1, M6.5) ficam sem cartão: trocar, ou a dona aceita a M2.5 com 11 como exceção (alternativa sem efeito em frase).
+       - A1 M3.1 (12 → 13): ***se coucher*** vai para a nota "Mais rotina" (nenhum uso no conteúdo publicado; *tôt / tard* ficam juntos no diálogo novo da versão grátis da M3.4;
+         a M3.4 continua com dois pronominais publicados como cartão, *se réveiller, se lever*).
+       - A1 M4.5 (10 → 11): ***la boisson*** vai para a nota "Mais no restaurante" (nenhum uso no publicado; *l'entrée* fica pela fórmula *entrée, plat, dessert*).
+       - A1 M5.3 (10 → 11): ***la chemise*** vai para a nota "Outras roupas" (com *la veste, le manteau, le sac*, que já aparecem em frases publicadas da `A1-10`).
+     - **Sem palavra que possa sair** (todas as outras são cartões publicados ou do conjunto fechado): ficam acima do limite, como exceção **a revisar pela dona**:
+       A1 M2.1 (**11**: os 10 publicados + *l'enfant*), A1 M3.3 (**12**: os dias são conjunto fechado e os outros 4 são publicados), A1 M8.5 (**11**: os 10 publicados +
+       *la saison*), A1 M9.1 (**11**: os 10 publicados + *voir*). A A1 M3.5 vai a **16** (conjunto fechado dos meses, já com 4 lições + Revisão).
+     - **Contas**: A1 com **349 cartões** (344 + 10 entradas, *l'anniversaire* só muda de unidade, − 5 que vão para nota): M1 60, M2 **32**, M3 **50**, M4 41, M5 30, M6 30,
+       M7 34, M8 **41**, M9 **31**. A2 com **426** (**416 novos** + 10 publicados; −1 por *l'enfant*): A2 M1 **47**. **Tempo do A1 ~29h35** (+50 min): M2 3h15 → **3h35**
+       (M2.1 e M2.3 com 4 lições, decisão 202), M3 3h25 → **3h35** (+1 palavra na M3.3 e na M3.5), M8 3h05 → **3h15** (M8.5 com 4 lições), M9 3h20 → **3h30** (M9.1 com
+       4 lições); M4 e M5 sem mudança (troca uma por uma). M2 e M3 passam de 3h30 (a revisar pela dona; M1 3h35 e M3 já aceitos pela decisão 142). A2 sem mudança (~33h10).
+       Lições do A1 ~143 (+4: M2.1, M2.3, M8.5, M9.1). Notas do A1 ~133 (127 recontadas pela auditoria + 6 de vocabulário: "Mais família", "Onde moro", "Mais rotina",
+       "Mais gostos", "Mais no restaurante", "Outras roupas").
+     - **A exceção "verbo de gramática em fórmula" para os irregulares NÃO foi aprovada** (ver 203).
+198. **Diálogo publicado da A1 M1.3 "No parque"** (*Quel âge a ta fille ? ... Et ton fils ? Ils sont grands !*, `A1-3`): *la fille, le fils* (cartões da M2.1) e *grand* (M2.3)
+     ficam como **exceção formal da regra 11** do `15` ("como entrada", já aceita no `09`), como *pour la santé* (decisão 171).
+199. **A1 M2.1**: *les grands-parents* e *marié(e)* ficam numa **nota de vocabulário "Mais família"** (sem cartão; Exp, alta, *nova*; exemplos *mes grands-parents*, *je suis
+     marié(e)*); *l'enfant* vira cartão (197), com a frase *J'ai deux enfants.* *marié* continua sem cartão (o cartão *se marier* é da A2 M1.5).
+200. ***ne quittez pas*** (A2 M9.1) é só formal: entra ***Ne quitte pas !*** em frase do diálogo da M9.1, junto do cartão (regra 1, formal e informal juntos). O cartão não muda.
+201. **Pontos de verificação depois das mudanças de currículo.** Todos os Pontos de verificação existentes (o da unidade, agora "Revisão da unidade", e o do módulo) são
+     **revisados**: conteúdo regenerado ou conferido contra o mapa novo, por script, junto com a reorganização (lista de implementação na seção 5 do `08 v2`; regra 15 do `15`).
+     **Pergunta aberta (a dona decide depois):** herdar ou não a aprovação já dada por alunos. Contexto para a decisão: os ids de módulo foram escolhidos por sobreposição de
+     unidades (`08 v2`, seção 5); o `A1-m4` antigo e o novo "Na cidade" dividem só 1 unidade de 6 (`A1-14`) e a auditoria recomenda não herdar; o `A1-m3` divide 2 unidades com
+     o novo M4 e 2 com o novo M5 (empate, falta um critério de desempate); os módulos novos `A1-m7`, `A1-m8`, `A1-m9` nunca foram aprovados por ninguém.
+202. **Correções do editor (do relatório, sem perguntar)**, aplicadas no `08 v2`:
+     - **Destino das ~60 frases publicadas sem destino** (seção 7 do `08 v2`, item 11 de "Conteúdo publicado que precisa de reescrita"), com a chave quando a frase serve na
+       unidade de destino e chave nova quando é trocada: 6 das 11 da `A1-4`; as 4 frases de mês da `A1-7` com a chave para a M3.5 (e *Aujourd'hui, il fait beau.* com a chave para
+       a M8.5); *Le train part à huit heures.* (M6.5) → *Le bus est à huit heures.*; *j'ai appris*, *j'ai visité*, *j'ai voyagé*, *au restaurant* (M9.4) trocados; *Il fait zéro
+       degré dehors.* (M8.5) trocada; *dans* e *sur* antes da M7.5; as da M1.1, M1.2, M2.3, M3.1, M4.1 a M4.3, M5.3, M8.5, M9.1.
+     - **Exercícios sem palavra ensinada**, reescritos na lista: `A1-g1` (*Ils ___ deux enfants.*, *Elle ___ faim.*), `A1-g2` (*mon amie*, *Son école est loin.*), `A1-g7`
+       (*livre*, *chat*), `A1-g9` (*arrivés*, *visité*, *marché*).
+     - **Ganchos**: A1 M8.1 sem *vacances* (*Je vais aux États-Unis, je pars en Italie*); A2 M2.1 *quand on est partis* no lugar de *arrivés*.
+     - **Lista de conferência da regra 14**: + *à pied / le pied*, *la date de naissance / la naissance*, *la carte / la carte postale*, *tard / plus tard*, *vite / à très vite*,
+       *inviter / l'invitation*, *urgent / les urgences*, *le vendeur / vendre*, *le séjour / le titre de séjour*, *se passer / passer l'aspirateur*, *tout droit / avoir le droit
+       de*, *OK, ça marche / marcher*; e, desta rodada, *l'ami(e)* (A1 M9.3) x *le copain / la copine* (A2 M1.1), *l'enfant* x *l'enfance*, *le jour* x *un jour* e *le jour
+       férié*, *acheter* x *vendre*.
+     - **Contagens**: "416 novos" da seção 5 era 417 até a decisão 196 e volta a **416** com a 197; "M8.7" → **M8.6**; totais parciais antigos na coluna "Muda" do A2 (M3.1,
+       M7.4, M9.1) tirados; notas do A2 **~74** (75 com *le château*); A1 M2.3 com 11 palavras = **4 lições + Revisão** (regra 13), M2 +10 min.
+     - **Diálogos das 8 lições aposentadas** (seção 5): cada um entra na lição nova que fecha a unidade (a última lição de vocabulário antes da Revisão), com a fala trocada
+       onde a decisão 202 manda.
+     - **Notas**: N28 sem "(unidade anterior)"; N09: *huitante* é só de alguns cantões suíços (Vaud, Valais, Fribourg), a Bélgica diz *quatre-vingts* (confiança alta);
+       regra 1: *Repose-toi !* junto de *Reposez-vous !* (A2 M4.1) e *Excuse-moi* junto de *Excusez-moi* (A1 M9.3).
+     - **`16`**: *pourquoi / parce que* fica na A1 M9.3 (convites), como no `08 v2`; sai da lista da M6.6. (A mensagem da dona diz "M9.4"; no mapa, *pourquoi ? / parce que* é
+       nota da M9.3, que é a posição aplicada.)
+     - **Dependência de código** (Bloqueia 2): a ordem de desbloqueio vem do array `UNITS` (`unitsOfLevel`, `markUnitCompleted`, `isFirstOfLevel` em `fr/app.js`); se a `A1-15`
+       só mudar de `level`, vira a 1ª unidade do A2 para o código (aberta para todos). Na seção 5 do `08 v2`: o `curriculo_ops.js` **reordena `UNITS` junto** com `level` e
+       `unitIds`, com teste de `isFirstOfLevel` e da cadeia.
+203. **PENDENTES (a dona pediu mais contexto; nada decidido)**, na seção 7 do `08 v2` com o contexto: (a) cartão dos verbos irregulares (*aller, faire, vouloir, pouvoir, devoir,
+     savoir, connaître, dire, donner*) pelo primeiro uso na trilha livre, já que a exceção foi **recusada**; (b) a frase `A1-7-p5` *La semaine prochaine, je pars en voyage.*;
+     (c) a nota do 14 de julho (A1 M3.5 x A2 M10.3); (d) as listas A1 M3.6 e M8.6, *laid* na nota da A1 M2.3 e os cortes da decisão 129, com *le portable* (A2 M9.1) e *le mail*
+     (A2 M9.6, no lugar de *l'écran*). As listas dessas unidades ficam como estão.
+     - **Status**: auditoria final feita e respondida (197 a 203); o mapa A1 + A2 aguarda as pendências da 203 e a aprovação final da dona.
