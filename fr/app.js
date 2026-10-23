@@ -3561,7 +3561,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
           <div class="prompt-translation">${ex.phrase.t}</div>
           ${audioBtnHTML(ex.phrase.f, 'audio-btn-lg')}
         </div>
-        <div class="reorder-wrap-hint">Toque nas palavras na ordem certa. Toque numa já colocada para devolvê-la.</div>
+        <div class="reorder-wrap-hint">${t('fr.reorder.tapHint')}</div>
       `}
       <div class="reorder-answer-slots" id="reorder-answer-slots"></div>
       <div class="reorder-blocks" id="reorder-blocks"></div>

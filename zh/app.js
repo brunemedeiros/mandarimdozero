@@ -4357,7 +4357,9 @@ function renderReviewViewInner(){
       saveState();
     }
     maybeShowStreakCelebration();
-    trackEvent('lesson_complete', 'flashcard_review', { count: STATE.reviewQueue.length });
+    // unitId da sessão de uma unidade, igual ao fr (o painel da professora deriva daí; auditoria de paridade C7).
+    trackEvent('lesson_complete', 'flashcard_review', Object.assign({ count: STATE.reviewQueue.length },
+      STATE.reviewSessionUnitFilter ? { unitId: STATE.reviewSessionUnitFilter } : {}));
     // Fase 6 do projeto de reorganização: terminar a revisão nunca deve
     // convidar a repetir a mesma bateria -- "Voltar" leva pra trilha,
     // "Praticar mais" leva pra PRATICAR (Combinar/Palavras difíceis), não

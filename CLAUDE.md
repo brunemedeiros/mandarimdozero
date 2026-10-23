@@ -38,6 +38,9 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   e-mail; texto montado no servidor sai no idioma do site de quem recebe (`_ui_lang`, ver `.claude/rules/i18n.md`).
 - **Decisão vale para todos os sites** (fr, zh, pt e futuros), como padrão (2026-10-15): regra de produto decidida aqui (XP, missões, regras de Revisão...)
   não é só de fr/zh. Código em `shared/` já vale para todos; site novo herda o molde. Exceção só com a autora aprovando. XP: `.claude/rules/xp.md`.
+- **Paridade entre sites** (pedido da autora, 2026-10-23): o fr recebe mais pedidos, mas peça usada por mais de um site
+  (CSS/HTML de componente de `shared/`, lição, Revisão, metas) muda em TODOS no mesmo PR, de preferência em `shared/`. O que
+  fica só num site precisa estar classificado em `docs/auditoria-paridade-fr-zh.md`. Guarda: `tests/paridade-sites/`.
 - **Português do Brasil coloquial** em todo texto de interface e notas (ex.: "pechinchar", não "regatear");
   sem "--" e sem "pra" em texto visível.
 - **Terminologia**: "aluno/aluna" = vínculo ativo em `teacher_students`; "usuário/conta" = qualquer perfil.

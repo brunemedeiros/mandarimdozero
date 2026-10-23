@@ -2155,6 +2155,7 @@ window.I18N_CATALOG['en'] = {
   'lesson.vocabDots.aria': 'Word {pos} of {total}', // ALTA
   'zh.exercise.translateToChinese': 'Translate into Chinese', // ALTA
   'zh.reorder.tapHint': 'Tap the blocks in the right order. Tap a placed one to send it back.', // ALTA
+  'fr.reorder.tapHint': 'Tap the words in the right order. Tap a placed one to send it back.', // ALTA
   'feedback.whereSeen': 'Where you saw this before', // ALTA
   'feedback.header.revealed': '👀 Answer revealed', // ALTA
   'feedback.header.notThisTime': '❌ Not this time', // ALTA
