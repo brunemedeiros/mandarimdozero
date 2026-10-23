@@ -1149,3 +1149,34 @@ Nada aplicado ao site. Continuam pendentes (seção 7 do `08 v2`, com contexto):
      exame do módulo nem no Teste de Nível). A marca é decidida por frase, na revisão de texto abaixo, e a regra de exclusão é aplicada por função pura testável (não por `if` solto).
 227. **Revisão de texto das frases "Na frase"**: passar por cada cartão do mapa, marcar cada frase como essencial ou só exemplo com esse critério, e reportar à dona por módulo
      e unidade. Faz parte da implementação do conteúdo (módulo a módulo), junto com a marca no código.
+
+---
+
+# Décima nona rodada (2026-10-23): revisão geral das decisões e grade comum
+
+Base: revisão de todas as decisões 1 a 227 pedida pela dona; ela aceitou **todos** os itens (N1 a N10 e T1 a T8). Vale desta decisão em diante.
+
+228. **N1. Mapa em dados**: `docs/i18n/curriculo/mapa.json` (módulos, unidades com id estável, cartões, notas com tipo/confiança/gancho, gramática com "versão grátis em").
+     Contagens, tempos e tabelas do `08` passam a ser **geradas** dele; ninguém digita total. [a fazer, por script com teste]
+229. **N2. Nome e id em toda conversa e registro**: "M4.2" é só rótulo gerado da ordem; vale para qualquer documento (estende a 221).
+230. **N3. Dividir o `12`**: decisões (o quê e o porquê, um parágrafo), exceções (dado, ver 232) e histórico de contas. Os padrões de tela (decisões 1 a 36) vão para
+     `.claude/rules/`. [a fazer; nada se descarta, só se move]
+231. **N4. Regra 13 simplificada**: A1 até **12** palavras por unidade aberta, com 4 lições + Revisão da unidade acima de 10; conjunto fechado pode passar; fim das exceções
+     caso a caso. Não mexe nas unidades já aprovadas.
+232. **N5. Registro de exceções em dado** (`excecoes.json`): expressões fixas aceitas, unidades acima do limite, "diálogo como entrada". Entrada nova só com o OK da dona;
+     o `auditor-curricular` lê dali. O texto da regra 11 deixa de carregar a lista.
+233. **N6. Validador "só palavras vistas"** em `tests/curriculo/` (diálogos, exercícios, ditados e Desafios contra cartões, notas vistas e exceções) e campo `papel` de cada
+     frase "Na frase" (essencial / só exemplo, decisão 226), aplicado por função pura.
+234. **N7. Modelo fixo de nota** (tipo, confiança, gancho, "versão grátis de qual gramática", texto); a dona aprova cada módulo numa página só, com as notas lado a lado.
+235. **N8. Mapa congelado na aprovação**: depois dela, mudança só por pedido de mudança, com o auditor rodando.
+236. **N9. Piloto de ponta a ponta antes dos outros módulos**: A1 "Apresentar-se", que já tem maquete; calibra esforço, modelo de nota e validador.
+237. **N10. Bloqueios de código**: (a) **não herdar** a aprovação dos Pontos de verificação quando o módulo novo divide menos da metade das unidades com o antigo (resolve a 201;
+     casos de borda vão para a dona); (b) o `curriculo_ops.js` reordena `UNITS` junto com o nível, com teste de `isFirstOfLevel` e da cadeia.
+238. **T1 a T3 (grade comum)**: cada unidade tem um **id de função** que não muda entre idiomas (ex.: `pedir-no-restaurante`) e cada idioma liga o seu id estável a ele;
+     a grade guarda **critérios** (campo, quantidade, conjunto fechado), não palavras; cada slot gramatical tem estado por idioma: **reusa, adapta ou omite/substitui**,
+     com justificativa (pt, confiança média: partitivo e ligação omitem; *passé composé* adapta, pois no Brasil se fala o pretérito perfeito simples; *tu/vous* vira *você / o senhor*).
+239. **T4 a T8**: notas de realidade/culturais não se reaproveitam, só o **slot**; exercícios, Pontos de verificação, Desafios, validadores e auditor valem para todos os
+     idiomas; **gerador** `novo-idioma` cria o esqueleto a partir da grade (etapa E8); **ordem**: aprovar o mapa fr, extrair a grade por script, piloto no pt (`piloto-pt/`);
+     o mandarim usa a mesma grade com slots próprios (escrita, tons, caracteres), sem forçar a grade latina.
+240. **Correções que a revisão pediu** (aplicadas no `15`): regra 4 reescrita à luz da regra 12; pendências a conferir: contagem de "Pedir no restaurante" com *le restaurant*
+     (220), *confirmer*, exceções M2.1/M3.3/M8.5/M9.1 e as palavras que foram para nota (*adorer, se coucher, la boisson, la chemise*).

@@ -9,8 +9,8 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
 3. **Gramática**: uma unidade de gramática = um conceito (ou conceitos muito ligados); conteúdo pequeno ligado ao vocabulário vira nota; um tópico pode aparecer informal cedo e ser
    sistematizado depois (espiral); o aluno nunca volta a lição anterior (`10`). Exemplo de "conceitos muito ligados": a M7.3 (g) *il y a* e *c'est* + adjetivo, com uma tela
    de contraste (*Il y a un salon. C'est un grand salon.*) (decisão 145).
-4. **Notas**: uma ideia por nota, curtas, sem teto de tamanho nem de quantidade; na primeira aparição só uma nota breve da frase que acabou de aparecer; a explicação completa vive na unidade
-   de gramática; mesmo conceito com outro conteúdo ou estrutura mais difícil = nota nova mais breve; V/F depois da nota (sem pular, sem XP); o Ponto de verificação não usa notas (`14`).
+4. **Notas**: uma ideia por nota, curtas, sem teto de tamanho nem de quantidade; na primeira aparição só uma nota breve da frase que acabou de aparecer; a unidade de gramática (Premium) sistematiza e treina, mas nunca é a única porta de
+   entrada: todo conceito tem antes a versão grátis (regra 12, decisão 240); mesmo conceito com outro conteúdo ou estrutura mais difícil = nota nova mais breve; V/F depois da nota (sem pular, sem XP); o Ponto de verificação não usa notas (`14`).
 5. **Feedback dos exercícios**: padrão único com frase correta + tradução + áudio; erro de digitação marca letras (`13`).
 6. **Pronúncia**: a prática vem logo depois da lição que introduz o fenômeno, nunca como atalho que tire o aluno da lição; sempre que o texto disser que dois sons são iguais ou
    diferentes, mostrar os dois lados com áudio (`12`).
@@ -39,7 +39,7 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
       ficam nas gramáticas (A1 M4.7, M6.4, M9.2; A2 M4.4, M6.4, M7.3). A tabela de conjugação continua grátis fora da trilha, na aba Conjugação.
     - Hoje não há bloqueio de gramática no código (auditoria de 2026-10-19): tratar isto como regra de produto até a implementação.
 
-13. **Limite de palavras por unidade** (dona, decisões 45, 129 e 139). O excedente vira **nota de vocabulário** na mesma unidade (como "Outros materiais").
+13. **Limite de palavras por unidade** (dona, decisões 45, 129 e 139). **Desde a decisão 231 (2026-10-23): A1 até 12 por unidade aberta, 4 lições + Revisão da unidade acima de 10; as exceções abaixo ficam como histórico.** O excedente vira **nota de vocabulário** na mesma unidade (como "Outros materiais").
     - **A1**: conjunto aberto com **no máximo 10** palavras. Exceções aceitas como conjuntos naturais (decisão 139): M1.2 (11, por causa de *le prénom*), M3.1 (12, rotina),
       M3.3 (11, dias) e M4.2 (11, comida; **12** com *préférer*, exceção aceita pela dona, decisão 212). Conjunto fechado (números, dias, meses, horas) pode passar de 10, com 4 lições + Revisão da unidade. A M2.3 (aparência) foi
       cortada para 10 (*laid, brun* em nota) e voltou a **11** com *brun* (decisão 147, exceção aceita pela dona; *laid* fica na nota).
