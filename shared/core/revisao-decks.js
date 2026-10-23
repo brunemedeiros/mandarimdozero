@@ -668,7 +668,7 @@ function isCardLessonCompleted(card){
   if (card.origin === 'teacher' || card.origin === 'self') return card.flashcardStatus === 'active';
   // Etapa 0 do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.3 item 8): cartão que já passou pelo
   // portão uma vez passa sempre (mover a palavra para uma unidade ainda não feita não a tira da Revisão).
-  // A marca só é gravada em item com chave estável (`studyKey`, fr); o zh continua só com a regra abaixo.
+  // A marca só é gravada em item com chave estável (`studyKey`; fr e zh desde o C1 da paridade).
   if (card.released) return true;
   // O portão de lição de sempre (função interna: os testes extraem isCardLessonCompleted inteira do texto).
   const passesGate = () => {

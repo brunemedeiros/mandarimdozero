@@ -5,7 +5,7 @@
 //
 // CHAVE ESTÁVEL `k` (Etapa 0 de docs/i18n/curriculo/04-lacunas-e-propostas-fr.md): cada palavra (vocab), frase (phrases) e
 // fala (dialogue.lines) tem uma chave congelada; o id do cartão e o progresso do aluno seguem a CHAVE, nunca a posição.
-// - Nunca mudar nem reaproveitar um `k`. Item novo: rode `node fr/scripts/congelar_chaves.js` (dá a próxima chave livre).
+// - Nunca mudar nem reaproveitar um `k`. Item novo: rode `node scripts/congelar_chaves.js fr` (dá a próxima chave livre).
 // - Mover, reordenar ou corrigir o texto com o MESMO sentido: o item leva o `k` junto.
 // - Mudou o sentido (outra palavra/frase): item novo com `k` novo; o antigo vai para STUDY_RETIRED_KEYS.
 // - Fundir ou excluir: fr/curriculum-changes.js. O teste tests/curriculo-ids/test_ids_publicados.js bloqueia id perdido.

@@ -2172,6 +2172,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'lesson.vocabDots.aria': 'Palavra {pos} de {total}',
   'zh.exercise.translateToChinese': 'Traduza para o chinês',
   'zh.reorder.tapHint': 'Toque nos blocos na ordem certa. Toque num já colocado para devolvê-lo.',
+  'fr.reorder.tapHint': 'Toque nas palavras na ordem certa. Toque numa já colocada para devolvê-la.',
   'feedback.whereSeen': 'Onde você já viu isso',
   'feedback.header.revealed': '👀 Resposta revelada',
   'feedback.header.notThisTime': '❌ Não foi dessa vez',

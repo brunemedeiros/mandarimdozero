@@ -153,13 +153,15 @@ console.log('== carregamento real do fr (applySerializedState) com o conteúdo v
   check('v2: A1-28 atrás do aluno com 24 concluídas: aberta e não concluída', up5['A1-28'].unlocked && !up5['A1-28'].completed);
 }
 
-console.log('== zh não muda');
+console.log('== fr e zh: mesma chamada (C1 da paridade, shared/core/curriculo-progresso.js)');
 {
-  const zsrc = fs.readFileSync(path.join(L.ROOT, 'zh/app.js'), 'utf8');
-  const fsrc = fs.readFileSync(path.join(L.ROOT, 'fr/app.js'), 'utf8');
-  const fn = (src) => { const a = src.indexOf('function applySerializedState('); return src.slice(a, src.indexOf('\n}\n', a)); };
-  check('fr: applySerializedState chama a regra', /openUnitsBeforeOpenOnes\(trailGroups\(\), STATE\.unitProgress\)/.test(fn(fsrc)));
-  check('zh: applySerializedState não chama a regra', !/openUnitsBeforeOpenOnes/.test(fn(zsrc)) && !/openUnitsBeforeOpenOnes/.test(zsrc));
+  const core = fs.readFileSync(path.join(L.ROOT, 'shared/core/curriculo-progresso.js'), 'utf8');
+  const fn = (src, name) => { const a = src.indexOf('function ' + name + '('); return src.slice(a, src.indexOf('\n}\n', a)); };
+  check('shared/core: curriculumLoadReconcileUnits chama a regra', /openUnitsBeforeOpenOnes\(trailGroups\(\), STATE\.unitProgress\)/.test(fn(core, 'curriculumLoadReconcileUnits')));
+  ['fr', 'zh'].forEach(lang => {
+    const src = fs.readFileSync(path.join(L.ROOT, lang, 'app.js'), 'utf8');
+    check(`${lang}: applySerializedState chama a função comum (e não uma cópia própria)`, fn(src, 'applySerializedState').includes('curriculumLoadReconcileUnits()') && !/openUnitsBeforeOpenOnes/.test(src));
+  });
 }
 
 summary('curriculo-ids unidade nova');

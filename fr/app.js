@@ -644,13 +644,11 @@ document.getElementById('report-menu-btn').addEventListener('click', () => {
 // abaixo, específicas do formato de STATE deste idioma.
 
 function serializeState(){
-  // Etapa 0 do currículo: guarda também o id da lição atual (lessonIdx segue o id se a lição mudar de posição).
-  stampUnitLessonIds(STATE.unitProgress, UNITS);
   return {
     cards: serializeCardsForSave(STATE.cards),
     cardVariants: STATE.cardVariants,
-    retiredStudyCards: STATE.retiredStudyCards,
-    _curriculumVersion: studyCurriculumChanges().version,
+    // Mudanças de currículo (shared/core/curriculo-progresso.js): arquivo de aposentados, versão e id da lição atual.
+    ...curriculumSaveFields(),
     unitProgress: STATE.unitProgress,
     xp: STATE.xp,
     streak: STATE.streak,
@@ -686,47 +684,30 @@ function serializeState(){
 
 function applySerializedState(data){
   if (!data) return;
-  // Etapa 0 do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.3): antes de aplicar o progresso,
-  // leva o save através das mudanças de currículo (fr/curriculum-changes.js): fusões de chave, aposentados e
-  // órfãos para o arquivo, volta de item arquivado. Idempotente; sem mudança nenhuma não altera nada.
-  const changes = studyCurriculumChanges();
-  const keyChanges = applyStudyKeyChanges(data.cards || [], {
-    merges: changes.merges, retiredKeys: changes.retiredKeys, archive: data.retiredStudyCards,
-    currentIds: STATE.cards.filter(c => c.origin === 'study').map(c => c.id), today: todayStr(),
-  });
-  STATE.retiredStudyCards = keyChanges.archive;
-  const renamed = renameStudyIdsInRecords(keyChanges.renames, data.cardVariants,
-    data.reviewRecords && data.reviewRecords.hardSeenIds);
-  if (data.cards || keyChanges.restored.length) {
+  // Mudanças de currículo (shared/core/curriculo-progresso.js, igual em todos os sites): antes de aplicar o progresso,
+  // leva o save através de fr/curriculum-changes.js (fusões, aposentados e órfãos para o arquivo, volta de arquivado,
+  // unidades/módulos fundidos). Idempotente; sem mudança nenhuma não altera nada.
+  const cur = curriculumLoadPrepare(data);
+  if (cur.hasCards) {
     // K2-C: cards da trilha só recebem a whitelist de progresso; ver
     // mergeSavedCards (shared/study-trail-model.js).
-    mergeSavedCards(STATE.cards, keyChanges.cards);
+    mergeSavedCards(STATE.cards, cur.cards);
   }
-  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(renamed.cardVariants);
+  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(cur.cardVariants);
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
   // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
   STATE.cards.forEach(migrateCardToFSRS);
   if (typeof refreshStudyCardTexts === 'function') refreshStudyCardTexts();
-  // Unidades/módulos fundidos (UNIT_MERGES/MODULE_MERGES): o progresso vai para o novo. Sem fusão, nada muda.
-  const unitMerged = applyUnitModuleMerges(data.unitProgress, data.checkpointProgress, changes.unitMerges, changes.moduleMerges);
   if (data.unitProgress) {
-    Object.assign(STATE.unitProgress, unitMerged.unitProgress);
+    Object.assign(STATE.unitProgress, cur.unitProgress);
     // Saves de antes das lições (Modelo B) não têm lessonIdx/lessonMisses.
     Object.values(STATE.unitProgress).forEach(p => {
       if (typeof p.lessonIdx !== 'number') p.lessonIdx = 0;
       if (!p.lessonMisses) p.lessonMisses = {};
     });
-    // A lição salva mudou de posição: lessonIdx segue o id; se sumiu, volta para a 1ª com palavra não liberada.
-    reconcileUnitLessonIdx(STATE.unitProgress, UNITS, (u, vi) => {
-      const c = STATE.cards.find(x => x.id === studyWordCardId(u, vi));
-      return !!(c && c.released);
-    });
-    // Etapa 0b (04, 2.10): unidade nova inserida antes de onde o aluno já está nasce aberta, mas não concluída.
-    openUnitsBeforeOpenOnes(trailGroups(), STATE.unitProgress);
+    curriculumLoadReconcileUnits();
   }
-  // Marca `released` em todo cartão já liberado pelo portão de lição (2.3 item 8): no 1º carregamento depois da
-  // Etapa 0, todos os cartões que já estavam na Revisão ganham a marca e continuam lá mesmo se a palavra mudar de unidade.
-  STATE.cards.forEach(c => { if (c.origin === 'study' && c.studyKey && !c.released) isCardLessonCompleted(c); });
+  curriculumLoadStampReleased();
   if (typeof data.xp === 'number') STATE.xp = data.xp;
   if (typeof data.streak === 'number') STATE.streak = data.streak;
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
@@ -738,7 +719,7 @@ function applySerializedState(data){
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
   if (data.reviewRecords && typeof data.reviewRecords === 'object'){
     STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
-    if (Object.keys(keyChanges.renames).length && Array.isArray(renamed.hardSeenIds)) STATE.reviewRecords.hardSeenIds = renamed.hardSeenIds;
+    if (cur.hardSeenIds) STATE.reviewRecords.hardSeenIds = cur.hardSeenIds;
   }
   if (data.reviewTimeStats && typeof data.reviewTimeStats === 'object') STATE.reviewTimeStats = { cards: Number(data.reviewTimeStats.cards) || 0, ms: Number(data.reviewTimeStats.ms) || 0 };
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
@@ -750,7 +731,7 @@ function applySerializedState(data){
   if (typeof data.dictationsAced === 'number') STATE.dictationsAced = Math.max(STATE.dictationsAced || 0, data.dictationsAced);
   if (data.periodXp) Object.assign(STATE.periodXp, data.periodXp);
   if (data.daily) Object.assign(STATE.daily, data.daily);
-  if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, unitMerged.checkpointProgress);
+  if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, cur.checkpointProgress);
   if (data.reviewMilestones) Object.assign(STATE.reviewMilestones, data.reviewMilestones);
   if (data.levelTestProgress) Object.assign(STATE.levelTestProgress, data.levelTestProgress);
   if (data.completedChallenges) Object.assign(STATE.completedChallenges, data.completedChallenges);
@@ -3563,7 +3544,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
           <div class="prompt-translation">${ex.phrase.t}</div>
           ${audioBtnHTML(ex.phrase.f, 'audio-btn-lg')}
         </div>
-        <div class="reorder-wrap-hint">Toque nas palavras na ordem certa. Toque numa já colocada para devolvê-la.</div>
+        <div class="reorder-wrap-hint">${t('fr.reorder.tapHint')}</div>
       `}
       <div class="reorder-answer-slots" id="reorder-answer-slots"></div>
       <div class="reorder-blocks" id="reorder-blocks"></div>

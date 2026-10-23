@@ -37,3 +37,8 @@ Bateria completa: 148 suítes antes, 151 depois; 0 falhas novas. Capturas antes 
 
 Script de operações (`curriculo_ops.js`), mapa do cron (`STUDY_ITEM_GATE`) e deploy do `notification-cron`, regra 2.10
 (unidade nova nasce aberta), esconder Course Deck de unidade que deixou de existir, camadas por chave.
+
+## Depois: zh e código comum (2026-10-23)
+
+O zh ganhou a mesma chave `k` e o carregar/salvar com mudanças de currículo foi para `shared/core/curriculo-progresso.js`
+(os scripts saíram de `fr/scripts/` para `scripts/`): `23-paridade-c1-chave-estavel-zh.md`.

@@ -1726,6 +1726,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .btn-gold:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--imperial-gold) 65%, #000); }
 .btn:disabled{ opacity:.45; cursor:not-allowed; }
 .btn-block{ width:100%; }
+.btn-sm{ padding:8px 14px; font-size:13px; border-radius:11px; text-decoration:none; --btn-depth:3px; --btn-depth-sm:2px; } /* usado por shared/ (deck-browser, friends); faltava no zh (2026-10-23) */
 
 /* ---------- Review / SRS flashcard ---------- */
 .review-empty{ text-align:center; padding: 60px 20px; }
@@ -5671,6 +5672,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/content-i18n.js"></script>
 <script src="../shared/card-variants.js"></script>
 <script src="content.js"></script>
+<script src="curriculum-changes.js"></script>
 <script src="stories.js"></script>
 <script src="hanzi-data.js"></script><script src="audio-manifest.js"></script>
 <script src="../shared/course-layer.js"></script>
@@ -5782,6 +5784,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/core/revisao-decks.js"></script>
 <script src="../shared/core/exercicios-licao.js"></script>
 <script src="../shared/core/estado-trilha-desafios.js"></script>
+<script src="../shared/core/curriculo-progresso.js"></script>
 <script src="lang-hooks.js"></script>
 <script src="../shared/core/quase-iguais-simples.js"></script>
 <script src="../shared/core/quase-iguais-textos.js"></script>
