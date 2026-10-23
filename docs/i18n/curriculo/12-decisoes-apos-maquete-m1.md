@@ -1126,3 +1126,13 @@ Nada aplicado ao site. Continuam pendentes (seção 7 do `08 v2`, com contexto):
      da M9.1, cartões novos do A2, regra 11 nos diálogos do M4 e regra 14) e a **aprovação do mapa pela dona**; depois, a Etapa 0b parte 2 e o conteúdo módulo a módulo.
      Greps de posições obsoletas feitos no `08 v2`, `15`, `16` e `00` (M9.1 com *voir*, 352, ~30h00, M5.1 "a confirmar", A1 M4.1 a M4.6 da numeração antiga); nos trechos
      históricos (decisões até a 215, contas "Antes", seções 6 e 8 do `08 v2`), *A1 M4.1 a M4.6* = M4.2 a M4.7 de hoje.
+
+---
+
+# Décima oitava rodada (2026-10-23)
+
+218. **"Só reconhecimento" (unidade nova "Verbos muito usados")** aprovado: um cartão só por verbo (francês → significado), sem produção na lição nem no Ponto de verificação.
+219. ***l'enfant*** fica na unidade "Apresentar a família" (módulo "Família e pessoas próximas"): é conteúdo A1 e central na família.
+220. ***le restaurant*** vira cartão na unidade "Pedir no restaurante" (módulo "Comer e beber").
+221. **Como falar com a dona**: sempre o nome do módulo e da unidade, nunca só a posição ou o id; explicar termos internos; contexto completo (também no `auditor-curricular`).
+222. **Revisão do cartão "Na frase" pedida**: antes de seguir com a decisão 211, repensar o que é o cartão "Na frase", onde as frases de exemplo são usadas (exemplo na ficha da palavra, cartão de Revisão e exercícios da lição) e o que cada uso pode conter.

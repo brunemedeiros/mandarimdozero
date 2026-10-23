@@ -25,3 +25,5 @@ Para cada mudança pedida (mover unidade, trocar módulo, criar, fundir, remover
 
 Entrega: um relatório curto em `docs/i18n/curriculo/auditoria/AAAA-MM-DD-<tema>.md` com seções **Bloqueia**, **Atenção**, **Ok** e **Sugestões**, cada achado com unidade (posição e id),
 evidência e recomendação em 1 linha; e um resumo de até 15 linhas para o chat. Seja crítico: não concorde por padrão. **Não edite o mapa nem o código**; só relate. Português do Brasil coloquial, sem "--" e sem "pra".
+
+**Como falar com a dona** (pedido dela, 2026-10-23): nunca cite só posição ou id (M6.1, A1-15). Sempre escreva o NOME do módulo e da unidade (ex.: "a unidade 'Pegar transporte' do módulo 'Na cidade'"), explique termos internos e dê o contexto completo de cada decisão.

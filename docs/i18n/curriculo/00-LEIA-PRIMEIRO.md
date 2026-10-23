@@ -163,3 +163,5 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   M8 3h15, **M9 3h20**), lições ~148, notas ~132; A2 com 10 módulos, 58 unidades (36 + 22), **428 cartões (418 novos + 10 publicados)**, ~33h10, notas ~76.
 - **Status: único próximo passo é a passada final do agente `auditor-curricular` e a aprovação do mapa pela dona** (decisão 217; os itens "a revisar" que ficam no mapa
   são revistos junto com a aprovação).
+
+> **Como falar com a dona** (2026-10-23): em toda mensagem a ela, citar o NOME do módulo e da unidade (não só M6.1 ou `A1-15`), explicar termos internos e dar o contexto completo de cada decisão. Vale para o chat e para qualquer agente.
