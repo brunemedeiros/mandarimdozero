@@ -321,13 +321,17 @@ function classLogWhenFieldsHTML(timeId, durId, log){
   // Padrão da autora (2026-10-15): aula sem horário = 7h, 1h de duração (o mesmo que o link de agenda usa).
   const time = log && log.start_time ? String(log.start_time).slice(0, 5) : CLASS_LOG_DEFAULT_TIME;
   const dur = (log && log.duration_minutes) || 60;
+  // Aula que veio do Google Agenda (117): horário e duração só mudam lá (sincronização em um sentido).
+  const fromGoogle = !!(log && log.google_event_ref);
+  const lock = fromGoogle ? ' disabled' : '';
   return `
     <div class="class-log-when">
       <div><label class="profile-edit-label" for="${timeId}">${t('panel.classLog.time')}</label>
-        <input type="time" id="${timeId}" class="profile-edit-input" value="${time}"></div>
+        <input type="time" id="${timeId}" class="profile-edit-input" value="${time}"${lock}></div>
       <div><label class="profile-edit-label" for="${durId}">${t('panel.classLog.durationMin')}</label>
-        <select id="${durId}" class="profile-edit-input">${classLogDurationOptionsHTML(dur)}</select></div>
-    </div>`;
+        <select id="${durId}" class="profile-edit-input"${lock}>${classLogDurationOptionsHTML(dur)}</select></div>
+    </div>
+    ${fromGoogle ? `<p class="profile-edit-hint class-log-from-google">📅 ${t('panel.gcal.timeFromGoogle')}</p>` : ''}`;
 }
 function classLogTimeLabel(log){
   return log && log.start_time ? ` · ${String(log.start_time).slice(0, 5)}` : '';
@@ -418,7 +422,8 @@ function wireClassLogsListBox(listBox){
       errorEl.textContent = '';
       const result = await updateClassLog(id, {
         classDate: document.getElementById(`edit-class-log-date-${id}`).value,
-        startTime: document.getElementById(`edit-class-log-time-${id}`).value,
+        // Aula ligada ao Google Agenda (117): o horário vem de lá; não manda (undefined = não mexe).
+        startTime: document.getElementById(`edit-class-log-time-${id}`).disabled ? undefined : document.getElementById(`edit-class-log-time-${id}`).value,
         durationMinutes: document.getElementById(`edit-class-log-duration-${id}`).value,
         topic: document.getElementById(`edit-class-log-topic-${id}`).value,
         homework: document.getElementById(`edit-class-log-homework-${id}`).value,
@@ -571,7 +576,7 @@ async function renderTeacherClassCalendar(){
     const id = form.dataset.editClassLogForm;
     const res = await updateClassLog(id, {
       classDate: form.querySelector(`#edit-class-log-date-${id}`).value,
-      startTime: form.querySelector(`#edit-class-log-time-${id}`).value,
+      startTime: form.querySelector(`#edit-class-log-time-${id}`).disabled ? undefined : form.querySelector(`#edit-class-log-time-${id}`).value,
       durationMinutes: form.querySelector(`#edit-class-log-duration-${id}`).value,
       topic: form.querySelector(`#edit-class-log-topic-${id}`).value,
       homework: form.querySelector(`#edit-class-log-homework-${id}`).value,
@@ -662,7 +667,7 @@ async function renderAdminClassLogsView(){
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="register">${t('panel.classLog.view.register')}</button>
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="calendar">${t('panel.classLog.view.calendar')}</button>
     </div>
-    <div id="admin-classlogs-calendar-wrap" hidden>${calendarFeedBoxHTML()}<div id="admin-classlogs-calendar"></div></div>
+    <div id="admin-classlogs-calendar-wrap" hidden>${typeof googleCalendarBoxShellHTML === 'function' ? googleCalendarBoxShellHTML() : ''}${calendarFeedBoxHTML()}<div id="admin-classlogs-calendar"></div></div>
     <div id="admin-classlogs-register">
     <div id="admin-notion-review"></div>
     <div class="profile-section">
@@ -724,6 +729,7 @@ async function renderAdminClassLogsView(){
   `;
   wrap.querySelectorAll('[data-classlog-view]').forEach(b => b.addEventListener('click', () => switchClassLogsView(b.dataset.classlogView)));
   wireCalendarFeedBox(wrap);
+  if (typeof wireGoogleCalendarBox === 'function'){ wireGoogleCalendarBox(wrap); renderGoogleCalendarBox(); }
   const repeatCb = document.getElementById('admin-class-log-repeat');
   repeatCb?.addEventListener('change', () => { document.getElementById('admin-class-log-repeat-box').hidden = !repeatCb.checked; });
   switchClassLogsView(ADMIN_CLASS_LOGS_STATE.view);
