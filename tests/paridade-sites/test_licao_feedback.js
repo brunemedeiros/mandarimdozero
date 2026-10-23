@@ -81,7 +81,7 @@ function erros(s){
   const zhSrc = read('zh/app.js'), zhAntigo = gitShow('zh/app.js');
   const logica = between(zhSrc, '// BEGIN pinyin-answer-logic', '// END pinyin-answer-logic');
   const zh = ctxNovo('zh');
-  vm.runInContext([logica, declaracao(zhSrc, 'pinyinAnswerCompareForm'), declaracao(zhSrc, 'pinyinWithoutTones'), declaracao(zhSrc, 'isToneOnlyMiss')].join('\n'), zh);
+  vm.runInContext([logica, declaracao(zhSrc, 'pinyinAnswerCompareForm'), declaracao(zhSrc, 'pinyinAttemptDisplayForm'), declaracao(zhSrc, 'pinyinWithoutTones'), declaracao(zhSrc, 'isToneOnlyMiss')].join('\n'), zh);
   // Forma de comparar ANTIGA (a seta "strip" que os dois exercícios tinham), tirada do zh/app.js de REF.
   const setas = zhAntigo.split('\n').filter(l => /const strip = s => normalizePinyinAnswer\(s\)/.test(l)).map(l => l.trim());
   check('C2 zh: o zh antigo tinha a seta de comparação nos exercícios de digitar', setas.length >= 2, setas.length);
@@ -119,6 +119,8 @@ function erros(s){
   check(`C2 zh: veredito (certo/errado e aviso de tom) igual ao de antes em ${n} respostas`, mudou.length === 0, mudou);
   check('C2 zh: toda resposta errada tem letra marcada em vermelho ou traço', incoerente.length === 0, incoerente);
   check('C2 zh: pinyin numerado certo ("ni3 hao3") não marca nada', numeradoMarcado.length === 0, numeradoMarcado);
+  const h2 = zh.typedAttemptHTML('Ni3 hao!', 'Nǐ hǎo!');
+  check('C2 zh: maiúscula fica como foi digitada e a pontuação (ignorada no veredito) não aparece marcada', h2 === '<div class="typed-attempt">Nǐ h<span class="conj-x">a</span>o</div>', h2);
   const h = zh.typedAttemptHTML('ni3 hao', 'nǐ hǎo');
   check('C2 zh: "ni3 hao" por "nǐ hǎo" mostra "nǐ" convertido e marca só o "a" sem tom', h === '<div class="typed-attempt">nǐ h<span class="conj-x">a</span>o</div>', h);
   check('C2 zh: "Digite o que ouviu" e a lacuna digitada passam attemptHTML ao painel',

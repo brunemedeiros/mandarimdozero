@@ -3383,6 +3383,12 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
 function pinyinAnswerCompareForm(s){
   return normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
 }
+// O que "Sua resposta" mostra: a mesma forma, mas mantendo maiúsculas como a aluna digitou (o alinhamento das letras
+// já ignora maiúscula, como o veredito). Pinyin numerado aparece convertido ("ni3" -> "nǐ") e a pontuação sai,
+// porque o veredito também a ignora: assim nada fica vermelho sem ter contado como erro.
+function pinyinAttemptDisplayForm(s){
+  return convertNumberedPinyin(String(s || '')).normalize('NFC').replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+}
 
 // BEGIN pinyin-answer-logic (extraído literalmente por zh/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
 // ---------- Comparação de pinyin digitado (preserva tom) ----------

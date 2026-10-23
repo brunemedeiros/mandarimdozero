@@ -31,8 +31,8 @@ const LANG_HOOKS = {
   dailyExtra: () => ({ hanziLessons: 0 }),
   // Dica do Verdadeiro ou Falso (trueFalseHint, shared/core/licao-feedback.js): chaves de texto deste site.
   trueFalseHintKeys: { seen: 'zh.hint.trueFalseUsage', generic: 'zh.hint.trueFalseDefault' },
-  // "Sua resposta" (typedAttemptHTML): compara na mesma forma do veredito (pinyin numerado vira marca de tom,
-  // minúsculas, sem pontuação), para a marcação vermelha concordar com o veredito.
-  typedAttemptForm: (s) => pinyinAnswerCompareForm(s),
+  // "Sua resposta" (typedAttemptHTML): mostra e compara na forma do veredito (pinyin numerado vira marca de tom,
+  // sem pontuação; maiúscula não conta), para a marcação vermelha concordar com o veredito.
+  typedAttemptForm: (s) => pinyinAttemptDisplayForm(s),
 // --- /E4 hooks ---
 };
