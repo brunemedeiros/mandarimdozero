@@ -72,5 +72,7 @@ const LANG_HOOKS = {
     return { score: 0, status: 'wrong' };
   },
   levelTestKeys: { sub: 'zh.levelTest.sub', intro: 'zh.levelTest.intro' },
+  // O "Manual da unidade" é da lição de uma unidade; na prova do módulo/nível ele some (openUnitDetail o mostra de novo).
+  examScreenOpened: () => { const b = document.getElementById('unit-manual-btn'); if (b) b.style.display = 'none'; },
 // --- /E4 hooks ---
 };

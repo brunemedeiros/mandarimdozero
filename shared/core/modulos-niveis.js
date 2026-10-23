@@ -16,6 +16,7 @@
 //   checkpointScore(digitado, item) (opcional)            nota de uma resposta; sem o gancho, scoreCheckpointAnswer
 //   grammarInputExtraHTML / wireGrammarInputExtra         teclado extra no campo (zh: tons do pinyin; já existiam)
 //   levelTestKeys (opcional)                              chaves do texto do Teste de Nível que citam o idioma
+//   examScreenOpened() (opcional)                         a prova abriu na tela da lição (zh: esconde o "Manual da unidade")
 // Grátis x Premium: igual ao fr de antes (pular unidades pelo Ponto de verificação/Teste de Nível é Premium só quando
 // TRAIL_SKIP_PAYWALL_ENABLED for ligado; hoje está desligado e todo mundo pode pular; o resto é grátis).
 
@@ -601,6 +602,8 @@ function openCheckpoint(moduleId){
   document.getElementById('ud-title').textContent = module.title;
   document.getElementById('ud-goal').textContent = t('trail.checkpoint.intro');
 
+  examScreenOpened();
+
   CHECKPOINT_STATE.moduleId = moduleId;
   CHECKPOINT_STATE.queue = buildCheckpointQueue(module);
   CHECKPOINT_STATE.index = 0;
@@ -609,6 +612,11 @@ function openCheckpoint(moduleId){
   renderCheckpointQuizStep();
 
   renderTopbarStats();
+}
+
+// A prova abriu na tela da lição: o site esconde o que é só da lição (zh: o botão "Manual da unidade").
+function examScreenOpened(){
+  if (typeof LANG_HOOKS !== 'undefined' && typeof LANG_HOOKS.examScreenOpened === 'function') LANG_HOOKS.examScreenOpened();
 }
 
 // Uma pergunta da prova (Ponto de verificação e Teste de Nível usam a mesma tela; só os ids mudam).
@@ -759,6 +767,8 @@ function openLevelTest(testId){
   document.getElementById('ud-eyebrow').textContent = t('trail.levelTest.eyebrow');
   document.getElementById('ud-title').textContent = test.title;
   document.getElementById('ud-goal').textContent = t(levelTestKey('intro'), { level: test.level, next: test.nextLevel });
+
+  examScreenOpened();
 
   LEVEL_TEST_STATE.testId = testId;
   LEVEL_TEST_STATE.queue = buildLevelTestQueue(test);

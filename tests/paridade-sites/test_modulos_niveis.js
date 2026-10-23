@@ -213,8 +213,10 @@ async function fingerprint(browser, root){
     let iguais = 0;
     for (const k of Object.keys(antes)){
       if (k === 'erros') continue;
-      // a porta do servidor de teste aparece nas URLs dos ícones: não conta
-      const a = JSON.stringify(antes[k]).replace(/127\.0\.0\.1:\d+/g, 'HOST'), b = JSON.stringify(depois[k]).replace(/127\.0\.0\.1:\d+/g, 'HOST');
+      // a porta do servidor de teste aparece nas URLs dos ícones, e o "tc-sticky" do cartão "Continue de onde parou" vem
+      // de um IntersectionObserver (depende de quando ele dispara, não do código testado): não contam
+      const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ tc-sticky/g, '');
+      const a = norm(antes[k]), b = norm(depois[k]);
       if (a === b){ iguais++; passed++; continue; }
       let i = 0; while (i < a.length && a[i] === b[i]) i++;
       check('igual ao fr de antes: ' + k, false, { antes: a.slice(Math.max(0, i - 120), i + 200), depois: (b || '').slice(Math.max(0, i - 120), i + 200) });
