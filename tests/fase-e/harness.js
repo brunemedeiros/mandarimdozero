@@ -40,6 +40,8 @@ const APP_FUNCTIONS = [
   'deckReviewSummary', 'deckCountsForReview', 'reviewFilterQueue',
   'sessionIntensityToLimit',
   'trailGroups', 'unitsOfLevel', // Etapa 0b: applySerializedState (fr) abre a unidade nova (04, 2.10)
+  // C1 da paridade: mudanças de currículo no carregar/salvar, em shared/core/curriculo-progresso.js (fr e zh)
+  'curriculumSaveFields', 'curriculumLoadPrepare', 'curriculumLoadReconcileUnits', 'curriculumLoadStampReleased',
 ];
 
 function loadLang(lang, overrides){

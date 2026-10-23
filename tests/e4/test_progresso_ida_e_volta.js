@@ -98,7 +98,8 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     // cartões não estudados: o carregamento só pode acrescentar a marca de migração (fsrsMigrated) e, no fr, a marca
     // `released` (Etapa 0 do currículo, 2026-10-18: cartão de unidade concluída ganha a marca do portão de lição no
     // carregamento). A marca só pode ser true e só em cartão que a Revisão já liberava.
-    const okRelease = (x, c, o) => x === 'released' && lang === 'fr' && c.released === undefined && o.released === true;
+    // (desde o C1 da paridade, 2026-10-23, o zh também: mesma chave estável e mesmo carregamento, shared/core/curriculo-progresso.js)
+    const okRelease = (x, c, o) => x === 'released' && c.released === undefined && o.released === true;
     let strange = null; sb.forEach((c, k) => { if (strange) return; const o = sa.get(k) || {}; const ks = [...new Set([...Object.keys(c), ...Object.keys(o)])].filter(x => x !== 'fsrsMigrated' && !okRelease(x, c, o) && JSON.stringify(c[x]) !== JSON.stringify(o[x])); if (ks.length) strange = { id: k, campos: ks }; });
     check(`${lang}: nenhum outro campo de cartão muda no carregamento`, !strange, strange);
     check(`${lang}: progresso das unidades volta igual`, JSON.stringify(r.before.unitProgress) === JSON.stringify(r.after.unitProgress));
@@ -109,7 +110,8 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     const IGN = new Set(['cards', 'hanziCards', 'periodXp']);
     const diffKeys = Object.keys(r.before).filter(k => !IGN.has(k) && JSON.stringify(r.before[k]) !== JSON.stringify(r.after[k]));
     check(`${lang}: demais campos do estado voltam iguais`, diffKeys.length === 0, diffKeys);
-    check(`${lang}: \`released\` só em cartão de unidade concluída (fr) / nunca (zh)`, r.releasedNotEligible.length === 0 && (lang === 'fr' ? r.nReleased > 0 : r.nReleased === 0), [r.nReleased, r.releasedNotEligible.slice(0, 3)]);
+    check(`${lang}: \`released\` só em cartão de unidade concluída (fr e zh)`, r.releasedNotEligible.length === 0 && r.nReleased > 0, [r.nReleased, r.releasedNotEligible.slice(0, 3)]);
+    check(`${lang}: save grava _curriculumVersion e o arquivo de aposentados`, r.after._curriculumVersion === 1 && r.after.retiredStudyCards && typeof r.after.retiredStudyCards === 'object', [r.after._curriculumVersion]);
     check(`${lang}: sem erro de página`, errs.length === 0, errs);
     await ctx.close();
   }

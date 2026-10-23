@@ -40,3 +40,6 @@ paths:
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
 - Ícones: emoji escrito no texto vira desenho do Fluent por `shared/emoji-icons.js`. Emoji novo precisa entrar no MAP de lá
   e ter o SVG em `shared/icons/fluent/` (senão aparece o emoji do aparelho). Ícone de menu = `<img class="tab-icon" ...>`.
+- **Paridade**: CSS de classe usada por `shared/` vai para o `index.html` de cada site (ou para um `.css` de `shared/`) no mesmo PR;
+  `tests/paridade-sites/test_css_compartilhado.js` descobre os sites sozinho e barra a falta. Recurso só do fr: ver a
+  classificação (A idioma, B pendência da autora, C esquecido) em `docs/auditoria-paridade-fr-zh.md` antes de dar por pronto.

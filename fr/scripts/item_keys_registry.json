@@ -1,5 +1,5 @@
 {
-  "_doc": "Maior número de chave já usado por unidade e tipo (v = palavra, p = frase, d = fala do diálogo). Inclui chaves aposentadas: um número nunca é reaproveitado. Mantido por fr/scripts/congelar_chaves.js.",
+  "_doc": "Maior número de chave já usado por unidade e tipo (v = palavra, p = frase, d = fala do diálogo). Inclui chaves aposentadas: um número nunca é reaproveitado. Mantido por scripts/congelar_chaves.js.",
   "units": {
     "A1-1": {
       "v": 9,
