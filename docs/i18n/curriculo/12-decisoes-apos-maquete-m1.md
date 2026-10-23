@@ -965,3 +965,54 @@ Base: auditoria `auditoria/2026-10-22-a1-a2-auditoria-final.md` (agente `auditor
      (c) a nota do 14 de julho (A1 M3.5 x A2 M10.3); (d) as listas A1 M3.6 e M8.6, *laid* na nota da A1 M2.3 e os cortes da decisão 129, com *le portable* (A2 M9.1) e *le mail*
      (A2 M9.6, no lugar de *l'écran*). As listas dessas unidades ficam como estão.
      - **Status**: auditoria final feita e respondida (197 a 203); o mapa A1 + A2 aguarda as pendências da 203 e a aprovação final da dona.
+
+---
+
+# Vigésima nona rodada (2026-10-23): pendências da decisão 203
+
+Respostas da dona às pendências da decisão 203, aprovadas em 2026-10-23. Aplicado em `08-mapa-final-a1-a2-v2.md` (cabeçalho, seções 1, 2.1, 3.1, 3.2, 4.2, 5, 6, 7, 8 e
+Resumo), `15` (regras 11, 13 e 14), `16` e `00`. Nada aplicado ao site. Continuam pendentes (seção 7 do `08 v2`, com contexto): verbos irregulares, frase `A1-7-p5` e *préférer*.
+
+204. **Nota do 14 de julho (responde a 203 c).** Na A1 M3.5 fica **só uma nota curta**: 14 de julho é a Festa Nacional da França; diz-se *le quatorze juillet* (Cult, alta,
+     *nova*). A história (tomada da Bastilha em 1789, desfile, fogos, comparação com o 7 de setembro do Brasil) fica **só na A2 M10.3**, junto do cartão *la fête nationale*,
+     sem "você já viu" (regra "nunca nota igual", `14`). Fecha a proposta da decisão 194.
+205. **Listas aprovadas (responde a 203 d, menos *le portable / le mail*, que é a 206).** Saem do "a revisar pela dona":
+     - A1 M3.6 "Frequência" (`A1-35`, 10): *toujours, souvent, parfois, rarement, jamais, tous les jours, d'habitude, de temps en temps, une fois par semaine, chaque*.
+     - A1 M8.6 "Pedir ajuda" (`A1-32`, 10): *au secours, appeler, avoir besoin de, urgent, vite, la police, perdu / perdue, le commissariat, l'aide, trouver*. As frases-modelo
+       e o texto das notas continuam para escrever módulo a módulo, aprovados pela dona.
+     - *laid* na nota de vocabulário "Outros traços" da A1 M2.3 (sem cartão).
+     - Os cortes da decisão 129: M5.1 (*en espèces, le portable, le mail* na nota "Pagar e dar o contato"), M5.4 (*le cuir* na nota "Outros materiais"), M7.1 (*le studio,
+       l'immeuble, le jardin* na nota "Outros tipos de moradia"), M8.1 (*le Japon* na nota "Outros países"). Responde a pergunta 64 do `08 v2`.
+206. ***le portable* e *le mail* viram cartão no A2.** ***le portable*** entra na **A2 M9.1** "Telefonar e deixar recado" (11 → **12**, cabe no limite do A2). ***le mail***
+     entra na **A2 M9.6** "Internet e redes" **no lugar de *l'écran*** (continua com 12); *l'écran* passa a frase e nota, sem cartão.
+     - **Regra 14 conferida**: nenhuma das duas é cartão em outra unidade do A1 ou do A2; no A1 M5.1 elas ficam só na nota de vocabulário "Pagar e dar o contato" (com a
+       nota *courriel* / *arobase*), o que não é cartão. *le portable* x *le numéro de téléphone* (A1 M5.1) e *le mail* x *la pièce jointe* (A2 M7.5) são palavras diferentes
+       (dois cartões). *l'écran* não é cartão em nenhuma outra unidade: só sai da lista.
+     - **Contas**: A2 M9 47 → **48**; A2 com **427 cartões (417 novos + 10 publicados)**. Tempo sem mudança (a M9.1 com 12 continua "unidade de até 12 palavras"; A2 ~33h10).
+     - *confirmer* na A2 M9.3 continua "a revisar pela dona" (decisão 190); a ideia da auditoria de pôr *le mail* na M9.3 sai.
+207. **A1 M2.5 fica com 11 palavras e *la ville* continua cartão** (revoga, só nesta parte, a decisão 197): *parler* entra como 11ª palavra e *la ville* não vai para nota.
+     Exceção à regra 13 **aceita pela dona** (não é mais "a revisar"). Com 11 palavras, a M2.5 tem **4 lições + Revisão da unidade** (regra 13, decisão 202), +10 min no M2.
+     - **Nota "Onde moro" sai** (ela só tinha *la ville*); notas do A1 ~133 → **~132**.
+     - **Frases**: *centre-ville* (*La place est au centre-ville.*, M6.1; *Le train va au centre-ville.*, M6.5) e *En ville, je prends le vélo.* (M6.5, chave nova da decisão 136)
+       **ficam**, porque *la ville* já é cartão (M2.5 vem antes do M6). *Quel est le nom de la ville ?* (publicada na M1.2, antes do cartão) deixa de ser trocada e **vai
+       com a chave para a M2.5** (decisão do editor: a frase serve à função "onde moro" e assim a chave é preservada). *Le père travaille en ville.* (M2.1, antes do cartão)
+       continua trocada, como na decisão 202.
+     - **Contas**: A1 M2 32 → **33**, ~3h35 → **~3h45**; A1 com **350 cartões**, ~**29h45**, lições ~143 → **~144**.
+208. ***l'ami / l'amie*** **fica na A1 M9.3** "Convidar" (confirma a decisão 197); *le copain / la copine* continua cartão na A2 M1.1 (lexemas diferentes, regra 14).
+209. ***coûter*** **vira cartão na A1 M5.1** "Perguntar o preço e pagar". A M5.1 passaria a 11 (conjunto aberto, limite 10); das palavras não publicadas da unidade (*mille, le prix,
+     payer, le numéro de téléphone*; as outras 6 são cartões publicados), a menos importante é ***le prix***, que vai para a nota de vocabulário "Pagar e dar o contato"
+     (*Quel est le prix ?*), **a revisar pela dona**: *Ça coûte combien ?* já cobre "perguntar o preço"; *mille* está no "Consigo" (preços até 1000 €), *payer* é a função e
+     *le numéro de téléphone* é o telefone da unidade. A M5.1 continua com **10**, sem mudar a conta nem o tempo do M5. Todas as frases publicadas com *coûter* (`A1-10`,
+     `A1-g10`, `A1-14`, diálogo "Numa loja") vêm depois da M5.1 e ficam.
+     - ***l'euro* NÃO vira cartão**: aparece só em frase (e no recurso "Na frase"), como unidade de preço junto dos números (*cinq euros*, *quarante euros*), inclusive na
+       fala publicada *Voilà, ça fait cinq euros.* (A1 M4.1). Fica registrado como exceção da regra 11 decidida pela dona.
+     - ***préférer* NÃO foi decidido**: continua pendência, com contexto na seção 7 do `08 v2` (a A1 M4.1 "Gostos" já está com 11 e não tem palavra livre para sair: as outras
+       10 são cartões publicados ou *aimer*, decisão 197).
+210. ***voir*** **fica na A1 M9.1** "Falar de lazer" (confirma a decisão 197; a mensagem que dizia "A2 M9.1" fica resolvida): a M9.1 fica com 11, exceção à regra 13 **a revisar
+     pela dona**. ***pourquoi / parce que*** fica na **A1 M9.3** (convites), como no `08 v2` e no `16` (conferido: o `16` já diz M9.3 e tira da M6.6, decisão 202).
+     - **Totais novos**: A1 com 9 módulos, 56 unidades (33 + 23), **350 cartões**, **~29h45** (M1 3h35, **M2 3h45**, M3 3h35, M4 3h15, M5 2h55, M6 3h05, M7 2h50, M8 3h15,
+       M9 3h30), lições **~144**, notas **~132**; A2 com 10 módulos, 58 unidades (36 + 22), **427 cartões (417 novos + 10 publicados)**, ~33h10, notas ~74.
+     - **Ainda pendentes (nada decidido; seção 7 do `08 v2`, com contexto para quem não conhece o assunto)**: (a) cartão dos verbos irregulares; (b) a frase `A1-7-p5`
+       *La semaine prochaine, je pars en voyage.*; (c) *préférer*. E as que já estavam abertas: exceções à regra 13 a revisar (M2.1, M3.3, M8.5, M9.1 e as palavras que foram
+       para nota: *adorer, se coucher, la boisson, la chemise, le prix*), *confirmer* (A2 M9.3), herança da aprovação dos Pontos de verificação (decisão 201).
+     - **Status**: o mapa A1 + A2 aguarda as três pendências acima e a aprovação final da dona.

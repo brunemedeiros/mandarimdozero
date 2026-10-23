@@ -9,7 +9,7 @@ numa gramática ganha a sua **versão grátis** numa unidade de vocabulário ant
 passou a M3.7 (a M3.6 é a unidade nova de vocabulário "Frequência", `A1-35`).
 **Correções da auditoria de 2026-10-21** (decisão 136; `auditoria/2026-10-21-a1-a2-rodada-equidade.md`): diálogos negativos posicionados na M3.1, M6.1 e M8.3; fala com *combien de* na
 M2.1; N43 sem *savoir* nem *pas encore*. O `08 v2` registra as mesmas posições (nota da M1.2 incluída).
-**Auditoria final** (decisões 197 e 202 do `12`, 2026-10-23; `auditoria/2026-10-22-a1-a2-auditoria-final.md`): *aimer* (M4.1) e *parler* (M2.5) viram cartão, então os diálogos negativos da M4.1 e da M2.5 usam só cartões; *pourquoi / parce que* sai da lista da M6.6 e fica na M9.3, como no `08 v2`.
+**Auditoria final** (decisões 197 e 202 do `12`, 2026-10-23; `auditoria/2026-10-22-a1-a2-auditoria-final.md`): *aimer* (M4.1) e *parler* (M2.5) viram cartão, então os diálogos negativos da M4.1 e da M2.5 usam só cartões; *pourquoi / parce que* sai da lista da M6.6 e fica na M9.3, como no `08 v2`. **Confirmado pela dona** (decisão 210, 2026-10-23): *pourquoi / parce que* fica na A1 M9.3 (convites).
 
 ## Princípio (versão 2)
 
