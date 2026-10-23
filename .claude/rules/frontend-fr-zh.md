@@ -38,6 +38,10 @@ paths:
 - **Unidade de gramática** (`type:"grammar"`) e **exercício de cenário**: motor comum em `shared/core/gramatica-cenario.js` (CSS em
   `shared/gramatica-cenario.css`); o que muda por idioma vem de `LANG_HOOKS` (`grammarAnswerVerdict`, `scenarioOptionHTML`, `phraseAnswerHTML`...).
   Guarda: `tests/paridade-sites/test_gramatica_cenario*.js`.
+- **Módulos e níveis** (Ponto de verificação do módulo e o pulo, Revisão do módulo, Teste de Nível, seletor de nível, trilha/Mapa por
+  módulos, tela de módulo concluído): motor comum em `shared/core/modulos-niveis.js` (CSS em `shared/modulos-niveis.css`, depois do `<style>`),
+  vale para todo site que declarar `MODULES`/`LEVEL_TESTS`; prova por idioma em `LANG_HOOKS.checkpointExam`/`checkpointScore`. Nunca copiar
+  para um `app.js`. Guarda: `tests/paridade-sites/test_modulos_niveis*.js`.
 - **Lembrete de revisão do rodapé** (`maybeShowReviewReminder`, `shared/core/revisao-decks.js`): o dia só é gravado depois de o banner ficar visível uns segundos ou ser clicado/dispensado
   (`markReviewReminderSeen`); em lição (`lesson-focus`) nem aparece nem gasta o dia; reavalia ao voltar para a aba e ao sair da lição. Guarda: `tests/lembrete-revisao/`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
