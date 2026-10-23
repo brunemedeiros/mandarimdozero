@@ -664,6 +664,7 @@ window.I18N_CATALOG['en'] = {
   'zh.hanzi.lessonTest': 'Lesson test — {i} of {n}', // ALTA
   'fr.exercise.counter': 'Exercise {i} of {n}', // ALTA
   'fr.exercise.whatMeans': 'What does it mean?', // ALTA
+  'fr.reorder.tapHint': 'Tap the words in the right order. Tap a placed one to send it back.', // ALTA
   'fr.exercise.listenChooseMeaning': 'Listen and choose the right meaning', // ALTA
   'fr.exercise.tapToHearAgain': 'tap to listen again', // ALTA
   'fr.exercise.typeWhatYouHeard': 'Type what you heard', // ALTA

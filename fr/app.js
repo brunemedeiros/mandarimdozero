@@ -3561,7 +3561,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
           <div class="prompt-translation">${ex.phrase.t}</div>
           ${audioBtnHTML(ex.phrase.f, 'audio-btn-lg')}
         </div>
-        <div class="reorder-wrap-hint">Toque nas palavras na ordem certa. Toque numa já colocada para devolvê-la.</div>
+        <div class="reorder-wrap-hint">${t('fr.reorder.tapHint')}</div>
       `}
       <div class="reorder-answer-slots" id="reorder-answer-slots"></div>
       <div class="reorder-blocks" id="reorder-blocks"></div>
@@ -3930,7 +3930,7 @@ function renderSpeedReview(){
   el.innerHTML = `
     <div class="speed-header">
       <div class="speed-hearts">${heartsHTML}</div>
-      <div class="speed-score">${SPEED_STATE.score} pts</div>
+      <div class="speed-score">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
     </div>
     <div class="speed-timer-track"><div class="speed-timer-fill" id="speed-timer-fill" style="width:100%"></div></div>
     <div class="speed-prompt">
@@ -6927,7 +6927,7 @@ const CHALLENGE_I18N = {
     'ch.lt.hint': 'Mostrar dica',
     'ch.lt.label': 'Digite sua tradução:',
     'ch.lt.placeholder': 'Sua tradução em português...',
-    'ch.verify': 'Vérifier',
+    'ch.verify': 'Verificar',
     'ch.lt.alert.negation': 'Atenção à negação: a frase original e a sua não concordam em "não/nunca/nada".',
     'ch.lt.alert.number': 'Atenção aos números: confira a quantidade na frase original.',
     'ch.lt.alert.mustInclude': 'Faltou uma ideia importante: "{word}".',
@@ -7105,7 +7105,7 @@ const CHALLENGE_I18N = {
     'ch.lt.hint': "Show a hint",
     'ch.lt.label': "Type your translation:",
     'ch.lt.placeholder': "Your translation in English...",
-    'ch.verify': "Vérifier",
+    'ch.verify': "Check",
     'ch.lt.alert.negation': "Watch the negation: the original sentence and yours don't agree on \"not/never/nothing\".",
     'ch.lt.alert.number': "Watch the numbers: check the quantity in the original sentence.",
     'ch.lt.alert.mustInclude': "An important idea is missing: \"{word}\".",
@@ -8032,7 +8032,9 @@ function openExpressionPlayer(c){
 function renderExpressionQuestionScreen(c){
   stopExerciseAudio();
   const content = document.getElementById('challenge-player-content');
+  // Comando no idioma do site, igual ao da trilha (rótulo + item); o campo `question` do conteúdo (em francês) não é mais desenhado.
   content.innerHTML = `
+    <div class="exercise-prompt-label">${t('fr.exercise.whatMeans')}</div>
     <div class="challenge-expression">
       ${escapeHtmlChallenge(c.canonicalExpression)}
       <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="${chT('ch.listenPron')}" title="${chT('ch.listenPron')}">🔊</button>
@@ -8040,7 +8042,6 @@ function renderExpressionQuestionScreen(c){
     </div>
     ${c.register ? `<div class="expr-question-reg">${expressionRegisterChipHTML(c)}</div>` : ''}
     <div class="challenge-hypothesis">
-      <p class="challenge-question">${escapeHtmlChallenge(c.question)}</p>
       <div class="challenge-choices-wrap">
         <div class="challenge-choices blurred" id="challenge-choices"></div>
         <button class="btn btn-secondary challenge-reveal-overlay-btn" id="challenge-reveal-btn">${chT('ch.expr.reveal')}</button>

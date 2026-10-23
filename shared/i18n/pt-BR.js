@@ -681,6 +681,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'zh.hanzi.lessonTest': 'Teste da lição — {i} de {n}',
   'fr.exercise.counter': 'Exercício {i} de {n}',
   'fr.exercise.whatMeans': 'O que significa?',
+  'fr.reorder.tapHint': 'Toque nas palavras na ordem certa. Toque numa já colocada para devolvê-la.',
   'fr.exercise.listenChooseMeaning': 'Ouça e escolha o significado certo',
   'fr.exercise.tapToHearAgain': 'toque para ouvir de novo',
   'fr.exercise.typeWhatYouHeard': 'Digite o que ouviu',
