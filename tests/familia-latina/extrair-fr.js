@@ -19,7 +19,8 @@ function fonteAntiga() {
 }
 // Etapa 5a da paridade (2026-10-23): a Conjugação (conjAlign, conjFold) saiu do fr/app.js para shared/conjugacao.js.
 // Etapa 5b (2026-10-23): os Ditados (bloco dictation-answer-logic, dictationLightNoteText) foram para shared/ditados.js.
-function fonteNova() { return withCore(fs.readFileSync(path.join(ROOT, 'shared/conjugacao.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'shared/ditados.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'fr/app.js'), 'utf8')); }
+// Etapa 5c (2026-10-23): os Desafios (bloco accent-challenge-logic) foram para shared/desafios.js.
+function fonteNova() { return withCore(fs.readFileSync(path.join(ROOT, 'shared/conjugacao.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'shared/ditados.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'shared/desafios.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'fr/app.js'), 'utf8')); }
 const ler = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 
 function ferramentas(SRC, nomeArquivo) {
@@ -130,6 +131,10 @@ function carregarNovo() {
     const motor = ler('shared/ditados.js');
     vm.runInContext(motor.slice(0, motor.indexOf('// ---------- Lista, filtro do módulo')), ctx, { filename: 'shared/ditados.js' });
     vm.runInContext(ler('fr/ditados-config.js'), ctx, { filename: 'fr/ditados-config.js' });
+    // A Acentuação chama chFamilia() (configuração do site): começo do motor dos Desafios + configuração do francês.
+    const desafios = ler('shared/desafios.js');
+    vm.runInContext(desafios.slice(0, desafios.indexOf('// DESAFIOS: três categorias')), ctx, { filename: 'shared/desafios.js' });
+    vm.runInContext(ler('fr/desafios-config.js'), ctx, { filename: 'fr/desafios-config.js' });
   });
 }
 
