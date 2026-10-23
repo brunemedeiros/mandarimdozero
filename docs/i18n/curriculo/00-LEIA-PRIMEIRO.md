@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar. Status (2026-10-23): auditoria final feita e respondida (decisões 197 a 203); pendências da 203 respondidas (decisões 204 a 214); aguarda duas pendências (verbos irregulares, opção A ou B, e o tamanho da A1 M5.1) e a aprovação do mapa.** Mapa final do A1 (9 módulos, 56 unidades, 352 cartões) e do A2 (10 módulos, 58 unidades, 427 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar. Status (2026-10-23): auditoria final feita e respondida (decisões 197 a 203); pendências da 203 respondidas (decisões 204 a 216: A1 M5.1 com 11; verbos irregulares pela opção B, unidade nova A1 M4.1 "Verbos muito usados"); próximo passo: passada final do `auditor-curricular` e aprovação do mapa (decisão 217).** Mapa final do A1 (9 módulos, 57 unidades, 357 cartões) e do A2 (10 módulos, 58 unidades, 428 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
@@ -151,5 +151,15 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   A1 M5.1, que fica com 11, **a confirmar** (recomendação: exceção).
 - **Totais novos**: A1 com 9 módulos, 56 unidades (33 + 23), **352 cartões**, **~30h00** (M1 3h35, M2 3h45, M3 3h35, **M4 3h20**, **M5 3h05**, M6 3h05, M7 2h50,
   M8 3h15, M9 3h30), lições ~145, notas ~132; A2 com 10 módulos, 58 unidades (36 + 22), **427 cartões (417 novos + 10 publicados)**, ~33h10, notas ~74.
-- **Status: aguarda duas pendências (verbos irregulares: opção A, cartões espalhados com exceções, ou opção B, unidade nova "Verbos muito usados" só de
-  reconhecimento; e o tamanho da A1 M5.1; contexto na seção 7 do `08 v2`) e a aprovação final do mapa.**
+- *Status anterior: aguardava duas pendências (verbos irregulares, opção A ou B, e o tamanho da A1 M5.1), respondidas abaixo.*
+- **Decisões 215 a 217 no `12`**: a **A1 M5.1 fica com 11** (*coûter* e *le prix* com cartão, exceção aceita); **verbos irregulares pela opção B**: unidade nova de vocabulário
+  **A1 M4.1 "Verbos muito usados"** (`A1-36`), só de reconhecimento (cartão do infinitivo com o significado e 1 ou 2 exemplos "Na frase", sem tabela e sem produção):
+  *aller, faire, vouloir, pouvoir, devoir, voir* (*voir* sai da A1 M9.1, que volta a 10). Fica no **começo do M4** porque é lá que esses verbos aparecem pela 1ª vez em
+  diálogo (*ça fait*, *Tu veux un dessert ?*, *Vous voulez combien...*) e porque no fim do M2 (~4h10) ou no começo do M3 (~4h00) o módulo passaria do teto de 3h45; o M4 vai a
+  ~3h45. **As antigas A1 M4.1 a M4.6 passam a M4.2 a M4.7** (ids iguais; nos registros antigos, inclusive as atualizações acima, "A1 M4.x" é a numeração anterior).
+  No A2: *savoir, connaître* (M6.3; *l'échange, la faute* em nota, a revisar), *dire* (M7.2, 12) e *donner* (M4.2; *se faire mal* em nota, a revisar). Pergunta da dona
+  respondida na regra 12 do `15`: a unidade grátis não tira o privilégio do Premium (grátis reconhece, Premium sistematiza e produz). Seção 7 do `08 v2` limpa.
+- **Totais novos**: A1 com 9 módulos, **57 unidades (34 + 23)**, **357 cartões**, **~30h15** (M1 3h35, M2 3h45, M3 3h35, **M4 3h45**, M5 3h05, M6 3h05, M7 2h50,
+  M8 3h15, **M9 3h20**), lições ~148, notas ~132; A2 com 10 módulos, 58 unidades (36 + 22), **428 cartões (418 novos + 10 publicados)**, ~33h10, notas ~76.
+- **Status: único próximo passo é a passada final do agente `auditor-curricular` e a aprovação do mapa pela dona** (decisão 217; os itens "a revisar" que ficam no mapa
+  são revistos junto com a aprovação).

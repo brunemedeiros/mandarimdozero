@@ -1088,3 +1088,41 @@ Nada aplicado ao site. Continuam pendentes (seção 7 do `08 v2`, com contexto):
        estavam abertas: exceções à regra 13 a revisar (M2.1, M3.3, M8.5, M9.1 e as palavras que foram para nota: *adorer, se coucher, la boisson*), *confirmer* (A2 M9.3),
        herança da aprovação dos Pontos de verificação (decisão 201).
      - **Status**: o mapa A1 + A2 aguarda as duas pendências acima e a aprovação final da dona.
+215. **A1 M5.1 "Perguntar o preço e pagar" fica com 11 palavras** (*soixante-dix, quatre-vingts, quatre-vingt-dix, cent, zéro, combien, mille, coûter, le prix, payer,
+     le numéro de téléphone*): *coûter* e *le prix* ficam como cartões, **exceção à regra 13 aceita pela dona** (como a M2.5, decisão 207). 4 lições + Revisão da unidade
+     (os +10 min já estavam contados no M5, ~3h05). Fecha a pendência da decisão 214 (sai da seção 7 do `08 v2`). Contas sem mudança.
+216. **Verbos irregulares: opção B aprovada** (fecha a pendência das decisões 203 a, 210 e 214; a opção A, cartões espalhados com exceções à regra 13, fica descartada).
+     - **A1: unidade nova de vocabulário "Verbos muito usados"** (id novo **`A1-36`**), só de **reconhecimento**: cartão do **infinitivo com o significado** e 1 ou 2
+       exemplos "Na frase" (com a tradução visível, regra 11 refinada pela decisão 211), **sem tabela de conjugação e sem exercícios de produção**. Paradigma, regras e
+       produção ficam nas gramáticas Premium; a Conjugação grátis continua fora da trilha. Cartões (6): *aller, faire, vouloir, pouvoir, devoir, voir*. ***voir* sai da A1 M9.1**,
+       que volta a **10** palavras (todas publicadas), sem exceção à regra 13, e a 3 lições + Revisão (−10 min; a frase publicada *Quel film vous allez voir ?* fica na M9.1,
+       com a chave: ilustra *le film*). Unidade nova (nasce aberta, não concluída, regra 2.10): 3 lições + Revisão da unidade, ~25 min.
+     - **Posição: A1 M4.1, no começo do módulo "Comer e beber"**; as antigas M4.1 a M4.6 passam a **M4.2 a M4.7** (ids iguais; `UNITS` reordenado pelo `curriculo_ops.js`).
+       Critério 1, **primeiro uso na trilha gratuita**: os verbos aparecem pela 1ª vez em diálogo no M4 (*Voilà, ça fait cinq euros.*, M4.2; *Tu veux un dessert ?*, M4.3;
+       *Vous voulez combien de pommes ?*, M4.4; fórmulas *je voudrais, je vais prendre*, M4.2, e *je fais les courses*, M4.3); do M1 ao M3 nenhum diálogo publicado ou novo
+       os usa (a fala *On se voit quel jour ?* da M3.3 já é trocada, decisão 202); antes só há a fórmula *vous pouvez répéter* (M1.1) e frases "Na frase" (*Il va se réveiller
+       tôt demain.*, M3.1), permitidas. Critério 2, **carga** (teto de 3h45 por módulo): no fim do M2, o módulo iria de ~3h45 a ~4h10; no começo do M3 (ou no fim), de ~3h35 a
+       ~4h00; no começo do M4, de ~3h20 a **~3h45**, dentro do teto. Os dois candidatos sugeridos (fim do M2, começo do M3) passariam do teto; o começo do M4 é o ponto mais
+       cedo que respeita o teto e ainda vem antes de todos os diálogos que usam os verbos.
+     - **Versão grátis ligada** (coluna "Versão grátis" do `08 v2`): *aller* → A1 M6.4 (g); *faire* → A1 M4.7 (g) *faire / prendre* (*prendre* fica só em fórmula); *vouloir,
+       pouvoir, devoir* → A1 M9.2 (g) modais. Os exemplos da M9.2 podem voltar a usar *voir* (já é cartão).
+     - **A2** (como já estava na tabela da opção B): ***savoir* e *connaître*** na A2 M6.3 (12 → 14 → 12: ***l'échange*** e ***la faute*** vão para a nota de vocabulário
+       "Mais sobre aprender", **a revisar pela dona**); ***dire*** na A2 M7.2 (11 → 12); ***donner*** na A2 M4.2 (12 → 13 → 12: ***se faire mal*** vai para a nota de
+       vocabulário "Mais na consulta", **a revisar pela dona**). Os ganchos grátis das gramáticas A2 M4.4 (COI, *Le médecin lui donne...*), A2 M6.4 (*savoir* x *connaître*)
+       e A2 M7.3 (*Il dit que...*) passam a ter o verbo como cartão na unidade de vocabulário logo antes.
+     - **Pergunta da dona: "a unidade grátis tira o privilégio do Premium?"** Resposta registrada: **não**. O grátis **reconhece** (significado, exemplos e revisão
+       espaçada), o Premium **sistematiza e produz** (paradigma completo, regras de uso e exercícios de conjugar e completar nas gramáticas). É o mínimo da regra 12 (versão
+       grátis antes da gramática); registrado na regra 12 do `15` e na seção 2.1 do `08 v2`.
+     - **Regra 14 conferida**: os 10 verbos não são cartão em nenhuma outra unidade (as expressões com *faire*, como *faire escale* ou *faire le ménage*, e *au revoir* são
+       expressões diferentes, com cartão próprio).
+     - **Totais novos**: **A1** com 9 módulos, **57 unidades (34 + 23)**, **357 cartões** (352 + 6 − *voir*, que muda de unidade = +5; soma 60 + 33 + 50 + **48** + 31 + 30 +
+       34 + 41 + **30**), **~30h15** (M1 3h35, M2 3h45, M3 3h35, **M4 3h45**, M5 3h05, M6 3h05, M7 2h50, M8 3h15, **M9 3h20**; nenhum módulo passa de 3h45), lições **~148**
+       (+4 da M4.1, −1 da M9.1), notas ~132 (a M4.1 não tem nota prevista); **A2** com 10 módulos, 58 unidades (36 + 22), **428 cartões (418 novos + 10 publicados)** (427 + 4
+       verbos − 3 que vão para nota; M7 47 → 48), ~33h10 (sem mudança), notas **~76** (+2 notas de vocabulário).
+217. **Pendências da seção 7 do `08 v2` limpas**: saem as linhas dos verbos irregulares (decisão 216) e do tamanho da A1 M5.1 (decisão 215). Os itens "a revisar pela dona"
+     que ficam dentro do mapa (exceções M2.1, M3.3, M8.5; *adorer, se coucher, la boisson* em nota; *confirmer*; *se faire mal, l'échange, la faute* em nota) são revistos
+     **junto com a aprovação do mapa**, e a herança da aprovação dos Pontos de verificação (decisão 201) é escolha da implementação, não passo antes da aprovação.
+     **Único próximo passo**: a **passada final do agente `auditor-curricular`** sobre o mapa com as decisões 215 e 216 (unidade nova `A1-36`, renumeração do A1 M4, *voir* fora
+     da M9.1, cartões novos do A2, regra 11 nos diálogos do M4 e regra 14) e a **aprovação do mapa pela dona**; depois, a Etapa 0b parte 2 e o conteúdo módulo a módulo.
+     Greps de posições obsoletas feitos no `08 v2`, `15`, `16` e `00` (M9.1 com *voir*, 352, ~30h00, M5.1 "a confirmar", A1 M4.1 a M4.6 da numeração antiga); nos trechos
+     históricos (decisões até a 215, contas "Antes", seções 6 e 8 do `08 v2`), *A1 M4.1 a M4.6* = M4.2 a M4.7 de hoje.
