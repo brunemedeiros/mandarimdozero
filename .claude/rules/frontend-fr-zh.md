@@ -10,7 +10,7 @@ paths:
 
 - `fr/app.js` e `zh/app.js` são espelhados: mudança em um quase sempre vale no outro (com as adaptações de idioma:
   zh tem hanzi+pinyin separados, `speakChinese`, `pinyinTonePickerHTML`; fr tem `speakFrench`, `frAccentPickerHTML`).
-  Desafios e Ditados só existem no fr (o motor dos Ditados é comum, ver abaixo).
+  Desafios e Ditados só existem no fr (os motores são comuns, ver abaixo).
 - **Tokens de cor**: nomes iguais podem ter valores diferentes. Em fr, `--seal-red` é AZUL (#3498D6) e
   `--on-seal-red` é quase preto; em zh é vermelho e branco. Ler o `:root` do arquivo antes de usar. Texto sobre
   `--error-red`/`--jade` usa `--on-vivid`. Cor nova vira token definido nos 3 blocos de tema (`:root`,
@@ -50,6 +50,11 @@ paths:
   `shared/ditados.js` (CSS em `shared/ditados.css`, depois do `<style>`); o que é do idioma (ditados, família latina, voz, teclado, mp3,
   abreviações, ganchos dos Desafios) vai em `fr/ditados-config.js` (`registerDictations`). Nunca copiar para um `app.js`; o zh não
   carrega (decisão da dona pendente). Guarda: `tests/paridade-sites/test_ditados*.js`.
+- **Desafios** (catálogo, Free x Premium, textos `chT`, revisão espaçada, correção de cada tipo, telas do aluno, linha "Desafios do Módulo N"
+  da trilha, admin e importação): motor comum em `shared/desafios.js`, `shared/desafios-telas.js` e `shared/desafios-admin.js` (CSS em
+  `shared/desafios.css`, logo depois do `<style>`); o que é do idioma (família da Acentuação, teclado, tabela, textos que citam o idioma) vai em
+  `fr/desafios-config.js` (`registerChallenges`). Nunca copiar para um `app.js`; o zh não carrega (decisão da dona pendente).
+  Guarda: `tests/paridade-sites/test_desafios*.js`.
 - **Lembrete de revisão do rodapé** (`maybeShowReviewReminder`, `shared/core/revisao-decks.js`): o dia só é gravado depois de o banner ficar visível uns segundos ou ser clicado/dispensado
   (`markReviewReminderSeen`); em lição (`lesson-focus`) nem aparece nem gasta o dia; reavalia ao voltar para a aba e ao sair da lição. Guarda: `tests/lembrete-revisao/`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").

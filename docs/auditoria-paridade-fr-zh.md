@@ -25,7 +25,7 @@ Esta auditoria **não mudou código**. Base: `main` em `153f5c3`.
 
 | Grupo | Funções | Categoria |
 |---|---|---|
-| Desafios (Expressões, Ouça e traduza, Acentuação, Complete a frase gramatical, fila, revisão espaçada, admin, Premium, áudio lento, `tpZero`, comparador de tradução) | 138 | B |
+| Desafios (Expressões, Ouça e traduza, Acentuação, Complete a frase gramatical, fila, revisão espaçada, admin, Premium, áudio lento, `tpZero`, comparador de tradução) **-- MOTOR FEITO (2026-10-23): `shared/desafios*.js`** | 138 | B |
 | Ditados (player, correção palavra a palavra, "Revisão do A1" de ditados) **-- MOTOR FEITO (2026-10-23): `shared/ditados.js`** | 39 | B |
 | Sistema de módulos e níveis (Ponto de verificação do módulo, Revisão do módulo, Teste de Nível, seletor de nível, tela de módulo concluído, estrelas, pular unidades) | 32 | B |
 | Conjugação (prática, busca de verbos, Jogos, contadores do dia) | 33 | A (para o zh); família latina para o pt |
@@ -67,17 +67,25 @@ Além das funções soltas, a comparação das funções de mesmo nome e dos arq
   `shared/ditados.js`, o CSS em `shared/ditados.css` e o que é do francês em `fr/ditados-config.js`
   (`registerDictations`). Continua categoria B: **o zh não carrega nada** até a dona decidir se o chinês terá Ditados
   (a correção de hoje é da família latina; o zh precisaria de uma comparação por hanzi/pinyin na configuração).
-  Os Desafios (138) seguem só no fr.
+- **Desafios: motor feito** na etapa 5c (registro: `docs/historico/29-paridade-desafios.md`): as 138 funções (dados e
+  catálogo, Free x Premium, textos, revisão espaçada, correção de cada tipo, telas do aluno, linha "Desafios do Módulo N"
+  da trilha, admin e importação) estão em `shared/desafios.js`, `shared/desafios-telas.js` e `shared/desafios-admin.js`,
+  o CSS em `shared/desafios.css` e o que é do francês (família latina da Acentuação, teclado, sentido em `meaning.fr`, os
+  4 textos que citam o francês) em `fr/desafios-config.js` (`registerChallenges`). Continua categoria B: **o zh não
+  carrega nada** até a dona decidir (a Acentuação de hoje é da família latina; o zh precisaria de uma correção por
+  tom/pinyin na configuração, e de desafios na tabela).
 Pendência da dona "módulos/aba de Desafios do chinês"; regra de `.claude/rules/frontend-fr-zh.md`: "Desafios e Ditados só
-existem no fr". Arquivos só do fr: `fr/dictations.js`, `shared/translation-compare.js` (comparador do "Ouça e traduza").
-Itens que parecem gerais mas só são usados aqui, e por isso ficam em B:
-- **Áudio lento 🐢** (`slowAudioBtnHTML`/`slowAudioIconBtnHTML`, `fr/app.js:207-212`, `SLOW_AUDIO_RATE = 0.65`): o próprio
+existem no fr" (os motores são comuns). Arquivos só do fr: `fr/dictations.js`, `fr/challenges.en.js`;
+`shared/translation-compare.js` (comparador do "Ouça e traduza") é comum e só o motor dos Desafios usa.
+Itens que antes pareciam gerais mas só eram usados nos Desafios (todos foram junto para `shared/desafios*.js`):
+- **Áudio lento 🐢** (`slowAudioBtnHTML`/`slowAudioIconBtnHTML`, hoje em `shared/desafios-telas.js`, `SLOW_AUDIO_RATE = 0.65`): o próprio
   comentário diz que é companheiro do "Écouter" manual dos Desafios; os únicos usos são `fr/app.js:8036`, `8111`, `8117`,
   `8483`, `8562`, `8609`, `8646`, todos em Desafios. Nas lições (fr e zh) não existe botão lento. Se a dona quiser o 🐢 nas
   lições, é pedido novo para os dois sites.
-- **`tpZero`** (`fr/app.js:194`, plural com zero): só usado nas linhas de Desafios da trilha (`fr/app.js:1414`, `1447`).
-  Função genérica; pode ir para `shared/core/` quando Desafios chegarem ao zh.
-- `chT`, `md5Hex`, `tierBadgeHTML`, `translation*`: internos de Desafios.
+- **`tpZero`** (plural com zero, hoje em `shared/desafios.js`): só usado nas linhas de Desafios da trilha (e pelo
+  `dictTpZero` dos Ditados, que tem cálculo próprio se o site não tiver Desafios). Pode ir para `shared/core/` se outro
+  recurso precisar.
+- `chT`, `md5Hex`, `tierBadgeHTML`, `translation*`: internos de Desafios (em `shared/desafios*.js`).
 
 ### B2. Sistema de módulos e níveis (32 funções) -- MOTOR FEITO (2026-10-23)
 - **Feito** na etapa 4 do pedido da dona (registro: `docs/historico/26-paridade-b2-modulos-niveis.md`): o motor (35
@@ -255,19 +263,24 @@ trilha e Mapa por módulos, tela de módulo concluído), com a prova (`shared/ch
 módulo (`shared/review-milestone.js`), as regras da família latina (`shared/core/familias/latina.js`) e a tela inteira
 da Conjugação (`shared/conjugacao.js` + `shared/conjugacao.css`, ligada por um `<site>/conj-config.js` com dados e regras
 do idioma; vale para quem carregar, o zh não carrega) e os Ditados (`shared/ditados.js` + `shared/ditados.css`, ligados por
-um `<site>/ditados-config.js` com os ditados, a família do idioma, a voz e o teclado; o zh não carrega).
+um `<site>/ditados-config.js` com os ditados, a família do idioma, a voz e o teclado; o zh não carrega) e os Desafios
+(`shared/desafios.js` + `shared/desafios-telas.js` + `shared/desafios-admin.js` + `shared/desafios.css`, ligados por um
+`<site>/desafios-config.js` com a família do idioma, o teclado, a tabela e os textos que citam o idioma; o zh não carrega).
 
 **Perde** (está só em `fr/app.js` e teria de ser copiado, o que recria o problema desta auditoria):
 - ~~Toda a tela da Conjugação (33 funções)~~: feito, `shared/conjugacao.js` (etapa 5a, 2026-10-23). O pt liga com
   `pt/conjugation-data.js` + `pt/conj-config.js` (passo a passo em `docs/historico/27-paridade-conjugacao.md`).
-- ~~Toda a parte de módulos e níveis (32 funções)~~: feito, `shared/core/modulos-niveis.js` (2026-10-23). Falta só a linha
-  dos Desafios do módulo (`buildModuleChallengesRow`, mista: desafios + contagem de ditados), que vai com os Desafios; a
-  linha "Revisão do A1" (só de ditados, `buildLevelReviewRow`) já está em `shared/ditados.js`.
+- ~~Toda a parte de módulos e níveis (32 funções)~~: feito, `shared/core/modulos-niveis.js` (2026-10-23). A linha dos
+  Desafios do módulo (`buildModuleChallengesRow`) foi com os Desafios (`shared/desafios-telas.js`, ligada pelo gancho
+  `afterModule` com `appendModuleChallengesSlot`); a linha "Revisão do A1" (`buildLevelReviewRow`) está em
+  `shared/ditados.js`.
 - ~~Unidade de gramática e exercício de cenário (C6)~~: feito, `shared/core/gramatica-cenario.js` (2026-10-23).
 - ~~`typedAttemptHTML` (C2)~~: feito, `shared/core/licao-feedback.js` (2026-10-23).
 - ~~Ditados (39 funções)~~: feito, `shared/ditados.js` (etapa 5b, 2026-10-23). O pt liga com `pt/dictations.js` +
   `pt/ditados-config.js` (passo a passo em `docs/historico/28-paridade-ditados.md`), quando a dona quiser.
-- Desafios (138 funções): entram no pt "aos poucos depois", pela decisão da dona.
+- ~~Desafios (138 funções)~~: feito, `shared/desafios*.js` (etapa 5c, 2026-10-23). O pt liga com a tabela/dados dele +
+  `pt/desafios-config.js` (passo a passo em `docs/historico/29-paridade-desafios.md`), "aos poucos depois", pela decisão
+  da dona.
 - ~~O carregamento com mudanças de currículo (C1)~~: feito, `shared/core/curriculo-progresso.js` (2026-10-23).
 
 **Pontos de `shared/` que ainda supõem só fr/zh** (já listados em `docs/i18n/arquitetura-multi-idioma-cursos.md:74` para a
@@ -311,7 +324,10 @@ pt) cobre o pt **se** a extração incluir os itens da lista "Perde". Recomendo 
 
 Itens B2 (módulos) e Conjugação: não são esquecimento, mas a recomendação é mover o motor para `shared/core/` **antes** de
 levar ao zh ou ao pt, em vez de copiar. (B2 feito em 2026-10-23: `shared/core/modulos-niveis.js`; Conjugação feita em
-2026-10-23: `shared/conjugacao.js`, fora do `core/` porque o zh não a carrega.)
+2026-10-23: `shared/conjugacao.js`, fora do `core/` porque o zh não a carrega; Ditados e Desafios feitos em 2026-10-23:
+`shared/ditados.js` e `shared/desafios*.js`, idem. Com a etapa 5c acabou a mudança de código do pedido: o `fr/app.js`
+ficou com 60 funções, todas de trilha/lição/diálogo/exercícios/revisão/estado/voz/teclado do francês, ver
+`docs/historico/29-paridade-desafios.md`.)
 
 ## 12. Guarda automática sugerida
 

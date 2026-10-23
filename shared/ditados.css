@@ -1,8 +1,10 @@
 /* Ditados: CSS comum aos sites que têm a tela (etapa 5b da paridade, docs/historico/28-paridade-ditados.md).
    Veio do <style> do fr/index.html, na MESMA ordem (base, passada de design dos Desafios, lista, "mesma linguagem
    das atividades"); as regras de seletor misto (.challenge-card, .dictation-card) foram divididas e a parte dos
-   Desafios ficou no fr. Carregar depois do <style> do site. .dictation-play-btn também é usado pelos Desafios do fr
-   (Ouça e traduza, Acentuação, exemplos); o áudio lento (.dictation-play-btn-slow, .audio-btn-*) ficou no fr. */
+   Desafios ficou no fr (desde a etapa 5c, em shared/desafios.css). Carregar depois do <style> do site.
+   .dictation-play-btn também é usado pelos Desafios (Ouça e traduza, Acentuação, exemplos); o áudio lento
+   (.dictation-play-btn-slow, .audio-btn-*), a linha .module-challenges e o cadeado .challenge-card-check (usados também
+   pelos Ditados) estão em shared/desafios.css. */
 /* ---------- Ditados ---------- */
 .dictation-explainer{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
