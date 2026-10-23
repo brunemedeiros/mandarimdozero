@@ -82,6 +82,9 @@ insert into r select (select match_state from st where event_id='e5') = 'linked'
 insert into r select (select match_state from st where event_id='p1') = 'ignored', 'agenda principal: "Almoço" ignorado sem incomodar';
 insert into r select (select match_state from st where event_id='p5') = 'ignored', 'agenda principal: "Life Dance" ignorado';
 insert into r select (select match_state from st where event_id='p3') = 'ignored', 'dia inteiro (aniversário) ignorado';
+insert into r select (select title is null and attendees = '[]'::jsonb from google_calendar_events where event_id = 'p1')
+  and (select title is null from google_calendar_events where event_id = 'p3'), 'evento pessoal ignorado não guarda título nem convidados';
+insert into r select (select title from google_calendar_events where event_id = 'e3') = 'Aulas de francês', 'evento para revisar mantém o título (a professora precisa ver)';
 insert into r select (select match_state from st where event_id='p2') = 'no_account', 'Evan sem conta no site: guardado esperando';
 insert into r select (select match_state from st where event_id='p4') = 'linked'
   and exists (select 1 from teacher_class_logs where student_id = '11700000-0000-0000-0000-0000000000b1' and class_date = '2026-10-28' and start_time = '15:00'),

@@ -385,6 +385,10 @@ begin
     else
       v_res := public._gcal_apply(v_id);
     end if;
+    -- Privacidade: evento que não é aula (pessoal, dia inteiro, "não é aula") não guarda título nem convidados.
+    update public.google_calendar_events set title = null, attendees = '[]'::jsonb
+     where id = v_id and match_state = 'ignored'
+       and match_reason in ('não reconhecido', 'dia inteiro', 'regra: ignorar', 'ignorado pela professora');
     v_counts := jsonb_set(v_counts, array[coalesce(v_res, 'none')], to_jsonb(coalesce((v_counts ->> coalesce(v_res, 'none'))::int, 0) + 1));
   end loop;
   update public.google_calendar_sources set sync_token = coalesce(p_next_sync_token, sync_token), last_synced_at = now()

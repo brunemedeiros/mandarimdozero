@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacidade: Google Agenda · Idiomas com Prof. Brune</title>
+<meta name="description" content="Como o site Idiomas com Prof. Brune usa os dados do Google Agenda das professoras que conectam a conta.">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="stylesheet" href="shared/fonts/nunito.css">
+<!-- Rascunho para aprovação da autora (2026-10-23). Página exigida pelo Google para publicar o app do Google Agenda
+     (migration 117, Edge Function google-calendar). Texto factual sobre a integração; a política completa do site é outra. -->
+<style>
+:root {
+  --ink: #201A2C; --ink-soft: #6B6478; --paper: #FAF7F2; --paper-warm: #F1ECE2; --paper-line: #E3DCCE;
+  --link: #2678AC;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ink: #EEE9F5; --ink-soft: #ADA5BE; --paper: #17141F; --paper-warm: #201C2B; --paper-line: #362F44; --link: #6CB8E6; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6; font-size: 17px; }
+main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.brand { font-weight: 800; color: var(--ink); text-decoration: none; }
+.langs a { color: var(--link); font-weight: 700; margin-left: 12px; }
+h1 { font-size: clamp(26px, 5vw, 34px); line-height: 1.2; margin: 24px 0 4px; }
+h2 { font-size: 20px; margin: 28px 0 6px; }
+.updated { color: var(--ink-soft); margin: 0 0 20px; }
+.box { background: var(--paper-warm); border: 1px solid var(--paper-line); border-radius: 14px; padding: 14px 16px; }
+a { color: var(--link); }
+ul { padding-left: 22px; }
+li { margin: 4px 0; }
+hr { border: none; border-top: 1px solid var(--paper-line); margin: 48px 0; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <a class="brand" href="https://app.profbrune.com.br/">Idiomas com Prof. Brune</a>
+  <nav class="langs"><a href="#pt">Português</a><a href="#en">English</a></nav>
+</header>
+
+<section id="pt" lang="pt-BR">
+<h1>Privacidade: conexão com o Google Agenda</h1>
+<p class="updated">Última atualização: 23 de outubro de 2026</p>
+
+<p class="box">Resumo: o site só <b>lê</b> as agendas que a professora escolher, para registrar as aulas com o dia e o horário certos.
+Ele nunca cria, muda nem apaga nada no Google Agenda, não vende nem repassa os dados e não usa esses dados para anúncios.</p>
+
+<h2>Quem usa e para quê</h2>
+<p>A conexão com o Google Agenda é opcional e serve só para professoras do site <b>Idiomas com Prof. Brune</b>
+(app.profbrune.com.br). Quando uma professora conecta a conta, o site lê os eventos das agendas que ela marcar e, para cada
+aula reconhecida, cria ou atualiza o registro da aula do aluno (dia, horário e duração). Os alunos não conectam nada.</p>
+
+<h2>O que o site pede ao Google</h2>
+<ul>
+  <li><b>Ver os eventos das suas agendas</b> (permissão só de leitura, <code>calendar.readonly</code>).</li>
+  <li><b>Seu endereço de e-mail do Google</b>, para mostrar qual conta está conectada.</li>
+</ul>
+<p>O site não pede permissão para escrever na sua agenda, ler seus e-mails, contatos ou arquivos.</p>
+
+<h2>O que fica guardado</h2>
+<ul>
+  <li>O e-mail da conta Google conectada e uma chave de acesso (fornecida pelo Google) que permite ao site ler a agenda de
+      tempos em tempos. Essa chave fica só no servidor; nem o navegador nem outras pessoas têm acesso a ela.</li>
+  <li>O nome de cada agenda da conta e a escolha da professora (ler ou não ler cada uma).</li>
+  <li>Dos eventos das agendas marcadas, de maio de 2025 até 90 dias à frente: título, início, fim, fuso horário, se foi
+      cancelado e os convidados (nome e e-mail), usados para reconhecer de qual aluno é a aula.</li>
+  <li>Eventos que <b>não</b> são aula (por exemplo, compromissos pessoais ou de dia inteiro): o site guarda só que existem e
+      que não são aula; o título e os convidados são apagados assim que o site decide que não é aula.</li>
+  <li>As escolhas que a professora ensina ao site (por exemplo, "eventos com o título X são do aluno Y").</li>
+</ul>
+
+<h2>Quem vê esses dados</h2>
+<ul>
+  <li>A professora vê as próprias aulas e os eventos que o site não reconheceu, para decidir de quem é a aula.</li>
+  <li>Cada aluno vê só as próprias aulas (data, horário, tema, tarefa e presença), como já acontece no site.
+      Os alunos não veem a agenda da professora nem os outros eventos dela.</li>
+  <li>Os dados ficam no banco de dados do site (Supabase), protegidos por regras de acesso e transmitidos com criptografia (HTTPS).
+      Não são vendidos, não são repassados a terceiros e não são usados para publicidade nem para treinar inteligência artificial.</li>
+</ul>
+
+<h2>Uso limitado dos dados do Google</h2>
+<p>O uso e a transferência, para qualquer outro aplicativo, de informações recebidas das APIs do Google seguem a
+<a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noopener">Política de Dados do Usuário dos Serviços de API do Google</a>,
+incluindo os requisitos de Uso Limitado.</p>
+
+<h2>Como desconectar e apagar</h2>
+<ul>
+  <li>No site: Professora &gt; Aulas &gt; Calendário &gt; Google Agenda &gt; <b>Desconectar</b>. Isso apaga a chave de acesso,
+      a lista de agendas e os eventos guardados. As aulas já registradas continuam no site, porque fazem parte do histórico
+      das aulas; a professora pode apagá-las quando quiser.</li>
+  <li>No Google: em <a href="https://myaccount.google.com/permissions" rel="noopener">myaccount.google.com/permissions</a>,
+      remova o acesso de "Prof. Brune". A partir daí o site não consegue mais ler a agenda.</li>
+  <li>Para apagar também as escolhas que você ensinou ao site, ou para qualquer dúvida, escreva para
+      <a href="mailto:brunemed1310@gmail.com">brunemed1310@gmail.com</a>.</li>
+</ul>
+
+<h2>Mudanças</h2>
+<p>Se esta página mudar, a data no topo é atualizada. Mudanças no que é lido ou guardado são avisadas no site antes de valer.</p>
+</section>
+
+<hr>
+
+<section id="en" lang="en">
+<h1>Privacy: Google Calendar connection</h1>
+<p class="updated">Last updated: October 23, 2026</p>
+
+<p class="box">In short: the site only <b>reads</b> the calendars a teacher chooses, to record lessons on the right day and time.
+It never creates, changes or deletes anything in Google Calendar, never sells or shares the data, and never uses it for ads.</p>
+
+<h2>Who uses it and why</h2>
+<p>The Google Calendar connection is optional and is only for teachers on <b>Idiomas com Prof. Brune</b> (app.profbrune.com.br).
+When a teacher connects her account, the site reads the events in the calendars she selects and, for each recognized lesson,
+creates or updates the student's lesson record (day, time and length). Students don't connect anything.</p>
+
+<h2>What the site asks Google for</h2>
+<ul>
+  <li><b>See the events on your calendars</b> (read-only permission, <code>calendar.readonly</code>).</li>
+  <li><b>Your Google email address</b>, to show which account is connected.</li>
+</ul>
+<p>The site doesn't ask to write to your calendar or to read your email, contacts or files.</p>
+
+<h2>What is stored</h2>
+<ul>
+  <li>The connected Google account's email and an access key (issued by Google) that lets the site read the calendar from time
+      to time. This key stays on the server only; neither the browser nor other people can access it.</li>
+  <li>The name of each calendar in the account and the teacher's choice (read it or not).</li>
+  <li>For events in the selected calendars, from May 2025 to 90 days ahead: title, start, end, time zone, whether it was
+      canceled, and guests (name and email), used to recognize which student the lesson is for.</li>
+  <li>Events that are <b>not</b> lessons (for example, personal or all-day events): the site only keeps the fact that they
+      exist and aren't lessons; their title and guests are deleted as soon as the site decides they aren't lessons.</li>
+  <li>The choices the teacher teaches the site (for example, "events titled X belong to student Y").</li>
+</ul>
+
+<h2>Who sees this data</h2>
+<ul>
+  <li>The teacher sees her own lessons and the events the site didn't recognize, so she can decide whose lesson it is.</li>
+  <li>Each student only sees their own lessons (date, time, topic, homework and attendance), as already happens on the site.
+      Students don't see the teacher's calendar or her other events.</li>
+  <li>The data is kept in the site's database (Supabase), protected by access rules and sent encrypted (HTTPS).
+      It isn't sold, isn't shared with third parties and isn't used for advertising or to train artificial intelligence.</li>
+</ul>
+
+<h2>Limited use of Google data</h2>
+<p>The use and transfer to any other app of information received from Google APIs will adhere to the
+<a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noopener">Google API Services User Data Policy</a>,
+including the Limited Use requirements.</p>
+
+<h2>How to disconnect and delete</h2>
+<ul>
+  <li>On the site: Teacher &gt; Lessons &gt; Calendar &gt; Google Calendar &gt; <b>Disconnect</b>. This deletes the access key,
+      the calendar list and the stored events. Lessons already recorded stay on the site, because they are part of the lesson
+      history; the teacher can delete them whenever she wants.</li>
+  <li>On Google: at <a href="https://myaccount.google.com/permissions" rel="noopener">myaccount.google.com/permissions</a>,
+      remove access for "Prof. Brune". From then on the site can no longer read the calendar.</li>
+  <li>To also delete the choices you taught the site, or for any question, write to
+      <a href="mailto:brunemed1310@gmail.com">brunemed1310@gmail.com</a>.</li>
+</ul>
+
+<h2>Changes</h2>
+<p>If this page changes, the date at the top is updated. Changes to what is read or stored are announced on the site before they take effect.</p>
+</section>
+</main>
+</body>
+</html>
