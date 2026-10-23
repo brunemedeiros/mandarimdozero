@@ -1148,40 +1148,7 @@ function buildModuleChallengesRow(module){
   return block;
 }
 
-// Unidade "Revisão do A1" no fim do nível: ditados que juntam o conteúdo de
-// 2 módulos (1 Free + 2 Premium, só rotulados por enquanto). Não depende do
-// banco: os ditados vivem em dictations.js.
-function buildLevelReviewRow(level){
-  const moduleId = `${level}-revisao`;
-  const items = dictationsVisible(moduleId);
-  if (!items.length) return null;
-  const mods = modulesOfLevel(level);
-  const lastModule = mods[mods.length - 1];
-  const open = !CHALLENGE_PAYWALL_ENABLED || challengesPremiumUnlocked();
-  const reachable = lastModule && moduleUnlocked(lastModule);
-  const free = items.filter(d => d.free !== false).length;
-  const premium = items.length - free;
-  const block = document.createElement('div');
-  block.className = 'unit-block module-challenges level-review' + (open && reachable ? '' : ' locked');
-  block.innerHTML = `
-    <div class="ub-header">
-      <div class="ub-icon">✍️</div>
-      <div class="ub-info">
-        <div class="ub-title-row"><span class="ub-title">${t('trail.levelReview.title', { level })}</span></div>
-        <div class="ub-goal">${t('trail.levelReview.goal')}</div>
-        <div class="ub-goal">${tp('fr.trail.freeDictation', free)}${premium ? ` · ${tpZero('fr.trail.premiumDictationsOnly', premium)}` : ''}</div>
-      </div>
-    </div>
-  `;
-  if (open && reachable){
-    wireHeaderActivation(block.querySelector('.ub-header'), () => {
-      pendingDictationModuleFilter = moduleId;
-      pendingChallengesModuleFilter = null;
-      switchTab('dictation');
-    });
-  }
-  return block;
-}
+// Unidade "Revisão do A1" no fim do nível (buildLevelReviewRow): shared/ditados.js.
 
 // Estado (recolhida/expandida) da faixa de Desafios de hoje -- lembrado
 // entre sessões, mesmo padrão de STATE.dailyMinutesLog etc: preferência de
@@ -4198,637 +4165,16 @@ function lessonTypedAnswerResult(typed, expected){
 // END accent-answer-logic
 
 // ============================================================
-// DITADOS
-// Um ditado por módulo, ligado à tarefa comunicativa do módulo (ver
-// dictations.js). Cada ditado tem um único áudio guiado pré-gerado
-// (locução de abertura + leitura de reconhecimento + ditado por cláusula
-// com pontuação falada e repetição + releitura final), reproduzindo a
-// estrutura real de um ditado DELF A1. Scoring por alinhamento
-// palavra-a-palavra (LCS) entre o texto certo e o que o aluno digitou.
+// DITADOS: motor comum em shared/ditados.js (etapa 5b da paridade, docs/historico/28-paridade-ditados.md);
+// o que é do francês (dados, voz, teclado, caminho do áudio, abreviações) está em fr/ditados-config.js.
 // ============================================================
-// Ditados de revisão do nível usam moduleId "<nível>-revisao" (não é um módulo).
-function isLevelReviewId(id){ return typeof id === 'string' && id.endsWith('-revisao'); }
-function moduleTitleFor(moduleId){
-  if (isLevelReviewId(moduleId)) return t('fr.dictation.levelReviewTitle', { level: moduleId.split('-')[0] });
-  const mod = MODULES.find(m => m.id === moduleId);
-  return mod ? mod.title : '';
-}
+wireDictationScreen();
 
-// Fase 9: com o site em inglês, usa a versão com as instruções em inglês
-// (gerada pela Action "Áudio TTS" > ditados-en) -- só depois que os mp3 existirem
-// (DICTATION_AUDIO_EN_READY em dictations.js). Até lá, toca o de sempre.
-function dictationAudioPath(d){
-  const en = typeof getUiLang === 'function' && getUiLang() === 'en' && DICTATION_AUDIO_EN_READY;
-  return `audio/dictation-${d.id}-guided${en ? '.en' : ''}.mp3`;
-}
-
-// Áudio do ditado em reprodução no momento (só um por vez).
-let dictationAudioEl = null;
-
-// ---- Fatia 3: áudio por frase (tela de resultado) ----
-// mp3 por frase gerado pelo workflow "ditados-frases"; enquanto não existir
-// (ou se der 404), cai para speakFrench (voz do navegador / manifest).
-function dictationSentenceAudioPath(d, n){
-  return `audio/dictation-${d.id}-s${n}.mp3`;
-}
-let dictationSentenceAudioEl = null;
-let dictationSentenceBtn = null;
-const dictationSentenceMissing = new Set(); // caminhos que já deram erro nesta sessão
-
-function stopDictationSentenceAudio(){
-  if (dictationSentenceAudioEl){
-    dictationSentenceAudioEl.pause();
-    dictationSentenceAudioEl = null;
-  }
-  if (dictationSentenceBtn){ dictationSentenceBtn.classList.remove('speaking'); dictationSentenceBtn = null; }
-  try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch(e){}
-}
-
-function playDictationSentence(d, n, sentence, btn){
-  // Para o áudio guiado (sem desmontar o player, que continua na tela),
-  // outros áudios de exercício/voz do navegador e a frase anterior.
-  if (dictationAudioEl) dictationAudioEl.pause();
-  stopExerciseAudio();
-  stopDictationSentenceAudio();
-
-  const fallback = () => {
-    if (canSpeakFrench(sentence)){
-      speakFrench(sentence, btn);
-      return;
-    }
-    btn.disabled = true;
-    btn.classList.remove('speaking');
-    btn.textContent = chT('dict.noAudio');
-    btn.setAttribute('aria-label', chT('dict.noAudioAria', { n }));
-    btn.title = chT('dict.noAudioTitle');
-  };
-  const path = dictationSentenceAudioPath(d, n);
-  if (dictationSentenceMissing.has(path)) return fallback();
-
-  const audio = new Audio(path);
-  dictationSentenceAudioEl = audio;
-  dictationSentenceBtn = btn;
-  btn.classList.add('speaking');
-  let failedOnce = false;
-  const fail = () => {
-    if (failedOnce || dictationSentenceAudioEl !== audio) return;
-    failedOnce = true;
-    dictationSentenceMissing.add(path);
-    dictationSentenceAudioEl = null;
-    dictationSentenceBtn = null;
-    btn.classList.remove('speaking');
-    if (btn.isConnected) fallback();
-  };
-  const done = () => { if (dictationSentenceAudioEl === audio){ btn.classList.remove('speaking'); dictationSentenceAudioEl = null; dictationSentenceBtn = null; } };
-  audio.addEventListener('error', fail);
-  audio.addEventListener('ended', done);
-  audio.play().catch(err => { if (err && err.name === 'NotAllowedError') done(); else fail(); });
-}
-
-function stopDictationAudio(){
-  stopDictationSentenceAudio();
-  if (dictationAudioEl){
-    dictationAudioEl.pause();
-    dictationAudioEl = null;
-  }
-  isDictationScrubbing = false;
-  dictationScrubHandler = null;
-}
-
-// Estado de "arrastar a barra de progresso" fica em nível de módulo, com um
-// único par de listeners em window (registrado uma vez abaixo) — evita
-// acumular listeners de window a cada vez que o player é reaberto.
-let isDictationScrubbing = false;
-let dictationScrubHandler = null;
-window.addEventListener('pointermove', (e) => {
-  if (isDictationScrubbing && dictationScrubHandler) dictationScrubHandler(e.clientX);
-});
-window.addEventListener('pointerup', () => { isDictationScrubbing = false; });
-
-function escapeHtmlDictation(str){
-  return str.replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
-}
-
-// Linha discreta no card: melhor nota e nº de tentativas (só se já tentou).
-function dictationCardProgressHTML(id){
-  const rec = STATE.dictations && STATE.dictations[id];
-  if (!rec || !rec.attempts) return '';
-  return `<div class="dictation-card-progress">${chT('dict.bestAttempts', { best: rec.bestScore, n: rec.attempts, unit: chT(rec.attempts === 1 ? 'dict.attempt.one' : 'dict.attempt.many') })}</div>`;
-}
-
-function renderDictationList(){
-  stopDictationAudio();
-  document.getElementById('dictation-list-wrap').style.display = 'block';
-  document.getElementById('dictation-player-wrap').style.display = 'none';
-
-  const cardsWrap = document.getElementById('dictation-cards');
-  const dictationsShown = dictationsVisible(dictationModuleFilter);
-  // Vindo da unidade "Revisão do A1" da trilha, o "voltar" leva de volta pra trilha.
-  document.getElementById('dictation-back-to-challenges').textContent = isLevelReviewId(dictationModuleFilter) ? chT('dict.back.trail') : chT('dict.back.challenges');
-  const dictProgressEl = document.getElementById('dictation-list-progress');
-  if (dictProgressEl) dictProgressEl.innerHTML = challengeProgressHTML(dictationsShown.filter(d => isDictationDone(d.id)).length, dictationsShown.length);
-  cardsWrap.innerHTML = dictationsShown.map(d => `
-    <button class="dictation-card ${isDictationLocked(d) ? 'locked' : ''}" data-dict-id="${d.id}">
-      ${isDictationLocked(d) ? `<span class="challenge-card-check" title="${chT('tier.premium')}">🔒</span>` : ''}
-      <div class="dictation-card-level">${d.level}</div>
-      <div class="dictation-card-task">${escapeHtmlDictation(dictationTask(d))}</div>
-      <div class="dictation-card-module">${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</div>
-      ${dictationCardProgressHTML(d.id)}
-      ${tierBadgeHTML(dictationTier(d))}
-    </button>
-  `).join('');
-
-  cardsWrap.querySelectorAll('.dictation-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const d = DICTATIONS.find(x => x.id === card.dataset.dictId);
-      if (d && isDictationLocked(d)) return openPremiumChallengesModal();
-      openDictationPlayer(card.dataset.dictId);
-    });
-  });
-}
-
-document.getElementById('dictation-explainer-toggle').addEventListener('click', () => {
-  document.getElementById('dictation-explainer-toggle').classList.toggle('collapsed');
-  document.getElementById('dictation-explainer-steps').classList.toggle('collapsed');
-});
-
-document.getElementById('dictation-back-to-list').addEventListener('click', renderDictationList);
-document.getElementById('dictation-back-to-challenges').addEventListener('click', () => {
-  if (isLevelReviewId(dictationModuleFilter)){ dictationModuleFilter = null; switchTab('path'); return; }
-  // Veio da unidade "Desafios do Módulo N"? Volta pro mesmo recorte.
-  pendingChallengesModuleFilter = dictationModuleFilter;
-  switchTab('challenges');
-});
 document.getElementById('challenges-module-back').addEventListener('click', () => {
   challengesModuleFilter = null;
   switchTab('path');
 });
 
-function openDictationPlayer(id){
-  const d = DICTATIONS.find(x => x.id === id);
-  if (!d) return;
-
-  trackEvent('lesson_start', 'dictation', { dictationId: d.id });
-  stopDictationAudio();
-  document.getElementById('dictation-list-wrap').style.display = 'none';
-  document.getElementById('dictation-player-wrap').style.display = 'block';
-
-  const content = document.getElementById('dictation-player-content');
-  content.innerHTML = `
-    <div class="dictation-player-task">${escapeHtmlDictation(dictationTask(d))}</div>
-    <p class="dictation-player-module">${d.level} · ${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</p>
-    <div class="dictation-audio-player">
-      <div class="dictation-transport">
-        <button class="dictation-play-btn" id="dictation-play-btn">${chT('dict.play')}</button>
-        <button class="dictation-icon-btn" id="dictation-restart-btn" aria-label="${chT('dict.restart')}" title="${chT('dict.restart')}">↺</button>
-      </div>
-      <div class="dictation-scrub-row">
-        <span class="dictation-time" id="dictation-time-current">00:00</span>
-        <div class="dictation-progress-track" id="dictation-progress-track">
-          <div class="dictation-progress-fill" id="dictation-progress-fill"></div>
-          <div class="dictation-progress-handle" id="dictation-progress-handle"></div>
-        </div>
-        <span class="dictation-time" id="dictation-time-total">00:00</span>
-      </div>
-      <div class="dictation-secondary-controls">
-        <div class="dictation-skip-controls">
-          <button class="dictation-skip-btn" id="dictation-skip-back" title="${chT('dict.back15')}">-15s</button>
-          <button class="dictation-skip-btn" id="dictation-skip-fwd" title="${chT('dict.fwd15')}">+15s</button>
-        </div>
-        <div class="dictation-volume-control">
-          <button class="dictation-icon-btn" id="dictation-mute-btn" aria-label="${chT('dict.mute')}" title="${chT('dict.mute')}">🔊</button>
-          <input type="range" class="dictation-volume-slider" id="dictation-volume-slider" min="0" max="100" value="100">
-        </div>
-        <div class="dictation-speed-controls">
-          <button class="dictation-speed-btn" data-speed="0.75">0.75x</button>
-          <button class="dictation-speed-btn active" data-speed="1">1x</button>
-          <button class="dictation-speed-btn" data-speed="1.5">1.5x</button>
-        </div>
-      </div>
-    </div>
-    <textarea class="dictation-textarea" id="dictation-input" placeholder="${chT('dict.placeholder')}" aria-label="${chT('dict.textAria')}" lang="fr" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="${Math.max(400, d.text.length * 3)}"></textarea>
-    ${frAccentPickerHTML()}
-    <div class="dictation-actions">
-      <button class="btn btn-primary" id="dictation-check-btn">${chT('dict.check')}</button>
-      <button class="btn btn-secondary" id="dictation-retry-btn" style="display:none;">${chT('dict.retry')}</button>
-    </div>
-    <div id="dictation-result-wrap"></div>
-  `;
-
-  dictationAudioEl = new Audio(dictationAudioPath(d));
-  wireFrAccentPicker(content.querySelector('.fr-accent-picker'), document.getElementById('dictation-input'));
-  const playBtn = document.getElementById('dictation-play-btn');
-  const progressFill = document.getElementById('dictation-progress-fill');
-  const progressHandle = document.getElementById('dictation-progress-handle');
-  const progressTrack = document.getElementById('dictation-progress-track');
-  const timeCurrentEl = document.getElementById('dictation-time-current');
-  const timeTotalEl = document.getElementById('dictation-time-total');
-  const muteBtn = document.getElementById('dictation-mute-btn');
-  const volumeSlider = document.getElementById('dictation-volume-slider');
-
-  playBtn.addEventListener('click', () => {
-    if (dictationAudioEl.paused){
-      stopDictationSentenceAudio();
-      dictationAudioEl.play().catch(() => showToast(chT('dict.audioFail')));
-    } else {
-      dictationAudioEl.pause();
-    }
-  });
-  document.getElementById('dictation-restart-btn').addEventListener('click', () => {
-    dictationAudioEl.currentTime = 0;
-  });
-  document.getElementById('dictation-skip-back').addEventListener('click', () => {
-    dictationAudioEl.currentTime = Math.max(0, dictationAudioEl.currentTime - 15);
-  });
-  document.getElementById('dictation-skip-fwd').addEventListener('click', () => {
-    dictationAudioEl.currentTime = Math.min(dictationAudioEl.duration || Infinity, dictationAudioEl.currentTime + 15);
-  });
-  content.querySelectorAll('.dictation-speed-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      content.querySelectorAll('.dictation-speed-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      dictationAudioEl.playbackRate = parseFloat(btn.dataset.speed);
-    });
-  });
-
-  // Volume: slider controla o volume; botão de mudo alterna com o volume
-  // anterior salvo, igual ao padrão de qualquer player de áudio.
-  let volumeBeforeMute = 1;
-  volumeSlider.addEventListener('input', () => {
-    const v = parseInt(volumeSlider.value, 10) / 100;
-    dictationAudioEl.volume = v;
-    dictationAudioEl.muted = false;
-    muteBtn.textContent = v === 0 ? '🔇' : '🔊';
-    muteBtn.setAttribute('aria-label', v === 0 ? chT('dict.unmute') : chT('dict.mute'));
-    muteBtn.title = v === 0 ? chT('dict.unmute') : chT('dict.mute');
-  });
-  muteBtn.addEventListener('click', () => {
-    if (dictationAudioEl.muted || dictationAudioEl.volume === 0){
-      dictationAudioEl.muted = false;
-      dictationAudioEl.volume = volumeBeforeMute || 1;
-      volumeSlider.value = Math.round(dictationAudioEl.volume * 100);
-      muteBtn.textContent = '🔊';
-      muteBtn.setAttribute('aria-label', chT('dict.mute'));
-      muteBtn.title = chT('dict.mute');
-    } else {
-      volumeBeforeMute = dictationAudioEl.volume;
-      dictationAudioEl.muted = true;
-      volumeSlider.value = 0;
-      muteBtn.textContent = '🔇';
-      muteBtn.setAttribute('aria-label', chT('dict.unmute'));
-      muteBtn.title = chT('dict.unmute');
-    }
-  });
-
-  // Barra de progresso arrastável: clique ou arraste em qualquer ponto da
-  // faixa pula o áudio pra aquele instante (igual ao player do lingua.com).
-  function seekToClientX(clientX){
-    if (!dictationAudioEl.duration) return;
-    const rect = progressTrack.getBoundingClientRect();
-    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
-    dictationAudioEl.currentTime = ratio * dictationAudioEl.duration;
-  }
-  dictationScrubHandler = seekToClientX;
-  progressTrack.addEventListener('pointerdown', (e) => {
-    isDictationScrubbing = true;
-    seekToClientX(e.clientX);
-  });
-
-  function formatDictationTime(seconds){
-    if (!isFinite(seconds) || seconds < 0) seconds = 0;
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${m}:${String(s).padStart(2, '0')}`;
-  }
-
-  dictationAudioEl.addEventListener('play', () => {
-    playBtn.textContent = chT('dict.pause');
-    playBtn.classList.add('speaking');
-  });
-  dictationAudioEl.addEventListener('pause', () => {
-    playBtn.textContent = chT('dict.play');
-    playBtn.classList.remove('speaking');
-  });
-  dictationAudioEl.addEventListener('ended', () => {
-    playBtn.textContent = chT('dict.play');
-    playBtn.classList.remove('speaking');
-  });
-  // Usa o próprio elemento do evento (e.target), não a variável global: ao
-  // sair do ditado, stopDictationAudio() faz pause() e zera a global, mas o
-  // navegador ainda dispara 'timeupdate' depois do pause -- ler a global
-  // aí dava "Cannot read properties of null (reading 'duration')".
-  dictationAudioEl.addEventListener('loadedmetadata', (e) => {
-    timeTotalEl.textContent = formatDictationTime(e.target.duration);
-  });
-  dictationAudioEl.addEventListener('timeupdate', (e) => {
-    const a = e.target;
-    if (a.duration){
-      const pct = (a.currentTime / a.duration) * 100;
-      progressFill.style.width = `${pct}%`;
-      progressHandle.style.left = `${pct}%`;
-    }
-    timeCurrentEl.textContent = formatDictationTime(a.currentTime);
-  });
-  dictationAudioEl.addEventListener('error', () => {
-    showToast(chT('dict.audioFail'));
-    playBtn.disabled = true;
-    playBtn.textContent = chT('dict.audioUnavailable');
-  });
-
-  document.getElementById('dictation-check-btn').addEventListener('click', () => {
-    const userText = document.getElementById('dictation-input').value;
-    if (!userText.trim()){ showToast(chT('dict.writeFirst')); return; }
-    renderDictationResult(d, userText);
-  });
-
-  document.getElementById('dictation-retry-btn').addEventListener('click', () => {
-    stopDictationSentenceAudio();
-    document.getElementById('dictation-input').value = '';
-    document.getElementById('dictation-result-wrap').innerHTML = '';
-    document.getElementById('dictation-retry-btn').style.display = 'none';
-    document.getElementById('dictation-check-btn').style.display = 'inline-flex';
-  });
-}
-
-// BEGIN dictation-answer-logic (extraído literalmente por fr/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
-// Correção do ditado, em 2 níveis de comparação:
-//  - ESTRITA (normalizeDictationWord): exige a grafia exata -- acento, hífen e
-//    apóstrofo contam. Só ignora maiúscula, pontuação e variantes tipográficas
-//    (aspas curvas, hífen especial do celular).
-//  - FROUXA (dictLooseNorm): tira acento, hífen, apóstrofo e œ->oe. Serve pra
-//    ALINHAR as palavras. Se alinham só pela forma frouxa, é "erro leve":
-//    vale meio ponto e a tela explica o que faltou.
-// Pontuação não desconta ponto (só é marcada); número em dígito é aceito e a
-// tela mostra a escrita por extenso.
-// Família latina, fase 2 (docs/i18n/familia-latina-modulo.md): a correção mora em
-// shared/core/familias/latina.js; os dados do francês (pontuação falada, números,
-// homófonos, concordância) e as explicações (catálogo de tradução, t()) estão em
-// LANG_HOOKS.familiaLatina (fr/lang-hooks.js). Os nomes abaixo continuam os mesmos.
-// Mudanças autorizadas pela dona (2026-10-15): número em dígito que o próprio texto
-// escreve em dígito fica como está; dois erros leves na mesma palavra (reason
-// 'multiple', com a lista em `reasons`) citam os dois; a explicação sai no idioma do site.
-function normalizeDictationWord(w){
-  return latinaFr().normalizarPalavraDitado(w);
-}
-function dictLooseNorm(w){
-  return latinaFr().palavraFrouxaDitado(w);
-}
-function dictLightReason(cs, us){
-  return latinaFr().motivoErroLeve(cs, us);
-}
-function frenchNumberWords(n){
-  return LANG_HOOKS.familiaLatina.numeroPorExtenso(n);
-}
-
-// Limpa o que o teclado do celular costuma bagunçar, antes de comparar.
-function prepareDictationUserText(text, refText){
-  return latinaFr().prepararTextoDitado(text, refText);
-}
-
-// Separa as palavras reais da pontuação "solta" (ex: "!" ou "?" digitados
-// com espaço antes, como manda a tipografia francesa). A pontuação solta
-// não participa do alinhamento: fica anexada à palavra anterior.
-function tokenizeDictationText(text){
-  return latinaFr().tokenizarDitado(text);
-}
-
-// "vingt cinq" digitado no lugar de "vingt-cinq": junta as palavras do aluno
-// (sem hífen, então conta como erro leve de hífen e não como 2 erros).
-function mergeSplitCompoundWords(userTok, refTok){
-  return latinaFr().juntarCompostos(userTok, refTok);
-}
-
-// Alinha as palavras do texto certo com as que o aluno digitou via LCS
-// (mesma ideia de um diff de texto), pra marcar acertos/erros mesmo quando
-// o aluno pula ou adianta uma palavra, sem desalinhar o resto da frase.
-function diffDictationWords(correctText, userText){
-  return latinaFr().diffDitado(correctText, userText);
-}
-
-// Junta um "miss" (palavra certa que faltou) adjacente a um "extra" (palavra
-// errada que o aluno digitou) numa única substituição.
-function mergeDictationDiff(diff){
-  return latinaFr().juntarDiff(diff);
-}
-
-// Corrige um ditado inteiro. Nota: acerto exato = 1 ponto; erro leve = 0,5;
-// palavra a mais (que não é troca) e pontuação escrita por extenso = -0,5.
-// Pontuação faltando e número em dígito não descontam nada.
-function evaluateDictation(refText, userText){
-  return latinaFr().avaliarDitado(refText, userText);
-}
-
-// ---- Fatia 2: explicar o tipo de erro (só explicativo, NÃO muda a nota) ----
-// Conservador de propósito: só nomeia o erro quando há alta confiança.
-// Devolve { kind: 'homophone'|'agreement'|'other', noteText } para uma troca
-// (token "sub"): refWord = palavra do texto, userWord = o que o aluno digitou.
-function classifyDictationError(refWord, userWord){
-  const r = latinaFr().classificarErroDitado(refWord, userWord);
-  return { kind: r.kind, noteText: r.noteText };
-}
-
-// ---- Fatia 2: progresso por ditado (puro, sem STATE) ----
-const DICT_WRONG_WORDS_MAX = 30;
-function dictDisplayWord(w){
-  return String(w || '').replace(/^[«"(\s]+|[.,!?;:…»")\s]+$/g, '').trim();
-}
-// Palavras do TEXTO que o aluno errou, faltou ou escreveu com desvio leve
-// nesta tentativa (deduplicadas sem diferenciar maiúscula, no máx. 30).
-function dictationWrongWords(evaluation){
-  const out = [], seen = new Set();
-  for (const x of (evaluation && evaluation.merged) || []){
-    let w = null;
-    if (x.type === 'sub') w = x.correct;
-    else if (x.type === 'miss') w = x.word;
-    else if (x.type === 'match' && x.light) w = x.word;
-    w = dictDisplayWord(w);
-    if (!w) continue;
-    const key = w.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key); out.push(w);
-    if (out.length >= DICT_WRONG_WORDS_MAX) break;
-  }
-  return out;
-}
-function sanitizeDictationRecord(rec){
-  const r = rec && typeof rec === 'object' ? rec : {};
-  const num = v => (typeof v === 'number' && isFinite(v)) ? Math.max(0, Math.min(100, Math.round(v))) : 0;
-  return {
-    bestScore: num(r.bestScore),
-    attempts: (typeof r.attempts === 'number' && isFinite(r.attempts) && r.attempts > 0) ? Math.floor(r.attempts) : 0,
-    lastScore: num(r.lastScore),
-    lastAt: typeof r.lastAt === 'string' ? r.lastAt : null,
-    wrongWords: Array.isArray(r.wrongWords) ? r.wrongWords.filter(w => typeof w === 'string' && w).slice(0, DICT_WRONG_WORDS_MAX) : []
-  };
-}
-// Registro novo depois de uma correção. bestScore nunca diminui.
-function updateDictationRecord(prev, evaluation, now){
-  const p = sanitizeDictationRecord(prev);
-  const score = (evaluation && typeof evaluation.score === 'number') ? Math.max(0, Math.min(100, Math.round(evaluation.score))) : 0;
-  const when = now instanceof Date ? now : new Date(now === undefined ? Date.now() : now);
-  return {
-    bestScore: Math.max(p.bestScore, score),
-    attempts: p.attempts + 1,
-    lastScore: score,
-    lastAt: isNaN(when.getTime()) ? null : when.toISOString(),
-    wrongWords: dictationWrongWords(evaluation)
-  };
-}
-
-// ---- Fatia 3: divisão em frases (áudio por frase) ----
-// MESMA regra de fr/scripts/dictation_sentences.py (o gerador dos mp3
-// audio/dictation-<id>-s<N>.mp3). Se mudar uma, mude a outra: o N do mp3 é a
-// posição da frase nesta lista (começa em 1).
-const DICT_SENT_END_RE = /[.!?…]+["'»”)\]]*$/;
-const DICT_SENT_CLOSERS_RE = /["'»”)\]]+$/;
-const DICT_SENT_ONLY_CLOSERS_RE = /^["'»”)\]]+$/;
-const DICT_SENT_INITIAL_RE = /^[A-Z]\.$/;
-const DICT_SENT_ABBREVIATIONS = new Set(['M.', 'Mme.', 'Mmes.', 'Mlle.', 'Mlles.', 'Dr.', 'Pr.', 'St.', 'Ste.', 'etc.', 'p.', 'n°.']);
-function dictIsAbbreviation(token){
-  const core = token.replace(DICT_SENT_CLOSERS_RE, '');
-  return DICT_SENT_ABBREVIATIONS.has(core) || DICT_SENT_INITIAL_RE.test(core);
-}
-function splitDictationSentences(text){
-  const sentences = [];
-  let current = [];
-  for (const tok of String(text || '').split(/\s+/)){
-    if (!tok) continue;
-    if (!current.length && sentences.length && DICT_SENT_ONLY_CLOSERS_RE.test(tok)){
-      sentences[sentences.length - 1] += ' ' + tok;
-      continue;
-    }
-    current.push(tok);
-    if (DICT_SENT_END_RE.test(tok) && !dictIsAbbreviation(tok)){
-      sentences.push(current.join(' '));
-      current = [];
-    }
-  }
-  if (current.length) sentences.push(current.join(' '));
-  return sentences.filter(s => s.trim());
-}
-// Para cada frase do texto, true se o aluno errou alguma palavra dela
-// (troca, palavra faltando, erro leve) ou digitou palavra a mais ali.
-// Só explicativo: NÃO muda a nota.
-function dictationSentenceErrorFlags(refText, evaluation){
-  const sentences = splitDictationSentences(refText);
-  const sentenceOfWord = [];
-  sentences.forEach((s, si) => {
-    const n = tokenizeDictationText(s).words.length;
-    for (let k = 0; k < n; k++) sentenceOfWord.push(si);
-  });
-  const flags = sentences.map(() => false);
-  if (!sentences.length) return flags;
-  const at = c => sentenceOfWord[Math.max(0, Math.min(c, sentenceOfWord.length - 1))];
-  let c = 0;
-  for (const x of (evaluation && evaluation.merged) || []){
-    if (x.type === 'extra'){ const s = at(c - 1); if (s !== undefined) flags[s] = true; continue; }
-    const s = sentenceOfWord[c];
-    if (s !== undefined && (x.type === 'miss' || x.type === 'sub' || (x.type === 'match' && x.light))) flags[s] = true;
-    c++;
-  }
-  return flags;
-}
-// END dictation-answer-logic
-
-function dictationScoreColorVar(score){
-  if (score >= 80) return 'var(--jade)';
-  if (score >= 60) return 'var(--imperial-gold)';
-  return 'var(--seal-red-dark)';
-}
-
-function dictationWordHtml(word, punctAfter, missingMarks, cls, title){
-  const esc = escapeHtmlDictation;
-  const titleAttr = title ? ` title="${esc(title)}"` : '';
-  if (!missingMarks){
-    return `<span class="${cls}"${titleAttr}>${esc(word)}</span>${punctAfter ? ' ' + esc(punctAfter) : ''}`;
-  }
-  const m = word.match(/^(.*?)([.,!?;:…]+)$/);
-  const core = m ? m[1] : word, trail = m ? m[2] : '';
-  return `<span class="${cls}"${titleAttr}>${esc(core)}</span><span class="dictation-punct-missing" title="${esc(t('fr.dict.punctMissing'))}">${esc(trail)}${punctAfter ? ' ' + esc(punctAfter) : ''}</span>`;
-}
-
-// Explicação do erro leve (hífen, apóstrofo, ligadura, acento, ou mais de um na
-// mesma palavra), no idioma do site: shared/core/familias/latina.js + t().
-function dictationLightNoteText(x){
-  return latinaFr().textoErroLeve(x);
-}
-
-function renderDictationResult(d, userText){
-  const ev = evaluateDictation(d.text, userText);
-  const { merged, total, score } = ev;
-  trackEvent('lesson_complete', 'dictation', { dictationId: d.id, score });
-  // Fatia 2: grava a tentativa (melhor nota nunca diminui).
-  const rec = updateDictationRecord(STATE.dictations[d.id], ev, new Date());
-  STATE.dictations[d.id] = rec;
-  if (score >= 90) STATE.dictationsAced = (STATE.dictationsAced || 0) + 1; // conquistas: trilha Ditado
-  saveState();
-
-  const wordsHtml = merged.map(x => {
-    if (x.type === 'match'){
-      return x.light
-        ? dictationWordHtml(x.word, x.punctAfter, x.missingMarks, 'dictation-word-near', chT('dict.nearPrefix') + dictationLightNoteText(x))
-        : dictationWordHtml(x.word, x.punctAfter, x.missingMarks, 'dictation-word', '');
-    }
-    const punct = x.punctAfter ? ` ${escapeHtmlDictation(x.punctAfter)}` : '';
-    if (x.type === 'sub') return `<span class="dictation-word-wrong" title="${escapeHtmlDictation(classifyDictationError(x.correct, x.wrong).noteText)}">${escapeHtmlDictation(x.wrong)}</span> <span class="dictation-word-correct">${escapeHtmlDictation(x.correct)}</span>${punct}`;
-    if (x.type === 'miss') return `<span class="dictation-word-correct">${escapeHtmlDictation(x.word)}</span>${punct}`;
-    return `<span class="dictation-word-wrong">${escapeHtmlDictation(x.word)}</span>`;
-  }).join(' ');
-
-  const notes = [];
-  merged.filter(x => x.type === 'match' && x.light).forEach(x => notes.push(dictationLightNoteText(x)));
-  merged.filter(x => x.type === 'sub').forEach(x => notes.push(classifyDictationError(x.correct, x.wrong).noteText));
-  ev.digitNotes.forEach(n => notes.push({ html: chT('dict.note.digits', { digits: n.digits, words: escapeHtmlDictation(n.words) }) }));
-  ev.spokenPunct.forEach(p => notes.push({ html: chT('dict.note.spoken', { said: escapeHtmlDictation(p.said), symbol: escapeHtmlDictation(p.symbol) }) }));
-  if (ev.missingMarks > 0) notes.push({ html: chT('dict.note.punct', { n: ev.missingMarks, places: chT(ev.missingMarks === 1 ? 'dict.place.one' : 'dict.place.many') }) });
-  const notesHtml = notes.length
-    ? `<ul class="dictation-notes">${notes.map(n => `<li>${n && n.html ? n.html : escapeHtmlDictation(n)}</li>`).join('')}</ul>`
-    : '';
-  const hit = ev.exact + ev.light;
-
-  // Fatia 3: o texto certo frase por frase, cada uma com seu áudio; as frases
-  // em que o aluno errou ficam marcadas (texto + borda, não só cor).
-  stopDictationSentenceAudio();
-  const sentences = splitDictationSentences(d.text);
-  const sentenceFlags = dictationSentenceErrorFlags(d.text, ev);
-  const sentencesHtml = sentences.length ? `
-      <div class="dictation-sentences">
-        <p class="dictation-sentences-title"><strong>${chT('dict.sent.title')}</strong>${sentenceFlags.some(Boolean) ? chT('dict.sent.flagHint') : ''}</p>
-        <ol class="dictation-sentence-list">
-          ${sentences.map((s, i) => `
-          <li class="dictation-sentence${sentenceFlags[i] ? ' has-error' : ''}">
-            <button type="button" class="dictation-sentence-play" data-sentence="${i + 1}" aria-label="${chT('dict.sent.listenN', { n: i + 1 })}${sentenceFlags[i] ? chT('dict.sent.errorAria') : ''}">${chT('dict.sent.listen')}</button>
-            <span class="dictation-sentence-text">${sentenceFlags[i] ? `<span class="dictation-sentence-flag">${chT('dict.sent.flag')}</span> ` : ''}${escapeHtmlDictation(s)}</span>
-          </li>`).join('')}
-        </ol>
-      </div>` : '';
-
-  const wrap = document.getElementById('dictation-result-wrap');
-  wrap.innerHTML = `
-    <div class="dictation-result" tabindex="-1">
-      <div class="dictation-result-text">${wordsHtml}</div>
-      <div class="dictation-result-summary">
-        <div class="dictation-score-badge" style="background:${dictationScoreColorVar(score)};">${score}</div>
-        <p class="dictation-score-text">${chT('dict.score', { hit, total, light: ev.light ? chT('dict.scoreLight', { n: ev.light }) : '', score })}</p>
-      </div>
-      <p class="dictation-record-line">${chT('dict.record', { best: rec.bestScore, n: rec.attempts, unit: chT(rec.attempts === 1 ? 'dict.attempt.one' : 'dict.attempt.many') })}</p>
-      ${notesHtml}
-      ${rec.wrongWords.length ? `<p class="dictation-review-words"><strong>${chT('dict.reviewWords')}</strong> ${rec.wrongWords.map(escapeHtmlDictation).join(', ')}</p>` : ''}
-      ${sentencesHtml}
-    </div>
-  `;
-  wrap.querySelectorAll('.dictation-sentence-play').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const n = parseInt(btn.dataset.sentence, 10);
-      playDictationSentence(d, n, sentences[n - 1], btn);
-    });
-  });
-
-  document.getElementById('dictation-check-btn').style.display = 'none';
-  document.getElementById('dictation-retry-btn').style.display = 'inline-flex';
-  const box = wrap.firstElementChild;
-  if (box){ box.scrollIntoView({ behavior: 'smooth', block: 'start' }); try { box.focus({ preventScroll: true }); } catch(e){} }
-}
 
 // ============================================================
 // DESAFIOS: três categorias compartilhando a mesma infraestrutura
@@ -5041,44 +4387,6 @@ const CHALLENGE_I18N = {
   'pt-BR': {
     'tier.premium': 'Premium',
     'tier.free': 'Free',
-    'dict.back.trail': '← Voltar à trilha',
-    'dict.back.challenges': '← Voltar aos desafios',
-    'dict.bestAttempts': 'Melhor nota: {best} · {n} {unit}',
-    'dict.attempt.one': 'tentativa',
-    'dict.attempt.many': 'tentativas',
-    'dict.play': '▶️ Ouvir o ditado',
-    'dict.pause': '⏸ Pausar',
-    'dict.restart': 'Reiniciar',
-    'dict.back15': 'Voltar 15s',
-    'dict.fwd15': 'Avançar 15s',
-    'dict.mute': 'Mudo',
-    'dict.unmute': 'Ativar som',
-    'dict.placeholder': 'Digite aqui o que você ouviu...',
-    'dict.textAria': 'Texto do ditado',
-    'dict.check': 'Verificar',
-    'dict.retry': 'Tentar novamente',
-    'dict.audioFail': 'Não foi possível reproduzir o áudio',
-    'dict.audioUnavailable': '⚠️ Áudio indisponível',
-    'dict.noAudio': '🔇 sem áudio',
-    'dict.noAudioAria': 'Áudio da frase {n} indisponível neste dispositivo',
-    'dict.noAudioTitle': 'Áudio indisponível neste dispositivo',
-    'dict.writeFirst': 'Escreva o que você ouviu antes de verificar.',
-    'dict.nearPrefix': 'Quase: ',
-    'dict.note.digits': 'Por extenso: {digits} → <strong>{words}</strong>. Numa escrita de ditado, o número vai por extenso (sem desconto).',
-    'dict.note.spoken': 'Você escreveu «{said}» por extenso. No ditado, escreva o sinal ({symbol}). Pequeno desconto.',
-    'dict.note.punct': 'Pontuação: faltou em {n} {places} (sublinhado acima). Não desconta pontos.',
-    'dict.place.one': 'lugar',
-    'dict.place.many': 'lugares',
-    'dict.sent.title': 'Ouça frase por frase',
-    'dict.sent.flagHint': ' · as marcadas com ⚠ têm erro seu',
-    'dict.sent.listenN': 'Ouvir a frase {n}',
-    'dict.sent.errorAria': ' (você errou nesta frase)',
-    'dict.sent.listen': '▶ ouvir frase',
-    'dict.sent.flag': '⚠ você errou aqui:',
-    'dict.score': 'Você escreveu <strong>{hit} de {total}</strong> palavras corretamente{light}. Você atingiu uma pontuação de {score} pontos ({score}%).',
-    'dict.scoreLight': ' ({n} com pequeno desvio de grafia, valem meio ponto)',
-    'dict.record': 'Melhor nota: <strong>{best}</strong> · {n} {unit}',
-    'dict.reviewWords': 'Palavras para revisar:',
     'dict.count.one': '{n} ditado',
     'dict.count.many': '{n} ditados',
     'ch.retryNow': '🔁 Tentar de novo',
@@ -5207,14 +4515,6 @@ const CHALLENGE_I18N = {
     'ch.static.back': '← Voltar às categorias',
     'ch.static.backChallenges': '← Voltar aos desafios',
     'ch.static.backTrail': '← Voltar à trilha',
-    'dict.static.title': 'Ditados',
-    'dict.static.sub': 'Treine sua compreensão auditiva e sua ortografia com ditados baseados em tarefas reais de cada módulo.',
-    'dict.static.how': '🎧 Como funciona o ditado?',
-    'dict.static.s1': 'Ouça o áudio — na velocidade normal ou devagar, quantas vezes quiser.',
-    'dict.static.s2': 'Digite exatamente o que você ouviu, com acentos e pontuação.',
-    'dict.static.s3': 'Clique em "Verificar" para comparar sua resposta com o texto original.',
-    'dict.static.s4': 'Veja o que acertou e o que precisa revisar, palavra por palavra.',
-    'dict.static.backList': '← Voltar aos ditados',
     'prem.modal.title': '🔒 Recurso Premium',
     'prem.modal.p1': 'Os <strong>Desafios do Módulo</strong> reforçam cada tema da trilha com Expressões, Ouça e traduza, Acentuação e Ditados extras.',
     'prem.modal.p2': 'Eles fazem parte do plano Premium. Para pedir o Premium, fale com a Prof. Brune pelo botão abaixo.'
@@ -5222,41 +4522,6 @@ const CHALLENGE_I18N = {
   'en': {
     'tier.premium': "Premium",
     'tier.free': "Free",
-    'dict.back.trail': "← Back to the Study Path",
-    'dict.back.challenges': "← Back to challenges",
-    'dict.bestAttempts': "Best score: {best} · {n} {unit}",
-    'dict.attempt.one': "attempt",
-    'dict.attempt.many': "attempts",
-    'dict.play': "▶️ Listen to the dictation",
-    'dict.pause': "⏸ Pause",
-    'dict.restart': "Restart",
-    'dict.back15': "Back 15s",
-    'dict.fwd15': "Forward 15s",
-    'dict.mute': "Mute",
-    'dict.unmute': "Unmute",
-    'dict.placeholder': "Type what you heard here...",
-    'dict.textAria': "Dictation text",
-    'dict.check': "Check",
-    'dict.retry': "Try again",
-    'dict.audioFail': "Couldn't play the audio",
-    'dict.audioUnavailable': "⚠️ Audio unavailable",
-    'dict.writeFirst': "Write what you heard before checking.",
-    'dict.nearPrefix': "Almost: ",
-    'dict.note.digits': "Spelled out: {digits} → <strong>{words}</strong>. In a dictation, write the number as words (no penalty).",
-    'dict.note.spoken': "You wrote “{said}” as a word. In a dictation, write the sign ({symbol}). Small penalty.",
-    'dict.note.punct': "Punctuation: missing in {n} {places} (underlined above). It doesn't cost points.",
-    'dict.place.one': "place",
-    'dict.place.many': "places",
-    'dict.sent.title': "Listen sentence by sentence",
-    'dict.sent.flagHint': " · the ones marked with ⚠ have a mistake of yours",
-    'dict.sent.listenN': "Listen to sentence {n}",
-    'dict.sent.errorAria': " (you made a mistake in this sentence)",
-    'dict.sent.listen': "▶ listen to sentence",
-    'dict.sent.flag': "⚠ you made a mistake here:",
-    'dict.score': "You wrote <strong>{hit} of {total}</strong> words correctly{light}. You scored {score} points ({score}%).",
-    'dict.scoreLight': " ({n} with a small spelling slip, worth half a point)",
-    'dict.record': "Best score: <strong>{best}</strong> · {n} {unit}",
-    'dict.reviewWords': "Words to review:",
     'dict.count.one': "{n} dictation",
     'dict.count.many': "{n} dictations",
     'ch.retryNow': "🔁 Try again",
@@ -5352,9 +4617,6 @@ const CHALLENGE_I18N = {
     'ch.lt.legend.bad': "wrong word", // ALTA
     'ch.lt.legend.near': "almost right", // ALTA
     'ch.lt.legend.miss': "missing", // ALTA
-    'dict.noAudio': "🔇 no audio", // ALTA
-    'dict.noAudioAria': "Audio for sentence {n} isn't available on this device", // ALTA
-    'dict.noAudioTitle': "Audio isn't available on this device", // ALTA
     'ch.lt.agreement': "⚠ Mind the agreement: after \"{pronoun}\", \"{verb}\" is not the right conjugation.",
     'ch.lt.yours': "Your answer",
     'ch.lt.expected': "Expected answer",
@@ -5389,14 +4651,6 @@ const CHALLENGE_I18N = {
     'ch.static.back': "← Back to categories",
     'ch.static.backChallenges': "← Back to challenges",
     'ch.static.backTrail': "← Back to the Study Path",
-    'dict.static.title': "Dictations",
-    'dict.static.sub': "Train your listening and spelling with dictations based on real tasks from each module.",
-    'dict.static.how': "🎧 How does the dictation work?",
-    'dict.static.s1': "Listen to the audio, at normal speed or slowly, as many times as you like.",
-    'dict.static.s2': "Type exactly what you heard, with accents and punctuation.",
-    'dict.static.s3': "Click \"Verificar\" to compare your answer with the original text.",
-    'dict.static.s4': "See what you got right and what needs review, word by word.",
-    'dict.static.backList': "← Back to dictations",
     'prem.modal.title': "🔒 Premium feature",
     'prem.modal.p1': "<strong>Module Challenges</strong> reinforce each topic in the course with Expressions, Listen and Translate, Accents, and extra Dictations.",
     'prem.modal.p2': "They're part of the Premium plan. To ask for Premium, contact Prof. Brune using the button below."
@@ -5404,9 +4658,13 @@ const CHALLENGE_I18N = {
 };
 function chT(key, vars){
   // Idioma do site (mecanismo global, shared/i18n); cai em pt-BR e, por fim, na chave.
+  // Os textos do Ditado (dict.*, menos dict.count.*) moram em DICTATION_I18N (shared/ditados.js): procura lá também.
   const lang = (typeof getUiLang === 'function' && getUiLang()) || 'pt-BR';
+  const DI = typeof DICTATION_I18N !== 'undefined' ? DICTATION_I18N : {};
   let str = (CHALLENGE_I18N[lang] && CHALLENGE_I18N[lang][key]);
+  if (str == null) str = (DI[lang] && DI[lang][key]);
   if (str == null) str = CHALLENGE_I18N['pt-BR'][key];
+  if (str == null) str = DI['pt-BR'] && DI['pt-BR'][key];
   if (str == null) return key;
   if (vars) str = str.replace(/\{(\w+)\}/g, (m, name) => (vars[name] != null ? vars[name] : m));
   return str;
@@ -5428,8 +4686,6 @@ window.addEventListener('i18n:change', () => { applyChallengeI18n(); });
 // pública no banco (mesmo nível de rigor de outros limites de UX do app).
 let challengesModuleFilter = null;        // moduleId enquanto a pessoa navega pela unidade do módulo
 let pendingChallengesModuleFilter = null; // repassado de openModuleChallenges() ao handler da aba
-let dictationModuleFilter = null;
-let pendingDictationModuleFilter = null;
 
 function challengeModuleId(c){ return (c && c.moduleId) || null; }
 // Desafios do Módulo e Ditados extras: célula "Desafios Premium" (challenges_premium) da tabela Admin > Planos.
@@ -5446,20 +4702,11 @@ const CHALLENGES_SERVER_GATING = false;
 // Free x Premium: desafios de módulo (Ouça e traduza, Acentuação, Expressões)
 // são Premium; ditado é Free só quando d.free === true (1 por módulo).
 function challengeTier(c){ return challengeModuleId(c) ? 'premium' : 'free'; }
-function dictationTier(d){ return d.free === false ? 'premium' : 'free'; }
 function tierBadgeHTML(tier){
   return `<span class="tier-badge tier-${tier}">${chT(tier === 'premium' ? 'tier.premium' : 'tier.free')}</span>`;
 }
-// Ditados Premium só existem dentro da unidade do módulo -- nunca na lista
-// geral de Desafios > Ditados (nem na trilha).
-function dictationsVisible(moduleId){
-  return moduleId ? DICTATIONS.filter(d => d.moduleId === moduleId) : DICTATIONS.filter(d => d.free !== false);
-}
 function isChallengeLocked(c){
   return CHALLENGE_PAYWALL_ENABLED && !!challengeModuleId(c) && !challengesPremiumUnlocked();
-}
-function isDictationLocked(d){
-  return CHALLENGE_PAYWALL_ENABLED && d.free === false && !challengesPremiumUnlocked();
 }
 // Tudo que a lista pode MOSTRAR (inclui os trancados) / só o que dá pra JOGAR.
 function listedChallenges(){
@@ -5594,10 +4841,6 @@ function challengeProgressHTML(done, total){
     <div class="challenge-progress-label">${chT(total === 1 ? 'ch.catProgress.one' : 'ch.catProgress.many', { done, total })}</div>
     <div class="challenge-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><div class="challenge-progress-fill" style="width:${pct}%"></div></div>
   </div>`;
-}
-function isDictationDone(id){
-  const rec = STATE.dictations && STATE.dictations[id];
-  return !!(rec && rec.attempts);
 }
 
 function markChallengeCompleted(id){
@@ -6437,11 +5680,6 @@ function challengeOverlay(c){
 function challengeText(c, field){
   const ov = challengeOverlay(c);
   return (ov && ov[field]) ? ov[field] : c[field];
-}
-function dictationTask(d){
-  const lang = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
-  const ov = lang !== 'pt-BR' && window.DICTATIONS_I18N && window.DICTATIONS_I18N[lang] && window.DICTATIONS_I18N[lang][d.id];
-  return (ov && ov.task) ? ov.task : d.task;
 }
 function listenTranslateSetup(c){
   const ov = challengeOverlay(c);

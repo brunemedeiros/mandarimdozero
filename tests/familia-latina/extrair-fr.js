@@ -18,7 +18,8 @@ function fonteAntiga() {
   return core.map(f => git(['show', REF + ':' + f])).join('\n') + '\n' + git(['show', REF + ':fr/app.js']);
 }
 // Etapa 5a da paridade (2026-10-23): a Conjugação (conjAlign, conjFold) saiu do fr/app.js para shared/conjugacao.js.
-function fonteNova() { return withCore(fs.readFileSync(path.join(ROOT, 'shared/conjugacao.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'fr/app.js'), 'utf8')); }
+// Etapa 5b (2026-10-23): os Ditados (bloco dictation-answer-logic, dictationLightNoteText) foram para shared/ditados.js.
+function fonteNova() { return withCore(fs.readFileSync(path.join(ROOT, 'shared/conjugacao.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'shared/ditados.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'fr/app.js'), 'utf8')); }
 const ler = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 
 function ferramentas(SRC, nomeArquivo) {
@@ -125,6 +126,10 @@ function carregarNovo() {
   return rodar(codigo, (ctx) => {
     vm.runInContext(ler('shared/core/familias/latina.js'), ctx, { filename: 'latina.js' });
     vm.runInContext(ler('fr/lang-hooks.js').replace('const LANG_HOOKS', 'var LANG_HOOKS'), ctx, { filename: 'fr/lang-hooks.js' });
+    // O bloco do ditado chama dictLatina() (configuração do site): começo do motor (sem DOM) + configuração do francês.
+    const motor = ler('shared/ditados.js');
+    vm.runInContext(motor.slice(0, motor.indexOf('// ---------- Lista, filtro do módulo')), ctx, { filename: 'shared/ditados.js' });
+    vm.runInContext(ler('fr/ditados-config.js'), ctx, { filename: 'fr/ditados-config.js' });
   });
 }
 
