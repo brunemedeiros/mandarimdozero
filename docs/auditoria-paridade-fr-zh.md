@@ -169,7 +169,10 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
   próximos sites, virar um campo do idioma em `LANG_HOOKS` (`pregenRate`, que o `dlgPlayLine` já usa).
 - **Risco**: baixo. Muda o que a aluna ouve: aprovação da dona.
 
-### C6. Motores gerais da lição que só existem no fr (o zh não perde hoje porque não tem conteúdo)
+### C6. Motores gerais da lição que só existem no fr (o zh não perde hoje porque não tem conteúdo) -- FEITO (2026-10-23)
+- **Feito**: `shared/core/gramatica-cenario.js` + `shared/gramatica-cenario.css`, com ganchos em `LANG_HOOKS`; o zh abre unidade
+  `type:"grammar"` e monta exercício de cenário quando houver conteúdo (hoje não há: nada muda na tela). Registro:
+  `docs/historico/25-paridade-c6-gramatica-cenario.md`. As linhas abaixo citam o `fr/app.js` de antes da mudança.
 - **Unidade de gramática** (passos "Explicação" paginada + "Exercícios", tabela): `fr/app.js:1571`, `1585`, `2026-2093` e `2144-2200` (telas),
   `2242-2258` (desvio em `renderStep`). O zh tem 0 unidades `type: "grammar"`; a gramática do zh entra como conceitos dentro das lições
   (`zh/app.js:1975-1985`). Se a dona criar uma unidade de gramática no zh, ela **não abre**: o zh não tem esses passos.
@@ -214,7 +217,7 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
 - Com a guarda nova, nenhuma classe usada por `shared/` falta no zh (`node tests/paridade-sites/test_css_compartilhado.js`:
   6/6, exceção única `level-test-highlight`, do Teste de Nível).
 - CSS que hoje só existe no fr e terá de ir junto quando o recurso for levado: ~~`.typed-attempt`, `.conj-x`, `.conj-gap`
-  (C2)~~ (feito: `shared/licao-feedback.css`), `.scenario-*` (C6), `.gram-*` (C6), `.module-label`/`.ml-*`/`.checkpoint-*` (B2),
+  (C2)~~ (feito: `shared/licao-feedback.css`), ~~`.scenario-*` (C6), `.gram-*` (C6)~~ (feito: `shared/gramatica-cenario.css`; `.gram-block*` fica em cada site), `.module-label`/`.ml-*`/`.checkpoint-*` (B2),
   `.cg-*` dos Jogos (`shared/conj-games.js`), `.reorder-final-*` (`fr/index.html:1675-1676`).
 - Ids só do fr (81): todos de Conjugação (28), Desafios (27), Ditado (10), janelas Premium de Desafios/Jogos (6), seletor
   de nível e Teste de Nível (5), menu Mais (2) e `path-level-title`. Nenhum é usado por `shared/` fora desses recursos
@@ -226,14 +229,15 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
 mural, painel da professora/admin, Banco de Revisão, Revisão (motor FSRS, decks, tags, filtros, Combinar, Revisão rápida),
 editor de cartões, importação/exportação Anki, meta de estudo, modo foco, roteamento, PWA, i18n, as ~190 funções da trilha
 e dos exercícios já extraídas nos lotes 1 a 5e da E4 (com `LANG_HOOKS`), o motor de id estável por item
-(`shared/study-trail-model.js`), o motor dos Jogos da Conjugação (`shared/conj-games.js`), o motor da prova do Ponto de
+(`shared/study-trail-model.js`), o motor dos Jogos da Conjugação (`shared/conj-games.js`), o motor da unidade de gramática e do exercício de cenário
+(`shared/core/gramatica-cenario.js`), o motor da prova do Ponto de
 verificação (`shared/checkpoint-exam.js`) e da Revisão do módulo (`shared/review-milestone.js`), e as regras da família
 latina (`shared/core/familias/latina.js`).
 
 **Perde** (está só em `fr/app.js` e teria de ser copiado, o que recria o problema desta auditoria):
 - Toda a tela da Conjugação (33 funções). O pt precisa dela desde o começo.
 - Toda a parte de módulos e níveis (32 funções): o pt vai ter módulos.
-- Unidade de gramática e exercício de cenário (C6).
+- ~~Unidade de gramática e exercício de cenário (C6)~~: feito, `shared/core/gramatica-cenario.js` (2026-10-23).
 - ~~`typedAttemptHTML` (C2)~~: feito, `shared/core/licao-feedback.js` (2026-10-23).
 - Desafios e Ditados (177 funções): entram no pt "aos poucos depois", pela decisão da dona.
 - ~~O carregamento com mudanças de currículo (C1)~~: feito, `shared/core/curriculo-progresso.js` (2026-10-23).
@@ -273,7 +277,7 @@ pt) cobre o pt **se** a extração incluir os itens da lista "Perde". Recomendo 
 | 4 | **FEITO (2026-10-23)** C3 dica do V ou F com o conceito | trocar `usageNote` por `concepts` no zh (`zh/app.js:1887-1891`) | trivial | sim (texto já aprovado no fr) |
 | 5 | **FEITO (2026-10-23)** C4 blocos certos verdes no Ordenar | uma condição em `zh/app.js:3789` | trivial | sim, aprovação |
 | 6 | **FEITO (2026-10-23)** C5 velocidade do mp3 | `pregenRate` por idioma em `LANG_HOOKS`; dona ouve e decide o valor do zh | trivial | sim (som), aprovação |
-| 7 | C6 unidade de gramática e cenário | mover para `shared/core/` junto com a extração da família latina (pt); zh só quando houver conteúdo | médio | não, até existir conteúdo |
+| 7 | **FEITO (2026-10-23)** C6 unidade de gramática e cenário | mover para `shared/core/` junto com a extração da família latina (pt); zh só quando houver conteúdo | médio | não, até existir conteúdo |
 | 8 | C7 `unitId` no evento da Revisão | uma linha no zh | trivial | não |
 
 Itens B2 (módulos) e Conjugação: não são esquecimento, mas a recomendação é mover o motor para `shared/core/` **antes** de
