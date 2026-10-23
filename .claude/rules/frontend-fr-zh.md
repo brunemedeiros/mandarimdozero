@@ -10,7 +10,7 @@ paths:
 
 - `fr/app.js` e `zh/app.js` são espelhados: mudança em um quase sempre vale no outro (com as adaptações de idioma:
   zh tem hanzi+pinyin separados, `speakChinese`, `pinyinTonePickerHTML`; fr tem `speakFrench`, `frAccentPickerHTML`).
-  Desafios e Ditados só existem no fr.
+  Desafios e Ditados só existem no fr (o motor dos Ditados é comum, ver abaixo).
 - **Tokens de cor**: nomes iguais podem ter valores diferentes. Em fr, `--seal-red` é AZUL (#3498D6) e
   `--on-seal-red` é quase preto; em zh é vermelho e branco. Ler o `:root` do arquivo antes de usar. Texto sobre
   `--error-red`/`--jade` usa `--on-vivid`. Cor nova vira token definido nos 3 blocos de tema (`:root`,
@@ -46,6 +46,10 @@ paths:
   motor comum em `shared/conjugacao.js` (CSS em `shared/conjugacao.css`, depois do `<style>`; jogos em `shared/conj-games.js`); o que é do
   idioma vai na config do site (`fr/conj-config.js`, `registerConjugation`). Nunca copiar para um `app.js`; o zh não carrega (não conjuga).
   Guarda: `tests/paridade-sites/test_conjugacao*.js`.
+- **Ditados** (lista, linha "Revisão do A1" da trilha, player, correção, resultado, registro da tentativa): motor comum em
+  `shared/ditados.js` (CSS em `shared/ditados.css`, depois do `<style>`); o que é do idioma (ditados, família latina, voz, teclado, mp3,
+  abreviações, ganchos dos Desafios) vai em `fr/ditados-config.js` (`registerDictations`). Nunca copiar para um `app.js`; o zh não
+  carrega (decisão da dona pendente). Guarda: `tests/paridade-sites/test_ditados*.js`.
 - **Lembrete de revisão do rodapé** (`maybeShowReviewReminder`, `shared/core/revisao-decks.js`): o dia só é gravado depois de o banner ficar visível uns segundos ou ser clicado/dispensado
   (`markReviewReminderSeen`); em lição (`lesson-focus`) nem aparece nem gasta o dia; reavalia ao voltar para a aba e ao sair da lição. Guarda: `tests/lembrete-revisao/`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
