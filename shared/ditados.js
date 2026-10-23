@@ -17,7 +17,7 @@
 //      o estado tem STATE.dictations ({}) e STATE.dictationsAced (0), como no fr (sanitizeDictationRecord ao juntar).
 //
 // Configuração (registerDictations). Obrigatórios: dictations, familia. O resto tem padrão.
-//   lang                   código do idioma estudado (atributo lang="" do campo de texto; padrão 'fr')
+//   lang                   código do idioma estudado (atributo lang="" do campo de texto; fr: 'fr')
 //   dictations()           a lista de ditados (fr: () => DICTATIONS)
 //   taskTranslations()     { idioma do site: { id: { task } } } (fr: window.DICTATIONS_I18N, da camada do curso)
 //   familia()              a instância da família do idioma (fr: latinaFr(), FamiliaLatina.criar(LANG_HOOKS.familiaLatina)):
@@ -51,7 +51,7 @@ function dictHasConfig(){ return !!DICT_CONFIG; }
 function registerDictations(cfg){
   const noop = () => {};
   DICT_CONFIG = Object.assign({
-    lang: 'fr',
+    lang: '',
     taskTranslations: () => window.DICTATIONS_I18N,
     audioPath: (d) => `audio/dictation-${d.id}-guided.mp3`,
     sentenceAudioPath: (d, n) => `audio/dictation-${d.id}-s${n}.mp3`,
