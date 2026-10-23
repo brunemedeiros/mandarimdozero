@@ -909,10 +909,12 @@ const REVIEW_REMINDER_THRESHOLD = 15;
 
 document.getElementById('review-reminder-dismiss-btn').addEventListener('click', () => {
   document.getElementById('review-reminder-banner').style.display = 'none';
+  markReviewReminderSeen(); // fechou = viu: grava o dia agora
 });
 
 document.getElementById('review-reminder-cta-btn').addEventListener('click', () => {
   document.getElementById('review-reminder-banner').style.display = 'none';
+  markReviewReminderSeen(); // clicou = viu: grava o dia antes de sair da tela
   switchTab('review');
   openReviewSession('flashcard');
 });

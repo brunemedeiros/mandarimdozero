@@ -451,3 +451,21 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   `my_permissions()` + `free`; permissão nova `conj_games`; `trail_skip_locked` ligado para Premium Basic/Pro; rótulos;
   5 RPCs de Deck público por `_has_permission(uid, 'public_deck_import')`. Detalhes e rollback:
   `docs/i18n/etapa5-auditoria-premium.md`, seção 8.
+
+## 117 -- Google Agenda → site (2026-10-23)
+
+- `shared/supabase_migrations/117_google_calendar_sync.sql`: tabelas `google_calendar_connections` (refresh token, sem acesso
+  do app), `google_calendar_sources`, `google_calendar_events`, `google_calendar_rules`, `google_oauth_states`; coluna
+  `teacher_class_logs.google_event_ref`; funções `_gcal_*`, `gcal_*` (service_role) e `google_calendar_*` (professora);
+  `class_calendar_feed` atualizada (sem horário = dia inteiro; professora conectada não recebe as aulas do Google). Sem DROP.
+- Staging (2026-10-23): partes A, C e D pela ferramenta (`117_google_calendar_sync_a/_c/_d`); parte B (`gcal_new_state`,
+  `gcal_take_state`, `google_calendar_disconnect`, com "delete", que trava a ferramenta) colada pela autora no SQL Editor;
+  `117e_gcal_incremental_privacy` (leitura incremental + apagar título/convidados de evento que não é aula). Edge Function
+  `google-calendar` v4 no Staging (verify_jwt false; sem login = 401). Staging sem Vault/cron do Google (não precisa).
+- Produção (2026-10-23, autorizada): `117_google_calendar_sync_a` (partes A, C, D e a 117e juntas, só sem a parte B); Vault
+  `gcal_sync_url`/`gcal_sync_token` (senha sorteada no banco, 64 caracteres) e cron `gcal-sync` (*/15) criados; Edge Function
+  `google-calendar` v1 (sem login = 401; senha errada = 401). 393 aulas com o mesmo hash antes e depois. Privilégios conferidos
+  (anon sem execute em nada; professora só nas `google_calendar_*`). **Parte B na produção: a autora cola
+  `docs/google-agenda/117b-sql-editor.sql` no SQL Editor** (sem ela o botão "Conectar" falha).
+- Teste local: `tests/aulas-presenca/run.sh` (117 33/33), `tests/aulas-presenca/test_google_map.mjs` 9/9.
+

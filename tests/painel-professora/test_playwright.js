@@ -39,6 +39,12 @@ const PANEL_STUB = (who) => {
     (window.__rpcCalls = window.__rpcCalls || []).push([name, args]);
     if (name === 'my_permissions') return { data: { roles: roles.roles, admin: roles.admin, permissions: Object.fromEntries(CAT.map(c => [c.key, { enabled: perm(c.key), limit: null }])) }, error: null };
     // 103: link de agenda (token de 64 hex; gerar outro devolve um novo).
+    // 117: Google Agenda conectado, 2 agendas, 1 evento para revisar.
+    if (name === 'google_calendar_status') return { data: { connected: true, google_email: 'brune@gmail.com', last_sync_at: new Date().toISOString(), last_error: null,
+      sources: [{ calendar_id: 'primary@x', summary: 'Brune Medeiros', is_primary: true, enabled: true, mode: 'matched' }, { calendar_id: 'trab@x', summary: 'Trabalho', is_primary: false, enabled: true, mode: 'all' }],
+      counts: { linked: 12, review: 1, no_account: 3 }, waiting: [{ name: 'Olivia', n: 3, reason: 'nome na agenda' }] }, error: null };
+    if (name === 'google_calendar_review_list') return { data: window.__gcalResolved ? [] : [{ id: 77, title: 'Aulas de francês', start_at: '2026-10-27T17:00:00Z', end_at: '2026-10-27T18:00:00Z', time_zone: 'America/Sao_Paulo', match_state: 'review', match_reason: 'não reconhecido', attendees: [], calendar_summary: 'Trabalho', class_log_id: null }], error: null };
+    if (name === 'google_calendar_resolve'){ window.__gcalResolved = args; return { data: 'linked', error: null }; }
     if (name === 'my_calendar_feed_token') return { data: (args && args.p_regenerate ? 'b' : 'a').repeat(16), error: null };
     // 101: com horário; inclui 1 aula futura (próximas aulas) marcada em São Paulo.
     if (name === 'get_my_class_schedule') return { data: who === 'S' ? [
@@ -350,6 +356,20 @@ const PANEL_STUB = (who) => {
       await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').open = true; });
       await page.waitForSelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]');
       L('calendário: professora recebe o link dela', await ev(() => /^https:\/\/agenda\.profbrune\.com\.br\/[ab]{16}$/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
+      await page.waitForSelector('#admin-gcal-box .gcal-review-item');
+      L('google: bloco diz que é sincronização em um sentido', await ev(() => /Google Agenda → site/.test(document.querySelector('#admin-gcal-box .gcal-oneway').textContent)));
+      L('google: aberto sozinho porque há evento para revisar, com contador', await ev(() => document.getElementById('admin-gcal-box').open && document.querySelector('#admin-gcal-box [data-gcal-badge]').textContent === '1'));
+      L('google: duas agendas com o modo de cada uma', await ev(() => [...document.querySelectorAll('#admin-gcal-box [data-gcal-mode]')].map(x => x.value).join(',') === 'matched,all'));
+      L('google: alunos sem conta listados', await ev(() => document.querySelector('#admin-gcal-box .gcal-waiting').textContent.includes('Olivia')));
+      await ev(() => { const sel = document.querySelector('#admin-gcal-box [data-gcal-target]'); sel.value = [...sel.options].find(o => o.value.startsWith('student|')).value; });
+      if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.getElementById('admin-gcal-box').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
+      await shot('aulas-google-agenda');
+      await ev(() => document.querySelector('#admin-gcal-box [data-gcal-do="assign"]').click());
+      await page.waitForFunction(() => !!window.__gcalResolved);
+      L('google: resolver manda aluno, idioma e "lembrar"', await ev(() => { const a = window.__gcalResolved; return a.p_event_id === 77 && a.p_action === 'student' && a.p_target === 'S' && !!a.p_language && a.p_remember === true; }), await ev(() => window.__gcalResolved));
+      L('google: aula vinda do Google trava horário e duração, com aviso', await ev(() => { const h = classLogWhenFieldsHTML('t1', 'd1', { google_event_ref: 5, start_time: '10:00:00', duration_minutes: 60 }); return (h.match(/ disabled/g) || []).length === 2 && h.includes(t('panel.gcal.timeFromGoogle')); }));
+      L('google: aula comum continua editável', await ev(() => !/ disabled/.test(classLogWhenFieldsHTML('t2', 'd2', { start_time: '10:00:00' }))));
+      await ev(() => { delete window.__gcalResolved; });
       if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aulas-link-agenda');
       // a aula agendada pode cair no mês seguinte: avança até achar
