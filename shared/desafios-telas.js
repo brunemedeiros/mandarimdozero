@@ -81,7 +81,7 @@ function buildModuleChallengesRow(module){
           ${premium ? (items.length ? `<span class="ub-badge">${done}/${items.length}</span>` : '') : `<span class="ub-badge ub-badge-premium">${t('trail.premiumBadge')}</span>`}
         </div>
         <div class="ub-goal">${t('trail.moduleChallenges.goal')}</div>
-        <div class="ub-goal">${dictFree ? tp('fr.trail.freeDictation', dictFree) : ''}${dictFree && (dictPremium || items.length) ? ' · ' : ''}${(dictPremium || items.length) ? tpZero('fr.trail.dictationsAnd', dictPremium) + ' ' + tpZero('fr.trail.premiumChallengesSuffix', items.length) : ''}</div>
+        <div class="ub-goal">${dictFree ? tp('fr.trail.freeDictation', dictFree) : ''}${dictFree && (dictPremium || items.length) ? ' · ' : ''}${(dictPremium || items.length) ? (chHasDictations() ? tpZero('fr.trail.dictationsAnd', dictPremium) + ' ' : '') + tpZero('fr.trail.premiumChallengesSuffix', items.length) : ''}</div>
       </div>
     </div>
   `;
@@ -1045,4 +1045,78 @@ function renderClozeGrammarFeedback(c, chosen, res){
   document.getElementById('cloze-grammar-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? chT('ch.cloze.right') : chT('ch.notQuite'), bodyHTML, res.outcome);
   recordChallengeReviewOutcome(c, res.outcome);
   wireChallengeCompleteButton(c);
+}
+
+
+// ---------- Marcação (para site novo; o fr tem a mesma no index.html) ----------
+// A seção da aba Desafios, igual à do fr/index.html (guarda: tests/paridade-sites/test_desafios_motor.js). Uma
+// diferença de propósito: o subtítulo usa data-ch-i18n="ch.sub" (texto da configuração do site) em vez do
+// data-i18n="fr.challenges.sub" do fr, que cita o francês.
+function challengesScreenHTML(){
+  return `
+    <div id="challenges-categories-wrap">
+      <button class="back-link" id="challenges-module-back" style="display:none;" data-ch-i18n="ch.static.backTrail">← Voltar à trilha</button>
+      <div class="path-header">
+        <h2 id="challenges-categories-title" data-i18n="nav.challenges">Desafios</h2>
+        <p data-ch-i18n="ch.sub" id="challenges-categories-sub"></p>
+      </div>
+      <div class="challenges-admin-bar" id="challenges-admin-bar" style="display:none;">
+        <button class="btn btn-secondary" id="challenges-admin-import-btn" data-i18n="adminChallenges.bar.import">📥 Importar JSON</button>
+        <button class="btn btn-secondary" id="challenges-admin-review-btn" data-i18n="adminChallenges.bar.review">🛠️ Revisar pendentes (<span id="challenges-pending-count">0</span>)</button>
+      </div>
+      <div class="challenges-categories" id="challenges-categories"></div>
+    </div>
+
+    <div id="challenges-list-wrap" style="display:none;">
+      <button class="back-link" id="challenges-list-back-btn" data-ch-i18n="ch.static.back">← Voltar às categorias</button>
+      <div class="path-header">
+        <h2 id="challenges-list-title" data-i18n="nav.challenges">Desafios</h2>
+      </div>
+      <div id="challenges-list-progress"></div>
+      <div class="challenges-level-tabs" id="challenges-level-tabs" style="display:none;"></div>
+      <div class="challenges-cards" id="challenges-cards"></div>
+    </div>
+
+    <div id="challenge-player-wrap" style="display:none;">
+      <button class="back-link" id="challenge-back-to-list" data-ch-i18n="ch.static.backChallenges">← Voltar aos desafios</button>
+      <div id="challenge-preview-banner" style="display:none;"></div>
+      <div id="challenge-player-content" aria-live="polite" aria-atomic="true"></div>
+    </div>
+
+    <div id="challenges-admin-wrap" style="display:none;">
+      <button class="back-link" id="challenges-admin-back-btn" data-i18n="fr.dictation.backToChallenges">← Voltar aos desafios</button>
+      <div id="challenges-admin-content"></div>
+    </div>
+`;
+}
+// A janela Premium dos Desafios do Módulo, igual à do fr/index.html.
+function challengesPremiumModalHTML(){
+  return `
+<div id="premium-challenges-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3 data-ch-i18n="prem.modal.title">🔒 Recurso Premium</h3>
+      <button class="app-modal-close" id="premium-challenges-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
+    </div>
+    <div class="app-modal-body">
+      <p data-ch-i18n="prem.modal.p1">Os <strong>Desafios do Módulo</strong> reforçam cada tema da trilha com Expressões, Ouça e traduza, Acentuação e Ditados extras.</p>
+      <p data-ch-i18n="prem.modal.p2">Eles fazem parte do plano Premium. Para pedir o Premium, fale com a Prof. Brune pelo botão abaixo.</p>
+      <div id="premium-challenges-contact" class="premium-contact-wrap"></div>
+    </div>
+  </div>
+</div>
+`;
+}
+// Monta a seção e a janela quando o site não as tem no index.html (o fr tem: nada muda). Chamada por
+// wireChallengesScreen() antes de ligar os listeners.
+function mountChallengesScreen(){
+  const view = document.getElementById('view-challenges');
+  let mounted = false;
+  if (view && !view.children.length){ view.innerHTML = challengesScreenHTML(); mounted = true; }
+  if (!document.getElementById('premium-challenges-modal')){ document.body.insertAdjacentHTML('beforeend', challengesPremiumModalHTML()); mounted = true; }
+  if (typeof challengesImportModalHTML === 'function' && !document.getElementById('challenges-import-modal')){ document.body.insertAdjacentHTML('beforeend', challengesImportModalHTML()); mounted = true; }
+  if (mounted){
+    if (typeof applyDomI18n === 'function') applyDomI18n(document);
+    applyChallengeI18n();
+  }
 }

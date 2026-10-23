@@ -66,6 +66,8 @@ function chSiteTexts(){ return (CH_CONFIG && CH_CONFIG.texts) || {}; }
 // Os listeners que eram de nível superior no fr/app.js, na mesma ordem (voltar à trilha, troca de idioma, janela
 // Premium, voltar da lista e do player); o site chama uma vez, no mesmo ponto do carregamento.
 function wireChallengesScreen(){
+  // site sem a seção no index.html: monta a marcação comum (shared/desafios-telas.js); o fr já tem, nada muda
+  if (typeof mountChallengesScreen === 'function') mountChallengesScreen();
   document.getElementById('challenges-module-back').addEventListener('click', () => {
     challengesModuleFilter = null;
     switchTab('path');
@@ -92,6 +94,8 @@ function wireChallengesScreen(){
       backToChallengesListOrCategories();
     }
   });
+  // barra do admin e importação (shared/desafios-admin.js), logo depois, como no fr/app.js
+  if (typeof wireChallengesAdminScreen === 'function') wireChallengesAdminScreen();
 }
 
 // Plural com contagem zero: em pt-BR o Intl.PluralRules trata 0 como 'one',

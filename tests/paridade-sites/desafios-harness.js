@@ -51,7 +51,7 @@ function importInputs(rows){
 const STUB = `(function(){
   window.__dbLog = [];
   function result(st){
-    if (st.table === 'challenges'){
+    if (st.table === 'challenges' || (window.__CH_TABLE && st.table === window.__CH_TABLE)){
       if (st.op !== 'select'){
         window.__dbLog.push(JSON.parse(JSON.stringify(st)));
         if (window.__dbFail) return { data: null, error: { message: 'falha simulada do banco' } };
