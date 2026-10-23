@@ -96,7 +96,11 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
 
 ## 5. Categoria C: recurso geral que está só no fr (o que a dona pediu para achar)
 
-### C1. Chave estável por item e mudanças de currículo (prioridade alta, invisível para o aluno)
+### C1. Chave estável por item e mudanças de currículo (prioridade alta, invisível para o aluno) -- FEITO (2026-10-23)
+- **Feito** na Etapa 1 do plano da dona, branch `claude/friendly-hamilton-u4ssl2` (registro:
+  `docs/historico/23-paridade-c1-chave-estavel-zh.md`): `k` em 305 itens do `zh/content.js` (nenhum id mudou),
+  `zh/curriculum-changes.js`, `zh/published_ids.json`, scripts e testes descobrindo os sites, e o carregar/salvar com mudanças
+  de currículo em `shared/core/curriculo-progresso.js`, chamado pelos dois app.js. O texto abaixo é o diagnóstico de antes.
 - **O que o aluno perde no zh**: hoje, nada que ele veja. O risco é de **progresso de memória (FSRS) ir para o cartão
   errado** no dia em que o conteúdo do zh mudar (palavra inserida no meio de uma unidade, unidade dividida, módulos do zh).
 - **Evidência**: no fr cada palavra/frase/fala tem a chave congelada `k` (`fr/content.js`, 533 ocorrências de `"k":`) e o
@@ -227,7 +231,7 @@ latina (`shared/core/familias/latina.js`).
 - Unidade de gramática e exercício de cenário (C6).
 - `typedAttemptHTML` (C2).
 - Desafios e Ditados (177 funções): entram no pt "aos poucos depois", pela decisão da dona.
-- O carregamento com mudanças de currículo (C1): a chamada está em `fr/app.js:692-725`, não no motor comum.
+- ~~O carregamento com mudanças de currículo (C1)~~: feito, `shared/core/curriculo-progresso.js` (2026-10-23).
 
 **Pontos de `shared/` que ainda supõem só fr/zh** (já listados em `docs/i18n/arquitetura-multi-idioma-cursos.md:74` para a
 E1): `shared/profile-placeholders.js:141` e `:147` (`studyLang === 'zh' ? 'zh' : 'fr'`: no site de português o
@@ -240,7 +244,8 @@ pt) cobre o pt **se** a extração incluir os itens da lista "Perde". Recomendo 
 
 - `zh/app.js:1326` chama `trailSkipAllowed()` e `openCheckpoint()`, que não existem no zh; seguro só porque `moduleId` é
   sempre `null` (`zh/app.js:1362`). Ao levar módulos ao zh, levar as funções junto (ou movê-las para `shared/core/`).
-- Sem C1, qualquer edição de ordem em `zh/content.js` move o progresso FSRS de uma palavra para outra, em silêncio.
+- ~~Sem C1, qualquer edição de ordem em `zh/content.js` move o progresso FSRS de uma palavra para outra, em silêncio.~~
+  Resolvido pelo C1 (2026-10-23): o zh também segue a chave `k`.
 
 ## 10. Resumo por categoria
 
@@ -257,7 +262,7 @@ pt) cobre o pt **se** a extração incluir os itens da lista "Perde". Recomendo 
 
 | # | Item | Proposta | Esforço | Muda o que a aluna vê? |
 |---|---|---|---|---|
-| 1 | C1 chave estável por item e mudanças de currículo no zh | `k` = id atual em `zh/content.js`; `zh/curriculum-changes.js` vazio; mover as chamadas de `fr/app.js:648-725` para uma função comum em `shared/study-trail-model.js` chamada pelos dois `applySerializedState`; livro-razão e teste descobrindo os sites | médio | não (teste de ida e volta obrigatório) |
+| 1 | **FEITO (2026-10-23)** C1 chave estável por item e mudanças de currículo no zh | `k` = id atual em `zh/content.js`; `zh/curriculum-changes.js` vazio; mover as chamadas de `fr/app.js:648-725` para uma função comum em `shared/study-trail-model.js` chamada pelos dois `applySerializedState`; livro-razão e teste descobrindo os sites | médio | não (teste de ida e volta obrigatório) |
 | 2 | C2 "Sua resposta" com letras erradas | `alinharLetras` e `typedAttemptHTML` para `shared/core/` com gancho de formas aceitas; CSS nos dois sites; decidir como mostrar o pinyin | pequeno a médio | sim, aprovação |
 | 3 | D1 português fixo no Ordenar do fr (bug) | usar `t()` (a chave `zh.reorder.tapHint` diz "blocos"; criar `fr.reorder.tapHint` ou uma chave comum) | trivial | só no site em inglês, corrige a regra |
 | 4 | C3 dica do V ou F com o conceito | trocar `usageNote` por `concepts` no zh (`zh/app.js:1887-1891`) | trivial | sim (texto já aprovado no fr) |
