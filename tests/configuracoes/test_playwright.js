@@ -135,8 +135,10 @@ let ok = 0, bad = 0; const chk = (n, c) => { if (c) ok++; else { bad++; console.
     await page.keyboard.press('Space');
     chk(lang + ': som alterna pelo teclado', await page.evaluate(s => isFeedbackSoundEnabled() !== s && document.getElementById('feedback-sound-switch').checked === isFeedbackSoundEnabled(), s0));
     // abas
-    await page.click('[data-settings-section="export"]');
-    chk(lang + ': aba Exportar marcada', await page.evaluate(() => document.querySelector('[data-settings-section="export"]').getAttribute('aria-pressed') === 'true' && document.querySelector('[data-settings-section="geral"]').getAttribute('aria-pressed') === 'false'));
+    // Aba Exportar ARQUIVADA em 2026-10-23 (docs/historico/23-*): sem botão de aba; o painel escondido segue testável pelo código.
+    chk(lang + ': só Geral e Notificações na barra de abas (Exportar arquivada)', await page.evaluate(() => [...document.querySelectorAll('.cfg-abas [data-settings-section]')].map(b => b.dataset.settingsSection).join(',') === 'geral,notifications' && !document.querySelector('[data-settings-section="export"]')));
+    chk(lang + ': painel de exportar escondido', await page.evaluate(() => getComputedStyle(document.getElementById('settings-export-content')).display === 'none'));
+    await page.evaluate(() => switchSettingsSection('export'));
     const n = await page.evaluate(() => document.querySelectorAll('#export-unit-select option').length);
     chk(lang + ': campo de unidade com Todas + unidades (' + n + ')', n > 5);
     chk(lang + ': primeira opção é Todas as unidades', await page.evaluate(() => document.querySelector('#export-unit-select option').textContent === 'Todas as unidades'));

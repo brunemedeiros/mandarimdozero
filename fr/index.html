@@ -5960,13 +5960,12 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <header class="p-cabecalho">
         <div>
           <h2 data-i18n="settings.title">Configurações</h2>
-          <span class="p-subtitulo" data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</span>
+          <span class="p-subtitulo" data-i18n="settings.subtitle">Suas informações e preferências de conta</span>
         </div>
       </header>
       <div class="p-seg cfg-abas" role="toolbar" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
         <button type="button" class="active" aria-pressed="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
         <button type="button" aria-pressed="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
-        <button type="button" aria-pressed="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
       </div>
       <div id="settings-geral-content" class="cfg-corpo">
         <article>
@@ -6018,6 +6017,9 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         </article>
       </div>
       <div id="settings-notifications-content" class="cfg-corpo" style="display:none;"></div>
+      <!-- ARQUIVADO (2026-10-23, decisão da autora): a aba "📦 Exportar" saiu de Configurações porque exportar para o Anki
+           esvaziaria a Revisão (que já tem Importar/Exportar no menu ⋯). Este painel fica escondido, sem aba que o abra, só para
+           o código de shared/anki-export.js seguir testável. Para trazer de volta: ver docs/historico/23-configuracoes-exportar-arquivado.md. -->
       <div id="settings-export-content" class="cfg-corpo" style="display:none;">
         <article>
           <header><h3 data-i18n="settings.export.title">Escolha o que exportar</h3></header>

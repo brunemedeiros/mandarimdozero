@@ -119,7 +119,7 @@ window.I18N_CATALOG['en'] = {
 
   // Fase 6 lote 1
   'settings.title': 'Settings', // ALTA
-  'settings.subtitle': 'Your account, preferences, and data export.', // ALTA
+  'settings.subtitle': 'Your account information and preferences', // ALTA
   'settings.tab.general': 'General', // ALTA
   'settings.tab.notifications': '🔔 Notifications', // ALTA
   'settings.tab.export': '📦 Export', // ALTA

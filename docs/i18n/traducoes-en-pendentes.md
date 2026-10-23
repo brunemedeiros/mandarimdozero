@@ -7,7 +7,7 @@ Todas entram como `aprovado (2026-10-05)` até a dona aprovar.
 | Chave | PT | EN | Confiança | Status |
 |---|---|---|---|---|
 | settings.title | Configurações | Settings | alta | aprovado (2026-10-05) |
-| settings.subtitle | Sua conta, preferências e exportação de dados. | Your account, preferences, and data export. | alta | aprovado (2026-10-05) |
+| settings.subtitle | Suas informações e preferências de conta | Your account information and preferences | alta | aprovado (2026-10-23, aba Exportar arquivada) |
 | settings.tab.general | Geral | General | alta | aprovado (2026-10-05) |
 | settings.tab.notifications | 🔔 Notificações | 🔔 Notifications | alta | aprovado (2026-10-05) |
 | settings.tab.export | 📦 Exportar | 📦 Export | alta | aprovado (2026-10-05) |
