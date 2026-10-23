@@ -121,7 +121,9 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
 - **Risco**: médio a alto se feito errado (mexe no save), baixo se feito com o teste de ida e volta do progresso e a
   conferência de que nenhum id mudou. Fazer **antes** de qualquer reestruturação do conteúdo do zh (módulos).
 
-### C2. "Sua resposta" com as letras erradas em vermelho nas lições (prioridade alta, visível)
+### C2. "Sua resposta" com as letras erradas em vermelho nas lições (prioridade alta, visível) -- FEITO (2026-10-23)
+- **Feito** (registro: `docs/historico/24-paridade-c2-c5-d6-licao.md`): `alinharLetras` e `typedAttemptHTML` em `shared/core/licao-feedback.js`, CSS em
+  `shared/licao-feedback.css`; o zh compara o pinyin convertido (`LANG_HOOKS.typedAttemptForm`). O texto abaixo é o diagnóstico de antes.
 - **O que o aluno perde no zh**: no fr, ao errar um "Digite o que ouviu" ou a lacuna digitada, o painel mostra o que ela
   digitou com só as letras erradas em vermelho e um traço onde faltou letra. No zh o painel mostra só a resposta certa
   (e o aviso de tom, quando é só o tom).
@@ -137,7 +139,8 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
   para os dois sites.
 - **Risco**: baixo (só apresentação do erro). Muda o que a aluna vê: precisa de aprovação da dona.
 
-### C3. Dica do Verdadeiro ou Falso cita a explicação vista (prioridade média, visível, trivial)
+### C3. Dica do Verdadeiro ou Falso cita a explicação vista (prioridade média, visível, trivial) -- FEITO (2026-10-23)
+- **Feito**: `trueFalseHint` em `shared/core/licao-feedback.js`, usado pelos dois `buildExerciseHint` (registro: `docs/historico/24-paridade-c2-c5-d6-licao.md`).
 - **O que o aluno perde no zh**: no fr a dica diz "Pense na explicação: '<título do conceito>'" quando ela já viu o
   conceito na lição. No zh sai sempre a dica genérica.
 - **Evidência**: fr `fr/app.js:1838-1842` usa `unit.concepts`; zh `zh/app.js:1887-1891` usa `unit.usageNote`, que nenhuma
@@ -147,14 +150,16 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
   para `shared/core/` como `buildExerciseHint` comum.
 - **Risco**: baixo. Muda texto visível (texto já aprovado no fr): confirmar com a dona.
 
-### C4. Ordenar frase: blocos no lugar certo ficam verdes quando a frase está errada (prioridade média, visível)
+### C4. Ordenar frase: blocos no lugar certo ficam verdes quando a frase está errada (prioridade média, visível) -- FEITO (2026-10-23)
+- **Feito**: `markReorderSlots` e `reorderBlockStatus` em `shared/core/licao-feedback.js` (registro: `docs/historico/24-paridade-c2-c5-d6-licao.md`).
 - **O que o aluno perde no zh**: no fr, ao errar o Ordenar, os blocos que já estavam na posição certa ficam verdes e só os
   outros ficam vermelhos ("dica de onde errou"). No zh todos ficam vermelhos.
 - **Evidência**: fr `fr/app.js:3637-3642`; zh `zh/app.js:3788-3790`. A linha "Sua resposta" com cores por bloco existe
   nos dois.
 - **Como levar**: trivial (mesma condição de uma linha). **Risco**: baixo. Visível: aprovação da dona.
 
-### C5. Velocidade do áudio pré-gravado (prioridade média, audível)
+### C5. Velocidade do áudio pré-gravado (prioridade média, audível) -- FEITO (2026-10-23)
+- **Feito**: `LANG_HOOKS.pregenRate()` é a fonte única; fr 0,9 e zh 0,9 por decisão da dona (registro: `docs/historico/24-paridade-c2-c5-d6-licao.md`).
 - **O que o aluno perde no zh**: no fr, depois de reclamações reais de alunos ("o áudio está muito rápido"), o mp3
   pré-gravado passou a tocar a 0,9 (`PREGEN_AUDIO_RATE`, `fr/app.js:91-112`). No zh o mp3 toca a 1,0
   (`zh/app.js:96-99`, sem o argumento `rate`), enquanto a voz do navegador do próprio zh já toca a 0,85 (`zh/app.js:128`).
@@ -199,7 +204,7 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
    personagens nomeados".
 5. **Histórias-checkpoint** (`zh/stories.js`, `zh/app.js:1428-1570`) e **busca de vocabulário** (pronta, mas sem botão
    visível por pedido: `zh/index.html:4704-4707`). Conteúdo e decisão da dona.
-6. Textos fixos no zh que o fr já traduz: selo "⏭ 跳过" (`zh/app.js:1234`; o fr usa `t('trail.unit.skippedBadge')`;
+6. **FEITO (2026-10-23)**, ver `docs/historico/24-paridade-c2-c5-d6-licao.md` (o fr também tinha um "pts" fixo no placar ao vivo, trocado). Textos fixos no zh que o fr já traduz: selo "⏭ 跳过" (`zh/app.js:1234`; o fr usa `t('trail.unit.skippedBadge')`;
    inalcançável hoje porque o zh não pula unidade) e "pts" na Revisão rápida (`zh/app.js:4010`, `4056`, `4078`; o fr usa
    `t('review.speed.points')`, mesmo texto). Triviais.
 7. Hanzi, radicais, traços, pinyin visível ou escondido, tons: próprios do chinês (A no sentido contrário).
@@ -208,8 +213,8 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
 
 - Com a guarda nova, nenhuma classe usada por `shared/` falta no zh (`node tests/paridade-sites/test_css_compartilhado.js`:
   6/6, exceção única `level-test-highlight`, do Teste de Nível).
-- CSS que hoje só existe no fr e terá de ir junto quando o recurso for levado: `.typed-attempt`, `.conj-x`, `.conj-gap`
-  (C2, `fr/index.html:3999-4002`), `.scenario-*` (C6), `.gram-*` (C6), `.module-label`/`.ml-*`/`.checkpoint-*` (B2),
+- CSS que hoje só existe no fr e terá de ir junto quando o recurso for levado: ~~`.typed-attempt`, `.conj-x`, `.conj-gap`
+  (C2)~~ (feito: `shared/licao-feedback.css`), `.scenario-*` (C6), `.gram-*` (C6), `.module-label`/`.ml-*`/`.checkpoint-*` (B2),
   `.cg-*` dos Jogos (`shared/conj-games.js`), `.reorder-final-*` (`fr/index.html:1675-1676`).
 - Ids só do fr (81): todos de Conjugação (28), Desafios (27), Ditado (10), janelas Premium de Desafios/Jogos (6), seletor
   de nível e Teste de Nível (5), menu Mais (2) e `path-level-title`. Nenhum é usado por `shared/` fora desses recursos
@@ -229,7 +234,7 @@ latina (`shared/core/familias/latina.js`).
 - Toda a tela da Conjugação (33 funções). O pt precisa dela desde o começo.
 - Toda a parte de módulos e níveis (32 funções): o pt vai ter módulos.
 - Unidade de gramática e exercício de cenário (C6).
-- `typedAttemptHTML` (C2).
+- ~~`typedAttemptHTML` (C2)~~: feito, `shared/core/licao-feedback.js` (2026-10-23).
 - Desafios e Ditados (177 funções): entram no pt "aos poucos depois", pela decisão da dona.
 - ~~O carregamento com mudanças de currículo (C1)~~: feito, `shared/core/curriculo-progresso.js` (2026-10-23).
 
@@ -263,11 +268,11 @@ pt) cobre o pt **se** a extração incluir os itens da lista "Perde". Recomendo 
 | # | Item | Proposta | Esforço | Muda o que a aluna vê? |
 |---|---|---|---|---|
 | 1 | **FEITO (2026-10-23)** C1 chave estável por item e mudanças de currículo no zh | `k` = id atual em `zh/content.js`; `zh/curriculum-changes.js` vazio; mover as chamadas de `fr/app.js:648-725` para uma função comum em `shared/study-trail-model.js` chamada pelos dois `applySerializedState`; livro-razão e teste descobrindo os sites | médio | não (teste de ida e volta obrigatório) |
-| 2 | C2 "Sua resposta" com letras erradas | `alinharLetras` e `typedAttemptHTML` para `shared/core/` com gancho de formas aceitas; CSS nos dois sites; decidir como mostrar o pinyin | pequeno a médio | sim, aprovação |
+| 2 | **FEITO (2026-10-23)** C2 "Sua resposta" com letras erradas | `alinharLetras` e `typedAttemptHTML` para `shared/core/` com gancho de formas aceitas; CSS nos dois sites; decidir como mostrar o pinyin | pequeno a médio | sim, aprovação |
 | 3 | D1 português fixo no Ordenar do fr (bug) | usar `t()` (a chave `zh.reorder.tapHint` diz "blocos"; criar `fr.reorder.tapHint` ou uma chave comum) | trivial | só no site em inglês, corrige a regra |
-| 4 | C3 dica do V ou F com o conceito | trocar `usageNote` por `concepts` no zh (`zh/app.js:1887-1891`) | trivial | sim (texto já aprovado no fr) |
-| 5 | C4 blocos certos verdes no Ordenar | uma condição em `zh/app.js:3789` | trivial | sim, aprovação |
-| 6 | C5 velocidade do mp3 | `pregenRate` por idioma em `LANG_HOOKS`; dona ouve e decide o valor do zh | trivial | sim (som), aprovação |
+| 4 | **FEITO (2026-10-23)** C3 dica do V ou F com o conceito | trocar `usageNote` por `concepts` no zh (`zh/app.js:1887-1891`) | trivial | sim (texto já aprovado no fr) |
+| 5 | **FEITO (2026-10-23)** C4 blocos certos verdes no Ordenar | uma condição em `zh/app.js:3789` | trivial | sim, aprovação |
+| 6 | **FEITO (2026-10-23)** C5 velocidade do mp3 | `pregenRate` por idioma em `LANG_HOOKS`; dona ouve e decide o valor do zh | trivial | sim (som), aprovação |
 | 7 | C6 unidade de gramática e cenário | mover para `shared/core/` junto com a extração da família latina (pt); zh só quando houver conteúdo | médio | não, até existir conteúdo |
 | 8 | C7 `unitId` no evento da Revisão | uma linha no zh | trivial | não |
 

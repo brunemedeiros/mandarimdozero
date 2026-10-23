@@ -33,7 +33,7 @@ paths:
 - **Resposta com mais de uma forma** ("allemand / allemande", "un / une"): em QUALQUER exercício de digitar (hoje e os futuros) vale uma
   forma só, o texto inteiro (barra com ou sem espaço, vírgula) na ordem do cartão; ordem trocada, só espaço e a 2ª forma incompleta são erro.
   Use os helpers (fr: `FamiliaLatina` / `typedAnswerVerdictForExpected`; zh: `acceptedFormsTyped` + `typedVariants`), nunca
-  `acceptedForms()` cru. Erro marcado em vermelho: `typedAttemptHTML`. O teclado de letras ganha uma fileira com letras que a resposta
+  `acceptedForms()` cru. Erro marcado em vermelho: `typedAttemptHTML` (comum, `shared/core/licao-feedback.js`; a forma de comparar de cada idioma vem de `LANG_HOOKS.typedAttemptForm`). O teclado de letras ganha uma fileira com letras que a resposta
   pede e ele não tem (`frAccentPickerHTML(resposta)`). Guarda: `tests/respostas-digitadas/`.
 - **Lembrete de revisão do rodapé** (`maybeShowReviewReminder`, `shared/core/revisao-decks.js`): o dia só é gravado depois de o banner ficar visível uns segundos ou ser clicado/dispensado
   (`markReviewReminderSeen`); em lição (`lesson-focus`) nem aparece nem gasta o dia; reavalia ao voltar para a aba e ao sair da lição. Guarda: `tests/lembrete-revisao/`.
