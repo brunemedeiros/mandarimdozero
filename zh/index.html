@@ -57,6 +57,7 @@ try{
 <link rel="stylesheet" href="../shared/painel/painel-componentes.css">
 <link rel="stylesheet" href="../shared/review-bank.css">
 <link rel="stylesheet" href="../shared/licao-feedback.css">
+<link rel="stylesheet" href="../shared/gramatica-cenario.css">
 <style>
 :root{
   /* Design tokens — inspirado no vermelho laca (印泥红) e dourado imperial chinês */
@@ -1499,6 +1500,8 @@ button.wrong-feedback-continue{ background: var(--brand-fill); color: var(--on-b
 .feedback-phrase-trans{ margin-top:8px; padding-top:8px; border-top:1px dashed var(--paper-line); font-size:13.5px; font-style:italic; color: var(--ink-soft); }
 .opt-pinyin-sentence{ font-size:13px; color: var(--seal-red-dark); font-weight:700; margin-bottom:4px; }
 .opt-hanzi-sentence{ font-family: var(--font-hanzi); font-size:19px; line-height:1.5; }
+/* Opção do exercício de cenário (shared/gramatica-cenario.css): pinyin em cima do hanzi, como no "Frase completa". */
+.scenario-option-text .opt-pinyin-sentence, .scenario-option-text .opt-hanzi-sentence{ display:block; }
 
 /* ---------- Exercício de verdadeiro ou falso (uso real) ---------- */
 .tf-scene{
@@ -5787,6 +5790,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/core/estado-trilha-desafios.js"></script>
 <script src="../shared/core/curriculo-progresso.js"></script>
 <script src="../shared/core/licao-feedback.js"></script>
+<script src="../shared/core/gramatica-cenario.js"></script>
 <script src="lang-hooks.js"></script>
 <script src="../shared/core/quase-iguais-simples.js"></script>
 <script src="../shared/core/quase-iguais-textos.js"></script>

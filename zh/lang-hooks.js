@@ -34,5 +34,21 @@ const LANG_HOOKS = {
   // "Sua resposta" (typedAttemptHTML): mostra e compara na forma do veredito (pinyin numerado vira marca de tom,
   // sem pontuação; maiúscula não conta), para a marcação vermelha concordar com o veredito.
   typedAttemptForm: (s) => pinyinAttemptDisplayForm(s),
+  // Unidade de gramática e exercício de cenário (shared/core/gramatica-cenario.js, paridade C6). Hoje o zh não tem
+  // conteúdo desses tipos; quando tiver, abre e funciona. Exercício de digitar da gramática: compara como os outros
+  // exercícios de digitar do zh (pinyin numerado vale, maiúscula e pontuação não contam, forma dupla "X / Y");
+  // só o tom errado = 'almost' (meio ponto, como o acento no fr).
+  grammarAnswerVerdict: (given, forms) => {
+    const strip = pinyinAnswerCompareForm;
+    const all = forms.flatMap(f => acceptedFormsTyped(f));
+    const typedAll = typedVariants(given, forms[0]).map(strip);
+    if (all.some(f => typedAll.includes(strip(f)))) return 'ok';
+    return isToneOnlyMiss(typedAll[0], all, strip) ? 'almost' : 'wrong';
+  },
+  grammarInputExtraHTML: () => pinyinTonePickerHTML(),
+  wireGrammarInputExtra: (wrapEl, inputEl) => wirePinyinTonePicker(wrapEl.querySelector('.pinyin-tone-picker'), inputEl),
+  // Opção do cenário: pinyin em cima do hanzi (como no "Frase completa"); o pinyin some com "esconder pinyin".
+  scenarioOptionHTML: (p) => { const f = phraseForExercise(p); return `<span class="pinyin opt-pinyin-sentence">${f.p}</span><span class="opt-hanzi-sentence">${f.c}</span>`; },
+  phraseAnswerHTML: (p) => { const f = phraseForExercise(p); return `<strong>${f.c}</strong> ${audioBtnHTML(f.c)} <span class="pinyin">(${f.p})</span>`; },
 // --- /E4 hooks ---
 };

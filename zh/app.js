@@ -1057,7 +1057,7 @@ function buildSearchIndex(){
   recalculateUnlockedUnits();
   const index = [];
   UNITS.forEach(u => {
-    u.vocab.forEach(v => {
+    (u.vocab || []).forEach(v => {
       index.push({
         pinyin: v.p, hanzi: v.c, trans: v.t,
         unitId: u.id, unitTitle: u.title, source: 'vocab',
@@ -1067,7 +1067,7 @@ function buildSearchIndex(){
     // Frases-modelo e diálogo também entram no índice -- algumas palavras
     // (principalmente gramaticais, como 很/吗/了) só aparecem em frases,
     // nunca como entrada isolada de vocabulário.
-    u.phrases.forEach(p => {
+    (u.phrases || []).forEach(p => {
       index.push({
         pinyin: p.p, hanzi: p.c, trans: p.t,
         unitId: u.id, unitTitle: u.title, source: 'phrase',
@@ -1608,6 +1608,7 @@ const STEP_DEFS = [
 // um passo "Dica de uso" vazio. Unidades ainda não migradas continuam com o
 // passo normalmente (mesmo comportamento de antes).
 function currentStepDefs(u){
+  if (isGrammarUnit(u)) return getStepDefsGrammar(); // unidade de gramática: shared/core/gramatica-cenario.js
   if (isLessonUnit(u)){
     const lesson = currentLesson(u);
     if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: t('trail.checkpoint.title') }];
@@ -1670,6 +1671,12 @@ const STEP_STATE = {
   // acerto (ver showCorrectFeedbackPanel).
   comboCount: 0,
   exerciseAnswered: false,
+  // Unidade de gramática (shared/core/gramatica-cenario.js): bloco da explicação e exercício atuais.
+  explanationIndex: 0,
+  explanationUnitId: null,
+  gramExerciseUnitId: null,
+  gramExerciseIndex: 0,
+  gramExerciseScore: 0,
   onChallengesScreen: false,
   // Fila de cartões de conceito (explicação contextual) tocando AGORA, por
   // cima do passo normal (vocab/diálogo) -- ver runConceptQueueThen. Vazia
@@ -1732,9 +1739,12 @@ function openUnitDetail(unitId){
   document.getElementById('unit-detail-wrap').style.display = 'block';
 
   const u = UNITS.find(x => x.id === unitId);
-  document.getElementById('ud-eyebrow').textContent = t('zh.path.unit.eyebrow', { id: u.id, total: UNITS.length });
+  // Unidade de gramática não mostra numeração (como no fr): só "Gramática".
+  document.getElementById('ud-eyebrow').textContent = isGrammarUnit(u) ? t('trail.eyebrow.grammar') : t('zh.path.unit.eyebrow', { id: u.id, total: UNITS.length });
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
+  // Unidade de gramática não tem vocabulário/frases/diálogo para o "Manual da unidade": o botão some nela.
+  { const manualBtn = document.getElementById('unit-manual-btn'); if (manualBtn) manualBtn.style.display = isGrammarUnit(u) ? 'none' : ''; }
   const langNotice = document.getElementById('ud-lang-notice');
   if (langNotice){
     const untranslated = !CONTENT_I18N.isUnitTranslated(u.id);
@@ -1774,6 +1784,8 @@ document.getElementById('kbd-shortcuts-modal').addEventListener('click', (e) => 
 // sem exercícios) — usado no modal "Manual da unidade" (📖 dentro do painel
 // de dicas de cada lição).
 function renderUnitSummaryHTML(u){
+  // Unidade de gramática (shared/core/gramatica-cenario.js) não tem vocabulário, frases nem diálogo: o manual dela é a própria explicação.
+  if (isGrammarUnit(u)) return '';
   const vocabHTML = u.vocab.map(v => `
     <div class="vocab-row vocab-row-readonly">
       <div class="pinyin">${v.p}</div>
@@ -1851,7 +1863,7 @@ function renderStepProgress(){
     // da lição atual (cada lição já é sua própria mini-sessão, com sua
     // própria tela de conclusão) -- não da unidade inteira, que é como o
     // motor antigo de blocos calculava.
-    const totalWords = (isLessonUnit(u) ? (acq.blocks[0] || []).length : u.vocab.length) || 1;
+    const totalWords = (isLessonUnit(u) ? (acq.blocks[0] || []).length : (u.vocab || []).length) || 1;
     const wordsBeforeBlock = acq.blocks.slice(0, acq.blockIdx).flat().length;
     const curBlockSize = (acq.blocks[acq.blockIdx] || []).length;
 
@@ -1866,6 +1878,9 @@ function renderStepProgress(){
     intraStepFraction = Math.min(1, (wordsBeforeBlock + curBlockSize * withinBlock) / totalWords);
   } else if (stepKey === 'exercises' || stepKey === 'checkpointExercises'){
     intraStepFraction = STEP_STATE.exerciseList.length ? STEP_STATE.exerciseIndex / STEP_STATE.exerciseList.length : 0;
+  } else {
+    const gramFraction = grammarStepFraction(u, stepKey); // shared/core/gramatica-cenario.js
+    if (gramFraction != null) intraStepFraction = gramFraction;
   }
 
   const pct = ((STEP_STATE.currentStep + intraStepFraction) / stepCount) * 100;
@@ -1897,6 +1912,9 @@ function buildExerciseHint(ex, unit){
   }
   if (ex.format === 'fullsentence'){
     return t('zh.hint.fullsentence');
+  }
+  if (ex.format === 'scenario'){
+    return scenarioHint(); // shared/core/gramatica-cenario.js
   }
   if (ex.format === 'cloze'){
     return t('zh.hint.cloze');
@@ -2060,8 +2078,9 @@ function finishCurrentLesson(u){
     return;
   }
 
-  const total = STEP_STATE.exerciseList.length;
-  const scorePct = total ? Math.round((STEP_STATE.exerciseScore / total) * 100) : 100;
+  // Unidade de gramática pontua pelos exercícios dela (shared/core/gramatica-cenario.js).
+  const { total, correct } = unitFinalScore(u);
+  const scorePct = total ? Math.round((correct / total) * 100) : 100;
   // XP real da UNIDADE (Fase 4): snapshot ANTES de markUnitCompleted (que
   // concede os +25 de bônus) -- skipToast:true porque quem chega aqui vai
   // ver a tela própria de "Unidade concluída!" logo abaixo, não o toast
@@ -2105,8 +2124,12 @@ function renderStep(){
   // Na micro-checagem do diálogo não há "Voltar": voltar ao diálogo
   // deixaria copiar as respostas.
   const showBack = stepKey !== 'dialogueCheck' && (STEP_STATE.currentStep > 0
-    || (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro' && (STEP_STATE.acq.blockIdx > 0 || STEP_STATE.acq.introIdx > 0)));
+    || (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro' && (STEP_STATE.acq.blockIdx > 0 || STEP_STATE.acq.introIdx > 0))
+    || grammarShowBack(stepKey));
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
+
+  // Unidade de gramática: passos próprios (shared/core/gramatica-cenario.js).
+  if (renderGrammarUnitStep(u, stepKey, contentEl, nextBtn)) return;
 
   if (stepKey === 'vocab'){
     if (STEP_STATE.acq.unitId !== u.id || (isLessonUnit(u) && STEP_STATE.acq.lessonIdx !== currentLessonIdx(u.id))){
@@ -2526,6 +2549,8 @@ document.getElementById('step-back-btn').addEventListener('click', () => {
     }
   }
 
+  if (grammarStepBack(stepKey)) return; // explicação da unidade de gramática: volta um bloco
+
   if (STEP_STATE.currentStep > 0){
     STEP_STATE.currentStep -= 1;
     renderStep();
@@ -2600,6 +2625,9 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
     }
     return;
   }
+
+  // Explicação da unidade de gramática: avança um bloco (shared/core/gramatica-cenario.js).
+  if (grammarStepNext(u, stepKey)) return;
 
   // Saindo do diálogo: mostra os conceitos cujo gatilho só existe em
   // contexto (a palavra em si não é vocabulário novo, só aparece na fala)
@@ -2680,7 +2708,15 @@ function buildExerciseSet(unit){
   // Só frases com blocks definidos entram como exercício de ordenar — proteção
   // defensiva caso alguma frase futura seja adicionada sem essa segmentação.
   const phrasesWithBlocks = (unit.phrases || []).filter(p => p.blocks && p.blocks.length >= 2);
-  const reorderExercises = phrasesWithBlocks.map(p => {
+  // Cenário ("o que você diria?", shared/core/gramatica-cenario.js): mesma regra do fr (frase ímpar com `scenario`,
+  // pelo menos 3 frases com cenário na unidade). Hoje nenhuma frase do zh tem `scenario`: nada muda nem é sorteado.
+  const phrasesWithScenario = (unit.phrases || []).filter(p => p.scenario);
+  const scenarioExercises = [];
+  const reorderExercises = phrasesWithBlocks.filter((p, i) => {
+    const scenarioEx = buildScenarioExercise(p, i, phrasesWithScenario);
+    if (scenarioEx) scenarioExercises.push(scenarioEx);
+    return !scenarioEx;
+  }).map(p => {
     const distractorCount = reorderDistractorCount(unit, p.blocks);
     const distractorBlocks = buildReorderDistractors(unit, p.blocks, distractorCount);
     return { format: 'reorder', phrase: p, shuffledBlocks: shuffle([...p.blocks, ...distractorBlocks]) };
@@ -2721,7 +2757,7 @@ function buildExerciseSet(unit){
 
   const fullSentenceExercises = buildFullSentenceExercises(unit);
 
-  return shuffle([...vocabExercises, ...cappedReorderExercises, ...trueFalseExercises, ...clozeExercises, ...fullSentenceExercises]);
+  return shuffle([...vocabExercises, ...cappedReorderExercises, ...scenarioExercises, ...trueFalseExercises, ...clozeExercises, ...fullSentenceExercises]);
 }
 
 // ---------- Exercício "Frase completa" — PT → escolher entre 4 frases em hanzi ----------
@@ -2734,7 +2770,7 @@ function buildCumulativeVocabPool(unit){
   const idx = UNITS.findIndex(u => u.id === unit.id);
   const priorUnits = UNITS.slice(0, idx + 1); // unidade atual + todas anteriores
   const pool = [];
-  priorUnits.forEach(u => u.vocab.forEach(v => pool.push(v)));
+  priorUnits.forEach(u => (u.vocab || []).forEach(v => pool.push(v))); // unidade de gramática não tem vocab
   return pool;
 }
 
@@ -3011,6 +3047,8 @@ function renderExerciseStep(){
     renderReorderExercise(ex, contentEl, nextBtn, total);
   } else if (ex.format === 'fullsentence'){
     renderFullSentenceExercise(ex, contentEl, nextBtn, total);
+  } else if (ex.format === 'scenario'){
+    renderScenarioExercise(ex, contentEl, nextBtn, total); // shared/core/gramatica-cenario.js
   } else if (ex.format === 'trueFalse'){
     renderTrueFalseExercise(ex, contentEl, nextBtn, total);
   } else if (ex.format === 'cloze'){
@@ -3073,6 +3111,7 @@ function clozeFeedbackDetailHTML(ex, withCorrect){
 function answerExplanationHTML(ex){
   if (ex && ex.format === 'cloze') return clozeFeedbackDetailHTML(ex, true);
   if (ex && ex.format === 'fullsentence') return phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t);
+  if (ex && ex.format === 'scenario' && ex.phrase) return scenarioExplanationHTML(ex); // shared/core/gramatica-cenario.js
   if (ex && ex.phrase){
     const phraseHTML = phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t);
     return phraseHTML + (noteOrConceptReviewHTML() || '');
@@ -5236,12 +5275,12 @@ function currentHanziLesson(){
 function findHanziAppearances(char, limit){
   const results = [];
   UNITS.forEach(u => {
-    u.vocab.forEach(v => {
+    (u.vocab || []).forEach(v => {
       if (v.c.includes(char) && !results.some(r => r.c === v.c)){
         results.push({ p: v.p, c: v.c, t: v.t });
       }
     });
-    u.phrases.forEach(p => {
+    (u.phrases || []).forEach(p => {
       if (p.c.includes(char) && !results.some(r => r.c === p.c)){
         results.push({ p: p.p, c: p.c, t: p.t });
       }

@@ -56,6 +56,7 @@ try{
 <link rel="stylesheet" href="../shared/painel/painel-componentes.css">
 <link rel="stylesheet" href="../shared/review-bank.css">
 <link rel="stylesheet" href="../shared/licao-feedback.css">
+<link rel="stylesheet" href="../shared/gramatica-cenario.css">
 <style>
 :root{
   /* Design tokens — paleta própria do Francês do Zero (azul como cor
@@ -64,6 +65,11 @@ try{
      Nomes de variável mantidos (--seal-red etc.) para não precisar
      renomear tudo que os referencia; só os valores mudaram de família. */
   --seal-red: #3498D6;       /* azul — cor primária */
+  /* Tabela da unidade de gramática (shared/gramatica-cenario.css): o fr mantém o cabeçalho roxo com texto na cor do papel
+     e o "quase" rosado de sempre; sem estes tokens, a peça comum usa --brand-fill/--on-brand-fill e o dourado do site. */
+  --gram-table-head: var(--brand-purple);
+  --on-gram-table-head: var(--paper);
+  --gram-almost-bg: rgba(227,107,202,0.1);
   --seal-red-dark: #1D5A82;  /* azul profundo — hover/pressed, texto de destaque */
   /* Caixas com texto (botões, abas e chips selecionados, contadores): azul + branco, 4,7:1 nos dois temas (decisão da autora, 2026-10-19).
      Mesmo valor no claro e no escuro: o azul claro do escuro não aguenta texto branco. */
@@ -1205,28 +1211,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
    forma/tradução de .gram-block-example. */
 .gram-block-variants{ margin:18px 0 0; padding-left:20px; text-align:left; font-size:14px; line-height:1.7; color: var(--ink); }
 .gram-block-variants li + li{ margin-top:6px; }
-
-.gram-tables{ display:flex; gap:14px; flex-wrap:wrap; margin-top:18px; }
-.gram-table{ flex:1; min-width:160px; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); overflow:hidden; }
-.gram-table-title{ background: var(--brand-purple); color: var(--paper); font-weight:800; text-align:center; padding:8px; font-size:14px; }
-.gram-table-row{ display:flex; justify-content:space-between; padding:8px 12px; border-top:1px solid var(--paper-line); font-size:13.5px; }
-.gram-table-pronoun{ color: var(--ink-soft); font-weight:700; }
-.gram-table-form{ font-weight:800; color: var(--seal-red-dark); }
-
-.gram-exercise{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:20px; text-align:center; margin-bottom:14px; }
-.gram-exercise-prompt{ font-size:19px; font-weight:700; margin-bottom:6px; }
-.gram-exercise-hint{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:14px; }
-.gram-exercise input{
-  width:100%; max-width:260px; text-align:center; font-size:16px; font-weight:700;
-  padding:10px 12px; border-radius:10px; border:2px solid var(--paper-line); background: var(--paper);
-  font-family: var(--font-body); color: var(--ink);
-}
-.gram-exercise input:focus{ outline:none; border-color: var(--imperial-gold); }
-.gram-exercise input:disabled{ opacity:.7; }
-.gram-exercise.ok input{ border-color: var(--jade); background: rgba(58,115,89,0.08); }
-.gram-exercise.almost input{ border-color: var(--imperial-gold); background: rgba(227,107,202,0.1); }
-.gram-exercise.wrong input{ border-color: var(--error-red); background: rgba(214,38,25,0.08); }
-.gram-exercise .expected{ font-size:12.5px; color:var(--seal-red-dark); font-weight:700; min-height:16px; margin-top:8px; }
+/* Tabela (.gram-table-*), exercício (.gram-exercise*) e cenário (.scenario-*): shared/gramatica-cenario.css, comum aos sites. */
 
 /* ---------- Audio button (TTS) ---------- */
 .audio-btn, .custom-audio-btn{
@@ -1366,33 +1351,6 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .exercise-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
 .exercise-option.disabled{ pointer-events:none; opacity:.6; }
 .exercise-option.disabled.correct, .exercise-option.disabled.incorrect{ opacity:1; }
-
-/* ---------- Exercício de cenário ("o que você diria...") ---------- */
-.scenario-question{ font-size:16px; font-weight:800; margin-bottom:16px; line-height:1.4; }
-.scenario-scene{
-  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
-  padding:26px 20px; margin-bottom:20px; font-size:48px; line-height:1;
-}
-.scenario-flag{ display:inline-block; width:64px; height:43px; border-radius:5px; overflow:hidden; box-shadow:0 0 0 1px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.15); vertical-align:middle; }
-.scenario-flag svg{ display:block; width:100%; height:100%; }
-.scenario-options{ display:flex; flex-direction:column; gap:10px; }
-@media (min-width:600px){ .scenario-options{ display:grid; grid-template-columns:1fr 1fr; } }
-.scenario-option{
-  display:flex; align-items:center; gap:12px; background: var(--paper); border:2px solid var(--paper-line);
-  border-radius:12px; padding:14px 16px; cursor:pointer; font-family: var(--font-body);
-  text-align:left; transition: all .12s ease;
-}
-@media (hover:hover){ .scenario-option:hover:not(.disabled){ border-color: var(--hover-gold); background: color-mix(in srgb, var(--hover-gold) 14%, transparent); transform: translateY(-1px); } }
-.scenario-option-num{
-  flex-shrink:0; width:24px; height:24px; border-radius:50%; background: var(--paper-warm);
-  border:1px solid var(--paper-line); display:flex; align-items:center; justify-content:center;
-  font-size:12px; font-weight:800; color: var(--ink-soft);
-}
-.scenario-option-text{ font-size:14.5px; font-weight:700; color: var(--ink); }
-.scenario-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.scenario-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
-.scenario-option.disabled{ pointer-events:none; opacity:.6; }
-.scenario-option.disabled.correct, .scenario-option.disabled.incorrect{ opacity:1; }
 
 /* ---------- Exercício de verdadeiro ou falso (uso real) ---------- */
 .tf-scene{
@@ -3983,7 +3941,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .conj-field.wrong input{ border-color: var(--error-red); background: rgba(214,38,25,0.08); }
 .conj-field .expected{ font-size:11px; color:var(--seal-red-dark); font-weight:700; min-height:14px; }
 
-.conj-progress{ font-size:12px; font-weight:800; color:var(--ink-soft); text-align:center; margin-bottom:12px; }
+/* .conj-progress (contador "Frase X de Y"): shared/gramatica-cenario.css. */
 
 .conj-actions{ display:flex; gap:10px; align-items:stretch; margin-bottom:14px; }
 .conj-actions .btn-block{ flex:1; }
@@ -6768,6 +6726,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/core/estado-trilha-desafios.js"></script>
 <script src="../shared/core/curriculo-progresso.js"></script>
 <script src="../shared/core/licao-feedback.js"></script>
+<script src="../shared/core/gramatica-cenario.js"></script>
 <script src="../shared/core/familias/latina.js"></script>
 <script src="lang-hooks.js"></script>
 <script src="../shared/core/quase-iguais-simples.js"></script>
