@@ -577,6 +577,12 @@ window.I18N_CATALOG['pt-BR'] = {
   'fr.checkpoint.exam.word': 'Como se diz "{w}" em francês?',
   'fr.checkpoint.exam.phrase': 'Escreva em francês: "{p}"',
   'fr.checkpoint.exam.listen': 'Ouça e escreva o que você ouviu',
+  // Paridade B2 (2026-10-23): prova do Ponto de verificação e Teste de Nível do zh (só aparecem quando o zh tiver módulos).
+  'zh.checkpoint.exam.word': 'Como se diz "{w}" em chinês? Escreva em pinyin.',
+  'zh.checkpoint.exam.phrase': 'Escreva em pinyin: "{p}"',
+  'zh.checkpoint.exam.listen': 'Ouça e escreva em pinyin o que você ouviu',
+  'zh.levelTest.sub': 'Já sabe chinês nível {level}? Faça esse teste e avance direto para o {next} — não precisa completar as unidades antes.',
+  'zh.levelTest.intro': 'Já sabe chinês nível {level}? Faça esse teste — se for bem, todo o nível é marcado como concluído e você já pode seguir direto para o {next}.',
   'limitCut.subject.deck': 'Este Deck',
   'limitCut.subject.import': 'Esta importação',
   'limitCut.subject.selection': 'Esta seleção',

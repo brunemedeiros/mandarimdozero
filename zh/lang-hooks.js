@@ -50,5 +50,27 @@ const LANG_HOOKS = {
   // Opção do cenário: pinyin em cima do hanzi (como no "Frase completa"); o pinyin some com "esconder pinyin".
   scenarioOptionHTML: (p) => { const f = phraseForExercise(p); return `<span class="pinyin opt-pinyin-sentence">${f.p}</span><span class="opt-hanzi-sentence">${f.c}</span>`; },
   phraseAnswerHTML: (p) => { const f = phraseForExercise(p); return `<strong>${f.c}</strong> ${audioBtnHTML(f.c)} <span class="pinyin">(${f.p})</span>`; },
+  // Ponto de verificação do módulo e Teste de Nível (shared/core/modulos-niveis.js, paridade B2). Hoje o zh não tem
+  // módulos; quando tiver, a prova pede o PINYIN (digitado como nos outros exercícios: numerado vale, tom errado = meio
+  // ponto, como o acento no fr), a escuta toca o hanzi pela voz do zh, e a correção mostra hanzi + pinyin.
+  // Frase com marcador de perfil ({nome}...) fica fora da prova (a resposta dependeria do nome de cada aluno).
+  checkpointExam: {
+    keys: { word: 'zh.checkpoint.exam.word', phrase: 'zh.checkpoint.exam.phrase', listen: 'zh.checkpoint.exam.listen' },
+    word: (v) => (v && v.c && v.p && v.t) ? { answer: v.p, meaning: v.t, extra: { hanzi: v.c, shown: `${v.c} (${v.p})` } } : null,
+    phrase: (p) => {
+      if (!p || !p.c || !p.p || !p.t || p.c.includes('{')) return null;
+      const f = phraseForExercise(p);
+      return { answer: f.p, meaning: p.t, audioText: f.c, extra: { hanzi: f.c, shown: `${f.c} (${f.p})` } };
+    },
+  },
+  checkpointScore: (given, ex) => {
+    const plain = (s) => String(s || '').replace(/[\s。！？，、.!?,]/g, '');
+    if (ex.hanzi && plain(given) && plain(given) === plain(ex.hanzi)) return { score: 1, status: 'ok' };
+    const v = LANG_HOOKS.grammarAnswerVerdict(String(given == null ? '' : given), [ex.answer]);
+    if (v === 'ok') return { score: 1, status: 'ok' };
+    if (v === 'almost') return { score: 0.5, status: 'almost' };
+    return { score: 0, status: 'wrong' };
+  },
+  levelTestKeys: { sub: 'zh.levelTest.sub', intro: 'zh.levelTest.intro' },
 // --- /E4 hooks ---
 };

@@ -542,6 +542,9 @@ const STATE = {
   // hanzi), não tocado aqui.
   reviewCardState: null,
   reviewSessionUnitFilter: null, // if set, review only this unit's cards
+  // Sessão do marco de Revisão do módulo ({moduleId, unitIds}; shared/core/modulos-niveis.js). Hoje o zh não tem
+  // módulos e isto fica sempre null. Nunca serializado.
+  reviewSessionMilestone: null,
   // Fase D ("Decks, Tags e Painel" -- Deck Engine, ver CLAUDE.md) -- mesmo
   // papel/ciclo de vida de reviewSessionUnitFilter acima, só que pra Deck em
   // vez de unidade: setado só por startDeckReviewSession(), lido só por
@@ -591,6 +594,10 @@ UNITS.forEach((u,i) => {
 HANZI_LESSONS.forEach((lesson, i) => {
   STATE.hanziLessonProgress[i] = { completed:false, unlocked: i===0 };
 });
+
+// Ponto de verificação do módulo, Revisão do módulo e Teste de Nível (shared/core/modulos-niveis.js, paridade B2):
+// sem MODULES/LEVEL_TESTS (o zh hoje) só cria os objetos vazios, que não vão para o save (moduleSaveFields).
+initModuleProgressState();
 
 // Fase 10 (i18n): conteúdo do curso no idioma do site (unidades, histórias e
 // banco de hanzi). Overlay em zh/content.<lang>.js (carregado sob demanda); o
@@ -807,6 +814,8 @@ function serializeState(){
     periodXp: STATE.periodXp,
     daily: STATE.daily,
     storyProgress: STATE.storyProgress,
+    // Módulos (shared/core/modulos-niveis.js): sem módulos não grava nada, o save fica como sempre foi.
+    ...moduleSaveFields(),
     // Só leitura pro Perfil (ver computeProgressSummary) -- nunca restaurado
     // de volta em applySerializedState, é recalculado a cada save.
     progressSummary: computeProgressSummary()
@@ -870,6 +879,9 @@ function applySerializedState(data){
   if (data.periodXp) Object.assign(STATE.periodXp, data.periodXp);
   if (data.daily) Object.assign(STATE.daily, data.daily);
   if (data.storyProgress) Object.assign(STATE.storyProgress, data.storyProgress);
+  // Módulos (shared/core/modulos-niveis.js): só existe no save de quem já teve módulos; com as fusões de módulo de
+  // zh/curriculum-changes.js já aplicadas (cur.checkpointProgress), como no fr.
+  moduleLoadApply(data, cur.checkpointProgress);
 }
 
 // registerExerciseCorrect, cardsDueNow, newCards, XP_PER_GRADE, todayStr e
@@ -1327,55 +1339,48 @@ const CHALLENGES_STRIP_COLLAPSE_KEY = 'mandarim_challenges_collapsed';
 // DOM/seleção/painel em shared/trail-map.js; aqui só o modelo (estados reais) e o que cada botão faz.
 const TRAIL_VIEW_KEY = 'mandarim_trail_view';
 
-function mapUnitDescribe(u, moduleId){
-  const st = unitBlockState(u);
-  const hasLessons = isLessonUnit(u) && u.lessons.length > 0;
-  const lines = [];
-  if (hasLessons){
-    const done = (st === 'done' || st === 'skipped') ? u.lessons.length : currentLessonIdx(u.id);
-    lines.push(tp('trail.lessonsCompleted', u.lessons.length === 1 ? 1 : 2, { done, total: u.lessons.length }));
-  }
-  const { dueForReview } = unitCardCounts(u.id);
-  if (dueForReview > 0) lines.push(t('trail.map.unit.toReview', { n: dueForReview }));
-  const actions = [];
-  if (st === 'locked'){
-    lines.push(t('trail.map.unit.lockedHint'));
-    if (moduleId && trailSkipAllowed()) actions.push({ label: t('trail.map.unit.skipCta'), primary: false, onClick: () => openCheckpoint(moduleId) });
-    else if (moduleId) lines.push(t('trail.checkpoint.skipLocked'));
-  } else if (st === 'done' || st === 'skipped'){
-    actions.push({ label: t('trail.map.unit.openAgain'), primary: false, onClick: () => openUnitDetail(u.id) });
-  } else {
-    const started = !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
-    actions.push({ label: started ? t('common.continue') : t('common.start'), primary: true, onClick: () => openUnitDetail(u.id) });
-  }
-  return { eyebrow: unitTypeOf(u) === 'grammar' ? t('trail.eyebrow.grammar') : t('trail.map.unit.eyebrow'), title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
+// mapUnitDescribe (o que o painel do Mapa diz e oferece para uma unidade, com o pulo pelo Ponto de verificação
+// quando há módulos): shared/core/modulos-niveis.js (paridade B2).
+
+// Nó do Mapa da história-checkpoint que vem logo depois da unidade (vazio se não houver).
+function storyMapNodes(u){
+  const story = STORIES.find(s => s.afterUnit === u.id);
+  if (!story) return [];
+  const unlocked = !!STATE.unitProgress[u.id]?.completed;
+  const done = !!STATE.storyProgress?.[story.id]?.completed;
+  const sst = done ? 'done' : (unlocked ? 'available' : 'locked');
+  return [{ key: 's:' + story.id, kind: 'story', icon: story.icon, label: story.title, state: sst,
+    aria: t('trail.map.aria.story', { title: story.title, state: TRAIL_MAP_STATE_LABEL[sst] }) }];
+}
+// Painel do Mapa de uma história (null se a chave não for de história).
+function storyMapDescribe(key){
+  if (!key.startsWith('s:')) return null;
+  const story = STORIES.find(s => String(s.id) === key.slice(2));
+  const unlocked = !!STATE.unitProgress[story.afterUnit]?.completed;
+  const done = !!STATE.storyProgress?.[story.id]?.completed;
+  return { eyebrow: t('trail.map.story.eyebrow'), title: story.title, status: TRAIL_MAP_STATE_LABEL[done ? 'done' : (unlocked ? 'available' : 'locked')], goal: story.subtitle || '',
+    lines: unlocked ? [] : [t('trail.map.story.lockedHint')],
+    actions: unlocked ? [{ label: done ? t('trail.map.story.readAgain') : t('trail.map.story.read'), primary: !done, onClick: () => openStory(story.id) }] : [] };
 }
 
 function renderTrailMapView(container){
+  // Com módulos (shared/core/modulos-niveis.js): uma seção por módulo, com Revisão do módulo e Ponto de verificação,
+  // e as histórias no mesmo lugar de sempre (logo depois da unidade). Hoje o zh não tem módulos.
+  if (trailHasModules()){
+    renderModulesTrailMap(container, modulesOfLevel(LEVELS[0].id), { afterUnitNodes: storyMapNodes, describeExtra: storyMapDescribe });
+    return;
+  }
   const nodes = [];
   UNITS.forEach(u => {
     const st = unitBlockState(u);
     nodes.push({ key: 'u:' + u.id, kind: 'unit', icon: UNIT_ICONS[u.id] || '📖', label: u.title, state: st, current: st === 'current',
       aria: `${u.title}, ${TRAIL_MAP_STATE_LABEL[st]}` });
     // Histórias-checkpoint: mesmo marco que a Trilha mostra logo após a unidade.
-    const story = STORIES.find(s => s.afterUnit === u.id);
-    if (story){
-      const unlocked = !!STATE.unitProgress[u.id]?.completed;
-      const done = !!STATE.storyProgress?.[story.id]?.completed;
-      const sst = done ? 'done' : (unlocked ? 'available' : 'locked');
-      nodes.push({ key: 's:' + story.id, kind: 'story', icon: story.icon, label: story.title, state: sst,
-        aria: t('trail.map.aria.story', { title: story.title, state: TRAIL_MAP_STATE_LABEL[sst] }) });
-    }
+    storyMapNodes(u).forEach(n => nodes.push(n));
   });
   const describe = (key) => {
-    if (key.startsWith('s:')){
-      const story = STORIES.find(s => String(s.id) === key.slice(2));
-      const unlocked = !!STATE.unitProgress[story.afterUnit]?.completed;
-      const done = !!STATE.storyProgress?.[story.id]?.completed;
-      return { eyebrow: t('trail.map.story.eyebrow'), title: story.title, status: TRAIL_MAP_STATE_LABEL[done ? 'done' : (unlocked ? 'available' : 'locked')], goal: story.subtitle || '',
-        lines: unlocked ? [] : [t('trail.map.story.lockedHint')],
-        actions: unlocked ? [{ label: done ? t('trail.map.story.readAgain') : t('trail.map.story.read'), primary: !done, onClick: () => openStory(story.id) }] : [] };
-    }
+    const storyInfo = storyMapDescribe(key);
+    if (storyInfo) return storyInfo;
     return mapUnitDescribe(UNITS.find(u => String(u.id) === key.slice(2)), null);
   };
   renderTrailMap(container, { sections: [{ title: t('trail.map.unitsSection'), nodes }] }, describe);
@@ -1403,19 +1408,33 @@ function renderUnitsGrid(){
     renderTrailMapView(mapRoot);
     return;
   }
+  // Com módulos (shared/core/modulos-niveis.js): rótulo do módulo, unidades, Revisão do módulo, Ponto de verificação
+  // e os Testes de Nível no fim, como no fr; as histórias continuam logo depois da unidade. Hoje o zh não tem módulos.
+  if (trailHasModules()){
+    const levelId = LEVELS[0].id;
+    renderModuleTrailList(grid, modulesOfLevel(levelId), { afterUnit: (u, list) => { const card = buildStoryCheckpointCard(u); if (card) list.appendChild(card); } });
+    levelTestsOfLevel(levelId).forEach(test => grid.appendChild(buildLevelTestCard(test)));
+    return;
+  }
   UNITS.forEach((u) => {
-    const prog = STATE.unitProgress[u.id];
     grid.appendChild(buildUnitBlock(u));
-
     // Checkpoint de história: aparece logo após a unidade que a desbloqueia,
     // como um marco na trilha, não mais uma unidade comum.
-    const story = STORIES.find(s => s.afterUnit === u.id);
-    if (story){
-      const storyUnlocked = prog.completed;
-      const storyDone = STATE.storyProgress?.[story.id]?.completed;
-      const storyCard = document.createElement('button');
-      storyCard.className = 'story-checkpoint-card' + (!storyUnlocked ? ' locked' : '') + (storyDone ? ' done' : '');
-      storyCard.innerHTML = `
+    const storyCard = buildStoryCheckpointCard(u);
+    if (storyCard) grid.appendChild(storyCard);
+  });
+}
+
+// Cartão da história-checkpoint que vem logo depois da unidade (null se não houver).
+function buildStoryCheckpointCard(u){
+  const prog = STATE.unitProgress[u.id];
+  const story = STORIES.find(s => s.afterUnit === u.id);
+  if (!story) return null;
+  const storyUnlocked = prog.completed;
+  const storyDone = STATE.storyProgress?.[story.id]?.completed;
+  const storyCard = document.createElement('button');
+  storyCard.className = 'story-checkpoint-card' + (!storyUnlocked ? ' locked' : '') + (storyDone ? ' done' : '');
+  storyCard.innerHTML = `
         <div class="story-checkpoint-icon">${story.icon}</div>
         <div class="story-checkpoint-text">
           <div class="story-checkpoint-label">${storyDone ? t('zh.path.story.done') : (storyUnlocked ? t('zh.path.story.unlocked') : t('zh.path.story.locked'))}</div>
@@ -1423,12 +1442,10 @@ function renderUnitsGrid(){
           <div class="story-checkpoint-subtitle">${story.subtitle}</div>
         </div>
       `;
-      if (storyUnlocked){
-        storyCard.addEventListener('click', () => openStory(story.id));
-      }
-      grid.appendChild(storyCard);
-    }
-  });
+  if (storyUnlocked){
+    storyCard.addEventListener('click', () => openStory(story.id));
+  }
+  return storyCard;
 }
 
 // ============================================================
@@ -1678,6 +1695,9 @@ const STEP_STATE = {
   gramExerciseIndex: 0,
   gramExerciseScore: 0,
   onChallengesScreen: false,
+  // Ponto de verificação do módulo / Teste de Nível abertos (shared/core/modulos-niveis.js). Hoje o zh não tem módulos.
+  onCheckpoint: null,
+  onLevelTest: null,
   // Fila de cartões de conceito (explicação contextual) tocando AGORA, por
   // cima do passo normal (vocab/diálogo) -- ver runConceptQueueThen. Vazia
   // na maior parte do tempo; só existe entre o momento em que um conceito é
@@ -1720,6 +1740,8 @@ function openUnitDetail(unitId){
   STATE.currentUnitId = unitId;
   STATE.unitProgress[unitId].started = true;
   STEP_STATE.onChallengesScreen = false;
+  STEP_STATE.onCheckpoint = null;
+  STEP_STATE.onLevelTest = null;
   STEP_STATE.onLessonBoundaryScreen = null;
   STEP_STATE.onUnitCompleteScreen = false;
   STEP_STATE.conceptQueue = [];
@@ -2603,6 +2625,10 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
     advanceConceptStep();
     return;
   }
+
+  // Fim do Ponto de verificação do módulo / Teste de Nível (shared/core/modulos-niveis.js): aplica a aprovação e
+  // volta à trilha. Sem módulos nunca acontece.
+  if (handleModuleStepNext()) return;
 
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
   const stepDefs = currentStepDefs(u);
@@ -4404,7 +4430,8 @@ function renderReviewViewInner(){
     if (allDue > 0){
       document.getElementById('review-start-all').addEventListener('click', () => {
         STATE.reviewSessionUnitFilter = null;
-        STATE.reviewSessionDeckId = null; // Fase D -- mesmo fallback de "abandona o escopo estreito" já usado pra unidade
+        STATE.reviewSessionDeckId = null;
+        STATE.reviewSessionMilestone = null; // Fase D -- mesmo fallback de "abandona o escopo estreito" já usado pra unidade
         startReviewSession();
       });
     }
@@ -4423,8 +4450,12 @@ function renderReviewViewInner(){
       saveState();
     }
     maybeShowStreakCelebration();
+    // Marco de Revisão do módulo (shared/core/modulos-niveis.js, igual ao fr): conta como feito quando a SESSÃO termina.
     // unitId da sessão de uma unidade, igual ao fr (o painel da professora deriva daí; auditoria de paridade C7).
+    const msMeta = STATE.reviewSessionMilestone;
+    if (msMeta) recordModuleReviewDone(msMeta.moduleId, STATE.reviewQueue.length);
     trackEvent('lesson_complete', 'flashcard_review', Object.assign({ count: STATE.reviewQueue.length },
+      msMeta ? { moduleId: msMeta.moduleId, unitIds: msMeta.unitIds } : {},
       STATE.reviewSessionUnitFilter ? { unitId: STATE.reviewSessionUnitFilter } : {}));
     // Fase 6 do projeto de reorganização: terminar a revisão nunca deve
     // convidar a repetir a mesma bateria -- "Voltar" leva pra trilha,
@@ -4448,11 +4479,13 @@ function renderReviewViewInner(){
     document.getElementById('review-again')?.addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
+      STATE.reviewSessionMilestone = null;
       switchTab('path');
     });
     document.getElementById('review-go-practice')?.addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
+      STATE.reviewSessionMilestone = null;
       backToReviewModeSelect();
     });
     renderProgressView();
@@ -4672,7 +4705,14 @@ function renderNormalCard(mountEl, card, localState, callbacks){
 
 
 function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
-  if (STATE.unitProgress[unitId].completed) return;
+  const prog0 = STATE.unitProgress[unitId];
+  if (prog0.completed){
+    // Unidade pulada pelo Ponto de verificação do módulo que o aluno depois estuda de verdade: passa a valer como
+    // concluída por lições (igual ao fr; hoje o zh não tem módulos, então nunca há unidade pulada).
+    if (prog0.completedVia !== 'skip_test') return;
+    prog0.completedVia = 'lessons';
+    prog0.completedAt = todayStr();
+  }
   STATE.unitProgress[unitId].completed = true;
   stampUnitCompletion(STATE.unitProgress[unitId], 'lessons', todayStr());
   const idx = UNITS.findIndex(u => u.id === unitId);
