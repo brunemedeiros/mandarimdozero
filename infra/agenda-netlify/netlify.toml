@@ -16,6 +16,15 @@
   status = 302
   force = true
 
+# Volta do login do Google (app "Idiomas com Prof. Brune", migration 117): repasse para a Edge Function google-calendar.
+# Assim o Google vê o domínio da Prof. Brune (exigido para verificar o app) em vez do endereço técnico do Supabase.
+# Vem antes da regra da senha. A função usa este endereço como redirect_uri (secret GCAL_REDIRECT_URI na produção).
+[[redirects]]
+  from = "/google/callback"
+  to = "https://eigjocalzwamisgqilhg.supabase.co/functions/v1/google-calendar/callback"
+  status = 200
+  force = true
+
 # agenda.profbrune.com.br/<senha> -> Edge Function (status 200 = repasse; quem assina só vê o domínio da agenda).
 [[redirects]]
   from = "/:token"
