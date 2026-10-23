@@ -1016,3 +1016,75 @@ Resumo), `15` (regras 11, 13 e 14), `16` e `00`. Nada aplicado ao site. Continua
        *La semaine prochaine, je pars en voyage.*; (c) *préférer*. E as que já estavam abertas: exceções à regra 13 a revisar (M2.1, M3.3, M8.5, M9.1 e as palavras que foram
        para nota: *adorer, se coucher, la boisson, la chemise, le prix*), *confirmer* (A2 M9.3), herança da aprovação dos Pontos de verificação (decisão 201).
      - **Status**: o mapa A1 + A2 aguarda as três pendências acima e a aprovação final da dona.
+
+---
+
+# Trigésima rodada (2026-10-23): frases "Na frase", *préférer*, A1 M5.3 e *le prix*
+
+Respostas da dona em 2026-10-23. Aplicado em `08-mapa-final-a1-a2-v2.md` (cabeçalho, seções 1, 2.1, 3.1, 3.2, 4.2, 7, 8 e Resumo), `15` (regras 11, 13 e 14) e `00`.
+Nada aplicado ao site. Continuam pendentes (seção 7 do `08 v2`, com contexto): verbos irregulares e o tamanho da A1 M5.1.
+
+211. **Refinamento da regra 11 (aprovado): palavra nova pode aparecer nas frases "Na frase".** As frases de exemplo da unidade (chaves `-p`, recurso "Na frase") mostram
+     a **tradução logo abaixo**, que dá ao aluno uma prévia do significado; a palavra é sistematizada depois, quando vira cartão. Por isso, nessas frases, palavra que ainda não
+     é cartão **não obriga a trocar nem a mover a frase**. **Não vale** (continuam sob a regra 11) para **diálogos** (`-d`), **exercícios de gramática**, opções do "Você
+     entendeu?" e exercícios de **produção ou escolha** que o aluno precisa resolver, nem para os ditados e os Desafios. Continua valendo a outra metade da regra 11: frase cujo
+     **assunto** saiu da unidade (o cartão que ela ilustra foi para outra unidade, ou o tema é de outro módulo) acompanha o assunto.
+     - **Frase `A1-7-p5`** *La semaine prochaine, je pars en voyage.* **fica na A1 M3.3** (decisão da dona: não mover). Fecha a pendência 203 b.
+     - **Critério da triagem** (seção 7 do `08 v2`, "Conteúdo publicado que precisa de reescrita"): a frase "Na frase" fica na unidade de origem, com a chave, quando ilustra
+       um cartão que continua nessa unidade; ela só muda de unidade quando o cartão que ilustra (ou o tema dela) foi para outra unidade, e aí vai com a chave para lá.
+     - **Desfeito: movimentações que só se justificavam pela regra antiga** (a frase fica na unidade de origem, com a chave): da decisão 136, *La rue est très calme le soir.*
+       (fica na M6.1, não vai para a M7.2), *La pomme est rouge et sucrée.* (fica na M4.1, não vai para a M5.4), *Le midi, je mange à la maison.* (fica na M3.1, não vai para a
+       M7.1), *Je viens du Portugal.* e *La nationalité est écrite sur le passeport.* (ficam na M2.5, não vão para a M8.1 e a M8.3), *La salle de bain est à côté de la chambre.*
+       (fica na M7.1, não vai para a M7.5), *La voiture est garée devant la maison.* (fica na M6.5, não vai para a M7.5; *garée* continua exceção, decisão 188); da decisão 132,
+       *La cuisine est très propre.* e *Le salon est confortable.* (ficam na M7.1, não vão para a M7.2); da decisão 202, *Au revoir, à demain !* e *Un café, s'il vous plaît.*
+       (ficam na M1.1), *Le Brésil est très grand.* (fica na M1.2), *Quel est le nom de la ville ?* (fica na M1.2: ilustra *le nom*; desfaz essa parte da decisão 207),
+       *Le mari et la femme habitent à Paris.* e *Le fils et la fille aiment l'école.* (ficam na M2.1), *Il va se réveiller tôt demain.* (fica na M3.1), *Aujourd'hui, il fait
+       beau.* (`A1-7-p4`, fica na M3.3: ilustra *aujourd'hui*), *Le sucre et le sel sont sur la table.* (fica na M4.2). São **18** frases.
+     - **Desfeito: trocas (chave nova) que só se justificavam pela regra antiga** (a frase publicada fica, com a chave, e não vai para o arquivo de aposentados): *Le pays est
+       magnifique.* (M1.2); *Le père travaille en ville.*, *La mère prépare le dîner.*, *Le frère et la sœur jouent ensemble.*, *Les parents adorent leurs enfants.* (M2.1);
+       *J'aime la couleur bleue.*, *Le chien est petit.* (M2.3); *Le soir, je regarde la télé.*, *Il regarde l'heure sur son téléphone.*, *Je vais dormir maintenant.* (M3.1);
+       *Le lait est dans le frigo.*, *Je vais détester ce plat, je pense.*, *Le café est très chaud.* (M4.1); *Le riz et les pâtes sont mes plats préférés.* (M4.2); *Il y a
+       beaucoup de monde ici.* (M4.3); *Cette veste / Le manteau / Ce sac coûte...* (3 frases) e *Le magasin ferme à dix-neuf heures.* (M5.3); *Le vélo est plus rapide en
+       ville.* (da decisão 136; a chave nova *En ville, je prends le vélo.* deixa de ser necessária) e *Le train part à huit heures.* (M6.5); *Le printemps est ma saison préférée.*
+       (M8.5); *J'adore écouter de la musique.*, *Elle adore danser et chanter.*, *Le film commence à vingt heures.*, *Les enfants aiment jouer dehors.* (M9.1); *L'année
+       dernière, j'ai appris le français.* e as frases com *j'ai visité* (2), *j'ai voyagé* e *au restaurant* (M9.4). São **31** frases.
+     - **Só a troca é desfeita, a mudança de unidade fica** (2 frases): *La fenêtre donne sur le jardin.* vai com a chave para a M7.4 (o cartão *la fenêtre* foi para lá,
+       decisão 113) sem troca; *Il fait zéro degré dehors.* vai com a chave para a M8.5 (decisão 115, da dona: frase de tempo) sem troca.
+     - **Mantido (destino com sentido pedagógico: a frase acompanha o cartão ou o tema)**: as 4 frases de mês e data da `A1-7` (`p2`, `p6`, `p7`, `p8`) vão com a chave para a
+       M3.5 (os meses saíram da M3.3); *Le pull est vert et jaune.* e as outras frases de cor da `A1-16` vão para a M5.4 (as cores saíram da M2.3); *L'hôpital est loin d'ici.*
+       vai para a M6.3 (o cartão *l'hôpital* foi para lá); *La porte est fermée à clé.* e *La fenêtre donne sur le jardin.* vão para a M7.4 (cartões *la porte, la fenêtre*);
+       *L'addition, s'il vous plaît.* vai para a M4.5 (cartão *l'addition* e função "pedir a conta"); *Récemment, j'ai changé de travail.* vai para a A2 M2.5 com o cartão
+       *récemment*; *Il fait zéro degré dehors.* vai para a M8.5 (decisão 115); *La main est blessée.* vai para a A2 M4.3 (decisão 162); *Elle est très gentille.* continua a
+       reescrever (o cartão *gentil* e o tema caráter saíram do A1 para a A2 M1.4).
+     - **Continua na lista (diálogo, exercício, gramática, ditado, Desafio)**: o diálogo da M2.3 com *gentil / sympa* e a pergunta de checagem; o diálogo da M2.5 (*en
+       Allemagne, au Portugal*) e a opção *Je suis d'Italie.*; a fala *On se voit quel jour ?* (M3.3); a fala *Qu'est-ce qu'on achète ?* (M4.2); a fala *Je cherche une robe*
+       (M5.3); a fala *On ne sait pas encore !* (M9.1); a fala *Oui, je vais au cinéma avec des amis.* (vai com a chave para a M9.3) e a opção *Oui, avec des amis.*; o diálogo
+       publicado da `A1-15`; os exercícios e exemplos de gramática (`A1-g1`, `g2`, `g3`, `g4`, `g6`, `g7`, `g9`); *Désolée, je suis rentrée tard hier* (exemplo da nota de
+       passé composé, M9.3 → M9.4, sequência de gramática, decisão 132); os Desafios da `A1-16` e os ditados.
+     - **Efeito da decisão 212**: com *préférer* cartão na M4.1, as falas *Tu préfères quelle saison ?* e *Je préfère l'été, il fait chaud.* do diálogo da M8.5 (`A1-13-d2`,
+       `d3`) **deixam de ser trocadas** (o verbo já é cartão quando a M8.5 chega).
+     - **Conta**: saem da lista de reescrita e movimentação **49 frases "Na frase"** (18 movimentações + 31 trocas desfeitas), mais 2 que só perdem a troca, mais a `A1-7-p5`
+       que deixa de ser pendência; e **2 falas de diálogo** pela decisão 212. Antes de cada lote de conteúdo, o cruzamento "frase só com palavras vistas" (pergunta 25)
+       confere só diálogos, exercícios, ditados e Desafios; nas frases "Na frase" confere só se a tradução está visível.
+212. ***préférer*** **vira cartão na A1 M4.1** "Gostos e pedidos no café", que fica com **12** palavras: exceção à regra 13 **aceita pela dona** (a M4.1 já tinha 4 lições +
+     Revisão com 11, então não ganha lição; +5 min). *préféré / préférée* aparece em frase (*mes plats préférés*, *ma saison préférée*), sem cartão próprio (mesmo lexema). Regra 14
+     conferida: não é cartão em nenhuma outra unidade do A1 nem do A2. Fecha a pendência *préférer* (decisão 209). Contas: A1 M4 41 → **42**, ~3h15 → **~3h20**.
+213. **A1 M5.3 "Comprar roupas" mantém *le pull, les chaussures, essayer, acheter*** (a dona não quer remover nenhuma); *la chemise* fica na nota "Outras roupas", como na decisão
+     197 (sai do "a revisar"). Portanto ***pouvoir* NÃO entra na M5.3** e a candidata *les chaussures* sai da proposta dos verbos irregulares (seção 7 do `08 v2`).
+214. ***le prix* continua cartão na A1 M5.1** "Perguntar o preço e pagar" (a dona recusou a ida para a nota "Pagar e dar o contato"; desfaz essa parte da decisão 209).
+     Como *coûter* também é cartão (decisão 209), a M5.1 fica com **11**, **a confirmar**: a decisão está pendente na seção 7 do `08 v2`, com contexto: (a) a M5.1 fica com 11
+     palavras, como exceção à regra 13 (4 lições + Revisão, +10 min); ou (b) outra palavra não publicada da M5.1 (*mille, payer, le numéro de téléphone*) vai para a nota.
+     **Recomendação: (a)** (*mille* está no "Consigo", *payer* é a função da unidade e *le numéro de téléphone* é o telefone que o aluno dá; nenhuma sobra). Enquanto isso,
+     o mapa conta a M5.1 com 11: A1 M5 30 → **31**, ~2h55 → **~3h05**.
+     - **Totais novos**: A1 com 9 módulos, 56 unidades (33 + 23), **352 cartões** (350 + *préférer* + *le prix*), **~30h00** (M1 3h35, M2 3h45, M3 3h35, **M4 3h20**,
+       **M5 3h05**, M6 3h05, M7 2h50, M8 3h15, M9 3h30), lições **~145** (+1: a M5.1 com 11 tem 4 lições + Revisão), notas **~132** (sem mudança: a nota "Pagar e dar o
+       contato" continua com *en espèces, le portable, le mail*); A2 sem mudança: 10 módulos, 58 unidades (36 + 22), **427 cartões (417 novos + 10 publicados)**, ~33h10,
+       notas ~74.
+     - **Ainda pendentes (nada decidido; seção 7 do `08 v2`, com contexto)**: (a) **verbos irregulares**: a dona pediu as duas opções escritas, sem decidir: **opção A**,
+       cartões espalhados pela unidade do primeiro uso, com exceções à regra 13; **opção B**, unidade nova **"Verbos muito usados"**, só de reconhecimento (cartão com o
+       significado do infinitivo e 1 a 2 exemplos, sem tabela de conjugação e sem exercícios de produção, que ficam nas gramáticas Premium). Pergunta da dona: "essa unidade
+       tira o privilégio do Premium de ter unidades dedicadas a esses verbos?" Resposta registrada: **não**: o Premium continua com o paradigma, as regras e a produção (as
+       gramáticas de *être / avoir*, *faire / prendre*, modais, *aller* e as do A2), e a tabela de conjugação já é grátis fora da trilha, na aba Conjugação. (b) A1 M5.1 com 11 (decisão 214). E as que já
+       estavam abertas: exceções à regra 13 a revisar (M2.1, M3.3, M8.5, M9.1 e as palavras que foram para nota: *adorer, se coucher, la boisson*), *confirmer* (A2 M9.3),
+       herança da aprovação dos Pontos de verificação (decisão 201).
+     - **Status**: o mapa A1 + A2 aguarda as duas pendências acima e a aprovação final da dona.

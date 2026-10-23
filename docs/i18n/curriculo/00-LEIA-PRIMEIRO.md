@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar. Status (2026-10-23): auditoria final feita e respondida (decisões 197 a 203); pendências da 203 respondidas em parte (decisões 204 a 210); aguarda três pendências (verbos irregulares, frase `A1-7-p5`, *préférer*) e a aprovação do mapa.** Mapa final do A1 (9 módulos, 56 unidades, 350 cartões) e do A2 (10 módulos, 58 unidades, 427 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar. Status (2026-10-23): auditoria final feita e respondida (decisões 197 a 203); pendências da 203 respondidas (decisões 204 a 214); aguarda duas pendências (verbos irregulares, opção A ou B, e o tamanho da A1 M5.1) e a aprovação do mapa.** Mapa final do A1 (9 módulos, 56 unidades, 352 cartões) e do A2 (10 módulos, 58 unidades, 427 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
@@ -141,4 +141,15 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   parce que* na A1 M9.3 confirmados.
 - **Totais novos**: A1 com 9 módulos, 56 unidades (33 + 23), **350 cartões**, **~29h45** (M1 3h35, **M2 3h45**, M3 3h35, M4 3h15, M5 2h55, M6 3h05, M7 2h50, M8 3h15,
   M9 3h30), ~144 lições, notas ~132; A2 com 10 módulos, 58 unidades (36 + 22), **427 cartões (417 novos + 10 publicados)**, ~33h10, notas ~74.
-- **Status: aguarda três pendências (verbos irregulares, frase `A1-7-p5` e *préférer*; contexto na seção 7 do `08 v2`) e a aprovação final do mapa.**
+- *Status anterior: aguardava três pendências (verbos irregulares, frase `A1-7-p5` e *préférer*), respondidas em parte abaixo.*
+- **Decisões 211 a 214 no `12`**: **refinamento da regra 11**: palavra nova pode aparecer nas frases "Na frase" (exemplos `-p`, com a tradução visível), porque a
+  palavra é sistematizada depois; diálogos, exercícios de gramática, opções do "Você entendeu?", exercícios de produção ou escolha, ditados e Desafios continuam sob a regra.
+  A frase `A1-7-p5` *La semaine prochaine, je pars en voyage.* **fica** na A1 M3.3; a triagem da seção 7 do `08 v2` tirou **49 frases "Na frase"** da lista de reescrita
+  (ficam na unidade de origem, com a chave; mudam só as que acompanham o cartão ou o tema: meses, cores, *l'hôpital*, *la porte / la fenêtre*, *l'addition*, *récemment*,
+  *zéro degré*, *La main est blessée.*). ***préférer*** com cartão na A1 M4.1 (12, exceção aceita; as falas *Tu préfères quelle saison ?* e *Je préfère l'été* da M8.5
+  deixam de ser trocadas); a A1 M5.3 mantém *le pull, les chaussures, essayer, acheter* (*la chemise* na nota; *pouvoir* não entra lá); ***le prix* continua cartão** na
+  A1 M5.1, que fica com 11, **a confirmar** (recomendação: exceção).
+- **Totais novos**: A1 com 9 módulos, 56 unidades (33 + 23), **352 cartões**, **~30h00** (M1 3h35, M2 3h45, M3 3h35, **M4 3h20**, **M5 3h05**, M6 3h05, M7 2h50,
+  M8 3h15, M9 3h30), lições ~145, notas ~132; A2 com 10 módulos, 58 unidades (36 + 22), **427 cartões (417 novos + 10 publicados)**, ~33h10, notas ~74.
+- **Status: aguarda duas pendências (verbos irregulares: opção A, cartões espalhados com exceções, ou opção B, unidade nova "Verbos muito usados" só de
+  reconhecimento; e o tamanho da A1 M5.1; contexto na seção 7 do `08 v2`) e a aprovação final do mapa.**
