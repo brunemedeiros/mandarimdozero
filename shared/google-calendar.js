@@ -122,11 +122,13 @@ function gcalBoxHTML(){
       <ul class="gcal-review">${GCAL_STATE.review.slice(0, 40).map(gcalReviewItemHTML).join('')}</ul>` : ''}`;
 }
 
-async function renderGoogleCalendarBox(){
+// quiet: atualização depois de um botão. Não troca a caixa por "carregando" (isso encolhia a página e jogava a tela para
+// baixo); troca o conteúdo de uma vez quando os dados chegam.
+async function renderGoogleCalendarBox(opts){
   const host = document.getElementById('admin-gcal-box');
   if (!host) return;
   const body = host.querySelector('[data-gcal-body]');
-  body.innerHTML = typeof loadingHTML === 'function' ? loadingHTML() : '…';
+  if (!(opts && opts.quiet)) body.innerHTML = typeof loadingHTML === 'function' ? loadingHTML() : '…';
   await gcalLoad();
   body.innerHTML = gcalBoxHTML();
   const n = GCAL_STATE.review.length;
@@ -143,14 +145,20 @@ function googleCalendarBoxShellHTML(){
   </details>`;
 }
 
-async function gcalAfter(promise, okMsg){
+// Depois de um botão: a tela fica onde estava (decisão da autora, 2026-10-23: nada de pular ao salvar).
+// doneEl: item da caixa "Eventos para revisar" já resolvido, que sai na hora sem esperar a lista nova.
+async function gcalAfter(promise, okMsg, doneEl){
   GCAL_STATE.busy = true;
+  const y = window.scrollY;
   const res = await promise;
   GCAL_STATE.busy = false;
-  if (res && res.error){ showToast(t('panel.gcal.errGeneric')); console.error('Google Agenda:', res.error.message || res.error); }
+  const failed = !!(res && res.error);
+  if (failed){ showToast(t('panel.gcal.errGeneric')); console.error('Google Agenda:', res.error.message || res.error); }
   else if (okMsg) showToast(okMsg);
-  await renderGoogleCalendarBox();
-  if (ADMIN_CLASS_LOGS_STATE.view === 'calendar' && typeof renderTeacherClassCalendar === 'function') renderTeacherClassCalendar();
+  if (doneEl && !failed) doneEl.remove();
+  await renderGoogleCalendarBox({ quiet: true });
+  if (ADMIN_CLASS_LOGS_STATE.view === 'calendar' && typeof renderTeacherClassCalendar === 'function') await renderTeacherClassCalendar();
+  window.scrollTo({ top: y, behavior: 'instant' });
 }
 
 function wireGoogleCalendarBox(root){
@@ -192,9 +200,9 @@ function wireGoogleCalendarBox(root){
         const v = (li.querySelector('[data-gcal-target]') || {}).value || '';
         if (!v){ showToast(t('panel.gcal.pickFirst')); return; }
         const [kind, target, lang] = v.split('|');
-        await gcalAfter(supabaseClient.rpc('google_calendar_resolve', { p_event_id: id, p_action: kind, p_target: target, p_language: lang || null, p_remember: remember }), t('panel.gcal.saved'));
+        await gcalAfter(supabaseClient.rpc('google_calendar_resolve', { p_event_id: id, p_action: kind, p_target: target, p_language: lang || null, p_remember: remember }), t('panel.gcal.saved'), li);
       } else {
-        await gcalAfter(supabaseClient.rpc('google_calendar_resolve', { p_event_id: id, p_action: act, p_remember: act === 'ignore' ? remember : false }), t('panel.gcal.saved'));
+        await gcalAfter(supabaseClient.rpc('google_calendar_resolve', { p_event_id: id, p_action: act, p_remember: act === 'ignore' ? remember : false }), t('panel.gcal.saved'), li);
       }
     }
   });

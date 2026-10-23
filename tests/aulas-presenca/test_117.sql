@@ -140,6 +140,24 @@ reset role;
 insert into r select (select match_state from st where event_id='p2') = 'linked'
   and exists (select 1 from teacher_class_logs where student_id = '11700000-0000-0000-0000-0000000000c1' and start_time = '10:00'), 'Evan vinculado: aula aparece com 10:00';
 
+-- 118: evento não reconhecido (aluna fora da lista) fica na caixa e entra sozinho quando a aluna ganha conta e vínculo
+set local role service_role;
+select gcal_ingest('11700000-0000-0000-0000-0000000000a1', 'trab@x', jsonb_build_array(
+  pg_temp.ev('z1', 'Zoe - aula', '2026-10-28T14:00:00-03:00', '2026-10-28T15:00:00-03:00')), null, false);
+reset role;
+insert into r select (select match_state from google_calendar_events where event_id = 'z1') = 'review', '118: aluna fora da lista: evento fica para revisar';
+insert into auth.users(id, email) values ('11700000-0000-0000-0000-0000000000e1','zoe117@x.invalid');
+insert into profiles(user_id, display_name) values ('11700000-0000-0000-0000-0000000000e1','Zoe Lima')
+ on conflict (user_id) do update set display_name = excluded.display_name;
+insert into teacher_students(teacher_id, student_id, language_app_key, status) values
+ ('11700000-0000-0000-0000-0000000000a1','11700000-0000-0000-0000-0000000000e1','frances','active');
+set local role service_role;
+select gcal_retry_waiting('11700000-0000-0000-0000-0000000000a1');
+reset role;
+insert into r select (select match_state from google_calendar_events where event_id = 'z1') = 'linked'
+  and exists (select 1 from teacher_class_logs where student_id = '11700000-0000-0000-0000-0000000000e1' and class_date = '2026-10-28' and start_time = '14:00'),
+  '118: Zoe vinculada: o evento da caixa vira aula na próxima leitura';
+
 -- link de agenda: professora conectada não recebe as aulas do Google (já estão na agenda dela); sem horário = dia inteiro
 insert into teacher_class_logs(teacher_id, student_id, language_app_key, class_date, topic)
  values ('11700000-0000-0000-0000-0000000000a1','11700000-0000-0000-0000-0000000000b1','frances', current_date - 2, 'Sem horário, sem Google');

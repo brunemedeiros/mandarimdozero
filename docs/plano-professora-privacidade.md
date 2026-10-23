@@ -513,6 +513,9 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   Página de privacidade da integração: `privacidade-google-agenda.html` (pt e en), exigida pelo Google para publicar o app.
 - Testes: SQL local 117 33/33; mapeamento de eventos 9/9; painel-professora 607/613 (as 6 falhas são "admin: 5 abas", da aba
   Privacidade de outra conversa, já falhavam antes).
+- 2026-10-23 (depois da 1ª leitura): botões da caixa não deslocam mais a tela (item resolvido sai na hora, sem "carregando");
+  aviso na caixa sobre aluno fora da lista; 118 tenta de novo os eventos da caixa a cada leitura; página pública `sobre.html`
+  (página inicial do app no Google) e retorno do login pelo `agenda.profbrune.com.br/google/callback` (Netlify).
 - Passos da autora: `docs/google-agenda/passo-a-passo-google-cloud.md` (feito) e `docs/google-agenda/117b-sql-editor.sql`
   (Staging feito; produção pendente).
 

@@ -3469,9 +3469,9 @@ window.I18N_CATALOG['en'] = {
   'panel.gcal.waitingTitle': 'Students without a site account', // ALTA
   'panel.gcal.waitingHint': 'These events were already recognized and are kept. They become lessons on their own once the student creates an account and is linked to you.', // ALTA
   'panel.gcal.reviewTitle': 'Events to review ({n})', // ALTA
-  'panel.gcal.reviewHint': 'The site didn\'t recognize these events. Choose whose lesson it is or mark it as not a lesson. With "remember" checked, future events with the same title (or the same guest) come in on their own.', // ALTA
+  'panel.gcal.reviewHint': 'The site didn\'t recognize these events. Choose whose lesson it is or mark it as not a lesson. With "remember" checked, future events with the same title (or the same guest) come in on their own. A student who isn\'t on the list (no account on the site yet): leave the event here. Once the student joins the site and is linked to you, the event becomes a lesson on its own if the guest email or the first name in the title match the account; if not, it stays here for you to choose. To keep the time right away, add the student to the Review Bank: they show up in the list under "Students without a site account".', // ALTA
   'panel.gcal.pick': 'Whose lesson is this?', // ALTA
-  'panel.gcal.pickFirst': 'Choose the student or class first.', // ALTA
+  'panel.gcal.pickFirst': 'Choose the student or class first. If the student isn\'t on the list, leave the event here: it becomes a lesson on its own once the student has an account linked to you.', // ALTA
   'panel.gcal.assign': 'Save', // ALTA
   'panel.gcal.ignore': 'Not a lesson', // ALTA
   'panel.gcal.remember': 'Remember for future events with this title', // ALTA

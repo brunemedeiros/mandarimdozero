@@ -469,3 +469,10 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   `docs/google-agenda/117b-sql-editor.sql` no SQL Editor** (sem ela o botão "Conectar" falha).
 - Teste local: `tests/aulas-presenca/run.sh` (117 33/33), `tests/aulas-presenca/test_google_map.mjs` 9/9.
 
+## 118 -- Google Agenda: evento "para revisar" tentado de novo (2026-10-23)
+
+- `shared/supabase_migrations/118_gcal_retry_review.sql`: `gcal_retry_waiting` passa a incluir `match_state = 'review'`
+  (antes, evento não reconhecido ficava na caixa para sempre, mesmo depois do vínculo da aluna). Só `create or replace`.
+- Staging: aplicada (2026-10-23, `118_gcal_retry_review`). Produção: pendente de autorização.
+- Teste local: `tests/aulas-presenca/run.sh` 117+118 35/35.
+

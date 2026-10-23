@@ -364,8 +364,12 @@ const PANEL_STUB = (who) => {
       await ev(() => { const sel = document.querySelector('#admin-gcal-box [data-gcal-target]'); sel.value = [...sel.options].find(o => o.value.startsWith('student|')).value; });
       if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.getElementById('admin-gcal-box').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aulas-google-agenda');
+      await ev(() => { document.querySelector('#admin-gcal-box .gcal-review-item').scrollIntoView({ block: 'center' }); window.__gcalY = window.scrollY; });
       await ev(() => document.querySelector('#admin-gcal-box [data-gcal-do="assign"]').click());
       await page.waitForFunction(() => !!window.__gcalResolved);
+      await page.waitForTimeout(600);
+      L('google: salvar não desloca a tela (decisão da autora, 2026-10-23)', await ev(() => window.__gcalY > 0 && Math.abs(window.scrollY - window.__gcalY) <= 2), await ev(() => [window.__gcalY, window.scrollY]));
+      L('google: o evento resolvido sai da caixa', await ev(() => !document.querySelector('#admin-gcal-box [data-gcal-event="77"]')));
       L('google: resolver manda aluno, idioma e "lembrar"', await ev(() => { const a = window.__gcalResolved; return a.p_event_id === 77 && a.p_action === 'student' && a.p_target === 'S' && !!a.p_language && a.p_remember === true; }), await ev(() => window.__gcalResolved));
       L('google: aula vinda do Google trava horário e duração, com aviso', await ev(() => { const h = classLogWhenFieldsHTML('t1', 'd1', { google_event_ref: 5, start_time: '10:00:00', duration_minutes: 60 }); return (h.match(/ disabled/g) || []).length === 2 && h.includes(t('panel.gcal.timeFromGoogle')); }));
       L('google: aula comum continua editável', await ev(() => !/ disabled/.test(classLogWhenFieldsHTML('t2', 'd2', { start_time: '10:00:00' }))));
