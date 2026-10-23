@@ -2487,48 +2487,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
   background: var(--paper); color: var(--ink);
 }
 
-/* ---------- Ditados ---------- */
-.dictation-explainer{
-  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
-  padding: 14px 16px; margin-bottom:18px;
-}
-.dictation-explainer-toggle{
-  display:flex; align-items:center; justify-content:space-between; width:100%;
-  background:none; border:none; cursor:pointer; padding:0;
-  font-family: var(--font-body); font-weight:800; font-size:15px; color: var(--ink);
-}
-.dictation-explainer-toggle::after{ content:'▾'; color: var(--ink-soft); font-size:18px; transition: transform .15s ease; }
-.dictation-explainer-toggle.collapsed::after{ transform: rotate(-90deg); }
-.dictation-explainer-steps{ margin:12px 0 0; padding-left:20px; font-size:13.5px; color: var(--ink-soft); line-height:1.6; }
-.dictation-explainer-steps li{ margin-bottom:4px; }
-.dictation-explainer-steps.collapsed{ display:none; }
-
-.dictation-cards{ display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:12px; }
-.dictation-card{
-  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
-  padding:16px; cursor:pointer; text-align:left; box-shadow: var(--shadow-card);
-  transition: transform .15s ease, box-shadow .15s ease;
-  display:flex; flex-direction:column; gap:6px;
-}
-.dictation-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift); }
-.dictation-card-level{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; color: var(--seal-red-dark); }
-.dictation-card-task{ font-size:15px; font-weight:800; color: var(--ink); }
-.dictation-card-module{ font-size:12.5px; color: var(--ink-soft); }
-.dictation-card-progress{ font-size:12px; font-weight:700; color: var(--ink-soft); }
-.dictation-record-line{ margin:10px 0 0; font-size:14px; color: var(--ink-soft); }
-.dictation-review-words{ margin:12px 0 0; font-size:14px; line-height:1.6; color: var(--ink); }
-
-.dictation-player-task{ font-size:20px; font-weight:800; margin:0 0 4px; }
-.dictation-player-module{ font-size:13px; color: var(--ink-soft); margin:0 0 18px; }
-.dictation-audio-player{ margin-bottom:18px; }
-.dictation-transport{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-.dictation-play-btn{
-  display:flex; align-items:center; gap:8px; background: var(--paper-warm); border:1px solid var(--paper-line);
-  border-radius:999px; padding:10px 18px; font-family: var(--font-body); font-weight:700; font-size:14px;
-  cursor:pointer; color: var(--ink);
-}
-.dictation-play-btn:hover{ border-color: var(--imperial-gold); }
-.dictation-play-btn.speaking{ background: linear-gradient(120deg, rgba(192,35,31,0.08), var(--paper-warm)); border-color: var(--seal-red); }
+/* Ditados (.dictation-*): shared/ditados.css, comum aos sites que têm a tela (etapa 5b da paridade). */
 /* Botão de áudio devagar -- companheiro secundário de qualquer "Écouter"
    manual (ver slowAudioBtnHTML/slowAudioIconBtnHTML em app.js), sempre ao
    lado do botão principal, nunca competindo com ele em destaque. */
@@ -2537,99 +2496,6 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .dictation-play-btn-slow:hover{ opacity:1; }
 .audio-btn-slow{ opacity:.7; }
 .audio-btn-slow:hover{ opacity:1; }
-.dictation-skip-btn{
-  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px;
-  padding:8px 12px; font-family: var(--font-body); font-weight:700; font-size:12.5px;
-  cursor:pointer; color: var(--ink-soft);
-}
-.dictation-skip-btn:hover{ border-color: var(--imperial-gold); color: var(--ink); }
-.dictation-icon-btn{
-  display:flex; align-items:center; justify-content:center;
-  width:38px; height:38px; background: var(--paper-warm); border:1px solid var(--paper-line);
-  border-radius:50%; font-size:16px; cursor:pointer; color: var(--ink-soft); flex-shrink:0;
-}
-.dictation-icon-btn:hover{ border-color: var(--imperial-gold); color: var(--ink); }
-.dictation-scrub-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-.dictation-time{ font-size:12px; font-weight:700; color: var(--ink-soft); font-variant-numeric: tabular-nums; min-width:32px; }
-.dictation-progress-track{
-  position:relative; flex:1; height:6px; background: var(--paper-warm); border-radius:5px;
-  cursor:pointer; touch-action:none;
-}
-.dictation-progress-fill{ height:100%; width:0%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:5px; pointer-events:none; }
-.dictation-progress-handle{
-  position:absolute; top:50%; left:0%; width:14px; height:14px; border-radius:50%;
-  background: var(--seal-red); box-shadow: var(--shadow-card); transform:translate(-50%,-50%);
-  pointer-events:none;
-}
-.dictation-secondary-controls{ display:flex; align-items:center; flex-wrap:wrap; gap:14px; }
-.dictation-skip-controls{ display:flex; align-items:center; gap:6px; }
-.dictation-volume-control{ display:flex; align-items:center; gap:6px; }
-.dictation-volume-slider{ width:70px; accent-color: var(--seal-red); }
-.dictation-speed-controls{ display:flex; align-items:center; gap:6px; margin-left:auto; }
-.dictation-speed-btn{
-  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px;
-  padding:6px 12px; font-family: var(--font-body); font-weight:700; font-size:12.5px;
-  cursor:pointer; color: var(--ink-soft);
-}
-.dictation-speed-btn:hover{ border-color: var(--imperial-gold); }
-.dictation-speed-btn.active{ background: var(--brand-fill); border-color: var(--brand-fill); color: var(--on-brand-fill); }
-@media (max-width: 480px){
-  .dictation-secondary-controls{ gap:10px; }
-  .dictation-speed-controls{ margin-left:0; }
-}
-.dictation-textarea{
-  width:100%; min-height:110px; border:1px solid var(--paper-line); border-radius: var(--radius);
-  padding:14px; font-family: var(--font-body); font-size:15px; color: var(--ink); background: var(--paper);
-  resize: vertical;
-}
-.dictation-textarea:focus{ outline:none; border-color: var(--imperial-gold); }
-.dictation-actions{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
-.dictation-result{ margin-top:20px; background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:18px; }
-.dictation-result-text{ font-size:16px; line-height:2.1; margin-bottom:18px; }
-.dictation-word-correct{
-  background: rgba(59,130,246,0.14); color: var(--ink); font-weight:700;
-  padding:1px 5px; border-radius:5px;
-}
-.dictation-word-near{
-  background: rgba(224,165,38,0.22); color: var(--ink); font-weight:700;
-  padding:1px 5px; border-radius:5px; border-bottom:2px solid var(--imperial-gold);
-}
-.dictation-punct-missing{ text-decoration: underline dotted var(--imperial-gold); text-underline-offset:4px; color: var(--ink); }
-.dictation-notes{ margin:14px 0 0; padding:12px 0 0 18px; border-top:1px dashed var(--paper-line); font-size:14px; line-height:1.6; color: var(--ink); }
-.dictation-notes li{ margin-bottom:4px; }
-/* Fatia 3: texto certo frase por frase, com áudio de cada frase. */
-.dictation-sentences{ margin:14px 0 0; padding-top:12px; border-top:1px dashed var(--paper-line); }
-.dictation-sentences-title{ margin:0 0 8px; font-size:14px; color: var(--ink); }
-.dictation-sentence-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
-.dictation-sentence{
-  display:flex; align-items:center; gap:10px; padding:6px 8px;
-  border:1px solid var(--paper-line); border-left:3px solid var(--paper-line); border-radius:10px;
-  background: var(--paper);
-}
-.dictation-sentence.has-error{ border-left-color: var(--error-red); }
-.dictation-sentence-text{ flex:1; min-width:0; font-size:15px; line-height:1.5; color: var(--ink); overflow-wrap:anywhere; }
-.dictation-sentence-flag{ font-weight:800; font-size:13px; color: var(--error-red); }
-.dictation-sentence-play{
-  flex-shrink:0; min-height:40px; min-width:40px; padding:6px 12px;
-  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px;
-  font-family: var(--font-body); font-weight:700; font-size:13px; color: var(--ink); cursor:pointer;
-}
-.dictation-sentence-play:hover:not(:disabled){ border-color: var(--imperial-gold); }
-.dictation-sentence-play:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }
-.dictation-sentence-play.speaking{ border-color: var(--seal-red); }
-.dictation-sentence-play:disabled{ cursor:default; color: var(--ink-soft); }
-@media (max-width: 480px){
-  .dictation-sentence{ align-items:flex-start; flex-direction:column; gap:6px; }
-}
-.dictation-result:focus{ outline:none; }
-.dictation-word-wrong{ color: var(--error-red-text); text-decoration: line-through; text-decoration-color: var(--error-red); }
-.dictation-result-summary{ display:flex; align-items:center; gap:14px; padding-top:16px; border-top:1px dashed var(--paper-line); }
-.dictation-score-badge{
-  flex-shrink:0; width:56px; height:56px; border-radius:14px; color:white;
-  display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;
-  box-shadow: var(--shadow-card);
-}
-.dictation-score-text{ margin:0; font-size:13.5px; color: var(--ink-soft); line-height:1.5; }
 
 /* ---------- Desafios ---------- */
 .challenges-admin-bar{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:16px; }
@@ -2655,11 +2521,10 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .challenge-card.completed{ opacity:.55; }
 .challenge-card-check{ position:absolute; top:12px; right:12px; font-size:16px; color: var(--jade); }
 .challenge-card{ position:relative; }
-.dictation-card{ position:relative; }
 /* Desafios do Módulo (Premium): trancado = mesmo cartão, só mais discreto e com
    cadeado; tokens neutros já calibrados nos dois temas (sem cor nova). */
-.challenge-card.locked, .dictation-card.locked{ opacity:.7; }
-.challenge-card.locked .challenge-card-check, .dictation-card.locked .challenge-card-check{ color: var(--ink-soft); }
+.challenge-card.locked{ opacity:.7; }
+.challenge-card.locked .challenge-card-check{ color: var(--ink-soft); }
 .unit-block.module-challenges{ border-style:dashed; }
 .unit-block.module-challenges .ub-icon{ background: var(--paper-warm); }
 .unit-block.premium-locked .ub-title{ color: var(--ink-soft); }
@@ -2673,7 +2538,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
    Só tokens já calibrados nos dois temas (texto --ink-soft, trilho
    --paper-warm, preenchimento --jade). */
 .challenge-progress{ width:100%; max-width:220px; margin:6px auto 0; }
-#challenges-list-progress .challenge-progress, #dictation-list-progress .challenge-progress{ margin:0 0 14px; max-width:320px; }
+#challenges-list-progress .challenge-progress{ margin:0 0 14px; max-width:320px; }
 .challenge-progress-label{ font-size:12px; font-weight:700; color: var(--ink-soft); margin-bottom:4px; }
 .challenge-progress-track{ height:5px; border-radius:999px; background: var(--paper-warm); border:1px solid var(--paper-line); overflow:hidden; }
 .challenge-progress-fill{ height:100%; background: var(--jade); border-radius:999px; transition: width .3s ease; }
@@ -2832,8 +2697,8 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
    tema via color-mix, alvos de toque de 44px+, foco visível. Só tokens que já
    existem nos dois temas; acerto = --jade, erro = --error-red, texto sobre
    essas cores = --on-vivid. */
-#view-challenges .back-link, #view-dictation .back-link{ min-height:44px; padding:10px 0; font-size:14px; margin-bottom:4px; }
-#view-challenges .path-header h2, #view-dictation .path-header h2{ font-family: var(--font-display); font-size:24px; font-weight:800; letter-spacing:-.01em; }
+#view-challenges .back-link{ min-height:44px; padding:10px 0; font-size:14px; margin-bottom:4px; }
+#view-challenges .path-header h2{ font-family: var(--font-display); font-size:24px; font-weight:800; letter-spacing:-.01em; }
 
 /* Tela principal: uma linha por categoria, com o progresso no anel do ícone */
 .challenges-categories{ grid-template-columns:1fr; gap:10px; }
@@ -2865,24 +2730,24 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .challenge-review-card .challenge-category-emoji{ background: color-mix(in srgb, var(--jade) 16%, var(--paper)); }
 
 /* Listas: nível em etiqueta, expressão em destaque, estado à direita */
-.challenges-cards, .dictation-cards{ grid-template-columns:1fr; gap:10px; }
-@media (min-width:760px){ .challenges-cards, .dictation-cards{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
-.challenge-card, .dictation-card{
+.challenges-cards{ grid-template-columns:1fr; gap:10px; }
+@media (min-width:760px){ .challenges-cards{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+.challenge-card{
   display:grid; grid-template-columns:minmax(0,1fr) 28px; column-gap:12px; row-gap:3px; align-items:center;
   padding:12px 16px; min-height:68px; transition: border-color .15s ease, box-shadow .15s ease;
 }
-.challenge-card > *, .dictation-card > *{ grid-column:1; }
-.challenge-card:hover, .dictation-card:hover{ transform:none; border-color: color-mix(in srgb, var(--seal-red) 55%, var(--paper-line)); box-shadow: var(--shadow-lift); }
-.challenge-card:focus-visible, .dictation-card:focus-visible{ outline:3px solid color-mix(in srgb, var(--seal-red) 55%, transparent); outline-offset:2px; }
-.challenge-card-level, .dictation-card-level{
+.challenge-card > *{ grid-column:1; }
+.challenge-card:hover{ transform:none; border-color: color-mix(in srgb, var(--seal-red) 55%, var(--paper-line)); box-shadow: var(--shadow-lift); }
+.challenge-card:focus-visible{ outline:3px solid color-mix(in srgb, var(--seal-red) 55%, transparent); outline-offset:2px; }
+.challenge-card-level{
   justify-self:start; font-size:12px; font-weight:800; text-transform:none; letter-spacing:0; color: var(--seal-red-dark);
   background: color-mix(in srgb, var(--seal-red) 13%, var(--paper)); border-radius:999px; padding:1px 9px;
 }
-.challenge-card-expr, .dictation-card-task{ font-family: var(--font-display); font-size:18px; font-weight:800; line-height:1.25; }
+.challenge-card-expr{ font-family: var(--font-display); font-size:18px; font-weight:800; line-height:1.25; }
 .challenge-card-expr{ overflow-wrap:anywhere; }
 .tier-badge{ text-transform:none; letter-spacing:0; font-size:11.5px; font-weight:700; padding:1px 8px; margin-top:0; justify-self:start; }
-.challenge-card::after, .dictation-card::after{ content:'›'; grid-column:2; grid-row:1 / span 4; font-size:26px; line-height:1; color: var(--ink-soft); justify-self:end; }
-.challenge-card:has(.challenge-card-check)::after, .dictation-card:has(.challenge-card-check)::after{ content:none; }
+.challenge-card::after{ content:'›'; grid-column:2; grid-row:1 / span 4; font-size:26px; line-height:1; color: var(--ink-soft); justify-self:end; }
+.challenge-card:has(.challenge-card-check)::after{ content:none; }
 .challenge-card-check{ position:static; grid-column:2; grid-row:1 / span 4; justify-self:end; align-self:center; }
 .challenge-card.completed{ opacity:1; background: color-mix(in srgb, var(--jade) 7%, var(--paper)); border-color: color-mix(in srgb, var(--jade) 38%, var(--paper-line)); }
 .challenge-card:not(.locked) .challenge-card-check{ font-size:0; width:26px; height:26px; border-radius:50%; background: var(--success-fill); display:grid; place-items:center; }
@@ -2891,7 +2756,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .challenges-level-heading{ min-height:44px; }
 
 /* Jogar: pergunta em destaque, áudio como ação principal */
-#challenge-player-content, #dictation-player-content{ max-width:640px; margin-inline:auto; }
+#challenge-player-content{ max-width:640px; margin-inline:auto; }
 .challenge-expression{ font-family: var(--font-display); }
 .challenge-expression:has(#challenge-expression-play-btn){ font-size:30px; line-height:1.15; letter-spacing:-.01em; margin:6px 0 18px; }
 .challenge-expression:not(:has(#challenge-expression-play-btn)){ justify-content:flex-start; font-size:20px; margin-bottom:14px; }
@@ -2906,13 +2771,12 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .listen-translate-hint-wrap{ text-align:left; }
 .listen-translate-hint-text{ font-style:normal; font-size:16px; color: var(--ink); background: var(--paper-warm); border-radius:10px; padding:10px 14px; }
 .listen-translate-answer-label{ font-size:14px; }
-.listen-translate-answer-input, .accent-answer-input, .dictation-textarea{ font-size:17px; border-width:1.5px; }
-.listen-translate-answer-input:focus-visible, .accent-answer-input:focus-visible, .dictation-textarea:focus-visible{
+.listen-translate-answer-input, .accent-answer-input{ font-size:17px; border-width:1.5px; }
+.listen-translate-answer-input:focus-visible, .accent-answer-input:focus-visible{
   outline:none; border-color: var(--seal-red); box-shadow: 0 0 0 3px color-mix(in srgb, var(--seal-red) 25%, transparent);
 }
-.dictation-textarea:focus{ border-color: var(--seal-red); }
 .listen-translate-actions{ margin-bottom:16px; }
-.listen-translate-actions .btn, .dictation-actions .btn{ min-height:50px; font-size:16px; flex:1 1 220px; }
+.listen-translate-actions .btn{ min-height:50px; font-size:16px; flex:1 1 220px; }
 
 /* Alternativas (Expressões e Complete a frase) */
 .challenge-choices{ gap:10px; }
@@ -3013,11 +2877,11 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .challenges-level-ring[data-complete="1"]::before{ background:var(--jade); }
 
 /* Lista: concluído sólido, pendente tracejado, premium trancado quente */
-.challenge-card, .dictation-card{ border-radius:16px; min-height:64px; }
-.challenge-card:not(.completed):not(.locked), .dictation-card:not(.completed):not(.locked){ border-style:dashed; }
-.challenge-card.locked, .dictation-card.locked{ opacity:1; background: var(--paper-warm); }
+.challenge-card{ border-radius:16px; min-height:64px; }
+.challenge-card:not(.completed):not(.locked){ border-style:dashed; }
+.challenge-card.locked{ opacity:1; background: var(--paper-warm); }
 .challenge-card.completed{ border-width:2px; }
-@media (prefers-reduced-motion: reduce){ .challenge-card, .dictation-card, .fb-ico{ transition:none; animation:none; } }
+@media (prefers-reduced-motion: reduce){ .challenge-card, .fb-ico{ transition:none; animation:none; } }
 
 /* Expressões: álbum de figurinhas + expressão de hoje (12/10/2026) */
 .expr-reg{ display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:800; line-height:1.2; border-radius:999px; padding:2px 9px; border:1.5px solid currentColor; white-space:nowrap; background: var(--paper); }
@@ -3070,11 +2934,8 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .expr-today-done p{ margin:0; font-weight:800; color: var(--ink); }
 @media (prefers-reduced-motion: no-preference){ .expr-card-seal{ transition: transform .2s ease; } .expr-card-wrap:hover .expr-card-seal{ transform:rotate(0deg); } }
 
-/* Ditado: mesma linguagem das atividades */
-.dictation-player-task{ font-family: var(--font-display); font-size:24px; letter-spacing:-.01em; }
-.dictation-card-module{ font-size:13px; }
 @media (prefers-reduced-motion: reduce){
-  .challenge-category-card, .challenge-card, .dictation-card, .challenge-choice-btn{ transition:none; }
+  .challenge-category-card, .challenge-card, .challenge-choice-btn{ transition:none; }
 }
 .accent-feedback-header{ font-weight:800; font-size:15px; margin-bottom:12px; }
 .accent-feedback-answer{ font-size:14px; margin:4px 0; }
@@ -5074,6 +4935,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <!-- Módulos e níveis (paridade B2): depois do <style> do site de propósito, para manter a ordem de antes das regras -->
 <link rel="stylesheet" href="../shared/modulos-niveis.css">
 <link rel="stylesheet" href="../shared/conjugacao.css">
+<link rel="stylesheet" href="../shared/ditados.css">
 </head>
 <body>
 
@@ -6295,6 +6157,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/conj-games.js"></script>
 <script src="../shared/conjugacao.js"></script>
 <script src="conj-config.js"></script>
+<script src="../shared/ditados.js"></script>
+<script src="ditados-config.js"></script>
 <script src="../shared/router.js"></script>
 <script src="../shared/anki-export.js"></script>
 <script src="../shared/pwa.js"></script>
