@@ -136,7 +136,7 @@ window.I18N_CATALOG['pt-BR'] = {
 
   // ---- Fase 6 lote 1: Configurações + menu da conta (fr e zh) ----
   'settings.title': 'Configurações',
-  'settings.subtitle': 'Sua conta, preferências e exportação de dados.',
+  'settings.subtitle': 'Suas informações e preferências de conta',
   'settings.tab.general': 'Geral',
   'settings.tab.notifications': '🔔 Notificações',
   'settings.tab.export': '📦 Exportar',

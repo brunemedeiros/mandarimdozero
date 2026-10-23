@@ -21,6 +21,7 @@ Recolocar, na barra `.cfg-abas` de cada `index.html`, depois do botão de Notifi
 
 e tirar o comentário "ARQUIVADO" do painel. `switchSettingsSection` e `wireAnkiExport` já tratam o resto.
 
-## Pendente de decisão
+## Subtítulo (decidido)
 
-O subtítulo de Configurações (`settings.subtitle`: "Sua conta, preferências e exportação de dados.") ainda cita exportação.
+Com a aba arquivada, o subtítulo de Configurações (`settings.subtitle`) deixou de citar exportação. Aprovado pela autora em 2026-10-23:
+pt-BR "Suas informações e preferências de conta"; en "Your account information and preferences".
