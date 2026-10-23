@@ -70,7 +70,15 @@ Itens que parecem gerais mas só são usados aqui, e por isso ficam em B:
   Função genérica; pode ir para `shared/core/` quando Desafios chegarem ao zh.
 - `chT`, `md5Hex`, `tierBadgeHTML`, `translation*`: internos de Desafios.
 
-### B2. Sistema de módulos e níveis (32 funções)
+### B2. Sistema de módulos e níveis (32 funções) -- MOTOR FEITO (2026-10-23)
+- **Feito** na etapa 4 do pedido da dona (registro: `docs/historico/26-paridade-b2-modulos-niveis.md`): o motor (35
+  funções) está em `shared/core/modulos-niveis.js`, o CSS em `shared/modulos-niveis.css`, e o zh carrega os dois (mais
+  `shared/checkpoint-exam.js` e `shared/review-milestone.js`), com ganchos `LANG_HOOKS` para a prova em pinyin, a voz e os
+  textos. Sem `MODULES`/`LEVEL_TESTS` nada muda; com eles, a trilha do zh mostra módulos e o Ponto de verificação, a
+  Revisão do módulo e o Teste de Nível funcionam. Continua pendente da dona: **quais** módulos o zh terá (conteúdo). Ficaram
+  no fr, com gancho (`afterModule`), as linhas de Desafios/Ditados do módulo (B1, etapa 5). O texto abaixo é o diagnóstico
+  de antes.
+
 O zh não tem módulos: `zh/content.js:6-8` tem um único nível (`HSK1`) e nenhuma constante `MODULES` (o fr tem
 `fr/content.js:4218`). Pendência "módulos do chinês". Tudo abaixo depende disso:
 - **Ponto de verificação do módulo** com palavra, frase, escuta e gramática (`shared/checkpoint-exam.js`, chamado em
@@ -215,9 +223,9 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
 ## 7. HTML e CSS de componentes
 
 - Com a guarda nova, nenhuma classe usada por `shared/` falta no zh (`node tests/paridade-sites/test_css_compartilhado.js`:
-  6/6, exceção única `level-test-highlight`, do Teste de Nível).
+  5/5, sem exceção desde a B2; a única que havia, `level-test-highlight`, foi para `shared/modulos-niveis.css`).
 - CSS que hoje só existe no fr e terá de ir junto quando o recurso for levado: ~~`.typed-attempt`, `.conj-x`, `.conj-gap`
-  (C2)~~ (feito: `shared/licao-feedback.css`), ~~`.scenario-*` (C6), `.gram-*` (C6)~~ (feito: `shared/gramatica-cenario.css`; `.gram-block*` fica em cada site), `.module-label`/`.ml-*`/`.checkpoint-*` (B2),
+  (C2)~~ (feito: `shared/licao-feedback.css`), ~~`.scenario-*` (C6), `.gram-*` (C6)~~ (feito: `shared/gramatica-cenario.css`; `.gram-block*` fica em cada site), ~~`.module-label`/`.ml-*`/`.checkpoint-*` (B2)~~ (feito: `shared/modulos-niveis.css`),
   `.cg-*` dos Jogos (`shared/conj-games.js`), `.reorder-final-*` (`fr/index.html:1675-1676`).
 - Ids só do fr (81): todos de Conjugação (28), Desafios (27), Ditado (10), janelas Premium de Desafios/Jogos (6), seletor
   de nível e Teste de Nível (5), menu Mais (2) e `path-level-title`. Nenhum é usado por `shared/` fora desses recursos
@@ -230,13 +238,15 @@ mural, painel da professora/admin, Banco de Revisão, Revisão (motor FSRS, deck
 editor de cartões, importação/exportação Anki, meta de estudo, modo foco, roteamento, PWA, i18n, as ~190 funções da trilha
 e dos exercícios já extraídas nos lotes 1 a 5e da E4 (com `LANG_HOOKS`), o motor de id estável por item
 (`shared/study-trail-model.js`), o motor dos Jogos da Conjugação (`shared/conj-games.js`), o motor da unidade de gramática e do exercício de cenário
-(`shared/core/gramatica-cenario.js`), o motor da prova do Ponto de
-verificação (`shared/checkpoint-exam.js`) e da Revisão do módulo (`shared/review-milestone.js`), e as regras da família
-latina (`shared/core/familias/latina.js`).
+(`shared/core/gramatica-cenario.js`), o sistema de módulos e níveis inteiro (`shared/core/modulos-niveis.js` +
+`shared/modulos-niveis.css`: Ponto de verificação do módulo e o pulo, Revisão do módulo, Teste de Nível, seletor de nível,
+trilha e Mapa por módulos, tela de módulo concluído), com a prova (`shared/checkpoint-exam.js`) e a seleção da Revisão do
+módulo (`shared/review-milestone.js`), e as regras da família latina (`shared/core/familias/latina.js`).
 
 **Perde** (está só em `fr/app.js` e teria de ser copiado, o que recria o problema desta auditoria):
 - Toda a tela da Conjugação (33 funções). O pt precisa dela desde o começo.
-- Toda a parte de módulos e níveis (32 funções): o pt vai ter módulos.
+- ~~Toda a parte de módulos e níveis (32 funções)~~: feito, `shared/core/modulos-niveis.js` (2026-10-23). Falta só a linha
+  dos Desafios/Ditados do módulo, que vai com o B1.
 - ~~Unidade de gramática e exercício de cenário (C6)~~: feito, `shared/core/gramatica-cenario.js` (2026-10-23).
 - ~~`typedAttemptHTML` (C2)~~: feito, `shared/core/licao-feedback.js` (2026-10-23).
 - Desafios e Ditados (177 funções): entram no pt "aos poucos depois", pela decisão da dona.
@@ -251,8 +261,9 @@ pt) cobre o pt **se** a extração incluir os itens da lista "Perde". Recomendo 
 
 ## 9. Riscos anotados
 
-- `zh/app.js:1326` chama `trailSkipAllowed()` e `openCheckpoint()`, que não existem no zh; seguro só porque `moduleId` é
-  sempre `null` (`zh/app.js:1362`). Ao levar módulos ao zh, levar as funções junto (ou movê-las para `shared/core/`).
+- ~~`zh/app.js:1326` chama `trailSkipAllowed()` e `openCheckpoint()`, que não existem no zh; seguro só porque `moduleId` é
+  sempre `null` (`zh/app.js:1362`).~~ Resolvido pela B2 (2026-10-23): as funções estão em `shared/core/modulos-niveis.js`,
+  carregado pelo zh, e o `mapUnitDescribe` do zh foi substituído pelo comum.
 - ~~Sem C1, qualquer edição de ordem em `zh/content.js` move o progresso FSRS de uma palavra para outra, em silêncio.~~
   Resolvido pelo C1 (2026-10-23): o zh também segue a chave `k`.
 
@@ -281,7 +292,7 @@ pt) cobre o pt **se** a extração incluir os itens da lista "Perde". Recomendo 
 | 8 | C7 `unitId` no evento da Revisão | uma linha no zh | trivial | não |
 
 Itens B2 (módulos) e Conjugação: não são esquecimento, mas a recomendação é mover o motor para `shared/core/` **antes** de
-levar ao zh ou ao pt, em vez de copiar.
+levar ao zh ou ao pt, em vez de copiar. (B2 feito em 2026-10-23: `shared/core/modulos-niveis.js`.)
 
 ## 12. Guarda automática sugerida
 

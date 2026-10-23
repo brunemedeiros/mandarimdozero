@@ -9,11 +9,9 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 
 // Exceções de propósito: a classe só faz sentido num recurso que o site ainda não tem. Sempre com o motivo.
-const ALLOW = {
-  zh: {
-    'level-test-highlight': 'Teste de Nível (módulos) ainda não existe no zh: pendência da autora "módulos do chinês".',
-  },
-};
+// (A exceção 'level-test-highlight' do zh saiu na paridade B2, 2026-10-23: o CSS do Teste de Nível está em
+// shared/modulos-niveis.css, carregado pelos dois sites.)
+const ALLOW = {};
 
 const sites = fs.readdirSync(ROOT).filter(d => fs.existsSync(path.join(ROOT, d, 'index.html')) && fs.existsSync(path.join(ROOT, d, 'app.js')));
 

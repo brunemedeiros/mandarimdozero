@@ -560,6 +560,11 @@ window.I18N_CATALOG['en'] = {
   'fr.checkpoint.exam.word': 'How do you say "{w}" in French?', // ALTA
   'fr.checkpoint.exam.phrase': 'Write in French: "{p}"', // ALTA
   'fr.checkpoint.exam.listen': 'Listen and write what you heard', // ALTA
+  'zh.checkpoint.exam.word': 'How do you say "{w}" in Chinese? Type it in pinyin.', // ALTA -- zh (paridade B2, needs_review)
+  'zh.checkpoint.exam.phrase': 'Write it in pinyin: "{p}"', // ALTA -- zh (paridade B2, needs_review)
+  'zh.checkpoint.exam.listen': 'Listen and type what you heard in pinyin', // ALTA -- zh (paridade B2, needs_review)
+  'zh.levelTest.sub': 'Already know Chinese at level {level}? Take this test and go straight to {next} — no need to complete the units first.', // ALTA -- zh (paridade B2, needs_review)
+  'zh.levelTest.intro': 'Already know Chinese at level {level}? Take this test — if you do well, the whole level is marked as completed and you can go straight to {next}.', // ALTA -- zh (paridade B2, needs_review)
   'limitCut.subject.deck': 'This Deck', // ALTA
   'limitCut.subject.import': 'This import', // ALTA
   'limitCut.subject.selection': 'This selection', // ALTA
