@@ -72,7 +72,8 @@ function erros(s){
   check(`C2 fr: typedAttemptHTML comum = fr antigo (${REF}) em ${n} casos (${frTexts.length} textos do fr/content.js)`, diff.length === 0 && n > 1000, diff);
   console.log(`  C2 fr: ${n} comparações com o fr antigo, ${diff.length} diferenças`);
   check('C2 fr: "allemand / allemand" marca o "e" que faltou', /conj-gap/.test(novo.typedAttemptHTML('allemand / allemand', 'allemand / allemande')));
-  check('C2 fr: conjAlign do fr/app.js usa alinharLetras comum', /function conjAlign\(a, b\)\{\n\s+return alinharLetras\(a, b\);/.test(read('fr/app.js')));
+  // Etapa 5a da paridade (2026-10-23): conjAlign foi com a Conjugação para shared/conjugacao.js.
+  check('C2 fr: conjAlign (shared/conjugacao.js) usa alinharLetras comum', /function conjAlign\(a, b\)\{\n\s+return alinharLetras\(a, b\);/.test(read('shared/conjugacao.js')));
   check('C2 fr: fr/app.js não tem mais typedAttemptHTML próprio', !/^function typedAttemptHTML\(/m.test(read('fr/app.js')));
 }
 

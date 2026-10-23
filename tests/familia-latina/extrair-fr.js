@@ -17,7 +17,8 @@ function fonteAntiga() {
   const core = git(['ls-tree', '--name-only', REF, 'shared/core/']).split('\n').filter(f => /^shared\/core\/[^/]+\.js$/.test(f)).sort();
   return core.map(f => git(['show', REF + ':' + f])).join('\n') + '\n' + git(['show', REF + ':fr/app.js']);
 }
-function fonteNova() { return withCore(fs.readFileSync(path.join(ROOT, 'fr/app.js'), 'utf8')); }
+// Etapa 5a da paridade (2026-10-23): a Conjugação (conjAlign, conjFold) saiu do fr/app.js para shared/conjugacao.js.
+function fonteNova() { return withCore(fs.readFileSync(path.join(ROOT, 'shared/conjugacao.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'fr/app.js'), 'utf8')); }
 const ler = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 
 function ferramentas(SRC, nomeArquivo) {
