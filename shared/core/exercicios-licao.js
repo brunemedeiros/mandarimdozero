@@ -97,6 +97,8 @@ function setLessonFocusMode(active){
   // regra de CSS (ver index.html) esconder o banner sem também precisar
   // mover o elemento de lugar no HTML.
   document.body.classList.toggle('lesson-focus', active);
+  // Saiu da lição: se o lembrete de revisão do dia ainda não foi visto, é a hora.
+  if (!active && typeof maybeShowReviewReminder === 'function') maybeShowReviewReminder();
 }
 
 // XP de um acerto (valores em shared/srs.js: EXERCISE_XP_RECOGNIZE/PRODUCE/ALMOST, decisão de 2026-10-15): um pouco menor quando o aluno pediu "Não sei" (e por
