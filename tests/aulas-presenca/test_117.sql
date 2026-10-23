@@ -91,6 +91,11 @@ insert into r select (select match_state from st where event_id='p4') = 'linked'
   'agendamento reconhecido pelo e-mail do convidado';
 insert into r select (select sync_token from google_calendar_sources where calendar_id = 'trab@x') = 'tok1', 'guarda o sync token para a próxima leitura';
 
+-- mesma leitura de novo, nada mudou: não reprocessa
+set local role service_role;
+insert into r select (gcal_ingest('11700000-0000-0000-0000-0000000000a1', 'trab@x', jsonb_build_array(
+  pg_temp.ev('e1', 'Cat - Prof. Brune', '2026-10-26T16:00:00-03:00', '2026-10-26T17:00:00-03:00')), null, false) -> 'counts' ->> 'same') = '1', 'evento sem mudança não é reprocessado';
+reset role;
 -- arrastou no Google: 16:00 -> 17:30
 set local role service_role;
 select gcal_ingest('11700000-0000-0000-0000-0000000000a1', 'trab@x', jsonb_build_array(

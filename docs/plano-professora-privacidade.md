@@ -492,7 +492,7 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   link = `webcal://agenda.profbrune.com.br/<senha>`. Testes: painel-professora 565/571 (as 6 falhas são da aba
   "Privacidade" do Admin, de outra conversa, e já falhavam sem esta mudança).
 
-### Google Agenda → site (2026-10-23, branch; migration 117 e função `google-calendar` no Staging, parte B pendente)
+### Google Agenda → site (2026-10-23; migration 117, função `google-calendar` e cron no Staging e na produção)
 
 - Decisões da autora: o horário de verdade vive no Google Agenda (agendas "Trabalho" e "Brune Medeiros", que também tem eventos
   pessoais); o link de agenda (ICS) criava eventos duplicados. Sincronização **em um sentido** (Google → site), escrito na tela;
@@ -508,7 +508,11 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
 - Leitura a cada 15 min (pg_cron `gcal-sync` → `_gcal_cron_post` → Edge Function; senha só no Vault, conferida por
   `gcal_check_sync_token`); janela 14 dias atrás a 90 à frente; primeira leitura de cada agenda desde 2025-05-01.
 - Grátis x Premium: grátis, dentro do plano Professora. Não usa Claude.
-- Testes: SQL local 117 30/30; mapeamento de eventos 5/5; painel-professora 607/613 (as 6 falhas são "admin: 5 abas", da aba
+- Leitura: a primeira de cada agenda desde 2025-05-01; depois uma leitura completa por dia e, a cada 15 min, só o que mudou
+  (`updatedMin`); evento sem mudança não é reprocessado. Privacidade: evento que não é aula fica sem título e sem convidados.
+  Página de privacidade da integração: `privacidade-google-agenda.html` (pt e en), exigida pelo Google para publicar o app.
+- Testes: SQL local 117 33/33; mapeamento de eventos 9/9; painel-professora 607/613 (as 6 falhas são "admin: 5 abas", da aba
   Privacidade de outra conversa, já falhavam antes).
-- Passos da autora: `docs/google-agenda/passo-a-passo-google-cloud.md` e `docs/google-agenda/117b-sql-editor.sql` (Staging).
+- Passos da autora: `docs/google-agenda/passo-a-passo-google-cloud.md` (feito) e `docs/google-agenda/117b-sql-editor.sql`
+  (Staging feito; produção pendente).
 

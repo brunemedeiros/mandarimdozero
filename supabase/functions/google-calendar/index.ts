@@ -8,8 +8,9 @@
 //   GET  .../google-calendar/callback?code&state   volta do Google: troca o code, guarda o refresh token, volta ao site
 //   POST {action:'sync'}                 x-sync-token = senha do Vault (pg_cron, todas as contas) OU professora (só a dela)
 //   POST {action:'calendars'}            professora: atualiza a lista de agendas da conta Google
-// Leitura: janela de 14 dias atrás a 90 dias à frente a cada rodada; na primeira vez de cada agenda, desde 2025-05-01 (para dar
-// horário às aulas antigas importadas do Notion). Nunca loga token nem código.
+// Leitura (janela de 14 dias atrás a 90 dias à frente): a primeira de cada agenda vem desde 2025-05-01 (dá horário às aulas
+// antigas importadas do Notion); uma vez por dia a janela inteira (pega as aulas repetidas que entram no horizonte); nas outras
+// rodadas (a cada 15 min) só o que mudou desde a última leitura (updatedMin). Nunca loga token nem código.
 // Secrets: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET (SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY já existem).
 // A senha do cron fica só no Vault (gcal_sync_token) e é conferida por gcal_check_sync_token.
 
@@ -93,9 +94,20 @@ export function mapEvent(e: any, calendarTz: string | null) {
   };
 }
 
-async function syncUser(sb: any, plan: any) {
-  const userId = plan.user_id;
-  const tok = await googleToken({ grant_type: 'refresh_token', refresh_token: plan.refresh_token });
+// Que leitura fazer: 'backfill' (primeira vez), 'full' (primeira do dia, horário de Brasília) ou 'incremental' (só o que mudou).
+// sync_token guarda "janela:AAAA-MM-DD" da última leitura completa.
+export function readPlan(src: { sync_token?: string | null; last_synced_at?: string | null }, now: number) {
+  const today = new Date(now - 3 * 36e5).toISOString().slice(0, 10);
+  const nextToken = `janela:${today}`;
+  if (!src.sync_token) return { kind: 'backfill', updatedMin: null as string | null, nextToken };
+  if (src.sync_token !== nextToken || !src.last_synced_at) return { kind: 'full', updatedMin: null as string | null, nextToken };
+  const since = new Date(new Date(src.last_synced_at).getTime() - 15 * 6e4).toISOString();
+  return { kind: 'incremental', updatedMin: since, nextToken };
+}
+
+async function syncUser(sb: any, userPlan: any) {
+  const userId = userPlan.user_id;
+  const tok = await googleToken({ grant_type: 'refresh_token', refresh_token: userPlan.refresh_token });
   if (!tok.ok || !tok.body.access_token) {
     const reason = tok.body?.error === 'invalid_grant' ? 'reconnect' : `token ${tok.body?.error || 'erro'}`;
     await sb.rpc('gcal_set_error', { p_user: userId, p_error: reason });
@@ -104,8 +116,9 @@ async function syncUser(sb: any, plan: any) {
   const access = tok.body.access_token as string;
   const out: any[] = [];
   const now = Date.now();
-  for (const src of plan.sources || []) {
-    const backfill = !src.sync_token;
+  for (const src of userPlan.sources || []) {
+    const plan = readPlan(src, now);
+    const backfill = plan.kind === 'backfill';
     const timeMin = backfill ? BACKFILL_FROM : new Date(now - 14 * 864e5).toISOString();
     const timeMax = new Date(now + 90 * 864e5).toISOString();
     let pageToken: string | null = null;
@@ -114,6 +127,7 @@ async function syncUser(sb: any, plan: any) {
     let failed = false;
     do {
       const qs = new URLSearchParams({ singleEvents: 'true', showDeleted: 'true', maxResults: '2500', timeMin, timeMax });
+      if (plan.updatedMin) qs.set('updatedMin', plan.updatedMin);
       if (pageToken) qs.set('pageToken', pageToken);
       const { status, body } = await gget(`/calendars/${encodeURIComponent(src.calendar_id)}/events?${qs}`, access);
       if (status !== 200) {
@@ -131,7 +145,7 @@ async function syncUser(sb: any, plan: any) {
       const last = i + 300 >= events.length;
       const { data, error } = await sb.rpc('gcal_ingest', {
         p_user: userId, p_calendar_id: src.calendar_id, p_events: batch,
-        p_next_sync_token: last ? 'janela' : null, p_full: backfill,
+        p_next_sync_token: last ? plan.nextToken : null, p_full: backfill,
       });
       if (error) { await sb.rpc('gcal_set_error', { p_user: userId, p_error: `ingest: ${error.message}` }); break; }
       out.push({ calendar: src.calendar_id, n: batch.length, counts: data?.counts });

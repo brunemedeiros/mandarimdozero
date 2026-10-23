@@ -345,7 +345,8 @@ end $$;
 create or replace function public.gcal_sync_plan(p_user uuid default null)
 returns jsonb language sql stable security definer set search_path = public as $$
   select coalesce(jsonb_agg(jsonb_build_object('user_id', c.user_id, 'refresh_token', c.refresh_token,
-    'sources', (select coalesce(jsonb_agg(jsonb_build_object('calendar_id', s.calendar_id, 'sync_token', s.sync_token)), '[]'::jsonb)
+    'sources', (select coalesce(jsonb_agg(jsonb_build_object('calendar_id', s.calendar_id, 'sync_token', s.sync_token,
+                                                             'last_synced_at', s.last_synced_at)), '[]'::jsonb)
                   from public.google_calendar_sources s where s.user_id = c.user_id and s.enabled))), '[]'::jsonb)
     from public.google_calendar_connections c
    where (p_user is null or c.user_id = p_user)
@@ -375,8 +376,16 @@ begin
       time_zone = coalesce(excluded.time_zone, google_calendar_events.time_zone),
       all_day = excluded.all_day, status = excluded.status, attendees = excluded.attendees, updated_at = now()
     returning id into v_id;
+    -- Nada mudou no Google desde a última leitura: não reprocessa (a leitura diária completa reenvia tudo).
+    if v_old.id is not null and v_old.match_state <> 'pending'
+       and v_old.title is not distinct from left(ev ->> 'title', 300)
+       and v_old.start_at is not distinct from (ev ->> 'start')::timestamptz
+       and v_old.end_at is not distinct from (ev ->> 'end')::timestamptz
+       and v_old.status = coalesce(ev ->> 'status', 'confirmed')
+       and v_old.attendees = coalesce(ev -> 'attendees', '[]'::jsonb) then
+      v_res := 'same';
     -- Decisão manual para este evento ("ignorar só este" / aluno escolhido à mão): mantém, atualizando o horário.
-    if v_old.id is not null and v_old.match_reason = 'ignorado pela professora'
+    elsif v_old.id is not null and v_old.match_reason = 'ignorado pela professora'
        and coalesce(ev ->> 'status', 'confirmed') <> 'cancelled' then
       v_res := 'kept';
     elsif v_old.id is not null and v_old.match_reason = 'escolhido pela professora'

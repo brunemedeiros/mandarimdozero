@@ -458,11 +458,14 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   do app), `google_calendar_sources`, `google_calendar_events`, `google_calendar_rules`, `google_oauth_states`; coluna
   `teacher_class_logs.google_event_ref`; funções `_gcal_*`, `gcal_*` (service_role) e `google_calendar_*` (professora);
   `class_calendar_feed` atualizada (sem horário = dia inteiro; professora conectada não recebe as aulas do Google). Sem DROP.
-- Staging (2026-10-23): partes A, C e D aplicadas pela ferramenta (`117_google_calendar_sync_a/_c/_d`); **parte B**
-  (`gcal_new_state`, `gcal_take_state`, `google_calendar_disconnect`, que têm "delete") travou na ferramenta: colar
-  `docs/google-agenda/117b-sql-editor.sql` no SQL Editor do Staging. Vault `gcal_sync_url`/`gcal_sync_token` e cron `gcal-sync`
-  (*/15) criados no Staging. Edge Function `google-calendar` v1 no Staging (verify_jwt false; sem as chaves do Google responde 503);
-  a versão do repo (senha do cron conferida pelo banco) ainda não foi publicada.
-- Teste local: `tests/aulas-presenca/run.sh` (117 30/30), `tests/aulas-presenca/test_google_map.mjs` 5/5.
-- Produção: pendente (aguardando as chaves do Google e autorização).
+- Staging (2026-10-23): partes A, C e D pela ferramenta (`117_google_calendar_sync_a/_c/_d`); parte B (`gcal_new_state`,
+  `gcal_take_state`, `google_calendar_disconnect`, com "delete", que trava a ferramenta) colada pela autora no SQL Editor;
+  `117e_gcal_incremental_privacy` (leitura incremental + apagar título/convidados de evento que não é aula). Edge Function
+  `google-calendar` v4 no Staging (verify_jwt false; sem login = 401). Staging sem Vault/cron do Google (não precisa).
+- Produção (2026-10-23, autorizada): `117_google_calendar_sync_a` (partes A, C, D e a 117e juntas, só sem a parte B); Vault
+  `gcal_sync_url`/`gcal_sync_token` (senha sorteada no banco, 64 caracteres) e cron `gcal-sync` (*/15) criados; Edge Function
+  `google-calendar` v1 (sem login = 401; senha errada = 401). 393 aulas com o mesmo hash antes e depois. Privilégios conferidos
+  (anon sem execute em nada; professora só nas `google_calendar_*`). **Parte B na produção: a autora cola
+  `docs/google-agenda/117b-sql-editor.sql` no SQL Editor** (sem ela o botão "Conectar" falha).
+- Teste local: `tests/aulas-presenca/run.sh` (117 33/33), `tests/aulas-presenca/test_google_map.mjs` 9/9.
 
