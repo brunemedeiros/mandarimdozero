@@ -45,7 +45,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   validar fr/zh × claro/escuro (ver `.claude/rules/frontend-fr-zh.md`).
 - **Caixas da marca com texto** (botão, aba/chip selecionado, contador; decisão da autora, 2026-10-19, PR 370): fundo
   `var(--brand-fill)` (azul no fr, vermelho no zh) e texto `var(--on-brand-fill)` (branco), igual nos dois temas. Nunca
-  `--seal-red` com texto, nem `#fff`/azul fixo. Guarda: `tests/cores-marca/`.
+  `--seal-red` com texto, nem `#fff`/azul fixo. Verde de sucesso (✓, "Continuar" do acerto, selo ok; PR 383, 2026-10-22):
+  `var(--success-fill)` com `var(--on-success-fill)` (branco); nunca `--jade` com texto. Guarda: `tests/cores-marca/`.
 - **Conteúdo nasce traduzido** (decisão da autora, 2026-10-19): todo conteúdo novo ou alterado (trilha, notas, diálogos,
   Desafios, ditados) já sai com a versão para CADA idioma de site do curso (hoje pt-BR e en), no mesmo lote e na mesma
   revisão; lote sem todas as traduções não é importado nem publicado. Como fazer: `.claude/rules/conteudo-trilha.md`.
