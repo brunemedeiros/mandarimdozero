@@ -451,3 +451,18 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   `my_permissions()` + `free`; permissão nova `conj_games`; `trail_skip_locked` ligado para Premium Basic/Pro; rótulos;
   5 RPCs de Deck público por `_has_permission(uid, 'public_deck_import')`. Detalhes e rollback:
   `docs/i18n/etapa5-auditoria-premium.md`, seção 8.
+
+## 117 -- Google Agenda → site (2026-10-23)
+
+- `shared/supabase_migrations/117_google_calendar_sync.sql`: tabelas `google_calendar_connections` (refresh token, sem acesso
+  do app), `google_calendar_sources`, `google_calendar_events`, `google_calendar_rules`, `google_oauth_states`; coluna
+  `teacher_class_logs.google_event_ref`; funções `_gcal_*`, `gcal_*` (service_role) e `google_calendar_*` (professora);
+  `class_calendar_feed` atualizada (sem horário = dia inteiro; professora conectada não recebe as aulas do Google). Sem DROP.
+- Staging (2026-10-23): partes A, C e D aplicadas pela ferramenta (`117_google_calendar_sync_a/_c/_d`); **parte B**
+  (`gcal_new_state`, `gcal_take_state`, `google_calendar_disconnect`, que têm "delete") travou na ferramenta: colar
+  `docs/google-agenda/117b-sql-editor.sql` no SQL Editor do Staging. Vault `gcal_sync_url`/`gcal_sync_token` e cron `gcal-sync`
+  (*/15) criados no Staging. Edge Function `google-calendar` v1 no Staging (verify_jwt false; sem as chaves do Google responde 503);
+  a versão do repo (senha do cron conferida pelo banco) ainda não foi publicada.
+- Teste local: `tests/aulas-presenca/run.sh` (117 30/30), `tests/aulas-presenca/test_google_map.mjs` 5/5.
+- Produção: pendente (aguardando as chaves do Google e autorização).
+
