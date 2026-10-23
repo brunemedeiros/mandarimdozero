@@ -4084,6 +4084,24 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   .cal-chip{ font-size:0; padding:0; height:6px; border-radius:3px; } .cal-chip b{ display:none; }
   .cal-nav, .cal-today-btn{ min-height:44px; min-width:44px; }
 }
+/* Google Agenda -> site (117, shared/google-calendar.js) */
+.gcal-box > summary { cursor: pointer; list-style: revert; }
+.gcal-body { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.gcal-badge { display: inline-block; min-width: 1.4em; padding: 0 6px; border-radius: 999px; background: var(--brand-fill); color: var(--on-brand-fill); font-size: 0.75rem; text-align: center; }
+.gcal-oneway { font-weight: 700; }
+.gcal-error { color: var(--error-red); font-weight: 700; margin: 0; }
+.gcal-sources, .gcal-review { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.gcal-sources li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.gcal-sources select { max-width: 260px; }
+.gcal-actions, .gcal-review-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.gcal-review-item { border: 1px solid var(--border, rgba(0,0,0,.12)); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.gcal-review-head { display: flex; flex-direction: column; gap: 2px; }
+.gcal-review-actions select { flex: 1; min-width: 180px; }
+.gcal-remember { font-size: 0.85rem; display: flex; gap: 6px; align-items: center; }
+.gcal-counts, .gcal-account { margin: 0; }
+@media (max-width: 600px) {
+  .gcal-actions .btn, .gcal-review-actions .btn { min-height: 44px; }
+}
 /* Link de agenda (103): assinatura ICS em Aulas (professora e aluno) */
 .calendar-feed-box > summary { cursor: pointer; list-style: revert; }
 .calendar-feed-body { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
@@ -5710,6 +5728,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/admin-flashcards.js"></script>
 <script src="../shared/teacher-class-logs.js"></script>
 <script src="../shared/admin-class-logs.js"></script>
+<script src="../shared/google-calendar.js"></script>
 <script src="../shared/teacher-support-materials.js"></script>
 <script src="../shared/teacher-materials-ui.js"></script>
 <script src="../shared/admin-support-materials.js"></script>
