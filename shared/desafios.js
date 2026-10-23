@@ -63,9 +63,35 @@ function chFamilia(){ return chCfg().familia(); }
 // Textos do site que citam o idioma estudado (chT procura aqui primeiro).
 function chSiteTexts(){ return (CH_CONFIG && CH_CONFIG.texts) || {}; }
 
-// Os listeners que eram de nível superior no fr/app.js, na mesma ordem; o site chama uma vez, no mesmo ponto.
+// Os listeners que eram de nível superior no fr/app.js, na mesma ordem (voltar à trilha, troca de idioma, janela
+// Premium, voltar da lista e do player); o site chama uma vez, no mesmo ponto do carregamento.
 function wireChallengesScreen(){
+  document.getElementById('challenges-module-back').addEventListener('click', () => {
+    challengesModuleFilter = null;
+    switchTab('path');
+  });
   window.addEventListener('i18n:change', () => { applyChallengeI18n(); });
+  document.getElementById('premium-challenges-modal-close').addEventListener('click', () => {
+    document.getElementById('premium-challenges-modal').style.display = 'none';
+  });
+  document.getElementById('premium-challenges-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'premium-challenges-modal') document.getElementById('premium-challenges-modal').style.display = 'none';
+  });
+  document.getElementById('challenges-list-back-btn').addEventListener('click', () => {
+    challengeQueueContext = null;
+    renderChallengeCategories();
+  });
+  document.getElementById('challenge-back-to-list').addEventListener('click', () => {
+    if (challengePreviewMode){
+      challengePreviewMode = false;
+      document.getElementById('challenge-preview-banner').style.display = 'none';
+      removePreviewWarningEl();
+      renderChallengesAdmin();
+    } else {
+      challengeQueueContext = null;
+      backToChallengesListOrCategories();
+    }
+  });
 }
 
 // Plural com contagem zero: em pt-BR o Intl.PluralRules trata 0 como 'one',
