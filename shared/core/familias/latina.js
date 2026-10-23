@@ -191,31 +191,8 @@
     return nomes[marca + ':' + base] || nomes[marca] || marca;
   }
 
-  // ---------------------------------------------------------------- alinhamento letra a letra (conjugação)
-
-  // = conjAlign do fr/app.js (distância de edição + operações, para marcar as letras erradas).
-  function alinharLetras(a, b) {
-    var A = Array.from(a || ''), B = Array.from(b || '');
-    var la = A.map(function (c) { return c.toLowerCase(); }), lb = B.map(function (c) { return c.toLowerCase(); });
-    var n = A.length, m = B.length, d = [];
-    for (var x0 = 0; x0 <= n; x0++) d.push(new Array(m + 1).fill(0));
-    for (var x = 0; x <= n; x++) d[x][0] = x;
-    for (var y = 0; y <= m; y++) d[0][y] = y;
-    for (x = 1; x <= n; x++) for (y = 1; y <= m; y++)
-      d[x][y] = Math.min(d[x - 1][y - 1] + (la[x - 1] === lb[y - 1] ? 0 : 1), d[x - 1][y] + 1, d[x][y - 1] + 1);
-    var ops = [];
-    x = n; y = m;
-    while (x > 0 || y > 0) {
-      if (x > 0 && y > 0 && d[x][y] === d[x - 1][y - 1] + (la[x - 1] === lb[y - 1] ? 0 : 1)) {
-        ops.push({ t: la[x - 1] === lb[y - 1] ? 'same' : 'sub', a: A[x - 1] }); x--; y--;
-      } else if (x > 0 && d[x][y] === d[x - 1][y] + 1) {
-        ops.push({ t: 'extra', a: A[x - 1] }); x--;
-      } else {
-        ops.push({ t: 'missing' }); y--;
-      }
-    }
-    return { ops: ops.reverse(), cost: d[n][m] };
-  }
+  // Alinhamento letra a letra: saiu daqui (não é latino, é distância de edição) e é comum a todos os sites:
+  // alinharLetras em shared/core/licao-feedback.js (paridade fr x zh, item C2, 2026-10-23).
 
   // ---------------------------------------------------------------- teclado de acentos (sem DOM)
 
@@ -612,7 +589,6 @@
     resultadoAcentuacao: resultadoAcentuacao,
     tiposDeErroDeAcento: tiposDeErroDeAcento,
     nomeDaMarca: nomeDaMarca,
-    alinharLetras: alinharLetras,
     htmlTecladoDeAcentos: htmlTecladoDeAcentos,
     inserirNoCursor: inserirNoCursor,
     criar: criar

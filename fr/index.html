@@ -55,6 +55,7 @@ try{
 <link rel="stylesheet" href="../shared/painel/painel-tokens.css">
 <link rel="stylesheet" href="../shared/painel/painel-componentes.css">
 <link rel="stylesheet" href="../shared/review-bank.css">
+<link rel="stylesheet" href="../shared/licao-feedback.css">
 <style>
 :root{
   /* Design tokens — paleta própria do Francês do Zero (azul como cor
@@ -3996,10 +3997,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .conj-session-result .score-num{ font-size:34px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
 
 .reorder-attempt{ font-size:18px; line-height:1.8; }
-.typed-attempt{ font-size:18px; line-height:1.8; overflow-wrap:anywhere; }
-/* Letra errada (vermelho) e letra que faltou (traço): usados na Conjugação e em "Sua resposta" dos exercícios de digitar. */
-.conj-x{ color:var(--error-red); background:color-mix(in srgb, var(--error-red) 16%, transparent); border-radius:3px; font-weight:800; text-decoration:underline wavy; text-decoration-thickness:1.5px; text-underline-offset:3px; }
-.conj-gap{ display:inline-block; width:.55em; height:1em; border-bottom:3px solid var(--error-red); vertical-align:-.15em; margin:0 1px; }
+/* .typed-attempt, .conj-x e .conj-gap ("Sua resposta" com letras erradas): shared/licao-feedback.css, comum aos sites. */
 .reorder-attempt-w.ok{ color:var(--jade); }
 .reorder-attempt-w.bad{ color:var(--error-red); font-weight:700; text-decoration:line-through; text-decoration-thickness:2px; }
 .reorder-attempt-w.near{ text-decoration:underline; text-decoration-color:#E0A526; text-decoration-thickness:3px; text-underline-offset:4px; }
@@ -6767,6 +6765,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/core/exercicios-licao.js"></script>
 <script src="../shared/core/estado-trilha-desafios.js"></script>
 <script src="../shared/core/curriculo-progresso.js"></script>
+<script src="../shared/core/licao-feedback.js"></script>
 <script src="../shared/core/familias/latina.js"></script>
 <script src="lang-hooks.js"></script>
 <script src="../shared/core/quase-iguais-simples.js"></script>

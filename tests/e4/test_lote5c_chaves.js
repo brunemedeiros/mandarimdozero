@@ -24,7 +24,8 @@ for (const l of ['fr', 'zh']) {
   check(vm.runInContext('LANG_HOOKS.chartLearnedDates().length', c) === (l === 'fr' ? 1 : 2), l + ' datas do gráfico (zh soma hanzi)');
   check(vm.runInContext('LANG_HOOKS.chartEmptyHTML("m")', c).includes(l === 'fr' ? 'color:var(--ink-soft)' : 'manual-empty'), l + ' gráfico vazio');
   check(vm.runInContext('LANG_HOOKS.ttsLang', c) === (l === 'fr' ? 'fr-FR' : 'zh-CN') && vm.runInContext('LANG_HOOKS.ttsRate', c) === (l === 'fr' ? 0.9 : 0.85), l + ' voz sintética do diálogo');
-  check(vm.runInContext('LANG_HOOKS.pregenRate()', c) === (l === 'fr' ? 0.9 : 0), l + ' velocidade do áudio gravado');
+  // Paridade C5 (2026-10-23, decisão da dona): o mp3 pré-gravado toca a 0,9 nos dois sites (antes o zh tocava a 1,0).
+  check(vm.runInContext('LANG_HOOKS.pregenRate()', c) === 0.9, l + ' velocidade do áudio gravado');
   const el = { textContent: '', innerHTML: '' }; c.el = el; vm.runInContext('LANG_HOOKS.setFlyContent(el, "<b>x</b>")', c);
   check(l === 'fr' ? el.textContent === '<b>x</b>' && el.innerHTML === '' : el.innerHTML === '<b>x</b>' && el.textContent === '', l + ' conteúdo do bloco que voa');
 }

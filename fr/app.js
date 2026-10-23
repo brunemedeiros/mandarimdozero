@@ -109,7 +109,7 @@ const PREGEN_AUDIO_RATE = 0.9;
 function speakFrenchAudioOnly(text, btnEl, isAutoplay){
   const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
   if (pregenFile){
-    playPregeneratedAudio(pregenFile, btnEl, isAutoplay, PREGEN_AUDIO_RATE);
+    playPregeneratedAudio(pregenFile, btnEl, isAutoplay, LANG_HOOKS.pregenRate());
     return;
   }
 
@@ -1819,10 +1819,7 @@ function buildExerciseHint(ex, unit){
     return t('fr.hint.cloze');
   }
   if (ex.format === 'trueFalse'){
-    const shown = unit.concepts && unit.concepts.find(c => STEP_STATE.conceptsShown.has(c.id));
-    return shown
-      ? t('fr.hint.trueFalseExplanation', { title: shown.blocks[0].title })
-      : t('fr.hint.trueFalseGeneric');
+    return trueFalseHint(unit); // shared/core/licao-feedback.js
   }
   return null;
 }
@@ -3619,10 +3616,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 
     // Acerto: tudo verde. Erro: só os blocos fora do lugar ficam vermelhos,
     // os que já estavam na posição certa ficam verdes (dica de onde errou).
-    slotsEl.querySelectorAll('.reorder-slot').forEach((slot, pos) => {
-      const here = ex.shuffledBlocks[chosenSequence[pos]] === correctOrder[pos];
-      slot.classList.add(isCorrect || here ? 'correct' : 'incorrect');
-    });
+    markReorderSlots(slotsEl, chosenSequence, ex.shuffledBlocks, correctOrder, isCorrect); // shared/core/licao-feedback.js
     // Com a frase completa, todo bloco já foi usado (visibility:hidden --
     // preserva a posição pra "desfazer" clicando num slot) -- mas essa
     // desfeita não existe mais depois de respondido, então a fileira de
@@ -3649,8 +3643,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       // frase (isca) ; amarelo sublinhado = palavra certa no lugar errado.
       const attemptHTML = `<div class="reorder-attempt">${chosenSequence.map((blockIdx, pos) => {
         const block = ex.shuffledBlocks[blockIdx];
-        const cls = block === correctOrder[pos] ? 'ok' : (correctOrder.includes(block) ? 'near' : 'bad');
-        return `<span class="reorder-attempt-w ${cls}">${block.f}</span>`;
+        return `<span class="reorder-attempt-w ${reorderBlockStatus(block, pos, correctOrder)}">${block.f}</span>`;
       }).join(' ')}</div>`;
       setTimeout(() => showWrongAnswerPanel(contentEl, ex, { attemptHTML }), 500);
     }
@@ -3913,7 +3906,7 @@ function renderSpeedReview(){
   el.innerHTML = `
     <div class="speed-header">
       <div class="speed-hearts">${heartsHTML}</div>
-      <div class="speed-score">${SPEED_STATE.score} pts</div>
+      <div class="speed-score">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
     </div>
     <div class="speed-timer-track"><div class="speed-timer-fill" id="speed-timer-fill" style="width:100%"></div></div>
     <div class="speed-prompt">
@@ -5258,9 +5251,9 @@ function conjOtherFormOf(verb, tenseKey, given, accepted){
 }
 
 // Alinhamento letra a letra (distância de edição), como no Jogo de Conjugações.
-// Família latina, fase 2: a conta mora em shared/core/familias/latina.js (alinharLetras).
+// A conta é comum a todos os sites: alinharLetras em shared/core/licao-feedback.js.
 function conjAlign(a, b){
-  return FamiliaLatina.alinharLetras(a, b);
+  return alinharLetras(a, b);
 }
 
 // O que a pessoa digitou, com só as letras erradas em vermelho; o traço
@@ -5276,22 +5269,7 @@ function conjAnswerViewHTML(given, target, status){
   return `<div class="${cls}" role="img" aria-label="${escapeHTML(t('feedback.label.yourAnswer') + ': ' + given)}"><span class="conj-answer-text">${html}</span>${icon}</div>`;
 }
 
-// "Sua resposta" dos exercícios de digitar da trilha: o que a pessoa digitou, com as letras erradas em
-// vermelho e um traço onde faltou letra (mesmo alinhamento da Conjugação). Cartão com duas formas
-// ("allemand / allemande"): compara com a forma mais parecida, ou com o texto inteiro se ela digitou a barra.
-function typedAttemptHTML(typed, expected){
-  const given = String(typed == null ? '' : typed).replace(/\s*\/\s*/g, ' / ').trim();
-  if (!given) return '';
-  const forms = acceptedForms(expected);
-  const alvos = (given.includes('/') && forms.length > 1) ? [forms.join(' / ')] : (forms.length ? forms : [String(expected || '')]);
-  let best = null;
-  alvos.forEach(a => { const r = conjAlign(given, a); if (!best || r.cost < best.cost) best = r; });
-  const html = best.ops.map(o =>
-    o.t === 'same' ? escapeHTML(o.a)
-    : o.t === 'missing' ? '<span class="conj-gap"></span>'
-    : `<span class="conj-x">${escapeHTML(o.a)}</span>`).join('');
-  return `<div class="typed-attempt">${html}</div>`;
-}
+// "Sua resposta" dos exercícios de digitar da trilha: typedAttemptHTML, comum a todos os sites (shared/core/licao-feedback.js).
 
 // Texto falado de uma forma: pronome + forma (sem pronome no impératif).
 function conjSpeakText(idx, tenseKey, form){

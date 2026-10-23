@@ -95,7 +95,7 @@ let feedbackAudioCtx = null;
 function speakChineseAudioOnly(text, btnEl, isAutoplay){
   const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
   if (pregenFile){
-    playPregeneratedAudio(pregenFile, btnEl, isAutoplay);
+    playPregeneratedAudio(pregenFile, btnEl, isAutoplay, LANG_HOOKS.pregenRate());
     return;
   }
 
@@ -1248,7 +1248,7 @@ function buildUnitBlock(u){
   if (state === 'current') block.setAttribute('aria-current', 'step');
 
   const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>`
-    : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="${t('trail.unit.skippedTitle')}">⏭ 跳过</span>` : '';
+    : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="${t('trail.unit.skippedTitle')}">${t('trail.unit.skippedBadge')}</span>` : '';
   const chevronHTML = hasLessons ? `<button class="ub-chevron" type="button" aria-label="${t('zh.path.unit.expandLessons')}">▾</button>` : '';
   // Só lições JÁ concluídas (e que não são o Ponto de verificação, cujo
   // reteste tem efeitos colaterais bem mais pesados -- desbloqueio de
@@ -1902,9 +1902,7 @@ function buildExerciseHint(ex, unit){
     return t('zh.hint.cloze');
   }
   if (ex.format === 'trueFalse'){
-    return unit.usageNote
-      ? t('zh.hint.trueFalseUsage', { title: unit.usageNote.title })
-      : t('zh.hint.trueFalseDefault');
+    return trueFalseHint(unit); // shared/core/licao-feedback.js (cita o conceito já visto, como no fr)
   }
   return null;
 }
@@ -3327,7 +3325,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   const inputEl = document.getElementById('vocab-type-input');
   inputEl.focus();
   wirePinyinTonePicker(contentEl.querySelector('.pinyin-tone-picker'), inputEl);
-  const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+  const strip = pinyinAnswerCompareForm;
 
   function lockInputs(){
     inputEl.disabled = true;
@@ -3336,7 +3334,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
-  function finish(isCorrect, toneOnly){
+  function finish(isCorrect, toneOnly, typedRaw){
     STEP_STATE.exerciseAnswered = true;
     playFeedbackSound(isCorrect);
     lockInputs();
@@ -3354,7 +3352,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       // A resposta certa já aparece dentro do próprio painel de resultado
       // (answerExplanationHTML mostra ex.item.p) -- sem repetir aqui como um
       // texto solto antes do painel, num estilo diferente.
-      showWrongAnswerPanel(contentEl, ex, { toneOnly });
+      showWrongAnswerPanel(contentEl, ex, { toneOnly, attemptHTML: typedAttemptHTML(typedRaw, ex.item.p) });
     }
   }
 
@@ -3368,7 +3366,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     const typedAll = typedVariants(inputEl.value, ex.item.p).map(strip), typed = typedAll[0];
     const forms = acceptedFormsTyped(ex.item.p);
     const ok = forms.some(form => typedAll.includes(strip(form)));
-    finish(ok, !ok && isToneOnlyMiss(typed, forms, strip));
+    finish(ok, !ok && isToneOnlyMiss(typed, forms, strip), inputEl.value);
   });
 
   wireDontKnowButton(contentEl, ex, () => {
@@ -3378,6 +3376,13 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   });
 }
 
+
+// Forma em que os exercícios de digitar do zh comparam o pinyin: numerado vira marca de tom, minúsculas, sem
+// pontuação. A marcação de "Sua resposta" (typedAttemptHTML, via LANG_HOOKS.typedAttemptForm) usa a mesma forma,
+// para as letras em vermelho concordarem com o veredito.
+function pinyinAnswerCompareForm(s){
+  return normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+}
 
 // BEGIN pinyin-answer-logic (extraído literalmente por zh/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
 // ---------- Comparação de pinyin digitado (preserva tom) ----------
@@ -3564,7 +3569,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
-  function finish(isCorrect, toneOnly){
+  function finish(isCorrect, toneOnly, typedRaw){
     STEP_STATE.exerciseAnswered = true;
     playFeedbackSound(isCorrect);
     revealBlank(isCorrect ? 'ok' : 'wrong');
@@ -3575,7 +3580,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       addStudyMinutes();
       setTimeout(() => showCorrectFeedbackPanel(contentEl, clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl, ex, { toneOnly }), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex, { toneOnly, attemptHTML: typedAttemptHTML(typedRaw, ex.correctBlock.p) }), 500);
     }
   }
 
@@ -3593,11 +3598,11 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     document.getElementById('cloze-verify-btn').addEventListener('click', () => {
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
-      const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+      const strip = pinyinAnswerCompareForm;
       const typedAll = typedVariants(inputEl.value, ex.correctBlock.p).map(strip), typed = typedAll[0];
       const forms = acceptedFormsTyped(ex.correctBlock.p);
       const ok = forms.some(form => typedAll.includes(strip(form)));
-      finish(ok, !ok && isToneOnlyMiss(typed, forms, strip));
+      finish(ok, !ok && isToneOnlyMiss(typed, forms, strip), inputEl.value);
     });
   } else {
     contentEl.querySelectorAll('.cloze-option').forEach(btn => {
@@ -3802,9 +3807,9 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     );
     playFeedbackSound(isCorrect);
 
-    slotsEl.querySelectorAll('.reorder-slot').forEach(slot => {
-      slot.classList.add(isCorrect ? 'correct' : 'incorrect');
-    });
+    // Acerto: tudo verde. Erro: só os blocos fora do lugar ficam vermelhos, os que já estavam na posição certa
+    // ficam verdes (dica de onde errou), como no fr. shared/core/licao-feedback.js
+    markReorderSlots(slotsEl, chosenSequence, ex.shuffledBlocks, correctOrder, isCorrect);
     // Com a frase completa, todo bloco já foi usado (visibility:hidden --
     // preserva a posição pra "desfazer" clicando num slot, ver renderSlots
     // acima) -- mas essa desfeita não existe mais depois de respondido, então
@@ -3825,8 +3830,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       // frase (isca); amarelo sublinhado = bloco certo no lugar errado.
       const attemptHTML = `<div class="reorder-attempt">${chosenSequence.map((blockIdx, pos) => {
         const block = ex.shuffledBlocks[blockIdx];
-        const cls = block === correctOrder[pos] ? 'ok' : (correctOrder.includes(block) ? 'near' : 'bad');
-        return `<span class="reorder-attempt-w ${cls}"><div class="pinyin">${block.p}</div><div class="hanzi">${block.c}</div></span>`;
+        return `<span class="reorder-attempt-w ${reorderBlockStatus(block, pos, correctOrder)}"><div class="pinyin">${block.p}</div><div class="hanzi">${block.c}</div></span>`;
       }).join('')}</div>`;
       setTimeout(() => showWrongAnswerPanel(contentEl, ex, { attemptHTML }), 500);
     }
@@ -4024,7 +4028,7 @@ function renderSpeedReview(){
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
         <h3>${t('review.speed.gameOver')}</h3>
-        <div class="score-num">${SPEED_STATE.score} pts</div>
+        <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
         <p>${tp('review.speed.answered', SPEED_STATE.index === 1 ? 1 : 2, { n: SPEED_STATE.index })}</p>
         <p class="review-record-line">${speedIsRecord ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
         <div class="review-complete-actions">
@@ -4070,7 +4074,7 @@ function renderSpeedReview(){
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
         <h3>${t('review.complete.title')}</h3>
-        <div class="score-num">${SPEED_STATE.score} pts</div>
+        <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
         <p class="review-record-line">${speedIsRecord2 || speedStreakRecord2 ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
@@ -4092,7 +4096,7 @@ function renderSpeedReview(){
   el.innerHTML = `
     <div class="speed-header">
       <div class="speed-hearts">${heartsHTML}</div>
-      <div class="speed-score">${SPEED_STATE.score} pts</div>
+      <div class="speed-score">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
     </div>
     <div class="speed-timer-track"><div class="speed-timer-fill" id="speed-timer-fill" style="width:100%"></div></div>
     <div class="speed-prompt">
@@ -4216,7 +4220,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     const inputEl = mountEl.querySelector('#cloze-review-input');
     inputEl.focus();
     wirePinyinTonePicker(mountEl.querySelector('.pinyin-tone-picker'), inputEl);
-    const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+    const strip = pinyinAnswerCompareForm;
     function verify(){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
@@ -4302,7 +4306,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     const inputEl = mountEl.querySelector('#cloze-review-input');
     inputEl.focus();
     wirePinyinTonePicker(mountEl.querySelector('.pinyin-tone-picker'), inputEl);
-    const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+    const strip = pinyinAnswerCompareForm;
     function verify(){
       if (inputEl.disabled) return;
       inputEl.disabled = true;

@@ -103,6 +103,8 @@ function carregarNovo() {
     declaracao('acceptedForms'),
     bloco('dictation-answer-logic'),
     bloco('accent-challenge-logic'),
+    // alinharLetras saiu do módulo latino para shared/core/licao-feedback.js (paridade C2, 2026-10-23): vem do core.
+    opcional('alinharLetras'),
     declaracao('conjAlign'),
     declaracao('conjFold'),
     opcional('FR_ACCENT_GROUPS'),
