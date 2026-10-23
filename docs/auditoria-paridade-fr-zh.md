@@ -41,10 +41,13 @@ Além das funções soltas, a comparação das funções de mesmo nome e dos arq
 
 ## 3. Categoria A: próprio do idioma (não se aplica ao zh)
 
-- **Conjugação** (`fr/app.js:5196-5980`, dados em `fr/conjugation-data.js`, 16 668 linhas; jogos em `fr/conj-games.js`
-  com motor já comum em `shared/conj-games.js`). Chinês não conjuga verbo. **Atenção para o pt**: a dona já decidiu que a
-  Conjugação é um dos módulos do começo do português (`docs/i18n/auditoria-app-portugues.md`, seção 7). Hoje a tela de
-  prática (33 funções) mora em `fr/app.js`; só o motor dos Jogos está em `shared/`. Ver seção 8.
+- **Conjugação** (dados em `fr/conjugation-data.js`, 16 668 linhas; jogos em `fr/conj-games.js`). Chinês não conjuga
+  verbo: o zh não carrega nada disto (correto). **Para o pt**: a dona já decidiu que a Conjugação é um dos módulos do
+  começo do português (`docs/i18n/auditoria-app-portugues.md`, seção 7). **Feito (etapa 5a, 2026-10-23)**: a tela inteira
+  (as 33 funções) saiu do `fr/app.js` para `shared/conjugacao.js` (motor, ao lado de `shared/conj-games.js`) +
+  `shared/conjugacao.css`; o que é do francês (tempos, pronomes e elisão, impératif, futur proche, concordância com être,
+  busca sem "se", bandeiras, voz) ficou em `fr/conj-config.js` (`registerConjugation`). O pt liga com dados + config
+  (passo a passo em `docs/historico/27-paridade-conjugacao.md`). Ver seção 8.
 - **Teclado de acentos, "oe" por "œ" valendo meio ponto, apóstrofo curvo** (`fr/app.js:3253-3275`, `5700-5735`; regras em
   `shared/core/familias/latina.js` com a configuração em `fr/lang-hooks.js`). O zh tem o equivalente próprio:
   `pinyinTonePickerHTML`, `normalizePinyinAnswer`, `acceptedFormsTyped` + `typedVariants`, `isToneOnlyMiss`
@@ -53,8 +56,8 @@ Além das funções soltas, a comparação das funções de mesmo nome e dos arq
 - **Voz** (`loadFrenchVoice`, `speakFrench`, `speakFrenchAudioOnly`), **números por extenso do francês**
   (`frenchNumberWords`, `fr/app.js:6350`, usado no Ditado), **destaque de vocabulário no diálogo sem artigo**
   (`dlgVocabTerms`, `fr/app.js:2345`, tira "le/la/un/une"), **gênero da nacionalidade falado** (`speakableProfileText`).
-- Missões e contadores do dia de Conjugação (`registerDailyConjugation*`, `fr/app.js:845-860`); o zh tem os de hanzi
-  (`registerDailyHanziLesson`).
+- Missões e contadores do dia de Conjugação (`registerDailyConjugation*` e `CONJ_DAILY_MISSIONS`, hoje em
+  `shared/conjugacao.js`); o zh tem os de hanzi (`registerDailyHanziLesson`).
 
 ## 4. Categoria B: depende de decisão ou conteúdo da dona
 
@@ -226,7 +229,8 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
   5/5, sem exceção desde a B2; a única que havia, `level-test-highlight`, foi para `shared/modulos-niveis.css`).
 - CSS que hoje só existe no fr e terá de ir junto quando o recurso for levado: ~~`.typed-attempt`, `.conj-x`, `.conj-gap`
   (C2)~~ (feito: `shared/licao-feedback.css`), ~~`.scenario-*` (C6), `.gram-*` (C6)~~ (feito: `shared/gramatica-cenario.css`; `.gram-block*` fica em cada site), ~~`.module-label`/`.ml-*`/`.checkpoint-*` (B2)~~ (feito: `shared/modulos-niveis.css`),
-  `.cg-*` dos Jogos (`shared/conj-games.js`), `.reorder-final-*` (`fr/index.html:1675-1676`).
+  ~~`.cg-*` dos Jogos (`shared/conj-games.js`)~~ (feito: `shared/conjugacao.css`, com todo o CSS da Conjugação),
+  `.reorder-final-*` (`fr/index.html:1675-1676`).
 - Ids só do fr (81): todos de Conjugação (28), Desafios (27), Ditado (10), janelas Premium de Desafios/Jogos (6), seletor
   de nível e Teste de Nível (5), menu Mais (2) e `path-level-title`. Nenhum é usado por `shared/` fora desses recursos
   (os de `shared/activity-focus.js` são de Desafios e Conjugação, procurados com `getElementById` que aceita ausência).
@@ -241,10 +245,13 @@ e dos exercícios já extraídas nos lotes 1 a 5e da E4 (com `LANG_HOOKS`), o mo
 (`shared/core/gramatica-cenario.js`), o sistema de módulos e níveis inteiro (`shared/core/modulos-niveis.js` +
 `shared/modulos-niveis.css`: Ponto de verificação do módulo e o pulo, Revisão do módulo, Teste de Nível, seletor de nível,
 trilha e Mapa por módulos, tela de módulo concluído), com a prova (`shared/checkpoint-exam.js`) e a seleção da Revisão do
-módulo (`shared/review-milestone.js`), e as regras da família latina (`shared/core/familias/latina.js`).
+módulo (`shared/review-milestone.js`), as regras da família latina (`shared/core/familias/latina.js`) e a tela inteira
+da Conjugação (`shared/conjugacao.js` + `shared/conjugacao.css`, ligada por um `<site>/conj-config.js` com dados e regras
+do idioma; vale para quem carregar, o zh não carrega).
 
 **Perde** (está só em `fr/app.js` e teria de ser copiado, o que recria o problema desta auditoria):
-- Toda a tela da Conjugação (33 funções). O pt precisa dela desde o começo.
+- ~~Toda a tela da Conjugação (33 funções)~~: feito, `shared/conjugacao.js` (etapa 5a, 2026-10-23). O pt liga com
+  `pt/conjugation-data.js` + `pt/conj-config.js` (passo a passo em `docs/historico/27-paridade-conjugacao.md`).
 - ~~Toda a parte de módulos e níveis (32 funções)~~: feito, `shared/core/modulos-niveis.js` (2026-10-23). Falta só a linha
   dos Desafios/Ditados do módulo, que vai com o B1.
 - ~~Unidade de gramática e exercício de cenário (C6)~~: feito, `shared/core/gramatica-cenario.js` (2026-10-23).
@@ -292,7 +299,8 @@ pt) cobre o pt **se** a extração incluir os itens da lista "Perde". Recomendo 
 | 8 | C7 `unitId` no evento da Revisão | uma linha no zh | trivial | não |
 
 Itens B2 (módulos) e Conjugação: não são esquecimento, mas a recomendação é mover o motor para `shared/core/` **antes** de
-levar ao zh ou ao pt, em vez de copiar. (B2 feito em 2026-10-23: `shared/core/modulos-niveis.js`.)
+levar ao zh ou ao pt, em vez de copiar. (B2 feito em 2026-10-23: `shared/core/modulos-niveis.js`; Conjugação feita em
+2026-10-23: `shared/conjugacao.js`, fora do `core/` porque o zh não a carrega.)
 
 ## 12. Guarda automática sugerida
 

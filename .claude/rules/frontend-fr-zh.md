@@ -42,6 +42,10 @@ paths:
   módulos, tela de módulo concluído): motor comum em `shared/core/modulos-niveis.js` (CSS em `shared/modulos-niveis.css`, depois do `<style>`),
   vale para todo site que declarar `MODULES`/`LEVEL_TESTS`; prova por idioma em `LANG_HOOKS.checkpointExam`/`checkpointScore`. Nunca copiar
   para um `app.js`. Guarda: `tests/paridade-sites/test_modulos_niveis*.js`.
+- **Conjugação** (escolha, busca, prática, correção, teclado, resultado, abas Praticar | Jogos, selo dos Jogos, contadores das missões):
+  motor comum em `shared/conjugacao.js` (CSS em `shared/conjugacao.css`, depois do `<style>`; jogos em `shared/conj-games.js`); o que é do
+  idioma vai na config do site (`fr/conj-config.js`, `registerConjugation`). Nunca copiar para um `app.js`; o zh não carrega (não conjuga).
+  Guarda: `tests/paridade-sites/test_conjugacao*.js`.
 - **Lembrete de revisão do rodapé** (`maybeShowReviewReminder`, `shared/core/revisao-decks.js`): o dia só é gravado depois de o banner ficar visível uns segundos ou ser clicado/dispensado
   (`markReviewReminderSeen`); em lição (`lesson-focus`) nem aparece nem gasta o dia; reavalia ao voltar para a aba e ao sair da lição. Guarda: `tests/lembrete-revisao/`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
