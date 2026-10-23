@@ -8002,6 +8002,9 @@ function openChallengePlayer(id){
   if (!c) return;
   if (isChallengeLocked(c)){ openPremiumChallengesModal(); return; }
 
+  // A fila "Revisar erros" abre o player direto da tela de categorias (sem passar
+  // pela lista): sem esconder as categorias, elas ficavam empilhadas acima do player.
+  document.getElementById('challenges-categories-wrap').style.display = 'none';
   document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'block';
   document.getElementById('challenge-preview-banner').style.display = 'none';
