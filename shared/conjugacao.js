@@ -340,7 +340,9 @@ function conjFlagHTML(lang){
   const c = conjCfg();
   const flags = c.flags || { fr: '🇫🇷', pt: '🇧🇷' };
   const keys = c.flagLabelKeys || { fr: 'fr.conj.sel.langFr', pt: 'fr.conj.sel.langPt' };
-  return `<span class="conj-flag" role="img" aria-label="${t(keys[lang])}">${SCENARIO_FLAG_SVG[flags[lang]]}</span>`;
+  // Bandeira desenhada (SCENARIO_FLAG_SVG) quando existe; senão, o próprio emoji (vira desenho do Fluent, se houver).
+  const svg = (typeof SCENARIO_FLAG_SVG !== 'undefined' && SCENARIO_FLAG_SVG[flags[lang]]) || escapeHTML(flags[lang] || '');
+  return `<span class="conj-flag" role="img" aria-label="${t(keys[lang])}">${svg}</span>`;
 }
 
 function renderConjSearchList(){
