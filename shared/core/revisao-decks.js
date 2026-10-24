@@ -635,6 +635,9 @@ function syncReviewBackLink(){
 }
 
 function startSpeedReview(){
+  // A3: nada da sessão anterior (cronômetro, próxima pergunta agendada) passa para esta.
+  if (typeof stopSpeedSession === 'function') stopSpeedSession();
+  SPEED_STATE.session = (SPEED_STATE.session || 0) + 1;
   holdBadgeCelebrations();
   trackEvent('lesson_start', 'speed_review', null);
   SPEED_STATE.queue = buildSpeedQueue();

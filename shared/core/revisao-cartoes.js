@@ -74,7 +74,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
-      ${clozeImageUrl ? `<img src="${clozeImageUrl}" class="flashcard-image" alt="">` : ''}
+      ${flashcardImageHTML(clozeImageUrl)}
       <div class="cloze-sentence">${LANG_HOOKS.reviewClozeSentenceHTML(sentenceHTML, view, answered)}</div>
       ${view.audioUrl ? customAudioBtnHTML(view.audioUrl) : ''}
       ${(answered || card.origin === 'teacher') && view.translation.text ? `<div class="cloze-trans">${escapeHTML(view.translation.text)}</div>` : ''}
@@ -145,12 +145,12 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
-      ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
+      ${flashcardImageHTML(promptImageUrl)}
       ${LANG_HOOKS.reviewPromptHTML(view, `${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${view.prompt.audioUrl ? customAudioBtnHTML(view.prompt.audioUrl) : ''}`)}
       ${answered ? `
         <div class="divider-line"></div>
         <span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}">${escapeHTML(view.displayAnswerText)}</span>
-        ${answerImageUrl ? `<img src="${answerImageUrl}" class="flashcard-image" alt="">` : ''}
+        ${flashcardImageHTML(answerImageUrl)}
         ${answerAudioUrl ? customAudioBtnHTML(answerAudioUrl) : ''}
       ` : ''}
     </div>
@@ -299,11 +299,11 @@ function renderNormalCard(mountEl, card, localState, callbacks){
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
-      ${resolvedFrontImageUrl ? `<img src="${resolvedFrontImageUrl}" class="flashcard-image" alt="">` : ''}
+      ${flashcardImageHTML(resolvedFrontImageUrl)}
       ${frontHTML}
       ${localState.revealed ? `
         <div class="divider-line"></div>
-        ${resolvedBackImageUrl ? `<img src="${resolvedBackImageUrl}" class="flashcard-image" alt="">` : ''}
+        ${flashcardImageHTML(resolvedBackImageUrl)}
         ${backHTML}
       ` : `<div class="flashcard-hint">${t('review.tapToReveal')}</div>`}
     </div>

@@ -278,8 +278,35 @@ function pickStudyProgress(card){
   STUDY_PROGRESS_FIELDS.forEach(k => { if (card[k] !== undefined) out[k] = card[k]; });
   return out;
 }
-function serializeCardsForSave(cards){
-  return (cards || []).map(c => (c && c.origin === 'study') ? pickStudyProgress(c) : c);
+// `preserved` (A2, revisão de 2026-10-24): entradas do save de cartões da professora/próprios cuja busca FALHOU neste
+// carregamento (ver PRESERVED_SAVED_CARDS em shared/core/estado-trilha-desafios.js). Voltam para o save como estavam,
+// para o progresso FSRS delas nunca sumir por uma falha de rede; um id já presente em `cards` vence.
+function serializeCardsForSave(cards, preserved){
+  const out = (cards || []).map(c => (c && c.origin === 'study') ? pickStudyProgress(c) : c);
+  if (Array.isArray(preserved) && preserved.length){
+    const ids = new Set(out.map(c => c && c.id));
+    preserved.forEach(s => { if (s && s.id != null && !ids.has(s.id)){ out.push(s); ids.add(s.id); } });
+  }
+  return out;
+}
+
+// Origem de uma entrada SALVA de cartão: 'teacher' (id t...), 'self' (id s...) ou null (trilha e o resto).
+// O save de professora/próprios guarda o objeto inteiro (com `origin`); o prefixo do id cobre save sem o campo.
+function savedCardOrigin(s){
+  if (!s || s.id == null) return null;
+  if (s.origin === 'teacher' || s.origin === 'self') return s.origin;
+  if (s.origin) return null;
+  const id = String(s.id);
+  if (/^t\d/.test(id)) return 'teacher';
+  if (/^s\d/.test(id)) return 'self';
+  return null;
+}
+// Entradas salvas das origens `origins` que não casaram com nenhum cartão de `cards` (A2): é o que mergeSavedCards
+// deixaria cair. Só se guardam quando a busca daquela origem falhou; com busca bem-sucedida, sumir é sinal de cartão apagado.
+function unmatchedSavedCardsOfOrigins(cards, savedCards, origins){
+  if (!Array.isArray(savedCards) || !origins || !origins.length) return [];
+  const ids = new Set((cards || []).map(c => c && c.id));
+  return savedCards.filter(s => s && s.id != null && !ids.has(s.id) && origins.includes(savedCardOrigin(s)));
 }
 
 // Load: aplica o save sobre os cards recém-reconstruídos, POR ID.
