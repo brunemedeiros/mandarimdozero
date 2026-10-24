@@ -8,8 +8,11 @@ paths:
 
 # Front-end fr/zh (app.js, index.html, CSS)
 
-- `fr/app.js` e `zh/app.js` são espelhados: mudança em um quase sempre vale no outro (com as adaptações de idioma:
-  zh tem hanzi+pinyin separados, `speakChinese`, `pinyinTonePickerHTML`; fr tem `speakFrench`, `frAccentPickerHTML`).
+- Lição, exercícios, diálogo, Revisão (cartões e Revisão rápida), voz, salvar/carregar, conquistas, trilha, configurações e a
+  casca do app são **comuns** em `shared/core/` (`licao-base`, `licao-dialogo`, `licao-exercicios`, `trilha-licao`,
+  `estado-salvar`, `revisao-cartoes`, `app-comum`, `voz`; família latina em `shared/core/familias/latina-licao.js`); o que muda
+  por idioma vem de `LANG_HOOKS` (`<site>/lang-hooks.js`). Nunca copiar para um `app.js` (que só tem dados/configuração e o
+  próprio do idioma: hanzi, pinyin, histórias no zh). Guarda: `tests/paridade-sites/test_quase_iguais.js` (paridade 5d).
   Desafios e Ditados só existem no fr (os motores são comuns, ver abaixo).
 - **Tokens de cor**: nomes iguais podem ter valores diferentes. Em fr, `--seal-red` é AZUL (#3498D6) e
   `--on-seal-red` é quase preto; em zh é vermelho e branco. Ler o `:root` do arquivo antes de usar. Texto sobre
