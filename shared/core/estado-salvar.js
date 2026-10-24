@@ -8,7 +8,8 @@ function serializeState(){
   // site declara, no mesmo lugar de sempre.
   const se = (k) => (k in STATE) ? { [k]: STATE[k] } : {};
   return {
-    cards: serializeCardsForSave(STATE.cards),
+    // A2: + entradas de cartões cuja busca falhou neste carregamento (progresso guardado até a próxima busca boa).
+    cards: serializeCardsForSave(STATE.cards, typeof PRESERVED_SAVED_CARDS !== 'undefined' ? PRESERVED_SAVED_CARDS : null),
     ...se('hanziCards'),
     cardVariants: STATE.cardVariants,
     // Mudanças de currículo (shared/core/curriculo-progresso.js): arquivo de aposentados, versão e id da lição atual.
@@ -57,6 +58,11 @@ function applySerializedState(data){
     // K2-C: cards da trilha só recebem a whitelist de progresso; ver
     // mergeSavedCards (shared/study-trail-model.js).
     mergeSavedCards(STATE.cards, cur.cards);
+    // A2: busca dos cartões da professora/próprios falhou -> guarda as entradas salvas que ficaram sem par (nunca apagar progresso).
+    if (typeof cardOriginsWithFailedFetch === 'function'){
+      const failed = cardOriginsWithFailedFetch();
+      PRESERVED_SAVED_CARDS = failed.length ? unmatchedSavedCardsOfOrigins(STATE.cards, cur.cards, failed) : [];
+    }
   }
   // Hanzi (zh): só o progresso volta (o texto vem da camada do curso); ver mergeSavedHanziCards.
   if ('hanziCards' in STATE && Array.isArray(data.hanziCards)) mergeSavedHanziCards(STATE.hanziCards, data.hanziCards);
