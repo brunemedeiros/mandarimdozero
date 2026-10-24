@@ -1180,3 +1180,13 @@ Base: revisão de todas as decisões 1 a 227 pedida pela dona; ela aceitou **tod
      o mandarim usa a mesma grade com slots próprios (escrita, tons, caracteres), sem forçar a grade latina.
 240. **Correções que a revisão pediu** (aplicadas no `15`): regra 4 reescrita à luz da regra 12; pendências a conferir: contagem de "Pedir no restaurante" com *le restaurant*
      (220), *confirmer*, exceções M2.1/M3.3/M8.5/M9.1 e as palavras que foram para nota (*adorer, se coucher, la boisson, la chemise*).
+
+241. **Exceções à regra 13 resolvidas pelo limite novo (decisão 231)**: "Apresentar a família" (11), "Dizer o dia e combinar" (12), "Falar do tempo e das estações" (11) e "Falar de lazer" (10) deixam
+     de ser "a revisar pela dona"; "Falar de lazer" já tinha voltado a 10 com *voir* em "Verbos muito usados" (216).
+242. ***le restaurant* em "Pedir no restaurante" (módulo "Comer e beber") sem estourar o teto de 3h45**: ***le menu* deixa de ser cartão** (continua ensinado pela nota "*le menu* x *la carte*");
+     a unidade fica com 10 palavras (*le petit-déjeuner, le déjeuner, le dîner, la carte, l'entrée, le plat, commander, le verre, l'addition, le restaurant*). Conferido: *le menu* não aparece em `fr/content.js`
+     (não é cartão publicado). Se a conferência no ledger `published_ids.json` achar o cartão, a unidade volta a 11 e o módulo a 3h55 (decisão a reabrir).
+243. ***confirmer*** fica em "Escrever para convidar, recusar e agradecer" (módulo "Comunicar e se relacionar", A2).
+244. **Palavras em nota continuam em nota**: *adorer* ("Mais gostos"), *se coucher* ("Mais rotina") e *la boisson* ("Mais no restaurante"). ***la chemise* volta a cartão** em "Comprar roupas" (módulo "Compras"),
+     que fica com 11 (4 lições + Revisão, +10 min no módulo, que continua abaixo do teto); a nota "Outras roupas" perde *la chemise* e segue com *la veste, le manteau, le sac*.
+245. **Título das notas de vocabulário: em discussão** (a dona propôs "Outras palavras de/na/sobre ...", "Mais sobre ..." ou "Indo além" sem tema). Até decidir, os títulos atuais ficam como provisórios.
