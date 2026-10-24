@@ -30,5 +30,7 @@ const exSrc = fs.readFileSync(path.join(ROOT, 'shared/core/licao-exercicios.js')
 const frHooks = fs.readFileSync(path.join(ROOT, 'fr/lang-hooks.js'), 'utf8');
 check('trilha: "Digite o que ouviu" e lacuna digitada usam lessonTypedAnswerResult', (exSrc.match(/LANG_HOOKS\.typedAnswer\.verdict\(inputEl\.value/g) || []).length === 2
   && /verdict: \(given, x\) => \{ const r = lessonTypedAnswerResult\(given, x\.f\);/.test(frHooks));
-check('Desafio Acentuação usa accentAnswerOutcome (família latina)', /accentAnswerOutcome\(studentAnswer, c\.targetText\)/.test(src));
+// A tela da Acentuação foi para shared/desafios-telas.js na etapa 5c da paridade (docs/historico/29-*).
+const desafiosTelas = fs.readFileSync(path.join(ROOT, 'shared/desafios-telas.js'), 'utf8');
+check('Desafio Acentuação usa accentAnswerOutcome (família latina)', /accentAnswerOutcome\(studentAnswer, c\.targetText\)/.test(desafiosTelas));
 summary();
