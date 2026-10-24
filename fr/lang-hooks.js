@@ -38,7 +38,7 @@ const LANG_HOOKS = {
   scenarioOptionHTML: (p) => p.f,
   phraseAnswerHTML: (p) => `<strong>${p.f}</strong> ${audioBtnHTML(p.f)}`,
   reviewEmptyEmoji: '☕',
-  speedPromptHTML: (card) => `<div class="french">${cardPromptText(card)}</div>`,
+  speedPromptHTML: (card) => `<div class="french">${escapeHTML(cardPromptText(card))}</div>`,
   clozeCorrectHTML: (b) => `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${b.f}</strong></div>`,
   phraseFeedbackHTML: (p, trans, correct) => `${correct}<div class="feedback-phrase-zh"><strong>${p.f}</strong> ${audioBtnHTML(p.f)}</div><div class="feedback-phrase-trans">${trans}</div>`,
   phraseHasWord: (word) => { const needle = word.f.replace(/\s*\([^()]*\)/g, '').trim().toLowerCase(); return (p) => p.f.toLowerCase().includes(needle); },

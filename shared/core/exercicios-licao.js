@@ -527,7 +527,7 @@ function renderMatchTiles(){
     <button class="match-tile" data-idx="${i}" data-card-id="${t.cardId}" data-side="${t.side}">
       <div class="match-tile-inner">
         <div class="match-tile-face match-tile-back"><span>?</span></div>
-        <div class="match-tile-face match-tile-front">${t.text}</div>
+        <div class="match-tile-face match-tile-front">${escapeHTML(t.text)}</div>
       </div>
     </button>
   `).join('');

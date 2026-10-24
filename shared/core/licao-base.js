@@ -425,7 +425,7 @@ function renderSpeedReview(){
       ${LANG_HOOKS.speedPromptHTML(card)}
     </div>
     <div class="speed-options">
-      ${options.map((opt, i) => `<button class="speed-option" data-idx="${i}">${cardAnswerText(opt)}</button>`).join('')}
+      ${options.map((opt, i) => `<button class="speed-option" data-idx="${i}">${escapeHTML(cardAnswerText(opt))}</button>`).join('')}
     </div>
   `;
 
