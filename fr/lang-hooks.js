@@ -90,6 +90,7 @@ const LANG_HOOKS = {
   introWordHTML: (v) => `<div class="vocab-card-word">${v.f} ${audioBtnHTML(v.f)}</div>`,
   introPhraseHTML: (p) => `<div class="vocab-phrase-french">${p.f} ${audioBtnHTML(p.f)}</div>`,
   wireIntroCard: () => {},
+  badgeLevel: { id: 'A1', label: 'A1' },
 // --- /E4 hooks ---
   // Família latina (shared/core/familias/latina.js): configuração do FRANCÊS. O português, quando o /pt existir,
   // terá a dele no pt/lang-hooks.js (rascunho em shared/core/familias/latina-idiomas.js). Ver docs/i18n/familia-latina-modulo.md.

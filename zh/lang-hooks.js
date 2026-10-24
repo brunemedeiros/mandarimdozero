@@ -141,5 +141,6 @@ const LANG_HOOKS = {
   introPhraseHTML: (p) => `<div class="vocab-phrase-pinyin">${p.p}</div>
       <div class="vocab-phrase-hanzi">${p.c} ${audioBtnHTML(p.c)}</div>`,
   wireIntroCard: (el) => wireStrokeButtons(el),
+  badgeLevel: { id: 'HSK1', label: 'HSK 1' },
 // --- /E4 hooks ---
 };
