@@ -4,7 +4,8 @@ Escopo: `shared/core/*.js` (com `familias/`), `shared/desafios*.js`, `shared/dit
 `shared/conj-games.js`, `shared/checkpoint-exam.js`, `shared/review-milestone.js`, `shared/study-trail-model.js`,
 `fr/*-config.js`, `fr/lang-hooks.js`, `zh/lang-hooks.js`, o que restou de `fr/app.js` e `zh/app.js` e a ordem dos
 `<script>` em `fr/index.html` e `zh/index.html`. Foco: erros e robustez (arquitetura fica com o outro revisor).
-Nenhum código foi alterado. Commit da `main` revisado: `1559776e`.
+Nenhum código foi alterado nesta revisão. Commit da `main` revisado: `1559776e`. **C1, A1, A2 e A3 foram corrigidos depois
+(2026-10-24); registro em `docs/historico/31-revisao-codigo-compartilhado.md`.**
 
 Os scripts de prova ficam no scratchpad da sessão
 (`/tmp/claude-0/-home-user-mandarimdozero/4c1eb048-5257-5fef-a1a8-50fce44b465c/scratchpad/revisao/`): carregam os
@@ -32,6 +33,10 @@ Críticos e altos, em uma linha cada:
 
 ### C1. URL de imagem e de áudio do cartão entram crus em atributo HTML (XSS entre contas pelo Deck público)
 
+> **CORRIGIDO** (2026-10-24, branch `claude/friendly-hamilton-u4ssl2`): `shared/core/midia-segura.js` (`safeMediaUrl`,
+> `flashcardImageHTML`) nos 4 renderers e no `customAudioBtnHTML`. Prova: `tests/revisao-seguranca/test_c1_*.js`.
+> A parte do banco (validar URL em `fields`/na publicação do Deck público) continua proposta, não feita.
+
 - **Gravidade**: crítico. **Confiança**: alta no cliente (provado); média na cadeia completa pelo banco (lida no SQL, não
   executada ao vivo).
 - **Onde**:
@@ -56,6 +61,9 @@ Críticos e altos, em uma linha cada:
 
 ### A1. Texto do cartão vira HTML no Combinar e na Revisão rápida
 
+> **CORRIGIDO** (2026-10-24): `escapeHTML` nos 3 pontos (+ pinyin do zh). Prova: `tests/revisao-seguranca/test_a1_texto.js`.
+> A marcação da opção certa por índice (B3) não foi mexida: com o texto escapado, a comparação por `textContent` acerta.
+
 - **Gravidade**: alto. **Confiança**: alta (provado).
 - **Onde**:
   - `shared/core/exercicios-licao.js:530`: `<div class="match-tile-face match-tile-front">${t.text}</div>` (Combinar).
@@ -72,6 +80,9 @@ Críticos e altos, em uma linha cada:
   pelo índice da opção (ver B3).
 
 ### A2. Busca de cartões da professora/próprios que falha no carregamento apaga o progresso FSRS deles
+
+> **CORRIGIDO** (2026-10-24): falha de busca = `null`; entradas salvas sem par guardadas em `PRESERVED_SAVED_CARDS` e
+> regravadas no save até a próxima busca boa. Prova: `tests/revisao-seguranca/test_a2_progresso.js`.
 
 - **Gravidade**: alto. **Confiança**: alta (provado).
 - **Onde**: `shared/core/estado-trilha-desafios.js:210-218` (`loadStateAndRender`) chama
@@ -94,6 +105,9 @@ Críticos e altos, em uma linha cada:
   as remova.
 
 ### A3. Revisão rápida continua corrigindo cartões depois que a aluna sai
+
+> **CORRIGIDO** (2026-10-24): `stopSpeedSession()` (troca de aba, Voltar, outro modo, sessão nova) e passagem de 700 ms
+> presa à sessão. Prova: `tests/revisao-seguranca/test_a3_revisao_rapida.js`.
 
 - **Gravidade**: alto. **Confiança**: alta (provado).
 - **Onde**: `shared/core/quase-iguais-textos.js:91`: depois de cada resposta, `setTimeout(() => renderSpeedReview(), 700)`

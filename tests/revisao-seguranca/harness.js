@@ -4,7 +4,7 @@
 // convidado. Carrega os arquivos de PRODUÇÃO; só a rede é stubada.
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules', __dirname] }));
 const http = require('http'), fs = require('fs'), path = require('path');
-const ROOT = process.env.REPO_ROOT || path.resolve(__dirname, '../..');
+const ROOT = path.resolve(process.env.REPO_ROOT || path.resolve(__dirname, '../..'));
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml' };
 const srv = http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html';

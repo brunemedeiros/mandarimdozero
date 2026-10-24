@@ -21,6 +21,7 @@ paths:
 - Toda cor de fundo nova: screenshot Playwright em fr claro, fr escuro, zh claro, zh escuro (skill `teste-navegador`).
 - Alvos de toque >= 44px no celular (só em `@media`), sem rolagem horizontal em 390px.
 - Texto vindo de usuário/autor: sempre `escapeHTML()` (escapa aspas; usado em atributos também).
+- URL de mídia de cartão (imagem/áudio) no HTML: sempre `safeMediaUrl()`/`flashcardImageHTML()` (`shared/core/midia-segura.js`), nunca crua. Guarda: `tests/revisao-seguranca/`.
 - Texto visível novo passa por `t()`/`shared/i18n` (ver `.claude/rules/i18n.md`); português não muda sem aprovação.
 - `let`/`const` top-level de `<script>` são bindings léxicos: não redeclarar o mesmo nome em dois scripts da página
   (ex.: `CARD_TYPE_UI_META` só em `admin-flashcards.js`); `window.X` não enxerga `let X`.
