@@ -243,7 +243,9 @@ function lessonRecapItems(u, lesson){
     .filter(i => misses[i] >= 1)
     .sort((a, b) => misses[b] - misses[a])
     .slice(0, 8)
-    .map(i => u.vocab[i])
+    // Unidade sem vocabulário (gramática): os erros guardados são de OUTRA unidade (Ponto de verificação anterior na mesma
+    // sessão); sem esta guarda, u.vocab undefined quebrava a tela e o "Ver resultado" da gramática não fazia nada (paridade 5d).
+    .map(i => (u.vocab || [])[i])
     .filter(Boolean);
 }
 

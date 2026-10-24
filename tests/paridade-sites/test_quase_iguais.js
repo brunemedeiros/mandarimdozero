@@ -11,6 +11,12 @@ const H = require('./quase-iguais-harness.js');
 const ROOT = path.resolve(__dirname, '..', '..');
 const REF = process.env.PARIDADE_5D_REF || '2e229930';
 const SITES = (process.env.SITES || 'fr,zh').split(',');
+// 1) "Ver resultado" da unidade de gramática depois de um Ponto de verificação com erros (lessonRecapItems sem vocab).
+// (A outra correção, a tradução da lacuna da Revisão escapada no fr, não muda nada nas cenas: o conteúdo de teste não
+// tem HTML. As duas são conferidas em tests/paridade-sites/test_correcoes_5d.js.)
+const CORRECOES = [
+  ['shared/core/exercicios-licao.js', '    .map(i => u.vocab[i])\n', '    .map(i => (u.vocab || [])[i])\n'],
+];
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? String(typeof x === 'string' ? x : JSON.stringify(x)).slice(0, 900) : ''); } };
 
@@ -40,6 +46,13 @@ function comparar(rotulo, antes, depois){
   try {
     wt = fs.mkdtempSync(path.join(os.tmpdir(), 'paridade-5d-'));
     execFileSync('git', ['worktree', 'add', '--detach', '-f', wt, REF], { cwd: ROOT, stdio: 'ignore' });
+    // Correções de bug feitas de propósito na etapa (docs/historico/30-paridade-quase-iguais.md): aplicadas também na REF,
+    // para a comparação provar que todo o resto continua igual.
+    for (const [arq, de, para] of CORRECOES){
+      const f = path.join(wt, arq), txt = fs.readFileSync(f, 'utf8');
+      if (!txt.includes(de)) throw new Error('correção não aplicável na REF: ' + arq);
+      fs.writeFileSync(f, txt.replace(de, para));
+    }
     for (const site of SITES){
       for (const [lang, opts] of [['pt-BR', {}], ['en', { maxLicoes: 2, maxRevisao: 40 }]]){
         const antes = await H.sequencia(browser, wt, site, lang, opts);
