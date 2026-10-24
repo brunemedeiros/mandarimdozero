@@ -493,4 +493,8 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Staging: `120_gcal_outside_tab` (2026-10-24). Produção: `119_120_gcal_review_tabs` (2026-10-24, 119 e 120 juntas; 897 aulas
   com o mesmo hash antes e depois; `google_calendar_review_items` sem execute para anon).
 - Teste local: `tests/aulas-presenca/run.sh` 117 a 120 45/45; painel-professora 685/685.
+- Site publicado pelo PR #399 (2026-10-24). Edge Function `google-calendar` v2 na produção (2026-10-24): volta do login pelo
+  `agenda.profbrune.com.br/google/callback` (Netlify). Sem login = 401. Staging continua na v4 (volta direto pelo Supabase).
+- Botão "Conectar de novo" (sem desconectar; não perde Pulados nem escolhas) publicado em 2026-10-24; painel-professora 691/691.
+  Caminho novo da volta do login conferido pela autora (`agenda.profbrune.com.br/google/callback` responde "Link expirado").
 

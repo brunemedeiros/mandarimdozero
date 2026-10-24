@@ -111,6 +111,7 @@ function gcalBoxHTML(){
   return `${intro}
     <p class="gcal-account">${t('panel.gcal.connectedAs', { email: escapeHTML(st.google_email || '?') })} · ${t('panel.gcal.lastRead', { when: escapeHTML(gcalAgo(st.last_sync_at)) })}</p>
     ${err ? `<p class="gcal-error" role="alert">${err}</p>` : ''}
+    ${st.last_error === 'reconnect' ? `<button type="button" class="btn btn-primary mural-small-btn" data-gcal-connect>${t('panel.gcal.reconnect')}</button>` : ''}
     <div class="section-label">${t('panel.gcal.calendars')}</div>
     <p class="profile-edit-hint">${t('panel.gcal.calendarsHint')}</p>
     <ul class="gcal-sources">${sources.map(s => `<li data-gcal-source="${escapeHTML(s.calendar_id)}">
@@ -122,6 +123,7 @@ function gcalBoxHTML(){
     <div class="gcal-actions">
       <button type="button" class="btn btn-secondary mural-small-btn" data-gcal-sync ${anyOn ? '' : 'disabled'}>${t('panel.gcal.syncNow')}</button>
       <button type="button" class="btn tinv-ghost mural-small-btn" data-gcal-refresh>${t('panel.gcal.refreshList')}</button>
+      <button type="button" class="admin-select-link gcal-skip" data-gcal-connect>${t('panel.gcal.reconnect')}</button>
       <a href="#" class="admin-select-link" data-gcal-disconnect>${t('panel.gcal.disconnect')}</a>
     </div>
     <p class="gcal-counts">${t('panel.gcal.counts', { linked: c.linked || 0, review: c.review || 0, waiting: c.no_account || 0 })}</p>

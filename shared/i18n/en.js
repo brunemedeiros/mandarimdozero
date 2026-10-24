@@ -3481,6 +3481,7 @@ window.I18N_CATALOG['en'] = {
   'panel.gcal.keep': 'Keep the lesson', // ALTA
   'panel.gcal.unlink': 'Unlink from Google', // ALTA
   'panel.gcal.saved': 'Done.', // ALTA
+  'panel.gcal.reconnect': 'Connect again', // ALTA
   'panel.gcal.restored': 'Back in To review.', // ALTA
   'panel.gcal.restore': 'Bring back', // ALTA
   'panel.gcal.dateRange': '{from} to {to}', // ALTA
@@ -3507,7 +3508,7 @@ window.I18N_CATALOG['en'] = {
   'panel.gcal.reading': 'Reading your calendar…', // ALTA
   'panel.gcal.synced': 'Calendar read.', // ALTA
   'panel.gcal.loadError': 'Couldn\'t load the Google connection right now.', // ALTA
-  'panel.gcal.errReconnect': 'Google asked you to connect again. Click Disconnect, then Connect Google Calendar.', // ALTA
+  'panel.gcal.errReconnect': 'Google asked you to connect again. Click "Connect again" (nothing is lost).', // ALTA
   'panel.gcal.errGeneric': 'Something went wrong with Google Calendar. Please try again in a moment.', // ALTA
   'panel.gcal.connectedToast': 'Google Calendar connected. Now choose the calendars with your lessons.', // ALTA
   'panel.gcal.cancelledToast': 'Google connection canceled.', // ALTA
