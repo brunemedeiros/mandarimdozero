@@ -184,7 +184,7 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
-      ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
+      ${flashcardImageHTML(promptImageUrl)}
       <div class="${LANG_HOOKS.promptClass}">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${customAudioUrl ? customAudioBtnHTML(customAudioUrl) : ''}</div>
       ${LANG_HOOKS.promptPinyinHTML(view)}
     </div>

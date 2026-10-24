@@ -18,7 +18,14 @@ const vm = require('vm');
 
 const APP_JS_PATH = path.join(__dirname, '..', 'app.js');
 // E4: parte do app.js passou para shared/core/*.js (carregado antes do app.js); o teste enxerga os dois.
-const SRC = require('../../tests/e4/app-source').withCore(fs.readFileSync(APP_JS_PATH, 'utf8'));
+// Etapa 5b da paridade (2026-10-23): o bloco dictation-answer-logic mora em shared/ditados.js (motor comum dos Ditados).
+const DITADOS_SRC = fs.readFileSync(path.join(__dirname, '..', '..', 'shared', 'ditados.js'), 'utf8');
+// Etapa 5c (2026-10-23): os blocos dos Desafios (accent-challenge-logic, challenge-translation-logic,
+// challenge-review-logic, cloze-grammar-logic) moram em shared/desafios.js (motor comum dos Desafios).
+const DESAFIOS_SRC = fs.readFileSync(path.join(__dirname, '..', '..', 'shared', 'desafios.js'), 'utf8');
+// Paridade 5d: o bloco accent-answer-logic e o teclado de acentos estão em shared/core/familias/latina-licao.js.
+const LATINA_LICAO_SRC = fs.readFileSync(path.join(__dirname, '..', '..', 'shared', 'core', 'familias', 'latina-licao.js'), 'utf8');
+const SRC = require('../../tests/e4/app-source').withCore(DITADOS_SRC + '\n' + DESAFIOS_SRC + '\n' + LATINA_LICAO_SRC + '\n' + fs.readFileSync(APP_JS_PATH, 'utf8'));
 
 function extractBlock(beginMarker, endMarker){
   const start = SRC.indexOf(beginMarker);
@@ -46,6 +53,18 @@ function runBlockAndExport(block, names){
   // latinaFr() (a instância do módulo) mora no bloco accent-answer-logic: os outros blocos precisam dele.
   const accentAnswer = extractBlock('// BEGIN accent-answer-logic', '// END accent-answer-logic');
   if (!block.includes('// BEGIN accent-answer-logic')) vm.runInContext(accentAnswer, sandbox);
+  // O bloco do ditado chama dictLatina()/dictSentAbbreviations() (configuração do site, registerDictations): carrega o
+  // começo do motor (configuração e textos, sem DOM) e a configuração do francês, como a página.
+  if (block.includes('// BEGIN dictation-answer-logic')){
+    vm.runInContext(DITADOS_SRC.slice(0, DITADOS_SRC.indexOf('// ---------- Lista, filtro do módulo')), sandbox);
+    vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'ditados-config.js'), 'utf8'), sandbox);
+  }
+  // A Acentuação chama chFamilia() (configuração do site, registerChallenges): carrega o começo do motor (só a
+  // configuração) e a configuração do francês, como a página.
+  if (block.includes('// BEGIN accent-challenge-logic')){
+    vm.runInContext(DESAFIOS_SRC.slice(0, DESAFIOS_SRC.indexOf('// DESAFIOS: três categorias')), sandbox);
+    vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'desafios-config.js'), 'utf8'), sandbox);
+  }
   vm.runInContext(block + `\n;this.__exports = { ${names.join(', ')} };`, sandbox);
   return sandbox.__exports;
 }

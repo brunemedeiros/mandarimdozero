@@ -11,7 +11,7 @@ function load(lang) {
   const nodes = {};
   const ctx = { console, spoken, document: { getElementById: (id) => nodes[id] || (nodes[id] = el()) }, STEP_STATE: { conceptQueue: [{ kind: 'x', blocks: [{ title: 'T', body: 'B', examples: [{ f: 'bonjour', c: '你好', p: 'nǐ hǎo', t: 'olá' }] }] }], conceptIdx: 0, conceptBlockIdx: 0, exerciseIndex: 0 },
     REALITY_NOTE_BANNER_TEXT: {}, CULTURE_NOTE_BANNER_TEXT: {}, setAcqPhaseBanner() {}, t: (k) => `[${k}]`, audioBtnHTML: (x) => `<btn ${x}>`, wireAudioButtons() {}, wireDontKnowButton() {},
-    escapeHTML: (x) => x, reviewProgressBarHTML: () => '', reviewCardTagLabel: () => 'tag', customAudioBtnHTML: () => '', reviewObservationHTML: () => '', isStudyLanguageField: () => true, APP_KEY: 'k',
+    escapeHTML: (x) => x, reviewProgressBarHTML: () => '', reviewCardTagLabel: () => 'tag', customAudioBtnHTML: () => '', flashcardImageHTML: () => '', reviewObservationHTML: () => '', isStudyLanguageField: () => true, APP_KEY: 'k',
     resolveCardContentView: () => ({ prompt: { text: 'PROMPT', pinyinText: 'PY' }, correctText: 'c', distractorTexts: ['d'] }), shuffle: (a) => a, wireCustomAudioButtons() {},
     canSpeakFrench: () => true, canSpeakChinese: () => true, speakFrench: (x) => spoken.push('fr:' + x), speakChinese: (x) => spoken.push('zh:' + x) };
   vm.createContext(ctx);

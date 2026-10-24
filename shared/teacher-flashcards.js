@@ -39,14 +39,16 @@ async function fetchMyActiveTeacherId(languageAppKey){
   return (data && data[0] && data[0].teacher_id) || null;
 }
 
-async function fetchFlashcardsForCurrentStudent(languageAppKey){
+// opts.nullOnError: devolve null (e não []) quando a busca FALHA -- o carregamento do progresso precisa distinguir
+// "não há cartões" de "não deu para saber" para nunca descartar o progresso salvo (A2, revisão de 2026-10-24).
+async function fetchFlashcardsForCurrentStudent(languageAppKey, opts){
   if (!CURRENT_USER) return [];
   const { data, error } = await supabaseClient
     .from('teacher_flashcards')
     .select('*')
     .eq('student_id', CURRENT_USER.id)
     .eq('language_app_key', languageAppKey);
-  if (error){ console.error('Erro ao carregar flashcards da aluna:', error); return []; }
+  if (error){ console.error('Erro ao carregar flashcards da aluna:', error); return (opts && opts.nullOnError) ? null : []; }
   return data || [];
 }
 

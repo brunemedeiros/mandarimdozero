@@ -74,5 +74,102 @@ const LANG_HOOKS = {
   levelTestKeys: { sub: 'zh.levelTest.sub', intro: 'zh.levelTest.intro' },
   // O "Manual da unidade" é da lição de uma unidade; na prova do módulo/nível ele some (openUnitDetail o mostra de novo).
   examScreenOpened: () => { const b = document.getElementById('unit-manual-btn'); if (b) b.style.display = 'none'; },
+  reviewEmptyEmoji: '🍵',
+  speedPromptHTML: (card) => `<div class="hanzi">${escapeHTML(cardPromptText(card))}</div>
+      <div class="pinyin">${escapeHTML(cardPromptPinyinText(card))}</div>`,
+  clozeCorrectHTML: (b) => `${t('feedback.correctAnswerColon')} <strong>${b.c}</strong> <span class="pinyin">(${b.p})</span>`,
+  phraseFeedbackHTML: (p, trans, correct) => phraseFeedbackDetailHTML(p, trans, correct),
+  phraseHasWord: (word) => (p) => p.c.includes(word.c),
+  dlgLineText: (l) => l.c,
+  dlgLineHTML: (l, terms) => `<div class="dlg-py">${dlgHighlightPinyin(l.c, l.p, terms)}</div>
+          <div class="dlg-hz">${dlgHighlight(l.c, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>`,
+  dlgSide: (dlg, spk) => dlgSpeakerSide(dlg, spk),
+  dlgWordToast: (d) => `${d.w}${d.py ? ' (' + d.py + ')' : ''} = ${d.tr}`,
+  dlgBubbleHTML: (l, blank) => blank ? '<div class="dlg-hz"><span class="dlg-blank">· · · · ·</span></div>' : `<div class="dlg-py">${escapeHTML(l.p)}</div><div class="dlg-hz">${escapeHTML(l.c)}</div>`,
+  dlgOptionHTML: (o) => `<span class="dlg-py">${escapeHTML(o.p)}</span><span class="dlg-hz">${escapeHTML(o.c)}</span>`,
+  textOf: (x) => x.c,
+  lessonKeys: { counter: 'zh.exercise.counter', whatMeans: 'zh.exercise.whatMeans', listenChoose: 'zh.exercise.listenChoose', tapAgain: 'zh.exercise.tapToListenAgain',
+    typeHeard: 'zh.exercise.typePinyinHeard', typePlaceholder: 'zh.exercise.typePinyinPlaceholder', clozePlaceholder: 'zh.review.cloze.placeholder',
+    translateTo: 'zh.exercise.translateToChinese', orderSentence: 'zh.exercise.orderSentence', reorderTapHint: 'zh.reorder.tapHint',
+    hintThinkWhen: 'zh.hint.thinkWhenUse', hintListenAgain: 'zh.hint.listenAgain', hintThinkContext: 'zh.hint.thinkContext',
+    hintReorderTranslate: 'fr.hint.reorderTranslate', hintReorderOrder: 'zh.hint.reorder', hintCloze: 'zh.hint.cloze', hintFullSentence: 'zh.hint.fullsentence',
+    expandLessons: 'zh.path.unit.expandLessons', unitDone: 'zh.toast.unitDone',
+    reviewClozePlaceholder: 'zh.review.cloze.placeholder', reviewTypePlaceholder: 'zh.review.typeAnswer.placeholder' },
+  itemPromptHTML: (i) => `<div class="prompt-hanzi">${i.c}</div>
+        <div class="prompt-pinyin">${i.p}</div>`,
+  itemAnswerHTML: (i) => `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${i.c}</strong> ${audioBtnHTML(i.c)} <span class="pinyin">(${i.p})</span></div><div class="feedback-phrase-trans">${i.t}</div>`,
+  originPhraseHTML: (o) => `<strong>${o.c}</strong><br><span class="pinyin">${o.p}</span><br>${o.t}`,
+  typedAnswer: {
+    verdict: (given, x) => {
+      const strip = pinyinAnswerCompareForm;
+      const typedAll = typedVariants(given, x.p).map(strip), typed = typedAll[0];
+      const forms = acceptedFormsTyped(x.p);
+      const ok = forms.some(form => typedAll.includes(strip(form)));
+      return { ok, almost: false, toneOnly: !ok && isToneOnlyMiss(typed, forms, strip) };
+    },
+    expected: (x) => x.p,
+    inputExtraHTML: () => pinyinTonePickerHTML(),
+    wireInputExtra: (root, inputEl) => wirePinyinTonePicker(root.querySelector('.pinyin-tone-picker'), inputEl),
+  },
+  clozeSentenceHTML: (ex) => `
+        <div class="cloze-hanzi">${ex.phrase.blocks.map((b, i) =>
+    i === ex.blankIdx ? '<span class="cloze-blank" id="cloze-blank">___</span>' : b.c
+  ).join('')}</div>
+        <div class="cloze-pinyin">${ex.phrase.blocks.map((b, i) =>
+    i === ex.blankIdx ? '___' : b.p
+  ).join(' ')}</div>
+      `,
+  clozeOptionsHTML: (options) => options.map((opt, i) => `
+          <button class="cloze-option" data-idx="${i}">
+            <span class="cloze-option-pinyin">${opt.p}</span>
+            <span class="cloze-option-hanzi">${opt.c}</span>
+          </button>
+        `).join(''),
+  clozeSpoken: (ex) => clozeExercisePhrase(ex).c,
+  phraseSpoken: (p) => phraseForExercise(p).c,
+  reorderBlockHTML: (b) => `<div class="pinyin">${b.p}</div><div class="hanzi">${b.c}</div>`,
+  reorderSlotHTML: (b) => `<div class="pinyin">${b.p}</div><div class="hanzi">${b.c}</div>`,
+  reorderAttemptSep: '',
+  flySource: (btn) => btn.innerHTML,
+  reorderDoneHTML: (p) => phraseFeedbackDetailHTML(p, p.t),
+  fullSentenceExercises: (u) => buildFullSentenceExercises(u),
+  unitEyebrow: (u) => isGrammarUnit(u) ? t('trail.eyebrow.grammar') : t('zh.path.unit.eyebrow', { id: u.id, total: UNITS.length }),
+  afterOpenUnit: (u) => { const manualBtn = document.getElementById('unit-manual-btn'); if (manualBtn) manualBtn.style.display = isGrammarUnit(u) ? 'none' : ''; },
+  trailAfterUnit: (u) => buildStoryCheckpointCard(u),
+  trailMap: (root) => renderTrailMapView(root),
+  introWordHTML: (v) => `<div class="vocab-card-pinyin">${v.p}</div>
+      <div class="vocab-card-hanzi">${v.c} ${audioBtnHTML(v.c)} ${strokeBtnHTML(v.c)}</div>`,
+  introPhraseHTML: (p) => `<div class="vocab-phrase-pinyin">${p.p}</div>
+      <div class="vocab-phrase-hanzi">${p.c} ${audioBtnHTML(p.c)}</div>`,
+  wireIntroCard: (el) => wireStrokeButtons(el),
+  badgeLevel: { id: 'HSK1', label: 'HSK 1' },
+  reviewTargetHTML: (text, audioUrl, pinyinText, isBack) => `
+      <div class="flashcard-hanzi">${escapeHTML(text)} ${audioBtnHTML(text, 'audio-btn-lg')}${audioUrl ? customAudioBtnHTML(audioUrl) : ''}</div>
+      <div class="flashcard-pinyin pinyin">${escapeHTML(pinyinText || '')}</div>${isBack ? '' : '\n    '}`,
+  reviewPromptHTML: (view, inner) => `<div class="flashcard-hanzi">${inner}</div>
+      <div class="flashcard-pinyin pinyin">${escapeHTML(view.prompt.pinyinText || '')}</div>`,
+  reviewClozeSentenceHTML: (s, view, answered) => `
+        <div class="cloze-hanzi">${s}</div>
+        ${answered ? `<div class="cloze-pinyin pinyin">${escapeHTML(view.compareAnswerText)}</div>` : ''}
+      `,
+  reviewTyped: {
+    inputExtraHTML: () => pinyinTonePickerHTML(),
+    wireInputExtra: (root, inputEl) => wirePinyinTonePicker(root.querySelector('.pinyin-tone-picker'), inputEl),
+    check: (given, expected, st) => {
+      const strip = pinyinAnswerCompareForm;
+      const typedAll = typedVariants(given, expected).map(strip), typed = typedAll[0];
+      const forms = acceptedFormsTyped(expected);
+      st.wasCorrect = forms.some(form => typedAll.includes(strip(form)));
+      st.toneOnly = st.wasCorrect ? false : isToneOnlyMiss(typed, forms, strip);
+    },
+    hintHTML: (st) => toneHintHTML(st),
+    wrongGrade: () => 0,
+  },
+  vocabCardSwap: (c, v) => { CardVariants.swapCardWordProgress(c, c.back_hanzi, v.c, STATE.cardVariants); c.front_pinyin = v.p; c.back_hanzi = v.c; },
+  refreshExtraCards: () => refreshHanziCardTexts(),
+  // Voz do idioma estudado (shared/core/voz.js): texto que vai para a voz do navegador e avisos deste site.
+  ttsText: (text) => text,
+  voiceMissingKey: 'zh.toast.chineseVoiceMissing',
+  audioRetryFailedKey: 'zh.toast.operaAudioFailed',
 // --- /E4 hooks ---
 };

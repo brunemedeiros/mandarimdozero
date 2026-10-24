@@ -160,7 +160,9 @@ console.log('== fr e zh: mesma chamada (C1 da paridade, shared/core/curriculo-pr
   check('shared/core: curriculumLoadReconcileUnits chama a regra', /openUnitsBeforeOpenOnes\(trailGroups\(\), STATE\.unitProgress\)/.test(fn(core, 'curriculumLoadReconcileUnits')));
   ['fr', 'zh'].forEach(lang => {
     const src = fs.readFileSync(path.join(L.ROOT, lang, 'app.js'), 'utf8');
-    check(`${lang}: applySerializedState chama a função comum (e não uma cópia própria)`, fn(src, 'applySerializedState').includes('curriculumLoadReconcileUnits()') && !/openUnitsBeforeOpenOnes/.test(src));
+    // paridade 5d: applySerializedState é comum (shared/core/estado-salvar.js); o app.js não tem cópia própria
+    const comum = fs.readFileSync(path.join(L.ROOT, 'shared/core/estado-salvar.js'), 'utf8');
+    check(`${lang}: applySerializedState chama a função comum (e não uma cópia própria)`, fn(comum, 'applySerializedState').includes('curriculumLoadReconcileUnits()') && !/function applySerializedState\(/.test(src) && !/openUnitsBeforeOpenOnes/.test(src));
   });
 }
 
