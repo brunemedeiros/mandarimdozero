@@ -24,6 +24,11 @@ check('shared/conjugacao.js: acceptedForms() cru só na lista de formas (conjExp
   && /function conjExpectedInfo\([^)]*\)\{\n[^\n]*\n\s+const plain = \{ display: expected, accepted: acceptedForms\(expected\) \};/.test(conjSrc), conjAF.map(x => x.n));
 // 4) as telas de digitar do fr passam pelo avaliador da família latina
 const src = fs.readFileSync(path.join(ROOT, 'fr/app.js'), 'utf8');
-check('trilha: "Digite o que ouviu" e lacuna digitada usam lessonTypedAnswerResult', (src.match(/lessonTypedAnswerResult\(inputEl\.value/g) || []).length === 2);
+// Paridade 5d: os dois exercícios são comuns (shared/core/licao-exercicios.js) e corrigem pelo gancho do site; o do fr é
+// lessonTypedAnswerResult (família latina).
+const exSrc = fs.readFileSync(path.join(ROOT, 'shared/core/licao-exercicios.js'), 'utf8');
+const frHooks = fs.readFileSync(path.join(ROOT, 'fr/lang-hooks.js'), 'utf8');
+check('trilha: "Digite o que ouviu" e lacuna digitada usam lessonTypedAnswerResult', (exSrc.match(/LANG_HOOKS\.typedAnswer\.verdict\(inputEl\.value/g) || []).length === 2
+  && /verdict: \(given, x\) => \{ const r = lessonTypedAnswerResult\(given, x\.f\);/.test(frHooks));
 check('Desafio Acentuação usa accentAnswerOutcome (família latina)', /accentAnswerOutcome\(studentAnswer, c\.targetText\)/.test(src));
 summary();

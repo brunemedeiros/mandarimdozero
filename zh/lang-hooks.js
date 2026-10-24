@@ -87,5 +87,49 @@ const LANG_HOOKS = {
   dlgWordToast: (d) => `${d.w}${d.py ? ' (' + d.py + ')' : ''} = ${d.tr}`,
   dlgBubbleHTML: (l, blank) => blank ? '<div class="dlg-hz"><span class="dlg-blank">· · · · ·</span></div>' : `<div class="dlg-py">${escapeHTML(l.p)}</div><div class="dlg-hz">${escapeHTML(l.c)}</div>`,
   dlgOptionHTML: (o) => `<span class="dlg-py">${escapeHTML(o.p)}</span><span class="dlg-hz">${escapeHTML(o.c)}</span>`,
+  textOf: (x) => x.c,
+  lessonKeys: { counter: 'zh.exercise.counter', whatMeans: 'zh.exercise.whatMeans', listenChoose: 'zh.exercise.listenChoose', tapAgain: 'zh.exercise.tapToListenAgain',
+    typeHeard: 'zh.exercise.typePinyinHeard', typePlaceholder: 'zh.exercise.typePinyinPlaceholder', clozePlaceholder: 'zh.review.cloze.placeholder',
+    translateTo: 'zh.exercise.translateToChinese', orderSentence: 'zh.exercise.orderSentence', reorderTapHint: 'zh.reorder.tapHint',
+    hintThinkWhen: 'zh.hint.thinkWhenUse', hintListenAgain: 'zh.hint.listenAgain', hintThinkContext: 'zh.hint.thinkContext',
+    hintReorderTranslate: 'fr.hint.reorderTranslate', hintReorderOrder: 'zh.hint.reorder', hintCloze: 'zh.hint.cloze', hintFullSentence: 'zh.hint.fullsentence' },
+  itemPromptHTML: (i) => `<div class="prompt-hanzi">${i.c}</div>
+        <div class="prompt-pinyin">${i.p}</div>`,
+  itemAnswerHTML: (i) => `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${i.c}</strong> ${audioBtnHTML(i.c)} <span class="pinyin">(${i.p})</span></div><div class="feedback-phrase-trans">${i.t}</div>`,
+  originPhraseHTML: (o) => `<strong>${o.c}</strong><br><span class="pinyin">${o.p}</span><br>${o.t}`,
+  typedAnswer: {
+    verdict: (given, x) => {
+      const strip = pinyinAnswerCompareForm;
+      const typedAll = typedVariants(given, x.p).map(strip), typed = typedAll[0];
+      const forms = acceptedFormsTyped(x.p);
+      const ok = forms.some(form => typedAll.includes(strip(form)));
+      return { ok, almost: false, toneOnly: !ok && isToneOnlyMiss(typed, forms, strip) };
+    },
+    expected: (x) => x.p,
+    inputExtraHTML: () => pinyinTonePickerHTML(),
+    wireInputExtra: (root, inputEl) => wirePinyinTonePicker(root.querySelector('.pinyin-tone-picker'), inputEl),
+  },
+  clozeSentenceHTML: (ex) => `
+        <div class="cloze-hanzi">${ex.phrase.blocks.map((b, i) =>
+    i === ex.blankIdx ? '<span class="cloze-blank" id="cloze-blank">___</span>' : b.c
+  ).join('')}</div>
+        <div class="cloze-pinyin">${ex.phrase.blocks.map((b, i) =>
+    i === ex.blankIdx ? '___' : b.p
+  ).join(' ')}</div>
+      `,
+  clozeOptionsHTML: (options) => options.map((opt, i) => `
+          <button class="cloze-option" data-idx="${i}">
+            <span class="cloze-option-pinyin">${opt.p}</span>
+            <span class="cloze-option-hanzi">${opt.c}</span>
+          </button>
+        `).join(''),
+  clozeSpoken: (ex) => clozeExercisePhrase(ex).c,
+  phraseSpoken: (p) => phraseForExercise(p).c,
+  reorderBlockHTML: (b) => `<div class="pinyin">${b.p}</div><div class="hanzi">${b.c}</div>`,
+  reorderSlotHTML: (b) => `<div class="pinyin">${b.p}</div><div class="hanzi">${b.c}</div>`,
+  reorderAttemptSep: '',
+  flySource: (btn) => btn.innerHTML,
+  reorderDoneHTML: (p) => phraseFeedbackDetailHTML(p, p.t),
+  fullSentenceExercises: (u) => buildFullSentenceExercises(u),
 // --- /E4 hooks ---
 };

@@ -36,7 +36,7 @@ const PAGE_LIB = () => {
   window.__estado = () => {
     let ser = ''; try { ser = JSON.stringify(serializeState()); } catch (e) { ser = 'ERRO ' + e.message; }
     const d = STATE.daily || {};
-    return { h: __h(ser), toast: [...document.querySelectorAll('#toast-layer .toast')].map(e => e.textContent).join(' | '), xp: STATE.xp, daily: JSON.stringify(d), missions: JSON.stringify(STATE.dailyMissions || STATE.missions || null), cur: STATE.currentUnitId, step: STEP_STATE.currentStep, exi: STEP_STATE.exerciseIndex, exn: (STEP_STATE.exerciseList || []).length, score: STEP_STATE.exerciseScore };
+    return { h: window.__fullState ? ser : __h(ser), toast: [...document.querySelectorAll('#toast-layer .toast')].map(e => e.textContent).join(' | '), xp: STATE.xp, daily: JSON.stringify(d), missions: JSON.stringify(STATE.dailyMissions || STATE.missions || null), cur: STATE.currentUnitId, step: STEP_STATE.currentStep, exi: STEP_STATE.exerciseIndex, exn: (STEP_STATE.exerciseList || []).length, score: STEP_STATE.exerciseScore };
   };
   // resposta digitada para o exercício atual: certa, quase (sem a última letra) ou errada
   window.__resposta = (kind) => {
@@ -126,6 +126,10 @@ async function abrir(browser, port, site, { lang = 'pt-BR', width = 1200, theme 
   await page.waitForFunction(() => typeof STATE !== 'undefined' && CURRENT_USER === false && STATE.cards && STATE.cards.length > 0, null, { timeout: 30000 });
   await page.clock.runFor(3000);
   await page.clock.pauseAt(new Date('2026-10-14T12:10:00Z'));
+  // às vezes o pauseAt para o relógio sem pular para a hora pedida: acerta a hora (sem disparar timer) e confere
+  await page.clock.setSystemTime(new Date('2026-10-14T12:10:00Z'));
+  const agora = await page.evaluate(() => Date.now());
+  if (agora !== Date.parse('2026-10-14T12:10:00Z')) throw new Error('relógio falso fora da hora: ' + new Date(agora).toISOString());
   await page.evaluate(PAGE_LIB);
   if (theme){
     await page.evaluate((th) => document.documentElement.setAttribute('data-theme', th), theme);

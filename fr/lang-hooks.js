@@ -48,6 +48,33 @@ const LANG_HOOKS = {
   dlgWordToast: (d) => `“${d.w}” = ${d.tr}`,
   dlgBubbleHTML: (l, blank) => `<div class="dlg-fr">${blank ? '<span class="dlg-blank">· · · · ·</span>' : escapeHTML(l.f)}</div>`,
   dlgOptionHTML: (o) => escapeHTML(typeof o === 'string' ? o : o.f),
+  textOf: (x) => x.f,
+  lessonKeys: { counter: 'fr.exercise.counter', whatMeans: 'fr.exercise.whatMeans', listenChoose: 'fr.exercise.listenChooseMeaning', tapAgain: 'fr.exercise.tapToHearAgain',
+    typeHeard: 'fr.exercise.typeWhatYouHeard', typePlaceholder: 'fr.exercise.typeInFrench', clozePlaceholder: 'review.cloze.placeholder',
+    translateTo: 'fr.exercise.translateToFrench', orderSentence: 'fr.exercise.orderSentence', reorderTapHint: 'fr.reorder.tapHint',
+    hintThinkWhen: 'fr.hint.thinkWhen', hintListenAgain: 'fr.hint.listenAgain', hintThinkContext: 'fr.hint.thinkContext',
+    hintReorderTranslate: 'fr.hint.reorderTranslate', hintReorderOrder: 'fr.hint.reorderOrder', hintCloze: 'fr.hint.cloze', hintFullSentence: 'zh.hint.fullsentence' },
+  itemPromptHTML: (i) => `<div class="prompt-french">${i.f}</div>`,
+  itemAnswerHTML: (i) => `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${i.f}</strong> ${audioBtnHTML(i.f)}</div><div class="feedback-phrase-trans">${i.t}</div>`,
+  originPhraseHTML: (o) => `<strong>${o.f}</strong><br>${o.t}`,
+  typedAnswer: {
+    verdict: (given, x) => { const r = lessonTypedAnswerResult(given, x.f); return { ok: r === 'ok' || r === 'quase', almost: r === 'quase', toneOnly: false }; },
+    expected: (x) => x.f,
+    inputExtraHTML: (x) => frAccentPickerHTML(x.f),
+    wireInputExtra: (root, inputEl) => wireFrAccentPicker(root.querySelector('.fr-accent-picker'), inputEl),
+  },
+  clozeSentenceHTML: (ex) => ex.phrase.blocks.map((b, i) =>
+    i === ex.blankIdx ? '<span class="cloze-blank" id="cloze-blank">___</span>' : b.f
+  ).join(' '),
+  clozeOptionsHTML: (options) => options.map((opt, i) => `<button class="cloze-option" data-idx="${i}">${opt.f}</button>`).join(''),
+  clozeSpoken: (ex) => ex.phrase.f,
+  phraseSpoken: (p) => p.f,
+  reorderBlockHTML: (b) => b.f,
+  reorderSlotHTML: (b) => `<div class="french">${b.f}</div>`,
+  reorderAttemptSep: ' ',
+  flySource: (btn) => btn.textContent.trim(),
+  reorderDoneHTML: (p) => `<div class="reorder-final"><div class="reorder-final-fr">${p.f} ${audioBtnHTML(p.f)}</div><div class="reorder-final-tr">${p.t}</div></div>`,
+  fullSentenceExercises: () => [],
 // --- /E4 hooks ---
   // Família latina (shared/core/familias/latina.js): configuração do FRANCÊS. O português, quando o /pt existir,
   // terá a dele no pt/lang-hooks.js (rascunho em shared/core/familias/latina-idiomas.js). Ver docs/i18n/familia-latina-modulo.md.

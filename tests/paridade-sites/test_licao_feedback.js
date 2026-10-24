@@ -125,7 +125,9 @@ function erros(s){
   const h = zh.typedAttemptHTML('ni3 hao', 'nǐ hǎo');
   check('C2 zh: "ni3 hao" por "nǐ hǎo" mostra "nǐ" convertido e marca só o "a" sem tom', h === '<div class="typed-attempt">nǐ h<span class="conj-x">a</span>o</div>', h);
   check('C2 zh: "Digite o que ouviu" e a lacuna digitada passam attemptHTML ao painel',
-    (zhSrc.match(/attemptHTML: typedAttemptHTML\(typedRaw, ex\.(item|correctBlock)\.p\)/g) || []).length === 2);
+    // paridade 5d: os exercícios de digitar são comuns (shared/core/licao-exercicios.js); o zh compara o pinyin (typedAnswer.expected)
+    (read('shared/core/licao-exercicios.js').match(/attemptHTML: typedAttemptHTML\(typed, LANG_HOOKS\.typedAnswer\.expected\(ex\.(item|correctBlock)\)\)/g) || []).length === 2
+    && /expected: \(x\) => x\.p,/.test(read('zh/lang-hooks.js')));
   check('C2: shared/licao-feedback.css carregado pelos dois sites e com .typed-attempt/.conj-x/.conj-gap',
     ['fr', 'zh'].every(s => read(s + '/index.html').includes('href="../shared/licao-feedback.css"') && read(s + '/index.html').includes('src="../shared/core/licao-feedback.js"'))
     && ['.typed-attempt', '.conj-x', '.conj-gap'].every(c => read('shared/licao-feedback.css').includes(c)));
@@ -140,7 +142,7 @@ for (const site of ['fr', 'zh']){
   c.STEP_STATE.conceptsShown.add('k1');
   check(`C3 ${site}: conceito visto = cita o título`, c.trueFalseHint(unit) === keys.seen + JSON.stringify({ title: 'Título A' }));
   check(`C3 ${site}: unidade sem concepts = dica geral`, c.trueFalseHint({}) === keys.generic);
-  check(`C3 ${site}: buildExerciseHint usa trueFalseHint`, /if \(ex\.format === 'trueFalse'\)\{\n\s+return trueFalseHint\(unit\);/.test(read(site + '/app.js')));
+  check(`C3 ${site}: buildExerciseHint usa trueFalseHint`, /if \(ex\.format === 'trueFalse'\)\{\n\s+return trueFalseHint\(unit\);/.test(read(site + '/app.js') + read('shared/core/licao-exercicios.js'))); // paridade 5d: comum
 }
 {
   // Texto: as chaves dos dois sites dizem o mesmo (pt-BR e en).
@@ -166,7 +168,7 @@ for (const site of ['fr', 'zh']){
   m = mk(3); c.markReorderSlots(m.el, [1, 3, 0], shuffled, correctOrder, true);
   check(`C4 ${site}: acerto deixa tudo verde`, m.slots.every(s => s.cls[0] === 'correct'));
   check(`C4 ${site}: estado do bloco ok/near/bad`, [c.reorderBlockStatus(A, 0, correctOrder), c.reorderBlockStatus(B, 0, correctOrder), c.reorderBlockStatus(X, 1, correctOrder)].join() === 'ok,near,bad');
-  check(`C4 ${site}: checkReorderAnswer chama markReorderSlots`, /markReorderSlots\(slotsEl, chosenSequence, ex\.shuffledBlocks, correctOrder, isCorrect\)/.test(read(site + '/app.js')));
+  check(`C4 ${site}: checkReorderAnswer chama markReorderSlots`, /markReorderSlots\(slotsEl, chosenSequence, ex\.shuffledBlocks, correctOrder, isCorrect\)/.test(read(site + '/app.js') + read('shared/core/licao-exercicios.js'))); // paridade 5d: comum
 }
 
 // ---------------------------------------------------------------- C5 velocidade do mp3

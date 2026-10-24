@@ -80,7 +80,8 @@ check('fr tem unidades de gramática', gramUnits.length >= 5, gramUnits.length);
 
 // ---------------------------------------------------------------- fr: antigo x novo
 const antigoSrc = gitShow('fr/app.js');
-const novoSrc = read('fr/app.js');
+// paridade 5d: answerExplanationHTML, buildExerciseHint e buildExerciseSet são comuns (shared/core/licao-exercicios.js)
+const novoSrc = read('fr/app.js') + '\n' + require('../e4/app-source.js').coreText();
 const latina = read('shared/core/familias/latina.js');
 const LATINA_FR = "let _latinaFr = null; function latinaFr(){ return _latinaFr || (_latinaFr = FamiliaLatina.criar(LANG_HOOKS.familiaLatina)); }";
 
@@ -204,9 +205,9 @@ function respostas(ex){
 
 // fr/app.js não tem mais as funções movidas
 for (const nome of ['renderGramTableHTML', 'renderGrammarExplanationStep', 'renderGrammarExerciseStep', 'renderScenarioExercise', 'scenarioSceneHTML', 'getStepDefsGrammar']) {
-  check(`fr/app.js sem ${nome} próprio`, !new RegExp('^function ' + nome + '\\(', 'm').test(novoSrc));
+  check(`fr/app.js sem ${nome} próprio`, !new RegExp('^function ' + nome + '\\(', 'm').test(read('fr/app.js')));
 }
-check('fr/app.js sem SCENARIO_FLAG_SVG próprio', !/^const SCENARIO_FLAG_SVG/m.test(novoSrc));
+check('fr/app.js sem SCENARIO_FLAG_SVG próprio', !/^const SCENARIO_FLAG_SVG/m.test(read('fr/app.js')));
 
 // ---------------------------------------------------------------- zh: unidade de gramática e cenário falsos
 {
@@ -288,11 +289,13 @@ check('fr/app.js sem SCENARIO_FLAG_SVG próprio', !/^const SCENARIO_FLAG_SVG/m.t
   const mk = (src) => {
     const ctx = ctxBase();
     vm.runInContext('var buildFullSentenceExercises = () => [];', ctx);
+    // paridade 5d: o buildExerciseSet comum lê o idioma pelos ganchos do zh (textOf, fullSentenceExercises)
+    vm.runInContext(read('zh/lang-hooks.js').replace('const LANG_HOOKS', 'var LANG_HOOKS'), ctx);
     estado(ctx, zhUnits);
     vm.runInContext(read('shared/core/gramatica-cenario.js').replace('const SCENARIO_FLAG_SVG', 'var SCENARIO_FLAG_SVG') + '\n' + declaracao(src, 'buildExerciseSet'), ctx);
     return ctx;
   };
-  const ZA = mk(gitShow('zh/app.js')), ZB = mk(read('zh/app.js'));
+  const ZA = mk(gitShow('zh/app.js')), ZB = mk(read('zh/app.js') + '\n' + require('../e4/app-source.js').coreText());
   let n = 0, diff = [];
   for (const u of zhUnits) for (const sd of [3, 99]) {
     const r = [ZA, ZB].map(ctx => { let x = sd; ctx.Math = Object.create(Math); ctx.Math.random = () => (x = (x * 16807) % 2147483647) / 2147483647;
