@@ -446,12 +446,13 @@ function showBadgeUnlockCelebration(badge, onDone){
   el.className = 'badge-unlock-toast';
   el.setAttribute('role', 'status');
   el.setAttribute('aria-live', 'polite');
+  // Nome e descrição vêm do catálogo de badges (admin/professora preenchem): escapados (revisão do código compartilhado, 2026-10-24).
   el.innerHTML = `
     <div class="badge-unlock-icon${badge.tier ? ' tier-' + badge.tier : ''}">${typeof badgeIconHTML === 'function' ? badgeIconHTML(badge) : badge.icon}</div>
     <div class="badge-unlock-text">
       <div class="badge-unlock-label">${badge.level > 1 ? t('badge.ui.levelUp') : t('badge.ui.newBadge')}</div>
-      <div class="badge-unlock-name">${badge.name}</div>
-      <div class="badge-unlock-desc">${badge.desc}</div>
+      <div class="badge-unlock-name">${escapeHTML(badge.name || '')}</div>
+      <div class="badge-unlock-desc">${escapeHTML(badge.desc || '')}</div>
     </div>
   `;
   let done = false;
