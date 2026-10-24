@@ -80,5 +80,12 @@ const LANG_HOOKS = {
   clozeCorrectHTML: (b) => `${t('feedback.correctAnswerColon')} <strong>${b.c}</strong> <span class="pinyin">(${b.p})</span>`,
   phraseFeedbackHTML: (p, trans, correct) => phraseFeedbackDetailHTML(p, trans, correct),
   phraseHasWord: (word) => (p) => p.c.includes(word.c),
+  dlgLineText: (l) => l.c,
+  dlgLineHTML: (l, terms) => `<div class="dlg-py">${dlgHighlightPinyin(l.c, l.p, terms)}</div>
+          <div class="dlg-hz">${dlgHighlight(l.c, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>`,
+  dlgSide: (dlg, spk) => dlgSpeakerSide(dlg, spk),
+  dlgWordToast: (d) => `${d.w}${d.py ? ' (' + d.py + ')' : ''} = ${d.tr}`,
+  dlgBubbleHTML: (l, blank) => blank ? '<div class="dlg-hz"><span class="dlg-blank">· · · · ·</span></div>' : `<div class="dlg-py">${escapeHTML(l.p)}</div><div class="dlg-hz">${escapeHTML(l.c)}</div>`,
+  dlgOptionHTML: (o) => `<span class="dlg-py">${escapeHTML(o.p)}</span><span class="dlg-hz">${escapeHTML(o.c)}</span>`,
 // --- /E4 hooks ---
 };

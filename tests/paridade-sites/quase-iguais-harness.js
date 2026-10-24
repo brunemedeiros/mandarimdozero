@@ -36,7 +36,7 @@ const PAGE_LIB = () => {
   window.__estado = () => {
     let ser = ''; try { ser = JSON.stringify(serializeState()); } catch (e) { ser = 'ERRO ' + e.message; }
     const d = STATE.daily || {};
-    return { h: __h(ser), xp: STATE.xp, daily: JSON.stringify(d), missions: JSON.stringify(STATE.dailyMissions || STATE.missions || null), cur: STATE.currentUnitId, step: STEP_STATE.currentStep, exi: STEP_STATE.exerciseIndex, exn: (STEP_STATE.exerciseList || []).length, score: STEP_STATE.exerciseScore };
+    return { h: __h(ser), toast: [...document.querySelectorAll('#toast-layer .toast')].map(e => e.textContent).join(' | '), xp: STATE.xp, daily: JSON.stringify(d), missions: JSON.stringify(STATE.dailyMissions || STATE.missions || null), cur: STATE.currentUnitId, step: STEP_STATE.currentStep, exi: STEP_STATE.exerciseIndex, exn: (STEP_STATE.exerciseList || []).length, score: STEP_STATE.exerciseScore };
   };
   // resposta digitada para o exercício atual: certa, quase (sem a última letra) ou errada
   window.__resposta = (kind) => {
@@ -59,7 +59,7 @@ const PAGE_LIB = () => {
   };
   // candidatos a clique dentro de um contêiner: botões e blocos visíveis, sem áudio/voltar/sair
   window.__candidatos = (root) => {
-    const sel = 'button, [role="button"], .reorder-block, .match-tile, .mc-option, .tf-btn, .dlg-option, .cloze-option, #flashcard, .flashcard.clickable, .speed-option, .match-card';
+    const sel = 'button, [role="button"], .reorder-block, .match-tile, .mc-option, .tf-btn, .dlg-option, .cloze-option, #flashcard, .flashcard.clickable, .speed-option, .match-card, .dlg-new, .dlg-row';
     const out = [];
     root.querySelectorAll(sel).forEach(el => {
       if (!__vis(el) || el.disabled || el.classList.contains('used')) return;

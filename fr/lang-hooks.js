@@ -42,6 +42,12 @@ const LANG_HOOKS = {
   clozeCorrectHTML: (b) => `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${b.f}</strong></div>`,
   phraseFeedbackHTML: (p, trans, correct) => `${correct}<div class="feedback-phrase-zh"><strong>${p.f}</strong> ${audioBtnHTML(p.f)}</div><div class="feedback-phrase-trans">${trans}</div>`,
   phraseHasWord: (word) => { const needle = word.f.replace(/\s*\([^()]*\)/g, '').trim().toLowerCase(); return (p) => p.f.toLowerCase().includes(needle); },
+  dlgLineText: (l) => l.f,
+  dlgLineHTML: (l, terms) => `<div class="dlg-fr">${dlgHighlight(l.f, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>`,
+  dlgSide: (dlg, spk) => spk === 'B' ? 'b' : 'a',
+  dlgWordToast: (d) => `“${d.w}” = ${d.tr}`,
+  dlgBubbleHTML: (l, blank) => `<div class="dlg-fr">${blank ? '<span class="dlg-blank">· · · · ·</span>' : escapeHTML(l.f)}</div>`,
+  dlgOptionHTML: (o) => escapeHTML(typeof o === 'string' ? o : o.f),
 // --- /E4 hooks ---
   // Família latina (shared/core/familias/latina.js): configuração do FRANCÊS. O português, quando o /pt existir,
   // terá a dele no pt/lang-hooks.js (rascunho em shared/core/familias/latina-idiomas.js). Ver docs/i18n/familia-latina-modulo.md.
@@ -50,7 +56,9 @@ const LANG_HOOKS = {
     ligaduras: [['œ', 'oe'], ['æ', 'ae']],
     hifen: true,
     apostrofo: true,
-    elisao: true,                       // ditado: "j' ai" -> "j'ai" antes de comparar
+    elisao: true,
+    // Artigos que caem do termo do vocabulário para destacar o substantivo nas falas do diálogo ("la sœur" -> "sœur").
+    artigos: ['le', 'la', 'les', "l'", 'un', 'une', 'des'],                       // ditado: "j' ai" -> "j'ai" antes de comparar
     acentoNaDigitacao: 'tolerante',     // exercícios de digitar: acento NÃO conta (decisão de 2026-09-16)
     ligadurasNaDigitacao: true,         // "soeur" por "sœur" = Quase (decisão da dona, 2026-10-15)
     ligadurasNaAcentuacao: true,        // desafio Acentuação: "soeur" por "sœur" = Quase (idem)
