@@ -40,6 +40,6 @@ Logotipo enviado = a marca precisa ser verificada antes de publicar. Para public
 
 - `sobre.html` (página pública) e `privacidade-google-agenda.html` (nome do app atualizado).
 - `infra/agenda-netlify/netlify.toml`: `/google/callback` repassado para a Edge Function `google-calendar`.
-- Edge Function: `GCAL_REDIRECT_URI` (secret só na produção) = `https://agenda.profbrune.com.br/google/callback`.
-  Ligar o secret **só depois** do passo 2 e do Netlify publicado; quem já está conectado não é afetado (a leitura usa o
-  token guardado, não o retorno do login).
+- Edge Function: na produção a volta do login é `https://agenda.profbrune.com.br/google/callback` (fixo no código pelo
+  projeto; o secret opcional `GCAL_REDIRECT_URI` sobrepõe). Quem já está conectado não é afetado (a leitura usa o token
+  guardado, não o retorno do login).

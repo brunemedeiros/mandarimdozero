@@ -47,7 +47,8 @@ const PANEL_STUB = (who) => {
     // 119: caixa inteira com "pulados": 12 para revisar (o 77 é o mais recente) e 1 pulado.
     if (name === 'google_calendar_review_items'){
       const mk = (id, day, extra) => Object.assign({ id, title: 'Evento ' + id, start_at: `2026-10-${String(day).padStart(2, '0')}T17:00:00Z`, end_at: null, time_zone: 'America/Sao_Paulo', match_state: 'review', match_reason: 'não reconhecido', attendees: [], calendar_summary: 'Trabalho', class_log_id: null, skipped_at: null }, extra || {});
-      const all = [mk(77, 27, { title: 'Aulas de francês' })].concat(Array.from({ length: 11 }, (_, i) => mk(i + 1, i + 1)), [mk(90, 20, { title: 'Bia', skipped_at: '2026-10-23T10:00:00Z' })]);
+      const all = [mk(77, 27, { title: 'Aulas de francês' })].concat(Array.from({ length: 11 }, (_, i) => mk(i + 1, i + 1)), [mk(90, 20, { title: 'Bia', skipped_at: '2026-10-23T10:00:00Z' })],
+        [5, 12].map(d => mk(200 + d, d, { title: 'Agendamento - Prof. Brune (Liz J)', match_state: 'ignored', match_reason: 'regra: fora do site', attendees: [{ email: 'liz@x.invalid', name: 'Liz J' }] })));
       return { data: all.filter(e => !(window.__gcalResolved && window.__gcalResolved.p_event_id === e.id && window.__gcalResolved.p_action === 'student')), error: null };
     }
     if (name === 'google_calendar_resolve'){ window.__gcalResolved = args; return { data: 'linked', error: null }; }
@@ -387,6 +388,11 @@ const PANEL_STUB = (who) => {
       L('google (119): botões Não é aula, Fora do site e Pular por agora', await ev(() => { const li = document.querySelector('#admin-gcal-box .gcal-review-item'); return !!li.querySelector('[data-gcal-do="ignore"]') && !!li.querySelector('[data-gcal-do="outside"]') && !!li.querySelector('[data-gcal-do="skip"]'); }));
       await ev(() => document.querySelector('[data-gcal-tab="skipped"]').click());
       L('google (119): aba Pulados mostra o pulado com "Voltar para a lista"', await ev(() => { const it = document.querySelectorAll('#admin-gcal-box .gcal-review-item'); return it.length === 1 && it[0].dataset.gcalEvent === '90' && !!it[0].querySelector('[data-gcal-do="unskip"]'); }));
+      await ev(() => document.querySelector('[data-gcal-tab="outside"]').click());
+      L('google (120): aba Fora do site agrupa a pessoa (2 eventos) com "Trazer de volta"', await ev(() => { const it = document.querySelectorAll('#admin-gcal-box .gcal-review-item'); return it.length === 1 && /2/.test(it[0].textContent) && !!it[0].querySelector('[data-gcal-do="restore"]') && /\(1\)/.test(document.querySelector('[data-gcal-tab="outside"]').textContent); }));
+      await ev(() => { delete window.__gcalResolved; document.querySelector('#admin-gcal-box [data-gcal-do="restore"]').click(); });
+      await page.waitForFunction(() => !!window.__gcalResolved);
+      L('google (120): trazer de volta manda p_action restore', await ev(() => window.__gcalResolved.p_action === 'restore'));
       await ev(() => document.querySelector('[data-gcal-tab="open"]').click());
       await ev(() => { delete window.__gcalResolved; document.querySelector('#admin-gcal-box .gcal-review-item [data-gcal-do="skip"]').click(); });
       await page.waitForFunction(() => !!window.__gcalResolved);

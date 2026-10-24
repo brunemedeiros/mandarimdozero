@@ -11,7 +11,7 @@
 // Leitura (janela de 14 dias atrás a 90 dias à frente): a primeira de cada agenda vem desde 2025-05-01 (dá horário às aulas
 // antigas importadas do Notion); uma vez por dia a janela inteira (pega as aulas repetidas que entram no horizonte); nas outras
 // rodadas (a cada 15 min) só o que mudou desde a última leitura (updatedMin). Nunca loga token nem código.
-// Secrets: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GCAL_REDIRECT_URI só na produção (SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY já existem).
+// Secrets: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET (SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY já existem).
 // A senha do cron fica só no Vault (gcal_sync_token) e é conferida por gcal_check_sync_token.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -21,9 +21,12 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const CLIENT_ID = Deno.env.get('GOOGLE_CLIENT_ID') || '';
 const CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET') || '';
-// Produção: GCAL_REDIRECT_URI = https://agenda.profbrune.com.br/google/callback (o Netlify repassa para cá; o Google só aceita
-// verificar o app com o retorno num domínio da Prof. Brune). Sem o secret, volta direto para o Supabase (Staging).
-const REDIRECT_URI = Deno.env.get('GCAL_REDIRECT_URI') || `${SUPABASE_URL}/functions/v1/google-calendar/callback`;
+// Produção: a volta do login é https://agenda.profbrune.com.br/google/callback (o Netlify repassa para cá, ver
+// infra/agenda-netlify/netlify.toml; o Google só verifica o app com o retorno num domínio da Prof. Brune).
+// Staging volta direto para o Supabase. GCAL_REDIRECT_URI (secret, opcional) sobrepõe os dois.
+const PROD_REF = 'eigjocalzwamisgqilhg';
+const REDIRECT_URI = Deno.env.get('GCAL_REDIRECT_URI')
+  || (SUPABASE_URL.includes(PROD_REF) ? 'https://agenda.profbrune.com.br/google/callback' : `${SUPABASE_URL}/functions/v1/google-calendar/callback`);
 const SCOPES = 'openid email https://www.googleapis.com/auth/calendar.readonly';
 const BACKFILL_FROM = '2025-05-01T00:00:00Z';
 const ALLOWED_RETURN = [/^https:\/\/app\.profbrune\.com\.br\//, /^https:\/\/brunemedeiros\.github\.io\//, /^http:\/\/localhost(:\d+)?\//, /^http:\/\/127\.0\.0\.1(:\d+)?\//];

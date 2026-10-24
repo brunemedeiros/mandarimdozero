@@ -134,28 +134,62 @@ function gcalBoxHTML(){
 // Caixa "Eventos para revisar": abas Para revisar / Pulados, ordem e 10 por vez.
 function gcalReviewHTML(){
   const all = GCAL_STATE.review;
-  const open = all.filter(e => !e.skipped_at);
-  const skipped = all.filter(e => e.skipped_at);
-  const tab = GCAL_STATE.tab === 'skipped' ? 'skipped' : 'open';
+  const isOutside = e => e.match_state === 'ignored';
+  const open = all.filter(e => !isOutside(e) && !e.skipped_at);
+  const skipped = all.filter(e => !isOutside(e) && e.skipped_at);
+  const outside = gcalOutsideGroups(all.filter(isOutside));
+  const tab = ['skipped', 'outside'].includes(GCAL_STATE.tab) ? GCAL_STATE.tab : 'open';
   const time = e => (e.start_at ? new Date(e.start_at).getTime() : 0);
-  const list = (tab === 'skipped' ? skipped : open).slice()
+  const list = (tab === 'skipped' ? skipped : tab === 'outside' ? outside : open).slice()
     .sort((a, b) => GCAL_STATE.sort === 'oldest' ? time(a) - time(b) : time(b) - time(a));
   const shown = list.slice(0, GCAL_STATE.shown);
   const rest = list.length - shown.length;
+  const itemHTML = tab === 'outside' ? gcalOutsideItemHTML : gcalReviewItemHTML;
+  const hint = tab === 'skipped' ? 'panel.gcal.skippedHint' : tab === 'outside' ? 'panel.gcal.outsideHint' : '';
+  const empty = tab === 'skipped' ? 'panel.gcal.emptySkipped' : tab === 'outside' ? 'panel.gcal.emptyOutside' : 'panel.gcal.emptyOpen';
   const tabBtn = (key, label) => `<button type="button" class="gcal-tab${tab === key ? ' is-active' : ''}" data-gcal-tab="${key}" aria-pressed="${tab === key}">${label}</button>`;
   return `<div class="section-label">${t('panel.gcal.reviewTitle', { n: open.length })}</div>
     <p class="profile-edit-hint">${t('panel.gcal.reviewHint')}</p>
     <div class="gcal-review-bar">
-      <div class="gcal-tabs">${tabBtn('open', t('panel.gcal.tabOpen', { n: open.length }))}${tabBtn('skipped', t('panel.gcal.tabSkipped', { n: skipped.length }))}</div>
+      <div class="gcal-tabs">${tabBtn('open', t('panel.gcal.tabOpen', { n: open.length }))}${tabBtn('skipped', t('panel.gcal.tabSkipped', { n: skipped.length }))}${tabBtn('outside', t('panel.gcal.tabOutside', { n: outside.length }))}</div>
       <select class="profile-edit-input" data-gcal-sort aria-label="${escapeHTML(t('panel.gcal.sortLabel'))}">
         <option value="recent" ${GCAL_STATE.sort !== 'oldest' ? 'selected' : ''}>${t('panel.gcal.sortRecent')}</option>
         <option value="oldest" ${GCAL_STATE.sort === 'oldest' ? 'selected' : ''}>${t('panel.gcal.sortOldest')}</option>
       </select>
     </div>
-    ${tab === 'skipped' ? `<p class="profile-edit-hint">${t('panel.gcal.skippedHint')}</p>` : ''}
-    ${shown.length ? `<ul class="gcal-review">${shown.map(gcalReviewItemHTML).join('')}</ul>`
-      : `<p class="profile-empty-note">${t(tab === 'skipped' ? 'panel.gcal.emptySkipped' : 'panel.gcal.emptyOpen')}</p>`}
+    ${hint ? `<p class="profile-edit-hint">${t(hint)}</p>` : ''}
+    ${shown.length ? `<ul class="gcal-review">${shown.map(itemHTML).join('')}</ul>`
+      : `<p class="profile-empty-note">${t(empty)}</p>`}
     ${rest > 0 ? `<button type="button" class="btn tinv-ghost mural-small-btn gcal-more" data-gcal-more>${t('panel.gcal.showMore', { n: Math.min(rest, GCAL_PAGE), rest })}</button>` : ''}`;
+}
+
+// Aba Fora do site: uma linha por pessoa (e-mail do convidado, senão o título), com o evento mais recente na frente.
+function gcalOutsideGroups(events){
+  const groups = new Map();
+  for (const e of events){
+    const mail = ((e.attendees || [])[0] || {}).email;
+    const key = mail ? 'm:' + mail : 't:' + String(e.title || '').split(' - ')[0].trim().toLowerCase();
+    const g = groups.get(key);
+    if (!g) groups.set(key, Object.assign({}, e, { n: 1, first_at: e.start_at }));
+    else {
+      g.n += 1;
+      if (e.start_at && (!g.start_at || e.start_at > g.start_at)) Object.assign(g, e, { n: g.n, first_at: g.first_at });
+      if (e.start_at && (!g.first_at || e.start_at < g.first_at)) g.first_at = e.start_at;
+    }
+  }
+  return [...groups.values()];
+}
+
+function gcalOutsideItemHTML(g){
+  const who = (g.attendees || []).map(a => a.name || a.email).filter(Boolean).join(', ');
+  const day = iso => iso ? fmtDate(new Date(iso), { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  return `<li class="gcal-review-item" data-gcal-event="${g.id}">
+    <div class="gcal-review-head"><b>${escapeHTML(g.title || t('panel.gcal.noTitle'))}</b>
+      <span class="profile-edit-hint">${t(g.n === 1 ? 'panel.gcal.outsideCountOne' : 'panel.gcal.outsideCount', { n: g.n })} · ${g.n > 1 ? t('panel.gcal.dateRange', { from: escapeHTML(day(g.first_at)), to: escapeHTML(day(g.start_at)) }) : escapeHTML(day(g.start_at))}${who ? ' · ' + escapeHTML(who) : ''}</span></div>
+    <div class="gcal-review-actions">
+      <button type="button" class="btn btn-secondary mural-small-btn" data-gcal-do="restore">${t('panel.gcal.restore')}</button>
+    </div>
+  </li>`;
 }
 
 // Troca de aba/ordem/"mostrar mais": só redesenha (sem buscar de novo).
@@ -174,7 +208,7 @@ async function renderGoogleCalendarBox(opts){
   if (!(opts && opts.quiet)) body.innerHTML = typeof loadingHTML === 'function' ? loadingHTML() : '…';
   await gcalLoad();
   body.innerHTML = gcalBoxHTML();
-  const n = GCAL_STATE.review.filter(e => !e.skipped_at).length;
+  const n = GCAL_STATE.review.filter(e => e.match_state !== 'ignored' && !e.skipped_at).length;
   const badge = host.querySelector('[data-gcal-badge]');
   if (badge){ badge.textContent = n ? String(n) : ''; badge.hidden = !n; }
   // Primeira vez: aberto se há algo para revisar ou se ainda não conectou; depois, mantém o que a professora escolheu.
@@ -249,7 +283,7 @@ function wireGoogleCalendarBox(root){
         const [kind, target, lang] = v.split('|');
         await gcalAfter(supabaseClient.rpc('google_calendar_resolve', { p_event_id: id, p_action: kind, p_target: target, p_language: lang || null, p_remember: remember }), t('panel.gcal.saved'), li);
       } else {
-        const msg = act === 'skip' ? t('panel.gcal.skipped') : act === 'unskip' ? t('panel.gcal.unskipped') : t('panel.gcal.saved');
+        const msg = act === 'skip' ? t('panel.gcal.skipped') : act === 'unskip' ? t('panel.gcal.unskipped') : act === 'restore' ? t('panel.gcal.restored') : t('panel.gcal.saved');
         await gcalAfter(supabaseClient.rpc('google_calendar_resolve', { p_event_id: id, p_action: act, p_remember: (act === 'ignore' || act === 'outside') ? remember : false }), msg, li);
       }
     }

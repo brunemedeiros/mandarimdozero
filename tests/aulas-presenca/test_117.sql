@@ -185,8 +185,17 @@ select gcal_ingest('11700000-0000-0000-0000-0000000000a1', 'trab@x', jsonb_build
   pg_temp.ev('x3', 'Agendamento - Prof. Brune (Liz J)', '2026-11-12T09:00:00-03:00', '2026-11-12T10:00:00-03:00',
              '{"attendees":[{"email":"liz@x.invalid","name":"Liz J"}]}')), null, false);
 reset role;
-insert into r select (select match_state = 'ignored' and title is null and attendees = '[]'::jsonb from google_calendar_events where event_id = 'x3'),
-  '119: evento novo da mesma pessoa: fora do site, sem título nem convidados';
+insert into r select (select match_state = 'ignored' and match_reason = 'regra: fora do site' and title is not null from google_calendar_events where event_id = 'x3'),
+  '120: evento novo da mesma pessoa: fora do site, com o nome guardado para a aba Fora do site';
+select pg_temp.as_user('11700000-0000-0000-0000-0000000000a1'); set local role authenticated;
+insert into r select (google_calendar_status() -> 'counts' ->> 'outside')::int = 3
+  and (select count(*) from jsonb_array_elements(google_calendar_review_items()) i where i ->> 'match_reason' = 'regra: fora do site') = 3,
+  '120: aba Fora do site com os 3 eventos da pessoa';
+insert into r select google_calendar_resolve(pg_temp.g('X1')::bigint, 'restore') = 'restore', '120: trazer de volta';
+reset role;
+insert into r select (select count(*) from google_calendar_events where event_id in ('x1','x2','x3') and match_state = 'review') = 3
+  and exists (select 1 from google_calendar_rules where key = 'liz@x.invalid' and not active),
+  '120: trazer de volta desliga a regra e os 3 eventos voltam para revisar';
 select pg_temp.as_user('11700000-0000-0000-0000-0000000000a1'); set local role authenticated;
 insert into r select google_calendar_resolve(pg_temp.g('Y1')::bigint, 'unskip') = 'unskip', '119: voltar para a lista';
 insert into r select (google_calendar_status() -> 'counts' ->> 'skipped')::int = 0, '119: depois de voltar, nenhum pulado';

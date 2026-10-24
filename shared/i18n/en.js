@@ -3481,6 +3481,14 @@ window.I18N_CATALOG['en'] = {
   'panel.gcal.keep': 'Keep the lesson', // ALTA
   'panel.gcal.unlink': 'Unlink from Google', // ALTA
   'panel.gcal.saved': 'Done.', // ALTA
+  'panel.gcal.restored': 'Back in To review.', // ALTA
+  'panel.gcal.restore': 'Bring back', // ALTA
+  'panel.gcal.dateRange': '{from} to {to}', // ALTA
+  'panel.gcal.outsideCount': '{n} events', // ALTA
+  'panel.gcal.outsideCountOne': '1 event', // ALTA
+  'panel.gcal.emptyOutside': 'No one marked as not on the site.', // ALTA
+  'panel.gcal.outsideHint': 'People marked as "Not on the site" (former students or students who don\'t use the site). Their events don\'t become lessons. "Bring back" returns all of that person\'s events to the To review list.', // ALTA
+  'panel.gcal.tabOutside': 'Not on the site ({n})', // ALTA
   'panel.gcal.emptySkipped': 'No skipped events.', // ALTA
   'panel.gcal.emptyOpen': 'Nothing to review right now.', // ALTA
   'panel.gcal.skippedHint': 'Skipped events are still read: they become lessons on their own once the site recognizes the student.', // ALTA
