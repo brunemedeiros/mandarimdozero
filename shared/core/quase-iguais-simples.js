@@ -101,6 +101,8 @@ function advanceUnitStep(u){
 }
 
 function backToReviewModeSelect(){
+  // A3: sair da sessão encerra a Revisão rápida (também no caminho da aba Aluno > Revisão, que retorna mais abaixo).
+  if (typeof stopSpeedSession === 'function') stopSpeedSession();
   releaseBadgeCelebrations();
   if (STATE.reviewSessionClassReview){
     STATE.reviewSessionStartedAt = null;
@@ -178,6 +180,8 @@ async function startDeckReviewSession(deckId, opts){
 }
 
 function openReviewSession(mode, opts){
+  // A3: abrir qualquer modo encerra uma Revisão rápida que ainda estivesse viva (a do modo 'speed' recomeça logo abaixo).
+  if (typeof stopSpeedSession === 'function') stopSpeedSession();
   document.getElementById('review-mode-select-wrap').style.display = 'none';
   document.getElementById('review-session-wrap').style.display = 'block';
   document.getElementById('review-content').style.display = mode === 'speed' || mode === 'match' ? 'none' : 'block';

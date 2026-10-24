@@ -342,6 +342,10 @@ const SPEED_STATE = {
   bestStreak: 0, // maior sequência de acertos da rodada (recorde do Speed Review)
   timerStart: 0,
   timerHandle: null,
+  // A3 (revisão de 2026-10-24): passagem para a próxima pergunta (700 ms depois da resposta) e número da sessão, para
+  // que nada da sessão anterior rode depois de a aluna sair (Voltar, outra aba) ou começar outra.
+  advanceHandle: null,
+  session: 0,
   answered: false,
   dailyCounted: false
 };

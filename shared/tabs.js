@@ -20,6 +20,9 @@ function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
       if (typeof STUDENT_PANEL_STATE !== 'undefined') STUDENT_PANEL_STATE.section = studentSection;
       tab = 'student-panel';
     }
+    // A3 (revisão de 2026-10-24): trocar de aba (inclusive voltar para a própria Revisão, que reabre a escolha de
+    // modos) encerra a Revisão rápida: cronômetro, próxima pergunta agendada e gravação de notas.
+    if (typeof stopSpeedSession === 'function') stopSpeedSession();
     if (onBeforeSwitch) onBeforeSwitch(tab);
     // Trocar de aba encerra o escopo da sessão Aluno > Revisão (cartões da professora).
     if (typeof STATE !== 'undefined') STATE.reviewSessionClassReview = false;

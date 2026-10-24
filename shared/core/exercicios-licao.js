@@ -544,6 +544,17 @@ function stopSpeedTimer(){
   }
 }
 
+// A3: encerra a sessão da Revisão rápida de vez -- cronômetro, passagem para a próxima pergunta já agendada e
+// `active`. Chamado ao sair (Voltar aos modos, trocar de aba, abrir outro modo). Depois disto nenhuma resposta é gravada.
+function stopSpeedSession(){
+  stopSpeedTimer();
+  if (SPEED_STATE.advanceHandle){
+    clearTimeout(SPEED_STATE.advanceHandle);
+    SPEED_STATE.advanceHandle = null;
+  }
+  SPEED_STATE.active = false;
+}
+
 function runSpeedTimer(el, onTimeout){
   stopSpeedTimer();
   SPEED_STATE.timerStart = Date.now();
@@ -558,7 +569,7 @@ function runSpeedTimer(el, onTimeout){
     }
     if (elapsed >= SPEED_TIME_LIMIT){
       stopSpeedTimer();
-      if (!SPEED_STATE.answered) onTimeout();
+      if (!SPEED_STATE.answered && SPEED_STATE.active) onTimeout();
     }
   }, 80);
 }
