@@ -185,7 +185,7 @@ for (const [site, fn] of [['fr', 'speakFrenchAudioOnly'], ['zh', 'speakChineseAu
 {
   const zhSrc = read('zh/app.js');
   check('D6 zh: sem "⏭ 跳过" fixo', !zhSrc.includes('跳过'));
-  check('D6 zh: selo de pulada usa trail.unit.skippedBadge', zhSrc.includes("${t('trail.unit.skippedBadge')}</span>"));
+  check('D6 zh: selo de pulada usa trail.unit.skippedBadge', (zhSrc + read('shared/core/trilha-licao.js')).includes("${t('trail.unit.skippedBadge')}</span>")); // paridade 5d: buildUnitBlock comum
   for (const site of ['fr', 'zh']){
     // paridade 5d: renderSpeedReview é comum (shared/core/licao-base.js); o texto conferido é o app.js + o core
     const src = read(site + '/app.js') + '\n' + read('shared/core/licao-base.js');

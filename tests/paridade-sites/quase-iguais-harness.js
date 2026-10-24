@@ -145,7 +145,8 @@ async function sequencia(browser, root, site, lang, opts = {}){
   const port = server.address().port;
   const { ctx, page, errors } = await abrir(browser, port, site, { lang, width: opts.width, theme: opts.theme });
   const cenas = [];
-  const norm = (s) => String(s).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ tc-sticky/g, '');
+  // style="display:none;" (escrito no HTML) e style="display: none;" (o mesmo valor regravado pelo JS) são o mesmo CSS
+  const norm = (s) => String(s).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ tc-sticky/g, '').replace(/style=\\+"([^"\\]*)\\+"/g, (m, css) => m.replace(css, css.replace(/:\s+/g, ':')));
   const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); return e ? e.innerHTML : null; }, sel);
   const cena = async (n, extra) => {
     const v = await page.evaluate(() => ({ e: __estado(), audio: window.__audio.splice(0).join(',') }));

@@ -53,7 +53,8 @@ const LANG_HOOKS = {
     typeHeard: 'fr.exercise.typeWhatYouHeard', typePlaceholder: 'fr.exercise.typeInFrench', clozePlaceholder: 'review.cloze.placeholder',
     translateTo: 'fr.exercise.translateToFrench', orderSentence: 'fr.exercise.orderSentence', reorderTapHint: 'fr.reorder.tapHint',
     hintThinkWhen: 'fr.hint.thinkWhen', hintListenAgain: 'fr.hint.listenAgain', hintThinkContext: 'fr.hint.thinkContext',
-    hintReorderTranslate: 'fr.hint.reorderTranslate', hintReorderOrder: 'fr.hint.reorderOrder', hintCloze: 'fr.hint.cloze', hintFullSentence: 'zh.hint.fullsentence' },
+    hintReorderTranslate: 'fr.hint.reorderTranslate', hintReorderOrder: 'fr.hint.reorderOrder', hintCloze: 'fr.hint.cloze', hintFullSentence: 'zh.hint.fullsentence',
+    expandLessons: 'fr.trail.expandLessons', unitDone: 'toast.unitComplete' },
   itemPromptHTML: (i) => `<div class="prompt-french">${i.f}</div>`,
   itemAnswerHTML: (i) => `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${i.f}</strong> ${audioBtnHTML(i.f)}</div><div class="feedback-phrase-trans">${i.t}</div>`,
   originPhraseHTML: (o) => `<strong>${o.f}</strong><br>${o.t}`,
@@ -75,6 +76,20 @@ const LANG_HOOKS = {
   flySource: (btn) => btn.textContent.trim(),
   reorderDoneHTML: (p) => `<div class="reorder-final"><div class="reorder-final-fr">${p.f} ${audioBtnHTML(p.f)}</div><div class="reorder-final-tr">${p.t}</div></div>`,
   fullSentenceExercises: () => [],
+  // Rótulo da lição: "Unidade N de M · A1" (gramática: "Gramática · A1", sem número).
+  unitEyebrow: (u) => {
+    const levelUnits = unitsOfLevel(u.level);
+    const eyebrowLabel = u.type === 'grammar'
+      ? t('trail.eyebrow.grammar')
+      : t('trail.eyebrow.unit', { num: unitOrdinalInfo(u, levelUnits).num, total: unitOrdinalInfo(u, levelUnits).total });
+    return `${eyebrowLabel} · ${u.level}`;
+  },
+  afterOpenUnit: () => {},
+  trailAfterUnit: () => null,
+  trailMap: (root, mods) => renderModulesTrailMap(root, mods),
+  introWordHTML: (v) => `<div class="vocab-card-word">${v.f} ${audioBtnHTML(v.f)}</div>`,
+  introPhraseHTML: (p) => `<div class="vocab-phrase-french">${p.f} ${audioBtnHTML(p.f)}</div>`,
+  wireIntroCard: () => {},
 // --- /E4 hooks ---
   // Família latina (shared/core/familias/latina.js): configuração do FRANCÊS. O português, quando o /pt existir,
   // terá a dele no pt/lang-hooks.js (rascunho em shared/core/familias/latina-idiomas.js). Ver docs/i18n/familia-latina-modulo.md.

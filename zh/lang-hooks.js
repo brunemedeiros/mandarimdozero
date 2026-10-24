@@ -92,7 +92,8 @@ const LANG_HOOKS = {
     typeHeard: 'zh.exercise.typePinyinHeard', typePlaceholder: 'zh.exercise.typePinyinPlaceholder', clozePlaceholder: 'zh.review.cloze.placeholder',
     translateTo: 'zh.exercise.translateToChinese', orderSentence: 'zh.exercise.orderSentence', reorderTapHint: 'zh.reorder.tapHint',
     hintThinkWhen: 'zh.hint.thinkWhenUse', hintListenAgain: 'zh.hint.listenAgain', hintThinkContext: 'zh.hint.thinkContext',
-    hintReorderTranslate: 'fr.hint.reorderTranslate', hintReorderOrder: 'zh.hint.reorder', hintCloze: 'zh.hint.cloze', hintFullSentence: 'zh.hint.fullsentence' },
+    hintReorderTranslate: 'fr.hint.reorderTranslate', hintReorderOrder: 'zh.hint.reorder', hintCloze: 'zh.hint.cloze', hintFullSentence: 'zh.hint.fullsentence',
+    expandLessons: 'zh.path.unit.expandLessons', unitDone: 'zh.toast.unitDone' },
   itemPromptHTML: (i) => `<div class="prompt-hanzi">${i.c}</div>
         <div class="prompt-pinyin">${i.p}</div>`,
   itemAnswerHTML: (i) => `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${i.c}</strong> ${audioBtnHTML(i.c)} <span class="pinyin">(${i.p})</span></div><div class="feedback-phrase-trans">${i.t}</div>`,
@@ -131,5 +132,14 @@ const LANG_HOOKS = {
   flySource: (btn) => btn.innerHTML,
   reorderDoneHTML: (p) => phraseFeedbackDetailHTML(p, p.t),
   fullSentenceExercises: (u) => buildFullSentenceExercises(u),
+  unitEyebrow: (u) => isGrammarUnit(u) ? t('trail.eyebrow.grammar') : t('zh.path.unit.eyebrow', { id: u.id, total: UNITS.length }),
+  afterOpenUnit: (u) => { const manualBtn = document.getElementById('unit-manual-btn'); if (manualBtn) manualBtn.style.display = isGrammarUnit(u) ? 'none' : ''; },
+  trailAfterUnit: (u) => buildStoryCheckpointCard(u),
+  trailMap: (root) => renderTrailMapView(root),
+  introWordHTML: (v) => `<div class="vocab-card-pinyin">${v.p}</div>
+      <div class="vocab-card-hanzi">${v.c} ${audioBtnHTML(v.c)} ${strokeBtnHTML(v.c)}</div>`,
+  introPhraseHTML: (p) => `<div class="vocab-phrase-pinyin">${p.p}</div>
+      <div class="vocab-phrase-hanzi">${p.c} ${audioBtnHTML(p.c)}</div>`,
+  wireIntroCard: (el) => wireStrokeButtons(el),
 // --- /E4 hooks ---
 };
