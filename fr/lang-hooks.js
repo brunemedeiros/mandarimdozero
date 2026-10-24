@@ -54,7 +54,8 @@ const LANG_HOOKS = {
     translateTo: 'fr.exercise.translateToFrench', orderSentence: 'fr.exercise.orderSentence', reorderTapHint: 'fr.reorder.tapHint',
     hintThinkWhen: 'fr.hint.thinkWhen', hintListenAgain: 'fr.hint.listenAgain', hintThinkContext: 'fr.hint.thinkContext',
     hintReorderTranslate: 'fr.hint.reorderTranslate', hintReorderOrder: 'fr.hint.reorderOrder', hintCloze: 'fr.hint.cloze', hintFullSentence: 'zh.hint.fullsentence',
-    expandLessons: 'fr.trail.expandLessons', unitDone: 'toast.unitComplete' },
+    expandLessons: 'fr.trail.expandLessons', unitDone: 'toast.unitComplete',
+    reviewClozePlaceholder: 'review.cloze.placeholder', reviewTypePlaceholder: 'review.typeAnswer.placeholder' },
   itemPromptHTML: (i) => `<div class="prompt-french">${i.f}</div>`,
   itemAnswerHTML: (i) => `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${i.f}</strong> ${audioBtnHTML(i.f)}</div><div class="feedback-phrase-trans">${i.t}</div>`,
   originPhraseHTML: (o) => `<strong>${o.f}</strong><br>${o.t}`,
@@ -91,6 +92,23 @@ const LANG_HOOKS = {
   introPhraseHTML: (p) => `<div class="vocab-phrase-french">${p.f} ${audioBtnHTML(p.f)}</div>`,
   wireIntroCard: () => {},
   badgeLevel: { id: 'A1', label: 'A1' },
+  reviewTargetHTML: (text, audioUrl) => `<div class="flashcard-french">${escapeHTML(text)} ${audioBtnHTML(text, 'audio-btn-lg')}${audioUrl ? customAudioBtnHTML(audioUrl) : ''}</div>`,
+  reviewPromptHTML: (view, inner) => `<div class="flashcard-french">${inner}</div>`,
+  reviewClozeSentenceHTML: (s) => s,
+  reviewTyped: {
+    inputExtraHTML: (expected) => frAccentPickerHTML(expected),
+    wireInputExtra: (root, inputEl) => wireFrAccentPicker(root.querySelector('.fr-accent-picker'), inputEl),
+    check: (given, expected, st) => {
+      const verdict = typedAnswerVerdictForExpected(given, expected);
+      st.wasCorrect = verdict !== 'errou';
+      st.almost = verdict === 'quase';
+      st.almostKind = st.almost ? typedAlmostKind(given, acceptedForms(expected)) : null;
+    },
+    hintHTML: (st) => reviewAlmostHTML(st),
+    wrongGrade: (st) => typedAnswerGrade(st.almost ? 'quase' : 'errou'),
+  },
+  vocabCardSwap: (c, v) => { CardVariants.swapCardWordProgress(c, c.front, v.f, STATE.cardVariants); c.front = v.f; },
+  refreshExtraCards: () => {},
 // --- /E4 hooks ---
   // Família latina (shared/core/familias/latina.js): configuração do FRANCÊS. O português, quando o /pt existir,
   // terá a dele no pt/lang-hooks.js (rascunho em shared/core/familias/latina-idiomas.js). Ver docs/i18n/familia-latina-modulo.md.

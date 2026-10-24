@@ -93,7 +93,8 @@ const LANG_HOOKS = {
     translateTo: 'zh.exercise.translateToChinese', orderSentence: 'zh.exercise.orderSentence', reorderTapHint: 'zh.reorder.tapHint',
     hintThinkWhen: 'zh.hint.thinkWhenUse', hintListenAgain: 'zh.hint.listenAgain', hintThinkContext: 'zh.hint.thinkContext',
     hintReorderTranslate: 'fr.hint.reorderTranslate', hintReorderOrder: 'zh.hint.reorder', hintCloze: 'zh.hint.cloze', hintFullSentence: 'zh.hint.fullsentence',
-    expandLessons: 'zh.path.unit.expandLessons', unitDone: 'zh.toast.unitDone' },
+    expandLessons: 'zh.path.unit.expandLessons', unitDone: 'zh.toast.unitDone',
+    reviewClozePlaceholder: 'zh.review.cloze.placeholder', reviewTypePlaceholder: 'zh.review.typeAnswer.placeholder' },
   itemPromptHTML: (i) => `<div class="prompt-hanzi">${i.c}</div>
         <div class="prompt-pinyin">${i.p}</div>`,
   itemAnswerHTML: (i) => `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${i.c}</strong> ${audioBtnHTML(i.c)} <span class="pinyin">(${i.p})</span></div><div class="feedback-phrase-trans">${i.t}</div>`,
@@ -142,5 +143,29 @@ const LANG_HOOKS = {
       <div class="vocab-phrase-hanzi">${p.c} ${audioBtnHTML(p.c)}</div>`,
   wireIntroCard: (el) => wireStrokeButtons(el),
   badgeLevel: { id: 'HSK1', label: 'HSK 1' },
+  reviewTargetHTML: (text, audioUrl, pinyinText, isBack) => `
+      <div class="flashcard-hanzi">${escapeHTML(text)} ${audioBtnHTML(text, 'audio-btn-lg')}${audioUrl ? customAudioBtnHTML(audioUrl) : ''}</div>
+      <div class="flashcard-pinyin pinyin">${escapeHTML(pinyinText || '')}</div>${isBack ? '' : '\n    '}`,
+  reviewPromptHTML: (view, inner) => `<div class="flashcard-hanzi">${inner}</div>
+      <div class="flashcard-pinyin pinyin">${escapeHTML(view.prompt.pinyinText || '')}</div>`,
+  reviewClozeSentenceHTML: (s, view, answered) => `
+        <div class="cloze-hanzi">${s}</div>
+        ${answered ? `<div class="cloze-pinyin pinyin">${escapeHTML(view.compareAnswerText)}</div>` : ''}
+      `,
+  reviewTyped: {
+    inputExtraHTML: () => pinyinTonePickerHTML(),
+    wireInputExtra: (root, inputEl) => wirePinyinTonePicker(root.querySelector('.pinyin-tone-picker'), inputEl),
+    check: (given, expected, st) => {
+      const strip = pinyinAnswerCompareForm;
+      const typedAll = typedVariants(given, expected).map(strip), typed = typedAll[0];
+      const forms = acceptedFormsTyped(expected);
+      st.wasCorrect = forms.some(form => typedAll.includes(strip(form)));
+      st.toneOnly = st.wasCorrect ? false : isToneOnlyMiss(typed, forms, strip);
+    },
+    hintHTML: (st) => toneHintHTML(st),
+    wrongGrade: () => 0,
+  },
+  vocabCardSwap: (c, v) => { CardVariants.swapCardWordProgress(c, c.back_hanzi, v.c, STATE.cardVariants); c.front_pinyin = v.p; c.back_hanzi = v.c; },
+  refreshExtraCards: () => refreshHanziCardTexts(),
 // --- /E4 hooks ---
 };
