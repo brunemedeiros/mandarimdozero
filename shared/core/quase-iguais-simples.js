@@ -47,8 +47,11 @@ function pollForVoices(){
 // automático da pronúncia). Classe própria (não "audio-btn") de propósito
 // -- wireAudioButtons() casa por `.audio-btn` e chamaria speakFrench()
 // com data-speak indefinido se este botão compartilhasse a classe.
+// C1 (revisão de 2026-10-24): a URL passa por safeMediaUrl (shared/core/midia-segura.js); recusada = sem botão.
 function customAudioBtnHTML(url){
-  return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="${t(LANG_HOOKS.audioListenKey)}" title="${t(LANG_HOOKS.audioListenKey)}">🎧</button>`;
+  const safe = safeMediaUrl(url);
+  if (!safe) return '';
+  return `<button class="custom-audio-btn" data-audio-url="${safe}" aria-label="${t(LANG_HOOKS.audioListenKey)}" title="${t(LANG_HOOKS.audioListenKey)}">🎧</button>`;
 }
 
 // Volta da sessão (Flashcard/Speed Review/Palavras difíceis/Combinar) pra
