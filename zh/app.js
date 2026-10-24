@@ -8,52 +8,14 @@
    - Áudio: Text-to-Speech via Web Speech API (voz zh-CN do navegador)
    ============================================================ */
 
-// Registro do service worker agora vem de shared/pwa.js.
+// Voz do idioma estudado: shared/core/voz.js (comum aos sites, paridade 5d). Os nomes de sempre ficam como repasses.
+function loadChineseVoice(){ return loadStudyVoice(); }
+function canSpeakChinese(text){ return canSpeakStudy(text); }
+function speakChineseAudioOnly(text, btnEl, isAutoplay){ return speakStudyAudioOnly(text, btnEl, isAutoplay); }
+function speakChinese(text, btnEl, isAutoplay){ return speakStudy(text, btnEl, isAutoplay); }
 
-// ---------- Text-to-Speech (mandarim) ----------
-// Navegadores baseados em Chromium (incluindo Opera) têm alguns bugs conhecidos
-// com a Web Speech API: getVoices() pode retornar vazio por mais tempo do que
-// no Chrome puro, o evento onvoiceschanged nem sempre dispara, e o synthesis
-// engine pode "engasgar" sem warm-up na primeira chamada. As estratégias abaixo
-// cobrem esses casos.
-const TTS = {
-  supported: 'speechSynthesis' in window,
-  voice: null,
-  voicesLoaded: false,
-  warmedUp: false,
-  pollAttempts: 0
-};
+initStudyVoice();
 
-
-function loadChineseVoice(){
-  if (!TTS.supported) return;
-  const voices = window.speechSynthesis.getVoices();
-  if (!voices.length) return false;
-  // Prioriza vozes zh-CN, depois qualquer zh-*; dentro de cada grupo, a de melhor qualidade.
-  const exact = voices.filter(v => v.lang === 'zh-CN').sort((a,b) => voiceQualityScore(b) - voiceQualityScore(a));
-  const anyZh = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('zh')).sort((a,b) => voiceQualityScore(b) - voiceQualityScore(a));
-  TTS.voice = exact[0] || anyZh[0] || null;
-  TTS.voicesLoaded = true;
-  return !!TTS.voice;
-}
-
-
-if (TTS.supported){
-  loadChineseVoice();
-  window.speechSynthesis.onvoiceschanged = loadChineseVoice;
-  pollForVoices();
-}
-
-document.addEventListener('click', warmUpTTSOnce, { once:true });
-document.addEventListener('touchstart', warmUpTTSOnce, { once:true });
-
-// Verdadeiro se dá pra tocar esse texto — seja por mp3 pré-gerado, seja pela
-// Web Speech API do navegador. Usado nos autoplay antes de chamar
-// speakChinese(), pra não depender só de TTS.voice (agora quase sempre
-// desnecessário, já que a maioria do conteúdo tem áudio pré-gerado).
-function canSpeakChinese(text){
-  return (typeof AUDIO_MANIFEST !== 'undefined' && !!AUDIO_MANIFEST[text]) || !!TTS.voice;
-}
 
 // ---------- Ciclo de vida do áudio de exercício ----------
 // Cada chamada de playPregeneratedAudio/speakChinese criava um novo player
@@ -85,112 +47,13 @@ const FEEDBACK_SOUND_KEY = 'mandarim_feedback_sound';
 let feedbackAudioCtx = null;
 
 
-// Fase 7d (ver CLAUDE.md) -- reprodução PURA de áudio (mp3 pré-gerado ou
-// Web Speech API), sem o efeito colateral de analytics (registerAudioPlay).
-// Extraída de dentro do que era o corpo de speakChinese() -- byte a byte o
-// mesmo código de sempre, só sem a chamada a registerAudioPlay() no topo.
-// speakChinese() (Review real, qualquer tela) chama registerAudioPlay() e
-// delega pra cá; playAudioPreview() (Preview do editor, Fase 6D.7) chama só
-// isto, nunca registerAudioPlay() -- ver os dois logo abaixo.
-function speakChineseAudioOnly(text, btnEl, isAutoplay){
-  const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
-  if (pregenFile){
-    playPregeneratedAudio(pregenFile, btnEl, isAutoplay, LANG_HOOKS.pregenRate());
-    return;
-  }
 
-  if (!TTS.supported){
-    showToast(t('toast.audioUnsupported'));
-    return;
-  }
-
-  // Tenta recarregar a voz na hora, caso o polling ainda não tenha pego
-  // (cobre o caso de clique muito rápido após o carregamento da página).
-  if (!TTS.voice){
-    loadChineseVoice();
-  }
-
-  if (!TTS.voice){
-    showToast(t('zh.toast.chineseVoiceMissing'));
-    return;
-  }
-
-  // Bug conhecido em navegadores Chromium: o synthesis engine às vezes fica
-  // "pausado" internamente sem motivo aparente. Forçar resume() antes de
-  // falar evita boa parte dos casos de "clica mas não sai som".
-  stopExerciseAudio();
-  window.speechSynthesis.resume();
-
-  const buildUtterance = () => {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'zh-CN';
-    u.voice = TTS.voice;
-    u.rate = 0.85; // um pouco mais devagar, melhor pra quem está aprendendo
-    u.pitch = 1;
-    u.volume = 1;
-    return u;
-  };
-
-  const utter = buildUtterance();
-
-  if (btnEl){ btnEl.classList.add('speaking'); LAST_AUDIO_BTN = btnEl; }
-
-  let didStart = false;
-  utter.onstart = () => { didStart = true; };
-  utter.onend = () => { if (btnEl) btnEl.classList.remove('speaking'); };
-  utter.onerror = () => {
-    if (btnEl) btnEl.classList.remove('speaking');
-    showToast(t('toast.audioPlayFailed'));
-  };
-
-  window.speechSynthesis.speak(utter);
-
-  // Watchdog: se depois de 800ms o evento "onstart" nunca disparou, é sinal
-  // de que o engine engasgou silenciosamente (padrão visto no Opera). Tenta
-  // uma segunda vez com um utterance novo antes de desistir — reutilizar o
-  // mesmo objeto numa nova chamada de speak() é ignorado por alguns engines.
-  setTimeout(() => {
-    if (!didStart){
-      stopExerciseAudio();
-      window.speechSynthesis.resume();
-
-      const retryUtter = buildUtterance();
-      let retryStarted = false;
-      retryUtter.onstart = () => { retryStarted = true; };
-      retryUtter.onend = () => { if (btnEl) btnEl.classList.remove('speaking'); };
-      retryUtter.onerror = () => {
-        if (btnEl) btnEl.classList.remove('speaking');
-      };
-
-      window.speechSynthesis.speak(retryUtter);
-
-      // Se nem a retentativa funcionar, aí sim avisamos e paramos de tentar.
-      setTimeout(() => {
-        if (!retryStarted){
-          if (btnEl) btnEl.classList.remove('speaking');
-          showToast(t('zh.toast.operaAudioFailed'));
-        }
-      }, 800);
-    }
-  }, 800);
-}
-
-function speakChinese(text, btnEl, isAutoplay){
-  registerAudioPlay();
-  speakChineseAudioOnly(text, btnEl, isAutoplay);
-}
 
 
 // Bug conhecido do Chromium/Opera: o speechSynthesis pode "adormecer" se
 // ficar muitos segundos sem uso, mesmo fora de uma fala ativa. Um resume()
 // periódico e leve evita que o próximo clique de áudio saia mudo.
-if (TTS.supported){
-  setInterval(() => {
-    if (!window.speechSynthesis.speaking){
-      window.speechSynthesis.resume();
-    }
-  }, 10000);
-}
+keepStudyVoiceAwake(); // shared/core/voz.js
 
 
 // ---------- Ordem dos traços (Hanzi Writer) — modo animação ----------
@@ -2320,16 +2183,6 @@ const MATCH_STATE = {
 // ============================================================
 
 
-// Projeto "Aprimoramento do Flashcard": os 4 botões de resposta mostram o
-// intervalo REAL que o motor agendaria (previewNextIntervalDays, mesma
-// função que scheduleReview usa de verdade -- shared/fsrs.js), nunca texto
-// estático. Usada tanto pelo Flashcard de vocabulário quanto pela revisão
-// de hanzi (mesmo cartão-base, mesmo motor).
-// i18n Fase 6 lote 2: cartão de professora/aluna traz unitTitleKey (catálogo);
-// cartão de trilha continua com unitTitle (título da unidade, conteúdo).
-function cardOriginTitle(card){
-  return card.unitTitleKey ? t(card.unitTitleKey) : card.unitTitle;
-}
 
 
 // renderTopbarStats() agora vem de shared/topbar-stats.js (idêntico nos dois idiomas).

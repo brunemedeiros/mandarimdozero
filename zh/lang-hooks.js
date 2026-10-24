@@ -167,5 +167,9 @@ const LANG_HOOKS = {
   },
   vocabCardSwap: (c, v) => { CardVariants.swapCardWordProgress(c, c.back_hanzi, v.c, STATE.cardVariants); c.front_pinyin = v.p; c.back_hanzi = v.c; },
   refreshExtraCards: () => refreshHanziCardTexts(),
+  // Voz do idioma estudado (shared/core/voz.js): texto que vai para a voz do navegador e avisos deste site.
+  ttsText: (text) => text,
+  voiceMissingKey: 'zh.toast.chineseVoiceMissing',
+  audioRetryFailedKey: 'zh.toast.operaAudioFailed',
 // --- /E4 hooks ---
 };

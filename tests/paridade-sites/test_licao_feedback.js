@@ -176,7 +176,8 @@ for (const [site, fn] of [['fr', 'speakFrenchAudioOnly'], ['zh', 'speakChineseAu
   const calls = [];
   const c = ctxNovo(site, { PREGEN_AUDIO_RATE: 0.9, AUDIO_MANIFEST: { 'olá': 'x.mp3' }, playPregeneratedAudio: (...a) => calls.push(a) });
   check(`C5 ${site}: LANG_HOOKS.pregenRate() = 0.9`, c.LANG_HOOKS.pregenRate() === 0.9);
-  vm.runInContext(declaracao(read(site + '/app.js'), fn), c);
+  // paridade 5d: a voz é comum (shared/core/voz.js); o app.js tem o nome de sempre como repasse de uma linha
+  vm.runInContext(declaracao(read('shared/core/voz.js'), 'speakStudyAudioOnly') + '\n' + new RegExp('^function ' + fn + '\\(.*$', 'm').exec(read(site + '/app.js'))[0], c);
   c[fn]('olá', null, false);
   check(`C5 ${site}: ${fn} toca o mp3 com a velocidade do gancho (0.9)`, calls.length === 1 && calls[0][3] === 0.9, calls);
 }

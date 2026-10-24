@@ -12,50 +12,14 @@
      mora numa aba interna de Configurações ("📦 Exportar").
    ============================================================ */
 
-// Registro do service worker agora vem de shared/pwa.js.
+// Voz do idioma estudado: shared/core/voz.js (comum aos sites, paridade 5d). Os nomes de sempre ficam como repasses.
+function loadFrenchVoice(){ return loadStudyVoice(); }
+function canSpeakFrench(text){ return canSpeakStudy(text); }
+function speakFrenchAudioOnly(text, btnEl, isAutoplay){ return speakStudyAudioOnly(text, btnEl, isAutoplay); }
+function speakFrench(text, btnEl, isAutoplay){ return speakStudy(text, btnEl, isAutoplay); }
 
-// ---------- Text-to-Speech (francês) ----------
-// Mesmas cautelas de navegador do app original (Chromium/Opera: getVoices()
-// pode demorar, onvoiceschanged pode não disparar, primeira fala pode
-// "engasgar" sem warm-up) — só trocando o idioma de zh-CN para fr-FR.
-const TTS = {
-  supported: 'speechSynthesis' in window,
-  voice: null,
-  voicesLoaded: false,
-  warmedUp: false,
-  pollAttempts: 0
-};
+initStudyVoice();
 
-
-function loadFrenchVoice(){
-  if (!TTS.supported) return;
-  const voices = window.speechSynthesis.getVoices();
-  if (!voices.length) return false;
-  // Prioriza vozes fr-FR, depois qualquer fr-*; dentro de cada grupo, a de melhor qualidade.
-  const exact = voices.filter(v => v.lang === 'fr-FR').sort((a,b) => voiceQualityScore(b) - voiceQualityScore(a));
-  const anyFr = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('fr')).sort((a,b) => voiceQualityScore(b) - voiceQualityScore(a));
-  TTS.voice = exact[0] || anyFr[0] || null;
-  TTS.voicesLoaded = true;
-  return !!TTS.voice;
-}
-
-
-if (TTS.supported){
-  loadFrenchVoice();
-  window.speechSynthesis.onvoiceschanged = loadFrenchVoice;
-  pollForVoices();
-}
-
-document.addEventListener('click', warmUpTTSOnce, { once:true });
-document.addEventListener('touchstart', warmUpTTSOnce, { once:true });
-
-// Verdadeiro se dá pra tocar esse texto — seja por mp3 pré-gerado, seja pela
-// Web Speech API do navegador. Usado nos autoplay antes de chamar
-// speakFrench(), pra não depender só de TTS.voice (agora quase sempre
-// desnecessário, já que a maioria do conteúdo tem áudio pré-gerado).
-function canSpeakFrench(text){
-  return (typeof AUDIO_MANIFEST !== 'undefined' && !!AUDIO_MANIFEST[text]) || !!TTS.voice;
-}
 
 // ---------- Ciclo de vida do áudio de exercício ----------
 // Cada chamada de playPregeneratedAudio/speakFrench criava um novo player
@@ -99,94 +63,10 @@ let feedbackAudioCtx = null;
 // à parte, isto aqui só normaliza o ritmo padrão.
 const PREGEN_AUDIO_RATE = 0.9;
 
-// Fase 7d (ver CLAUDE.md) -- reprodução PURA de áudio (mp3 pré-gerado ou
-// Web Speech API), sem o efeito colateral de analytics (registerAudioPlay).
-// Extraída de dentro do que era o corpo de speakFrench() -- byte a byte o
-// mesmo código de sempre, só sem a chamada a registerAudioPlay() no topo.
-// speakFrench() (Review real, qualquer tela) chama registerAudioPlay() e
-// delega pra cá; playAudioPreview() (Preview do editor, Fase 6D.7) chama só
-// isto, nunca registerAudioPlay() -- ver os dois logo abaixo.
-function speakFrenchAudioOnly(text, btnEl, isAutoplay){
-  const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
-  if (pregenFile){
-    playPregeneratedAudio(pregenFile, btnEl, isAutoplay, LANG_HOOKS.pregenRate());
-    return;
-  }
-
-  if (!TTS.supported){
-    showToast(t('toast.audioUnsupported'));
-    return;
-  }
-
-  if (!TTS.voice){
-    loadFrenchVoice();
-  }
-  if (!TTS.voice){
-    showToast(t('toast.voiceMissingFr'));
-    return;
-  }
-
-  stopExerciseAudio();
-  window.speechSynthesis.resume();
-
-  const buildUtterance = () => {
-    // Forma neutra de gênero ("brésilien·ne") é lida como as duas formas
-    // ("brésilien, brésilienne"); texto exibido e manifest não mudam.
-    const u = new SpeechSynthesisUtterance(typeof speakableProfileText === 'function' ? speakableProfileText(text) : text);
-    u.lang = 'fr-FR';
-    u.voice = TTS.voice;
-    u.rate = 0.9;
-    u.pitch = 1;
-    u.volume = 1;
-    return u;
-  };
-
-  const utter = buildUtterance();
-  if (btnEl){ btnEl.classList.add('speaking'); LAST_AUDIO_BTN = btnEl; }
-
-  let didStart = false;
-  utter.onstart = () => { didStart = true; };
-  utter.onend = () => { if (btnEl) btnEl.classList.remove('speaking'); };
-  utter.onerror = () => {
-    if (btnEl) btnEl.classList.remove('speaking');
-    showToast(t('toast.audioPlayFailed'));
-  };
-
-  window.speechSynthesis.speak(utter);
-
-  setTimeout(() => {
-    if (!didStart){
-      stopExerciseAudio();
-      window.speechSynthesis.resume();
-      const retryUtter = buildUtterance();
-      let retryStarted = false;
-      retryUtter.onstart = () => { retryStarted = true; };
-      retryUtter.onend = () => { if (btnEl) btnEl.classList.remove('speaking'); };
-      retryUtter.onerror = () => { if (btnEl) btnEl.classList.remove('speaking'); };
-      window.speechSynthesis.speak(retryUtter);
-      setTimeout(() => {
-        if (!retryStarted){
-          if (btnEl) btnEl.classList.remove('speaking');
-          showToast(t('toast.audioPlayFailedThis'));
-        }
-      }, 800);
-    }
-  }, 800);
-}
-
-function speakFrench(text, btnEl, isAutoplay){
-  registerAudioPlay();
-  speakFrenchAudioOnly(text, btnEl, isAutoplay);
-}
 
 
-if (TTS.supported){
-  setInterval(() => {
-    if (!window.speechSynthesis.speaking){
-      window.speechSynthesis.resume();
-    }
-  }, 10000);
-}
+
+keepStudyVoiceAwake(); // shared/core/voz.js
 
 
 // ---------- Taxonomia de "notas de realidade" (sociolinguística) ----------
@@ -1104,48 +984,6 @@ document.addEventListener('keydown', (e) => {
 const ESTIMATED_SECONDS_PER_EXERCISE = 20;
 
 
-// ---------- Exercício de vocabulário "Digite o que ouviu" (ditado) ----------
-// Só entra na rotação depois que a palavra já foi vista em múltipla escolha
-// pelo menos uma vez (gating em buildExerciseSet) — igual ao Memrise, nunca
-// pede pra digitar de ouvido uma palavra ainda não exposta.
-// Ninguém tem acento fácil de digitar num teclado físico/mobile padrão --
-// isso dá um jeito de inserir a letra certa sem precisar trocar de layout
-// de teclado. Importante: o acento NÃO é exigido pra acertar (a comparação
-// já remove diacríticos dos dois lados, ver lessonTypedAnswerResult nos
-// dois exercícios abaixo) -- isso é só pra quem quer treinar digitando com o
-// acento certo mesmo, não um requisito escondido. Minúsculas só (a
-// comparação já ignora maiúscula/minúscula) -- mesmo espírito do
-// PINYIN_TONE_GROUPS em zh/app.js, adaptado pro alfabeto francês.
-// Família latina, fase 2: as letras do teclado estão em LANG_HOOKS.familiaLatina.gruposDeAcentos
-// (fr/lang-hooks.js) e a marcação/inserção, em shared/core/familias/latina.js. As classes
-// continuam fr-accent-* (o CSS e as capturas de tela não mudam).
-// `expected` (opcional): a resposta que o exercício pede. Se ela tem uma letra que o teclado não tem (æ, ñ, ß...),
-// entra uma fileira a mais só com essa letra, sem legenda; sem isso, o teclado é o de sempre.
-function frAccentPickerHTML(expected){
-  const base = LANG_HOOKS.familiaLatina.gruposDeAcentos;
-  const tem = new Set([].concat(...base));
-  const extras = [...new Set(Array.from(String(expected || '').toLowerCase()).filter(ch => /\p{L}/u.test(ch) && !/[a-z]/.test(ch) && !tem.has(ch)))];
-  return extras.length ? FamiliaLatina.htmlTecladoDeAcentos(base.concat([extras])) : latinaFr().htmlTecladoDeAcentos();
-}
-
-// Escreve a tecla no campo: insere no CURSOR (não sempre no final) -- dá pra
-// corrigir só a letra que falta o acento no meio da palavra sem apagar o resto.
-function insertAccentAtCursor(inputEl, ch){
-  const r = FamiliaLatina.inserirNoCursor(inputEl.value, inputEl.selectionStart, inputEl.selectionEnd, ch);
-  inputEl.value = r.value;
-  inputEl.focus();
-  inputEl.setSelectionRange(r.cursor, r.cursor);
-}
-
-function wireFrAccentPicker(pickerEl, inputEl){
-  if (!pickerEl || !inputEl) return;
-  pickerEl.querySelectorAll('.fr-accent-key').forEach(btn => {
-    // Não deixa o toque na tecla tirar o foco/cursor do campo (no celular
-    // isso fechava e reabria o teclado).
-    btn.addEventListener('mousedown', e => e.preventDefault());
-    btn.addEventListener('click', () => insertAccentAtCursor(inputEl, btn.textContent));
-  });
-}
 
 
 // Painel de acerto (estilo Duolingo): toda resposta certa PÁRA aqui em vez
@@ -1230,11 +1068,6 @@ const REVIEW_ORIGIN_LABELS = {
   get self(){ return t('review.origin.self'); }
 };
 
-// Título (tag) do cartão: cartão de professora/aluna traz `unitTitleKey`
-// (shared/flashcard-model.js); cartão de trilha usa o título da unidade (conteúdo).
-function flashcardUnitTitleText(card){
-  return card.unitTitleKey ? t(card.unitTitleKey) : card.unitTitle;
-}
 
 
 document.getElementById('review-back-to-modes').addEventListener('click', backToReviewModeSelect);
@@ -1256,9 +1089,6 @@ const MATCH_STATE = {
   busy: false      // trava cliques durante a animação de erro
 };
 
-// Placeholder mantido só pra não quebrar as chamadas já existentes
-// (review-back-to-modes, switchTab) — o jogo não usa mais timer.
-function stopMatchTimer(){}
 
 
 // Marco de Revisão do módulo (moduleReviewSelection, recordModuleReviewDone, startModuleReviewSession,
@@ -1537,35 +1367,7 @@ wireAnkiExport(ANKI_EXPORT_CONFIG);
 // ============================================================
 wireConjugationScreen();
 
-// BEGIN accent-answer-logic (extraído literalmente por fr/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
-// Normaliza pra comparação "quase certo": remove acentos e ignora maiúsculas.
-// Erro de terminal (ex: "prennons" por "prenons") continua contando como errado.
-// Auditoria 2026-09-16 (grilling): comportamento tolerante a acento
-// CONFIRMADO como intencional pro francês (acento não muda a nota nos
-// exercícios digitados de vocabulário/cloze/conjugação) -- preservado sem
-// alteração. Só o pinyin do chinês (zh/app.js) tinha esse mesmo padrão
-// aplicado errado -- ver normalizePinyinAnswer lá, tom não é decoração.
-// Família latina, fase 2 (docs/i18n/familia-latina-modulo.md): as regras moram em
-// shared/core/familias/latina.js; a configuração do francês, em LANG_HOOKS.familiaLatina (fr/lang-hooks.js).
-function normalizeLoose(str){
-  return FamiliaLatina.normalizarFrouxo(str);
-}
-
-// Uma instância do módulo por página, criada no primeiro uso (o lang-hooks.js e o módulo já carregaram).
-let _latinaFr = null;
-
-function latinaFr(){
-  return _latinaFr || (_latinaFr = FamiliaLatina.criar(LANG_HOOKS.familiaLatina));
-}
-
-// Exercícios de digitar da trilha ("Digite o que ouviu" e a lacuna digitada): 'ok' | 'quase' | 'errou'.
-// Acento não conta (como sempre); "oe" por "œ" = 'quase' (decisão da dona, 2026-10-15); o apóstrofo
-// curvo do celular (’) é ignorado nos dois exercícios (antes só no "Digite o que ouviu").
-function lessonTypedAnswerResult(typed, expected){
-  return latinaFr().avaliarRespostaDigitada(typed, expected, FamiliaLatina.PONTUACAO_VOCAB_RE);
-}
-
-// END accent-answer-logic
+// Teclado de acentos e correção do digitar (accent-answer-logic): shared/core/familias/latina-licao.js (paridade 5d).
 
 // ============================================================
 // DITADOS: motor comum em shared/ditados.js (etapa 5b da paridade, docs/historico/28-paridade-ditados.md);

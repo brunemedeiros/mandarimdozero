@@ -6,7 +6,7 @@ const LANG_HOOKS = {
   speak: (...a) => speakFrench(...a),
   loadVoice: () => loadFrenchVoice(),
   audioListenKey: 'fr.audio.listen',
-  cardOriginTitle: (c) => flashcardUnitTitleText(c),
+  cardOriginTitle: (c) => cardOriginTitle(c),
   foldCase: (s) => s.toLowerCase(),
   recapText: (i) => i.f,
   recapExtra: () => '',
@@ -109,6 +109,10 @@ const LANG_HOOKS = {
   },
   vocabCardSwap: (c, v) => { CardVariants.swapCardWordProgress(c, c.front, v.f, STATE.cardVariants); c.front = v.f; },
   refreshExtraCards: () => {},
+  // Voz do idioma estudado (shared/core/voz.js): texto que vai para a voz do navegador e avisos deste site.
+  ttsText: (text) => typeof speakableProfileText === 'function' ? speakableProfileText(text) : text,
+  voiceMissingKey: 'toast.voiceMissingFr',
+  audioRetryFailedKey: 'toast.audioPlayFailedThis',
 // --- /E4 hooks ---
   // Família latina (shared/core/familias/latina.js): configuração do FRANCÊS. O português, quando o /pt existir,
   // terá a dele no pt/lang-hooks.js (rascunho em shared/core/familias/latina-idiomas.js). Ver docs/i18n/familia-latina-modulo.md.

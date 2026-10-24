@@ -350,3 +350,12 @@ function renderNormalCard(mountEl, card, localState, callbacks){
     });
   }
 }
+
+// Título (tag) do cartão na Revisão: cartão de professora/aluna traz `unitTitleKey` (catálogo, shared/flashcard-model.js);
+// cartão de trilha usa o título da unidade (conteúdo). Era flashcardUnitTitleText no fr e cardOriginTitle no zh, iguais.
+function cardOriginTitle(card){
+  return card.unitTitleKey ? t(card.unitTitleKey) : card.unitTitle;
+}
+
+// Combinar: o jogo não usa mais timer; a função vazia fica para as chamadas que já existiam (troca de aba, voltar aos modos).
+function stopMatchTimer(){}
