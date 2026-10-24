@@ -23,7 +23,9 @@ const DITADOS_SRC = fs.readFileSync(path.join(__dirname, '..', '..', 'shared', '
 // Etapa 5c (2026-10-23): os blocos dos Desafios (accent-challenge-logic, challenge-translation-logic,
 // challenge-review-logic, cloze-grammar-logic) moram em shared/desafios.js (motor comum dos Desafios).
 const DESAFIOS_SRC = fs.readFileSync(path.join(__dirname, '..', '..', 'shared', 'desafios.js'), 'utf8');
-const SRC = require('../../tests/e4/app-source').withCore(DITADOS_SRC + '\n' + DESAFIOS_SRC + '\n' + fs.readFileSync(APP_JS_PATH, 'utf8'));
+// Paridade 5d: o bloco accent-answer-logic e o teclado de acentos estão em shared/core/familias/latina-licao.js.
+const LATINA_LICAO_SRC = fs.readFileSync(path.join(__dirname, '..', '..', 'shared', 'core', 'familias', 'latina-licao.js'), 'utf8');
+const SRC = require('../../tests/e4/app-source').withCore(DITADOS_SRC + '\n' + DESAFIOS_SRC + '\n' + LATINA_LICAO_SRC + '\n' + fs.readFileSync(APP_JS_PATH, 'utf8'));
 
 function extractBlock(beginMarker, endMarker){
   const start = SRC.indexOf(beginMarker);

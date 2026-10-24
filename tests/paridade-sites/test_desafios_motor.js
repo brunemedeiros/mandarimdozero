@@ -50,7 +50,9 @@ const MOTOR = ['shared/desafios.js', 'shared/desafios-telas.js', 'shared/desafio
   const nomes = ['renderChallengeCategories', 'renderChallengesList', 'openChallengePlayer', 'checkListenTranslateAnswer', 'checkAccentAnswer', 'openClozeGrammarPlayer', 'renderChallengesAdmin', 'importChallengesFromJSON',
     'loadChallengesFromDB', 'chT', 'applyChallengeI18n', 'tpZero', 'slowAudioBtnHTML', 'expressionOfTheDay', 'expressionCardHTML', 'fillExpressionLevelSections', 'dueChallengeReviews', 'buildModuleChallengesRow', 'fillModuleChallengeRows', 'md5Hex', 'accentAnswerOutcome', 'analyzeTranslation'];
   check('fr/app.js não tem mais os Desafios', nomes.every(n => !new RegExp('^(async )?function ' + n + '\\(', 'm').test(app)) && !/CHALLENGE_I18N|^const CHALLENGE(?!S_STRIP_COLLAPSE_KEY)|^let CHALLENGES/m.test(app) && (app.match(/^wireChallengesScreen\(\);$/gm) || []).length === 1);
-  check('fr/app.js liga a linha da trilha pelo gancho afterModule', /afterModule\(module, list\)\{\n\s+appendModuleChallengesSlot\(module, list\);/.test(app) && /fillModuleChallengeRows\(\);/.test(app));
+  // paridade 5d: renderUnitsGrid é comum (shared/core/trilha-licao.js) e liga a linha quando o site tem Desafios
+  const trilha = fs.readFileSync(path.join(ROOT, 'shared/core/trilha-licao.js'), 'utf8');
+  check('fr/app.js liga a linha da trilha pelo gancho afterModule', /afterModule\(module, list\)\{\n\s+if \(typeof appendModuleChallengesSlot === 'function'\) appendModuleChallengesSlot\(module, list\);/.test(trilha) && /fillModuleChallengeRows\(\);/.test(trilha) && !/function renderUnitsGrid/.test(app));
   const html = read('fr/index.html');
   const iStyleEnd = html.indexOf('</style>'), iCss = html.indexOf('href="../shared/desafios.css"'), iMod = html.indexOf('href="../shared/modulos-niveis.css"');
   const pos = (s) => html.indexOf(s);

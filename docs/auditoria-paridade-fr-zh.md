@@ -8,6 +8,13 @@ Caso que motivou: a janela "Minha meta de estudo" (`shared/wizard.js`) usava cla
 
 Esta auditoria **não mudou código**. Base: `main` em `153f5c3`.
 
+**Atualização 2026-10-24 (etapa 5d, `docs/historico/30-paridade-quase-iguais.md`):** as funções que o `fr/app.js` e o
+`zh/app.js` tinham em dobro (lição, exercícios, diálogo, Revisão, voz, teclado, estado/conquistas, trilha, configurações e a
+casca do app) estão em `shared/core/` (`licao-base`, `licao-dialogo`, `licao-exercicios`, `trilha-licao`, `estado-salvar`,
+`revisao-cartoes`, `app-comum`, `voz`) e em `shared/core/familias/latina-licao.js`. O `fr/app.js` ficou com 697 linhas (só
+dados/configuração do francês e 4 repasses da voz); o `zh/app.js` com 2 312 (hanzi, pinyin, histórias, busca, Manual da
+unidade, Frase completa). Os números de linha citados abaixo são de antes.
+
 ## 1. Como foi feito
 
 - Funções de nível superior: `grep -oE "^(async )?function [A-Za-z0-9_]+"` em `fr/app.js` (9651 linhas) e `zh/app.js`
@@ -223,11 +230,11 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
    `t('zh.reorder.tapHint')` (`zh/app.js:3713`), que já tem inglês em `shared/i18n/en.js:2157`. Fere a regra "site em inglês
    não tem nada em português". A varredura `tests/i18n/scan_pt_literais.js` já aponta essa linha (entre 481 literais), mas não
    barra o merge.
-2. **Manual da unidade** (botão "📖 Manual da unidade" na lição, com vocabulário, frases e diálogo):
+2. **Manual da unidade** (continua só no zh depois da etapa 5d; ligar no fr é decisão da dona) (botão "📖 Manual da unidade" na lição, com vocabulário, frases e diálogo):
    `zh/index.html:4848`, `zh/app.js:1759-1806`. O fr não tem. Recurso geral; decisão da dona se o fr deve ganhar.
-3. **Exercício "Frase completa"** (escolher a frase certa entre 4, com distratores trocando palavra ou negação):
+3. **Exercício "Frase completa"** (etapa 5d: a série de exercícios comum já o aceita pelo gancho `fullSentenceExercises`; o montador e a tela continuam no zh, porque as regras usam hanzi, 不/没 e pinyin) (escolher a frase certa entre 4, com distratores trocando palavra ou negação):
    `zh/app.js:2718-2760` e `3625`. O fr tem só um resto de código para ele (`fr/app.js:3036`).
-4. **Lado do balão no diálogo pelo primeiro falante** (`dlgSpeakerSide`, `zh/app.js:2255`): aceita falante com qualquer
+4. **Lado do balão no diálogo pelo primeiro falante** (etapa 5d: `dlgSpeakerSide` está no motor comum `shared/core/licao-dialogo.js`, ligado só no zh pelo gancho `dlgSide`; ligar no fr é decisão da dona) (`dlgSpeakerSide`, `zh/app.js:2255`): aceita falante com qualquer
    nome. O fr só põe à direita quem se chama `B` (`fr/app.js:2390`, `2525`). Importa para a pendência "diálogos com
    personagens nomeados".
 5. **Histórias-checkpoint** (`zh/stories.js`, `zh/app.js:1428-1570`) e **busca de vocabulário** (pronta, mas sem botão
@@ -282,6 +289,10 @@ um `<site>/ditados-config.js` com os ditados, a família do idioma, a voz e o te
   `pt/desafios-config.js` (passo a passo em `docs/historico/29-paridade-desafios.md`), "aos poucos depois", pela decisão
   da dona.
 - ~~O carregamento com mudanças de currículo (C1)~~: feito, `shared/core/curriculo-progresso.js` (2026-10-23).
+- ~~Lição em passos, exercícios, diálogo, Revisão (cartões e Revisão rápida), voz, teclado de acentos, salvar/carregar o
+  progresso, conquistas, trilha, configurações e a casca do app~~: feito, `shared/core/*.js` e
+  `shared/core/familias/latina-licao.js` (etapa 5d, 2026-10-24, `docs/historico/30-paridade-quase-iguais.md`). Um site novo
+  traz os dados, o `STATE`, o `lang-hooks.js` (com a família) e as chamadas `wire*` no `app.js`.
 
 **Pontos de `shared/` que ainda supõem só fr/zh** (já listados em `docs/i18n/arquitetura-multi-idioma-cursos.md:74` para a
 E1): `shared/profile-placeholders.js:141` e `:147` (`studyLang === 'zh' ? 'zh' : 'fr'`: no site de português o

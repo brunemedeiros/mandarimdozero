@@ -215,7 +215,7 @@ console.log('== zh');
   check('zh: todo cartão da trilha tem studyKey (chave no conteúdo)', cards.length > 0 && cards.every(c => typeof c.studyKey === 'string'));
   check('zh: id = u{k} = o id de antes pela posição (nenhum id mudou)', cards.every(c => c.phraseIdx != null ? c.id === 'u' + c.studyKey && /^u.+-[pd]\d+$/.test(c.id) : (c.id === `u${c.unitId}-v${c.vocabIdx}` || c.id === `u${c.unitId}-v${c.vocabIdx}-b`)));
   check('zh: ids == livro-razão zh/published_ids.json (conferido contra a origin/main)', JSON.stringify(cards.map(c => c.id).sort()) === JSON.stringify(ledger.cards.slice().sort()));
-  const src = fs.readFileSync(path.join(L.ROOT, 'zh/app.js'), 'utf8');
+  const src = fs.readFileSync(path.join(L.ROOT, 'zh/app.js'), 'utf8') + '\n' + fs.readFileSync(path.join(L.ROOT, 'shared/core/estado-salvar.js'), 'utf8'); // paridade 5d: salvar/carregar é comum
   const fn = (name) => { const a = src.indexOf('function ' + name + '('); return src.slice(a, src.indexOf('\n}\n', a)); };
   check('zh: applySerializedState chama as funções comuns (shared/core/curriculo-progresso.js)', ['curriculumLoadPrepare(data)', 'curriculumLoadReconcileUnits()', 'curriculumLoadStampReleased()'].every(x => fn('applySerializedState').includes(x)));
   check('zh: serializeState grava os campos de currículo', fn('serializeState').includes('...curriculumSaveFields()'));

@@ -125,3 +125,17 @@ A dona propôs agrupar por FAMÍLIA em vez de deixar o grupo D separado: idiomas
 - **Família logográfica** (zh hoje; ja depois): hanzi + pinyin/leitura, tons, traços.
 - **Quando fazer:** a extração dos exercícios grandes (grupo D) para um módulo da família latina só é feita junto com o app de português (E5), porque só com o segundo membro da família dá para ver o que é de fato comum e o que é do francês. Extrair antes seria adivinhar. O zh fica como está até existir um segundo idioma logográfico.
 - A estrutura prevista: `shared/core/` (igual para todos) + `shared/core/familias/latina/` + `<idioma>/lang-hooks.js` (o que é só daquele idioma).
+
+## 11. Paridade 5d (2026-10-23/24): as quase iguais que restavam e o grupo D, feitos
+Pedido da dona: mover TUDO o que é compartilhado. As 23 quase iguais (grupos C e D) e as idênticas que tinham ficado de fora
+(`renderSettingsView`, `switchSettingsSection`, `isAdminUser`) foram para `shared/core/` em 9 partes, com o fr como molde
+(família latina) e o que o zh tinha a mais como superconjunto, sem ligar nada novo no fr. Registro completo, provas e o que
+ficou em cada site: `docs/historico/30-paridade-quase-iguais.md`. Manifestos: `scripts/e4-batches/p5d-1.js` a `p5d-6.js`.
+- Arquivos novos: `licao-base.js`, `licao-dialogo.js`, `licao-exercicios.js`, `trilha-licao.js`, `estado-salvar.js`,
+  `revisao-cartoes.js`, `app-comum.js`, `voz.js` e `familias/latina-licao.js` (só sites da família latina).
+- O que restou: no `fr/app.js`, só dados/configuração do francês (697 linhas, 4 repasses da voz); no `zh/app.js`, o que é do
+  chinês (hanzi, pinyin, histórias, busca, Manual da unidade, Frase completa). O módulo logográfico (`familias/`) fica para
+  quando houver um 2º idioma da família; a Frase completa e o Manual só viram motor geral com decisão da dona.
+- Para o pt: `pt/lang-hooks.js` com os mesmos ganchos do fr (a lista comentada está em cada manifesto `p5d-*.js`) e a
+  configuração `familiaLatina` do português (rascunho em `shared/core/familias/latina-idiomas.js`, já com `artigos`).
+
