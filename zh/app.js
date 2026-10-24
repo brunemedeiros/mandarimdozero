@@ -17,37 +17,12 @@ function speakChinese(text, btnEl, isAutoplay){ return speakStudy(text, btnEl, i
 initStudyVoice();
 
 
-// ---------- Ciclo de vida do áudio de exercício ----------
-// Cada chamada de playPregeneratedAudio/speakChinese criava um novo player
-// (Audio ou SpeechSynthesisUtterance) sem nunca parar o anterior -- ao
-// avançar de exercício rápido, o áudio antigo continuava tocando em
-// segundo plano ao mesmo tempo que o novo, sobrepondo os dois. Rastreia o
-// player de áudio pré-gerado atualmente ativo (mesmo padrão já usado nos
-// ditados do francês) e para ele -- e qualquer fala em andamento via Web
-// Speech API -- sempre que um novo áudio de exercício vai começar OU o
-// exercício/tela que o iniciou deixa de estar ativo (trocar de exercício,
-// responder, avançar, sair da lição, trocar de aba etc.).
-let exerciseAudioEl = null;
-
-// Último botão de áudio que de fato tocou algo (clique manual OU autoplay --
-// ambos passam por playPregeneratedAudio/speakChinese com btnEl) -- é o que
-// o atalho "r" repete. Não precisa de lógica própria de "expiração": ao
-// trocar de tela, o botão antigo é removido do DOM (innerHTML novo), então
-// LAST_AUDIO_BTN.isConnected já vira false sozinho.
-let LAST_AUDIO_BTN = null;
-
-
 // ---------- Som curto de acerto/erro (feedback por exercício) ----------
 // Sintetizado via Web Audio API -- sem arquivo de áudio externo pra baixar/
 // hospedar, e sem disputar com o player de pronúncia acima (Audio/Speech
 // Synthesis são players diferentes; um "ding" de ~200ms não precisa de
 // stopExerciseAudio()). Silenciável em Preferências (Seu progresso).
 const FEEDBACK_SOUND_KEY = 'mandarim_feedback_sound';
-
-let feedbackAudioCtx = null;
-
-
-
 
 
 // Bug conhecido do Chromium/Opera: o speechSynthesis pode "adormecer" se
@@ -190,59 +165,6 @@ function buildHanziCards(lessons){
   return cards;
 }
 
-// ---------- Taxonomia de "notas de realidade" (sociolinguística) ----------
-// Grilling 2026-09-17 (mesma decisão espelhada de fr/app.js): proposta de
-// mostrar contraste "forma ensinada vs forma real" (registro, gíria,
-// variação regional, desvio gramatical coloquial). NENHUMA nota de
-// realidade foi escrita ainda e este bloco não está wireado em lugar
-// nenhum do motor -- é só a taxonomia + as regras de nível travadas em
-// código agora, pra não precisar redescobrir esse raciocínio quando o
-// conteúdo além de HSK1 existir. Hoje só o nível inicial (HSK1) tem
-// conteúdo real (`level: "HSK1"` é o valor de verdade usado em
-// zh/content.js, confirmado antes de escrever isto -- as chaves abaixo
-// usam a MESMA nomenclatura HSK, não A1/A2/B1/B2 do francês, porque
-// copiar a chave "A1" aqui sem checar seria exatamente o tipo de erro que
-// motivou esta sessão de grilling no primeiro lugar, ver bug de tom do
-// pinyin corrigido mais cedo). HSK2/HSK3/HSK4 abaixo são propositalmente
-// hipotéticos, sem nenhuma unidade pra validar contra.
-//
-// Quatro categorias fechadas (não usar string livre -- consistência de
-// badge/cor na UI quando isso for implementado). Mesmas 4 categorias do
-// francês -- a taxonomia é a mesma nos dois idiomas, só os exemplos mudam:
-const REALITY_NOTE_CATEGORY = {
-  // Registro cotidiano "ainda reconhecível como a mesma forma, só mais
-  // casual" -- ex: 早上好 (zǎoshang hǎo) ensinado, 早 (zǎo) sozinho no dia a
-  // dia entre pessoas que já se conhecem.
-  INFORMAL: 'informal',
-  // Registro marcado/familiar -- termos de tratamento afetivos/de gíria
-  // entre amigos próximos, mais marcados socialmente que "informal" simples.
-  // Exige mais cuidado que a categoria acima (CLAUDE.md: badge/cor
-  // DIFERENTE de "informal", nunca a mesma).
-  FAMILIAR_GIRIA: 'familiar-giria',
-  // Variação lexical por lugar/comunidade, SEM forma "oficial" -- China
-  // continental vs. Taiwan vs. Singapura têm vocabulário cotidiano
-  // diferente pra vários conceitos comuns. Shape de dado diferente das
-  // outras 3 categorias: usa `variants: [{region, form, pinyin}, ...]`
-  // (2+ opções igualmente corretas, cada uma com o lugar onde é ouvida),
-  // nunca um par learned/everyday -- nenhuma forma é "a ensinada" e a
-  // outra "a real".
-  REGIONAL: 'regional',
-  // Desvio GRAMATICAL real (não só léxico/registro) que já é aceito como
-  // correto na fala. Mesmo espírito do francês ("Je sais pas" por "Je ne
-  // sais pas") -- ainda sem um exemplo confirmado em mandarim padrão
-  // levantado nesta sessão (não inventar um sem confirmar antes de usar
-  // em conteúdo de verdade). Diferença importante das outras 3: esta
-  // categoria pode eventualmente ATRAVESSAR pra dentro da correção de
-  // exercícios comuns (não só um card passivo) -- se o aluno digitar a
-  // forma coloquial num exercício normal de digitar, o ideal é aceitar
-  // como correta MAS mostrar a forma padrão ao lado (mesmo espírito do
-  // status "quase"/"almost" já usado na correção do francês). NÃO
-  // IMPLEMENTADO AINDA -- exige decidir onde a nota mora por item e
-  // alterar as funções de finish()/painel de feedback dos exercícios
-  // digitados. Fica registrado aqui como o próximo ponto de decisão
-  // explícito antes de tocar em qualquer lógica de correção de verdade.
-  GRAMATICA_COLOQUIAL: 'gramatica-coloquial',
-};
 
 // 3 eixos de "profundidade" aprovados no grilling, por nível -- só o
 // eixo 1 (explanationDepth) está de fato em uso hoje, porque só o nível
@@ -284,54 +206,6 @@ const REALITY_NOTE_LEVEL_GUIDANCE = {
   },
 };
 
-
-// Texto do banner (topo do cartão) quando um concept é uma nota de
-// realidade (concept.kind === 'reality') em vez de gramática comum --
-// renderConceptStep() escolhe entre isto e o banner padrão de gramática.
-// Sem cor/badge própria por categoria ainda (piloto usa só texto+emoji pra
-// diferenciar -- ver CLAUDE.md, seção da camada de notas de realidade, "MVP
-// = card passivo"); se familiar-giria vira conteúdo de verdade algum dia,
-// dar a ela uma cor própria vira obrigatório (mesma regra já registrada
-// sobre --on-vivid vs --on-seal-red -- não reaproveitar o badge de
-// 'informal' pra um registro mais marcado).
-const REALITY_NOTE_BANNER_TEXT = {
-  // Getters (i18n): avaliados a cada leitura, não congelados no load.
-  get [REALITY_NOTE_CATEGORY.INFORMAL]() { return t('concept.banner.reality.informal'); },
-  get [REALITY_NOTE_CATEGORY.FAMILIAR_GIRIA]() { return t('concept.banner.reality.familiar'); },
-  get [REALITY_NOTE_CATEGORY.REGIONAL]() { return t('concept.banner.reality.regional'); },
-  get [REALITY_NOTE_CATEGORY.GRAMATICA_COLOQUIAL]() { return t('concept.banner.reality.colloquialGrammar'); },
-};
-
-// ---------- Taxonomia de "notas culturais" (grilling 2026-09-17) ----------
-// Camada IRMÃ das notas de realidade acima, não a mesma coisa: `reality` é
-// especificamente um CONTRASTE DE FORMA (ensinado vs. real, mesma ideia dita
-// diferente). `culture` é um FATO ISOLADO -- história de palavra, costume,
-// festividade -- sem nenhum contraste de forma envolvido. As duas usam o
-// mesmo mecanismo de `concepts`/trigger (kind diferente), nunca a mesma nota
-// tentando fazer as duas coisas. Mesmas regras de densidade/revisão já
-// travadas pras notas de realidade (ver CLAUDE.md): sem teto numérico, só
-// entra se a relação pedagógica com a palavra/frase ensinada for genuína,
-// toda nota reportada no chat com nível de confiança pra revisão manual.
-const CULTURE_NOTE_CATEGORY = {
-  // Origem/etimologia de uma palavra ou expressão -- ex: os dias da semana
-  // vêm dos deuses/planetas romanos.
-  HISTORIA: 'historia',
-  // Etiqueta ou tradição social do dia a dia -- ex: como funciona uma
-  // saudação, um hábito à mesa, uma regra social não escrita.
-  COSTUME: 'costume',
-  // Feriado, celebração, data especial -- ex: como funciona o Ano Novo
-  // Chinês, uma tradição de Natal específica da França.
-  FESTIVIDADE: 'festividade',
-};
-
-// Texto do banner quando concept.kind === 'culture' -- tom mais leve/
-// "curiosidade" que o de `reality` (que soa mais "cuidado, isso pode te
-// confundir"), já que aqui não há nenhum contraste de forma pra alertar.
-const CULTURE_NOTE_BANNER_TEXT = {
-  get [CULTURE_NOTE_CATEGORY.HISTORIA]() { return t('concept.banner.culture.history'); },
-  get [CULTURE_NOTE_CATEGORY.COSTUME]() { return t('concept.banner.culture.custom'); },
-  get [CULTURE_NOTE_CATEGORY.FESTIVIDADE]() { return t('concept.banner.culture.festivity'); },
-};
 
 // ---------- Estado global ----------
 const STATE = {
@@ -472,8 +346,7 @@ const CONTENT_I18N = ContentI18n.create({
   getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
   onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); if (typeof repaintTrailForUiLanguage === 'function') repaintTrailForUiLanguage(); }
 });
-window.addEventListener('i18n:change', () => { CONTENT_I18N.sync(); });
-CONTENT_I18N.sync();
+wireContentI18nSync(); // shared/core/app-comum.js
 
 // Conexão com o Supabase (supabaseClient, cleanRedirectURL) agora vem de
 // shared/supabase-client.js -- mesmo projeto/tabela `progress` de sempre,
@@ -524,38 +397,15 @@ loadPinyinPreference();
 const CLOZE_MODE_KEY = 'mandarim_cloze_mode';
 
 
-document.getElementById('cloze-mode-switch').addEventListener('change', () => {
-  const next = getClozeMode() === 'type' ? 'choice' : 'type';
-  localStorageSafeSet(CLOZE_MODE_KEY, next);
-  updateClozeModeSwitch();
-});
-updateClozeModeSwitch();
-
-document.getElementById('feedback-sound-switch').addEventListener('change', () => {
-  localStorageSafeSet(FEEDBACK_SOUND_KEY, isFeedbackSoundEnabled() ? '0' : '1');
-  updateFeedbackSoundSwitch();
-});
-updateFeedbackSoundSwitch();
+wireStudyPreferenceSwitches(); // shared/core/app-comum.js
 
 
 // Login (Google/e-mail/convidado), menu do usuário e logout agora vêm de
 // shared/auth.js -- os botões/formulários abaixo continuam no HTML de cada
 // idioma, só a lógica de wiring foi extraída.
 
-// "Meu perfil" abre a tela de identidade própria (shared/profile.js) --
-// deixou de ser um alias de "Seu progresso" (ver arquitetura aprovada:
-// Perfil != painel de estatísticas). "Seu progresso" continua existindo,
-// só passou a ser alcançado a partir de dentro do Perfil ("Ver
-// estatísticas completas").
-document.getElementById('user-profile-btn').addEventListener('click', () => {
-  document.getElementById('user-menu-dropdown').classList.remove('open');
-  switchTab('profile');
-});
+wireAppMenuButtons(); // shared/core/app-comum.js
 
-document.getElementById('leaderboard-btn').addEventListener('click', () => {
-  document.getElementById('user-menu-dropdown').classList.remove('open');
-  switchTab('leaderboard');
-});
 
 // Item extra do menu "Mais" (só mobile, ver .mais-extra-tab) -- 汉字 não
 // cabe nos 4 botões fixos da barra inferior, então vive aqui.
@@ -564,28 +414,11 @@ document.getElementById('mais-hanzi-btn').addEventListener('click', () => {
   switchTab('hanzi');
 });
 
-document.getElementById('user-settings-btn').addEventListener('click', () => {
-  document.getElementById('user-menu-dropdown').classList.remove('open');
-  switchTab('settings');
-});
-
-document.getElementById('admin-badges-btn').addEventListener('click', () => {
-  document.getElementById('user-menu-dropdown').classList.remove('open');
-  switchTab('admin-badges');
-});
 
 // Prop 3 (ver CLAUDE.md, "7 propostas") -- "Meus Cartões" saiu do menu do
 // avatar e ganhou um botão de verdade no topo da tela de Revisão
 // (#review-my-flashcards-btn, wired mais abaixo).
 
-
-// Entrada geral da bandeira ⚑ (menu "Mais"/usuário) -- sem contexto de
-// exercício específico, captureReportContext() ainda pega unidade/lição
-// atual se o clique acontecer em modo foco.
-document.getElementById('report-menu-btn').addEventListener('click', () => {
-  document.getElementById('user-menu-dropdown').classList.remove('open');
-  openReportModal({ source: 'menu' });
-});
 
 // Esta tabela `progress` é compartilhada com os outros idiomas da
 // plataforma (mesmo Supabase, mesma linha por user_id). Cada idioma guarda
@@ -617,10 +450,6 @@ function loadLegacyState(data){
 // dois idiomas. Ver ARCHITECTURE.md na raiz do repo.
 
 
-document.getElementById('streak-modal-continue-btn').addEventListener('click', () => {
-  document.getElementById('streak-modal-overlay').style.display = 'none';
-});
-
 // ---------- Plano de estudo com meta diária (assistente estilo Busuu) ----------
 // Meta diária em LIÇÕES (ver "A Gramática da Recompensa", §4). OBJECTIVE_OPTIONS,
 // DAY_DEFS, DAY_KEY_BY_JS_INDEX, PT_MONTHS, formatDatePt, estimateCompletionDate,
@@ -636,25 +465,7 @@ const LEVEL_DESCRIPTIONS = {
 };
 
 
-// ---------- Lembrete de revisão acumulada (estilo Busuu) ----------
-// Pop-up não bloqueante no rodapé, avisando que há palavras vistas em lições
-// mas nunca revisadas se acumulando. Aparece no máximo uma vez por dia, só
-// quando o total de cartões pendentes passa de um limiar — pra não incomodar
-// quem já revisa em dia.
-const REVIEW_REMINDER_THRESHOLD = 15;
-
-
-document.getElementById('review-reminder-dismiss-btn').addEventListener('click', () => {
-  document.getElementById('review-reminder-banner').style.display = 'none';
-  markReviewReminderSeen(); // fechou = viu: grava o dia agora
-});
-
-document.getElementById('review-reminder-cta-btn').addEventListener('click', () => {
-  document.getElementById('review-reminder-banner').style.display = 'none';
-  markReviewReminderSeen(); // clicou = viu: grava o dia antes de sair da tela
-  switchTab('review');
-  openReviewSession('flashcard');
-});
+wireReviewReminderButtons(); // shared/core/app-comum.js
 
 
 function registerDailyHanziLesson(){
@@ -662,10 +473,6 @@ function registerDailyHanziLesson(){
   STATE.daily.hanziLessons += 1;
 }
 
-const EASY_CHALLENGES = [
-  { id:'streak', icon:'🔥', get label(){ return t('fr.mission.streak'); }, target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
-  { id:'firstLesson', icon:'🌅', get label(){ return t('fr.mission.firstLesson'); }, target:1, get: d => d.lessons }
-];
 const REVISAO_HANZI_CHALLENGES = [
   { id:'hanzi1', icon:'🀄', get label(){ return t('zh.mission.hanzi1'); }, target:1, get: d => d.hanziLessons },
   // labelForTarget: usado só quando resolveRevisaoMission() escala a meta
@@ -699,42 +506,14 @@ const GENERAL_CHALLENGES = [
 ];
 
 
-// ---------- Feasibility das missões de estoque limitado (grilling "missões
-// do dia") ----------
-// Só reviews15/overdue3/matchGame1/speedReview1 dependem de um estoque real
-// (cartas pra revisar) que pode não existir -- as demais (lições, XP,
-// hanzi...) não têm teto real no dia de hoje, ficam de fora desta checagem.
-const MISSION_QUANTITY_FLOOR = 3; // abaixo disso, trata como inviável (rodada 2)
-
-
 const ALL_CHALLENGE_POOLS = [EASY_CHALLENGES, REVISAO_HANZI_CHALLENGES, GENERAL_CHALLENGES];
 
 
 // showToast agora vem de shared/toast.js.
 
-// Conquistas com níveis (docs/conquistas-proposta-niveis.md): BADGES é preenchido por rebuildTrackBadges()
-// (shared/badge-tracks-app.js) a partir do catálogo shared/badge-tracks.js e das métricas abaixo.
-const BADGES = [];
 
 // Modos de estudo que contam para a trilha Explorar (chinês não tem Ditado nem Desafios).
 const BADGE_MODES = ['review', 'speed', 'match', 'hanzi', 'stories'];
-
-// ---------- Detecção + celebração de nova conquista ----------
-// earnedBadgeIds é semeado uma vez, logo depois do estado carregar
-// (seedEarnedBadges, chamada em loadStateAndRender) -- reflete os badges já
-// ganhos em sessões anteriores, pra só celebrar o que for GENUÍNO desta
-// sessão em diante. checkAndCelebrateBadges roda dentro de addXP(): todo
-// badge hoje depende de streak/unidade/XP/revisões, e todos esses caminhos
-// já passam por addXP -- não precisa espalhar a checagem por unit/streak/
-// revisão separadamente.
-let earnedBadgeIds = new Set();
-
-let badgeCelebrationQueue = [];
-let badgeCelebrationShowing = false;
-// Durante uma sessão de revisão (Flashcard/Palavras difíceis/Speed Review/
-// Deck), a conquista fica guardada e aparece só na tela de fim ("Revisão
-// concluída"), para não cobrir o cartão. Fora da sessão, aparece na hora.
-let badgeCelebrationHeld = false;
 
 
 // Ícones temáticos por unidade — substituem o número na trilha, dando
@@ -892,29 +671,6 @@ document.getElementById('search-modal-close').addEventListener('click', () => {
 document.getElementById('search-input').addEventListener('input', (e) => {
   renderSearchResults(e.target.value);
 });
-
-
-// Modo admin: só a conta da autora do curso -- deixa REVISAR qualquer lição
-// de qualquer unidade (mesmo travada pros demais usuários), sem nunca
-// desbloquear nada de verdade nem mexer no progresso real. Reaproveita o
-// mesmo modo revisão não-destrutivo de openLessonReview (ver
-// STEP_STATE.lessonReview): a lição abre pra estudo/conferência, mas
-// terminar ela não avança lessonIdx nem concede XP/desafio.
-//
-// Isto é sempre a IDENTIDADE (isAdminUser -- calculada por e-mail, nunca
-// muda) -- o bypass de navegação abaixo em buildUnitBlock() só se aplica
-// quando isAdminModeOn() (shared/profile.js) também for true. Com Admin
-// Mode OFF, a conta continua sendo reconhecida como admin (Painel de
-// Admin, ferramentas etc. -- ver Fase 10), só a navegação/conclusão de
-// lição passa a seguir exatamente a mesma regra de um aluno comum.
-const ADMIN_EMAIL = 'brunemed1310@gmail.com';
-
-
-// Lembra se o aluno abriu/fechou manualmente o bloco de uma unidade nesta
-// sessão (não é salvo -- é só estado de UI). Sem entrada aqui, o bloco usa o
-// padrão: concluída/bloqueada começam compactas, a unidade atual começa
-// expandida.
-const UNIT_BLOCK_EXPAND_OVERRIDE = {};
 
 
 // Estado (recolhida/expandida) da faixa de Desafios de hoje -- lembrado
@@ -1162,116 +918,8 @@ document.getElementById('story-back-to-path').addEventListener('click', () => {
 // ============================================================
 
 
-// ---------- Sessão de aquisição de vocabulário (introdução + prática intercalada) ----------
-// Substitui o antigo fluxo linear "Palavra 1 de N ... Palavra N de N" seguido
-// de um bag único de exercícios no final. Em vez disso, a unidade é dividida
-// em pequenos blocos de palavras novas; cada bloco passa por
-// introdução -> checagem imediata -> prática, e a partir do segundo bloco
-// os exercícios de prática misturam o bloco atual com todos os anteriores
-// (recuperação ativa, não repetição na ordem em que acabou de ver). O passo
-// final da unidade ("exercises") vira uma consolidação curta, priorizando
-// as palavras que o aluno errou mais durante a sessão em vez de repetir a
-// unidade inteira de novo -- ver buildExerciseSet(). Referência conceitual:
-// a separação do Memrise entre "aquisição" e "prática/revisão intercalada"
-// dentro da mesma sessão -- não uma cópia de interface, só do princípio.
-const ACQ_BLOCK_SIZE = 3;
+wireLessonChromeButtons(); // shared/core/app-comum.js
 
-
-const STEP_STATE = {
-  currentStep: 0,
-  acq: { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {}, lessonScore: { correct: 0, total: 0 }, xpAtLessonStart: 0 },
-  exerciseList: [],
-  exerciseIndex: 0,
-  exerciseScore: 0,
-  // XP real desta lição/checkpoint (Fase 1/3 da tarefa de conclusão de
-  // lição/unidade) -- snapshot de STATE.xp tirado no início da sessão de
-  // consolidação do checkpoint (ver renderStep, stepKey 'exercises'/
-  // 'checkpointExercises'); null fora dessa sessão.
-  checkpointXpAtStart: null,
-  // Erros DESTE Ponto de verificação (Revisão dos erros + consolidação
-  // principal juntas) -- vocabIdx -> contagem. Independente de
-  // STEP_STATE.acq.wordMisses/STATE.unitProgress[u.id].lessonMisses (que
-  // acumulam por LIÇÃO/UNIDADE ao longo do tempo, resetam só quando a
-  // unidade termina): aquele objeto só é inicializado quando o passo
-  // 'vocab' roda (ver freshAcquisitionState em renderStep), e o Ponto de
-  // verificação nunca tem passo 'vocab' (currentStepDefs devolve só
-  // 'checkpointExercises') -- reabrir a unidade direto na última lição e ir
-  // pro checkpoint sem passar pela introdução de nenhuma lição nesta sessão
-  // deixava STEP_STATE.acq.unitId nulo, e o card do resultado do checkpoint
-  // ("Palavras que você errou no Ponto de verificação") caía pra um
-  // lessonMisses desatualizado/vazio -- uma lista que não correspondia ao
-  // erro real que o aluno acabou de cometer (bug relatado, 2026-09-15).
-  // Resetado só ao entrar no checkpoint (ver renderStep, stepKey
-  // 'checkpointExercises'), nunca em openUnitDetail (mesmo padrão de
-  // checkpointXpAtStart).
-  checkpointMisses: {},
-  // Respostas CERTAS seguidas na lição atual (zera em qualquer erro ou
-  // "Não sei" -- ver showAnswerPanel) -- alimenta o modo combo do painel de
-  // acerto (ver showCorrectFeedbackPanel).
-  comboCount: 0,
-  exerciseAnswered: false,
-  // Unidade de gramática (shared/core/gramatica-cenario.js): bloco da explicação e exercício atuais.
-  explanationIndex: 0,
-  explanationUnitId: null,
-  gramExerciseUnitId: null,
-  gramExerciseIndex: 0,
-  gramExerciseScore: 0,
-  onChallengesScreen: false,
-  // Ponto de verificação do módulo / Teste de Nível abertos (shared/core/modulos-niveis.js). Hoje o zh não tem módulos.
-  onCheckpoint: null,
-  onLevelTest: null,
-  // Fila de cartões de conceito (explicação contextual) tocando AGORA, por
-  // cima do passo normal (vocab/diálogo) -- ver runConceptQueueThen. Vazia
-  // na maior parte do tempo; só existe entre o momento em que um conceito é
-  // disparado e o aluno terminar de ler todos os cartões pendentes daquele
-  // ponto da lição.
-  conceptQueue: [],
-  conceptIdx: 0,
-  conceptBlockIdx: 0,
-  conceptAfterFn: null,
-  conceptsShown: new Set(),
-  // Tela de "lição concluída" (Modelo B, entre lições da mesma unidade,
-  // nunca no fim da unidade inteira -- essa continua usando
-  // onChallengesScreen). Guarda quantos cartões estão devidos AGORA pra
-  // decidir, no clique de "Continuar", se leva direto pro Flashcard.
-  onLessonBoundaryScreen: null,
-  // Tela "Unidade concluída!" (Fase 4 da tarefa de conclusão de
-  // lição/unidade) -- true só enquanto ela está na tela, entre o fim do
-  // Ponto de verificação e a tela de Desafios de hoje. "Continuar" aqui
-  // NUNCA revisita lógica de conclusão (markUnitCompleted já rodou) -- só
-  // avança pra renderDailyChallengesScreen, exatamente o que já acontecia
-  // antes desta tela existir.
-  onUnitCompleteScreen: false,
-  // Cache pra restaurar esta tela via Voltar/Avançar do navegador (mesmo
-  // padrão de lastUnitResultCache) -- nunca reexecuta markUnitCompleted.
-  lastUnitCompleteCache: null,
-  // Revisão de uma lição JÁ CONCLUÍDA (ou, pra conta admin, QUALQUER lição
-  // de QUALQUER unidade -- ver isAdminUser), clicada direto na lista
-  // expandida da Trilha (ver buildUnitBlock) -- { unitId, reviewIdx }, null
-  // fora de revisão. NUNCA mexe em STATE.unitProgress[unitId].lessonIdx (o
-  // ponteiro de progresso real fica intocado o tempo todo) --
-  // currentLessonIdx() devolve reviewIdx no lugar dele enquanto isto existe,
-  // só pra essa unidade. Por construção não há nada pra "corromper" mesmo se
-  // o aluno fechar a aba no meio da revisão. exitToPath() (único jeito de sair
-  // durante o modo foco) e finishCurrentLesson() zeram isto de volta pra
-  // null antes de voltar pra Trilha.
-  lessonReview: null
-};
-
-
-document.getElementById('back-to-path').addEventListener('click', exitToPath);
-
-document.getElementById('lesson-kbd-btn').addEventListener('click', () => {
-  document.getElementById('kbd-shortcuts-modal').style.display = 'flex';
-});
-document.getElementById('kbd-shortcuts-modal-close').addEventListener('click', () => {
-  document.getElementById('kbd-shortcuts-modal').style.display = 'none';
-});
-document.getElementById('kbd-shortcuts-modal').addEventListener('click', (e) => {
-  if (e.target.id === 'kbd-shortcuts-modal'){
-    document.getElementById('kbd-shortcuts-modal').style.display = 'none';
-  }
-});
 
 // ============================================================
 // MANUAL DE APOIO (resumo por unidade + aba geral)
@@ -1355,9 +1003,6 @@ document.getElementById('unit-manual-modal').addEventListener('click', (e) => {
 // vocabulário, em vez de só numa unidade de gramática inteira.
 
 
-const CONFETTI_COLORS = ['#d64545', '#e3b341', '#2f8f6e', '#3498d6', '#a15fc9'];
-
-
 // ============================================================
 // RENDER: Diálogo da lição (balões, áudio em sequência, vocabulário
 // destacado e micro-checagem "Você entendeu?") -- mesma experiência do
@@ -1432,150 +1077,7 @@ function dlgHighlightPinyin(c, p, terms){
 }
 
 
-document.getElementById('step-back-btn').addEventListener('click', () => {
-  const u = UNITS.find(x => x.id === STATE.currentUnitId);
-  const stepKey = currentStepDefs(u)[STEP_STATE.currentStep].key;
-
-  // No passo de vocabulário, "Voltar" recua palavra a palavra dentro do
-  // bloco atual (e entre blocos) antes de sair do passo -- só volta para o
-  // passo anterior da unidade quando já está na primeira palavra do
-  // primeiro bloco. Não existe "voltar" dentro de checkpoint/practice/mixed
-  // (o botão fica escondido nessas fases, ver renderStep).
-  if (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro'){
-    const acq = STEP_STATE.acq;
-    if (acq.introIdx > 0){
-      acq.introIdx -= 1;
-      renderStep();
-      return;
-    }
-    if (acq.blockIdx > 0){
-      acq.blockIdx -= 1;
-      acq.introIdx = acq.blocks[acq.blockIdx].length - 1;
-      renderStep();
-      return;
-    }
-  }
-
-  if (grammarStepBack(stepKey)) return; // explicação da unidade de gramática: volta um bloco
-
-  if (STEP_STATE.currentStep > 0){
-    STEP_STATE.currentStep -= 1;
-    renderStep();
-  }
-});
-document.getElementById('step-next-btn').addEventListener('click', () => {
-  // Tela "Unidade concluída!" (Fase 4) -- markUnitCompleted já rodou
-  // (concedeu XP, desbloqueou a próxima unidade etc.) antes desta tela
-  // aparecer; "Continuar" aqui só avança pra Desafios de hoje, nunca
-  // reexecuta lógica de conclusão.
-  if (STEP_STATE.onUnitCompleteScreen){
-    STEP_STATE.onUnitCompleteScreen = false;
-    STEP_STATE.onChallengesScreen = true;
-    renderDailyChallengesScreen();
-    return;
-  }
-  if (STEP_STATE.onChallengesScreen){
-    STEP_STATE.onChallengesScreen = false;
-    setLessonFocusMode(false);
-    document.getElementById('path-list-wrap').style.display = 'block';
-    document.getElementById('unit-detail-wrap').style.display = 'none';
-    renderUnitsGrid();
-    return;
-  }
-
-  // Tela de "Lição concluída" (Modelo B, entre lições da mesma unidade) --
-  // se havia cartões devidos no momento em que a lição terminou, leva
-  // direto pro Flashcard em vez de voltar pra trilha (opção (a) do
-  // redesenho: mostra quantos cartões estão pendentes e já entra na
-  // revisão, sem depender do aluno abrir a aba por conta própria).
-  if (STEP_STATE.onLessonBoundaryScreen){
-    const { dueCount } = STEP_STATE.onLessonBoundaryScreen;
-    STEP_STATE.onLessonBoundaryScreen = null;
-    setLessonFocusMode(false);
-    document.getElementById('unit-detail-wrap').style.display = 'none';
-    document.getElementById('path-list-wrap').style.display = 'block';
-    renderUnitsGrid();
-    if (dueCount > 0){
-      switchTab('review');
-      openReviewSession('flashcard');
-    }
-    return;
-  }
-
-  // Um cartão de explicação contextual está tocando por cima do passo normal
-  // -- "Continuar"/"Entendi" aqui avança DENTRO da fila de conceitos, não do
-  // passo da unidade (ver runConceptQueueThen). Tem prioridade sobre tudo
-  // abaixo, igual checkpoint/practice/mixed já tinham sobre o vocab normal.
-  if (STEP_STATE.conceptQueue.length){
-    advanceConceptStep();
-    return;
-  }
-
-  // Fim do Ponto de verificação do módulo / Teste de Nível (shared/core/modulos-niveis.js): aplica a aprovação e
-  // volta à trilha. Sem módulos nunca acontece.
-  if (handleModuleStepNext()) return;
-
-  const u = UNITS.find(x => x.id === STATE.currentUnitId);
-  const stepDefs = currentStepDefs(u);
-  const stepKey = stepDefs[STEP_STATE.currentStep].key;
-
-  // No passo de vocabulário, o botão "Continuar" só existe na fase de
-  // introdução (checkpoint/practice/mixed escondem o botão global e avançam
-  // pela navegação própria dos exercícios) -- navega palavra a palavra
-  // dentro do bloco atual e, no fim do bloco, dispara a checagem imediata.
-  if (stepKey === 'vocab'){
-    const acq = STEP_STATE.acq;
-    if (acq.phase === 'intro'){
-      const block = acq.blocks[acq.blockIdx];
-      if (acq.introIdx < block.length - 1){
-        acq.introIdx += 1;
-        renderStep();
-      } else {
-        finishBlockIntro();
-      }
-    }
-    return;
-  }
-
-  // Explicação da unidade de gramática: avança um bloco (shared/core/gramatica-cenario.js).
-  if (grammarStepNext(u, stepKey)) return;
-
-  // Saindo do diálogo: mostra os conceitos cujo gatilho só existe em
-  // contexto (a palavra em si não é vocabulário novo, só aparece na fala)
-  // antes de seguir pro próximo passo da unidade.
-  if (stepKey === 'dialogue'){
-    runConceptQueueThen(pendingConceptsAfterDialogue(u), () => advanceUnitStep(u));
-    return;
-  }
-
-  advanceUnitStep(u);
-});
-
-// ---------- Geração dos exercícios (múltipla escolha + ordenar, estilo Memrise) ----------
-// Pensado para iniciante absoluto: a pergunta SEMPRE mostra pinyin + hanzi juntos
-// (apoio total de leitura), e pede a tradução em português como resposta — nunca
-// o inverso. Isso evita pedir reconhecimento de hanzi de memória, o que é cedo
-// demais nesta fase, e evita repetir o mesmo pinyin na pergunta e nas opções
-// (o que tornava a resposta óbvia sem precisar saber o significado).
-//
-// Exercícios de vocabulário (meaning/listen) e de ordenar frase (reorder) são
-// gerados separadamente e depois embaralhados juntos numa única sequência.
-// ---------- Consolidação final da unidade (ETAPA 7) ----------
-// Depois que a aquisição por blocos já deu a cada palavra checagem + prática
-// (+ mistura, a partir do 2º bloco), repetir a unidade inteira de novo aqui
-// seria só reexpor conteúdo já praticado à toa. Em vez disso, prioriza quem
-// errou durante a sessão e pega só uma amostra do resto -- consolidação como
-// recuperação e aplicação, não como "mostrar tudo de novo". Se por algum
-// motivo a sessão de aquisição não corresponder a esta unidade (ex: estado
-// inconsistente), cai de volta pra cobrir todas as palavras, sem quebrar a
-// tela.
-// CONSOLIDATION_CAP existe pra a consolidação continuar CURTA mesmo numa
-// sessão onde o aluno errou muitas palavras -- sem teto, "priorizar quem
-// errou" vira o oposto do pedido (uma sessão que só cresce quanto mais o
-// aluno erra, em vez de ficar objetiva). Cobre cada palavra errada 1x
-// primeiro; só dá uma 2ª rodada pra elas se ainda sobrar espaço dentro do
-// teto depois de cobrir as demais palavras da unidade pelo menos uma vez.
-const CONSOLIDATION_CAP = 10;
+wireStepNavButtons(); // shared/core/app-comum.js (Voltar e Continuar da lição)
 
 
 // ---------- Exercício "Frase completa" — PT → escolher entre 4 frases em hanzi ----------
@@ -1730,61 +1232,7 @@ function buildFullSentenceExercises(unit){
 }
 
 
-// ---------- Atalho de teclado 1-4 pras alternativas selecionáveis ----------
-// Um ÚNICO listener global (registrado uma vez, logo abaixo), nunca um novo
-// por exercício renderizado. Cada tela de exercício só chama
-// wireKeyboardOptions (que atualiza KEYBOARD_OPTION_MAP) ou deixa de chamar
-// (digitação, ordenar frase) -- o mapa fica null nesses casos e o listener
-// não faz nada.
-let KEYBOARD_OPTION_MAP = null;
-
-
-// Registrado uma única vez, no carregamento do script -- nunca por render.
-document.addEventListener('keydown', (e) => {
-  if (anyAppModalOpen()) return;
-
-  if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey){
-    // Enter digitado DENTRO de um campo de resposta é do próprio campo (ele
-    // chama Verificar). Sem isto, o mesmo Enter que mostra o painel de erro
-    // também clicava "Continuar" dele na hora, e o aluno nunca via o
-    // resultado (relato de 2026-10-07: "haizi" no ditado de pinyin).
-    const tgt = e.target;
-    if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
-    const target = findEnterAdvanceTarget();
-    if (target){
-      e.preventDefault();
-      target.click();
-    }
-    return;
-  }
-
-  const tag = document.activeElement?.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable) return;
-
-  // "r" repete o último áudio que de fato tocou (clique manual ou autoplay)
-  // -- reaproveita o mesmo botão/clique de sempre, não uma lógica própria.
-  // Sem modificador: Ctrl/Cmd+R continua sendo "recarregar página" do navegador.
-  if (e.key === 'r' && !e.ctrlKey && !e.metaKey && !e.altKey){
-    if (LAST_AUDIO_BTN && LAST_AUDIO_BTN.isConnected && !LAST_AUDIO_BTN.disabled && !LAST_AUDIO_BTN.classList.contains('disabled')){
-      e.preventDefault();
-      LAST_AUDIO_BTN.click();
-    }
-    return;
-  }
-
-  if (!KEYBOARD_OPTION_MAP) return;
-  const entry = KEYBOARD_OPTION_MAP.find(x => x.key === e.key);
-  if (!entry) return;
-  if (!entry.el.isConnected || entry.el.disabled || entry.el.classList.contains('disabled')) return;
-  e.preventDefault();
-  entry.el.click();
-});
-
-
-// Estimativa de minutos estudados: cada exercício respondido (certo ou errado)
-// conta como ESTIMATED_SECONDS_PER_EXERCISE segundos, acumulado por dia — usado
-// pelo anel de meta diária. Não é cronômetro real, é uma aproximação.
-const ESTIMATED_SECONDS_PER_EXERCISE = 20;
+wireLessonKeyboardShortcuts(); // shared/core/app-comum.js
 
 
 // Explicação usada no painel de erro/revelação, sempre mostrada
@@ -2055,87 +1503,12 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
 }
 
 
-// Painel de acerto (estilo Duolingo): toda resposta certa PÁRA aqui em vez
-// de avançar sozinha -- só segue pro próximo exercício quando o aluno toca
-// "Continuar". A frase de elogio varia a cada vez (nunca repete a mesma
-// duas vezes seguidas dentro da mesma lição, ver nextCorrectFeedbackPhrase).
-// A partir de COMBO_MIN acertos seguidos entra em "modo combo" (badge ⚡ +
-// frase de incentivo própria, ver COMBO_PHRASES/nextComboPhrase abaixo).
-// `detail`, quando informado, é o HTML extra que vale a pena reforçar mesmo
-// já tendo acertado -- ex: a tradução da frase inteira num "ordene a frase"
-// (montar a ordem certa não garante que o aluno entendeu o SENTIDO). Pra
-// formatos onde a resposta certa já fica visível na própria tela do
-// exercício antes do painel abrir (múltipla escolha destaca a opção certa,
-// cloze já revela a tradução, digitar de ouvido nunca mostrou o hanzi antes
-// então esse sim ganha detail), repetir a mesma informação de novo dentro
-// do painel não ajuda em nada -- passa null.
-// Chaves do catálogo (i18n fase 9): o texto é resolvido no momento do uso.
-const CORRECT_FEEDBACK_PHRASES = Array.from({ length: 16 }, (_, i) => 'feedback.praise.' + (i + 1));
-let correctFeedbackQueue = [];
-
-// ---------- Combo de acertos seguidos (estilo Duolingo) ----------
-// A partir de COMBO_MIN acertos seguidos (ver STEP_STATE.comboCount, zerado
-// em showAnswerPanel a cada erro/"Não sei"), o painel troca a frase de
-// elogio genérica por uma de incentivo de combo -- e a cada múltiplo de
-// COMBO_MILESTONE_STEP mostra o número explícito ("Uau, 5 seguidas!") em
-// vez de uma frase genérica, pra marcar só os marcos redondos, não toda
-// resposta certa da sequência.
-const COMBO_PHRASES = ['feedback.combo.1', 'feedback.combo.2', 'feedback.combo.3'];
-let comboPhraseQueue = [];
-const COMBO_MIN = 3;
-const COMBO_MILESTONE_STEP = 5;
-
-
-// RENDER: Revisão (SRS)
-// ============================================================
-// ---------- Speed Review (estilo Memrise) ----------
-// Múltipla escolha contra o relógio, 3 corações, pontuação maior quanto mais
-// rápido. Usa o mesmo pool de cartões "due" da revisão normal (vocabulário),
-// mas sem aplicar SM-2 — é um modo de prática/jogo, não substitui o SRS.
-const SPEED_TIME_LIMIT = 6000; // ms por pergunta
-// XP real por resposta certa no Speed Review -- mesmo patamar do Combinar
-// (addXP(2) por par, ver startMatchGame) já que os dois são jogos de
-// reconhecimento rápido, não revisão espaçada de verdade (não mexem no
-// SM2 -- ver comentário de renderReviewModeSelect). O "score" em pts
-// mostrado na tela É SEPARADO disso: é só a pontuação do minijogo
-// (velocidade de resposta), nunca foi XP de verdade nem contava pro
-// Ranking -- daí o relato "ganhei pontos demais mas não foram pro
-// Ranking". Mantido propositalmente bem menor que o score em pts pra não
-// inflar XP artificialmente num modo sem o "custo" de uma revisão SM2 real.
-const SPEED_REVIEW_XP_PER_CORRECT = 2;
-
-const SPEED_STATE = {
-  active: false,
-  queue: [],
-  index: 0,
-  hearts: 3,
-  score: 0,
-  correctCount: 0,
-  streak: 0,
-  bestStreak: 0, // maior sequência de acertos da rodada (recorde do Speed Review)
-  timerStart: 0,
-  timerHandle: null,
-  answered: false,
-  dailyCounted: false
-};
-
-
 function cardPromptPinyinText(cardOrPseudo){
   const view = resolveCardContentView(cardOrPseudo);
   const field = view.kind === 'multiple_choice' ? view.prompt : view.front;
   return (field && field.pinyinText) || '';
 }
 
-
-// Rótulos curtos reaproveitados em 2 lugares: as opções do <select> no
-// painel ⚙️ (com contagem entre parênteses) e o indicador discreto no
-// hero (sem contagem, só o nome do filtro ativo) -- texto-fonte único
-// pra nunca dessincronizar entre os dois.
-const REVIEW_FILTER_LABELS = {
-  get all(){ return t('review.origin.all'); },
-  get hard(){ return t('review.filter.hard'); },
-  get oldest(){ return t('review.filter.oldest'); }
-};
 
 // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): rótulos do
 // filtro de ORIGEM -- diferente de REVIEW_FILTER_LABELS (que decide COMO
@@ -2149,24 +1522,7 @@ const REVIEW_ORIGIN_LABELS = {
 };
 
 
-document.getElementById('review-back-to-modes').addEventListener('click', backToReviewModeSelect);
-
-// ---------- Combinar: jogo de pares (hanzi <-> tradução) ----------
-// Pool: TODA palavra de uma lição já concluída (eligibleReviewPool), sem
-// exigir reps>0 nem respeitar data de vencimento do SM2 -- é jogo, não
-// ferramenta de revisão espaçada (decisão da autora, ver auditoria do
-// sistema de XP). Tamanho da sessão é escolha do aluno (ver
-// renderMatchSizePicker/MATCH_SIZE_OPTIONS), não fixo.
-const MATCH_SIZE_OPTIONS = [5, 8, 10]; // pares -- 10/16/20 cartas
-const MATCH_STATE = {
-  pairSize: 8,     // pares por sessão, escolhido em renderMatchSizePicker
-  pairs: [],
-  tiles: [],
-  selected: null,
-  matchedCount: 0,
-  attempts: 0,
-  busy: false
-};
+wireReviewBackToModes(); // shared/core/app-comum.js
 
 
 // ============================================================
@@ -2181,8 +1537,6 @@ const MATCH_STATE = {
 //   responsabilidade do motor de Review já existente (regra central da
 //   Fase D: "Deck define o ESCOPO, Review define quem do escopo entra").
 // ============================================================
-
-
 
 
 // renderTopbarStats() agora vem de shared/topbar-stats.js (idêntico nos dois idiomas).
@@ -2215,75 +1569,10 @@ const switchTab = createTabSwitcher({
   }
 });
 
-// [data-tab] exclui #mais-btn (barra inferior, Fase 6) -- ele reaproveita a
-// classe .tab-btn só pelo visual, mas não é uma aba de verdade (abre o
-// menu "Mais" via listener próprio em shared/auth.js, não troca de view).
-document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-});
-
-// Toggle manual da sidebar (desktop, ≥900px) -- "Mostrar/Ocultar barra
-// lateral", inspirado no do Claude. Independe do modo foco automático da
-// lição (.lesson-focus), que sempre esconde tudo de qualquer jeito. Estado
-// persistido por dispositivo, mesmo padrão de CHALLENGES_STRIP_COLLAPSE_KEY.
-const SIDEBAR_COLLAPSE_KEY = 'sidebar_collapsed';
-if (localStorageSafeGet(SIDEBAR_COLLAPSE_KEY) === '1'){
-  document.getElementById('app').classList.add('sidebar-collapsed');
-}
-syncSidebarToggleLabel();
-document.getElementById('sidebar-toggle-btn').addEventListener('click', () => {
-  const collapsed = document.getElementById('app').classList.toggle('sidebar-collapsed');
-  localStorageSafeSet(SIDEBAR_COLLAPSE_KEY, collapsed ? '1' : '0');
-  syncSidebarToggleLabel();
-});
+wireTabsAndSidebar(); // shared/core/app-comum.js
 
 
-// Alterna entre as duas seções internas de Configurações (Geral/Exportar) --
-// mesmo padrão de switchAdminPanelSection (shared/admin-analytics.js).
-// Lembra a última seção aberta (SETTINGS_SECTION), mesmo espírito de
-// ADMIN_PANEL_STATE.section: reabrir sempre na mesma aba entre visitas.
-let SETTINGS_SECTION = 'geral';
-
-// Lista fixa de opções de "Novas palavras por dia" (4ª rodada de
-// grilling -- era um stepper -/+ livre de 0 a 50). 9999 é o sentinela de
-// "sem limite": não existe pool de conteúdo remotamente perto desse
-// tamanho (fr/content.js ~940 blocos, zh/content.js ~608), então
-// slice(0, 9999) em getStudyQueue já devolve a lista inteira sem precisar
-// de nenhum caso especial no motor -- e ao contrário de usar Infinity,
-// sobrevive normalmente a JSON.stringify (Supabase/localStorage).
-const NEW_CARDS_PER_DAY_OPTIONS = [0, 5, 10, 15, 20, 9999];
-
-
-document.getElementById('review-frequency-select').addEventListener('change', (e) => {
-  updateStudySetting({ reviewFrequency: e.target.value });
-});
-document.getElementById('review-newcards-select').addEventListener('change', (e) => {
-  updateStudySetting({ newCardsPerDay: Number(e.target.value) });
-});
-document.getElementById('review-intensity-select').addEventListener('change', (e) => {
-  updateStudySetting({ sessionIntensity: e.target.value });
-});
-// Fase 4 do sistema de alunas particulares (ver CLAUDE.md) -- elemento só
-// existe no HTML se o app tiver a seção nova (index.html); no-op seguro
-// se por algum motivo não existir (mesmo padrão defensivo de outros
-// selects opcionais desta tela).
-document.getElementById('review-origin-select')?.addEventListener('change', (e) => {
-  updateStudySetting({ reviewOriginFilter: e.target.value });
-});
-// Fase I (Tags): alterna uma tag no filtro (OR); "Limpar" volta a [].
-document.getElementById('review-tag-chips')?.addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-review-tag]');
-  if (!btn) return;
-  const tag = btn.dataset.reviewTag;
-  const cur = activeReviewTagFilter();
-  updateStudySetting({ reviewTagFilter: cur.includes(tag) ? cur.filter(t => t !== tag) : cur.concat(tag) });
-});
-document.getElementById('review-tag-clear')?.addEventListener('click', () => {
-  updateStudySetting({ reviewTagFilter: [] });
-});
-document.querySelectorAll('[data-settings-section]').forEach(btn => {
-  btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));
-});
+wireReviewSettingsControls(); // shared/core/app-comum.js
 
 // ============================================================
 // EXPORTAÇÃO .apkg (motor comum em shared/anki-export.js) — só o que é
