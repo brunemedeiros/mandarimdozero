@@ -3469,18 +3469,41 @@ window.I18N_CATALOG['en'] = {
   'panel.gcal.waitingTitle': 'Students without a site account', // ALTA
   'panel.gcal.waitingHint': 'These events were already recognized and are kept. They become lessons on their own once the student creates an account and is linked to you.', // ALTA
   'panel.gcal.reviewTitle': 'Events to review ({n})', // ALTA
-  'panel.gcal.reviewHint': 'The site didn\'t recognize these events. Choose whose lesson it is or mark it as not a lesson. With "remember" checked, future events with the same title (or the same guest) come in on their own.', // ALTA
+  'panel.gcal.reviewHint': 'The site didn\'t recognize these events. Choose whose lesson it is, or mark "Not a lesson" or "Not on the site" (former student or a student who doesn\'t use the site: it doesn\'t become a lesson). With "remember" checked, it also applies to future events from the same person (by guest email) or with the same title. A student who will be linked to you later: use "Skip for now". The event goes to Skipped and becomes a lesson on its own once the site recognizes the student.', // ALTA
   'panel.gcal.pick': 'Whose lesson is this?', // ALTA
-  'panel.gcal.pickFirst': 'Choose the student or class first.', // ALTA
+  'panel.gcal.pickFirst': 'Choose the student or class first. Student not on the list: use "Skip for now" or "Not on the site".', // ALTA
   'panel.gcal.assign': 'Save', // ALTA
   'panel.gcal.ignore': 'Not a lesson', // ALTA
-  'panel.gcal.remember': 'Remember for future events with this title', // ALTA
+  'panel.gcal.remember': 'Remember for future events from this person (or with this title)', // ALTA
   'panel.gcal.noTitle': '(no title)', // ALTA
   'panel.gcal.noAccountGroup': 'Students without a site account', // ALTA
   'panel.gcal.cancelledHint': 'This event was deleted or canceled in Google. The lesson stays on the site with everything you recorded.', // ALTA
   'panel.gcal.keep': 'Keep the lesson', // ALTA
   'panel.gcal.unlink': 'Unlink from Google', // ALTA
   'panel.gcal.saved': 'Done.', // ALTA
+  'panel.gcal.restored': 'Back in To review.', // ALTA
+  'panel.gcal.restore': 'Bring back', // ALTA
+  'panel.gcal.dateRange': '{from} to {to}', // ALTA
+  'panel.gcal.outsideCount': '{n} events', // ALTA
+  'panel.gcal.outsideCountOne': '1 event', // ALTA
+  'panel.gcal.emptyOutside': 'No one marked as not on the site.', // ALTA
+  'panel.gcal.outsideHint': 'People marked as "Not on the site" (former students or students who don\'t use the site). Their events don\'t become lessons. "Bring back" returns all of that person\'s events to the To review list.', // ALTA
+  'panel.gcal.tabOutside': 'Not on the site ({n})', // ALTA
+  'panel.gcal.emptySkipped': 'No skipped events.', // ALTA
+  'panel.gcal.emptyOpen': 'Nothing to review right now.', // ALTA
+  'panel.gcal.skippedHint': 'Skipped events are still read: they become lessons on their own once the site recognizes the student.', // ALTA
+  'panel.gcal.outsideTitle': 'Former student or a student who doesn\'t use the site: the event doesn\'t become a lesson', // ALTA
+  'panel.gcal.outside': 'Not on the site', // ALTA
+  'panel.gcal.unskipped': 'Back on the list.', // ALTA
+  'panel.gcal.skipped': 'Moved to Skipped.', // ALTA
+  'panel.gcal.unskip': 'Back to the list', // ALTA
+  'panel.gcal.skip': 'Skip for now', // ALTA
+  'panel.gcal.showMore': 'Show {n} more ({rest} left)', // ALTA
+  'panel.gcal.sortOldest': 'Oldest first', // ALTA
+  'panel.gcal.sortRecent': 'Most recent first', // ALTA
+  'panel.gcal.sortLabel': 'Order', // ALTA
+  'panel.gcal.tabSkipped': 'Skipped ({n})', // ALTA
+  'panel.gcal.tabOpen': 'To review ({n})', // ALTA
   'panel.gcal.reading': 'Reading your calendar…', // ALTA
   'panel.gcal.synced': 'Calendar read.', // ALTA
   'panel.gcal.loadError': 'Couldn\'t load the Google connection right now.', // ALTA

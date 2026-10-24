@@ -469,3 +469,28 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   `docs/google-agenda/117b-sql-editor.sql` no SQL Editor** (sem ela o botão "Conectar" falha).
 - Teste local: `tests/aulas-presenca/run.sh` (117 33/33), `tests/aulas-presenca/test_google_map.mjs` 9/9.
 
+## 118 -- Google Agenda: evento "para revisar" tentado de novo (2026-10-23)
+
+- `shared/supabase_migrations/118_gcal_retry_review.sql`: `gcal_retry_waiting` passa a incluir `match_state = 'review'`
+  (antes, evento não reconhecido ficava na caixa para sempre, mesmo depois do vínculo da aluna). Só `create or replace`.
+- Staging: aplicada (2026-10-23, `118_gcal_retry_review`). Produção: aplicada (2026-10-24, autorizada, `118_gcal_retry_review`).
+- Teste local: `tests/aulas-presenca/run.sh` 117+118 35/35.
+
+## 119 -- Google Agenda: Pular por agora e Fora do site (2026-10-23, pedido da autora)
+
+- `shared/supabase_migrations/119_gcal_review_skip_outside.sql`: `google_calendar_events.skipped_at`,
+  `google_calendar_rules.ignore_kind` ('not_lesson' | 'outside'); `_gcal_apply`, `gcal_ingest`, `google_calendar_status`
+  (conta `skipped`) e `google_calendar_resolve` (ações `skip`, `unskip`, `outside`) refeitos; `google_calendar_review_items()`
+  (caixa inteira, sem o limite de 300). Só `add column if not exists` e `create or replace`.
+- Staging: aplicada (2026-10-23, `119_gcal_review_skip_outside`). Produção: aplicada junto com a 120 (2026-10-24, `119_120_gcal_review_tabs`).
+- Teste local: `tests/aulas-presenca/run.sh` 117+118+119 42/42; painel-professora 673/673.
+
+## 120 -- Google Agenda: aba "Fora do site" com "Trazer de volta" (2026-10-24, pedido da autora)
+
+- `shared/supabase_migrations/120_gcal_outside_tab.sql`: `google_calendar_rules.active` (trazer de volta desliga a regra,
+  sem apagar); eventos "fora do site" guardam título e convidados (são aulas; a aba mostra quem é); `google_calendar_resolve`
+  ganha `restore`; `google_calendar_review_items` inclui os "fora do site"; `google_calendar_status` conta `outside`.
+- Staging: `120_gcal_outside_tab` (2026-10-24). Produção: `119_120_gcal_review_tabs` (2026-10-24, 119 e 120 juntas; 897 aulas
+  com o mesmo hash antes e depois; `google_calendar_review_items` sem execute para anon).
+- Teste local: `tests/aulas-presenca/run.sh` 117 a 120 45/45; painel-professora 685/685.
+
