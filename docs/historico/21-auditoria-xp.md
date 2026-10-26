@@ -40,3 +40,13 @@ Sem XP: Desafios (fr), Jogos da Conjugação, Modo aula, pular Ponto de verifica
 
 ## Regra de produto
 Tudo o que for decidido sobre XP vale para todos os sites (fr, zh, pt e futuros). Ver `.claude/rules/xp.md`.
+
+## Etapa 6 (2026-10-26, decisões da dona; registro em `docs/i18n/etapa6-boas-vindas-proposta.md`, seção "Implementação")
+- **Ícone**: XP tem um ícone só, a estrela ⭐ (topo, "XP ganho" das telas de Lição/Unidade concluída, missão "Ganhe 50 XP hoje").
+  O raio ⚡ fica só para o Combo (acertos seguidos) e para o ícone da Revisão rápida (modo, não XP).
+- **Estrelas aposentadas**: a tela "Módulo concluído!" do Ponto de verificação/Teste de Nível não mostra mais "Estrelas" nem
+  caixa de recompensa (só a nota e "Agora você já sabe"). Conferido: pular pelo Ponto de verificação continua sem dar XP.
+- **Aviso "+N XP"**: `addXP(n, { quiet: true })` soma igual e só não mostra o aviso. Usado num caso só: o +4 de fechar a
+  1ª lição do curso, porque o bloco "Recado da Prof. Brune" já mostra o XP. Os avisos que estiverem na tela somem quando
+  a janela da sequência abre (não ficam empilhados por cima dela). Valores de XP: nenhum mudou.
+- Teste: `tests/boas-vindas/test_playwright.js`.

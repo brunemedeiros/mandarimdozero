@@ -25,6 +25,23 @@ function maybeShowStreakCelebration(){
   setTimeout(showStreakCelebration, 500);
 }
 
+// Etapa 6 ("Voz da Prof. Brune", decisão da dona de 2026-10-26): as telas de conclusão da trilha (Lição concluída,
+// Unidade concluída, Ponto de verificação do módulo, Teste de Nível) NÃO abrem mais a janela da sequência por cima;
+// ela fica pendente e aparece depois do "Continuar", já de volta à trilha (ou ao sair pelo ✕, ver exitToPath).
+// Na 1ª lição do curso, o bloco "Recado da Prof. Brune" (STEP_STATE.welcomeBShown) já diz "Sequência: 1 dia" com a
+// mesma informação da janela; aí a janela é pulada (a notificação do sino continua sendo disparada).
+function showDeferredStreakCelebration(){
+  if (!STATE.pendingStreakCelebration) return;
+  if (STEP_STATE.welcomeBShown){
+    STEP_STATE.welcomeBShown = false;
+    STATE.pendingStreakCelebration = false;
+    renderTopbarStats();
+    fireNotificationEvent('streak_completed', 'streak', { days: STATE.streak });
+    return;
+  }
+  maybeShowStreakCelebration();
+}
+
 // ---------- Tela de sequência de streak (estilo Duolingo) ----------
 // Aparece uma única vez por dia, na primeira atividade que ativa o streak
 // (lição, checkpoint, revisão, jogo de combinar, conjugação...) — nunca de
@@ -72,6 +89,9 @@ function showStreakCelebration(){
       <div class="streak-day-label">${d.label}</div>
     </div>
   `).join('');
+  // Avisos "+N XP" que ainda estavam na tela não ficam empilhados por cima da janela (Etapa 6).
+  const layer = document.getElementById('toast-layer');
+  if (layer) layer.querySelectorAll('.toast').forEach(el => el.remove());
   document.getElementById('streak-modal-overlay').style.display = 'flex';
 }
 

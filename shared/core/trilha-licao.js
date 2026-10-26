@@ -87,7 +87,8 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   }
 
   nextBtn.style.display = 'flex';
-  nextBtn.textContent = posInBlock < block.length - 1 ? t('zh.path.nextWordArrow') : t('zh.path.seeWhatLearnedArrow');
+  // Última palavra: o que vem depois varia (nota "Vale entender isso" ou "Checagem rápida"), então o botão só diz Continuar (Etapa 6).
+  nextBtn.textContent = posInBlock < block.length - 1 ? t('zh.path.nextWordArrow') : t('common.continueArrow');
 }
 
 function buildUnitBlock(u){
@@ -115,6 +116,8 @@ function buildUnitBlock(u){
   }
   else fracLabel = `${pct}%`;
   if (dueForReview > 0) fracLabel += ` · 🔁 ${dueForReview}`;
+  // Unidade pulada (Etapa 6): só o selo "Pulada", sem "4 de 4 lições" nem "Pulada" repetido ao lado.
+  if (state === 'skipped') fracLabel = '';
 
   const block = document.createElement('div');
   block.className = 'unit-block'
@@ -205,6 +208,7 @@ function openUnitDetail(unitId){
   STEP_STATE.onLevelTest = null;
   STEP_STATE.onLessonBoundaryScreen = null;
   STEP_STATE.onUnitCompleteScreen = false;
+  STEP_STATE.welcomeBShown = false;
   STEP_STATE.conceptQueue = [];
   STEP_STATE.conceptsShown = new Set();
   STEP_STATE.comboCount = 0;
@@ -276,7 +280,9 @@ function renderStep(){
     if (STEP_STATE.acq.phase === 'bridge'){
       startBridgeQueue(u);
     } else if (STEP_STATE.acq.phase === 'intro'){
-      renderBlockIntroCard(u, contentEl, nextBtn);
+      // Etapa 6: 1ª lição do curso abre com o cartão de boas-vindas (shared/core/boas-vindas.js).
+      if (typeof shouldShowWelcomeA === 'function' && shouldShowWelcomeA(u)) renderWelcomeCardA(u, contentEl, nextBtn);
+      else renderBlockIntroCard(u, contentEl, nextBtn);
     } else {
       // checkpoint / practice / mixed reaproveitam o motor de exercícios
       // (STEP_STATE.exerciseList/exerciseIndex) -- a navegação própria dele
@@ -457,7 +463,9 @@ function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   // atividade do dia nunca via nem a tela de sequência nem o pill do
   // topbar atualizado -- o fluxo seguinte (Missões do dia -> Trilha) não
   // chamava maybeShowStreakCelebration() em nenhum ponto.
-  maybeShowStreakCelebration();
+  // Etapa 6: vindo da lição (skipToast = vai para a tela "Unidade concluída!"), a janela fica pendente e aparece
+  // depois do Continuar, de volta à trilha (showDeferredStreakCelebration); nos outros caminhos, aparece já.
+  if (!skipToast) maybeShowStreakCelebration();
   if (typeof scorePct === 'number'){
     // Fase 6: estrelas retiradas do fluxo de UNIDADE -- STATE.daily.xp
     // (alimentado dentro de addXP()) já cobre o desafio diário equivalente

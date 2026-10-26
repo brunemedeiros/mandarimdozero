@@ -42,6 +42,8 @@ function serializeState(){
     ...se('completedChallenges'),
     ...se('dictations'),
     ...se('challengeReviews'),
+    // Boas-vindas da 1ª lição (shared/core/boas-vindas.js): por curso, só existe depois de aparecer.
+    ...(STATE.welcome && Object.keys(STATE.welcome).length ? { welcome: STATE.welcome } : {}),
     // Só leitura pro Perfil (ver computeProgressSummary) -- nunca restaurado
     // de volta em applySerializedState, é recalculado a cada save.
     progressSummary: computeProgressSummary()
@@ -106,6 +108,8 @@ function applySerializedState(data){
   if ('dictationsAced' in STATE && typeof data.dictationsAced === 'number') STATE.dictationsAced = Math.max(STATE.dictationsAced || 0, data.dictationsAced);
   if (data.periodXp) Object.assign(STATE.periodXp, data.periodXp);
   if (data.daily) Object.assign(STATE.daily, data.daily);
+  // Boas-vindas da 1ª lição (por curso): só acrescenta marcas, nunca apaga.
+  if (data.welcome && typeof data.welcome === 'object') STATE.welcome = Object.assign({}, STATE.welcome, data.welcome);
   if ('storyProgress' in STATE && data.storyProgress) Object.assign(STATE.storyProgress, data.storyProgress);
   // Módulos (shared/core/modulos-niveis.js): só existe no save de quem já teve módulos; com as fusões de módulo de
   // <site>/curriculum-changes.js já aplicadas (cur.checkpointProgress).

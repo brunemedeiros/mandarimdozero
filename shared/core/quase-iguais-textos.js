@@ -3,7 +3,9 @@
 // (fr/lang-hooks.js e zh/lang-hooks.js, carregados antes do app.js) ou para uma verificação explícita (typeof/in) no próprio código.
 // Mesmos nomes globais; nenhuma chamada muda. Carregado antes do app.js.
 
-function addXP(amount){
+function addXP(amount, opts){
+  // opts.quiet (Etapa 6): soma igual, só não mostra o aviso "+N XP" (a tela que chamou já mostra o XP, ex.: bloco
+  // "Recado da Prof. Brune" da 1ª lição). Notificação, conquistas e missões continuam iguais.
   // amount 0 (ex: exerciseXP() em modo de revisão de lição, ver comentário
   // lá) nunca deve gerar toast/notificação/checagem de badge -- não é XP
   // de verdade, é só o funil compartilhado sendo chamado com nada a somar.
@@ -15,7 +17,7 @@ function addXP(amount){
   // diário 'xp50' (GENERAL_CHALLENGES), que substituiu 'stars40'.
   ensureDailyBucket();
   STATE.daily.xp += amount;
-  showToast(t('toast.xpGain', { amount }));
+  if (!(opts && opts.quiet)) showToast(t('toast.xpGain', { amount }));
   // Fase 1 do sistema de notificações (evento "Cliente" -- ver
   // shared/notifications.js): fire-and-forget, o anti-spam (cooldown/
   // daily_cap da categoria "gamificacao") já evita virar spam a cada
@@ -205,7 +207,7 @@ function onMatchTileClick(btn){
 // checkpoint e a tela de Unidade concluída/objetivos comunicacionais estava
 // fora de ordem (mesmo bug relatado): a sequência deve aparecer só DEPOIS
 // da tela de Unidade concluída, nunca entre ela e o resultado do checkpoint.
-function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, scorePct, trackHistory = true }){
+function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, scorePct, trackHistory = true, welcomeB = false }){
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   const backBtn = document.getElementById('step-back-btn');
@@ -213,7 +215,8 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   hideAcqPhaseBanner();
   backBtn.style.display = 'none';
   document.getElementById('step-progress-fill').style.width = '100%';
-  if (!isCheckpoint) maybeShowStreakCelebration();
+  // Etapa 6: a janela da sequência NÃO abre mais por cima desta tela; aparece depois do Continuar
+  // (showDeferredStreakCelebration, no clique do step-next-btn em shared/core/app-comum.js, ou ao sair pelo ✕).
 
   const recapItems = lessonRecapItems(u, lesson);
   const recapLabel = (lesson && lesson.vocabIdx && lesson.vocabIdx.length)
@@ -234,11 +237,11 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
       <h2>${isCheckpoint ? t('zh.path.lessonDone.checkpointTitle') : t('zh.path.lessonDone.lessonTitle')}</h2>
       <p class="lesson-boundary-title">${(!isCheckpoint && lesson) ? lesson.title : ''}</p>
       <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.xpEarned')}</div><div class="lc-stat-value">+${xpEarned} ⚡</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.xpEarned')}</div><div class="lc-stat-value">+${xpEarned} ⭐</div></div>
         ${scorePct !== undefined && scorePct !== null ? `<div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.score')}</div><div class="lc-stat-value">${scorePct}%</div></div>` : ''}
       </div>
       ${dueCount > 0 ? `<p class="lesson-boundary-due">${tp('zh.path.lessonDone.cardsWaiting', dueCount)}</p>` : ''}
-      ${challengesBefore ? renderChallengeChipHTML(challengesBefore) : ''}
+      ${(challengesBefore && !welcomeB) ? renderChallengeChipHTML(challengesBefore) : ''}${welcomeB && typeof welcomeBlockBHTML === 'function' ? welcomeBlockBHTML({ xpEarned, words: (lesson && lesson.vocabIdx) ? lesson.vocabIdx.length : 0 }) : ''}
       ${typeof duoLessonStripHTML === 'function' ? duoLessonStripHTML() : ''}
       ${recapItems.length ? `
         <div class="lesson-recap">
@@ -254,6 +257,9 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
     </div>
   `;
   wireAudioButtons(contentEl);
+  // Etapa 6: na 1ª lição do curso o bloco "Recado da Prof. Brune" já explica o XP; os avisos "+N XP" dos últimos
+  // exercícios saem da tela para não ficarem por cima do título.
+  if (welcomeB){ const layer = document.getElementById('toast-layer'); if (layer) layer.querySelectorAll('.toast').forEach(el => el.remove()); }
 
   if (!trackHistory){
     nextBtn.textContent = t('common.continueArrow');
@@ -269,7 +275,7 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   // reconstruir a MESMA tela (mesmo chip de desafio), sem recalcular nada
   // (nunca reexecuta finishCurrentLesson nem mexe em XP/progresso -- só
   // repete este render com os mesmos insumos).
-  STEP_STATE.lastUnitResultCache = { unitId: u.id, lesson, challengesBefore, xpEarned, scorePct, trackHistory };
+  STEP_STATE.lastUnitResultCache = { unitId: u.id, lesson, challengesBefore, xpEarned, scorePct, trackHistory, welcomeB };
   nextBtn.textContent = dueCount > 0 ? t('zh.path.reviewNowArrow', { n: dueCount }) : t('common.continueArrow');
   nextBtn.style.display = 'flex';
 
@@ -298,7 +304,7 @@ function renderUnitCompleteScreen(u, xpEarned){
   hideAcqPhaseBanner();
   backBtn.style.display = 'none';
   document.getElementById('step-progress-fill').style.width = '100%';
-  maybeShowStreakCelebration();
+  // Etapa 6: a janela da sequência fica para depois do Continuar (volta à trilha, ver showDeferredStreakCelebration).
 
   const competencies = (u.lessons || []).filter(l => !l.isCheckpoint).map(l => l.title).filter(Boolean);
   // Todas as palavras novas da unidade, na ordem das lições (decisão da
@@ -316,7 +322,7 @@ function renderUnitCompleteScreen(u, xpEarned){
       <h2>${t('zh.path.unitDone.congrats', { name: currentStudentName() })}</h2>
       <p class="lesson-boundary-title">${u.title}</p>
       <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.xpEarned')}</div><div class="lc-stat-value" id="uc-stat-xp">+0 ⚡</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.xpEarned')}</div><div class="lc-stat-value" id="uc-stat-xp">+0 ⭐</div></div>
       </div>
       ${competencies.length ? `
         <div class="unit-skills">
@@ -348,7 +354,7 @@ function renderUnitCompleteScreen(u, xpEarned){
   // pra si mesma (ver comentário histórico removido de renderLessonCompleteScreen).
   wireAudioButtons(contentEl);
   spawnConfetti(20, 1800);
-  animateCount(document.getElementById('uc-stat-xp'), xpEarned, { prefix: '+', suffix: ' ⚡' });
+  animateCount(document.getElementById('uc-stat-xp'), xpEarned, { prefix: '+', suffix: ' ⭐' });
 
   STEP_STATE.onUnitCompleteScreen = true;
   // Cache pra restaurar via Voltar/Avançar (mesmo padrão de lastUnitResultCache)
