@@ -71,8 +71,9 @@ function normalizeProfileGender(g){
 
 // Forma da nacionalidade conforme o gênero. Só masculino/feminino escolhem uma
 // forma; Outro, Prefiro não dizer, vazio e convidado usam a neutra.
+// lang: idioma de Field com as três formas na tabela (fr, pt); outro cai no português (lado da tradução, como antes).
 function pickNationalityForm(country, lang, gender){
-  var k = lang === 'fr' ? 'fr' : 'pt';
+  var k = (lang && country[lang + 'n'] !== undefined && country[lang + 'm'] !== undefined) ? lang : 'pt';
   if (gender === 'masculine') return country[k + 'm'];
   if (gender === 'feminine') return country[k];
   return country[k + 'n'];
@@ -128,7 +129,7 @@ function sanitizeProfileName(raw){
     .slice(0, 60);
 }
 
-// opts: { profile, studyLang:'fr'|'zh', uiLang:'pt-BR'|'en'|'es', guest? }
+// opts: { profile, studyLang:'fr'|'zh'|'pt', uiLang:'pt-BR'|'en'|'es', guest? }
 function buildProfilePlaceholderContext(opts){
   opts = opts || {};
   var profile = opts.profile || null;
@@ -138,13 +139,15 @@ function buildProfilePlaceholderContext(opts){
   if (!name) name = guestName;
   var first = name.split(' ')[0] || name;
   var country = profileCountryByCode(profile && profile.country) || profileCountryByCode(PROFILE_DEFAULT_COUNTRY);
-  var studyLang = opts.studyLang === 'zh' ? 'zh' : 'fr';
+  // Melhoria 3 (2026-10-26): o idioma estudado vem do registro (fieldLang: 'fr', 'zh', 'pt'); antes todo site que não
+  // era zh recebia a nacionalidade em francês. Valor desconhecido: 'fr', como antes.
+  var studyLang = (opts.studyLang === 'zh' || opts.studyLang === 'pt' || opts.studyLang === 'fr') ? opts.studyLang : 'fr';
   // Gênero vem de profile_private (nunca de profiles); convidado = sem gênero.
   var gender = opts.guest ? null : normalizeProfileGender(opts.gender);
   return {
     nome: name,
     primeiro_nome: first,
-    nacionalidade: studyLang === 'zh' ? country.zh : pickNationalityForm(country, 'fr', gender),
+    nacionalidade: studyLang === 'zh' ? country.zh : pickNationalityForm(country, studyLang, gender),
     nacionalidade_p: country.zhp,
     nacionalidade_t: uiLang === 'en' ? country.en : pickNationalityForm(country, 'pt', gender)
   };
@@ -198,7 +201,7 @@ function applyProfilePlaceholders(opts){
   var user = typeof CURRENT_USER !== 'undefined' ? CURRENT_USER : null;
   var ctx = buildProfilePlaceholderContext({
     profile: profile,
-    studyLang: opts.studyLang || (LanguageRegistry.isCjk(appKey) ? 'zh' : 'fr'),
+    studyLang: opts.studyLang || LanguageRegistry.studyLangOf(appKey) || 'fr',
     uiLang: opts.uiLang || (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
     guest: opts.guest !== undefined ? opts.guest : !user,
     gender: opts.gender !== undefined ? opts.gender : (typeof PROFILE_PRIVATE_CACHE !== 'undefined' && PROFILE_PRIVATE_CACHE ? PROFILE_PRIVATE_CACHE.gender : null)

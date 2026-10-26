@@ -47,6 +47,15 @@ function studyWordCardId(unit, idx){
   return studyItemCardId(unit.id, 'v', idx, unit.vocab ? unit.vocab[idx] : null);
 }
 
+// Idioma dos Fields da trilha de um idioma não CJK, pelo registro (melhoria 3 da revisão de arquitetura, 2026-10-26):
+// estudado = fieldLang ('fr', 'pt'); tradução = idioma da base do curso ('pt-BR' no fr; 'en' no pt). Antes eram 'fr' e
+// 'pt-BR' fixos para todo idioma; fr e zh geram exatamente os mesmos Fields (tests/paridade-sites/test_idioma_registro.js).
+// appKey fora do registro: o de antes ('fr' / 'pt-BR').
+function studyFieldLang(appKey){ return LanguageRegistry.studyLangOf(appKey) || 'fr'; }
+function studyTranslationFieldLang(appKey){
+  return (typeof LanguageRegistry.baseTranslationLangOf === 'function' && LanguageRegistry.baseTranslationLangOf(appKey)) || 'pt-BR';
+}
+
 // Linha sintética (mesmo shape que o motor interpreta pra uma Note nativa)
 // de UMA palavra. Ids de Field determinísticos. Texto exatamente como está
 // em content.js (AUDIO_MANIFEST procura o texto literal).
@@ -61,7 +70,7 @@ function studyNoteRowForWord(unit, vocab, idx, appKey){
     fields = [f(0, 'zh', vocab.c), f(1, 'zh-pinyin', vocab.p), f(2, 'pt-BR', vocab.t)];
     fields[0].pinyinFieldId = fields[1].id;
   } else {
-    fields = [f(0, 'fr', vocab.f), f(1, 'pt-BR', vocab.t)];
+    fields = [f(0, studyFieldLang(appKey), vocab.f), f(1, studyTranslationFieldLang(appKey), vocab.t)];
   }
   return {
     id: idx, revision: 0, status: 'active', note: null,
@@ -223,7 +232,7 @@ function studyNoteRowForPhrase(unit, phrase, idx, appKey, gateVocabIdx){
     fields = [f(0, 'zh', phrase.c), f(1, 'zh-pinyin', phrase.p), f(2, 'pt-BR', phrase.t)];
     fields[0].pinyinFieldId = fields[1].id;
   } else {
-    fields = [f(0, 'fr', phrase.f), f(1, 'pt-BR', phrase.t)];
+    fields = [f(0, studyFieldLang(appKey), phrase.f), f(1, studyTranslationFieldLang(appKey), phrase.t)];
   }
   return {
     id: idx, revision: 0, status: 'active', note: null,

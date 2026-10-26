@@ -41,6 +41,12 @@ const LanguageRegistry = (function(){
     folderOf: function(appKey){ const l = find(appKey); return l ? l.path.replace(/\/$/, '') : null; },
     // Idioma do Field do estudado ('fr', 'zh', 'pt'); não confundir com o lado da tradução ('pt-BR').
     studyLangOf: function(appKey){ return pick(appKey, 'fieldLang') || null; },
+    // Idioma do texto de TRADUÇÃO da base do curso (campo `t` do content.js, lado da tradução no Field da trilha):
+    // o 1º idioma de site do curso ('pt-BR' no fr e no zh; 'en' no pt, que só tem site em inglês). Melhoria 3 da revisão
+    // de arquitetura (2026-10-26): antes o código comum fixava 'pt-BR' para todo idioma.
+    baseTranslationLangOf: function(appKey){ const s = pick(appKey, 'siteLanguages'); return (s && s[0]) || null; },
+    // Locale de voz/idioma completo do idioma estudado ('fr-FR', 'zh-CN', 'pt-BR'), pelo idioma do Field ('fr', 'zh', 'pt').
+    localeOfFieldLang: function(fieldLang){ const l = list.find(x => x.fieldLang === fieldLang); return l ? l.locale : null; },
     familyOf: function(appKey){ return pick(appKey, 'family') || null; },
     isCjk: function(appKey){ return pick(appKey, 'family') === 'cjk'; },
     studyLangMap: function(){ return mapOf('fieldLang'); },

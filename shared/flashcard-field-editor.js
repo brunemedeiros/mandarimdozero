@@ -142,10 +142,14 @@ const TTS_LANGUAGE_UI_OPTIONS = [
   { value: 'zh-CN', labelKey: 'fieldEditor.audio.ttsLang.zh' },
   { value: 'pt-BR', labelKey: 'fieldEditor.audio.ttsLang.pt' },
 ];
+// Melhoria 3 (2026-10-26): o idioma de Field do estudado ('fr', 'zh', 'pt') vira o locale do registro (languages/registry.json
+// `locale`: fr-FR, zh-CN, pt-BR); 'zh-pinyin' segue o zh; um locale que já é opção do menu ('pt-BR') fica como está.
 function suggestedTtsLanguageForFieldLang(lang){
-  if (lang === 'fr') return 'fr-FR';
-  if (lang === 'zh' || lang === 'zh-pinyin') return 'zh-CN';
-  if (lang === 'pt-BR') return 'pt-BR';
+  const base = lang === 'zh-pinyin' ? 'zh' : lang;
+  const locale = (typeof LanguageRegistry !== 'undefined' && LanguageRegistry.localeOfFieldLang) ? LanguageRegistry.localeOfFieldLang(base) : null;
+  const known = (v) => TTS_LANGUAGE_UI_OPTIONS.some(o => o.value && o.value === v);
+  if (locale && known(locale)) return locale;
+  if (known(lang)) return lang;
   return '';
 }
 const TTS_RATE_UI_OPTIONS = [
