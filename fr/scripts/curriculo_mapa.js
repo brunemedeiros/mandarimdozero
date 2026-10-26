@@ -228,7 +228,7 @@ function conferirIdFuncao(mapa){
   return problemas;
 }
 
-// Exceções: toda unidade citada em excecoes.json existe no mapa.
+// Exceções: toda unidade citada em excecoes.json existe no mapa (entrada com "escopo": "nivel:A1" vale para o nível inteiro e não cita unidade).
 function conferirExcecoes(mapa, excecoes){
   const idx = indicePorId(mapa), problemas = [];
   for (const e of excecoes.palavras_antes_do_cartao || []){
