@@ -34,7 +34,7 @@ decisão estão marcados **(para a dona)**.
    (A2-6) e *personne* (A2-24) da tabela "Negação complexa", e as outras 20 versões grátis *(nota nova)* que a coluna "Versão grátis" das gramáticas põe
    numa unidade de vocabulário sem que a coluna "Notas" dela as liste (marcadas `origem_coluna: "versao_gratis"`). *le château* fica fora
    (`status: "se couber"`). Assim dá 76, como o 08; mas a interpretação é minha.
-8. **Colunas de versão grátis que não dizem a mesma coisa (19 pares).** A linha da gramática cita a unidade, mas a linha da unidade de vocabulário
+8. **[RESOLVIDO, decisão 260: um lugar só, `versao_gratis_em` na gramática; a unidade que abriga é derivada] Colunas de versão grátis que não dizem a mesma coisa (19 pares).** A linha da gramática cita a unidade, mas a linha da unidade de vocabulário
    não lista a gramática em "abriga a versão grátis de" (no json: `versao_gratis_em` x `abriga_versao_gratis_de`; lista completa em `--conferir`):
    - "Gramática: palavras interrogativas (pessoas)" (`A1-g22`) cita "Dizer o nome e a nacionalidade", "Dizer de onde é e onde mora" e "Apresentar a família";
    - "Gramática: perguntar sim ou não" (`A1-g12`) cita "Cumprimentar e se despedir" (nota *Ça va ?* sobe), que diz "(nenhuma)";

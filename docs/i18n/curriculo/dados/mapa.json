@@ -127,8 +127,7 @@
                   "nova": true,
                   "decisao": 223
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A1-2",
@@ -257,10 +256,6 @@
                   "breve": true
                 }
               ],
-              "abriga_versao_gratis_de": [
-                "A1-g1",
-                "A1-g11"
-              ],
               "licao_pronuncia": "O alfabeto e soletrar o nome",
               "licoes_08": 5,
               "licoes_motivo": "3 lições + lição de pronúncia do alfabeto + Revisão da unidade (08, seção 1 e linha da M1.2)"
@@ -371,9 +366,6 @@
                   "confianca": "alta",
                   "nova": true
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g1"
               ]
             },
             {
@@ -464,9 +456,6 @@
                   "confianca": "alta",
                   "nova": true
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g1"
               ]
             },
             {
@@ -571,10 +560,6 @@
                   "nova": true,
                   "observacao": "revisão da dona antes de publicar"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g11",
-                "A1-g5"
               ]
             },
             {
@@ -737,10 +722,6 @@
                     "A1-g17"
                   ]
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g17",
-                "A1-g2"
               ]
             },
             {
@@ -849,9 +830,6 @@
                   ],
                   "decisao": 149
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g15"
               ]
             },
             {
@@ -974,10 +952,6 @@
                     "A1-g12"
                   ]
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g12",
-                "A1-g4"
               ]
             },
             {
@@ -1144,11 +1118,6 @@
                     "A1-g18"
                   ]
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g3",
-                "A1-g18",
-                "A1-g20"
               ]
             },
             {
@@ -1273,8 +1242,7 @@
                   "confianca": "n/r",
                   "nova": true
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A1-g18",
@@ -1401,8 +1369,7 @@
                   "confianca": "alta",
                   "nova": true
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A1-35",
@@ -1488,9 +1455,6 @@
                     "A1-g8"
                   ]
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g8"
               ]
             },
             {
@@ -1569,12 +1533,7 @@
                   "reconhecimento_so": true
                 }
               ],
-              "notas": [],
-              "abriga_versao_gratis_de": [
-                "A1-g5",
-                "A1-g13",
-                "A1-g6"
-              ]
+              "notas": []
             },
             {
               "id": "A1-5",
@@ -1701,10 +1660,6 @@
                   "nova": true,
                   "breve": true
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g14",
-                "A1-g5"
               ]
             },
             {
@@ -1784,9 +1739,6 @@
                   "confianca": "alta",
                   "id": "N27"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g14"
               ]
             },
             {
@@ -1865,9 +1817,6 @@
                   "confianca": "alta",
                   "nova": true
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g14"
               ]
             },
             {
@@ -1978,8 +1927,7 @@
                   "nova": true,
                   "decisao": 242
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A1-g5",
@@ -2126,9 +2074,6 @@
                   ],
                   "decisao": 205
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g10"
               ]
             },
             {
@@ -2274,9 +2219,6 @@
                   "breve": true,
                   "gancho": "pas cher"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g9"
               ]
             },
             {
@@ -2389,9 +2331,6 @@
                   "confianca": "alta",
                   "id": "N14"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g15"
               ]
             },
             {
@@ -2509,9 +2448,6 @@
                     "A1-g19"
                   ]
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g19"
               ]
             },
             {
@@ -2616,9 +2552,6 @@
                     "A1-g13"
                   ]
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g13"
               ]
             },
             {
@@ -2723,8 +2656,7 @@
                     "A2-g20"
                   ]
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A1-g23",
@@ -2869,9 +2801,6 @@
                   ],
                   "decisao": 251
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g24"
               ]
             },
             {
@@ -2933,9 +2862,6 @@
                   "nova": true,
                   "decisao": 133
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g7"
               ]
             },
             {
@@ -3031,8 +2957,7 @@
                   "nova": true,
                   "decisao": 133
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A1-18",
@@ -3097,8 +3022,7 @@
                   "confianca": "n/r",
                   "nova": true
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A1-g7",
@@ -3205,9 +3129,6 @@
                   ],
                   "observacao": "o 08 lista \"le Japon...\" (lista aberta)"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g4"
               ]
             },
             {
@@ -3319,9 +3240,6 @@
                     "A1-g20"
                   ]
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g20"
               ]
             },
             {
@@ -3419,8 +3337,7 @@
                   "nova": true,
                   "variante": "regional"
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A1-32",
@@ -3490,8 +3407,7 @@
                   "nova": true,
                   "decisao": 141
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             }
           ]
         },
@@ -3592,9 +3508,6 @@
                     "A1-g6"
                   ]
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g6"
               ]
             },
             {
@@ -3711,8 +3624,7 @@
                   "nova": true,
                   "variante": "informal"
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A1-20",
@@ -3819,10 +3731,6 @@
                     "A1-g9"
                   ]
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A1-g9",
-                "A1-g16"
               ]
             },
             {
@@ -3965,9 +3873,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g1"
               ]
             },
             {
@@ -4063,9 +3968,6 @@
                     "A2-g21"
                   ]
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g21"
               ]
             },
             {
@@ -4153,8 +4055,7 @@
                   "decisao": 139,
                   "observacao": "palavras: o que passar de 12 (lista não definida no 08)"
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A2-3",
@@ -4226,10 +4127,7 @@
                   "origem": "novo"
                 }
               ],
-              "notas": [],
-              "abriga_versao_gratis_de": [
-                "A2-g5"
-              ]
+              "notas": []
             }
           ]
         },
@@ -4329,9 +4227,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g3"
               ]
             },
             {
@@ -4453,10 +4348,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g9",
-                "A2-g24"
               ]
             },
             {
@@ -4575,10 +4466,6 @@
                   "origem_coluna": "versao_gratis",
                   "status": "proposta"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g5",
-                "A2-g21"
               ]
             },
             {
@@ -4677,9 +4564,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g6"
               ]
             },
             {
@@ -4784,9 +4668,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g8"
               ]
             },
             {
@@ -4904,9 +4785,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g7"
               ]
             },
             {
@@ -5034,10 +4912,6 @@
                   "decisao": 134
                 }
               ],
-              "abriga_versao_gratis_de": [
-                "A2-g10",
-                "A2-g13"
-              ],
               "licoes_08": 4,
               "licoes_motivo": "unidade publicada: 3 lições + a lição final, agora \"Revisão da unidade\" (decisão 130)"
             },
@@ -5141,9 +5015,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g10"
               ]
             },
             {
@@ -5224,8 +5095,7 @@
                   "nova": true,
                   "decisao": 141
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A2-g10",
@@ -5331,9 +5201,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g11"
               ]
             },
             {
@@ -5472,10 +5339,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g12",
-                "A2-g21"
               ]
             },
             {
@@ -5573,9 +5436,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g13"
               ]
             },
             {
@@ -5677,8 +5537,7 @@
                   "breve": true,
                   "decisao": 172
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             }
           ]
         },
@@ -5785,9 +5644,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g15"
               ]
             },
             {
@@ -5905,9 +5761,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g17"
               ]
             },
             {
@@ -6019,9 +5872,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g16"
               ]
             },
             {
@@ -6131,8 +5981,7 @@
                   "nova": true,
                   "decisao": 182
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A2-20",
@@ -6217,9 +6066,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g19"
               ]
             },
             {
@@ -6321,8 +6167,7 @@
                   "breve": true,
                   "decisao": 182
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A2-25",
@@ -6402,9 +6247,6 @@
                   "nova": true,
                   "decisao": 182
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g21"
               ]
             }
           ]
@@ -6494,8 +6336,7 @@
                   "nova": true,
                   "decisao": 186
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A2-24",
@@ -6594,9 +6435,6 @@
                   "origem_coluna": "versao_gratis",
                   "status": "proposta"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g21"
               ]
             },
             {
@@ -6683,8 +6521,7 @@
                   "origem": "novo"
                 }
               ],
-              "notas": [],
-              "abriga_versao_gratis_de": []
+              "notas": []
             },
             {
               "id": "A2-21",
@@ -6779,9 +6616,6 @@
                     "A2-g21"
                   ]
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g21"
               ]
             },
             {
@@ -6894,9 +6728,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g2"
               ]
             },
             {
@@ -7009,9 +6840,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g22"
               ]
             },
             {
@@ -7111,8 +6939,7 @@
                   "nova": true,
                   "decisao": 191
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A2-30",
@@ -7184,8 +7011,7 @@
                   "origem": "novo"
                 }
               ],
-              "notas": [],
-              "abriga_versao_gratis_de": []
+              "notas": []
             }
           ]
         },
@@ -7285,9 +7111,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g24"
               ]
             },
             {
@@ -7391,8 +7214,7 @@
                   "status": "se couber",
                   "decisao": 194
                 }
-              ],
-              "abriga_versao_gratis_de": []
+              ]
             },
             {
               "id": "A2-33",
@@ -7476,9 +7298,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g26"
               ]
             },
             {
@@ -7592,9 +7411,6 @@
                   ],
                   "origem_coluna": "versao_gratis"
                 }
-              ],
-              "abriga_versao_gratis_de": [
-                "A2-g25"
               ]
             },
             {

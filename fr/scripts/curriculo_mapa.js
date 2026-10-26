@@ -180,24 +180,15 @@ function conferirVersaoGratis(mapa){
   }
   return problemas;
 }
-// Diferenças entre "versao_gratis_em" (linha da gramática) e "abriga_versao_gratis_de" (linha da unidade de vocabulário).
-// Não é erro de regra: mostra onde as duas colunas do 08 não dizem a mesma coisa (ACHADOS.md).
-function divergenciasVersaoGratis(mapa){
-  const lista = unidadesEmOrdem(mapa).map(it => it.unidade), saida = [];
-  const porId = Object.fromEntries(lista.map(u => [u.id, u]));
-  for (const g of lista.filter(u => u.tipo === 'gramatica')){
-    for (const id of g.versao_gratis_em || []){
-      const v = porId[id];
-      if (v && v.tipo === 'vocabulario' && !(v.abriga_versao_gratis_de || []).includes(g.id)) saida.push({ gramatica: g.id, unidade: id, falta: 'abriga_versao_gratis_de' });
-    }
+// A versão grátis tem um lugar só: "versao_gratis_em" na linha da gramática (decisão 260). A unidade de vocabulário não repete a ligação;
+// quem precisa saber o que uma unidade abriga usa esta função derivada.
+function gramaticasAbrigadasPor(mapa){
+  const abriga = {};
+  for (const it of unidadesEmOrdem(mapa)){
+    if (it.unidade.tipo !== 'gramatica') continue;
+    for (const id of it.unidade.versao_gratis_em || []) (abriga[id] = abriga[id] || []).push(it.unidade.id);
   }
-  for (const v of lista.filter(u => u.tipo === 'vocabulario')){
-    for (const id of v.abriga_versao_gratis_de || []){
-      const g = porId[id];
-      if (g && !(g.versao_gratis_em || []).includes(v.id)) saida.push({ gramatica: id, unidade: v.id, falta: 'versao_gratis_em' });
-    }
-  }
-  return saida;
+  return abriga;
 }
 
 // Regra 16: teto de tempo por módulo, menos o último módulo de cada nível.
@@ -282,7 +273,7 @@ module.exports = {
   REGRAS, carregarMapa, carregarExcecoes, unidadesEmOrdem, indicePorId, palavrasDaUnidade, cartoesDaUnidade, cartoesAB,
   licoesDaUnidade, licoesPelaRegra, notasDaUnidade, tempoDoModulo, formatarTempo, contasDoModulo, contasDoNivel, contas,
   conferirLimitePalavras, conferirRegra14, conferirChaves, chavesPublicadasForaDoMapa, conferirVersaoGratis,
-  divergenciasVersaoGratis, conferirTetoTempo, conferirTitulosNotasVocab, conferirIdFuncao, conferirExcecoes, conferirTudo, tabela,
+  gramaticasAbrigadasPor, conferirTetoTempo, conferirTitulosNotasVocab, conferirIdFuncao, conferirExcecoes, conferirTudo, tabela,
   TITULO_NOTA_VOCAB,
 };
 
@@ -297,9 +288,6 @@ if (require.main === module){
     for (const [nome, lista] of Object.entries(r)){ console.log(`${nome}: ${lista.length ? lista.length + ' problema(s)' : 'ok'}`); lista.forEach(p => console.log('  ' + JSON.stringify(p))); falhas += lista.length; }
     const fora = chavesPublicadasForaDoMapa(mapa, ids);
     console.log(`cartões publicados fora do mapa: ${fora.length ? fora.join(', ') : 'nenhum'}`);
-    const div = divergenciasVersaoGratis(mapa);
-    console.log(`colunas de versão grátis que não batem (informativo): ${div.length}`);
-    div.forEach(d => console.log('  ' + JSON.stringify(d)));
     process.exit(falhas + fora.length ? 1 : 0);
   }
   console.log('Uso: node fr/scripts/curriculo_mapa.js --tabela | --conferir');

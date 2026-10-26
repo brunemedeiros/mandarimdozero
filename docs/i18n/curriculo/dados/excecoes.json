@@ -154,15 +154,15 @@
       "expressao": "l'euro",
       "tipo": "uso_comum",
       "unidades": [
-        "A1-28",
-        "A1-10"
+        "A1 inteiro"
       ],
       "chaves": [],
       "cartao_em": [],
       "decisoes": [
-        209
+        209,
+        260
       ],
-      "observacao": "só em frase, sem cartão em lugar nenhum"
+      "observacao": "só em frase, sem cartão em lugar nenhum; vale para o A1 inteiro (decisão 260), junto dos números e preços"
     },
     {
       "expressao": "je vais prendre",

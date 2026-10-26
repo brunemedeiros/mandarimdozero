@@ -1225,3 +1225,10 @@ Base: `auditoria/2026-10-26-a1-a2-passada-final.md`, seção 3. A dona aceitou D
 259. **MAPA A1 + A2 APROVADO PELA DONA E CONGELADO** (2026-10-26): A1 com 9 módulos, 57 unidades, **360 cartões**, ~30h40; A2 com 10 módulos, 58 unidades, **428 cartões** (418 novos + 10 publicados), ~33h10 (`08-mapa-final-a1-a2-v2.md`,
      decisões 1 a 258). Daqui em diante (decisão 235) o mapa só muda por **pedido de mudança**, com o `auditor-curricular` rodando. Próximos passos, sem tocar em produção nem em código do site: `mapa.json` e `excecoes.json`
      gerando as contas (228, 232), teste de coerência, depois implementação (reordenar `UNITS`, campo `papel`, validador "só palavras vistas") e o piloto "Apresentar-se"; cada passo que mexer em código ou dado em produção pede autorização própria.
+
+260. **Respostas aos achados do `mapa.json`** (2026-10-26). **Versão grátis num lugar só**: vale o `versao_gratis_em` da gramática; a unidade de vocabulário **não** repete a ligação ("abriga a versão grátis de" deixa de existir
+     no dado e vira função derivada `gramaticasAbrigadasPor`, com teste); a dona não vê necessidade de citar a unidade que abriga. ***l'euro*** vale **para o A1 inteiro** (exceção da 209, só em frase, sem cartão; `excecoes.json`).
+261. **Tempo do A1 = número estimado e digitado** por módulo (`tempo_08_min`), sem fórmula inventada; o A2 segue a regra (40 min por vocabulário, 25 por gramática). Medir de verdade exige dados de uso reais (produção): só com autorização.
+262. **Lições fora da regra mantidas como aprovadas**: "Dizer o nome e a nacionalidade" com 5 lições e "Corpo e dores" com 4 (`licoes_08` no dado), registradas como exceção.
+263. **`id_funcao` das gramáticas é provisório** (alguns carregam palavra do francês); o nome do slot gramatical da grade comum se define na extração (T7).
+264. **Notas**: a contagem do A1 passa a ser a do `mapa.json` (132) e a do A2 também (76); os "~131" e a interpretação das 76 do `08` ficam como histórico.

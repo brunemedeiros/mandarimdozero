@@ -71,6 +71,12 @@ check('todo cartão de palavra publicado está no mapa (como chave ou fundida)',
 
 console.log('== funções puras (regras isoladas)');
 {
+  // decisão 260: a versão grátis tem um lugar só (versao_gratis_em na gramática); a unidade que abriga é derivada.
+  const abriga = C.gramaticasAbrigadasPor({ niveis: [{ id: 'X', modulos: [{ id: 'm', unidades: [{ id: 'V1', tipo: 'vocabulario' }, { id: 'V2', tipo: 'vocabulario' }, { id: 'G1', tipo: 'gramatica', versao_gratis_em: ['V1', 'V2'] }] }] }] });
+  check('versão grátis derivada: unidade abriga a gramática que a cita', JSON.stringify(abriga) === JSON.stringify({ V1: ['G1'], V2: ['G1'] }), abriga);
+  check('mapa.json não repete a ligação nas unidades', !JSON.stringify(mapa).includes('abriga_versao_gratis_de'));
+}
+{
   const voc = (n, extra) => Object.assign({ tipo: 'vocabulario', cartoes: Array.from({ length: n }, (_, i) => ({ palavra: 'p' + i })) }, extra);
   check('lições: 10 palavras = 3 + Revisão', C.licoesDaUnidade(voc(10)) === 4);
   check('lições: 11 palavras = 4 + Revisão', C.licoesDaUnidade(voc(11)) === 5);
