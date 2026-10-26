@@ -889,14 +889,17 @@ function checkListenTranslateAnswer(c){
   // completa (alertas de negação/número/mustInclude, 3 níveis).
   const lt = listenTranslateSetup(c);
   const i18nCmp = lt.lang !== 'pt-BR';
-  let personMismatch, outcome, analysis = null;
+  let personMismatch, outcome, analysis = null, ptPt = null;
   if (i18nCmp){
     personMismatch = lt.cmp.personMismatch(studentAnswer);
     outcome = (!personMismatch && lt.cmp.isAcceptable(studentAnswer, lt.refs)) ? 'ok' : 'fail';
   } else {
     personMismatch = translationHasPersonMismatch(studentAnswer);
-    outcome = listenTranslateOutcome(studentAnswer, c.referenceTranslations, personMismatch, c);
-    analysis = analyzeTranslation(studentAnswer, c.referenceTranslations, c);
+    // Resposta em português de Portugal: 'partial' e a forma do Brasil na devolutiva (regra da dona, 2026-10-26).
+    const verdict = listenTranslateVerdict(studentAnswer, c.referenceTranslations, personMismatch, c);
+    outcome = verdict.outcome;
+    ptPt = verdict.ptPt;
+    analysis = analyzeTranslation(ptPt ? ptPt.text : studentAnswer, c.referenceTranslations, c);
   }
   const isCorrect = outcome === 'ok';
   // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
@@ -906,7 +909,7 @@ function checkListenTranslateAnswer(c){
   const yoursHTML = marked ? markedWordsHTML(marked.student) : escapeHtmlChallenge(studentAnswer || '—');
   const expectedHTML = marked ? markedWordsHTML(marked.reference) : escapeHtmlChallenge((analysis && analysis.bestRef) || lt.refs[0]);
   const ltBodyHTML = `
-      ${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
+      ${ptPt ? `<p class="listen-translate-feedback-warning lt-ptpt-warning">${chT('ch.lt.ptpt', { forms: ptPt.marks.map(m => chT('ch.lt.ptpt.pair', { br: escapeHtmlChallenge(m.br), pt: escapeHtmlChallenge(m.pt) })).join(', ') })}</p>` : ''}${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
       ${analysis ? translationAlertsHTML(analysis, outcome) : ''}
       <div class="fb-cmp">
         <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${yoursHTML}</p>
@@ -919,7 +922,7 @@ function checkListenTranslateAnswer(c){
         ${slowAudioBtnHTML('lt-replay-slow-btn')}
       </div>
   `;
-  document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, outcome === 'ok' ? chT('ch.lt.right') : outcome === 'partial' ? chT('ch.lt.partial') : chT('ch.notQuite'), ltBodyHTML, outcome);
+  document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, outcome === 'ok' ? chT('ch.lt.right') : outcome === 'partial' ? chT(ptPt ? 'ch.lt.partialPtPt' : 'ch.lt.partial') : chT('ch.notQuite'), ltBodyHTML, outcome);
   document.getElementById('lt-verify-btn').style.display = 'none';
   recordChallengeReviewOutcome(c, outcome);
   document.getElementById('lt-replay-btn').addEventListener('click', (e) => {

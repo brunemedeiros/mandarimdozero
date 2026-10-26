@@ -99,3 +99,27 @@ Testes: desafios-modulo 75/75, desafios-conclusao 19/19, test_answer_validation 
   "O que será que significa?" e sem etiqueta de nível, 2 por linha no celular e 3 ou mais no computador, som no canto de
   baixo. Lista inteira de 6891px para 4256px de altura (1200px) e de 12897px para 5898px (390px).
   `tests/desafios-album` 66/66, desafios-modulo 75/75, desafios-conclusao 19/19.
+
+## Inglês dos 16 da primeira leva, correções de texto e regra do português de Portugal (2026-10-26)
+- **Inglês**: os 16 Desafios publicados só na produção, sem fonte no repositório (accent-a1/a2/b2-001, expr-a1/a2/b2-001..003,
+  lt-a1/a2/b1/b2-001), ganharam a tradução em inglês aprovada pela dona (`docs/i18n/challenges-en.json`, overlay
+  `fr/challenges.en.js` regerado). Retrato da produção em `docs/i18n/challenges-producao-sem-fonte.json` (o validador usa
+  como fonte, igual ao do A1-m3). Voltam a aparecer e abrir no site em inglês (`tests/desafios-idioma-site` 41/41).
+- **Correções na produção** (SQL para a autora aplicar: `docs/rollout-sql/desafios-correcoes-2026-10-26.sql`, com backup,
+  conferência do valor antigo e checagem final que desfaz tudo; testado num Postgres local): expr-b2-001 "aspetos" ->
+  "aspectos"; lt-a1-001 "Eu estou a comer" -> "Eu estou comendo"; lt-b2-001 "Conquanto" -> "Embora"; accent-b2-001
+  explicação nova; expr-a2-001 explicação em francês sem definição circular; expr-a1-003 opção certa "Ne pas se tromper"
+  (no lugar de "Avoir la bonne opinion"); expr-b2-002 2º exemplo "Mon colocataire a vraiment un poil dans la main : il ne
+  fait jamais la vaisselle." (o SQL tira o `audioFile` antigo 8161a79d42ec.mp3; o mp3 novo seria fda7a771ac1c.mp3, ainda
+  NÃO gerado). O retrato no repositório já tem os textos novos.
+- **Regra da dona (vale para todo Ouça e traduza em pt-BR, hoje e os próximos)**: resposta em português de Portugal não é
+  "certa": é "Quase", e a devolutiva mostra a forma do Brasil ("🟡 Quase! Essa forma é de Portugal." + "No Brasil se diz:
+  **estou comendo** (em vez de "estou a comer")."; chaves `ch.lt.partialPtPt`, `ch.lt.ptpt`, `ch.lt.ptpt.pair`). Código:
+  `ptEuropeanToBrazilian` + `listenTranslateVerdict` no bloco `challenge-translation-logic` de `shared/desafios.js`
+  (`listenTranslateOutcome` passa por ele); tela em `shared/desafios-telas.js`. Marcas: estar/andar/ficar + "a" +
+  infinitivo (vira gerúndio); telemóvel, autocarro, comboio, pequeno-almoço, casa de banho, facto, contacto/contactar, ecrã,
+  frigorífico, rapariga, sumo (só como substantivo), apanhar + meio de transporte (vira pegar); plurais incluídos. "tu" + 2ª
+  pessoa NÃO conta. No site em inglês não se aplica (comparador próprio). Varredura: na produção só o lt-a1-001 tinha forma
+  de Portugal; nos lotes do repositório nenhuma.
+- Testes: `tests/desafios-ptpt/test_ptpt.js` 282/282 (PT-PT -> Quase, Brasil -> certo, falsos positivos, varredura de 163
+  traduções aceitas do repositório), `tests/desafios-ptpt/test_playwright.js` 8/8 (tela pt-BR e en).

@@ -371,6 +371,9 @@ const CHALLENGE_I18N = {
     'ch.listenAgain': '▶ Ouvir de novo',
     'ch.lt.right': '✅ Tradução certa.',
     'ch.lt.partial': '🟡 Quase: a ideia está certa, mas confira os detalhes.',
+    'ch.lt.partialPtPt': '🟡 Quase! Essa forma é de Portugal.',
+    'ch.lt.ptpt': 'No Brasil se diz: {forms}.',
+    'ch.lt.ptpt.pair': '<strong>{br}</strong> (em vez de "{pt}")',
     'ch.accent.label': 'Digite o que você ouviu:',
     'ch.accent.yours': 'Sua resposta: <strong>{answer}</strong>',
     'ch.accent.right': '✅ Certo.',
@@ -503,6 +506,9 @@ const CHALLENGE_I18N = {
     'ch.today.allDone': "🎉 You have discovered every available expression.",
     'ch.lt.right': "✅ Correct translation.",
     'ch.lt.partial': "🟡 Almost: right idea, but check the details.",
+    'ch.lt.partialPtPt': "🟡 Almost! That form is from Portugal.",
+    'ch.lt.ptpt': "In Brazil people say: {forms}.",
+    'ch.lt.ptpt.pair': "<strong>{br}</strong> (instead of \"{pt}\")",
     'ch.accent.label': "Type what you heard:",
     'ch.accent.yours': "Your answer: <strong>{answer}</strong>",
     'ch.accent.right': "✅ Correct.",
@@ -981,12 +987,102 @@ function analyzeTranslation(studentAnswer, referenceTranslations, extra){
 // (0,55 a 0,8, ou qualquer alerta -- concordância, negação, número,
 // mustInclude/mustExclude) -- conclui com explicação; 'fail' = erro total
 // (< 0,55 ou vazio) -- não conclui.
-function listenTranslateOutcome(studentAnswer, referenceTranslations, personMismatch, extra){
+function listenTranslateBaseOutcome(studentAnswer, referenceTranslations, personMismatch, extra){
   if (!studentAnswer || !studentAnswer.trim()) return 'fail';
   const an = analyzeTranslation(studentAnswer, referenceTranslations, extra);
   if (an.similarity < 0.55) return 'fail';
   if (personMismatch || an.alerts.length || an.similarity < 0.8) return 'partial';
   return 'ok';
+}
+
+// ---- Português de Portugal na resposta (regra da dona, 2026-10-26) ----
+// O site em pt-BR ensina o português do Brasil: resposta com marca de Portugal nunca é "certa". Se, trocada
+// pela forma do Brasil, ela bate com uma referência, o resultado é 'partial' (Quase) e a devolutiva mostra a
+// forma do Brasil. Só entram marcas seguras: a construção estar/andar/ficar + "a" + infinitivo ("estou a
+// comer" = "estou comendo") e vocabulário típico (lista abaixo). "tu" + 2ª pessoa NÃO conta (o Brasil também
+// usa). Vale só para o comparador em português; no site em inglês o comparador é outro (translation-compare.js).
+const PT_EU_ASPECT_AUX = new Set([
+  'estou','estas','esta','estamos','estao','estava','estavas','estavamos','estavam','estive','estiveste','esteve',
+  'estivemos','estiveram','estarei','estaras','estara','estaremos','estarao','estaria','estarias','estariamos','estariam',
+  'esteja','estejas','estejamos','estejam','estivesse','estivesses','estivessemos','estivessem','estar',
+  'ando','andas','anda','andamos','andam','andava','andavas','andavamos','andavam','andei','andou','andaram','andar',
+  'fico','ficas','fica','ficamos','ficam','ficava','ficavas','ficavamos','ficavam','fiquei','ficou','ficaram','ficar',
+  'ficarei','ficara','ficaria'
+]);
+// Palavras em -ar/-er/-ir que não são infinitivo depois de "estar a" (substantivos).
+const PT_EU_NOT_INFINITIVE = new Set(['lugar','mar','par','ar','bar','colher','mulher','prazer','altar','nivel','dever']);
+// [palavras de Portugal (normalizadas, sem acento), forma do Brasil]
+const PT_EU_VOCAB = [
+  [['casas','de','banho'], 'banheiros'], [['casa','de','banho'], 'banheiro'],
+  [['pequenos','almocos'], 'cafés da manhã'], [['pequeno','almoco'], 'café da manhã'], [['pequeno-almoco'], 'café da manhã'],
+  [['telemovel'], 'celular'], [['telemoveis'], 'celulares'],
+  [['autocarro'], 'ônibus'], [['autocarros'], 'ônibus'],
+  [['comboio'], 'trem'], [['comboios'], 'trens'],
+  [['facto'], 'fato'], [['factos'], 'fatos'],
+  [['contacto'], 'contato'], [['contactos'], 'contatos'], [['contactar'], 'contatar'],
+  [['ecra'], 'tela'], [['ecras'], 'telas'],
+  [['frigorifico'], 'geladeira'], [['frigorificos'], 'geladeiras'],
+  [['rapariga'], 'moça'], [['raparigas'], 'moças']
+];
+// "sumo" (suco) só como substantivo: "eu sumo" (do verbo sumir) é do Brasil.
+const PT_EU_SUMO_BEFORE = new Set(['o','um','os','uns','do','no','ao','meu','teu','seu','nosso','este','esse','aquele','de','com']);
+const PT_EU_TRANSPORT = new Set(['autocarro','autocarros','comboio','comboios','onibus','trem','trens','metro','taxi','aviao','barco','eletrico','electrico']);
+
+function ptEuGerund(inf){
+  if (inf === 'por') return 'pondo';
+  return inf.slice(0, -2) + ({ ar: 'ando', er: 'endo', ir: 'indo' })[inf.slice(-2)];
+}
+// Devolve { text: a resposta com as formas do Brasil, marks: [{ pt, br }] } (marks vazio = nenhuma marca).
+function ptEuropeanToBrazilian(text){
+  const toks = String(text || '').split(/\s+/).filter(Boolean).map(raw => {
+    const core = raw.replace(/^[^\p{L}\d]+|[^\p{L}\d-]+$/gu, '');
+    return { raw, core, norm: normalizeForTranslationCompare(core) };
+  });
+  const out = [], marks = [];
+  const isInf = w => (/^[a-z]{2,}(ar|er|ir)$/.test(w) && !PT_EU_NOT_INFINITIVE.has(w)) || w === 'por';
+  for (let i = 0; i < toks.length; i++){
+    const t = toks[i];
+    // estar/andar/ficar + a + infinitivo -> gerúndio
+    if (PT_EU_ASPECT_AUX.has(t.norm) && toks[i + 1] && toks[i + 1].norm === 'a' && toks[i + 2] && isInf(toks[i + 2].norm)){
+      const ger = ptEuGerund(toks[i + 2].norm);
+      out.push(t.core, ger);
+      marks.push({ pt: `${t.core} a ${toks[i + 2].core}`.toLowerCase(), br: `${t.core} ${ger}`.toLowerCase() });
+      i += 2; continue;
+    }
+    // apanhar (o autocarro, o comboio...) -> pegar
+    if (/^apanh(ar|o|as|a|amos|am|ei|ou|aram|ava|avas|avamos|avam|aste|ando|e|es|em)$/.test(t.norm)
+        && toks.slice(i + 1, i + 4).some(x => PT_EU_TRANSPORT.has(x.norm))){
+      const rest = t.norm.slice(5);
+      const br = (/^[ei]/.test(rest) ? 'pegu' : 'peg') + rest;
+      out.push(br); marks.push({ pt: t.core.toLowerCase(), br }); continue;
+    }
+    if (t.norm === 'sumo' && ((i > 0 && PT_EU_SUMO_BEFORE.has(toks[i - 1].norm)) || (toks[i + 1] && toks[i + 1].norm === 'de'))){
+      out.push('suco'); marks.push({ pt: 'sumo', br: 'suco' }); continue;
+    }
+    if (t.norm === 'sumos'){ out.push('sucos'); marks.push({ pt: 'sumos', br: 'sucos' }); continue; }
+    const v = PT_EU_VOCAB.find(([seq]) => seq.every((w, k) => toks[i + k] && toks[i + k].norm === w));
+    if (v){
+      const n = v[0].length;
+      out.push(v[1]);
+      marks.push({ pt: toks.slice(i, i + n).map(x => x.core).join(' ').toLowerCase(), br: v[1] });
+      i += n - 1; continue;
+    }
+    out.push(t.raw);
+  }
+  return { text: marks.length ? out.join(' ') : String(text || ''), marks };
+}
+
+// Veredito completo do Ouça e traduza em português: { outcome, ptPt } (ptPt = marcas de Portugal achadas, ou null).
+function listenTranslateVerdict(studentAnswer, referenceTranslations, personMismatch, extra){
+  const base = listenTranslateBaseOutcome(studentAnswer, referenceTranslations, personMismatch, extra);
+  const eu = ptEuropeanToBrazilian(studentAnswer);
+  if (!eu.marks.length) return { outcome: base, ptPt: null };
+  const br = listenTranslateBaseOutcome(eu.text, referenceTranslations, personMismatch, extra);
+  if (br === 'fail' && base === 'fail') return { outcome: 'fail', ptPt: null };
+  return { outcome: 'partial', ptPt: eu };
+}
+function listenTranslateOutcome(studentAnswer, referenceTranslations, personMismatch, extra){
+  return listenTranslateVerdict(studentAnswer, referenceTranslations, personMismatch, extra).outcome;
 }
 
 // ---- Marcação palavra a palavra (07/10/2026) ----
