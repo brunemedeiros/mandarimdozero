@@ -163,7 +163,7 @@ async function fill(page, wrongIdx){
     await page.click('#conj-start-btn');
     await page.waitForSelector('.conj-tense-box');
     const s1 = await page.evaluate(() => ({ n: CONJ_STATE.verbQueue.length, next: !!document.querySelector('.conj-verb-header.next'),
-      bar: document.querySelector('.conj-progress-bar > i').style.width, acc: document.querySelectorAll('.conj-accents .fr-accent-key').length }));
+      bar: document.querySelector('#conj-practice-wrap .lesson-progress-fill').style.width, acc: document.querySelectorAll('.conj-accents .fr-accent-key').length }));
     check('sessão com 3 verbos, sem "Próximo verbo", barra em 0%, teclas de acento', s1.n === 3 && !s1.next && s1.bar === '0%' && s1.acc === 7 /* 2026-10-16: só as letras dos verbos */, s1);
 
     // Acento entra no campo com o cursor; Enter passa para o próximo campo.
@@ -186,7 +186,7 @@ async function fill(page, wrongIdx){
     const d = await page.evaluate(() => ({ x: Array.from(document.querySelectorAll('.conj-field.wrong .conj-x')).map(e => e.textContent).join(''),
       view: document.querySelector('.conj-field.wrong .conj-answer-text').textContent, exp: document.querySelector('.conj-field.wrong .expected').textContent.trim(),
       audio: document.querySelectorAll('.conj-field .audio-btn').length, speak: document.querySelector('.conj-field[data-idx="3"] .audio-btn').dataset.speak,
-      bar: document.querySelector('.conj-progress-bar > i').style.width, focus: document.activeElement && document.activeElement.id }));
+      bar: document.querySelector('#conj-practice-wrap .lesson-progress-fill').style.width, focus: document.activeElement && document.activeElement.id }));
     check('letras erradas em vermelho só onde erra (parlez -> "ez")', d.x === 'ez' && d.view === 'parlez' && d.exp.includes('parlons'), d);
     check('áudio em cada forma depois de corrigir, com o pronome', d.audio === 6 && d.speak === 'nous parlons', d);
     check('barra avança e o foco vai para "Próximo verbo"', d.bar === '50%' && d.focus === 'conj-next-verb-btn', d);

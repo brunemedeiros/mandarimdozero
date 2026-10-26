@@ -11,7 +11,7 @@
   // (a ⚑ da topbar some no modo foco, ver shared/reports.js).
   const AREAS = [
     { tab: 'review', wrap: 'review-session-wrap', back: 'review-back-to-modes' },
-    { tab: 'conjugaison', wrap: 'conj-practice-wrap', back: 'conj-back-to-select' },
+    { tab: 'conjugaison', wrap: 'conj-practice-wrap', back: 'conj-back-to-select', lessonBar: true },
     // lessonBar: topo igual ao da trilha (progresso + ⚑ + ⌨️ + X) em vez do link de voltar (padrão das telas de exercício, 2026-10-23).
     { tab: 'conjugaison', wrap: 'conj-game-wrap', back: 'conj-game-back', lessonBar: true },
     { tab: 'challenges', wrap: 'challenge-player-wrap', back: 'challenge-back-to-list' }
@@ -130,6 +130,29 @@
     syncActivityFocus();
   }
 
+  // A sessão reescreve o próprio conteúdo a cada passo (innerHTML) e a barra mora dentro dele, logo abaixo do cabeçalho (como
+  // na lição: contexto da unidade, depois a barra). Fluxo: grab (pega a barra), reescreve o conteúdo, mount (põe de volta).
+  function activityBarGrab(wrapId){
+    syncActivityFocus();
+    const w = document.getElementById(wrapId);
+    return w ? w.querySelector('.activity-lesson-bar') : null;
+  }
+  function activityBarMount(wrapId, bar, afterSelector){
+    const w = document.getElementById(wrapId);
+    if (!w || !bar) return;
+    const host = w.querySelector('[id$="-content"]');
+    if (!host) return;
+    const anchor = afterSelector ? host.querySelector(afterSelector) : null;
+    if (anchor) anchor.after(bar); else host.prepend(bar);
+  }
+  function activityBarProgress(wrapId, pct){
+    const w = document.getElementById(wrapId);
+    const fill = w && w.querySelector('.activity-lesson-bar .lesson-progress-fill');
+    if (fill) fill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+  }
+  if (typeof window !== 'undefined'){
+    window.activityBarGrab = activityBarGrab; window.activityBarMount = activityBarMount; window.activityBarProgress = activityBarProgress;
+  }
   if (typeof window !== 'undefined') window.syncActivityFocus = syncActivityFocus;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();

@@ -5023,8 +5023,7 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 /* Conjugação, fase 1: barra de progresso, acentos, letras erradas, áudio por forma, revisão no fim. */
 #view-conjugaison .conj-progress{ display:flex; align-items:center; gap:12px; max-width:520px; margin:0 auto 14px; font-variant-numeric:tabular-nums; }
 #view-conjugaison .conj-progress > span:first-child{ white-space:nowrap; }
-#view-conjugaison .conj-progress-bar{ flex:1; height:6px; border-radius:99px; background:var(--paper-line); overflow:hidden; }
-#view-conjugaison .conj-progress-bar > i{ display:block; height:100%; border-radius:99px; background:var(--seal-red); transition:width .3s ease; }
+#conj-practice-wrap .conj-progress{ justify-content:center; }
 #view-conjugaison .conj-verb-nav{ grid-template-columns:minmax(0, 1fr); max-width:520px; margin-left:auto; margin-right:auto; }
 /* Tempos lado a lado (cada um uma coluna vertical); no celular, um embaixo do outro. */
 #view-conjugaison .conj-tense-grid{ grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 480px)); justify-content:center; }
@@ -5140,7 +5139,7 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 #app.lesson-focus #review-session-wrap, #app.lesson-focus #challenge-player-wrap{ max-width:760px; margin-left:auto; margin-right:auto; }
 #app.lesson-focus #conj-practice-wrap{ max-width:1040px; margin-left:auto; margin-right:auto; }
 #view-conjugaison .conj-actions, #view-conjugaison .conj-verb-pager{ max-width:640px; margin-left:auto; margin-right:auto; }
-@media (max-width:620px){ body[data-activity-focus] .activity-report-btn{ width:44px; height:44px; } }
+@media (max-width:620px){ body[data-activity-focus] .activity-report-btn, .activity-lesson-bar .lesson-close-btn{ width:44px; height:44px; } }
 /* Conjugação: abas Praticar | Jogos e o jogo de escolha (shared/conj-games.js). */
 #view-conjugaison .conj-modes{ display:inline-flex; gap:4px; padding:4px; margin:0 0 18px; border-radius:999px; background:var(--paper-warm); border:1px solid var(--paper-line); }
 #view-conjugaison .conj-mode{ min-height:40px; padding:8px 20px; border:none; border-radius:999px; background:transparent; color:var(--ink-soft); font-family:var(--font-body); font-weight:800; font-size:14.5px; cursor:pointer; }
@@ -5175,7 +5174,8 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 #view-conjugaison .cg-dontknow{ display:block; margin:14px auto 0; }
 #view-conjugaison .cg-dontknow.disabled{ display:none; }
 #view-conjugaison .cg-choice.is-right{ border-color:var(--jade); background:color-mix(in srgb, var(--jade) 12%, var(--paper)); }
-#view-conjugaison .cg-choice.is-wrong{ border-color:var(--error-red); background:color-mix(in srgb, var(--error-red) 9%, var(--paper)); }
+#view-conjugaison .cg-choice.is-wrong{ border-color:var(--error-red); background:color-mix(in srgb, var(--error-red) 9%, var(--paper)); animation:shakeWrong .4s ease; }
+@media (prefers-reduced-motion:reduce){ #view-conjugaison .cg-choice.is-wrong{ animation:none; } }
 #view-conjugaison .cg-choice.is-dim{ opacity:.5; }
 #view-conjugaison .cg-feedback:empty{ display:none; }
 #view-conjugaison .cg-feedback{ margin-top:20px; padding-top:18px; border-top:1px solid var(--paper-line); }

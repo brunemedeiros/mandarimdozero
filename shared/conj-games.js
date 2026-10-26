@@ -91,16 +91,15 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
     return `<div class="cg-progress"><span>${esc(tt('games.counter', { i: S.idx + 1, n: S.order.length }))}</span></div>`;
   }
 
-  // O trilho fica na barra do topo (criada por activity-focus.js; sync aqui garante que ela já exista).
-  function setProgress(pct){
-    if (typeof window.syncActivityFocus === 'function') window.syncActivityFocus();
-    const fill = $(ids.wrap) && $(ids.wrap).querySelector('.lesson-progress-fill');
-    if (fill) fill.style.width = pct + '%';
-  }
+  // A barra do topo (criada por activity-focus.js) mora no conteúdo, logo abaixo do cabeçalho: pega antes de reescrever e recoloca depois.
+  const grabBar = () => (window.activityBarGrab ? window.activityBarGrab(ids.wrap) : null);
+  const mountBar = (bar, afterSel) => { if (window.activityBarMount) window.activityBarMount(ids.wrap, bar, afterSel); };
+  const setProgress = pct => { if (window.activityBarProgress) window.activityBarProgress(ids.wrap, pct); };
 
   function renderQuestion(){
     const it = item(), g = S.game;
     S.answered = false;
+    const bar = grabBar();
     // Mesmo visual da lição (2026-10-20, pedido da autora): cabeçalho discreto, frase centralizada num painel
     // bege; depois da resposta, o 🔊 fica colado na frase e a tradução logo abaixo (como o "Na frase" da lição).
     $(ids.content).innerHTML = `
@@ -127,6 +126,7 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
     $('cg-dontknow').addEventListener('click', () => answer(null));
     // Número 1/2 em cada resposta; as teclas valem pelo teclado global do app (respeita janela aberta).
     if (typeof wireKeyboardOptions === 'function') wireKeyboardOptions(choices, { mode: 'sequential' });
+    mountBar(bar, '.cg-head');
     setProgress(Math.round(100 * S.idx / S.order.length));
   }
 
@@ -138,6 +138,8 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
     S.log.push({ it, ok, given: k });
     const dk = $('cg-dontknow');
     if (dk) dk.classList.add('disabled');
+    // Som de acerto/erro como na trilha; "Não sei" é silencioso (a resposta é só revelada).
+    if (!revealed && typeof playFeedbackSound === 'function') playFeedbackSound(ok);
     $(ids.content).querySelectorAll('.cg-choice').forEach(b => {
       b.disabled = true;
       b.classList.add(b.dataset.k === it.ans ? 'is-right' : (b.dataset.k === k ? 'is-wrong' : 'is-dim'));
@@ -176,7 +178,7 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
   function renderResult(){
     const g = S.game, n = S.order.length, miss = S.log.filter(x => !x.ok);
     if (typeof clearKeyboardOptions === 'function') clearKeyboardOptions();
-    setProgress(100);
+    const bar = grabBar();
     // Sem XP (prática livre), mas o dia conta para a sequência, como a trilha (decisão da autora, 2026-10-26).
     if (typeof registerStudyToday === 'function'){
       registerStudyToday();
@@ -198,6 +200,8 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
           <button type="button" class="btn btn-secondary" id="cg-to-list">${esc(tt('games.backToGames'))}</button>
         </div>
       </div>`;
+    mountBar(bar, null);
+    setProgress(100);
     const ids0 = miss.map(x => x.it.id);
     if (miss.length) $('cg-mistakes').addEventListener('click', () => start(g.id, ids0));
     $('cg-again').addEventListener('click', () => start(g.id));
