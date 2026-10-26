@@ -194,7 +194,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 - **Totais novos**: A1 com 9 módulos, 57 unidades (34 + 23), **360 cartões** (**713** A/B: os 7 verbos de "Verbos muito usados" têm um cartão só), **~30h40** (M1 3h35, M2 3h45, M3 3h35,
   **M4 3h50**, **M5 3h20**, **M6 3h00**, **M7 3h00**, M8 3h15, M9 3h20), lições ~150, notas **~131**; A2 sem mudança: 10 módulos, 58 unidades (36 + 22), 428 cartões (418 novos + 10 publicados;
   852 A/B), ~33h10, notas ~76.
-- **Status**: "Comer e beber" fica com ~3h50, acima do teto de 3h45 da regra 16; pela decisão 255, a regra é revista ou o módulo reduz em outro ponto (**pendente da dona**). Depois disso, segue a
+- **Status**: "Comer e beber" fica com ~3h50, dentro do teto de 3h50 da regra 16 (decisão 257); frase *J'ai deux frères et trois sœurs.* confirmada em "Apresentar a família" (258). Depois disso, segue a
   aprovação do mapa pela dona (decisão 217).
 
 > **Como falar com a dona** (2026-10-23): em toda mensagem a ela, citar o NOME do módulo e da unidade (não só M6.1 ou `A1-15`), explicar termos internos e dar o contexto completo de cada decisão. Vale para o chat e para qualquer agente.

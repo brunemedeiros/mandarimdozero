@@ -1216,3 +1216,6 @@ Base: `auditoria/2026-10-26-a1-a2-passada-final.md`, seção 3. A dona aceitou D
      próprio. Revoga a parte da decisão 224 que mantinha o cartão em "Pegar transporte" e a recusa de pôr *prendre* na unidade nova; *je vais prendre* e *je voudrais* continuam expressões fixas na lista.
      Não precisa trocar *je la prends*, o ditado `d3-p2` nem o Desafio `lt-a1m3-006` por causa de *prendre*. Se o tempo de "Comer e beber" passar de 3h45, a regra 16 (252) é revista ou o módulo reduz em outro ponto.
 256. **D6, frases `A1-3-p6` e `p7`**: *Quel est l'âge de ton père ?* fica em "Dizer a idade"; a outra segue o destino definido na revisão geral. Fecha a D6.
+257. **Teto de tempo sobe para 3h50 por módulo** (opção a; revê a 252): "Comer e beber" fica com ~3h50 depois do cartão *prendre* em "Verbos muito usados"; as estimativas têm confiança baixa (não medidas) e não se criam exceções por
+     módulo. Mantida a exceção do último módulo de cada nível (A2 "Opinião, cultura e mundo", ~3h55). Regra 16 do `15` e linha 16 do `08 v2` atualizadas.
+258. **Frase *J'ai deux frères et trois sœurs.*** (`A1-3-p6`) vai, com a chave, para "Apresentar a família" (módulo "Família e pessoas próximas"), como na revisão geral de 2026-10-23; *Quel est l'âge de ton père ?* fica em "Dizer a idade" (256).
