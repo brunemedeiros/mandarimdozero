@@ -1232,3 +1232,7 @@ Base: `auditoria/2026-10-26-a1-a2-passada-final.md`, seção 3. A dona aceitou D
 262. **Lições fora da regra mantidas como aprovadas**: "Dizer o nome e a nacionalidade" com 5 lições e "Corpo e dores" com 4 (`licoes_08` no dado), registradas como exceção.
 263. **`id_funcao` das gramáticas é provisório** (alguns carregam palavra do francês); o nome do slot gramatical da grade comum se define na extração (T7).
 264. **Notas**: a contagem do A1 passa a ser a do `mapa.json` (132) e a do A2 também (76); os "~131" e a interpretação das 76 do `08` ficam como histórico.
+265. **Validador e papel (respostas às escolhas do agente)**: o Ponto de verificação da unidade ("Revisão da unidade") fica **fechado** para frases "só exemplo" (cobra produção); as notas que mostram a expressão com tradução contam como vistas
+     **só nos diálogos**, não nos exercícios da lição (refina a 253). Para as notas de explicação, realidade e cultura contarem como vistas, falta um campo de palavras no `mapa.json` (pedido de mudança no mapa).
+266. **Piloto de ponta a ponta**: começa pela unidade "Cumprimentar e se despedir" (A1-1) do módulo "Apresentar-se", em rascunho pt-BR em `docs/i18n/curriculo/piloto-m1/A1-1/` (JSON + leitura para a dona); en só depois da aprovação (81);
+     nada entra em `fr/content.js` antes da aprovação da dona e da autorização para mexer em código.
