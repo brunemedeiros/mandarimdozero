@@ -2,6 +2,11 @@
 
 Projeto do Google Cloud: **Prof Brune Agenda**. Escopo pedido: `calendar.readonly` (sensível, sem avaliação de segurança).
 
+**Estado (2026-10-26):** passos 1 a 5 feitos (domínio verificado no Search Console, endereços e domínios do supabase.co
+tirados, app publicado, marca verificada e aparecendo para os usuários em 2026-10-25). **Pendente (a autora deixou para
+depois): passo 6**, verificação do escopo com o vídeo (roteiro abaixo). Até lá, a tela do Google mostra o aviso laranja
+"não verificado", mas a conexão funciona e não vence.
+
 Dois avisos diferentes na tela do Google:
 - **Nome técnico** (`eigjocalzwamisgqilhg.supabase.co`) no lugar do nome do app: some com a **verificação da marca**
   (branding) e com o retorno do login pelo domínio da Prof. Brune (`agenda.profbrune.com.br/google/callback`).
@@ -28,6 +33,24 @@ Logotipo enviado = a marca precisa ser verificada antes de publicar. Para public
 6. **Central de verificação** > verificação do escopo: justificativa (texto abaixo) + vídeo no YouTube (não listado)
    mostrando: tela do site com o botão "Conectar Google Agenda", a tela do Google com o nome do app e o escopo, e as aulas
    aparecendo em Professora > Aulas > Calendário. Em inglês ou com legenda em inglês.
+
+## Roteiro do vídeo (passo 6)
+
+Antes: site em inglês (menu da bandeira; voltar depois), Chrome com a barra de endereço visível, gravador (Win+Alt+R ou
+Clipchamp; Mac Cmd+Shift+5), evento de teste "Test lesson" na agenda Trabalho. Nomes de alunos aparecem: passar rápido.
+
+1. `https://app.profbrune.com.br/sobre.html`, trecho "Optional Google Calendar connection" (5 s).
+2. Teacher > Lessons > Calendar > Google Calendar: mostrar a frase "One-way sync" (10 s).
+3. "Connect again" > tela do Google em **English** (seletor no rodapé) > clicar na barra de endereço e mostrar
+   `client_id=...apps.googleusercontent.com` (3 s parado) > nome do app e escopo > Continue > Allow (30 s).
+4. De volta ao site: conectado, lista de agendas (10 s).
+5. "Read now" > aulas com horário no calendário > abrir uma aula com horário travado "do Google" (20 s).
+6. Arrastar "Test lesson" no Google Agenda > "Read now" > horário da aula muda no site (40 s).
+7. Passar o mouse em "Disconnect" sem clicar (5 s).
+
+Enviar: YouTube **Não listado** > Google Auth Platform > Acesso a dados (conferir `.../auth/calendar.readonly` nos
+escopos sensíveis) > Central de verificação > "Prepare for verification" > justificativa (abaixo) + link do vídeo > enviar.
+A resposta chega em `brunemed1310@gmail.com`.
 
 ## Justificativa do escopo (colar)
 
