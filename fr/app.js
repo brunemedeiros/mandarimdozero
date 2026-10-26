@@ -2896,6 +2896,10 @@ function findEnterAdvanceTarget(){
   if (correctContinueBtn) return correctContinueBtn;
   const queueContinueBtn = document.getElementById('queue-continue-btn');
   if (queueContinueBtn) return queueContinueBtn;
+  const exprContinueBtn = document.getElementById('expr-continue-btn');
+  if (exprContinueBtn) return exprContinueBtn;
+  const challengeCompleteBtn = document.getElementById('challenge-complete-btn');
+  if (challengeCompleteBtn) return challengeCompleteBtn;
   const stepNextBtn = document.getElementById('step-next-btn');
   if (stepNextBtn && stepNextBtn.offsetParent !== null) return stepNextBtn;
   return null;
@@ -6919,6 +6923,18 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': 'Você terminou todos os exercícios desse nível.',
     'ch.queue.back': 'Voltar aos níveis',
     'ch.listenPron': 'Ouvir pronúncia',
+    'ch.expr.guessLabel': 'Meu palpite (opcional)',
+    'ch.expr.guessPlaceholder': 'O que você acha que significa?',
+    'ch.expr.seeOptions': 'Ver opções',
+    'ch.expr.yourGuess': 'Seu palpite:',
+    'ch.expr.seeInSentences': 'Veja em frases',
+    'ch.expr.fillBlank': 'Digite o que falta:',
+    'ch.expr.turnPlaceholder': 'Digite em francês',
+    'ch.expr.finalOk': 'Desafio completo!',
+    'ch.expr.finalFail': 'Quase lá! Vale tentar de novo.',
+    'ch.expr.sumChoice': 'Escolha da resposta',
+    'ch.expr.sumTurn': 'Sua vez',
+    'ch.expr.sumXp': 'XP desta conclusão',
     'ch.expr.reveal': 'Ver as respostas',
     'ch.expr.yourAnswer': 'Sua resposta: {chosen}<br>Resposta certa: <strong>{correct}</strong>',
     'ch.expr.signifies': 'significa <strong>{fr}</strong>.',
@@ -7097,6 +7113,18 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': "You have finished all the exercises in this level.",
     'ch.queue.back': "Back to levels",
     'ch.listenPron': "Listen to pronunciation",
+    'ch.expr.guessLabel': "My guess (optional)",
+    'ch.expr.guessPlaceholder': "What do you think it means?",
+    'ch.expr.seeOptions': "See options",
+    'ch.expr.yourGuess': "Your guess:",
+    'ch.expr.seeInSentences': "See it in sentences",
+    'ch.expr.fillBlank': "Type what's missing:",
+    'ch.expr.turnPlaceholder': "Type in French",
+    'ch.expr.finalOk': "Challenge complete!",
+    'ch.expr.finalFail': "Almost there! Worth another try.",
+    'ch.expr.sumChoice': "Choosing the answer",
+    'ch.expr.sumTurn': "Your turn",
+    'ch.expr.sumXp': "XP for this completion",
     'ch.expr.reveal': "See the answers",
     'ch.expr.yourAnswer': "Your answer: {chosen}<br>Correct answer: <strong>{correct}</strong>",
     'ch.expr.signifies': "means <strong>{fr}</strong>.",
@@ -8015,6 +8043,9 @@ function openChallengePlayer(id){
   document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'block';
   document.getElementById('challenge-preview-banner').style.display = 'none';
+  // Barra do topo no molde da trilha (X, ⌨️, ⚑, progresso): por enquanto só nas Expressões (shared/activity-focus.js).
+  document.getElementById('challenge-player-wrap').dataset.lessonBar = c.type === 'expression' ? '1' : '';
+  if (typeof syncActivityFocus === 'function') syncActivityFocus();
   // Só pra diagnóstico de report (ver captureReportContext em
   // shared/reports.js) -- não existia nenhuma referência global ao desafio
   // aberto no momento (`c` era só uma variável local desta função).
@@ -8036,58 +8067,254 @@ function openExpressionPlayer(c){
   renderExpressionQuestionScreen(c);
 }
 
-function renderExpressionQuestionScreen(c){
-  stopExerciseAudio();
-  const content = document.getElementById('challenge-player-content');
-  // Comando no idioma do site, igual ao da trilha (rótulo + item); o campo `question` do conteúdo (em francês) não é mais desenhado.
-  content.innerHTML = `
-    <div class="exercise-prompt-label">${t('fr.exercise.whatMeans')}</div>
-    <div class="challenge-expression">
-      ${escapeHtmlChallenge(c.canonicalExpression)}
-      <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="${chT('ch.listenPron')}" title="${chT('ch.listenPron')}">🔊</button>
-      ${c.expressionAudioFile ? slowAudioIconBtnHTML('challenge-expression-play-slow-btn') : ''}
-    </div>
-    ${c.register ? `<div class="expr-question-reg">${expressionRegisterChipHTML(c)}</div>` : ''}
-    <div class="challenge-hypothesis">
-      <div class="challenge-choices-wrap">
-        <div class="challenge-choices blurred" id="challenge-choices"></div>
-        <button class="btn btn-secondary challenge-reveal-overlay-btn" id="challenge-reveal-btn">${chT('ch.expr.reveal')}</button>
-      </div>
-    </div>
-  `;
+// ---------- Expressões em passos curtos, no molde da trilha (decisão da autora, 2026-10-26) ----------
+// 1) pergunta com "Meu palpite" (livre, NÃO corrigido) e "Ver opções"; 2) resposta (opções coloridas + painel curto + Continuar);
+// 3) "Veja em frases"; 4) "Sua vez" (digitar; o "Quase" é o da trilha, typedAnswerVerdictForExpected); 5) final ("Ir além" + Concluir
+// ou Tentar de novo). A barra do topo (progresso, ⚑, ⌨️, X) é a de shared/activity-focus.js (data-lesson-bar no #challenge-player-wrap).
+// XP da "Sua vez": só na PRIMEIRA conclusão do desafio (refazer concluído = 0, como na trilha), pago ao tocar em Concluir.
+const EXPR_LAST_STEP = 4;
+let EXPR_RUN = null; // { c, chosenIdx, isCorrect, revealed, answered, guess, turn: { verdict, revealed, typed }, xpPaid }
 
-  if (c.expressionAudioFile){
-    document.getElementById('challenge-expression-play-btn').addEventListener('click', (e) => {
-      playPregeneratedAudio(`challenges/${c.expressionAudioFile}`, e.currentTarget);
-    });
-    document.getElementById('challenge-expression-play-slow-btn').addEventListener('click', (e) => {
-      playPregeneratedAudio(`challenges/${c.expressionAudioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
-    });
-  }
-
-  const choicesEl = document.getElementById('challenge-choices');
-  const shuffled = shuffle(c.options.map((text, i) => ({ text, origIdx: i })));
-  choicesEl.innerHTML = shuffled.map(o =>
-    `<button class="challenge-choice-btn" data-orig-idx="${o.origIdx}">${escapeHtmlChallenge(o.text)}</button>`
-  ).join('');
-
-  document.getElementById('challenge-reveal-btn').addEventListener('click', (e) => {
-    choicesEl.classList.remove('blurred');
-    e.currentTarget.style.display = 'none';
-    choicesEl.querySelectorAll('.challenge-choice-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        answerChallenge(c, parseInt(btn.dataset.origIdx, 10));
-      });
-    });
-  });
+function exprHeadHTML(c){
+  return `<div class="lesson-unit-context"><div class="lesson-hint-eyebrow">${chT('ch.title')}${c.level ? ' · ' + escapeHtmlChallenge(c.level) : ''}</div>
+    <div class="lesson-unit-title">${chT('ch.cat.expression.title')}</div></div>`;
 }
 
-function answerChallenge(c, chosenIdx){
-  const isCorrect = c.options[chosenIdx] === c.correctAnswer;
-  // Desafios de conteúdo (Expressões/Ouça e traduza/Acentuação) continuam
-  // clicáveis mesmo já concluídos (não há como "gastar" o desafio), então
-  // não dão XP -- decisão de produto, ver auditoria do sistema de XP.
-  renderExpressionFeedbackScreen(c, chosenIdx, isCorrect);
+// A barra do topo mora dentro do conteúdo: pega antes de reescrever e recoloca logo abaixo do cabeçalho.
+function exprRender(c, html, step){
+  const content = document.getElementById('challenge-player-content');
+  const bar = typeof activityBarGrab === 'function' ? activityBarGrab('challenge-player-wrap') : null;
+  stopExerciseAudio();
+  clearKeyboardOptions();
+  content.innerHTML = exprHeadHTML(c) + html;
+  if (typeof activityBarMount === 'function') activityBarMount('challenge-player-wrap', bar, '.lesson-unit-context');
+  if (typeof activityBarProgress === 'function') activityBarProgress('challenge-player-wrap', Math.round(100 * step / EXPR_LAST_STEP));
+  window.scrollTo(0, 0);
+}
+
+function exprWireAudio(id, file, rate){
+  const btn = document.getElementById(id);
+  if (btn && file) btn.addEventListener('click', (e) => playPregeneratedAudio(`challenges/${file}`, e.currentTarget, false, rate));
+}
+
+function exprMeaningBoxHTML(c){
+  // Site em outro idioma: o sentido vem da tradução do desafio (fr/challenges.en.js, campo `meaning`) quando existe.
+  const ov = challengeOverlay(c);
+  const meaningShown = (ov && ov.meaning) ? ov.meaning : c.meaning.pt;
+  return `<div class="feedback-inner-box expr-meaning-box"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
+    ${expressionMeaningLineHTML('ch.expr.signifies', 'fr', c.meaning.fr)}<br>
+    ${expressionMeaningLineHTML('ch.expr.inPt', 'pt', meaningShown)}
+    ${c.explanation ? `<p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>` : ''}</div>`;
+}
+
+function renderExpressionQuestionScreen(c){
+  EXPR_RUN = { c, chosenIdx: null, isCorrect: false, revealed: false, answered: false, guess: '', turn: null, xpPaid: false };
+  exprRender(c, `
+    <div class="exercise-wrap expr-wrap">
+      <div class="exercise-prompt-label">${t('fr.exercise.whatMeans')}</div>
+      <div class="exercise-prompt">
+        <div class="prompt-french">${escapeHtmlChallenge(c.canonicalExpression)}</div>
+        <div class="audio-btn-row">
+          <button class="audio-btn" id="challenge-expression-play-btn" aria-label="${chT('ch.listenPron')}" title="${chT('ch.listenPron')}">🔊</button>
+          ${c.expressionAudioFile ? slowAudioIconBtnHTML('challenge-expression-play-slow-btn') : ''}
+        </div>
+        ${c.register ? `<div class="expr-question-reg">${expressionRegisterChipHTML(c)}</div>` : ''}
+      </div>
+      <div id="expr-stage">
+        <div class="expr-guess">
+          <label class="expr-guess-label" for="expr-guess-input">${chT('ch.expr.guessLabel')}</label>
+          <input type="text" class="expr-guess-input" id="expr-guess-input" maxlength="120" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${chT('ch.expr.guessPlaceholder')}">
+        </div>
+        <div class="expr-guess-actions"><button class="btn btn-secondary" id="expr-see-options-btn">${chT('ch.expr.seeOptions')}</button></div>
+      </div>
+    </div>`, 0);
+  exprWireAudio('challenge-expression-play-btn', c.expressionAudioFile);
+  exprWireAudio('challenge-expression-play-slow-btn', c.expressionAudioFile, SLOW_AUDIO_RATE);
+  const input = document.getElementById('expr-guess-input');
+  document.getElementById('expr-see-options-btn').addEventListener('click', () => exprShowOptions(c));
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter'){ e.preventDefault(); exprShowOptions(c); } });
+}
+
+// O palpite é só reflexão: guardado na tela, nunca corrigido nem enviado.
+function exprShowOptions(c){
+  const run = EXPR_RUN;
+  const stage = document.getElementById('expr-stage');
+  if (!run || !stage || run.answered) return;
+  run.guess = (document.getElementById('expr-guess-input') || { value: '' }).value.trim();
+  const shuffled = shuffle(c.options.map((text, i) => ({ text, origIdx: i })));
+  stage.innerHTML = `
+    ${run.guess ? `<p class="expr-guess-line">${chT('ch.expr.yourGuess')} <strong>“${escapeHtmlChallenge(run.guess)}”</strong></p>` : ''}
+    <div class="exercise-options">${shuffled.map(o =>
+      `<button class="exercise-option" data-orig-idx="${o.origIdx}"><div class="opt-text">${escapeHtmlChallenge(o.text)}</div></button>`).join('')}</div>
+    <button class="exercise-dontknow" id="expr-dontknow-btn">${t('common.dontKnow')}</button>`;
+  const btns = stage.querySelectorAll('.exercise-option');
+  btns.forEach(b => b.addEventListener('click', () => exprAnswer(c, parseInt(b.dataset.origIdx, 10))));
+  document.getElementById('expr-dontknow-btn').addEventListener('click', () => exprAnswer(c, null));
+  wireKeyboardOptions(btns, { mode: 'sequential' });
+}
+
+// origIdx null = "Não sei": revela a resposta, conta como erro e fica em silêncio (como na trilha).
+function exprAnswer(c, origIdx){
+  const run = EXPR_RUN;
+  if (!run || run.answered) return;
+  run.answered = true;
+  run.revealed = origIdx == null;
+  run.chosenIdx = origIdx;
+  run.isCorrect = !run.revealed && c.options[origIdx] === c.correctAnswer;
+  const stage = document.getElementById('expr-stage');
+  stage.querySelectorAll('.exercise-option').forEach(b => {
+    b.disabled = true;
+    const text = c.options[parseInt(b.dataset.origIdx, 10)];
+    if (text === c.correctAnswer) b.classList.add('correct');
+    else if (!run.revealed && parseInt(b.dataset.origIdx, 10) === origIdx) b.classList.add('incorrect');
+  });
+  const dk = document.getElementById('expr-dontknow-btn');
+  if (dk) dk.classList.add('disabled');
+  if (!run.revealed) playFeedbackSound(run.isCorrect);
+  recordChallengeReviewOutcome(c, run.isCorrect ? 'ok' : 'fail');
+  if (typeof activityBarProgress === 'function') activityBarProgress('challenge-player-wrap', Math.round(100 / EXPR_LAST_STEP));
+  const panel = document.createElement('div');
+  panel.className = (run.isCorrect ? 'correct-feedback' : 'wrong-feedback') + ' expr-panel';
+  panel.innerHTML = run.isCorrect ? `
+    <div class="feedback-card-body">
+      <div class="correct-feedback-header">✅ ${nextCorrectFeedbackPhrase()}</div>
+      ${exprMeaningBoxHTML(c)}
+      <button class="btn btn-primary btn-block correct-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
+    </div>` : `
+    <div class="feedback-card-body">
+      <div class="wrong-feedback-header">${t(run.revealed ? 'feedback.header.revealed' : 'feedback.header.notThisTime')}</div>
+      ${run.revealed ? '' : `<div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${t('feedback.label.yourAnswer')}</div>
+        <div class="feedback-inner-box">${escapeHtmlChallenge(c.options[origIdx])}</div></div>`}
+      <div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${t('feedback.label.answer')}</div>${exprMeaningBoxHTML(c)}</div>
+      <button class="btn btn-primary btn-block wrong-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
+    </div>`;
+  stage.parentElement.appendChild(panel);
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowExamples(c));
+}
+
+function exprShowExamples(c){
+  const exs = [c.example, c.secondExample].filter(ex => ex && ex.text);
+  if (!exs.length) return exprShowYourTurn(c);
+  exprRender(c, `
+    <div class="exercise-wrap expr-wrap">
+      <div class="exercise-prompt-label">${chT('ch.expr.seeInSentences')}</div>
+      ${exs.map((ex, i) => `
+        <div class="exercise-prompt expr-example">
+          <div class="expr-example-label">${chT('ch.expr.example' + (i + 1))}</div>
+          <div class="expr-example-text" lang="fr">${escapeHtmlChallenge(ex.text)}</div>
+          ${ex.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="expr-ex${i}-play">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('expr-ex' + i + '-slow')}</div>` : ''}
+        </div>`).join('')}
+      <button class="btn btn-primary btn-block" id="expr-continue-btn">${t('common.continueArrow')}</button>
+    </div>`, 2);
+  exs.forEach((ex, i) => { exprWireAudio(`expr-ex${i}-play`, ex.audioFile); exprWireAudio(`expr-ex${i}-slow`, ex.audioFile, SLOW_AUDIO_RATE); });
+  document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowYourTurn(c));
+}
+
+// Respostas aceitas da "Sua vez": a do conteúdo (várias formas separadas por "/", como no resto do site) e, se o autor
+// quiser, `microActivity.alsoAccept` (lista). Nada de variação inventada: só vale o que o autor escreveu + o "Quase" da trilha.
+function exprTurnExpected(c){
+  const m = c.microActivity || {};
+  return [m.answer].concat(Array.isArray(m.alsoAccept) ? m.alsoAccept : []).filter(Boolean).join(' / ');
+}
+function exprTurnSentenceHTML(c, filled){
+  const m = c.microActivity;
+  const answer = String(m.answer || '').split('/')[0].trim();
+  return escapeHtmlChallenge(m.prompt).replace(/_{3,}/, filled
+    ? `<strong class="expr-filled">${escapeHtmlChallenge(answer)}</strong>`
+    : '<span class="expr-blank" aria-label="___">&nbsp;</span>');
+}
+
+function exprShowYourTurn(c){
+  const m = c.microActivity;
+  if (!m || !m.prompt || !m.answer) return exprShowFinal(c);
+  exprRender(c, `
+    <div class="exercise-wrap expr-wrap">
+      <div class="exercise-prompt-label">${chT('ch.expr.yourTurn')}</div>
+      <div class="exercise-prompt"><div class="expr-turn-sentence" lang="fr">${exprTurnSentenceHTML(c, false)}</div></div>
+      <div id="expr-turn-stage">
+        <label class="expr-guess-label" for="expr-turn-input">${chT('ch.expr.fillBlank')}</label>
+        <input type="text" class="expr-guess-input" id="expr-turn-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${chT('ch.expr.turnPlaceholder')}">
+        ${frAccentPickerHTML(m.answer)}
+        <button class="btn btn-primary btn-block expr-verify" id="expr-turn-verify-btn">${chT('ch.verify')}</button>
+        <button class="exercise-dontknow" id="expr-turn-dontknow-btn">${t('common.dontKnow')}</button>
+      </div>
+    </div>`, 3);
+  const input = document.getElementById('expr-turn-input');
+  wireFrAccentPicker(document.querySelector('#expr-turn-stage .fr-accent-picker'), input);
+  input.focus();
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter'){ e.preventDefault(); exprCheckTurn(c, false); } });
+  document.getElementById('expr-turn-verify-btn').addEventListener('click', () => exprCheckTurn(c, false));
+  document.getElementById('expr-turn-dontknow-btn').addEventListener('click', () => exprCheckTurn(c, true));
+}
+
+function exprCheckTurn(c, revealed){
+  const run = EXPR_RUN;
+  if (!run || run.turn) return;
+  const input = document.getElementById('expr-turn-input');
+  const typed = input.value.trim();
+  if (!revealed && !typed){ input.focus(); return; }
+  const verdict = revealed ? 'errou' : typedAnswerVerdictForExpected(typed, exprTurnExpected(c));
+  run.turn = { verdict, revealed, typed };
+  input.disabled = true;
+  document.getElementById('expr-turn-verify-btn').disabled = true;
+  document.getElementById('expr-turn-dontknow-btn').classList.add('disabled');
+  if (!revealed) playFeedbackSound(verdict !== 'errou');
+  const good = verdict !== 'errou';
+  const answer = String(c.microActivity.answer).split('/')[0].trim();
+  const panel = document.createElement('div');
+  panel.className = (good ? 'correct-feedback' : 'wrong-feedback') + ' expr-panel';
+  const full = `<div class="feedback-inner-box expr-turn-full" lang="fr">${exprTurnSentenceHTML(c, true)}</div>`;
+  panel.innerHTML = good ? `
+    <div class="feedback-card-body">
+      <div class="correct-feedback-header">✅ ${nextCorrectFeedbackPhrase()}</div>
+      ${verdict === 'quase' ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>` : ''}
+      ${full}
+      <button class="btn btn-primary btn-block correct-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
+    </div>` : `
+    <div class="feedback-card-body">
+      <div class="wrong-feedback-header">${t(revealed ? 'feedback.header.revealed' : 'feedback.header.notThisTime')}</div>
+      ${typed ? `<div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${t('feedback.label.yourAnswer')}</div>
+        <div class="feedback-inner-box">${typedAttemptHTML(typed, answer)}</div></div>` : ''}
+      <div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${t('feedback.label.fullSentence')}</div>${full}</div>
+      <button class="btn btn-primary btn-block wrong-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
+    </div>`;
+  document.getElementById('expr-turn-stage').parentElement.appendChild(panel);
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowFinal(c));
+}
+
+// XP da "Sua vez" (constantes de shared/srs.js, ver .claude/rules/xp.md): digitar certo = EXERCISE_XP_PRODUCE, "quase" =
+// EXERCISE_XP_ALMOST, errou ou "Não sei" = 0. Só vale na PRIMEIRA conclusão do desafio (refazer concluído = 0).
+function exprTurnXP(c){
+  const run = EXPR_RUN;
+  if (!run || run.c.id !== c.id || !run.turn || run.turn.revealed) return 0;
+  if (isChallengeCompleted(c.id) || challengePreviewMode) return 0;
+  return run.turn.verdict === 'ok' ? EXERCISE_XP_PRODUCE : run.turn.verdict === 'quase' ? EXERCISE_XP_ALMOST : 0;
+}
+
+function exprShowFinal(c){
+  const run = EXPR_RUN;
+  const ok = run.isCorrect;
+  const turn = run.turn;
+  const xp = exprTurnXP(c);
+  const mark = v => v === 'ok' ? '✓' : v === 'quase' ? '~' : '✕';
+  exprRender(c, `
+    <div class="exercise-wrap expr-wrap expr-final">
+      <div class="expr-final-ico" aria-hidden="true">${ok ? '🎉' : '💪'}</div>
+      <h3 class="expr-final-title">${chT(ok ? 'ch.expr.finalOk' : 'ch.expr.finalFail')}</h3>
+      <ul class="expr-final-sum">
+        <li><span>${chT('ch.expr.sumChoice')}</span><b>${ok ? '✓' : '✕'}</b></li>
+        ${turn ? `<li><span>${chT('ch.expr.sumTurn')}</span><b>${turn.revealed ? '✕' : mark(turn.verdict)}</b></li>` : ''}
+        ${xp ? `<li><span>${chT('ch.expr.sumXp')}</span><b>+${xp} XP</b></li>` : ''}
+      </ul>
+      ${challengeExternalResourcesHTML(c)}
+      ${ok ? challengeCompleteButtonHTML() : challengeRetryButtonsHTML()}
+    </div>`, EXPR_LAST_STEP);
+  // O XP é pago antes do "Concluir" marcar o desafio como concluído (o listener de baixo roda depois deste).
+  const done = document.getElementById('challenge-complete-btn');
+  if (done) done.addEventListener('click', () => { if (!run.xpPaid){ run.xpPaid = true; addXP(exprTurnXP(c)); } });
+  wireChallengeCompleteButton(c);
 }
 
 // Etapa 3 (decisão da dona, 2026-10-19): o modelo da frase termina em ponto
@@ -8101,66 +8328,6 @@ function expressionMeaningLineHTML(key, param, raw){
   const value = keepsOwnEnd ? trimmed : trimmed.replace(/[.\s]+$/, '');
   const html = chT(key, { [param]: escapeHtmlChallenge(value) });
   return keepsOwnEnd ? html.replace(/\.\s*$/, '') : html;
-}
-
-function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
-  const content = document.getElementById('challenge-player-content');
-  // Etapa 3 (c1): com o site em outro idioma, o sentido vem da tradução do desafio (fr/challenges.en.js,
-  // campo `meaning`) quando existe; sem tradução, continua o português do banco.
-  const exprOv = challengeOverlay(c);
-  const meaningShown = (exprOv && exprOv.meaning) ? exprOv.meaning : c.meaning.pt;
-  const bodyHTML = `
-      ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.expr.yourAnswer', { chosen: escapeHtmlChallenge(c.options[chosenIdx]), correct: escapeHtmlChallenge(c.correctAnswer) })}</p>`}
-      <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
-      ${expressionMeaningLineHTML('ch.expr.signifies', 'fr', c.meaning.fr)}<br>
-      ${expressionMeaningLineHTML('ch.expr.inPt', 'pt', meaningShown)}</p>
-      <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
-
-      <div class="challenge-second-example">
-        <div class="challenge-second-example-label">${chT('ch.expr.example1')}</div>
-        <p class="challenge-second-example-text">${escapeHtmlChallenge(c.example.text)}</p>
-        ${c.example.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="challenge-example-play-btn">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('challenge-example-play-slow-btn')}</div>` : ''}
-      </div>
-
-      <div class="challenge-second-example">
-        <div class="challenge-second-example-label">${chT('ch.expr.example2')}</div>
-        <p class="challenge-second-example-text">${escapeHtmlChallenge(c.secondExample.text)}</p>
-        ${c.secondExample.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="challenge-second-example-play-btn">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('challenge-second-example-play-slow-btn')}</div>` : ''}
-      </div>
-
-      <div class="challenge-microactivity">
-        <div class="challenge-microactivity-label">${chT('ch.expr.yourTurn')}</div>
-        <p class="challenge-microactivity-prompt">${escapeHtmlChallenge(c.microActivity.prompt)}</p>
-        <button class="btn btn-secondary" id="challenge-reveal-answer-btn">${chT('ch.expr.showAnswer')}</button>
-        <p class="challenge-microactivity-answer" id="challenge-microactivity-answer" style="display:none;">${escapeHtmlChallenge(c.microActivity.answer)}</p>
-      </div>
-
-      ${challengeExternalResourcesHTML(c)}
-  `;
-  content.innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? chT('ch.expr.right') : chT('ch.notQuite'), bodyHTML);
-  recordChallengeReviewOutcome(c, isCorrect ? 'ok' : 'fail');
-
-  if (c.example.audioFile){
-    document.getElementById('challenge-example-play-btn').addEventListener('click', (e) => {
-      playPregeneratedAudio(`challenges/${c.example.audioFile}`, e.currentTarget);
-    });
-    document.getElementById('challenge-example-play-slow-btn').addEventListener('click', (e) => {
-      playPregeneratedAudio(`challenges/${c.example.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
-    });
-  }
-  if (c.secondExample.audioFile){
-    document.getElementById('challenge-second-example-play-btn').addEventListener('click', (e) => {
-      playPregeneratedAudio(`challenges/${c.secondExample.audioFile}`, e.currentTarget);
-    });
-    document.getElementById('challenge-second-example-play-slow-btn').addEventListener('click', (e) => {
-      playPregeneratedAudio(`challenges/${c.secondExample.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
-    });
-  }
-  document.getElementById('challenge-reveal-answer-btn').addEventListener('click', () => {
-    document.getElementById('challenge-reveal-answer-btn').style.display = 'none';
-    document.getElementById('challenge-microactivity-answer').style.display = 'block';
-  });
-  wireChallengeCompleteButton(c);
 }
 
 // ---------- Ouça e traduza ----------

@@ -55,9 +55,9 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     await page.evaluate(() => { CURRENT_USER = { id: 'u-t' }; ensureProfileLoaded = async () => ({ plan_tier: 'premium' }); switchTab('challenges'); });
     await page.waitForSelector('#challenges-categories .challenge-category-card', { timeout: 8000 });
     await page.evaluate(() => openChallengePlayer('ch-e1'));
-    await page.waitForSelector('#challenge-reveal-btn', { timeout: 8000 });
+    await page.waitForSelector('#expr-see-options-btn', { timeout: 8000 });
     const info = await page.evaluate(() => ({
-      label: (document.querySelector('#challenge-player-content > .exercise-prompt-label') || {}).textContent || '',
+      label: (document.querySelector('#challenge-player-content .exercise-prompt-label') || {}).textContent || '',
       hasQuestion: !!document.querySelector('#challenge-player-content .challenge-question'),
       text: document.getElementById('challenge-player-content').innerText
     }));

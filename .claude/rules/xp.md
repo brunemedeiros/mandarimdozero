@@ -20,5 +20,8 @@ site novo parte do molde da família (ver `docs/i18n/e4-plano-de-extracao.md`) e
 - **Hanzi e histórias** (hoje só no zh; valem para qualquer site que ganhe essas atividades; constantes em `shared/srs.js`): escrever hanzi `HANZI_WRITE_XP` 2, acerto no teste
   de hanzi `HANZI_TEST_XP` 1, concluir lição de hanzi `LESSON_CLOSE_XP` 4, pergunta de história certa `STORY_QUESTION_XP` 1, concluir história `STORY_DONE_XP` 20.
   Lição de hanzi ou história JÁ concluída não paga XP de novo (mesma regra de "refazer lição" da trilha).
+- **Desafios, Expressões, "Sua vez"** (decisão da autora, 2026-10-26; só este passo dá XP, o resto dos Desafios continua sem XP): digitar certo
+  `EXERCISE_XP_PRODUCE` 2, "quase" `EXERCISE_XP_ALMOST` 1, errou ou "Não sei" 0. Só na PRIMEIRA conclusão do desafio, pago ao tocar em Concluir
+  (`exprTurnXP`, `fr/app.js`); refazer desafio concluído ou "Revisar erros" = 0, para não virar fonte infinita. Teste: `tests/desafios-expressoes-passos/`.
 - O toast "+N XP" aparece para todo ganho maior que 0. A notificação do sino usa `notification_rules.min_xp_amount` (categoria `gamificacao`, 15 na produção).
 - Demais fontes e valores atuais, e o que está em revisão: `docs/historico/21-auditoria-xp.md`. Ao mexer em qualquer XP, atualizar esse arquivo e o teste `tests/xp/`.

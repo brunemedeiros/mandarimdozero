@@ -38,5 +38,19 @@ Outros achados:
 - C: revisão do Expressões (auditoria + protótipo antes de codar).
 - D (a decidir): Desafios restantes, Ditados e Revisão.
 
+## Entregue (branch `claude/peaceful-hypatia-a9vfca`, sem PR até 2026-10-26)
+- **Revisar erros**: categorias não ficam mais junto do player (`openChallengePlayer`). Teste `tests/desafios-revisar-erros/`.
+- **A** (comando no idioma do site): Expressões usa o rótulo `fr.exercise.whatMeans`; `ch.verify` = Verificar/Check; dica do ordenar e pontos do Speed via `t()`.
+  Teste `tests/desafios-comando-idioma/`. "Combo x" ficou (palavra igual em pt e en). `zh/app.js` ainda tem "pts" fixo.
+- **B** (Jogos) e **B2** (Prática da Conjugação): topo no molde da trilha (cabeçalho, depois a barra com progresso, ⚑, ⌨️, ✕; helpers
+  `activityBarGrab/Mount/Progress` em `shared/activity-focus.js`), respostas 1/2, "Não sei", "Continuar →", som e tremida no erro, dia de estudo
+  contado ao terminar (sem XP). Testes `tests/jogos-padrao-trilha/`, `tests/conjugacao/`, `tests/modo-foco/`.
+- **C** (Expressões em passos, variante B "Meu palpite" sem correção): pergunta -> resposta (painel curto) -> "Veja em frases" -> "Sua vez"
+  (digitar, "Quase" da trilha, `microActivity.alsoAccept` opcional para variações escritas pelo autor, XP só na 1ª conclusão) -> final
+  (Ir além + Concluir/Tentar de novo). Barra do topo só nas Expressões (`data-lesson-bar`). Teste `tests/desafios-expressoes-passos/`.
+  Protótipos: `docs/prototipos/expressoes/`.
+- Falta: "Veja em frases" mais rico (a autora pediu sugestões), outros tipos de Desafios, Ditados e Revisão (a autoavaliação e o Modo aula não mudam),
+  traduzir os campos de conteúdo (explicação, exemplos, microatividade) para o site em inglês.
+
 ## Não verificado
 Layout real no navegador, quantidade de desafios sem overlay em en, banco Supabase, `zh/` (Desafios e Jogos só existem no fr).

@@ -14,7 +14,8 @@
     { tab: 'conjugaison', wrap: 'conj-practice-wrap', back: 'conj-back-to-select', lessonBar: true },
     // lessonBar: topo igual ao da trilha (progresso + ⚑ + ⌨️ + X) em vez do link de voltar (padrão das telas de exercício, 2026-10-23).
     { tab: 'conjugaison', wrap: 'conj-game-wrap', back: 'conj-game-back', lessonBar: true },
-    { tab: 'challenges', wrap: 'challenge-player-wrap', back: 'challenge-back-to-list' }
+    // lessonBarFlag: a barra da lição só aparece quando o player marca data-lesson-bar="1" (hoje, as Expressões; os outros tipos seguem com o link).
+    { tab: 'challenges', wrap: 'challenge-player-wrap', back: 'challenge-back-to-list', lessonBarFlag: 'lessonBar' }
   ];
   const tr = (k, fb) => (typeof t === 'function' ? t(k) : fb);
 
@@ -63,13 +64,27 @@
       if (m) m.style.display = 'flex';
     });
     bar.querySelector('.activity-exit-btn').addEventListener('click', () => back.click());
-    back.style.display = 'none';
+    // O link de voltar (e a barra com ⚑ que o envolve, se já existir) fica escondido: o X aciona o mesmo botão.
+    const holder = back.parentElement && back.parentElement.classList.contains('activity-focus-bar') ? back.parentElement : back;
+    holder.style.display = 'none';
     wrap.insertBefore(bar, wrap.firstChild);
   }
 
   // Barra do topo da sessão: o link de voltar à esquerda e a ⚑ à direita.
+  function wantsLessonBar(area){
+    if (area.lessonBar) return true;
+    const w = area.lessonBarFlag ? document.getElementById(area.wrap) : null;
+    return !!w && w.dataset[area.lessonBarFlag] === '1';
+  }
   function ensureBar(area){
-    if (area.lessonBar) return ensureLessonBar(area);
+    if (wantsLessonBar(area)) return ensureLessonBar(area);
+    // Tipo sem barra da lição: devolve o link de voltar (a barra anterior, se sobrou, sai).
+    if (area.lessonBarFlag){
+      const w = document.getElementById(area.wrap), old = w && w.querySelector('.activity-lesson-bar');
+      if (old) old.remove();
+      const b = document.getElementById(area.back);
+      if (b){ b.style.display = ''; if (b.parentElement && b.parentElement.classList.contains('activity-focus-bar')) b.parentElement.style.display = ''; }
+    }
     const back = document.getElementById(area.back);
     if (!back || back.parentElement.classList.contains('activity-focus-bar')) return;
     const bar = document.createElement('div');
