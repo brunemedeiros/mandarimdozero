@@ -514,8 +514,23 @@ async function fingerprint(browser, root, keys){
 }
 
 // Site em inglês (outra carga da página com ui-language = en)
+// M3 da revisão do código compartilhado (2026-10-26, mudança deliberada): no site em inglês, desafio publicado sem a
+// tradução em fr/challenges.en.js deixou de aparecer. Para continuar comparando o resto (telas, devolutivas, trilha) com o
+// fr de antes, a carga em inglês só publica os desafios que têm tradução; o sumiço dos outros é provado em
+// tests/desafios-idioma-site/test_playwright.js.
+function rowsComTraducaoEn(){
+  const sandbox = { window: {} };
+  require('vm').runInNewContext(fs.readFileSync(path.join(ROOT, 'fr/challenges.en.js'), 'utf8'), sandbox);
+  const ov = sandbox.window.CHALLENGES_I18N.en;
+  // mesma regra de CHALLENGE_SITE_LANG_FIELDS (shared/desafios.js), reescrita aqui de propósito (o teste não confia no código testado)
+  const tem = (o, f) => Array.isArray(o[f]) ? o[f].length > 0 : !!String(o[f] || '').trim();
+  const precisa = (r) => { const d = r.data, e = String(d.explanation || '').trim();
+    return { expression: [d.meaning && d.meaning.pt && 'meaning'], listen_translate: ['referenceTranslations', e && 'explanation'],
+      accent: [e && 'explanation'], cloze_grammar: [d.translationPt && 'translation', 'explanation'] }[r.type].filter(Boolean); };
+  return H.challengeRows().filter(r => r.status !== 'published' || (ov[r.id] && precisa(r).every(f => tem(ov[r.id], f))));
+}
 async function fingerprintEn(browser, root){
-  const { page, ctx, server, errors } = await H.boot(browser, root, { lang: 'en' });
+  const { page, ctx, server, errors } = await H.boot(browser, root, { lang: 'en', rows: rowsComTraducaoEn() });
   const out = {};
   // a duração dos mp3 no checklist do admin chega quando o áudio carrega (momento variável): fica de fora
   const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); return c.innerHTML; }, sel);

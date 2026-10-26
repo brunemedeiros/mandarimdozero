@@ -36,6 +36,7 @@ async function fillModuleChallengeRows(){
     await loadChallengesFromDB();
   }
   await ensureChallengesPlanLoaded();
+  await ensureChallengesSiteLangLoaded(); // M3
   // A Trilha pode ter sido redesenhada enquanto carregava: usa só os slots que ainda estão na tela.
   document.querySelectorAll('.module-challenges-slot').forEach(slot => {
     const module = MODULES.find(m => m.id === slot.dataset.moduleId);
@@ -56,7 +57,7 @@ function appendModuleChallengesSlot(module, list){
 }
 
 function buildModuleChallengesRow(module){
-  const items = publishedChallenges().filter(c => challengeModuleId(c) === module.id);
+  const items = studentChallenges().filter(c => challengeModuleId(c) === module.id); // M3: sem tradução no idioma do site, fora
   const dictations = chHasDictations() ? dictationsVisible(module.id) : [];
   const dictFree = dictations.filter(d => d.free !== false).length;
   const dictPremium = dictations.length - dictFree;
@@ -256,6 +257,7 @@ async function renderChallengeCategories(){
     return;
   }
   await ensureChallengesPlanLoaded();
+  await ensureChallengesSiteLangLoaded(); // M3: a lista no inglês precisa do overlay
 
   // Cabeçalho muda quando a pessoa chegou pela unidade "Desafios do Módulo N"
   // da Trilha (challengesModuleFilter): mesmo menu, só recortado pro módulo.
@@ -424,6 +426,18 @@ function challengeCardHTML(c){
       ${tierBadgeHTML(challengeTier(c))}
     </button>
   `;
+}
+
+// M3: o overlay do idioma do site (challenges.<lang>.js) chega depois do boot; quando chega (ou o idioma muda), a lista
+// visível é pintada de novo para mostrar os desafios que agora têm tradução (e esconder os que não têm).
+function repaintChallengesForUiLanguage(){
+  if (typeof document === 'undefined') return;
+  const view = document.getElementById('view-challenges');
+  if (!view || !view.classList.contains('active') || !CHALLENGES.length) return;
+  const vis = id => { const el = document.getElementById(id); return !!(el && el.style.display !== 'none' && el.style.display !== ''); };
+  if (vis('challenge-player-wrap') || vis('challenges-admin-wrap')) return;
+  if (vis('challenges-list-wrap') && !challengeReviewQueueActive) renderChallengesList(currentChallengesCategory);
+  else if (vis('challenges-categories-wrap')) renderChallengeCategories();
 }
 
 function renderChallengesList(type){
@@ -658,6 +672,8 @@ let challengePreviewMode = false;
 function openChallengePlayer(id){
   const c = CHALLENGES.find(x => x.id === id);
   if (!c) return;
+  // M3: desafio sem tradução no idioma do site não abre para o aluno (a prévia da admin continua abrindo).
+  if (!challengePreviewMode && !challengeAvailableInSiteLang(c)) return;
   if (isChallengeLocked(c)){ openPremiumChallengesModal(); return; }
 
   document.getElementById('challenges-list-wrap').style.display = 'none';
@@ -755,7 +771,7 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
   // Etapa 3 (c1): com o site em outro idioma, o sentido vem da tradução do desafio (fr/challenges.en.js,
   // campo `meaning`) quando existe; sem tradução, continua o português do banco.
   const exprOv = challengeOverlay(c);
-  const meaningShown = (exprOv && exprOv.meaning) ? exprOv.meaning : c.meaning.pt;
+  const meaningShown = (exprOv && exprOv.meaning) ? exprOv.meaning : (c.meaning || {}).pt;
   const bodyHTML = `
       ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.expr.yourAnswer', { chosen: escapeHtmlChallenge(c.options[chosenIdx]), correct: escapeHtmlChallenge(c.correctAnswer) })}</p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>

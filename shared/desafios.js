@@ -571,9 +571,43 @@ function tierBadgeHTML(tier){
 function isChallengeLocked(c){
   return CHALLENGE_PAYWALL_ENABLED && !!challengeModuleId(c) && !challengesPremiumUnlocked();
 }
+// M3 da revisão do código compartilhado (2026-10-26; regra da autora: site em inglês não tem NADA em português).
+// Campos de texto em português que a tela do aluno mostra, por tipo, e o nome do campo no overlay
+// (<site>/challenges.<lang>.js) que precisa existir para o desafio aparecer num site que não é pt-BR. O texto do idioma
+// estudado (expressão, frase, explicação da Expressão em francês, pergunta) não entra: é igual em todo site.
+const CHALLENGE_SITE_LANG_FIELDS = {
+  expression: c => [c.meaning && c.meaning.pt ? 'meaning' : null],
+  listen_translate: c => ['referenceTranslations', String(c.explanation || '').trim() ? 'explanation' : null],
+  accent: c => [String(c.explanation || '').trim() ? 'explanation' : null],
+  cloze_grammar: c => [c.translationPt ? 'translation' : null, 'explanation'],
+};
+// Verdadeiro se o desafio pode ser mostrado no idioma do site atual. pt-BR: sempre (nada muda). Outro idioma: só com
+// a tradução de todos os campos acima; tipo desconhecido não aparece. Não mexe no progresso salvo (completedChallenges,
+// challengeReviews): o desafio só deixa de ser listado/contado/sorteado enquanto não tiver tradução.
+function challengeAvailableInSiteLang(c){
+  const lang = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+  if (lang === 'pt-BR') return true;
+  const need = CHALLENGE_SITE_LANG_FIELDS[c && c.type];
+  if (!need) return false;
+  const ov = challengeOverlay(c) || {};
+  return need(c).filter(Boolean).every(f => Array.isArray(ov[f]) ? ov[f].some(x => String(x || '').trim()) : !!String(ov[f] || '').trim());
+}
+// Espera o overlay dos desafios do idioma do site (<site>/challenges.<lang>.js, baixado pelo CONTENT_I18N do site) antes de
+// listar: sem isto, logo depois do boot no site em inglês a lista sairia vazia até o arquivo chegar. Sem overlay
+// configurado ou em pt-BR, não espera nada.
+async function ensureChallengesSiteLangLoaded(){
+  const lang = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+  if (lang === 'pt-BR' || (window.CHALLENGES_I18N && window.CHALLENGES_I18N[lang])) return;
+  try { if (typeof CONTENT_I18N !== 'undefined' && CONTENT_I18N && typeof CONTENT_I18N.load === 'function') await CONTENT_I18N.load(lang); } catch (e) { /* sem rede: os sem tradução ficam fora */ }
+}
+// Os publicados que o aluno vê neste idioma do site (lista, contagem, fila, revisão, Expressão do dia, linha da trilha).
+function studentChallenges(){
+  return publishedChallenges().filter(challengeAvailableInSiteLang);
+}
+
 // Tudo que a lista pode MOSTRAR (inclui os trancados) / só o que dá pra JOGAR.
 function listedChallenges(){
-  const all = publishedChallenges();
+  const all = studentChallenges();
   return challengesModuleFilter ? all.filter(c => challengeModuleId(c) === challengesModuleFilter) : all;
 }
 function playableChallenges(){

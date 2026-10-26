@@ -123,7 +123,7 @@ async function boot(browser, root, opts){
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   if (opts.blockMp3) await page.route(/\.mp3(\?|$)/, () => {});
-  const rows = challengeRows();
+  const rows = opts.rows || challengeRows();
   await page.addInitScript(([lang, rows, imports, theme]) => {
     try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', lang); if (theme) localStorage.setItem('theme', theme); } catch (e) {}
     let s = 12345; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647;
