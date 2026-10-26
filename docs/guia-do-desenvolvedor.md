@@ -20,6 +20,19 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
   função (a Edge Function só muda em produção após novo deploy).
 - Detalhes e decisões: `docs/historico/21-*`, `22-*`, `docs/i18n/curriculo/04-lacunas-e-propostas-fr.md` seção 2.
 
+## Mapa do currículo em dados (`mapa.json` e `excecoes.json`)
+- **Onde fica:** `docs/i18n/curriculo/dados/mapa.json` (A1 e A2 do francês: níveis, módulos e unidades com id estável, `id_funcao`,
+  cartões com chave, notas com tipo, confiança e gancho, gramáticas com `versao_gratis_em`) e `dados/excecoes.json` (expressões fixas,
+  fórmulas de diálogo, "diálogo como entrada", unidades acima do limite). As contas saem de `fr/scripts/curriculo_mapa.js` (funções puras).
+  Divergências com o `08`: `dados/ACHADOS.md`.
+- **Como mudar:** o mapa está congelado (decisão 259); mudança só por pedido de mudança aprovado pela dona, com o `auditor-curricular`.
+  Edite o json, rode `node fr/scripts/curriculo_mapa.js --conferir` e `--tabela` e cole os números no `08`. Exceção nova só com o OK da dona.
+  Regra numérica (limite de palavras, lições, teto de tempo) muda em `REGRAS` no script e no `15`, nunca no json.
+- **Como testar:** `node tests/curriculo/test_mapa_totais.js` (totais do `08`, regras 12, 13, 14 e 16, títulos das notas de vocabulário, chaves
+  contra `fr/published_ids.json`).
+- **O que não fazer:** não digitar total no `08` nem no json; não mudar número do json para o teste passar (registre em `ACHADOS.md`);
+  não usar a posição ("M4.2") como id; o json ainda não alimenta o site (`fr/content.js` continua sendo o conteúdo publicado).
+
 ## Como testar
 - Testes por tema em `tests/<tema>/`; bateria completa e suítes instáveis: `.claude/rules/testes.md`.
 - Mudou progresso/trilha: rode `tests/curriculo-ids`, `tests/e4/test_progresso_ida_e_volta.js`, `tests/e4/test_core_carregado.js` e as capturas

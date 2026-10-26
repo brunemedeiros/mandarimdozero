@@ -1,0 +1,351 @@
+{
+  "_doc": "Exceções aceitas pela dona às regras do currículo (decisão 232; regras 11, 13 e 14 do docs/i18n/curriculo/15-regras-do-curriculo.md). Entrada nova só com o OK da dona; o auditor-curricular e fr/scripts/curriculo_mapa.js leem daqui. 'unidades' = ids estáveis onde a exceção vale; 'cartao_em' = lista de cartões onde a palavra é ensinada depois (vazia = nunca vira cartão); 'chaves' = chaves das frases ou falas publicadas em fr/content.js (só referência). Tipos: expressao_fixa, uso_comum (adjetivo ou expressão de uso comum, regra 11), formula_de_dialogo (decisão 250), dialogo_como_entrada (decisão 198).",
+  "idioma": "fr",
+  "versao": "2026-10-26",
+  "palavras_antes_do_cartao": [
+    {
+      "expressao": "pour la santé",
+      "tipo": "expressao_fixa",
+      "unidades": [
+        "A1-11",
+        "A1-19"
+      ],
+      "chaves": [
+        "A1-11-p5",
+        "A1-19-p6"
+      ],
+      "cartao_em": [
+        {
+          "palavra": "la santé",
+          "unidade": "A2-12"
+        }
+      ],
+      "decisoes": [
+        171
+      ]
+    },
+    {
+      "expressao": "délicieux",
+      "tipo": "uso_comum",
+      "unidades": [
+        "A1-5",
+        "A1-11"
+      ],
+      "chaves": [
+        "A1-5-p4",
+        "A1-11-p4"
+      ],
+      "cartao_em": [
+        {
+          "palavra": "délicieux",
+          "unidade": "A2-13"
+        }
+      ],
+      "decisoes": [
+        176
+      ]
+    },
+    {
+      "expressao": "cuit",
+      "tipo": "uso_comum",
+      "unidades": [
+        "A1-11"
+      ],
+      "chaves": [
+        "A1-11-p9"
+      ],
+      "cartao_em": [
+        {
+          "palavra": "bien cuit",
+          "unidade": "A2-13"
+        },
+        {
+          "palavra": "cuire",
+          "unidade": "A2-14"
+        }
+      ],
+      "decisoes": [
+        176
+      ],
+      "observacao": "o 08 diz 'cartões no A2 M5': bien cuit em 'Reservar e pedir no restaurante' (A2-13) e cuire em 'Explicar uma receita' (A2-14)"
+    },
+    {
+      "expressao": "sucrée",
+      "tipo": "uso_comum",
+      "unidades": [
+        "A1-5"
+      ],
+      "chaves": [
+        "A1-5-p8"
+      ],
+      "cartao_em": [
+        {
+          "palavra": "sucré",
+          "unidade": "A2-13"
+        }
+      ],
+      "decisoes": [
+        176
+      ]
+    },
+    {
+      "expressao": "prochain / prochaine",
+      "tipo": "uso_comum",
+      "unidades": [
+        "A1-7",
+        "A1-g20"
+      ],
+      "chaves": [
+        "A1-7-p5"
+      ],
+      "cartao_em": [
+        {
+          "palavra": "prochain / prochaine",
+          "unidade": "A2-18"
+        }
+      ],
+      "decisoes": [
+        180,
+        211
+      ],
+      "observacao": "frase 'La semaine prochaine, je pars en voyage.' (Dizer o dia e combinar) e o quadro da gramática do futuro próximo"
+    },
+    {
+      "expressao": "le projet",
+      "tipo": "uso_comum",
+      "unidades": [
+        "A1-19"
+      ],
+      "chaves": [
+        "A1-19-d0"
+      ],
+      "cartao_em": [
+        {
+          "palavra": "le projet",
+          "unidade": "A2-18"
+        }
+      ],
+      "decisoes": [
+        180
+      ],
+      "observacao": "fala 'Tu as des projets pour le week-end ?'"
+    },
+    {
+      "expressao": "garée",
+      "tipo": "uso_comum",
+      "unidades": [
+        "A1-14"
+      ],
+      "chaves": [
+        "A1-14-p6"
+      ],
+      "cartao_em": [
+        {
+          "palavra": "se garer",
+          "unidade": "A2-26"
+        }
+      ],
+      "decisoes": [
+        188,
+        211
+      ]
+    },
+    {
+      "expressao": "l'euro",
+      "tipo": "uso_comum",
+      "unidades": [
+        "A1-28",
+        "A1-10"
+      ],
+      "chaves": [],
+      "cartao_em": [],
+      "decisoes": [
+        209
+      ],
+      "observacao": "só em frase, sem cartão em lugar nenhum"
+    },
+    {
+      "expressao": "je vais prendre",
+      "tipo": "expressao_fixa",
+      "unidades": [
+        "A1-5",
+        "A1-25"
+      ],
+      "chaves": [],
+      "cartao_em": [
+        {
+          "palavra": "prendre",
+          "unidade": "A1-36"
+        }
+      ],
+      "decisoes": [
+        224,
+        255
+      ],
+      "observacao": "café e restaurante; continua na lista depois que o cartão prendre foi para 'Verbos muito usados' (255)"
+    },
+    {
+      "expressao": "je voudrais",
+      "tipo": "expressao_fixa",
+      "unidades": [
+        "A1-5",
+        "A1-25"
+      ],
+      "chaves": [
+        "A1-5-p5"
+      ],
+      "cartao_em": [
+        {
+          "palavra": "vouloir",
+          "unidade": "A1-36"
+        }
+      ],
+      "decisoes": [
+        224,
+        255
+      ],
+      "observacao": "café e restaurante"
+    },
+    {
+      "expressao": "Ça te va ?",
+      "tipo": "formula_de_dialogo",
+      "unidades": [
+        "A1-7"
+      ],
+      "chaves": [
+        "A1-7-d1"
+      ],
+      "cartao_em": [],
+      "decisoes": [
+        250
+      ],
+      "observacao": "vem de ça va"
+    },
+    {
+      "expressao": "Merci beaucoup",
+      "tipo": "formula_de_dialogo",
+      "unidades": [
+        "A1-8"
+      ],
+      "chaves": [
+        "A1-8-d4"
+      ],
+      "cartao_em": [],
+      "decisoes": [
+        250
+      ]
+    },
+    {
+      "expressao": "Parfait",
+      "tipo": "formula_de_dialogo",
+      "unidades": [
+        "A1-7",
+        "A1-10"
+      ],
+      "chaves": [
+        "A1-7-d3",
+        "A1-10-d4"
+      ],
+      "cartao_em": [],
+      "decisoes": [
+        250
+      ]
+    },
+    {
+      "expressao": "Vous désirez ?",
+      "tipo": "formula_de_dialogo",
+      "unidades": [
+        "A1-5"
+      ],
+      "chaves": [
+        "A1-5-d0"
+      ],
+      "cartao_em": [],
+      "decisoes": [
+        250
+      ]
+    },
+    {
+      "expressao": "Autre chose ?",
+      "tipo": "formula_de_dialogo",
+      "unidades": [
+        "A1-5"
+      ],
+      "chaves": [
+        "A1-5-d2"
+      ],
+      "cartao_em": [],
+      "decisoes": [
+        250
+      ]
+    },
+    {
+      "expressao": "C'est tout",
+      "tipo": "formula_de_dialogo",
+      "unidades": [
+        "A1-5"
+      ],
+      "chaves": [
+        "A1-5-d3"
+      ],
+      "cartao_em": [],
+      "decisoes": [
+        250
+      ]
+    },
+    {
+      "expressao": "fille, fils, grands",
+      "tipo": "dialogo_como_entrada",
+      "unidades": [
+        "A1-3"
+      ],
+      "chaves": [
+        "A1-3-d0",
+        "A1-3-d1",
+        "A1-3-d3"
+      ],
+      "cartao_em": [
+        {
+          "palavra": "la fille",
+          "unidade": "A1-4"
+        },
+        {
+          "palavra": "le fils",
+          "unidade": "A1-4"
+        },
+        {
+          "palavra": "grand",
+          "unidade": "A1-16"
+        }
+      ],
+      "decisoes": [
+        198
+      ],
+      "observacao": "diálogo publicado 'No parque' de 'Dizer a idade: de 1 a 29'"
+    }
+  ],
+  "unidades_acima_do_limite": [
+    {
+      "unidade": "A1-3",
+      "motivo": "conjunto fechado (números de 1 a 29)",
+      "decisoes": [
+        231
+      ]
+    },
+    {
+      "unidade": "A1-21",
+      "motivo": "conjunto fechado (números até 69)",
+      "decisoes": [
+        231
+      ]
+    },
+    {
+      "unidade": "A1-24",
+      "motivo": "conjunto fechado (meses)",
+      "decisoes": [
+        231
+      ]
+    }
+  ],
+  "regra14_repeticoes_aceitas": []
+}
