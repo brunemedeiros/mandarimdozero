@@ -1200,7 +1200,7 @@ Base: revisão de todas as decisões 1 a 227 pedida pela dona; ela aceitou **tod
 
 # Trigésima terceira rodada (2026-10-26): respostas à passada final do auditor
 
-Base: `auditoria/2026-10-26-a1-a2-passada-final.md`, seção 3. A dona aceitou D2 a D5 e respondeu parte da D6; a D1 (*prendre*) segue em discussão.
+Base: `auditoria/2026-10-26-a1-a2-passada-final.md`, seção 3. A dona aceitou D2 a D5 e respondeu parte da D6; a D1 (*prendre*) foi resolvida pela decisão 255.
 
 250. **D2, fórmulas de diálogo**: aceitas como fórmula, sem cartão, no `excecoes.json` (232): *Ça te va ?* (vem de *ça va*), *Merci beaucoup*, *Parfait*, *Vous désirez ?*, *Autre chose ?*, *C'est tout*.
      **Trocadas nos diálogos**: *cinq minutes* ("Perguntar e indicar o caminho"), *la bonne direction* e *centre-ville* ("Pegar transporte"); as frases "Na frase" com *centre-ville* ficam.
