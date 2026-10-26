@@ -11,7 +11,9 @@ const TTS = {
   voice: null,
   voicesLoaded: false,
   warmedUp: false,
-  pollAttempts: 0
+  pollAttempts: 0,
+  speakToken: 0,   // M2: muda a cada stopExerciseAudio(); a nova tentativa só roda se ainda for a mesma fala
+  retryTimers: []  // M2: timers da nova tentativa (cancelStudyVoiceRetry)
 };
 
 // Escolhe a voz: primeiro a do idioma exato (ex.: fr-FR), depois qualquer uma do idioma (fr-*); em cada grupo, a de melhor
@@ -96,24 +98,38 @@ function speakStudyAudioOnly(text, btnEl, isAutoplay){
   window.speechSynthesis.speak(utter);
 
   // Se em 800ms o onstart não disparou, o motor engasgou: tenta de novo com um utterance novo antes de desistir.
-  setTimeout(() => {
-    if (!didStart){
-      stopExerciseAudio();
-      window.speechSynthesis.resume();
-      const retryUtter = buildUtterance();
-      let retryStarted = false;
-      retryUtter.onstart = () => { retryStarted = true; };
-      retryUtter.onend = () => { if (btnEl) btnEl.classList.remove('speaking'); };
-      retryUtter.onerror = () => { if (btnEl) btnEl.classList.remove('speaking'); };
-      window.speechSynthesis.speak(retryUtter);
-      setTimeout(() => {
-        if (!retryStarted){
-          if (btnEl) btnEl.classList.remove('speaking');
-          showToast(t(LANG_HOOKS.audioRetryFailedKey));
-        }
-      }, 800);
-    }
-  }, 800);
+  // M2 da revisão do código compartilhado (2026-10-26): os dois timers ficam em TTS.retryTimers e são cancelados por
+  // cancelStudyVoiceRetry(), que stopExerciseAudio() chama (tocar outro áudio, trocar de cartão, de aba ou sair da
+  // lição/Revisão). Sem isso, a nova tentativa cortava o áudio do cartão seguinte e falava a palavra anterior. Também
+  // não tenta de novo se o botão que pediu a fala já saiu da tela (btnEl.isConnected).
+  let token = TTS.speakToken;
+  const later = (fn) => { const h = setTimeout(() => { TTS.retryTimers = TTS.retryTimers.filter(x => x !== h); if (token === TTS.speakToken) fn(); }, 800); TTS.retryTimers.push(h); };
+  later(() => {
+    if (didStart) return;
+    if (btnEl && !btnEl.isConnected) return;
+    stopExerciseAudio(); // cancela a fala engasgada (e troca o token)
+    window.speechSynthesis.resume();
+    token = TTS.speakToken; // a 2ª tentativa vale até o próximo stopExerciseAudio()
+    const retryUtter = buildUtterance();
+    let retryStarted = false;
+    retryUtter.onstart = () => { retryStarted = true; };
+    retryUtter.onend = () => { if (btnEl) btnEl.classList.remove('speaking'); };
+    retryUtter.onerror = () => { if (btnEl) btnEl.classList.remove('speaking'); };
+    window.speechSynthesis.speak(retryUtter);
+    later(() => {
+      if (!retryStarted){
+        if (btnEl) btnEl.classList.remove('speaking');
+        showToast(t(LANG_HOOKS.audioRetryFailedKey));
+      }
+    });
+  });
+}
+
+// Cancela a nova tentativa pendente da voz do navegador (M2). Chamado por stopExerciseAudio(); seguro sem nada pendente.
+function cancelStudyVoiceRetry(){
+  TTS.speakToken = (TTS.speakToken || 0) + 1;
+  (TTS.retryTimers || []).forEach(h => clearTimeout(h));
+  TTS.retryTimers = [];
 }
 
 function speakStudy(text, btnEl, isAutoplay){

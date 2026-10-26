@@ -6,6 +6,7 @@
 // Carregado antes do app.js em fr/index.html e zh/index.html.
 
 function stopExerciseAudio(){
+  if (typeof cancelStudyVoiceRetry === 'function') cancelStudyVoiceRetry(); // M2: nova tentativa da voz pendente
   if (exerciseAudioEl){
     exerciseAudioEl.pause();
     exerciseAudioEl.currentTime = 0;
