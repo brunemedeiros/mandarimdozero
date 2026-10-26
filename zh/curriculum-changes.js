@@ -13,6 +13,9 @@
 //   MODULE_MERGES      { móduloAntigo: móduloNovo | null }     null = módulo excluído.
 //   RETIRED_LESSON_IDS ["<unidade>/<id da lição>", ...]       lição removida de propósito.
 //   CURRICULUM_VERSION número gravado em cada bloco de progresso (`_curriculumVersion`).
+//   HANZI_RETIRED_KEYS [chave, ...]   hanzi excluído de zh/hanzi-data.js (chave `k`, ex.: "3-c2"; id do cartão "h3-c2").
+//                      Sem isto o teste barra o sumiço. ATENÇÃO: o progresso desse hanzi não vai para arquivo nenhum
+//                      (some no próximo save); só aposentar com a autora de acordo.
 //
 // NUNCA editar à mão para "consertar" um id: toda mudança de currículo passa pelo script de operações (Etapa 0b).
 // O teste tests/curriculo-ids/test_ids_publicados.js bloqueia o merge se um id já publicado (zh/published_ids.json)
@@ -26,7 +29,8 @@ const UNIT_MERGES = {};
 const MODULE_MERGES = {};
 const RETIRED_LESSON_IDS = [];
 const CURRICULUM_VERSION = 1;
+const HANZI_RETIRED_KEYS = [];
 
 if (typeof module !== 'undefined' && module.exports){
-  module.exports = { STUDY_KEY_MERGES, STUDY_RETIRED_KEYS, UNIT_MERGES, MODULE_MERGES, RETIRED_LESSON_IDS, CURRICULUM_VERSION };
+  module.exports = { STUDY_KEY_MERGES, STUDY_RETIRED_KEYS, UNIT_MERGES, MODULE_MERGES, RETIRED_LESSON_IDS, CURRICULUM_VERSION, HANZI_RETIRED_KEYS };
 }

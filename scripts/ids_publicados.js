@@ -3,7 +3,7 @@
 // levado a todos os sites na Etapa 1 da paridade, docs/auditoria-paridade-fr-zh.md C1).
 //
 // <site>/published_ids.json guarda TODO id que já foi ao ar: cartões da trilha (palavra A/B e "Na frase"), unidades,
-// módulos e lições ("<unidade>/<lição>"). Só cresce (união com o que já estava). O teste
+// módulos, lições ("<unidade>/<lição>") e, no site com hanzi-data.js (zh), os cartões de hanzi ("h<chave>"). Só cresce (união com o que já estava). O teste
 // tests/curriculo-ids/test_ids_publicados.js falha se um id dele sumir do conteúdo sem estar em <site>/curriculum-changes.js.
 // Os sites são descobertos sozinhos (scripts/lib/sites.js: pasta com index.html e app.js).
 //
@@ -47,13 +47,27 @@ function buildStudyCards(site, contentSource){
   return { cards: ctx.__cards, UNITS: ctx.UNITS, MODULES: ctx.MODULES, ctx };
 }
 
-function currentIds(site, contentSource){
+// Cartões de hanzi (site com <site>/hanzi-data.js, o zh; M1 da revisão do código compartilhado): ids montados com as
+// funções de PRODUÇÃO hanziCardId/buildHanziCards de <site>/app.js. hanziSource: texto alternativo do hanzi-data.js (testes).
+function buildHanziIds(site, hanziSource){
+  const file = path.join(ROOT, site, 'hanzi-data.js');
+  if (!fs.existsSync(file)) return [];
+  const app = read(site + '/app.js');
+  const pick = name => { const m = new RegExp('function ' + name + '\\([^)]*\\)\\{[\\s\\S]*?\\n\\}').exec(app); if (!m) throw new Error(name + ' não encontrada em ' + site + '/app.js'); return m[0]; };
+  const ctx = vm.createContext({});
+  vm.runInContext((hanziSource == null ? fs.readFileSync(file, 'utf8') : hanziSource) + '\n' + pick('hanziCardId') + '\n' + pick('buildHanziCards') +
+    '\n;this.__ids = buildHanziCards(HANZI_LESSONS).map(c => c.id);', ctx, { filename: site + '/hanzi-data.js' });
+  return Array.from(ctx.__ids);
+}
+
+function currentIds(site, contentSource, hanziSource){
   const { cards, UNITS, MODULES } = buildStudyCards(site, contentSource);
   return {
     cards: cards.map(c => c.id).sort(),
     units: UNITS.map(u => String(u.id)),
     modules: MODULES.map(mo => String(mo.id)),
     lessons: UNITS.flatMap(u => (u.lessons || []).map(l => u.id + '/' + l.id)),
+    hanzi: buildHanziIds(site, hanziSource),
   };
 }
 
@@ -64,7 +78,7 @@ function checkLedger(ledger, current, changes){
   const ch = changes || {};
   const merges = ch.STUDY_KEY_MERGES || {}, retired = new Set(ch.STUDY_RETIRED_KEYS || []);
   const has = (arr) => { const s = new Set(arr || []); return x => s.has(x); };
-  const cur = { cards: has(current.cards), units: has(current.units), modules: has(current.modules), lessons: has(current.lessons) };
+  const cur = { cards: has(current.cards), units: has(current.units), modules: has(current.modules), lessons: has(current.lessons), hanzi: has(current.hanzi) };
   const resolve = (k) => { const seen = new Set(); while (Object.prototype.hasOwnProperty.call(merges, k) && merges[k] && !seen.has(k)){ seen.add(k); k = merges[k]; } return k; };
   const problems = [];
   (ledger.cards || []).forEach(id => {
@@ -88,6 +102,9 @@ function checkLedger(ledger, current, changes){
     if (Object.prototype.hasOwnProperty.call(unitMerges, u)) return; // a unidade inteira saiu/fundiu
     problems.push(`lição ${id} sumiu sem estar em RETIRED_LESSON_IDS`);
   });
+  // hanzi (zh): id "h" + chave; só pode sumir se a chave estiver em HANZI_RETIRED_KEYS
+  const retiredHanzi = new Set(ch.HANZI_RETIRED_KEYS || []);
+  (ledger.hanzi || []).forEach(id => { if (!cur.hanzi(id) && !retiredHanzi.has(id.slice(1))) problems.push(`hanzi ${id} sumiu do conteúdo sem estar em HANZI_RETIRED_KEYS`); });
   return problems;
 }
 
@@ -99,6 +116,13 @@ function readLedger(site){
 function readChanges(site){
   const p = path.join(ROOT, site, 'curriculum-changes.js');
   return fs.existsSync(p) ? require(p) : {};
+}
+
+// h<lição>-c<n> em ordem numérica (h2-c0 antes de h10-c0)
+function hanziSort(a, b){
+  const pa = /^h(\d+)-c(\d+)$/.exec(a), pb = /^h(\d+)-c(\d+)$/.exec(b);
+  if (pa && pb) return (+pa[1] - +pb[1]) || (+pa[2] - +pb[2]);
+  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 function union(a, b){ return Array.from(new Set([...(a || []), ...(b || [])])); }
@@ -113,6 +137,7 @@ function ledgerText(site, ledger){
     modules: ledger.modules.slice(),
     lessons: ledger.lessons.slice(),
   };
+  if ((ledger.hanzi || []).length) out.hanzi = ledger.hanzi.slice().sort(hanziSort); // só o site com hanzi (zh)
   // uma linha por id: diffs legíveis
   return JSON.stringify(out, null, 1).replace(/\n {2,}/g, '\n  ') + '\n';
 }
@@ -122,13 +147,14 @@ function runSite(site, conferir){
   const LEDGER = ledgerPath(site);
   const cur = currentIds(site);
   const old = readLedger(site);
-  const next = { cards: union(old.cards, cur.cards), units: union(old.units, cur.units), modules: union(old.modules, cur.modules), lessons: union(old.lessons, cur.lessons) };
+  const next = { cards: union(old.cards, cur.cards), units: union(old.units, cur.units), modules: union(old.modules, cur.modules), lessons: union(old.lessons, cur.lessons), hanzi: union(old.hanzi, cur.hanzi) };
   const text = ledgerText(site, next);
   const stale = !fs.existsSync(LEDGER) || fs.readFileSync(LEDGER, 'utf8') !== text;
   const problems = checkLedger(old, cur, readChanges(site));
   problems.forEach(p => console.error(`ERRO (${site}):`, p));
   if (problems.length) return 2;
-  const resumo = `${next.cards.length} cartões, ${next.units.length} unidades, ${next.modules.length} módulos, ${next.lessons.length} lições`;
+  const resumo = `${next.cards.length} cartões, ${next.units.length} unidades, ${next.modules.length} módulos, ${next.lessons.length} lições` +
+    (next.hanzi.length ? `, ${next.hanzi.length} hanzi` : '');
   if (conferir){
     console.log(stale ? `${site}: livro-razão desatualizado: rode node scripts/ids_publicados.js ${site}` : `${site}: ok: ${resumo}`);
     return stale ? 1 : 0;
@@ -146,4 +172,4 @@ if (require.main === module){
   process.exit(Math.max(0, ...codes));
 }
 
-module.exports = { buildStudyCards, currentIds, readLedger, readChanges, checkLedger, ledgerPath, runSite, discoverSites: () => discoverSites(ROOT) };
+module.exports = { buildStudyCards, buildHanziIds, currentIds, readLedger, readChanges, checkLedger, ledgerPath, runSite, discoverSites: () => discoverSites(ROOT) };

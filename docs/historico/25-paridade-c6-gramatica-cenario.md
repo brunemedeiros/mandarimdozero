@@ -84,3 +84,8 @@ desafios-cloze, placeholders, trilha-tags, respostas-digitadas, xp). Tudo passa,
 Teste antigo ajustado de propósito: `tests/familia-latina/extrair-fr.js` conferia que o `fr/app.js` chamava
 `latinaFr().avaliarComSeparadores(given, forms)`; agora confere a chamada do core ao gancho e o gancho do fr.
 `tests/paridade-sites/test_css_compartilhado.js` passou sem exceção nova (6/6).
+
+## Cabeçalho da tabela de gramática no fr: azul da marca (2026-10-26)
+- A autora viu a prévia (roxo de hoje x azul com branco, claro e escuro) e aprovou o azul. Saíram `--gram-table-head` e
+  `--on-gram-table-head` do `:root` do fr; o cabeçalho usa `--brand-fill`/`--on-brand-fill`, como manda a regra "Caixas da
+  marca com texto" (no zh já era assim, em vermelho).

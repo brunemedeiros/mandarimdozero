@@ -128,6 +128,15 @@ document.getElementById('stroke-modal').addEventListener('click', (e) => {
 });
 
 
+// Id do cartão de um hanzi: "h" + a chave congelada `k` do caractere em zh/hanzi-data.js (M1 da revisão do código
+// compartilhado, 2026-10-26). O valor inicial de `k` é a posição de hoje ("0-c0"), então nenhum id mudou; daqui para a
+// frente inserir, tirar ou reordenar um hanzi não passa o progresso de um caractere para outro. Caractere sem `k`
+// (ainda não congelado: rode node scripts/congelar_chaves.js zh) cai na posição, como antes.
+// Os ids publicados ficam em zh/published_ids.json (campo hanzi); tests/curriculo-ids/test_ids_publicados.js barra sumiço.
+function hanziCardId(char, lessonIdx, charIdx){
+  return 'h' + (char && typeof char.k === 'string' && char.k ? char.k : `${lessonIdx}-c${charIdx}`);
+}
+
 // Um cartão SRS por caractere (do banco completo de hanzi), reaproveitando a mesma estrutura de
 // estado SM-2 do vocabulário — fila separada, mas mesmo motor de repetição.
 function buildHanziCards(lessons){
@@ -135,7 +144,7 @@ function buildHanziCards(lessons){
   lessons.forEach((lesson, lessonIdx) => {
     lesson.forEach((char, charIdx) => {
       cards.push({
-        id: `h${lessonIdx}-c${charIdx}`,
+        id: hanziCardId(char, lessonIdx, charIdx),
         lessonIndex: lessonIdx,
         type: 'hanzi',
         char: char.char,
@@ -525,12 +534,13 @@ const UNIT_ICONS = {
   16: '📅', 17: '✅', 18: '❓'
 };
 
-// Cartões de hanzi no idioma do site (refreshStudyCardTexts comum chama por LANG_HOOKS.refreshExtraCards). Por posição
-// (id h<lição>-c<índice>): o overlay pode trocar o caractere do slot (巴 -> 美 no inglês), então casar por caractere não serve.
+// Cartões de hanzi no idioma do site (refreshStudyCardTexts comum chama por LANG_HOOKS.refreshExtraCards). Pelo id
+// (chave `k`, hanziCardId): o overlay pode trocar o caractere do slot (巴 -> 美 no inglês), então casar por caractere não serve.
 function refreshHanziCardTexts(){
+  const byId = {};
+  HANZI_LESSONS.forEach((lesson, li) => lesson.forEach((h, ci) => { byId[hanziCardId(h, li, ci)] = h; }));
   STATE.hanziCards.forEach((c) => {
-    const m = /^h(\d+)-c(\d+)$/.exec(c.id);
-    const h = m && HANZI_LESSONS[+m[1]] && HANZI_LESSONS[+m[1]][+m[2]];
+    const h = byId[c.id];
     if (h){ CardVariants.swapCardWordProgress(c, c.char, h.char, STATE.cardVariants); c.char = h.char; c.pinyin = h.pinyin; c.meaning = h.meaning; c.radicals = h.radicals; }
   });
 }

@@ -14,6 +14,8 @@ paths:
   por idioma vem de `LANG_HOOKS` (`<site>/lang-hooks.js`). Nunca copiar para um `app.js` (que só tem dados/configuração e o
   próprio do idioma: hanzi, pinyin, histórias no zh). Guarda: `tests/paridade-sites/test_quase_iguais.js` (paridade 5d).
   Desafios e Ditados só existem no fr (os motores são comuns, ver abaixo).
+- **LANG_HOOKS**: contrato único em `shared/core/lang-hooks-contrato.js` (tipo, obrigatório, padrão neutro); gancho novo entra lá no mesmo PR, e
+  padrão comum nunca é texto de um idioma. Guarda: `tests/paridade-sites/test_contrato_lang_hooks.js`. Idioma de Field/voz/nacionalidade vem do registro (`languages/registry.*`), nunca `'fr'` fixo.
 - **Tokens de cor**: nomes iguais podem ter valores diferentes. Em fr, `--seal-red` é AZUL (#3498D6) e
   `--on-seal-red` é quase preto; em zh é vermelho e branco. Ler o `:root` do arquivo antes de usar. Texto sobre
   `--error-red`/`--jade` usa `--on-vivid`. Cor nova vira token definido nos 3 blocos de tema (`:root`,
