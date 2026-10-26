@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar. Status (2026-10-23): auditoria final feita e respondida (decisões 197 a 203); pendências da 203 respondidas (decisões 204 a 216: A1 M5.1 com 11; verbos irregulares pela opção B, unidade nova A1 M4.1 "Verbos muito usados"); próximo passo: passada final do `auditor-curricular` e aprovação do mapa (decisão 217).** Mapa final do A1 (9 módulos, 57 unidades, 357 cartões) e do A2 (10 módulos, 58 unidades, 428 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar. Status (2026-10-23): auditoria final feita e respondida (decisões 197 a 203); pendências da 203 respondidas (decisões 204 a 216: A1 M5.1 com 11; verbos irregulares pela opção B, unidade nova A1 M4.1 "Verbos muito usados"); próximo passo: passada final do `auditor-curricular` e aprovação do mapa (decisão 217); decisões 218 a 246 aplicadas no mapa em 2026-10-26.** Mapa final do A1 (9 módulos, 57 unidades, 358 cartões) e do A2 (10 módulos, 58 unidades, 428 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
@@ -163,5 +163,21 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   M8 3h15, **M9 3h20**), lições ~148, notas ~132; A2 com 10 módulos, 58 unidades (36 + 22), **428 cartões (418 novos + 10 publicados)**, ~33h10, notas ~76.
 - **Status: único próximo passo é a passada final do agente `auditor-curricular` e a aprovação do mapa pela dona** (decisão 217; os itens "a revisar" que ficam no mapa
   são revistos junto com a aprovação).
+
+## Atualização 2026-10-26
+
+- **Decisões 218 a 246 do `12` aplicadas no `08 v2` e no `15`** (só documentos; nada no site):
+  nota de *excusez-moi / excuse-moi* na unidade "Cumprimentar e se despedir" (módulo "Apresentar-se"), junto de *pardon* e com menção a *désolé(e)*; sai de
+  "Convidar, aceitar, recusar e se desculpar" e não se repete em "Perguntar e indicar o caminho" (223); *je vais prendre* e *je voudrais* como expressões fixas, *prendre*
+  com cartão em "Pegar transporte" (224, regra 11 do `15`; a lista vai para `excecoes.json`, 232); "vistas" (225) e marca essencial / só exemplo das frases "Na frase",
+  decidida na revisão de texto feita junto com o conteúdo (226 e 227); **regra 13 simplificada**: A1 até 12 palavras por unidade aberta, sem rótulo de exceção nas unidades
+  com 11 ou 12 (231 e 241); "Pedir no restaurante" (módulo "Comer e beber") com *le restaurant* e sem *le menu* como cartão, 10 palavras (*le menu* não está em `fr/content.js`
+  nem em `fr/published_ids.json`; 242); *confirmer* fica em "Escrever para convidar, recusar e agradecer" (243); *adorer, se coucher, la boisson* ficam em nota e
+  *la chemise* volta a cartão em "Comprar roupas" (módulo "Compras", 11; 244); títulos das notas de vocabulário padronizados: "Outras palavras de/em/sobre ..." para lista de
+  itens da mesma categoria e "Mais sobre ..." para o resto (246; a caixa "Como ler" do `08 v2` traduz os nomes antigos dos trechos históricos).
+- **Totais novos**: A1 com 9 módulos, 57 unidades (34 + 23), **358 cartões**, **~30h25** (M1 3h35, M2 3h45, M3 3h35, M4 3h45, **M5 3h15**, M6 3h05, M7 2h50, M8 3h15, M9 3h20),
+  lições ~149, notas ~132; A2 sem mudança: 10 módulos, 58 unidades (36 + 22), 428 cartões (418 novos + 10 publicados), ~33h10, notas ~76.
+- **Status**: segue a decisão 217 (passada final do `auditor-curricular` e aprovação do mapa); ainda "a revisar" no A2: as notas de vocabulário da decisão 216
+  ("Mais sobre a consulta" e "Mais sobre aprender").
 
 > **Como falar com a dona** (2026-10-23): em toda mensagem a ela, citar o NOME do módulo e da unidade (não só M6.1 ou `A1-15`), explicar termos internos e dar o contexto completo de cada decisão. Vale para o chat e para qualquer agente.
