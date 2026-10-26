@@ -1219,3 +1219,9 @@ Base: `auditoria/2026-10-26-a1-a2-passada-final.md`, seção 3. A dona aceitou D
 257. **Teto de tempo sobe para 3h50 por módulo** (opção a; revê a 252): "Comer e beber" fica com ~3h50 depois do cartão *prendre* em "Verbos muito usados"; as estimativas têm confiança baixa (não medidas) e não se criam exceções por
      módulo. Mantida a exceção do último módulo de cada nível (A2 "Opinião, cultura e mundo", ~3h55). Regra 16 do `15` e linha 16 do `08 v2` atualizadas.
 258. **Frase *J'ai deux frères et trois sœurs.*** (`A1-3-p6`) vai, com a chave, para "Apresentar a família" (módulo "Família e pessoas próximas"), como na revisão geral de 2026-10-23; *Quel est l'âge de ton père ?* fica em "Dizer a idade" (256).
+
+# Trigésima quarta rodada (2026-10-26): aprovação do mapa
+
+259. **MAPA A1 + A2 APROVADO PELA DONA E CONGELADO** (2026-10-26): A1 com 9 módulos, 57 unidades, **360 cartões**, ~30h40; A2 com 10 módulos, 58 unidades, **428 cartões** (418 novos + 10 publicados), ~33h10 (`08-mapa-final-a1-a2-v2.md`,
+     decisões 1 a 258). Daqui em diante (decisão 235) o mapa só muda por **pedido de mudança**, com o `auditor-curricular` rodando. Próximos passos, sem tocar em produção nem em código do site: `mapa.json` e `excecoes.json`
+     gerando as contas (228, 232), teste de coerência, depois implementação (reordenar `UNITS`, campo `papel`, validador "só palavras vistas") e o piloto "Apresentar-se"; cada passo que mexer em código ou dado em produção pede autorização própria.
