@@ -16,6 +16,11 @@ for (const f of fs.readdirSync(dir).filter(f => /^lote-.*\.json$/.test(f) && !/c
 for (const c of JSON.parse(fs.readFileSync(path.join(root, 'docs/i18n/challenges-producao-a1m3-lt.json'), 'utf8')).challenges) {
   sources.push({ ...c, _src: 'docs/i18n/challenges-producao-a1m3-lt.json' });
 }
+// 16 Desafios da primeira leva (accent-*-001, expr-a1/a2/b2-*, lt-a1/a2/b1/b2-001): publicados na produção e sem fonte
+// no repositório. Conferidos contra o retrato da produção (2026-10-26).
+for (const c of JSON.parse(fs.readFileSync(path.join(root, 'docs/i18n/challenges-producao-sem-fonte.json'), 'utf8')).challenges) {
+  sources.push({ ...c, _src: 'docs/i18n/challenges-producao-sem-fonte.json' });
+}
 const byId = new Map(sources.map(c => [c.id, c]));
 const dicts = load('fr/dictations.js', 'DICTATIONS');
 const ch = JSON.parse(fs.readFileSync(path.join(root, 'docs/i18n/challenges-en.json'), 'utf8'));

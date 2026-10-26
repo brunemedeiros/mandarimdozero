@@ -863,5 +863,71 @@
  "cloze-a1m6-006": {
   "translation": "Last weekend, we went to the movies.",
   "explanation": "\"Aller\" uses être (nous sommes), and the past participle agrees with the plural subject: allés (with -s)."
+ },
+ "accent-a1-001": {
+  "explanation": "\"e\" has an acute accent: école."
+ },
+ "accent-a2-001": {
+  "explanation": "\"a\" has a grave accent and \"o\" has a circumflex accent: à bientôt."
+ },
+ "accent-b2-001": {
+  "explanation": "The first two \"e\"s have an acute accent: préférer (pré-fé-rer). The last \"e\" has no accent."
+ },
+ "expr-a1-001": {
+  "meaning": "To be hungry; to want to eat. (French says \"to have hunger\": j'ai faim.)"
+ },
+ "expr-a1-002": {
+  "meaning": "To be thirsty; to want to drink. (French says \"to have thirst\": j'ai soif.)"
+ },
+ "expr-a1-003": {
+  "meaning": "To be right; your opinion or answer is correct. (French says \"to have reason\": tu as raison.)"
+ },
+ "expr-a2-001": {
+  "meaning": "A hand; a bit of help. \"Donner un coup de main\" = to give someone a hand."
+ },
+ "expr-a2-002": {
+  "meaning": "To have stage fright; to get nervous or scared before doing something important (going on stage, giving a talk, taking an exam)."
+ },
+ "expr-a2-003": {
+  "meaning": "To sleep in; to stay in bed late in the morning (a lie-in)."
+ },
+ "expr-b2-001": {
+  "meaning": "To spell things out; to make every detail perfectly clear so there's no misunderstanding (close to \"dotting the i's and crossing the t's\")."
+ },
+ "expr-b2-002": {
+  "meaning": "To be very lazy; to avoid work at all costs (literally \"to have a hair in your hand\")."
+ },
+ "expr-b2-003": {
+  "meaning": "To not hold back; to go at it hard, with a lot of force or bluntness (to pull no punches)."
+ },
+ "lt-a1-001": {
+  "referenceTranslations": [
+   "I'm eating an apple.",
+   "I am eating an apple.",
+   "I eat an apple."
+  ]
+ },
+ "lt-a2-001": {
+  "referenceTranslations": [
+   "I bought a new book last night and I've already started it.",
+   "I bought a new book last night and I already started it.",
+   "Last night I bought a new book and I've already started reading it.",
+   "I bought a new book yesterday evening and have already started it."
+  ]
+ },
+ "lt-b1-001": {
+  "referenceTranslations": [
+   "Last night I watched an interesting movie on TV, but I fell asleep before the end.",
+   "Last night, I watched an interesting film on television, but I fell asleep before the end.",
+   "Yesterday evening I watched an interesting movie on TV, but I fell asleep before it ended."
+  ]
+ },
+ "lt-b2-001": {
+  "referenceTranslations": [
+   "Even though the project is ambitious, we are convinced that we will manage to see it through thanks to everyone's collaboration.",
+   "Even if the project is ambitious, we're confident we'll succeed in carrying it out thanks to everyone working together.",
+   "Although the project is ambitious, we're sure we'll pull it off thanks to everyone's cooperation."
+  ],
+  "explanation": "\"Mener à bien\" means to carry something through successfully, to see it through to the end. Here \"le\" (it) stands for the project: \"le mener à bien\" = \"to see it through\"."
  }
 }
