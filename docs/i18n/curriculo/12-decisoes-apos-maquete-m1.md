@@ -1211,3 +1211,8 @@ Base: `auditoria/2026-10-26-a1-a2-passada-final.md`, seção 3. A dona aceitou D
      nota segue a regra das frases "Na frase" (226). Refina a 225.
 254. **D6 (parcial)**: nota N33 de "Pegar transporte": ***à vélo*** é a forma tradicional e recomendada; ***en vélo*** é muito comum na fala (confiança média; fonte a dona); o texto não diz "incorreto".
      A nota ***très / super / hyper*** ("Tipos de moradia e cômodos") é **descartada** (notas do A1 −1). Falta responder: destino das frases `A1-3-p6` e `p7` (recomendação: *Quel est l'âge de ton père ?* fica em "Dizer a idade").
+255. **D1, *prendre* como cartão em "Verbos muito usados"** (módulo "Comer e beber", logo no começo; opção a): o cartão publicado `A1-14-v6` muda de unidade com a mesma chave; a unidade fica com
+     **7 verbos** (*aller, faire, vouloir, pouvoir, devoir, voir, prendre*), só reconhecimento (218). "Pegar transporte" (módulo "Na cidade") fica com 9 palavras, sem o rótulo "*prendre* (já visto)" como cartão
+     próprio. Revoga a parte da decisão 224 que mantinha o cartão em "Pegar transporte" e a recusa de pôr *prendre* na unidade nova; *je vais prendre* e *je voudrais* continuam expressões fixas na lista.
+     Não precisa trocar *je la prends*, o ditado `d3-p2` nem o Desafio `lt-a1m3-006` por causa de *prendre*. Se o tempo de "Comer e beber" passar de 3h45, a regra 16 (252) é revista ou o módulo reduz em outro ponto.
+256. **D6, frases `A1-3-p6` e `p7`**: *Quel est l'âge de ton père ?* fica em "Dizer a idade"; a outra segue o destino definido na revisão geral. Fecha a D6.
