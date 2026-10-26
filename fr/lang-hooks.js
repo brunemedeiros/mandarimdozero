@@ -1,6 +1,8 @@
 // E4: o que muda de um idioma estudado para outro e que o código compartilhado (shared/core) precisa saber.
 // Carregado antes do app.js. Funções chamam as do app.js só na hora do uso (setas), então a ordem de carga não importa.
-const LANG_HOOKS = {
+// Contrato de todos os ganchos (tipo, obrigatório/opcional, padrão): shared/core/lang-hooks-contrato.js.
+// (sem o contrato carregado, ex.: testes antigos que leem só este arquivo, o objeto passa como está)
+const LANG_HOOKS = (typeof defineLangHooks === 'function' ? defineLangHooks : (h) => h)({
 // --- E4 hooks ---
   speakAudioOnly: (...a) => speakFrenchAudioOnly(...a),
   speak: (...a) => speakFrench(...a),
@@ -209,4 +211,4 @@ const LANG_HOOKS = {
       },
     },
   },
-};
+});
