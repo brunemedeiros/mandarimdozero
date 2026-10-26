@@ -113,6 +113,10 @@ const LANG_HOOKS = (typeof defineLangHooks === 'function' ? defineLangHooks : (h
   refreshExtraCards: () => {},
   // Voz do idioma estudado (shared/core/voz.js): texto que vai para a voz do navegador e avisos deste site.
   ttsText: (text) => typeof speakableProfileText === 'function' ? speakableProfileText(text) : text,
+  // Prova do Ponto de verificação e Teste de Nível (shared/core/modulos-niveis.js): as chaves de texto que citam o francês
+  // (melhoria 2, 2026-10-26: antes eram o padrão do código comum; mesmas chaves, nada muda na tela).
+  checkpointExam: { keys: { word: 'fr.checkpoint.exam.word', phrase: 'fr.checkpoint.exam.phrase', listen: 'fr.checkpoint.exam.listen' } },
+  levelTestKeys: { sub: 'trail.levelTest.sub', intro: 'trail.levelTest.intro' },
   voiceMissingKey: 'toast.voiceMissingFr',
   audioRetryFailedKey: 'toast.audioPlayFailedThis',
 // --- /E4 hooks ---

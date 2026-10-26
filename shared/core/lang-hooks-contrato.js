@@ -117,10 +117,10 @@ const LANG_HOOKS_CONTRATO = {
   cardOriginTitle:       { tipo: 'function', obrigatorio: true, desc: 'título da origem do cartão (o fr e o zh passam a função comum)' },
 
   // ---------- Módulos, Ponto de verificação e Teste de Nível (shared/core/modulos-niveis.js, shared/checkpoint-exam.js) ----------
-  checkpointExam:   { tipo: 'object', /* obrigatorioSe: 'modulos' (melhoria 2) */ chaves: ['keys'], chavesOpcionais: ['word', 'phrase'],
+  checkpointExam:   { tipo: 'object', obrigatorioSe: 'modulos', chaves: ['keys'], chavesOpcionais: ['word', 'phrase'],
     desc: 'prova do Ponto de verificação/Teste de Nível: keys = { word, phrase, listen } (chaves de texto que citam o idioma); word(v)/phrase(p) para outra escrita (zh)' },
   checkpointScore:  { tipo: 'function', desc: 'nota de uma resposta da prova (zh: pinyin e tom); opcional' },
-  levelTestKeys:    { tipo: 'object', /* obrigatorioSe: 'testeDeNivel' (melhoria 2) */ textos: true, chaves: ['sub', 'intro'], desc: 'textos do Teste de Nível que citam o idioma' },
+  levelTestKeys:    { tipo: 'object', obrigatorioSe: 'testeDeNivel', textos: true, chaves: ['sub', 'intro'], desc: 'textos do Teste de Nível que citam o idioma' },
   examScreenOpened: { tipo: 'function', desc: 'a prova abriu na tela da lição (zh: esconde o Manual); opcional' },
 
   // ---------- Família ----------

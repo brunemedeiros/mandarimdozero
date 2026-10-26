@@ -103,6 +103,10 @@ for (const { site, appKey } of sites){
   check('gancho fora do contrato: acusa', C.verificarLangHooks(extra, sctx).some(p => p.includes('ganchoNovo')));
   const subRuim = carregarSite('fr', src.replace("unitDone: 'toast.unitComplete',", "unitDone: 'toast.unitComplete', novaChave: 'x',"));
   check('subchave nova em lessonKeys: acusa', C.verificarLangHooks(subRuim, sctx).some(p => p.includes('lessonKeys.novaChave')));
+  const semNivel = carregarSite('fr', src); delete semNivel.levelTestKeys; delete semNivel.checkpointExam;
+  const rN = C.verificarLangHooks(semNivel, sctx);
+  check('site com módulos e Teste de Nível sem checkpointExam/levelTestKeys: acusa os dois (melhoria 2)', rN.some(p => p.includes('checkpointExam')) && rN.some(p => p.includes('levelTestKeys')), rN);
+  check('site sem módulos nem Teste de Nível: não precisa deles', C.verificarLangHooks(semNivel, { familia: 'latin', modulos: false, testeDeNivel: false }).length === 0);
   const padroes = carregarSite('fr', src.replace("  recapExtra: () => '',\n", '').replace('  afterOpenUnit: () => {},\n', ''));
   check('gancho com padrão neutro que falta: defineLangHooks põe o padrão', padroes.recapExtra() === '' && typeof padroes.afterOpenUnit === 'function' && C.verificarLangHooks(padroes, sctx).length === 0);
 }
