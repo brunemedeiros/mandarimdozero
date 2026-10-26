@@ -1197,3 +1197,17 @@ Base: revisão de todas as decisões 1 a 227 pedida pela dona; ela aceitou **tod
 248. ***l'échange*** e ***la faute*** ficam na nota "Mais sobre aprender" ("Falar do aprendizado de línguas", módulo "Estudos e projetos", A2): palavras de apoio, não da função da unidade. Fecha o "a revisar".
 249. **Desculpa no presente com modal** (*Désolée, je ne peux pas, je dois travailler.*) aceita como exemplo de desculpa de "Convidar, aceitar, recusar e se desculpar" (módulo "Lazer, convites e passado", A1); o gratuito
      entende pela nota de "Falar de lazer". Fecha o "a revisar". A regra 4 da seção 2.1 do `08 v2` foi alinhada à do `15` (decisão 240).
+
+# Trigésima terceira rodada (2026-10-26): respostas à passada final do auditor
+
+Base: `auditoria/2026-10-26-a1-a2-passada-final.md`, seção 3. A dona aceitou D2 a D5 e respondeu parte da D6; a D1 (*prendre*) segue em discussão.
+
+250. **D2, fórmulas de diálogo**: aceitas como fórmula, sem cartão, no `excecoes.json` (232): *Ça te va ?* (vem de *ça va*), *Merci beaucoup*, *Parfait*, *Vous désirez ?*, *Autre chose ?*, *C'est tout*.
+     **Trocadas nos diálogos**: *cinq minutes* ("Perguntar e indicar o caminho"), *la bonne direction* e *centre-ville* ("Pegar transporte"); as frases "Na frase" com *centre-ville* ficam.
+251. **D3, palavras soltas com o limite de 12**: ***chercher*** vira cartão em "Comprar roupas" (módulo "Compras", 11 → 12, +5 min); ***le balcon*** entra na nota "Outras palavras de moradia"
+     ("Tipos de moradia e cômodos"); ***la clé*** vira cartão em "Móveis e objetos da casa" (10 → 11, ao lado de *La porte est fermée à clé.*). Contagens e tempos recalculados no próximo lote do editor.
+252. **D4, regra 16 no `15`**: teto de **3h45 por módulo**, com exceção registrada do último módulo de cada nível (A2 "Opinião, cultura e mundo", ~3h55).
+253. **D5, "vistas"**: **toda nota que mostra a expressão com tradução** (vocabulário, explicação, realidade ou cultural) conta como vista **nos diálogos**; não conta em ditados nem em Desafios. O exemplo dentro de
+     nota segue a regra das frases "Na frase" (226). Refina a 225.
+254. **D6 (parcial)**: nota N33 de "Pegar transporte": ***à vélo*** é a forma tradicional e recomendada; ***en vélo*** é muito comum na fala (confiança média; fonte a dona); o texto não diz "incorreto".
+     A nota ***très / super / hyper*** ("Tipos de moradia e cômodos") é **descartada** (notas do A1 −1). Falta responder: destino das frases `A1-3-p6` e `p7` (recomendação: *Quel est l'âge de ton père ?* fica em "Dizer a idade").
