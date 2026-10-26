@@ -33,6 +33,24 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
 - **O que não fazer:** não digitar total no `08` nem no json; não mudar número do json para o teste passar (registre em `ACHADOS.md`);
   não usar a posição ("M4.2") como id; o json ainda não alimenta o site (`fr/content.js` continua sendo o conteúdo publicado).
 
+## Papel das frases "Na frase" e validador "só palavras vistas" (decisões 226 e 233)
+- **Onde fica:** regra do papel em `fr/scripts/curriculo_papel.js` (`frasePodeAparecer(papel, contexto)`: `so_exemplo` só em ficha, Revisão e
+  exercício da lição; `essencial` em todo lugar; Ponto de verificação da unidade fechado para `so_exemplo` por escolha conservadora) e papéis
+  por chave em `docs/i18n/curriculo/dados/frases_na_frase.json` (começa vazio; marca-se junto com o conteúdo, decisão 227).
+  Validador em `fr/scripts/curriculo_palavras_vistas.js` (`palavrasVistasAte`, `validarTexto`), com dados em `dados/palavras_funcionais.json`
+  (cada grupo justificado; cartão vence a lista; grupo com `lema` só vale depois do cartão do lema) e `dados/formas_extras.json` (formas
+  irregulares e nomes de pessoa). Relatório: `node fr/scripts/curriculo_palavras_vistas.js --relatorio` grava `dados/RELATORIO-palavras-vistas.md`.
+- **Como mudar:** contexto novo entra em `CONTEXTOS` do `curriculo_papel.js` (lista única, o validador usa a mesma); onde a nota conta como
+  vista é `NOTAS_CONTAM_EM` (hoje só `dialogo`, decisões 225 e 253). Forma irregular que aparece como "incerta": acrescente em `formas_extras.json`.
+  Palavra funcional nova: grupo com justificativa. Exceção nova só em `excecoes.json`, com o OK da dona.
+- **Como testar:** `node tests/curriculo/test_palavras_vistas.js` e `node tests/curriculo/test_papel_frases.js` (casos sintéticos + mapa real).
+- **O que não fazer:** não usar o relatório como teste que falha (é a lista de reescrita, informativa); não editar o relatório à mão; não pôr
+  palavra de conteúdo em `palavras_funcionais.json` para "limpar" achado; não espalhar `if (papel === ...)` pelo app (chamar `frasePodeAparecer`).
+- **Limitações:** comparação por forma (gerador simples: gênero, número, presente regular, particípio, imperfeito); forma irregular fora de
+  `formas_extras.json` vira `incerta` só quando é de verbo visto. Expressão de várias palavras libera cada palavra solta. Notas só contam pelo
+  campo `palavras` do `mapa.json` (as de explicação, realidade e cultura ainda não listam palavras). Gramática não libera formas (ex.: *il faut*).
+  Exceções valem só na unidade citada (não acumulam). Nome próprio: maiúscula no meio da frase ou lista de nomes.
+
 ## Como testar
 - Testes por tema em `tests/<tema>/`; bateria completa e suítes instáveis: `.claude/rules/testes.md`.
 - Mudou progresso/trilha: rode `tests/curriculo-ids`, `tests/e4/test_progresso_ida_e_volta.js`, `tests/e4/test_core_carregado.js` e as capturas

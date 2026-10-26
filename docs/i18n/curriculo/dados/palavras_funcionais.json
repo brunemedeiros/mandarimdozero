@@ -1,0 +1,107 @@
+{
+  "_doc": "Palavras funcionais do francês para o validador \"só palavras vistas\" (decisão 233; fr/scripts/curriculo_palavras_vistas.js). São palavras gramaticais de classe fechada, que nenhuma frase consegue evitar e que o currículo não ensina como palavra solta (artigos, pronomes, preposições, conjunções, negação). Regras de leitura: (1) por padrão, se a palavra também é cartão de UMA palavra no mapa.json (ex.: 'je', 'dans', 'deux', 'combien'), o cartão vence: ela só conta como vista a partir da unidade do cartão; 'antes_do_cartao': true desliga isso para o grupo (ex.: artigos, porque o cartão 'un / une' ensina o número). (2) Grupo com 'lema' (formas de verbo) só conta a partir da unidade do cartão desse lema (ex.: formas de aller a partir de 'Verbos muito usados', A1-36); se o lema não é cartão no mapa, vale desde o começo. Mudou a lista? Justifique no grupo e rode node tests/curriculo/test_palavras_vistas.js. Formas aqui são escritas em minúsculas; forma elidida termina em apóstrofo reto (').",
+  "idioma": "fr",
+  "versao": "2026-10-26",
+  "grupos": [
+    {
+      "id": "artigos",
+      "justificativa": "Artigos definidos, indefinidos, partitivos e contraídos acompanham todo substantivo; o cartão já vem com o artigo. 'un / une' é cartão do número em 'Dizer a idade', por isso o grupo vale antes do cartão.",
+      "antes_do_cartao": true,
+      "palavras": ["le", "la", "les", "l'", "un", "une", "des", "du", "de", "d'", "au", "aux"]
+    },
+    {
+      "id": "pronomes",
+      "justificativa": "Pronomes pessoais, reflexivos, tônicos e adverbiais (y, en) e os demonstrativos neutros. 'je' e 'tu' são cartões em 'Dizer o nome e a nacionalidade': antes disso o cartão vence e eles contam como não vistos.",
+      "palavras": ["je", "j'", "tu", "il", "elle", "on", "nous", "vous", "ils", "elles", "me", "m'", "te", "t'", "se", "s'", "moi", "toi", "lui", "eux", "leur", "y", "en", "ce", "c'", "ça", "cela", "ceci", "t"]
+    },
+    {
+      "id": "determinantes",
+      "justificativa": "Possessivos e demonstrativos (ensinados em gramática, sem cartão).",
+      "palavras": ["mon", "ma", "mes", "ton", "ta", "tes", "son", "sa", "ses", "notre", "nos", "votre", "vos", "leurs", "cet", "cette", "ces"]
+    },
+    {
+      "id": "interrogativos_e_relativos",
+      "justificativa": "Palavras de pergunta e relativos (gramáticas 'palavras interrogativas', sem cartão). 'comment' e 'combien' são cartões: o cartão vence.",
+      "palavras": ["qui", "que", "qu'", "quoi", "où", "quel", "quelle", "quels", "quelles", "quand", "comment", "combien", "pourquoi", "est-ce"]
+    },
+    {
+      "id": "preposicoes",
+      "justificativa": "Preposições simples. As de lugar que são cartão em 'Dizer onde as coisas estão' (sur, sous, dans, devant, derrière, entre) e 'après'/'avant' seguem o cartão.",
+      "palavras": ["à", "de", "d'", "en", "dans", "sur", "sous", "avec", "pour", "par", "chez", "sans", "entre", "vers", "devant", "derrière", "pendant", "depuis", "avant", "après", "jusqu'"]
+    },
+    {
+      "id": "conjuncoes",
+      "justificativa": "Conjunções e ligações de frase.",
+      "palavras": ["et", "ou", "mais", "donc", "car", "si", "parce", "puis", "alors", "comme", "aussi", "ni"]
+    },
+    {
+      "id": "negacao_e_resposta",
+      "justificativa": "Negação (ne ... pas) e respostas sim/não, que aparecem desde a primeira frase de diálogo; 'très' e 'bien' como intensificadores.",
+      "palavras": ["ne", "n'", "pas", "oui", "non", "très", "bien", "plus", "moins"]
+    },
+    {
+      "id": "apresentativos",
+      "justificativa": "'voilà' e 'voici' apresentam algo (ex.: 'Voilà, ça fait cinq euros.'); não têm cartão e não se trocam por outra palavra.",
+      "palavras": ["voilà", "voici"]
+    },
+    {
+      "id": "etre",
+      "lema": "être",
+      "justificativa": "Formas de être (presente, particípio, imperfeito): contam a partir do cartão 'être'.",
+      "palavras": ["être", "suis", "es", "est", "sommes", "êtes", "sont", "été", "étais", "était", "étions", "étiez", "étaient", "sois", "soit"]
+    },
+    {
+      "id": "avoir",
+      "lema": "avoir",
+      "justificativa": "Formas de avoir (presente, particípio, imperfeito): contam a partir do cartão 'avoir'.",
+      "palavras": ["avoir", "ai", "as", "a", "avons", "avez", "ont", "eu", "avais", "avait", "avions", "aviez", "avaient"]
+    },
+    {
+      "id": "aller",
+      "lema": "aller",
+      "justificativa": "Formas de aller: contam a partir do cartão de 'Verbos muito usados' (decisão 216).",
+      "palavras": ["aller", "vais", "vas", "va", "allons", "allez", "vont", "allé", "allée", "allés", "allées"]
+    },
+    {
+      "id": "faire",
+      "lema": "faire",
+      "justificativa": "Formas de faire: contam a partir do cartão de 'Verbos muito usados'.",
+      "palavras": ["faire", "fais", "fait", "faisons", "faites", "font", "faite"]
+    },
+    {
+      "id": "vouloir",
+      "lema": "vouloir",
+      "justificativa": "Formas de vouloir (inclui 'voudrais'): contam a partir do cartão de 'Verbos muito usados'; antes disso, 'je voudrais' só passa onde excecoes.json aceita.",
+      "palavras": ["vouloir", "veux", "veut", "voulons", "voulez", "veulent", "voudrais", "voudrait", "voulu"]
+    },
+    {
+      "id": "pouvoir",
+      "lema": "pouvoir",
+      "justificativa": "Formas de pouvoir: contam a partir do cartão de 'Verbos muito usados'.",
+      "palavras": ["pouvoir", "peux", "peut", "pouvons", "pouvez", "peuvent", "pourrais", "pourrait", "pu"]
+    },
+    {
+      "id": "devoir",
+      "lema": "devoir",
+      "justificativa": "Formas de devoir: contam a partir do cartão de 'Verbos muito usados'.",
+      "palavras": ["devoir", "dois", "doit", "devons", "devez", "doivent", "dû"]
+    },
+    {
+      "id": "voir",
+      "lema": "voir",
+      "justificativa": "Formas de voir: contam a partir do cartão de 'Verbos muito usados'.",
+      "palavras": ["voir", "vois", "voit", "voyons", "voyez", "voient", "vu", "vue"]
+    },
+    {
+      "id": "prendre",
+      "lema": "prendre",
+      "justificativa": "Formas de prendre: contam a partir do cartão de 'Verbos muito usados' (decisão 255); antes disso, 'je vais prendre' só passa onde excecoes.json aceita.",
+      "palavras": ["prendre", "prends", "prend", "prenons", "prenez", "prennent", "pris", "prise"]
+    },
+    {
+      "id": "numeros_0_a_100",
+      "justificativa": "Números de 0 a 100 (os compostos com hífen, como 'vingt-cinq', são lidos parte por parte). Quase todos são cartões ('Dizer a idade', 'Perguntar a idade dos outros', 'Perguntar o preço e pagar'): o cartão vence, então cada número conta a partir da sua unidade.",
+      "palavras": ["zéro", "un", "une", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "vingt", "vingts", "trente", "quarante", "cinquante", "soixante", "cent"]
+    }
+  ]
+}

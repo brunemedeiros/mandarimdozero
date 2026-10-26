@@ -1,0 +1,32 @@
+{
+  "_doc": "Formas que o gerador automático não sabe fazer (verbos irregulares ou com mudança de radical), por cartão do mapa.json. Chave = a 'palavra' do cartão exatamente como está no mapa (ou uma das alternativas separadas por ' / '); valor = formas em minúsculas. A forma só conta como vista a partir da unidade desse cartão. Sem a forma aqui, o validador (fr/scripts/curriculo_palavras_vistas.js) põe a palavra em 'incertas', nunca em 'não vistas', quando ela começa com o radical de um cartão já visto. Formas de conjugação padrão do francês (confiança alta); forma nova entra aqui, não no código. 'nomes_proprios' = nomes de pessoa usados no conteúdo, que passam mesmo no começo da frase (no meio da frase, a maiúscula já basta).",
+  "idioma": "fr",
+  "versao": "2026-10-26",
+  "nomes_proprios": ["Ana", "Clara", "Jean", "Julie", "Léa", "Léo", "Manon", "Marc", "Nicolas", "Paul", "Silva", "Sofia", "Sophie", "Tom"],
+  "formas": {
+    "s'appeler": ["appelle", "appelles", "appellent", "appelé", "appelée"],
+    "épeler": ["épelle", "épelles", "épellent"],
+    "se lever": ["lève", "lèves", "lèvent", "levé", "levée"],
+    "préférer": ["préfère", "préfères", "préfèrent"],
+    "acheter": ["achète", "achètes", "achètent"],
+    "essayer": ["essaie", "essaies", "essaient"],
+    "payer": ["paie", "paies", "paient"],
+    "appeler": ["appelle", "appelles", "appellent"],
+    "boire": ["bois", "boit", "buvons", "buvez", "boivent", "bu"],
+    "dormir": ["dors", "dort", "dormons", "dormez", "dorment", "dormi"],
+    "sortir": ["sors", "sort", "sortons", "sortez", "sortent", "sorti", "sortie"],
+    "partir": ["pars", "part", "partons", "partez", "partent", "parti", "partie"],
+    "lire": ["lis", "lit", "lisons", "lisez", "lisent", "lu"],
+    "venir de": ["viens", "vient", "venons", "venez", "viennent", "venu", "venue"],
+    "le travail": ["travaux"],
+    "les yeux": ["œil"],
+    "beau / belle": ["bel", "beaux", "belles"],
+    "vieux / vieille": ["vieil", "vieilles"],
+    "mourir": ["meurs", "meurt", "mourons", "mourez", "meurent", "mort", "morte"],
+    "naître": ["nais", "naît", "naissons", "naissez", "naissent", "né", "née"],
+    "savoir": ["sais", "sait", "savons", "savez", "savent", "su"],
+    "connaître": ["connais", "connaît", "connaissons", "connaissez", "connaissent", "connu"],
+    "dire": ["dis", "dit", "disons", "dites", "disent"],
+    "apprendre": ["apprends", "apprend", "apprenons", "apprenez", "apprennent", "appris"]
+  }
+}
