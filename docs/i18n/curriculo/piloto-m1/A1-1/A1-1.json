@@ -1,0 +1,410 @@
+{
+  "_doc": "Rascunho revisado da unidade A1-1 'Cumprimentar e se despedir' (módulo 'Apresentar-se', A1-m1), piloto do currículo novo (decisões 236 e 266 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md). Só pt-BR: os campos 'en' ficam null até a aprovação da dona (decisão 81). Nada daqui está em fr/content.js nem na camada courses/fr-pt-BR/layer.js. Chave estável: a publicada em fr/published_ids.json; item novo = 'nova' (a chave definitiva sai de node fr/scripts/congelar_chaves.js quando o conteúdo entrar no site). Leitura para a dona: A1-1.md. Validação 'só palavras vistas': node docs/i18n/curriculo/piloto-m1/A1-1/validar.js (usa fr/scripts/curriculo_palavras_vistas.js).",
+  "status": "needs_review",
+  "versao": "2026-10-26",
+  "unidade": {
+    "id": "A1-1",
+    "id_funcao": "cumprimentar-e-se-despedir",
+    "modulo": "A1-m1",
+    "posicao": "M1.1",
+    "tipo": "vocabulario",
+    "funcao": "cumprimentar, agradecer, pedir para repetir",
+    "titulo": { "pt-BR": "Cumprimentar e se despedir", "en": null, "muda": false },
+    "objetivo": {
+      "publicado": "Cumprimentar alguém, se despedir e agradecer numa interação básica.",
+      "pt-BR": "Cumprimentar, se despedir, agradecer e pedir para repetir, com amigos e com desconhecidos.",
+      "en": null,
+      "muda": true,
+      "motivo": "a função do mapa inclui 'pedir para repetir' e o 'Consigo' do módulo pede escolher o registro (regra 1)"
+    },
+    "gramatica_do_mapa": "fórmulas (je ne comprends pas, vous pouvez): ficam só em frases 'Na frase' marcadas so_exemplo (ver frases_na_frase)",
+    "versao_gratis": "nenhuma (decisão 260: a ligação fica só na gramática)",
+    "gratis_premium": "Tudo da unidade é grátis (lições, notas, V/F, diálogo, Revisão da unidade). Desafios do módulo são Premium (paywall hoje desligado); o ditado do módulo segue aberto (trail)."
+  },
+
+  "cartoes": [
+    { "ordem": 0, "chave": "A1-1-v0", "fr": "bonjour", "traducao": { "pt-BR": "olá / bom dia", "en": null }, "licao": "ola-e-tchau", "origem": "publicado", "muda": "igual", "frase_do_cartao": "A1-1-d1" },
+    { "ordem": 1, "chave": "A1-1-v3", "fr": "salut", "traducao": { "pt-BR": "oi / tchau (informal)", "en": null }, "licao": "ola-e-tchau", "origem": "publicado", "muda": "sobe da lição 2 para a 1, logo depois de bonjour (regra 1: par formal/informal em cartões seguidos)", "frase_do_cartao": "A1-1-p6" },
+    { "ordem": 2, "chave": "A1-1-v1", "fr": "bonsoir", "traducao": { "pt-BR": "boa noite (saudação)", "en": null }, "licao": "ola-e-tchau", "origem": "publicado", "muda": "igual (passa a ser o 3º cartão)", "frase_do_cartao": "A1-1-p4" },
+    { "ordem": 3, "chave": "A1-1-v2", "fr": "au revoir", "traducao": { "pt-BR": "tchau / até logo", "en": null }, "licao": "informal-agradecer", "origem": "publicado", "muda": "desce da lição 1 para a 2", "frase_do_cartao": "nova-p2" },
+    { "ordem": 4, "chave": "A1-1-v4", "fr": "merci", "traducao": { "pt-BR": "obrigado(a)", "en": null }, "licao": "informal-agradecer", "origem": "publicado", "muda": "igual", "frase_do_cartao": "A1-1-p1" },
+    { "ordem": 5, "chave": "A1-1-v5", "fr": "de rien", "traducao": { "pt-BR": "de nada", "en": null }, "licao": "informal-agradecer", "origem": "publicado", "muda": "igual", "frase_do_cartao": "A1-1-p7" },
+    { "ordem": 6, "chave": "A1-1-v6", "fr": "s'il vous plaît / s'il te plaît", "traducao": { "pt-BR": "por favor (formal / informal)", "en": null, "publicado": "por favor (formal)" }, "licao": "cortesia-e-como-vai", "origem": "publicado", "muda": "vira cartão em par com a mesma chave (decisão 48)", "frase_do_cartao": "A1-1-p8" },
+    { "ordem": 7, "chave": "A1-1-v7", "fr": "pardon", "traducao": { "pt-BR": "desculpe / com licença", "en": null }, "licao": "cortesia-e-como-vai", "origem": "publicado", "muda": "igual (frase do cartão passa a ser a nova 'Pardon ? Vous pouvez répéter ?')", "frase_do_cartao": "nova-p1" },
+    { "ordem": 8, "chave": "A1-1-v8", "fr": "ça va", "traducao": { "pt-BR": "tudo bem", "en": null }, "licao": "cortesia-e-como-vai", "origem": "publicado", "muda": "igual", "frase_do_cartao": "A1-1-p3" },
+    { "ordem": 9, "chave": "A1-1-v9", "fr": "à bientôt", "traducao": { "pt-BR": "até breve", "en": null }, "licao": "cortesia-e-como-vai", "origem": "publicado", "muda": "igual", "frase_do_cartao": "nova-p3" }
+  ],
+  "_frase_do_cartao": "Hoje o app escolhe a 1ª frase ou fala que contém a palavra (findMatchingPhrase). Fixar a frase por cartão é o campo exampleK (ajuste pequeno, item 11 da 2.3 do 04, ainda não existe). Sem ele: bonjour mostraria A1-1-p0, au revoir A1-1-p5, pardon A1-1-p2, à bientôt A1-1-d3.",
+
+  "licoes": [
+    {
+      "id": "ola-e-tchau", "ordem": 1,
+      "titulo": { "publicado": "Dizer olá e até logo", "pt-BR": "Dizer olá", "en": null },
+      "funcao": "cumprimentar, escolhendo entre formal (bonjour, bonsoir) e informal (salut)",
+      "cartoes": ["A1-1-v0", "A1-1-v3", "A1-1-v1"],
+      "sequencia": ["cartão bonjour", "cartão salut", "nota letras-mudas-no-fim", "V/F da nota", "cartão bonsoir", "nota bonjour-vs-bonsoir", "V/F da nota", "checagem rápida", "praticando"],
+      "exercicios": [
+        { "tipo": "checagem_rapida", "conteudo": "1 'O que significa?' por cartão (3), 4 opções em português + 'Não sei'" },
+        { "tipo": "praticando", "conteudo": "cada cartão em 'O que significa?', 'Ouça e escolha o significado certo' ou 'Digite o que ouviu' (gerado pelo app); erro guarda a palavra para a Revisão da unidade" }
+      ]
+    },
+    {
+      "id": "informal-agradecer", "ordem": 2,
+      "titulo": { "publicado": "Cumprimentar informalmente e agradecer", "pt-BR": "Agradecer e se despedir", "en": null },
+      "funcao": "agradecer, responder ao agradecimento e se despedir",
+      "cartoes": ["A1-1-v2", "A1-1-v4", "A1-1-v5"],
+      "sequencia": ["ponte (1 ou 2 palavras da lição 1)", "cartão au revoir", "cartão merci", "cartão de rien", "nota bienvenue-quebec", "checagem rápida", "praticando"],
+      "exercicios": [
+        { "tipo": "ponte", "conteudo": "'O que significa?' com salut e bonsoir" },
+        { "tipo": "checagem_rapida", "conteudo": "1 por cartão (3)" },
+        { "tipo": "praticando", "conteudo": "gerado pelo app, como na lição 1" }
+      ]
+    },
+    {
+      "id": "cortesia-e-como-vai", "ordem": 3,
+      "titulo": { "publicado": "Pedir por favor e perguntar como vai", "pt-BR": "Pedir por favor e perguntar como vai", "en": null },
+      "funcao": "pedir por favor (formal e informal), pedir desculpa ou para repetir, perguntar como vai e se despedir até breve",
+      "cartoes": ["A1-1-v6", "A1-1-v7", "A1-1-v8", "A1-1-v9"],
+      "inclui_dialogo": true,
+      "sequencia": ["ponte (lição 2)", "cartão s'il vous plaît / s'il te plaît", "nota svp-informal (N02)", "V/F da nota (2 itens)", "cartão pardon", "nota pardon-excusez-moi", "V/F da nota", "cartão ça va", "nota ca-va-entonacao", "cartão à bientôt", "nota a-bientot-informal (N03)", "checagem rápida", "praticando", "diálogo 'Encontro na rua'", "Você entendeu? (3 checagens)", "nota la-bise-cumprimento (N04)"],
+      "exercicios": [
+        { "tipo": "ponte", "conteudo": "'O que significa?' com merci e de rien" },
+        { "tipo": "checagem_rapida", "conteudo": "1 por cartão (4)" },
+        { "tipo": "praticando", "conteudo": "gerado pelo app" },
+        { "tipo": "dialogo_e_voce_entendeu", "conteudo": "ver dialogos[0].check" }
+      ]
+    },
+    {
+      "id": "checkpoint", "ordem": 4,
+      "titulo": { "publicado": "Ponto de verificação", "pt-BR": "Revisão da unidade", "en": null, "decisao": 47 },
+      "funcao": "revisar e cobrar a unidade (produção); só frases essenciais (decisão 265)",
+      "conteudo": "ver revisao_da_unidade"
+    }
+  ],
+
+  "dialogos": [
+    {
+      "titulo": { "pt-BR": "Encontro na rua", "en": null },
+      "cena": { "pt-BR": "De manhã, na rua do bairro: Léa encontra o vizinho Hugo.", "en": null },
+      "licao": "cortesia-e-como-vai",
+      "muda": "igual ao publicado (texto, chaves e checagens); todas as palavras são cartões da unidade ou funcionais",
+      "falantes": { "A": { "nome": "Léa", "emoji": "👩" }, "B": { "nome": "Hugo", "emoji": "👨" } },
+      "falas": [
+        { "chave": "A1-1-d0", "falante": "A", "fr": "Bonjour !", "pt-BR": "Olá!", "en": null },
+        { "chave": "A1-1-d1", "falante": "B", "fr": "Bonjour ! Ça va ?", "pt-BR": "Olá! Tudo bem?", "en": null },
+        { "chave": "A1-1-d2", "falante": "A", "fr": "Ça va bien, merci ! Et toi ?", "pt-BR": "Vou bem, obrigada! E você?", "en": null },
+        { "chave": "A1-1-d3", "falante": "B", "fr": "Ça va. À bientôt !", "pt-BR": "Tudo bem. Até breve!", "en": null }
+      ],
+      "check": [
+        { "tipo": "fill", "fala": 3, "opcoes_erradas": ["Bonsoir !", "S'il vous plaît !"] },
+        { "tipo": "listen", "fala": 0, "opcoes_erradas": ["À bientôt !", "Au revoir !"] },
+        { "tipo": "understand", "pergunta": { "pt-BR": "Como Léa e Hugo se despedem no final?", "en": null },
+          "opcoes": [{ "pt-BR": "Dizem \"até breve\"", "en": null, "certa": true }, { "pt-BR": "Dizem \"de nada\"", "en": null }, { "pt-BR": "Pedem \"por favor\"", "en": null }] }
+      ]
+    }
+  ],
+
+  "frases_na_frase": [
+    { "chave": "A1-1-p0", "fr": "Bonjour ! Je m'appelle {nome}.", "pt-BR": "Olá! Eu me chamo {nome}.", "en": null, "ilustra": "A1-1-v0", "papel": "so_exemplo", "motivo": "je, m'appelle são cartões de 'Dizer o nome e a nacionalidade'; o tema nome é da unidade seguinte", "cenario": { "pt-BR": "Você encontra alguém novo numa festa e quer se apresentar. O que você diz?", "en": null }, "muda": "papel novo; cenário só em exercício da lição (não entra na Revisão da unidade)" },
+    { "chave": "A1-1-p1", "fr": "Merci beaucoup !", "pt-BR": "Muito obrigada!", "en": null, "ilustra": "A1-1-v4", "papel": "so_exemplo", "motivo": "beaucoup só vira cartão em 'Pedir quantidades na feira' (como beaucoup de); a fórmula Merci beaucoup é exceção só em 'Dizer o dia e combinar' (A1-8)", "cenario": { "pt-BR": "Um amigo te ajuda a carregar as compras. Como você agradece?", "en": null }, "muda": "papel novo" },
+    { "chave": "A1-1-p2", "fr": "Pardon, je ne comprends pas.", "pt-BR": "Desculpe, eu não entendo.", "en": null, "ilustra": "A1-1-v7", "papel": "so_exemplo", "motivo": "je, comprendre (sem cartão no mapa); é a fórmula 'je ne comprends pas' do mapa", "cenario": { "pt-BR": "Alguém fala muito rápido em francês e você não entendeu nada. O que você diz?", "en": null }, "muda": "papel novo" },
+    { "chave": "A1-1-p3", "fr": "Ça va bien, et toi ?", "pt-BR": "Vou bem, e você?", "en": null, "ilustra": "A1-1-v8", "papel": "essencial", "motivo": "responder e devolver a pergunta é a função da unidade; só palavras da unidade e funcionais", "cenario": { "pt-BR": "Uma amiga pergunta \"Ça va?\". Você quer responder que está bem e perguntar de volta. O que você diz?", "en": null }, "muda": "papel novo" },
+    { "chave": "A1-1-p4", "fr": "Bonsoir ! Comment allez-vous ?", "pt-BR": "Boa noite! Como vai o senhor / a senhora?", "en": null, "ilustra": "A1-1-v1", "papel": "so_exemplo", "motivo": "allez (aller) só vira cartão em 'Verbos muito usados'; mostra a versão formal de 'como vai'", "muda": "papel novo; tradução com espaço em volta da barra" },
+    { "chave": "A1-1-p5", "fr": "Au revoir, à demain !", "pt-BR": "Tchau, até amanhã!", "en": null, "ilustra": "A1-1-v2", "papel": "so_exemplo", "motivo": "demain é cartão de 'Dizer o dia e combinar'", "muda": "papel novo" },
+    { "chave": "A1-1-p6", "fr": "Salut ! Ça va bien ?", "pt-BR": "Oi! Tudo bem?", "en": null, "ilustra": "A1-1-v3", "papel": "essencial", "motivo": "cumprimentar no registro informal; só palavras vistas", "muda": "papel novo" },
+    { "chave": "A1-1-p7", "fr": "De rien, c'est normal.", "pt-BR": "De nada, imagina.", "en": null, "publicado": "De nada, é o de menos.", "ilustra": "A1-1-v5", "papel": "so_exemplo", "motivo": "c'est (être) e normal ainda não são cartões", "muda": "papel novo; tradução mais coloquial (confiança média, a dona escolhe)" },
+    { "chave": "A1-1-p8", "fr": "Un café, s'il vous plaît.", "pt-BR": "Um café, por favor.", "en": null, "ilustra": "A1-1-v6", "papel": "so_exemplo", "motivo": "café é cartão de 'Gostos e pedidos no café'", "muda": "papel novo" },
+    { "chave": "nova", "id_rascunho": "nova-p1", "fr": "Pardon ? Vous pouvez répéter ?", "pt-BR": "Desculpe? Pode repetir?", "en": null, "ilustra": "A1-1-v7", "papel": "so_exemplo", "motivo": "pouvez (pouvoir) só vira cartão em 'Verbos muito usados'; répéter não tem cartão. Para virar essencial precisa entrar em excecoes.json como fórmula (decisão 232, OK da dona)", "muda": "nova (mapa: 'frase nova Pardon ? Vous pouvez répéter ?')" },
+    { "chave": "nova", "id_rascunho": "nova-p2", "fr": "Merci, au revoir !", "pt-BR": "Obrigada, tchau!", "en": null, "ilustra": "A1-1-v2", "papel": "essencial", "motivo": "agradecer e se despedir ao sair de uma loja ou padaria; só palavras da unidade", "cenario": { "pt-BR": "Você pagou o pão e está saindo da padaria. O que você diz?", "en": null }, "muda": "nova" },
+    { "chave": "nova", "id_rascunho": "nova-p3", "fr": "Salut, à bientôt !", "pt-BR": "Tchau, até breve!", "en": null, "ilustra": "A1-1-v9", "papel": "essencial", "motivo": "despedir-se de um amigo; só palavras da unidade", "muda": "nova" }
+  ],
+
+  "notas": [
+    {
+      "id": "bonjour-vs-bonsoir", "id_mapa": "N01", "nova": false,
+      "titulo": { "pt-BR": "\"Bonjour\" ou \"Bonsoir\"?", "en": null },
+      "tipo": "Exp", "kind": null, "category": null,
+      "confianca": "alta", "confianca_mapa": "n/r",
+      "fonte": "uso padrão (bonjour durante o dia, bonsoir à noite; salut informal a qualquer hora); texto publicado",
+      "gancho": { "afterKey": "A1-1-v1", "afterVocabIdx_no_rascunho": 2 },
+      "texto": { "pt-BR": "Usamos <strong>bonjour</strong> de manhã até o fim da tarde: é a saudação padrão do dia. À noite, ao chegar num lugar, trocamos para <strong>bonsoir</strong>. Já <strong>salut</strong> funciona a qualquer hora, mas só com amigos e pessoas próximas, nunca com desconhecidos ou em contextos formais.", "en": null },
+      "exemplos": [
+        { "fr": "bonjour", "pt-BR": "olá / bom dia", "en": null },
+        { "fr": "bonsoir", "pt-BR": "boa noite (saudação)", "en": null },
+        { "fr": "salut", "pt-BR": "oi (informal)", "en": null }
+      ],
+      "audios_previstos": ["bonjour", "bonsoir", "salut"],
+      "versao_gratis_de": null,
+      "vf": [
+        { "afirmacao": { "pt-BR": "À noite, ao chegar numa loja, dizemos <i>bonsoir</i>.", "en": null }, "resposta": true,
+          "porque": { "pt-BR": "<b>Bonsoir</b> é o cumprimento da noite; <b>bonjour</b> vale de manhã até o fim da tarde.", "en": null },
+          "fr": "Bonsoir !", "traducao": { "pt-BR": "Boa noite!", "en": null } }
+      ],
+      "muda": "texto sem travessão; ganha o exemplo salut (a nota já falava dele); V/F novo; gatilho continua depois de bonsoir"
+    },
+    {
+      "id": "letras-mudas-no-fim", "nova": true,
+      "titulo": { "pt-BR": "Letras que ficam mudas no fim", "en": null },
+      "tipo": "Pron", "kind": "pronuncia", "category": null,
+      "confianca": "alta",
+      "fonte": "regra geral da pronúncia do francês (consoante final muda; c, r, f, l costumam soar); maquete v4 aprovada",
+      "gancho": { "afterKey": "A1-1-v3", "afterVocabIdx_no_rascunho": 1 },
+      "texto": { "pt-BR": "Em francês, muitas consoantes do fim da palavra não soam: o <strong>t</strong> de <strong>salut</strong>, o <strong>s</strong> de <strong>vous</strong>, o <strong>t</strong> de <strong>plaît</strong>. Escreva, mas não pronuncie. Nem todas ficam mudas: o <strong>r</strong> de <strong>bonjour</strong> soa.", "en": null },
+      "exemplos": [
+        { "fr": "salut", "pt-BR": "oi / tchau (informal)", "en": null },
+        { "fr": "s'il vous plaît", "pt-BR": "por favor (formal)", "en": null },
+        { "fr": "bonjour", "pt-BR": "olá / bom dia", "en": null }
+      ],
+      "audios_previstos": ["salut", "s'il vous plaît", "bonjour"],
+      "versao_gratis_de": null,
+      "vf": [
+        { "afirmacao": { "pt-BR": "O <i>t</i> de <i>salut</i> se pronuncia.", "en": null }, "resposta": false,
+          "porque": { "pt-BR": "Em <i>salut</i> o <b>t</b> é mudo: escreva, mas não pronuncie. Já o <b>r</b> de <i>bonjour</i> soa.", "en": null },
+          "fr": "Salut !", "traducao": { "pt-BR": "Oi! / Tchau!", "en": null } }
+      ],
+      "muda": "nova (mapa); a maquete usava 'Merci beaucoup !' como exemplo e o p de beaucoup; troquei por palavras desta unidade e pus o contraexemplo do r (para a regra não sair geral demais)"
+    },
+    {
+      "id": "bienvenue-quebec", "nova": true,
+      "titulo": { "pt-BR": "Bienvenue: no Quebec, também é \"de nada\"", "en": null },
+      "tipo": "Real", "kind": "reality", "category": "regional",
+      "variants": [{ "regiao": "França", "forma": "de rien" }, { "regiao": "Quebec", "forma": "bienvenue" }],
+      "confianca": "alta",
+      "fonte": "uso corrente no francês do Quebec (calque de 'you're welcome'); maquete v4",
+      "gancho": { "afterKey": "A1-1-v5", "afterVocabIdx_no_rascunho": 5 },
+      "texto": { "pt-BR": "Na França, a resposta mais comum a <strong>merci</strong> é <strong>de rien</strong>. No Quebec, também é muito comum responder <strong>bienvenue</strong>, que no resto do mundo francófono quer dizer \"bem-vindo(a)\".", "en": null },
+      "exemplos": [
+        { "fr": "Merci ! · Bienvenue !", "fala": "Merci ! Bienvenue !", "pt-BR": "Obrigada! · De nada! (Quebec)", "en": null }
+      ],
+      "audios_previstos": ["Merci ! Bienvenue !"],
+      "versao_gratis_de": null,
+      "vf": [],
+      "muda": "nova (mapa); sem V/F, como na maquete"
+    },
+    {
+      "id": "svp-informal", "id_mapa": "N02", "nova": false,
+      "titulo": { "pt-BR": "\"S'il vous plaît\" no dia a dia", "en": null },
+      "tipo": "Real", "kind": "reality", "category": "informal",
+      "confianca": "alta",
+      "fonte": "texto publicado; decisão 26 (fica como está)",
+      "gancho": { "afterKey": "A1-1-v6", "afterVocabIdx_no_rascunho": 6 },
+      "texto": { "pt-BR": "Na fala informal ou em mensagens de texto, <strong>s'il vous plaît</strong> quase sempre encolhe: com amigos vira <strong>s'il te plaît</strong> (a forma \"tu\", não \"vous\"), e por escrito é comum ver só <strong>STP</strong>. A forma completa com \"vous\" continua sendo a mais segura com desconhecidos.", "en": null },
+      "exemplos": [
+        { "fr": "s'il te plaît", "pt-BR": "por favor (informal, entre amigos)", "en": null },
+        { "fr": "STP", "fala": "s'il te plaît", "pt-BR": "abreviação de texto para \"s'il te plaît\"", "en": null, "publicado": "abreviação de texto pra \"s'il te plaît\"" }
+      ],
+      "audios_previstos": ["s'il te plaît"],
+      "versao_gratis_de": null,
+      "vf": [
+        { "afirmacao": { "pt-BR": "Em conversa com amigos, usamos <i>s'il te plaît</i> em vez de <i>s'il vous plaît</i>.", "en": null }, "resposta": true,
+          "porque": { "pt-BR": "Com amigos a forma é a do <i>tu</i>: <b>s'il te plaît</b>. Com desconhecidos, <b>s'il vous plaît</b>.", "en": null },
+          "fr": "S'il te plaît !", "traducao": { "pt-BR": "Por favor! (entre amigos)", "en": null } },
+        { "afirmacao": { "pt-BR": "Em mensagem de texto, é comum digitar só <i>svp</i> (ou <i>stp</i> com amigos).", "en": null }, "resposta": true,
+          "porque": { "pt-BR": "Por escrito, <b>SVP</b> = <i>s'il vous plaît</i> e <b>STP</b> = <i>s'il te plaît</i>. Na fala, diga a forma inteira.", "en": null },
+          "fr": "SVP = s'il vous plaît", "fala": "s'il vous plaît", "traducao": { "pt-BR": "por favor (abreviação só na escrita)", "en": null } }
+      ],
+      "muda": "texto igual (decisão 26); 'pra' vira 'para' no exemplo (aprovado em lote, 08 seção 2.2); V/F da maquete, com 'Un café, s'il te plaît !' trocado por 'S'il te plaît !' (café ainda não é cartão)"
+    },
+    {
+      "id": "pardon-excusez-moi", "nova": true,
+      "titulo": { "pt-BR": "Pardon, excusez-moi ou excuse-moi?", "en": null },
+      "tipo": "Real", "kind": "reality", "category": "informal",
+      "confianca": "alta",
+      "fonte": "decisão 223 (nota com pardon, excusez-moi / excuse-moi e menção a désolé(e)); usos correntes do francês",
+      "gancho": { "afterKey": "A1-1-v7", "afterVocabIdx_no_rascunho": 7 },
+      "texto": { "pt-BR": "<strong>Pardon</strong> serve para pedir licença, pedir desculpa por algo pequeno (um esbarrão) e, com a voz subindo, para pedir que a pessoa repita: <strong>Pardon ?</strong> Para chamar a atenção de alguém ou pedir desculpa com mais cuidado, diga <strong>excusez-moi</strong> a desconhecidos e <strong>excuse-moi</strong> a amigos e família. Para dizer \"sinto muito\", use <strong>désolé</strong> (ou <strong>désolée</strong>, se quem fala é mulher).", "en": null },
+      "exemplos": [
+        { "fr": "Pardon ?", "pt-BR": "Como? / Pode repetir?", "en": null },
+        { "fr": "Excusez-moi !", "pt-BR": "Com licença! / Desculpe! (com desconhecidos)", "en": null },
+        { "fr": "Excuse-moi !", "pt-BR": "Desculpa! (com amigos)", "en": null },
+        { "fr": "Désolé ! · Désolée !", "fala": "Désolé ! Désolée !", "pt-BR": "Sinto muito!", "en": null }
+      ],
+      "audios_previstos": ["Pardon ?", "Excusez-moi !", "Excuse-moi !", "Désolé !", "Désolée !"],
+      "versao_gratis_de": null,
+      "vf": [
+        { "afirmacao": { "pt-BR": "Para chamar a atenção de um desconhecido, dizemos <i>excuse-moi</i>.", "en": null }, "resposta": false,
+          "porque": { "pt-BR": "Com desconhecidos, <b>excusez-moi</b>; <b>excuse-moi</b> é para amigos e família.", "en": null },
+          "fr": "Excusez-moi !", "traducao": { "pt-BR": "Com licença!", "en": null } }
+      ],
+      "muda": "nova (decisão 223; vinha da unidade 'Convidar, aceitar, recusar e se desculpar'; não se repete em 'Perguntar e indicar o caminho')"
+    },
+    {
+      "id": "ca-va-entonacao", "nova": true,
+      "titulo": { "pt-BR": "Ça va ? sobe, Ça va. desce", "en": null },
+      "tipo": "Pron", "kind": "pronuncia", "category": null,
+      "confianca": "alta",
+      "observacao_confianca": "alta no conteúdo; o áudio depende do teste de entonação do TTS (decisão 11): Chirp 3 HD pode ler as duas iguais",
+      "fonte": "decisões 32 e 33; entonação de pergunta total por subida no fim (padrão do francês falado)",
+      "gancho": { "afterKey": "A1-1-v8", "afterVocabIdx_no_rascunho": 8 },
+      "texto": { "pt-BR": "A mesma frase serve para perguntar e para responder. Na pergunta, a voz <strong>sobe</strong> no fim ↗; na resposta, ela <strong>desce</strong> ↘. Ouça as duas:", "en": null },
+      "exemplos": [
+        { "fr": "Ça va ? ↗", "fala": "Ça va ?", "pt-BR": "Tudo bem? (pergunta)", "en": null },
+        { "fr": "Ça va. ↘", "fala": "Ça va.", "pt-BR": "Tudo bem. (resposta)", "en": null }
+      ],
+      "botao_extra": { "pt-BR": "Ouvir as duas em seguida", "en": null, "toca": ["Ça va ?", "Ça va."] },
+      "audios_previstos": ["Ça va ?", "Ça va."],
+      "risco": "TTS pode não variar a entonação; testar 'Ça va ?' x 'Ça va.' no laboratório de áudio do fr ANTES de publicar; se não variar, usar áudio gravado ou ajustado (SSML/prosódia). Sem os dois áudios diferentes, a nota não entra (regra 6: mostrar os dois lados com áudio).",
+      "versao_gratis_de": null,
+      "vf": [],
+      "muda": "nova (mapa); sem V/F (decisão do 14: V/F só em explicação e realidade)"
+    },
+    {
+      "id": "a-bientot-informal", "id_mapa": "N03", "nova": false,
+      "titulo": { "pt-BR": "\"À bientôt\" entre amigos vira \"à plus\"", "en": null },
+      "tipo": "Real", "kind": "reality", "category": "informal",
+      "confianca": "alta",
+      "fonte": "texto publicado; 'à plus' [s pronunciado] e 'A+' são correntes no francês da França",
+      "gancho": { "afterKey": "A1-1-v9", "afterVocabIdx_no_rascunho": 9 },
+      "texto": { "pt-BR": "Com amigos, <strong>à bientôt</strong> é comum, mas no dia a dia (e quase sempre em mensagem de texto) a despedida mais usada é <strong>à plus</strong>, que por escrito costuma virar só <strong>A+</strong>. Aqui o <strong>s</strong> de <i>plus</i> soa. Com desconhecidos ou em contexto formal, <strong>à bientôt</strong> continua sendo a escolha certa.", "en": null },
+      "exemplos": [
+        { "fr": "à plus", "pt-BR": "até mais (informal, entre amigos)", "en": null },
+        { "fr": "A+", "fala": "à plus", "pt-BR": "abreviação de texto para \"à plus\"", "en": null, "publicado": "abreviação de texto pra \"à plus\"" }
+      ],
+      "audios_previstos": ["à plus"],
+      "versao_gratis_de": null,
+      "vf": [],
+      "muda": "sem travessão e sem 'pra'; frase nova 'Aqui o s de plus soa' (a nota de letras mudas acabou de dizer que o s final costuma ser mudo)"
+    },
+    {
+      "id": "la-bise-cumprimento", "id_mapa": "N04", "nova": false,
+      "titulo": { "pt-BR": "Por que os franceses se cumprimentam com beijinhos no rosto?", "en": null },
+      "tipo": "Cult", "kind": "culture", "category": "costume",
+      "confianca": "alta",
+      "fonte": "texto publicado; costume amplamente documentado (número de beijos varia por região)",
+      "gancho": { "after": "dialogue" },
+      "texto": { "pt-BR": "Além de dizer <strong>bonjour</strong>, é muito comum cumprimentar amigos e familiares com <strong>la bise</strong>: um ou mais beijinhos leves no rosto. O número varia por região: 2 é o mais comum, mas em algumas regiões são 3 ou até 4. Entre desconhecidos ou em contexto formal ou profissional, o normal é apertar a mão.", "en": null },
+      "exemplos": [
+        { "fr": "faire la bise", "pt-BR": "cumprimentar com beijinho(s) no rosto", "en": null }
+      ],
+      "audios_previstos": ["faire la bise"],
+      "versao_gratis_de": null,
+      "vf": [],
+      "muda": "sem travessões e sem 'formal/profissional' com barra; sentido igual"
+    }
+  ],
+
+  "verdadeiro_falso_da_unidade": [
+    { "publicado": { "subject": "Merci beaucoup !", "claim": "Isso é o que dizemos quando alguém nos ajuda muito.", "motivo_da_troca": "beaucoup não é visto na posição (A1-1); a frase continua como 'Na frase' só exemplo (A1-1-p1)" } },
+    { "subject": "De rien !", "emoji": "🙂", "afirmacao": { "pt-BR": "Respondemos isso quando alguém diz <i>merci</i>.", "en": null }, "resposta": true,
+      "porque": { "pt-BR": "Correto: <strong>de rien</strong> significa \"de nada\", a resposta a <i>merci</i>.", "en": null }, "chave": "nova" },
+    { "subject": "Bonsoir !", "emoji": "🌙", "afirmacao": { "pt-BR": "Dizemos isso para cumprimentar alguém de manhã.", "en": null }, "resposta": false,
+      "porque": { "pt-BR": "<strong>Bonsoir</strong> é o cumprimento da noite. De manhã, dizemos <strong>bonjour</strong>.", "en": null }, "chave": "nova" }
+  ],
+
+  "revisao_da_unidade": {
+    "licao": "checkpoint",
+    "titulo": { "pt-BR": "Revisão da unidade", "en": "Unit review" },
+    "regra": "contexto ponto_verificacao_unidade: fechado para frases so_exemplo (decisão 265); notas não contam como vistas (265); a 💡 mostra as 8 notas da unidade",
+    "itens": [
+      { "tipo": "rodada_por_palavra", "conteudo": "1 rodada por cartão (10), gerada pelo app" },
+      { "tipo": "ordenar_blocos", "frase": "A1-1-p3", "blocos": ["Ça va", "bien,", "et toi ?"], "iscas": ["merci"] },
+      { "tipo": "ordenar_blocos", "frase": "A1-1-p6", "blocos": ["Salut !", "Ça va bien ?"], "iscas": ["Bonsoir !"] },
+      { "tipo": "ordenar_blocos", "frase": "nova-p2", "blocos": ["Merci,", "au revoir !"], "iscas": ["de rien"] },
+      { "tipo": "ordenar_blocos", "frase": "nova-p3", "blocos": ["Salut,", "à bientôt !"], "iscas": ["bonjour"] },
+      { "tipo": "cenario", "id": "cen-repetir", "enunciado": { "pt-BR": "A Léa falou rápido demais e você não entendeu. Você quer que ela repita. O que você diz?", "en": null },
+        "opcoes": [{ "fr": "Pardon ?", "certa": true }, { "fr": "De rien !" }, { "fr": "Au revoir !" }],
+        "resposta_painel": { "fr": "Pardon ?", "pt-BR": "Como? / Pode repetir?" },
+        "nota": "função 'pedir para repetir' cobrada só com palavra vista; a maquete usava 'Pardon ? Vous pouvez répéter ?', que agora é só exemplo (pouvez, répéter)" },
+      { "tipo": "cenario", "id": "cen-padaria", "frase": "nova-p2", "enunciado": { "pt-BR": "Você pagou o pão e está saindo da padaria. O que você diz?", "en": null },
+        "opcoes": [{ "fr": "Merci, au revoir !", "certa": true }, { "fr": "Pardon ?" }, { "fr": "De rien !" }] },
+      { "tipo": "cenario", "id": "cen-ca-va", "frase": "A1-1-p3", "enunciado": { "pt-BR": "Uma amiga pergunta \"Ça va?\". Você quer responder que está bem e perguntar de volta. O que você diz?", "en": null },
+        "opcoes": [{ "fr": "Ça va bien, et toi ?", "certa": true }, { "fr": "Merci, au revoir !" }, { "fr": "Pardon ?" }] },
+      { "tipo": "cenario", "id": "cen-jantar", "enunciado": { "pt-BR": "São nove da noite e você chega para jantar na casa dos pais de um amigo. Como você cumprimenta?", "en": null },
+        "opcoes": [{ "fr": "Bonsoir !", "certa": true }, { "fr": "Salut !" }, { "fr": "Bonjour !" }],
+        "resposta_painel": { "fr": "Bonsoir !", "pt-BR": "Boa noite!" },
+        "nota": "cobra horário (bonsoir x bonjour) e registro (salut com desconhecidos mais velhos)" },
+      { "tipo": "cenario", "id": "cen-de-rien", "enunciado": { "pt-BR": "Um amigo diz \"Merci !\". O que você responde?", "en": null },
+        "opcoes": [{ "fr": "De rien !", "certa": true }, { "fr": "Pardon ?" }, { "fr": "S'il te plaît !" }] },
+      { "tipo": "verdadeiro_falso", "conteudo": "os 2 itens de verdadeiro_falso_da_unidade" },
+      { "tipo": "lacuna_tocando", "frase": "A1-1-d2", "texto": "Ça va bien, ___ ! Et toi ?", "certa": "merci", "opcoes": ["merci", "pardon", "de rien"] },
+      { "tipo": "lacuna_tocando", "frase": "nova-p3", "texto": "Salut, à ___ !", "certa": "bientôt", "opcoes": ["bientôt", "revoir", "rien"] }
+    ],
+    "fica_de_fora": "A1-1-p0, p1, p2, p4, p5, p7, p8 e nova-p1 (so_exemplo): aparecem na ficha, na Revisão (cartões) e em exercícios da lição que não pedem digitar. Os cenários publicados de p0, p1 e p2 passam para a lição (exige código: hoje o cenário só existe no Ponto de verificação da unidade)."
+  },
+
+  "ditados": {
+    "decisao": "trail, no MÓDULO (escopo do ditado é o módulo, shared/challenge-policy.js); nenhum ditado é da unidade A1-1",
+    "publicados_do_modulo": ["d1 (grátis)", "d1-p1 (Premium)", "d1-p2 (Premium)"],
+    "conferencia": "validados no fim do módulo 'Apresentar-se' (posição A1-g11, contexto ditado); resultado em A1-1.md, seção Validação",
+    "candidato_para_o_modulo": {
+      "fr": "Bonsoir ! Ça va ? Ça va bien, merci. Au revoir, à bientôt !",
+      "tarefa": { "pt-BR": "Um encontro rápido à noite", "en": null },
+      "status": "sugestão: só palavras da A1-1; serve se a dona quiser um ditado curto de aquecimento no começo do módulo (não existe hoje)"
+    }
+  },
+
+  "desafios": {
+    "_doc": "Checklist challengeChecklist('frances', 'unit') decidido por categoria (skill criar-desafios). Fonte atual: fr/scripts/challenges_import/modulo-a1-m1-content.json (itens com unitId A1-1). Estado no banco não conferido (conferir antes de trocar texto de item já importado).",
+    "checklist": [
+      { "categoria": "dictation", "decisao": "n/a na unidade", "motivo": "ditado é por módulo (trail); ver 'ditados'" },
+      { "categoria": "listen_translate", "decisao": "premium", "quantidade": 2 },
+      { "categoria": "writing_marks", "decisao": "premium", "quantidade": 2, "motivo": "acento real em plaît (^) e à bientôt (` e ^)" },
+      { "categoria": "expression", "decisao": "premium", "quantidade": 4, "motivo": "M1 fica com 5 (1 em 'Dizer o nome e a nacionalidade' + 4 aqui); 'Ça marche !' sai da unidade" },
+      { "categoria": "cloze_grammar", "decisao": "n/a", "motivo": "a unidade não ensina ponto de gramática; o Complete a frase do módulo se decide com as gramáticas do módulo (être e avoir, masculino e feminino)" }
+    ],
+    "listen_translate": [
+      { "status": "igual", "fr": "Bonsoir, ça va ?", "hide": ["va"], "refs": ["Boa noite, tudo bem?", "Boa noite, tudo bom?", "Boa noite, como vai?"],
+        "explicacao": { "pt-BR": "\"Bonsoir\" é o cumprimento da noite; \"ça va ?\" é a pergunta informal \"tudo bem?\".", "en": null } },
+      { "status": "troca", "publicado": "Un café, s'il vous plaît.", "motivo": "café não é visto no módulo 'Apresentar-se'",
+        "fr": "Merci, au revoir !", "hide": ["revoir"], "refs": ["Obrigado, tchau!", "Obrigada, tchau!", "Obrigado, até logo!", "Obrigada, até logo!", "Valeu, tchau!"],
+        "explicacao": { "pt-BR": "\"Merci, au revoir !\" é o jeito comum de agradecer e se despedir ao sair de uma loja.", "en": null } }
+    ],
+    "accent": [
+      { "status": "igual", "texto": "s'il vous plaît", "explicacao": { "pt-BR": "\"i\" de \"plaît\" tem acento circunflexo.", "en": null } },
+      { "status": "novo", "texto": "à bientôt", "explicacao": { "pt-BR": "\"à\" tem acento grave e o \"o\" de \"bientôt\" tem acento circunflexo.", "en": null } }
+    ],
+    "expression": [
+      { "status": "exemplo trocado", "expression": "Comme ci, comme ça", "register": "neutre",
+        "meaningPt": "Mais ou menos; assim, assim.",
+        "exampleText": "Ça va ? — Comme ci, comme ça.",
+        "secondExampleText": "Et toi, ça va ? — Comme ci, comme ça.", "secondExample_publicado": "Mon français ? Comme ci, comme ça.",
+        "microPrompt": "Ça va ? — __________.", "microAnswer": "comme ci, comme ça",
+        "meaningFr": "Ni bien ni mal ; moyen.",
+        "question": "Que veut dire « comme ci, comme ça » ?", "options": ["Moyen, ni bien ni mal", "Très bien", "Très mal", "Tout de suite"], "correctAnswer": "Moyen, ni bien ni mal",
+        "explanationFr": "On répond « comme ci, comme ça » à la question « Ça va ? » quand ça ne va ni bien ni mal.",
+        "confianca_registro": "alta" },
+      { "status": "exemplo trocado", "expression": "Pas mal", "register": "neutre",
+        "meaningPt": "Nada mal; até que está bem.",
+        "exampleText": "Ça va ? — Pas mal, merci !",
+        "secondExampleText": "Salut ! Ça va ? — Pas mal, et toi ?", "secondExample_publicado": "Ce café est pas mal.",
+        "microPrompt": "Ça va ? — __________, merci !", "microAnswer": "pas mal",
+        "meaningFr": "Plutôt bien.",
+        "question": "Que veut dire « pas mal » ?", "options": ["Plutôt bien", "Très mauvais", "Très cher", "Très tard"], "correctAnswer": "Plutôt bien",
+        "explanationFr": "« Pas mal » veut dire « plutôt bien ». C'est une réponse courante à « Ça va ? ».",
+        "confianca_registro": "alta" },
+      { "status": "exemplo trocado", "expression": "Pas de problème !", "register": "neutre",
+        "meaningPt": "Sem problema! Tranquilo!",
+        "exampleText": "Pardon ! — Pas de problème !",
+        "secondExampleText": "Merci ! — Pas de problème !", "secondExample_publicado": "Tu peux m'aider ? — Pas de problème.",
+        "microPrompt": "Pardon ! — Pas de __________ !", "microAnswer": "problème",
+        "meaningFr": "Ce n'est pas grave ; d'accord.",
+        "question": "Que veut dire « Pas de problème ! » ?", "options": ["Ce n'est pas grave", "C'est très difficile", "Je suis fatigué", "Je ne sais pas"], "correctAnswer": "Ce n'est pas grave",
+        "explanationFr": "On répond « Pas de problème ! » à un « Pardon ! » ou à un « Merci ! ».", "explanationFr_publicado": "On répond « Pas de problème ! » à un « Pardon ! » ou à une demande d'aide.",
+        "confianca_registro": "alta" },
+      { "status": "novo", "expression": "Bonne journée !", "register": "neutre",
+        "meaningPt": "Tenha um bom dia! (para se despedir de manhã ou à tarde)",
+        "exampleText": "Merci, au revoir ! — Bonne journée !",
+        "secondExampleText": "Salut, à bientôt ! Bonne journée !",
+        "microPrompt": "Merci, au revoir ! — Bonne __________ !", "microAnswer": "journée",
+        "meaningFr": "On le dit pour dire au revoir pendant la journée.",
+        "question": "Quand dit-on « Bonne journée ! » ?", "options": ["Pour dire au revoir le matin ou l'après-midi", "Pour dire bonjour le soir", "Pour dire merci", "Pour demander pardon"], "correctAnswer": "Pour dire au revoir le matin ou l'après-midi",
+        "explanationFr": "Le soir, on dit « Bonne soirée ! ».",
+        "confianca_registro": "alta" },
+      { "status": "sai da unidade", "expression": "Ça marche !", "register": "familier",
+        "motivo": "função de aceitar proposta, não de cumprimentar; os exemplos ('Un café ensemble ?', 'Je t'appelle ce soir.') usam palavras de outros módulos. Sugestão: 'Dizer o dia e combinar' ou 'Convidar, aceitar, recusar e se desculpar'." }
+    ],
+    "cloze_grammar": []
+  },
+
+  "audios_novos_previstos": ["Ça va ?", "Ça va.", "Pardon ?", "Excusez-moi !", "Excuse-moi !", "Désolé !", "Désolée !", "Merci ! Bienvenue !", "à plus", "s'il te plaît / s'il vous plaît (cartão em par)", "S'il te plaît !", "Pardon ? Vous pouvez répéter ?", "Merci, au revoir !", "Salut, à bientôt !", "De rien !", "Bonsoir !", "faire la bise", "Bonne journée ! (Desafio)", "Merci, au revoir ! (Ouça e traduza)", "à bientôt (Acentuação)"],
+
+  "camadas_a_mexer_quando_aprovado": [
+    "fr/content.js (ordem dos cartões nas lições, cartão em par, frases novas com chave de congelar_chaves.js, concepts novos, trueFalseExercises)",
+    "courses/fr-pt-BR/layer.js (títulos de lição, objetivo, notas, traduções; DELIBERATE_PT_CHANGES em tests/i18n)",
+    "camada en (depois da aprovação, decisão 81)",
+    "docs/i18n/curriculo/dados/frases_na_frase.json (papel das frases -p)",
+    "fr/scripts/challenges_import/modulo-a1-m1-content.json + build_modulo.py",
+    "áudio (skill audio-tts) e teste de entonação de Ça va ? x Ça va.",
+    "node scripts/gerar_mapa_cron.js (mudou a ordem dos cartões nas lições)"
+  ]
+}
