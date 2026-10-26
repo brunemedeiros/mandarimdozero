@@ -72,7 +72,8 @@ function erros(s){
   check(`C2 fr: typedAttemptHTML comum = fr antigo (${REF}) em ${n} casos (${frTexts.length} textos do fr/content.js)`, diff.length === 0 && n > 1000, diff);
   console.log(`  C2 fr: ${n} comparações com o fr antigo, ${diff.length} diferenças`);
   check('C2 fr: "allemand / allemand" marca o "e" que faltou', /conj-gap/.test(novo.typedAttemptHTML('allemand / allemand', 'allemand / allemande')));
-  check('C2 fr: conjAlign do fr/app.js usa alinharLetras comum', /function conjAlign\(a, b\)\{\n\s+return alinharLetras\(a, b\);/.test(read('fr/app.js')));
+  // Etapa 5a da paridade (2026-10-23): conjAlign foi com a Conjugação para shared/conjugacao.js.
+  check('C2 fr: conjAlign (shared/conjugacao.js) usa alinharLetras comum', /function conjAlign\(a, b\)\{\n\s+return alinharLetras\(a, b\);/.test(read('shared/conjugacao.js')));
   check('C2 fr: fr/app.js não tem mais typedAttemptHTML próprio', !/^function typedAttemptHTML\(/m.test(read('fr/app.js')));
 }
 
@@ -124,7 +125,9 @@ function erros(s){
   const h = zh.typedAttemptHTML('ni3 hao', 'nǐ hǎo');
   check('C2 zh: "ni3 hao" por "nǐ hǎo" mostra "nǐ" convertido e marca só o "a" sem tom', h === '<div class="typed-attempt">nǐ h<span class="conj-x">a</span>o</div>', h);
   check('C2 zh: "Digite o que ouviu" e a lacuna digitada passam attemptHTML ao painel',
-    (zhSrc.match(/attemptHTML: typedAttemptHTML\(typedRaw, ex\.(item|correctBlock)\.p\)/g) || []).length === 2);
+    // paridade 5d: os exercícios de digitar são comuns (shared/core/licao-exercicios.js); o zh compara o pinyin (typedAnswer.expected)
+    (read('shared/core/licao-exercicios.js').match(/attemptHTML: typedAttemptHTML\(typed, LANG_HOOKS\.typedAnswer\.expected\(ex\.(item|correctBlock)\)\)/g) || []).length === 2
+    && /expected: \(x\) => x\.p,/.test(read('zh/lang-hooks.js')));
   check('C2: shared/licao-feedback.css carregado pelos dois sites e com .typed-attempt/.conj-x/.conj-gap',
     ['fr', 'zh'].every(s => read(s + '/index.html').includes('href="../shared/licao-feedback.css"') && read(s + '/index.html').includes('src="../shared/core/licao-feedback.js"'))
     && ['.typed-attempt', '.conj-x', '.conj-gap'].every(c => read('shared/licao-feedback.css').includes(c)));
@@ -139,7 +142,7 @@ for (const site of ['fr', 'zh']){
   c.STEP_STATE.conceptsShown.add('k1');
   check(`C3 ${site}: conceito visto = cita o título`, c.trueFalseHint(unit) === keys.seen + JSON.stringify({ title: 'Título A' }));
   check(`C3 ${site}: unidade sem concepts = dica geral`, c.trueFalseHint({}) === keys.generic);
-  check(`C3 ${site}: buildExerciseHint usa trueFalseHint`, /if \(ex\.format === 'trueFalse'\)\{\n\s+return trueFalseHint\(unit\);/.test(read(site + '/app.js')));
+  check(`C3 ${site}: buildExerciseHint usa trueFalseHint`, /if \(ex\.format === 'trueFalse'\)\{\n\s+return trueFalseHint\(unit\);/.test(read(site + '/app.js') + read('shared/core/licao-exercicios.js'))); // paridade 5d: comum
 }
 {
   // Texto: as chaves dos dois sites dizem o mesmo (pt-BR e en).
@@ -165,7 +168,7 @@ for (const site of ['fr', 'zh']){
   m = mk(3); c.markReorderSlots(m.el, [1, 3, 0], shuffled, correctOrder, true);
   check(`C4 ${site}: acerto deixa tudo verde`, m.slots.every(s => s.cls[0] === 'correct'));
   check(`C4 ${site}: estado do bloco ok/near/bad`, [c.reorderBlockStatus(A, 0, correctOrder), c.reorderBlockStatus(B, 0, correctOrder), c.reorderBlockStatus(X, 1, correctOrder)].join() === 'ok,near,bad');
-  check(`C4 ${site}: checkReorderAnswer chama markReorderSlots`, /markReorderSlots\(slotsEl, chosenSequence, ex\.shuffledBlocks, correctOrder, isCorrect\)/.test(read(site + '/app.js')));
+  check(`C4 ${site}: checkReorderAnswer chama markReorderSlots`, /markReorderSlots\(slotsEl, chosenSequence, ex\.shuffledBlocks, correctOrder, isCorrect\)/.test(read(site + '/app.js') + read('shared/core/licao-exercicios.js'))); // paridade 5d: comum
 }
 
 // ---------------------------------------------------------------- C5 velocidade do mp3
@@ -173,7 +176,8 @@ for (const [site, fn] of [['fr', 'speakFrenchAudioOnly'], ['zh', 'speakChineseAu
   const calls = [];
   const c = ctxNovo(site, { PREGEN_AUDIO_RATE: 0.9, AUDIO_MANIFEST: { 'olá': 'x.mp3' }, playPregeneratedAudio: (...a) => calls.push(a) });
   check(`C5 ${site}: LANG_HOOKS.pregenRate() = 0.9`, c.LANG_HOOKS.pregenRate() === 0.9);
-  vm.runInContext(declaracao(read(site + '/app.js'), fn), c);
+  // paridade 5d: a voz é comum (shared/core/voz.js); o app.js tem o nome de sempre como repasse de uma linha
+  vm.runInContext(declaracao(read('shared/core/voz.js'), 'speakStudyAudioOnly') + '\n' + new RegExp('^function ' + fn + '\\(.*$', 'm').exec(read(site + '/app.js'))[0], c);
   c[fn]('olá', null, false);
   check(`C5 ${site}: ${fn} toca o mp3 com a velocidade do gancho (0.9)`, calls.length === 1 && calls[0][3] === 0.9, calls);
 }
@@ -182,9 +186,10 @@ for (const [site, fn] of [['fr', 'speakFrenchAudioOnly'], ['zh', 'speakChineseAu
 {
   const zhSrc = read('zh/app.js');
   check('D6 zh: sem "⏭ 跳过" fixo', !zhSrc.includes('跳过'));
-  check('D6 zh: selo de pulada usa trail.unit.skippedBadge', zhSrc.includes("${t('trail.unit.skippedBadge')}</span>"));
+  check('D6 zh: selo de pulada usa trail.unit.skippedBadge', (zhSrc + read('shared/core/trilha-licao.js')).includes("${t('trail.unit.skippedBadge')}</span>")); // paridade 5d: buildUnitBlock comum
   for (const site of ['fr', 'zh']){
-    const src = read(site + '/app.js');
+    // paridade 5d: renderSpeedReview é comum (shared/core/licao-base.js); o texto conferido é o app.js + o core
+    const src = read(site + '/app.js') + '\n' + read('shared/core/licao-base.js');
     check(`D6 ${site}: Revisão rápida sem "pts" fixo`, !/\$\{SPEED_STATE\.score\} pts/.test(src));
     check(`D6 ${site}: Revisão rápida usa review.speed.points (3 lugares)`, (src.match(/t\('review\.speed\.points', \{ n: SPEED_STATE\.score \}\)/g) || []).length === 3);
   }

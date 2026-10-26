@@ -140,6 +140,67 @@ reset role;
 insert into r select (select match_state from st where event_id='p2') = 'linked'
   and exists (select 1 from teacher_class_logs where student_id = '11700000-0000-0000-0000-0000000000c1' and start_time = '10:00'), 'Evan vinculado: aula aparece com 10:00';
 
+-- 118: evento não reconhecido (aluna fora da lista) fica na caixa e entra sozinho quando a aluna ganha conta e vínculo
+set local role service_role;
+select gcal_ingest('11700000-0000-0000-0000-0000000000a1', 'trab@x', jsonb_build_array(
+  pg_temp.ev('z1', 'Zoe - aula', '2026-10-28T14:00:00-03:00', '2026-10-28T15:00:00-03:00')), null, false);
+reset role;
+insert into r select (select match_state from google_calendar_events where event_id = 'z1') = 'review', '118: aluna fora da lista: evento fica para revisar';
+insert into auth.users(id, email) values ('11700000-0000-0000-0000-0000000000e1','zoe117@x.invalid');
+insert into profiles(user_id, display_name) values ('11700000-0000-0000-0000-0000000000e1','Zoe Lima')
+ on conflict (user_id) do update set display_name = excluded.display_name;
+insert into teacher_students(teacher_id, student_id, language_app_key, status) values
+ ('11700000-0000-0000-0000-0000000000a1','11700000-0000-0000-0000-0000000000e1','frances','active');
+set local role service_role;
+select gcal_retry_waiting('11700000-0000-0000-0000-0000000000a1');
+reset role;
+insert into r select (select match_state from google_calendar_events where event_id = 'z1') = 'linked'
+  and exists (select 1 from teacher_class_logs where student_id = '11700000-0000-0000-0000-0000000000e1' and class_date = '2026-10-28' and start_time = '14:00'),
+  '118: Zoe vinculada: o evento da caixa vira aula na próxima leitura';
+
+-- 119: Pular por agora e Fora do site
+set local role service_role;
+select gcal_ingest('11700000-0000-0000-0000-0000000000a1', 'trab@x', jsonb_build_array(
+  pg_temp.ev('x1', 'Agendamento - Prof. Brune (Liz J)', '2026-10-29T09:00:00-03:00', '2026-10-29T10:00:00-03:00',
+             '{"attendees":[{"email":"liz@x.invalid","name":"Liz J"}]}'),
+  pg_temp.ev('x2', 'Agendamento - Prof. Brune (Liz J)', '2026-11-05T09:00:00-03:00', '2026-11-05T10:00:00-03:00',
+             '{"attendees":[{"email":"liz@x.invalid","name":"Liz J"}]}'),
+  pg_temp.ev('y1', 'Aulas de francês da Bia', '2026-10-30T09:00:00-03:00', '2026-10-30T10:00:00-03:00')), null, false);
+reset role;
+insert into v select 'X1', id::text from google_calendar_events where event_id = 'x1';
+insert into v select 'Y1', id::text from google_calendar_events where event_id = 'y1';
+select pg_temp.as_user('11700000-0000-0000-0000-0000000000a1'); set local role authenticated;
+insert into r select google_calendar_resolve(pg_temp.g('Y1')::bigint, 'skip') = 'skip', '119: pular por agora';
+insert into r select (google_calendar_status() -> 'counts' ->> 'skipped')::int = 1
+  and exists (select 1 from jsonb_array_elements(google_calendar_review_items()) i where (i ->> 'id')::bigint = pg_temp.g('Y1')::bigint and i ->> 'skipped_at' is not null),
+  '119: pulado sai da contagem e aparece em Pulados';
+insert into r select google_calendar_resolve(pg_temp.g('X1')::bigint, 'outside', null, null, true) = 'ignored', '119: fora do site (lembrar)';
+reset role;
+insert into r select (select count(*) from google_calendar_events where event_id in ('x1','x2') and match_state = 'ignored' and match_reason = 'regra: fora do site') = 2
+  and exists (select 1 from google_calendar_rules where key_type = 'email' and key = 'liz@x.invalid' and action = 'ignore' and ignore_kind = 'outside')
+  and not exists (select 1 from teacher_class_logs l join google_calendar_events e on e.id = l.google_event_ref where e.event_id in ('x1','x2')),
+  '119: regra pelo e-mail vale para os 2 eventos da pessoa, sem criar aula';
+set local role service_role;
+select gcal_ingest('11700000-0000-0000-0000-0000000000a1', 'trab@x', jsonb_build_array(
+  pg_temp.ev('x3', 'Agendamento - Prof. Brune (Liz J)', '2026-11-12T09:00:00-03:00', '2026-11-12T10:00:00-03:00',
+             '{"attendees":[{"email":"liz@x.invalid","name":"Liz J"}]}')), null, false);
+reset role;
+insert into r select (select match_state = 'ignored' and match_reason = 'regra: fora do site' and title is not null from google_calendar_events where event_id = 'x3'),
+  '120: evento novo da mesma pessoa: fora do site, com o nome guardado para a aba Fora do site';
+select pg_temp.as_user('11700000-0000-0000-0000-0000000000a1'); set local role authenticated;
+insert into r select (google_calendar_status() -> 'counts' ->> 'outside')::int = 3
+  and (select count(*) from jsonb_array_elements(google_calendar_review_items()) i where i ->> 'match_reason' = 'regra: fora do site') = 3,
+  '120: aba Fora do site com os 3 eventos da pessoa';
+insert into r select google_calendar_resolve(pg_temp.g('X1')::bigint, 'restore') = 'restore', '120: trazer de volta';
+reset role;
+insert into r select (select count(*) from google_calendar_events where event_id in ('x1','x2','x3') and match_state = 'review') = 3
+  and exists (select 1 from google_calendar_rules where key = 'liz@x.invalid' and not active),
+  '120: trazer de volta desliga a regra e os 3 eventos voltam para revisar';
+select pg_temp.as_user('11700000-0000-0000-0000-0000000000a1'); set local role authenticated;
+insert into r select google_calendar_resolve(pg_temp.g('Y1')::bigint, 'unskip') = 'unskip', '119: voltar para a lista';
+insert into r select (google_calendar_status() -> 'counts' ->> 'skipped')::int = 0, '119: depois de voltar, nenhum pulado';
+reset role;
+
 -- link de agenda: professora conectada não recebe as aulas do Google (já estão na agenda dela); sem horário = dia inteiro
 insert into teacher_class_logs(teacher_id, student_id, language_app_key, class_date, topic)
  values ('11700000-0000-0000-0000-0000000000a1','11700000-0000-0000-0000-0000000000b1','frances', current_date - 2, 'Sem horário, sem Google');

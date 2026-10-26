@@ -8,9 +8,12 @@ paths:
 
 # Front-end fr/zh (app.js, index.html, CSS)
 
-- `fr/app.js` e `zh/app.js` são espelhados: mudança em um quase sempre vale no outro (com as adaptações de idioma:
-  zh tem hanzi+pinyin separados, `speakChinese`, `pinyinTonePickerHTML`; fr tem `speakFrench`, `frAccentPickerHTML`).
-  Desafios e Ditados só existem no fr.
+- Lição, exercícios, diálogo, Revisão (cartões e Revisão rápida), voz, salvar/carregar, conquistas, trilha, configurações e a
+  casca do app são **comuns** em `shared/core/` (`licao-base`, `licao-dialogo`, `licao-exercicios`, `trilha-licao`,
+  `estado-salvar`, `revisao-cartoes`, `app-comum`, `voz`; família latina em `shared/core/familias/latina-licao.js`); o que muda
+  por idioma vem de `LANG_HOOKS` (`<site>/lang-hooks.js`). Nunca copiar para um `app.js` (que só tem dados/configuração e o
+  próprio do idioma: hanzi, pinyin, histórias no zh). Guarda: `tests/paridade-sites/test_quase_iguais.js` (paridade 5d).
+  Desafios e Ditados só existem no fr (os motores são comuns, ver abaixo).
 - **Tokens de cor**: nomes iguais podem ter valores diferentes. Em fr, `--seal-red` é AZUL (#3498D6) e
   `--on-seal-red` é quase preto; em zh é vermelho e branco. Ler o `:root` do arquivo antes de usar. Texto sobre
   `--error-red`/`--jade` usa `--on-vivid`. Cor nova vira token definido nos 3 blocos de tema (`:root`,
@@ -18,6 +21,7 @@ paths:
 - Toda cor de fundo nova: screenshot Playwright em fr claro, fr escuro, zh claro, zh escuro (skill `teste-navegador`).
 - Alvos de toque >= 44px no celular (só em `@media`), sem rolagem horizontal em 390px.
 - Texto vindo de usuário/autor: sempre `escapeHTML()` (escapa aspas; usado em atributos também).
+- URL de mídia de cartão (imagem/áudio) no HTML: sempre `safeMediaUrl()`/`flashcardImageHTML()` (`shared/core/midia-segura.js`), nunca crua. Guarda: `tests/revisao-seguranca/`.
 - Texto visível novo passa por `t()`/`shared/i18n` (ver `.claude/rules/i18n.md`); português não muda sem aprovação.
 - `let`/`const` top-level de `<script>` são bindings léxicos: não redeclarar o mesmo nome em dois scripts da página
   (ex.: `CARD_TYPE_UI_META` só em `admin-flashcards.js`); `window.X` não enxerga `let X`.
@@ -38,6 +42,23 @@ paths:
 - **Unidade de gramática** (`type:"grammar"`) e **exercício de cenário**: motor comum em `shared/core/gramatica-cenario.js` (CSS em
   `shared/gramatica-cenario.css`); o que muda por idioma vem de `LANG_HOOKS` (`grammarAnswerVerdict`, `scenarioOptionHTML`, `phraseAnswerHTML`...).
   Guarda: `tests/paridade-sites/test_gramatica_cenario*.js`.
+- **Módulos e níveis** (Ponto de verificação do módulo e o pulo, Revisão do módulo, Teste de Nível, seletor de nível, trilha/Mapa por
+  módulos, tela de módulo concluído): motor comum em `shared/core/modulos-niveis.js` (CSS em `shared/modulos-niveis.css`, depois do `<style>`),
+  vale para todo site que declarar `MODULES`/`LEVEL_TESTS`; prova por idioma em `LANG_HOOKS.checkpointExam`/`checkpointScore`. Nunca copiar
+  para um `app.js`. Guarda: `tests/paridade-sites/test_modulos_niveis*.js`.
+- **Conjugação** (escolha, busca, prática, correção, teclado, resultado, abas Praticar | Jogos, selo dos Jogos, contadores das missões):
+  motor comum em `shared/conjugacao.js` (CSS em `shared/conjugacao.css`, depois do `<style>`; jogos em `shared/conj-games.js`); o que é do
+  idioma vai na config do site (`fr/conj-config.js`, `registerConjugation`). Nunca copiar para um `app.js`; o zh não carrega (não conjuga).
+  Guarda: `tests/paridade-sites/test_conjugacao*.js`.
+- **Ditados** (lista, linha "Revisão do A1" da trilha, player, correção, resultado, registro da tentativa): motor comum em
+  `shared/ditados.js` (CSS em `shared/ditados.css`, depois do `<style>`); o que é do idioma (ditados, família latina, voz, teclado, mp3,
+  abreviações, ganchos dos Desafios) vai em `fr/ditados-config.js` (`registerDictations`). Nunca copiar para um `app.js`; o zh não
+  carrega (decisão da dona pendente). Guarda: `tests/paridade-sites/test_ditados*.js`.
+- **Desafios** (catálogo, Free x Premium, textos `chT`, revisão espaçada, correção de cada tipo, telas do aluno, linha "Desafios do Módulo N"
+  da trilha, admin e importação): motor comum em `shared/desafios.js`, `shared/desafios-telas.js` e `shared/desafios-admin.js` (CSS em
+  `shared/desafios.css`, logo depois do `<style>`); o que é do idioma (família da Acentuação, teclado, tabela, textos que citam o idioma) vai em
+  `fr/desafios-config.js` (`registerChallenges`). Nunca copiar para um `app.js`; o zh não carrega (decisão da dona pendente).
+  Guarda: `tests/paridade-sites/test_desafios*.js`.
 - **Lembrete de revisão do rodapé** (`maybeShowReviewReminder`, `shared/core/revisao-decks.js`): o dia só é gravado depois de o banner ficar visível uns segundos ou ser clicado/dispensado
   (`markReviewReminderSeen`); em lição (`lesson-focus`) nem aparece nem gasta o dia; reavalia ao voltar para a aba e ao sair da lição. Guarda: `tests/lembrete-revisao/`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").

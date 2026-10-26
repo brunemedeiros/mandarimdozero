@@ -67,7 +67,7 @@ async function openAs(page, kind, seedCount = 0){
       L(`selo do limite: "${E.badge}"`, r.badge === E.badge, r.badge);
       L(`limite ${E.unlimited ? 'sem teto' : '20 por conta'}`, E.unlimited ? (r.unlimited === true && r.limit === null) || (r.unlimited === true) : (r.unlimited === false && r.limit === 20), r);
       L(`aviso dos tipos com o botão de e-mail ${E.types === 1 ? 'aparece' : 'não aparece'}`, r.hint === (E.types === 1), r.hint);
-      L(`Deck público ${E.deck ? 'abre' : 'mostra o aviso com o botão'}`, r.deckCan === E.deck && (E.deck ? r.gate === '' : /data-premium-contact/.test(r.gate) && /mailto:brunemed1310@gmail\.com/.test(r.gate)), r.gate.slice(0, 200));
+      L(`Deck público ${E.deck ? 'abre' : 'mostra o aviso com o botão'}`, r.deckCan === E.deck && (E.deck ? r.gate === '' : /data-premium-contact/.test(r.gate) && /mailto:contato@profbrune\.com\.br/.test(r.gate)), r.gate.slice(0, 200));
       L('ver quem copiou meu Deck segue a mesma linha', r.copies === E.deck);
       if (lang === 'fr'){
         const g = await ev(() => {
@@ -99,7 +99,7 @@ async function openAs(page, kind, seedCount = 0){
     const mail = decodeURIComponent(lim.href || '');
     check(`${lang}: no teto o botão Criar trava`, lim.disabled === true, lim);
     check(`${lang}: aviso de limite fala da conta e do Premium, sem "profbrune"`, /20 cartões próprios ativos/.test(lim.text) && /somando todos os cursos/.test(lim.text) && !/profbrune|administração/.test(lim.text), lim.text);
-    check(`${lang}: botão "Fale com a Prof. Brune" abre o e-mail com assunto e texto preenchidos`, /Fale com a Prof\. Brune/.test(lim.btn) && mail.startsWith('mailto:brunemed1310@gmail.com?subject=Quero o Premium (' + course + ')') && mail.includes('Meu usuário: @aluna.teste') && mail.includes('Curso: ' + course), mail);
+    check(`${lang}: botão "Fale com a Prof. Brune" abre o e-mail com assunto e texto preenchidos`, /Fale com a Prof\. Brune/.test(lim.btn) && mail.startsWith('mailto:contato@profbrune.com.br?subject=Quero o Premium (' + course + ')') && mail.includes('Meu usuário: @aluna.teste') && mail.includes('Curso: ' + course), mail);
     if (OUT){
       await page.setViewportSize({ width: 390, height: 844 });
       for (const scheme of ['light', 'dark']){

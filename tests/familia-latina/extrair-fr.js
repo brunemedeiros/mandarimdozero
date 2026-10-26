@@ -17,7 +17,10 @@ function fonteAntiga() {
   const core = git(['ls-tree', '--name-only', REF, 'shared/core/']).split('\n').filter(f => /^shared\/core\/[^/]+\.js$/.test(f)).sort();
   return core.map(f => git(['show', REF + ':' + f])).join('\n') + '\n' + git(['show', REF + ':fr/app.js']);
 }
-function fonteNova() { return withCore(fs.readFileSync(path.join(ROOT, 'fr/app.js'), 'utf8')); }
+// Etapa 5a da paridade (2026-10-23): a Conjugação (conjAlign, conjFold) saiu do fr/app.js para shared/conjugacao.js.
+// Etapa 5b (2026-10-23): os Ditados (bloco dictation-answer-logic, dictationLightNoteText) foram para shared/ditados.js.
+// Etapa 5c (2026-10-23): os Desafios (bloco accent-challenge-logic) foram para shared/desafios.js.
+function fonteNova() { return withCore(fs.readFileSync(path.join(ROOT, 'shared/conjugacao.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'shared/ditados.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'shared/desafios.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'shared/core/familias/latina-licao.js'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'fr/app.js'), 'utf8')); } // paridade 5d: teclado e accent-answer-logic em latina-licao.js
 const ler = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 
 function ferramentas(SRC, nomeArquivo) {
@@ -94,7 +97,10 @@ function carregarNovo() {
   const SRC = fonteNova();
   const { bloco, declaracao, tem, linhas } = ferramentas(SRC, 'fr/app.js');
   // Os exercícios de digitar e o de gramática chamam o módulo direto: confere que o fr/app.js usa mesmo estas chamadas.
-  const usoDigitar = linhas(/lessonTypedAnswerResult\(inputEl\.value, /);
+  // Paridade 5d (2026-10-23): os dois exercícios de digitar são comuns (shared/core/licao-exercicios.js) e corrigem pelo
+  // gancho LANG_HOOKS.typedAnswer.verdict; o do fr (fr/lang-hooks.js) chama lessonTypedAnswerResult.
+  const ganchoDigitar = /verdict: \(given, x\) => \{ const r = lessonTypedAnswerResult\(given, x\.f\);/.test(ler('fr/lang-hooks.js'));
+  const usoDigitar = ganchoDigitar ? linhas(/LANG_HOOKS\.typedAnswer\.verdict\(inputEl\.value, /) : [];
   // O exercício da unidade de gramática foi para shared/core/gramatica-cenario.js (paridade C6, 2026-10-23): o core chama
   // LANG_HOOKS.grammarAnswerVerdict, e o gancho do fr (fr/lang-hooks.js) chama o módulo.
   const usoGram = linhas(/LANG_HOOKS\.grammarAnswerVerdict\(given, forms\)/)
@@ -124,6 +130,14 @@ function carregarNovo() {
   return rodar(codigo, (ctx) => {
     vm.runInContext(ler('shared/core/familias/latina.js'), ctx, { filename: 'latina.js' });
     vm.runInContext(ler('fr/lang-hooks.js').replace('const LANG_HOOKS', 'var LANG_HOOKS'), ctx, { filename: 'fr/lang-hooks.js' });
+    // O bloco do ditado chama dictLatina() (configuração do site): começo do motor (sem DOM) + configuração do francês.
+    const motor = ler('shared/ditados.js');
+    vm.runInContext(motor.slice(0, motor.indexOf('// ---------- Lista, filtro do módulo')), ctx, { filename: 'shared/ditados.js' });
+    vm.runInContext(ler('fr/ditados-config.js'), ctx, { filename: 'fr/ditados-config.js' });
+    // A Acentuação chama chFamilia() (configuração do site): começo do motor dos Desafios + configuração do francês.
+    const desafios = ler('shared/desafios.js');
+    vm.runInContext(desafios.slice(0, desafios.indexOf('// DESAFIOS: três categorias')), ctx, { filename: 'shared/desafios.js' });
+    vm.runInContext(ler('fr/desafios-config.js'), ctx, { filename: 'fr/desafios-config.js' });
   });
 }
 

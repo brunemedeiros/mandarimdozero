@@ -8,6 +8,13 @@ Caso que motivou: a janela "Minha meta de estudo" (`shared/wizard.js`) usava cla
 
 Esta auditoria **não mudou código**. Base: `main` em `153f5c3`.
 
+**Atualização 2026-10-24 (etapa 5d, `docs/historico/30-paridade-quase-iguais.md`):** as funções que o `fr/app.js` e o
+`zh/app.js` tinham em dobro (lição, exercícios, diálogo, Revisão, voz, teclado, estado/conquistas, trilha, configurações e a
+casca do app) estão em `shared/core/` (`licao-base`, `licao-dialogo`, `licao-exercicios`, `trilha-licao`, `estado-salvar`,
+`revisao-cartoes`, `app-comum`, `voz`) e em `shared/core/familias/latina-licao.js`. O `fr/app.js` ficou com 697 linhas (só
+dados/configuração do francês e 4 repasses da voz); o `zh/app.js` com 2 312 (hanzi, pinyin, histórias, busca, Manual da
+unidade, Frase completa). Os números de linha citados abaixo são de antes.
+
 ## 1. Como foi feito
 
 - Funções de nível superior: `grep -oE "^(async )?function [A-Za-z0-9_]+"` em `fr/app.js` (9651 linhas) e `zh/app.js`
@@ -25,8 +32,8 @@ Esta auditoria **não mudou código**. Base: `main` em `153f5c3`.
 
 | Grupo | Funções | Categoria |
 |---|---|---|
-| Desafios (Expressões, Ouça e traduza, Acentuação, Complete a frase gramatical, fila, revisão espaçada, admin, Premium, áudio lento, `tpZero`, comparador de tradução) | 138 | B |
-| Ditados (player, correção palavra a palavra, "Revisão do A1" de ditados) | 39 | B |
+| Desafios (Expressões, Ouça e traduza, Acentuação, Complete a frase gramatical, fila, revisão espaçada, admin, Premium, áudio lento, `tpZero`, comparador de tradução) **-- MOTOR FEITO (2026-10-23): `shared/desafios*.js`** | 138 | B |
+| Ditados (player, correção palavra a palavra, "Revisão do A1" de ditados) **-- MOTOR FEITO (2026-10-23): `shared/ditados.js`** | 39 | B |
 | Sistema de módulos e níveis (Ponto de verificação do módulo, Revisão do módulo, Teste de Nível, seletor de nível, tela de módulo concluído, estrelas, pular unidades) | 32 | B |
 | Conjugação (prática, busca de verbos, Jogos, contadores do dia) | 33 | A (para o zh); família latina para o pt |
 | Teclado de acentos e correção com acento (`frAccentPickerHTML`, `lessonTypedAnswerResult`, `normalizeLoose`...) | 6 | A |
@@ -41,10 +48,13 @@ Além das funções soltas, a comparação das funções de mesmo nome e dos arq
 
 ## 3. Categoria A: próprio do idioma (não se aplica ao zh)
 
-- **Conjugação** (`fr/app.js:5196-5980`, dados em `fr/conjugation-data.js`, 16 668 linhas; jogos em `fr/conj-games.js`
-  com motor já comum em `shared/conj-games.js`). Chinês não conjuga verbo. **Atenção para o pt**: a dona já decidiu que a
-  Conjugação é um dos módulos do começo do português (`docs/i18n/auditoria-app-portugues.md`, seção 7). Hoje a tela de
-  prática (33 funções) mora em `fr/app.js`; só o motor dos Jogos está em `shared/`. Ver seção 8.
+- **Conjugação** (dados em `fr/conjugation-data.js`, 16 668 linhas; jogos em `fr/conj-games.js`). Chinês não conjuga
+  verbo: o zh não carrega nada disto (correto). **Para o pt**: a dona já decidiu que a Conjugação é um dos módulos do
+  começo do português (`docs/i18n/auditoria-app-portugues.md`, seção 7). **Feito (etapa 5a, 2026-10-23)**: a tela inteira
+  (as 33 funções) saiu do `fr/app.js` para `shared/conjugacao.js` (motor, ao lado de `shared/conj-games.js`) +
+  `shared/conjugacao.css`; o que é do francês (tempos, pronomes e elisão, impératif, futur proche, concordância com être,
+  busca sem "se", bandeiras, voz) ficou em `fr/conj-config.js` (`registerConjugation`). O pt liga com dados + config
+  (passo a passo em `docs/historico/27-paridade-conjugacao.md`). Ver seção 8.
 - **Teclado de acentos, "oe" por "œ" valendo meio ponto, apóstrofo curvo** (`fr/app.js:3253-3275`, `5700-5735`; regras em
   `shared/core/familias/latina.js` com a configuração em `fr/lang-hooks.js`). O zh tem o equivalente próprio:
   `pinyinTonePickerHTML`, `normalizePinyinAnswer`, `acceptedFormsTyped` + `typedVariants`, `isToneOnlyMiss`
@@ -53,24 +63,46 @@ Além das funções soltas, a comparação das funções de mesmo nome e dos arq
 - **Voz** (`loadFrenchVoice`, `speakFrench`, `speakFrenchAudioOnly`), **números por extenso do francês**
   (`frenchNumberWords`, `fr/app.js:6350`, usado no Ditado), **destaque de vocabulário no diálogo sem artigo**
   (`dlgVocabTerms`, `fr/app.js:2345`, tira "le/la/un/une"), **gênero da nacionalidade falado** (`speakableProfileText`).
-- Missões e contadores do dia de Conjugação (`registerDailyConjugation*`, `fr/app.js:845-860`); o zh tem os de hanzi
-  (`registerDailyHanziLesson`).
+- Missões e contadores do dia de Conjugação (`registerDailyConjugation*` e `CONJ_DAILY_MISSIONS`, hoje em
+  `shared/conjugacao.js`); o zh tem os de hanzi (`registerDailyHanziLesson`).
 
 ## 4. Categoria B: depende de decisão ou conteúdo da dona
 
 ### B1. Desafios (138 funções) e Ditados (39)
+- **Ditados: motor feito** na etapa 5b do pedido da dona (registro: `docs/historico/28-paridade-ditados.md`): as funções
+  dos Ditados (lista, linha "Revisão do A1" da trilha, player, correção, resultado, registro da tentativa) estão em
+  `shared/ditados.js`, o CSS em `shared/ditados.css` e o que é do francês em `fr/ditados-config.js`
+  (`registerDictations`). Continua categoria B: **o zh não carrega nada** até a dona decidir se o chinês terá Ditados
+  (a correção de hoje é da família latina; o zh precisaria de uma comparação por hanzi/pinyin na configuração).
+- **Desafios: motor feito** na etapa 5c (registro: `docs/historico/29-paridade-desafios.md`): as 138 funções (dados e
+  catálogo, Free x Premium, textos, revisão espaçada, correção de cada tipo, telas do aluno, linha "Desafios do Módulo N"
+  da trilha, admin e importação) estão em `shared/desafios.js`, `shared/desafios-telas.js` e `shared/desafios-admin.js`,
+  o CSS em `shared/desafios.css` e o que é do francês (família latina da Acentuação, teclado, sentido em `meaning.fr`, os
+  4 textos que citam o francês) em `fr/desafios-config.js` (`registerChallenges`). Continua categoria B: **o zh não
+  carrega nada** até a dona decidir (a Acentuação de hoje é da família latina; o zh precisaria de uma correção por
+  tom/pinyin na configuração, e de desafios na tabela).
 Pendência da dona "módulos/aba de Desafios do chinês"; regra de `.claude/rules/frontend-fr-zh.md`: "Desafios e Ditados só
-existem no fr". Arquivos só do fr: `fr/dictations.js`, `shared/translation-compare.js` (comparador do "Ouça e traduza").
-Itens que parecem gerais mas só são usados aqui, e por isso ficam em B:
-- **Áudio lento 🐢** (`slowAudioBtnHTML`/`slowAudioIconBtnHTML`, `fr/app.js:207-212`, `SLOW_AUDIO_RATE = 0.65`): o próprio
+existem no fr" (os motores são comuns). Arquivos só do fr: `fr/dictations.js`, `fr/challenges.en.js`;
+`shared/translation-compare.js` (comparador do "Ouça e traduza") é comum e só o motor dos Desafios usa.
+Itens que antes pareciam gerais mas só eram usados nos Desafios (todos foram junto para `shared/desafios*.js`):
+- **Áudio lento 🐢** (`slowAudioBtnHTML`/`slowAudioIconBtnHTML`, hoje em `shared/desafios-telas.js`, `SLOW_AUDIO_RATE = 0.65`): o próprio
   comentário diz que é companheiro do "Écouter" manual dos Desafios; os únicos usos são `fr/app.js:8036`, `8111`, `8117`,
   `8483`, `8562`, `8609`, `8646`, todos em Desafios. Nas lições (fr e zh) não existe botão lento. Se a dona quiser o 🐢 nas
   lições, é pedido novo para os dois sites.
-- **`tpZero`** (`fr/app.js:194`, plural com zero): só usado nas linhas de Desafios da trilha (`fr/app.js:1414`, `1447`).
-  Função genérica; pode ir para `shared/core/` quando Desafios chegarem ao zh.
-- `chT`, `md5Hex`, `tierBadgeHTML`, `translation*`: internos de Desafios.
+- **`tpZero`** (plural com zero, hoje em `shared/desafios.js`): só usado nas linhas de Desafios da trilha (e pelo
+  `dictTpZero` dos Ditados, que tem cálculo próprio se o site não tiver Desafios). Pode ir para `shared/core/` se outro
+  recurso precisar.
+- `chT`, `md5Hex`, `tierBadgeHTML`, `translation*`: internos de Desafios (em `shared/desafios*.js`).
 
-### B2. Sistema de módulos e níveis (32 funções)
+### B2. Sistema de módulos e níveis (32 funções) -- MOTOR FEITO (2026-10-23)
+- **Feito** na etapa 4 do pedido da dona (registro: `docs/historico/26-paridade-b2-modulos-niveis.md`): o motor (35
+  funções) está em `shared/core/modulos-niveis.js`, o CSS em `shared/modulos-niveis.css`, e o zh carrega os dois (mais
+  `shared/checkpoint-exam.js` e `shared/review-milestone.js`), com ganchos `LANG_HOOKS` para a prova em pinyin, a voz e os
+  textos. Sem `MODULES`/`LEVEL_TESTS` nada muda; com eles, a trilha do zh mostra módulos e o Ponto de verificação, a
+  Revisão do módulo e o Teste de Nível funcionam. Continua pendente da dona: **quais** módulos o zh terá (conteúdo). Ficaram
+  no fr, com gancho (`afterModule`), as linhas de Desafios/Ditados do módulo (B1, etapa 5). O texto abaixo é o diagnóstico
+  de antes.
+
 O zh não tem módulos: `zh/content.js:6-8` tem um único nível (`HSK1`) e nenhuma constante `MODULES` (o fr tem
 `fr/content.js:4218`). Pendência "módulos do chinês". Tudo abaixo depende disso:
 - **Ponto de verificação do módulo** com palavra, frase, escuta e gramática (`shared/checkpoint-exam.js`, chamado em
@@ -198,11 +230,11 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
    `t('zh.reorder.tapHint')` (`zh/app.js:3713`), que já tem inglês em `shared/i18n/en.js:2157`. Fere a regra "site em inglês
    não tem nada em português". A varredura `tests/i18n/scan_pt_literais.js` já aponta essa linha (entre 481 literais), mas não
    barra o merge.
-2. **Manual da unidade** (botão "📖 Manual da unidade" na lição, com vocabulário, frases e diálogo):
+2. **Manual da unidade** (continua só no zh depois da etapa 5d; ligar no fr é decisão da dona) (botão "📖 Manual da unidade" na lição, com vocabulário, frases e diálogo):
    `zh/index.html:4848`, `zh/app.js:1759-1806`. O fr não tem. Recurso geral; decisão da dona se o fr deve ganhar.
-3. **Exercício "Frase completa"** (escolher a frase certa entre 4, com distratores trocando palavra ou negação):
+3. **Exercício "Frase completa"** (etapa 5d: a série de exercícios comum já o aceita pelo gancho `fullSentenceExercises`; o montador e a tela continuam no zh, porque as regras usam hanzi, 不/没 e pinyin) (escolher a frase certa entre 4, com distratores trocando palavra ou negação):
    `zh/app.js:2718-2760` e `3625`. O fr tem só um resto de código para ele (`fr/app.js:3036`).
-4. **Lado do balão no diálogo pelo primeiro falante** (`dlgSpeakerSide`, `zh/app.js:2255`): aceita falante com qualquer
+4. **Lado do balão no diálogo pelo primeiro falante** (etapa 5d: `dlgSpeakerSide` está no motor comum `shared/core/licao-dialogo.js`, ligado só no zh pelo gancho `dlgSide`; ligar no fr é decisão da dona) (`dlgSpeakerSide`, `zh/app.js:2255`): aceita falante com qualquer
    nome. O fr só põe à direita quem se chama `B` (`fr/app.js:2390`, `2525`). Importa para a pendência "diálogos com
    personagens nomeados".
 5. **Histórias-checkpoint** (`zh/stories.js`, `zh/app.js:1428-1570`) e **busca de vocabulário** (pronta, mas sem botão
@@ -215,10 +247,12 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
 ## 7. HTML e CSS de componentes
 
 - Com a guarda nova, nenhuma classe usada por `shared/` falta no zh (`node tests/paridade-sites/test_css_compartilhado.js`:
-  6/6, exceção única `level-test-highlight`, do Teste de Nível).
+  5/5, sem exceção desde a B2; a única que havia, `level-test-highlight`, foi para `shared/modulos-niveis.css`).
 - CSS que hoje só existe no fr e terá de ir junto quando o recurso for levado: ~~`.typed-attempt`, `.conj-x`, `.conj-gap`
-  (C2)~~ (feito: `shared/licao-feedback.css`), ~~`.scenario-*` (C6), `.gram-*` (C6)~~ (feito: `shared/gramatica-cenario.css`; `.gram-block*` fica em cada site), `.module-label`/`.ml-*`/`.checkpoint-*` (B2),
-  `.cg-*` dos Jogos (`shared/conj-games.js`), `.reorder-final-*` (`fr/index.html:1675-1676`).
+  (C2)~~ (feito: `shared/licao-feedback.css`), ~~`.scenario-*` (C6), `.gram-*` (C6)~~ (feito: `shared/gramatica-cenario.css`; `.gram-block*` fica em cada site), ~~`.module-label`/`.ml-*`/`.checkpoint-*` (B2)~~ (feito: `shared/modulos-niveis.css`),
+  ~~`.cg-*` dos Jogos (`shared/conj-games.js`)~~ (feito: `shared/conjugacao.css`, com todo o CSS da Conjugação),
+  ~~`.dictation-*` dos Ditados~~ (feito: `shared/ditados.css`; `.dictation-play-btn` também serve aos Desafios do fr),
+  `.reorder-final-*` (`fr/index.html:1675-1676`).
 - Ids só do fr (81): todos de Conjugação (28), Desafios (27), Ditado (10), janelas Premium de Desafios/Jogos (6), seletor
   de nível e Teste de Nível (5), menu Mais (2) e `path-level-title`. Nenhum é usado por `shared/` fora desses recursos
   (os de `shared/activity-focus.js` são de Desafios e Conjugação, procurados com `getElementById` que aceita ausência).
@@ -230,17 +264,35 @@ mural, painel da professora/admin, Banco de Revisão, Revisão (motor FSRS, deck
 editor de cartões, importação/exportação Anki, meta de estudo, modo foco, roteamento, PWA, i18n, as ~190 funções da trilha
 e dos exercícios já extraídas nos lotes 1 a 5e da E4 (com `LANG_HOOKS`), o motor de id estável por item
 (`shared/study-trail-model.js`), o motor dos Jogos da Conjugação (`shared/conj-games.js`), o motor da unidade de gramática e do exercício de cenário
-(`shared/core/gramatica-cenario.js`), o motor da prova do Ponto de
-verificação (`shared/checkpoint-exam.js`) e da Revisão do módulo (`shared/review-milestone.js`), e as regras da família
-latina (`shared/core/familias/latina.js`).
+(`shared/core/gramatica-cenario.js`), o sistema de módulos e níveis inteiro (`shared/core/modulos-niveis.js` +
+`shared/modulos-niveis.css`: Ponto de verificação do módulo e o pulo, Revisão do módulo, Teste de Nível, seletor de nível,
+trilha e Mapa por módulos, tela de módulo concluído), com a prova (`shared/checkpoint-exam.js`) e a seleção da Revisão do
+módulo (`shared/review-milestone.js`), as regras da família latina (`shared/core/familias/latina.js`) e a tela inteira
+da Conjugação (`shared/conjugacao.js` + `shared/conjugacao.css`, ligada por um `<site>/conj-config.js` com dados e regras
+do idioma; vale para quem carregar, o zh não carrega) e os Ditados (`shared/ditados.js` + `shared/ditados.css`, ligados por
+um `<site>/ditados-config.js` com os ditados, a família do idioma, a voz e o teclado; o zh não carrega) e os Desafios
+(`shared/desafios.js` + `shared/desafios-telas.js` + `shared/desafios-admin.js` + `shared/desafios.css`, ligados por um
+`<site>/desafios-config.js` com a família do idioma, o teclado, a tabela e os textos que citam o idioma; o zh não carrega).
 
 **Perde** (está só em `fr/app.js` e teria de ser copiado, o que recria o problema desta auditoria):
-- Toda a tela da Conjugação (33 funções). O pt precisa dela desde o começo.
-- Toda a parte de módulos e níveis (32 funções): o pt vai ter módulos.
+- ~~Toda a tela da Conjugação (33 funções)~~: feito, `shared/conjugacao.js` (etapa 5a, 2026-10-23). O pt liga com
+  `pt/conjugation-data.js` + `pt/conj-config.js` (passo a passo em `docs/historico/27-paridade-conjugacao.md`).
+- ~~Toda a parte de módulos e níveis (32 funções)~~: feito, `shared/core/modulos-niveis.js` (2026-10-23). A linha dos
+  Desafios do módulo (`buildModuleChallengesRow`) foi com os Desafios (`shared/desafios-telas.js`, ligada pelo gancho
+  `afterModule` com `appendModuleChallengesSlot`); a linha "Revisão do A1" (`buildLevelReviewRow`) está em
+  `shared/ditados.js`.
 - ~~Unidade de gramática e exercício de cenário (C6)~~: feito, `shared/core/gramatica-cenario.js` (2026-10-23).
 - ~~`typedAttemptHTML` (C2)~~: feito, `shared/core/licao-feedback.js` (2026-10-23).
-- Desafios e Ditados (177 funções): entram no pt "aos poucos depois", pela decisão da dona.
+- ~~Ditados (39 funções)~~: feito, `shared/ditados.js` (etapa 5b, 2026-10-23). O pt liga com `pt/dictations.js` +
+  `pt/ditados-config.js` (passo a passo em `docs/historico/28-paridade-ditados.md`), quando a dona quiser.
+- ~~Desafios (138 funções)~~: feito, `shared/desafios*.js` (etapa 5c, 2026-10-23). O pt liga com a tabela/dados dele +
+  `pt/desafios-config.js` (passo a passo em `docs/historico/29-paridade-desafios.md`), "aos poucos depois", pela decisão
+  da dona.
 - ~~O carregamento com mudanças de currículo (C1)~~: feito, `shared/core/curriculo-progresso.js` (2026-10-23).
+- ~~Lição em passos, exercícios, diálogo, Revisão (cartões e Revisão rápida), voz, teclado de acentos, salvar/carregar o
+  progresso, conquistas, trilha, configurações e a casca do app~~: feito, `shared/core/*.js` e
+  `shared/core/familias/latina-licao.js` (etapa 5d, 2026-10-24, `docs/historico/30-paridade-quase-iguais.md`). Um site novo
+  traz os dados, o `STATE`, o `lang-hooks.js` (com a família) e as chamadas `wire*` no `app.js`.
 
 **Pontos de `shared/` que ainda supõem só fr/zh** (já listados em `docs/i18n/arquitetura-multi-idioma-cursos.md:74` para a
 E1): `shared/profile-placeholders.js:141` e `:147` (`studyLang === 'zh' ? 'zh' : 'fr'`: no site de português o
@@ -251,8 +303,9 @@ pt) cobre o pt **se** a extração incluir os itens da lista "Perde". Recomendo 
 
 ## 9. Riscos anotados
 
-- `zh/app.js:1326` chama `trailSkipAllowed()` e `openCheckpoint()`, que não existem no zh; seguro só porque `moduleId` é
-  sempre `null` (`zh/app.js:1362`). Ao levar módulos ao zh, levar as funções junto (ou movê-las para `shared/core/`).
+- ~~`zh/app.js:1326` chama `trailSkipAllowed()` e `openCheckpoint()`, que não existem no zh; seguro só porque `moduleId` é
+  sempre `null` (`zh/app.js:1362`).~~ Resolvido pela B2 (2026-10-23): as funções estão em `shared/core/modulos-niveis.js`,
+  carregado pelo zh, e o `mapUnitDescribe` do zh foi substituído pelo comum.
 - ~~Sem C1, qualquer edição de ordem em `zh/content.js` move o progresso FSRS de uma palavra para outra, em silêncio.~~
   Resolvido pelo C1 (2026-10-23): o zh também segue a chave `k`.
 
@@ -281,7 +334,11 @@ pt) cobre o pt **se** a extração incluir os itens da lista "Perde". Recomendo 
 | 8 | C7 `unitId` no evento da Revisão | uma linha no zh | trivial | não |
 
 Itens B2 (módulos) e Conjugação: não são esquecimento, mas a recomendação é mover o motor para `shared/core/` **antes** de
-levar ao zh ou ao pt, em vez de copiar.
+levar ao zh ou ao pt, em vez de copiar. (B2 feito em 2026-10-23: `shared/core/modulos-niveis.js`; Conjugação feita em
+2026-10-23: `shared/conjugacao.js`, fora do `core/` porque o zh não a carrega; Ditados e Desafios feitos em 2026-10-23:
+`shared/ditados.js` e `shared/desafios*.js`, idem. Com a etapa 5c acabou a mudança de código do pedido: o `fr/app.js`
+ficou com 60 funções, todas de trilha/lição/diálogo/exercícios/revisão/estado/voz/teclado do francês, ver
+`docs/historico/29-paridade-desafios.md`.)
 
 ## 12. Guarda automática sugerida
 

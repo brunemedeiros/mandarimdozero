@@ -47,8 +47,11 @@ function pollForVoices(){
 // automático da pronúncia). Classe própria (não "audio-btn") de propósito
 // -- wireAudioButtons() casa por `.audio-btn` e chamaria speakFrench()
 // com data-speak indefinido se este botão compartilhasse a classe.
+// C1 (revisão de 2026-10-24): a URL passa por safeMediaUrl (shared/core/midia-segura.js); recusada = sem botão.
 function customAudioBtnHTML(url){
-  return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="${t(LANG_HOOKS.audioListenKey)}" title="${t(LANG_HOOKS.audioListenKey)}">🎧</button>`;
+  const safe = safeMediaUrl(url);
+  if (!safe) return '';
+  return `<button class="custom-audio-btn" data-audio-url="${safe}" aria-label="${t(LANG_HOOKS.audioListenKey)}" title="${t(LANG_HOOKS.audioListenKey)}">🎧</button>`;
 }
 
 // Volta da sessão (Flashcard/Speed Review/Palavras difíceis/Combinar) pra
@@ -98,6 +101,8 @@ function advanceUnitStep(u){
 }
 
 function backToReviewModeSelect(){
+  // A3: sair da sessão encerra a Revisão rápida (também no caminho da aba Aluno > Revisão, que retorna mais abaixo).
+  if (typeof stopSpeedSession === 'function') stopSpeedSession();
   releaseBadgeCelebrations();
   if (STATE.reviewSessionClassReview){
     STATE.reviewSessionStartedAt = null;
@@ -175,6 +180,8 @@ async function startDeckReviewSession(deckId, opts){
 }
 
 function openReviewSession(mode, opts){
+  // A3: abrir qualquer modo encerra uma Revisão rápida que ainda estivesse viva (a do modo 'speed' recomeça logo abaixo).
+  if (typeof stopSpeedSession === 'function') stopSpeedSession();
   document.getElementById('review-mode-select-wrap').style.display = 'none';
   document.getElementById('review-session-wrap').style.display = 'block';
   document.getElementById('review-content').style.display = mode === 'speed' || mode === 'match' ? 'none' : 'block';

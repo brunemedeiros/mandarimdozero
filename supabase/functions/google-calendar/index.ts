@@ -21,7 +21,12 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const CLIENT_ID = Deno.env.get('GOOGLE_CLIENT_ID') || '';
 const CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET') || '';
-const REDIRECT_URI = `${SUPABASE_URL}/functions/v1/google-calendar/callback`;
+// Produção: a volta do login é https://agenda.profbrune.com.br/google/callback (o Netlify repassa para cá, ver
+// infra/agenda-netlify/netlify.toml; o Google só verifica o app com o retorno num domínio da Prof. Brune).
+// Staging volta direto para o Supabase. GCAL_REDIRECT_URI (secret, opcional) sobrepõe os dois.
+const PROD_REF = 'eigjocalzwamisgqilhg';
+const REDIRECT_URI = Deno.env.get('GCAL_REDIRECT_URI')
+  || (SUPABASE_URL.includes(PROD_REF) ? 'https://agenda.profbrune.com.br/google/callback' : `${SUPABASE_URL}/functions/v1/google-calendar/callback`);
 const SCOPES = 'openid email https://www.googleapis.com/auth/calendar.readonly';
 const BACKFILL_FROM = '2025-05-01T00:00:00Z';
 const ALLOWED_RETURN = [/^https:\/\/app\.profbrune\.com\.br\//, /^https:\/\/brunemedeiros\.github\.io\//, /^http:\/\/localhost(:\d+)?\//, /^http:\/\/127\.0\.0\.1(:\d+)?\//];

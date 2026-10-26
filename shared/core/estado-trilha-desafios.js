@@ -95,22 +95,56 @@ function wireKnowButtons(container){
 // de uma linha cloze multi-marca (`t${row.id}`) nunca existe de verdade
 // (os ids reais são `t${row.id}-c1`/`-c2`/...) -- checar só ele faria o
 // guard de idempotência nunca bater, duplicando cartões numa 2ª chamada.
+// A2 (revisão de 2026-10-24): busca de cartões que FALHA (rede, timeout) não é "não há cartões". Sem isto, o progresso
+// salvo desses cartões não achava par em STATE.cards, mergeSavedCards o descartava e o próximo save gravava sem ele
+// (memória FSRS zerada). Agora: falhou -> CARD_FETCH_FAILED[origem] = true e, no applySerializedState, as entradas
+// salvas dessa origem ficam guardadas em PRESERVED_SAVED_CARDS, que o save regrava intactas. Na próxima busca
+// bem-sucedida (mesma sessão ou próximo acesso) o progresso volta para os cartões e a lista se esvazia.
+// Mesmo espírito de CLASS_ACTIVE_TEACHER_ID (undefined = não deu para saber = não esconder nada).
+const CARD_FETCH_FAILED = { teacher: false, self: false };
+let PRESERVED_SAVED_CARDS = [];
+function cardOriginsWithFailedFetch(){
+  return Object.keys(CARD_FETCH_FAILED).filter(k => CARD_FETCH_FAILED[k]);
+}
+// Busca bem-sucedida de `origin`: aplica o progresso guardado aos cartões que acabaram de entrar e esvazia a parte
+// dessa origem (o que não voltou na busca foi apagado no banco, igual ao carregamento normal).
+function restorePreservedSavedCards(origin, addedCards){
+  CARD_FETCH_FAILED[origin] = false;
+  const mine = PRESERVED_SAVED_CARDS.filter(s => savedCardOrigin(s) === origin);
+  if (!mine.length) return;
+  mergeSavedCards(addedCards, mine);
+  if (typeof migrateCardToFSRS === 'function') addedCards.forEach(migrateCardToFSRS);
+  PRESERVED_SAVED_CARDS = PRESERVED_SAVED_CARDS.filter(s => savedCardOrigin(s) !== origin);
+}
+function pushFreshCards(cards, origin){
+  const existingIds = new Set(STATE.cards.map(c => c.id));
+  const added = [];
+  cards.forEach(card => {
+    if (existingIds.has(card.id)) return;
+    STATE.cards.push(card);
+    existingIds.add(card.id);
+    added.push(card);
+  });
+  restorePreservedSavedCards(origin, added);
+}
+
 async function mergeTeacherFlashcardsIntoState(){
   if (typeof fetchFlashcardsForCurrentStudent !== 'function') return;
-  const [rows, activeTeacher] = await Promise.all([
-    fetchFlashcardsForCurrentStudent(APP_KEY),
-    typeof fetchMyActiveTeacherId === 'function' ? fetchMyActiveTeacherId(APP_KEY) : Promise.resolve(undefined),
-  ]);
+  let rows, activeTeacher;
+  try {
+    [rows, activeTeacher] = await Promise.all([
+      fetchFlashcardsForCurrentStudent(APP_KEY, { nullOnError: true }),
+      typeof fetchMyActiveTeacherId === 'function' ? fetchMyActiveTeacherId(APP_KEY) : Promise.resolve(undefined),
+    ]);
+  } catch (e) {
+    console.error('Erro ao carregar os cartões da professora:', e);
+    rows = null; activeTeacher = undefined;
+  }
   CLASS_ACTIVE_TEACHER_ID = activeTeacher;
-  if (!rows.length) return;
-  const existingIds = new Set(STATE.cards.map(c => c.id));
-  rows.forEach(row => {
-    buildCardFromTeacherFlashcard(row).forEach(card => {
-      if (existingIds.has(card.id)) return;
-      STATE.cards.push(card);
-      existingIds.add(card.id);
-    });
-  });
+  if (!Array.isArray(rows)){ CARD_FETCH_FAILED.teacher = true; return; }
+  const cards = [];
+  rows.forEach(row => { buildCardFromTeacherFlashcard(row).forEach(card => cards.push(card)); });
+  pushFreshCards(cards, 'teacher');
 }
 
 // Busca os cartões que a PRÓPRIA aluna já criou (shared/own-flashcards.js)
@@ -121,16 +155,13 @@ async function mergeTeacherFlashcardsIntoState(){
 // mergeTeacherFlashcardsIntoState() acima.
 async function mergeSelfFlashcardsIntoState(){
   if (typeof fetchMyOwnFlashcards !== 'function') return;
-  const rows = await fetchMyOwnFlashcards(APP_KEY);
-  if (!rows.length) return;
-  const existingIds = new Set(STATE.cards.map(c => c.id));
-  rows.forEach(row => {
-    buildCardFromSelfFlashcard(row).forEach(card => {
-      if (existingIds.has(card.id)) return;
-      STATE.cards.push(card);
-      existingIds.add(card.id);
-    });
-  });
+  let rows;
+  try { rows = await fetchMyOwnFlashcards(APP_KEY, { nullOnError: true }); }
+  catch (e) { console.error('Erro ao carregar seus cartões:', e); rows = null; }
+  if (!Array.isArray(rows)){ CARD_FETCH_FAILED.self = true; return; }
+  const cards = [];
+  rows.forEach(row => { buildCardFromSelfFlashcard(row).forEach(card => cards.push(card)); });
+  pushFreshCards(cards, 'self');
 }
 
 // Empurra um cartão recém-criado por shared/my-flashcards.js direto em
@@ -213,6 +244,8 @@ async function loadStateAndRender(){
   // estejam em STATE.cards quando applySerializedState() fizer o merge
   // por id (senão um cartão salvo sem correspondência na lista fresca é
   // descartado -- exatamente o bloqueio identificado na Fase 0).
+  // A2: progresso guardado de um carregamento anterior (outra conta ou outro curso) nunca passa para este.
+  PRESERVED_SAVED_CARDS = [];
   await mergeTeacherFlashcardsIntoState();
   await mergeSelfFlashcardsIntoState();
   await loadState();
@@ -413,12 +446,13 @@ function showBadgeUnlockCelebration(badge, onDone){
   el.className = 'badge-unlock-toast';
   el.setAttribute('role', 'status');
   el.setAttribute('aria-live', 'polite');
+  // Nome e descrição vêm do catálogo de badges (admin/professora preenchem): escapados (revisão do código compartilhado, 2026-10-24).
   el.innerHTML = `
     <div class="badge-unlock-icon${badge.tier ? ' tier-' + badge.tier : ''}">${typeof badgeIconHTML === 'function' ? badgeIconHTML(badge) : badge.icon}</div>
     <div class="badge-unlock-text">
       <div class="badge-unlock-label">${badge.level > 1 ? t('badge.ui.levelUp') : t('badge.ui.newBadge')}</div>
-      <div class="badge-unlock-name">${badge.name}</div>
-      <div class="badge-unlock-desc">${badge.desc}</div>
+      <div class="badge-unlock-name">${escapeHTML(badge.name || '')}</div>
+      <div class="badge-unlock-desc">${escapeHTML(badge.desc || '')}</div>
     </div>
   `;
   let done = false;
