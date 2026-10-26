@@ -1190,3 +1190,6 @@ Base: revisão de todas as decisões 1 a 227 pedida pela dona; ela aceitou **tod
 244. **Palavras em nota continuam em nota**: *adorer* ("Mais gostos"), *se coucher* ("Mais rotina") e *la boisson* ("Mais no restaurante"). ***la chemise* volta a cartão** em "Comprar roupas" (módulo "Compras"),
      que fica com 11 (4 lições + Revisão, +10 min no módulo, que continua abaixo do teto); a nota "Outras roupas" perde *la chemise* e segue com *la veste, le manteau, le sac*.
 245. **Título das notas de vocabulário: em discussão** (a dona propôs "Outras palavras de/na/sobre ...", "Mais sobre ..." ou "Indo além" sem tema). Até decidir, os títulos atuais ficam como provisórios.
+246. **Título das notas de vocabulário (fecha a 245)**: dois formatos, escolhidos pela natureza da nota. **"Outras palavras de/em/sobre ..."** para lista de itens da mesma categoria
+     (ex.: "Outras palavras de roupa", "de cor", "de material", "de traços", "de países", "de moradia"); **"Mais sobre ..."** para o resto (ex.: "Mais sobre família", "sobre rotina",
+     "sobre gostos", "sobre o restaurante", "sobre a consulta", "sobre aprender"). "Indo além" não é usado. Os títulos provisórios do `08 v2` são padronizados no próximo lote do editor.
