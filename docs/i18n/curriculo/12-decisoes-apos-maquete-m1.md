@@ -1129,7 +1129,7 @@ Nada aplicado ao site. Continuam pendentes (seção 7 do `08 v2`, com contexto):
 
 ---
 
-# Décima oitava rodada (2026-10-23)
+# Trigésima primeira rodada (2026-10-23)
 
 218. **"Só reconhecimento" (unidade nova "Verbos muito usados")** aprovado: um cartão só por verbo (francês → significado), sem produção na lição nem no Ponto de verificação.
 219. ***l'enfant*** fica na unidade "Apresentar a família" (módulo "Família e pessoas próximas"): é conteúdo A1 e central na família.
@@ -1152,7 +1152,7 @@ Nada aplicado ao site. Continuam pendentes (seção 7 do `08 v2`, com contexto):
 
 ---
 
-# Décima nona rodada (2026-10-23): revisão geral das decisões e grade comum
+# Trigésima segunda rodada (2026-10-23): revisão geral das decisões e grade comum
 
 Base: revisão de todas as decisões 1 a 227 pedida pela dona; ela aceitou **todos** os itens (N1 a N10 e T1 a T8). Vale desta decisão em diante.
 

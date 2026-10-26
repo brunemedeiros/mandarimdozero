@@ -96,7 +96,7 @@ O texto das notas novas só se escreve depois, módulo a módulo, aprovado pela 
 | *comment est...* | A1-16 | M2.3 | adjetivos (*il est grand*) |
 | *qu'est-ce qui ne va pas*, *depuis quand* | A1-15 | **saiu do A1**: A2 M4.1 (decisão 116) | *J'ai mal à...*, *depuis hier* |
 | ***qui*** | **não aparece hoje** | M2.1 | *Qui est-ce ? C'est ma sœur.* (a introduzir) |
-| ***pourquoi / parce que*** | **não aparece hoje** (*parce que* é vocabulário do M9.3) | M9.3 | *Pourquoi tu viens ? Parce que...* (a introduzir) |
+| ***pourquoi / parce que*** | **não aparece hoje** (*parce que* não é cartão: é fórmula e nota em "Convidar, aceitar, recusar e se desculpar", M9.3) | M9.3 | *Pourquoi tu viens ? Parce que...* (a introduzir) |
 
 ### O que isto mostra
 
@@ -119,7 +119,7 @@ perderia o ponto de consolidação cedo, perto das apresentações pessoais.
 - **M2.7** continua "Perguntar: sim ou não" (entonação, *est-ce que*, inversão só reconhecer), sem negação.
 - **M2.1** ganha 1 diálogo/frase com *qui* (*Qui est-ce ? C'est ma sœur.*): conteúdo novo, chave nova.
 - **M6.1**: mantém *où est* (já existe); os diálogos com *quand* de M3 viram a base da gramática do M6.
-- **M9.3**: *pourquoi / parce que* em diálogo de convite (já há *parce que* como vocabulário).
+- **M9.3**: *pourquoi / parce que* em diálogo de convite (*parce que* não é cartão: entra como fórmula e na nota *pourquoi ? / parce que* da unidade "Convidar, aceitar, recusar e se desculpar").
 - Notas de pergunta soltas **não são obrigatórias** (as frases com a pergunta e a resposta já estão nos diálogos atuais); onde houver um propósito (ex.: a nota de *combien* na M5.1), a nota pode existir. Não é regra geral (a dona, 2026-10-19).
 
 ## Respostas da dona (2026-10-19)
