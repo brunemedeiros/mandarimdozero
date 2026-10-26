@@ -33,7 +33,9 @@ const PRECACHE_URLS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)).then(() => self.skipWaiting())
+    // Pré-cache também revalidando (no-cache): sem isso, um arquivo ainda no cache HTTP (max-age do servidor) podia
+    // entrar no cache da versão nova com o conteúdo da anterior.
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS.map((u) => new Request(u, { cache: 'no-cache' })))).then(() => self.skipWaiting())
   );
 });
 
@@ -52,11 +54,14 @@ self.addEventListener('fetch', (event) => {
   // seguem direto pra rede, sem passar pelo cache.
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
 
-  // cache: 'no-store' força ignorar o cache HTTP do próprio navegador nesse
-  // fetch -- sem isso, "network-first" podia devolver uma resposta antiga
-  // que o navegador já tinha em cache, mesmo com internet disponível.
+  // cache: 'no-cache' (melhoria 4 da revisão de arquitetura, 2026-10-26): o navegador SEMPRE pergunta ao servidor
+  // (If-None-Match/If-Modified-Since) antes de usar o cache HTTP -- então "network-first" nunca devolve uma versão
+  // antiga quando há internet -- mas o que não mudou volta como 304, sem corpo. Antes era 'no-store', que baixava os
+  // ~150 arquivos inteiros (cerca de 3,7 MB no fr) a cada abertura. Versão nova: cada deploy muda este arquivo
+  // (__BUILD_ID__), o navegador instala o SW novo e shared/pwa.js oferece recarregar; e cada arquivo alterado tem
+  // ETag novo, então chega na hora (200) mesmo antes disso.
   event.respondWith(
-    fetch(event.request, { cache: 'no-store' })
+    fetch(event.request, { cache: 'no-cache' })
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
