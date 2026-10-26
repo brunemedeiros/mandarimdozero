@@ -599,6 +599,7 @@ window.I18N_CATALOG['en'] = {
   'zh.search.unitLocked': '🔒 Unit {id}: {title}', // ALTA
   'zh.search.loadMore': 'Load more ({shown} of {total})', // ALTA
   'zh.manual.title': 'Manual — Unit {id}: {title}', // ALTA
+  'zh.manual.empty': 'Nothing here yet: the manual fills in as you work through the unit.', // ALTA
   'zh.hint.thinkWhenUse': 'Think about when you would use this expression. It appears in this sentence you already studied: "{masked}"', // ALTA
   'zh.hint.listenAgain': 'Listen again, paying attention to the sounds. It is an expression from this unit\'s topic.', // MÉDIA
   'zh.hint.thinkContext': 'Think about the context of this unit\'s topic ("{title}"): in what situation would you use this word?', // ALTA

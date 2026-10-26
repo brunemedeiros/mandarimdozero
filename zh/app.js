@@ -936,12 +936,15 @@ wireLessonChromeButtons(); // shared/core/app-comum.js
 // ============================================================
 
 // Gera o HTML de resumo de uma unidade (vocabulário + frases + diálogo,
-// sem exercícios) — usado no modal "Manual da unidade" (📖 dentro do painel
-// de dicas de cada lição).
-function renderUnitSummaryHTML(u){
+// sem exercícios) -- usado no modal "Manual da unidade" (📖 dentro do painel
+// de dicas de cada lição). Mostra só o que a aluna já viu (`seen`, de
+// unitSeenContent em shared/core/trilha-licao.js); seção sem nada visto não
+// aparece, e sem nada visto vem uma frase curta no lugar.
+function renderUnitSummaryHTML(u, seen){
   // Unidade de gramática (shared/core/gramatica-cenario.js) não tem vocabulário, frases nem diálogo: o manual dela é a própria explicação.
   if (isGrammarUnit(u)) return '';
-  const vocabHTML = u.vocab.map(v => `
+  const sel = seen || unitSeenContent(u, { all: true });
+  const vocabHTML = sel.vocabIdx.map(i => u.vocab[i]).map(v => `
     <div class="vocab-row vocab-row-readonly">
       <div class="pinyin">${v.p}</div>
       <div class="hanzi">${v.c} ${audioBtnHTML(v.c)} ${strokeBtnHTML(v.c)}</div>
@@ -949,7 +952,7 @@ function renderUnitSummaryHTML(u){
     </div>
   `).join('');
 
-  const phrasesHTML = u.phrases.map(p => `
+  const phrasesHTML = sel.phraseIdx.map(i => u.phrases[i]).map(p => `
     <div class="phrase-item">
       <div class="pinyin">${p.p}</div>
       <div class="hanzi">${p.c} ${audioBtnHTML(p.c)}</div>
@@ -957,7 +960,7 @@ function renderUnitSummaryHTML(u){
     </div>
   `).join('');
 
-  const dialogueHTML = `<div class="dialogue-title">${u.dialogue.title}</div>` +
+  const dialogueHTML = sel.dialogue ? `<div class="dialogue-title">${u.dialogue.title}</div>` +
     u.dialogue.lines.map(l => `
       <div class="dialogue-line">
         <div class="dialogue-spk">${l.spk}</div>
@@ -967,16 +970,18 @@ function renderUnitSummaryHTML(u){
           <div class="trans">${l.t}</div>
         </div>
       </div>
-    `).join('');
+    `).join('') : '';
 
-  return `
+  if (!vocabHTML && !phrasesHTML && !dialogueHTML){
+    return `<p class="unit-manual-empty">${t('zh.manual.empty')}</p>`;
+  }
+  return (vocabHTML ? `
     <div class="section-label">${t('zh.path.summary.vocabulary')}</div>
-    <div class="vocab-table">${vocabHTML}</div>
+    <div class="vocab-table">${vocabHTML}</div>` : '') + (phrasesHTML ? `
     <div class="section-label">${t('zh.path.summary.phrases')}</div>
-    <div class="phrase-list">${phrasesHTML}</div>
+    <div class="phrase-list">${phrasesHTML}</div>` : '') + (dialogueHTML ? `
     <div class="section-label">${t('zh.path.summary.dialogue')}</div>
-    <div class="dialogue-box">${dialogueHTML}</div>
-  `;
+    <div class="dialogue-box">${dialogueHTML}</div>` : '');
 }
 
 // ---------- Modal: manual da unidade atual ----------
@@ -984,7 +989,7 @@ document.getElementById('unit-manual-btn').addEventListener('click', () => {
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
   document.getElementById('unit-manual-title').textContent = t('zh.manual.title', { id: u.id, title: u.title });
   const bodyEl = document.getElementById('unit-manual-body');
-  bodyEl.innerHTML = renderUnitSummaryHTML(u);
+  bodyEl.innerHTML = renderUnitSummaryHTML(u, unitSeenContentNow(u));
   wireAudioButtons(bodyEl);
   wireStrokeButtons(bodyEl);
   document.getElementById('unit-manual-modal').style.display = 'flex';

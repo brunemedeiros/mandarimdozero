@@ -617,6 +617,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'zh.search.unitLocked': '🔒 Unidade {id}: {title}',
   'zh.search.loadMore': 'Carregar mais ({shown} de {total})',
   'zh.manual.title': 'Manual — Unidade {id}: {title}',
+  'zh.manual.empty': 'Ainda não tem nada aqui: o manual vai sendo preenchido conforme você avança na unidade.',
   'zh.hint.thinkWhenUse': 'Pense em quando você usaria essa expressão. Ela aparece nesta frase que você já estudou: "{masked}"',
   'zh.hint.listenAgain': 'Ouça de novo com atenção aos sons. É uma expressão do tema desta unidade.',
   'zh.hint.thinkContext': 'Pense no contexto do tema desta unidade ("{title}"): em que situação você usaria essa palavra?',
