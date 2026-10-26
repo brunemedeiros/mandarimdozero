@@ -5,7 +5,9 @@
 // Jogo que não é de tempo verbal (être x avoir, tu x vous) não tem desenho: sem opts.sketch, a
 // legenda (opts.tl) aparece sozinha como a regra. game.level ('A1', 'A2') vira etiqueta no cartão.
 // Os dados ficam por idioma (fr/conj-games.js -> CONJ_GAMES); o texto de cada item vem
-// por idioma do site (text['pt-BR'], text.en). Sem XP: é prática livre, como a Conjugação.
+// por idioma do site (text['pt-BR'], text.en). Sem XP: é prática livre, como a Conjugação (mas conta o dia de estudo).
+// Molde da trilha (2026-10-26): topo com progresso + ⚑ + ⌨️ + X (shared/activity-focus.js, lessonBar), respostas numeradas
+// (wireKeyboardOptions + teclado global), "Não sei" (revela e conta como erro) e "Continuar →".
 function createConjGames({ games, speak, ids, isLocked, onLocked }){
   // isLocked(game): paywall (Jogos são Premium; true só com o bloqueio ligado E sem a permissão "Jogos da Conjugação");
   // onLocked(game): o que fazer ao tocar num jogo trancado (a janela Premium própria dos Jogos).
@@ -86,9 +88,14 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
   }
 
   function progressHTML(){
-    const n = S.order.length;
-    return `<div class="cg-progress"><span>${esc(tt('games.counter', { i: S.idx + 1, n }))}</span>
-      <div class="cg-progress-bar" aria-hidden="true"><i style="width:${Math.round(100 * S.idx / n)}%"></i></div></div>`;
+    return `<div class="cg-progress"><span>${esc(tt('games.counter', { i: S.idx + 1, n: S.order.length }))}</span></div>`;
+  }
+
+  // O trilho fica na barra do topo (criada por activity-focus.js; sync aqui garante que ela já exista).
+  function setProgress(pct){
+    if (typeof window.syncActivityFocus === 'function') window.syncActivityFocus();
+    const fill = $(ids.wrap) && $(ids.wrap).querySelector('.lesson-progress-fill');
+    if (fill) fill.style.width = pct + '%';
   }
 
   function renderQuestion(){
@@ -112,17 +119,25 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
           ${['a', 'b'].map((k, i) => `<button type="button" class="cg-choice" data-k="${k}" aria-keyshortcuts="${i + 1}">
             <span class="cg-choice-form" lang="fr">${esc(it[k])}</span><span class="cg-choice-label">${esc(g.opts[k].label)}</span></button>`).join('')}
         </div>
+        <button type="button" class="exercise-dontknow cg-dontknow" id="cg-dontknow">${esc(tt('common.dontKnow'))}</button>
         <div class="cg-feedback" id="cg-feedback" aria-live="polite"></div>
       </div>`;
-    $(ids.content).querySelectorAll('.cg-choice').forEach(b => b.addEventListener('click', () => answer(b.dataset.k)));
+    const choices = $(ids.content).querySelectorAll('.cg-choice');
+    choices.forEach(b => b.addEventListener('click', () => answer(b.dataset.k)));
+    $('cg-dontknow').addEventListener('click', () => answer(null));
+    // Número 1/2 em cada resposta; as teclas valem pelo teclado global do app (respeita janela aberta).
+    if (typeof wireKeyboardOptions === 'function') wireKeyboardOptions(choices, { mode: 'sequential' });
+    setProgress(Math.round(100 * S.idx / S.order.length));
   }
 
   function answer(k){
     if (S.answered) return;
-    const it = item(), g = S.game, ok = k === it.ans;
+    const it = item(), g = S.game, ok = k === it.ans, revealed = k == null;
     S.answered = true;
     if (ok) S.hits++;
     S.log.push({ it, ok, given: k });
+    const dk = $('cg-dontknow');
+    if (dk) dk.classList.add('disabled');
     $(ids.content).querySelectorAll('.cg-choice').forEach(b => {
       b.disabled = true;
       b.classList.add(b.dataset.k === it.ans ? 'is-right' : (b.dataset.k === k ? 'is-wrong' : 'is-dim'));
@@ -139,12 +154,12 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
     const last = S.idx + 1 >= S.order.length;
     const fb = $('cg-feedback');
     fb.innerHTML = `
-      <p class="cg-verdict ${ok ? 'ok' : 'no'}">${esc(tt(ok ? 'games.right' : 'games.wrong'))}${ok ? '' : ` <span>${esc(tt('games.answerWas', { form: it[it.ans] }))}</span>`}</p>
+      <p class="cg-verdict ${ok ? 'ok' : 'no'}">${esc(tt(ok ? 'games.right' : (revealed ? 'feedback.header.revealed' : 'games.wrong')))}${ok ? '' : ` <span>${esc(tt('games.answerWas', { form: it[it.ans] }))}</span>`}</p>
       <div class="cg-why">
         <figure class="cg-timeline${SKETCH[opt.sketch] ? '' : ' cg-rule'}">${SKETCH[opt.sketch] ? `<svg viewBox="0 0 134 44" role="img" aria-label="${esc(plain(L(opt.tl)))}">${SKETCH[opt.sketch]}</svg>` : ''}<figcaption>${rich(L(opt.tl))}</figcaption></figure>
         <div><h3>${rich(tt('games.whyTense', { tense: '{' + opt.label + '}' }))}</h3><p>${rich(txt.why || '')}</p></div>
       </div>
-      <button type="button" class="btn btn-primary cg-next" id="cg-next">${esc(tt(last ? 'games.seeResult' : 'games.next'))}</button>`;
+      <button type="button" class="btn btn-primary cg-next" id="cg-next">${esc(tt(last ? 'common.seeResultArrow' : 'common.continueArrow'))}</button>`;
     S.shownAt = performance.now();
     $('cg-next').addEventListener('click', next);
     setTimeout(() => { const n = $('cg-next'); if (n) n.focus(); }, 0);
@@ -160,6 +175,16 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
 
   function renderResult(){
     const g = S.game, n = S.order.length, miss = S.log.filter(x => !x.ok);
+    if (typeof clearKeyboardOptions === 'function') clearKeyboardOptions();
+    setProgress(100);
+    // Sem XP (prática livre), mas o dia conta para a sequência, como a trilha (decisão da autora, 2026-10-26).
+    if (typeof registerStudyToday === 'function'){
+      registerStudyToday();
+      if (typeof saveState === 'function') saveState();
+      if (typeof renderTopbarStats === 'function') renderTopbarStats();
+      if (typeof maybeShowStreakCelebration === 'function') maybeShowStreakCelebration();
+    }
+    if (typeof trackEvent === 'function') trackEvent('lesson_complete', 'conj_game', { game: g.id, hits: S.hits, total: n, scorePct: n ? Math.round(100 * S.hits / n) : 0 });
     $(ids.content).innerHTML = `
       <div class="cg-result">
         <h2 class="cg-title">${esc(tt('games.resultTitle'))}</h2>
@@ -179,15 +204,12 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
     $('cg-to-list').addEventListener('click', exit);
   }
 
-  function exit(){ show(false); renderList(); }
+  function exit(){
+    if (typeof clearKeyboardOptions === 'function') clearKeyboardOptions();
+    show(false); renderList();
+  }
 
-  // 1/2 escolhem; Enter segue (quando a resposta já foi dada).
-  document.addEventListener('keydown', e => {
-    const wrap = $(ids.wrap);
-    if (!wrap || wrap.style.display === 'none' || !S.game || e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
-    if (!S.answered && (e.key === '1' || e.key === '2')){ e.preventDefault(); answer(e.key === '1' ? 'a' : 'b'); }
-  });
+  // As teclas 1/2 vêm do teclado global (wireKeyboardOptions); Enter segue pelo foco no botão "Continuar".
   const back = $(ids.back);
   if (back) back.addEventListener('click', exit);
   window.addEventListener('i18n:change', () => { if ($(ids.wrap) && $(ids.wrap).style.display === 'none') renderList(); });

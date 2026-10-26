@@ -361,8 +361,8 @@ async function fill(page, wrongIdx){
       await page.click('#cg-mistakes');
       const m = await page.evaluate(() => CONJ_GAMES_UI.state.order.map(x => x.id));
       check('"Praticar só os que errei" repete só a frase errada', m.length === 1 && m[0] === it0.id, m);
-      await page.click('#conj-game-back');
-      check('voltar aos jogos sai do foco', await page.evaluate(() => !document.body.dataset.activityFocus && document.getElementById('conj-select-wrap').style.display === 'block'));
+      await page.click('#conj-game-wrap .activity-exit-btn');
+      check('sair pelo X sai do foco e volta à lista de jogos', await page.evaluate(() => !document.body.dataset.activityFocus && document.getElementById('conj-select-wrap').style.display === 'block'));
       // Site em inglês: nada em português no jogo.
       await page.evaluate(() => { window.getUiLang = () => 'en'; });
       await page.click('.cg-play[data-game="pc-imparfait"]');
@@ -415,7 +415,7 @@ async function fill(page, wrongIdx){
       check(`${id}: acerto, sem desenho, regra em quadro, pista marcada, francês em azul na explicação, verbo ${it.verb ? 'mostrado' : 'escondido'}`,
         /ok/.test(f.verdict) && !f.svg && f.rule.length > 10 && f.clue && f.fr >= 2 && !f.braces && f.audioNear && /A1/.test(f.eyebrow) && (it.verb ? verb === '(' + it.verb + ')' : verb === ''), { f, verb, it: it.id });
       if (process.env.SHOTS) await page.screenshot({ path: process.env.SHOTS + `/jogo-${id}.png`, fullPage: true });
-      await page.click('#conj-game-back');
+      await page.click('#conj-game-wrap .activity-exit-btn');
     }
     await page.evaluate(() => { window.getUiLang = () => 'en'; });
     await page.click('.cg-play[data-game="tu-vous"]');

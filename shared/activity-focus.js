@@ -12,7 +12,8 @@
   const AREAS = [
     { tab: 'review', wrap: 'review-session-wrap', back: 'review-back-to-modes' },
     { tab: 'conjugaison', wrap: 'conj-practice-wrap', back: 'conj-back-to-select' },
-    { tab: 'conjugaison', wrap: 'conj-game-wrap', back: 'conj-game-back' },
+    // lessonBar: topo igual ao da trilha (progresso + ⚑ + ⌨️ + X) em vez do link de voltar (padrão das telas de exercício, 2026-10-23).
+    { tab: 'conjugaison', wrap: 'conj-game-wrap', back: 'conj-game-back', lessonBar: true },
     { tab: 'challenges', wrap: 'challenge-player-wrap', back: 'challenge-back-to-list' }
   ];
   const tr = (k, fb) => (typeof t === 'function' ? t(k) : fb);
@@ -26,8 +27,49 @@
     });
   }
 
+  // Topo no molde da lição: trilho de progresso, ⚑, ⌨️ (abre o modal de atalhos) e X (aciona o botão de voltar da sessão,
+  // que fica escondido). O motor da sessão move o trilho (.lesson-progress-fill) pela largura.
+  const LESSON_BAR_BTNS = [
+    { cls: 'activity-flag-btn', icon: '⚑', key: 'report.entry.label', fb: 'Reportar problema', report: true },
+    { cls: 'activity-kbd-btn', icon: '⌨️', key: 'ui.kbd.ariaTitle', fb: 'Atalhos do teclado' },
+    { cls: 'activity-exit-btn', icon: '✕', key: 'games.exit', fb: 'Sair do jogo' }
+  ];
+  function labelLessonBar(root){
+    root.querySelectorAll('[data-activity-label]').forEach(b => {
+      const label = tr(b.getAttribute('data-activity-label'), b.getAttribute('data-activity-fb'));
+      b.setAttribute('aria-label', label); b.title = label;
+    });
+  }
+  function ensureLessonBar(area){
+    const wrap = document.getElementById(area.wrap);
+    const back = document.getElementById(area.back);
+    if (!wrap || !back || wrap.querySelector('.activity-lesson-bar')) return;
+    const bar = document.createElement('div');
+    bar.className = 'lesson-focus-bar activity-lesson-bar';
+    bar.innerHTML = '<div class="lesson-progress-track"><div class="lesson-progress-fill" style="width:0%"></div></div>';
+    LESSON_BAR_BTNS.forEach(d => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'lesson-close-btn ' + d.cls;
+      if (d.report) b.setAttribute('data-report-flag', '');
+      b.setAttribute('data-activity-label', d.key);
+      b.setAttribute('data-activity-fb', d.fb);
+      b.textContent = d.icon;
+      bar.appendChild(b);
+    });
+    labelLessonBar(bar);
+    bar.querySelector('.activity-kbd-btn').addEventListener('click', () => {
+      const m = document.getElementById('kbd-shortcuts-modal');
+      if (m) m.style.display = 'flex';
+    });
+    bar.querySelector('.activity-exit-btn').addEventListener('click', () => back.click());
+    back.style.display = 'none';
+    wrap.insertBefore(bar, wrap.firstChild);
+  }
+
   // Barra do topo da sessão: o link de voltar à esquerda e a ⚑ à direita.
   function ensureBar(area){
+    if (area.lessonBar) return ensureLessonBar(area);
     const back = document.getElementById(area.back);
     if (!back || back.parentElement.classList.contains('activity-focus-bar')) return;
     const bar = document.createElement('div');
@@ -83,6 +125,7 @@
         const label = tr('report.entry.label', 'Reportar problema');
         b.setAttribute('aria-label', label); b.title = label;
       });
+      labelLessonBar(document);
     });
     syncActivityFocus();
   }
