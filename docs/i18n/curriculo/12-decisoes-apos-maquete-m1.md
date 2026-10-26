@@ -1193,3 +1193,7 @@ Base: revisão de todas as decisões 1 a 227 pedida pela dona; ela aceitou **tod
 246. **Título das notas de vocabulário (fecha a 245)**: dois formatos, escolhidos pela natureza da nota. **"Outras palavras de/em/sobre ..."** para lista de itens da mesma categoria
      (ex.: "Outras palavras de roupa", "de cor", "de material", "de traços", "de países", "de moradia"); **"Mais sobre ..."** para o resto (ex.: "Mais sobre família", "sobre rotina",
      "sobre gostos", "sobre o restaurante", "sobre a consulta", "sobre aprender"). "Indo além" não é usado. Os títulos provisórios do `08 v2` são padronizados no próximo lote do editor.
+247. ***se faire mal*** fica na nota "Mais sobre a consulta" ("Na consulta", módulo "Saúde e bem-estar", A2); *avoir mal* e *la douleur* já cobrem a função; a expressão volta em frase "Na frase". Fecha o "a revisar".
+248. ***l'échange*** e ***la faute*** ficam na nota "Mais sobre aprender" ("Falar do aprendizado de línguas", módulo "Estudos e projetos", A2): palavras de apoio, não da função da unidade. Fecha o "a revisar".
+249. **Desculpa no presente com modal** (*Désolée, je ne peux pas, je dois travailler.*) aceita como exemplo de desculpa de "Convidar, aceitar, recusar e se desculpar" (módulo "Lazer, convites e passado", A1); o gratuito
+     entende pela nota de "Falar de lazer". Fecha o "a revisar". A regra 4 da seção 2.1 do `08 v2` foi alinhada à do `15` (decisão 240).
