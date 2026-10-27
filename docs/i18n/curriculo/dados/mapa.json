@@ -1,7 +1,7 @@
 {
-  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235). Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
+  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedido de mudança aplicado: decisões 267 a 279 (A1-1 com 12 palavras; campo opcional \"licao\" por cartão, decisão 274). Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
   "idioma": "fr",
-  "versao": "2026-10-26",
+  "versao": "2026-10-27",
   "fonte": "docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md",
   "niveis": [
     {
@@ -13,7 +13,7 @@
           "nome": "Apresentar-se",
           "ordem": 1,
           "consigo": "cumprimentar e despedir-se escolhendo tu ou vous; dizer nome, sobrenome e nacionalidade no masculino e no feminino; soletrar o meu nome; dizer a idade (1 a 69) e perguntar a do outro; dizer a profissão sem artigo; reagir (Et toi ? Moi aussi.) e pedir para repetir",
-          "tempo_08_min": 215,
+          "tempo_08_min": 235,
           "unidades": [
             {
               "id": "A1-1",
@@ -27,52 +27,76 @@
                 {
                   "palavra": "bonjour",
                   "chave": "A1-1-v0",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "bonsoir",
-                  "chave": "A1-1-v1",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "au revoir",
-                  "chave": "A1-1-v2",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 1
                 },
                 {
                   "palavra": "salut",
                   "chave": "A1-1-v3",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 1
+                },
+                {
+                  "palavra": "bonsoir",
+                  "chave": "A1-1-v1",
+                  "origem": "publicado",
+                  "licao": 1
+                },
+                {
+                  "palavra": "monsieur / madame",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 270,
+                  "licao": 1
+                },
+                {
+                  "palavra": "au revoir",
+                  "chave": "A1-1-v2",
+                  "origem": "publicado",
+                  "licao": 2
                 },
                 {
                   "palavra": "merci",
                   "chave": "A1-1-v4",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 2
                 },
                 {
                   "palavra": "de rien",
                   "chave": "A1-1-v5",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 2
+                },
+                {
+                  "palavra": "bonne journée / bonne soirée",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 269,
+                  "licao": 2
                 },
                 {
                   "palavra": "s'il vous plaît / s'il te plaît",
                   "chave": "A1-1-v6",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 3
                 },
                 {
                   "palavra": "pardon",
                   "chave": "A1-1-v7",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 3
                 },
                 {
                   "palavra": "ça va",
                   "chave": "A1-1-v8",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 4
                 },
                 {
                   "palavra": "à bientôt",
                   "chave": "A1-1-v9",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 4
                 }
               ],
               "notas": [
@@ -114,18 +138,25 @@
                   "variante": "regional"
                 },
                 {
-                  "titulo": "Ça va ? sobe, Ça va. desce, com os dois áudios",
-                  "tipo": "Pron",
-                  "confianca": "alta",
-                  "nova": true,
-                  "observacao": "alta no conteúdo; áudio depende do teste de entonação"
-                },
-                {
                   "titulo": "Pardon x Excusez-moi e Excuse-moi, com menção a désolé(e)",
                   "tipo": "Real",
                   "confianca": "alta",
                   "nova": true,
                   "decisao": 223
+                },
+                {
+                  "titulo": "Madame, monsieur e mademoiselle",
+                  "tipo": "Real",
+                  "confianca": "alta",
+                  "nova": true,
+                  "decisao": 267
+                },
+                {
+                  "titulo": "Como perguntar 'tudo bem?'",
+                  "tipo": "Exp",
+                  "confianca": "alta",
+                  "nova": true,
+                  "decisao": 278
                 }
               ]
             },

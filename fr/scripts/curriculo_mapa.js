@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Contas do mapa do currículo em dados (decisões 228, 232 e 259 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md).
+// Contas do mapa do currículo em dados (decisões 228, 232, 259 e 270 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md).
 //
 // Fonte única: docs/i18n/curriculo/dados/mapa.json (mapa A1 e A2 aprovado e congelado) e dados/excecoes.json.
 // Aqui ficam só funções puras sobre esses dados (cartões, A/B, lições, tempo, notas, conferências das regras 13, 14 e 12)
@@ -18,7 +18,7 @@ const DADOS = path.join(ROOT, 'docs', 'i18n', 'curriculo', 'dados');
 const REGRAS = {
   limitePalavras: { A1: 12, A2: 12 },          // regra 13 (decisões 139 e 231)
   palavrasAte3Licoes: 10,                     // até 10 palavras: 3 lições + Revisão; acima: 4 lições + Revisão (regra 13)
-  tetoModuloMin: 230,                         // regra 16: 3h50 por módulo (decisão 257); o último módulo de cada nível é exceção
+  tetoModuloMin: 235,                         // regra 16: 3h55 para todos os módulos, sem exceção (decisão 270, revê a 257)
   tempoA2: { vocabularioMin: 40, gramaticaMin: 25 }, // 08 seção 1, linha "A2: tempo de trilha" (confiança baixa)
 };
 
@@ -191,15 +191,14 @@ function gramaticasAbrigadasPor(mapa){
   return abriga;
 }
 
-// Regra 16: teto de tempo por módulo, menos o último módulo de cada nível.
+// Regra 16: teto de tempo igual para todos os módulos (decisão 270: some a exceção do último módulo de cada nível).
 function conferirTetoTempo(mapa){
   const problemas = [];
   for (const nivel of mapa.niveis){
-    nivel.modulos.forEach((m, i) => {
-      const ultimo = i === nivel.modulos.length - 1;
+    for (const m of nivel.modulos){
       const t = tempoDoModulo(nivel.id, m).min;
-      if (!ultimo && t > REGRAS.tetoModuloMin) problemas.push({ modulo: m.id, nome: m.nome, tempo: formatarTempo(t), teto: formatarTempo(REGRAS.tetoModuloMin) });
-    });
+      if (t > REGRAS.tetoModuloMin) problemas.push({ modulo: m.id, nome: m.nome, tempo: formatarTempo(t), teto: formatarTempo(REGRAS.tetoModuloMin) });
+    }
   }
   return problemas;
 }

@@ -103,7 +103,7 @@ Desafios continuam Premium com o paywall desligado (todos usam). O *défi* de fi
     aparece com cadeado e é pulada na cadeia de desbloqueio (decisão 138).
 13. **Limite de palavras por unidade** (decisões 45, 129, 139 e **231**). **A1**: até **12** palavras por unidade aberta, com 4 lições + Revisão da unidade acima de 10; conjunto
     fechado (números, dias, meses) pode passar; **sem exceções caso a caso** (decisão 231; não mexe nas unidades já aprovadas). **A2**: no máximo 12 por unidade. O excedente vira nota de vocabulário.
-    Unidades do A1 com 11 ou 12 palavras, todas dentro do limite (decisão 241): "Dizer o nome e a nacionalidade" (11), "Apresentar a família" (11), "Descrever a aparência" (11),
+    Unidades do A1 com 11 ou 12 palavras, todas dentro do limite (decisão 241): "Cumprimentar e se despedir" (12, com *monsieur / madame* e *bonne journée / bonne soirée*, decisões 269 e 270), "Dizer o nome e a nacionalidade" (11), "Apresentar a família" (11), "Descrever a aparência" (11),
     "Dizer de onde é e onde mora" (11), "Dizer as horas e a rotina" (12), "Dizer o dia e combinar" (12), "Gostos e pedidos no café" (12), "Perguntar o preço e pagar" (11),
     "Comprar roupas" (**12**, com *la chemise*, decisão 244, e *chercher*, decisão 251), "Falar do tempo e das estações" (11) e "Móveis e objetos da casa" (11, com *la clé*, decisão 251); "Dizer a data e o aniversário" vai a 16 (meses, conjunto fechado). Histórico: até a
     decisão 231 o A1 tinha limite de 10 e exceções aceitas ou a revisar (decisões 139, 147, 197, 207, 212, 213 e 215).
