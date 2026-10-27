@@ -239,7 +239,8 @@ async function fingerprint(browser, root){
     check('fr de agora: sem erro de página', depois.erros.length === 0, depois.erros);
     check('mesmas cenas', JSON.stringify(Object.keys(antes)) === JSON.stringify(Object.keys(depois)), [Object.keys(antes).length, Object.keys(depois).length]);
     let iguais = 0, total = 0;
-    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST');
+        // E-mail de contato do Premium trocado na main (brunemed1310@gmail.com -> contato@profbrune.com.br, shared/permissions.js): o REF antigo ainda tem o e-mail velho; neutralizado nos dois lados.
+    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL');
     for (const k of Object.keys(antes)){
       if (k === 'erros') continue;
       if (k === 'correcao'){ // um resultado por verbo
