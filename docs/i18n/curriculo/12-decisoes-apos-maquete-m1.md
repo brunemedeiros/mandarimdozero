@@ -1236,3 +1236,27 @@ Base: `auditoria/2026-10-26-a1-a2-passada-final.md`, seção 3. A dona aceitou D
      **só nos diálogos**, não nos exercícios da lição (refina a 253). Para as notas de explicação, realidade e cultura contarem como vistas, falta um campo de palavras no `mapa.json` (pedido de mudança no mapa).
 266. **Piloto de ponta a ponta**: começa pela unidade "Cumprimentar e se despedir" (A1-1) do módulo "Apresentar-se", em rascunho pt-BR em `docs/i18n/curriculo/piloto-m1/A1-1/` (JSON + leitura para a dona); en só depois da aprovação (81);
      nada entra em `fr/content.js` antes da aprovação da dona e da autorização para mexer em código.
+
+# Trigésima quinta rodada (2026-10-27): respostas ao piloto da unidade "Cumprimentar e se despedir" (A1-1)
+
+Base: `piloto-m1/A1-1/A1-1.md`. **Pedido de mudança ao mapa congelado (decisão 235)**: itens 270 e 271; aplicar em `mapa.json` e `08` e rodar o `auditor-curricular` antes de implementar.
+
+267. **Nota "Ça va ? sobe, Ça va. desce" sai** do rascunho (a dona); some o risco do TTS (decisão 11 segue aberta só para o futuro). Nota nova sobre ***mademoiselle*** entra (Real, confiança alta): hoje é evitado (aposentado
+     dos formulários oficiais em 2012); *madame* serve para qualquer mulher adulta. Notas do A1-1: 8; do A1: 132.
+268. **Aceitos como propostos**: D1 (*Pardon ?* cobra "pedir para repetir"; *Pardon ? Vous pouvez répéter ?* só exemplo), D2 (*salut* e *au revoir* trocam de lição; lições 1 e 2 renomeadas), D3 (objetivo novo), D5 (V/F depois da nota "Letras mudas"),
+     D8 (frase "Aqui o **s** de *plus* soa."), D11 (traduções no feminino). **D4**: tradução de *De rien, c'est normal.* = **"De nada, é normal."** (mais próxima, nível iniciante).
+269. **D6**: ***bonne journée / bonne soirée*** vira **cartão em par** em A1-1 (despedida do dia, formal ou informal; não é Desafio); ***Ça marche !*** vai para os Desafios de Expressão do módulo "Lazer, convites e passado"
+     ("Convidar, aceitar, recusar e se desculpar").
+270. ***monsieur / madame*** vira **cartão em par** em A1-1 (regra 1; padrão de *bonjour / salut*) e há um **diálogo formal** novo, mais longo, além do informal de Léa e Hugo. A1-1 fica com **12 palavras**, 4 lições + Revisão da unidade;
+     "Apresentar-se" vai a **~3h55** (+20 min). **Teto do tempo por módulo sobe para 3h55** para todos (revisa a 257): some a exceção do último módulo de cada nível. A1: **362 cartões**, 717 A/B, ~151 lições, ~31h00 (a recalcular no
+     `mapa.json`). Rascunho do diálogo formal (a dona pediu mais fala): cena "À noite, na portaria do prédio: o Sr. Martin encontra a vizinha, Sra. Dubois." com *Bonsoir, madame.* / *Bonsoir, monsieur. Comment allez-vous ?* /
+     *Très bien, merci. Et vous, madame ?* / *Très bien, merci.* / *Bonne soirée, madame !* / *Merci, monsieur. Au revoir !* / *Au revoir, madame !*
+271. ***Comment allez-vous ?*** (formal) entra com ***ça va ?*** (informal) por regra 1: proposta de **par no mesmo cartão** (`A1-1-v8`, mesma chave, como a decisão 48); **aguarda OK da dona** (o validador acusa *allez* sem isso).
+272. **D7**: pergunta e opções das Expressões dos Desafios ficam **no idioma do site, no site inteiro** (fr, zh e pt); em francês ficam só a expressão e os exemplos.
+273. **D9** (campo `exampleK`: frase do cartão escolhida por nós) e **D10** (cenários das frases "só exemplo" recriados **dentro das lições**; a dona gosta dos cenários) aceitos; **ambos exigem código e entram na implementação**
+     (autorização própria), sem perda dos cenários.
+274. **Lacunas do modelo**: campo `palavras` das notas **gerado dos exemplos com tradução** da própria nota (não digitado); `licao` por cartão no `mapa.json`; `audios_previstos` na nota; `risco` **opcional** (só quando houver).
+275. **Pronúncia no cartão e tradução literal (estilo Memrise) — respostas parciais, sem implementar**: tradução **literal só quando difere** da natural (expressões e fórmulas); campos na **ficha da palavra e no verso da Revisão** (não na frente);
+     o campo cuida da **palavra**, e as **notas de pronúncia ficam só para fenômenos** que cruzam palavras (letras mudas, ligação, entonação, com lição própria quando houver conteúdo); respelling gerado por **script com tabela de regras +
+     exceções escritas e revisadas** (confiança por item, `needs_review`), literais à mão; ficam na **camada do curso** (por idioma do site). **Em aberto**: como marcar os sons difíceis sem pôr texto extra no cartão (a dona não quer tirar foco da
+     palavra + tradução). Grilling em andamento.
