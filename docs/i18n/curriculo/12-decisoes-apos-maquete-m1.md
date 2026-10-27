@@ -1251,7 +1251,7 @@ Base: `piloto-m1/A1-1/A1-1.md`. **Pedido de mudança ao mapa congelado (decisão
      "Apresentar-se" vai a **~3h55** (+20 min). **Teto do tempo por módulo sobe para 3h55** para todos (revisa a 257): some a exceção do último módulo de cada nível. A1: **362 cartões**, 717 A/B, ~151 lições, ~31h00 (a recalcular no
      `mapa.json`). Rascunho do diálogo formal (a dona pediu mais fala): cena "À noite, na portaria do prédio: o Sr. Martin encontra a vizinha, Sra. Dubois." com *Bonsoir, madame.* / *Bonsoir, monsieur. Comment allez-vous ?* /
      *Très bien, merci. Et vous, madame ?* / *Très bien, merci.* / *Bonne soirée, madame !* / *Merci, monsieur. Au revoir !* / *Au revoir, madame !*
-271. ***Comment allez-vous ?*** (formal) entra com ***ça va ?*** (informal) por regra 1: proposta de **par no mesmo cartão** (`A1-1-v8`, mesma chave, como a decisão 48); **aguarda OK da dona** (o validador acusa *allez* sem isso).
+271. ***Comment allez-vous ?*** (formal): a proposta de par com *ça va ?* no cartão `A1-1-v8` foi **recusada** pela dona (o par do cartão é a versão *tu* e a versão *vous* da mesma frase). Ver 276.
 272. **D7**: pergunta e opções das Expressões dos Desafios ficam **no idioma do site, no site inteiro** (fr, zh e pt); em francês ficam só a expressão e os exemplos.
 273. **D9** (campo `exampleK`: frase do cartão escolhida por nós) e **D10** (cenários das frases "só exemplo" recriados **dentro das lições**; a dona gosta dos cenários) aceitos; **ambos exigem código e entram na implementação**
      (autorização própria), sem perda dos cenários.
@@ -1260,3 +1260,9 @@ Base: `piloto-m1/A1-1/A1-1.md`. **Pedido de mudança ao mapa congelado (decisão
      o campo cuida da **palavra**, e as **notas de pronúncia ficam só para fenômenos** que cruzam palavras (letras mudas, ligação, entonação, com lição própria quando houver conteúdo); respelling gerado por **script com tabela de regras +
      exceções escritas e revisadas** (confiança por item, `needs_review`), literais à mão; ficam na **camada do curso** (por idioma do site). **Em aberto**: como marcar os sons difíceis sem pôr texto extra no cartão (a dona não quer tirar foco da
      palavra + tradução). Grilling em andamento.
+276. **Pergunta "como vai?" (A1-1)**: o par certo é ***Comment vas-tu ? / Comment allez-vous ?*** (tu e vous), não *ça va ?* com *comment allez-vous ?*. Como a unidade já está em 12 palavras (limite da regra 13), o par entra numa **nota
+     de explicação** nova, "Como perguntar 'tudo bem?'" (*Ça va ?*, *Comment vas-tu ?*, *Comment allez-vous ?*, com tradução, grátis; confiança alta), e **não** como cartão; pela decisão 253 as palavras da nota contam como vistas no
+     diálogo formal, que usa *Comment allez-vous ?*. Notas do A1-1: 9; do A1: 133. **Aguarda OK da dona** (alternativa: cartão em par, A1-1 com 13 palavras, acima do limite).
+277. **Grilling dos campos do cartão (respostas da dona)**: (Q1) som difícil marcado no **respelling em negrito ou cor**, com dica de uma linha só ao tocar, sem texto visível por padrão; (Q6) respelling com **a mesma convenção** nos dois
+     idiomas do site (sílabas em minúsculas separadas por espaço, sem marca de sílaba forte); (Q7) pronúncia e literal **só em cartões** (palavras e expressões), não em frases nem diálogos; (Q8) rótulo **"Tradução literal" / "Literal translation"**;
+     (Q9) campos **grátis**, **fr primeiro**, zh só com literal, pt depois. Junto com a 275, o desenho dos dois campos está fechado; **nada implementado**.
