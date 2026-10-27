@@ -48,6 +48,8 @@
     hifen: true,                        // guarda-chuva, segunda-feira, ênclise (chame-me)
     apostrofo: true,                    // raro, mas existe: copo d'água, Sant'Ana, pau-d'alho
     elisao: false,                      // não há "j' ai": não junta apóstrofo + espaço
+    // Artigos que caem do termo do vocabulário para destacar o substantivo nas falas do diálogo ("o irmão" -> "irmão").
+    artigos: ['o', 'a', 'os', 'as', 'um', 'uma', 'uns', 'umas'],
     // Exercícios de digitar: falta de acento = Quase (decisão da dona, 2026-10-15), não certo nem erro total,
     // porque avô/avó, pais/país, esta/está são palavras diferentes.
     acentoNaDigitacao: 'quase',

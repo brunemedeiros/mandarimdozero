@@ -119,7 +119,7 @@ window.I18N_CATALOG['en'] = {
 
   // Fase 6 lote 1
   'settings.title': 'Settings', // ALTA
-  'settings.subtitle': 'Your account, preferences, and data export.', // ALTA
+  'settings.subtitle': 'Your account information and preferences', // ALTA
   'settings.tab.general': 'General', // ALTA
   'settings.tab.notifications': '🔔 Notifications', // ALTA
   'settings.tab.export': '📦 Export', // ALTA
@@ -560,6 +560,11 @@ window.I18N_CATALOG['en'] = {
   'fr.checkpoint.exam.word': 'How do you say "{w}" in French?', // ALTA
   'fr.checkpoint.exam.phrase': 'Write in French: "{p}"', // ALTA
   'fr.checkpoint.exam.listen': 'Listen and write what you heard', // ALTA
+  'zh.checkpoint.exam.word': 'How do you say "{w}" in Chinese? Type it in pinyin.', // ALTA -- zh (paridade B2, needs_review)
+  'zh.checkpoint.exam.phrase': 'Write it in pinyin: "{p}"', // ALTA -- zh (paridade B2, needs_review)
+  'zh.checkpoint.exam.listen': 'Listen and type what you heard in pinyin', // ALTA -- zh (paridade B2, needs_review)
+  'zh.levelTest.sub': 'Already know Chinese at level {level}? Take this test and go straight to {next} — no need to complete the units first.', // ALTA -- zh (paridade B2, needs_review)
+  'zh.levelTest.intro': 'Already know Chinese at level {level}? Take this test — if you do well, the whole level is marked as completed and you can go straight to {next}.', // ALTA -- zh (paridade B2, needs_review)
   'limitCut.subject.deck': 'This Deck', // ALTA
   'limitCut.subject.import': 'This import', // ALTA
   'limitCut.subject.selection': 'This selection', // ALTA
@@ -594,6 +599,7 @@ window.I18N_CATALOG['en'] = {
   'zh.search.unitLocked': '🔒 Unit {id}: {title}', // ALTA
   'zh.search.loadMore': 'Load more ({shown} of {total})', // ALTA
   'zh.manual.title': 'Manual — Unit {id}: {title}', // ALTA
+  'zh.manual.empty': 'Nothing here yet: the manual fills in as you work through the unit.', // ALTA
   'zh.hint.thinkWhenUse': 'Think about when you would use this expression. It appears in this sentence you already studied: "{masked}"', // ALTA
   'zh.hint.listenAgain': 'Listen again, paying attention to the sounds. It is an expression from this unit\'s topic.', // MÉDIA
   'zh.hint.thinkContext': 'Think about the context of this unit\'s topic ("{title}"): in what situation would you use this word?', // ALTA
@@ -664,7 +670,6 @@ window.I18N_CATALOG['en'] = {
   'zh.hanzi.lessonTest': 'Lesson test — {i} of {n}', // ALTA
   'fr.exercise.counter': 'Exercise {i} of {n}', // ALTA
   'fr.exercise.whatMeans': 'What does it mean?', // ALTA
-  'fr.reorder.tapHint': 'Tap the words in the right order. Tap a placed one to send it back.', // ALTA
   'fr.exercise.listenChooseMeaning': 'Listen and choose the right meaning', // ALTA
   'fr.exercise.tapToHearAgain': 'tap to listen again', // ALTA
   'fr.exercise.typeWhatYouHeard': 'Type what you heard', // ALTA
@@ -2157,6 +2162,7 @@ window.I18N_CATALOG['en'] = {
   'lesson.vocabDots.aria': 'Word {pos} of {total}', // ALTA
   'zh.exercise.translateToChinese': 'Translate into Chinese', // ALTA
   'zh.reorder.tapHint': 'Tap the blocks in the right order. Tap a placed one to send it back.', // ALTA
+  'fr.reorder.tapHint': 'Tap the words in the right order. Tap a placed one to send it back.', // ALTA
   'feedback.whereSeen': 'Where you saw this before', // ALTA
   'feedback.header.revealed': '👀 Answer revealed', // ALTA
   'feedback.header.notThisTime': '❌ Not this time', // ALTA
@@ -3441,6 +3447,74 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.cal.empty': 'No lessons on this day.', // ALTA
   'panel.classLog.cal.schedule': 'Schedule a lesson on this day', // ALTA
   'myClassLogs.upcoming': 'Upcoming lessons', // ALTA
+  'panel.gcal.title': 'Google Calendar', // ALTA
+  'panel.gcal.oneWay': 'One-way sync: Google Calendar → site. The site only reads your calendar; nothing is written to your Google account.', // ALTA
+  'panel.gcal.howItWorks': 'Connect your Google account and choose the calendars with your lessons. Every 15 minutes the site reads the events and creates or updates each lesson on the right day and time, recognizing the student by the name in the title or the guest\'s email. If you move a lesson in Google, the site follows.', // ALTA
+  'panel.gcal.connect': 'Connect Google Calendar', // ALTA
+  'panel.gcal.connectedAs': 'Connected as {email}', // ALTA
+  'panel.gcal.lastRead': 'last read: {when}', // ALTA
+  'panel.gcal.never': 'not read yet', // ALTA
+  'panel.gcal.justNow': 'just now', // ALTA
+  'panel.gcal.minAgo': '{n} min ago', // ALTA
+  'panel.gcal.calendars': 'Calendars', // ALTA
+  'panel.gcal.calendarsHint': 'Check the calendars that have lessons. "Every event is a lesson": anything the site doesn\'t recognize goes to review. "Only recognized events": personal events (lunch, birthdays) are ignored.', // ALTA
+  'panel.gcal.primary': 'main', // ALTA
+  'panel.gcal.modeAll': 'Every event is a lesson', // ALTA
+  'panel.gcal.modeMatched': 'Only recognized events', // ALTA
+  'panel.gcal.noCalendars': 'No calendars found. Click "Refresh calendar list".', // ALTA
+  'panel.gcal.syncNow': 'Read now', // ALTA
+  'panel.gcal.refreshList': 'Refresh calendar list', // ALTA
+  'panel.gcal.disconnect': 'Disconnect', // ALTA
+  'panel.gcal.disconnectConfirm': 'Disconnect Google Calendar? Your lessons stay on the site; it just stops reading your calendar.', // ALTA
+  'panel.gcal.disconnected': 'Google Calendar disconnected.', // ALTA
+  'panel.gcal.counts': '{linked} lessons linked to Google · {review} to review · {waiting} waiting for a site account', // ALTA
+  'panel.gcal.waitingTitle': 'Students without a site account', // ALTA
+  'panel.gcal.waitingHint': 'These events were already recognized and are kept. They become lessons on their own once the student creates an account and is linked to you.', // ALTA
+  'panel.gcal.reviewTitle': 'Events to review ({n})', // ALTA
+  'panel.gcal.reviewHint': 'The site didn\'t recognize these events. Choose whose lesson it is, or mark "Not a lesson" or "Not on the site" (former student or a student who doesn\'t use the site: it doesn\'t become a lesson). With "remember" checked, it also applies to future events from the same person (by guest email) or with the same title. A student who will be linked to you later: use "Skip for now". The event goes to Skipped and becomes a lesson on its own once the site recognizes the student.', // ALTA
+  'panel.gcal.pick': 'Whose lesson is this?', // ALTA
+  'panel.gcal.pickFirst': 'Choose the student or class first. Student not on the list: use "Skip for now" or "Not on the site".', // ALTA
+  'panel.gcal.assign': 'Save', // ALTA
+  'panel.gcal.ignore': 'Not a lesson', // ALTA
+  'panel.gcal.remember': 'Remember for future events from this person (or with this title)', // ALTA
+  'panel.gcal.noTitle': '(no title)', // ALTA
+  'panel.gcal.noAccountGroup': 'Students without a site account', // ALTA
+  'panel.gcal.cancelledHint': 'This event was deleted or canceled in Google. The lesson stays on the site with everything you recorded.', // ALTA
+  'panel.gcal.keep': 'Keep the lesson', // ALTA
+  'panel.gcal.unlink': 'Unlink from Google', // ALTA
+  'panel.gcal.saved': 'Done.', // ALTA
+  'panel.gcal.reconnect': 'Connect again', // ALTA
+  'panel.gcal.restored': 'Back in To review.', // ALTA
+  'panel.gcal.restore': 'Bring back', // ALTA
+  'panel.gcal.dateRange': '{from} to {to}', // ALTA
+  'panel.gcal.outsideCount': '{n} events', // ALTA
+  'panel.gcal.outsideCountOne': '1 event', // ALTA
+  'panel.gcal.emptyOutside': 'No one marked as not on the site.', // ALTA
+  'panel.gcal.outsideHint': 'People marked as "Not on the site" (former students or students who don\'t use the site). Their events don\'t become lessons. "Bring back" returns all of that person\'s events to the To review list.', // ALTA
+  'panel.gcal.tabOutside': 'Not on the site ({n})', // ALTA
+  'panel.gcal.emptySkipped': 'No skipped events.', // ALTA
+  'panel.gcal.emptyOpen': 'Nothing to review right now.', // ALTA
+  'panel.gcal.skippedHint': 'Skipped events are still read: they become lessons on their own once the site recognizes the student.', // ALTA
+  'panel.gcal.outsideTitle': 'Former student or a student who doesn\'t use the site: the event doesn\'t become a lesson', // ALTA
+  'panel.gcal.outside': 'Not on the site', // ALTA
+  'panel.gcal.unskipped': 'Back on the list.', // ALTA
+  'panel.gcal.skipped': 'Moved to Skipped.', // ALTA
+  'panel.gcal.unskip': 'Back to the list', // ALTA
+  'panel.gcal.skip': 'Skip for now', // ALTA
+  'panel.gcal.showMore': 'Show {n} more ({rest} left)', // ALTA
+  'panel.gcal.sortOldest': 'Oldest first', // ALTA
+  'panel.gcal.sortRecent': 'Most recent first', // ALTA
+  'panel.gcal.sortLabel': 'Order', // ALTA
+  'panel.gcal.tabSkipped': 'Skipped ({n})', // ALTA
+  'panel.gcal.tabOpen': 'To review ({n})', // ALTA
+  'panel.gcal.reading': 'Reading your calendar…', // ALTA
+  'panel.gcal.synced': 'Calendar read.', // ALTA
+  'panel.gcal.loadError': 'Couldn\'t load the Google connection right now.', // ALTA
+  'panel.gcal.errReconnect': 'Google asked you to connect again. Click "Connect again" (nothing is lost).', // ALTA
+  'panel.gcal.errGeneric': 'Something went wrong with Google Calendar. Please try again in a moment.', // ALTA
+  'panel.gcal.connectedToast': 'Google Calendar connected. Now choose the calendars with your lessons.', // ALTA
+  'panel.gcal.cancelledToast': 'Google connection canceled.', // ALTA
+  'panel.gcal.timeFromGoogle': 'Time comes from Google Calendar: to change it, change it there.', // ALTA
   'myClassLogs.feed.title': 'See your lessons in your calendar (Google, Apple, Outlook)', // ALTA
   'myClassLogs.feed.intro': 'Subscribe to this link once and your lessons show up in your calendar on their own, in your time zone. When a lesson changes here, your calendar follows.', // ALTA
   'myClassLogs.feed.google': 'Open in Google Calendar', // ALTA

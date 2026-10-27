@@ -20,6 +20,11 @@ function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
       if (typeof STUDENT_PANEL_STATE !== 'undefined') STUDENT_PANEL_STATE.section = studentSection;
       tab = 'student-panel';
     }
+    // A3 (revisão de 2026-10-24): trocar de aba (inclusive voltar para a própria Revisão, que reabre a escolha de
+    // modos) encerra a Revisão rápida: cronômetro, próxima pergunta agendada e gravação de notas.
+    if (typeof stopSpeedSession === 'function') stopSpeedSession();
+    // M2 (revisão de 2026-10-26): a nova tentativa pendente da voz do navegador não fala na aba nova.
+    if (typeof cancelStudyVoiceRetry === 'function') cancelStudyVoiceRetry();
     if (onBeforeSwitch) onBeforeSwitch(tab);
     // Trocar de aba encerra o escopo da sessão Aluno > Revisão (cartões da professora).
     if (typeof STATE !== 'undefined') STATE.reviewSessionClassReview = false;

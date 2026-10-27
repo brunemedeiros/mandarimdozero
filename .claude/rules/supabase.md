@@ -21,7 +21,11 @@ Procedimento de aplicar migration: skill `migration-supabase`.
 - Comparação com `auth.jwt()->>'email'` sempre com `coalesce(..., '')` (NULL nunca pode virar "é admin").
 - Admin por e-mail `brunemed1310@gmail.com`; `teacher_flashcards` só o admin escreve (RLS 026, intencional).
 - `profiles` é de leitura pública: dado pessoal (gênero etc.) vai em `profile_private` (RLS só do dono).
-- Edge Functions: `verify_jwt:true` (exceção: `class-calendar-feed`, lida pelo Google sem login; o token é a senha), CORS (OPTIONS + cabeçalhos) em toda resposta, nunca logar segredo.
+- Edge Functions: `verify_jwt:true` (exceções: `class-calendar-feed`, lida pelo Google sem login, o token é a senha; `google-calendar`, volta do login do Google sem JWT, cada rota confere quem chama), CORS (OPTIONS + cabeçalhos) em toda resposta, nunca logar segredo.
   Mudou o código → novo `deploy_edge_function`. `notification-cron`: o trecho `STUDY_ITEM_GATE` é gerado (`scripts/gerar_mapa_cron.js`). Secrets: `TTS_PROVIDER_API_KEY`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`.
 - Resend ativo (domínio `profbrune.com.br`). Só a faixa de reengajamento tem e-mail; outros eventos só `in_app`.
+- E-mail do domínio: envio pelo Resend (`contato@` e `nao-responda@`); recebimento pelo ImprovMX (MX no Registro.br, 2026-10-25),
+  que repassa `contato@profbrune.com.br` para o Gmail da autora. Contato público do site (privacidade, Sobre, botão do Premium): `contato@`.
+- Google Cloud: "Entrar com Google" no projeto **Prof Brune** (cliente "Login do site"; mandarim-do-zero encerrado em 2026-10-25);
+  Google Agenda no projeto **Prof Brune Agenda** (`docs/google-agenda/`).
 - Testes de banco: transação + `ROLLBACK`, hash/contagem antes e depois, zero resíduo.

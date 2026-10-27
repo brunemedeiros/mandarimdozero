@@ -51,6 +51,9 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
   Duração = seletor 30 min a 5h (`CLASS_LOG_DURATIONS`). Link de agenda (103): `class_calendar_feed` + Edge Function
   `class-calendar-feed` (verify_jwt false; senha de 16 caracteres, 107); o feed nunca leva Anotações nem Observações.
   Endereço bonito `agenda.profbrune.com.br/<senha>` via Netlify (`infra/agenda-netlify`), ligado por `CALENDAR_FEED_HOST`.
+- Google Agenda → site (117, `shared/google-calendar.js`, Edge Function `google-calendar`): só LÊ o Google, nunca escreve.
+  Reconhece o aluno pelos "nomes na agenda" do Banco, e-mail do convidado ou regra aprendida; aula do Google tem horário travado
+  no site (`google_event_ref`). Ida e volta é decisão futura da autora; não escrever no Google sem ela pedir.
 - Rotina automática do Banco (`supabase/functions/review-bank-agent`, migrations 089, 090 e 097 a 100): a tarefa da madrugada só INSERE itens/recaps de alunos
   com `agent_managed = true` e gera cartões pelo mesmo motor do site; `engine.generated.mjs` é GERADO (`node scripts/build-review-bank-agent.js`,
   nunca editar à mão). Mudou `shared/review-bank*.js` ou o motor de cartões: regerar, rodar `tests/banco-revisao/test_agent_core.js`, novo deploy.

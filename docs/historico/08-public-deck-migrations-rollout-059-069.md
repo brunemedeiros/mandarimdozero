@@ -451,3 +451,50 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   `my_permissions()` + `free`; permissão nova `conj_games`; `trail_skip_locked` ligado para Premium Basic/Pro; rótulos;
   5 RPCs de Deck público por `_has_permission(uid, 'public_deck_import')`. Detalhes e rollback:
   `docs/i18n/etapa5-auditoria-premium.md`, seção 8.
+
+## 117 -- Google Agenda → site (2026-10-23)
+
+- `shared/supabase_migrations/117_google_calendar_sync.sql`: tabelas `google_calendar_connections` (refresh token, sem acesso
+  do app), `google_calendar_sources`, `google_calendar_events`, `google_calendar_rules`, `google_oauth_states`; coluna
+  `teacher_class_logs.google_event_ref`; funções `_gcal_*`, `gcal_*` (service_role) e `google_calendar_*` (professora);
+  `class_calendar_feed` atualizada (sem horário = dia inteiro; professora conectada não recebe as aulas do Google). Sem DROP.
+- Staging (2026-10-23): partes A, C e D pela ferramenta (`117_google_calendar_sync_a/_c/_d`); parte B (`gcal_new_state`,
+  `gcal_take_state`, `google_calendar_disconnect`, com "delete", que trava a ferramenta) colada pela autora no SQL Editor;
+  `117e_gcal_incremental_privacy` (leitura incremental + apagar título/convidados de evento que não é aula). Edge Function
+  `google-calendar` v4 no Staging (verify_jwt false; sem login = 401). Staging sem Vault/cron do Google (não precisa).
+- Produção (2026-10-23, autorizada): `117_google_calendar_sync_a` (partes A, C, D e a 117e juntas, só sem a parte B); Vault
+  `gcal_sync_url`/`gcal_sync_token` (senha sorteada no banco, 64 caracteres) e cron `gcal-sync` (*/15) criados; Edge Function
+  `google-calendar` v1 (sem login = 401; senha errada = 401). 393 aulas com o mesmo hash antes e depois. Privilégios conferidos
+  (anon sem execute em nada; professora só nas `google_calendar_*`). **Parte B na produção: a autora cola
+  `docs/google-agenda/117b-sql-editor.sql` no SQL Editor** (sem ela o botão "Conectar" falha).
+- Teste local: `tests/aulas-presenca/run.sh` (117 33/33), `tests/aulas-presenca/test_google_map.mjs` 9/9.
+
+## 118 -- Google Agenda: evento "para revisar" tentado de novo (2026-10-23)
+
+- `shared/supabase_migrations/118_gcal_retry_review.sql`: `gcal_retry_waiting` passa a incluir `match_state = 'review'`
+  (antes, evento não reconhecido ficava na caixa para sempre, mesmo depois do vínculo da aluna). Só `create or replace`.
+- Staging: aplicada (2026-10-23, `118_gcal_retry_review`). Produção: aplicada (2026-10-24, autorizada, `118_gcal_retry_review`).
+- Teste local: `tests/aulas-presenca/run.sh` 117+118 35/35.
+
+## 119 -- Google Agenda: Pular por agora e Fora do site (2026-10-23, pedido da autora)
+
+- `shared/supabase_migrations/119_gcal_review_skip_outside.sql`: `google_calendar_events.skipped_at`,
+  `google_calendar_rules.ignore_kind` ('not_lesson' | 'outside'); `_gcal_apply`, `gcal_ingest`, `google_calendar_status`
+  (conta `skipped`) e `google_calendar_resolve` (ações `skip`, `unskip`, `outside`) refeitos; `google_calendar_review_items()`
+  (caixa inteira, sem o limite de 300). Só `add column if not exists` e `create or replace`.
+- Staging: aplicada (2026-10-23, `119_gcal_review_skip_outside`). Produção: aplicada junto com a 120 (2026-10-24, `119_120_gcal_review_tabs`).
+- Teste local: `tests/aulas-presenca/run.sh` 117+118+119 42/42; painel-professora 673/673.
+
+## 120 -- Google Agenda: aba "Fora do site" com "Trazer de volta" (2026-10-24, pedido da autora)
+
+- `shared/supabase_migrations/120_gcal_outside_tab.sql`: `google_calendar_rules.active` (trazer de volta desliga a regra,
+  sem apagar); eventos "fora do site" guardam título e convidados (são aulas; a aba mostra quem é); `google_calendar_resolve`
+  ganha `restore`; `google_calendar_review_items` inclui os "fora do site"; `google_calendar_status` conta `outside`.
+- Staging: `120_gcal_outside_tab` (2026-10-24). Produção: `119_120_gcal_review_tabs` (2026-10-24, 119 e 120 juntas; 897 aulas
+  com o mesmo hash antes e depois; `google_calendar_review_items` sem execute para anon).
+- Teste local: `tests/aulas-presenca/run.sh` 117 a 120 45/45; painel-professora 685/685.
+- Site publicado pelo PR #399 (2026-10-24). Edge Function `google-calendar` v2 na produção (2026-10-24): volta do login pelo
+  `agenda.profbrune.com.br/google/callback` (Netlify). Sem login = 401. Staging continua na v4 (volta direto pelo Supabase).
+- Botão "Conectar de novo" (sem desconectar; não perde Pulados nem escolhas) publicado em 2026-10-24; painel-professora 691/691.
+  Caminho novo da volta do login conferido pela autora (`agenda.profbrune.com.br/google/callback` responde "Link expirado").
+

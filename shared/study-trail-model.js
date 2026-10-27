@@ -20,7 +20,7 @@
 // save antigo, é ignorado por não estar aqui).
 // `released` (Etapa 0 do currículo, docs/i18n/curriculo/04-lacunas-e-propostas-fr.md 2.3 item 8): o cartão já
 // passou pelo portão de lição uma vez; passa sempre daí em diante (mover a palavra para uma unidade nova não a
-// tira da Revisão). Só os itens com chave estável (`k`, fr) ganham a marca.
+// tira da Revisão). Só os itens com chave estável (`k`; fr e zh desde o C1 da paridade) ganham a marca.
 const STUDY_PROGRESS_FIELDS = [
   'ef', 'interval', 'reps', 'due', 'lapses',
   'stability', 'difficulty', 'state', 'lastReview',
@@ -29,8 +29,8 @@ const STUDY_PROGRESS_FIELDS = [
 
 // ============================================================
 // Etapa 0 do currículo (docs/i18n/curriculo/04-lacunas-e-propostas-fr.md, seção 2): o cartão é identificado
-// pelo ITEM, nunca pelo lugar. Cada palavra/frase/fala do fr/content.js tem uma chave congelada `k`
-// (valor inicial = id de hoje sem o "u", então nenhum id mudou). Item SEM `k` (zh hoje) usa a regra antiga
+// pelo ITEM, nunca pelo lugar. Cada palavra/frase/fala do <site>/content.js (fr; zh desde o C1 da paridade) tem uma
+// chave congelada `k` (valor inicial = id de hoje sem o "u", então nenhum id mudou). Item SEM `k` usa a regra antiga
 // por posição: `u{unidade}-{v|p|d}{posição}`.
 // ============================================================
 function studyItemKey(item){
@@ -47,6 +47,15 @@ function studyWordCardId(unit, idx){
   return studyItemCardId(unit.id, 'v', idx, unit.vocab ? unit.vocab[idx] : null);
 }
 
+// Idioma dos Fields da trilha de um idioma não CJK, pelo registro (melhoria 3 da revisão de arquitetura, 2026-10-26):
+// estudado = fieldLang ('fr', 'pt'); tradução = idioma da base do curso ('pt-BR' no fr; 'en' no pt). Antes eram 'fr' e
+// 'pt-BR' fixos para todo idioma; fr e zh geram exatamente os mesmos Fields (tests/paridade-sites/test_idioma_registro.js).
+// appKey fora do registro: o de antes ('fr' / 'pt-BR').
+function studyFieldLang(appKey){ return LanguageRegistry.studyLangOf(appKey) || 'fr'; }
+function studyTranslationFieldLang(appKey){
+  return (typeof LanguageRegistry.baseTranslationLangOf === 'function' && LanguageRegistry.baseTranslationLangOf(appKey)) || 'pt-BR';
+}
+
 // Linha sintética (mesmo shape que o motor interpreta pra uma Note nativa)
 // de UMA palavra. Ids de Field determinísticos. Texto exatamente como está
 // em content.js (AUDIO_MANIFEST procura o texto literal).
@@ -61,7 +70,7 @@ function studyNoteRowForWord(unit, vocab, idx, appKey){
     fields = [f(0, 'zh', vocab.c), f(1, 'zh-pinyin', vocab.p), f(2, 'pt-BR', vocab.t)];
     fields[0].pinyinFieldId = fields[1].id;
   } else {
-    fields = [f(0, 'fr', vocab.f), f(1, 'pt-BR', vocab.t)];
+    fields = [f(0, studyFieldLang(appKey), vocab.f), f(1, studyTranslationFieldLang(appKey), vocab.t)];
   }
   return {
     id: idx, revision: 0, status: 'active', note: null,
@@ -223,7 +232,7 @@ function studyNoteRowForPhrase(unit, phrase, idx, appKey, gateVocabIdx){
     fields = [f(0, 'zh', phrase.c), f(1, 'zh-pinyin', phrase.p), f(2, 'pt-BR', phrase.t)];
     fields[0].pinyinFieldId = fields[1].id;
   } else {
-    fields = [f(0, 'fr', phrase.f), f(1, 'pt-BR', phrase.t)];
+    fields = [f(0, studyFieldLang(appKey), phrase.f), f(1, studyTranslationFieldLang(appKey), phrase.t)];
   }
   return {
     id: idx, revision: 0, status: 'active', note: null,
@@ -278,8 +287,35 @@ function pickStudyProgress(card){
   STUDY_PROGRESS_FIELDS.forEach(k => { if (card[k] !== undefined) out[k] = card[k]; });
   return out;
 }
-function serializeCardsForSave(cards){
-  return (cards || []).map(c => (c && c.origin === 'study') ? pickStudyProgress(c) : c);
+// `preserved` (A2, revisão de 2026-10-24): entradas do save de cartões da professora/próprios cuja busca FALHOU neste
+// carregamento (ver PRESERVED_SAVED_CARDS em shared/core/estado-trilha-desafios.js). Voltam para o save como estavam,
+// para o progresso FSRS delas nunca sumir por uma falha de rede; um id já presente em `cards` vence.
+function serializeCardsForSave(cards, preserved){
+  const out = (cards || []).map(c => (c && c.origin === 'study') ? pickStudyProgress(c) : c);
+  if (Array.isArray(preserved) && preserved.length){
+    const ids = new Set(out.map(c => c && c.id));
+    preserved.forEach(s => { if (s && s.id != null && !ids.has(s.id)){ out.push(s); ids.add(s.id); } });
+  }
+  return out;
+}
+
+// Origem de uma entrada SALVA de cartão: 'teacher' (id t...), 'self' (id s...) ou null (trilha e o resto).
+// O save de professora/próprios guarda o objeto inteiro (com `origin`); o prefixo do id cobre save sem o campo.
+function savedCardOrigin(s){
+  if (!s || s.id == null) return null;
+  if (s.origin === 'teacher' || s.origin === 'self') return s.origin;
+  if (s.origin) return null;
+  const id = String(s.id);
+  if (/^t\d/.test(id)) return 'teacher';
+  if (/^s\d/.test(id)) return 'self';
+  return null;
+}
+// Entradas salvas das origens `origins` que não casaram com nenhum cartão de `cards` (A2): é o que mergeSavedCards
+// deixaria cair. Só se guardam quando a busca daquela origem falhou; com busca bem-sucedida, sumir é sinal de cartão apagado.
+function unmatchedSavedCardsOfOrigins(cards, savedCards, origins){
+  if (!Array.isArray(savedCards) || !origins || !origins.length) return [];
+  const ids = new Set((cards || []).map(c => c && c.id));
+  return savedCards.filter(s => s && s.id != null && !ids.has(s.id) && origins.includes(savedCardOrigin(s)));
 }
 
 // Load: aplica o save sobre os cards recém-reconstruídos, POR ID.
@@ -323,7 +359,7 @@ function mergeSavedCards(cards, savedCards){
 // ============================================================
 const STUDY_ARCHIVE_EXTRA_FIELDS = ['retiredAt', 'mergedInto'];
 
-// Mudanças de currículo do idioma da página (fr/curriculum-changes.js); sem o arquivo (zh, testes) = nenhuma.
+// Mudanças de currículo do idioma da página (<site>/curriculum-changes.js); sem o arquivo (testes) = nenhuma.
 function studyCurriculumChanges(){
   return {
     merges: typeof STUDY_KEY_MERGES !== 'undefined' ? STUDY_KEY_MERGES : {},

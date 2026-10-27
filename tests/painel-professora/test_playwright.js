@@ -39,6 +39,19 @@ const PANEL_STUB = (who) => {
     (window.__rpcCalls = window.__rpcCalls || []).push([name, args]);
     if (name === 'my_permissions') return { data: { roles: roles.roles, admin: roles.admin, permissions: Object.fromEntries(CAT.map(c => [c.key, { enabled: perm(c.key), limit: null }])) }, error: null };
     // 103: link de agenda (token de 64 hex; gerar outro devolve um novo).
+    // 117: Google Agenda conectado, 2 agendas, 1 evento para revisar.
+    if (name === 'google_calendar_status') return { data: { connected: true, google_email: 'brune@gmail.com', last_sync_at: new Date().toISOString(), last_error: null,
+      sources: [{ calendar_id: 'primary@x', summary: 'Brune Medeiros', is_primary: true, enabled: true, mode: 'matched' }, { calendar_id: 'trab@x', summary: 'Trabalho', is_primary: false, enabled: true, mode: 'all' }],
+      counts: { linked: 12, review: 1, no_account: 3 }, waiting: [{ name: 'Olivia', n: 3, reason: 'nome na agenda' }] }, error: null };
+    if (name === 'google_calendar_review_list') return { data: window.__gcalResolved ? [] : [{ id: 77, title: 'Aulas de francês', start_at: '2026-10-27T17:00:00Z', end_at: '2026-10-27T18:00:00Z', time_zone: 'America/Sao_Paulo', match_state: 'review', match_reason: 'não reconhecido', attendees: [], calendar_summary: 'Trabalho', class_log_id: null }], error: null };
+    // 119: caixa inteira com "pulados": 12 para revisar (o 77 é o mais recente) e 1 pulado.
+    if (name === 'google_calendar_review_items'){
+      const mk = (id, day, extra) => Object.assign({ id, title: 'Evento ' + id, start_at: `2026-10-${String(day).padStart(2, '0')}T17:00:00Z`, end_at: null, time_zone: 'America/Sao_Paulo', match_state: 'review', match_reason: 'não reconhecido', attendees: [], calendar_summary: 'Trabalho', class_log_id: null, skipped_at: null }, extra || {});
+      const all = [mk(77, 27, { title: 'Aulas de francês' })].concat(Array.from({ length: 11 }, (_, i) => mk(i + 1, i + 1)), [mk(90, 20, { title: 'Bia', skipped_at: '2026-10-23T10:00:00Z' })],
+        [5, 12].map(d => mk(200 + d, d, { title: 'Agendamento - Prof. Brune (Liz J)', match_state: 'ignored', match_reason: 'regra: fora do site', attendees: [{ email: 'liz@x.invalid', name: 'Liz J' }] })));
+      return { data: all.filter(e => !(window.__gcalResolved && window.__gcalResolved.p_event_id === e.id && window.__gcalResolved.p_action === 'student')), error: null };
+    }
+    if (name === 'google_calendar_resolve'){ window.__gcalResolved = args; return { data: 'linked', error: null }; }
     if (name === 'my_calendar_feed_token') return { data: (args && args.p_regenerate ? 'b' : 'a').repeat(16), error: null };
     // 101: com horário; inclui 1 aula futura (próximas aulas) marcada em São Paulo.
     if (name === 'get_my_class_schedule') return { data: who === 'S' ? [
@@ -350,6 +363,46 @@ const PANEL_STUB = (who) => {
       await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').open = true; });
       await page.waitForSelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]');
       L('calendário: professora recebe o link dela', await ev(() => /^https:\/\/agenda\.profbrune\.com\.br\/[ab]{16}$/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
+      await page.waitForSelector('#admin-gcal-box .gcal-review-item');
+      L('google: bloco diz que é sincronização em um sentido', await ev(() => /Google Agenda → site/.test(document.querySelector('#admin-gcal-box .gcal-oneway').textContent)));
+      L('google: aberto sozinho porque há evento para revisar, com contador', await ev(() => document.getElementById('admin-gcal-box').open && document.querySelector('#admin-gcal-box [data-gcal-badge]').textContent === '12'));
+      L('google (119): 10 por vez, com "mostrar mais" e as abas Para revisar e Pulados', await ev(() => document.querySelectorAll('#admin-gcal-box .gcal-review-item').length === 10 && !!document.querySelector('#admin-gcal-box [data-gcal-more]') && document.querySelector('[data-gcal-tab="open"]').classList.contains('is-active') && /1/.test(document.querySelector('[data-gcal-tab="skipped"]').textContent)));
+      L('google (119): mais recente primeiro', await ev(() => document.querySelector('#admin-gcal-box .gcal-review-item').dataset.gcalEvent === '77'));
+      L('google: conectada mostra "Conectar de novo" (sem precisar desconectar)', await ev(() => { const b = document.querySelector('#admin-gcal-box .gcal-actions [data-gcal-connect]'); return !!b && b.textContent.trim() === t('panel.gcal.reconnect'); }));
+      L('google: duas agendas com o modo de cada uma', await ev(() => [...document.querySelectorAll('#admin-gcal-box [data-gcal-mode]')].map(x => x.value).join(',') === 'matched,all'));
+      L('google: alunos sem conta listados', await ev(() => document.querySelector('#admin-gcal-box .gcal-waiting').textContent.includes('Olivia')));
+      await ev(() => { const sel = document.querySelector('#admin-gcal-box [data-gcal-target]'); sel.value = [...sel.options].find(o => o.value.startsWith('student|')).value; });
+      if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.getElementById('admin-gcal-box').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
+      await shot('aulas-google-agenda');
+      await ev(() => { document.querySelector('#admin-gcal-box .gcal-review-item').scrollIntoView({ block: 'center' }); window.__gcalY = window.scrollY; });
+      await ev(() => document.querySelector('#admin-gcal-box [data-gcal-do="assign"]').click());
+      await page.waitForFunction(() => !!window.__gcalResolved);
+      await page.waitForTimeout(600);
+      L('google: salvar não desloca a tela (decisão da autora, 2026-10-23)', await ev(() => window.__gcalY > 0 && Math.abs(window.scrollY - window.__gcalY) <= 2), await ev(() => [window.__gcalY, window.scrollY]));
+      L('google: o evento resolvido sai da caixa', await ev(() => !document.querySelector('#admin-gcal-box [data-gcal-event="77"]')));
+      L('google: resolver manda aluno, idioma e "lembrar"', await ev(() => { const a = window.__gcalResolved; return a.p_event_id === 77 && a.p_action === 'student' && a.p_target === 'S' && !!a.p_language && a.p_remember === true; }), await ev(() => window.__gcalResolved));
+      L('google: aula vinda do Google trava horário e duração, com aviso', await ev(() => { const h = classLogWhenFieldsHTML('t1', 'd1', { google_event_ref: 5, start_time: '10:00:00', duration_minutes: 60 }); return (h.match(/ disabled/g) || []).length === 2 && h.includes(t('panel.gcal.timeFromGoogle')); }));
+      await ev(() => document.querySelector('#admin-gcal-box [data-gcal-more]').click());
+      L('google (119): mostrar mais traz o resto', await ev(() => document.querySelectorAll('#admin-gcal-box .gcal-review-item').length === 11 && !document.querySelector('#admin-gcal-box [data-gcal-more]')));
+      await ev(() => { const sel = document.querySelector('#admin-gcal-box [data-gcal-sort]'); sel.value = 'oldest'; sel.dispatchEvent(new Event('change', { bubbles: true })); });
+      L('google (119): mais antigos primeiro', await ev(() => document.querySelector('#admin-gcal-box .gcal-review-item').dataset.gcalEvent === '1'));
+      L('google (119): botões Não é aula, Fora do site e Pular por agora', await ev(() => { const li = document.querySelector('#admin-gcal-box .gcal-review-item'); return !!li.querySelector('[data-gcal-do="ignore"]') && !!li.querySelector('[data-gcal-do="outside"]') && !!li.querySelector('[data-gcal-do="skip"]'); }));
+      await ev(() => document.querySelector('[data-gcal-tab="skipped"]').click());
+      L('google (119): aba Pulados mostra o pulado com "Voltar para a lista"', await ev(() => { const it = document.querySelectorAll('#admin-gcal-box .gcal-review-item'); return it.length === 1 && it[0].dataset.gcalEvent === '90' && !!it[0].querySelector('[data-gcal-do="unskip"]'); }));
+      await ev(() => document.querySelector('[data-gcal-tab="outside"]').click());
+      L('google (120): aba Fora do site agrupa a pessoa (2 eventos) com "Trazer de volta"', await ev(() => { const it = document.querySelectorAll('#admin-gcal-box .gcal-review-item'); return it.length === 1 && /2/.test(it[0].textContent) && !!it[0].querySelector('[data-gcal-do="restore"]') && /\(1\)/.test(document.querySelector('[data-gcal-tab="outside"]').textContent); }));
+      await ev(() => { delete window.__gcalResolved; document.querySelector('#admin-gcal-box [data-gcal-do="restore"]').click(); });
+      await page.waitForFunction(() => !!window.__gcalResolved);
+      L('google (120): trazer de volta manda p_action restore', await ev(() => window.__gcalResolved.p_action === 'restore'));
+      await ev(() => document.querySelector('[data-gcal-tab="open"]').click());
+      await ev(() => { delete window.__gcalResolved; document.querySelector('#admin-gcal-box .gcal-review-item [data-gcal-do="skip"]').click(); });
+      await page.waitForFunction(() => !!window.__gcalResolved);
+      L('google (119): pular manda p_action skip', await ev(() => window.__gcalResolved.p_action === 'skip' && window.__gcalResolved.p_event_id === 1));
+      await ev(() => { delete window.__gcalResolved; document.querySelector('#admin-gcal-box .gcal-review-item [data-gcal-do="outside"]').click(); });
+      await page.waitForFunction(() => !!window.__gcalResolved);
+      L('google (119): fora do site manda p_action outside com lembrar', await ev(() => window.__gcalResolved.p_action === 'outside' && window.__gcalResolved.p_remember === true));
+      L('google: aula comum continua editável', await ev(() => !/ disabled/.test(classLogWhenFieldsHTML('t2', 'd2', { start_time: '10:00:00' }))));
+      await ev(() => { delete window.__gcalResolved; });
       if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aulas-link-agenda');
       // a aula agendada pode cair no mês seguinte: avança até achar
@@ -372,7 +425,9 @@ const PANEL_STUB = (who) => {
       await ev(() => { switchTab('admin-badges'); switchAdminPanelSection('premium'); });
       await page.waitForSelector('#plans-search-input');
       const adminTabs = await ev(() => [...document.querySelectorAll('#view-admin-badges [data-admin-section]')].map(b => b.dataset.adminSection));
-      L('admin: 5 abas, sem as da professora e sem Tags', JSON.stringify(adminTabs) === '["badges","analytics","notifications","reports","premium"]', adminTabs);
+      // TEMPORÁRIO: "privacy" é a aba provisória de Privacidade (shared/privacy-draft.js, só admin). Quando ela sair do Painel de Admin
+      // (menu Mais > Ajuda), tirar "privacy" daqui e voltar o texto para "5 abas".
+      L('admin: 6 abas (5 + a temporária Privacidade), sem as da professora e sem Tags', JSON.stringify(adminTabs) === '["badges","analytics","notifications","reports","premium","privacy"]', adminTabs);
       await page.waitForSelector('[data-plano-matriz] tbody tr');
       L('matriz: 12 permissões x 5 tipos', await ev(() => document.querySelectorAll('[data-plano-matriz] tbody tr').length === 12 && document.querySelectorAll('[data-plano-matriz] thead th').length === 6));
       await page.fill('#plans-search-input', 'a');

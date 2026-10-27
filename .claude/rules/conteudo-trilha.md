@@ -21,9 +21,11 @@ paths:
 Skills: `notas-de-realidade` (notas de realidade/culturais) e `criar-desafios`. Histórico: `docs/historico/01-*`, `09-*`.
 
 - fr: níveis A1..., unidades `A1-N` e unidades `type:"grammar"` (sem vocab, sem notas). zh: HSK1 Unit 1..18 (sem módulos).
-- fr: o cartão é do ITEM, nunca do lugar: cada palavra/frase/fala tem `k` congelado (nunca mudar nem reaproveitar; item novo:
-  `node fr/scripts/congelar_chaves.js`; mesmo sentido mantém `k`, sentido novo = `k` novo). Fundir/excluir só via
-  `fr/curriculum-changes.js`; antes de publicar conteúdo, `node fr/scripts/ids_publicados.js` (livro-razão).
+- Todos os sites (fr, zh e os próximos): o cartão é do ITEM, nunca do lugar: cada palavra/frase/fala tem `k` congelado (nunca
+  mudar nem reaproveitar; item novo: `node scripts/congelar_chaves.js <site>`; mesmo sentido mantém `k`, sentido novo = `k` novo).
+  Fundir/excluir só via `<site>/curriculum-changes.js`; antes de publicar conteúdo, `node scripts/ids_publicados.js` (livro-razão
+  `<site>/published_ids.json`; os scripts descobrem os sites sozinhos). Site novo nasce com os três arquivos.
+  Hanzi do zh também têm `k` (`zh/hanzi-data.js`, id `h<k>`, no livro-razão; excluir só com `HANZI_RETIRED_KEYS`).
 - Mudou palavra, lição ou unidade (fr ou zh): `node scripts/gerar_mapa_cron.js` (mapa `STUDY_ITEM_GATE` do
   `notification-cron` e da cópia do painel) e novo deploy do cron. Unidade inserida atrás do aluno abre sozinha (2.10).
 - Notas ficam em `concepts` com `kind:'reality'|'culture'` + `category`; nunca forçar nota sem relação com a palavra

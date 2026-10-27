@@ -19,7 +19,8 @@
 // acumulado (ver applySerializedState/merge por id, Fase 0); só ficam de
 // fora da FILA DE REVISÃO (isCardLessonCompleted checa `status` na
 // origem 'self', fr/zh app.js).
-async function fetchMyOwnFlashcards(languageAppKey){
+// opts.nullOnError: null (e não []) quando a busca FALHA; ver fetchFlashcardsForCurrentStudent (A2).
+async function fetchMyOwnFlashcards(languageAppKey, opts){
   if (!CURRENT_USER) return [];
   const { data, error } = await supabaseClient
     .from('own_flashcards')
@@ -27,7 +28,7 @@ async function fetchMyOwnFlashcards(languageAppKey){
     .eq('owner_id', CURRENT_USER.id)
     .eq('language_app_key', languageAppKey)
     .order('created_at', { ascending: false });
-  if (error){ console.error('Erro ao carregar seus flashcards:', error); return []; }
+  if (error){ console.error('Erro ao carregar seus flashcards:', error); return (opts && opts.nullOnError) ? null : []; }
   return data || [];
 }
 

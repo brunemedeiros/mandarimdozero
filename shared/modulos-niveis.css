@@ -1,0 +1,122 @@
+/* Paridade B2 (docs/auditoria-paridade-fr-zh.md; registro docs/historico/26-paridade-b2-modulos-niveis.md): visual do
+   sistema de módulos e níveis (shared/core/modulos-niveis.js), comum a todos os sites. Antes só no fr/index.html.
+   Carregado DEPOIS do <style> de cada site (mantém a ordem que as regras tinham no fr: elas vinham depois das regras
+   gerais de .unit-block, que elas sobrescrevem).
+   Cores: tokens do site (--seal-red, --imperial-gold, --brand-fill...). O fr define --level-skip-bg/--on-level-skip-bg
+   (chip "Pular" roxo), --checkpoint-tint/--checkpoint-icon-tint (rosado) e --level-test-pulse (pulso roxo), para não
+   mudar nada; sem eles, o chip é caixa da marca (--brand-fill com --on-brand-fill) e os tons saem do dourado do site. */
+
+/* ---------- Seletor de nível (toggle + modal, estilo Busuu) ---------- */
+.level-toggle-btn{
+  display:flex; align-items:center; gap:6px; background:none; border:none; cursor:pointer;
+  padding:4px 0 12px; font-family: var(--font-display); font-weight:800; font-size:20px; color: var(--ink);
+}
+.level-toggle-chevron{ font-size:19px; color: var(--ink-soft); transition: transform .15s ease; }
+.level-toggle-btn:hover .level-toggle-chevron{ transform: translateY(2px); }
+.level-empty{ text-align:center; padding:50px 20px; color: var(--ink-soft); }
+.level-empty .big-emoji{ font-size:40px; margin-bottom:10px; }
+
+.level-list{ display:flex; flex-direction:column; gap:8px; }
+.level-list-row{ display:flex; align-items:center; gap:8px; }
+.level-skip-chip{
+  flex-shrink:0; background: var(--level-skip-bg, var(--brand-fill)); color: var(--on-level-skip-bg, var(--on-brand-fill)); border:none; cursor:pointer;
+  font-family: var(--font-body); font-weight:800; font-size:12px; border-radius:999px;
+  padding:8px 14px; white-space:nowrap; transition: background .15s ease;
+}
+.level-skip-chip:hover{ background: var(--seal-red-dark); }
+.level-list-item{
+  display:flex; align-items:center; gap:14px; flex:1; min-width:0; text-align:left;
+  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:14px 16px; cursor:pointer; font-family: var(--font-body); transition: all .15s ease;
+}
+.level-list-item:hover{ border-color: var(--imperial-gold); }
+.level-list-item.active{ background: color-mix(in srgb, var(--seal-red) 8%, var(--paper)); border-color: var(--seal-red); }
+.level-list-badge{
+  flex-shrink:0; width:44px; height:44px; border-radius:12px; background: var(--paper-warm);
+  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color: var(--ink-soft);
+}
+.level-list-item.active .level-list-badge{ background: var(--brand-fill); color: var(--on-brand-fill); }
+.level-list-title{ font-weight:800; font-size:15px; }
+.level-list-sub{ font-size:12.5px; color: var(--ink-soft); margin-top:2px; }
+/* ---------- Módulo: rótulo fino de seção, sem cartão próprio ----------
+   A Unidade é quem carrega o peso visual principal da trilha agora -- o
+   Módulo só organiza em capítulos ("Hierarquia da Trilha", seções 3 e 6).
+   Altura (4px) e gradiente (seal-red -> imperial-gold) da barrinha seguem a
+   mesma paleta de progresso usada em todo o resto do app. */
+.module-label{
+  display:flex; align-items:center; gap:10px;
+  margin: 26px 0 10px; padding-top: 14px; border-top: 1px dashed var(--paper-line);
+}
+.module-label:first-child{ margin-top:0; padding-top:0; border-top:none; }
+.module-label .ml-text{
+  font-family: var(--font-display); font-weight:900; font-size:15px; text-transform:none; letter-spacing:0;
+  color:var(--ink); white-space:normal; min-width:0; /* rótulo longo (ex.: inglês) quebra em vez de estourar a tela de 390px */
+}
+.module-label .ml-track{ flex:1; height:4px; border-radius:2px; background:var(--paper-warm); overflow:hidden; }
+.module-label .ml-fill{ height:100%; border-radius:2px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
+.module-label .ml-badge{ font-size:12px; color: var(--jade); flex-shrink:0; }
+.module-units-list{ display:flex; flex-direction:column; gap:10px; }
+.module-units-list.locked{ opacity:.55; }
+.unit-block.review-milestone{ border-style:dashed; border-color: var(--ink-soft); background: var(--paper-warm); }
+.unit-block.review-milestone.empty{ opacity:.8; border-style:dotted; }
+.unit-block.review-milestone .ub-icon{ background: var(--paper); }
+.ub-type-chip.review{ color: var(--ink); border-color: var(--ink-soft); }
+.unit-block.skip-locked .ub-goal{ color: var(--ink-soft); }
+/* ---------- Ponto de verificação do módulo ---------- */
+.unit-block.checkpoint{ border-color: var(--imperial-gold); background: var(--checkpoint-tint, color-mix(in srgb, var(--imperial-gold) 6%, transparent)); }
+.unit-block.checkpoint .ub-icon{ background: var(--checkpoint-icon-tint, color-mix(in srgb, var(--imperial-gold) 14%, transparent)); }
+.unit-block.checkpoint.done .ub-icon{ background: rgba(58,115,89,0.14); }
+
+/* ---------- Teste de Nível (prova final, sempre desbloqueado) ---------- */
+.level-test-card{
+  display:flex; align-items:center; gap:16px; width:100%; text-align:left;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--seal-red) 8%, transparent), color-mix(in srgb, var(--seal-red) 15%, transparent));
+  border:2px solid var(--seal-red); border-radius: var(--radius);
+  padding:18px 20px; margin-top:8px; cursor:pointer; font-family: var(--font-body);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.level-test-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+.level-test-card.done{ border-color: var(--jade); background: linear-gradient(135deg, rgba(58,115,89,0.06), rgba(58,115,89,0.1)); }
+.level-test-icon{ flex-shrink:0; width:52px; height:52px; border-radius:14px; background: var(--brand-fill); display:flex; align-items:center; justify-content:center; font-size:26px; }
+.level-test-card.done .level-test-icon{ background: var(--success-fill); }
+.level-test-body{ flex:1; min-width:0; }
+.level-test-title{ font-weight:800; font-size:16px; margin-bottom:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.level-test-done-pill{ background: var(--success-fill); color:var(--on-success-fill); font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
+.level-test-sub{ font-size:13px; color: var(--ink-soft); line-height:1.4; }
+.level-test-cta{ flex-shrink:0; font-weight:800; font-size:14px; color: var(--seal-red-dark); white-space:nowrap; }
+.level-test-card.done .level-test-cta{ color: var(--jade); }
+
+/* Destaque temporário quando a pessoa chega dizendo "já sei o básico" na
+   primeira entrada (ver applyPendingLevelTestOffer em shared/auth.js) --
+   chama atenção pro card sem precisar abrir o teste sem avisar. */
+@keyframes levelTestPulse{
+  0%, 100%{ box-shadow: 0 0 0 0 var(--level-test-pulse, color-mix(in srgb, var(--seal-red) 35%, transparent)); }
+  50%{ box-shadow: 0 0 0 8px transparent; }
+}
+.level-test-card.level-test-highlight{ animation: levelTestPulse 1s ease-out 3; }
+/* ---------- Tela de conclusão de módulo/nível (checkpoint / teste de nível) ---------- */
+.module-complete{ text-align:center; padding: 20px 4px; }
+.module-complete-icon{ font-size:52px; margin-bottom:8px; }
+.module-complete h2{ margin:0 0 4px; font-size:22px; }
+.module-complete-sub{ margin:0 0 18px; color: var(--ink-soft); font-size:13.5px; font-weight:700; }
+.module-skills{ text-align:left; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); padding:6px 0; }
+.module-skills-label{
+  padding:10px 16px; font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+  color: var(--seal-red-dark);
+}
+.module-skill-item{
+  display:flex; align-items:flex-start; gap:10px; padding:10px 16px; font-size:14px; font-weight:600;
+  line-height:1.4; color: var(--ink);
+}
+.module-skill-item + .module-skill-item{ border-top:1px solid var(--paper-line); }
+.module-skill-check{
+  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--success-fill); color:var(--on-success-fill);
+  font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px;
+}
+.module-retry-note{ color: var(--ink-soft); font-size:13.5px; line-height:1.5; max-width:340px; margin:0 auto; }
+.module-complete-icon.tier-stamp{ animation: iconStampIn .55s cubic-bezier(.2,.8,.3,1.15); }
+@keyframes iconStampIn{ 0%{ transform: scale(2.4) rotate(-14deg); opacity:0; } 55%{ transform: scale(.9) rotate(4deg); opacity:1; } 80%{ transform: scale(1.06) rotate(-1deg); } 100%{ transform: scale(1) rotate(0); } }
+
+@media (prefers-reduced-motion: reduce){
+  .module-complete-icon.tier-stamp{ animation:none; }
+}

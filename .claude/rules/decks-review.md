@@ -24,9 +24,11 @@ Fonte de verdade: `docs/arquitetura-total-decks-tags-painel.md` (30 invariantes,
   Contagens de Deck são estruturais (sem filtros de sessão).
 - Trilha: Course Decks por unidade (`course_unit_id`), cartões "Na frase" (1 por frase de exemplo, ids `u{u}-p{i}`/
   `u{u}-d{i}`), tags derivadas não salvas. Cartão só entra na revisão quando a lição terminou (`isCardLessonCompleted`).
-- Id do cartão da trilha = chave estável do item (`studyItemCardId`: fr `u{k}`; sem `k`, zh, regra antiga por posição); nunca
-  montar `u${unit.id}-v${idx}` na mão. Fusão/exclusão: `fr/curriculum-changes.js`; arquivo `STATE.retiredStudyCards`; marca
-  `released` no portão. Testes: `tests/curriculo-ids` (livro-razão `fr/published_ids.json` bloqueia id perdido).
+- Id do cartão da trilha = chave estável do item (`studyItemCardId`: `u{k}` em fr e zh; item sem `k`, regra antiga por posição);
+  nunca montar `u${unit.id}-v${idx}` na mão. Fusão/exclusão: `<site>/curriculum-changes.js`; arquivo `STATE.retiredStudyCards`;
+  marca `released` no portão. Carregar/salvar com mudanças de currículo: `shared/core/curriculo-progresso.js` (as duas
+  `applySerializedState`/`serializeState` chamam; nunca copiar no app.js). Testes: `tests/curriculo-ids` (livro-razão
+  `<site>/published_ids.json` bloqueia id perdido).
   Course Deck de unidade que saiu do conteúdo: fica no banco (vazio) e escondido na tabela (`deckBrowserUnitVisible`).
 - Cartões da professora (origin 'teacher') ficam FORA da Revisão geral (pool, tabela de Decks, Painel, opção de origem):
   só na aba Aluno > Revisão (`startClassReviewSession`, `STATE.reviewSessionClassReview`, rota `#/review/class`). 2026-10-14.

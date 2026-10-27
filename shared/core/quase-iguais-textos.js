@@ -43,6 +43,8 @@ function addXP(amount){
 
 function answerSpeedQuestion(isCorrect, el, chosenIdx){
   if (SPEED_STATE.answered) return;
+  // A3: sessão já encerrada (a aluna saiu) nunca grava nota.
+  if (!SPEED_STATE.active) return;
   SPEED_STATE.answered = true;
   stopSpeedTimer();
 
@@ -88,7 +90,14 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
   // resposta isolada -- mesmo raciocínio do Flashcard (ver gradeCurrentCard).
   SPEED_STATE.index += 1;
 
-  setTimeout(() => renderSpeedReview(), 700);
+  // A3: guardado em SPEED_STATE.advanceHandle (stopSpeedSession cancela) e preso a ESTA sessão.
+  const session = SPEED_STATE.session;
+  if (SPEED_STATE.advanceHandle) clearTimeout(SPEED_STATE.advanceHandle);
+  SPEED_STATE.advanceHandle = setTimeout(() => {
+    SPEED_STATE.advanceHandle = null;
+    if (!SPEED_STATE.active || SPEED_STATE.session !== session) return;
+    renderSpeedReview();
+  }, 700);
 }
 
 function onMatchTileClick(btn){

@@ -22,3 +22,13 @@ $P aulas94 -c "create or replace function public._ui_lang(p_user uuid) returns t
 $P aulas94 -f "$MIG/107_calendar_feed_short_token.sql" >/dev/null
 $P aulas94 -f "$MIG/107_calendar_feed_short_token.sql" >/dev/null
 psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_107.sql" 2>&1 | grep -v '^\s*$'
+# 117 (Google Agenda): precisa da 096 (Banco ligado a turma).
+$P aulas94 -f "$MIG/096_review_bank_classrooms.sql" >/dev/null
+$P aulas94 -f "$MIG/117_google_calendar_sync.sql" >/dev/null
+$P aulas94 -f "$MIG/117_google_calendar_sync.sql" >/dev/null
+$P aulas94 -f "$MIG/118_gcal_retry_review.sql" >/dev/null
+$P aulas94 -f "$MIG/119_gcal_review_skip_outside.sql" >/dev/null
+$P aulas94 -f "$MIG/119_gcal_review_skip_outside.sql" >/dev/null
+$P aulas94 -f "$MIG/120_gcal_outside_tab.sql" >/dev/null
+$P aulas94 -f "$MIG/120_gcal_outside_tab.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_117.sql" 2>&1 | grep -v '^\s*$'

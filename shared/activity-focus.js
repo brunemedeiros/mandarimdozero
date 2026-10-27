@@ -83,7 +83,9 @@
       const w = document.getElementById(area.wrap), old = w && w.querySelector('.activity-lesson-bar');
       if (old) old.remove();
       const b = document.getElementById(area.back);
-      if (b){ b.style.display = ''; if (b.parentElement && b.parentElement.classList.contains('activity-focus-bar')) b.parentElement.style.display = ''; }
+      // só desfaz o que a barra da lição escondeu; sem deixar style="" para trás (o HTML dos outros tipos fica igual ao de antes)
+      const show = el => { if (el && el.style.display === 'none'){ el.style.removeProperty('display'); if (!el.getAttribute('style')) el.removeAttribute('style'); } };
+      if (b){ show(b); if (b.parentElement && b.parentElement.classList.contains('activity-focus-bar')) show(b.parentElement); }
     }
     const back = document.getElementById(area.back);
     if (!back || back.parentElement.classList.contains('activity-focus-bar')) return;

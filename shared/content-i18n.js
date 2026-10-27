@@ -329,7 +329,8 @@
       return !!(activeOverlay && activeOverlay.units && activeOverlay.units[unitId]);
     }
 
-    return { sync: sync, apply: apply, isUnitTranslated: isUnitTranslated, activeLang: function(){ return activeLang; } };
+    // load: só baixa os arquivos do idioma (sem aplicar); os Desafios esperam o overlay deles antes de listar (M3).
+    return { sync: sync, apply: apply, load: load, isUnitTranslated: isUnitTranslated, activeLang: function(){ return activeLang; } };
   }
 
   window.ContentI18n = { create: create };

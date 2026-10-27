@@ -1,12 +1,14 @@
 // E4: o que muda de um idioma estudado para outro e que o código compartilhado (shared/core) precisa saber.
 // Carregado antes do app.js. Funções chamam as do app.js só na hora do uso (setas), então a ordem de carga não importa.
-const LANG_HOOKS = {
+// Contrato de todos os ganchos (tipo, obrigatório/opcional, padrão): shared/core/lang-hooks-contrato.js.
+// (sem o contrato carregado, ex.: testes antigos que leem só este arquivo, o objeto passa como está)
+const LANG_HOOKS = (typeof defineLangHooks === 'function' ? defineLangHooks : (h) => h)({
 // --- E4 hooks ---
   speakAudioOnly: (...a) => speakFrenchAudioOnly(...a),
   speak: (...a) => speakFrench(...a),
   loadVoice: () => loadFrenchVoice(),
   audioListenKey: 'fr.audio.listen',
-  cardOriginTitle: (c) => flashcardUnitTitleText(c),
+  cardOriginTitle: (c) => cardOriginTitle(c),
   foldCase: (s) => s.toLowerCase(),
   recapText: (i) => i.f,
   recapExtra: () => '',
@@ -27,6 +29,96 @@ const LANG_HOOKS = {
   revisaoPool: () => REVISAO_CONJ_CHALLENGES,
   revisaoFallbackId: 'conj1',
   dailyExtra: () => ({ stars: 0, grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0, conjugationTenses: [] }),
+  // Dica do Verdadeiro ou Falso (trueFalseHint, shared/core/licao-feedback.js): chaves de texto deste site.
+  trueFalseHintKeys: { seen: 'fr.hint.trueFalseExplanation', generic: 'fr.hint.trueFalseGeneric' },
+  // "Sua resposta" (typedAttemptHTML): o fr compara o texto como foi digitado (o alinhamento já ignora maiúscula).
+  typedAttemptForm: (s) => s,
+  // Unidade de gramática e exercício de cenário (shared/core/gramatica-cenario.js, paridade C6):
+  // exercício de digitar da gramática: acento errado = 'almost'; hífen, espaço e apóstrofo contam como iguais
+  // ("soixante dix" = "soixante-dix"), só a grafia do separador nunca deve custar o ponto de quem sabe a palavra.
+  grammarAnswerVerdict: (given, forms) => latinaFr().avaliarComSeparadores(given, forms),
+  scenarioOptionHTML: (p) => p.f,
+  phraseAnswerHTML: (p) => `<strong>${p.f}</strong> ${audioBtnHTML(p.f)}`,
+  reviewEmptyEmoji: '☕',
+  speedPromptHTML: (card) => `<div class="french">${escapeHTML(cardPromptText(card))}</div>`,
+  clozeCorrectHTML: (b) => `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${b.f}</strong></div>`,
+  phraseFeedbackHTML: (p, trans, correct) => `${correct}<div class="feedback-phrase-zh"><strong>${p.f}</strong> ${audioBtnHTML(p.f)}</div><div class="feedback-phrase-trans">${trans}</div>`,
+  phraseHasWord: (word) => { const needle = word.f.replace(/\s*\([^()]*\)/g, '').trim().toLowerCase(); return (p) => p.f.toLowerCase().includes(needle); },
+  dlgLineText: (l) => l.f,
+  dlgLineHTML: (l, terms) => `<div class="dlg-fr">${dlgHighlight(l.f, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>`,
+  dlgSide: (dlg, spk) => spk === 'B' ? 'b' : 'a',
+  dlgWordToast: (d) => `“${d.w}” = ${d.tr}`,
+  dlgBubbleHTML: (l, blank) => `<div class="dlg-fr">${blank ? '<span class="dlg-blank">· · · · ·</span>' : escapeHTML(l.f)}</div>`,
+  dlgOptionHTML: (o) => escapeHTML(typeof o === 'string' ? o : o.f),
+  textOf: (x) => x.f,
+  lessonKeys: { counter: 'fr.exercise.counter', whatMeans: 'fr.exercise.whatMeans', listenChoose: 'fr.exercise.listenChooseMeaning', tapAgain: 'fr.exercise.tapToHearAgain',
+    typeHeard: 'fr.exercise.typeWhatYouHeard', typePlaceholder: 'fr.exercise.typeInFrench', clozePlaceholder: 'review.cloze.placeholder',
+    translateTo: 'fr.exercise.translateToFrench', orderSentence: 'fr.exercise.orderSentence', reorderTapHint: 'fr.reorder.tapHint',
+    hintThinkWhen: 'fr.hint.thinkWhen', hintListenAgain: 'fr.hint.listenAgain', hintThinkContext: 'fr.hint.thinkContext',
+    hintReorderTranslate: 'fr.hint.reorderTranslate', hintReorderOrder: 'fr.hint.reorderOrder', hintCloze: 'fr.hint.cloze', hintFullSentence: 'zh.hint.fullsentence',
+    expandLessons: 'fr.trail.expandLessons', unitDone: 'toast.unitComplete',
+    reviewClozePlaceholder: 'review.cloze.placeholder', reviewTypePlaceholder: 'review.typeAnswer.placeholder' },
+  itemPromptHTML: (i) => `<div class="prompt-french">${i.f}</div>`,
+  itemAnswerHTML: (i) => `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${i.f}</strong> ${audioBtnHTML(i.f)}</div><div class="feedback-phrase-trans">${i.t}</div>`,
+  originPhraseHTML: (o) => `<strong>${o.f}</strong><br>${o.t}`,
+  typedAnswer: {
+    verdict: (given, x) => { const r = lessonTypedAnswerResult(given, x.f); return { ok: r === 'ok' || r === 'quase', almost: r === 'quase', toneOnly: false }; },
+    expected: (x) => x.f,
+    inputExtraHTML: (x) => frAccentPickerHTML(x.f),
+    wireInputExtra: (root, inputEl) => wireFrAccentPicker(root.querySelector('.fr-accent-picker'), inputEl),
+  },
+  clozeSentenceHTML: (ex) => ex.phrase.blocks.map((b, i) =>
+    i === ex.blankIdx ? '<span class="cloze-blank" id="cloze-blank">___</span>' : b.f
+  ).join(' '),
+  clozeOptionsHTML: (options) => options.map((opt, i) => `<button class="cloze-option" data-idx="${i}">${opt.f}</button>`).join(''),
+  clozeSpoken: (ex) => ex.phrase.f,
+  phraseSpoken: (p) => p.f,
+  reorderBlockHTML: (b) => b.f,
+  reorderSlotHTML: (b) => `<div class="french">${b.f}</div>`,
+  reorderAttemptSep: ' ',
+  flySource: (btn) => btn.textContent.trim(),
+  reorderDoneHTML: (p) => `<div class="reorder-final"><div class="reorder-final-fr">${p.f} ${audioBtnHTML(p.f)}</div><div class="reorder-final-tr">${p.t}</div></div>`,
+  fullSentenceExercises: () => [],
+  // Rótulo da lição: "Unidade N de M · A1" (gramática: "Gramática · A1", sem número).
+  unitEyebrow: (u) => {
+    const levelUnits = unitsOfLevel(u.level);
+    const eyebrowLabel = u.type === 'grammar'
+      ? t('trail.eyebrow.grammar')
+      : t('trail.eyebrow.unit', { num: unitOrdinalInfo(u, levelUnits).num, total: unitOrdinalInfo(u, levelUnits).total });
+    return `${eyebrowLabel} · ${u.level}`;
+  },
+  afterOpenUnit: () => {},
+  trailAfterUnit: () => null,
+  trailMap: (root, mods) => renderModulesTrailMap(root, mods),
+  introWordHTML: (v) => `<div class="vocab-card-word">${v.f} ${audioBtnHTML(v.f)}</div>`,
+  introPhraseHTML: (p) => `<div class="vocab-phrase-french">${p.f} ${audioBtnHTML(p.f)}</div>`,
+  wireIntroCard: () => {},
+  badgeLevel: { id: 'A1', label: 'A1' },
+  reviewTargetHTML: (text, audioUrl) => `<div class="flashcard-french">${escapeHTML(text)} ${audioBtnHTML(text, 'audio-btn-lg')}${audioUrl ? customAudioBtnHTML(audioUrl) : ''}</div>`,
+  reviewPromptHTML: (view, inner) => `<div class="flashcard-french">${inner}</div>`,
+  reviewClozeSentenceHTML: (s) => s,
+  reviewTyped: {
+    inputExtraHTML: (expected) => frAccentPickerHTML(expected),
+    wireInputExtra: (root, inputEl) => wireFrAccentPicker(root.querySelector('.fr-accent-picker'), inputEl),
+    check: (given, expected, st) => {
+      const verdict = typedAnswerVerdictForExpected(given, expected);
+      st.wasCorrect = verdict !== 'errou';
+      st.almost = verdict === 'quase';
+      st.almostKind = st.almost ? typedAlmostKind(given, acceptedForms(expected)) : null;
+    },
+    hintHTML: (st) => reviewAlmostHTML(st),
+    wrongGrade: (st) => typedAnswerGrade(st.almost ? 'quase' : 'errou'),
+  },
+  vocabCardSwap: (c, v) => { CardVariants.swapCardWordProgress(c, c.front, v.f, STATE.cardVariants); c.front = v.f; },
+  refreshExtraCards: () => {},
+  // Voz do idioma estudado (shared/core/voz.js): texto que vai para a voz do navegador e avisos deste site.
+  ttsText: (text) => typeof speakableProfileText === 'function' ? speakableProfileText(text) : text,
+  // Prova do Ponto de verificação e Teste de Nível (shared/core/modulos-niveis.js): as chaves de texto que citam o francês
+  // (melhoria 2, 2026-10-26: antes eram o padrão do código comum; mesmas chaves, nada muda na tela).
+  checkpointExam: { keys: { word: 'fr.checkpoint.exam.word', phrase: 'fr.checkpoint.exam.phrase', listen: 'fr.checkpoint.exam.listen' } },
+  levelTestKeys: { sub: 'trail.levelTest.sub', intro: 'trail.levelTest.intro' },
+  voiceMissingKey: 'toast.voiceMissingFr',
+  audioRetryFailedKey: 'toast.audioPlayFailedThis',
 // --- /E4 hooks ---
   // Família latina (shared/core/familias/latina.js): configuração do FRANCÊS. O português, quando o /pt existir,
   // terá a dele no pt/lang-hooks.js (rascunho em shared/core/familias/latina-idiomas.js). Ver docs/i18n/familia-latina-modulo.md.
@@ -35,7 +127,9 @@ const LANG_HOOKS = {
     ligaduras: [['œ', 'oe'], ['æ', 'ae']],
     hifen: true,
     apostrofo: true,
-    elisao: true,                       // ditado: "j' ai" -> "j'ai" antes de comparar
+    elisao: true,
+    // Artigos que caem do termo do vocabulário para destacar o substantivo nas falas do diálogo ("la sœur" -> "sœur").
+    artigos: ['le', 'la', 'les', "l'", 'un', 'une', 'des'],                       // ditado: "j' ai" -> "j'ai" antes de comparar
     acentoNaDigitacao: 'tolerante',     // exercícios de digitar: acento NÃO conta (decisão de 2026-09-16)
     ligadurasNaDigitacao: true,         // "soeur" por "sœur" = Quase (decisão da dona, 2026-10-15)
     ligadurasNaAcentuacao: true,        // desafio Acentuação: "soeur" por "sœur" = Quase (idem)
@@ -121,4 +215,4 @@ const LANG_HOOKS = {
       },
     },
   },
-};
+});

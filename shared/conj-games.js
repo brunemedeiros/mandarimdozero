@@ -8,7 +8,8 @@
 // por idioma do site (text['pt-BR'], text.en). Sem XP: é prática livre, como a Conjugação (mas conta o dia de estudo).
 // Molde da trilha (2026-10-26): topo com progresso + ⚑ + ⌨️ + X (shared/activity-focus.js, lessonBar), respostas numeradas
 // (wireKeyboardOptions + teclado global), "Não sei" (revela e conta como erro) e "Continuar →".
-function createConjGames({ games, speak, ids, isLocked, onLocked }){
+function createConjGames({ games, speak, ids, isLocked, onLocked, lang = 'fr' }){
+  // lang: idioma estudado (atributo lang="" das frases e formas); padrão 'fr', o site de português passa 'pt'.
   // isLocked(game): paywall (Jogos são Premium; true só com o bloqueio ligado E sem a permissão "Jogos da Conjugação");
   // onLocked(game): o que fazer ao tocar num jogo trancado (a janela Premium própria dos Jogos).
   const $ = id => document.getElementById(id);
@@ -20,7 +21,7 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
   const L = o => (o && typeof o === 'object') ? (o[uiLang()] || o.en || o['pt-BR'] || '') : (o || '');
   // Trecho em francês marcado com {chaves} nos textos (título, apresentação, regra e explicação) sai em azul,
   // para separar do português/inglês do site (pedido da autora, 2026-10-19). plain() tira as chaves (aria-label).
-  const rich = s => esc(s).replace(/\{([^{}]+)\}/g, '<span class="cg-fr" lang="fr">$1</span>');
+  const rich = s => esc(s).replace(/\{([^{}]+)\}/g, `<span class="cg-fr" lang="${lang}">$1</span>`);
   const plain = s => String(s == null ? '' : s).replace(/[{}]/g, '');
   const shuffle = a => { const r = a.slice(); for (let i = r.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; };
 
@@ -84,7 +85,7 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
     };
     const gap = filled ? `<span class="cg-fill">${esc(it[it.ans])}</span>` : '<span class="cg-blank" aria-label="___">&nbsp;</span>';
     // Espaço antes de ? ! : ; (tipografia francesa) vira inseparável: o sinal não cai sozinho na linha de baixo.
-    return `<p class="cg-sentence" lang="fr">${mark(it.before)}${gap}${mark(it.after)}</p>`.replace(/ ([?!:;])/g, '\u00a0$1');
+    return `<p class="cg-sentence" lang="${lang}">${mark(it.before)}${gap}${mark(it.after)}</p>`.replace(/ ([?!:;])/g, '\u00a0$1');
   }
 
   function progressHTML(){
@@ -110,13 +111,13 @@ function createConjGames({ games, speak, ids, isLocked, onLocked }){
       ${progressHTML()}
       <div class="cg-stage">
         <div class="cg-panel">
-          ${it.verb ? `<span class="cg-verb" lang="fr">(${esc(it.verb)})</span>` : ''}
+          ${it.verb ? `<span class="cg-verb" lang="${lang}">(${esc(it.verb)})</span>` : ''}
           <div class="cg-sentence-row">${sentenceHTML(it, false)}</div>
           <p class="cg-tr" hidden></p>
         </div>
         <div class="cg-choices">
           ${['a', 'b'].map((k, i) => `<button type="button" class="cg-choice" data-k="${k}" aria-keyshortcuts="${i + 1}">
-            <span class="cg-choice-form" lang="fr">${esc(it[k])}</span><span class="cg-choice-label">${esc(g.opts[k].label)}</span></button>`).join('')}
+            <span class="cg-choice-form" lang="${lang}">${esc(it[k])}</span><span class="cg-choice-label">${esc(g.opts[k].label)}</span></button>`).join('')}
         </div>
         <button type="button" class="exercise-dontknow cg-dontknow" id="cg-dontknow">${esc(tt('common.dontKnow'))}</button>
         <div class="cg-feedback" id="cg-feedback" aria-live="polite"></div>

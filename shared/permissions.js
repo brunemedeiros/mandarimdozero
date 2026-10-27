@@ -85,7 +85,7 @@ async function loadPlanPermissions(force){ await loadMyPermissions(force); retur
 
 // ---------- "Fale com a Prof. Brune" (decisão 6 da dona: o Premium se pede só por e-mail) ----------
 // Abre o e-mail da professora com assunto e texto já preenchidos com o @ da pessoa e o curso, no idioma do site.
-const PREMIUM_CONTACT_EMAIL = 'brunemed1310@gmail.com';
+const PREMIUM_CONTACT_EMAIL = 'contato@profbrune.com.br';
 function premiumContactMailto(){
   const tt = (k, p) => (typeof t === 'function' ? t(k, p) : k);
   const profile = typeof PROFILE_CACHE !== 'undefined' ? PROFILE_CACHE : null;

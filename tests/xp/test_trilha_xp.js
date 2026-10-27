@@ -24,11 +24,12 @@ ctx.STEP_STATE.lessonReview = { unitId: 'u1' };
 check('refazer lição concluída = 0', ctx.exerciseXP({ format: 'type' }, ctx.EXERCISE_XP_PRODUCE) === 0);
 
 // nenhum valor fixo sobrou nos chamadores (fr, zh e módulos compartilhados)
-for (const f of ['fr/app.js', 'zh/app.js', 'shared/core/quase-iguais-pinyin.js', 'shared/core/quase-iguais-textos.js']) {
+for (const f of ['fr/app.js', 'zh/app.js', 'shared/core/quase-iguais-pinyin.js', 'shared/core/quase-iguais-textos.js', 'shared/core/licao-base.js']) {
   const src = read(f);
   check(`${f}: sem exerciseXP(ex, número)`, !/exerciseXP\(ex,\s*\d/.test(src));
   check(`${f}: sem addXP(8) de fechar lição`, !/addXP\(8\)/.test(src));
 }
-for (const f of ['fr/app.js', 'zh/app.js']) check(`${f}: fecha lição com LESSON_CLOSE_XP`, /addXP\(LESSON_CLOSE_XP\)/.test(read(f)));
+// paridade 5d: finishCurrentLesson (fecha a lição) é comum aos sites, em shared/core/licao-base.js
+for (const f of ['shared/core/licao-base.js']) check(`${f}: fecha lição com LESSON_CLOSE_XP`, /addXP\(LESSON_CLOSE_XP\)/.test(read(f)));
 console.log(`xp trilha: ${pass}/${pass + fail}`);
 process.exit(fail ? 1 : 0);

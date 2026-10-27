@@ -491,3 +491,31 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
   "certificate parameter is required", erro conhecido do Netlify; resolveu sozinho). `CALENDAR_FEED_HOST` ligado:
   link = `webcal://agenda.profbrune.com.br/<senha>`. Testes: painel-professora 565/571 (as 6 falhas são da aba
   "Privacidade" do Admin, de outra conversa, e já falhavam sem esta mudança).
+
+### Google Agenda → site (2026-10-23; migration 117, função `google-calendar` e cron no Staging e na produção)
+
+- Decisões da autora: o horário de verdade vive no Google Agenda (agendas "Trabalho" e "Brune Medeiros", que também tem eventos
+  pessoais); o link de agenda (ICS) criava eventos duplicados. Sincronização **em um sentido** (Google → site), escrito na tela;
+  ida e volta completa fica para depois (cada aula guarda `google_event_ref`). Conteúdo da aula centralizado no site; Notion sai
+  do caminho (as 39 aulas novas do Notion ficam sem importar por enquanto). Aulas antigas sem horário: o horário vem do Google.
+- Como reconhece: regra aprendida (título ou e-mail do convidado) → e-mail de aluno com vínculo → "nomes na agenda" do Banco
+  (`review_bank_students.agenda_names`, já preenchidos: Cat, Poli, Jo Dieuvil...) → primeiro nome de aluno com vínculo.
+  Agenda "todas são aulas": o resto vai para "Eventos para revisar"; agenda "só as reconhecidas": eventos pessoais ignorados
+  (exceto com convidado ou "agendamento" no título). Dia inteiro ignorado. Apagado no Google: aula fica, vai para revisar.
+  Aluno sem conta: evento guardado, vira aula quando vincular. Aula antiga do mesmo aluno no mesmo dia: ligada ao evento.
+- Professora conectada: aulas ligadas ao Google saem do link ICS dela (sem duplicar); alunos continuam recebendo. Aula sem
+  horário no link volta a ser "dia inteiro". Na edição, horário/duração de aula do Google ficam travados ("mude no Google").
+- Leitura a cada 15 min (pg_cron `gcal-sync` → `_gcal_cron_post` → Edge Function; senha só no Vault, conferida por
+  `gcal_check_sync_token`); janela 14 dias atrás a 90 à frente; primeira leitura de cada agenda desde 2025-05-01.
+- Grátis x Premium: grátis, dentro do plano Professora. Não usa Claude.
+- Leitura: a primeira de cada agenda desde 2025-05-01; depois uma leitura completa por dia e, a cada 15 min, só o que mudou
+  (`updatedMin`); evento sem mudança não é reprocessado. Privacidade: evento que não é aula fica sem título e sem convidados.
+  Página de privacidade da integração: `privacidade-google-agenda.html` (pt e en), exigida pelo Google para publicar o app.
+- Testes: SQL local 117 33/33; mapeamento de eventos 9/9; painel-professora 607/613 (as 6 falhas são "admin: 5 abas", da aba
+  Privacidade de outra conversa, já falhavam antes).
+- 2026-10-23 (depois da 1ª leitura): botões da caixa não deslocam mais a tela (item resolvido sai na hora, sem "carregando");
+  aviso na caixa sobre aluno fora da lista; 118 tenta de novo os eventos da caixa a cada leitura; página pública `sobre.html`
+  (página inicial do app no Google) e retorno do login pelo `agenda.profbrune.com.br/google/callback` (Netlify).
+- Passos da autora: `docs/google-agenda/passo-a-passo-google-cloud.md` (feito) e `docs/google-agenda/117b-sql-editor.sql`
+  (Staging feito; produção pendente).
+

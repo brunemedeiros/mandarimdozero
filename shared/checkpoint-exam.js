@@ -1,7 +1,8 @@
 // Fase 6 da trilha (06/10/2026): prova do Ponto de verificação (módulo e Teste de
-// Nível), PURA. Antes era só "Como se diz X em francês?" com palavra isolada; a
+// Nível), PURA. Antes era só "Como se diz X em <idioma>?" com palavra isolada; a
 // decisão da professora é medir também frases e compreensão auditiva. Sem DOM,
-// sem STATE: quem chama injeta shuffle() e canSpeak().
+// sem STATE: quem chama injeta shuffle() e canSpeak() (e, num site de outra escrita como o zh, opts.item e opts.keys:
+// ver shared/core/modulos-niveis.js e o gancho checkpointExam de <site>/lang-hooks.js).
 //
 // Tipos de item:
 //   word    -- palavra isolada a partir do sentido (já existia)
@@ -13,7 +14,7 @@ const CHECKPOINT_EXAM_QUOTAS = { listen: 3, phrase: 3, grammar: 2 }; // o resto 
 
 // i18n: usa t() quando existe (navegador); sem ele (testes em Node) cai no português.
 function _ckT(key, params, fallback){
-  if (typeof t === 'function'){
+  if (key && typeof t === 'function'){
     const v = t(key, params);
     if (v && v !== key) return v;
   }
@@ -25,6 +26,12 @@ function buildCheckpointExamQueue(units, opts){
   const shuffleFn = opts.shuffle || (a => a.slice());
   const canSpeak = opts.canSpeak || (() => false);
   const total = opts.total || CHECKPOINT_EXAM_SIZE;
+  // Paridade B2: opts.item (gancho checkpointExam do site: word/phrase para outra escrita) e opts.keys (chaves do
+  // enunciado, que citam o idioma). Melhoria 2 da revisão de arquitetura (2026-10-26): sem padrão em francês; o site
+  // declara LANG_HOOKS.checkpointExam.keys (o contrato shared/core/lang-hooks-contrato.js cobra de quem tem módulos).
+  // Sem chaves (só em teste Node), o enunciado sai neutro, sem citar idioma.
+  const item = opts.item || null;
+  const keys = Object.assign({}, opts.keys || {});
   const pools = { word: [], phrase: [], listen: [], grammar: [] };
   const seenAnswers = new Set();
   const take = (kind, item) => { const k = kind + '|' + item.answer; if (seenAnswers.has(k)) return; seenAnswers.add(k); pools[kind].push(item); };
@@ -33,12 +40,27 @@ function buildCheckpointExamQueue(units, opts){
       ((u.grammar && u.grammar.exercises) || []).forEach(ex => take('grammar', { kind: 'grammar', prompt: ex.prompt, hint: ex.hint || null, answer: ex.answer }));
       return;
     }
+    if (item){
+      // Site com outra escrita (zh): o próprio site diz a resposta digitável, o sentido, o texto falado e a forma
+      // mostrada na correção (item.word(v) / item.phrase(p) -> null quando o item não serve para a prova).
+      (u.vocab || []).forEach(v => {
+        const x = item.word ? item.word(v) : null;
+        if (x) take('word', Object.assign({ kind: 'word', prompt: _ckT(keys.word, { w: x.meaning }, 'Como se diz "{w}"?'), hint: null, answer: x.answer }, x.extra || {}));
+      });
+      (u.phrases || []).forEach(p => {
+        const x = item.phrase ? item.phrase(p) : null;
+        if (!x) return;
+        take('phrase', Object.assign({ kind: 'phrase', prompt: _ckT(keys.phrase, { p: x.meaning }, 'Escreva: "{p}"'), hint: null, answer: x.answer }, x.extra || {}));
+        if (x.audioText && canSpeak(x.audioText)) take('listen', Object.assign({ kind: 'listen', prompt: _ckT(keys.listen, null, 'Ouça e escreva o que você ouviu'), hint: null, answer: x.answer, audioText: x.audioText }, x.extra || {}));
+      });
+      return;
+    }
     // Forma dupla ("français / française") não dá para cobrar por digitação exata.
     (u.vocab || []).filter(v => v.f && !v.f.includes(' / ')).forEach(v =>
-      take('word', { kind: 'word', prompt: _ckT('fr.checkpoint.exam.word', { w: v.t }, 'Como se diz "{w}" em francês?'), hint: null, answer: v.f }));
+      take('word', { kind: 'word', prompt: _ckT(keys.word, { w: v.t }, 'Como se diz "{w}"?'), hint: null, answer: v.f }));
     (u.phrases || []).filter(p => p.f && p.t && !p.f.includes(' / ')).forEach(p => {
-      take('phrase', { kind: 'phrase', prompt: _ckT('fr.checkpoint.exam.phrase', { p: p.t }, 'Escreva em francês: "{p}"'), hint: null, answer: p.f });
-      if (canSpeak(p.f)) take('listen', { kind: 'listen', prompt: _ckT('fr.checkpoint.exam.listen', null, 'Ouça e escreva o que você ouviu'), hint: null, answer: p.f, audioText: p.f });
+      take('phrase', { kind: 'phrase', prompt: _ckT(keys.phrase, { p: p.t }, 'Escreva: "{p}"'), hint: null, answer: p.f });
+      if (canSpeak(p.f)) take('listen', { kind: 'listen', prompt: _ckT(keys.listen, null, 'Ouça e escreva o que você ouviu'), hint: null, answer: p.f, audioText: p.f });
     });
   });
   Object.keys(pools).forEach(k => { pools[k] = shuffleFn(pools[k]); });

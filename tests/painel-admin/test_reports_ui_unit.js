@@ -65,7 +65,7 @@ check('detalhe: contexto recolhido', d.includes('<details class="p-automaticos"'
 check('detalhe: histórico da última resposta e campos de nova resposta', d.includes('Última resposta enviada') && d.includes('Corrigido') && d.includes('id="report-resp-enviar"') && d.includes('maxlength="150"'));
 const d2 = run('trpDetailDialogHTML(r, LB)', { r: R(8, { screenshot_url: 'javascript:alert(1)', expected_behavior: null, severity_reported: null }), LB });
 check('detalhe: captura perigosa não vira link e campos vazios mostram "não informado"', !/<a /.test(d2.replace(/<a [^>]*data-/g, '')) && d2.includes('sem captura anexada') && (d2.match(/não informado/g) || []).length === 2);
-check('detalhe: convidado sem e-mail não pode responder e o aviso aparece', run('trpDetailDialogHTML(r, LB)', { r: R(9), LB }).includes('não é possível responder') && !run('trpDetailDialogHTML(r, LB)', { r: R(9), LB }).includes('id="report-resp-enviar"'));
+check('detalhe: convidado sem e-mail não pode responder e o aviso aparece', run('trpDetailDialogHTML(r, LB)', { r: R(9), LB }).includes('Não é possível responder') && !run('trpDetailDialogHTML(r, LB)', { r: R(9), LB }).includes('id="report-resp-enviar"'));
 check('detalhe: sem prioridade escolhe "não definida"', /<option value="" selected|<option value="">\(não definida\)/.test(d2));
 const pg = run('trpPageHTML(s)', { s: { reports: REPS, filtros: { statusFilter: 'all', kindFilter: 'all', languageFilter: 'all', busca: '' }, L: LB, languageKeys: ['frances', 'mandarim'], truncated: false } });
 check('página: filtros, lista e tudo sob .painel', pg.startsWith('<div class="painel">') && pg.includes('data-reports-status') && pg.includes('data-reports-lista') && (pg.match(/data-report-row=/g) || []).length === 3);
