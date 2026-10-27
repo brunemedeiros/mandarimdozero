@@ -7,13 +7,13 @@ decisão estão marcados **(para a dona)**.
 
 ## 1. O que bate com o 08
 
-- A1: 9 módulos, 57 unidades (34 + 23), 360 cartões, 713 A/B, cartões por módulo 60/33/50/49/33/29/35/41/30, ~150 lições
-  (23/15/19/21/14/12/17/17/12), ~30h40.
+- A1: 9 módulos, 57 unidades (34 + 23), 362 cartões, 717 A/B, cartões por módulo 62/33/50/49/33/29/35/41/30, ~151 lições
+  (24/15/19/21/14/12/17/17/12), 133 notas, ~31h00 (depois do pedido de mudança das decisões 267 a 279, 2026-10-27; antes 360, 713, ~150, 132 e ~30h40).
 - A2: 10 módulos, 58 unidades (36 + 22), 428 cartões (418 novos + 10 publicados), 852 A/B, cartões por módulo 47/36/34/47/36/36/48/48/48/48,
   ~33h10 (a regra "40 min por unidade de vocabulário, 25 por gramática" reproduz os 10 tempos do 08), ~76 notas (77 com *le château*).
 - Os 204 cartões de palavra publicados estão todos no mapa (200 como chave + 4 fundidos); as 30 unidades publicadas também.
 - Regra 14 (nenhuma palavra é cartão em duas unidades), regra 13 (até 12, fora os conjuntos fechados), regra 12 (versão grátis antes de cada
-  gramática), regra 16 (até 3h50, fora o último módulo de cada nível) e títulos das notas de vocabulário (decisão 246): sem problema.
+  gramática), regra 16 (até 3h55 para todos os módulos, sem exceção, decisão 270) e títulos das notas de vocabulário (decisão 246): sem problema.
 
 ## 2. Divergências e ambiguidades
 
@@ -85,3 +85,12 @@ decisão estão marcados **(para a dona)**.
 19. **Regra 14 por texto.** A conferência compara o texto do cartão; pares de lexemas diferentes (*le poste / la poste*, *le jour / un jour*,
     *goûter / le goûter*) não aparecem como repetição, de propósito. A conferência por lexema continua com o `auditor-curricular` (lista da seção 3.2 do 08).
 20. **Teste de Nível.** "Teste de Nível A1" (`A1-final`) não é unidade: fica em `niveis[0].teste_de_nivel`. O 08 não tem linha de teste de nível do A2.
+21. **Pedido de mudança 267 a 279 (2026-10-27): versão grátis de "Gramática: perguntar sim ou não" (`A1-g12`, módulo "Família e pessoas próximas") (para a dona).**
+    O 08 dava como versão grátis a nota "*Ça va ?* sobe, *Ça va.* desce" de "Cumprimentar e se despedir" + a nota de *est-ce que* de "Dizer de onde é e onde mora".
+    A nota de "Cumprimentar e se despedir" saiu (decisão 267). O `versao_gratis_em` da gramática continua com `A1-1` e `A1-9` (não mexi: fora do pedido); a regra 12
+    continua atendida pela `A1-9`. Falta decidir se a `A1-1` sai da lista ou se a nota nova "Como perguntar 'tudo bem?'" (*Ça va ?*, *Comment vas-tu ?*,
+    *Comment allez-vous ?*) passa a ser a parte grátis da M1.1.
+22. **Lições de "Cumprimentar e se despedir" (A1-1) no campo `licao`.** A regra 13 dá 4 lições + Revisão da unidade para 12 palavras. As lições 1 ("Dizer olá") e 2
+    ("Agradecer e se despedir") seguem o pedido (4 cartões cada); a lição 3 do rascunho (`piloto-m1/A1-1/`, "Pedir por favor e perguntar como vai", 4 cartões) foi
+    dividida em lição 3 (*s'il vous plaît / s'il te plaît, pardon*) e lição 4 (*ça va, à bientôt*). Títulos das lições 3 e 4 e a distribuição final: a decidir no
+    rascunho, com a dona.

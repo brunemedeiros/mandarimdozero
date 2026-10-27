@@ -6,7 +6,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 
 | Ordem | Arquivo | O que é | Leia |
 |---|---|---|---|
-| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar. Status (2026-10-23): auditoria final feita e respondida (decisões 197 a 203); pendências da 203 respondidas (decisões 204 a 216: A1 M5.1 com 11; verbos irregulares pela opção B, unidade nova A1 M4.1 "Verbos muito usados"); próximo passo: passada final do `auditor-curricular` e aprovação do mapa (decisão 217); decisões 218 a 256 aplicadas no mapa em 2026-10-26 (250 a 256: respostas à passada final do auditor; "Comer e beber" com ~3h50, acima do teto da regra 16, pendente da dona).** Mapa final do A1 (9 módulos, 57 unidades, 360 cartões) e do A2 (10 módulos, 58 unidades, 428 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
+| **0 (2026-10-19)** | **`08-mapa-final-a1-a2-v2.md`** | **Versão 2 do 08: documento único para revisar. Status (2026-10-23): auditoria final feita e respondida (decisões 197 a 203); pendências da 203 respondidas (decisões 204 a 216: A1 M5.1 com 11; verbos irregulares pela opção B, unidade nova A1 M4.1 "Verbos muito usados"); próximo passo: passada final do `auditor-curricular` e aprovação do mapa (decisão 217); decisões 218 a 256 aplicadas no mapa em 2026-10-26 (250 a 256: respostas à passada final do auditor); mapa aprovado e congelado (decisão 259, 2026-10-26); pedido de mudança: decisões 267 a 279 (2026-10-27), aplicadas no `08`, no `15` e em `dados/mapa.json`.** Mapa final do A1 (9 módulos, 57 unidades, 362 cartões) e do A2 (10 módulos, 58 unidades, 428 cartões, com a `A1-15` "Corpo e saúde" vinda do A1), com notas por unidade, coluna **"Versão grátis"** de cada gramática, gramáticas corrigidas, riscos de progresso (inclusive a unidade que muda de nível e a conclusão com paywall), 64 perguntas (as respondidas marcadas), pendências e conflitos resolvidos | **inteiro, no lugar do 08, 09, 10, 11 e 14** |
 | 1 | `08-revisao-por-funcao-comunicativa.md` | Mapa v3 do A1 e do A2 por função | **fonte, já resumido no 08 v2** (só consulta) |
 | fonte | `09-preview-m1.md` · `10-revisao-unidades-gramatica.md` · `11-inventario-notas.md` · `14-decisoes-notas.md` | preview do M1, gramáticas, inventário e decisões das notas | **fonte, já resumidos no 08 v2** (só consulta) |
 | 2 | `04-lacunas-e-propostas-fr.md` | Proposta principal (v2). **Seções 3, 4.3, 5 e 11 estão superadas pelo 08** | só: caixa "Dúvidas respondidas", seção 0.1 (suas decisões), **2 (Etapa 0: ids estáveis)**, **7 (atividade final e correção)**, **13 (decisões)** e **14 (plano de execução)** |
@@ -196,5 +196,19 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   852 A/B), ~33h10, notas ~76.
 - **Status**: "Comer e beber" fica com ~3h50, dentro do teto de 3h50 da regra 16 (decisão 257); frase *J'ai deux frères et trois sœurs.* confirmada em "Apresentar a família" (258). Depois disso, segue a
   aprovação do mapa pela dona (decisão 217).
+
+## Atualização 2026-10-27 (decisões 267 a 279, pedido de mudança)
+
+- **Pedido de mudança ao mapa congelado** (decisão 235), respostas ao piloto de "Cumprimentar e se despedir" (módulo "Apresentar-se"), aplicado no `08 v2`, no `15`, em
+  `dados/mapa.json` e no script `fr/scripts/curriculo_mapa.js` (só documentos e dados; nada no site): cartões em par ***monsieur / madame*** (270) e ***bonne journée / bonne soirée***
+  (269), novos, com A e B; a unidade vai a **12 palavras**, 4 lições + Revisão da unidade, na ordem do rascunho (`piloto-m1/A1-1/`), com o campo `licao` (1 a 4) por cartão no
+  `mapa.json` (274); sai a nota "*Ça va ?* sobe, *Ça va.* desce" (267); entram as notas "*Madame, monsieur* e *mademoiselle*" (Real, alta, 267) e "Como perguntar 'tudo bem?'"
+  (*Ça va ?*, *Comment vas-tu ?*, *Comment allez-vous ?*; Exp, alta, 276 e 278); o par *ça va / comment allez-vous* no cartão `A1-1-v8` foi recusado (271); o Desafio de Expressão
+  *Ça marche !* vai para "Convidar, aceitar, recusar e se desculpar" (módulo "Lazer, convites e passado") e *Bonne journée !* deixa de ser Desafio (269).
+- **Regra 16 no `15`** (decisão 270): teto de **3h55 para todos os módulos**; some a exceção do último módulo de cada nível.
+- **Totais novos**: A1 com 9 módulos, 57 unidades (34 + 23), **362 cartões** (**717** A/B), **~31h00** (**M1 3h55**, M2 3h45, M3 3h35, M4 3h50, M5 3h20, M6 3h00, M7 3h00,
+  M8 3h15, M9 3h20; "Apresentar-se" com 62 cartões), lições **~151**, notas **133** (contagem do `mapa.json`); A2 sem mudança: 10 módulos, 58 unidades (36 + 22), 428 cartões
+  (418 novos + 10 publicados; 852 A/B), ~33h10, notas 76.
+- **Para a dona**: a versão grátis de "Gramática: perguntar sim ou não" citava a nota de entonação que saiu; e os títulos das lições 3 e 4 da unidade (`dados/ACHADOS.md`, itens 21 e 22).
 
 > **Como falar com a dona** (2026-10-23): em toda mensagem a ela, citar o NOME do módulo e da unidade (não só M6.1 ou `A1-15`), explicar termos internos e dar o contexto completo de cada decisão. Vale para o chat e para qualquer agente.

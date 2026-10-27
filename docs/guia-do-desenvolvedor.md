@@ -27,7 +27,9 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
   Divergências com o `08`: `dados/ACHADOS.md`.
 - **Como mudar:** o mapa está congelado (decisão 259); mudança só por pedido de mudança aprovado pela dona, com o `auditor-curricular`.
   Edite o json, rode `node fr/scripts/curriculo_mapa.js --conferir` e `--tabela` e cole os números no `08`. Exceção nova só com o OK da dona.
-  Regra numérica (limite de palavras, lições, teto de tempo) muda em `REGRAS` no script e no `15`, nunca no json.
+  Regra numérica (limite de palavras, lições, teto de tempo) muda em `REGRAS` no script e no `15`, nunca no json
+  (teto da regra 16: 3h55 para todos os módulos, sem exceção, decisão 270). Campo opcional `licao` no cartão: número da lição (1 a 4)
+  quando a distribuição está decidida (decisão 274; hoje só "Cumprimentar e se despedir") ou `"pronuncia"` (não conta como palavra).
 - **Como testar:** `node tests/curriculo/test_mapa_totais.js` (totais do `08`, regras 12, 13, 14 e 16, títulos das notas de vocabulário, chaves
   contra `fr/published_ids.json`).
 - **O que não fazer:** não digitar total no `08` nem no json; não mudar número do json para o teste passar (registre em `ACHADOS.md`);
