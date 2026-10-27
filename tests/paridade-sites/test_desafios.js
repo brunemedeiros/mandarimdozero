@@ -584,7 +584,8 @@ async function fingerprintEn(browser, root){
     check('chaves de texto encontradas', keys.length > 100, keys.length);
     let iguais = 0, total = 0;
     // published_at/rejected_at... = new Date().toISOString() (relógio fixo, mas por garantia)
-    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ch\.verify=(Vérifier|Verificar|Check)/g, 'ch.verify=VERIFICAR').replace(/\\"(Vérifier|Verificar|Check)\\"/g, '\\"VERIFICAR\\"').replace(VERIFICAR_RE, '>VERIFICAR</button>');
+    // E-mail de contato do Premium trocado na main (brunemed1310@gmail.com -> contato@profbrune.com.br, shared/permissions.js): o REF antigo ainda tem o e-mail velho; neutralizado nos dois lados.
+    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ch\.verify=(Vérifier|Verificar|Check)/g, 'ch.verify=VERIFICAR').replace(/\\"(Vérifier|Verificar|Check)\\"/g, '\\"VERIFICAR\\"').replace(VERIFICAR_RE, '>VERIFICAR</button>').replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL');
     for (const lado of ['pt', 'en']){
       const A = antes[lado], B = depois[lado];
       check(lado + ': a sequência rodou no fr de antes', Object.keys(A).length > (lado === 'pt' ? 900 : 30), Object.keys(A).length);

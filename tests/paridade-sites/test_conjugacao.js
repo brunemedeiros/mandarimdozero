@@ -259,7 +259,8 @@ async function fingerprint(browser, root){
       // o jogo agora conta o dia de estudo (registerStudyToday) ao terminar: o contador de atividade do dia sobe 1
       [/\\"activityLog\\":\{[^}]*\}/g, '\\"activityLog\\":AL'],
     ];
-    const norm = (v) => NEUTRO.reduce((str, [re, to]) => str.replace(re, to), JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST'));
+        // E-mail de contato do Premium trocado na main (brunemed1310@gmail.com -> contato@profbrune.com.br, shared/permissions.js): o REF antigo ainda tem o e-mail velho; neutralizado nos dois lados.
+    const norm = (v) => NEUTRO.reduce((str, [re, to]) => str.replace(re, to), JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST')).replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL');
     for (const k of Object.keys(antes)){
       if (k === 'erros') continue;
       if (k === 'correcao'){ // um resultado por verbo
