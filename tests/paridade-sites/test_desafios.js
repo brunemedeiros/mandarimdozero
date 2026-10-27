@@ -465,6 +465,7 @@ async function fingerprint(browser, root, keys){
   for (const t of Object.keys(byType)){
     const id = await page.evaluate((t) => { const c = pendingChallenges().find(x => x.type === t); return c && c.id; }, t);
     if (!id) continue;
+    await page.evaluate(() => window.__seed(777)); // o sorteio das opções não pode depender de quantos sorteios as cenas de antes gastaram
     await act(id, 'preview');
     out['adm_previa_' + t] = await html('#challenge-player-wrap');
     await page.evaluate(() => { const b = document.getElementById('preview-show-answer-btn'); if (b) b.click(); });

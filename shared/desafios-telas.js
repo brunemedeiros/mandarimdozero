@@ -709,10 +709,10 @@ function openExpressionPlayer(c){
 
 // ---------- Expressões em passos curtos, no molde da trilha (decisão da autora, 2026-10-26) ----------
 // 1) pergunta com "Meu palpite" (livre, NÃO corrigido) e "Ver opções"; 2) resposta (opções coloridas + painel curto + Continuar);
-// 3) "Veja em frases"; 4) "Sua vez" (digitar; o "Quase" é o da trilha, typedAnswerVerdictForExpected); 5) final ("Ir além" + Concluir
-// ou Tentar de novo). A barra do topo (progresso, ⚑, ⌨️, X) é a de shared/activity-focus.js (data-lesson-bar no #challenge-player-wrap).
+// 3) "Veja em frases" (com "Quando usar": registro e cuidado); 4) "Monte a frase" (ordenar o exemplo 1; sem XP); 5) "Sua vez" (digitar;
+// o "Quase" é o da trilha, typedAnswerVerdictForExpected); 6) final ("Ir além" + Concluir ou Tentar de novo). A barra do topo (progresso, ⚑, ⌨️, X) é a de shared/activity-focus.js (data-lesson-bar no #challenge-player-wrap).
 // XP da "Sua vez": só na PRIMEIRA conclusão do desafio (refazer concluído = 0, como na trilha), pago ao tocar em Concluir.
-const EXPR_LAST_STEP = 4;
+const EXPR_LAST_STEP = 5;
 let EXPR_RUN = null; // { c, chosenIdx, isCorrect, revealed, answered, guess, turn: { verdict, revealed, typed }, xpPaid }
 
 function exprHeadHTML(c){
@@ -836,9 +836,17 @@ function exprAnswer(c, origIdx){
 function exprShowExamples(c){
   const exs = [c.example, c.secondExample].filter(ex => ex && ex.text);
   if (!exs.length) return exprShowYourTurn(c);
+  // "Quando usar": o registro da expressão (formal, dia a dia, entre amigos, gíria, pode ofender) com o cuidado que ele pede. Sem registro no dado, não aparece.
+  const regChip = expressionRegisterChipHTML(c);
+  const whenHTML = regChip ? `
+      <div class="expr-when">
+        <div class="expr-when-label">${chT('ch.expr.whenToUse')}</div>
+        <div class="expr-when-body">${regChip}<p>${chT('ch.reg.' + c.register + '.hint')}</p></div>
+      </div>` : '';
   exprRender(c, `
     <div class="exercise-wrap expr-wrap">
       <div class="exercise-prompt-label">${chT('ch.expr.seeInSentences')}</div>
+      ${whenHTML}
       ${exs.map((ex, i) => `
         <div class="exercise-prompt expr-example">
           <div class="expr-example-label">${chT('ch.expr.example' + (i + 1))}</div>
@@ -848,7 +856,95 @@ function exprShowExamples(c){
       <button class="btn btn-primary btn-block" id="expr-continue-btn">${t('common.continueArrow')}</button>
     </div>`, 2);
   exs.forEach((ex, i) => { exprWireAudio(`expr-ex${i}-play`, ex.audioFile); exprWireAudio(`expr-ex${i}-slow`, ex.audioFile, SLOW_AUDIO_RATE); });
-  document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowYourTurn(c));
+  document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowOrder(c));
+}
+
+// "Monte a frase": ordenar as palavras do exemplo 1 (que a aluna acabou de ver). Sem XP (só a "Sua vez" dá), sem tradução (o
+// conteúdo ainda não tem a do exemplo). Palavras = pedaços do texto separados por espaço, com a pontuação junto. Sem frase
+// de 3 a 14 palavras no dado, o passo é pulado. Mesma mecânica da trilha: toque coloca na próxima casa, toque numa casa
+// devolve ela e as seguintes; completou, confere sozinho; "Não sei" mostra a frase e conta como erro.
+function exprOrderTokens(c){
+  const tokens = String((c.example && c.example.text) || '').trim().split(/\s+/).filter(Boolean);
+  return tokens.length >= 3 && tokens.length <= 14 ? tokens : null;
+}
+function exprShowOrder(c){
+  const tokens = exprOrderTokens(c);
+  if (!tokens) return exprShowYourTurn(c);
+  let blocks = shuffle(tokens.map((f, i) => ({ f, i })));
+  if (blocks.every((b, k) => b.f === tokens[k])) blocks = blocks.slice(1).concat(blocks.slice(0, 1)); // nunca nasce já na ordem certa
+  const chosen = []; // posições em `blocks`, na ordem escolhida
+  let finished = false;
+  const file = c.example.audioFile;
+  exprRender(c, `
+    <div class="exercise-wrap expr-wrap">
+      <div class="exercise-prompt-label">${chT('ch.expr.orderIt')}</div>
+      <div class="exercise-prompt reorder-target">
+        <div class="prompt-translation">${chT('ch.expr.orderPrompt')}</div>
+        ${file ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="expr-order-play">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('expr-order-slow')}</div>` : ''}
+      </div>
+      <div class="reorder-wrap-hint">${chT('ch.expr.tapHint')}</div>
+      <div class="reorder-answer-slots" id="expr-order-slots"></div>
+      <div class="reorder-blocks" id="expr-order-blocks"></div>
+      <button class="exercise-dontknow" id="expr-order-dontknow-btn">${t('common.dontKnow')}</button>
+    </div>`, 3);
+  exprWireAudio('expr-order-play', file);
+  exprWireAudio('expr-order-slow', file, SLOW_AUDIO_RATE);
+  const slotsEl = document.getElementById('expr-order-slots'), blocksEl = document.getElementById('expr-order-blocks');
+  const lang = chCfg().lang;
+
+  function draw(){
+    slotsEl.innerHTML = tokens.map((_, pos) => chosen[pos] === undefined
+      ? '<div class="reorder-slot empty"></div>'
+      : `<div class="reorder-slot filled" data-seq-pos="${pos}"><div class="french" lang="${lang}">${escapeHtmlChallenge(blocks[chosen[pos]].f)}</div></div>`).join('');
+    blocksEl.innerHTML = blocks.map((b, bi) => `<button class="reorder-block${chosen.includes(bi) ? ' used' : ''}" data-block-idx="${bi}" lang="${lang}" ${chosen.includes(bi) ? 'disabled' : ''}>${escapeHtmlChallenge(b.f)}</button>`).join('');
+    slotsEl.querySelectorAll('.reorder-slot.filled').forEach(slot => slot.addEventListener('click', () => {
+      if (finished) return;
+      chosen.splice(parseInt(slot.dataset.seqPos, 10));
+      draw();
+    }));
+    blocksEl.querySelectorAll('.reorder-block:not(.used)').forEach(btn => btn.addEventListener('click', () => {
+      if (finished) return;
+      chosen.push(parseInt(btn.dataset.blockIdx, 10));
+      draw();
+      if (chosen.length === tokens.length) finish(false);
+    }));
+  }
+
+  function finish(revealed){
+    if (finished) return;
+    finished = true;
+    const ok = !revealed && chosen.every((bi, pos) => blocks[bi].f === tokens[pos]);
+    EXPR_RUN.order = { ok, revealed };
+    if (!revealed) playFeedbackSound(ok);
+    // Certo: tudo verde. Errado: o que já estava no lugar fica verde e o resto vermelho (dica de onde errou). "Não sei": mostra a frase certa.
+    if (revealed){
+      slotsEl.innerHTML = tokens.map(f => `<div class="reorder-slot filled correct"><div class="french" lang="${lang}">${escapeHtmlChallenge(f)}</div></div>`).join('');
+    } else {
+      slotsEl.querySelectorAll('.reorder-slot').forEach((slot, pos) => slot.classList.add(blocks[chosen[pos]].f === tokens[pos] ? 'correct' : 'incorrect'));
+    }
+    blocksEl.style.display = 'none';
+    const dk = document.getElementById('expr-order-dontknow-btn'); if (dk) dk.classList.add('disabled');
+    const full = `<div class="feedback-inner-box expr-order-full" lang="${lang}">${escapeHtmlChallenge(c.example.text)}</div>`;
+    const panel = document.createElement('div');
+    panel.className = (ok ? 'correct-feedback' : 'wrong-feedback') + ' expr-panel';
+    panel.innerHTML = ok ? `
+      <div class="feedback-card-body">
+        <div class="correct-feedback-header">✅ ${nextCorrectFeedbackPhrase()}</div>
+        ${full}
+        <button class="btn btn-primary btn-block correct-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
+      </div>` : `
+      <div class="feedback-card-body">
+        <div class="wrong-feedback-header">${t(revealed ? 'feedback.header.revealed' : 'feedback.header.notThisTime')}</div>
+        <div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${t('feedback.label.fullSentence')}</div>${full}</div>
+        <button class="btn btn-primary btn-block wrong-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
+      </div>`;
+    slotsEl.parentElement.appendChild(panel);
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowYourTurn(c));
+  }
+
+  document.getElementById('expr-order-dontknow-btn').addEventListener('click', () => finish(true));
+  draw();
 }
 
 // Respostas aceitas da "Sua vez": a do conteúdo (várias formas separadas por "/", como no resto do site) e, se o autor
@@ -879,7 +975,7 @@ function exprShowYourTurn(c){
         <button class="btn btn-primary btn-block expr-verify" id="expr-turn-verify-btn">${chT('ch.verify')}</button>
         <button class="exercise-dontknow" id="expr-turn-dontknow-btn">${t('common.dontKnow')}</button>
       </div>
-    </div>`, 3);
+    </div>`, 4);
   const input = document.getElementById('expr-turn-input');
   chCfg().wireAccentPicker(document.getElementById('expr-turn-stage'), input);
   input.focus();
@@ -945,6 +1041,7 @@ function exprShowFinal(c){
       <h3 class="expr-final-title">${chT(ok ? 'ch.expr.finalOk' : 'ch.expr.finalFail')}</h3>
       <ul class="expr-final-sum">
         <li><span>${chT('ch.expr.sumChoice')}</span><b>${ok ? '✓' : '✕'}</b></li>
+        ${run.order ? `<li><span>${chT('ch.expr.sumOrder')}</span><b>${run.order.ok ? '✓' : '✕'}</b></li>` : ''}
         ${turn ? `<li><span>${chT('ch.expr.sumTurn')}</span><b>${turn.revealed ? '✕' : mark(turn.verdict)}</b></li>` : ''}
         ${xp ? `<li><span>${chT('ch.expr.sumXp')}</span><b>+${xp} XP</b></li>` : ''}
       </ul>

@@ -170,7 +170,7 @@ const PT_CONFIG = `({
       passos.push(await page.evaluate(() => document.getElementById('challenge-player-content').innerText));
       const fim = await page.evaluate(() => !!document.getElementById('challenge-complete-btn'));
       if (fim) break;
-      await page.evaluate(() => { const d = document.getElementById('expr-turn-dontknow-btn'); (d && d.offsetParent ? d : document.getElementById('expr-continue-btn')).click(); });
+      await page.evaluate(() => { const d = document.getElementById('expr-turn-dontknow-btn'), o = document.getElementById('expr-order-dontknow-btn'); (d && d.offsetParent ? d : (o && o.offsetParent ? o : document.getElementById('expr-continue-btn'))).click(); });
     }
     const ex = passos.join('\n');
     L('Expressão: certa, com o sentido no idioma estudado (meaning.pt) e em inglês (camada do curso), exemplos e "Sua vez"', /Pergunta informal/.test(ex) && /An informal way to ask/.test(ex) && /Oi, Ana! Tudo bem\?/.test(ex) && /Oi! .*Tudo ótimo!/.test(ex) && semFrances(ex), ex.slice(0, 900));

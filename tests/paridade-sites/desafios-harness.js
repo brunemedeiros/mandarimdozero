@@ -134,8 +134,8 @@ async function boot(browser, root, opts){
     window.__exprOpcoes = () => [...document.querySelectorAll('.challenge-choice-btn, .exercise-option[data-orig-idx]')];
     window.__exprTexto = (b) => (b.querySelector('.opt-text') || b).textContent;
     window.__exprAteFinal = () => { for (let i = 0; i < 8 && !document.getElementById('challenge-complete-btn') && !document.getElementById('challenge-retry-btn'); i++){
-      const d = document.getElementById('expr-turn-dontknow-btn'), c = document.getElementById('expr-continue-btn');
-      if (d && d.offsetParent) d.click(); else if (c) c.click(); else break; } };
+      const d = document.getElementById('expr-turn-dontknow-btn'), o = document.getElementById('expr-order-dontknow-btn'), c = document.getElementById('expr-continue-btn');
+      if (d && d.offsetParent) d.click(); else if (o && o.offsetParent) o.click(); else if (c) c.click(); else break; } };
     window.__CH_ROWS = rows; window.__importInputs = imports;
   }, [opts.lang || 'pt-BR', rows, importInputs(rows), opts.theme || null]);
   await page.addInitScript(VARIANTS_SRC);

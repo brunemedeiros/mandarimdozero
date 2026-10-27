@@ -45,4 +45,4 @@ Tudo o que for decidido sobre XP vale para todos os sites (fr, zh, pt e futuros)
 - Decisão da autora: o passo "Sua vez" das Expressões (digitar a lacuna da microatividade) dá XP: certo `EXERCISE_XP_PRODUCE` (2), "quase" `EXERCISE_XP_ALMOST` (1),
   errou ou "Não sei" 0. Antes os Desafios de conteúdo não davam XP; os outros tipos continuam sem.
 - Contra XP infinito: pago só ao tocar em Concluir e só na PRIMEIRA conclusão do desafio (refazer concluído e "Revisar erros" = 0).
-  Código: `exprTurnXP` e `exprShowFinal` em `fr/app.js`. Cobertura: `tests/desafios-expressoes-passos/` (2 XP certo, 1 XP quase, 0 errado/"Não sei", 0 ao refazer).
+  Código: `exprTurnXP` e `exprShowFinal` em `shared/desafios-telas.js`. Cobertura: `tests/desafios-expressoes-passos/` (2 XP certo, 1 XP quase, 0 errado/"Não sei", 0 ao refazer).

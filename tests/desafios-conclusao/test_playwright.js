@@ -105,6 +105,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     for (let i = 0; i < 8; i++){
       if (await page.isVisible('#challenge-complete-btn') || await page.isVisible('#challenge-retry-btn')) return;
       if (await page.isVisible('#expr-turn-dontknow-btn')) await page.click('#expr-turn-dontknow-btn');
+      else if (await page.isVisible('#expr-order-dontknow-btn')) await page.click('#expr-order-dontknow-btn');
       else await page.click('#expr-continue-btn');
       await page.waitForTimeout(60);
     }

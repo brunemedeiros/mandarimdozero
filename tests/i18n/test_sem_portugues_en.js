@@ -456,6 +456,8 @@ async function run(browser, port, app){
         if (type === 'expression'){ // passos novos das Expressões: exemplos, "Sua vez" (vazia e respondida) e tela final
           const passo = (txt, fn) => S(`Desafios: expression (${id}) ${txt}`, fn, { wait: 500 });
           await passo('exemplos', () => { const c = document.getElementById('expr-continue-btn'); if (c) c.click(); });
+          await passo('Monte a frase', () => { const c = document.getElementById('expr-continue-btn'); if (c) c.click(); });
+          await passo('Monte a frase respondida', () => { const b = document.getElementById('expr-order-dontknow-btn'); if (b) b.click(); });
           await passo('Sua vez', () => { const c = document.getElementById('expr-continue-btn'); if (c) c.click(); });
           await passo('Sua vez respondida', () => { const i = document.getElementById('expr-turn-input'); if (i){ i.value = 'test'; document.getElementById('expr-turn-verify-btn').click(); } });
           await passo('final', () => { const c = document.getElementById('expr-continue-btn'); if (c) c.click(); });
