@@ -28,7 +28,7 @@
 //   lang                   código do idioma estudado (fr: 'fr'): o sentido da Expressão em meaning[lang]
 //   familia()              a instância da família do idioma (fr: latinaFr()): a correção da Acentuação
 //                          (resultadoAcentuacao: acento exigido, "oe" por "œ" = quase)
-//   texts                  { 'pt-BR': {...}, en: {...} } textos que citam o idioma estudado: ch.sub, ch.verify,
+//   texts                  { 'pt-BR': {...}, en: {...} } textos que citam o idioma estudado: ch.sub,
 //                          ch.knowMore, ch.goFurther (consultados antes dos textos comuns de CHALLENGE_I18N)
 //   table, publishedRpc    tabela e RPC do Supabase (padrão 'challenges' e 'get_published_challenges')
 //   accentPickerHTML(), wireAccentPicker(conteúdo, campo)   teclado de letras do idioma na Acentuação (padrão: sem)
@@ -314,6 +314,8 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': 'Você terminou todos os exercícios desse nível.',
     'ch.queue.back': 'Voltar aos níveis',
     'ch.listenPron': 'Ouvir pronúncia',
+    'ch.verify': 'Verificar',
+    'ch.expr.whatMeans': 'O que significa?',
     'ch.expr.reveal': 'Ver as respostas',
     'ch.expr.yourAnswer': 'Sua resposta: {chosen}<br>Resposta certa: <strong>{correct}</strong>',
     'ch.expr.signifies': 'significa <strong>{fr}</strong>.',
@@ -445,6 +447,8 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': "You have finished all the exercises in this level.",
     'ch.queue.back': "Back to levels",
     'ch.listenPron': "Listen to pronunciation",
+    'ch.verify': "Check",
+    'ch.expr.whatMeans': "What does it mean?",
     'ch.expr.reveal': "See the answers",
     'ch.expr.yourAnswer': "Your answer: {chosen}<br>Correct answer: <strong>{correct}</strong>",
     'ch.expr.signifies': "means <strong>{fr}</strong>.",

@@ -519,3 +519,4 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 .challenges-import-status.err{ color: var(--error-red-text); }
 #app.lesson-focus #challenge-player-wrap{ max-width:760px; margin-left:auto; margin-right:auto; }
 .challenge-category-card{ box-shadow:0 3px 0 var(--paper-line); }
+#challenge-player-content > .exercise-prompt-label{ text-align:center; }
