@@ -1269,3 +1269,14 @@ Base: `piloto-m1/A1-1/A1-1.md`. **Pedido de mudança ao mapa congelado (decisão
 278. **Nota "Como perguntar 'tudo bem?'" aceita** no lugar do cartão (decisão 276): A1-1 fica com 12 palavras e 9 notas; o diálogo formal usa *Comment allez-vous ?* (palavras vistas pela nota, decisão 253).
 279. **Grilling dos campos, fecho**: (Q10) respelling em inglês gerado por regras, revisado pelo `revisor-conteudo` e conferido por **verificação externa de uma amostra**, tudo `needs_review` com confiança; a dona revisa só o pt-BR; antes, levantar **como o Memrise e outros sites fazem
      o respelling em inglês** (pesquisa pedida pela dona); (Q11) o piloto do módulo "Apresentar-se" **segue sem esses campos**; os campos entram numa trilha própria depois (decisão de código com autorização própria).
+
+# Trigésima sexta rodada (2026-10-28): respostas à auditoria do pedido de mudança e ao respelling
+
+280. **Respelling (a dona, vendo cartões do Memrise em inglês)**: vogais nasais escritas **sem parênteses**, como **"ahn", "ohn", "ehn", "uhn"** (ex.: *bohn-zhoor*, *ahn*), porque parênteses são usados para letra que pode cair (*je (ne) sais pas*); o "n" da nasal vai
+     estilizado como som difícil (decisão 277, Q1a) e a dica ao toque diz que o n só nasaliza a vogal. Também sem parênteses para o e mudo: "uh" em palavra pequena (*tuh, duh*) e omitido no fim da palavra (*prahndr, offr*). Pesquisa e links: `dados/pesquisa-respelling-en.md`.
+281. **Desafios (a dona)**: a revisão dos Desafios de cada módulo (trocar expressão que virou cartão, mover *Ça marche !*, etc.) é feita **módulo a módulo, depois de definidos os cartões da trilha**; **nunca** mover um cartão para Desafio sem decisão da dona
+     (tira do gratuito: Desafios são Premium). Os Desafios *Bonne journée !* ("Rotina e calendário") e *Bonne soirée !* ("Lazer, convites e passado") e o exemplo *Un café ensemble ?* (*ensemble*) entram na revisão dos respectivos módulos.
+282. **Ids de lição (D3, delegado ao critério técnico)**: o progresso dentro da unidade segue a **posição** (`lessonIdx`) e a unidade concluída continua concluída; o id de lição não carrega progresso. Decisão: lições **novas por função, com ids novos e estáveis**
+     (ex.: `cumprimentar-alguem`), os antigos em `RETIRED_LESSON_IDS`, sem herdar id; antes de publicar, conferir (com autorização para ler produção) quantos alunos estão no meio da unidade; melhoria futura de código (pedido de mudança): guardar o id da lição no progresso.
+283. **Nota "Como perguntar 'tudo bem?'" (D4)**: mostra as quatro formas, com tradução, e **quando se usa cada uma**: informal (família, amigos, jovens da mesma idade, mesmo desconhecidos) *Ça va ?* (a mais comum) e *Comment vas-tu ?*; formal (desconhecidos,
+     chefes e superiores, pessoas idosas, prestadores de serviço) *Comment allez-vous ?* e *Vous allez bien ?*. Confiança alta. O diálogo formal usa essas formas (palavras vistas pela nota, 253).
