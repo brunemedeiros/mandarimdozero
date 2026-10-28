@@ -1293,3 +1293,16 @@ Base: `piloto-m1/A1-1/A1-1.md`. **Pedido de mudança ao mapa congelado (decisão
      conteúdo em notas, porque nota não gera cartão de Revisão. A proposta da lição 2 de "Cumprimentar e se despedir" (um cartão, resposta só na nota "Como responder") foi **recusada**; ver a proposta nova no chat de 2026-10-28.
 288. **Respelling, letras (a dona)**: **inglês** com as letras do Wikivoyage onde não há conflito (*uu, eu, zh, ny, uh*) e as nasais *ahn, ohn, ehn, uhn*; **pt-BR**: o **u francês escrito "y"** (símbolo do IPA reaproveitado; a dica ao toque diz "y é o som de i com biquinho de u"; **não** usar "ú"), **"é" para o e aberto (è)** e **"ê" para o e fechado (é)**;
      hífen entre sílabas dentro da palavra e espaço entre palavras (decisão 280). Em aberto: *eu*/*œ* e as nasais em pt-BR.
+
+289. **Respelling pt-BR, nasais**: **til + n** (*ãn, õn*, e *ẽn* para *in/ain*, a confirmar), ex.: *bõn-jur* (a dona). Proposta ainda sem resposta para *eu/œ*: reaproveitar os símbolos do IPA como no *y* (*ø* para o *eu* fechado, *œ* para o aberto, com dica ao toque).
+290. ***Comme ci, comme ça*** **sai** (a dona: não se usa mais na França); fica fora dos cartões e dos Desafios de Expressão do módulo "Apresentar-se" (revisão dos Desafios do módulo, decisão 281). *Pas mal* só entra se a dona pedir.
+291. **A nota "Letras que ficam mudas no fim" sai** da unidade "Cumprimentar e se despedir" (a dona): o assunto vira um **curso de Pronúncia do Francês**, a criar no futuro (pendência no `CLAUDE.md`).
+292. **Cartões e notas de "Cumprimentar e se despedir" definidos pela dona (2026-10-28)** (limite de 12 e teto de tempo em análise; ver 293):
+     Lição 1 "Cumprimentar alguém": *salut / coucou* (só como "oi, olá", **não** como tchau), *bonjour*, *bonsoir* (+ nota "Bonjour ou Bonsoir?" depois de *bonsoir*), *monsieur / madame* (+ nota "Madame, monsieur e mademoiselle").
+     Lição 2 "Perguntar como a pessoa está e responder": *ça va* (+ nota "Ça va pode ser pergunta ou resposta", sem falar de entonação, com *Salut, ça va ? Oui, ça va. Et toi ?*, *et toi ?* apresentado sem explicação), *comment vas-tu ? / comment allez-vous ?* (+ nota "Como perguntar 'tudo bem?'"),
+     *je vais bien* (+ nota "Como responder").
+     Lição 3 "Fórmulas de cortesia" (*formules de politesse*): *merci* (frase "Je vais bien, merci." + nota Bienvenue no Quebec), *de rien*, *s'il te plaît / s'il vous plaît* (informal primeiro; + nota "S'il vous plaît no dia a dia", que explica também o STP),
+     *excuse-moi / excusez-moi* (+ nota "Pardon, excuse-moi ou excusez-moi?"). Dúvida a confirmar: o cartão *pardon* fica?
+     Lição 4 "Despedir-se": *au revoir*, *à bientôt* (+ nota "à plus"), *bonne journée / bonne soirée*, nota "*salut* também pode ser tchau, de modo informal" e os diálogos (informal e formal).
+     Total: 14 a 16 cartões (a confirmar *pardon* e *salut / coucou* em um cartão ou dois), acima do limite de 12 da regra 13.
+293. **Tempo por lição em análise (a dona)**: entender por que cada lição "toma tanto tempo" nas estimativas (5 min por palavra, +10 min pela 4ª lição, ~40 min por unidade no A2) antes de fechar o tamanho da unidade; análise estática do código em `dados/analise-tempo-por-licao.md`.
