@@ -1306,3 +1306,6 @@ Base: `piloto-m1/A1-1/A1-1.md`. **Pedido de mudança ao mapa congelado (decisão
      Lição 4 "Despedir-se": *au revoir*, *à bientôt* (+ nota "à plus"), *bonne journée / bonne soirée*, nota "*salut* também pode ser tchau, de modo informal" e os diálogos (informal e formal).
      Total: 14 a 16 cartões (a confirmar *pardon* e *salut / coucou* em um cartão ou dois), acima do limite de 12 da regra 13.
 293. **Tempo por lição em análise (a dona)**: entender por que cada lição "toma tanto tempo" nas estimativas (5 min por palavra, +10 min pela 4ª lição, ~40 min por unidade no A2) antes de fechar o tamanho da unidade; análise estática do código em `dados/analise-tempo-por-licao.md`.
+294. **A1-1, dúvidas fechadas (a dona)**: o cartão ***pardon* fica**; ***salut / coucou*** é **um cartão em par**. A unidade fica com **15 cartões** (lição 1: 4; lição 2: 3; lição 3: 5; lição 4: 3), acima do limite de 12 (regra 13); o tamanho e o teto do módulo "Apresentar-se"
+     dependem da análise de tempo (293).
+295. **Medir o tempo real das lições com dados de produção**: pergunta da dona sobre privacidade (LGPD) em aberto; nenhuma leitura nova de produção sem a decisão dela. O app já grava eventos de uso (`trackEvent`, `lesson_complete`).
