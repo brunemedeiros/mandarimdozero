@@ -796,8 +796,8 @@
   "mark2": "Ta gueule",
   "conf": "media",
   "nota": "Vulgar; 'cala a boca' e 'shut up' são equivalentes usuais, talvez um pouco mais suaves que 'ta gueule' (pode-se usar 'cala essa boca'/'shut your trap').",
-  "lit_pt": "tua boca (de bicho)",
-  "lit_en": "your maw",
+  "lit_pt": "teu focinho",
+  "lit_en": "your muzzle",
   "lit_conf": "media"
  },
  {
@@ -899,7 +899,7 @@
   "conf": "alta",
   "nota": "",
   "lit_pt": "passar um golpe de fio",
-  "lit_en": "to pass a blow of thread",
+  "lit_en": "to pass a blow of wire",
   "lit_conf": "media"
  },
  {
@@ -1090,8 +1090,8 @@
   "mark2": "avaient la dalle",
   "conf": "alta",
   "nota": "",
-  "lit_pt": "ter a laje",
-  "lit_en": "to have the slab",
+  "lit_pt": "ter a goela",
+  "lit_en": "to have the gullet",
   "lit_conf": "media"
  },
  {
@@ -1593,8 +1593,8 @@
   "mark2": "espèce de con",
   "conf": "media",
   "nota": "Vulgar; 'idiota' é um pouco mais leve que 'con'.",
-  "lit_pt": "espécie de con (palavrão para a vagina)",
-  "lit_en": "kind of con (vulgar word for the vagina)",
+  "lit_pt": "espécie de idiota",
+  "lit_en": "kind of idiot",
   "lit_conf": "media"
  },
  {
@@ -1735,7 +1735,7 @@
   "conf": "alta",
   "nota": "",
   "lit_pt": "ter as bolas",
-  "lit_en": "to have the balls (the round kind, as in boules)",
+  "lit_en": "to have the balls",
   "lit_conf": "alta"
  },
  {
@@ -1833,7 +1833,7 @@
   "mark2": "a tiré la gueule",
   "conf": "media",
   "nota": "Banco marca como vulgar; 'cara fechada' é mais leve.",
-  "lit_pt": "puxar a fuça",
+  "lit_pt": "puxar o focinho",
   "lit_en": "to pull the muzzle",
   "lit_conf": "media"
  },
@@ -1915,8 +1915,8 @@
   "mark2": "à fond la caisse",
   "conf": "alta",
   "nota": "",
-  "lit_pt": "a fundo a caixa",
-  "lit_en": "to the bottom, the box",
+  "lit_pt": "a fundo a caixa (gíria: o carro)",
+  "lit_en": "to the floor, the box (slang: the car)",
   "lit_conf": "media"
  },
  {

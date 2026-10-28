@@ -7,6 +7,9 @@ Tradução pt-BR e en dos 2 exemplos de cada uma das 122 expressões, marcação
 - `rascunho-final.json`: 122 itens (`text1/2` = francês igual ao banco; `pt1/2`, `en1/2`; `mark1/2` = trecho exato do francês a destacar; `lit_pt`/`lit_en` = tradução literal; `conf`, `lit_conf`).
 - `aplicar-lote-exemplos.sql`: UPDATE aditivo (só acrescenta `example.pt/mark`, `secondExample.pt/mark`, `literal.pt`), com guarda pelo texto em francês. Testado num Postgres local: 122 linhas + 1 (tirer la gueule), áudios intactos.
 - `overlay-en-novos-campos.json`: inglês por id (`example`, `secondExample`, `literal`) para `docs/i18n/challenges-en.json`.
+- `gerar.py`: gera o SQL e o inglês a partir de `rascunho-final.json` (`python3 gerar.py rascunho-final.json`).
+- `overlay-en-significados-novos.json`: significado em inglês das 9 expressões que não tinham nenhuma tradução + aviso de registro de `tirer la gueule`.
+- `backup-producao-antes.json`: as 122 linhas de produção ANTES do lote (2026-10-28), para voltar atrás.
 - `validar.js`: `node validar.js rascunho-final.json` (122 itens, 0 problemas).
 - `revisao-exemplos.md`: relatório do revisor de conteúdo sobre as traduções dos exemplos. Literais: revisados em 2026-10-28 e aplicados.
 
@@ -25,3 +28,8 @@ Tradução pt-BR e en dos 2 exemplos de cada uma das 122 expressões, marcação
 5. Overlay em inglês (`challenges-en.json` + `scripts/build-challenges-overlay.js` + `scripts/validate-challenges-en.js`).
 6. Produção: o mesmo SQL, depois da prévia aprovada no Staging.
 - Pré-existente: 9 expressões (expr-a1-001..003, a2-001..003, b2-001..003) não têm nenhuma tradução em inglês e por isso não aparecem no site em inglês.
+
+## Andamento (2026-10-28)
+- Backup feito. Staging semeado com as 122 linhas (hash do `data` idêntico ao de produção).
+- Literais corrigidos pela autora: `dalle` = goela/gullet (fonte: Expressio, Linternaute), `con` = idiota (sentido de insulto, não o anatômico), `ta gueule` = focinho. Conferência em dicionários: `Wiktionnaire`/`CNRTL`/`Larousse` não abriram nesta sessão (rede bloqueada), só resumos de busca; conferir direto quando liberar.
+- Origens (gueule de bois, pommes, plaque, pêche, boules, poil dans la main, cinglé) são hipóteses nas fontes: não escrever "história de origem" no texto sem esse aviso.
