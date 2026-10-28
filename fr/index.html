@@ -92,6 +92,9 @@ try{
   --jade: #3A7359;           /* verde — sucesso/acerto (funcional, fora da paleta de marca) */
   /* Caixas de sucesso com texto/check (Continuar do acerto, ✓ de concluído): verde + branco, 5,6:1 nos dois temas (decisão da autora, 2026-10-22). */
   --success-fill: #3A7359; --on-success-fill: #FFFFFF;
+  /* Botões de nota da Revisão e do Banco (decisão da autora, 2026-10-28): cores fixas, iguais nos dois temas e nos dois idiomas, texto branco.
+     Difícil usa o amarelo exato da Revisão no escuro (#C9973A); branco sobre ele dá 2,6:1 (escolha da autora, abaixo do AA). */
+  --grade-fill-again: #D62619; --grade-fill-hard: #C9973A; --grade-fill-good: #2879B3; --grade-fill-easy: #3A7359; --on-grade-fill: #FFFFFF;
   --ink-soft: #5C4E73;       /* texto secundário */
   /* Selo colorido atrás do ícone de cada desafio diário -- 3 cores fixas
      por posição no card (não por desafio específico), pra manter a mesma
@@ -1854,10 +1857,10 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
    --error-red/--jade -- agora os 4 concordam: texto branco no claro,
    texto escuro no escuro, em vez de 2 fixos sempre-escuro + 2 que
    alternam. */
-.grade-again{ background: var(--error-red); color: var(--on-vivid); }
-.grade-hard{ background: var(--grade-hard-bg); color: var(--on-vivid); }
-.grade-good{ background: var(--grade-good-bg); color: var(--on-vivid); }
-.grade-easy{ background: var(--jade); color: var(--on-vivid); }
+.grade-again{ background: var(--grade-fill-again); color: var(--on-grade-fill); }
+.grade-hard{ background: var(--grade-fill-hard); color: var(--on-grade-fill); }
+.grade-good{ background: var(--grade-fill-good); color: var(--on-grade-fill); }
+.grade-easy{ background: var(--grade-fill-easy); color: var(--on-grade-fill); }
 
 /* ---------- Progress / gamification view ---------- */
 .stat-cards{ display:grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:26px; }
