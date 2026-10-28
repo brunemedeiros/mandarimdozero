@@ -128,6 +128,14 @@ async function boot(browser, root, opts){
     try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', lang); if (theme) localStorage.setItem('theme', theme); } catch (e) {}
     let s = 12345; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647;
     window.__seed = (n) => { s = n; };
+    // Expressões: o fr de REF ainda tem o desfoque + "Ver as respostas"; o de agora tem palpite + "Ver opções" + passos (2026-10-26).
+    // Estes ajudantes valem para os dois, para a mesma sequência rodar nos dois lados.
+    window.__exprAbrir = () => { const r = document.getElementById('challenge-reveal-btn'); if (r) r.click(); else { const v = document.getElementById('expr-see-options-btn'); if (v) v.click(); } };
+    window.__exprOpcoes = () => [...document.querySelectorAll('.challenge-choice-btn, .exercise-option[data-orig-idx]')];
+    window.__exprTexto = (b) => (b.querySelector('.opt-text') || b).textContent;
+    window.__exprAteFinal = () => { for (let i = 0; i < 8 && !document.getElementById('challenge-complete-btn') && !document.getElementById('challenge-retry-btn'); i++){
+      const d = document.getElementById('expr-turn-dontknow-btn'), o = document.getElementById('expr-order-dontknow-btn'), c = document.getElementById('expr-continue-btn');
+      if (d && d.offsetParent) d.click(); else if (o && o.offsetParent) o.click(); else if (c) c.click(); else break; } };
     window.__CH_ROWS = rows; window.__importInputs = imports;
   }, [opts.lang || 'pt-BR', rows, importInputs(rows), opts.theme || null]);
   await page.addInitScript(VARIANTS_SRC);

@@ -750,6 +750,7 @@ window.I18N_CATALOG['en'] = {
   'games.answerWas': 'The answer is "{form}".', // ALTA
   'games.whyTense': 'Why {tense}?', // ALTA
   'games.listen': 'Listen to the sentence', // ALTA
+  'games.exit': 'Leave the game', // ALTA
   'games.next': 'Next sentence', // ALTA
   'games.seeResult': 'See result', // ALTA
   'games.resultTitle': 'End of round', // ALTA

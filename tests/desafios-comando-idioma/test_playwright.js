@@ -52,14 +52,13 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     await page.addInitScript(([th, lg]) => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('theme', th); localStorage.setItem('ui-language', lg); } catch (e) {} try { document.documentElement.dataset.theme = th; } catch (e) {} }, [theme, lang]);
     await page.goto(`http://127.0.0.1:${port}/fr/index.html`);
     await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
-    // site em inglês: o desafio só abre com a tradução do sentido (M3 da main); o conteúdo real tem
     await page.evaluate(() => { window.CHALLENGES_I18N = window.CHALLENGES_I18N || {}; window.CHALLENGES_I18N.en = Object.assign(window.CHALLENGES_I18N.en || {}, { 'ch-e1': { meaning: 'To be hungry.' } }); });
     await page.evaluate(() => { CURRENT_USER = { id: 'u-t' }; ensureProfileLoaded = async () => ({ plan_tier: 'premium' }); switchTab('challenges'); });
     await page.waitForSelector('#challenges-categories .challenge-category-card', { timeout: 8000 });
     await page.evaluate(() => openChallengePlayer('ch-e1'));
-    await page.waitForSelector('#challenge-reveal-btn', { timeout: 8000 });
+    await page.waitForSelector('#expr-see-options-btn', { timeout: 8000 });
     const info = await page.evaluate(() => ({
-      label: (document.querySelector('#challenge-player-content > .exercise-prompt-label') || {}).textContent || '',
+      label: (document.querySelector('#challenge-player-content .exercise-prompt-label') || {}).textContent || '',
       hasQuestion: !!document.querySelector('#challenge-player-content .challenge-question'),
       text: document.getElementById('challenge-player-content').innerText
     }));

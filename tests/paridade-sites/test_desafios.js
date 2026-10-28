@@ -227,15 +227,17 @@ async function fingerprint(browser, root, keys){
 
   // Players: todos os publicados, pergunta e devolutiva com várias respostas, pelo DOM
   const pubs = await page.evaluate(() => publishedChallenges().map(c => ({ id: c.id, type: c.type })));
+  out.expr_ids = pubs.filter(p => p.type === 'expression').map(p => p.id).join();
   for (const { id, type } of pubs){
     await page.evaluate((id) => { window.__seed(4242); openChallengePlayer(id); }, id);
     out['q_' + id] = await html('#challenge-player-content');
     if (type === 'expression'){
-      const n = await page.evaluate(() => document.querySelectorAll('.challenge-choice-btn').length);
+      const n = await page.evaluate((id) => CHALLENGES.find(x => x.id === id).options.length, id);
       for (let k = 0; k < n; k++){
         await page.evaluate(([id, k]) => { window.__seed(4242); openChallengePlayer(id); document.getElementById('challenge-expression-play-btn').click(); const sl = document.getElementById('challenge-expression-play-slow-btn'); if (sl) sl.click();
-          document.getElementById('challenge-reveal-btn').click(); document.querySelectorAll('.challenge-choice-btn')[k].click(); }, [id, k]);
+          window.__exprAbrir(); window.__exprOpcoes()[k].click(); }, [id, k]);
         out['fb_' + id + '_' + k] = await html('#challenge-player-content');
+        await page.evaluate(() => window.__exprAteFinal());   // fluxo novo: passa pelos passos até a tela final (no antigo já está nela)
         await page.evaluate(() => { ['challenge-example-play-btn', 'challenge-example-play-slow-btn', 'challenge-second-example-play-btn', 'challenge-second-example-play-slow-btn', 'challenge-reveal-answer-btn'].forEach(i => { const b = document.getElementById(i); if (b) b.click(); }); });
         out['fb2_' + id + '_' + k] = await html('#challenge-player-content') + (await extra());
         const last = k === n - 1;
@@ -319,7 +321,7 @@ async function fingerprint(browser, root, keys){
       if (c.type === 'accent'){ document.getElementById('accent-answer-input').value = c.targetText; document.getElementById('accent-verify-btn').click(); }
       else if (c.type === 'listen_translate'){ document.getElementById('lt-answer-input').value = c.referenceTranslations[0]; document.getElementById('lt-verify-btn').click(); }
       else if (c.type === 'cloze_grammar'){ (c.blanks || []).forEach((b, i) => { [...document.querySelectorAll('.challenge-choice-btn[data-blank="' + i + '"]')].find(x => x.dataset.value === b.answer).click(); }); document.getElementById('cloze-grammar-verify-btn').click(); }
-      else { document.getElementById('challenge-reveal-btn').click(); [...document.querySelectorAll('.challenge-choice-btn')].find(x => x.textContent === c.correctAnswer).click(); }
+      else { window.__exprAbrir(); window.__exprOpcoes().find(x => window.__exprTexto(x) === c.correctAnswer).click(); window.__exprAteFinal(); }
       document.getElementById('challenge-complete-btn').click(); return false; });
     if (done) break;
   }
@@ -463,6 +465,7 @@ async function fingerprint(browser, root, keys){
   for (const t of Object.keys(byType)){
     const id = await page.evaluate((t) => { const c = pendingChallenges().find(x => x.type === t); return c && c.id; }, t);
     if (!id) continue;
+    await page.evaluate(() => window.__seed(777)); // o sorteio das opções não pode depender de quantos sorteios as cenas de antes gastaram
     await act(id, 'preview');
     out['adm_previa_' + t] = await html('#challenge-player-wrap');
     await page.evaluate(() => { const b = document.getElementById('preview-show-answer-btn'); if (b) b.click(); });
@@ -549,7 +552,7 @@ async function fingerprintEn(browser, root){
     await page.evaluate((id) => { window.__seed(4242); openChallengePlayer(id); }, id);
     out['q_' + id] = await html('#challenge-player-content');
     await page.evaluate((id) => { const c = CHALLENGES.find(x => x.id === id);
-      if (c.type === 'expression'){ document.getElementById('challenge-reveal-btn').click(); document.querySelectorAll('.challenge-choice-btn')[0].click(); }
+      if (c.type === 'expression'){ window.__exprAbrir(); window.__exprOpcoes()[0].click(); }
       else if (c.type === 'listen_translate'){ const ov = (window.CHALLENGES_I18N.en || {})[c.id]; document.getElementById('lt-answer-input').value = ov && ov.referenceTranslations ? ov.referenceTranslations[0] : 'I like it'; document.getElementById('lt-verify-btn').click(); }
       else if (c.type === 'accent'){ document.getElementById('accent-answer-input').value = c.targetText.normalize('NFD').replace(/[̀-ͯ]/g, ''); document.getElementById('accent-verify-btn').click(); }
       else { document.getElementById('cloze-grammar-verify-btn').click(); (c.blanks || []).forEach((b, i) => { [...document.querySelectorAll('.challenge-choice-btn[data-blank="' + i + '"]')].find(x => x.dataset.value !== b.answer).click(); }); document.getElementById('cloze-grammar-verify-btn').click(); } }, id);
@@ -582,9 +585,7 @@ async function fingerprintEn(browser, root){
     let iguais = 0, total = 0;
     // published_at/rejected_at... = new Date().toISOString() (relógio fixo, mas por garantia)
     // E-mail de contato do Premium trocado na main (brunemed1310@gmail.com -> contato@profbrune.com.br, shared/permissions.js): o REF antigo ainda tem o e-mail velho; neutralizado nos dois lados.
-    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ch\.verify=(Vérifier|Verificar|Check)/g, 'ch.verify=VERIFICAR').replace(/\\"(Vérifier|Verificar|Check)\\"/g, '\\"VERIFICAR\\"').replace(VERIFICAR_RE, '>VERIFICAR</button>')
-      // Expressões (etapa A, 2026-10-26): a pergunta em francês do conteúdo (<p class="challenge-question">) saiu e entrou o rótulo "O que significa?"
-      .replace(/<div class=\\"exercise-prompt-label\\">[^<]*<\/div>\\n    /g, '').replace(/<p class=\\"challenge-question\\">[^<]*<\/p>\\n      /g, '').replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL');
+    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ch\.verify=(Vérifier|Verificar|Check)/g, 'ch.verify=VERIFICAR').replace(/\\"(Vérifier|Verificar|Check)\\"/g, '\\"VERIFICAR\\"').replace(VERIFICAR_RE, '>VERIFICAR</button>').replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL');
     for (const lado of ['pt', 'en']){
       const A = antes[lado], B = depois[lado];
       check(lado + ': a sequência rodou no fr de antes', Object.keys(A).length > (lado === 'pt' ? 900 : 30), Object.keys(A).length);
@@ -598,7 +599,13 @@ async function fingerprintEn(browser, root){
           continue;
         }
         total++;
-        const a = norm(A[k]), b = norm(B[k]);
+        let a = norm(A[k]), b = norm(B[k]);
+        // Expressões em passos (2026-10-26, docs/historico/23-auditoria-telas-de-exercicio.md): a pergunta e a devolutiva das Expressões mudaram
+        // DE PROPÓSITO (palpite + opções numeradas + passos). Cena do player de Expressão (antes: desfoque/devolutiva única; agora: expr-wrap)
+        // não se compara; o resto, sim. "dep_" de Expressão compara só o estado (o tamanho do HTML leva o player junto).
+        if (/challenge-hypothesis|challenge-feedback-meaning|challenge-microactivity/.test(a) && /expr-wrap|expr-panel|expr-final/.test(b)){ iguais++; passed++; continue; }
+        const idDep = (k.match(/^dep_(.+)_\d+$/) || [])[1];
+        if (idDep && String(A.expr_ids || '').split(',').includes(idDep)){ a = a.replace(/^"\d+/, '"'); b = b.replace(/^"\d+/, '"'); }
         if (a === b){ iguais++; passed++; continue; }
         let i = 0; while (i < a.length && a[i] === b[i]) i++;
         check('igual ao fr de antes (' + lado + '): ' + k, false, { antes: a.slice(Math.max(0, i - 200), i + 250), depois: (b || '').slice(Math.max(0, i - 200), i + 250) });

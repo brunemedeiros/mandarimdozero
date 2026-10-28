@@ -11,7 +11,7 @@ registerChallenges({
   // exigido, "oe" por "œ" = quase (decisão da dona, 2026-10-15).
   familia: () => latinaFr(),
   // Teclado de letras do francês (é è ê ë à â ç ...) na Acentuação.
-  accentPickerHTML: () => frAccentPickerHTML(),
+  accentPickerHTML: (expected) => frAccentPickerHTML(expected),
   wireAccentPicker: (content, input) => wireFrAccentPicker(content.querySelector('.fr-accent-picker'), input),
   // Textos de interface que citam o francês (o resto dos textos dos Desafios é comum, em CHALLENGE_I18N).
   texts: {

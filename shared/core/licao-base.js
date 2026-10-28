@@ -544,6 +544,11 @@ function findEnterAdvanceTarget(){
   if (correctContinueBtn) return correctContinueBtn;
   const queueContinueBtn = document.getElementById('queue-continue-btn');
   if (queueContinueBtn) return queueContinueBtn;
+  // Expressões em passos (shared/desafios-telas.js) e o "Concluir" dos Desafios.
+  const exprContinueBtn = document.getElementById('expr-continue-btn');
+  if (exprContinueBtn) return exprContinueBtn;
+  const challengeCompleteBtn = document.getElementById('challenge-complete-btn');
+  if (challengeCompleteBtn) return challengeCompleteBtn;
   const stepNextBtn = document.getElementById('step-next-btn');
   if (stepNextBtn && stepNextBtn.offsetParent !== null) return stepNextBtn;
   return null;

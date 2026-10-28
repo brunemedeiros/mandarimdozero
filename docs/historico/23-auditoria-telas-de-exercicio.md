@@ -38,12 +38,32 @@ Outros achados:
 - C: revisão do Expressões (auditoria + protótipo antes de codar).
 - D (a decidir): Desafios restantes, Ditados e Revisão.
 
-## Entregue neste PR (a): "Revisar erros" e etapa A
-- **Revisar erros**: as categorias não ficam mais junto do player (`openChallengePlayer`, `shared/desafios-telas.js`). Teste `tests/desafios-revisar-erros/`.
-- **A** (comando no idioma do site): Expressões usa o rótulo "O que significa?" (`ch.expr.whatMeans`, mesmo texto da trilha) no lugar da frase em francês
-  do campo `question`; o botão de verificar é traduzido (`ch.verify`: Verificar / Check, em `CHALLENGE_I18N`; saiu o "Vérifier" de `fr/desafios-config.js`,
-  decisão da autora). Teste `tests/desafios-comando-idioma/`. Testes de paridade da main ajustados só para o rótulo do botão.
-- Fica para o PR (b): Jogos, Prática da Conjugação e Expressões em passos.
+## Estado em 2026-10-27 (branch `claude/peaceful-hypatia-a9vfca`, sem PR)
+- A `main` ficou 109 commits à frente e levou os Desafios e a Conjugação para `shared/` (paridade 5a/5c). A branch recebeu a mescla da `main` (merge
+  commit) e as mudanças abaixo foram PORTADAS: Desafios em `shared/desafios-telas.js`, `shared/desafios.js`, `shared/desafios.css`; Prática em
+  `shared/conjugacao.js` e `shared/conjugacao.css`; Jogos em `shared/conj-games.js`; Enter em `shared/core/licao-base.js`; `fr/app.js` ficou igual ao da main.
+- `fr/desafios-config.js`: saiu o `'ch.verify': 'Vérifier'` (decisão da autora: o botão é traduzido, Verificar/Check, em `CHALLENGE_I18N`); o teclado
+  recebe a resposta esperada (`accentPickerHTML(esperado)`). Texto "O que significa?" das Expressões: chave própria `ch.expr.whatMeans` (o motor comum não cita `LANG_HOOKS`).
+- "Veja em frases": sugestões 2 ("Quando usar": registro + cuidado, sem registro no dado some) e 3 ("Monte a frase": ordenar o exemplo 1, sem XP, pula
+  se o exemplo tem menos de 3 ou mais de 14 palavras). Sugestão 1 (destaque da expressão e "ver tradução") fica para o lote de conteúdo: o dado de cada
+  exemplo só tem texto e áudio, e as 121 expressões ficam no Supabase (o repositório tem 3 de amostra).
+- Testes de paridade da main ajustados às mudanças de propósito (lista de neutralização com data e motivo em `test_conjugacao.js` e `test_desafios.js`;
+  ajudantes `__exprAbrir/__exprOpcoes/__exprAteFinal` em `desafios-harness.js`). Falhas que já existiam na main e continuam: e-mail de contato do Premium
+  (`test_conjugacao.js` j_janela, `test_desafios.js` premium), `desafios-progresso` 22/23, cascata do CSS (`:root`), e `test_ditados.js` instável.
+
+## Entregue antes da mescla (branch `claude/peaceful-hypatia-a9vfca`, 2026-10-26)
+- **Revisar erros**: categorias não ficam mais junto do player (`openChallengePlayer`). Teste `tests/desafios-revisar-erros/`.
+- **A** (comando no idioma do site): Expressões usa o rótulo `fr.exercise.whatMeans`; `ch.verify` = Verificar/Check; dica do ordenar e pontos do Speed via `t()`.
+  Teste `tests/desafios-comando-idioma/`. "Combo x" ficou (palavra igual em pt e en). `zh/app.js` ainda tem "pts" fixo.
+- **B** (Jogos) e **B2** (Prática da Conjugação): topo no molde da trilha (cabeçalho, depois a barra com progresso, ⚑, ⌨️, ✕; helpers
+  `activityBarGrab/Mount/Progress` em `shared/activity-focus.js`), respostas 1/2, "Não sei", "Continuar →", som e tremida no erro, dia de estudo
+  contado ao terminar (sem XP). Testes `tests/jogos-padrao-trilha/`, `tests/conjugacao/`, `tests/modo-foco/`.
+- **C** (Expressões em passos, variante B "Meu palpite" sem correção): pergunta -> resposta (painel curto) -> "Veja em frases" -> "Sua vez"
+  (digitar, "Quase" da trilha, `microActivity.alsoAccept` opcional para variações escritas pelo autor, XP só na 1ª conclusão) -> final
+  (Ir além + Concluir/Tentar de novo). Barra do topo só nas Expressões (`data-lesson-bar`). Teste `tests/desafios-expressoes-passos/`.
+  Protótipos: `docs/prototipos/expressoes/`.
+- Falta: "Veja em frases" mais rico (a autora pediu sugestões), outros tipos de Desafios, Ditados e Revisão (a autoavaliação e o Modo aula não mudam),
+  traduzir os campos de conteúdo (explicação, exemplos, microatividade) para o site em inglês.
 
 ## Não verificado
 Layout real no navegador, quantidade de desafios sem overlay em en, banco Supabase, `zh/` (Desafios e Jogos só existem no fr).

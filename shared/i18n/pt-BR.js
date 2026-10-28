@@ -768,6 +768,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'games.answerWas': 'A resposta é "{form}".',
   'games.whyTense': 'Por que {tense}?',
   'games.listen': 'Ouvir a frase',
+  'games.exit': 'Sair do jogo',
   'games.next': 'Próxima frase',
   'games.seeResult': 'Ver resultado',
   'games.resultTitle': 'Fim da partida',

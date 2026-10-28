@@ -560,9 +560,16 @@ function setConjMode(mode){
 function renderConjPracticeStep(){
   const contentEl = document.getElementById('conj-practice-content');
   const tenses = CONJ_STATE.sessionTenses;
+  // Barra do topo (progresso, ⚑, ⌨️, X; shared/activity-focus.js) vive dentro do conteúdo: pega antes de reescrever, recoloca depois.
+  const lessonBar = typeof activityBarGrab === 'function' ? activityBarGrab('conj-practice-wrap') : null;
+  const mountLessonBar = pct => {
+    if (typeof activityBarMount === 'function') activityBarMount('conj-practice-wrap', lessonBar, null);
+    if (typeof activityBarProgress === 'function') activityBarProgress('conj-practice-wrap', pct);
+  };
 
   if (CONJ_STATE.verbIndex >= CONJ_STATE.verbQueue.length){
     renderConjSessionResult(contentEl);
+    mountLessonBar(100);
     return;
   }
 
@@ -607,7 +614,6 @@ function renderConjPracticeStep(){
   contentEl.innerHTML = `
     <div class="conj-progress">
       <span>${t('fr.conj.verbCounter', { i: CONJ_STATE.verbIndex + 1, n: total })}</span>
-      <span class="conj-progress-bar" aria-hidden="true"><i style="width:${(CONJ_STATE.checked.size / total) * 100}%"></i></span>
     </div>
     <div class="conj-verb-nav">
       <div class="conj-verb-header">
@@ -637,6 +643,7 @@ function renderConjPracticeStep(){
     </div>
   `;
 
+  mountLessonBar(Math.round((CONJ_STATE.checked.size / total) * 100));
   wireAudioButtons(contentEl);
   const inputs = Array.from(contentEl.querySelectorAll('.conj-field input[data-idx]:not(:disabled)'));
 

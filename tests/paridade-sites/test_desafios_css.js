@@ -58,7 +58,7 @@ async function scenes(page, visit){
     await ev((id) => openChallengePlayer(id), id); await visit('q-' + id);
     for (let k = 0; k < 3; k++){
       await ev(([id, k]) => { openChallengePlayer(id); const c = CHALLENGES.find(x => x.id === id);
-        if (c.type === 'expression'){ document.getElementById('challenge-reveal-btn').click(); const b = [...document.querySelectorAll('.challenge-choice-btn')]; (k === 0 ? b.find(x => x.textContent === c.correctAnswer) : b.find(x => x.textContent !== c.correctAnswer)).click(); const r = document.getElementById('challenge-reveal-answer-btn'); if (r && k === 2) r.click(); }
+        if (c.type === 'expression'){ window.__exprAbrir(); const b = window.__exprOpcoes(); (k === 0 ? b.find(x => window.__exprTexto(x) === c.correctAnswer) : b.find(x => window.__exprTexto(x) !== c.correctAnswer)).click(); if (k === 2){ const r = document.getElementById('challenge-reveal-answer-btn'); if (r) r.click(); else window.__exprAteFinal(); } }
         else if (c.type === 'listen_translate'){ document.getElementById('lt-hint-btn').click(); document.getElementById('lt-answer-input').value = [c.referenceTranslations[0], c.referenceTranslations[0].split(' ').slice(1).join(' ') + ' não', 'xyz'][k]; document.getElementById('lt-verify-btn').click(); }
         else if (c.type === 'accent'){ document.getElementById('accent-answer-input').value = [c.targetText, c.targetText.normalize('NFD').replace(/[̀-ͯ]/g, ''), 'zzz'][k]; document.getElementById('accent-verify-btn').click(); }
         else { if (k === 2){ document.getElementById('cloze-grammar-verify-btn').click(); return; } (c.blanks || []).forEach((b, i) => { [...document.querySelectorAll('.challenge-choice-btn[data-blank="' + i + '"]')].find(x => k === 0 ? x.dataset.value === b.answer : x.dataset.value !== b.answer).click(); }); document.getElementById('cloze-grammar-verify-btn').click(); } }, [id, k]);
@@ -106,9 +106,13 @@ async function scenes(page, visit){
       // 2. mesmas regras
       const cnt = (list) => { const m = new Map(); list.forEach(r => m.set(key(r), (m.get(key(r)) || 0) + 1)); return m; };
       const ca = cnt(ra), cb = cnt(rb);
-      const sumiu = [...ca].filter(([k, n]) => (cb.get(k) || 0) < n).map(([k]) => k);
-      const apareceu = [...cb].filter(([k, n]) => (ca.get(k) || 0) < n).map(([k]) => k);
-      check(`${theme} ${width}: mesmas regras (${ra.length})`, ra.length === rb.length && !sumiu.length && !apareceu.length, { sumiu: sumiu.slice(0, 5), apareceu: apareceu.slice(0, 5) });
+      // Regras mexidas DE PROPÓSITO depois do refactor (2026-10-26, docs/historico/23-auditoria-telas-de-exercicio.md): as Expressões em passos
+      // (.expr-*), a barra do topo (.activity-lesson-bar), e nos Jogos/Prática da Conjugação a barra fina que saiu, o "Não sei", o número
+      // das respostas (.cg-choice position) e a tremida no erro (.cg-choice.is-wrong). Nenhuma outra regra pode sumir, aparecer ou mudar.
+      const DELIB = /expr-|activity-lesson-bar|cg-progress-bar|conj-progress-bar|cg-dontknow|\.cg-choice\|\|\{"position|\.cg-choice\.is-wrong|#conj-practice-wrap \.conj-progress/;
+      const sumiu = [...ca].filter(([k, n]) => (cb.get(k) || 0) < n).map(([k]) => k).filter(k => !DELIB.test(k));
+      const apareceu = [...cb].filter(([k, n]) => (ca.get(k) || 0) < n).map(([k]) => k).filter(k => !DELIB.test(k));
+      check(`${theme} ${width}: mesmas regras (${ra.length})`, !sumiu.length && !apareceu.length, { sumiu: sumiu.slice(0, 5), apareceu: apareceu.slice(0, 5) });
       const moved = rb.filter(r => /desafios\.css$/.test(r.sheet));
       if (theme === 'light' && width === 390) check('o desafios.css tem regras', moved.length > 300, moved.length);
       // posições (k-ésima ocorrência da mesma chave)
