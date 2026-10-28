@@ -1,0 +1,573 @@
+{
+ "expr-001": {
+  "example": "Last night I drank too much, and this morning I'm really hungover.",
+  "secondExample": "After the party, the students were hungover and regretted their excesses.",
+  "literal": "to have a wooden mouth"
+ },
+ "expr-002": {
+  "example": "Stop making that noise, you've been driving me nuts since this morning!",
+  "secondExample": "I tried to explain the situation to him calmly, but he kept asking me the same questions, and it was driving me nuts.",
+  "literal": "to break (someone's) feet"
+ },
+ "expr-003": {
+  "example": "I was really mad because my friend stood me up last night.",
+  "secondExample": "She decided to stand him up because she didn't want to see him anymore.",
+  "literal": "to put a rabbit"
+ },
+ "expr-a1-001": {
+  "example": "I'm very hungry. I want to eat.",
+  "secondExample": "We're hungry after playing sports.",
+  "literal": "to have hunger"
+ },
+ "expr-a1-002": {
+  "example": "It's hot, I'm thirsty.",
+  "secondExample": "After playing sports, we're thirsty.",
+  "literal": "to have thirst"
+ },
+ "expr-a1-003": {
+  "example": "Paul says: 'I think I'm right.'",
+  "secondExample": "She's right, the store is closed.",
+  "literal": "to have reason"
+ },
+ "expr-a1m1-001": {
+  "example": "— Hello, my name is Léo.\n— Nice to meet you!",
+  "secondExample": "I'm Ana. Nice to meet you!"
+ },
+ "expr-a1m1-002": {
+  "example": "— How's it going?\n— So-so.",
+  "secondExample": "My French? So-so.",
+  "literal": "like this, like that"
+ },
+ "expr-a1m1-003": {
+  "example": "— How's it going?\n— Not bad, thanks!",
+  "secondExample": "This coffee isn't bad."
+ },
+ "expr-a1m1-004": {
+  "example": "— Coffee together?\n— Sounds good!",
+  "secondExample": "— I'll call you tonight.\n— Works for me!",
+  "literal": "That walks!"
+ },
+ "expr-a1m1-005": {
+  "example": "— Sorry!\n— No problem!",
+  "secondExample": "— Can you help me?\n— No problem."
+ },
+ "expr-a1m2-001": {
+  "example": "— Here's your dish.\n— Enjoy your meal!",
+  "secondExample": "Enjoy your meal, everyone!"
+ },
+ "expr-a1m2-002": {
+  "example": "Kids, come to the table!",
+  "secondExample": "Come to the table! Dinner is ready.",
+  "literal": "To the table!"
+ },
+ "expr-a1m2-003": {
+  "example": "— I'm going to the market.\n— See you later!",
+  "secondExample": "I'm leaving at noon. See you later!"
+ },
+ "expr-a1m2-004": {
+  "example": "— Are you coming?\n— Yes, right away!",
+  "secondExample": "I'm coming right away."
+ },
+ "expr-a1m2-005": {
+  "example": "Goodbye, and have a good day!",
+  "secondExample": "Thanks, have a good day!"
+ },
+ "expr-a1m3-001": {
+  "example": "Excuse me, where is the train station?",
+  "secondExample": "Sorry, I'm late."
+ },
+ "expr-a1m3-002": {
+  "example": "— Thank you so much!\n— You're welcome.",
+  "secondExample": "Please, come in.",
+  "literal": "I beg you"
+ },
+ "expr-a1m3-003": {
+  "example": "How much is it, please?",
+  "secondExample": "How much is it for both?",
+  "literal": "That makes how much?"
+ },
+ "expr-a1m3-004": {
+  "example": "A hundred euros? That's too expensive!",
+  "secondExample": "This bag is pretty, but it's too expensive."
+ },
+ "expr-a1m3-005": {
+  "example": "— A kilo of apples.\n— Anything else?",
+  "secondExample": "— Anything else?\n— A bottle of water.",
+  "literal": "And with that?"
+ },
+ "expr-a1m4-001": {
+  "example": "Take an umbrella, it's pouring!",
+  "secondExample": "It's been pouring since this morning.",
+  "literal": "It's raining ropes"
+ },
+ "expr-a1m4-002": {
+  "example": "Are you leaving tomorrow? Have a good trip!",
+  "secondExample": "Have a good trip and see you soon!"
+ },
+ "expr-a1m4-003": {
+  "example": "Are you sick? Get well soon!",
+  "secondExample": "Get well, see you soon!"
+ },
+ "expr-a1m4-004": {
+  "example": "— Achoo!\n— Bless you!",
+  "secondExample": "Bless you, ma'am!",
+  "literal": "To your wishes!"
+ },
+ "expr-a1m4-005": {
+  "example": "Ugh, this weather! It's raining again.",
+  "secondExample": "Ugh, this weather! It's freezing."
+ },
+ "expr-a1m5-001": {
+  "example": "Come in, make yourself at home!",
+  "secondExample": "This is the living room. Make yourself at home.",
+  "literal": "Do as at your place"
+ },
+ "expr-a1m5-002": {
+  "example": "Come over to my place tonight!",
+  "secondExample": "My place has two bedrooms.",
+  "literal": "at the home of me"
+ },
+ "expr-a1m5-003": {
+  "example": "Welcome to my place!",
+  "secondExample": "Welcome to Paris!"
+ },
+ "expr-a1m5-004": {
+  "example": "That red dress looks good on you!",
+  "secondExample": "Blue suits you.",
+  "literal": "That goes well on you!"
+ },
+ "expr-a1m5-005": {
+  "example": "My new house, do you like it?",
+  "secondExample": "Do you like this color?",
+  "literal": "Does it please you?"
+ },
+ "expr-a1m6-001": {
+  "example": "Goodbye, have a good weekend!",
+  "secondExample": "Thanks, you have a good weekend too!"
+ },
+ "expr-a1m6-002": {
+  "example": "Goodbye, have a good evening!",
+  "secondExample": "Thank you, have a good evening too!"
+ },
+ "expr-a1m6-003": {
+  "example": "The movie is starting. Here we go!",
+  "secondExample": "Do we have everything? Then here we go!",
+  "literal": "It has set off!"
+ },
+ "expr-a1m6-004": {
+  "example": "Hi! What's new?",
+  "secondExample": "What's new since last week?",
+  "literal": "What of new?"
+ },
+ "expr-a1m6-005": {
+  "example": "Hi Marc! It's been a long time!",
+  "secondExample": "I haven't seen you in a long time!",
+  "literal": "That makes a long time!"
+ },
+ "expr-a2-001": {
+  "example": "I need a hand carrying these heavy boxes.",
+  "secondExample": "My neighbors gave me a hand with the move.",
+  "literal": "blow of the hand"
+ },
+ "expr-a2-002": {
+  "example": "Before going on stage, the actor had stage fright.",
+  "secondExample": "When she has to speak in public, she always gets nervous."
+ },
+ "expr-a2-003": {
+  "example": "On Sundays, I like to sleep in and not get up early.",
+  "secondExample": "After the party, we slept in on Saturday.",
+  "literal": "to do the fat morning"
+ },
+ "expr-b2-001": {
+  "example": "Although the project had been approved in principle, there was still a need to dot the i's and cross the t's on the budget details.",
+  "secondExample": "After the meeting, the manager asked his team to dot the i's and cross the t's before submitting the final report.",
+  "literal": "to put the dots on the i's"
+ },
+ "expr-b2-002": {
+  "example": "Although his project is ambitious, he seems to be allergic to work, since he constantly puts off deadlines.",
+  "secondExample": "Despite the criticism, she was never lazy about defending her ideas.",
+  "literal": "to have a hair in the hand"
+ },
+ "expr-b2-003": {
+  "example": "Although the subject is sensitive, the speaker did not hold back in denouncing social injustices.",
+  "secondExample": "Despite the warnings, she defended her project without holding back in the face of the harsh criticism.",
+  "literal": "not to go with a dead hand"
+ },
+ "expr-lote1-001": {
+  "example": "— The Earth is flat.\n— You're talking nonsense!",
+  "secondExample": "He ate a bunch of junk for dinner, and now he has a stomachache.",
+  "literal": "no matter what"
+ },
+ "expr-lote1-002": {
+  "example": "I'm sick of the rain, I want sunshine!",
+  "secondExample": "The kids were fed up with waiting in the car."
+ },
+ "expr-lote1-003": {
+  "example": "— Your team lost!\n— I don't give a damn, I don't like soccer.",
+  "secondExample": "She couldn't care less what people say."
+ },
+ "expr-lote1-004": {
+  "example": "I missed my train and I have an interview in twenty minutes: I'm in deep shit.",
+  "secondExample": "Without their keys or their phone, they were in deep shit."
+ },
+ "expr-lote1-005": {
+  "example": "The concert is canceled? That sucks, I already had my tickets.",
+  "secondExample": "That neighborhood at night was a bit sketchy, so we took a taxi."
+ },
+ "expr-lote1-006": {
+  "example": "I can't be bothered to cook tonight, want to order a pizza?",
+  "secondExample": "On Sunday, he felt too lazy to go out, so he stayed in bed.",
+  "literal": "to have the phlegm"
+ },
+ "expr-lote1-007": {
+  "example": "He ran the marathon in under three hours? That's crazy!",
+  "secondExample": "It was crazy: it was snowing in the middle of May."
+ },
+ "expr-lote1-008": {
+  "example": "The neighbor yelled: \"Get the hell out of my garden!\"",
+  "secondExample": "By the time the police arrived, the thieves had already taken off.",
+  "literal": "to throw the camp"
+ },
+ "expr-lote1-009": {
+  "example": "— You lost again, huh?\n— Oh, shut your trap!",
+  "secondExample": "Annoyed by his brother's jokes, Paul snapped: \"Shut the hell up, seriously!\"",
+  "literal": "your maw"
+ },
+ "expr-lote1-010": {
+  "example": "It pisses me off to have to work this Saturday.",
+  "secondExample": "Your dog barked all night again, he really pissed us off.",
+  "literal": "to make (someone) shit"
+ },
+ "expr-lote1-011": {
+  "example": "Don't stress about it, we'll pick the restaurant when we get there.",
+  "secondExample": "Yesterday, my parents got into a pointless argument over the remote control.",
+  "literal": "to take one's head"
+ },
+ "expr-lote1-012": {
+  "example": "— He's going to clean his room by himself.\n— Yeah, right! He's never done it.",
+  "secondExample": "— The bus will be on time today.\n— Yeah, right, it's already twenty minutes late!",
+  "literal": "you speak!"
+ },
+ "expr-lote1-013": {
+  "example": "Changing a light bulb? It's a piece of cake!",
+  "secondExample": "For her, the first exam was a piece of cake, but the second one was harder.",
+  "literal": "it's cake"
+ },
+ "expr-lote1-014": {
+  "example": "On Sunday evenings, I often feel down.",
+  "secondExample": "Far from her family, she felt blue all winter.",
+  "literal": "to have the cockroach"
+ },
+ "expr-lote1-015": {
+  "example": "I'm going to give my mom a call.",
+  "secondExample": "Yesterday, he gave the doctor a call to make an appointment.",
+  "literal": "to pass a blow of thread"
+ },
+ "expr-lote1-016": {
+  "example": "At the bakery, you have to stand in line on Sundays.",
+  "secondExample": "We waited in line for an hour to get into the museum.",
+  "literal": "to make the tail"
+ },
+ "expr-lote1-017": {
+  "example": "I can't wait to go on vacation!",
+  "secondExample": "The kids couldn't wait to open their presents."
+ },
+ "expr-lote1-018": {
+  "example": "— I finished all my homework in ten minutes.\n— Yeah, right!",
+  "secondExample": "— I only ate one chocolate.\n— Yeah, right, the box is empty!",
+  "literal": "my eye!"
+ },
+ "expr-lote1-019": {
+  "example": "As soon as anyone criticizes his project, he gets all worked up.",
+  "secondExample": "She flew off the handle when the waiter got the order wrong.",
+  "literal": "to climb onto one's big horses"
+ },
+ "expr-lote1-020": {
+  "example": "After lunch, I always hit a wall around three in the afternoon.",
+  "secondExample": "He suddenly felt exhausted at the wheel and pulled over at a rest area.",
+  "literal": "to have a blow of the bar"
+ },
+ "expr-lote2-001": {
+  "example": "\"Get lost, I don't want to see you anymore!\" she yelled at her ex.",
+  "secondExample": "The cat got up on the table, so I told him: \"Come on, scram!\""
+ },
+ "expr-lote2-002": {
+  "example": "It's late, I'm out of here. See you tomorrow!",
+  "secondExample": "When the police showed up, they took off running.",
+  "literal": "to break oneself"
+ },
+ "expr-lote2-003": {
+  "example": "Another hour-long meeting? What a pain in the ass!",
+  "secondExample": "Standing in line at the government office was a real pain in the ass."
+ },
+ "expr-lote2-004": {
+  "example": "I'm scared to death of flying.",
+  "secondExample": "During the horror movie, we were scared stiff all evening."
+ },
+ "expr-lote2-005": {
+  "example": "I'm beat, I worked twelve hours today.",
+  "secondExample": "After the marathon, they were completely wiped out.",
+  "literal": "to be burst"
+ },
+ "expr-lote2-006": {
+  "example": "He drank six beers, he's completely hammered.",
+  "secondExample": "Last night we were so wasted that we took a taxi home.",
+  "literal": "to be stuffed"
+ },
+ "expr-lote2-007": {
+  "example": "I'm starving, what are we eating tonight?",
+  "secondExample": "The kids were starving when they got home from school.",
+  "literal": "to have the slab"
+ },
+ "expr-lote2-008": {
+  "example": "Quit busting my chops with your questions!",
+  "secondExample": "My neighbor drives us nuts with his music every night.",
+  "literal": "to break the candies"
+ },
+ "expr-lote2-009": {
+  "example": "— I ate ten pizzas yesterday.\n— Get out of here!",
+  "secondExample": "You won the lottery twice? Get out of here, I don't believe you!",
+  "literal": "stop your chariot"
+ },
+ "expr-lote2-010": {
+  "example": "It was so hot in the subway that a lady passed out.",
+  "secondExample": "When I see blood, I pass out.",
+  "literal": "to fall in the apples"
+ },
+ "expr-lote2-011": {
+  "example": "I can't figure out the answer to your riddle, I give up.",
+  "secondExample": "After ten minutes, the students gave up.",
+  "literal": "to give one's tongue to the cat"
+ },
+ "expr-lote2-012": {
+  "example": "This coat costs an arm and a leg.",
+  "secondExample": "Our vacation in Japan cost us an arm and a leg.",
+  "literal": "to cost the eyes of the head"
+ },
+ "expr-lote2-013": {
+  "example": "The baby cried, so I had a sleepless night.",
+  "secondExample": "Before exams, a lot of students pull all-nighters.",
+  "literal": "white night"
+ },
+ "expr-lote2-014": {
+  "example": "This sudoku is too hard, I'm throwing in the towel.",
+  "secondExample": "After three years of problems, they threw in the towel and closed the restaurant.",
+  "literal": "to throw the sponge"
+ },
+ "expr-lote2-015": {
+  "example": "Léa forgot her keys again, she always has her head in the clouds.",
+  "secondExample": "During the meeting, I had my head in the clouds.",
+  "literal": "to have one's head in the clouds"
+ },
+ "expr-lote2-016": {
+  "example": "My grandmother has a heart of gold: she helps the whole neighborhood.",
+  "secondExample": "Our neighbors have always been very generous with us.",
+  "literal": "to have the heart on the hand"
+ },
+ "expr-lote2-017": {
+  "example": "At the end of the wedding, Uncle Bernard was tipsy and singing off-key.",
+  "secondExample": "Don't let her drive, she's had a few.",
+  "literal": "to have a glass in the nose"
+ },
+ "expr-lote2-018": {
+  "example": "The tickets for the final cost a bundle.",
+  "secondExample": "Fixing my motorcycle cost me a bundle.",
+  "literal": "to cost the skin of the butt"
+ },
+ "expr-lote2-019": {
+  "example": "I'm five minutes late, don't make a big deal out of it!",
+  "secondExample": "She spilled a little coffee and he made a huge fuss about it.",
+  "literal": "to make a whole cheese out of it"
+ },
+ "expr-lote2-020": {
+  "example": "When his boss made fun of his tie in front of everyone, Thomas gave a forced laugh.",
+  "secondExample": "I force a smile every time someone reminds me of my failure on the exam.",
+  "literal": "to laugh yellow"
+ },
+ "expr-lote3-001": {
+  "example": "The museum is a bit pricey, but it's worth it.",
+  "secondExample": "— Do you think it was worth getting up at five?\n— Yes, look at that sunrise!",
+  "literal": "that's worth the blow"
+ },
+ "expr-lote3-002": {
+  "example": "— I missed the bus by two minutes.\n— Ah, tough luck!",
+  "secondExample": "It's raining the whole weekend of our vacation, just our luck.",
+  "literal": "no bowl"
+ },
+ "expr-lote3-003": {
+  "example": "He found a parking spot right out front, he's so lucky!",
+  "secondExample": "We got lucky: the last train waited for us.",
+  "literal": "to have a bowl"
+ },
+ "expr-lote3-004": {
+  "example": "Watch out, the floor is wet!",
+  "secondExample": "We were careful not to wake the baby when we got home."
+ },
+ "expr-lote3-005": {
+  "example": "I didn't study enough and I bombed the exam.",
+  "secondExample": "— Did you take the right road?\n— No, we messed up, we have to turn around.",
+  "literal": "to plant oneself"
+ },
+ "expr-lote3-006": {
+  "example": "This game is too hard and no fun, it sucks.",
+  "secondExample": "— The concert is canceled?\n— Yes, that sucks!",
+  "literal": "it's null"
+ },
+ "expr-lote3-007": {
+  "example": "You got your license? That's awesome!",
+  "secondExample": "We're going to the beach tomorrow, it's awesome!"
+ },
+ "expr-lote3-008": {
+  "example": "Darn, I forgot my keys!",
+  "secondExample": "— The store closes at noon today.\n— Oh, darn!"
+ },
+ "expr-lote3-009": {
+  "example": "His joke was so funny, I was dying laughing.",
+  "secondExample": "Check out this cat video, my sister and I were dying laughing!"
+ },
+ "expr-lote3-010": {
+  "example": "This restaurant is really top-notch, I recommend it.",
+  "secondExample": "After a good night's sleep, I'm in top form!"
+ },
+ "expr-lote3-011": {
+  "example": "The bus is an hour late and people are starting to lose patience.",
+  "secondExample": "The teacher lost his patience when the students kept chatting."
+ },
+ "expr-lote3-012": {
+  "example": "He met Julie on vacation and fell in love.",
+  "secondExample": "I think I'm falling in love with this city!",
+  "literal": "to fall amorous"
+ },
+ "expr-lote3-013": {
+  "example": "Stop telling everyone my secrets! Shut up!",
+  "secondExample": "\"Shut up for a bit, I'm trying to listen to the game!\"",
+  "literal": "close it"
+ },
+ "expr-lote3-014": {
+  "example": "Stop following me everywhere and leave me the hell alone!",
+  "secondExample": "\"Leave me the hell alone, I'm working!\" shouted the neighbor."
+ },
+ "expr-lote3-015": {
+  "example": "You're asking me for another hundred euros? Are you kidding me?",
+  "secondExample": "— The plumber said he'd come next Tuesday.\n— Is he messing with us or what?"
+ },
+ "expr-lote3-016": {
+  "example": "Dammit, another traffic jam on the highway!",
+  "secondExample": "\"What the hell is this mess?\" asked the teacher when he saw the classroom.",
+  "literal": "brothel"
+ },
+ "expr-lote3-017": {
+  "example": "Shit, I missed the train again!",
+  "secondExample": "\"Holy shit, it's beautiful!\" said Marc, looking at the sea.",
+  "literal": "whore"
+ },
+ "expr-lote3-018": {
+  "example": "\"You dumbass, watch where you're walking!\"",
+  "secondExample": "He shouted \"you dumbass!\" at the driver who hadn't stopped.",
+  "literal": "kind of con (vulgar word for the vagina)"
+ },
+ "expr-lote3-019": {
+  "example": "That asshole cut ahead of me in line without saying anything.",
+  "secondExample": "\"What an asshole, he didn't even say thank you!\""
+ },
+ "expr-lote3-020": {
+  "example": "His answer has nothing to do with the question, he's completely off base.",
+  "secondExample": "I was completely off: I thought the meeting was tomorrow.",
+  "literal": "to be next to the plate"
+ },
+ "expr-lote4-001": {
+  "example": "He pretends to be asleep when his mother comes in.",
+  "secondExample": "I pretended to like the cake to be polite.",
+  "literal": "to make appearance"
+ },
+ "expr-lote4-002": {
+  "example": "\"Sorry, it wasn't on purpose!\" said Léa after she broke the glass.",
+  "secondExample": "My brother sings loudly on purpose to annoy me.",
+  "literal": "to do expressly"
+ },
+ "expr-lote4-003": {
+  "example": "After his divorce, Paul decided to turn the page and move away.",
+  "secondExample": "We argued a long time ago, now we need to move on."
+ },
+ "expr-lote4-004": {
+  "example": "She's still upset with her friend for forgetting her birthday.",
+  "secondExample": "— Are you mad at me?\n— No, it's forgotten."
+ },
+ "expr-lote4-005": {
+  "example": "We missed the last train, that's it for tonight.",
+  "secondExample": "The project fell through, it's all ruined."
+ },
+ "expr-lote4-006": {
+  "example": "I can't go out this weekend, I'm totally broke.",
+  "secondExample": "When we were students, we were always broke at the end of the month.",
+  "literal": "to be mown"
+ },
+ "expr-lote4-007": {
+  "example": "I'm bummed, my favorite concert got canceled.",
+  "secondExample": "She was crushed when she failed her driving test by one point.",
+  "literal": "to have the balls (the round kind, as in boules)"
+ },
+ "expr-lote4-008": {
+  "example": "This morning I'm full of energy: I'm going for a run before work.",
+  "secondExample": "After her vacation, my grandmother was really full of pep.",
+  "literal": "to have the peach"
+ },
+ "expr-lote4-009": {
+  "example": "I struggled to find an apartment in Paris.",
+  "secondExample": "The new students are struggling a bit with math.",
+  "literal": "to row in a galley"
+ },
+ "expr-lote4-010": {
+  "example": "His parents have loads of cash, they go on vacation three times a year.",
+  "secondExample": "If I had some cash, I'd buy a house by the sea."
+ },
+ "expr-lote4-011": {
+  "example": "\"Stop asking me the same question, you're pissing me off!\"",
+  "secondExample": "His lame jokes really piss me off.",
+  "literal": "you cover me in shit"
+ },
+ "expr-lote4-012": {
+  "example": "He asked me to do his job for him; I told him to get lost.",
+  "secondExample": "\"Get lost with your advice!\" shouted the neighbor.",
+  "literal": "go get yourself seen"
+ },
+ "expr-lote4-013": {
+  "example": "Ever since we refused to go to the restaurant, Julien has been sulking.",
+  "secondExample": "She sulked all evening because they had forgotten to invite her.",
+  "literal": "to pull the muzzle"
+ },
+ "expr-lote4-014": {
+  "example": "Did you see the price of this sandwich? They must think we're idiots!",
+  "secondExample": "Quit messing with me, I know you're lying."
+ },
+ "expr-lote4-015": {
+  "example": "With exams coming up, everyone is on edge.",
+  "secondExample": "Don't talk to him about the bill now, he's already on edge.",
+  "literal": "to be on the nerves"
+ },
+ "expr-lote4-016": {
+  "example": "Take an umbrella, it's pouring outside!",
+  "secondExample": "Yesterday it was pouring rain and the game was canceled.",
+  "literal": "it's raining ropes"
+ },
+ "expr-lote4-017": {
+  "example": "For his daughter's wedding, he went all out: orchestra, fireworks, everything.",
+  "secondExample": "If we want to win the final, we'll have to give it everything we've got.",
+  "literal": "to put the package"
+ },
+ "expr-lote4-018": {
+  "example": "A motorcycle zoomed past the school at full speed.",
+  "secondExample": "We were late, so we raced across the city at full speed.",
+  "literal": "to the bottom, the box"
+ },
+ "expr-lote4-019": {
+  "example": "The movie is watchable, but it's nothing special.",
+  "secondExample": "His new album was nothing special, the reviews were lukewarm.",
+  "literal": "it doesn't break bricks"
+ },
+ "expr-lote4-020": {
+  "example": "You want to swim in the sea in January? You're nuts!",
+  "secondExample": "My neighbor is a bit crazy: he talks to his plants all day long.",
+  "literal": "to be lashed"
+ }
+}
