@@ -676,6 +676,9 @@ function openChallengePlayer(id){
   if (!challengePreviewMode && !challengeAvailableInSiteLang(c)) return;
   if (isChallengeLocked(c)){ openPremiumChallengesModal(); return; }
 
+  // A fila "Revisar erros" abre o player direto da tela de categorias (sem passar pela lista): sem esconder as categorias,
+  // elas ficavam empilhadas acima do player.
+  document.getElementById('challenges-categories-wrap').style.display = 'none';
   document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'block';
   document.getElementById('challenge-preview-banner').style.display = 'none';
@@ -703,7 +706,9 @@ function openExpressionPlayer(c){
 function renderExpressionQuestionScreen(c){
   stopExerciseAudio();
   const content = document.getElementById('challenge-player-content');
+  // Comando no idioma do site, igual ao da trilha (rótulo + item); o campo `question` do conteúdo (em francês) não é mais desenhado.
   content.innerHTML = `
+    <div class="exercise-prompt-label">${chT('ch.expr.whatMeans')}</div>
     <div class="challenge-expression">
       ${escapeHtmlChallenge(c.canonicalExpression)}
       <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="${chT('ch.listenPron')}" title="${chT('ch.listenPron')}">🔊</button>
@@ -711,7 +716,6 @@ function renderExpressionQuestionScreen(c){
     </div>
     ${c.register ? `<div class="expr-question-reg">${expressionRegisterChipHTML(c)}</div>` : ''}
     <div class="challenge-hypothesis">
-      <p class="challenge-question">${escapeHtmlChallenge(c.question)}</p>
       <div class="challenge-choices-wrap">
         <div class="challenge-choices blurred" id="challenge-choices"></div>
         <button class="btn btn-secondary challenge-reveal-overlay-btn" id="challenge-reveal-btn">${chT('ch.expr.reveal')}</button>

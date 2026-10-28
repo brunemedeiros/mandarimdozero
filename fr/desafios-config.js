@@ -19,13 +19,11 @@ registerChallenges({
       'ch.knowMore': 'En savoir plus',
       'ch.goFurther': 'Pour aller plus loin',
       'ch.sub': 'Pratique francês de verdade: expressões, compreensão auditiva e ortografia.',
-      'ch.verify': 'Vérifier',
     },
     'en': {
       'ch.knowMore': "En savoir plus",
       'ch.goFurther': "Pour aller plus loin",
       'ch.sub': "Practice real French: expressions, listening comprehension and spelling.",
-      'ch.verify': "Vérifier",
     },
   },
 });

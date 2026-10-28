@@ -22,6 +22,8 @@ const http = require('http'), fs = require('fs'), path = require('path'), os = r
 const ROOT = path.resolve(__dirname, '..', '..');
 const REF = process.env.PARIDADE_5C_REF || '3035549c';
 const H = require('./desafios-harness.js');
+// Botão de verificar traduzido DE PROPÓSITO (2026-10-26, etapa A): antes "Vérifier" nos dois idiomas, agora "Verificar" (pt-BR) e "Check" (en).
+const VERIFICAR_RE = />(Vérifier|Verificar|Check)<\/button>/g;
 
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? String(typeof x === 'string' ? x : JSON.stringify(x)).slice(0, 900) : ''); } };
@@ -30,7 +32,7 @@ async function fingerprint(browser, root, keys){
   const { page, ctx, server, errors } = await H.boot(browser, root, { lang: 'pt-BR' });
   const out = {};
   // a duração dos mp3 no checklist do admin chega quando o áudio carrega (momento variável): fica de fora
-  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); return c.innerHTML; }, sel);
+  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); return c.innerHTML; }, sel).then(v => (typeof v === 'string' ? v.replace(VERIFICAR_RE, '>VERIFICAR</button>') : v));
   const click = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) throw new Error('sem ' + s); e.click(); }, sel);
   const state = () => page.evaluate(() => JSON.stringify({ done: STATE.completedChallenges, rev: STATE.challengeReviews, xp: STATE.xp,
     daily: STATE.daily, modes: STATE.modesUsed, saved: serializeState(), badges: collectBadgeMetrics(STATE), cur: typeof CURRENT_CHALLENGE_PLAYER !== 'undefined' ? CURRENT_CHALLENGE_PLAYER : 'x' }));
@@ -533,7 +535,7 @@ async function fingerprintEn(browser, root){
   const { page, ctx, server, errors } = await H.boot(browser, root, { lang: 'en', rows: rowsComTraducaoEn() });
   const out = {};
   // a duração dos mp3 no checklist do admin chega quando o áudio carrega (momento variável): fica de fora
-  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); return c.innerHTML; }, sel);
+  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); return c.innerHTML; }, sel).then(v => (typeof v === 'string' ? v.replace(VERIFICAR_RE, '>VERIFICAR</button>') : v));
   await page.evaluate(() => switchTab('challenges'));
   await page.waitForFunction(() => document.querySelector('#challenges-categories .challenge-category-card'));
   out.categorias = await html('#view-challenges');
@@ -579,7 +581,10 @@ async function fingerprintEn(browser, root){
     check('chaves de texto encontradas', keys.length > 100, keys.length);
     let iguais = 0, total = 0;
     // published_at/rejected_at... = new Date().toISOString() (relógio fixo, mas por garantia)
-    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST');
+    // E-mail de contato do Premium trocado na main (brunemed1310@gmail.com -> contato@profbrune.com.br, shared/permissions.js): o REF antigo ainda tem o e-mail velho; neutralizado nos dois lados.
+    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ch\.verify=(Vérifier|Verificar|Check)/g, 'ch.verify=VERIFICAR').replace(/\\"(Vérifier|Verificar|Check)\\"/g, '\\"VERIFICAR\\"').replace(VERIFICAR_RE, '>VERIFICAR</button>')
+      // Expressões (etapa A, 2026-10-26): a pergunta em francês do conteúdo (<p class="challenge-question">) saiu e entrou o rótulo "O que significa?"
+      .replace(/<div class=\\"exercise-prompt-label\\">[^<]*<\/div>\\n    /g, '').replace(/<p class=\\"challenge-question\\">[^<]*<\/p>\\n      /g, '').replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL');
     for (const lado of ['pt', 'en']){
       const A = antes[lado], B = depois[lado];
       check(lado + ': a sequência rodou no fr de antes', Object.keys(A).length > (lado === 'pt' ? 900 : 30), Object.keys(A).length);

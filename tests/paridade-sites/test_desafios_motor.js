@@ -45,7 +45,7 @@ const MOTOR = ['shared/desafios.js', 'shared/desafios-telas.js', 'shared/desafio
   const valores = keysFr.flatMap(k => ['pt-BR', 'en'].map(l => [k, l, (cat.I18N_CATALOG[l] || {})[k]]));
   check('chaves fr.* usadas pelo motor existem em pt-BR e en e não citam o francês', keysFr.length >= 8 && valores.every(([, , v]) => v && !/franc[eê]s|French/i.test(JSON.stringify(v))), [keysFr.length, valores.filter(([, , v]) => !v || /franc|French/i.test(JSON.stringify(v)))]);
   const cfg = read('fr/desafios-config.js');
-  check('fr/desafios-config.js tem o que é do francês', ["lang: 'fr'", 'latinaFr()', 'frAccentPickerHTML()', 'wireFrAccentPicker(', "'ch.verify': 'Vérifier'", 'Pratique francês de verdade', 'Practice real French', 'En savoir plus', 'Pour aller plus loin'].every(w => cfg.includes(w)));
+  check('fr/desafios-config.js tem o que é do francês', ["lang: 'fr'", 'latinaFr()', 'frAccentPickerHTML()', 'wireFrAccentPicker(', 'Pratique francês de verdade', 'Practice real French', 'En savoir plus', 'Pour aller plus loin'].every(w => cfg.includes(w)));
   const app = read('fr/app.js');
   const nomes = ['renderChallengeCategories', 'renderChallengesList', 'openChallengePlayer', 'checkListenTranslateAnswer', 'checkAccentAnswer', 'openClozeGrammarPlayer', 'renderChallengesAdmin', 'importChallengesFromJSON',
     'loadChallengesFromDB', 'chT', 'applyChallengeI18n', 'tpZero', 'slowAudioBtnHTML', 'expressionOfTheDay', 'expressionCardHTML', 'fillExpressionLevelSections', 'dueChallengeReviews', 'buildModuleChallengesRow', 'fillModuleChallengeRows', 'md5Hex', 'accentAnswerOutcome', 'analyzeTranslation'];
