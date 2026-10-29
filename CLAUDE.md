@@ -123,5 +123,6 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - Currículo fr (decisões de 2026-10-18 em `docs/i18n/curriculo/12-*`): défi de fim de módulo ARQUIVADO (retomar ligado ao DELF, sem sobrepor Ponto de
   verificação e Desafios; `07` + maquete preservados); explorar gravação de apresentação/diálogo/habilidade como recurso geral; testar entonação
   pergunta x afirmação no TTS fr antes da lição de som; corretor de pronúncia (API) no futuro.
+- Pendência (decisão 291): curso de **Pronúncia do Francês** (futuro; letras mudas e exceções, nasais, ligação, *oi* = "uá"); comparação com a Duolingo em `docs/i18n/curriculo/dados/comparacao-duolingo-x-regras-fr.md`.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados (placeholders de perfil); Stripe. País dos alunos: já preenchido nos 13 alunos (conferido 2026-10-14).
