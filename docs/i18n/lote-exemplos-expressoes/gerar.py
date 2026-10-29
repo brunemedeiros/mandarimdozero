@@ -3,7 +3,10 @@
 import json,sys
 f=sys.argv[1]; r=json.load(open(f))
 def q(s):
-    assert '$q$' not in s; return '$q$'+s+'$q$'
+    # Sem quebra de linha escrita dentro do texto (colar no navegador troca \n por \r\n): usa chr(10)
+    assert '$q$' not in s
+    if '\n' in s: return '(' + ' || chr(10) || '.join('$q$'+p+'$q$' for p in s.split('\n')) + ')'
+    return '$q$'+s+'$q$'
 def sql(x):
     e='data'
     for path,val in [('{example,pt}',x['pt1']),('{example,mark}',x['mark1']),('{secondExample,pt}',x['pt2']),('{secondExample,mark}',x['mark2'])]:

@@ -33,3 +33,8 @@ Tradução pt-BR e en dos 2 exemplos de cada uma das 122 expressões, marcação
 - Backup feito. Staging semeado com as 122 linhas (hash do `data` idêntico ao de produção).
 - Literais corrigidos pela autora: `dalle` = goela/gullet (fonte: Expressio, Linternaute), `con` = idiota (sentido de insulto, não o anatômico), `ta gueule` = focinho. Conferência em dicionários: `Wiktionnaire`/`CNRTL`/`Larousse` não abriram nesta sessão (rede bloqueada), só resumos de busca; conferir direto quando liberar.
 - Origens (gueule de bois, pommes, plaque, pêche, boules, poil dans la main, cinglé) são hipóteses nas fontes: não escrever "história de origem" no texto sem esse aviso.
+
+## Staging (2026-10-29)
+- Staging semeado (idêntico a produção) e lote aplicado: 122 linhas com `example.pt`, 80 com `literal.pt`; hash final do `data` = `3c99dbde66794e001d9e002a77091943` (igual ao teste local).
+- Achado: colar o SQL no editor do navegador trocou `\n` por `\r\n` nos 24 diálogos. Corrigido com `reparo-crlf.sql` e o gerador agora escreve a quebra com `chr(10)`. **Sempre conferir pelo hash/por linha depois de gravar.**
+- Falta: auditoria dos literais nos dicionários (Wiktionnaire/CNRTL/Larousse abriram em 2026-10-29), PR do app, inglês no overlay, produção.
