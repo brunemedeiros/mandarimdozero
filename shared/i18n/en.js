@@ -259,6 +259,7 @@ window.I18N_CATALOG['en'] = {
   'xpWeek.range': '{from} to {to}', // ALTA
   'xpWeek.loading': 'Loading previous weeks...', // ALTA
   'xpWeek.error': 'Couldn\'t load the previous weeks right now.', // ALTA
+  'xpWeek.totalLabel': 'Total XP in this course', // ALTA
   'xpWeek.note': 'Weeks run Monday to Sunday and add up all your courses, same as the Leaderboard.', // ALTA
   'toast.pointsGain': '+{n} pts', // ALTA
   'toast.extraLife': '❤️ Extra life!', // ALTA

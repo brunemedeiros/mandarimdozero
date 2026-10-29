@@ -276,6 +276,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'xpWeek.range': '{from} a {to}',
   'xpWeek.loading': 'Carregando as semanas anteriores...',
   'xpWeek.error': 'Não deu para carregar as semanas anteriores agora.',
+  'xpWeek.totalLabel': 'XP total neste curso',
   'xpWeek.note': 'Semana de segunda a domingo, somando todos os seus cursos, igual ao Ranking.',
   'toast.pointsGain': '+{n} pts',
   'toast.extraLife': '❤️ Vida extra!',

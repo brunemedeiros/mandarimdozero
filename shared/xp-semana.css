@@ -39,4 +39,6 @@
 .xp-week-bar{ height:6px; border-radius:999px; background: var(--paper-line); margin-top:6px; overflow:hidden; }
 .xp-week-bar > span{ display:block; height:100%; border-radius:999px; background: var(--ink-soft); min-width:0; }
 .xp-week-row.is-current .xp-week-bar > span{ background: var(--brand-fill); }
+.xp-week-total{ display:flex; justify-content:space-between; gap:12px; margin:10px 2px 0; padding-top:10px; border-top:1px solid var(--paper-line); font-size:14px; color: var(--ink); }
+.xp-week-total strong{ font-weight:800; }
 .xp-week-note{ color: var(--ink-soft); font-size:12px; margin:10px 2px 2px; line-height:1.35; }

@@ -230,6 +230,9 @@
     html += '</ol>';
     if (!srv && status === 'loading') html += '<p class="xp-week-note" role="status">' + esc(t('xpWeek.loading')) + '</p>';
     else if (!srv && status === 'error') html += '<p class="xp-week-note" role="status">' + esc(t('xpWeek.error')) + '</p>';
+    // XP total do curso aberto (o número que o topo mostrava antes; decisão da dona de 2026-10-29: não sumir com ele).
+    var total = (typeof STATE !== 'undefined' && STATE && typeof STATE.xp === 'number') ? STATE.xp : null;
+    if (total !== null) html += '<div class="xp-week-total"><span>' + esc(t('xpWeek.totalLabel')) + '</span><strong>' + esc(t('xpWeek.amount', { n: total })) + '</strong></div>';
     html += '<p class="xp-week-note">' + esc(t('xpWeek.note')) + '</p>';
     pop.innerHTML = html;
   }
