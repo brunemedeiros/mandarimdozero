@@ -507,7 +507,7 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   preenchido ou muda (Google só mexe no horário, não repete); material novo vira aviso; sino para cada aluno no idioma do site;
   texto sempre lido da aula/material (`_mural_ref`), aviso some se a aula/material for apagado; sem retroativo.
   `mural_feed` devolve `kind`, `ref` e a capa. Aditiva (sem DROP, sem DELETE).
-- Staging: aplicada (2026-10-29, `121_mural_classroom_style`, versão 20261029205008). Produção: PENDENTE (aguarda aprovação da prévia).
+- Staging: aplicada (2026-10-29, `121_mural_classroom_style`, versão 20261029205008). Produção: aplicada (2026-10-29, autorizada, versão 20261029205506; 931 aulas com o mesmo hash antes e depois, 1 post e 0 avisos automáticos logo depois; `mural_set_cover` sem execute para anon, `_mural_auto_post` sem execute para authenticated).
 - Teste local: `tests/aulas-presenca/run.sh` 121 17/17 (094 27/27, 101 7/7, 103 22/22, 107 14/14, 117 a 120 45/45).
 - Telas (branch `claude/fervent-noether-9f1ya7`, sem PR): menu da professora Alunos | Cartões | Mural; dentro do Mural as abas
   Mural | Aulas e materiais | Pessoas e a escolha Todos/turma/aluno; capa, coluna lateral (próximas aulas; aluno: próxima aula e
