@@ -45,7 +45,7 @@
  "expr-a1m1-004": {
   "example": "— Coffee together?\n— Sounds good!",
   "secondExample": "— I'll call you tonight.\n— Works for me!",
-  "literal": "That walks!"
+  "literal": "That works!"
  },
  "expr-a1m1-005": {
   "example": "— Sorry!\n— No problem!",
@@ -98,7 +98,7 @@
  "expr-a1m4-001": {
   "example": "Take an umbrella, it's pouring!",
   "secondExample": "It's been pouring since this morning.",
-  "literal": "It's raining ropes"
+  "literal": "it's raining ropes"
  },
  "expr-a1m4-002": {
   "example": "Are you leaving tomorrow? Have a good trip!",
@@ -196,7 +196,7 @@
  "expr-lote1-001": {
   "example": "— The Earth is flat.\n— You're talking nonsense!",
   "secondExample": "He ate a bunch of junk for dinner, and now he has a stomachache.",
-  "literal": "no matter what"
+  "literal": "it doesn't matter what"
  },
  "expr-lote1-002": {
   "example": "I'm sick of the rain, I want sunshine!",
@@ -307,7 +307,7 @@
  "expr-lote2-005": {
   "example": "I'm beat, I worked twelve hours today.",
   "secondExample": "After the marathon, they were completely wiped out.",
-  "literal": "to be burst"
+  "literal": "to be dead"
  },
  "expr-lote2-006": {
   "example": "He drank six beers, he's completely hammered.",
@@ -327,7 +327,7 @@
  "expr-lote2-009": {
   "example": "— I ate ten pizzas yesterday.\n— Get out of here!",
   "secondExample": "You won the lottery twice? Get out of here, I don't believe you!",
-  "literal": "stop your chariot"
+  "literal": "stop your bluff"
  },
  "expr-lote2-010": {
   "example": "It was so hot in the subway that a lady passed out.",

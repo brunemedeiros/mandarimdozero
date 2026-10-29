@@ -156,8 +156,8 @@
   "mark2": "Ça marche",
   "conf": "alta",
   "nota": "",
-  "lit_pt": "Isso anda!",
-  "lit_en": "That walks!",
+  "lit_pt": "Isso funciona!",
+  "lit_en": "That works!",
   "lit_conf": "media"
  },
  {
@@ -339,8 +339,8 @@
   "mark2": "Il pleut des cordes",
   "conf": "alta",
   "nota": "Equivalente pt 'chover canivete' (também 'chover a cântaros'); en 'pouring' / 'raining cats and dogs'.",
-  "lit_pt": "Chove cordas",
-  "lit_en": "It's raining ropes",
+  "lit_pt": "chove cordas",
+  "lit_en": "it's raining ropes",
   "lit_conf": "alta"
  },
  {
@@ -676,7 +676,7 @@
   "conf": "alta",
   "nota": "Dois sentidos: bobagem (ex. 1) e qualquer coisa (ex. 2).",
   "lit_pt": "não importa o quê",
-  "lit_en": "no matter what",
+  "lit_en": "it doesn't matter what",
   "lit_conf": "media"
  },
  {
@@ -1056,8 +1056,8 @@
   "mark2": "étaient complètement crevées",
   "conf": "alta",
   "nota": "Marcação com \"complètement\" no meio da expressão (ser crevé).",
-  "lit_pt": "estar estourado",
-  "lit_en": "to be burst",
+  "lit_pt": "estar morto",
+  "lit_en": "to be dead",
   "lit_conf": "media"
  },
  {
@@ -1124,8 +1124,8 @@
   "mark2": "Arrête ton char",
   "conf": "alta",
   "nota": "",
-  "lit_pt": "pare o seu carro",
-  "lit_en": "stop your chariot",
+  "lit_pt": "para com a sua lorota",
+  "lit_en": "stop your bluff",
   "lit_conf": "media"
  },
  {
@@ -1799,7 +1799,7 @@
   "mark2": "m'emmerde",
   "conf": "alta",
   "nota": "Vulgar.",
-  "lit_pt": "você me enche de merda",
+  "lit_pt": "você me cobre de merda",
   "lit_en": "you cover me in shit",
   "lit_conf": "media"
  },

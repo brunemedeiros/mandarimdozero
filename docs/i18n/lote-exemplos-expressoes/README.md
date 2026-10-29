@@ -38,3 +38,11 @@ Tradução pt-BR e en dos 2 exemplos de cada uma das 122 expressões, marcação
 - Staging semeado (idêntico a produção) e lote aplicado: 122 linhas com `example.pt`, 80 com `literal.pt`; hash final do `data` = `3c99dbde66794e001d9e002a77091943` (igual ao teste local).
 - Achado: colar o SQL no editor do navegador trocou `\n` por `\r\n` nos 24 diálogos. Corrigido com `reparo-crlf.sql` e o gerador agora escreve a quebra com `chr(10)`. **Sempre conferir pelo hash/por linha depois de gravar.**
 - Falta: auditoria dos literais nos dicionários (Wiktionnaire/CNRTL/Larousse abriram em 2026-10-29), PR do app, inglês no overlay, produção.
+
+## Auditoria dos literais em dicionários (2026-10-29)
+Wiktionnaire, CNRTL (pela API do site) e Larousse abriram; Expressio não (403/DNS). Mesmo defeito de "dalle/con/gueule" (literal pegou o sentido comum, a expressão vem de outro):
+- **Aplicados (confiança alta; Staging atualizado, hash `a9f09484493bd136925204fbc7424937`):** `arrête ton char` = "para com a sua lorota" (char = charre = blefe; Larousse/CNRTL); `être crevé` = "estar morto" (CNRTL); `ça marche` = "Isso funciona!" (marcher = funcionar/topar); `tu m'emmerdes` = "você me cobre de merda" (CNRTL "couvrir, souiller d'excréments"); en de `n'importe quoi` = "it doesn't matter what".
+- **Esperando a autora (média/baixa):** `bol` (sentido antigo "cul": "ter rabo"/"sem rabo" em vez de "tigela"; só Wiktionnaire), `être à côté de la plaque` ("ao lado do alvo", CNRTL põe junto de "plaque de tir"), `se planter` ("se plantar" em pt-BR é ficar parado; origem "bater/esborrachar"), `ça vaut le coup` ("golpe" lembra fraude; coup = lance), `coup de fil` ("toque", não pancada), `coup de main` ("golpe de mão" já existe em pt com outro sentido).
+- Literais conferidos e mantidos: gueule de bois (boca seca como madeira), flemme, cafard, fauché, cinglé, bourré, casser les bonbons, à fond la caisse, grasse matinée, poser un lapin, tomber dans les pommes, faire la queue, main morte, c'est parti.
+- Sem fonte para a origem (hipótese): avoir les boules, avoir la pêche, mettre le paquet, se casser, foutre le camp, briques, casser les pieds.
+- Duplicata: `expr-a1m4-001` (despublicada em 2026-10-19) e `expr-lote4-016` são a mesma expressão (il pleut des cordes).
