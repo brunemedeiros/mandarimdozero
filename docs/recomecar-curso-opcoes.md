@@ -254,3 +254,17 @@ próprios intacto, XP igual), cliente, produção só com autorização.
 - Não conferi o Staging. O `notification-cron` em produção foi lido pelo repositório, não pelo bundle publicado.
 - Não medi quantos cartões ficariam vencidos de uma vez para quem volta (não há conta parada há mais de dois meses).
 - Por que o zh tem 0 cartões com `released` (o carimbo existe desde a paridade C1; pode ser que as contas zh não tenham carregado desde então).
+
+## Decisões da dona (2026-10-29)
+
+1. Só existe o "recomeçar do zero" (não oferecer a A): zera TUDO do curso, incluindo XP, Ranking e conquistas do curso,
+   trilha, memória (FSRS) dos cartões da trilha, Desafios e Ditados. Cópia do progresso guardada por 30 dias para desfazer.
+2. Depois de recomeçar, as lições voltam a dar XP.
+3. Desafios e Ditados recomeçam.
+4. As boas-vindas da primeira lição aparecem de novo (regra por curso).
+5. Aluno da professora pode recomeçar sozinho.
+6. Retomada guiada para quem ficou 60 dias parado.
+7. Antes de tudo, numa entrega separada: o conserto da memória dos cartões da professora e dos próprios (decisão P1 de
+   2026-10-12, memória por idioma estudado e não por curso).
+Ponto a decidir na implementação: cartões próprios e da professora não são apagados (são do idioma, não do curso); a
+memória deles também fica (depois da P1 ela nem fica no bloco do curso).
