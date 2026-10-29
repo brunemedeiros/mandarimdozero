@@ -53,6 +53,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - **Conteúdo nasce traduzido** (decisão da autora, 2026-10-19): todo conteúdo novo ou alterado (trilha, notas, diálogos,
   Desafios, ditados) já sai com a versão para CADA idioma de site do curso (hoje pt-BR e en), no mesmo lote e na mesma
   revisão; lote sem todas as traduções não é importado nem publicado. Como fazer: `.claude/rules/conteudo-trilha.md`.
+- **Português de Portugal em resposta = Quase** (dona, 2026-10-26/29): a devolutiva mostra a forma do Brasil; vale para todo exercício
+  com resposta em português (Desafios, lição, Revisão, Banco, gramática, Conjugação). Código: `shared/core/familias/portugues-variantes.js`.
 - **Notas de realidade/culturais**: toda nota nova ou editada é reportada no chat com nível de confiança
   (alta/média/baixa). Procedimento na skill `notas-de-realidade`.
 - **Conteúdo novo (nível/módulo/unidade)**: decidir os Desafios por categoria (skill `criar-desafios`).

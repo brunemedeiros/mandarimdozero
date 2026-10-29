@@ -27,8 +27,10 @@ Histórico e decisões: `docs/historico/09-desafios-ditados.md`. Política em c�
    antes de importar. Lote sem inglês não é importado.
 4d. **Português do Brasil no Ouça e traduza** (regra de 26/10/2026): as `referenceTranslations` em pt só têm formas do
    Brasil (nada de "estou a comer", autocarro, telemóvel...; "tu" + 2ª pessoa pode). Resposta da aluna em português de
-   Portugal vira "Quase" com a forma do Brasil na devolutiva (`ptEuropeanToBrazilian`/`listenTranslateVerdict` em
-   `shared/desafios.js`); a varredura de `tests/desafios-ptpt/test_ptpt.js` barra forma de Portugal nos lotes.
+   Portugal vira "Quase" com a forma do Brasil na devolutiva. A detecção e a troca são do código comum
+   (`shared/core/familias/portugues-variantes.js`, vale para todo exercício com resposta em português); o Ouça e traduza
+   chama por `listenTranslateVerdict` em `shared/desafios.js`. A varredura de `tests/desafios-ptpt/test_ptpt.js` barra
+   forma de Portugal nos lotes.
 5. Áudio: Actions > "Áudio TTS" com o modo do lote (ex.: `desafios-a1-m1`, `ditados`).
 6. Conclusão: acerto ou erro leve conclui; erro total mostra "Tentar de novo"/"Tentar mais tarde".
 7. Textos de interface via `chT()`/`CHALLENGE_I18N`. chinês ainda não tem aba Desafios.
