@@ -56,3 +56,20 @@ Tudo o que for decidido sobre XP vale para todos os sites (fr, zh, pt e futuros)
   errou ou "Não sei" 0. Antes os Desafios de conteúdo não davam XP; os outros tipos continuam sem.
 - Contra XP infinito: pago só ao tocar em Concluir e só na PRIMEIRA conclusão do desafio (refazer concluído e "Revisar erros" = 0).
   Código: `exprTurnXP` e `exprShowFinal` em `shared/desafios-telas.js`. Cobertura: `tests/desafios-expressoes-passos/` (2 XP certo, 1 XP quase, 0 errado/"Não sei", 0 ao refazer).
+
+## 2026-10-29: XP da semana no topo, janelinha das semanas e avisos fora das telas de conclusão (decisões da dona)
+- **Topo**: o contador ⭐ mostra o **XP da semana**, com "XP" ao lado do número no fr e no zh (antes: total no topo; o fr
+  escondia "XP" no celular). O XP total continua no Perfil (cartão de estatísticas). Valores de XP: nenhum mudou.
+- **Semana e soma = Ranking**: segunda a domingo no fuso do aparelho (mesma conta de `currentWeekStart()` e
+  `leaderboardCurrentWeekStart()`), somando todos os idiomas da conta em `weekly_xp`, como o Ranking "Geral" (que é a aba
+  que o Ranking abre). Conferido na produção (2026-10-29, só leitura): `week_start` é sempre segunda-feira; leitura pública.
+- **Local x servidor**: até a leitura de `weekly_xp` chegar, o topo mostra `STATE.periodXp` (curso aberto); quando chega, o
+  número sobe contando até o valor do servidor. XP ganho depois da leitura soma na hora; o idioma da página nunca fica abaixo
+  do local (servidor atrasado em relação ao último save).
+- **Janelinha** (botão com `aria-expanded`): semana atual em destaque + 3 anteriores, com datas e barras; abre com mouse por
+  cima, clique, Enter/Espaço e toque; fecha com Esc (foco volta ao botão), clique fora e Tab. Código: `shared/xp-semana.js`,
+  `shared/xp-semana.css`; chaves `xpWeek.*` (pt-BR e en).
+- **Telas de conclusão**: aviso "+N XP" (`showToast(..., { kind: 'xp' })`) não aparece enquanto uma tela de conclusão está
+  visível e os pendentes somem quando ela abre (a tela já mostra o XP ganho). Lista das telas: `COMPLETION_SCREEN_SELECTOR`
+  em `shared/toast.js` (tela nova de conclusão entra lá ou usa `data-completion-screen`). Outros avisos continuam.
+- Testes: `tests/xp-semana/` (cálculo e navegador fr/zh, claro/escuro, 390/1280, pt-BR/en).

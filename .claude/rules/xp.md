@@ -23,5 +23,8 @@ site novo parte do molde da família (ver `docs/i18n/e4-plano-de-extracao.md`) e
 - **Desafios, Expressões, "Sua vez"** (decisão da autora, 2026-10-26; só este passo dá XP, o resto dos Desafios continua sem XP): digitar certo
   `EXERCISE_XP_PRODUCE` 2, "quase" `EXERCISE_XP_ALMOST` 1, errou ou "Não sei" 0. Só na PRIMEIRA conclusão do desafio, pago ao tocar em Concluir
   (`exprTurnXP`, `shared/desafios-telas.js`); refazer desafio concluído ou "Revisar erros" = 0, para não virar fonte infinita. Teste: `tests/desafios-expressoes-passos/`.
+- **Topo** (decisão da dona, 2026-10-29): ⭐ N XP = XP DA SEMANA, mesma semana (segunda a domingo) e mesma soma do Ranking "Geral" (`weekly_xp`
+  de todos os idiomas); janelinha com 4 semanas (`shared/xp-semana.js`). Aviso "+N XP" não aparece em tela de conclusão (`COMPLETION_SCREEN_SELECTOR`,
+  `shared/toast.js`). Teste: `tests/xp-semana/`.
 - O toast "+N XP" aparece para todo ganho maior que 0. A notificação do sino usa `notification_rules.min_xp_amount` (categoria `gamificacao`, 15 na produção).
 - Demais fontes e valores atuais, e o que está em revisão: `docs/historico/21-auditoria-xp.md`. Ao mexer em qualquer XP, atualizar esse arquivo e o teste `tests/xp/`.
