@@ -233,6 +233,8 @@ function exitToPath(){
   document.getElementById('path-list-wrap').style.display = 'block';
   document.getElementById('unit-detail-wrap').style.display = 'none';
   renderUnitsGrid();
+  // Saiu pelo ✕ de uma tela de conclusão: a janela da sequência que ficou pendente aparece agora (Etapa 6).
+  if (typeof showDeferredStreakCelebration === 'function') showDeferredStreakCelebration();
 
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'path' });
 }

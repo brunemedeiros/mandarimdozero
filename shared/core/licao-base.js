@@ -72,8 +72,13 @@ function finishCurrentLesson(u){
     // própria, acessível pela aba "Desafios").
     const challengesBefore = todaysChallenges().map(c => Math.min(c.get(STATE.daily), c.target));
     const lessonKey = `${u.id}:${currentLessonIdx(u.id)}`;
+    // Etapa 6: 1ª lição do curso ganha o bloco "Recado da Prof. Brune" na tela de conclusão. Decidido ANTES de a
+    // lição avançar (o curso ainda está "novo"); o bloco já mostra o XP, então o aviso "+4 XP" de fechar a lição não
+    // aparece por cima dele (o XP é somado do mesmo jeito).
+    const welcomeB = typeof shouldShowWelcomeB === 'function' && shouldShowWelcomeB();
     STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
-    addXP(LESSON_CLOSE_XP);
+    addXP(LESSON_CLOSE_XP, welcomeB ? { quiet: true } : undefined);
+    if (welcomeB){ markWelcome('b'); STEP_STATE.welcomeBShown = true; }
     // Terminar esta lição intermediária já conta como "estudei hoje" pro
     // streak -- antes só o Ponto de verificação (fim da unidade inteira)
     // contava, deixando quem completa 1-2 lições de uma unidade grande sem
@@ -103,7 +108,7 @@ function finishCurrentLesson(u){
     // conclusão logo acima -- STATE.xp só muda dentro de addXP() (ver
     // Fase 1), então esse delta é exatamente o que esta lição concedeu.
     const xpEarned = STATE.xp - STEP_STATE.acq.xpAtLessonStart;
-    renderLessonCompleteScreen(u, finished, { challengesBefore, xpEarned, scorePct: lessonScorePct });
+    renderLessonCompleteScreen(u, finished, { challengesBefore, xpEarned, scorePct: lessonScorePct, welcomeB });
     return;
   }
 
