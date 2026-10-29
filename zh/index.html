@@ -4686,6 +4686,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <link rel="stylesheet" href="../shared/modulos-niveis.css">
 <!-- Boas-vindas da 1ª lição do curso (Etapa 6) -->
 <link rel="stylesheet" href="../shared/boas-vindas.css">
+<link rel="stylesheet" href="../shared/xp-semana.css">
 </head>
 <body>
 
@@ -4735,7 +4736,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
     <div class="stats-pills-wrap">
       <div class="stats-pills">
         <div class="pill streak">🔥 <span id="streak-count" class="stat-count">0</span></div>
-        <div class="pill xp">⭐ <span id="xp-count" class="stat-count">0</span> XP</div>
+        <!-- ⭐ = XP da semana (mesma do Ranking); clique/toque/mouse abre a janelinha das últimas semanas (shared/xp-semana.js). -->
+        <button type="button" class="xp-week-btn" id="xp-week-btn" aria-expanded="false" aria-controls="xp-week-pop" aria-haspopup="dialog" data-i18n-attr="aria-label:xpWeek.buttonShort;title:xpWeek.buttonShort" aria-label="XP desta semana" title="XP desta semana"><span class="pill xp">⭐ <span id="xp-count" class="stat-count">0</span><span class="xp-suffix"> XP</span></span></button>
         <!-- Pinyin: só na topbar principal era redundante e ocupava espaço --
              o toggle continua acessível dentro da lição (#pinyin-toggle-btn-lesson,
              ver .lesson-focus-bar), que é onde realmente se decide ler em hanzi puro.
@@ -5797,6 +5799,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/public-profile.js"></script>
 <script src="../shared/public-deck.js"></script>
 <script src="../shared/topbar-stats.js"></script>
+<script src="../shared/xp-semana.js"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>
 <script src="../shared/activity-focus.js"></script>

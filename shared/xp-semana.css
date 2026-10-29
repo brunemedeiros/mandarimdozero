@@ -1,0 +1,42 @@
+/* XP da semana no topo + janelinha das últimas semanas (shared/xp-semana.js; decisão da dona, 2026-10-29).
+   Comum a todos os sites: só tokens do próprio site (--paper, --ink, --brand-fill...), que já mudam no claro/escuro. */
+
+/* O botão é só o alvo de toque: o desenho continua sendo o .pill.xp de cada site. */
+.xp-week-btn{
+  display:flex; align-items:center; flex-shrink:0;
+  background:none; border:0; padding:0; margin:0; font:inherit; color:inherit; cursor:pointer;
+  border-radius:999px;
+}
+.xp-week-btn:focus-visible{ outline:2px solid var(--brand-fill); outline-offset:2px; }
+.xp-week-btn[aria-expanded="true"] .pill.xp{ border-color: var(--brand-fill); }
+@media (max-width: 899px){
+  .xp-week-btn{ min-height:44px; }
+}
+
+.xp-week-pop{
+  position:fixed; z-index:var(--z-dropdown, 600);
+  width:min(280px, calc(100vw - 32px)); box-sizing:border-box;
+  background: var(--paper); color: var(--ink);
+  border:1px solid var(--paper-line); border-radius:14px; box-shadow: var(--shadow-lift);
+  padding:14px 14px 10px; font-size:13px;
+}
+.xp-week-pop[hidden]{ display:none; }
+.xp-week-pop:focus{ outline:none; }
+.xp-week-pop:focus-visible{ outline:2px solid var(--brand-fill); outline-offset:2px; }
+.xp-week-pop-title{ font-weight:800; font-size:14px; margin:0 0 10px; }
+.xp-week-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.xp-week-row{ padding:8px 10px; border-radius:10px; border:1px solid transparent; }
+.xp-week-row.is-current{
+  background: color-mix(in srgb, var(--brand-fill) 10%, var(--paper));
+  border-color: var(--brand-fill);
+}
+.xp-week-row-head{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.xp-week-label{ font-weight:700; }
+.xp-week-amount{ font-weight:800; white-space:nowrap; }
+.xp-week-row.is-current .xp-week-label,
+.xp-week-row.is-current .xp-week-amount{ font-weight:800; font-size:14px; }
+.xp-week-dates{ color: var(--ink-soft); font-size:12px; margin-top:1px; }
+.xp-week-bar{ height:6px; border-radius:999px; background: var(--paper-line); margin-top:6px; overflow:hidden; }
+.xp-week-bar > span{ display:block; height:100%; border-radius:999px; background: var(--ink-soft); min-width:0; }
+.xp-week-row.is-current .xp-week-bar > span{ background: var(--brand-fill); }
+.xp-week-note{ color: var(--ink-soft); font-size:12px; margin:10px 2px 2px; line-height:1.35; }
