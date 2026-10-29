@@ -1,0 +1,76 @@
+/* Mural no estilo Google Classroom (migration 121, shared/mural.js; decisões da autora, 2026-10-26 a 29).
+   Comum a todos os sites: usa só tokens que cada index.html define (--brand-fill, --paper*, --ink*). */
+
+/* Professora: abas Mural | Aulas e materiais | Pessoas + escolha da turma ou do aluno */
+.mc-shell{ display:flex; flex-direction:column; gap:12px; margin-bottom:16px; }
+.mc-tabs{ margin:0; }
+.mc-picker{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.mc-picker-label{ font-size:13.5px; font-weight:800; color:var(--ink-soft); margin-right:4px; }
+.mc-student-pick select{ width:auto; min-width:180px; max-width:260px; min-height:40px; padding:6px 12px; border-radius:999px; font-weight:700; }
+.mc-student-pick select.is-active{ background:var(--brand-fill); color:var(--on-brand-fill); border-color:var(--brand-fill); }
+
+/* Capa */
+.mc-cover{ position:relative; min-height:170px; border-radius:18px; padding:24px 28px; box-sizing:border-box; display:flex; align-items:flex-end; gap:16px;
+  background-color:var(--brand-fill); color:var(--on-brand-fill); background-size:cover; background-position:center; overflow:hidden; }
+.mc-cover.has-photo::before{ content:""; position:absolute; inset:0; background:rgba(20,12,30,0.45); }
+.mc-cover > *{ position:relative; }
+.mc-cover-text{ flex:1; min-width:0; }
+.mc-cover-title{ margin:0; font-size:clamp(24px, 4vw, 34px); font-weight:900; line-height:1.1; color:inherit; overflow-wrap:anywhere; }
+.mc-cover-sub{ margin:6px 0 0; font-size:15px; font-weight:700; color:inherit; opacity:0.95; }
+.mc-cover-edit{ flex:0 0 auto; min-height:44px; padding:8px 14px; border-radius:10px; border:1.5px solid currentColor; background:transparent; color:inherit; font:inherit; font-size:14px; font-weight:800; cursor:pointer; }
+.mc-cover-edit:hover{ background:rgba(255,255,255,0.15); }
+.mc-cover-editor{ margin-top:10px; padding:14px; border:1px solid var(--paper-line); border-radius:var(--radius, 14px); background:var(--paper-warm); display:flex; flex-direction:column; gap:10px; }
+.mc-cover-editor[hidden]{ display:none; }
+.mc-cover-editor .panel-h{ margin:0; }
+.mc-swatches{ display:flex; flex-wrap:wrap; gap:8px; }
+.mc-swatch{ width:40px; height:40px; border-radius:50%; border:3px solid var(--paper); box-shadow:0 0 0 1px var(--paper-line); cursor:pointer; padding:0; }
+.mc-swatch-site{ background:var(--brand-fill); }
+.mc-swatch.is-active{ box-shadow:0 0 0 3px var(--ink); }
+.mc-cover-actions{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.mc-cover-actions label{ cursor:pointer; }
+
+/* Coluna + mural */
+.mc-layout{ display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start; margin-top:16px; }
+.mc-side{ flex:1 1 220px; max-width:260px; display:flex; flex-direction:column; gap:12px; }
+.mc-stream{ flex:999 1 480px; min-width:0; display:flex; flex-direction:column; gap:12px; }
+.mc-card{ padding:14px 16px; border:1px solid var(--paper-line); border-radius:var(--radius, 14px); background:var(--paper); display:flex; flex-direction:column; gap:6px; }
+.mc-card-title{ margin:0; font-size:14.5px; font-weight:800; color:var(--ink); }
+.mc-card .mural-meta{ margin:0; }
+.mc-card-link{ align-self:flex-start; padding-left:0; color:var(--seal-red-dark, var(--ink)); }
+.mc-next{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.mc-next li{ display:flex; flex-direction:column; gap:2px; }
+.mc-next-when{ font-weight:800; color:var(--ink); font-size:14px; }
+
+/* Caixa de escrever fechada */
+.mc-composer-open{ display:flex; align-items:center; gap:12px; width:100%; padding:14px 16px; border:1px solid var(--paper-line); border-radius:var(--radius, 14px);
+  background:var(--paper); color:var(--ink-soft); font:inherit; font-size:15px; text-align:left; cursor:pointer; min-height:56px; box-shadow:var(--shadow-card, none); }
+.mc-composer-open:hover{ border-color:var(--brand-fill); }
+.mc-composer-open[hidden], .mc-composer-wrap[hidden]{ display:none; }
+
+/* Aviso automático (aula registrada / material novo) */
+.mural-post.mc-auto{ border-left-width:1px; }
+.mc-auto-row{ display:flex; align-items:center; gap:12px; }
+.mc-auto-ico{ width:40px; height:40px; border-radius:50%; flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; font-size:20px; background:var(--paper-warm); border:1px solid var(--paper-line); }
+.mc-auto-text{ flex:1; min-width:0; }
+.mc-auto-title{ margin:0; color:var(--ink); font-size:15px; line-height:1.45; overflow-wrap:anywhere; }
+.mc-auto-text .mural-meta{ margin:2px 0 0; }
+.mc-auto-open{ color:var(--seal-red-dark, var(--ink)); text-decoration:none; }
+
+/* Pessoas */
+.mc-people{ display:flex; flex-direction:column; gap:12px; }
+.mc-people .panel-h{ margin:6px 0 0; }
+.mc-people-list{ list-style:none; margin:0; padding:0; border:1px solid var(--paper-line); border-radius:12px; background:var(--paper); }
+.mc-people-list li{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 12px; padding:6px 12px; }
+.mc-people-list li + li{ border-top:1px solid var(--paper-line); }
+.mc-person{ display:flex; align-items:center; gap:12px; }
+.mc-person p{ margin:0; }
+.mc-person-btn{ display:inline-flex; align-items:center; gap:8px; }
+
+@media (max-width: 700px){
+  .mc-side{ max-width:none; flex-basis:100%; order:0; }
+  .mc-stream{ flex-basis:100%; }
+  .mc-cover{ min-height:130px; padding:18px; flex-wrap:wrap; }
+  .mc-cover-edit, .mc-student-pick select, .mc-auto-open, .mc-card-link{ min-height:44px; }
+  .mc-auto-row{ flex-wrap:wrap; }
+  .mc-auto-row .mural-post-actions{ flex-basis:100%; justify-content:flex-end; }
+}

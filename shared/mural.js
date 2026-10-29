@@ -20,7 +20,7 @@ const MURAL_CODE_RE = /^[a-z0-9]{10}$/;
 const MURAL_LANG_DIR = { frances: 'fr', mandarim: 'zh' };
 const MURAL_STATE = {
   list: null,
-  teacher: { mode: 'classrooms', classroomId: null, studentId: null, links: {} },
+  teacher: { tab: 'mural', sel: null, links: {} },
   student: { key: null },
   files: new Map(),     // composer (elemento) -> [{ blob, name, type, size }]
   badgeTimer: null,
@@ -234,6 +234,7 @@ function muralCommentHTML(c){
 }
 
 function muralPostHTML(p){
+  if (p.kind === 'lesson' || p.kind === 'material') return muralAutoPostHTML(p);
   return `
     <article class="mural-post${p.by_teacher ? ' is-teacher' : ''}" data-post-id="${p.id}">
       <header class="mural-post-head">
@@ -352,6 +353,21 @@ async function renderMuralFeed(board, ctx){
   const posts = Array.isArray(data.posts) ? data.posts : [];
   feed.innerHTML = posts.length ? posts.map(muralPostHTML).join('') : `<p class="profile-empty-note">${t('mural.empty')}</p>`;
   const reload = () => renderMuralFeed(board, ctx);
+  const coverSlot = board.querySelector('.mc-cover-slot');
+  if (coverSlot){ coverSlot.innerHTML = muralCoverHTML(ctx, data); muralFillCoverPhoto(coverSlot); wireMuralCover(coverSlot, ctx, data, reload); }
+  const side = board.querySelector('.mc-side');
+  if (side && !side.dataset.loaded){
+    side.dataset.loaded = '1';
+    side.innerHTML = loadingHTML();
+    muralSideHTML(ctx, data).then(html => {
+      side.innerHTML = html;
+      side.querySelectorAll('[data-mural-open-lesson]').forEach(b => b.addEventListener('click', () => muralOpenLesson(ctx)));
+      side.querySelector('[data-mural-open-people]')?.addEventListener('click', () => { MURAL_STATE.teacher.tab = 'pessoas'; renderTeacherMuralSection(); });
+      side.querySelector('[data-mural-review]')?.addEventListener('click', () => { if (typeof startClassReviewSession === 'function') startClassReviewSession(); });
+    }).catch(e => { console.error('Erro na coluna do mural:', e); side.innerHTML = ''; });
+  }
+  feed.querySelectorAll('[data-mural-open-lesson]').forEach(b => b.addEventListener('click', () => muralOpenLesson(ctx)));
+  feed.querySelectorAll('[data-mural-open-material]').forEach(b => b.addEventListener('click', () => muralOpenMaterial(ctx)));
   feed.querySelectorAll('[data-mural-comment-form]').forEach(form => form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const input = form.querySelector('input');
@@ -415,85 +431,392 @@ function openMuralEdit(article, post, reload){
   });
 }
 
-// Quadro = escrever + lista. teacherId: dono da pasta dos anexos.
-function mountMuralBoard(host, ctx, teacherId){
-  host.innerHTML = `${muralComposerHTML(ctx)}<div class="mural-feed"></div>`;
-  const board = host;
-  wireMuralComposer(host.querySelector('.mural-composer'), ctx, teacherId, () => renderMuralFeed(board, ctx));
-  renderMuralFeed(board, ctx);
-}
-
 // ---------- Professora ----------
 function muralChipHTML(attrs, label, unread, active, avatar){
   return `<button type="button" class="mural-chip${active ? ' is-active' : ''}" ${attrs} aria-pressed="${active ? 'true' : 'false'}">
     ${avatar || ''}<span class="mural-chip-label">${escapeHTML(label)}</span>${muralCountHTML(unread)}</button>`;
 }
 
+// ---------- Mural estilo Classroom (121; decisões da autora, 2026-10-26 a 29) ----------
+// Capa (cor do site, outra cor ou foto: só a professora troca, só em turma), coluna ao lado (próximas aulas; aluno: revisão
+// de hoje), caixa de escrever fechada e avisos automáticos de aula e material (kind 'lesson' / 'material', texto ao vivo).
+const MURAL_COVER_COLORS = ['#2879B3', '#A83226', '#2F6B50', '#6B3FA0', '#9A4A12', '#2E3A59', '#8A2E5C'];
+
+function muralIsoToday(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function muralLessonWhen(log){
+  if (typeof myClassLogWhen === 'function') return myClassLogWhen(log).label;
+  return String(log.class_date || '') + (log.start_time ? ` · ${String(log.start_time).slice(0, 5)}` : '');
+}
+
+function muralSafeLink(url){ return /^https?:\/\//i.test(String(url || '')) ? String(url) : ''; }
+
+// Aviso automático (aula registrada / material novo): linha com ícone; o texto vem da aula ou do material.
+function muralAutoPostHTML(p){
+  const ref = p.ref || {};
+  const who = escapeHTML(p.author?.name || '');
+  let icon, head, title, meta, open;
+  if (p.kind === 'lesson'){
+    icon = '📅';
+    head = t('mural.auto.lesson', { name: who });
+    title = escapeHTML(ref.topic || ref.homework || '');
+    meta = [escapeHTML(muralLessonWhen(ref)), ref.homework && ref.topic ? escapeHTML(t('mural.auto.homework', { hw: ref.homework })) : ''].filter(Boolean).join(' · ');
+    open = `<button type="button" class="mural-text-btn mc-auto-open" data-mural-open-lesson>${t('mural.auto.openLesson')}</button>`;
+  } else {
+    icon = '📎';
+    head = t('mural.auto.material', { name: who });
+    title = escapeHTML(ref.title || '');
+    meta = escapeHTML(muralTimeLabel(p.created_at));
+    const link = muralSafeLink(ref.link_url);
+    open = link
+      ? `<a class="mural-text-btn mc-auto-open" href="${escapeHTML(link)}" target="_blank" rel="noopener">${t('mural.auto.openMaterial')}</a>`
+      : `<button type="button" class="mural-text-btn mc-auto-open" data-mural-open-material>${t('mural.auto.openMaterial')}</button>`;
+  }
+  return `
+    <article class="mural-post mc-auto mc-auto-${p.kind}" data-post-id="${p.id}">
+      <div class="mc-auto-row">
+        <span class="mc-auto-ico" aria-hidden="true">${icon}</span>
+        <div class="mc-auto-text">
+          <p class="mc-auto-title"><strong>${head}</strong> ${title}</p>
+          ${meta ? `<p class="mural-meta">${meta}</p>` : ''}
+        </div>
+        <div class="mural-post-actions">${open}
+          ${p.can_delete ? `<button type="button" class="mural-text-btn is-danger" data-mural-del-post="${p.id}">${t('mural.delete')}</button>` : ''}</div>
+      </div>
+      <ul class="mural-comments">${(p.comments || []).map(muralCommentHTML).join('')}</ul>
+      <form class="mural-comment-form" data-mural-comment-form="${p.id}">
+        <label class="sr-only" for="mural-c-${p.id}">${t('mural.comment.label')}</label>
+        <input id="mural-c-${p.id}" class="profile-edit-input" maxlength="2000" autocomplete="off" placeholder="${escapeHTML(t('mural.comment.placeholder'))}">
+        <button type="submit" class="btn btn-secondary mural-small-btn">${t('mural.comment.send')}</button>
+      </form>
+    </article>`;
+}
+
+// Capa: turma = nome da turma; mural individual = nome do aluno (professora) ou "Com {professora}" (aluno).
+function muralCoverHTML(ctx, data){
+  const c = data.classroom;
+  const isTeacher = !!data.is_teacher;
+  const lang = escapeHTML(muralLangWord(APP_KEY));
+  let title, sub;
+  if (c){
+    title = escapeHTML(c.name);
+    const n = (ctx.members || []).length;
+    sub = isTeacher ? `${lang} · ${escapeHTML(tp('mural.cover.members', n, { n }))}` : `${lang} · ${escapeHTML(t('mural.cover.with', { name: data.teacher?.name || '' }))}`;
+  } else if (isTeacher){
+    title = escapeHTML(data.student?.name || '');
+    sub = `${lang} · ${escapeHTML(t('mural.cover.individual'))}`;
+  } else {
+    title = escapeHTML(t('mural.individualChip', { name: data.teacher?.name || '' }));
+    sub = `${lang} · ${escapeHTML(t('mural.cover.individualStudent'))}`;
+  }
+  const color = c && c.cover_color ? ` style="background-color:${escapeHTML(c.cover_color)};"` : '';
+  const photo = c && c.cover_path ? ` data-mural-cover-path="${escapeHTML(c.cover_path)}"` : '';
+  const edit = isTeacher && c ? `
+    <button type="button" class="mc-cover-edit" data-mural-cover-edit aria-expanded="false">🖼️ ${t('mural.cover.change')}</button>` : '';
+  return `
+    <div class="mc-cover${c && c.cover_path ? ' has-photo' : ''}"${color}${photo}>
+      <div class="mc-cover-text"><h3 class="mc-cover-title">${title}</h3><p class="mc-cover-sub">${sub}</p></div>
+      ${edit}
+    </div>
+    ${isTeacher && c ? `
+    <div class="mc-cover-editor" hidden>
+      <p class="panel-h">${t('mural.cover.title')}</p>
+      <div class="mc-swatches" role="group" aria-label="${escapeHTML(t('mural.cover.colors'))}">
+        <button type="button" class="mc-swatch mc-swatch-site${!c.cover_color ? ' is-active' : ''}" data-mural-cover-color="" aria-label="${escapeHTML(t('mural.cover.siteColor'))}" title="${escapeHTML(t('mural.cover.siteColor'))}"></button>
+        ${MURAL_COVER_COLORS.map((hex, i) => `<button type="button" class="mc-swatch${c.cover_color === hex ? ' is-active' : ''}" style="background:${hex};" data-mural-cover-color="${hex}" aria-label="${escapeHTML(t('mural.cover.colorN', { n: i + 1 }))}"></button>`).join('')}
+      </div>
+      <div class="mc-cover-actions">
+        <label class="btn btn-secondary mural-small-btn">${t('mural.cover.upload')}
+          <input type="file" data-mural-cover-file accept="image/jpeg,image/png,image/webp" hidden></label>
+        ${c.cover_path ? `<button type="button" class="btn tinv-ghost mural-small-btn" data-mural-cover-nophoto>${t('mural.cover.removePhoto')}</button>` : ''}
+      </div>
+      <p class="mural-composer-hint">${t('mural.cover.hint')}</p>
+    </div>` : ''}`;
+}
+
+async function muralFillCoverPhoto(slot){
+  const el = slot.querySelector('[data-mural-cover-path]');
+  if (!el) return;
+  const { data, error } = await supabaseClient.storage.from('mural').createSignedUrl(el.dataset.muralCoverPath, 3600);
+  if (error || !data?.signedUrl){ if (error) console.error('Erro ao abrir a capa:', error); return; }
+  el.style.backgroundImage = `url("${data.signedUrl.replace(/"/g, '%22')}")`;
+}
+
+function wireMuralCover(slot, ctx, data, reload){
+  const c = data.classroom;
+  if (!data.is_teacher || !c) return;
+  const btn = slot.querySelector('[data-mural-cover-edit]');
+  const box = slot.querySelector('.mc-cover-editor');
+  btn?.addEventListener('click', () => { box.hidden = !box.hidden; btn.setAttribute('aria-expanded', String(!box.hidden)); });
+  const save = async (color, path) => {
+    const res = await muralRpc('mural_set_cover', { p_id: c.id, p_color: color, p_path: path });
+    if (res.error){ showToast(muralErrorText(res.error)); return false; }
+    if (res.old_path && res.old_path !== path) await muralRemoveFiles([res.old_path]);
+    showToast(t('mural.cover.saved'));
+    reload();
+    return true;
+  };
+  slot.querySelectorAll('[data-mural-cover-color]').forEach(b => b.addEventListener('click', () => save(b.dataset.muralCoverColor || null, c.cover_path || null)));
+  slot.querySelector('[data-mural-cover-nophoto]')?.addEventListener('click', () => save(c.cover_color || null, null));
+  slot.querySelector('[data-mural-cover-file]')?.addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)){ showToast(t('mural.cover.badFile')); return; }
+    const prepared = await muralPrepareFile(file);
+    if (prepared.error){ showToast(prepared.error); return; }
+    const me = CURRENT_USER.id;
+    const path = `${me}/${me}/capa-${c.id}-${Date.now()}.${prepared.type === 'image/png' ? 'png' : prepared.type === 'image/webp' ? 'webp' : 'jpg'}`;
+    const { error } = await supabaseClient.storage.from('mural').upload(path, prepared.blob, { contentType: prepared.type, upsert: false });
+    if (error){ console.error('Erro ao enviar a capa:', error); showToast(muralErrorText('upload')); return; }
+    if (!(await save(c.cover_color || null, path))) await muralRemoveFiles([path]);
+  });
+}
+
+// Coluna ao lado: próximas aulas (professora: desta turma/aluno; aluno: as suas) e, para o aluno, a revisão de hoje.
+async function muralSideHTML(ctx, data){
+  const parts = [];
+  let next = [];
+  const today = muralIsoToday();
+  if (data.is_teacher){
+    let q = supabaseClient.from('teacher_class_logs').select('id, class_date, start_time, time_zone, topic')
+      .eq('teacher_id', CURRENT_USER.id).eq('language_app_key', APP_KEY).gte('class_date', today);
+    q = ctx.classroomId ? q.eq('classroom_id', ctx.classroomId) : q.eq('student_id', ctx.studentId);
+    const { data: rows, error } = await q.order('class_date').order('start_time', { nullsFirst: false }).limit(3);
+    if (!error && Array.isArray(rows)) next = rows;
+  } else if (typeof fetchMyClassLogs === 'function'){
+    const rows = await fetchMyClassLogs(APP_KEY);
+    next = rows.filter(r => String(r.class_date) >= today)
+      .sort((a, b) => (String(a.class_date) + (a.start_time || '')).localeCompare(String(b.class_date) + (b.start_time || ''))).slice(0, 2);
+  }
+  parts.push(`
+    <section class="mc-card">
+      <h4 class="mc-card-title">${t(data.is_teacher ? 'mural.side.next' : 'mural.side.nextOne')}</h4>
+      ${next.length ? `<ul class="mc-next">${next.map(l => `<li><span class="mc-next-when">${escapeHTML(muralLessonWhen(l))}</span>${l.topic ? `<span class="mural-meta">${escapeHTML(l.topic)}</span>` : ''}</li>`).join('')}</ul>`
+        : `<p class="mural-meta">${t('mural.side.noNext')}</p>`}
+      <button type="button" class="mural-text-btn mc-card-link" data-mural-open-lesson>${t('mural.side.seeAll')}</button>
+    </section>`);
+  if (data.is_teacher && ctx.classroomId){
+    const n = (ctx.members || []).length;
+    parts.push(`
+      <section class="mc-card">
+        <h4 class="mc-card-title">${t('mural.tab.people')}</h4>
+        <p class="mural-meta">${escapeHTML(tp('mural.cover.members', n, { n }))}</p>
+        <button type="button" class="mural-text-btn mc-card-link" data-mural-open-people>${t('mural.side.peopleCta')}</button>
+      </section>`);
+  }
+  if (!data.is_teacher){
+    let n = 0;
+    try { n = typeof classReviewTodayCount === 'function' ? classReviewTodayCount() : 0; } catch (e) { n = 0; }
+    parts.push(`
+      <section class="mc-card">
+        <h4 class="mc-card-title">${t('mural.side.review')}</h4>
+        <p class="mural-meta">${n ? escapeHTML(tp('mural.side.reviewN', n, { n })) : t('mural.side.reviewNone')}</p>
+        ${n ? `<button type="button" class="btn btn-primary mural-small-btn" data-mural-review>${t('mural.side.reviewCta')}</button>` : ''}
+      </section>`);
+  }
+  return parts.join('');
+}
+
+function muralOpenLesson(ctx){
+  if (ctx.role === 'teacher'){ muralOpenTeacherTab('aulas'); renderTeacherMuralSection(); }
+  else if (typeof switchStudentPanelSection === 'function') switchStudentPanelSection('classlogs');
+}
+function muralOpenMaterial(ctx){
+  if (ctx.role === 'teacher'){ muralOpenTeacherTab('aulas'); renderTeacherMuralSection(); }
+  else if (typeof switchStudentPanelSection === 'function') switchStudentPanelSection('materials');
+}
+
+// Quadro = capa + coluna + (escrever fechado) + lista. teacherId: dono da pasta dos anexos.
+function mountMuralBoard(host, ctx, teacherId){
+  const me = typeof PROFILE_CACHE !== 'undefined' && PROFILE_CACHE ? { id: CURRENT_USER?.id, name: PROFILE_CACHE.display_name || PROFILE_CACHE.username, avatar: PROFILE_CACHE.avatar_url } : { id: CURRENT_USER?.id, name: '?' };
+  const ph = ctx.role === 'teacher'
+    ? (ctx.classroomId ? t('mural.composer.openClassroom') : t('mural.composer.openStudent', { name: ctx.studentName || '' }))
+    : t('mural.composer.placeholderStudent');
+  host.innerHTML = `
+    <div class="mc-cover-slot"></div>
+    <div class="mc-layout">
+      <aside class="mc-side" aria-label="${escapeHTML(t('mural.side.aria'))}"></aside>
+      <div class="mc-stream">
+        <button type="button" class="mc-composer-open">${muralAvatarHTML(me)}<span>${escapeHTML(ph)}</span></button>
+        <div class="mc-composer-wrap" hidden>${muralComposerHTML(ctx)}</div>
+        <div class="mural-feed"></div>
+      </div>
+    </div>`;
+  const board = host;
+  const openBtn = host.querySelector('.mc-composer-open');
+  const wrap = host.querySelector('.mc-composer-wrap');
+  const collapse = () => { wrap.hidden = true; openBtn.hidden = false; };
+  openBtn.addEventListener('click', () => { openBtn.hidden = true; wrap.hidden = false; wrap.querySelector('textarea').focus(); });
+  const cancel = document.createElement('button');
+  cancel.type = 'button'; cancel.className = 'btn tinv-ghost mural-small-btn'; cancel.textContent = t('mural.cancel');
+  cancel.addEventListener('click', collapse);
+  wrap.querySelector('.mural-composer-bar').insertBefore(cancel, wrap.querySelector('.mural-publish'));
+  wireMuralComposer(wrap.querySelector('.mural-composer'), ctx, teacherId, () => { collapse(); renderMuralFeed(board, ctx); });
+  renderMuralFeed(board, ctx);
+}
+
+// ---------- Professora: Mural | Aulas e materiais | Pessoas ----------
+// sel: 'all' | 'c:<turma>' | 's:<aluno>'. "Todos" só existe em Aulas e materiais e em Pessoas (o mural é sempre de alguém).
+function muralOpenTeacherTab(tab, fromSection){
+  const st = MURAL_STATE.teacher;
+  st.tab = ['mural', 'aulas', 'pessoas'].includes(tab) ? tab : 'mural';
+  if (fromSection === 'classlogs' && typeof ADMIN_CLASS_LOGS_STATE !== 'undefined' && ADMIN_CLASS_LOGS_STATE.studentIds.size === 1){
+    st.sel = 's:' + [...ADMIN_CLASS_LOGS_STATE.studentIds][0];
+  }
+}
+
+function muralShowTeacherBox(ids){
+  ['mural', 'classlogs', 'materials', 'people'].forEach(s => {
+    const el = document.getElementById(`admin-${s}-content`);
+    if (el) el.style.display = ids.includes(s) ? '' : 'none';
+  });
+}
+
+function muralApplyAulasScope(sel){
+  const scope = sel && sel.startsWith('c:') ? { classroomId: Number(sel.slice(2)) } : sel && sel.startsWith('s:') ? { studentId: sel.slice(2) } : null;
+  if (typeof ADMIN_CLASS_LOGS_STATE !== 'undefined'){
+    ADMIN_CLASS_LOGS_STATE.scope = scope;
+    if (scope?.studentId){ ADMIN_CLASS_LOGS_STATE.studentIds = new Set([scope.studentId]); ADMIN_CLASS_LOGS_STATE.classroomIds = new Set(); }
+    else if (scope?.classroomId){ ADMIN_CLASS_LOGS_STATE.classroomIds = new Set([String(scope.classroomId)]); ADMIN_CLASS_LOGS_STATE.studentIds = new Set(); }
+  }
+  if (typeof MATERIALS_VIEW !== 'undefined') MATERIALS_VIEW.filtros.aluno = scope?.studentId || '';
+}
+
 async function renderTeacherMuralSection(){
+  const shell = document.getElementById('admin-mural-shell');
   const wrap = document.getElementById('admin-mural-content');
   if (!wrap) return;
-  wrap.innerHTML = loadingHTML();
+  if (shell) shell.style.display = '';
   const list = await muralLoadList();
   muralApplyBadges();
   const tch = list?.as_teacher;
-  if (!tch){ wrap.innerHTML = `<p class="profile-empty-note">${muralErrorText('not_authorized')}</p>`; return; }
+  if (!tch){ muralShowTeacherBox(['mural']); wrap.innerHTML = `<p class="profile-empty-note">${muralErrorText('not_authorized')}</p>`; return; }
   const st = MURAL_STATE.teacher;
   const classrooms = tch.classrooms || [];
   const roster = tch.roster || [];
-  const solo = roster.filter(s => !s.in_classroom);
-  if (st.classroomId && !classrooms.some(c => c.id === st.classroomId)) st.classroomId = null;
-  if (st.studentId && !solo.some(s => s.id === st.studentId)) st.studentId = null;
-  const cUnread = classrooms.reduce((a, c) => a + (c.unread || 0), 0);
-  const sUnread = solo.reduce((a, s) => a + (s.unread || 0), 0);
-  const picker = st.mode === 'classrooms'
-    ? `${classrooms.map(c => muralChipHTML(`data-mural-classroom="${c.id}"`, c.name, c.unread, c.id === st.classroomId)).join('')}
-       <button type="button" class="mural-chip mural-chip-new" data-mural-new>${t('mural.newClassroom')}</button>`
-    : solo.map(s => muralChipHTML(`data-mural-student="${escapeHTML(s.id)}"`, s.name, s.unread, s.id === st.studentId, muralAvatarHTML(s, 'mural-avatar mural-avatar-xs'))).join('');
-  const empty = st.mode === 'classrooms'
-    ? (classrooms.length ? t('mural.pickClassroom') : t('mural.noClassrooms'))
-    : (!roster.length ? t('mural.noStudents') : (!solo.length ? t('mural.allInClassrooms') : t('mural.pickStudent')));
-  wrap.innerHTML = `
-    <div class="mural-wrap">
-      <p class="mural-intro">${t('mural.teacherIntro')}</p>
-      <div class="deck-topbar panel-subnav mural-mode" role="tablist" aria-label="${escapeHTML(t('mural.title'))}">
-        <button type="button" class="deck-topbar-btn${st.mode === 'classrooms' ? ' is-active' : ''}" role="tab" aria-selected="${st.mode === 'classrooms'}" data-mural-mode="classrooms">${t('mural.mode.classrooms')}${muralCountHTML(cUnread)}</button>
-        <button type="button" class="deck-topbar-btn${st.mode === 'students' ? ' is-active' : ''}" role="tab" aria-selected="${st.mode === 'students'}" data-mural-mode="students">${t('mural.mode.students')}${muralCountHTML(sUnread)}</button>
-      </div>
-      <div class="mural-picker">${picker}</div>
-      <form class="mural-new-form" hidden>
-        <label class="sr-only" for="mural-new-name">${t('mural.newClassroomPh')}</label>
-        <input id="mural-new-name" class="profile-edit-input" maxlength="60" placeholder="${escapeHTML(t('mural.newClassroomPh'))}">
-        <button type="submit" class="btn btn-primary mural-small-btn">${t('mural.create')}</button>
-        <button type="button" class="btn tinv-ghost mural-small-btn" data-mural-new-cancel>${t('mural.cancel')}</button>
-        <p class="profile-edit-error" role="alert"></p>
-      </form>
-      <div class="mural-manage-host"></div>
-      <div class="mural-board-host">${(st.mode === 'classrooms' ? st.classroomId : st.studentId) ? '' : `<p class="profile-empty-note">${empty}</p>`}</div>
-    </div>`;
-  wrap.querySelectorAll('[data-mural-mode]').forEach(b => b.addEventListener('click', () => { st.mode = b.dataset.muralMode; renderTeacherMuralSection(); }));
-  wrap.querySelectorAll('[data-mural-classroom]').forEach(b => b.addEventListener('click', () => { st.classroomId = Number(b.dataset.muralClassroom); renderTeacherMuralSection(); }));
-  wrap.querySelectorAll('[data-mural-student]').forEach(b => b.addEventListener('click', () => { st.studentId = b.dataset.muralStudent; renderTeacherMuralSection(); }));
-  const newForm = wrap.querySelector('.mural-new-form');
-  wrap.querySelector('[data-mural-new]')?.addEventListener('click', () => { newForm.hidden = false; newForm.querySelector('input').focus(); });
-  newForm.querySelector('[data-mural-new-cancel]').addEventListener('click', () => { newForm.hidden = true; });
-  newForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const res = await muralRpc('mural_save_classroom', { p_lang: APP_KEY, p_id: null, p_name: newForm.querySelector('input').value });
-    if (res.error){ newForm.querySelector('.profile-edit-error').textContent = muralErrorText(res.error); return; }
-    st.classroomId = res.id;
-    st.openManage = true;
-    renderTeacherMuralSection();
-  });
-  const boardHost = wrap.querySelector('.mural-board-host');
-  if (st.mode === 'classrooms' && st.classroomId){
-    const c = classrooms.find(x => x.id === st.classroomId);
-    const members = (c.members || []).map(id => roster.find(s => s.id === id)).filter(Boolean);
-    renderMuralManage(wrap.querySelector('.mural-manage-host'), c, roster, !!st.openManage);
-    st.openManage = false;
-    mountMuralBoard(boardHost, { role: 'teacher', classroomId: c.id, members }, CURRENT_USER.id);
-  } else if (st.mode === 'students' && st.studentId){
-    mountMuralBoard(boardHost, { role: 'teacher', studentId: st.studentId }, CURRENT_USER.id);
+  const valid = new Set(['all', ...classrooms.map(c => 'c:' + c.id), ...roster.map(s => 's:' + s.id)]);
+  if (!st.sel || !valid.has(st.sel)) st.sel = 'all';
+  if (st.tab === 'mural' && st.sel === 'all') st.sel = classrooms.length ? 'c:' + classrooms[0].id : (roster.length ? 's:' + roster[0].id : 'all');
+  const cUnread = (c) => c.unread || 0;
+  const studentSel = st.sel.startsWith('s:') ? st.sel.slice(2) : '';
+  const tabBtn = (key, label, n) => `<button type="button" class="deck-topbar-btn${st.tab === key ? ' is-active' : ''}" role="tab" aria-selected="${st.tab === key}" data-mural-tab="${key}">${label}${muralCountHTML(n || 0)}</button>`;
+  const allUnread = classrooms.reduce((a, c) => a + cUnread(c), 0) + roster.reduce((a, s) => a + (s.unread || 0), 0);
+  if (shell){
+    shell.innerHTML = `
+      <div class="mc-shell">
+        <div class="deck-topbar panel-subnav mc-tabs" role="tablist" aria-label="${escapeHTML(t('mural.title'))}">
+          ${tabBtn('mural', t('mural.tab.mural'), allUnread)}${tabBtn('aulas', t('mural.tab.aulas'))}${tabBtn('pessoas', t('mural.tab.people'))}
+        </div>
+        <div class="mc-picker">
+          <span class="mc-picker-label">${t('mural.pick.label')}</span>
+          ${st.tab !== 'mural' ? muralChipHTML('data-mural-sel="all"', t('mural.pick.all'), 0, st.sel === 'all') : ''}
+          ${classrooms.map(c => muralChipHTML(`data-mural-sel="c:${c.id}"`, c.name, cUnread(c), st.sel === 'c:' + c.id)).join('')}
+          ${roster.length ? `<label class="mc-student-pick"><span class="sr-only">${t('mural.pick.student')}</span>
+            <select class="profile-edit-input${studentSel ? ' is-active' : ''}" data-mural-student-select>
+              <option value="">${t('mural.pick.student')}</option>
+              ${roster.map(s => `<option value="${escapeHTML(s.id)}"${s.id === studentSel ? ' selected' : ''}>${escapeHTML(s.name || '')}${s.unread ? ` (${s.unread})` : ''}</option>`).join('')}
+            </select></label>` : ''}
+          <button type="button" class="mural-chip mural-chip-new" data-mural-new>${t('mural.newClassroom')}</button>
+        </div>
+        <form class="mural-new-form" hidden>
+          <label class="sr-only" for="mural-new-name">${t('mural.newClassroomPh')}</label>
+          <input id="mural-new-name" class="profile-edit-input" maxlength="60" placeholder="${escapeHTML(t('mural.newClassroomPh'))}">
+          <button type="submit" class="btn btn-primary mural-small-btn">${t('mural.create')}</button>
+          <button type="button" class="btn tinv-ghost mural-small-btn" data-mural-new-cancel>${t('mural.cancel')}</button>
+          <p class="profile-edit-error" role="alert"></p>
+        </form>
+      </div>`;
+    shell.querySelectorAll('[data-mural-tab]').forEach(b => b.addEventListener('click', () => { st.tab = b.dataset.muralTab; renderTeacherMuralSection(); }));
+    shell.querySelectorAll('[data-mural-sel]').forEach(b => b.addEventListener('click', () => { st.sel = b.dataset.muralSel; renderTeacherMuralSection(); }));
+    shell.querySelector('[data-mural-student-select]')?.addEventListener('change', (e) => {
+      if (!e.target.value) return;
+      st.sel = 's:' + e.target.value; renderTeacherMuralSection();
+    });
+    const newForm = shell.querySelector('.mural-new-form');
+    shell.querySelector('[data-mural-new]').addEventListener('click', () => { newForm.hidden = false; newForm.querySelector('input').focus(); });
+    newForm.querySelector('[data-mural-new-cancel]').addEventListener('click', () => { newForm.hidden = true; });
+    newForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await muralRpc('mural_save_classroom', { p_lang: APP_KEY, p_id: null, p_name: newForm.querySelector('input').value });
+      if (res.error){ newForm.querySelector('.profile-edit-error').textContent = muralErrorText(res.error); return; }
+      st.sel = 'c:' + res.id; st.tab = 'pessoas';
+      renderTeacherMuralSection();
+    });
   }
+
+  if (st.tab === 'aulas'){
+    muralShowTeacherBox(['classlogs', 'materials']);
+    muralApplyAulasScope(st.sel);
+    renderAdminClassLogsView();
+    renderAdminSupportMaterialsView();
+    return;
+  }
+  if (st.tab === 'pessoas'){
+    muralShowTeacherBox(['people']);
+    renderMuralPeople(document.getElementById('admin-people-content'), st, classrooms, roster);
+    return;
+  }
+  muralShowTeacherBox(['mural']);
+  if (st.sel === 'all'){ wrap.innerHTML = `<p class="profile-empty-note">${roster.length ? t('mural.pickClassroom') : t('mural.noStudents')}</p>`; return; }
+  if (st.sel.startsWith('c:')){
+    const c = classrooms.find(x => 'c:' + x.id === st.sel);
+    const members = (c.members || []).map(id => roster.find(s => s.id === id)).filter(Boolean);
+    mountMuralBoard(wrap, { role: 'teacher', classroomId: c.id, members }, CURRENT_USER.id);
+  } else {
+    const s = roster.find(x => 's:' + x.id === st.sel);
+    mountMuralBoard(wrap, { role: 'teacher', studentId: s.id, studentName: s.name }, CURRENT_USER.id);
+  }
+}
+
+// Pessoas: turma = nome, alunos, link e apagar; aluno = ficha curta; Todos = turmas e alunos.
+function renderMuralPeople(host, st, classrooms, roster){
+  if (!host) return;
+  if (st.sel.startsWith('c:')){
+    const c = classrooms.find(x => 'c:' + x.id === st.sel);
+    host.innerHTML = '<div class="mc-people"></div>';
+    renderMuralManage(host.querySelector('.mc-people'), c, roster, true);
+    return;
+  }
+  const inRooms = (id) => classrooms.filter(c => (c.members || []).includes(id)).map(c => c.name);
+  if (st.sel.startsWith('s:')){
+    const s = roster.find(x => 's:' + x.id === st.sel);
+    const rooms = inRooms(s.id);
+    host.innerHTML = `
+      <div class="mc-people">
+        <div class="mc-person">${muralAvatarHTML(s)}<div><p class="mural-author">${escapeHTML(s.name || '')}</p>
+          ${s.username ? `<p class="mural-meta">@${escapeHTML(s.username)}</p>` : ''}
+          <p class="mural-meta">${rooms.length ? escapeHTML(t('mural.people.rooms', { list: rooms.join(', ') })) : t('mural.people.noRoom')}</p></div></div>
+        <button type="button" class="btn btn-secondary mural-small-btn" data-mural-ficha="${escapeHTML(s.id)}">${t('mural.people.openFicha')}</button>
+      </div>`;
+  } else {
+    host.innerHTML = `
+      <div class="mc-people">
+        ${classrooms.length ? `<p class="panel-h">${t('mural.mode.classrooms')}</p>
+        <ul class="mc-people-list">${classrooms.map(c => `<li><button type="button" class="mural-text-btn" data-mural-sel-go="c:${c.id}">👥 ${escapeHTML(c.name)}</button>
+          <span class="mural-meta">${escapeHTML(tp('mural.cover.members', (c.members || []).length, { n: (c.members || []).length }))}</span></li>`).join('')}</ul>` : ''}
+        <p class="panel-h">${t('mural.mode.students')}</p>
+        ${roster.length ? `<ul class="mc-people-list">${roster.map(s => `<li><button type="button" class="mural-text-btn mc-person-btn" data-mural-sel-go="s:${escapeHTML(s.id)}">${muralAvatarHTML(s, 'mural-avatar mural-avatar-xs')} ${escapeHTML(s.name || '')}</button>
+          <span class="mural-meta">${inRooms(s.id).length ? escapeHTML(inRooms(s.id).join(', ')) : t('mural.people.noRoom')}</span></li>`).join('')}</ul>`
+          : `<p class="profile-empty-note">${t('mural.noStudents')}</p>`}
+      </div>`;
+  }
+  host.querySelectorAll('[data-mural-sel-go]').forEach(b => b.addEventListener('click', () => { st.sel = b.dataset.muralSelGo; renderTeacherMuralSection(); }));
+  host.querySelector('[data-mural-ficha]')?.addEventListener('click', (e) => {
+    const id = e.currentTarget.dataset.muralFicha;
+    switchTeacherPanelSection('students');
+    // A ficha abre pelo vínculo; espera a lista de alunos carregar (até ~3 s).
+    let tries = 0;
+    const tryOpen = () => {
+      const link = typeof STUDENT_VIEW !== 'undefined' && (STUDENT_VIEW.links || []).find(l => l.student_id === id && l.language_app_key === APP_KEY);
+      if (link && typeof openStudentFicha === 'function') return openStudentFicha(link.id);
+      if (++tries < 30) setTimeout(tryOpen, 100);
+    };
+    setTimeout(tryOpen, 100);
+  });
 }
 
 function muralClassroomURL(code){
@@ -590,7 +913,7 @@ function renderMuralManage(host, c, roster, open){
     const res = await muralRpc('mural_delete_classroom', { p_id: c.id });
     if (res.error){ showToast(muralErrorText(res.error)); return; }
     await muralRemoveFiles(res.removed_paths);
-    MURAL_STATE.teacher.classroomId = null;
+    MURAL_STATE.teacher.sel = 'all';
     renderTeacherMuralSection();
   });
 }
@@ -617,8 +940,6 @@ async function renderMyMuralView(){
   const cur = murals.find(m => m.key === st.key);
   wrap.innerHTML = `
     <div class="mural-wrap">
-      <div class="mural-teacher-line">${muralAvatarHTML(s.teacher, 'mural-avatar mural-avatar-sm')}
-        <span>${escapeHTML(t('mural.studentIntro', { name: s.teacher?.name || '', lang: muralLangWord(APP_KEY) }))}</span></div>
       ${murals.length > 1 ? `<div class="mural-picker">${murals.map(m => muralChipHTML(`data-mural-key="${escapeHTML(m.key)}"`, m.label, m.unread, m.key === st.key)).join('')}</div>` : ''}
       <div class="mural-board-host"></div>
     </div>`;
