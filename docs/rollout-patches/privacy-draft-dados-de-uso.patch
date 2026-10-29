@@ -1,0 +1,13 @@
+diff --git a/shared/privacy-draft.js b/shared/privacy-draft.js
+index 6f7dc7c..4f572f1 100644
+--- a/shared/privacy-draft.js
++++ b/shared/privacy-draft.js
+@@ -47,7 +47,7 @@ const PRIVACY_DRAFT = {
+  ],
+  [
+   "li",
+-  "Uso do site: telas e ações usadas, tipo de aparelho, navegador, sistema e um identificador da sessão. Usamos para melhorar o site e entender o que funciona."
++  "Uso do site e desempenho nos estudos: telas e ações usadas, lições e exercícios concluídos, acertos, erros e notas, os horários em que essas ações acontecem (o que permite calcular quanto tempo cada atividade costuma levar), tipo de aparelho, navegador, sistema, um identificador da sessão e erros técnicos. Usamos para mostrar seu progresso, melhorar o conteúdo, a ordem e a dificuldade das lições, produzir estatísticas agregadas que não identificam você e corrigir problemas técnicos."
+  ],
+  [
+   "li",

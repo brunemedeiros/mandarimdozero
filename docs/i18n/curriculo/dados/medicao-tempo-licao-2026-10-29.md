@@ -17,3 +17,8 @@ Mediana típica de **1 a 3 minutos** por lição (50 a 196 s); a de maior median
 - Mediana de ~1 min 50 s por lição de vocabulário; p75 de ~3 min. O código previa de 1,2 a 3,9 min (lições 1 e 2) e 3 a 9 min (a lição com diálogo): **bate com o piso e o meio da faixa**, longe dos ~7 a 10 min por lição implícitos nos tempos do mapa.
 - Não mede: Revisão da unidade, gramática, Ponto de verificação do módulo (sem evento hoje), refazer lição, e a 1ª lição de cada sessão. Quem aparece aqui continua estudando na sessão (viés de quem não desiste).
 - Amostra pequena: 43 contas com progresso, 26 com francês.
+
+## Complemento (2026-10-29): Revisão da unidade
+O evento `lesson_complete` / `unit_checkpoint` existe (80 no total). Duração = diferença para a lição de vocabulário imediatamente anterior da mesma conta e sessão: **48 pares válidos** (3 acima de 30 min descartados), **mediana 159 s (2 min 39 s)**, p25 125 s, p75 226 s.
+Não há evento de conclusão para **gramática** nem para o **Ponto de verificação do módulo** (correção: eu havia dito que "não se mede"; a Revisão da unidade se mede, gramática e Ponto do módulo não gravam evento). Não existe `lesson_start` para `vocab_lesson`
+(existe para flashcard_review, match_game, dictation, conjugation_session e speed_review): é por isso que a 1ª lição de cada sessão não tem duração.
