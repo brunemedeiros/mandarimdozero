@@ -11,11 +11,11 @@
 // Funciona SEM MODULES/LEVEL_TESTS (o zh hoje): trailModules()/trailLevelTests() devolvem [] e nada aparece.
 // O que muda por idioma vem de LANG_HOOKS (<site>/lang-hooks.js):
 //   canSpeak(texto), speak(texto, botão, autoplay)       voz do idioma (já existiam)
-//   checkpointExam (opcional)                             como montar a prova: chaves de texto e item de palavra/frase
-//                                                         (o fr não define: a prova é a de sempre, em francês)
+//   checkpointExam (obrigatório com módulos)              como montar a prova: keys (chaves do enunciado) e, para outra
+//                                                         escrita (zh), word/phrase; o fr declara só as keys
 //   checkpointScore(digitado, item) (opcional)            nota de uma resposta; sem o gancho, scoreCheckpointAnswer
 //   grammarInputExtraHTML / wireGrammarInputExtra         teclado extra no campo (zh: tons do pinyin; já existiam)
-//   levelTestKeys (opcional)                              chaves do texto do Teste de Nível que citam o idioma
+//   levelTestKeys (obrigatório com Teste de Nível)        chaves do texto do Teste de Nível que citam o idioma
 //   examScreenOpened() (opcional)                         a prova abriu na tela da lição (zh: esconde o "Manual da unidade")
 // Grátis x Premium: igual ao fr de antes (pular unidades pelo Ponto de verificação/Teste de Nível é Premium só quando
 // TRAIL_SKIP_PAYWALL_ENABLED for ligado; hoje está desligado e todo mundo pode pular; o resto é grátis).
@@ -287,9 +287,13 @@ function renderModulesTrailMap(container, levelModules, opts){
   renderTrailMap(container, { sections }, describe);
 }
 
+// Melhoria 2 (2026-10-26): sem padrão em francês. Site com Teste de Nível declara LANG_HOOKS.levelTestKeys (o contrato
+// cobra); se faltar, o texto fica vazio e o console avisa (melhor que mostrar "French" no site de outro idioma).
 function levelTestKey(name){
   const keys = (typeof LANG_HOOKS !== 'undefined' && LANG_HOOKS.levelTestKeys) || null;
-  return (keys && keys[name]) || ('trail.levelTest.' + name);
+  if (keys && keys[name]) return keys[name];
+  if (typeof console !== 'undefined') console.error('[LANG_HOOKS] falta levelTestKeys.' + name + ' (shared/core/lang-hooks-contrato.js)');
+  return '';
 }
 
 function buildLevelTestCard(test){
@@ -552,11 +556,12 @@ const CHECKPOINT_STATE = {
 
 function buildCheckpointQueue(module){
   // Fase 6: palavra + frase + escuta + gramática (shared/checkpoint-exam.js, puro).
-  // O site diz como virar palavra/frase em item da prova (LANG_HOOKS.checkpointExam; o fr não precisa: é o padrão).
+  // O site diz as chaves do enunciado (LANG_HOOKS.checkpointExam.keys, obrigatório com módulos) e, se a escrita não é a
+  // do campo `f` (zh), como virar palavra/frase em item da prova (checkpointExam.word/phrase; o fr não declara: usa `f`).
   const moduleUnits = module.unitIds.map(id => UNITS.find(u => u.id === id));
   const exam = (typeof LANG_HOOKS !== 'undefined' && LANG_HOOKS.checkpointExam) || null;
   const opts = { shuffle, canSpeak: LANG_HOOKS.canSpeak };
-  if (exam) Object.assign(opts, { item: exam, keys: exam.keys });
+  if (exam) Object.assign(opts, { item: (exam.word || exam.phrase) ? exam : null, keys: exam.keys });
   return buildCheckpointExamQueue(moduleUnits, opts);
 }
 

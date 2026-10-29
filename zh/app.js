@@ -128,6 +128,15 @@ document.getElementById('stroke-modal').addEventListener('click', (e) => {
 });
 
 
+// Id do cartão de um hanzi: "h" + a chave congelada `k` do caractere em zh/hanzi-data.js (M1 da revisão do código
+// compartilhado, 2026-10-26). O valor inicial de `k` é a posição de hoje ("0-c0"), então nenhum id mudou; daqui para a
+// frente inserir, tirar ou reordenar um hanzi não passa o progresso de um caractere para outro. Caractere sem `k`
+// (ainda não congelado: rode node scripts/congelar_chaves.js zh) cai na posição, como antes.
+// Os ids publicados ficam em zh/published_ids.json (campo hanzi); tests/curriculo-ids/test_ids_publicados.js barra sumiço.
+function hanziCardId(char, lessonIdx, charIdx){
+  return 'h' + (char && typeof char.k === 'string' && char.k ? char.k : `${lessonIdx}-c${charIdx}`);
+}
+
 // Um cartão SRS por caractere (do banco completo de hanzi), reaproveitando a mesma estrutura de
 // estado SM-2 do vocabulário — fila separada, mas mesmo motor de repetição.
 function buildHanziCards(lessons){
@@ -135,7 +144,7 @@ function buildHanziCards(lessons){
   lessons.forEach((lesson, lessonIdx) => {
     lesson.forEach((char, charIdx) => {
       cards.push({
-        id: `h${lessonIdx}-c${charIdx}`,
+        id: hanziCardId(char, lessonIdx, charIdx),
         lessonIndex: lessonIdx,
         type: 'hanzi',
         char: char.char,
@@ -525,12 +534,13 @@ const UNIT_ICONS = {
   16: '📅', 17: '✅', 18: '❓'
 };
 
-// Cartões de hanzi no idioma do site (refreshStudyCardTexts comum chama por LANG_HOOKS.refreshExtraCards). Por posição
-// (id h<lição>-c<índice>): o overlay pode trocar o caractere do slot (巴 -> 美 no inglês), então casar por caractere não serve.
+// Cartões de hanzi no idioma do site (refreshStudyCardTexts comum chama por LANG_HOOKS.refreshExtraCards). Pelo id
+// (chave `k`, hanziCardId): o overlay pode trocar o caractere do slot (巴 -> 美 no inglês), então casar por caractere não serve.
 function refreshHanziCardTexts(){
+  const byId = {};
+  HANZI_LESSONS.forEach((lesson, li) => lesson.forEach((h, ci) => { byId[hanziCardId(h, li, ci)] = h; }));
   STATE.hanziCards.forEach((c) => {
-    const m = /^h(\d+)-c(\d+)$/.exec(c.id);
-    const h = m && HANZI_LESSONS[+m[1]] && HANZI_LESSONS[+m[1]][+m[2]];
+    const h = byId[c.id];
     if (h){ CardVariants.swapCardWordProgress(c, c.char, h.char, STATE.cardVariants); c.char = h.char; c.pinyin = h.pinyin; c.meaning = h.meaning; c.radicals = h.radicals; }
   });
 }
@@ -926,12 +936,15 @@ wireLessonChromeButtons(); // shared/core/app-comum.js
 // ============================================================
 
 // Gera o HTML de resumo de uma unidade (vocabulário + frases + diálogo,
-// sem exercícios) — usado no modal "Manual da unidade" (📖 dentro do painel
-// de dicas de cada lição).
-function renderUnitSummaryHTML(u){
+// sem exercícios) -- usado no modal "Manual da unidade" (📖 dentro do painel
+// de dicas de cada lição). Mostra só o que a aluna já viu (`seen`, de
+// unitSeenContent em shared/core/trilha-licao.js); seção sem nada visto não
+// aparece, e sem nada visto vem uma frase curta no lugar.
+function renderUnitSummaryHTML(u, seen){
   // Unidade de gramática (shared/core/gramatica-cenario.js) não tem vocabulário, frases nem diálogo: o manual dela é a própria explicação.
   if (isGrammarUnit(u)) return '';
-  const vocabHTML = u.vocab.map(v => `
+  const sel = seen || unitSeenContent(u, { all: true });
+  const vocabHTML = sel.vocabIdx.map(i => u.vocab[i]).map(v => `
     <div class="vocab-row vocab-row-readonly">
       <div class="pinyin">${v.p}</div>
       <div class="hanzi">${v.c} ${audioBtnHTML(v.c)} ${strokeBtnHTML(v.c)}</div>
@@ -939,7 +952,7 @@ function renderUnitSummaryHTML(u){
     </div>
   `).join('');
 
-  const phrasesHTML = u.phrases.map(p => `
+  const phrasesHTML = sel.phraseIdx.map(i => u.phrases[i]).map(p => `
     <div class="phrase-item">
       <div class="pinyin">${p.p}</div>
       <div class="hanzi">${p.c} ${audioBtnHTML(p.c)}</div>
@@ -947,7 +960,7 @@ function renderUnitSummaryHTML(u){
     </div>
   `).join('');
 
-  const dialogueHTML = `<div class="dialogue-title">${u.dialogue.title}</div>` +
+  const dialogueHTML = sel.dialogue ? `<div class="dialogue-title">${u.dialogue.title}</div>` +
     u.dialogue.lines.map(l => `
       <div class="dialogue-line">
         <div class="dialogue-spk">${l.spk}</div>
@@ -957,16 +970,18 @@ function renderUnitSummaryHTML(u){
           <div class="trans">${l.t}</div>
         </div>
       </div>
-    `).join('');
+    `).join('') : '';
 
-  return `
+  if (!vocabHTML && !phrasesHTML && !dialogueHTML){
+    return `<p class="unit-manual-empty">${t('zh.manual.empty')}</p>`;
+  }
+  return (vocabHTML ? `
     <div class="section-label">${t('zh.path.summary.vocabulary')}</div>
-    <div class="vocab-table">${vocabHTML}</div>
+    <div class="vocab-table">${vocabHTML}</div>` : '') + (phrasesHTML ? `
     <div class="section-label">${t('zh.path.summary.phrases')}</div>
-    <div class="phrase-list">${phrasesHTML}</div>
+    <div class="phrase-list">${phrasesHTML}</div>` : '') + (dialogueHTML ? `
     <div class="section-label">${t('zh.path.summary.dialogue')}</div>
-    <div class="dialogue-box">${dialogueHTML}</div>
-  `;
+    <div class="dialogue-box">${dialogueHTML}</div>` : '');
 }
 
 // ---------- Modal: manual da unidade atual ----------
@@ -974,7 +989,7 @@ document.getElementById('unit-manual-btn').addEventListener('click', () => {
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
   document.getElementById('unit-manual-title').textContent = t('zh.manual.title', { id: u.id, title: u.title });
   const bodyEl = document.getElementById('unit-manual-body');
-  bodyEl.innerHTML = renderUnitSummaryHTML(u);
+  bodyEl.innerHTML = renderUnitSummaryHTML(u, unitSeenContentNow(u));
   wireAudioButtons(bodyEl);
   wireStrokeButtons(bodyEl);
   document.getElementById('unit-manual-modal').style.display = 'flex';

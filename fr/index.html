@@ -74,8 +74,6 @@ try{
   --checkpoint-tint: rgba(227,107,202,0.06);
   --checkpoint-icon-tint: rgba(227,107,202,0.14);
   --level-test-pulse: rgba(61,22,123,0.35);
-  --gram-table-head: var(--brand-purple);
-  --on-gram-table-head: var(--paper);
   --gram-almost-bg: rgba(227,107,202,0.1);
   --seal-red-dark: #1D5A82;  /* azul profundo — hover/pressed, texto de destaque */
   /* Caixas com texto (botões, abas e chips selecionados, contadores): azul + branco, 4,7:1 nos dois temas (decisão da autora, 2026-10-19).
@@ -94,6 +92,9 @@ try{
   --jade: #3A7359;           /* verde — sucesso/acerto (funcional, fora da paleta de marca) */
   /* Caixas de sucesso com texto/check (Continuar do acerto, ✓ de concluído): verde + branco, 5,6:1 nos dois temas (decisão da autora, 2026-10-22). */
   --success-fill: #3A7359; --on-success-fill: #FFFFFF;
+  /* Botões de nota da Revisão e do Banco (decisão da autora, 2026-10-28): cores fixas, iguais nos dois temas e nos dois idiomas, texto branco.
+     Difícil usa o amarelo exato da Revisão no escuro (#C9973A); branco sobre ele dá 2,6:1 (escolha da autora, abaixo do AA). */
+  --grade-fill-again: #D62619; --grade-fill-hard: #C9973A; --grade-fill-good: #2879B3; --grade-fill-easy: #3A7359; --on-grade-fill: #FFFFFF;
   --ink-soft: #5C4E73;       /* texto secundário */
   /* Selo colorido atrás do ícone de cada desafio diário -- 3 cores fixas
      por posição no card (não por desafio específico), pra manter a mesma
@@ -1856,10 +1857,10 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
    --error-red/--jade -- agora os 4 concordam: texto branco no claro,
    texto escuro no escuro, em vez de 2 fixos sempre-escuro + 2 que
    alternam. */
-.grade-again{ background: var(--error-red); color: var(--on-vivid); }
-.grade-hard{ background: var(--grade-hard-bg); color: var(--on-vivid); }
-.grade-good{ background: var(--grade-good-bg); color: var(--on-vivid); }
-.grade-easy{ background: var(--jade); color: var(--on-vivid); }
+.grade-again{ background: var(--grade-fill-again); color: var(--on-grade-fill); }
+.grade-hard{ background: var(--grade-fill-hard); color: var(--on-grade-fill); }
+.grade-good{ background: var(--grade-fill-good); color: var(--on-grade-fill); }
+.grade-easy{ background: var(--grade-fill-easy); color: var(--on-grade-fill); }
 
 /* ---------- Progress / gamification view ---------- */
 .stat-cards{ display:grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:26px; }
@@ -4129,7 +4130,7 @@ body[data-activity-focus] .activity-report-btn:hover{ color:var(--ink); }
 body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 #app.lesson-focus #review-session-wrap{ max-width:760px; margin-left:auto; margin-right:auto; }
 /* #conj-practice-wrap no modo foco e .conj-actions/.conj-verb-pager: shared/conjugacao.css. */
-@media (max-width:620px){ body[data-activity-focus] .activity-report-btn{ width:44px; height:44px; } }
+@media (max-width:620px){ body[data-activity-focus] .activity-report-btn, .activity-lesson-bar .lesson-close-btn{ width:44px; height:44px; } }
 /* Conjugação: abas Praticar | Jogos e os Jogos (.cg-*): shared/conjugacao.css. */
 /* ---------- Cara de jogo: telas (passo 4, docs/historico/15) ----------
    Bloco único com o visual "de jogo" das telas fora de Amigos: pódio e "faltam
@@ -5673,6 +5674,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/core/modulos-niveis.js"></script>
 <script src="../shared/core/familias/latina.js"></script>
 <script src="../shared/core/familias/latina-licao.js"></script>
+<script src="../shared/core/lang-hooks-contrato.js"></script>
 <script src="lang-hooks.js"></script>
 <script src="../shared/core/quase-iguais-simples.js"></script>
 <script src="../shared/core/quase-iguais-textos.js"></script>

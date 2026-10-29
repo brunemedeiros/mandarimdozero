@@ -1,6 +1,8 @@
 // E4: o que muda de um idioma estudado para outro e que o código compartilhado (shared/core) precisa saber.
 // Carregado antes do app.js. Funções chamam as do app.js só na hora do uso (setas), então a ordem de carga não importa.
-const LANG_HOOKS = {
+// Contrato de todos os ganchos (tipo, obrigatório/opcional, padrão): shared/core/lang-hooks-contrato.js.
+// (sem o contrato carregado, ex.: testes antigos que leem só este arquivo, o objeto passa como está)
+const LANG_HOOKS = (typeof defineLangHooks === 'function' ? defineLangHooks : (h) => h)({
 // --- E4 hooks ---
   speakAudioOnly: (...a) => speakFrenchAudioOnly(...a),
   speak: (...a) => speakFrench(...a),
@@ -111,6 +113,10 @@ const LANG_HOOKS = {
   refreshExtraCards: () => {},
   // Voz do idioma estudado (shared/core/voz.js): texto que vai para a voz do navegador e avisos deste site.
   ttsText: (text) => typeof speakableProfileText === 'function' ? speakableProfileText(text) : text,
+  // Prova do Ponto de verificação e Teste de Nível (shared/core/modulos-niveis.js): as chaves de texto que citam o francês
+  // (melhoria 2, 2026-10-26: antes eram o padrão do código comum; mesmas chaves, nada muda na tela).
+  checkpointExam: { keys: { word: 'fr.checkpoint.exam.word', phrase: 'fr.checkpoint.exam.phrase', listen: 'fr.checkpoint.exam.listen' } },
+  levelTestKeys: { sub: 'trail.levelTest.sub', intro: 'trail.levelTest.intro' },
   voiceMissingKey: 'toast.voiceMissingFr',
   audioRetryFailedKey: 'toast.audioPlayFailedThis',
 // --- /E4 hooks ---
@@ -209,4 +215,4 @@ const LANG_HOOKS = {
       },
     },
   },
-};
+});

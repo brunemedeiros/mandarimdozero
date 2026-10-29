@@ -485,3 +485,62 @@ function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   }
   saveState();
 }
+
+// ---------- Manual da unidade: só o que a aluna já viu (pedido da dona, 2026-10-26) ----------
+// Regra PURA (sem STATE/DOM; reaproveitável por qualquer site): recebe a unidade e o que já foi visto e devolve os
+// índices de vocabulário e frases, e se o diálogo entra. Nada do que a aluna ainda não viu aparece no manual.
+//   seen.all           unidade concluída, releitura ou revisão: mostra tudo
+//   seen.lessonsDone   lições concluídas desta unidade (o ponteiro real, STATE.unitProgress[id].lessonIdx)
+//   seen.introducedIdx palavras já apresentadas na lição em andamento (STEP_STATE.acq.introduced)
+//   seen.extraWordIdx  palavras desta unidade com evidência de estudo (cartão com reps > 0)
+//   seen.dialogueDone  o passo do diálogo da lição em andamento já foi feito
+//   seen.phraseHasWord (palavra) => (frase) => bool  (LANG_HOOKS.phraseHasWord)
+// Frase vista = a frase da unidade que aparece como "Na frase" no cartão de uma palavra já vista (mesma escolha de
+// findMatchingPhrase: a primeira frase da unidade que contém a palavra). As outras frases só aparecem nos exercícios do
+// Ponto de verificação, então entram com a unidade concluída.
+function unitSeenContent(unit, seen){
+  const s = seen || {};
+  const vocab = (unit && unit.vocab) || [];
+  const phrases = (unit && unit.phrases) || [];
+  const hasDialogue = !!(unit && unit.dialogue && Array.isArray(unit.dialogue.lines) && unit.dialogue.lines.length);
+  if (s.all){
+    return { all: true, vocabIdx: vocab.map((_, i) => i), phraseIdx: phrases.map((_, i) => i), dialogue: hasDialogue };
+  }
+  const lessons = (unit && Array.isArray(unit.lessons)) ? unit.lessons : [];
+  const done = lessons.slice(0, Math.max(0, s.lessonsDone || 0));
+  const words = new Set();
+  done.forEach(l => (l.vocabIdx || []).forEach(i => words.add(i)));
+  (s.introducedIdx || []).forEach(i => words.add(i));
+  (s.extraWordIdx || []).forEach(i => words.add(i));
+  const vocabIdx = [...words].map(Number).filter(i => Number.isInteger(i) && i >= 0 && i < vocab.length).sort((a, b) => a - b);
+  const phraseSet = new Set();
+  if (typeof s.phraseHasWord === 'function'){
+    vocabIdx.forEach(i => {
+      const pi = phrases.findIndex(s.phraseHasWord(vocab[i]));
+      if (pi >= 0) phraseSet.add(pi);
+    });
+  }
+  const dialogue = hasDialogue && (!!s.dialogueDone || done.some(l => l.includesDialogue));
+  return { all: false, vocabIdx, phraseIdx: [...phraseSet].sort((a, b) => a - b), dialogue };
+}
+
+// Lê o estado do app (STATE/STEP_STATE) e chama a regra pura acima para a unidade `u`.
+function unitSeenContentNow(u){
+  const prog = (STATE.unitProgress && STATE.unitProgress[u.id]) || {};
+  const reviewing = !!(STEP_STATE.lessonReview && STEP_STATE.lessonReview.unitId === u.id);
+  if (prog.completed || reviewing) return unitSeenContent(u, { all: true });
+  const lessonsDone = prog.lessonIdx || 0; // ponteiro real (currentLessonIdx devolveria o da revisão)
+  const acq = STEP_STATE.acq || {};
+  const sameSession = acq.unitId === u.id && (!isLessonUnit(u) || acq.lessonIdx === lessonsDone);
+  const introducedIdx = sameSession ? Object.keys(acq.introduced || {}).map(Number) : [];
+  const extraWordIdx = (u.vocab || []).map((_, i) => i)
+    .filter(i => studyWordHasEvidence(studyWordCardsFor(STATE.cards, u.id, i)));
+  let dialogueDone = false;
+  const lesson = isLessonUnit(u) ? u.lessons[lessonsDone] : null;
+  if (STATE.currentUnitId === u.id && (!isLessonUnit(u) || (lesson && lesson.includesDialogue))){
+    const defs = currentStepDefs(u);
+    const di = defs.findIndex(d => d.key === 'dialogue');
+    dialogueDone = di >= 0 && STEP_STATE.currentStep > di;
+  }
+  return unitSeenContent(u, { lessonsDone, introducedIdx, extraWordIdx, dialogueDone, phraseHasWord: LANG_HOOKS.phraseHasWord });
+}

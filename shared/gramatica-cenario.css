@@ -1,6 +1,6 @@
 /* Unidade de gramática (tabela e exercício de digitar) e exercício de cenário: shared/core/gramatica-cenario.js.
    Comum a todos os sites (paridade fr x zh, item C6, 2026-10-23). As cores vêm dos tokens do :root de cada site.
-   Cabeçalho da tabela = caixa com texto: --gram-table-head/--on-gram-table-head se o site definir (o fr mantém o roxo
+   Cabeçalho da tabela = caixa com texto: --gram-table-head/--on-gram-table-head se o site definir (o fr usava o roxo até 2026-10-26, quando a autora aprovou o azul da marca
    de sempre); senão a cor da marca com o texto dela (--brand-fill/--on-brand-fill, regra "Caixas da marca com texto").
    Os blocos da explicação (.gram-block*) ficam no index.html de cada site: são os mesmos dos cartões de conceito. */
 .gram-tables{ display:flex; gap:14px; flex-wrap:wrap; margin-top:18px; }

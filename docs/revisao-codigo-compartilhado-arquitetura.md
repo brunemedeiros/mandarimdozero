@@ -5,7 +5,9 @@ Base: `main` em `1559776e` (depois da paridade 5d, PR #397).
 Escopo: `shared/core/*.js` (com `familias/`), `shared/desafios*.js`, `shared/ditados.js`, `shared/conjugacao.js`,
 `shared/conj-games.js`, `shared/checkpoint-exam.js`, `shared/review-milestone.js`, `shared/study-trail-model.js`, os `.css` novos
 de `shared/`, `fr/*-config.js`, `fr/lang-hooks.js`, `zh/lang-hooks.js`, o que restou de `fr/app.js` e `zh/app.js`, e os dois `index.html`.
-Foco: arquitetura e manutenção (bugs e segurança ficam com outro revisor). **Nenhum código foi alterado.**
+Foco: arquitetura e manutenção (bugs e segurança ficam com outro revisor). **Nenhum código foi alterado nesta revisão.**
+**Propostas 1 a 4 da seção 9 feitas em 2026-10-26** (branch `claude/friendly-hamilton-u4ssl2`; registro em
+`docs/historico/31-revisao-codigo-compartilhado.md`).
 
 Grátis x Premium: esta revisão não cria recurso; nenhuma proposta muda o que é grátis ou Premium.
 
@@ -320,10 +322,10 @@ Validar com `teste-navegador` (SW ligado) e na publicação.
 
 | # | Proposta | Benefício | Esforço | Risco | Muda algo visível? |
 |:-|:-|:-|:-|:-|:-|
-| 1 | Contrato único `LANG_HOOKS` com `defineLangHooks` + `test_contrato_lang_hooks.js` (5.x) | pt nasce com lista exata; gancho esquecido falha no teste | médio | baixo | não |
-| 2 | Tirar padrões com texto do francês (fr declara `checkpointExam.keys`/`levelTestKeys`; padrão vira obrigatório) | evita "French" no pt | pequeno | baixo | não |
-| 3 | `study-trail-model.js` e `profile-placeholders.js` lendo o registro (`studyLangOf`, idioma do site) + `'pt'` no editor de Field | pt funcional na Revisão, no editor e nos placeholders | pequeno | médio (ids/fields dos cartões da trilha: provar com ida e volta) | não no fr/zh |
-| 4 | `cache: 'no-cache'` no service worker | abertura muito mais leve | pequeno | baixo | só velocidade |
+| 1 | **FEITO (2026-10-26)** Contrato único `LANG_HOOKS` com `defineLangHooks` + `test_contrato_lang_hooks.js` (5.x) | pt nasce com lista exata; gancho esquecido falha no teste | médio | baixo | não |
+| 2 | **FEITO (2026-10-26)** Tirar padrões com texto do francês (fr declara `checkpointExam.keys`/`levelTestKeys`; padrão vira obrigatório) | evita "French" no pt | pequeno | baixo | não |
+| 3 | **FEITO (2026-10-26)** `study-trail-model.js` e `profile-placeholders.js` lendo o registro (`studyLangOf`, idioma do site) + `'pt'` no editor de Field | pt funcional na Revisão, no editor e nos placeholders | pequeno | médio (ids/fields dos cartões da trilha: provar com ida e volta) | não no fr/zh |
+| 4 | **FEITO (2026-10-26)** `cache: 'no-cache'` no service worker | abertura muito mais leve | pequeno | baixo | só velocidade |
 | 5 | `tests/lib/sites.js` + guardas 3, 4 e 5 da seção 7 | testes passam a incluir o pt sozinhos; barra regressão a "só fr/zh" | pequeno | nenhum | não |
 | 6 | Chaves de texto neutras: renomear `zh.path.*`/`fr.mission.*`/`fr.step.*` usadas por código comum e os 12 `uiKey` idênticos para um prefixo comum (com apelidos antigos durante a transição) | o pt não precisa repetir textos; fim das chaves cruzadas | médio | baixo (texto igual) | não |
 | 7 | `shared/core/site.js` (I3) + listas de idiomas pelo registro (I4) | menos constantes por site; 4º idioma sem caça a listas | médio | baixo | não |

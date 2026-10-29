@@ -138,6 +138,7 @@ function run({ site, write }){
   const registryOut = { _doc: 'Maior número de chave já usado por unidade e tipo (v = palavra, p = frase, d = fala do diálogo). ' +
     'Inclui chaves aposentadas: um número nunca é reaproveitado. Mantido por scripts/congelar_chaves.js.', units: {} };
   Object.keys(maxUsed).sort(unitSort).forEach(u => { registryOut.units[u] = {}; ['v', 'p', 'd'].forEach(kd => { if (maxUsed[u][kd] != null) registryOut.units[u][kd] = maxUsed[u][kd]; }); });
+  if (registry.hanzi) registryOut.hanzi = registry.hanzi; // chaves dos hanzi (runHanzi): preservadas
   const registryText = JSON.stringify(registryOut, null, 2) + '\n';
   const registryStale = !fs.existsSync(REGISTRY) || fs.readFileSync(REGISTRY, 'utf8') !== registryText;
 
@@ -199,12 +200,89 @@ function unitSort(a, b){
   return (Number(pa[1]) || 0) - (Number(pb[1]) || 0) || (a < b ? -1 : a > b ? 1 : 0);
 }
 
+// ---------- Hanzi (M1 da revisão do código compartilhado, 2026-10-26) ----------
+// Site com <site>/hanzi-data.js (o zh): cada caractere de HANZI_LESSONS ganha a chave `k`, UMA vez. O valor inicial é o
+// id de cartão de hoje sem o "h" ("0-c0", "3-c7"): nenhum id muda. Caractere NOVO (sem `k`) ganha
+// "<lição atual>-c<próximo número livre da lição>" pelo registro (<site>/scripts/item_keys_registry.json, campo `hanzi`),
+// nunca reaproveitado. A chave é opaca: o hanzi que muda de lição continua com a chave antiga.
+const HANZI_KEY_RE = /^\d+-c\d+$/;
+const hanziPath = site => path.join(ROOT, site, 'hanzi-data.js');
+function loadHanzi(src){
+  const ctx = vm.createContext({});
+  vm.runInContext(src + '\n;this.__H = HANZI_LESSONS;', ctx);
+  return JSON.parse(JSON.stringify(ctx.__H));
+}
+function runHanzi({ site, write }){
+  const FILE = hanziPath(site), REGISTRY = registryPath(site);
+  if (!fs.existsSync(FILE)) return 0;
+  const src = fs.readFileSync(FILE, 'utf8');
+  const lessons = loadHanzi(src);
+  const registry = readRegistry(REGISTRY);
+  const maxUsed = Object.assign({}, registry.hanzi || {});
+  const seen = new Map(), problems = [];
+  lessons.forEach((lesson, li) => lesson.forEach((h, ci) => {
+    if (h.k === undefined) return;
+    if (typeof h.k !== 'string' || !HANZI_KEY_RE.test(h.k)) problems.push(`chave de hanzi inválida em [${li}][${ci}]: ${JSON.stringify(h.k)}`);
+    if (seen.has(h.k)) problems.push(`chave de hanzi repetida ${h.k}`);
+    seen.set(h.k, `[${li}][${ci}]`);
+    const m = /^(\d+)-c(\d+)$/.exec(h.k);
+    if (m && !(maxUsed[m[1]] >= +m[2])) maxUsed[m[1]] = +m[2];
+  }));
+  if (problems.length){ problems.forEach(p => console.error(`ERRO (${site}):`, p)); return 2; }
+  const frozenBefore = seen.size > 0 || Object.keys(registry.hanzi || {}).length > 0;
+  const plan = [];
+  lessons.forEach((lesson, li) => lesson.forEach((h, ci) => {
+    if (h.k !== undefined) return;
+    let k;
+    if (!frozenBefore) k = `${li}-c${ci}`; // congelamento inicial: a posição de hoje
+    else { const n = maxUsed[li] != null ? maxUsed[li] + 1 : 0; k = `${li}-c${n}`; }
+    if (seen.has(k)) throw new Error('chave de hanzi calculada já existe: ' + k);
+    seen.set(k, `[${li}][${ci}]`);
+    const m = /^(\d+)-c(\d+)$/.exec(k); if (!(maxUsed[m[1]] >= +m[2])) maxUsed[m[1]] = +m[2];
+    plan.push({ li, ci, k });
+  }));
+  const hanziReg = {};
+  Object.keys(maxUsed).sort((a, b) => a - b).forEach(l => { hanziReg[l] = maxUsed[l]; });
+  const regOut = readRegistry(REGISTRY);
+  const regStale = JSON.stringify(regOut.hanzi || {}) !== JSON.stringify(hanziReg);
+  if (!write){
+    if (plan.length) console.log(`${site}: faltam ${plan.length} chaves de hanzi`);
+    if (regStale) console.log(`${site}: registro de hanzi desatualizado`);
+    if (!plan.length && !regStale) console.log(`${site}: ok: ${seen.size} chaves de hanzi`);
+    return plan.length || regStale ? 1 : 0;
+  }
+  // escrita textual: cada objeto de caractere começa com `{` seguido de "char" (ordem do texto = ordem de HANZI_LESSONS)
+  const re = /\{(\s*)"char"\s*:/g;
+  const starts = []; let m;
+  while ((m = re.exec(src))) starts.push({ pos: m.index + 1, ws: m[1] });
+  const flat = []; lessons.forEach((lesson, li) => lesson.forEach((h, ci) => flat.push({ li, ci })));
+  if (starts.length !== flat.length) throw new Error(`objetos de hanzi no texto (${starts.length}) não batem com HANZI_LESSONS (${flat.length})`);
+  const byPos = new Map(plan.map(p => [p.li + ':' + p.ci, p.k]));
+  let out = src;
+  for (let i = starts.length - 1; i >= 0; i--){
+    const k = byPos.get(flat[i].li + ':' + flat[i].ci);
+    if (k == null) continue;
+    const ws = starts[i].ws.includes('\n') ? starts[i].ws : ' ';
+    out = out.slice(0, starts[i].pos) + `${ws}"k": ${JSON.stringify(k)},` + out.slice(starts[i].pos);
+  }
+  const strip = ls => JSON.stringify(ls.map(l => l.map(h => { const c = Object.assign({}, h); delete c.k; return c; })));
+  const after = loadHanzi(out);
+  if (strip(after) !== strip(lessons)) throw new Error('a escrita dos hanzi mudou algo além de `k`');
+  plan.forEach(({ li, ci, k }) => { if (after[li][ci].k !== k) throw new Error('chave de hanzi fora do lugar: ' + k); });
+  if (plan.length) fs.writeFileSync(FILE, out);
+  regOut.hanzi = hanziReg;
+  fs.mkdirSync(path.dirname(REGISTRY), { recursive: true });
+  fs.writeFileSync(REGISTRY, JSON.stringify(regOut, null, 2) + '\n');
+  console.log(`${site}: ${plan.length} chaves de hanzi escritas; ${seen.size} no total`);
+  return 0;
+}
+
 if (require.main === module){
   const args = process.argv.slice(2);
   const named = args.filter(a => !a.startsWith('--'));
   const sites = named.length ? named : require('./lib/sites.js').discoverSites(ROOT).map(s => s.site);
   const write = !args.includes('--conferir');
-  const codes = sites.map(site => run({ site, write }));
+  const codes = sites.map(site => Math.max(run({ site, write }), runHanzi({ site, write })));
   process.exit(Math.max(0, ...codes));
 }
-module.exports = { run, arraysInOrder, KEY_RE };
+module.exports = { run, runHanzi, arraysInOrder, KEY_RE, HANZI_KEY_RE };

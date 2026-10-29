@@ -231,7 +231,7 @@ const CONTENT_I18N = ContentI18n.create({
   overlayUrl: (lang) => `content.${lang}.js`,
   extraUrls: (lang) => [`challenges.${lang}.js`],
   getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
-  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); if (typeof repaintTrailForUiLanguage === 'function') repaintTrailForUiLanguage(); }
+  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); if (typeof repaintTrailForUiLanguage === 'function') repaintTrailForUiLanguage(); if (typeof repaintChallengesForUiLanguage === 'function') repaintChallengesForUiLanguage(); }
 });
 wireContentI18nSync(); // shared/core/app-comum.js
 

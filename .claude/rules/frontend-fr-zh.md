@@ -14,6 +14,8 @@ paths:
   por idioma vem de `LANG_HOOKS` (`<site>/lang-hooks.js`). Nunca copiar para um `app.js` (que só tem dados/configuração e o
   próprio do idioma: hanzi, pinyin, histórias no zh). Guarda: `tests/paridade-sites/test_quase_iguais.js` (paridade 5d).
   Desafios e Ditados só existem no fr (os motores são comuns, ver abaixo).
+- **LANG_HOOKS**: contrato único em `shared/core/lang-hooks-contrato.js` (tipo, obrigatório, padrão neutro); gancho novo entra lá no mesmo PR, e
+  padrão comum nunca é texto de um idioma. Guarda: `tests/paridade-sites/test_contrato_lang_hooks.js`. Idioma de Field/voz/nacionalidade vem do registro (`languages/registry.*`), nunca `'fr'` fixo.
 - **Tokens de cor**: nomes iguais podem ter valores diferentes. Em fr, `--seal-red` é AZUL (#3498D6) e
   `--on-seal-red` é quase preto; em zh é vermelho e branco. Ler o `:root` do arquivo antes de usar. Texto sobre
   `--error-red`/`--jade` usa `--on-vivid`. Cor nova vira token definido nos 3 blocos de tema (`:root`,
@@ -39,6 +41,10 @@ paths:
   Use os helpers (fr: `FamiliaLatina` / `typedAnswerVerdictForExpected`; zh: `acceptedFormsTyped` + `typedVariants`), nunca
   `acceptedForms()` cru. Erro marcado em vermelho: `typedAttemptHTML` (comum, `shared/core/licao-feedback.js`; a forma de comparar de cada idioma vem de `LANG_HOOKS.typedAttemptForm`). O teclado de letras ganha uma fileira com letras que a resposta
   pede e ele não tem (`frAccentPickerHTML(resposta)`). Guarda: `tests/respostas-digitadas/`.
+- **Telas de exercício seguem o molde da trilha** (decisão da autora, 2026-10-23, vale para Jogos, Desafios, Revisão e futuros): o comando
+  fica SEMPRE no idioma do site, em qualquer nível (rótulo pequeno `t('fr.exercise.whatMeans')`, nos Desafios `chT('ch.expr.whatMeans')` com o mesmo texto, acima do cartão com o item; nunca frase em
+  francês vinda do conteúdo); saída pelo X com barra de progresso (não link "← Voltar"); ⚑ e pílula de Atalhos do teclado; respostas com
+  badge numerado 1-4 e seleção digitando o número; "Não sei" abaixo das opções; feedback com Continuar. Auditoria e plano: `docs/historico/`.
 - **Unidade de gramática** (`type:"grammar"`) e **exercício de cenário**: motor comum em `shared/core/gramatica-cenario.js` (CSS em
   `shared/gramatica-cenario.css`); o que muda por idioma vem de `LANG_HOOKS` (`grammarAnswerVerdict`, `scenarioOptionHTML`, `phraseAnswerHTML`...).
   Guarda: `tests/paridade-sites/test_gramatica_cenario*.js`.
@@ -59,6 +65,10 @@ paths:
   `shared/desafios.css`, logo depois do `<style>`); o que é do idioma (família da Acentuação, teclado, tabela, textos que citam o idioma) vai em
   `fr/desafios-config.js` (`registerChallenges`). Nunca copiar para um `app.js`; o zh não carrega (decisão da dona pendente).
   Guarda: `tests/paridade-sites/test_desafios*.js`.
+  **Expressões em passos** (palpite, resposta, "Veja em frases" com "Quando usar", "Monte a frase", "Sua vez" com XP só na 1ª conclusão, final): `exprShowOptions`...
+  `exprShowFinal` em `shared/desafios-telas.js`; barra do topo só nelas (`data-lesson-bar`, `shared/activity-focus.js`); texto novo = chave em `CHALLENGE_I18N`
+  (pt-BR e en). Os testes `tests/paridade-sites/test_desafios*.js` e `test_conjugacao*.js` comparam "antes x depois" do refactor: mudança de propósito
+  entra na lista de neutralizações do teste (com data e motivo), nunca apagando a comparação. Testes: `tests/desafios-expressoes-passos/`.
 - **Lembrete de revisão do rodapé** (`maybeShowReviewReminder`, `shared/core/revisao-decks.js`): o dia só é gravado depois de o banner ficar visível uns segundos ou ser clicado/dispensado
   (`markReviewReminderSeen`); em lição (`lesson-focus`) nem aparece nem gasta o dia; reavalia ao voltar para a aba e ao sair da lição. Guarda: `tests/lembrete-revisao/`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").

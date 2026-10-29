@@ -28,10 +28,11 @@
 //   lang                   código do idioma estudado (fr: 'fr'): o sentido da Expressão em meaning[lang]
 //   familia()              a instância da família do idioma (fr: latinaFr()): a correção da Acentuação
 //                          (resultadoAcentuacao: acento exigido, "oe" por "œ" = quase)
-//   texts                  { 'pt-BR': {...}, en: {...} } textos que citam o idioma estudado: ch.sub, ch.verify,
+//   texts                  { 'pt-BR': {...}, en: {...} } textos que citam o idioma estudado: ch.sub,
 //                          ch.knowMore, ch.goFurther (consultados antes dos textos comuns de CHALLENGE_I18N)
 //   table, publishedRpc    tabela e RPC do Supabase (padrão 'challenges' e 'get_published_challenges')
-//   accentPickerHTML(), wireAccentPicker(conteúdo, campo)   teclado de letras do idioma na Acentuação (padrão: sem)
+//   accentPickerHTML(esperado), wireAccentPicker(conteúdo, campo)   teclado de letras do idioma na Acentuação e na "Sua vez" das
+//                          Expressões; `esperado` = a resposta, para acrescentar as letras que ela pede (padrão: sem teclado)
 //
 // Grátis x Premium (igual ao fr de antes): desafio com moduleId é Premium (Desafios do Módulo), sem moduleId é Free;
 // hoje só com o selo, porque a trava está desligada (CHALLENGE_PAYWALL_ENABLED = false; permissão challenges_premium
@@ -52,7 +53,7 @@ function registerChallenges(cfg){
     texts: {},
     table: 'challenges',
     publishedRpc: 'get_published_challenges',
-    accentPickerHTML: () => '',
+    accentPickerHTML: () => '',  // (esperado) => html
     wireAccentPicker: noop,
   }, cfg);
   return CH_CONFIG;
@@ -314,6 +315,25 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': 'Você terminou todos os exercícios desse nível.',
     'ch.queue.back': 'Voltar aos níveis',
     'ch.listenPron': 'Ouvir pronúncia',
+    'ch.verify': 'Verificar',
+    'ch.expr.whatMeans': 'O que significa?',
+    'ch.expr.guessLabel': 'Meu palpite (opcional)',
+    'ch.expr.guessPlaceholder': 'O que você acha que significa?',
+    'ch.expr.seeOptions': 'Ver opções',
+    'ch.expr.yourGuess': 'Seu palpite:',
+    'ch.expr.seeInSentences': 'Veja em frases',
+    'ch.expr.whenToUse': 'Quando usar',
+    'ch.expr.orderIt': 'Monte a frase',
+    'ch.expr.orderPrompt': 'Ordene as palavras do Exemplo 1',
+    'ch.expr.tapHint': 'Toque nas palavras na ordem certa. Toque numa já colocada para devolvê-la.',
+    'ch.expr.sumOrder': 'Monte a frase',
+    'ch.expr.fillBlank': 'Digite o que falta:',
+    'ch.expr.turnPlaceholder': 'Digite aqui',
+    'ch.expr.finalOk': 'Desafio completo!',
+    'ch.expr.finalFail': 'Quase lá! Vale tentar de novo.',
+    'ch.expr.sumChoice': 'Escolha da resposta',
+    'ch.expr.sumTurn': 'Sua vez',
+    'ch.expr.sumXp': 'XP desta conclusão',
     'ch.expr.reveal': 'Ver as respostas',
     'ch.expr.yourAnswer': 'Sua resposta: {chosen}<br>Resposta certa: <strong>{correct}</strong>',
     'ch.expr.signifies': 'significa <strong>{fr}</strong>.',
@@ -445,6 +465,25 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': "You have finished all the exercises in this level.",
     'ch.queue.back': "Back to levels",
     'ch.listenPron': "Listen to pronunciation",
+    'ch.verify': "Check",
+    'ch.expr.whatMeans': "What does it mean?",
+    'ch.expr.guessLabel': "My guess (optional)",
+    'ch.expr.guessPlaceholder': "What do you think it means?",
+    'ch.expr.seeOptions': "See options",
+    'ch.expr.yourGuess': "Your guess:",
+    'ch.expr.seeInSentences': "See it in sentences",
+    'ch.expr.whenToUse': "When to use it",
+    'ch.expr.orderIt': "Build the sentence",
+    'ch.expr.orderPrompt': "Put the words of Example 1 in order",
+    'ch.expr.tapHint': "Tap the words in the right order. Tap a placed one to send it back.",
+    'ch.expr.sumOrder': "Build the sentence",
+    'ch.expr.fillBlank': "Type what's missing:",
+    'ch.expr.turnPlaceholder': "Type here",
+    'ch.expr.finalOk': "Challenge complete!",
+    'ch.expr.finalFail': "Almost there! Worth another try.",
+    'ch.expr.sumChoice': "Choosing the answer",
+    'ch.expr.sumTurn': "Your turn",
+    'ch.expr.sumXp': "XP for this completion",
     'ch.expr.reveal': "See the answers",
     'ch.expr.yourAnswer': "Your answer: {chosen}<br>Correct answer: <strong>{correct}</strong>",
     'ch.expr.signifies': "means <strong>{fr}</strong>.",
@@ -571,9 +610,43 @@ function tierBadgeHTML(tier){
 function isChallengeLocked(c){
   return CHALLENGE_PAYWALL_ENABLED && !!challengeModuleId(c) && !challengesPremiumUnlocked();
 }
+// M3 da revisão do código compartilhado (2026-10-26; regra da autora: site em inglês não tem NADA em português).
+// Campos de texto em português que a tela do aluno mostra, por tipo, e o nome do campo no overlay
+// (<site>/challenges.<lang>.js) que precisa existir para o desafio aparecer num site que não é pt-BR. O texto do idioma
+// estudado (expressão, frase, explicação da Expressão em francês, pergunta) não entra: é igual em todo site.
+const CHALLENGE_SITE_LANG_FIELDS = {
+  expression: c => [c.meaning && c.meaning.pt ? 'meaning' : null],
+  listen_translate: c => ['referenceTranslations', String(c.explanation || '').trim() ? 'explanation' : null],
+  accent: c => [String(c.explanation || '').trim() ? 'explanation' : null],
+  cloze_grammar: c => [c.translationPt ? 'translation' : null, 'explanation'],
+};
+// Verdadeiro se o desafio pode ser mostrado no idioma do site atual. pt-BR: sempre (nada muda). Outro idioma: só com
+// a tradução de todos os campos acima; tipo desconhecido não aparece. Não mexe no progresso salvo (completedChallenges,
+// challengeReviews): o desafio só deixa de ser listado/contado/sorteado enquanto não tiver tradução.
+function challengeAvailableInSiteLang(c){
+  const lang = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+  if (lang === 'pt-BR') return true;
+  const need = CHALLENGE_SITE_LANG_FIELDS[c && c.type];
+  if (!need) return false;
+  const ov = challengeOverlay(c) || {};
+  return need(c).filter(Boolean).every(f => Array.isArray(ov[f]) ? ov[f].some(x => String(x || '').trim()) : !!String(ov[f] || '').trim());
+}
+// Espera o overlay dos desafios do idioma do site (<site>/challenges.<lang>.js, baixado pelo CONTENT_I18N do site) antes de
+// listar: sem isto, logo depois do boot no site em inglês a lista sairia vazia até o arquivo chegar. Sem overlay
+// configurado ou em pt-BR, não espera nada.
+async function ensureChallengesSiteLangLoaded(){
+  const lang = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+  if (lang === 'pt-BR' || (window.CHALLENGES_I18N && window.CHALLENGES_I18N[lang])) return;
+  try { if (typeof CONTENT_I18N !== 'undefined' && CONTENT_I18N && typeof CONTENT_I18N.load === 'function') await CONTENT_I18N.load(lang); } catch (e) { /* sem rede: os sem tradução ficam fora */ }
+}
+// Os publicados que o aluno vê neste idioma do site (lista, contagem, fila, revisão, Expressão do dia, linha da trilha).
+function studentChallenges(){
+  return publishedChallenges().filter(challengeAvailableInSiteLang);
+}
+
 // Tudo que a lista pode MOSTRAR (inclui os trancados) / só o que dá pra JOGAR.
 function listedChallenges(){
-  const all = publishedChallenges();
+  const all = studentChallenges();
   return challengesModuleFilter ? all.filter(c => challengeModuleId(c) === challengesModuleFilter) : all;
 }
 function playableChallenges(){

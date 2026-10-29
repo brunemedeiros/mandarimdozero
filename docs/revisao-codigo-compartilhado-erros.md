@@ -5,7 +5,7 @@ Escopo: `shared/core/*.js` (com `familias/`), `shared/desafios*.js`, `shared/dit
 `fr/*-config.js`, `fr/lang-hooks.js`, `zh/lang-hooks.js`, o que restou de `fr/app.js` e `zh/app.js` e a ordem dos
 `<script>` em `fr/index.html` e `zh/index.html`. Foco: erros e robustez (arquitetura fica com o outro revisor).
 Nenhum código foi alterado nesta revisão. Commit da `main` revisado: `1559776e`. **C1, A1, A2 e A3 foram corrigidos depois
-(2026-10-24); registro em `docs/historico/31-revisao-codigo-compartilhado.md`.**
+(2026-10-24) e M1, M2 e M3 em 2026-10-26; registro em `docs/historico/31-revisao-codigo-compartilhado.md`.**
 
 Os scripts de prova ficam no scratchpad da sessão
 (`/tmp/claude-0/-home-user-mandarimdozero/4c1eb048-5257-5fef-a1a8-50fce44b465c/scratchpad/revisao/`): carregam os
@@ -127,6 +127,10 @@ Críticos e altos, em uma linha cada:
 
 ### M1. Cartões de hanzi (zh) ainda têm id pela posição
 
+> **CORRIGIDO** (2026-10-26): chave `k` congelada em cada hanzi de `zh/hanzi-data.js` (valor = posição de hoje, nenhum id
+> mudou), id = "h" + k (`zh/app.js` `hanziCardId`), 198 ids no `zh/published_ids.json` (campo `hanzi`), `HANZI_RETIRED_KEYS`
+> em `zh/curriculum-changes.js`. Prova: `tests/curriculo-ids/test_hanzi_chaves.js`.
+
 - **Gravidade**: médio. **Confiança**: alta no mecanismo; o dano depende de alguém editar `zh/hanzi-data.js`.
 - **Onde**: `zh/app.js:138` (`id: \`h${lessonIdx}-c${charIdx}\``) e `mergeSavedHanziCards`
   (`shared/study-trail-model.js:556`), que casa por esse id. O livro-razão `zh/published_ids.json` não tem nenhum id `h...`,
@@ -137,6 +141,10 @@ Críticos e altos, em uma linha cada:
   os ids `h...` no livro-razão.
 
 ### M2. Nova tentativa da voz do navegador não pode ser cancelada e corta o áudio do cartão seguinte
+
+> **CORRIGIDO** (2026-10-26): timers em `TTS.retryTimers` presos a um token; `cancelStudyVoiceRetry()` em
+> `stopExerciseAudio()` e na troca de aba; sem nova tentativa se o botão saiu da tela. Prova:
+> `tests/revisao-seguranca/test_m2_voz_cancelar.js`.
 
 - **Gravidade**: médio. **Confiança**: média (lido no código; não reproduzido num navegador com voz real).
 - **Onde**: `shared/core/voz.js:99-116`: se `onstart` não disparou em 800 ms, o
@@ -149,6 +157,10 @@ Críticos e altos, em uma linha cada:
   está no documento (`btnEl.isConnected`).
 
 ### M3. Desafios no site em inglês caem no português quando falta a tradução do item
+
+> **CORRIGIDO** (2026-10-26): fora do pt-BR, desafio sem a tradução dos campos que a tela mostra em português não aparece
+> (`challengeAvailableInSiteLang`/`studentChallenges`, `shared/desafios.js`); `c.meaning.pt` sem `meaning` não derruba mais.
+> Na produção, 16 dos 228 publicados não tinham inglês (lista no histórico 31). Prova: `tests/desafios-idioma-site/`.
 
 - **Gravidade**: médio. **Confiança**: média (o código é claro; não dá para conferir aqui se todo desafio publicado na
   produção tem entrada em `fr/challenges.en.js`, que hoje tem 216 ids).

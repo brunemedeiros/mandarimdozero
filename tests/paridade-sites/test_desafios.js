@@ -22,6 +22,8 @@ const http = require('http'), fs = require('fs'), path = require('path'), os = r
 const ROOT = path.resolve(__dirname, '..', '..');
 const REF = process.env.PARIDADE_5C_REF || '3035549c';
 const H = require('./desafios-harness.js');
+// Botão de verificar traduzido DE PROPÓSITO (2026-10-26, etapa A): antes "Vérifier" nos dois idiomas, agora "Verificar" (pt-BR) e "Check" (en).
+const VERIFICAR_RE = />(Vérifier|Verificar|Check)<\/button>/g;
 
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? String(typeof x === 'string' ? x : JSON.stringify(x)).slice(0, 900) : ''); } };
@@ -30,7 +32,7 @@ async function fingerprint(browser, root, keys){
   const { page, ctx, server, errors } = await H.boot(browser, root, { lang: 'pt-BR' });
   const out = {};
   // a duração dos mp3 no checklist do admin chega quando o áudio carrega (momento variável): fica de fora
-  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); return c.innerHTML; }, sel);
+  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); return c.innerHTML; }, sel).then(v => (typeof v === 'string' ? v.replace(VERIFICAR_RE, '>VERIFICAR</button>') : v));
   const click = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) throw new Error('sem ' + s); e.click(); }, sel);
   const state = () => page.evaluate(() => JSON.stringify({ done: STATE.completedChallenges, rev: STATE.challengeReviews, xp: STATE.xp,
     daily: STATE.daily, modes: STATE.modesUsed, saved: serializeState(), badges: collectBadgeMetrics(STATE), cur: typeof CURRENT_CHALLENGE_PLAYER !== 'undefined' ? CURRENT_CHALLENGE_PLAYER : 'x' }));
@@ -225,15 +227,17 @@ async function fingerprint(browser, root, keys){
 
   // Players: todos os publicados, pergunta e devolutiva com várias respostas, pelo DOM
   const pubs = await page.evaluate(() => publishedChallenges().map(c => ({ id: c.id, type: c.type })));
+  out.expr_ids = pubs.filter(p => p.type === 'expression').map(p => p.id).join();
   for (const { id, type } of pubs){
     await page.evaluate((id) => { window.__seed(4242); openChallengePlayer(id); }, id);
     out['q_' + id] = await html('#challenge-player-content');
     if (type === 'expression'){
-      const n = await page.evaluate(() => document.querySelectorAll('.challenge-choice-btn').length);
+      const n = await page.evaluate((id) => CHALLENGES.find(x => x.id === id).options.length, id);
       for (let k = 0; k < n; k++){
         await page.evaluate(([id, k]) => { window.__seed(4242); openChallengePlayer(id); document.getElementById('challenge-expression-play-btn').click(); const sl = document.getElementById('challenge-expression-play-slow-btn'); if (sl) sl.click();
-          document.getElementById('challenge-reveal-btn').click(); document.querySelectorAll('.challenge-choice-btn')[k].click(); }, [id, k]);
+          window.__exprAbrir(); window.__exprOpcoes()[k].click(); }, [id, k]);
         out['fb_' + id + '_' + k] = await html('#challenge-player-content');
+        await page.evaluate(() => window.__exprAteFinal());   // fluxo novo: passa pelos passos até a tela final (no antigo já está nela)
         await page.evaluate(() => { ['challenge-example-play-btn', 'challenge-example-play-slow-btn', 'challenge-second-example-play-btn', 'challenge-second-example-play-slow-btn', 'challenge-reveal-answer-btn'].forEach(i => { const b = document.getElementById(i); if (b) b.click(); }); });
         out['fb2_' + id + '_' + k] = await html('#challenge-player-content') + (await extra());
         const last = k === n - 1;
@@ -317,7 +321,7 @@ async function fingerprint(browser, root, keys){
       if (c.type === 'accent'){ document.getElementById('accent-answer-input').value = c.targetText; document.getElementById('accent-verify-btn').click(); }
       else if (c.type === 'listen_translate'){ document.getElementById('lt-answer-input').value = c.referenceTranslations[0]; document.getElementById('lt-verify-btn').click(); }
       else if (c.type === 'cloze_grammar'){ (c.blanks || []).forEach((b, i) => { [...document.querySelectorAll('.challenge-choice-btn[data-blank="' + i + '"]')].find(x => x.dataset.value === b.answer).click(); }); document.getElementById('cloze-grammar-verify-btn').click(); }
-      else { document.getElementById('challenge-reveal-btn').click(); [...document.querySelectorAll('.challenge-choice-btn')].find(x => x.textContent === c.correctAnswer).click(); }
+      else { window.__exprAbrir(); window.__exprOpcoes().find(x => window.__exprTexto(x) === c.correctAnswer).click(); window.__exprAteFinal(); }
       document.getElementById('challenge-complete-btn').click(); return false; });
     if (done) break;
   }
@@ -461,6 +465,7 @@ async function fingerprint(browser, root, keys){
   for (const t of Object.keys(byType)){
     const id = await page.evaluate((t) => { const c = pendingChallenges().find(x => x.type === t); return c && c.id; }, t);
     if (!id) continue;
+    await page.evaluate(() => window.__seed(777)); // o sorteio das opções não pode depender de quantos sorteios as cenas de antes gastaram
     await act(id, 'preview');
     out['adm_previa_' + t] = await html('#challenge-player-wrap');
     await page.evaluate(() => { const b = document.getElementById('preview-show-answer-btn'); if (b) b.click(); });
@@ -514,11 +519,26 @@ async function fingerprint(browser, root, keys){
 }
 
 // Site em inglês (outra carga da página com ui-language = en)
+// M3 da revisão do código compartilhado (2026-10-26, mudança deliberada): no site em inglês, desafio publicado sem a
+// tradução em fr/challenges.en.js deixou de aparecer. Para continuar comparando o resto (telas, devolutivas, trilha) com o
+// fr de antes, a carga em inglês só publica os desafios que têm tradução; o sumiço dos outros é provado em
+// tests/desafios-idioma-site/test_playwright.js.
+function rowsComTraducaoEn(){
+  const sandbox = { window: {} };
+  require('vm').runInNewContext(fs.readFileSync(path.join(ROOT, 'fr/challenges.en.js'), 'utf8'), sandbox);
+  const ov = sandbox.window.CHALLENGES_I18N.en;
+  // mesma regra de CHALLENGE_SITE_LANG_FIELDS (shared/desafios.js), reescrita aqui de propósito (o teste não confia no código testado)
+  const tem = (o, f) => Array.isArray(o[f]) ? o[f].length > 0 : !!String(o[f] || '').trim();
+  const precisa = (r) => { const d = r.data, e = String(d.explanation || '').trim();
+    return { expression: [d.meaning && d.meaning.pt && 'meaning'], listen_translate: ['referenceTranslations', e && 'explanation'],
+      accent: [e && 'explanation'], cloze_grammar: [d.translationPt && 'translation', 'explanation'] }[r.type].filter(Boolean); };
+  return H.challengeRows().filter(r => r.status !== 'published' || (ov[r.id] && precisa(r).every(f => tem(ov[r.id], f))));
+}
 async function fingerprintEn(browser, root){
-  const { page, ctx, server, errors } = await H.boot(browser, root, { lang: 'en' });
+  const { page, ctx, server, errors } = await H.boot(browser, root, { lang: 'en', rows: rowsComTraducaoEn() });
   const out = {};
   // a duração dos mp3 no checklist do admin chega quando o áudio carrega (momento variável): fica de fora
-  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); return c.innerHTML; }, sel);
+  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); return c.innerHTML; }, sel).then(v => (typeof v === 'string' ? v.replace(VERIFICAR_RE, '>VERIFICAR</button>') : v));
   await page.evaluate(() => switchTab('challenges'));
   await page.waitForFunction(() => document.querySelector('#challenges-categories .challenge-category-card'));
   out.categorias = await html('#view-challenges');
@@ -532,7 +552,7 @@ async function fingerprintEn(browser, root){
     await page.evaluate((id) => { window.__seed(4242); openChallengePlayer(id); }, id);
     out['q_' + id] = await html('#challenge-player-content');
     await page.evaluate((id) => { const c = CHALLENGES.find(x => x.id === id);
-      if (c.type === 'expression'){ document.getElementById('challenge-reveal-btn').click(); document.querySelectorAll('.challenge-choice-btn')[0].click(); }
+      if (c.type === 'expression'){ window.__exprAbrir(); window.__exprOpcoes()[0].click(); }
       else if (c.type === 'listen_translate'){ const ov = (window.CHALLENGES_I18N.en || {})[c.id]; document.getElementById('lt-answer-input').value = ov && ov.referenceTranslations ? ov.referenceTranslations[0] : 'I like it'; document.getElementById('lt-verify-btn').click(); }
       else if (c.type === 'accent'){ document.getElementById('accent-answer-input').value = c.targetText.normalize('NFD').replace(/[̀-ͯ]/g, ''); document.getElementById('accent-verify-btn').click(); }
       else { document.getElementById('cloze-grammar-verify-btn').click(); (c.blanks || []).forEach((b, i) => { [...document.querySelectorAll('.challenge-choice-btn[data-blank="' + i + '"]')].find(x => x.dataset.value !== b.answer).click(); }); document.getElementById('cloze-grammar-verify-btn').click(); } }, id);
@@ -564,7 +584,8 @@ async function fingerprintEn(browser, root){
     check('chaves de texto encontradas', keys.length > 100, keys.length);
     let iguais = 0, total = 0;
     // published_at/rejected_at... = new Date().toISOString() (relógio fixo, mas por garantia)
-    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST');
+    // E-mail de contato do Premium trocado na main (brunemed1310@gmail.com -> contato@profbrune.com.br, shared/permissions.js): o REF antigo ainda tem o e-mail velho; neutralizado nos dois lados.
+    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ch\.verify=(Vérifier|Verificar|Check)/g, 'ch.verify=VERIFICAR').replace(/\\"(Vérifier|Verificar|Check)\\"/g, '\\"VERIFICAR\\"').replace(VERIFICAR_RE, '>VERIFICAR</button>').replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL');
     for (const lado of ['pt', 'en']){
       const A = antes[lado], B = depois[lado];
       check(lado + ': a sequência rodou no fr de antes', Object.keys(A).length > (lado === 'pt' ? 900 : 30), Object.keys(A).length);
@@ -578,7 +599,13 @@ async function fingerprintEn(browser, root){
           continue;
         }
         total++;
-        const a = norm(A[k]), b = norm(B[k]);
+        let a = norm(A[k]), b = norm(B[k]);
+        // Expressões em passos (2026-10-26, docs/historico/23-auditoria-telas-de-exercicio.md): a pergunta e a devolutiva das Expressões mudaram
+        // DE PROPÓSITO (palpite + opções numeradas + passos). Cena do player de Expressão (antes: desfoque/devolutiva única; agora: expr-wrap)
+        // não se compara; o resto, sim. "dep_" de Expressão compara só o estado (o tamanho do HTML leva o player junto).
+        if (/challenge-hypothesis|challenge-feedback-meaning|challenge-microactivity/.test(a) && /expr-wrap|expr-panel|expr-final/.test(b)){ iguais++; passed++; continue; }
+        const idDep = (k.match(/^dep_(.+)_\d+$/) || [])[1];
+        if (idDep && String(A.expr_ids || '').split(',').includes(idDep)){ a = a.replace(/^"\d+/, '"'); b = b.replace(/^"\d+/, '"'); }
         if (a === b){ iguais++; passed++; continue; }
         let i = 0; while (i < a.length && a[i] === b[i]) i++;
         check('igual ao fr de antes (' + lado + '): ' + k, false, { antes: a.slice(Math.max(0, i - 200), i + 250), depois: (b || '').slice(Math.max(0, i - 200), i + 250) });
