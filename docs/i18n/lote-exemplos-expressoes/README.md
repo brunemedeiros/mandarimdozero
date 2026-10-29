@@ -46,3 +46,11 @@ Wiktionnaire, CNRTL (pela API do site) e Larousse abriram; Expressio não (403/D
 - Literais conferidos e mantidos: gueule de bois (boca seca como madeira), flemme, cafard, fauché, cinglé, bourré, casser les bonbons, à fond la caisse, grasse matinée, poser un lapin, tomber dans les pommes, faire la queue, main morte, c'est parti.
 - Sem fonte para a origem (hipótese): avoir les boules, avoir la pêche, mettre le paquet, se casser, foutre le camp, briques, casser les pieds.
 - Duplicata: `expr-a1m4-001` (despublicada em 2026-10-19) e `expr-lote4-016` são a mesma expressão (il pleut des cordes).
+
+## Decisões da autora sobre os literais (2026-10-29)
+- `arrête ton char`: fica "para com a sua lorota" (origem charre = exagero; trocadilho com o carro/Ben-Hur só em nota).
+- `bol` (avoir du bol / pas de bol): volta a "ter tigela / sem tigela" + **nota** de que "bol" vem do sentido antigo de "bunda" (eufemismo de "cul"). A nota ainda não tem campo no app: entra no PR do app.
+- Os três `coup`: literal mesmo ("isso vale o golpe", "golpe de fio", "golpe de mão"); o sentido de "ação rápida" fica na explicação.
+- `n'importe quoi`: "qualquer coisa" / "any thing".
+- `Comme ci, comme ça` (expr-a1m1-002): **despublicada** em produção e no Staging em 2026-10-29 (status `approved` + `unpublished_*`, igual ao botão Despublicar). Continua no lote porque o SQL só preenche campos.
+- Hash do `data` esperado no Staging depois de tudo: `695d3b5a8786e419ec10075dcc0e7d78`.
