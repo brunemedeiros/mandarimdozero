@@ -132,6 +132,30 @@ function applySerializedState(data){
   }
 }
 
+// P1 (docs/p1-memoria-por-idioma.md): curso que ainda não tem bloco salvo recebe a memória dos cartões da professora e
+// próprios do IDIOMA (LangCardMemory.memoryEntriesForLoad). Só sobe progresso: um cartão que já tem mais histórico no STATE
+// fica como está. Cartões da trilha não são tocados (as entradas são só de professora/próprios).
+function applyLanguageCardMemory(entries){
+  if (!Array.isArray(entries) || !entries.length || typeof LangCardMemory === 'undefined') return;
+  const byId = {};
+  STATE.cards.forEach(c => { if (c && c.id != null) byId[String(c.id)] = c; });
+  const better = entries.filter(e => {
+    const c = byId[String(e.id)];
+    return !c || LangCardMemory.compareHistory(e, c) > 0;
+  });
+  mergeSavedCards(STATE.cards, better);
+  // A2: busca falhou -> as entradas sem par ficam guardadas para o próximo save (nunca apagar progresso).
+  if (typeof cardOriginsWithFailedFetch === 'function'){
+    const failed = cardOriginsWithFailedFetch();
+    if (failed.length){
+      const keep = unmatchedSavedCardsOfOrigins(STATE.cards, entries, failed);
+      const ids = new Set(PRESERVED_SAVED_CARDS.map(s => s && s.id));
+      keep.forEach(s => { if (!ids.has(s.id)) PRESERVED_SAVED_CARDS.push(s); });
+    }
+  }
+  STATE.cards.forEach(c => { if (c && (c.origin === 'teacher' || c.origin === 'self')) migrateCardToFSRS(c); });
+}
+
 function badgeModesUsedCount(s){
   const used = Object.assign({}, s.modesUsed || {});
   if (s.totalReviews > 0) used.review = true;
