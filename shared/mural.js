@@ -693,13 +693,15 @@ async function renderTeacherMuralSection(){
   if (shell) shell.style.display = '';
   const list = await muralLoadList();
   muralApplyBadges();
-  const tch = list?.as_teacher;
-  if (!tch){ muralShowTeacherBox(['mural']); wrap.innerHTML = `<p class="profile-empty-note">${muralErrorText('not_authorized')}</p>`; return; }
   const st = MURAL_STATE.teacher;
+  // Sem o Mural (erro de rede, banco sem a 087), Aulas e materiais continuam abrindo: só o mural e Pessoas dependem dele.
+  const tch = list?.as_teacher || (st.tab === 'aulas' ? { classrooms: [], roster: [] } : null);
+  if (!tch){ muralShowTeacherBox(['mural']); wrap.innerHTML = `<p class="profile-empty-note">${muralErrorText('not_authorized')}</p>`; return; }
   const classrooms = tch.classrooms || [];
   const roster = tch.roster || [];
-  const valid = new Set(['all', ...classrooms.map(c => 'c:' + c.id), ...roster.map(s => 's:' + s.id)]);
-  if (!st.sel || !valid.has(st.sel)) st.sel = 'all';
+  // Sem a lista do Mural não dá para conferir a escolha: fica a que veio (ex.: aluno aberto pela ficha em Alunos).
+  const valid = list?.as_teacher ? new Set(['all', ...classrooms.map(c => 'c:' + c.id), ...roster.map(s => 's:' + s.id)]) : null;
+  if (!st.sel || (valid && !valid.has(st.sel))) st.sel = 'all';
   if (st.tab === 'mural' && st.sel === 'all') st.sel = classrooms.length ? 'c:' + classrooms[0].id : (roster.length ? 's:' + roster[0].id : 'all');
   const cUnread = (c) => c.unread || 0;
   const studentSel = st.sel.startsWith('s:') ? st.sel.slice(2) : '';
