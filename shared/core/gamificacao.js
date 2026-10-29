@@ -28,17 +28,11 @@ function maybeShowStreakCelebration(){
 // Etapa 6 ("Voz da Prof. Brune", decisão da dona de 2026-10-26): as telas de conclusão da trilha (Lição concluída,
 // Unidade concluída, Ponto de verificação do módulo, Teste de Nível) NÃO abrem mais a janela da sequência por cima;
 // ela fica pendente e aparece depois do "Continuar", já de volta à trilha (ou ao sair pelo ✕, ver exitToPath).
-// Na 1ª lição do curso, o bloco "Recado da Prof. Brune" (STEP_STATE.welcomeBShown) já diz "Sequência: 1 dia" com a
-// mesma informação da janela; aí a janela é pulada (a notificação do sino continua sendo disparada).
+// Na 1ª lição do curso a janela também aparece depois do Continuar (decisão da dona de 2026-10-29), mesmo com o bloco
+// "Recado da Prof. Brune" já falando da sequência.
 function showDeferredStreakCelebration(){
   if (!STATE.pendingStreakCelebration) return;
-  if (STEP_STATE.welcomeBShown){
-    STEP_STATE.welcomeBShown = false;
-    STATE.pendingStreakCelebration = false;
-    renderTopbarStats();
-    fireNotificationEvent('streak_completed', 'streak', { days: STATE.streak });
-    return;
-  }
+  if (typeof STEP_STATE !== 'undefined') STEP_STATE.welcomeBShown = false;
   maybeShowStreakCelebration();
 }
 

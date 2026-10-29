@@ -209,7 +209,7 @@ async function scenarioNewCourse(browser, base, app, lang){
   await page.waitForTimeout(1200);
   const onTrail = await page.evaluate(() => getComputedStyle(document.getElementById('path-list-wrap')).display !== 'none');
   check(`${tag}: Continuar volta à trilha`, onTrail);
-  check(`${tag}: 1ª lição com bloco B: janela da sequência pulada (mesmo conteúdo do bloco)`, !(await streakModalVisible(page)));
+  check(`${tag}: 1ª lição com bloco B: janela da sequência aparece depois do Continuar (decisão de 2026-10-29)`, await streakModalVisible(page));
   // Bloco do curso: 'frances'/'mandarim' (pt-BR) ou 'frances@en'/'mandarim@en' (site em inglês).
   const saved = await page.evaluate((k) => { const last = window.__upserts[window.__upserts.length - 1]; if (!last || !last.data) return null;
     const key = Object.keys(last.data).find(x => x === k || x.startsWith(k + '@')); return key ? last.data[key].welcome : null; }, BLOCK[app]);
