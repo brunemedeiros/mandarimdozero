@@ -1,4 +1,4 @@
-// Regra da dona (2026-10-26): no Ouça e traduza em pt-BR, resposta em português de PORTUGAL não é "certa": é "Quase"
+// Regra da dona (2026-10-26; código comum desde 2026-10-29): no Ouça e traduza em pt-BR, resposta em português de PORTUGAL não é "certa": é "Quase"
 // ('partial'), e a devolutiva mostra a forma do Brasil. Roda o bloco REAL challenge-translation-logic de shared/desafios.js.
 // Também varre TODAS as traduções aceitas do repositório (fr/challenges.js, lotes, retratos da produção): nenhuma pode ter
 // marca de Portugal (fora as listadas em CONHECIDAS, que o SQL docs/rollout-sql/desafios-correcoes-2026-10-26.sql tira) e
@@ -8,7 +8,9 @@ const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.resolve(__dirname, '..', '..');
 const SRC = fs.readFileSync(path.join(ROOT, 'shared', 'desafios.js'), 'utf8');
 const a = SRC.indexOf('// BEGIN challenge-translation-logic'), b = SRC.indexOf('// END challenge-translation-logic');
-const ctx = {}; vm.runInNewContext(SRC.slice(a, b) + '\n;globalThis.__x = { listenTranslateOutcome, listenTranslateVerdict, ptEuropeanToBrazilian, translationHasPersonMismatch };', ctx);
+// 2026-10-29: a detecção/troca PT-PT -> BR mora no código comum (shared/core/familias/portugues-variantes.js), carregado antes.
+const PV_SRC = fs.readFileSync(path.join(ROOT, 'shared', 'core', 'familias', 'portugues-variantes.js'), 'utf8');
+const ctx = {}; vm.runInNewContext(PV_SRC + '\n' + SRC.slice(a, b) + '\n;globalThis.__x = { listenTranslateOutcome, listenTranslateVerdict, ptEuropeanToBrazilian, translationHasPersonMismatch };', ctx);
 const { listenTranslateOutcome, listenTranslateVerdict, ptEuropeanToBrazilian, translationHasPersonMismatch } = ctx.__x;
 
 let passed = 0, failed = 0;

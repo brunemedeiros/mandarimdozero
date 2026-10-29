@@ -909,7 +909,7 @@ function checkListenTranslateAnswer(c){
   const yoursHTML = marked ? markedWordsHTML(marked.student) : escapeHtmlChallenge(studentAnswer || '—');
   const expectedHTML = marked ? markedWordsHTML(marked.reference) : escapeHtmlChallenge((analysis && analysis.bestRef) || lt.refs[0]);
   const ltBodyHTML = `
-      ${ptPt ? `<p class="listen-translate-feedback-warning lt-ptpt-warning">${chT('ch.lt.ptpt', { forms: ptPt.marks.map(m => chT('ch.lt.ptpt.pair', { br: escapeHtmlChallenge(m.br), pt: escapeHtmlChallenge(m.pt) })).join(', ') })}</p>` : ''}${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
+      ${ptPt ? ptVariantes().ptBrFeedbackHTML(ptPt.marks, { t: chT, keys: { line: 'ch.lt.ptpt', pair: 'ch.lt.ptpt.pair' }, esc: escapeHtmlChallenge, tag: 'p', cls: 'listen-translate-feedback-warning lt-ptpt-warning' }) : ''}${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
       ${analysis ? translationAlertsHTML(analysis, outcome) : ''}
       <div class="fb-cmp">
         <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${yoursHTML}</p>

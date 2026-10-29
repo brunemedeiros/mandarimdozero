@@ -998,88 +998,27 @@ function listenTranslateBaseOutcome(studentAnswer, referenceTranslations, person
 // ---- Português de Portugal na resposta (regra da dona, 2026-10-26) ----
 // O site em pt-BR ensina o português do Brasil: resposta com marca de Portugal nunca é "certa". Se, trocada
 // pela forma do Brasil, ela bate com uma referência, o resultado é 'partial' (Quase) e a devolutiva mostra a
-// forma do Brasil. Só entram marcas seguras: a construção estar/andar/ficar + "a" + infinitivo ("estou a
-// comer" = "estou comendo") e vocabulário típico (lista abaixo). "tu" + 2ª pessoa NÃO conta (o Brasil também
-// usa). Vale só para o comparador em português; no site em inglês o comparador é outro (translation-compare.js).
-const PT_EU_ASPECT_AUX = new Set([
-  'estou','estas','esta','estamos','estao','estava','estavas','estavamos','estavam','estive','estiveste','esteve',
-  'estivemos','estiveram','estarei','estaras','estara','estaremos','estarao','estaria','estarias','estariamos','estariam',
-  'esteja','estejas','estejamos','estejam','estivesse','estivesses','estivessemos','estivessem','estar',
-  'ando','andas','anda','andamos','andam','andava','andavas','andavamos','andavam','andei','andou','andaram','andar',
-  'fico','ficas','fica','ficamos','ficam','ficava','ficavas','ficavamos','ficavam','fiquei','ficou','ficaram','ficar',
-  'ficarei','ficara','ficaria'
-]);
-// Palavras em -ar/-er/-ir que não são infinitivo depois de "estar a" (substantivos).
-const PT_EU_NOT_INFINITIVE = new Set(['lugar','mar','par','ar','bar','colher','mulher','prazer','altar','nivel','dever']);
-// [palavras de Portugal (normalizadas, sem acento), forma do Brasil]
-const PT_EU_VOCAB = [
-  [['casas','de','banho'], 'banheiros'], [['casa','de','banho'], 'banheiro'],
-  [['pequenos','almocos'], 'cafés da manhã'], [['pequeno','almoco'], 'café da manhã'], [['pequeno-almoco'], 'café da manhã'],
-  [['telemovel'], 'celular'], [['telemoveis'], 'celulares'],
-  [['autocarro'], 'ônibus'], [['autocarros'], 'ônibus'],
-  [['comboio'], 'trem'], [['comboios'], 'trens'],
-  [['facto'], 'fato'], [['factos'], 'fatos'],
-  [['contacto'], 'contato'], [['contactos'], 'contatos'], [['contactar'], 'contatar'],
-  [['ecra'], 'tela'], [['ecras'], 'telas'],
-  [['frigorifico'], 'geladeira'], [['frigorificos'], 'geladeiras'],
-  [['rapariga'], 'moça'], [['raparigas'], 'moças']
-];
-// "sumo" (suco) só como substantivo: "eu sumo" (do verbo sumir) é do Brasil.
-const PT_EU_SUMO_BEFORE = new Set(['o','um','os','uns','do','no','ao','meu','teu','seu','nosso','este','esse','aquele','de','com']);
-const PT_EU_TRANSPORT = new Set(['autocarro','autocarros','comboio','comboios','onibus','trem','trens','metro','taxi','aviao','barco','eletrico','electrico']);
-
-function ptEuGerund(inf){
-  if (inf === 'por') return 'pondo';
-  return inf.slice(0, -2) + ({ ar: 'ando', er: 'endo', ir: 'indo' })[inf.slice(-2)];
+// forma do Brasil. A detecção e a troca são COMUNS a todo exercício com resposta em português (2026-10-29):
+// shared/core/familias/portugues-variantes.js (PortuguesVariantes). Vale só para o comparador em português; no site
+// em inglês o comparador é outro (translation-compare.js).
+function ptVariantes(){
+  return (typeof PortuguesVariantes !== 'undefined' && PortuguesVariantes) || (typeof globalThis !== 'undefined' && globalThis.PortuguesVariantes) || null;
 }
 // Devolve { text: a resposta com as formas do Brasil, marks: [{ pt, br }] } (marks vazio = nenhuma marca).
 function ptEuropeanToBrazilian(text){
-  const toks = String(text || '').split(/\s+/).filter(Boolean).map(raw => {
-    const core = raw.replace(/^[^\p{L}\d]+|[^\p{L}\d-]+$/gu, '');
-    return { raw, core, norm: normalizeForTranslationCompare(core) };
-  });
-  const out = [], marks = [];
-  const isInf = w => (/^[a-z]{2,}(ar|er|ir)$/.test(w) && !PT_EU_NOT_INFINITIVE.has(w)) || w === 'por';
-  for (let i = 0; i < toks.length; i++){
-    const t = toks[i];
-    // estar/andar/ficar + a + infinitivo -> gerúndio
-    if (PT_EU_ASPECT_AUX.has(t.norm) && toks[i + 1] && toks[i + 1].norm === 'a' && toks[i + 2] && isInf(toks[i + 2].norm)){
-      const ger = ptEuGerund(toks[i + 2].norm);
-      out.push(t.core, ger);
-      marks.push({ pt: `${t.core} a ${toks[i + 2].core}`.toLowerCase(), br: `${t.core} ${ger}`.toLowerCase() });
-      i += 2; continue;
-    }
-    // apanhar (o autocarro, o comboio...) -> pegar
-    if (/^apanh(ar|o|as|a|amos|am|ei|ou|aram|ava|avas|avamos|avam|aste|ando|e|es|em)$/.test(t.norm)
-        && toks.slice(i + 1, i + 4).some(x => PT_EU_TRANSPORT.has(x.norm))){
-      const rest = t.norm.slice(5);
-      const br = (/^[ei]/.test(rest) ? 'pegu' : 'peg') + rest;
-      out.push(br); marks.push({ pt: t.core.toLowerCase(), br }); continue;
-    }
-    if (t.norm === 'sumo' && ((i > 0 && PT_EU_SUMO_BEFORE.has(toks[i - 1].norm)) || (toks[i + 1] && toks[i + 1].norm === 'de'))){
-      out.push('suco'); marks.push({ pt: 'sumo', br: 'suco' }); continue;
-    }
-    if (t.norm === 'sumos'){ out.push('sucos'); marks.push({ pt: 'sumos', br: 'sucos' }); continue; }
-    const v = PT_EU_VOCAB.find(([seq]) => seq.every((w, k) => toks[i + k] && toks[i + k].norm === w));
-    if (v){
-      const n = v[0].length;
-      out.push(v[1]);
-      marks.push({ pt: toks.slice(i, i + n).map(x => x.core).join(' ').toLowerCase(), br: v[1] });
-      i += n - 1; continue;
-    }
-    out.push(t.raw);
-  }
-  return { text: marks.length ? out.join(' ') : String(text || ''), marks };
+  const pv = ptVariantes();
+  return pv ? pv.paraBrasil(text) : { text: String(text || ''), marks: [] };
 }
 
-// Veredito completo do Ouça e traduza em português: { outcome, ptPt } (ptPt = marcas de Portugal achadas, ou null).
+// Veredito completo do Ouça e traduza em português: { outcome, ptPt } (ptPt = { text, marks } de Portugal achadas, ou null).
 function listenTranslateVerdict(studentAnswer, referenceTranslations, personMismatch, extra){
   const base = listenTranslateBaseOutcome(studentAnswer, referenceTranslations, personMismatch, extra);
-  const eu = ptEuropeanToBrazilian(studentAnswer);
-  if (!eu.marks.length) return { outcome: base, ptPt: null };
-  const br = listenTranslateBaseOutcome(eu.text, referenceTranslations, personMismatch, extra);
-  if (br === 'fail' && base === 'fail') return { outcome: 'fail', ptPt: null };
-  return { outcome: 'partial', ptPt: eu };
+  const pv = ptVariantes();
+  const adj = pv && pv.ptBrVerdictAdjust(studentAnswer, referenceTranslations, {
+    aceita: (texto) => (texto === studentAnswer ? base : listenTranslateBaseOutcome(texto, referenceTranslations, personMismatch, extra)) !== 'fail'
+  });
+  if (!adj) return { outcome: base, ptPt: null };
+  return { outcome: 'partial', ptPt: { text: adj.text, marks: adj.pairs } };
 }
 function listenTranslateOutcome(studentAnswer, referenceTranslations, personMismatch, extra){
   return listenTranslateVerdict(studentAnswer, referenceTranslations, personMismatch, extra).outcome;
