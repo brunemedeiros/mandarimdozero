@@ -107,8 +107,17 @@ console.log('== mapa e dados reais');
   check('real: délicieux acusado em "Pedir quantidades na feira" (sem exceção ali)', r2.nao_vistas.includes('délicieux'), r2);
   const r3 = V.validarTexto('Ça fait cinq euros.', 'dialogo', 'A1-5', mapaReal, excReal);
   check("real: l'euro vale no A1 inteiro (decisão 260)", !r3.nao_vistas.includes('euros'), r3);
-  const r4 = V.validarTexto('Je vais au musée.', 'dialogo', 'A1-1', mapaReal, excReal);
-  check('real: "vais" e "musée" acusados em "Cumprimentar e se despedir"', r4.nao_vistas.includes('vais') && r4.nao_vistas.includes('musée'), r4);
+  // Desde a decisão 313, "je vais bien" é cartão de "Cumprimentar e se despedir": "vais" passa a ser vista lá; "veux" (vouloir, de
+  // "Verbos muito usados") e "musée" continuam não vistas.
+  const r4 = V.validarTexto('Je veux aller au musée.', 'dialogo', 'A1-1', mapaReal, excReal);
+  check('real: "veux" e "musée" acusados em "Cumprimentar e se despedir"', r4.nao_vistas.includes('veux') && r4.nao_vistas.includes('musée'), r4);
+  const r4b = V.validarTexto('Je vais bien, et vous ?', 'dialogo', 'A1-1', mapaReal, excReal);
+  check('real: "Je vais bien, et vous ?" vista no fim de "Cumprimentar e se despedir" (cartões da decisão 313)', r4b.nao_vistas.length === 0 && r4b.incertas.length === 0, r4b);
+  const r4c = V.validarTexto('Comment allez-vous ?', 'dialogo', 'A1-1', mapaReal, excReal);
+  const r4d = V.validarTexto('Comment allez-vous ?', 'ponto_verificacao_unidade', 'A1-1', mapaReal, excReal);
+  check('real: palavra só de nota (exemplos com tradução) conta no diálogo e não na Revisão da unidade (decisões 253, 265 e 274)',
+    !V.validarTexto('mademoiselle', 'dialogo', 'A1-1', mapaReal, excReal).nao_vistas.length &&
+    V.validarTexto('mademoiselle', 'ponto_verificacao_unidade', 'A1-1', mapaReal, excReal).nao_vistas.includes('mademoiselle'), [r4c, r4d]);
   const d = V.carregarDados();
   const grupos = d.funcionais.grupos;
   check('palavras_funcionais.json: todo grupo tem justificativa', grupos.every(g => typeof g.justificativa === 'string' && g.justificativa.length > 10));

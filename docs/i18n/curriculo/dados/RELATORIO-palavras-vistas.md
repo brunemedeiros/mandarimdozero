@@ -1,6 +1,6 @@
 # Relatório "só palavras vistas" (gerado)
 
-Gerado por `node fr/scripts/curriculo_palavras_vistas.js --relatorio` em 2026-10-26. **Não editar à mão.**
+Gerado por `node fr/scripts/curriculo_palavras_vistas.js --relatorio` em 2026-10-29. **Não editar à mão.**
 Só informativo (decisão 233): é a lista de reescrita ao vivo do conteúdo publicado medido na posição do mapa NOVO (`mapa.json`). O site ainda
 segue a ordem antiga, então muita coisa aparece aqui sem ser erro no site de hoje. Regras e limitações: `fr/scripts/curriculo_palavras_vistas.js`
 e `docs/guia-do-desenvolvedor.md`.
@@ -14,18 +14,18 @@ e `docs/guia-do-desenvolvedor.md`.
 
 | Seção | Textos | Com achado | Não vistas | Incertas |
 |---|---:|---:|---:|---:|
-| Diálogos | 87 | 15 | 19 | 0 |
-| Opções do "Você entendeu?" | 80 | 16 | 18 | 0 |
+| Diálogos | 87 | 14 | 16 | 0 |
+| Opções do "Você entendeu?" | 80 | 16 | 17 | 0 |
 | Verdadeiro ou falso | 8 | 3 | 3 | 0 |
-| Frases "Na frase" (como se fossem essenciais) | 182 | 97 | 138 | 1 |
-| Gramáticas: telas | 62 | 30 | 38 | 0 |
-| Gramáticas: exercícios | 64 | 30 | 42 | 0 |
+| Frases "Na frase" (como se fossem essenciais) | 182 | 97 | 134 | 1 |
+| Gramáticas: telas | 62 | 29 | 37 | 0 |
+| Gramáticas: exercícios | 64 | 30 | 41 | 0 |
 | Ditados | 21 | 8 | 9 | 0 |
-| Desafios: texto da tarefa | 123 | 47 | 92 | 0 |
-| Desafios: enunciado em francês | 30 | 30 | 195 | 0 |
-| **Total** | 657 | 276 | 554 | 1 |
+| Desafios: texto da tarefa | 123 | 45 | 83 | 0 |
+| Desafios: enunciado em francês | 30 | 30 | 187 | 0 |
+| **Total** | 657 | 272 | 527 | 1 |
 
-Palavras não vistas diferentes: 280 (170 viram cartão ou nota mais adiante no mapa; 110 não estão no mapa).
+Palavras não vistas diferentes: 271 (165 viram cartão ou nota mais adiante no mapa; 106 não estão no mapa).
 
 **As 10 palavras não vistas mais frequentes** (textos em que aparecem; onde o mapa ensina):
 
@@ -34,11 +34,11 @@ Palavras não vistas diferentes: 280 (170 viram cartão ou nota mais adiante no 
 3. *bon*: 10 (sem cartão no mapa)
 4. *quelqu'un*: 7 (sem cartão no mapa)
 5. *veut*: 7 (cartão em "Verbos muito usados" (A1-36))
-6. *bonne*: 6 (sem cartão no mapa)
-7. *faim*: 6 (sem cartão no mapa)
-8. *tout*: 6 (cartão em "Perguntar e indicar o caminho" (A1-8))
-9. *autre*: 5 (sem cartão no mapa)
-10. *demande*: 5 (sem cartão no mapa)
+6. *faim*: 6 (sem cartão no mapa)
+7. *tout*: 6 (cartão em "Perguntar e indicar o caminho" (A1-8))
+8. *autre*: 5 (sem cartão no mapa)
+9. *demande*: 5 (sem cartão no mapa)
+10. *ensemble*: 5 (sem cartão no mapa)
 
 **As 10 incertas mais frequentes:**
 
@@ -53,22 +53,22 @@ Palavras não vistas diferentes: 280 (170 viram cartão ou nota mais adiante no 
 #### M1.1 "Cumprimentar e se despedir" (A1-1)
 
 - Verdadeiro ou falso, `A1-1 V/F 1`: "Merci beaucoup !". não vistas: *beaucoup* (cartão em "Pedir quantidades na feira" (A1-12)).
-- Frases "Na frase" (como se fossem essenciais), `A1-1-p0`: "Bonjour ! Je m'appelle {nome}.". não vistas: *je* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *appelle* (cartão em "Dizer o nome e a nacionalidade" (A1-2)).
+- Frases "Na frase" (como se fossem essenciais), `A1-1-p0`: "Bonjour ! Je m'appelle {nome}.". não vistas: *appelle* (cartão em "Dizer o nome e a nacionalidade" (A1-2)).
 - Frases "Na frase" (como se fossem essenciais), `A1-1-p1`: "Merci beaucoup !". não vistas: *beaucoup* (cartão em "Pedir quantidades na feira" (A1-12)).
-- Frases "Na frase" (como se fossem essenciais), `A1-1-p2`: "Pardon, je ne comprends pas.". não vistas: *je* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *comprends* (sem cartão no mapa).
-- Frases "Na frase" (como se fossem essenciais), `A1-1-p4`: "Bonsoir ! Comment allez-vous ?". não vistas: *allez* (cartão em "Verbos muito usados" (A1-36)).
+- Frases "Na frase" (como se fossem essenciais), `A1-1-p2`: "Pardon, je ne comprends pas.". não vistas: *comprends* (sem cartão no mapa).
+- Frases "Na frase" (como se fossem essenciais), `A1-1-p4`: "Bonsoir ! Comment allez-vous ?". não vistas: *allez-vous* (nota em "Cumprimentar e se despedir" (A1-1)).
 - Frases "Na frase" (como se fossem essenciais), `A1-1-p5`: "Au revoir, à demain !". não vistas: *demain* (cartão em "Dizer o dia e combinar" (A1-7)).
 - Frases "Na frase" (como se fossem essenciais), `A1-1-p7`: "De rien, c'est normal.". não vistas: *est* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *normal* (sem cartão no mapa).
 - Frases "Na frase" (como se fossem essenciais), `A1-1-p8`: "Un café, s'il vous plaît.". não vistas: *café* (cartão em "Gostos e pedidos no café" (A1-5)).
 - Desafios: texto da tarefa, `lt-a1m1-002 (listen_translate)`: "Un café, s'il vous plaît.". não vistas: *café* (cartão em "Gostos e pedidos no café" (A1-5)).
 - Desafios: texto da tarefa, `expr-a1m1-002 (expression)`: "Comme ci, comme ça / Ça va ? — Comme ci, comme ça. / Mon français ? Comme ci, comme ça. / Ça va ? — comme ci, comme ça.". não vistas: *ci* (sem cartão no mapa), *français* (cartão em "Dizer o nome e a nacionalidade" (A1-2)).
-- Desafios: enunciado em francês, `expr-a1m1-002 (expression)`: "Que veut dire « comme ci, comme ça » ? / Moyen, ni bien ni mal / Très bien / Très mal / Tout de suite / Ni bien ni mal ; moyen.". não vistas: *veut* (cartão em "Verbos muito usados" (A1-36)), *dire* (cartão em "Procurar emprego" (A2-20)), *ci* (sem cartão no mapa), *moyen* (sem cartão no mapa), *mal* (cartão em "Corpo e dores" (A1-15)), *tout* (cartão em "Perguntar e indicar o caminho" (A1-8)), *suite* (sem cartão no mapa).
-- Desafios: texto da tarefa, `expr-a1m1-003 (expression)`: "Pas mal / Ça va ? — Pas mal, merci ! / Ce café est pas mal. / Ça va ? — pas mal, merci !". não vistas: *mal* (cartão em "Corpo e dores" (A1-15)), *café* (cartão em "Gostos e pedidos no café" (A1-5)), *est* (cartão em "Dizer o nome e a nacionalidade" (A1-2)).
-- Desafios: enunciado em francês, `expr-a1m1-003 (expression)`: "Que veut dire « pas mal » ? / Plutôt bien / Très mauvais / Très cher / Très tard / Plutôt bien.". não vistas: *veut* (cartão em "Verbos muito usados" (A1-36)), *dire* (cartão em "Procurar emprego" (A2-20)), *mal* (cartão em "Corpo e dores" (A1-15)), *plutôt* (sem cartão no mapa), *mauvais* (sem cartão no mapa), *cher* (cartão em "Comprar roupas" (A1-10)), *tard* (cartão em "Dizer as horas e a rotina" (A1-6)).
-- Desafios: texto da tarefa, `expr-a1m1-004 (expression)`: "Ça marche ! / Un café ensemble ? — Ça marche ! / Je t'appelle ce soir. — Ça marche ! / Un café ? — Ça marche !". não vistas: *marche* (cartão em "Comprar on-line e reclamar" (A2-8)), *café* (cartão em "Gostos e pedidos no café" (A1-5)), *ensemble* (sem cartão no mapa), *je* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *appelle* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *soir* (cartão em "Dizer as horas e a rotina" (A1-6)).
-- Desafios: enunciado em francês, `expr-a1m1-004 (expression)`: "Que veut dire « Ça marche ! » ? / D'accord, c'est bon / Je ne comprends pas / J'ai faim / Au revoir / D'accord ; c'est bon.". não vistas: *veut* (cartão em "Verbos muito usados" (A1-36)), *dire* (cartão em "Procurar emprego" (A2-20)), *marche* (cartão em "Comprar on-line e reclamar" (A2-8)), *d'accord* (cartão em "Convidar, aceitar, recusar e se desculpar" (A1-27)), *est* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *bon* (sem cartão no mapa), *je* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *comprends* (sem cartão no mapa), *ai* (cartão em "Dizer a idade: de 1 a 29" (A1-3)), *faim* (sem cartão no mapa).
-- Desafios: texto da tarefa, `expr-a1m1-005 (expression)`: "Pas de problème ! / Pardon ! — Pas de problème ! / Tu peux m'aider ? — Pas de problème. / Pardon ! — Pas de problème !". não vistas: *problème* (cartão em "Contar um imprevisto" (A2-5)), *tu* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *peux* (cartão em "Verbos muito usados" (A1-36)), *aider* (sem cartão no mapa).
-- Desafios: enunciado em francês, `expr-a1m1-005 (expression)`: "Que veut dire « Pas de problème ! » ? / Ce n'est pas grave / C'est très difficile / Je suis fatigué / Je ne sais pas / Ce n'est pas grave ; d'accord.". não vistas: *veut* (cartão em "Verbos muito usados" (A1-36)), *dire* (cartão em "Procurar emprego" (A2-20)), *problème* (cartão em "Contar um imprevisto" (A2-5)), *est* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *grave* (cartão em "Emergências" (A2-11)), *difficile* (sem cartão no mapa), *je* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *suis* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *fatigué* (sem cartão no mapa), *sais* (cartão em "Falar do aprendizado de línguas" (A2-17)), *d'accord* (cartão em "Convidar, aceitar, recusar e se desculpar" (A1-27)).
+- Desafios: enunciado em francês, `expr-a1m1-002 (expression)`: "Que veut dire « comme ci, comme ça » ? / Moyen, ni bien ni mal / Très bien / Très mal / Tout de suite / Ni bien ni mal ; moyen.". não vistas: *veut* (cartão em "Verbos muito usados" (A1-36)), *dire* (cartão em "Procurar emprego" (A2-20)), *ci* (sem cartão no mapa), *moyen* (sem cartão no mapa), *mal* (nota em "Cumprimentar e se despedir" (A1-1)), *tout* (cartão em "Perguntar e indicar o caminho" (A1-8)), *suite* (sem cartão no mapa).
+- Desafios: texto da tarefa, `expr-a1m1-003 (expression)`: "Pas mal / Ça va ? — Pas mal, merci ! / Ce café est pas mal. / Ça va ? — pas mal, merci !". não vistas: *mal* (nota em "Cumprimentar e se despedir" (A1-1)), *café* (cartão em "Gostos e pedidos no café" (A1-5)), *est* (cartão em "Dizer o nome e a nacionalidade" (A1-2)).
+- Desafios: enunciado em francês, `expr-a1m1-003 (expression)`: "Que veut dire « pas mal » ? / Plutôt bien / Très mauvais / Très cher / Très tard / Plutôt bien.". não vistas: *veut* (cartão em "Verbos muito usados" (A1-36)), *dire* (cartão em "Procurar emprego" (A2-20)), *mal* (nota em "Cumprimentar e se despedir" (A1-1)), *plutôt* (sem cartão no mapa), *mauvais* (sem cartão no mapa), *cher* (cartão em "Comprar roupas" (A1-10)), *tard* (cartão em "Dizer as horas e a rotina" (A1-6)).
+- Desafios: texto da tarefa, `expr-a1m1-004 (expression)`: "Ça marche ! / Un café ensemble ? — Ça marche ! / Je t'appelle ce soir. — Ça marche ! / Un café ? — Ça marche !". não vistas: *marche* (cartão em "Comprar on-line e reclamar" (A2-8)), *café* (cartão em "Gostos e pedidos no café" (A1-5)), *ensemble* (sem cartão no mapa), *appelle* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *soir* (cartão em "Dizer as horas e a rotina" (A1-6)).
+- Desafios: enunciado em francês, `expr-a1m1-004 (expression)`: "Que veut dire « Ça marche ! » ? / D'accord, c'est bon / Je ne comprends pas / J'ai faim / Au revoir / D'accord ; c'est bon.". não vistas: *veut* (cartão em "Verbos muito usados" (A1-36)), *dire* (cartão em "Procurar emprego" (A2-20)), *marche* (cartão em "Comprar on-line e reclamar" (A2-8)), *d'accord* (cartão em "Convidar, aceitar, recusar e se desculpar" (A1-27)), *est* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *bon* (sem cartão no mapa), *comprends* (sem cartão no mapa), *ai* (cartão em "Dizer a idade: de 1 a 29" (A1-3)), *faim* (sem cartão no mapa).
+- Desafios: texto da tarefa, `expr-a1m1-005 (expression)`: "Pas de problème ! / Pardon ! — Pas de problème ! / Tu peux m'aider ? — Pas de problème. / Pardon ! — Pas de problème !". não vistas: *problème* (cartão em "Contar um imprevisto" (A2-5)), *peux* (cartão em "Verbos muito usados" (A1-36)), *aider* (sem cartão no mapa).
+- Desafios: enunciado em francês, `expr-a1m1-005 (expression)`: "Que veut dire « Pas de problème ! » ? / Ce n'est pas grave / C'est très difficile / Je suis fatigué / Je ne sais pas / Ce n'est pas grave ; d'accord.". não vistas: *veut* (cartão em "Verbos muito usados" (A1-36)), *dire* (cartão em "Procurar emprego" (A2-20)), *problème* (cartão em "Contar um imprevisto" (A2-5)), *est* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *grave* (cartão em "Emergências" (A2-11)), *difficile* (sem cartão no mapa), *suis* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *fatigué* (sem cartão no mapa), *sais* (cartão em "Falar do aprendizado de línguas" (A2-17)), *d'accord* (cartão em "Convidar, aceitar, recusar e se desculpar" (A1-27)).
 
 #### M1.2 "Dizer o nome e a nacionalidade" (A1-2)
 
@@ -77,7 +77,7 @@ Palavras não vistas diferentes: 280 (170 viram cartão ou nota mais adiante no 
 - Frases "Na frase" (como se fossem essenciais), `A1-2-p6`: "Le Brésil est très grand.". não vistas: *grand* (cartão em "Descrever a aparência" (A1-16)).
 - Frases "Na frase" (como se fossem essenciais), `A1-2-p7`: "Le pays est magnifique.". não vistas: *magnifique* (sem cartão no mapa).
 - Desafios: texto da tarefa, `expr-a1m1-001 (expression)`: "Enchanté ! / Bonjour, je m'appelle Léo. — Enchanté ! / Je suis Ana. Enchantée ! / Bonjour, je m'appelle Ana. — Enchanté !". não vistas: *enchanté* (sem cartão no mapa), *enchantée* (sem cartão no mapa).
-- Desafios: enunciado em francês, `expr-a1m1-001 (expression)`: "Quand dit-on « Enchanté ! » ? / Quand on rencontre quelqu'un / Quand on dit au revoir / Quand on a faim / Quand on est fatigué / On le dit quand on rencontre quelqu'un pour la première fois.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *enchanté* (sem cartão no mapa), *rencontre* (sem cartão no mapa), *quelqu'un* (sem cartão no mapa), *a* (cartão em "Dizer a idade: de 1 a 29" (A1-3)), *faim* (sem cartão no mapa), *fatigué* (sem cartão no mapa), *première* (sem cartão no mapa), *fois* (cartão em "Frequência" (A1-35)).
+- Desafios: enunciado em francês, `expr-a1m1-001 (expression)`: "Quand dit-on « Enchanté ! » ? / Quand on rencontre quelqu'un / Quand on dit au revoir / Quand on a faim / Quand on est fatigué / On le dit quand on rencontre quelqu'un pour la première fois.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *enchanté* (sem cartão no mapa), *rencontre* (sem cartão no mapa), *quelqu'un* (sem cartão no mapa), *a* (nota em "Cumprimentar e se despedir" (A1-1)), *faim* (sem cartão no mapa), *fatigué* (sem cartão no mapa), *première* (sem cartão no mapa), *fois* (cartão em "Frequência" (A1-35)).
 
 #### M1.3 "Dizer a idade: de 1 a 29" (A1-3)
 
@@ -154,9 +154,9 @@ Palavras não vistas diferentes: 280 (170 viram cartão ou nota mais adiante no 
 - Frases "Na frase" (como se fossem essenciais), `A1-6-p5`: "Le midi, je mange à la maison.". não vistas: *mange* (cartão em "Gostos e pedidos no café" (A1-5)), *maison* (cartão em "Tipos de moradia e cômodos" (A1-17)).
 - Frases "Na frase" (como se fossem essenciais), `A1-6-p6`: "Il va se réveiller tôt demain.". não vistas: *demain* (cartão em "Dizer o dia e combinar" (A1-7)).
 - Frases "Na frase" (como se fossem essenciais), `A1-6-p8`: "Il doit travailler jusqu'à minuit.". não vistas: *doit* (cartão em "Verbos muito usados" (A1-36)).
-- Frases "Na frase" (como se fossem essenciais), `A1-6-p9`: "Je vais dormir maintenant.". não vistas: *vais* (cartão em "Verbos muito usados" (A1-36)), *maintenant* (cartão em "Comparar antes e agora" (A2-2)).
-- Desafios: texto da tarefa, `expr-a1m2-003 (expression)`: "À tout à l'heure ! / Je vais au marché. — À tout à l'heure ! / Je pars à midi. À tout à l'heure ! / Je pars au travail. — À tout à l'heure !". não vistas: *tout* (cartão em "Perguntar e indicar o caminho" (A1-8)), *vais* (cartão em "Verbos muito usados" (A1-36)), *marché* (cartão em "Comprar on-line e reclamar" (A2-8)), *pars* (cartão em "Países e cidades" (A1-31)).
-- Desafios: enunciado em francês, `expr-a1m2-003 (expression)`: "Quand dit-on « À tout à l'heure ! » ? / Quand on va se revoir bientôt / Quand on ne se revoit jamais / Quand on se voit la semaine prochaine / Quand on arrive / Au revoir, on se voit bientôt dans la journée.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *tout* (cartão em "Perguntar e indicar o caminho" (A1-8)), *jamais* (cartão em "Frequência" (A1-35)), *voit* (cartão em "Verbos muito usados" (A1-36)), *semaine* (cartão em "Dizer o dia e combinar" (A1-7)), *prochaine* (cartão em "Projetos e sonhos" (A2-18)), *arrive* (cartão em "Contar um acontecimento" (A2-6)), *dans* (cartão em "Dizer onde as coisas estão" (A1-18)), *journée* (sem cartão no mapa).
+- Frases "Na frase" (como se fossem essenciais), `A1-6-p9`: "Je vais dormir maintenant.". não vistas: *maintenant* (cartão em "Comparar antes e agora" (A2-2)).
+- Desafios: texto da tarefa, `expr-a1m2-003 (expression)`: "À tout à l'heure ! / Je vais au marché. — À tout à l'heure ! / Je pars à midi. À tout à l'heure ! / Je pars au travail. — À tout à l'heure !". não vistas: *tout* (cartão em "Perguntar e indicar o caminho" (A1-8)), *marché* (cartão em "Comprar on-line e reclamar" (A2-8)), *pars* (cartão em "Países e cidades" (A1-31)).
+- Desafios: enunciado em francês, `expr-a1m2-003 (expression)`: "Quand dit-on « À tout à l'heure ! » ? / Quand on va se revoir bientôt / Quand on ne se revoit jamais / Quand on se voit la semaine prochaine / Quand on arrive / Au revoir, on se voit bientôt dans la journée.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *tout* (cartão em "Perguntar e indicar o caminho" (A1-8)), *jamais* (cartão em "Frequência" (A1-35)), *voit* (cartão em "Verbos muito usados" (A1-36)), *semaine* (cartão em "Dizer o dia e combinar" (A1-7)), *prochaine* (cartão em "Projetos e sonhos" (A2-18)), *arrive* (cartão em "Contar um acontecimento" (A2-6)), *dans* (cartão em "Dizer onde as coisas estão" (A1-18)).
 - Desafios: texto da tarefa, `expr-a1m2-004 (expression)`: "Tout de suite / Tu viens ? — Oui, tout de suite ! / Je viens tout de suite. / Tu viens manger ? — Oui, tout de suite !". não vistas: *tout* (cartão em "Perguntar e indicar o caminho" (A1-8)), *suite* (sem cartão no mapa), *manger* (cartão em "Gostos e pedidos no café" (A1-5)).
 - Desafios: enunciado em francês, `expr-a1m2-004 (expression)`: "Que veut dire « tout de suite » ? / Immédiatement / Beaucoup plus tard / Jamais / Le soir / Immédiatement, sans attendre.". não vistas: *veut* (cartão em "Verbos muito usados" (A1-36)), *dire* (cartão em "Procurar emprego" (A2-20)), *tout* (cartão em "Perguntar e indicar o caminho" (A1-8)), *suite* (sem cartão no mapa), *immédiatement* (sem cartão no mapa), *beaucoup* (cartão em "Pedir quantidades na feira" (A1-12)), *jamais* (cartão em "Frequência" (A1-35)), *attendre* (sem cartão no mapa).
 
@@ -174,14 +174,13 @@ Palavras não vistas diferentes: 280 (170 viram cartão ou nota mais adiante no 
 - Frases "Na frase" (como se fossem essenciais), `A1-7-p2`: "Mon anniversaire est en mars.". não vistas: *anniversaire* (cartão em "Dizer a data e o aniversário" (A1-24)), *mars* (cartão em "Dizer a data e o aniversário" (A1-24)).
 - Frases "Na frase" (como se fossem essenciais), `A1-7-p4`: "Aujourd'hui, il fait beau.". não vistas: *fait* (cartão em "Verbos muito usados" (A1-36)), *beau* (nota em "Descrever a aparência" (A1-16)).
 - Frases "Na frase" (como se fossem essenciais), `A1-7-p5`: "La semaine prochaine, je pars en voyage.". não vistas: *pars* (cartão em "Países e cidades" (A1-31)), *voyage* (cartão em "Contar uma viagem" (A2-4)).
-- Frases "Na frase" (como se fossem essenciais), `A1-7-p6`: "Le mois de janvier est très froid.". não vistas: *mois* (cartão em "Dizer a data e o aniversário" (A1-24)), *janvier* (cartão em "Dizer a data e o aniversário" (A1-24)), *froid* (cartão em "Falar do tempo e das estações" (A1-13)).
+- Frases "Na frase" (como se fossem essenciais), `A1-7-p6`: "Le mois de janvier est très froid.". não vistas: *janvier* (cartão em "Dizer a data e o aniversário" (A1-24)), *froid* (cartão em "Falar do tempo e das estações" (A1-13)).
 - Frases "Na frase" (como se fossem essenciais), `A1-7-p7`: "Mon anniversaire est en décembre.". não vistas: *anniversaire* (cartão em "Dizer a data e o aniversário" (A1-24)), *décembre* (cartão em "Dizer a data e o aniversário" (A1-24)).
 - Frases "Na frase" (como se fossem essenciais), `A1-7-p8`: "Quelle est la date aujourd'hui ?". não vistas: *date* (cartão em "Dizer a data e o aniversário" (A1-24)).
 - Desafios: texto da tarefa, `accent-a1m2-005 (accent)`: "décembre". não vistas: *décembre* (cartão em "Dizer a data e o aniversário" (A1-24)).
 - Desafios: texto da tarefa, `accent-a1m2-006 (accent)`: "février". não vistas: *février* (cartão em "Dizer a data e o aniversário" (A1-24)).
 - Desafios: texto da tarefa, `accent-a1m2-007 (accent)`: "août". não vistas: *août* (cartão em "Dizer a data e o aniversário" (A1-24)).
-- Desafios: texto da tarefa, `expr-a1m2-005 (expression)`: "Bonne journée ! / Au revoir et bonne journée ! / Merci, bonne journée ! / Au revoir, bonne journée !". não vistas: *bonne* (sem cartão no mapa), *journée* (sem cartão no mapa).
-- Desafios: enunciado em francês, `expr-a1m2-005 (expression)`: "Quand dit-on « Bonne journée ! » ? / En se quittant le matin ou l'après-midi / En se couchant / Avant de manger / En arrivant / On le dit pour se quitter pendant la journée.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *bonne* (sem cartão no mapa), *journée* (sem cartão no mapa), *quittant* (sem cartão no mapa), *couchant* (nota em "Dizer as horas e a rotina" (A1-6)), *avant* (cartão em "Contar o que você fez" (A1-20)), *manger* (cartão em "Gostos e pedidos no café" (A1-5)), *arrivant* (cartão em "Contar um acontecimento" (A2-6)), *quitter* (sem cartão no mapa).
+- Desafios: enunciado em francês, `expr-a1m2-005 (expression)`: "Quand dit-on « Bonne journée ! » ? / En se quittant le matin ou l'après-midi / En se couchant / Avant de manger / En arrivant / On le dit pour se quitter pendant la journée.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *quittant* (sem cartão no mapa), *couchant* (nota em "Dizer as horas e a rotina" (A1-6)), *avant* (cartão em "Contar o que você fez" (A1-20)), *manger* (cartão em "Gostos e pedidos no café" (A1-5)), *arrivant* (cartão em "Contar um acontecimento" (A2-6)), *quitter* (sem cartão no mapa).
 
 #### M3.7 "Gramática: advérbios de frequência" (A1-g8)
 
@@ -191,7 +190,7 @@ Palavras não vistas diferentes: 280 (170 viram cartão ou nota mais adiante no 
 - Gramáticas: telas, `A1-g8 tela 2 ex. 2`: "Il chante rarement.". não vistas: *chante* (cartão em "Falar de lazer" (A1-19)).
 - Gramáticas: telas, `A1-g8 tela 3 ex. 1`: "Je ne danse jamais.". não vistas: *danse* (cartão em "Dizer onde as coisas estão" (A1-18)).
 - Gramáticas: telas, `A1-g8 tela 3 ex. 2`: "Il ne sort jamais le lundi.". não vistas: *sort* (cartão em "Falar de lazer" (A1-19)).
-- Gramáticas: exercícios, `A1-g8 exercício 1`: "Je vais toujours au cinéma le week-end.". não vistas: *vais* (cartão em "Verbos muito usados" (A1-36)), *cinéma* (cartão em "Falar de lazer" (A1-19)), *week-end* (cartão em "Falar de lazer" (A1-19)).
+- Gramáticas: exercícios, `A1-g8 exercício 1`: "Je vais toujours au cinéma le week-end.". não vistas: *cinéma* (cartão em "Falar de lazer" (A1-19)), *week-end* (cartão em "Falar de lazer" (A1-19)).
 - Gramáticas: exercícios, `A1-g8 exercício 2`: "Il joue parfois de la guitare.". não vistas: *joue* (cartão em "Falar de lazer" (A1-19)), *guitare* (sem cartão no mapa).
 - Gramáticas: exercícios, `A1-g8 exercício 3`: "Nous sortons souvent le dimanche.". não vistas: *sortons* (cartão em "Falar de lazer" (A1-19)).
 - Gramáticas: exercícios, `A1-g8 exercício 4`: "Elle ne chante jamais.". não vistas: *chante* (cartão em "Falar de lazer" (A1-19)).
@@ -267,7 +266,6 @@ Palavras não vistas diferentes: 280 (170 viram cartão ou nota mais adiante no 
 
 #### M6.1 "Perguntar e indicar o caminho" (A1-8)
 
-- Diálogos, `A1-8-d0`: "Excusez-moi, où est le musée ?". não vistas: *excusez* (cartão em "Escrever para convidar, recusar e agradecer" (A2-28)).
 - Diálogos, `A1-8-d3`: "Non, c'est à cinq minutes.". não vistas: *minutes* (sem cartão no mapa).
 - Opções do "Você entendeu?", `A1-8 check listen opção 1`: "Non, c'est à cinq minutes.". não vistas: *minutes* (sem cartão no mapa).
 - Verdadeiro ou falso, `A1-8 V/F 1`: "C'est loin d'ici ?". não vistas: *ici* (sem cartão no mapa).
@@ -276,16 +274,16 @@ Palavras não vistas diferentes: 280 (170 viram cartão ou nota mais adiante no 
 - Frases "Na frase" (como se fossem essenciais), `A1-8-p5`: "La place est au centre-ville.". não vistas: *centre* (sem cartão no mapa).
 - Frases "Na frase" (como se fossem essenciais), `A1-8-p6`: "L'hôpital est loin d'ici.". não vistas: *l'hôpital* (cartão em "Lugares da cidade" (A1-30)), *ici* (sem cartão no mapa).
 - Desafios: texto da tarefa, `accent-a1m3-002 (accent)`: "hôpital". não vistas: *hôpital* (cartão em "Lugares da cidade" (A1-30)).
-- Desafios: texto da tarefa, `expr-a1m3-001 (expression)`: "Excusez-moi ! / Excusez-moi, où est la gare ? / Excusez-moi, je suis en retard. / Excusez-moi, où est le musée ?". não vistas: *excusez* (cartão em "Escrever para convidar, recusar e agradecer" (A2-28)), *retard* (cartão em "Contar um imprevisto" (A2-5)).
-- Desafios: enunciado em francês, `expr-a1m3-001 (expression)`: "Quand dit-on « Excusez-moi ! » ? / Pour attirer l'attention poliment / Pour dire au revoir / Pour remercier / Pour refuser / On l'utilise pour attirer l'attention ou s'excuser poliment.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *excusez* (cartão em "Escrever para convidar, recusar e agradecer" (A2-28)), *attirer* (sem cartão no mapa), *attention* (sem cartão no mapa), *poliment* (sem cartão no mapa), *dire* (cartão em "Procurar emprego" (A2-20)), *remercier* (cartão em "Escrever para convidar, recusar e agradecer" (A2-28)), *refuser* (cartão em "Escrever para convidar, recusar e agradecer" (A2-28)), *utilise* (sem cartão no mapa), *s'excuser* (cartão em "Escrever para convidar, recusar e agradecer" (A2-28)).
+- Desafios: texto da tarefa, `expr-a1m3-001 (expression)`: "Excusez-moi ! / Excusez-moi, où est la gare ? / Excusez-moi, je suis en retard. / Excusez-moi, où est le musée ?". não vistas: *retard* (cartão em "Contar um imprevisto" (A2-5)).
+- Desafios: enunciado em francês, `expr-a1m3-001 (expression)`: "Quand dit-on « Excusez-moi ! » ? / Pour attirer l'attention poliment / Pour dire au revoir / Pour remercier / Pour refuser / On l'utilise pour attirer l'attention ou s'excuser poliment.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *attirer* (sem cartão no mapa), *attention* (sem cartão no mapa), *poliment* (sem cartão no mapa), *dire* (cartão em "Procurar emprego" (A2-20)), *remercier* (cartão em "Escrever para convidar, recusar e agradecer" (A2-28)), *refuser* (cartão em "Escrever para convidar, recusar e agradecer" (A2-28)), *utilise* (sem cartão no mapa), *s'excuser* (cartão em "Escrever para convidar, recusar e agradecer" (A2-28)).
 - Desafios: texto da tarefa, `expr-a1m3-002 (expression)`: "Je vous en prie / Merci beaucoup ! — Je vous en prie. / Je vous en prie, entrez. / Merci ! — Je vous en prie.". não vistas: *prie* (sem cartão no mapa), *entrez* (sem cartão no mapa).
 - Desafios: enunciado em francês, `expr-a1m3-002 (expression)`: "Que veut dire « Je vous en prie » après « Merci » ? / De rien / Au revoir / Je ne sais pas / Pardon / C'est la réponse polie à « merci » (« de rien », en plus formel).". não vistas: *dire* (cartão em "Procurar emprego" (A2-20)), *prie* (sem cartão no mapa), *sais* (cartão em "Falar do aprendizado de línguas" (A2-17)), *réponse* (cartão em "Escrever para convidar, recusar e agradecer" (A2-28)), *polie* (sem cartão no mapa), *formel* (sem cartão no mapa).
 
 #### M6.5 "Pegar transporte" (A1-14)
 
-- Diálogos, `A1-14-d0`: "Excusez-moi, ce train va au centre-ville ?". não vistas: *excusez* (cartão em "Escrever para convidar, recusar e agradecer" (A2-28)), *centre* (sem cartão no mapa).
-- Diálogos, `A1-14-d1`: "Oui, c'est la bonne direction.". não vistas: *bonne* (sem cartão no mapa), *direction* (sem cartão no mapa).
-- Opções do "Você entendeu?", `A1-14 check fill opção 1`: "Oui, c'est la bonne direction.". não vistas: *bonne* (sem cartão no mapa), *direction* (sem cartão no mapa).
+- Diálogos, `A1-14-d0`: "Excusez-moi, ce train va au centre-ville ?". não vistas: *centre* (sem cartão no mapa).
+- Diálogos, `A1-14-d1`: "Oui, c'est la bonne direction.". não vistas: *direction* (sem cartão no mapa).
+- Opções do "Você entendeu?", `A1-14 check fill opção 1`: "Oui, c'est la bonne direction.". não vistas: *direction* (sem cartão no mapa).
 - Opções do "Você entendeu?", `A1-14 check fill opção 2`: "Le train va au centre-ville.". não vistas: *centre* (sem cartão no mapa).
 - Frases "Na frase" (como se fossem essenciais), `A1-14-p5`: "Le train part à huit heures.". não vistas: *part* (cartão em "Países e cidades" (A1-31)).
 - Frases "Na frase" (como se fossem essenciais), `A1-14-p6`: "La voiture est garée devant la maison.". não vistas: *devant* (cartão em "Dizer onde as coisas estão" (A1-18)), *maison* (cartão em "Tipos de moradia e cômodos" (A1-17)).
@@ -376,8 +374,7 @@ Palavras não vistas diferentes: 280 (170 viram cartão ou nota mais adiante no 
 - Desafios: texto da tarefa, `accent-a1m6-002 (accent)`: "écouter". não vistas: *écouter* (sem cartão no mapa).
 - Desafios: texto da tarefa, `expr-a1m6-001 (expression)`: "Bon week-end ! / Au revoir, bon week-end ! / Merci, bon week-end à toi aussi ! / À lundi ! Bon week-end !". não vistas: *bon* (sem cartão no mapa).
 - Desafios: enunciado em francês, `expr-a1m6-001 (expression)`: "Quand dit-on « Bon week-end ! » ? / Avant le week-end / Le lundi matin / Le soir de Noël / À l'anniversaire / On le dit pour se quitter avant le week-end.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *bon* (sem cartão no mapa), *avant* (cartão em "Contar o que você fez" (A1-20)), *quitter* (sem cartão no mapa).
-- Desafios: texto da tarefa, `expr-a1m6-002 (expression)`: "Bonne soirée ! / Au revoir, bonne soirée ! / Merci, bonne soirée à vous aussi ! / Au revoir, bonne soirée !". não vistas: *bonne* (sem cartão no mapa), *soirée* (sem cartão no mapa).
-- Desafios: enunciado em francês, `expr-a1m6-002 (expression)`: "Quand dit-on « Bonne soirée ! » ? / Le soir, en se quittant / Le matin, en arrivant / À midi, avant de manger / À minuit, en se réveillant / On le dit pour se quitter le soir.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *bonne* (sem cartão no mapa), *soirée* (sem cartão no mapa), *quittant* (sem cartão no mapa), *arrivant* (cartão em "Contar um acontecimento" (A2-6)), *avant* (cartão em "Contar o que você fez" (A1-20)), *quitter* (sem cartão no mapa).
+- Desafios: enunciado em francês, `expr-a1m6-002 (expression)`: "Quand dit-on « Bonne soirée ! » ? / Le soir, en se quittant / Le matin, en arrivant / À midi, avant de manger / À minuit, en se réveillant / On le dit pour se quitter le soir.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *quittant* (sem cartão no mapa), *arrivant* (cartão em "Contar um acontecimento" (A2-6)), *avant* (cartão em "Contar o que você fez" (A1-20)), *quitter* (sem cartão no mapa).
 - Desafios: texto da tarefa, `expr-a1m6-003 (expression)`: "C'est parti ! / Le film commence. C'est parti ! / On a tout ? Alors, c'est parti ! / 3, 2, 1... C'est parti !". não vistas: *commence* (sem cartão no mapa).
 - Desafios: enunciado em francês, `expr-a1m6-003 (expression)`: "Que veut dire « C'est parti ! » ? / On commence / On arrête / On rentre / On dort / On commence quelque chose.". não vistas: *dire* (cartão em "Procurar emprego" (A2-20)), *commence* (sem cartão no mapa), *rentre* (sem cartão no mapa), *quelque* (sem cartão no mapa), *chose* (sem cartão no mapa).
 
@@ -409,7 +406,6 @@ Palavras não vistas diferentes: 280 (170 viram cartão ou nota mais adiante no 
 
 #### M9.5 "Gramática: passé composé com avoir" (A1-g9)
 
-- Gramáticas: telas, `A1-g9 tela 1 ex. 2`: "Elle a travaillé toute la journée.". não vistas: *journée* (sem cartão no mapa).
 - Gramáticas: telas, `A1-g9 tela 3 ex. 1`: "Elle est allée au marché.". não vistas: *marché* (cartão em "Comprar on-line e reclamar" (A2-8)).
 - Gramáticas: exercícios, `A1-g9 exercício 4`: "Nous avons travaillé ensemble.". não vistas: *ensemble* (sem cartão no mapa).
 - Gramáticas: exercícios, `A1-g9 exercício 5`: "Elle est allée au marché.". não vistas: *marché* (cartão em "Comprar on-line e reclamar" (A2-8)).
@@ -428,7 +424,7 @@ Palavras não vistas diferentes: 280 (170 viram cartão ou nota mais adiante no 
 - Frases "Na frase" (como se fossem essenciais), `A1-15-p8`: "Je vais avoir mal à la tête si ça continue.". não vistas: *continue* (sem cartão no mapa).
 - Desafios: texto da tarefa, `expr-a1m4-003 (expression)`: "Bon rétablissement ! / Tu es malade ? Bon rétablissement ! / Bon rétablissement, à bientôt ! / Il a de la fièvre. — Bon rétablissement !". não vistas: *bon* (sem cartão no mapa), *rétablissement* (sem cartão no mapa).
 - Desafios: enunciado em francês, `expr-a1m4-003 (expression)`: "À qui dit-on « Bon rétablissement ! » ? / À une personne malade / À une personne en vacances / À une personne qui part / À une personne qui mange / On le dit à quelqu'un de malade.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *bon* (sem cartão no mapa), *rétablissement* (sem cartão no mapa), *personne* (sem cartão no mapa), *quelqu'un* (sem cartão no mapa).
-- Desafios: texto da tarefa, `expr-a1m4-004 (expression)`: "À tes souhaits ! / Atchoum ! — À tes souhaits ! / À vos souhaits, madame ! / Atchoum ! — À tes souhaits !". não vistas: *souhaits* (sem cartão no mapa), *atchoum* (sem cartão no mapa), *madame* (sem cartão no mapa).
+- Desafios: texto da tarefa, `expr-a1m4-004 (expression)`: "À tes souhaits ! / Atchoum ! — À tes souhaits ! / À vos souhaits, madame ! / Atchoum ! — À tes souhaits !". não vistas: *souhaits* (sem cartão no mapa), *atchoum* (sem cartão no mapa).
 - Desafios: enunciado em francês, `expr-a1m4-004 (expression)`: "Quand dit-on « À tes souhaits ! » ? / Quand quelqu'un éternue / Quand quelqu'un mange / Quand quelqu'un part / Quand quelqu'un arrive / On le dit quand quelqu'un éternue.". não vistas: *dit* (cartão em "Procurar emprego" (A2-20)), *souhaits* (sem cartão no mapa), *quelqu'un* (sem cartão no mapa), *éternue* (sem cartão no mapa).
 
 ### A2 M10 "Opinião, cultura e mundo"

@@ -30,6 +30,10 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
   Regra numérica (limite de palavras, lições, teto de tempo) muda em `REGRAS` no script e no `15`, nunca no json
   (teto da regra 16: 3h55 para todos os módulos, sem exceção, decisão 270). Campo opcional `licao` no cartão: número da lição (1 a 4)
   quando a distribuição está decidida (decisão 274; hoje só "Cumprimentar e se despedir") ou `"pronuncia"` (não conta como palavra).
+  Unidade com lições decididas (hoje só "Cumprimentar e se despedir", decisões 313 e 314): `licoes` ({licao, id, titulo}; a Revisão da unidade
+  não entra), `momento` em cada nota ({licao, depois_de}) e `exemplos` ({fr, pt-BR}); `conferirLicoesDaUnidade` confere a coerência. As palavras
+  de uma nota (vistas nos diálogos, decisões 253 e 274) saem de `palavrasDaNota(nota)` (exemplos com tradução + `palavras` antigo das notas de
+  vocabulário): não digite `palavras` em nota que tem exemplos.
 - **Como testar:** `node tests/curriculo/test_mapa_totais.js` (totais do `08`, regras 12, 13, 14 e 16, títulos das notas de vocabulário, chaves
   contra `fr/published_ids.json`).
 - **O que não fazer:** não digitar total no `08` nem no json; não mudar número do json para o teste passar (registre em `ACHADOS.md`);

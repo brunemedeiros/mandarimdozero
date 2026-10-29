@@ -211,4 +211,13 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   (418 novos + 10 publicados; 852 A/B), ~33h10, notas 76.
 - **Para a dona**: a versão grátis de "Gramática: perguntar sim ou não" citava a nota de entonação que saiu; e os títulos das lições 3 e 4 da unidade (`dados/ACHADOS.md`, itens 21 e 22).
 
+## Atualização 2026-10-29 (decisões 311 a 314, "Cumprimentar e se despedir" polida pela dona)
+
+- **"Cumprimentar e se despedir"** (módulo "Apresentar-se") com **16 cartões**, 4 lições por função + Revisão da unidade, 9 notas e 2 diálogos, aplicada em `dados/mapa.json`
+  (cartões com `licao`; lições com id e título em `licoes`; notas com `momento` e `exemplos`, de onde saem as palavras vistas da nota, decisão 274), `dados/excecoes.json`
+  (unidade liberada acima do limite de 12, decisão 308), `dados/frases_na_frase.json` (papel das 9 frases publicadas, como proposta), `08 v2`, `15` e no rascunho
+  `piloto-m1/A1-1/` (`A1-1.md` para a dona ler, `A1-1.json`, `validar.js`). O tempo do módulo fica no número digitado (~3h55), sem regra nova (decisões 300 e 308).
+- **Totais novos**: A1 com **366 cartões** (**725** A/B), ~151 lições (sem mudança), 133 notas (sem mudança), ~31h00 (sem mudança); "Apresentar-se" com 66 cartões. A2 sem mudança.
+- **Para a dona**: as decisões D1 a D10 do `piloto-m1/A1-1/A1-1.md` (seção 10) e o que fazer com os cartões novos de quem já concluiu ou está no meio da unidade (seção 8).
+
 > **Como falar com a dona** (2026-10-23): em toda mensagem a ela, citar o NOME do módulo e da unidade (não só M6.1 ou `A1-15`), explicar termos internos e dar o contexto completo de cada decisão. Vale para o chat e para qualquer agente.

@@ -70,6 +70,13 @@ function notaConta(n){ return !STATUS_FORA_DA_CONTA.includes(n.status); }
 function notasDaUnidade(u){ return (u.notas || []).filter(notaConta); }
 function notasCondicionais(u){ return (u.notas || []).filter(n => n.status === 'se couber'); }
 
+// Palavras que uma nota mostra com tradução (decisões 253 e 274): geradas dos `exemplos` da nota ({fr, pt-BR}), nunca digitadas de novo.
+// As notas de vocabulário antigas ainda trazem `palavras` digitado (lista de itens, sem exemplo): entram também. Sem repetição.
+function palavrasDaNota(n){
+  const doExemplo = (n.exemplos || []).filter(e => e && e.fr && e['pt-BR']).map(e => e.fr);
+  return [...new Set([...(n.palavras || []), ...doExemplo])];
+}
+
 // Tempo do módulo em minutos. A2: regra do 08 (40 min por unidade de vocabulário de até 12 palavras, 25 por gramática).
 // A1: o 08 só dá regras de diferença (+5 min por palavra, +10 min pela 4ª lição) sobre estimativas feitas à mão;
 // sem regra absoluta, vale o valor do 08 (tempo_08_min). Ver docs/i18n/curriculo/dados/ACHADOS.md.
@@ -238,8 +245,35 @@ function conferirExcecoes(mapa, excecoes){
   return problemas;
 }
 
+// Lições declaradas numa unidade (`licoes`, decisões 274 e 314): números 1..n sem buraco, ids únicos, todo cartão com `licao` numérico
+// cai numa lição declarada e toda lição tem cartão; n + Revisão da unidade = conta de lições do mapa; o `momento` de cada nota aponta
+// para um cartão daquela lição. Unidade sem `licoes` não é conferida (a distribuição ainda não foi decidida).
+function conferirLicoesDaUnidade(mapa){
+  const problemas = [];
+  for (const it of unidadesEmOrdem(mapa)){
+    const u = it.unidade;
+    if (!Array.isArray(u.licoes)) continue;
+    const nums = u.licoes.map(l => l.licao);
+    if (JSON.stringify(nums) !== JSON.stringify(nums.map((_, i) => i + 1))) problemas.push({ unidade: u.id, problema: 'lições fora de 1..n', nums });
+    const ids = u.licoes.map(l => l.id);
+    if (new Set(ids).size !== ids.length || ids.some(id => !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id || ''))) problemas.push({ unidade: u.id, problema: 'id de lição repetido ou fora do formato', ids });
+    if (ids.includes('checkpoint')) problemas.push({ unidade: u.id, problema: '"checkpoint" é a Revisão da unidade, não entra em licoes' });
+    const comLicao = (u.cartoes || []).filter(c => typeof c.licao === 'number');
+    for (const c of comLicao) if (!nums.includes(c.licao)) problemas.push({ unidade: u.id, problema: 'cartão numa lição não declarada', palavra: c.palavra, licao: c.licao });
+    for (const n of nums) if (!comLicao.some(c => c.licao === n)) problemas.push({ unidade: u.id, problema: 'lição sem cartão', licao: n });
+    if (nums.length + 1 + (u.licao_pronuncia ? 1 : 0) !== licoesDaUnidade(u)) problemas.push({ unidade: u.id, problema: 'lições declaradas + Revisão não batem com a conta', declaradas: nums.length, conta: licoesDaUnidade(u) });
+    for (const nota of u.notas || []){
+      if (!nota.momento) continue;
+      const alvo = (u.cartoes || []).find(c => c.palavra === nota.momento.depois_de);
+      if (!alvo || alvo.licao !== nota.momento.licao) problemas.push({ unidade: u.id, problema: 'momento da nota não aponta para um cartão da lição', nota: nota.titulo, momento: nota.momento });
+    }
+  }
+  return problemas;
+}
+
 function conferirTudo(mapa, excecoes, idsPublicados){
   return {
+    licoes: conferirLicoesDaUnidade(mapa),
     limitePalavras: conferirLimitePalavras(mapa, excecoes),
     regra14: conferirRegra14(mapa, excecoes),
     chaves: conferirChaves(mapa, idsPublicados),
@@ -270,7 +304,7 @@ function tabela(mapa){
 
 module.exports = {
   REGRAS, carregarMapa, carregarExcecoes, unidadesEmOrdem, indicePorId, palavrasDaUnidade, cartoesDaUnidade, cartoesAB,
-  licoesDaUnidade, licoesPelaRegra, notasDaUnidade, tempoDoModulo, formatarTempo, contasDoModulo, contasDoNivel, contas,
+  licoesDaUnidade, licoesPelaRegra, notasDaUnidade, palavrasDaNota, conferirLicoesDaUnidade, tempoDoModulo, formatarTempo, contasDoModulo, contasDoNivel, contas,
   conferirLimitePalavras, conferirRegra14, conferirChaves, chavesPublicadasForaDoMapa, conferirVersaoGratis,
   gramaticasAbrigadasPor, conferirTetoTempo, conferirTitulosNotasVocab, conferirIdFuncao, conferirExcecoes, conferirTudo, tabela,
   TITULO_NOTA_VOCAB,

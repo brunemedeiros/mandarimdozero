@@ -1,3 +1,48 @@
 {
-  "_doc": "Papel de cada frase \"Na frase\" (chave -p de fr/content.js), decisões 226, 227 e 233 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md. Formato: {\"A1-5-p3\": {\"papel\": \"essencial\" | \"so_exemplo\", \"unidade\": \"A1-25\", \"nota\": \"por que\"}}. 'essencial' = essencial para a função comunicativa da unidade, pode ser cobrada em qualquer lugar; 'so_exemplo' = só na ficha, na Revisão e nos exercícios da lição que não pedem digitar (nunca no Ponto de verificação, no exame do módulo, no Teste de Nível, em diálogo, ditado ou Desafio). A regra mora em fr/scripts/curriculo_papel.js (frasePodeAparecer). A marca é feita frase por frase junto com o conteúdo, módulo a módulo (decisão 227), e reportada à dona; começa vazio de propósito. 'unidade' = id estável da unidade no mapa.json onde a frase fica. Conferir: node fr/scripts/curriculo_papel.js --conferir."
+  "_doc": "Papel de cada frase \"Na frase\" (chave -p de fr/content.js), decisões 226, 227 e 233 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md. Formato: {\"A1-5-p3\": {\"papel\": \"essencial\" | \"so_exemplo\", \"unidade\": \"A1-25\", \"nota\": \"por que\"}}. 'essencial' = essencial para a função comunicativa da unidade, pode ser cobrada em qualquer lugar; 'so_exemplo' = só na ficha, na Revisão e nos exercícios da lição que não pedem digitar (nunca no Ponto de verificação, no exame do módulo, no Teste de Nível, em diálogo, ditado ou Desafio). A regra mora em fr/scripts/curriculo_papel.js (frasePodeAparecer). A marca é feita frase por frase junto com o conteúdo, módulo a módulo (decisão 227), e reportada à dona; começa vazio de propósito. 'unidade' = id estável da unidade no mapa.json onde a frase fica. Conferir: node fr/scripts/curriculo_papel.js --conferir.",
+  "A1-1-p0": {
+    "papel": "so_exemplo",
+    "unidade": "A1-1",
+    "nota": "je, m'appelle: cartões de \"Dizer o nome e a nacionalidade\" (rascunho piloto-m1/A1-1, aguarda OK da dona)"
+  },
+  "A1-1-p1": {
+    "papel": "so_exemplo",
+    "unidade": "A1-1",
+    "nota": "beaucoup ainda não é cartão (rascunho piloto-m1/A1-1, aguarda OK da dona)"
+  },
+  "A1-1-p2": {
+    "papel": "so_exemplo",
+    "unidade": "A1-1",
+    "nota": "je ne comprends pas: fórmula ainda não ensinada (rascunho piloto-m1/A1-1, aguarda OK da dona)"
+  },
+  "A1-1-p3": {
+    "papel": "essencial",
+    "unidade": "A1-1",
+    "nota": "frase \"Na frase\" de et toi ? / et vous ? (rascunho piloto-m1/A1-1, aguarda OK da dona)"
+  },
+  "A1-1-p4": {
+    "papel": "so_exemplo",
+    "unidade": "A1-1",
+    "nota": "Comment allez-vous ? só na nota \"Como perguntar 'tudo bem?'\" (nota não conta na Revisão da unidade) (rascunho piloto-m1/A1-1, aguarda OK da dona)"
+  },
+  "A1-1-p5": {
+    "papel": "so_exemplo",
+    "unidade": "A1-1",
+    "nota": "demain ainda não é cartão (rascunho piloto-m1/A1-1, aguarda OK da dona)"
+  },
+  "A1-1-p6": {
+    "papel": "essencial",
+    "unidade": "A1-1",
+    "nota": "frase \"Na frase\" de salut / coucou (rascunho piloto-m1/A1-1, aguarda OK da dona)"
+  },
+  "A1-1-p7": {
+    "papel": "so_exemplo",
+    "unidade": "A1-1",
+    "nota": "c'est normal ainda não é visto (rascunho piloto-m1/A1-1, aguarda OK da dona)"
+  },
+  "A1-1-p8": {
+    "papel": "so_exemplo",
+    "unidade": "A1-1",
+    "nota": "frase \"Na frase\" de s'il te plaît / s'il vous plaît; café ainda não é cartão (decisão da dona: só exemplo) (rascunho piloto-m1/A1-1, aguarda OK da dona)"
+  }
 }

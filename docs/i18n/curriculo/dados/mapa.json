@@ -1,7 +1,7 @@
 {
-  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedido de mudança aplicado: decisões 267 a 279 (A1-1 com 12 palavras; campo opcional \"licao\" por cartão, decisão 274). Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
+  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedidos de mudança aplicados: decisões 267 a 279 (campo opcional \"licao\" por cartão, decisão 274) e 311 a 314 (A1-1 polida pela dona: 16 cartões, 4 lições com id e título em \"licoes\", 9 notas com \"momento\" e \"exemplos\", 2 diálogos). As palavras de uma nota saem dos exemplos com tradução (palavrasDaNota em fr/scripts/curriculo_mapa.js, decisão 274); \"palavras\" digitado só nas notas antigas de vocabulário. Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
   "idioma": "fr",
-  "versao": "2026-10-27",
+  "versao": "2026-10-29",
   "fonte": "docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md",
   "niveis": [
     {
@@ -21,18 +21,51 @@
               "ordem": 1,
               "tipo": "vocabulario",
               "id_funcao": "cumprimentar-e-se-despedir",
-              "funcao": "cumprimentar, agradecer, pedir para repetir",
+              "funcao": "cumprimentar, perguntar como a pessoa está e responder, agradecer e pedir com cortesia, se despedir",
               "origem": "publicada",
+              "decisoes": [
+                292,
+                294,
+                311,
+                312,
+                313,
+                314
+              ],
+              "licoes": [
+                {
+                  "licao": 1,
+                  "id": "ola-e-tchau",
+                  "titulo": "Cumprimentar alguém"
+                },
+                {
+                  "licao": 2,
+                  "id": "cortesia-e-como-vai",
+                  "titulo": "Perguntar como a pessoa está e responder"
+                },
+                {
+                  "licao": 3,
+                  "id": "informal-agradecer",
+                  "titulo": "Fórmulas de cortesia",
+                  "titulo_a_confirmar": true
+                },
+                {
+                  "licao": 4,
+                  "id": "despedir-se",
+                  "id_novo": true,
+                  "titulo": "Despedir-se"
+                }
+              ],
               "cartoes": [
+                {
+                  "palavra": "salut / coucou",
+                  "chave": "A1-1-v3",
+                  "origem": "publicado",
+                  "licao": 1,
+                  "decisao": 294
+                },
                 {
                   "palavra": "bonjour",
                   "chave": "A1-1-v0",
-                  "origem": "publicado",
-                  "licao": 1
-                },
-                {
-                  "palavra": "salut",
-                  "chave": "A1-1-v3",
                   "origem": "publicado",
                   "licao": 1
                 },
@@ -50,45 +83,68 @@
                   "licao": 1
                 },
                 {
-                  "palavra": "au revoir",
-                  "chave": "A1-1-v2",
+                  "palavra": "ça va",
+                  "chave": "A1-1-v8",
                   "origem": "publicado",
+                  "licao": 2
+                },
+                {
+                  "palavra": "tu vas bien ? / vous allez bien ?",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 313,
+                  "licao": 2
+                },
+                {
+                  "palavra": "et toi ? / et vous ?",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 313,
+                  "licao": 2
+                },
+                {
+                  "palavra": "je vais bien",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 292,
                   "licao": 2
                 },
                 {
                   "palavra": "merci",
                   "chave": "A1-1-v4",
                   "origem": "publicado",
-                  "licao": 2
+                  "licao": 3
                 },
                 {
                   "palavra": "de rien",
                   "chave": "A1-1-v5",
                   "origem": "publicado",
-                  "licao": 2
+                  "licao": 3
                 },
                 {
-                  "palavra": "bonne journée / bonne soirée",
-                  "chave": "nova",
-                  "origem": "novo",
-                  "decisao": 269,
-                  "licao": 2
-                },
-                {
-                  "palavra": "s'il vous plaît / s'il te plaît",
+                  "palavra": "s'il te plaît / s'il vous plaît",
                   "chave": "A1-1-v6",
                   "origem": "publicado",
-                  "licao": 3
+                  "licao": 3,
+                  "decisao": 292
                 },
                 {
                   "palavra": "pardon",
                   "chave": "A1-1-v7",
                   "origem": "publicado",
+                  "licao": 3,
+                  "decisao": 294
+                },
+                {
+                  "palavra": "excuse-moi / excusez-moi",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 292,
                   "licao": 3
                 },
                 {
-                  "palavra": "ça va",
-                  "chave": "A1-1-v8",
+                  "palavra": "au revoir",
+                  "chave": "A1-1-v2",
                   "origem": "publicado",
                   "licao": 4
                 },
@@ -97,66 +153,244 @@
                   "chave": "A1-1-v9",
                   "origem": "publicado",
                   "licao": 4
+                },
+                {
+                  "palavra": "bonne journée / bonne soirée",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 269,
+                  "licao": 4
                 }
               ],
               "notas": [
                 {
                   "titulo": "\"Bonjour\" ou \"Bonsoir\"?",
                   "tipo": "Exp",
-                  "confianca": "n/r",
-                  "id": "N01"
-                },
-                {
-                  "titulo": "\"S'il vous plaît\" no dia a dia",
-                  "tipo": "Real",
                   "confianca": "alta",
-                  "id": "N02"
-                },
-                {
-                  "titulo": "à plus",
-                  "tipo": "Real",
-                  "confianca": "alta",
-                  "id": "N03"
-                },
-                {
-                  "titulo": "la bise",
-                  "tipo": "Cult",
-                  "confianca": "alta",
-                  "id": "N04"
-                },
-                {
-                  "titulo": "Letras que ficam mudas no fim",
-                  "tipo": "Pron",
-                  "confianca": "alta",
-                  "nova": true
-                },
-                {
-                  "titulo": "Bienvenue no Quebec, também \"bem-vindo(a)\"",
-                  "tipo": "Real",
-                  "confianca": "alta",
-                  "nova": true,
-                  "variante": "regional"
-                },
-                {
-                  "titulo": "Pardon x Excusez-moi e Excuse-moi, com menção a désolé(e)",
-                  "tipo": "Real",
-                  "confianca": "alta",
-                  "nova": true,
-                  "decisao": 223
+                  "id": "N01",
+                  "momento": {
+                    "licao": 1,
+                    "depois_de": "bonsoir"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "bonjour",
+                      "pt-BR": "olá / bom dia"
+                    },
+                    {
+                      "fr": "bonsoir",
+                      "pt-BR": "boa noite (ao chegar)"
+                    },
+                    {
+                      "fr": "salut",
+                      "pt-BR": "oi (informal)"
+                    }
+                  ]
                 },
                 {
                   "titulo": "Madame, monsieur e mademoiselle",
                   "tipo": "Real",
                   "confianca": "alta",
                   "nova": true,
-                  "decisao": 267
+                  "decisao": 267,
+                  "momento": {
+                    "licao": 1,
+                    "depois_de": "monsieur / madame"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Bonjour, monsieur !",
+                      "pt-BR": "Bom dia, senhor!"
+                    },
+                    {
+                      "fr": "Bonjour, madame !",
+                      "pt-BR": "Bom dia, senhora!"
+                    },
+                    {
+                      "fr": "mademoiselle",
+                      "pt-BR": "senhorita (hoje evitado)"
+                    }
+                  ]
+                },
+                {
+                  "titulo": "Ça va pode ser pergunta ou resposta",
+                  "tipo": "Exp",
+                  "confianca": "alta",
+                  "nova": true,
+                  "decisao": 292,
+                  "momento": {
+                    "licao": 2,
+                    "depois_de": "ça va"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Salut, ça va ? Oui, ça va. Et toi ?",
+                      "pt-BR": "Oi, tudo bem? Sim, tudo bem. E você?"
+                    }
+                  ]
                 },
                 {
                   "titulo": "Como perguntar 'tudo bem?'",
                   "tipo": "Exp",
                   "confianca": "alta",
                   "nova": true,
-                  "decisao": 278
+                  "decisao": 283,
+                  "momento": {
+                    "licao": 2,
+                    "depois_de": "tu vas bien ? / vous allez bien ?"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Ça va ?",
+                      "pt-BR": "Tudo bem?"
+                    },
+                    {
+                      "fr": "Tu vas bien ?",
+                      "pt-BR": "Você está bem?"
+                    },
+                    {
+                      "fr": "Comment vas-tu ?",
+                      "pt-BR": "Como você vai?"
+                    },
+                    {
+                      "fr": "Vous allez bien ?",
+                      "pt-BR": "O senhor (a senhora) está bem?"
+                    },
+                    {
+                      "fr": "Comment allez-vous ?",
+                      "pt-BR": "Como vai o senhor (a senhora)?"
+                    }
+                  ]
+                },
+                {
+                  "titulo": "Como responder",
+                  "tipo": "Real",
+                  "confianca": "alta",
+                  "nova": true,
+                  "decisao": 314,
+                  "momento": {
+                    "licao": 2,
+                    "depois_de": "je vais bien"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Très bien, merci !",
+                      "pt-BR": "Muito bem, obrigada!"
+                    },
+                    {
+                      "fr": "Pas mal, et toi ?",
+                      "pt-BR": "Bem, e você?"
+                    },
+                    {
+                      "fr": "Bof...",
+                      "pt-BR": "Mais ou menos... (informal)"
+                    }
+                  ]
+                },
+                {
+                  "titulo": "\"S'il vous plaît\" no dia a dia",
+                  "tipo": "Real",
+                  "confianca": "alta",
+                  "id": "N02",
+                  "momento": {
+                    "licao": 3,
+                    "depois_de": "s'il te plaît / s'il vous plaît"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "STP",
+                      "pt-BR": "s'il te plaît (por escrito, entre amigos)"
+                    },
+                    {
+                      "fr": "SVP",
+                      "pt-BR": "s'il vous plaît (por escrito)"
+                    }
+                  ]
+                },
+                {
+                  "titulo": "Pardon, excuse-moi ou excusez-moi?",
+                  "tipo": "Real",
+                  "confianca": "alta",
+                  "nova": true,
+                  "decisao": 223,
+                  "momento": {
+                    "licao": 3,
+                    "depois_de": "excuse-moi / excusez-moi"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Pardon ?",
+                      "pt-BR": "Como? / Pode repetir?"
+                    },
+                    {
+                      "fr": "Excusez-moi !",
+                      "pt-BR": "Com licença! / Desculpe! (com desconhecidos)"
+                    },
+                    {
+                      "fr": "Excuse-moi !",
+                      "pt-BR": "Desculpa! (com amigos)"
+                    },
+                    {
+                      "fr": "Désolé ! Désolée !",
+                      "pt-BR": "Sinto muito!"
+                    }
+                  ]
+                },
+                {
+                  "titulo": "À plus",
+                  "tipo": "Real",
+                  "confianca": "alta",
+                  "id": "N03",
+                  "momento": {
+                    "licao": 4,
+                    "depois_de": "à bientôt"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "à plus",
+                      "pt-BR": "até mais"
+                    },
+                    {
+                      "fr": "A+",
+                      "pt-BR": "até mais (por escrito)"
+                    }
+                  ]
+                },
+                {
+                  "titulo": "Salut também pode ser tchau, de modo informal",
+                  "tipo": "Real",
+                  "confianca": "alta",
+                  "nova": true,
+                  "decisao": 292,
+                  "momento": {
+                    "licao": 4,
+                    "depois_de": "bonne journée / bonne soirée"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Salut, à bientôt !",
+                      "pt-BR": "Tchau, até breve!"
+                    },
+                    {
+                      "fr": "Au revoir, madame !",
+                      "pt-BR": "Tchau, senhora! (com desconhecidos, au revoir)"
+                    }
+                  ]
+                }
+              ],
+              "dialogos": [
+                {
+                  "titulo": "Encontro na rua",
+                  "registro": "informal",
+                  "origem": "publicado",
+                  "licao": 4
+                },
+                {
+                  "titulo": "Na portaria",
+                  "registro": "formal",
+                  "origem": "novo",
+                  "licao": 4,
+                  "decisao": 270
                 }
               ]
             },
@@ -609,7 +843,8 @@
               "telas": 5,
               "exercicios": 8
             }
-          ]
+          ],
+          "tempo_08_nota": "Tempo digitado (decisão 270) mantido: \"Cumprimentar e se despedir\" agora tem 16 cartões (decisões 313 e 314), mas nenhum limite novo de tempo é proposto enquanto as lições são revistas (decisões 300 e 308); medição real em dados/medicao-tempo-licao-2026-10-29.md."
         },
         {
           "id": "A1-m7",

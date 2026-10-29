@@ -188,7 +188,7 @@ function palavrasVistasAte(mapa, excecoes, unidadeId, opcoes){
     });
     const notaDaPosicao = i < pos || (i === pos && ctx.posicao !== 'inicio');
     if (notasContam && notaDaPosicao){
-      for (const n of M.notasDaUnidade(u)) for (const p of n.palavras || []){
+      for (const n of M.notasDaUnidade(u)) for (const p of M.palavrasDaNota(n)){
         const fp = formasDaPalavra(p, extras, funcionais); fp.todas.forEach(f => formas.add(f)); radicais.push(...fp.radicais);
       }
     }
@@ -297,7 +297,7 @@ function indiceDeEnsino(mapa, dados){
       for (const f of formasDaPalavra(c.palavra, extras, funcionais).todas) marca(f, v);
       for (const g of gruposComLema) if (alternativas(c.palavra).includes(g.lema)) g.palavras.forEach(f => marca(f.toLowerCase(), v));
     }
-    for (const n of M.notasDaUnidade(u)) for (const p of n.palavras || []) for (const f of formasDaPalavra(p, extras, funcionais).todas) marca(f, { unidade: u.id, nome: u.nome, como: 'nota', palavra: p });
+    for (const n of M.notasDaUnidade(u)) for (const p of M.palavrasDaNota(n)) for (const f of formasDaPalavra(p, extras, funcionais).todas) marca(f, { unidade: u.id, nome: u.nome, como: 'nota', palavra: p });
   }
   porDados.set(d, idx);
   return idx;
