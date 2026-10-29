@@ -186,9 +186,15 @@ function conjEvaluate(verb, tenseKey, idx, given){
     otherForm = conjOtherFormOf(verb, tenseKey, g, info.accepted);
     status = otherForm ? 'wrong' : 'almost';
   }
+  // Português de Portugal (site com LANG_HOOKS.typedAnswerLang = 'pt-BR'; regra da dona, 2026-10-29): "estou a falar"
+  // por "estou falando" = Quase, com a forma do Brasil na devolutiva. fr: typedPtBrAdjust devolve null sem olhar.
+  const ptBr = typeof typedPtBrAdjust === 'function'
+    ? typedPtBrAdjust(g, (texto) => info.accepted.includes(texto.trim()) || info.accepted.some(f => conjLoose(texto) === conjLoose(f)))
+    : null;
+  if (ptBr){ status = 'almost'; otherForm = null; }
   // Forma mais parecida com o que foi digitado, para marcar as letras.
   const target = info.accepted.slice().sort((a, b) => conjAlign(g, a).cost - conjAlign(g, b).cost)[0] || '';
-  return Object.assign({ status, target, otherForm }, info);
+  return Object.assign({ status, target, otherForm }, ptBr ? { ptBr } : {}, info);
 }
 
 // Palavra digitada que é, letra por letra, outra forma do mesmo verbo:
@@ -592,7 +598,8 @@ function renderConjPracticeStep(){
       </div>`;
     const ev = conjEvaluate(verb, tenseKey, i, given);
     const speak = audioBtnHTML(conjSpeakText(i, tenseKey, ev.accepted[0] || ''));
-    const note = ev.otherForm ? `<span class="conj-other-form">${escapeHTML(t('fr.conj.otherForm', { form: ev.otherForm.word, tense: conjTenseLabel(ev.otherForm.tenseKey) }))}</span>` : '';
+    const note = (ev.otherForm ? `<span class="conj-other-form">${escapeHTML(t('fr.conj.otherForm', { form: ev.otherForm.word, tense: conjTenseLabel(ev.otherForm.tenseKey) }))}</span>` : '')
+      + (ev.ptBr ? typedPtBrNoteHTML(ev.ptBr) : '');
     // Certa: caixa verde + ✓, áudio ao lado. Quase/errada: caixa amarela ou
     // vermelha com as letras marcadas; embaixo, a forma certa com o áudio.
     return `
