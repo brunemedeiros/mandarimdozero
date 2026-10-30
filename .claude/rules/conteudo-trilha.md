@@ -40,6 +40,12 @@ Skills: `notas-de-realidade` (notas de realidade/culturais) e `criar-desafios`. 
   e `node scripts/validate-challenges-en.js`. Explicação traduzida explica para quem fala aquele idioma (não "em português...").
   Mudou o pt de um item já traduzido: mudar o en junto. Guarda final: `node tests/i18n/test_sem_portugues_en.js` (0/0).
   Antes de traduzir Desafios, conferir que o lote do repositório bate com a tabela `challenges` da produção.
+- **Português do Brasil nas respostas** (regra da dona, 2026-10-26, ampliada em 2026-10-29): resposta aceita em português só tem
+  forma do Brasil (nada de "estou a comer", autocarro, telemóvel...; "tu" + 2ª pessoa pode). Resposta da aluna em português de
+  Portugal vira "Quase" com a forma do Brasil na devolutiva, em QUALQUER exercício com resposta em português: Ouça e traduza
+  (`listenTranslateVerdict`, `shared/desafios.js`) e, no site que declara `LANG_HOOKS.typedAnswerLang = 'pt-BR'` (o pt), lição,
+  Revisão/Banco, gramática e Conjugação (`typedPtBrAdjust`, `shared/core/licao-feedback.js`). Detecção e troca comuns:
+  `shared/core/familias/portugues-variantes.js` (marca nova de Portugal entra lá). Guardas: `tests/desafios-ptpt/`, `tests/respostas-ptbr/`.
 - Desafios entram como `needs_review` com um `.md` de revisão para a autora; só publicados aparecem na trilha.
 - Mudou texto com áudio pré-gerado → regenerar mp3 (skill `audio-tts`).
 - **Jogos da Conjugação** (`fr/conj-games.js`): todo trecho em francês dentro do texto em português/inglês (título,

@@ -53,6 +53,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - **Conteúdo nasce traduzido** (decisão da autora, 2026-10-19): todo conteúdo novo ou alterado (trilha, notas, diálogos,
   Desafios, ditados) já sai com a versão para CADA idioma de site do curso (hoje pt-BR e en), no mesmo lote e na mesma
   revisão; lote sem todas as traduções não é importado nem publicado. Como fazer: `.claude/rules/conteudo-trilha.md`.
+- **Português de Portugal em resposta = Quase** (dona, 2026-10-26/29): a devolutiva mostra a forma do Brasil; vale para todo exercício
+  com resposta em português (Desafios, lição, Revisão, Banco, gramática, Conjugação). Código: `shared/core/familias/portugues-variantes.js`.
 - **Notas de realidade/culturais**: toda nota nova ou editada é reportada no chat com nível de confiança
   (alta/média/baixa). Procedimento na skill `notas-de-realidade`.
 - **Conteúdo novo (nível/módulo/unidade)**: decidir os Desafios por categoria (skill `criar-desafios`).
@@ -141,5 +143,6 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - Etapa 6 (boas-vindas por curso A e B, janela da sequência depois do Continuar, XP só ⭐, Pulada única, selo Premium no mapa) publicada pelo PR #413 (2026-10-29; `docs/i18n/etapa6-boas-vindas-proposta.md`). Próxima do plano: Etapa 7 (vocabulário), só com autorização.
 - XP da semana no topo ("⭐ N XP", igual ao Ranking Geral) com janelinha das últimas semanas e XP total do curso; avisos +XP não cobrem telas de conclusão: PR #415 (2026-10-29; `.claude/rules/xp.md`).
 - Recomeçar o curso (decisões da dona 2026-10-29, `docs/recomecar-curso-opcoes.md`): só "do zero" (zera trilha, FSRS da trilha, XP, Ranking, conquistas, Desafios), cópia por 30 dias, retomada guiada aos 60 dias parado. Conserto P1 (memória dos cartões da professora e próprios por idioma em `progress.data._lang`, espelho nos blocos) publicado pelo PR #415 (2026-10-29; `docs/p1-memoria-por-idioma.md`); o recomeço em si ainda não foi implementado e terá de zerar `_lang` e os blocos do idioma juntos.
+- Áudio novo pendente (gerar junto com os Desafios novos/alterados de outra branch): 2º exemplo de `expr-b2-002` (mp3 `fda7a771ac1c.mp3`, texto novo de 2026-10-26; sem áudio até gerar; UPDATE de volta no fim de `docs/rollout-sql/desafios-correcoes-2026-10-26.sql`). Gerar exige a chave GCP_TTS_KEY (`fr/scripts/challenges_import/generate_challenge_audio.py`) ou a Edge `tts-generate`.
 - Pendências da autora: "Manual da unidade" (só o já visto, `unitSeenContent` em `shared/core/trilha-licao.js`) talvez no fr no futuro (2026-10-26; hoje só zh); layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados (placeholders de perfil); Stripe. País dos alunos: já preenchido nos 13 alunos (conferido 2026-10-14).

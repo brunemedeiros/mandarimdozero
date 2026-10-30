@@ -2,6 +2,8 @@
 // publicado SEM a tradução dos campos que a tela mostra em português (fr/challenges.en.js) não aparece: nem na lista, nem na
 // contagem, nem na fila, nem na revisão espaçada, nem na Expressão do dia, nem na linha "Desafios do Módulo" da trilha, e não
 // abre. O progresso salvo dele continua intacto. No site em pt-BR nada muda (todos aparecem).
+// 2026-10-26: os 16 Desafios da primeira leva (só na produção, retrato em docs/i18n/challenges-producao-sem-fonte.json) ganharam a
+// tradução em inglês aprovada pela dona e voltam a aparecer e abrir no site em inglês.
 // Desafios de verdade (lote A1-m1 e o de Complete a frase, com tradução) + 1 cópia de cada tipo com id novo (sem tradução).
 // Rodar: node tests/desafios-idioma-site/test_playwright.js
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
@@ -28,7 +30,11 @@ const semEn = [
 ];
 semEn[0].meaning = Object.assign({}, semEn[0].meaning, { pt: PT });
 const SEM = semEn.map(x => x.id);
-const ROWS = [...lote, ...cloze, ...semEn].map(i => toRow(i));
+// 16 da primeira leva (só na produção; retrato em docs/i18n/challenges-producao-sem-fonte.json): com a tradução em inglês
+// aprovada em 2026-10-26, voltam a aparecer no site em inglês.
+const leva1 = JSON.parse(fs.readFileSync(path.join(ROOT, 'docs/i18n/challenges-producao-sem-fonte.json'), 'utf8')).challenges;
+const LEVA1 = leva1.map(x => x.id);
+const ROWS = [...lote, ...cloze, ...semEn, ...leva1].map(i => toRow(i));
 
 const STUB = `
 (function(){
@@ -111,7 +117,26 @@ async function cenario(page, SEM){
     const en = await cenario(page, SEM);
     const inter = (a) => a.filter(id => SEM.includes(id));
     check('en: nenhum desafio sem tradução na lista do aluno', inter(en.listed).length === 0, inter(en.listed));
-    check('en: os desafios com tradução continuam (lote A1-m1 + Complete a frase)', en.listed.length === lote.length + cloze.length, en.listed.length);
+    check('en: os desafios com tradução continuam (lote A1-m1 + Complete a frase + 16 da primeira leva)', en.listed.length === lote.length + cloze.length + leva1.length, en.listed.length);
+    check('en: os 16 da primeira leva estão na lista do aluno', LEVA1.every(id => en.listed.includes(id)), LEVA1.filter(id => !en.listed.includes(id)));
+    const leva = await page.evaluate((ids) => {
+      const r = { opened: {}, overlay: {} };
+      for (const id of ids){
+        const c = studentChallenges().find(x => x.id === id);
+        r.overlay[id] = !!challengeOverlay(c);
+        renderChallengesList(c.type); openChallengePlayer(id);
+        r.opened[id] = document.getElementById('challenge-player-wrap').style.display === 'block';
+      }
+      const lt = listenTranslateSetup(studentChallenges().find(x => x.id === 'lt-a1-001'));
+      r.ltLang = lt.lang; r.ltRef = lt.refs[0]; r.ltOk = lt.cmp.isAcceptable('I am eating an apple', lt.refs);
+      const b2 = listenTranslateSetup(studentChallenges().find(x => x.id === 'lt-b2-001'));
+      r.b2Expl = b2.explanation;
+      return r;
+    }, LEVA1);
+    check('en: os 16 da primeira leva têm tradução (overlay)', Object.values(leva.overlay).every(Boolean), leva.overlay);
+    check('en: os 16 da primeira leva abrem', Object.values(leva.opened).every(Boolean), leva.opened);
+    check('en: lt-a1-001 traduz para o inglês e aceita "I am eating an apple"', leva.ltLang === 'en' && leva.ltRef === "I'm eating an apple." && leva.ltOk, leva);
+    check('en: explicação do lt-b2-001 em inglês', /^"Mener à bien" means/.test(leva.b2Expl || ''), leva.b2Expl);
     check('en: nenhum sem tradução no que dá para jogar', inter(en.playable).length === 0);
     check('en: revisão espaçada só com os traduzidos (lt-a1m1-001 devido, os 4 sem tradução fora)', JSON.stringify(en.due) === JSON.stringify(['lt-a1m1-001']), en.due);
     for (const [type, l] of Object.entries(en.lists)){
@@ -119,7 +144,7 @@ async function cenario(page, SEM){
       check(`en: fila de ${type} (próximo do A1) nunca é o sem tradução`, !SEM.includes(l.next), l.next);
       check(`en: lista ${type} sem o texto em português`, !l.html.includes(PT));
     }
-    const totais = { expression: 5, listen_translate: 8, accent: 9, cloze_grammar: 6 };
+    const totais = { expression: 5 + 9, listen_translate: 8 + 4, accent: 9 + 3, cloze_grammar: 6 };
     for (const [type, n] of Object.entries(totais)) check(`en: contagem de ${type} sem o sem tradução (total ${n})`, new RegExp('\\b' + n + '\\b').test(en.lists[type].progress) && !new RegExp('\\b' + (n + 1) + '\\b').test(en.lists[type].progress), en.lists[type].progress);
     check('en: Expressão do dia nunca é a sem tradução', en.today && !SEM.includes(en.today), en.today);
     check('en: linha "Desafios do Módulo" não conta os sem tradução', en.moduleRows[0] && en.moduleRows[1] && !en.moduleRows.join(' ').includes(PT), en.moduleRows);
@@ -139,7 +164,7 @@ async function cenario(page, SEM){
     check('pt-BR: revisão espaçada com todos os devidos', SEM.every(id => pt.due.includes(id)) && pt.due.includes('lt-a1m1-001'), pt.due);
     check('pt-BR: desafio sem tradução abre', Object.values(pt.opened).every(v => v === true), pt.opened);
     check('pt-BR: Expressões mostra a sem tradução', pt.lists.expression.ids.includes('expr-zz-sem-en'));
-    const totaisPt = { expression: 6, listen_translate: 9, accent: 10, cloze_grammar: 7 };
+    const totaisPt = { expression: 6 + 9, listen_translate: 9 + 4, accent: 10 + 3, cloze_grammar: 7 };
     for (const [type, n] of Object.entries(totaisPt)) check(`pt-BR: contagem de ${type} com todos (total ${n})`, new RegExp('\\b' + n + '\\b').test(pt.lists[type].progress), pt.lists[type].progress);
     check('pt-BR: sem erro de página', errors.filter(e => !/ERR_TUNNEL/.test(e)).length === 0, errors);
     await ctx.close();
