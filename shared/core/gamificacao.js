@@ -43,12 +43,21 @@ function showDeferredStreakCelebration(){
 // primeira chamada depois da virada do dia.
 // STREAK_DAY_LABELS agora vem de shared/wizard.js (também usada por
 // buildMinutesWeekData lá).
-function buildStreakWeekData(){
+// Semana de SEGUNDA a DOMINGO, igual ao Ranking e à janela da sequência do topo (decisão da dona, 2026-10-30; antes eram
+// os últimos 7 dias). Dias que ainda vão chegar ficam com isFuture (círculo tracejado). Mesma conta de
+// TopPopCalc.weekDays (shared/janelas-topo.js).
+function buildStreakWeekData(now){
+  const base = now || new Date();
+  const diffToMonday = base.getDay() === 0 ? -6 : 1 - base.getDay();
+  const pad = (n) => String(n).padStart(2, '0');
+  const keyOf = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const todayKey = keyOf(base);
+  const log = STATE.activityLog || {};
   const days = [];
-  for (let i = 6; i >= 0; i--){
-    const d = new Date(Date.now() - i*86400000);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    days.push({ label: STREAK_DAY_LABELS[d.getDay()], done: !!STATE.activityLog[key], isToday: i === 0 });
+  for (let i = 0; i < 7; i++){
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + diffToMonday + i, 12);
+    const key = keyOf(d);
+    days.push({ key, label: STREAK_DAY_LABELS[d.getDay()], done: Number(log[key]) > 0, isToday: key === todayKey, isFuture: key > todayKey });
   }
   return days;
 }
@@ -78,7 +87,7 @@ function showStreakCelebration(){
     }
   }
   document.getElementById('streak-week-row').innerHTML = buildStreakWeekData().map(d => `
-    <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
+    <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''} ${d.isFuture ? 'future' : ''}">
       <div class="streak-day-circle">${d.done ? '✓' : ''}</div>
       <div class="streak-day-label">${d.label}</div>
     </div>

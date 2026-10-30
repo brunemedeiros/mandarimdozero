@@ -28,12 +28,13 @@ agenda_names = [primeiro nome, nome do evento], notebook_id = id do Doc. Sem cad
 Se o Calendar falhar, não leia cadernos; mande só o que já tiver e relate o erro.
 
 ## Passo 3: cadernos (só os alunos descritos no Passo 2: aula já ocorrida ainda não lida, ou nunca lido)
-Para cada um deles, rode a consulta 2 (itens existentes) e leia o caderno (Google Drive, `notebook_id`; se o texto vier cortado, exporte como texto). Salve em arquivo e leia em partes com python.
+Para cada um deles, rode a consulta 2 (itens existentes) e leia o caderno exportando como HTML (Google Drive download_file_content com o `notebook_id`, `exportMimeType` text/html; o conteúdo vem em base64: salve em arquivo e decodifique com python). NÃO extraia itens do texto de read_file_content nem de text/plain: nas tabelas Vocabulário | Gramática as linhas de dentro de cada célula chegam coladas numa linha só, sem separador (ex.: "incomodado = botheredEles estão envelhecendo = envelhecerdesafio = challenge"). No HTML, converta com python de modo que cada parágrafo (<p>) e cada item de lista (<li>) vire uma linha própria, inclusive dentro das células das tabelas, e trabalhe sobre essas linhas. Se a exportação em HTML falhar, separe de volta cada par "forma = sentido" com cuidado; se não der para saber onde uma linha termina, não crie o item e explique em `doubt`. Leia em partes com python.
 Considere só as entradas com data POSTERIOR a `last_entry_read` (títulos de data têm formatos variados, às vezes sem ano: deduza pelo contexto). Siga as convenções do Manual (`manual_markdown`); o resumo abaixo vale se o Manual não disser nada:
 - "forma = sentido" → vocabulário (registro entre parênteses vai para note). Língua-alvo à esquerda do "=". Substantivo com artigo: mantenha o artigo em a.
 - "verbo — tempo: formas" → verbo. q = infinitivo + tempo; a = as formas.
 - "regra = sentido ⇒ explicação" + linha "Ex.: frase" → estrutura. a = a frase do exemplo; q = o sentido da frase; explicação em note; gap = trecho da frase que materializa a regra (só se aparecer LITERALMENTE em a).
-- Duas formas equivalentes separadas por "/" → a recebe as duas separadas por " / " (e gap também, se couber).
+- Duas formas equivalentes separadas por "/" ou por vírgula na MESMA linha → a recebe as duas separadas por " / " (e gap também, se couber). Ex.: "enfrentando, lidando = dealing with" → q "dealing with", a "enfrentando / lidando".
+- REGRA FIXA: cada linha do caderno é um item diferente. Nunca junte com " / " palavras de linhas diferentes só porque foram ensinadas na mesma aula ou em sequência (ex.: "incomodado = bothered", "desafio = challenge" e "enfrentando, lidando = dealing with" são três itens). O " / " serve só para alternativas escritas na MESMA linha.
 - "palavra /som/" → pronúncia. "❌ frase do aluno → ✅ forma certa (por quê)" → erro: wrong = frase com ❌, a = forma com ✅, note = o porquê, q = sentido da frase na língua de referência.
 - Texto depois de "⇒" ou entre parênteses = note. Linhas "=" sem tradução ou com "?": complete se tiver certeza e preencha `doubt`; se não tiver certeza, não crie o item.
 - Ignore respostas de exercício sem frase ("b-4 ✅"), links, números de página, recados, tabelas vazias.
@@ -42,6 +43,7 @@ Considere só as entradas com data POSTERIOR a `last_entry_read` (títulos de da
   `doubt` = "Conteúdo pessoal: <o que é, em poucas palavras>. Decida se entra na revisão." (ou "Linguagem livre: …"). Não grave proposal nesses itens.
 - q na língua de referência do aluno, a na língua-alvo; para itens que não são erro, q é o sentido ou a frase a traduzir, não uma pergunta sobre a língua. Uma ideia por item.
 - Frase do aluno errada e sem marcação: item `erro` com a forma certa em a e a explicação em `doubt`. Se algo no caderno parecer errado, corrija em a e explique em `doubt`.
+- Revisão de qualidade: se um item JÁ existente (consulta 2) juntou linhas diferentes do caderno num cartão só ("x / y / z" em q e em a), envie `doubt` = "Linhas separadas do caderno viraram um cartão só" com `proposal` = {acao: "dividir", resumo, cartoes: um por linha, como está no caderno}. Pares feitos de propósito na mesma linha do caderno (ex.: "sortudo / azarado", "meu irmão / minha irmã") ficam como estão.
 - Não repita itens que já existem para o aluno (consulta 2), inclusive os cortados. (O servidor também ignora repetidos, mas evite.)
 - Sugestão aplicável: dúvida de QUALIDADE (não de conteúdo pessoal) que você sabe consertar exatamente → `proposal` = {acao: "editar"|"dividir"|"cortar", resumo: frase curta em português, cartoes: [{tipo,q,a,errado,lacuna,nota}]}.
   Se só a professora pode resolver, não grave proposal.
