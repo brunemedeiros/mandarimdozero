@@ -248,6 +248,19 @@ window.I18N_CATALOG['en'] = {
   'toast.markedKnown': 'Marked as already known ⭐', // ALTA
   'toast.dailyMissionsAllDone': '🎯 All of today\'s missions complete! +30 XP', // ALTA
   'toast.xpGain': '+{amount} XP', // ALTA
+  // XP of the week in the top bar + last weeks popover (shared/xp-semana.js; 2026-10-29).
+  'xpWeek.buttonShort': 'XP this week', // ALTA
+  'xpWeek.buttonAria': '{n} XP this week. See the last few weeks', // ALTA
+  'xpWeek.title': 'Your XP by week', // ALTA
+  'xpWeek.thisWeek': 'This week', // ALTA
+  'xpWeek.lastWeek': 'Last week', // ALTA
+  'xpWeek.weeksAgo': { one: '{n} week ago', other: '{n} weeks ago' }, // ALTA
+  'xpWeek.amount': '{n} XP', // ALTA
+  'xpWeek.range': '{from} to {to}', // ALTA
+  'xpWeek.loading': 'Loading previous weeks...', // ALTA
+  'xpWeek.error': 'Couldn\'t load the previous weeks right now.', // ALTA
+  'xpWeek.totalLabel': 'Total XP in this course', // ALTA
+  'xpWeek.note': 'Weeks run Monday to Sunday and add up all your courses, same as the Leaderboard.', // ALTA
   'toast.pointsGain': '+{n} pts', // ALTA
   'toast.extraLife': '❤️ Extra life!', // ALTA
   'toast.unitComplete': 'Unit complete! 🥐', // ALTA -- emoji de croissant (fr)
@@ -456,7 +469,6 @@ window.I18N_CATALOG['en'] = {
   'zh.path.reviewNowArrow': 'Review now ({n}) →', // ALTA
   'zh.path.continueStoryArrow': 'Continue story →', // ALTA
   'zh.path.nextWordArrow': 'Next word →', // ALTA
-  'zh.path.seeWhatLearnedArrow': 'See what you learned →', // ALTA
   'zh.hanzi.nowWriteArrow': 'Now write →', // ALTA
   'zh.hanzi.backToLessons': 'Back to lessons', // ALTA
   'zh.path.knownAsk': 'Already know it?', // ALTA
@@ -542,7 +554,6 @@ window.I18N_CATALOG['en'] = {
   'fr.mission.listen10': 'Play audio 10 times', // ALTA
   'fr.mission.translateBlocks2': 'Complete 2 "Translate the sentence" exercises', // ALTA
   'fr.moduleDone.almostThere': 'Almost there!', // ALTA
-  'fr.moduleDone.stars': 'Stars', // ALTA
   'fr.moduleDone.retryNote': 'You need at least {pct}% to pass. Keep studying the units in this section and try again whenever you like — no rush.', // ALTA
   'fr.moduleDone.nowYouKnow': 'Now you can do this in real life:', // MÉDIA
   'trail.backToTrail': 'Back to the Study Path', // ALTA -- "Study Path", escolha da dona (2026-10-19)
@@ -3925,6 +3936,38 @@ window.I18N_CATALOG['en'] = {
   'common.backArrow': '← Back', // ALTA
   'streak.modal.headline.one': 'You\'re on a {n}-day streak!', // ALTA
   'streak.modal.headline.other': 'You\'re on a {n}-day streak!', // ALTA
+  // Etapa 6 ("Voz da Prof. Brune", 2026-10-26): boas-vindas da 1ª lição do curso. needs_review: tradução nova.
+  'welcome.a.kicker': 'Your first lesson', // ALTA -- Etapa 6
+  'welcome.a.title': 'Hi, {name}! So glad you\'re here.', // ALTA -- Etapa 6
+  'welcome.a.titleNoName': 'Hi! So glad you\'re here.', // ALTA -- Etapa 6
+  'welcome.a.text': 'I\'ll be with you, one short lesson at a time. Here\'s how this first one works:', // ALTA -- Etapa 6
+  'welcome.a.text.frances': 'I\'ll be with you as you learn French, one short lesson at a time. Here\'s how this first one works:', // ALTA -- Etapa 6
+  'welcome.a.text.mandarim': 'I\'ll be with you as you learn Chinese, one short lesson at a time. Here\'s how this first one works:', // ALTA -- Etapa 6
+  'welcome.a.text.portugues': 'I\'ll be with you as you learn Portuguese, one short lesson at a time. Here\'s how this first one works:', // ALTA -- Etapa 6
+  'welcome.a.words': { one: '1 new word', other: '{n} new words' }, // ALTA -- Etapa 6
+  'welcome.a.wordsSub': 'With audio and an example sentence. Tap 🔊 as often as you like.', // ALTA -- Etapa 6
+  'welcome.a.wordsSub.mandarim': 'With hanzi, pinyin and audio. Tap 🔊 as often as you like.', // ALTA -- Etapa 6
+  'welcome.a.check': 'A quick check', // ALTA -- Etapa 6
+  'welcome.a.checkSub': 'Every right answer earns XP. Got one wrong? That\'s part of it: you see the answer and keep going.', // ALTA -- Etapa 6
+  'welcome.a.review': 'Then, Review', // ALTA -- Etapa 6
+  'welcome.a.reviewSub': 'The words come back at the right time, so you don\'t forget them.', // ALTA -- Etapa 6
+  'welcome.a.time': 'It only takes a few minutes.', // ALTA -- Etapa 6
+  'welcome.a.start': 'Start the lesson →', // ALTA -- Etapa 6
+  'welcome.b.kicker': 'A note from Prof. Brune', // ALTA -- Etapa 6
+  'welcome.b.title': 'Nice work, {name}! Your first words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.title.frances': 'Nice work, {name}! Your first French words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.title.mandarim': 'Nice work, {name}! Your first Chinese words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.title.portugues': 'Nice work, {name}! Your first Portuguese words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.titleNoName': 'Nice work! Your first words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.titleNoName.frances': 'Nice work! Your first French words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.titleNoName.mandarim': 'Nice work! Your first Chinese words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.titleNoName.portugues': 'Nice work! Your first Portuguese words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.streak': { one: 'Streak: {n} day', other: 'Streak: {n} days' }, // ALTA -- Etapa 6
+  'welcome.b.streakSub': 'Today counts. Study a little tomorrow and it becomes {next} days.', // ALTA -- Etapa 6
+  'welcome.b.review': 'Review', // ALTA -- Etapa 6
+  'welcome.b.reviewSub': { one: 'Your new word is already waiting in Review. A few minutes a day is what makes it stick.', other: 'Your {n} new words are already waiting in Review. A few minutes a day is what makes them stick.' }, // ALTA -- Etapa 6
+  'welcome.b.xp': '{n} XP', // ALTA -- Etapa 6
+  'welcome.b.xpSub': 'Lessons and reviews add XP to your Daily missions and the Leaderboard.', // ALTA -- Etapa 6
   'ui.reviewReminder.subRest': 'cards are waiting for you. Sharpen your memory by reviewing what you\'ve already seen.', // ALTA -- o travessão virou ponto; o número fica antes, no <span>
   'ui.reviewReminder.cta': 'Review now', // ALTA
   'profile.goals.title': 'My goals', // ALTA

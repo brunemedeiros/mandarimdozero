@@ -120,3 +120,8 @@
 @media (prefers-reduced-motion: reduce){
   .module-complete-icon.tier-stamp{ animation:none; }
 }
+
+/* Etapa 6: selo "⭐ Premium" no Ponto de verificação do Mapa, para quem não tem "pular unidades" (selo sem botão, no
+   mesmo tom dourado do selo dos Jogos da Conjugação). Texto na cor da tinta: contraste igual nos dois temas. */
+.tm-note.tm-note-premium{ align-self:flex-start; padding:2px 8px; border-radius:999px; font-weight:800; color:var(--ink);
+  background:color-mix(in srgb, var(--imperial-gold) 22%, var(--paper)); border:1px solid color-mix(in srgb, var(--imperial-gold) 45%, transparent); }
