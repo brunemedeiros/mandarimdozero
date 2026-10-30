@@ -12,10 +12,18 @@
 // Depende de: shared/permissions.js, shared/supabase-client.js, shared/auth.js,
 // fr/zh app.js (switchTab, APP_KEY) e os renders das abas acima.
 
-const TEACHER_PANEL_SECTIONS = ['students', 'flashcards', 'classlogs', 'materials', 'mural'];
+// Mural estilo Classroom (decisão da autora, 2026-10-29): Aulas e Material de apoio passaram para DENTRO do Mural
+// (abas Mural | Aulas e materiais | Pessoas, shared/mural.js). 'classlogs' e 'materials' continuam aceitos (atalhos da
+// ficha do aluno, avisos antigos) e abrem o Mural na aba Aulas e materiais.
+const TEACHER_PANEL_SECTIONS = ['students', 'flashcards', 'mural'];
+const TEACHER_PANEL_CONTAINERS = ['students', 'flashcards', 'reviewbank', 'classlogs', 'materials', 'mural', 'people'];
 const TEACHER_PANEL_STATE = { section: 'students', cardsSub: 'cards' };
 
 function switchTeacherPanelSection(section){
+  if ((section === 'classlogs' || section === 'materials') && typeof muralOpenTeacherTab === 'function'){
+    muralOpenTeacherTab('aulas', section);
+    section = 'mural';
+  }
   if (!TEACHER_PANEL_SECTIONS.includes(section)) section = 'students';
   TEACHER_PANEL_STATE.section = section;
   document.querySelectorAll('[data-teacher-section]').forEach(btn => {
@@ -23,10 +31,13 @@ function switchTeacherPanelSection(section){
     btn.classList.toggle('is-active', on);
     btn.setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  TEACHER_PANEL_SECTIONS.forEach(s => {
+  // Cada aba esconde todas as caixas; quem mostra a sua é o render (o Mural escolhe entre mural, aulas e pessoas).
+  TEACHER_PANEL_CONTAINERS.forEach(s => {
     const el = document.getElementById(`admin-${s}-content`);
-    if (el) el.style.display = s === section ? '' : 'none';
+    if (el) el.style.display = 'none';
   });
+  const shell = document.getElementById('admin-mural-shell');
+  if (shell) shell.style.display = section === 'mural' ? '' : 'none';
   // Cartões tem 2 partes: Cartões e Banco de Revisão (só com a permissão review_bank, plano Professora).
   const subnav = document.getElementById('admin-cards-subnav');
   const bankOk = typeof hasPermission === 'function' && hasPermission('review_bank');
@@ -41,11 +52,9 @@ function switchTeacherPanelSection(section){
     btn.classList.toggle('is-active', on);
     btn.setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  if (section === 'students') renderAdminStudentsView();
+  if (section === 'students'){ document.getElementById('admin-students-content').style.display = ''; renderAdminStudentsView(); }
   else if (section === 'flashcards') (bank ? renderReviewBankView() : renderAdminFlashcardsView());
-  else if (section === 'classlogs') renderAdminClassLogsView();
-  else if (section === 'mural') renderTeacherMuralSection();
-  else renderAdminSupportMaterialsView();
+  else renderTeacherMuralSection();
 }
 
 async function renderTeacherPanelView(){
