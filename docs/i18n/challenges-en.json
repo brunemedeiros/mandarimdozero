@@ -1,12 +1,21 @@
 {
  "expr-001": {
-  "meaning": "To feel sick and have a headache after drinking too much alcohol; to be hungover."
+  "meaning": "To feel sick and have a headache after drinking too much alcohol; to be hungover.",
+  "example": "Last night I drank too much, and this morning I'm really hungover.",
+  "secondExample": "After the party, the students were hungover and regretted their excesses.",
+  "literal": "to have a wooden mouth"
  },
  "expr-002": {
-  "meaning": "Means to bother or really irritate someone; to get on someone's nerves."
+  "meaning": "Means to bother or really irritate someone; to get on someone's nerves.",
+  "example": "Stop making that noise, you've been driving me nuts since this morning!",
+  "secondExample": "I tried to explain the situation to him calmly, but he kept asking me the same questions, and it was driving me nuts.",
+  "literal": "to break (someone's) feet"
  },
  "expr-003": {
-  "meaning": "To stand someone up; to not show up to an appointment."
+  "meaning": "To stand someone up; to not show up to an appointment.",
+  "example": "I was really mad because my friend stood me up last night.",
+  "secondExample": "She decided to stand him up because she didn't want to see him anymore.",
+  "literal": "to put a rabbit"
  },
  "lt-auto-001": {
   "referenceTranslations": [
@@ -139,19 +148,31 @@
   "explanation": "\"e\" has a grave accent."
  },
  "expr-a1m1-001": {
-  "meaning": "Nice to meet you. (Women say \"enchantée\"; it sounds the same.)"
+  "meaning": "Nice to meet you. (Women say \"enchantée\"; it sounds the same.)",
+  "example": "— Hello, my name is Léo.\n— Nice to meet you!",
+  "secondExample": "I'm Ana. Nice to meet you!"
  },
  "expr-a1m1-002": {
-  "meaning": "So-so; not great, not bad."
+  "meaning": "So-so; not great, not bad.",
+  "example": "— How's it going?\n— So-so.",
+  "secondExample": "My French? So-so.",
+  "literal": "like this, like that"
  },
  "expr-a1m1-003": {
-  "meaning": "Not bad; pretty good."
+  "meaning": "Not bad; pretty good.",
+  "example": "— How's it going?\n— Not bad, thanks!",
+  "secondExample": "This coffee isn't bad."
  },
  "expr-a1m1-004": {
-  "meaning": "Deal! Sounds good! Great! Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "Deal! Sounds good! Great! Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "— Coffee together?\n— Sounds good!",
+  "secondExample": "— I'll call you tonight.\n— Works for me!",
+  "literal": "That works!"
  },
  "expr-a1m1-005": {
-  "meaning": "No problem! No worries!"
+  "meaning": "No problem! No worries!",
+  "example": "— Sorry!\n— No problem!",
+  "secondExample": "— Can you help me?\n— No problem."
  },
  "lt-a1m2-001": {
   "referenceTranslations": [
@@ -227,19 +248,30 @@
   "explanation": "\"à\" has a grave accent."
  },
  "expr-a1m2-001": {
-  "meaning": "Enjoy your meal!"
+  "meaning": "Enjoy your meal!",
+  "example": "— Here's your dish.\n— Enjoy your meal!",
+  "secondExample": "Enjoy your meal, everyone!"
  },
  "expr-a1m2-002": {
-  "meaning": "Time to eat! Come to the table!"
+  "meaning": "Time to eat! Come to the table!",
+  "example": "Kids, come to the table!",
+  "secondExample": "Come to the table! Dinner is ready.",
+  "literal": "To the table!"
  },
  "expr-a1m2-003": {
-  "meaning": "See you in a bit!"
+  "meaning": "See you in a bit!",
+  "example": "— I'm going to the market.\n— See you later!",
+  "secondExample": "I'm leaving at noon. See you later!"
  },
  "expr-a1m2-004": {
-  "meaning": "Right now; right away."
+  "meaning": "Right now; right away.",
+  "example": "— Are you coming?\n— Yes, right away!",
+  "secondExample": "I'm coming right away."
  },
  "expr-a1m2-005": {
-  "meaning": "Have a good day!"
+  "meaning": "Have a good day!",
+  "example": "Goodbye, and have a good day!",
+  "secondExample": "Thanks, have a good day!"
  },
  "lt-a1m3-001": {
   "referenceTranslations": [
@@ -334,19 +366,32 @@
   "explanation": "\"e\" has a grave accent."
  },
  "expr-a1m3-001": {
-  "meaning": "Excuse me! Sorry!"
+  "meaning": "Excuse me! Sorry!",
+  "example": "Excuse me, where is the train station?",
+  "secondExample": "Sorry, I'm late."
  },
  "expr-a1m3-002": {
-  "meaning": "You're welcome; please, make yourself at home."
+  "meaning": "You're welcome; please, make yourself at home.",
+  "example": "— Thank you so much!\n— You're welcome.",
+  "secondExample": "Please, come in.",
+  "literal": "I beg you"
  },
  "expr-a1m3-003": {
-  "meaning": "How much is it? How much does that come to?"
+  "meaning": "How much is it? How much does that come to?",
+  "example": "How much is it, please?",
+  "secondExample": "How much is it for both?",
+  "literal": "That makes how much?"
  },
  "expr-a1m3-004": {
-  "meaning": "It's too expensive!"
+  "meaning": "It's too expensive!",
+  "example": "A hundred euros? That's too expensive!",
+  "secondExample": "This bag is pretty, but it's too expensive."
  },
  "expr-a1m3-005": {
-  "meaning": "Anything else?"
+  "meaning": "Anything else?",
+  "example": "— A kilo of apples.\n— Anything else?",
+  "secondExample": "— Anything else?\n— A bottle of water.",
+  "literal": "And with that?"
  },
  "lt-a1m4-001": {
   "referenceTranslations": [
@@ -421,19 +466,31 @@
   "explanation": "\"e\" has a grave accent."
  },
  "expr-a1m4-001": {
-  "meaning": "It's raining cats and dogs; it's pouring."
+  "meaning": "It's raining cats and dogs; it's pouring.",
+  "example": "Take an umbrella, it's pouring!",
+  "secondExample": "It's been pouring since this morning.",
+  "literal": "it's raining ropes"
  },
  "expr-a1m4-002": {
-  "meaning": "Have a good trip!"
+  "meaning": "Have a good trip!",
+  "example": "Are you leaving tomorrow? Have a good trip!",
+  "secondExample": "Have a good trip and see you soon!"
  },
  "expr-a1m4-003": {
-  "meaning": "Get well soon!"
+  "meaning": "Get well soon!",
+  "example": "Are you sick? Get well soon!",
+  "secondExample": "Get well, see you soon!"
  },
  "expr-a1m4-004": {
-  "meaning": "Bless you! (when someone sneezes)"
+  "meaning": "Bless you! (when someone sneezes)",
+  "example": "— Achoo!\n— Bless you!",
+  "secondExample": "Bless you, ma'am!",
+  "literal": "To your wishes!"
  },
  "expr-a1m4-005": {
-  "meaning": "What weather! (commenting on the weather)"
+  "meaning": "What weather! (commenting on the weather)",
+  "example": "Ugh, this weather! It's raining again.",
+  "secondExample": "Ugh, this weather! It's freezing."
  },
  "lt-a1m5-001": {
   "referenceTranslations": [
@@ -502,19 +559,33 @@
   "explanation": "\"à\" has a grave accent, \"ô\" has a circumflex accent, and \"é\" has an acute accent."
  },
  "expr-a1m5-001": {
-  "meaning": "Make yourself at home."
+  "meaning": "Make yourself at home.",
+  "example": "Come in, make yourself at home!",
+  "secondExample": "This is the living room. Make yourself at home.",
+  "literal": "Do as at your place"
  },
  "expr-a1m5-002": {
-  "meaning": "At my place; at home."
+  "meaning": "At my place; at home.",
+  "example": "Come over to my place tonight!",
+  "secondExample": "My place has two bedrooms.",
+  "literal": "at the home of me"
  },
  "expr-a1m5-003": {
-  "meaning": "Welcome!"
+  "meaning": "Welcome!",
+  "example": "Welcome to my place!",
+  "secondExample": "Welcome to Paris!"
  },
  "expr-a1m5-004": {
-  "meaning": "It looks good on you! It suits you!"
+  "meaning": "It looks good on you! It suits you!",
+  "example": "That red dress looks good on you!",
+  "secondExample": "Blue suits you.",
+  "literal": "That goes well on you!"
  },
  "expr-a1m5-005": {
-  "meaning": "Do you like it? Do you like that?"
+  "meaning": "Do you like it? Do you like that?",
+  "example": "My new house, do you like it?",
+  "secondExample": "Do you like this color?",
+  "literal": "Does it please you?"
  },
  "lt-a1m6-001": {
   "referenceTranslations": [
@@ -564,259 +635,491 @@
   "explanation": "\"e\" has an acute accent."
  },
  "expr-a1m6-001": {
-  "meaning": "Have a good weekend!"
+  "meaning": "Have a good weekend!",
+  "example": "Goodbye, have a good weekend!",
+  "secondExample": "Thanks, you have a good weekend too!"
  },
  "expr-a1m6-002": {
-  "meaning": "Have a good evening!"
+  "meaning": "Have a good evening!",
+  "example": "Goodbye, have a good evening!",
+  "secondExample": "Thank you, have a good evening too!"
  },
  "expr-a1m6-003": {
-  "meaning": "Let's go! Here we go!"
+  "meaning": "Let's go! Here we go!",
+  "example": "The movie is starting. Here we go!",
+  "secondExample": "Do we have everything? Then here we go!",
+  "literal": "It has set off!"
  },
  "expr-a1m6-004": {
-  "meaning": "What's new? What's up, any news? Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "What's new? What's up, any news? Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "Hi! What's new?",
+  "secondExample": "What's new since last week?",
+  "literal": "What of new?"
  },
  "expr-a1m6-005": {
-  "meaning": "Long time no see! It's been a while!"
+  "meaning": "Long time no see! It's been a while!",
+  "example": "Hi Marc! It's been a long time!",
+  "secondExample": "I haven't seen you in a long time!",
+  "literal": "That makes a long time!"
  },
  "expr-lote1-001": {
-  "meaning": "anything / nonsense Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "anything / nonsense Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "— The Earth is flat.\n— You're talking nonsense!",
+  "secondExample": "He ate a bunch of junk for dinner, and now he has a stomachache.",
+  "literal": "any thing"
  },
  "expr-lote1-002": {
-  "meaning": "to be fed up Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be fed up Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "I'm sick of the rain, I want sunshine!",
+  "secondExample": "The kids were fed up with waiting in the car."
  },
  "expr-lote1-003": {
-  "meaning": "to not give a damn ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+  "meaning": "to not give a damn ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "example": "— Your team lost!\n— I don't give a damn, I don't like soccer.",
+  "secondExample": "She couldn't care less what people say."
  },
  "expr-lote1-004": {
-  "meaning": "to be in deep trouble / in a terrible situation ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+  "meaning": "to be in deep trouble / in a terrible situation ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "example": "I missed my train and I have an interview in twenty minutes: I'm in deep shit.",
+  "secondExample": "Without their keys or their phone, they were in deep shit."
  },
  "expr-lote1-005": {
-  "meaning": "that sucks / what a mess Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "that sucks / what a mess Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "The concert is canceled? That sucks, I already had my tickets.",
+  "secondExample": "That neighborhood at night was a bit sketchy, so we took a taxi."
  },
  "expr-lote1-006": {
-  "meaning": "to feel lazy / can't be bothered Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to feel lazy / can't be bothered Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "I can't be bothered to cook tonight, want to order a pizza?",
+  "secondExample": "On Sunday, he felt too lazy to go out, so he stayed in bed.",
+  "literal": "to have the phlegm"
  },
  "expr-lote1-007": {
-  "meaning": "that's crazy / that's incredible Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "that's crazy / that's incredible Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "He ran the marathon in under three hours? That's crazy!",
+  "secondExample": "It was crazy: it was snowing in the middle of May."
  },
  "expr-lote1-008": {
-  "meaning": "to get out / to clear off ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+  "meaning": "to get out / to clear off ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "example": "The neighbor yelled: \"Get the hell out of my garden!\"",
+  "secondExample": "By the time the police arrived, the thieves had already taken off.",
+  "literal": "to throw the camp"
  },
  "expr-lote1-009": {
-  "meaning": "shut up ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+  "meaning": "shut up ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "example": "— You lost again, huh?\n— Oh, shut your trap!",
+  "secondExample": "Annoyed by his brother's jokes, Paul snapped: \"Shut the hell up, seriously!\"",
+  "literal": "your muzzle"
  },
  "expr-lote1-010": {
-  "meaning": "to be a pain in the neck / to piss someone off ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+  "meaning": "to be a pain in the neck / to piss someone off ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "example": "It pisses me off to have to work this Saturday.",
+  "secondExample": "Your dog barked all night again, he really pissed us off.",
+  "literal": "to make (someone) shit"
  },
  "expr-lote1-011": {
-  "meaning": "to stress out / to argue over nothing Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to stress out / to argue over nothing Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "Don't stress about it, we'll pick the restaurant when we get there.",
+  "secondExample": "Yesterday, my parents got into a pointless argument over the remote control.",
+  "literal": "to take one's head"
  },
  "expr-lote1-012": {
-  "meaning": "yeah right! / no way! Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "yeah right! / no way! Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "— He's going to clean his room by himself.\n— Yeah, right! He's never done it.",
+  "secondExample": "— The bus will be on time today.\n— Yeah, right, it's already twenty minutes late!",
+  "literal": "you speak!"
  },
  "expr-lote1-013": {
-  "meaning": "it's a piece of cake Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "it's a piece of cake Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "Changing a light bulb? It's a piece of cake!",
+  "secondExample": "For her, the first exam was a piece of cake, but the second one was harder.",
+  "literal": "it's cake"
  },
  "expr-lote1-014": {
-  "meaning": "to feel down / to have the blues Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to feel down / to have the blues Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "On Sunday evenings, I often feel down.",
+  "secondExample": "Far from her family, she felt blue all winter.",
+  "literal": "to have the cockroach"
  },
  "expr-lote1-015": {
-  "meaning": "to give someone a call"
+  "meaning": "to give someone a call",
+  "example": "I'm going to give my mom a call.",
+  "secondExample": "Yesterday, he gave the doctor a call to make an appointment.",
+  "literal": "to pass a blow of wire"
  },
  "expr-lote1-016": {
-  "meaning": "to stand in line / to wait in line"
+  "meaning": "to stand in line / to wait in line",
+  "example": "At the bakery, you have to stand in line on Sundays.",
+  "secondExample": "We waited in line for an hour to get into the museum.",
+  "literal": "to make the tail"
  },
  "expr-lote1-017": {
-  "meaning": "to be looking forward to it / can't wait"
+  "meaning": "to be looking forward to it / can't wait",
+  "example": "I can't wait to go on vacation!",
+  "secondExample": "The kids couldn't wait to open their presents."
  },
  "expr-lote1-018": {
-  "meaning": "yeah, sure... / tell me another one Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "yeah, sure... / tell me another one Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "— I finished all my homework in ten minutes.\n— Yeah, right!",
+  "secondExample": "— I only ate one chocolate.\n— Yeah, right, the box is empty!",
+  "literal": "my eye!"
  },
  "expr-lote1-019": {
-  "meaning": "to get on one's high horse / to fly off the handle"
+  "meaning": "to get on one's high horse / to fly off the handle",
+  "example": "As soon as anyone criticizes his project, he gets all worked up.",
+  "secondExample": "She flew off the handle when the waiter got the order wrong.",
+  "literal": "to climb onto one's big horses"
  },
  "expr-lote1-020": {
-  "meaning": "to hit a wall of tiredness / to feel suddenly drained Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to hit a wall of tiredness / to feel suddenly drained Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "After lunch, I always hit a wall around three in the afternoon.",
+  "secondExample": "He suddenly felt exhausted at the wheel and pulled over at a rest area.",
+  "literal": "to have a blow of the bar"
  },
  "expr-lote2-001": {
-  "meaning": "get lost / beat it ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+  "meaning": "get lost / beat it ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "example": "\"Get lost, I don't want to see you anymore!\" she yelled at her ex.",
+  "secondExample": "The cat got up on the table, so I told him: \"Come on, scram!\""
  },
  "expr-lote2-002": {
-  "meaning": "to leave / to take off ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+  "meaning": "to leave / to take off ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "example": "It's late, I'm out of here. See you tomorrow!",
+  "secondExample": "When the police showed up, they took off running.",
+  "literal": "to break oneself"
  },
  "expr-lote2-003": {
-  "meaning": "it's a pain / it's a drag ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+  "meaning": "it's a pain / it's a drag ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "example": "Another hour-long meeting? What a pain in the ass!",
+  "secondExample": "Standing in line at the government office was a real pain in the ass."
  },
  "expr-lote2-004": {
-  "meaning": "to be scared / to be scared to death Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be scared / to be scared to death Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "I'm scared to death of flying.",
+  "secondExample": "During the horror movie, we were scared stiff all evening."
  },
  "expr-lote2-005": {
-  "meaning": "to be dead tired Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be dead tired Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "I'm beat, I worked twelve hours today.",
+  "secondExample": "After the marathon, they were completely wiped out.",
+  "literal": "to be dead"
  },
  "expr-lote2-006": {
-  "meaning": "to be drunk / to be wasted ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+  "meaning": "to be drunk / to be wasted ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "example": "He drank six beers, he's completely hammered.",
+  "secondExample": "Last night we were so wasted that we took a taxi home.",
+  "literal": "to be stuffed"
  },
  "expr-lote2-007": {
-  "meaning": "to be starving ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+  "meaning": "to be starving ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "example": "I'm starving, what are we eating tonight?",
+  "secondExample": "The kids were starving when they got home from school.",
+  "literal": "to have the gullet"
  },
  "expr-lote2-008": {
-  "meaning": "to be a pain in the neck / to bug someone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+  "meaning": "to be a pain in the neck / to bug someone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "example": "Quit busting my chops with your questions!",
+  "secondExample": "My neighbor drives us nuts with his music every night.",
+  "literal": "to break the candies"
  },
  "expr-lote2-009": {
-  "meaning": "stop exaggerating / stop making things up Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "stop exaggerating / stop making things up Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "— I ate ten pizzas yesterday.\n— Get out of here!",
+  "secondExample": "You won the lottery twice? Get out of here, I don't believe you!",
+  "literal": "stop your exaggeration"
  },
  "expr-lote2-010": {
-  "meaning": "to pass out Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to pass out Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "It was so hot in the subway that a lady passed out.",
+  "secondExample": "When I see blood, I pass out.",
+  "literal": "to fall in the apples"
  },
  "expr-lote2-011": {
-  "meaning": "to give up guessing / to ask for the answer Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to give up guessing / to ask for the answer Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "I can't figure out the answer to your riddle, I give up.",
+  "secondExample": "After ten minutes, the students gave up.",
+  "literal": "to give one's tongue to the cat"
  },
  "expr-lote2-012": {
-  "meaning": "to cost a fortune / to cost an arm and a leg"
+  "meaning": "to cost a fortune / to cost an arm and a leg",
+  "example": "This coat costs an arm and a leg.",
+  "secondExample": "Our vacation in Japan cost us an arm and a leg.",
+  "literal": "to cost the eyes of the head"
  },
  "expr-lote2-013": {
-  "meaning": "a sleepless night / a night without sleep"
+  "meaning": "a sleepless night / a night without sleep",
+  "example": "The baby cried, so I had a sleepless night.",
+  "secondExample": "Before exams, a lot of students pull all-nighters.",
+  "literal": "white night"
  },
  "expr-lote2-014": {
-  "meaning": "to give up / to throw in the towel"
+  "meaning": "to give up / to throw in the towel",
+  "example": "This sudoku is too hard, I'm throwing in the towel.",
+  "secondExample": "After three years of problems, they threw in the towel and closed the restaurant.",
+  "literal": "to throw the sponge"
  },
  "expr-lote2-015": {
-  "meaning": "to have your head in the clouds"
+  "meaning": "to have your head in the clouds",
+  "example": "Léa forgot her keys again, she always has her head in the clouds.",
+  "secondExample": "During the meeting, I had my head in the clouds.",
+  "literal": "to have one's head in the clouds"
  },
  "expr-lote2-016": {
-  "meaning": "to be generous / to have a heart of gold"
+  "meaning": "to be generous / to have a heart of gold",
+  "example": "My grandmother has a heart of gold: she helps the whole neighborhood.",
+  "secondExample": "Our neighbors have always been very generous with us.",
+  "literal": "to have the heart on the hand"
  },
  "expr-lote2-017": {
-  "meaning": "to be tipsy / to be a little drunk Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be tipsy / to be a little drunk Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "At the end of the wedding, Uncle Bernard was tipsy and singing off-key.",
+  "secondExample": "Don't let her drive, she's had a few.",
+  "literal": "to have a glass in the nose"
  },
  "expr-lote2-018": {
-  "meaning": "to cost an arm and a leg Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to cost an arm and a leg Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "The tickets for the final cost a bundle.",
+  "secondExample": "Fixing my motorcycle cost me a bundle.",
+  "literal": "to cost the skin of the butt"
  },
  "expr-lote2-019": {
-  "meaning": "to make a mountain out of a molehill Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to make a mountain out of a molehill Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "I'm five minutes late, don't make a big deal out of it!",
+  "secondExample": "She spilled a little coffee and he made a huge fuss about it.",
+  "literal": "to make a whole cheese out of it"
  },
  "expr-lote2-020": {
-  "meaning": "to give a forced laugh / to laugh it off awkwardly"
+  "meaning": "to give a forced laugh / to laugh it off awkwardly",
+  "example": "When his boss made fun of his tie in front of everyone, Thomas gave a forced laugh.",
+  "secondExample": "I force a smile every time someone reminds me of my failure on the exam.",
+  "literal": "to laugh yellow"
  },
  "expr-lote3-001": {
-  "meaning": "it's worth it Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "it's worth it Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "The museum is a bit pricey, but it's worth it.",
+  "secondExample": "— Do you think it was worth getting up at five?\n— Yes, look at that sunrise!",
+  "literal": "that's worth the blow"
  },
  "expr-lote3-002": {
-  "meaning": "bad luck / what a shame Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "bad luck / what a shame Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "— I missed the bus by two minutes.\n— Ah, tough luck!",
+  "secondExample": "It's raining the whole weekend of our vacation, just our luck.",
+  "literal": "no bowl",
+  "literalNote": "In old slang, \"bol\" meant the backside: \"pas de bol\" is the mild version of \"pas de cul\" (bad luck)."
  },
  "expr-lote3-003": {
-  "meaning": "to be lucky Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be lucky Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "He found a parking spot right out front, he's so lucky!",
+  "secondExample": "We got lucky: the last train waited for us.",
+  "literal": "to have a bowl",
+  "literalNote": "In old slang, \"bol\" meant the backside: \"avoir du bol\" is the mild version of \"avoir du cul\" (to be lucky)."
  },
  "expr-lote3-004": {
-  "meaning": "to be careful / to watch out Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be careful / to watch out Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "Watch out, the floor is wet!",
+  "secondExample": "We were careful not to wake the baby when we got home."
  },
  "expr-lote3-005": {
-  "meaning": "to mess up badly / to fail Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to mess up badly / to fail Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "I didn't study enough and I bombed the exam.",
+  "secondExample": "— Did you take the right road?\n— No, we messed up, we have to turn around.",
+  "literal": "to plant oneself"
  },
  "expr-lote3-006": {
-  "meaning": "it's terrible / it sucks Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "it's terrible / it sucks Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "This game is too hard and no fun, it sucks.",
+  "secondExample": "— The concert is canceled?\n— Yes, that sucks!",
+  "literal": "it's null"
  },
  "expr-lote3-007": {
-  "meaning": "it's awesome Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "it's awesome Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "You got your license? That's awesome!",
+  "secondExample": "We're going to the beach tomorrow, it's awesome!"
  },
  "expr-lote3-008": {
-  "meaning": "oh dear / darn (mild exclamation) Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "oh dear / darn (mild exclamation) Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "Darn, I forgot my keys!",
+  "secondExample": "— The store closes at noon today.\n— Oh, darn!"
  },
  "expr-lote3-009": {
-  "meaning": "dying of laughter (lol) Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "dying of laughter (lol) Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "His joke was so funny, I was dying laughing.",
+  "secondExample": "Check out this cat video, my sister and I were dying laughing!"
  },
  "expr-lote3-010": {
-  "meaning": "to be on top form Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be on top form Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "This restaurant is really top-notch, I recommend it.",
+  "secondExample": "After a good night's sleep, I'm in top form!"
  },
  "expr-lote3-011": {
-  "meaning": "to lose patience"
+  "meaning": "to lose patience",
+  "example": "The bus is an hour late and people are starting to lose patience.",
+  "secondExample": "The teacher lost his patience when the students kept chatting."
  },
  "expr-lote3-012": {
-  "meaning": "to fall in love"
+  "meaning": "to fall in love",
+  "example": "He met Julie on vacation and fell in love.",
+  "secondExample": "I think I'm falling in love with this city!",
+  "literal": "to fall amorous"
  },
  "expr-lote3-013": {
-  "meaning": "shut up (milder than 'ta gueule') Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "shut up (milder than 'ta gueule') Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "Stop telling everyone my secrets! Shut up!",
+  "secondExample": "\"Shut up for a bit, I'm trying to listen to the game!\"",
+  "literal": "close it"
  },
  "expr-lote3-014": {
-  "meaning": "leave me alone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+  "meaning": "leave me alone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "example": "Stop following me everywhere and leave me the hell alone!",
+  "secondExample": "\"Leave me the hell alone, I'm working!\" shouted the neighbor."
  },
  "expr-lote3-015": {
-  "meaning": "are you kidding me? ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+  "meaning": "are you kidding me? ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "example": "You're asking me for another hundred euros? Are you kidding me?",
+  "secondExample": "— The plumber said he'd come next Tuesday.\n— Is he messing with us or what?"
  },
  "expr-lote3-016": {
-  "meaning": "damn / hell (strong exclamation) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+  "meaning": "damn / hell (strong exclamation) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "example": "Dammit, another traffic jam on the highway!",
+  "secondExample": "\"What the hell is this mess?\" asked the teacher when he saw the classroom.",
+  "literal": "brothel"
  },
  "expr-lote3-017": {
-  "meaning": "strong exclamation (surprise, anger) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+  "meaning": "strong exclamation (surprise, anger) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "example": "Shit, I missed the train again!",
+  "secondExample": "\"Holy shit, it's beautiful!\" said Marc, looking at the sea.",
+  "literal": "whore"
  },
  "expr-lote3-018": {
-  "meaning": "you idiot (insult) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+  "meaning": "you idiot (insult) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "example": "\"You dumbass, watch where you're walking!\"",
+  "secondExample": "He shouted \"you dumbass!\" at the driver who hadn't stopped.",
+  "literal": "kind of idiot"
  },
  "expr-lote3-019": {
-  "meaning": "jerk (insult) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+  "meaning": "jerk (insult) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "example": "That asshole cut ahead of me in line without saying anything.",
+  "secondExample": "\"What an asshole, he didn't even say thank you!\""
  },
  "expr-lote3-020": {
-  "meaning": "to be completely off the mark Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be completely off the mark Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "His answer has nothing to do with the question, he's completely off base.",
+  "secondExample": "I was completely off: I thought the meeting was tomorrow.",
+  "literal": "to be next to the plate"
  },
  "expr-lote4-001": {
-  "meaning": "to pretend"
+  "meaning": "to pretend",
+  "example": "He pretends to be asleep when his mother comes in.",
+  "secondExample": "I pretended to like the cake to be polite.",
+  "literal": "to make appearance"
  },
  "expr-lote4-002": {
-  "meaning": "to do on purpose"
+  "meaning": "to do on purpose",
+  "example": "\"Sorry, it wasn't on purpose!\" said Léa after she broke the glass.",
+  "secondExample": "My brother sings loudly on purpose to annoy me.",
+  "literal": "to do expressly"
  },
  "expr-lote4-003": {
-  "meaning": "to turn the page, to move on"
+  "meaning": "to turn the page, to move on",
+  "example": "After his divorce, Paul decided to turn the page and move away.",
+  "secondExample": "We argued a long time ago, now we need to move on."
  },
  "expr-lote4-004": {
-  "meaning": "to hold a grudge against someone"
+  "meaning": "to hold a grudge against someone",
+  "example": "She's still upset with her friend for forgetting her birthday.",
+  "secondExample": "— Are you mad at me?\n— No, it's forgotten."
  },
  "expr-lote4-005": {
-  "meaning": "it's over, it's lost Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "it's over, it's lost Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "We missed the last train, that's it for tonight.",
+  "secondExample": "The project fell through, it's all ruined."
  },
  "expr-lote4-006": {
-  "meaning": "to be broke Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be broke Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "I can't go out this weekend, I'm totally broke.",
+  "secondExample": "When we were students, we were always broke at the end of the month.",
+  "literal": "to be mown"
  },
  "expr-lote4-007": {
-  "meaning": "to be upset, angry or disappointed Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be upset, angry or disappointed Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "I'm bummed, my favorite concert got canceled.",
+  "secondExample": "She was crushed when she failed her driving test by one point.",
+  "literal": "to have the balls"
  },
  "expr-lote4-008": {
-  "meaning": "to be full of energy / to be in high spirits Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be full of energy / to be in high spirits Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "This morning I'm full of energy: I'm going for a run before work.",
+  "secondExample": "After her vacation, my grandmother was really full of pep.",
+  "literal": "to have the peach"
  },
  "expr-lote4-009": {
-  "meaning": "to struggle / to have a hard time Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to struggle / to have a hard time Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "I struggled to find an apartment in Paris.",
+  "secondExample": "The new students are struggling a bit with math.",
+  "literal": "to row in a galley"
  },
  "expr-lote4-010": {
-  "meaning": "to have money / to have cash Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to have money / to have cash Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "His parents have loads of cash, they go on vacation three times a year.",
+  "secondExample": "If I had some cash, I'd buy a house by the sea."
  },
  "expr-lote4-011": {
-  "meaning": "you're driving me crazy / you're a pain in the neck ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+  "meaning": "you're driving me crazy / you're a pain in the neck ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "example": "\"Stop asking me the same question, you're pissing me off!\"",
+  "secondExample": "His lame jokes really piss me off.",
+  "literal": "you cover me in shit"
  },
  "expr-lote4-012": {
-  "meaning": "get lost / go to hell ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+  "meaning": "get lost / go to hell ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "example": "He asked me to do his job for him; I told him to get lost.",
+  "secondExample": "\"Get lost with your advice!\" shouted the neighbor.",
+  "literal": "go get yourself seen"
  },
  "expr-lote4-013": {
-  "meaning": "to sulk / to wear a sour face ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+  "meaning": "to sulk / to wear a sour face Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "Ever since we refused to go to the restaurant, Julien has been sulking.",
+  "secondExample": "She sulked all evening because they had forgotten to invite her.",
+  "literal": "to pull the muzzle"
  },
  "expr-lote4-014": {
-  "meaning": "to make fun of someone / to mess with someone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+  "meaning": "to make fun of someone / to mess with someone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "example": "Did you see the price of this sandwich? They must think we're idiots!",
+  "secondExample": "Quit messing with me, I know you're lying."
  },
  "expr-lote4-015": {
-  "meaning": "to be on edge / to be all keyed up Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be on edge / to be all keyed up Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "With exams coming up, everyone is on edge.",
+  "secondExample": "Don't talk to him about the bill now, he's already on edge.",
+  "literal": "to be on the nerves"
  },
  "expr-lote4-016": {
-  "meaning": "it's raining cats and dogs Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "it's raining cats and dogs Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "Take an umbrella, it's pouring outside!",
+  "secondExample": "Yesterday it was pouring rain and the game was canceled.",
+  "literal": "it's raining ropes"
  },
  "expr-lote4-017": {
-  "meaning": "to go all out / to pull out all the stops Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to go all out / to pull out all the stops Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "For his daughter's wedding, he went all out: orchestra, fireworks, everything.",
+  "secondExample": "If we want to win the final, we'll have to give it everything we've got.",
+  "literal": "to put the package"
  },
  "expr-lote4-018": {
-  "meaning": "at full speed / flat out Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "at full speed / flat out Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "A motorcycle zoomed past the school at full speed.",
+  "secondExample": "We were late, so we raced across the city at full speed.",
+  "literal": "to the floor, the box (slang: the car)"
  },
  "expr-lote4-019": {
-  "meaning": "it's nothing special Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "it's nothing special Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "The movie is watchable, but it's nothing special.",
+  "secondExample": "His new album was nothing special, the reviews were lukewarm.",
+  "literal": "it doesn't break bricks"
  },
  "expr-lote4-020": {
-  "meaning": "to be crazy / to be nuts Register: informal — use with friends and people you're close to; avoid in formal settings."
+  "meaning": "to be crazy / to be nuts Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "example": "You want to swim in the sea in January? You're nuts!",
+  "secondExample": "My neighbor is a bit crazy: he talks to his plants all day long.",
+  "literal": "to be lashed"
  },
  "lt-a1m6-005": {
   "referenceTranslations": [
@@ -863,5 +1166,59 @@
  "cloze-a1m6-006": {
   "translation": "Last weekend, we went to the movies.",
   "explanation": "\"Aller\" uses être (nous sommes), and the past participle agrees with the plural subject: allés (with -s)."
+ },
+ "expr-a1-001": {
+  "meaning": "To feel hunger; to want to eat.",
+  "example": "I'm very hungry. I want to eat.",
+  "secondExample": "We're hungry after playing sports.",
+  "literal": "to have hunger"
+ },
+ "expr-a1-002": {
+  "meaning": "The feeling of wanting to drink.",
+  "example": "It's hot, I'm thirsty.",
+  "secondExample": "After playing sports, we're thirsty.",
+  "literal": "to have thirst"
+ },
+ "expr-a1-003": {
+  "meaning": "When you hold the right opinion or give the correct answer.",
+  "example": "Paul says: 'I think I'm right.'",
+  "secondExample": "She's right, the store is closed.",
+  "literal": "to have reason"
+ },
+ "expr-a2-001": {
+  "meaning": "Help; a helping hand.",
+  "example": "I need a hand carrying these heavy boxes.",
+  "secondExample": "My neighbors gave me a hand with the move.",
+  "literal": "blow of the hand",
+  "literalNote": "It was a quick surprise attack (military, 18th century); it later came to mean quick help (19th century)."
+ },
+ "expr-a2-002": {
+  "meaning": "To feel nervous or scared before doing something important; stage fright.",
+  "example": "Before going on stage, the actor had stage fright.",
+  "secondExample": "When she has to speak in public, she always gets nervous."
+ },
+ "expr-a2-003": {
+  "meaning": "To sleep in; to wake up late.",
+  "example": "On Sundays, I like to sleep in and not get up early.",
+  "secondExample": "After the party, we slept in on Saturday.",
+  "literal": "to do the fat morning"
+ },
+ "expr-b2-001": {
+  "meaning": "To clarify all the details; to be precise about every aspect of a situation or agreement.",
+  "example": "Although the project had been approved in principle, there was still a need to dot the i's and cross the t's on the budget details.",
+  "secondExample": "After the meeting, the manager asked his team to dot the i's and cross the t's before submitting the final report.",
+  "literal": "to put the dots on the i's"
+ },
+ "expr-b2-002": {
+  "meaning": "To be lazy; to have an aversion to work.",
+  "example": "Although his project is ambitious, he seems to be allergic to work, since he constantly puts off deadlines.",
+  "secondExample": "Despite the criticism, she was never lazy about defending her ideas.",
+  "literal": "to have a hair in the hand"
+ },
+ "expr-b2-003": {
+  "meaning": "To act with great force and energy, without holding back, in a very direct or forceful way.",
+  "example": "Although the subject is sensitive, the speaker did not hold back in denouncing social injustices.",
+  "secondExample": "Despite the warnings, she defended her project without holding back in the face of the harsh criticism.",
+  "literal": "not to go with a dead hand"
  }
 }
