@@ -62,3 +62,7 @@ Wiktionnaire, CNRTL (pela API do site) e Larousse abriram; Expressio não (403/D
 - SQL rodado pela autora no SQL Editor + 1 ajuste pelo conector (`arrête ton char` = exagero). Hash do `data` das 122 linhas = `c2701c9e20b7f62aeb296dcae24307d6` (igual ao Staging). `Comme ci, comme ça` (expr-a1m1-002) despublicada.
 - Código no app: `exprExampleView/exprHighlightHTML/exprLiteralHTML` em `shared/desafios-telas.js`; CSS `.expr-mark/.expr-tr-btn/.expr-example-tr/.expr-literal` em `shared/desafios.css`; inglês em `docs/i18n/challenges-en.json` (+ `scripts/build-challenges-overlay.js`, `validate-challenges-en.js`). Regressão: 80/80 no teste novo, sem falha nova (pré-existentes: `test_desafios_css.js` regras `.rb-big`, `test_content_en.js` aviso de gramática).
 - Pendente: `literal.note` em produção (bol: pas de bol e avoir du bol; coup de main) e PR do app.
+
+## Ajustes de tela depois da conferência da autora (2026-10-30)
+- Áudio da expressão toca sozinho ao abrir a pergunta; caixa do "Monte a frase" com destaque, áudio e tradução; "Sua vez" com tradução da frase quando existir (`microActivity.pt` no banco / `microActivity` no overlay en: AINDA SEM CONTEÚDO); linha "significa [francês]" saiu do painel da resposta; tela final com festa e XP em destaque; XP opção A.
+- Falta (lote de conteúdo): opções das 122 expressões no idioma do site (hoje em francês) e tradução da frase da "Sua vez".

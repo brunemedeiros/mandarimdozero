@@ -17,7 +17,7 @@ const base = (id, extra) => ({ id, type: 'expression', level: 'A1', status: 'pub
   meaning: { fr: 'Pas de chance.', pt: 'Que azar.' }, explanation: 'Familier.', microActivity: { prompt: 'Oh, __________ !', answer: 'pas de bol' } }, extra) });
 const ROWS = [
   // completo: destaque, tradução com dois falantes (quebra de linha), literal e nota
-  base('ch-full', { example: { text: "J'ai raté le bus de deux minutes. — Pas de bol !", mark: 'Pas de bol', pt: '— Perdi o ônibus por dois minutos.\n— Que azar!' }, secondExample: { text: 'Pas de bol, il pleut.', mark: 'Pas de bol', pt: 'Que azar, está chovendo.' },
+  base('ch-full', { microActivity: { prompt: 'Oh, __________ !', answer: 'pas de bol', pt: 'Ah, que azar!' }, example: { text: "J'ai raté le bus de deux minutes. — Pas de bol !", audioFile: 'a.mp3', mark: 'Pas de bol', pt: '— Perdi o ônibus por dois minutos.\n— Que azar!' }, secondExample: { text: 'Pas de bol, il pleut.', mark: 'Pas de bol', pt: 'Que azar, está chovendo.' },
     literal: { pt: 'sem tigela', note: 'Na gíria antiga, "bol" era a bunda.' } }),
   // sem nenhum campo novo (como antes do lote): nada muda
   base('ch-old', { example: { text: 'Oh, pas de bol !' }, secondExample: { text: 'Pas de bol hier.' } }),
@@ -31,7 +31,7 @@ const STUB = `(function(){ const ROWS = ${JSON.stringify(ROWS)};
     storage: { from: () => ({ upload: async () => ({}), getPublicUrl: () => ({ data: { publicUrl: '' } }), remove: async () => ({}) }) }, functions: { invoke: async () => ({ data: null, error: null }) } };
   window.supabase = { createClient: () => client }; })();`;
 const EN = {
-  'ch-full': { meaning: 'Bad luck.', example: "— I missed the bus by two minutes.\n— Bad luck!", secondExample: "Bad luck, it's raining.", literal: 'no bowl', literalNote: 'In old slang, "bol" meant the backside.' },
+  'ch-full': { meaning: 'Bad luck.', example: "— I missed the bus by two minutes.\n— Bad luck!", secondExample: "Bad luck, it's raining.", literal: 'no bowl', literalNote: 'In old slang, "bol" meant the backside.', microActivity: 'Oh, bad luck!' },
   'ch-old': { meaning: 'Bad luck.' },
   'ch-odd': { meaning: 'Bad luck.', example: 'What <i>luck</i>!' },
 };
@@ -84,6 +84,23 @@ const ateExemplos = async page => { await ateResposta(page); await page.click('#
     await page.click('#expr-continue-btn'); await page.waitForSelector('.expr-order-tr, #expr-order-dontknow-btn'); await page.waitForTimeout(80);
     const ord = await page.evaluate(() => (document.querySelector('.expr-order-tr') || {}).innerText || null);
     check(label + ' Monte a frase: tradução do exemplo 1 como apoio', ord === (pt ? '— Perdi o ônibus por dois minutos.\n— Que azar!' : "— I missed the bus by two minutes.\n— Bad luck!"), ord);
+    // ---- Monte a frase até o fim: caixa da frase montada (destaque, áudio, tradução) e a "Sua vez" com tradução ----
+    const toks = await page.evaluate(() => EXPR_RUN.c.example.text.trim().split(/\s+/));
+    for (const tok of toks) await page.evaluate(t => { [...document.querySelectorAll('.reorder-block:not(.used)')].find(b => b.textContent === t).click(); }, tok);
+    await page.waitForSelector('.correct-feedback .expr-order-full'); await page.waitForTimeout(80);
+    const box = await page.evaluate(() => { const b = document.querySelector('.expr-order-full'); return { mark: (b.querySelector('.expr-mark') || {}).textContent, tr: (b.querySelector('.expr-order-full-tr') || {}).innerText, audio: b.querySelectorAll('.dictation-play-btn, .slow-audio-btn, button').length }; });
+    check(label + ' Monte a frase: caixa da resposta com a expressão em destaque, áudio (normal e devagar) e a tradução', box.mark === 'Pas de bol' && box.audio >= 2 && box.tr === (pt ? '— Perdi o ônibus por dois minutos.\n— Que azar!' : "— I missed the bus by two minutes.\n— Bad luck!"), box);
+    if (OUT) { await page.waitForTimeout(400); await page.screenshot({ path: path.join(OUT, `4-monte-caixa-${label}.png`) }); }
+    await page.click('#expr-continue-btn'); await page.waitForSelector('#expr-turn-input');
+    const turnTr = await page.evaluate(() => (document.querySelector('.expr-turn-tr') || {}).innerText);
+    check(label + ' Sua vez: tradução da frase junto da lacuna', turnTr === (pt ? 'Ah, que azar!' : 'Oh, bad luck!'), turnTr);
+    await page.fill('#expr-turn-input', 'pas de bol'); await page.click('#expr-turn-verify-btn'); await page.waitForSelector('.expr-turn-full'); await page.waitForTimeout(80);
+    const turnBox = await page.evaluate(() => ({ tr: (document.querySelector('.expr-turn-full .expr-order-full-tr') || {}).innerText, strong: (document.querySelector('.expr-turn-full strong') || {}).textContent }));
+    check(label + ' Sua vez: caixa da resposta com a frase completa (preenchida em destaque) e a tradução', turnBox.strong === 'pas de bol' && turnBox.tr === (pt ? 'Ah, que azar!' : 'Oh, bad luck!'), turnBox);
+    await page.click('#expr-continue-btn'); await page.waitForSelector('.expr-final'); await page.waitForTimeout(900);
+    const fin = await page.evaluate(() => ({ learned: (document.querySelector('.expr-final-learned') || {}).innerText, xp: (document.getElementById('expr-final-xp-num') || { dataset: {} }).dataset.xp, shown: (document.getElementById('expr-final-xp-num') || {}).textContent, title: (document.querySelector('.expr-final-title') || {}).textContent }));
+    check(label + ' tela final: "Você aprendeu [expressão]", XP em destaque (+5) já contado na tela', fin.learned === (pt ? 'Você aprendeu pas de bol' : 'You learned pas de bol') && fin.xp === '5' && fin.shown === '+5', fin);
+    if (OUT) await page.screenshot({ path: path.join(OUT, `5-final-${label}.png`), fullPage: true });
     // ---- sem campos novos ----
     await open(page, 'ch-old'); await ateResposta(page);
     check(label + ' sem literal no dado: painel igual ao de antes', (await page.evaluate(() => !document.querySelector('.expr-literal'))));

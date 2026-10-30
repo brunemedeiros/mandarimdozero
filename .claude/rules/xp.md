@@ -20,9 +20,10 @@ site novo parte do molde da família (ver `docs/i18n/e4-plano-de-extracao.md`) e
 - **Hanzi e histórias** (hoje só no zh; valem para qualquer site que ganhe essas atividades; constantes em `shared/srs.js`): escrever hanzi `HANZI_WRITE_XP` 2, acerto no teste
   de hanzi `HANZI_TEST_XP` 1, concluir lição de hanzi `LESSON_CLOSE_XP` 4, pergunta de história certa `STORY_QUESTION_XP` 1, concluir história `STORY_DONE_XP` 20.
   Lição de hanzi ou história JÁ concluída não paga XP de novo (mesma regra de "refazer lição" da trilha).
-- **Desafios, Expressões, "Sua vez"** (decisão da autora, 2026-10-26; só este passo dá XP, o resto dos Desafios continua sem XP): digitar certo
-  `EXERCISE_XP_PRODUCE` 2, "quase" `EXERCISE_XP_ALMOST` 1, errou ou "Não sei" 0. Só na PRIMEIRA conclusão do desafio, pago ao tocar em Concluir
-  (`exprTurnXP`, `shared/desafios-telas.js`); refazer desafio concluído ou "Revisar erros" = 0, para não virar fonte infinita. Teste: `tests/desafios-expressoes-passos/`.
+- **Desafios, Expressões** (decisão da autora, 2026-10-30, "opção A": mesmo padrão da trilha; antes, 2026-10-26, só a "Sua vez" dava XP; o resto dos Desafios continua sem XP): escolher a
+  resposta certa `EXERCISE_XP_RECOGNIZE` 1, montar a frase certa `EXERCISE_XP_PRODUCE` 2, "Sua vez" digitar certo `EXERCISE_XP_PRODUCE` 2, "quase" `EXERCISE_XP_ALMOST` 1, errou ou
+  "Não sei" 0 (teto 5). Só na PRIMEIRA conclusão do desafio, pago ao tocar em Concluir (`exprXPBreakdown`, `shared/desafios-telas.js`); refazer desafio concluído ou "Revisar erros" = 0, para
+  não virar fonte infinita. Errou a escolha: não há Concluir (Tentar de novo), então nada é pago. Teste: `tests/desafios-expressoes-passos/`.
 - **Topo** (decisão da dona, 2026-10-29): ⭐ N XP = XP DA SEMANA, mesma semana (segunda a domingo) e mesma soma do Ranking "Geral" (`weekly_xp`
   de todos os idiomas); janelinha com 4 semanas (`shared/xp-semana.js`). Aviso "+N XP" não aparece em tela de conclusão (`COMPLETION_SCREEN_SELECTOR`,
   `shared/toast.js`). Teste: `tests/xp-semana/`.
