@@ -593,6 +593,9 @@ async function fingerprintEn(browser, root){
       // (como na trilha): tira do registro de toques os mp3 das expressões, nos dois lados; (2) XP por passo (escolha 1, montar 2, Sua vez 2/1; antes só a Sua vez):
       // o XP guardado no estado (xp e daily.xp) é neutralizado nos dois lados. O resto da comparação segue valendo.
       .replace(/(\\*)"\/fr\/audio\/challenges\/([0-9a-z-]+\.mp3)@[\d.]+\1",?/g, (m, bs, f) => EXPR_AUDIO.has(f) ? '' : m)
+      // (3) o toast "+N XP" dos novos ganhos (escolha e Monte a frase) aparece na lista de avisos das cenas seguintes: sai nos dois lados.
+      .replace(/(\\*)"\+\d+ XP\1",?/g, '')
+      .replace(/\[,/g, '[')
       .replace(/,(\\*\]|\])/g, '$1')
       .replace(/(\\?)"xp(\\?)":\d+/g, '$1"xp$2":0')
       .replace(/(\\?)"periodXp\1":\{[^}]*\}/g, '$1"periodXp$1":{}');
