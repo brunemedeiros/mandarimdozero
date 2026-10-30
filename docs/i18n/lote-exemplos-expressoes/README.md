@@ -57,3 +57,8 @@ Wiktionnaire, CNRTL (pela API do site) e Larousse abriram; Expressio não (403/D
 
 - 2026-10-30: `arrête ton char` = "pare com o seu exagero" / "stop your exaggeration" (preferência da autora). Hash esperado em produção e no Staging depois do lote: `c2701c9e20b7f62aeb296dcae24307d6`. `avoir un poil dans la main` ex. 2: a autora manteve a frase francesa e a tradução como estão.
 - Nota de `coup de main` (autora): origem militar (séc. XVIII, ataque-surpresa rápido), depois sentido de ajuda rápida (séc. XIX). Entra na nota do app junto com a do `bol`.
+
+## Produção (2026-10-30)
+- SQL rodado pela autora no SQL Editor + 1 ajuste pelo conector (`arrête ton char` = exagero). Hash do `data` das 122 linhas = `c2701c9e20b7f62aeb296dcae24307d6` (igual ao Staging). `Comme ci, comme ça` (expr-a1m1-002) despublicada.
+- Código no app: `exprExampleView/exprHighlightHTML/exprLiteralHTML` em `shared/desafios-telas.js`; CSS `.expr-mark/.expr-tr-btn/.expr-example-tr/.expr-literal` em `shared/desafios.css`; inglês em `docs/i18n/challenges-en.json` (+ `scripts/build-challenges-overlay.js`, `validate-challenges-en.js`). Regressão: 80/80 no teste novo, sem falha nova (pré-existentes: `test_desafios_css.js` regras `.rb-big`, `test_content_en.js` aviso de gramática).
+- Pendente: `literal.note` em produção (bol: pas de bol e avoir du bol; coup de main) e PR do app.
