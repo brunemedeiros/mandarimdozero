@@ -250,10 +250,13 @@ const nb = (x) => String(x).replace(/\u00a0/g, ' ');
     await page.fill('#signup-name', 'Nova Pessoa'); await waitMsg(page, 'signup', /está livre/);
     await page.fill('#signup-email', 'nova@x.com'); await page.fill('#signup-password', 'segredo1');
     await page.click('#signup-submit'); await visible(page, 'gate-verify');
+    // Etapa 6 (decisão da dona, 2026-10-26): o chinês não tem Teste de Nível, então "Você já sabe algo de chinês?" (uma opção
+    // só) é pulada e a entrada segue direto para o curso. O teste segura a ida (goToLanguageApp) para conferir o idioma.
+    await page.evaluate(() => { window.__went = null; goToLanguageApp = (id, knows) => { window.__went = [id, !!knows]; }; });
     await page.fill('#gate-code', '123456'); await page.click('#gate-verify-btn');
-    await visible(page, 'gate-choose-experience');
-    const ex = await page.evaluate(() => ({ gate: localStorage.getItem('ui-language-gate'), ui: getUiLang(), h: document.getElementById('gate-exp-title').textContent }));
-    check('"Eu falo inglês" com a página em português: curso em inglês', ex.gate === 'en' && ex.ui === 'en' && ex.h === 'Do you already know some Chinese?', ex);
+    await page.waitForFunction(() => window.__went);
+    const ex = await page.evaluate(() => ({ gate: localStorage.getItem('ui-language-gate'), ui: getUiLang(), went: window.__went, expShown: getComputedStyle(document.getElementById('gate-choose-experience')).display !== 'none' }));
+    check('"Eu falo inglês" com a página em português: curso em inglês, sem a pergunta de experiência no chinês', ex.gate === 'en' && ex.ui === 'en' && ex.went[0] === 'zh' && ex.went[1] === false && !ex.expShown, ex);
     await ctx.close();
   }
 
@@ -305,9 +308,12 @@ const nb = (x) => String(x).replace(/\u00a0/g, ' ');
     await page.waitForFunction(() => window.__calls.some(c => c[0] === 'oauth'));
     const intent = await page.evaluate(() => JSON.parse(localStorage.getItem('signup-intent') || 'null'));
     check('Google no passo 2: guarda o curso antes de sair', intent && intent.lang === 'zh' && intent.speak === 'pt-BR' && !intent.username, intent);
+    // Etapa 6: chinês sem Teste de Nível vai direto para o curso (sem "Você já sabe algo de chinês?").
+    await page.evaluate(() => { window.__went = null; window.__goOrig = goToLanguageApp; goToLanguageApp = (id, knows) => { window.__went = [id, !!knows]; }; });
     await page.evaluate(() => afterAuthResolved({ id: 'g1' }));
-    await visible(page, 'gate-choose-experience');
-    check('volta do Google: experiência do curso escolhido, sem gravar @', await page.evaluate(() => document.getElementById('gate-exp-title').textContent === 'Você já sabe algo de chinês?' && !window.__calls.some(c => c[0] === 'rpc' && c[1][0] === 'claim_my_username')));
+    await page.waitForFunction(() => window.__went);
+    check('volta do Google: segue direto para o curso escolhido (zh, sem a pergunta de experiência), sem gravar @', await page.evaluate(() => window.__went[0] === 'zh' && window.__went[1] === false && getComputedStyle(document.getElementById('gate-choose-experience')).display === 'none' && !window.__calls.some(c => c[0] === 'rpc' && c[1][0] === 'claim_my_username')));
+    await page.evaluate(() => { goToLanguageApp = window.__goOrig; });
     // Google pela tela Entrar, sem cadastro guardado: escolha do curso de sempre
     await page.evaluate(() => localStorage.removeItem('signup-intent'));
     await page.evaluate(() => afterAuthResolved({ id: 'g2' }));

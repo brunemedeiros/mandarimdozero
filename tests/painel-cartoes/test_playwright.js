@@ -61,7 +61,7 @@ async function abrirCartoes(opts){
     L('destino: Deck padrão da Marina e o subdeck Verbos', opts.length === 2 && opts[0].includes('padrão') && opts[1] === 'Verbos', opts);
     await p.click('[data-dest-row="s1"] details > summary');
     await p.waitForSelector('[data-tree-row]');
-    L('árvore de Decks com contagem de cartões (padrão 1, Verbos 1)', (await p.$$eval('[data-dest-row="s1"] [data-tree-row]', l => l.map(e => e.innerText.replace(/\s+/g, ' ').trim()))).join('|').match(/padrão\) \(1 cartão\(ões\).*\|Verbos \(1 cartão/) !== null, await p.$$eval('[data-dest-row="s1"] [data-tree-row]', l => l.map(e => e.innerText)));
+    L('árvore de Decks com contagem de cartões (padrão 1, Verbos 1)', (await p.$$eval('[data-dest-row="s1"] [data-tree-row]', l => l.map(e => e.innerText.replace(/\s+/g, ' ').trim()))).join('|').match(/padrão\) \(1 cartão(?:\(ões\))?[,)].*\|Verbos \(1 cartão/) !== null, await p.$$eval('[data-dest-row="s1"] [data-tree-row]', l => l.map(e => e.innerText)));
     L('Deck com cartão não pode ser apagado', await p.$$eval('[data-dest-row="s1"] [data-tree-delete]', l => l.every(b => b.disabled)));
     await abrirPicker(); await p.check('[data-student-checkbox][value="s2"]'); await p.waitForSelector('[data-dest-select="s2"]'); await p.keyboard.press('Escape');
     L('duas pessoas: 2 chips, botão no plural, 2 destinos', (await p.$$eval('[data-cards-chips] .p-chip', l => l.length)) === 2 && (await p.textContent('#admin-create-flashcard-btn')).includes('2 alunos') && (await p.$$eval('[data-dest-row]', l => l.length)) === 2);
@@ -91,7 +91,8 @@ async function abrirCartoes(opts){
     L('a contagem da aba subiu para 17', (await p.textContent('[data-cards-tabs]')).includes('(17)'));
     L('formulário limpo: sem campos, sem nota, Normal marcado', (await p.$$eval('#admin-flashcard-native-fields [data-field-content]', l => l.length)) === 0 && (await p.inputValue('#admin-flashcard-note')) === '' && (await p.isChecked('[data-card-type][value="normal"]')));
     L('as pessoas escolhidas continuam (várias criações seguidas)', (await p.$$eval('[data-cards-chips] .p-chip', l => l.length)) === 1 && !(await p.isDisabled('#admin-create-flashcard-btn')));
-    L('a árvore de Decks já conta o cartão novo (padrão 2)', (await p.innerText('[data-dest-row="s1"] [data-tree-list]')).includes('(2 cartão'));
+    await p.waitForFunction(() => ((document.querySelector('[data-dest-row="s1"] [data-tree-list]') || {}).innerText || '').replace(/\s+/g, ' ').includes('(2 cartões'), null, { timeout: 5000 }).catch(() => {});
+    L('a árvore de Decks já conta o cartão novo (padrão 2)', (await p.innerText('[data-dest-row="s1"] [data-tree-list]')).replace(/\s+/g, ' ').includes('(2 cartões'));
 
     // ---- novo subdeck e criar para duas pessoas ----
     await p.fill('[data-dest-subname="s1"]', 'Revisão da semana'); await p.click('[data-dest-newsub="s1"]');

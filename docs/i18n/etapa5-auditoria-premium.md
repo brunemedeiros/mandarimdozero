@@ -341,3 +341,8 @@ Admin com o Admin Mode desligado vê a coluna Grátis (só na interface; o servi
 5. 008: continua esperando o paywall (lista em `docs/historico/14-pendencias-pos-paywall-e-decks.md`).
 6. Pergunta aberta para a dona: a Professora (sem ser admin) pode pular unidades? Hoje a célula está desligada (a decisão
    2 citou só Premium e Aluno); a dona liga em Admin > Planos se quiser, sem código.
+
+
+### Publicação (2026-10-22, prévia aprovada pela dona)
+- 116 na produção (`20261022215604`); site pelo PR #382; `tts-generate` v11 na produção (verify_jwt true; antes v10, conferida igual ao repo).
+- Pendente da dona: Professora sem papel de admin pode pular unidades? (hoje não; célula em Admin > Planos).

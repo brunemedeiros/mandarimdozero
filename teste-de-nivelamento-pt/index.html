@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Portuguese placement test · Prof. Brune</title>
+<meta name="description" content="Find out your Brazilian Portuguese level (A1 to C1) in a few minutes, with Prof. Brune.">
+<meta name="theme-color" content="#0B6B3A">
+<meta property="og:title" content="Portuguese placement test · Prof. Brune">
+<meta property="og:description" content="Find out your Brazilian Portuguese level (A1 to C1) in a few minutes.">
+<meta property="og:url" content="https://app.profbrune.com.br/teste-de-nivelamento-pt/">
+<meta property="og:type" content="website">
+<style>
+  /* Moldura: o teste de português mora no mesmo Apps Script do teste de francês (com ?teste=pt)
+     e aparece aqui dentro, então o endereço app.profbrune.com.br/teste-de-nivelamento-pt fica na barra do navegador.
+     Para mudar perguntas ou visual, atualize o IndexPT no Apps Script, não este arquivo.
+     A página é toda em inglês, como a interface do teste. */
+  html, body { margin: 0; height: 100%; background: #FAF5EA; }
+  iframe { display: block; width: 100%; height: 100%; border: 0; }
+  .fallback { position: fixed; inset: auto 0 0 0; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); font: 600 14px/1.4 system-ui, sans-serif; color: #10291C; background: #FAF5EA; text-align: center; }
+</style>
+</head>
+<body>
+<iframe id="app" title="Portuguese placement test" allow="clipboard-write"></iframe>
+<noscript><p class="fallback">Please turn on JavaScript to take the test.</p></noscript>
+<script>
+  // Mesmo endereço /exec do teste de francês; ?teste=pt abre o teste de português.
+  // Os parâmetros do link (ex.: ?origem=instagram-bio) seguem junto.
+  var EXEC = 'https://script.google.com/macros/s/AKfycbwAIymL9R0yP_OWqsZ2qXaP51WgK-d81ySxbLeaDzyaW1NUoEIWWY4btbSbh0vRcXoN-w/exec';
+  var extra = (location.search || '').replace(/^\?/, '').replace(/(^|&)teste=[^&]*/g, '').replace(/^&/, '');
+  document.getElementById('app').src = EXEC + '?teste=pt' + (extra ? '&' + extra : '');
+</script>
+</body>
+</html>

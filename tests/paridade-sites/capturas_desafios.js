@@ -61,18 +61,18 @@ fs.mkdirSync(OUT, { recursive: true });
       await ev((id) => { window.__seed(4242); openChallengePlayer(id); }, id);
       await shot('q-' + id);
       const type = await ev((id) => CHALLENGES.find(c => c.id === id).type, id);
-      if (type === 'expression'){ await ev(() => document.getElementById('challenge-reveal-btn').click()); await shot('q-revelada-' + id); }
+      if (type === 'expression'){ await ev(() => window.__exprAbrir()); await shot('q-revelada-' + id); }
       if (type === 'accent'){ await page.click('#accent-answer-input'); await page.keyboard.type('caf'); await ev(() => { const b = document.querySelector('#challenge-player-content .fr-accent-picker button'); if (b) b.click(); }); await shot('q-foco-' + id, { keepFocus: true }); }
       for (const k of [0, 1, 2]){
         if (type === 'expression' && k === 1) continue;
         await ev(([id, k]) => { window.__seed(4242); openChallengePlayer(id); const c = CHALLENGES.find(x => x.id === id);
-          if (c.type === 'expression'){ document.getElementById('challenge-reveal-btn').click(); const b = [...document.querySelectorAll('.challenge-choice-btn')]; (k === 0 ? b.find(x => x.textContent === c.correctAnswer) : b.find(x => x.textContent !== c.correctAnswer)).click(); }
+          if (c.type === 'expression'){ window.__exprAbrir(); const b = window.__exprOpcoes(); (k === 0 ? b.find(x => window.__exprTexto(x) === c.correctAnswer) : b.find(x => window.__exprTexto(x) !== c.correctAnswer)).click(); }
           else if (c.type === 'listen_translate'){ document.getElementById('lt-hint-btn').click(); const r = c.referenceTranslations[0]; document.getElementById('lt-answer-input').value = [r, 'Não ' + r.split(' ').slice(0, -1).join(' '), 'Eu gosto de gatos azuis'][k]; document.getElementById('lt-verify-btn').click(); }
           else if (c.type === 'accent'){ document.getElementById('accent-answer-input').value = [c.targetText, c.targetText.normalize('NFD').replace(/[̀-ͯ]/g, ''), 'zzz'][k]; document.getElementById('accent-verify-btn').click(); }
           else { if (k === 1){ document.getElementById('cloze-grammar-verify-btn').click(); return; } (c.blanks || []).forEach((b, i) => { [...document.querySelectorAll('.challenge-choice-btn[data-blank="' + i + '"]')].find(x => k === 0 ? x.dataset.value === b.answer : x.dataset.value !== b.answer).click(); }); document.getElementById('cloze-grammar-verify-btn').click(); } }, [id, k]);
         await shot('fb' + k + '-' + id);
       }
-      if (type === 'expression'){ await ev(() => document.getElementById('challenge-reveal-answer-btn').click()); await shot('fb-micro-' + id); }
+      if (type === 'expression'){ await ev(() => { const r = document.getElementById('challenge-reveal-answer-btn'); if (r) r.click(); else window.__exprAteFinal(); }); await shot('fb-micro-' + id); }
     }
     // fila
     await ev(() => { const c = publishedChallenges().find(x => x.type === 'accent'); challengeQueueContext = { type: 'accent', level: c.level }; openChallengePlayer(c.id); document.getElementById('accent-answer-input').value = c.targetText; document.getElementById('accent-verify-btn').click(); document.getElementById('challenge-complete-btn').click(); });

@@ -202,8 +202,9 @@ function mapUnitDescribe(u, moduleId){
   const st = unitBlockState(u);
   const hasLessons = isLessonUnit(u) && u.lessons.length > 0;
   const lines = [];
-  if (hasLessons){
-    const done = (st === 'done' || st === 'skipped') ? u.lessons.length : currentLessonIdx(u.id);
+  // Unidade pulada (Etapa 6): o painel diz só "Pulada" (status), sem "N de N lições concluídas".
+  if (hasLessons && st !== 'skipped'){
+    const done = st === 'done' ? u.lessons.length : currentLessonIdx(u.id);
     lines.push(tp('trail.lessonsCompleted', u.lessons.length === 1 ? 1 : 2, { done, total: u.lessons.length }));
   }
   const { dueForReview } = unitCardCounts(u.id);
@@ -242,8 +243,12 @@ function renderModulesTrailMap(container, levelModules, opts){
     nodes.push({ key: 'r:' + module.id, kind: 'review', icon: '🔁', label: t('trail.moduleReview.chip'), state: !moduleUnlocked(module) ? 'locked' : (rst === 'empty' ? 'empty' : (rst === 'done' ? 'done' : 'available')),
       aria: t('trail.map.aria.review', { n: mIdx + 1 }) + (rst === 'empty' ? t('trail.map.aria.reviewEmptySuffix') : '') });
     const cp = STATE.checkpointProgress[module.id];
+    // Etapa 6: quem não tem o recurso (pular unidades) vê o selo "⭐ Premium" em vez de "Disponível" (regra 7 dos selos:
+    // selo sem botão; o cadeado só aparece na trilha em lista, que já tem o seu).
+    const cpPremium = !cp.completed && moduleUnlocked(module) && !trailSkipAllowed();
     nodes.push({ key: 'c:' + module.id, kind: 'checkpoint', icon: '🏆', label: t('trail.map.checkpointShort'), state: cp.completed ? 'done' : (moduleUnlocked(module) ? 'available' : 'locked'),
-      aria: t('trail.map.aria.checkpoint', { n: mIdx + 1 }) });
+      note: cpPremium ? '⭐ ' + t('trail.premiumBadge') : undefined, noteClass: cpPremium ? 'tm-note-premium' : undefined,
+      aria: t('trail.map.aria.checkpoint', { n: mIdx + 1 }) + (cpPremium ? ', ' + t('trail.premiumBadge') : '') });
     return { title: t('trail.module.label', { n: mIdx + 1, title: module.title }), nodes };
   });
   const find = key => { const [k, id] = [key.slice(0, 1), key.slice(2)]; return { k, id }; };
@@ -274,7 +279,9 @@ function renderModulesTrailMap(container, levelModules, opts){
     if (!moduleUnlocked(module)) lines.push(t('trail.map.checkpoint.lockedHint'));
     else if (!trailSkipAllowed()) lines.push(t('trail.checkpoint.skipLocked'));
     else actions.push({ label: cp.completed ? t('trail.map.checkpoint.redo') : t('trail.map.checkpoint.take'), primary: !cp.completed, onClick: () => openCheckpoint(module.id) });
-    return { eyebrow: t('trail.checkpoint.title'), title: module.title, status: cp.completed ? t('trail.map.checkpoint.passed', { score: cp.bestScore || 0 }) : (moduleUnlocked(module) ? t('trail.map.state.available') : t('trail.map.checkpoint.locked')),
+    const cpStatus = cp.completed ? t('trail.map.checkpoint.passed', { score: cp.bestScore || 0 })
+      : (!moduleUnlocked(module) ? t('trail.map.checkpoint.locked') : (trailSkipAllowed() ? t('trail.map.state.available') : '⭐ ' + t('trail.premiumBadge')));
+    return { eyebrow: t('trail.checkpoint.title'), title: module.title, status: cpStatus,
       goal: t('trail.map.checkpoint.goal'), lines, actions };
   };
   renderTrailMap(container, { sections }, describe);
@@ -365,6 +372,8 @@ function renderModuleTrailList(grid, levelModules, opts){
 }
 
 
+// Etapa 6 (2026-10-26): as estrelas foram aposentadas (trocadas por XP) e nenhuma tela mostra mais esta conta; a função
+// fica só porque o teste de paridade (tests/paridade-sites/test_modulos_niveis.js) ainda a compara. Texto antigo:
 // Ainda usada por markUnitCompleted (registerDailyStars) -- retirar o
 // sistema de estrelas por completo é uma fase à parte (não autorizada
 // ainda), esta função em si não é o problema; o problema era ela alimentar
@@ -395,8 +404,10 @@ function registerDailyStars(amount){
 // Diferente da tela de fim de lição normal: não repete vocabulário isolado,
 // foca no que o aluno já é capaz de fazer na vida real com o que aprendeu
 // (usa o campo `goal` de cada unidade do módulo/nível).
+// Etapa 6 (decisão da dona, 2026-10-26): pular pelo Ponto de verificação/Teste de Nível NÃO dá XP nem estrelas, então a
+// tela de aprovado não tem caixa de recompensa: mostra só a nota e o que a pessoa já sabe. A janela da sequência fica
+// para depois do Continuar (handleModuleStepNext -> showDeferredStreakCelebration).
 function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitle, units, scorePct, passThreshold, nextLabel, tier = 'module' }){
-  maybeShowStreakCelebration();
   if (!passed){
     contentEl.innerHTML = `
       <div class="lesson-complete">
@@ -414,7 +425,6 @@ function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitl
     return;
   }
 
-  const stars = lessonStars(scorePct);
   const goals = units.map(u => u.goal).filter(Boolean);
 
   contentEl.innerHTML = `
@@ -423,7 +433,6 @@ function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitl
       <h2>${title}</h2>
       <p class="module-complete-sub">${subtitle}</p>
       <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">${t('fr.moduleDone.stars')}</div><div class="lc-stat-value" id="lc-stat-stars">0 ⭐</div></div>
         <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.score')}</div><div class="lc-stat-value" id="lc-stat-pct">0%</div></div>
       </div>
       <div class="module-skills">
@@ -439,7 +448,6 @@ function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitl
   // precisar de uma tela totalmente diferente pra isso.
   const isLevel = tier === 'level';
   spawnConfetti(isLevel ? 34 : 24, isLevel ? 2600 : 2000);
-  animateCount(document.getElementById('lc-stat-stars'), stars, { prefix: '+', suffix: ' ⭐', duration: isLevel ? 900 : 750 });
   animateCount(document.getElementById('lc-stat-pct'), scorePct, { suffix: '%', duration: isLevel ? 900 : 750 });
   nextBtn.textContent = nextLabel || t('common.continueArrow');
   nextBtn.style.display = 'flex';
@@ -834,6 +842,7 @@ function handleModuleStepNext(){
     document.getElementById('path-list-wrap').style.display = 'block';
     document.getElementById('unit-detail-wrap').style.display = 'none';
     renderUnitsGrid();
+    if (typeof showDeferredStreakCelebration === 'function') showDeferredStreakCelebration();
     return true;
   }
 
@@ -847,6 +856,7 @@ function handleModuleStepNext(){
     document.getElementById('path-list-wrap').style.display = 'block';
     document.getElementById('unit-detail-wrap').style.display = 'none';
     renderUnitsGrid();
+    if (typeof showDeferredStreakCelebration === 'function') showDeferredStreakCelebration();
     return true;
   }
   return false;

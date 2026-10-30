@@ -43,12 +43,66 @@ function toastDurationMs(msg){
   return Math.min(10000, Math.max(4000, String(msg || '').length * 60));
 }
 
-function showToast(msg){
+// Telas de conclusão (decisão da dona, 2026-10-29): os avisos "+N XP" não ficam por cima do título/conteúdo.
+// Solução única para todos os sites e todas as telas: enquanto uma tela de conclusão está visível, aviso de XP não
+// aparece (a própria tela já mostra o XP ganho, ex.: "XP ganho +12 ⭐"), e os que estavam na fila somem no instante
+// em que ela abre. Os outros avisos (missão concluída, erro ao salvar...) continuam normais.
+// Tela nova de conclusão: acrescentar a classe do bloco principal aqui (ou usar data-completion-screen).
+const COMPLETION_SCREEN_SELECTOR = [
+  '[data-completion-screen]',
+  '.lesson-complete',            // Lição concluída, Ponto de verificação, Unidade e Módulo concluídos
+  '.exercise-result',            // zh: lição de hanzi concluída
+  '.story-complete',             // zh: história concluída
+  '.expr-final',                 // Desafios: final das Expressões
+  '.challenge-queue-interstitial', // Desafios: revisão/nível concluídos
+  '.conj-session-result',        // Conjugação: resultado da prática
+  '.cg-result',                  // Jogos da Conjugação
+  '.dictation-result',           // Ditados
+  '.review-complete-actions',    // Revisão: sessão concluída / fim da Revisão rápida
+  '.match-complete',             // Revisão: Combinar concluído
+].join(', ');
+
+function completionScreenVisible(){
+  const els = document.querySelectorAll(COMPLETION_SCREEN_SELECTOR);
+  for (const el of els){ if (el.getClientRects().length) return true; }
+  return false;
+}
+
+function clearXpToasts(){
+  const layer = document.getElementById('toast-layer');
+  if (layer) layer.querySelectorAll('.toast[data-kind="xp"]').forEach(el => el.remove());
+}
+
+// Observa a página só enquanto existe aviso de XP na tela (dura no máximo uns 10 s): quando uma tela de conclusão
+// aparece, os avisos de XP somem na hora.
+let xpToastObserver = null;
+let xpToastCheckQueued = false;
+function watchCompletionForXpToasts(){
+  if (xpToastObserver || typeof MutationObserver === 'undefined') return;
+  const check = () => {
+    xpToastCheckQueued = false;
+    const layer = document.getElementById('toast-layer');
+    if (!layer || !layer.querySelector('.toast[data-kind="xp"]')){ xpToastObserver.disconnect(); xpToastObserver = null; return; }
+    if (completionScreenVisible()) clearXpToasts();
+  };
+  xpToastObserver = new MutationObserver(() => {
+    if (xpToastCheckQueued) return;
+    xpToastCheckQueued = true;
+    requestAnimationFrame(check);
+  });
+  xpToastObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class', 'hidden'] });
+}
+
+// opts.kind 'xp' = aviso "+N XP" (addXP): não aparece por cima de tela de conclusão (ver acima).
+function showToast(msg, opts){
+  const isXp = !!(opts && opts.kind === 'xp');
+  if (isXp && completionScreenVisible()) return;
   const layer = document.getElementById('toast-layer');
   if (!layer.hasAttribute('role')){ layer.setAttribute('role', 'status'); layer.setAttribute('aria-live', 'polite'); }
   layer.style.top = toastTopOffset() + 'px';
   const el = document.createElement('div');
   el.className = 'toast';
+  if (isXp) el.dataset.kind = 'xp';
   el.textContent = msg;
   layer.appendChild(el);
   let timer = null, removal = null;
@@ -57,4 +111,5 @@ function showToast(msg){
   el.addEventListener('mouseenter', () => { clearTimeout(timer); clearTimeout(removal); el.classList.remove('saindo'); });
   el.addEventListener('mouseleave', () => start(1500));
   start(toastDurationMs(msg));
+  if (isXp) watchCompletionForXpToasts();
 }

@@ -28,10 +28,11 @@
 //   lang                   código do idioma estudado (fr: 'fr'): o sentido da Expressão em meaning[lang]
 //   familia()              a instância da família do idioma (fr: latinaFr()): a correção da Acentuação
 //                          (resultadoAcentuacao: acento exigido, "oe" por "œ" = quase)
-//   texts                  { 'pt-BR': {...}, en: {...} } textos que citam o idioma estudado: ch.sub, ch.verify,
+//   texts                  { 'pt-BR': {...}, en: {...} } textos que citam o idioma estudado: ch.sub,
 //                          ch.knowMore, ch.goFurther (consultados antes dos textos comuns de CHALLENGE_I18N)
 //   table, publishedRpc    tabela e RPC do Supabase (padrão 'challenges' e 'get_published_challenges')
-//   accentPickerHTML(), wireAccentPicker(conteúdo, campo)   teclado de letras do idioma na Acentuação (padrão: sem)
+//   accentPickerHTML(esperado), wireAccentPicker(conteúdo, campo)   teclado de letras do idioma na Acentuação e na "Sua vez" das
+//                          Expressões; `esperado` = a resposta, para acrescentar as letras que ela pede (padrão: sem teclado)
 //
 // Grátis x Premium (igual ao fr de antes): desafio com moduleId é Premium (Desafios do Módulo), sem moduleId é Free;
 // hoje só com o selo, porque a trava está desligada (CHALLENGE_PAYWALL_ENABLED = false; permissão challenges_premium
@@ -52,7 +53,7 @@ function registerChallenges(cfg){
     texts: {},
     table: 'challenges',
     publishedRpc: 'get_published_challenges',
-    accentPickerHTML: () => '',
+    accentPickerHTML: () => '',  // (esperado) => html
     wireAccentPicker: noop,
   }, cfg);
   return CH_CONFIG;
@@ -314,11 +315,32 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': 'Você terminou todos os exercícios desse nível.',
     'ch.queue.back': 'Voltar aos níveis',
     'ch.listenPron': 'Ouvir pronúncia',
+    'ch.verify': 'Verificar',
+    'ch.expr.whatMeans': 'O que significa?',
+    'ch.expr.guessLabel': 'Meu palpite (opcional)',
+    'ch.expr.guessPlaceholder': 'O que você acha que significa?',
+    'ch.expr.seeOptions': 'Ver opções',
+    'ch.expr.yourGuess': 'Seu palpite:',
+    'ch.expr.seeInSentences': 'Veja em frases',
+    'ch.expr.whenToUse': 'Quando usar',
+    'ch.expr.orderIt': 'Monte a frase',
+    'ch.expr.orderPrompt': 'Ordene as palavras do Exemplo 1',
+    'ch.expr.tapHint': 'Toque nas palavras na ordem certa. Toque numa já colocada para devolvê-la.',
+    'ch.expr.sumOrder': 'Monte a frase',
+    'ch.expr.fillBlank': 'Digite o que falta:',
+    'ch.expr.turnPlaceholder': 'Digite aqui',
+    'ch.expr.finalOk': 'Desafio completo!',
+    'ch.expr.finalFail': 'Quase lá! Vale tentar de novo.',
+    'ch.expr.sumChoice': 'Escolha da resposta',
+    'ch.expr.sumTurn': 'Sua vez',
+    'ch.expr.sumXp': 'XP desta conclusão',
     'ch.expr.reveal': 'Ver as respostas',
     'ch.expr.yourAnswer': 'Sua resposta: {chosen}<br>Resposta certa: <strong>{correct}</strong>',
     'ch.expr.signifies': 'significa <strong>{fr}</strong>.',
     'ch.expr.inPt': 'Em português: <strong>{pt}</strong>.',
     'ch.expr.example1': 'Exemplo 1',
+    'ch.expr.seeTranslation': 'Ver tradução',
+    'ch.expr.literal': 'Tradução literal',
     'ch.expr.example2': 'Exemplo 2',
     'ch.listenFr': '▶ Ouvir',
     'ch.slow': 'Devagar',
@@ -448,11 +470,32 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': "You have finished all the exercises in this level.",
     'ch.queue.back': "Back to levels",
     'ch.listenPron': "Listen to pronunciation",
+    'ch.verify': "Check",
+    'ch.expr.whatMeans': "What does it mean?",
+    'ch.expr.guessLabel': "My guess (optional)",
+    'ch.expr.guessPlaceholder': "What do you think it means?",
+    'ch.expr.seeOptions': "See options",
+    'ch.expr.yourGuess': "Your guess:",
+    'ch.expr.seeInSentences': "See it in sentences",
+    'ch.expr.whenToUse': "When to use it",
+    'ch.expr.orderIt': "Build the sentence",
+    'ch.expr.orderPrompt': "Put the words of Example 1 in order",
+    'ch.expr.tapHint': "Tap the words in the right order. Tap a placed one to send it back.",
+    'ch.expr.sumOrder': "Build the sentence",
+    'ch.expr.fillBlank': "Type what's missing:",
+    'ch.expr.turnPlaceholder': "Type here",
+    'ch.expr.finalOk': "Challenge complete!",
+    'ch.expr.finalFail': "Almost there! Worth another try.",
+    'ch.expr.sumChoice': "Choosing the answer",
+    'ch.expr.sumTurn': "Your turn",
+    'ch.expr.sumXp': "XP for this completion",
     'ch.expr.reveal': "See the answers",
     'ch.expr.yourAnswer': "Your answer: {chosen}<br>Correct answer: <strong>{correct}</strong>",
     'ch.expr.signifies': "means <strong>{fr}</strong>.",
     'ch.expr.inPt': "In English: <strong>{pt}</strong>.",
     'ch.expr.example1': "Example 1",
+    'ch.expr.seeTranslation': "See translation",
+    'ch.expr.literal': "Literal translation",
     'ch.expr.example2': "Example 2",
     'ch.listenFr': "▶ Listen",
     'ch.slow': "Slowly",

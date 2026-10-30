@@ -239,7 +239,28 @@ async function fingerprint(browser, root){
     check('fr de agora: sem erro de página', depois.erros.length === 0, depois.erros);
     check('mesmas cenas', JSON.stringify(Object.keys(antes)) === JSON.stringify(Object.keys(depois)), [Object.keys(antes).length, Object.keys(depois).length]);
     let iguais = 0, total = 0;
-    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST');
+    // Mudanças DE PROPÓSITO depois do refactor (2026-10-26, padrão das telas de exercício: docs/historico/23-auditoria-telas-de-exercicio.md).
+    // Tiradas dos dois lados antes de comparar, para a prova continuar valendo para todo o resto: a barra do topo da Prática e dos
+    // Jogos (progresso, ⚑, ⌨️, X) no lugar do link "Voltar" (que fica escondido) e da barra fina; "Não sei" e número 1/2 nos Jogos;
+    // "Próxima frase" -> "Continuar →" e "Ver resultado" -> "Ver resultado →".
+    const NEUTRO = [
+      [/<div class=\\"lesson-focus-bar activity-lesson-bar\\">.*?<\/button><\/div>/g, ''],
+      // antes: o link de voltar vinha embrulhado numa barra com a ⚑; agora o link fica escondido e a barra nova tem X e ⚑
+      [/<div class=\\"activity-focus-bar\\">(<button[^>]*id=\\"(?:conj-game-back|conj-back-to-select)\\"[^>]*>[^<]*<\/button>)<button[^>]*class=\\"activity-report-btn\\"[^>]*>(?:<span class=\\"emo\\"[^>]*>)?⚑(?:<\/span>)?<\/button><\/div>/g, '$1'],
+      [/(id=\\"(?:conj-game-back|conj-back-to-select)\\"[^>]*?) style=\\"display: none;\\"/g, '$1'],
+      [/(?:\\n\s*)?<span class=\\"conj-progress-bar\\"[^>]*><i style=\\"[^"]*?\\"><\/i><\/span>(?:\\n\s*)?/g, ''],
+      [/(?:\\n\s*)?<div class=\\"cg-progress-bar\\"[^>]*><i style=\\"[^"]*?\\"><\/i><\/div>(?:\\n\s*)?/g, ''],
+      // contador "Verbo i de n" / "Frase i de n" sem a barra fina: o espaço que sobrava antes do </div> é só formato
+      [/(<div class=\\"(?:conj-progress|cg-progress)\\">(?:\\n\s*)?<span>[^<]*<\/span>)(?:\\n\s*)?<\/div>/g, '$1</div>'],
+      [/<button type=\\"button\\" class=\\"exercise-dontknow cg-dontknow[^"]*?\\" id=\\"cg-dontknow\\">[^<]*<\/button>(?:\\n\s*)?/g, ''],
+      [/<span class=\\"kbd-hint\\">\d<\/span>/g, ''],
+      [/(Próxima frase|Next sentence|Continuar →|Continue →)/g, 'PROXIMA'],
+      [/(Ver resultado →|Ver resultado|See result →|See result)/g, 'VER_RESULTADO'],
+      // o jogo agora conta o dia de estudo (registerStudyToday) ao terminar: o contador de atividade do dia sobe 1
+      [/\\"activityLog\\":\{[^}]*\}/g, '\\"activityLog\\":AL'],
+    ];
+        // E-mail de contato do Premium trocado na main (brunemed1310@gmail.com -> contato@profbrune.com.br, shared/permissions.js): o REF antigo ainda tem o e-mail velho; neutralizado nos dois lados.
+    const norm = (v) => NEUTRO.reduce((str, [re, to]) => str.replace(re, to), JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST')).replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL');
     for (const k of Object.keys(antes)){
       if (k === 'erros') continue;
       if (k === 'correcao'){ // um resultado por verbo

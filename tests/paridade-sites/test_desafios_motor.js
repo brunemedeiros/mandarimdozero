@@ -45,7 +45,7 @@ const MOTOR = ['shared/desafios.js', 'shared/desafios-telas.js', 'shared/desafio
   const valores = keysFr.flatMap(k => ['pt-BR', 'en'].map(l => [k, l, (cat.I18N_CATALOG[l] || {})[k]]));
   check('chaves fr.* usadas pelo motor existem em pt-BR e en e não citam o francês', keysFr.length >= 8 && valores.every(([, , v]) => v && !/franc[eê]s|French/i.test(JSON.stringify(v))), [keysFr.length, valores.filter(([, , v]) => !v || /franc|French/i.test(JSON.stringify(v)))]);
   const cfg = read('fr/desafios-config.js');
-  check('fr/desafios-config.js tem o que é do francês', ["lang: 'fr'", 'latinaFr()', 'frAccentPickerHTML()', 'wireFrAccentPicker(', "'ch.verify': 'Vérifier'", 'Pratique francês de verdade', 'Practice real French', 'En savoir plus', 'Pour aller plus loin'].every(w => cfg.includes(w)));
+  check('fr/desafios-config.js tem o que é do francês', ["lang: 'fr'", 'latinaFr()', 'frAccentPickerHTML(expected)', 'wireFrAccentPicker(', 'Pratique francês de verdade', 'Practice real French', 'En savoir plus', 'Pour aller plus loin'].every(w => cfg.includes(w)));
   const app = read('fr/app.js');
   const nomes = ['renderChallengeCategories', 'renderChallengesList', 'openChallengePlayer', 'checkListenTranslateAnswer', 'checkAccentAnswer', 'openClozeGrammarPlayer', 'renderChallengesAdmin', 'importChallengesFromJSON',
     'loadChallengesFromDB', 'chT', 'applyChallengeI18n', 'tpZero', 'slowAudioBtnHTML', 'expressionOfTheDay', 'expressionCardHTML', 'fillExpressionLevelSections', 'dueChallengeReviews', 'buildModuleChallengesRow', 'fillModuleChallengeRows', 'md5Hex', 'accentAnswerOutcome', 'analyzeTranslation'];
@@ -162,9 +162,18 @@ const PT_CONFIG = `({
     L('álbum com a expressão do português e a Expressão do dia', album.hoje === 'Tudo bem?' && album.cards === 1 && album.tier === 'Premium', album);
     // Expressão: pergunta e devolutiva
     await page.evaluate(() => { document.querySelector('[data-today-open]').click(); });
-    await page.evaluate(() => { document.getElementById('challenge-reveal-btn').click(); [...document.querySelectorAll('.challenge-choice-btn')].find(b => b.textContent === 'Ao cumprimentar alguém').click(); });
-    const ex = await page.evaluate(() => document.getElementById('challenge-player-content').innerText);
-    L('Expressão: certa, com o sentido no idioma estudado (meaning.pt) e em inglês (camada do curso)', /Pergunta informal/.test(ex) && /An informal way to ask/.test(ex) && /Oi, Ana! Tudo bem\?/.test(ex) && semFrances(ex), ex.slice(0, 600));
+    // Expressões em passos (2026-10-26): palpite -> opções -> resposta -> "Veja em frases" -> "Sua vez" -> final. O texto de todos os passos
+    // junto tem de trazer o sentido (idioma estudado e inglês), o exemplo e o texto da "Sua vez", sem nada em francês.
+    await page.evaluate(() => { document.getElementById('expr-see-options-btn').click(); [...document.querySelectorAll('.exercise-option')].find(b => b.querySelector('.opt-text').textContent === 'Ao cumprimentar alguém').click(); });
+    const passos = [];
+    for (let i = 0; i < 8; i++){
+      passos.push(await page.evaluate(() => document.getElementById('challenge-player-content').innerText));
+      const fim = await page.evaluate(() => !!document.getElementById('challenge-complete-btn'));
+      if (fim) break;
+      await page.evaluate(() => { const d = document.getElementById('expr-turn-dontknow-btn'), o = document.getElementById('expr-order-dontknow-btn'); (d && d.offsetParent ? d : (o && o.offsetParent ? o : document.getElementById('expr-continue-btn'))).click(); });
+    }
+    const ex = passos.join('\n');
+    L('Expressão: certa, com o sentido no idioma estudado (meaning.pt) e em inglês (camada do curso), exemplos e "Sua vez"', /Pergunta informal/.test(ex) && /An informal way to ask/.test(ex) && /Oi, Ana! Tudo bem\?/.test(ex) && /Oi! .*Tudo ótimo!/.test(ex) && semFrances(ex), ex.slice(0, 900));
     await page.evaluate(() => document.getElementById('challenge-complete-btn').click());
     // Ouça e traduza: tradução para o inglês (comparador do idioma do site)
     const lt = [];

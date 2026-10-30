@@ -40,3 +40,36 @@ Sem XP: Desafios (fr), Jogos da Conjugação, Modo aula, pular Ponto de verifica
 
 ## Regra de produto
 Tudo o que for decidido sobre XP vale para todos os sites (fr, zh, pt e futuros). Ver `.claude/rules/xp.md`.
+
+## Etapa 6 (2026-10-26, decisões da dona; registro em `docs/i18n/etapa6-boas-vindas-proposta.md`, seção "Implementação")
+- **Ícone**: XP tem um ícone só, a estrela ⭐ (topo, "XP ganho" das telas de Lição/Unidade concluída, missão "Ganhe 50 XP hoje").
+  O raio ⚡ fica só para o Combo (acertos seguidos) e para o ícone da Revisão rápida (modo, não XP).
+- **Estrelas aposentadas**: a tela "Módulo concluído!" do Ponto de verificação/Teste de Nível não mostra mais "Estrelas" nem
+  caixa de recompensa (só a nota e "Agora você já sabe"). Conferido: pular pelo Ponto de verificação continua sem dar XP.
+- **Aviso "+N XP"**: `addXP(n, { quiet: true })` soma igual e só não mostra o aviso. Usado num caso só: o +4 de fechar a
+  1ª lição do curso, porque o bloco "Recado da Prof. Brune" já mostra o XP. Os avisos que estiverem na tela somem quando
+  a janela da sequência abre (não ficam empilhados por cima dela). Valores de XP: nenhum mudou.
+- Teste: `tests/boas-vindas/test_playwright.js`.
+
+## 2026-10-26: Desafios, Expressões, "Sua vez"
+- Decisão da autora: o passo "Sua vez" das Expressões (digitar a lacuna da microatividade) dá XP: certo `EXERCISE_XP_PRODUCE` (2), "quase" `EXERCISE_XP_ALMOST` (1),
+  errou ou "Não sei" 0. Antes os Desafios de conteúdo não davam XP; os outros tipos continuam sem.
+- Contra XP infinito: pago só ao tocar em Concluir e só na PRIMEIRA conclusão do desafio (refazer concluído e "Revisar erros" = 0).
+  Código: `exprTurnXP` e `exprShowFinal` em `shared/desafios-telas.js`. Cobertura: `tests/desafios-expressoes-passos/` (2 XP certo, 1 XP quase, 0 errado/"Não sei", 0 ao refazer).
+
+## 2026-10-29: XP da semana no topo, janelinha das semanas e avisos fora das telas de conclusão (decisões da dona)
+- **Topo**: o contador ⭐ mostra o **XP da semana**, com "XP" ao lado do número no fr e no zh (antes: total no topo; o fr
+  escondia "XP" no celular). O XP total continua no Perfil (cartão de estatísticas). Valores de XP: nenhum mudou.
+- **Semana e soma = Ranking**: segunda a domingo no fuso do aparelho (mesma conta de `currentWeekStart()` e
+  `leaderboardCurrentWeekStart()`), somando todos os idiomas da conta em `weekly_xp`, como o Ranking "Geral" (que é a aba
+  que o Ranking abre). Conferido na produção (2026-10-29, só leitura): `week_start` é sempre segunda-feira; leitura pública.
+- **Local x servidor**: até a leitura de `weekly_xp` chegar, o topo mostra `STATE.periodXp` (curso aberto); quando chega, o
+  número sobe contando até o valor do servidor. XP ganho depois da leitura soma na hora; o idioma da página nunca fica abaixo
+  do local (servidor atrasado em relação ao último save).
+- **Janelinha** (botão com `aria-expanded`): semana atual em destaque + 3 anteriores, com datas e barras; abre com mouse por
+  cima, clique, Enter/Espaço e toque; fecha com Esc (foco volta ao botão), clique fora e Tab. Código: `shared/xp-semana.js`,
+  `shared/xp-semana.css`; chaves `xpWeek.*` (pt-BR e en).
+- **Telas de conclusão**: aviso "+N XP" (`showToast(..., { kind: 'xp' })`) não aparece enquanto uma tela de conclusão está
+  visível e os pendentes somem quando ela abre (a tela já mostra o XP ganho). Lista das telas: `COMPLETION_SCREEN_SELECTOR`
+  em `shared/toast.js` (tela nova de conclusão entra lá ou usa `data-completion-screen`). Outros avisos continuam.
+- Testes: `tests/xp-semana/` (cálculo e navegador fr/zh, claro/escuro, 390/1280, pt-BR/en).
