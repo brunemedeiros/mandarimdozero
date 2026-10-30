@@ -46,7 +46,7 @@ const LANG_HOOKS = (typeof defineLangHooks === 'function' ? defineLangHooks : (h
   phraseHasWord: (word) => { const needle = word.f.replace(/\s*\([^()]*\)/g, '').trim().toLowerCase(); return (p) => p.f.toLowerCase().includes(needle); },
   dlgLineText: (l) => l.f,
   dlgLineHTML: (l, terms) => `<div class="dlg-fr">${dlgHighlight(l.f, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>`,
-  dlgSide: (dlg, spk) => spk === 'B' ? 'b' : 'a',
+  dlgSide: (dlg, spk) => dlgSpeakerSide(dlg, spk),
   dlgWordToast: (d) => `“${d.w}” = ${d.tr}`,
   dlgBubbleHTML: (l, blank) => `<div class="dlg-fr">${blank ? '<span class="dlg-blank">· · · · ·</span>' : escapeHTML(l.f)}</div>`,
   dlgOptionHTML: (o) => escapeHTML(typeof o === 'string' ? o : o.f),
