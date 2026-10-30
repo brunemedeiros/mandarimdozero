@@ -350,7 +350,7 @@ const GENERAL_CHALLENGES = [
   // (estrelas -- sistema paralelo de pontuação retirado do fluxo de unidade,
   // ver registerDailyStars) por um desafio ligado ao XP real, a única
   // moeda que o app de fato usa em todo o resto da interface.
-  { id:'xp50', icon:'⚡', get label(){ return t('fr.mission.xp50'); }, target:50, get: d => d.xp },
+  { id:'xp50', icon:'⭐', get label(){ return t('fr.mission.xp50'); }, target:50, get: d => d.xp },
   { id:'highscore2', icon:'📈', get label(){ return t('fr.mission.highscore2'); }, target:2, get: d => d.highScoreLessons },
   { id:'perfect1', icon:'🎯', get label(){ return t('fr.mission.perfect1'); }, target:1, get: d => d.perfectLessons },
   { id:'grammar1', icon:'🧠', get label(){ return t('fr.mission.grammar1'); }, target:1, get: d => d.grammarLessons },

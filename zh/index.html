@@ -78,6 +78,9 @@ try{
   --jade: #3A7359;          /* verde jade — sucesso/acerto, contraste intencional ao vermelho */
   /* Caixas de sucesso com texto/check (Continuar do acerto, ✓ de concluído): verde + branco, 5,6:1 nos dois temas (decisão da autora, 2026-10-22). */
   --success-fill: #3A7359; --on-success-fill: #FFFFFF;
+  /* Botões de nota da Revisão e do Banco (decisão da autora, 2026-10-28): cores fixas, iguais nos dois temas e nos dois idiomas, texto branco.
+     Difícil usa o amarelo exato da Revisão no escuro (#C9973A); branco sobre ele dá 2,6:1 (escolha da autora, abaixo do AA). */
+  --grade-fill-again: #D62619; --grade-fill-hard: #C9973A; --grade-fill-good: #2879B3; --grade-fill-easy: #3A7359; --on-grade-fill: #FFFFFF;
   --ink-soft: #5C4A3F;      /* texto secundário */
   --on-seal-red: #FFFFFF;   /* texto legível sobre fundo --seal-red — 6.0:1 no claro */
   /* Botões de nota da revisão: fundo próprio + texto --on-vivid (mesmo padrão do fr). Branco no claro (>=5.0:1), escuro no escuro (>=6.8:1). */
@@ -2094,10 +2097,10 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .typed-grade{ grid-template-columns: repeat(2,1fr); }
 .grade-btn:active{ transform: scale(.96); }
 .grade-btn small{ font-weight:600; font-size:10.5px; opacity:.85; }
-.grade-again{ background: var(--grade-again-bg); color: var(--on-vivid); }
-.grade-hard{ background: var(--grade-hard-bg); color: var(--on-vivid); }
-.grade-good{ background: var(--grade-good-bg); color: var(--on-vivid); }
-.grade-easy{ background: var(--grade-easy-bg); color: var(--on-vivid); }
+.grade-again{ background: var(--grade-fill-again); color: var(--on-grade-fill); }
+.grade-hard{ background: var(--grade-fill-hard); color: var(--on-grade-fill); }
+.grade-good{ background: var(--grade-fill-good); color: var(--on-grade-fill); }
+.grade-easy{ background: var(--grade-fill-easy); color: var(--on-grade-fill); }
 
 /* ---------- Progress / gamification view ---------- */
 .stat-cards{ display:grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:26px; }
@@ -4681,6 +4684,11 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 </style>
 <!-- Módulos e níveis (paridade B2): depois do <style> do site de propósito, para manter a ordem de antes das regras -->
 <link rel="stylesheet" href="../shared/modulos-niveis.css">
+<!-- Boas-vindas da 1ª lição do curso (Etapa 6) -->
+<link rel="stylesheet" href="../shared/boas-vindas.css">
+<link rel="stylesheet" href="../shared/mural-classroom.css">
+<!-- Janelas do topo (🔥 sequência e ⭐ XP da semana), shared/janelas-topo.js e shared/xp-semana.js -->
+<link rel="stylesheet" href="../shared/janelas-topo.css">
 </head>
 <body>
 
@@ -4729,8 +4737,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
     </div>
     <div class="stats-pills-wrap">
       <div class="stats-pills">
-        <div class="pill streak">🔥 <span id="streak-count" class="stat-count">0</span></div>
-        <div class="pill xp">⭐ <span id="xp-count" class="stat-count">0</span> XP</div>
+        <!-- 🔥 = sequência de dias; mouse, clique, toque ou teclado abre a janela da sequência (shared/janelas-topo.js). -->
+        <button type="button" class="tpop-btn" id="streak-btn" aria-expanded="false" aria-controls="streak-pop" aria-haspopup="dialog"><span class="pill streak">🔥 <span id="streak-count" class="stat-count">0</span></span></button>
+        <!-- ⭐ = XP da semana (mesma do Ranking); clique/toque/mouse abre a janelinha das últimas semanas (shared/xp-semana.js). -->
+        <button type="button" class="xp-week-btn tpop-btn" id="xp-week-btn" aria-expanded="false" aria-controls="xp-week-pop" aria-haspopup="dialog" data-i18n-attr="aria-label:xpWeek.buttonShort;title:xpWeek.buttonShort" aria-label="XP desta semana" title="XP desta semana"><span class="pill xp">⭐ <span id="xp-count" class="stat-count">0</span><span class="xp-suffix"> XP</span></span></button>
         <!-- Pinyin: só na topbar principal era redundante e ocupava espaço --
              o toggle continua acessível dentro da lição (#pinyin-toggle-btn-lesson,
              ver .lesson-focus-bar), que é onde realmente se decide ler em hanzi puro.
@@ -5165,8 +5175,6 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
     <div class="deck-topbar panel-nav" role="tablist" aria-label="Seção do painel da professora" data-i18n-attr="aria-label:panel.teacher.aria">
       <button class="deck-topbar-btn is-active" role="tab" aria-selected="true" data-teacher-section="students" data-i18n="panel.tab.students">Alunos</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="flashcards" data-i18n="panel.tab.cards">Cartões</button>
-      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="classlogs" data-i18n="panel.tab.classlogs">Aulas</button>
-      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="materials" data-i18n="panel.tab.materials">Material de apoio</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="mural" data-i18n="panel.tab.mural">Mural</button>
     </div>
     <div id="admin-students-content"></div>
@@ -5176,9 +5184,11 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
     </div>
     <div id="admin-flashcards-content" style="display:none;"></div>
     <div id="admin-reviewbank-content" style="display:none;"></div>
+    <div id="admin-mural-shell" style="display:none;"></div>
     <div id="admin-classlogs-content" style="display:none;"></div>
     <div id="admin-materials-content" style="display:none;"></div>
     <div id="admin-mural-content" style="display:none;"></div>
+    <div id="admin-people-content" style="display:none;"></div>
   </div>
 
   <!-- ===== ALUNO (vínculo ativo com professora): Mural | Aulas | Material de apoio (shared/teacher-panel.js, mural.js) ===== -->
@@ -5694,6 +5704,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/i18n/i18n.js"></script>
 <script src="../shared/i18n/pt-BR.js"></script>
 <script src="../shared/content-i18n.js"></script>
+<script src="../shared/core/familias/portugues-variantes.js"></script>
 <script src="../shared/card-variants.js"></script>
 <script src="content.js"></script>
 <script src="curriculum-changes.js"></script>
@@ -5706,6 +5717,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../languages/index.js"></script>
 <script src="../shared/course-storage.js"></script>
 <script src="../shared/account-progress.js"></script>
+<script src="../shared/lang-card-memory.js"></script>
 <script src="../shared/utils.js"></script>
 <script src="../shared/core/midia-segura.js"></script>
 <script src="../shared/theme.js"></script>
@@ -5792,6 +5804,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/public-profile.js"></script>
 <script src="../shared/public-deck.js"></script>
 <script src="../shared/topbar-stats.js"></script>
+<script src="../shared/janelas-topo.js"></script>
+<script src="../shared/xp-semana.js"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>
 <script src="../shared/activity-focus.js"></script>
@@ -5808,6 +5822,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/badge-tracks.js"></script>
 <script src="../shared/badge-tracks-app.js"></script>
 <script src="../shared/core/gamificacao.js"></script>
+<script src="../shared/core/boas-vindas.js"></script>
 <script src="../shared/core/revisao-decks.js"></script>
 <script src="../shared/core/exercicios-licao.js"></script>
 <script src="../shared/core/estado-trilha-desafios.js"></script>

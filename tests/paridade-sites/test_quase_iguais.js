@@ -20,6 +20,16 @@ const CORRECOES = [
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? String(typeof x === 'string' ? x : JSON.stringify(x)).slice(0, 900) : ''); } };
 
+// Mudanças de propósito da Etapa 6 (decisões da dona, 2026-10-26; docs/i18n/etapa6-boas-vindas-proposta.md, seção 7), iguais
+// nas duas árvores para a comparação provar que o resto não mudou: o último cartão de palavra diz "Continuar →"; o XP usa
+// ⭐ (o ⚡ ficou só no Combo); e a janela da sequência (agora depois do Continuar) limpa os avisos "+N XP" da tela, então
+// numa cena a árvore nova pode ter a lista de avisos vazia onde a antiga ainda tinha avisos.
+const ETAPA6 = (v) => v.split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
+  .replace(/26a1\.svg(&quot;\);\\?">)⚡/g, '2b50.svg$1⭐');
+const SEM_TOAST = (v) => v.replace(/\\?"toast\\?":\\?"[^"\\]*\\?"/, 'T');
+const TOAST_VAZIO = /\\?"toast\\?":\\?"\\?"/;
+const igualEtapa6 = (a, b) => { const x = ETAPA6(a), y = ETAPA6(b); return x === y || (TOAST_VAZIO.test(y) && SEM_TOAST(x) === SEM_TOAST(y)); };
+
 function comparar(rotulo, antes, depois){
   check(`${rotulo}: a sequência rodou (${antes.cenas.length} cenas)`, antes.cenas.length > 100, antes.cenas.length);
   check(`${rotulo}: mesmos erros de página antes e depois`, JSON.stringify(antes.errors) === JSON.stringify(depois.errors), { antes: antes.errors.slice(0, 3), depois: depois.errors.slice(0, 3) });
@@ -28,7 +38,7 @@ function comparar(rotulo, antes, depois){
   const n = Math.min(antes.cenas.length, depois.cenas.length);
   for (let i = 0; i < n; i++){
     const a = antes.cenas[i], b = depois.cenas[i];
-    if (a.n === b.n && a.v === b.v){ iguais++; continue; }
+    if ((a.n === b.n || ETAPA6(a.n) === ETAPA6(b.n)) && (a.v === b.v || igualEtapa6(a.v, b.v))){ iguais++; continue; } // o nome da cena traz o texto do botão clicado
     if (mostradas++ < 3){
       let j = 0; while (j < a.v.length && a.v[j] === b.v[j]) j++;
       check(`${rotulo}: cena ${i} igual (${a.n})`, false, { depoisNome: b.n, antes: a.v.slice(Math.max(0, j - 150), j + 250), depois: b.v.slice(Math.max(0, j - 150), j + 250) });

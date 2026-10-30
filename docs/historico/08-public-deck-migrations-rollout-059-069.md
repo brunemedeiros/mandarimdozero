@@ -498,3 +498,21 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Botão "Conectar de novo" (sem desconectar; não perde Pulados nem escolhas) publicado em 2026-10-24; painel-professora 691/691.
   Caminho novo da volta do login conferido pela autora (`agenda.profbrune.com.br/google/callback` responde "Link expirado").
 
+
+## 121 -- Mural estilo Google Classroom (2026-10-29, pedido da autora)
+
+- `shared/supabase_migrations/121_mural_classroom_style.sql`: capa da turma (`classrooms.cover_color`, `cover_path`; RPC
+  `mural_set_cover`, só a professora; foto no bucket `mural` em `<professora>/<professora>/capa-...`, lida pelos membros da turma);
+  avisos automáticos (`mural_posts.kind` 'lesson' | 'material' + `ref_id`, índice único): aula vira aviso quando tema ou tarefa é
+  preenchido ou muda (Google só mexe no horário, não repete); material novo vira aviso; sino para cada aluno no idioma do site;
+  texto sempre lido da aula/material (`_mural_ref`), aviso some se a aula/material for apagado; sem retroativo.
+  `mural_feed` devolve `kind`, `ref` e a capa. Aditiva (sem DROP, sem DELETE).
+- Staging: aplicada (2026-10-29, `121_mural_classroom_style`, versão 20261029205008). Produção: aplicada (2026-10-29, autorizada, versão 20261029205506; 931 aulas com o mesmo hash antes e depois, 1 post e 0 avisos automáticos logo depois; `mural_set_cover` sem execute para anon, `_mural_auto_post` sem execute para authenticated).
+- Teste local: `tests/aulas-presenca/run.sh` 121 17/17 (094 27/27, 101 7/7, 103 22/22, 107 14/14, 117 a 120 45/45).
+- Telas (branch `claude/fervent-noether-9f1ya7`, sem PR): menu da professora Alunos | Cartões | Mural; dentro do Mural as abas
+  Mural | Aulas e materiais | Pessoas e a escolha Todos/turma/aluno; capa, coluna lateral (próximas aulas; aluno: próxima aula e
+  revisão de hoje), caixa de escrever fechada. Testes: mural 310/310, painel-professora 691/691, painel-alunos 256/256,
+  painel-materiais 210/210 e 42/42, banco-revisao 672/672, k10 114/114, planos 162/162, planos-permissoes 105/105,
+  cores-marca 20/20, paridade CSS 5/5, i18n 2341/2341 e sem português no en 6/6. Mudança de propósito em testes antigos:
+  painel-professora (5 abas → 3) e painel-alunos ("Registrar aula" abre Mural > Aulas e materiais já no aluno).
+- Fica para depois: contagem de cartões do Banco dentro do aviso da aula.

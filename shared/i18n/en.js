@@ -248,6 +248,45 @@ window.I18N_CATALOG['en'] = {
   'toast.markedKnown': 'Marked as already known ⭐', // ALTA
   'toast.dailyMissionsAllDone': '🎯 All of today\'s missions complete! +30 XP', // ALTA
   'toast.xpGain': '+{amount} XP', // ALTA
+  // XP of the week in the top bar + last weeks popover (shared/xp-semana.js; 2026-10-29).
+  'xpWeek.buttonShort': 'XP this week', // ALTA
+  'xpWeek.buttonAria': '{n} XP this week. See the last few weeks', // ALTA
+  'xpWeek.thisWeek': 'This week', // ALTA
+  'xpWeek.amount': '{n} XP', // ALTA
+  'xpWeek.loading': 'Loading previous weeks...', // ALTA
+  'xpWeek.error': 'Couldn\'t load the previous weeks right now.', // ALTA
+  'xpWeek.totalLabel': 'Total XP in this course', // ALTA
+  'xpWeek.note': 'Weeks run Monday to Sunday and add up all your courses, same as the Leaderboard.', // ALTA
+  'xpWeek.headUnit': 'XP this week', // ALTA
+  'xpWeek.last4': 'Last 4 weeks', // ALTA
+  'xpWeek.colRange': '{m} {d1}–{d2}', // ALTA
+  'xpWeek.colRangeCross': '{m1} {d1}–{m2} {d2}', // ALTA
+  'xpWeek.better': { one: '+{n} XP more than last week', other: '+{n} XP more than last week' }, // ALTA
+  'xpWeek.seeRanking': 'See leaderboard', // ALTA
+  'streakPop.buttonAria': { one: 'Streak: {n} day in a row. See details', other: 'Streak: {n} days in a row. See details' }, // ALTA
+  'streakPop.buttonAriaZero': 'Streak: today can be day 1. See details', // ALTA
+  'streakPop.unit': { one: 'day streak', other: 'day streak' }, // ALTA
+  'streakPop.sub.done': 'Today counts. Day {next} is tomorrow!', // ALTA
+  'streakPop.sub.pending': 'One lesson or review today makes it {next} days.', // ALTA
+  'streakPop.zero.headline': 'Today can be day 1', // ALTA
+  'streakPop.zero.sub': 'One lesson or review starts a new streak.', // ALTA
+  'streakPop.week': 'This week', // ALTA
+  'streakPop.weekCount': '{n} of 7 days', // ALTA
+  'streakPop.dayStudied': '{day}: studied', // ALTA
+  'streakPop.best': 'Longest streak', // ALTA
+  'streakPop.bestNow': 'that’s now!', // ALTA
+  'streakPop.days': { one: '{n} day', other: '{n} days' }, // ALTA
+  'streakPop.friends.title': 'Friend streaks', // ALTA
+  'streakPop.friends.oneActive': '1 active: {days} with {name}', // ALTA
+  'streakPop.friends.oneActiveNoName': '1 active: {days}', // ALTA
+  'streakPop.friends.manyActive': '{k} active. Longest: {days} with {name}', // ALTA
+  'streakPop.friends.manyActiveNoName': '{k} active. Longest: {days}', // ALTA
+  'streakPop.friends.none': 'Study on the same day and your streak together begins.', // ALTA
+  'streakPop.friends.noFriends': 'Studying with someone helps you keep the rhythm.', // ALTA
+  'streakPop.friends.loading': 'Loading...', // ALTA
+  'streakPop.friends.error': 'Couldn\'t load your friends right now.', // ALTA
+  'streakPop.friends.see': 'See friends', // ALTA
+  'streakPop.friends.invite': 'Invite friends', // ALTA
   'toast.pointsGain': '+{n} pts', // ALTA
   'toast.extraLife': '❤️ Extra life!', // ALTA
   'toast.unitComplete': 'Unit complete! 🥐', // ALTA -- emoji de croissant (fr)
@@ -456,7 +495,6 @@ window.I18N_CATALOG['en'] = {
   'zh.path.reviewNowArrow': 'Review now ({n}) →', // ALTA
   'zh.path.continueStoryArrow': 'Continue story →', // ALTA
   'zh.path.nextWordArrow': 'Next word →', // ALTA
-  'zh.path.seeWhatLearnedArrow': 'See what you learned →', // ALTA
   'zh.hanzi.nowWriteArrow': 'Now write →', // ALTA
   'zh.hanzi.backToLessons': 'Back to lessons', // ALTA
   'zh.path.knownAsk': 'Already know it?', // ALTA
@@ -542,7 +580,6 @@ window.I18N_CATALOG['en'] = {
   'fr.mission.listen10': 'Play audio 10 times', // ALTA
   'fr.mission.translateBlocks2': 'Complete 2 "Translate the sentence" exercises', // ALTA
   'fr.moduleDone.almostThere': 'Almost there!', // ALTA
-  'fr.moduleDone.stars': 'Stars', // ALTA
   'fr.moduleDone.retryNote': 'You need at least {pct}% to pass. Keep studying the units in this section and try again whenever you like — no rush.', // ALTA
   'fr.moduleDone.nowYouKnow': 'Now you can do this in real life:', // MÉDIA
   'trail.backToTrail': 'Back to the Study Path', // ALTA -- "Study Path", escolha da dona (2026-10-19)
@@ -801,6 +838,9 @@ window.I18N_CATALOG['en'] = {
   'review.deck.myDecks': 'My Decks', // ALTA -- Revisão nova
   'review.observation': 'Note from your teacher', // ALTA
   'review.almost': 'Almost there', // ALTA
+  'answer.ptpt.almost': 'Almost! That form is from Portugal.', // ALTA (mesmo texto de ch.lt.partialPtPt)
+  'answer.ptpt.line': 'In Brazil people say: {forms}.', // ALTA
+  'answer.ptpt.pair': '<strong>{br}</strong> (instead of "{pt}")', // ALTA
   'review.almost.accent': 'Almost there: check the accents', // ALTA
   'review.almost.letter': 'Almost there: check the letters', // ALTA
   'review.deck.teacherCards': 'Teacher\'s cards', // MÉDIA -- Revisão nova
@@ -3574,6 +3614,46 @@ window.I18N_CATALOG['en'] = {
   'mural.teacherTag': 'Teacher', // ALTA
   'mural.onlyFor': '🔒 Only for {name}', // ALTA
   'mural.individualChip': 'With {name}', // ALTA
+  'mural.tab.mural': 'Board', // ALTA
+  'mural.tab.aulas': 'Lessons and materials', // ALTA
+  'mural.tab.people': 'People', // ALTA
+  'mural.pick.label': 'Class or student:', // ALTA
+  'mural.pick.all': 'Everyone', // ALTA
+  'mural.pick.student': 'Choose a student', // ALTA
+  'mural.auto.lesson': '{name} logged a lesson:', // ALTA
+  'mural.auto.material': '{name} shared a material:', // ALTA
+  'mural.auto.homework': 'Homework: {hw}', // ALTA
+  'mural.auto.openLesson': 'See lesson', // ALTA
+  'mural.auto.openMaterial': 'Open', // ALTA
+  'mural.cover.with': 'with {name}', // ALTA
+  'mural.cover.individual': 'one-on-one board', // ALTA
+  'mural.cover.individualStudent': 'only you and your teacher see it', // ALTA
+  'mural.cover.change': 'Change cover', // ALTA
+  'mural.cover.title': 'Class cover', // ALTA
+  'mural.cover.colors': 'Cover colors', // ALTA
+  'mural.cover.siteColor': 'Site color', // ALTA
+  'mural.cover.colorN': 'Color {n}', // ALTA
+  'mural.cover.upload': 'Upload photo', // ALTA
+  'mural.cover.removePhoto': 'Remove photo', // ALTA
+  'mural.cover.hint': 'The photo shows to the students in the class. JPG, PNG or WebP, up to 10 MB.', // ALTA
+  'mural.cover.saved': 'Cover updated!', // ALTA
+  'mural.cover.badFile': 'Choose a JPG, PNG or WebP photo.', // ALTA
+  'mural.side.aria': 'Upcoming lessons and shortcuts', // ALTA
+  'mural.side.next': 'Upcoming lessons', // ALTA
+  'mural.side.nextOne': 'Next lesson', // ALTA
+  'mural.side.noNext': 'No lessons scheduled.', // ALTA
+  'mural.side.seeAll': 'See all lessons', // ALTA
+  'mural.side.peopleCta': 'See people', // ALTA
+  'mural.side.review': 'Review for today', // ALTA
+  'mural.side.reviewNone': 'Nothing to review today.', // ALTA
+  'mural.side.reviewCta': 'Review now', // ALTA
+  'mural.composer.openClassroom': 'Write an announcement for the class…', // ALTA
+  'mural.composer.openStudent': 'Write a note to {name}…', // ALTA
+  'mural.people.rooms': 'Classes: {list}', // ALTA
+  'mural.people.noRoom': 'No class', // ALTA
+  'mural.people.openFicha': 'Open the student\'s profile', // ALTA
+  'mural.cover.members': { one: '{n} student', other: '{n} students' }, // ALTA
+  'mural.side.reviewN': { one: '{n} card from your teacher', other: '{n} cards from your teacher' }, // ALTA
   'mural.noClassrooms': 'You have no classes yet. Create one, add your students or send the class link.', // ALTA
   'mural.pickClassroom': 'Pick a class to see its board.', // ALTA
   'mural.noStudents': 'You have no students in this language yet. Invite them in the Students tab.', // ALTA
@@ -3925,6 +4005,38 @@ window.I18N_CATALOG['en'] = {
   'common.backArrow': '← Back', // ALTA
   'streak.modal.headline.one': 'You\'re on a {n}-day streak!', // ALTA
   'streak.modal.headline.other': 'You\'re on a {n}-day streak!', // ALTA
+  // Etapa 6 ("Voz da Prof. Brune", 2026-10-26): boas-vindas da 1ª lição do curso. needs_review: tradução nova.
+  'welcome.a.kicker': 'Your first lesson', // ALTA -- Etapa 6
+  'welcome.a.title': 'Hi, {name}! So glad you\'re here.', // ALTA -- Etapa 6
+  'welcome.a.titleNoName': 'Hi! So glad you\'re here.', // ALTA -- Etapa 6
+  'welcome.a.text': 'I\'ll be with you, one short lesson at a time. Here\'s how this first one works:', // ALTA -- Etapa 6
+  'welcome.a.text.frances': 'I\'ll be with you as you learn French, one short lesson at a time. Here\'s how this first one works:', // ALTA -- Etapa 6
+  'welcome.a.text.mandarim': 'I\'ll be with you as you learn Chinese, one short lesson at a time. Here\'s how this first one works:', // ALTA -- Etapa 6
+  'welcome.a.text.portugues': 'I\'ll be with you as you learn Portuguese, one short lesson at a time. Here\'s how this first one works:', // ALTA -- Etapa 6
+  'welcome.a.words': { one: '1 new word', other: '{n} new words' }, // ALTA -- Etapa 6
+  'welcome.a.wordsSub': 'With audio and an example sentence. Tap 🔊 as often as you like.', // ALTA -- Etapa 6
+  'welcome.a.wordsSub.mandarim': 'With hanzi, pinyin and audio. Tap 🔊 as often as you like.', // ALTA -- Etapa 6
+  'welcome.a.check': 'A quick check', // ALTA -- Etapa 6
+  'welcome.a.checkSub': 'Every right answer earns XP. Got one wrong? That\'s part of it: you see the answer and keep going.', // ALTA -- Etapa 6
+  'welcome.a.review': 'Then, Review', // ALTA -- Etapa 6
+  'welcome.a.reviewSub': 'The words come back at the right time, so you don\'t forget them.', // ALTA -- Etapa 6
+  'welcome.a.time': 'It only takes a few minutes.', // ALTA -- Etapa 6
+  'welcome.a.start': 'Start the lesson →', // ALTA -- Etapa 6
+  'welcome.b.kicker': 'A note from Prof. Brune', // ALTA -- Etapa 6
+  'welcome.b.title': 'Nice work, {name}! Your first words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.title.frances': 'Nice work, {name}! Your first French words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.title.mandarim': 'Nice work, {name}! Your first Chinese words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.title.portugues': 'Nice work, {name}! Your first Portuguese words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.titleNoName': 'Nice work! Your first words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.titleNoName.frances': 'Nice work! Your first French words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.titleNoName.mandarim': 'Nice work! Your first Chinese words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.titleNoName.portugues': 'Nice work! Your first Portuguese words are yours now.', // ALTA -- Etapa 6
+  'welcome.b.streak': { one: 'Streak: {n} day', other: 'Streak: {n} days' }, // ALTA -- Etapa 6
+  'welcome.b.streakSub': 'Today counts. Study a little tomorrow and it becomes {next} days.', // ALTA -- Etapa 6
+  'welcome.b.review': 'Review', // ALTA -- Etapa 6
+  'welcome.b.reviewSub': { one: 'Your new word is already waiting in Review. A few minutes a day is what makes it stick.', other: 'Your {n} new words are already waiting in Review. A few minutes a day is what makes them stick.' }, // ALTA -- Etapa 6
+  'welcome.b.xp': '{n} XP', // ALTA -- Etapa 6
+  'welcome.b.xpSub': 'Lessons and reviews add XP to your Daily missions and the Leaderboard.', // ALTA -- Etapa 6
   'ui.reviewReminder.subRest': 'cards are waiting for you. Sharpen your memory by reviewing what you\'ve already seen.', // ALTA -- o travessão virou ponto; o número fica antes, no <span>
   'ui.reviewReminder.cta': 'Review now', // ALTA
   'profile.goals.title': 'My goals', // ALTA

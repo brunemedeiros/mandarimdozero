@@ -167,7 +167,8 @@ async function openZh(browser, theme, withModules){
     check(tag + 'a prova passou por escuta, "quase" e erro', sawListen && sawAlmost && sawWrong, { sawListen, sawAlmost, sawWrong });
     const t4 = await page.evaluate(() => ({ pct: CHECKPOINT_STATE.lastPct, html: document.getElementById('step-content').textContent, btn: document.getElementById('step-next-btn').textContent,
       goals: document.querySelectorAll('.module-skill-item').length }));
-    check(tag + 'tela de módulo concluído com estrelas e o que a aluna já sabe', t4.pct >= 70 && /Módulo concluído/.test(t4.html) && /Estrelas/.test(t4.html) && t4.goals === 3 && /Concluir seção/.test(t4.btn), t4);
+    // Etapa 6 (2026-10-26): Estrelas aposentadas; pular não dá recompensa, a tela mostra só a nota e o que a aluna já sabe.
+    check(tag + 'tela de módulo concluído com a nota e o que a aluna já sabe, sem Estrelas nem XP', t4.pct >= 70 && /Módulo concluído/.test(t4.html) && !/Estrelas|XP/.test(t4.html) && /Pontuação/.test(t4.html) && t4.goals === 3 && /Concluir seção/.test(t4.btn), t4);
     const xp0 = await page.evaluate(() => STATE.xp);
     await click('#step-next-btn');
     const t5 = await page.evaluate(() => {
