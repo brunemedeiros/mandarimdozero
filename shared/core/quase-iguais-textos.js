@@ -17,7 +17,7 @@ function addXP(amount, opts){
   // diário 'xp50' (GENERAL_CHALLENGES), que substituiu 'stars40'.
   ensureDailyBucket();
   STATE.daily.xp += amount;
-  if (!(opts && opts.quiet)) showToast(t('toast.xpGain', { amount }));
+  if (!(opts && opts.quiet)) showToast(t('toast.xpGain', { amount }), { kind: 'xp' });
   // Fase 1 do sistema de notificações (evento "Cliente" -- ver
   // shared/notifications.js): fire-and-forget, o anti-spam (cooldown/
   // daily_cap da categoria "gamificacao") já evita virar spam a cada

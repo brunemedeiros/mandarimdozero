@@ -248,6 +248,19 @@ window.I18N_CATALOG['en'] = {
   'toast.markedKnown': 'Marked as already known ⭐', // ALTA
   'toast.dailyMissionsAllDone': '🎯 All of today\'s missions complete! +30 XP', // ALTA
   'toast.xpGain': '+{amount} XP', // ALTA
+  // XP of the week in the top bar + last weeks popover (shared/xp-semana.js; 2026-10-29).
+  'xpWeek.buttonShort': 'XP this week', // ALTA
+  'xpWeek.buttonAria': '{n} XP this week. See the last few weeks', // ALTA
+  'xpWeek.title': 'Your XP by week', // ALTA
+  'xpWeek.thisWeek': 'This week', // ALTA
+  'xpWeek.lastWeek': 'Last week', // ALTA
+  'xpWeek.weeksAgo': { one: '{n} week ago', other: '{n} weeks ago' }, // ALTA
+  'xpWeek.amount': '{n} XP', // ALTA
+  'xpWeek.range': '{from} to {to}', // ALTA
+  'xpWeek.loading': 'Loading previous weeks...', // ALTA
+  'xpWeek.error': 'Couldn\'t load the previous weeks right now.', // ALTA
+  'xpWeek.totalLabel': 'Total XP in this course', // ALTA
+  'xpWeek.note': 'Weeks run Monday to Sunday and add up all your courses, same as the Leaderboard.', // ALTA
   'toast.pointsGain': '+{n} pts', // ALTA
   'toast.extraLife': '❤️ Extra life!', // ALTA
   'toast.unitComplete': 'Unit complete! 🥐', // ALTA -- emoji de croissant (fr)
@@ -799,6 +812,9 @@ window.I18N_CATALOG['en'] = {
   'review.deck.myDecks': 'My Decks', // ALTA -- Revisão nova
   'review.observation': 'Note from your teacher', // ALTA
   'review.almost': 'Almost there', // ALTA
+  'answer.ptpt.almost': 'Almost! That form is from Portugal.', // ALTA (mesmo texto de ch.lt.partialPtPt)
+  'answer.ptpt.line': 'In Brazil people say: {forms}.', // ALTA
+  'answer.ptpt.pair': '<strong>{br}</strong> (instead of "{pt}")', // ALTA
   'review.almost.accent': 'Almost there: check the accents', // ALTA
   'review.almost.letter': 'Almost there: check the letters', // ALTA
   'review.deck.teacherCards': 'Teacher\'s cards', // MÉDIA -- Revisão nova

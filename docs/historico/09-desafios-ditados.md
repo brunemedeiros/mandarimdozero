@@ -99,3 +99,50 @@ Testes: desafios-modulo 75/75, desafios-conclusao 19/19, test_answer_validation 
   "O que será que significa?" e sem etiqueta de nível, 2 por linha no celular e 3 ou mais no computador, som no canto de
   baixo. Lista inteira de 6891px para 4256px de altura (1200px) e de 12897px para 5898px (390px).
   `tests/desafios-album` 66/66, desafios-modulo 75/75, desafios-conclusao 19/19.
+
+## Inglês dos 16 da primeira leva, correções de texto e regra do português de Portugal (2026-10-26)
+- **Inglês**: os 16 Desafios publicados só na produção, sem fonte no repositório (accent-a1/a2/b2-001, expr-a1/a2/b2-001..003,
+  lt-a1/a2/b1/b2-001), ganharam a tradução em inglês aprovada pela dona (`docs/i18n/challenges-en.json`, overlay
+  `fr/challenges.en.js` regerado). Retrato da produção em `docs/i18n/challenges-producao-sem-fonte.json` (o validador usa
+  como fonte, igual ao do A1-m3). Voltam a aparecer e abrir no site em inglês (`tests/desafios-idioma-site` 41/41).
+- **Correções na produção** (SQL para a autora aplicar: `docs/rollout-sql/desafios-correcoes-2026-10-26.sql`, com backup,
+  conferência do valor antigo e checagem final que desfaz tudo; testado num Postgres local): expr-b2-001 "aspetos" ->
+  "aspectos"; lt-a1-001 "Eu estou a comer" -> "Eu estou comendo"; lt-b2-001 "Conquanto" -> "Embora"; accent-b2-001
+  explicação nova; expr-a2-001 explicação em francês sem definição circular; expr-a1-003 opção certa "Ne pas se tromper"
+  (no lugar de "Avoir la bonne opinion"); expr-b2-002 2º exemplo "Mon colocataire a vraiment un poil dans la main : il ne
+  fait jamais la vaisselle." (o SQL tira o `audioFile` antigo 8161a79d42ec.mp3; o mp3 novo seria fda7a771ac1c.mp3, ainda
+  NÃO gerado). O retrato no repositório já tem os textos novos.
+- **Regra da dona (vale para todo Ouça e traduza em pt-BR, hoje e os próximos)**: resposta em português de Portugal não é
+  "certa": é "Quase", e a devolutiva mostra a forma do Brasil ("🟡 Quase! Essa forma é de Portugal." + "No Brasil se diz:
+  **estou comendo** (em vez de "estou a comer")."; chaves `ch.lt.partialPtPt`, `ch.lt.ptpt`, `ch.lt.ptpt.pair`). Código:
+  `ptEuropeanToBrazilian` + `listenTranslateVerdict` no bloco `challenge-translation-logic` de `shared/desafios.js`
+  (`listenTranslateOutcome` passa por ele); tela em `shared/desafios-telas.js`. Marcas: estar/andar/ficar + "a" +
+  infinitivo (vira gerúndio); telemóvel, autocarro, comboio, pequeno-almoço, casa de banho, facto, contacto/contactar, ecrã,
+  frigorífico, rapariga, sumo (só como substantivo), apanhar + meio de transporte (vira pegar); plurais incluídos. "tu" + 2ª
+  pessoa NÃO conta. No site em inglês não se aplica (comparador próprio). Varredura: na produção só o lt-a1-001 tinha forma
+  de Portugal; nos lotes do repositório nenhuma.
+- Testes: `tests/desafios-ptpt/test_ptpt.js` 282/282 (PT-PT -> Quase, Brasil -> certo, falsos positivos, varredura de 163
+  traduções aceitas do repositório), `tests/desafios-ptpt/test_playwright.js` 8/8 (tela pt-BR e en).
+
+## Português de Portugal = Quase em toda resposta em português (2026-10-29)
+- **Decisão da dona**: a regra de 2026-10-26 (resposta em português de Portugal não é "certa", é "Quase", com a forma do Brasil
+  na devolutiva) vale para QUALQUER resposta escrita em português, não só para o Ouça e traduza.
+- **Código comum**: a detecção/troca saiu de `shared/desafios.js` para `shared/core/familias/portugues-variantes.js`
+  (`PortuguesVariantes`: `paraBrasil` = antigo `ptEuropeanToBrazilian`, `ptBrVerdictAdjust(resposta, aceitas, { aceita })` ->
+  `{ verdict: 'almost', pairs: [{ pt, br }], text }` ou null, `ptBrFeedbackHTML(pairs, { t, keys, esc, tag, cls, lead })`),
+  carregado por fr e zh antes de `licao-feedback.js` e `desafios.js`. O Ouça e traduza chama a função comum
+  (`listenTranslateVerdict` e a tela em `shared/desafios-telas.js`), com o mesmo resultado.
+- **Gancho para o site de português**: `LANG_HOOKS.typedAnswerLang` (opcional, no contrato `shared/core/lang-hooks-contrato.js`).
+  Com `'pt-BR'`, `typedPtBrAdjust`/`typedPtBrNoteHTML` (`shared/core/licao-feedback.js`) entram em: "Digite o que ouviu" e lacuna
+  digitada (`typedVerdictPtBr`, `shared/core/licao-exercicios.js`; meio ponto e `EXERCISE_XP_ALMOST`), Revisão Digite a
+  resposta/Cloze, também os cartões do Banco (`reviewTypedCheckPtBr`, `shared/core/revisao-cartoes.js`; nota Difícil pelo
+  `wrongGrade` do site), gramática (`shared/core/gramatica-cenario.js`; meio ponto) e Conjugação (`conjEvaluate`,
+  `shared/conjugacao.js`; "quase"). Devolutiva: "Quase! Essa forma é de Portugal. No Brasil se diz: **estou comendo** (em vez de
+  "estou a comer")." (chaves `answer.ptpt.almost/line/pair` em pt-BR e en, mesmos textos dos Desafios). fr e zh não declaram o
+  gancho: nada muda. O Modo aula do Banco não tem resposta digitada (a professora dá a nota).
+- **Testes**: `tests/desafios-ptpt` 282/282 e 8/8 (iguais a antes); `tests/respostas-ptbr/test_api.js` 12/12;
+  `tests/respostas-ptbr/test_playwright.js` 30/30 (site de mentira 'pt' na página do fr: "estou a comer" -> Quase e
+  "estou comendo" -> certo na lição, lacuna, gramática, Revisão e Conjugação; fr e zh julgam igual a antes em todo o
+  content.js; todo site carrega o módulo). Guardas atualizadas para a chamada nova: `tests/respostas-digitadas/test_guarda.js`,
+  `tests/familia-latina/extrair-fr.js`, `tests/i18n/test_i18n_unit.js` (chaves `answer.ptpt.*` novas).
+

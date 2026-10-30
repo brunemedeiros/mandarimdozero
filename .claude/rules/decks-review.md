@@ -33,3 +33,6 @@ Fonte de verdade: `docs/arquitetura-total-decks-tags-painel.md` (30 invariantes,
 - Cartões da professora (origin 'teacher') ficam FORA da Revisão geral (pool, tabela de Decks, Painel, opção de origem):
   só na aba Aluno > Revisão (`startClassReviewSession`, `STATE.reviewSessionClassReview`, rota `#/review/class`). 2026-10-14.
 - Tela da Revisão: tabela estilo Anki (`shared/deck-browser.js`), Painel em janela, rotas `#/review/decks/...`.
+- Memória FSRS (P1, 2026-10-29): trilha por CURSO (bloco do curso); professora e próprios por IDIOMA ESTUDADO em `progress.data._lang[<appKey>]`,
+  com espelho em `cards` de cada bloco do idioma. Carregar/salvar passam por `shared/lang-card-memory.js` (fica a cópia de mais revisões); nunca
+  ler/gravar essas entradas direto do bloco. Recomeço que zere essa memória tem de zerar `_lang` e todos os blocos juntos. `docs/p1-memoria-por-idioma.md`.

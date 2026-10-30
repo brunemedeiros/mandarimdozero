@@ -93,6 +93,7 @@ const LANG_HOOKS_CONTRATO = {
   reviewTyped:          { tipo: 'object', obrigatorio: true, chaves: ['check', 'hintHTML', 'wrongGrade', 'inputExtraHTML', 'wireInputExtra'], desc: 'digitar na Revisão' },
   grammarInputExtraHTML: { tipo: 'function', desc: 'teclado extra no campo da gramática (zh: tons do pinyin); opcional' },
   wireGrammarInputExtra: { tipo: 'function', desc: 'liga o teclado extra da gramática; opcional' },
+  typedAnswerLang:      { tipo: 'string', desc: "idioma das respostas DIGITADAS da lição, Revisão (e Banco), gramática e Conjugação. 'pt-BR' liga a regra do português de Portugal (regra da dona, 2026-10-29): resposta com forma de Portugal que seria aceita na forma do Brasil vira Quase (XP de EXERCISE_XP_ALMOST, nota Difícil, meio ponto) e a devolutiva mostra a forma do Brasil (shared/core/familias/portugues-variantes.js; typedPtBrAdjust em shared/core/licao-feedback.js). Opcional; ausente = nenhuma regra (fr, zh)" },
 
   // ---------- Chaves de texto ----------
   lessonKeys: { tipo: 'object', obrigatorio: true, textos: true, desc: 'textos da lição que citam o idioma',

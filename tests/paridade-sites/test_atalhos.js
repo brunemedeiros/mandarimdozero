@@ -49,7 +49,10 @@ async function rodar(browser, root, site){
       // Etapa 6 (decisão da dona, 2026-10-26): a janela da sequência abre depois do Continuar e limpa os avisos "+N XP" que
       // estavam na tela; nessa cena, a árvore nova pode diferir da antiga só no campo "toast".
       const semToast = (x) => String(x).replace(/"toast":"[^"]*"/, '"toast":""');
-      a.cenas.forEach(([n, v], i) => { const ok = b.cenas[i] && (b.cenas[i][1] === v || (b.cenas[i][2] && semToast(b.cenas[i][1]) === semToast(v))); if (ok) iguais++; check(`${site}: ${i} ${n} igual`, ok); });
+      // XP da semana (decisão da dona, 2026-10-29): aviso "+N XP" não fica por cima de tela de conclusão ("Lição concluída!"):
+      // nessa cena a árvore nova também pode diferir só no campo "toast".
+      const conclusao = (x) => /class="lesson-complete/.test(String(x));
+      a.cenas.forEach(([n, v], i) => { const ok = b.cenas[i] && (b.cenas[i][1] === v || ((b.cenas[i][2] || conclusao(b.cenas[i][1])) && semToast(b.cenas[i][1]) === semToast(v))); if (ok) iguais++; check(`${site}: ${i} ${n} igual`, ok); });
       if (process.env.DUMP) a.cenas.forEach(([n, v], i) => { const w = b.cenas[i] && b.cenas[i][1]; if (w !== v){ let k = 0; while (v[k] === w[k]) k++; console.log('DIFF', site, i, JSON.stringify(v.slice(Math.max(0,k-200), k+300)), JSON.stringify(String(w).slice(Math.max(0,k-200), k+300))); } });
       const distintas = new Set(b.cenas.map(c => c[1])).size;
       check(`${site}: as teclas mudaram a tela (${distintas} telas diferentes)`, distintas > 10, distintas);

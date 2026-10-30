@@ -189,13 +189,16 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
     // (separadores, acento, tom) vem de LANG_HOOKS.grammarAnswerVerdict.
     // "Quase" (acento/tom) vale meio ponto.
     const forms = [expected, ...(ex.alt || [])];
-    const verdict = LANG_HOOKS.grammarAnswerVerdict(given, forms);
+    // Português de Portugal (site com LANG_HOOKS.typedAnswerLang = 'pt-BR'): Quase, com a forma do Brasil.
+    const ptBr = typeof typedPtBrAdjust === 'function' ? typedPtBrAdjust(given, (texto) => LANG_HOOKS.grammarAnswerVerdict(texto, forms) !== 'wrong') : null;
+    const verdict = ptBr ? 'almost' : LANG_HOOKS.grammarAnswerVerdict(given, forms);
     if (verdict === 'ok'){
       wrapEl.classList.add('ok');
       STEP_STATE.gramExerciseScore += 1;
     } else if (verdict === 'almost'){
       wrapEl.classList.add('almost');
       expectedEl.textContent = t('feedback.almostArrow', { expected });
+      if (ptBr) expectedEl.insertAdjacentHTML('afterend', typedPtBrNoteHTML(ptBr));
       STEP_STATE.gramExerciseScore += 0.5;
     } else {
       wrapEl.classList.add('wrong');
