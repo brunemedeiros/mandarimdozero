@@ -585,7 +585,15 @@ async function fingerprintEn(browser, root){
     let iguais = 0, total = 0;
     // published_at/rejected_at... = new Date().toISOString() (relógio fixo, mas por garantia)
     // E-mail de contato do Premium trocado na main (brunemed1310@gmail.com -> contato@profbrune.com.br, shared/permissions.js): o REF antigo ainda tem o e-mail velho; neutralizado nos dois lados.
-    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ch\.verify=(Vérifier|Verificar|Check)/g, 'ch.verify=VERIFICAR').replace(/\\"(Vérifier|Verificar|Check)\\"/g, '\\"VERIFICAR\\"').replace(VERIFICAR_RE, '>VERIFICAR</button>').replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL');
+    const EXPR_AUDIO = new Set();
+    { const dir = path.join(ROOT, 'fr/scripts/challenges_import'); for (const f of fs.readdirSync(dir).filter(f => /^lote-.*\.json$/.test(f) && !/content/.test(f))) for (const c of JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'))) if (c.expressionAudioFile) EXPR_AUDIO.add(c.expressionAudioFile); }
+    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ch\.verify=(Vérifier|Verificar|Check)/g, 'ch.verify=VERIFICAR').replace(/\\"(Vérifier|Verificar|Check)\\"/g, '\\"VERIFICAR\\"').replace(VERIFICAR_RE, '>VERIFICAR</button>').replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL')
+      // Expressões, ajustes de 2026-10-30 (decisão da autora; docs/historico/21-auditoria-xp.md): (1) o áudio da expressão toca sozinho ao abrir a pergunta
+      // (como na trilha): tira do registro de toques os mp3 das expressões, nos dois lados; (2) XP por passo (escolha 1, montar 2, Sua vez 2/1; antes só a Sua vez):
+      // o XP guardado no estado (xp e daily.xp) é neutralizado nos dois lados. O resto da comparação segue valendo.
+      .replace(/(\\*)"\/fr\/audio\/challenges\/([0-9a-z-]+\.mp3)@[\d.]+\1",?/g, (m, bs, f) => EXPR_AUDIO.has(f) ? '' : m)
+      .replace(/,(\\*\]|\])/g, '$1')
+      .replace(/(\\?)"xp(\\?)":\d+/g, '$1"xp$2":0');
     for (const lado of ['pt', 'en']){
       const A = antes[lado], B = depois[lado];
       check(lado + ': a sequência rodou no fr de antes', Object.keys(A).length > (lado === 'pt' ? 900 : 30), Object.keys(A).length);
