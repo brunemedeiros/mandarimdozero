@@ -31,9 +31,9 @@ Skills: `notas-de-realidade` (notas de realidade/culturais) e `criar-desafios`. 
 - Notas ficam em `concepts` com `kind:'reality'|'culture'` + `category`; nunca forçar nota sem relação com a palavra
   ensinada naquele momento; sem teto/mínimo por unidade. `familiar-giria` só a partir de A2/HSK2.
 - Placeholders de perfil: `{nome}`, `{primeiro_nome}`, `{nacionalidade}`, `{nacionalidade_p}`, `{nacionalidade_t}`
-  (quando o falante é o próprio aluno).
+  (quando o falante é o próprio aluno). Texto resolvido quase nunca bate `AUDIO_MANIFEST` (cai no Web Speech).
 - Lado do balão (todos os sites): quem abre o diálogo à esquerda, o outro à direita. Diálogo em que a aluna faz o papel dela
-  mesma: `dialogue.learner` = chave do falante dela, que fica sempre à direita (modelo WhatsApp). Guarda: `tests/dialogo-lado/`. Texto resolvido quase nunca bate `AUDIO_MANIFEST` (cai no Web Speech).
+  mesma: `dialogue.learner` = chave do falante dela, que fica sempre à direita (modelo WhatsApp). Guarda: `tests/dialogo-lado/`.
 - Frases só com vocabulário já visto (ditados: `python3 fr/scripts/check_dictation_vocab.py`).
 - **Conteúdo nasce traduzido** (regra da autora, 2026-10-19): o lote só está pronto quando tem a versão de cada idioma de site.
   Trilha: texto pt na camada `courses/<fr|zh>-pt-BR/layer.js` + en em `docs/i18n/content-en/` ou `content-zh-en/` (inclui
