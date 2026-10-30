@@ -89,7 +89,8 @@ const check = (n, c, x) => { if (c) ok++; else { ruim++; console.log('  FALHOU:'
     await p.waitForFunction(() => { const b = document.querySelector('[data-bloco-decks]'); return b && !b.querySelector('.p-spinner'); });
     L('Decks do aluno sem cartões: mensagem explicando', (await p.innerText('[data-bloco-decks]')).includes('O aluno ainda não tem cartões nos Decks.'));
     await p.click('[data-ir-secao="classlogs"]');
-    L('Registrar aula abre a aba Aulas', await p.evaluate(() => document.querySelector('[data-teacher-section="classlogs"]').classList.contains('is-active')));
+    await p.waitForFunction(() => document.getElementById('admin-classlogs-content')?.style.display !== 'none');
+    L('Registrar aula abre Mural > Aulas e materiais já no aluno (Aulas foi para dentro do Mural, 2026-10-29)', await p.evaluate(() => document.querySelector('[data-teacher-section="mural"]').classList.contains('is-active') && MURAL_STATE.teacher.tab === 'aulas' && MURAL_STATE.teacher.sel.startsWith('s:')));
     await p.evaluate(() => switchTeacherPanelSection('students')); await p.waitForSelector('[data-tsu="geral"]');
     L('voltar à aba Alunos mostra o quadro geral (não fica preso na ficha)', !(await p.$('[data-tsu="ficha"]')));
 

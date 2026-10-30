@@ -32,3 +32,7 @@ $P aulas94 -f "$MIG/119_gcal_review_skip_outside.sql" >/dev/null
 $P aulas94 -f "$MIG/120_gcal_outside_tab.sql" >/dev/null
 $P aulas94 -f "$MIG/120_gcal_outside_tab.sql" >/dev/null
 psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_117.sql" 2>&1 | grep -v '^\s*$'
+# 121 (Mural estilo Classroom): avisos automáticos de aula e material, capa da turma.
+$P aulas94 -f "$MIG/121_mural_classroom_style.sql" >/dev/null
+$P aulas94 -f "$MIG/121_mural_classroom_style.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_121.sql" 2>&1 | grep -v '^\s*$'
