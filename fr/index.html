@@ -4422,7 +4422,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <!-- Boas-vindas da 1ª lição do curso (Etapa 6) -->
 <link rel="stylesheet" href="../shared/boas-vindas.css">
 <link rel="stylesheet" href="../shared/mural-classroom.css">
-<link rel="stylesheet" href="../shared/xp-semana.css">
+<!-- Janelas do topo (🔥 sequência e ⭐ XP da semana), shared/janelas-topo.js e shared/xp-semana.js -->
+<link rel="stylesheet" href="../shared/janelas-topo.css">
 <link rel="stylesheet" href="../shared/conjugacao.css">
 <link rel="stylesheet" href="../shared/ditados.css">
 </head>
@@ -4472,9 +4473,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       </div>
     </div>
     <div class="stats-pills">
-      <div class="pill streak">🔥 <span id="streak-count" class="stat-count">0</span></div>
+      <!-- 🔥 = sequência de dias; mouse, clique, toque ou teclado abre a janela da sequência (shared/janelas-topo.js). -->
+      <button type="button" class="tpop-btn" id="streak-btn" aria-expanded="false" aria-controls="streak-pop" aria-haspopup="dialog"><span class="pill streak">🔥 <span id="streak-count" class="stat-count">0</span></span></button>
       <!-- ⭐ = XP da semana (mesma do Ranking); clique/toque/mouse abre a janelinha das últimas semanas (shared/xp-semana.js). -->
-      <button type="button" class="xp-week-btn" id="xp-week-btn" aria-expanded="false" aria-controls="xp-week-pop" aria-haspopup="dialog" data-i18n-attr="aria-label:xpWeek.buttonShort;title:xpWeek.buttonShort" aria-label="XP desta semana" title="XP desta semana"><span class="pill xp">⭐ <span id="xp-count" class="stat-count">0</span><span class="xp-suffix"> XP</span></span></button>
+      <button type="button" class="xp-week-btn tpop-btn" id="xp-week-btn" aria-expanded="false" aria-controls="xp-week-pop" aria-haspopup="dialog" data-i18n-attr="aria-label:xpWeek.buttonShort;title:xpWeek.buttonShort" aria-label="XP desta semana" title="XP desta semana"><span class="pill xp">⭐ <span id="xp-count" class="stat-count">0</span><span class="xp-suffix"> XP</span></span></button>
       <!-- Admin Mode ON/OFF: só a conta admin vê isto (ver applyAdminModeUI
            em shared/auth.js) -- OFF simula a experiência de uma aluna
            comum na navegação/conclusão de lição, sem revogar privilégios
@@ -5644,6 +5646,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/public-profile.js"></script>
 <script src="../shared/public-deck.js"></script>
 <script src="../shared/topbar-stats.js"></script>
+<script src="../shared/janelas-topo.js"></script>
 <script src="../shared/xp-semana.js"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>

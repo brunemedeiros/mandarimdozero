@@ -15,7 +15,7 @@
 // (showToast). openPublicProfileModalForUsername/switchTab são só chamados
 // dentro de funções.
 
-const FRIENDS_STATE = { pendingCount: 0, searchSeq: 0, rankScope: 'all', rankSeq: 0, inviteUsername: null, extras: null, duo: null, friends: [] };
+const FRIENDS_STATE = { focusInvite: false, pendingCount: 0, searchSeq: 0, rankScope: 'all', rankSeq: 0, inviteUsername: null, extras: null, duo: null, friends: [] };
 
 // ---------- convite por link (?amigo=usuario) ----------
 // O link de convite abre o site com ?amigo=<usuario>. Guardamos o usuário no
@@ -423,6 +423,22 @@ function friendsEmptyHTML(keepQuery, inviteUser){
     </section>`;
 }
 
+// "Chamar amigos" da janela da sequência (shared/janelas-topo.js): abre Amigos com o convite em foco (link, QR code, busca e
+// sugestões, o que a tela já tem). Sem amigos, o foco vai para o botão do convite da tela vazia; com amigos, para o do topo.
+function friendsOpenInvite(){
+  FRIENDS_STATE.focusInvite = true;
+  if (typeof switchTab === 'function') switchTab('friends');
+}
+
+function friendsFocusInvite(wrap){
+  if (!FRIENDS_STATE.focusInvite) return;
+  FRIENDS_STATE.focusInvite = false;
+  const box = wrap.querySelector('#friends-invite') || wrap.querySelector('.friends-head-actions');
+  if (!box) return;
+  try { box.scrollIntoView({ block: 'start' }); } catch (e) { /* navegador antigo */ }
+  box.querySelector('[data-friends-invite]')?.focus({ preventScroll: true });
+}
+
 async function renderFriendsView(){
   const wrap = document.getElementById('friends-content');
   if (!wrap) return;
@@ -477,6 +493,7 @@ async function renderFriendsView(){
   FRIENDS_STATE.friends = ov.friends;
   renderFriendsBadges();
   wireFriendsView(wrap);
+  friendsFocusInvite(wrap);
   if (hasFriends){ loadFriendsMiniRank(); loadFriendsActivity(); loadFriendsExtras(); loadFriendsDuo(); loadFriendsPushInvite(); }
   loadFriendsReceivedCongrats();
   loadFriendsSuggestions();

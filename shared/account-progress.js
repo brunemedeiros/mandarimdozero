@@ -10,13 +10,16 @@
 //   activityLog, dailyLessonsLog        = união dos dias, maior valor por dia
 //   hadStreakComeback                   = OU
 //   streak = maior entre (dias seguidos no log terminando em lastStudyDay) e (streaks vivos cujo lastStudyDay é esse mesmo dia)
+//   bestStreak (recorde, janela da sequência do topo, 2026-10-30) = o maior entre os recordes guardados, a sequência e o maior
+//     bloco de dias seguidos do activityLog da conta. Só sobe. Na primeira gravação nasce do histórico de dias (activityLog,
+//     o mais antigo que existe: desde 2026-08 na produção; a tabela study_days do servidor só começa em 2026-10-12).
 // NÃO entram aqui: studyGoal (objetivo e níveis são por idioma; hora do lembrete espera a decisão P2), dailyMinutesLog (legado).
 //
 // Funções puras, sem DOM nem rede. Depende de LanguageRegistry (languages/registry.js).
 (function(root){
   'use strict';
 
-  var ACCOUNT_FIELDS = ['streak', 'lastStudyDay', 'activityLog', 'hadStreakComeback', 'dailyLessonsLog', 'lastReviewReminderDay'];
+  var ACCOUNT_FIELDS = ['streak', 'lastStudyDay', 'activityLog', 'hadStreakComeback', 'dailyLessonsLog', 'lastReviewReminderDay', 'bestStreak'];
   var DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
   function isDay(s){ return typeof s === 'string' && DAY_RE.test(s); }
@@ -53,6 +56,27 @@
     return n;
   }
 
+  // Maior bloco de dias seguidos com atividade no log (dias 'YYYY-MM-DD' com valor > 0).
+  function longestRun(log){
+    if (!isObj(log)) return 0;
+    var days = Object.keys(log).filter(function(k){ return isDay(k) && Number(log[k]) > 0; }).sort();
+    var best = 0, run = 0, prev = null;
+    days.forEach(function(k){
+      var t = Date.parse(k + 'T00:00:00Z');
+      run = (prev !== null && t - prev === 86400000) ? run + 1 : 1;
+      prev = t;
+      if (run > best) best = run;
+    });
+    return best;
+  }
+
+  // Recorde de dias seguidos de um estado/bloco: guardado, sequência (mesmo congelada: já aconteceu) e o histórico de dias.
+  function bestStreakOf(s){
+    if (!isObj(s)) return 0;
+    var vals = [Number(s.bestStreak) || 0, Number(s.streak) || 0, longestRun(s.activityLog)];
+    return Math.max.apply(null, vals.map(function(v){ return isFinite(v) && v > 0 ? Math.floor(v) : 0; }));
+  }
+
   // Só os campos da conta que existirem no bloco.
   function pickAccount(block){
     var out = {};
@@ -82,6 +106,8 @@
       [a, b].forEach(function(x){ if (typeof x.streak === 'number') candidates.push(x.streak); });
     }
     if (candidates.length) out.streak = Math.max.apply(null, candidates);
+    var best = Math.max(bestStreakOf(a), bestStreakOf(b), bestStreakOf(out));
+    if (best > 0) out.bestStreak = best;
     return out;
   }
 
@@ -108,6 +134,7 @@
     if (!state || !isObj(account)) return state;
     if (isDay(account.lastStudyDay)) state.lastStudyDay = account.lastStudyDay;
     if (typeof account.streak === 'number') state.streak = account.streak;
+    if (typeof account.bestStreak === 'number') state.bestStreak = Math.max(Number(state.bestStreak) || 0, account.bestStreak);
     if (account.hadStreakComeback) state.hadStreakComeback = true;
     if (isDay(account.lastReviewReminderDay)) state.lastReviewReminderDay = maxDay(state.lastReviewReminderDay, account.lastReviewReminderDay);
     if (isObj(account.activityLog)) state.activityLog = Object.assign(isObj(state.activityLog) ? state.activityLog : {}, unionMax(state.activityLog, account.activityLog));
@@ -162,7 +189,7 @@
     return out;
   }
 
-  var api = { ACCOUNT_BADGE_IDS: ACCOUNT_BADGE_IDS, isAccountBadge: isAccountBadge, unionBadgeIds: unionBadgeIds, snapshotBase: snapshotBase, mirrorForBlock: mirrorForBlock, ACCOUNT_FIELDS: ACCOUNT_FIELDS, pickAccount: pickAccount, mergeAccount: mergeAccount, deriveAccountFromRow: deriveAccountFromRow, applyAccountToState: applyAccountToState, consecutiveEndingAt: consecutiveEndingAt };
+  var api = { ACCOUNT_BADGE_IDS: ACCOUNT_BADGE_IDS, isAccountBadge: isAccountBadge, unionBadgeIds: unionBadgeIds, snapshotBase: snapshotBase, mirrorForBlock: mirrorForBlock, ACCOUNT_FIELDS: ACCOUNT_FIELDS, pickAccount: pickAccount, mergeAccount: mergeAccount, deriveAccountFromRow: deriveAccountFromRow, applyAccountToState: applyAccountToState, consecutiveEndingAt: consecutiveEndingAt, longestRun: longestRun, bestStreakOf: bestStreakOf };
   (typeof globalThis !== 'undefined' ? globalThis : root).AccountProgress = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
