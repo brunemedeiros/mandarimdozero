@@ -100,7 +100,10 @@ function carregarNovo() {
   // Paridade 5d (2026-10-23): os dois exercícios de digitar são comuns (shared/core/licao-exercicios.js) e corrigem pelo
   // gancho LANG_HOOKS.typedAnswer.verdict; o do fr (fr/lang-hooks.js) chama lessonTypedAnswerResult.
   const ganchoDigitar = /verdict: \(given, x\) => \{ const r = lessonTypedAnswerResult\(given, x\.f\);/.test(ler('fr/lang-hooks.js'));
-  const usoDigitar = ganchoDigitar ? linhas(/LANG_HOOKS\.typedAnswer\.verdict\(inputEl\.value, /) : [];
+  // 2026-10-29: as duas telas passam por typedVerdictPtBr (regra do português de Portugal, só no site com typedAnswerLang
+  // 'pt-BR'; no fr devolve o próprio LANG_HOOKS.typedAnswer.verdict).
+  const viaPtBr = /function typedVerdictPtBr\(typed, x\)\{\n  const v = LANG_HOOKS\.typedAnswer\.verdict\(typed, x\);/.test(ler('shared/core/licao-exercicios.js'));
+  const usoDigitar = ganchoDigitar && viaPtBr ? linhas(/typedVerdictPtBr\(inputEl\.value, /) : [];
   // O exercício da unidade de gramática foi para shared/core/gramatica-cenario.js (paridade C6, 2026-10-23): o core chama
   // LANG_HOOKS.grammarAnswerVerdict, e o gancho do fr (fr/lang-hooks.js) chama o módulo.
   const usoGram = linhas(/LANG_HOOKS\.grammarAnswerVerdict\(given, forms\)/)

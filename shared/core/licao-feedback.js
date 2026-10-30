@@ -42,6 +42,22 @@ function alinhamentoHTML(ops){
 // LANG_HOOKS.typedAttemptForm (opcional): a forma em que o idioma COMPARA a resposta para dar o veredito, aplicada
 // ao que foi digitado e a cada forma certa, para a marcação concordar com o veredito (zh: pinyin numerado convertido
 // para marca de tom, minúsculas, sem pontuação). Sem o gancho (fr), compara o texto como foi digitado.
+// Português de Portugal em resposta digitada (regra da dona, 2026-10-29; vale para TODO exercício com resposta em português).
+// Só age quando o site declara LANG_HOOKS.typedAnswerLang = 'pt-BR' (o site de português); fr e zh: devolve null sem olhar
+// a resposta. aceita(texto) -> boolean = o veredito do próprio exercício ("este texto seria aceito?"). Devolve null ou
+// { verdict: 'almost', pairs: [{ pt, br }], text } (shared/core/familias/portugues-variantes.js).
+function typedPtBrAdjust(typed, aceita){
+  if (typeof LANG_HOOKS === 'undefined' || !LANG_HOOKS || LANG_HOOKS.typedAnswerLang !== 'pt-BR') return null;
+  const pv = typeof PortuguesVariantes !== 'undefined' ? PortuguesVariantes : (typeof globalThis !== 'undefined' ? globalThis.PortuguesVariantes : null);
+  if (!pv) return null;
+  return pv.ptBrVerdictAdjust(typed, null, { aceita: (texto) => !!aceita(texto) });
+}
+// Devolutiva do "Quase" de Portugal: "Quase! Essa forma é de Portugal. No Brasil se diz: <strong>estou comendo</strong> (em vez de "estou a comer")."
+function typedPtBrNoteHTML(adj){
+  if (!adj || typeof PortuguesVariantes === 'undefined') return '';
+  return PortuguesVariantes.ptBrFeedbackHTML(adj.pairs, { t, esc: escapeHTML, lead: t('answer.ptpt.almost') });
+}
+
 function typedAttemptHTML(typed, expected){
   const form = (typeof LANG_HOOKS !== 'undefined' && LANG_HOOKS.typedAttemptForm) || (s => s);
   const given = form(String(typed == null ? '' : typed).replace(/\s*\/\s*/g, ' / ').trim());

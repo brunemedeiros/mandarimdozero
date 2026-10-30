@@ -325,7 +325,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       addStudyMinutes();
       // Detalhe extra vale a pena aqui -- o exercício testou só o som da
       // palavra, a forma escrita em francês nunca apareceu na tela antes.
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, `${almost ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>` : ''}<strong>${LANG_HOOKS.textOf(ex.item)}</strong> ${audioBtnHTML(LANG_HOOKS.textOf(ex.item))}`), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, `${v.ptBr ? typedPtBrNoteHTML(v.ptBr) : almost ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>` : ''}<strong>${LANG_HOOKS.textOf(ex.item)}</strong> ${audioBtnHTML(LANG_HOOKS.textOf(ex.item))}`), 500);
     } else {
       // A resposta certa já aparece dentro do próprio painel de resultado
       // (answerExplanationHTML mostra a palavra) -- sem repetir aqui como um
@@ -341,7 +341,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     if (STEP_STATE.exerciseAnswered) return;
     // Vocabulário com forma dupla (ex: "un / une") -- qualquer uma das duas
     // conta como resposta completa, não só a string inteira com a barra.
-    finish(LANG_HOOKS.typedAnswer.verdict(inputEl.value, ex.item), inputEl.value);
+    finish(typedVerdictPtBr(inputEl.value, ex.item), inputEl.value);
   });
 
   wireDontKnowButton(contentEl, ex, () => {
@@ -349,6 +349,15 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     lockInputs();
     showAnswerPanel(contentEl, ex, { revealed: true });
   });
+}
+
+// Veredito do digitar da lição (LANG_HOOKS.typedAnswer.verdict) com a regra do português de Portugal: no site com
+// LANG_HOOKS.typedAnswerLang = 'pt-BR', "estou a comer" no lugar de "estou comendo" = Quase (meio ponto,
+// EXERCISE_XP_ALMOST) e v.ptBr leva os pares para a devolutiva. fr e zh: o veredito de sempre, sem mudança.
+function typedVerdictPtBr(typed, x){
+  const v = LANG_HOOKS.typedAnswer.verdict(typed, x);
+  const ptBr = typedPtBrAdjust(typed, (texto) => LANG_HOOKS.typedAnswer.verdict(texto, x).ok);
+  return ptBr ? { ok: true, almost: true, toneOnly: false, ptBr } : v;
 }
 
 // ---------- Exercício de completar frase (cloze, estilo Clozemaster) ----------
@@ -414,7 +423,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       addXP(exerciseXP(ex, almost ? EXERCISE_XP_ALMOST : EXERCISE_XP_PRODUCE));
       addStudyMinutes();
       setTimeout(() => showCorrectFeedbackPanel(contentEl, almost
-        ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>${clozeFeedbackDetailHTML(ex, true)}`
+        ? `${v.ptBr ? typedPtBrNoteHTML(v.ptBr) : `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>`}${clozeFeedbackDetailHTML(ex, true)}`
         : clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex, { toneOnly: v.toneOnly, attemptHTML: typedAttemptHTML(typed, LANG_HOOKS.typedAnswer.expected(ex.correctBlock)) }), 500);
@@ -435,7 +444,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     document.getElementById('cloze-verify-btn').addEventListener('click', () => {
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
-      finish(LANG_HOOKS.typedAnswer.verdict(inputEl.value, ex.correctBlock), inputEl.value);
+      finish(typedVerdictPtBr(inputEl.value, ex.correctBlock), inputEl.value);
     });
   } else {
     contentEl.querySelectorAll('.cloze-option').forEach(btn => {

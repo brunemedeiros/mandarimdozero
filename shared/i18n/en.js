@@ -812,6 +812,9 @@ window.I18N_CATALOG['en'] = {
   'review.deck.myDecks': 'My Decks', // ALTA -- Revisão nova
   'review.observation': 'Note from your teacher', // ALTA
   'review.almost': 'Almost there', // ALTA
+  'answer.ptpt.almost': 'Almost! That form is from Portugal.', // ALTA (mesmo texto de ch.lt.partialPtPt)
+  'answer.ptpt.line': 'In Brazil people say: {forms}.', // ALTA
+  'answer.ptpt.pair': '<strong>{br}</strong> (instead of "{pt}")', // ALTA
   'review.almost.accent': 'Almost there: check the accents', // ALTA
   'review.almost.letter': 'Almost there: check the letters', // ALTA
   'review.deck.teacherCards': 'Teacher\'s cards', // MÉDIA -- Revisão nova

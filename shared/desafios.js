@@ -393,6 +393,9 @@ const CHALLENGE_I18N = {
     'ch.listenAgain': '▶ Ouvir de novo',
     'ch.lt.right': '✅ Tradução certa.',
     'ch.lt.partial': '🟡 Quase: a ideia está certa, mas confira os detalhes.',
+    'ch.lt.partialPtPt': '🟡 Quase! Essa forma é de Portugal.',
+    'ch.lt.ptpt': 'No Brasil se diz: {forms}.',
+    'ch.lt.ptpt.pair': '<strong>{br}</strong> (em vez de "{pt}")',
     'ch.accent.label': 'Digite o que você ouviu:',
     'ch.accent.yours': 'Sua resposta: <strong>{answer}</strong>',
     'ch.accent.right': '✅ Certo.',
@@ -546,6 +549,9 @@ const CHALLENGE_I18N = {
     'ch.today.allDone': "🎉 You have discovered every available expression.",
     'ch.lt.right': "✅ Correct translation.",
     'ch.lt.partial': "🟡 Almost: right idea, but check the details.",
+    'ch.lt.partialPtPt': "🟡 Almost! That form is from Portugal.",
+    'ch.lt.ptpt': "In Brazil people say: {forms}.",
+    'ch.lt.ptpt.pair': "<strong>{br}</strong> (instead of \"{pt}\")",
     'ch.accent.label': "Type what you heard:",
     'ch.accent.yours': "Your answer: <strong>{answer}</strong>",
     'ch.accent.right': "✅ Correct.",
@@ -1024,12 +1030,41 @@ function analyzeTranslation(studentAnswer, referenceTranslations, extra){
 // (0,55 a 0,8, ou qualquer alerta -- concordância, negação, número,
 // mustInclude/mustExclude) -- conclui com explicação; 'fail' = erro total
 // (< 0,55 ou vazio) -- não conclui.
-function listenTranslateOutcome(studentAnswer, referenceTranslations, personMismatch, extra){
+function listenTranslateBaseOutcome(studentAnswer, referenceTranslations, personMismatch, extra){
   if (!studentAnswer || !studentAnswer.trim()) return 'fail';
   const an = analyzeTranslation(studentAnswer, referenceTranslations, extra);
   if (an.similarity < 0.55) return 'fail';
   if (personMismatch || an.alerts.length || an.similarity < 0.8) return 'partial';
   return 'ok';
+}
+
+// ---- Português de Portugal na resposta (regra da dona, 2026-10-26) ----
+// O site em pt-BR ensina o português do Brasil: resposta com marca de Portugal nunca é "certa". Se, trocada
+// pela forma do Brasil, ela bate com uma referência, o resultado é 'partial' (Quase) e a devolutiva mostra a
+// forma do Brasil. A detecção e a troca são COMUNS a todo exercício com resposta em português (2026-10-29):
+// shared/core/familias/portugues-variantes.js (PortuguesVariantes). Vale só para o comparador em português; no site
+// em inglês o comparador é outro (translation-compare.js).
+function ptVariantes(){
+  return (typeof PortuguesVariantes !== 'undefined' && PortuguesVariantes) || (typeof globalThis !== 'undefined' && globalThis.PortuguesVariantes) || null;
+}
+// Devolve { text: a resposta com as formas do Brasil, marks: [{ pt, br }] } (marks vazio = nenhuma marca).
+function ptEuropeanToBrazilian(text){
+  const pv = ptVariantes();
+  return pv ? pv.paraBrasil(text) : { text: String(text || ''), marks: [] };
+}
+
+// Veredito completo do Ouça e traduza em português: { outcome, ptPt } (ptPt = { text, marks } de Portugal achadas, ou null).
+function listenTranslateVerdict(studentAnswer, referenceTranslations, personMismatch, extra){
+  const base = listenTranslateBaseOutcome(studentAnswer, referenceTranslations, personMismatch, extra);
+  const pv = ptVariantes();
+  const adj = pv && pv.ptBrVerdictAdjust(studentAnswer, referenceTranslations, {
+    aceita: (texto) => (texto === studentAnswer ? base : listenTranslateBaseOutcome(texto, referenceTranslations, personMismatch, extra)) !== 'fail'
+  });
+  if (!adj) return { outcome: base, ptPt: null };
+  return { outcome: 'partial', ptPt: { text: adj.text, marks: adj.pairs } };
+}
+function listenTranslateOutcome(studentAnswer, referenceTranslations, personMismatch, extra){
+  return listenTranslateVerdict(studentAnswer, referenceTranslations, personMismatch, extra).outcome;
 }
 
 // ---- Marcação palavra a palavra (07/10/2026) ----
