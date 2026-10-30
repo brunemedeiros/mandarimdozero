@@ -553,3 +553,13 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 .expr-when-body{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
 .expr-when-body p{ margin:0; font-size:14px; color:var(--ink); flex:1 1 220px; }
 .expr-order-full{ font-weight:800; }
+/* Veja em frases: expressão em destaque (cor + negrito, nunca sublinhado, como o vocabulário do diálogo), tradução sob demanda, literal e nota. */
+.expr-mark{ background:transparent; font-weight:900; color:var(--seal-red-dark); }
+.expr-tr-btn{ margin-top:8px; padding:8px 14px; min-height:36px; border-radius:var(--radius); border:1.5px solid var(--paper-line); background:var(--paper); color:var(--ink); font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+.expr-tr-btn:hover{ border-color:var(--ink-soft); }
+.expr-example-tr, .expr-order-tr{ margin-top:8px; font-size:15px; font-weight:600; color:var(--ink-soft); line-height:1.45; white-space:pre-line; text-align:left; }
+.expr-example-tr[hidden]{ display:none; }
+.expr-literal{ margin:8px 0 0; font-size:14px; color:var(--ink); }
+.expr-literal-label{ font-weight:800; color:var(--ink-soft); }
+.expr-literal-note{ display:block; margin-top:4px; font-size:13px; color:var(--ink-soft); }
+@media (max-width:600px){ .expr-tr-btn{ min-height:44px; } }

@@ -737,6 +737,32 @@ function exprWireAudio(id, file, rate){
   if (btn && file) btn.addEventListener('click', (e) => playPregeneratedAudio(`challenges/${file}`, e.currentTarget, false, rate));
 }
 
+// Campos de conteúdo que existem em pt-BR no banco e, no site em outro idioma, vêm do overlay (fr/challenges.<lang>.js).
+// Opcionais: sem o campo no idioma do site, a parte simplesmente não aparece (nada some do desafio).
+// Exemplo i (0 ou 1): { text, mark (trecho exato do francês a destacar), tr (tradução no idioma do site) }.
+function exprExampleView(c, i){
+  const ex = (i === 0 ? c.example : c.secondExample) || {};
+  const ov = challengeOverlay(c);
+  const tr = ov ? ov[i === 0 ? 'example' : 'secondExample'] : ex.pt;
+  const text = String(ex.text || '');
+  const mark = ex.mark && text.indexOf(ex.mark) >= 0 ? ex.mark : '';
+  return { text, mark, tr: String(tr || '').trim(), audioFile: ex.audioFile };
+}
+// Texto do exemplo com a expressão em destaque (primeira ocorrência do trecho exato). Tudo escapado.
+function exprHighlightHTML(text, mark){
+  const at = mark ? text.indexOf(mark) : -1;
+  if (at < 0) return escapeHtmlChallenge(text);
+  return escapeHtmlChallenge(text.slice(0, at)) + '<mark class="expr-mark">' + escapeHtmlChallenge(mark) + '</mark>' + escapeHtmlChallenge(text.slice(at + mark.length));
+}
+// "Tradução literal" (palavra por palavra) e, quando há, a nota de origem; só no painel da resposta.
+function exprLiteralHTML(c){
+  const ov = challengeOverlay(c);
+  const lit = String((ov ? ov.literal : (c.literal || {}).pt) || '').trim();
+  if (!lit) return '';
+  const note = String((ov ? ov.literalNote : (c.literal || {}).note) || '').trim();
+  return `<p class="expr-literal"><span class="expr-literal-label">${chT('ch.expr.literal')}:</span> <em>${escapeHtmlChallenge(lit)}</em>${note ? `<br><span class="expr-literal-note">${escapeHtmlChallenge(note)}</span>` : ''}</p>`;
+}
+
 function exprMeaningBoxHTML(c){
   // Site em outro idioma: o sentido vem da tradução do desafio (fr/challenges.en.js, campo `meaning`) quando existe.
   const ov = challengeOverlay(c);
@@ -744,6 +770,7 @@ function exprMeaningBoxHTML(c){
   return `<div class="feedback-inner-box expr-meaning-box"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
     ${expressionMeaningLineHTML('ch.expr.signifies', 'fr', (c.meaning || {})[chCfg().lang])}<br>
     ${expressionMeaningLineHTML('ch.expr.inPt', 'pt', meaningShown)}
+    ${exprLiteralHTML(c)}
     ${c.explanation ? `<p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>` : ''}</div>`;
 }
 
@@ -834,7 +861,8 @@ function exprAnswer(c, origIdx){
 }
 
 function exprShowExamples(c){
-  const exs = [c.example, c.secondExample].filter(ex => ex && ex.text);
+  const exKeys = [0, 1].filter(k => { const ex = k === 0 ? c.example : c.secondExample; return ex && ex.text; }); // posição original (0 = example, 1 = secondExample)
+  const exs = exKeys.map(k => k === 0 ? c.example : c.secondExample);
   if (!exs.length) return exprShowYourTurn(c);
   // "Quando usar": o registro da expressão (formal, dia a dia, entre amigos, gíria, pode ofender) com o cuidado que ele pede. Sem registro no dado, não aparece.
   const regChip = expressionRegisterChipHTML(c);
@@ -847,20 +875,24 @@ function exprShowExamples(c){
     <div class="exercise-wrap expr-wrap">
       <div class="exercise-prompt-label">${chT('ch.expr.seeInSentences')}</div>
       ${whenHTML}
-      ${exs.map((ex, i) => `
+      ${exs.map((ex, i) => { const v = exprExampleView(c, exKeys[i]); return `
         <div class="exercise-prompt expr-example">
           <div class="expr-example-label">${chT('ch.expr.example' + (i + 1))}</div>
-          <div class="expr-example-text" lang="${chCfg().lang}">${escapeHtmlChallenge(ex.text)}</div>
+          <div class="expr-example-text" lang="${chCfg().lang}">${exprHighlightHTML(ex.text, v.mark)}</div>
+          ${v.tr ? `<button type="button" class="expr-tr-btn" id="expr-ex${i}-trbtn">${chT('ch.expr.seeTranslation')}</button><div class="expr-example-tr" id="expr-ex${i}-tr" hidden>${escapeHtmlChallenge(v.tr)}</div>` : ''}
           ${ex.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="expr-ex${i}-play">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('expr-ex' + i + '-slow')}</div>` : ''}
-        </div>`).join('')}
+        </div>`; }).join('')}
       <button class="btn btn-primary btn-block" id="expr-continue-btn">${t('common.continueArrow')}</button>
     </div>`, 2);
-  exs.forEach((ex, i) => { exprWireAudio(`expr-ex${i}-play`, ex.audioFile); exprWireAudio(`expr-ex${i}-slow`, ex.audioFile, SLOW_AUDIO_RATE); });
+  exs.forEach((ex, i) => {
+    exprWireAudio(`expr-ex${i}-play`, ex.audioFile); exprWireAudio(`expr-ex${i}-slow`, ex.audioFile, SLOW_AUDIO_RATE);
+    const trBtn = document.getElementById(`expr-ex${i}-trbtn`);
+    if (trBtn) trBtn.addEventListener('click', () => { document.getElementById(`expr-ex${i}-tr`).hidden = false; trBtn.hidden = true; });
+  });
   document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowOrder(c));
 }
 
-// "Monte a frase": ordenar as palavras do exemplo 1 (que a aluna acabou de ver). Sem XP (só a "Sua vez" dá), sem tradução (o
-// conteúdo ainda não tem a do exemplo). Palavras = pedaços do texto separados por espaço, com a pontuação junto. Sem frase
+// "Monte a frase": ordenar as palavras do exemplo 1 (que a aluna acabou de ver). Sem XP (só a "Sua vez" dá); mostra a tradução do exemplo como apoio quando o dado tem. Palavras = pedaços do texto separados por espaço, com a pontuação junto. Sem frase
 // de 3 a 14 palavras no dado, o passo é pulado. Mesma mecânica da trilha: toque coloca na próxima casa, toque numa casa
 // devolve ela e as seguintes; completou, confere sozinho; "Não sei" mostra a frase e conta como erro.
 function exprOrderTokens(c){
@@ -875,11 +907,13 @@ function exprShowOrder(c){
   const chosen = []; // posições em `blocks`, na ordem escolhida
   let finished = false;
   const file = c.example.audioFile;
+  const orderTr = exprExampleView(c, 0).tr; // apoio: tradução do exemplo (quando existe)
   exprRender(c, `
     <div class="exercise-wrap expr-wrap">
       <div class="exercise-prompt-label">${chT('ch.expr.orderIt')}</div>
       <div class="exercise-prompt reorder-target">
         <div class="prompt-translation">${chT('ch.expr.orderPrompt')}</div>
+        ${orderTr ? `<div class="expr-order-tr">${escapeHtmlChallenge(orderTr)}</div>` : ''}
         ${file ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="expr-order-play">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('expr-order-slow')}</div>` : ''}
       </div>
       <div class="reorder-wrap-hint">${chT('ch.expr.tapHint')}</div>
