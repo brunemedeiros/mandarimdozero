@@ -2,6 +2,9 @@
 // Decisão da dona (2026-10-29), vale para todos os sites (fr, zh, pt e futuros):
 //  - o contador ⭐ do topo mostra o XP DA SEMANA (não o total), com "XP" ao lado do número;
 //  - tocar/clicar (ou passar o mouse) abre uma janelinha com a semana atual em destaque e as 3 anteriores.
+// Rework (2026-10-30, docs/janelas-topo-proposta.md): a janela usa o desenho e o controle comuns das janelas do topo
+// (shared/janelas-topo.js, TopPop): cabeçalho na cor da marca, colunas das 4 semanas (antiga à esquerda), frase
+// "+N XP a mais que na semana passada" só quando a atual é maior, total do curso e botão "Ver ranking".
 //
 // Semana = a MESMA do Ranking semanal (shared/leaderboard.js): segunda-feira a domingo no fuso do aparelho, chave
 // 'YYYY-MM-DD' da segunda (currentWeekStart() em shared/core/estado-trilha-desafios.js e
@@ -17,7 +20,7 @@
 // local (o servidor pode estar atrasado em relação ao último save).
 //
 // Depende (só dentro de funções): STATE, APP_KEY, CURRENT_USER/progressLoadedOk (shared/auth.js), supabaseClient,
-// t()/fmtDate() (shared/i18n/i18n.js), animateStatPill (shared/topbar-stats.js).
+// t()/fmtDate() (shared/i18n/i18n.js), animateStatPill (shared/topbar-stats.js), TopPop/TopPopCalc (shared/janelas-topo.js).
 
 (function(root){
   var WEEKS_SHOWN = 4;            // atual + 3 anteriores
@@ -101,8 +104,6 @@
   var server = null;          // { userId, weeks, localAtFetch, weekAtFetch, at }
   var status = 'idle';        // idle | loading | ok | error
   var inflight = null;
-  var openMode = null;        // null | 'hover' | 'click'
-  var hoverTimer = null;
 
   function localPeriod(){ return (typeof STATE !== 'undefined' && STATE && STATE.periodXp) ? STATE.periodXp : null; }
   function appKey(){ return typeof APP_KEY !== 'undefined' ? APP_KEY : null; }
@@ -134,7 +135,7 @@
     var lp = localPeriod();
     var localAtFetch = lp && lp.weekStart === cur ? (Number(lp.amount) || 0) : 0;
     status = srv ? status : 'loading';
-    renderPopover();
+    rerender();
     inflight = Promise.resolve().then(function(){
       return supabaseClient.from('weekly_xp').select('week_start, language_app_key, amount').eq('user_id', uid).gte('week_start', oldest);
     }).then(function(res){
@@ -148,7 +149,7 @@
       inflight = null;
       if (!currentServer()) status = 'error';
       try { console.warn('XP da semana: não deu para ler weekly_xp', err); } catch (e) {}
-      renderPopover();
+      rerender();
       return false;
     });
     return inflight;
@@ -166,7 +167,7 @@
       btn.setAttribute('aria-label', label);
       btn.setAttribute('title', label);
     }
-    renderPopover();
+    rerender();
   }
 
   function renderTopbar(){
@@ -176,149 +177,70 @@
     if (!srv || srv.weekAtFetch !== cur) refresh(false);
   }
 
-  // ---------- Janelinha ----------
-  function popEl(){ return document.getElementById('xp-week-pop'); }
-
-  function ensurePopover(){
-    var pop = popEl();
-    if (pop) return pop;
-    pop = document.createElement('div');
-    pop.id = 'xp-week-pop';
-    pop.className = 'xp-week-pop';
-    pop.setAttribute('role', 'dialog');
-    pop.setAttribute('aria-labelledby', 'xp-week-pop-title');
-    pop.setAttribute('tabindex', '-1');
-    pop.hidden = true;
-    document.body.appendChild(pop);
-    pop.addEventListener('keydown', onKeydown);
-    pop.addEventListener('pointerenter', function(e){ if (e.pointerType === 'mouse') clearTimeout(hoverTimer); });
-    pop.addEventListener('pointerleave', function(e){ if (e.pointerType === 'mouse') scheduleHoverClose(); });
-    return pop;
-  }
-
-  function weekLabel(ago){
-    if (ago === 0) return t('xpWeek.thisWeek');
-    if (ago === 1) return t('xpWeek.lastWeek');
-    return tp('xpWeek.weeksAgo', ago);
-  }
-
-  function dayMonth(key){
-    var p = key.split('-').map(Number);
-    var d = new Date(p[0], p[1] - 1, p[2], 12);
-    return typeof fmtDate === 'function' ? fmtDate(d, { day: 'numeric', month: 'short' }) : key;
-  }
+  // ---------- Janela (desenho comum das janelas do topo, shared/janelas-topo.js) ----------
+  function rerender(){ if (root.TopPop) root.TopPop.render('xp'); }
 
   function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
-  function renderPopover(){
-    var pop = popEl();
-    if (!pop || pop.hidden || typeof t !== 'function') return;
+  // "26 out a 1 nov" / "5 a 11 out" (en: "Oct 26–Nov 1" / "Oct 5–11"). Mês curto do idioma do site, sem o ponto.
+  function monthShort(d){ return (typeof fmtDate === 'function' ? fmtDate(d, { month: 'short' }) : String(d.getMonth() + 1)).replace(/\.$/, ''); }
+  function rangeLabel(weekKey){
+    var p = weekKey.split('-').map(Number);
+    var a = new Date(p[0], p[1] - 1, p[2], 12), b = weekEnd(weekKey);
+    if (a.getMonth() === b.getMonth()) return t('xpWeek.colRange', { d1: a.getDate(), d2: b.getDate(), m: monthShort(a) });
+    return t('xpWeek.colRangeCross', { d1: a.getDate(), m1: monthShort(a), d2: b.getDate(), m2: monthShort(b) });
+  }
+
+  function popoverHTML(){
     var rows = currentSeries();
-    var max = Math.max.apply(null, rows.map(function(r){ return r.amount; }).concat([1]));
     var srv = currentServer();
-    var html = '<div class="xp-week-pop-title" id="xp-week-pop-title">' + esc(t('xpWeek.title')) + '</div><ol class="xp-week-list">';
-    rows.forEach(function(r){
-      var showNum = r.current || srv;
-      var amountTxt = showNum ? t('xpWeek.amount', { n: r.amount }) : '…';
-      var pct = showNum ? Math.round(100 * r.amount / max) : 0;
-      html += '<li class="xp-week-row' + (r.current ? ' is-current' : '') + '"' + (r.current ? ' aria-current="date"' : '') + ' data-week="' + r.weekStart + '">' +
-        '<div class="xp-week-row-head"><span class="xp-week-label">' + esc(weekLabel(r.ago)) + '</span>' +
-        '<span class="xp-week-amount">' + esc(amountTxt) + '</span></div>' +
-        '<div class="xp-week-dates">' + esc(t('xpWeek.range', { from: dayMonth(r.weekStart), to: dayMonth(r.weekEnd) })) + '</div>' +
-        '<div class="xp-week-bar" aria-hidden="true"><span style="width:' + pct + '%"></span></div></li>';
-    });
-    html += '</ol>';
-    if (!srv && status === 'loading') html += '<p class="xp-week-note" role="status">' + esc(t('xpWeek.loading')) + '</p>';
-    else if (!srv && status === 'error') html += '<p class="xp-week-note" role="status">' + esc(t('xpWeek.error')) + '</p>';
+    var cur = rows[0];
+    var head = '<p class="tpop-big" id="xp-week-pop-title"><span class="tpop-num">' + cur.amount + '</span><span class="tpop-unit">' + esc(t('xpWeek.headUnit')) + '</span></p>' +
+      '<p class="tpop-sub">' + esc(rangeLabel(cur.weekStart)) + '</p>';
+    var art = '<span class="tpop-art' + (cur.amount ? '' : ' is-off') + '" aria-hidden="true">⭐</span>';
+    var better = root.TopPopCalc ? root.TopPopCalc.xpBetterThanLast(rows) : 0;
+    var betterHTML = better > 0 ? '<p class="tpop-better" data-better="' + better + '">' + esc(tp('xpWeek.better', better, { n: better })) + '</p>' : '';
+    var known = rows.map(function(r){ return r.current || !!srv; });
+    var max = Math.max.apply(null, rows.map(function(r, i){ return known[i] ? r.amount : 0; }).concat([1]));
+    var cols = rows.slice().reverse().map(function(r){
+      var i = rows.indexOf(r), show = known[i];
+      var h = show ? Math.max(4, Math.round(84 * r.amount / max)) : 4;
+      return '<li class="tpop-bar xp-week-row' + (r.current ? ' is-current' : '') + '"' + (r.current ? ' aria-current="date"' : '') + ' data-week="' + r.weekStart + '">' +
+        '<span class="tpop-bar-val xp-week-amount">' + esc(show ? t('xpWeek.amount', { n: r.amount }) : '…') + '</span>' +
+        '<span class="tpop-bar-track" aria-hidden="true"><span class="tpop-bar-fill" style="height:' + h + 'px"></span></span>' +
+        '<span class="tpop-bar-label xp-week-label">' + esc(r.current ? t('xpWeek.thisWeek') : rangeLabel(r.weekStart)) + '</span></li>';
+    }).join('');
+    var body = betterHTML + '<div class="tpop-sec"><div class="tpop-sec-head"><p class="tpop-sec-title" id="xp-week-pop-last4">' + esc(t('xpWeek.last4')) + '</p></div>' +
+      '<ol class="tpop-bars" aria-labelledby="xp-week-pop-last4">' + cols + '</ol></div>';
+    if (!srv && status === 'loading') body += '<p class="tpop-note" role="status">' + esc(t('xpWeek.loading')) + '</p>';
+    else if (!srv && status === 'error') body += '<p class="tpop-note" role="status">' + esc(t('xpWeek.error')) + '</p>';
     // XP total do curso aberto (o número que o topo mostrava antes; decisão da dona de 2026-10-29: não sumir com ele).
     var total = (typeof STATE !== 'undefined' && STATE && typeof STATE.xp === 'number') ? STATE.xp : null;
-    if (total !== null) html += '<div class="xp-week-total"><span>' + esc(t('xpWeek.totalLabel')) + '</span><strong>' + esc(t('xpWeek.amount', { n: total })) + '</strong></div>';
-    html += '<p class="xp-week-note">' + esc(t('xpWeek.note')) + '</p>';
-    pop.innerHTML = html;
+    if (total !== null) body += '<div class="tpop-card xp-week-total"><span class="tpop-card-icon" aria-hidden="true">📚</span><div class="tpop-card-text"><p class="tpop-card-title">' +
+      esc(t('xpWeek.totalLabel')) + '</p></div><span class="tpop-line-value">' + esc(t('xpWeek.amount', { n: total })) + '</span></div>';
+    body += '<p class="tpop-note">' + esc(t('xpWeek.note')) + '</p>';
+    body += '<div class="tpop-actions"><button type="button" class="tpop-link" data-tpop-action="ranking">' + esc(t('xpWeek.seeRanking')) + '</button></div>';
+    return '<div class="tpop-clip"><div class="tpop-head">' + head + art + '</div><div class="tpop-body">' + body + '</div></div>';
   }
 
-  function position(){
-    var pop = popEl(), btn = document.getElementById('xp-week-btn');
-    if (!pop || !btn || pop.hidden) return;
-    var r = btn.getBoundingClientRect();
-    var vw = document.documentElement.clientWidth || window.innerWidth;
-    var w = pop.offsetWidth;
-    var left = Math.round(r.left + r.width / 2 - w / 2);
-    left = Math.max(16, Math.min(left, vw - w - 16));
-    pop.style.left = left + 'px';
-    pop.style.top = Math.round(r.bottom + 8) + 'px';
-  }
-
-  function open(mode){
-    var btn = document.getElementById('xp-week-btn');
-    if (!btn) return;
-    var pop = ensurePopover();
-    clearTimeout(hoverTimer);
-    var wasOpen = !pop.hidden;
-    openMode = mode;
-    if (!wasOpen){
-      pop.hidden = false;
-      renderPopover();
-      refresh(false);
-    }
-    btn.setAttribute('aria-expanded', 'true');
-    position();
-    if (mode === 'click') pop.focus({ preventScroll: true });
-  }
-
-  function close(returnFocus){
-    var pop = popEl(), btn = document.getElementById('xp-week-btn');
-    clearTimeout(hoverTimer);
-    openMode = null;
-    if (pop) pop.hidden = true;
-    if (btn){
-      btn.setAttribute('aria-expanded', 'false');
-      if (returnFocus) btn.focus({ preventScroll: true });
-    }
-  }
-
-  function isOpen(){ var pop = popEl(); return !!(pop && !pop.hidden); }
-
-  function scheduleHoverClose(){
-    if (openMode !== 'hover') return;
-    clearTimeout(hoverTimer);
-    hoverTimer = setTimeout(function(){ if (openMode === 'hover') close(false); }, 250);
-  }
-
-  function onKeydown(e){
-    if (e.key === 'Escape' || e.key === 'Esc'){
-      if (!isOpen()) return;
-      e.preventDefault(); e.stopPropagation();
-      close(true);
-    } else if (e.key === 'Tab' && popEl() && popEl().contains(e.target)){
-      // A janelinha não tem nada para focar dentro: Tab volta ao contador (a ordem da página segue dali).
-      e.preventDefault();
-      close(true);
-    }
-  }
+  function isOpen(){ return !!(root.TopPop && root.TopPop.isOpen('xp')); }
+  function open(mode){ if (root.TopPop) root.TopPop.open('xp', mode || 'click'); }
+  function close(returnFocus){ if (root.TopPop) root.TopPop.close('xp', returnFocus); }
 
   function wire(){
     var btn = document.getElementById('xp-week-btn');
-    if (!btn || btn.dataset.xpWeekWired) return;
-    btn.dataset.xpWeekWired = '1';
-    ensurePopover();
-    btn.addEventListener('click', function(){
-      // Aberta pelo mouse (hover): o clique "fixa" a janelinha; aberta por clique/teclado/toque: fecha.
-      if (isOpen() && openMode === 'click') close(false);
-      else open('click');
-    });
-    btn.addEventListener('keydown', onKeydown);
-    btn.addEventListener('pointerenter', function(e){ if (e.pointerType === 'mouse' && !isOpen()) open('hover'); else if (e.pointerType === 'mouse') clearTimeout(hoverTimer); });
-    btn.addEventListener('pointerleave', function(e){ if (e.pointerType === 'mouse') scheduleHoverClose(); });
-    document.addEventListener('pointerdown', function(e){
-      if (!isOpen()) return;
-      var pop = popEl();
-      if (btn.contains(e.target) || (pop && pop.contains(e.target))) return;
-      close(false);
-    }, true);
-    document.addEventListener('keydown', function(e){ if ((e.key === 'Escape' || e.key === 'Esc') && isOpen()){ close(true); } });
-    window.addEventListener('resize', position);
-    window.addEventListener('scroll', position, { passive: true });
+    if (!btn || !root.TopPop) return;
+    root.TopPop.register({ id: 'xp', btnId: 'xp-week-btn', popId: 'xp-week-pop', className: 'xp-week-pop', render: popoverHTML, onOpen: function(){ refresh(false); } });
+    if (!document.documentElement.dataset.xpWeekActions){
+      document.documentElement.dataset.xpWeekActions = '1';
+      document.addEventListener('click', function(e){
+        var b = e.target.closest && e.target.closest('#xp-week-pop [data-tpop-action="ranking"]');
+        if (!b) return;
+        root.TopPop.closeAll();
+        // "Ver ranking": a tela do Ranking (abre em "Geral", a mesma soma do número do topo).
+        if (typeof switchTab === 'function') switchTab('leaderboard');
+      });
+    }
     window.addEventListener('i18n:change', function(){ paint(); });
   }
 

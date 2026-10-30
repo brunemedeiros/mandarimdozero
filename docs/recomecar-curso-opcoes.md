@@ -268,3 +268,4 @@ próprios intacto, XP igual), cliente, produção só com autorização.
    2026-10-12, memória por idioma estudado e não por curso).
 Ponto a decidir na implementação: cartões próprios e da professora não são apagados (são do idioma, não do curso); a
 memória deles também fica (depois da P1 ela nem fica no bloco do curso).
+8. (2026-10-30) O recorde de sequência (`_account.bestStreak`) é da conta e FICA ao recomeçar o curso.

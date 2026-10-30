@@ -251,16 +251,42 @@ window.I18N_CATALOG['en'] = {
   // XP of the week in the top bar + last weeks popover (shared/xp-semana.js; 2026-10-29).
   'xpWeek.buttonShort': 'XP this week', // ALTA
   'xpWeek.buttonAria': '{n} XP this week. See the last few weeks', // ALTA
-  'xpWeek.title': 'Your XP by week', // ALTA
   'xpWeek.thisWeek': 'This week', // ALTA
-  'xpWeek.lastWeek': 'Last week', // ALTA
-  'xpWeek.weeksAgo': { one: '{n} week ago', other: '{n} weeks ago' }, // ALTA
   'xpWeek.amount': '{n} XP', // ALTA
-  'xpWeek.range': '{from} to {to}', // ALTA
   'xpWeek.loading': 'Loading previous weeks...', // ALTA
   'xpWeek.error': 'Couldn\'t load the previous weeks right now.', // ALTA
   'xpWeek.totalLabel': 'Total XP in this course', // ALTA
   'xpWeek.note': 'Weeks run Monday to Sunday and add up all your courses, same as the Leaderboard.', // ALTA
+  'xpWeek.headUnit': 'XP this week', // ALTA
+  'xpWeek.last4': 'Last 4 weeks', // ALTA
+  'xpWeek.colRange': '{m} {d1}–{d2}', // ALTA
+  'xpWeek.colRangeCross': '{m1} {d1}–{m2} {d2}', // ALTA
+  'xpWeek.better': { one: '+{n} XP more than last week', other: '+{n} XP more than last week' }, // ALTA
+  'xpWeek.seeRanking': 'See leaderboard', // ALTA
+  'streakPop.buttonAria': { one: 'Streak: {n} day in a row. See details', other: 'Streak: {n} days in a row. See details' }, // ALTA
+  'streakPop.buttonAriaZero': 'Streak: today can be day 1. See details', // ALTA
+  'streakPop.unit': { one: 'day streak', other: 'day streak' }, // ALTA
+  'streakPop.sub.done': 'Today counts. Day {next} is tomorrow!', // ALTA
+  'streakPop.sub.pending': 'One lesson or review today makes it {next} days.', // ALTA
+  'streakPop.zero.headline': 'Today can be day 1', // ALTA
+  'streakPop.zero.sub': 'One lesson or review starts a new streak.', // ALTA
+  'streakPop.week': 'This week', // ALTA
+  'streakPop.weekCount': '{n} of 7 days', // ALTA
+  'streakPop.dayStudied': '{day}: studied', // ALTA
+  'streakPop.best': 'Longest streak', // ALTA
+  'streakPop.bestNow': 'that’s now!', // ALTA
+  'streakPop.days': { one: '{n} day', other: '{n} days' }, // ALTA
+  'streakPop.friends.title': 'Friend streaks', // ALTA
+  'streakPop.friends.oneActive': '1 active: {days} with {name}', // ALTA
+  'streakPop.friends.oneActiveNoName': '1 active: {days}', // ALTA
+  'streakPop.friends.manyActive': '{k} active. Longest: {days} with {name}', // ALTA
+  'streakPop.friends.manyActiveNoName': '{k} active. Longest: {days}', // ALTA
+  'streakPop.friends.none': 'Study on the same day and your streak together begins.', // ALTA
+  'streakPop.friends.noFriends': 'Studying with someone helps you keep the rhythm.', // ALTA
+  'streakPop.friends.loading': 'Loading...', // ALTA
+  'streakPop.friends.error': 'Couldn\'t load your friends right now.', // ALTA
+  'streakPop.friends.see': 'See friends', // ALTA
+  'streakPop.friends.invite': 'Invite friends', // ALTA
   'toast.pointsGain': '+{n} pts', // ALTA
   'toast.extraLife': '❤️ Extra life!', // ALTA
   'toast.unitComplete': 'Unit complete! 🥐', // ALTA -- emoji de croissant (fr)
