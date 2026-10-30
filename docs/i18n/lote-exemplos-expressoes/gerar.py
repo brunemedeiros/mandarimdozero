@@ -11,7 +11,9 @@ def sql(x):
     e='data'
     for path,val in [('{example,pt}',x['pt1']),('{example,mark}',x['mark1']),('{secondExample,pt}',x['pt2']),('{secondExample,mark}',x['mark2'])]:
         e=f"jsonb_set({e},'{path}',to_jsonb({q(val)}::text))"
-    if x.get('lit_pt'): e=f"jsonb_set({e},'{{literal}}',jsonb_build_object('pt',{q(x['lit_pt'])}::text))"
+    if x.get('lit_pt'):
+        extra = f",'note',{q(x['lit_note_pt'])}::text" if x.get('lit_note_pt') else ''
+        e=f"jsonb_set({e},'{{literal}}',jsonb_build_object('pt',{q(x['lit_pt'])}::text{extra}))"
     return (f"update public.challenges set data = {e} where id = '{x['id']}' "
             f"and data->'example'->>'text' = {q(x['text1'])} and data->'secondExample'->>'text' = {q(x['text2'])};")
 out=['-- Lote de exemplos das Expressões (2026-10-28). ADITIVO: só acrescenta example.pt/mark, secondExample.pt/mark e literal.pt.',
