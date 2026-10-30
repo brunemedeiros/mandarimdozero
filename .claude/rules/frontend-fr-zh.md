@@ -69,6 +69,7 @@ paths:
   `exprShowFinal` em `shared/desafios-telas.js`; barra do topo só nelas (`data-lesson-bar`, `shared/activity-focus.js`); texto novo = chave em `CHALLENGE_I18N`
   (pt-BR e en). Os testes `tests/paridade-sites/test_desafios*.js` e `test_conjugacao*.js` comparam "antes x depois" do refactor: mudança de propósito
   entra na lista de neutralizações do teste (com data e motivo), nunca apagando a comparação. Testes: `tests/desafios-expressoes-passos/`.
+  Dados opcionais de cada expressão: `example/secondExample.{pt,mark}` (tradução e trecho exato do francês a destacar), `literal.{pt,note}` (tradução literal e nota de origem); no site em outro idioma vêm do overlay (`docs/i18n/challenges-en.json`: `example`, `secondExample`, `literal`, `literalNote`) e nunca entram em `CHALLENGE_SITE_LANG_FIELDS` (sem o campo, a parte some; o desafio não). Teste: `tests/desafios-exemplos-traducao/`. Gravar SQL no navegador troca `\n` por `\r\n`: usar `chr(10)` (`docs/i18n/lote-exemplos-expressoes/gerar.py`) e conferir por hash.
 - **Lembrete de revisão do rodapé** (`maybeShowReviewReminder`, `shared/core/revisao-decks.js`): o dia só é gravado depois de o banner ficar visível uns segundos ou ser clicado/dispensado
   (`markReviewReminderSeen`); em lição (`lesson-focus`) nem aparece nem gasta o dia; reavalia ao voltar para a aba e ao sair da lição. Guarda: `tests/lembrete-revisao/`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
