@@ -271,6 +271,8 @@ async function onUserLoggedIn(user){
   if (typeof teacherInvitesAfterLogin === 'function') teacherInvitesAfterLogin();
   // Mural (087): link da turma guardado e o "+N" no Perfil.
   if (typeof muralAfterLogin === 'function') muralAfterLogin();
+  // Recomeçar o curso (123): aviso depois de recomeçar/desfazer e a retomada guiada de quem volta depois de 60 dias.
+  if (typeof RecomecarCurso !== 'undefined') RecomecarCurso.afterLogin();
 }
 
 // ---------- Admin Mode ON/OFF (topbar) ----------
@@ -590,6 +592,10 @@ async function saveState(){
     // vitalício menor que o que a mais nova já gravou).
     const blockKey = progressBlockKey(existing && existing.data);
     const existingPayload = existing && existing.data && existing.data[blockKey];
+    // Recomeçar o curso (migration 123, shared/recomecar-curso.js): o servidor tem um recomeço ou desfazer MAIS NOVO que o
+    // carregado nesta aba (época maior). Nunca grava por cima: avisa e recarrega. Vem antes do guarda-corpo de campos
+    // vitalícios porque, depois de um recomeço, a aba velha tem XP MAIOR e passaria por ele.
+    if (typeof RecomecarCurso !== 'undefined' && RecomecarCurso.blocksSave(existingPayload)) return;
     if (existingPayload){
       const regressed = MONOTONIC_PROGRESS_FIELDS.find(field => Number(payload[field]) < Number(existingPayload[field] || 0));
       if (regressed){
@@ -616,6 +622,8 @@ async function saveState(){
       accountMerged = AccountProgress.mergeAccount(AccountProgress.deriveAccountFromRow(existing && existing.data), AccountProgress.pickAccount(payload));
       if (progressAccountBase) blockPayload = Object.assign({}, payload, AccountProgress.mirrorForBlock(payload, progressAccountBase));
     }
+    // Época do recomeço vai junto com o bloco (sem recomeço, o mesmo objeto: nada muda para quem nunca recomeçou).
+    if (typeof RecomecarCurso !== 'undefined') blockPayload = RecomecarCurso.stampForSave(blockPayload);
     const merged = Object.assign({}, existing && existing.data, { [blockKey]: blockPayload });
     // P1 (docs/p1-memoria-por-idioma.md): memória dos cartões da professora e próprios é do IDIOMA ESTUDADO. Junta com a
     // leitura fresca (fica a cópia de mais histórico), grava em _lang[APP_KEY] e sobe o espelho dos outros cursos do idioma.
@@ -629,6 +637,8 @@ async function saveState(){
     if (pendingAccountUiLanguage){
       merged._meta = Object.assign({}, merged._meta, { uiLanguage: pendingAccountUiLanguage });
     }
+    // Retomada guiada (60 dias): o dia para o qual a janela já apareceu (uma vez por retorno).
+    if (typeof RecomecarCurso !== 'undefined') merged._meta = RecomecarCurso.metaForSave(merged._meta);
     if (CourseStorage.isPerSiteLanguage()){
       // C5: registra o curso iniciado e qual é o atual (só acrescenta; nunca muda registro existente).
       const courseId = CourseStorage.activeCourseId(APP_KEY, pageSiteLanguage(existing && existing.data));
@@ -776,6 +786,11 @@ async function loadState(){
           progressAccountBase = AccountProgress.snapshotBase(ownSnapshot, STATE);
         }
         catch (e) { console.error('Erro ao aplicar progresso da conta:', e); }
+      }
+      // Recomeçar o curso: lembra a época carregada; se mudou desde o último carregamento desta página, recarrega.
+      if (typeof RecomecarCurso !== 'undefined' && data && data.data){
+        const courseId = CourseStorage.activeCourseId(APP_KEY, pageSiteLanguage(data.data));
+        if (!RecomecarCurso.onLoaded(data.data, blockKey, courseId)) return;
       }
       // Só chega aqui depois de uma leitura bem-sucedida (com ou sem dado
       // pra essa conta -- as duas são um resultado válido, "conta nova"

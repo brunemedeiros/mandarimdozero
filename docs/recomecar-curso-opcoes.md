@@ -269,3 +269,101 @@ próprios intacto, XP igual), cliente, produção só com autorização.
 Ponto a decidir na implementação: cartões próprios e da professora não são apagados (são do idioma, não do curso); a
 memória deles também fica (depois da P1 ela nem fica no bloco do curso).
 8. (2026-10-30) O recorde de sequência (`_account.bestStreak`) é da conta e FICA ao recomeçar o curso.
+
+## Implementação (2026-10-30)
+
+Branch `claude/optimistic-ramanujan-tercxc`. Tudo grátis. Migration `shared/supabase_migrations/123_restart_course.sql`;
+site em `shared/recomecar-curso.js` + `shared/recomecar-curso.css` (fr e zh), ganchos em `shared/auth.js` e
+`shared/core/licao-base.js`; professora em `shared/teacher-panel.js` (sino), `shared/student-metrics.js`,
+`shared/admin-students.js` e `shared/teacher-students-ui.js` (ficha). Testes em `tests/recomecar-curso/`.
+
+### O que zera e o que fica
+
+| Dado | Dono | Ao recomeçar |
+|---|---|---|
+| Trilha: `unitProgress`, `checkpointProgress`, `levelTestProgress`, `reviewMilestones`; zh: `hanziCards`, `hanziLessonProgress`, `storyProgress` | curso | **zera** |
+| Cartões da trilha (FSRS e `released`), `retiredStudyCards`, `cardVariants` | curso | **zera** (saem do array `cards`; o site recria como novos) |
+| XP do curso (`xp`, `periodXp`), contadores (`totalReviews`, `totalAudioPlays`, `everUsed*`, `modesUsed`, `reviewRecords`, `reviewTimeStats`, `dailyMinutesLog`), missões (`daily`) | curso | **zera** |
+| Desafios (`completedChallenges`, `challengeReviews`), Ditados (`dictations`, `dictationsAced`) | curso | **zera** |
+| Boas-vindas da 1ª lição (`welcome`), `progressSummary` | curso | **zera** (as boas-vindas voltam; o resumo é recalculado no 1º salvar) |
+| Cartões da professora e próprios (entradas `origin` teacher/self do bloco) | idioma | **fica** igual (e `_lang` nem é tocado) |
+| Espelho da sequência no bloco (`streak`, `lastStudyDay`, `activityLog`, `dailyLessonsLog`, `hadStreakComeback`, `lastReviewReminderDay`, `bestStreak`) | conta | **fica** |
+| `studyGoal` (meta e lembrete), `studySettings` (ajustes da Revisão), `_curriculumVersion` | preferência | **fica** |
+| `_account` (sequência e recorde `bestStreak`), `_lang`, `_meta`, outros cursos, zh antigo na raiz | conta | **fica** (byte a byte) |
+| `weekly_xp` (Ranking) | idioma | único curso com XP do idioma: **apaga todas as semanas do idioma**; existe outro curso do mesmo idioma com XP: só a semana atual perde o XP deste curso, as passadas ficam (não dá para separar o que foi de cada curso) |
+| `earned_badges` | idioma (as da conta valem em todos) | único curso do idioma: **apaga as do curso** (`course1`, `ear`, `explore`, `vocab`, `aced`, `dictation`, `challenge`, antigas `unit_*`, `trained_ear`, `explorer`, `multitasker`); **ficam as da conta** (`days`, `review`, `streak`, `xp`, `weekend`, `podium`, `duo`, `friends`, `comeback` e antigas `first_step`, `streak_3/7`, `xp_100/500`, `reviews_100`); com outro curso do idioma, nada é apagado |
+| Decks, `own_flashcards`, `teacher_flashcards`, vínculo, Banco de Revisão, amigos, `study_days`, missões em dupla, `badge_grants` | idioma/conta | **fica** |
+
+Por que assim no Ranking e nas conquistas: são guardados por idioma estudado. Para quem só tem aquele curso no idioma (todos os
+casos reais hoje, menos 4 contas), "tudo fica zero" vale por inteiro. Com dois cursos do mesmo idioma (ex.: `frances` e `frances@en`),
+apagar as semanas passadas ou as conquistas tiraria também o que foi ganho no outro curso; por isso só a semana atual é ajustada.
+As conquistas da conta (sequência, dias, revisões, XP total da conta) ficam porque a sequência e a conta ficam (decisão 8).
+
+Pendência leve para a dona confirmar: cartões próprios e da professora e a memória deles ficam (são do idioma e alimentam o Banco
+da professora); a janela diz isso com todas as letras ("Continua como está").
+
+### Servidor (migration 123)
+
+- Tabela `course_restart_backups` (RLS: só o dono lê; ninguém escreve direto): bloco inteiro, linhas de `weekly_xp` do idioma, ajuste
+  da semana, conquistas apagadas, `epoch`, `only_course`, `expires_at` = +30 dias, `restored_at`, `superseded_at`, `purged_at`.
+- `restart_course(p_course_key)` (security definer): só a própria conta, chave válida (`frances`, `frances@en`, `mandarim`...,
+  nunca `_lang`/`_account`), grava a cópia, regrava o bloco (nunca apaga a chave: no zh antigo o site leria a raiz), apaga/ajusta
+  `weekly_xp` e `earned_badges` como na tabela acima, marca a cópia anterior do mesmo curso como substituída e avisa a professora
+  com vínculo ativo no idioma (sino dela, 108, no idioma do site dela; params `name`, `course`).
+- `undo_restart_course(p_backup_id)`: só a última cópia do curso, dentro de 30 dias, não desfeita; devolve o bloco exatamente
+  como era (mais a nova época), as semanas e as conquistas (com a data original); com outro curso do idioma, devolve o XP
+  tirado da semana e tira o que o curso recomeçado ganhou nela. Avisa a professora ("desfez o recomeço").
+- `get_teacher_student_restarts(p_student_id, p_language_app_key)`: professora com vínculo ativo naquele idioma (ou a admin) vê
+  os últimos recomeços (data e se desfez). A ficha do aluno mostra "Recomeçou o curso do zero em DD/MM".
+- `purge_expired_course_restart_backups()`: esvazia as cópias vencidas (o registro "recomeçou em" fica); roda no recomeço, no
+  desfazer e num cron diário (`purge-course-restart-backups`, 07:17 UTC, só se `pg_cron` existir).
+- **Época**: o bloco recomeçado ganha `restartEpoch` (+1 a cada recomeço ou desfazer) e `restartedAt`. O gatilho
+  `progress_guard_restart_epoch` (BEFORE UPDATE em `progress`) devolve o bloco do servidor quando uma gravação traz época menor
+  (aba aberta com o código antigo); o resto da gravação passa. Bloco sem `restartEpoch` (todos hoje) não é afetado.
+
+### Site
+
+- Configurações > Geral, caixa "Recomeçar este curso" (só logado e com o curso começado): texto do que acontece, botão vermelho
+  (`.p-perigo`: `--error-red` com `--on-vivid`); com cópia válida, "Você recomeçou este curso em DD/MM. Dá para desfazer até DD/MM."
+  e o botão "Desfazer o recomeço".
+- Janela de confirmação: lista "Volta para o zero" e "Continua como está" (só com o que o site tem: Desafios e Ditados no fr,
+  hanzi e histórias no zh), nota dos 30 dias e de que o estudo depois do recomeço se perde ao desfazer, aviso de que a
+  professora vai saber (só para aluno vinculado), caixa "Entendi: o progresso de X volta para o zero." que liga o botão
+  "Recomeçar do zero". Esc fecha, foco preso, 44px.
+- Depois: a página recarrega (STATE do zero), aviso "Pronto! O curso recomeçou do zero. Boa jornada!", 1º salvar recalcula o resumo.
+  As lições voltam a dar XP e as boas-vindas da 1ª lição voltam (marca `welcome` apagada).
+- Época no navegador: `loadState` guarda a época; `saveState` recusa gravar quando o servidor tem época maior (antes do
+  guarda-corpo de XP, que deixaria passar: a aba velha tem XP maior), avisa ("Este curso mudou em outra aba ou aparelho...") e
+  recarrega; o bloco gravado leva a época. Um sinal pelo `localStorage` faz as outras abas da mesma conta recarregarem na hora.
+  Conta que nunca recomeçou: bloco gravado idêntico ao de antes.
+- Retomada guiada: ao abrir um curso cujo último dia estudado NESTE curso foi há 60 dias ou mais, janela "Que bom te ver de volta!"
+  com Continuar de onde parei, Fazer uma revisão rápida (sessão curta de 5 minutos), Fazer o Ponto de verificação do módulo (só
+  onde há módulos e o pulo está liberado) e Recomeçar o curso. Uma vez por retorno: `_meta.comebackSeen[courseId]` guarda o dia.
+
+### Testes (2026-10-30)
+
+- `tests/recomecar-curso/run.sh` (SQL, Postgres local, ROLLBACK): 57/57, zero resíduo. Cobre só o dono, chave inválida, só o curso
+  pedido, outros cursos e outras contas intactos, `_lang` e `_account.bestStreak` intactos, cópia fiel, desfazer byte a byte (Ranking e
+  conquistas com as datas), vencida não desfaz e é esvaziada, aba antiga barrada pelo gatilho, dois cursos do mesmo idioma, zh antigo
+  na raiz, professora avisada no idioma dela (en e pt-BR), RLS da tabela.
+- `tests/recomecar-curso/test_unit.js` (Node, arquivos de produção): 30/30 (época no saveState/loadState, conta sem recomeço com
+  bloco idêntico ao de antes, "uma vez por retorno").
+- `tests/recomecar-curso/test_playwright.js` (fr e zh, pt-BR e en, 1280 e 390, claro e escuro com `SHOTS=`): 354/354.
+- Regressão: i18n 2341/2341, sem português no en 6/6, i18n navegador 209/209, acessibilidade 60/60, Configurações 27/27, conta-excluir
+  20/20, p1 67/67, janelas-topo 35/35 e 276/276, xp 10/10, 19/19, 9/9 e 10/10, boas-vindas 190/190, curso-progresso (47, 124, 40,
+  28, 9, 26, 20, 12, 25: todos ok), painel-professora 691/691, sino-professora 108 45/45, 115 25/25 e navegador 280/280,
+  deck-browser 208/208, banco-revisao navegador 672/672 e unidades ok, paridade (quase iguais 1004+382+1007+363 cenas, CSS 5/5,
+  contrato 29/29), cores-marca 20/20, 36/36, 6/6, 26/26. Falha que já existia: `tests/banco-revisao/test_agent_core.js` 48/49
+  (`engine.generated.mjs` desatualizado; igual sem esta mudança, conferido num worktree da HEAD).
+- Mudança de propósito em testes antigos: `tests/i18n/test_i18n_unit.js` (prefixos `restart.`/`comeback.` são textos novos) e
+  `tests/paridade-sites/test_quase_iguais.js` (a caixa nova e vazia de Configurações é neutralizada na comparação antes x depois).
+
+### Produção (pendente, só com autorização)
+
+1. Staging: terminar de aplicar a 123 (ver o registro da 123 no histórico 08) e conferir.
+2. Produção: colar `docs/rollout-sql/123_sql_editor.sql` no SQL Editor (tem DELETE dentro das funções). Conferir com SELECT:
+   funções `restart_course`, `undo_restart_course`, `get_teacher_student_restarts` com execute para authenticated e não para anon;
+   gatilho `progress_guard_restart_epoch`; job `purge-course-restart-backups`; hash de `progress`, `weekly_xp` e `earned_badges`
+   igual antes e depois (a migration não muda dado).
+3. Só depois do banco: publicar o site (PR). O site sem a 123 continua funcionando: a caixa de Configurações aparece, mas
+   recomeçar dá o erro "Não deu para recomeçar agora. Nada mudou..." (a RPC não existe). Por isso a ordem é banco primeiro.

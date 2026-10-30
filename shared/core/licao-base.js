@@ -29,6 +29,8 @@ function renderSettingsView(){
   document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? t('settings.account.emailPassword') : '—');
   switchSettingsSection(SETTINGS_SECTION);
   if (typeof refreshDeleteAccountBox === 'function') refreshDeleteAccountBox();
+  // Recomeçar este curso (migration 123, shared/recomecar-curso.js).
+  if (typeof RecomecarCurso !== 'undefined') RecomecarCurso.refreshBox();
 }
 
 function switchSettingsSection(section){
