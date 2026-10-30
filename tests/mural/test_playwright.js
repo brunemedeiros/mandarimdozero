@@ -247,8 +247,11 @@ const MURAL_FAKE = (who) => {
     await ev(() => { document.querySelector('[data-mural-tab="mural"]').click(); });
     await page.waitForSelector('#admin-mural-content .mc-cover');
     // aviso automático (gatilho 121): aula registrada na turma
-    await ev(() => { const M = window.__M; M.posts.push({ id: ++M.seq, kind: 'lesson', ref: { id: 9, class_date: '2026-10-22', start_time: '17:00:00', topic: 'Passé composé', homework: 'Exercícios 3 e 4' },
+    await ev(() => { const M = window.__M; M.posts.push({ id: ++M.seq, kind: 'lesson', ref: { id: 9, class_date: '2026-10-22', start_time: '17:00:00', topic: 'Passé composé', homework: 'Exercícios 3 e 4', bank_cards: 8 },
       classroom: M.classrooms[0].id, student: null, author: 'P', body: '', attachments: [], t: M.tick++ }); });
+    await ev(() => { document.querySelector(`[data-mural-sel="c:${window.__M.classrooms[0].id}"]`).click(); });
+    await page.waitForSelector('#admin-mural-content .mc-auto-lesson');
+    L('professora: aviso da aula mostra só o número de cartões do Banco (122), sem botão', await ev(() => { const b = document.querySelector('#admin-mural-content .mc-auto-lesson .mc-auto-bank'); return !!b && b.textContent.includes(tp('mural.auto.bankCardsTeacher', 8, { n: 8 })) && !b.querySelector('[data-mural-review]'); }));
 
     // ===== aluna da turma =====
     await login('S');
@@ -262,6 +265,8 @@ const MURAL_FAKE = (who) => {
     L('aluna: abre na turma com novidade', await ev(() => document.querySelector('#my-mural-content .mural-chip.is-active')?.textContent.includes('Turma de quinta')));
     L('aluna: vê os 2 recados e o aviso da aula', await ev(() => document.querySelectorAll('#my-mural-content .mural-post').length === 3));
     L('aluna: aviso automático da aula com tema e tarefa', await ev(() => { const a = document.querySelector('#my-mural-content .mc-auto-lesson'); return !!a && a.textContent.includes('Passé composé') && a.textContent.includes('Exercícios 3 e 4') && !!a.querySelector('[data-mural-open-lesson]'); }));
+    L('aluna: aviso da aula diz quantos cartões estão na Revisão (122)', await ev(() => document.querySelector('#my-mural-content .mc-auto-lesson .mc-auto-bank')?.textContent.includes(tp('mural.auto.bankCards', 8, { n: 8 }))));
+    L('aluna: botão Revisar do aviso abre a revisão da professora', await ev(() => { const orig = window.startClassReviewSession; let hit = false; window.startClassReviewSession = () => { hit = true; }; document.querySelector('#my-mural-content .mc-auto-lesson [data-mural-review]').click(); window.startClassReviewSession = orig; return hit; }));
     L('aluna: capa da turma com a cor escolhida e sem botão de trocar', await ev(() => /168, 50, 38/.test(getComputedStyle(document.querySelector('#my-mural-content .mc-cover')).backgroundColor) && !document.querySelector('#my-mural-content [data-mural-cover-edit]')));
     await page.waitForSelector('#my-mural-content .mc-side .mc-card');
     L('aluna: coluna com próxima aula e revisão de hoje', await ev(() => document.querySelectorAll('#my-mural-content .mc-side .mc-card').length === 2));

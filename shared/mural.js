@@ -233,8 +233,8 @@ function muralCommentHTML(c){
     </li>`;
 }
 
-function muralPostHTML(p){
-  if (p.kind === 'lesson' || p.kind === 'material') return muralAutoPostHTML(p);
+function muralPostHTML(p, ctx){
+  if (p.kind === 'lesson' || p.kind === 'material') return muralAutoPostHTML(p, ctx);
   return `
     <article class="mural-post${p.by_teacher ? ' is-teacher' : ''}" data-post-id="${p.id}">
       <header class="mural-post-head">
@@ -351,7 +351,7 @@ async function renderMuralFeed(board, ctx){
   const data = await muralRpc('mural_feed', { p_lang: APP_KEY, p_classroom_id: ctx.classroomId || null, p_student_id: ctx.role === 'teacher' ? (ctx.studentId || null) : null });
   if (data.error){ feed.innerHTML = `<p class="profile-empty-note">${escapeHTML(muralErrorText(data.error))}</p>`; return; }
   const posts = Array.isArray(data.posts) ? data.posts : [];
-  feed.innerHTML = posts.length ? posts.map(muralPostHTML).join('') : `<p class="profile-empty-note">${t('mural.empty')}</p>`;
+  feed.innerHTML = posts.length ? posts.map(p => muralPostHTML(p, ctx)).join('') : `<p class="profile-empty-note">${t('mural.empty')}</p>`;
   const reload = () => renderMuralFeed(board, ctx);
   const coverSlot = board.querySelector('.mc-cover-slot');
   if (coverSlot){ coverSlot.innerHTML = muralCoverHTML(ctx, data); muralFillCoverPhoto(coverSlot); wireMuralCover(coverSlot, ctx, data, reload); }
@@ -368,6 +368,7 @@ async function renderMuralFeed(board, ctx){
   }
   feed.querySelectorAll('[data-mural-open-lesson]').forEach(b => b.addEventListener('click', () => muralOpenLesson(ctx)));
   feed.querySelectorAll('[data-mural-open-material]').forEach(b => b.addEventListener('click', () => muralOpenMaterial(ctx)));
+  feed.querySelectorAll('[data-mural-review]').forEach(b => b.addEventListener('click', () => { if (typeof startClassReviewSession === 'function') startClassReviewSession(); }));
   feed.querySelectorAll('[data-mural-comment-form]').forEach(form => form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const input = form.querySelector('input');
@@ -455,16 +456,24 @@ function muralLessonWhen(log){
 function muralSafeLink(url){ return /^https?:\/\//i.test(String(url || '')) ? String(url) : ''; }
 
 // Aviso automático (aula registrada / material novo): linha com ícone; o texto vem da aula ou do material.
-function muralAutoPostHTML(p){
+function muralAutoPostHTML(p, ctx){
   const ref = p.ref || {};
   const who = escapeHTML(p.author?.name || '');
-  let icon, head, title, meta, open;
+  let icon, head, title, meta, open, bank = '';
   if (p.kind === 'lesson'){
     icon = '📅';
     head = t('mural.auto.lesson', { name: who });
     title = escapeHTML(ref.topic || ref.homework || '');
     meta = [escapeHTML(muralLessonWhen(ref)), ref.homework && ref.topic ? escapeHTML(t('mural.auto.homework', { hw: ref.homework })) : ''].filter(Boolean).join(' · ');
     open = `<button type="button" class="mural-text-btn mc-auto-open" data-mural-open-lesson>${t('mural.auto.openLesson')}</button>`;
+    // Cartões do Banco que saíram desta aula (122, contagem ao vivo): o aluno ganha o botão Revisar; a professora vê só o número.
+    const nCards = Number(ref.bank_cards) || 0;
+    if (nCards > 0){
+      bank = ctx?.role === 'teacher'
+        ? `<p class="mural-meta mc-auto-bank"><span>🗂️ ${escapeHTML(tp('mural.auto.bankCardsTeacher', nCards, { n: nCards }))}</span></p>`
+        : `<p class="mc-auto-bank"><span>🗂️ ${escapeHTML(tp('mural.auto.bankCards', nCards, { n: nCards }))}</span>
+             <button type="button" class="mural-text-btn mc-auto-open" data-mural-review>${t('mural.auto.reviewNow')}</button></p>`;
+    }
   } else {
     icon = '📎';
     head = t('mural.auto.material', { name: who });
@@ -482,6 +491,7 @@ function muralAutoPostHTML(p){
         <div class="mc-auto-text">
           <p class="mc-auto-title"><strong>${head}</strong> ${title}</p>
           ${meta ? `<p class="mural-meta">${meta}</p>` : ''}
+          ${bank}
         </div>
         <div class="mural-post-actions">${open}
           ${p.can_delete ? `<button type="button" class="mural-text-btn is-danger" data-mural-del-post="${p.id}">${t('mural.delete')}</button>` : ''}</div>

@@ -515,4 +515,15 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   painel-materiais 210/210 e 42/42, banco-revisao 672/672, k10 114/114, planos 162/162, planos-permissoes 105/105,
   cores-marca 20/20, paridade CSS 5/5, i18n 2341/2341 e sem português no en 6/6. Mudança de propósito em testes antigos:
   painel-professora (5 abas → 3) e painel-alunos ("Registrar aula" abre Mural > Aulas e materiais já no aluno).
-- Fica para depois: contagem de cartões do Banco dentro do aviso da aula.
+- Site publicado pelo PR #414 (2026-10-30; conferido no ar: `app.profbrune.com.br/shared/mural-classroom.css`). Até 2026-10-30 nenhum aviso automático na produção (só aulas novas com tema ou tarefa).
+
+## 122 -- Aviso da aula conta os cartões do Banco (2026-10-30, decisão da autora)
+
+- `shared/supabase_migrations/122_mural_lesson_bank_cards.sql`: só troca `_mural_ref`; a aula ganha `bank_cards` = itens do Banco
+  do mesmo aluno (ou turma), professora, idioma e data, aprovados e com cartão ativo. Ao vivo: os cartões que a rotina da madrugada gera
+  depois da aula aparecem sozinhos no aviso. Tela: o aluno vê "N cartões desta aula estão na sua Revisão" + Revisar
+  (`startClassReviewSession`); a professora vê só o número.
+- Staging: aplicada (2026-10-30, `122_mural_lesson_bank_cards`, versão 20261030224513). Produção: PENDENTE (aguarda a autora).
+- Testes: SQL local 122 6/6 (121 17/17 e o resto da `tests/aulas-presenca/run.sh` igual); mural 325/325 (15 novas),
+  painel-professora 691/691, painel-alunos 256/256, painel-materiais 210/210, banco-revisao 672/672, k10 114/114, cores-marca 20/20,
+  i18n 2341/2341, sem português no en 6/6, paridade CSS 5/5.

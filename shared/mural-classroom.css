@@ -54,6 +54,8 @@
 .mc-auto-text{ flex:1; min-width:0; }
 .mc-auto-title{ margin:0; color:var(--ink); font-size:15px; line-height:1.45; overflow-wrap:anywhere; }
 .mc-auto-text .mural-meta{ margin:2px 0 0; }
+.mc-auto-bank{ margin:6px 0 0; display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; font-size:14px; color:var(--ink); }
+.mc-auto-bank.mural-meta{ color:var(--ink-soft); }
 .mc-auto-open{ color:var(--seal-red-dark, var(--ink)); text-decoration:none; }
 
 /* Pessoas */
