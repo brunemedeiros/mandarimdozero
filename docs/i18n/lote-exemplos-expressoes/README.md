@@ -54,3 +54,6 @@ Wiktionnaire, CNRTL (pela API do site) e Larousse abriram; Expressio não (403/D
 - `n'importe quoi`: "qualquer coisa" / "any thing".
 - `Comme ci, comme ça` (expr-a1m1-002): **despublicada** em produção e no Staging em 2026-10-29 (status `approved` + `unpublished_*`, igual ao botão Despublicar). Continua no lote porque o SQL só preenche campos.
 - Hash do `data` esperado no Staging depois de tudo: `695d3b5a8786e419ec10075dcc0e7d78`.
+
+- 2026-10-30: `arrête ton char` = "pare com o seu exagero" / "stop your exaggeration" (preferência da autora). Hash esperado em produção e no Staging depois do lote: `c2701c9e20b7f62aeb296dcae24307d6`. `avoir un poil dans la main` ex. 2: a autora manteve a frase francesa e a tradução como estão.
+- Nota de `coup de main` (autora): origem militar (séc. XVIII, ataque-surpresa rápido), depois sentido de ajuda rápida (séc. XIX). Entra na nota do app junto com a do `bol`.
