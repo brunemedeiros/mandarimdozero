@@ -5,7 +5,7 @@
 //    Ranking "Geral" (weekly_xp de todos os idiomas da conta na semana de segunda a domingo);
 //  - mostra o local até o servidor responder e depois sobe para o valor do servidor; XP ganho depois soma na hora;
 //  - leitura de weekly_xp só da própria conta e só das 4 semanas;
-//  - janelinha: 4 semanas (atual destacada, com aria-current), datas, abre com mouse (hover), clique, Enter, Espaço e
+//  - janelinha (rework 2026-10-30, desenho comum das janelas do topo): 4 colunas (atual destacada, com aria-current), datas, abre com mouse (hover), clique, Enter, Espaço e
 //    toque; fecha com Esc (foco volta ao botão) e clique fora; foco dentro ao abrir por teclado; alvo de 44px no celular;
 //  - site em inglês sem português na janelinha;
 //  - tela "Lição concluída!": nenhum aviso "+N XP" visível; aviso de XP pendente some quando a tela de conclusão abre.
@@ -96,14 +96,17 @@ async function shot(page, name){ if (SHOTS) await page.screenshot({ path: path.j
 const topText = (page) => page.evaluate(() => document.querySelector('#xp-week-btn .pill.xp').innerText.replace(/\s+/g, ' ').trim());
 const popState = (page) => page.evaluate(() => {
   const pop = document.getElementById('xp-week-pop'), btn = document.getElementById('xp-week-btn');
-  const rows = pop ? [...pop.querySelectorAll('.xp-week-row')] : [];
+  // Rework 2026-10-30 (janelas do topo): colunas com a mais antiga à esquerda; aqui a lista volta a ficar "atual primeiro".
+  const rows = pop ? [...pop.querySelectorAll('.xp-week-row')].reverse() : [];
   const r = pop ? pop.getBoundingClientRect() : null;
+  const fill = (x) => x ? getComputedStyle(x.querySelector('.tpop-bar-fill')).backgroundColor : '';
   return { open: !!pop && !pop.hidden && pop.getClientRects().length > 0, expanded: btn.getAttribute('aria-expanded'),
-    rows: rows.map(x => ({ cur: x.classList.contains('is-current'), ariaCur: x.getAttribute('aria-current'), label: x.querySelector('.xp-week-label').innerText,
-      amount: x.querySelector('.xp-week-amount').innerText, dates: x.querySelector('.xp-week-dates').innerText, week: x.dataset.week })),
+    rows: rows.map(x => ({ cur: x.classList.contains('is-current'), ariaCur: x.getAttribute('aria-current'), label: x.querySelector('.xp-week-label').innerText.replace(/\s+/g, ' '),
+      amount: x.querySelector('.xp-week-amount').innerText, week: x.dataset.week })),
+    headRange: pop && pop.querySelector('.tpop-sub') ? pop.querySelector('.tpop-sub').innerText : '',
     text: pop ? pop.innerText : '', focusInPop: !!pop && pop.contains(document.activeElement), focusOnBtn: document.activeElement === btn,
     inView: r ? (r.left >= 0 && r.right <= window.innerWidth + 0.5 && r.top >= 0) : false,
-    curBg: rows[0] ? getComputedStyle(rows[0]).backgroundColor : '', otherBg: rows[1] ? getComputedStyle(rows[1]).backgroundColor : '' };
+    curBg: fill(rows[0]), otherBg: fill(rows[1]) };
 });
 
 // Anda pela lição respondendo certo até a tela de conclusão (mesmo andador de tests/boas-vindas/).
@@ -176,10 +179,11 @@ async function scenario(browser, base, app, o){
   check(`${tag}: ${mobile ? 'toque' : 'mouse por cima'} abre a janelinha (aria-expanded=true)`, st.open && st.expanded === 'true', { open: st.open, exp: st.expanded });
   check(`${tag}: 4 semanas, a atual primeiro e destacada (aria-current)`, st.rows.length === 4 && st.rows[0].cur && st.rows[0].ariaCur === 'date' && st.rows.slice(1).every(r => !r.cur), st.rows);
   check(`${tag}: números das semanas (65, 90, 0, 15)`, st.rows.map(r => r.amount.replace(/\D/g, '')).join(',') === '65,90,0,15', st.rows.map(r => r.amount));
-  const labels = o.lang === 'en' ? ['This week', 'Last week', '2 weeks ago', '3 weeks ago'] : ['Esta semana', 'Semana passada', '2 semanas atrás', '3 semanas atrás'];
-  check(`${tag}: rótulos das semanas`, JSON.stringify(st.rows.map(r => r.label)) === JSON.stringify(labels), st.rows.map(r => r.label));
-  check(`${tag}: cada semana com as datas (segunda a domingo)`, st.rows.every(r => /\d/.test(r.dates) && (o.lang === 'en' ? / to /.test(r.dates) : / a /.test(r.dates))), st.rows.map(r => r.dates));
-  check(`${tag}: semana atual com fundo diferente das outras`, st.curBg && st.curBg !== st.otherBg, [st.curBg, st.otherBg]);
+  // Rework 2026-10-30: a semana atual se chama "Esta semana"; as outras mostram as datas (segunda a domingo).
+  const thisWeek = o.lang === 'en' ? 'This week' : 'Esta semana';
+  check(`${tag}: rótulos: "Esta semana" e as datas das outras`, st.rows[0].label === thisWeek && st.rows.slice(1).every(r => /\d/.test(r.label) && (o.lang === 'en' ? /–/.test(r.label) : / a /.test(r.label))), st.rows.map(r => r.label));
+  check(`${tag}: cabeçalho com as datas da semana (segunda a domingo)`, /\d/.test(st.headRange) && (o.lang === 'en' ? /–/.test(st.headRange) : / a /.test(st.headRange)), st.headRange);
+  check(`${tag}: coluna da semana atual com cor diferente das outras`, st.curBg && st.curBg !== st.otherBg, [st.curBg, st.otherBg]);
   check(`${tag}: janelinha dentro da tela`, st.inView);
   if (o.lang === 'en') check(`${tag}: janelinha sem português`, !PT_WORDS.test(st.text), st.text.match(PT_WORDS));
   await shot(page, `janelinha-${app}-${o.lang}-${o.theme}-${o.width}`);

@@ -101,3 +101,51 @@ Carregando / erro: as colunas antigas mostram "…" e a nota atual `xpWeek.loadi
 5. Janela do XP: incluir uma frase comparando com a semana passada (só quando for positiva, ex.: "Já passou a semana passada!")?
    E um botão "Ver ranking", fazendo par com o "Ver amigos"?
 6. A janela da sequência abre também ao passar o mouse (como a do XP hoje) ou só no clique/toque?
+
+## 6. Implementação (2026-10-30)
+
+Respostas da dona (2026-10-30): 1) janela da sequência como na prévia e rework da do XP no mesmo estilo, abrindo com mouse,
+clique, toque e teclado; 2) zerada = "Hoje pode ser o dia 1"; 3) semana de segunda a domingo nas duas janelas (topo e depois
+da lição); 4) recorde guardado de verdade; 5) sem amigos = "Chamar amigos"; 6) frase do XP só quando a semana atual for maior
+e botão "Ver ranking".
+
+**Grátis x Premium:** tudo grátis.
+
+### Arquivos
+
+| Arquivo | O que faz |
+|---|---|
+| `shared/janelas-topo.js` | Contas puras (`TopPopCalc`: semana seg a dom, estado da sequência, recorde, amigos, frase do XP), controle comum das janelas (`TopPop.register/open/close`: mouse, clique, toque, Enter/Espaço, Tab, Esc, clique fora, uma por vez, nada durante `lesson-focus`, bico apontando para o pill) e a janela da sequência. |
+| `shared/janelas-topo.css` | Desenho das duas janelas (substitui `shared/xp-semana.css`, apagado). Só tokens que já existem. |
+| `shared/xp-semana.js` | Mesmos dados de antes (`weekly_xp` + `STATE.periodXp`); a janela agora usa `TopPop` (colunas, frase, total, "Ver ranking" -> `switchTab('leaderboard')`). |
+| `shared/topbar-stats.js` | `renderTopbarStats()` também atualiza o rótulo do botão 🔥 (`TopPop.paintStreak`). |
+| `shared/friends.js` | `friendsOpenInvite()`: abre Amigos e põe o foco no botão de convite (sem amigos: o bloco "Estudar junto é mais divertido", com Convidar amigos, Mostrar QR code e a busca; com amigos: os botões do topo). |
+| `shared/core/gamificacao.js` | `buildStreakWeekData()` (janela depois da lição) passou de "últimos 7 dias" para segunda a domingo, com os dias que ainda vão chegar tracejados. |
+| `shared/account-progress.js`, `shared/auth.js` (só o `saveState`, uma linha antes da união da conta), `shared/core/estado-salvar.js` (leitura), `shared/core/estado-trilha-desafios.js` | Recorde `bestStreak` (abaixo). Fica fora do `serializeState()` de propósito: os testes de paridade comparam aquele objeto antes x depois. |
+| `fr/index.html`, `zh/index.html` | 🔥 virou `<button id="streak-btn" class="tpop-btn">` (o pill continua dentro), CSS e script novos. |
+| `shared/i18n/pt-BR.js`, `en.js` | Chaves `streakPop.*` e `xpWeek.headUnit/last4/colRange/colRangeCross/better/seeRanking`; saíram `xpWeek.title/lastWeek/weeksAgo/range` (sem uso). |
+
+### Recorde ("Maior sequência")
+
+- **Onde fica:** `progress.data._account.bestStreak` (campo da conta, junto com `streak`/`activityLog`), com espelho em cada bloco de
+  curso, como os outros campos da conta. Sem migration: `progress.data` é JSON.
+- **Como nasce:** no primeiro save depois desta versão, `saveState` põe `bestStreak` no bloco e `AccountProgress.mergeAccount` grava o maior entre o recorde guardado, a
+  sequência (mesmo congelada, porque aconteceu) e o maior bloco de dias seguidos do `activityLog` da conta. O `activityLog` é o
+  histórico mais antigo que existe (conferido na produção, só SELECT: começa em 2026-08-24, 24 contas; a tabela `study_days` do
+  servidor só começa em 2026-10-12 e não é lida pelo site), por isso não foi preciso migration.
+- **Como sobe:** `registerStudyToday()` sobe `STATE.bestStreak` quando a sequência passa dele; o save e a união da conta só ficam com o maior
+  (nunca desce). A janela mostra o maior entre guardado, histórico e sequência atual, então já aparece certo antes do primeiro save.
+- Não entrou em `MONOTONIC_PROGRESS_FIELDS` de `shared/auth.js` e nenhum guarda-corpo mudou (`progressLoadedOk`, campos vitalícios): a união já impede a queda.
+- Recomeçar o curso (futuro): o recorde é da CONTA; decidir com a dona se o recomeço zera ou não.
+
+### Amigos na janela
+
+Ao abrir a janela (no máximo 1 leitura por minuto): `friends_duo_state` (109; sem ela, `friends_duo` da 102), uma linha por amigo
+aceito; sequência ativa = `joint_streak >= 2`; o nome do amigo da maior vem da lista de Amigos já carregada ou de `profile_cards`.
+"Ver amigos" -> aba Amigos. "Chamar amigos" -> aba Amigos com o foco no botão "Convidar amigos" da tela vazia (link, QR code, busca,
+sugestões).
+
+### Testes
+
+`tests/janelas-topo/` (`run.sh`): `test_calculo.js` (contas, recorde, semana depois da lição) e `test_playwright.js` (fr/zh, pt-BR e en,
+1280 e 390; `SHOTS=dir` salva as capturas). `tests/xp-semana/test_playwright.js` atualizado para o desenho novo (colunas, datas).
