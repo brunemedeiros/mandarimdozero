@@ -581,6 +581,7 @@ async function fingerprintEn(browser, root){
     const run = async (r) => ({ pt: await fingerprint(browser, r, keys), en: await fingerprintEn(browser, r) });
     const antes = await run(wt);
     const depois = await run(ROOT);
+    if (process.env.PARIDADE_DUMP) fs.writeFileSync(process.env.PARIDADE_DUMP, JSON.stringify({ antes, depois })); // depuração: guarda as duas rodadas para comparar sem rodar tudo de novo
     check('chaves de texto encontradas', keys.length > 100, keys.length);
     let iguais = 0, total = 0;
     // published_at/rejected_at... = new Date().toISOString() (relógio fixo, mas por garantia)
@@ -593,7 +594,8 @@ async function fingerprintEn(browser, root){
       // o XP guardado no estado (xp e daily.xp) é neutralizado nos dois lados. O resto da comparação segue valendo.
       .replace(/(\\*)"\/fr\/audio\/challenges\/([0-9a-z-]+\.mp3)@[\d.]+\1",?/g, (m, bs, f) => EXPR_AUDIO.has(f) ? '' : m)
       .replace(/,(\\*\]|\])/g, '$1')
-      .replace(/(\\?)"xp(\\?)":\d+/g, '$1"xp$2":0');
+      .replace(/(\\?)"xp(\\?)":\d+/g, '$1"xp$2":0')
+      .replace(/(\\?)"periodXp\1":\{[^}]*\}/g, '$1"periodXp$1":{}');
     for (const lado of ['pt', 'en']){
       const A = antes[lado], B = depois[lado];
       check(lado + ': a sequência rodou no fr de antes', Object.keys(A).length > (lado === 'pt' ? 900 : 30), Object.keys(A).length);
