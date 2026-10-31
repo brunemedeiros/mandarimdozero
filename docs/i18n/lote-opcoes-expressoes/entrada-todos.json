@@ -1,0 +1,2076 @@
+[
+ {
+  "id": "expr-001",
+  "expr": "avoir la gueule de bois",
+  "register": "familiar",
+  "meaning_fr": "Avoir mal à la tête et se sentir mal après avoir trop bu d'alcool.",
+  "meaning_pt": "Sentir-se mal, ter dor de cabeça após ter bebido muito álcool.",
+  "options": [
+   "Être très fatigué après une longue journée.",
+   "Se sentir mal et avoir mal à la tête après avoir trop bu d'alcool.",
+   "Avoir une mauvaise humeur passagère.",
+   "Être surpris par une nouvelle."
+  ],
+  "correctAnswer": "Se sentir mal et avoir mal à la tête après avoir trop bu d'alcool.",
+  "turn_prompt": "Hier soir, j'ai trop bu à la fête, alors ce matin, je __________ et je ne veux pas sortir.",
+  "turn_answer": "ai la gueule de bois",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-002",
+  "expr": "casser les pieds",
+  "register": "familiar",
+  "meaning_fr": "C'est quand quelqu'un t'énerve ou t'ennuie beaucoup.",
+  "meaning_pt": "Significa incomodar ou irritar muito alguém.",
+  "options": [
+   "Faire du bruit fort",
+   "Être très fatigué",
+   "Incommoder ou énerver quelqu'un",
+   "Casser un objet"
+  ],
+  "correctAnswer": "Incommoder ou énerver quelqu'un",
+  "turn_prompt": "Mon frère a encore oublié de faire la vaisselle, il __________ !",
+  "turn_answer": "me casse les pieds",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-003",
+  "expr": "poser un lapin",
+  "register": "familiar",
+  "meaning_fr": "Ne pas venir à un rendez-vous sans prévenir.",
+  "meaning_pt": "Dar um bolo, não comparecer a um compromisso.",
+  "options": [
+   "Faire une blague à quelqu'un.",
+   "Ne pas venir à un rendez-vous sans prévenir.",
+   "Inviter quelqu'un à manger.",
+   "Raconter une histoire drôle."
+  ],
+  "correctAnswer": "Ne pas venir à un rendez-vous sans prévenir.",
+  "turn_prompt": "Il ne faut pas __________ quand on a promis de venir.",
+  "turn_answer": "poser de lapin",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1-001",
+  "expr": "avoir faim",
+  "register": "neutral",
+  "meaning_fr": "Avoir faim veut dire vouloir manger.",
+  "meaning_pt": "Sentir fome, ter vontade de comer.",
+  "options": [
+   "Être fatigué",
+   "Avoir soif",
+   "Vouloir manger",
+   "Être content"
+  ],
+  "correctAnswer": "Vouloir manger",
+  "turn_prompt": "Il est midi. J'ai __________ !",
+  "turn_answer": "faim",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1-002",
+  "expr": "avoir soif",
+  "register": "neutral",
+  "meaning_fr": "C'est quand on veut boire.",
+  "meaning_pt": "É a sensação de querer beber.",
+  "options": [
+   "Avoir faim",
+   "Avoir soif",
+   "Avoir froid",
+   "Avoir chaud"
+  ],
+  "correctAnswer": "Avoir soif",
+  "turn_prompt": "J'ai couru 5 kilomètres, maintenant je __________.",
+  "turn_answer": "ai soif",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1-003",
+  "expr": "avoir raison",
+  "register": "neutral",
+  "meaning_fr": "C'est quand on a la bonne opinion ou la bonne réponse.",
+  "meaning_pt": "É quando você tem a opinião certa ou a resposta correta.",
+  "options": [
+   "Être fatigué",
+   "Avoir faim",
+   "Avoir la bonne opinion",
+   "Avoir soif"
+  ],
+  "correctAnswer": "Avoir la bonne opinion",
+  "turn_prompt": "Tu dis que le film est bon. Je crois que tu __________.",
+  "turn_answer": "as raison",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m1-001",
+  "expr": "Enchanté !",
+  "register": "neutral",
+  "meaning_fr": "On le dit quand on rencontre quelqu'un pour la première fois.",
+  "meaning_pt": "Prazer em conhecer. (Mulheres dizem \"enchantée\"; a pronúncia é a mesma.)",
+  "options": [
+   "Quand on rencontre quelqu'un",
+   "Quand on dit au revoir",
+   "Quand on a faim",
+   "Quand on est fatigué"
+  ],
+  "correctAnswer": "Quand on rencontre quelqu'un",
+  "turn_prompt": "Bonjour, je m'appelle Ana. — __________ !",
+  "turn_answer": "Enchanté",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m1-002",
+  "expr": "Comme ci, comme ça",
+  "register": "neutral",
+  "meaning_fr": "Ni bien ni mal ; moyen.",
+  "meaning_pt": "Mais ou menos; assim, assim.",
+  "options": [
+   "Moyen, ni bien ni mal",
+   "Très bien",
+   "Très mal",
+   "Tout de suite"
+  ],
+  "correctAnswer": "Moyen, ni bien ni mal",
+  "turn_prompt": "Ça va ? — __________.",
+  "turn_answer": "comme ci, comme ça",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m1-003",
+  "expr": "Pas mal",
+  "register": "neutral",
+  "meaning_fr": "Plutôt bien.",
+  "meaning_pt": "Nada mal; até que está bem.",
+  "options": [
+   "Plutôt bien",
+   "Très mauvais",
+   "Très cher",
+   "Très tard"
+  ],
+  "correctAnswer": "Plutôt bien",
+  "turn_prompt": "Ça va ? — __________, merci !",
+  "turn_answer": "pas mal",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m1-004",
+  "expr": "Ça marche !",
+  "register": "familiar",
+  "meaning_fr": "D'accord ; c'est bon.",
+  "meaning_pt": "Combinado! Fechado! Beleza! Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "D'accord, c'est bon",
+   "Je ne comprends pas",
+   "J'ai faim",
+   "Au revoir"
+  ],
+  "correctAnswer": "D'accord, c'est bon",
+  "turn_prompt": "Un café ? — __________ !",
+  "turn_answer": "Ça marche",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m1-005",
+  "expr": "Pas de problème !",
+  "register": "neutral",
+  "meaning_fr": "Ce n'est pas grave ; d'accord.",
+  "meaning_pt": "Sem problema! Tranquilo!",
+  "options": [
+   "Ce n'est pas grave",
+   "C'est très difficile",
+   "Je suis fatigué",
+   "Je ne sais pas"
+  ],
+  "correctAnswer": "Ce n'est pas grave",
+  "turn_prompt": "Pardon ! — Pas de __________ !",
+  "turn_answer": "problème",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m2-001",
+  "expr": "Bon appétit !",
+  "register": "neutral",
+  "meaning_fr": "On le dit avant de manger.",
+  "meaning_pt": "Bom apetite!",
+  "options": [
+   "Avant de manger",
+   "En se réveillant",
+   "En quittant la maison",
+   "Quand on est malade"
+  ],
+  "correctAnswer": "Avant de manger",
+  "turn_prompt": "Le dîner est prêt. — __________ !",
+  "turn_answer": "Bon appétit",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m2-002",
+  "expr": "À table !",
+  "register": "neutral",
+  "meaning_fr": "On appelle tout le monde pour manger.",
+  "meaning_pt": "Hora de comer! Para a mesa!",
+  "options": [
+   "Venez manger",
+   "Allez dormir",
+   "Allez travailler",
+   "Rangez la table"
+  ],
+  "correctAnswer": "Venez manger",
+  "turn_prompt": "Maman appelle : « __________ ! »",
+  "turn_answer": "À table",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m2-003",
+  "expr": "À tout à l'heure !",
+  "register": "neutral",
+  "meaning_fr": "Au revoir, on se voit bientôt dans la journée.",
+  "meaning_pt": "Até daqui a pouco!",
+  "options": [
+   "Quand on va se revoir bientôt",
+   "Quand on ne se revoit jamais",
+   "Quand on se voit la semaine prochaine",
+   "Quand on arrive"
+  ],
+  "correctAnswer": "Quand on va se revoir bientôt",
+  "turn_prompt": "Je pars au travail. — À tout à __________ !",
+  "turn_answer": "l'heure",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m2-004",
+  "expr": "Tout de suite",
+  "register": "neutral",
+  "meaning_fr": "Immédiatement, sans attendre.",
+  "meaning_pt": "Agora mesmo; já.",
+  "options": [
+   "Immédiatement",
+   "Beaucoup plus tard",
+   "Jamais",
+   "Le soir"
+  ],
+  "correctAnswer": "Immédiatement",
+  "turn_prompt": "Tu viens manger ? — Oui, __________ !",
+  "turn_answer": "tout de suite",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m2-005",
+  "expr": "Bonne journée !",
+  "register": "neutral",
+  "meaning_fr": "On le dit pour se quitter pendant la journée.",
+  "meaning_pt": "Tenha um bom dia!",
+  "options": [
+   "En se quittant le matin ou l'après-midi",
+   "En se couchant",
+   "Avant de manger",
+   "En arrivant"
+  ],
+  "correctAnswer": "En se quittant le matin ou l'après-midi",
+  "turn_prompt": "Au revoir, __________ !",
+  "turn_answer": "bonne journée",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m3-001",
+  "expr": "Excusez-moi !",
+  "register": "neutral",
+  "meaning_fr": "On l'utilise pour attirer l'attention ou s'excuser poliment.",
+  "meaning_pt": "Com licença! Desculpe!",
+  "options": [
+   "Pour attirer l'attention poliment",
+   "Pour dire au revoir",
+   "Pour remercier",
+   "Pour refuser"
+  ],
+  "correctAnswer": "Pour attirer l'attention poliment",
+  "turn_prompt": "__________, où est le musée ?",
+  "turn_answer": "Excusez-moi",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m3-002",
+  "expr": "Je vous en prie",
+  "register": "neutral",
+  "meaning_fr": "C'est la réponse polie à « merci » (« de rien », en plus formel).",
+  "meaning_pt": "De nada; por favor, fique à vontade.",
+  "options": [
+   "De rien",
+   "Au revoir",
+   "Je ne sais pas",
+   "Pardon"
+  ],
+  "correctAnswer": "De rien",
+  "turn_prompt": "Merci ! — Je vous en __________.",
+  "turn_answer": "prie",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m3-003",
+  "expr": "Ça fait combien ?",
+  "register": "neutral",
+  "meaning_fr": "On demande le prix total.",
+  "meaning_pt": "Quanto fica? Quanto dá?",
+  "options": [
+   "Quel est le prix ?",
+   "Quelle heure est-il ?",
+   "Où est-ce ?",
+   "Qui est-ce ?"
+  ],
+  "correctAnswer": "Quel est le prix ?",
+  "turn_prompt": "__________ combien, s'il vous plaît ?",
+  "turn_answer": "Ça fait",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m3-004",
+  "expr": "C'est trop cher !",
+  "register": "neutral",
+  "meaning_fr": "Le prix est trop élevé.",
+  "meaning_pt": "É caro demais!",
+  "options": [
+   "Le prix est trop élevé",
+   "Le prix est parfait",
+   "C'est gratuit",
+   "C'est très petit"
+  ],
+  "correctAnswer": "Le prix est trop élevé",
+  "turn_prompt": "Quatre-vingts euros ? C'est __________ cher !",
+  "turn_answer": "trop",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m3-005",
+  "expr": "Et avec ça ?",
+  "register": "neutral",
+  "meaning_fr": "Le vendeur demande si vous voulez autre chose.",
+  "meaning_pt": "Mais alguma coisa?",
+  "options": [
+   "Le vendeur",
+   "Le client",
+   "Le médecin",
+   "Le professeur"
+  ],
+  "correctAnswer": "Le vendeur",
+  "turn_prompt": "Un litre de lait. — Et avec __________ ?",
+  "turn_answer": "ça",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m4-001",
+  "expr": "Il pleut des cordes",
+  "register": "familiar",
+  "meaning_fr": "Il pleut très fort.",
+  "meaning_pt": "Está chovendo canivetes; chove muito. Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Il pleut très fort",
+   "Il ne pleut pas",
+   "Il neige",
+   "Il fait beau"
+  ],
+  "correctAnswer": "Il pleut très fort",
+  "turn_prompt": "Dehors, il pleut des __________ !",
+  "turn_answer": "cordes",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m4-002",
+  "expr": "Bon voyage !",
+  "register": "neutral",
+  "meaning_fr": "On le dit à quelqu'un qui part en voyage.",
+  "meaning_pt": "Boa viagem!",
+  "options": [
+   "À quelqu'un qui part",
+   "À quelqu'un qui arrive",
+   "À quelqu'un qui mange",
+   "À quelqu'un qui dort"
+  ],
+  "correctAnswer": "À quelqu'un qui part",
+  "turn_prompt": "Au revoir, __________ voyage !",
+  "turn_answer": "bon",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m4-003",
+  "expr": "Bon rétablissement !",
+  "register": "neutral",
+  "meaning_fr": "On le dit à quelqu'un de malade.",
+  "meaning_pt": "Melhoras! Boa recuperação!",
+  "options": [
+   "À une personne malade",
+   "À une personne en vacances",
+   "À une personne qui part",
+   "À une personne qui mange"
+  ],
+  "correctAnswer": "À une personne malade",
+  "turn_prompt": "Il a de la fièvre. — Bon __________ !",
+  "turn_answer": "rétablissement",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m4-004",
+  "expr": "À tes souhaits !",
+  "register": "neutral",
+  "meaning_fr": "On le dit quand quelqu'un éternue.",
+  "meaning_pt": "Saúde! (quando alguém espirra)",
+  "options": [
+   "Quand quelqu'un éternue",
+   "Quand quelqu'un mange",
+   "Quand quelqu'un part",
+   "Quand quelqu'un arrive"
+  ],
+  "correctAnswer": "Quand quelqu'un éternue",
+  "turn_prompt": "Atchoum ! — À tes __________ !",
+  "turn_answer": "souhaits",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m4-005",
+  "expr": "Quel temps !",
+  "register": "neutral",
+  "meaning_fr": "On commente le temps qu'il fait (souvent pour se plaindre).",
+  "meaning_pt": "Que tempo! (comentando o clima)",
+  "options": [
+   "On commente le temps qu'il fait",
+   "On demande l'heure",
+   "On dit au revoir",
+   "On remercie"
+  ],
+  "correctAnswer": "On commente le temps qu'il fait",
+  "turn_prompt": "__________ temps ! Il neige !",
+  "turn_answer": "Quel",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m5-001",
+  "expr": "Fais comme chez toi",
+  "register": "neutral",
+  "meaning_fr": "On dit à un invité de se sentir à l'aise.",
+  "meaning_pt": "Fique à vontade; faça como se fosse a sua casa.",
+  "options": [
+   "À un invité, pour qu'il soit à l'aise",
+   "À un voisin qui part",
+   "À un ami malade",
+   "À un client"
+  ],
+  "correctAnswer": "À un invité, pour qu'il soit à l'aise",
+  "turn_prompt": "Entre ! Fais comme __________ toi !",
+  "turn_answer": "chez",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m5-002",
+  "expr": "Chez moi",
+  "register": "neutral",
+  "meaning_fr": "À la maison ; dans mon logement.",
+  "meaning_pt": "Na minha casa; em casa.",
+  "options": [
+   "Dans ma maison",
+   "Dans ton école",
+   "Au restaurant",
+   "À la gare"
+  ],
+  "correctAnswer": "Dans ma maison",
+  "turn_prompt": "On mange __________ moi ce soir.",
+  "turn_answer": "chez",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m5-003",
+  "expr": "Bienvenue !",
+  "register": "neutral",
+  "meaning_fr": "On accueille quelqu'un.",
+  "meaning_pt": "Bem-vindo(a)!",
+  "options": [
+   "Quand on accueille quelqu'un",
+   "Quand on part",
+   "Quand on mange",
+   "Quand on dort"
+  ],
+  "correctAnswer": "Quand on accueille quelqu'un",
+  "turn_prompt": "__________ chez moi !",
+  "turn_answer": "Bienvenue",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m5-004",
+  "expr": "Ça te va bien !",
+  "register": "neutral",
+  "meaning_fr": "Ce vêtement ou cette couleur te va bien.",
+  "meaning_pt": "Fica bem em você! Combina com você!",
+  "options": [
+   "C'est joli sur toi",
+   "C'est trop petit",
+   "C'est trop cher",
+   "C'est sale"
+  ],
+  "correctAnswer": "C'est joli sur toi",
+  "turn_prompt": "Ce pull vert, ça te __________ bien !",
+  "turn_answer": "va",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m5-005",
+  "expr": "Ça te plaît ?",
+  "register": "neutral",
+  "meaning_fr": "On demande si quelqu'un aime quelque chose.",
+  "meaning_pt": "Você gostou? Gostou disso?",
+  "options": [
+   "Tu aimes ça ?",
+   "Tu as faim ?",
+   "Tu es fatigué ?",
+   "Tu viens ?"
+  ],
+  "correctAnswer": "Tu aimes ça ?",
+  "turn_prompt": "Cette robe, ça te __________ ?",
+  "turn_answer": "plaît",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m6-001",
+  "expr": "Bon week-end !",
+  "register": "neutral",
+  "meaning_fr": "On le dit pour se quitter avant le week-end.",
+  "meaning_pt": "Bom fim de semana!",
+  "options": [
+   "Avant le week-end",
+   "Le lundi matin",
+   "Le soir de Noël",
+   "À l'anniversaire"
+  ],
+  "correctAnswer": "Avant le week-end",
+  "turn_prompt": "À lundi ! __________ week-end !",
+  "turn_answer": "Bon",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m6-002",
+  "expr": "Bonne soirée !",
+  "register": "neutral",
+  "meaning_fr": "On le dit pour se quitter le soir.",
+  "meaning_pt": "Boa noite! Tenha uma boa noite!",
+  "options": [
+   "Le soir, en se quittant",
+   "Le matin, en arrivant",
+   "À midi, avant de manger",
+   "À minuit, en se réveillant"
+  ],
+  "correctAnswer": "Le soir, en se quittant",
+  "turn_prompt": "Au revoir, __________ soirée !",
+  "turn_answer": "bonne",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m6-003",
+  "expr": "C'est parti !",
+  "register": "neutral",
+  "meaning_fr": "On commence quelque chose.",
+  "meaning_pt": "Vamos lá! Começou!",
+  "options": [
+   "On commence",
+   "On arrête",
+   "On rentre",
+   "On dort"
+  ],
+  "correctAnswer": "On commence",
+  "turn_prompt": "3, 2, 1... __________ parti !",
+  "turn_answer": "C'est",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m6-004",
+  "expr": "Quoi de neuf ?",
+  "register": "familiar",
+  "meaning_fr": "On demande des nouvelles récentes à un ami.",
+  "meaning_pt": "Quais as novidades? E aí, novidades? Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Il y a des nouvelles ?",
+   "Il est quelle heure ?",
+   "Tu viens d'où ?",
+   "Tu as quel âge ?"
+  ],
+  "correctAnswer": "Il y a des nouvelles ?",
+  "turn_prompt": "Salut ! Quoi de __________ ?",
+  "turn_answer": "neuf",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a1m6-005",
+  "expr": "Ça fait longtemps !",
+  "register": "neutral",
+  "meaning_fr": "On dit à quelqu'un qu'on ne l'a pas vu depuis longtemps.",
+  "meaning_pt": "Quanto tempo! Faz tempo!",
+  "options": [
+   "On ne s'est pas vus depuis longtemps",
+   "On se voit demain",
+   "On est en retard",
+   "On a faim"
+  ],
+  "correctAnswer": "On ne s'est pas vus depuis longtemps",
+  "turn_prompt": "Salut ! Ça fait __________ !",
+  "turn_answer": "longtemps",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a2-001",
+  "expr": "coup de main",
+  "register": "familiar",
+  "meaning_fr": "Une aide, une assistance.",
+  "meaning_pt": "Uma ajuda, uma mãozinha.",
+  "options": [
+   "Un problème difficile",
+   "Une aide ponctuelle",
+   "Une grande fatigue",
+   "Une idée soudaine"
+  ],
+  "correctAnswer": "Une aide ponctuelle",
+  "turn_prompt": "Peux-tu me donner un __________ pour finir ce travail ?",
+  "turn_answer": "coup de main",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a2-002",
+  "expr": "avoir le trac",
+  "register": "neutral",
+  "meaning_fr": "Avoir peur ou être nerveux avant de faire quelque chose d'important.",
+  "meaning_pt": "Ficar nervoso ou com medo antes de fazer algo importante.",
+  "options": [
+   "Être très content.",
+   "Avoir peur ou être nerveux.",
+   "Être fatigué.",
+   "Avoir faim."
+  ],
+  "correctAnswer": "Avoir peur ou être nerveux.",
+  "turn_prompt": "Demain, je dois présenter mon projet devant toute la classe. Je crois que je vais __________.",
+  "turn_answer": "avoir le trac",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-a2-003",
+  "expr": "faire la grasse matinée",
+  "register": "neutral",
+  "meaning_fr": "Dormir tard le matin, ne pas se lever tout de suite.",
+  "meaning_pt": "Dormir até tarde, acordar tarde.",
+  "options": [
+   "Se réveiller très tôt le matin.",
+   "Dormir beaucoup pendant la nuit.",
+   "Se lever tard le matin, ne pas se presser pour sortir du lit.",
+   "Faire une sieste pendant la journée."
+  ],
+  "correctAnswer": "Se lever tard le matin, ne pas se presser pour sortir du lit.",
+  "turn_prompt": "Quand je suis en vacances, j'adore __________.",
+  "turn_answer": "faire la grasse matinée",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-b2-001",
+  "expr": "mettre les points sur les i",
+  "register": "neutral",
+  "meaning_fr": "Clarifier tous les détails, être précis sur tous les aspects d'une situation ou d'un accord.",
+  "meaning_pt": "Esclarecer todos os detalhes, ser preciso sobre todos os aspetos de uma situação ou acordo.",
+  "options": [
+   "Être très fatigué",
+   "Clarifier les derniers détails et être précis",
+   "Se disputer pour des broutilles",
+   "Prendre une décision hâtive"
+  ],
+  "correctAnswer": "Clarifier les derniers détails et être précis",
+  "turn_prompt": "Avant de signer le contrat, nous devons absolument __________ pour éviter tout malentendu futur.",
+  "turn_answer": "mettre les points sur les i",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-b2-002",
+  "expr": "avoir un poil dans la main",
+  "register": "familiar",
+  "meaning_fr": "Ne pas aimer travailler, être paresseux.",
+  "meaning_pt": "Ser preguiçoso, ter aversão ao trabalho.",
+  "options": [
+   "Être très travailleur et efficace.",
+   "Avoir une grande dextérité manuelle.",
+   "Être paresseux et éviter le travail.",
+   "Avoir une petite douleur au doigt."
+  ],
+  "correctAnswer": "Être paresseux et éviter le travail.",
+  "turn_prompt": "Il est étonnant de voir à quel point il __________ , lui qui est pourtant si doué.",
+  "turn_answer": "a un poil dans la main",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-b2-003",
+  "expr": "ne pas y aller de main morte",
+  "register": "familiar",
+  "meaning_fr": "Agir avec beaucoup de force, d'énergie, sans retenue, de manière très directe ou virulente.",
+  "meaning_pt": "Agir com muita força, energia, sem hesitação, de forma muito direta ou virulenta.",
+  "options": [
+   "Parler avec douceur et diplomatie.",
+   "Agir avec force et détermination, sans modération.",
+   "Exprimer son opinion avec hésitation.",
+   "Critiquer de manière subtile et indirecte."
+  ],
+  "correctAnswer": "Agir avec force et détermination, sans modération.",
+  "turn_prompt": "Face à cette injustice flagrante, il a décidé de __________ pour faire entendre sa voix.",
+  "turn_answer": "ne pas y aller de main morte",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-001",
+  "expr": "n'importe quoi",
+  "register": "familiar",
+  "meaning_fr": "Une chose stupide ou fausse ; quelque chose sans sens.",
+  "meaning_pt": "qualquer coisa / bobagem Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Une chose bête ou sans sens",
+   "Une chose très importante",
+   "Une chose très chère",
+   "Une chose très rapide"
+  ],
+  "correctAnswer": "Une chose bête ou sans sens",
+  "turn_prompt": "Arrête de parler de ton chat qui parle anglais, tu racontes __________ !",
+  "turn_answer": "n'importe quoi",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-002",
+  "expr": "en avoir marre",
+  "register": "familiar",
+  "meaning_fr": "Être fatigué d'une situation, ne plus la supporter.",
+  "meaning_pt": "estar de saco cheio Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Avoir très faim",
+   "Ne plus supporter une situation",
+   "Être très content",
+   "Avoir beaucoup d'argent"
+  ],
+  "correctAnswer": "Ne plus supporter une situation",
+  "turn_prompt": "Ça fait trois heures que je fais mes devoirs, j'__________ !",
+  "turn_answer": "en ai marre",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-003",
+  "expr": "s'en foutre",
+  "register": "slang",
+  "meaning_fr": "Ne pas s'intéresser du tout à quelque chose, s'en moquer complètement.",
+  "meaning_pt": "não estar nem aí ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
+  "options": [
+   "Être totalement indifférent à quelque chose",
+   "Être très fier de soi",
+   "Être très en colère contre quelqu'un",
+   "Avoir très peur de quelque chose"
+  ],
+  "correctAnswer": "Être totalement indifférent à quelque chose",
+  "turn_prompt": "Il peut critiquer ma coupe de cheveux, je __________, elle me plaît.",
+  "turn_answer": "m'en fous",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-004",
+  "expr": "être dans la merde",
+  "register": "vulgar",
+  "meaning_fr": "Être dans une situation très difficile, avoir de gros problèmes.",
+  "meaning_pt": "estar ferrado / numa situação péssima ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos.",
+  "options": [
+   "Travailler dans un jardin",
+   "Être de très bonne humeur",
+   "Avoir un très gros problème",
+   "Être très bien installé"
+  ],
+  "correctAnswer": "Avoir un très gros problème",
+  "turn_prompt": "Mon ordinateur est tombé en panne la veille de rendre mon mémoire : je suis __________ !",
+  "turn_answer": "dans la merde",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-005",
+  "expr": "ça craint",
+  "register": "familiar",
+  "meaning_fr": "Se dit d'une situation mauvaise, nulle ou inquiétante.",
+  "meaning_pt": "que droga / que roubada Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "C'est délicieux",
+   "C'est parfaitement normal",
+   "C'est nul ou inquiétant",
+   "C'est très facile"
+  ],
+  "correctAnswer": "C'est nul ou inquiétant",
+  "turn_prompt": "Il n'y a plus de batterie et on est perdus en forêt… __________ !",
+  "turn_answer": "ça craint",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-006",
+  "expr": "avoir la flemme",
+  "register": "familiar",
+  "meaning_fr": "Ne pas avoir envie de faire un effort, être paresseux sur le moment.",
+  "meaning_pt": "estar com preguiça Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Avoir envie de faire du sport",
+   "Avoir de la fièvre",
+   "Être très pressé",
+   "Ne pas avoir envie de faire un effort"
+  ],
+  "correctAnswer": "Ne pas avoir envie de faire un effort",
+  "turn_prompt": "Le linge est sec, mais j'__________ de le plier maintenant.",
+  "turn_answer": "ai la flemme",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-007",
+  "expr": "c'est dingue",
+  "register": "familiar",
+  "meaning_fr": "Se dit de quelque chose d'incroyable, de surprenant ou d'absurde.",
+  "meaning_pt": "é loucura / que incrível Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "C'est très ennuyeux",
+   "C'est incroyable ou surprenant",
+   "C'est très logique",
+   "C'est un peu triste"
+  ],
+  "correctAnswer": "C'est incroyable ou surprenant",
+  "turn_prompt": "Elle parle six langues à seulement quinze ans, __________ !",
+  "turn_answer": "c'est dingue",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-008",
+  "expr": "foutre le camp",
+  "register": "slang",
+  "meaning_fr": "Partir vite, s'en aller (souvent sur un ton agressif).",
+  "meaning_pt": "cair fora / dar o fora ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
+  "options": [
+   "Planter une tente",
+   "Faire la fête",
+   "Se mettre au travail",
+   "Partir rapidement, s'en aller"
+  ],
+  "correctAnswer": "Partir rapidement, s'en aller",
+  "turn_prompt": "Il en a eu assez de ce travail et il a décidé de __________ à l'étranger.",
+  "turn_answer": "foutre le camp",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-009",
+  "expr": "ta gueule",
+  "register": "vulgar",
+  "meaning_fr": "Ordre très grossier pour faire taire quelqu'un.",
+  "meaning_pt": "cala a boca ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos.",
+  "options": [
+   "Pour féliciter quelqu'un",
+   "Pour demander l'heure poliment",
+   "Pour dire bonjour à un ami",
+   "Pour dire à quelqu'un de se taire, grossièrement"
+  ],
+  "correctAnswer": "Pour dire à quelqu'un de se taire, grossièrement",
+  "turn_prompt": "Arrête de chanter faux à deux heures du matin, __________ !",
+  "turn_answer": "ta gueule",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-010",
+  "expr": "faire chier",
+  "register": "vulgar",
+  "meaning_fr": "Énerver beaucoup quelqu'un, l'ennuyer fortement.",
+  "meaning_pt": "encher o saco ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos.",
+  "options": [
+   "Aider quelqu'un à dormir",
+   "Énerver ou ennuyer beaucoup",
+   "Rendre quelqu'un riche",
+   "Faire très plaisir"
+  ],
+  "correctAnswer": "Énerver ou ennuyer beaucoup",
+  "turn_prompt": "Arrête de me poser la même question toutes les cinq minutes, tu me __________ !",
+  "turn_answer": "fais chier",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-011",
+  "expr": "se prendre la tête",
+  "register": "familiar",
+  "meaning_fr": "Se compliquer la vie, trop réfléchir, ou se disputer pour rien.",
+  "meaning_pt": "esquentar a cabeça / discutir à toa Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Se compliquer la vie ou se disputer pour rien",
+   "Se reposer longtemps",
+   "Se laver les cheveux",
+   "Se faire un compliment"
+  ],
+  "correctAnswer": "Se compliquer la vie ou se disputer pour rien",
+  "turn_prompt": "Ça fait deux heures que vous discutez pour rien : arrêtez de vous __________ !",
+  "turn_answer": "prendre la tête",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-012",
+  "expr": "tu parles !",
+  "register": "familiar",
+  "meaning_fr": "Exclamation ironique pour dire que ce qui vient d'être dit est faux.",
+  "meaning_pt": "até parece! / imagina! Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Je suis tout à fait d'accord",
+   "Je n'y crois pas du tout (ironie)",
+   "Tu parles très bien français",
+   "Continue à parler, s'il te plaît"
+  ],
+  "correctAnswer": "Je n'y crois pas du tout (ironie)",
+  "turn_prompt": "« Paul a dit qu'il arrêterait de fumer demain. » — « __________ Il dit ça tous les mois. »",
+  "turn_answer": "Tu parles !",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-013",
+  "expr": "c'est du gâteau",
+  "register": "familiar",
+  "meaning_fr": "Se dit d'une chose très facile à faire.",
+  "meaning_pt": "é moleza Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "C'est très cher",
+   "C'est très facile",
+   "C'est une fête d'anniversaire",
+   "C'est très sucré"
+  ],
+  "correctAnswer": "C'est très facile",
+  "turn_prompt": "Monter ce petit meuble avec la notice ? __________, il faut dix minutes.",
+  "turn_answer": "C'est du gâteau",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-014",
+  "expr": "avoir le cafard",
+  "register": "familiar",
+  "meaning_fr": "Se sentir triste, mélancolique, sans raison précise.",
+  "meaning_pt": "estar na fossa / estar pra baixo Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Avoir beaucoup de chance",
+   "Être très énergique",
+   "Avoir un insecte chez soi",
+   "Être triste et mélancolique"
+  ],
+  "correctAnswer": "Être triste et mélancolique",
+  "turn_prompt": "Depuis que son meilleur ami a déménagé, il __________ et ne sort plus.",
+  "turn_answer": "a le cafard",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-015",
+  "expr": "passer un coup de fil",
+  "register": "neutral",
+  "meaning_fr": "Téléphoner à quelqu'un.",
+  "meaning_pt": "dar uma ligada",
+  "options": [
+   "Coudre un vêtement",
+   "Téléphoner à quelqu'un",
+   "Envoyer une lettre",
+   "Couper un câble"
+  ],
+  "correctAnswer": "Téléphoner à quelqu'un",
+  "turn_prompt": "Attends deux minutes, je dois __________ à mon patron.",
+  "turn_answer": "passer un coup de fil",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-016",
+  "expr": "faire la queue",
+  "register": "neutral",
+  "meaning_fr": "Attendre son tour, les uns derrière les autres.",
+  "meaning_pt": "fazer fila / pegar fila",
+  "options": [
+   "Fermer un magasin",
+   "Attendre son tour dans une file",
+   "Cuisiner un plat",
+   "Courir très vite"
+  ],
+  "correctAnswer": "Attendre son tour dans une file",
+  "turn_prompt": "Il y a beaucoup de monde à la poste, on va devoir __________.",
+  "turn_answer": "faire la queue",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-017",
+  "expr": "avoir hâte",
+  "register": "neutral",
+  "meaning_fr": "Être impatient de faire quelque chose ou qu'une chose arrive.",
+  "meaning_pt": "estar ansioso / não ver a hora",
+  "options": [
+   "Avoir peur de quelque chose",
+   "Être très fatigué",
+   "Être impatient qu'une chose arrive",
+   "Être en retard"
+  ],
+  "correctAnswer": "Être impatient qu'une chose arrive",
+  "turn_prompt": "Mon frère arrive demain du Canada, j'__________ de le revoir !",
+  "turn_answer": "ai hâte",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-018",
+  "expr": "mon œil !",
+  "register": "familiar",
+  "meaning_fr": "Exclamation ironique pour dire qu'on ne croit pas ce que l'autre raconte.",
+  "meaning_pt": "sei… / me engana que eu gosto Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Regarde attentivement",
+   "Je l'ai vu de mes propres yeux",
+   "J'ai mal à l'œil",
+   "Je ne te crois absolument pas"
+  ],
+  "correctAnswer": "Je ne te crois absolument pas",
+  "turn_prompt": "« Le chien a mangé mon devoir, madame. » — « __________ Trouve une meilleure excuse. »",
+  "turn_answer": "Mon œil !",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-019",
+  "expr": "monter sur ses grands chevaux",
+  "register": "neutral",
+  "meaning_fr": "Se mettre en colère et réagir de manière excessive ou hautaine.",
+  "meaning_pt": "subir nas tamancas / se exaltar",
+  "options": [
+   "Prendre une décision calme",
+   "S'emporter et réagir avec excès",
+   "Faire de l'équitation",
+   "Devenir très riche"
+  ],
+  "correctAnswer": "S'emporter et réagir avec excès",
+  "turn_prompt": "Je lui ai juste fait une petite remarque, inutile de __________ comme ça !",
+  "turn_answer": "monter sur ses grands chevaux",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote1-020",
+  "expr": "avoir un coup de barre",
+  "register": "familiar",
+  "meaning_fr": "Ressentir une fatigue soudaine et forte.",
+  "meaning_pt": "bater um cansaço / dar uma moleza Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Recevoir un coup violent",
+   "Trouver une solution rapide",
+   "Boire un verre au bar",
+   "Ressentir une fatigue soudaine"
+  ],
+  "correctAnswer": "Ressentir une fatigue soudaine",
+  "turn_prompt": "Je vais faire une sieste, j'ai __________ après ce gros repas.",
+  "turn_answer": "un coup de barre",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-001",
+  "expr": "dégage",
+  "register": "slang",
+  "meaning_fr": "Façon très directe et brutale de dire à quelqu'un de partir tout de suite.",
+  "meaning_pt": "cai fora / some daqui ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
+  "options": [
+   "Pour remercier quelqu'un très chaleureusement",
+   "Pour demander poliment de l'aide à quelqu'un",
+   "Pour souhaiter bon voyage à un ami",
+   "Pour dire à quelqu'un de partir, de façon brutale"
+  ],
+  "correctAnswer": "Pour dire à quelqu'un de partir, de façon brutale",
+  "turn_prompt": "Tu m'énerves, __________ de ma chambre !",
+  "turn_answer": "dégage",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-002",
+  "expr": "se casser",
+  "register": "slang",
+  "meaning_fr": "Partir, s'en aller, souvent rapidement.",
+  "meaning_pt": "ir embora / vazar ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
+  "options": [
+   "S'endormir très vite",
+   "Se faire mal en tombant",
+   "Partir, s'en aller",
+   "Se fâcher contre quelqu'un"
+  ],
+  "correctAnswer": "Partir, s'en aller",
+  "turn_prompt": "Cette fête est nulle, on __________ ?",
+  "turn_answer": "se casse",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-003",
+  "expr": "c'est chiant",
+  "register": "vulgar",
+  "meaning_fr": "C'est très ennuyeux ou très pénible à supporter.",
+  "meaning_pt": "é um saco ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos.",
+  "options": [
+   "C'est très drôle et amusant",
+   "C'est très ennuyeux ou pénible",
+   "C'est très cher à acheter",
+   "C'est très facile à faire"
+  ],
+  "correctAnswer": "C'est très ennuyeux ou pénible",
+  "turn_prompt": "Remplir ces papiers pendant trois heures, __________ !",
+  "turn_answer": "c'est chiant",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-004",
+  "expr": "avoir la trouille",
+  "register": "familiar",
+  "meaning_fr": "Avoir peur.",
+  "meaning_pt": "estar com medo / morrer de medo Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Avoir froid",
+   "Avoir honte",
+   "Avoir sommeil",
+   "Avoir peur"
+  ],
+  "correctAnswer": "Avoir peur",
+  "turn_prompt": "Mon petit frère refuse d'entrer dans la grotte : il __________.",
+  "turn_answer": "a la trouille",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-005",
+  "expr": "être crevé",
+  "register": "familiar",
+  "meaning_fr": "Être très fatigué, ne plus avoir d'énergie.",
+  "meaning_pt": "estar morto de cansaço Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Être très fatigué",
+   "Être très malade",
+   "Être très en colère",
+   "Être très content"
+  ],
+  "correctAnswer": "Être très fatigué",
+  "turn_prompt": "J'ai déménagé toute la journée, je suis __________.",
+  "turn_answer": "crevé",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-006",
+  "expr": "être bourré",
+  "register": "slang",
+  "meaning_fr": "Être ivre, avoir bu beaucoup trop d'alcool.",
+  "meaning_pt": "estar bêbado / de porre ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
+  "options": [
+   "Avoir trop bu d'alcool",
+   "Avoir trop mangé",
+   "Être plein d'argent",
+   "Être très pressé"
+  ],
+  "correctAnswer": "Avoir trop bu d'alcool",
+  "turn_prompt": "Après toutes ces bouteilles de vin, Marc était complètement __________.",
+  "turn_answer": "bourré",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-007",
+  "expr": "avoir la dalle",
+  "register": "slang",
+  "meaning_fr": "Avoir très faim.",
+  "meaning_pt": "estar morrendo de fome ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
+  "options": [
+   "Avoir très soif",
+   "Avoir envie de dormir",
+   "Avoir très faim",
+   "Avoir mal au ventre"
+  ],
+  "correctAnswer": "Avoir très faim",
+  "turn_prompt": "Je n'ai rien mangé depuis ce matin, j'__________ !",
+  "turn_answer": "ai la dalle",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-008",
+  "expr": "casser les bonbons",
+  "register": "slang",
+  "meaning_fr": "Énerver quelqu'un, l'embêter sans arrêt.",
+  "meaning_pt": "encher o saco ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
+  "options": [
+   "Énerver quelqu'un sans arrêt",
+   "Aider quelqu'un à cuisiner",
+   "Offrir des cadeaux à quelqu'un",
+   "Faire rire tout le monde"
+  ],
+  "correctAnswer": "Énerver quelqu'un sans arrêt",
+  "turn_prompt": "Tu répètes la même chose depuis une heure, tu me __________ !",
+  "turn_answer": "casses les bonbons",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-009",
+  "expr": "arrête ton char",
+  "register": "familiar",
+  "meaning_fr": "Arrête d'exagérer ou de raconter des histoires.",
+  "meaning_pt": "para de exagerar / para de inventar Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Quand quelqu'un parle trop bas",
+   "Quand quelqu'un exagère ou ment",
+   "Quand quelqu'un conduit trop vite",
+   "Quand quelqu'un part trop tôt"
+  ],
+  "correctAnswer": "Quand quelqu'un exagère ou ment",
+  "turn_prompt": "Toi, tu parles dix langues ? __________ !",
+  "turn_answer": "Arrête ton char",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-010",
+  "expr": "tomber dans les pommes",
+  "register": "familiar",
+  "meaning_fr": "S'évanouir, perdre connaissance pendant un moment.",
+  "meaning_pt": "desmaiar Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Être amoureux",
+   "Manger trop de fruits",
+   "S'évanouir",
+   "Faire une chute à vélo"
+  ],
+  "correctAnswer": "S'évanouir",
+  "turn_prompt": "Elle n'avait rien mangé et elle est __________ pendant le cours de sport.",
+  "turn_answer": "tombée dans les pommes",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-011",
+  "expr": "donner sa langue au chat",
+  "register": "familiar",
+  "meaning_fr": "Arrêter de chercher une réponse et demander la solution.",
+  "meaning_pt": "desistir de adivinhar / pedir a resposta Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Garder un secret",
+   "Parler trop longtemps",
+   "Nourrir son animal",
+   "Renoncer à trouver la réponse"
+  ],
+  "correctAnswer": "Renoncer à trouver la réponse",
+  "turn_prompt": "Alors, tu as deviné ? Non ? Tu __________ ?",
+  "turn_answer": "donnes ta langue au chat",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-012",
+  "expr": "coûter les yeux de la tête",
+  "register": "neutral",
+  "meaning_fr": "Être très cher.",
+  "meaning_pt": "custar uma fortuna / custar os olhos da cara",
+  "options": [
+   "Être très beau",
+   "Être gratuit",
+   "Coûter très cher",
+   "Faire très mal"
+  ],
+  "correctAnswer": "Coûter très cher",
+  "turn_prompt": "On ne peut pas acheter cette voiture, elle __________.",
+  "turn_answer": "coûte les yeux de la tête",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-013",
+  "expr": "nuit blanche",
+  "register": "neutral",
+  "meaning_fr": "Une nuit où on ne dort pas.",
+  "meaning_pt": "noite em claro / noite sem dormir",
+  "options": [
+   "Une nuit sans dormir",
+   "Une nuit très calme",
+   "Une nuit de fête de mariage",
+   "Une nuit avec de la neige"
+  ],
+  "correctAnswer": "Une nuit sans dormir",
+  "turn_prompt": "Je n'ai pas dormi du tout : j'ai passé une __________.",
+  "turn_answer": "nuit blanche",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-014",
+  "expr": "jeter l'éponge",
+  "register": "neutral",
+  "meaning_fr": "Abandonner, arrêter d'essayer.",
+  "meaning_pt": "desistir / jogar a toalha",
+  "options": [
+   "Abandonner, renoncer",
+   "Faire le ménage",
+   "Se mettre en colère",
+   "Commencer un projet"
+  ],
+  "correctAnswer": "Abandonner, renoncer",
+  "turn_prompt": "Il a raté son permis cinq fois, puis il a __________.",
+  "turn_answer": "jeté l'éponge",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-015",
+  "expr": "avoir la tête dans les nuages",
+  "register": "neutral",
+  "meaning_fr": "Être distrait, rêver au lieu de faire attention.",
+  "meaning_pt": "viver no mundo da lua",
+  "options": [
+   "Avoir mal à la tête",
+   "Être distrait, rêveur",
+   "Avoir peur de l'avion",
+   "Être très intelligent"
+  ],
+  "correctAnswer": "Être distrait, rêveur",
+  "turn_prompt": "Tu n'écoutes jamais ce que je dis, tu __________ !",
+  "turn_answer": "as la tête dans les nuages",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-016",
+  "expr": "avoir le cœur sur la main",
+  "register": "neutral",
+  "meaning_fr": "Être très généreux, aimer aider les autres.",
+  "meaning_pt": "ser generoso / ser mão aberta",
+  "options": [
+   "Être très généreux",
+   "Être très malade",
+   "Être très amoureux",
+   "Être très timide"
+  ],
+  "correctAnswer": "Être très généreux",
+  "turn_prompt": "Paul donne souvent son temps aux personnes dans le besoin : il __________.",
+  "turn_answer": "a le cœur sur la main",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-017",
+  "expr": "avoir un verre dans le nez",
+  "register": "familiar",
+  "meaning_fr": "Avoir un peu trop bu, être légèrement ivre.",
+  "meaning_pt": "estar alto / estar alegrinho (de bebida) Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Être un peu ivre",
+   "Être enrhumé",
+   "Être très curieux",
+   "Avoir le nez cassé"
+  ],
+  "correctAnswer": "Être un peu ivre",
+  "turn_prompt": "Il riait trop fort et parlait à tout le monde : visiblement, il __________.",
+  "turn_answer": "avait un verre dans le nez",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-018",
+  "expr": "coûter la peau des fesses",
+  "register": "familiar",
+  "meaning_fr": "Coûter extrêmement cher.",
+  "meaning_pt": "custar os olhos da cara Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Coûter extrêmement cher",
+   "Faire mal en tombant",
+   "Être très inconfortable",
+   "Ne rien coûter du tout"
+  ],
+  "correctAnswer": "Coûter extrêmement cher",
+  "turn_prompt": "Avec tous ces frais cachés, mon abonnement de téléphone me coûte la peau des __________ !",
+  "turn_answer": "fesses",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-019",
+  "expr": "en faire tout un fromage",
+  "register": "familiar",
+  "meaning_fr": "Donner trop d'importance à un petit problème.",
+  "meaning_pt": "fazer tempestade em copo d'água Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Exagérer un petit problème",
+   "Raconter une histoire drôle",
+   "Préparer un grand repas",
+   "Oublier un rendez-vous"
+  ],
+  "correctAnswer": "Exagérer un petit problème",
+  "turn_prompt": "C'est juste une petite rayure sur la voiture, pas la peine d'en __________.",
+  "turn_answer": "faire tout un fromage",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote2-020",
+  "expr": "rire jaune",
+  "register": "neutral",
+  "meaning_fr": "Rire sans en avoir envie, pour cacher sa gêne ou sa déception.",
+  "meaning_pt": "rir amarelo / rir sem graça",
+  "options": [
+   "Rire en regardant un film",
+   "Rire sans en avoir vraiment envie",
+   "Rire très fort et longtemps",
+   "Rire pour se moquer des autres"
+  ],
+  "correctAnswer": "Rire sans en avoir vraiment envie",
+  "turn_prompt": "La blague sur son âge ne lui a pas plu : elle a __________.",
+  "turn_answer": "ri jaune",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-001",
+  "expr": "ça vaut le coup",
+  "register": "familiar",
+  "meaning_fr": "Ça mérite l'effort, le temps ou l'argent qu'on y met.",
+  "meaning_pt": "vale a pena Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Ça mérite l'effort ou l'argent",
+   "Ça coûte beaucoup trop cher",
+   "Ça fait mal comme un coup",
+   "Ça arrive tout d'un coup"
+  ],
+  "correctAnswer": "Ça mérite l'effort ou l'argent",
+  "turn_prompt": "Ce film dure trois heures, mais crois-moi, ça __________ !",
+  "turn_answer": "vaut le coup",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-002",
+  "expr": "pas de bol",
+  "register": "familiar",
+  "meaning_fr": "On le dit quand quelqu'un n'a pas de chance.",
+  "meaning_pt": "que azar Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Quand quelqu'un n'a pas de chance",
+   "Quand on n'a plus rien à manger",
+   "Quand on refuse une invitation",
+   "Quand quelqu'un a très faim"
+  ],
+  "correctAnswer": "Quand quelqu'un n'a pas de chance",
+  "turn_prompt": "Le magasin a fermé juste quand on arrivait. __________ !",
+  "turn_answer": "Pas de bol",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-003",
+  "expr": "avoir du bol",
+  "register": "familiar",
+  "meaning_fr": "Avoir de la chance.",
+  "meaning_pt": "ter sorte Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Avoir de la chance",
+   "Avoir très soif",
+   "Avoir beaucoup d'argent",
+   "Avoir mauvais caractère"
+  ],
+  "correctAnswer": "Avoir de la chance",
+  "turn_prompt": "Elle a gagné au loto du premier coup, elle __________ !",
+  "turn_answer": "a du bol",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-004",
+  "expr": "faire gaffe",
+  "register": "familiar",
+  "meaning_fr": "Faire attention.",
+  "meaning_pt": "tomar cuidado / prestar atenção Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Faire attention",
+   "Faire une blague",
+   "Faire du bruit",
+   "Faire la fête"
+  ],
+  "correctAnswer": "Faire attention",
+  "turn_prompt": "__________ en traversant, les voitures roulent vite ici !",
+  "turn_answer": "Fais gaffe",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-005",
+  "expr": "se planter",
+  "register": "familiar",
+  "meaning_fr": "Se tromper complètement ou échouer.",
+  "meaning_pt": "errar feio / fracassar Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Se tromper ou échouer",
+   "S'installer dans un jardin",
+   "S'arrêter pour se reposer",
+   "Se lever très tôt"
+  ],
+  "correctAnswer": "Se tromper ou échouer",
+  "turn_prompt": "Je n'ai pas compris la question et je __________ : zéro sur vingt !",
+  "turn_answer": "me suis planté",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-006",
+  "expr": "c'est nul",
+  "register": "familiar",
+  "meaning_fr": "C'est très mauvais.",
+  "meaning_pt": "é péssimo Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "C'est très mauvais",
+   "C'est gratuit",
+   "C'est très facile",
+   "C'est terminé"
+  ],
+  "correctAnswer": "C'est très mauvais",
+  "turn_prompt": "Ce film est ennuyeux et les acteurs jouent mal. __________ !",
+  "turn_answer": "C'est nul",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-007",
+  "expr": "c'est génial",
+  "register": "familiar",
+  "meaning_fr": "C'est très bien, c'est super.",
+  "meaning_pt": "é demais Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "C'est super",
+   "C'est bizarre",
+   "C'est difficile",
+   "C'est dommage"
+  ],
+  "correctAnswer": "C'est super",
+  "turn_prompt": "Mes parents m'offrent un chien pour mon anniversaire, __________ !",
+  "turn_answer": "c'est génial",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-008",
+  "expr": "mince alors",
+  "register": "familiar",
+  "meaning_fr": "On le dit quand on est surpris ou un peu énervé.",
+  "meaning_pt": "puxa / droga (interjeição suave) Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Quand on est surpris ou déçu",
+   "Quand on dit bonjour",
+   "Quand on parle d'une personne maigre",
+   "Quand on remercie quelqu'un"
+  ],
+  "correctAnswer": "Quand on est surpris ou déçu",
+  "turn_prompt": "__________, il n'y a plus de lait pour le café !",
+  "turn_answer": "Mince alors",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-009",
+  "expr": "mort de rire",
+  "register": "familiar",
+  "meaning_fr": "On rit beaucoup, très fort.",
+  "meaning_pt": "morrendo de rir (mdr) Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Qui rit énormément",
+   "Qui est très fatigué",
+   "Qui a très peur",
+   "Qui est très triste"
+  ],
+  "correctAnswer": "Qui rit énormément",
+  "turn_prompt": "Quand il est tombé dans la piscine tout habillé, tout le monde était __________.",
+  "turn_answer": "mort de rire",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-010",
+  "expr": "être au top",
+  "register": "familiar",
+  "meaning_fr": "Être excellent, au meilleur niveau.",
+  "meaning_pt": "estar ótimo Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Être excellent",
+   "Être en haut d'un immeuble",
+   "Être en retard",
+   "Être très occupé"
+  ],
+  "correctAnswer": "Être excellent",
+  "turn_prompt": "L'hôtel était propre, le personnel gentil : tout était __________.",
+  "turn_answer": "au top",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-011",
+  "expr": "perdre patience",
+  "register": "neutral",
+  "meaning_fr": "Ne plus réussir à attendre calmement, commencer à s'énerver.",
+  "meaning_pt": "perder a paciência",
+  "options": [
+   "Ne plus réussir à rester calme",
+   "Perdre un objet important",
+   "Attendre avec plaisir",
+   "Oublier un rendez-vous"
+  ],
+  "correctAnswer": "Ne plus réussir à rester calme",
+  "turn_prompt": "Ça fait trente minutes que j'attends au téléphone, je commence à __________.",
+  "turn_answer": "perdre patience",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-012",
+  "expr": "tomber amoureux",
+  "register": "neutral",
+  "meaning_fr": "Commencer à aimer quelqu'un.",
+  "meaning_pt": "apaixonar-se",
+  "options": [
+   "Commencer à aimer quelqu'un",
+   "Tomber par terre",
+   "Se disputer avec quelqu'un",
+   "Quitter quelqu'un"
+  ],
+  "correctAnswer": "Commencer à aimer quelqu'un",
+  "turn_prompt": "Mes grands-parents se sont rencontrés au bal et ils sont __________ tout de suite.",
+  "turn_answer": "tombés amoureux",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-013",
+  "expr": "ferme-la",
+  "register": "familiar",
+  "meaning_fr": "Ordre impoli pour dire à quelqu'un de se taire.",
+  "meaning_pt": "cala a boca (mais suave que 'ta gueule') Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Tais-toi",
+   "Ferme la porte",
+   "Va te coucher",
+   "Arrête de manger"
+  ],
+  "correctAnswer": "Tais-toi",
+  "turn_prompt": "Tu dis toujours n'importe quoi. __________ une seconde et écoute-moi !",
+  "turn_answer": "Ferme-la",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-014",
+  "expr": "fous-moi la paix",
+  "register": "slang",
+  "meaning_fr": "Façon très impolie de demander à quelqu'un de nous laisser tranquille.",
+  "meaning_pt": "me deixa em paz ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
+  "options": [
+   "Laisse-moi tranquille",
+   "Viens m'aider",
+   "Fais la paix avec moi",
+   "Parle-moi plus fort"
+  ],
+  "correctAnswer": "Laisse-moi tranquille",
+  "turn_prompt": "Ça fait dix fois que tu me poses la même question, __________ !",
+  "turn_answer": "fous-moi la paix",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-015",
+  "expr": "tu te fous de moi ?",
+  "register": "slang",
+  "meaning_fr": "Question pour dire qu'on pense que l'autre se moque de nous ou plaisante.",
+  "meaning_pt": "tá de brincadeira comigo? ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
+  "options": [
+   "Tu te moques de moi ?",
+   "Tu as peur de moi ?",
+   "Tu penses à moi ?",
+   "Tu viens avec moi ?"
+  ],
+  "correctAnswer": "Tu te moques de moi ?",
+  "turn_prompt": "Tu arrives avec deux heures de retard et tu me dis « je suis en avance » ? __________",
+  "turn_answer": "Tu te fous de moi ?",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-016",
+  "expr": "bordel",
+  "register": "vulgar",
+  "meaning_fr": "Mot très grossier pour exprimer la colère ou l'agacement.",
+  "meaning_pt": "caramba / droga (interjeição forte) ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos.",
+  "options": [
+   "Quand on est très énervé",
+   "Quand on dit merci",
+   "Quand on est calme et content",
+   "Quand on salue un ami"
+  ],
+  "correctAnswer": "Quand on est très énervé",
+  "turn_prompt": "C'est quoi ce __________ ? Tout le monde crie dans le couloir !",
+  "turn_answer": "bordel",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-017",
+  "expr": "putain",
+  "register": "vulgar",
+  "meaning_fr": "Mot très grossier pour exprimer une forte surprise, la colère ou l'admiration.",
+  "meaning_pt": "interjeição forte (espanto, raiva) ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos.",
+  "options": [
+   "Pour exprimer une émotion forte",
+   "Pour demander poliment",
+   "Pour dire au revoir",
+   "Pour remercier quelqu'un"
+  ],
+  "correctAnswer": "Pour exprimer une émotion forte",
+  "turn_prompt": "Ce __________ de réveil n'a pas sonné ce matin !",
+  "turn_answer": "putain",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-018",
+  "expr": "espèce de con",
+  "register": "vulgar",
+  "meaning_fr": "Insulte pour traiter quelqu'un d'idiot.",
+  "meaning_pt": "seu idiota (insulto) ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos.",
+  "options": [
+   "C'est une insulte : « idiot »",
+   "C'est un compliment",
+   "C'est une façon de saluer",
+   "C'est un mot pour s'excuser"
+  ],
+  "correctAnswer": "C'est une insulte : « idiot »",
+  "turn_prompt": "Espèce de __________ (3 lettres), tu as cassé mon vélo !",
+  "turn_answer": "con",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-019",
+  "expr": "connard",
+  "register": "vulgar",
+  "meaning_fr": "Insulte pour un homme méchant ou désagréable.",
+  "meaning_pt": "babaca (insulto) ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos.",
+  "options": [
+   "C'est une insulte : « homme méchant »",
+   "C'est un mot pour un ami",
+   "C'est un métier",
+   "C'est un mot gentil"
+  ],
+  "correctAnswer": "C'est une insulte : « homme méchant »",
+  "turn_prompt": "Ce mec n'est pas juste un peu bête, c'est un vrai __________ : il fait du mal exprès.",
+  "turn_answer": "connard",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote3-020",
+  "expr": "être à côté de la plaque",
+  "register": "familiar",
+  "meaning_fr": "Se tromper complètement, ne pas comprendre la situation.",
+  "meaning_pt": "estar totalmente errado Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Se tromper complètement",
+   "Être assis à côté de quelqu'un",
+   "Être en retard au dîner",
+   "Être très attentif"
+  ],
+  "correctAnswer": "Se tromper complètement",
+  "turn_prompt": "Tu parles de vacances alors qu'on cherche une solution au problème ? Tu es totalement __________ !",
+  "turn_answer": "à côté de la plaque",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-001",
+  "expr": "faire semblant",
+  "register": "neutral",
+  "meaning_fr": "Montrer une chose qui n'est pas vraie.",
+  "meaning_pt": "fingir",
+  "options": [
+   "Faire comme si c'était vrai",
+   "Faire quelque chose très vite",
+   "Dire toujours la vérité",
+   "Faire la même chose qu'un ami"
+  ],
+  "correctAnswer": "Faire comme si c'était vrai",
+  "turn_prompt": "Le petit garçon ne dort pas, il __________ de dormir.",
+  "turn_answer": "fait semblant",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-002",
+  "expr": "faire exprès",
+  "register": "neutral",
+  "meaning_fr": "Faire une chose volontairement, pas par accident.",
+  "meaning_pt": "fazer de propósito",
+  "options": [
+   "Faire une chose volontairement",
+   "Faire une chose trop tard",
+   "Faire une chose avec un ami",
+   "Faire une chose très bien"
+  ],
+  "correctAnswer": "Faire une chose volontairement",
+  "turn_prompt": "Désolé de t'avoir poussé, je n'ai pas __________ !",
+  "turn_answer": "fait exprès",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-003",
+  "expr": "tourner la page",
+  "register": "neutral",
+  "meaning_fr": "Oublier une période difficile et passer à autre chose.",
+  "meaning_pt": "virar a página, seguir em frente",
+  "options": [
+   "Laisser le passé derrière soi",
+   "Lire un livre très rapidement",
+   "Revenir sur une vieille dispute",
+   "Changer souvent d'avis"
+  ],
+  "correctAnswer": "Laisser le passé derrière soi",
+  "turn_prompt": "Ce travail m'a rendu malheureux pendant des années, mais j'ai enfin __________.",
+  "turn_answer": "tourné la page",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-004",
+  "expr": "en vouloir à quelqu'un",
+  "register": "neutral",
+  "meaning_fr": "Être fâché contre quelqu'un à cause de ce qu'il a fait.",
+  "meaning_pt": "guardar mágoa de alguém",
+  "options": [
+   "Garder de la rancune contre quelqu'un",
+   "Avoir envie de voir quelqu'un",
+   "Demander un service à quelqu'un",
+   "Être jaloux de quelqu'un"
+  ],
+  "correctAnswer": "Garder de la rancune contre quelqu'un",
+  "turn_prompt": "Il m'a menti, alors je lui __________ encore un peu.",
+  "turn_answer": "en veux",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-005",
+  "expr": "c'est foutu",
+  "register": "familiar",
+  "meaning_fr": "Il n'y a plus rien à faire, c'est raté.",
+  "meaning_pt": "já era, está perdido Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Quand il n'y a plus d'espoir",
+   "Quand tout se passe très bien",
+   "Quand on veut remercier quelqu'un",
+   "Quand on commence un projet"
+  ],
+  "correctAnswer": "Quand il n'y a plus d'espoir",
+  "turn_prompt": "Il reste deux minutes et on perd trois à zéro : __________.",
+  "turn_answer": "c'est foutu",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-006",
+  "expr": "être fauché",
+  "register": "familiar",
+  "meaning_fr": "Ne plus avoir d'argent.",
+  "meaning_pt": "estar sem dinheiro / duro Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Ne pas avoir d'argent",
+   "Être très fatigué",
+   "Avoir trop de travail",
+   "Être malade"
+  ],
+  "correctAnswer": "Ne pas avoir d'argent",
+  "turn_prompt": "Tu peux payer le café ? Je n'ai plus un euro, je suis __________.",
+  "turn_answer": "fauché",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-007",
+  "expr": "avoir les boules",
+  "register": "familiar",
+  "meaning_fr": "Être très déçu, énervé ou triste.",
+  "meaning_pt": "ficar chateado, com raiva ou decepcionado Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Être déçu ou énervé",
+   "Être très content",
+   "Avoir froid",
+   "Avoir faim"
+  ],
+  "correctAnswer": "Être déçu ou énervé",
+  "turn_prompt": "On a perdu le match à la dernière seconde, j'__________ !",
+  "turn_answer": "ai les boules",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-008",
+  "expr": "avoir la pêche",
+  "register": "familiar",
+  "meaning_fr": "Être en pleine forme, plein d'énergie.",
+  "meaning_pt": "estar cheio de energia / com a corda toda Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Être en pleine forme",
+   "Avoir envie de manger un fruit",
+   "Être de mauvaise humeur",
+   "Avoir sommeil"
+  ],
+  "correctAnswer": "Être en pleine forme",
+  "turn_prompt": "J'ai bien dormi, aujourd'hui j'__________ !",
+  "turn_answer": "ai la pêche",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-009",
+  "expr": "galérer",
+  "register": "familiar",
+  "meaning_fr": "Avoir beaucoup de difficultés pour faire quelque chose.",
+  "meaning_pt": "passar perrengue / ralar Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Avoir beaucoup de mal à faire quelque chose",
+   "Voyager en bateau",
+   "Réussir très facilement",
+   "Refuser de travailler"
+  ],
+  "correctAnswer": "Avoir beaucoup de mal à faire quelque chose",
+  "turn_prompt": "Sans GPS, on a __________ pendant une heure pour trouver l'hôtel.",
+  "turn_answer": "galéré",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-010",
+  "expr": "avoir du fric",
+  "register": "familiar",
+  "meaning_fr": "Avoir de l'argent, souvent beaucoup.",
+  "meaning_pt": "ter grana Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Avoir de l'argent",
+   "Avoir froid",
+   "Avoir de la chance",
+   "Avoir des amis"
+  ],
+  "correctAnswer": "Avoir de l'argent",
+  "turn_prompt": "Il roule en voiture de luxe, il doit __________.",
+  "turn_answer": "avoir du fric",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-011",
+  "expr": "tu m'emmerdes",
+  "register": "vulgar",
+  "meaning_fr": "Tu m'énerves beaucoup, tu me déranges.",
+  "meaning_pt": "você me enche o saco ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos.",
+  "options": [
+   "Quand quelqu'un nous énerve beaucoup",
+   "Quand on veut féliciter quelqu'un",
+   "Quand on dit au revoir poliment",
+   "Quand on demande de l'aide"
+  ],
+  "correctAnswer": "Quand quelqu'un nous énerve beaucoup",
+  "turn_prompt": "Ça fait dix fois que tu frappes à ma porte, __________ !",
+  "turn_answer": "tu m'emmerdes",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-012",
+  "expr": "va te faire voir",
+  "register": "slang",
+  "meaning_fr": "Phrase pour envoyer promener quelqu'un avec colère.",
+  "meaning_pt": "vai se danar / vai pastar ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
+  "options": [
+   "Pour rejeter quelqu'un avec colère",
+   "Pour inviter quelqu'un à une fête",
+   "Pour proposer une visite guidée",
+   "Pour remercier un ami"
+  ],
+  "correctAnswer": "Pour rejeter quelqu'un avec colère",
+  "turn_prompt": "Tu veux encore que je te prête de l'argent ? Non, __________ !",
+  "turn_answer": "va te faire voir",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-013",
+  "expr": "tirer la gueule",
+  "register": "familiar",
+  "meaning_fr": "Montrer sa mauvaise humeur par un visage fermé, bouder.",
+  "meaning_pt": "ficar de cara fechada / emburrar ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos.",
+  "options": [
+   "Faire une tête fâchée et bouder",
+   "Rire très fort",
+   "Parler sans arrêt",
+   "Faire des grimaces pour amuser"
+  ],
+  "correctAnswer": "Faire une tête fâchée et bouder",
+  "turn_prompt": "Il n'a pas eu le cadeau qu'il voulait, alors il __________ depuis ce matin.",
+  "turn_answer": "tire la gueule",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-014",
+  "expr": "se foutre de la gueule de quelqu'un",
+  "register": "slang",
+  "meaning_fr": "Se moquer de quelqu'un, le prendre pour un idiot.",
+  "meaning_pt": "zombar de alguém / tirar sarro ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
+  "options": [
+   "Se moquer de quelqu'un",
+   "Admirer quelqu'un",
+   "Aider quelqu'un en secret",
+   "Ignorer quelqu'un poliment"
+  ],
+  "correctAnswer": "Se moquer de quelqu'un",
+  "turn_prompt": "Trois heures de retard et aucune excuse ? Ils __________ !",
+  "turn_answer": "se foutent de notre gueule",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-015",
+  "expr": "être sur les nerfs",
+  "register": "familiar",
+  "meaning_fr": "Être très tendu, stressé et prêt à s'énerver.",
+  "meaning_pt": "estar com os nervos à flor da pele Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Être très tendu et irritable",
+   "Être parfaitement calme",
+   "Être en train de faire du sport",
+   "Être très amoureux"
+  ],
+  "correctAnswer": "Être très tendu et irritable",
+  "turn_prompt": "Elle n'a pas dormi depuis deux jours à cause du déménagement, elle est __________.",
+  "turn_answer": "sur les nerfs",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-016",
+  "expr": "il pleut des cordes",
+  "register": "familiar",
+  "meaning_fr": "Il pleut très fort.",
+  "meaning_pt": "está chovendo canivete Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Il pleut très fort",
+   "Il fait très chaud",
+   "Il y a beaucoup de vent",
+   "Il commence à neiger"
+  ],
+  "correctAnswer": "Il pleut très fort",
+  "turn_prompt": "Je suis trempé : en sortant du métro, __________ !",
+  "turn_answer": "il pleuvait des cordes",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-017",
+  "expr": "mettre le paquet",
+  "register": "familiar",
+  "meaning_fr": "Faire tous les efforts possibles ou dépenser beaucoup pour quelque chose.",
+  "meaning_pt": "caprichar / dar tudo Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Donner le maximum",
+   "Envoyer un colis par la poste",
+   "Faire le strict minimum",
+   "Abandonner un projet"
+  ],
+  "correctAnswer": "Donner le maximum",
+  "turn_prompt": "L'entretien est demain : ce soir, je révise tout, je vais __________ !",
+  "turn_answer": "mettre le paquet",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-018",
+  "expr": "à fond la caisse",
+  "register": "familiar",
+  "meaning_fr": "À toute vitesse, très vite.",
+  "meaning_pt": "a toda velocidade / a mil Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "À toute vitesse",
+   "Très lentement",
+   "En silence",
+   "Avec beaucoup de prudence"
+  ],
+  "correctAnswer": "À toute vitesse",
+  "turn_prompt": "Le livreur a démarré __________ et il a failli renverser un piéton.",
+  "turn_answer": "à fond la caisse",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-019",
+  "expr": "ça ne casse pas des briques",
+  "register": "familiar",
+  "meaning_fr": "Ce n'est pas extraordinaire, c'est assez moyen.",
+  "meaning_pt": "não é nada de especial Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Ce n'est rien d'exceptionnel",
+   "C'est vraiment génial",
+   "C'est très dangereux",
+   "C'est en train de se casser"
+  ],
+  "correctAnswer": "Ce n'est rien d'exceptionnel",
+  "turn_prompt": "Ce resto est correct, mais franchement, __________.",
+  "turn_answer": "ça ne casse pas des briques",
+  "alsoAccept": null
+ },
+ {
+  "id": "expr-lote4-020",
+  "expr": "être cinglé",
+  "register": "familiar",
+  "meaning_fr": "Être fou, faire des choses bizarres ou dangereuses.",
+  "meaning_pt": "ser doido / pirado Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
+  "options": [
+   "Être fou",
+   "Être très intelligent",
+   "Être fatigué",
+   "Être timide"
+  ],
+  "correctAnswer": "Être fou",
+  "turn_prompt": "Traverser l'autoroute à pied ? Il faut être __________ !",
+  "turn_answer": "cinglé",
+  "alsoAccept": null
+ }
+]

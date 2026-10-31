@@ -1,0 +1,1100 @@
+{
+ "expr-001": {
+  "options": [
+   "To be very tired after a long day.",
+   "To feel sick and have a headache after drinking too much.",
+   "To be in a bad mood for a while.",
+   "To be caught off guard by some news."
+  ],
+  "microActivity": "Last night I drank too much at the party, so this morning I'm hungover and I don't want to go out."
+ },
+ "expr-002": {
+  "options": [
+   "To make a lot of noise",
+   "To be very tired",
+   "To bother or annoy someone",
+   "To break an object"
+  ],
+  "microActivity": "My brother forgot to do the dishes again, he's getting on my nerves!"
+ },
+ "expr-003": {
+  "options": [
+   "To play a trick on someone.",
+   "To not show up without warning.",
+   "To invite someone to eat.",
+   "To tell a funny story."
+  ],
+  "microActivity": "You shouldn't stand someone up when you've promised to come."
+ },
+ "expr-a1-001": {
+  "options": [
+   "To be tired",
+   "To be thirsty",
+   "To want to eat",
+   "To be happy"
+  ],
+  "microActivity": "It's noon. I'm hungry!"
+ },
+ "expr-a1-002": {
+  "options": [
+   "To be hungry",
+   "To be thirsty",
+   "To be cold",
+   "To be hot"
+  ],
+  "microActivity": "I ran 5 kilometers, now I'm thirsty."
+ },
+ "expr-a1-003": {
+  "options": [
+   "To be tired",
+   "To be hungry",
+   "To be right",
+   "To be thirsty"
+  ],
+  "microActivity": "You say the movie is good. I think you're right."
+ },
+ "expr-a1m1-001": {
+  "options": [
+   "When you meet someone",
+   "When you say goodbye",
+   "When you're hungry",
+   "When you're tired"
+  ],
+  "microActivity": "Hi, my name is Ana. — Nice to meet you!"
+ },
+ "expr-a1m1-002": {
+  "options": [
+   "So-so, neither good nor bad",
+   "Very good",
+   "Very bad",
+   "Right away"
+  ],
+  "microActivity": "How are you? — So-so."
+ },
+ "expr-a1m1-003": {
+  "options": [
+   "Pretty good",
+   "Very bad",
+   "Very expensive",
+   "Very late"
+  ],
+  "microActivity": "How are you? — Not bad, thanks!"
+ },
+ "expr-a1m1-004": {
+  "options": [
+   "OK, sounds good",
+   "I don't understand",
+   "I'm hungry",
+   "Goodbye"
+  ],
+  "microActivity": "A coffee? — Sounds good!"
+ },
+ "expr-a1m1-005": {
+  "options": [
+   "It's no big deal",
+   "It's very difficult",
+   "I'm tired",
+   "I don't know"
+  ],
+  "microActivity": "Sorry! — No problem!"
+ },
+ "expr-a1m2-001": {
+  "options": [
+   "Before eating",
+   "When waking up",
+   "When leaving the house",
+   "When you're sick"
+  ],
+  "microActivity": "Dinner is ready. — Enjoy your meal!"
+ },
+ "expr-a1m2-002": {
+  "options": [
+   "Come and eat",
+   "Go to sleep",
+   "Go to work",
+   "Clear the table"
+  ],
+  "microActivity": "Mom calls out: \"Dinner's ready!\""
+ },
+ "expr-a1m2-003": {
+  "options": [
+   "When you'll see each other again soon",
+   "When you'll never see each other again",
+   "When you'll see each other next week",
+   "When you arrive"
+  ],
+  "microActivity": "I'm off to work. — See you later!"
+ },
+ "expr-a1m2-004": {
+  "options": [
+   "Immediately",
+   "Much later",
+   "Never",
+   "In the evening"
+  ],
+  "microActivity": "Are you coming to eat? — Yes, right away!"
+ },
+ "expr-a1m2-005": {
+  "options": [
+   "When saying goodbye in the morning or afternoon",
+   "When going to bed",
+   "Before eating",
+   "When arriving"
+  ],
+  "microActivity": "Bye, have a nice day!"
+ },
+ "expr-a1m3-001": {
+  "options": [
+   "To get someone's attention politely",
+   "To say goodbye",
+   "To say thank you",
+   "To say no"
+  ],
+  "microActivity": "Excuse me, where is the museum?"
+ },
+ "expr-a1m3-002": {
+  "options": [
+   "You're welcome",
+   "Goodbye",
+   "I don't know",
+   "Sorry"
+  ],
+  "microActivity": "Thank you! — You're welcome."
+ },
+ "expr-a1m3-003": {
+  "options": [
+   "What's the price?",
+   "What time is it?",
+   "Where is it?",
+   "Who is it?"
+  ],
+  "microActivity": "How much is it, please?"
+ },
+ "expr-a1m3-004": {
+  "options": [
+   "The price is too high",
+   "The price is perfect",
+   "It's free",
+   "It's very small"
+  ],
+  "microActivity": "Eighty euros? That's too expensive!"
+ },
+ "expr-a1m3-005": {
+  "options": [
+   "The salesperson",
+   "The customer",
+   "The doctor",
+   "The teacher"
+  ],
+  "microActivity": "A liter of milk. — Anything else?"
+ },
+ "expr-a1m4-001": {
+  "options": [
+   "It's raining very hard",
+   "It's not raining",
+   "It's snowing",
+   "The weather is nice"
+  ],
+  "microActivity": "It's raining cats and dogs outside!"
+ },
+ "expr-a1m4-002": {
+  "options": [
+   "To someone who is leaving",
+   "To someone who is arriving",
+   "To someone who is eating",
+   "To someone who is sleeping"
+  ],
+  "microActivity": "Goodbye, have a good trip!"
+ },
+ "expr-a1m4-003": {
+  "options": [
+   "To a sick person",
+   "To a person on vacation",
+   "To a person who is leaving",
+   "To a person who is eating"
+  ],
+  "microActivity": "He has a fever. — Get well soon!"
+ },
+ "expr-a1m4-004": {
+  "options": [
+   "When someone sneezes",
+   "When someone eats",
+   "When someone leaves",
+   "When someone arrives"
+  ],
+  "microActivity": "Achoo! — Bless you!"
+ },
+ "expr-a1m4-005": {
+  "options": [
+   "You comment on the weather",
+   "You ask the time",
+   "You say goodbye",
+   "You say thank you"
+  ],
+  "microActivity": "What weather! It's snowing!"
+ },
+ "expr-a1m5-001": {
+  "options": [
+   "To a guest, so they feel at ease",
+   "To a neighbor who is leaving",
+   "To a sick friend",
+   "To a customer"
+  ],
+  "microActivity": "Come in! Make yourself at home!"
+ },
+ "expr-a1m5-002": {
+  "options": [
+   "At my house",
+   "At your school",
+   "At the restaurant",
+   "At the station"
+  ],
+  "microActivity": "Tonight we're eating at my place."
+ },
+ "expr-a1m5-003": {
+  "options": [
+   "When you welcome someone",
+   "When you leave",
+   "When you eat",
+   "When you sleep"
+  ],
+  "microActivity": "Welcome to my home!"
+ },
+ "expr-a1m5-004": {
+  "options": [
+   "It looks nice on you",
+   "It's too small",
+   "It's too expensive",
+   "It's dirty"
+  ],
+  "microActivity": "That green sweater looks good on you!"
+ },
+ "expr-a1m5-005": {
+  "options": [
+   "Do you like it?",
+   "Are you hungry?",
+   "Are you tired?",
+   "Are you coming?"
+  ],
+  "microActivity": "Do you like this dress?"
+ },
+ "expr-a1m6-001": {
+  "options": [
+   "Before the weekend",
+   "On Monday morning",
+   "On Christmas Eve",
+   "At a birthday"
+  ],
+  "microActivity": "See you Monday! Have a good weekend!"
+ },
+ "expr-a1m6-002": {
+  "options": [
+   "In the evening, when leaving",
+   "In the morning, when arriving",
+   "At noon, before eating",
+   "At midnight, when waking up"
+  ],
+  "microActivity": "Goodbye, have a nice evening!"
+ },
+ "expr-a1m6-003": {
+  "options": [
+   "Let's start",
+   "Let's stop",
+   "Let's go home",
+   "Let's go to sleep"
+  ],
+  "microActivity": "3, 2, 1... Here we go!"
+ },
+ "expr-a1m6-004": {
+  "options": [
+   "Any news?",
+   "What time is it?",
+   "Where are you from?",
+   "How old are you?"
+  ],
+  "microActivity": "Hi! What's new?"
+ },
+ "expr-a1m6-005": {
+  "options": [
+   "We haven't seen each other in a long time",
+   "We'll see each other tomorrow",
+   "We're late",
+   "We're hungry"
+  ],
+  "microActivity": "Hi! Long time no see!"
+ },
+ "expr-a2-001": {
+  "options": [
+   "A difficult problem",
+   "A little help",
+   "Great fatigue",
+   "A sudden idea"
+  ],
+  "microActivity": "Can you give me a hand to finish this job?"
+ },
+ "expr-a2-002": {
+  "options": [
+   "To be very happy.",
+   "To be scared or nervous.",
+   "To be tired.",
+   "To be hungry."
+  ],
+  "microActivity": "Tomorrow I have to present my project in front of the whole class. I think I'm going to get stage fright."
+ },
+ "expr-a2-003": {
+  "options": [
+   "To wake up very early in the morning.",
+   "To sleep a lot during the night.",
+   "To get up late in the morning, in no hurry to get out of bed.",
+   "To take a nap during the day."
+  ],
+  "microActivity": "When I'm on vacation, I love sleeping in."
+ },
+ "expr-b2-001": {
+  "options": [
+   "To be very tired",
+   "To clarify the final details and be precise",
+   "To argue over trifles",
+   "To make a hasty decision"
+  ],
+  "microActivity": "Before signing the contract, we absolutely have to dot the i's and cross the t's to avoid any future misunderstanding."
+ },
+ "expr-b2-002": {
+  "options": [
+   "To be very hardworking and efficient.",
+   "To have great manual dexterity.",
+   "To be lazy and avoid work.",
+   "To have a slight pain in one's finger."
+  ],
+  "microActivity": "It's amazing how lazy he is, even though he's so talented."
+ },
+ "expr-b2-003": {
+  "options": [
+   "To speak gently and diplomatically.",
+   "To act with force and determination, without restraint.",
+   "To express one's opinion hesitantly.",
+   "To criticize in a subtle, indirect way."
+  ],
+  "microActivity": "Faced with this blatant injustice, he decided not to pull any punches to make his voice heard."
+ },
+ "expr-lote1-001": {
+  "options": [
+   "Something silly or meaningless",
+   "Something very important",
+   "Something very expensive",
+   "Something very fast"
+  ],
+  "microActivity": "Stop going on about your cat that speaks English, you're talking nonsense!"
+ },
+ "expr-lote1-002": {
+  "options": [
+   "To be very hungry",
+   "To be sick of a situation",
+   "To be very happy",
+   "To have a lot of money"
+  ],
+  "microActivity": "I've been doing my homework for three hours, I'm fed up!"
+ },
+ "expr-lote1-003": {
+  "options": [
+   "To be totally indifferent to something",
+   "To be very proud of oneself",
+   "To be very angry with someone",
+   "To be very scared of something"
+  ],
+  "microActivity": "He can criticize my haircut, I don't give a damn: I like it."
+ },
+ "expr-lote1-004": {
+  "options": [
+   "To work in a garden",
+   "To be in a very good mood",
+   "To have a very big problem",
+   "To be very comfortably settled"
+  ],
+  "microActivity": "My computer broke down the day before I had to hand in my thesis: I'm in deep shit!"
+ },
+ "expr-lote1-005": {
+  "options": [
+   "It's delicious",
+   "It's perfectly normal",
+   "It's lame or worrying",
+   "It's very easy"
+  ],
+  "microActivity": "The battery's dead and we're lost in the forest… this sucks!"
+ },
+ "expr-lote1-006": {
+  "options": [
+   "To feel like working out",
+   "To have a fever",
+   "To be in a big hurry",
+   "To not feel like making an effort"
+  ],
+  "microActivity": "The laundry is dry, but I can't be bothered to fold it right now."
+ },
+ "expr-lote1-007": {
+  "options": [
+   "It's very boring",
+   "It's incredible or surprising",
+   "It's very logical",
+   "It's a little sad"
+  ],
+  "microActivity": "She speaks six languages and she's only fifteen, that's crazy!"
+ },
+ "expr-lote1-008": {
+  "options": [
+   "To pitch a tent",
+   "To party",
+   "To get to work",
+   "To leave quickly, to go away"
+  ],
+  "microActivity": "He'd had enough of that job and decided to get the hell out and move abroad."
+ },
+ "expr-lote1-009": {
+  "options": [
+   "To congratulate someone",
+   "To ask the time politely",
+   "To say hello to a friend",
+   "To rudely tell someone to be quiet"
+  ],
+  "microActivity": "Stop singing off-key at two in the morning, shut the hell up!"
+ },
+ "expr-lote1-010": {
+  "options": [
+   "To help someone sleep",
+   "To annoy or bother a lot",
+   "To make someone rich",
+   "To please a lot"
+  ],
+  "microActivity": "Stop asking me the same question every five minutes, you're pissing me off!"
+ },
+ "expr-lote1-011": {
+  "options": [
+   "To complicate things or argue over nothing",
+   "To rest for a long time",
+   "To wash one's hair",
+   "To pay oneself a compliment"
+  ],
+  "microActivity": "You've been arguing over nothing for two hours: stop getting so worked up!"
+ },
+ "expr-lote1-012": {
+  "options": [
+   "I totally agree",
+   "I don't believe it at all (irony)",
+   "You speak French very well",
+   "Keep talking, please"
+  ],
+  "microActivity": "\"Paul said he'd quit smoking tomorrow.\" — \"Yeah, right! He says that every month.\""
+ },
+ "expr-lote1-013": {
+  "options": [
+   "It's very expensive",
+   "It's very easy",
+   "It's a birthday party",
+   "It's very sweet"
+  ],
+  "microActivity": "Putting together this little piece of furniture with the instructions? Piece of cake, it takes ten minutes."
+ },
+ "expr-lote1-014": {
+  "options": [
+   "To be very lucky",
+   "To be very energetic",
+   "To have an insect at home",
+   "To be sad and melancholy"
+  ],
+  "microActivity": "Since his best friend moved away, he's been feeling down and doesn't go out anymore."
+ },
+ "expr-lote1-015": {
+  "options": [
+   "To sew a garment",
+   "To call someone",
+   "To send a letter",
+   "To cut a cable"
+  ],
+  "microActivity": "Wait two minutes, I need to give my boss a call."
+ },
+ "expr-lote1-016": {
+  "options": [
+   "To close a shop",
+   "To wait one's turn in line",
+   "To cook a dish",
+   "To run very fast"
+  ],
+  "microActivity": "There are lots of people at the post office, we're going to have to wait in line."
+ },
+ "expr-lote1-017": {
+  "options": [
+   "To be afraid of something",
+   "To be very tired",
+   "To be eager for something to happen",
+   "To be late"
+  ],
+  "microActivity": "My brother arrives from Canada tomorrow, I can't wait to see him again!"
+ },
+ "expr-lote1-018": {
+  "options": [
+   "Look carefully",
+   "I saw it with my own eyes",
+   "My eye hurts",
+   "I don't believe you at all"
+  ],
+  "microActivity": "\"The dog ate my homework, miss.\" — \"Oh, sure! Come up with a better excuse.\""
+ },
+ "expr-lote1-019": {
+  "options": [
+   "To make a calm decision",
+   "To lose one's temper and overreact",
+   "To go horseback riding",
+   "To become very rich"
+  ],
+  "microActivity": "I just made a little remark, no need to get on your high horse like that!"
+ },
+ "expr-lote1-020": {
+  "options": [
+   "To get hit hard",
+   "To find a quick fix",
+   "To have a drink at a bar",
+   "To feel suddenly exhausted"
+  ],
+  "microActivity": "I'm going to take a nap, I'm suddenly wiped out after that big meal."
+ },
+ "expr-lote2-001": {
+  "options": [
+   "To thank someone very warmly",
+   "To politely ask someone for help",
+   "To wish a friend a good trip",
+   "To tell someone to leave, rudely"
+  ],
+  "microActivity": "You're getting on my nerves, get out of my room!"
+ },
+ "expr-lote2-002": {
+  "options": [
+   "Fall asleep very quickly",
+   "Get hurt in a fall",
+   "Leave, go away",
+   "Get angry at someone"
+  ],
+  "microActivity": "This party sucks, wanna bail?"
+ },
+ "expr-lote2-003": {
+  "options": [
+   "It's very funny and entertaining",
+   "It's very boring or annoying",
+   "It's very expensive to buy",
+   "It's very easy to do"
+  ],
+  "microActivity": "Filling out these forms for three hours is a pain in the ass!"
+ },
+ "expr-lote2-004": {
+  "options": [
+   "Be cold",
+   "Be ashamed",
+   "Be sleepy",
+   "Be scared"
+  ],
+  "microActivity": "My little brother won't go into the cave: he's scared stiff."
+ },
+ "expr-lote2-005": {
+  "options": [
+   "Be very tired",
+   "Be very sick",
+   "Be very angry",
+   "Be very happy"
+  ],
+  "microActivity": "I spent the whole day moving, I'm wiped out."
+ },
+ "expr-lote2-006": {
+  "options": [
+   "Have had too much to drink",
+   "Have eaten too much",
+   "Be full of cash",
+   "Be in a big hurry"
+  ],
+  "microActivity": "After all those bottles of wine, Marc was completely hammered."
+ },
+ "expr-lote2-007": {
+  "options": [
+   "Be very thirsty",
+   "Feel like sleeping",
+   "Be very hungry",
+   "Have a stomachache"
+  ],
+  "microActivity": "I haven't eaten anything since this morning, I'm starving!"
+ },
+ "expr-lote2-008": {
+  "options": [
+   "Annoy someone nonstop",
+   "Help someone cook",
+   "Give someone gifts",
+   "Make everyone laugh"
+  ],
+  "microActivity": "You've been repeating the same thing for an hour, you're driving me nuts!"
+ },
+ "expr-lote2-009": {
+  "options": [
+   "When someone speaks too quietly",
+   "When someone exaggerates or lies",
+   "When someone drives too fast",
+   "When someone leaves too early"
+  ],
+  "microActivity": "You speak ten languages? Give me a break!"
+ },
+ "expr-lote2-010": {
+  "options": [
+   "Be in love",
+   "Eat too much fruit",
+   "Faint",
+   "Fall off a bike"
+  ],
+  "microActivity": "She hadn't eaten anything and passed out during PE class."
+ },
+ "expr-lote2-011": {
+  "options": [
+   "Keep a secret",
+   "Talk for too long",
+   "Feed your pet",
+   "Give up on finding the answer"
+  ],
+  "microActivity": "So, did you guess? No? Do you give up?"
+ },
+ "expr-lote2-012": {
+  "options": [
+   "Be very beautiful",
+   "Be free",
+   "Cost a lot",
+   "Hurt a lot"
+  ],
+  "microActivity": "We can't buy this car, it costs an arm and a leg."
+ },
+ "expr-lote2-013": {
+  "options": [
+   "A night without sleep",
+   "A very quiet night",
+   "A wedding party night",
+   "A night with snow"
+  ],
+  "microActivity": "I didn't sleep at all: I spent a sleepless night."
+ },
+ "expr-lote2-014": {
+  "options": [
+   "Give up, quit",
+   "Clean the house",
+   "Get angry",
+   "Start a project"
+  ],
+  "microActivity": "He failed his driving test five times, then he threw in the towel."
+ },
+ "expr-lote2-015": {
+  "options": [
+   "Have a headache",
+   "Be distracted, dreamy",
+   "Be afraid of flying",
+   "Be very smart"
+  ],
+  "microActivity": "You never listen to what I say, you've got your head in the clouds!"
+ },
+ "expr-lote2-016": {
+  "options": [
+   "Be very generous",
+   "Be very sick",
+   "Be deeply in love",
+   "Be very shy"
+  ],
+  "microActivity": "Paul often gives his time to people in need: he has a heart of gold."
+ },
+ "expr-lote2-017": {
+  "options": [
+   "Be a bit drunk",
+   "Have a cold",
+   "Be very curious",
+   "Have a broken nose"
+  ],
+  "microActivity": "He was laughing too loudly and talking to everyone: he'd clearly had a few."
+ },
+ "expr-lote2-018": {
+  "options": [
+   "Be extremely expensive",
+   "Get hurt in a fall",
+   "Be very uncomfortable",
+   "Cost nothing at all"
+  ],
+  "microActivity": "With all these hidden fees, my phone plan is costing me an arm and a leg!"
+ },
+ "expr-lote2-019": {
+  "options": [
+   "Exaggerate a small problem",
+   "Tell a funny story",
+   "Cook a big meal",
+   "Forget an appointment"
+  ],
+  "microActivity": "It's just a little scratch on the car, no need to make a mountain out of a molehill."
+ },
+ "expr-lote2-020": {
+  "options": [
+   "Laugh while watching a movie",
+   "Laugh without really wanting to",
+   "Laugh very loudly for a long time",
+   "Laugh to make fun of others"
+  ],
+  "microActivity": "She didn't like the joke about her age: she gave a forced laugh."
+ },
+ "expr-lote3-001": {
+  "options": [
+   "It's worth the effort or money",
+   "It costs way too much",
+   "It hurts like a blow",
+   "It happens all of a sudden"
+  ],
+  "microActivity": "This movie is three hours long, but trust me, it's worth it!"
+ },
+ "expr-lote3-002": {
+  "options": [
+   "When someone is out of luck",
+   "When there's nothing left to eat",
+   "When you turn down an invitation",
+   "When someone is very hungry"
+  ],
+  "microActivity": "The store closed just as we were getting there. Just our luck!"
+ },
+ "expr-lote3-003": {
+  "options": [
+   "Be lucky",
+   "Be very thirsty",
+   "Have lots of money",
+   "Have a bad temper"
+  ],
+  "microActivity": "She won the lottery on her very first try, she's so lucky!"
+ },
+ "expr-lote3-004": {
+  "options": [
+   "Be careful",
+   "Make a joke",
+   "Make noise",
+   "Party"
+  ],
+  "microActivity": "Watch out when you cross, cars go fast around here!"
+ },
+ "expr-lote3-005": {
+  "options": [
+   "Get it wrong or fail",
+   "Settle into a garden",
+   "Stop to rest",
+   "Get up very early"
+  ],
+  "microActivity": "I didn't understand the question and totally blew it: I got a zero!"
+ },
+ "expr-lote3-006": {
+  "options": [
+   "It's really bad",
+   "It's free",
+   "It's very easy",
+   "It's over"
+  ],
+  "microActivity": "This movie is boring and the actors are bad. It sucks!"
+ },
+ "expr-lote3-007": {
+  "options": [
+   "It's great",
+   "It's weird",
+   "It's hard",
+   "It's a shame"
+  ],
+  "microActivity": "My parents are giving me a dog for my birthday, that's awesome!"
+ },
+ "expr-lote3-008": {
+  "options": [
+   "When you're surprised or disappointed",
+   "When you say hello",
+   "When you talk about a thin person",
+   "When you thank someone"
+  ],
+  "microActivity": "Oh shoot, there's no more milk for the coffee!"
+ },
+ "expr-lote3-009": {
+  "options": [
+   "Laughing really hard",
+   "Feeling very tired",
+   "Feeling very scared",
+   "Feeling very sad"
+  ],
+  "microActivity": "When he fell into the pool fully dressed, everyone was in stitches."
+ },
+ "expr-lote3-010": {
+  "options": [
+   "Be excellent",
+   "Be at the top of a building",
+   "Be late",
+   "Be very busy"
+  ],
+  "microActivity": "The hotel was clean, the staff was friendly: everything was top-notch."
+ },
+ "expr-lote3-011": {
+  "options": [
+   "Be unable to stay calm",
+   "Lose an important item",
+   "Enjoy waiting",
+   "Forget an appointment"
+  ],
+  "microActivity": "I've been on hold for thirty minutes, I'm starting to lose patience."
+ },
+ "expr-lote3-012": {
+  "options": [
+   "To start loving someone",
+   "To fall to the ground",
+   "To argue with someone",
+   "To break up with someone"
+  ],
+  "microActivity": "My grandparents met at a dance and fell in love right away."
+ },
+ "expr-lote3-013": {
+  "options": [
+   "Be quiet",
+   "Close the door",
+   "Go to bed",
+   "Stop eating"
+  ],
+  "microActivity": "You always talk nonsense. Shut up for a second and listen to me!"
+ },
+ "expr-lote3-014": {
+  "options": [
+   "Leave me alone",
+   "Come help me",
+   "Make peace with me",
+   "Speak louder to me"
+  ],
+  "microActivity": "That's the tenth time you've asked me the same question, leave me the hell alone!"
+ },
+ "expr-lote3-015": {
+  "options": [
+   "Are you making fun of me?",
+   "Are you scared of me?",
+   "Are you thinking of me?",
+   "Are you coming with me?"
+  ],
+  "microActivity": "You show up two hours late and tell me \"I'm early\"? Are you kidding me?"
+ },
+ "expr-lote3-016": {
+  "options": [
+   "When you're really annoyed",
+   "When you say thank you",
+   "When you're calm and happy",
+   "When you greet a friend"
+  ],
+  "microActivity": "What the hell is going on? Everyone's yelling in the hallway!"
+ },
+ "expr-lote3-017": {
+  "options": [
+   "To express a strong emotion",
+   "To ask politely",
+   "To say goodbye",
+   "To thank someone"
+  ],
+  "microActivity": "This fucking alarm clock didn't go off this morning!"
+ },
+ "expr-lote3-018": {
+  "options": [
+   "It's an insult: \"idiot\"",
+   "It's a compliment",
+   "It's a way of saying hello",
+   "It's a word for apologizing"
+  ],
+  "microActivity": "You dumbass, you broke my bike!"
+ },
+ "expr-lote3-019": {
+  "options": [
+   "It's an insult: \"mean man\"",
+   "It's a word for a friend",
+   "It's a job",
+   "It's a kind word"
+  ],
+  "microActivity": "This guy isn't just a bit dumb, he's a real asshole: he hurts people on purpose."
+ },
+ "expr-lote3-020": {
+  "options": [
+   "To be completely wrong",
+   "To be sitting next to someone",
+   "To be late for dinner",
+   "To be very attentive"
+  ],
+  "microActivity": "You're talking about vacation while we're looking for a solution to the problem? You're totally off the mark!"
+ },
+ "expr-lote4-001": {
+  "options": [
+   "To act as if it were true",
+   "To do something very fast",
+   "To always tell the truth",
+   "To do the same as a friend"
+  ],
+  "microActivity": "The little boy isn't sleeping, he's pretending to sleep."
+ },
+ "expr-lote4-002": {
+  "options": [
+   "To do something on purpose",
+   "To do something too late",
+   "To do something with a friend",
+   "To do something very well"
+  ],
+  "microActivity": "Sorry for pushing you, I didn't do it on purpose!"
+ },
+ "expr-lote4-003": {
+  "options": [
+   "To leave the past behind",
+   "To read a book very quickly",
+   "To bring up an old argument",
+   "To change your mind often"
+  ],
+  "microActivity": "That job made me unhappy for years, but I've finally turned the page."
+ },
+ "expr-lote4-004": {
+  "options": [
+   "To hold a grudge against someone",
+   "To want to see someone",
+   "To ask someone a favor",
+   "To be jealous of someone"
+  ],
+  "microActivity": "He lied to me, so I'm still a bit mad at him."
+ },
+ "expr-lote4-005": {
+  "options": [
+   "When there's no hope left",
+   "When everything is going really well",
+   "When you want to thank someone",
+   "When you start a project"
+  ],
+  "microActivity": "Two minutes left and we're losing three to nothing: we're done for."
+ },
+ "expr-lote4-006": {
+  "options": [
+   "To have no money",
+   "To be very tired",
+   "To have too much work",
+   "To be sick"
+  ],
+  "microActivity": "Can you pay for the coffee? I don't have a single euro left, I'm broke."
+ },
+ "expr-lote4-007": {
+  "options": [
+   "To be upset",
+   "To be very happy",
+   "To be cold",
+   "To be hungry"
+  ],
+  "microActivity": "We lost the game in the last second, I'm so bummed!"
+ },
+ "expr-lote4-008": {
+  "options": [
+   "To be full of energy",
+   "To feel like eating fruit",
+   "To be in a bad mood",
+   "To be sleepy"
+  ],
+  "microActivity": "I slept well, today I'm raring to go!"
+ },
+ "expr-lote4-009": {
+  "options": [
+   "To have a hard time doing something",
+   "To travel by boat",
+   "To succeed very easily",
+   "To refuse to work"
+  ],
+  "microActivity": "Without GPS, we struggled for an hour to find the hotel."
+ },
+ "expr-lote4-010": {
+  "options": [
+   "To have money",
+   "To be cold",
+   "To be lucky",
+   "To have friends"
+  ],
+  "microActivity": "He drives a luxury car, he must be loaded."
+ },
+ "expr-lote4-011": {
+  "options": [
+   "When someone really annoys you",
+   "When you want to congratulate someone",
+   "When you say goodbye politely",
+   "When you ask for help"
+  ],
+  "microActivity": "That's the tenth time you've knocked on my door, you're pissing me off!"
+ },
+ "expr-lote4-012": {
+  "options": [
+   "To reject someone angrily",
+   "To invite someone to a party",
+   "To suggest a guided tour",
+   "To thank a friend"
+  ],
+  "microActivity": "You want me to lend you money again? No, go to hell!"
+ },
+ "expr-lote4-013": {
+  "options": [
+   "To look angry and sulk",
+   "To laugh very loudly",
+   "To talk nonstop",
+   "To make faces to amuse people"
+  ],
+  "microActivity": "He didn't get the present he wanted, so he's been sulking since this morning."
+ },
+ "expr-lote4-014": {
+  "options": [
+   "To make fun of someone",
+   "To admire someone",
+   "To secretly help someone",
+   "To politely ignore someone"
+  ],
+  "microActivity": "Three hours late and no apology? They're screwing with us!"
+ },
+ "expr-lote4-015": {
+  "options": [
+   "To be tense and irritable",
+   "To be perfectly calm",
+   "To be playing sports",
+   "To be deeply in love"
+  ],
+  "microActivity": "She hasn't slept in two days because of the move, she's on edge."
+ },
+ "expr-lote4-016": {
+  "options": [
+   "It's raining very hard",
+   "It's very hot",
+   "It's very windy",
+   "It's starting to snow"
+  ],
+  "microActivity": "I'm soaked: when I came out of the subway, it was raining cats and dogs!"
+ },
+ "expr-lote4-017": {
+  "options": [
+   "To give it everything",
+   "To send a package by mail",
+   "To do the bare minimum",
+   "To give up on a project"
+  ],
+  "microActivity": "The interview is tomorrow: tonight I'm going over everything, I'm going all out!"
+ },
+ "expr-lote4-018": {
+  "options": [
+   "At full speed",
+   "Very slowly",
+   "In silence",
+   "Very carefully"
+  ],
+  "microActivity": "The delivery guy floored it and nearly ran over a pedestrian."
+ },
+ "expr-lote4-019": {
+  "options": [
+   "It's nothing special",
+   "It's really great",
+   "It's very dangerous",
+   "It's breaking"
+  ],
+  "microActivity": "This restaurant is okay, but honestly, it's nothing to write home about."
+ },
+ "expr-lote4-020": {
+  "options": [
+   "To be crazy",
+   "To be very smart",
+   "To be tired",
+   "To be shy"
+  ],
+  "microActivity": "Cross the highway on foot? You'd have to be nuts!"
+ }
+}

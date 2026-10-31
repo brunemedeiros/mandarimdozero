@@ -1,0 +1,2686 @@
+[
+ {
+  "id": "expr-001",
+  "optionsPt": [
+   "Estar muito cansado depois de um dia longo.",
+   "Passar mal e ter dor de cabeça depois de beber demais.",
+   "Ficar de mau humor por um tempo.",
+   "Ser pego de surpresa por uma notícia."
+  ],
+  "optionsEn": [
+   "To be very tired after a long day.",
+   "To feel sick and have a headache after drinking too much.",
+   "To be in a bad mood for a while.",
+   "To be caught off guard by some news."
+  ],
+  "turnPt": "Ontem à noite eu bebi demais na festa, então hoje de manhã estou de ressaca e não quero sair.",
+  "turnEn": "Last night I drank too much at the party, so this morning I'm hungover and I don't want to go out.",
+  "conf": "alta",
+  "nota": "No original francês a opção certa já é bem mais longa que as outras (entrega a resposta); a tradução encurtou um pouco, mas o problema vem da fonte.",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-002",
+  "optionsPt": [
+   "Fazer muito barulho",
+   "Estar muito cansado",
+   "Incomodar ou irritar alguém",
+   "Quebrar um objeto"
+  ],
+  "optionsEn": [
+   "To make a lot of noise",
+   "To be very tired",
+   "To bother or annoy someone",
+   "To break an object"
+  ],
+  "turnPt": "Meu irmão esqueceu de lavar a louça de novo, ele me tira do sério!",
+  "turnEn": "My brother forgot to do the dishes again, he's getting on my nerves!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 2,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-003",
+  "optionsPt": [
+   "Pregar uma peça em alguém.",
+   "Não ir a um encontro sem avisar.",
+   "Convidar alguém para comer.",
+   "Contar uma história engraçada."
+  ],
+  "optionsEn": [
+   "To play a trick on someone.",
+   "To not show up without warning.",
+   "To invite someone to eat.",
+   "To tell a funny story."
+  ],
+  "turnPt": "Não se deve dar bolo em ninguém quando a gente prometeu ir.",
+  "turnEn": "You shouldn't stand someone up when you've promised to come.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1-001",
+  "optionsPt": [
+   "Estar cansado",
+   "Estar com sede",
+   "Querer comer",
+   "Estar feliz"
+  ],
+  "optionsEn": [
+   "To be tired",
+   "To be thirsty",
+   "To want to eat",
+   "To be happy"
+  ],
+  "turnPt": "É meio-dia. Estou com fome!",
+  "turnEn": "It's noon. I'm hungry!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 2,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1-002",
+  "optionsPt": [
+   "Estar com fome",
+   "Estar com sede",
+   "Estar com frio",
+   "Estar com calor"
+  ],
+  "optionsEn": [
+   "To be hungry",
+   "To be thirsty",
+   "To be cold",
+   "To be hot"
+  ],
+  "turnPt": "Corri 5 quilômetros, agora estou com sede.",
+  "turnEn": "I ran 5 kilometers, now I'm thirsty.",
+  "conf": "alta",
+  "nota": "No original as opções são as próprias expressões em francês (a certa é igual à expressão perguntada); traduzidas, viram significados e o exercício passa a fazer sentido.",
+  "_cert_idx": 1,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1-003",
+  "optionsPt": [
+   "Estar cansado",
+   "Estar com fome",
+   "Estar certo",
+   "Estar com sede"
+  ],
+  "optionsEn": [
+   "To be tired",
+   "To be hungry",
+   "To be right",
+   "To be thirsty"
+  ],
+  "turnPt": "Você diz que o filme é bom. Acho que você tem razão.",
+  "turnEn": "You say the movie is good. I think you're right.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 2,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m1-001",
+  "optionsPt": [
+   "Quando a gente conhece alguém",
+   "Quando a gente se despede",
+   "Quando a gente está com fome",
+   "Quando a gente está cansado"
+  ],
+  "optionsEn": [
+   "When you meet someone",
+   "When you say goodbye",
+   "When you're hungry",
+   "When you're tired"
+  ],
+  "turnPt": "Oi, meu nome é Ana. — Prazer!",
+  "turnEn": "Hi, my name is Ana. — Nice to meet you!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m1-002",
+  "optionsPt": [
+   "Mais ou menos, nem bem nem mal",
+   "Muito bem",
+   "Muito mal",
+   "Agora mesmo"
+  ],
+  "optionsEn": [
+   "So-so, neither good nor bad",
+   "Very good",
+   "Very bad",
+   "Right away"
+  ],
+  "turnPt": "Tudo bem? — Mais ou menos.",
+  "turnEn": "How are you? — So-so.",
+  "conf": "alta",
+  "nota": "Expressão despublicada na produção (2026-10-30, segundo o CLAUDE.md); conferir se o lote ainda deve incluí-la.",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m1-003",
+  "optionsPt": [
+   "Até que bem",
+   "Muito ruim",
+   "Muito caro",
+   "Muito tarde"
+  ],
+  "optionsEn": [
+   "Pretty good",
+   "Very bad",
+   "Very expensive",
+   "Very late"
+  ],
+  "turnPt": "Tudo bem? — Nada mal, obrigado!",
+  "turnEn": "How are you? — Not bad, thanks!",
+  "conf": "media",
+  "nota": "\"Plutôt bien\" virou \"Até que bem\" para ficar curto como as outras; alternativa: \"Bem, no geral\".",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m1-004",
+  "optionsPt": [
+   "Combinado, tudo certo",
+   "Não entendi",
+   "Estou com fome",
+   "Tchau"
+  ],
+  "optionsEn": [
+   "OK, sounds good",
+   "I don't understand",
+   "I'm hungry",
+   "Goodbye"
+  ],
+  "turnPt": "Um café? — Fechado!",
+  "turnEn": "A coffee? — Sounds good!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m1-005",
+  "optionsPt": [
+   "Não tem importância",
+   "É muito difícil",
+   "Estou cansado",
+   "Não sei"
+  ],
+  "optionsEn": [
+   "It's no big deal",
+   "It's very difficult",
+   "I'm tired",
+   "I don't know"
+  ],
+  "turnPt": "Desculpa! — Sem problema!",
+  "turnEn": "Sorry! — No problem!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m2-001",
+  "optionsPt": [
+   "Antes de comer",
+   "Ao acordar",
+   "Ao sair de casa",
+   "Quando a gente está doente"
+  ],
+  "optionsEn": [
+   "Before eating",
+   "When waking up",
+   "When leaving the house",
+   "When you're sick"
+  ],
+  "turnPt": "O jantar está pronto. — Bom apetite!",
+  "turnEn": "Dinner is ready. — Enjoy your meal!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m2-002",
+  "optionsPt": [
+   "Venham comer",
+   "Vão dormir",
+   "Vão trabalhar",
+   "Tirem a mesa"
+  ],
+  "optionsEn": [
+   "Come and eat",
+   "Go to sleep",
+   "Go to work",
+   "Clear the table"
+  ],
+  "turnPt": "A mãe chama: \"Venham comer!\"",
+  "turnEn": "Mom calls out: \"Dinner's ready!\"",
+  "conf": "media",
+  "nota": "\"Rangez la table\" foi traduzido como \"Tirem a mesa\" e não \"Arrumem a mesa\", porque no Brasil \"arrumar a mesa\" também quer dizer pôr a mesa para comer e ficaria parecido com a certa.",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m2-003",
+  "optionsPt": [
+   "Quando a gente vai se ver de novo logo",
+   "Quando a gente nunca mais se vê",
+   "Quando a gente se vê na semana que vem",
+   "Quando a gente chega"
+  ],
+  "optionsEn": [
+   "When you'll see each other again soon",
+   "When you'll never see each other again",
+   "When you'll see each other next week",
+   "When you arrive"
+  ],
+  "turnPt": "Vou para o trabalho. — Até daqui a pouco!",
+  "turnEn": "I'm off to work. — See you later!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m2-004",
+  "optionsPt": [
+   "Imediatamente",
+   "Bem mais tarde",
+   "Nunca",
+   "À noite"
+  ],
+  "optionsEn": [
+   "Immediately",
+   "Much later",
+   "Never",
+   "In the evening"
+  ],
+  "turnPt": "Você vem comer? — Sim, já vou!",
+  "turnEn": "Are you coming to eat? — Yes, right away!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m2-005",
+  "optionsPt": [
+   "Ao se despedir de manhã ou à tarde",
+   "Ao ir dormir",
+   "Antes de comer",
+   "Ao chegar"
+  ],
+  "optionsEn": [
+   "When saying goodbye in the morning or afternoon",
+   "When going to bed",
+   "Before eating",
+   "When arriving"
+  ],
+  "turnPt": "Tchau, tenha um bom dia!",
+  "turnEn": "Bye, have a nice day!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m3-001",
+  "optionsPt": [
+   "Para chamar a atenção com educação",
+   "Para se despedir",
+   "Para agradecer",
+   "Para recusar"
+  ],
+  "optionsEn": [
+   "To get someone's attention politely",
+   "To say goodbye",
+   "To say thank you",
+   "To say no"
+  ],
+  "turnPt": "Com licença, onde fica o museu?",
+  "turnEn": "Excuse me, where is the museum?",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m3-002",
+  "optionsPt": [
+   "De nada",
+   "Tchau",
+   "Não sei",
+   "Desculpa"
+  ],
+  "optionsEn": [
+   "You're welcome",
+   "Goodbye",
+   "I don't know",
+   "Sorry"
+  ],
+  "turnPt": "Obrigado! — Não há de quê.",
+  "turnEn": "Thank you! — You're welcome.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m3-003",
+  "optionsPt": [
+   "Qual é o preço?",
+   "Que horas são?",
+   "Onde fica?",
+   "Quem é?"
+  ],
+  "optionsEn": [
+   "What's the price?",
+   "What time is it?",
+   "Where is it?",
+   "Who is it?"
+  ],
+  "turnPt": "Quanto fica, por favor?",
+  "turnEn": "How much is it, please?",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m3-004",
+  "optionsPt": [
+   "O preço é alto demais",
+   "O preço está ótimo",
+   "É de graça",
+   "É muito pequeno"
+  ],
+  "optionsEn": [
+   "The price is too high",
+   "The price is perfect",
+   "It's free",
+   "It's very small"
+  ],
+  "turnPt": "Oitenta euros? É caro demais!",
+  "turnEn": "Eighty euros? That's too expensive!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m3-005",
+  "optionsPt": [
+   "O vendedor",
+   "O cliente",
+   "O médico",
+   "O professor"
+  ],
+  "optionsEn": [
+   "The salesperson",
+   "The customer",
+   "The doctor",
+   "The teacher"
+  ],
+  "turnPt": "Um litro de leite. — Mais alguma coisa?",
+  "turnEn": "A liter of milk. — Anything else?",
+  "conf": "media",
+  "nota": "As opções respondem \"quem diz?\", não \"o que significa?\"; conferir se o enunciado da tela combina com elas.",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m4-001",
+  "optionsPt": [
+   "Está chovendo muito forte",
+   "Não está chovendo",
+   "Está nevando",
+   "O tempo está bom"
+  ],
+  "optionsEn": [
+   "It's raining very hard",
+   "It's not raining",
+   "It's snowing",
+   "The weather is nice"
+  ],
+  "turnPt": "Lá fora está chovendo canivete!",
+  "turnEn": "It's raining cats and dogs outside!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m4-002",
+  "optionsPt": [
+   "Para alguém que está partindo",
+   "Para alguém que está chegando",
+   "Para alguém que está comendo",
+   "Para alguém que está dormindo"
+  ],
+  "optionsEn": [
+   "To someone who is leaving",
+   "To someone who is arriving",
+   "To someone who is eating",
+   "To someone who is sleeping"
+  ],
+  "turnPt": "Tchau, boa viagem!",
+  "turnEn": "Goodbye, have a good trip!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m4-003",
+  "optionsPt": [
+   "Para uma pessoa doente",
+   "Para uma pessoa de férias",
+   "Para uma pessoa que está partindo",
+   "Para uma pessoa que está comendo"
+  ],
+  "optionsEn": [
+   "To a sick person",
+   "To a person on vacation",
+   "To a person who is leaving",
+   "To a person who is eating"
+  ],
+  "turnPt": "Ele está com febre. — Melhoras!",
+  "turnEn": "He has a fever. — Get well soon!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m4-004",
+  "optionsPt": [
+   "Quando alguém espirra",
+   "Quando alguém come",
+   "Quando alguém vai embora",
+   "Quando alguém chega"
+  ],
+  "optionsEn": [
+   "When someone sneezes",
+   "When someone eats",
+   "When someone leaves",
+   "When someone arrives"
+  ],
+  "turnPt": "Atchim! — Saúde!",
+  "turnEn": "Achoo! — Bless you!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m4-005",
+  "optionsPt": [
+   "A gente comenta o clima",
+   "A gente pergunta as horas",
+   "A gente se despede",
+   "A gente agradece"
+  ],
+  "optionsEn": [
+   "You comment on the weather",
+   "You ask the time",
+   "You say goodbye",
+   "You say thank you"
+  ],
+  "turnPt": "Que tempo! Está nevando!",
+  "turnEn": "What weather! It's snowing!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m5-001",
+  "optionsPt": [
+   "Para um convidado se sentir à vontade",
+   "Para um vizinho que está indo embora",
+   "Para um amigo doente",
+   "Para um cliente"
+  ],
+  "optionsEn": [
+   "To a guest, so they feel at ease",
+   "To a neighbor who is leaving",
+   "To a sick friend",
+   "To a customer"
+  ],
+  "turnPt": "Entra! Sinta-se em casa!",
+  "turnEn": "Come in! Make yourself at home!",
+  "conf": "alta",
+  "nota": "Como no original, a opção certa é a mais longa das quatro (vem da fonte).",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m5-002",
+  "optionsPt": [
+   "Na minha casa",
+   "Na sua escola",
+   "No restaurante",
+   "Na estação"
+  ],
+  "optionsEn": [
+   "At my house",
+   "At your school",
+   "At the restaurant",
+   "At the station"
+  ],
+  "turnPt": "Hoje à noite a gente vai comer na minha casa.",
+  "turnEn": "Tonight we're eating at my place.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m5-003",
+  "optionsPt": [
+   "Quando a gente recebe alguém",
+   "Quando a gente vai embora",
+   "Quando a gente come",
+   "Quando a gente dorme"
+  ],
+  "optionsEn": [
+   "When you welcome someone",
+   "When you leave",
+   "When you eat",
+   "When you sleep"
+  ],
+  "turnPt": "Bem-vindo à minha casa!",
+  "turnEn": "Welcome to my home!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m5-004",
+  "optionsPt": [
+   "Fica bonito em você",
+   "É pequeno demais",
+   "É caro demais",
+   "Está sujo"
+  ],
+  "optionsEn": [
+   "It looks nice on you",
+   "It's too small",
+   "It's too expensive",
+   "It's dirty"
+  ],
+  "turnPt": "Esse suéter verde fica bem em você!",
+  "turnEn": "That green sweater looks good on you!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m5-005",
+  "optionsPt": [
+   "Você gosta disso?",
+   "Você está com fome?",
+   "Você está cansado?",
+   "Você vem?"
+  ],
+  "optionsEn": [
+   "Do you like it?",
+   "Are you hungry?",
+   "Are you tired?",
+   "Are you coming?"
+  ],
+  "turnPt": "E esse vestido, você gostou?",
+  "turnEn": "Do you like this dress?",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m6-001",
+  "optionsPt": [
+   "Antes do fim de semana",
+   "Na segunda de manhã",
+   "Na noite de Natal",
+   "No aniversário"
+  ],
+  "optionsEn": [
+   "Before the weekend",
+   "On Monday morning",
+   "On Christmas Eve",
+   "At a birthday"
+  ],
+  "turnPt": "Até segunda! Bom fim de semana!",
+  "turnEn": "See you Monday! Have a good weekend!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a1m6-002",
+  "optionsPt": [
+   "À noite, na despedida",
+   "De manhã, ao chegar",
+   "Ao meio-dia, antes de comer",
+   "À meia-noite, ao acordar"
+  ],
+  "optionsEn": [
+   "In the evening, when leaving",
+   "In the morning, when arriving",
+   "At noon, before eating",
+   "At midnight, when waking up"
+  ],
+  "turnPt": "Tchau, tenha uma boa noite!",
+  "turnEn": "Goodbye, have a nice evening!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m6-003",
+  "optionsPt": [
+   "Vamos começar",
+   "Vamos parar",
+   "Vamos voltar para casa",
+   "Vamos dormir"
+  ],
+  "optionsEn": [
+   "Let's start",
+   "Let's stop",
+   "Let's go home",
+   "Let's go to sleep"
+  ],
+  "turnPt": "3, 2, 1... Vamos lá!",
+  "turnEn": "3, 2, 1... Here we go!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m6-004",
+  "optionsPt": [
+   "Tem novidades?",
+   "Que horas são?",
+   "De onde você é?",
+   "Quantos anos você tem?"
+  ],
+  "optionsEn": [
+   "Any news?",
+   "What time is it?",
+   "Where are you from?",
+   "How old are you?"
+  ],
+  "turnPt": "Oi! Quais são as novidades?",
+  "turnEn": "Hi! What's new?",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a1m6-005",
+  "optionsPt": [
+   "A gente não se vê há muito tempo",
+   "A gente se vê amanhã",
+   "A gente está atrasado",
+   "A gente está com fome"
+  ],
+  "optionsEn": [
+   "We haven't seen each other in a long time",
+   "We'll see each other tomorrow",
+   "We're late",
+   "We're hungry"
+  ],
+  "turnPt": "Oi! Quanto tempo!",
+  "turnEn": "Hi! Long time no see!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a2-001",
+  "optionsPt": [
+   "Um problema difícil",
+   "Uma ajuda rápida",
+   "Um grande cansaço",
+   "Uma ideia repentina"
+  ],
+  "optionsEn": [
+   "A difficult problem",
+   "A little help",
+   "Great fatigue",
+   "A sudden idea"
+  ],
+  "turnPt": "Você pode me dar uma mãozinha para terminar este trabalho?",
+  "turnEn": "Can you give me a hand to finish this job?",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-a2-002",
+  "optionsPt": [
+   "Estar muito contente.",
+   "Estar com medo ou nervoso.",
+   "Estar cansado.",
+   "Estar com fome."
+  ],
+  "optionsEn": [
+   "To be very happy.",
+   "To be scared or nervous.",
+   "To be tired.",
+   "To be hungry."
+  ],
+  "turnPt": "Amanhã tenho que apresentar meu projeto para a turma toda. Acho que vou ficar nervoso.",
+  "turnEn": "Tomorrow I have to present my project in front of the whole class. I think I'm going to get stage fright.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-a2-003",
+  "optionsPt": [
+   "Acordar bem cedo de manhã.",
+   "Dormir muito durante a noite.",
+   "Levantar tarde de manhã, sem pressa de sair da cama.",
+   "Tirar um cochilo durante o dia."
+  ],
+  "optionsEn": [
+   "To wake up very early in the morning.",
+   "To sleep a lot during the night.",
+   "To get up late in the morning, in no hurry to get out of bed.",
+   "To take a nap during the day."
+  ],
+  "turnPt": "Quando estou de férias, adoro dormir até tarde.",
+  "turnEn": "When I'm on vacation, I love sleeping in.",
+  "conf": "media",
+  "nota": "Já no francês a certa é bem mais longa que as outras e entrega a resposta; sugestão: encurtar para \"Se lever tard le matin.\" (pt \"Levantar tarde de manhã.\", en \"To get up late in the morning.\"). \"Dormir muito durante a noite\" também fica perto do sentido.",
+  "_cert_idx": 2,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-b2-001",
+  "optionsPt": [
+   "Estar muito cansado",
+   "Esclarecer os últimos detalhes e ser preciso",
+   "Brigar por bobagem",
+   "Tomar uma decisão precipitada"
+  ],
+  "optionsEn": [
+   "To be very tired",
+   "To clarify the final details and be precise",
+   "To argue over trifles",
+   "To make a hasty decision"
+  ],
+  "turnPt": "Antes de assinar o contrato, precisamos colocar os pingos nos is para evitar qualquer mal-entendido no futuro.",
+  "turnEn": "Before signing the contract, we absolutely have to dot the i's and cross the t's to avoid any future misunderstanding.",
+  "conf": "alta",
+  "nota": "Fora desta tarefa: o meaning_pt usa \"aspetos\" (grafia de Portugal); no Brasil é \"aspectos\". A certa já é mais longa no original.",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-b2-002",
+  "optionsPt": [
+   "Ser muito trabalhador e eficiente.",
+   "Ter muita habilidade manual.",
+   "Ser preguiçoso e fugir do trabalho.",
+   "Ter uma dorzinha no dedo."
+  ],
+  "optionsEn": [
+   "To be very hardworking and efficient.",
+   "To have great manual dexterity.",
+   "To be lazy and avoid work.",
+   "To have a slight pain in one's finger."
+  ],
+  "turnPt": "É impressionante como ele é preguiçoso, sendo que é tão talentoso.",
+  "turnEn": "It's amazing how lazy he is, even though he's so talented.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 2,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-b2-003",
+  "optionsPt": [
+   "Falar com delicadeza e diplomacia.",
+   "Agir com força e determinação, sem moderação.",
+   "Dar a opinião com hesitação.",
+   "Criticar de forma sutil e indireta."
+  ],
+  "optionsEn": [
+   "To speak gently and diplomatically.",
+   "To act with force and determination, without restraint.",
+   "To express one's opinion hesitantly.",
+   "To criticize in a subtle, indirect way."
+  ],
+  "turnPt": "Diante dessa injustiça escancarada, ele decidiu pegar pesado para ser ouvido.",
+  "turnEn": "Faced with this blatant injustice, he decided not to pull any punches to make his voice heard.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-001",
+  "optionsPt": [
+   "Uma coisa boba ou sem sentido",
+   "Uma coisa muito importante",
+   "Uma coisa muito cara",
+   "Uma coisa muito rápida"
+  ],
+  "optionsEn": [
+   "Something silly or meaningless",
+   "Something very important",
+   "Something very expensive",
+   "Something very fast"
+  ],
+  "turnPt": "Para de falar do seu gato que fala inglês, você está falando besteira!",
+  "turnEn": "Stop going on about your cat that speaks English, you're talking nonsense!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-002",
+  "optionsPt": [
+   "Estar com muita fome",
+   "Não aguentar mais uma situação",
+   "Estar muito contente",
+   "Ter muito dinheiro"
+  ],
+  "optionsEn": [
+   "To be very hungry",
+   "To be sick of a situation",
+   "To be very happy",
+   "To have a lot of money"
+  ],
+  "turnPt": "Faz três horas que estou fazendo a lição de casa, estou de saco cheio!",
+  "turnEn": "I've been doing my homework for three hours, I'm fed up!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-003",
+  "optionsPt": [
+   "Ser totalmente indiferente a algo",
+   "Ter muito orgulho de si mesmo",
+   "Estar com muita raiva de alguém",
+   "Ter muito medo de algo"
+  ],
+  "optionsEn": [
+   "To be totally indifferent to something",
+   "To be very proud of oneself",
+   "To be very angry with someone",
+   "To be very scared of something"
+  ],
+  "turnPt": "Ele pode criticar meu corte de cabelo, tô pouco me lixando: eu gosto dele.",
+  "turnEn": "He can criticize my haircut, I don't give a damn: I like it.",
+  "conf": "media",
+  "nota": "\"m'en fous\" é um pouco mais forte que \"não tô nem aí\" (seguiu o meaning_pt); alternativa mais próxima: \"tô pouco me lixando\".",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-004",
+  "optionsPt": [
+   "Trabalhar num jardim",
+   "Estar de muito bom humor",
+   "Ter um problema muito grande",
+   "Estar muito bem acomodado"
+  ],
+  "optionsEn": [
+   "To work in a garden",
+   "To be in a very good mood",
+   "To have a very big problem",
+   "To be very comfortably settled"
+  ],
+  "turnPt": "Meu computador quebrou na véspera de entregar o TCC: tô na merda!",
+  "turnEn": "My computer broke down the day before I had to hand in my thesis: I'm in deep shit!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 2,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-005",
+  "optionsPt": [
+   "É delicioso",
+   "É perfeitamente normal",
+   "É ruim ou preocupante",
+   "É muito fácil"
+  ],
+  "optionsEn": [
+   "It's delicious",
+   "It's perfectly normal",
+   "It's lame or worrying",
+   "It's very easy"
+  ],
+  "turnPt": "A bateria acabou e a gente está perdido na floresta… que roubada!",
+  "turnEn": "The battery's dead and we're lost in the forest… this sucks!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 2,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote1-006",
+  "optionsPt": [
+   "Ter vontade de fazer exercício",
+   "Estar com febre",
+   "Estar com muita pressa",
+   "Não ter vontade de fazer esforço"
+  ],
+  "optionsEn": [
+   "To feel like working out",
+   "To have a fever",
+   "To be in a big hurry",
+   "To not feel like making an effort"
+  ],
+  "turnPt": "A roupa já secou, mas estou com preguiça de dobrar agora.",
+  "turnEn": "The laundry is dry, but I can't be bothered to fold it right now.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 3,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-007",
+  "optionsPt": [
+   "É muito chato",
+   "É incrível ou surpreendente",
+   "É muito lógico",
+   "É um pouco triste"
+  ],
+  "optionsEn": [
+   "It's very boring",
+   "It's incredible or surprising",
+   "It's very logical",
+   "It's a little sad"
+  ],
+  "turnPt": "Ela fala seis línguas e só tem quinze anos, que loucura!",
+  "turnEn": "She speaks six languages and she's only fifteen, that's crazy!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-008",
+  "optionsPt": [
+   "Armar uma barraca",
+   "Fazer festa",
+   "Começar a trabalhar",
+   "Sair rápido, ir embora"
+  ],
+  "optionsEn": [
+   "To pitch a tent",
+   "To party",
+   "To get to work",
+   "To leave quickly, to go away"
+  ],
+  "turnPt": "Ele cansou desse trabalho e decidiu se mandar para o exterior.",
+  "turnEn": "He'd had enough of that job and decided to get the hell out and move abroad.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 3,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-009",
+  "optionsPt": [
+   "Para dar os parabéns a alguém",
+   "Para perguntar as horas com educação",
+   "Para dar oi a um amigo",
+   "Para mandar alguém calar a boca, de forma grosseira"
+  ],
+  "optionsEn": [
+   "To congratulate someone",
+   "To ask the time politely",
+   "To say hello to a friend",
+   "To rudely tell someone to be quiet"
+  ],
+  "turnPt": "Para de cantar desafinado às duas da manhã, cala essa boca!",
+  "turnEn": "Stop singing off-key at two in the morning, shut the hell up!",
+  "conf": "media",
+  "nota": "Já no francês a certa é a mais longa (\", grossièrement\") e entrega a resposta; em inglês ficou curta (\"rudely\" no começo). Sugestão para o pt: \"Para mandar alguém calar a boca\".",
+  "_cert_idx": 3,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-010",
+  "optionsPt": [
+   "Ajudar alguém a dormir",
+   "Irritar ou incomodar muito",
+   "Deixar alguém rico",
+   "Agradar muito"
+  ],
+  "optionsEn": [
+   "To help someone sleep",
+   "To annoy or bother a lot",
+   "To make someone rich",
+   "To please a lot"
+  ],
+  "turnPt": "Para de me fazer a mesma pergunta a cada cinco minutos, você está me enchendo o saco!",
+  "turnEn": "Stop asking me the same question every five minutes, you're pissing me off!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-011",
+  "optionsPt": [
+   "Complicar a vida ou brigar por nada",
+   "Descansar por muito tempo",
+   "Lavar o cabelo",
+   "Fazer um elogio a si mesmo"
+  ],
+  "optionsEn": [
+   "To complicate things or argue over nothing",
+   "To rest for a long time",
+   "To wash one's hair",
+   "To pay oneself a compliment"
+  ],
+  "turnPt": "Faz duas horas que vocês estão discutindo à toa: parem de esquentar a cabeça!",
+  "turnEn": "You've been arguing over nothing for two hours: stop getting so worked up!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-012",
+  "optionsPt": [
+   "Concordo totalmente",
+   "Não acredito nem um pouco (ironia)",
+   "Você fala francês muito bem",
+   "Continue falando, por favor"
+  ],
+  "optionsEn": [
+   "I totally agree",
+   "I don't believe it at all (irony)",
+   "You speak French very well",
+   "Keep talking, please"
+  ],
+  "turnPt": "\"O Paul disse que vai parar de fumar amanhã.\" — \"Até parece! Ele diz isso todo mês.\"",
+  "turnEn": "\"Paul said he'd quit smoking tomorrow.\" — \"Yeah, right! He says that every month.\"",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-013",
+  "optionsPt": [
+   "É muito caro",
+   "É muito fácil",
+   "É uma festa de aniversário",
+   "É muito doce"
+  ],
+  "optionsEn": [
+   "It's very expensive",
+   "It's very easy",
+   "It's a birthday party",
+   "It's very sweet"
+  ],
+  "turnPt": "Montar esse movelzinho com o manual? É moleza, leva dez minutos.",
+  "turnEn": "Putting together this little piece of furniture with the instructions? Piece of cake, it takes ten minutes.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote1-014",
+  "optionsPt": [
+   "Ter muita sorte",
+   "Estar cheio de energia",
+   "Ter um inseto em casa",
+   "Estar triste e melancólico"
+  ],
+  "optionsEn": [
+   "To be very lucky",
+   "To be very energetic",
+   "To have an insect at home",
+   "To be sad and melancholy"
+  ],
+  "turnPt": "Desde que o melhor amigo dele se mudou, ele anda na fossa e não sai mais.",
+  "turnEn": "Since his best friend moved away, he's been feeling down and doesn't go out anymore.",
+  "conf": "alta",
+  "nota": "Fora desta tarefa: o meaning_pt tem \"estar pra baixo\" (\"pra\" é vetado em texto visível); trocar por \"estar para baixo\" ou \"estar desanimado\".",
+  "_cert_idx": 3,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-015",
+  "optionsPt": [
+   "Costurar uma roupa",
+   "Ligar para alguém",
+   "Mandar uma carta",
+   "Cortar um cabo"
+  ],
+  "optionsEn": [
+   "To sew a garment",
+   "To call someone",
+   "To send a letter",
+   "To cut a cable"
+  ],
+  "turnPt": "Espera dois minutinhos, preciso dar uma ligada para o meu chefe.",
+  "turnEn": "Wait two minutes, I need to give my boss a call.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote1-016",
+  "optionsPt": [
+   "Fechar uma loja",
+   "Esperar a vez numa fila",
+   "Preparar um prato",
+   "Correr muito rápido"
+  ],
+  "optionsEn": [
+   "To close a shop",
+   "To wait one's turn in line",
+   "To cook a dish",
+   "To run very fast"
+  ],
+  "turnPt": "Tem muita gente nos Correios, vamos ter que pegar fila.",
+  "turnEn": "There are lots of people at the post office, we're going to have to wait in line.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-017",
+  "optionsPt": [
+   "Ter medo de algo",
+   "Estar muito cansado",
+   "Estar ansioso para que algo aconteça",
+   "Estar atrasado"
+  ],
+  "optionsEn": [
+   "To be afraid of something",
+   "To be very tired",
+   "To be eager for something to happen",
+   "To be late"
+  ],
+  "turnPt": "Meu irmão chega do Canadá amanhã, não vejo a hora de vê-lo de novo!",
+  "turnEn": "My brother arrives from Canada tomorrow, I can't wait to see him again!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 2,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-018",
+  "optionsPt": [
+   "Olhe com atenção",
+   "Eu vi com meus próprios olhos",
+   "Estou com dor no olho",
+   "Não acredito nada em você"
+  ],
+  "optionsEn": [
+   "Look carefully",
+   "I saw it with my own eyes",
+   "My eye hurts",
+   "I don't believe you at all"
+  ],
+  "turnPt": "\"O cachorro comeu minha lição, professora.\" — \"Sei... Inventa uma desculpa melhor.\"",
+  "turnEn": "\"The dog ate my homework, miss.\" — \"Oh, sure! Come up with a better excuse.\"",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 3,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-019",
+  "optionsPt": [
+   "Tomar uma decisão com calma",
+   "Se exaltar e reagir com exagero",
+   "Andar a cavalo",
+   "Ficar muito rico"
+  ],
+  "optionsEn": [
+   "To make a calm decision",
+   "To lose one's temper and overreact",
+   "To go horseback riding",
+   "To become very rich"
+  ],
+  "turnPt": "Eu só fiz um comentariozinho, não precisa subir nas tamancas desse jeito!",
+  "turnEn": "I just made a little remark, no need to get on your high horse like that!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote1-020",
+  "optionsPt": [
+   "Levar uma pancada forte",
+   "Achar uma solução rápida",
+   "Tomar um drinque no bar",
+   "Sentir um cansaço repentino"
+  ],
+  "optionsEn": [
+   "To get hit hard",
+   "To find a quick fix",
+   "To have a drink at a bar",
+   "To feel suddenly exhausted"
+  ],
+  "turnPt": "Vou tirar um cochilo, bateu um cansaço depois dessa comilança.",
+  "turnEn": "I'm going to take a nap, I'm suddenly wiped out after that big meal.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 3,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote2-001",
+  "optionsPt": [
+   "Para agradecer alguém com muito carinho",
+   "Para pedir ajuda a alguém com educação",
+   "Para desejar boa viagem a um amigo",
+   "Para mandar alguém embora, de forma grosseira"
+  ],
+  "optionsEn": [
+   "To thank someone very warmly",
+   "To politely ask someone for help",
+   "To wish a friend a good trip",
+   "To tell someone to leave, rudely"
+  ],
+  "turnPt": "Você está me irritando, cai fora do meu quarto!",
+  "turnEn": "You're getting on my nerves, get out of my room!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 3,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote2-002",
+  "optionsPt": [
+   "Pegar no sono muito rápido",
+   "Se machucar ao cair",
+   "Ir embora, sair",
+   "Ficar bravo com alguém"
+  ],
+  "optionsEn": [
+   "Fall asleep very quickly",
+   "Get hurt in a fall",
+   "Leave, go away",
+   "Get angry at someone"
+  ],
+  "turnPt": "Essa festa está muito chata, vamos vazar?",
+  "turnEn": "This party sucks, wanna bail?",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 2,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote2-003",
+  "optionsPt": [
+   "É muito engraçado e divertido",
+   "É muito chato ou cansativo",
+   "É muito caro de comprar",
+   "É muito fácil de fazer"
+  ],
+  "optionsEn": [
+   "It's very funny and entertaining",
+   "It's very boring or annoying",
+   "It's very expensive to buy",
+   "It's very easy to do"
+  ],
+  "turnPt": "Preencher essa papelada durante três horas é um saco!",
+  "turnEn": "Filling out these forms for three hours is a pain in the ass!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote2-004",
+  "optionsPt": [
+   "Estar com frio",
+   "Estar com vergonha",
+   "Estar com sono",
+   "Estar com medo"
+  ],
+  "optionsEn": [
+   "Be cold",
+   "Be ashamed",
+   "Be sleepy",
+   "Be scared"
+  ],
+  "turnPt": "Meu irmãozinho se recusa a entrar na caverna: ele está morrendo de medo.",
+  "turnEn": "My little brother won't go into the cave: he's scared stiff.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 3,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote2-005",
+  "optionsPt": [
+   "Estar muito cansado",
+   "Estar muito doente",
+   "Estar muito bravo",
+   "Estar muito feliz"
+  ],
+  "optionsEn": [
+   "Be very tired",
+   "Be very sick",
+   "Be very angry",
+   "Be very happy"
+  ],
+  "turnPt": "Passei o dia inteiro fazendo mudança, estou morto.",
+  "turnEn": "I spent the whole day moving, I'm wiped out.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote2-006",
+  "optionsPt": [
+   "Ter bebido demais",
+   "Ter comido demais",
+   "Estar cheio de dinheiro",
+   "Estar com muita pressa"
+  ],
+  "optionsEn": [
+   "Have had too much to drink",
+   "Have eaten too much",
+   "Be full of cash",
+   "Be in a big hurry"
+  ],
+  "turnPt": "Depois de todas aquelas garrafas de vinho, o Marc estava completamente de porre.",
+  "turnEn": "After all those bottles of wine, Marc was completely hammered.",
+  "conf": "alta",
+  "nota": "En: evitei 'loaded with money' na distratora 3 porque 'loaded' também é gíria para bêbado.",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote2-007",
+  "optionsPt": [
+   "Estar com muita sede",
+   "Estar com vontade de dormir",
+   "Estar com muita fome",
+   "Estar com dor de barriga"
+  ],
+  "optionsEn": [
+   "Be very thirsty",
+   "Feel like sleeping",
+   "Be very hungry",
+   "Have a stomachache"
+  ],
+  "turnPt": "Não comi nada desde hoje de manhã, estou morrendo de fome!",
+  "turnEn": "I haven't eaten anything since this morning, I'm starving!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 2,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote2-008",
+  "optionsPt": [
+   "Irritar alguém sem parar",
+   "Ajudar alguém a cozinhar",
+   "Dar presentes a alguém",
+   "Fazer todo mundo rir"
+  ],
+  "optionsEn": [
+   "Annoy someone nonstop",
+   "Help someone cook",
+   "Give someone gifts",
+   "Make everyone laugh"
+  ],
+  "turnPt": "Você está repetindo a mesma coisa há uma hora, está me enchendo o saco!",
+  "turnEn": "You've been repeating the same thing for an hour, you're driving me nuts!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote2-009",
+  "optionsPt": [
+   "Quando alguém fala baixo demais",
+   "Quando alguém exagera ou mente",
+   "Quando alguém dirige rápido demais",
+   "Quando alguém vai embora cedo demais"
+  ],
+  "optionsEn": [
+   "When someone speaks too quietly",
+   "When someone exaggerates or lies",
+   "When someone drives too fast",
+   "When someone leaves too early"
+  ],
+  "turnPt": "Você fala dez línguas? Conta outra!",
+  "turnEn": "You speak ten languages? Give me a break!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote2-010",
+  "optionsPt": [
+   "Estar apaixonado",
+   "Comer fruta demais",
+   "Desmaiar",
+   "Cair de bicicleta"
+  ],
+  "optionsEn": [
+   "Be in love",
+   "Eat too much fruit",
+   "Faint",
+   "Fall off a bike"
+  ],
+  "turnPt": "Ela não tinha comido nada e desmaiou durante a aula de educação física.",
+  "turnEn": "She hadn't eaten anything and passed out during PE class.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 2,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote2-011",
+  "optionsPt": [
+   "Guardar um segredo",
+   "Falar por tempo demais",
+   "Alimentar seu animal",
+   "Desistir de achar a resposta"
+  ],
+  "optionsEn": [
+   "Keep a secret",
+   "Talk for too long",
+   "Feed your pet",
+   "Give up on finding the answer"
+  ],
+  "turnPt": "E aí, adivinhou? Não? Desiste?",
+  "turnEn": "So, did you guess? No? Do you give up?",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 3,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote2-012",
+  "optionsPt": [
+   "Ser muito bonito",
+   "Ser de graça",
+   "Custar muito caro",
+   "Doer muito"
+  ],
+  "optionsEn": [
+   "Be very beautiful",
+   "Be free",
+   "Cost a lot",
+   "Hurt a lot"
+  ],
+  "turnPt": "A gente não pode comprar esse carro, ele custa os olhos da cara.",
+  "turnEn": "We can't buy this car, it costs an arm and a leg.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 2,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote2-013",
+  "optionsPt": [
+   "Uma noite sem dormir",
+   "Uma noite muito tranquila",
+   "Uma noite de festa de casamento",
+   "Uma noite com neve"
+  ],
+  "optionsEn": [
+   "A night without sleep",
+   "A very quiet night",
+   "A wedding party night",
+   "A night with snow"
+  ],
+  "turnPt": "Não dormi nada: passei a noite em claro.",
+  "turnEn": "I didn't sleep at all: I spent a sleepless night.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote2-014",
+  "optionsPt": [
+   "Abandonar, desistir",
+   "Fazer faxina",
+   "Ficar bravo",
+   "Começar um projeto"
+  ],
+  "optionsEn": [
+   "Give up, quit",
+   "Clean the house",
+   "Get angry",
+   "Start a project"
+  ],
+  "turnPt": "Ele foi reprovado na prova de direção cinco vezes e aí jogou a toalha.",
+  "turnEn": "He failed his driving test five times, then he threw in the towel.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote2-015",
+  "optionsPt": [
+   "Ter dor de cabeça",
+   "Estar distraído, sonhador",
+   "Ter medo de avião",
+   "Ser muito inteligente"
+  ],
+  "optionsEn": [
+   "Have a headache",
+   "Be distracted, dreamy",
+   "Be afraid of flying",
+   "Be very smart"
+  ],
+  "turnPt": "Você nunca escuta o que eu digo, vive no mundo da lua!",
+  "turnEn": "You never listen to what I say, you've got your head in the clouds!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote2-016",
+  "optionsPt": [
+   "Ser muito generoso",
+   "Estar muito doente",
+   "Estar muito apaixonado",
+   "Ser muito tímido"
+  ],
+  "optionsEn": [
+   "Be very generous",
+   "Be very sick",
+   "Be deeply in love",
+   "Be very shy"
+  ],
+  "turnPt": "O Paul costuma doar o seu tempo para quem precisa: ele tem um coração de ouro.",
+  "turnEn": "Paul often gives his time to people in need: he has a heart of gold.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote2-017",
+  "optionsPt": [
+   "Estar um pouco bêbado",
+   "Estar resfriado",
+   "Ser muito curioso",
+   "Estar com o nariz quebrado"
+  ],
+  "optionsEn": [
+   "Be a bit drunk",
+   "Have a cold",
+   "Be very curious",
+   "Have a broken nose"
+  ],
+  "turnPt": "Ele ria alto demais e falava com todo mundo: dava para ver que ele estava alegrinho.",
+  "turnEn": "He was laughing too loudly and talking to everyone: he'd clearly had a few.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote2-018",
+  "optionsPt": [
+   "Custar caríssimo",
+   "Se machucar ao cair",
+   "Ser muito desconfortável",
+   "Não custar nada"
+  ],
+  "optionsEn": [
+   "Be extremely expensive",
+   "Get hurt in a fall",
+   "Be very uncomfortable",
+   "Cost nothing at all"
+  ],
+  "turnPt": "Com todas essas taxas escondidas, meu plano de celular está me custando os olhos da cara!",
+  "turnEn": "With all these hidden fees, my phone plan is costing me an arm and a leg!",
+  "conf": "media",
+  "nota": "A lacuna do francês é só 'fesses'; as frases traduzidas trazem a expressão inteira equivalente (pt 'os olhos da cara', en 'an arm and a leg'), sem palavra correspondente a 'fesses'.",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote2-019",
+  "optionsPt": [
+   "Exagerar um problema pequeno",
+   "Contar uma história engraçada",
+   "Preparar uma grande refeição",
+   "Esquecer um compromisso"
+  ],
+  "optionsEn": [
+   "Exaggerate a small problem",
+   "Tell a funny story",
+   "Cook a big meal",
+   "Forget an appointment"
+  ],
+  "turnPt": "É só um arranhãozinho no carro, não precisa fazer tempestade em copo d'água.",
+  "turnEn": "It's just a little scratch on the car, no need to make a mountain out of a molehill.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote2-020",
+  "optionsPt": [
+   "Rir vendo um filme",
+   "Rir sem ter vontade de verdade",
+   "Rir muito alto e por muito tempo",
+   "Rir para zombar dos outros"
+  ],
+  "optionsEn": [
+   "Laugh while watching a movie",
+   "Laugh without really wanting to",
+   "Laugh very loudly for a long time",
+   "Laugh to make fun of others"
+  ],
+  "turnPt": "A piada sobre a idade dela não agradou: ela riu amarelo.",
+  "turnEn": "She didn't like the joke about her age: she gave a forced laugh.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 1,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-001",
+  "optionsPt": [
+   "Vale o esforço ou o dinheiro",
+   "Custa caro demais",
+   "Dói como uma pancada",
+   "Acontece de repente"
+  ],
+  "optionsEn": [
+   "It's worth the effort or money",
+   "It costs way too much",
+   "It hurts like a blow",
+   "It happens all of a sudden"
+  ],
+  "turnPt": "Esse filme dura três horas, mas, acredite, vale a pena!",
+  "turnEn": "This movie is three hours long, but trust me, it's worth it!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote3-002",
+  "optionsPt": [
+   "Quando alguém não tem sorte",
+   "Quando não sobrou nada para comer",
+   "Quando a gente recusa um convite",
+   "Quando alguém está com muita fome"
+  ],
+  "optionsEn": [
+   "When someone is out of luck",
+   "When there's nothing left to eat",
+   "When you turn down an invitation",
+   "When someone is very hungry"
+  ],
+  "turnPt": "A loja fechou bem quando a gente estava chegando. Que azar!",
+  "turnEn": "The store closed just as we were getting there. Just our luck!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-003",
+  "optionsPt": [
+   "Ter sorte",
+   "Estar com muita sede",
+   "Ter muito dinheiro",
+   "Ter gênio ruim"
+  ],
+  "optionsEn": [
+   "Be lucky",
+   "Be very thirsty",
+   "Have lots of money",
+   "Have a bad temper"
+  ],
+  "turnPt": "Ela ganhou na loteria logo na primeira vez, que sortuda!",
+  "turnEn": "She won the lottery on her very first try, she's so lucky!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-004",
+  "optionsPt": [
+   "Tomar cuidado",
+   "Fazer uma piada",
+   "Fazer barulho",
+   "Cair na farra"
+  ],
+  "optionsEn": [
+   "Be careful",
+   "Make a joke",
+   "Make noise",
+   "Party"
+  ],
+  "turnPt": "Toma cuidado ao atravessar, os carros andam rápido aqui!",
+  "turnEn": "Watch out when you cross, cars go fast around here!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-005",
+  "optionsPt": [
+   "Errar ou fracassar",
+   "Se instalar num jardim",
+   "Parar para descansar",
+   "Acordar muito cedo"
+  ],
+  "optionsEn": [
+   "Get it wrong or fail",
+   "Settle into a garden",
+   "Stop to rest",
+   "Get up very early"
+  ],
+  "turnPt": "Não entendi a pergunta e me dei mal: tirei zero!",
+  "turnEn": "I didn't understand the question and totally blew it: I got a zero!",
+  "conf": "media",
+  "nota": "'zéro sur vingt' (escala francesa de 0 a 20) virou 'tirei zero' / 'I got a zero' nas duas traduções.",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-006",
+  "optionsPt": [
+   "É muito ruim",
+   "É de graça",
+   "É muito fácil",
+   "Já acabou"
+  ],
+  "optionsEn": [
+   "It's really bad",
+   "It's free",
+   "It's very easy",
+   "It's over"
+  ],
+  "turnPt": "Esse filme é chato e os atores atuam mal. Que porcaria!",
+  "turnEn": "This movie is boring and the actors are bad. It sucks!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-007",
+  "optionsPt": [
+   "É ótimo",
+   "É estranho",
+   "É difícil",
+   "É uma pena"
+  ],
+  "optionsEn": [
+   "It's great",
+   "It's weird",
+   "It's hard",
+   "It's a shame"
+  ],
+  "turnPt": "Meus pais vão me dar um cachorro de aniversário, que demais!",
+  "turnEn": "My parents are giving me a dog for my birthday, that's awesome!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-008",
+  "optionsPt": [
+   "Quando a gente está surpreso ou decepcionado",
+   "Quando a gente diz oi",
+   "Quando a gente fala de uma pessoa magra",
+   "Quando a gente agradece alguém"
+  ],
+  "optionsEn": [
+   "When you're surprised or disappointed",
+   "When you say hello",
+   "When you talk about a thin person",
+   "When you thank someone"
+  ],
+  "turnPt": "Poxa vida, não tem mais leite para o café!",
+  "turnEn": "Oh shoot, there's no more milk for the coffee!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote3-009",
+  "optionsPt": [
+   "Que está rindo muito",
+   "Que está muito cansado",
+   "Que está com muito medo",
+   "Que está muito triste"
+  ],
+  "optionsEn": [
+   "Laughing really hard",
+   "Feeling very tired",
+   "Feeling very scared",
+   "Feeling very sad"
+  ],
+  "turnPt": "Quando ele caiu na piscina de roupa e tudo, todo mundo morreu de rir.",
+  "turnEn": "When he fell into the pool fully dressed, everyone was in stitches.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-010",
+  "optionsPt": [
+   "Estar ótimo",
+   "Estar no alto de um prédio",
+   "Estar atrasado",
+   "Estar muito ocupado"
+  ],
+  "optionsEn": [
+   "Be excellent",
+   "Be at the top of a building",
+   "Be late",
+   "Be very busy"
+  ],
+  "turnPt": "O hotel era limpo, os funcionários eram simpáticos: estava tudo top.",
+  "turnEn": "The hotel was clean, the staff was friendly: everything was top-notch.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-011",
+  "optionsPt": [
+   "Não conseguir mais ficar calmo",
+   "Perder um objeto importante",
+   "Esperar com prazer",
+   "Esquecer um compromisso"
+  ],
+  "optionsEn": [
+   "Be unable to stay calm",
+   "Lose an important item",
+   "Enjoy waiting",
+   "Forget an appointment"
+  ],
+  "turnPt": "Faz trinta minutos que estou esperando no telefone, estou começando a perder a paciência.",
+  "turnEn": "I've been on hold for thirty minutes, I'm starting to lose patience.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote3-012",
+  "optionsPt": [
+   "Começar a amar alguém",
+   "Cair no chão",
+   "Brigar com alguém",
+   "Terminar com alguém"
+  ],
+  "optionsEn": [
+   "To start loving someone",
+   "To fall to the ground",
+   "To argue with someone",
+   "To break up with someone"
+  ],
+  "turnPt": "Meus avós se conheceram num baile e se apaixonaram na hora.",
+  "turnEn": "My grandparents met at a dance and fell in love right away.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote3-013",
+  "optionsPt": [
+   "Fica quieto",
+   "Fecha a porta",
+   "Vai dormir",
+   "Para de comer"
+  ],
+  "optionsEn": [
+   "Be quiet",
+   "Close the door",
+   "Go to bed",
+   "Stop eating"
+  ],
+  "turnPt": "Você sempre fala besteira. Cala a boca um segundo e me escuta!",
+  "turnEn": "You always talk nonsense. Shut up for a second and listen to me!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-014",
+  "optionsPt": [
+   "Me deixa em paz",
+   "Vem me ajudar",
+   "Faz as pazes comigo",
+   "Fala mais alto comigo"
+  ],
+  "optionsEn": [
+   "Leave me alone",
+   "Come help me",
+   "Make peace with me",
+   "Speak louder to me"
+  ],
+  "turnPt": "Já é a décima vez que você me faz a mesma pergunta, me deixa em paz, pô!",
+  "turnEn": "That's the tenth time you've asked me the same question, leave me the hell alone!",
+  "conf": "media",
+  "nota": "Registro da frase em pt: \"me deixa em paz, pô!\"; alternativa \"sai do meu pé!\" (um pouco mais leve).",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-015",
+  "optionsPt": [
+   "Você está me zoando?",
+   "Você tem medo de mim?",
+   "Você está pensando em mim?",
+   "Você vem comigo?"
+  ],
+  "optionsEn": [
+   "Are you making fun of me?",
+   "Are you scared of me?",
+   "Are you thinking of me?",
+   "Are you coming with me?"
+  ],
+  "turnPt": "Você chega com duas horas de atraso e me diz \"estou adiantado\"? Tá de sacanagem comigo?",
+  "turnEn": "You show up two hours late and tell me \"I'm early\"? Are you kidding me?",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-016",
+  "optionsPt": [
+   "Quando alguém está muito irritado",
+   "Quando alguém agradece",
+   "Quando alguém está calmo e feliz",
+   "Quando alguém cumprimenta um amigo"
+  ],
+  "optionsEn": [
+   "When you're really annoyed",
+   "When you say thank you",
+   "When you're calm and happy",
+   "When you greet a friend"
+  ],
+  "turnPt": "Que zona é essa? Todo mundo está gritando no corredor!",
+  "turnEn": "What the hell is going on? Everyone's yelling in the hallway!",
+  "conf": "media",
+  "nota": "Na frase da Sua vez, \"bordel\" é substantivo (bagunça, caos), não a interjeição das opções; traduzido como \"zona\" (pt) e \"what the hell\" (en).",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-017",
+  "optionsPt": [
+   "Para expressar uma emoção forte",
+   "Para pedir com educação",
+   "Para se despedir",
+   "Para agradecer alguém"
+  ],
+  "optionsEn": [
+   "To express a strong emotion",
+   "To ask politely",
+   "To say goodbye",
+   "To thank someone"
+  ],
+  "turnPt": "Essa porra de despertador não tocou hoje de manhã!",
+  "turnEn": "This fucking alarm clock didn't go off this morning!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote3-018",
+  "optionsPt": [
+   "É um insulto: \"idiota\"",
+   "É um elogio",
+   "É um jeito de cumprimentar",
+   "É uma palavra para pedir desculpa"
+  ],
+  "optionsEn": [
+   "It's an insult: \"idiot\"",
+   "It's a compliment",
+   "It's a way of saying hello",
+   "It's a word for apologizing"
+  ],
+  "turnPt": "Seu imbecil, você quebrou minha bicicleta!",
+  "turnEn": "You dumbass, you broke my bike!",
+  "conf": "alta",
+  "nota": "A dica \"(3 lettres)\" do original foi tirada da tradução.",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote3-019",
+  "optionsPt": [
+   "É um insulto: \"homem malvado\"",
+   "É uma palavra para um amigo",
+   "É uma profissão",
+   "É uma palavra gentil"
+  ],
+  "optionsEn": [
+   "It's an insult: \"mean man\"",
+   "It's a word for a friend",
+   "It's a job",
+   "It's a kind word"
+  ],
+  "turnPt": "Esse cara não é só meio bobo, é um babaca de verdade: ele faz maldade de propósito.",
+  "turnEn": "This guy isn't just a bit dumb, he's a real asshole: he hurts people on purpose.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote3-020",
+  "optionsPt": [
+   "Estar totalmente enganado",
+   "Estar sentado ao lado de alguém",
+   "Estar atrasado para o jantar",
+   "Estar muito atento"
+  ],
+  "optionsEn": [
+   "To be completely wrong",
+   "To be sitting next to someone",
+   "To be late for dinner",
+   "To be very attentive"
+  ],
+  "turnPt": "Você está falando de férias enquanto a gente procura uma solução para o problema? Você está totalmente viajando!",
+  "turnEn": "You're talking about vacation while we're looking for a solution to the problem? You're totally off the mark!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote4-001",
+  "optionsPt": [
+   "Fazer de conta que é verdade",
+   "Fazer algo muito rápido",
+   "Sempre dizer a verdade",
+   "Fazer o mesmo que um amigo"
+  ],
+  "optionsEn": [
+   "To act as if it were true",
+   "To do something very fast",
+   "To always tell the truth",
+   "To do the same as a friend"
+  ],
+  "turnPt": "O menininho não está dormindo, ele está fingindo que dorme.",
+  "turnEn": "The little boy isn't sleeping, he's pretending to sleep.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote4-002",
+  "optionsPt": [
+   "Fazer algo de propósito",
+   "Fazer algo tarde demais",
+   "Fazer algo com um amigo",
+   "Fazer algo muito bem"
+  ],
+  "optionsEn": [
+   "To do something on purpose",
+   "To do something too late",
+   "To do something with a friend",
+   "To do something very well"
+  ],
+  "turnPt": "Desculpa por ter te empurrado, não foi de propósito!",
+  "turnEn": "Sorry for pushing you, I didn't do it on purpose!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote4-003",
+  "optionsPt": [
+   "Deixar o passado para trás",
+   "Ler um livro bem rápido",
+   "Voltar a uma briga antiga",
+   "Mudar de ideia toda hora"
+  ],
+  "optionsEn": [
+   "To leave the past behind",
+   "To read a book very quickly",
+   "To bring up an old argument",
+   "To change your mind often"
+  ],
+  "turnPt": "Esse trabalho me deixou infeliz por anos, mas finalmente virei a página.",
+  "turnEn": "That job made me unhappy for years, but I've finally turned the page.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote4-004",
+  "optionsPt": [
+   "Guardar rancor de alguém",
+   "Ter vontade de ver alguém",
+   "Pedir um favor a alguém",
+   "Ter ciúme de alguém"
+  ],
+  "optionsEn": [
+   "To hold a grudge against someone",
+   "To want to see someone",
+   "To ask someone a favor",
+   "To be jealous of someone"
+  ],
+  "turnPt": "Ele mentiu para mim, então ainda estou com um pouco de raiva dele.",
+  "turnEn": "He lied to me, so I'm still a bit mad at him.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote4-005",
+  "optionsPt": [
+   "Quando não tem mais esperança",
+   "Quando tudo está indo muito bem",
+   "Quando alguém quer agradecer",
+   "Quando alguém começa um projeto"
+  ],
+  "optionsEn": [
+   "When there's no hope left",
+   "When everything is going really well",
+   "When you want to thank someone",
+   "When you start a project"
+  ],
+  "turnPt": "Faltam dois minutos e a gente está perdendo de três a zero: já era.",
+  "turnEn": "Two minutes left and we're losing three to nothing: we're done for.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote4-006",
+  "optionsPt": [
+   "Não ter dinheiro",
+   "Estar muito cansado",
+   "Ter trabalho demais",
+   "Estar doente"
+  ],
+  "optionsEn": [
+   "To have no money",
+   "To be very tired",
+   "To have too much work",
+   "To be sick"
+  ],
+  "turnPt": "Você pode pagar o café? Não tenho mais nem um euro, estou duro.",
+  "turnEn": "Can you pay for the coffee? I don't have a single euro left, I'm broke.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote4-007",
+  "optionsPt": [
+   "Estar chateado",
+   "Estar muito feliz",
+   "Estar com frio",
+   "Estar com fome"
+  ],
+  "optionsEn": [
+   "To be upset",
+   "To be very happy",
+   "To be cold",
+   "To be hungry"
+  ],
+  "turnPt": "A gente perdeu o jogo no último segundo, que raiva!",
+  "turnEn": "We lost the game in the last second, I'm so bummed!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote4-008",
+  "optionsPt": [
+   "Estar cheio de energia",
+   "Estar com vontade de comer uma fruta",
+   "Estar de mau humor",
+   "Estar com sono"
+  ],
+  "optionsEn": [
+   "To be full of energy",
+   "To feel like eating fruit",
+   "To be in a bad mood",
+   "To be sleepy"
+  ],
+  "turnPt": "Dormi bem, hoje estou com a corda toda!",
+  "turnEn": "I slept well, today I'm raring to go!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote4-009",
+  "optionsPt": [
+   "Ter muita dificuldade para fazer algo",
+   "Viajar de barco",
+   "Conseguir com muita facilidade",
+   "Se recusar a trabalhar"
+  ],
+  "optionsEn": [
+   "To have a hard time doing something",
+   "To travel by boat",
+   "To succeed very easily",
+   "To refuse to work"
+  ],
+  "turnPt": "Sem GPS, a gente penou uma hora para achar o hotel.",
+  "turnEn": "Without GPS, we struggled for an hour to find the hotel.",
+  "conf": "alta",
+  "nota": "A certa já é a mais longa no original francês.",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote4-010",
+  "optionsPt": [
+   "Ter dinheiro",
+   "Sentir frio",
+   "Ter sorte",
+   "Ter amigos"
+  ],
+  "optionsEn": [
+   "To have money",
+   "To be cold",
+   "To be lucky",
+   "To have friends"
+  ],
+  "turnPt": "Ele anda de carro de luxo, deve ter grana.",
+  "turnEn": "He drives a luxury car, he must be loaded.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote4-011",
+  "optionsPt": [
+   "Quando alguém irrita muito a gente",
+   "Quando a gente quer parabenizar alguém",
+   "Quando a gente se despede com educação",
+   "Quando a gente pede ajuda"
+  ],
+  "optionsEn": [
+   "When someone really annoys you",
+   "When you want to congratulate someone",
+   "When you say goodbye politely",
+   "When you ask for help"
+  ],
+  "turnPt": "Já é a décima vez que você bate na minha porta, você está me enchendo o saco!",
+  "turnEn": "That's the tenth time you've knocked on my door, you're pissing me off!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote4-012",
+  "optionsPt": [
+   "Para rejeitar alguém com raiva",
+   "Para convidar alguém para uma festa",
+   "Para propor uma visita guiada",
+   "Para agradecer um amigo"
+  ],
+  "optionsEn": [
+   "To reject someone angrily",
+   "To invite someone to a party",
+   "To suggest a guided tour",
+   "To thank a friend"
+  ],
+  "turnPt": "Você quer que eu te empreste dinheiro de novo? Não, vai se danar!",
+  "turnEn": "You want me to lend you money again? No, go to hell!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote4-013",
+  "optionsPt": [
+   "Ficar de cara fechada e emburrado",
+   "Rir muito alto",
+   "Falar sem parar",
+   "Fazer careta para divertir"
+  ],
+  "optionsEn": [
+   "To look angry and sulk",
+   "To laugh very loudly",
+   "To talk nonstop",
+   "To make faces to amuse people"
+  ],
+  "turnPt": "Ele não ganhou o presente que queria, então está emburrado desde hoje de manhã.",
+  "turnEn": "He didn't get the present he wanted, so he's been sulking since this morning.",
+  "conf": "alta",
+  "nota": "No original, register = familiar, mas o meaning_pt traz o aviso de registro vulgar; conferir qual vale. A certa já é a mais longa no original.",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote4-014",
+  "optionsPt": [
+   "Tirar sarro de alguém",
+   "Admirar alguém",
+   "Ajudar alguém em segredo",
+   "Ignorar alguém educadamente"
+  ],
+  "optionsEn": [
+   "To make fun of someone",
+   "To admire someone",
+   "To secretly help someone",
+   "To politely ignore someone"
+  ],
+  "turnPt": "Três horas de atraso e nenhuma desculpa? Eles estão tirando com a nossa cara!",
+  "turnEn": "Three hours late and no apology? They're screwing with us!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote4-015",
+  "optionsPt": [
+   "Estar muito tenso e irritado",
+   "Estar totalmente calmo",
+   "Estar praticando esporte",
+   "Estar muito apaixonado"
+  ],
+  "optionsEn": [
+   "To be tense and irritable",
+   "To be perfectly calm",
+   "To be playing sports",
+   "To be deeply in love"
+  ],
+  "turnPt": "Ela não dorme há dois dias por causa da mudança, está com os nervos à flor da pele.",
+  "turnEn": "She hasn't slept in two days because of the move, she's on edge.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote4-016",
+  "optionsPt": [
+   "Está chovendo muito forte",
+   "Está muito calor",
+   "Está ventando muito",
+   "Está começando a nevar"
+  ],
+  "optionsEn": [
+   "It's raining very hard",
+   "It's very hot",
+   "It's very windy",
+   "It's starting to snow"
+  ],
+  "turnPt": "Estou encharcado: quando saí do metrô, estava chovendo canivete!",
+  "turnEn": "I'm soaked: when I came out of the subway, it was raining cats and dogs!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote4-017",
+  "optionsPt": [
+   "Dar o máximo",
+   "Mandar um pacote pelo correio",
+   "Fazer só o mínimo",
+   "Desistir de um projeto"
+  ],
+  "optionsEn": [
+   "To give it everything",
+   "To send a package by mail",
+   "To do the bare minimum",
+   "To give up on a project"
+  ],
+  "turnPt": "A entrevista é amanhã: hoje à noite eu reviso tudo, vou com tudo!",
+  "turnEn": "The interview is tomorrow: tonight I'm going over everything, I'm going all out!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote4-018",
+  "optionsPt": [
+   "A toda velocidade",
+   "Bem devagar",
+   "Em silêncio",
+   "Com muito cuidado"
+  ],
+  "optionsEn": [
+   "At full speed",
+   "Very slowly",
+   "In silence",
+   "Very carefully"
+  ],
+  "turnPt": "O entregador arrancou a mil e quase atropelou um pedestre.",
+  "turnEn": "The delivery guy floored it and nearly ran over a pedestrian.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ },
+ {
+  "id": "expr-lote4-019",
+  "optionsPt": [
+   "Não é nada de especial",
+   "É incrível de verdade",
+   "É muito perigoso",
+   "Está quebrando"
+  ],
+  "optionsEn": [
+   "It's nothing special",
+   "It's really great",
+   "It's very dangerous",
+   "It's breaking"
+  ],
+  "turnPt": "Esse restaurante é razoável, mas, sinceramente, não é nada de mais.",
+  "turnEn": "This restaurant is okay, but honestly, it's nothing to write home about.",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": true,
+  "_mais_longa_pt": true
+ },
+ {
+  "id": "expr-lote4-020",
+  "optionsPt": [
+   "Ser louco",
+   "Ser muito inteligente",
+   "Estar cansado",
+   "Ser tímido"
+  ],
+  "optionsEn": [
+   "To be crazy",
+   "To be very smart",
+   "To be tired",
+   "To be shy"
+  ],
+  "turnPt": "Atravessar a rodovia a pé? Só sendo pirado!",
+  "turnEn": "Cross the highway on foot? You'd have to be nuts!",
+  "conf": "alta",
+  "nota": "",
+  "_cert_idx": 0,
+  "_mais_longa_fr": false,
+  "_mais_longa_pt": false
+ }
+]
