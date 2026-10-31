@@ -36,3 +36,8 @@ psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_117.sql" 2>&1 |
 $P aulas94 -f "$MIG/121_mural_classroom_style.sql" >/dev/null
 $P aulas94 -f "$MIG/121_mural_classroom_style.sql" >/dev/null
 psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_121.sql" 2>&1 | grep -v '^\s*$'
+# 122: o aviso da aula conta os cartões do Banco daquela aula.
+$P aulas94 -f "$MIG/122_mural_lesson_bank_cards.sql" >/dev/null
+$P aulas94 -f "$MIG/122_mural_lesson_bank_cards.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_121.sql" 2>&1 | grep -v '^\s*$' | tail -1
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_122.sql" 2>&1 | grep -v '^\s*$'

@@ -3678,6 +3678,9 @@ window.I18N_CATALOG['en'] = {
   'mural.auto.homework': 'Homework: {hw}', // ALTA
   'mural.auto.openLesson': 'See lesson', // ALTA
   'mural.auto.openMaterial': 'Open', // ALTA
+  'mural.auto.bankCards': { one: '{n} card from this lesson is in your Review', other: '{n} cards from this lesson are in your Review' }, // ALTA
+  'mural.auto.bankCardsTeacher': { one: '{n} Review Bank card from this lesson', other: '{n} Review Bank cards from this lesson' }, // ALTA
+  'mural.auto.reviewNow': 'Review', // ALTA
   'mural.cover.with': 'with {name}', // ALTA
   'mural.cover.individual': 'one-on-one board', // ALTA
   'mural.cover.individualStudent': 'only you and your teacher see it', // ALTA
