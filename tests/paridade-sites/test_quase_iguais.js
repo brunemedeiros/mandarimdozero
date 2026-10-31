@@ -24,10 +24,23 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
 // nas duas árvores para a comparação provar que o resto não mudou: o último cartão de palavra diz "Continuar →"; o XP usa
 // ⭐ (o ⚡ ficou só no Combo); e a janela da sequência (agora depois do Continuar) limpa os avisos "+N XP" da tela, então
 // numa cena a árvore nova pode ter a lista de avisos vazia onde a antiga ainda tinha avisos.
-const ETAPA6 = (v) => v.split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
+const ETAPA6 = (v) => PROGRESSO_ORDEM(v).split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
   .replace(/26a1\.svg(&quot;\);\\?">)⚡/g, '2b50.svg$1⭐')
   // Recomeçar o curso (2026-10-30, migration 123): caixa nova e vazia (hidden) em Configurações > Geral, montada por shared/recomecar-curso.js.
   .replace(/<!-- Recomeçar este curso.*?-->(\\n|\n)\s*<article id=\\?"settings-restart-box\\?"[^>]*><\/article>(\\n|\n)\s*/g, '');
+// Perfil > Progresso (decisão da dona, 2026-10-31): Conquistas saíram de cima dos números e foram para o fim da tela.
+// Na árvore antiga, o bloco (título + grade) é movido para o fim; na nova, sai o comentário que explica a ordem.
+// Assim a comparação continua provando que números, gráficos e conquistas têm o mesmo conteúdo.
+const CONQ_INI = '<div data-i18n=\\"profile.sectionBadges\\"', STATS_INI = '<div class=\\"stat-cards\\"', NL4 = '\\n    ', FIM = '\\n  "}';
+const PROGRESSO_ORDEM = (v) => {
+  v = v.replace(/<!-- Conquistas no fim[\s\S]*?-->\\n\s*/, '');
+  const i = v.indexOf(CONQ_INI), j = v.indexOf(STATS_INI), k = v.lastIndexOf(FIM);
+  if (i < 0 || j < 0 || k < 0 || i > j) return v;
+  const bloco = v.slice(i, j); // título + grade + quebra de linha antes dos números
+  if (!bloco.endsWith(NL4)) return v;
+  const resto = v.slice(0, i) + v.slice(j), k2 = resto.lastIndexOf(FIM);
+  return resto.slice(0, k2) + NL4 + bloco.slice(0, -NL4.length) + resto.slice(k2);
+};
 const SEM_TOAST = (v) => v.replace(/\\?"toast\\?":\\?"[^"\\]*\\?"/, 'T');
 const TOAST_VAZIO = /\\?"toast\\?":\\?"\\?"/;
 const igualEtapa6 = (a, b) => { const x = ETAPA6(a), y = ETAPA6(b); return x === y || (TOAST_VAZIO.test(y) && SEM_TOAST(x) === SEM_TOAST(y)); };
