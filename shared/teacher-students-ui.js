@@ -314,6 +314,22 @@ function tsuDecksHTML(decks){
 
 // Ficha completa. st = { link, overview, metrics (undefined = carregando), logs (undefined = carregando), decks (undefined = carregando), langKey }
 // st.bare = true: só o corpo (sem trilha, cabeçalho nem Aulas), para a janela Analytics do perfil público (renderStudentPanelHTML).
+// Recomeçar o curso (migration 123): o aluno recomeçou este curso do zero (o mais recente; some 30 dias depois, junto com a cópia,
+// se a função ainda não tiver o registro). Data no formato DD/MM (pt-BR) ou "Oct 30" (en).
+function tsuRestartDate(iso){
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return (typeof getUiLang === 'function' && getUiLang() === 'en') ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+}
+function tsuRestartHTML(ov, lang){
+  const list = ov && Array.isArray(ov.restarts) ? ov.restarts : [];
+  const r = list.find(x => x && lang && String(x.course_key || '').split('@')[0] === lang.key) || null;
+  if (!r) return '';
+  const text = r.restored_at ? t('students.restartedUndone', { date: tsuRestartDate(r.created_at), undo: tsuRestartDate(r.restored_at) })
+    : t('students.restarted', { date: tsuRestartDate(r.created_at) });
+  return `<div class="p-alerta p-alerta--info" data-tsu-recomecou><span>🔄 ${tsuEsc(text)}</span></div>`;
+}
 function tsuFichaHTML(st, canRemove){
   const link = st.link || { language_app_key: st.overview && st.overview.linkedLanguage, student_id: '' }, ov = st.overview, name = tsuName(link);
   const langs = ov && Array.isArray(ov.languages) ? ov.languages : [];
@@ -345,7 +361,7 @@ function tsuFichaHTML(st, canRemove){
   const p7 = studentPanelPct(a.last7Correct, a.last7Total);
   const lastAccess = Array.isArray(ov.timeline) && ov.timeline[0] ? studentPanelEventTime(ov.timeline[0].at) : '';
   const total = tsuNum(q.new) + tsuNum(q.learning) + tsuNum(q.review);
-  return `<div class="painel"><div class="p-pagina" data-tsu="ficha">${head}${switcher}${note}
+  return `<div class="painel"><div class="p-pagina" data-tsu="ficha">${head}${switcher}${note}${tsuRestartHTML(ov, lang)}
     <div class="p-resumo">
       ${tsuIndicatorHTML(t('students.ind.last'), tsuDaysLabel(days), lastAccess ? t('students.ind.lastAccess', { when: lastAccess }) : t('students.ind.noRecord'))}
       ${tsuIndicatorHTML(t('students.ind.streak'), tsuStreak(lang) === null ? '—' : tsuTp('students.streak.days', tsuStreak(lang)), tsuTp('students.ind.activeDays', act.active))}

@@ -32,13 +32,13 @@ const dc = JSON.parse(fs.readFileSync(path.join(root, 'docs/i18n/dictations-en.j
 const errors = [];
 const ne = v => typeof v === 'string' && v.trim().length > 0;
 // cloze_grammar (Complete a frase): translation = tradução da frase (fonte: translationPt), explanation = explicação.
-const ALLOWED = { expression: ['meaning', 'example', 'secondExample', 'literal', 'literalNote'], listen_translate: ['referenceTranslations', 'explanation'], accent: ['explanation'], cloze_grammar: ['translation', 'explanation'] };
+const ALLOWED = { expression: ['meaning', 'example', 'secondExample', 'literal', 'literalNote', 'microActivity'], listen_translate: ['referenceTranslations', 'explanation'], accent: ['explanation'], cloze_grammar: ['translation', 'explanation'] };
 for (const [id, e] of Object.entries(ch)) {
   const c = byId.get(id);
   if (!c) { errors.push(`${id}: id não existe nas fontes`); continue; }
   for (const k of Object.keys(e)) if (!ALLOWED[c.type].includes(k)) errors.push(`${id}: campo "${k}" não existe no tipo ${c.type}`);
   if (c.type === 'expression' && !ne(e.meaning)) errors.push(`${id}: meaning vazio`);
-  if (c.type === 'expression') for (const k of ['example', 'secondExample', 'literal', 'literalNote']) if (k in e && !ne(e[k])) errors.push(`${id}: ${k} vazio`);
+  if (c.type === 'expression') for (const k of ['example', 'secondExample', 'literal', 'literalNote', 'microActivity']) if (k in e && !ne(e[k])) errors.push(`${id}: ${k} vazio`);
   if (c.type === 'expression' && 'literalNote' in e && !('literal' in e)) errors.push(`${id}: literalNote sem literal`);
   if (c.type === 'accent' && !ne(e.explanation)) errors.push(`${id}: explanation vazio`);
   if (c.type === 'cloze_grammar'){
