@@ -124,6 +124,55 @@ window.I18N_CATALOG['en'] = {
   'settings.tab.notifications': '🔔 Notifications', // ALTA
   'settings.tab.export': '📦 Export', // ALTA
   'settings.section.account': 'Account', // ALTA
+  // Restart the course (migration 123, shared/recomecar-curso.js) and the guided comeback (60 days).
+  'restart.title': 'Restart this course', // ALTA
+  'restart.hint': 'Takes the {course} course back to zero, like day one. You can undo it for 30 days.', // ALTA
+  'restart.btn': 'Restart this course', // ALTA
+  'restart.undoNotice': 'You restarted this course on {date}. You can undo it until {until}.', // ALTA
+  'restart.undoBtn': 'Undo the restart', // ALTA
+  'restart.modal.title': 'Restart {course} from zero?', // ALTA
+  'restart.modal.zeroTitle': 'Goes back to zero', // ALTA
+  'restart.modal.keepTitle': 'Stays as it is', // ALTA
+  'restart.zero.trail': 'Lessons, units, Checkpoints and Level Test', // ALTA
+  'restart.zero.memory': 'The memory of your path flashcards (they come back as new)', // ALTA
+  'restart.zero.xp': 'This course\'s XP and your place in the Leaderboard', // ALTA
+  'restart.zero.badges': 'The course achievements', // ALTA
+  'restart.zero.missions': 'Daily missions and your Review records', // ALTA
+  'restart.zero.hanzi': 'Hanzi and hanzi lessons', // ALTA
+  'restart.zero.stories': 'Stories', // ALTA
+  'restart.zero.challenges': 'Challenges', // ALTA
+  'restart.zero.dictations': 'Dictations', // ALTA
+  'restart.keep.streak': 'Your day streak and your record', // ALTA
+  'restart.keep.cards': 'Your teacher\'s flashcards and your own, with their memory', // ALTA
+  'restart.keep.decks': 'Your Decks, your goal and your settings', // ALTA
+  'restart.keep.teacher': 'Your teacher, the Review Bank and your friends', // ALTA
+  'restart.keep.other': 'Your other courses', // ALTA
+  'restart.modal.undoNote': 'You can undo it for 30 days. If you undo it, what you study in this course after restarting is lost.', // ALTA
+  'restart.modal.teacherNote': 'Your teacher will get a notice that you restarted.', // ALTA
+  'restart.modal.check': 'I understand: my {course} progress goes back to zero.', // ALTA
+  'restart.modal.cancel': 'Cancel', // ALTA
+  'restart.modal.yes': 'Restart from zero', // ALTA
+  'restart.modal.working': 'Just a moment...', // ALTA
+  'restart.err.generic': 'Could not restart right now. Nothing changed in your progress. Please try again in a moment.', // ALTA
+  'restart.done': 'Done! The course restarted from zero. Enjoy the journey!', // ALTA
+  'restart.staleTab': 'This course changed in another tab or device. Reloading to show the right progress.', // ALTA
+  'restart.undo.title': 'Undo the restart?', // ALTA
+  'restart.undo.text': 'The {course} course goes back to how it was on {date}. What you studied in it after restarting is lost.', // ALTA
+  'restart.undo.yes': 'Undo', // ALTA
+  'restart.undo.cancel': 'Not now', // ALTA
+  'restart.undo.done': 'Done! Your progress is back.', // ALTA
+  'restart.undo.err.expired': 'This restart can no longer be undone.', // ALTA
+  'restart.undo.err.generic': 'Could not undo right now. Please try again in a moment.', // ALTA
+  'comeback.title': 'Great to see you back!', // ALTA
+  'comeback.sub': 'It has been a while since your last time in {course}. How would you like to go on?', // ALTA
+  'comeback.continue': 'Continue where I left off', // ALTA
+  'comeback.continueSub': 'Your path is just as you left it.', // ALTA
+  'comeback.review': 'Do a quick review', // ALTA
+  'comeback.reviewSub': 'About 5 minutes with words you have already seen.', // ALTA
+  'comeback.checkpoint': 'Take the module Checkpoint', // ALTA
+  'comeback.checkpointSub': 'A short test to see where you are.', // ALTA
+  'comeback.restart': 'Restart the course', // ALTA
+  'comeback.restartSub': 'Start from zero. You can undo it for 30 days.', // ALTA
   'accountDelete.title': 'Delete my account', // ALTA
   'accountDelete.hint': 'Deletes your account and everything linked to it: progress, flashcards, achievements, friendships, photos and files. This cannot be undone.', // ALTA
   'accountDelete.btn': 'Delete my account', // ALTA
@@ -2663,6 +2712,8 @@ window.I18N_CATALOG['en'] = {
   'panel.tbell.ev.postClass': '{name} posted on the board (class {classroom}): {snippet}', // ALTA (mesma frase da 104)
   'panel.tbell.ev.comment': '{name} commented on the board: {snippet}', // ALTA (mesma frase da 104)
   'panel.tbell.ev.joinClass': '{name} joined the class {classroom} through your link', // ALTA (mesma frase da 104)
+  'panel.tbell.ev.restart': '{name} restarted the {lang} course from zero.', // ALTA
+  'panel.tbell.ev.restartUndo': '{name} undid the restart of the {lang} course.', // ALTA
   'panel.tbell.ev.joinClassNew': '{name} joined the class {classroom} through your link and now studies {lang} with you 🎉', // ALTA -- Etapa 4: aprovado pela dona
   'panel.tab.students': 'Students', // ALTA
   'panel.tab.cards': 'Cards', // ALTA
@@ -2859,6 +2910,8 @@ window.I18N_CATALOG['en'] = {
   'students.dialog.cancel': 'Cancel', // ALTA
   'students.crumb.aria': 'You are here', // ALTA
   'students.ficha.kicker': 'Student · {lang} · linked on {date}', // ALTA
+  'students.restarted': 'Restarted the course from zero on {date}.', // ALTA
+  'students.restartedUndone': 'Restarted the course on {date} and undid it on {undo}.', // ALTA
   'students.ficha.level': 'Level {level} · {pct}%', // ALTA
   'students.act.class': 'Log a class', // ALTA
   'students.act.card': 'Create a card', // ALTA

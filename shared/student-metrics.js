@@ -54,3 +54,13 @@ async function fetchTeacherStudentOverview(studentId, languageAppKey){
   }
   return data;
 }
+
+// Recomeçar o curso (migration 123): últimos recomeços do aluno no idioma do vínculo (data e se desfez). Mesma checagem de
+// vínculo ativo, feita dentro da function. Erro ou função ainda não aplicada = lista vazia (a ficha só não mostra o aviso).
+async function fetchTeacherStudentRestarts(studentId, languageAppKey){
+  try {
+    const { data, error } = await supabaseClient.rpc('get_teacher_student_restarts', { p_student_id: studentId, p_language_app_key: languageAppKey });
+    if (error || !data || data.error || !Array.isArray(data.restarts)) return [];
+    return data.restarts;
+  } catch (e) { return []; }
+}

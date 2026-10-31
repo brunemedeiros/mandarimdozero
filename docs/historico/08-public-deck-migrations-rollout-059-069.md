@@ -516,3 +516,19 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   cores-marca 20/20, paridade CSS 5/5, i18n 2341/2341 e sem português no en 6/6. Mudança de propósito em testes antigos:
   painel-professora (5 abas → 3) e painel-alunos ("Registrar aula" abre Mural > Aulas e materiais já no aluno).
 - Fica para depois: contagem de cartões do Banco dentro do aviso da aula.
+
+## 123 -- Recomeçar o curso do zero (2026-10-30)
+
+- `shared/supabase_migrations/123_restart_course.sql`: tabela `course_restart_backups` (cópia de 30 dias, RLS só leitura do dono),
+  RPCs `restart_course(p_course_key)`, `undo_restart_course(p_backup_id)`, `get_teacher_student_restarts(p_student_id, p_language_app_key)`,
+  ajudantes fechados (`_is_account_badge`, `_restart_epoch_of`, `_block_week_xp`, `_restart_notify_teachers`,
+  `purge_expired_course_restart_backups`), gatilho `progress_guard_restart_epoch` (época do recomeço contra aba antiga) e cron diário
+  `purge-course-restart-backups` (só com `pg_cron`). Sem DROP; **tem DELETE** (`weekly_xp`/`earned_badges`) dentro das funções.
+  Não muda nenhum dado ao ser aplicada. Desenho e o que zera/fica: `docs/recomecar-curso-opcoes.md`, seção "Implementação".
+- Staging: **parcial**. Aplicada pela ferramenta só a parte sem DELETE (tabela, RLS, ajudantes e o aviso da professora), como
+  `123_restart_course_a_table` (2026-10-30). A parte com DELETE (`restart_course`) parou na pergunta de confirmação da ferramenta
+  (sem resposta em 230 s) e NÃO entrou; `undo_restart_course`, `get_teacher_student_restarts`, o gatilho e o cron também faltam.
+  Para terminar: colar `docs/rollout-sql/123_sql_editor.sql` no SQL Editor do Staging (idempotente: a parte já aplicada não muda).
+- Produção: **pendente** (só com autorização; mesmo arquivo `docs/rollout-sql/123_sql_editor.sql` no SQL Editor; depois o site).
+- Teste local: `tests/recomecar-curso/run.sh` 57/57 (zero resíduo depois do ROLLBACK); unidade 30/30; navegador 354/354.
+- Situação em 2026-10-31: Staging completo (a dona colou `docs/rollout-sql/123_sql_editor.sql`; RPCs, gatilho e cron conferidos). Produção aplicada pelo MCP com autorização da dona, versão `20261031001322` (`123_restart_course`); conferido: 3 RPCs com execute para authenticated e não para anon, gatilho, cron, 0 cópias, hashes de `weekly_xp` e `earned_badges` iguais antes e depois, 43 linhas em `progress`, nenhum bloco com `restartEpoch`.
