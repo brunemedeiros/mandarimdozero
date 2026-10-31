@@ -339,3 +339,16 @@ Em todos os lotes:
 5. zh: manter "Ponto de verificação" para a fase final da unidade ou renomear (ex.: "Teste da unidade").
 6. "Fechar painel" do Mapa: deixar ou trocar por "Fechar".
 7. Ordem dos lotes (sugestão: 1a, 4, 5, 2, 1b, 3; o 3 por último porque mexe em mais testes e no banco).
+
+## 8. Decisões da dona (2026-10-31)
+
+- "Excluir" só para a conta; "Apagar" para todo o resto.
+- "Fechar painel" do Mapa vira "Fechar".
+- Notificações em inglês continuam "In-app".
+- NÃO usar "Reforço": continua "Revisão do módulo" e o botão continua "Revisar agora" (lote 5 cancelado).
+- NÃO usar "Navegar": continua "Painel" (lote 4 cancelado).
+- Lotes 1a (grátis, sequência, Revisão rápida, Apagar) e 2 (cartão, Observação, Ponto de verificação) aprovados.
+- Ponto de verificação é só o do módulo; a fase final dentro da unidade (zh) passa a se chamar "Revisão da Unidade".
+- "Devidos" -> "Para hoje": aceito, mas os rótulos de Perfil > Progresso ficam para pensar melhor (a dona perguntou a
+  diferença entre "Para hoje" e "Na sessão de hoje" e o sentido de "Em revisão"); "20 para revisar" da unidade: em discussão
+  ("20 cartões aguardando revisão"?).
