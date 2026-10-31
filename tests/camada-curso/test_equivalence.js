@@ -71,7 +71,10 @@ for (const lang of ['fr', 'zh']){
   // estrutura, não existe no original). Sai dos dois lados da comparação; tests/curriculo-ids confere as chaves.
   // M1 da revisão do código compartilhado (2026-10-26): os hanzi do zh também ganharam `k` (zh/hanzi-data.js); sai igual.
   const noItemKeys = (c) => { (c.units || c).forEach(u => { (u.vocab || []).forEach(v => { delete v.k; }); (u.phrases || []).forEach(p => { delete p.k; }); if (u.dialogue) (u.dialogue.lines || []).forEach(l => { delete l.k; }); }); (c.hanzi || []).forEach(l => (l || []).forEach(h => { delete h.k; })); return c; };
-  ok(hash(orig) === hash(noItemKeys(JSON.parse(JSON.stringify(diskContent)))), lang + ': arquivos em disco (base + camada) == original');
+  // Etapa 7 (2026-10-31, vocabulário aprovado pela dona): a lição final dentro da unidade deixou de se chamar
+  // "Ponto de verificação" (nome que ficou só para a prova do módulo) e virou "Revisão da Unidade". Mudança deliberada da camada.
+  const etapa7 = (c) => { (c.units || []).forEach(u => (u.lessons || []).forEach(l => { if (l.isCheckpoint && l.title === 'Ponto de verificação') l.title = 'Revisão da Unidade'; })); return c; };
+  ok(hash(etapa7(JSON.parse(JSON.stringify(orig)))) === hash(noItemKeys(JSON.parse(JSON.stringify(diskContent)))), lang + ': arquivos em disco (base + camada) == original');
   const diskBaseOnly = (() => { const ctx = vm.createContext({}); vm.runInContext(fs.readFileSync(path.join(ROOT, lang, 'content.js'), 'utf8') + ';this.U=UNITS;', ctx); return noItemKeys(JSON.parse(JSON.stringify(ctx.U))); })();
   ok(JSON.stringify(diskBaseOnly).indexOf('"title"') === -1 && JSON.stringify(diskBaseOnly).indexOf('"goal"') === -1, lang + ': content.js em disco não tem title/goal (sem texto de língua de origem)');
   ok(hash(diskBaseOnly) === hash(base.units), lang + ': content.js em disco == strip(original)');

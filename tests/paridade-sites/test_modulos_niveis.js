@@ -14,6 +14,7 @@
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
 const http = require('http'), fs = require('fs'), path = require('path'), os = require('os'), { execFileSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..', '..');
+const { etapa7 } = require('./etapa7-neutro.js'); // Etapa 7 (2026-10-31): vocabulário aprovado pela dona
 const REF = process.env.PARIDADE_B2_REF || 'adf10b82';
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.mp3': 'audio/mpeg', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
 function serve(root){
@@ -223,7 +224,7 @@ async function fingerprint(browser, root){
         .replace(/<div class=\\"lc-stat\\"><div class=\\"lc-stat-label\\">Estrelas<\/div>.*?<\/div><\/div>\\n\s*/g, '')
         .replace(/(class=\\"unit-block[^"\\]*\bskipped\b[\s\S]*?<div class=\\"ub-frac\\">)[^<]*(<\/div>)/g, '$1$2')
         .replace(/(tm-status\\">Pulada<\/div>[\s\S]*?)<p class=\\"tm-line\\">\d+ de \d+ lições? concluídas?<\/p>/g, '$1');
-      const a = etapa6(norm(antes[k])), b = norm(depois[k]);
+      const a = etapa7(etapa6(norm(antes[k]))), b = norm(depois[k]); // etapa7: vocabulário (2026-10-31)
       if (a === b){ iguais++; passed++; continue; }
       let i = 0; while (i < a.length && a[i] === b[i]) i++;
       check('igual ao fr de antes: ' + k, false, { antes: a.slice(Math.max(0, i - 120), i + 200), depois: (b || '').slice(Math.max(0, i - 120), i + 200) });

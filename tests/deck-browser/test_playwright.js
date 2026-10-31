@@ -284,7 +284,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     check(lang + ' tela do Deck: nome com caminho', detail.title === 'Meus Decks › Verbos', detail.title);
     check(lang + ' tela do Deck: Novo/Aprendendo/Revisar + Estudar agora', detail.labels.join('|') === 'Novo|Aprendendo|Revisar' && detail.nums[0] === 2 && detail.study, detail);
     check(lang + ' tela do Deck: mesma barra do topo', detail.bar.join('|') === 'Decks|Adicionar|Painel|Configurar|⋯', detail.bar);
-    check(lang + ' tela do Deck pessoal: Criar subdeck, Renomear, Publicar, Excluir', ['Criar subdeck', 'Renomear', 'Excluir'].every(b => detail.footer.includes(b)) && detail.footer.some(b => /Publicar|Público|Privado/.test(b)), detail.footer);
+    check(lang + ' tela do Deck pessoal: Criar subdeck, Renomear, Publicar, Apagar', ['Criar subdeck', 'Renomear', 'Apagar'] /* Etapa 7 (2026-10-31): Excluir -> Apagar */.every(b => detail.footer.includes(b)) && detail.footer.some(b => /Publicar|Público|Privado/.test(b)), detail.footer);
     check(lang + ' tela do Deck tem endereço próprio', detail.hash === '#/review/decks/9002', detail.hash);
     if (lang === 'fr'){ await shot(page, 'deck-detail-fr'); await page.evaluate(() => openReviewSettingsModal()); await shot(page, 'deck-settings-fr'); await page.evaluate(() => closeReviewSettingsModal()); }
     await page.click('[data-deck-study]');
@@ -461,7 +461,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
       const w = document.getElementById('review-deck-wrap');
       return { text: w.querySelector('.deck-delete-dialog').textContent, opts: Array.from(w.querySelectorAll('#deck-delete-target option')).map(o => o.value) };
     });
-    check(lang + ' diálogo: mensagem da seção 5.4', dlg.text.includes('Excluir este deck irá excluir todos os cartões dentro dele') && dlg.text.includes('Mover para outro deck') && dlg.text.includes('Excluir permanentemente'), dlg.text);
+    check(lang + ' diálogo: mensagem da seção 5.4', dlg.text.includes('Apagar este deck irá apagar todos os cartões dentro dele') && dlg.text.includes('Mover para outro deck') && dlg.text.includes('Apagar permanentemente'), dlg.text);
     check(lang + ' diálogo: subárvore fora dos destinos', !dlg.opts.includes('9002') && !dlg.opts.includes('9003') && dlg.opts.includes('9001') && dlg.opts.includes('9004'), dlg.opts);
     await page.selectOption('#deck-delete-target', '9001');
     await page.evaluate(() => { window.__writes = []; });

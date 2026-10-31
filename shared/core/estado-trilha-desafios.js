@@ -1067,10 +1067,9 @@ function renderProgressView(){
   // K.3: o antigo "Pendentes agora" era cardsDueNow(STATE.cards) = qualquer card
   // com due<=agora, inclusive New (due=0) e lições ainda não concluídas -- uma
   // mistura. Agora: contagens ESTRUTURAIS (CardInstance) do universo estudável,
-  // sem os filtros de sessão (origem/tag), e "Para estudar hoje" = a fila que
-  // uma sessão entrega (mesma definição/número do hero da Revisão).
+  // sem os filtros de sessão (origem/tag). Etapa 7 (2026-10-31, opção A da dona): o contador
+  // "Para estudar hoje" saiu do Perfil; a fila de uma sessão aparece só na aba Revisão.
   const sc = structuralCounts(eligibleDeckReviewPool());
-  const studyToday = trueDueReviewCount(eligibleReviewPool());
 
   // K.7: "Conteúdos estudados" (Note) de Teacher e Self, SEMPRE separados e
   // fora de "Palavras aprendidas"; só aparece a origem que tem conteúdo ativo.
@@ -1097,7 +1096,6 @@ function renderProgressView(){
     <div class="stat-card" data-stat="learning"><div class="num">${sc.learning}</div><div class="label">${t('progress.statLearning')}</div></div>
     <div class="stat-card" data-stat="review"><div class="num">${sc.review}</div><div class="label">${t('progress.statReview')}</div></div>
     <div class="stat-card" data-stat="due"><div class="num">${sc.due}</div><div class="label">${t('progress.statDueNow')}</div></div>
-    <div class="stat-card" data-stat="today" title="${escapeHTML(t('progress.statTodayTitle'))}"><div class="num">${studyToday}</div><div class="label">${t('progress.statToday')}</div></div>
     ${ownContentCards}
     <div class="stat-card" data-stat="xp"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
   `;

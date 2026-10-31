@@ -12,7 +12,7 @@
           "cumprimentar": "Cumprimentar e agradecer",
           "desculpas": "Pedir desculpa e responder",
           "saudacoes": "Saudar de manhã e à noite",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "olá",
@@ -95,7 +95,7 @@
           "nome": "Eu, você e como se chamar",
           "ser-pessoa": "Nome e o verbo ser",
           "nacionalidade": "Dizer de que país você é",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": ["eu", "você", "chamar-se", "nome", "ser/estar", "pessoa", "Brasil", "China", "qual", "país"],
         "phrases": [
@@ -173,7 +173,7 @@
           "numeros-3": "Contar até oito",
           "numeros-idade": "Contar até dez e dizer a idade",
           "idade-altura": "Perguntar idade e altura",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "zero",
@@ -259,7 +259,7 @@
           "irmaos": "Falar dos irmãos",
           "ter-familia": "Dizer quem você tem na família",
           "quantas-pessoas": "Perguntar quantas pessoas há na família",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "família / casa",
@@ -349,7 +349,7 @@
           "pedir-comida": "Pedir macarrão, água e chá",
           "gostoso": "Dizer que algo está gostoso",
           "pedir-o-que-quer": "Pedir o que você quer",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "comer",
@@ -430,7 +430,7 @@
           "horas": "Dizer que horas são",
           "rotina": "Contar sua rotina",
           "presente": "O que está acontecendo agora",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "hora(s)",
@@ -510,7 +510,7 @@
           "onde-fica": "Perguntar onde fica algo",
           "direcoes": "Dar direções: direita, frente e atrás",
           "perto-longe": "Dizer se fica perto ou longe",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": ["estar (localização)", "onde", "esquerda", "direita", "na frente", "atrás", "distância de", "perto", "longe"],
         "phrases": [
@@ -567,7 +567,7 @@
           "dinheiro": "Falar de dinheiro: kuài e máo",
           "caro-desconto": "Dizer que está caro e pedir desconto",
           "roupas-sapatos": "Comprar roupas e sapatos",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "comprar",
@@ -646,7 +646,7 @@
         "lessons": {
           "quente-frio": "Descrever se está quente ou frio",
           "clima-geral": "Falar sobre chuva, sol e vento",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": ["clima/tempo", "quente", "frio", "chover", "dia ensolarado", "dia nublado", "vento"],
         "phrases": [
@@ -711,7 +711,7 @@
           "meios-transporte": "Nomear os meios de transporte",
           "como-chegar": "Perguntar como chegar a um lugar",
           "passagem": "Comprar uma passagem",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "ônibus",
@@ -786,7 +786,7 @@
           "partes-corpo": "Nomear partes do corpo",
           "dor": "Dizer que algo dói",
           "ajuda-medica": "Pedir ajuda médica",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": ["corpo", "cabeça", "barriga", "doer", "ficar doente", "médico(a)", "hospital", "não estar bem/mal-estar"],
         "phrases": [
@@ -850,7 +850,7 @@
           "hobbies-leitura": "Falar de hobbies: ler e ouvir música",
           "atividades": "Assistir filme, se exercitar e cantar",
           "dancar-tempo-livre": "Convidar alguém pra dançar",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "hobby",
@@ -922,7 +922,7 @@
         "lessons": {
           "planos": "Dizer o que você planeja fazer",
           "viagem-estudo": "Falar de planos de viagem e estudo",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": ["planejar/pretender", "amanhã", "semana que vem", "viajar/turismo", "estudar", "plano", "depois/no futuro"],
         "phrases": [
@@ -977,7 +977,7 @@
         "lessons": {
           "comparar": "Comparar duas coisas",
           "diferente-melhor": "Dizer o que é diferente ou o melhor",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "comparado a / mais que",
@@ -1040,7 +1040,7 @@
           "saber-conseguir": "Dizer o que você sabe ou consegue fazer",
           "pedidos": "Fazer pedidos educados",
           "convite-cinema": "Convidar alguém para o cinema",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "querer / pensar em fazer algo",
@@ -1126,7 +1126,7 @@
           "dias-semana": "Dizer os dias da semana",
           "data-completa": "Dizer uma data completa",
           "hora-encontro": "Dizer a hora exata e marcar um encontro",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "semana",
@@ -1212,7 +1212,7 @@
           "ja-comeu": "Dizer o que você já comeu",
           "ainda-nao": "Dizer o que ainda não aconteceu",
           "nao-aconteceu": "Falar do que não aconteceu ontem",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "partícula de conclusão/mudança",
@@ -1324,7 +1324,7 @@
           "quem-porque": "Perguntar quem e por quê",
           "escola": "Falar de escola e estudantes",
           "apresentar-trabalho": "Apresentar alguém e dizer onde trabalha",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "quem",

@@ -96,7 +96,7 @@ function reviewTagFilterAfterDelete(filter, tag){
 const TAG_MANAGER_ERROR_LABELS = {
   invalid_tag: 'Nome de tag inválido.',
   invalid_scope: 'Escopo inválido.',
-  system_tag_protected: 'Tags de atribuição (criado-por-…) são de sistema e não podem ser criadas, renomeadas ou excluídas.',
+  system_tag_protected: 'Tags de atribuição (criado-por-…) são de sistema e não podem ser criadas, renomeadas ou apagadas.',
 };
 const TAG_MANAGER_ERROR_KEYS = { invalid_tag: 'tagManager.err.invalidTag', invalid_scope: 'tagManager.err.invalidScope', system_tag_protected: 'tagManager.err.systemProtected' };
 function tagManagerErrorMessage(err){
@@ -166,8 +166,8 @@ function tagManagerRowsHTML(list, ui){
       </div>`;
     } else if (ui.deleting === tag){
       extra = `<div class="tag-manager-panel" data-tag-delete-panel="${e}" style="width:100%; margin-top:6px;">
-        <p class="profile-edit-hint" style="margin:0 0 6px;">${tagManagerT('tagManager.delete.askHtml', 'Excluir <strong>#{tag}</strong>? Essa Tag será removida de {notes}. A remoção é global no seu escopo e não pode ser desfeita.', { tag: e, notes: noteLabel })}</p>
-        <button type="button" class="btn btn-primary" data-tag-delete-confirm="${e}" ${ui.busy ? 'disabled' : ''}>${tagManagerT('tagManager.delete.confirm', 'Excluir Tag')}</button>
+        <p class="profile-edit-hint" style="margin:0 0 6px;">${tagManagerT('tagManager.delete.askHtml', 'Apagar <strong>#{tag}</strong>? Essa Tag será removida de {notes}. A remoção é global no seu escopo e não pode ser desfeita.', { tag: e, notes: noteLabel })}</p>
+        <button type="button" class="btn btn-primary" data-tag-delete-confirm="${e}" ${ui.busy ? 'disabled' : ''}>${tagManagerT('tagManager.delete.confirm', 'Apagar Tag')}</button>
         <button type="button" class="btn btn-secondary" data-tag-delete-cancel ${ui.busy ? 'disabled' : ''}>${tagManagerT('tagManager.cancel', 'Cancelar')}</button>
       </div>`;
     }
@@ -179,7 +179,7 @@ function tagManagerRowsHTML(list, ui){
     return `<div class="admin-badge-row" data-tag-row="${e}" style="flex-wrap:wrap;">
       <span style="flex:1; min-width:120px;"><span class="pill note-tag-chip">#${e}</span> <span class="profile-edit-hint">${noteLabel}</span></span>
       <button type="button" class="btn btn-secondary" data-tag-rename="${e}" ${ui.busy ? 'disabled' : ''}>${tagManagerT('tagManager.rename', 'Renomear')}</button>
-      <button type="button" class="admin-badge-delete-btn" data-tag-delete="${e}" title="${tagManagerT('tagManager.delete.title', 'Excluir tag')}" aria-label="${tagManagerT('tagManager.delete.aria', 'Excluir tag {tag}', { tag: e })}" ${ui.busy ? 'disabled' : ''}>🗑</button>
+      <button type="button" class="admin-badge-delete-btn" data-tag-delete="${e}" title="${tagManagerT('tagManager.delete.title', 'Apagar tag')}" aria-label="${tagManagerT('tagManager.delete.aria', 'Apagar tag {tag}', { tag: e })}" ${ui.busy ? 'disabled' : ''}>🗑</button>
       ${extra}
     </div>`;
   }).join('');
@@ -193,7 +193,7 @@ async function renderTagManagerInto(mountEl, opts){
   mountEl.innerHTML = `<p class="profile-empty-note">${tagManagerT('tagManager.loading', 'Carregando tags…')}</p>`;
 
   const hint = scope === 'teacher'
-    ? tagManagerT('tagManager.hint.teacher', 'Tags dos seus cartões de aluno (todos os alunos e idiomas). Renomear ou excluir vale para todos eles.')
+    ? tagManagerT('tagManager.hint.teacher', 'Tags dos seus cartões de aluno (todos os alunos e idiomas). Renomear ou apagar vale para todos eles.')
     : tagManagerT('tagManager.hint.own', 'Tags dos seus próprios cartões. As tags dos cartões da professora não aparecem aqui e não podem ser alteradas por você.');
 
   async function load(){
@@ -263,7 +263,7 @@ async function renderTagManagerInto(mountEl, opts){
     if (dc) dc.addEventListener('click', async () => {
       if (ui.busy) return;
       const tag = dc.dataset.tagDeleteConfirm;
-      ui.busy = true; dc.disabled = true; dc.textContent = tagManagerT('tagManager.deleting', 'Excluindo…');
+      ui.busy = true; dc.disabled = true; dc.textContent = tagManagerT('tagManager.deleting', 'Apagando…');
       const res = await deleteNoteTag(scope, tag);
       if (!res.ok){ ui.busy = false; ui.msg = res.error; ui.msgKind = 'error'; paint(); return; }
       applyTagChangeToLocalState(scope, 'delete', tag, null);

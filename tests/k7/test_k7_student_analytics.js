@@ -84,10 +84,10 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     await ev(() => { setCards([mk('teacher', 'ta', 1, { state: 'review', due: PAST }), mk('self', 'sa', 2, { state: 'review', due: PAST })]); progress(); });
     const today1 = await ev(() => ({ ui: stat('today'), rule: String(trueDueReviewCount(eligibleReviewPool())) }));
     // 2026-10-14: cartão da professora fica na aba Aluno > Revisão, fora do "Para estudar hoje" da Revisão geral.
-    L('6 Para estudar hoje = trueDueReviewCount(eligibleReviewPool()) (sem o da professora)', today1.ui === today1.rule && today1.ui === '1', today1);
+    L('6 fila da sessão = trueDueReviewCount(eligibleReviewPool()) (sem o da professora); o Perfil não mostra mais o contador "Para estudar hoje" (Etapa 7, opção A da dona, 2026-10-31)', today1.ui === null && today1.rule === '1', today1);
     await ev(() => { STATE.studySettings.reviewOriginFilter = 'study'; progress(); });
     const today2 = await ev(() => ({ ui: stat('today'), rule: String(trueDueReviewCount(eligibleReviewPool())), d: stat('due') }));
-    L('6 filtro de origem muda Para estudar hoje (0) mas não Devidos (2)', today2.ui === '0' && today2.rule === '0' && today2.d === '2', today2);
+    L('6 filtro de origem muda a fila da sessão (0) mas não Para hoje (2)', today2.ui === null && today2.rule === '0' && today2.d === '2', today2);
 
     // 7) Strength Note-level: Não iniciada separada de Fraca; weakest; New não rebaixa
     const st = await ev(() => {

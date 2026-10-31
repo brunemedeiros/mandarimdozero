@@ -90,7 +90,7 @@ const ANTES = () => {
     const before = await reads('usage_events');
     await go('atividade');
     L('Atividade: novos x recorrentes (u1 e u3 novos no período, u2 recorrente) e barras por dia', (await p.innerText('[data-analytics-panel="atividade"]')).includes('Alunos ativos por dia') && (await p.$$eval('[data-analytics-panel="atividade"] .p-barra', l => l.length)) >= 3);
-    await go('navegacao'); L('Navegação: 2 áreas (revisão e ranking) e as funcionalidades com rótulo', (await p.$$eval('[data-analytics-panel="navegacao"] article:first-of-type .p-barra-linha', l => l.length)) === 2 && (await p.innerText('[data-analytics-panel="navegacao"]')).includes('Sessão de flashcards'));
+    await go('navegacao'); L('Navegação: 2 áreas (revisão e ranking) e as funcionalidades com rótulo', (await p.$$eval('[data-analytics-panel="navegacao"] article:first-of-type .p-barra-linha', l => l.length)) === 2 && (await p.innerText('[data-analytics-panel="navegacao"]')).includes('Sessão de cartões')) /* Etapa 7 (2026-10-31): flashcards -> cartões */;
     await go('exercicios');
     L('Exercícios: tabela por tipo e funil só com tipos com início', (await p.$$eval('[data-analytics-panel="exercicios"] tbody tr', l => l.length)) === 4 && (await p.$$eval('[data-analytics-panel="exercicios"] .p-funil-linha', l => l.length)) >= 1);
     await go('progressao'); L('Progressão: 3 blocos', (await p.$$eval('[data-analytics-panel="progressao"] article', l => l.length)) === 3);

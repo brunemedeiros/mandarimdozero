@@ -12,7 +12,7 @@
           "ola-e-tchau": "Dizer olá e até logo",
           "informal-agradecer": "Cumprimentar informalmente e agradecer",
           "cortesia-e-como-vai": "Pedir por favor e perguntar como vai",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "olá / bom dia",
@@ -104,7 +104,7 @@
           "pronomes-e-nome": "Eu, você e dizer seu nome",
           "nome-e-ser": "O nome e o verbo être",
           "nacionalidades": "Falar da nacionalidade e do país",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "eu",
@@ -197,7 +197,7 @@
           "primeiros-numeros": "Primeiros números",
           "contar-ate-vinte": "Contar até vinte",
           "idade": "Perguntar e dizer a idade",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": ["zero", "um / uma", "dois", "três", "dez", "vinte", "a idade", "ter", "anos", "quanto / quantos"],
         "phrases": [
@@ -319,7 +319,7 @@
           "nuclear": "Família nuclear",
           "irmaos": "Falar de irmãos",
           "completa": "Família completa",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "a família",
@@ -459,7 +459,7 @@
           "pao-agua-cafe": "Pedir pão, água e café",
           "leite-queijo-maca": "Falar de leite, queijo e maçã",
           "comer-beber-detestar": "Comer, beber e dizer o que odeia",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "o pão",
@@ -546,7 +546,7 @@
           "horas-e-periodos": "Dizer as horas e os períodos do dia",
           "noite-acordar-levantar": "A noite, acordar e levantar",
           "rotina-diaria": "Comer, trabalhar, dormir e a meia-noite",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "a hora",
@@ -667,7 +667,7 @@
           "dias-da-semana": "Dias da semana e hoje",
           "ontem-amanha-semana": "Amanhã, ontem e a semana",
           "meses-e-data": "Meses e a data",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "segunda-feira",
@@ -751,7 +751,7 @@
           "lugares-na-cidade": "Lugares na cidade",
           "hospital-estacao-em-frente": "Hospital, estação e seguir em frente",
           "direcoes": "Dar direções: esquerda, direita, perto e longe",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "a rua",
@@ -875,7 +875,7 @@
           "nacionalidades-1": "Francês, brasileiro e americano",
           "nacionalidades-2": "Inglês, espanhol e italiano",
           "nacionalidade-e-origem": "Alemão, português e perguntar de onde vem",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "francês / francesa",
@@ -960,7 +960,7 @@
           "numeros-30-50": "Números: trinta a cinquenta",
           "numeros-60-80": "Números: sessenta a oitenta",
           "numeros-90-100": "Números: noventa e cem",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "a calça",
@@ -1097,7 +1097,7 @@
           "carne-frango-legumes": "Carne, frango e legumes",
           "salada-arroz-massa": "Salada, arroz e massa",
           "acucar-sal-ovo-sobremesa": "Açúcar, sal, ovo e sobremesa",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "a carne",
@@ -1179,7 +1179,7 @@
           "quilo-meio-quilo-litro": "Quilo, meio quilo e litro",
           "grama-pouco-muito": "Grama, um pouco e muito",
           "suficiente-demais-fatia-garrafa": "O suficiente, demais, fatia e garrafa",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "um quilo (de)",
@@ -1250,7 +1250,7 @@
           "tempo-bonito-frio-quente": "Descrever o tempo: bonito, frio e quente",
           "chuva-neve-sol": "Chuva, neve e sol",
           "estacoes-do-ano": "As quatro estações do ano",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "está bonito (tempo)",
@@ -1328,7 +1328,7 @@
           "onibus-trem-metro": "Ônibus, trem e metrô",
           "carro-bicicleta-pe": "Carro, bicicleta e a pé",
           "pegar-transporte-passagem": "Pegar transporte, ponto, passagem e estação",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "o ônibus",
@@ -1454,7 +1454,7 @@
           "cabeca-barriga-mao": "Cabeça, barriga e mão",
           "pe-doente-medico": "Pé, estar doente e o médico",
           "farmacia-dor-febre": "Farmácia, dor, febre e se sentir",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "a cabeça",
@@ -1601,7 +1601,7 @@
           "vermelho-azul-verde": "Vermelho, azul e verde",
           "amarelo-preto-branco": "Amarelo, preto e branco",
           "tamanho-e-personalidade": "Descrever tamanho e personalidade",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "vermelho",
@@ -1728,7 +1728,7 @@
           "casa-apartamento-quarto": "Casa, apartamento e quarto",
           "cozinha-banheiro-sala": "Cozinha, banheiro e sala",
           "porta-janela-tem-nao-tem": "Porta, janela e dizer o que tem ou não tem",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "a casa",
@@ -1818,7 +1818,7 @@
           "cama-mesa-cadeira": "Cama, mesa e cadeira",
           "sofa-luminaria-em-cima": "Sofá, luminária e em cima de",
           "embaixo-frente-atras-lado": "Embaixo, na frente, atrás e ao lado",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "a cama",
@@ -1887,7 +1887,7 @@
           "cinema-musica-esporte": "Cinema, música e esporte",
           "ler-jogar-dancar": "Ler, jogar/tocar e dançar",
           "cantar-fim-de-semana-sair-filme": "Cantar, o fim de semana, sair e o filme",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "o cinema",
@@ -2024,7 +2024,7 @@
           "ontem-anteontem-semana-passada": "Ontem, anteontem e a semana passada",
           "fim-de-semana-mes-ano-passados": "Fim de semana, mês e ano passados",
           "dois-dias-atras-ja-recentemente": "Há dois dias, hoje de manhã, já e recentemente",
-          "checkpoint": "Ponto de verificação"
+          "checkpoint": "Revisão da Unidade"
         },
         "vocab": [
           "ontem",

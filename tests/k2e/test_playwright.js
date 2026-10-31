@@ -127,7 +127,7 @@ async function bootPage(browser, lang, port){
     check(lang + ' UI: não iniciadas = palavras sem estudo, nenhuma fraca', ui.vs[0] === totalWords - 3 && ui.vs[1] === 0, ui.vs);
     check(lang + ' UI: 1 palavra forte, 2 medianas', ui.vs[3] === 1 && ui.vs[2] === 2, ui.vs);
     check(lang + ' UI: "Pendentes agora" aposentado', ui.hasPend === false);
-    check(lang + ' UI: rótulos Novos/Aprendendo/Para revisar/Devidos/Para estudar hoje', ['Novos','Aprendendo','Para revisar','Devidos','Para estudar hoje'].every((l, i) => ui.stat[['new','learning','review','due','today'][i]] && ui.stat[['new','learning','review','due','today'][i]].label === l), ui.stat);
+    check(lang + ' UI: rótulos Novos/Aprendendo/Já aprendidos/Para hoje, sem o Para estudar hoje (Etapa 7, opção A da dona, 2026-10-31)', ['Novos','Aprendendo','Já aprendidos','Para hoje'].every((l, i) => ui.stat[['new','learning','review','due'][i]] && ui.stat[['new','learning','review','due'][i]].label === l) && !ui.stat.today, ui.stat);
     check(lang + ' UI: Novos = cartões sem histórico (CardInstance), Para revisar = 4 cartões estudados', ui.stat.new && ui.stat.new.n === info.allCards - 4 - 0 && ui.stat.review && ui.stat.review.n === 4, ui.stat);
     // Deck/Review continuam por CardInstance
     const cs = await ev(async () => {

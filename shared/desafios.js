@@ -255,7 +255,7 @@ function pendingChallenges(){
 const CHALLENGE_I18N = {
   'pt-BR': {
     'tier.premium': 'Premium',
-    'tier.free': 'Free',
+    'tier.free': 'Grátis',
     'dict.count.one': '{n} ditado',
     'dict.count.many': '{n} ditados',
     'ch.retryNow': '🔁 Tentar de novo',

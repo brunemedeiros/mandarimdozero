@@ -94,7 +94,7 @@ function renderTrailMap(root, model, describe, opts){
     if (btn){ btn.classList.add('selected'); btn.setAttribute('aria-expanded', 'true'); }
     const d = describe(key) || {};
     panel.innerHTML = `
-      <button type="button" class="tm-close" aria-label="${trailEscape(trailMapT('trail.map.closePanel'))}">✕</button>
+      <button type="button" class="tm-close" aria-label="${trailEscape(trailMapT('common.close'))}">✕</button>
       ${d.eyebrow ? `<div class="tm-eyebrow">${trailEscape(d.eyebrow)}</div>` : ''}
       <h3 id="tm-panel-title" class="tm-title">${trailEscape(d.title)}</h3>
       ${d.status ? `<div class="tm-status">${trailEscape(d.status)}</div>` : ''}

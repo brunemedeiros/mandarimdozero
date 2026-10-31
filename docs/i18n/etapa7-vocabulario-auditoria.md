@@ -352,3 +352,277 @@ Em todos os lotes:
 - "Devidos" -> "Para hoje": aceito, mas os rótulos de Perfil > Progresso ficam para pensar melhor (a dona perguntou a
   diferença entre "Para hoje" e "Na sessão de hoje" e o sentido de "Em revisão"); "20 para revisar" da unidade: em discussão
   ("20 cartões aguardando revisão"?).
+
+## 9. Lotes 1a e 2 aplicados (2026-10-31)
+
+Aplicado na branch `claude/optimistic-ramanujan-tercxc` (sem commit; a `main` foi mesclada antes, com o conflito do `CLAUDE.md`
+resolvido mantendo os dois lados). Sem banco e sem Edge Function: nenhuma migration nestes lotes. **Grátis x Premium:** nada
+muda (só nomes). Paridade: tudo é catálogo comum (`shared/i18n/`) ou código de `shared/`, então fr, zh e o futuro pt recebem juntos.
+
+### 9.1 O que entrou
+
+- **Lote 1a**: grátis (selo dos Desafios `CHALLENGE_I18N['pt-BR']['tier.free']` em `shared/desafios.js` e `fr.trail.freeDictation`,
+  que ganhou plural de verdade); sequência (3 chaves do Admin); Revisão rápida (en Quick review); Apagar no lugar de Excluir (26 chaves,
+  mais os textos de reserva em `shared/tag-manager.js`). "Excluir minha conta" (`accountDelete.*`) e "Excluir minha atividade dos
+  Analytics" ficaram. O "app" de `admin.analytics.eng.xpNote2` ficou para o lote 1b.
+- **Retomada**: "Fazer uma revisão rápida" virou "Fazer uma revisão de 5 minutos" (en "Do a 5-minute review") e o ícone fixo de
+  `shared/recomecar-curso.js` passou de ⚡ para ⏱ (o ⏱ já está no MAP do Fluent e é o mesmo do botão "5 minutos" da aba Revisão).
+- **Lote 2**: cartão (inclui a aba antiga "📇 Flashcards" -> "📇 Cartões", que hoje nenhuma tela usa: o Painel da professora usa
+  `panel.tab.cards` = "Cartões"; por isso `admin.students.metrics.noCards` passou a citar a aba "Cartões"); Observação (3 chaves);
+  Ponto de verificação só para a prova do módulo (rótulo do Mapa inteiro, "Refazer o Ponto de verificação", metas das conquistas com
+  maiúscula).
+- **zh (e fr): fase final dentro da unidade = "Revisão da Unidade"** (en "Unit review"). Achado: essa fase existe nos DOIS sites
+  (20 lições `isCheckpoint` no fr e 18 no zh, todas com o título "Ponto de verificação" na camada do curso). Pela decisão "Ponto de
+  verificação é só o do módulo" e pela regra de paridade, mudou nos dois: título da lição em `courses/fr-pt-BR/layer.js` e
+  `courses/zh-pt-BR/layer.js` ("Revisão da Unidade") e em `fr/content.en.js`/`zh/content.en.js` ("Unit review"); faixa da fase
+  (`zh.path.banner.checkpoint`), tela de fim (`zh.path.lessonDone.checkpointTitle`, `.recapMissed`) e o rótulo do passo
+  (`shared/core/licao-base.js` usava `trail.checkpoint.title`; agora usa a chave nova `trail.unitReview.title`).
+- **História desbloqueada** (en "Story unlocked"): `zh.path.story.unlocked` era o cartão da HISTÓRIA entre unidades (confirmado em
+  `zh/app.js:757`).
+- **Analytics do Admin**: o evento `unit_checkpoint` é "unidade concluída" (dispara em `shared/core/trilha-licao.js` ao concluir a
+  unidade, inclusive as de gramática sem lições), não o Ponto de verificação do módulo. Em vez de "Ponto de verificação" (proposta da
+  seção 4.3), ficou "✅ Unidade concluída" / "unidade concluída" e o "(checkpoints)" saiu do título "Unidades concluídas por aluno".
+- **Mapa**: o ✕ do painel usa `common.close` ("Fechar"/"Close"); `trail.map.closePanel` foi apagada.
+- **Acréscimo aprovado pela dona (2026-10-31)**:
+  - Perfil > Progresso, opção A: saiu o contador "Para estudar hoje" (a fila da sessão fica só na aba Revisão);
+    `progress.statReview` "Para revisar" -> "Já aprendidos" (en "Learned", confiança média) e `progress.statDueNow` "Devidos" ->
+    "Para hoje" (en "Due today"). As mesmas chaves aparecem na tabela "Decks do aluno" do painel da professora
+    (`shared/teacher-students-ui.js`) e ficam com os nomes novos. `progress.statToday` e `progress.statTodayTitle` ficaram sem uso e
+    foram apagadas. Grade: com um contador a menos, o "XP acumulado" fica sozinho na última linha (390: 2 colunas; 1280: 4 colunas);
+    sem sobreposição nem rolagem lateral (capturas 3).
+  - Painel da unidade no Mapa: `trail.map.unit.toReview` virou plural ("🔁 1 cartão para revisar hoje" / "🔁 N cartões para revisar
+    hoje"; en "1 card to review today" / "N cards to review today"), chamado com `tp()` em `shared/core/modulos-niveis.js`.
+  - `deck.countsFull`/`deck.countsDetail` ("Para revisar: · Devidos:" na lista de Decks) NÃO mudaram: são do lote 3 ("para hoje").
+- **Chaves sem uso apagadas** (conferido com busca no código e no HTML, inclusive chave montada): `review.mode.flashcard.name`,
+  `review.mode.speed.desc`, `zh.progress.statDue`. A seção 2 fala em 4, mas só há 3 listadas nas seções 4.1, 4.6 e 4.7. Além delas:
+  `trail.map.closePanel`, `progress.statToday`, `progress.statTodayTitle` (ficaram sem uso nesta entrega).
+- Traduções novas em inglês marcadas no `en.js` com "Etapa 7 (needs_review)"; confiança alta, menos "Learned" (média).
+
+### 9.2 Chaves mudadas (pt antes -> depois | en antes -> depois)
+
+| Chave | pt | en |
+|---|---|---|
+| `comeback.review` | 'Fazer uma revisão rápida' → 'Fazer uma revisão de 5 minutos' | 'Do a quick review' → 'Do a 5-minute review' |
+| `review.mode.flashcard.name` | removida | removida |
+| `review.mode.speed.name` | 'Speed Review' → 'Revisão rápida' | 'Speed Review' → 'Quick review' |
+| `review.mode.speed.desc` | removida | removida |
+| `review.speed.insufficientBody` | 'O Speed Review precisa de palavras já estudadas com sucesso pelo menos uma vez. Continue estudando unidades no Estudo.' → 'A Revisão rápida precisa de palavras já estudadas com sucesso pelo menos uma vez. Continue estudando unidades no Est... | 'Speed Review needs words you have already studied successfully at least once. Keep studying units in Study.' → 'Quick review needs words you have already studied successfully at least once. Keep studying units in Study.' |
+| `myFlashcards.note.label` | 'Nota (opcional)' → 'Observação (opcional)' | (igual) |
+| `zh.path.story.unlocked` | 'Checkpoint desbloqueado' → 'História desbloqueada' | 'Checkpoint unlocked' → 'Story unlocked' |
+| `zh.path.lessonDone.recapMissed` | 'Palavras para rever do Ponto de verificação' → 'Palavras para rever da Revisão da Unidade' | 'Words to review from the Checkpoint' → 'Words to review from the Unit review' |
+| `zh.path.lessonDone.checkpointTitle` | 'Ponto de verificação concluído!' → 'Revisão da Unidade concluída!' | 'Checkpoint completed!' → 'Unit review completed!' |
+| `zh.path.banner.checkpoint` | '🧩 Ponto de verificação' → '🧩 Revisão da Unidade' | '🧩 Checkpoint' → '🧩 Unit review' |
+| `fr.mission.speedReview1` | 'Complete uma sessão de Revisão Rápida' → 'Complete uma sessão de Revisão rápida' | 'Complete a Speed Review session' → 'Complete a Quick review session' |
+| `fr.mission.overdue` | { one: 'Revise {n} carta em atraso', other: 'Revise {n} cartas em atraso' } → { one: 'Revise {n} cartão atrasado', other: 'Revise {n} cartões atrasados' } | (igual) |
+| `zh.progress.statDue` | removida | removida |
+| `progress.statReview` | 'Para revisar' → 'Já aprendidos' | 'To review' → 'Learned' |
+| `progress.statDueNow` | 'Devidos' → 'Para hoje' | 'Due' → 'Due today' |
+| `fr.trail.freeDictation` | { one: '{n} ditado Free', other: '{n} ditado Free' } → { one: '{n} ditado grátis', other: '{n} ditados grátis' } | (igual) |
+| `review.deck.delete` | 'Excluir' → 'Apagar' | (igual) |
+| `review.deck.deleteTitle` | 'Excluir este deck irá excluir todos os cartões dentro dele' → 'Apagar este deck irá apagar todos os cartões dentro dele' | (igual) |
+| `review.deck.alsoDeleted` | ' (que também serão excluídos)' → ' (que também serão apagados)' | (igual) |
+| `review.deck.deletePermanently` | 'Excluir permanentemente' → 'Apagar permanentemente' | (igual) |
+| `review.deck.deleteConfirm` | 'Excluir "{name}" e {n} {cards} para sempre? O histórico de revisão também será apagado. Isso não pode ser desfeito.' → 'Apagar "{name}" e {n} {cards} para sempre? O histórico de revisão também será apagado. Isso não pode ser desfeito.' | (igual) |
+| `review.deck.deletedMoved` | 'Deck excluído. {n} {what} para "{dest}".' → 'Deck apagado. {n} {what} para "{dest}".' | (igual) |
+| `review.deck.deletedWith` | 'Deck excluído com {n} {cards}.' → 'Deck apagado com {n} {cards}.' | (igual) |
+| `review.panel.deleteOne` | '🗑 Excluir' → '🗑 Apagar' | (igual) |
+| `review.panel.deleteManyConfirm` | 'Excluir {n} {items} ({total} {cards}) para sempre? O histórico de revisão também será apagado.' → 'Apagar {n} {items} ({total} {cards}) para sempre? O histórico de revisão também será apagado.' | (igual) |
+| `review.panel.deletedWhat.one` | 'conteúdo excluído' → 'conteúdo apagado' | (igual) |
+| `review.panel.deletedWhat.other` | 'conteúdos excluídos' → 'conteúdos apagados' | (igual) |
+| `review.tags.hint` | 'Tags valem para o cartão inteiro (todos os cards gerados dele) e servem para filtrar a Revisão. Até {max} tags de {l... → 'Tags valem para o item inteiro (todos os cartões gerados dele) e servem para filtrar a Revisão. Até {max} tags de {l... | 'Tags apply to the whole card (every card generated from it) and can be used to filter Review. Up to {max} tags of {l... → 'Tags apply to the whole item (every card generated from it) and can be used to filter Review. Up to {max} tags of {l... |
+| `publicProfile.sectionFlashcards` | 'Flashcards' → 'Cartões' | 'Flashcards' → 'Cards' |
+| `publicProfile.labelNote` | 'Nota' → 'Observação' | (igual) |
+| `admin.students.metrics.noCards` | 'Você ainda não criou nenhum cartão para este aluno, na aba "📇 Flashcards".' → 'Você ainda não criou nenhum cartão para este aluno, na aba "Cartões".' | 'You haven\'t created any cards for this student yet, in the "📇 Flashcards" tab.' → 'You haven\'t created any cards for this student yet, in the "Cards" tab.' |
+| `admin.flashcards.edit.modeFlip` | ' Flashcard normal' → ' Cartão normal' | ' Normal flashcard' → ' Normal card' |
+| `admin.notifications.btn.delete` | 'Excluir' → 'Apagar' | (igual) |
+| `admin.notifications.confirm.delete` | 'Excluir esta variante de notificação?' → 'Apagar esta variante de notificação?' | (igual) |
+| `admin.badges.catalog.deleteTitle` | 'Excluir badge (e todas as concessões dele)' → 'Apagar badge (e todas as concessões dele)' | (igual) |
+| `admin.badges.grant.notePh` | 'ex: reportou o bug do streak' → 'ex: reportou o bug da sequência' | (igual) |
+| `admin.badges.confirm.delete` | 'Excluir este badge e todas as concessões dele?' → 'Apagar este badge e todas as concessões dele?' | (igual) |
+| `admin.analytics.lesson.unit_checkpoint` | '✅ Checkpoint de unidade' → '✅ Unidade concluída' | '✅ Unit checkpoint' → '✅ Unit completed' |
+| `admin.analytics.lesson.flashcard_review` | '🔁 Sessão de flashcards' → '🔁 Sessão de cartões' | '🔁 Flashcard session' → '🔁 Card session' |
+| `admin.analytics.resumo.rateNA` | 'Taxa de conclusão indisponível: ninguém começou um exercício dos tipos contados aqui (flashcards, revisão rápida, jo... → 'Taxa de conclusão indisponível: ninguém começou um exercício dos tipos contados aqui (cartões, revisão rápida, jogo ... | 'Completion rate unavailable: nobody started an exercise of the types counted here (flashcards, speed review, memory ... → 'Completion rate unavailable: nobody started an exercise of the types counted here (cards, quick review, memory game,... |
+| `admin.analytics.resumo.rateNote` | 'A taxa de conclusão só usa os exercícios que têm um "começo" registrado (flashcards, revisão rápida, jogo da memória... → 'A taxa de conclusão só usa os exercícios que têm um "começo" registrado (cartões, revisão rápida, jogo da memória, h... | 'The completion rate only uses exercises that have a recorded "start" (flashcards, speed review, memory game, hanzi, ... → 'The completion rate only uses exercises that have a recorded "start" (cards, quick review, memory game, hanzi, dicta... |
+| `admin.analytics.resumo.xpNote` | 'Quer ver XP total e sequência de dias (streak)? Isso está na aba Engajamento, não aqui no Resumo.' → 'Quer ver XP total e sequência de dias? Isso está na aba Engajamento, não aqui no Resumo.' | (igual) |
+| `admin.analytics.prog.units` | 'Unidades concluídas por aluno (checkpoints)' → 'Unidades concluídas por aluno' | 'Units completed per student (checkpoints)' → 'Units completed per student' |
+| `admin.analytics.prog.unitsNote` | 'Nem toda unidade tem lições internas (ex: unidades de gramática no francês) — essas pontuam como um bloco único de e... → 'Nem toda unidade tem lições internas (ex: unidades de gramática no francês) — essas pontuam como um bloco único de e... | 'Not every unit has internal lessons (e.g. grammar units in French): those count as a single block of exercises, and ... → 'Not every unit has internal lessons (e.g. grammar units in French): those count as a single block of exercises, and ... |
+| `admin.analytics.eng.xpNote2` | 'Sequência é uma aproximação calculada a partir dos dias com atividade registrada, não o streak "oficial" do app (que... → 'Sequência é uma aproximação calculada a partir dos dias com atividade registrada, não a sequência "oficial" do app (... | (igual) |
+| `admin.panel.tab.flashcards` | '📇 Flashcards' → '📇 Cartões' | '📇 Flashcards' → '📇 Cards' |
+| `ui.myCards.sub` | 'Crie seus próprios flashcards: palavras e frases que você quer memorizar, mesmo que não estejam na trilha.' → 'Crie seus próprios cartões: palavras e frases que você quer memorizar, mesmo que não estejam na trilha.' | 'Create your own flashcards: words and phrases you want to memorize, even if they\'re not in the path.' → 'Create your own cards: words and phrases you want to memorize, even if they\'re not in the path.' |
+| `badge.track.course1.goal.4` | 'Tire 100% em todos os pontos de verificação do {level}' → 'Tire 100% em todos os Pontos de verificação do {level}' | 'Score 100% on every checkpoint of {level}' → 'Score 100% on every Checkpoint of {level}' |
+| `badge.track.aced.goal` | 'Tire 100% em {n} pontos de verificação' → 'Tire 100% em {n} Pontos de verificação' | 'Score 100% on {n} checkpoints' → 'Score 100% on {n} Checkpoints' |
+| `badge.track.aced.goal.1` | 'Tire 100% em um ponto de verificação' → 'Tire 100% em um Ponto de verificação' | 'Score 100% on a checkpoint' → 'Score 100% on a Checkpoint' |
+| `badge.track.aced.goal.4` | 'Tire 100% em todos os pontos de verificação do {level}' → 'Tire 100% em todos os Pontos de verificação do {level}' | 'Score 100% on every checkpoint of {level}' → 'Score 100% on every Checkpoint of {level}' |
+| `students.ev.act.unit_checkpoint` | 'ponto de verificação' → 'unidade concluída' | 'checkpoint' → 'unit completed' |
+| `students.ev.act.flashcard_review` | 'revisão de flashcards' → 'revisão de cartões' | 'flashcard review' → 'card review' |
+| `trail.map.closePanel` | removida | removida |
+| `trail.map.checkpointShort` | 'Ponto' → 'Ponto de verificação' | (igual) |
+| `trail.map.unit.toReview` | '🔁 {n} para revisar' → { one: '🔁 {n} cartão para revisar hoje', other: '🔁 {n} cartões para revisar hoje' } | '🔁 {n} to review' → { one: '🔁 {n} card to review today', other: '🔁 {n} cards to review today' } |
+| `trail.map.checkpoint.redo` | 'Refazer o ponto' → 'Refazer o Ponto de verificação' | 'Retake the checkpoint' → 'Retake the Checkpoint' |
+| `tagManager.err.systemProtected` | 'Tags de atribuição (criado-por-…) são de sistema e não podem ser criadas, renomeadas ou excluídas.' → 'Tags de atribuição (criado-por-…) são de sistema e não podem ser criadas, renomeadas ou apagadas.' | (igual) |
+| `tagManager.delete.askHtml` | 'Excluir <strong>#{tag}</strong>? Essa Tag será removida de {notes}. A remoção é global no seu escopo e não pode ser ... → 'Apagar <strong>#{tag}</strong>? Essa Tag será removida de {notes}. A remoção é global no seu escopo e não pode ser d... | (igual) |
+| `tagManager.delete.confirm` | 'Excluir Tag' → 'Apagar Tag' | (igual) |
+| `tagManager.delete.title` | 'Excluir tag' → 'Apagar tag' | (igual) |
+| `tagManager.delete.aria` | 'Excluir tag {tag}' → 'Apagar tag {tag}' | (igual) |
+| `tagManager.hint.teacher` | 'Tags dos seus cartões de aluno (todos os alunos e idiomas). Renomear ou excluir vale para todos eles.' → 'Tags dos seus cartões de aluno (todos os alunos e idiomas). Renomear ou apagar vale para todos eles.' | (igual) |
+| `tagManager.deleting` | 'Excluindo…' → 'Apagando…' | (igual) |
+| `deck.delete.err.notOwn` | 'Só é possível excluir um Deck pessoal seu.' → 'Só é possível apagar um Deck pessoal seu.' | (igual) |
+| `deck.delete.err.moveFailed` | 'Não foi possível mover os cartões agora. Nada foi excluído.' → 'Não foi possível mover os cartões agora. Nada foi apagado.' | (igual) |
+| `deck.delete.err.deleteCardsFailed` | 'Não foi possível excluir os cartões agora. Nada foi excluído.' → 'Não foi possível apagar os cartões agora. Nada foi apagado.' | (igual) |
+| `deck.delete.err.movedButDeck` | 'Os cartões foram movidos, mas não foi possível excluir o Deck agora. Tente de novo.' → 'Os cartões foram movidos, mas não foi possível apagar o Deck agora. Tente de novo.' | (igual) |
+| `deck.delete.err.deletedButDeck` | 'Os cartões foram excluídos, mas não foi possível excluir o Deck agora. Tente de novo.' → 'Os cartões foram apagados, mas não foi possível apagar o Deck agora. Tente de novo.' | (igual) |
+| `publicDeck.publish.ownKeyHtml` | 'Cada Deck tem a própria chave: <strong>subdecks não mudam junto</strong>. O campo "nota privada" dos cartões nunca é... → 'Cada Deck tem a própria chave: <strong>subdecks não mudam junto</strong>. O campo "Observação" dos cartões nunca é p... | 'Each Deck has its own switch: <strong>subdecks don\'t change with it</strong>. The cards\' "private note" field is n... → 'Each Deck has its own switch: <strong>subdecks don\'t change with it</strong>. The cards\' "Note" field is never pub... |
+| `restart.zero.memory` | (igual) | 'The memory of your path flashcards (they come back as new)' → 'The memory of your path cards (they come back as new)' |
+| `restart.keep.cards` | (igual) | 'Your teacher\'s flashcards and your own, with their memory' → 'Your teacher\'s cards and your own, with their memory' |
+| `accountDelete.hint` | (igual) | 'Deletes your account and everything linked to it: progress, flashcards, achievements, friendships, photos and files.... → 'Deletes your account and everything linked to it: progress, cards, achievements, friendships, photos and files. This... |
+| `accountDelete.modal.explain` | (igual) | 'This deletes your progress, your flashcards, the records your teacher keeps about you (lessons and flashcards), and ... → 'This deletes your progress, your cards, the records your teacher keeps about you (lessons and cards), and your files... |
+| `admin.flashcards.linkFirst` | (igual) | 'Link a student first, in the "🎓 Students" tab, to be able to create flashcards for them.' → 'Link a student first, in the "🎓 Students" tab, to be able to create cards for them.' |
+| `admin.analytics.lesson.speed_review` | (igual) | '⚡ Speed review' → '⚡ Quick review' |
+| `ui.reviewReminder.title` | (igual) | 'Shall we do a quick review?' → 'Shall we do a short review?' |
+| `badge.explorer.desc` | (igual) | 'Used review, speed review and the memory game' → 'Used review, quick review and the memory game' |
+| `students.ev.act.speed_review` | (igual) | 'speed review' → 'quick review' |
+| `trail.unitReview.title` (nova) | Revisão da Unidade | Unit review |
+| `progress.statToday`, `progress.statTodayTitle` | removidas (contador saiu do Perfil) | removidas |
+| `CHALLENGE_I18N['pt-BR']['tier.free']` (`shared/desafios.js`) | Free -> Grátis | (igual, Free) |
+| lição `checkpoint` das unidades (camadas `courses/*-pt-BR/layer.js`, `*/content.en.js`) | Ponto de verificação -> Revisão da Unidade (38 lições) | Checkpoint -> Unit review |
+
+HTML fixo: `ui.myCards.sub` (texto padrão no `fr/index.html` e `zh/index.html`). Ícone: `shared/recomecar-curso.js` ⚡ -> ⏱.
+Regra curta nova em `.claude/rules/i18n.md` (vocabulário único).
+
+### 9.3 Testes
+
+Ajustados de propósito (só o texto que mudou):
+- `tests/i18n/test_i18n_unit.js`: lista `ETAPA7_DONA` (pares antes -> depois) entrou em `DELIBERATE_PT_CHANGES`; `trail.unitReview.title`
+  em `NEW_KEYS`; saíram de `EN_SAME_AS_PT_OK` as chaves apagadas ou que deixaram de ser iguais (`review.mode.flashcard.name`,
+  `review.mode.speed.name`, `publicProfile.sectionFlashcards`, `admin.panel.tab.flashcards`).
+- `tests/camada-curso/test_equivalence.js`: a comparação "arquivos em disco == original" aplica a troca do título da lição final.
+- `tests/deck-browser/test_playwright.js`: "Excluir"/"Excluir este deck irá excluir..."/"Excluir permanentemente" -> "Apagar...".
+- `tests/desafios-modulo/test_playwright.js`: selo "Free" -> "Grátis" e "1 ditado Free" -> "1 ditado grátis".
+- `tests/k2e/test_playwright.js`: rótulos do Perfil "Já aprendidos"/"Para hoje" e o contador "Para estudar hoje" ausente.
+- `tests/k7/test_k7_student_analytics.js`: a regra da fila da sessão continua conferida pela função; o Perfil não mostra mais o contador.
+- `tests/painel-admin/test_analytics_playwright.js`: "Sessão de flashcards" -> "Sessão de cartões".
+- Testes "antes x depois" da paridade (`test_conjugacao.js`, `test_ditados.js`, `test_modulos_niveis.js`, `test_quase_iguais.js`):
+  neutralização nova `tests/paridade-sites/etapa7-neutro.js` aplicada ao lado de antes (lista dos textos desta seção), sem apagar
+  nenhuma comparação.
+
+Regressão (antes = árvore desta branch com a `main` mesclada, sem as mudanças; depois = com as mudanças):
+
+| Teste | Antes | Depois |
+|---|---|---|
+| `tests/i18n/test_i18n_unit.js` | 2341/2341 | 2335/2335 |
+| `tests/i18n/test_playwright.js` | 209/209 | 209/209 |
+| `tests/i18n/test_sem_portugues_en.js` | 6/6 | 6/6 |
+| `tests/acessibilidade/test_playwright.js` | 60/60 | 60/60 |
+| `tests/trilha/test_a0_eligibility.js` | 12/12 | 12/12 |
+| `tests/trilha/test_checkpoint_exam.js` | 43/43 | 43/43 |
+| `tests/trilha/test_grammar_validator.js` | 8/8 | 8/8 |
+| `tests/trilha/test_mobile_shell.js` | 108/108 | 108/108 |
+| `tests/trilha/test_review_milestone.js` | 14/14 | 14/14 |
+| `tests/trilha/test_review_milestone_ui.js` | 34/34 | 34/34 |
+| `tests/trilha/test_skip_checkpoint_ui.js` | 19/19 | 19/19 |
+| `tests/trilha/test_trail_helpers.js` | 6/6 | 6/6 |
+| `tests/trilha/test_trail_map.js` | 61/61 | 61/61 |
+| `tests/trilha/test_trail_state_model.js` | 37/37 | 37/37 |
+| `tests/trilha/test_trail_ui.js` | 86/86 | 86/86 |
+| `tests/trilha/test_zh_map_stories.js` | 4/4 | 4/4 |
+| `tests/checkpoint-zh/test_playwright.js` | 25/25 | 25/25 |
+| `tests/paridade-sites/test_atalhos.js` | 92/92 | 92/92 |
+| `tests/paridade-sites/test_conjugacao.js` | 343/343 | 343/343 |
+| `tests/paridade-sites/test_conjugacao_motor.js` | 45/45 | 45/45 |
+| `tests/paridade-sites/test_contrato_lang_hooks.js` | 29/29 | 29/29 |
+| `tests/paridade-sites/test_correcoes_5d.js` | 4/4 | 4/4 |
+| `tests/paridade-sites/test_css_compartilhado.js` | 5/5 | 5/5 |
+| `tests/paridade-sites/test_desafios.js` | quebra (erro) | quebra (erro) |
+| `tests/paridade-sites/test_desafios_css.js` | falha (dark 1200) | falha (dark 1200) |
+| `tests/paridade-sites/test_desafios_motor.js` | 49/49 | 49/49 |
+| `tests/paridade-sites/test_ditados.js` | 828/828 | 828/828 |
+| `tests/paridade-sites/test_ditados_motor.js` | 41/41 | 41/41 |
+| `tests/paridade-sites/test_gramatica_cenario.js` | 46/46 | 46/46 |
+| `tests/paridade-sites/test_gramatica_cenario_zh_playwright.js` | 54/54 | 54/54 |
+| `tests/paridade-sites/test_idioma_registro.js` | 10/10 | 10/10 |
+| `tests/paridade-sites/test_licao_feedback.js` | 43/43 | 43/43 |
+| `tests/paridade-sites/test_licao_feedback_playwright.js` | 16/16 | 16/16 |
+| `tests/paridade-sites/test_modulos_niveis.js` | 90/90 | 90/90 |
+| `tests/paridade-sites/test_modulos_niveis_zh_playwright.js` | 95/95 | 95/95 |
+| `tests/paridade-sites/test_quase_iguais.js` | 2768/2768 | 2768/2768 |
+| `tests/paridade-sites/test_voz.js` | ok | ok |
+| `tests/deck-browser/test_playwright.js` | 208/208 | 208/208 |
+| `tests/janelas-revisao/test_playwright.js` | 40/40 | 40/40 |
+| `tests/painel-cartoes/test_cards_ui_unit.js` | 45/45 | 45/45 |
+| `tests/painel-cartoes/test_playwright.js` | 264/264 | 264/264 |
+| `tests/painel-cartoes/test_verso_preenchimento.js` | 35/35 | 35/35 |
+| `tests/painel-professora/test_playwright.js` | 691/691 | 691/691 |
+| `tests/limite-corte/test_cut_unit.js` | 30/30 | 30/30 |
+| `tests/limite-corte/test_playwright.js` | 38/38 | 38/38 |
+| `tests/desafios-album/test_playwright.js` | 66/66 | 66/66 |
+| `tests/desafios-cloze/test_playwright.js` | 38/38 | 38/38 |
+| `tests/desafios-comando-idioma/test_playwright.js` | 48/48 | 48/48 |
+| `tests/desafios-conclusao/test_playwright.js` | 19/19 | 19/19 |
+| `tests/desafios-exemplos-traducao/test_playwright.js` | 112/112 | 112/112 |
+| `tests/desafios-expressoes-passos/test_playwright.js` | 175/175 | 175/175 |
+| `tests/desafios-idioma-site/test_playwright.js` | 41/41 | 41/41 |
+| `tests/desafios-modulo/test_playwright.js` | 75/75 | 75/75 |
+| `tests/desafios-progresso/test_playwright.js` | 22/23 (falha) | 22/23 (falha) |
+| `tests/desafios-ptpt/test_playwright.js` | 8/8 | 8/8 |
+| `tests/desafios-ptpt/test_ptpt.js` | 282/282 | 282/282 |
+| `tests/desafios-revisar-erros/test_playwright.js` | 36/36 | 36/36 |
+| `tests/conjugacao/test_playwright.js` | 80/80 | 80/80 |
+| `tests/recomecar-curso/test_playwright.js` | 220/220 | 220/220 |
+| `tests/recomecar-curso/test_unit.js` | 30/30 | 30/30 |
+| `tests/janelas-topo/test_calculo.js` | 35/35 | 35/35 |
+| `tests/janelas-topo/test_playwright.js` | 276/276 | 276/276 |
+| `tests/boas-vindas/test_playwright.js` | 190/190 | 190/190 |
+| `tests/conquistas/test_badge_tracks.js` | 76/76 | 76/76 |
+| `tests/conquistas/test_playwright.js` | 66/66 | 66/66 |
+| `tests/k10/test_playwright.js` | 114/114 | 114/114 |
+| `tests/k2e/test_playwright.js` | 28/28 | 28/28 |
+| `tests/k7/test_k7_student_analytics.js` | 40/40 | 40/40 |
+| `tests/k3/test_k3_playwright.js` | 20/20 | 20/20 |
+| `tests/k5/test_k5_deck_analytics.js` | 32/32 | 32/32 |
+| `tests/k5/test_k5_playwright.js` | 18/18 | 18/18 |
+| `tests/painel-alunos/test_playwright.js` | 256/256 | 256/256 |
+| `tests/painel-alunos/test_students_ui_unit.js` | 61/61 | 61/61 |
+| `tests/fase-h/test_teacher_experience_unit.js` | 76/78 (falha) | 76/78 (falha) |
+| `tests/fase-h/test_playwright.js` | quebra (erro) | quebra (erro) |
+| `tests/fase-j/test_tag_manager_unit.js` | 85/85 | 85/85 |
+| `tests/conta-excluir/test_core.js` | 16/16 | 16/16 |
+| `tests/conta-excluir/test_playwright.js` | 20/20 | 20/20 |
+| `tests/camada-curso/test_equivalence.js` | 75/75 | 75/75 |
+| `tests/lembrete-revisao/test_playwright.js` | 26/26 | 26/26 |
+| `tests/modo-foco/test_playwright.js` | 19/19 | 19/19 |
+| `tests/revisao-proposta-a/test_playwright.js` | 60/60 | 60/60 |
+| `tests/painel-admin/test_analytics_playwright.js` | 174/174 | 174/174 |
+| `tests/notificacoes/test_playwright.js` | 36/36 | 36/36 |
+| `tests/configuracoes/test_playwright.js` | 27/27 | 27/27 |
+| `tests/zh-manual/test_playwright.js` | 27/27 | 27/27 |
+| `tests/i18n/test_content_en.js` | 29/30 (falha) | 29/30 (falha) |
+| `tests/fase-k6/test_playwright.js` | 28/28 | 28/28 |
+| `tests/fase-g/test_playwright.js` | 68/68 | 68/68 |
+| `tests/fase-f/test_playwright.js` | 50/50 | 50/50 |
+| `tests/curriculo-ids/test_playwright_0b.js` | 23/23 | 23/23 |
+| `tests/revisao-ajustes/test_playwright.js` | 48/48 | 48/48 |
+| `tests/fase-i/test_playwright.js` | 48/48 | 48/48 |
+| `tests/metas-wizard/test_playwright.js` | 18/18 | 18/18 |
+
+Falhas que já existiam antes (iguais antes e depois, nada a ver com o vocabulário): `test_desafios.js` (TypeError em `fingerprint`),
+`test_desafios_css.js` (regras do tema escuro em 1200), `desafios-progresso` 22/23 ("barra existe"), `fase-h` (unit 76/78 e
+navegador, "zh H5 aluno vê a árvore") e `i18n/test_content_en.js` 29/30 (aviso na unidade de gramática). `i18n/test_i18n_unit.js`
+tem 6 verificações a menos porque 6 chaves saíram do catálogo. `test_conjugacao.js` falhou 1 vez por instabilidade (94 x 92 cenas
+no jogo) numa rodada em paralelo e passou 343/343 nas outras duas.
+
+### 9.4 Capturas
+
+fr e zh, tema claro, 390 e 1280 (site em pt-BR), pasta temporária desta sessão
+`/tmp/claude-0/-home-user-mandarimdozero/3e41ab12-78b3-5f2b-964b-fef249117fbb/scratchpad/etapa7-lotes/shots/` (roteiro
+`capturas.js` na pasta acima): `1-unidade-revisao-da-unidade` (trilha com a última lição "Revisão da Unidade"),
+`2-mapa-unidade-fechar` (painel da unidade com "🔁 N cartões para revisar hoje"; o ✕ tem aria "Fechar"), `3-perfil-progresso`
+(contadores sem "Para estudar hoje", com "Já aprendidos" e "Para hoje"), `4-revisao-rapida` e `5-revisao-decks` (aba Revisão:
+modo "Revisão rápida"), `6-deck-apagar` (tela do Deck pessoal com "Apagar"), `7-adicionar-observacao` (janela Adicionar cartão
+com "Observação (opcional)"). 0 erros de página nas 4 rodadas.
+
+### 9.5 Fica para depois
+
+- Lote 1b (site/app), lote 3 ("para hoje" no resto: `deck.countsFull`, `deck.countsDetail`, Revisão, Professora, banco) e os rótulos
+  que ainda dizem "Para revisar"/"Devidos" fora do Perfil.
+- Lote 4 (Navegar) e lote 5 (Reforço) cancelados pela dona.
+- `admin.panel.tab.flashcards` mudou de texto, mas nenhuma tela usa a chave (candidata a apagar num próximo lote).
