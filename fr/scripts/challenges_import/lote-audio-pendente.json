@@ -1,0 +1,9 @@
+[
+  {
+    "id": "expr-b2-002",
+    "type": "expression",
+    "canonicalExpression": "avoir un poil dans la main",
+    "example": { "text": "Bien que son projet soit ambitieux, il semble avoir un poil dans la main, car il repousse constamment les échéances." },
+    "secondExample": { "text": "Mon colocataire a vraiment un poil dans la main : il ne fait jamais la vaisselle." }
+  }
+]

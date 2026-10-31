@@ -11,6 +11,9 @@ Histórico: `docs/historico/05-audio-midia-anki-fase-7.md`, `07-*` (camada de te
 - Nunca rodar geração local com a chave: usar GitHub Actions > "Áudio TTS" (`.github/workflows/audio-tts.yml`):
   `laboratorio` (variantes para ouvir), `regenerar` (todas as entradas afetadas pelas regras), `gerar-faltantes`,
   e modos de lote (`ditados`, `desafios-a1-mN`). O robô commita mp3/manifest e dispara o deploy.
+- Desafio com texto novo ou alterado (já na produção): pôr o item em `fr/scripts/challenges_import/lote-audio-pendente.json`
+  e rodar o modo `desafios-pendentes` (o que já tem mp3 é reaproveitado); depois gravar o `audioFile` na tabela `challenges`.
+  O robô pode rodar numa branch (salva na própria branch).
 - Validação do gerador: STT tolerante a elisão + checagem física (`audio_is_healthy`).
 - Cota grátis do Google: 1M caracteres/mês (o site usa ~1,3%).
 
