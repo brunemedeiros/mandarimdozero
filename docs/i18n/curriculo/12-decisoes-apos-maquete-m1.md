@@ -1354,3 +1354,18 @@ Base: `piloto-m1/A1-1/A1-1.md`. **Pedido de mudança ao mapa congelado (decisão
 320. **Diálogo informal da A1-1 (a dona escolheu a alternativa sem cartão novo)**: no **fim da lição 2**, antes das fórmulas de cortesia: *Salut ! Tu vas bien ?* / *Je vais bien, et toi ?* / *Ça va !* (só cartões das lições 1 e 2). *Moi aussi* **não** entra na A1-1 (fica na nota *moi aussi / moi non plus*
      de "Gostos e pedidos no café"). O diálogo formal "Na portaria" continua no fim da lição 4. As 4 falas publicadas (`A1-1-d0` a `d3`) saem do diálogo: na implementação, as chaves vão para o arquivo de aposentados (progresso guardado) ou ficam como frases da unidade, se o código permitir.
      Validador do rascunho: 117 textos, 0 falhas.
+
+# Trigésima sétima rodada (2026-10-31): respostas à auditoria da unidade 1 e à revisão dos cortes
+
+321. **Auditoria da unidade 1, respostas da dona**:
+     - A1: o cartão *pardon* **não muda** a tradução ("desculpe" já serve para "desculpe?" quando a pessoa não entendeu); o "pedir para repetir" fica pela frase *Pardon ? Vous pouvez répéter ?* (ver 322 sobre qual frase fica no cartão).
+     - A2: o diálogo formal **fica como está** (as formas são muito parecidas; evitar repetição).
+     - A3 (**regra das frases essenciais em exercício**): uma frase essencial pode entrar em exercício desde que o exercício **cobre a palavra já ensinada** (lacuna, escolha) e não foque a palavra ainda não vista; exercícios de ordenar a frase em blocos podem usá-la inteira quando a palavra nova é de compreensão fácil e a tradução está visível (ex.: *Merci, madame !* na lição 1, onde o cartão é *madame*). Vai para a função pura do papel das frases (código, na implementação).
+     - A4: notas da 2ª unidade **podem repetir** sistematizando o que o cartão mostrou sem explicação (nota de tônicos parte de *et toi ?*; "Tu ou vous?" sistematiza); ajustar o texto da regra 9.
+     - A5: "Consigo..." do módulo passa a "reagir (*Et toi ? Et vous ?*)".
+     - A6: tradução de *salut / coucou* = **"oi / olá"** (en: **"hi / hello"**), sem contexto dentro da tradução (o contexto vai na nota).
+322. **Frase "Na frase" do cartão *pardon***: a dona entende que a frase do cartão é *Pardon ? Vous pouvez répéter ?* (só exemplo, com tradução). Hoje o rascunho usa *Pardon, madame !*: trocar para *Pardon ? Vous pouvez répéter ?* (a confirmar no chat).
+323. **Revisão dos cortes, aprovada (a dona)**: **voltam a cartão** as 23 recomendadas: A1 *les grands-parents, marié / mariée* ("Apresentar a família"); *beau / belle, long, court* ("Descrever a aparência"); *se coucher* ("Dizer as horas e a rotina");
+     *adorer* ("Gostos e pedidos no café"); *la boisson, le menu* ("Pedir no restaurante"); *en espèces, le portable, le mail* ("Perguntar o preço e pagar"); *le studio, l'immeuble, le jardin, le balcon* ("Tipos de moradia e cômodos"); A2 *bavard, paresseux* ("Descrever o caráter");
+     *en ligne* ("Comprar on-line e reclamar"); *le dentiste* ("Na consulta"); *la note* ("Contar a formação"); *la faute* ("Falar do aprendizado de línguas"); *l'écran* ("Internet e redes", no lugar de *le mail*). **Ficam**: *laid, le cuir, le Japon, se faire mal, l'échange* e os itens de categoria aberta das notas, *aimer bien*.
+     Detalhes aceitos: *marié / mariée* e *se marier* com os dois cartões; *le portable* e *le mail* só em frase no A2; nota "Outras palavras de caráter" com a lista de origem, tirando o que voltou. Lista da nota "Outras palavras de países": a decidir (pergunta da dona sobre o gênero dos países).
