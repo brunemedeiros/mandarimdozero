@@ -109,9 +109,14 @@ async function scenes(page, visit){
       // Regras mexidas DE PROPÓSITO depois do refactor (2026-10-26, docs/historico/23-auditoria-telas-de-exercicio.md): as Expressões em passos
       // (.expr-*), a barra do topo (.activity-lesson-bar), e nos Jogos/Prática da Conjugação a barra fina que saiu, o "Não sei", o número
       // das respostas (.cg-choice position) e a tremida no erro (.cg-choice.is-wrong). Nenhuma outra regra pode sumir, aparecer ou mudar.
-      const DELIB = /expr-|activity-lesson-bar|cg-progress-bar|conj-progress-bar|cg-dontknow|\.cg-choice\|\|\{"position|\.cg-choice\.is-wrong|#conj-practice-wrap \.conj-progress/;
+      // Atualizado em 2026-10-31 (decisões de cor da autora e features de outras sessões depois do refactor): blocos de tokens `:root`
+      // (--brand-fill, --success-fill, --grade-fill-*), botões de nota recoloridos (.grade-*, .rb-big.is-*) e o .xp-suffix da regra de XP.
+      // E regra NOVA no fr (gcal-*, bv-*, tm-note...) só importa se cair no desafios.css: o que este teste guarda é que as regras
+      // movidas continuam as mesmas; recurso novo de outra tela não é "regra que mudou de lugar".
+      const DELIB = /expr-|activity-lesson-bar|cg-progress-bar|conj-progress-bar|cg-dontknow|\.cg-choice\|\|\{"position|\.cg-choice\.is-wrong|#conj-practice-wrap \.conj-progress|^:root\|\||\.rb-big\.is-(ok|help|good|bad)\||^\.grade-(again|hard|good|easy)\||^\.xp-suffix\|/;
       const sumiu = [...ca].filter(([k, n]) => (cb.get(k) || 0) < n).map(([k]) => k).filter(k => !DELIB.test(k));
-      const apareceu = [...cb].filter(([k, n]) => (ca.get(k) || 0) < n).map(([k]) => k).filter(k => !DELIB.test(k));
+      const keysMoved = new Set(rb.filter(r => /desafios\.css$/.test(r.sheet)).map(key));
+      const apareceu = [...cb].filter(([k, n]) => (ca.get(k) || 0) < n).map(([k]) => k).filter(k => !DELIB.test(k) && keysMoved.has(k));
       check(`${theme} ${width}: mesmas regras (${ra.length})`, !sumiu.length && !apareceu.length, { sumiu: sumiu.slice(0, 5), apareceu: apareceu.slice(0, 5) });
       const moved = rb.filter(r => /desafios\.css$/.test(r.sheet));
       if (theme === 'light' && width === 390) check('o desafios.css tem regras', moved.length > 300, moved.length);
