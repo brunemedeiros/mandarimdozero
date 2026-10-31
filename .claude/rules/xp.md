@@ -25,7 +25,8 @@ site novo parte do molde da família (ver `docs/i18n/e4-plano-de-extracao.md`) e
   "Não sei" 0 (teto 5). Só na PRIMEIRA conclusão do desafio, pago ao tocar em Concluir (`exprXPBreakdown`, `shared/desafios-telas.js`); refazer desafio concluído ou "Revisar erros" = 0, para
   não virar fonte infinita. Errou a escolha: não há Concluir (Tentar de novo), então nada é pago. Teste: `tests/desafios-expressoes-passos/`.
 - **Topo** (decisão da dona, 2026-10-29): ⭐ N XP = XP DA SEMANA, mesma semana (segunda a domingo) e mesma soma do Ranking "Geral" (`weekly_xp`
-  de todos os idiomas); janelinha com 4 semanas (`shared/xp-semana.js`). Aviso "+N XP" não aparece em tela de conclusão (`COMPLETION_SCREEN_SELECTOR`,
+  de todos os idiomas); janela com 4 semanas, frase "+N XP a mais" só quando a semana é maior e "Ver ranking" (`shared/xp-semana.js`, desenho e controle comuns
+  com a janela da sequência em `shared/janelas-topo.js`; recorde de dias seguidos = `bestStreak` da conta). Teste: `tests/janelas-topo/`. Aviso "+N XP" não aparece em tela de conclusão (`COMPLETION_SCREEN_SELECTOR`,
   `shared/toast.js`). Teste: `tests/xp-semana/`.
 - O toast "+N XP" aparece para todo ganho maior que 0. A notificação do sino usa `notification_rules.min_xp_amount` (categoria `gamificacao`, 15 na produção).
 - Demais fontes e valores atuais, e o que está em revisão: `docs/historico/21-auditoria-xp.md`. Ao mexer em qualquer XP, atualizar esse arquivo e o teste `tests/xp/`.

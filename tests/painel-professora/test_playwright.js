@@ -222,7 +222,7 @@ const PANEL_STUB = (who) => {
       await ev(() => switchTab('teacher-panel'));
       await page.waitForTimeout(400);
       const tabs = await ev(() => [...document.querySelectorAll('#view-teacher-panel [data-teacher-section]')].map(b => b.textContent.trim()));
-      L('professora: 5 abas (Mural entrou na Etapa 4)', tabs.length === 5, tabs);
+      L('professora: 3 abas, Alunos | Cartões | Mural (Aulas e Material foram para dentro do Mural, 2026-10-29)', tabs.length === 3 && /Mural/.test(tabs[2]), tabs);
       L('professora: Alunos abre (sem aviso de acesso negado)', !(await ev(() => document.getElementById('admin-students-content').textContent.includes(t('admin.common.adminOnly')))));
       L('professora: sem formulário de vincular (só a admin vincula)', await ev(() => !document.querySelector('#admin-assign-student-form')));
       // ---- convite: link ----

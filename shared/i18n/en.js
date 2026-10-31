@@ -251,16 +251,42 @@ window.I18N_CATALOG['en'] = {
   // XP of the week in the top bar + last weeks popover (shared/xp-semana.js; 2026-10-29).
   'xpWeek.buttonShort': 'XP this week', // ALTA
   'xpWeek.buttonAria': '{n} XP this week. See the last few weeks', // ALTA
-  'xpWeek.title': 'Your XP by week', // ALTA
   'xpWeek.thisWeek': 'This week', // ALTA
-  'xpWeek.lastWeek': 'Last week', // ALTA
-  'xpWeek.weeksAgo': { one: '{n} week ago', other: '{n} weeks ago' }, // ALTA
   'xpWeek.amount': '{n} XP', // ALTA
-  'xpWeek.range': '{from} to {to}', // ALTA
   'xpWeek.loading': 'Loading previous weeks...', // ALTA
   'xpWeek.error': 'Couldn\'t load the previous weeks right now.', // ALTA
   'xpWeek.totalLabel': 'Total XP in this course', // ALTA
   'xpWeek.note': 'Weeks run Monday to Sunday and add up all your courses, same as the Leaderboard.', // ALTA
+  'xpWeek.headUnit': 'XP this week', // ALTA
+  'xpWeek.last4': 'Last 4 weeks', // ALTA
+  'xpWeek.colRange': '{m} {d1}–{d2}', // ALTA
+  'xpWeek.colRangeCross': '{m1} {d1}–{m2} {d2}', // ALTA
+  'xpWeek.better': { one: '+{n} XP more than last week', other: '+{n} XP more than last week' }, // ALTA
+  'xpWeek.seeRanking': 'See leaderboard', // ALTA
+  'streakPop.buttonAria': { one: 'Streak: {n} day in a row. See details', other: 'Streak: {n} days in a row. See details' }, // ALTA
+  'streakPop.buttonAriaZero': 'Streak: today can be day 1. See details', // ALTA
+  'streakPop.unit': { one: 'day streak', other: 'day streak' }, // ALTA
+  'streakPop.sub.done': 'Today counts. Day {next} is tomorrow!', // ALTA
+  'streakPop.sub.pending': 'One lesson or review today makes it {next} days.', // ALTA
+  'streakPop.zero.headline': 'Today can be day 1', // ALTA
+  'streakPop.zero.sub': 'One lesson or review starts a new streak.', // ALTA
+  'streakPop.week': 'This week', // ALTA
+  'streakPop.weekCount': '{n} of 7 days', // ALTA
+  'streakPop.dayStudied': '{day}: studied', // ALTA
+  'streakPop.best': 'Longest streak', // ALTA
+  'streakPop.bestNow': 'that’s now!', // ALTA
+  'streakPop.days': { one: '{n} day', other: '{n} days' }, // ALTA
+  'streakPop.friends.title': 'Friend streaks', // ALTA
+  'streakPop.friends.oneActive': '1 active: {days} with {name}', // ALTA
+  'streakPop.friends.oneActiveNoName': '1 active: {days}', // ALTA
+  'streakPop.friends.manyActive': '{k} active. Longest: {days} with {name}', // ALTA
+  'streakPop.friends.manyActiveNoName': '{k} active. Longest: {days}', // ALTA
+  'streakPop.friends.none': 'Study on the same day and your streak together begins.', // ALTA
+  'streakPop.friends.noFriends': 'Studying with someone helps you keep the rhythm.', // ALTA
+  'streakPop.friends.loading': 'Loading...', // ALTA
+  'streakPop.friends.error': 'Couldn\'t load your friends right now.', // ALTA
+  'streakPop.friends.see': 'See friends', // ALTA
+  'streakPop.friends.invite': 'Invite friends', // ALTA
   'toast.pointsGain': '+{n} pts', // ALTA
   'toast.extraLife': '❤️ Extra life!', // ALTA
   'toast.unitComplete': 'Unit complete! 🥐', // ALTA -- emoji de croissant (fr)
@@ -3588,6 +3614,46 @@ window.I18N_CATALOG['en'] = {
   'mural.teacherTag': 'Teacher', // ALTA
   'mural.onlyFor': '🔒 Only for {name}', // ALTA
   'mural.individualChip': 'With {name}', // ALTA
+  'mural.tab.mural': 'Board', // ALTA
+  'mural.tab.aulas': 'Lessons and materials', // ALTA
+  'mural.tab.people': 'People', // ALTA
+  'mural.pick.label': 'Class or student:', // ALTA
+  'mural.pick.all': 'Everyone', // ALTA
+  'mural.pick.student': 'Choose a student', // ALTA
+  'mural.auto.lesson': '{name} logged a lesson:', // ALTA
+  'mural.auto.material': '{name} shared a material:', // ALTA
+  'mural.auto.homework': 'Homework: {hw}', // ALTA
+  'mural.auto.openLesson': 'See lesson', // ALTA
+  'mural.auto.openMaterial': 'Open', // ALTA
+  'mural.cover.with': 'with {name}', // ALTA
+  'mural.cover.individual': 'one-on-one board', // ALTA
+  'mural.cover.individualStudent': 'only you and your teacher see it', // ALTA
+  'mural.cover.change': 'Change cover', // ALTA
+  'mural.cover.title': 'Class cover', // ALTA
+  'mural.cover.colors': 'Cover colors', // ALTA
+  'mural.cover.siteColor': 'Site color', // ALTA
+  'mural.cover.colorN': 'Color {n}', // ALTA
+  'mural.cover.upload': 'Upload photo', // ALTA
+  'mural.cover.removePhoto': 'Remove photo', // ALTA
+  'mural.cover.hint': 'The photo shows to the students in the class. JPG, PNG or WebP, up to 10 MB.', // ALTA
+  'mural.cover.saved': 'Cover updated!', // ALTA
+  'mural.cover.badFile': 'Choose a JPG, PNG or WebP photo.', // ALTA
+  'mural.side.aria': 'Upcoming lessons and shortcuts', // ALTA
+  'mural.side.next': 'Upcoming lessons', // ALTA
+  'mural.side.nextOne': 'Next lesson', // ALTA
+  'mural.side.noNext': 'No lessons scheduled.', // ALTA
+  'mural.side.seeAll': 'See all lessons', // ALTA
+  'mural.side.peopleCta': 'See people', // ALTA
+  'mural.side.review': 'Review for today', // ALTA
+  'mural.side.reviewNone': 'Nothing to review today.', // ALTA
+  'mural.side.reviewCta': 'Review now', // ALTA
+  'mural.composer.openClassroom': 'Write an announcement for the class…', // ALTA
+  'mural.composer.openStudent': 'Write a note to {name}…', // ALTA
+  'mural.people.rooms': 'Classes: {list}', // ALTA
+  'mural.people.noRoom': 'No class', // ALTA
+  'mural.people.openFicha': 'Open the student\'s profile', // ALTA
+  'mural.cover.members': { one: '{n} student', other: '{n} students' }, // ALTA
+  'mural.side.reviewN': { one: '{n} card from your teacher', other: '{n} cards from your teacher' }, // ALTA
   'mural.noClassrooms': 'You have no classes yet. Create one, add your students or send the class link.', // ALTA
   'mural.pickClassroom': 'Pick a class to see its board.', // ALTA
   'mural.noStudents': 'You have no students in this language yet. Invite them in the Students tab.', // ALTA

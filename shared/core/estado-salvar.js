@@ -86,6 +86,8 @@ function applySerializedState(data){
   curriculumLoadStampReleased();
   if (typeof data.xp === 'number') STATE.xp = data.xp;
   if (typeof data.streak === 'number') STATE.streak = data.streak;
+  // Recorde de dias seguidos (gravado por saveState em shared/auth.js; janela da sequência do topo, 2026-10-30).
+  if (typeof data.bestStreak === 'number') STATE.bestStreak = Math.max(Number(STATE.bestStreak) || 0, data.bestStreak);
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
   if (data.lastReviewReminderDay) STATE.lastReviewReminderDay = data.lastReviewReminderDay;
   if (data.studyGoal) Object.assign(STATE.studyGoal, data.studyGoal);

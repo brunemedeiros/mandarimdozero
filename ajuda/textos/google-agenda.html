@@ -1,0 +1,54 @@
+<p class="box">Resumo: o site só <b>lê</b> as agendas que a professora escolher, para registrar as aulas com o dia e o horário certos.
+Ele nunca cria, muda nem apaga nada no Google Agenda, não vende nem repassa os dados e não usa esses dados para anúncios.</p>
+
+<h2 id="quem-usa-e-para-que">Quem usa e para quê</h2>
+<p>A conexão com o Google Agenda é opcional e serve só para professoras do site <b>Idiomas com Prof. Brune</b>
+(app.profbrune.com.br). Quando uma professora conecta a conta, o site lê os eventos das agendas que ela marcar e, para cada
+aula reconhecida, cria ou atualiza o registro da aula do aluno (dia, horário e duração). Os alunos não conectam nada.</p>
+
+<h2 id="o-que-o-site-pede-ao-google">O que o site pede ao Google</h2>
+<ul>
+  <li><b>Ver os eventos das suas agendas</b> (permissão só de leitura, <code>calendar.readonly</code>).</li>
+  <li><b>Seu endereço de e-mail do Google</b>, para mostrar qual conta está conectada.</li>
+</ul>
+<p>O site não pede permissão para escrever na sua agenda, ler seus e-mails, contatos ou arquivos.</p>
+
+<h2 id="o-que-fica-guardado">O que fica guardado</h2>
+<ul>
+  <li>O e-mail da conta Google conectada e uma chave de acesso (fornecida pelo Google) que permite ao site ler a agenda de
+      tempos em tempos. Essa chave fica só no servidor; nem o navegador nem outras pessoas têm acesso a ela.</li>
+  <li>O nome de cada agenda da conta e a escolha da professora (ler ou não ler cada uma).</li>
+  <li>Dos eventos das agendas marcadas, de maio de 2025 até 90 dias à frente: título, início, fim, fuso horário, se foi
+      cancelado e os convidados (nome e e-mail), usados para reconhecer de qual aluno é a aula.</li>
+  <li>Eventos que <b>não</b> são aula (por exemplo, compromissos pessoais ou de dia inteiro): o site guarda só que existem e
+      que não são aula; o título e os convidados são apagados assim que o site decide que não é aula.</li>
+  <li>As escolhas que a professora ensina ao site (por exemplo, "eventos com o título X são do aluno Y").</li>
+</ul>
+
+<h2 id="quem-ve-esses-dados">Quem vê esses dados</h2>
+<ul>
+  <li>A professora vê as próprias aulas e os eventos que o site não reconheceu, para decidir de quem é a aula.</li>
+  <li>Cada aluno vê só as próprias aulas (data, horário, tema, tarefa e presença), como já acontece no site.
+      Os alunos não veem a agenda da professora nem os outros eventos dela.</li>
+  <li>Os dados ficam no banco de dados do site (Supabase), protegidos por regras de acesso e transmitidos com criptografia (HTTPS).
+      Não são vendidos, não são repassados a terceiros e não são usados para publicidade nem para treinar inteligência artificial.</li>
+</ul>
+
+<h2 id="uso-limitado-dos-dados-do-google">Uso limitado dos dados do Google</h2>
+<p>O uso e a transferência, para qualquer outro aplicativo, de informações recebidas das APIs do Google seguem a
+<a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noopener">Política de Dados do Usuário dos Serviços de API do Google</a>,
+incluindo os requisitos de Uso Limitado.</p>
+
+<h2 id="como-desconectar-e-apagar">Como desconectar e apagar</h2>
+<ul>
+  <li>No site: Professora &gt; Aulas &gt; Calendário &gt; Google Agenda &gt; <b>Desconectar</b>. Isso apaga a chave de acesso,
+      a lista de agendas e os eventos guardados. As aulas já registradas continuam no site, porque fazem parte do histórico
+      das aulas; a professora pode apagá-las quando quiser.</li>
+  <li>No Google: em <a href="https://myaccount.google.com/permissions" rel="noopener">myaccount.google.com/permissions</a>,
+      remova o acesso de "Idiomas com Prof. Brune". A partir daí o site não consegue mais ler a agenda.</li>
+  <li>Para apagar também as escolhas que você ensinou ao site, ou para qualquer dúvida, escreva para
+      <a href="mailto:contato@profbrune.com.br">contato@profbrune.com.br</a>.</li>
+</ul>
+
+<h2 id="mudancas">Mudanças</h2>
+<p>Se esta página mudar, a data no topo é atualizada. Mudanças no que é lido ou guardado são avisadas no site antes de valer.</p>

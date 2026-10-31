@@ -610,6 +610,9 @@ async function saveState(){
     let blockPayload = payload;
     let accountMerged = null;
     if (typeof AccountProgress !== 'undefined'){
+      // Recorde de dias seguidos (janela da sequência do topo, 2026-10-30): guardado, sequência e histórico de dias. Só sobe
+      // (mergeAccount fica com o maior). Fora do serializeState de propósito: os testes de paridade comparam aquele objeto.
+      payload.bestStreak = AccountProgress.bestStreakOf(STATE);
       accountMerged = AccountProgress.mergeAccount(AccountProgress.deriveAccountFromRow(existing && existing.data), AccountProgress.pickAccount(payload));
       if (progressAccountBase) blockPayload = Object.assign({}, payload, AccountProgress.mirrorForBlock(payload, progressAccountBase));
     }

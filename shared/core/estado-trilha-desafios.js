@@ -286,6 +286,8 @@ function registerStudyToday(){
     STATE.streak = 1;
   }
   STATE.lastStudyDay = today;
+  // Recorde de dias seguidos (janela da sequência do topo): só sobe.
+  if (STATE.streak > (Number(STATE.bestStreak) || 0)) STATE.bestStreak = STATE.streak;
   // Marco de sequência (5, 10, 15... 365) para a atividade dos amigos (shared/friends.js, migration 086).
   if (typeof friendsRecordStreakMilestone === 'function') friendsRecordStreakMilestone(STATE.streak, today);
   // Não mostra a tela de sequência AGORA -- isso interromperia no meio de
