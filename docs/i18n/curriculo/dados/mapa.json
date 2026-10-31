@@ -382,8 +382,9 @@
                 {
                   "titulo": "Encontro na rua",
                   "registro": "informal",
-                  "origem": "publicado",
-                  "licao": 4
+                  "origem": "novo (substitui as falas publicadas A1-1-d0 a d3)",
+                  "licao": 2,
+                  "decisao": 320
                 },
                 {
                   "titulo": "Na portaria",

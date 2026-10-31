@@ -356,5 +356,6 @@
       ]
     }
   ],
-  "regra14_repeticoes_aceitas": []
+  "regra14_repeticoes_aceitas": [],
+  "_doc_unidades_acima_do_limite": "Histórico: a regra 13 deixou de ser limite por unidade (decisão 319); a lista não é mais conferida como liberação, só registra os conjuntos grandes."
 }

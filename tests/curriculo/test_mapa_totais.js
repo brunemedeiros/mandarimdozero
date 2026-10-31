@@ -59,7 +59,6 @@ console.log('== "Cumprimentar e se despedir" (A1-1), unidade polida pela dona (d
     'Pardon, excuse-moi ou excusez-moi?', 'À plus', 'Salut também pode ser tchau, de modo informal']), titulos);
   check('saem bise, letras mudas e Bienvenue (decisões 291 e 311)', !titulos.some(t => /bise|mudas|Bienvenue/i.test(t)));
   check('toda nota tem momento e exemplos com tradução', C.notasDaUnidade(u).every(n => n.momento && C.palavrasDaNota(n).length > 0));
-  check('regra 13: A1-1 liberada no excecoes.json (decisão 308)', exc.unidades_acima_do_limite.some(e => e.unidade === 'A1-1' && e.decisoes.includes(308)));
   check('conferência das lições declaradas: sem problema', C.conferirLicoesDaUnidade(mapa).length === 0, C.conferirLicoesDaUnidade(mapa));
 }
 
@@ -75,10 +74,15 @@ console.log('== reconhecimento só (decisões 218 e 255; regra 12)');
 
 console.log('== regras');
 check('regra 14: nenhuma palavra é cartão em duas unidades (fora as aceitas)', C.conferirRegra14(mapa, exc).length === 0, C.conferirRegra14(mapa, exc));
-check('regra 13: nenhuma unidade A1 ou A2 acima de 12 palavras (fora conjunto fechado em excecoes.json)',
-  C.conferirLimitePalavras(mapa, exc).length === 0, C.conferirLimitePalavras(mapa, exc));
-check('regra 13: as liberadas são A1-1 (16 cartões, decisão 308) e os conjuntos fechados A1-3, A1-21, A1-24',
-  JSON.stringify(exc.unidades_acima_do_limite.map(e => e.unidade)) === JSON.stringify(['A1-1', 'A1-3', 'A1-21', 'A1-24']));
+check('regra 13 (decisão 319): de 3 a 5 cartões por lição nas unidades desenhadas lição por lição', C.conferirCartoesPorLicao(mapa).length === 0, C.conferirCartoesPorLicao(mapa));
+{
+  const fake = { niveis: [{ id: 'X', modulos: [{ id: 'm', unidades: [{ id: 'U', nome: 'U', tipo: 'vocabulario', cartoes: [
+    { palavra: 'a', licao: 1 }, { palavra: 'b', licao: 1 }, { palavra: 'c', licao: 2 }, { palavra: 'd', licao: 2 }, { palavra: 'e', licao: 2 },
+    { palavra: 'f', licao: 2 }, { palavra: 'g', licao: 2 }, { palavra: 'h', licao: 2 } ] }] }] }] };
+  const p = C.conferirCartoesPorLicao(fake);
+  check('regra 13: lição com 2 cartões e lição com 6 são acusadas', p.length === 2 && p.some(x => x.licao === 1 && x.cartoes === 2) && p.some(x => x.licao === 2 && x.cartoes === 6), p);
+}
+check('regra 13: unidade grande é só aviso (função existe e devolve lista)', Array.isArray(C.sinaisUnidadeGrande(mapa)));
 check('regra 12: toda gramática tem versão grátis numa unidade ANTERIOR de vocabulário', C.conferirVersaoGratis(mapa).length === 0, C.conferirVersaoGratis(mapa));
 check('regra 16: todo módulo até 3h55, sem exceção (decisão 270)', C.conferirTetoTempo(mapa).length === 0, C.conferirTetoTempo(mapa));
 check('decisão 246: títulos das notas de vocabulário', C.conferirTitulosNotasVocab(mapa).length === 0, C.conferirTitulosNotasVocab(mapa));

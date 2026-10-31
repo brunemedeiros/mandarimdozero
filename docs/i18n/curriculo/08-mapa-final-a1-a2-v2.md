@@ -101,7 +101,7 @@ Desafios continuam Premium com o paywall desligado (todos usam). O *défi* de fi
     revisão espaçada), o Premium **sistematiza e produz** (paradigma, regras e exercícios de conjugar e completar nas gramáticas).
     Com o paywall ligado, o gratuito conclui módulo e nível sem as gramáticas e o Ponto de verificação cobra dele só palavras, frases e escuta (decisão 125); a gramática
     aparece com cadeado e é pulada na cadeia de desbloqueio (decisão 138).
-13. **Limite de palavras por unidade** (decisões 45, 129, 139 e **231**). **A1**: até **12** palavras por unidade aberta, com 4 lições + Revisão da unidade acima de 10; conjunto
+13. **Cartões por lição, não limite por unidade** (decisão **319**, 2026-10-31): de 3 a 5 cartões novos por lição; o objetivo comunicativo decide o tamanho da unidade; mais de ~18 cartões é só aviso. **Histórico** (até a 318): **Limite de palavras por unidade** (decisões 45, 129, 139 e **231**). **A1**: até **12** palavras por unidade aberta, com 4 lições + Revisão da unidade acima de 10; conjunto
     fechado (números, dias, meses) pode passar; **sem exceções caso a caso** (decisão 231; não mexe nas unidades já aprovadas). **A2**: no máximo 12 por unidade. O excedente vira nota de vocabulário.
     "Cumprimentar e se despedir" tem **16** cartões (decisões 313 e 314), liberada no `excecoes.json` pela decisão 308 (limites em revisão; nenhum limite novo até a revisão dos cortes). Unidades do A1 com 11 ou 12 palavras, todas dentro do limite (decisão 241): "Dizer o nome e a nacionalidade" (11), "Apresentar a família" (11), "Descrever a aparência" (11),
     "Dizer de onde é e onde mora" (11), "Dizer as horas e a rotina" (12), "Dizer o dia e combinar" (12), "Gostos e pedidos no café" (12), "Perguntar o preço e pagar" (11),

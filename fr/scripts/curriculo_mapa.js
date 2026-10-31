@@ -16,7 +16,8 @@ const DADOS = path.join(ROOT, 'docs', 'i18n', 'curriculo', 'dados');
 
 // Regras numéricas do 08 (seção 1 e seção 2.1). Mudou uma regra? Muda aqui e no 15, nunca no meio do código.
 const REGRAS = {
-  limitePalavras: { A1: 12, A2: 12 },          // regra 13 (decisões 139 e 231)
+  cartoesPorLicao: { min: 3, max: 5 },        // regra 13 (decisão 319): orientação por lição, não limite por unidade
+  sinalUnidadeGrande: 18,                     // regra 13: acima disso, perguntar se a unidade tem duas funções (só aviso)
   palavrasAte3Licoes: 10,                     // até 10 palavras: 3 lições + Revisão; acima: 4 lições + Revisão (regra 13)
   tetoModuloMin: 235,                         // regra 16: 3h55 para todos os módulos, sem exceção (decisão 270, revê a 257)
   tempoA2: { vocabularioMin: 40, gramaticaMin: 25 }, // 08 seção 1, linha "A2: tempo de trilha" (confiança baixa)
@@ -120,17 +121,27 @@ function contas(mapa){ return mapa.niveis.map(contasDoNivel); }
 
 // ---------------------------------------------------------------- conferências (cada uma devolve a lista de problemas)
 
-// Regra 13: palavras por unidade de vocabulário; conjunto fechado só passa se estiver em excecoes.json.
-function conferirLimitePalavras(mapa, excecoes){
-  const liberadas = new Set((excecoes.unidades_acima_do_limite || []).map(e => e.unidade));
+// Regra 13 (decisão 319): de 3 a 5 cartões novos por lição; o objetivo comunicativo decide o tamanho da unidade.
+// Só confere as unidades cujos cartões já têm `licao` (unidades desenhadas lição por lição).
+function conferirCartoesPorLicao(mapa){
   const problemas = [];
   for (const it of unidadesEmOrdem(mapa)){
     const u = it.unidade;
-    if (u.tipo !== 'vocabulario') continue;
-    const n = palavrasDaUnidade(u).length, limite = REGRAS.limitePalavras[it.nivel];
-    if (n > limite && !liberadas.has(u.id)) problemas.push({ unidade: u.id, nome: u.nome, palavras: n, limite });
+    const cartoes = (u.cartoes || []).filter(c => typeof c.licao === 'number');
+    if (!cartoes.length) continue;
+    const porLicao = {};
+    cartoes.forEach(c => { porLicao[c.licao] = (porLicao[c.licao] || 0) + 1; });
+    for (const [licao, n] of Object.entries(porLicao)){
+      if (n < REGRAS.cartoesPorLicao.min || n > REGRAS.cartoesPorLicao.max) problemas.push({ unidade: u.id, nome: u.nome, licao: Number(licao), cartoes: n });
+    }
   }
   return problemas;
+}
+// Regra 13: aviso (não é erro) para unidade grande, que pode ter duas funções comunicativas.
+function sinaisUnidadeGrande(mapa){
+  return unidadesEmOrdem(mapa).map(it => it.unidade)
+    .filter(u => u.tipo === 'vocabulario' && palavrasDaUnidade(u).length > REGRAS.sinalUnidadeGrande)
+    .map(u => ({ unidade: u.id, nome: u.nome, palavras: palavrasDaUnidade(u).length }));
 }
 
 // Regra 14: uma palavra, um cartão (também entre A1 e A2). Repetição só se estiver em excecoes.json.
@@ -274,7 +285,7 @@ function conferirLicoesDaUnidade(mapa){
 function conferirTudo(mapa, excecoes, idsPublicados){
   return {
     licoes: conferirLicoesDaUnidade(mapa),
-    limitePalavras: conferirLimitePalavras(mapa, excecoes),
+    cartoesPorLicao: conferirCartoesPorLicao(mapa),
     regra14: conferirRegra14(mapa, excecoes),
     chaves: conferirChaves(mapa, idsPublicados),
     versaoGratis: conferirVersaoGratis(mapa),
@@ -305,7 +316,7 @@ function tabela(mapa){
 module.exports = {
   REGRAS, carregarMapa, carregarExcecoes, unidadesEmOrdem, indicePorId, palavrasDaUnidade, cartoesDaUnidade, cartoesAB,
   licoesDaUnidade, licoesPelaRegra, notasDaUnidade, palavrasDaNota, conferirLicoesDaUnidade, tempoDoModulo, formatarTempo, contasDoModulo, contasDoNivel, contas,
-  conferirLimitePalavras, conferirRegra14, conferirChaves, chavesPublicadasForaDoMapa, conferirVersaoGratis,
+  conferirCartoesPorLicao, sinaisUnidadeGrande, conferirRegra14, conferirChaves, chavesPublicadasForaDoMapa, conferirVersaoGratis,
   gramaticasAbrigadasPor, conferirTetoTempo, conferirTitulosNotasVocab, conferirIdFuncao, conferirExcecoes, conferirTudo, tabela,
   TITULO_NOTA_VOCAB,
 };
