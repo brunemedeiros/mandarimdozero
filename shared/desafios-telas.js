@@ -810,7 +810,7 @@ function exprShowOptions(c){
   const stage = document.getElementById('expr-stage');
   if (!run || !stage || run.answered) return;
   run.guess = (document.getElementById('expr-guess-input') || { value: '' }).value.trim();
-  const shuffled = shuffle(c.options.map((text, i) => ({ text, origIdx: i })));
+  const shuffled = shuffle(c.options.map((_, i) => ({ text: exprOptionLabel(c, i), origIdx: i })));
   stage.innerHTML = `
     ${run.guess ? `<p class="expr-guess-line">${chT('ch.expr.yourGuess')} <strong>“${escapeHtmlChallenge(run.guess)}”</strong></p>` : ''}
     <div class="exercise-options">${shuffled.map(o =>
@@ -833,7 +833,7 @@ function exprAnswer(c, origIdx){
   const stage = document.getElementById('expr-stage');
   stage.querySelectorAll('.exercise-option').forEach(b => {
     b.disabled = true;
-    const text = c.options[parseInt(b.dataset.origIdx, 10)];
+    const text = c.options[parseInt(b.dataset.origIdx, 10)]; // francês: é ele que se compara com a resposta certa
     if (text === c.correctAnswer) b.classList.add('correct');
     else if (!run.revealed && parseInt(b.dataset.origIdx, 10) === origIdx) b.classList.add('incorrect');
   });
@@ -853,7 +853,7 @@ function exprAnswer(c, origIdx){
     <div class="feedback-card-body">
       <div class="wrong-feedback-header">${t(run.revealed ? 'feedback.header.revealed' : 'feedback.header.notThisTime')}</div>
       ${run.revealed ? '' : `<div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${t('feedback.label.yourAnswer')}</div>
-        <div class="feedback-inner-box">${escapeHtmlChallenge(c.options[origIdx])}</div></div>`}
+        <div class="feedback-inner-box">${escapeHtmlChallenge(exprOptionLabel(c, origIdx))}</div></div>`}
       <div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${t('feedback.label.answer')}</div>${exprMeaningBoxHTML(c)}</div>
       <button class="btn btn-primary btn-block wrong-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
     </div>`;
@@ -994,6 +994,15 @@ function exprShowOrder(c){
 function exprTurnExpected(c){
   const m = c.microActivity || {};
   return [m.answer].concat(Array.isArray(m.alsoAccept) ? m.alsoAccept : []).filter(Boolean).join(' / ');
+}
+// Opções da escolha no idioma do site (decisão da autora, 2026-10-30): pt-BR do banco (`optionsPt`, mesma ordem de `options`); outro idioma do
+// site, do overlay (`options`). A correção usa SEMPRE o texto em francês (c.options / c.correctAnswer); isto é só o rótulo mostrado. Sem a
+// tradução (ou com tamanho diferente), mostra o francês de antes: nada some.
+function exprOptionLabel(c, i){
+  const ov = challengeOverlay(c);
+  const list = ov ? ov.options : c.optionsPt;
+  const t = Array.isArray(list) && list.length === c.options.length ? String(list[i] || '').trim() : '';
+  return t || c.options[i];
 }
 // Tradução da frase da "Sua vez" (opcional): pt-BR do banco (microActivity.pt); outro idioma do site, do overlay (`microActivity`).
 function exprTurnTranslation(c){

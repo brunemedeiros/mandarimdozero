@@ -17,7 +17,7 @@ const base = (id, extra) => ({ id, type: 'expression', level: 'A1', status: 'pub
   meaning: { fr: 'Pas de chance.', pt: 'Que azar.' }, explanation: 'Familier.', microActivity: { prompt: 'Oh, __________ !', answer: 'pas de bol' } }, extra) });
 const ROWS = [
   // completo: destaque, tradução com dois falantes (quebra de linha), literal e nota
-  base('ch-full', { microActivity: { prompt: 'Oh, __________ !', answer: 'pas de bol', pt: 'Ah, que azar!' }, example: { text: "J'ai raté le bus de deux minutes. — Pas de bol !", audioFile: 'a.mp3', mark: 'Pas de bol', pt: '— Perdi o ônibus por dois minutos.\n— Que azar!' }, secondExample: { text: 'Pas de bol, il pleut.', mark: 'Pas de bol', pt: 'Que azar, está chovendo.' },
+  base('ch-full', { optionsPt: ['Falta de sorte', 'Muito', 'Uma tigela', 'Nada'], microActivity: { prompt: 'Oh, __________ !', answer: 'pas de bol', pt: 'Ah, que azar!' }, example: { text: "J'ai raté le bus de deux minutes. — Pas de bol !", audioFile: 'a.mp3', mark: 'Pas de bol', pt: '— Perdi o ônibus por dois minutos.\n— Que azar!' }, secondExample: { text: 'Pas de bol, il pleut.', mark: 'Pas de bol', pt: 'Que azar, está chovendo.' },
     literal: { pt: 'sem tigela', note: 'Na gíria antiga, "bol" era a bunda.' } }),
   // sem nenhum campo novo (como antes do lote): nada muda
   base('ch-old', { example: { text: 'Oh, pas de bol !' }, secondExample: { text: 'Pas de bol hier.' } }),
@@ -31,7 +31,7 @@ const STUB = `(function(){ const ROWS = ${JSON.stringify(ROWS)};
     storage: { from: () => ({ upload: async () => ({}), getPublicUrl: () => ({ data: { publicUrl: '' } }), remove: async () => ({}) }) }, functions: { invoke: async () => ({ data: null, error: null }) } };
   window.supabase = { createClient: () => client }; })();`;
 const EN = {
-  'ch-full': { meaning: 'Bad luck.', example: "— I missed the bus by two minutes.\n— Bad luck!", secondExample: "Bad luck, it's raining.", literal: 'no bowl', literalNote: 'In old slang, "bol" meant the backside.', microActivity: 'Oh, bad luck!' },
+  'ch-full': { options: ['Bad luck', 'A lot', 'A bowl', 'Nothing'], meaning: 'Bad luck.', example: "— I missed the bus by two minutes.\n— Bad luck!", secondExample: "Bad luck, it's raining.", literal: 'no bowl', literalNote: 'In old slang, "bol" meant the backside.', microActivity: 'Oh, bad luck!' },
   'ch-old': { meaning: 'Bad luck.' },
   'ch-odd': { meaning: 'Bad luck.', example: 'What <i>luck</i>!' },
 };
@@ -66,6 +66,16 @@ const ateExemplos = async page => { await ateResposta(page); await page.click('#
   for (const lang of ['pt-BR', 'en']) for (const theme of ['light', 'dark']) for (const [vw, vh, tag] of [[1200, 800, 'desktop'], [390, 800, 'celular']]){
     const label = `${lang}-${theme}-${tag}`, pt = lang === 'pt-BR';
     const { page, ctx, errors } = await boot(browser, port, { lang, theme, vw, vh });
+    // ---- opções no idioma do site (mesma ordem; a correção segue o francês) ----
+    await open(page, 'ch-full'); await page.click('#expr-see-options-btn'); await page.waitForSelector('.exercise-option');
+    const labs = await page.evaluate(() => [...document.querySelectorAll('.exercise-option')].reduce((o, b) => (o[b.dataset.origIdx] = b.querySelector('.opt-text').textContent, o), {}));
+    check(label + ' opções no idioma do site, cada uma na sua posição de origem', JSON.stringify(labs) === JSON.stringify(pt ? { 0: 'Falta de sorte', 1: 'Muito', 2: 'Uma tigela', 3: 'Nada' } : { 0: 'Bad luck', 1: 'A lot', 2: 'A bowl', 3: 'Nothing' }), labs);
+    await page.click('.exercise-option[data-orig-idx="2"]'); await page.waitForSelector('.wrong-feedback'); await page.waitForTimeout(60);
+    const wrongTxt = await page.evaluate(() => ({ yours: (document.querySelector('.wrong-feedback .feedback-inner-box') || {}).textContent, okOpt: (document.querySelector('.exercise-option.correct .opt-text') || {}).textContent, badOpt: (document.querySelector('.exercise-option.incorrect .opt-text') || {}).textContent }));
+    check(label + ' errou: "Sua resposta" e as marcas verde/vermelha no idioma do site, correção pelo francês', wrongTxt.yours.trim() === (pt ? 'Uma tigela' : 'A bowl') && wrongTxt.okOpt === (pt ? 'Falta de sorte' : 'Bad luck') && wrongTxt.badOpt === (pt ? 'Uma tigela' : 'A bowl'), wrongTxt);
+    if (OUT) await page.screenshot({ path: path.join(OUT, `0-opcoes-${label}.png`) });
+    await open(page, 'ch-old'); await page.click('#expr-see-options-btn'); await page.waitForSelector('.exercise-option');
+    check(label + ' sem tradução das opções no dado: mostra o francês de antes', await page.evaluate(() => [...document.querySelectorAll('.exercise-option .opt-text')].map(e => e.textContent).sort().join('|')) === ['Beaucoup', 'Pas de chance', 'Rien', 'Un bol'].join('|'));
     // ---- completo ----
     await open(page, 'ch-full'); await ateResposta(page);
     const lit = await page.evaluate(() => ({ label: (document.querySelector('.expr-literal-label') || {}).textContent, text: (document.querySelector('.expr-literal em') || {}).textContent, note: (document.querySelector('.expr-literal-note') || {}).textContent }));
