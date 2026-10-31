@@ -228,6 +228,13 @@ const MURAL_FAKE = (who) => {
     // mural individual (qualquer aluno, com ou sem turma)
     await page.selectOption('[data-mural-student-select]', 'S2');
     await page.waitForFunction(() => document.querySelector('#admin-mural-content .mc-cover-title')?.textContent === 'Anabela');
+    L('aluno escolhido: campo na cor da marca, mas a lista aberta com as cores normais (bug 2026-10-31)', await ev(() => {
+      const sel = document.querySelector('[data-mural-student-select]'); const o = sel.querySelector('option');
+      const paper = getComputedStyle(document.body).getPropertyValue('--paper').trim();
+      const probe = document.createElement('div'); probe.style.background = paper; document.body.appendChild(probe);
+      const want = getComputedStyle(probe).backgroundColor; probe.remove();
+      return sel.classList.contains('is-active') && getComputedStyle(o).backgroundColor === want && getComputedStyle(o).backgroundColor !== getComputedStyle(sel).backgroundColor;
+    }));
     L('mural individual: sem "Para" e sem trocar capa', await ev(() => !document.querySelector('#admin-mural-content .mural-target') && !document.querySelector('[data-mural-cover-edit]')));
     await page.click('#admin-mural-content .mc-composer-open');
     await page.fill('#admin-mural-content .mural-composer-text', 'Bela, mandei o exercício');

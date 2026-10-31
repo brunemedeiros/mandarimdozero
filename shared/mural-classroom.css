@@ -8,6 +8,8 @@
 .mc-picker-label{ font-size:13.5px; font-weight:800; color:var(--ink-soft); margin-right:4px; }
 .mc-student-pick select{ width:auto; min-width:180px; max-width:260px; min-height:40px; padding:6px 12px; border-radius:999px; font-weight:700; }
 .mc-student-pick select.is-active{ background:var(--brand-fill); color:var(--on-brand-fill); border-color:var(--brand-fill); }
+/* A lista aberta herda o fundo do campo: as opções voltam às cores normais (só o campo fechado fica azul/vermelho) */
+.mc-student-pick select option{ background:var(--paper); color:var(--ink); }
 
 /* Capa */
 .mc-cover{ position:relative; min-height:170px; border-radius:18px; padding:24px 28px; box-sizing:border-box; display:flex; align-items:flex-end; gap:16px;
