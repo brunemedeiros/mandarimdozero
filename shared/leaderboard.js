@@ -27,13 +27,37 @@ let SIDE_RANKING_MODE = 'all';
 // "Ver ranking completo" do card leva à tela já na aba que o card mostrava;
 // qualquer outra entrada (menu, sidebar, notificação) abre SEMPRE em Geral.
 let LEADERBOARD_PENDING_MODE = null;
+// Aba 'classroom' (Turma, migration 124): só aparece para quem está em alguma turma (aluno com vínculo ativo)
+// ou é a professora dona dela. Lista das turmas buscada ao abrir o Ranking; a escolhida fica em LEADERBOARD_CLASSROOM_ID.
+let LEADERBOARD_ROOMS = null;
+let LEADERBOARD_CLASSROOM_ID = null;
 // Contadores de requisição: se a pessoa troca de aba rápido, só a última resposta desenha.
 let LEADERBOARD_RENDER_SEQ = 0;
 let SIDE_RANKING_RENDER_SEQ = 0;
 function openLeaderboardView(){
   LEADERBOARD_MODE = LEADERBOARD_PENDING_MODE || 'all';
   LEADERBOARD_PENDING_MODE = null;
+  LEADERBOARD_ROOMS = null;
   return renderLeaderboardView();
+}
+
+async function fetchClassroomRankingRooms(){
+  const { data, error } = await supabaseClient.rpc('classroom_ranking_rooms');
+  if (error){ console.error('Erro ao carregar as turmas do ranking:', error); return []; }
+  return data || [];
+}
+
+// Ranking da turma: os alunos da turma com vínculo ativo, XP da semana no idioma da turma. Mesmo formato de linha
+// de fetchFriendsLeaderboard(); quem ainda não pontuou vem no fim com 0. null = falhou.
+async function fetchClassroomLeaderboard(classroomId, weekStart){
+  const { data, error } = await supabaseClient.rpc('classroom_leaderboard', { p_classroom_id: classroomId, p_week: weekStart });
+  if (error){ console.error('Erro ao carregar ranking da turma:', error); return null; }
+  return (data || []).map((r, i) => ({
+    user_id: r.user_id,
+    amount: r.amount,
+    rank: i + 1,
+    profile: { user_id: r.user_id, username: r.username, display_name: r.display_name, avatar_url: r.avatar_url, featured_badge_id: r.featured_badge_id },
+  }));
 }
 
 // Última posição vista pela PRÓPRIA pessoa, guardada localmente -- é o que
@@ -333,16 +357,25 @@ async function renderLeaderboardView(){
   // -- fetchLeaderboard() já roda em paralelo com isso.
   const loggedIn = !!(typeof CURRENT_USER !== 'undefined' && CURRENT_USER);
   if (!loggedIn) LEADERBOARD_MODE = 'all';
+  if (loggedIn && LEADERBOARD_ROOMS === null) LEADERBOARD_ROOMS = await fetchClassroomRankingRooms();
+  if (renderSeq !== LEADERBOARD_RENDER_SEQ) return;
+  const rooms = loggedIn ? (LEADERBOARD_ROOMS || []) : [];
+  if (LEADERBOARD_MODE === 'classroom' && !rooms.length) LEADERBOARD_MODE = 'all';
   const mode = LEADERBOARD_MODE;
+  if (!rooms.some(c => c.id === LEADERBOARD_CLASSROOM_ID)) LEADERBOARD_CLASSROOM_ID = rooms[0]?.id ?? null;
+  const room = rooms.find(c => c.id === LEADERBOARD_CLASSROOM_ID) || null;
   const [fetched, catalog] = await Promise.all([
-    mode === 'friends' ? fetchFriendsLeaderboard(scope, weekStart) : fetchLeaderboard(scope, weekStart),
+    mode === 'friends' ? fetchFriendsLeaderboard(scope, weekStart)
+      : mode === 'classroom' ? fetchClassroomLeaderboard(room.id, weekStart)
+      : fetchLeaderboard(scope, weekStart),
     fetchBadgeCatalog(),
   ]);
   if (renderSeq !== LEADERBOARD_RENDER_SEQ) return; // chegou uma troca de aba mais nova
-  const loadFailed = mode === 'friends' && fetched === null;
+  const loadFailed = (mode === 'friends' || mode === 'classroom') && fetched === null;
   const rows = fetched || [];
   // Sem nenhum amigo, o ranking de amigos só teria você: mostra o convite.
   const noFriendsYet = mode === 'friends' && !loadFailed && rows.length <= 1;
+  const emptyRoom = mode === 'classroom' && !loadFailed && !rows.length;
 
   // role="tablist"/"tab": são páginas alternativas do mesmo painel (Geral /
   // um idioma por vez), não botões soltos -- deixa um leitor de tela
@@ -356,11 +389,20 @@ async function renderLeaderboardView(){
     <div class="leaderboard-tabs leaderboard-mode-tabs" role="tablist" aria-label="${t('friends.mode.aria')}">
       <button class="leaderboard-tab ${mode === 'friends' ? 'active' : ''}" role="tab" aria-selected="${mode === 'friends'}" data-mode="friends">👥 ${t('friends.mode.friends')}</button>
       <button class="leaderboard-tab ${mode === 'all' ? 'active' : ''}" role="tab" aria-selected="${mode === 'all'}" data-mode="all">🌎 ${t('friends.mode.all')}</button>
+      ${rooms.length ? `<button class="leaderboard-tab ${mode === 'classroom' ? 'active' : ''}" role="tab" aria-selected="${mode === 'classroom'}" data-mode="classroom">🏫 ${t('leaderboard.mode.classroom')}</button>` : ''}
     </div>` : '';
+  // Na Turma o idioma é o da turma: no lugar de Geral/idiomas, a escolha da turma (só quando há mais de uma).
+  const roomLang = (key) => { const l = AVAILABLE_LANGUAGES.find(x => x.appKey === key); return l ? languageDisplayName(l) : ''; };
+  const roomTabsHTML = mode === 'classroom' && rooms.length > 1 ? `
+    <div class="leaderboard-tabs" role="tablist" aria-label="${t('leaderboard.classroom.roomsAria')}">${rooms.map(c =>
+      `<button class="leaderboard-tab ${c.id === LEADERBOARD_CLASSROOM_ID ? 'active' : ''}" role="tab" aria-selected="${c.id === LEADERBOARD_CLASSROOM_ID}" data-classroom="${c.id}">${escapeHTML(c.name)}</button>`).join('')}</div>` : '';
 
   const emptyHTML = loadFailed ? `
     <div class="review-empty"><div class="big-emoji">⚠️</div><h3>${t('friends.rank.failTitle')}</h3>
       <p>${t('friends.rank.failText')}</p><button type="button" class="btn btn-secondary" id="leaderboard-retry">${t('friends.retry')}</button></div>`
+    : emptyRoom ? `
+    <div class="review-empty"><div class="big-emoji">🏫</div><h3>${t('leaderboard.classroom.emptyTitle')}</h3>
+      <p>${t('leaderboard.classroom.emptyText')}</p></div>`
     : noFriendsYet ? `
     <div class="review-empty leaderboard-empty-friends"><div class="big-emoji">👥</div><h3>${t('friends.rank.noFriendsTitle')}</h3>
       <p>${t('friends.rank.noFriendsText')}</p>
@@ -372,7 +414,7 @@ async function renderLeaderboardView(){
       <p>${t('leaderboard.emptyText')}</p>
     </div>`;
 
-  const rowsHTML = (rows.length && !noFriendsYet && !loadFailed) ? rows.map(r => {
+  const rowsHTML = (rows.length && !noFriendsYet && !loadFailed && !emptyRoom) ? rows.map(r => {
     const isMe = !!(CURRENT_USER && r.user_id === CURRENT_USER.id);
     // Sem @username na linha -- o username é um identificador gerado pelo
     // sistema (ver createInitialProfile / migration 060), não o nome pelo
@@ -416,20 +458,25 @@ async function renderLeaderboardView(){
   // Pódio dos 3 primeiros e "faltam X XP" acima da lista (cara de jogo, docs/historico/15).
   // A lista continua completa embaixo (leitor de tela e posição de cada um).
   const meId = (CURRENT_USER && CURRENT_USER.id) || null;
-  const showGame = rows.length >= 2 && !noFriendsYet && !loadFailed;
+  const showGame = rows.length >= 2 && !noFriendsYet && !loadFailed && !emptyRoom;
   const gameHTML = showGame ? `<div class="lb-game">${leaderboardPodiumHTML(rows, meId)}${leaderboardDuelHTML(rows, meId)}</div>` : '';
 
   wrap.innerHTML = `
     <div class="leaderboard-week-label"><span class="lb-days-pill">⏳ ${leaderboardDaysRemainingLabel(weekStart)}</span></div>
     ${modeTabsHTML}
-    <div class="leaderboard-tabs" role="tablist" aria-label="${t('leaderboard.scopeAria')}">${scopeTabsHTML}</div>
+    ${mode === 'classroom' ? roomTabsHTML : `<div class="leaderboard-tabs" role="tablist" aria-label="${t('leaderboard.scopeAria')}">${scopeTabsHTML}</div>`}
     ${gameHTML}
     <div class="leaderboard-list" role="list">${rowsHTML}</div>
-    <p class="leaderboard-footnote">${mode === 'friends' ? t('friends.rank.footnoteFriends') : t('leaderboard.footnote')}</p>
+    <p class="leaderboard-footnote">${mode === 'friends' ? t('friends.rank.footnoteFriends')
+      : mode === 'classroom' ? t('leaderboard.classroom.footnote', { name: escapeHTML(room?.name || ''), lang: roomLang(room?.language_app_key) })
+      : t('leaderboard.footnote')}</p>
   `;
 
   wrap.querySelectorAll('[data-mode]').forEach(btn => {
     btn.addEventListener('click', () => { LEADERBOARD_MODE = btn.dataset.mode; renderLeaderboardView(); });
+  });
+  wrap.querySelectorAll('[data-classroom]').forEach(btn => {
+    btn.addEventListener('click', () => { LEADERBOARD_CLASSROOM_ID = Number(btn.dataset.classroom); renderLeaderboardView(); });
   });
   wrap.querySelector('#leaderboard-retry')?.addEventListener('click', renderLeaderboardView);
   wrap.querySelector('#leaderboard-add-friends')?.addEventListener('click', () => switchTab('friends'));
