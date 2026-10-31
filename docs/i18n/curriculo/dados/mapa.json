@@ -1,7 +1,7 @@
 {
-  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedidos de mudança aplicados: decisões 267 a 279 (campo opcional \"licao\" por cartão, decisão 274) e 311 a 314 (A1-1 polida pela dona: 16 cartões, 4 lições com id e título em \"licoes\", 9 notas com \"momento\" e \"exemplos\", 2 diálogos). As palavras de uma nota saem dos exemplos com tradução (palavrasDaNota em fr/scripts/curriculo_mapa.js, decisão 274); \"palavras\" digitado só nas notas antigas de vocabulário. Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
+  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedidos de mudança aplicados: decisões 267 a 279 (campo opcional \"licao\" por cartão, decisão 274) e 311 a 320 (A1-1 polida pela dona: 16 cartões, 4 lições com id e título em \"licoes\", 9 notas com \"momento\" e \"exemplos\", 2 diálogos com \"licao\": o informal no fim da lição 2 e o formal no fim da lição 4). As palavras de uma nota saem dos exemplos com tradução (palavrasDaNota em fr/scripts/curriculo_mapa.js, decisão 274); \"palavras\" digitado só nas notas antigas de vocabulário. Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
   "idioma": "fr",
-  "versao": "2026-10-29",
+  "versao": "2026-10-31",
   "fonte": "docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md",
   "niveis": [
     {
@@ -29,7 +29,11 @@
                 311,
                 312,
                 313,
-                314
+                314,
+                315,
+                316,
+                319,
+                320
               ],
               "licoes": [
                 {
@@ -45,8 +49,7 @@
                 {
                   "licao": 3,
                   "id": "informal-agradecer",
-                  "titulo": "Fórmulas de cortesia",
-                  "titulo_a_confirmar": true
+                  "titulo": "Fórmulas de cortesia"
                 },
                 {
                   "licao": 4,
@@ -250,7 +253,7 @@
                     },
                     {
                       "fr": "Comment vas-tu ?",
-                      "pt-BR": "Como você vai?"
+                      "pt-BR": "Como vai você?"
                     },
                     {
                       "fr": "Vous allez bien ?",
@@ -279,7 +282,7 @@
                     },
                     {
                       "fr": "Pas mal, et toi ?",
-                      "pt-BR": "Bem, e você?"
+                      "pt-BR": "Nada mal, e você?"
                     },
                     {
                       "fr": "Bof...",
@@ -373,7 +376,7 @@
                     },
                     {
                       "fr": "Au revoir, madame !",
-                      "pt-BR": "Tchau, senhora! (com desconhecidos, au revoir)"
+                      "pt-BR": "Até logo, senhora!"
                     }
                   ]
                 }

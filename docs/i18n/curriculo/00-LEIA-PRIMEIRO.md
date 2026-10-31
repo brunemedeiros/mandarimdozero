@@ -218,6 +218,17 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   (unidade liberada acima do limite de 12, decisão 308), `dados/frases_na_frase.json` (papel das 9 frases publicadas, como proposta), `08 v2`, `15` e no rascunho
   `piloto-m1/A1-1/` (`A1-1.md` para a dona ler, `A1-1.json`, `validar.js`). O tempo do módulo fica no número digitado (~3h55), sem regra nova (decisões 300 e 308).
 - **Totais novos**: A1 com **366 cartões** (**725** A/B), ~151 lições (sem mudança), 133 notas (sem mudança), ~31h00 (sem mudança); "Apresentar-se" com 66 cartões. A2 sem mudança.
-- **Para a dona**: as decisões D1 a D10 do `piloto-m1/A1-1/A1-1.md` (seção 10) e o que fazer com os cartões novos de quem já concluiu ou está no meio da unidade (seção 8).
+- **Para a dona**: as decisões D1 a D10 do `piloto-m1/A1-1/A1-1.md` (seção 10) e o que fazer com os cartões novos de quem já concluiu ou está no meio da unidade (seção 8). Respondidas na decisão 315.
+
+## Atualização 2026-10-31 (decisões 315 a 320, "Cumprimentar e se despedir")
+
+- **Aprovações da dona** (315): progresso dos alunos pela opção (a) (quem concluiu recebe os cartões novos direto na Revisão; ids de lição pela função, 284), decisões
+  D1 a D10 do rascunho (inclui a nuance de *Comment vas-tu ?* na nota "Como perguntar 'tudo bem?'", confiança média, e o título da lição 3 "Fórmulas de cortesia")
+  e o texto das 9 notas. Desafios a arquivar na revisão do módulo: *Un café, s'il vous plaît.*, *Bonne journée !* e *Bonne soirée !* (316).
+- **Regra 13 trocada** (319): de 3 a 5 cartões novos por lição; o objetivo comunicativo decide o tamanho da unidade; mais de ~18 cartões é só aviso.
+- **Diálogo informal novo no fim da lição 2** (320): *Salut ! Tu vas bien ?* / *Je vais bien, et toi ?* / *Ça va !*; o formal "Na portaria" fica no fim da lição 4; as
+  falas publicadas `A1-1-d0` a `d3` saem (arquivo de aposentados na implementação). Aplicado em `dados/mapa.json`, `08 v2` e no rascunho `piloto-m1/A1-1/`
+  (o `validar.js` confere cada diálogo na posição da sua lição). Auditoria: `auditoria/2026-10-31-unidade-1-polida.md`.
+- **Totais**: sem mudança (A1 com 366 cartões, 725 A/B, ~151 lições, 133 notas, ~31h00; "Apresentar-se" com 66 cartões e ~3h55).
 
 > **Como falar com a dona** (2026-10-23): em toda mensagem a ela, citar o NOME do módulo e da unidade (não só M6.1 ou `A1-15`), explicar termos internos e dar o contexto completo de cada decisão. Vale para o chat e para qualquer agente.

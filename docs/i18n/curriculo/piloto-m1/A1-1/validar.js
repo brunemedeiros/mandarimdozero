@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Validação do rascunho A1-1.json (piloto do currículo; unidade polida pela dona, decisões 311 a 314; validador das decisões 233, 253 e 265).
+// Validação do rascunho A1-1.json (piloto do currículo; unidade polida pela dona, decisões 311 a 320; validador das decisões 233, 253 e 265).
 // 1) Coerência com o mapa (fonte única de ordem, lições, notas e exemplos: docs/i18n/curriculo/dados/mapa.json).
 // 2) "Só palavras vistas" com as funções puras de fr/scripts/curriculo_palavras_vistas.js (validarTexto) sobre o mapa.json real.
 // Grupos "obrigatório" precisam sair sem palavra não vista (senão o texto é reescrito); grupos "informativo" só listam (frases só exemplo
@@ -36,19 +36,49 @@ confere(new Set(R.cartoes.map(c => c.frase_do_cartao)).size === R.cartoes.length
 const marcadas = P.carregarFrases();
 for (const f of R.frases_na_frase.filter(f => f.chave !== 'nova')) confere(P.papelDaFrase(marcadas, f.chave) === f.papel, `papel de ${f.chave} diverge do frases_na_frase.json`);
 confere(M.conferirLicoesDaUnidade(mapa).length === 0, 'conferência de lições do mapa acusou problema');
+// Diálogos: mesma lição no rascunho e no mapa (decisão 320); só a lição do diálogo tem inclui_dialogo e o diálogo na sequência.
+const numLicao = Object.fromEntries(u.licoes.map(l => [l.id, l.licao]));
+confere(JSON.stringify(R.dialogos.map(d => [d.titulo['pt-BR'], numLicao[d.licao]])) === JSON.stringify((u.dialogos || []).map(d => [d.titulo, d.licao])), 'diálogos do rascunho (título ou lição) divergem do mapa');
+for (const l of R.licoes.filter(l => l.id !== 'checkpoint')){
+  const seus = R.dialogos.filter(d => d.licao === l.id).map(d => d.titulo['pt-BR']);
+  const naSequencia = R.dialogos.filter(d => l.sequencia.some(s => s.includes(`"${d.titulo['pt-BR']}"`))).map(d => d.titulo['pt-BR']);
+  confere(l.inclui_dialogo === (seus.length > 0), `lição ${l.id}: inclui_dialogo não bate com os diálogos dela`);
+  confere(JSON.stringify(naSequencia) === JSON.stringify(seus), `lição ${l.id}: sequência não traz exatamente os diálogos dela`);
+}
 
 // ---------------------------------------------------------------- 2) só palavras vistas
 const posDoCartao = palavra => u.cartoes.findIndex(c => c.palavra === palavra) + 1; // n cartões vistos ao chegar na nota
 const idFrase = f => f.chave === 'nova' ? f.id_rascunho : f.chave;
 
 const casos = [];
-const add = (grupo, obrigatorio, onde, fr, contexto, unidade) => casos.push({ grupo, obrigatorio, onde, fr, contexto, unidade: unidade || 'A1-1' });
+const add = (grupo, obrigatorio, onde, fr, contexto, unidade, mapaDoCaso) => casos.push({ grupo, obrigatorio, onde, fr, contexto, unidade: unidade || 'A1-1', mapa: mapaDoCaso || mapa });
 
-// Diálogos e "Você entendeu?" (fim da lição 4, depois dos 16 cartões e das 9 notas).
+// Posição do fim de uma lição (decisões 253 e 320): os cartões das lições 1 a n (prefixo da ordem do mapa) e só as notas dessas lições.
+// Na última lição é o fim da unidade (todos os cartões e notas). Função pura: devolve {mapa, posicao} sem mexer no mapa real.
+function posicaoNoFimDaLicao(mapaReal, unidadeId, n){
+  const un = M.indicePorId(mapaReal)[unidadeId].unidade;
+  if (n >= Math.max(...un.licoes.map(l => l.licao))) return { mapa: mapaReal, posicao: 'fim' };
+  const copia = JSON.parse(JSON.stringify(mapaReal));
+  const uc = M.indicePorId(copia)[unidadeId].unidade;
+  uc.notas = (uc.notas || []).filter(x => x.momento && x.momento.licao <= n);
+  return { mapa: copia, posicao: un.cartoes.filter(c => c.licao <= n).length };
+}
+confere(u.cartoes.every((c, i, a) => i === 0 || a[i - 1].licao <= c.licao), 'cartões do mapa fora da ordem das lições (a posição do fim da lição depende disso)');
+
+// Diálogos e "Você entendeu?": na posição do fim da lição do diálogo (informal no fim da lição 2, formal no fim da lição 4; decisão 320).
 for (const d of R.dialogos){
   const nome = d.titulo['pt-BR'];
-  for (const f of d.falas) add(`Diálogo "${nome}"`, true, f.chave === 'nova' ? `nova (${f.falante})` : f.chave, f.fr, 'dialogo');
-  for (const c of d.check) for (const o of c.opcoes_erradas || []) add('Você entendeu? (opções)', true, `${nome} ${c.tipo}`, o, { tipo: 'exercicio_licao', posicao: 'fim' });
+  const p = posicaoNoFimDaLicao(mapa, 'A1-1', numLicao[d.licao]);
+  for (const f of d.falas) add(`Diálogo "${nome}" (fim da lição ${numLicao[d.licao]})`, true, f.chave === 'nova' ? `nova (${f.falante})` : f.chave, f.fr, { tipo: 'dialogo', posicao: p.posicao }, 'A1-1', p.mapa);
+  for (const c of d.check) for (const o of c.opcoes_erradas || []) add('Você entendeu? (opções)', true, `${nome} ${c.tipo}`, o, { tipo: 'exercicio_licao', posicao: p.posicao }, 'A1-1', p.mapa);
+  // Autoteste: um cartão de lição posterior, que nenhuma nota das lições anteriores mostra (ex.: merci aparece em "Très bien, merci !"
+  // da nota "Como responder"), tem de ser acusado nesta posição; sem isso, um diálogo do meio passaria como se fosse o fim.
+  const exemplosAntes = u.notas.filter(x => x.momento && x.momento.licao <= numLicao[d.licao]).flatMap(x => (x.exemplos || []).map(e => e.fr.toLowerCase()));
+  const prox = u.cartoes.find(c => c.licao > numLicao[d.licao] && !exemplosAntes.some(e => e.includes(c.palavra.split(' / ')[0].toLowerCase())));
+  if (prox && p.posicao !== 'fim'){
+    const r = V.validarTexto(prox.palavra.split(' / ')[0], { tipo: 'dialogo', posicao: p.posicao }, 'A1-1', p.mapa, excecoes);
+    confere(r.nao_vistas.length > 0, `autoteste: "${prox.palavra}" (lição ${prox.licao}) passou como vista no diálogo "${nome}"`);
+  }
 }
 
 // Frases "Na frase": na ficha logo depois do cartão que ilustram (informativo); as essenciais também na Revisão da unidade (obrigatório).
@@ -91,9 +121,9 @@ for (const x of DES.expression.filter(x => x.unitId === 'A1-1')){
   for (const campo of ['exampleText', 'secondExampleText', 'microPrompt']) if (x[campo]) add('Desafios publicados (lista para a revisão do módulo)', false, `Expressão "${x.expression}" ${campo}`, x[campo], 'desafio');
 }
 
-const resultados = casos.map(c => Object.assign({}, c, V.validarTexto(c.fr, c.contexto, c.unidade, mapa, excecoes)));
+const resultados = casos.map(c => Object.assign({}, c, V.validarTexto(c.fr, c.contexto, c.unidade, c.mapa, excecoes)));
 
-if (process.argv.includes('--json')){ console.log(JSON.stringify({ coerencia, resultados }, null, 1)); process.exit(0); }
+if (process.argv.includes('--json')){ console.log(JSON.stringify({ coerencia, resultados: resultados.map(({ mapa: _m, ...r }) => r) }, null, 1)); process.exit(0); }
 console.log(`## Coerência com o mapa.json e o frases_na_frase.json: ${coerencia.length ? coerencia.length + ' problema(s)' : 'ok'}`);
 coerencia.forEach(p => console.log('- ' + p));
 let falhas = coerencia.length;

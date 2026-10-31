@@ -1,7 +1,7 @@
 {
- "_doc": "Rascunho da unidade A1-1 'Cumprimentar e se despedir' (módulo 'Apresentar-se', A1-m1), polida pela dona (decisões 311 a 314 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md); piloto do currículo novo (decisões 236 e 266). Só pt-BR: os campos 'en' ficam null até a aprovação da dona (decisão 81). Nada daqui está em fr/content.js nem na camada courses/fr-pt-BR/layer.js. Chave estável: a publicada em fr/published_ids.json; item novo = 'nova' (a chave definitiva sai de node fr/scripts/congelar_chaves.js quando o conteúdo entrar no site). Ordem dos cartões, lições, notas (com exemplos) e diálogos: dados/mapa.json (fonte única; o validar.js confere). Leitura para a dona: A1-1.md. Validação: node docs/i18n/curriculo/piloto-m1/A1-1/validar.js.",
+ "_doc": "Rascunho da unidade A1-1 'Cumprimentar e se despedir' (módulo 'Apresentar-se', A1-m1), polida pela dona (decisões 311 a 320 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md); piloto do currículo novo (decisões 236 e 266). Só pt-BR: os campos 'en' ficam null até a aprovação da dona (decisão 81). Nada daqui está em fr/content.js nem na camada courses/fr-pt-BR/layer.js. Chave estável: a publicada em fr/published_ids.json; item novo = 'nova' (a chave definitiva sai de node fr/scripts/congelar_chaves.js quando o conteúdo entrar no site). Ordem dos cartões, lições, notas (com exemplos) e diálogos: dados/mapa.json (fonte única; o validar.js confere). Leitura para a dona: A1-1.md. Validação: node docs/i18n/curriculo/piloto-m1/A1-1/validar.js.",
  "status": "needs_review",
- "versao": "2026-10-29",
+ "versao": "2026-10-31",
  "unidade": {
   "id": "A1-1",
   "id_funcao": "cumprimentar-e-se-despedir",
@@ -21,7 +21,7 @@
    "muda": true,
    "motivo": "as lições novas: cumprimentar, perguntar e responder, fórmulas de cortesia, despedir-se (decisões 292 e 313)"
   },
-  "tamanho": "16 cartões (4 + 4 + 5 + 3), 4 lições + Revisão da unidade, 9 notas, 2 diálogos (decisão 314); acima do limite de 12 da regra 13, liberada no excecoes.json (decisão 308)",
+  "tamanho": "16 cartões (4 + 4 + 5 + 3), 4 lições + Revisão da unidade, 9 notas, 2 diálogos: o informal no fim da lição 2 e o formal no fim da lição 4 (decisões 314 e 320); dentro da regra 13 nova, de 3 a 5 cartões por lição (decisão 319)",
   "gramatica_do_mapa": "fórmulas (je vais bien, tu vas / vous allez, je ne comprends pas, vous pouvez): je vais bien e tu vas bien ? / vous allez bien ? são cartões; as outras só em frases \"Na frase\" so_exemplo",
   "versao_gratis": "nenhuma ligação aqui (decisão 260: a ligação fica só na gramática)",
   "gratis_premium": "Tudo da unidade é grátis (lições, cartões, notas, V/F, diálogos, Revisão da unidade). Desafios do módulo são Premium (paywall hoje desligado); o ditado do módulo segue aberto."
@@ -282,7 +282,7 @@
     "nova: et toi ? / et vous ?",
     "nova: je vais bien"
    ],
-   "inclui_dialogo": false,
+   "inclui_dialogo": true,
    "sequencia": [
     "ponte (lição 1)",
     "cartão ça va",
@@ -293,7 +293,8 @@
     "cartão je vais bien",
     "nota Como responder + V/F",
     "checagem rápida",
-    "praticando"
+    "praticando",
+    "diálogo \"Encontro na rua\" + Você entendeu?"
    ]
   },
   {
@@ -304,7 +305,8 @@
     "publicado": "Cumprimentar informalmente e agradecer",
     "pt-BR": "Fórmulas de cortesia",
     "en": null,
-    "a_confirmar": true
+    "a_confirmar": false,
+    "decisao": 315
    },
    "cartoes": [
     "A1-1-v4",
@@ -352,7 +354,6 @@
     "nota Salut também pode ser tchau + V/F",
     "checagem rápida",
     "praticando",
-    "diálogo \"Encontro na rua\" + Você entendeu?",
     "diálogo \"Na portaria\" + Você entendeu?"
    ]
   },
@@ -396,14 +397,14 @@
      "chave": "nova",
      "falante": "A",
      "fr": "Salut ! Tu vas bien ?",
-     "pt-BR": "Oi! Tudo bem?",
+     "pt-BR": "Oi! Você está bem?",
      "en": null
     },
     {
      "chave": "nova",
      "falante": "B",
      "fr": "Je vais bien, et toi ?",
-     "pt-BR": "Vou bem, e você?",
+     "pt-BR": "Estou bem, e você?",
      "en": null
     },
     {
@@ -673,12 +674,12 @@
   {
    "chave": "nova",
    "id_rascunho": "nova-de-rien",
-   "fr": "Merci ! — De rien !",
-   "pt-BR": "Obrigada! — De nada!",
+   "fr": "Merci ! De rien !",
+   "pt-BR": "Obrigada! De nada!",
    "en": null,
    "ilustra": "A1-1-v5",
    "papel": "essencial",
-   "motivo": "frase do cartão (a dona); duas falas numa frase só"
+   "motivo": "frase do cartão (a dona); pergunta e resposta numa frase só, sem travessão"
   },
   {
    "chave": "A1-1-p8",
@@ -815,8 +816,7 @@
    "en": null,
    "ilustra": "A1-1-v7",
    "papel": "so_exemplo",
-   "motivo": "pouvez, répéter ainda não são cartões; mantida da decisão 268 (D1), a confirmar no desenho novo",
-   "a_confirmar": true
+   "motivo": "pouvez, répéter ainda não são cartões; mantida da decisão 268 (D1) e aprovada como só exemplo na decisão 315 (D3)"
   }
  ],
  "notas": [
@@ -1004,14 +1004,14 @@
    "kind": null,
    "category": null,
    "confianca": "alta",
-   "fonte": "decisões 276, 278, 283 e 313; uso corrente",
+   "fonte": "decisões 276, 278, 283, 313 e 315 (D10); uso corrente",
    "momento": {
     "licao": "cortesia-e-como-vai",
     "depois_do_cartao": "tu vas bien ? / vous allez bien ?",
     "afterKey": "nova"
    },
    "texto": {
-    "pt-BR": "Há vários jeitos de perguntar como a pessoa está. <strong>Informal</strong> (família, amigos, jovens da mesma idade, mesmo que não se conheçam): <strong>Ça va ?</strong>, o mais comum, <strong>Tu vas bien ?</strong> e <strong>Comment vas-tu ?</strong>. <strong>Formal</strong> (desconhecidos, chefes e superiores, pessoas idosas, quem presta um serviço): <strong>Vous allez bien ?</strong> e <strong>Comment allez-vous ?</strong>.",
+    "pt-BR": "Há vários jeitos de perguntar como a pessoa está. <strong>Informal</strong> (família, amigos, jovens da mesma idade, mesmo que não se conheçam): <strong>Ça va ?</strong>, o mais comum, <strong>Tu vas bien ?</strong> e <strong>Comment vas-tu ?</strong>, que na fala do dia a dia soa um pouco mais cuidado que <strong>Ça va ?</strong> e <strong>Tu vas bien ?</strong>. <strong>Formal</strong> (desconhecidos, chefes e superiores, pessoas idosas, quem presta um serviço): <strong>Vous allez bien ?</strong> e <strong>Comment allez-vous ?</strong>.",
     "en": null
    },
    "exemplos": [
@@ -1027,7 +1027,7 @@
     },
     {
      "fr": "Comment vas-tu ?",
-     "pt-BR": "Como você vai?",
+     "pt-BR": "Como vai você?",
      "en": null
     },
     {
@@ -1062,7 +1062,14 @@
      }
     }
    ],
-   "muda": "nova (decisões 278 e 283); com o cartão tu vas bien ? / vous allez bien ? (313), a nota traz Comment vas-tu ? / Comment allez-vous ? e quando usar cada forma"
+   "muda": "nova (decisões 278 e 283); com o cartão tu vas bien ? / vous allez bien ? (313), a nota traz Comment vas-tu ? / Comment allez-vous ? e quando usar cada forma",
+   "confianca_por_trecho": [
+    {
+     "trecho": "Comment vas-tu ? soa um pouco mais cuidado que Ça va ? e Tu vas bien ?",
+     "confianca": "média",
+     "decisao": 315
+    }
+   ]
   },
   {
    "id": "como-responder",
@@ -1095,7 +1102,7 @@
     },
     {
      "fr": "Pas mal, et toi ?",
-     "pt-BR": "Bem, e você?",
+     "pt-BR": "Nada mal, e você?",
      "en": null
     },
     {
@@ -1333,7 +1340,7 @@
     },
     {
      "fr": "Au revoir, madame !",
-     "pt-BR": "Tchau, senhora! (com desconhecidos, au revoir)",
+     "pt-BR": "Até logo, senhora!",
      "en": null
     }
    ],
@@ -1682,7 +1689,7 @@
    {
     "categoria": "listen_translate",
     "texto": "Un café, s'il vous plaît.",
-    "situacao": "café não é visto no módulo \"Apresentar-se\"; o rascunho anterior propunha \"Merci, au revoir !\""
+    "situacao": "arquivar na revisão do módulo (decisão 316): o cartão já ensina s'il vous plaît e un café é cognato"
    },
    {
     "categoria": "accent",
@@ -1712,7 +1719,7 @@
    {
     "categoria": "expression (outros módulos)",
     "texto": "Bonne journée ! (\"Rotina e calendário\") e Bonne soirée ! (\"Lazer, convites e passado\")",
-    "situacao": "viraram cartão em par nesta unidade (decisões 269 e 281); revisar nesses módulos"
+    "situacao": "viraram cartão em par nesta unidade (decisão 269); arquivar as duas Expressões na revisão do módulo (decisão 316)"
    },
    {
     "categoria": "expression (sugestão)",
@@ -1757,7 +1764,7 @@
     "efeito": "quem estava no Ponto de verificação vai para a Revisão da unidade e pula a lição 4 nova"
    }
   ],
-  "cartoes_novos_em_unidade_concluida": "unidade concluída libera todos os cartões dela (isCardLessonCompleted em shared/core/revisao-decks.js): os 14 que concluíram recebem os 6 cartões novos (e as frases novas) direto na Revisão, sem passar pela lição; quem pula uma lição recebe os cartões dela do mesmo jeito. Decidir antes de publicar (ver A1-1.md, seção 8)."
+  "cartoes_novos_em_unidade_concluida": "unidade concluída libera todos os cartões dela (isCardLessonCompleted em shared/core/revisao-decks.js): os 14 que concluíram recebem os 6 cartões novos (e as frases novas) direto na Revisão, sem passar pela lição; quem pula uma lição recebe os cartões dela do mesmo jeito. Opção (a) aprovada pela dona (decisão 315): aceitar."
  },
  "audios_novos_previstos": [
   "salut / coucou",
@@ -1775,7 +1782,7 @@
   "Bonsoir, madame. Vous allez bien ?",
   "Je vais bien, et toi ?",
   "Je vais bien, merci.",
-  "Merci ! — De rien !",
+  "Merci ! De rien !",
   "Pardon, madame !",
   "Excusez-moi, monsieur !",
   "Au revoir, madame !",
