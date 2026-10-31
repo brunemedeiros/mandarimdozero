@@ -531,3 +531,4 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   Para terminar: colar `docs/rollout-sql/123_sql_editor.sql` no SQL Editor do Staging (idempotente: a parte já aplicada não muda).
 - Produção: **pendente** (só com autorização; mesmo arquivo `docs/rollout-sql/123_sql_editor.sql` no SQL Editor; depois o site).
 - Teste local: `tests/recomecar-curso/run.sh` 57/57 (zero resíduo depois do ROLLBACK); unidade 30/30; navegador 354/354.
+- Situação em 2026-10-31: Staging completo (a dona colou `docs/rollout-sql/123_sql_editor.sql`; RPCs, gatilho e cron conferidos). Produção aplicada pelo MCP com autorização da dona, versão `20261031001322` (`123_restart_course`); conferido: 3 RPCs com execute para authenticated e não para anon, gatilho, cron, 0 cópias, hashes de `weekly_xp` e `earned_badges` iguais antes e depois, 43 linhas em `progress`, nenhum bloco com `restartEpoch`.
