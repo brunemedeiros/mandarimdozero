@@ -1132,6 +1132,29 @@ function renderProgressView(){
   wireTrackChips(badgeGridEl, trackViews.concat(classics));
 }
 
+// Perfil > Progresso já nas Conquistas (fim da tela): chamada por switchTab('profile-badges') (shared/tabs.js), depois do render.
+// Rola até o título "Conquistas" (descontando a barra do topo, que é sticky) e, se o aviso "Nova conquista!" disse qual foi
+// (PROGRESS_BADGE_SPOTLIGHT, nome da conquista), destaca o cartão dela por uns segundos. Decisão da dona, 2026-10-31.
+let PROGRESS_BADGE_SPOTLIGHT = null;
+function focusProgressBadges(){
+  const name = PROGRESS_BADGE_SPOTLIGHT;
+  PROGRESS_BADGE_SPOTLIGHT = null;
+  const label = document.querySelector('#view-progress .conquests-label');
+  if (!label) return;
+  const bar = [...document.querySelectorAll('.topbar')].find(b => b.offsetParent !== null && /sticky|fixed/.test(getComputedStyle(b).position));
+  const offset = (bar ? bar.getBoundingClientRect().height : 0) + 12;
+  window.scrollTo({ top: Math.max(0, label.getBoundingClientRect().top + window.scrollY - offset) });
+  if (!name) return;
+  const norm = x => String(x || '').trim().toLowerCase();
+  const card = [...document.querySelectorAll('#badge-grid .track-card, #badge-grid .track-chip')]
+    .find(c => norm((c.querySelector('.track-name, .track-chip-name') || {}).textContent) === norm(name));
+  if (!card) return; // a conquista já subiu de nível (o nome mudou): fica só a rolagem
+  card.classList.remove('is-spotlight');
+  void card.offsetWidth; // reinicia a animação se o mesmo cartão for destacado de novo
+  card.classList.add('is-spotlight');
+  setTimeout(() => card.classList.remove('is-spotlight'), 4000);
+}
+
 // ---------- Heatmap de atividade diária (estilo GitHub) ----------
 // Mostra as últimas ~18 semanas em grade: colunas = semanas, linhas = dias da
 // semana (dom-sáb). Intensidade da cor reflete quantas respostas você deu
