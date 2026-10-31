@@ -3665,7 +3665,8 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
   background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-card);
 }
 #view-progress .stat-cards > .guest-warning{ grid-column:1 / -1; margin:0; border-radius:0; }
-#view-progress .stat-card{ border:none; border-radius:0; background:none; padding:14px 16px; box-shadow:1px 0 0 var(--paper-line), 0 1px 0 var(--paper-line); }
+/* padding-left 64px: espaço do ícone (.stat-card::before, mais abaixo); sem ele o ícone cobre o número. */
+#view-progress .stat-card{ border:none; border-radius:0; background:none; padding:14px 12px 14px 64px; box-shadow:1px 0 0 var(--paper-line), 0 1px 0 var(--paper-line); }
 #view-progress .stat-card .num{ font-size:24px; font-variant-numeric:tabular-nums; }
 #view-progress .stat-card .label{ font-weight:600; }
 
