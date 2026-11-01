@@ -519,3 +519,8 @@ foi aplicada na produção (`20261012210455`). Próxima etapa do plano: 4) mural
 - Passos da autora: `docs/google-agenda/passo-a-passo-google-cloud.md` (feito) e `docs/google-agenda/117b-sql-editor.sql`
   (Staging feito; produção pendente).
 
+
+### Aba Turma no Ranking (2026-10-31)
+
+- Migration 124 + aba "Turma" no Ranking, só para quem está em alguma turma (ou é a professora dela). Detalhes e testes:
+  `docs/historico/08-public-deck-migrations-rollout-059-069.md`, seção 124.

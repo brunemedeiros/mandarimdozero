@@ -1170,6 +1170,11 @@ window.I18N_CATALOG['en'] = {
   'leaderboard.emptyText': 'Nobody has scored in this category yet this week.', // ALTA
   'leaderboard.scopeAria': 'Leaderboard scope', // ALTA
   'leaderboard.footnote': 'The leaderboard resets every Monday. Only people who have earned XP this week appear.', // ALTA
+  'leaderboard.mode.classroom': 'Class', // ALTA
+  'leaderboard.classroom.roomsAria': 'Choose the class', // ALTA
+  'leaderboard.classroom.emptyTitle': 'No one in the class yet', // ALTA
+  'leaderboard.classroom.emptyText': 'When students join the class, the ranking shows up here.', // ALTA
+  'leaderboard.classroom.footnote': 'Only students in {name}, with this week\'s {lang} XP. The ranking resets every Monday and people who haven\'t earned XP yet appear at the end.', // ALTA
   'profile.err.saveFailed': 'Couldn\'t save your profile. Check your connection and try again.', // ALTA
   'profile.err.imageRead': "We couldn't read that image.", // ALTA
   'profile.err.imageTooBig': 'Image too large (max 8MB).', // ALTA
