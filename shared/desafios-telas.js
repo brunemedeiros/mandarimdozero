@@ -774,11 +774,17 @@ function exprMeaningBoxHTML(c){
     ${c.explanation ? `<p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>` : ''}</div>`;
 }
 
+// Tipo da pergunta da expressão (campo opcional `questionMode` no banco): padrão "O que significa?"; `when` = "Quando se usa isso?",
+// `who` = "Quem diz isso?", `whom` = "A quem se diz isso?". O rótulo vem sempre do idioma do site, nunca da frase em francês do conteúdo.
+function exprQuestionKey(c){
+  return ['when', 'who', 'whom'].includes(c.questionMode) ? 'ch.expr.q.' + c.questionMode : 'ch.expr.whatMeans';
+}
+
 function renderExpressionQuestionScreen(c){
   EXPR_RUN = { c, chosenIdx: null, isCorrect: false, revealed: false, answered: false, guess: '', turn: null, xpPaid: false };
   exprRender(c, `
     <div class="exercise-wrap expr-wrap">
-      <div class="exercise-prompt-label">${chT('ch.expr.whatMeans')}</div>
+      <div class="exercise-prompt-label">${chT(exprQuestionKey(c))}</div>
       <div class="exercise-prompt">
         <div class="prompt-french">${escapeHtmlChallenge(c.canonicalExpression)}</div>
         <div class="audio-btn-row">

@@ -2,16 +2,16 @@
  {
   "id": "expr-001",
   "optionsPt": [
-   "Estar muito cansado depois de um dia longo.",
-   "Passar mal e ter dor de cabeça depois de beber demais.",
-   "Ficar de mau humor por um tempo.",
-   "Ser pego de surpresa por uma notícia."
+   "Ficar muito cansado depois de um dia longo.",
+   "Passar mal com dor de cabeça por beber demais.",
+   "Ficar de mau humor por um tempo, sem motivo.",
+   "Levar um susto com uma notícia inesperada."
   ],
   "optionsEn": [
-   "To be very tired after a long day.",
-   "To feel sick and have a headache after drinking too much.",
-   "To be in a bad mood for a while.",
-   "To be caught off guard by some news."
+   "To be exhausted after a long day at work.",
+   "To have a headache after drinking too much.",
+   "To be in a bad mood for no real reason.",
+   "To be shocked by some unexpected news."
   ],
   "turnPt": "Ontem à noite eu bebi demais na festa, então hoje de manhã estou de ressaca e não quero sair.",
   "turnEn": "Last night I drank too much at the party, so this morning I'm hungover and I don't want to go out.",
@@ -24,16 +24,16 @@
  {
   "id": "expr-002",
   "optionsPt": [
-   "Fazer muito barulho",
-   "Estar muito cansado",
-   "Incomodar ou irritar alguém",
-   "Quebrar um objeto"
+   "Fazer barulho alto",
+   "Ficar muito cansado",
+   "Irritar muito alguém",
+   "Quebrar alguma coisa"
   ],
   "optionsEn": [
-   "To make a lot of noise",
-   "To be very tired",
-   "To bother or annoy someone",
-   "To break an object"
+   "To make a loud noise",
+   "To be really tired",
+   "To annoy someone a lot",
+   "To break something"
   ],
   "turnPt": "Meu irmão esqueceu de lavar a louça de novo, ele me tira do sério!",
   "turnEn": "My brother forgot to do the dishes again, he's getting on my nerves!",
@@ -46,16 +46,16 @@
  {
   "id": "expr-003",
   "optionsPt": [
-   "Pregar uma peça em alguém.",
-   "Não ir a um encontro sem avisar.",
-   "Convidar alguém para comer.",
-   "Contar uma história engraçada."
+   "Pregar uma peça num amigo.",
+   "Faltar a um encontro sem avisar.",
+   "Convidar alguém para jantar.",
+   "Contar uma piada para alguém."
   ],
   "optionsEn": [
-   "To play a trick on someone.",
+   "To play a prank on a friend.",
    "To not show up without warning.",
-   "To invite someone to eat.",
-   "To tell a funny story."
+   "To invite someone over to eat.",
+   "To tell someone a funny joke."
   ],
   "turnPt": "Não se deve dar bolo em ninguém quando a gente prometeu ir.",
   "turnEn": "You shouldn't stand someone up when you've promised to come.",
@@ -332,16 +332,16 @@
  {
   "id": "expr-a1m2-005",
   "optionsPt": [
-   "Ao se despedir de manhã ou à tarde",
-   "Ao ir dormir",
-   "Antes de comer",
-   "Ao chegar"
+   "Ao se despedir de dia",
+   "Ao ir dormir de noite",
+   "Antes de uma refeição",
+   "Ao chegar num lugar"
   ],
   "optionsEn": [
-   "When saying goodbye in the morning or afternoon",
-   "When going to bed",
-   "Before eating",
-   "When arriving"
+   "When leaving during the day",
+   "When going to bed at night",
+   "Before starting a meal",
+   "When arriving somewhere"
   ],
   "turnPt": "Tchau, tenha um bom dia!",
   "turnEn": "Bye, have a nice day!",
@@ -354,16 +354,16 @@
  {
   "id": "expr-a1m3-001",
   "optionsPt": [
-   "Para chamar a atenção com educação",
-   "Para se despedir",
-   "Para agradecer",
-   "Para recusar"
+   "Para chamar a atenção de alguém",
+   "Para se despedir de alguém",
+   "Para agradecer a ajuda de alguém",
+   "Para recusar o pedido de alguém"
   ],
   "optionsEn": [
-   "To get someone's attention politely",
-   "To say goodbye",
-   "To say thank you",
-   "To say no"
+   "To get someone's attention",
+   "To say goodbye to someone",
+   "To thank someone for their help",
+   "To turn down someone's request"
   ],
   "turnPt": "Com licença, onde fica o museu?",
   "turnEn": "Excuse me, where is the museum?",
@@ -554,14 +554,14 @@
   "optionsPt": [
    "A gente comenta o clima",
    "A gente pergunta as horas",
-   "A gente se despede",
-   "A gente agradece"
+   "A gente diz tchau a alguém",
+   "A gente agradece um favor"
   ],
   "optionsEn": [
    "You comment on the weather",
-   "You ask the time",
-   "You say goodbye",
-   "You say thank you"
+   "You ask what time it is",
+   "You say goodbye to someone",
+   "You thank someone for a favor"
   ],
   "turnPt": "Que tempo! Está nevando!",
   "turnEn": "What weather! It's snowing!",
@@ -574,16 +574,16 @@
  {
   "id": "expr-a1m5-001",
   "optionsPt": [
-   "Para um convidado se sentir à vontade",
-   "Para um vizinho que está indo embora",
-   "Para um amigo doente",
-   "Para um cliente"
+   "Para um convidado que chega",
+   "Para um vizinho que vai embora",
+   "Para um amigo que está doente",
+   "Para um cliente da loja"
   ],
   "optionsEn": [
-   "To a guest, so they feel at ease",
-   "To a neighbor who is leaving",
-   "To a sick friend",
-   "To a customer"
+   "To a guest who's arriving",
+   "To a neighbor who's leaving",
+   "To a friend who's sick",
+   "To a customer in a store"
   ],
   "turnPt": "Entra! Sinta-se em casa!",
   "turnEn": "Come in! Make yourself at home!",
@@ -620,14 +620,14 @@
   "optionsPt": [
    "Quando a gente recebe alguém",
    "Quando a gente vai embora",
-   "Quando a gente come",
-   "Quando a gente dorme"
+   "Quando a gente vai almoçar",
+   "Quando a gente vai dormir"
   ],
   "optionsEn": [
    "When you welcome someone",
-   "When you leave",
-   "When you eat",
-   "When you sleep"
+   "When you're about to leave",
+   "When you sit down to eat",
+   "When you're going to bed"
   ],
   "turnPt": "Bem-vindo à minha casa!",
   "turnEn": "Welcome to my home!",
@@ -773,15 +773,15 @@
   "id": "expr-a1m6-005",
   "optionsPt": [
    "A gente não se vê há muito tempo",
-   "A gente se vê amanhã",
-   "A gente está atrasado",
-   "A gente está com fome"
+   "A gente vai se ver amanhã de novo",
+   "A gente está muito atrasado",
+   "A gente está morrendo de fome"
   ],
   "optionsEn": [
-   "We haven't seen each other in a long time",
-   "We'll see each other tomorrow",
-   "We're late",
-   "We're hungry"
+   "We haven't seen each other in ages",
+   "We'll see each other again tomorrow",
+   "We're running really late",
+   "We're absolutely starving"
   ],
   "turnPt": "Oi! Quanto tempo!",
   "turnEn": "Hi! Long time no see!",
@@ -839,15 +839,15 @@
   "id": "expr-a2-003",
   "optionsPt": [
    "Acordar bem cedo de manhã.",
-   "Dormir muito durante a noite.",
-   "Levantar tarde de manhã, sem pressa de sair da cama.",
-   "Tirar um cochilo durante o dia."
+   "Ir dormir bem cedo à noite.",
+   "Levantar tarde de manhã.",
+   "Tirar um cochilo à tarde."
   ],
   "optionsEn": [
    "To wake up very early in the morning.",
-   "To sleep a lot during the night.",
-   "To get up late in the morning, in no hurry to get out of bed.",
-   "To take a nap during the day."
+   "To go to bed very early at night.",
+   "To get up late in the morning.",
+   "To take a nap in the afternoon."
   ],
   "turnPt": "Quando estou de férias, adoro dormir até tarde.",
   "turnEn": "When I'm on vacation, I love sleeping in.",
@@ -860,16 +860,16 @@
  {
   "id": "expr-b2-001",
   "optionsPt": [
-   "Estar muito cansado",
-   "Esclarecer os últimos detalhes e ser preciso",
-   "Brigar por bobagem",
-   "Tomar uma decisão precipitada"
+   "Ficar cansado de tudo",
+   "Esclarecer todos os detalhes",
+   "Brigar por qualquer bobagem",
+   "Tomar uma decisão às pressas"
   ],
   "optionsEn": [
-   "To be very tired",
-   "To clarify the final details and be precise",
-   "To argue over trifles",
-   "To make a hasty decision"
+   "To be tired of everything",
+   "To clarify every detail",
+   "To argue over little things",
+   "To make a rushed decision"
   ],
   "turnPt": "Antes de assinar o contrato, precisamos colocar os pingos nos is para evitar qualquer mal-entendido no futuro.",
   "turnEn": "Before signing the contract, we absolutely have to dot the i's and cross the t's to avoid any future misunderstanding.",
@@ -981,8 +981,8 @@
    "To be very angry with someone",
    "To be very scared of something"
   ],
-  "turnPt": "Ele pode criticar meu corte de cabelo, tô pouco me lixando: eu gosto dele.",
-  "turnEn": "He can criticize my haircut, I don't give a damn: I like it.",
+  "turnPt": "Ele pode criticar meu corte de cabelo, tô me fodendo: eu gosto dele.",
+  "turnEn": "He can criticize my haircut, I don't fucking care: I like it.",
   "conf": "media",
   "nota": "\"m'en fous\" é um pouco mais forte que \"não tô nem aí\" (seguiu o meaning_pt); alternativa mais próxima: \"tô pouco me lixando\".",
   "_cert_idx": 0,
@@ -1103,15 +1103,15 @@
   "id": "expr-lote1-009",
   "optionsPt": [
    "Para dar os parabéns a alguém",
-   "Para perguntar as horas com educação",
-   "Para dar oi a um amigo",
-   "Para mandar alguém calar a boca, de forma grosseira"
+   "Para perguntar as horas a alguém",
+   "Para dar oi a um amigo na rua",
+   "Para mandar alguém calar a boca"
   ],
   "optionsEn": [
    "To congratulate someone",
-   "To ask the time politely",
-   "To say hello to a friend",
-   "To rudely tell someone to be quiet"
+   "To ask someone the time",
+   "To say hi to a friend",
+   "To tell someone to shut up"
   ],
   "turnPt": "Para de cantar desafinado às duas da manhã, cala essa boca!",
   "turnEn": "Stop singing off-key at two in the morning, shut the hell up!",
@@ -1146,16 +1146,16 @@
  {
   "id": "expr-lote1-011",
   "optionsPt": [
-   "Complicar a vida ou brigar por nada",
+   "Complicar as coisas à toa",
    "Descansar por muito tempo",
-   "Lavar o cabelo",
+   "Lavar o cabelo com calma",
    "Fazer um elogio a si mesmo"
   ],
   "optionsEn": [
-   "To complicate things or argue over nothing",
+   "To overcomplicate things",
    "To rest for a long time",
-   "To wash one's hair",
-   "To pay oneself a compliment"
+   "To wash your hair slowly",
+   "To compliment yourself"
   ],
   "turnPt": "Faz duas horas que vocês estão discutindo à toa: parem de esquentar a cabeça!",
   "turnEn": "You've been arguing over nothing for two hours: stop getting so worked up!",
@@ -1168,16 +1168,16 @@
  {
   "id": "expr-lote1-012",
   "optionsPt": [
-   "Concordo totalmente",
-   "Não acredito nem um pouco (ironia)",
+   "Concordo com você totalmente",
+   "Não acredito nisso nem um pouco",
    "Você fala francês muito bem",
    "Continue falando, por favor"
   ],
   "optionsEn": [
-   "I totally agree",
-   "I don't believe it at all (irony)",
-   "You speak French very well",
-   "Keep talking, please"
+   "I totally agree with you",
+   "I don't believe that at all",
+   "You speak French really well",
+   "Go on, keep talking, please"
   ],
   "turnPt": "\"O Paul disse que vai parar de fumar amanhã.\" — \"Até parece! Ele diz isso todo mês.\"",
   "turnEn": "\"Paul said he'd quit smoking tomorrow.\" — \"Yeah, right! He says that every month.\"",
@@ -1256,16 +1256,16 @@
  {
   "id": "expr-lote1-016",
   "optionsPt": [
-   "Fechar uma loja",
-   "Esperar a vez numa fila",
-   "Preparar um prato",
-   "Correr muito rápido"
+   "Fechar a loja mais cedo",
+   "Esperar a vez na fila",
+   "Preparar um prato novo",
+   "Sair correndo bem rápido"
   ],
   "optionsEn": [
-   "To close a shop",
-   "To wait one's turn in line",
-   "To cook a dish",
-   "To run very fast"
+   "To close the shop early",
+   "To wait your turn in line",
+   "To make a dish for dinner",
+   "To run off really fast"
   ],
   "turnPt": "Tem muita gente nos Correios, vamos ter que pegar fila.",
   "turnEn": "There are lots of people at the post office, we're going to have to wait in line.",
@@ -1366,16 +1366,16 @@
  {
   "id": "expr-lote2-001",
   "optionsPt": [
-   "Para agradecer alguém com muito carinho",
-   "Para pedir ajuda a alguém com educação",
-   "Para desejar boa viagem a um amigo",
-   "Para mandar alguém embora, de forma grosseira"
+   "Para agradecer muito a alguém",
+   "Para pedir ajuda a um vizinho",
+   "Para desejar boa viagem a alguém",
+   "Para mandar alguém ir embora já"
   ],
   "optionsEn": [
-   "To thank someone very warmly",
-   "To politely ask someone for help",
-   "To wish a friend a good trip",
-   "To tell someone to leave, rudely"
+   "To thank someone warmly",
+   "To ask a neighbor for help",
+   "To wish someone a good trip",
+   "To tell someone to get lost"
   ],
   "turnPt": "Você está me irritando, cai fora do meu quarto!",
   "turnEn": "You're getting on my nerves, get out of my room!",
@@ -2136,16 +2136,16 @@
  {
   "id": "expr-lote3-016",
   "optionsPt": [
-   "Quando alguém está muito irritado",
-   "Quando alguém agradece",
-   "Quando alguém está calmo e feliz",
-   "Quando alguém cumprimenta um amigo"
+   "Quando alguém está irritado ou diante de uma bagunça",
+   "Quando alguém agradece um favor ou um presente",
+   "Quando alguém está calmo ou diante de algo bonito",
+   "Quando alguém cumprimenta um amigo ou um vizinho"
   ],
   "optionsEn": [
-   "When you're really annoyed",
-   "When you say thank you",
-   "When you're calm and happy",
-   "When you greet a friend"
+   "When someone is annoyed or facing a mess",
+   "When someone is grateful for a gift or a favor",
+   "When someone is calm or sees something lovely",
+   "When someone greets a friend or a neighbor"
   ],
   "turnPt": "Que zona é essa? Todo mundo está gritando no corredor!",
   "turnEn": "What the hell is going on? Everyone's yelling in the hallway!",
@@ -2202,16 +2202,16 @@
  {
   "id": "expr-lote3-019",
   "optionsPt": [
-   "É um insulto: \"homem malvado\"",
-   "É uma palavra para um amigo",
-   "É uma profissão",
-   "É uma palavra gentil"
+   "É um insulto para um homem",
+   "É um apelido para um amigo",
+   "É o nome de uma profissão",
+   "É um elogio para alguém"
   ],
   "optionsEn": [
-   "It's an insult: \"mean man\"",
-   "It's a word for a friend",
-   "It's a job",
-   "It's a kind word"
+   "It's an insult for a man",
+   "It's a nickname for a friend",
+   "It's the name of a job",
+   "It's a compliment for someone"
   ],
   "turnPt": "Esse cara não é só meio bobo, é um babaca de verdade: ele faz maldade de propósito.",
   "turnEn": "This guy isn't just a bit dumb, he's a real asshole: he hurts people on purpose.",
@@ -2422,16 +2422,16 @@
  {
   "id": "expr-lote4-009",
   "optionsPt": [
-   "Ter muita dificuldade para fazer algo",
-   "Viajar de barco",
-   "Conseguir com muita facilidade",
-   "Se recusar a trabalhar"
+   "Ter muita dificuldade com algo",
+   "Fazer uma viagem de barco",
+   "Conseguir algo com facilidade",
+   "Se recusar a fazer o trabalho"
   ],
   "optionsEn": [
-   "To have a hard time doing something",
-   "To travel by boat",
-   "To succeed very easily",
-   "To refuse to work"
+   "To struggle a lot with something",
+   "To go on a long boat trip",
+   "To do something very easily",
+   "To refuse to do any work"
   ],
   "turnPt": "Sem GPS, a gente penou uma hora para achar o hotel.",
   "turnEn": "Without GPS, we struggled for an hour to find the hotel.",

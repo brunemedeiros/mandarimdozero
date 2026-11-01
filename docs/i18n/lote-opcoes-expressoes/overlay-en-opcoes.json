@@ -1,28 +1,28 @@
 {
  "expr-001": {
   "options": [
-   "To be very tired after a long day.",
-   "To feel sick and have a headache after drinking too much.",
-   "To be in a bad mood for a while.",
-   "To be caught off guard by some news."
+   "To be exhausted after a long day at work.",
+   "To have a headache after drinking too much.",
+   "To be in a bad mood for no real reason.",
+   "To be shocked by some unexpected news."
   ],
   "microActivity": "Last night I drank too much at the party, so this morning I'm hungover and I don't want to go out."
  },
  "expr-002": {
   "options": [
-   "To make a lot of noise",
-   "To be very tired",
-   "To bother or annoy someone",
-   "To break an object"
+   "To make a loud noise",
+   "To be really tired",
+   "To annoy someone a lot",
+   "To break something"
   ],
   "microActivity": "My brother forgot to do the dishes again, he's getting on my nerves!"
  },
  "expr-003": {
   "options": [
-   "To play a trick on someone.",
+   "To play a prank on a friend.",
    "To not show up without warning.",
-   "To invite someone to eat.",
-   "To tell a funny story."
+   "To invite someone over to eat.",
+   "To tell someone a funny joke."
   ],
   "microActivity": "You shouldn't stand someone up when you've promised to come."
  },
@@ -136,19 +136,19 @@
  },
  "expr-a1m2-005": {
   "options": [
-   "When saying goodbye in the morning or afternoon",
-   "When going to bed",
-   "Before eating",
-   "When arriving"
+   "When leaving during the day",
+   "When going to bed at night",
+   "Before starting a meal",
+   "When arriving somewhere"
   ],
   "microActivity": "Bye, have a nice day!"
  },
  "expr-a1m3-001": {
   "options": [
-   "To get someone's attention politely",
-   "To say goodbye",
-   "To say thank you",
-   "To say no"
+   "To get someone's attention",
+   "To say goodbye to someone",
+   "To thank someone for their help",
+   "To turn down someone's request"
   ],
   "microActivity": "Excuse me, where is the museum?"
  },
@@ -227,18 +227,18 @@
  "expr-a1m4-005": {
   "options": [
    "You comment on the weather",
-   "You ask the time",
-   "You say goodbye",
-   "You say thank you"
+   "You ask what time it is",
+   "You say goodbye to someone",
+   "You thank someone for a favor"
   ],
   "microActivity": "What weather! It's snowing!"
  },
  "expr-a1m5-001": {
   "options": [
-   "To a guest, so they feel at ease",
-   "To a neighbor who is leaving",
-   "To a sick friend",
-   "To a customer"
+   "To a guest who's arriving",
+   "To a neighbor who's leaving",
+   "To a friend who's sick",
+   "To a customer in a store"
   ],
   "microActivity": "Come in! Make yourself at home!"
  },
@@ -254,9 +254,9 @@
  "expr-a1m5-003": {
   "options": [
    "When you welcome someone",
-   "When you leave",
-   "When you eat",
-   "When you sleep"
+   "When you're about to leave",
+   "When you sit down to eat",
+   "When you're going to bed"
   ],
   "microActivity": "Welcome to my home!"
  },
@@ -316,10 +316,10 @@
  },
  "expr-a1m6-005": {
   "options": [
-   "We haven't seen each other in a long time",
-   "We'll see each other tomorrow",
-   "We're late",
-   "We're hungry"
+   "We haven't seen each other in ages",
+   "We'll see each other again tomorrow",
+   "We're running really late",
+   "We're absolutely starving"
   ],
   "microActivity": "Hi! Long time no see!"
  },
@@ -344,18 +344,18 @@
  "expr-a2-003": {
   "options": [
    "To wake up very early in the morning.",
-   "To sleep a lot during the night.",
-   "To get up late in the morning, in no hurry to get out of bed.",
-   "To take a nap during the day."
+   "To go to bed very early at night.",
+   "To get up late in the morning.",
+   "To take a nap in the afternoon."
   ],
   "microActivity": "When I'm on vacation, I love sleeping in."
  },
  "expr-b2-001": {
   "options": [
-   "To be very tired",
-   "To clarify the final details and be precise",
-   "To argue over trifles",
-   "To make a hasty decision"
+   "To be tired of everything",
+   "To clarify every detail",
+   "To argue over little things",
+   "To make a rushed decision"
   ],
   "microActivity": "Before signing the contract, we absolutely have to dot the i's and cross the t's to avoid any future misunderstanding."
  },
@@ -402,7 +402,7 @@
    "To be very angry with someone",
    "To be very scared of something"
   ],
-  "microActivity": "He can criticize my haircut, I don't give a damn: I like it."
+  "microActivity": "He can criticize my haircut, I don't fucking care: I like it."
  },
  "expr-lote1-004": {
   "options": [
@@ -452,9 +452,9 @@
  "expr-lote1-009": {
   "options": [
    "To congratulate someone",
-   "To ask the time politely",
-   "To say hello to a friend",
-   "To rudely tell someone to be quiet"
+   "To ask someone the time",
+   "To say hi to a friend",
+   "To tell someone to shut up"
   ],
   "microActivity": "Stop singing off-key at two in the morning, shut the hell up!"
  },
@@ -469,19 +469,19 @@
  },
  "expr-lote1-011": {
   "options": [
-   "To complicate things or argue over nothing",
+   "To overcomplicate things",
    "To rest for a long time",
-   "To wash one's hair",
-   "To pay oneself a compliment"
+   "To wash your hair slowly",
+   "To compliment yourself"
   ],
   "microActivity": "You've been arguing over nothing for two hours: stop getting so worked up!"
  },
  "expr-lote1-012": {
   "options": [
-   "I totally agree",
-   "I don't believe it at all (irony)",
-   "You speak French very well",
-   "Keep talking, please"
+   "I totally agree with you",
+   "I don't believe that at all",
+   "You speak French really well",
+   "Go on, keep talking, please"
   ],
   "microActivity": "\"Paul said he'd quit smoking tomorrow.\" — \"Yeah, right! He says that every month.\""
  },
@@ -514,10 +514,10 @@
  },
  "expr-lote1-016": {
   "options": [
-   "To close a shop",
-   "To wait one's turn in line",
-   "To cook a dish",
-   "To run very fast"
+   "To close the shop early",
+   "To wait your turn in line",
+   "To make a dish for dinner",
+   "To run off really fast"
   ],
   "microActivity": "There are lots of people at the post office, we're going to have to wait in line."
  },
@@ -559,10 +559,10 @@
  },
  "expr-lote2-001": {
   "options": [
-   "To thank someone very warmly",
-   "To politely ask someone for help",
-   "To wish a friend a good trip",
-   "To tell someone to leave, rudely"
+   "To thank someone warmly",
+   "To ask a neighbor for help",
+   "To wish someone a good trip",
+   "To tell someone to get lost"
   ],
   "microActivity": "You're getting on my nerves, get out of my room!"
  },
@@ -874,10 +874,10 @@
  },
  "expr-lote3-016": {
   "options": [
-   "When you're really annoyed",
-   "When you say thank you",
-   "When you're calm and happy",
-   "When you greet a friend"
+   "When someone is annoyed or facing a mess",
+   "When someone is grateful for a gift or a favor",
+   "When someone is calm or sees something lovely",
+   "When someone greets a friend or a neighbor"
   ],
   "microActivity": "What the hell is going on? Everyone's yelling in the hallway!"
  },
@@ -901,10 +901,10 @@
  },
  "expr-lote3-019": {
   "options": [
-   "It's an insult: \"mean man\"",
-   "It's a word for a friend",
-   "It's a job",
-   "It's a kind word"
+   "It's an insult for a man",
+   "It's a nickname for a friend",
+   "It's the name of a job",
+   "It's a compliment for someone"
   ],
   "microActivity": "This guy isn't just a bit dumb, he's a real asshole: he hurts people on purpose."
  },
@@ -991,10 +991,10 @@
  },
  "expr-lote4-009": {
   "options": [
-   "To have a hard time doing something",
-   "To travel by boat",
-   "To succeed very easily",
-   "To refuse to work"
+   "To struggle a lot with something",
+   "To go on a long boat trip",
+   "To do something very easily",
+   "To refuse to do any work"
   ],
   "microActivity": "Without GPS, we struggled for an hour to find the hotel."
  },
