@@ -553,7 +553,7 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Tela (`shared/leaderboard.js`): aba "🏫 Turma" depois de Amigos e Geral, só para quem tem turma; no lugar de Geral/idiomas,
   a escolha da turma (só com mais de uma); pódio e "faltam X XP" como nas outras abas. O card do Ranking da lateral continua
   só com Amigos e Geral.
-- Staging: aplicada (2026-10-31, `124_classroom_ranking`). Produção: PENDENTE (aguarda a autora).
+- Staging: aplicada (2026-10-31, `124_classroom_ranking`). Produção: aplicada (2026-11-01, autorizada, versão 20261101112953; sem execute para anon; conferida como a professora: 2 turmas, 3 alunos na lista da 1ª).
 - Testes: SQL local 124 10/10 (`tests/aulas-presenca/run.sh`); navegador `tests/ranking-turma/test_playwright.js` 75/75
   (fr/zh, claro/escuro, 390); amigos 210/210, amigos-dupla 255/255, janelas-topo 276/276, cores-marca 20/20, paridade CSS 5/5,
   i18n 2341/2341, sem português no en 6/6.
