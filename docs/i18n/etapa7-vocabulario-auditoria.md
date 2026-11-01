@@ -626,3 +626,7 @@ com "Observação (opcional)"). 0 erros de página nas 4 rodadas.
   que ainda dizem "Para revisar"/"Devidos" fora do Perfil.
 - Lote 4 (Navegar) e lote 5 (Reforço) cancelados pela dona.
 - `admin.panel.tab.flashcards` mudou de texto, mas nenhuma tela usa a chave (candidata a apagar num próximo lote).
+
+### 9.x Ajuste da dona (2026-11-01)
+- `progress.statReview` passa a "Em revisão" (en "In review"), no lugar de "Já aprendidos", para não confundir com "X palavras
+  aprendidas" do topo do Perfil. "Revisão da Unidade" vale para o fr e o zh (confirmado).

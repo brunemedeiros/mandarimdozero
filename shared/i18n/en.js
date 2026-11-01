@@ -715,7 +715,7 @@ window.I18N_CATALOG['en'] = {
   'zh.progress.statXp': 'Total XP', // ALTA
   'progress.statNew': 'New', // ALTA
   'progress.statLearning': 'Learning', // ALTA
-  'progress.statReview': 'Learned', // MÉDIA -- Etapa 7 (needs_review)
+  'progress.statReview': 'In review', // ALTA -- Etapa 7 (needs_review)
   'progress.statDueNow': 'Due today', // ALTA -- Etapa 7 (needs_review)
   'zh.progress.chartEmpty': 'Start studying to see your progress over time here.', // ALTA
   'zh.progress.chartPoint': { one: '{date}: {n} word', other: '{date}: {n} words' }, // ALTA

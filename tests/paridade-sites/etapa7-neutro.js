@@ -34,9 +34,9 @@ function etapa7(v){
     // nome do modo na aba Revisão: "Speed Review" virou "Revisão rápida" (pt) / "Quick review" (en); vira um marcador só
     .replace(new RegExp('(class=' + q + 'name' + q + '>)(?:Speed Review|Revisão rápida|Quick review)<', 'g'), '$1MODO_RAPIDO<')
     .split('Revisão Rápida').join('Revisão rápida')
-    // Perfil > Progresso (opção A da dona): sem o contador "Para estudar hoje"; "Para revisar" -> "Já aprendidos", "Devidos" -> "Para hoje"
+    // Perfil > Progresso (opção A da dona): sem o contador "Para estudar hoje"; "Para revisar" -> "Em revisão", "Devidos" -> "Para hoje"
     .replace(new RegExp('<div class=' + q + 'stat-card' + q + ' data-stat=' + q + 'today' + q + '[^>]*><div class=' + q + 'num' + q + '>[^<]*</div><div class=' + q + 'label' + q + '>[^<]*</div></div>(\\\\n|\\n)?\\s*', 'g'), '')
-    .replace(new RegExp('(data-stat=' + q + 'review' + q + '><div class=' + q + 'num' + q + '>[^<]*</div><div class=' + q + 'label' + q + '>)(?:Para revisar|To review)<', 'g'), (m, a) => a + (/To review/.test(m) ? 'Learned<' : 'Já aprendidos<'))
+    .replace(new RegExp('(data-stat=' + q + 'review' + q + '><div class=' + q + 'num' + q + '>[^<]*</div><div class=' + q + 'label' + q + '>)(?:Para revisar|To review)<', 'g'), (m, a) => a + (/To review/.test(m) ? 'In review<' : 'Em revisão<'))
     .replace(new RegExp('(data-stat=' + q + 'due' + q + '><div class=' + q + 'num' + q + '>[^<]*</div><div class=' + q + 'label' + q + '>)(?:Devidos|Due)<', 'g'), (m, a) => a + (/Devidos/.test(m) ? 'Para hoje<' : 'Due today<'))
     // cartão (pt) / card (en) no lugar de flashcard
     .split('Crie seus próprios flashcards').join('Crie seus próprios cartões')

@@ -337,7 +337,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     ["Só é possível excluir um Deck pessoal seu.","Só é possível apagar um Deck pessoal seu."], // deck.delete.err.notOwn: Etapa 7: vocabulário aprovado pela dona
     ["Complete uma sessão de Revisão Rápida","Complete uma sessão de Revisão rápida"], // fr.mission.speedReview1: Etapa 7: vocabulário aprovado pela dona
     ["Nota (opcional)","Observação (opcional)"], // myFlashcards.note.label: Etapa 7: vocabulário aprovado pela dona
-    ["<div class=\"label\">Para revisar</div>","<div class=\"label\">Já aprendidos</div>"], // progress.statReview: Etapa 7: vocabulário aprovado pela dona
+    ["<div class=\"label\">Para revisar</div>","<div class=\"label\">Em revisão</div>"], // progress.statReview: Etapa 7: vocabulário aprovado pela dona
     ["Cada Deck tem a própria chave: <strong>subdecks não mudam junto</strong>. O campo \"nota privada\" dos cartões nunca é público.","Cada Deck tem a própria chave: <strong>subdecks não mudam junto</strong>. O campo \"Observação\" dos cartões nunca é público."], // publicDeck.publish.ownKeyHtml: Etapa 7: vocabulário aprovado pela dona
     [" (que também serão excluídos)"," (que também serão apagados)"], // review.deck.alsoDeleted: Etapa 7: vocabulário aprovado pela dona
     ["Excluir \"","Apagar \""], // review.deck.deleteConfirm: Etapa 7: vocabulário aprovado pela dona

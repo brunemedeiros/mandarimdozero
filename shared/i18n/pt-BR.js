@@ -734,7 +734,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'zh.progress.statXp': 'XP acumulado',
   'progress.statNew': 'Novos',
   'progress.statLearning': 'Aprendendo',
-  'progress.statReview': 'Já aprendidos',
+  'progress.statReview': 'Em revisão',
   'progress.statDueNow': 'Para hoje',
   'zh.progress.chartEmpty': 'Comece a estudar para ver seu progresso ao longo do tempo aqui.',
   'zh.progress.chartPoint': { one: '{date}: {n} palavra', other: '{date}: {n} palavras' },
