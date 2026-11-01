@@ -89,8 +89,13 @@ function studentFetchOverview(l){
   const c = STUDENT_METRICS_CACHE[l.id];
   if (c && c.overview) return Promise.resolve(c.overview);
   if (!STUDENT_OVERVIEW_INFLIGHT[l.id]){
-    STUDENT_OVERVIEW_INFLIGHT[l.id] = fetchTeacherStudentOverview(l.student_id, l.language_app_key).then(ov => {
+    STUDENT_OVERVIEW_INFLIGHT[l.id] = Promise.all([
+      fetchTeacherStudentOverview(l.student_id, l.language_app_key),
+      typeof fetchTeacherStudentRestarts === 'function' ? fetchTeacherStudentRestarts(l.student_id, l.language_app_key) : Promise.resolve([]),
+    ]).then(([ov, restarts]) => {
       delete STUDENT_OVERVIEW_INFLIGHT[l.id];
+      // Recomeçar o curso (123): "Recomeçou em DD/MM" na ficha.
+      if (ov && Array.isArray(ov.languages)) ov.restarts = restarts || [];
       if (ov && Array.isArray(ov.languages)){ STUDENT_METRICS_CACHE[l.id] = Object.assign(STUDENT_METRICS_CACHE[l.id] || {}, { overview: ov }); return ov; }
       return null;
     });

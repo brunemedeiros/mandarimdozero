@@ -25,7 +25,9 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
 // ⭐ (o ⚡ ficou só no Combo); e a janela da sequência (agora depois do Continuar) limpa os avisos "+N XP" da tela, então
 // numa cena a árvore nova pode ter a lista de avisos vazia onde a antiga ainda tinha avisos.
 const ETAPA6 = (v) => v.split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
-  .replace(/26a1\.svg(&quot;\);\\?">)⚡/g, '2b50.svg$1⭐');
+  .replace(/26a1\.svg(&quot;\);\\?">)⚡/g, '2b50.svg$1⭐')
+  // Recomeçar o curso (2026-10-30, migration 123): caixa nova e vazia (hidden) em Configurações > Geral, montada por shared/recomecar-curso.js.
+  .replace(/<!-- Recomeçar este curso.*?-->(\\n|\n)\s*<article id=\\?"settings-restart-box\\?"[^>]*><\/article>(\\n|\n)\s*/g, '');
 const SEM_TOAST = (v) => v.replace(/\\?"toast\\?":\\?"[^"\\]*\\?"/, 'T');
 const TOAST_VAZIO = /\\?"toast\\?":\\?"\\?"/;
 const igualEtapa6 = (a, b) => { const x = ETAPA6(a), y = ETAPA6(b); return x === y || (TOAST_VAZIO.test(y) && SEM_TOAST(x) === SEM_TOAST(y)); };
