@@ -1,7 +1,7 @@
 {
- "_doc": "Rascunho da unidade A1-1 'Cumprimentar e se despedir' (módulo 'Apresentar-se', A1-m1), polida pela dona (decisões 311 a 320 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md); piloto do currículo novo (decisões 236 e 266). Só pt-BR: os campos 'en' ficam null até a aprovação da dona (decisão 81). Nada daqui está em fr/content.js nem na camada courses/fr-pt-BR/layer.js. Chave estável: a publicada em fr/published_ids.json; item novo = 'nova' (a chave definitiva sai de node fr/scripts/congelar_chaves.js quando o conteúdo entrar no site). Ordem dos cartões, lições, notas (com exemplos) e diálogos: dados/mapa.json (fonte única; o validar.js confere). Leitura para a dona: A1-1.md. Validação: node docs/i18n/curriculo/piloto-m1/A1-1/validar.js.",
+ "_doc": "Rascunho da unidade A1-1 'Cumprimentar e se despedir' (módulo 'Apresentar-se', A1-m1), polida pela dona (decisões 311 a 324 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md); piloto do currículo novo (decisões 236 e 266). Só pt-BR: os campos 'en' ficam null até a aprovação da dona (decisão 81). Nada daqui está em fr/content.js nem na camada courses/fr-pt-BR/layer.js. Chave estável: a publicada em fr/published_ids.json; item novo = 'nova' (a chave definitiva sai de node fr/scripts/congelar_chaves.js quando o conteúdo entrar no site). Ordem dos cartões, lições, notas (com exemplos) e diálogos: dados/mapa.json (fonte única; o validar.js confere). Leitura para a dona: A1-1.md. Validação: node docs/i18n/curriculo/piloto-m1/A1-1/validar.js.",
  "status": "needs_review",
- "versao": "2026-10-31",
+ "versao": "2026-11-01",
  "unidade": {
   "id": "A1-1",
   "id_funcao": "cumprimentar-e-se-despedir",
@@ -32,12 +32,12 @@
    "chave": "A1-1-v3",
    "fr": "salut / coucou",
    "traducao": {
-    "pt-BR": "oi (informal) / oi (entre amigos e família)",
-    "en": null
+    "pt-BR": "oi / olá",
+    "en": "hi / hello"
    },
    "licao": "ola-e-tchau",
    "origem": "publicado",
-   "muda": "vira par: salut só como \"oi\" (o \"tchau\" fica na nota da lição 4); coucou entra no mesmo cartão (decisão 294)",
+   "muda": "vira par: salut só como \"oi\" (o \"tchau\" fica na nota da lição 4); coucou entra no mesmo cartão (decisão 294); tradução \"oi / olá\" (en \"hi / hello\"), sem contexto dentro da tradução: o registro fica nas notas (decisão 321, A6)",
    "frase_do_cartao": "A1-1-p6"
   },
   {
@@ -180,8 +180,8 @@
    },
    "licao": "informal-agradecer",
    "origem": "publicado",
-   "muda": "igual (fica, decisão 294)",
-   "frase_do_cartao": "nova-pardon"
+   "muda": "igual (fica, decisão 294; a tradução não muda, decisão 321, A1); frase do cartão: Pardon ? Vous pouvez répéter ? (decisões 322 e 324)",
+   "frase_do_cartao": "nova-repetir"
   },
   {
    "ordem": 12,
@@ -700,7 +700,7 @@
    "en": null,
    "ilustra": "A1-1-v7",
    "papel": "essencial",
-   "motivo": "frase do cartão (a dona)"
+   "motivo": "outra frase da unidade (decisões 322 e 324); era a frase do cartão pardon"
   },
   {
    "chave": "nova",
@@ -816,9 +816,16 @@
    "en": null,
    "ilustra": "A1-1-v7",
    "papel": "so_exemplo",
-   "motivo": "pouvez, répéter ainda não são cartões; mantida da decisão 268 (D1) e aprovada como só exemplo na decisão 315 (D3)"
+   "motivo": "frase do cartão pardon (decisões 322 e 324): mostra o \"pedir para repetir\"; só exemplo porque pouvez e répéter ainda não são cartões (decisão 268, D1; D3 da decisão 315)",
+   "muda": "vira a frase do cartão pardon (antes frase extra)"
   }
  ],
+ "regra_frases_essenciais_em_exercicio": {
+  "decisao": "321 (A3)",
+  "status": "a implementar na função pura do papel das frases (fr/scripts/curriculo_papel.js, frasePodeAparecer), na implementação; nenhum código mudou agora",
+  "regra": "uma frase essencial pode entrar em exercício da lição mesmo com palavra ainda não ensinada, desde que o exercício cobre a palavra já ensinada (lacuna, escolha) e não foque a palavra ainda não vista; exercício de ordenar a frase em blocos pode usar a frase inteira quando a palavra nova é de compreensão fácil e a tradução está visível",
+  "exemplo": "Merci, madame ! na lição 1, onde o cartão é madame (merci só vira cartão na lição 3)"
+ },
  "notas": [
   {
    "id": "bonjour-vs-bonsoir",

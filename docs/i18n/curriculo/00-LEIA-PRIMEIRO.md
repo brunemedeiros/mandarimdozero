@@ -231,4 +231,22 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   (o `validar.js` confere cada diálogo na posição da sua lição). Auditoria: `auditoria/2026-10-31-unidade-1-polida.md`.
 - **Totais**: sem mudança (A1 com 366 cartões, 725 A/B, ~151 lições, 133 notas, ~31h00; "Apresentar-se" com 66 cartões e ~3h55).
 
+## Atualização 2026-11-01 (decisões 321 a 324: revisão dos cortes e unidade 1)
+
+- **Revisão dos cortes aplicada** (323; lista em `dados/revisao-dos-cortes.md`): **23 palavras voltam a cartão**, cada uma na sua unidade, com chave nova. A1: *les grands-parents,
+  marié / mariée* ("Apresentar a família"); *beau / belle, long, court* ("Descrever a aparência"); *se coucher* ("Dizer as horas e a rotina"); *adorer* ("Gostos e pedidos
+  no café"); *la boisson, le menu* ("Pedir no restaurante"); *en espèces, le portable, le mail* ("Perguntar o preço e pagar"); *le studio, l'immeuble, le jardin, le balcon*
+  ("Tipos de moradia e cômodos"). A2: *bavard, paresseux* ("Descrever o caráter (antes e hoje)"); *en ligne* ("Comprar on-line e reclamar"); *le dentiste* ("Na consulta");
+  *la note* ("Contar a formação"); *la faute* ("Falar do aprendizado de línguas"); *l'écran* ("Internet e redes", no lugar de *le mail*). *le portable* e *le mail* ficam só
+  em frase no A2 ("Telefonar e deixar recado" e "Internet e redes"). *marié / mariée* e *se marier* ("Contar as fases da vida") com dois cartões (regra 14).
+- **Notas**: somem 5 notas de vocabulário do A1 que ficaram vazias ("Mais sobre família", "Mais sobre rotina", "Mais sobre o restaurante", "Mais sobre pagamento e contato",
+  "Outras palavras de moradia"); "Outras palavras de caráter" ganha *sociable, égoïste, ambitieux* (lista de origem, sem *bavard* e *paresseux*); "Outras palavras de países"
+  ("Países e cidades", módulo "Viagem e férias") fecha em *la Chine, l'Argentine, le Japon, le Mexique, les Pays-Bas* (324).
+- **Unidade 1** ("Cumprimentar e se despedir", 321, 322 e 324): *salut / coucou* = "oi / olá" (en "hi / hello"), sem contexto; frase do cartão *pardon* =
+  *Pardon ? Vous pouvez répéter ?* (só exemplo) e *Pardon, madame !* como outra frase da unidade; diálogo formal igual; "Consigo..." do módulo "Apresentar-se" com
+  "reagir (*Et toi ? Et vous ?*)"; notas da 2ª unidade podem repetir sistematizando (regra 9 do `15`); regra das frases essenciais em exercício registrada no rascunho
+  `piloto-m1/A1-1/`, a implementar na função pura do papel das frases.
+- **Totais novos**: A1 com **382 cartões** (**757** A/B), **~153 lições** (+1 em "Pedir no restaurante" e +1 em "Tipos de moradia e cômodos", pela regra do script),
+  **128 notas**, ~31h00 (tempo digitado, sem regra nova, decisão 300). A2 com **433 cartões** (423 novos + 10 publicados; **862** A/B), ~178 lições, 76 notas, ~33h10.
+
 > **Como falar com a dona** (2026-10-23): em toda mensagem a ela, citar o NOME do módulo e da unidade (não só M6.1 ou `A1-15`), explicar termos internos e dar o contexto completo de cada decisão. Vale para o chat e para qualquer agente.

@@ -17,22 +17,24 @@ console.log('== totais do 08 v2 (seção 1 e 3)');
 check('A1: 9 módulos', A1.modulos === 9, A1.modulos);
 check('A1: 57 unidades', A1.unidades === 57, A1.unidades);
 check('A1: 34 vocabulário + 23 gramática', A1.vocabulario === 34 && A1.gramatica === 23, [A1.vocabulario, A1.gramatica]);
-check('A1: 366 cartões (decisões 313 e 314: "Cumprimentar e se despedir" com 16 cartões, era 12)', A1.cartoes === 366, A1.cartoes);
-check('A1: 725 cartões A/B (366 × 2 − 7 de reconhecimento)', A1.ab === 725, A1.ab);
-check('A1: cartões por módulo 66/33/50/49/33/29/35/41/30',
-  JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([66, 33, 50, 49, 33, 29, 35, 41, 30]), A1.porModulo.map(m => m.cartoes));
-check('A1: ~151 lições (M1 24, M2 15, M3 19, M4 21, M5 14, M6 12, M7 17, M8 17, M9 12)',
-  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([24, 15, 19, 21, 14, 12, 17, 17, 12]), A1.porModulo.map(m => m.licoes));
+check('A1: 382 cartões (decisão 323: 16 voltam da revisão dos cortes; era 366)', A1.cartoes === 382, A1.cartoes);
+check('A1: 757 cartões A/B (382 × 2 − 7 de reconhecimento)', A1.ab === 757, A1.ab);
+check('A1: 192 novos + 190 publicados', A1.novos === 192 && A1.publicados === 190, [A1.novos, A1.publicados]);
+check('A1: cartões por módulo 66/38/51/52/36/29/39/41/30',
+  JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([66, 38, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
+check('A1: ~153 lições (M1 24, M2 15, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisão 323: "Pedir no restaurante" e "Tipos de moradia e cômodos" passam de 10 palavras)',
+  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([24, 15, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
 check('A1: ~31h00 de trilha', A1.tempo === 31 * 60, C.formatarTempo(A1.tempo));
 check('A1: "Apresentar-se" fica com o tempo digitado ~3h55 (decisão 270; 16 cartões na A1-1 não mudam a regra, decisões 300 e 308)', A1.porModulo[0].tempo === 3 * 60 + 55, C.formatarTempo(A1.porModulo[0].tempo));
-check('A1: 133 notas (decisões 311 a 314: "Cumprimentar e se despedir" continua com 9; saem bise, letras mudas e Bienvenue, entram 3)', A1.notas === 133, A1.notas);
+check('A1: 128 notas (decisão 323: saem 5 notas de vocabulário que ficaram vazias; era 133)', A1.notas === 128, A1.notas);
 check('A2: 10 módulos', A2.modulos === 10, A2.modulos);
 check('A2: 58 unidades (36 vocabulário + 22 gramática)', A2.unidades === 58 && A2.vocabulario === 36 && A2.gramatica === 22, [A2.unidades, A2.vocabulario, A2.gramatica]);
-check('A2: 428 cartões', A2.cartoes === 428, A2.cartoes);
-check('A2: 418 novos + 10 publicados', A2.novos === 418 && A2.publicados === 10, [A2.novos, A2.publicados]);
-check('A2: 852 cartões A/B', A2.ab === 852, A2.ab);
-check('A2: cartões por módulo 47/36/34/47/36/36/48/48/48/48',
-  JSON.stringify(A2.porModulo.map(m => m.cartoes)) === JSON.stringify([47, 36, 34, 47, 36, 36, 48, 48, 48, 48]), A2.porModulo.map(m => m.cartoes));
+check('A2: 433 cartões (decisão 323: +7 que voltam, −2 que passam ao A1; era 428)', A2.cartoes === 433, A2.cartoes);
+check('A2: 423 novos + 10 publicados', A2.novos === 423 && A2.publicados === 10, [A2.novos, A2.publicados]);
+check('A2: 862 cartões A/B', A2.ab === 862, A2.ab);
+check('A2: cartões por módulo 49/36/35/48/36/38/48/48/47/48',
+  JSON.stringify(A2.porModulo.map(m => m.cartoes)) === JSON.stringify([49, 36, 35, 48, 36, 38, 48, 48, 47, 48]), A2.porModulo.map(m => m.cartoes));
+check('A2: ~178 lições (sem mudança pela decisão 323)', A2.licoes === 178, A2.licoes);
 check('A2: ~33h10 de trilha pela regra do 08 (40 min por vocabulário, 25 por gramática)', A2.tempo === 33 * 60 + 10, C.formatarTempo(A2.tempo));
 check('A2: tempos por módulo do 08 = regra', A2.porModulo.every((m, i) => m.tempo === mapa.niveis[1].modulos[i].tempo_08_min),
   A2.porModulo.map(m => C.formatarTempo(m.tempo)));
@@ -60,6 +62,31 @@ console.log('== "Cumprimentar e se despedir" (A1-1), unidade polida pela dona (d
   check('saem bise, letras mudas e Bienvenue (decisões 291 e 311)', !titulos.some(t => /bise|mudas|Bienvenue/i.test(t)));
   check('toda nota tem momento e exemplos com tradução', C.notasDaUnidade(u).every(n => n.momento && C.palavrasDaNota(n).length > 0));
   check('conferência das lições declaradas: sem problema', C.conferirLicoesDaUnidade(mapa).length === 0, C.conferirLicoesDaUnidade(mapa));
+}
+
+console.log('== revisão dos cortes (decisões 323 e 324)');
+{
+  const idx = C.indicePorId(mapa);
+  const palavras = id => idx[id].unidade.cartoes.map(c => c.palavra);
+  const voltam = { 'A1-4': ['les grands-parents', 'marié / mariée'], 'A1-16': ['beau / belle', 'long', 'court'], 'A1-6': ['se coucher'], 'A1-5': ['adorer'],
+    'A1-25': ['le menu', 'la boisson'], 'A1-28': ['en espèces', 'le portable', 'le mail'], 'A1-17': ['le studio', "l'immeuble", 'le jardin', 'le balcon'],
+    'A2-35': ['bavard', 'paresseux'], 'A2-8': ['en ligne'], 'A2-10': ['le dentiste'], 'A2-16': ['la note'], 'A2-17': ['la faute'], 'A2-30': ["l'écran"] };
+  const cartoes = Object.entries(voltam).flatMap(([id, ps]) => ps.map(p => idx[id].unidade.cartoes.find(c => c.palavra === p)));
+  check('as 23 palavras voltam a cartão, cada uma na sua unidade, com chave "nova"', cartoes.length === 23 && cartoes.every(c => c && c.chave === 'nova' && c.origem === 'novo'),
+    Object.entries(voltam).flatMap(([id, ps]) => ps.filter(p => !palavras(id).includes(p)).map(p => id + ':' + p)));
+  check('le portable e le mail só no A1 ("Telefonar e deixar recado" e "Internet e redes" sem os dois)',
+    !palavras('A2-27').includes('le portable') && !palavras('A2-30').includes('le mail'));
+  check('se marier continua cartão de "Contar as fases da vida" (dois cartões com marié / mariée)', palavras('A2-3').includes('se marier'));
+  const vocab = C.unidadesEmOrdem(mapa).flatMap(it => (it.unidade.notas || []).filter(n => n.tipo === 'Vocab').map(n => ({ u: it.unidade.id, n })));
+  check('nenhuma nota de vocabulário vazia nem com palavra que virou cartão', vocab.every(({ u, n }) => (n.palavras || []).length > 0 &&
+    !(n.palavras || []).some(p => palavras(u).includes(p))), vocab.filter(({ u, n }) => !(n.palavras || []).length || n.palavras.some(p => palavras(u).includes(p))).map(x => x.n.titulo));
+  check('saem as 5 notas que ficaram vazias', !vocab.some(({ n }) => ['Mais sobre família', 'Mais sobre rotina', 'Mais sobre o restaurante',
+    'Mais sobre pagamento e contato', 'Outras palavras de moradia'].includes(n.titulo)));
+  const carater = vocab.find(({ u, n }) => u === 'A2-35' && n.titulo === 'Outras palavras de caráter');
+  check('"Outras palavras de caráter" com a lista de origem, sem bavard e paresseux', carater && JSON.stringify(carater.n.palavras) === '["sociable","égoïste","ambitieux"]');
+  const paises = vocab.find(({ u, n }) => u === 'A1-31' && n.titulo === 'Outras palavras de países');
+  check('"Outras palavras de países" fechada (decisão 324)', paises && JSON.stringify(paises.n.palavras) === JSON.stringify(['la Chine', "l'Argentine", 'le Japon', 'le Mexique', 'les Pays-Bas']));
+  check('nenhuma unidade passa do aviso de ~18 cartões', C.sinaisUnidadeGrande(mapa).length === 0, C.sinaisUnidadeGrande(mapa));
 }
 
 console.log('== reconhecimento só (decisões 218 e 255; regra 12)');

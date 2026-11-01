@@ -7,13 +7,15 @@ decisão estão marcados **(para a dona)**.
 
 ## 1. O que bate com o 08
 
-- A1: 9 módulos, 57 unidades (34 + 23), 366 cartões, 725 A/B, cartões por módulo 66/33/50/49/33/29/35/41/30, ~151 lições
-  (24/15/19/21/14/12/17/17/12), 133 notas, ~31h00 (depois das decisões 311 a 314, 2026-10-29: "Cumprimentar e se despedir" com 16 cartões; antes 362, 717,
+- A1: 9 módulos, 57 unidades (34 + 23), 382 cartões, 757 A/B, cartões por módulo 66/38/51/52/36/29/39/41/30, ~153 lições
+  (24/15/19/22/14/12/18/17/12), 128 notas, ~31h00 (depois do pedido de mudança das decisões 321 a 324, 2026-11-01: 16 cartões voltam da revisão dos cortes;
+  antes 366, 725, 66/33/50/49/33/29/35/41/30, ~151 e 133, depois das decisões 311 a 314, 2026-10-29: "Cumprimentar e se despedir" com 16 cartões; antes 362, 717,
   62 no M1; antes do pedido de mudança das decisões 267 a 279, 360, 713, ~150, 132 e ~30h40).
-- A2: 10 módulos, 58 unidades (36 + 22), 428 cartões (418 novos + 10 publicados), 852 A/B, cartões por módulo 47/36/34/47/36/36/48/48/48/48,
+- A2: 10 módulos, 58 unidades (36 + 22), 433 cartões (423 novos + 10 publicados), 862 A/B, cartões por módulo 49/36/35/48/36/38/48/48/47/48
+  (decisão 323: +7 que voltam, −2 que passam ao A1; antes 428, 418 + 10, 852 e 47/36/34/47/36/36/48/48/48/48),
   ~33h10 (a regra "40 min por unidade de vocabulário, 25 por gramática" reproduz os 10 tempos do 08), ~76 notas (77 com *le château*).
 - Os 204 cartões de palavra publicados estão todos no mapa (200 como chave + 4 fundidos); as 30 unidades publicadas também.
-- Regra 14 (nenhuma palavra é cartão em duas unidades), regra 13 (até 12, fora os conjuntos fechados e "Cumprimentar e se despedir", liberada pela decisão 308), regra 12 (versão grátis antes de cada
+- Regra 14 (nenhuma palavra é cartão em duas unidades), regra 13 (de 3 a 5 cartões por lição nas unidades desenhadas lição por lição, decisão 319; nenhuma unidade passa do aviso de ~18), regra 12 (versão grátis antes de cada
   gramática), regra 16 (até 3h55 para todos os módulos, sem exceção, decisão 270) e títulos das notas de vocabulário (decisão 246): sem problema.
 
 ## 2. Divergências e ambiguidades
@@ -65,13 +67,13 @@ decisão estão marcados **(para a dona)**.
 12. **`id_funcao` das gramáticas (para a dona / grade comum).** Gerado em kebab-case do nome, como pedido; nas gramáticas ele carrega palavras do
     francês (`gramatica-etre-e-avoir`, `gramatica-faire-e-prendre`, `gramatica-savoir-x-connaitre`), o que não é independente do idioma
     (decisão 238). O nome do slot gramatical da grade comum ainda não foi definido.
-13. **Confiança não registrada.** Ficaram `n/r` porque o 08 não dá a confiança: as notas de vocabulário "Mais sobre pagamento e contato",
-    "Outras palavras de moradia", "Outras palavras de países" e "Outras palavras de caráter"; as notas *nova* com gancho de "Apresentar a família"
+13. **Confiança não registrada.** Ficaram `n/r` porque o 08 não dá a confiança: a nota de vocabulário "Outras palavras de caráter" ("Mais sobre pagamento e contato" e
+    "Outras palavras de moradia" saíram pela decisão 323; "Outras palavras de países" ficou com confiança alta ao fechar a lista, decisão 324); as notas *nova* com gancho de "Apresentar a família"
     (artigos, *son / sa*, *pas de*), "Dizer de onde é e onde mora" (*est-ce que*), "Dizer as horas e a rotina" (pronúncia de *travailler*, *se*),
     "Frequência" (*ne... jamais*), "Perguntar e indicar o caminho" (*Tourne / Tournez*), "Lugares da cidade" (*au*), "Férias e hotel" (*Je vais réserver*),
     "Falar de lazer" (*Tu veux sortir ?*), "Contar o que você fez" (*Tu as mangé ?*), a do *ne... pas* de "Dizer o nome e a nacionalidade" e as 20
     versões grátis do A2 do item 7, mais as notas propostas de *rien* e *personne*.
-14. **Notas de vocabulário com lista aberta.** "Outras palavras de países" diz "*le Japon*..." e "Outras palavras de caráter" não lista palavras
+14. **[RESOLVIDO pelas decisões 323 e 324: "Outras palavras de caráter" com *sociable, égoïste, ambitieux*; "Outras palavras de países" com *la Chine, l'Argentine, le Japon, le Mexique, les Pays-Bas*] Notas de vocabulário com lista aberta.** "Outras palavras de países" diz "*le Japon*..." e "Outras palavras de caráter" não lista palavras
     ("o que passar de 12"). O json guarda só o que o 08 escreve.
 15. ***l'euro* (para a dona).** A exceção (decisão 209) é registrada no 08 nas linhas de "Perguntar o preço e pagar" e "Comprar roupas", mas as falas
     publicadas *Voilà, ça fait cinq euros.* (`A1-5-d4`, "Gostos e pedidos no café", antes) e *Ça coûte deux euros.* (`A1-14-d3`, "Pegar transporte")
@@ -104,8 +106,22 @@ decisão estão marcados **(para a dona)**.
     - **Lições**: a tarefa previa "+1 lição", mas a unidade já tinha 4 lições + Revisão desde a decisão 270 (12 palavras); com 16 continua com 4 + Revisão, e o A1 fica em ~151.
     - **Tempo (para a dona)**: o "Apresentar-se" fica com o número digitado, 3h55 (decisões 300 e 308). Pela regra antiga de diferença (+5 min por palavra), os 4 cartões
       a mais dariam +20 min (4h15, acima do teto de 3h55 da regra 16). O teto só passa porque o tempo é digitado; quando a regra 16 for revista, este é o primeiro caso.
-24. **Sobreposição com "Dizer o nome e a nacionalidade" (A1-2) (para a dona / auditor).** A nota "*Moi, je m'appelle Ana. Et toi ? Et vous ?*: *moi, toi, vous* são
+24. **[RESOLVIDO pela decisão 321, A4: a nota da 2ª unidade pode repetir sistematizando o que o cartão mostrou; regra 9 do `15`] Sobreposição com "Dizer o nome e a nacionalidade" (A1-2) (para a dona / auditor).** A nota "*Moi, je m'appelle Ana. Et toi ? Et vous ?*: *moi, toi, vous* são
     tônicos" agora vem depois do cartão *et toi ? / et vous ?* (A1-1). Não fere a regra 14 (nota não é cartão), mas o texto da nota pode partir do cartão já
     visto. Também: *je* e *tu* são cartões da A1-2, e a A1-1 já usa *je vais bien* e *tu vas bien ?* como expressões (fórmula, sem cartão próprio de *je* ou *tu*).
 25. **Versão grátis do verbo *aller* (`A1-g13`).** *je vais bien* e *tu vas bien ? / vous allez bien ?* passam a ser uma menção breve de *aller* já na A1-1
     (decisão 285). O `versao_gratis_em` da gramática continua com "Dizer as horas e a rotina"; não mexi (fora do pedido).
+26. **Pedido de mudança 321 a 324 (2026-11-01): revisão dos cortes e unidade 1.** As 23 palavras da decisão 323 entraram como cartão com chave `nova` (campo
+    `decisao: 323`), na posição mais natural dentro da unidade (ex.: *les grands-parents* depois de *les parents*, *se coucher* depois de *se lever*); a ordem é
+    proposta, porque essas unidades ainda não têm `licao` por cartão. Pontos para registro:
+    - **Lições**: só "Pedir no restaurante" (10 → 12) e "Tipos de moradia e cômodos" (10 → 14) mudam de número de lições pela regra do script
+      (`palavrasAte3Licoes`: até 10 palavras, 3 lições + Revisão; acima, 4 + Revisão), de 4 para 5 com a Revisão. As outras já tinham mais de 10 palavras.
+      A revisão dos cortes sugeria que "Perguntar o preço e pagar" e "Tipos de moradia e cômodos" poderiam caber em 3 lições de 4 a 5; pela regra do script
+      ficam com 4. A regra 13 nova (3 a 5 por lição) só é conferida pelo código quando a unidade tiver `licao` em cada cartão.
+    - **Tempo (para a dona)**: o tempo do A1 continua digitado (decisão 300): os 16 cartões a mais não mudam nenhum `tempo_08_min`. Pela regra antiga de diferença
+      (+5 min por palavra, +10 min pela 4ª lição) seriam ~+1h40 no A1; "Comer e beber" (3h50) e "Casa e moradia" (3h00) passariam a ~4h15 e ~3h30. No A2, a regra de
+      40 min por unidade de vocabulário foi feita para "até 12 palavras" e não olha o número de cartões: as unidades com 13 ou 14 continuam com 40 min.
+    - **Notas que saíram** com campos de ligação: "Mais sobre rotina" tinha `versao_gratis_de: A1-g18`; a ligação de verdade fica em `versao_gratis_em` da gramática
+      (decisão 260) e a nota *je me réveille, tu te réveilles* continua na unidade. A nota *courriel* / *arobase* passou a ter gancho no cartão *le mail*.
+    - **Conteúdo publicado** (não mexido, fica para a implementação): o ditado `d6-p2` (*J'adore*) deixa de precisar de troca, porque *adorer* agora é cartão antes
+      do módulo do ditado; a fala publicada com *le balcon* ("Tipos de moradia e cômodos") passa a ter cartão.

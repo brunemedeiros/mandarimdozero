@@ -1,7 +1,7 @@
 {
   "_doc": "Exceções aceitas pela dona às regras do currículo (decisão 232; regras 11, 13 e 14 do docs/i18n/curriculo/15-regras-do-curriculo.md). Entrada nova só com o OK da dona; o auditor-curricular e fr/scripts/curriculo_mapa.js leem daqui. 'unidades' = ids estáveis onde a exceção vale; 'cartao_em' = lista de cartões onde a palavra é ensinada depois (vazia = nunca vira cartão); 'chaves' = chaves das frases ou falas publicadas em fr/content.js (só referência). Tipos: expressao_fixa, uso_comum (adjetivo ou expressão de uso comum, regra 11), formula_de_dialogo (decisão 250), dialogo_como_entrada (decisão 198).",
   "idioma": "fr",
-  "versao": "2026-10-29",
+  "versao": "2026-11-01",
   "palavras_antes_do_cartao": [
     {
       "expressao": "pour la santé",
@@ -326,12 +326,14 @@
   "unidades_acima_do_limite": [
     {
       "unidade": "A1-1",
-      "motivo": "conjunto aberto com 16 cartões definidos pela dona; o limite da regra 13 está em revisão e nenhum limite novo é proposto até a revisão dos cortes",
+      "motivo": "conjunto aberto com 16 cartões definidos pela dona (4, 4, 5 e 3 por lição); a regra 13 nova (decisão 319) não tem limite por unidade e a revisão dos cortes foi aplicada (decisão 323), então a entrada é só histórico",
       "decisoes": [
         294,
         308,
         313,
-        314
+        314,
+        319,
+        323
       ]
     },
     {
@@ -357,5 +359,5 @@
     }
   ],
   "regra14_repeticoes_aceitas": [],
-  "_doc_unidades_acima_do_limite": "Histórico: a regra 13 deixou de ser limite por unidade (decisão 319); a lista não é mais conferida como liberação, só registra os conjuntos grandes."
+  "_doc_unidades_acima_do_limite": "Histórico: a regra 13 deixou de ser limite por unidade (decisão 319); a lista não é mais conferida como liberação, só registra os conjuntos grandes. A revisão dos cortes (decisão 323) devolveu 23 palavras a cartão sem precisar de entrada nova aqui: nenhuma unidade passa do aviso de ~18 cartões."
 }

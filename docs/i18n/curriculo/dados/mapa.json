@@ -1,7 +1,7 @@
 {
-  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedidos de mudança aplicados: decisões 267 a 279 (campo opcional \"licao\" por cartão, decisão 274) e 311 a 320 (A1-1 polida pela dona: 16 cartões, 4 lições com id e título em \"licoes\", 9 notas com \"momento\" e \"exemplos\", 2 diálogos com \"licao\": o informal no fim da lição 2 e o formal no fim da lição 4). As palavras de uma nota saem dos exemplos com tradução (palavrasDaNota em fr/scripts/curriculo_mapa.js, decisão 274); \"palavras\" digitado só nas notas antigas de vocabulário. Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
+  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedidos de mudança aplicados: decisões 267 a 279 (campo opcional \"licao\" por cartão, decisão 274) e 311 a 324 (321 a 324: 23 cartões voltam da revisão dos cortes, docs/i18n/curriculo/dados/revisao-dos-cortes.md; le portable e le mail passam ao A1; A1-1 polida pela dona: 16 cartões, 4 lições com id e título em \"licoes\", 9 notas com \"momento\" e \"exemplos\", 2 diálogos com \"licao\": o informal no fim da lição 2 e o formal no fim da lição 4). As palavras de uma nota saem dos exemplos com tradução (palavrasDaNota em fr/scripts/curriculo_mapa.js, decisão 274); \"palavras\" digitado só nas notas antigas de vocabulário. Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
   "idioma": "fr",
-  "versao": "2026-10-31",
+  "versao": "2026-11-01",
   "fonte": "docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md",
   "niveis": [
     {
@@ -12,7 +12,7 @@
           "id": "A1-m1",
           "nome": "Apresentar-se",
           "ordem": 1,
-          "consigo": "cumprimentar e despedir-se escolhendo tu ou vous; dizer nome, sobrenome e nacionalidade no masculino e no feminino; soletrar o meu nome; dizer a idade (1 a 69) e perguntar a do outro; dizer a profissão sem artigo; reagir (Et toi ? Moi aussi.) e pedir para repetir",
+          "consigo": "cumprimentar e despedir-se escolhendo tu ou vous; dizer nome, sobrenome e nacionalidade no masculino e no feminino; soletrar o meu nome; dizer a idade (1 a 69) e perguntar a do outro; dizer a profissão sem artigo; reagir (Et toi ? Et vous ?) e pedir para repetir",
           "tempo_08_min": 235,
           "unidades": [
             {
@@ -33,7 +33,10 @@
                 315,
                 316,
                 319,
-                320
+                320,
+                321,
+                322,
+                324
               ],
               "licoes": [
                 {
@@ -897,6 +900,12 @@
                   "origem": "publicado"
                 },
                 {
+                  "palavra": "les grands-parents",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "le fils",
                   "chave": "A1-4-v6",
                   "origem": "publicado"
@@ -917,23 +926,18 @@
                   "origem": "publicado"
                 },
                 {
+                  "palavra": "marié / mariée",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "l'enfant",
                   "chave": "nova",
                   "origem": "novo"
                 }
               ],
               "notas": [
-                {
-                  "titulo": "Mais sobre família",
-                  "tipo": "Vocab",
-                  "confianca": "alta",
-                  "nova": true,
-                  "palavras": [
-                    "les grands-parents",
-                    "marié / mariée"
-                  ],
-                  "decisao": 199
-                },
                 {
                   "titulo": "papa, maman",
                   "tipo": "Real",
@@ -1032,6 +1036,12 @@
                   "origem": "publicado"
                 },
                 {
+                  "palavra": "beau / belle",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "brun",
                   "chave": "nova",
                   "origem": "novo"
@@ -1040,6 +1050,18 @@
                   "palavra": "les cheveux",
                   "chave": "nova",
                   "origem": "novo"
+                },
+                {
+                  "palavra": "long",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
+                  "palavra": "court",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
                 },
                 {
                   "palavra": "les yeux",
@@ -1091,14 +1113,11 @@
                     "laid",
                     "châtain",
                     "roux",
-                    "long",
-                    "court",
                     "bouclé",
                     "raide",
-                    "la barbe",
-                    "beau / belle"
+                    "la barbe"
                   ],
-                  "decisao": 149
+                  "decisao": 323
                 }
               ]
             },
@@ -1311,6 +1330,12 @@
                   "origem": "publicado"
                 },
                 {
+                  "palavra": "se coucher",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "travailler",
                   "chave": "A1-6-v7",
                   "origem": "publicado"
@@ -1337,19 +1362,6 @@
                 }
               ],
               "notas": [
-                {
-                  "titulo": "Mais sobre rotina",
-                  "tipo": "Vocab",
-                  "confianca": "alta",
-                  "nova": true,
-                  "palavras": [
-                    "se coucher"
-                  ],
-                  "decisao": 197,
-                  "versao_gratis_de": [
-                    "A1-g18"
-                  ]
-                },
                 {
                   "titulo": "horas com être",
                   "tipo": "Exp",
@@ -1868,6 +1880,12 @@
                   "origem": "novo"
                 },
                 {
+                  "palavra": "adorer",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "préférer",
                   "chave": "nova",
                   "origem": "novo"
@@ -1885,10 +1903,9 @@
                   "confianca": "alta",
                   "nova": true,
                   "palavras": [
-                    "adorer",
                     "aimer bien"
                   ],
-                  "decisao": 197
+                  "decisao": 323
                 },
                 {
                   "titulo": "J'aime le café x je bois du café",
@@ -2136,6 +2153,12 @@
                   "origem": "novo"
                 },
                 {
+                  "palavra": "le menu",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "l'entrée",
                   "chave": "nova",
                   "origem": "novo"
@@ -2156,6 +2179,12 @@
                   "origem": "novo"
                 },
                 {
+                  "palavra": "la boisson",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "l'addition",
                   "chave": "nova",
                   "origem": "novo"
@@ -2167,16 +2196,6 @@
                 }
               ],
               "notas": [
-                {
-                  "titulo": "Mais sobre o restaurante",
-                  "tipo": "Vocab",
-                  "confianca": "alta",
-                  "nova": true,
-                  "palavras": [
-                    "la boisson"
-                  ],
-                  "decisao": 197
-                },
                 {
                   "titulo": "déjeuner / dîner / souper na Bélgica, Suíça e Quebec",
                   "tipo": "Real",
@@ -2286,9 +2305,27 @@
                   "origem": "novo"
                 },
                 {
+                  "palavra": "en espèces",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "le numéro de téléphone",
                   "chave": "nova",
                   "origem": "novo"
+                },
+                {
+                  "palavra": "le portable",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
+                  "palavra": "le mail",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
                 }
               ],
               "notas": [
@@ -2313,7 +2350,7 @@
                   "confianca": "alta",
                   "nova": true,
                   "variante": "regional",
-                  "gancho": "depois da nota \"Mais sobre pagamento e contato\""
+                  "gancho": "le mail"
                 },
                 {
                   "titulo": "combien, também Ça coûte combien ?",
@@ -2331,18 +2368,6 @@
                   "versao_gratis_de": [
                     "A1-g10"
                   ]
-                },
-                {
-                  "titulo": "Mais sobre pagamento e contato",
-                  "tipo": "Vocab",
-                  "confianca": "n/r",
-                  "nova": true,
-                  "palavras": [
-                    "en espèces",
-                    "le portable",
-                    "le mail"
-                  ],
-                  "decisao": 205
                 }
               ]
             },
@@ -2973,6 +2998,18 @@
                   "origem": "publicado"
                 },
                 {
+                  "palavra": "le studio",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
+                  "palavra": "l'immeuble",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "la chambre",
                   "chave": "A1-17-v2",
                   "origem": "publicado"
@@ -3001,6 +3038,18 @@
                   "palavra": "l'adresse",
                   "chave": "nova",
                   "origem": "novo"
+                },
+                {
+                  "palavra": "le jardin",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
+                  "palavra": "le balcon",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
                 },
                 {
                   "palavra": "il y a",
@@ -3057,19 +3106,6 @@
                   "tipo": "Exp",
                   "confianca": "n/r",
                   "nova": true
-                },
-                {
-                  "titulo": "Outras palavras de moradia",
-                  "tipo": "Vocab",
-                  "confianca": "n/r",
-                  "nova": true,
-                  "palavras": [
-                    "le studio",
-                    "l'immeuble",
-                    "le jardin",
-                    "le balcon"
-                  ],
-                  "decisao": 251
                 }
               ]
             },
@@ -3392,12 +3428,17 @@
                 {
                   "titulo": "Outras palavras de países",
                   "tipo": "Vocab",
-                  "confianca": "n/r",
+                  "confianca": "alta",
                   "nova": true,
                   "palavras": [
-                    "le Japon"
+                    "la Chine",
+                    "l'Argentine",
+                    "le Japon",
+                    "le Mexique",
+                    "les Pays-Bas"
                   ],
-                  "observacao": "o 08 lista \"le Japon...\" (lista aberta)"
+                  "observacao": "lista fechada para servir à \"Gramática: preposições com cidades e países\": le Mexique termina em -e e é masculino (exceção); les Pays-Bas é plural, com aux",
+                  "decisao": 324
                 }
               ]
             },
@@ -4270,6 +4311,12 @@
                   "origem": "novo"
                 },
                 {
+                  "palavra": "bavard",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "courageux",
                   "chave": "nova",
                   "origem": "novo"
@@ -4278,6 +4325,12 @@
                   "palavra": "patient",
                   "chave": "nova",
                   "origem": "novo"
+                },
+                {
+                  "palavra": "paresseux",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
                 },
                 {
                   "palavra": "drôle",
@@ -4322,8 +4375,13 @@
                   "tipo": "Vocab",
                   "confianca": "n/r",
                   "nova": true,
-                  "decisao": 139,
-                  "observacao": "palavras: o que passar de 12 (lista não definida no 08)"
+                  "decisao": 323,
+                  "observacao": "lista de origem (08-revisao-por-funcao-comunicativa.md, seção 3.4), sem as palavras que já são cartão e sem bavard e paresseux, que voltaram a cartão (decisão 323)",
+                  "palavras": [
+                    "sociable",
+                    "égoïste",
+                    "ambitieux"
+                  ]
                 }
               ]
             },
@@ -4859,6 +4917,12 @@
               "origem": "nova",
               "cartoes": [
                 {
+                  "palavra": "en ligne",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "la livraison",
                   "chave": "nova",
                   "origem": "novo"
@@ -5198,6 +5262,12 @@
                   "palavra": "le rendez-vous",
                   "chave": "nova",
                   "origem": "novo"
+                },
+                {
+                  "palavra": "le dentiste",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
                 },
                 {
                   "palavra": "l'ordonnance",
@@ -5853,6 +5923,12 @@
                   "origem": "novo"
                 },
                 {
+                  "palavra": "la note",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "réussir",
                   "chave": "nova",
                   "origem": "novo"
@@ -5974,6 +6050,12 @@
                   "origem": "novo"
                 },
                 {
+                  "palavra": "la faute",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 323
+                },
+                {
                   "palavra": "bilingue",
                   "chave": "nova",
                   "origem": "novo"
@@ -6015,10 +6097,9 @@
                   "confianca": "alta",
                   "nova": true,
                   "palavras": [
-                    "l'échange",
-                    "la faute"
+                    "l'échange"
                   ],
-                  "decisao": 248
+                  "decisao": 323
                 },
                 {
                   "titulo": "Je sais parler anglais / Je connais Paris",
@@ -6926,11 +7007,6 @@
               "origem": "nova",
               "cartoes": [
                 {
-                  "palavra": "le portable",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
                   "palavra": "rappeler",
                   "chave": "nova",
                   "origem": "novo"
@@ -7271,9 +7347,10 @@
                   "origem": "novo"
                 },
                 {
-                  "palavra": "le mail",
+                  "palavra": "l'écran",
                   "chave": "nova",
-                  "origem": "novo"
+                  "origem": "novo",
+                  "decisao": 323
                 },
                 {
                   "palavra": "l'ordinateur",
