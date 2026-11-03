@@ -571,4 +571,4 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 
 - `shared/supabase_migrations/126_etapa7_aviso_para_hoje.sql`: só UPDATE de `notification_templates.body` (ids 39 e 41 pt, 119 e 120
   en, `review_overdue`), condicionado ao texto antigo; desfazer no comentário. Detalhes: `docs/i18n/etapa7-vocabulario-auditoria.md` seção 11.
-- Staging: aplicada (2026-11-03; lá só existem 39 e 41). Produção: pendente (só com autorização).
+- Staging: aplicada (2026-11-03; lá só existem 39 e 41). Produção: aplicada (2026-11-03, autorizada, versão `20261103224909`); conferido: as 4 linhas com o texto novo.

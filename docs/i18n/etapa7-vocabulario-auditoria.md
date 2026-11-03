@@ -768,7 +768,7 @@ Inglês novo marcado "Etapa 7 (needs_review)", confiança alta.
 **Banco**: migration `126_etapa7_aviso_para_hoje` (só UPDATE de texto, condicionado ao texto antigo; desfazer no comentário):
 `notification_templates` 39 e 41 (pt) "{{dueCount}} palavras estão prontas para uma revisão rápida 📚" → "{{dueCount}} palavras para
 hoje na Revisão 📚"; 119 e 120 (en) "...are ready for a quick review 📚" → "{{dueCount}} words due today in Review 📚". Título fica.
-Staging aplicada (2026-11-03); produção pendente de autorização.
+Staging aplicada (2026-11-03); produção aplicada (2026-11-03, autorizada, versão `20261103224909`).
 
 Testes: i18n unidade 2335/2335, navegador 209/209, sem português no en 6/6, k5 32/32 e 18/18, fase-k6 28/28, k7 40/40, k10 114/114,
 painel-alunos 61/61 e 256/256, marco de revisão 14/14 e 34/34, faixa da professora 51/51.
