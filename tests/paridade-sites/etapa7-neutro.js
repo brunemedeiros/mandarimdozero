@@ -50,6 +50,20 @@ function etapa7(v){
     .split('Shall we do a quick review?').join('Shall we do a short review?')
     .split('Fazer uma revisão rápida').join('Fazer uma revisão de 5 minutos')
     .split('Do a quick review').join('Do a 5-minute review')
-    .replace(/Revise (\d+) cartas? em atraso/g, (m, n) => 'Revise ' + n + plural(n, ' cartão atrasado', ' cartões atrasados'));
+    .replace(/Revise (\d+) cartas? em atraso/g, (m, n) => 'Revise ' + n + plural(n, ' cartão atrasado', ' cartões atrasados'))
+    // Lote 1b (2026-11-03, aprovado pela dona): o produto é "site"; o inglês das Notificações continua "In-app"
+    .split('Muda só os textos do app').join('Muda só os textos do site')
+    .split('usado aqui no app.').join('usado aqui no site.')
+    .split('Notificações no app').join('Notificações no site')
+    .split('Só existe aviso no app para Amigos').join('Só existe aviso no site para Amigos')
+    .split('com o app fechado').join('com o site fechado')
+    .split('Atualizamos o app.').join('Atualizamos o site.')
+    .split('ajudar a melhorar o app!').join('ajudar a melhorar o site!')
+    .split("Changes only the app\\'s text").join("Changes only the site\\'s text")
+    .split("Changes only the app's text").join("Changes only the site's text")
+    .split('as in the app.').join('as on the site.')
+    .split('even when the app is closed').join('even when the site is closed')
+    .split('We updated the app.').join('We updated the site.')
+    .split('helping improve the app!').join('helping improve the site!');
 }
 module.exports = { etapa7 };

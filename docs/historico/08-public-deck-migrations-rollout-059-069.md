@@ -557,3 +557,12 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Testes: SQL local 124 10/10 (`tests/aulas-presenca/run.sh`); navegador `tests/ranking-turma/test_playwright.js` 75/75
   (fr/zh, claro/escuro, 390); amigos 210/210, amigos-dupla 255/255, janelas-topo 276/276, cores-marca 20/20, paridade CSS 5/5,
   i18n 2341/2341, sem português no en 6/6.
+
+## 125 -- Etapa 7, lote 1b: o produto é "site" nas conquistas (2026-11-03, aprovado pela dona)
+
+- `shared/supabase_migrations/125_etapa7_badge_catalog_site.sql`: só UPDATE de texto em `badge_catalog.description`
+  (`ambassador` e `pioneer`: "aplicativo"/"app" → "site"), condicionado ao texto antigo; desfazer no comentário do arquivo.
+  Sem esquema, sem progresso. O site mostra a chave de i18n `badge.catalog.<id>.desc` (trocada no mesmo lote); o banco aparece
+  só em Admin > Badges.
+- Staging: aplicada (2026-11-03, versão `20261103195358`; 0 linhas, as 2 conquistas não existem lá).
+- Produção: aplicada (2026-11-03, autorizada, versão `20261103222258`); conferido: as 2 descrições com "site".

@@ -44,7 +44,10 @@ const STUB = `window.supabase={createClient(){return{auth:{getSession:async()=>(
     // lista de níveis das trilhas; o texto de antes continua só na clássica Multitarefa.
     check(`${site}: BADGES pt-BR com os nomes aprovados (${pt.b.length} níveis)`, pt.b.length >= 40 && ['Revisor(a) Aprendiz', 'Uma Semana!', 'Primeiro Passo', 'Mestre da Revisão'].every(n => pt.b.some(x => x[1] === n)), pt.b.slice(0, 3));
     check(`${site}: Multitarefa (clássica) com o texto de antes`, JSON.stringify(pt.b.find(x => x[0] === 'multitasker')) === JSON.stringify(before.b.find(x => x[0] === 'multitasker')));
-    check(`${site}: SPECIAL_BADGES pt-BR idêntico`, JSON.stringify(pt.s) === JSON.stringify(before.s));
+    // Etapa 7 lote 1b (2026-11-03, aprovado pela dona): o produto é "site" (antes "plataforma"/"app").
+    const LOTE1B = [['Criadora da plataforma', 'Criadora do site'], ['Ajudou a testar o app antes', 'Ajudou a testar o site antes']];
+    const beforeS = LOTE1B.reduce((acc, [a, c]) => acc.split(a).join(c), JSON.stringify(before.s));
+    check(`${site}: SPECIAL_BADGES pt-BR idêntico (com o lote 1b da Etapa 7)`, JSON.stringify(pt.s) === beforeS);
     check(`${site}: em inglês, nomes mudam e nenhum vira chave`, en.b.length === pt.b.length && en.b.every((x, i) => x[1] !== pt.b[i][1]) && en.b.every(x => !x[1].startsWith('badge.') && !x[2].startsWith('badge.')));
     check(`${site}: Fundadora/Beta em inglês`, en.s[0][1] === 'Founder' && en.s[1][2].startsWith('Helped test'));
     check(`${site}: catálogo traduzido e fallback pro banco`, en.cat && en.cat[0] === "Prof. Brune's student" && en.cat[1] === 'Texto do banco');
