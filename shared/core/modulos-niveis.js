@@ -208,7 +208,7 @@ function mapUnitDescribe(u, moduleId){
     lines.push(tp('trail.lessonsCompleted', u.lessons.length === 1 ? 1 : 2, { done, total: u.lessons.length }));
   }
   const { dueForReview } = unitCardCounts(u.id);
-  if (dueForReview > 0) lines.push(t('trail.map.unit.toReview', { n: dueForReview }));
+  if (dueForReview > 0) lines.push(tp('trail.map.unit.toReview', dueForReview));
   const actions = [];
   if (st === 'locked'){
     lines.push(t('trail.map.unit.lockedHint'));

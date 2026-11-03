@@ -632,7 +632,7 @@ function currentStepDefs(unit){
   if (isGrammarUnit(u)) return getStepDefsGrammar();
   if (isLessonUnit(u)){
     const lesson = currentLesson(u);
-    if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: t('trail.checkpoint.title') }];
+    if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: t('trail.unitReview.title') }];
     const steps = [];
     if (lesson.vocabIdx && lesson.vocabIdx.length) steps.push({ key: 'vocab', label: t('fr.step.vocab') });
     if (lesson.includesDialogue){
