@@ -18,3 +18,12 @@ Estado: rascunho em andamento (ver arquivos desta pasta).
 - `expr-003`: `poser de lapin` está certo (depois de "ne ... pas", "un" vira "de"); sugestão pendente: aceitar também `poser un lapin` (`microActivity.alsoAccept`).
 - Pendências para a autora aprovar (dados em produção): register de `s'en foutre` (slang -> vulgar) e o aviso embutido no `meaning.pt`; `expr-lote1-014` ainda tem "pra baixo" (a `expr-b2-001` já foi corrigida em outra sessão); `ça vaut le coup` (familiar -> neutral?) e `se casser` (slang -> familiar?).
 - SQL: `aplicar-opcoes.sql` (122 UPDATEs, inclui `questionMode` em 23; testado em Postgres local; hash da projeção em `esperado-hash.txt` = `dfad085f0db4c66720ddec68d35de914`).
+
+## Correções aprovadas e gravadas (2026-11-03; Staging e produção, só estas 4 linhas)
+- `poser un lapin` (expr-003): `microActivity.alsoAccept = ["poser un lapin"]` (a resposta certa "poser de lapin" continua valendo).
+- `s'en foutre` (expr-lote1-003): register slang -> **vulgar** + aviso do significado.
+- `ça vaut le coup` (expr-lote3-001): familiar -> **neutral**, sem aviso.
+- `se casser` (expr-lote2-002): slang -> **familiar** + aviso.
+- O inglês dessas 3 (`meaning` em `docs/i18n/challenges-en.json`) foi atualizado no repositório (vale no site quando o PR for mesclado).
+- Ainda aguardam a autora: texto do significado de `avoir le cafard` (expr-lote1-014, hoje "estar na fossa / estar pra baixo"); gravação do lote das opções (Staging primeiro).
+- Regra de comunicação com a autora: ela não reconhece os códigos expr-...; sempre citar a expressão em francês e o sentido junto do código.
