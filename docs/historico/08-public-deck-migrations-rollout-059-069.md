@@ -566,3 +566,9 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   só em Admin > Badges.
 - Staging: aplicada (2026-11-03, versão `20261103195358`; 0 linhas, as 2 conquistas não existem lá).
 - Produção: aplicada (2026-11-03, autorizada, versão `20261103222258`); conferido: as 2 descrições com "site".
+
+## 126 -- Etapa 7, lote "para hoje": aviso da revisão do dia (2026-11-03)
+
+- `shared/supabase_migrations/126_etapa7_aviso_para_hoje.sql`: só UPDATE de `notification_templates.body` (ids 39 e 41 pt, 119 e 120
+  en, `review_overdue`), condicionado ao texto antigo; desfazer no comentário. Detalhes: `docs/i18n/etapa7-vocabulario-auditoria.md` seção 11.
+- Staging: aplicada (2026-11-03; lá só existem 39 e 41). Produção: pendente (só com autorização).
