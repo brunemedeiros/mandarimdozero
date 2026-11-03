@@ -116,6 +116,10 @@ async function scenes(page, visit){
       const DELIB = /expr-|activity-lesson-bar|cg-progress-bar|conj-progress-bar|cg-dontknow|\.cg-choice\|\|\{"position|\.cg-choice\.is-wrong|#conj-practice-wrap \.conj-progress|^:root\|\||\.rb-big\.is-(ok|help|good|bad)\||^\.grade-(again|hard|good|easy)\||^\.xp-suffix\|/;
       const sumiu = [...ca].filter(([k, n]) => (cb.get(k) || 0) < n).map(([k]) => k).filter(k => !DELIB.test(k));
       const keysMoved = new Set(rb.filter(r => /desafios\.css$/.test(r.sheet)).map(key));
+      // Regra de OUTRA tela que outra sessão mexeu depois do refactor (ex.: #view-progress .stat-card) não é o que este teste guarda: só
+      // conta quem tem seletor do desafios.css (ou de Desafios por nome) e mudou ou sumiu. Atualizado em 2026-11-03.
+      const selOf = (k) => k.split('|')[0], selMoved = new Set(rb.filter(r => /desafios\.css$/.test(r.sheet)).map(r => r.sel));
+      for (let i = sumiu.length - 1; i >= 0; i--) if (!selMoved.has(selOf(sumiu[i])) && !/challenge|desafio/i.test(selOf(sumiu[i]))) sumiu.splice(i, 1);
       const apareceu = [...cb].filter(([k, n]) => (ca.get(k) || 0) < n).map(([k]) => k).filter(k => !DELIB.test(k) && keysMoved.has(k));
       check(`${theme} ${width}: mesmas regras (${ra.length})`, !sumiu.length && !apareceu.length, { sumiu: sumiu.slice(0, 5), apareceu: apareceu.slice(0, 5) });
       const moved = rb.filter(r => /desafios\.css$/.test(r.sheet));
