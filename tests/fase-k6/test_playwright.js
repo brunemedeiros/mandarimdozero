@@ -66,10 +66,10 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     L('nada estudado: "fracos" não inclui não iniciados', /2 não iniciados · 0 fracos/.test(t2), t2);
     const t3 = await open(3); L('Reverse+Cloze+Normal: 3 conteúdos, 6 cartões', /Conteúdos criados para este aluno\s*3/.test(t3) && /Cartões gerados\s*6 /.test(t3), t3);
     L('sibling New não rebaixa: 2 estudados de 3; 1 médio 1 forte; Cloze não iniciado', t3.includes('2 de 3') && /1 não iniciados · 0 fracos · 1 médios · 1 fortes/.test(t3), t3);
-    L('N/L/R/Vencidos por cartão: 4 novos, 1 aprendendo, 1 para revisar, 2 vencidos', t3.includes('4 novos') && t3.includes('1 aprendendo') && t3.includes('1 para revisar') && t3.includes('2 vencidos'), t3);
+    L('N/L/R/Vencidos por cartão: 4 novos, 1 aprendendo, 1 para revisar, 2 vencidos', t3.includes('4 novos') && t3.includes('1 aprendendo') && t3.includes('1 em revisão') && t3.includes('2 para hoje'), t3);
     const t4 = await open(4); L('arquivado fora do ativo e mostrado como informativo', /Conteúdos criados para este aluno\s*1\b/.test(t4) && t4.includes('Arquivados') && t4.includes('1 conteúdo') && t4.includes('1 cartão') && /Cartões gerados\s*1 /.test(t4), t4);
     L('relearning conta como aprendendo; força fraca', t4.includes('1 aprendendo') && /1 fracos/.test(t4), t4);
-    const t5 = await open(5); L('Self e Study com mesmo rowId não entram', /Cartões gerados\s*1 /.test(t5) && t5.includes('1 para revisar') && t5.includes('0 vencidos') && !/Study|trilha/i.test(t5), t5);
+    const t5 = await open(5); L('Self e Study com mesmo rowId não entram', /Cartões gerados\s*1 /.test(t5) && t5.includes('1 em revisão') && t5.includes('0 para hoje') && !/Study|trilha/i.test(t5), t5);
     const t6 = await open(6); L('vários estados: 5 conteúdos, 4 estudados, 1 não iniciado', t6.includes('4 de 5') && /1 não iniciados · 1 fracos · 2 médios · 1 fortes/.test(t6), t6);
     L('sem XP/streak no bloco', !/xp|streak|sequência/i.test(t6 + t3));
     L('rótulos: conteúdos x cartões', t6.includes('Conteúdos criados para este aluno') && t6.includes('Cartões gerados'));

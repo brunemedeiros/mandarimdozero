@@ -743,3 +743,32 @@ Configurações está certo no HTML, mas a linha fica escondida enquanto os curs
 ### 10.5 Passos manuais
 
 - Aplicar a 125 na produção (com a dona): colar `shared/supabase_migrations/125_etapa7_badge_catalog_site.sql` ou aplicar pelo MCP.
+
+## 11. Lote "para hoje" (2026-11-03, pedido da dona: "pode seguir com o resto do para hoje")
+
+Segue o vocabulário já aprovado: o que vence hoje é "para hoje" (en "due today"); o estado do cartão é "em revisão" (en "in
+review"), como em Perfil > Progresso. Contagem com número usa "N cartões para revisar hoje", como já aprovado no painel do aluno.
+
+| Chave | pt antes → depois | en antes → depois |
+|---|---|---|
+| `deck.countsFull` (lista de Decks) | "Para revisar: {review} · Devidos: {due}" → "Em revisão: {review} · Para hoje: {due}" | "To review · Due" → "In review · Due today" |
+| `deck.countsDetail` | "{review} para revisar" → "{review} em revisão" (e o singular "1 cartões" → "1 cartão") | "to review" → "in review" |
+| `review.speed.upToDateBody` | "Nenhuma revisão pendente agora." → "Nenhuma revisão para hoje." | "No reviews due right now." → "No reviews due today." |
+| `review.session.pendingOverall` | "{n} cartões pendentes no geral" → "{n} cartões para revisar hoje no total" | "due overall" → "due today in total" |
+| `review.session.classEmptyTitle` | "Nenhum cartão das aulas para revisar agora" → "Nenhum cartão das aulas para hoje" | "No lesson cards due today" |
+| `ui.review.practiceHint` | "mesmo sem revisões pendentes" → "mesmo sem nada para hoje" | "even with nothing due today" |
+| `review.strength.hint` (fim) | "sem nenhuma revisão pendente agora" → "sem nenhuma revisão para hoje" | "due today" |
+| `zh.hanzi.pendingChars` | "{n} caracteres pendentes" → "{n} caracteres para revisar hoje" | "due today" |
+| `trail.moduleReview.reason.due` (+ reserva em `shared/review-milestone.js`) | "{n} vencendo hoje" → "{n} para hoje" | (igual) |
+| Professora: `students.col.due`, `students.ind.due`, `students.ind.dueCount` | "Revisões vencidas" → "Para hoje" | "Reviews due" → "Due today" |
+| Professora: `students.created.cardsValue` | "· {review} para revisar · {due} vencidos" → "· {review} em revisão · {due} para hoje" | "to review · due" → "in review · due today" |
+
+Inglês novo marcado "Etapa 7 (needs_review)", confiança alta.
+
+**Banco**: migration `126_etapa7_aviso_para_hoje` (só UPDATE de texto, condicionado ao texto antigo; desfazer no comentário):
+`notification_templates` 39 e 41 (pt) "{{dueCount}} palavras estão prontas para uma revisão rápida 📚" → "{{dueCount}} palavras para
+hoje na Revisão 📚"; 119 e 120 (en) "...are ready for a quick review 📚" → "{{dueCount}} words due today in Review 📚". Título fica.
+Staging aplicada (2026-11-03); produção aplicada (2026-11-03, autorizada, versão `20261103224909`).
+
+Testes: i18n unidade 2335/2335, navegador 209/209, sem português no en 6/6, k5 32/32 e 18/18, fase-k6 28/28, k7 40/40, k10 114/114,
+painel-alunos 61/61 e 256/256, marco de revisão 14/14 e 34/34, faixa da professora 51/51.
