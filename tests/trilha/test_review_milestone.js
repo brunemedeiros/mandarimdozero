@@ -28,7 +28,7 @@ const sel = c.selectMilestoneCards(mix, { now: NOW });
 t('ordem: erros recentes, vencidos, fracos, novos', sel.cards.map(x => x.id).join() === 'l2,l1,l3,d2,d1,w2,w1,f1', sel.cards.map(x => x.id));
 t('motivos contados por faixa', JSON.stringify(sel.reasons) === JSON.stringify({ learning: 3, due: 2, weak: 2, fresh: 1 }), sel.reasons);
 t('available = tamanho do pool', sel.available === 8);
-t('texto do porquê', c.milestoneReasonText(sel) === '8 itens: 3 com erros recentes, 2 vencendo hoje, 2 com memória mais fraca, 1 novo', c.milestoneReasonText(sel));
+t('texto do porquê', c.milestoneReasonText(sel) === '8 itens: 3 com erros recentes, 2 para hoje, 2 com memória mais fraca, 1 novo', c.milestoneReasonText(sel));
 
 // teto de 20 (e cap configurável); sempre priorizando necessidade
 const many = Array.from({ length: 50 }, (_, i) => card('n' + i, 'U1'))
@@ -43,5 +43,5 @@ t('sem duplicar cartão', new Set(s2.cards.map(x => x.id)).size === 20);
 const e = c.selectMilestoneCards([], { now: NOW });
 t('pool vazio: nada selecionado, texto vazio', e.cards.length === 0 && e.available === 0 && c.milestoneReasonText(e) === '');
 t('estado empty/ready/done', c.milestoneState(0, null) === 'empty' && c.milestoneState(5, null) === 'ready' && c.milestoneState(5, { lastDate: '2026-10-06' }) === 'done' && c.milestoneState(0, { lastDate: 'x' }) === 'empty');
-t('singular', c.milestoneReasonText({ cards: [1], reasons: { learning: 0, due: 1, weak: 0, fresh: 0 } }) === '1 item: 1 vencendo hoje');
+t('singular', c.milestoneReasonText({ cards: [1], reasons: { learning: 0, due: 1, weak: 0, fresh: 0 } }) === '1 item: 1 para hoje');
 console.log(`Fase 5 marco de Revisão: ${ok}/${ok + bad} verificações — ${bad ? 'FALHOU' : 'OK'}`); process.exit(bad ? 1 : 0);
