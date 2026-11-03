@@ -53,7 +53,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
   const answered = localState.answered;
   const blankHTML = answered
     ? `<span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}" id="cloze-blank">${escapeHTML(view.displayAnswerText)}</span>`
-    : `<span class="cloze-blank" id="cloze-blank">___</span>`;
+    : `<span class="cloze-blank" id="cloze-blank">&nbsp;</span>`;
   const hiddenSentence = renderClozeText(view.rawSentenceText, view.markId, { reveal: false });
   // Texto autorado: escapado ANTES de inserir o HTML da lacuna (escapeHTML
   // não altera '___').
