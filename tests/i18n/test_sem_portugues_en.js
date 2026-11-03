@@ -447,10 +447,21 @@ async function run(browser, port, app){
           const root = document.getElementById('challenge-player-wrap') || document.body;
           root.querySelectorAll('.cloze-grammar-group').forEach(g => { const b = g.querySelector('.cloze-option'); if (b && b.offsetParent) b.click(); });
           const rv = root.querySelector('.challenge-reveal-overlay-btn'); if (rv && rv.offsetParent) rv.click(); const opt = root.querySelector('.challenge-choice-btn'); if (opt) opt.click();
+          // Expressões em passos (2026-10-26): "Ver opções" e uma opção (as telas seguintes são visitadas logo abaixo)
+          const so = root.querySelector('#expr-see-options-btn'); if (so && so.offsetParent) so.click(); const eo = root.querySelector('.exercise-option'); if (eo && eo.offsetParent) eo.click();
           root.querySelectorAll('textarea, input[type="text"]').forEach(el => { if (el.offsetParent){ el.value = 'test'; el.dispatchEvent(new Event('input', { bubbles: true })); } });
           const btn = [...root.querySelectorAll('button')].find(b => b.offsetParent && /check|verify|submit|confirm|vérifier/i.test(b.textContent));
           if (btn) btn.click();
         }, { wait: 800 });
+        if (type === 'expression'){ // passos novos das Expressões: exemplos, "Sua vez" (vazia e respondida) e tela final
+          const passo = (txt, fn) => S(`Desafios: expression (${id}) ${txt}`, fn, { wait: 500 });
+          await passo('exemplos', () => { const c = document.getElementById('expr-continue-btn'); if (c) c.click(); });
+          await passo('Monte a frase', () => { const c = document.getElementById('expr-continue-btn'); if (c) c.click(); });
+          await passo('Monte a frase respondida', () => { const b = document.getElementById('expr-order-dontknow-btn'); if (b) b.click(); });
+          await passo('Sua vez', () => { const c = document.getElementById('expr-continue-btn'); if (c) c.click(); });
+          await passo('Sua vez respondida', () => { const i = document.getElementById('expr-turn-input'); if (i){ i.value = 'test'; document.getElementById('expr-turn-verify-btn').click(); } });
+          await passo('final', () => { const c = document.getElementById('expr-continue-btn'); if (c) c.click(); });
+        }
       }
     }
     await S('Ditados: lista', () => { switchTab('challenges'); renderDictationList(); }, { wait: 700 });

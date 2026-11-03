@@ -134,8 +134,7 @@
 /* Conjugação, fase 1: barra de progresso, acentos, letras erradas, áudio por forma, revisão no fim. */
 #view-conjugaison .conj-progress{ display:flex; align-items:center; gap:12px; max-width:520px; margin:0 auto 14px; font-variant-numeric:tabular-nums; }
 #view-conjugaison .conj-progress > span:first-child{ white-space:nowrap; }
-#view-conjugaison .conj-progress-bar{ flex:1; height:6px; border-radius:99px; background:var(--paper-line); overflow:hidden; }
-#view-conjugaison .conj-progress-bar > i{ display:block; height:100%; border-radius:99px; background:var(--seal-red); transition:width .3s ease; }
+#conj-practice-wrap .conj-progress{ justify-content:center; }
 #view-conjugaison .conj-verb-nav{ grid-template-columns:minmax(0, 1fr); max-width:520px; margin-left:auto; margin-right:auto; }
 /* Tempos lado a lado (cada um uma coluna vertical); no celular, um embaixo do outro. */
 #view-conjugaison .conj-tense-grid{ grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 480px)); justify-content:center; }
@@ -256,8 +255,6 @@
 #view-conjugaison .cg-title{ font-size:18px; font-weight:800; margin:0 0 10px; color:var(--ink); }
 #view-conjugaison .cg-progress{ display:flex; align-items:center; gap:12px; margin-bottom:18px; font-size:13px; font-weight:700; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
 #view-conjugaison .cg-progress > span{ white-space:nowrap; }
-#view-conjugaison .cg-progress-bar{ flex:1; height:6px; border-radius:99px; background:var(--paper-line); overflow:hidden; }
-#view-conjugaison .cg-progress-bar > i{ display:block; height:100%; border-radius:99px; background:var(--seal-red); transition:width .3s ease; }
 #view-conjugaison .cg-stage{ background:var(--paper); border:1px solid var(--paper-line); border-radius:20px; padding:26px 24px 22px; box-shadow:var(--shadow-card); }
 #view-conjugaison .cg-verb{ display:inline-block; font-size:13.5px; font-weight:700; color:var(--ink-soft); margin-bottom:6px; }
 #view-conjugaison .cg-sentence{ font-size:clamp(21px, 3.2vw, 27px); font-weight:700; line-height:1.5; color:var(--ink); margin:0 0 22px; }
@@ -272,8 +269,12 @@
 #view-conjugaison .cg-choice-form{ font-size:clamp(18px, 2.6vw, 22px); font-weight:900; }
 #view-conjugaison .cg-choice-label{ font-size:12.5px; font-weight:700; color:var(--ink-soft); }
 #view-conjugaison .cg-choice:disabled{ cursor:default; }
+#view-conjugaison .cg-choice{ position:relative; }
+#view-conjugaison .cg-dontknow{ display:block; margin:14px auto 0; }
+#view-conjugaison .cg-dontknow.disabled{ display:none; }
 #view-conjugaison .cg-choice.is-right{ border-color:var(--jade); background:color-mix(in srgb, var(--jade) 12%, var(--paper)); }
-#view-conjugaison .cg-choice.is-wrong{ border-color:var(--error-red); background:color-mix(in srgb, var(--error-red) 9%, var(--paper)); }
+#view-conjugaison .cg-choice.is-wrong{ border-color:var(--error-red); background:color-mix(in srgb, var(--error-red) 9%, var(--paper)); animation:shakeWrong .4s ease; }
+@media (prefers-reduced-motion:reduce){ #view-conjugaison .cg-choice.is-wrong{ animation:none; } }
 #view-conjugaison .cg-choice.is-dim{ opacity:.5; }
 #view-conjugaison .cg-feedback:empty{ display:none; }
 #view-conjugaison .cg-feedback{ margin-top:20px; padding-top:18px; border-top:1px solid var(--paper-line); }

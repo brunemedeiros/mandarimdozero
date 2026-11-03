@@ -2,7 +2,7 @@
 // Gera fr/challenges.<lang>.js (desafios + ditados no idioma do site) a partir de
 // docs/i18n/challenges-<lang>.json e docs/i18n/dictations-<lang>.json.
 // Uso: node scripts/build-challenges-overlay.js [en]
-// Campos por tipo (chave = id do desafio): expression {meaning}; listen_translate {referenceTranslations,
+// Campos por tipo (chave = id do desafio): expression {meaning, example, secondExample (tradução do exemplo), literal, literalNote -- os 4 últimos opcionais}; listen_translate {referenceTranslations,
 // explanation}; accent {explanation}; cloze_grammar {translation (da translationPt), explanation}.
 // Conferência completa contra as fontes: node scripts/validate-challenges-en.js
 const fs = require('fs'), path = require('path');

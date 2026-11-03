@@ -41,6 +41,10 @@ paths:
   Use os helpers (fr: `FamiliaLatina` / `typedAnswerVerdictForExpected`; zh: `acceptedFormsTyped` + `typedVariants`), nunca
   `acceptedForms()` cru. Erro marcado em vermelho: `typedAttemptHTML` (comum, `shared/core/licao-feedback.js`; a forma de comparar de cada idioma vem de `LANG_HOOKS.typedAttemptForm`). O teclado de letras ganha uma fileira com letras que a resposta
   pede e ele não tem (`frAccentPickerHTML(resposta)`). Guarda: `tests/respostas-digitadas/`.
+- **Telas de exercício seguem o molde da trilha** (decisão da autora, 2026-10-23, vale para Jogos, Desafios, Revisão e futuros): o comando
+  fica SEMPRE no idioma do site, em qualquer nível (rótulo pequeno `t('fr.exercise.whatMeans')`, nos Desafios `chT('ch.expr.whatMeans')` com o mesmo texto, acima do cartão com o item; nunca frase em
+  francês vinda do conteúdo); saída pelo X com barra de progresso (não link "← Voltar"); ⚑ e pílula de Atalhos do teclado; respostas com
+  badge numerado 1-4 e seleção digitando o número; "Não sei" abaixo das opções; feedback com Continuar. Auditoria e plano: `docs/historico/`.
 - **Unidade de gramática** (`type:"grammar"`) e **exercício de cenário**: motor comum em `shared/core/gramatica-cenario.js` (CSS em
   `shared/gramatica-cenario.css`); o que muda por idioma vem de `LANG_HOOKS` (`grammarAnswerVerdict`, `scenarioOptionHTML`, `phraseAnswerHTML`...).
   Guarda: `tests/paridade-sites/test_gramatica_cenario*.js`.
@@ -61,6 +65,11 @@ paths:
   `shared/desafios.css`, logo depois do `<style>`); o que é do idioma (família da Acentuação, teclado, tabela, textos que citam o idioma) vai em
   `fr/desafios-config.js` (`registerChallenges`). Nunca copiar para um `app.js`; o zh não carrega (decisão da dona pendente).
   Guarda: `tests/paridade-sites/test_desafios*.js`.
+  **Expressões em passos** (palpite, resposta, "Veja em frases" com "Quando usar", "Monte a frase", "Sua vez" com XP só na 1ª conclusão, final): `exprShowOptions`...
+  `exprShowFinal` em `shared/desafios-telas.js`; barra do topo só nelas (`data-lesson-bar`, `shared/activity-focus.js`); texto novo = chave em `CHALLENGE_I18N`
+  (pt-BR e en). Os testes `tests/paridade-sites/test_desafios*.js` e `test_conjugacao*.js` comparam "antes x depois" do refactor: mudança de propósito
+  entra na lista de neutralizações do teste (com data e motivo), nunca apagando a comparação. Testes: `tests/desafios-expressoes-passos/`.
+  Dados opcionais de cada expressão: `example/secondExample.{pt,mark}` (tradução e trecho exato do francês a destacar), `literal.{pt,note}` (tradução literal e nota de origem); no site em outro idioma vêm do overlay (`docs/i18n/challenges-en.json`: `example`, `secondExample`, `literal`, `literalNote`) e nunca entram em `CHALLENGE_SITE_LANG_FIELDS` (sem o campo, a parte some; o desafio não). Teste: `tests/desafios-exemplos-traducao/`. Gravar SQL no navegador troca `\n` por `\r\n`: usar `chr(10)` (`docs/i18n/lote-exemplos-expressoes/gerar.py`) e conferir por hash.
 - **Lembrete de revisão do rodapé** (`maybeShowReviewReminder`, `shared/core/revisao-decks.js`): o dia só é gravado depois de o banner ficar visível uns segundos ou ser clicado/dispensado
   (`markReviewReminderSeen`); em lição (`lesson-focus`) nem aparece nem gasta o dia; reavalia ao voltar para a aba e ao sair da lição. Guarda: `tests/lembrete-revisao/`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").

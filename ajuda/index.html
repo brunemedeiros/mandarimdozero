@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Central de Ajuda · Idiomas com Prof. Brune</title>
+<meta name="description" content="Respostas curtas sobre a sua conta, os seus dados e as regras de uso do site Idiomas com Prof. Brune.">
+<link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
+<link rel="stylesheet" href="../shared/fonts/nunito.css">
+<!-- RASCUNHO (2026-10-30): Central de Ajuda estática. Perguntas curtas em ajuda/conteudo.js, textos completos em ajuda/textos/*.html.
+     Ainda não está ligada a nenhum menu do site (Mais > Ajuda não existe) e fica fora dos buscadores (noindex) até o advogado fechar os textos. -->
+<style>
+:root {
+  --ink: #201A2C; --ink-soft: #6B6478; --paper: #FAF7F2; --paper-warm: #F1ECE2; --paper-line: #E3DCCE; --surface: #FFFFFF;
+  --link: #2678AC; --brand-fill: #3D167B; --on-brand-fill: #FFFFFF; --warn-bg: #FDF3E1; --warn-ink: #7A4B0B;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ink: #EEE9F5; --ink-soft: #ADA5BE; --paper: #17141F; --paper-warm: #201C2B; --paper-line: #362F44; --surface: #1D1928;
+    --link: #6CB8E6; --brand-fill: #6B3FD0; --on-brand-fill: #FFFFFF; --warn-bg: #3A2D12; --warn-ink: #F2C166; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; font-size: 17px; }
+a { color: var(--link); }
+main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+header.topo { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.brand { font-weight: 800; color: var(--ink); text-decoration: none; }
+.brand span { color: var(--ink-soft); font-weight: 700; }
+h1 { font-size: clamp(26px, 5vw, 36px); line-height: 1.2; margin: 24px 0 8px; text-wrap: balance; }
+h2 { font-size: 21px; margin: 28px 0 6px; }
+h3 { font-size: 18px; margin: 20px 0 4px; }
+.rascunho { background: var(--warn-bg); color: var(--warn-ink); border-radius: 12px; padding: 10px 14px; margin: 16px 0; font-weight: 700; font-size: 15px; }
+.busca { display: block; width: 100%; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--paper-line); border-radius: 999px; padding: 12px 18px; margin: 8px 0 20px; }
+.cartoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin: 8px 0 24px; }
+.cartao { display: block; background: var(--surface); border: 1px solid var(--paper-line); border-radius: 14px; padding: 18px 16px; text-align: center; text-decoration: none; color: var(--ink); }
+.cartao:hover, .cartao:focus-visible { border-color: var(--link); }
+.cartao b { display: block; margin-bottom: 4px; }
+.cartao span { color: var(--ink-soft); font-size: 15px; }
+.migalhas { font-size: 15px; color: var(--ink-soft); margin: 18px 0 0; }
+.migalhas a { text-decoration: none; }
+.faq { background: var(--surface); border: 1px solid var(--paper-line); border-radius: 14px; margin: 12px 0; overflow: hidden; }
+.faq details { border-top: 1px solid var(--paper-line); }
+.faq details:first-child { border-top: none; }
+.faq summary { cursor: pointer; padding: 14px 16px; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: '▾'; color: var(--ink-soft); }
+.faq details[open] summary::after { content: '▴'; }
+.faq .resp { padding: 0 16px 14px; }
+.faq .resp p { margin: 0 0 8px; }
+.vermais { font-weight: 800; text-transform: uppercase; letter-spacing: .04em; font-size: 14px; text-decoration: none; }
+.faq .pendente { font-size: 13px; color: var(--warn-ink); background: var(--warn-bg); border-radius: 8px; padding: 2px 8px; display: inline-block; margin-bottom: 8px; }
+.layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 32px; align-items: start; margin-top: 8px; }
+.lateral h2 { font-size: 16px; margin: 8px 0; }
+.lateral a { display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: var(--ink); font-size: 15px; line-height: 1.35; }
+.lateral a[aria-current="page"] { background: var(--brand-fill); color: var(--on-brand-fill); }
+.atualizado { color: var(--ink-soft); font-size: 15px; margin: 0 0 16px; }
+.simples { background: var(--paper-warm); border: 1px solid var(--paper-line); border-radius: 14px; padding: 14px 16px; margin: 16px 0 24px; }
+.simples h2 { margin: 0 0 6px; font-size: 18px; }
+.simples ul { margin: 0; padding-left: 20px; }
+.texto h2 { margin-top: 32px; }
+.texto .tabela { overflow-x: auto; }
+.texto table { border-collapse: collapse; min-width: 640px; font-size: 15px; }
+.texto th, .texto td { border: 1px solid var(--paper-line); padding: 6px 9px; text-align: left; vertical-align: top; }
+.texto th { background: var(--paper-warm); }
+.texto .box { background: var(--paper-warm); border: 1px solid var(--paper-line); border-radius: 14px; padding: 14px 16px; }
+mark.confirmar { background: var(--warn-bg); color: var(--warn-ink); border-radius: 4px; padding: 0 3px; }
+dfn { font-style: normal; border-bottom: 2px dotted var(--link); cursor: help; }
+.difíceis, .dificeis { margin-top: 32px; border-top: 1px solid var(--paper-line); padding-top: 8px; }
+.dificeis dt { font-weight: 800; margin-top: 8px; }
+.dificeis dd { margin: 0; color: var(--ink-soft); }
+.relacionados ul { padding-left: 20px; }
+.vazio { color: var(--ink-soft); padding: 12px 0; }
+footer { margin-top: 48px; color: var(--ink-soft); font-size: 15px; border-top: 1px solid var(--paper-line); padding-top: 16px; }
+@media (max-width: 760px) { .layout { grid-template-columns: minmax(0, 1fr); gap: 8px; } }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <header class="topo">
+    <a class="brand" href="#/">Idiomas com Prof. Brune <span>· Central de Ajuda</span></a>
+    <a href="../sobre.html">Sobre o site</a>
+  </header>
+  <p class="rascunho">Central de Ajuda em construção. Os Termos e a Política de Privacidade estão em revisão jurídica e ainda não valem.</p>
+  <div id="app" aria-live="polite"></div>
+  <footer>Idiomas com Prof. Brune · <a href="mailto:contato@profbrune.com.br">contato@profbrune.com.br</a></footer>
+</main>
+<script src="conteudo.js"></script>
+<script>
+(function(){
+  var A = AJUDA, app = document.getElementById('app');
+  var TITULO = 'Central de Ajuda · Idiomas com Prof. Brune';
+
+  function el(tag, attrs, kids){
+    var n = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function(k){
+      if (k === 'text') n.textContent = attrs[k]; else if (k === 'html') n.innerHTML = attrs[k]; else n.setAttribute(k, attrs[k]);
+    });
+    (kids || []).forEach(function(c){ if (c) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function catPorId(id){ return A.categorias.filter(function(c){ return c.id === id; })[0]; }
+  function artPorSlug(s){ return A.artigos.filter(function(a){ return a.slug === s; })[0]; }
+  function perguntasDe(cat){ return A.perguntas.filter(function(p){ return p.cat === cat; }); }
+  function categoriasComConteudo(){
+    return A.categorias.filter(function(c){ return perguntasDe(c.id).length || A.artigos.some(function(a){ return a.cat === c.id; }); });
+  }
+  function norm(s){ return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  function setTitulo(t){ document.title = t ? t + ' · Central de Ajuda' : TITULO; }
+
+  function linkArtigo(p){ return '#/a/' + p.artigo + (p.ancora ? '/' + p.ancora : ''); }
+
+  // Uma pergunta: título que abre, resposta curta e "Ver mais" para o texto completo.
+  function faqItem(p, aberto){
+    var d = el('details', {}, [el('summary', { text: p.q })]);
+    if (aberto) d.open = true;
+    var r = el('div', { 'class': 'resp' });
+    if (p.revisar) r.appendChild(el('span', { 'class': 'pendente', text: 'Resposta a rever com o texto do advogado' }));
+    r.appendChild(el('p', { text: p.curta }));
+    if (p.artigo) r.appendChild(el('a', { 'class': 'vermais', href: linkArtigo(p), text: 'Ver mais' }));
+    d.appendChild(r);
+    return d;
+  }
+
+  function inicio(){
+    setTitulo('');
+    var cats = categoriasComConteudo();
+    var busca = el('input', { 'class': 'busca', type: 'search', placeholder: 'Pesquisa', 'aria-label': 'Pesquisar na Central de Ajuda' });
+    var resultados = el('div', { id: 'resultados' });
+    var grade = el('div', { 'class': 'cartoes' }, cats.map(function(c){
+      return el('a', { 'class': 'cartao', href: '#/c/' + c.id }, [el('b', { text: c.titulo }), el('span', { text: c.resumo })]);
+    }));
+    busca.addEventListener('input', function(){
+      var q = norm(busca.value.trim());
+      resultados.textContent = '';
+      grade.hidden = !!q;
+      if (!q) return;
+      var achou = A.perguntas.filter(function(p){ return norm(p.q + ' ' + p.curta).indexOf(q) !== -1; });
+      if (!achou.length){ resultados.appendChild(el('p', { 'class': 'vazio', text: 'Nada encontrado. Tente outra palavra ou escreva para contato@profbrune.com.br.' })); return; }
+      var box = el('div', { 'class': 'faq' }, achou.map(function(p){ return faqItem(p, false); }));
+      resultados.appendChild(box);
+    });
+    app.replaceChildren(el('h1', { text: 'Como podemos ajudar?' }), busca, grade, resultados);
+  }
+
+  function categoria(id){
+    var c = catPorId(id);
+    if (!c) return inicio();
+    setTitulo(c.titulo);
+    var kids = [
+      el('p', { 'class': 'migalhas' }, [el('a', { href: '#/', text: 'Central de Ajuda' }), ' › ' + c.titulo]),
+      el('h1', { text: c.titulo }),
+    ];
+    var ps = perguntasDe(id);
+    if (ps.length) kids.push(el('div', { 'class': 'faq' }, ps.map(function(p){ return faqItem(p, false); })));
+    var arts = A.artigos.filter(function(a){ return a.cat === id; });
+    if (arts.length){
+      kids.push(el('h2', { text: 'Textos completos' }));
+      kids.push(el('div', { 'class': 'faq' }, arts.map(function(a){
+        return el('details', {}, [el('summary', { text: a.titulo }), el('div', { 'class': 'resp' }, [el('a', { 'class': 'vermais', href: '#/a/' + a.slug, text: 'Abrir' })])]);
+      })));
+    }
+    kids.push(el('p', {}, ['Ainda tem dúvidas? Escreva para ', el('a', { href: 'mailto:contato@profbrune.com.br', text: 'contato@profbrune.com.br' }), '.']));
+    app.replaceChildren.apply(app, kids);
+  }
+
+  // Sublinha a primeira vez que cada "palavra difícil" aparece e devolve as que apareceram.
+  function aplicarGlossario(raiz){
+    var achadas = [];
+    A.glossario.forEach(function(g){
+      var re = new RegExp('(^|[^\\p{L}\\p{N}])(' + g.termo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![\\p{L}\\p{N}])', 'iu');
+      var walker = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT, null);
+      var no;
+      while ((no = walker.nextNode())){
+        if (no.parentNode.closest('h1,h2,h3,mark,dfn,a,th')) continue;
+        var m = re.exec(no.nodeValue);
+        if (!m) continue;
+        var ini = m.index + m[1].length, fim = ini + m[2].length;
+        var depois = no.splitText(fim), meio = no.splitText(ini);
+        var dfn = el('dfn', { tabindex: '0', title: g.def, text: meio.nodeValue });
+        meio.parentNode.replaceChild(dfn, meio);
+        achadas.push(g);
+        break;
+      }
+    });
+    return achadas;
+  }
+
+  function artigo(slug, ancora){
+    var a = artPorSlug(slug);
+    if (!a) return inicio();
+    setTitulo(a.titulo);
+    var c = catPorId(a.cat);
+    var corpo = el('div', { 'class': 'texto' });
+    var lateral = el('nav', { 'class': 'lateral', 'aria-label': 'Artigos nessa seção' }, [el('h2', { text: 'Artigos nessa seção' })].concat(
+      A.artigos.filter(function(x){ return x.cat === a.cat; }).map(function(x){
+        var l = el('a', { href: '#/a/' + x.slug, text: x.titulo });
+        if (x.slug === slug) l.setAttribute('aria-current', 'page');
+        return l;
+      })));
+    var principal = el('article', {}, [
+      el('h1', { text: a.titulo }),
+      el('p', { 'class': 'atualizado', text: (a.estado === 'publicado' ? 'Atualizado: ' + (a.atualizado || A.atualizado) : a.estado === 'rascunho' ? 'Rascunho em revisão jurídica · ' + A.atualizado : 'Em redação') }),
+      el('section', { 'class': 'simples', 'aria-label': 'Em palavras simples' }, [el('h2', { text: 'Em palavras simples' }), el('ul', {}, a.simples.map(function(s){ return el('li', { text: s }); }))]),
+      corpo,
+    ]);
+    app.replaceChildren(
+      el('p', { 'class': 'migalhas' }, [el('a', { href: '#/', text: 'Central de Ajuda' }), ' › ', el('a', { href: '#/c/' + a.cat, text: c.titulo }), ' › ' + a.titulo]),
+      el('div', { 'class': 'layout' }, [lateral, principal])
+    );
+    corpo.appendChild(el('p', { 'class': 'vazio', text: 'Carregando…' }));
+    fetch(a.arquivo).then(function(r){ if (!r.ok) throw new Error(r.status); return r.text(); }).then(function(h){
+      corpo.innerHTML = h;
+      var achadas = aplicarGlossario(corpo);
+      if (achadas.length){
+        var dl = el('dl', { 'class': 'dificeis' }, [el('h2', { text: 'Palavras difíceis deste texto' })]);
+        achadas.forEach(function(g){ dl.appendChild(el('dt', { text: g.termo })); dl.appendChild(el('dd', { text: g.def })); });
+        corpo.appendChild(dl);
+      }
+      var rel = (a.relacionados || []).map(artPorSlug).filter(Boolean);
+      if (rel.length){
+        corpo.appendChild(el('section', { 'class': 'relacionados' }, [el('h2', { text: 'Artigos relacionados' }), el('ul', {}, rel.map(function(x){
+          return el('li', {}, [el('a', { href: '#/a/' + x.slug, text: x.titulo })]);
+        }))]));
+      }
+      if (ancora){ var alvo = document.getElementById(ancora); if (alvo) alvo.scrollIntoView(); }
+    }).catch(function(){
+      corpo.textContent = '';
+      corpo.appendChild(el('p', { text: 'Não consegui abrir este texto agora. Escreva para contato@profbrune.com.br.' }));
+    });
+  }
+
+  function rota(){
+    var p = (location.hash || '#/').replace(/^#\/?/, '').split('/');
+    if (p[0] === 'c' && p[1]) categoria(p[1]);
+    else if (p[0] === 'a' && p[1]) artigo(p[1], p[2]);
+    else inicio();
+    if (!(p[0] === 'a' && p[2])) window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', rota);
+  rota();
+})();
+</script>
+</body>
+</html>

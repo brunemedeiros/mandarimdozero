@@ -11,7 +11,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "p",
-  "Este é um rascunho escrito a partir de como o site funciona hoje (conferido em 19/10/2026). Não é a política oficial e não foi revisado por advogado. Trechos entre [colchetes] precisam ser confirmados. A seção \"Pontos para o advogado\", no fim, reúne tudo o que precisa de atenção especial."
+  "Este é um rascunho escrito a partir de como o site funciona hoje (conferido em 19/10/2026, com ajustes de 30/10/2026). Não é a política oficial e não foi revisado por advogado. Trechos entre [colchetes] precisam ser confirmados. A seção \"Pontos para o advogado\", no fim, reúne tudo o que precisa de atenção especial."
  ],
  [
   "h",
@@ -19,7 +19,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "p",
-  "O site Idiomas com Prof. Brune oferece estudo de idiomas e acompanhamento por uma professora. Responsável pelos dados: [CONFIRMAR: nome completo ou razão social e CNPJ ou CPF]. Contato sobre privacidade: [CONFIRMAR: e-mail]."
+  "O site Idiomas com Prof. Brune oferece estudo de idiomas e acompanhamento por uma professora. Responsável pelos dados: [CONFIRMAR: nome completo ou razão social e CNPJ ou CPF]. Contato sobre privacidade: contato@profbrune.com.br."
  ],
  [
   "h",
@@ -31,7 +31,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "li",
-  "Conta: e-mail, nome de exibição, nome de usuário (@), senha (guardada de forma protegida pelo serviço de login), idioma do site, tipo de conta (usuária, professora ou administradora) e plano (grátis ou Premium)."
+  "Conta: e-mail, nome de exibição, nome de usuário (@), senha (guardada de forma protegida pelo serviço de login), idioma do site, tipo de conta (usuária, professora ou administradora) e plano (grátis ou Premium). Se você entra com Google, o Google também envia o seu nome e a sua foto de perfil, que ficam com a conta de login (veja a página \"Privacidade: Entrar com Google\")."
  ],
  [
   "li",
@@ -103,7 +103,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "li",
-  "Agenda: o link de calendário (.ics) mostra os horários das aulas e o nome das alunas. Quem tiver o link vê a agenda, por isso o link é secreto e pode ser trocado. Anotações e observações nunca saem nele."
+  "Agenda: o link de calendário (.ics) mostra os horários das aulas e o nome das alunas. Quem tiver o link vê a agenda, por isso o link é secreto e pode ser trocado. Anotações e observações nunca saem nele. Conexão com o Google Agenda (opcional): o site lê, só para leitura, os eventos das agendas que a professora marcar, para registrar as aulas com o dia e o horário certos (veja a página \"Privacidade: conexão com o Google Agenda\")."
  ],
  [
   "li",
@@ -151,7 +151,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "li",
-  "Serviços que nos ajudam a operar o site: Supabase (banco de dados, login e arquivos; servidores no Brasil [CONFIRMAR: região]), Resend (envio de e-mails), Google Cloud Text-to-Speech (voz dos cartões; recebe só o texto do cartão), GitHub Pages (hospedagem do site) e os serviços de entrega de avisos push dos navegadores."
+  "Serviços que nos ajudam a operar o site: Supabase (banco de dados, login e arquivos; servidores no Brasil [CONFIRMAR: região]), Resend (envio de e-mails), Google (login com Google e conexão opcional com o Google Agenda, que têm páginas próprias; e Cloud Text-to-Speech, para a voz dos cartões, que recebe só o texto do cartão), GitHub Pages (hospedagem do site) e os serviços de entrega de avisos push dos navegadores."
  ],
  [
   "li",
@@ -183,7 +183,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "p",
-  "Pela LGPD, você pode pedir: confirmação de que tratamos seus dados, acesso a eles, correção, anonimização ou exclusão, portabilidade, informação sobre com quem compartilhamos e a revogação de consentimento. Escreva para [CONFIRMAR: e-mail]. Você também pode ajustar o perfil público ou privado e as notificações nas Configurações."
+  "Pela LGPD, você pode pedir: confirmação de que tratamos seus dados, acesso a eles, correção, anonimização ou exclusão, portabilidade, informação sobre com quem compartilhamos e a revogação de consentimento. Escreva para contato@profbrune.com.br. Você também pode ajustar o perfil público ou privado e as notificações nas Configurações."
  ],
  [
   "h",
@@ -342,7 +342,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "li",
-  "Hoje não existe botão para a pessoa ver ou baixar os próprios dados nem para excluir a conta. O pedido chega por e-mail [CONFIRMAR: endereço]; a administradora confirma a identidade pelo e-mail da conta, reúne os dados das tabelas listadas no mapa e responde. [CONFIRMAR com o advogado: prazos da LGPD para a resposta]"
+  "Hoje não existe botão para a pessoa ver ou baixar os próprios dados. Alunas e usuárias podem excluir a própria conta em Configurações (seção 7); contas de professora e de administradora ainda não. Os demais pedidos chegam por e-mail (contato@profbrune.com.br); a administradora confirma a identidade pelo e-mail da conta, reúne os dados das tabelas listadas no mapa e responde. [CONFIRMAR com o advogado: prazos da LGPD para a resposta]"
  ],
  [
   "h",
@@ -362,7 +362,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "li",
-  "Pessoas sem conta no Banco de Revisão (hoje 14 das 24 pessoas ativas): base legal para guardar os dados delas e como informá-las."
+  "Pessoas sem conta no Banco de Revisão (em 30/10/2026, 16 das 25 pessoas ativas): base legal para guardar os dados delas e como informá-las."
  ],
  [
   "li",

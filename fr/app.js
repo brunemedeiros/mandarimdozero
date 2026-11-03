@@ -350,7 +350,7 @@ const GENERAL_CHALLENGES = [
   // (estrelas -- sistema paralelo de pontuação retirado do fluxo de unidade,
   // ver registerDailyStars) por um desafio ligado ao XP real, a única
   // moeda que o app de fato usa em todo o resto da interface.
-  { id:'xp50', icon:'⚡', get label(){ return t('fr.mission.xp50'); }, target:50, get: d => d.xp },
+  { id:'xp50', icon:'⭐', get label(){ return t('fr.mission.xp50'); }, target:50, get: d => d.xp },
   { id:'highscore2', icon:'📈', get label(){ return t('fr.mission.highscore2'); }, target:2, get: d => d.highScoreLessons },
   { id:'perfect1', icon:'🎯', get label(){ return t('fr.mission.perfect1'); }, target:1, get: d => d.perfectLessons },
   { id:'grammar1', icon:'🧠', get label(){ return t('fr.mission.grammar1'); }, target:1, get: d => d.grammarLessons },
@@ -572,7 +572,7 @@ const ANKI_EXPORT_CONFIG = {
   get qfmt(){ return `<div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{${this.fieldNames().fr}}}</div>`; },
   get afmt(){ return `{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:18px;color:#5C4E73;'>{{${this.fieldNames().tr}}}</div>`; },
   css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FAF5EA; color:#201335; }",
-  get deckDesc(){ return ankiExportText('ankiExport.deckDesc', `Exportado do app ${APP_IDENTITY.apps.fr.name}`, { app: this.modelName }); },
+  get deckDesc(){ return ankiExportText('ankiExport.deckDesc', `Exportado do site ${APP_IDENTITY.apps.fr.name}`, { app: this.modelName }); },
   // K2-F: template do modelo "Reverso" (B da trilha): frente = Tradução,
   // verso = Francês. Mesmos campos semânticos do Básico.
   get reverseQfmt(){ return `<div style='text-align:center;font-size:22px;color:#5C4E73;font-weight:bold;'>{{${this.fieldNames().tr}}}</div>`; },

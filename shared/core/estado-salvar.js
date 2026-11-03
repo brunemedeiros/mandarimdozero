@@ -42,6 +42,8 @@ function serializeState(){
     ...se('completedChallenges'),
     ...se('dictations'),
     ...se('challengeReviews'),
+    // Boas-vindas da 1ª lição (shared/core/boas-vindas.js): por curso, só existe depois de aparecer.
+    ...(STATE.welcome && Object.keys(STATE.welcome).length ? { welcome: STATE.welcome } : {}),
     // Só leitura pro Perfil (ver computeProgressSummary) -- nunca restaurado
     // de volta em applySerializedState, é recalculado a cada save.
     progressSummary: computeProgressSummary()
@@ -84,6 +86,8 @@ function applySerializedState(data){
   curriculumLoadStampReleased();
   if (typeof data.xp === 'number') STATE.xp = data.xp;
   if (typeof data.streak === 'number') STATE.streak = data.streak;
+  // Recorde de dias seguidos (gravado por saveState em shared/auth.js; janela da sequência do topo, 2026-10-30).
+  if (typeof data.bestStreak === 'number') STATE.bestStreak = Math.max(Number(STATE.bestStreak) || 0, data.bestStreak);
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
   if (data.lastReviewReminderDay) STATE.lastReviewReminderDay = data.lastReviewReminderDay;
   if (data.studyGoal) Object.assign(STATE.studyGoal, data.studyGoal);
@@ -106,6 +110,8 @@ function applySerializedState(data){
   if ('dictationsAced' in STATE && typeof data.dictationsAced === 'number') STATE.dictationsAced = Math.max(STATE.dictationsAced || 0, data.dictationsAced);
   if (data.periodXp) Object.assign(STATE.periodXp, data.periodXp);
   if (data.daily) Object.assign(STATE.daily, data.daily);
+  // Boas-vindas da 1ª lição (por curso): só acrescenta marcas, nunca apaga.
+  if (data.welcome && typeof data.welcome === 'object') STATE.welcome = Object.assign({}, STATE.welcome, data.welcome);
   if ('storyProgress' in STATE && data.storyProgress) Object.assign(STATE.storyProgress, data.storyProgress);
   // Módulos (shared/core/modulos-niveis.js): só existe no save de quem já teve módulos; com as fusões de módulo de
   // <site>/curriculum-changes.js já aplicadas (cur.checkpointProgress).
@@ -126,6 +132,30 @@ function applySerializedState(data){
       STATE.dictations[id] = cur ? Object.assign({}, inc, { bestScore: Math.max(inc.bestScore, cur.bestScore || 0) }) : inc;
     });
   }
+}
+
+// P1 (docs/p1-memoria-por-idioma.md): curso que ainda não tem bloco salvo recebe a memória dos cartões da professora e
+// próprios do IDIOMA (LangCardMemory.memoryEntriesForLoad). Só sobe progresso: um cartão que já tem mais histórico no STATE
+// fica como está. Cartões da trilha não são tocados (as entradas são só de professora/próprios).
+function applyLanguageCardMemory(entries){
+  if (!Array.isArray(entries) || !entries.length || typeof LangCardMemory === 'undefined') return;
+  const byId = {};
+  STATE.cards.forEach(c => { if (c && c.id != null) byId[String(c.id)] = c; });
+  const better = entries.filter(e => {
+    const c = byId[String(e.id)];
+    return !c || LangCardMemory.compareHistory(e, c) > 0;
+  });
+  mergeSavedCards(STATE.cards, better);
+  // A2: busca falhou -> as entradas sem par ficam guardadas para o próximo save (nunca apagar progresso).
+  if (typeof cardOriginsWithFailedFetch === 'function'){
+    const failed = cardOriginsWithFailedFetch();
+    if (failed.length){
+      const keep = unmatchedSavedCardsOfOrigins(STATE.cards, entries, failed);
+      const ids = new Set(PRESERVED_SAVED_CARDS.map(s => s && s.id));
+      keep.forEach(s => { if (!ids.has(s.id)) PRESERVED_SAVED_CARDS.push(s); });
+    }
+  }
+  STATE.cards.forEach(c => { if (c && (c.origin === 'teacher' || c.origin === 'self')) migrateCardToFSRS(c); });
 }
 
 function badgeModesUsedCount(s){

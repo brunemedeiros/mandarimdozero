@@ -521,7 +521,10 @@ async function renderTeacherClassCalendar(){
   const now = new Date();
   const cal = ADMIN_CLASS_LOGS_STATE.cal || (ADMIN_CLASS_LOGS_STATE.cal = { y: now.getFullYear(), m: now.getMonth() });
   const range = classCalendarMonthRange(cal.y, cal.m);
-  const logs = await fetchTeacherClassLogsRange(range.from, range.to);
+  // Mural > Aulas e materiais com uma turma ou um aluno escolhido: o calendário mostra só as aulas dele (121).
+  const scope = ADMIN_CLASS_LOGS_STATE.scope;
+  const logs = (await fetchTeacherClassLogsRange(range.from, range.to))
+    .filter(l => !scope || (scope.classroomId ? l.classroom_id === scope.classroomId : l.student_id === scope.studentId));
   const entries = logs.map(l => {
     const label = l.attendance_label_id != null ? classLogLabelById(l.attendance_label_id) : null;
     return { id: l.id, date: String(l.class_date), time: l.start_time ? String(l.start_time).slice(0, 5) : '', label: classLogWhoShort(l), color: label ? label.color : '', log: l };

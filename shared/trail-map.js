@@ -72,7 +72,9 @@ function renderTrailMap(root, model, describe, opts){
       b.dataset.key = n.key;
       b.setAttribute('aria-label', n.aria || `${n.label}, ${TRAIL_MAP_STATE_LABEL[n.state] || n.state}`);
       if (n.current) b.setAttribute('aria-current', 'step');
-      b.innerHTML = `<span class="tm-icon" aria-hidden="true">${trailEscape(n.icon)}</span><span class="tm-label">${trailEscape(n.label)}</span>${TRAIL_MAP_NOTE[n.state] ? `<span class="tm-note" aria-hidden="true">${TRAIL_MAP_NOTE[n.state]}</span>` : ''}`;
+      // n.note (opcional) troca a linha curta do estado (ex.: selo "⭐ Premium" no Ponto de verificação, Etapa 6).
+      const note = n.note || TRAIL_MAP_NOTE[n.state];
+      b.innerHTML = `<span class="tm-icon" aria-hidden="true">${trailEscape(n.icon)}</span><span class="tm-label">${trailEscape(n.label)}</span>${note ? `<span class="tm-note${n.noteClass ? ' ' + trailEscape(n.noteClass) : ''}" aria-hidden="true">${trailEscape(note)}</span>` : ''}`;
       b.addEventListener('click', () => select(n.key, b));
       row.appendChild(b);
     });
@@ -92,7 +94,7 @@ function renderTrailMap(root, model, describe, opts){
     if (btn){ btn.classList.add('selected'); btn.setAttribute('aria-expanded', 'true'); }
     const d = describe(key) || {};
     panel.innerHTML = `
-      <button type="button" class="tm-close" aria-label="${trailEscape(trailMapT('trail.map.closePanel'))}">✕</button>
+      <button type="button" class="tm-close" aria-label="${trailEscape(trailMapT('common.close'))}">✕</button>
       ${d.eyebrow ? `<div class="tm-eyebrow">${trailEscape(d.eyebrow)}</div>` : ''}
       <h3 id="tm-panel-title" class="tm-title">${trailEscape(d.title)}</h3>
       ${d.status ? `<div class="tm-status">${trailEscape(d.status)}</div>` : ''}

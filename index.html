@@ -555,6 +555,8 @@ document.querySelectorAll('.gate-speak button').forEach(b => b.addEventListener(
 function askExperienceThenProceed(langId, finalCallback){
   const target = AVAILABLE_LANGUAGES.find(l => l.id === langId);
   if (!target){ finalCallback(langId, false); return; }
+  // Curso sem Teste de Nível (hoje o chinês): a pergunta teria uma opção só ("Sou iniciante"); segue direto (Etapa 6).
+  if (!target.hasLevelTest){ finalCallback(langId, false); return; }
   // No meio da frase em português o nome do idioma vai com minúscula ("algo de francês"); em inglês, com maiúscula.
   const expName = LanguageRegistry.shortName(target.appKey, gateSiteLang()) || target.name;
   gateExpLang = gateSiteLang() === 'pt-BR' ? expName.toLowerCase() : expName;

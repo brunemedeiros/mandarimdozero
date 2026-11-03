@@ -6,6 +6,7 @@
 :root[data-curso="fr"]{
   --seal-red:#3498D6; --seal-red-dark:#1D5A82; --on-seal-red:#201335; --imperial-gold:#E36BCA;
   --brand-fill:#2879B3; --brand-fill-hover:#1D5A82; --on-brand-fill:#FFFFFF; --success-fill:#3A7359; --on-success-fill:#FFFFFF;
+  --grade-fill-again:#D62619; --grade-fill-hard:#C9973A; --grade-fill-good:#2879B3; --grade-fill-easy:#3A7359; --on-grade-fill:#FFFFFF;
   --paper:#FAF5EA; --paper-warm:#F0E8D8; --paper-line:#E1D6C0; --ink:#201335; --ink-soft:#5C4E73;
   --jade:#3A7359; --error-red:#D62619; --on-vivid:#FFFFFF; --grade-hard-bg:#8C5F0E; --count-new:#1D5A82;
   --radius:14px; --shadow-card:0 2px 8px rgba(33,23,20,0.08), 0 1px 2px rgba(33,23,20,0.06);
@@ -21,6 +22,7 @@
 :root[data-curso="zh"]{
   --seal-red:#C0231F; --seal-red-dark:#8E1915; --on-seal-red:#FFFFFF; --imperial-gold:#D4A017;
   --brand-fill:#C0231F; --brand-fill-hover:#8E1915; --on-brand-fill:#FFFFFF; --success-fill:#3A7359; --on-success-fill:#FFFFFF;
+  --grade-fill-again:#D62619; --grade-fill-hard:#C9973A; --grade-fill-good:#2879B3; --grade-fill-easy:#3A7359; --on-grade-fill:#FFFFFF;
   --paper:#FBF4E8; --paper-warm:#F3E6CE; --paper-line:#E2CFA6; --ink:#211714; --ink-soft:#5C4A3F;
   --jade:#3A7359; --grade-again-bg:#D62619; --on-vivid:#FFFFFF; --grade-hard-bg:#8C5F0E; --count-new:#1D5A82;
   --error-red:var(--seal-red);

@@ -1,4 +1,5 @@
-// ---------- Pills de estatística do topbar (🔥 streak / ⭐ XP) ----------
+// ---------- Pills de estatística do topbar (🔥 streak / ⭐ XP da semana) ----------
+// Os dois pills são botões que abrem as janelas do topo (shared/janelas-topo.js, shared/xp-semana.js).
 // Idêntico nos dois idiomas: os dois têm STATE.streak/STATE.xp e os mesmos
 // ids #streak-count/#xp-count no topbar. Chamado depois de qualquer ação
 // que mude streak/XP (responder exercício, revisão, wizard, etc.).
@@ -41,5 +42,10 @@ function renderTopbarStats(){
   // em vez de zerar (ver comentário na função).
   const streak = effectiveStreak();
   animateStatPill(document.getElementById('streak-count'), streak);
-  animateStatPill(document.getElementById('xp-count'), STATE.xp);
+  // Rótulo do botão 🔥 e janela da sequência aberta (shared/janelas-topo.js).
+  if (typeof TopPop !== 'undefined') TopPop.paintStreak();
+  // ⭐ do topo = XP DA SEMANA, mesma semana e mesma soma do Ranking (decisão da dona, 2026-10-29; shared/xp-semana.js).
+  // Sem o módulo carregado (página antiga em cache), cai no total de antes.
+  if (typeof XpSemana !== 'undefined') XpSemana.renderTopbar();
+  else animateStatPill(document.getElementById('xp-count'), STATE.xp);
 }

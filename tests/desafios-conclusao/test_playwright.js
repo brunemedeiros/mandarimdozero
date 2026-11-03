@@ -100,17 +100,29 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   check('traduzir: acerto conclui', await done('lt-old-001'));
 
   // ---- Expressões (binário) ----
+  // Expressões em passos (2026-10-26): palpite -> opções -> resposta -> exemplos -> "Sua vez" ("Não sei") -> tela final.
+  const exprToFinal = async () => {
+    for (let i = 0; i < 8; i++){
+      if (await page.isVisible('#challenge-complete-btn') || await page.isVisible('#challenge-retry-btn')) return;
+      if (await page.isVisible('#expr-turn-dontknow-btn')) await page.click('#expr-turn-dontknow-btn');
+      else if (await page.isVisible('#expr-order-dontknow-btn')) await page.click('#expr-order-dontknow-btn');
+      else await page.click('#expr-continue-btn');
+      await page.waitForTimeout(60);
+    }
+  };
   await ev(() => openChallengePlayer('expr-old-001'));
-  await page.click('#challenge-reveal-btn');
+  await page.click('#expr-see-options-btn');
   const wrong = await ev(() => { const c = CHALLENGES.find(x => x.id === 'expr-old-001'); return c.options.findIndex(o => o !== c.correctAnswer); });
-  await page.click(`.challenge-choice-btn[data-orig-idx="${wrong}"]`);
+  await page.click(`.exercise-option[data-orig-idx="${wrong}"]`);
+  await exprToFinal();
   check('expressão: errar mostra Tentar de novo', await page.isVisible('#challenge-retry-btn'));
   check('expressão: errar não conclui', !(await done('expr-old-001')));
   await page.click('#challenge-retry-btn');
-  check('expressão: Tentar de novo reabre a pergunta', await page.isVisible('#challenge-reveal-btn'));
-  await page.click('#challenge-reveal-btn');
+  check('expressão: Tentar de novo reabre a pergunta', await page.isVisible('#expr-see-options-btn'));
+  await page.click('#expr-see-options-btn');
   const right = await ev(() => { const c = CHALLENGES.find(x => x.id === 'expr-old-001'); return c.options.findIndex(o => o === c.correctAnswer); });
-  await page.click(`.challenge-choice-btn[data-orig-idx="${right}"]`);
+  await page.click(`.exercise-option[data-orig-idx="${right}"]`);
+  await exprToFinal();
   await page.click('#challenge-complete-btn');
   check('expressão: acertar conclui', await done('expr-old-001'));
 

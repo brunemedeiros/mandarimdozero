@@ -20,5 +20,13 @@ site novo parte do molde da família (ver `docs/i18n/e4-plano-de-extracao.md`) e
 - **Hanzi e histórias** (hoje só no zh; valem para qualquer site que ganhe essas atividades; constantes em `shared/srs.js`): escrever hanzi `HANZI_WRITE_XP` 2, acerto no teste
   de hanzi `HANZI_TEST_XP` 1, concluir lição de hanzi `LESSON_CLOSE_XP` 4, pergunta de história certa `STORY_QUESTION_XP` 1, concluir história `STORY_DONE_XP` 20.
   Lição de hanzi ou história JÁ concluída não paga XP de novo (mesma regra de "refazer lição" da trilha).
+- **Desafios, Expressões** (decisão da autora, 2026-10-30, "opção A": mesmo padrão da trilha; antes, 2026-10-26, só a "Sua vez" dava XP; o resto dos Desafios continua sem XP): escolher a
+  resposta certa `EXERCISE_XP_RECOGNIZE` 1, montar a frase certa `EXERCISE_XP_PRODUCE` 2, "Sua vez" digitar certo `EXERCISE_XP_PRODUCE` 2, "quase" `EXERCISE_XP_ALMOST` 1, errou ou
+  "Não sei" 0 (teto 5). Só na PRIMEIRA conclusão do desafio, pago ao tocar em Concluir (`exprXPBreakdown`, `shared/desafios-telas.js`); refazer desafio concluído ou "Revisar erros" = 0, para
+  não virar fonte infinita. Errou a escolha: não há Concluir (Tentar de novo), então nada é pago. Teste: `tests/desafios-expressoes-passos/`.
+- **Topo** (decisão da dona, 2026-10-29): ⭐ N XP = XP DA SEMANA, mesma semana (segunda a domingo) e mesma soma do Ranking "Geral" (`weekly_xp`
+  de todos os idiomas); janela com 4 semanas, frase "+N XP a mais" só quando a semana é maior e "Ver ranking" (`shared/xp-semana.js`, desenho e controle comuns
+  com a janela da sequência em `shared/janelas-topo.js`; recorde de dias seguidos = `bestStreak` da conta). Teste: `tests/janelas-topo/`. Aviso "+N XP" não aparece em tela de conclusão (`COMPLETION_SCREEN_SELECTOR`,
+  `shared/toast.js`). Teste: `tests/xp-semana/`.
 - O toast "+N XP" aparece para todo ganho maior que 0. A notificação do sino usa `notification_rules.min_xp_amount` (categoria `gamificacao`, 15 na produção).
 - Demais fontes e valores atuais, e o que está em revisão: `docs/historico/21-auditoria-xp.md`. Ao mexer em qualquer XP, atualizar esse arquivo e o teste `tests/xp/`.

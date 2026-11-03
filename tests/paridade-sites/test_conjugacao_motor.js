@@ -212,7 +212,8 @@ const PT_CONFIG = `({
     const ov = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
     L('sem rolagem horizontal em 390px', ov);
     // aba Jogos sem jogos: abre vazia, sem erro
-    await page.click('#conj-back-to-select');
+    // (2026-10-26: a saída da Prática é o X da barra do topo; o link "Voltar à seleção" fica escondido e o X aciona o mesmo botão)
+    await page.click('#conj-practice-wrap .activity-exit-btn');
     await page.click('#conj-mode-games');
     L('aba Jogos sem jogos: lista vazia, sem erro', await page.evaluate(() => !document.getElementById('conj-games-pane').hidden && document.getElementById('conj-games-list').children.length === 0));
     L('sem erro de página', errs.length === 0, errs);

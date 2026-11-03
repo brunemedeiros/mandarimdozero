@@ -163,7 +163,7 @@ async function fill(page, wrongIdx){
     await page.click('#conj-start-btn');
     await page.waitForSelector('.conj-tense-box');
     const s1 = await page.evaluate(() => ({ n: CONJ_STATE.verbQueue.length, next: !!document.querySelector('.conj-verb-header.next'),
-      bar: document.querySelector('.conj-progress-bar > i').style.width, acc: document.querySelectorAll('.conj-accents .fr-accent-key').length }));
+      bar: document.querySelector('#conj-practice-wrap .lesson-progress-fill').style.width, acc: document.querySelectorAll('.conj-accents .fr-accent-key').length }));
     check('sessão com 3 verbos, sem "Próximo verbo", barra em 0%, teclas de acento', s1.n === 3 && !s1.next && s1.bar === '0%' && s1.acc === 7 /* 2026-10-16: só as letras dos verbos */, s1);
 
     // Acento entra no campo com o cursor; Enter passa para o próximo campo.
@@ -186,7 +186,7 @@ async function fill(page, wrongIdx){
     const d = await page.evaluate(() => ({ x: Array.from(document.querySelectorAll('.conj-field.wrong .conj-x')).map(e => e.textContent).join(''),
       view: document.querySelector('.conj-field.wrong .conj-answer-text').textContent, exp: document.querySelector('.conj-field.wrong .expected').textContent.trim(),
       audio: document.querySelectorAll('.conj-field .audio-btn').length, speak: document.querySelector('.conj-field[data-idx="3"] .audio-btn').dataset.speak,
-      bar: document.querySelector('.conj-progress-bar > i').style.width, focus: document.activeElement && document.activeElement.id }));
+      bar: document.querySelector('#conj-practice-wrap .lesson-progress-fill').style.width, focus: document.activeElement && document.activeElement.id }));
     check('letras erradas em vermelho só onde erra (parlez -> "ez")', d.x === 'ez' && d.view === 'parlez' && d.exp.includes('parlons'), d);
     check('áudio em cada forma depois de corrigir, com o pronome', d.audio === 6 && d.speak === 'nous parlons', d);
     check('barra avança e o foco vai para "Próximo verbo"', d.bar === '50%' && d.focus === 'conj-next-verb-btn', d);
@@ -326,7 +326,7 @@ async function fill(page, wrongIdx){
       const pw = await page.evaluate(() => ({ modal: getComputedStyle(document.getElementById('premium-games-modal')).display, ch: getComputedStyle(document.getElementById('premium-challenges-modal')).display,
         text: document.getElementById('premium-games-modal').innerText, mail: (document.querySelector('#premium-games-modal a[data-premium-contact]') || {}).href || '', playing: document.getElementById('conj-game-wrap').style.display }));
       check('bloqueio ligado: abre a janela Premium dos Jogos (não a dos Desafios) em vez do jogo', pw.modal === 'flex' && pw.ch === 'none' && pw.playing !== 'block' && /Jogos da Conjugação/.test(pw.text) && !/Desafios do Módulo/.test(pw.text), pw);
-      check('janela dos Jogos: botão Fale com a Prof. Brune com e-mail, @ e curso', pw.mail.startsWith('mailto:brunemed1310@gmail.com') && decodeURIComponent(pw.mail).includes('@aluna.teste') && decodeURIComponent(pw.mail).includes('Francês') && /Fale com a Prof\. Brune/.test(pw.text), pw.mail);
+      check('janela dos Jogos: botão Fale com a Prof. Brune com e-mail, @ e curso', pw.mail.startsWith('mailto:contato@profbrune.com.br') && decodeURIComponent(pw.mail).includes('@aluna.teste') && decodeURIComponent(pw.mail).includes('Francês') && /Fale com a Prof\. Brune/.test(pw.text), pw.mail);
       // Bloqueio ligado, aluno (tabela: Jogos ligados para Aluno): sem cadeado, joga.
       await page.evaluate(p => { document.getElementById('premium-games-modal').style.display = 'none'; MY_PERMISSIONS = p; setConjMode('games'); }, require('../planos-permissoes/fixtures').permsFor('student'));
       const st = await page.evaluate(() => ({ badge: (document.querySelector('.cg-card .cg-premium') || {}).textContent, tab: (document.querySelector('#conj-mode-games [data-conj-games-seal]') || {}).textContent }));
@@ -361,8 +361,8 @@ async function fill(page, wrongIdx){
       await page.click('#cg-mistakes');
       const m = await page.evaluate(() => CONJ_GAMES_UI.state.order.map(x => x.id));
       check('"Praticar só os que errei" repete só a frase errada', m.length === 1 && m[0] === it0.id, m);
-      await page.click('#conj-game-back');
-      check('voltar aos jogos sai do foco', await page.evaluate(() => !document.body.dataset.activityFocus && document.getElementById('conj-select-wrap').style.display === 'block'));
+      await page.click('#conj-game-wrap .activity-exit-btn');
+      check('sair pelo X sai do foco e volta à lista de jogos', await page.evaluate(() => !document.body.dataset.activityFocus && document.getElementById('conj-select-wrap').style.display === 'block'));
       // Site em inglês: nada em português no jogo.
       await page.evaluate(() => { window.getUiLang = () => 'en'; });
       await page.click('.cg-play[data-game="pc-imparfait"]');
@@ -415,7 +415,7 @@ async function fill(page, wrongIdx){
       check(`${id}: acerto, sem desenho, regra em quadro, pista marcada, francês em azul na explicação, verbo ${it.verb ? 'mostrado' : 'escondido'}`,
         /ok/.test(f.verdict) && !f.svg && f.rule.length > 10 && f.clue && f.fr >= 2 && !f.braces && f.audioNear && /A1/.test(f.eyebrow) && (it.verb ? verb === '(' + it.verb + ')' : verb === ''), { f, verb, it: it.id });
       if (process.env.SHOTS) await page.screenshot({ path: process.env.SHOTS + `/jogo-${id}.png`, fullPage: true });
-      await page.click('#conj-game-back');
+      await page.click('#conj-game-wrap .activity-exit-btn');
     }
     await page.evaluate(() => { window.getUiLang = () => 'en'; });
     await page.click('.cg-play[data-game="tu-vous"]');

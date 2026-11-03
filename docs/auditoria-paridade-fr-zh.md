@@ -234,7 +234,7 @@ motor (são funções que só leem `MODULES`, `UNITS` e `STATE`) para `shared/co
    `zh/index.html:4848`, `zh/app.js:1759-1806`. O fr não tem. Recurso geral; decisão da dona se o fr deve ganhar.
 3. **Exercício "Frase completa"** (etapa 5d: a série de exercícios comum já o aceita pelo gancho `fullSentenceExercises`; o montador e a tela continuam no zh, porque as regras usam hanzi, 不/没 e pinyin) (escolher a frase certa entre 4, com distratores trocando palavra ou negação):
    `zh/app.js:2718-2760` e `3625`. O fr tem só um resto de código para ele (`fr/app.js:3036`).
-4. **Lado do balão no diálogo pelo primeiro falante** (etapa 5d: `dlgSpeakerSide` está no motor comum `shared/core/licao-dialogo.js`, ligado só no zh pelo gancho `dlgSide`; ligar no fr é decisão da dona) (`dlgSpeakerSide`, `zh/app.js:2255`): aceita falante com qualquer
+4. **Lado do balão no diálogo pelo primeiro falante** (FEITO em 2026-10-30, decisão da dona: fr e zh usam `dlgSpeakerSide`; com `dialogue.learner` a aluna fica sempre à direita, como no WhatsApp; guarda `tests/dialogo-lado/`) (etapa 5d: `dlgSpeakerSide` está no motor comum `shared/core/licao-dialogo.js`, ligado só no zh pelo gancho `dlgSide`; ligar no fr é decisão da dona) (`dlgSpeakerSide`, `zh/app.js:2255`): aceita falante com qualquer
    nome. O fr só põe à direita quem se chama `B` (`fr/app.js:2390`, `2525`). Importa para a pendência "diálogos com
    personagens nomeados".
 5. **Histórias-checkpoint** (`zh/stories.js`, `zh/app.js:1428-1570`) e **busca de vocabulário** (pronta, mas sem botão

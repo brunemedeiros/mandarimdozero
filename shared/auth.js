@@ -271,6 +271,8 @@ async function onUserLoggedIn(user){
   if (typeof teacherInvitesAfterLogin === 'function') teacherInvitesAfterLogin();
   // Mural (087): link da turma guardado e o "+N" no Perfil.
   if (typeof muralAfterLogin === 'function') muralAfterLogin();
+  // Recomeçar o curso (123): aviso depois de recomeçar/desfazer e a retomada guiada de quem volta depois de 60 dias.
+  if (typeof RecomecarCurso !== 'undefined') RecomecarCurso.afterLogin();
 }
 
 // ---------- Admin Mode ON/OFF (topbar) ----------
@@ -590,6 +592,10 @@ async function saveState(){
     // vitalício menor que o que a mais nova já gravou).
     const blockKey = progressBlockKey(existing && existing.data);
     const existingPayload = existing && existing.data && existing.data[blockKey];
+    // Recomeçar o curso (migration 123, shared/recomecar-curso.js): o servidor tem um recomeço ou desfazer MAIS NOVO que o
+    // carregado nesta aba (época maior). Nunca grava por cima: avisa e recarrega. Vem antes do guarda-corpo de campos
+    // vitalícios porque, depois de um recomeço, a aba velha tem XP MAIOR e passaria por ele.
+    if (typeof RecomecarCurso !== 'undefined' && RecomecarCurso.blocksSave(existingPayload)) return;
     if (existingPayload){
       const regressed = MONOTONIC_PROGRESS_FIELDS.find(field => Number(payload[field]) < Number(existingPayload[field] || 0));
       if (regressed){
@@ -610,14 +616,29 @@ async function saveState(){
     let blockPayload = payload;
     let accountMerged = null;
     if (typeof AccountProgress !== 'undefined'){
+      // Recorde de dias seguidos (janela da sequência do topo, 2026-10-30): guardado, sequência e histórico de dias. Só sobe
+      // (mergeAccount fica com o maior). Fora do serializeState de propósito: os testes de paridade comparam aquele objeto.
+      payload.bestStreak = AccountProgress.bestStreakOf(STATE);
       accountMerged = AccountProgress.mergeAccount(AccountProgress.deriveAccountFromRow(existing && existing.data), AccountProgress.pickAccount(payload));
       if (progressAccountBase) blockPayload = Object.assign({}, payload, AccountProgress.mirrorForBlock(payload, progressAccountBase));
     }
+    // Época do recomeço vai junto com o bloco (sem recomeço, o mesmo objeto: nada muda para quem nunca recomeçou).
+    if (typeof RecomecarCurso !== 'undefined') blockPayload = RecomecarCurso.stampForSave(blockPayload);
     const merged = Object.assign({}, existing && existing.data, { [blockKey]: blockPayload });
+    // P1 (docs/p1-memoria-por-idioma.md): memória dos cartões da professora e próprios é do IDIOMA ESTUDADO. Junta com a
+    // leitura fresca (fica a cópia de mais histórico), grava em _lang[APP_KEY] e sobe o espelho dos outros cursos do idioma.
+    if (typeof LangCardMemory !== 'undefined'){
+      const mem = LangCardMemory.prepareSave(existing && existing.data, APP_KEY, blockKey, blockPayload, new Date().toISOString());
+      merged[blockKey] = mem.payload;
+      Object.assign(merged, mem.otherBlocks);
+      if (mem.lang) merged[LangCardMemory.KEY] = mem.lang;
+    }
     if (accountMerged) merged._account = accountMerged;
     if (pendingAccountUiLanguage){
       merged._meta = Object.assign({}, merged._meta, { uiLanguage: pendingAccountUiLanguage });
     }
+    // Retomada guiada (60 dias): o dia para o qual a janela já apareceu (uma vez por retorno).
+    if (typeof RecomecarCurso !== 'undefined') merged._meta = RecomecarCurso.metaForSave(merged._meta);
     if (CourseStorage.isPerSiteLanguage()){
       // C5: registra o curso iniciado e qual é o atual (só acrescenta; nunca muda registro existente).
       const courseId = CourseStorage.activeCourseId(APP_KEY, pageSiteLanguage(existing && existing.data));
@@ -735,10 +756,12 @@ async function loadState(){
 
       progressAccountUiLanguage = (typeof uiLanguageFromProgressData === 'function' && data)
         ? uiLanguageFromProgressData(data.data) : null;
-      progressAccountIsNew = !(data && data.data && Object.keys(data.data).some(k => k !== '_meta' && k !== '_account'));
+      progressAccountIsNew = !(data && data.data && Object.keys(data.data).some(k => k !== '_meta' && k !== '_account' && k !== '_lang'));
       const blockKey = progressBlockKey(data && data.data);
+      const langMemory = typeof LangCardMemory !== 'undefined' ? LangCardMemory : null;
       if (data && data.data && data.data[blockKey]){
-        applySerializedState(data.data[blockKey]);
+        // P1: o bloco do curso com a memória do idioma (cartões da professora e próprios) por cima; ver shared/lang-card-memory.js.
+        applySerializedState(langMemory ? langMemory.blockForLoad(data.data, APP_KEY, blockKey) : data.data[blockKey]);
       } else if (typeof loadLegacyState === 'function' && data && data.data
         && (!CourseStorage.isPerSiteLanguage() || CourseStorage.isLegacyCourse(APP_KEY, pageSiteLanguage(data.data)))){
         // Hook opcional: um idioma que já persistia progresso ANTES do
@@ -749,6 +772,11 @@ async function loadState(){
         // novo, nunca teve formato antigo pra migrar).
         loadLegacyState(data.data);
       }
+      // P1: curso sem bloco ainda (curso novo de um idioma que a conta já estuda): a memória dos cartões da professora e
+      // próprios vem do idioma (antes começava do zero). Só sobe progresso (nunca troca por uma cópia com menos histórico).
+      if (langMemory && data && data.data && !data.data[blockKey] && typeof applyLanguageCardMemory === 'function'){
+        applyLanguageCardMemory(langMemory.memoryEntriesForLoad(data.data, APP_KEY));
+      }
       // E3/C2: sequência de dias, lições do dia e afins vêm da CONTA (soma dos blocos), por cima do que o bloco trouxe.
       // Guarda antes o que é só DESTE idioma, para o espelho do bloco não receber dias estudados no outro (ver saveState).
       if (data && data.data && typeof AccountProgress !== 'undefined'){
@@ -758,6 +786,11 @@ async function loadState(){
           progressAccountBase = AccountProgress.snapshotBase(ownSnapshot, STATE);
         }
         catch (e) { console.error('Erro ao aplicar progresso da conta:', e); }
+      }
+      // Recomeçar o curso: lembra a época carregada; se mudou desde o último carregamento desta página, recarrega.
+      if (typeof RecomecarCurso !== 'undefined' && data && data.data){
+        const courseId = CourseStorage.activeCourseId(APP_KEY, pageSiteLanguage(data.data));
+        if (!RecomecarCurso.onLoaded(data.data, blockKey, courseId)) return;
       }
       // Só chega aqui depois de uma leitura bem-sucedida (com ou sem dado
       // pra essa conta -- as duas são um resultado válido, "conta nova"

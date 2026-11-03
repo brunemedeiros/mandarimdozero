@@ -711,6 +711,10 @@ pertencentes à mesma unidade de conteúdo.
 
 FSRS é global por usuário.
 
+Onde a memória é guardada (P1, 2026-10-29): cartões da trilha, por curso (bloco do curso em `progress.data`); cartões da
+professora e próprios, por idioma estudado (`progress.data._lang[<appKey>]`, com espelho nos blocos dos cursos). Ver
+`docs/p1-memoria-por-idioma.md`.
+
 Não haverá presets de FSRS específicos por Deck.
 
 Configurações globais incluem:

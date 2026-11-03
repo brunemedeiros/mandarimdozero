@@ -1,0 +1,32 @@
+/* Etapa 6 ("Voz da Prof. Brune"): boas-vindas da 1ª lição do curso (shared/core/boas-vindas.js).
+   Só tokens do site (cada index.html define os valores claro/escuro): --brand-fill, --paper, --paper-warm, --paper-line,
+   --ink, --ink-soft, --seal-red-dark. Carregado depois do <style> do site, igual aos outros .css de shared/. */
+.bv{ text-align:left; color:var(--ink); }
+.bv-a{ max-width:560px; margin:8px auto 0; }
+.bv-quem{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.bv-foto{ width:52px; height:52px; border-radius:50%; object-fit:cover; flex:none;
+  border:2px solid var(--paper); box-shadow:0 0 0 2px var(--brand-fill); }
+.bv-kicker{ font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--seal-red-dark); }
+.bv-assina{ font-size:15px; font-weight:800; color:var(--ink); }
+.bv-titulo{ font-size:24px; line-height:1.25; font-weight:800; margin:0 0 8px; color:var(--ink); }
+/* O título recebe o foco por programa (tabindex="-1") só para o leitor de tela anunciar o cartão; não é clicável. */
+.bv-titulo:focus, .bv-titulo:focus-visible{ outline:none; }
+.bv-texto{ font-size:16px; line-height:1.5; color:var(--ink-soft); margin:0 0 16px; }
+.bv-lista{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+.bv-lista li{ display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:14px;
+  background:var(--paper-warm); border:1px solid var(--paper-line); }
+.bv-ic{ width:40px; height:40px; flex:none; display:grid; place-items:center; border-radius:12px; font-size:20px;
+  background:color-mix(in srgb, var(--brand-fill) 14%, transparent); }
+.bv-item{ min-width:0; }
+.bv-lista b{ display:block; font-size:15.5px; font-weight:800; color:var(--ink); }
+.bv-lista small{ display:block; font-size:14px; line-height:1.45; color:var(--ink-soft); margin-top:2px; }
+.bv-tempo{ margin:14px 0 0; font-size:14px; font-weight:700; color:var(--ink-soft); text-align:center; }
+/* B: bloco dentro da tela "Lição concluída!" */
+.bv-b{ margin:18px 0 14px; padding:16px; border-radius:16px; background:var(--paper);
+  border:1.5px solid color-mix(in srgb, var(--brand-fill) 45%, var(--paper-line)); }
+.bv-b .bv-quem{ margin-bottom:10px; }
+.bv-b .bv-foto{ width:44px; height:44px; }
+.bv-b h3{ font-size:18px; line-height:1.3; font-weight:800; margin:0 0 12px; color:var(--ink); }
+.bv-b .bv-lista li{ padding:10px 12px; }
+.bv-b .bv-ic{ width:36px; height:36px; font-size:18px; }
+@media (max-width:700px){ .bv-titulo{ font-size:22px; } }

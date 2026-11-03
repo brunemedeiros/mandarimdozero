@@ -7,9 +7,11 @@
 const DLG = { run: 0, check: null };
 const DLG_AUTOPLAY_KEY = 'dlg_autoplay';
 
-// Lado do balão: à esquerda quem abre o diálogo, à direita o outro (aceita falante com qualquer nome, ex.: "Garçom").
-// Motor geral (veio do zh). O zh usa (LANG_HOOKS.dlgSide); o fr continua pondo à direita só quem se chama "B" até a dona decidir.
+// Lado do balão (regra de todos os sites, decisão da dona em 2026-10-30): à esquerda quem abre o diálogo, à direita o outro
+// (aceita falante com qualquer nome, ex.: "Garçom"). Diálogo em que a aluna faz o papel dela mesma (`learner`: chave do
+// falante que é ela) segue o WhatsApp: ela sempre à direita, quem conversa com ela à esquerda, não importa quem começa.
 function dlgSpeakerSide(dlg, spk){
+  if (dlg.learner) return spk === dlg.learner ? 'b' : 'a';
   const first = dlg.lines[0].spk;
   return spk === first ? 'a' : 'b';
 }

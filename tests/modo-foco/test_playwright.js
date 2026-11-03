@@ -81,7 +81,7 @@ async function bootPage(browser, lang, port, theme, viewport){
 const state = (page) => page.evaluate(() => {
   const vis = sel => Array.from(document.querySelectorAll(sel)).some(el => getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().height > 0);
   return { focus: document.body.classList.contains('lesson-focus'), owner: document.body.dataset.activityFocus || null,
-    topbar: vis('.topbar'), sidebar: vis('.sidebar'), cards: vis('.right-cards'), flag: vis('.activity-report-btn') };
+    topbar: vis('.topbar'), sidebar: vis('.sidebar'), cards: vis('.right-cards'), flag: vis('.activity-report-btn, .activity-flag-btn') };
 });
 
 (async () => {
@@ -99,13 +99,14 @@ const state = (page) => page.evaluate(() => {
     await page.waitForSelector('.conj-tense-box');
     s = await state(page);
     check('fr conj: sessão em foco (sem topo, menu e cartões; com ⚑)', s.focus && s.owner === 'conjugaison' && !s.topbar && !s.sidebar && !s.cards && s.flag, s);
-    const bar = await page.evaluate(() => { const b = document.querySelector('#conj-practice-wrap .activity-focus-bar');
-      return b && b.querySelector('#conj-back-to-select') && b.querySelector('[data-report-flag]') ? true : false; });
-    check('fr conj: link de voltar e ⚑ na mesma barra', bar);
-    await page.click('.activity-report-btn');
+    // Prática no molde da trilha (2026-10-26): barra com progresso, ⚑, ⌨️ e X no lugar do link de voltar.
+    const bar = await page.evaluate(() => { const b = document.querySelector('#conj-practice-wrap .activity-lesson-bar');
+      return b && b.querySelector('.activity-exit-btn') && b.querySelector('[data-report-flag]') && b.querySelector('.activity-kbd-btn') ? true : false; });
+    check('fr conj: X, ⌨️ e ⚑ na mesma barra (molde da trilha)', bar);
+    await page.click('#conj-practice-wrap .activity-flag-btn');
     check('fr conj: ⚑ abre o report', await page.evaluate(() => { const m = document.getElementById('report-modal'); return !!m && getComputedStyle(m).display !== 'none'; }));
     await page.evaluate(() => { const m = document.getElementById('report-modal'); if (typeof closeReportModal === 'function') closeReportModal(); else if (m) m.style.display = 'none'; });
-    await page.click('#conj-back-to-select');
+    await page.click('#conj-practice-wrap .activity-exit-btn');
     s = await state(page);
     check('fr conj: voltar à seleção desliga o foco', !s.focus && !s.owner && s.topbar && s.sidebar, s);
     // Sessão aberta e troca de aba por fora (ex.: rota): o foco não fica preso.
@@ -170,7 +171,7 @@ const state = (page) => page.evaluate(() => {
     await page.evaluate(() => switchTab('conjugaison'));
     await page.click('#conj-start-btn');
     await page.waitForSelector('.conj-tense-box');
-    const m = await page.evaluate(() => { const nav = document.querySelector('.bottom-nav'); const f = document.querySelector('#conj-practice-wrap .activity-report-btn').getBoundingClientRect();
+    const m = await page.evaluate(() => { const nav = document.querySelector('.bottom-nav'); const f = document.querySelector('#conj-practice-wrap .activity-flag-btn').getBoundingClientRect();
       return { nav: !!nav && getComputedStyle(nav).display !== 'none', flag: Math.round(f.width), noOverflow: document.documentElement.scrollWidth <= window.innerWidth + 1 }; });
     check('celular: sem barra de baixo no foco, ⚑ com 44px, sem rolagem lateral', !m.nav && m.flag >= 44 && m.noOverflow, m);
     check('celular: zero pageerror', errors.length === 0, errors);

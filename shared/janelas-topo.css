@@ -1,0 +1,124 @@
+/* Janelas do topo: sequência (🔥, shared/janelas-topo.js) e XP da semana (⭐, shared/xp-semana.js), mesmo desenho
+   (decisão da dona, 2026-10-30; docs/janelas-topo-proposta.md). Comum a todos os sites: só tokens que já existem em todos e
+   nos dois temas: --brand-fill/--on-brand-fill (caixa da marca com texto, igual nos dois temas), --success-fill/
+   --on-success-fill (✓ dos dias), --paper, --paper-warm, --paper-line, --ink, --ink-soft, --seal-red-dark, --shadow-lift,
+   --font-display, --font-body. Nenhuma cor nova. Substitui shared/xp-semana.css. */
+
+/* Botões do topo (🔥 e ⭐): só o alvo de toque; o desenho continua sendo o .pill de cada site. */
+.xp-week-btn,
+.tpop-btn{ display:flex; align-items:center; flex-shrink:0; background:none; border:0; padding:0; margin:0; font:inherit; color:inherit; cursor:pointer; border-radius:999px; }
+.tpop-btn:focus-visible{ outline:2px solid var(--brand-fill); outline-offset:2px; }
+:root:root .stats-pills .tpop-btn[aria-expanded="true"] .pill.pill{ background: var(--paper-warm); border-color: var(--brand-fill); box-shadow: 0 0 0 1px var(--brand-fill); }
+@media (max-width: 899px){ .tpop-btn{ min-height:44px; } }
+
+.tpop{
+  position:fixed; z-index:var(--z-dropdown, 600);
+  width:340px; max-width:calc(100vw - 32px); box-sizing:border-box;
+  background: var(--paper); color: var(--ink); font-family: var(--font-body);
+  border:1px solid var(--paper-line); border-radius:18px; box-shadow: var(--shadow-lift);
+  overflow:visible;
+}
+.tpop:focus{ outline:none; }
+.tpop:focus-visible{ outline:2px solid var(--brand-fill); outline-offset:2px; }
+/* Bico apontando para o pill (na cor do cabeçalho). --caret-x vem do JS. */
+.tpop::before{
+  content:""; position:absolute; top:-7px; left:calc(var(--caret-x, 50%) - 8px);
+  width:16px; height:16px; background: var(--brand-fill); transform:rotate(45deg); border-radius:3px 0 0 0;
+}
+.tpop-clip{ border-radius:17px; overflow:hidden; position:relative; }
+
+/* ---- Cabeçalho: caixa da marca com texto (fundo --brand-fill, texto --on-brand-fill) ---- */
+.tpop-head{
+  position:relative; background: var(--brand-fill); color: var(--on-brand-fill);
+  padding:18px 104px 18px 20px; min-height:104px; box-sizing:border-box;
+}
+.tpop-big{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin:0; line-height:1; }
+.tpop-num{ font-family: var(--font-display); font-size:44px; font-weight:800; letter-spacing:-0.02em; }
+.tpop-unit{ font-size:17px; font-weight:800; }
+.tpop-headline{ font-family: var(--font-display); font-size:24px; font-weight:800; line-height:1.15; margin:0; }
+.tpop-sub{ margin:8px 0 0; font-size:14px; font-weight:600; line-height:1.4; }
+/* Ícone grande à direita: colorido quando a sequência está de pé; em cinza e apagado quando zerada (aria-hidden). */
+.tpop-art{ position:absolute; right:14px; top:50%; transform:translateY(-50%) rotate(-6deg); font-size:62px; line-height:1; pointer-events:none; }
+.tpop-art .emo{ width:1.15em; height:1.15em; }
+.tpop-art.is-off{ filter: grayscale(1) brightness(1.9); opacity:.4; }
+/* "Hoje ainda não": a chama fica um pouco apagada (sem cinza), sinal de que falta o dia de hoje. */
+.tpop-art.is-wait{ opacity:.7; }
+
+/* ---- Corpo ---- */
+.tpop-body{ padding:16px 18px 18px; display:flex; flex-direction:column; gap:14px; }
+.tpop-sec-head{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin:0 0 10px; }
+.tpop-sec-title{ font-size:13px; font-weight:800; margin:0; }
+.tpop-sec-aside{ font-size:12.5px; color: var(--ink-soft); font-weight:700; }
+
+/* Semana (seg a dom) */
+.tpop-week{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; }
+.tpop-day{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+.tpop-dot{
+  width:32px; height:32px; border-radius:50%; box-sizing:border-box; display:flex; align-items:center; justify-content:center;
+  border:2px solid var(--paper-line); background: var(--paper); font-size:15px; font-weight:900;
+}
+.tpop-day.is-done .tpop-dot{ background: var(--success-fill); border-color: var(--success-fill); color: var(--on-success-fill); }
+.tpop-day.is-future .tpop-dot{ border-style:dashed; background:transparent; }
+.tpop-day.is-today .tpop-dot{ box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--brand-fill); }
+.tpop-dlabel{ font-size:11.5px; font-weight:700; color: var(--ink-soft); }
+.tpop-day.is-today .tpop-dlabel{ color: var(--seal-red-dark); font-weight:900; }
+.tpop-day.is-future .tpop-dlabel{ opacity:.75; }
+
+/* Linha de dado (recorde, total) */
+.tpop-line{ display:flex; align-items:center; gap:10px; font-size:14px; padding-top:12px; border-top:1px solid var(--paper-line); }
+.tpop-line-label{ flex:1; min-width:0; font-weight:700; }
+.tpop-line-value{ font-weight:900; white-space:nowrap; }
+.tpop-chip{ display:inline-block; margin-left:6px; padding:2px 8px; border-radius:999px; font-size:11.5px; font-weight:800; background: var(--brand-fill); color: var(--on-brand-fill); white-space:nowrap; vertical-align:1px; }
+
+/* Cartão (amigos / total do curso) */
+.tpop-card{ display:flex; flex-wrap:wrap; align-items:center; gap:10px 12px; background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:14px; padding:12px 14px; }
+.tpop-card-icon{ font-size:26px; line-height:1; flex-shrink:0; }
+.tpop-card-text{ flex:1; min-width:0; }
+.tpop-card-title{ font-size:14px; font-weight:800; margin:0; }
+.tpop-card-sub{ font-size:12.5px; color: var(--ink-soft); margin:2px 0 0; line-height:1.35; }
+.tpop-card-sub strong{ color: var(--ink); }
+.tpop-card.has-btn .tpop-card-text{ flex:1 1 calc(100% - 50px); }
+.tpop-card .tpop-link{ margin-left:38px; }
+.tpop-link{
+  flex-shrink:0; font:inherit; font-size:13px; font-weight:800; cursor:pointer;
+  background:transparent; color: var(--seal-red-dark); border:2px solid currentColor; border-radius:999px; padding:6px 12px;
+}
+.tpop-link:hover{ background: color-mix(in srgb, var(--brand-fill) 10%, transparent); }
+.tpop-link:focus-visible{ outline:2px solid var(--brand-fill); outline-offset:2px; }
+
+.tpop-note{ font-size:12px; color: var(--ink-soft); margin:0; line-height:1.4; }
+
+/* XP: colunas das 4 semanas (antigas à esquerda, esta semana à direita) */
+.tpop-bars{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; align-items:end; }
+.tpop-bar{ display:flex; flex-direction:column; align-items:center; gap:5px; }
+.tpop-bar-val{ font-size:12.5px; font-weight:800; color: var(--ink-soft); }
+.tpop-bar-track{ width:100%; max-width:52px; height:84px; display:flex; align-items:flex-end; }
+.tpop-bar-fill{ width:100%; border-radius:8px 8px 3px 3px; background: color-mix(in srgb, var(--ink-soft) 35%, var(--paper)); min-height:4px; }
+.tpop-bar-label{ font-size:11.5px; font-weight:700; color: var(--ink-soft); text-align:center; line-height:1.2; min-height:2.4em; }
+.tpop-bar.is-current .tpop-bar-fill{ background: var(--brand-fill); }
+.tpop-bar.is-current .tpop-bar-val{ color: var(--ink); font-size:13.5px; }
+.tpop-bar.is-current .tpop-bar-label{ color: var(--seal-red-dark); font-weight:900; }
+
+/* Celular: a janela ocupa a largura com 16px de margem; o botão do cartão desce e vira 44px. */
+@media (max-width: 599px){
+  .tpop{ width:calc(100vw - 32px); }
+  .tpop-head{ padding-right:92px; }
+  .tpop-art{ font-size:54px; right:12px; }
+  .tpop-card .tpop-link{ flex:1 1 auto; min-height:44px; }
+}
+
+/* Frase "+N XP a mais que na semana passada" (só quando a semana atual é maior). */
+.tpop-better{ margin:0; font-size:13.5px; font-weight:800; color: var(--ink); display:flex; align-items:center; gap:6px; }
+.tpop-better::before{ content:"↑"; display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%;
+  background: var(--success-fill); color: var(--on-success-fill); font-size:13px; font-weight:900; flex-shrink:0; }
+.tpop-actions{ display:flex; }
+.tpop[hidden]{ display:none; }
+.tpop .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+/* Janela da sequência depois da lição (shared/core/gamificacao.js): semana de segunda a domingo, dias que ainda vão chegar
+   tracejados (mesmo desenho da janela do topo). */
+.streak-day-item.future .streak-day-circle{ border-style:dashed; background:transparent; }
+
+@media (max-width: 599px){
+  .tpop-actions .tpop-link{ flex:1 1 auto; min-height:44px; }
+}

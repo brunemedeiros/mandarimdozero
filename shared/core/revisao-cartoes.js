@@ -85,7 +85,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
         ${LANG_HOOKS.reviewTyped.inputExtraHTML(view.compareAnswerText)}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `${LANG_HOOKS.reviewTyped.hintHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
+    ` : `${localState.ptBr ? typedPtBrNoteHTML(localState.ptBr) : LANG_HOOKS.reviewTyped.hintHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
   `;
 
   wireCustomAudioButtons(mountEl);
@@ -102,7 +102,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      LANG_HOOKS.reviewTyped.check(inputEl.value, view.compareAnswerText, localState); // wasCorrect + quase (fr) ou tom (zh)
+      reviewTypedCheckPtBr(inputEl.value, view.compareAnswerText, localState); // wasCorrect + quase (fr) ou tom (zh) + Portugal (pt)
       renderClozeCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
@@ -160,7 +160,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
         ${LANG_HOOKS.reviewTyped.inputExtraHTML(view.compareAnswerText)}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `${LANG_HOOKS.reviewTyped.hintHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
+    ` : `${localState.ptBr ? typedPtBrNoteHTML(localState.ptBr) : LANG_HOOKS.reviewTyped.hintHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -183,7 +183,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      LANG_HOOKS.reviewTyped.check(inputEl.value, view.compareAnswerText, localState); // wasCorrect + quase (fr) ou tom (zh)
+      reviewTypedCheckPtBr(inputEl.value, view.compareAnswerText, localState); // wasCorrect + quase (fr) ou tom (zh) + Portugal (pt)
       renderTypeAnswerCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
@@ -359,3 +359,15 @@ function cardOriginTitle(card){
 
 // Combinar: o jogo não usa mais timer; a função vazia fica para as chamadas que já existiam (troca de aba, voltar aos modos).
 function stopMatchTimer(){}
+
+// Correção do digitar da Revisão (LANG_HOOKS.reviewTyped.check) com a regra do português de Portugal: no site com
+// LANG_HOOKS.typedAnswerLang = 'pt-BR', forma de Portugal que seria aceita na forma do Brasil = Quase (nota Difícil,
+// pelo wrongGrade do site com st.almost) e st.ptBr leva os pares para a devolutiva. Vale também para os cartões do Banco.
+function reviewTypedCheckPtBr(given, expected, st){
+  LANG_HOOKS.reviewTyped.check(given, expected, st);
+  if (st.ptBr) delete st.ptBr;
+  const ptBr = typeof typedPtBrAdjust === 'function'
+    ? typedPtBrAdjust(given, (texto) => { const s2 = {}; LANG_HOOKS.reviewTyped.check(texto, expected, s2); return !!s2.wasCorrect; })
+    : null;
+  if (ptBr){ st.wasCorrect = true; st.almost = true; st.almostKind = 'ptpt'; st.ptBr = ptBr; }
+}

@@ -16,7 +16,7 @@ const seed = (page, n) => page.evaluate(n => {
 }, n);
 const modal = page => page.evaluate(() => { const m = document.getElementById('flashcard-limit-modal'); const a = m.querySelector('a[data-premium-contact]'); return { open: m.style.display === 'flex', text: m.innerText, cta: !!m.querySelector('[data-limit-premium-cta]'), mail: a ? a.getAttribute('href') : null }; });
 // Etapa 5: botão "Fale com a Prof. Brune" = e-mail da professora com o @ e o curso no assunto/texto.
-const mailOk = (m, course) => !!m.mail && m.mail.startsWith('mailto:brunemed1310@gmail.com?subject=') && decodeURIComponent(m.mail).includes(course) && decodeURIComponent(m.mail).includes('@aluna.teste');
+const mailOk = (m, course) => !!m.mail && m.mail.startsWith('mailto:contato@profbrune.com.br?subject=') /* e-mail trocado pelo commit c9e90275 */ && decodeURIComponent(m.mail).includes(course) && decodeURIComponent(m.mail).includes('@aluna.teste');
 const closeModal = page => page.evaluate(() => { document.getElementById('flashcard-limit-modal').style.display = 'none'; });
 
 (async () => {

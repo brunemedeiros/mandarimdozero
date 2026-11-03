@@ -1,0 +1,312 @@
+{
+ "_sobre": "Retrato (2026-10-26, só leitura) de 16 Desafios publicados NA PRODUÇÃO (tabela challenges) que não existem em nenhuma fonte do repositório (fr/challenges.js nem lote-*.json): a primeira leva, gerada antes dos lotes. O overlay en (docs/i18n/challenges-en.json) segue a produção; o validador usa este retrato como fonte destes ids. Só os campos de texto (sem áudio nem links). Os textos já estão COM as correções de docs/rollout-sql/desafios-correcoes-2026-10-26.sql (aspectos, Embora, explicações, opção certa do expr-a1-003, 2º exemplo do expr-b2-002, lt-a1-001 sem a forma de Portugal); se o SQL não for aplicado, a produção ainda tem os textos antigos (o SELECT de backup do SQL mostra os dois).",
+ "challenges": [
+  {
+   "id": "accent-a1-001",
+   "type": "accent",
+   "level": "A1",
+   "targetText": "école",
+   "explanation": "\"e\" tem acento agudo."
+  },
+  {
+   "id": "accent-a2-001",
+   "type": "accent",
+   "level": "A2",
+   "targetText": "à bientôt",
+   "explanation": "\"a\" tem acento grave, \"o\" tem acento circunflexo."
+  },
+  {
+   "id": "accent-b2-001",
+   "type": "accent",
+   "level": "B2",
+   "targetText": "préférer",
+   "explanation": "Os dois primeiros \"e\" têm acento agudo: pré-fé-rer."
+  },
+  {
+   "id": "expr-a1-001",
+   "type": "expression",
+   "level": "A1",
+   "register": "neutral",
+   "canonicalExpression": "avoir faim",
+   "meaning": {
+    "fr": "Avoir faim veut dire vouloir manger.",
+    "pt": "Sentir fome, ter vontade de comer."
+   },
+   "question": "Que signifie 'avoir faim' ?",
+   "options": [
+    "Être fatigué",
+    "Avoir soif",
+    "Vouloir manger",
+    "Être content"
+   ],
+   "correctAnswer": "Vouloir manger",
+   "explanation": "C'est une expression pour dire que vous voulez manger. On utilise 'avoir' avec 'faim'.",
+   "example": {
+    "text": "J'ai très faim. Je veux manger."
+   },
+   "secondExample": {
+    "text": "Nous avons faim après le sport."
+   }
+  },
+  {
+   "id": "expr-a1-002",
+   "type": "expression",
+   "level": "A1",
+   "register": "neutral",
+   "canonicalExpression": "avoir soif",
+   "meaning": {
+    "fr": "C'est quand on veut boire.",
+    "pt": "É a sensação de querer beber."
+   },
+   "question": "Que signifie cette expression ?",
+   "options": [
+    "Avoir faim",
+    "Avoir soif",
+    "Avoir froid",
+    "Avoir chaud"
+   ],
+   "correctAnswer": "Avoir soif",
+   "explanation": "L'expression 'avoir soif' veut dire qu'on a besoin de boire. C'est comme quand il fait très chaud.",
+   "example": {
+    "text": "Il fait chaud, j'ai soif."
+   },
+   "secondExample": {
+    "text": "Après le sport, nous avons soif."
+   }
+  },
+  {
+   "id": "expr-a1-003",
+   "type": "expression",
+   "level": "A1",
+   "register": "neutral",
+   "canonicalExpression": "avoir raison",
+   "meaning": {
+    "fr": "C'est quand on a la bonne opinion ou la bonne réponse.",
+    "pt": "É quando você tem a opinião certa ou a resposta correta."
+   },
+   "question": "Que signifie cette expression ?",
+   "options": [
+    "Être fatigué",
+    "Avoir faim",
+    "Ne pas se tromper",
+    "Avoir soif"
+   ],
+   "correctAnswer": "Ne pas se tromper",
+   "explanation": "Quand vous avez raison, votre idée ou votre réponse est correcte. C'est le contraire d'avoir tort.",
+   "example": {
+    "text": "Paul dit : 'Je pense que j'ai raison.'"
+   },
+   "secondExample": {
+    "text": "Elle a raison, le magasin est fermé."
+   }
+  },
+  {
+   "id": "expr-a2-001",
+   "type": "expression",
+   "level": "A2",
+   "register": "familiar",
+   "canonicalExpression": "coup de main",
+   "meaning": {
+    "fr": "Une aide, une assistance.",
+    "pt": "Uma ajuda, uma mãozinha."
+   },
+   "question": "Que signifie cette expression ?",
+   "options": [
+    "Un problème difficile",
+    "Une aide ponctuelle",
+    "Une grande fatigue",
+    "Une idée soudaine"
+   ],
+   "correctAnswer": "Une aide ponctuelle",
+   "explanation": "C'est une expression familière pour demander ou proposer de l'aide. Donner un coup de main à quelqu'un, c'est l'aider un peu.",
+   "example": {
+    "text": "J'ai besoin d'un coup de main pour porter ces cartons lourds."
+   },
+   "secondExample": {
+    "text": "Mes voisins m'ont donné un coup de main pour déménager."
+   }
+  },
+  {
+   "id": "expr-a2-002",
+   "type": "expression",
+   "level": "A2",
+   "register": "neutral",
+   "canonicalExpression": "avoir le trac",
+   "meaning": {
+    "fr": "Avoir peur ou être nerveux avant de faire quelque chose d'important.",
+    "pt": "Ficar nervoso ou com medo antes de fazer algo importante."
+   },
+   "question": "Que signifie l'expression 'avoir le trac' ?",
+   "options": [
+    "Être très content.",
+    "Avoir peur ou être nerveux.",
+    "Être fatigué.",
+    "Avoir faim."
+   ],
+   "correctAnswer": "Avoir peur ou être nerveux.",
+   "explanation": "C'est un sentiment de nervosité avant une performance ou un événement.",
+   "example": {
+    "text": "Avant de monter sur scène, l'acteur a eu le trac."
+   },
+   "secondExample": {
+    "text": "Quand elle doit parler en public, elle a toujours le trac."
+   }
+  },
+  {
+   "id": "expr-a2-003",
+   "type": "expression",
+   "level": "A2",
+   "register": "neutral",
+   "canonicalExpression": "faire la grasse matinée",
+   "meaning": {
+    "fr": "Dormir tard le matin, ne pas se lever tout de suite.",
+    "pt": "Dormir até tarde, acordar tarde."
+   },
+   "question": "Que signifie cette expression ?",
+   "options": [
+    "Se réveiller très tôt le matin.",
+    "Dormir beaucoup pendant la nuit.",
+    "Se lever tard le matin, ne pas se presser pour sortir du lit.",
+    "Faire une sieste pendant la journée."
+   ],
+   "correctAnswer": "Se lever tard le matin, ne pas se presser pour sortir du lit.",
+   "explanation": "Faire la grasse matinée veut dire dormir plus longtemps le matin. C'est quand on ne veut pas se lever tout de suite.",
+   "example": {
+    "text": "Dimanche, j'aime faire la grasse matinée et ne pas me lever tôt."
+   },
+   "secondExample": {
+    "text": "Après la fête, nous avons fait la grasse matinée samedi."
+   }
+  },
+  {
+   "id": "expr-b2-001",
+   "type": "expression",
+   "level": "B2",
+   "register": "neutral",
+   "canonicalExpression": "mettre les points sur les i",
+   "meaning": {
+    "fr": "Clarifier tous les détails, être précis sur tous les aspects d'une situation ou d'un accord.",
+    "pt": "Esclarecer todos os detalhes, ser preciso sobre todos os aspectos de uma situação ou acordo."
+   },
+   "question": "Que signifie cette expression ?",
+   "options": [
+    "Être très fatigué",
+    "Clarifier les derniers détails et être précis",
+    "Se disputer pour des broutilles",
+    "Prendre une décision hâtive"
+   ],
+   "correctAnswer": "Clarifier les derniers détails et être précis",
+   "explanation": "Cette expression signifie qu'il faut finaliser les choses en précisant tous les éléments importants pour éviter toute ambiguïté.",
+   "example": {
+    "text": "Bien que le projet ait été approuvé en principe, il restait encore à mettre les points sur les i concernant les détails budgétaires."
+   },
+   "secondExample": {
+    "text": "Après la réunion, le manager a demandé à son équipe de mettre les points sur les i avant de soumettre le rapport final."
+   }
+  },
+  {
+   "id": "expr-b2-002",
+   "type": "expression",
+   "level": "B2",
+   "register": "familiar",
+   "canonicalExpression": "avoir un poil dans la main",
+   "meaning": {
+    "fr": "Ne pas aimer travailler, être paresseux.",
+    "pt": "Ser preguiçoso, ter aversão ao trabalho."
+   },
+   "question": "Que signifie cette expression ?",
+   "options": [
+    "Être très travailleur et efficace.",
+    "Avoir une grande dextérité manuelle.",
+    "Être paresseux et éviter le travail.",
+    "Avoir une petite douleur au doigt."
+   ],
+   "correctAnswer": "Être paresseux et éviter le travail.",
+   "explanation": "Cette expression signifie que quelqu'un est très paresseux et n'aime pas faire d'efforts. C'est l'inverse de quelqu'un de travailleur.",
+   "example": {
+    "text": "Bien que son projet soit ambitieux, il semble avoir un poil dans la main, car il repousse constamment les échéances."
+   },
+   "secondExample": {
+    "text": "Mon colocataire a vraiment un poil dans la main : il ne fait jamais la vaisselle."
+   }
+  },
+  {
+   "id": "expr-b2-003",
+   "type": "expression",
+   "level": "B2",
+   "register": "familiar",
+   "canonicalExpression": "ne pas y aller de main morte",
+   "meaning": {
+    "fr": "Agir avec beaucoup de force, d'énergie, sans retenue, de manière très directe ou virulente.",
+    "pt": "Agir com muita força, energia, sem hesitação, de forma muito direta ou virulenta."
+   },
+   "question": "Que signifie cette expression ?",
+   "options": [
+    "Parler avec douceur et diplomatie.",
+    "Agir avec force et détermination, sans modération.",
+    "Exprimer son opinion avec hésitation.",
+    "Critiquer de manière subtile et indirecte."
+   ],
+   "correctAnswer": "Agir avec force et détermination, sans modération.",
+   "explanation": "Cette expression signifie qu'on agit avec beaucoup d'énergie et de conviction, sans se retenir. Cela peut s'appliquer à une critique, une action ou une défense.",
+   "example": {
+    "text": "Bien que le sujet soit délicat, le conférencier n'y est pas allé de main morte pour dénoncer les injustices sociales."
+   },
+   "secondExample": {
+    "text": "Malgré les avertissements, elle a défendu son projet sans y aller de main morte face aux critiques acerbes."
+   }
+  },
+  {
+   "id": "lt-a1-001",
+   "type": "listen_translate",
+   "level": "A1",
+   "sentenceFr": "Je mange une pomme.",
+   "hintText": "Je ______ une pomme.",
+   "explanation": "",
+   "referenceTranslations": [
+    "Eu como uma maçã.",
+    "Estou comendo uma maçã.",
+    "Eu estou comendo uma maçã."
+   ]
+  },
+  {
+   "id": "lt-a2-001",
+   "type": "listen_translate",
+   "level": "A2",
+   "sentenceFr": "J'ai acheté un nouveau livre hier soir et je l'ai déjà commencé.",
+   "hintText": "J'ai acheté ______ livre ______ et je l'ai ______ commencé.",
+   "explanation": "",
+   "referenceTranslations": [
+    "Comprei um livro novo ontem à noite e já comecei.",
+    "Ontem à noite eu comprei um livro novo e já o iniciei.",
+    "Comprei um livro novo ontem e já comecei a ler."
+   ]
+  },
+  {
+   "id": "lt-b1-001",
+   "type": "listen_translate",
+   "level": "B1",
+   "sentenceFr": "Hier soir, j'ai regardé un film intéressant à la télévision, mais je me suis endormi avant la fin.",
+   "hintText": "Hier soir, j'ai regardé un film intéressant ______ la télévision, mais je me suis endormi ______ la fin.",
+   "explanation": "",
+   "referenceTranslations": [
+    "Ontem à noite, assisti a um filme interessante na televisão, mas adormeci antes do final.",
+    "Ontem à noite, eu vi um filme interessante pela TV, porém acabei dormindo antes de terminar.",
+    "Eu vi um filme legal na TV ontem à noite, mas peguei no sono antes do fim."
+   ]
+  },
+  {
+   "id": "lt-b2-001",
+   "type": "listen_translate",
+   "level": "B2",
+   "sentenceFr": "Même si le projet est ambitieux, nous sommes convaincus que nous parviendrons à le mener à bien grâce à la collaboration de tous.",
+   "hintText": "______ le projet est ambitieux, nous sommes ______ que nous parviendrons à le ______ à bien ______ à la collaboration de tous.",
+   "explanation": "A expressão 'mener à bien' significa concluir com sucesso, realizar algo de forma satisfatória.",
+   "referenceTranslations": [
+    "Mesmo que o projeto seja ambicioso, estamos confiantes de que conseguiremos levá-lo adiante graças à colaboração de todos.",
+    "Ainda que o projeto seja ambicioso, temos a convicção de que seremos capazes de concluí-lo com sucesso devido à cooperação de todos.",
+    "Embora o projeto seja ambicioso, estamos certos de que o finalizaremos com êxito pela colaboração geral."
+   ]
+  }
+ ]
+}

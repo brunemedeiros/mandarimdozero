@@ -30,6 +30,6 @@ for (const f of ['fr/app.js', 'zh/app.js', 'shared/core/quase-iguais-pinyin.js',
   check(`${f}: sem addXP(8) de fechar lição`, !/addXP\(8\)/.test(src));
 }
 // paridade 5d: finishCurrentLesson (fecha a lição) é comum aos sites, em shared/core/licao-base.js
-for (const f of ['shared/core/licao-base.js']) check(`${f}: fecha lição com LESSON_CLOSE_XP`, /addXP\(LESSON_CLOSE_XP\)/.test(read(f)));
+for (const f of ['shared/core/licao-base.js']) check(`${f}: fecha lição com LESSON_CLOSE_XP`, /addXP\(LESSON_CLOSE_XP[,)]/.test(read(f)) /* Etapa 6: pode levar { quiet: true } (1ª lição do curso, bloco B) */);
 console.log(`xp trilha: ${pass}/${pass + fail}`);
 process.exit(fail ? 1 : 0);

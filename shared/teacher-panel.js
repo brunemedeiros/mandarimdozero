@@ -12,10 +12,18 @@
 // Depende de: shared/permissions.js, shared/supabase-client.js, shared/auth.js,
 // fr/zh app.js (switchTab, APP_KEY) e os renders das abas acima.
 
-const TEACHER_PANEL_SECTIONS = ['students', 'flashcards', 'classlogs', 'materials', 'mural'];
+// Mural estilo Classroom (decisão da autora, 2026-10-29): Aulas e Material de apoio passaram para DENTRO do Mural
+// (abas Mural | Aulas e materiais | Pessoas, shared/mural.js). 'classlogs' e 'materials' continuam aceitos (atalhos da
+// ficha do aluno, avisos antigos) e abrem o Mural na aba Aulas e materiais.
+const TEACHER_PANEL_SECTIONS = ['students', 'flashcards', 'mural'];
+const TEACHER_PANEL_CONTAINERS = ['students', 'flashcards', 'reviewbank', 'classlogs', 'materials', 'mural', 'people'];
 const TEACHER_PANEL_STATE = { section: 'students', cardsSub: 'cards' };
 
 function switchTeacherPanelSection(section){
+  if ((section === 'classlogs' || section === 'materials') && typeof muralOpenTeacherTab === 'function'){
+    muralOpenTeacherTab('aulas', section);
+    section = 'mural';
+  }
   if (!TEACHER_PANEL_SECTIONS.includes(section)) section = 'students';
   TEACHER_PANEL_STATE.section = section;
   document.querySelectorAll('[data-teacher-section]').forEach(btn => {
@@ -23,10 +31,13 @@ function switchTeacherPanelSection(section){
     btn.classList.toggle('is-active', on);
     btn.setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  TEACHER_PANEL_SECTIONS.forEach(s => {
+  // Cada aba esconde todas as caixas; quem mostra a sua é o render (o Mural escolhe entre mural, aulas e pessoas).
+  TEACHER_PANEL_CONTAINERS.forEach(s => {
     const el = document.getElementById(`admin-${s}-content`);
-    if (el) el.style.display = s === section ? '' : 'none';
+    if (el) el.style.display = 'none';
   });
+  const shell = document.getElementById('admin-mural-shell');
+  if (shell) shell.style.display = section === 'mural' ? '' : 'none';
   // Cartões tem 2 partes: Cartões e Banco de Revisão (só com a permissão review_bank, plano Professora).
   const subnav = document.getElementById('admin-cards-subnav');
   const bankOk = typeof hasPermission === 'function' && hasPermission('review_bank');
@@ -41,11 +52,9 @@ function switchTeacherPanelSection(section){
     btn.classList.toggle('is-active', on);
     btn.setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  if (section === 'students') renderAdminStudentsView();
+  if (section === 'students'){ document.getElementById('admin-students-content').style.display = ''; renderAdminStudentsView(); }
   else if (section === 'flashcards') (bank ? renderReviewBankView() : renderAdminFlashcardsView());
-  else if (section === 'classlogs') renderAdminClassLogsView();
-  else if (section === 'mural') renderTeacherMuralSection();
-  else renderAdminSupportMaterialsView();
+  else renderTeacherMuralSection();
 }
 
 async function renderTeacherPanelView(){
@@ -63,7 +72,7 @@ async function renderTeacherPanelView(){
 const TBELL = { open: false, items: [], unread: 0, available: true, loaded: false, error: false, timer: null };
 const TBELL_LIMIT = 50;
 const TBELL_ICON = { supervisao: '🎓', mural: '📌' };
-const TBELL_EVENT_ICON = { mural_comment: '💬', mural_classroom_join: '🏫', student_inactive_alert: '👋' };
+const TBELL_EVENT_ICON = { mural_comment: '💬', mural_classroom_join: '🏫', student_inactive_alert: '👋', student_course_restart: '🔄', student_course_restart_undo: '🔄' };
 
 function teacherBellActive(){
   return TBELL.available && typeof CURRENT_USER !== 'undefined' && !!CURRENT_USER
@@ -120,6 +129,9 @@ function teacherBellText(n){
     if (n.event_type === 'mural_post') return t(p.classroom ? 'panel.tbell.ev.postClass' : 'panel.tbell.ev.post', v);
     if (n.event_type === 'mural_comment') return t('panel.tbell.ev.comment', v);
     if (n.event_type === 'mural_classroom_join') return t(p.new_link ? 'panel.tbell.ev.joinClassNew' : 'panel.tbell.ev.joinClass', v);
+    // Recomeçar o curso (123): aluno recomeçou do zero ou desfez.
+    if (n.event_type === 'student_course_restart') return t('panel.tbell.ev.restart', v);
+    if (n.event_type === 'student_course_restart_undo') return t('panel.tbell.ev.restartUndo', v);
   }
   return String((n && n.body) || '');
 }

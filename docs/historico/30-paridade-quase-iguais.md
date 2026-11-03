@@ -70,7 +70,7 @@ Ordem de carregamento (antes do `app.js`, depois dos `quase-iguais-*`): `licao-b
 
 ## Recursos do zh que podem ser ligados no fr (decisão da dona; ligar muda a tela do fr)
 
-- Lado do balão pelo primeiro falante (`dlgSpeakerSide`, já no motor comum): no fr, trocar `LANG_HOOKS.dlgSide`.
+- Lado do balão pelo primeiro falante (`dlgSpeakerSide`, já no motor comum): no fr, trocar `LANG_HOOKS.dlgSide`. Feito em 2026-10-30 (decisão da dona), com `dialogue.learner`: diálogo em que a aluna faz o papel dela mesma a deixa sempre à direita, quem fala com ela à esquerda (modelo WhatsApp). Nenhum diálogo atual mudou de lado; teste `tests/dialogo-lado/test_lado.js` 67/67.
   Importa para "diálogos com personagens nomeados".
 - "Manual da unidade" e "Frase completa": hoje só no zh (ver acima); para o fr, virar motor geral com as regras da família.
 - Passo `usage` (nota de uso) e o aviso de "tom" já estão no motor comum (o fr não tem conteúdo que os use).

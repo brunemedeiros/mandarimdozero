@@ -238,6 +238,8 @@ const STEP_STATE = {
   // onChallengesScreen). Guarda quantos cartões estão devidos AGORA pra
   // decidir, no clique de "Continuar", se leva direto pro Flashcard.
   onLessonBoundaryScreen: null,
+  // Etapa 6: a tela de conclusão da 1ª lição do curso mostrou o bloco "Recado da Prof. Brune" (shared/core/boas-vindas.js).
+  welcomeBShown: false,
   // Tela "Unidade concluída!" (Fase 4 da tarefa de conclusão de
   // lição/unidade) -- true só enquanto ela está na tela, entre o fim do
   // Ponto de verificação e a tela de Desafios de hoje. "Continuar" aqui
@@ -634,6 +636,7 @@ function wireStepNavButtons(){
       document.getElementById('path-list-wrap').style.display = 'block';
       document.getElementById('unit-detail-wrap').style.display = 'none';
       renderUnitsGrid();
+      showDeferredStreakCelebration(); // Etapa 6: a janela da sequência vem depois do Continuar, já na trilha
       return;
     }
 
@@ -651,6 +654,8 @@ function wireStepNavButtons(){
         switchTab('review');
         openReviewSession('flashcard');
       }
+      // Etapa 6: a janela da sequência não cobre mais a tela "Lição concluída!"; aparece agora, depois do Continuar.
+      showDeferredStreakCelebration();
       return;
     }
 
@@ -673,6 +678,8 @@ function wireStepNavButtons(){
     // pela navegação própria dos exercícios).
     if (stepKey === 'vocab'){
       const acq = STEP_STATE.acq;
+      // Cartão de boas-vindas da 1ª lição (Etapa 6): "Começar a lição →" vai para a 1ª palavra.
+      if (typeof welcomeAHandleNext === 'function' && welcomeAHandleNext()) return;
       if (acq.phase === 'intro'){
         const block = acq.blocks[acq.blockIdx];
         if (acq.introIdx < block.length - 1){
