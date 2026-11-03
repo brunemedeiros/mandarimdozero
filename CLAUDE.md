@@ -44,6 +44,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - **Português do Brasil coloquial** em todo texto de interface e notas (ex.: "pechinchar", não "regatear");
   sem "--" e sem "pra" em texto visível.
 - **Terminologia**: "aluno/aluna" = vínculo ativo em `teacher_students`; "usuário/conta" = qualquer perfil.
+- **Falar com a autora por NOME, não por código** (pedido dela, 2026-11-03): em listas, perguntas e pendências, citar sempre o item pela expressão/palavra (ex.: "avoir le cafard", "estar na fossa") junto do id (`expr-lote1-014`); só o id não diz nada para ela.
 - **Cor de botão**: trocar `background` sempre junto com `color`, usando tokens `--on-*` do próprio arquivo;
   validar fr/zh × claro/escuro (ver `.claude/rules/frontend-fr-zh.md`).
 - **Caixas da marca com texto** (botão, aba/chip selecionado, contador; decisão da autora, 2026-10-19, PR 370): fundo
