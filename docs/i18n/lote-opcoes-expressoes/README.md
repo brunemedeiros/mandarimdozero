@@ -27,3 +27,8 @@ Estado: rascunho em andamento (ver arquivos desta pasta).
 - O inglês dessas 3 (`meaning` em `docs/i18n/challenges-en.json`) foi atualizado no repositório (vale no site quando o PR for mesclado).
 - Ainda aguardam a autora: texto do significado de `avoir le cafard` (expr-lote1-014, hoje "estar na fossa / estar pra baixo"); gravação do lote das opções (Staging primeiro).
 - Regra de comunicação com a autora: ela não reconhece os códigos expr-...; sempre citar a expressão em francês e o sentido junto do código.
+
+## Staging (2026-11-03): GRAVADO e conferido
+- `aplicar-opcoes.sql` (122 UPDATEs, em 5 pedaços de 25) gravado no Staging com a autorização da dona; contagens: 122 com `optionsPt`, 23 com `questionMode`; hash da projeção no Staging = `dfad085f0db4c66720ddec68d35de914` = esperado (`esperado-hash.txt`).
+- Também no Staging e na produção em 2026-11-03: `avoir le cafard` (expr-lote1-014) "estar pra baixo" -> "estar para baixo" (escolha A da autora).
+- FALTA: produção (mesmo SQL, mesmo hash) e o PR do app (código já mesclado; inglês das opções em `docs/i18n/challenges-en.json`, ainda na branch). Ajuste pendente de revisão: `expr-a1m5-001` (Fais comme chez toi) mistura "Entra!" com "Sinta-se": trocar por "Entre! Sinta-se em casa!" antes de gravar em produção.
