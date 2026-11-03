@@ -28,7 +28,10 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
 const ETAPA6 = (v) => etapa7(v).split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
   .replace(/26a1\.svg(&quot;\);\\?">)⚡/g, '2b50.svg$1⭐')
   // Recomeçar o curso (2026-10-30, migration 123): caixa nova e vazia (hidden) em Configurações > Geral, montada por shared/recomecar-curso.js.
-  .replace(/<!-- Recomeçar este curso.*?-->(\\n|\n)\s*<article id=\\?"settings-restart-box\\?"[^>]*><\/article>(\\n|\n)\s*/g, '');
+  .replace(/<!-- Recomeçar este curso.*?-->(\\n|\n)\s*<article id=\\?"settings-restart-box\\?"[^>]*><\/article>(\\n|\n)\s*/g, '')
+  // Lacuna dos cartões de completar sem os três tracinhos (2026-11-03, pedido da dona: a borda já é o sublinhado): a árvore nova
+  // traz só um espaço dentro de <span class="cloze-blank">; a antiga trazia ___. Mesmo resto da cena.
+  .replace(/(<span class=\\?"cloze-blank\\?" id=\\?"cloze-blank\\?">)&nbsp;(<\/span>)/g, '$1___$2');
 const SEM_TOAST = (v) => v.replace(/\\?"toast\\?":\\?"[^"\\]*\\?"/, 'T');
 const TOAST_VAZIO = /\\?"toast\\?":\\?"\\?"/;
 const igualEtapa6 = (a, b) => { const x = ETAPA6(a), y = ETAPA6(b); return x === y || (TOAST_VAZIO.test(y) && SEM_TOAST(x) === SEM_TOAST(y)); };
