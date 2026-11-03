@@ -540,8 +540,21 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 .expr-filled{ color:var(--seal-red-dark); }
 #expr-turn-stage{ text-align:center; }
 #expr-turn-stage .expr-guess-label{ text-align:left; }
-.expr-final-ico{ font-size:44px; }
-.expr-final-title{ margin:6px 0 14px; font-size:20px; }
+/* Tela final: festa de quem completou (emoji que "pula", XP em destaque); fracasso fica sóbrio. Sem movimento com prefers-reduced-motion. */
+.expr-final-ico{ font-size:56px; line-height:1; }
+.expr-final.is-ok .expr-final-ico{ display:inline-block; animation:expr-final-pop .7s cubic-bezier(.2,1.4,.4,1) both; }
+.expr-final-title{ margin:8px 0 6px; font-size:24px; font-weight:900; }
+.expr-final-learned{ margin:0 0 14px; font-size:15px; color:var(--ink-soft); }
+.expr-final-learned strong{ color:var(--seal-red-dark); font-weight:900; }
+.expr-final-xp{ display:inline-flex; align-items:baseline; gap:6px; margin:0 0 16px; padding:8px 22px; border-radius:999px; background:var(--brand-fill); color:var(--on-brand-fill); box-shadow:0 3px 0 rgba(0,0,0,.18); }
+.expr-final-xp-num{ font-size:34px; font-weight:900; line-height:1; }
+.expr-final-xp-unit{ font-size:16px; font-weight:800; letter-spacing:.04em; }
+.expr-final-sum li b{ display:inline-flex; align-items:baseline; gap:8px; }
+.expr-final-gain{ font-size:12px; font-weight:800; color:var(--ink-soft); }
+@keyframes expr-final-pop{ 0%{ transform:scale(.3) rotate(-12deg); opacity:0; } 100%{ transform:scale(1) rotate(0); opacity:1; } }
+@media (prefers-reduced-motion: reduce){ .expr-final.is-ok .expr-final-ico{ animation:none; } }
+.expr-order-full-tr, .expr-turn-tr{ margin-top:8px; font-size:14.5px; font-weight:600; color:var(--ink-soft); line-height:1.4; white-space:pre-line; }
+.expr-order-full .audio-btn-row{ margin-top:10px; }
 .expr-final-sum{ list-style:none; padding:0; margin:0 0 18px; text-align:left; background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); }
 .expr-final-sum li{ display:flex; justify-content:space-between; gap:12px; padding:12px 16px; font-size:14.5px; border-bottom:1px solid var(--paper-line); }
 .expr-final-sum li:last-child{ border-bottom:none; }

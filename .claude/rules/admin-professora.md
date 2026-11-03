@@ -45,6 +45,8 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
   professora, `mural_set_cover`), avisos automáticos `kind` lesson/material (texto lido ao vivo por `_mural_ref`, sem editar).
   Aluno só vê com vínculo ativo; recado "só para um aluno" exige o aluno na turma. Anexos no bucket privado `mural`
   (`<professora>/<autor>/<arquivo>`), lidos por link assinado; apagar post devolve os caminhos e o app limpa o Storage.
+- Ranking da turma (124, `shared/leaderboard.js`): aba Turma só para quem está numa turma (vínculo ativo) ou é a professora dela;
+  RPCs `classroom_ranking_rooms`/`classroom_leaderboard` (XP da semana no idioma da turma; professora vê sem entrar). Teste: `tests/ranking-turma/`.
 - Aulas (094, `shared/teacher-class-logs.js`, `admin-class-logs.js`): Presença = rótulo da professora (`class_attendance_labels`,
   9 cores do Notion, seletor no próprio campo como no Notion, sem seção separada; arquivar em vez de apagar), Competências = lista fixa `CLASS_LOG_SKILLS`. Aula de turma = 1 linha com
   `classroom_id` e sem aluno; turma com aula registrada não se apaga (FK restrict). Aluno lê por `get_my_class_log_entries`.

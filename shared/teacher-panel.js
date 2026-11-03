@@ -72,7 +72,7 @@ async function renderTeacherPanelView(){
 const TBELL = { open: false, items: [], unread: 0, available: true, loaded: false, error: false, timer: null };
 const TBELL_LIMIT = 50;
 const TBELL_ICON = { supervisao: '🎓', mural: '📌' };
-const TBELL_EVENT_ICON = { mural_comment: '💬', mural_classroom_join: '🏫', student_inactive_alert: '👋' };
+const TBELL_EVENT_ICON = { mural_comment: '💬', mural_classroom_join: '🏫', student_inactive_alert: '👋', student_course_restart: '🔄', student_course_restart_undo: '🔄' };
 
 function teacherBellActive(){
   return TBELL.available && typeof CURRENT_USER !== 'undefined' && !!CURRENT_USER
@@ -129,6 +129,9 @@ function teacherBellText(n){
     if (n.event_type === 'mural_post') return t(p.classroom ? 'panel.tbell.ev.postClass' : 'panel.tbell.ev.post', v);
     if (n.event_type === 'mural_comment') return t('panel.tbell.ev.comment', v);
     if (n.event_type === 'mural_classroom_join') return t(p.new_link ? 'panel.tbell.ev.joinClassNew' : 'panel.tbell.ev.joinClass', v);
+    // Recomeçar o curso (123): aluno recomeçou do zero ou desfez.
+    if (n.event_type === 'student_course_restart') return t('panel.tbell.ev.restart', v);
+    if (n.event_type === 'student_course_restart_undo') return t('panel.tbell.ev.restartUndo', v);
   }
   return String((n && n.body) || '');
 }

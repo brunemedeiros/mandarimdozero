@@ -73,3 +73,8 @@ Tudo o que for decidido sobre XP vale para todos os sites (fr, zh, pt e futuros)
   visível e os pendentes somem quando ela abre (a tela já mostra o XP ganho). Lista das telas: `COMPLETION_SCREEN_SELECTOR`
   em `shared/toast.js` (tela nova de conclusão entra lá ou usa `data-completion-screen`). Outros avisos continuam.
 - Testes: `tests/xp-semana/` (cálculo e navegador fr/zh, claro/escuro, 390/1280, pt-BR/en).
+
+## 2026-10-30: Expressões passam a dar XP por passo ("opção A")
+- Motivo: a autora achou 2 XP pouco para uma sequência maior de exercícios (escolha, Monte a frase, Sua vez). Decisão: mesmo padrão da trilha.
+- Valores: escolha certa `EXERCISE_XP_RECOGNIZE` 1, Monte a frase certo `EXERCISE_XP_PRODUCE` 2, Sua vez certa 2 / "quase" `EXERCISE_XP_ALMOST` 1, errou ou "Não sei" 0 (teto 5). Só na 1ª conclusão, pago no Concluir; refazer ou "Revisar erros" = 0.
+- Código: `exprXPBreakdown` (substitui `exprTurnXP`) em `shared/desafios-telas.js`; a tela final mostra o total em destaque (+N XP) e o ganho de cada passo. Teste: `tests/desafios-expressoes-passos/` (175/175).

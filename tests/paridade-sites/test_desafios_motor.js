@@ -173,7 +173,9 @@ const PT_CONFIG = `({
       await page.evaluate(() => { const d = document.getElementById('expr-turn-dontknow-btn'), o = document.getElementById('expr-order-dontknow-btn'); (d && d.offsetParent ? d : (o && o.offsetParent ? o : document.getElementById('expr-continue-btn'))).click(); });
     }
     const ex = passos.join('\n');
-    L('Expressão: certa, com o sentido no idioma estudado (meaning.pt) e em inglês (camada do curso), exemplos e "Sua vez"', /Pergunta informal/.test(ex) && /An informal way to ask/.test(ex) && /Oi, Ana! Tudo bem\?/.test(ex) && /Oi! .*Tudo ótimo!/.test(ex) && semFrances(ex), ex.slice(0, 900));
+    // 2026-10-30 (autora): a linha "significa [definição no idioma estudado]" saiu do painel da resposta (ficava colada na expressão em destaque);
+    // fica só o sentido no idioma do site (aqui, inglês da camada do curso). Por isso não se exige mais o meaning.pt na tela.
+    L('Expressão: certa, com o sentido em inglês (camada do curso), exemplos e "Sua vez" (sem a definição no idioma estudado)', !/Pergunta informal/.test(ex) && /An informal way to ask/.test(ex) && /Oi, Ana! Tudo bem\?/.test(ex) && /Oi! .*Tudo ótimo!/.test(ex) && semFrances(ex), ex.slice(0, 900));
     await page.evaluate(() => document.getElementById('challenge-complete-btn').click());
     // Ouça e traduza: tradução para o inglês (comparador do idioma do site)
     const lt = [];

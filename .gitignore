@@ -8,3 +8,4 @@ __pycache__/
 # Laboratório de escuta (mp3 temporários)
 fr/scripts/lab_output/
 fr/scripts/lab_output_pt/
+tests/perfil-progresso/capturas/

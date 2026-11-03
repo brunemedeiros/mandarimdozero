@@ -1,0 +1,41 @@
+/* Recomeçar o curso e retomada guiada (shared/recomecar-curso.js, migration 123). Carregado depois do <style> de fr e zh.
+   Só tokens que já existem nos dois sites e nos dois temas (Design System do painel: --p-*; marca --brand-fill/--on-brand-fill).
+   Botão de recomeçar: .p-perigo (fundo --p-erro = --error-red, texto --p-sobre-vivo = --on-vivid), igual ao Excluir conta. */
+
+.painel .rc-caixa .rc-desfazer{ margin: .75rem 0 0; }
+.painel .rc-caixa .rc-desfazer button{ width: auto; margin: 0; }
+
+.rc-janela{ max-width: 540px; }
+/* O cabeçalho da janela fica parado no topo quando o corpo rola (celular): fundo igual ao da janela, para o texto não passar por baixo. */
+.app-modal.painel.janela-painel.rc-janela .app-modal-header{ background: var(--p-elevado); }
+.janela-painel.painel .rc-lista{ margin: .35rem 0 0; padding-left: 1.1rem; font-size: .9rem; line-height: 1.45; }
+.janela-painel.painel .rc-lista li{ margin: .15rem 0; }
+.rc-janela.janela-painel.painel .jp-bloco b{ display: block; }
+.janela-painel.painel .rc-nota{ margin: .8rem 0 0; font-size: .88rem; color: var(--p-tinta-suave); }
+.janela-painel.painel .rc-check{ display: flex; align-items: flex-start; gap: .6rem; margin: 1rem 0 0; padding: .7rem .85rem; min-height: 44px;
+  border: 1px solid var(--p-linha); border-radius: var(--p-raio-controle, 10px); background: var(--p-superficie); cursor: pointer; font-weight: 700; font-size: .92rem; }
+.janela-painel.painel .rc-check input{ flex: none; width: 1.25rem; height: 1.25rem; margin: .1rem 0 0; }
+.janela-painel.painel .rc-erro{ color: var(--p-erro); min-height: 1.2em; margin: .5rem 0 0; font-size: .9rem; }
+/* Botão vermelho de erro (texto --on-vivid), também desabilitado com o mesmo par de cores. */
+.janela-painel.painel button.btn.p-perigo{ background: var(--p-erro); border: 0; color: var(--p-sobre-vivo); }
+.janela-painel.painel button.btn.p-perigo:hover{ background: color-mix(in srgb, var(--p-erro) 86%, black); }
+.janela-painel.painel button.btn:disabled{ opacity: .45; cursor: not-allowed; }
+
+/* Retomada guiada: lista de caminhos, a primeira (Continuar) em destaque com a cor da marca. */
+.comeback-opcoes{ display: grid; gap: .6rem; margin-top: .4rem; }
+.janela-painel.painel button.comeback-opcao{ display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .8rem; align-items: center; width: 100%;
+  min-height: 56px; margin: 0; padding: .7rem .95rem; text-align: left; border: 1px solid var(--p-borda-campo); border-radius: 14px;
+  background: var(--p-elevado); color: var(--p-tinta); box-shadow: none; font-weight: 400; }
+.janela-painel.painel button.comeback-opcao:hover{ background: var(--p-superficie); }
+.janela-painel.painel button.comeback-opcao:focus-visible{ outline: 3px solid var(--p-marca); outline-offset: 2px; }
+.janela-painel.painel button.comeback-opcao.is-principal{ background: var(--brand-fill, var(--p-marca)); border-color: transparent; color: var(--on-brand-fill, #fff); }
+.janela-painel.painel button.comeback-opcao.is-principal:hover{ background: color-mix(in srgb, var(--brand-fill, var(--p-marca)) 88%, black); }
+.comeback-icone{ font-size: 1.5rem; line-height: 1; }
+.comeback-texto{ display: grid; gap: .1rem; }
+.comeback-texto b{ font-size: .98rem; }
+.comeback-texto span{ font-size: .85rem; opacity: .85; }
+
+@media (max-width: 600px){
+  .rc-janela{ max-width: none; }
+  .painel .rc-caixa footer button{ width: 100%; min-height: 44px; }
+}

@@ -515,4 +515,45 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   painel-materiais 210/210 e 42/42, banco-revisao 672/672, k10 114/114, planos 162/162, planos-permissoes 105/105,
   cores-marca 20/20, paridade CSS 5/5, i18n 2341/2341 e sem português no en 6/6. Mudança de propósito em testes antigos:
   painel-professora (5 abas → 3) e painel-alunos ("Registrar aula" abre Mural > Aulas e materiais já no aluno).
-- Fica para depois: contagem de cartões do Banco dentro do aviso da aula.
+- Site publicado pelo PR #414 (2026-10-30; conferido no ar: `app.profbrune.com.br/shared/mural-classroom.css`). Até 2026-10-30 nenhum aviso automático na produção (só aulas novas com tema ou tarefa).
+
+## 122 -- Aviso da aula conta os cartões do Banco (2026-10-30, decisão da autora)
+
+- `shared/supabase_migrations/122_mural_lesson_bank_cards.sql`: só troca `_mural_ref`; a aula ganha `bank_cards` = itens do Banco
+  do mesmo aluno (ou turma), professora, idioma e data, aprovados e com cartão ativo. Ao vivo: os cartões que a rotina da madrugada gera
+  depois da aula aparecem sozinhos no aviso. Tela: o aluno vê "N cartões desta aula estão na sua Revisão" + Revisar
+  (`startClassReviewSession`); a professora vê só o número.
+- Staging: aplicada (2026-10-30, `122_mural_lesson_bank_cards`, versão 20261030224513). Produção: aplicada (2026-10-31, autorizada, versão 20261031150702; contagens e hash das 936 aulas iguais antes e depois; nas 134 aulas com itens do Banco a função soma 1188 cartões, máximo 43).
+- Testes: SQL local 122 6/6 (121 17/17 e o resto da `tests/aulas-presenca/run.sh` igual); mural 325/325 (15 novas),
+  painel-professora 691/691, painel-alunos 256/256, painel-materiais 210/210, banco-revisao 672/672, k10 114/114, cores-marca 20/20,
+  i18n 2341/2341, sem português no en 6/6, paridade CSS 5/5.
+
+## 123 -- Recomeçar o curso do zero (2026-10-30)
+
+- `shared/supabase_migrations/123_restart_course.sql`: tabela `course_restart_backups` (cópia de 30 dias, RLS só leitura do dono),
+  RPCs `restart_course(p_course_key)`, `undo_restart_course(p_backup_id)`, `get_teacher_student_restarts(p_student_id, p_language_app_key)`,
+  ajudantes fechados (`_is_account_badge`, `_restart_epoch_of`, `_block_week_xp`, `_restart_notify_teachers`,
+  `purge_expired_course_restart_backups`), gatilho `progress_guard_restart_epoch` (época do recomeço contra aba antiga) e cron diário
+  `purge-course-restart-backups` (só com `pg_cron`). Sem DROP; **tem DELETE** (`weekly_xp`/`earned_badges`) dentro das funções.
+  Não muda nenhum dado ao ser aplicada. Desenho e o que zera/fica: `docs/recomecar-curso-opcoes.md`, seção "Implementação".
+- Staging: **parcial**. Aplicada pela ferramenta só a parte sem DELETE (tabela, RLS, ajudantes e o aviso da professora), como
+  `123_restart_course_a_table` (2026-10-30). A parte com DELETE (`restart_course`) parou na pergunta de confirmação da ferramenta
+  (sem resposta em 230 s) e NÃO entrou; `undo_restart_course`, `get_teacher_student_restarts`, o gatilho e o cron também faltam.
+  Para terminar: colar `docs/rollout-sql/123_sql_editor.sql` no SQL Editor do Staging (idempotente: a parte já aplicada não muda).
+- Produção: **pendente** (só com autorização; mesmo arquivo `docs/rollout-sql/123_sql_editor.sql` no SQL Editor; depois o site).
+- Teste local: `tests/recomecar-curso/run.sh` 57/57 (zero resíduo depois do ROLLBACK); unidade 30/30; navegador 354/354.
+- Situação em 2026-10-31: Staging completo (a dona colou `docs/rollout-sql/123_sql_editor.sql`; RPCs, gatilho e cron conferidos). Produção aplicada pelo MCP com autorização da dona, versão `20261031001322` (`123_restart_course`); conferido: 3 RPCs com execute para authenticated e não para anon, gatilho, cron, 0 cópias, hashes de `weekly_xp` e `earned_badges` iguais antes e depois, 43 linhas em `progress`, nenhum bloco com `restartEpoch`.
+
+## 124 -- Aba Turma no Ranking (2026-10-31, pedido da autora)
+
+- `shared/supabase_migrations/124_classroom_ranking.sql`: `classroom_ranking_rooms()` (turmas em que a pessoa está com vínculo
+  ativo, ou que são dela como professora) e `classroom_leaderboard(p_classroom_id, p_week)` (alunos da turma com vínculo ativo,
+  XP da semana no idioma da turma, quem tem 0 no fim; a professora vê, sem entrar na lista; foto só de perfil público ou com
+  acesso total, como `profile_cards`). Só funções novas; sem DROP e sem DELETE.
+- Tela (`shared/leaderboard.js`): aba "🏫 Turma" depois de Amigos e Geral, só para quem tem turma; no lugar de Geral/idiomas,
+  a escolha da turma (só com mais de uma); pódio e "faltam X XP" como nas outras abas. O card do Ranking da lateral continua
+  só com Amigos e Geral.
+- Staging: aplicada (2026-10-31, `124_classroom_ranking`). Produção: aplicada (2026-11-01, autorizada, versão 20261101112953; sem execute para anon; conferida como a professora: 2 turmas, 3 alunos na lista da 1ª).
+- Testes: SQL local 124 10/10 (`tests/aulas-presenca/run.sh`); navegador `tests/ranking-turma/test_playwright.js` 75/75
+  (fr/zh, claro/escuro, 390); amigos 210/210, amigos-dupla 255/255, janelas-topo 276/276, cores-marca 20/20, paridade CSS 5/5,
+  i18n 2341/2341, sem português no en 6/6.

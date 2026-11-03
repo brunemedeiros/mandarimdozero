@@ -17,6 +17,7 @@
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
 const http = require('http'), fs = require('fs'), path = require('path'), os = require('os'), { execFileSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..', '..');
+const { etapa7 } = require('./etapa7-neutro.js'); // Etapa 7 (2026-10-31): vocabulário aprovado pela dona
 const REF = process.env.PARIDADE_5B_REF || '11ddcb84';
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.mp3': 'audio/mpeg', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
 function serve(root){
@@ -295,7 +296,7 @@ async function fingerprint(browser, root){
     let iguais = 0, total = 0;
     // lastAt = new Date() da tentativa: o relógio do teste anda com o tempo real (milissegundos diferentes entre as duas
     // rodadas); a hora é trocada por DATA, o resto do registro é comparado inteiro.
-    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/2026-10-14T12:\d\d:\d\d\.\d{3}Z/g, 'DATA');
+    const norm = (v) => etapa7(JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/2026-10-14T12:\d\d:\d\d\.\d{3}Z/g, 'DATA')); // etapa7: textos mudados de propósito (2026-10-31)
     for (const k of Object.keys(antes)){
       if (k === 'erros') continue;
       if (k === 'puras'){ // um resultado por ditado
