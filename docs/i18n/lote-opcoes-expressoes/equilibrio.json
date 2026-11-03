@@ -1,0 +1,410 @@
+[
+ {
+  "id": "expr-001",
+  "optionsPt": [
+   "Ficar muito cansado depois de um dia longo.",
+   "Passar mal com dor de cabeça por beber demais.",
+   "Ficar de mau humor por um tempo, sem motivo.",
+   "Levar um susto com uma notícia inesperada."
+  ],
+  "optionsEn": [
+   "To be exhausted after a long day at work.",
+   "To have a headache after drinking too much.",
+   "To be in a bad mood for no real reason.",
+   "To be shocked by some unexpected news."
+  ],
+  "comprimentos_pt": [
+   43,
+   46,
+   44,
+   42
+  ]
+ },
+ {
+  "id": "expr-002",
+  "optionsPt": [
+   "Fazer barulho alto",
+   "Ficar muito cansado",
+   "Irritar muito alguém",
+   "Quebrar alguma coisa"
+  ],
+  "optionsEn": [
+   "To make a loud noise",
+   "To be really tired",
+   "To annoy someone a lot",
+   "To break something"
+  ],
+  "comprimentos_pt": [
+   18,
+   19,
+   20,
+   20
+  ]
+ },
+ {
+  "id": "expr-003",
+  "optionsPt": [
+   "Pregar uma peça num amigo.",
+   "Faltar a um encontro sem avisar.",
+   "Convidar alguém para jantar.",
+   "Contar uma piada para alguém."
+  ],
+  "optionsEn": [
+   "To play a prank on a friend.",
+   "To not show up without warning.",
+   "To invite someone over to eat.",
+   "To tell someone a funny joke."
+  ],
+  "comprimentos_pt": [
+   26,
+   32,
+   28,
+   29
+  ]
+ },
+ {
+  "id": "expr-a1m2-005",
+  "optionsPt": [
+   "Ao se despedir de dia",
+   "Ao ir dormir de noite",
+   "Antes de uma refeição",
+   "Ao chegar num lugar"
+  ],
+  "optionsEn": [
+   "When leaving during the day",
+   "When going to bed at night",
+   "Before starting a meal",
+   "When arriving somewhere"
+  ],
+  "comprimentos_pt": [
+   21,
+   21,
+   21,
+   19
+  ]
+ },
+ {
+  "id": "expr-a1m3-001",
+  "optionsPt": [
+   "Para chamar a atenção de alguém",
+   "Para se despedir de alguém",
+   "Para agradecer a ajuda de alguém",
+   "Para recusar o pedido de alguém"
+  ],
+  "optionsEn": [
+   "To get someone's attention",
+   "To say goodbye to someone",
+   "To thank someone for their help",
+   "To turn down someone's request"
+  ],
+  "comprimentos_pt": [
+   31,
+   26,
+   32,
+   31
+  ],
+  "nota": "Saiu \"com educação\" da certa (era o que a destacava); o sentido continua o mesmo."
+ },
+ {
+  "id": "expr-a1m4-005",
+  "optionsPt": [
+   "A gente comenta o clima",
+   "A gente pergunta as horas",
+   "A gente diz tchau a alguém",
+   "A gente agradece um favor"
+  ],
+  "optionsEn": [
+   "You comment on the weather",
+   "You ask what time it is",
+   "You say goodbye to someone",
+   "You thank someone for a favor"
+  ],
+  "comprimentos_pt": [
+   23,
+   25,
+   26,
+   25
+  ]
+ },
+ {
+  "id": "expr-a1m5-001",
+  "optionsPt": [
+   "Para um convidado que chega",
+   "Para um vizinho que vai embora",
+   "Para um amigo que está doente",
+   "Para um cliente da loja"
+  ],
+  "optionsEn": [
+   "To a guest who's arriving",
+   "To a neighbor who's leaving",
+   "To a friend who's sick",
+   "To a customer in a store"
+  ],
+  "comprimentos_pt": [
+   27,
+   30,
+   29,
+   23
+  ],
+  "nota": "A certa ficou \"Para um convidado que chega\" (sem \"para se sentir à vontade\", que a deixava bem mais longa); continua a única defensável, mas o francês segue com o detalhe."
+ },
+ {
+  "id": "expr-a1m5-003",
+  "optionsPt": [
+   "Quando a gente recebe alguém",
+   "Quando a gente vai embora",
+   "Quando a gente vai almoçar",
+   "Quando a gente vai dormir"
+  ],
+  "optionsEn": [
+   "When you welcome someone",
+   "When you're about to leave",
+   "When you sit down to eat",
+   "When you're going to bed"
+  ],
+  "comprimentos_pt": [
+   28,
+   25,
+   26,
+   25
+  ]
+ },
+ {
+  "id": "expr-a1m6-005",
+  "optionsPt": [
+   "A gente não se vê há muito tempo",
+   "A gente vai se ver amanhã de novo",
+   "A gente está muito atrasado",
+   "A gente está morrendo de fome"
+  ],
+  "optionsEn": [
+   "We haven't seen each other in ages",
+   "We'll see each other again tomorrow",
+   "We're running really late",
+   "We're absolutely starving"
+  ],
+  "comprimentos_pt": [
+   32,
+   33,
+   27,
+   29
+  ]
+ },
+ {
+  "id": "expr-a2-003",
+  "optionsPt": [
+   "Acordar bem cedo de manhã.",
+   "Ir dormir bem cedo à noite.",
+   "Levantar tarde de manhã.",
+   "Tirar um cochilo à tarde."
+  ],
+  "optionsEn": [
+   "To wake up very early in the morning.",
+   "To go to bed very early at night.",
+   "To get up late in the morning.",
+   "To take a nap in the afternoon."
+  ],
+  "comprimentos_pt": [
+   26,
+   27,
+   24,
+   25
+  ],
+  "nota": "A distratora [1] (\"Dormir muito durante a noite\") virou \"Ir dormir bem cedo à noite\", claramente errada. O francês [1] continua \"Dormir beaucoup pendant la nuit\" e a certa em francês segue longa."
+ },
+ {
+  "id": "expr-b2-001",
+  "optionsPt": [
+   "Ficar cansado de tudo",
+   "Esclarecer todos os detalhes",
+   "Brigar por qualquer bobagem",
+   "Tomar uma decisão às pressas"
+  ],
+  "optionsEn": [
+   "To be tired of everything",
+   "To clarify every detail",
+   "To argue over little things",
+   "To make a rushed decision"
+  ],
+  "comprimentos_pt": [
+   21,
+   28,
+   27,
+   28
+  ]
+ },
+ {
+  "id": "expr-lote1-009",
+  "optionsPt": [
+   "Para dar os parabéns a alguém",
+   "Para perguntar as horas a alguém",
+   "Para dar oi a um amigo na rua",
+   "Para mandar alguém calar a boca"
+  ],
+  "optionsEn": [
+   "To congratulate someone",
+   "To ask someone the time",
+   "To say hi to a friend",
+   "To tell someone to shut up"
+  ],
+  "comprimentos_pt": [
+   29,
+   32,
+   29,
+   31
+  ],
+  "nota": "Tirei a dica \"de forma grosseira\" e também o \"com educação\" da [1], que fazia contraste. O francês ainda tem \", grossièrement\" e \"poliment\"."
+ },
+ {
+  "id": "expr-lote1-011",
+  "optionsPt": [
+   "Complicar as coisas à toa",
+   "Descansar por muito tempo",
+   "Lavar o cabelo com calma",
+   "Fazer um elogio a si mesmo"
+  ],
+  "optionsEn": [
+   "To overcomplicate things",
+   "To rest for a long time",
+   "To wash your hair slowly",
+   "To compliment yourself"
+  ],
+  "comprimentos_pt": [
+   25,
+   25,
+   24,
+   26
+  ],
+  "nota": "A certa perdeu a parte \"ou brigar por nada\" para ficar do tamanho das outras; continua certa (a frase da Sua vez é sobre discutir à toa, e \"complicar as coisas à toa\" cobre)."
+ },
+ {
+  "id": "expr-lote1-016",
+  "optionsPt": [
+   "Fechar a loja mais cedo",
+   "Esperar a vez na fila",
+   "Preparar um prato novo",
+   "Sair correndo bem rápido"
+  ],
+  "optionsEn": [
+   "To close the shop early",
+   "To wait your turn in line",
+   "To make a dish for dinner",
+   "To run off really fast"
+  ],
+  "comprimentos_pt": [
+   23,
+   21,
+   22,
+   24
+  ]
+ },
+ {
+  "id": "expr-lote3-019",
+  "optionsPt": [
+   "É um insulto para um homem",
+   "É um apelido para um amigo",
+   "É o nome de uma profissão",
+   "É um elogio para alguém"
+  ],
+  "optionsEn": [
+   "It's an insult for a man",
+   "It's a nickname for a friend",
+   "It's the name of a job",
+   "It's a compliment for someone"
+  ],
+  "comprimentos_pt": [
+   26,
+   26,
+   25,
+   23
+  ],
+  "nota": "Saiu o \"homem malvado\" entre aspas; a certa ficou só \"insulto para um homem\", ainda a única possível."
+ },
+ {
+  "id": "expr-lote4-009",
+  "optionsPt": [
+   "Ter muita dificuldade com algo",
+   "Fazer uma viagem de barco",
+   "Conseguir algo com facilidade",
+   "Se recusar a fazer o trabalho"
+  ],
+  "optionsEn": [
+   "To struggle a lot with something",
+   "To go on a long boat trip",
+   "To do something very easily",
+   "To refuse to do any work"
+  ],
+  "comprimentos_pt": [
+   30,
+   25,
+   29,
+   29
+  ]
+ },
+ {
+  "id": "expr-lote1-012",
+  "optionsPt": [
+   "Concordo com você totalmente",
+   "Não acredito nisso nem um pouco",
+   "Você fala francês muito bem",
+   "Continue falando, por favor"
+  ],
+  "optionsEn": [
+   "I totally agree with you",
+   "I don't believe that at all",
+   "You speak French really well",
+   "Go on, keep talking, please"
+  ],
+  "comprimentos_pt": [
+   28,
+   31,
+   27,
+   27
+  ],
+  "nota": "Tirei a dica \"(ironia)\"; o francês ainda tem \"(ironie)\"."
+ },
+ {
+  "id": "expr-lote2-001",
+  "optionsPt": [
+   "Para agradecer muito a alguém",
+   "Para pedir ajuda a um vizinho",
+   "Para desejar boa viagem a alguém",
+   "Para mandar alguém ir embora já"
+  ],
+  "optionsEn": [
+   "To thank someone warmly",
+   "To ask a neighbor for help",
+   "To wish someone a good trip",
+   "To tell someone to get lost"
+  ],
+  "comprimentos_pt": [
+   29,
+   29,
+   32,
+   31
+  ],
+  "nota": "Tirei a dica \"de forma grosseira\" e o \"com educação\" da [1]; o francês ainda tem \"de façon brutale\" e \"poliment\"."
+ },
+ {
+  "id": "expr-lote3-016",
+  "optionsPt": [
+   "Quando alguém está irritado ou diante de uma bagunça",
+   "Quando alguém agradece um favor ou um presente",
+   "Quando alguém está calmo ou diante de algo bonito",
+   "Quando alguém cumprimenta um amigo ou um vizinho"
+  ],
+  "optionsEn": [
+   "When someone is annoyed or facing a mess",
+   "When someone is grateful for a gift or a favor",
+   "When someone is calm or sees something lovely",
+   "When someone greets a friend or a neighbor"
+  ],
+  "comprimentos_pt": [
+   52,
+   46,
+   49,
+   48
+  ],
+  "nota": "A certa agora cobre irritação e bagunça, mas o francês continua \"Quand on est très énervé\" (só irritação): pt/en dizem mais que a fonte."
+ }
+]
