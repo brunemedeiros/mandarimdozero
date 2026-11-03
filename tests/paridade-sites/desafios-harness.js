@@ -20,7 +20,8 @@ function serve(root){
 function challengeRows(){
   const dir = path.join(ROOT, 'fr/scripts/challenges_import');
   const seen = new Map();
-  fs.readdirSync(dir).filter(f => /^lote-.*\.json$/.test(f)).sort().forEach(f => {
+  // lote-audio-pendente.json (2026-11-03, geração de áudio): lista auxiliar com desafios sem opções, não é lote de importação; derrubava o player.
+  fs.readdirSync(dir).filter(f => /^lote-.*\.json$/.test(f) && !/audio-pendente/.test(f)).sort().forEach(f => {
     const j = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
     (Array.isArray(j) ? j : []).forEach(c => { if (c && c.id && c.type && !seen.has(c.id)) seen.set(c.id, c); });
   });
