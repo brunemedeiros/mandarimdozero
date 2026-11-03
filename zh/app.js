@@ -1639,7 +1639,7 @@ const ANKI_EXPORT_CONFIG = {
   get qfmt(){ return `<div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{${this.fieldNames().py}}}</div>`; },
   get afmt(){ const n = this.fieldNames(); return `{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:36px;'>{{${n.ch}}}</div><div style='text-align:center;font-size:18px;color:#5C4A3F;'>{{${n.tr}}}</div>`; },
   css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FBF4E8; color:#211714; }",
-  get deckDesc(){ return ankiExportText('ankiExport.deckDesc', `Exportado do app ${APP_IDENTITY.apps.zh.name}`, { app: this.modelName }); },
+  get deckDesc(){ return ankiExportText('ankiExport.deckDesc', `Exportado do site ${APP_IDENTITY.apps.zh.name}`, { app: this.modelName }); },
   // K2-F: template do modelo "Reverso" (B da trilha): frente = Tradução,
   // verso = Pinyin + Caractere. Mesmos campos semânticos do Básico.
   get reverseQfmt(){ return `<div style='text-align:center;font-size:22px;color:#5C4A3F;font-weight:bold;'>{{${this.fieldNames().tr}}}</div>`; },

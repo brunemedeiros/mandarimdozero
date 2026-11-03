@@ -630,3 +630,116 @@ com "Observação (opcional)"). 0 erros de página nas 4 rodadas.
 ### 9.x Ajuste da dona (2026-11-01)
 - `progress.statReview` passa a "Em revisão" (en "In review"), no lugar de "Já aprendidos", para não confundir com "X palavras
   aprendidas" do topo do Perfil. "Revisão da Unidade" vale para o fr e o zh (confirmado).
+
+## 10. Lote 1b (site/app) aplicado (2026-11-03)
+
+Aprovado pela dona: o produto se chama **site** (no lugar de "plataforma", "app" e "aplicativo"); "app" fica só para o que é
+instalado no celular (PWA/app de loja). As Notificações em inglês continuam "In-app" (decisão da seção 8). Inglês: "site".
+Sem commit. **Grátis x Premium:** nada muda (só nomes). Paridade: tudo é catálogo comum (`shared/i18n/`) ou `shared/`; os dois
+`index.html` (fr e zh) levam as mesmas 4 cópias do HTML, e os dois `app.js` o mesmo texto de reserva do `.apkg`.
+
+### 10.1 Chaves mudadas (pt antes -> depois | en)
+
+Aluno (20):
+
+| Chave | pt | en |
+|---|---|---|
+| `report.modal.successText` | ...melhorar o app! -> ...melhorar o site! | improve the app! -> improve the site! |
+| `settings.uiLanguage.sub` | textos do app -> textos do site | the app's text -> the site's text |
+| `settings.export.descFr`, `.descZh` | usado aqui no app -> usado aqui no site | as in the app -> as on the site |
+| `notif.pref.inAppOnly` | Só existe aviso no app para Amigos -> no site | sem mudança ("in-app") |
+| `notif.pref.inApp.title` | Notificações no app -> Notificações no site | sem mudança ("In-app notifications") |
+| `notif.pref.push.sub` | mesmo com o app fechado -> com o site fechado | when the app is closed -> when the site is closed |
+| `notif.pref.matrix.app` | App -> Site | sem mudança ("App", coluna do canal in-app) |
+| `notif.pref.titleMatrixInApp` (sem uso na tela) | No app -> No site | sem mudança ("In the app") |
+| `ankiExport.deckDesc` (+ reserva em `fr/app.js`, `zh/app.js`) | Exportado do app {app} -> Exportado do site {app} | Exported from the {app} app -> ... {app} site |
+| `ui.update.body` | Atualizamos o app. -> Atualizamos o site. | We updated the app. -> We updated the site. |
+| `badge.founder.desc` | Criadora da plataforma -> Criadora do site | Creator of the platform -> Creator of the site |
+| `badge.beta_tester.desc` | testar o app -> testar o site | test the app -> test the site |
+| `badge.catalog.ambassador.desc` | Divulgou o aplicativo... -> Divulgou o site... | about the app -> about the site |
+| `badge.catalog.pioneer.desc` | usar o app em sua fase inicial -> usar o site... | use the app -> use the site |
+| `gate.link.entrar.title` | Entrar no app -> Entrar no site | Log in to the app -> Log in to the site |
+| `ankiImport.warn.clozeNoTranslation` (+ reserva) | O app exige -> O site exige | The app needs -> The site needs |
+| `import.tagsDropped.system` (plural, + reserva) | feita pelo app -> feita pelo site | made in the app -> made on the site |
+| `ankiImport.warn.hintsDropped` (plural, + reserva) | neste app -> neste site | in this app -> on this site |
+| `ankiImport.warn.systemTags` (plural, + reserva) | pelo próprio app -> pelo próprio site | by the app itself -> by the site itself |
+
+Professora/Admin (16): `admin.common.adminOnly` (administração da plataforma -> do site; en "site administration"),
+`admin.panel.sub` (uso da plataforma -> uso do site; sem uso na tela), `admin.notifications.channel.inAppLower` (no app -> no site;
+en fica "in the app"), `admin.notifications.new.lang` e `notifications.filter.lang.aria` (Idioma do app -> Idioma do site; en
+"Site language"), `admin.notifications.new.channelInApp` (📱 No app -> 📱 No site; en fica "📱 In the app"), `admin.notifications.new.hint`
+(cita a variante "No site"; en fica "In the app"), `admin.badges.create.descPh`, `admin.analytics.kpi.activeStudentsNote`,
+`.kpi.sessionsNote`, `.prog.levelNote` (idioma do site), `.eng.xpNote2` (sequência "oficial" do site; o "app" que tinha ficado do lote 1a),
+`.tech.note`, `notifications.sub`, `badges.builtin.hint`, `analytics.sub` (app -> site; en app -> site).
+
+Traduções em inglês marcadas no `en.js` com "Etapa 7 lote 1b (needs_review)"; confiança alta.
+
+**O que ficou "app" e por quê:** o inglês do canal de Notificações ("In-app notifications", "in-app", coluna "App", "In the app",
+"📱 In the app"), por decisão da dona; `ankiExport.appName.*` (é a variável `{app}` com o nome do curso); a Central de Ajuda
+(`ajuda/textos/entrar-com-google.html` e `google-agenda.html`: "qualquer outro aplicativo" é o texto exigido pelo Google e fala de
+apps de terceiros); metas técnicas do HTML (`apple-mobile-web-app-*`); comentários de código. Não há hoje no catálogo nenhum texto
+sobre o app instalado no celular (o `friends.push.iosText` já diz "site" na Tela de Início). O `es.js` está congelado e não mudou.
+Fora das telas: os exemplos do guia de estilo (`shared/painel/guia-de-estilo.html`) ainda dizem "app" (página de referência, não é
+tela de aluno nem de professora).
+
+### 10.2 Banco: migration 125
+
+`shared/supabase_migrations/125_etapa7_badge_catalog_site.sql`: só 2 UPDATE em `badge_catalog.description`, com o texto antigo no
+comentário para desfazer, e só trocam se o texto ainda for o antigo:
+- `ambassador`: "Divulgou o aplicativo para outras pessoas" -> "Divulgou o site para outras pessoas";
+- `pioneer`: "Primeiras pessoas a usar o app em sua fase inicial" -> "Primeiras pessoas a usar o site em sua fase inicial".
+
+Staging: aplicada em 2026-11-03 (versão `20261103195358`, `125_etapa7_badge_catalog_site`). No Staging essas 2 linhas não existem
+(o `badge_catalog` do Staging só tem 1 badge de turma), então afetou 0 linhas; a troca foi provada antes num bloco com as 2 linhas
+inseridas e desfeito no fim (resultado: os 2 textos novos; contagem da tabela continua 1, sem resíduo). **Produção: NÃO aplicada**
+(fica para a autora com a dona; hoje a produção tem os 2 textos antigos, conferido com SELECT).
+
+**Qual texto vence na tela:** o do catálogo de i18n. `catalogBadgeText` (`shared/profile.js`) usa `badge.catalog.<id>.desc` do idioma
+do site quando a chave existe (existe em pt-BR e en para os dois); o texto do banco só aparece para badge sem chave. Por isso a tela
+já mostra "site" com o site publicado, mesmo antes da migration; a 125 deixa o banco igual (Admin > Badges lista o texto do banco).
+
+### 10.3 Testes
+
+Ajustados de propósito: `tests/i18n/test_i18n_unit.js` (lista `ETAPA7_LOTE1B` em `DELIBERATE_PT_CHANGES`; `notif.pref.matrix.app` saiu de
+`EN_SAME_AS_PT_OK`, porque pt e en agora diferem; o par "App" -> "Site" fica só como comentário, já que a troca por split/join no texto
+antigo inteiro mexeria em outras palavras), `tests/i18n/test_playwright.js` e `tests/i18n/test_badges_i18n.js` (troca aprovada aplicada ao
+lado de antes), `tests/paridade-sites/etapa7-neutro.js` (textos do lote 1b), `tests/k2f/test_playwright_anki_idioma.js` ("Exportado do
+site"/"Exported from the ... site"), `tests/login-obrigatorio/test_playwright.js` ("Entrar no site"), `tests/painel-admin/test_notifications_playwright.js`
+(selo "no site").
+
+| Teste | Resultado |
+|---|---|
+| `tests/i18n/test_i18n_unit.js` | 2335/2335 |
+| `tests/i18n/test_playwright.js` | 209/209 |
+| `tests/i18n/test_sem_portugues_en.js` | 6/6 |
+| `tests/i18n/test_badges_i18n.js` | 22/22 |
+| `tests/acessibilidade/test_playwright.js` | 60/60 |
+| `tests/conquistas/test_badge_tracks.js` (catálogo) | 76/76 |
+| `tests/conquistas/test_playwright.js` (navegador) | 66/66 |
+| `tests/painel-admin/test_analytics_calc_unit.js` | 54/54 |
+| `tests/painel-admin/test_analytics_ui_unit.js` | 39/40 (a mesma falha sem as mudanças, `git stash`) |
+| `tests/painel-admin/test_analytics_playwright.js` | 174/174 |
+| `tests/painel-admin/test_badges_ui_unit.js` | 29/29 |
+| `tests/painel-admin/test_badges_playwright.js` | 188/188 |
+| `tests/painel-admin/test_notifications_ui_unit.js` | 27/27 |
+| `tests/painel-admin/test_notifications_playwright.js` | 174/174 |
+| `tests/configuracoes/test_playwright.js` | 27/27 |
+| `tests/login-obrigatorio/test_entrada_idioma.js` | 153/153 |
+| `tests/login-obrigatorio/test_playwright.js` | 121/121 |
+| `tests/ajuda/test_conteudo.js` | 534 checagens, 0 falhas |
+| `tests/k2f/test_unit.js` / `test_anki_teacher_self_reverse.js` / `test_playwright_anki_idioma.js` | 58/58, 60/60, 52/52 |
+| `tests/paridade-sites/` (atalhos, conjugação, conjugação motor, contrato, 5d, CSS, desafios motor, ditados, ditados motor, gramática x2, idioma registro, lição x2, módulos x2, quase iguais, voz) | 92, 343, 45, 29, 4, 5, 49, 828, 41, 46, 54, 10, 43, 16, 90, 95, 2768, 34: todos sem falha |
+| `tests/paridade-sites/test_desafios.js` | quebra (TypeError), igual sem as mudanças |
+| `tests/paridade-sites/test_desafios_css.js` | 21 ok, 4 falhas (regras `.rb-big`), igual sem as mudanças (rodado numa cópia da HEAD) |
+
+### 10.4 Capturas
+
+fr, tema claro, 390 px, site em pt-BR, pasta temporária
+`/tmp/claude-0/-home-user-mandarimdozero/3e41ab12-78b3-5f2b-964b-fef249117fbb/scratchpad/etapa7-1b/` (roteiro `capturas.js`):
+`1-report-enviado-melhorar-o-site.png`, `2-notificacoes-no-site.png` ("Notificações no site" e "Avisa mesmo com o site fechado"),
+`3-aviso-atualizamos-o-site.png`. Sem erro de página e sem rolagem lateral (largura 390). O "Muda só os textos do site" de
+Configurações está certo no HTML, mas a linha fica escondida enquanto os cursos por idioma do site estão ligados.
+
+### 10.5 Passos manuais
+
+- Aplicar a 125 na produção (com a dona): colar `shared/supabase_migrations/125_etapa7_badge_catalog_site.sql` ou aplicar pelo MCP.

@@ -2,7 +2,7 @@
 // Chromium real, fr e zh, exportação REAL (botão de Configurações > Exportar):
 //   - pt-BR: nomes de campo, de template, de modelo, descrição do baralho e nome do
 //     arquivo EXATAMENTE como antes (Francês/Caractere/Tradução, "Cartão 1", "- Reverso",
-//     "Exportado do app ...", frances-com-prof-brune-unidade-N.apkg);
+//     "Exportado do site ...", frances-com-prof-brune-unidade-N.apkg);
 //   - en: os mesmos em inglês (French/Character/Translation, "Card 1", "- Reverse",
 //     french-with-prof-brune-unit-N.apkg);
 //   - o GUID das notas é o mesmo nos dois idiomas (reimportar no Anki atualiza, não duplica);
@@ -129,7 +129,7 @@ async function importPlan(page, buf){
     check(`${app} pt-BR: modelos "${appPt}" e "${appPt} - Reverso" e "- Cloze"`, pt.base.name === appPt && pt.rev.name === appPt + ' - Reverso' && pt.cloze.name === appPt + ' - Cloze', [pt.base.name, pt.rev.name, pt.cloze.name]);
     check(`${app} pt-BR: Cloze com campos Text/Tradução`, pt.cloze.flds.map(f => f.name).join() === 'Text,Tradução' && /\{\{Tradução\}\}/.test(pt.cloze.tmpls[0].afmt));
     check(`${app} pt-BR: qfmt/afmt usam os nomes em português`, /\{\{Tradução\}\}/.test(pt.rev.tmpls[0].qfmt) && (isZh ? /\{\{Caractere\}\}/.test(pt.base.tmpls[0].afmt) : /\{\{Francês\}\}/.test(pt.base.tmpls[0].qfmt)));
-    check(`${app} pt-BR: descrição "Exportado do app ${appPt}"`, pt.deck.desc === 'Exportado do app ' + appPt, pt.deck.desc);
+    check(`${app} pt-BR: descrição "Exportado do site ${appPt}"`, pt.deck.desc === 'Exportado do site ' + appPt, pt.deck.desc);
     check(`${app} pt-BR: baralho começa por "${appPt} - "`, pt.deck.name.startsWith(appPt + ' - '), pt.deck.name);
     const filePt = `${isZh ? 'chines' : 'frances'}-com-prof-brune-unidade-${pt.unitId}.apkg`;
     check(`${app} pt-BR: arquivo ${filePt}`, pt.filename === filePt, pt.filename);
@@ -140,7 +140,7 @@ async function importPlan(page, buf){
     check(`${app} en: Cloze com campos Text/Translation`, en.cloze.flds.map(f => f.name).join() === 'Text,Translation' && /\{\{Translation\}\}/.test(en.cloze.tmpls[0].afmt));
     const allTmpl = m => m.tmpls.map(t => t.qfmt + t.afmt).join();
     check(`${app} en: nenhum nome em português nos modelos (campos/templates)`, [en.base, en.rev, en.cloze].every(m => !/Tradução|Francês|Caractere|Cartão|Reverso/.test(JSON.stringify(m.flds) + allTmpl(m) + m.name + m.tmpls.map(t => t.name).join())));
-    check(`${app} en: descrição em inglês`, en.deck.desc === `Exported from the ${appEn} app`, en.deck.desc);
+    check(`${app} en: descrição em inglês`, en.deck.desc === `Exported from the ${appEn} site`, en.deck.desc);
     check(`${app} en: baralho começa por "${appEn} - "`, en.deck.name.startsWith(appEn + ' - '), en.deck.name);
     const fileEn = `${isZh ? 'chinese' : 'french'}-with-prof-brune-unit-${en.unitId}.apkg`;
     check(`${app} en: arquivo ${fileEn}`, en.filename === fileEn, en.filename);
