@@ -214,6 +214,12 @@ const LanguageRegistry = (function(){
     folderOf: function(appKey){ const l = find(appKey); return l ? l.path.replace(/\/$/, '') : null; },
     // Idioma do Field do estudado ('fr', 'zh', 'pt'); não confundir com o lado da tradução ('pt-BR').
     studyLangOf: function(appKey){ return pick(appKey, 'fieldLang') || null; },
+    // Idioma do texto de TRADUÇÃO da base do curso (campo `t` do content.js, lado da tradução no Field da trilha):
+    // o 1º idioma de site do curso ('pt-BR' no fr e no zh; 'en' no pt, que só tem site em inglês). Melhoria 3 da revisão
+    // de arquitetura (2026-10-26): antes o código comum fixava 'pt-BR' para todo idioma.
+    baseTranslationLangOf: function(appKey){ const s = pick(appKey, 'siteLanguages'); return (s && s[0]) || null; },
+    // Locale de voz/idioma completo do idioma estudado ('fr-FR', 'zh-CN', 'pt-BR'), pelo idioma do Field ('fr', 'zh', 'pt').
+    localeOfFieldLang: function(fieldLang){ const l = list.find(x => x.fieldLang === fieldLang); return l ? l.locale : null; },
     familyOf: function(appKey){ return pick(appKey, 'family') || null; },
     isCjk: function(appKey){ return pick(appKey, 'family') === 'cjk'; },
     studyLangMap: function(){ return mapOf('fieldLang'); },
@@ -697,6 +703,7 @@ const TTS_GENERATION_ERROR_LABELS = {
   get provider_rate_limited(){ return t('flashcardModel.tts.providerRateLimited'); },
   get rate_limited(){ return t('flashcardModel.tts.rateLimited'); },
   get monthly_quota_exceeded(){ return t('flashcardModel.tts.monthlyQuotaExceeded'); },
+  get plan_required(){ return t('flashcardModel.tts.planRequired'); }, // Etapa 5: célula da tabela desligada para o plano
   get quota_check_failed(){ return t('flashcardModel.tts.quotaCheckFailed'); },
   get unsupported_language(){ return t('flashcardModel.tts.unsupportedLanguage'); },
   get invalid_voice(){ return t('flashcardModel.tts.invalidVoice'); },
@@ -2291,10 +2298,14 @@ const TTS_LANGUAGE_UI_OPTIONS = [
   { value: 'zh-CN', labelKey: 'fieldEditor.audio.ttsLang.zh' },
   { value: 'pt-BR', labelKey: 'fieldEditor.audio.ttsLang.pt' },
 ];
+// Melhoria 3 (2026-10-26): o idioma de Field do estudado ('fr', 'zh', 'pt') vira o locale do registro (languages/registry.json
+// `locale`: fr-FR, zh-CN, pt-BR); 'zh-pinyin' segue o zh; um locale que já é opção do menu ('pt-BR') fica como está.
 function suggestedTtsLanguageForFieldLang(lang){
-  if (lang === 'fr') return 'fr-FR';
-  if (lang === 'zh' || lang === 'zh-pinyin') return 'zh-CN';
-  if (lang === 'pt-BR') return 'pt-BR';
+  const base = lang === 'zh-pinyin' ? 'zh' : lang;
+  const locale = (typeof LanguageRegistry !== 'undefined' && LanguageRegistry.localeOfFieldLang) ? LanguageRegistry.localeOfFieldLang(base) : null;
+  const known = (v) => TTS_LANGUAGE_UI_OPTIONS.some(o => o.value && o.value === v);
+  if (locale && known(locale)) return locale;
+  if (known(lang)) return lang;
   return '';
 }
 const TTS_RATE_UI_OPTIONS = [
@@ -3803,7 +3814,7 @@ function summarizeDroppedImportTags(states, opts){
   const lim = all.length - sys;
   const parts = [];
   if (lim) parts.push(nativePersistenceText('import.tagsDropped.limit', { one: '{n} tag foi ignorada por passar do limite ({max} tags por cartão, {len} caracteres por tag).', other: '{n} tags foram ignoradas por passar do limite ({max} tags por cartão, {len} caracteres por tag).' }, { n: lim, max: TAG_MAX_PER_NOTE, len: TAG_MAX_LENGTH }));
-  if (sys) parts.push(nativePersistenceText('import.tagsDropped.system', { one: '{n} tag de sistema (atribuição de autoria) não é importada por arquivo/link: só uma cópia feita pelo app a cria.', other: '{n} tags de sistema (atribuição de autoria) não são importadas por arquivo/link: só uma cópia feita pelo app a cria.' }, { n: sys }));
+  if (sys) parts.push(nativePersistenceText('import.tagsDropped.system', { one: '{n} tag de sistema (atribuição de autoria) não é importada por arquivo/link: só uma cópia feita pelo site a cria.', other: '{n} tags de sistema (atribuição de autoria) não são importadas por arquivo/link: só uma cópia feita pelo site a cria.' }, { n: sys }));
   return parts.join(' ');
 }
 
