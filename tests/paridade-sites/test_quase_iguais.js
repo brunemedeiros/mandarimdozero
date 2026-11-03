@@ -9,6 +9,7 @@ const { chromium } = require(require.resolve('playwright', { paths: [process.env
 const fs = require('fs'), path = require('path'), os = require('os'), { execFileSync } = require('child_process');
 const H = require('./quase-iguais-harness.js');
 const ROOT = path.resolve(__dirname, '..', '..');
+const { etapa7 } = require('./etapa7-neutro.js'); // Etapa 7 (2026-10-31): vocabulário aprovado pela dona
 const REF = process.env.PARIDADE_5D_REF || '2e229930';
 const SITES = (process.env.SITES || 'fr,zh').split(',');
 // 1) "Ver resultado" da unidade de gramática depois de um Ponto de verificação com erros (lessonRecapItems sem vocab).
@@ -24,7 +25,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
 // nas duas árvores para a comparação provar que o resto não mudou: o último cartão de palavra diz "Continuar →"; o XP usa
 // ⭐ (o ⚡ ficou só no Combo); e a janela da sequência (agora depois do Continuar) limpa os avisos "+N XP" da tela, então
 // numa cena a árvore nova pode ter a lista de avisos vazia onde a antiga ainda tinha avisos.
-const ETAPA6 = (v) => v.split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
+const ETAPA6 = (v) => etapa7(v).split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
   .replace(/26a1\.svg(&quot;\);\\?">)⚡/g, '2b50.svg$1⭐')
   // Recomeçar o curso (2026-10-30, migration 123): caixa nova e vazia (hidden) em Configurações > Geral, montada por shared/recomecar-curso.js.
   .replace(/<!-- Recomeçar este curso.*?-->(\\n|\n)\s*<article id=\\?"settings-restart-box\\?"[^>]*><\/article>(\\n|\n)\s*/g, '');
