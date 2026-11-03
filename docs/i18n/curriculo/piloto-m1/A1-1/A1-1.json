@@ -847,7 +847,7 @@
     "afterKey": "A1-1-v1"
    },
    "texto": {
-    "pt-BR": "Usamos <strong>bonjour</strong> de manhã até o fim da tarde: é a saudação padrão do dia. À noite, ao chegar num lugar, trocamos para <strong>bonsoir</strong>. Já <strong>salut</strong> funciona a qualquer hora, mas só com amigos e pessoas próximas, nunca com desconhecidos ou em contextos formais.",
+    "pt-BR": "Usamos <strong>bonjour</strong> de manhã até o fim da tarde: é a saudação padrão do dia. À noite, ao chegar num lugar, trocamos para <strong>bonsoir</strong>. Já <strong>salut</strong> funciona a qualquer hora, mas só com amigos e pessoas próximas, nunca com desconhecidos ou em contextos formais. E <strong>coucou</strong> é ainda mais próximo que <strong>salut</strong>: usamos com família, amigos e crianças.",
     "en": null
    },
    "exemplos": [
@@ -865,13 +865,19 @@
      "fr": "salut",
      "pt-BR": "oi (informal)",
      "en": null
+    },
+    {
+     "fr": "coucou",
+     "pt-BR": "oi (bem próximo)",
+     "en": null
     }
    ],
    "exemplos_fonte": "dados/mapa.json (um lugar só; o validar.js confere que são iguais)",
    "audios_previstos": [
     "bonjour",
     "bonsoir",
-    "salut"
+    "salut",
+    "coucou"
    ],
    "vf": [
     {
@@ -886,7 +892,7 @@
      }
     }
    ],
-   "muda": "publicada; texto sem travessão; ganha o exemplo salut"
+   "muda": "publicada; texto sem travessão; ganha o exemplo salut; ganha a linha e o exemplo coucou (decisão 325, D5)"
   },
   {
    "id": "madame-monsieur-mademoiselle",

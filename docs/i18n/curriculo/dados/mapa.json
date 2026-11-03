@@ -190,6 +190,10 @@
                     {
                       "fr": "salut",
                       "pt-BR": "oi (informal)"
+                    },
+                    {
+                      "fr": "coucou",
+                      "pt-BR": "oi (bem próximo)"
                     }
                   ]
                 },
@@ -1052,13 +1056,13 @@
                   "origem": "novo"
                 },
                 {
-                  "palavra": "long",
+                  "palavra": "long / longue",
                   "chave": "nova",
                   "origem": "novo",
                   "decisao": 323
                 },
                 {
-                  "palavra": "court",
+                  "palavra": "court / courte",
                   "chave": "nova",
                   "origem": "novo",
                   "decisao": 323
@@ -1096,7 +1100,7 @@
               ],
               "notas": [
                 {
-                  "titulo": "lugar do adjetivo (+1 linha \"o mesmo -e de grand, grande\"; +1 linha \"plural: grands, o s não se ouve\")",
+                  "titulo": "lugar do adjetivo (+1 linha \"o mesmo -e de grand, grande\"; +1 linha \"plural: grands, o s não se ouve\"; +1 linha \"bel antes de vogal: un bel homme\", decisão 325)",
                   "tipo": "Exp",
                   "confianca": "n/r",
                   "id": "N15",

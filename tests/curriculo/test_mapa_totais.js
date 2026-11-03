@@ -68,7 +68,7 @@ console.log('== revisão dos cortes (decisões 323 e 324)');
 {
   const idx = C.indicePorId(mapa);
   const palavras = id => idx[id].unidade.cartoes.map(c => c.palavra);
-  const voltam = { 'A1-4': ['les grands-parents', 'marié / mariée'], 'A1-16': ['beau / belle', 'long', 'court'], 'A1-6': ['se coucher'], 'A1-5': ['adorer'],
+  const voltam = { 'A1-4': ['les grands-parents', 'marié / mariée'], 'A1-16': ['beau / belle', 'long / longue', 'court / courte'], 'A1-6': ['se coucher'], 'A1-5': ['adorer'],
     'A1-25': ['le menu', 'la boisson'], 'A1-28': ['en espèces', 'le portable', 'le mail'], 'A1-17': ['le studio', "l'immeuble", 'le jardin', 'le balcon'],
     'A2-35': ['bavard', 'paresseux'], 'A2-8': ['en ligne'], 'A2-10': ['le dentiste'], 'A2-16': ['la note'], 'A2-17': ['la faute'], 'A2-30': ["l'écran"] };
   const cartoes = Object.entries(voltam).flatMap(([id, ps]) => ps.map(p => idx[id].unidade.cartoes.find(c => c.palavra === p)));
@@ -111,7 +111,7 @@ check('regra 13 (decisão 319): de 3 a 5 cartões por lição nas unidades desen
 }
 check('regra 13: unidade grande é só aviso (função existe e devolve lista)', Array.isArray(C.sinaisUnidadeGrande(mapa)));
 check('regra 12: toda gramática tem versão grátis numa unidade ANTERIOR de vocabulário', C.conferirVersaoGratis(mapa).length === 0, C.conferirVersaoGratis(mapa));
-check('regra 16: todo módulo até 3h55, sem exceção (decisão 270)', C.conferirTetoTempo(mapa).length === 0, C.conferirTetoTempo(mapa));
+check('regra 16 suspensa (decisão 325): o teto de tempo não entra nas conferências que falham', !('tetoTempo' in C.conferirTudo(mapa, exc, ids)));
 check('decisão 246: títulos das notas de vocabulário', C.conferirTitulosNotasVocab(mapa).length === 0, C.conferirTitulosNotasVocab(mapa));
 check('decisão 246: existe ao menos uma nota de vocabulário (o teste não roda vazio)',
   C.unidadesEmOrdem(mapa).some(it => (it.unidade.notas || []).some(n => n.tipo === 'Vocab')));

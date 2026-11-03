@@ -289,7 +289,7 @@ function conferirTudo(mapa, excecoes, idsPublicados){
     regra14: conferirRegra14(mapa, excecoes),
     chaves: conferirChaves(mapa, idsPublicados),
     versaoGratis: conferirVersaoGratis(mapa),
-    tetoTempo: conferirTetoTempo(mapa),
+    // tetoTempo fica fora: regra 16 suspensa até nova medição (decisão 325); conferirTetoTempo continua disponível como aviso.
     titulosNotasVocab: conferirTitulosNotasVocab(mapa),
     idFuncao: conferirIdFuncao(mapa),
     excecoes: conferirExcecoes(mapa, excecoes),
