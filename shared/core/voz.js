@@ -6,6 +6,17 @@
 //
 // Cautelas de navegador (Chromium/Opera): getVoices() pode demorar, onvoiceschanged pode não disparar, a primeira fala pode
 // "engasgar" sem aquecimento e o speechSynthesis pode "adormecer" depois de muitos segundos sem uso.
+// A pronúncia anotada entre barras (/bʁe.zi.ljɛ̃/, /muá, sé Bia/) é dica para ler na tela: a voz NÃO deve lê-la (2026-11-03, pedido da
+// dona). Só vale a barra que abre depois de espaço (ou no começo) e fecha antes de espaço/pontuação, sem espaço logo depois de abrir:
+// "tu / vous" e "e/ou" continuam como estão (alternativas, não pronúncia). Vale para todo idioma e para a voz do navegador.
+function stripPronunciationHints(text){
+  if (typeof text !== 'string' || text.indexOf('/') === -1) return text;
+  return text.replace(/(^|[\s(])\/(?=\S)[^\/\n]*?\S\/(?=$|[\s,.;:!?)\u00D7])/g, (m, pre, off, str) => {
+    const next = str.charAt(off + m.length);
+    return (/\s/.test(pre) && /[,.;:!?)]/.test(next)) ? '' : pre; // "bon /bõ/, bonne" -> "bon, bonne" (sem espaço antes da pontuação)
+  }).replace(/[ \t]{2,}/g, ' ').trim();
+}
+
 const TTS = {
   supported: 'speechSynthesis' in window,
   voice: null,
@@ -75,7 +86,7 @@ function speakStudyAudioOnly(text, btnEl, isAutoplay){
   window.speechSynthesis.resume();
 
   const buildUtterance = () => {
-    const u = new SpeechSynthesisUtterance(LANG_HOOKS.ttsText(text));
+    const u = new SpeechSynthesisUtterance(LANG_HOOKS.ttsText(stripPronunciationHints(text)));
     u.lang = LANG_HOOKS.ttsLang;
     u.voice = TTS.voice;
     u.rate = LANG_HOOKS.ttsRate;
