@@ -120,7 +120,7 @@ const state = page => page.evaluate(() => ({ xp: STATE.xp, done: !!STATE.complet
     // monta na ordem certa: cada toque pega a próxima palavra ainda não usada
     for (const tok of od.tokens) await page.evaluate(t => { [...document.querySelectorAll('.reorder-block:not(.used)')].find(b => b.textContent === t).click(); }, tok);
     const or = await page.evaluate(() => ({ ok: !!document.querySelector('.correct-feedback .expr-order-full'), slots: [...document.querySelectorAll('.reorder-slot.correct')].length, wrongSlots: document.querySelectorAll('.reorder-slot.incorrect').length, sounds: window.__sounds.join(), xp: STATE.xp, full: (document.querySelector('.expr-order-full') || {}).textContent, audioBtns: document.querySelectorAll('.expr-order-full .dictation-play-btn, .expr-order-full .slow-audio-btn, .expr-order-full [id^=expr-order-done]').length }));
-    check(label + ' "Monte a frase" certo: casas verdes, painel com a frase inteira, som, sem XP', or.ok && or.slots === od.tokens.length && or.wrongSlots === 0 && or.sounds === 'true,true' && or.xp === 0 && or.full.trim().startsWith(od.tokens.join(' ')) && or.audioBtns === 2, or);
+    check(label + ' "Monte a frase" certo: casas verdes, painel com a frase inteira, som, sem XP', or.ok && or.slots === od.tokens.length && or.wrongSlots === 0 && or.sounds === 'true,true' && or.xp === 0 && or.full.trim().startsWith(od.tokens.join(' ')) && or.audioBtns === 0, or);
     if (OUT) { await page.waitForTimeout(450); await page.screenshot({ path: path.join(OUT, `4c-ordenado-${label}.png`), fullPage: true }); }
     await page.keyboard.press('Enter'); // Enter avança
     await page.waitForSelector('#expr-turn-input');

@@ -103,8 +103,8 @@ const ateExemplos = async page => { await ateResposta(page); await page.click('#
     const toks = await page.evaluate(() => EXPR_RUN.c.example.text.trim().split(/\s+/));
     for (const tok of toks) await page.evaluate(t => { [...document.querySelectorAll('.reorder-block:not(.used)')].find(b => b.textContent === t).click(); }, tok);
     await page.waitForSelector('.correct-feedback .expr-order-full'); await page.waitForTimeout(80);
-    const box = await page.evaluate(() => { const b = document.querySelector('.expr-order-full'); return { mark: (b.querySelector('.expr-mark') || {}).textContent, tr: (b.querySelector('.expr-order-full-tr') || {}).innerText, audio: b.querySelectorAll('.dictation-play-btn, .slow-audio-btn, button').length }; });
-    check(label + ' Monte a frase: caixa da resposta com a expressão em destaque, áudio (normal e devagar) e a tradução', box.mark === 'Pas de bol' && box.audio >= 2 && box.tr === (pt ? '— Perdi o ônibus por dois minutos.\n— Que azar!' : "— I missed the bus by two minutes.\n— Bad luck!"), box);
+    const box = await page.evaluate(() => { const b = document.querySelector('.expr-order-full'); return { mark: (b.querySelector('.expr-mark') || {}).textContent, tr: (b.querySelector('.expr-order-full-tr') || {}).innerText, audio: b.querySelectorAll('button').length, topAudio: document.querySelectorAll('.reorder-target button, .reorder-target .dictation-play-btn').length }; });
+    check(label + ' Monte a frase: caixa da resposta com a expressão em destaque e a tradução, SEM botões de áudio (ficam só no cartão de cima)', box.mark === 'Pas de bol' && box.audio === 0 && box.topAudio >= 2 && box.tr === (pt ? '— Perdi o ônibus por dois minutos.\n— Que azar!' : "— I missed the bus by two minutes.\n— Bad luck!"), box);
     if (OUT) { await page.waitForTimeout(400); await page.screenshot({ path: path.join(OUT, `4-monte-caixa-${label}.png`) }); }
     await page.click('#expr-continue-btn'); await page.waitForSelector('#expr-turn-input');
     const turnTr = await page.evaluate(() => (document.querySelector('.expr-turn-tr') || {}).innerText);

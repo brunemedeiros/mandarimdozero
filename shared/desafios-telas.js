@@ -966,10 +966,9 @@ function exprShowOrder(c){
     }
     blocksEl.style.display = 'none';
     const dk = document.getElementById('expr-order-dontknow-btn'); if (dk) dk.classList.add('disabled');
-    // Frase montada inteira, com a expressão em destaque, áudio e tradução: é a recompensa de quem acabou de montá-la (como na trilha).
+    // Frase montada inteira, com a expressão em destaque e a tradução (sem botões de áudio: já estão no cartão de cima; decisão da autora, 2026-11-04).
     const ev = exprExampleView(c, 0);
     const full = `<div class="feedback-inner-box expr-order-full" lang="${lang}">${exprHighlightHTML(c.example.text, ev.mark)}
-      ${file ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="expr-order-done-play">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('expr-order-done-slow')}</div>` : ''}
       ${ev.tr ? `<div class="expr-order-full-tr">${escapeHtmlChallenge(ev.tr)}</div>` : ''}</div>`;
     const panel = document.createElement('div');
     panel.className = (ok ? 'correct-feedback' : 'wrong-feedback') + ' expr-panel';
@@ -985,8 +984,6 @@ function exprShowOrder(c){
         <button class="btn btn-primary btn-block wrong-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
       </div>`;
     slotsEl.parentElement.appendChild(panel);
-    exprWireAudio('expr-order-done-play', file);
-    exprWireAudio('expr-order-done-slow', file, SLOW_AUDIO_RATE);
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowYourTurn(c));
   }
