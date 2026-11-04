@@ -4,6 +4,7 @@
 
 function rqCard(){
   try {
+    if (STATE.reviewPeek != null) return null;
     const c = STATE.reviewQueue && STATE.reviewQueue[STATE.reviewIndex];
     return c && c.origin === 'teacher' && c.rowId != null && !c.__isPreviewCard ? c : null;
   } catch (e) { return null; }

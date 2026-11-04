@@ -146,6 +146,11 @@ function renderReviewViewInner(){
   stopExerciseAudio();
   const el = document.getElementById('review-content');
 
+  if (STATE.reviewPeek != null && STATE.reviewSessionClassReview && STATE.reviewHistory && STATE.reviewHistory[STATE.reviewPeek]){
+    renderReviewPeek(el);
+    return;
+  }
+
   if (!STATE.reviewQueue.length){
     releaseBadgeCelebrations();
     // Mesma fonte que startReviewSession()/Speed Review usam de verdade

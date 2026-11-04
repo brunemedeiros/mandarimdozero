@@ -247,6 +247,20 @@
 .rq-actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 .rq-msg{ font-size:12px; color:var(--rb-wrong); }
 .review-progress .rq-open.in-row{ position:static; flex:none; width:44px; height:44px; margin:-18px 0; }
+/* Voltar na sessão de cartões da professora: rever o cartão anterior e mudar a nota */
+.review-prev-btn{ flex:none; min-height:44px; margin:-18px 0; padding:0 10px; border:none; background:transparent; color:var(--ink); font:inherit; font-weight:800; font-size:14px; cursor:pointer; border-radius:10px; }
+.review-prev-btn:hover{ background:var(--paper-warm); }
+.review-prev-btn[hidden]{ display:none; }
+.review-peek-head{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.review-peek-title{ font-size:13px; font-weight:800; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
+.review-peek-card{ background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:10px; overflow-wrap:anywhere; }
+.review-peek-line small{ display:block; font-weight:800; }
+.review-peek-line.is-answer{ color:var(--rb-answer, var(--ink)); font-size:18px; }
+.review-peek-note{ margin:14px 0 0; font-size:13px; font-weight:700; color:var(--ink-soft); text-align:center; }
+.review-peek-locked{ margin-top:8px; font-size:13px; color:var(--ink-soft); text-align:center; }
+.review-peek-grades .grade-btn.is-current{ outline:3px solid var(--ink); outline-offset:2px; }
+.review-peek-grades .grade-btn:disabled{ opacity:.5; cursor:not-allowed; }
+.review-peek .btn-block{ margin-top:16px; }
 
 /* Faixa "cartões da sua professora para hoje" (Revisão e Estudo) */
 .class-review-banner{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:14px 0 4px; padding:12px 14px; border:2px solid var(--brand-fill); border-radius:14px; background:var(--paper-warm); }
