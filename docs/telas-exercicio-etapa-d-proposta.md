@@ -1,7 +1,7 @@
 # Etapa D das telas de exercício: Desafios restantes, Ditados e Revisão (proposta, 2026-11-04)
 
 Continuação de `docs/historico/23-auditoria-telas-de-exercicio.md` (etapas A, B e C já publicadas). Regra:
-`.claude/rules/frontend-fr-zh.md`, "Telas de exercício seguem o molde da trilha". Nada codado ainda; aguarda a dona.
+`.claude/rules/frontend-fr-zh.md`, "Telas de exercício seguem o molde da trilha". Aprovada pela dona em 2026-11-04 (D1 a D4 como recomendado). Lote 1 (Desafios) implementado na branch, ver "Entrega".
 
 ## Como está hoje (capturas do código atual, 390 px, claro)
 
@@ -42,3 +42,17 @@ Grátis x Premium: nada muda (só a moldura da tela). Paridade: tudo em `shared/
 - D2: "Não sei" conta como erro na revisão espaçada dos Desafios (recomendado)?
 - D3: "Continuar" no lugar de "Concluir" no fim de cada desafio (recomendado)?
 - D4: ordem dos lotes: Desafios, Ditados, Revisão, um PR cada, com prévia antes de publicar (recomendado)?
+
+## Entrega
+
+### Lote 1, Desafios (2026-11-04, na branch, sem PR)
+- `shared/desafios-telas.js`: barra do topo em todos os tipos; `chStepRender` (cabeçalho "Desafios · nível / categoria", barra, 50%),
+  `chStepAnswered` (100%, "Não sei" some, teclas desligadas, foco no Continuar ou Tentar de novo), `challengeContinueButtonHTML`
+  ("Continuar →", verde no acerto; mesmo id do Concluir). "Não sei": revela, sem som, conta como erro (`recordChallengeReviewOutcome` 'fail'),
+  oferece Tentar de novo / Tentar mais tarde. Enter no campo verifica (com `preventDefault`, senão o mesmo Enter clicava o botão que recebe o foco).
+  Complete a frase: números 1-N em cada lacuna, teclas na lacuna da vez; no "Não sei" a lacuna mostra a forma certa.
+- Textos novos: `ch.cmd.listen`, `ch.cmd.accent`, `ch.cmd.cloze` (pt-BR e en, inglês needs_review, confiança alta). `ch.cloze.instruction` ficou sem uso.
+- CSS: números nas opções do Complete a frase (`shared/desafios.css`).
+- Testes: `tests/desafios-etapa-d/` 404/404 (pt-BR e en, claro e escuro, 1200 e 390). Ajustados de propósito: `desafios-revisar-erros` (sai pelo ✕),
+  `desafios-expressoes-passos` (Acentuação também com barra), neutralizações datadas em `paridade-sites/test_desafios.js` e `test_desafios_css.js`.
+  Iguais à main: `paridade-sites/test_desafios.js` 362 falhas e `desafios-progresso` 22/23 (já existiam).

@@ -66,7 +66,9 @@ paths:
   `fr/desafios-config.js` (`registerChallenges`). Nunca copiar para um `app.js`; o zh não carrega (decisão da dona pendente).
   Guarda: `tests/paridade-sites/test_desafios*.js`.
   **Expressões em passos** (palpite, resposta, "Veja em frases" com "Quando usar", "Monte a frase", "Sua vez" com XP só na 1ª conclusão, final): `exprShowOptions`...
-  `exprShowFinal` em `shared/desafios-telas.js`; barra do topo só nelas (`data-lesson-bar`, `shared/activity-focus.js`); texto novo = chave em `CHALLENGE_I18N`
+  `exprShowFinal` em `shared/desafios-telas.js`; barra do topo em todos os tipos (`data-lesson-bar`, `shared/activity-focus.js`; Ouça e traduza,
+  Acentuação e Complete a frase pela etapa D, `chStepRender`/`chStepAnswered`: comando `ch.cmd.*`, pergunta 50% e devolutiva 100%, "Não sei" revela e
+  conta como erro, "Continuar →" verde no acerto, foco no próximo botão; teste `tests/desafios-etapa-d/`); texto novo = chave em `CHALLENGE_I18N`
   (pt-BR e en). Os testes `tests/paridade-sites/test_desafios*.js` e `test_conjugacao*.js` comparam "antes x depois" do refactor: mudança de propósito
   entra na lista de neutralizações do teste (com data e motivo), nunca apagando a comparação. Testes: `tests/desafios-expressoes-passos/`.
   Dados opcionais de cada expressão: `example/secondExample.{pt,mark}` (tradução e trecho exato do francês a destacar), `literal.{pt,note}` (tradução literal e nota de origem); no site em outro idioma vêm do overlay (`docs/i18n/challenges-en.json`: `example`, `secondExample`, `literal`, `literalNote`) e nunca entram em `CHALLENGE_SITE_LANG_FIELDS` (sem o campo, a parte some; o desafio não). Teste: `tests/desafios-exemplos-traducao/`. Gravar SQL no navegador troca `\n` por `\r\n`: usar `chr(10)` (`docs/i18n/lote-exemplos-expressoes/gerar.py`) e conferir por hash.
