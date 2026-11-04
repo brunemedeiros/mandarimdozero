@@ -157,10 +157,34 @@ const frame = async (page, label, cmd) => {
     // ✕ sai do player
     await page.click('#challenge-player-wrap .activity-exit-btn'); await page.waitForTimeout(200);
     check(L + ' ✕ sai do player', !(await vis(page, '#challenge-player-wrap')));
+    // ---- Lote 2: Ditados (modo foco, cabeçalho, comando, barra 50% -> 100%, Tentar de novo volta a 50%, ✕ volta à lista) ----
+    const did = await page.evaluate(() => { const d = (typeof dictCfg === 'function' ? dictCfg().dictations() : [])[0]; return d && d.id; });
+    check(L + ' ditado: há ditado no fr', !!did);
+    await page.evaluate(i => { switchTab('dictation'); openDictationPlayer(i); }, did); await page.waitForSelector('#dictation-input');
+    await page.waitForTimeout(100);
+    const D = { cmd: lang === 'en' ? 'Listen and write what you hear' : 'Ouça e escreva o que você ouvir', title: lang === 'en' ? 'Dictations' : 'Ditados' };
+    check(L + ' ditado: modo foco', await page.evaluate(() => document.getElementById('app').classList.contains('lesson-focus') && document.body.dataset.activityFocus === 'dictation'));
+    check(L + ' ditado: barra com ⚑, ⌨️ e ✕', await page.evaluate(() => ['.activity-flag-btn', '.activity-kbd-btn', '.activity-exit-btn'].every(s => document.querySelector('#dictation-player-wrap .activity-lesson-bar ' + s))));
+    check(L + ' ditado: barra logo abaixo do cabeçalho', await page.evaluate(() => { const c = document.querySelector('#dictation-player-content .lesson-unit-context'); return !!c && c.nextElementSibling && c.nextElementSibling.classList.contains('activity-lesson-bar'); }));
+    check(L + ' ditado: sem o link de voltar', !(await vis(page, '#dictation-back-to-list')));
+    check(L + ' ditado: cabeçalho com "' + D.title + ' · nível"', (await page.textContent('.dictation-player-module')).startsWith(D.title + ' · '));
+    check(L + ' ditado: comando no idioma do site', (await page.textContent('.dictation-cmd')).trim() === D.cmd);
+    const dprog = () => page.evaluate(() => document.querySelector('#dictation-player-wrap .lesson-progress-fill').style.width);
+    check(L + ' ditado: 50% escrevendo', (await dprog()) === '50%', await dprog());
+    check(L + ' ditado: sem rolagem lateral', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+    await shot(page, `dit-player-${L}`);
+    await page.fill('#dictation-input', 'bonjour'); await page.click('#dictation-check-btn'); await page.waitForTimeout(150);
+    check(L + ' ditado: 100% no resultado', (await dprog()) === '100%', await dprog());
+    await shot(page, `dit-resultado-${L}`);
+    await page.click('#dictation-retry-btn'); await page.waitForTimeout(80);
+    check(L + ' ditado: Tentar de novo volta a 50%', (await dprog()) === '50%');
+    await page.click('#dictation-player-wrap .activity-exit-btn'); await page.waitForTimeout(200);
+    check(L + ' ditado: ✕ volta à lista', await vis(page, '#dictation-list-wrap') && !(await vis(page, '#dictation-player-wrap')));
+    check(L + ' ditado: foco desligado na lista', await page.evaluate(() => !document.getElementById('app').classList.contains('lesson-focus')));
     check(L + ' zero pageerror', errors.length === 0, errors);
     await ctx.close();
   }
   await browser.close(); server.close();
-  console.log(`desafios etapa D (lote 1): ${passed}/${passed + failed} checks`);
+  console.log(`desafios etapa D (lotes 1 e 2): ${passed}/${passed + failed} checks`);
   process.exit(failed ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

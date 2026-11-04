@@ -15,7 +15,9 @@
     // lessonBar: topo igual ao da trilha (progresso + ⚑ + ⌨️ + X) em vez do link de voltar (padrão das telas de exercício, 2026-10-23).
     { tab: 'conjugaison', wrap: 'conj-game-wrap', back: 'conj-game-back', lessonBar: true },
     // lessonBarFlag: a barra da lição só aparece quando o player marca data-lesson-bar="1" (hoje, as Expressões; os outros tipos seguem com o link).
-    { tab: 'challenges', wrap: 'challenge-player-wrap', back: 'challenge-back-to-list', lessonBarFlag: 'lessonBar' }
+    { tab: 'challenges', wrap: 'challenge-player-wrap', back: 'challenge-back-to-list', lessonBarFlag: 'lessonBar' },
+    // Ditados (etapa D, lote 2, 2026-11-04): modo foco e barra da lição; o ✕ aciona "← Voltar aos ditados".
+    { tab: 'dictation', wrap: 'dictation-player-wrap', back: 'dictation-back-to-list', lessonBar: true }
   ];
   const tr = (k, fb) => (typeof t === 'function' ? t(k) : fb);
 

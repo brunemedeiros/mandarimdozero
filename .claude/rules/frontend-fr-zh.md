@@ -59,7 +59,8 @@ paths:
 - **Ditados** (lista, linha "Revisão do A1" da trilha, player, correção, resultado, registro da tentativa): motor comum em
   `shared/ditados.js` (CSS em `shared/ditados.css`, depois do `<style>`); o que é do idioma (ditados, família latina, voz, teclado, mp3,
   abreviações, ganchos dos Desafios) vai em `fr/ditados-config.js` (`registerDictations`). Nunca copiar para um `app.js`; o zh não
-  carrega (decisão da dona pendente). Guarda: `tests/paridade-sites/test_ditados*.js`.
+  carrega (decisão da dona pendente). Guarda: `tests/paridade-sites/test_ditados*.js`. Player no molde da lição (etapa D, 2026-11-04): modo foco,
+  cabeçalho, comando `dict.cmd` e barra do topo (área `dictation` em `shared/activity-focus.js`; 50% escrevendo, 100% no resultado).
 - **Desafios** (catálogo, Free x Premium, textos `chT`, revisão espaçada, correção de cada tipo, telas do aluno, linha "Desafios do Módulo N"
   da trilha, admin e importação): motor comum em `shared/desafios.js`, `shared/desafios-telas.js` e `shared/desafios-admin.js` (CSS em
   `shared/desafios.css`, logo depois do `<style>`); o que é do idioma (família da Acentuação, teclado, tabela, textos que citam o idioma) vai em

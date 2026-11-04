@@ -185,7 +185,7 @@ const PT_CONFIG = `({
     L('texto certo: 100, melhor nota sobe, 2 tentativas, conta 1 ditado com 90+', ok.score === '100' && ok.rec.bestScore === 100 && ok.rec.attempts === 2 && ok.aced === 1, ok);
     L('sem rolagem horizontal em 390px', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
     // trava Premium (2º ditado, free: false) com a trava ligada: cadeado e janela do site
-    await page.click('#dictation-back-to-list');
+    await page.click('#dictation-player-wrap .activity-exit-btn'); // etapa D: o ✕ da barra no lugar do link de voltar
     const lock = await page.evaluate(() => {
       window.__ptDict.push({ id: 'pt2', moduleId: 'A1-m1', level: 'A1', text: 'Bom dia! Eu quero um pão, por favor.', free: false });
       window.__ptPaywall = true; pendingDictationModuleFilter = 'A1-m1'; switchTab('dictation');

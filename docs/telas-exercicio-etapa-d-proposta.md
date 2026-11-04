@@ -1,7 +1,7 @@
 # Etapa D das telas de exercício: Desafios restantes, Ditados e Revisão (proposta, 2026-11-04)
 
 Continuação de `docs/historico/23-auditoria-telas-de-exercicio.md` (etapas A, B e C já publicadas). Regra:
-`.claude/rules/frontend-fr-zh.md`, "Telas de exercício seguem o molde da trilha". Aprovada pela dona em 2026-11-04 (D1 a D4 como recomendado). Lote 1 (Desafios) implementado na branch, ver "Entrega".
+`.claude/rules/frontend-fr-zh.md`, "Telas de exercício seguem o molde da trilha". Aprovada pela dona em 2026-11-04 (D1 a D4 como recomendado). Lotes 1 (Desafios) e 2 (Ditados) implementados na branch, ver "Entrega".
 
 ## Como está hoje (capturas do código atual, 390 px, claro)
 
@@ -56,3 +56,11 @@ Grátis x Premium: nada muda (só a moldura da tela). Paridade: tudo em `shared/
 - Testes: `tests/desafios-etapa-d/` 404/404 (pt-BR e en, claro e escuro, 1200 e 390). Ajustados de propósito: `desafios-revisar-erros` (sai pelo ✕),
   `desafios-expressoes-passos` (Acentuação também com barra), neutralizações datadas em `paridade-sites/test_desafios.js` e `test_desafios_css.js`.
   Iguais à main: `paridade-sites/test_desafios.js` 362 falhas e `desafios-progresso` 22/23 (já existiam).
+
+### Lote 2, Ditados (2026-11-04, na branch, sem PR)
+- `shared/activity-focus.js`: área nova `dictation` (modo foco e barra da lição; o ✕ aciona "← Voltar aos ditados", que fica escondido).
+- `shared/ditados.js`: cabeçalho "Ditados · nível · módulo" + tarefa (`lesson-unit-context`), barra logo abaixo, comando `dict.cmd`
+  ("Ouça e escreva o que você ouvir" / "Listen and write what you hear", inglês needs_review, confiança alta); progresso 50% escrevendo, 100% no
+  resultado, de volta a 50% no "Tentar novamente". Sem "Não sei" (decisão da proposta). CSS do cabeçalho em `shared/ditados.css`.
+- Testes: `tests/desafios-etapa-d/` 508/508 (lotes 1 e 2). Ajustados de propósito: `paridade-sites/test_ditados.js` (neutralização datada do player
+  novo; 828/828) e `test_ditados_motor.js` (sai pelo ✕; 41/41). `tests/ditado/` 58/58 e `modo-foco` 19/19 sem mudança.
