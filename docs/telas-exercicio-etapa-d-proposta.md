@@ -1,7 +1,7 @@
 # Etapa D das telas de exercício: Desafios restantes, Ditados e Revisão (proposta, 2026-11-04)
 
 Continuação de `docs/historico/23-auditoria-telas-de-exercicio.md` (etapas A, B e C já publicadas). Regra:
-`.claude/rules/frontend-fr-zh.md`, "Telas de exercício seguem o molde da trilha". Aprovada pela dona em 2026-11-04 (D1 a D4 como recomendado). Lotes 1 (Desafios) e 2 (Ditados) implementados na branch, ver "Entrega".
+`.claude/rules/frontend-fr-zh.md`, "Telas de exercício seguem o molde da trilha". Aprovada pela dona em 2026-11-04 (D1 a D4 como recomendado). Os 3 lotes (Desafios, Ditados, Revisão) implementados na branch, ver "Entrega".
 
 ## Como está hoje (capturas do código atual, 390 px, claro)
 
@@ -64,3 +64,15 @@ Grátis x Premium: nada muda (só a moldura da tela). Paridade: tudo em `shared/
   resultado, de volta a 50% no "Tentar novamente". Sem "Não sei" (decisão da proposta). CSS do cabeçalho em `shared/ditados.css`.
 - Testes: `tests/desafios-etapa-d/` 508/508 (lotes 1 e 2). Ajustados de propósito: `paridade-sites/test_ditados.js` (neutralização datada do player
   novo; 828/828) e `test_ditados_motor.js` (sai pelo ✕; 41/41). `tests/ditado/` 58/58 e `modo-foco` 19/19 sem mudança.
+
+### Lote 3, Revisão (2026-11-04, na branch, sem PR)
+- `shared/activity-focus.js`: a sessão da Revisão (`review-session-wrap`) ganha a barra da lição (⚑, ⌨️, ✕; o ✕ aciona o link de voltar, que
+  continua mudando de texto e de destino: modos, Deck ou Aluno). Achado e corrigido junto: o ✕ dizia "Sair do jogo" ao leitor de tela em toda
+  atividade; agora é "Sair"/"Exit" (`activity.exit`) na Revisão, Prática da Conjugação, Desafios e Ditados, e "Sair do jogo" só nos Jogos.
+- `shared/core/licao-base.js`: `reviewTopBarProgress` (cartão N de total no Flashcard e na Revisão rápida; 100% no fim). A linha "N / total" do
+  cartão fica (é onde mora o ⋯ dos pedidos do Banco), sem a barrinha própria (CSS em fr/zh index.html). Jogo de pares: sem trilha de progresso
+  (`data-review-mode`, `shared/core/quase-iguais-simples.js`). Errei/Difícil/Bom/Fácil, autoavaliação e Modo aula do Banco sem mudança.
+- Testes: `tests/desafios-etapa-d/` 596/596 (3 lotes). Ajustados de propósito (saem pelo ✕): `k2h` 30/30, `modo-foco` 19/19,
+  `banco-revisao` 672/672. Regressão: i18n 2337/2337 e 209/209, sem português no en 6/6, conjugação 80/80, 343/343 e 45/45, jogos 224/224,
+  atalhos 92/92, ditados 828/828, 41/41 e 58/58, desafios (todas as pastas verdes, menos as 2 falhas antigas acima), revisão 48/48 e 60/60,
+  banco-revisao-voltar 80/80, acessibilidade 60/60, cores-marca 20/20, paridade de CSS 5/5.

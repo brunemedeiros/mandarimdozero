@@ -852,6 +852,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'games.whyTense': 'Por que {tense}?',
   'games.listen': 'Ouvir a frase',
   'games.exit': 'Sair do jogo',
+  'activity.exit': 'Sair',
   'games.next': 'Próxima frase',
   'games.seeResult': 'Ver resultado',
   'games.resultTitle': 'Fim da partida',

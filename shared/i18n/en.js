@@ -833,6 +833,7 @@ window.I18N_CATALOG['en'] = {
   'games.whyTense': 'Why {tense}?', // ALTA
   'games.listen': 'Listen to the sentence', // ALTA
   'games.exit': 'Leave the game', // ALTA
+  'activity.exit': 'Exit', // ALTA -- etapa D (needs_review)
   'games.next': 'Next sentence', // ALTA
   'games.seeResult': 'See result', // ALTA
   'games.resultTitle': 'End of round', // ALTA

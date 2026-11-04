@@ -4400,6 +4400,10 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 #app.lesson-focus #review-session-wrap, #app.lesson-focus #challenge-player-wrap{ max-width:760px; margin-left:auto; margin-right:auto; }
 #app.lesson-focus #conj-practice-wrap{ max-width:1040px; margin-left:auto; margin-right:auto; }
 @media (max-width:620px){ body[data-activity-focus] .activity-report-btn, .activity-lesson-bar .lesson-close-btn{ width:44px; height:44px; } }
+/* Etapa D, lote 3 (2026-11-04): na Revisão o progresso fica na barra do topo; a linha "N / total" fica sem a barrinha própria. O jogo de
+   pares não tem fila: a trilha some e ficam só ⚑, ⌨️ e ✕. */
+#review-session-wrap .review-progress-bar{ display:none; }
+#review-session-wrap[data-review-mode="match"] .activity-lesson-bar .lesson-progress-track{ visibility:hidden; }
 /* ---------- Cara de jogo: telas (passo 4, docs/historico/15) ----------
    Bloco único com o visual "de jogo" das telas fora de Amigos: pódio e "faltam
    X XP" (Ranking e Amigos), Perfil, Progresso, Metas e o volume dos cartões

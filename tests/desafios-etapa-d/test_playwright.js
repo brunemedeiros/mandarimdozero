@@ -181,10 +181,32 @@ const frame = async (page, label, cmd) => {
     await page.click('#dictation-player-wrap .activity-exit-btn'); await page.waitForTimeout(200);
     check(L + ' ditado: ✕ volta à lista', await vis(page, '#dictation-list-wrap') && !(await vis(page, '#dictation-player-wrap')));
     check(L + ' ditado: foco desligado na lista', await page.evaluate(() => !document.getElementById('app').classList.contains('lesson-focus')));
+    // ---- Lote 3: Revisão (barra do topo com o progresso da sessão; linha "N / total" sem barrinha; ✕ volta aos modos) ----
+    await page.evaluate(() => { const now = Date.now(); STATE.cards.slice(0, 3).forEach(c => { c.status = 'review'; c.due = now - 86400000; c.interval = 2; c.reps = 2; }); if (typeof isCardLessonCompleted === 'function') window.isCardLessonCompleted = () => true; switchTab('review'); openReviewSession('flashcard'); });
+    await page.waitForTimeout(200);
+    const qlen = await page.evaluate(() => STATE.reviewQueue.length);
+    check(L + ' revisão: fila com cartões', qlen > 0, qlen);
+    check(L + ' revisão: barra com ⚑, ⌨️ e ✕', await page.evaluate(() => ['.activity-flag-btn', '.activity-kbd-btn', '.activity-exit-btn'].every(s => document.querySelector('#review-session-wrap .activity-lesson-bar ' + s))));
+    check(L + ' revisão: sem o link de voltar', !(await vis(page, '#review-back-to-modes')));
+    check(L + ' revisão: ✕ com nome "Sair"/"Exit"', await page.evaluate(x => document.querySelector('#review-session-wrap .activity-exit-btn').getAttribute('aria-label') === x, lang === 'en' ? 'Exit' : 'Sair'));
+    check(L + ' revisão: barrinha antiga escondida, contagem fica', await page.evaluate(() => { const b = document.querySelector('#review-content .review-progress-bar'); const c = document.querySelector('#review-content .review-progress-count'); return (!b || getComputedStyle(b).display === 'none') && !!c && c.offsetParent !== null; }));
+    const rp = () => page.evaluate(() => document.querySelector('#review-session-wrap .lesson-progress-fill').style.width);
+    check(L + ' revisão: 0% no primeiro cartão', (await rp()) === '0%', await rp());
+    await shot(page, `rev-cartao-${L}`);
+    await page.evaluate(() => { STATE.reviewIndex = STATE.reviewQueue.length; renderReviewView(); });
+    await page.waitForTimeout(100);
+    check(L + ' revisão: 100% no fim da sessão', (await rp()) === '100%', await rp());
+    await page.evaluate(() => openReviewSession('match')); await page.waitForTimeout(150);
+    check(L + ' revisão: jogo de pares sem trilha de progresso', await page.evaluate(() => getComputedStyle(document.querySelector('#review-session-wrap .lesson-progress-track')).visibility === 'hidden'));
+    await page.evaluate(() => openReviewSession('flashcard')); await page.waitForTimeout(150);
+    check(L + ' revisão: de volta ao Flashcard a trilha volta', await page.evaluate(() => getComputedStyle(document.querySelector('#review-session-wrap .lesson-progress-track')).visibility === 'visible'));
+    await page.click('#review-session-wrap .activity-exit-btn'); await page.waitForTimeout(200);
+    check(L + ' revisão: ✕ volta aos modos e desliga o foco', !(await vis(page, '#review-session-wrap')) && await page.evaluate(() => !document.getElementById('app').classList.contains('lesson-focus')));
+    check(L + ' Ditados e Desafios: ✕ com nome "Sair"', await page.evaluate(x => [...document.querySelectorAll('#dictation-player-wrap .activity-exit-btn, #challenge-player-wrap .activity-exit-btn')].every(b => b.getAttribute('aria-label') === x), lang === 'en' ? 'Exit' : 'Sair'));
     check(L + ' zero pageerror', errors.length === 0, errors);
     await ctx.close();
   }
   await browser.close(); server.close();
-  console.log(`desafios etapa D (lotes 1 e 2): ${passed}/${passed + failed} checks`);
+  console.log(`etapa D (lotes 1, 2 e 3): ${passed}/${passed + failed} checks`);
   process.exit(failed ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
