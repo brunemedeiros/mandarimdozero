@@ -1053,6 +1053,17 @@ window.I18N_CATALOG['en'] = {
   'review.today.speedSplitAria': 'New {new}, Learning {learning}, Review {review}', // ALTA -- Revisão nova
   'review.backToDeck': '← Back to Deck', // ALTA -- Revisão nova
   'review.backToStudent': '← Back to Student', // ALTA
+  'review.exitSession': '← Exit', // ALTA
+  'review.prev': 'Back', // ALTA
+  'review.prev.aria': 'Back to the previous card', // ALTA
+  'review.peek.title': 'Previous card', // ALTA
+  'review.peek.yourNote': 'Your grade: {grade}', // ALTA
+  'review.peek.change': 'Want to change the grade?', // ALTA
+  'review.peek.typed': 'You wrote: {text}', // ALTA
+  'review.peek.chose': 'You chose: {text}', // ALTA
+  'review.peek.next': 'Back to the current card', // ALTA
+  'review.peek.changed': 'Grade changed', // ALTA
+  'review.peek.locked': 'This card came back later in the session, so its latest grade is the one that counts.', // ALTA
   'review.backToModes': '← Back to modes', // ALTA -- Revisão nova
   'review.settings.origin': 'Source', // ALTA -- Revisão nova
   'review.settings.freq.balanced': 'Balanced (recommended)', // ALTA -- Revisão nova
