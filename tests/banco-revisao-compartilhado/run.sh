@@ -14,5 +14,7 @@ for f in $(ls "$MIG" | sort | grep -E '^0(59|6[1-9]|7[0-9]|8[0-9]|90|94|95|96)_'
 done
 $P $DB -f "$MIG/112_review_bank_shared_schedule.sql" >/dev/null
 $P $DB -f "$MIG/112_review_bank_shared_schedule.sql" >/dev/null
-echo "migrations aplicadas (até 096 + 112, 112 duas vezes)"
+$P $DB -f "$MIG/127_bank_home_correction.sql" >/dev/null
+$P $DB -f "$MIG/127_bank_home_correction.sql" >/dev/null
+echo "migrations aplicadas (até 096 + 112 + 127, duas vezes cada)"
 psql -h /tmp/pg -p 54329 -U pguser $DB -q -At -f "$HERE/test_112.sql" 2>&1 | grep -v '^\s*$'

@@ -74,4 +74,5 @@ Arquivo `shared/supabase_migrations/081_review_bank.sql`. Renumerada de 080 para
 - Nota trocada: o FSRS volta ao estado de antes e é recalculado; o XP ajusta pela diferença (nunca abaixo de zero); "Errei" põe o reforço no fim da fila e
   sair de "Errei" tira o reforço. Se o cartão já voltou como reforço e foi respondido, só a resposta mais recente muda.
 - Limite conhecido (v1, sem migration): a correção chega ao Banco como uma segunda resposta (`log_my_bank_review`), então conta 2x em "Desempenho (aula e casa)".
-  Futuro opcional: migration em que a correção substitui a nota anterior (Staging primeiro).
+  Resolvido pela migration 127 (`correct_my_bank_review`, troca a resposta de hoje em vez de somar): no Staging em 2026-11-04; produção só com autorização da dona.
+  Cliente: `logBankHomeStudy(..., {correction:true})` troca a resposta ainda na fila ou envia pela função nova; sem a 127 no banco cai na função comum. Testes: `tests/banco-revisao-voltar/test_correcao_fila.js` (3/3) e `tests/banco-revisao-compartilhado/run.sh` (33/33).
