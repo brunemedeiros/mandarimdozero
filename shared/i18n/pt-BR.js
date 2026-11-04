@@ -2164,7 +2164,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'ui.review.newPerDay.5': '5 (ritmo mais lento)',
   'ui.review.newPerDay.15': '15 (ritmo mais rápido)',
   'ui.review.newPerDay.20': '20 (ritmo bem rápido)',
-  'ui.review.newPerDay.unlimited': 'Sem limite (todas as pendentes de uma vez)',
+  'ui.review.newPerDay.unlimited': 'Sem limite (todas as novas de uma vez)',
   'ui.review.intensity': 'Intensidade da sessão',
   'ui.review.intensity.light': 'Leve (sessões mais curtas)',
   'ui.review.intensity.intense': 'Intensa (sessões mais longas)',

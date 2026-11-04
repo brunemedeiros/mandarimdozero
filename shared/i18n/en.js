@@ -2145,7 +2145,7 @@ window.I18N_CATALOG['en'] = {
   'ui.review.newPerDay.5': '5 (slower pace)', // ALTA
   'ui.review.newPerDay.15': '15 (faster pace)', // ALTA
   'ui.review.newPerDay.20': '20 (very fast pace)', // ALTA
-  'ui.review.newPerDay.unlimited': 'No limit (all pending at once)', // ALTA
+  'ui.review.newPerDay.unlimited': 'No limit (all new cards at once)', // ALTA -- Etapa 7 (needs_review)
   'ui.review.intensity': 'Session intensity', // ALTA
   'ui.review.intensity.light': 'Light (shorter sessions)', // ALTA
   'ui.review.intensity.intense': 'Intense (longer sessions)', // ALTA
