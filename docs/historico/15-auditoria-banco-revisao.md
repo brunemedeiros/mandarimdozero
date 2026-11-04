@@ -66,3 +66,13 @@ Arquivo `shared/supabase_migrations/081_review_bank.sql`. Renumerada de 080 para
 - Antes e depois: Eduardo com 124 cartões do Banco, 124 itens entregues; a função devolveu 0 cartões novos (ele já tinha
   todos). Destinatários agora = membros da turma. Quando a Sandra criar a conta e entrar na turma, o gatilho
   `trg_classroom_members_review_bank` entrega todos os cartões aprovados a ela.
+
+## Voltar na sessão da aluna (2026-11-04)
+- Aluno > Revisão (cartões da professora): botão "‹ Voltar" na linha do progresso, a partir do 2º cartão, abre o cartão anterior com a resposta
+  (e o que a aluna digitou ou escolheu) e deixa MUDAR a nota sem refazer o cartão. O link do topo virou "← Sair". Código: `reviewGoBack`,
+  `regradeReviewEntry`, `renderReviewPeek` (`shared/core/revisao-decks.js`); teste `tests/banco-revisao-voltar/test_voltar.js` (76/76).
+- Nota trocada: o FSRS volta ao estado de antes e é recalculado; o XP ajusta pela diferença (nunca abaixo de zero); "Errei" põe o reforço no fim da fila e
+  sair de "Errei" tira o reforço. Se o cartão já voltou como reforço e foi respondido, só a resposta mais recente muda.
+- Limite conhecido (v1, sem migration): a correção chega ao Banco como uma segunda resposta (`log_my_bank_review`), então conta 2x em "Desempenho (aula e casa)".
+  Resolvido pela migration 127 (`correct_my_bank_review`, troca a resposta de hoje em vez de somar): no Staging em 2026-11-04; produção só com autorização da dona.
+  Cliente: `logBankHomeStudy(..., {correction:true})` troca a resposta ainda na fila ou envia pela função nova; sem a 127 no banco cai na função comum. Testes: `tests/banco-revisao-voltar/test_correcao_fila.js` (3/3) e `tests/banco-revisao-compartilhado/run.sh` (33/33).

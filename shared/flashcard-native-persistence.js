@@ -524,7 +524,7 @@ function summarizeDroppedImportTags(states, opts){
   const lim = all.length - sys;
   const parts = [];
   if (lim) parts.push(nativePersistenceText('import.tagsDropped.limit', { one: '{n} tag foi ignorada por passar do limite ({max} tags por cartão, {len} caracteres por tag).', other: '{n} tags foram ignoradas por passar do limite ({max} tags por cartão, {len} caracteres por tag).' }, { n: lim, max: TAG_MAX_PER_NOTE, len: TAG_MAX_LENGTH }));
-  if (sys) parts.push(nativePersistenceText('import.tagsDropped.system', { one: '{n} tag de sistema (atribuição de autoria) não é importada por arquivo/link: só uma cópia feita pelo app a cria.', other: '{n} tags de sistema (atribuição de autoria) não são importadas por arquivo/link: só uma cópia feita pelo app a cria.' }, { n: sys }));
+  if (sys) parts.push(nativePersistenceText('import.tagsDropped.system', { one: '{n} tag de sistema (atribuição de autoria) não é importada por arquivo/link: só uma cópia feita pelo site a cria.', other: '{n} tags de sistema (atribuição de autoria) não são importadas por arquivo/link: só uma cópia feita pelo site a cria.' }, { n: sys }));
   return parts.join(' ');
 }
 

@@ -280,7 +280,7 @@
     document.getElementById('comeback-sub').textContent = t('comeback.sub', { course: course });
     var opts = [
       { id: 'continue', icon: '▶️', title: 'comeback.continue', sub: 'comeback.continueSub' },
-      { id: 'review', icon: '⚡', title: 'comeback.review', sub: 'comeback.reviewSub' }
+      { id: 'review', icon: '⏱', title: 'comeback.review', sub: 'comeback.reviewSub' }
     ];
     if (mod) opts.push({ id: 'checkpoint', icon: '🏆', title: 'comeback.checkpoint', sub: 'comeback.checkpointSub' });
     opts.push({ id: 'restart', icon: '🔄', title: 'comeback.restart', sub: 'comeback.restartSub' });

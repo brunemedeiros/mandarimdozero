@@ -16,6 +16,7 @@
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
 const http = require('http'), fs = require('fs'), path = require('path'), os = require('os'), { execFileSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..', '..');
+const { etapa7 } = require('./etapa7-neutro.js'); // Etapa 7 (2026-10-31): vocabulário aprovado pela dona
 const REF = process.env.PARIDADE_5A_REF || 'f22bda99';
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.mp3': 'audio/mpeg', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
 function serve(root){
@@ -258,9 +259,11 @@ async function fingerprint(browser, root){
       [/(Ver resultado →|Ver resultado|See result →|See result)/g, 'VER_RESULTADO'],
       // o jogo agora conta o dia de estudo (registerStudyToday) ao terminar: o contador de atividade do dia sobe 1
       [/\\"activityLog\\":\{[^}]*\}/g, '\\"activityLog\\":AL'],
+      // Etapa 7 (2026-10-31, vocabulário aprovado pela dona): textos das Missões do dia guardados no estado
+      // (ver etapa7-neutro.js, aplicado em norm)
     ];
         // E-mail de contato do Premium trocado na main (brunemed1310@gmail.com -> contato@profbrune.com.br, shared/permissions.js): o REF antigo ainda tem o e-mail velho; neutralizado nos dois lados.
-    const norm = (v) => NEUTRO.reduce((str, [re, to]) => str.replace(re, to), JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST')).replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL');
+    const norm = (v) => etapa7(NEUTRO.reduce((str, [re, to]) => str.replace(re, to), JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST')).replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL'));
     for (const k of Object.keys(antes)){
       if (k === 'erros') continue;
       if (k === 'correcao'){ // um resultado por verbo

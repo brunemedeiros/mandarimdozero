@@ -255,7 +255,7 @@ function pendingChallenges(){
 const CHALLENGE_I18N = {
   'pt-BR': {
     'tier.premium': 'Premium',
-    'tier.free': 'Free',
+    'tier.free': 'Grátis',
     'dict.count.one': '{n} ditado',
     'dict.count.many': '{n} ditados',
     'ch.retryNow': '🔁 Tentar de novo',
@@ -317,6 +317,9 @@ const CHALLENGE_I18N = {
     'ch.listenPron': 'Ouvir pronúncia',
     'ch.verify': 'Verificar',
     'ch.expr.whatMeans': 'O que significa?',
+    'ch.expr.q.when': 'Quando se usa isso?',
+    'ch.expr.q.who': 'Quem diz isso?',
+    'ch.expr.q.whom': 'A quem se diz isso?',
     'ch.expr.guessLabel': 'Meu palpite (opcional)',
     'ch.expr.guessPlaceholder': 'O que você acha que significa?',
     'ch.expr.seeOptions': 'Ver opções',
@@ -472,6 +475,9 @@ const CHALLENGE_I18N = {
     'ch.listenPron': "Listen to pronunciation",
     'ch.verify': "Check",
     'ch.expr.whatMeans': "What does it mean?",
+    'ch.expr.q.when': "When do you use it?",
+    'ch.expr.q.who': "Who says this?",
+    'ch.expr.q.whom': "Who do you say this to?",
     'ch.expr.guessLabel': "My guess (optional)",
     'ch.expr.guessPlaceholder': "What do you think it means?",
     'ch.expr.seeOptions': "See options",

@@ -145,6 +145,12 @@ function renderReviewViewInner(){
   syncReviewBackLink();
   stopExerciseAudio();
   const el = document.getElementById('review-content');
+  syncReviewPrevRow(false);
+
+  if (STATE.reviewPeek != null && STATE.reviewSessionClassReview && STATE.reviewHistory && STATE.reviewHistory[STATE.reviewPeek]){
+    renderReviewPeek(el);
+    return;
+  }
 
   if (!STATE.reviewQueue.length){
     releaseBadgeCelebrations();
@@ -231,6 +237,7 @@ function renderReviewViewInner(){
   }
 
   const card = STATE.reviewQueue[STATE.reviewIndex];
+  syncReviewPrevRow(true);
 
   // Fase 4 (motor de tipos/templates, ver CLAUDE.md) -- despacho por
   // cardTypeId. Cartão nativo (Note/CardInstance, origin teacher/self)
@@ -632,7 +639,7 @@ function currentStepDefs(unit){
   if (isGrammarUnit(u)) return getStepDefsGrammar();
   if (isLessonUnit(u)){
     const lesson = currentLesson(u);
-    if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: t('trail.checkpoint.title') }];
+    if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: t('trail.unitReview.title') }];
     const steps = [];
     if (lesson.vocabIdx && lesson.vocabIdx.length) steps.push({ key: 'vocab', label: t('fr.step.vocab') });
     if (lesson.includesDialogue){

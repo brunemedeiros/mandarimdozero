@@ -117,6 +117,28 @@ select pg_temp.as_user(pg_temp.g('A')); set local role authenticated;
 insert into r select (select count(*) from get_my_pending_bank_grades('frances')) = 1, 'a da Ana continua pendente';
 reset role;
 
+
+-- ===== 127: correção da nota em casa (troca a resposta de hoje, não soma) =====
+select pg_temp.as_user(pg_temp.g('C')); set local role authenticated;
+select log_my_bank_review(pg_temp.g('cC')::bigint, 2, false, jsonb_build_object('state', 'review', 'due', 1760400000000));
+insert into r select correct_my_bank_review(pg_temp.g('cC')::bigint, 0, false, jsonb_build_object('state', 'relearning', 'due', 1760500000000)), '127: corrigir devolve true';
+reset role;
+insert into r select pg_temp.sq(format($q$select (count(*) filter (where grade = 0) >= 1)::text from review_bank_reviews where item_id = %L and student_id = %L and via = 'casa'$q$, pg_temp.g('i2'), pg_temp.g('C'))) = 'true', '127: a nota corrigida (Errei) foi registrada';
+insert into r select pg_temp.sq(format($q$select (last_result = 'errou' and fsrs ->> 'state' = 'relearning')::text from review_bank_items where id = %L$q$, pg_temp.g('i2'))) = 'true', '127: o item espelha a nota corrigida';
+create temp table c127(n bigint) on commit drop; grant all on c127 to public;
+insert into c127 select count(*) from review_bank_reviews where item_id = pg_temp.g('i2')::uuid and student_id = pg_temp.g('C')::uuid and via = 'casa';
+select pg_temp.as_user(pg_temp.g('C')); set local role authenticated;
+select correct_my_bank_review(pg_temp.g('cC')::bigint, 3, false, jsonb_build_object('state', 'review', 'due', 1760900000000));
+reset role;
+insert into r select (select count(*) from review_bank_reviews where item_id = pg_temp.g('i2')::uuid and student_id = pg_temp.g('C')::uuid and via = 'casa') = (select n from c127), '127: corrigir de novo troca a linha (o total de respostas não cresce)';
+select pg_temp.as_user(pg_temp.g('A')); set local role authenticated;
+insert into r select correct_my_bank_review(pg_temp.g('cC')::bigint, 1, false, null) = false, '127: cartão de outro aluno: false e nada é apagado';
+reset role;
+insert into r select (select count(*) from review_bank_reviews where item_id = pg_temp.g('i2')::uuid and student_id = pg_temp.g('C')::uuid and via = 'casa') = (select n from c127), '127: nada foi apagado do outro aluno';
+select pg_temp.as_user(pg_temp.g('C')); set local role authenticated;
+insert into r select pg_temp.try('select correct_my_bank_review(' || pg_temp.g('cC') || ', 9, false, null)') like '%grade_invalido%', '127: nota inválida é recusada';
+reset role;
+
 -- ===== Vínculo inativo =====
 update teacher_students set status = 'removed' where teacher_id = pg_temp.g('T')::uuid and student_id = pg_temp.g('C')::uuid;
 select pg_temp.as_user(pg_temp.g('C')); set local role authenticated;

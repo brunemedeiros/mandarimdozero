@@ -473,7 +473,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
       // rejeitaria esta Note de qualquer jeito (validateNativeClozeStructure
       // exige tradução não-vazia); nunca inventamos uma. Erro recuperável,
       // não fatal.
-      return { ok: false, reason: 'cloze_missing_translation', warning: ankiImportText('ankiImport.warn.clozeNoTranslation', 'Este cartão Cloze não tem um 2º campo de tradução preenchido no Anki. O app exige uma tradução para este formato, então o item foi pulado. Pode ser criado manualmente depois.') };
+      return { ok: false, reason: 'cloze_missing_translation', warning: ankiImportText('ankiImport.warn.clozeNoTranslation', 'Este cartão Cloze não tem um 2º campo de tradução preenchido no Anki. O site exige uma tradução para este formato, então o item foi pulado. Pode ser criado manualmente depois.') };
     }
     const { text: nativeSyntax, hintsDropped } = convertAnkiClozeToNativeSyntax(textClean.text);
     const marks = parseClozeMarks(nativeSyntax);
@@ -483,7 +483,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
     const textField = createFieldState({ lang: null, content: { value: nativeSyntax } });
     const translationField = createFieldState({ lang: null, content: { value: translationClean.text } });
     const warnings = [];
-    if (hintsDropped > 0) warnings.push(ankiImportText('ankiImport.warn.hintsDropped', { one: '{n} dica de lacuna do Anki não foi preservada (sem equivalente seguro neste app). A resposta em si foi mantida.', other: '{n} dicas de lacuna do Anki não foram preservadas (sem equivalente seguro neste app). A resposta em si foi mantida.' }, { n: hintsDropped }));
+    if (hintsDropped > 0) warnings.push(ankiImportText('ankiImport.warn.hintsDropped', { one: '{n} dica de lacuna do Anki não foi preservada (sem equivalente seguro neste site). A resposta em si foi mantida.', other: '{n} dicas de lacuna do Anki não foram preservadas (sem equivalente seguro neste site). A resposta em si foi mantida.' }, { n: hintsDropped }));
     return {
       ok: true,
       warnings,
@@ -690,7 +690,7 @@ function buildAnkiImportPlan(parseResult, { languageAppKey, existingRows }){
       if (part.dropped.length){
         mapped.editorState.tags = part.tags;
         const sysTags = part.dropped.filter(d => d.reason === 'system_tag').map(d => d.tag);
-        if (sysTags.length) tagLimitWarnings.push(ankiImportText('ankiImport.warn.systemTags', { one: '{n} tag de sistema ({tags}) não pode ser importada: a atribuição de autoria só é criada pelo próprio app.', other: '{n} tags de sistema ({tags}) não podem ser importadas: a atribuição de autoria só é criada pelo próprio app.' }, { n: sysTags.length, tags: sysTags.join(', ') }));
+        if (sysTags.length) tagLimitWarnings.push(ankiImportText('ankiImport.warn.systemTags', { one: '{n} tag de sistema ({tags}) não pode ser importada: a atribuição de autoria só é criada pelo próprio site.', other: '{n} tags de sistema ({tags}) não podem ser importadas: a atribuição de autoria só é criada pelo próprio site.' }, { n: sysTags.length, tags: sysTags.join(', ') }));
         const tooLong = part.dropped.filter(d => d.reason === 'too_long').map(d => d.tag);
         const overLimit = part.dropped.filter(d => d.reason === 'over_limit').map(d => d.tag);
         if (tooLong.length) tagLimitWarnings.push(ankiImportText('ankiImport.warn.tagsTooLong', { one: '{n} tag acima de {max} caracteres não foi importada: {tags}.', other: '{n} tags acima de {max} caracteres não foram importadas: {tags}.' }, { n: tooLong.length, max: TAG_MAX_LENGTH, tags: tooLong.map(x => x.slice(0, 20) + '…').join(', ') }));

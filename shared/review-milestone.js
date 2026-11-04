@@ -52,7 +52,7 @@ const MILESTONE_TEXT_PT = {
   'trail.moduleReview.reason.itemWord.one': 'item',
   'trail.moduleReview.reason.itemWord.other': 'itens',
   'trail.moduleReview.reason.learning': '{n} com erros recentes',
-  'trail.moduleReview.reason.due': '{n} vencendo hoje',
+  'trail.moduleReview.reason.due': '{n} para hoje',
   'trail.moduleReview.reason.weak': '{n} com memória mais fraca',
   'trail.moduleReview.reason.fresh.one': '{n} novo',
   'trail.moduleReview.reason.fresh.other': '{n} novos',
@@ -62,7 +62,7 @@ function milestoneT(key, params){
   return String(MILESTONE_TEXT_PT[key] || key).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? String(params[k]) : m));
 }
 
-// "12 itens: 7 com erros recentes, 5 vencendo hoje"
+// "12 itens: 7 com erros recentes, 5 para hoje"
 function milestoneReasonText(sel){
   const n = sel.cards.length;
   if (!n) return '';

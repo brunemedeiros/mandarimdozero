@@ -164,7 +164,7 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     L('depois do aviso segue para o app', true);
     await page.evaluate(() => localStorage.removeItem('signup-intent'));
     // os outros botões dos e-mails também só valem com um toque
-    for (const [kind, type, title, next] of [['entrar', 'email', 'Entrar no app', '#gate-choose-language'],
+    for (const [kind, type, title, next] of [['entrar', 'email', 'Entrar no site', '#gate-choose-language'],
       ['nova-senha', 'recovery', 'Crie uma senha nova', '#gate-new-password'], ['trocar-email', 'email_change', 'Confirmar o novo e-mail', '#gate-choose-language']]){
       await page.goto(`http://127.0.0.1:${port}/index.html?${kind}=hashbom`);
       await page.waitForSelector('#gate-confirm-link', { state: 'visible' });
