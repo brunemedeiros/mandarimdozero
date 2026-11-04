@@ -46,7 +46,9 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     const first = await ev(() => STATE.reviewQueue[0].id);
     await ev(() => gradeCurrentCard(2));
     await page.waitForSelector('#review-prev-btn', { timeout: 3000 });
-    L('2º cartão: botão Voltar aparece, com 44px', await ev(() => document.getElementById('review-prev-btn').offsetHeight >= 44));
+    L('2º cartão: botão Voltar com 44px, abaixo do cartão e na esquerda', await ev(() => { const b = document.getElementById('review-prev-btn').getBoundingClientRect(), c = document.querySelector('#review-content').getBoundingClientRect(); return b.height >= 44 && b.top >= c.bottom - 1 && b.left <= c.left + 16; }));
+    await ev(() => document.querySelector('#review-content .review-card, #review-content .flashcard, #review-content [class*=card]').click());
+    L('Voltar continua ali depois de virar o cartão', await ev(() => !!document.getElementById('review-prev-btn')));
     L('Bom deu 4 XP', await ev(() => STATE.xp) === xp0 + 4);
     const dueGood = await ev(() => STATE.reviewQueue[0].due);
     await shot('segundo-cartao');

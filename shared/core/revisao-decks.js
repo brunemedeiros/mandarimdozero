@@ -811,12 +811,9 @@ function reviewProgressBarHTML(card){
     return `<div class="review-progress"><div class="review-progress-count">${t('review.previewLabel')}</div></div>`;
   }
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
-  // Sessão de cartões da professora: "Voltar" rever o cartão anterior (e mudar a nota) a partir do 2º cartão.
-  const prevBtn = STATE.reviewSessionClassReview && STATE.reviewHistory && STATE.reviewHistory.length
-    ? `<button type="button" class="review-prev-btn" id="review-prev-btn" aria-label="${escapeHTML(t('review.prev.aria'))}">‹ ${escapeHTML(t('review.prev'))}</button>` : '';
   return `
     <div class="review-progress">
-      ${prevBtn}<div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
+      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
       <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
     </div>
   `;
@@ -847,6 +844,21 @@ function subtractReviewXP(n){
 function reviewEntryLocked(idx){
   const h = STATE.reviewHistory || [];
   return h.some((x, i) => i > idx && x.card === h[idx].card);
+}
+// Botão "Voltar" fixo ABAIXO do cartão, na esquerda (fora de #review-content, que os cartões refazem a cada toque).
+function syncReviewPrevRow(show){
+  const content = document.getElementById('review-content');
+  if (!content) return;
+  let row = document.getElementById('review-prev-row');
+  if (!row){
+    row = document.createElement('div');
+    row.id = 'review-prev-row';
+    row.className = 'review-prev-row';
+    content.insertAdjacentElement('afterend', row);
+  }
+  const want = !!show && STATE.reviewSessionClassReview && STATE.reviewHistory && STATE.reviewHistory.length > 0;
+  row.hidden = !want;
+  row.innerHTML = want ? `<button type="button" class="review-prev-btn" id="review-prev-btn" aria-label="${escapeHTML(t('review.prev.aria'))}">‹ ${escapeHTML(t('review.prev'))}</button>` : '';
 }
 function reviewGoBack(){
   const h = STATE.reviewHistory || [];

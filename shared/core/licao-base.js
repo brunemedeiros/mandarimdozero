@@ -145,6 +145,7 @@ function renderReviewViewInner(){
   syncReviewBackLink();
   stopExerciseAudio();
   const el = document.getElementById('review-content');
+  syncReviewPrevRow(false);
 
   if (STATE.reviewPeek != null && STATE.reviewSessionClassReview && STATE.reviewHistory && STATE.reviewHistory[STATE.reviewPeek]){
     renderReviewPeek(el);
@@ -236,6 +237,7 @@ function renderReviewViewInner(){
   }
 
   const card = STATE.reviewQueue[STATE.reviewIndex];
+  syncReviewPrevRow(true);
 
   // Fase 4 (motor de tipos/templates, ver CLAUDE.md) -- despacho por
   // cardTypeId. Cartão nativo (Note/CardInstance, origin teacher/self)
